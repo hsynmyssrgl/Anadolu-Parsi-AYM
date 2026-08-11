@@ -155,6 +155,7 @@ const ppk008 = requirements.find((requirement) => requirement.id === 'PPK-008');
 const ppk009 = requirements.find((requirement) => requirement.id === 'PPK-009');
 const ppk010 = requirements.find((requirement) => requirement.id === 'PPK-010');
 const ppk011 = requirements.find((requirement) => requirement.id === 'PPK-011');
+const ppk012 = requirements.find((requirement) => requirement.id === 'PPK-012');
 const startedStatuses = new Set(['PARTIAL', 'FOUNDATION_STARTED']);
 const chainScore = (requirement) => [
   ...policy.implementationChainFields,
@@ -225,6 +226,7 @@ const report = {
   PPK009: ppk009?.status ?? 'MISSING',
   PPK010: ppk010?.status ?? 'MISSING',
   PPK011: ppk011?.status ?? 'MISSING',
+  PPK012: ppk012?.status ?? 'MISSING',
   authoritativeSource: policy.authoritativeSource,
   currentStep: workPlan.currentStep,
   status: currentGatesPass ? 'PASS_WITH_OPEN_SCOPE' : 'FAIL_CURRENT_GATE',
@@ -233,7 +235,7 @@ const report = {
     ...policy.numberingPolicy,
     newBuildAssigned: false,
     reason: official31TComplete
-      ? 'The 31-X through 32-G top closures complete PPK-002 universal enforcement, PPK-003 bounded default-deny availability, PPK-004 complete policy-context binding, PPK-005 complete data classification, PPK-006 complete policy obligations, PPK-007 signed versioned policy packages, PPK-008 application identity/device-certificate manifests, PPK-009 Core Service decision re-evaluation, PPK-010 central policy zero-exception enforcement and PPK-011 contextual ownership-share policy. Other Bronze scope, including B4-02, remains open.'
+      ? 'The 31-X through 32-H top closures complete PPK-002 universal enforcement, PPK-003 bounded default-deny availability, PPK-004 complete policy-context binding, PPK-005 complete data classification, PPK-006 complete policy obligations, PPK-007 signed versioned policy packages, PPK-008 application identity/device-certificate manifests, PPK-009 Core Service decision re-evaluation, PPK-010 central policy zero-exception enforcement, PPK-011 contextual ownership-share policy and PPK-012 finite offline capability leases with a fail-closed sensitive-cache fence. Other Bronze scope, including B4-02, remains open.'
       : official31SComplete
       ? 'The 31-S detached versioned cutover decision preflight and current authoritative-source protection have verified D: external receipts. No successor decision, real-data transfer, SQLite ownership transfer, automatic activation, or cutover authority exists.'
       : official31RComplete
@@ -474,6 +476,7 @@ Olusturma (UTC): ${report.generatedAt}
 - PPK-009: **${report.PPK009}**
 - PPK-010: **${report.PPK010}**
 - PPK-011: **${report.PPK011}**
+- PPK-012: **${report.PPK012}**
 - Yeni Build verildi: **Hayir**
 
 ## Yuzde gercekligi

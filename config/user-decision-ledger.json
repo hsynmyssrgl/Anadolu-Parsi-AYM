@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 46,
+  "decisionCount": 47,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1097,6 +1097,32 @@
         "artifacts/validation/32-G-ppk-011-contextual-ownership-policy-contract.json",
         "artifacts/validation/32-G-ppk-011-contextual-ownership-policy-runtime.json",
         "docs/audit/32-G_PPK-011_BAGLAMSAL_SAHIPLIK_ORANI_UST_KAPANIS.md"
+      ]
+    },
+    {
+      "id": "DEC-193",
+      "date": "2026-08-11",
+      "acceptedAt": "2026-08-11",
+      "title": "PPK-012 finite offline capability lease and sensitive-cache fence top closure",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: Paketler bitince diğerine başla",
+      "document": "docs/decisions/DEC-193-ppk-012-offline-capability-lease-cache-fence.md",
+      "requirements": ["PPK-012"],
+      "codeAreas": [
+        "packages/platform-policy/src/offline-capability-lease.ts",
+        "packages/domain/src/app-data.ts",
+        "packages/application/src/offline-capability-lease-use-cases.ts",
+        "packages/repository-contracts/src/offline-capability-lease-repository.ts",
+        "packages/repositories/src/offline-capability-lease-repository.ts",
+        "packages/database/src/family-database-migrations.ts",
+        "apps/desktop/src/main/ipc-read-sharing.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/renderer/App.tsx"
+      ],
+      "evidence": [
+        "artifacts/validation/32-H-ppk-012-offline-capability-lease-contract.json",
+        "artifacts/validation/32-H-ppk-012-offline-capability-lease-runtime.json",
+        "docs/audit/32-H_PPK-012_CEVRIMDISI_CAPABILITY_LEASE_UST_KAPANIS.md"
       ]
     }
   ]

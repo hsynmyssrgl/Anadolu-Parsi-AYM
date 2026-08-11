@@ -1,5 +1,12 @@
 import { createHash } from 'node:crypto';
 import type { IpcTransportRevisions } from './ipc-transport-context.js';
+import {
+  OfflineCapabilityLeasePolicy,
+  isOfflineCapabilityLeaseStructurallyValid,
+  type OfflineCapabilityLease,
+  type PlatformCapability
+} from '@ppt/platform-policy';
+import type { OfflineSensitiveCacheStateView } from '@ppt/domain';
 
 export type IpcReadSharingPriority = 'interactive' | 'standard';
 
@@ -272,6 +279,118 @@ export class IpcReadResultCacheRegistry {
 
   #prune(cache: Map<string, CachedReadResult>, now: number): void {
     for (const [key, entry] of cache.entries()) if (entry.expiresAt <= now) cache.delete(key);
+  }
+}
+
+interface OfflineSensitiveCacheEntry {
+  readonly leaseSha256: string;
+  readonly expiresAt: number;
+  readonly value: unknown;
+  readonly estimatedBytes: number;
+}
+
+export interface OfflineSensitiveCacheContext {
+  readonly familyId: string;
+  readonly subjectAccountId: string;
+  readonly deviceId: string;
+  readonly capability: PlatformCapability;
+  readonly policyPackageVersion: number;
+  readonly policyPackageSha256: string;
+  readonly capabilityManifestSha256: string;
+}
+
+/**
+ * A dedicated fail-closed cache boundary for data that may only survive while
+ * a finite offline capability lease is active. Expiry/revocation clears every
+ * entry and leaves the registry locked until a fresh lease is activated.
+ */
+export class OfflineSensitiveCacheRegistry {
+  readonly #policy = new OfflineCapabilityLeasePolicy();
+  readonly #entries = new Map<string, OfflineSensitiveCacheEntry>();
+  #lease: OfflineCapabilityLease | undefined;
+  #reason: OfflineSensitiveCacheStateView['reason'] = 'NO_LEASE';
+
+  public activate(lease: OfflineCapabilityLease, now = Date.now()): boolean {
+    if (!isOfflineCapabilityLeaseStructurallyValid(lease) || lease.revokedAt) {
+      this.lock(lease.revokedAt ? 'REVOKED' : 'INVALID_LEASE');
+      return false;
+    }
+    if (now < Date.parse(lease.notBefore)) { this.lock('NOT_YET_VALID'); return false; }
+    if (now >= Date.parse(lease.expiresAt)) { this.lock('EXPIRED'); return false; }
+    if (this.#lease?.leaseSha256 !== lease.leaseSha256) this.#entries.clear();
+    this.#lease = lease;
+    this.#reason = 'ACTIVE';
+    return true;
+  }
+
+  public lookup<TResult>(key: string, context: OfflineSensitiveCacheContext, now = Date.now()): IpcReadCacheLookup<TResult> {
+    if (!this.#authorize(context, now)) return Object.freeze({ hit: false });
+    const entry = this.#entries.get(key);
+    if (!entry) return Object.freeze({ hit: false });
+    if (entry.expiresAt <= now || entry.leaseSha256 !== this.#lease?.leaseSha256) {
+      this.#entries.delete(key);
+      return Object.freeze({ hit: false });
+    }
+    return Object.freeze({ hit: true, result: cloneValue(entry.value) as TResult, estimatedBytes: entry.estimatedBytes });
+  }
+
+  public store<TResult>(key: string, value: TResult, context: OfflineSensitiveCacheContext, options: {
+    readonly ttlMs: number; readonly maxEntries: number; readonly maxResultBytes: number; readonly now?: number;
+  }): boolean {
+    const now = options.now ?? Date.now();
+    if (!this.#authorize(context, now) || !this.#lease || options.ttlMs <= 0 || options.maxEntries <= 0) return false;
+    let estimatedBytes: number;
+    let cloned: TResult;
+    try {
+      estimatedBytes = estimateResultBytes(value, options.maxResultBytes);
+      cloned = cloneValue(value);
+    } catch { return false; }
+    const expiresAt = Math.min(now + options.ttlMs, Date.parse(this.#lease.expiresAt));
+    if (expiresAt <= now) { this.lock('EXPIRED'); return false; }
+    this.#entries.delete(key);
+    this.#entries.set(key, { leaseSha256: this.#lease.leaseSha256, expiresAt, value: cloned, estimatedBytes });
+    while (this.#entries.size > options.maxEntries) {
+      const oldest = this.#entries.keys().next().value as string | undefined;
+      if (!oldest) break;
+      this.#entries.delete(oldest);
+    }
+    return true;
+  }
+
+  public revoke(leaseId: string): void {
+    if (this.#lease?.leaseId === leaseId) this.lock('REVOKED');
+  }
+
+  public lock(reason: Exclude<OfflineSensitiveCacheStateView['reason'], 'ACTIVE'> = 'NO_LEASE'): void {
+    this.#entries.clear();
+    this.#lease = undefined;
+    this.#reason = reason;
+  }
+
+  public state(now = Date.now()): OfflineSensitiveCacheStateView {
+    if (this.#lease && now >= Date.parse(this.#lease.expiresAt)) this.lock('EXPIRED');
+    return Object.freeze({
+      locked: !this.#lease,
+      reason: this.#lease ? 'ACTIVE' : this.#reason,
+      ...(this.#lease ? { leaseId: this.#lease.leaseId, capability: this.#lease.capability, expiresAt: this.#lease.expiresAt } : {}),
+      entryCount: this.#entries.size
+    });
+  }
+
+  #authorize(context: OfflineSensitiveCacheContext, now: number): boolean {
+    if (!this.#lease) return false;
+    const decision = this.#policy.evaluate({
+      lease: this.#lease,
+      occurredAt: new Date(now).toISOString(),
+      online: false,
+      ...context
+    });
+    if (decision.allowed) return true;
+    this.lock(decision.reason === 'EXPIRED' ? 'EXPIRED'
+      : decision.reason === 'REVOKED' ? 'REVOKED'
+        : decision.reason === 'NOT_YET_VALID' ? 'NOT_YET_VALID'
+          : decision.reason === 'INVALID_LEASE' ? 'INVALID_LEASE' : 'CONTEXT_MISMATCH');
+    return false;
   }
 }
 

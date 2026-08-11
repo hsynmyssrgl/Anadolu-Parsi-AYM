@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "step": "32-H",
+  "requirement": "PPK-012",
+  "title": "Finite offline capability lease and fail-closed sensitive-cache fence",
+  "status": "COMPLETED",
+  "boundaries": {
+    "finiteLeaseWindow": true,
+    "maximumOfflineSeconds": 86400,
+    "minimumOfflineSeconds": 60,
+    "familySubjectDeviceCapabilityBinding": true,
+    "policyPackageBinding": true,
+    "capabilityManifestBinding": true,
+    "canonicalSha256Integrity": true,
+    "offlineOnlyEvaluation": true,
+    "exactExpiryFailClosed": true,
+    "revocationFailClosed": true,
+    "sensitiveCacheLeaseIdentityBinding": true,
+    "sensitiveCacheExpiryClearAndLock": true,
+    "repositoryRoundTrip": true,
+    "durableMigration76": true,
+    "typedIpcAndUi": true,
+    "logoutLocksSensitiveCache": true
+  },
+  "validation": {
+    "contract": "artifacts/validation/32-H-ppk-012-offline-capability-lease-contract.json",
+    "runtime": "artifacts/validation/32-H-ppk-012-offline-capability-lease-runtime.json",
+    "targetedTest": "apps/desktop/tests/ppk012-offline-capability-lease-cache-fence.test.ts",
+    "contractChecks": "32/32",
+    "runtimeChecks": "8/8",
+    "targetedTests": "12/12",
+    "dataStoreLeaseRuntime": "1/1",
+    "migration": "76 PASS",
+    "fullVitest": "61 files / 405 tests",
+    "rootTypeScriptDiagnostics": 0
+  },
+  "persistentSensitivePayloadCacheIntroduced": false,
+  "policySensitiveIpcNoCacheWeakened": false,
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "requirementCompletionClaimed": true,
+  "mandatoryTruthSentence": "PPK-012 sonlu çevrimdışı yetki kirasını ve kira süresi dolduğunda bellek içi hassas cache'i temizleyip kilitleyen sınırı tamamlar; kalıcı hassas payload cache eklenmemiş, mevcut no-cache kanalları gevşetilmemiş ve çalıştırılmayan hiçbir kontrol PASS sayılmamıştır."
+}

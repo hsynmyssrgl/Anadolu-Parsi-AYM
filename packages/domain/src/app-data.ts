@@ -420,6 +420,27 @@ export type AuthorizationPurpose = 'general'|'care'|'finance'|'health'|'archive'
 export interface ObjectPermissionView { id:string; subjectAccountId:string; resourceType:string; resourceId:string; actions:ObjectPermissionAction[]; effect:'allow'|'deny'; purpose:AuthorizationPurpose; familyBranchId?:string; ownershipBasisPoints?:number; denialReason?:string; startsAt:string; endsAt?:string; createdAt:string; }
 export interface UpsertObjectPermissionInput { id?:string; subjectAccountId:string; resourceType:string; resourceId:string; actions:ObjectPermissionAction[]; effect:'allow'|'deny'; purpose?:AuthorizationPurpose; familyBranchId?:string; ownershipBasisPoints?:number; denialReason?:string; startsAt?:string; endsAt?:string; }
 export interface AuthorizationContextWorkspaceView { accounts:readonly FamilyAccountView[]; permissions:readonly ObjectPermissionView[]; branches:readonly FamilyBranch[]; }
+export type OfflineCapability =
+  | 'family.read'|'family.write'|'health.read'|'health.write'|'finance.read'|'finance.write'
+  | 'location.read'|'location.share'|'archive.read'|'archive.write'|'archive.ocr'
+  | 'ai.process'|'translation.process'|'communication.message'|'communication.call'
+  | 'communication.record'|'file.share'|'backup.create'|'backup.restore'|'cluster.admin'|'plugin.execute';
+export type OfflineCapabilityLeaseState = 'pending'|'active'|'expired'|'revoked';
+export interface OfflineCapabilityLeaseView {
+  schemaVersion:1; leaseId:string; familyId:string; subjectAccountId:string; deviceId:string;
+  capability:OfflineCapability; issuedAt:string; notBefore:string; expiresAt:string; policyVersion:string;
+  policyPackageVersion:number; policyPackageSha256:string; capabilityManifestSha256:string; nonce:string;
+  revokedAt?:string; leaseSha256:string; state:OfflineCapabilityLeaseState; remainingSeconds:number;
+}
+export interface IssueOfflineCapabilityLeaseInput { subjectAccountId:string; capability:OfflineCapability; durationMinutes:number; }
+export interface OfflineSensitiveCacheStateView {
+  locked:boolean; reason:'NO_LEASE'|'ACTIVE'|'NOT_YET_VALID'|'EXPIRED'|'REVOKED'|'INVALID_LEASE'|'CONTEXT_MISMATCH';
+  leaseId?:string; capability?:OfflineCapability; expiresAt?:string; entryCount:number;
+}
+export interface OfflineCapabilityLeaseWorkspaceView {
+  leases:readonly OfflineCapabilityLeaseView[]; cache:OfflineSensitiveCacheStateView;
+  maximumDurationMinutes:number; minimumDurationMinutes:number;
+}
 export interface UpdateFamilyAccountInput { accountId:string; role:FamilyRole; status:FamilyMembershipStatus; startsAt?:string; endsAt?:string; personId?:string; }
 
 export type RecordPrivacy = 'private' | 'selected_members' | 'family';

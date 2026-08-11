@@ -8,11 +8,14 @@ import type {
 } from '@ppt/application';
 import type { TransactionExecutor } from '@ppt/repository-contracts';
 import type { AuditEntryView, AuditIntegrityView, ObjectPermissionView } from '@ppt/domain';
+import type { OfflineCapabilityLease } from '@ppt/platform-policy';
 import type {
   AccountRepositoryPort,
   AuditRepositoryPort,
   HouseholdMembershipRepositoryPort,
   ObjectPermissionRepositoryPort,
+  OfflineCapabilityLeaseRepositoryPort,
+  OfflineCapabilityLeaseRow,
   AccountRow,
   ObjectPermissionRow,
   RepositoryExecutionContext
@@ -22,6 +25,7 @@ export interface RepositoryBackedAuthorizationDependencies {
   readonly transactionExecutor: TransactionExecutor;
   readonly accountRepository: AccountRepositoryPort;
   readonly permissionRepository: ObjectPermissionRepositoryPort;
+  readonly offlineCapabilityLeaseRepository: OfflineCapabilityLeaseRepositoryPort;
   readonly householdMembershipRepository?: HouseholdMembershipRepositoryPort;
   readonly auditRepository: AuditRepositoryPort;
 }
@@ -50,6 +54,20 @@ const mapPermission = (permission: ObjectPermissionRow): ObjectPermissionView =>
   ...(permission.endsAt ? { endsAt: permission.endsAt } : {}),
   createdAt: permission.createdAt
 });
+
+const mapOfflineLease = (lease: OfflineCapabilityLeaseRow): OfflineCapabilityLease => ({ ...lease });
+
+const toOfflineLeaseRow = (lease: OfflineCapabilityLease): OfflineCapabilityLeaseRow => {
+  const { revokedAt: _revokedAt, ...base } = lease;
+  return {
+    ...base,
+    subjectAccountId: asUserId(lease.subjectAccountId),
+    issuedAt: asIsoDateTime(lease.issuedAt),
+    notBefore: asIsoDateTime(lease.notBefore),
+    expiresAt: asIsoDateTime(lease.expiresAt),
+    ...(lease.revokedAt ? { revokedAt: asIsoDateTime(lease.revokedAt) } : {})
+  };
+};
 
 const toRepositoryContext = (
   transaction: Parameters<Parameters<TransactionExecutor['execute']>[1]>[0],
@@ -98,6 +116,14 @@ export class RepositoryBackedAuthorizationQueryPort implements AuthorizationQuer
       const actorId = asUserId('authorization-query');
       const result = this.dependencies.permissionRepository.listAll(toRepositoryContext(transaction, context, actorId));
       return result.ok ? { ok: true, value: result.value.map(mapPermission) } : result;
+    });
+  }
+
+  public listOfflineCapabilityLeases(context: AuthorizationApplicationContext, familyId: string): ReturnType<AuthorizationQueryPort['listOfflineCapabilityLeases']> {
+    return this.dependencies.transactionExecutor.execute(context.correlationId, (transaction) => {
+      const actorId = asUserId('offline-capability-lease-query');
+      const result = this.dependencies.offlineCapabilityLeaseRepository.listForFamily(toRepositoryContext(transaction, context, actorId), familyId);
+      return result.ok ? { ok: true, value: result.value.map(mapOfflineLease) } : result;
     });
   }
 
@@ -163,6 +189,19 @@ class RepositoryBackedAuthorizationWriteScope implements AuthorizationWriteScope
 
   public deletePermission(id: string): ReturnType<AuthorizationWriteScope['deletePermission']> {
     return this.dependencies.permissionRepository.delete(this.repositoryContext, id);
+  }
+
+  public findOfflineCapabilityLease(leaseId: string): ReturnType<AuthorizationWriteScope['findOfflineCapabilityLease']> {
+    const result = this.dependencies.offlineCapabilityLeaseRepository.findById(this.repositoryContext, leaseId);
+    return result.ok ? { ok: true, value: result.value ? mapOfflineLease(result.value) : undefined } : result;
+  }
+
+  public insertOfflineCapabilityLease(lease: OfflineCapabilityLease): ReturnType<AuthorizationWriteScope['insertOfflineCapabilityLease']> {
+    return this.dependencies.offlineCapabilityLeaseRepository.insert(this.repositoryContext, toOfflineLeaseRow(lease));
+  }
+
+  public revokeOfflineCapabilityLease(lease: OfflineCapabilityLease): ReturnType<AuthorizationWriteScope['revokeOfflineCapabilityLease']> {
+    return this.dependencies.offlineCapabilityLeaseRepository.revoke(this.repositoryContext, toOfflineLeaseRow(lease));
   }
 
   public appendAudit(input: Parameters<AuthorizationWriteScope['appendAudit']>[0]): ReturnType<AuthorizationWriteScope['appendAudit']> {

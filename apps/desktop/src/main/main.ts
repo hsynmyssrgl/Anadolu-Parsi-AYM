@@ -18,6 +18,7 @@ import type {
   WindowsHelloStateView
 } from '@ppt/domain';
 import type { WindowsHelloPlatformPort } from '@ppt/application';
+import type { IssueOfflineCapabilityLeaseInput, OfflineCapabilityLeaseWorkspaceView } from '@ppt/domain';
 import {
   FamilyDataStore,
   FullBackupRestoreRestartRequiredError,
@@ -27,7 +28,7 @@ import { bootstrapDesktopRuntime, type DesktopRuntime } from './runtime-bootstra
 import { registerCorrelatedIpcHandler, registerIpcCancellationHandlers, createRuntimeCorrelationId, type IpcHandler } from './ipc-runtime.js';
 import { IpcTransportSessionRegistry } from './ipc-transport-context.js';
 import { getIpcRequestAbortSignal, getIpcRequestContext, IpcRequestLifecycleRegistry } from './ipc-request-lifecycle.js';
-import { IpcReadResultCacheRegistry } from './ipc-read-sharing.js';
+import { IpcReadResultCacheRegistry, OfflineSensitiveCacheRegistry } from './ipc-read-sharing.js';
 import { IpcPerformanceTelemetryRegistry } from './ipc-performance-telemetry.js';
 import { IPC_ADAPTIVE_RESOURCE_BUDGET_POLICY_FINGERPRINT, IpcAdaptiveResourceBudgetController } from './ipc-adaptive-resource-budget.js';
 import { IpcAdaptiveResourceBudgetStateStore } from './ipc-adaptive-resource-budget-state.js';
@@ -204,6 +205,7 @@ let maintenanceReauthenticationBinding: string | undefined;
 const ipcTransportSessions = new IpcTransportSessionRegistry();
 const ipcRequestLifecycles = new IpcRequestLifecycleRegistry();
 const ipcReadResults = new IpcReadResultCacheRegistry();
+const offlineSensitiveCache = new OfflineSensitiveCacheRegistry();
 const ipcPerformanceTelemetry = new IpcPerformanceTelemetryRegistry();
 const ipcAdaptiveResourceBudgetStateStore = new IpcAdaptiveResourceBudgetStateStore({
   directoryPath: join(app.getPath('userData'), 'runtime-state'),
@@ -895,7 +897,7 @@ function registerIpc(): void {
       throw new Error('Windows Hello işlemi sürerken oturum kapatılamaz.');
     }
     try { return store().logout(); }
-    finally { sealUserDataSession(); }
+    finally { offlineSensitiveCache.lock('NO_LEASE'); sealUserDataSession(); }
   });
   registerIpcHandler('auth:changePassword', (_event, input: ChangePasswordInput) => {
     if (windowsHelloOperationInProgress) {
@@ -1013,6 +1015,23 @@ function registerIpc(): void {
   registerIpcHandler('permissions:list', () => store().listPermissions());
   registerIpcHandler('permissions:upsert', (_event, input:UpsertObjectPermissionInput) => store().upsertPermission(input));
   registerIpcHandler('permissions:delete', (_event, id:string) => store().deletePermission(id));
+  const offlineCapabilityWorkspace = (): OfflineCapabilityLeaseWorkspaceView => ({
+    leases: store().listOfflineCapabilityLeases(),
+    cache: offlineSensitiveCache.state(),
+    maximumDurationMinutes: 1_440,
+    minimumDurationMinutes: 1
+  });
+  registerIpcHandler('offlineCapability:getWorkspace', () => offlineCapabilityWorkspace());
+  registerIpcHandler('offlineCapability:issue', (_event, input:IssueOfflineCapabilityLeaseInput) => {
+    const lease = store().issueOfflineCapabilityLease(input);
+    offlineSensitiveCache.activate(lease);
+    return offlineCapabilityWorkspace();
+  });
+  registerIpcHandler('offlineCapability:revoke', (_event, leaseId:string) => {
+    store().revokeOfflineCapabilityLease(leaseId);
+    offlineSensitiveCache.revoke(leaseId);
+    return offlineCapabilityWorkspace();
+  });
   registerIpcHandler('data-repair:workspace', () => store().getDataRepairWorkspace());
   registerIpcHandler('data-repair:preview', (_event, input:{issueId:string;reason:string}) => store().previewDataRepair(input));
   registerIpcHandler('data-repair:apply', (_event, input:{operationId:string;expectedRevisionToken:string}) => store().applyDataRepair(input));

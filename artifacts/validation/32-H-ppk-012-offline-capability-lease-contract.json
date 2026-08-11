@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-H",
+  "requirement": "PPK-012",
+  "phase": "OFFLINE_CAPABILITY_LEASE_CONTRACT",
+  "status": "PASS",
+  "checkCount": 32,
+  "passed": 32,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "lease duration has a hard 24-hour ceiling",
+      "status": "PASS"
+    },
+    {
+      "name": "lease duration has a positive minimum",
+      "status": "PASS"
+    },
+    {
+      "name": "lease binds family, subject, device and capability",
+      "status": "PASS"
+    },
+    {
+      "name": "lease binds policy package and capability manifest",
+      "status": "PASS"
+    },
+    {
+      "name": "lease carries a canonical SHA-256 integrity identity",
+      "status": "PASS"
+    },
+    {
+      "name": "structural validation enforces finite canonical time",
+      "status": "PASS"
+    },
+    {
+      "name": "offline lease cannot replace online policy",
+      "status": "PASS"
+    },
+    {
+      "name": "exact expiry is fail closed",
+      "status": "PASS"
+    },
+    {
+      "name": "all security context mismatches have dedicated denials",
+      "status": "PASS"
+    },
+    {
+      "name": "revocation recomputes integrity and remains structurally valid",
+      "status": "PASS"
+    },
+    {
+      "name": "domain exposes lease, issue and cache-state views",
+      "status": "PASS"
+    },
+    {
+      "name": "domain workspace exposes lease and cache state together",
+      "status": "PASS"
+    },
+    {
+      "name": "repository contract exposes list, active lookup, insert and revoke",
+      "status": "PASS"
+    },
+    {
+      "name": "repository maps every policy binding from SQLite",
+      "status": "PASS"
+    },
+    {
+      "name": "repository active lookup excludes revoked and expired leases",
+      "status": "PASS"
+    },
+    {
+      "name": "repository insert persists the complete lease envelope",
+      "status": "PASS"
+    },
+    {
+      "name": "repository revocation is compare-and-set on active rows",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 76 creates the durable lease table and scope index",
+      "status": "PASS"
+    },
+    {
+      "name": "migration enforces the 60..86400 second window",
+      "status": "PASS"
+    },
+    {
+      "name": "migration makes lease identity fields immutable",
+      "status": "PASS"
+    },
+    {
+      "name": "migration permits only one valid revocation transition",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 76 is append-only registered",
+      "status": "PASS"
+    },
+    {
+      "name": "application exposes list, issue, revoke and evaluate use cases",
+      "status": "PASS"
+    },
+    {
+      "name": "lease administration uses the central authorization service",
+      "status": "PASS"
+    },
+    {
+      "name": "desktop adapter and composition root wire the repository",
+      "status": "PASS"
+    },
+    {
+      "name": "sensitive cache starts locked and requires an active lease",
+      "status": "PASS"
+    },
+    {
+      "name": "cache entries are bound to lease digest and capped at lease expiry",
+      "status": "PASS"
+    },
+    {
+      "name": "expiry, revocation and mismatch clear then lock the cache",
+      "status": "PASS"
+    },
+    {
+      "name": "logout locks the sensitive cache",
+      "status": "PASS"
+    },
+    {
+      "name": "typed IPC, preload and renderer declaration expose the lease workspace",
+      "status": "PASS"
+    },
+    {
+      "name": "existing permissions menu renders lease and lock controls",
+      "status": "PASS"
+    },
+    {
+      "name": "registry, decision, scope and runtime tests close only PPK-012 truthfully",
+      "status": "PASS"
+    }
+  ],
+  "failures": [],
+  "persistentSensitivePayloadCacheIntroduced": false,
+  "policySensitiveIpcNoCacheWeakened": false,
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T13:48:36.497Z"
+}

@@ -27,6 +27,7 @@ import {
   SqliteLocationRepository,
   SqliteNotificationStateRepository,
   SqliteObjectPermissionRepository,
+  SqliteOfflineCapabilityLeaseRepository,
   SqliteOutboxRepository,
   SqlitePersonRepository,
   SqlitePersonLifecycleRepository,
@@ -74,6 +75,7 @@ import type {
   LocationRepositoryPort,
   NotificationStateRepositoryPort,
   ObjectPermissionRepositoryPort,
+  OfflineCapabilityLeaseRepositoryPort,
   OutboxRepositoryPort,
   PersonRepositoryPort,
   PersonLifecycleRepositoryPort,
@@ -116,6 +118,7 @@ export interface RepositoryCompositionRoot {
   readonly locationRepository: LocationRepositoryPort & LocationPolicyResourceRepositoryPort;
   readonly notificationStateRepository: NotificationStateRepositoryPort;
   readonly objectPermissionRepository: ObjectPermissionRepositoryPort;
+  readonly offlineCapabilityLeaseRepository: OfflineCapabilityLeaseRepositoryPort;
   readonly outboxRepository: OutboxRepositoryPort;
   readonly personRepository: PersonRepositoryPort;
   readonly personLifecycleRepository: PersonLifecycleRepositoryPort;
@@ -167,6 +170,7 @@ export const createSqliteRepositoryCompositionRoot = (
     locationRepository: new SqliteLocationRepository(repositoryOptions),
     notificationStateRepository: new SqliteNotificationStateRepository(repositoryOptions),
     objectPermissionRepository: new SqliteObjectPermissionRepository(repositoryOptions),
+    offlineCapabilityLeaseRepository: new SqliteOfflineCapabilityLeaseRepository(repositoryOptions),
     outboxRepository: new SqliteOutboxRepository(repositoryOptions),
     personRepository: new SqlitePersonRepository(repositoryOptions),
     personLifecycleRepository: new SqlitePersonLifecycleRepository(repositoryOptions),

@@ -25,6 +25,7 @@ import {
 import type { FamilyEventView, FamilyMutationResultView, SetFamilyEventArchivedInput, UpdateFamilyEventInput } from '@ppt/domain';
 import type { AssignPersonMembershipInput, CreateFamilyBranchInput, CreateHouseholdInput, FamilyBranch, Household, HouseholdMembershipWorkspaceView, PersonLifecycleProfile, PersonLifecycleWorkspaceView, PersonMembership, UpdatePersonProfileInput } from '@ppt/domain';
 import type { AuthorizationContextWorkspaceView } from '@ppt/domain';
+import type { IssueOfflineCapabilityLeaseInput, OfflineCapabilityLeaseWorkspaceView } from '@ppt/domain';
 import type { DataRepairOperation, DataRepairWorkspaceView } from '@ppt/domain';
 import type {
   EnrollWindowsHelloInput,
@@ -373,6 +374,9 @@ contextBridge.exposeInMainWorld('pardus', {
   listPermissions:():Promise<ObjectPermissionView[]>=>invoke('permissions:list'),
   upsertPermission:(input:UpsertObjectPermissionInput):Promise<ObjectPermissionView[]>=>invoke('permissions:upsert',input),
   deletePermission:(id:string):Promise<ObjectPermissionView[]>=>invoke('permissions:delete',id),
+  getOfflineCapabilityLeaseWorkspace:():Promise<OfflineCapabilityLeaseWorkspaceView>=>invoke('offlineCapability:getWorkspace'),
+  issueOfflineCapabilityLease:(input:IssueOfflineCapabilityLeaseInput):Promise<OfflineCapabilityLeaseWorkspaceView>=>invoke('offlineCapability:issue',input),
+  revokeOfflineCapabilityLease:(leaseId:string):Promise<OfflineCapabilityLeaseWorkspaceView>=>invoke('offlineCapability:revoke',leaseId),
   getDataRepairWorkspace:():Promise<DataRepairWorkspaceView>=>invoke('data-repair:workspace'),
   previewDataRepair:(input:{issueId:string;reason:string}):Promise<DataRepairOperation>=>invoke('data-repair:preview',input),
   applyDataRepair:(input:{operationId:string;expectedRevisionToken:string}):Promise<DataRepairOperation>=>invoke('data-repair:apply',input),

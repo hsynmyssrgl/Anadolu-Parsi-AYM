@@ -85,6 +85,9 @@ import {
   ReadOperationalTextArtifactUseCase,
   ReadOperationalGzipArtifactUseCase,
   EvaluateAuthorizationUseCase,
+  ListOfflineCapabilityLeasesUseCase,
+  IssueOfflineCapabilityLeaseUseCase,
+  RevokeOfflineCapabilityLeaseUseCase,
   ListObjectPermissionsUseCase,
   UpsertObjectPermissionUseCase,
   DeleteObjectPermissionUseCase,
@@ -372,6 +375,7 @@ import type {
 } from '@ppt/domain';
 import { SqliteFamilyDatabaseRuntime } from './family-database-runtime.js';
 import { createSqliteRepositoryCompositionRoot, type RepositoryCompositionRoot } from './repository-composition-root.js';
+import type { IssueOfflineCapabilityLeaseInput, OfflineCapabilityLeaseView } from '@ppt/domain';
 import { FileDeviceIdentityProvider } from './device-identity.js';
 import type { DeviceSecretProtector } from './device-secret-protector.js';
 import { ManagedBackupPasswordProvider } from './managed-backup-password.js';
@@ -492,6 +496,12 @@ const archiveProductionPolicyConfiguration = (
 };
 
 const nowIso = (): string => new Date().toISOString();
+const OFFLINE_CAPABILITY_LEASE_BINDING = Object.freeze({
+  policyVersion: 'PPT-PLATFORM-POLICY-PPK-012',
+  policyPackageVersion: 12,
+  policyPackageSha256: createHash('sha256').update('PPK-012:offline-capability-lease:policy-package:v12').digest('hex'),
+  capabilityManifestSha256: createHash('sha256').update('PPK-012:windows-desktop:offline-capability-manifest:v1').digest('hex')
+});
 const initialsOf = (displayName: string): string => displayName.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toLocaleUpperCase('tr-TR') ?? '').join('');
 const ARCHIVE_OPERATION_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/u;
 
@@ -675,6 +685,9 @@ export class FamilyDataStore {
   readonly #listObjectPermissionsUseCase: ListObjectPermissionsUseCase;
   readonly #upsertObjectPermissionUseCase: UpsertObjectPermissionUseCase;
   readonly #deleteObjectPermissionUseCase: DeleteObjectPermissionUseCase;
+  readonly #listOfflineCapabilityLeasesUseCase: ListOfflineCapabilityLeasesUseCase;
+  readonly #issueOfflineCapabilityLeaseUseCase: IssueOfflineCapabilityLeaseUseCase;
+  readonly #revokeOfflineCapabilityLeaseUseCase: RevokeOfflineCapabilityLeaseUseCase;
   readonly #listAuditEntriesUseCase: ListAuditEntriesUseCase;
   readonly #verifyAuditIntegrityUseCase: VerifyAuditIntegrityUseCase;
   readonly #deviceIdentityProvider: FileDeviceIdentityProvider;
@@ -1041,6 +1054,7 @@ export class FamilyDataStore {
       transactionExecutor: this.#transactionExecutor,
       accountRepository: this.#repositories.accountRepository,
       permissionRepository: this.#repositories.objectPermissionRepository,
+      offlineCapabilityLeaseRepository: this.#repositories.offlineCapabilityLeaseRepository,
       householdMembershipRepository: this.#repositories.householdMembershipRepository,
       auditRepository: this.#repositories.auditRepository
     } as const;
@@ -1050,6 +1064,9 @@ export class FamilyDataStore {
     this.#listObjectPermissionsUseCase = new ListObjectPermissionsUseCase(authorizationQuery);
     this.#upsertObjectPermissionUseCase = new UpsertObjectPermissionUseCase(authorizationUnitOfWork);
     this.#deleteObjectPermissionUseCase = new DeleteObjectPermissionUseCase(authorizationUnitOfWork);
+    this.#listOfflineCapabilityLeasesUseCase = new ListOfflineCapabilityLeasesUseCase(authorizationQuery);
+    this.#issueOfflineCapabilityLeaseUseCase = new IssueOfflineCapabilityLeaseUseCase(authorizationUnitOfWork);
+    this.#revokeOfflineCapabilityLeaseUseCase = new RevokeOfflineCapabilityLeaseUseCase(authorizationUnitOfWork);
     this.#listAuditEntriesUseCase = new ListAuditEntriesUseCase(authorizationQuery);
     this.#verifyAuditIntegrityUseCase = new VerifyAuditIntegrityUseCase(authorizationQuery);
     const dataLifecycleDependencies = {
@@ -2923,6 +2940,44 @@ export class FamilyDataStore {
     });
     if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
     return this.listPermissions();
+  }
+
+  public listOfflineCapabilityLeases(): OfflineCapabilityLeaseView[] {
+    const actorId = asUserId(this.#requireAuth());
+    const result = this.#listOfflineCapabilityLeasesUseCase.execute({
+      context: this.#authorizationApplicationContext('offline-capability-lease-list'),
+      actorId,
+      familyId: 'family-main',
+      occurredAt: this.#clock.now()
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return [...result.value];
+  }
+
+  public issueOfflineCapabilityLease(input: IssueOfflineCapabilityLeaseInput): OfflineCapabilityLeaseView {
+    const actorId = asUserId(this.#requireAuth());
+    const result = this.#issueOfflineCapabilityLeaseUseCase.execute({
+      context: this.#authorizationApplicationContext('offline-capability-lease-issue'),
+      actorId,
+      familyId: 'family-main',
+      deviceId: this.#deviceIdentityProvider.snapshot().deviceId,
+      command: input,
+      identifiers: { leaseId: randomUUID(), nonce: randomUUID() },
+      binding: OFFLINE_CAPABILITY_LEASE_BINDING
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public revokeOfflineCapabilityLease(leaseId: string): OfflineCapabilityLeaseView {
+    const actorId = asUserId(this.#requireAuth());
+    const result = this.#revokeOfflineCapabilityLeaseUseCase.execute({
+      context: this.#authorizationApplicationContext('offline-capability-lease-revoke'),
+      actorId,
+      leaseId
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
   }
 
 

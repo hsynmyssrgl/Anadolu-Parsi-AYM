@@ -12,6 +12,7 @@
     "@ppt/core": "4.8.2026-29",
     "@ppt/domain": "4.8.2026-29",
     "@ppt/events": "4.8.2026-29",
+    "@ppt/platform-policy": "4.8.2026-29",
     "@ppt/security": "4.8.2026-29"
   },
   "scripts": {

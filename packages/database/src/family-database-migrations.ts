@@ -5958,6 +5958,61 @@ SET value='REVISION-32-G-PPK-011-CONTEXTUAL-OWNERSHIP-SHARE',
 WHERE key='schema_generation';
 `;
 
+const offlineCapabilityLeaseSql = `CREATE TABLE offline_capability_leases(
+  lease_id TEXT PRIMARY KEY CHECK(length(lease_id) BETWEEN 1 AND 128),
+  schema_version INTEGER NOT NULL CHECK(schema_version=1),
+  family_id TEXT NOT NULL CHECK(length(family_id) BETWEEN 1 AND 128),
+  subject_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+  device_id TEXT NOT NULL CHECK(length(device_id) BETWEEN 1 AND 128),
+  capability TEXT NOT NULL CHECK(capability IN (
+    'family.read','family.write','health.read','health.write','finance.read','finance.write',
+    'location.read','location.share','archive.read','archive.write','archive.ocr','ai.process',
+    'translation.process','communication.message','communication.call','communication.record',
+    'file.share','backup.create','backup.restore','cluster.admin','plugin.execute'
+  )),
+  issued_at TEXT NOT NULL,
+  not_before TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  policy_version TEXT NOT NULL CHECK(length(policy_version) BETWEEN 1 AND 80),
+  policy_package_version INTEGER NOT NULL CHECK(policy_package_version>=1),
+  policy_package_sha256 TEXT NOT NULL CHECK(length(policy_package_sha256)=64 AND policy_package_sha256 NOT GLOB '*[^0-9a-f]*'),
+  capability_manifest_sha256 TEXT NOT NULL CHECK(length(capability_manifest_sha256)=64 AND capability_manifest_sha256 NOT GLOB '*[^0-9a-f]*'),
+  nonce TEXT NOT NULL UNIQUE CHECK(length(nonce) BETWEEN 1 AND 128),
+  revoked_at TEXT,
+  lease_sha256 TEXT NOT NULL UNIQUE CHECK(length(lease_sha256)=64 AND lease_sha256 NOT GLOB '*[^0-9a-f]*'),
+  CHECK(datetime(issued_at) IS NOT NULL AND datetime(not_before) IS NOT NULL AND datetime(expires_at) IS NOT NULL),
+  CHECK(unixepoch(not_before)>=unixepoch(issued_at)),
+  CHECK(unixepoch(expires_at)-unixepoch(not_before) BETWEEN 60 AND 86400),
+  CHECK(revoked_at IS NULL OR (datetime(revoked_at) IS NOT NULL AND unixepoch(revoked_at)>=unixepoch(issued_at)))
+);
+
+CREATE INDEX idx_offline_capability_lease_scope
+ON offline_capability_leases(family_id,subject_account_id,device_id,capability,expires_at)
+WHERE revoked_at IS NULL;
+
+CREATE TRIGGER trg_ppk012_offline_capability_lease_immutable
+BEFORE UPDATE OF lease_id,schema_version,family_id,subject_account_id,device_id,capability,issued_at,not_before,expires_at,
+  policy_version,policy_package_version,policy_package_sha256,capability_manifest_sha256,nonce
+ON offline_capability_leases
+BEGIN
+  SELECT RAISE(ABORT,'offline capability lease identity is immutable');
+END;
+
+CREATE TRIGGER trg_ppk012_offline_capability_lease_revoke_once
+BEFORE UPDATE OF revoked_at,lease_sha256 ON offline_capability_leases
+WHEN OLD.revoked_at IS NOT NULL OR NEW.revoked_at IS NULL
+  OR datetime(NEW.revoked_at) IS NULL OR unixepoch(NEW.revoked_at)<unixepoch(OLD.issued_at)
+  OR length(NEW.lease_sha256)<>64 OR NEW.lease_sha256 GLOB '*[^0-9a-f]*'
+BEGIN
+  SELECT RAISE(ABORT,'offline capability lease revocation is invalid');
+END;
+
+UPDATE database_metadata
+SET value='REVISION-32-H-PPK-012-OFFLINE-CAPABILITY-LEASE-CACHE-FENCE',
+    updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
+WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -6033,7 +6088,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(72, 'ppk007_signed_versioned_policy_package', platformPolicyPackageBindingSql),
   createMigrationDefinition(73, 'ppk008_application_identity_device_certificate_manifest', platformApplicationIdentityBindingSql),
   createMigrationDefinition(74, 'ppk009_core_service_decision_reevaluation', platformPolicyDecisionAuthorityBindingSql),
-  createMigrationDefinition(75, 'ppk011_contextual_ownership_share', authorizationOwnershipShareSql)
+  createMigrationDefinition(75, 'ppk011_contextual_ownership_share', authorizationOwnershipShareSql),
+  createMigrationDefinition(76, 'ppk012_offline_capability_lease_cache_fence', offlineCapabilityLeaseSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

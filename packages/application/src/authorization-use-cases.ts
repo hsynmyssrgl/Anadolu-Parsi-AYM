@@ -26,6 +26,7 @@ import {
   type AuthorizationDecision,
   type AuthorizationGrant
 } from '@ppt/security';
+import type { OfflineCapabilityLease } from '@ppt/platform-policy';
 
 export interface AuthorizationAccountRecord {
   readonly id: UserId;
@@ -43,6 +44,7 @@ export interface AuthorizationQueryPort {
   listActiveGrants(accountId: UserId, occurredAt: IsoDateTime, context: AuthorizationApplicationContext): Result<readonly ObjectPermissionView[], AppError>;
   listActiveBranchIds?(personId: PersonId, occurredAt: IsoDateTime, context: AuthorizationApplicationContext): Result<readonly FamilyBranchId[], AppError>;
   listAllPermissions(context: AuthorizationApplicationContext): Result<readonly ObjectPermissionView[], AppError>;
+  listOfflineCapabilityLeases(context: AuthorizationApplicationContext, familyId: string): Result<readonly OfflineCapabilityLease[], AppError>;
   verifyAuditIntegrity(context: AuthorizationApplicationContext): Result<AuditIntegrityView, AppError>;
   listAuditEntries(context: AuthorizationApplicationContext, limit: number): Result<readonly AuditEntryView[], AppError>;
 }
@@ -52,6 +54,9 @@ export interface AuthorizationWriteScope {
   getAccount(accountId: UserId): Result<AuthorizationAccountRecord | null, AppError>;
   upsertPermission(input: ObjectPermissionView): Result<void, AppError>;
   deletePermission(id: string): Result<boolean, AppError>;
+  findOfflineCapabilityLease(leaseId: string): Result<OfflineCapabilityLease | undefined, AppError>;
+  insertOfflineCapabilityLease(lease: OfflineCapabilityLease): Result<void, AppError>;
+  revokeOfflineCapabilityLease(lease: OfflineCapabilityLease): Result<boolean, AppError>;
   appendAudit(input: {
     readonly id: string;
     readonly action: string;

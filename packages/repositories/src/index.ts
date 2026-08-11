@@ -18,6 +18,7 @@ export * from './account-repository.js';
 export * from './trusted-device-repository.js';
 export * from './windows-hello-registration-repository.js';
 export * from './platform-policy-transaction-repository.js';
+export * from './offline-capability-lease-repository.js';
 
 export * from './object-permission-repository.js';
 

@@ -1297,4 +1297,27 @@ describe('FamilyDataStore', () => {
     raw.close();
   });
 
+  it('PPK-012 çevrimdışı yetki kirasını kalıcılaştırır ve iptali tek yönlü uygular', async () => {
+    const { store, directory } = makeStore();
+    await authenticate(store);
+    const account = store.listAccounts().find((item) => item.status === 'active');
+    expect(account).toBeTruthy();
+    const issued = store.issueOfflineCapabilityLease({
+      subjectAccountId: account!.id,
+      capability: 'health.read',
+      durationMinutes: 60
+    });
+    expect(issued).toMatchObject({ state: 'active', capability: 'health.read', remainingSeconds: 3600 });
+    expect(issued.leaseSha256).toMatch(/^[0-9a-f]{64}$/u);
+    expect(store.listOfflineCapabilityLeases().some((lease) => lease.leaseId === issued.leaseId)).toBe(true);
+    const raw = new DatabaseSync(join(directory, 'family.db'));
+    expect(raw.prepare('SELECT COUNT(*) AS count FROM offline_capability_leases WHERE lease_id=?').get(issued.leaseId)).toEqual({ count: 1 });
+    const revoked = store.revokeOfflineCapabilityLease(issued.leaseId);
+    expect(revoked.state).toBe('revoked');
+    expect(revoked.leaseSha256).not.toBe(issued.leaseSha256);
+    expect(() => store.revokeOfflineCapabilityLease(issued.leaseId)).not.toThrow();
+    expect(() => store.issueOfflineCapabilityLease({ subjectAccountId: account!.id, capability: 'health.read', durationMinutes: 1_441 })).toThrow(/24 saat/u);
+    raw.close();
+  });
+
 });

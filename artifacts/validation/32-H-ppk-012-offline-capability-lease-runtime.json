@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-H",
+  "requirement": "PPK-012",
+  "phase": "OFFLINE_CAPABILITY_LEASE_RUNTIME",
+  "status": "PASS",
+  "checkCount": 8,
+  "passed": 8,
+  "failed": 0,
+  "results": [
+    {
+      "id": "ppk-012-contract",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "PASS (32/32)",
+      "outputSha256": "4c7ba971aab82c04d1cb85b595f16e42dcdac48231c096508cf0cc62af911259",
+      "outputTail": "32-H PPK-012 contract: PASS (32/32)."
+    },
+    {
+      "id": "ppk-012-targeted-policy-cache",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 12,
+      "minimumTests": 12,
+      "outputSha256": "a8fdf7cd8acf2994db5de62821abec5fdb8f9680c5804f183825ba1fef5c8ebc",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n············\n\n Test Files  1 passed (1)\n      Tests  12 passed (12)\n   Start at  16:46:45\n   Duration  550ms (transform 152ms, setup 0ms, import 253ms, tests 15ms, environment 0ms)"
+    },
+    {
+      "id": "ppk-012-data-store-repository-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 1,
+      "minimumTests": 1,
+      "outputSha256": "cfa8c1c3df26eaeff8e123bc21dd2288d8bac2b023f921300564494c665bb5fd",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n------------------------------------------·\n\n Test Files  1 passed (1)\n      Tests  1 passed | 42 skipped (43)\n   Start at  16:46:49\n   Duration  6.19s (transform 2.55s, setup 0ms, import 4.87s, tests 1.03s, environment 0ms)\n\n\n(node:19844) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "sensitive-cache-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 15,
+      "minimumTests": 15,
+      "outputSha256": "9fd18fc75841ab5902e93fbc9bd36da02fec484689f4b78cd15b7474fdcf68e8",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n···············\n\n Test Files  2 passed (2)\n      Tests  15 passed (15)\n   Start at  16:46:56\n   Duration  539ms (transform 237ms, setup 0ms, import 439ms, tests 23ms, environment 0ms)"
+    },
+    {
+      "id": "migration-76-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "\"version\": 76",
+      "outputSha256": "7c4a2f91b5cf911625c04272bb97fb410ce27123287fd1c447e3f532d7d4661d",
+      "outputTail": "me\": \"ppk004_complete_policy_context_binding\",\n      \"checksum\": \"b0eaf8abbf4b45e00404717a1ba767ce64687e9f575a0e11798326cbdbfeeb91\"\n    },\n    {\n      \"version\": 70,\n      \"name\": \"ppk005_complete_data_classification\",\n      \"checksum\": \"bfd3643232c6daa25d85804f08c4580f896fe4d6e81c2ad3d7dcf602649085e9\"\n    },\n    {\n      \"version\": 71,\n      \"name\": \"ppk006_complete_policy_obligation_suite\",\n      \"checksum\": \"ba678463aa0138780d74d2342bcc453ab622e87c7213a4d10078319762c96a90\"\n    },\n    {\n      \"version\": 72,\n      \"name\": \"ppk007_signed_versioned_policy_package\",\n      \"checksum\": \"6660072205bd61c06dd1d4f4b744884f7edb29bf370d44a228c150ebca679a83\"\n    },\n    {\n      \"version\": 73,\n      \"name\": \"ppk008_application_identity_device_certificate_manifest\",\n      \"checksum\": \"0099d0238be94ea6bb95579d2ac9f33c015e99d5c14463442313953c014b87fd\"\n    },\n    {\n      \"version\": 74,\n      \"name\": \"ppk009_core_service_decision_reevaluation\",\n      \"checksum\": \"99c89269ac120adbb387dc796ecf1b837f978e04e375d3d41c4fb605020ea813\"\n    },\n    {\n      \"version\": 75,\n      \"name\": \"ppk011_contextual_ownership_share\",\n      \"checksum\": \"3c59ecd6df8d4bf777a8eee8c4864f19848fb712c85691105320afa17b476337\"\n    },\n    {\n      \"version\": 76,\n      \"name\": \"ppk012_offline_capability_lease_cache_fence\",\n      \"checksum\": \"98546bdde3fe97f9f37f2421dd74ad305ce5301dd23a9954ed54bd53610e9388\"\n    }\n  ],\n  \"generatedAt\": \"2026-08-11T13:46:59.187Z\"\n}\n\n(node:1844) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "root-typescript",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "",
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputTail": ""
+    },
+    {
+      "id": "dependency-lock-integrity",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "Lockfile integrity verified",
+      "outputSha256": "b1a3c4364d25bc903136cdc1496a000a5425ff9d88b0f035d5650e68154445b1",
+      "outputTail": "Lockfile integrity verified: 530 assertions across 18 workspaces."
+    },
+    {
+      "id": "full-vitest-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 405,
+      "minimumTests": 405,
+      "outputSha256": "08f21fcc438d1d5b72677b6d31b3c961c3335fa5a6be57a6bf0b5f1a2072201e",
+      "outputTail": "any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:23032) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:17468) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:27916) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:4624) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:24472) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:20748) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:21468) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:15580) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:32760) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    }
+  ],
+  "validatedBoundaries": [
+    "FINITE_OFFLINE_LEASE",
+    "LEASE_INTEGRITY_AND_CONTEXT_BINDING",
+    "EXACT_EXPIRY_LOCK",
+    "REVOCATION_LOCK",
+    "SENSITIVE_CACHE_CLEAR",
+    "USE_CASE_REPOSITORY_ROUNDTRIP",
+    "MIGRATION_76_TRIGGERS",
+    "TYPED_UI_IPC",
+    "FULL_VITEST_REGRESSION"
+  ],
+  "persistentSensitivePayloadCacheIntroduced": false,
+  "policySensitiveIpcNoCacheWeakened": false,
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T13:48:16.910Z"
+}
