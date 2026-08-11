@@ -441,6 +441,19 @@ export interface OfflineCapabilityLeaseWorkspaceView {
   leases:readonly OfflineCapabilityLeaseView[]; cache:OfflineSensitiveCacheStateView;
   maximumDurationMinutes:number; minimumDurationMinutes:number;
 }
+export interface ClientDataAccessBoundaryView {
+  schemaVersion:1;
+  enforcement:'fail-closed';
+  allowedTransports:readonly ['typed-electron-ipc','versioned-core-service-api'];
+  directAccess:{repository:false;sql:false;sqlite:false;vaultFile:false};
+  directAccessExceptionCount:0;
+  registeredApplicationServiceChannels:number;
+  protectedContextBindings:readonly ['application','device','subject','family','policy-package','capability-manifest','device-certificate','authorization-context'];
+  legacyDesktopVaultPreserved:true;
+  sqliteOwnershipTransferred:false;
+  persistentPathExposed:false;
+  secretMaterialExposed:false;
+}
 export interface UpdateFamilyAccountInput { accountId:string; role:FamilyRole; status:FamilyMembershipStatus; startsAt?:string; endsAt?:string; personId?:string; }
 
 export type RecordPrivacy = 'private' | 'selected_members' | 'family';

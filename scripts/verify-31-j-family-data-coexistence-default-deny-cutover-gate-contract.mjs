@@ -21,12 +21,21 @@ const [scope, authority, priority, plan, ledger, decisions, registry, decision, 
 const checks = []; const check = (condition, name) => checks.push({ name, status: condition ? 'PASS' : 'FAIL' });
 const step = plan.steps.find((item) => item.id === '31-J');
 const requirementRecords = scope.requirements.map((id) => registry.requirements.find((item) => item.id === id));
-const authorizedRequirementState = (item) => item?.status !== 'COMPLETE' || (
-  item.id === 'PPK-003'
-  && Object.values(item.chain ?? {}).every((value) => value === true)
-  && item.evidence?.includes('docs/decisions/DEC-184-ppk-003-bounded-default-deny-policy-decision-availability.md')
-  && item.evidence?.includes('artifacts/validation/31-Y-ppk-003-default-deny-availability-runtime.json')
-);
+const authorizedRequirementState = (item) => {
+  if (item?.status !== 'COMPLETE') return true;
+  const evidence = item.evidence ?? [];
+  const completeChain = Object.values(item.chain ?? {}).every((value) => value === true);
+  if (!completeChain) return false;
+  return (
+    item.id === 'PPK-003'
+    && evidence.includes('docs/decisions/DEC-184-ppk-003-bounded-default-deny-policy-decision-availability.md')
+    && evidence.includes('artifacts/validation/31-Y-ppk-003-default-deny-availability-runtime.json')
+  ) || (
+    item.id === 'PPK-013'
+    && evidence.includes('docs/decisions/DEC-194-ppk-013-client-data-access-boundary.md')
+    && evidence.includes('artifacts/validation/32-I-ppk-013-client-data-access-runtime.json')
+  );
+};
 const complete = step?.status === 'COMPLETED';
 const later = inspectAuthorizedSuccessorLifecycle({ plan, ledger, predecessorId: '31-J' });
 

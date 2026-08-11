@@ -37,6 +37,7 @@ const createHarness = (writable = true, trusted = true) => {
     policyVersion: 'PPK-31-U',
     signingKey: Buffer.alloc(32, 31),
     decisionAuthorityId: 'windows-core-service',
+    deviceCertificateRequiredApplications: ['windows-desktop'],
     applicationCapabilities: { 'windows-desktop': ['family.read', 'family.write'] },
     consentRequiredCapabilities: [],
     onlineOnlyCapabilities: [],
@@ -57,6 +58,9 @@ const createHarness = (writable = true, trusted = true) => {
       personId: 'person-31-u',
       deviceId: 'device-31-u',
       applicationId: 'windows-desktop',
+      applicationVersion: 'v1',
+      devicePublicKeyFingerprintSha256: '1'.repeat(64),
+      deviceCertificateIssuedAt: NOW,
       deviceTrusted: trusted,
       membershipActive: true,
       roles: ['adult_member'],
@@ -65,8 +69,19 @@ const createHarness = (writable = true, trusted = true) => {
       expiresAt: EXPIRES
     }),
     repositoryPolicyScope,
+    resolveBootstrapClientContext: () => ({
+      applicationId: 'windows-desktop',
+      deviceId: 'device-31-u',
+      policyVersion: 'PPK-31-U',
+      policyPackageSha256: kernel.policyPackage.payloadSha256,
+      capabilityManifestSha256: kernel.policyPackage.payload.applicationManifests['windows-desktop']!.capabilityManifestSha256,
+      occurredAt: NOW
+    }),
     clock: () => NOW
   });
+  for (const channel of ['dashboard:getOverview', 'family:createMember', 'auth:login']) {
+    enforcement.registerClientApplicationServiceChannel(channel);
+  }
   return { enforcement, records, repositoryPolicyScope };
 };
 

@@ -162,7 +162,12 @@ describe('32-E PPK-009 Core Service policy decision re-evaluation', () => {
         authorize: () => { throw new Error('must-not-run'); }, verify: () => false
       },
       receiptSink: { append: () => undefined }, clusterFence: () => ({ writable: true, epoch: 74 }),
-      resolveAuthority: authority, repositoryPolicyScope: new DesktopRepositoryPolicyScope(), clock: () => NOW
+      resolveAuthority: authority, repositoryPolicyScope: new DesktopRepositoryPolicyScope(),
+      resolveBootstrapClientContext: () => ({
+        applicationId: 'windows-desktop', deviceId: 'device-32-e', policyVersion: 'PPK-009',
+        policyPackageSha256: '1'.repeat(64), capabilityManifestSha256: '2'.repeat(64), occurredAt: NOW
+      }),
+      clock: () => NOW
     })).toThrow('DESKTOP_API_POLICY_AUTHORITY_UNAVAILABLE');
   });
 

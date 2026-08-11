@@ -1,12 +1,16 @@
 import {
+  ClientDataAccessBoundaryPolicy,
   PlatformPolicyEnforcementPoint,
   assertActivePlatformPolicyTransactionContext,
+  type ClientDataAccessBootstrapRequest,
   type PlatformPolicyAuthorizationProvider,
   type PlatformPolicyClusterFence,
   type PlatformPolicyConnectionAuthority,
   type PlatformPolicyIntent,
   type PlatformPolicyReceiptSink
 } from '@ppt/platform-policy';
+import { EnforceClientDataAccessUseCase, GetClientDataAccessBoundaryUseCase } from '@ppt/application';
+import type { ClientDataAccessBoundaryView } from '@ppt/domain';
 import type { CorrelationId } from '@ppt/core';
 import { DesktopRepositoryPolicyScope } from './desktop-repository-policy-scope.js';
 
@@ -16,6 +20,7 @@ export interface DesktopUniversalApiPolicyEnforcementDependencies {
   readonly clusterFence: PlatformPolicyClusterFence;
   readonly resolveAuthority: () => PlatformPolicyConnectionAuthority | Promise<PlatformPolicyConnectionAuthority>;
   readonly repositoryPolicyScope: DesktopRepositoryPolicyScope;
+  readonly resolveBootstrapClientContext: () => Omit<ClientDataAccessBootstrapRequest, 'schemaVersion' | 'channel' | 'method' | 'transport'>;
   readonly clock?: () => string;
 }
 
@@ -80,11 +85,16 @@ export class DesktopUniversalApiPolicyEnforcement {
   readonly #enforcementPoint: PlatformPolicyEnforcementPoint;
   readonly #clusterFence: PlatformPolicyClusterFence;
   readonly #repositoryPolicyScope: DesktopRepositoryPolicyScope;
+  readonly #clientDataAccessPolicy = new ClientDataAccessBoundaryPolicy();
+  readonly #clientDataAccessEnforcement: EnforceClientDataAccessUseCase;
+  readonly #clientDataAccessStatus: GetClientDataAccessBoundaryUseCase;
+  readonly #resolveBootstrapClientContext: DesktopUniversalApiPolicyEnforcementDependencies['resolveBootstrapClientContext'];
 
   public constructor(dependencies: DesktopUniversalApiPolicyEnforcementDependencies) {
     if (
       !dependencies ||
       typeof dependencies.resolveAuthority !== 'function' ||
+      typeof dependencies.resolveBootstrapClientContext !== 'function' ||
       dependencies.authorizationProvider?.decisionAuthority !== 'windows-core-service' ||
       !(dependencies.repositoryPolicyScope instanceof DesktopRepositoryPolicyScope)
     ) {
@@ -92,6 +102,9 @@ export class DesktopUniversalApiPolicyEnforcement {
     }
     this.#clusterFence = dependencies.clusterFence;
     this.#repositoryPolicyScope = dependencies.repositoryPolicyScope;
+    this.#resolveBootstrapClientContext = dependencies.resolveBootstrapClientContext;
+    this.#clientDataAccessEnforcement = new EnforceClientDataAccessUseCase(this.#clientDataAccessPolicy);
+    this.#clientDataAccessStatus = new GetClientDataAccessBoundaryUseCase(this.#clientDataAccessPolicy);
     this.#enforcementPoint = new PlatformPolicyEnforcementPoint({
       provider: dependencies.authorizationProvider,
       receiptSink: dependencies.receiptSink,
@@ -115,12 +128,34 @@ export class DesktopUniversalApiPolicyEnforcement {
     });
   }
 
+  public registerClientApplicationServiceChannel(channel: string): void {
+    this.#clientDataAccessPolicy.registerApplicationServiceChannel(
+      channel,
+      isDesktopPolicyBootstrapChannel(channel)
+    );
+  }
+
+  public clientDataAccessBoundary(): ClientDataAccessBoundaryView {
+    return this.#clientDataAccessStatus.execute();
+  }
+
   public async execute<T>(input: DesktopUniversalApiExecutionInput<T>): Promise<T> {
     if (isDesktopPolicyBootstrapChannel(input.channel)) {
-      return this.#repositoryPolicyScope.runBootstrap({
+      const binding = this.#resolveBootstrapClientContext();
+      return this.#clientDataAccessEnforcement.executeBootstrap({
         correlationId: input.correlationId,
-        boundary: input.channel
-      }, input.operation);
+        request: Object.freeze({
+          schemaVersion: 1,
+          channel: input.channel,
+          method: 'application-service',
+          transport: 'typed-electron-ipc',
+          ...binding
+        }),
+        operation: () => this.#repositoryPolicyScope.runBootstrap({
+          correlationId: input.correlationId,
+          boundary: input.channel
+        }, input.operation)
+      });
     }
     const intent = resolveDesktopUniversalApiIntent(input.channel, input.correlationId);
     return this.#repositoryPolicyScope.runPolicyResolution({
@@ -137,7 +172,40 @@ export class DesktopUniversalApiPolicyEnforcement {
         fenceEpoch: authorization.fenceEpoch,
         fenceWritable: authorization.fenceWritable
       });
-      return this.#repositoryPolicyScope.runAuthorized(authorization, input.operation);
+      const receiptRequest = authorization.receiptRecord.request;
+      const certificate = receiptRequest.subject.deviceCertificate;
+      return this.#clientDataAccessEnforcement.execute({
+        correlationId: input.correlationId,
+        request: Object.freeze({
+          schemaVersion: 1,
+          channel: input.channel,
+          method: 'application-service',
+          transport: 'typed-electron-ipc',
+          applicationId: authorization.subject.applicationId,
+          deviceId: authorization.subject.deviceId,
+          subjectAccountId: authorization.subject.accountId,
+          familyId: authorization.resourceFamilyId,
+          policyVersion: authorization.policyVersion,
+          policyPackageSha256: authorization.policyPackageSha256,
+          capabilityManifestSha256: authorization.capabilityManifestSha256 ?? '',
+          deviceCertificateSha256: authorization.deviceCertificateSha256 ?? '',
+          authorizationContextSha256: authorization.contextHash,
+          occurredAt: authorization.occurredAt
+        }),
+        authoritativeContext: Object.freeze({
+          applicationId: receiptRequest.subject.applicationId,
+          deviceId: receiptRequest.subject.deviceId,
+          subjectAccountId: receiptRequest.subject.accountId,
+          familyId: receiptRequest.resource.familyId,
+          policyVersion: receiptRequest.policyVersion,
+          policyPackageSha256: receiptRequest.policyPackageSha256 ?? '',
+          capabilityManifestSha256: receiptRequest.subject.capabilityManifestSha256 ?? '',
+          deviceCertificateSha256: certificate?.certificateSha256 ?? '',
+          authorizationContextSha256: authorization.contextHash,
+          expiresAt: certificate?.expiresAt ?? ''
+        }),
+        operation: () => this.#repositoryPolicyScope.runAuthorized(authorization, input.operation)
+      });
     }));
   }
 }

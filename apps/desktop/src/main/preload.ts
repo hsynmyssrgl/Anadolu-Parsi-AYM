@@ -26,6 +26,7 @@ import type { FamilyEventView, FamilyMutationResultView, SetFamilyEventArchivedI
 import type { AssignPersonMembershipInput, CreateFamilyBranchInput, CreateHouseholdInput, FamilyBranch, Household, HouseholdMembershipWorkspaceView, PersonLifecycleProfile, PersonLifecycleWorkspaceView, PersonMembership, UpdatePersonProfileInput } from '@ppt/domain';
 import type { AuthorizationContextWorkspaceView } from '@ppt/domain';
 import type { IssueOfflineCapabilityLeaseInput, OfflineCapabilityLeaseWorkspaceView } from '@ppt/domain';
+import type { ClientDataAccessBoundaryView } from '@ppt/domain';
 import type { DataRepairOperation, DataRepairWorkspaceView } from '@ppt/domain';
 import type {
   EnrollWindowsHelloInput,
@@ -371,6 +372,7 @@ contextBridge.exposeInMainWorld('pardus', {
   resendInvitation:(input:ResendFamilyInvitationInput):Promise<{invitation:FamilyInvitationView;token:string}>=>invoke('invitations:resend',input),
   acceptInvitation:(input:AcceptFamilyInvitationInput):Promise<AuthStateView>=>invoke('invitations:accept',input),
   getAuthorizationContextWorkspace:():Promise<AuthorizationContextWorkspaceView>=>invoke('permissions:getContextWorkspace'),
+  getClientDataAccessBoundary:():Promise<ClientDataAccessBoundaryView>=>invoke('clientDataAccess:getBoundary'),
   listPermissions:():Promise<ObjectPermissionView[]>=>invoke('permissions:list'),
   upsertPermission:(input:UpsertObjectPermissionInput):Promise<ObjectPermissionView[]>=>invoke('permissions:upsert',input),
   deletePermission:(id:string):Promise<ObjectPermissionView[]>=>invoke('permissions:delete',id),

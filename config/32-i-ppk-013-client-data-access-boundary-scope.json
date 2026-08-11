@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "step": "32-I",
+  "requirement": "PPK-013",
+  "title": "Client repository, SQL, SQLite and vault direct-access prohibition",
+  "status": "COMPLETED",
+  "boundaries": {
+    "zeroDirectAccessExceptions": true,
+    "rendererRepositoryImportForbidden": true,
+    "rendererRawSqlForbidden": true,
+    "rendererSqliteRuntimeForbidden": true,
+    "rendererVaultFileAccessForbidden": true,
+    "preloadDirectDataProviderAccessForbidden": true,
+    "coreServiceClientSdkDirectDataProviderAccessForbidden": true,
+    "typedIpcApplicationServiceOnly": true,
+    "centralPolicyTransactionRequired": true,
+    "applicationDeviceSubjectFamilyBinding": true,
+    "policyPackageManifestCertificateContextBinding": true,
+    "malformedContextFailClosed": true,
+    "exactContextExpiryFailClosed": true,
+    "typescriptSyntaxFailGate": true,
+    "uiAndMenuStatusVisible": true,
+    "migration74PolicyReceiptAuthorityReused": true,
+    "newSchemaMigrationRequired": false
+  },
+  "clientZones": [
+    "apps/desktop/src/renderer",
+    "apps/desktop/src/main/preload.ts",
+    "packages/core-service-client/src"
+  ],
+  "providerZonesPreserved": [
+    "apps/desktop/src/main",
+    "packages/repositories",
+    "packages/database"
+  ],
+  "validation": {
+    "contract": "artifacts/validation/32-I-ppk-013-client-data-access-contract.json",
+    "runtime": "artifacts/validation/32-I-ppk-013-client-data-access-runtime.json",
+    "targetedTest": "apps/desktop/tests/ppk013-client-data-access-boundary.test.ts",
+    "clientSourceGate": "3 zones / 11 files / 0 findings / 6 malicious self-tests",
+    "contractChecks": "36/36",
+    "runtimeChecks": "10/10",
+    "targetedTests": "20/20",
+    "fullVitest": "62 files / 425 tests / deterministic single worker",
+    "migration": "76 PASS; no new schema migration; migration 74 receipt authority reused",
+    "rootTypeScriptDiagnostics": 0,
+    "productionBuild": "18 workspaces + Core Service + Electron main/preload + renderer PASS"
+  },
+  "threatModel": "docs/security/PPK-013_CLIENT_DATA_ACCESS_THREAT_MODEL.md",
+  "directAccessExceptionCount": 0,
+  "legacyDesktopVaultPreserved": true,
+  "sqliteOwnershipTransferred": false,
+  "persistentPathExposed": false,
+  "secretMaterialExposed": false,
+  "policySensitiveIpcNoCacheWeakened": false,
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "requirementCompletionClaimed": true,
+  "mandatoryTruthSentence": "PPK-013 istemci uygulamaların repository, ham SQL, SQLite ve korumalı kasa dosyasına doğrudan erişimini sıfır istisnayla yasaklar; mevcut Desktop kasa/SQLite sahipliğini değiştirmez, gerçek veri taşımaz, PPK-012 no-cache ve hassas önbellek sınırlarını gevşetmez."
+}

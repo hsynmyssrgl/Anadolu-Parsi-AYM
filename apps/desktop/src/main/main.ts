@@ -277,6 +277,20 @@ function universalApiPolicyEnforcement(): DesktopUniversalApiPolicyEnforcement {
         applicationVersion: coreService.health.policyPackage.payload.applicationVersions['windows-desktop']!
       }),
       repositoryPolicyScope: desktopRepositoryPolicyScope,
+      resolveBootstrapClientContext: () => {
+        const health = coreServiceConnection().health;
+        const manifest = health.policyPackage.payload.applicationManifests['windows-desktop'];
+        const device = currentWindowsHelloDeviceBinding();
+        if (!manifest) throw new Error('CLIENT_DATA_ACCESS_APPLICATION_MANIFEST_UNAVAILABLE');
+        return Object.freeze({
+          applicationId: 'windows-desktop' as const,
+          deviceId: device.deviceId,
+          policyVersion: health.policyVersion,
+          policyPackageSha256: health.policyPackage.payloadSha256,
+          capabilityManifestSha256: manifest.capabilityManifestSha256,
+          occurredAt: runtime().clock.now()
+        });
+      },
       clock: () => runtime().clock.now()
     });
   }
@@ -574,6 +588,8 @@ function registerIpcHandler<TArguments extends unknown[], TResult>(
   channel: string,
   handler: IpcHandler<TArguments, TResult>
 ): void {
+  const policyEnforcement = universalApiPolicyEnforcement();
+  policyEnforcement.registerClientApplicationServiceChannel(channel);
   registerCorrelatedIpcHandler({
     ipcMain,
     runtime: runtime(),
@@ -584,7 +600,7 @@ function registerIpcHandler<TArguments extends unknown[], TResult>(
     readResults: ipcReadResults,
     telemetry: ipcPerformanceTelemetry,
     adaptiveBudget: ipcAdaptiveResourceBudget,
-    policyEnforcement: universalApiPolicyEnforcement(),
+    policyEnforcement,
     handler
   });
 }
@@ -1015,6 +1031,7 @@ function registerIpc(): void {
   registerIpcHandler('permissions:list', () => store().listPermissions());
   registerIpcHandler('permissions:upsert', (_event, input:UpsertObjectPermissionInput) => store().upsertPermission(input));
   registerIpcHandler('permissions:delete', (_event, id:string) => store().deletePermission(id));
+  registerIpcHandler('clientDataAccess:getBoundary', () => universalApiPolicyEnforcement().clientDataAccessBoundary());
   const offlineCapabilityWorkspace = (): OfflineCapabilityLeaseWorkspaceView => ({
     leases: store().listOfflineCapabilityLeases(),
     cache: offlineSensitiveCache.state(),

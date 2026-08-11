@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 47,
+  "decisionCount": 48,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1123,6 +1123,32 @@
         "artifacts/validation/32-H-ppk-012-offline-capability-lease-contract.json",
         "artifacts/validation/32-H-ppk-012-offline-capability-lease-runtime.json",
         "docs/audit/32-H_PPK-012_CEVRIMDISI_CAPABILITY_LEASE_UST_KAPANIS.md"
+      ]
+    },
+    {
+      "id": "DEC-194",
+      "date": "2026-08-11",
+      "acceptedAt": "2026-08-11",
+      "title": "PPK-013 zero-exception client data-access boundary top closure",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: PPK-013 tam kapsamlı ve tam otomatik uygula",
+      "document": "docs/decisions/DEC-194-ppk-013-client-data-access-boundary.md",
+      "requirements": ["PPK-013"],
+      "codeAreas": [
+        "packages/platform-policy/src/client-data-access-boundary.ts",
+        "packages/domain/src/app-data.ts",
+        "packages/application/src/client-data-access-use-cases.ts",
+        "apps/desktop/src/main/desktop-universal-api-policy-enforcement.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/renderer/App.tsx",
+        "scripts/verify-client-data-access-boundary.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/32-I-ppk-013-client-data-access-contract.json",
+        "artifacts/validation/32-I-ppk-013-client-data-access-runtime.json",
+        "docs/security/PPK-013_CLIENT_DATA_ACCESS_THREAT_MODEL.md",
+        "docs/audit/32-I_PPK-013_ISTEMCI_VERI_ERISIM_UST_KAPANIS.md"
       ]
     }
   ]

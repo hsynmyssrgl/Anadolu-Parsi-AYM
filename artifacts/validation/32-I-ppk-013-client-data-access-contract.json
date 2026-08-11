@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-I",
+  "requirement": "PPK-013",
+  "phase": "CLIENT_DATA_ACCESS_BOUNDARY_CONTRACT",
+  "status": "PASS",
+  "checkCount": 36,
+  "passed": 36,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "direct data-access exception registry is exported empty and frozen",
+      "status": "PASS"
+    },
+    {
+      "name": "policy enumerates repository SQL SQLite and vault direct methods",
+      "status": "PASS"
+    },
+    {
+      "name": "each direct method has a dedicated fail-closed denial",
+      "status": "PASS"
+    },
+    {
+      "name": "policy binds application device subject and family context",
+      "status": "PASS"
+    },
+    {
+      "name": "policy binds package manifest certificate and authorization digest",
+      "status": "PASS"
+    },
+    {
+      "name": "policy rejects exact expiry and malformed context",
+      "status": "PASS"
+    },
+    {
+      "name": "only typed IPC or versioned Core API transports are modeled",
+      "status": "PASS"
+    },
+    {
+      "name": "registered application-service channels are mandatory",
+      "status": "PASS"
+    },
+    {
+      "name": "bootstrap is isolated to an explicit channel registry",
+      "status": "PASS"
+    },
+    {
+      "name": "client boundary is exported by platform policy",
+      "status": "PASS"
+    },
+    {
+      "name": "domain exposes a non-secret boundary status view",
+      "status": "PASS"
+    },
+    {
+      "name": "application use case stops the operation on denial",
+      "status": "PASS"
+    },
+    {
+      "name": "application status use case preserves Desktop vault and no ownership transfer",
+      "status": "PASS"
+    },
+    {
+      "name": "Desktop universal PEP owns the client data-access policy",
+      "status": "PASS"
+    },
+    {
+      "name": "authenticated client fence executes inside the signed transaction callback",
+      "status": "PASS"
+    },
+    {
+      "name": "Desktop registers every handler with the client service-channel registry",
+      "status": "PASS"
+    },
+    {
+      "name": "Desktop IPC wrapper still applies universal policy enforcement",
+      "status": "PASS"
+    },
+    {
+      "name": "no Desktop main module bypasses the centralized IPC runtime",
+      "status": "PASS"
+    },
+    {
+      "name": "typed client boundary status is exposed through IPC and preload",
+      "status": "PASS"
+    },
+    {
+      "name": "renderer declaration exposes only the typed status method",
+      "status": "PASS"
+    },
+    {
+      "name": "permissions menu renders the PPK-013 boundary posture",
+      "status": "PASS"
+    },
+    {
+      "name": "client syntax scan covers renderer preload and Core Service client SDK",
+      "status": "PASS"
+    },
+    {
+      "name": "client scan blocks repository database SQLite filesystem and vault imports",
+      "status": "PASS"
+    },
+    {
+      "name": "client scan detects raw SQL syntax and runs malicious self-tests",
+      "status": "PASS"
+    },
+    {
+      "name": "current client source scan has zero findings",
+      "status": "PASS"
+    },
+    {
+      "name": "typecheck and production build both run the client fail gate",
+      "status": "PASS"
+    },
+    {
+      "name": "Core Service client SDK depends only on safe contracts",
+      "status": "PASS"
+    },
+    {
+      "name": "repository and schema ownership remain provider-side",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 74 receipt authority is reused and no migration 77 exists",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-012 policy-sensitive no-cache channel registry remains present",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted tests cover direct paths and all security mismatches",
+      "status": "PASS"
+    },
+    {
+      "name": "threat model records assets trust zones abuse cases and mitigations",
+      "status": "PASS"
+    },
+    {
+      "name": "accepted registry closes the complete PPK-013 evidence chain",
+      "status": "PASS"
+    },
+    {
+      "name": "scope closes only PPK-013 without cutover or real transfer",
+      "status": "PASS"
+    },
+    {
+      "name": "DEC-194 is the latest decision and binds PPK-013 evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "decision and audit preserve Desktop vault SQLite ownership and no-cache",
+      "status": "PASS"
+    }
+  ],
+  "failures": [],
+  "clientSourceScan": {
+    "zones": 3,
+    "files": 11,
+    "findings": []
+  },
+  "directIpcHandlerFiles": [],
+  "migrationDecision": "NO_NEW_SCHEMA_MIGRATION_REUSE_74_POLICY_RECEIPT_AUTHORITY",
+  "directAccessExceptions": 0,
+  "legacyDesktopVaultPreserved": true,
+  "sqliteOwnershipTransferred": false,
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "policySensitiveIpcNoCacheWeakened": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T14:48:13.597Z"
+}

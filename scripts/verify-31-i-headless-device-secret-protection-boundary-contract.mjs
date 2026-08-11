@@ -34,6 +34,12 @@ const checks = [];
 const check = (passed, name) => checks.push({ name, status: passed ? 'PASS' : 'FAIL' });
 const step = plan.steps.find((item) => item.id === '31-I');
 const requirements = scope.requirements.map((id) => registry.requirements.find((item) => item.id === id));
+const authorizedRequirementState = (item) => item?.status !== 'COMPLETE' || (
+  item.id === 'PPK-013'
+  && Object.values(item.chain ?? {}).every((value) => value === true)
+  && item.evidence?.includes('docs/decisions/DEC-194-ppk-013-client-data-access-boundary.md')
+  && item.evidence?.includes('artifacts/validation/32-I-ppk-013-client-data-access-runtime.json')
+);
 const complete = step?.status === 'COMPLETED' && step.validationStatus === 'PASS' && step.persistentReceiptStatus === 'PASS';
 const laterSuccessor = inspectAuthorizedSuccessorLifecycle({ plan, ledger, predecessorId: '31-I' });
 
@@ -49,7 +55,7 @@ check(priority.status === 'PASS' && priority.failed === 0 && priority.passed ===
 check(decision.includes('@ppt/security') && decision.includes('CurrentUser DPAPI') && decision.includes('Core Service'), 'DEC-170 records the headless boundary');
 check(step?.title === scope.title && step.scopeRequirement === 'DHA-001', 'work plan selects 31-I');
 check((complete && ledger.libraryUploadStatus === '31-I_COMPLETED_RECEIPT_PASS' && ledger.activeMicroStep === null) || (!complete && ledger.libraryUploadStatus.startsWith('31-I_MAIN_STRUCTURE_') && ledger.activeMicroStep === '31-I') || (laterSuccessor.planValid && laterSuccessor.ledgerValid && laterSuccessor.nextTaskValid), 'ledger lifecycle');
-check(requirements.every(Boolean) && requirements.every((item) => item.priority === 'P0' && item.status !== 'COMPLETE'), 'foundation requirements remain open P0');
+check(requirements.every(Boolean) && requirements.every((item) => item.priority === 'P0' && authorizedRequirementState(item)), 'foundation requirements remain open P0 work or have an authorized successor closure');
 check(requirements.every((item) => item.evidence.includes('docs/decisions/DEC-170-headless-device-secret-protection-boundary.md')), 'registry binds DEC-170 evidence');
 
 check(securityIndex.includes("export * from './device-secret-protector.js'"), 'security package exports the protector boundary');

@@ -14,6 +14,7 @@ export * from './security-epoch.js';
 
 export * from './authorization-use-cases.js';
 export * from './offline-capability-lease-use-cases.js';
+export * from './client-data-access-use-cases.js';
 export * from './membership-use-cases.js';
 
 export * from './health-use-cases.js';
