@@ -2,7 +2,7 @@
 
 - Görünür sürüm: **Bronze 04.08.2026.29**
 - Makine okunur defter: `config/user-decision-ledger.json`
-- Aktif karar sayısı: **32**
+- Aktif karar sayısı: **38**
 
 Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağlayıcı kullanıcı kararlarını karar düzeyinde, etkilediği kural/belge/kod alanlarıyla saklar. Ham konuşma erişimi olmadan “tam transcript” iddiası yapılmaz.
 
@@ -40,3 +40,9 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 - `DEC-176` — Synthetic key lifecycle proof harness detached non-submittable boundary
 - `DEC-177` — Synthetic rollback and recovery drill detached non-submittable boundary
 - `DEC-178` — End-to-end security evidence aggregator detached non-submittable boundary
+- `DEC-179` — Explicit user approval receipt detached no-cutover boundary
+- `DEC-180` — Versioned cutover decision preflight detached no-authority boundary
+- `DEC-181` — PPK-002 family import governed rollback exact delete receipt fence
+- `DEC-182` — PPK-002 remaining technical boundaries
+- `DEC-183` — PPK-002 universal enforcement top closure
+- `DEC-184` — PPK-003 bounded default-deny policy decision availability top closure

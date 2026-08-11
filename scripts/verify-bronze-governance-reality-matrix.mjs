@@ -29,6 +29,7 @@ const b002 = scope.requirements?.find((item) => item.id === 'B0-02');
 const b201 = scope.requirements?.find((item) => item.id === 'B2-01');
 const gov005 = scope.requirements?.find((item) => item.id === 'GOV-005');
 const ppk002 = scope.requirements?.find((item) => item.id === 'PPK-002');
+const ppk003 = scope.requirements?.find((item) => item.id === 'PPK-003');
 const statusCounts = Object.fromEntries(
   [...new Set(scope.requirements.map((item) => item.status))]
     .sort()
@@ -44,7 +45,9 @@ check(decisions.decisions?.filter((item) => item.id === 'DEC-165' && item.status
 check(decisions.decisions?.filter((item) => item.id === 'DEC-180' && item.status === 'ACTIVE').length === 1, 'active DEC-180 must be unique');
 check(decisions.decisions?.filter((item) => item.id === 'DEC-181' && item.status === 'ACTIVE').length === 1, 'active DEC-181 must be unique');
 check(decisions.decisions?.filter((item) => item.id === 'DEC-183' && item.status === 'ACTIVE').length === 1, 'active DEC-183 must be unique');
+check(decisions.decisions?.filter((item) => item.id === 'DEC-184' && item.status === 'ACTIVE').length === 1, 'active DEC-184 must be unique');
 check(ppk002?.priority === 'P0' && ppk002.status === 'COMPLETE' && Object.values(ppk002.chain ?? {}).every((value) => value === true), 'PPK-002 must be P0 COMPLETE with a closed chain');
+check(ppk003?.priority === 'P0' && ppk003.status === 'COMPLETE' && Object.values(ppk003.chain ?? {}).every((value) => value === true), 'PPK-003 must be P0 COMPLETE with a closed chain');
 check(Boolean(b001), 'B0-01 is missing');
 check(b001?.status === 'COMPLETE', 'B0-01 is not COMPLETE');
 check(Object.values(b001?.chain ?? {}).every((value) => value === true), 'B0-01 completion chain is not closed');
@@ -67,6 +70,7 @@ check(featureReality.requirements === 350 && featureReality.status === 'PASS', '
 check(featureReality.silverReady === false, 'Silver must remain blocked');
 check(audit.scope.total === 350, 'Bronze audit scope total mismatch');
 check(audit.PPK002 === 'COMPLETE', 'Bronze audit PPK-002 status is not COMPLETE');
+check(audit.PPK003 === 'COMPLETE', 'Bronze audit PPK-003 status is not COMPLETE');
 check(JSON.stringify(audit.scope.statusCounts) === JSON.stringify(statusCounts), 'Bronze audit status counts mismatch');
 check(audit.numberingAssessment.newBuildAssigned === false, 'Bronze audit assigned a new Build');
 check(audit.checkpoint30Z.persistentReceiptStatus === 'PASS', 'frozen external 30-Z receipt must be PASS');
@@ -157,6 +161,7 @@ if (mode === 'capture') {
     external31KThrough31TReceiptStatus: 'PASS',
     currentCheckpoint: '31-T',
     PPK002: 'COMPLETE',
+    PPK003: 'COMPLETE',
     successorDecisionCreated: false,
     cutoverAuthorityAttached: false,
     officialCompletionClaimed: true,
@@ -165,7 +170,7 @@ if (mode === 'capture') {
     newBuildAssigned: false,
     decisionSha256: await hashFile(decisionPath),
     rootBindingVerifier: 'scripts/verify-aym-governance-incremental-contract.mjs',
-    truthBoundary: 'The focused 30-Z through 31-T external receipts and current-source D: external protection are PASS. DEC-183 and the 31-X contract/runtime evidence complete PPK-002 universal API, use-case and production repository enforcement. The 31-S preflight remains read-only and non-authoritative; no successor cutover decision or cutover authority exists. Other Bronze scope remains open.'
+    truthBoundary: 'The focused 30-Z through 31-T external receipts and current-source D: external protection are PASS. DEC-183/31-X complete PPK-002 universal enforcement; DEC-184/31-Y complete PPK-003 bounded default-deny decision availability. The 31-S preflight remains read-only and non-authoritative; no successor cutover decision or cutover authority exists. Other Bronze scope remains open.'
   };
   await mkdir(dirname(evidencePath), { recursive: true });
   const content = `${JSON.stringify(report, null, 2)}\n`;
@@ -173,4 +178,4 @@ if (mode === 'capture') {
   check(await readFile(evidencePath, 'utf8') === content, 'matrix evidence readback mismatch');
 }
 
-console.log(`Bronze governance reality matrix: PASS (${checks} checks; mode=${mode}; B0-02 COMPLETE; PPK-002 COMPLETE; 30-Z through 31-T receipts PASS; current-source D: protection PASS; no successor cutover decision or cutover authority).`);
+console.log(`Bronze governance reality matrix: PASS (${checks} checks; mode=${mode}; B0-02 COMPLETE; PPK-002 COMPLETE; PPK-003 COMPLETE; 30-Z through 31-T receipts PASS; current-source D: protection PASS; no successor cutover decision or cutover authority).`);

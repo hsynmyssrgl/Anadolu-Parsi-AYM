@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "31-Y",
+  "requirement": "PPK-003",
+  "phase": "DEFAULT_DENY_AVAILABILITY_CONTRACT",
+  "status": "PASS",
+  "checkCount": 22,
+  "passed": 22,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "dedicated unavailable-decision error schema exists",
+      "status": "PASS"
+    },
+    {
+      "name": "all six trusted pre-operation stages are explicitly modeled",
+      "status": "PASS",
+      "details": {
+        "stageCount": 6
+      }
+    },
+    {
+      "name": "production dependency deadline defaults to five seconds",
+      "status": "PASS"
+    },
+    {
+      "name": "decision deadline is bounded against unsafe configuration",
+      "status": "PASS"
+    },
+    {
+      "name": "invalid enforcement composition is rejected before use",
+      "status": "PASS"
+    },
+    {
+      "name": "authority resolution is deadline guarded",
+      "status": "PASS"
+    },
+    {
+      "name": "resource resolution is deadline guarded",
+      "status": "PASS"
+    },
+    {
+      "name": "replay reservation is deadline guarded",
+      "status": "PASS"
+    },
+    {
+      "name": "policy authorization is deadline guarded",
+      "status": "PASS"
+    },
+    {
+      "name": "signed receipt verification is deadline guarded",
+      "status": "PASS"
+    },
+    {
+      "name": "mandatory receipt persistence is deadline guarded",
+      "status": "PASS"
+    },
+    {
+      "name": "deadline error cannot open the operation callback",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted tests cover all unavailable stages",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test proves a late allow cannot execute",
+      "status": "PASS"
+    },
+    {
+      "name": "universal authenticated Desktop API PEP remains active",
+      "status": "PASS"
+    },
+    {
+      "name": "production repository execution remains active-scope guarded",
+      "status": "PASS"
+    },
+    {
+      "name": "renderer UI and menu remain confined to preload IPC",
+      "status": "PASS"
+    },
+    {
+      "name": "durable policy transaction schema and migration remain present",
+      "status": "PASS"
+    },
+    {
+      "name": "DEC-171 real-data cutover block remains fail-closed",
+      "status": "PASS"
+    },
+    {
+      "name": "DEC-184 forbids real-data and ownership cutover",
+      "status": "PASS"
+    },
+    {
+      "name": "accepted scope marks PPK-003 complete with a closed chain",
+      "status": "PASS"
+    },
+    {
+      "name": "31-Y scope binds contract, runtime and targeted evidence",
+      "status": "PASS"
+    }
+  ],
+  "failures": [],
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T09:52:41.272Z"
+}

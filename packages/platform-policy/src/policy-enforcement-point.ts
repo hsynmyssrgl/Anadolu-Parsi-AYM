@@ -297,12 +297,22 @@ export type PlatformPolicyEnforcementErrorCode =
   | 'OBLIGATION_EXECUTION_FAILED'
   | 'TRANSACTION_CONTEXT_INVALID'
   | 'TRANSACTION_CONTEXT_MISMATCH'
+  | 'POLICY_DECISION_UNAVAILABLE'
   | 'ENFORCEMENT_UNAVAILABLE';
+
+export type PlatformPolicyAvailabilityStage =
+  | 'AUTHORITY_RESOLUTION'
+  | 'RESOURCE_RESOLUTION'
+  | 'REPLAY_RESERVATION'
+  | 'POLICY_AUTHORIZATION'
+  | 'RECEIPT_VERIFICATION'
+  | 'RECEIPT_PERSISTENCE';
 
 export class PlatformPolicyEnforcementError extends Error {
   public readonly code: PlatformPolicyEnforcementErrorCode;
   public readonly decision: PlatformPolicyDecision | undefined;
   public readonly receipt: PlatformPolicyReceipt | undefined;
+  public readonly availabilityStage: PlatformPolicyAvailabilityStage | undefined;
 
   public constructor(
     code: PlatformPolicyEnforcementErrorCode,
@@ -310,6 +320,7 @@ export class PlatformPolicyEnforcementError extends Error {
     options?: ErrorOptions & {
       readonly decision?: PlatformPolicyDecision;
       readonly receipt?: PlatformPolicyReceipt;
+      readonly availabilityStage?: PlatformPolicyAvailabilityStage;
     }
   ) {
     super(message, options);
@@ -317,6 +328,7 @@ export class PlatformPolicyEnforcementError extends Error {
     this.code = code;
     this.decision = options?.decision;
     this.receipt = options?.receipt;
+    this.availabilityStage = options?.availabilityStage;
   }
 }
 
@@ -328,6 +340,12 @@ interface PlatformPolicyEnforcementPointBaseOptions {
   readonly clock?: () => string;
   readonly nonceFactory?: () => string;
   readonly receiptTtlMs?: number;
+  /**
+   * Maximum wait for each trusted pre-operation policy dependency. A dependency
+   * that never settles is treated as an unavailable decision and the protected
+   * operation is never entered.
+   */
+  readonly decisionTimeoutMs?: number;
   /**
    * Production business writes use this mode after recording the exact receipt
    * and fence in their SQLite transaction. Denied decisions are still appended
@@ -507,14 +525,30 @@ export class PlatformPolicyEnforcementPoint {
   readonly #clock: () => string;
   readonly #nonceFactory: () => string;
   readonly #receiptTtlMs: number;
+  readonly #decisionTimeoutMs: number;
   readonly #deferAllowedReceiptPersistence: boolean;
 
   public constructor(options: PlatformPolicyEnforcementPointOptions) {
+    if (!options || typeof options !== 'object') {
+      throw new PlatformPolicyEnforcementError('ENFORCEMENT_UNAVAILABLE', 'Policy enforcement composition is unavailable');
+    }
     if ((options.kernel === undefined) === (options.provider === undefined)) {
       throw new PlatformPolicyEnforcementError(
         'ENFORCEMENT_UNAVAILABLE',
         'Exactly one policy kernel or authorization provider must be composed'
       );
+    }
+    if (
+      !options.authorityResolver || typeof options.authorityResolver.resolve !== 'function'
+      || !options.resourceResolver || typeof options.resourceResolver.resolve !== 'function'
+      || !options.receiptSink || typeof options.receiptSink.append !== 'function'
+      || (options.replayStore !== undefined && typeof options.replayStore.reserve !== 'function')
+      || (options.provider !== undefined
+        && (typeof options.provider.authorize !== 'function' || typeof options.provider.verify !== 'function'))
+      || (options.kernel !== undefined
+        && (typeof options.kernel.authorizeWithReceipt !== 'function' || typeof options.kernel.verifyReceiptForRequest !== 'function'))
+    ) {
+      throw new PlatformPolicyEnforcementError('ENFORCEMENT_UNAVAILABLE', 'Policy enforcement dependency is unavailable');
     }
     this.#kernel = options.kernel;
     this.#provider = options.provider;
@@ -529,6 +563,14 @@ export class PlatformPolicyEnforcementPoint {
       throw new PlatformPolicyEnforcementError('RECEIPT_VERIFICATION_FAILED', 'Policy receipt TTL must be an integer between 1000 and 300000 milliseconds');
     }
     this.#receiptTtlMs = receiptTtlMs;
+    const decisionTimeoutMs = options.decisionTimeoutMs ?? 5_000;
+    if (!Number.isSafeInteger(decisionTimeoutMs) || decisionTimeoutMs < 10 || decisionTimeoutMs > 60_000) {
+      throw new PlatformPolicyEnforcementError(
+        'ENFORCEMENT_UNAVAILABLE',
+        'Policy decision timeout must be an integer between 10 and 60000 milliseconds'
+      );
+    }
+    this.#decisionTimeoutMs = decisionTimeoutMs;
     this.#deferAllowedReceiptPersistence = options.deferAllowedReceiptPersistence === true;
     if (this.#deferAllowedReceiptPersistence && typeof options.receiptSink.ensure !== 'function') {
       throw new PlatformPolicyEnforcementError(
@@ -557,8 +599,12 @@ export class PlatformPolicyEnforcementPoint {
     }
     let authority: PlatformPolicyConnectionAuthority;
     try {
-      authority = await this.#authorityResolver.resolve();
+      authority = await this.#withinDecisionDeadline(
+        'AUTHORITY_RESOLUTION',
+        () => this.#authorityResolver.resolve()
+      );
     } catch (error) {
+      if (error instanceof PlatformPolicyEnforcementError && error.code === 'POLICY_DECISION_UNAVAILABLE') throw error;
       throw new PlatformPolicyEnforcementError('AUTHORITY_RESOLUTION_FAILED', 'Trusted policy connection authority could not be resolved', { cause: error });
     }
     this.#assertAuthority(authority, parseTimestamp(this.#clock()));
@@ -574,8 +620,12 @@ export class PlatformPolicyEnforcementPoint {
 
     let resource: PolicyResource;
     try {
-      resource = await this.#resourceResolver.resolve(intent, authority);
+      resource = await this.#withinDecisionDeadline(
+        'RESOURCE_RESOLUTION',
+        () => this.#resourceResolver.resolve(intent, authority)
+      );
     } catch (error) {
+      if (error instanceof PlatformPolicyEnforcementError && error.code === 'POLICY_DECISION_UNAVAILABLE') throw error;
       throw new PlatformPolicyEnforcementError('RESOURCE_RESOLUTION_FAILED', 'Policy resource context could not be resolved', { cause: error });
     }
     if (!resource || typeof resource !== 'object') {
@@ -636,7 +686,10 @@ export class PlatformPolicyEnforcementPoint {
     const reservationExpiresAtMs = Math.min(issuedAtMs + (this.#receiptTtlMs * 2), authorityExpiresAtMs);
     let reserved: boolean;
     try {
-      reserved = await this.#replayStore.reserve({ nonce, reservedAtMs: issuedAtMs, expiresAtMs: reservationExpiresAtMs });
+      reserved = await this.#withinDecisionDeadline(
+        'REPLAY_RESERVATION',
+        () => this.#replayStore.reserve({ nonce, reservedAtMs: issuedAtMs, expiresAtMs: reservationExpiresAtMs })
+      );
     } catch (error) {
       if (error instanceof PlatformPolicyEnforcementError) throw error;
       throw new PlatformPolicyEnforcementError(
@@ -646,7 +699,10 @@ export class PlatformPolicyEnforcementPoint {
       );
     }
     if (!reserved) throw new PlatformPolicyEnforcementError('RECEIPT_REPLAYED', 'Policy receipt nonce was already issued');
-    const provided = await this.#authorize(request, issuedAt, nonce);
+    const provided = await this.#withinDecisionDeadline(
+      'POLICY_AUTHORIZATION',
+      () => this.#authorize(request, issuedAt, nonce)
+    );
     const effectiveRequest = this.#assertEffectiveRequest(request, provided.effectiveRequest);
     const authorization = provided.authorization;
     if (
@@ -685,7 +741,7 @@ export class PlatformPolicyEnforcementPoint {
         'Cluster writability fence changed while policy authorization was being issued'
       );
     }
-    if (!(await this.#verify(effectiveRequest, authorization.receipt))) {
+    if (!(await this.#verifyWithinDecisionDeadline(effectiveRequest, authorization.receipt))) {
       throw new PlatformPolicyEnforcementError('RECEIPT_VERIFICATION_FAILED', 'Policy receipt is not bound to the resolved request');
     }
     if (authorization.decision.allowed && !effectiveRequest.clusterWritable) {
@@ -719,7 +775,7 @@ export class PlatformPolicyEnforcementPoint {
         authorization,
         'Denied policy receipt could not be persisted before returning the decision'
       );
-      if (!(await this.#verify(effectiveRequest, authorization.receipt))) {
+      if (!(await this.#verifyWithinDecisionDeadline(effectiveRequest, authorization.receipt))) {
         throw new PlatformPolicyEnforcementError('RECEIPT_VERIFICATION_FAILED', 'Persisted policy receipt changed or no longer matches the resolved request');
       }
       throw new PlatformPolicyEnforcementError('POLICY_DENIED', `Policy denied the transaction: ${authorization.decision.reason}`, {
@@ -733,7 +789,7 @@ export class PlatformPolicyEnforcementPoint {
         authorization,
         'Policy receipt could not be persisted before transaction execution'
       );
-      if (!(await this.#verify(effectiveRequest, authorization.receipt))) {
+      if (!(await this.#verifyWithinDecisionDeadline(effectiveRequest, authorization.receipt))) {
         throw new PlatformPolicyEnforcementError('RECEIPT_VERIFICATION_FAILED', 'Persisted policy receipt changed or no longer matches the resolved request');
       }
     }
@@ -812,8 +868,12 @@ export class PlatformPolicyEnforcementPoint {
     message: string
   ): Promise<void> {
     try {
-      await this.#receiptSink.append(record);
+      await this.#withinDecisionDeadline(
+        'RECEIPT_PERSISTENCE',
+        () => this.#receiptSink.append(record)
+      );
     } catch (error) {
+      if (error instanceof PlatformPolicyEnforcementError && error.code === 'POLICY_DECISION_UNAVAILABLE') throw error;
       throw new PlatformPolicyEnforcementError('RECEIPT_PERSISTENCE_FAILED', message, {
         cause: error,
         decision: authorization.decision,
@@ -851,6 +911,35 @@ export class PlatformPolicyEnforcementPoint {
       return (await this.#provider!.verify(Object.freeze({ request, receipt }))) === true;
     } catch (error) {
       throw new PlatformPolicyEnforcementError('RECEIPT_VERIFICATION_FAILED', 'Policy receipt provider verification failed', { cause: error });
+    }
+  }
+
+  #verifyWithinDecisionDeadline(
+    request: PlatformPolicyRequest,
+    receipt: PlatformPolicyReceipt
+  ): Promise<boolean> {
+    return this.#withinDecisionDeadline(
+      'RECEIPT_VERIFICATION',
+      () => this.#verify(request, receipt)
+    );
+  }
+
+  async #withinDecisionDeadline<T>(
+    stage: PlatformPolicyAvailabilityStage,
+    operation: () => Promise<T> | T
+  ): Promise<T> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const unavailable = new Promise<never>((_resolve, reject) => {
+      timer = setTimeout(() => reject(new PlatformPolicyEnforcementError(
+        'POLICY_DECISION_UNAVAILABLE',
+        `Policy decision dependency did not settle within ${this.#decisionTimeoutMs} milliseconds`,
+        { availabilityStage: stage }
+      )), this.#decisionTimeoutMs);
+    });
+    try {
+      return await Promise.race([Promise.resolve().then(operation), unavailable]);
+    } finally {
+      if (timer !== undefined) clearTimeout(timer);
     }
   }
 

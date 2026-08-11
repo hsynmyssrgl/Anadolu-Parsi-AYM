@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-GOVERNANCE-REALITY-MATRIX-B0-01",
-  "generatedAt": "2026-08-11T09:27:13.476Z",
+  "generatedAt": "2026-08-11T09:54:08.031Z",
   "status": "PASS_SOURCE_NATIVE_MATRIX",
   "requirement": "B0-01",
   "decision": "DEC-153",
@@ -15,19 +15,19 @@
     "PR-194",
     "PR-203"
   ],
-  "checks": 77,
+  "checks": 80,
   "authoritativeSource": "06_KOD/app",
   "requirementCount": 350,
   "statusCounts": {
-    "COMPLETE": 15,
-    "FOUNDATION_STARTED": 5,
+    "COMPLETE": 16,
+    "FOUNDATION_STARTED": 4,
     "NOT_IMPLEMENTED": 292,
     "PARTIAL": 38
   },
-  "strictComplete": 15,
-  "strictRequirementCompletionPercent": 4.2857,
-  "implementationChainCoveragePercent": 4.8571,
-  "governanceEvidenceChainCoveragePercent": 45.4286,
+  "strictComplete": 16,
+  "strictRequirementCompletionPercent": 4.5714,
+  "implementationChainCoveragePercent": 5.0857,
+  "governanceEvidenceChainCoveragePercent": 45.5238,
   "b201RequirementStatus": "COMPLETE",
   "b201NativeStatus": "USER_DEFERRED_NOT_RUN_NOT_PASS",
   "b201NativeCompletionBlocking": false,
@@ -40,6 +40,7 @@
   "external31KThrough31TReceiptStatus": "PASS",
   "currentCheckpoint": "31-T",
   "PPK002": "COMPLETE",
+  "PPK003": "COMPLETE",
   "successorDecisionCreated": false,
   "cutoverAuthorityAttached": false,
   "officialCompletionClaimed": true,
@@ -48,5 +49,5 @@
   "newBuildAssigned": false,
   "decisionSha256": "6d5287fe1cb027e0896d5f9e7418074f1fee7d9f3bf45683de469cf6c90b7a84",
   "rootBindingVerifier": "scripts/verify-aym-governance-incremental-contract.mjs",
-  "truthBoundary": "The focused 30-Z through 31-T external receipts and current-source D: external protection are PASS. DEC-183 and the 31-X contract/runtime evidence complete PPK-002 universal API, use-case and production repository enforcement. The 31-S preflight remains read-only and non-authoritative; no successor cutover decision or cutover authority exists. Other Bronze scope remains open."
+  "truthBoundary": "The focused 30-Z through 31-T external receipts and current-source D: external protection are PASS. DEC-183/31-X complete PPK-002 universal enforcement; DEC-184/31-Y complete PPK-003 bounded default-deny decision availability. The 31-S preflight remains read-only and non-authoritative; no successor cutover decision or cutover authority exists. Other Bronze scope remains open."
 }

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 37,
+  "decisionCount": 38,
   "decisions": [
     {
       "id": "DEC-121",
@@ -880,6 +880,27 @@
         "artifacts/validation/31-X-ppk-002-top-closure-contract.json",
         "artifacts/validation/31-X-ppk-002-top-closure-runtime.json",
         "docs/audit/31-X_PPK-002_UST_KAPANIS.md"
+      ]
+    },
+    {
+      "id": "DEC-184",
+      "date": "2026-08-11",
+      "acceptedAt": "2026-08-11",
+      "title": "PPK-003 bounded default-deny policy decision availability top closure",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: PPK-003 tam otomatik devam",
+      "document": "docs/decisions/DEC-184-ppk-003-bounded-default-deny-policy-decision-availability.md",
+      "requirements": ["PPK-003"],
+      "codeAreas": [
+        "packages/platform-policy/src/policy-enforcement-point.ts",
+        "packages/platform-policy/policy-decision-availability.test.ts",
+        "apps/desktop/src/main/desktop-universal-api-policy-enforcement.ts",
+        "apps/desktop/src/main/desktop-repository-policy-scope.ts"
+      ],
+      "evidence": [
+        "artifacts/validation/31-Y-ppk-003-default-deny-availability-contract.json",
+        "artifacts/validation/31-Y-ppk-003-default-deny-availability-runtime.json",
+        "docs/audit/31-Y_PPK-003_VARSAYILAN_RET_UST_KAPANIS.md"
       ]
     }
   ]

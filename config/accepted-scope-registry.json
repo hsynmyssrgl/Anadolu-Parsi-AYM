@@ -5606,22 +5606,22 @@
       "area": "Politika Çekirdeği",
       "title": "Varsayılan ret; politika kararı alınamazsa işlem fail-closed reddedilir",
       "priority": "P0",
-      "status": "FOUNDATION_STARTED",
+      "status": "COMPLETE",
       "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
       "chain": {
         "decision": true,
         "domain": true,
-        "schema": false,
-        "migration": false,
-        "useCase": false,
-        "repository": false,
+        "schema": true,
+        "migration": true,
+        "useCase": true,
+        "repository": true,
         "policy": true,
-        "apiOrIpc": false,
-        "ui": false,
-        "menu": false,
-        "targetedTest": false,
+        "apiOrIpc": true,
+        "ui": true,
+        "menu": true,
+        "targetedTest": true,
         "documentation": true,
-        "evidence": false
+        "evidence": true
       },
       "evidence": [
         "artifacts/authority/31-G_MAIN_STRUCTURE_PRIORITY_AUTHORITY.json",
@@ -5671,7 +5671,14 @@
         "artifacts/authority/31-S_VERSIONED_CUTOVER_DECISION_PREFLIGHT_AUTHORITY.json",
         "artifacts/validation/31-S_PRIORITY_SELECTION_VALIDATION.json",
         "docs/decisions/DEC-180-versioned-cutover-decision-preflight-boundary.md",
-        "config/31-s-versioned-cutover-decision-preflight-scope.json"
+        "config/31-s-versioned-cutover-decision-preflight-scope.json",
+        "docs/decisions/DEC-184-ppk-003-bounded-default-deny-policy-decision-availability.md",
+        "config/31-y-ppk-003-default-deny-availability-top-closure-scope.json",
+        "packages/platform-policy/src/policy-enforcement-point.ts",
+        "packages/platform-policy/policy-decision-availability.test.ts",
+        "docs/audit/31-Y_PPK-003_VARSAYILAN_RET_UST_KAPANIS.md",
+        "artifacts/validation/31-Y-ppk-003-default-deny-availability-contract.json",
+        "artifacts/validation/31-Y-ppk-003-default-deny-availability-runtime.json"
       ]
     },
     {

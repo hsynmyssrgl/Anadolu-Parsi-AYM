@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "31-Y",
+  "requirement": "PPK-003",
+  "phase": "DEFAULT_DENY_AVAILABILITY_RUNTIME",
+  "status": "PASS",
+  "checkCount": 4,
+  "passed": 4,
+  "failed": 0,
+  "results": [
+    {
+      "id": "ppk-003-contract",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputSha256": "2fb76dc60a5ff14c08e8ef79ca7162637e684ce985bf90cfcb06319d1d34ffc6",
+      "outputTail": "31-Y PPK-003 contract: PASS (22/22)."
+    },
+    {
+      "id": "ppk-003-targeted-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 9,
+      "minimumTests": 9,
+      "outputSha256": "8fe0452b16c25196e70f133505cb08bb208d6706bf4228173a11b124e1408fab",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·········\n\n Test Files  1 passed (1)\n      Tests  9 passed (9)\n   Start at  12:52:41\n   Duration  718ms (transform 92ms, setup 0ms, import 165ms, tests 265ms, environment 0ms)"
+    },
+    {
+      "id": "ppk-002-universal-enforcement-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 9,
+      "minimumTests": 9,
+      "outputSha256": "27f48d4d63549059fbd0075f2c71ae0cb7a2c052793f9a71660a1902a29ecc4c",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·········\n\n Test Files  1 passed (1)\n      Tests  9 passed (9)\n   Start at  12:52:43\n   Duration  2.56s (transform 1.15s, setup 0ms, import 2.27s, tests 20ms, environment 0ms)\n\n\n(node:15576) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "full-vitest-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 280,
+      "minimumTests": 280,
+      "outputSha256": "87cc1b7e6ee532eabd3421dcd533cafa0d77edad1610d23bb6ba698e0f58b3ba",
+      "outputTail": "any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:11092) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:27700) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:18088) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:20176) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:20376) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:28720) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:9616) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:15932) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:22616) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    }
+  ],
+  "validatedBoundaries": [
+    "BOUNDED_AUTHORITY_RESOLUTION",
+    "BOUNDED_RESOURCE_RESOLUTION",
+    "BOUNDED_REPLAY_RESERVATION",
+    "BOUNDED_POLICY_AUTHORIZATION",
+    "BOUNDED_RECEIPT_VERIFICATION",
+    "BOUNDED_RECEIPT_PERSISTENCE",
+    "LATE_ALLOW_NON_EXECUTION",
+    "UNIVERSAL_DESKTOP_API_REGRESSION",
+    "FULL_VITEST_REGRESSION"
+  ],
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T09:53:49.358Z"
+}

@@ -21,6 +21,12 @@ const [scope, authority, priority, plan, ledger, decisions, registry, decision, 
 const checks = []; const check = (condition, name) => checks.push({ name, status: condition ? 'PASS' : 'FAIL' });
 const step = plan.steps.find((item) => item.id === '31-J');
 const requirementRecords = scope.requirements.map((id) => registry.requirements.find((item) => item.id === id));
+const authorizedRequirementState = (item) => item?.status !== 'COMPLETE' || (
+  item.id === 'PPK-003'
+  && Object.values(item.chain ?? {}).every((value) => value === true)
+  && item.evidence?.includes('docs/decisions/DEC-184-ppk-003-bounded-default-deny-policy-decision-availability.md')
+  && item.evidence?.includes('artifacts/validation/31-Y-ppk-003-default-deny-availability-runtime.json')
+);
 const complete = step?.status === 'COMPLETED';
 const later = inspectAuthorizedSuccessorLifecycle({ plan, ledger, predecessorId: '31-J' });
 
@@ -42,7 +48,7 @@ check(decision.includes('User approval alone does not bypass the technical gates
 check(currentDecisions.includes('DEC-171') && decisions.decisions.some((item) => item.id === 'DEC-171') && decisions.decisionCount === decisions.decisions.length, 'decision registers include DEC-171');
 check(step?.title === scope.title && (plan.currentStep === '31-J' || later.planValid), 'work plan selects 31-J or an authorized successor');
 check((complete && ledger.libraryUploadStatus === '31-J_COMPLETED_RECEIPT_PASS' && ledger.activeMicroStep === null) || (!complete && ledger.libraryUploadStatus.startsWith('31-J_MAIN_STRUCTURE_') && ledger.activeMicroStep === '31-J') || (complete && later.planValid && later.ledgerValid && later.nextTaskValid), 'governance ledger follows the 31-J or authorized-successor lifecycle');
-check(requirementRecords.every(Boolean) && requirementRecords.every((item) => item.priority === 'P0' && item.status !== 'COMPLETE'), 'foundation requirements remain open P0 work');
+check(requirementRecords.every(Boolean) && requirementRecords.every((item) => item.priority === 'P0' && authorizedRequirementState(item)), 'foundation requirements remain open P0 work or have an authorized successor closure');
 check(requirementRecords.every((item) => item.evidence.includes('docs/decisions/DEC-171-family-data-coexistence-default-deny-cutover-gate.md')), 'scope registry binds DEC-171 evidence');
 
 check(contracts.includes('CoreServiceFamilyDataCutoverStatusContract'), 'typed cutover status contract exists');

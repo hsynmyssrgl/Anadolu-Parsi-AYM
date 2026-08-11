@@ -1,9 +1,10 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-11T09:27:13.359Z",
+  "generatedAt": "2026-08-11T09:54:07.900Z",
   "release": "Bronze 04.08.2026.29",
   "PPK002": "COMPLETE",
+  "PPK003": "COMPLETE",
   "authoritativeSource": "06_KOD/app",
   "currentStep": "31-T",
   "status": "PASS_WITH_OPEN_SCOPE",
@@ -14,21 +15,21 @@
     "checkpointIds": "Checkpoint identifiers preserve work history and are never reused.",
     "buildIds": "A new Build number is assigned only after required current gates, manifest and receipt evidence exist.",
     "newBuildAssigned": false,
-    "reason": "The 31-T family-import rollback receipt remains immutable and the 31-X top closure now completes PPK-002 universal API, use-case and production repository enforcement. Other Bronze scope remains open."
+    "reason": "The 31-X and 31-Y top closures complete PPK-002 universal enforcement and PPK-003 bounded default-deny decision availability. Other Bronze scope remains open."
   },
   "percentages": {
     "officialWeightedBronzePercent": 25,
     "officialWeightedEvidenceStep": "31-T",
-    "strictRequirementCompletionPercent": 4.2857,
-    "implementationChainCoveragePercent": 4.8571,
-    "governanceEvidenceChainCoveragePercent": 45.4286,
+    "strictRequirementCompletionPercent": 4.5714,
+    "implementationChainCoveragePercent": 5.0857,
+    "governanceEvidenceChainCoveragePercent": 45.5238,
     "interpretation": "These are separate measures and must not be blended into an invented single completion claim."
   },
   "scope": {
     "total": 350,
     "statusCounts": {
-      "COMPLETE": 15,
-      "FOUNDATION_STARTED": 5,
+      "COMPLETE": 16,
+      "FOUNDATION_STARTED": 4,
       "NOT_IMPLEMENTED": 292,
       "PARTIAL": 38
     },
@@ -38,21 +39,21 @@
       "P2": 5
     },
     "completeByPriority": {
-      "P0": 14,
+      "P0": 15,
       "P1": 1,
       "P2": 0
     },
-    "incompleteCount": 335,
-    "strictComplete": 15,
+    "incompleteCount": 334,
+    "strictComplete": 16,
     "implementationCoverage": {
-      "passed": 170,
+      "passed": 178,
       "total": 3500,
-      "percent": 4.8571
+      "percent": 5.0857
     },
     "governanceCoverage": {
-      "passed": 477,
+      "passed": 478,
       "total": 1050,
-      "percent": 45.4286
+      "percent": 45.5238
     }
   },
   "rules": {
@@ -210,7 +211,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "31-G main-structure contract: PASS (35/35; requirements remain open foundation)."
+          "31-G main-structure contract: PASS (35/35; open foundation plus authorized PPK-003 successor closure)."
         ]
       },
       {
@@ -1066,27 +1067,6 @@
       "workOrderClass": "STARTED_BEFORE_NEW",
       "area": "Politika Çekirdeği",
       "title": "Tek PlatformPolicyKernel; kimlik, yetki, gizlilik, rıza, saklama, AI, kayıt ve dışa aktarım kararlarının tek otoritesi",
-      "completedChainCount": 4,
-      "completionBlockers": [],
-      "missingChain": [
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "evidence"
-      ]
-    },
-    {
-      "id": "PPK-003",
-      "priority": "P0",
-      "status": "FOUNDATION_STARTED",
-      "workOrderClass": "STARTED_BEFORE_NEW",
-      "area": "Politika Çekirdeği",
-      "title": "Varsayılan ret; politika kararı alınamazsa işlem fail-closed reddedilir",
       "completedChainCount": 4,
       "completionBlockers": [],
       "missingChain": [
