@@ -83,22 +83,32 @@ try {
     assert.equal(provider.current(), undefined);
   });
 
-  await verify('JSONL file logging redacts and rotates', async () => {
+  await verify('JSONL file logging rejects payload and rotates content-free events', async () => {
     const directory = join(root, 'file-logger');
+    const failures = [];
     const logger = new JsonLinesFileLogger({
       directory,
       minimumLevel: 'debug',
-      maxFileBytes: 2_048,
-      retentionDays: 30
+      maxFileBytes: 256,
+      retentionDays: 30,
+      onWriteError: (failure) => failures.push(failure)
     });
     for (let index = 0; index < 24; index += 1) {
       logger.info({
         timestamp: asIsoDateTime(new Date().toISOString()),
         service: 'test', process: 'node', event: 'rotation.test',
         correlationId: asCorrelationId(`cor-${index}`),
-        metadata: { password: 'never-log', payload: 'x'.repeat(240), index }
+        metadata: { eventId: `evt-${index}`, index }
       });
     }
+    logger.info({
+      timestamp: asIsoDateTime(new Date().toISOString()),
+      service: 'test', process: 'node', event: 'payload.rejected',
+      correlationId: asCorrelationId('cor-sensitive'),
+      metadata: { password: 'never-log', payload: 'OCR secret text' }
+    });
+    assert.equal(failures.length, 1);
+    assert.equal(failures[0].code, 'SENSITIVE_LOG_POLICY_REJECTED');
     const files = await readdir(directory);
     assert.ok(files.length > 1, 'Log rotasyonu oluşmadı.');
     for (const file of files) {

@@ -1,6 +1,8 @@
 import { randomBytes } from 'node:crypto';
 import { isAbsolute, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { asCorrelationId, asIsoDateTime } from '@ppt/core';
+import { writeContentFreeConsoleEvent, type LogLevel } from '@ppt/logging';
 import { PlatformPolicyKernel } from '@ppt/platform-policy';
 import { CORE_SERVICE_APPLICATION_API_VERSION } from '@ppt/core-service-contracts';
 import { CoreServiceLocalAdminServer } from './local-admin-server.js';
@@ -215,6 +217,51 @@ export const createCoreServiceProcessHost = (
 export const runCoreServiceProcess = async (): Promise<void> => {
   const host = createCoreServiceProcessHost();
   const instanceId = randomBytes(8).toString('hex');
+  interface CoreServiceLogMetadata {
+    readonly signal?: string;
+    readonly lifecycle?: string;
+    readonly role?: string;
+    readonly writable?: boolean;
+    readonly safeMode?: boolean;
+    readonly policyVersion?: string;
+    readonly failureCode?: string;
+  }
+  const logProcessResult = (
+    level: LogLevel,
+    event: string,
+    metadata: CoreServiceLogMetadata,
+    stream: 'stdout' | 'stderr' = 'stdout'
+  ): void => {
+    writeContentFreeConsoleEvent({
+      timestamp: asIsoDateTime(new Date().toISOString()),
+      level,
+      service: 'core-service',
+      process: 'service-host',
+      event,
+      correlationId: asCorrelationId(`core-service-${instanceId}`),
+      outcome: level === 'error' ? 'failure' : 'success',
+      metadata: {
+        instanceId,
+        signal: metadata.signal,
+        lifecycle: metadata.lifecycle,
+        role: metadata.role,
+        writable: metadata.writable,
+        safeMode: metadata.safeMode,
+        policyVersion: metadata.policyVersion,
+        failureCode: metadata.failureCode
+      }
+    }, stream);
+  };
+  const healthMetadata = (): CoreServiceLogMetadata => {
+    const health = host.runtime.health();
+    return Object.freeze({
+      lifecycle: health.lifecycle,
+      role: health.role,
+      writable: health.writable,
+      safeMode: health.safeMode,
+      policyVersion: health.policyVersion
+    });
+  };
   let shutdownPromise: Promise<void> | undefined;
 
   const requestShutdown = (signal: 'SIGINT' | 'SIGTERM'): void => {
@@ -223,12 +270,12 @@ export const runCoreServiceProcess = async (): Promise<void> => {
     process.removeListener('SIGTERM', onSigterm);
     shutdownPromise = (async () => {
       const stopping = host.stop();
-      console.log(JSON.stringify({ event: 'core-service.stopping', instanceId, signal, health: host.runtime.health() }));
+      logProcessResult('info', 'core-service.stopping', { signal, ...healthMetadata() });
       await stopping;
-      console.log(JSON.stringify({ event: 'core-service.stopped', instanceId, health: host.runtime.health() }));
+      logProcessResult('info', 'core-service.stopped', healthMetadata());
       process.exitCode = 0;
     })().catch(() => {
-      console.error(JSON.stringify({ event: 'core-service.shutdown-failed', instanceId }));
+      logProcessResult('error', 'core-service.shutdown_failed', { failureCode: 'SHUTDOWN_FAILED' }, 'stderr');
       process.exitCode = 1;
     });
   };
@@ -240,7 +287,7 @@ export const runCoreServiceProcess = async (): Promise<void> => {
   try {
     await host.start();
     if (!shutdownPromise) {
-      console.log(JSON.stringify({ event: 'core-service.ready', instanceId, health: host.runtime.health() }));
+      logProcessResult('info', 'core-service.ready', healthMetadata());
     } else {
       await shutdownPromise;
     }
@@ -256,10 +303,16 @@ const entryPoint = process.argv[1];
 if (entryPoint && import.meta.url === pathToFileURL(resolve(entryPoint)).href) {
   void runCoreServiceProcess().catch((error: unknown) => {
     const configurationFailure = error instanceof CoreServiceProcessConfigurationError;
-    console.error(JSON.stringify({
-      event: 'core-service.startup-failed',
-      code: configurationFailure ? 'CONFIGURATION_INVALID' : 'STARTUP_FAILED'
-    }));
+    writeContentFreeConsoleEvent({
+      timestamp: asIsoDateTime(new Date().toISOString()),
+      level: 'error',
+      service: 'core-service',
+      process: 'service-host',
+      event: 'core-service.startup_failed',
+      correlationId: asCorrelationId('core-service-startup'),
+      outcome: 'failure',
+      metadata: { failureCode: configurationFailure ? 'CONFIGURATION_INVALID' : 'STARTUP_FAILED' }
+    }, 'stderr');
     process.exitCode = configurationFailure ? 78 : 1;
   });
 }

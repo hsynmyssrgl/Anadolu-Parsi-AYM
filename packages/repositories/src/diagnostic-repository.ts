@@ -4,7 +4,14 @@ import type { DiagnosticArchiveView, DiagnosticEntryView, DiagnosticReportHistor
 import type { RepositoryResult } from '@ppt/repository-contracts';
 import { SqliteRepository } from './sqlite-base.js';
 import type { RepositoryExecutionContext } from '@ppt/repository-contracts';
-const diagnostic=(r:Record<string,unknown>):DiagnosticEntryView=>({id:String(r.id),severity:String(r.severity) as DiagnosticEntryView['severity'],code:String(r.code),message:String(r.message),...(r.details?{details:String(r.details)}:{}),occurredAt:String(r.occurred_at)});
+import { SensitiveLogPolicy } from '@ppt/platform-policy';
+
+const sensitiveLogPolicy = new SensitiveLogPolicy();
+const diagnostic=(r:Record<string,unknown>):DiagnosticEntryView=>{
+  const value:DiagnosticEntryView={id:String(r.id),severity:String(r.severity) as DiagnosticEntryView['severity'],code:String(r.code),message:String(r.message),...(r.details?{details:String(r.details)}:{}),occurredAt:String(r.occurred_at)};
+  if(!sensitiveLogPolicy.verifyDiagnostic(value)) throw new Error('SENSITIVE_LOG_STORED_DIAGNOSTIC_INVALID');
+  return value;
+};
 const performance=(r:Record<string,unknown>):PerformanceSampleView=>({id:String(r.id),cpuLoadPercent:Number(r.cpu_load_percent),memoryUsagePercent:Number(r.memory_usage_percent),databaseBytes:Number(r.database_bytes),archiveBytes:Number(r.archive_bytes),sampledAt:String(r.sampled_at)});
 const health=(r:Record<string,unknown>):SystemHealthHistoryView=>({id:String(r.id),score:Number(r.score),grade:String(r.grade) as SystemHealthHistoryView['grade'],systemStatus:String(r.system_status) as SystemHealthHistoryView['systemStatus'],deductions:Number(r.deductions),capturedAt:String(r.captured_at)});
 const maintenance=(r:Record<string,unknown>):MaintenanceHistoryView=>({id:String(r.id),operation:String(r.operation) as MaintenanceHistoryView['operation'],success:Boolean(r.success),message:String(r.message),startedAt:String(r.started_at),completedAt:String(r.completed_at),durationMs:Number(r.duration_ms),source:String(r.source) as MaintenanceHistoryView['source']});
@@ -17,8 +24,8 @@ const diagnosticArchive=(r:Record<string,unknown>):DiagnosticArchiveView=>({id:S
 const notification=(r:Record<string,unknown>):HealthNotificationView=>({id:String(r.id),severity:String(r.severity) as HealthNotificationView['severity'],code:String(r.code),title:String(r.title),message:String(r.message),createdAt:String(r.created_at),...(r.acknowledged_at?{acknowledgedAt:String(r.acknowledged_at)}:{}),...(r.generated_task_id?{generatedTaskId:String(r.generated_task_id)}:{})});
 
 export class SqliteDiagnosticRepository extends SqliteRepository implements DiagnosticRepositoryPort {
-  public insertIfAbsent(c:RepositoryExecutionContext,r:DiagnosticRecord):RepositoryResult<void>{return this.execute(c,()=>{this.database(c).prepare('INSERT OR IGNORE INTO diagnostic_entries(id,severity,code,message,details,occurred_at) VALUES(?,?,?,?,?,?)').run(r.id,r.severity,r.code,r.message,r.details??null,r.occurredAt);});}
-  public insertDiagnostic(c:RepositoryExecutionContext,r:DiagnosticEntryView):RepositoryResult<void>{return this.execute(c,()=>{this.database(c).prepare('INSERT INTO diagnostic_entries(id,severity,code,message,details,occurred_at) VALUES(?,?,?,?,?,?)').run(r.id,r.severity,r.code,r.message,r.details??null,r.occurredAt);});}
+  public insertIfAbsent(c:RepositoryExecutionContext,r:DiagnosticRecord):RepositoryResult<void>{return this.execute(c,()=>{const safe=sensitiveLogPolicy.sanitizeDiagnostic(r);this.database(c).prepare('INSERT OR IGNORE INTO diagnostic_entries(id,severity,code,message,details,occurred_at) VALUES(?,?,?,?,?,?)').run(safe.id,safe.severity,safe.code,safe.message,safe.details??null,safe.occurredAt);});}
+  public insertDiagnostic(c:RepositoryExecutionContext,r:DiagnosticEntryView):RepositoryResult<void>{return this.execute(c,()=>{if(!sensitiveLogPolicy.verifyDiagnostic(r))throw new Error('SENSITIVE_LOG_DIAGNOSTIC_WRITE_REJECTED');this.database(c).prepare('INSERT INTO diagnostic_entries(id,severity,code,message,details,occurred_at) VALUES(?,?,?,?,?,?)').run(r.id,r.severity,r.code,r.message,r.details??null,r.occurredAt);});}
   public listDiagnostics(c:RepositoryExecutionContext,limit:number):RepositoryResult<readonly DiagnosticEntryView[]>{return this.execute(c,()=> (this.database(c).prepare('SELECT * FROM diagnostic_entries ORDER BY occurred_at DESC LIMIT ?').all(limit) as Record<string,unknown>[]).map(diagnostic));}
   public insertPerformanceSample(c:RepositoryExecutionContext,r:PerformanceSampleView):RepositoryResult<void>{return this.execute(c,()=>{this.database(c).prepare('INSERT INTO performance_samples(id,cpu_load_percent,memory_usage_percent,database_bytes,archive_bytes,sampled_at) VALUES(?,?,?,?,?,?)').run(r.id,r.cpuLoadPercent,r.memoryUsagePercent,r.databaseBytes,r.archiveBytes,r.sampledAt);});}
   public listPerformanceSamples(c:RepositoryExecutionContext,limit:number):RepositoryResult<readonly PerformanceSampleView[]>{return this.execute(c,()=> (this.database(c).prepare('SELECT * FROM performance_samples ORDER BY sampled_at DESC LIMIT ?').all(limit) as Record<string,unknown>[]).map(performance));}
@@ -57,4 +64,3 @@ export class SqliteDiagnosticRepository extends SqliteRepository implements Diag
   public deleteDiagnosticsThrough(c:RepositoryExecutionContext,cutoff:string):RepositoryResult<void>{return this.execute(c,()=>{this.database(c).prepare('DELETE FROM diagnostic_entries WHERE occurred_at<=?').run(cutoff);});}
 
 }
-

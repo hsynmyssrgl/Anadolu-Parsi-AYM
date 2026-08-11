@@ -1097,8 +1097,9 @@ describe('FamilyDataStore', () => {
     const policy=store.upsertMaintenancePolicy({intervalHours:12,keepDiagnosticDays:30,keepPerformanceDays:60});
     expect(policy.intervalHours).toBe(12);
     const report=store.getDiagnosticReport();
-    expect(report.queue.some(item=>item.id===task.id&&item.status==='completed')).toBe(true);
-    expect(Array.isArray(report.healthNotifications)).toBe(true);
+    expect(report.queueResults.completedCount).toBeGreaterThanOrEqual(1);
+    expect(report.queueResults.totalCount).toBeGreaterThanOrEqual(1);
+    expect(report.notificationResults.activeCount).toBeGreaterThanOrEqual(0);
     store.close();
   });
 
@@ -1106,7 +1107,11 @@ describe('FamilyDataStore', () => {
     const { directory, store } = makeStore();
     await authenticate(store);
     store.recordDiagnostic('warning','mvp25.filter','Filtrelenebilir tanılama kaydı','ayrıntı');
-    expect(store.searchDiagnostics({ query:'Filtrelenebilir', severity:'warning' })).toHaveLength(1);
+    const contentFreeDiagnostics=store.searchDiagnostics({ code:'mvp25.filter', severity:'warning' });
+    expect(contentFreeDiagnostics).toHaveLength(1);
+    expect(contentFreeDiagnostics[0]?.message).toBe('Teknik tanı sonucu: mvp25.filter.');
+    expect(contentFreeDiagnostics[0]?.details).toMatch(/^sha256:[a-f0-9]{64}$/u);
+    expect(JSON.stringify(contentFreeDiagnostics)).not.toContain('Filtrelenebilir tanılama kaydı');
     const score=store.getSystemHealthScore();
     expect(score.score).toBeGreaterThanOrEqual(0);
     expect(score.score).toBeLessThanOrEqual(100);
@@ -1116,6 +1121,39 @@ describe('FamilyDataStore', () => {
     expect(history).toHaveLength(1);
     expect(history[0]?.sha256).toHaveLength(64);
     expect(history[0]?.healthScore).toBe(score.score);
+    store.close();
+  });
+
+  it('PPK-017 tanı, rapor ve arşiv zincirinde hassas payloadı kalıcılaştırmaz', async () => {
+    const { directory, store } = makeStore();
+    await authenticate(store);
+    const canary='OCR sağlık finans gizli payload metni PPK017';
+    store.enqueueTask({taskType:'performance.sample',label:canary,priority:'high',payload:JSON.stringify({sourceText:canary})});
+    store.recordDiagnostic('error','ppk017.canary',canary,`C:\\private\\ocr.txt ${canary}`);
+
+    const rows=store.searchDiagnostics({code:'ppk017.canary'});
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.message).toBe('Teknik tanı sonucu: ppk017.canary.');
+    expect(rows[0]?.details).toMatch(/^sha256:[a-f0-9]{64}$/u);
+    expect(JSON.stringify(rows)).not.toContain(canary);
+
+    const report=store.getDiagnosticReport();
+    expect(report.queueResults.totalCount).toBeGreaterThanOrEqual(1);
+    expect(JSON.stringify(report)).not.toContain(canary);
+    expect(report).not.toHaveProperty('queue');
+    expect(report).not.toHaveProperty('backupTargets');
+
+    const reportPath=join(directory,'ppk017-report.json');
+    store.exportDiagnosticReport(reportPath);
+    const reportRecord=store.listDiagnosticReports(1)[0]!;
+    const reportContent=store.readDiagnosticReport(reportRecord.id);
+    expect(reportContent.valid).toBe(true);
+    expect(reportContent.content).not.toContain(canary);
+
+    const archivePath=join(directory,'ppk017-diagnostics.json.gz');
+    const archive=store.archiveDiagnostics('2999-01-01T00:00:00.000Z',archivePath);
+    const archiveContent=store.readDiagnosticArchive(archive.id);
+    expect(JSON.stringify(archiveContent)).not.toContain(canary);
     store.close();
   });
 

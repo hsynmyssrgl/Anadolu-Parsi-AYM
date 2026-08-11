@@ -9,6 +9,10 @@ import {
 } from 'node:fs';
 import { join } from 'node:path';
 import type { CausationId, CorrelationId, ErrorCode, IsoDateTime } from '@ppt/core';
+import {
+  SensitiveLogPolicy,
+  type SensitiveLogPolicyRejectionReason
+} from '@ppt/platform-policy';
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
@@ -33,45 +37,75 @@ export interface Logger {
   error(event: Omit<LogEvent, 'level'>): void;
 }
 
-const sensitiveKeyPattern = /(password|secret|token|recovery|private.?key|totp|authorization|cookie|credential)/i;
+const sensitiveLogPolicy = new SensitiveLogPolicy();
 
-const redactValue = (value: unknown, key: string, seen: WeakSet<object>): unknown => {
-  if (sensitiveKeyPattern.test(key)) return '<redacted>';
-  if (value === null || value === undefined) return value;
-  if (typeof value === 'bigint') return value.toString();
-  if (typeof value === 'function') return '<function>';
-  if (typeof value !== 'object') return value;
-  if (seen.has(value)) return '<circular>';
-  seen.add(value);
-  if (Array.isArray(value)) return value.map((item) => redactValue(item, '', seen));
-  return Object.fromEntries(
-    Object.entries(value).map(([entryKey, entryValue]) => [
-      entryKey,
-      redactValue(entryValue, entryKey, seen)
-    ])
-  );
-};
+export class SensitiveLogPolicyViolation extends Error {
+  public constructor(public readonly reason: SensitiveLogPolicyRejectionReason) {
+    super('SENSITIVE_LOG_POLICY_REJECTED');
+    this.name = 'SensitiveLogPolicyViolation';
+  }
+}
+
+export interface SafeLogWriteFailure {
+  readonly code: 'SENSITIVE_LOG_POLICY_REJECTED' | 'LOG_WRITE_FAILED';
+  readonly reason: SensitiveLogPolicyRejectionReason | 'FILESYSTEM_OPERATION_FAILED';
+}
+
+export const toSafeLogWriteFailure = (error: unknown): SafeLogWriteFailure => Object.freeze(
+  error instanceof SensitiveLogPolicyViolation
+    ? { code: 'SENSITIVE_LOG_POLICY_REJECTED', reason: error.reason }
+    : { code: 'LOG_WRITE_FAILED', reason: 'FILESYSTEM_OPERATION_FAILED' }
+);
 
 export const redactLogMetadata = (
   metadata: Readonly<Record<string, unknown>> | undefined
 ): Readonly<Record<string, unknown>> | undefined => {
-  if (metadata === undefined) return undefined;
-  return Object.freeze(redactValue(metadata, '', new WeakSet<object>()) as Record<string, unknown>);
+  const decision = sensitiveLogPolicy.evaluate({
+    timestamp: '2026-01-01T00:00:00.000Z',
+    level: 'info',
+    service: 'metadata-policy',
+    process: 'logging',
+    event: 'metadata.evaluate',
+    correlationId: 'metadata-policy',
+    ...(metadata === undefined ? {} : { metadata })
+  });
+  if (!decision.allowed) throw new SensitiveLogPolicyViolation(decision.reason);
+  return decision.metadata;
 };
 
 export const serializeLogEvent = (event: LogEvent): string => {
-  const metadata = redactLogMetadata(event.metadata);
+  const decision = sensitiveLogPolicy.evaluate(event);
+  if (!decision.allowed) throw new SensitiveLogPolicyViolation(decision.reason);
+  const metadata = decision.metadata;
   const safeEvent = metadata === undefined
     ? Object.fromEntries(Object.entries(event).filter(([key]) => key !== 'metadata'))
     : { ...event, metadata };
   return JSON.stringify(safeEvent);
 };
 
+export const writeContentFreeConsoleEvent = (
+  event: LogEvent,
+  stream: 'stdout' | 'stderr' = 'stdout'
+): boolean => {
+  try {
+    const line = `${serializeLogEvent(event)}\n`;
+    process[stream].write(line);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export class MemoryLogger implements Logger {
   readonly #events: LogEvent[] = [];
+  readonly #rejections: SafeLogWriteFailure[] = [];
 
   public get events(): readonly LogEvent[] {
     return this.#events;
+  }
+
+  public get rejections(): readonly SafeLogWriteFailure[] {
+    return this.#rejections;
   }
 
   public debug(event: Omit<LogEvent, 'level'>): void { this.#push('debug', event); }
@@ -80,11 +114,17 @@ export class MemoryLogger implements Logger {
   public error(event: Omit<LogEvent, 'level'>): void { this.#push('error', event); }
 
   #push(level: LogLevel, event: Omit<LogEvent, 'level'>): void {
-    const metadata = redactLogMetadata(event.metadata);
-    const value: LogEvent = metadata === undefined
-      ? { ...event, level }
-      : { ...event, level, metadata };
-    this.#events.push(Object.freeze(value));
+    try {
+      const complete: LogEvent = { ...event, level };
+      const decision = sensitiveLogPolicy.evaluate(complete);
+      if (!decision.allowed) throw new SensitiveLogPolicyViolation(decision.reason);
+      const value: LogEvent = decision.metadata === undefined
+        ? Object.fromEntries(Object.entries(complete).filter(([key]) => key !== 'metadata')) as unknown as LogEvent
+        : { ...complete, metadata: decision.metadata };
+      this.#events.push(Object.freeze(value));
+    } catch (error) {
+      this.#rejections.push(toSafeLogWriteFailure(error));
+    }
   }
 }
 
@@ -101,7 +141,7 @@ export interface JsonLinesFileLoggerOptions {
   readonly minimumLevel?: LogLevel;
   readonly maxFileBytes: number;
   readonly retentionDays: number;
-  readonly onWriteError?: (error: unknown) => void;
+  readonly onWriteError?: (failure: SafeLogWriteFailure) => void;
 }
 
 /**
@@ -113,7 +153,7 @@ export class JsonLinesFileLogger implements Logger {
   readonly #minimumLevel: LogLevel;
   readonly #maxFileBytes: number;
   readonly #retentionDays: number;
-  readonly #onWriteError: ((error: unknown) => void) | undefined;
+  readonly #onWriteError: ((failure: SafeLogWriteFailure) => void) | undefined;
 
   public constructor(private readonly options: JsonLinesFileLoggerOptions) {
     mkdirSync(options.directory, { recursive: true });
@@ -141,7 +181,7 @@ export class JsonLinesFileLogger implements Logger {
       this.#rotateIfRequired(Buffer.byteLength(line, 'utf8'));
       appendFileSync(this.#filePath, line, { encoding: 'utf8', mode: 0o600 });
     } catch (error) {
-      this.#onWriteError?.(error);
+      this.#onWriteError?.(toSafeLogWriteFailure(error));
     }
   }
 
@@ -169,7 +209,7 @@ export class JsonLinesFileLogger implements Logger {
         if (statSync(filePath).mtimeMs < cutoff) unlinkSync(filePath);
       }
     } catch (error) {
-      this.#onWriteError?.(error);
+      this.#onWriteError?.(toSafeLogWriteFailure(error));
     }
   }
 }

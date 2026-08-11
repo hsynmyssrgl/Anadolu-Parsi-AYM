@@ -9,7 +9,8 @@
     ".": "./dist/index.js"
   },
   "dependencies": {
-    "@ppt/core": "4.8.2026-29"
+    "@ppt/core": "4.8.2026-29",
+    "@ppt/platform-policy": "4.8.2026-29"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

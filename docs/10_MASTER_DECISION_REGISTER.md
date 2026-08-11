@@ -28,6 +28,10 @@ Bir çelişki olduğunda aşağıdaki sıra uygulanır:
 Eski kararlar silinmez; tarihsel kanıt olarak korunur. Ancak aktif ürün davranışını
 belirleyemez. Çelişki sessizce birleştirilmez; değişiklik kaydına işlenir.
 
+## DEC-198 — PPK-017 hassas log ve content-free tanı sınırı
+
+32-M ile üretim logları, erken başlangıç kanıtları ve operasyonel tanı kayıtları merkezi fail-closed `SensitiveLogPolicy` sınırına bağlanır. Yalnız teknik kimlik, SHA-256, sonuç, correlation, sayaç, boolean, zaman ve sürüm metadata'sı kabul edilir; payload, OCR metni, serbest mesaj, stack, kalıcı yol, secret ve nested metadata yasaktır. Desktop üretim sink'i cihaz anahtarlı korumalı `.pplog` olarak kalır; diagnostic kaynak metni sabit teknik mesaj ve tek yönlü SHA-256 hash'e dönüştürülür. Yeni migration/backfill/cutover yoktur; PPK-018 değişmez audit zinciri ayrı kapsamdır. Ayrıntılı ve bağlayıcı karar `docs/decisions/DEC-198-ppk-017-sensitive-log-policy.md` dosyasındadır.
+
 ## 3. Ürün kimliği ve kapsam
 
 ### DEC-001 — Güncel resmî ürün adı

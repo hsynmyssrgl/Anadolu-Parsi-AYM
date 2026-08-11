@@ -1,0 +1,315 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-M",
+  "requirement": "PPK-017",
+  "phase": "SENSITIVE_LOG_POLICY_CONTRACT",
+  "status": "PASS",
+  "checkCount": 66,
+  "passed": 66,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "central policy declares the eight accepted metadata classes",
+      "status": "PASS"
+    },
+    {
+      "name": "policy is exported from the platform-policy package",
+      "status": "PASS"
+    },
+    {
+      "name": "policy snapshot is fail-closed and content-free",
+      "status": "PASS"
+    },
+    {
+      "name": "metadata field and technical token limits are fixed",
+      "status": "PASS"
+    },
+    {
+      "name": "forbidden metadata key policy covers payload OCR text stack query credentials and paths",
+      "status": "PASS"
+    },
+    {
+      "name": "nested metadata is rejected and only bounded migration version arrays are accepted",
+      "status": "PASS"
+    },
+    {
+      "name": "diagnostic sanitizer stores a fixed technical message and SHA-256 source fingerprint",
+      "status": "PASS"
+    },
+    {
+      "name": "diagnostic verifier accepts only the fixed message and hash envelope",
+      "status": "PASS"
+    },
+    {
+      "name": "sensitive signal hashing includes error name message and stack without returning them",
+      "status": "PASS"
+    },
+    {
+      "name": "logging serializer evaluates the central policy before JSON serialization",
+      "status": "PASS"
+    },
+    {
+      "name": "policy rejection exposes only a stable code and reason",
+      "status": "PASS"
+    },
+    {
+      "name": "memory logger drops unsafe events into content-free rejection evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "central console writer serializes before bracket stream write",
+      "status": "PASS"
+    },
+    {
+      "name": "logging package declares the platform policy dependency",
+      "status": "PASS"
+    },
+    {
+      "name": "foundation builds platform policy before logging",
+      "status": "PASS"
+    },
+    {
+      "name": "domain exposes a content-free sensitive logging boundary view",
+      "status": "PASS"
+    },
+    {
+      "name": "domain and application roots export the PPK-017 contracts",
+      "status": "PASS"
+    },
+    {
+      "name": "application boundary use case derives its view from SensitiveLogPolicy",
+      "status": "PASS"
+    },
+    {
+      "name": "boundary view records latest migration 77 and no payload path secret or cutover exposure",
+      "status": "PASS"
+    },
+    {
+      "name": "diagnostic application use case requires central policy and sanitizes before write",
+      "status": "PASS"
+    },
+    {
+      "name": "diagnostic repository sanitizes event ingestion independently",
+      "status": "PASS"
+    },
+    {
+      "name": "diagnostic repository rejects direct unsafe writes",
+      "status": "PASS"
+    },
+    {
+      "name": "diagnostic repository read mapping is verified fail-closed",
+      "status": "PASS"
+    },
+    {
+      "name": "DataStore injects central policy into RecordDiagnosticUseCase",
+      "status": "PASS"
+    },
+    {
+      "name": "diagnostic report projection retains only content-free result summaries",
+      "status": "PASS"
+    },
+    {
+      "name": "diagnostic report projection excludes full backup target run notification and queue payload arrays",
+      "status": "PASS"
+    },
+    {
+      "name": "DataStore computes content-free diagnostic report counts",
+      "status": "PASS"
+    },
+    {
+      "name": "protected desktop logger serializes centrally and writes only protected records",
+      "status": "PASS"
+    },
+    {
+      "name": "runtime bootstrap composes protected logger and content-free write failure callback",
+      "status": "PASS"
+    },
+    {
+      "name": "early startup evidence stores error name and fingerprint only",
+      "status": "PASS"
+    },
+    {
+      "name": "desktop fatal console fallback uses central content-free writer",
+      "status": "PASS"
+    },
+    {
+      "name": "Core Service uses the central writer and has no console primitive",
+      "status": "PASS"
+    },
+    {
+      "name": "Core Service package declares core and logging dependencies",
+      "status": "PASS"
+    },
+    {
+      "name": "main registers a typed zero-input sensitive logging status handler",
+      "status": "PASS"
+    },
+    {
+      "name": "preload and renderer global expose the typed boundary method",
+      "status": "PASS"
+    },
+    {
+      "name": "sensitive logging IPC is zero-argument in integration policy",
+      "status": "PASS"
+    },
+    {
+      "name": "sensitive logging IPC is policy-sensitive no-cache",
+      "status": "PASS"
+    },
+    {
+      "name": "renderer loads and displays PPK-017 fail-closed posture",
+      "status": "PASS"
+    },
+    {
+      "name": "profile menu exposes the PPK-017 sensitive logging posture",
+      "status": "PASS"
+    },
+    {
+      "name": "static gate scans all production source zones and forbids direct console and stream primitives",
+      "status": "PASS"
+    },
+    {
+      "name": "static gate forbids plaintext logger serializer and diagnostic SQL bypasses",
+      "status": "PASS"
+    },
+    {
+      "name": "static gate covers unsafe metadata raw errors spread and nesting",
+      "status": "PASS"
+    },
+    {
+      "name": "static source gate passes its malicious and benign self-tests with no finding",
+      "status": "PASS"
+    },
+    {
+      "name": "pretypecheck includes the PPK-017 source gate",
+      "status": "PASS"
+    },
+    {
+      "name": "root package exposes all four PPK-017 commands",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test covers central policy use case SQLite protected sink and IPC UI",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test includes payload OCR nested raw error and persistent path attacks",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test proves direct diagnostic write and stored-row tamper fail closed",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test proves protected log decrypts without canary leakage",
+      "status": "PASS"
+    },
+    {
+      "name": "DataStore regression carries a synthetic PPK-017 canary through report and archive",
+      "status": "PASS"
+    },
+    {
+      "name": "logging regression covers policy rejection and content-free error callback",
+      "status": "PASS"
+    },
+    {
+      "name": "latest database migration remains 77 with no PPK-017 migration",
+      "status": "PASS"
+    },
+    {
+      "name": "scope records no transfer backfill ownership change or cutover",
+      "status": "PASS"
+    },
+    {
+      "name": "scope explicitly leaves immutable decision audit to PPK-018",
+      "status": "PASS"
+    },
+    {
+      "name": "production inventory has seven reviewed owners and zero open sensitive payload owner",
+      "status": "PASS"
+    },
+    {
+      "name": "production inventory records zero direct console plaintext sink and diagnostic SQL exceptions",
+      "status": "PASS"
+    },
+    {
+      "name": "production inventory keeps PPK-018 audit outside PPK-017 evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "DEC-198 records content-free metadata schema and no-migration truth",
+      "status": "PASS"
+    },
+    {
+      "name": "threat model records fail-closed read write report and protected sink controls",
+      "status": "PASS"
+    },
+    {
+      "name": "audit records the complete final validation matrix",
+      "status": "PASS"
+    },
+    {
+      "name": "user decision ledger contains active DEC-198 and exact count",
+      "status": "PASS"
+    },
+    {
+      "name": "accepted registry closes the complete PPK-017 evidence chain",
+      "status": "PASS"
+    },
+    {
+      "name": "prior PPK-012 through PPK-016 packages remain complete",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-018 is not claimed complete by PPK-017",
+      "status": "PASS"
+    },
+    {
+      "name": "scope closes PPK-017 without schema migration backfill or cutover",
+      "status": "PASS"
+    },
+    {
+      "name": "inventory closes only after final validation",
+      "status": "PASS"
+    }
+  ],
+  "failures": [],
+  "sourceGate": {
+    "status": "PASS",
+    "zones": 18,
+    "files": 338,
+    "relevantFiles": 37,
+    "maliciousSelfTests": 11,
+    "maliciousSelfTestsPassed": 11,
+    "benignSelfTests": 3,
+    "benignSelfTestsPassed": 3,
+    "findings": []
+  },
+  "latestDatabaseMigration": 77,
+  "schemaMigrationRequired": false,
+  "allowedMetadataClasses": [
+    "IDENTIFIER",
+    "SHA256",
+    "RESULT",
+    "CORRELATION",
+    "COUNTER",
+    "BOOLEAN",
+    "TIMESTAMP",
+    "VERSION"
+  ],
+  "payloadLoggingAllowed": false,
+  "ocrTextLoggingAllowed": false,
+  "plaintextDesktopProductionSinkAllowed": false,
+  "directConsolePrimitiveExceptions": 0,
+  "diagnosticSqlWriteExceptions": 0,
+  "auditDecisionChainCompletedByThisPackage": false,
+  "auditDecisionChainRequirement": "PPK-018",
+  "legacyDesktopVaultPreserved": true,
+  "sqliteOwnershipTransferred": false,
+  "realDataTransferPerformed": false,
+  "realDataBackfillPerformed": false,
+  "cutoverAuthorityAttached": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T21:58:56.247Z"
+}

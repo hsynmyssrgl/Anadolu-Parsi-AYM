@@ -298,6 +298,7 @@ import {
 } from './archive-application-adapter.js';
 import {
   PlatformPolicyEnforcementError,
+  SensitiveLogPolicy,
   type PlatformPolicyAuthorizationProvider,
   type PlatformPolicyClusterFence,
   type PlatformPolicyConnectionAuthority,
@@ -853,7 +854,7 @@ export class FamilyDataStore {
         outcome: 'partial',
         metadata: {
           eventId,
-          reason: error instanceof Error ? error.message.slice(0, 300) : 'unknown'
+          errorName: error instanceof Error ? error.name : typeof error
         }
       });
       return undefined;
@@ -1422,7 +1423,7 @@ export class FamilyDataStore {
     this.#recordPerformanceSampleUseCase = new RecordPerformanceSampleUseCase(operationalHealthAdapter);
     this.#listPerformanceSamplesUseCase = new ListPerformanceSamplesUseCase(operationalHealthAdapter);
     this.#getPerformanceTrendUseCase = new GetPerformanceTrendUseCase(operationalHealthAdapter);
-    this.#recordDiagnosticUseCase = new RecordDiagnosticUseCase(operationalHealthAdapter);
+    this.#recordDiagnosticUseCase = new RecordDiagnosticUseCase(operationalHealthAdapter, new SensitiveLogPolicy());
     this.#listDiagnosticsUseCase = new ListDiagnosticsUseCase(operationalHealthAdapter);
     this.#recordSystemHealthHistoryUseCase = new RecordSystemHealthHistoryUseCase(operationalHealthAdapter);
     this.#listSystemHealthHistoryUseCase = new ListSystemHealthHistoryUseCase(operationalHealthAdapter);
@@ -1779,8 +1780,7 @@ export class FamilyDataStore {
         event: 'event_dispatch.batch.failed',
         correlationId,
         outcome: 'failure',
-        errorCode: result.error.code,
-        metadata: { message: result.error.message }
+        errorCode: result.error.code
       });
       throw new Error(`[${result.error.code}] ${result.error.message}`);
     }
@@ -1791,7 +1791,15 @@ export class FamilyDataStore {
       event: 'event_dispatch.batch.completed',
       correlationId,
       outcome: 'success',
-      metadata: { ...result.value }
+      metadata: {
+        checkedAt: result.value.checkedAt,
+        claimed: result.value.claimed,
+        published: result.value.published,
+        retried: result.value.retried,
+        failed: result.value.failed,
+        successfulHandlers: result.value.successfulHandlers,
+        skippedHandlers: result.value.skippedHandlers
+      }
     });
     return result.value;
   }
@@ -1814,7 +1822,36 @@ export class FamilyDataStore {
   public recordExportArtifact(kind:ExportArtifactView['kind'],format:ExportArtifactView['format'],filePath:string,sha256:string,sizeBytes:number,recordCount?:number): ExportArtifactView { this.#requireAuth(); const row:ExportArtifactView={id:randomUUID(),kind,format,filePath,sha256,sizeBytes,...(recordCount===undefined?{}:{recordCount}),createdAt:nowIso()}; const result=this.#recordExportArtifactUseCase.execute(this.#operationalHealthApplicationContext('export-artifact-record'),row); if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`); return result.value; }
   public listExportArtifacts(limit=100): ExportArtifactView[] { this.#requireAuth(); const result=this.#listExportArtifactsUseCase.execute(this.#operationalHealthApplicationContext('export-artifact-list'),limit); if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`); return [...result.value]; }
   public verifyExportArtifact(id:string): ExportArtifactVerificationView { this.#requireAuth(); const context=this.#operationalHealthApplicationContext('export-artifact-verify'); const result=this.#findExportArtifactUseCase.execute(context,id); if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`); const row=result.value; if(!row)throw new Error('Dışa aktarım kaydı bulunamadı.'); const verification=this.#verifyOperationalArtifactUseCase.execute(context.correlationId,{filePath:row.filePath,expectedSha256:row.sha256}); if(!verification.ok)throw new Error(`[${verification.error.code}] ${verification.error.message}`); return {id,...verification.value,checkedAt:nowIso()}; }
-  public getDiagnosticReport(): DiagnosticReportView { this.#requireAuth(); return {generatedAt:nowIso(),healthScore:this.getSystemHealthScore(),system:this.getSystemHealth(),adaptive:this.getAdaptiveResourceState(),performance:this.getPerformanceTrend(24),backupTargets:this.listBackupTargets(),recentBackupRuns:this.listBackupRuns(50),diagnostics:this.searchDiagnostics({limit:100}),healthNotifications:this.evaluateHealthNotifications(),queue:this.listQueuedTasks(100)}; }
+  public getDiagnosticReport(): DiagnosticReportView {
+    this.#requireAuth();
+    const backupTargets=this.listBackupTargets();
+    const recentBackupRuns=this.listBackupRuns(50);
+    const healthNotifications=this.listHealthNotifications(100);
+    const queue=this.listQueuedTasks(100);
+    return {
+      generatedAt:nowIso(),
+      healthScore:this.getSystemHealthScore(),
+      system:this.getSystemHealth(),
+      adaptive:this.getAdaptiveResourceState(),
+      performance:this.getPerformanceTrend(24),
+      diagnostics:this.searchDiagnostics({limit:100}),
+      backupResults:{
+        targetCount:backupTargets.length,
+        recentRunCount:recentBackupRuns.length,
+        successfulRunCount:recentBackupRuns.filter((run)=>run.status==='success').length,
+        failedRunCount:recentBackupRuns.filter((run)=>run.status==='failed').length
+      },
+      notificationResults:{activeCount:healthNotifications.filter((entry)=>entry.acknowledgedAt===undefined).length},
+      queueResults:{
+        totalCount:queue.length,
+        queuedCount:queue.filter((entry)=>entry.status==='queued').length,
+        runningCount:queue.filter((entry)=>entry.status==='running').length,
+        completedCount:queue.filter((entry)=>entry.status==='completed').length,
+        failedCount:queue.filter((entry)=>entry.status==='failed').length,
+        deferredCount:queue.filter((entry)=>entry.status==='deferred').length
+      }
+    };
+  }
   public exportDiagnosticReport(destinationPath:string): string { this.#requireAuth(); const context=this.#operationalHealthApplicationContext('diagnostic-report-export'); const report=this.getDiagnosticReport(); const written=this.#writeOperationalTextArtifactUseCase.execute(context.correlationId,{destinationPath,content:JSON.stringify(report,null,2)}); if(!written.ok)throw new Error(`[${written.error.code}] ${written.error.message}`); const id=randomUUID(); const row:DiagnosticReportHistoryView={id,generatedAt:report.generatedAt,healthScore:report.healthScore.score,status:report.system.status,filePath:written.value.filePath,sha256:written.value.sha256,sizeBytes:written.value.sizeBytes}; const saved=this.#recordDiagnosticReportUseCase.execute(context,row); if(!saved.ok)throw new Error(`[${saved.error.code}] ${saved.error.message}`); this.#writeAudit('diagnostic.exported','diagnostic_report',id,nowIso()); this.recordExportArtifact('diagnostic_report','json',written.value.filePath,written.value.sha256,written.value.sizeBytes); return written.value.filePath; }
   public listDiagnosticReports(limit=100): DiagnosticReportHistoryView[] { this.#requireAuth(); const result=this.#listDiagnosticReportsUseCase.execute(this.#operationalHealthApplicationContext('diagnostic-report-list'),limit); if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`); return [...result.value]; }
   public captureSystemHealthScore(): SystemHealthHistoryView { this.#requireAuth(); const score=this.getSystemHealthScore(),entry:SystemHealthHistoryView={id:randomUUID(),score:score.score,grade:score.grade,systemStatus:score.systemStatus,deductions:score.deductions.length,capturedAt:nowIso()}; const r=this.#recordSystemHealthHistoryUseCase.execute(this.#operationalHealthApplicationContext('health-score-record'),entry); if(!r.ok)throw new Error(`[${r.error.code}] ${r.error.message}`); return r.value; }

@@ -1023,7 +1023,17 @@ export interface IpcAdaptiveBudgetMaintenanceRecoveryInput { password:string; co
 export interface IpcAdaptiveBudgetMaintenanceRecoveryView { canceled:boolean; recovered?:boolean; recoveredAt?:string; previousReason?:IpcAdaptiveBudgetMaintenanceAuthorityReason; clearedContextCount?:number; recoveryContextFingerprint?:string; sessionTerminated?:boolean; trustedDeviceReevaluationRequired?:boolean; recoveryCooldownUntil?:string; securityEpochAdvanced?:boolean; previousSecurityEpoch?:number; securityEpoch?:number; trustedDevicesRevoked?:boolean; revokedTrustedDeviceCount?:number; }
 export interface IpcAdaptiveBudgetResetView { canceled:boolean; resetAt?:string; previousMode?:IpcAdaptiveResourceBudgetMode; current?:IpcAdaptiveResourceBudgetView; cacheCleared?:boolean; telemetryCleared?:boolean; quarantinePruned?:number; maintenanceSessionFingerprint?:string; }
 export interface IpcAdaptiveBudgetDiagnosticExportView { canceled:boolean; filePath?:string; checksumPath?:string; sha256?:string; sizeBytes?:number; generatedAt?:string; journalEntryCount?:number; quarantineFileCount?:number; maintenanceSessionFingerprint?:string; }
-export interface DiagnosticReportView { generatedAt:string; healthScore:SystemHealthScoreView; system:SystemHealthView; adaptive:AdaptiveResourceStateView; performance:PerformanceTrendView; backupTargets:BackupTargetView[]; recentBackupRuns:BackupRunView[]; diagnostics:DiagnosticEntryView[]; healthNotifications:HealthNotificationView[]; queue:QueuedTaskView[]; }
+export interface DiagnosticReportView {
+  generatedAt:string;
+  healthScore:SystemHealthScoreView;
+  system:SystemHealthView;
+  adaptive:AdaptiveResourceStateView;
+  performance:PerformanceTrendView;
+  diagnostics:DiagnosticEntryView[];
+  backupResults:{targetCount:number;recentRunCount:number;successfulRunCount:number;failedRunCount:number};
+  notificationResults:{activeCount:number};
+  queueResults:{totalCount:number;queuedCount:number;runningCount:number;completedCount:number;failedCount:number;deferredCount:number};
+}
 
 export interface BackupInspectionCheckView { code:string; label:string; valid:boolean; detail:string; }
 export interface BackupInspectionView { valid:boolean; formatVersion:number; legacy:boolean; createdAt?:string; archiveCount:number; databaseBytes:number; archiveBytes:number; fileBytes:number; sha256:string; riskLevel:'low'|'attention'; recommendation:string; checks:BackupInspectionCheckView[]; }

@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "step": "32-M",
+  "requirement": "PPK-017",
+  "status": "COMPLETE",
+  "completionClaimed": true,
+  "definition": {
+    "governedLogEvent": "Yalnız teknik kimlik, SHA-256, sonuç, correlation, sayaç, boolean, zaman ve sürüm metadata sınıflarından oluşan düz ve content-free olay zarfıdır.",
+    "sensitivePayload": "OCR metni dahil kullanıcı semantiği, serbest mesaj, hata stack'i, body, sorgu, secret, kalıcı yol, başlık, not veya açıklamadır ve log/tanı yüzeyinde yasaktır.",
+    "operationalDiagnostic": "Kaynak metni saklamayan; sabit teknik mesaj, kod, zaman, önem ve tek yönlü kaynak hash'i taşıyan tanı kaydıdır.",
+    "adjacentAuditRecord": "Karar, politika sürümü, yükümlülük ve reddetme nedeninin değişmez zinciridir; PPK-018 kapsamındadır ve PPK-017 kapanışı bu zinciri tamamlamaz."
+  },
+  "productionInventory": [
+    {
+      "id": "desktop-protected-structured-log",
+      "classification": "GOVERNED_LOG_EVENT",
+      "paths": [
+        "packages/logging/src/index.ts",
+        "apps/desktop/src/main/protected-side-artifact-logger.ts",
+        "apps/desktop/src/main/runtime-bootstrap.ts"
+      ],
+      "control": "Merkezi SensitiveLogPolicy serialization öncesi fail-closed çalışır; Desktop üretim sink'i yalnız cihaz anahtarlı korumalı .pplog yan artefaktıdır.",
+      "disposition": "CLOSED_CONTENT_FREE_PROTECTED_SINK"
+    },
+    {
+      "id": "core-service-console-stream",
+      "classification": "GOVERNED_LOG_EVENT",
+      "paths": [
+        "apps/core-service/src/main.ts"
+      ],
+      "control": "Doğrudan console ve process stream primitive'leri kaldırılmış; yalnız merkezi serializer ile content-free olay yazılır.",
+      "disposition": "CLOSED_CONTENT_FREE_CENTRAL_WRITER"
+    },
+    {
+      "id": "desktop-early-startup-failure-evidence",
+      "classification": "GOVERNED_LOG_EVENT",
+      "paths": [
+        "apps/desktop/src/main/main.ts"
+      ],
+      "control": "Fatal startup kanıtı ham message/stack yerine yalnız errorName ve SHA-256 errorFingerprint saklar.",
+      "disposition": "CLOSED_FINGERPRINT_ONLY"
+    },
+    {
+      "id": "sqlite-diagnostic-entries",
+      "classification": "OPERATIONAL_DIAGNOSTIC",
+      "paths": [
+        "packages/application/src/operational-health-use-cases.ts",
+        "packages/repositories/src/diagnostic-repository.ts"
+      ],
+      "control": "Use-case ve repository yazma yolunda kaynak metin sabit teknik mesaja ve SHA-256 hash'e çevrilir; read-back merkezi politikaya uymayan satırı fail-closed reddeder.",
+      "disposition": "CLOSED_CONTENT_FREE_WRITE_AND_READ"
+    },
+    {
+      "id": "diagnostic-report-and-archive",
+      "classification": "OPERATIONAL_DIAGNOSTIC",
+      "paths": [
+        "packages/domain/src/app-data.ts",
+        "apps/desktop/src/main/data-store.ts"
+      ],
+      "control": "Rapor ve arşiv; kullanıcı hedef adı/yolu, queue etiketi/payload'ı, serbest hata metni veya OCR içeriği yerine yalnız teknik skor, sayaç ve content-free tanı kayıtları taşır.",
+      "disposition": "CLOSED_CONTENT_FREE_EXPORT_CHAIN"
+    },
+    {
+      "id": "sensitive-logging-boundary-ipc-ui",
+      "classification": "BOUNDARY_POSTURE",
+      "paths": [
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/main/ipc-read-sharing.ts",
+        "apps/desktop/src/renderer/App.tsx"
+      ],
+      "control": "Tipli sıfır argümanlı IPC yalnız politika duruşunu gösterir, no-cache'tir ve payload/yol/secret göstermez.",
+      "disposition": "CLOSED_CONTENT_FREE_NO_CACHE"
+    },
+    {
+      "id": "immutable-policy-decision-audit",
+      "classification": "ADJACENT_AUDIT_REQUIREMENT",
+      "paths": [],
+      "control": "Karar, policy sürümü, yükümlülük ve reddetme nedeni zinciri ayrı PPK-018 kabul şartıdır; PPK-017 kanıtı olarak sayılmaz.",
+      "disposition": "EXCLUDED_TO_PPK_018"
+    }
+  ],
+  "closureSummary": {
+    "reviewedOwners": 7,
+    "activeSensitiveLogPayloadOwners": 0,
+    "directConsolePrimitiveExceptions": 0,
+    "plaintextDesktopProductionSinkExceptions": 0,
+    "diagnosticSqlWriteExceptions": 0,
+    "openBlockerCount": 0,
+    "openBlockers": [],
+    "finalValidationPending": false
+  }
+}

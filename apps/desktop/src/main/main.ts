@@ -4,6 +4,8 @@ import { dirname, extname, isAbsolute, join } from 'node:path';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
+import { asCorrelationId, asIsoDateTime } from '@ppt/core';
+import { writeContentFreeConsoleEvent } from '@ppt/logging';
 import { APP_META, USER_VISIBLE_APP_INFO, type CreateArchiveItemInput, CreateFamilyEventInput, UpdateEventParticipantsInput, UpdateEventInvitationInput, UpdateEventNotesInput, UpdateFamilyEventInput, SetFamilyEventArchivedInput, AcknowledgeFamilyNotificationInput, CreateFamilyLocationInput, CreateFamilyMemberInput, CreateFamilyRelationInput, LoginInput, SetupAdminInput, ChangePasswordInput, EnableTwoFactorInput, DisableTwoFactorInput, TrustCurrentDeviceInput, ReauthorizeCurrentDeviceInput, CreateFamilyInvitationInput, InspectFamilyInvitationInput, ResendFamilyInvitationInput, AcceptFamilyInvitationInput, UpsertObjectPermissionInput, UpdateFamilyAccountInput, CreateFinanceRecordInput, CreateHealthRecordInput, CreateMedicationPlanInput, CreateFamilyHealthHistoryInput, CreateFinanceValuationInput, CreateLifeRecordInput, CreateAutomationRuleInput, CreateArchiveCategoryInput, UpdateArchiveClassificationInput, UpsertAiConsentInput, AiConsentPurpose, RunAutomationInput, UpsertDigitalLegacyPlanInput, UpsertLegacyGrantInput, ExecuteLegacyPlanInput, ApproveLegacyExecutionInput, CancelLegacyExecutionInput, ArchiveSearchInput, CreateArchiveRetentionPolicyInput, AssignArchiveRetentionPolicyInput, UpsertBackupTargetInput, MaintenanceResultView, BackupSchedulerResultView, AdaptiveResourceStateView, EnqueueTaskInput, UpsertMaintenancePolicyInput, DiagnosticFilterInput, DiagnosticArchiveSearchInput, MaintenanceHistoryFilterInput, CreateDataRetentionPolicyInput, ArchiveDataResourceInput, RestoreDataResourceInput, RequestDataPurgeInput, CancelDataPurgeInput, ExecuteDataPurgeInput, SetDataLegalHoldInput, UpdateBackupQuarantinePolicyInput, SetBackupQuarantineLegalHoldInput, DestroyBackupQuarantineBatchInput, RegisterExternalBackupCopyInput, ReviewExternalBackupCopyInput, SetExternalBackupCopyLegalHoldInput, AttestExternalBackupCopyDestroyedInput, RegisterExternalBackupEvidenceIssuerInput, RotateExternalBackupEvidenceIssuerInput, RevokeExternalBackupEvidenceIssuerInput, ApplyExternalBackupEvidenceRevocationListInput, UpsertExternalBackupRevocationEndpointInput, PendingRevocationSyncListView, ApplyPendingRevocationSyncInput, RevocationSyncEndpointStateView, RevocationSyncRunResultView, VerifyExternalBackupDestructionEvidenceInput, ApplyFamilyDataImportInput, RollbackFamilyDataImportInput, GenealogyTreePageInput, TimelinePageInput, ArchivePageInput, PersonCatalogPageInput, EventCatalogPageInput, EntityCatalogLookupInput, FamilySnapshotSectionsInput, IpcAdaptiveBudgetMaintenanceOperation, IpcAdaptiveBudgetMaintenanceAuthorizationInput, IpcAdaptiveBudgetMaintenanceReauthenticationInput, IpcAdaptiveBudgetMaintenanceRecoveryInput, UpdateBackupCleanRewritePolicyInput } from '@ppt/domain';
 import type {
   AssignPersonMembershipInput,
@@ -17,7 +19,7 @@ import type {
   WindowsHelloAuthenticationView,
   WindowsHelloStateView
 } from '@ppt/domain';
-import { GetDerivedDataPolicyBoundaryUseCase, type WindowsHelloPlatformPort } from '@ppt/application';
+import { GetDerivedDataPolicyBoundaryUseCase, GetSensitiveLoggingBoundaryUseCase, type WindowsHelloPlatformPort } from '@ppt/application';
 import type { IssueOfflineCapabilityLeaseInput, OfflineCapabilityLeaseWorkspaceView } from '@ppt/domain';
 import {
   FamilyDataStore,
@@ -66,8 +68,8 @@ import { connectCoreServiceAtStartup, type CoreServiceStartupConnectionResult } 
 import { PlatformPolicyReceiptFileSink } from './platform-policy-receipt-file-sink.js';
 import { DesktopUniversalApiPolicyEnforcement } from './desktop-universal-api-policy-enforcement.js';
 import { DesktopRepositoryPolicyScope } from './desktop-repository-policy-scope.js';
-import { DerivedDataInheritancePolicy, NetworkEgressPolicy } from '@ppt/platform-policy';
-import type { DerivedDataPolicyBoundaryView, NetworkEgressBoundaryView } from '@ppt/domain';
+import { DerivedDataInheritancePolicy, NetworkEgressPolicy, SensitiveLogPolicy } from '@ppt/platform-policy';
+import type { DerivedDataPolicyBoundaryView, NetworkEgressBoundaryView, SensitiveLoggingBoundaryView } from '@ppt/domain';
 
 type ArchiveMutationInput<TInput> = TInput & { readonly operationId: string };
 interface ArchiveItemMutationInput {
@@ -78,7 +80,9 @@ interface ArchiveItemMutationInput {
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const networkEgressPolicy = new NetworkEgressPolicy();
 const derivedDataInheritancePolicy = new DerivedDataInheritancePolicy();
+const sensitiveLogPolicy = new SensitiveLogPolicy();
 const getDerivedDataPolicyBoundaryUseCase = new GetDerivedDataPolicyBoundaryUseCase(derivedDataInheritancePolicy);
+const getSensitiveLoggingBoundaryUseCase = new GetSensitiveLoggingBoundaryUseCase(sensitiveLogPolicy);
 const currentProductName = 'Anadolu Parsı Aile Yaşam Merkezi';
 const volatileRuntimeRoot = join(app.getPath('temp'), 'Anadolu-Parsi-Aile-Yasam-Merkezi', `runtime-${process.pid}`);
 rmSync(volatileRuntimeRoot, { recursive: true, force: true });
@@ -173,9 +177,8 @@ let startupStage: StartupStage = 'WAITING_FOR_APP_READY';
 const writeEarlyStartupFailureEvidence = (error: unknown, origin: string): void => {
   const outputPath = process.env.PPT_WINDOWS_STARTUP_DIAGNOSTIC_PATH;
   if (!outputPath || !isAbsolute(outputPath)) return;
-  const normalized = error instanceof Error
-    ? { name: error.name, message: error.message, stack: error.stack ?? `${error.name}: ${error.message}` }
-    : { name: 'NonErrorThrown', message: String(error), stack: String(error) };
+  const errorName = error instanceof Error ? error.name : 'NonErrorThrown';
+  const errorFingerprint = sensitiveLogPolicy.hashSensitiveSignal(error);
   mkdirSync(dirname(outputPath), { recursive: true, mode: 0o700 });
   writeFileSync(outputPath, `${JSON.stringify({
     schemaVersion: 1,
@@ -187,16 +190,40 @@ const writeEarlyStartupFailureEvidence = (error: unknown, origin: string): void 
     fatal: true,
     origin,
     startupStage,
-    error: normalized,
+    errorName,
+    errorFingerprint,
     generatedAt: new Date().toISOString()
   }, null, 2)}\n`, { encoding: 'utf8', mode: 0o600, flag: 'wx' });
 };
 
 const exitAfterFatalStartupError = (error: unknown, origin: string): void => {
   try { writeEarlyStartupFailureEvidence(error, origin); } catch (diagnosticError) {
-    console.error('Erken başlangıç tanısal kanıtı yazılamadı.', diagnosticError);
+    writeContentFreeConsoleEvent({
+      timestamp: asIsoDateTime(new Date().toISOString()),
+      level: 'error',
+      service: 'desktop-main',
+      process: 'startup',
+      event: 'startup.evidence_write_failed',
+      correlationId: asCorrelationId('startup-fatal'),
+      outcome: 'failure',
+      metadata: { origin, startupStage, errorName: diagnosticError instanceof Error ? diagnosticError.name : typeof diagnosticError }
+    }, 'stderr');
   }
-  console.error('Anadolu Parsı Aile Yaşam Merkezi başlatılamadı.', error);
+  writeContentFreeConsoleEvent({
+    timestamp: asIsoDateTime(new Date().toISOString()),
+    level: 'error',
+    service: 'desktop-main',
+    process: 'startup',
+    event: 'application.startup_failed',
+    correlationId: asCorrelationId('startup-fatal'),
+    outcome: 'failure',
+    metadata: {
+      origin,
+      startupStage,
+      errorName: error instanceof Error ? error.name : 'NonErrorThrown',
+      errorFingerprint: sensitiveLogPolicy.hashSensitiveSignal(error)
+    }
+  }, 'stderr');
   process.exitCode = 1;
   app.exit(1);
 };
@@ -1131,6 +1158,7 @@ function registerIpc(): void {
   registerIpcHandler('system:getCoreServiceApiBoundary', () => coreServiceConnection().adapter.getApiBoundaryStatus());
   registerIpcHandler('system:getNetworkEgressBoundary', ():NetworkEgressBoundaryView => networkEgressPolicy.snapshot());
   registerIpcHandler('system:getDerivedDataPolicyBoundary', ():DerivedDataPolicyBoundaryView => getDerivedDataPolicyBoundaryUseCase.execute());
+  registerIpcHandler('system:getSensitiveLoggingBoundary', ():SensitiveLoggingBoundaryView => getSensitiveLoggingBoundaryUseCase.execute());
   registerIpcHandler('system:listBackupTargets', () => store().listBackupTargets());
   registerIpcHandler('system:upsertBackupTarget', (_event,input:UpsertBackupTargetInput) => store().upsertBackupTarget(input));
   registerIpcHandler('system:listBackupRuns', (_event,limit?:number) => store().listBackupRuns(limit));
@@ -1823,7 +1851,7 @@ function createWindow(): void {
       outcome: 'failure',
       metadata: {
         reason,
-        ...(permission ? { permission } : {})
+        permission
       }
     })
   });
@@ -2026,9 +2054,9 @@ app.whenReady().then(async () => {
         reason: maintenanceReauthenticationRestore.reason,
         restoredContextCount: maintenanceReauthenticationRestore.restoredContextCount,
         recoveryHold: maintenanceReauthenticationRestore.recoveryHold,
-        recoveryHoldUntil: maintenanceReauthenticationRestore.recoveryHoldUntil ?? null,
+        recoveryHoldUntil: maintenanceReauthenticationRestore.recoveryHoldUntil,
         quarantined: maintenanceReauthenticationRestore.quarantinePath !== undefined,
-        classification: maintenanceReauthenticationRestore.classification ?? null,
+        classification: maintenanceReauthenticationRestore.classification,
         stateRewriteCompleted: maintenanceReauthenticationRestore.stateRewriteCompleted ?? false,
         protectionTemporarilyUnavailable: maintenanceReauthenticationRestore.status === 'UNAVAILABLE',
         protectionProvider: startupSecurityReport?.protectionProvider

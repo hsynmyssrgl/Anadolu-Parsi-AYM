@@ -1,5 +1,6 @@
 import { ERROR_CODES, createAppError, err, ok, type AppError, type CorrelationId, type Result, type UserId } from '@ppt/core';
 import type { DiagnosticArchiveView, DiagnosticEntryView, DiagnosticReportHistoryView, ExportArtifactView, HealthNotificationView, MaintenanceHistoryFilterInput, MaintenanceHistoryView, MaintenancePolicyView, MaintenanceRecommendationView, PerformanceSampleView, PerformanceTrendView, SystemHealthHistoryView, SystemHealthView } from '@ppt/domain';
+import { SensitiveLogPolicy } from '@ppt/platform-policy';
 
 export interface OperationalHealthApplicationContext { readonly actorId: UserId; readonly correlationId: CorrelationId; }
 export interface OperationalHealthQueryPort {
@@ -67,7 +68,29 @@ export class GetMaintenanceRecommendationsUseCase {
 export class RecordPerformanceSampleUseCase { constructor(private readonly write:OperationalHealthWritePort){} execute(c:OperationalHealthApplicationContext,s:PerformanceSampleView):Result<PerformanceSampleView,AppError>{ if([s.cpuLoadPercent,s.memoryUsagePercent,s.databaseBytes,s.archiveBytes].some(x=>!Number.isFinite(x)||x<0)) return err(invalid(c,'Performans örneği negatif veya geçersiz değer içeremez.')); const saved=this.write.insertPerformanceSample(c,s); return saved.ok?ok(s):saved; } }
 export class ListPerformanceSamplesUseCase { constructor(private readonly query:OperationalHealthQueryPort){} execute(c:OperationalHealthApplicationContext,limit=100){return this.query.listPerformanceSamples(c,clamp(Math.trunc(limit),1,1000));} }
 export class GetPerformanceTrendUseCase { constructor(private readonly query:OperationalHealthQueryPort){} execute(c:OperationalHealthApplicationContext,windowHours=24):Result<PerformanceTrendView,AppError>{ const hours=clamp(Math.trunc(windowHours),1,720),since=new Date(Date.now()-hours*3600_000).toISOString(); const rows=this.query.listPerformanceSamplesSince(c,since); if(!rows.ok)return rows; if(!rows.value.length)return ok({generatedAt:new Date().toISOString(),sampleCount:0,windowHours:hours,averageCpuPercent:0,averageMemoryPercent:0,peakCpuPercent:0,peakMemoryPercent:0,databaseGrowthBytes:0,archiveGrowthBytes:0,direction:'stable'}); const cpu=rows.value.map(r=>r.cpuLoadPercent),mem=rows.value.map(r=>r.memoryUsagePercent),first=rows.value[0]!,last=rows.value.at(-1)!; const averageCpuPercent=Math.round(cpu.reduce((a,b)=>a+b,0)/cpu.length*10)/10,averageMemoryPercent=Math.round(mem.reduce((a,b)=>a+b,0)/mem.length*10)/10,pressure=averageCpuPercent+averageMemoryPercent; return ok({generatedAt:new Date().toISOString(),sampleCount:rows.value.length,windowHours:hours,averageCpuPercent,averageMemoryPercent,peakCpuPercent:Math.max(...cpu),peakMemoryPercent:Math.max(...mem),databaseGrowthBytes:last.databaseBytes-first.databaseBytes,archiveGrowthBytes:last.archiveBytes-first.archiveBytes,direction:pressure>=145?'degrading':pressure<=80?'improving':'stable'}); } }
-export class RecordDiagnosticUseCase { constructor(private readonly write:OperationalHealthWritePort){} execute(c:OperationalHealthApplicationContext,e:DiagnosticEntryView):Result<void,AppError>{ if(!e.code.trim()||!e.message.trim())return err(invalid(c,'Tanılama kodu ve mesajı zorunludur.')); return this.write.insertDiagnostic(c,{...e,code:e.code.trim(),message:e.message.trim(),...(e.details?.trim()?{details:e.details.trim()}:{})}); } }
+export class RecordDiagnosticUseCase {
+  constructor(
+    private readonly write: OperationalHealthWritePort,
+    private readonly sensitiveLogPolicy: SensitiveLogPolicy
+  ) {}
+
+  execute(c: OperationalHealthApplicationContext, e: DiagnosticEntryView): Result<void, AppError> {
+    if (!e.code.trim() || !e.message.trim()) return err(invalid(c, 'Tanılama kodu ve mesajı zorunludur.'));
+    try {
+      const safe = this.sensitiveLogPolicy.sanitizeDiagnostic({
+        id: e.id,
+        severity: e.severity,
+        code: e.code.trim(),
+        message: e.message,
+        ...(e.details === undefined ? {} : { details: e.details }),
+        occurredAt: e.occurredAt
+      });
+      return this.write.insertDiagnostic(c, safe);
+    } catch {
+      return err(invalid(c, 'Tanılama kaydı içeriksiz log politikasını karşılamıyor.'));
+    }
+  }
+}
 export class ListDiagnosticsUseCase { constructor(private readonly query:OperationalHealthQueryPort){} execute(c:OperationalHealthApplicationContext,limit=100){return this.query.listDiagnostics(c,clamp(Math.trunc(limit),1,500));} }
 export class RecordSystemHealthHistoryUseCase { constructor(private readonly write:OperationalHealthWritePort){} execute(c:OperationalHealthApplicationContext,e:SystemHealthHistoryView):Result<SystemHealthHistoryView,AppError>{ if(!Number.isFinite(e.score)||e.score<0||e.score>100)return err(invalid(c,'Sistem sağlık puanı 0-100 aralığında olmalıdır.')); const saved=this.write.insertSystemHealthHistory(c,e);return saved.ok?ok(e):saved;} }
 export class ListSystemHealthHistoryUseCase { constructor(private readonly query:OperationalHealthQueryPort){} execute(c:OperationalHealthApplicationContext,limit=500){return this.query.listSystemHealthHistory(c,clamp(Math.trunc(limit),1,2000));} }

@@ -107,8 +107,10 @@ export const registerCorrelatedIpcHandler = <TArguments extends unknown[], TResu
           metadata: {
             channel: input.channel,
             reason: payloadDecision.reason,
-            path: payloadDecision.path,
-            ...payloadDecision.metrics
+            argumentCount: payloadDecision.metrics.argumentCount,
+            nodeCount: payloadDecision.metrics.nodeCount,
+            maximumDepth: payloadDecision.metrics.maximumDepth,
+            estimatedBytes: payloadDecision.metrics.estimatedBytes
           }
         });
         throw createAppError({
@@ -164,7 +166,6 @@ export const registerCorrelatedIpcHandler = <TArguments extends unknown[], TResu
           metadata: {
             channel: input.channel,
             reason: integrationDecision.reason,
-            path: integrationDecision.path,
             argumentCount: handlerArguments.length
           }
         });
@@ -318,8 +319,8 @@ export const registerCorrelatedIpcHandler = <TArguments extends unknown[], TResu
           admissionQueued: requestLease.admission.queued,
           admissionWaitMs: requestLease.admission.waitMs,
           admissionPriority: requestLease.admission.priority,
-          payloadEstimatedBytes: payloadDecision.metrics.estimatedBytes,
-          payloadNodeCount: payloadDecision.metrics.nodeCount,
+          requestEstimatedBytes: payloadDecision.metrics.estimatedBytes,
+          requestNodeCount: payloadDecision.metrics.nodeCount,
           senderId: event.sender?.id
         }
       });

@@ -5,19 +5,19 @@ import {
   StoredCorrelationContextProvider,
   SystemClock,
   asCorrelationId,
+  asIsoDateTime,
   type Clock,
   type CorrelationContext
 } from '@ppt/core';
 import {
   applyConfigOverrides,
   createDefaultConfig,
-  redactConfig,
   resolveRuntimeEnvironment,
   validateConfig,
   type AppConfig,
   type AppConfigOverrides
 } from '@ppt/config';
-import type { Logger } from '@ppt/logging';
+import { writeContentFreeConsoleEvent, type Logger } from '@ppt/logging';
 import { ProtectedSideArtifactLogger } from './protected-side-artifact-logger.js';
 import type { ProtectedSideArtifactStore } from './protected-side-artifact-store.js';
 
@@ -65,7 +65,18 @@ export const bootstrapDesktopRuntime = (input: BootstrapDesktopRuntimeInput): De
     maxFileBytes: config.logging.maxFileBytes,
     retentionDays: config.logging.retentionDays,
     minimumLevel: config.logging.level,
-    onWriteError: (error) => console.error('Korumalı structured log yazılamadı.', error)
+    onWriteError: (failure) => {
+      writeContentFreeConsoleEvent({
+        timestamp: asIsoDateTime(new Date().toISOString()),
+        level: 'error',
+        service: 'desktop-main',
+        process: 'logging',
+        event: 'protected_log.write_failed',
+        correlationId: asCorrelationId('protected-log-write'),
+        outcome: 'failure',
+        metadata: { failureCode: failure.code, reason: failure.reason }
+      }, 'stderr');
+    }
   });
   const correlation = new StoredCorrelationContextProvider(
     new AsyncLocalStorage<CorrelationContext>()
@@ -78,7 +89,11 @@ export const bootstrapDesktopRuntime = (input: BootstrapDesktopRuntimeInput): De
     event: 'runtime.bootstrap.completed',
     correlationId: asCorrelationId('runtime-bootstrap'),
     outcome: 'success',
-    metadata: { config: redactConfig(config) }
+    metadata: {
+      applicationVersion: config.app.version,
+      environment: config.app.environment,
+      loggingLevel: config.logging.level
+    }
   });
   return { config, logger, correlation, clock, protectedArtifacts: input.protectedArtifacts };
 };

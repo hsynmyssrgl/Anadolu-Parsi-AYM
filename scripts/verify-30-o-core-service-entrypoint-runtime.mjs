@@ -192,7 +192,7 @@ try {
     });
     entrypointChild.stderr.on('data', (chunk) => { directOutput += chunk.toString('utf8'); });
   });
-  check('direct-entrypoint-emits-ready', readyEvent.health?.lifecycle === 'ready', readyEvent);
+  check('direct-entrypoint-emits-ready', readyEvent.metadata?.lifecycle === 'ready' && readyEvent.metadata?.writable === true, readyEvent);
   const directHealth = await new CoreServiceLocalAdminClient({
     endpoint: childEndpoint,
     authenticationToken,

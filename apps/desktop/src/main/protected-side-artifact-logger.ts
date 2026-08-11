@@ -1,6 +1,13 @@
 import { existsSync, readdirSync, renameSync, statSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
-import { serializeLogEvent, type LogEvent, type Logger, type LogLevel } from '@ppt/logging';
+import {
+  serializeLogEvent,
+  toSafeLogWriteFailure,
+  type LogEvent,
+  type Logger,
+  type LogLevel,
+  type SafeLogWriteFailure
+} from '@ppt/logging';
 import type { ProtectedSideArtifactStore } from './protected-side-artifact-store.js';
 
 const levelWeight: Readonly<Record<LogLevel, number>> = Object.freeze({ debug: 10, info: 20, warn: 30, error: 40 });
@@ -11,7 +18,7 @@ export interface ProtectedSideArtifactLoggerOptions {
   readonly minimumLevel?: LogLevel;
   readonly maxFileBytes: number;
   readonly retentionDays: number;
-  readonly onWriteError?: (error: unknown) => void;
+  readonly onWriteError?: (failure: SafeLogWriteFailure) => void;
 }
 
 export class ProtectedSideArtifactLogger implements Logger {
@@ -37,7 +44,7 @@ export class ProtectedSideArtifactLogger implements Logger {
       this.#rotateIfRequired(Buffer.byteLength(serialized, 'utf8') * 2 + 768);
       this.options.store.appendTextRecord(this.#filePath, 'log-event', serialized);
     } catch (error) {
-      this.options.onWriteError?.(error);
+      this.options.onWriteError?.(toSafeLogWriteFailure(error));
     }
   }
 
@@ -65,7 +72,7 @@ export class ProtectedSideArtifactLogger implements Logger {
         if (statSync(filePath).mtimeMs < cutoff) unlinkSync(filePath);
       }
     } catch (error) {
-      this.options.onWriteError?.(error);
+      this.options.onWriteError?.(toSafeLogWriteFailure(error));
     }
   }
 }

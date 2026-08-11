@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 51,
+  "decisionCount": 52,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1227,6 +1227,35 @@
         "artifacts/validation/32-L-ppk-016-derived-data-policy-inheritance-runtime.json",
         "docs/security/PPK-016_DERIVED_DATA_POLICY_INHERITANCE_THREAT_MODEL.md",
         "docs/audit/32-L_PPK-016_TURETILMIS_VERI_POLITIKA_MIRASI_UST_KAPANIS.md"
+      ]
+    },
+    {
+      "id": "DEC-198",
+      "date": "2026-08-12",
+      "acceptedAt": "2026-08-12",
+      "title": "PPK-017 fail-closed content-free sensitive logging and diagnostic boundary top closure",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: tüm işleri full auto olarak sen yap",
+      "document": "docs/decisions/DEC-198-ppk-017-sensitive-log-policy.md",
+      "requirements": ["PPK-017"],
+      "codeAreas": [
+        "packages/platform-policy/src/sensitive-log-policy.ts",
+        "packages/logging/src/index.ts",
+        "packages/domain/src/sensitive-logging.ts",
+        "packages/application/src/sensitive-logging-use-cases.ts",
+        "packages/application/src/operational-health-use-cases.ts",
+        "packages/repositories/src/diagnostic-repository.ts",
+        "apps/desktop/src/main/protected-side-artifact-logger.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/core-service/src/main.ts",
+        "scripts/verify-sensitive-log-boundary.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/32-M-ppk-017-sensitive-log-policy-contract.json",
+        "artifacts/validation/32-M-ppk-017-sensitive-log-policy-runtime.json",
+        "docs/security/PPK-017_SENSITIVE_LOG_POLICY_THREAT_MODEL.md",
+        "docs/audit/32-M_PPK-017_HASSAS_LOG_POLITIKASI_UST_KAPANIS.md",
+        "config/32-m-ppk-017-log-surface-inventory.json"
       ]
     }
   ]

@@ -17,3 +17,4 @@ export * from './data-repair.js';
 
 export * from './product-lifecycle-policy.js';
 export * from './derived-data-policy.js';
+export * from './sensitive-logging.js';

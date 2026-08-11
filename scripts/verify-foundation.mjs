@@ -81,14 +81,16 @@ verify('Configuration redaction', () => {
     data: '<configured>', archive: '<configured>', cache: '<configured>', logs: '<configured>', temp: '<configured>'
   });
 });
-verify('Structured logging redaction', () => {
+verify('Structured logging fail-closed content boundary', () => {
   const logger = new MemoryLogger();
   logger.info({
     timestamp: asIsoDateTime('2026-07-23T12:00:00.000Z'),
     service: 'test', process: 'unit', event: 'auth.completed', correlationId: asCorrelationId('cor-2'),
     metadata: { password: 'secret', nested: { totpSecret: 'ABC', safe: 2 } }
   });
-  assert.deepEqual(logger.events[0].metadata, { password: '<redacted>', nested: { totpSecret: '<redacted>', safe: 2 } });
+  assert.equal(logger.events.length, 0);
+  assert.equal(logger.rejections.length, 1);
+  assert.equal(logger.rejections[0].code, 'SENSITIVE_LOG_POLICY_REJECTED');
 });
 verify('JSON Lines serialization', () => {
   const value = serializeLogEvent({

@@ -33,7 +33,8 @@ export const IPC_POLICY_SENSITIVE_READ_CHANNELS = Object.freeze([
 
 export const IPC_SECURITY_POSTURE_NO_CACHE_CHANNELS = Object.freeze([
   'system:getNetworkEgressBoundary',
-  'system:getDerivedDataPolicyBoundary'
+  'system:getDerivedDataPolicyBoundary',
+  'system:getSensitiveLoggingBoundary'
 ] as const);
 
 /**

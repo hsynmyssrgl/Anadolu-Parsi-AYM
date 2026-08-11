@@ -2,7 +2,7 @@
 
 - Görünür sürüm: **Bronze 04.08.2026.29**
 - Makine okunur defter: `config/user-decision-ledger.json`
-- Aktif karar sayısı: **47**
+- Aktif karar sayısı: **52**
 
 Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağlayıcı kullanıcı kararlarını karar düzeyinde, etkilediği kural/belge/kod alanlarıyla saklar. Ham konuşma erişimi olmadan “tam transcript” iddiası yapılmaz.
 
@@ -57,3 +57,6 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 - `DEC-193` — PPK-012 finite offline capability lease and sensitive-cache fence top closure
 - `DEC-194` — PPK-013 zero-exception client data-access boundary top closure
 - `DEC-195` — PPK-014 zero-exception versioned Core Service client API boundary top closure
+- `DEC-196` — PPK-015 zero-exception allowlisted TLS/mTLS network egress policy top closure
+- `DEC-197` — PPK-016 fail-closed derived-data policy inheritance and immutable lineage metadata top closure
+- `DEC-198` — PPK-017 fail-closed content-free sensitive logging and diagnostic boundary top closure
