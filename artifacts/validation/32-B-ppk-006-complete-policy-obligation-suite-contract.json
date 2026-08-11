@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-B",
+  "requirement": "PPK-006",
+  "phase": "COMPLETE_POLICY_OBLIGATION_SUITE_CONTRACT",
+  "status": "PASS",
+  "checkCount": 32,
+  "passed": 32,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "policy obligation domain has one reusable type",
+      "status": "PASS"
+    },
+    {
+      "name": "all eight accepted PPK-006 obligations are published",
+      "status": "PASS",
+      "details": {
+        "obligationCount": 8
+      }
+    },
+    {
+      "name": "data classes map to deterministic obligation sets",
+      "status": "PASS"
+    },
+    {
+      "name": "non-owner reads receive signed field masking",
+      "status": "PASS"
+    },
+    {
+      "name": "missing field projections use one wildcard mask",
+      "status": "PASS"
+    },
+    {
+      "name": "declared field masks are put in canonical order",
+      "status": "PASS"
+    },
+    {
+      "name": "special processing can be confined to local execution",
+      "status": "PASS"
+    },
+    {
+      "name": "restricted classes generate no-cache",
+      "status": "PASS"
+    },
+    {
+      "name": "restricted and offline data generate no-export",
+      "status": "PASS"
+    },
+    {
+      "name": "restricted classes generate no-AI",
+      "status": "PASS"
+    },
+    {
+      "name": "restricted classes generate no-record",
+      "status": "PASS"
+    },
+    {
+      "name": "share watermark is bound to policy version and correlation",
+      "status": "PASS"
+    },
+    {
+      "name": "retention is bound to consent or the strictest data class",
+      "status": "PASS"
+    },
+    {
+      "name": "value-less controls reject injected values",
+      "status": "PASS"
+    },
+    {
+      "name": "mask fields require unique canonical requested fields or wildcard",
+      "status": "PASS"
+    },
+    {
+      "name": "watermark execution validates exact context binding",
+      "status": "PASS"
+    },
+    {
+      "name": "retention execution accepts only the closed policy vocabulary",
+      "status": "PASS"
+    },
+    {
+      "name": "PEP exposes all enforceable obligation controls",
+      "status": "PASS"
+    },
+    {
+      "name": "obligations execute before the operation callback",
+      "status": "PASS"
+    },
+    {
+      "name": "no-export blocks file sharing before operation",
+      "status": "PASS"
+    },
+    {
+      "name": "no-AI blocks AI processing before operation",
+      "status": "PASS"
+    },
+    {
+      "name": "no-record blocks communication recording before operation",
+      "status": "PASS"
+    },
+    {
+      "name": "local-only rejects non-local application identities",
+      "status": "PASS"
+    },
+    {
+      "name": "execution attestation hashes request nonce sequence controls and time",
+      "status": "PASS"
+    },
+    {
+      "name": "active context verifies the exact receipt-bound execution attestation",
+      "status": "PASS"
+    },
+    {
+      "name": "receipt record carries obligation execution evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "repository contract preserves historical compatibility for execution hash",
+      "status": "PASS"
+    },
+    {
+      "name": "repository binding requires the active execution attestation",
+      "status": "PASS"
+    },
+    {
+      "name": "repository persists obligation execution hash beside the receipt",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 71 adds and enforces the execution hash",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted and durable tests cover all obligations conflicts and missing persistence",
+      "status": "PASS"
+    },
+    {
+      "name": "accepted scope, UI/menu confinement and no-cutover truth are closed",
+      "status": "PASS"
+    }
+  ],
+  "failures": [],
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T11:13:48.185Z"
+}

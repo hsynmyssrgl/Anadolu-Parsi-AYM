@@ -143,6 +143,8 @@ export interface PlatformPolicyTransactionReceiptRecord {
   readonly contextHash?: string;
   /** Absent only on historical rows created before migration 70. */
   readonly dataClasses?: readonly PlatformDataClass[];
+  /** Absent only on historical rows created before migration 71. */
+  readonly obligationExecutionHash?: string;
   readonly nonce: string;
   readonly correlationId: string;
   readonly policyVersion: string;

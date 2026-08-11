@@ -149,6 +149,7 @@ const ppk002 = requirements.find((requirement) => requirement.id === 'PPK-002');
 const ppk003 = requirements.find((requirement) => requirement.id === 'PPK-003');
 const ppk004 = requirements.find((requirement) => requirement.id === 'PPK-004');
 const ppk005 = requirements.find((requirement) => requirement.id === 'PPK-005');
+const ppk006 = requirements.find((requirement) => requirement.id === 'PPK-006');
 const startedStatuses = new Set(['PARTIAL', 'FOUNDATION_STARTED']);
 const chainScore = (requirement) => [
   ...policy.implementationChainFields,
@@ -213,6 +214,7 @@ const report = {
   PPK003: ppk003?.status ?? 'MISSING',
   PPK004: ppk004?.status ?? 'MISSING',
   PPK005: ppk005?.status ?? 'MISSING',
+  PPK006: ppk006?.status ?? 'MISSING',
   authoritativeSource: policy.authoritativeSource,
   currentStep: workPlan.currentStep,
   status: currentGatesPass ? 'PASS_WITH_OPEN_SCOPE' : 'FAIL_CURRENT_GATE',
@@ -221,7 +223,7 @@ const report = {
     ...policy.numberingPolicy,
     newBuildAssigned: false,
     reason: official31TComplete
-      ? 'The 31-X, 31-Y, 31-Z and 32-A top closures complete PPK-002 universal enforcement, PPK-003 bounded default-deny availability, PPK-004 complete policy-context binding and PPK-005 complete data classification. Other Bronze scope remains open.'
+      ? 'The 31-X, 31-Y, 31-Z, 32-A and 32-B top closures complete PPK-002 universal enforcement, PPK-003 bounded default-deny availability, PPK-004 complete policy-context binding, PPK-005 complete data classification and PPK-006 complete policy obligations. Other Bronze scope remains open.'
       : official31SComplete
       ? 'The 31-S detached versioned cutover decision preflight and current authoritative-source protection have verified D: external receipts. No successor decision, real-data transfer, SQLite ownership transfer, automatic activation, or cutover authority exists.'
       : official31RComplete
@@ -456,6 +458,7 @@ Olusturma (UTC): ${report.generatedAt}
 - PPK-003: **${report.PPK003}**
 - PPK-004: **${report.PPK004}**
 - PPK-005: **${report.PPK005}**
+- PPK-006: **${report.PPK006}**
 - Yeni Build verildi: **Hayir**
 
 ## Yuzde gercekligi

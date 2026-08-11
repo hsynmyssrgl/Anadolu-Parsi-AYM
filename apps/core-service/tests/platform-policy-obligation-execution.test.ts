@@ -64,9 +64,17 @@ describe('31-V strict policy obligation execution', () => {
       purpose: 'family'
     }, () => ({ writable: true, epoch: 31 }), (context) => {
       captured = context;
-      expect(context.decision.obligations.map((item) => item.type)).toEqual(['high_detail_audit', 'no_export']);
-      expect(context.obligationExecution.executed.map((item) => item.type)).toEqual(['high_detail_audit', 'no_export']);
-      expect(context.obligationExecution.controls).toMatchObject({ highDetailAudit: true, allowExport: false });
+      expect(context.decision.obligations.map((item) => item.type)).toEqual([
+        'high_detail_audit', 'no_export', 'delete_after'
+      ]);
+      expect(context.obligationExecution.executed.map((item) => item.type)).toEqual([
+        'high_detail_audit', 'no_export', 'delete_after'
+      ]);
+      expect(context.obligationExecution.controls).toMatchObject({
+        highDetailAudit: true,
+        allowExport: false,
+        deleteAfter: 'retention:data-class:personal'
+      });
       expect(context.receiptRecord.obligationExecution).toEqual(context.obligationExecution);
       expect(context.obligationExecution.attestationHash).toMatch(/^[0-9a-f]{64}$/u);
       return 'executed';

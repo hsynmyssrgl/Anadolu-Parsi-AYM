@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-B",
+  "requirement": "PPK-006",
+  "phase": "COMPLETE_POLICY_OBLIGATION_SUITE_RUNTIME",
+  "status": "PASS",
+  "checkCount": 8,
+  "passed": 8,
+  "failed": 0,
+  "results": [
+    {
+      "id": "ppk-006-contract",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "PASS (32/32)",
+      "outputSha256": "d372beb66a8f706070023c8978cc1c077b36925231732362176c4e54d6e88b7a",
+      "outputTail": "32-B PPK-006 contract: PASS (32/32)."
+    },
+    {
+      "id": "ppk-006-targeted-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 15,
+      "minimumTests": 15,
+      "outputSha256": "c25f3c1d129437e9b6f81d6deefd0c0dd3281c40259cffab2fa4afa9205c0a9d",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n···············\n\n Test Files  1 passed (1)\n      Tests  15 passed (15)\n   Start at  14:13:48\n   Duration  478ms (transform 105ms, setup 0ms, import 178ms, tests 20ms, environment 0ms)"
+    },
+    {
+      "id": "core-service-obligation-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 2,
+      "minimumTests": 2,
+      "outputSha256": "b7215312e68f0f22ad76e2823af03383bb9d958f922d7b3902767916bd323a58",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n··\n\n Test Files  1 passed (1)\n      Tests  2 passed (2)\n   Start at  14:13:49\n   Duration  459ms (transform 100ms, setup 0ms, import 172ms, tests 12ms, environment 0ms)"
+    },
+    {
+      "id": "database-package-build",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "",
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputTail": ""
+    },
+    {
+      "id": "migration-71-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "\"version\": 71",
+      "outputSha256": "8db4fe5d1daf55898e74afe87a5eaf8b5e7a38dde646afba90b04ffa77cc2279",
+      "outputTail": "    \"version\": 64,\n      \"name\": \"health_policy_receipt_fence\",\n      \"checksum\": \"23125396bf9edbc0cecad63e4863cdd00b2b52a759533c248e2939a03579a92c\"\n    },\n    {\n      \"version\": 65,\n      \"name\": \"life_policy_receipt_fence\",\n      \"checksum\": \"a47e05b0b5249e300b8b001b31314663d90020b921b1049252df13426c58d178\"\n    },\n    {\n      \"version\": 66,\n      \"name\": \"location_policy_receipt_fence\",\n      \"checksum\": \"e55b15e48f504fc65452556f6c907b8845bb81b6b6d65caa5c243410d11c9609\"\n    },\n    {\n      \"version\": 67,\n      \"name\": \"local_ppk002_timeline_event_policy_receipt_fence\",\n      \"checksum\": \"a67f9807f2a2bb00ada3768d06882a0ca2648d91b19eacb2becf46cf9ef2b528\"\n    },\n    {\n      \"version\": 68,\n      \"name\": \"ppk002_family_import_governed_rollback_receipt_fence\",\n      \"checksum\": \"298ffa1c65a65e762904cb913ecb9b45d1dfa5fcd94659c1a3181a5984f71bd6\"\n    },\n    {\n      \"version\": 69,\n      \"name\": \"ppk004_complete_policy_context_binding\",\n      \"checksum\": \"b0eaf8abbf4b45e00404717a1ba767ce64687e9f575a0e11798326cbdbfeeb91\"\n    },\n    {\n      \"version\": 70,\n      \"name\": \"ppk005_complete_data_classification\",\n      \"checksum\": \"bfd3643232c6daa25d85804f08c4580f896fe4d6e81c2ad3d7dcf602649085e9\"\n    },\n    {\n      \"version\": 71,\n      \"name\": \"ppk006_complete_policy_obligation_suite\",\n      \"checksum\": \"ba678463aa0138780d74d2342bcc453ab622e87c7213a4d10078319762c96a90\"\n    }\n  ],\n  \"generatedAt\": \"2026-08-11T11:13:52.636Z\"\n}\n\n(node:18400) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "durable-obligation-repository-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 17,
+      "minimumTests": 17,
+      "outputSha256": "2cc835097c97d43d180d27ac8dc47cdb899fd0cc6029b9d0aefbdcbc7e874aa2",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·················\n\n Test Files  1 passed (1)\n      Tests  17 passed (17)\n   Start at  14:13:53\n   Duration  17.22s (transform 1.17s, setup 0ms, import 2.36s, tests 14.58s, environment 0ms)\n\n\n(node:19976) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "root-typescript",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "",
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputTail": ""
+    },
+    {
+      "id": "full-vitest-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 333,
+      "minimumTests": 333,
+      "outputSha256": "6e69b2a0ecc573efbe3fcbf6efd77a58f87cd44b1e3e35ca022599eacf1d5447",
+      "outputTail": "ny time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:10912) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:11384) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:15628) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:28444) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:32680) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:27260) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:15588) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:15824) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:16676) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    }
+  ],
+  "validatedBoundaries": [
+    "EIGHT_SIGNED_OBLIGATIONS",
+    "CANONICAL_OBLIGATION_VALIDATION",
+    "CONFLICTING_OPERATION_DEFAULT_DENY",
+    "PRE_OPERATION_CONTROL_EXECUTION",
+    "SHA256_EXECUTION_ATTESTATION",
+    "MIGRATION_71_EXECUTION_HASH",
+    "SQLITE_OBLIGATION_TRIGGER",
+    "DURABLE_REPOSITORY_BINDING",
+    "FULL_VITEST_REGRESSION"
+  ],
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T11:15:17.492Z"
+}

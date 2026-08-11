@@ -105,11 +105,13 @@ export interface PolicyConsent {
   readonly revokedAt?: string;
 }
 
+export type PolicyObligationType =
+  | 'mask_fields' | 'local_processing_only' | 'no_cache' | 'no_clipboard'
+  | 'no_export' | 'no_ai' | 'no_recording' | 'watermark'
+  | 'delete_after' | 'strong_reauthentication' | 'online_only' | 'high_detail_audit';
+
 export interface PolicyObligation {
-  readonly type:
-    | 'mask_fields' | 'local_processing_only' | 'no_cache' | 'no_clipboard'
-    | 'no_export' | 'no_ai' | 'no_recording' | 'watermark'
-    | 'delete_after' | 'strong_reauthentication' | 'online_only' | 'high_detail_audit';
+  readonly type: PolicyObligationType;
   readonly value?: string | readonly string[];
 }
 
@@ -230,6 +232,16 @@ export const PLATFORM_DATA_CLASSES = Object.freeze([
 const validDataClasses = new Set<PlatformDataClass>(PLATFORM_DATA_CLASSES);
 const dataClassOrder = new Map<PlatformDataClass, number>(PLATFORM_DATA_CLASSES.map((value, index) => [value, index]));
 const validClassificationSources = new Set<PlatformDataClassificationSource>(['declared', 'policy_default']);
+export const PPK006_POLICY_OBLIGATION_TYPES = Object.freeze([
+  'mask_fields',
+  'local_processing_only',
+  'no_cache',
+  'no_export',
+  'no_ai',
+  'no_recording',
+  'watermark',
+  'delete_after'
+] as const satisfies readonly PolicyObligationType[]);
 const validActions = new Set<PolicyAction>(['read', 'create', 'update', 'delete', 'share', 'process', 'record', 'administer']);
 const actions = (...values: PolicyAction[]): readonly PolicyAction[] => Object.freeze(values);
 const capabilityActions: Readonly<Record<PlatformCapability, readonly PolicyAction[]>> = Object.freeze({
@@ -314,6 +326,21 @@ const dataClassCapabilityCompatible = (
   if (dataClass === 'communication') return capability.startsWith('communication.');
   return true;
 };
+
+const obligationDataClassSets = Object.freeze({
+  localProcessingOnly: new Set<PlatformDataClass>(['special', 'health', 'finance', 'biometric']),
+  noCache: new Set<PlatformDataClass>(['special', 'health', 'finance', 'child', 'location', 'communication', 'biometric', 'legacy']),
+  noExport: new Set<PlatformDataClass>(['special', 'health', 'finance', 'child', 'biometric', 'legacy']),
+  noAi: new Set<PlatformDataClass>(['special', 'health', 'finance', 'child', 'biometric']),
+  noRecording: new Set<PlatformDataClass>(['special', 'health', 'finance', 'child', 'location', 'biometric', 'legacy'])
+});
+const retentionPriority = Object.freeze([
+  'biometric', 'child', 'special', 'health', 'finance', 'communication', 'location', 'legacy', 'personal'
+] as const satisfies readonly PlatformDataClass[]);
+const hasObligationClass = (
+  dataClasses: readonly PlatformDataClass[],
+  values: ReadonlySet<PlatformDataClass>
+): boolean => dataClasses.some((value) => values.has(value));
 
 export const platformPolicyContextSnapshot = (request: PlatformPolicyRequest): PlatformPolicyContextSnapshot => Object.freeze({
   schemaVersion: 1 as const,
@@ -495,26 +522,43 @@ export class PlatformPolicyKernel {
       if (!obligations.some((current) => current.type === obligation.type)) obligations.push(obligation);
     };
     const dataClasses = request.resource.dataClasses ?? [];
+    const nonOwnerRead = request.action === 'read' && !owner;
+    const retentionClass = retentionPriority.find((value) => dataClasses.includes(value));
     if (isSensitive(request.resource.sensitivity) || dataClasses.some((value) => value !== 'general' && value !== 'personal')) {
       addObligation({ type: 'high_detail_audit' });
     }
-    if (request.capability === 'archive.ocr' || request.capability === 'ai.process' || request.capability === 'translation.process') {
+    if (nonOwnerRead && dataClasses.some((value) => value !== 'general')) {
+      addObligation({
+        type: 'mask_fields',
+        value: Object.freeze(request.requestedFields?.length
+          ? [...request.requestedFields].sort()
+          : ['*'])
+      });
+    }
+    if (
+      request.capability === 'archive.ocr'
+      || request.capability === 'ai.process'
+      || request.capability === 'translation.process'
+      || hasObligationClass(dataClasses, obligationDataClassSets.localProcessingOnly)
+    ) {
       addObligation({ type: 'local_processing_only' });
     }
-    if (dataClasses.includes('child')) {
-      addObligation({ type: 'no_ai' });
-      addObligation({ type: 'no_export' });
-    }
+    if (hasObligationClass(dataClasses, obligationDataClassSets.noCache)) addObligation({ type: 'no_cache' });
     if (dataClasses.includes('biometric')) {
-      addObligation({ type: 'local_processing_only' });
-      addObligation({ type: 'no_cache' });
       addObligation({ type: 'no_clipboard' });
-      addObligation({ type: 'no_export' });
-      addObligation({ type: 'no_ai' });
     }
-    if (dataClasses.includes('legacy')) addObligation({ type: 'no_export' });
+    if (hasObligationClass(dataClasses, obligationDataClassSets.noExport)) addObligation({ type: 'no_export' });
     if (!request.online) addObligation({ type: 'no_export' });
-    if (request.capability === 'communication.record') addObligation({ type: 'delete_after', value: 'consent-retention-policy' });
+    if (hasObligationClass(dataClasses, obligationDataClassSets.noAi)) addObligation({ type: 'no_ai' });
+    if (hasObligationClass(dataClasses, obligationDataClassSets.noRecording)) addObligation({ type: 'no_recording' });
+    if (request.action === 'share') {
+      addObligation({ type: 'watermark', value: `policy:${this.#config.policyVersion};correlation:${request.correlationId}` });
+    }
+    if (request.capability === 'communication.record') {
+      addObligation({ type: 'delete_after', value: 'retention:consent-policy' });
+    } else if (retentionClass) {
+      addObligation({ type: 'delete_after', value: `retention:data-class:${retentionClass}` });
+    }
 
     return Object.freeze({
       allowed: true,

@@ -434,6 +434,14 @@ const validApplications = new Set<PlatformApplicationId>([
 
 const nonEmptyBounded = (value: unknown, max: number): value is string => typeof value === 'string' && value.trim() === value && value.length > 0 && value.length <= max;
 const uniqueStrings = (values: readonly string[]): boolean => new Set(values).size === values.length;
+const noValueObligations = new Set<PolicyObligation['type']>([
+  'local_processing_only', 'no_cache', 'no_clipboard', 'no_export', 'no_ai',
+  'no_recording', 'strong_reauthentication', 'online_only', 'high_detail_audit'
+]);
+const localProcessingApplications = new Set<PlatformApplicationId>([
+  'windows-desktop', 'windows-core-service', 'macos-companion',
+  'ocr-worker', 'ai-worker', 'translation-worker'
+]);
 const parseTimestamp = (value: unknown): number => typeof value === 'string' ? Date.parse(value) : Number.NaN;
 const stable = (value: unknown): string => {
   if (Array.isArray(value)) return `[${value.map(stable).join(',')}]`;
@@ -482,10 +490,22 @@ const executePolicyObligations = (
     }
     seen.add(obligation.type);
     const value = obligation.value;
+    if (noValueObligations.has(obligation.type) && value !== undefined) {
+      throw new PlatformPolicyEnforcementError('OBLIGATION_EXECUTION_FAILED', `${obligation.type} obligation does not accept a value`);
+    }
     switch (obligation.type) {
       case 'mask_fields': {
-        if (!Array.isArray(value) || value.length < 1 || value.some((field) => !nonEmptyBounded(field, 256))) {
-          throw new PlatformPolicyEnforcementError('OBLIGATION_EXECUTION_FAILED', 'mask_fields obligation requires a non-empty bounded field list');
+        if (
+          !Array.isArray(value)
+          || value.length < 1
+          || value.length > 10_000
+          || value.some((field) => !nonEmptyBounded(field, 256))
+          || !uniqueStrings(value)
+          || stable(value) !== stable([...value].sort())
+          || (value.includes('*') && value.length !== 1)
+          || (!value.includes('*') && value.some((field) => !(request.requestedFields ?? []).includes(field)))
+        ) {
+          throw new PlatformPolicyEnforcementError('OBLIGATION_EXECUTION_FAILED', 'mask_fields obligation requires a canonical requested-field set or a single wildcard');
         }
         for (const field of value) maskedFields.add(field);
         break;
@@ -497,11 +517,17 @@ const executePolicyObligations = (
       case 'no_ai': allowAi = false; break;
       case 'no_recording': allowRecording = false; break;
       case 'watermark':
-        if (!nonEmptyBounded(value, 512)) throw new PlatformPolicyEnforcementError('OBLIGATION_EXECUTION_FAILED', 'watermark obligation requires a bounded value');
+        if (
+          !nonEmptyBounded(value, 512)
+          || value !== `policy:${request.policyVersion};correlation:${request.correlationId}`
+        ) throw new PlatformPolicyEnforcementError('OBLIGATION_EXECUTION_FAILED', 'watermark obligation is not bound to the policy version and correlation');
         watermark = value;
         break;
       case 'delete_after':
-        if (!nonEmptyBounded(value, 512)) throw new PlatformPolicyEnforcementError('OBLIGATION_EXECUTION_FAILED', 'delete_after obligation requires a bounded retention directive');
+        if (
+          !nonEmptyBounded(value, 512)
+          || !/^retention:(?:consent-policy|data-class:(?:personal|special|health|finance|child|location|communication|biometric|legacy))$/u.test(value)
+        ) throw new PlatformPolicyEnforcementError('OBLIGATION_EXECUTION_FAILED', 'delete_after obligation requires a supported retention directive');
         deleteAfter = value;
         break;
       case 'strong_reauthentication':
@@ -546,6 +572,24 @@ const executePolicyObligations = (
     controls
   });
   return Object.freeze({ ...payload, attestationHash: sha256(stable(payload)) });
+};
+
+const assertObligationControlCompatibility = (
+  request: PlatformPolicyRequest,
+  controls: PlatformPolicyObligationControls
+): void => {
+  if (controls.localProcessingOnly && !localProcessingApplications.has(request.subject.applicationId)) {
+    throw new PlatformPolicyEnforcementError('OBLIGATION_EXECUTION_FAILED', 'Local-only processing cannot run in the resolved application');
+  }
+  if (!controls.allowExport && request.capability === 'file.share') {
+    throw new PlatformPolicyEnforcementError('OBLIGATION_EXECUTION_FAILED', 'No-export policy blocks the requested file-share operation');
+  }
+  if (!controls.allowAi && request.capability === 'ai.process') {
+    throw new PlatformPolicyEnforcementError('OBLIGATION_EXECUTION_FAILED', 'No-AI policy blocks the requested AI operation');
+  }
+  if (!controls.allowRecording && request.capability === 'communication.record') {
+    throw new PlatformPolicyEnforcementError('OBLIGATION_EXECUTION_FAILED', 'No-record policy blocks the requested recording operation');
+  }
 };
 
 const assertObligationExecution = (
@@ -843,6 +887,7 @@ export class PlatformPolicyEnforcementPoint {
     const obligationExecution = allowedDecision
       ? executePolicyObligations(effectiveRequest, allowedDecision, authorization.receipt, this.#clock())
       : undefined;
+    if (obligationExecution) assertObligationControlCompatibility(effectiveRequest, obligationExecution.controls);
     const record: PlatformPolicyReceiptRecord = Object.freeze({
       correlationId: intent.correlationId,
       contextHash,

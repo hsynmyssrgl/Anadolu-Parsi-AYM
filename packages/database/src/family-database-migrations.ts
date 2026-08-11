@@ -5709,6 +5709,96 @@ SET value='REVISION-32-A-PPK-005-COMPLETE-DATA-CLASSIFICATION',
 WHERE key='schema_generation';
 `;
 
+const platformPolicyObligationExecutionSql = `ALTER TABLE platform_policy_transaction_receipts
+ADD COLUMN obligation_execution_hash TEXT CHECK(
+  obligation_execution_hash IS NULL OR (
+    length(obligation_execution_hash)=64
+    AND obligation_execution_hash NOT GLOB '*[^0-9a-f]*'
+  )
+);
+
+CREATE INDEX idx_platform_policy_receipt_obligation_execution
+ON platform_policy_transaction_receipts(obligation_execution_hash)
+WHERE obligation_execution_hash IS NOT NULL;
+
+CREATE TRIGGER trg_ppk006_platform_policy_obligation_execution_insert
+BEFORE INSERT ON platform_policy_transaction_receipts
+WHEN NEW.obligation_execution_hash IS NULL
+  OR length(NEW.obligation_execution_hash)<>64
+  OR NEW.obligation_execution_hash GLOB '*[^0-9a-f]*'
+  OR json_type(NEW.record_json,'$.obligationExecution') IS NOT 'object'
+  OR json_extract(NEW.record_json,'$.obligationExecution.schemaVersion') IS NOT 1
+  OR json_extract(NEW.record_json,'$.obligationExecution.executorId') IS NOT 'ppt.platform-policy.strict-obligation-executor.v1'
+  OR json_extract(NEW.record_json,'$.obligationExecution.requestHash') IS NOT NEW.request_hash
+  OR json_extract(NEW.record_json,'$.obligationExecution.receiptNonce') IS NOT NEW.nonce
+  OR julianday(json_extract(NEW.record_json,'$.obligationExecution.executedAt')) IS NULL
+  OR json_extract(NEW.record_json,'$.obligationExecution.attestationHash') IS NOT NEW.obligation_execution_hash
+  OR json_type(NEW.record_json,'$.decision.obligations') IS NOT 'array'
+  OR json_type(NEW.record_json,'$.obligationExecution.executed') IS NOT 'array'
+  OR json_array_length(json_extract(NEW.record_json,'$.obligationExecution.executed'))
+     <>json_array_length(json_extract(NEW.record_json,'$.decision.obligations'))
+  OR EXISTS(
+    SELECT 1
+    FROM json_each(NEW.record_json,'$.obligationExecution.executed') executed
+    LEFT JOIN json_each(NEW.record_json,'$.decision.obligations') obligation
+      ON obligation.key=executed.key
+    WHERE json_extract(executed.value,'$.ordinal') IS NOT executed.key
+      OR json_extract(executed.value,'$.enforcement') IS NOT 'PEP_RUNTIME_CONTROL'
+      OR json_extract(executed.value,'$.type') IS NOT json_extract(obligation.value,'$.type')
+      OR json_extract(executed.value,'$.value') IS NOT json_extract(obligation.value,'$.value')
+  )
+  OR json_type(NEW.record_json,'$.obligationExecution.controls') IS NOT 'object'
+  OR json_type(NEW.record_json,'$.obligationExecution.controls.localProcessingOnly') NOT IN ('true','false')
+  OR json_type(NEW.record_json,'$.obligationExecution.controls.allowCache') NOT IN ('true','false')
+  OR json_type(NEW.record_json,'$.obligationExecution.controls.allowExport') NOT IN ('true','false')
+  OR json_type(NEW.record_json,'$.obligationExecution.controls.allowAi') NOT IN ('true','false')
+  OR json_type(NEW.record_json,'$.obligationExecution.controls.allowRecording') NOT IN ('true','false')
+  OR json_type(NEW.record_json,'$.obligationExecution.controls.maskedFields') IS NOT 'array'
+  OR json_extract(NEW.record_json,'$.obligationExecution.controls.localProcessingOnly') IS NOT CASE WHEN EXISTS(
+    SELECT 1 FROM json_each(NEW.record_json,'$.decision.obligations') item
+    WHERE json_extract(item.value,'$.type')='local_processing_only'
+  ) THEN 1 ELSE 0 END
+  OR json_extract(NEW.record_json,'$.obligationExecution.controls.allowCache') IS NOT CASE WHEN EXISTS(
+    SELECT 1 FROM json_each(NEW.record_json,'$.decision.obligations') item
+    WHERE json_extract(item.value,'$.type')='no_cache'
+  ) THEN 0 ELSE 1 END
+  OR json_extract(NEW.record_json,'$.obligationExecution.controls.allowExport') IS NOT CASE WHEN EXISTS(
+    SELECT 1 FROM json_each(NEW.record_json,'$.decision.obligations') item
+    WHERE json_extract(item.value,'$.type')='no_export'
+  ) THEN 0 ELSE 1 END
+  OR json_extract(NEW.record_json,'$.obligationExecution.controls.allowAi') IS NOT CASE WHEN EXISTS(
+    SELECT 1 FROM json_each(NEW.record_json,'$.decision.obligations') item
+    WHERE json_extract(item.value,'$.type')='no_ai'
+  ) THEN 0 ELSE 1 END
+  OR json_extract(NEW.record_json,'$.obligationExecution.controls.allowRecording') IS NOT CASE WHEN EXISTS(
+    SELECT 1 FROM json_each(NEW.record_json,'$.decision.obligations') item
+    WHERE json_extract(item.value,'$.type')='no_recording'
+  ) THEN 0 ELSE 1 END
+  OR json_extract(NEW.record_json,'$.obligationExecution.controls.maskedFields') IS NOT COALESCE((
+    SELECT json_extract(item.value,'$.value')
+    FROM json_each(NEW.record_json,'$.decision.obligations') item
+    WHERE json_extract(item.value,'$.type')='mask_fields'
+  ),json('[]'))
+  OR json_extract(NEW.record_json,'$.obligationExecution.controls.watermark') IS NOT (
+    SELECT json_extract(item.value,'$.value')
+    FROM json_each(NEW.record_json,'$.decision.obligations') item
+    WHERE json_extract(item.value,'$.type')='watermark'
+  )
+  OR json_extract(NEW.record_json,'$.obligationExecution.controls.deleteAfter') IS NOT (
+    SELECT json_extract(item.value,'$.value')
+    FROM json_each(NEW.record_json,'$.decision.obligations') item
+    WHERE json_extract(item.value,'$.type')='delete_after'
+  )
+BEGIN
+  SELECT RAISE(ABORT,'platform policy obligation execution is missing or inconsistent');
+END;
+
+UPDATE database_metadata
+SET value='REVISION-32-B-PPK-006-COMPLETE-POLICY-OBLIGATION-SUITE',
+    updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
+WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -5779,7 +5869,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(67, 'local_ppk002_timeline_event_policy_receipt_fence', timelineEventPolicyReceiptFenceSql),
   createMigrationDefinition(68, 'ppk002_family_import_governed_rollback_receipt_fence', familyImportGovernedRollbackReceiptFenceSql),
   createMigrationDefinition(69, 'ppk004_complete_policy_context_binding', platformPolicyContextBindingSql),
-  createMigrationDefinition(70, 'ppk005_complete_data_classification', platformPolicyDataClassificationSql)
+  createMigrationDefinition(70, 'ppk005_complete_data_classification', platformPolicyDataClassificationSql),
+  createMigrationDefinition(71, 'ppk006_complete_policy_obligation_suite', platformPolicyObligationExecutionSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

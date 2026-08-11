@@ -512,7 +512,9 @@ describe('30-P durable archive policy transaction', () => {
       receipt: 1, archive: 1, audit: 1, outbox: 1, projection: 1
     });
     const binding = harness.runtime.database.prepare(`
-      SELECT receipt.receipt_hash,audit.policy_receipt_hash AS audit_hash,outbox.policy_receipt_hash AS outbox_hash
+      SELECT receipt.receipt_hash,receipt.obligation_execution_hash,
+        json_extract(receipt.record_json,'$.obligationExecution.attestationHash') AS record_obligation_execution_hash,
+        audit.policy_receipt_hash AS audit_hash,outbox.policy_receipt_hash AS outbox_hash
       FROM platform_policy_transaction_receipts receipt
       JOIN audit_log audit ON audit.resource_type=receipt.resource_type AND audit.resource_id=receipt.resource_id
       JOIN event_outbox outbox ON outbox.aggregate_type=receipt.resource_type AND outbox.aggregate_id=receipt.resource_id
@@ -520,6 +522,8 @@ describe('30-P durable archive policy transaction', () => {
     `).get('archive-30p-atomic-commit');
     expect(binding?.audit_hash).toBe(binding?.receipt_hash);
     expect(binding?.outbox_hash).toBe(binding?.receipt_hash);
+    expect(binding?.obligation_execution_hash).toMatch(/^[0-9a-f]{64}$/u);
+    expect(binding?.record_obligation_execution_hash).toBe(binding?.obligation_execution_hash);
   });
 
   it('rolls back receipt, business mutation, audit, outbox and projection together', async () => {
@@ -598,10 +602,10 @@ describe('30-P durable archive policy transaction', () => {
     ).get('nonce-30p-direct-baseline') as Record<string, unknown>;
     const insert = harness.runtime.database.prepare(`
       INSERT INTO platform_policy_transaction_receipts(
-        receipt_hash,receipt_version,request_hash,context_hash,data_classes_json,nonce,correlation_id,policy_version,
+        receipt_hash,receipt_version,request_hash,context_hash,data_classes_json,obligation_execution_hash,nonce,correlation_id,policy_version,
         resource_type,resource_id,action,capability,fence_name,fence_epoch,fence_writable,
         issued_at,recorded_at,record_json
-      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     `);
     const makeCandidate = (suffix: string, overrides: Record<string, unknown> = {}) => {
       const nonce = String(overrides.nonce ?? `nonce-30p-direct-${suffix}`);
@@ -611,7 +615,10 @@ describe('30-P durable archive policy transaction', () => {
         ...record,
         correlationId,
         request: { ...record.request, correlationId },
-        receipt: { ...record.receipt, nonce }
+        receipt: { ...record.receipt, nonce },
+        obligationExecution: record.obligationExecution
+          ? { ...record.obligationExecution, receiptNonce: nonce }
+          : undefined
       };
       return {
         receipt_hash: String(overrides.receipt_hash ?? createHash('sha256').update(`30-p-${suffix}`).digest('hex')),
@@ -619,6 +626,7 @@ describe('30-P durable archive policy transaction', () => {
         request_hash: rebound.receipt.requestHash,
         context_hash: rebound.contextHash,
         data_classes_json: JSON.stringify(rebound.dataClasses),
+        obligation_execution_hash: rebound.obligationExecution?.attestationHash,
         nonce,
         correlation_id: correlationId,
         policy_version: rebound.decision.policyVersion,
@@ -636,7 +644,7 @@ describe('30-P durable archive policy transaction', () => {
     };
     const executeInsert = (candidate: ReturnType<typeof makeCandidate>) => insert.run(
       candidate.receipt_hash, candidate.receipt_version, candidate.request_hash, candidate.context_hash,
-      candidate.data_classes_json, candidate.nonce,
+      candidate.data_classes_json, candidate.obligation_execution_hash, candidate.nonce,
       candidate.correlation_id, candidate.policy_version, candidate.resource_type, candidate.resource_id,
       candidate.action, candidate.capability, candidate.fence_name, candidate.fence_epoch,
       candidate.fence_writable, candidate.issued_at, candidate.recorded_at, candidate.record_json
@@ -645,13 +653,14 @@ describe('30-P durable archive policy transaction', () => {
     const missingClassification = makeCandidate('missing-classification');
     expect(() => harness.runtime.database.prepare(`
       INSERT INTO platform_policy_transaction_receipts(
-        receipt_hash,receipt_version,request_hash,context_hash,nonce,correlation_id,policy_version,
+        receipt_hash,receipt_version,request_hash,context_hash,obligation_execution_hash,nonce,correlation_id,policy_version,
         resource_type,resource_id,action,capability,fence_name,fence_epoch,fence_writable,
         issued_at,recorded_at,record_json
-      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     `).run(
       missingClassification.receipt_hash, missingClassification.receipt_version,
       missingClassification.request_hash, missingClassification.context_hash,
+      missingClassification.obligation_execution_hash,
       missingClassification.nonce, missingClassification.correlation_id,
       missingClassification.policy_version, missingClassification.resource_type,
       missingClassification.resource_id, missingClassification.action,
@@ -660,6 +669,25 @@ describe('30-P durable archive policy transaction', () => {
       missingClassification.issued_at, missingClassification.recorded_at,
       missingClassification.record_json
     )).toThrow(/platform policy data classification is missing or inconsistent/u);
+
+    const missingObligationExecution = makeCandidate('missing-obligation-execution');
+    expect(() => harness.runtime.database.prepare(`
+      INSERT INTO platform_policy_transaction_receipts(
+        receipt_hash,receipt_version,request_hash,context_hash,data_classes_json,nonce,correlation_id,policy_version,
+        resource_type,resource_id,action,capability,fence_name,fence_epoch,fence_writable,
+        issued_at,recorded_at,record_json
+      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+    `).run(
+      missingObligationExecution.receipt_hash, missingObligationExecution.receipt_version,
+      missingObligationExecution.request_hash, missingObligationExecution.context_hash,
+      missingObligationExecution.data_classes_json, missingObligationExecution.nonce,
+      missingObligationExecution.correlation_id, missingObligationExecution.policy_version,
+      missingObligationExecution.resource_type, missingObligationExecution.resource_id,
+      missingObligationExecution.action, missingObligationExecution.capability,
+      missingObligationExecution.fence_name, missingObligationExecution.fence_epoch,
+      missingObligationExecution.fence_writable, missingObligationExecution.issued_at,
+      missingObligationExecution.recorded_at, missingObligationExecution.record_json
+    )).toThrow(/platform policy obligation execution is missing or inconsistent/u);
 
     expect(() => executeInsert(makeCandidate('missing-reservation'))).toThrow();
 

@@ -118,24 +118,29 @@ describe('32-A PPK-005 complete platform data classification', () => {
     });
   });
 
-  it('applies no-AI and no-export controls to child data', () => {
+  it('applies the complete restricted control suite to child data', () => {
     const decision = kernel().evaluate(baseRequest(['child']));
     expect(decision.allowed).toBe(true);
-    expect(decision.obligations.map((item) => item.type)).toEqual(['high_detail_audit', 'no_ai', 'no_export']);
+    expect(decision.obligations.map((item) => item.type)).toEqual([
+      'high_detail_audit', 'no_cache', 'no_export', 'no_ai', 'no_recording', 'delete_after'
+    ]);
   });
 
   it('applies local-only, no-cache, no-clipboard, no-export and no-AI controls to biometric data', () => {
     const decision = kernel().evaluate(baseRequest(['biometric']));
     expect(decision.allowed).toBe(true);
     expect(decision.obligations.map((item) => item.type)).toEqual([
-      'high_detail_audit', 'local_processing_only', 'no_cache', 'no_clipboard', 'no_export', 'no_ai'
+      'high_detail_audit', 'local_processing_only', 'no_cache', 'no_clipboard',
+      'no_export', 'no_ai', 'no_recording', 'delete_after'
     ]);
   });
 
   it('prevents legacy data export by signed obligation', () => {
     const decision = kernel().evaluate(baseRequest(['legacy']));
     expect(decision).toMatchObject({ allowed: true });
-    expect(decision.obligations.map((item) => item.type)).toEqual(['high_detail_audit', 'no_export']);
+    expect(decision.obligations.map((item) => item.type)).toEqual([
+      'high_detail_audit', 'no_cache', 'no_export', 'no_recording', 'delete_after'
+    ]);
   });
 
   it('infers combined child-health classification before authorization and persists it exactly', async () => {
