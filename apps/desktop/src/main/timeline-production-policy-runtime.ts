@@ -647,6 +647,8 @@ const loadAuthoritySnapshotInTransaction = (
       personId: person.id,
       deviceId: identity.deviceId,
       applicationId: 'windows-desktop',
+      devicePublicKeyFingerprintSha256: device.fingerprint,
+      deviceCertificateIssuedAt: device.trustedAt,
       deviceTrusted: true,
       membershipActive: true,
       roles: Object.freeze([account.role]),

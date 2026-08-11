@@ -2,7 +2,7 @@
 
 - Görünür sürüm: **Bronze 04.08.2026.29**
 - Makine okunur defter: `config/user-decision-ledger.json`
-- Aktif karar sayısı: **42**
+- Aktif karar sayısı: **43**
 
 Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağlayıcı kullanıcı kararlarını karar düzeyinde, etkilediği kural/belge/kod alanlarıyla saklar. Ham konuşma erişimi olmadan “tam transcript” iddiası yapılmaz.
 
@@ -50,3 +50,4 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 - `DEC-186` — PPK-005 complete data classification top closure
 - `DEC-187` — PPK-006 complete policy obligation suite top closure
 - `DEC-188` — PPK-007 signed, versioned and SHA-256-bound policy package top closure
+- `DEC-189` — PPK-008 unique application identity, trusted-device certificate and capability manifest top closure

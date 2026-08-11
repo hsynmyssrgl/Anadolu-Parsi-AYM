@@ -2522,6 +2522,8 @@ export class FamilyDataStore {
       deviceId: device.deviceId,
       applicationId: 'windows-desktop',
       applicationVersion: binding.applicationVersion,
+      devicePublicKeyFingerprintSha256: device.fingerprint,
+      deviceCertificateIssuedAt: device.createdAt,
       deviceTrusted: true,
       membershipActive: true,
       roles: Object.freeze([account.role]),

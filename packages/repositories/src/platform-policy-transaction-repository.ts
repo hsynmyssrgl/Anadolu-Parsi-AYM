@@ -183,6 +183,8 @@ export interface PlatformPolicyPersistenceBinding {
   readonly policyPackageVersion: number;
   readonly policyPackageSha256: string;
   readonly applicationVersion: string;
+  readonly capabilityManifestSha256?: string;
+  readonly deviceCertificateSha256?: string;
   readonly nonce: string;
   readonly resourceType: string;
   readonly resourceId: string;
@@ -224,6 +226,8 @@ export const platformPolicyPersistenceBinding = (
     policyPackageVersion: authorization.policyPackageVersion,
     policyPackageSha256: authorization.policyPackageSha256,
     applicationVersion: authorization.applicationVersion,
+    ...(authorization.capabilityManifestSha256 ? { capabilityManifestSha256: authorization.capabilityManifestSha256 } : {}),
+    ...(authorization.deviceCertificateSha256 ? { deviceCertificateSha256: authorization.deviceCertificateSha256 } : {}),
     nonce: authorization.receipt.nonce,
     resourceType: authorization.resourceType,
     resourceId: authorization.resourceId,
@@ -277,6 +281,12 @@ const mapReceipt = (row: Record<string, unknown>): PlatformPolicyTransactionRece
     : {}),
   ...(typeof row.application_version === 'string'
     ? { applicationVersion: row.application_version }
+    : {}),
+  ...(typeof row.capability_manifest_sha256 === 'string'
+    ? { capabilityManifestSha256: row.capability_manifest_sha256 }
+    : {}),
+  ...(typeof row.device_certificate_sha256 === 'string'
+    ? { deviceCertificateSha256: row.device_certificate_sha256 }
     : {}),
   nonce: String(row.nonce),
   correlationId: String(row.correlation_id),
@@ -485,6 +495,10 @@ const assertRecordMatchesContext = (
     record.request.policyPackageVersion !== authorization.policyPackageVersion ||
     record.request.policyPackageSha256 !== authorization.policyPackageSha256 ||
     record.request.subject.applicationVersion !== authorization.applicationVersion ||
+    record.capabilityManifestSha256 !== authorization.capabilityManifestSha256 ||
+    record.deviceCertificateSha256 !== authorization.deviceCertificateSha256 ||
+    record.request.subject.capabilityManifestSha256 !== authorization.capabilityManifestSha256 ||
+    record.request.subject.deviceCertificate?.certificateSha256 !== authorization.deviceCertificateSha256 ||
     record.request.clusterWritable !== true ||
     record.request.enforcementMode !== 'strict' ||
     record.contextHash !== authorization.contextHash ||
@@ -509,6 +523,10 @@ const assertRecordMatchesContext = (
     record.decision.policyPackageSha256 !== authorization.policyPackageSha256 ||
     record.receipt.decision.applicationVersion !== authorization.applicationVersion ||
     record.decision.applicationVersion !== authorization.applicationVersion ||
+    record.receipt.decision.capabilityManifestSha256 !== authorization.capabilityManifestSha256 ||
+    record.decision.capabilityManifestSha256 !== authorization.capabilityManifestSha256 ||
+    record.receipt.decision.deviceCertificateSha256 !== authorization.deviceCertificateSha256 ||
+    record.decision.deviceCertificateSha256 !== authorization.deviceCertificateSha256 ||
     record.decision.allowed !== true ||
     canonicalPlatformPolicyJson(record.decision) !== canonicalPlatformPolicyJson(record.receipt.decision) ||
     canonicalPlatformPolicyJson(record.receipt) !== canonicalPlatformPolicyJson(authorization.receipt)
@@ -787,10 +805,10 @@ export class SqlitePlatformPolicyTransactionRepository
       this.database(context).prepare(`
         INSERT INTO platform_policy_transaction_receipts(
           receipt_hash,receipt_version,request_hash,context_hash,data_classes_json,obligation_execution_hash,
-          policy_package_version,policy_package_sha256,application_version,nonce,correlation_id,policy_version,
+          policy_package_version,policy_package_sha256,application_version,capability_manifest_sha256,device_certificate_sha256,nonce,correlation_id,policy_version,
           resource_type,resource_id,action,capability,fence_name,fence_epoch,fence_writable,
           issued_at,recorded_at,record_json
-        ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
       `).run(
         receiptHash,
         record.receipt.receiptVersion,
@@ -801,6 +819,8 @@ export class SqlitePlatformPolicyTransactionRepository
         record.policyPackageVersion,
         record.policyPackageSha256,
         record.applicationVersion,
+        record.capabilityManifestSha256,
+        record.deviceCertificateSha256 ?? null,
         record.receipt.nonce,
         record.correlationId,
         record.decision.policyVersion,

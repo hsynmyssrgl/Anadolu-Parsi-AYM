@@ -1,14 +1,17 @@
 import { createHash, randomUUID } from 'node:crypto';
 import {
+  createPlatformDeviceCertificate,
   PlatformPolicyKernel,
   inferPlatformDataClasses,
   normalizePlatformDataClasses,
   platformPolicyContextHash,
+  verifyPlatformDeviceCertificate,
   type PlatformApplicationId,
   type PlatformPolicyAuthorization,
   type PlatformCapability,
   type PlatformDataClass,
   type PlatformPolicyDecision,
+  type PlatformDeviceCertificate,
   type PlatformPolicyPackage,
   type PlatformPolicyReceipt,
   type PlatformPolicyRequest,
@@ -37,6 +40,11 @@ export interface PlatformPolicyConnectionAuthority {
   readonly deviceId: string;
   readonly applicationId: PlatformApplicationId;
   readonly applicationVersion?: string;
+  readonly capabilityManifestSha256?: string;
+  readonly deviceCertificate?: PlatformDeviceCertificate;
+  /** Trusted-device registry fields used once to mint a manifest-bound certificate. */
+  readonly devicePublicKeyFingerprintSha256?: string;
+  readonly deviceCertificateIssuedAt?: string;
   readonly deviceTrusted: boolean;
   readonly membershipActive: boolean;
   readonly roles: readonly string[];
@@ -63,6 +71,8 @@ export interface PlatformPolicyReceiptRecord {
   readonly policyPackageVersion: number;
   readonly policyPackageSha256: string;
   readonly applicationVersion: string;
+  readonly capabilityManifestSha256?: string;
+  readonly deviceCertificateSha256?: string;
   readonly dataClasses: readonly PlatformDataClass[];
   readonly resourceType: string;
   readonly resourceId: string;
@@ -213,6 +223,8 @@ export interface PlatformPolicyTransactionContext {
   readonly policyPackageVersion: number;
   readonly policyPackageSha256: string;
   readonly applicationVersion: string;
+  readonly capabilityManifestSha256?: string;
+  readonly deviceCertificateSha256?: string;
   readonly subject: PlatformPolicyTransactionSubjectSnapshot;
   readonly resourceType: string;
   readonly resourceId: string;
@@ -239,6 +251,8 @@ export interface PlatformPolicyTransactionSubjectSnapshot {
   readonly deviceId: string;
   readonly applicationId: PlatformApplicationId;
   readonly applicationVersion: string;
+  readonly capabilityManifestSha256?: string;
+  readonly deviceCertificateSha256?: string;
   readonly roles: readonly string[];
   readonly familyIds: readonly string[];
   readonly householdIds: readonly string[];
@@ -306,12 +320,22 @@ export const assertActivePlatformPolicyTransactionContext: (
     || context.policyPackageSha256 !== context.receiptRecord.policyPackageSha256
     || context.applicationVersion !== context.receiptRecord.request.subject.applicationVersion
     || context.applicationVersion !== context.receiptRecord.applicationVersion
+    || context.capabilityManifestSha256 !== context.receiptRecord.request.subject.capabilityManifestSha256
+    || context.capabilityManifestSha256 !== context.receiptRecord.capabilityManifestSha256
+    || context.deviceCertificateSha256 !== context.receiptRecord.request.subject.deviceCertificate?.certificateSha256
+    || context.deviceCertificateSha256 !== context.receiptRecord.deviceCertificateSha256
     || stable(context.subject) !== stable({
       accountId: context.receiptRecord.request.subject.accountId,
       ...(context.receiptRecord.request.subject.personId ? { personId: context.receiptRecord.request.subject.personId } : {}),
       deviceId: context.receiptRecord.request.subject.deviceId,
       applicationId: context.receiptRecord.request.subject.applicationId,
       applicationVersion: context.receiptRecord.request.subject.applicationVersion,
+      ...(context.receiptRecord.request.subject.capabilityManifestSha256 ? {
+        capabilityManifestSha256: context.receiptRecord.request.subject.capabilityManifestSha256
+      } : {}),
+      ...(context.receiptRecord.request.subject.deviceCertificate ? {
+        deviceCertificateSha256: context.receiptRecord.request.subject.deviceCertificate.certificateSha256
+      } : {}),
       roles: context.receiptRecord.request.subject.roles,
       familyIds: context.receiptRecord.request.subject.familyIds,
       householdIds: context.receiptRecord.request.subject.householdIds,
@@ -799,6 +823,8 @@ export class PlatformPolicyEnforcementPoint {
       deviceId: authority.deviceId,
       applicationId: authority.applicationId,
       applicationVersion: authority.applicationVersion!,
+      ...(authority.capabilityManifestSha256 ? { capabilityManifestSha256: authority.capabilityManifestSha256 } : {}),
+      ...(authority.deviceCertificate ? { deviceCertificateSha256: authority.deviceCertificate.certificateSha256 } : {}),
       roles: Object.freeze([...authority.roles]),
       familyIds: Object.freeze([...authority.familyIds]),
       householdIds: Object.freeze([...(authority.householdIds ?? [])]),
@@ -811,6 +837,7 @@ export class PlatformPolicyEnforcementPoint {
       policyPackageSha256: authority.policyPackageSha256!,
       subject: Object.freeze({
         ...subject,
+        ...(authority.deviceCertificate ? { deviceCertificate: authority.deviceCertificate } : {}),
         deviceTrusted: authority.deviceTrusted,
         membershipActive: authority.membershipActive
       }),
@@ -864,6 +891,10 @@ export class PlatformPolicyEnforcementPoint {
       authorization.decision.policyPackageVersion !== effectiveRequest.policyPackageVersion ||
       authorization.decision.policyPackageSha256 !== effectiveRequest.policyPackageSha256 ||
       authorization.decision.applicationVersion !== effectiveRequest.subject.applicationVersion ||
+      (effectiveRequest.subject.capabilityManifestSha256 !== undefined
+        && authorization.decision.capabilityManifestSha256 !== effectiveRequest.subject.capabilityManifestSha256) ||
+      (effectiveRequest.subject.deviceCertificate !== undefined
+        && authorization.decision.deviceCertificateSha256 !== effectiveRequest.subject.deviceCertificate.certificateSha256) ||
       authorization.decision.contextHash !== contextHash ||
       authorization.receipt.decision.contextHash !== contextHash
     ) {
@@ -922,6 +953,12 @@ export class PlatformPolicyEnforcementPoint {
       policyPackageVersion: effectiveRequest.policyPackageVersion!,
       policyPackageSha256: effectiveRequest.policyPackageSha256!,
       applicationVersion: effectiveRequest.subject.applicationVersion!,
+      ...(effectiveRequest.subject.capabilityManifestSha256 ? {
+        capabilityManifestSha256: effectiveRequest.subject.capabilityManifestSha256
+      } : {}),
+      ...(effectiveRequest.subject.deviceCertificate ? {
+        deviceCertificateSha256: effectiveRequest.subject.deviceCertificate.certificateSha256
+      } : {}),
       dataClasses: Object.freeze([...(effectiveRequest.resource.dataClasses ?? [])]),
       resourceType: resource.type,
       resourceId: resource.id,
@@ -983,6 +1020,12 @@ export class PlatformPolicyEnforcementPoint {
       policyPackageVersion: decision.policyPackageVersion!,
       policyPackageSha256: decision.policyPackageSha256!,
       applicationVersion: decision.applicationVersion!,
+      ...(effectiveRequest.subject.capabilityManifestSha256 ? {
+        capabilityManifestSha256: effectiveRequest.subject.capabilityManifestSha256
+      } : {}),
+      ...(effectiveRequest.subject.deviceCertificate ? {
+        deviceCertificateSha256: effectiveRequest.subject.deviceCertificate.certificateSha256
+      } : {}),
       subject,
       resourceType: resource.type,
       resourceId: resource.id,
@@ -1162,6 +1205,7 @@ export class PlatformPolicyEnforcementPoint {
       (authority.personId !== undefined && !nonEmptyBounded(authority.personId, 256)) ||
       !validApplications.has(authority.applicationId) || typeof authority.deviceTrusted !== 'boolean' ||
       !nonEmptyBounded(authority.applicationVersion, 128) ||
+      (authority.capabilityManifestSha256 !== undefined && !/^[0-9a-f]{64}$/u.test(authority.capabilityManifestSha256)) ||
       typeof authority.membershipActive !== 'boolean' || typeof authority.online !== 'boolean' ||
       !Array.isArray(authority.roles) || authority.roles.length === 0 || authority.roles.some((role) => !nonEmptyBounded(role, 128)) || authority.roles.length > 64 || !uniqueStrings(authority.roles) ||
       !Array.isArray(authority.familyIds) || authority.familyIds.length === 0 || authority.familyIds.length > 10_000 || authority.familyIds.some((id) => !nonEmptyBounded(id, 256)) ||
@@ -1188,6 +1232,7 @@ export class PlatformPolicyEnforcementPoint {
     }
     if (!policyPackage) return authority;
     const applicationVersion = policyPackage.payload.applicationVersions[authority.applicationId];
+    const applicationManifest = policyPackage.payload.applicationManifests[authority.applicationId];
     if (
       policyPackage.payload.schemaVersion !== 1
       || policyPackage.payload.policyVersion !== authority.policyVersion
@@ -1195,17 +1240,48 @@ export class PlatformPolicyEnforcementPoint {
       || policyPackage.signatureAlgorithm !== 'HMAC-SHA256'
       || !/^[0-9a-f]{64}$/u.test(policyPackage.signature)
       || applicationVersion === undefined
+      || applicationManifest === undefined
+      || applicationManifest.applicationId !== authority.applicationId
+      || applicationManifest.applicationVersion !== applicationVersion
       || (authority.policyPackageVersion !== undefined && authority.policyPackageVersion !== policyPackage.payload.packageVersion)
       || (authority.policyPackageSha256 !== undefined && authority.policyPackageSha256 !== policyPackage.payloadSha256)
       || (authority.applicationVersion !== undefined && authority.applicationVersion !== applicationVersion)
     ) {
       throw new PlatformPolicyEnforcementError('AUTHORITY_INVALID', 'Policy authority does not match the signed policy package');
     }
+    let deviceCertificate = authority.deviceCertificate;
+    if (applicationManifest.deviceCertificateRequired && !deviceCertificate) {
+      if (
+        !/^[0-9a-f]{64}$/u.test(authority.devicePublicKeyFingerprintSha256 ?? '')
+        || !Number.isFinite(parseTimestamp(authority.deviceCertificateIssuedAt ?? ''))
+      ) throw new PlatformPolicyEnforcementError(
+        'AUTHORITY_INVALID',
+        'Trusted-device certificate source is missing for the registered application'
+      );
+      deviceCertificate = createPlatformDeviceCertificate({
+        schemaVersion: 1,
+        issuer: 'trusted-device-registry',
+        deviceId: authority.deviceId,
+        applicationId: authority.applicationId,
+        publicKeyFingerprintSha256: authority.devicePublicKeyFingerprintSha256!,
+        capabilityManifestSha256: applicationManifest.capabilityManifestSha256,
+        issuedAt: authority.deviceCertificateIssuedAt!,
+        expiresAt: authority.expiresAt
+      });
+    }
+    if (deviceCertificate && !verifyPlatformDeviceCertificate(deviceCertificate, {
+      deviceId: authority.deviceId,
+      applicationId: authority.applicationId,
+      capabilityManifestSha256: applicationManifest.capabilityManifestSha256,
+      occurredAt: this.#clock()
+    })) throw new PlatformPolicyEnforcementError('AUTHORITY_INVALID', 'Device certificate is invalid or not bound to the application manifest');
     return Object.freeze({
       ...authority,
       policyPackageVersion: policyPackage.payload.packageVersion,
       policyPackageSha256: policyPackage.payloadSha256,
-      applicationVersion
+      applicationVersion,
+      capabilityManifestSha256: applicationManifest.capabilityManifestSha256,
+      ...(deviceCertificate ? { deviceCertificate } : {})
     });
   }
 

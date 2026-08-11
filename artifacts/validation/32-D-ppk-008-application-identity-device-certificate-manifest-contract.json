@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-D",
+  "requirement": "PPK-008",
+  "phase": "APPLICATION_IDENTITY_DEVICE_CERTIFICATE_MANIFEST_CONTRACT",
+  "status": "PASS",
+  "checkCount": 34,
+  "passed": 34,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "closed application identity vocabulary is exported",
+      "status": "PASS"
+    },
+    {
+      "name": "application vocabulary contains every required Windows Apple service and worker identity",
+      "status": "PASS"
+    },
+    {
+      "name": "application identity manifest has an explicit schema",
+      "status": "PASS"
+    },
+    {
+      "name": "manifest binds application id and version",
+      "status": "PASS"
+    },
+    {
+      "name": "manifest binds canonical capability set",
+      "status": "PASS"
+    },
+    {
+      "name": "manifest binds certificate requirement",
+      "status": "PASS"
+    },
+    {
+      "name": "manifest publishes SHA-256 binding",
+      "status": "PASS"
+    },
+    {
+      "name": "manifest hash canonicalizes capabilities",
+      "status": "PASS"
+    },
+    {
+      "name": "duplicate certificate registrations fail kernel construction",
+      "status": "PASS"
+    },
+    {
+      "name": "unknown application registrations fail kernel construction",
+      "status": "PASS"
+    },
+    {
+      "name": "signed policy package carries application manifests",
+      "status": "PASS"
+    },
+    {
+      "name": "device certificate has an explicit closed issuer",
+      "status": "PASS"
+    },
+    {
+      "name": "device certificate binds device and application identity",
+      "status": "PASS"
+    },
+    {
+      "name": "device certificate binds public-key fingerprint",
+      "status": "PASS"
+    },
+    {
+      "name": "device certificate binds capability manifest",
+      "status": "PASS"
+    },
+    {
+      "name": "device certificate binds issue and expiry times",
+      "status": "PASS"
+    },
+    {
+      "name": "certificate hash covers only the canonical certificate payload",
+      "status": "PASS"
+    },
+    {
+      "name": "certificate verification checks exact device and application",
+      "status": "PASS"
+    },
+    {
+      "name": "certificate verification checks manifest and lifetime",
+      "status": "PASS"
+    },
+    {
+      "name": "strict kernel denies missing or mismatched manifest",
+      "status": "PASS"
+    },
+    {
+      "name": "strict kernel denies invalid certificate",
+      "status": "PASS"
+    },
+    {
+      "name": "PEP mints certificate only from trusted authority facts",
+      "status": "PASS"
+    },
+    {
+      "name": "PEP rejects certificate not bound to signed manifest",
+      "status": "PASS"
+    },
+    {
+      "name": "strict request carries manifest and complete certificate",
+      "status": "PASS"
+    },
+    {
+      "name": "decision and receipt verification bind manifest and certificate hashes",
+      "status": "PASS"
+    },
+    {
+      "name": "active transaction context revalidates both identity hashes",
+      "status": "PASS"
+    },
+    {
+      "name": "Core Service registers all fourteen production identities",
+      "status": "PASS"
+    },
+    {
+      "name": "Desktop device identity remains Ed25519 proof capable",
+      "status": "PASS"
+    },
+    {
+      "name": "all production policy resolvers source trusted device fingerprint and trust time",
+      "status": "PASS"
+    },
+    {
+      "name": "universal Desktop authority sources the protected device identity",
+      "status": "PASS"
+    },
+    {
+      "name": "repository contract preserves migration-73 historical compatibility",
+      "status": "PASS"
+    },
+    {
+      "name": "repository persists and compares both identity bindings",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 73 adds both columns and exact JSON trigger",
+      "status": "PASS"
+    },
+    {
+      "name": "scope registry evidence UI menu confinement and no-cutover truth are closed",
+      "status": "PASS"
+    }
+  ],
+  "failures": [],
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T12:24:49.766Z"
+}

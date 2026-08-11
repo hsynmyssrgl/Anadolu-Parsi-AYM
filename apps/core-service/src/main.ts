@@ -98,11 +98,41 @@ export class CoreServiceProcessHost {
       signingKey: configuration.policySigningKey,
       applicationVersions: {
         'windows-desktop': CORE_SERVICE_APPLICATION_API_VERSION,
-        'windows-core-service': CORE_SERVICE_APPLICATION_API_VERSION
+        'windows-core-service': CORE_SERVICE_APPLICATION_API_VERSION,
+        'windows-cluster-agent': 'not-deployed',
+        'macos-companion': 'not-deployed',
+        'ios-companion': 'not-deployed',
+        'ipados-companion': 'not-deployed',
+        'watchos-companion': 'not-deployed',
+        'visionos-companion': 'not-deployed',
+        'ocr-worker': 'not-deployed',
+        'ai-worker': 'not-deployed',
+        'translation-worker': 'not-deployed',
+        'communication-service': 'not-deployed',
+        'backup-worker': 'not-deployed',
+        'signed-plugin': 'not-deployed'
       },
+      deviceCertificateRequiredApplications: [
+        'windows-desktop', 'windows-core-service', 'windows-cluster-agent',
+        'macos-companion', 'ios-companion', 'ipados-companion', 'watchos-companion',
+        'visionos-companion', 'ocr-worker', 'ai-worker', 'translation-worker',
+        'communication-service', 'backup-worker', 'signed-plugin'
+      ],
       applicationCapabilities: {
         'windows-desktop': ['family.read', 'family.write', 'health.read', 'health.write', 'finance.read', 'finance.write', 'location.read', 'location.share', 'archive.read', 'archive.write'],
-        'windows-core-service': ['health.read','health.write','finance.read','finance.write','archive.read','archive.write','archive.ocr','ai.process','translation.process','communication.message','communication.call','communication.record','file.share','backup.create','backup.restore','cluster.admin','plugin.execute']
+        'windows-core-service': ['health.read','health.write','finance.read','finance.write','archive.read','archive.write','archive.ocr','ai.process','translation.process','communication.message','communication.call','communication.record','file.share','backup.create','backup.restore','cluster.admin','plugin.execute'],
+        'windows-cluster-agent': [],
+        'macos-companion': [],
+        'ios-companion': [],
+        'ipados-companion': [],
+        'watchos-companion': [],
+        'visionos-companion': [],
+        'ocr-worker': [],
+        'ai-worker': [],
+        'translation-worker': [],
+        'communication-service': [],
+        'backup-worker': [],
+        'signed-plugin': []
       },
       consentRequiredCapabilities: ['archive.ocr','ai.process','translation.process','communication.record','location.share'],
       onlineOnlyCapabilities: ['communication.call','communication.record','cluster.admin'],

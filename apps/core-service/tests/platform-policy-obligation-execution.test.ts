@@ -101,6 +101,7 @@ describe('31-V strict policy obligation execution', () => {
             policyPackageVersion: providerKernel.policyPackage.payload.packageVersion,
             policyPackageSha256: providerKernel.policyPackage.payloadSha256,
             applicationVersion: 'v1',
+            capabilityManifestSha256: request.subject.capabilityManifestSha256,
             contextHash: platformPolicyContextHash(request),
             obligations: Object.freeze([{ type: 'strong_reauthentication' as const }])
           });

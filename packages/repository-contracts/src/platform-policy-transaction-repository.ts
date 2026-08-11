@@ -151,6 +151,10 @@ export interface PlatformPolicyTransactionReceiptRecord {
   readonly policyPackageSha256?: string;
   /** Absent only on historical rows created before migration 72. */
   readonly applicationVersion?: string;
+  /** Absent only on historical rows created before migration 73. */
+  readonly capabilityManifestSha256?: string;
+  /** Present when the application manifest requires a trusted-device certificate. */
+  readonly deviceCertificateSha256?: string;
   readonly nonce: string;
   readonly correlationId: string;
   readonly policyVersion: string;

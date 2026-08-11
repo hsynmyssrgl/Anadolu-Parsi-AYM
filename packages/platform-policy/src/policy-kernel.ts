@@ -16,6 +16,14 @@ export type PlatformApplicationId =
   | 'backup-worker'
   | 'signed-plugin';
 
+export const PLATFORM_APPLICATION_IDS = Object.freeze([
+  'windows-desktop', 'windows-core-service', 'windows-cluster-agent',
+  'macos-companion', 'ios-companion', 'ipados-companion', 'watchos-companion',
+  'visionos-companion', 'ocr-worker', 'ai-worker', 'translation-worker',
+  'communication-service', 'backup-worker', 'signed-plugin'
+] as const satisfies readonly PlatformApplicationId[]);
+const platformApplicationIdSet = new Set<PlatformApplicationId>(PLATFORM_APPLICATION_IDS);
+
 export type PlatformCapability =
   | 'family.read' | 'family.write' | 'health.read' | 'health.write'
   | 'finance.read' | 'finance.write' | 'location.read' | 'location.share'
@@ -58,7 +66,30 @@ export type PolicyReason =
   | 'POLICY_PACKAGE_VERSION_MISMATCH'
   | 'POLICY_PACKAGE_HASH_MISMATCH'
   | 'APPLICATION_VERSION_MISMATCH'
+  | 'APPLICATION_MANIFEST_MISMATCH'
+  | 'DEVICE_CERTIFICATE_INVALID'
   | 'INVALID_REQUEST';
+
+export interface PlatformApplicationIdentityManifest {
+  readonly schemaVersion: 1;
+  readonly applicationId: PlatformApplicationId;
+  readonly applicationVersion: string;
+  readonly capabilities: readonly PlatformCapability[];
+  readonly deviceCertificateRequired: boolean;
+  readonly capabilityManifestSha256: string;
+}
+
+export interface PlatformDeviceCertificate {
+  readonly schemaVersion: 1;
+  readonly issuer: 'trusted-device-registry';
+  readonly deviceId: string;
+  readonly applicationId: PlatformApplicationId;
+  readonly publicKeyFingerprintSha256: string;
+  readonly capabilityManifestSha256: string;
+  readonly issuedAt: string;
+  readonly expiresAt: string;
+  readonly certificateSha256: string;
+}
 
 export interface PolicySubject {
   readonly accountId: string;
@@ -66,6 +97,8 @@ export interface PolicySubject {
   readonly deviceId: string;
   readonly applicationId: PlatformApplicationId;
   readonly applicationVersion?: string;
+  readonly capabilityManifestSha256?: string;
+  readonly deviceCertificate?: PlatformDeviceCertificate;
   readonly deviceTrusted: boolean;
   readonly membershipActive: boolean;
   readonly roles: readonly string[];
@@ -147,6 +180,8 @@ export interface PlatformPolicyDecision {
   readonly policyPackageVersion?: number;
   readonly policyPackageSha256?: string;
   readonly applicationVersion?: string;
+  readonly capabilityManifestSha256?: string;
+  readonly deviceCertificateSha256?: string;
   /** SHA-256 binding of the complete validated authorization context. */
   readonly contextHash?: string;
   readonly matchedGrantId?: string;
@@ -166,6 +201,8 @@ export interface PlatformPolicyContextSnapshot {
     readonly deviceId: string;
     readonly applicationId: PlatformApplicationId;
     readonly applicationVersion: string;
+    readonly capabilityManifestSha256: string;
+    readonly deviceCertificateSha256: string;
     readonly deviceTrusted: boolean;
     readonly membershipActive: boolean;
     readonly roles: readonly string[];
@@ -213,6 +250,7 @@ export interface PlatformPolicyKernelConfig {
   readonly signingKey: Uint8Array;
   readonly policyPackageVersion?: number;
   readonly applicationVersions?: Readonly<Partial<Record<PlatformApplicationId, string>>>;
+  readonly deviceCertificateRequiredApplications?: readonly PlatformApplicationId[];
   readonly applicationCapabilities: Readonly<Partial<Record<PlatformApplicationId, readonly PlatformCapability[]>>>;
   readonly consentRequiredCapabilities: readonly PlatformCapability[];
   readonly onlineOnlyCapabilities: readonly PlatformCapability[];
@@ -225,6 +263,7 @@ export interface PlatformPolicyPackagePayload {
   readonly policyVersion: string;
   readonly applicationVersions: Readonly<Partial<Record<PlatformApplicationId, string>>>;
   readonly applicationCapabilities: Readonly<Partial<Record<PlatformApplicationId, readonly PlatformCapability[]>>>;
+  readonly applicationManifests: Readonly<Partial<Record<PlatformApplicationId, PlatformApplicationIdentityManifest>>>;
   readonly consentRequiredCapabilities: readonly PlatformCapability[];
   readonly onlineOnlyCapabilities: readonly PlatformCapability[];
   readonly writeActions: readonly PolicyAction[];
@@ -249,6 +288,69 @@ const stable = (value: unknown): string => {
 const digest = (value: unknown): string => createHmac('sha256', 'ppt-policy-request-v1').update(stable(value)).digest('hex');
 const sign = (key: Uint8Array, value: unknown): string => createHmac('sha256', key).update(stable(value)).digest('hex');
 const sha256 = (value: unknown): string => createHash('sha256').update(stable(value), 'utf8').digest('hex');
+const sha256Pattern = /^[0-9a-f]{64}$/u;
+
+export const platformCapabilityManifestHash = (input: {
+  readonly applicationId: PlatformApplicationId;
+  readonly applicationVersion: string;
+  readonly capabilities: readonly PlatformCapability[];
+  readonly deviceCertificateRequired: boolean;
+}): string => sha256({
+  schemaVersion: 1,
+  applicationId: input.applicationId,
+  applicationVersion: input.applicationVersion,
+  capabilities: [...input.capabilities].sort(),
+  deviceCertificateRequired: input.deviceCertificateRequired
+});
+
+type PlatformDeviceCertificatePayload = Omit<PlatformDeviceCertificate, 'certificateSha256'>;
+
+export const createPlatformDeviceCertificate = (
+  input: PlatformDeviceCertificatePayload
+): PlatformDeviceCertificate => {
+  const payload: PlatformDeviceCertificatePayload = Object.freeze({
+    schemaVersion: input.schemaVersion,
+    issuer: input.issuer,
+    deviceId: input.deviceId,
+    applicationId: input.applicationId,
+    publicKeyFingerprintSha256: input.publicKeyFingerprintSha256,
+    capabilityManifestSha256: input.capabilityManifestSha256,
+    issuedAt: input.issuedAt,
+    expiresAt: input.expiresAt
+  });
+  return Object.freeze({ ...payload, certificateSha256: sha256(payload) });
+};
+
+export const verifyPlatformDeviceCertificate = (
+  certificate: PlatformDeviceCertificate,
+  expected: {
+    readonly deviceId: string;
+    readonly applicationId: PlatformApplicationId;
+    readonly capabilityManifestSha256: string;
+    readonly occurredAt: string;
+  }
+): boolean => {
+  try {
+    const { certificateSha256, ...payload } = certificate;
+    const occurredAt = Date.parse(expected.occurredAt);
+    return certificate.schemaVersion === 1
+      && certificate.issuer === 'trusted-device-registry'
+      && certificate.deviceId === expected.deviceId
+      && certificate.applicationId === expected.applicationId
+      && certificate.capabilityManifestSha256 === expected.capabilityManifestSha256
+      && sha256Pattern.test(certificate.publicKeyFingerprintSha256)
+      && sha256Pattern.test(certificate.capabilityManifestSha256)
+      && sha256Pattern.test(certificateSha256)
+      && certificateSha256 === sha256(payload)
+      && Number.isFinite(occurredAt)
+      && Number.isFinite(Date.parse(certificate.issuedAt))
+      && Number.isFinite(Date.parse(certificate.expiresAt))
+      && Date.parse(certificate.issuedAt) <= occurredAt
+      && occurredAt <= Date.parse(certificate.expiresAt);
+  } catch {
+    return false;
+  }
+};
 const signPolicyPackage = (key: Uint8Array, payload: PlatformPolicyPackagePayload): string =>
   createHmac('sha256', key).update('ppt-policy-package-v1\0', 'utf8').update(stable(payload), 'utf8').digest('hex');
 const parseTime = (value?: string): number => value ? Date.parse(value) : Number.NaN;
@@ -391,6 +493,8 @@ export const platformPolicyContextSnapshot = (request: PlatformPolicyRequest): P
     deviceId: request.subject.deviceId,
     applicationId: request.subject.applicationId,
     applicationVersion: request.subject.applicationVersion ?? '',
+    capabilityManifestSha256: request.subject.capabilityManifestSha256 ?? '',
+    deviceCertificateSha256: request.subject.deviceCertificate?.certificateSha256 ?? '',
     deviceTrusted: request.subject.deviceTrusted,
     membershipActive: request.subject.membershipActive,
     roles: Object.freeze([...(request.subject.roles ?? [])]),
@@ -423,7 +527,11 @@ export const platformPolicyContextHash = (request: PlatformPolicyRequest): strin
   createHash('sha256').update(stable(platformPolicyContextSnapshot(request)), 'utf8').digest('hex');
 
 export class PlatformPolicyKernel {
-  readonly #config: PlatformPolicyKernelConfig;
+  readonly #config: PlatformPolicyKernelConfig & {
+    readonly policyPackageVersion: number;
+    readonly applicationVersions: Readonly<Partial<Record<PlatformApplicationId, string>>>;
+    readonly applicationManifests: Readonly<Partial<Record<PlatformApplicationId, PlatformApplicationIdentityManifest>>>;
+  };
   readonly #policyPackage: PlatformPolicyPackage;
 
   public constructor(config: PlatformPolicyKernelConfig) {
@@ -434,6 +542,9 @@ export class PlatformPolicyKernel {
     const applicationCapabilities = Object.fromEntries(
       Object.entries(config.applicationCapabilities).map(([applicationId, capabilities]) => [applicationId, Object.freeze([...(capabilities ?? [])].sort())])
     ) as Partial<Record<PlatformApplicationId, readonly PlatformCapability[]>>;
+    if (Object.keys(applicationCapabilities).some((applicationId) => !platformApplicationIdSet.has(applicationId as PlatformApplicationId))) {
+      throw new Error('application capability registry contains an invalid applicationId');
+    }
     const applicationVersions = Object.fromEntries(
       Object.keys(applicationCapabilities).sort().map((applicationId) => {
         const version = config.applicationVersions?.[applicationId as PlatformApplicationId] ?? 'v1';
@@ -441,12 +552,41 @@ export class PlatformPolicyKernel {
         return [applicationId, version];
       })
     ) as Partial<Record<PlatformApplicationId, string>>;
+    const certificateRequired = new Set(config.deviceCertificateRequiredApplications ?? []);
+    if (
+      certificateRequired.size !== (config.deviceCertificateRequiredApplications?.length ?? 0)
+      || [...certificateRequired].some((applicationId) => !platformApplicationIdSet.has(applicationId))
+    ) throw new Error('device certificate application registry is invalid');
+    const applicationManifests = Object.fromEntries(
+      Object.keys(applicationCapabilities).sort().map((applicationIdValue) => {
+        const applicationId = applicationIdValue as PlatformApplicationId;
+        const applicationVersion = applicationVersions[applicationId]!;
+        const capabilities = applicationCapabilities[applicationId]!;
+        const deviceCertificateRequired = certificateRequired.has(applicationId);
+        const manifest = Object.freeze({
+          schemaVersion: 1 as const,
+          applicationId,
+          applicationVersion,
+          capabilities,
+          deviceCertificateRequired,
+          capabilityManifestSha256: platformCapabilityManifestHash({
+            applicationId,
+            applicationVersion,
+            capabilities,
+            deviceCertificateRequired
+          })
+        });
+        return [applicationId, manifest];
+      })
+    ) as Partial<Record<PlatformApplicationId, PlatformApplicationIdentityManifest>>;
     this.#config = Object.freeze({
       policyVersion: config.policyVersion,
       signingKey: Uint8Array.from(config.signingKey),
       policyPackageVersion: packageVersion,
       applicationVersions: Object.freeze(applicationVersions),
       applicationCapabilities: Object.freeze(applicationCapabilities),
+      applicationManifests: Object.freeze(applicationManifests),
+      deviceCertificateRequiredApplications: Object.freeze([...certificateRequired].sort()),
       consentRequiredCapabilities: Object.freeze([...config.consentRequiredCapabilities].sort()),
       onlineOnlyCapabilities: Object.freeze([...config.onlineOnlyCapabilities].sort()),
       writeActions: Object.freeze([...config.writeActions].sort())
@@ -457,6 +597,7 @@ export class PlatformPolicyKernel {
       policyVersion: this.#config.policyVersion,
       applicationVersions: this.#config.applicationVersions!,
       applicationCapabilities: this.#config.applicationCapabilities,
+      applicationManifests: this.#config.applicationManifests,
       consentRequiredCapabilities: this.#config.consentRequiredCapabilities,
       onlineOnlyCapabilities: this.#config.onlineOnlyCapabilities,
       writeActions: this.#config.writeActions
@@ -492,6 +633,7 @@ export class PlatformPolicyKernel {
           policyVersion: this.#config.policyVersion,
           applicationVersions: this.#config.applicationVersions,
           applicationCapabilities: this.#config.applicationCapabilities,
+          applicationManifests: this.#config.applicationManifests,
           consentRequiredCapabilities: this.#config.consentRequiredCapabilities,
           onlineOnlyCapabilities: this.#config.onlineOnlyCapabilities,
           writeActions: this.#config.writeActions
@@ -511,6 +653,9 @@ export class PlatformPolicyKernel {
     const decisionApplicationVersion = request?.subject?.applicationId
       ? this.applicationVersionFor(request.subject.applicationId)
       : undefined;
+    const decisionApplicationManifest = request?.subject?.applicationId
+      ? this.#policyPackage.payload.applicationManifests[request.subject.applicationId]
+      : undefined;
     const deny = (reason: PolicyReason, obligations: readonly PolicyObligation[] = []): PlatformPolicyDecision =>
       Object.freeze({
         allowed: false,
@@ -519,6 +664,12 @@ export class PlatformPolicyKernel {
         policyPackageVersion: this.#policyPackage.payload.packageVersion,
         policyPackageSha256: this.#policyPackage.payloadSha256,
         ...(decisionApplicationVersion === undefined ? {} : { applicationVersion: decisionApplicationVersion }),
+        ...(decisionApplicationManifest === undefined ? {} : {
+          capabilityManifestSha256: decisionApplicationManifest.capabilityManifestSha256
+        }),
+        ...(request?.subject?.deviceCertificate === undefined ? {} : {
+          deviceCertificateSha256: request.subject.deviceCertificate.certificateSha256
+        }),
         ...(contextHash ? { contextHash } : {}),
         obligations: freezeObligations(obligations)
       });
@@ -532,6 +683,7 @@ export class PlatformPolicyKernel {
       (request.policyPackageSha256 !== undefined && !/^[0-9a-f]{64}$/u.test(request.policyPackageSha256)) ||
       !nonEmpty(request.subject?.accountId) || !nonEmpty(request.subject?.deviceId) ||
       (request.subject.applicationVersion !== undefined && !nonEmpty(request.subject.applicationVersion, 128)) ||
+      (request.subject.capabilityManifestSha256 !== undefined && !sha256Pattern.test(request.subject.capabilityManifestSha256)) ||
       (request.subject.personId !== undefined && !nonEmpty(request.subject.personId)) ||
       !nonEmpty(request.resource?.type) || !nonEmpty(request.resource?.id) || !nonEmpty(request.resource?.familyId) ||
       (request.resource.householdId !== undefined && !nonEmpty(request.resource.householdId)) ||
@@ -582,10 +734,27 @@ export class PlatformPolicyKernel {
     }
     const capabilities = this.#config.applicationCapabilities[request.subject.applicationId];
     if (!capabilities) return deny('APPLICATION_NOT_REGISTERED');
+    const applicationManifest = this.#policyPackage.payload.applicationManifests[request.subject.applicationId];
+    if (!applicationManifest) return deny('APPLICATION_NOT_REGISTERED');
     if (
       request.subject.applicationVersion !== undefined
       && request.subject.applicationVersion !== this.applicationVersionFor(request.subject.applicationId)
     ) return deny('APPLICATION_VERSION_MISMATCH');
+    if (
+      request.subject.capabilityManifestSha256 !== undefined
+      && request.subject.capabilityManifestSha256 !== applicationManifest.capabilityManifestSha256
+    ) return deny('APPLICATION_MANIFEST_MISMATCH');
+    if (strictContext && applicationManifest.deviceCertificateRequired) {
+      if (request.subject.capabilityManifestSha256 !== applicationManifest.capabilityManifestSha256) {
+        return deny('APPLICATION_MANIFEST_MISMATCH');
+      }
+      if (!request.subject.deviceCertificate || !verifyPlatformDeviceCertificate(request.subject.deviceCertificate, {
+        deviceId: request.subject.deviceId,
+        applicationId: request.subject.applicationId,
+        capabilityManifestSha256: applicationManifest.capabilityManifestSha256,
+        occurredAt: request.occurredAt
+      })) return deny('DEVICE_CERTIFICATE_INVALID');
+    }
     if (!capabilities.includes(request.capability)) return deny('CAPABILITY_NOT_DECLARED');
     if (!capabilityActions[request.capability]?.includes(request.action)) return deny('ACTION_CAPABILITY_MISMATCH');
     if (!(request.resource.dataClasses ?? []).every((dataClass) => dataClassCapabilityCompatible(dataClass, request.capability))) {
@@ -620,6 +789,8 @@ export class PlatformPolicyKernel {
       policyPackageVersion: this.#policyPackage.payload.packageVersion,
       policyPackageSha256: this.#policyPackage.payloadSha256,
       applicationVersion: decisionApplicationVersion!,
+      capabilityManifestSha256: decisionApplicationManifest!.capabilityManifestSha256,
+      ...(request.subject.deviceCertificate ? { deviceCertificateSha256: request.subject.deviceCertificate.certificateSha256 } : {}),
       contextHash,
       matchedGrantId: explicitDeny.id,
       obligations: freezeObligations([])
@@ -699,6 +870,8 @@ export class PlatformPolicyKernel {
       policyPackageVersion: this.#policyPackage.payload.packageVersion,
       policyPackageSha256: this.#policyPackage.payloadSha256,
       applicationVersion: decisionApplicationVersion!,
+      capabilityManifestSha256: decisionApplicationManifest!.capabilityManifestSha256,
+      ...(request.subject.deviceCertificate ? { deviceCertificateSha256: request.subject.deviceCertificate.certificateSha256 } : {}),
       contextHash,
       ...(explicitAllow ? { matchedGrantId: explicitAllow.id } : {}),
       ...(matchedConsentId ? { matchedConsentId } : {}),

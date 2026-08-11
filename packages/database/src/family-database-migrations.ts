@@ -5848,6 +5848,50 @@ SET value='REVISION-32-C-PPK-007-SIGNED-VERSIONED-POLICY-PACKAGE',
 WHERE key='schema_generation';
 `;
 
+const platformApplicationIdentityBindingSql = `ALTER TABLE platform_policy_transaction_receipts
+ADD COLUMN capability_manifest_sha256 TEXT CHECK(
+  capability_manifest_sha256 IS NULL OR (
+    length(capability_manifest_sha256)=64
+    AND capability_manifest_sha256 NOT GLOB '*[^0-9a-f]*'
+  )
+);
+
+ALTER TABLE platform_policy_transaction_receipts
+ADD COLUMN device_certificate_sha256 TEXT CHECK(
+  device_certificate_sha256 IS NULL OR (
+    length(device_certificate_sha256)=64
+    AND device_certificate_sha256 NOT GLOB '*[^0-9a-f]*'
+  )
+);
+
+CREATE INDEX idx_platform_policy_receipt_application_identity
+ON platform_policy_transaction_receipts(capability_manifest_sha256,device_certificate_sha256)
+WHERE capability_manifest_sha256 IS NOT NULL;
+
+CREATE TRIGGER trg_ppk008_platform_application_identity_insert
+BEFORE INSERT ON platform_policy_transaction_receipts
+WHEN NEW.capability_manifest_sha256 IS NULL
+  OR json_extract(NEW.record_json,'$.capabilityManifestSha256') IS NOT NEW.capability_manifest_sha256
+  OR json_extract(NEW.record_json,'$.request.subject.capabilityManifestSha256') IS NOT NEW.capability_manifest_sha256
+  OR json_extract(NEW.record_json,'$.decision.capabilityManifestSha256') IS NOT NEW.capability_manifest_sha256
+  OR json_extract(NEW.record_json,'$.receipt.decision.capabilityManifestSha256') IS NOT NEW.capability_manifest_sha256
+  OR (NEW.device_certificate_sha256 IS NULL) IS NOT (json_type(NEW.record_json,'$.request.subject.deviceCertificate') IS NULL)
+  OR (NEW.device_certificate_sha256 IS NOT NULL AND (
+    json_extract(NEW.record_json,'$.deviceCertificateSha256') IS NOT NEW.device_certificate_sha256
+    OR json_extract(NEW.record_json,'$.request.subject.deviceCertificate.certificateSha256') IS NOT NEW.device_certificate_sha256
+    OR json_extract(NEW.record_json,'$.decision.deviceCertificateSha256') IS NOT NEW.device_certificate_sha256
+    OR json_extract(NEW.record_json,'$.receipt.decision.deviceCertificateSha256') IS NOT NEW.device_certificate_sha256
+  ))
+BEGIN
+  SELECT RAISE(ABORT,'platform application identity binding is missing or inconsistent');
+END;
+
+UPDATE database_metadata
+SET value='REVISION-32-D-PPK-008-APPLICATION-IDENTITY-DEVICE-CERTIFICATE-CAPABILITY-MANIFEST',
+    updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
+WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -5920,7 +5964,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(69, 'ppk004_complete_policy_context_binding', platformPolicyContextBindingSql),
   createMigrationDefinition(70, 'ppk005_complete_data_classification', platformPolicyDataClassificationSql),
   createMigrationDefinition(71, 'ppk006_complete_policy_obligation_suite', platformPolicyObligationExecutionSql),
-  createMigrationDefinition(72, 'ppk007_signed_versioned_policy_package', platformPolicyPackageBindingSql)
+  createMigrationDefinition(72, 'ppk007_signed_versioned_policy_package', platformPolicyPackageBindingSql),
+  createMigrationDefinition(73, 'ppk008_application_identity_device_certificate_manifest', platformApplicationIdentityBindingSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

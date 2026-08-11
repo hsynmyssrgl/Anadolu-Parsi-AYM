@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 42,
+  "decisionCount": 43,
   "decisions": [
     {
       "id": "DEC-121",
@@ -994,6 +994,31 @@
         "artifacts/validation/32-C-ppk-007-signed-versioned-policy-package-contract.json",
         "artifacts/validation/32-C-ppk-007-signed-versioned-policy-package-runtime.json",
         "docs/audit/32-C_PPK-007_IMZALI_SURUMLU_POLITIKA_PAKETI_UST_KAPANIS.md"
+      ]
+    },
+    {
+      "id": "DEC-189",
+      "date": "2026-08-11",
+      "acceptedAt": "2026-08-11",
+      "title": "PPK-008 unique application identity, trusted-device certificate and capability manifest top closure",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: Paketler bitince diğerine başla",
+      "document": "docs/decisions/DEC-189-ppk-008-application-identity-device-certificate-manifest.md",
+      "requirements": ["PPK-008"],
+      "codeAreas": [
+        "packages/platform-policy/src/policy-kernel.ts",
+        "packages/platform-policy/src/policy-enforcement-point.ts",
+        "apps/core-service/src/main.ts",
+        "apps/desktop/src/main/device-identity.ts",
+        "apps/desktop/src/main/data-store.ts",
+        "packages/repository-contracts/src/platform-policy-transaction-repository.ts",
+        "packages/repositories/src/platform-policy-transaction-repository.ts",
+        "packages/database/src/family-database-migrations.ts"
+      ],
+      "evidence": [
+        "artifacts/validation/32-D-ppk-008-application-identity-device-certificate-manifest-contract.json",
+        "artifacts/validation/32-D-ppk-008-application-identity-device-certificate-manifest-runtime.json",
+        "docs/audit/32-D_PPK-008_UYGULAMA_KIMLIGI_CIHAZ_SERTIFIKASI_UST_KAPANIS.md"
       ]
     }
   ]

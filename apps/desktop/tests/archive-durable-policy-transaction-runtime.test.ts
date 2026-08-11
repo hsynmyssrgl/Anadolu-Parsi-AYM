@@ -603,10 +603,10 @@ describe('30-P durable archive policy transaction', () => {
     const insert = harness.runtime.database.prepare(`
       INSERT INTO platform_policy_transaction_receipts(
         receipt_hash,receipt_version,request_hash,context_hash,data_classes_json,obligation_execution_hash,
-        policy_package_version,policy_package_sha256,application_version,nonce,correlation_id,policy_version,
+        policy_package_version,policy_package_sha256,application_version,capability_manifest_sha256,device_certificate_sha256,nonce,correlation_id,policy_version,
         resource_type,resource_id,action,capability,fence_name,fence_epoch,fence_writable,
         issued_at,recorded_at,record_json
-      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     `);
     const makeCandidate = (suffix: string, overrides: Record<string, unknown> = {}) => {
       const nonce = String(overrides.nonce ?? `nonce-30p-direct-${suffix}`);
@@ -631,6 +631,8 @@ describe('30-P durable archive policy transaction', () => {
         policy_package_version: rebound.policyPackageVersion,
         policy_package_sha256: rebound.policyPackageSha256,
         application_version: rebound.applicationVersion,
+        capability_manifest_sha256: rebound.capabilityManifestSha256,
+        device_certificate_sha256: rebound.deviceCertificateSha256 ?? null,
         nonce,
         correlation_id: correlationId,
         policy_version: rebound.decision.policyVersion,
@@ -649,7 +651,8 @@ describe('30-P durable archive policy transaction', () => {
     const executeInsert = (candidate: ReturnType<typeof makeCandidate>) => insert.run(
       candidate.receipt_hash, candidate.receipt_version, candidate.request_hash, candidate.context_hash,
       candidate.data_classes_json, candidate.obligation_execution_hash,
-      candidate.policy_package_version, candidate.policy_package_sha256, candidate.application_version, candidate.nonce,
+      candidate.policy_package_version, candidate.policy_package_sha256, candidate.application_version,
+      candidate.capability_manifest_sha256, candidate.device_certificate_sha256, candidate.nonce,
       candidate.correlation_id, candidate.policy_version, candidate.resource_type, candidate.resource_id,
       candidate.action, candidate.capability, candidate.fence_name, candidate.fence_epoch,
       candidate.fence_writable, candidate.issued_at, candidate.recorded_at, candidate.record_json
@@ -659,16 +662,17 @@ describe('30-P durable archive policy transaction', () => {
     expect(() => harness.runtime.database.prepare(`
       INSERT INTO platform_policy_transaction_receipts(
         receipt_hash,receipt_version,request_hash,context_hash,obligation_execution_hash,
-        policy_package_version,policy_package_sha256,application_version,nonce,correlation_id,policy_version,
+        policy_package_version,policy_package_sha256,application_version,capability_manifest_sha256,device_certificate_sha256,nonce,correlation_id,policy_version,
         resource_type,resource_id,action,capability,fence_name,fence_epoch,fence_writable,
         issued_at,recorded_at,record_json
-      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     `).run(
       missingClassification.receipt_hash, missingClassification.receipt_version,
        missingClassification.request_hash, missingClassification.context_hash,
        missingClassification.obligation_execution_hash,
        missingClassification.policy_package_version, missingClassification.policy_package_sha256,
        missingClassification.application_version,
+       missingClassification.capability_manifest_sha256, missingClassification.device_certificate_sha256,
       missingClassification.nonce, missingClassification.correlation_id,
       missingClassification.policy_version, missingClassification.resource_type,
       missingClassification.resource_id, missingClassification.action,
@@ -682,16 +686,18 @@ describe('30-P durable archive policy transaction', () => {
     expect(() => harness.runtime.database.prepare(`
       INSERT INTO platform_policy_transaction_receipts(
         receipt_hash,receipt_version,request_hash,context_hash,data_classes_json,
-        policy_package_version,policy_package_sha256,application_version,nonce,correlation_id,policy_version,
+        policy_package_version,policy_package_sha256,application_version,capability_manifest_sha256,device_certificate_sha256,nonce,correlation_id,policy_version,
         resource_type,resource_id,action,capability,fence_name,fence_epoch,fence_writable,
         issued_at,recorded_at,record_json
-      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     `).run(
       missingObligationExecution.receipt_hash, missingObligationExecution.receipt_version,
        missingObligationExecution.request_hash, missingObligationExecution.context_hash,
        missingObligationExecution.data_classes_json,
        missingObligationExecution.policy_package_version, missingObligationExecution.policy_package_sha256,
-       missingObligationExecution.application_version, missingObligationExecution.nonce,
+       missingObligationExecution.application_version,
+      missingObligationExecution.capability_manifest_sha256, missingObligationExecution.device_certificate_sha256,
+      missingObligationExecution.nonce,
       missingObligationExecution.correlation_id, missingObligationExecution.policy_version,
       missingObligationExecution.resource_type, missingObligationExecution.resource_id,
       missingObligationExecution.action, missingObligationExecution.capability,

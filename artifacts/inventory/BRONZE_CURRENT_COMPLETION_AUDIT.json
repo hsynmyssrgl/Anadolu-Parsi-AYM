@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-11T11:57:21.414Z",
+  "generatedAt": "2026-08-11T12:24:49.662Z",
   "release": "Bronze 04.08.2026.29",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
@@ -9,6 +9,7 @@
   "PPK005": "COMPLETE",
   "PPK006": "COMPLETE",
   "PPK007": "COMPLETE",
+  "PPK008": "COMPLETE",
   "authoritativeSource": "06_KOD/app",
   "currentStep": "31-T",
   "status": "PASS_WITH_OPEN_SCOPE",
@@ -19,22 +20,22 @@
     "checkpointIds": "Checkpoint identifiers preserve work history and are never reused.",
     "buildIds": "A new Build number is assigned only after required current gates, manifest and receipt evidence exist.",
     "newBuildAssigned": false,
-    "reason": "The 31-X, 31-Y, 31-Z, 32-A, 32-B and 32-C top closures complete PPK-002 universal enforcement, PPK-003 bounded default-deny availability, PPK-004 complete policy-context binding, PPK-005 complete data classification, PPK-006 complete policy obligations and PPK-007 signed versioned policy packages. Other Bronze scope remains open."
+    "reason": "The 31-X, 31-Y, 31-Z, 32-A, 32-B, 32-C and 32-D top closures complete PPK-002 universal enforcement, PPK-003 bounded default-deny availability, PPK-004 complete policy-context binding, PPK-005 complete data classification, PPK-006 complete policy obligations, PPK-007 signed versioned policy packages and PPK-008 application identity/device-certificate manifests. Other Bronze scope remains open."
   },
   "percentages": {
     "officialWeightedBronzePercent": 25,
     "officialWeightedEvidenceStep": "31-T",
-    "strictRequirementCompletionPercent": 5.7143,
-    "implementationChainCoveragePercent": 6.1714,
-    "governanceEvidenceChainCoveragePercent": 46.1905,
+    "strictRequirementCompletionPercent": 6,
+    "implementationChainCoveragePercent": 6.4571,
+    "governanceEvidenceChainCoveragePercent": 46.381,
     "interpretation": "These are separate measures and must not be blended into an invented single completion claim."
   },
   "scope": {
     "total": 350,
     "statusCounts": {
-      "COMPLETE": 20,
+      "COMPLETE": 21,
       "FOUNDATION_STARTED": 3,
-      "NOT_IMPLEMENTED": 289,
+      "NOT_IMPLEMENTED": 288,
       "PARTIAL": 38
     },
     "priorityCounts": {
@@ -43,21 +44,21 @@
       "P2": 5
     },
     "completeByPriority": {
-      "P0": 19,
+      "P0": 20,
       "P1": 1,
       "P2": 0
     },
-    "incompleteCount": 330,
-    "strictComplete": 20,
+    "incompleteCount": 329,
+    "strictComplete": 21,
     "implementationCoverage": {
-      "passed": 216,
+      "passed": 226,
       "total": 3500,
-      "percent": 6.1714
+      "percent": 6.4571
     },
     "governanceCoverage": {
-      "passed": 485,
+      "passed": 487,
       "total": 1050,
-      "percent": 46.1905
+      "percent": 46.381
     }
   },
   "rules": {
@@ -319,7 +320,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"b0ebd528039c941b30f71127bb78a26bf2a229b525abdf796c63105605639396\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\b0ebd528039c941b30f71127bb78a26bf2a229b525abdf796c63105605639396\",\"files\":9}"
+          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"5438824e1e490f0cc5e10c9b6dabfff7ecac27a1901552ec7cd94abf414e17b7\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\5438824e1e490f0cc5e10c9b6dabfff7ecac27a1901552ec7cd94abf414e17b7\",\"files\":9}"
         ]
       },
       {
@@ -998,7 +999,7 @@
     "status": "PASS",
     "officialCompletionClaimed": true,
     "storageBackend": "EXTERNAL_USB_D_DRIVE",
-    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\b0ebd528039c941b30f71127bb78a26bf2a229b525abdf796c63105605639396"
+    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\5438824e1e490f0cc5e10c9b6dabfff7ecac27a1901552ec7cd94abf414e17b7"
   },
   "remainingWork": [
     {
@@ -4451,30 +4452,6 @@
       "workOrderClass": "NEW_NOT_STARTED",
       "area": "OCR Silme",
       "title": "Kaynak imha/izin iptalinde OCR metni, indeks, embedding, cache ve türevler karantinaya/silmeye girer",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "PPK-008",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Uygulama Kimliği",
-      "title": "Her Windows/Apple/service/worker için benzersiz appId, cihaz sertifikası ve capability manifest",
       "completedChainCount": 1,
       "completionBlockers": [],
       "missingChain": [

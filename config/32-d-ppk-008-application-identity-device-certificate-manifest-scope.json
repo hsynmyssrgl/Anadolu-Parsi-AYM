@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "step": "32-D",
+  "requirement": "PPK-008",
+  "title": "Unique application identity, trusted-device certificate and capability manifest top closure",
+  "status": "COMPLETED",
+  "boundaries": {
+    "fourteenCanonicalApplicationIds": true,
+    "duplicateApplicationIdDefaultDeny": true,
+    "signedApplicationIdentityManifests": true,
+    "canonicalCapabilityManifestSha256": true,
+    "trustedDeviceRegistryCertificate": true,
+    "certificateApplicationBinding": true,
+    "certificateManifestBinding": true,
+    "certificateLifetimeValidation": true,
+    "strictRequestIdentityBinding": true,
+    "decisionAndReceiptIdentityBinding": true,
+    "providerPackageIdentityResolution": true,
+    "productionTrustedDeviceSourceBinding": true,
+    "durableMigration73": true,
+    "sqliteIdentityBindingTrigger": true,
+    "repositoryIdentityBinding": true,
+    "uiAndMenuRemainBehindUniversalPep": true
+  },
+  "validation": {
+    "contract": "artifacts/validation/32-D-ppk-008-application-identity-device-certificate-manifest-contract.json",
+    "runtime": "artifacts/validation/32-D-ppk-008-application-identity-device-certificate-manifest-runtime.json",
+    "targetedTest": "packages/platform-policy/application-identity-device-certificate.test.ts",
+    "contractChecks": "34/34",
+    "runtimeChecks": "8/8",
+    "targetedTests": "10/10",
+    "platformPolicyRegression": "88/88",
+    "migration": "73 PASS",
+    "fullVitest": "57 files / 360 tests",
+    "rootTypeScriptDiagnostics": 0
+  },
+  "requirementCompletionClaimed": true,
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "mandatoryTruthSentence": "Bu kapanış yalnız PPK-008 gereksinimini tamamlar; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır."
+}
