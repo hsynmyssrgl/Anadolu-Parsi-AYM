@@ -19,7 +19,7 @@ import type {
   WindowsHelloAuthenticationView,
   WindowsHelloStateView
 } from '@ppt/domain';
-import { GetDerivedDataPolicyBoundaryUseCase, GetSensitiveLoggingBoundaryUseCase, type WindowsHelloPlatformPort } from '@ppt/application';
+import { GetDerivedDataPolicyBoundaryUseCase, GetPolicyDecisionAuditBoundaryUseCase, GetSensitiveLoggingBoundaryUseCase, type WindowsHelloPlatformPort } from '@ppt/application';
 import type { IssueOfflineCapabilityLeaseInput, OfflineCapabilityLeaseWorkspaceView } from '@ppt/domain';
 import {
   FamilyDataStore,
@@ -66,10 +66,11 @@ import { runWindowsOpen021EfsEvidenceProbe, type WindowsOpen021EfsEvidenceProbeR
 import { runWindowsOpen022SideArtifactEvidenceProbe, type WindowsOpen022SideArtifactEvidenceProbeReport } from './windows-open022-side-artifact-evidence-probe.js';
 import { connectCoreServiceAtStartup, type CoreServiceStartupConnectionResult } from './core-service-startup-connection.js';
 import { PlatformPolicyReceiptFileSink } from './platform-policy-receipt-file-sink.js';
+import { PlatformPolicyDecisionAuditInspectionAdapter } from './policy-decision-audit-application-adapter.js';
 import { DesktopUniversalApiPolicyEnforcement } from './desktop-universal-api-policy-enforcement.js';
 import { DesktopRepositoryPolicyScope } from './desktop-repository-policy-scope.js';
-import { DerivedDataInheritancePolicy, NetworkEgressPolicy, SensitiveLogPolicy } from '@ppt/platform-policy';
-import type { DerivedDataPolicyBoundaryView, NetworkEgressBoundaryView, SensitiveLoggingBoundaryView } from '@ppt/domain';
+import { DerivedDataInheritancePolicy, ImmutablePolicyDecisionAuditPolicy, NetworkEgressPolicy, SensitiveLogPolicy } from '@ppt/platform-policy';
+import type { DerivedDataPolicyBoundaryView, NetworkEgressBoundaryView, PolicyDecisionAuditBoundaryView, SensitiveLoggingBoundaryView } from '@ppt/domain';
 
 type ArchiveMutationInput<TInput> = TInput & { readonly operationId: string };
 interface ArchiveItemMutationInput {
@@ -81,6 +82,7 @@ const currentDir = dirname(fileURLToPath(import.meta.url));
 const networkEgressPolicy = new NetworkEgressPolicy();
 const derivedDataInheritancePolicy = new DerivedDataInheritancePolicy();
 const sensitiveLogPolicy = new SensitiveLogPolicy();
+const immutablePolicyDecisionAuditPolicy = new ImmutablePolicyDecisionAuditPolicy();
 const getDerivedDataPolicyBoundaryUseCase = new GetDerivedDataPolicyBoundaryUseCase(derivedDataInheritancePolicy);
 const getSensitiveLoggingBoundaryUseCase = new GetSensitiveLoggingBoundaryUseCase(sensitiveLogPolicy);
 const currentProductName = 'Anadolu Parsı Aile Yaşam Merkezi';
@@ -1159,6 +1161,10 @@ function registerIpc(): void {
   registerIpcHandler('system:getNetworkEgressBoundary', ():NetworkEgressBoundaryView => networkEgressPolicy.snapshot());
   registerIpcHandler('system:getDerivedDataPolicyBoundary', ():DerivedDataPolicyBoundaryView => getDerivedDataPolicyBoundaryUseCase.execute());
   registerIpcHandler('system:getSensitiveLoggingBoundary', ():SensitiveLoggingBoundaryView => getSensitiveLoggingBoundaryUseCase.execute());
+  registerIpcHandler('system:getPolicyDecisionAuditBoundary', ():PolicyDecisionAuditBoundaryView => new GetPolicyDecisionAuditBoundaryUseCase(
+    immutablePolicyDecisionAuditPolicy,
+    new PlatformPolicyDecisionAuditInspectionAdapter(policyReceiptSink())
+  ).execute());
   registerIpcHandler('system:listBackupTargets', () => store().listBackupTargets());
   registerIpcHandler('system:upsertBackupTarget', (_event,input:UpsertBackupTargetInput) => store().upsertBackupTarget(input));
   registerIpcHandler('system:listBackupRuns', (_event,limit?:number) => store().listBackupRuns(limit));

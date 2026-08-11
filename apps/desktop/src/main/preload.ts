@@ -30,6 +30,7 @@ import type { ClientDataAccessBoundaryView } from '@ppt/domain';
 import type { NetworkEgressBoundaryView } from '@ppt/domain';
 import type { DerivedDataPolicyBoundaryView } from '@ppt/domain';
 import type { SensitiveLoggingBoundaryView } from '@ppt/domain';
+import type { PolicyDecisionAuditBoundaryView } from '@ppt/domain';
 import type { DataRepairOperation, DataRepairWorkspaceView } from '@ppt/domain';
 import type {
   EnrollWindowsHelloInput,
@@ -291,6 +292,7 @@ contextBridge.exposeInMainWorld('pardus', {
   getNetworkEgressBoundary:():Promise<NetworkEgressBoundaryView>=>invoke('system:getNetworkEgressBoundary'),
   getDerivedDataPolicyBoundary:():Promise<DerivedDataPolicyBoundaryView>=>invoke('system:getDerivedDataPolicyBoundary'),
   getSensitiveLoggingBoundary:():Promise<SensitiveLoggingBoundaryView>=>invoke('system:getSensitiveLoggingBoundary'),
+  getPolicyDecisionAuditBoundary:():Promise<PolicyDecisionAuditBoundaryView>=>invoke('system:getPolicyDecisionAuditBoundary'),
   listBackupTargets:():Promise<BackupTargetView[]>=>invoke('system:listBackupTargets'),
   upsertBackupTarget:(input:UpsertBackupTargetInput):Promise<BackupTargetView[]>=>invoke('system:upsertBackupTarget',input),
   listBackupRuns:(limit?:number):Promise<BackupRunView[]>=>invoke('system:listBackupRuns',limit),

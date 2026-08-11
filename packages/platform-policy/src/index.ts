@@ -6,3 +6,4 @@ export * from './versioned-core-service-api-boundary.js';
 export * from './network-egress-policy.js';
 export * from './derived-data-inheritance-policy.js';
 export * from './sensitive-log-policy.js';
+export * from './immutable-policy-decision-audit.js';

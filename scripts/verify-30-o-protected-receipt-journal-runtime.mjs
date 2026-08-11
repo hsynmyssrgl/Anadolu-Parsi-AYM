@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { mkdtemp, mkdir, readFile, rm, utimes, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
-import { PlatformPolicyKernel } from '../packages/platform-policy/dist/index.js';
+import { PlatformPolicyEnforcementPoint, PlatformPolicyKernel } from '../packages/platform-policy/dist/index.js';
 import { ProtectedSideArtifactStore } from '../apps/desktop/dist/main/protected-side-artifact-store.js';
 import { PlatformPolicyReceiptFileSink } from '../apps/desktop/dist/main/platform-policy-receipt-file-sink.js';
 
@@ -122,12 +122,14 @@ const attackerRechain = (first, remaining) => {
   }
   return Buffer.from(`${rechained.map((entry) => JSON.stringify(entry)).join('\n')}\n`, 'utf8');
 };
-const makeRecord = (sequence, nonce) => {
+const makeRecord = async (sequence, nonce) => {
   const correlationId = `corr-30o-journal-${sequence}`;
-  const request = Object.freeze({
-    correlationId,
-    policyVersion,
-    subject: Object.freeze({
+  let capturedRecord;
+  const enforcementPoint = new PlatformPolicyEnforcementPoint({
+    kernel,
+    authorityResolver: Object.freeze({
+      resolve: () => Object.freeze({
+        policyVersion,
       accountId: 'account-30o-journal',
       personId: 'person-30o-journal',
       deviceId: 'device-30o-journal',
@@ -137,9 +139,13 @@ const makeRecord = (sequence, nonce) => {
       roles: Object.freeze(['adult_member']),
       familyIds: Object.freeze(['family-30o-journal']),
       householdIds: Object.freeze([]),
-      familyBranchIds: Object.freeze([])
+        familyBranchIds: Object.freeze([]),
+        online: true,
+        expiresAt: '2026-08-07T03:30:00.000Z'
+      })
     }),
-    resource: Object.freeze({
+    resourceResolver: Object.freeze({
+      resolve: () => Object.freeze({
       type: 'archive_item',
       id: `archive-30o-journal-${sequence}`,
       familyId: 'family-30o-journal',
@@ -147,30 +153,26 @@ const makeRecord = (sequence, nonce) => {
       sensitivity: 'personal',
       dataClasses: Object.freeze(['personal']),
       classificationSource: 'declared'
+      })
     }),
+    receiptSink: Object.freeze({
+      append: (record) => { capturedRecord = record; }
+    }),
+    replayStore: Object.freeze({ reserve: () => true }),
+    clock: () => occurredAt,
+    nonceFactory: () => nonce
+  });
+  const result = await enforcementPoint.execute({
+    correlationId,
+    resourceType: 'archive_item',
+    resourceId: `archive-30o-journal-${sequence}`,
     action: 'update',
     capability: 'archive.write',
-    purpose: 'journal-runtime-verification',
-    occurredAt,
-    online: true,
-    clusterWritable: true,
-    enforcementMode: 'strict'
-  });
-  const authorization = kernel.authorizeWithReceipt(request, occurredAt, nonce);
-  assert.equal(authorization.decision.allowed, true);
-  return Object.freeze({
-    correlationId,
-    contextHash: authorization.decision.contextHash,
-    dataClasses: request.resource.dataClasses,
-    resourceType: request.resource.type,
-    resourceId: request.resource.id,
-    action: request.action,
-    capability: request.capability,
-    request,
-    decision: authorization.decision,
-    receipt: authorization.receipt,
-    recordedAt: authorization.receipt.issuedAt
-  });
+    purpose: 'journal-runtime-verification'
+  }, () => Object.freeze({ writable: true, epoch: 30 }), () => 'authorized');
+  assert.equal(result, 'authorized');
+  assert.ok(capturedRecord);
+  return capturedRecord;
 };
 
 let temporaryRoot;
@@ -184,9 +186,9 @@ try {
   const macKeyPath = resolve(temporaryRoot, 'keys', 'receipt-journal-mac-key.json');
   const journalPath = resolve(temporaryRoot, 'journal', 'policy-receipts.jsonl');
   const lockPath = `${journalPath}.lock`;
-  const firstRecord = makeRecord(1, 'nonce-30o-journal-1');
-  const secondRecord = makeRecord(2, 'nonce-30o-journal-2');
-  const thirdRecord = makeRecord(3, 'nonce-30o-journal-3');
+  const firstRecord = await makeRecord(1, 'nonce-30o-journal-1');
+  const secondRecord = await makeRecord(2, 'nonce-30o-journal-2');
+  const thirdRecord = await makeRecord(3, 'nonce-30o-journal-3');
   const monotonicAuthority = new ControlledMonotonicAuthority();
 
   firstStore = new ProtectedSideArtifactStore({
@@ -358,7 +360,7 @@ try {
   });
 
   await check('forged receipt in a locally authentic journal is rejected by trusted restart verification', async () => {
-    const original = makeRecord(4, 'nonce-30o-journal-forged');
+    const original = await makeRecord(4, 'nonce-30o-journal-forged');
     const forgedRecord = Object.freeze({
       ...original,
       receipt: Object.freeze({ ...original.receipt, signature: '0'.repeat(64) })

@@ -1,0 +1,440 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-N",
+  "requirement": "PPK-018",
+  "phase": "IMMUTABLE_POLICY_DECISION_AUDIT_CONTRACT",
+  "status": "PASS",
+  "checkCount": 99,
+  "passed": 99,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "central immutable audit policy: IMMUTABLE_POLICY_DECISION_AUDIT_SCHEMA_VERSION = 1",
+      "status": "PASS"
+    },
+    {
+      "name": "central immutable audit policy: ImmutablePolicyDecisionAuditRecord",
+      "status": "PASS"
+    },
+    {
+      "name": "central immutable audit policy: decisionReason",
+      "status": "PASS"
+    },
+    {
+      "name": "central immutable audit policy: policyVersion",
+      "status": "PASS"
+    },
+    {
+      "name": "central immutable audit policy: policyPackageVersion",
+      "status": "PASS"
+    },
+    {
+      "name": "central immutable audit policy: policyPackageSha256",
+      "status": "PASS"
+    },
+    {
+      "name": "central immutable audit policy: obligations",
+      "status": "PASS"
+    },
+    {
+      "name": "central immutable audit policy: requestHash",
+      "status": "PASS"
+    },
+    {
+      "name": "central immutable audit policy: contextHash",
+      "status": "PASS"
+    },
+    {
+      "name": "central immutable audit policy: receiptHash",
+      "status": "PASS"
+    },
+    {
+      "name": "central immutable audit policy: recordHash",
+      "status": "PASS"
+    },
+    {
+      "name": "central immutable audit policy: auditHash",
+      "status": "PASS"
+    },
+    {
+      "name": "central immutable audit policy: assertObligationExecution(record)",
+      "status": "PASS"
+    },
+    {
+      "name": "central immutable audit policy: enforcement: 'fail-closed'",
+      "status": "PASS"
+    },
+    {
+      "name": "central immutable audit policy: allowedDecisionsRecorded: true",
+      "status": "PASS"
+    },
+    {
+      "name": "central immutable audit policy: deniedDecisionsRecorded: true",
+      "status": "PASS"
+    },
+    {
+      "name": "central immutable audit policy: payloadExposedToClient: false",
+      "status": "PASS"
+    },
+    {
+      "name": "audit required field registry includes decision policy obligations reason and cryptographic bindings",
+      "status": "PASS"
+    },
+    {
+      "name": "audit policy is exported from platform-policy root",
+      "status": "PASS"
+    },
+    {
+      "name": "audit hash binds the canonical unsigned record",
+      "status": "PASS"
+    },
+    {
+      "name": "audit verification reconstructs and exact-compares the record",
+      "status": "PASS"
+    },
+    {
+      "name": "receipt request hash uses the platform request HMAC domain",
+      "status": "PASS"
+    },
+    {
+      "name": "allowed decision requires valid strict obligation execution attestation",
+      "status": "PASS"
+    },
+    {
+      "name": "denied decision cannot claim obligation execution",
+      "status": "PASS"
+    },
+    {
+      "name": "PEP persists denied decision before returning POLICY_DENIED",
+      "status": "PASS"
+    },
+    {
+      "name": "PEP persists non-deferred allowed decision before payload operation",
+      "status": "PASS"
+    },
+    {
+      "name": "PEP fails closed with RECEIPT_PERSISTENCE_FAILED",
+      "status": "PASS"
+    },
+    {
+      "name": "PEP constructor requires a concrete append sink",
+      "status": "PASS"
+    },
+    {
+      "name": "deferred receipt mode requires exact idempotent ensure",
+      "status": "PASS"
+    },
+    {
+      "name": "protected journal: JOURNAL_SCHEMA_VERSION = 2",
+      "status": "PASS"
+    },
+    {
+      "name": "protected journal: PROTECTED_DECISION_AUDIT_ENVELOPE_SCHEMA_VERSION = 1",
+      "status": "PASS"
+    },
+    {
+      "name": "protected journal: PROTECTED_DECISION_AUDIT_ENVELOPE_KIND = 'immutable-policy-decision-audit'",
+      "status": "PASS"
+    },
+    {
+      "name": "protected journal: decisionAuditPolicy.create(record)",
+      "status": "PASS"
+    },
+    {
+      "name": "protected journal: decisionAuditPolicy.verify(receiptRecord, auditRecord)",
+      "status": "PASS"
+    },
+    {
+      "name": "protected journal: protectedArtifactStore.sealBuffer(RECEIPT_ARTIFACT_KIND, recordBytes)",
+      "status": "PASS"
+    },
+    {
+      "name": "protected journal: entryHash: entryHash(payload, this.#macKey)",
+      "status": "PASS"
+    },
+    {
+      "name": "protected journal: fsyncSync(journalDescriptor)",
+      "status": "PASS"
+    },
+    {
+      "name": "protected journal: canonicalize(verified.auditRecord) !== canonicalize(auditRecord)",
+      "status": "PASS"
+    },
+    {
+      "name": "protected journal: inspectWithTrustedProvider",
+      "status": "PASS"
+    },
+    {
+      "name": "protected journal: checkpointPolicyJournal",
+      "status": "PASS"
+    },
+    {
+      "name": "protected journal: POLICY_RECEIPT_JOURNAL_NONCE_REPLAY",
+      "status": "PASS"
+    },
+    {
+      "name": "new audit is created before protected sealing",
+      "status": "PASS"
+    },
+    {
+      "name": "legacy direct receipt payload remains readable without becoming an audit record",
+      "status": "PASS"
+    },
+    {
+      "name": "journal inspection counts audited and legacy entries separately",
+      "status": "PASS"
+    },
+    {
+      "name": "trusted restart re-verifies every receipt with provider",
+      "status": "PASS"
+    },
+    {
+      "name": "projection proof binds exact receipt record and journal head",
+      "status": "PASS"
+    },
+    {
+      "name": "domain exposes only content-free policy audit boundary posture",
+      "status": "PASS"
+    },
+    {
+      "name": "domain boundary does not expose receipt audit resource reason or obligations payload",
+      "status": "PASS"
+    },
+    {
+      "name": "domain and application roots export the PPK-018 contracts",
+      "status": "PASS"
+    },
+    {
+      "name": "application use case validates counts and hashes fail closed",
+      "status": "PASS"
+    },
+    {
+      "name": "application adapter calls only content-free decision audit inspection",
+      "status": "PASS"
+    },
+    {
+      "name": "main composes protected journal and trusted startup verification",
+      "status": "PASS"
+    },
+    {
+      "name": "main passes the verified journal to universal API and DataStore runtimes",
+      "status": "PASS"
+    },
+    {
+      "name": "main registers typed content-free PPK-018 status handler",
+      "status": "PASS"
+    },
+    {
+      "name": "preload and renderer global expose typed PPK-018 status only",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-018 status IPC is zero argument",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-018 status IPC is policy-sensitive no-cache",
+      "status": "PASS"
+    },
+    {
+      "name": "renderer loads and displays the PPK-018 posture without payload",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate passes all malicious and benign self-tests with no finding",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate scans all production zones and all PEP compositions",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate: PEP_RECEIPT_SINK_MISSING",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate: PEP_NOOP_RECEIPT_SINK",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate: DEFERRED_RECEIPT_ENSURE_MISSING",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate: DENIAL_AUDIT_NOT_PERSISTED_BEFORE_RETURN",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate: PLAINTEXT_POLICY_AUDIT_SERIALIZATION",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate: CLIENT_POLICY_AUDIT_PAYLOAD_EXPOSURE",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate: POLICY_AUDIT_STATUS_CHANNEL_CACHEABLE",
+      "status": "PASS"
+    },
+    {
+      "name": "pretypecheck and prebuild include PPK-018 audit gate",
+      "status": "PASS"
+    },
+    {
+      "name": "root package exposes all four PPK-018 commands",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test: ImmutablePolicyDecisionAuditPolicy",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test: PlatformPolicyReceiptFileSink",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test: GetPolicyDecisionAuditBoundaryUseCase",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test: captureRecord(true, 'nonce-018-policy-allow')",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test: captureRecord(false, 'nonce-018-policy-deny')",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test: tarihsel doğrudan receipt payloadını geriye uyumlu okur",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test: aynı nonce ile değişen kararın tek bir baytını bile eklemez",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test: journal bit değişikliğinde hiçbir durum projectionı döndürmez",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test: ['izin', true]",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test: ['ret', false]",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test: payloadExposedToClient: false",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted tamper matrix covers package context resource reason obligations and execution",
+      "status": "PASS"
+    },
+    {
+      "name": "legacy protected journal runtime now creates canonical records through real PEP",
+      "status": "PASS"
+    },
+    {
+      "name": "latest database migration remains 77 and no PPK-018 migration exists",
+      "status": "PASS"
+    },
+    {
+      "name": "scope forbids migration backfill transfer ownership change and cutover",
+      "status": "PASS"
+    },
+    {
+      "name": "scope records journal entry v2 and protected audit envelope v1",
+      "status": "PASS"
+    },
+    {
+      "name": "scope distinguishes legacy read from new audited writes",
+      "status": "PASS"
+    },
+    {
+      "name": "scope rejects generic audit and allowed-only ledger as PPK-018 authority",
+      "status": "PASS"
+    },
+    {
+      "name": "inventory reviews seven owners with zero unaudited owner and zero bypass exception",
+      "status": "PASS"
+    },
+    {
+      "name": "inventory classifies protected journal as the immutable audit owner",
+      "status": "PASS"
+    },
+    {
+      "name": "inventory keeps business audit and SQLite allowed receipts non-authoritative",
+      "status": "PASS"
+    },
+    {
+      "name": "DEC-199 records fail-closed ordering protected journal and no-migration truth",
+      "status": "PASS"
+    },
+    {
+      "name": "threat model records no-op sink tamper rollback legacy and client threats",
+      "status": "PASS"
+    },
+    {
+      "name": "audit contains the exact final truth boundary and executed evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "user decision ledger contains active DEC-199 and exact count",
+      "status": "PASS"
+    },
+    {
+      "name": "accepted registry closes the complete PPK-018 evidence chain",
+      "status": "PASS"
+    },
+    {
+      "name": "prior PPK-012 through PPK-017 packages remain complete",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-019 remains outside PPK-018 closure",
+      "status": "PASS"
+    },
+    {
+      "name": "scope closes PPK-018 with no migration transfer backfill or cutover",
+      "status": "PASS"
+    },
+    {
+      "name": "inventory closes only after final validation",
+      "status": "PASS"
+    }
+  ],
+  "failures": [],
+  "sourceGate": {
+    "status": "PASS",
+    "zones": 18,
+    "files": 342,
+    "relevantFiles": 45,
+    "enforcementPointCompositions": 7,
+    "maliciousSelfTests": 6,
+    "maliciousSelfTestsPassed": 6,
+    "benignSelfTests": 3,
+    "benignSelfTestsPassed": 3,
+    "findings": []
+  },
+  "latestDatabaseMigration": 77,
+  "schemaMigrationRequired": false,
+  "journalEntrySchemaVersion": 2,
+  "protectedAuditEnvelopeSchemaVersion": 1,
+  "allowedDecisionsRecorded": true,
+  "deniedDecisionsRecorded": true,
+  "decisionReasonRequired": true,
+  "obligationsRecordedExactly": true,
+  "auditPersistenceFailureBlocksOperation": true,
+  "clientAuditPayloadExposureAllowed": false,
+  "historicalBackfillPerformed": false,
+  "legacyDesktopVaultPreserved": true,
+  "sqliteOwnershipTransferred": false,
+  "realDataTransferPerformed": false,
+  "cutoverAuthorityAttached": false,
+  "successorRequirementCompletedByThisPackage": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T22:49:35.983Z"
+}

@@ -57,7 +57,7 @@ verify(runtime.includes("event: 'ipc.read_cache.hit'"),'cache hit audit event');
 verify(runtime.includes('input.readResults.lookup<TResult>'),'cache lookup before handler');
 verify(runtime.includes('input.readResults.store'),'successful result cache store');
 verify(runtime.includes('readCacheGeneration'),'cache generation captured before handler');
-verify(runtime.includes('createIpcTransportResponseEnvelope(requestContext, correlationId, cached.result as TResult)'),'cache hit remains request-bound');
+verify(runtime.includes('const authorizedCachedResult = input.policyEnforcement')&&runtime.includes('createIpcTransportResponseEnvelope(requestContext, correlationId, authorizedCachedResult)'),'cache hit remains request-bound and policy re-authorized');
 verify(main.includes('const ipcReadResults = new IpcReadResultCacheRegistry()'),'main cache singleton');
 verify(main.includes('readResults: ipcReadResults'),'all handlers use cache registry');
 verify(main.includes('ipcReadResults.invalidateSender(primaryWebContentsId)'),'window close cache cleanup');

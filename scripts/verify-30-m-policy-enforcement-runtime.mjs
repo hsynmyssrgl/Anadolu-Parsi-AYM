@@ -61,6 +61,7 @@ const baseIntent = (overrides = {}) => ({
   capability: 'archive.write',
   resourceType: 'archive_item',
   resourceId: 'archive-30m',
+  purpose: 'archive-maintenance',
   ...overrides
 });
 const makeHarness = (options = {}) => {
@@ -234,10 +235,9 @@ await check('deny receipt is persisted and operation remains closed', async () =
 });
 
 const versionDenied = makeHarness({ authority: { policyVersion: 'PPT-POLICY-OLD' } });
-await expectCode('policy-version mismatch produces a persisted denial instead of an unverifiable receipt', () => versionDenied.pep.execute(baseIntent(), () => ({ writable: true, epoch: 1 }), () => undefined), 'POLICY_DENIED');
-await check('policy-version mismatch denial receipt verifies against its canonical request', async () => {
-  assert.equal(versionDenied.records[0].decision.reason, 'POLICY_VERSION_MISMATCH');
-  assert.equal(versionDenied.kernel.verifyReceiptForRequest(versionDenied.records[0].receipt, versionDenied.records[0].request), true);
+await expectCode('authority policy-version mismatch is rejected before an unverifiable receipt can be issued', () => versionDenied.pep.execute(baseIntent(), () => ({ writable: true, epoch: 1 }), () => undefined), 'AUTHORITY_INVALID');
+await check('authority policy-version mismatch cannot create an audit record', async () => {
+  assert.equal(versionDenied.records.length, 0);
 });
 
 const sharedNonce = `cross-instance-${++nonceSequence}`;
@@ -311,7 +311,18 @@ await check('kernel config and signing key are defensive copies', async () => {
   const capabilities = ['archive.write'];
   const signingKey = Buffer.alloc(32, 51);
   const kernel = new PlatformPolicyKernel(kernelConfig({ signingKey, applicationCapabilities: { 'windows-core-service': capabilities } }));
-  const request = record.request;
+  const applicationManifest = kernel.policyPackage.payload.applicationManifests['windows-core-service'];
+  assert.ok(applicationManifest);
+  const request = Object.freeze({
+    ...record.request,
+    policyPackageVersion: kernel.policyPackage.payload.packageVersion,
+    policyPackageSha256: kernel.policyPackage.payloadSha256,
+    subject: Object.freeze({
+      ...record.request.subject,
+      applicationVersion: applicationManifest.applicationVersion,
+      capabilityManifestSha256: applicationManifest.capabilityManifestSha256
+    })
+  });
   const authorization = kernel.authorizeWithReceipt(request, record.recordedAt, `copy-${++nonceSequence}`);
   capabilities.length = 0;
   signingKey.fill(0);

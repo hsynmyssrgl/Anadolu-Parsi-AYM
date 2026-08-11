@@ -28,6 +28,10 @@ Bir çelişki olduğunda aşağıdaki sıra uygulanır:
 Eski kararlar silinmez; tarihsel kanıt olarak korunur. Ancak aktif ürün davranışını
 belirleyemez. Çelişki sessizce birleştirilmez; değişiklik kaydına işlenir.
 
+## DEC-199 — PPK-018 değişmez policy karar audit zinciri
+
+32-N ile allow ve deny policy kararları; açık karar/ret nedeni, policy sürümü ve imzalı package bağı, exact yükümlülükler, request/context/receipt/record hashleri ile korumalı append-only journala yazılır. Ret dönüşü ve non-deferred izin operasyonu persistence öncesi açılamaz; yazım arızası fail-closed kalır. Yeni kayıtlar AES-256-GCM audit+receipt zarfı ve HMAC-SHA-256 journal zinciri kullanır; tarihsel direct receipt payloadları okunur fakat backfill edilmez. Yeni migration, gerçek veri taşıma, SQLite/vault sahiplik değişimi veya cutover yoktur; PPK-019 ayrı kapsamdır. Ayrıntılı ve bağlayıcı karar `docs/decisions/DEC-199-ppk-018-immutable-policy-decision-audit.md` dosyasındadır.
+
 ## DEC-198 — PPK-017 hassas log ve content-free tanı sınırı
 
 32-M ile üretim logları, erken başlangıç kanıtları ve operasyonel tanı kayıtları merkezi fail-closed `SensitiveLogPolicy` sınırına bağlanır. Yalnız teknik kimlik, SHA-256, sonuç, correlation, sayaç, boolean, zaman ve sürüm metadata'sı kabul edilir; payload, OCR metni, serbest mesaj, stack, kalıcı yol, secret ve nested metadata yasaktır. Desktop üretim sink'i cihaz anahtarlı korumalı `.pplog` olarak kalır; diagnostic kaynak metni sabit teknik mesaj ve tek yönlü SHA-256 hash'e dönüştürülür. Yeni migration/backfill/cutover yoktur; PPK-018 değişmez audit zinciri ayrı kapsamdır. Ayrıntılı ve bağlayıcı karar `docs/decisions/DEC-198-ppk-017-sensitive-log-policy.md` dosyasındadır.

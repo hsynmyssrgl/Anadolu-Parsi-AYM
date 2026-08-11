@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-N",
+  "requirement": "PPK-018",
+  "phase": "IMMUTABLE_POLICY_DECISION_AUDIT_RUNTIME",
+  "status": "PASS",
+  "checkCount": 15,
+  "passed": 15,
+  "failed": 0,
+  "results": [
+    {
+      "id": "ppk-018-contract",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "PPK-018 contract: PASS",
+      "outputSha256": "f07a5f201916fc327533ecfbafcae88908c872ed15eadafa720c205ec3314dc0",
+      "outputTail": "PPK-018 contract: PASS (99/99)."
+    },
+    {
+      "id": "immutable-policy-decision-audit-production-source-gate",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "\"status\": \"PASS\"",
+      "outputSha256": "286a9f1295231c2d537a7524d77f3d83ed076f6feb9d7eb5feaae02a6d94286c",
+      "outputTail": "{\n  \"status\": \"PASS\",\n  \"zones\": 18,\n  \"files\": 342,\n  \"relevantFiles\": 45,\n  \"enforcementPointCompositions\": 7,\n  \"maliciousSelfTests\": 6,\n  \"maliciousSelfTestsPassed\": 6,\n  \"benignSelfTests\": 3,\n  \"benignSelfTestsPassed\": 3,\n  \"findings\": []\n}"
+    },
+    {
+      "id": "ppk-018-policy-journal-ipc-targeted",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 20,
+      "minimumTests": 20,
+      "outputSha256": "dcd10294b92f37459f85f866cf322970da318f7af0c23d960825f8885a016528",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n····················\n\n Test Files  1 passed (1)\n      Tests  20 passed (20)\n   Start at  01:49:37\n   Duration  2.32s (transform 928ms, setup 0ms, import 1.83s, tests 222ms, environment 0ms)"
+    },
+    {
+      "id": "protected-receipt-journal-backward-compatibility-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "30-O protected receipt journal runtime: PASS (14 checks).",
+      "outputSha256": "4764bf0b253173dc83eb61cade8a3bad724bef26ff5b30db1d6ca6964e447bb4",
+      "outputTail": "30-O protected receipt journal runtime: PASS (14 checks).\nBu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır."
+    },
+    {
+      "id": "strict-obligation-execution-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 15,
+      "minimumTests": 1,
+      "outputSha256": "5f7ecc53899f9f34e2d48cc96f8585e71281238f501cf1aa05a3f62eb41dc405",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n···············\n\n Test Files  1 passed (1)\n      Tests  15 passed (15)\n   Start at  01:49:43\n   Duration  637ms (transform 202ms, setup 0ms, import 350ms, tests 24ms, environment 0ms)"
+    },
+    {
+      "id": "durable-policy-transaction-projection-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 17,
+      "minimumTests": 1,
+      "outputSha256": "586fba4b2d007dff2db63c89327eaf102a671790a47ba2b2c8eef3081cf5917e",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·················\n\n Test Files  1 passed (1)\n      Tests  17 passed (17)\n   Start at  01:49:45\n   Duration  17.75s (transform 1.28s, setup 0ms, import 2.46s, tests 14.98s, environment 0ms)"
+    },
+    {
+      "id": "ppk-012-through-ppk-017-security-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 162,
+      "minimumTests": 162,
+      "outputSha256": "dede6ee4ee6e43648eb78197d154fab5cd1e651cd3cf7fbeb5bd97b2afe1e8c0",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n··································································································································································\n\n Test Files  6 passed (6)\n      Tests  162 passed (162)\n   Start at  01:50:03\n   Duration  6.58s (transform 1.98s, setup 0ms, import 4.47s, tests 558ms, environment 1ms)"
+    },
+    {
+      "id": "data-store-smoke",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "\"checks\": 14",
+      "outputSha256": "c8f51162ec437e6c0279eb1bce9652f6ac2d049b3947d6008ee8d09d881eeb0e",
+      "outputTail": "{\n  \"schemaVersion\": 1,\n  \"product\": \"Panthera pardus tulliana\",\n  \"version\": \"24.07.2026.60\",\n  \"milestone\": \"B064-M20 Backup Application Migration\",\n  \"status\": \"passed\",\n  \"checks\": 14,\n  \"peopleBefore\": 1,\n  \"peopleAfter\": 2,\n  \"backupCreated\": true,\n  \"migrationVersions\": [\n    1,\n    2,\n    3,\n    4,\n    5,\n    6,\n    7,\n    8,\n    9,\n    10,\n    11,\n    12,\n    13,\n    14,\n    15,\n    16,\n    17,\n    18,\n    19,\n    20,\n    21,\n    22,\n    23,\n    24,\n    25,\n    26,\n    27,\n    28,\n    29,\n    30,\n    31,\n    32,\n    33,\n    34,\n    35,\n    36,\n    37,\n    38,\n    39,\n    40,\n    41,\n    42,\n    43,\n    44,\n    45,\n    46,\n    47,\n    48,\n    49,\n    50,\n    51,\n    52,\n    53,\n    54,\n    55,\n    56,\n    57,\n    58,\n    59,\n    60,\n    61,\n    62,\n    63,\n    64,\n    65,\n    66,\n    67,\n    68,\n    69,\n    70,\n    71,\n    72,\n    73,\n    74,\n    75,\n    76,\n    77\n  ],\n  \"schemaFingerprint\": \"5d36e7fecbbf181b2ea52a98a7c448691f233b820da9aa81326b028592cac5e4\"\n}"
+    },
+    {
+      "id": "migration-77-no-ppk018-schema-change",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "\"version\": 77",
+      "outputSha256": "f4b1802210cb84e611fb4cb1702f32dcec7d6eaa3eb54135abe185cc7efed0bb",
+      "outputTail": "26c58d178\"\n    },\n    {\n      \"version\": 66,\n      \"name\": \"location_policy_receipt_fence\",\n      \"checksum\": \"e55b15e48f504fc65452556f6c907b8845bb81b6b6d65caa5c243410d11c9609\"\n    },\n    {\n      \"version\": 67,\n      \"name\": \"local_ppk002_timeline_event_policy_receipt_fence\",\n      \"checksum\": \"a67f9807f2a2bb00ada3768d06882a0ca2648d91b19eacb2becf46cf9ef2b528\"\n    },\n    {\n      \"version\": 68,\n      \"name\": \"ppk002_family_import_governed_rollback_receipt_fence\",\n      \"checksum\": \"298ffa1c65a65e762904cb913ecb9b45d1dfa5fcd94659c1a3181a5984f71bd6\"\n    },\n    {\n      \"version\": 69,\n      \"name\": \"ppk004_complete_policy_context_binding\",\n      \"checksum\": \"b0eaf8abbf4b45e00404717a1ba767ce64687e9f575a0e11798326cbdbfeeb91\"\n    },\n    {\n      \"version\": 70,\n      \"name\": \"ppk005_complete_data_classification\",\n      \"checksum\": \"bfd3643232c6daa25d85804f08c4580f896fe4d6e81c2ad3d7dcf602649085e9\"\n    },\n    {\n      \"version\": 71,\n      \"name\": \"ppk006_complete_policy_obligation_suite\",\n      \"checksum\": \"ba678463aa0138780d74d2342bcc453ab622e87c7213a4d10078319762c96a90\"\n    },\n    {\n      \"version\": 72,\n      \"name\": \"ppk007_signed_versioned_policy_package\",\n      \"checksum\": \"6660072205bd61c06dd1d4f4b744884f7edb29bf370d44a228c150ebca679a83\"\n    },\n    {\n      \"version\": 73,\n      \"name\": \"ppk008_application_identity_device_certificate_manifest\",\n      \"checksum\": \"0099d0238be94ea6bb95579d2ac9f33c015e99d5c14463442313953c014b87fd\"\n    },\n    {\n      \"version\": 74,\n      \"name\": \"ppk009_core_service_decision_reevaluation\",\n      \"checksum\": \"99c89269ac120adbb387dc796ecf1b837f978e04e375d3d41c4fb605020ea813\"\n    },\n    {\n      \"version\": 75,\n      \"name\": \"ppk011_contextual_ownership_share\",\n      \"checksum\": \"3c59ecd6df8d4bf777a8eee8c4864f19848fb712c85691105320afa17b476337\"\n    },\n    {\n      \"version\": 76,\n      \"name\": \"ppk012_offline_capability_lease_cache_fence\",\n      \"checksum\": \"98546bdde3fe97f9f37f2421dd74ad305ce5301dd23a9954ed54bd53610e9388\"\n    },\n    {\n      \"version\": 77,\n      \"name\": \"ppk016_derived_data_policy_inheritance\",\n      \"checksum\": \"de7fbb16719ad427c33d20be3cf564577185d6a1c2eb916cbe0dbdf40724a1da\"\n    }\n  ],\n  \"generatedAt\": \"2026-08-11T22:50:15.732Z\"\n}"
+    },
+    {
+      "id": "foundation-policy-receipt-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "\"checks\": 14",
+      "outputSha256": "fdd4d701971b2e2f532a228fa7af72d1ba312d7f7b6cf12ba2ccdb026b27d035",
+      "outputTail": "{\n  \"status\": \"passed\",\n  \"checks\": 14,\n  \"names\": [\n    \"Result success mapping\",\n    \"Result error short-circuit\",\n    \"Result error mapping\",\n    \"Result flatMap\",\n    \"Throwable mapping\",\n    \"Result matching\",\n    \"Central AppError\",\n    \"Deterministic clock\",\n    \"Pagination limits\",\n    \"Configuration defaults and validation\",\n    \"Configuration path isolation\",\n    \"Configuration redaction\",\n    \"Structured logging fail-closed content boundary\",\n    \"JSON Lines serialization\"\n  ]\n}"
+    },
+    {
+      "id": "runtime-protected-artifact-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "\"checks\": 6",
+      "outputSha256": "c41d390d1c4a13ad38bb9002e3e33dc6b46ab1e47b2be58d8cf5d8c3ba86e251",
+      "outputTail": "{\n  \"status\": \"passed\",\n  \"checks\": 6,\n  \"names\": [\n    \"runtime environment resolution\",\n    \"configuration overrides and validation\",\n    \"stored correlation provider propagates async context\",\n    \"JSONL file logging rejects payload and rotates content-free events\",\n    \"desktop runtime creates isolated paths and startup log\",\n    \"IPC wrapper logs success and preserves return value\"\n  ]\n}"
+    },
+    {
+      "id": "platform-policy-enforcement-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "PASS (43 controlled checks",
+      "outputSha256": "1c57d25d7c8776123fc6a597ab81e544b8872e3bbf4cbbb7d7e4dd14beebceac",
+      "outputTail": "30-M predecessor runtime regression: PASS (43 controlled checks; PPK-002 remains PARTIAL).\n\n(node:5636) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "core-service-boundary",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "Core Service boundary: PASS (8 checks).",
+      "outputSha256": "55d075584f9f8466eb88cdfdec4b3c012d030a160cc18cd26f24f32f5969011b",
+      "outputTail": "Core Service boundary: PASS (8 checks)."
+    },
+    {
+      "id": "core-service-entrypoint-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "30-O Core Service Entrypoint Runtime: PASS (24 assertions).",
+      "outputSha256": "e7a1a571f1a4f121fbbf283139a30998c2603bc991805d88dc8c5691773ab2b3",
+      "outputTail": "30-O Core Service Entrypoint Runtime: PASS (24 assertions).\n\n(node:3708) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "root-typescript",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "",
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputTail": ""
+    }
+  ],
+  "validatedBoundaries": [
+    "ALLOW_AND_DENY_DECISIONS_AUDITED",
+    "POLICY_VERSION_PACKAGE_OBLIGATIONS_REASON_EXACT_BINDING",
+    "AUDIT_PERSISTENCE_BEFORE_OPERATION_OR_DENIAL_RETURN",
+    "AUDIT_PERSISTENCE_FAILURE_BLOCKS_OPERATION",
+    "STRICT_OBLIGATION_EXECUTION_ATTESTATION",
+    "AES_256_GCM_PROTECTED_AUDIT_ENVELOPE",
+    "HMAC_SHA256_APPEND_ONLY_CHAIN",
+    "FSYNC_EXACT_READBACK_AND_NONCE_REPLAY_REJECTION",
+    "TRUSTED_PROVIDER_RESTART_VERIFICATION",
+    "EXTERNAL_MONOTONIC_CHECKPOINT",
+    "DURABLE_SQLITE_RECEIPT_PROJECTION_PROOF",
+    "LEGACY_RECEIPT_READ_WITHOUT_BACKFILL",
+    "CONTENT_FREE_NO_CACHE_STATUS_IPC",
+    "ZERO_NOOP_SINK_PLAINTEXT_CLIENT_PAYLOAD_BYPASS",
+    "PPK_012_TO_PPK_017_SECURITY_REGRESSION",
+    "MIGRATION_77_UNCHANGED_NO_TRANSFER_OR_CUTOVER",
+    "ROOT_TYPESCRIPT"
+  ],
+  "targetedPolicyTestsMinimum": 20,
+  "protectedJournalRuntimeChecks": 14,
+  "schemaMigrationRequired": false,
+  "latestDatabaseMigration": 77,
+  "journalEntrySchemaVersion": 2,
+  "protectedAuditEnvelopeSchemaVersion": 1,
+  "allowedDecisionsRecorded": true,
+  "deniedDecisionsRecorded": true,
+  "decisionReasonRequired": true,
+  "obligationsRecordedExactly": true,
+  "clientAuditPayloadExposureAllowed": false,
+  "historicalBackfillPerformed": false,
+  "legacyDesktopVaultPreserved": true,
+  "sqliteOwnershipTransferred": false,
+  "realDataTransferPerformed": false,
+  "cutoverAuthorityAttached": false,
+  "successorRequirementCompletedByThisPackage": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T22:50:22.566Z"
+}

@@ -14,11 +14,13 @@ import {
   writeFileSync
 } from 'node:fs';
 import { dirname, isAbsolute } from 'node:path';
-import type {
-  PlatformPolicyAuthorizationProvider,
-  PlatformPolicyJournalProjectionProof,
-  PlatformPolicyReceiptRecord,
-  PlatformPolicyReceiptSink
+import {
+  ImmutablePolicyDecisionAuditPolicy,
+  type ImmutablePolicyDecisionAuditRecord,
+  type PlatformPolicyAuthorizationProvider,
+  type PlatformPolicyJournalProjectionProof,
+  type PlatformPolicyReceiptRecord,
+  type PlatformPolicyReceiptSink
 } from '@ppt/platform-policy';
 import type { DeviceSecretProtector } from './device-secret-protector.js';
 import type {
@@ -29,6 +31,8 @@ import type { ProtectedSideArtifactEnvelope } from './protected-side-artifact-st
 import { ProtectedSideArtifactStore } from './protected-side-artifact-store.js';
 
 const JOURNAL_SCHEMA_VERSION = 2 as const;
+const PROTECTED_DECISION_AUDIT_ENVELOPE_SCHEMA_VERSION = 1 as const;
+const PROTECTED_DECISION_AUDIT_ENVELOPE_KIND = 'immutable-policy-decision-audit' as const;
 const MAC_KEY_SCHEMA_VERSION = 1 as const;
 const GENESIS_HASH = '0'.repeat(64);
 const RECEIPT_ARTIFACT_KIND = 'platform-policy-receipt';
@@ -53,6 +57,14 @@ interface PlatformPolicyReceiptJournalEntry extends PlatformPolicyReceiptJournal
 
 interface VerifiedPlatformPolicyReceiptJournalEntry extends PlatformPolicyReceiptJournalEntry {
   readonly record: PlatformPolicyReceiptRecord;
+  readonly auditRecord?: ImmutablePolicyDecisionAuditRecord;
+}
+
+interface ProtectedPolicyDecisionAuditEnvelope {
+  readonly schemaVersion: 1;
+  readonly kind: 'immutable-policy-decision-audit';
+  readonly auditRecord: ImmutablePolicyDecisionAuditRecord;
+  readonly receiptRecord: PlatformPolicyReceiptRecord;
 }
 
 type PlatformPolicyJournalProjectionProofPayload = Omit<PlatformPolicyJournalProjectionProof, 'proofMac'>;
@@ -86,8 +98,22 @@ export interface PlatformPolicyReceiptJournalInspection {
   readonly sizeBytes: number;
   readonly sha256: string;
   readonly headHash: string;
+  readonly auditedEntryCount: number;
+  readonly legacyReceiptEntryCount: number;
   readonly latestReceiptNonce?: string;
+  readonly latestAuditHash?: string;
 }
+
+export interface PlatformPolicyDecisionAuditJournalInspection {
+  readonly valid: boolean;
+  readonly entryCount: number;
+  readonly auditedEntryCount: number;
+  readonly legacyReceiptEntryCount: number;
+  readonly headHash: string;
+  readonly latestAuditHash?: string;
+}
+
+const decisionAuditPolicy = new ImmutablePolicyDecisionAuditPolicy();
 
 const canonicalize = (value: unknown): string => {
   if (value === null) return 'null';
@@ -221,7 +247,7 @@ const assertProtectedRecordShape: (value: unknown) => asserts value is Protected
 const openReceiptRecord = (
   protectedArtifactStore: ProtectedSideArtifactStore,
   envelope: ProtectedSideArtifactEnvelope
-): PlatformPolicyReceiptRecord => {
+): { readonly record: PlatformPolicyReceiptRecord; readonly auditRecord?: ImmutablePolicyDecisionAuditRecord } => {
   const plaintext = protectedArtifactStore.openEnvelope(envelope);
   try {
     let parsed: unknown;
@@ -230,8 +256,25 @@ const openReceiptRecord = (
     } catch (error) {
       throw new Error('POLICY_RECEIPT_JOURNAL_PROTECTED_PAYLOAD_INVALID', { cause: error });
     }
+    if (
+      parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+      && (parsed as Record<string, unknown>).schemaVersion === PROTECTED_DECISION_AUDIT_ENVELOPE_SCHEMA_VERSION
+      && (parsed as Record<string, unknown>).kind === PROTECTED_DECISION_AUDIT_ENVELOPE_KIND
+    ) {
+      const candidate = parsed as Partial<ProtectedPolicyDecisionAuditEnvelope> & Record<string, unknown>;
+      if (!exactKeys(candidate, ['schemaVersion', 'kind', 'auditRecord', 'receiptRecord'])) {
+        throw new Error('POLICY_DECISION_AUDIT_ENVELOPE_INVALID');
+      }
+      assertReceiptRecordShape(candidate.receiptRecord as PlatformPolicyReceiptRecord);
+      const receiptRecord = candidate.receiptRecord as PlatformPolicyReceiptRecord;
+      const auditRecord = candidate.auditRecord as ImmutablePolicyDecisionAuditRecord;
+      if (!decisionAuditPolicy.verify(receiptRecord, auditRecord)) {
+        throw new Error('POLICY_DECISION_AUDIT_BINDING_INVALID');
+      }
+      return Object.freeze({ record: receiptRecord, auditRecord });
+    }
     assertReceiptRecordShape(parsed as PlatformPolicyReceiptRecord);
-    return parsed as PlatformPolicyReceiptRecord;
+    return Object.freeze({ record: parsed as PlatformPolicyReceiptRecord });
   } finally {
     plaintext.fill(0);
   }
@@ -283,12 +326,13 @@ const parseJournal = (
       sha256(canonicalize(entry.protectedRecord)) !== entry.protectedRecordHash ||
       !equalHex(entryHash(entryPayload(entry), macKey), entry.entryHash)
     ) throw new Error('POLICY_RECEIPT_JOURNAL_HASH_CHAIN_INVALID');
-    const record = openReceiptRecord(protectedArtifactStore, entry.protectedRecord);
+    const opened = openReceiptRecord(protectedArtifactStore, entry.protectedRecord);
+    const { record } = opened;
     if (receiptNonces.has(record.receipt.nonce)) {
       throw new Error('POLICY_RECEIPT_JOURNAL_NONCE_REPLAY');
     }
     receiptNonces.add(record.receipt.nonce);
-    entries.push(Object.freeze({ ...entry, record }));
+    entries.push(Object.freeze({ ...entry, record, ...(opened.auditRecord ? { auditRecord: opened.auditRecord } : {}) }));
     expectedPreviousHash = entry.entryHash;
   }
   return Object.freeze(entries);
@@ -586,7 +630,18 @@ export class PlatformPolicyReceiptFileSink implements PlatformPolicyReceiptSink 
         throw new Error('POLICY_RECEIPT_JOURNAL_NONCE_REPLAY');
       }
 
-      const recordBytes = Buffer.from(canonicalRecord, 'utf8');
+      const auditRecord = decisionAuditPolicy.create(record);
+      const protectedPayload: ProtectedPolicyDecisionAuditEnvelope = Object.freeze({
+        schemaVersion: PROTECTED_DECISION_AUDIT_ENVELOPE_SCHEMA_VERSION,
+        kind: PROTECTED_DECISION_AUDIT_ENVELOPE_KIND,
+        auditRecord,
+        receiptRecord: record
+      });
+      const canonicalProtectedPayload = canonicalize(protectedPayload);
+      if (Buffer.byteLength(canonicalProtectedPayload, 'utf8') > MAX_RECORD_BYTES) {
+        throw new Error('POLICY_RECEIPT_JOURNAL_RECORD_TOO_LARGE');
+      }
+      const recordBytes = Buffer.from(canonicalProtectedPayload, 'utf8');
       let protectedRecord: ProtectedSideArtifactEnvelope;
       try {
         protectedRecord = this.#protectedArtifactStore.sealBuffer(RECEIPT_ARTIFACT_KIND, recordBytes);
@@ -627,6 +682,7 @@ export class PlatformPolicyReceiptFileSink implements PlatformPolicyReceiptSink 
         readback.byteLength !== before.byteLength + Buffer.byteLength(line, 'utf8') ||
         !verified || verified.sequence !== appended.sequence || verified.entryHash !== appended.entryHash ||
         verified.protectedRecordHash !== appended.protectedRecordHash || canonicalize(verified.record) !== canonicalRecord
+        || !verified.auditRecord || canonicalize(verified.auditRecord) !== canonicalize(auditRecord)
       ) throw new Error('POLICY_RECEIPT_JOURNAL_READBACK_MISMATCH');
       return this.#createProjectionProof(verified, verifiedEntries, readback.byteLength);
     } finally {
@@ -730,6 +786,19 @@ export class PlatformPolicyReceiptFileSink implements PlatformPolicyReceiptSink 
     return this.#inspectLocal().inspection;
   }
 
+  /** Content-free production projection; no receipt, resource or payload leaves the main process. */
+  public inspectDecisionAuditBoundary(): PlatformPolicyDecisionAuditJournalInspection {
+    const inspection = this.#inspectLocal().inspection;
+    return Object.freeze({
+      valid: inspection.valid,
+      entryCount: inspection.entryCount,
+      auditedEntryCount: inspection.auditedEntryCount,
+      legacyReceiptEntryCount: inspection.legacyReceiptEntryCount,
+      headHash: inspection.headHash,
+      ...(inspection.latestAuditHash ? { latestAuditHash: inspection.latestAuditHash } : {})
+    });
+  }
+
   public async inspectWithTrustedProvider(
     provider: Pick<PlatformPolicyAuthorizationProvider, 'verify'>
   ): Promise<PlatformPolicyReceiptJournalInspection> {
@@ -803,6 +872,8 @@ export class PlatformPolicyReceiptFileSink implements PlatformPolicyReceiptSink 
         valid: true,
         protection: 'AES_256_GCM_AND_HMAC_SHA256_DEVICE_PROTECTED_KEYS',
         entryCount: 0,
+        auditedEntryCount: 0,
+        legacyReceiptEntryCount: 0,
         sizeBytes: 0,
         sha256: sha256(Buffer.alloc(0)),
         headHash: GENESIS_HASH
@@ -813,6 +884,8 @@ export class PlatformPolicyReceiptFileSink implements PlatformPolicyReceiptSink 
     if (bytes.byteLength > this.#maxJournalBytes) throw new Error('POLICY_RECEIPT_JOURNAL_SIZE_LIMIT_EXCEEDED');
     const entries = parseJournal(bytes, this.#protectedArtifactStore, this.#macKey);
     const latest = entries.at(-1);
+    const auditedEntryCount = entries.filter((entry) => entry.auditRecord !== undefined).length;
+    const latestAuditRecord = entries.findLast((entry) => entry.auditRecord !== undefined)?.auditRecord;
     return Object.freeze({
       entries,
       inspection: Object.freeze({
@@ -821,10 +894,13 @@ export class PlatformPolicyReceiptFileSink implements PlatformPolicyReceiptSink 
         valid: true,
         protection: 'AES_256_GCM_AND_HMAC_SHA256_DEVICE_PROTECTED_KEYS',
         entryCount: entries.length,
+        auditedEntryCount,
+        legacyReceiptEntryCount: entries.length - auditedEntryCount,
         sizeBytes: bytes.byteLength,
         sha256: sha256(bytes),
         headHash: latest?.entryHash ?? GENESIS_HASH,
-        ...(latest ? { latestReceiptNonce: latest.record.receipt.nonce } : {})
+        ...(latest ? { latestReceiptNonce: latest.record.receipt.nonce } : {}),
+        ...(latestAuditRecord ? { latestAuditHash: latestAuditRecord.auditHash } : {})
       })
     });
   }

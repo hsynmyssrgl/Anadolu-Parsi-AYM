@@ -17,6 +17,7 @@ export * from './offline-capability-lease-use-cases.js';
 export * from './client-data-access-use-cases.js';
 export * from './derived-data-inheritance-use-cases.js';
 export * from './sensitive-logging-use-cases.js';
+export * from './policy-decision-audit-use-cases.js';
 export * from './membership-use-cases.js';
 
 export * from './health-use-cases.js';

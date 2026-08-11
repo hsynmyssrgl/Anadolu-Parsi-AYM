@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "step": "32-N",
+  "requirement": "PPK-018",
+  "status": "COMPLETE",
+  "completionClaimed": true,
+  "definition": {
+    "policyDecisionAudit": "PEP tarafından üretilen izin veya ret kararını; policy sürümü/paketi, exact yükümlülükler, ret nedeni, request/context/receipt/record hashleri ve kimlik/kaynak bağlarıyla değiştirilemez korumalı zincire bağlayan kayıttır.",
+    "immutableChain": "AES-256-GCM korumalı payload, ayrı cihaz korumalı anahtarla HMAC-SHA-256 entry zinciri, fsync/readback, nonce replay reddi, trusted-provider restart doğrulaması ve harici monotonic checkpoint birleşimidir.",
+    "legacyReceipt": "PPK-018 öncesinde aynı journal entry schemaVersion=2 altında doğrudan korunan receipt payloadıdır; okunur ve doğrulanır ancak yeni audit kaydı sayılmaz veya geriye dönük dönüştürülmez.",
+    "adjacentBusinessAudit": "Genel audit_log ya da yalnız allowed transaction receipt satırı PPK-018 izin+ret karar zincirinin yerine geçmez."
+  },
+  "productionInventory": [
+    {
+      "id": "platform-policy-enforcement-point",
+      "classification": "DECISION_PRODUCER_AND_FAIL_CLOSED_GATE",
+      "paths": [
+        "packages/platform-policy/src/policy-enforcement-point.ts"
+      ],
+      "control": "Ret kararı dönmeden ve non-deferred izin operasyonu açılmadan receipt/audit sink çağrılır; persistence arızası RECEIPT_PERSISTENCE_FAILED ile operasyonu kapatır.",
+      "disposition": "CLOSED_CENTRAL_FAIL_CLOSED"
+    },
+    {
+      "id": "immutable-policy-decision-audit-policy",
+      "classification": "CANONICAL_AUDIT_POLICY",
+      "paths": [
+        "packages/platform-policy/src/immutable-policy-decision-audit.ts"
+      ],
+      "control": "Karar, reason, policy/package, exact obligations, request/context/receipt/record ve kimlik/kaynak bağları doğrulanır; auditHash kanonik gövdeyi bağlar.",
+      "disposition": "CLOSED_CANONICAL_EXACT_BINDING"
+    },
+    {
+      "id": "desktop-protected-policy-journal",
+      "classification": "IMMUTABLE_AUDIT_OWNER",
+      "paths": [
+        "apps/desktop/src/main/platform-policy-receipt-file-sink.ts",
+        "apps/desktop/src/main/main.ts"
+      ],
+      "control": "Yeni receiptler audit+receipt zarfı olarak AES-256-GCM korunur, HMAC-SHA-256 zincirine eklenir, fsync/readback ve monotonic checkpoint sonrası kabul edilir.",
+      "disposition": "CLOSED_PROTECTED_APPEND_ONLY_OWNER"
+    },
+    {
+      "id": "deferred-sqlite-policy-transactions",
+      "classification": "DURABLE_ALLOWED_RECEIPT_PROJECTION",
+      "paths": [
+        "apps/desktop/src/main/archive-production-policy-runtime.ts",
+        "apps/desktop/src/main/finance-production-policy-runtime.ts",
+        "apps/desktop/src/main/health-production-policy-runtime.ts",
+        "apps/desktop/src/main/life-production-policy-runtime.ts",
+        "apps/desktop/src/main/location-production-policy-runtime.ts",
+        "apps/desktop/src/main/timeline-production-policy-runtime.ts"
+      ],
+      "control": "Allowed SQLite transaction receiptleri atomik committen sonra exact ensure + projection proof + acknowledge akışıyla aynı korumalı audit journalına taşınır; pending satır kaybolmaz.",
+      "disposition": "CLOSED_DURABLE_PROJECTION"
+    },
+    {
+      "id": "trusted-restart-and-legacy-read",
+      "classification": "READ_BACK_AND_COMPATIBILITY",
+      "paths": [
+        "apps/desktop/src/main/platform-policy-receipt-file-sink.ts",
+        "scripts/verify-30-o-protected-receipt-journal-runtime.mjs"
+      ],
+      "control": "Restartta tüm receiptler trusted provider ile yeniden doğrulanır; yeni zarf audit bağı ayrıca doğrulanır. Tarihsel direct receipt payload okunur, ayrı sayılır ve backfill edilmez.",
+      "disposition": "CLOSED_FAIL_CLOSED_READ_BACK"
+    },
+    {
+      "id": "policy-decision-audit-status-ipc-ui",
+      "classification": "CONTENT_FREE_BOUNDARY_POSTURE",
+      "paths": [
+        "packages/domain/src/policy-decision-audit.ts",
+        "packages/application/src/policy-decision-audit-use-cases.ts",
+        "apps/desktop/src/main/policy-decision-audit-application-adapter.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/main/ipc-read-sharing.ts",
+        "apps/desktop/src/renderer/App.tsx"
+      ],
+      "control": "Sıfır argümanlı no-cache IPC yalnız content-free zincir duruşunu ve sayaç/hash durumunu gösterir; receipt, audit, kaynak, karar nedeni veya yükümlülük payloadı istemciye çıkmaz.",
+      "disposition": "CLOSED_CONTENT_FREE_NO_CACHE"
+    },
+    {
+      "id": "generic-business-audit-and-sqlite-allowed-receipts",
+      "classification": "ADJACENT_NOT_AUTHORITATIVE",
+      "paths": [
+        "packages/database/src/family-database-migrations.ts",
+        "packages/repositories/src/policy-transaction-repository.ts"
+      ],
+      "control": "Genel business audit_log ve migration 56/57 allowed-only transaction receipt temeli korunur; denied karar audit otoritesi veya PPK-018 kapanış kanıtı olarak sayılmaz.",
+      "disposition": "CLASSIFIED_SEPARATE_BOUNDARY"
+    }
+  ],
+  "closureSummary": {
+    "reviewedOwners": 7,
+    "activeUnauditedPolicyDecisionOwners": 0,
+    "noOpReceiptSinkProductionExceptions": 0,
+    "plaintextPolicyAuditProductionExceptions": 0,
+    "clientAuditPayloadExposureExceptions": 0,
+    "openBlockerCount": 0,
+    "openBlockers": [],
+    "finalValidationPending": false
+  }
+}

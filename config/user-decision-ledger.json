@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 52,
+  "decisionCount": 53,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1256,6 +1256,34 @@
         "docs/security/PPK-017_SENSITIVE_LOG_POLICY_THREAT_MODEL.md",
         "docs/audit/32-M_PPK-017_HASSAS_LOG_POLITIKASI_UST_KAPANIS.md",
         "config/32-m-ppk-017-log-surface-inventory.json"
+      ]
+    },
+    {
+      "id": "DEC-199",
+      "date": "2026-08-12",
+      "acceptedAt": "2026-08-12",
+      "title": "PPK-018 fail-closed immutable policy decision audit chain top closure",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: tüm işleri full auto olarak sen yap",
+      "document": "docs/decisions/DEC-199-ppk-018-immutable-policy-decision-audit.md",
+      "requirements": ["PPK-018"],
+      "codeAreas": [
+        "packages/platform-policy/src/immutable-policy-decision-audit.ts",
+        "packages/platform-policy/src/policy-enforcement-point.ts",
+        "packages/domain/src/policy-decision-audit.ts",
+        "packages/application/src/policy-decision-audit-use-cases.ts",
+        "apps/desktop/src/main/platform-policy-receipt-file-sink.ts",
+        "apps/desktop/src/main/policy-decision-audit-application-adapter.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/ipc-read-sharing.ts",
+        "scripts/verify-immutable-policy-decision-audit-boundary.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/32-N-ppk-018-immutable-policy-decision-audit-contract.json",
+        "artifacts/validation/32-N-ppk-018-immutable-policy-decision-audit-runtime.json",
+        "docs/security/PPK-018_IMMUTABLE_POLICY_DECISION_AUDIT_THREAT_MODEL.md",
+        "docs/audit/32-N_PPK-018_DEGISMEZ_POLICY_KARAR_AUDIT_UST_KAPANIS.md",
+        "config/32-n-ppk-018-policy-decision-audit-inventory.json"
       ]
     }
   ]
