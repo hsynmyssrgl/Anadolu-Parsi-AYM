@@ -5892,6 +5892,34 @@ SET value='REVISION-32-D-PPK-008-APPLICATION-IDENTITY-DEVICE-CERTIFICATE-CAPABIL
 WHERE key='schema_generation';
 `;
 
+const platformPolicyDecisionAuthorityBindingSql = `ALTER TABLE platform_policy_transaction_receipts
+ADD COLUMN decision_authority_id TEXT CHECK(
+  decision_authority_id IS NULL OR decision_authority_id IN ('local-policy-kernel','windows-core-service')
+);
+
+CREATE INDEX idx_platform_policy_receipt_decision_authority
+ON platform_policy_transaction_receipts(decision_authority_id)
+WHERE decision_authority_id IS NOT NULL;
+
+CREATE TRIGGER trg_ppk009_platform_policy_decision_authority_insert
+BEFORE INSERT ON platform_policy_transaction_receipts
+WHEN (NEW.decision_authority_id IS NULL) IS NOT (json_type(NEW.record_json,'$.decisionAuthorityId') IS NULL)
+  OR (NEW.decision_authority_id IS NOT NULL AND (
+    json_extract(NEW.record_json,'$.decisionAuthorityId') IS NOT NEW.decision_authority_id
+    OR json_extract(NEW.record_json,'$.request.decisionAuthorityId') IS NOT NEW.decision_authority_id
+    OR json_extract(NEW.record_json,'$.decision.decisionAuthorityId') IS NOT NEW.decision_authority_id
+    OR json_extract(NEW.record_json,'$.receipt.decision.decisionAuthorityId') IS NOT NEW.decision_authority_id
+  ))
+BEGIN
+  SELECT RAISE(ABORT,'platform policy decision authority is missing or inconsistent');
+END;
+
+UPDATE database_metadata
+SET value='REVISION-32-E-PPK-009-CORE-SERVICE-DECISION-REEVALUATION',
+    updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
+WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -5965,7 +5993,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(70, 'ppk005_complete_data_classification', platformPolicyDataClassificationSql),
   createMigrationDefinition(71, 'ppk006_complete_policy_obligation_suite', platformPolicyObligationExecutionSql),
   createMigrationDefinition(72, 'ppk007_signed_versioned_policy_package', platformPolicyPackageBindingSql),
-  createMigrationDefinition(73, 'ppk008_application_identity_device_certificate_manifest', platformApplicationIdentityBindingSql)
+  createMigrationDefinition(73, 'ppk008_application_identity_device_certificate_manifest', platformApplicationIdentityBindingSql),
+  createMigrationDefinition(74, 'ppk009_core_service_decision_reevaluation', platformPolicyDecisionAuthorityBindingSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

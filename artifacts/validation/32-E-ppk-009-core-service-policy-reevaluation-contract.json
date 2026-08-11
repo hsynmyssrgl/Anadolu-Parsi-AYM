@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-E",
+  "requirement": "PPK-009",
+  "phase": "CORE_SERVICE_POLICY_REEVALUATION_CONTRACT",
+  "status": "PASS",
+  "checkCount": 32,
+  "passed": 32,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "decision authority has a closed vocabulary",
+      "status": "PASS"
+    },
+    {
+      "name": "kernel configuration accepts an explicit decision authority",
+      "status": "PASS"
+    },
+    {
+      "name": "invalid decision authority stops composition",
+      "status": "PASS"
+    },
+    {
+      "name": "signed package payload carries the decision authority",
+      "status": "PASS"
+    },
+    {
+      "name": "strict request carries the expected evaluator",
+      "status": "PASS"
+    },
+    {
+      "name": "decision carries the actual evaluator",
+      "status": "PASS"
+    },
+    {
+      "name": "context hash covers decision authority",
+      "status": "PASS"
+    },
+    {
+      "name": "missing or changed evaluator is denied",
+      "status": "PASS"
+    },
+    {
+      "name": "allow decisions bind signed evaluator identity",
+      "status": "PASS"
+    },
+    {
+      "name": "receipt signing includes the complete decision",
+      "status": "PASS"
+    },
+    {
+      "name": "PEP authority receives package-bound evaluator",
+      "status": "PASS"
+    },
+    {
+      "name": "PEP request carries evaluator before provider crossing",
+      "status": "PASS"
+    },
+    {
+      "name": "PEP compares returned evaluator before persistence",
+      "status": "PASS"
+    },
+    {
+      "name": "active context revalidates request evaluator",
+      "status": "PASS"
+    },
+    {
+      "name": "active context revalidates signed receipt evaluator",
+      "status": "PASS"
+    },
+    {
+      "name": "provider exposes an explicit Core process marker",
+      "status": "PASS"
+    },
+    {
+      "name": "Core adapter is the production marked provider",
+      "status": "PASS"
+    },
+    {
+      "name": "Core production kernel signs itself as authority",
+      "status": "PASS"
+    },
+    {
+      "name": "Core runtime rejects a conflicting signed authority",
+      "status": "PASS"
+    },
+    {
+      "name": "Core runtime freshly calls kernel authorization",
+      "status": "PASS"
+    },
+    {
+      "name": "Core narrows Desktop fence with live writability",
+      "status": "PASS"
+    },
+    {
+      "name": "dispatcher requires a complete strict policy context",
+      "status": "PASS"
+    },
+    {
+      "name": "Desktop universal PEP requires the Core provider marker",
+      "status": "PASS"
+    },
+    {
+      "name": "UI intent is derived from channel not visibility claims",
+      "status": "PASS"
+    },
+    {
+      "name": "receiptless bootstrap is a closed explicit registry",
+      "status": "PASS"
+    },
+    {
+      "name": "protected operation executes only inside active signed callback",
+      "status": "PASS"
+    },
+    {
+      "name": "production main composes universal PEP with Core provider",
+      "status": "PASS"
+    },
+    {
+      "name": "repository contract preserves migration-74 history",
+      "status": "PASS"
+    },
+    {
+      "name": "repository persists and compares decision authority",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 74 adds the exact JSON binding trigger",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test proves provider relabel and UI bypass default deny",
+      "status": "PASS"
+    },
+    {
+      "name": "scope registry UI menu evidence and no-cutover truth are closed",
+      "status": "PASS"
+    }
+  ],
+  "failures": [],
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T12:39:14.542Z"
+}

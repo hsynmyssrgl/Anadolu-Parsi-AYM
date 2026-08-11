@@ -11,6 +11,7 @@ import {
   type PlatformCapability,
   type PlatformDataClass,
   type PlatformPolicyDecision,
+  type PlatformPolicyDecisionAuthorityId,
   type PlatformDeviceCertificate,
   type PlatformPolicyPackage,
   type PlatformPolicyReceipt,
@@ -35,6 +36,7 @@ export interface PlatformPolicyConnectionAuthority {
   readonly policyVersion: string;
   readonly policyPackageVersion?: number;
   readonly policyPackageSha256?: string;
+  readonly decisionAuthorityId?: PlatformPolicyDecisionAuthorityId;
   readonly accountId: string;
   readonly personId?: string;
   readonly deviceId: string;
@@ -71,6 +73,7 @@ export interface PlatformPolicyReceiptRecord {
   readonly policyPackageVersion: number;
   readonly policyPackageSha256: string;
   readonly applicationVersion: string;
+  readonly decisionAuthorityId?: PlatformPolicyDecisionAuthorityId;
   readonly capabilityManifestSha256?: string;
   readonly deviceCertificateSha256?: string;
   readonly dataClasses: readonly PlatformDataClass[];
@@ -186,6 +189,8 @@ export interface PlatformPolicyProviderVerificationInput {
  * PEP validates every other request field before accepting the result.
  */
 export interface PlatformPolicyAuthorizationProvider {
+  /** Production Desktop providers must cross the Windows Core Service process boundary. */
+  readonly decisionAuthority?: 'windows-core-service';
   /** Trusted package metadata for out-of-process kernels; omission fails closed. */
   readonly resolvePolicyPackage?: (applicationId: PlatformApplicationId) => PlatformPolicyPackage;
   authorize(input: PlatformPolicyProviderAuthorizationInput):
@@ -222,6 +227,7 @@ export interface PlatformPolicyTransactionContext {
   readonly policyVersion: string;
   readonly policyPackageVersion: number;
   readonly policyPackageSha256: string;
+  readonly decisionAuthorityId?: PlatformPolicyDecisionAuthorityId;
   readonly applicationVersion: string;
   readonly capabilityManifestSha256?: string;
   readonly deviceCertificateSha256?: string;
@@ -318,6 +324,10 @@ export const assertActivePlatformPolicyTransactionContext: (
     || context.policyPackageVersion !== context.receiptRecord.policyPackageVersion
     || context.policyPackageSha256 !== context.receiptRecord.request.policyPackageSha256
     || context.policyPackageSha256 !== context.receiptRecord.policyPackageSha256
+    || context.decisionAuthorityId !== context.receiptRecord.request.decisionAuthorityId
+    || context.decisionAuthorityId !== context.receiptRecord.decisionAuthorityId
+    || context.decisionAuthorityId !== context.decision.decisionAuthorityId
+    || context.decisionAuthorityId !== context.receipt.decision.decisionAuthorityId
     || context.applicationVersion !== context.receiptRecord.request.subject.applicationVersion
     || context.applicationVersion !== context.receiptRecord.applicationVersion
     || context.capabilityManifestSha256 !== context.receiptRecord.request.subject.capabilityManifestSha256
@@ -835,6 +845,7 @@ export class PlatformPolicyEnforcementPoint {
       policyVersion: authority.policyVersion,
       policyPackageVersion: authority.policyPackageVersion!,
       policyPackageSha256: authority.policyPackageSha256!,
+      ...(authority.decisionAuthorityId ? { decisionAuthorityId: authority.decisionAuthorityId } : {}),
       subject: Object.freeze({
         ...subject,
         ...(authority.deviceCertificate ? { deviceCertificate: authority.deviceCertificate } : {}),
@@ -890,6 +901,7 @@ export class PlatformPolicyEnforcementPoint {
       authorization.decision.policyVersion !== effectiveRequest.policyVersion ||
       authorization.decision.policyPackageVersion !== effectiveRequest.policyPackageVersion ||
       authorization.decision.policyPackageSha256 !== effectiveRequest.policyPackageSha256 ||
+      authorization.decision.decisionAuthorityId !== effectiveRequest.decisionAuthorityId ||
       authorization.decision.applicationVersion !== effectiveRequest.subject.applicationVersion ||
       (effectiveRequest.subject.capabilityManifestSha256 !== undefined
         && authorization.decision.capabilityManifestSha256 !== effectiveRequest.subject.capabilityManifestSha256) ||
@@ -952,6 +964,7 @@ export class PlatformPolicyEnforcementPoint {
       contextHash,
       policyPackageVersion: effectiveRequest.policyPackageVersion!,
       policyPackageSha256: effectiveRequest.policyPackageSha256!,
+      ...(effectiveRequest.decisionAuthorityId ? { decisionAuthorityId: effectiveRequest.decisionAuthorityId } : {}),
       applicationVersion: effectiveRequest.subject.applicationVersion!,
       ...(effectiveRequest.subject.capabilityManifestSha256 ? {
         capabilityManifestSha256: effectiveRequest.subject.capabilityManifestSha256
@@ -1019,6 +1032,7 @@ export class PlatformPolicyEnforcementPoint {
       policyVersion: decision.policyVersion,
       policyPackageVersion: decision.policyPackageVersion!,
       policyPackageSha256: decision.policyPackageSha256!,
+      ...(decision.decisionAuthorityId ? { decisionAuthorityId: decision.decisionAuthorityId } : {}),
       applicationVersion: decision.applicationVersion!,
       ...(effectiveRequest.subject.capabilityManifestSha256 ? {
         capabilityManifestSha256: effectiveRequest.subject.capabilityManifestSha256
@@ -1203,6 +1217,9 @@ export class PlatformPolicyEnforcementPoint {
       !Number.isSafeInteger(authority.policyPackageVersion) || authority.policyPackageVersion! < 1 ||
       !/^[0-9a-f]{64}$/u.test(authority.policyPackageSha256 ?? '') ||
       (authority.personId !== undefined && !nonEmptyBounded(authority.personId, 256)) ||
+      (authority.decisionAuthorityId !== undefined
+        && authority.decisionAuthorityId !== 'local-policy-kernel'
+        && authority.decisionAuthorityId !== 'windows-core-service') ||
       !validApplications.has(authority.applicationId) || typeof authority.deviceTrusted !== 'boolean' ||
       !nonEmptyBounded(authority.applicationVersion, 128) ||
       (authority.capabilityManifestSha256 !== undefined && !/^[0-9a-f]{64}$/u.test(authority.capabilityManifestSha256)) ||
@@ -1233,6 +1250,7 @@ export class PlatformPolicyEnforcementPoint {
     if (!policyPackage) return authority;
     const applicationVersion = policyPackage.payload.applicationVersions[authority.applicationId];
     const applicationManifest = policyPackage.payload.applicationManifests[authority.applicationId];
+    const decisionAuthorityId = policyPackage.payload.decisionAuthorityId;
     if (
       policyPackage.payload.schemaVersion !== 1
       || policyPackage.payload.policyVersion !== authority.policyVersion
@@ -1246,6 +1264,7 @@ export class PlatformPolicyEnforcementPoint {
       || (authority.policyPackageVersion !== undefined && authority.policyPackageVersion !== policyPackage.payload.packageVersion)
       || (authority.policyPackageSha256 !== undefined && authority.policyPackageSha256 !== policyPackage.payloadSha256)
       || (authority.applicationVersion !== undefined && authority.applicationVersion !== applicationVersion)
+      || (authority.decisionAuthorityId !== undefined && authority.decisionAuthorityId !== decisionAuthorityId)
     ) {
       throw new PlatformPolicyEnforcementError('AUTHORITY_INVALID', 'Policy authority does not match the signed policy package');
     }
@@ -1279,6 +1298,7 @@ export class PlatformPolicyEnforcementPoint {
       ...authority,
       policyPackageVersion: policyPackage.payload.packageVersion,
       policyPackageSha256: policyPackage.payloadSha256,
+      ...(decisionAuthorityId ? { decisionAuthorityId } : {}),
       applicationVersion,
       capabilityManifestSha256: applicationManifest.capabilityManifestSha256,
       ...(deviceCertificate ? { deviceCertificate } : {})

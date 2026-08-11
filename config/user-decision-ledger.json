@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 43,
+  "decisionCount": 44,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1019,6 +1019,32 @@
         "artifacts/validation/32-D-ppk-008-application-identity-device-certificate-manifest-contract.json",
         "artifacts/validation/32-D-ppk-008-application-identity-device-certificate-manifest-runtime.json",
         "docs/audit/32-D_PPK-008_UYGULAMA_KIMLIGI_CIHAZ_SERTIFIKASI_UST_KAPANIS.md"
+      ]
+    },
+    {
+      "id": "DEC-190",
+      "date": "2026-08-11",
+      "acceptedAt": "2026-08-11",
+      "title": "PPK-009 Core Service policy decision re-evaluation top closure",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: Paketler bitince diğerine başla",
+      "document": "docs/decisions/DEC-190-ppk-009-core-service-policy-reevaluation.md",
+      "requirements": ["PPK-009"],
+      "codeAreas": [
+        "packages/platform-policy/src/policy-kernel.ts",
+        "packages/platform-policy/src/policy-enforcement-point.ts",
+        "apps/core-service/src/main.ts",
+        "apps/core-service/src/core-service-runtime.ts",
+        "apps/core-service/src/core-service-method-dispatcher.ts",
+        "apps/desktop/src/main/core-service-application-adapter.ts",
+        "apps/desktop/src/main/desktop-universal-api-policy-enforcement.ts",
+        "packages/repositories/src/platform-policy-transaction-repository.ts",
+        "packages/database/src/family-database-migrations.ts"
+      ],
+      "evidence": [
+        "artifacts/validation/32-E-ppk-009-core-service-policy-reevaluation-contract.json",
+        "artifacts/validation/32-E-ppk-009-core-service-policy-reevaluation-runtime.json",
+        "docs/audit/32-E_PPK-009_CORE_SERVICE_POLITIKA_YENIDEN_DEGERLENDIRME_UST_KAPANIS.md"
       ]
     }
   ]

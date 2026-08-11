@@ -37,6 +37,7 @@ export class CoreServiceApplicationAdapter {
   };
 
   public readonly policyProvider: PlatformPolicyAuthorizationProvider = Object.freeze({
+    decisionAuthority: 'windows-core-service' as const,
     resolvePolicyPackage: () => {
       if (!this.#policyPackage) throw new Error('Core Service signed policy package has not been observed');
       return this.#policyPackage;

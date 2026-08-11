@@ -36,6 +36,7 @@ const createHarness = (writable = true, trusted = true) => {
   const kernel = new PlatformPolicyKernel({
     policyVersion: 'PPK-31-U',
     signingKey: Buffer.alloc(32, 31),
+    decisionAuthorityId: 'windows-core-service',
     applicationCapabilities: { 'windows-desktop': ['family.read', 'family.write'] },
     consentRequiredCapabilities: [],
     onlineOnlyCapabilities: [],
@@ -43,6 +44,7 @@ const createHarness = (writable = true, trusted = true) => {
   });
   const enforcement = new DesktopUniversalApiPolicyEnforcement({
     authorizationProvider: {
+      decisionAuthority: 'windows-core-service',
       resolvePolicyPackage: () => kernel.policyPackage,
       authorize: ({ request, nonce }) => ({ effectiveRequest: request, authorization: kernel.authorizeWithReceipt(request, NOW, nonce) }),
       verify: ({ request, receipt }) => kernel.verifyReceiptForRequest(receipt, request)

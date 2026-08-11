@@ -85,6 +85,7 @@ export class DesktopUniversalApiPolicyEnforcement {
     if (
       !dependencies ||
       typeof dependencies.resolveAuthority !== 'function' ||
+      dependencies.authorizationProvider?.decisionAuthority !== 'windows-core-service' ||
       !(dependencies.repositoryPolicyScope instanceof DesktopRepositoryPolicyScope)
     ) {
       throw new Error('DESKTOP_API_POLICY_AUTHORITY_UNAVAILABLE');

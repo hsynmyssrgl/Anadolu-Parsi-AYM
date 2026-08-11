@@ -96,6 +96,7 @@ export class CoreServiceProcessHost {
     const kernel = new PlatformPolicyKernel({
       policyVersion: configuration.policyVersion,
       signingKey: configuration.policySigningKey,
+      decisionAuthorityId: 'windows-core-service',
       applicationVersions: {
         'windows-desktop': CORE_SERVICE_APPLICATION_API_VERSION,
         'windows-core-service': CORE_SERVICE_APPLICATION_API_VERSION,

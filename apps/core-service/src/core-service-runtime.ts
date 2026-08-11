@@ -80,6 +80,10 @@ export class CoreServiceRuntime {
     if (this.#kernel.policyPackage.payload.policyVersion !== this.#policyVersion) {
       throw new Error('Core Service policy version does not match the signed policy package');
     }
+    if (
+      this.#kernel.policyPackage.payload.decisionAuthorityId !== undefined
+      && this.#kernel.policyPackage.payload.decisionAuthorityId !== 'windows-core-service'
+    ) throw new Error('Core Service is not the signed policy decision authority');
     if (this.#kernel.applicationVersionFor('windows-core-service') !== CORE_SERVICE_APPLICATION_API_VERSION) {
       throw new Error('Core Service application API version does not match the signed policy package');
     }

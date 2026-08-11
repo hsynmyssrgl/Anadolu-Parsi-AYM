@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "step": "32-E",
+  "requirement": "PPK-009",
+  "title": "Core Service policy decision re-evaluation and UI-bypass top closure",
+  "status": "COMPLETED",
+  "boundaries": {
+    "uiVisibilityIsNotAuthorization": true,
+    "canonicalChannelDerivedIntent": true,
+    "coreServiceDecisionAuthoritySignedInPackage": true,
+    "strictRequestDecisionAuthorityBinding": true,
+    "decisionAndReceiptAuthorityBinding": true,
+    "providerRelabelDefaultDeny": true,
+    "desktopUniversalPepRequiresCoreProvider": true,
+    "coreFreshKernelEvaluation": true,
+    "clusterFenceNarrowingAtCore": true,
+    "explicitUnauthenticatedBootstrapRegistry": true,
+    "repositoryExecutionInsideSignedCallback": true,
+    "durableMigration74": true,
+    "sqliteDecisionAuthorityTrigger": true,
+    "repositoryDecisionAuthorityBinding": true
+  },
+  "validation": {
+    "contract": "artifacts/validation/32-E-ppk-009-core-service-policy-reevaluation-contract.json",
+    "runtime": "artifacts/validation/32-E-ppk-009-core-service-policy-reevaluation-runtime.json",
+    "targetedTest": "apps/desktop/tests/core-service-policy-reevaluation.test.ts",
+    "contractChecks": "32/32",
+    "runtimeChecks": "8/8",
+    "targetedTests": "10/10",
+    "platformPolicyAndUniversalRegression": "100/100",
+    "migration": "74 PASS",
+    "fullVitest": "58 files / 370 tests",
+    "rootTypeScriptDiagnostics": 0
+  },
+  "requirementCompletionClaimed": true,
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "mandatoryTruthSentence": "Bu kapanış yalnız PPK-009 gereksinimini tamamlar; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır."
+}

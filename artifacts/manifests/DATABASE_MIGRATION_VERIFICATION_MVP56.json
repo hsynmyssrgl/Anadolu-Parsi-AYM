@@ -382,7 +382,12 @@
       "version": 73,
       "name": "ppk008_application_identity_device_certificate_manifest",
       "checksum": "0099d0238be94ea6bb95579d2ac9f33c015e99d5c14463442313953c014b87fd"
+    },
+    {
+      "version": 74,
+      "name": "ppk009_core_service_decision_reevaluation",
+      "checksum": "99c89269ac120adbb387dc796ecf1b837f978e04e375d3d41c4fb605020ea813"
     }
   ],
-  "generatedAt": "2026-08-11T12:22:23.211Z"
+  "generatedAt": "2026-08-11T12:37:28.708Z"
 }

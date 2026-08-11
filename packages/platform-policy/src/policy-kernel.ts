@@ -32,6 +32,8 @@ export type PlatformCapability =
   | 'communication.call' | 'communication.record' | 'file.share'
   | 'backup.create' | 'backup.restore' | 'cluster.admin' | 'plugin.execute';
 
+export type PlatformPolicyDecisionAuthorityId = 'local-policy-kernel' | 'windows-core-service';
+
 export type DataSensitivity = 'public' | 'internal' | 'personal' | 'sensitive' | 'highly_sensitive';
 export type PlatformDataClass =
   | 'general'
@@ -68,6 +70,7 @@ export type PolicyReason =
   | 'APPLICATION_VERSION_MISMATCH'
   | 'APPLICATION_MANIFEST_MISMATCH'
   | 'DEVICE_CERTIFICATE_INVALID'
+  | 'DECISION_AUTHORITY_MISMATCH'
   | 'INVALID_REQUEST';
 
 export interface PlatformApplicationIdentityManifest {
@@ -159,6 +162,8 @@ export interface PlatformPolicyRequest {
   readonly policyPackageVersion?: number;
   /** SHA-256 of the exact canonical signed policy package payload. */
   readonly policyPackageSha256?: string;
+  /** Trusted process that must freshly evaluate this complete request. */
+  readonly decisionAuthorityId?: PlatformPolicyDecisionAuthorityId;
   readonly subject: PolicySubject;
   readonly resource: PolicyResource;
   readonly action: PolicyAction;
@@ -182,6 +187,7 @@ export interface PlatformPolicyDecision {
   readonly applicationVersion?: string;
   readonly capabilityManifestSha256?: string;
   readonly deviceCertificateSha256?: string;
+  readonly decisionAuthorityId?: PlatformPolicyDecisionAuthorityId;
   /** SHA-256 binding of the complete validated authorization context. */
   readonly contextHash?: string;
   readonly matchedGrantId?: string;
@@ -195,6 +201,7 @@ export interface PlatformPolicyContextSnapshot {
   readonly policyVersion: string;
   readonly policyPackageVersion: number;
   readonly policyPackageSha256: string;
+  readonly decisionAuthorityId: PlatformPolicyDecisionAuthorityId | '';
   readonly subject: {
     readonly accountId: string;
     readonly personId: string | null;
@@ -249,6 +256,7 @@ export interface PlatformPolicyKernelConfig {
   readonly policyVersion: string;
   readonly signingKey: Uint8Array;
   readonly policyPackageVersion?: number;
+  readonly decisionAuthorityId?: PlatformPolicyDecisionAuthorityId;
   readonly applicationVersions?: Readonly<Partial<Record<PlatformApplicationId, string>>>;
   readonly deviceCertificateRequiredApplications?: readonly PlatformApplicationId[];
   readonly applicationCapabilities: Readonly<Partial<Record<PlatformApplicationId, readonly PlatformCapability[]>>>;
@@ -261,6 +269,7 @@ export interface PlatformPolicyPackagePayload {
   readonly schemaVersion: 1;
   readonly packageVersion: number;
   readonly policyVersion: string;
+  readonly decisionAuthorityId?: PlatformPolicyDecisionAuthorityId;
   readonly applicationVersions: Readonly<Partial<Record<PlatformApplicationId, string>>>;
   readonly applicationCapabilities: Readonly<Partial<Record<PlatformApplicationId, readonly PlatformCapability[]>>>;
   readonly applicationManifests: Readonly<Partial<Record<PlatformApplicationId, PlatformApplicationIdentityManifest>>>;
@@ -487,6 +496,7 @@ export const platformPolicyContextSnapshot = (request: PlatformPolicyRequest): P
   policyVersion: request.policyVersion,
   policyPackageVersion: request.policyPackageVersion ?? 0,
   policyPackageSha256: request.policyPackageSha256 ?? '',
+  decisionAuthorityId: request.decisionAuthorityId ?? '',
   subject: Object.freeze({
     accountId: request.subject.accountId,
     personId: request.subject.personId ?? null,
@@ -537,6 +547,11 @@ export class PlatformPolicyKernel {
   public constructor(config: PlatformPolicyKernelConfig) {
     if (!config.policyVersion.trim()) throw new Error('policyVersion is required');
     if (config.signingKey.byteLength < 32) throw new Error('policy signing key must be at least 256 bits');
+    if (
+      config.decisionAuthorityId !== undefined
+      && config.decisionAuthorityId !== 'local-policy-kernel'
+      && config.decisionAuthorityId !== 'windows-core-service'
+    ) throw new Error('decisionAuthorityId is invalid');
     const packageVersion = config.policyPackageVersion ?? 1;
     if (!Number.isSafeInteger(packageVersion) || packageVersion < 1) throw new Error('policyPackageVersion must be a positive safe integer');
     const applicationCapabilities = Object.fromEntries(
@@ -583,6 +598,7 @@ export class PlatformPolicyKernel {
       policyVersion: config.policyVersion,
       signingKey: Uint8Array.from(config.signingKey),
       policyPackageVersion: packageVersion,
+      ...(config.decisionAuthorityId ? { decisionAuthorityId: config.decisionAuthorityId } : {}),
       applicationVersions: Object.freeze(applicationVersions),
       applicationCapabilities: Object.freeze(applicationCapabilities),
       applicationManifests: Object.freeze(applicationManifests),
@@ -595,6 +611,7 @@ export class PlatformPolicyKernel {
       schemaVersion: 1 as const,
       packageVersion,
       policyVersion: this.#config.policyVersion,
+      ...(this.#config.decisionAuthorityId ? { decisionAuthorityId: this.#config.decisionAuthorityId } : {}),
       applicationVersions: this.#config.applicationVersions!,
       applicationCapabilities: this.#config.applicationCapabilities,
       applicationManifests: this.#config.applicationManifests,
@@ -631,6 +648,7 @@ export class PlatformPolicyKernel {
           schemaVersion: 1,
           packageVersion: this.#config.policyPackageVersion,
           policyVersion: this.#config.policyVersion,
+          ...(this.#config.decisionAuthorityId ? { decisionAuthorityId: this.#config.decisionAuthorityId } : {}),
           applicationVersions: this.#config.applicationVersions,
           applicationCapabilities: this.#config.applicationCapabilities,
           applicationManifests: this.#config.applicationManifests,
@@ -663,6 +681,7 @@ export class PlatformPolicyKernel {
         policyVersion: this.#config.policyVersion,
         policyPackageVersion: this.#policyPackage.payload.packageVersion,
         policyPackageSha256: this.#policyPackage.payloadSha256,
+        ...(this.#config.decisionAuthorityId ? { decisionAuthorityId: this.#config.decisionAuthorityId } : {}),
         ...(decisionApplicationVersion === undefined ? {} : { applicationVersion: decisionApplicationVersion }),
         ...(decisionApplicationManifest === undefined ? {} : {
           capabilityManifestSha256: decisionApplicationManifest.capabilityManifestSha256
@@ -681,6 +700,9 @@ export class PlatformPolicyKernel {
       !nonEmpty(request.policyVersion, 128) ||
       (request.policyPackageVersion !== undefined && (!Number.isSafeInteger(request.policyPackageVersion) || request.policyPackageVersion < 1)) ||
       (request.policyPackageSha256 !== undefined && !/^[0-9a-f]{64}$/u.test(request.policyPackageSha256)) ||
+      (request.decisionAuthorityId !== undefined
+        && request.decisionAuthorityId !== 'local-policy-kernel'
+        && request.decisionAuthorityId !== 'windows-core-service') ||
       !nonEmpty(request.subject?.accountId) || !nonEmpty(request.subject?.deviceId) ||
       (request.subject.applicationVersion !== undefined && !nonEmpty(request.subject.applicationVersion, 128)) ||
       (request.subject.capabilityManifestSha256 !== undefined && !sha256Pattern.test(request.subject.capabilityManifestSha256)) ||
@@ -732,6 +754,10 @@ export class PlatformPolicyKernel {
     if (request.policyPackageSha256 !== undefined && request.policyPackageSha256 !== this.#policyPackage.payloadSha256) {
       return deny('POLICY_PACKAGE_HASH_MISMATCH');
     }
+    if (
+      this.#config.decisionAuthorityId !== undefined
+      && (request.decisionAuthorityId === undefined || request.decisionAuthorityId !== this.#config.decisionAuthorityId)
+    ) return deny('DECISION_AUTHORITY_MISMATCH');
     const capabilities = this.#config.applicationCapabilities[request.subject.applicationId];
     if (!capabilities) return deny('APPLICATION_NOT_REGISTERED');
     const applicationManifest = this.#policyPackage.payload.applicationManifests[request.subject.applicationId];
@@ -788,6 +814,7 @@ export class PlatformPolicyKernel {
       policyVersion: this.#config.policyVersion,
       policyPackageVersion: this.#policyPackage.payload.packageVersion,
       policyPackageSha256: this.#policyPackage.payloadSha256,
+      ...(this.#config.decisionAuthorityId ? { decisionAuthorityId: this.#config.decisionAuthorityId } : {}),
       applicationVersion: decisionApplicationVersion!,
       capabilityManifestSha256: decisionApplicationManifest!.capabilityManifestSha256,
       ...(request.subject.deviceCertificate ? { deviceCertificateSha256: request.subject.deviceCertificate.certificateSha256 } : {}),
@@ -869,6 +896,7 @@ export class PlatformPolicyKernel {
       policyVersion: this.#config.policyVersion,
       policyPackageVersion: this.#policyPackage.payload.packageVersion,
       policyPackageSha256: this.#policyPackage.payloadSha256,
+      ...(this.#config.decisionAuthorityId ? { decisionAuthorityId: this.#config.decisionAuthorityId } : {}),
       applicationVersion: decisionApplicationVersion!,
       capabilityManifestSha256: decisionApplicationManifest!.capabilityManifestSha256,
       ...(request.subject.deviceCertificate ? { deviceCertificateSha256: request.subject.deviceCertificate.certificateSha256 } : {}),

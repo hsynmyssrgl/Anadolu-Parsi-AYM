@@ -155,6 +155,8 @@ export interface PlatformPolicyTransactionReceiptRecord {
   readonly capabilityManifestSha256?: string;
   /** Present when the application manifest requires a trusted-device certificate. */
   readonly deviceCertificateSha256?: string;
+  /** Present on receipts bound to migration-74 decision-authority metadata. */
+  readonly decisionAuthorityId?: PlatformPolicyReceiptRecord['decisionAuthorityId'];
   readonly nonce: string;
   readonly correlationId: string;
   readonly policyVersion: string;
