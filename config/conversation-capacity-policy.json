@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "PPT-CONVERSATION-CAPACITY-POLICY-V2",
+  "actualMetricOnly": true,
+  "warningUsedPercent": 85,
+  "hardStopUsedPercent": 90,
+  "assistantEstimateForbidden": true,
+  "unavailableStatus": "UNAVAILABLE",
+  "handoffRequiredAtHardStop": true,
+  "newReleaseForbiddenAtHardStop": true,
+  "handoffFilePattern": "NEW_CHAT_HANDOFF_<VISIBLE_RELEASE>.md"
+}

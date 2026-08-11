@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "24.07.2026.55",
+  "milestone": "B060-M15 Finance Records & Valuation Application Migration",
+  "status": "passed",
+  "checks": 13,
+  "scenarios": [
+    "finance record created through use case",
+    "valuation computes market value",
+    "invalid owner rolls back record audit and outbox",
+    "invalid amount rejected",
+    "invalid operations leave no partial writes",
+    "owner sees own private finance record",
+    "explicit deny overrides ownership",
+    "explicit deny blocks valuation",
+    "finance outbox events are publishable",
+    "finance data survives restart",
+    "finance writes have audit evidence",
+    "finance writes have outbox evidence",
+    "audit chain remains valid"
+  ],
+  "generatedAt": "2026-07-24T03:11:27.939Z"
+}

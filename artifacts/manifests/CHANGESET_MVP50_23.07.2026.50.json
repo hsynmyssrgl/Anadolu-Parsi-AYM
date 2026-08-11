@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "23.07.2026.50",
+  "milestone": "B060-M10 Authentication & Session Application Migration",
+  "added": [
+    "packages/application/src/auth-use-cases.ts",
+    "packages/repositories/src/account-repository.ts",
+    "packages/security/src/session.ts",
+    "apps/desktop/src/main/auth-application-adapter.ts",
+    "scripts/verify-auth-use-cases.mjs"
+  ],
+  "modified": [
+    "apps/desktop/src/main/data-store.ts",
+    "apps/desktop/src/main/main.ts",
+    "packages/core/src/error.ts",
+    "packages/domain/src/app-data.ts",
+    "packages/application/src/index.ts",
+    "packages/repositories/src/index.ts",
+    "packages/security/src/index.ts",
+    "package.json",
+    "package-lock.json",
+    "apps/desktop/package.json",
+    "packages/security/package.json",
+    "scripts/verify-bronze-database.mjs",
+    "artifacts/manifests/VERSION_LEDGER.json"
+  ],
+  "removed": [],
+  "generatedAt": "2026-07-23T19:12:40.625913Z"
+}

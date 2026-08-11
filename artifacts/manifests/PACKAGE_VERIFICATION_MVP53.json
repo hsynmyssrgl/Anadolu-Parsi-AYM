@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "23.07.2026.53",
+  "packageVersion": "23.7.2026-53",
+  "milestone": "B060-M13 Membership Collaboration & Notifications",
+  "status": "passed",
+  "sourceInventoryFiles": 495,
+  "sourceTypeScriptFiles": 95,
+  "manifestFiles": 496,
+  "internalSha256Entries": 497,
+  "ipc": {
+    "main": 132,
+    "preload": 132,
+    "matched": true
+  },
+  "database": {
+    "createTables": 46,
+    "applicationSecurityTables": 42,
+    "infrastructureTables": 4,
+    "migrations": 8
+  },
+  "cleanTree": {
+    "nodeModules": false,
+    "dist": false,
+    "release": false,
+    "temporaryDirectories": false,
+    "symlinks": 0
+  },
+  "generatedAt": "2026-07-23T20:47:51.748179Z"
+}

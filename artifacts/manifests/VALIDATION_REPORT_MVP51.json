@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "channel": "Bronze",
+  "version": "23.07.2026.51",
+  "packageVersion": "23.7.2026-51",
+  "milestone": "B060-M11 MFA Recovery & Trusted Device Identity",
+  "status": "passed",
+  "checks": {
+    "foundation": 14,
+    "runtime": 6,
+    "migration": 9,
+    "sqliteSmoke": 14,
+    "repositoryOutbox": 10,
+    "transactionalAtomicity": 9,
+    "eventDispatcher": 3,
+    "familyUseCases": 14,
+    "genealogy": 6,
+    "timeline": 17,
+    "dashboardNavigation": 14,
+    "authenticationSession": 16,
+    "mfaTrustedDevice": 16
+  },
+  "totalChecks": 148,
+  "typescriptWorkspaces": 12,
+  "electronMainPreloadTypecheck": "passed",
+  "ipc": {
+    "main": 128,
+    "preload": 128,
+    "matched": true
+  },
+  "database": {
+    "applicationSecurityTables": 41,
+    "infrastructureTables": 4,
+    "migrations": 6,
+    "schemaFingerprint": "55c995c19629afc7946adce49172e439e4e862dcd53fb14a0d3b38fc8dcf3759"
+  },
+  "security": {
+    "totp": "RFC-6238 compatible profile",
+    "recoveryCodes": 8,
+    "recoveryCodeStorage": "SHA-256 hashes only",
+    "deviceIdentity": "Ed25519",
+    "automaticTrustInheritance": false,
+    "devicePrivateKeySeparatedFromDatabase": true
+  },
+  "limitations": [
+    "Full Electron/Vite/Vitest production build not rerun",
+    "Windows installer deferred to Silver",
+    "OS-backed DPAPI/Hello secret store deferred to later security/device milestone",
+    "Manual UI and screenshot validation deferred to Silver"
+  ],
+  "verifiedAt": "2026-07-23T19:40:43.367097Z"
+}

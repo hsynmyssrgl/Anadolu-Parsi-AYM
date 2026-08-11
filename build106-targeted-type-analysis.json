@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "build": 106,
+  "generatedAt": "2026-07-25T08:38:36.580Z",
+  "compiler": "Version 5.8.3",
+  "officialWorkspaceTypecheck": false,
+  "note": "Targeted no-emit analyses only. Repository implementation analysis uses a narrow @ppt/database error-mapper stub; Node crypto/runtime declarations are test stubs. These checks do not replace clean npm ci followed by root tsc --noEmit.",
+  "checks": [
+    {
+      "id": "repository-contracts",
+      "status": "PASS",
+      "sourceModules": 26
+    },
+    {
+      "id": "repository-implementations",
+      "status": "PASS",
+      "repositoryCount": 26,
+      "usesDatabaseStub": true
+    },
+    {
+      "id": "repository-backed-desktop-adapters",
+      "status": "PASS",
+      "adapterCount": 21,
+      "usesNodeRuntimeStub": true
+    }
+  ]
+}

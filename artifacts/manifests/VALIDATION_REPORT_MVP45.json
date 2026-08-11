@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "channel": "Bronze",
+  "version": "23.07.2026.45",
+  "packageVersion": "23.7.2026-45",
+  "milestone": "B060-M5 Event Dispatcher & Idempotency",
+  "status": "passed",
+  "summary": {
+    "typescriptWorkspaces": 12,
+    "electronMainTypecheck": "passed",
+    "foundationChecks": 14,
+    "runtimeChecks": 6,
+    "migrationChecks": 9,
+    "dataStoreSmokeChecks": 14,
+    "repositoryOutboxChecks": 10,
+    "transactionalAtomicityChecks": 9,
+    "dispatcherScenarioGroups": 3,
+    "ipcMainChannels": 124,
+    "ipcPreloadCalls": 124,
+    "applicationTables": 40,
+    "infrastructureTables": 4,
+    "migrationCount": 5
+  },
+  "dispatcherEvidence": {
+    "successReceiptsPerMemberEvent": 2,
+    "idempotentReplay": true,
+    "retryableFailureRescheduled": true,
+    "nonRetryableFailureFinalized": true,
+    "staleProcessingRecovered": true,
+    "duplicateDiagnosticPrevented": true
+  },
+  "limitations": [
+    "Full Electron/Vite/Vitest production build and Windows installer validation are deferred to the consolidated Silver phase."
+  ]
+}

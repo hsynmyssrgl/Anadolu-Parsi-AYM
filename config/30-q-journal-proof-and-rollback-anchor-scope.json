@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "30-Q",
+  "requirement": "PPK-002",
+  "scope": "PROTECTED_JOURNAL_CRYPTOGRAPHIC_ACKNOWLEDGEMENT_PROOF_AND_SQLITE_ROLLBACK_ANCHOR",
+  "predecessor": {
+    "step": "30-P",
+    "completionRecord": "artifacts/checkpoints/30-P_COMPLETION_RECORD.json",
+    "persistentReceiptStatus": "PASS"
+  },
+  "targets": [
+    {
+      "id": "cryptographic-projection-proof",
+      "requiredResult": "The protected journal sink returns an HMAC-authenticated proof bound to the exact canonical receipt record, journal entry and read-back head."
+    },
+    {
+      "id": "proof-required-database-acknowledgement",
+      "requiredResult": "SQLite rejects a projected status transition unless the exact proof fields are present and match the durable receipt row."
+    },
+    {
+      "id": "monotonic-journal-anchor",
+      "requiredResult": "Every acknowledgement monotonically anchors the proven journal head in SQLite and preserves the complete proof."
+    },
+    {
+      "id": "complete-tail-rollback-detection",
+      "requiredResult": "Before pending projection or new archive authorization, the runtime verifies that the SQLite-anchored journal head still exists at the exact sequence and fails closed after rollback to an older internally valid complete tail."
+    },
+    {
+      "id": "tamper-and-restart-runtime",
+      "requiredResult": "Real SQLite and protected-file tests reject forged proof fields, proof reuse for another receipt, valid complete-tail rollback, and restart with an unverifiable anchor."
+    }
+  ],
+  "requiredOrder": [
+    "trusted-journal-readback",
+    "cryptographic-proof-issuance",
+    "cryptographic-proof-verification",
+    "sqlite-proof-bound-acknowledgement",
+    "monotonic-anchor-update",
+    "pre-authorization-anchor-verification"
+  ],
+  "evidenceBoundary": {
+    "PPK002": "PARTIAL",
+    "journalAcknowledgementCryptographicProofToken": "TARGETED_PASS",
+    "journalOnlyCompleteTailRollbackDetection": "TARGETED_PASS",
+    "externalMonotonicAuthorityAgainstCoordinatedDatabaseAndJournalRollback": "NOT_IMPLEMENTED",
+    "universalRepositoryEnforcement": "NOT_COMPLETE",
+    "directSqlArchiveTableUniversalFenceEnforcement": "NOT_COMPLETE",
+    "newCorrelationRetryIdempotencyAfterUnknownCommitOutcome": "NOT_COMPLETE",
+    "expiredUnusedReplayReservationPruning": "NOT_IMPLEMENTED",
+    "obligationExecution": "NOT_RUN_NOT_PASS",
+    "requirementCompletionClaimed": false
+  },
+  "mandatoryTruthSentence": "Bu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır."
+}

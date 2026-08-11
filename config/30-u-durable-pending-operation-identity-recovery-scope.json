@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "30-U",
+  "requirement": "PPK-002",
+  "scope": "DURABLE_RENDERER_AND_APPLICATION_RESTART_PENDING_OPERATION_IDENTITY_RECOVERY",
+  "predecessor": {
+    "step": "30-T",
+    "completionRecord": "artifacts/checkpoints/30-T_COMPLETION_RECORD.json",
+    "persistentReceiptStatus": "PASS"
+  },
+  "targets": [
+    {
+      "id": "durable-pending-operation-registry",
+      "requiredResult": "A governed archive mutation reserves its stable operation identity in SQLite before any protected business side effect and can recover that identity after renderer or application restart."
+    },
+    {
+      "id": "canonical-pending-intent-binding",
+      "requiredResult": "Each pending identity is bound to family, actor, mutation family and canonical semantic fingerprint; conflicting reuse or ambiguous lookup fails closed."
+    },
+    {
+      "id": "explicit-success-acknowledgement",
+      "requiredResult": "A successful caller acknowledgement atomically seals the pending identity so a later intentional identical mutation may acquire a new identity, while an unknown outcome remains recoverable."
+    },
+    {
+      "id": "renderer-and-application-restart-recovery",
+      "requiredResult": "Preload and main IPC recover the same pending operation identifier after renderer state loss and after SQLite close and reopen."
+    },
+    {
+      "id": "exactly-once-restart-proof",
+      "requiredResult": "Real SQLite and child-process tests force unknown outcomes and restart boundaries, then prove the same operation identifier is reused and protected business, audit, outbox and attachment mutations occur exactly once."
+    },
+    {
+      "id": "fail-closed-concurrency-and-mismatch",
+      "requiredResult": "Concurrent acquisition and semantic fingerprint mismatch produce one canonical pending identity or an explicit rejection without duplicate side effects."
+    }
+  ],
+  "requiredOrder": [
+    "selection-and-scope-lock",
+    "migration-and-repository-contract",
+    "main-process-durable-identity-service",
+    "preload-ipc-recovery-and-acknowledgement",
+    "real-sqlite-restart-runtime-and-regression",
+    "security-review"
+  ],
+  "evidenceBoundary": {
+    "PPK002": "PARTIAL",
+    "archiveCoreAndAccessoryReceiptFence": "TARGETED_PASS",
+    "newCorrelationRetryIdempotencyAfterUnknownCommitOutcome": "TARGETED_PASS",
+    "durableDatabaseLedgerAcrossSqliteRestart": "TARGETED_PASS",
+    "rendererRestartPendingOperationIdentityRecovery": "TARGETED_NOT_YET_PASS",
+    "universalRepositoryEnforcement": "NOT_COMPLETE",
+    "externalMonotonicAuthorityAgainstCoordinatedDatabaseAndJournalRollback": "NOT_IMPLEMENTED",
+    "expiredUnusedReplayReservationPruning": "NOT_IMPLEMENTED",
+    "obligationExecution": "NOT_RUN_NOT_PASS",
+    "secureFileDeletionAndDatabaseCommitAtomicity": "NOT_IMPLEMENTED",
+    "installedCoreServiceRegistrationAndScmLifecycle": "NOT_RUN_NOT_PASS",
+    "requirementCompletionClaimed": false
+  },
+  "mandatoryTruthSentence": "Bu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır."
+}

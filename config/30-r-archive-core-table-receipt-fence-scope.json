@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "30-R",
+  "requirement": "PPK-002",
+  "scope": "DATABASE_ENFORCED_RECEIPT_BINDING_FOR_ARCHIVE_CORE_BUSINESS_TABLES",
+  "predecessor": {
+    "step": "30-Q",
+    "completionRecord": "artifacts/checkpoints/30-Q_COMPLETION_RECORD.json",
+    "persistentReceiptStatus": "PASS"
+  },
+  "targets": [
+    {
+      "id": "archive-item-receipt-binding",
+      "requiredResult": "Every new archive_items INSERT and governed UPDATE carries an exact allowed receipt binding whose resource, action and archive.write capability match the row mutation."
+    },
+    {
+      "id": "archive-version-receipt-binding",
+      "requiredResult": "Every new archive_versions INSERT carries the exact create receipt for its parent archive item; version mutation and deletion remain fail-closed."
+    },
+    {
+      "id": "immutable-receipt-consumption-ledger",
+      "requiredResult": "SQLite records each receipt/table/operation consumption immutably and rejects replay of a consumed binding."
+    },
+    {
+      "id": "direct-sql-bypass-tests",
+      "requiredResult": "Real SQLite tests reject missing, mismatched, replayed and cross-resource bindings even when SQL bypasses repository types."
+    },
+    {
+      "id": "governed-repository-regression",
+      "requiredResult": "Production archive create, version, classification, retention assignment and destruction flows continue through exact receipt-bound writes."
+    }
+  ],
+  "requiredOrder": [
+    "migration-and-trigger-contract",
+    "repository-binding-write-path",
+    "real-sqlite-direct-bypass-tests",
+    "production-archive-regression",
+    "security-review"
+  ],
+  "evidenceBoundary": {
+    "PPK002": "PARTIAL",
+    "archiveCoreTableDirectSqlFence": "TARGETED_PASS",
+    "archiveAccessoryTableUniversalFenceEnforcement": "NOT_COMPLETE",
+    "universalRepositoryEnforcement": "NOT_COMPLETE",
+    "externalMonotonicAuthorityAgainstCoordinatedDatabaseAndJournalRollback": "NOT_IMPLEMENTED",
+    "newCorrelationRetryIdempotencyAfterUnknownCommitOutcome": "NOT_COMPLETE",
+    "expiredUnusedReplayReservationPruning": "NOT_IMPLEMENTED",
+    "obligationExecution": "NOT_RUN_NOT_PASS",
+    "requirementCompletionClaimed": false
+  },
+  "mandatoryTruthSentence": "Bu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır."
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "version": "24.07.2026.55",
+  "milestone": "B060-M15 Finance Records & Valuation Application Migration",
+  "added": [
+    "packages/application/src/finance-use-cases.ts",
+    "packages/repositories/src/finance-repository.ts",
+    "apps/desktop/src/main/finance-application-adapter.ts",
+    "database/migrations/0010_finance_query_indexes.sql",
+    "scripts/verify-finance-use-cases.mjs"
+  ],
+  "modified": [
+    "apps/desktop/src/main/data-store.ts",
+    "apps/desktop/src/main/database-migrations.ts",
+    "packages/application/src/index.ts",
+    "packages/repositories/src/index.ts",
+    "packages/domain/src/app-meta.ts",
+    "package.json",
+    "artifacts/manifests/VERSION_LEDGER.json"
+  ],
+  "verification": "passed"
+}

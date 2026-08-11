@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "channel": "Bronze",
+  "version": "23.07.2026.43",
+  "packageVersion": "23.7.2026-43",
+  "revision": "REVİZYON-060",
+  "milestone": "B060-M4 Database Migration Foundation",
+  "generatedAt": "2026-07-23T17:07:09.458829Z",
+  "summary": {
+    "addedFiles": [
+      "database/migrations/0001_legacy_mvp40_schema.sql",
+      "database/migrations/0002_legacy_mvp40_compatibility.sql",
+      "database/migrations/0003_database_metadata.sql",
+      "apps/desktop/src/main/database-migrations.ts",
+      "packages/database/src/sqlite.ts",
+      "packages/database/src/migration-runner.ts",
+      "packages/database/src/sqlite-error.ts",
+      "packages/database/src/transaction.ts",
+      "packages/database/src/health.ts",
+      "scripts/verify-database-migrations.mjs",
+      "scripts/verify-version-sequence.mjs",
+      "scripts/verify-bronze-database.mjs",
+      "tests/smoke/electron-stub.d.ts",
+      "tests/smoke/tsconfig.electron-main.json",
+      "artifacts/manifests/VERSION_LEDGER.json"
+    ],
+    "modifiedAreas": [
+      "FamilyDataStore database startup",
+      "Electron runtime database configuration",
+      "database package exports",
+      "central error code catalog",
+      "workspace dependency graph",
+      "Bronze verification scripts",
+      "version and release documentation"
+    ],
+    "removedBehavior": [
+      "FamilyDataStore private monolithic migration method"
+    ]
+  },
+  "database": {
+    "applicationTableCount": 40,
+    "infrastructureTableCount": 2,
+    "migrationCount": 3,
+    "legacyFingerprint": "45fedc9c9dc9d4456a7b5829809cd4e23bb4e837070a57e8e5608f89a0d39569",
+    "safetyRules": [
+      "known legacy schema is backed up before migration metadata mutation",
+      "unknown schema stops without mutation",
+      "checksum mismatch blocks startup",
+      "failed migration rolls back schema and records"
+    ]
+  },
+  "compatibility": {
+    "ipcMainChannels": 124,
+    "preloadInvokeChannels": 124,
+    "rendererContractChanged": false,
+    "existingDatabaseNamePreserved": true,
+    "localDbBackupPreserved": true
+  }
+}

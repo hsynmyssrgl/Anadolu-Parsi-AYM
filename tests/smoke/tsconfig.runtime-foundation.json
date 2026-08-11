@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "../../.tmp-runtime-dist",
+    "rootDir": "../../apps/desktop/src/main",
+    "types": ["node"],
+    "typeRoots": ["../../node_modules/@types"],
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "noEmit": false
+  },
+  "include": [
+    "../../apps/desktop/src/main/runtime-bootstrap.ts",
+    "../../apps/desktop/src/main/ipc-runtime.ts",
+    "./electron-stub.d.ts"
+  ]
+}

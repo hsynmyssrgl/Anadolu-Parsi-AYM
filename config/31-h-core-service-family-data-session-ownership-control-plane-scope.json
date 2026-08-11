@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "31-H",
+  "requirements": [
+    "DHA-001",
+    "PPK-003",
+    "PPK-014"
+  ],
+  "primaryRequirement": "DHA-001",
+  "decision": "DEC-169",
+  "title": "Core Service protected family-data session ownership control plane",
+  "status": "COMPLETED",
+  "targetSliceStatus": "PASS",
+  "targets": {
+    "typedStatusMethod": "FAMILY_DATA_STATUS_IN_CORE_SERVICE_METHOD_MAP",
+    "ownershipStateMachine": "MONOTONIC_EPOCH_FAIL_CLOSED_SESSION_LIFECYCLE",
+    "ownershipTruth": "CORE_SERVICE_ONLY_AFTER_REAL_SESSION_PORT_ATTACHMENT",
+    "desktopHandshake": "ARCHITECTURE_AND_FAMILY_DATA_STATUS_MUST_MATCH",
+    "pathPrivacy": "NO_DATABASE_PATH_EXPOSED_OVER_CLIENT_PROTOCOL",
+    "drivePolicy": "NO_GOOGLE_DRIVE_OR_UNUSED_PATHS"
+  },
+  "openBoundaries": {
+    "protectedVaultSessionHandoff": "NOT_COMPLETE",
+    "coreServiceSqliteOwnership": "NOT_COMPLETE",
+    "familyGraphReadApi": "NOT_COMPLETE",
+    "familyWriteApi": "NOT_COMPLETE",
+    "backupAndSyncOwnership": "NOT_COMPLETE",
+    "windowsServiceInstallation": "APPROVAL_BOUND_NOT_RUN_NOT_PASS"
+  },
+  "requirementCompletionClaimed": false,
+  "newBuildIssued": false,
+  "startedAt": "2026-08-10T18:40:31.223Z",
+  "validationStatus": "PASS",
+  "persistentReceiptStatus": "PASS",
+  "validatedAt": "2026-08-10T19:27:11.410Z",
+  "officialCompletionClaimed": true,
+  "completedAt": "2026-08-10T19:32:28.271Z"
+}

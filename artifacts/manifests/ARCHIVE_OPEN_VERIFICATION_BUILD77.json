@@ -1,0 +1,10 @@
+{
+  "build": 77,
+  "version": "24.07.2026.77",
+  "scope": "archive open application/repository boundary",
+  "checks": 10,
+  "passed": 10,
+  "directSqlRemoved": true,
+  "productionCompileExecuted": false,
+  "productionCompileNote": "Tam bağımlılık kurulumu bulunan temiz Electron/TypeScript ortamı mevcut değildi."
+}

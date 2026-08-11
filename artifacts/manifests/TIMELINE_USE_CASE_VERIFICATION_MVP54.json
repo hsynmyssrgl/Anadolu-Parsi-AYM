@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "23.07.2026.54",
+  "milestone": "B060-M14 Health Records & Medication Application Migration",
+  "status": "passed",
+  "checks": 17,
+  "scenarios": [
+    "timeline read model loads seed locations and events",
+    "create important day normalizes all supported fields",
+    "important day details use case returns full record",
+    "timeline read model generates reminder notification",
+    "AI preview respects authoritative event permission flag",
+    "important day events are published by two idempotent handlers",
+    "published important day events are not processed twice",
+    "unknown participant is rejected without partial write",
+    "unknown location is rejected without partial write",
+    "selected member visibility requires participant",
+    "invalid date and oversized notes are rejected",
+    "unknown important day detail is not exposed",
+    "important day transaction contains event audit and outbox",
+    "diagnostic projection exists once per important day event",
+    "rejected commands leave no extra event outbox record",
+    "timeline application layer has no SQLite dependency",
+    "FamilyDataStore delegates timeline operations to application use cases"
+  ],
+  "timelineRepositoryActive": true,
+  "importantDayDetailsActive": true,
+  "participantValidationActive": true,
+  "aiPermissionPreserved": true,
+  "transactionalOutboxActive": true,
+  "generatedAt": "2026-07-23T21:11:43.355Z"
+}

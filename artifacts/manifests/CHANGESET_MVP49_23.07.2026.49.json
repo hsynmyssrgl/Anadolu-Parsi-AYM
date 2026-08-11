@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "23.07.2026.49",
+  "packageVersion": "23.7.2026-49",
+  "milestone": "B060-M9 Dashboard Query & Navigation State",
+  "added": [
+    "packages/application/src/dashboard-use-cases.ts",
+    "packages/repositories/src/dashboard-repository.ts",
+    "apps/desktop/src/main/dashboard-application-adapter.ts",
+    "apps/desktop/src/renderer/navigation.ts",
+    "scripts/verify-dashboard-overview.mjs",
+    "artifacts/manifests/DASHBOARD_OVERVIEW_VERIFICATION_MVP49.json"
+  ],
+  "modified": [
+    "packages/domain/src/app-data.ts",
+    "packages/repositories/src/index.ts",
+    "packages/application/src/index.ts",
+    "apps/desktop/src/main/data-store.ts",
+    "apps/desktop/src/main/main.ts",
+    "apps/desktop/src/main/preload.ts",
+    "apps/desktop/src/renderer/global.d.ts",
+    "apps/desktop/src/renderer/App.tsx",
+    "apps/desktop/src/renderer/styles.css",
+    "package.json",
+    "package-lock.json",
+    "apps/desktop/package.json",
+    "packages/domain/src/app-meta.ts",
+    "scripts/verify-bronze-database.mjs",
+    "scripts/verify-repository.mjs",
+    "artifacts/manifests/VERSION_LEDGER.json"
+  ],
+  "architecture": [
+    "Dashboard aggregation moved from renderer calculations to application/query layer.",
+    "SQLite dashboard queries are isolated in repository and Electron adapter layers.",
+    "Navigation state is managed by a deterministic reducer with bounded history.",
+    "Private module counts are scoped by family-admin role and linked person identity."
+  ],
+  "compatibility": {
+    "existingIpcChannelsPreserved": 124,
+    "newIpcChannels": 1,
+    "totalIpcChannels": 125,
+    "databaseSchemaChanged": false,
+    "migrationCount": 5
+  },
+  "generatedAt": "2026-07-23T18:57:06.075826Z"
+}

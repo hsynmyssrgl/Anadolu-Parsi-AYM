@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "version": "23.07.2026.50",
+  "milestone": "B060-M10 Authentication & Session Application Migration",
+  "checks": 14,
+  "checkNames": [
+    "dashboard family identity is authoritative",
+    "member and generation metrics are query-backed",
+    "upcoming important days are sorted and bounded",
+    "timeline and related content totals are centralized",
+    "all planned modules have status records",
+    "member mutation refreshes dashboard metrics",
+    "important day mutation refreshes dashboard calendar",
+    "navigation reducer tracks active and previous modules",
+    "navigation back restores prior module",
+    "duplicate navigation does not grow history",
+    "dashboard application layer has no infrastructure dependency",
+    "FamilyDataStore delegates dashboard to application use case",
+    "renderer consumes centralized dashboard overview",
+    "private dashboard counts are scoped to the signed-in member"
+  ],
+  "metrics": {
+    "initialMembers": 6,
+    "initialGenerations": 4,
+    "initialUpcomingImportantDays": 2,
+    "initialTimelineEvents": 4,
+    "initialRelatedContent": 48,
+    "moduleStatusCount": 15,
+    "finalMembers": 7,
+    "finalUpcomingImportantDays": 3,
+    "finalTimelineEvents": 5,
+    "memberVisibleArchiveCount": 0
+  },
+  "verifiedAt": "2026-07-23T19:09:48.223Z"
+}

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 2,
+  "registry": "https://registry.npmjs.org/",
+  "maxAttempts": 3,
+  "baseDelayMs": 1500,
+  "maxDelayMs": 6000,
+  "retryableHttpStatuses": [
+    408,
+    429,
+    500,
+    502,
+    503,
+    504
+  ],
+  "retryableNetworkCodes": [
+    "EAI_AGAIN",
+    "ECONNRESET",
+    "ECONNREFUSED",
+    "ENETUNREACH",
+    "ETIMEDOUT",
+    "UND_ERR_CONNECT_TIMEOUT",
+    "UND_ERR_SOCKET"
+  ],
+  "attemptTimeoutMs": 180000,
+  "offlineCache": {
+    "enabled": true,
+    "attemptWhenComplete": true,
+    "preferOfflineForOnlineAttempts": true
+  },
+  "ignoreScripts": true
+}

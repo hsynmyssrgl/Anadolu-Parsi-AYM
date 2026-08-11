@@ -1,0 +1,2097 @@
+import { useEffect, useMemo, useReducer, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { Button, EmptyState, Modal, PageHeader, SectionHeader, StatRow, StatusMessage, Surface, VisuallyHidden } from './ui';
+import { navigationReducer, persistNavigationState, readNavigationState } from './navigation';
+import brandMarkUrl from './assets/brand-mark.png';
+import { accessibilityAnnouncement, nextRovingIndex, parseAccessibilityPreferences, serializeAccessibilityPreferences, type AccessibilityPreferences } from './accessibility';
+import { AsyncWriteGuard, MutationRevisionWatermark } from './async-state-guard';
+import { DEVICE_REAUTHORIZATION_CONFIRMATION, SECURITY_CENTER_LABEL, SECURITY_CENTER_ROUTE, canSubmitDeviceReauthorization, securityCenterNeedsAttention } from './security-center-navigation';
+import {
+  USER_VISIBLE_APP_INFO,
+  type UserVisibleAppInfo,
+  assessPassword
+} from '@ppt/domain/renderer';
+import { FAMILY_RELATIONSHIP_CATALOG, OBJECT_PERMISSION_ACTIONS, getFamilyRelationship, type FamilyRelationshipCategory, type FamilyRelationshipCode } from '@ppt/domain';
+import type {
+  CreateFamilyEventInput,
+  UpdateFamilyEventInput,
+  CreateFamilyLocationInput,
+  CreateFamilyMemberInput,
+  CreateFamilyRelationInput,
+  AssignPersonMembershipInput,
+  CreateFamilyBranchInput,
+  DashboardOverviewView,
+  AuthStateView,
+  ExternalIdentityProviderView,
+  FamilyAppSnapshot,
+  FamilySnapshotPatchView,
+  FamilySnapshotSection,
+  FamilyMutationResultView,
+  HouseholdMembershipWorkspaceView,
+  PersonLifecycleWorkspaceView,
+  UpdatePersonProfileInput,
+  HouseholdKind,
+  PersonMembershipRole,
+  FamilyEventView,
+  FamilyMemberView,
+  AuditEntryView, AuditIntegrityView,
+  LoginInput,
+  SetupAdminInput,
+  TwoFactorSetupView,
+  FamilyAccountView, FamilyInvitationView, FamilyInvitationInspectionView, ObjectPermissionView, FamilyRole, ObjectPermissionAction, FinanceRecordView, HealthRecordView, CreateFinanceRecordInput, CreateHealthRecordInput, MedicationPlanView, CreateMedicationPlanInput, FamilyHealthHistoryView, CreateFamilyHealthHistoryInput, FinanceValuationView, CreateFinanceValuationInput, LifeRecordView, CreateLifeRecordInput, AutomationRuleView, CreateAutomationRuleInput, AutomationRunView, ReportSummaryView, GenealogyInsightView, TrustedDeviceView, SecurityEventReceiptView, SecurityEventReceiptArchiveItemView, SecurityEventReceiptVerificationView, AiConsentView, AiConsentPurpose, AiAccessPreviewView, DigitalLegacyPlanView, LegacyGrantView, LegacyApprovalView, ArchiveSearchInput, ArchiveVersionView, ArchiveRetentionPolicyView, ArchiveRetentionStatusView, ArchiveCategoryView, ArchiveClassificationView, SystemHealthView, BackupTargetView, BackupRunView, PerformanceSampleView, DiagnosticEntryView, MaintenanceResultView, PerformanceTrendView, BackgroundTaskView, SchedulerStatusView, BackupSchedule, QueuedTaskView, MaintenancePolicyView, HealthNotificationView, DiagnosticReportHistoryView, SystemHealthScoreView, SystemHealthHistoryView, SystemHealthTrendView, DiagnosticArchiveView, DiagnosticArchiveVerificationView, DiagnosticReportContentView, DiagnosticReportComparisonView, DiagnosticArchiveContentView, DiagnosticArchiveSearchInput, MaintenanceHistoryView, PerformanceAnomalyView, IpcPerformanceTelemetryView, IpcAdaptiveBudgetMaintenanceAuthorityView, IpcAdaptiveBudgetMaintenanceRecoveryAuthorityView, MaintenanceRecommendationView, ExportArtifactView, BackupInspectionView, BackupPropagationRunView, BackupCleanRewriteStatusView, BackupCleanRewriteRunView, BackupQuarantinePolicyView, BackupQuarantineBatchView, ExternalBackupCopyView, ExternalBackupInventorySummaryView, ExternalBackupCopyKind, ExternalBackupEvidenceIssuerView, ExternalBackupEvidenceIssuerRotationView, ExternalBackupEvidenceRevocationListView, ExternalBackupRevocationEndpointView, RevocationSyncEndpointStateView, ExternalBackupDestructionEvidenceView, DataRetentionPolicyView, DataLifecycleRecordView, DataLifecycleResourceType, FamilyDataImportPreviewView, FamilyDataImportBatchView, GenealogyTreeNodeView, ArchivePageItemView, EventCatalogItemView
+} from '@ppt/domain';
+import type { AuthorizationContextWorkspaceView, AuthorizationPurpose } from '@ppt/domain';
+import type { DataRepairEntitySnapshot, DataRepairIssue, DataRepairOperation, DataRepairWorkspaceView } from '@ppt/domain';
+import type { LoginWithWindowsHelloInput, WindowsHelloAuthenticationOutcome, WindowsHelloEnrollmentView, WindowsHelloStateView } from '@ppt/domain';
+import type { CoreServiceHealthContract } from '@ppt/core-service-contracts';
+
+type ReleaseChannel = 'bronze' | 'silver' | 'gold';
+const releaseChannelFromStage = (stage: string): ReleaseChannel => {
+  const normalized = stage.toLocaleLowerCase('tr-TR');
+  if (normalized.includes('gold')) return 'gold';
+  if (normalized.includes('silver')) return 'silver';
+  return 'bronze';
+};
+
+type ScreenId =
+  | 'dashboard'
+  | 'family'
+  | 'households'
+  | 'people-lifecycle'
+  | 'tree'
+  | 'timeline'
+  | 'important-days'
+  | 'archive'
+  | 'finance'
+  | 'health'
+  | 'life-center'
+  | 'automation'
+  | 'reports'
+  | 'location'
+  | 'invitations'
+  | 'data-repair'
+  | 'windows-hello'
+  | 'permissions'
+  | 'ai'
+  | 'legacy'
+  | 'security'
+  | 'settings';
+
+const navItems: Array<{ id: ScreenId; label: string; icon: string }> = [
+  { id: 'dashboard', label: 'Gösterge Paneli', icon: '⌂' },
+  { id: 'family', label: 'Aile', icon: '♙' },
+  { id: 'households', label: 'Haneler ve Dallar', icon: '⌑' },
+  { id: 'people-lifecycle', label: 'Kişi Profilleri', icon: '♙' },
+  { id: 'tree', label: 'Soy Ağacı', icon: '⌘' },
+  { id: 'timeline', label: 'Zaman Tüneli', icon: '◷' },
+  { id: 'important-days', label: 'Önemli Günler', icon: '□' },
+  { id: 'archive', label: 'Arşiv', icon: '▣' },
+  { id: 'finance', label: 'Finans', icon: '₺' },
+  { id: 'health', label: 'Sağlık', icon: '♡' },
+  { id: 'life-center', label: 'Yaşam Merkezi', icon: '◇' },
+  { id: 'automation', label: 'Bildirim ve Otomasyon', icon: '◉' },
+  { id: 'reports', label: 'Raporlama', icon: '▤' },
+  { id: 'location', label: 'Konum', icon: '⌖' },
+  { id: 'invitations', label: 'Davetler', icon: '✉' },
+  { id: 'data-repair', label: 'Veri Onarma Merkezi', icon: '⌁' },
+  { id: 'windows-hello', label: 'Windows Hello', icon: '◎' },
+  { id: 'permissions', label: 'Bağlamsal Yetkiler', icon: '♧' },
+  { id: 'ai', label: 'Yapay Zekâ', icon: '✣' },
+  { id: 'legacy', label: 'Dijital Miras', icon: '♜' },
+  { id: SECURITY_CENTER_ROUTE, label: SECURITY_CENTER_LABEL, icon: '⛨' },
+  { id: 'settings', label: 'Sistem ve Bakım', icon: '⚙' }
+];
+
+const navGroups: Array<{ label: string; items: ScreenId[] }> = [
+  { label: 'Ana Merkez', items: ['dashboard'] },
+  { label: 'Aile Hafızası', items: ['family', 'households', 'people-lifecycle', 'tree', 'timeline', 'important-days', 'archive'] },
+  { label: 'Yaşam', items: ['finance', 'health', 'life-center', 'automation', 'reports', 'location'] },
+  { label: 'Gizlilik ve Sistem', items: ['invitations', 'data-repair', 'permissions', 'ai', 'legacy', 'windows-hello', 'security', 'settings'] }
+];
+
+type ThemeMode = 'dark' | 'light';
+
+const readTheme = (): ThemeMode =>
+  globalThis.localStorage?.getItem('ppt-theme') === 'light' ? 'light' : 'dark';
+
+const readSidebarState = (): boolean =>
+  globalThis.localStorage?.getItem('ppt-sidebar-collapsed') === 'true';
+
+const readAccessibilityPreferences = (): AccessibilityPreferences =>
+  parseAccessibilityPreferences(globalThis.localStorage?.getItem('ppt-accessibility') ?? null, {
+    highContrast: globalThis.matchMedia?.('(prefers-contrast: more)').matches ?? false,
+    reduceMotion: globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+  });
+
+const shellPreviewMode = import.meta.env.DEV && new URLSearchParams(globalThis.location?.search ?? '').has('shell-preview');
+
+const fallbackSnapshot: FamilyAppSnapshot = {
+  family: { id: 'family-main', name: 'Ailem' },
+  people: [],
+  relations: [],
+  locations: [],
+  events: [],
+  notifications: [],
+  lastUpdatedAt: new Date().toISOString()
+};
+
+const snapshotFromOverview = (overview: DashboardOverviewView): FamilyAppSnapshot => ({
+  family: overview.family,
+  people: [],
+  relations: [],
+  locations: [],
+  events: [],
+  notifications: [],
+  lastUpdatedAt: overview.lastActivityAt
+});
+
+const mergeSnapshotPatch = (current: FamilyAppSnapshot, patch: FamilySnapshotPatchView): FamilyAppSnapshot => ({
+  family: patch.family,
+  people: patch.people ? [...patch.people] : current.people,
+  relations: patch.relations ? [...patch.relations] : current.relations,
+  locations: patch.locations ? [...patch.locations] : current.locations,
+  events: patch.events ? [...patch.events] : current.events,
+  notifications: patch.notifications ? [...patch.notifications] : current.notifications,
+  lastUpdatedAt: patch.lastUpdatedAt
+});
+
+const formatDate = (iso: string, options?: Intl.DateTimeFormatOptions): string =>
+  new Intl.DateTimeFormat('tr-TR', options ?? { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(iso));
+
+const yearsOld = (birthDate?: string): string => {
+  if (!birthDate) return 'Yaş bilgisi yok';
+  const today = new Date();
+  const birth = new Date(birthDate);
+  let age = today.getFullYear() - birth.getFullYear();
+  if (today < new Date(today.getFullYear(), birth.getMonth(), birth.getDate())) age -= 1;
+  return `${age} yaş`;
+};
+
+
+const fallbackDashboardOverview = (snapshot: FamilyAppSnapshot): DashboardOverviewView => {
+  const now = Date.now();
+  const upcoming = snapshot.events.filter((event) => event.kind === 'important_day' && new Date(event.startAt).getTime() >= now).toSorted((a,b)=>a.startAt.localeCompare(b.startAt));
+  const moduleCount = (id: DashboardOverviewView['modules'][number]['id']): number => ({
+    family:snapshot.people.length, tree:snapshot.relations.length, timeline:snapshot.events.length,
+    'important-days':snapshot.events.filter((event)=>event.kind==='important_day').length, archive:0, finance:0, health:0,
+    'life-center':0, automation:0, reports:snapshot.events.length, location:snapshot.locations.length, permissions:1, ai:0, legacy:0, settings:1
+  })[id];
+  const labels: Record<DashboardOverviewView['modules'][number]['id'],string> = {
+    family:'Aile',tree:'Soy Ağacı',timeline:'Zaman Tüneli','important-days':'Önemli Günler',archive:'Arşiv',finance:'Finans',health:'Sağlık',
+    'life-center':'Yaşam Merkezi',automation:'Bildirim ve Otomasyon',reports:'Raporlama',location:'Konum',permissions:'Yetkiler',ai:'Yapay Zekâ',legacy:'Dijital Miras',settings:'Ayarlar'
+  };
+  return {
+    family:snapshot.family, memberCount:snapshot.people.length, generationCount:new Set(snapshot.people.map((person)=>person.generation)).size,
+    upcomingImportantDayCount:upcoming.length, ...(upcoming[0]?{nextImportantDayInDays:Math.max(0,Math.ceil((new Date(upcoming[0].startAt).getTime()-now)/86_400_000))}:{}),
+    timelineEventCount:snapshot.events.length, relatedContentCount:snapshot.events.reduce((sum,event)=>sum+event.attachmentCount,0), notificationCount:snapshot.notifications.length,
+    upcomingImportantDays:upcoming.slice(0,6), recentEvents:snapshot.events.toSorted((a,b)=>b.startAt.localeCompare(a.startAt)).slice(0,4),
+    modules:(Object.keys(labels) as Array<keyof typeof labels>).map((id)=>({id,label:labels[id],recordCount:moduleCount(id),state:moduleCount(id)>0?'ready':'empty',detail:moduleCount(id)>0?'Modül verisi hazır':'Kayıt bekleniyor'})),
+    generatedAt:new Date().toISOString(), lastActivityAt:snapshot.lastUpdatedAt
+  };
+};
+
+function Dashboard({ overview, onNavigate, onAddMember, onAddImportantDay }: { overview: DashboardOverviewView; onNavigate: (id: ScreenId) => void; onAddMember:()=>void; onAddImportantDay:()=>void }) {
+  const readyModules = overview.modules.filter((module) => module.state === 'ready').length;
+  const attentionModules = overview.modules.filter((module) => module.state === 'attention');
+  const moduleCount=(id:DashboardOverviewView['modules'][number]['id'])=>overview.modules.find(module=>module.id===id)?.recordCount??0;
+  const justStarted=overview.memberCount===1&&moduleCount('tree')===0&&moduleCount('timeline')===0&&moduleCount('location')===0;
+  if(justStarted)return <>
+    <PageHeader eyebrow={overview.family.name} title="Aile alanınız hazır" description="İlk kayıtları birlikte oluşturalım. Eklediğiniz her bilgi yalnız bu bilgisayarda saklanır."/>
+    <section className="welcome-panel panel">
+      <div className="welcome-copy"><span className="eyebrow">Hoş geldiniz</span><h2>Aile hikâyeniz burada başlıyor.</h2><p>Önce aile üyelerinizi ekleyin, aralarındaki bağları kurun; ardından önemli günleri ve anıları kaydedin.</p><div className="welcome-actions"><Button tone="primary" onClick={onAddMember}>＋ İlk aile üyesini ekle</Button><Button onClick={onAddImportantDay}>□ Önemli gün oluştur</Button></div></div>
+      <div className="welcome-mark" aria-hidden="true"><span>♙</span><i/><span>♙</span><i/><span>♙</span></div>
+    </section>
+    <section className="onboarding-grid">
+      <button className="onboarding-card done" onClick={()=>onNavigate('family')}><span>✓</span><small>1. adım</small><strong>Aile alanı oluşturuldu</strong><p>Yerel yönetici profiliniz güvenli biçimde hazır.</p></button>
+      <button className="onboarding-card active" onClick={onAddMember}><span>＋</span><small>2. adım</small><strong>Aile üyelerini ekleyin</strong><p>Eş, çocuk, anne, baba ve diğer yakınlarınızı kaydedin.</p></button>
+      <button className="onboarding-card" onClick={()=>onNavigate('tree')}><span>⌘</span><small>3. adım</small><strong>Aile bağlarını kurun</strong><p>Kişileri birbirine bağlayarak soy ağacınızı oluşturun.</p></button>
+      <button className="onboarding-card" onClick={onAddImportantDay}><span>□</span><small>4. adım</small><strong>İlk önemli günü ekleyin</strong><p>Doğum günü, buluşma ve özel anları unutmayın.</p></button>
+    </section>
+    <section className="privacy-reminder panel"><span>◉</span><div><strong>Yerel ve size ait</strong><p>Bulut hesabı yok. E-posta girişi yok. Verileriniz sizin belirlediğiniz yedekler dışında bu bilgisayardan ayrılmaz.</p></div><Button onClick={()=>onNavigate('settings')}>Yedeklemeyi ayarla</Button></section>
+  </>;
+  return (
+    <>
+      <PageHeader eyebrow={overview.family.name} title="Aile yaşamı panosu" description="Ailenizin kayıtları, yaklaşan günleri ve dijital hafızası tek yerde." />
+      <section className="metric-grid">
+        <article className="metric-card"><span className="metric-icon blue">♙</span><div><small>Aile üyeleri</small><strong>{overview.memberCount}</strong><p>{overview.generationCount} nesil kayıtlı</p></div></article>
+        <article className="metric-card"><span className="metric-icon red">□</span><div><small>Yaklaşan önemli gün</small><strong>{overview.upcomingImportantDayCount}</strong><p>{overview.nextImportantDayInDays === undefined ? 'Yeni kayıt bekleniyor' : `${overview.nextImportantDayInDays} gün içinde`}</p></div></article>
+        <article className="metric-card"><span className="metric-icon green">◷</span><div><small>Zaman tüneli</small><strong>{overview.timelineEventCount}</strong><p>Kişisel ve aile olayları</p></div></article>
+        <article className="metric-card"><span className="metric-icon amber">▣</span><div><small>İlişkili içerik</small><strong>{overview.relatedContentCount}</strong><p>Fotoğraf, davetiye, belge ve arşiv</p></div></article>
+      </section>
+      <section className="dashboard-grid">
+        <article className="panel upcoming-card">
+          <div className="panel-heading"><div><span className="eyebrow">Takvim</span><h2>Yaklaşan önemli günler</h2></div><button className="text-button" onClick={() => onNavigate('important-days')}>Tümünü gör</button></div>
+          <div className="stack-list">
+            {overview.upcomingImportantDays.length === 0 && <EmptyState title="Yaklaşan gün yok" body="Yeni bir önemli gün ekleyerek başlayın." />}
+            {overview.upcomingImportantDays.slice(0, 4).map((event) => <EventListItem event={event} key={event.id} />)}
+          </div>
+        </article>
+        <article className="panel timeline-card">
+          <div className="panel-heading"><div><span className="eyebrow">Aile hafızası</span><h2>Son zaman tüneli kayıtları</h2></div><button className="text-button" onClick={() => onNavigate('timeline')}>Zaman tüneline git</button></div>
+          <div className="mini-timeline">
+            {overview.recentEvents.map((event) => (
+              <div className="mini-timeline-row" key={event.id}><span className="timeline-dot" /><time>{formatDate(event.startAt)}</time><div><strong>{event.title}</strong><p>{event.description}</p><small>⌖ {event.locationLabel ?? 'Konum eklenmemiş'} · {event.attachmentCount} içerik</small></div></div>
+            ))}
+          </div>
+        </article>
+        <article className="panel ai-card">
+          <div className="ai-orb">✣</div><span className="eyebrow">Ana merkez durumu</span><h2>{readyModules}/{overview.modules.length} modül veri almaya hazır</h2>
+          <p>{attentionModules.length > 0 ? `${attentionModules.length} modül dikkat bekliyor.` : 'Kritik bekleyen modül uyarısı bulunmuyor.'}</p>
+          <div className="module-readiness">{overview.modules.slice(0,6).map((module)=><button key={module.id} onClick={()=>onNavigate(module.id as ScreenId)}><span className={`module-state ${module.state}`} /> <strong>{module.label}</strong><small>{module.detail}</small></button>)}</div>
+          <Button onClick={() => onNavigate('settings')}>Sistem merkezini aç</Button>
+        </article>
+        <article className="panel quick-actions">
+          <span className="eyebrow">Hızlı işlemler</span><h2>Bugün ne yapmak istersiniz?</h2>
+          <button onClick={() => onNavigate('family')}><span>＋</span><div><strong>Aile üyesi ekle</strong><small>Kişi ve üyelik kaydı</small></div></button>
+          <button onClick={() => onNavigate('important-days')}><span>□</span><div><strong>Önemli gün oluştur</strong><small>Yer, davetiye ve katılımcılar</small></div></button>
+          <button onClick={() => onNavigate('tree')}><span>⌘</span><div><strong>Soy ağacını incele</strong><small>Nesiller ve aile dalları</small></div></button>
+        </article>
+      </section>
+    </>
+  );
+}
+
+function EventListItem({ event, selected, onClick }: { event: FamilyEventView; selected?: boolean; onClick?: () => void }) {
+  const date = new Date(event.startAt);
+  return (
+    <button className={`event-list-item ${selected ? 'selected' : ''}`} onClick={onClick}>
+      <span className="calendar-tile"><small>{date.toLocaleDateString('tr-TR', { month: 'short' }).toLocaleUpperCase('tr-TR')}</small><strong>{date.getDate()}</strong></span>
+      <span className="event-copy"><strong>{event.title}</strong><small>{formatDate(event.startAt, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</small></span>
+      <span className="event-location">⌖ {event.locationLabel ?? 'Konum yok'}</span>
+    </button>
+  );
+}
+
+const mergeCatalogItems = <T extends { id: string }>(...groups: ReadonlyArray<readonly T[]>): T[] => {
+  const byId = new Map<string, T>();
+  for (const group of groups) for (const item of group) byId.set(item.id, item);
+  return [...byId.values()];
+};
+
+function usePersonCatalogData(query: string, selectedIds: readonly string[] = [], fallbackPeople: readonly FamilyMemberView[] = [], revision = 0) {
+  const [items, setItems] = useState<FamilyMemberView[]>([]);
+  const [nextCursor, setNextCursor] = useState<string>();
+  const [hasMore, setHasMore] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const guardRef = useRef(new AsyncWriteGuard());
+  const selectedKey = selectedIds.join('|');
+  const load = async (reset: boolean, cursor?: string) => {
+    const ticket = guardRef.current.start('person-page');
+    setLoading(true); setError('');
+    try {
+      if (window.pardus) {
+        const page = await window.pardus.listPersonCatalog({ limit: 30, ...(query.trim() ? { query: query.trim() } : {}), ...(cursor ? { cursor } : {}) });
+        guardRef.current.commit(ticket, () => {
+          setItems((current) => reset ? mergeCatalogItems(current.filter((item) => selectedIds.includes(item.id)), page.items) : mergeCatalogItems(current, page.items));
+          setNextCursor(page.nextCursor); setHasMore(page.hasMore);
+        });
+      } else {
+        const normalized = query.trim().toLocaleLowerCase('tr-TR');
+        const matches = fallbackPeople.filter((person) => !normalized || person.displayName.toLocaleLowerCase('tr-TR').includes(normalized)).slice(0, 100);
+        guardRef.current.commit(ticket, () => {
+          setItems((current) => mergeCatalogItems(current.filter((item) => selectedIds.includes(item.id)), matches));
+          setNextCursor(undefined); setHasMore(false);
+        });
+      }
+    } catch (caught) {
+      guardRef.current.commit(ticket, () => setError(caught instanceof Error ? caught.message : 'Kişi kataloğu yüklenemedi.'));
+    } finally {
+      guardRef.current.commit(ticket, () => setLoading(false));
+    }
+  };
+  useEffect(() => {
+    guardRef.current.invalidate('person-page');
+    const timer = globalThis.setTimeout(() => { void load(true); }, 220);
+    return () => { globalThis.clearTimeout(timer); guardRef.current.invalidate('person-page'); };
+  }, [query, revision]);
+  useEffect(() => {
+    guardRef.current.invalidate('person-lookup');
+    if (!window.pardus || !selectedIds.length) return;
+    const missing = selectedIds.filter((id) => !items.some((item) => item.id === id));
+    if (!missing.length) return;
+    const ticket = guardRef.current.start('person-lookup');
+    void window.pardus.lookupEntityCatalog({ personIds: missing }).then((result) => {
+      guardRef.current.commit(ticket, () => setItems((current) => mergeCatalogItems(current, result.people)));
+    }).catch((caught) => {
+      guardRef.current.commit(ticket, () => setError(caught instanceof Error ? caught.message : 'Seçili kişiler çözümlenemedi.'));
+    });
+    return () => { guardRef.current.invalidate('person-lookup'); };
+  }, [selectedKey]);
+  useEffect(() => () => guardRef.current.invalidateAll(), []);
+  return { items, nextCursor, hasMore, loading, error, reload: () => load(true), loadMore: () => nextCursor ? load(false, nextCursor) : Promise.resolve() };
+}
+
+function PersonCatalogSelect({ label, value, onChange, allowEmpty = false, excludeIds = [], fallbackPeople = [] }: { label: string; value: string; onChange: (value: string) => void; allowEmpty?: boolean; excludeIds?: readonly string[]; fallbackPeople?: readonly FamilyMemberView[] }) {
+  const [query, setQuery] = useState('');
+  const catalog = usePersonCatalogData(query, value ? [value] : [], fallbackPeople);
+  const options = catalog.items.filter((person) => person.id === value || !excludeIds.includes(person.id));
+  useEffect(() => { if (!value && !allowEmpty && options[0]) onChange(options[0].id); }, [options.length, value, allowEmpty]);
+  return <div className="catalog-field"><label>{label}<input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Kişi ara…"/></label><select value={value} onChange={(event) => onChange(event.target.value)}>{allowEmpty&&<option value="">Seçim yok</option>}{options.map((person)=><option key={person.id} value={person.id}>{person.displayName} · {person.relationshipType}</option>)}</select>{catalog.error&&<small className="catalog-error">{catalog.error}</small>}{catalog.hasMore&&<button type="button" className="catalog-more" disabled={catalog.loading} onClick={()=>void catalog.loadMore()}>{catalog.loading?'Yükleniyor…':'Daha fazla kişi'}</button>}</div>;
+}
+
+function PersonCatalogMultiPicker({ selectedIds, onChange, fallbackPeople = [] }: { selectedIds: readonly string[]; onChange: (ids: string[]) => void; fallbackPeople?: readonly FamilyMemberView[] }) {
+  const [query, setQuery] = useState('');
+  const catalog = usePersonCatalogData(query, selectedIds, fallbackPeople);
+  const toggle = (id: string) => onChange(selectedIds.includes(id) ? selectedIds.filter((item) => item !== id) : [...selectedIds, id]);
+  const selectedPeople = selectedIds.map((id) => catalog.items.find((item) => item.id === id)).filter((item): item is FamilyMemberView => Boolean(item));
+  return <fieldset className="span-2 participant-fieldset catalog-participants"><legend>Katılımcılar</legend><input type="search" value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="Katılımcı ara…" aria-label="Katılımcı ara"/><div className="catalog-selected">{selectedPeople.map((person)=><button type="button" key={person.id} onClick={()=>toggle(person.id)}>{person.displayName} ×</button>)}</div><div className="catalog-options">{catalog.items.map((person)=><label key={person.id}><input type="checkbox" checked={selectedIds.includes(person.id)} onChange={()=>toggle(person.id)}/>{person.displayName}</label>)}</div>{catalog.error&&<small className="catalog-error">{catalog.error}</small>}{catalog.hasMore&&<button type="button" className="catalog-more" disabled={catalog.loading} onClick={()=>void catalog.loadMore()}>{catalog.loading?'Yükleniyor…':'Daha fazla kişi'}</button>}</fieldset>;
+}
+
+function EventCatalogSelect({ label, value, onChange, allowEmpty = true, archiveMode = 'all', fallbackEvents = [] }: { label: string; value: string; onChange: (value: string) => void; allowEmpty?: boolean; archiveMode?: 'active'|'archived'|'all'; fallbackEvents?: readonly FamilyEventView[] }) {
+  const [query,setQuery]=useState(''); const [items,setItems]=useState<EventCatalogItemView[]>([]); const [nextCursor,setNextCursor]=useState<string>(); const [hasMore,setHasMore]=useState(false); const [loading,setLoading]=useState(false); const [error,setError]=useState(''); const guardRef=useRef(new AsyncWriteGuard());
+  const load=async(reset:boolean,cursor?:string)=>{const ticket=guardRef.current.start('event-page');setLoading(true);setError('');try{if(window.pardus){const page=await window.pardus.listEventCatalog({limit:30,archiveMode,...(query.trim()?{query:query.trim()}:{}),...(cursor?{cursor}:{})});guardRef.current.commit(ticket,()=>{setItems(current=>reset?mergeCatalogItems(current.filter(item=>item.id===value),page.items):mergeCatalogItems(current,page.items));setNextCursor(page.nextCursor);setHasMore(page.hasMore);});}else{const normalized=query.trim().toLocaleLowerCase('tr-TR');const rows=fallbackEvents.filter(event=>!normalized||event.title.toLocaleLowerCase('tr-TR').includes(normalized)).slice(0,100).map(event=>({id:event.id,title:event.title,kind:event.kind,startAt:event.startAt,...(event.archivedAt?{archivedAt:event.archivedAt}:{})}));guardRef.current.commit(ticket,()=>{setItems(current=>mergeCatalogItems(current.filter(item=>item.id===value),rows));setNextCursor(undefined);setHasMore(false);});}}catch(caught){guardRef.current.commit(ticket,()=>setError(caught instanceof Error?caught.message:'Olay kataloğu yüklenemedi.'));}finally{guardRef.current.commit(ticket,()=>setLoading(false));}};
+  useEffect(()=>{guardRef.current.invalidate('event-page');const timer=globalThis.setTimeout(()=>void load(true),220);return()=>{globalThis.clearTimeout(timer);guardRef.current.invalidate('event-page');};},[query,archiveMode]);
+  useEffect(()=>{guardRef.current.invalidate('event-lookup');if(!window.pardus||!value||items.some(item=>item.id===value))return;const ticket=guardRef.current.start('event-lookup');void window.pardus.lookupEntityCatalog({eventIds:[value]}).then(result=>{guardRef.current.commit(ticket,()=>setItems(current=>mergeCatalogItems(current,result.events)));}).catch(caught=>{guardRef.current.commit(ticket,()=>setError(caught instanceof Error?caught.message:'Seçili olay çözümlenemedi.'));});return()=>{guardRef.current.invalidate('event-lookup');};},[value]);
+  useEffect(()=>()=>guardRef.current.invalidateAll(),[]);
+  return <div className="catalog-field"><label>{label}<input type="search" value={query} onChange={event=>setQuery(event.target.value)} placeholder="Olay ara…"/></label><select value={value} onChange={event=>onChange(event.target.value)}>{allowEmpty&&<option value="">Tüm olaylar</option>}{items.map(item=><option key={item.id} value={item.id}>{item.title} · {formatDate(item.startAt,{dateStyle:'short'})}</option>)}</select>{error&&<small className="catalog-error">{error}</small>}{hasMore&&<button type="button" className="catalog-more" disabled={loading} onClick={()=>void load(false,nextCursor)}>{loading?'Yükleniyor…':'Daha fazla olay'}</button>}</div>;
+}
+
+function FamilyScreen({ onAdd, revision = 0 }: { onAdd: () => void; revision?: number }) {
+  const [query,setQuery]=useState(''); const [selectedId,setSelectedId]=useState(''); const catalog=usePersonCatalogData(query,selectedId?[selectedId]:[],[],revision); const selected=catalog.items.find(person=>person.id===selectedId)??catalog.items[0]; const [relatedEvents,setRelatedEvents]=useState<EventCatalogItemView[]>([]); const [relatedError,setRelatedError]=useState(''); const relatedGuardRef=useRef(new AsyncWriteGuard());
+  useEffect(()=>{if(!selectedId&&catalog.items[0])setSelectedId(catalog.items[0].id);},[catalog.items.length,selectedId]);
+  useEffect(()=>{relatedGuardRef.current.invalidate('related-events');if(!selected){setRelatedEvents([]);return;}const ticket=relatedGuardRef.current.start('related-events');setRelatedError('');void (async()=>{try{if(window.pardus){const page=await window.pardus.listEventCatalog({limit:10,personId:selected.id,archiveMode:'active'});relatedGuardRef.current.commit(ticket,()=>setRelatedEvents(page.items));}else relatedGuardRef.current.commit(ticket,()=>setRelatedEvents([]));}catch(caught){relatedGuardRef.current.commit(ticket,()=>setRelatedError(caught instanceof Error?caught.message:'İlişkili olaylar yüklenemedi.'));}})();return()=>relatedGuardRef.current.invalidate('related-events');},[selected?.id,revision]);
+  useEffect(()=>()=>relatedGuardRef.current.invalidateAll(),[]);
+  return <><PageHeader eyebrow="Aile kimliği" title="Aile üyeleri" description="Kişiler arama destekli katalogdan sınırlı sayfalar hâlinde yüklenir; seçim sırasında tüm aile listesi belleğe alınmaz." actions={<Button tone="primary" onClick={onAdd}>＋ Üye ekle</Button>}/><section className="family-layout"><article className="panel member-list-panel"><div className="panel-heading"><div><span className="eyebrow">{catalog.items.length} kişi yüklendi</span><h2>Üyeler</h2></div></div><input className="catalog-search" type="search" value={query} onChange={event=>setQuery(event.target.value)} placeholder="Aile üyesi ara…"/><div className="member-list">{catalog.items.map(person=><button className={selected?.id===person.id?'selected':''} key={person.id} onClick={()=>setSelectedId(person.id)}><span className="person-avatar">{person.initials}</span><span><strong>{person.displayName}</strong><small>{person.relationshipType} · {yearsOld(person.birthDate)}</small></span><i className="status-dot"/></button>)}</div>{catalog.error&&<StatusMessage tone="danger">{catalog.error}</StatusMessage>}{catalog.hasMore&&<div className="large-data-load-more"><Button disabled={catalog.loading} onClick={()=>void catalog.loadMore()}>{catalog.loading?'Yükleniyor…':'Sonraki 30 kişiyi yükle'}</Button></div>}</article>{selected&&<article className="panel person-detail"><div className="person-hero"><span className="person-avatar xl">{selected.initials}</span><div><span className="tag success">Aktif üye</span><h2>{selected.displayName}</h2><p>{selected.relationshipType} · {selected.branch}</p></div></div><div className="detail-grid"><div><small>Doğum tarihi</small><strong>{selected.birthDate?formatDate(selected.birthDate):'Belirtilmedi'}</strong></div><div><small>Nesil</small><strong>{selected.generation}. nesil</strong></div><div><small>Aile dalı</small><strong>{selected.branch}</strong></div><div><small>Durum</small><strong>Aktif</strong></div></div><div className="related-events"><div className="panel-heading"><div><span className="eyebrow">Sınırlı katalog</span><h3>İlişkili olaylar</h3></div></div>{relatedEvents.map(event=><div className="catalog-event-row" key={event.id}><strong>{event.title}</strong><small>{formatDate(event.startAt,{dateStyle:'medium'})}</small></div>)}{!relatedEvents.length&&!relatedError&&<small>İlişkili olay bulunamadı.</small>}{relatedError&&<StatusMessage tone="danger">{relatedError}</StatusMessage>}</div></article>}</section></>;
+}
+
+function TreeScreen({ snapshot, onAddRelation }: { snapshot: FamilyAppSnapshot; onAddRelation: () => void }) {
+  const [zoom, setZoom] = useState(1);
+  const [insights,setInsights]=useState<GenealogyInsightView>();
+  const [items,setItems]=useState<GenealogyTreeNodeView[]>([]);
+  const [query,setQuery]=useState('');
+  const [branch,setBranch]=useState('');
+  const [generation,setGeneration]=useState('');
+  const [nextCursor,setNextCursor]=useState<string>();
+  const [hasMore,setHasMore]=useState(false);
+  const [loadingPage,setLoadingPage]=useState(false);
+  const [pageMessage,setPageMessage]=useState('');
+  const [metrics,setMetrics]=useState<{returned:number;scanned:number;queryDurationMs:number;limit:number}>();
+  const guardRef=useRef(new AsyncWriteGuard());
+  const branchOptions=[...new Set(snapshot.people.map(person=>person.branch))].toSorted((a,b)=>a.localeCompare(b,'tr-TR'));
+  const generationOptions=[...new Set(snapshot.people.map(person=>person.generation))].toSorted((a,b)=>a-b);
+  const loadPage=async(reset:boolean,cursor?:string)=>{
+    const ticket=guardRef.current.start('tree-page');setLoadingPage(true);setPageMessage('');
+    try{
+      if(window.pardus){
+        const page=await window.pardus.listLargeGenealogyTree({limit:80,...(query.trim()?{query:query.trim()}:{}),...(branch?{branch}:{}),...(generation?{generation:Number(generation)}:{}),...(cursor?{cursor}:{})});
+        guardRef.current.commit(ticket,()=>{setItems(current=>reset?page.items:[...current,...page.items]);setNextCursor(page.nextCursor);setHasMore(page.hasMore);setMetrics(page.metrics);});
+      }else{
+        const fallback=snapshot.people.filter(person=>!query.trim()||person.displayName.toLocaleLowerCase('tr-TR').includes(query.trim().toLocaleLowerCase('tr-TR'))).filter(person=>!branch||person.branch===branch).filter(person=>!generation||person.generation===Number(generation)).slice(0,200).map(person=>({...person,relationCount:snapshot.relations.filter(relation=>relation.fromPersonId===person.id||relation.toPersonId===person.id).length,parentCount:0,childCount:0}));
+        guardRef.current.commit(ticket,()=>{setItems(fallback);setNextCursor(undefined);setHasMore(false);setMetrics({returned:fallback.length,scanned:fallback.length,queryDurationMs:0,limit:200});});
+      }
+    }catch(error){guardRef.current.commit(ticket,()=>setPageMessage(error instanceof Error?error.message:'Soy ağacı sayfası yüklenemedi.'));}
+    finally{guardRef.current.commit(ticket,()=>setLoadingPage(false));}
+  };
+  useEffect(()=>{guardRef.current.invalidate('tree-insights');if(!window.pardus)return;const ticket=guardRef.current.start('tree-insights');void window.pardus.getGenealogyInsights().then(value=>{guardRef.current.commit(ticket,()=>setInsights(value));});return()=>guardRef.current.invalidate('tree-insights');},[snapshot.lastUpdatedAt]);
+  useEffect(()=>{guardRef.current.invalidate('tree-page');void loadPage(true);return()=>guardRef.current.invalidate('tree-page');},[snapshot.lastUpdatedAt]);
+  useEffect(()=>()=>guardRef.current.invalidateAll(),[]);
+  const updateZoom = (next: number) => setZoom(Math.min(1.35, Math.max(.7, Number(next.toFixed(2)))));
+  const generations=[...new Set(items.map(person=>person.generation))].toSorted((a,b)=>a-b);
+  return (
+    <>
+      <PageHeader eyebrow={snapshot.family.name} title="Soy ağacı" description="Büyük ailelerde kişi kartları ana işlemciyi yormadan sayfalar hâlinde yüklenir; nesil, dal ve ad filtresi sunucu tarafında uygulanır." actions={<Button tone="primary" onClick={onAddRelation}>＋ İlişki ekle</Button>} />
+      <section className="tree-performance-toolbar panel" aria-label="Büyük soy ağacı filtreleri">
+        <label>Kişi ara<input type="search" value={query} onChange={event=>setQuery(event.target.value)} placeholder="Ad veya soyad"/></label>
+        <label>Aile dalı<select value={branch} onChange={event=>setBranch(event.target.value)}><option value="">Tüm dallar</option>{branchOptions.map(value=><option key={value}>{value}</option>)}</select></label>
+        <label>Nesil<select value={generation} onChange={event=>setGeneration(event.target.value)}><option value="">Tüm nesiller</option>{generationOptions.map(value=><option key={value} value={value}>{value}. nesil</option>)}</select></label>
+        <Button disabled={loadingPage} onClick={()=>void loadPage(true)}>{loadingPage?'Yükleniyor…':'Filtrele'}</Button>
+      </section>
+      {pageMessage&&<StatusMessage tone="danger">{pageMessage}</StatusMessage>}
+      <article className="panel tree-canvas">
+        <div className="tree-toolbar"><span>{items.length} kişi yüklendi · {generations.length} nesil · {new Set(items.map(person=>person.branch)).size} görünür dal{metrics?` · ${metrics.queryDurationMs} ms`:''}</span><div><button type="button" aria-label="Uzaklaştır" onClick={()=>updateZoom(zoom-.1)}>−</button><output aria-label="Yakınlaştırma oranı">%{Math.round(zoom*100)}</output><button type="button" aria-label="Yakınlaştır" onClick={()=>updateZoom(zoom+.1)}>＋</button><button type="button" aria-label="Yakınlaştırmayı sıfırla" onClick={()=>setZoom(1)}>⌗</button></div></div>
+        <div className="generations large-tree-window" style={{transform:`scale(${zoom})`,transformOrigin:'top left',width:`${100/zoom}%`}}>
+          {generations.map(generationValue=>(
+            <div className="generation-row" key={generationValue}>
+              <div className="generation-label"><strong>{generationValue}. Nesil</strong><small>{generationValue===1?'Kök kuşak':`${generationValue-1}. alt kuşak`}</small></div>
+              <div className="generation-members">
+                {items.filter(person=>person.generation===generationValue).map(person=><article className="tree-person" key={person.id}><span className="person-avatar">{person.initials}</span><div><strong>{person.displayName}</strong><small>{person.birthDate?.slice(0,4)??'?'} — {person.relationshipType}</small><small>{person.branch} · {person.relationCount} bağlantı</small></div><i className="status-dot"/></article>)}
+              </div>
+            </div>
+          ))}
+          {!items.length&&!loadingPage&&<EmptyState title="Kişi bulunamadı" body="Filtreleri değiştirin veya aile üyesi ekleyin."/>}
+        </div>
+        {hasMore&&<div className="large-data-load-more"><Button disabled={loadingPage||!nextCursor} onClick={()=>void loadPage(false,nextCursor)}>{loadingPage?'Yükleniyor…':'Sonraki 80 kişiyi yükle'}</Button></div>}
+        <div className="evidence-strip"><div><span className="eyebrow">Performans penceresi</span><h3>Yalnız görüntülenen kayıtlar çizilir</h3></div><div className="evidence-cards"><span>⇥ Anahtar tabanlı sayfalama</span><span>⌁ İndeksli nesil sırası</span><span>◫ Sınırlı DOM kartı</span><span>⏱ Ölçümlü sorgu</span></div></div>
+      </article>
+      <section className="insight-grid">
+        <Surface><SectionHeader eyebrow="Soy analizi" title="Aile dalları"/>{insights?.branches.length?insights.branches.map(branchItem=><StatRow key={branchItem.name} value={branchItem.members} label={branchItem.name}/>):<EmptyState title="Dal analizi bekleniyor" body="Üyeleri ve ilişkileri ekledikçe aile dalları burada oluşur"/>}</Surface>
+        <Surface><SectionHeader eyebrow="Bütünlük" title="Bağlantı denetimi"/><StatRow value={insights?.missingParentLinks.length??0} label="Eksik ebeveyn bağlantısı"/><StatRow value={insights?.integrity?.cyclePersonIds.length??0} label="Döngüsel ilişki"/><StatRow value={insights?.integrity?.brokenRelationIds.length??0} label="Bozuk ilişki"/><StatusMessage tone={(insights?.integrity?.cyclePersonIds.length??0)+(insights?.integrity?.brokenRelationIds.length??0)===0?'success':'warning'}>{(insights?.integrity?.cyclePersonIds.length??0)+(insights?.integrity?.brokenRelationIds.length??0)===0?'Soy ağacı bağlantıları tutarlı.':'Bağlantılarda incelenmesi gereken kayıtlar var.'}</StatusMessage></Surface>
+      </section>
+    </>
+  );
+}
+
+function TimelineScreen({ snapshot, onEdit, onArchive, onOpenArchive }: { snapshot: FamilyAppSnapshot; onEdit: (event: FamilyEventView) => void; onArchive: (eventId: string) => Promise<void>; onOpenArchive: (eventId: string) => void }) {
+  const [filter,setFilter]=useState<'family'|'personal'>('family');
+  const [personId,setPersonId]=useState(snapshot.people[0]?.id??'');
+  const [query,setQuery]=useState('');
+  const [kind,setKind]=useState('all');
+  const [year,setYear]=useState('all');
+  const [events,setEvents]=useState<FamilyEventView[]>([]);
+  const [nextCursor,setNextCursor]=useState<string>();
+  const [hasMore,setHasMore]=useState(false);
+  const [metrics,setMetrics]=useState<{returned:number;scanned:number;queryDurationMs:number;limit:number}>();
+  const [busyId,setBusyId]=useState('');
+  const [loadingPage,setLoadingPage]=useState(false);
+  const [error,setError]=useState('');
+  const guardRef=useRef(new AsyncWriteGuard());
+  const currentYear=new Date().getFullYear();
+  const years=Array.from({length:16},(_,index)=>String(currentYear-index));
+  const kinds=[...new Set(['important_day',...snapshot.events.map(event=>event.kind)])].toSorted();
+  const loadPage=async(reset:boolean,cursor?:string)=>{
+    const ticket=guardRef.current.start('timeline-page');setLoadingPage(true);setError('');
+    try{
+      if(window.pardus){
+        const page=await window.pardus.listLargeTimeline({limit:80,...(query.trim()?{query:query.trim()}:{}),...(filter==='personal'&&personId?{personId}:{}),...(kind!=='all'?{kind}:{}),...(year!=='all'?{year:Number(year)}:{}),...(cursor?{cursor}:{})});
+        guardRef.current.commit(ticket,()=>{setEvents(current=>reset?page.items:[...current,...page.items]);setNextCursor(page.nextCursor);setHasMore(page.hasMore);setMetrics(page.metrics);});
+      }else{
+        const normalized=query.trim().toLocaleLowerCase('tr-TR');const fallback=snapshot.events.filter(event=>filter==='family'||event.participantPersonIds.includes(personId)).filter(event=>kind==='all'||event.kind===kind).filter(event=>year==='all'||String(new Date(event.startAt).getFullYear())===year).filter(event=>!normalized||[event.title,event.description,event.locationLabel,event.notes].some(value=>value?.toLocaleLowerCase('tr-TR').includes(normalized))).toSorted((a,b)=>b.startAt.localeCompare(a.startAt)).slice(0,200);
+        guardRef.current.commit(ticket,()=>{setEvents(fallback);setNextCursor(undefined);setHasMore(false);setMetrics({returned:fallback.length,scanned:fallback.length,queryDurationMs:0,limit:200});});
+      }
+    }catch(caught){guardRef.current.commit(ticket,()=>setError(caught instanceof Error?caught.message:'Zaman tüneli yüklenemedi.'));}
+    finally{guardRef.current.commit(ticket,()=>setLoadingPage(false));}
+  };
+  useEffect(()=>{guardRef.current.invalidate('timeline-page');void loadPage(true);return()=>guardRef.current.invalidate('timeline-page');},[snapshot.lastUpdatedAt]);
+  useEffect(()=>()=>guardRef.current.invalidateAll(),[]);
+  const archive=async(event:FamilyEventView)=>{if(!confirm(`“${event.title}” arşivlensin mi? Kayıt silinmez ve arşivden geri alınabilir.`))return;setBusyId(event.id);setError('');try{await onArchive(event.id);setEvents(current=>current.filter(item=>item.id!==event.id));}catch(caught){setError(caught instanceof Error?caught.message:'Olay arşivlenemedi.');}finally{setBusyId('');}};
+  const clearFilters=()=>{setQuery('');setKind('all');setYear('all');};
+  return <>
+    <PageHeader eyebrow="Dijital aile hafızası" title="Zaman tüneli" description="Büyük zaman çizgileri anahtar tabanlı sayfalama ile yüklenir; arama ve filtreler SQLite üzerinde uygulanır."/>
+    <div className="segmented"><button className={filter==='personal'?'active':''} onClick={()=>setFilter('personal')}>Kişisel zaman tüneli</button><button className={filter==='family'?'active':''} onClick={()=>setFilter('family')}>Aile zaman tüneli</button></div>
+    <section className="timeline-toolbar panel" aria-label="Zaman tüneli filtreleri">
+      <label className="timeline-search">Kayıtlarda ara<input type="search" value={query} onChange={event=>setQuery(event.target.value)} placeholder="Başlık, açıklama, konum veya not…"/></label>
+      {filter==='personal'&&<PersonCatalogSelect label="Kişi" value={personId} onChange={setPersonId} fallbackPeople={snapshot.people}/>}
+      <label>Olay türü<select value={kind} onChange={event=>setKind(event.target.value)}><option value="all">Tüm türler</option>{kinds.map(value=><option key={value} value={value}>{value==='important_day'?'Önemli gün':value.replaceAll('_',' ')}</option>)}</select></label>
+      <label>Yıl<select value={year} onChange={event=>setYear(event.target.value)}><option value="all">Tüm yıllar</option>{years.map(value=><option key={value}>{value}</option>)}</select></label>
+      <Button disabled={loadingPage} onClick={()=>void loadPage(true)}>{loadingPage?'Süzülüyor…':'Uygula'}</Button>
+      {(query||kind!=='all'||year!=='all')&&<Button onClick={clearFilters}>Temizle</Button>}
+    </section>
+    {error&&<StatusMessage tone="danger">{error}</StatusMessage>}
+    <section className="timeline-layout">
+      <article className="panel full-timeline large-timeline-window">
+        {events.length?events.map((event,index)=><div className="full-timeline-row" key={event.id}><div className="year-marker"><strong>{new Date(event.startAt).getFullYear()}</strong><span className="timeline-dot"/></div><div className="event-date"><strong>{new Date(event.startAt).getDate().toString().padStart(2,'0')}</strong><small>{new Date(event.startAt).toLocaleDateString('tr-TR',{month:'short'})}</small></div><div className="timeline-event-content"><div><span className="tag">{event.kind==='important_day'?'Önemli gün':event.kind.replace('_',' ')}</span><h3>{event.title}</h3><p>{event.description||'Açıklama eklenmemiş.'}</p><div className="timeline-row-actions"><Button onClick={()=>onEdit(event)}>Düzenle</Button><Button onClick={()=>onOpenArchive(event.id)}>Bağlı arşiv</Button><Button tone="danger" disabled={busyId===event.id} onClick={()=>void archive(event)}>{busyId===event.id?'Arşivleniyor…':'Arşivle'}</Button></div></div><div className="timeline-meta"><span>⌖ {event.locationLabel??'Konum yok'}</span><span>♙ {event.participantPersonIds.length} kişi</span><span>▣ {event.attachmentCount} içerik</span><span>{event.aiProcessingAllowed?'✣ AI açık':'⊘ AI kapalı'}</span><span>Güncelleme: {formatDate(event.updatedAt??event.createdAt,{dateStyle:'short'})}</span></div></div>{index<events.length-1&&<span className="timeline-line"/>}</div>):<EmptyState title="Bu ölçütlerde olay bulunamadı" body="Filtreleri temizleyin veya yeni bir önemli gün ekleyin."/>}
+        {hasMore&&<div className="large-data-load-more"><Button disabled={loadingPage||!nextCursor} onClick={()=>void loadPage(false,nextCursor)}>{loadingPage?'Yükleniyor…':'Sonraki 80 olayı yükle'}</Button></div>}
+      </article>
+      <aside className="panel timeline-summary"><span className="eyebrow">Sayfalı özet</span><h2>{filter==='family'?'Aile zaman çizgisi':'Kişisel zaman çizgisi'}</h2><div className="summary-number">{events.length}</div><p>şu anda yüklenen olay</p><hr/><div className="summary-stats"><span><strong>{events.reduce((sum,event)=>sum+event.attachmentCount,0)}</strong> ilişkili içerik</span><span><strong>{new Set(events.map(event=>event.locationLabel).filter(Boolean)).size}</strong> farklı yer</span><span><strong>{metrics?.queryDurationMs??0} ms</strong> son sorgu</span><span><strong>{metrics?.scanned??0}</strong> taranan satır</span></div></aside>
+    </section>
+  </>;
+}
+
+function ImportantDaysScreen({ snapshot, archivedEvents, onAdd, onEdit, onArchive, onRestore, onOpenArchive }: { snapshot: FamilyAppSnapshot; archivedEvents: FamilyEventView[]; onAdd: () => void; onEdit: (event: FamilyEventView) => void; onArchive: (eventId: string) => Promise<void>; onRestore: (eventId: string) => Promise<void>; onOpenArchive:(eventId:string)=>void }) {
+  const events = snapshot.events.filter((event) => event.kind === 'important_day').toSorted((a, b) => a.startAt.localeCompare(b.startAt));
+  const [selectedId, setSelectedId] = useState(events[0]?.id ?? '');
+  const selected = events.find((event) => event.id === selectedId) ?? events[0];
+  const [busyId,setBusyId]=useState(''); const [error,setError]=useState(''); const [showArchived,setShowArchived]=useState(false);
+  useEffect(()=>{if(!selectedId&&events[0])setSelectedId(events[0].id);},[events.length,selectedId]);
+  const participantNames = selected?.participantPersonIds.map((id) => snapshot.people.find((person) => person.id === id)?.displayName).filter(Boolean) ?? [];
+  const archive=async()=>{if(!selected||!confirm(`“${selected.title}” arşivlensin mi?`))return;setBusyId(selected.id);setError('');try{await onArchive(selected.id);setSelectedId('');}catch(caught){setError(caught instanceof Error?caught.message:'Önemli gün arşivlenemedi.');}finally{setBusyId('');}};
+  const restore=async(eventId:string)=>{setBusyId(eventId);setError('');try{await onRestore(eventId);}catch(caught){setError(caught instanceof Error?caught.message:'Kayıt geri alınamadı.');}finally{setBusyId('');}};
+  const archivedImportantDays = archivedEvents.filter((event) => event.kind === 'important_day');
+  return (
+    <>
+      <PageHeader eyebrow="Anılar ve etkinlikler merkezi" title="Önemli günler" description="Bir güne ait tarih, yer, davetiye, katılımcı ve notların tamamını tek kayıtta yönetin." actions={<><Button onClick={()=>setShowArchived((value)=>!value)}>Arşiv ({archivedImportantDays.length})</Button><Button tone="primary" onClick={onAdd}>＋ Yeni ekle</Button></>} />
+      {error&&<StatusMessage tone="danger">{error}</StatusMessage>}
+      {showArchived&&<section className="panel archived-events-panel"><SectionHeader eyebrow="Geri alınabilir kayıtlar" title="Önemli gün arşivi" action={<Button onClick={()=>setShowArchived(false)}>Kapat</Button>}/>{archivedImportantDays.length?<div className="archived-event-list">{archivedImportantDays.map((event)=><article key={event.id}><div><strong>{event.title}</strong><small>{formatDate(event.startAt)} · {event.locationLabel??'Konum yok'}</small><small>Arşivlenme: {formatDate(event.archivedAt??event.updatedAt??event.createdAt,{dateStyle:'medium',timeStyle:'short'})}</small></div><Button disabled={busyId===event.id} onClick={()=>void restore(event.id)}>{busyId===event.id?'Geri alınıyor…':'Geri al'}</Button></article>)}</div>:<EmptyState title="Arşiv boş" body="Arşivlenen önemli günler burada geri alınabilir."/>}</section>}
+      <section className="important-layout">
+        <article className="panel important-list"><div className="panel-heading"><div><span className="eyebrow">Takvim</span><h2>Önemli günler</h2></div></div>{events.map((event) => <EventListItem event={event} key={event.id} selected={selected?.id === event.id} onClick={() => setSelectedId(event.id)} />)}</article>
+        {selected ? <article className="panel event-detail-panel">
+          <div className="event-detail-header"><span className="calendar-tile large"><small>{new Date(selected.startAt).toLocaleDateString('tr-TR', { month: 'short' }).toLocaleUpperCase('tr-TR')}</small><strong>{new Date(selected.startAt).getDate()}</strong></span><div><span className="tag blue">Önemli gün</span><h2>{selected.title}</h2><p>{selected.description||'Açıklama eklenmemiş.'}</p></div><div className="event-header-actions"><Button onClick={()=>onEdit(selected)}>Tüm alanları düzenle</Button><Button tone="danger" disabled={busyId===selected.id} onClick={()=>void archive()}>{busyId===selected.id?'Arşivleniyor…':'Arşivle'}</Button></div></div>
+          <div className="event-facts"><div><small>Tarih ve saat</small><strong>{formatDate(selected.startAt, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</strong></div><div><small>Konum</small><strong>⌖ {selected.locationLabel ?? 'Eklenmemiş'}</strong></div><div><small>Gizlilik</small><strong>{selected.visibility==='family'?'Aileyle paylaşılıyor':selected.visibility==='selected_members'?'Seçili üyeler':'Kişisel'}</strong></div><div><small>Tekrar</small><strong>{selected.recurrence === 'yearly' ? 'Her yıl' : 'Tek sefer'}</strong></div><div><small>Hatırlatma</small><strong>{selected.reminderDays.length ? selected.reminderDays.map((day) => day === 0 ? 'aynı gün' : `${day} gün`).join(', ') : 'Kapalı'}</strong></div></div>
+          <div className="event-content-grid">
+            <section><span className="eyebrow">Davetiye</span><div className="invitation-preview"><span>Anadolu Parsı</span><h3>{selected.title}</h3><p>{selected.invitationText ?? 'Bu etkinlik için davetiye eklenmemiş.'}</p><small>{formatDate(selected.startAt)}</small></div></section>
+            <section><span className="eyebrow">Katılımcılar ({participantNames.length})</span><div className="participant-chips">{participantNames.map((name) => <span key={name}>{name}</span>)}</div></section>
+            <section><span className="eyebrow">İçerikler</span><div className="attachment-overview"><strong>{selected.attachmentCount}</strong><span>fotoğraf, video veya belge</span><Button onClick={()=>onOpenArchive(selected.id)}>Arşivde görüntüle</Button></div></section>
+            <section><span className="eyebrow">Notlar ve anılar</span><div className="notes-card">{selected.notes ?? 'Henüz not eklenmemiş.'}</div></section>
+          </div>
+          <div className="event-milestones"><span className="done">✓ Planlama</span><i /><span className="done">✓ Davetiye</span><i /><span className="active">● Etkinlik günü</span><i /><span>○ Anılar paylaşıldı</span></div>
+        </article> : <EmptyState title="Önemli gün bulunamadı" body="Yeni bir kayıt ekleyin." />}
+      </section>
+    </>
+  );
+}
+
+function ArchiveScreen({ revision, snapshot, eventFilter, onEventFilterChange, onImport, onOpen }: { revision:number; snapshot: FamilyAppSnapshot; eventFilter:string; onEventFilterChange:(eventId:string)=>void; onImport: (input: { title: string; linkedEventId?: string }) => Promise<void>; onOpen:(id:string)=>Promise<void> }) {
+  const [title,setTitle]=useState('');const [linkedEventId,setLinkedEventId]=useState('');const [error,setError]=useState('');const [busy,setBusy]=useState(false);
+  const [query,setQuery]=useState('');const [categoryId,setCategoryId]=useState('');const [sensitivity,setSensitivity]=useState('');const [tag,setTag]=useState('');const [mimeType,setMimeType]=useState('');
+  const [results,setResults]=useState<ArchivePageItemView[]>([]);const [selectedIds,setSelectedIds]=useState<string[]>([]);const [selectedItemId,setSelectedItemId]=useState('');
+  const [versions,setVersions]=useState<ArchiveVersionView[]>([]);const [compareIds,setCompareIds]=useState<string[]>([]);const [policies,setPolicies]=useState<ArchiveRetentionPolicyView[]>([]);const [categories,setCategories]=useState<ArchiveCategoryView[]>([]);
+  const [nextCursor,setNextCursor]=useState<string>();const [hasMore,setHasMore]=useState(false);const [metrics,setMetrics]=useState<{returned:number;scanned:number;queryDurationMs:number;limit:number}>();const guardRef=useRef(new AsyncWriteGuard());
+  const buildSearch=():ArchiveSearchInput=>({...((query.trim())?{query:query.trim()}:{}),...(categoryId?{categoryId}:{}),...(sensitivity?{sensitivity:sensitivity as NonNullable<ArchiveSearchInput['sensitivity']>}:{}),...(tag.trim()?{tag:tag.trim()}:{}),...(mimeType.trim()?{mimeType:mimeType.trim()}:{}),...(eventFilter?{linkedEventId:eventFilter}:{})});
+  const reload=async(reset=true,cursor?:string)=>{if(!window.pardus)return;const ticket=guardRef.current.start('archive-page');setBusy(true);setError('');try{const [page,nextPolicies,nextCategories]=await Promise.all([window.pardus.listLargeArchive({...buildSearch(),limit:80,...(cursor?{cursor}:{})}),window.pardus.listArchiveRetentionPolicies(),window.pardus.listArchiveCategories()]);guardRef.current.commit(ticket,()=>{setResults(current=>reset?page.items:[...current,...page.items]);setPolicies(nextPolicies);setCategories(nextCategories);setNextCursor(page.nextCursor);setHasMore(page.hasMore);setMetrics(page.metrics);setSelectedItemId(current=>page.items.some(item=>item.id===current)?current:(reset?(page.items[0]?.id??''):current));});}catch(caught){guardRef.current.commit(ticket,()=>setError(caught instanceof Error?caught.message:'Arşiv sayfası yüklenemedi.'));}finally{guardRef.current.commit(ticket,()=>setBusy(false));}};
+  useEffect(()=>{guardRef.current.invalidate('archive-page');void reload(true);return()=>guardRef.current.invalidate('archive-page');},[revision,eventFilter]);
+  useEffect(()=>{guardRef.current.invalidate('archive-versions');if(!selectedItemId||!window.pardus){setVersions([]);return;}const ticket=guardRef.current.start('archive-versions');void window.pardus.listArchiveVersions(selectedItemId).then(value=>{guardRef.current.commit(ticket,()=>setVersions(value));}).catch(caught=>{guardRef.current.commit(ticket,()=>setError(caught instanceof Error?caught.message:'Arşiv sürümleri yüklenemedi.'));});return()=>guardRef.current.invalidate('archive-versions');},[selectedItemId]);
+  useEffect(()=>()=>guardRef.current.invalidateAll(),[]);
+  const submit=async()=>{try{setBusy(true);setError('');await onImport({title,...(linkedEventId?{linkedEventId}:{})});setTitle('');await reload(true);}catch(caught){setError(caught instanceof Error?caught.message:'Dosya eklenemedi.');}finally{setBusy(false);}};
+  const toggle=(id:string)=>setSelectedIds(value=>value.includes(id)?value.filter(item=>item!==id):[...value,id]);
+  const bulkClassify=async()=>{if(!window.pardus||!selectedIds.length)return;const category=prompt('Kategori kimliği (boş = mevcut kategori):',categoryId)??'';const tags=(prompt('Etiketler (virgülle):',tag)??'').split(',').map(value=>value.trim()).filter(Boolean);const level=(prompt('Hassasiyet: standard / personal / high','standard')??'standard') as ArchiveClassificationView['sensitivity'];setBusy(true);setError('');try{for(const itemId of selectedIds){const existing=results.find(item=>item.id===itemId);await window.pardus.updateArchiveClassification({itemId,...(category?{categoryId:category}:existing?.categoryId?{categoryId:existing.categoryId}:{}),tagNames:tags.length?tags:(existing?.tagNames??[]),sensitivity:['standard','personal','high'].includes(level)?level:(existing?.sensitivity??'standard'),aiProcessingAllowed:false});}setSelectedIds([]);await reload(true);}catch(caught){setError(caught instanceof Error?caught.message:'Toplu sınıflandırma başarısız.');}finally{setBusy(false);}};
+  const assignPolicy=async(itemId:string,policyId:string)=>{if(!window.pardus)return;setBusy(true);try{await window.pardus.assignArchiveRetentionPolicy({itemId,...(policyId?{policyId}:{})});await reload(true);}catch(caught){setError(caught instanceof Error?caught.message:'Saklama politikası atanamadı.');}finally{setBusy(false);}};
+  const createPolicy=async(event:FormEvent<HTMLFormElement>)=>{event.preventDefault();if(!window.pardus)return;const data=new FormData(event.currentTarget);setPolicies(await window.pardus.createArchiveRetentionPolicy({name:String(data.get('name')),retentionDays:Number(data.get('days')),secureDestroy:data.get('secure')==='on'}));event.currentTarget.reset();};
+  const createCategory=async(event:FormEvent<HTMLFormElement>)=>{event.preventDefault();if(!window.pardus)return;const data=new FormData(event.currentTarget);const name=String(data.get('name')??'').trim();const description=String(data.get('description')??'').trim();if(name.length<2)return;setCategories(await window.pardus.createArchiveCategory({name,...(description?{description}:{})}));event.currentTarget.reset();};
+  const destroy=async(id:string)=>{if(!window.pardus||!confirm('Bu belge güvenli biçimde imha edilecek. Devam edilsin mi?'))return;setBusy(true);try{await window.pardus.securelyDestroyArchiveItem(id);await reload(true);}catch(caught){setError(caught instanceof Error?caught.message:'İmha işlemi başarısız.');}finally{setBusy(false);}};
+  const clear=()=>{setQuery('');setCategoryId('');setSensitivity('');setTag('');setMimeType('');onEventFilterChange('');};
+  const selected=results.find(item=>item.id===selectedItemId);const compare=versions.filter(version=>compareIds.includes(version.id));const dueQueue=results.filter(item=>item.eligibleForDestruction);
+  return <><PageHeader eyebrow="Gelişmiş belge yaşam döngüsü" title="Doküman Merkezi" description="Büyük arşivler indeksli filtreler ve anahtar tabanlı sayfalama ile açılır; yalnız yüklenen belgeler renderer belleğinde tutulur." actions={<Button tone="primary" onClick={()=>void submit()} disabled={busy||title.trim().length<2}>＋ Dosya ekle</Button>}/>
+    <section className="document-toolbar panel"><input value={query} onChange={event=>setQuery(event.target.value)} placeholder="Başlık, dosya adı veya etiket ara" aria-label="Arşivde başlık, dosya adı veya etiket ara"/><EventCatalogSelect label="Bağlı önemli gün" value={eventFilter} onChange={onEventFilterChange} archiveMode="all" fallbackEvents={snapshot.events}/><select value={categoryId} onChange={event=>setCategoryId(event.target.value)} aria-label="Arşiv kategorisi"><option value="">Tüm kategoriler</option>{categories.map(category=><option key={category.id} value={category.id}>{category.name}</option>)}</select><select value={sensitivity} onChange={event=>setSensitivity(event.target.value)} aria-label="Arşiv hassasiyet seviyesi"><option value="">Tüm hassasiyetler</option><option value="standard">Standart</option><option value="personal">Kişisel</option><option value="high">Yüksek</option></select><input value={tag} onChange={event=>setTag(event.target.value)} placeholder="Etiket" aria-label="Arşiv etiketi"/><input value={mimeType} onChange={event=>setMimeType(event.target.value)} placeholder="MIME türü" aria-label="Arşiv MIME türü"/><Button disabled={busy} onClick={()=>void reload(true)}>Ara</Button><Button onClick={clear}>Temizle</Button></section>
+    {error&&<div className="form-error">{error}</div>}
+    <section className="document-layout"><article className="panel document-list"><div className="panel-heading"><div><span className="eyebrow">{results.length} kayıt yüklendi{metrics?` · ${metrics.queryDurationMs} ms`:''}</span><h2>Belgeler</h2></div><div className="header-actions"><Button disabled={!selectedIds.length} onClick={()=>void bulkClassify()}>Toplu sınıflandır ({selectedIds.length})</Button></div></div>
+    <div className="document-import"><input value={title} onChange={event=>setTitle(event.target.value)} placeholder="Yeni belge başlığı"/><select value={linkedEventId} onChange={event=>setLinkedEventId(event.target.value)}><option value="">Etkinlik bağlantısı yok</option>{snapshot.events.map(event=><option key={event.id} value={event.id}>{event.title}</option>)}</select></div>
+    {results.length?results.map(item=><div className={`document-row ${selectedItemId===item.id?'selected':''}`} key={item.id} onClick={()=>setSelectedItemId(item.id)}><input type="checkbox" checked={selectedIds.includes(item.id)} onChange={()=>toggle(item.id)} onClick={event=>event.stopPropagation()}/><div><strong>{item.title}</strong><span>{item.originalName} · {(item.sizeBytes/1024).toFixed(1)} KB</span><small>{item.categoryName??'Kategorisiz'} · {item.sensitivity} · {item.tagNames.join(', ')||'etiket yok'}</small></div><div className="document-row-actions"><span className={`tag ${item.eligibleForDestruction?'red':'blue'}`}>{item.retentionPolicyName??'Politika yok'}</span><Button onClick={event=>{event.stopPropagation();void onOpen(item.id);}}>Aç</Button></div></div>):<EmptyState title="Belge bulunamadı" body="Filtreleri değiştirin veya yeni belge ekleyin."/>}
+    {hasMore&&<div className="large-data-load-more"><Button disabled={busy||!nextCursor} onClick={()=>void reload(false,nextCursor)}>{busy?'Yükleniyor…':'Sonraki 80 belgeyi yükle'}</Button></div>}</article>
+    <article className="panel document-detail">{selected?<><div className="panel-heading"><div><span className="eyebrow">Belge ayrıntısı</span><h2>{selected.title}</h2></div><span className="tag blue">SHA {selected.sha256.slice(0,12)}…</span></div><div className="detail-grid"><div><small>Dosya</small><strong>{selected.originalName}</strong></div><div><small>Tür</small><strong>{selected.mimeType}</strong></div><div><small>Boyut</small><strong>{(selected.sizeBytes/1024).toFixed(1)} KB</strong></div><div><small>Eklenme</small><strong>{formatDate(selected.createdAt)}</strong></div></div><h3>Sürüm geçmişi</h3><div className="version-list">{versions.map(version=><label className="version-row" key={version.id}><input type="checkbox" checked={compareIds.includes(version.id)} onChange={()=>setCompareIds(ids=>ids.includes(version.id)?ids.filter(id=>id!==version.id):(ids.length<2?[...ids,version.id]:[ids[1]!,version.id]))}/><div><strong>v{version.versionNo} · {version.originalName}</strong><span>{formatDate(version.createdAt)} · {(version.sizeBytes/1024).toFixed(1)} KB</span></div><code>{version.sha256.slice(0,16)}…</code></label>)}</div>{compare.length===2&&<div className="version-compare"><h4>Sürüm karşılaştırması</h4><div><span>Dosya adı</span><strong>{compare[0]!.originalName===compare[1]!.originalName?'Aynı':'Değişti'}</strong></div><div><span>Boyut farkı</span><strong>{((compare[1]!.sizeBytes-compare[0]!.sizeBytes)/1024).toFixed(1)} KB</strong></div><div><span>İçerik özeti</span><strong>{compare[0]!.sha256===compare[1]!.sha256?'Aynı':'Farklı'}</strong></div></div>}<h3>Saklama politikası</h3><select value={selected.retentionPolicyId??''} onChange={event=>void assignPolicy(selected.id,event.target.value)}><option value="">Politika yok</option>{policies.map(policy=><option key={policy.id} value={policy.id}>{policy.name} · {policy.retentionDays} gün</option>)}</select>{selected.retainUntil&&<p className="muted">Saklama bitişi: {formatDate(selected.retainUntil)} · {selected.eligibleForDestruction?'İmhaya hazır':'Koruma altında'}</p>}</>:<EmptyState title="Belge seçilmedi" body="Ayrıntıları görmek için listeden bir belge seçin."/>}</article>
+    <aside className="document-side"><article className="panel"><span className="eyebrow">Düzenleme</span><h2>Arşiv kategorileri</h2><form className="form-grid" onSubmit={event=>void createCategory(event)}><label className="span-2">Kategori adı<input name="name" required minLength={2} placeholder="Örn. Tapular"/></label><label className="span-2">Açıklama<input name="description" placeholder="Bu kategorinin kullanım amacı"/></label><Button type="submit">Kategori oluştur</Button></form>{categories.map(category=><div className="context-stat" key={category.id}><strong>{category.name}</strong><span>{category.description??'Açıklama yok'}</span></div>)}</article><article className="panel"><span className="eyebrow">Politika yönetimi</span><h2>Saklama politikaları</h2><form className="form-grid" onSubmit={event=>void createPolicy(event)}><label className="span-2">Politika adı<input name="name" required minLength={2}/></label><label>Gün<input name="days" type="number" min="1" max="36500" defaultValue="3650"/></label><label className="check-label"><input name="secure" type="checkbox" defaultChecked/>Güvenli imha</label><Button type="submit">Politika oluştur</Button></form>{policies.map(policy=><div className="context-stat" key={policy.id}><strong>{policy.name}</strong><span>{policy.retentionDays} gün · {policy.secureDestroy?'güvenli imha':'standart silme'}</span></div>)}</article><article className="panel"><span className="eyebrow">{dueQueue.length} yüklü kayıt</span><h2>İmha kuyruğu</h2>{dueQueue.length?dueQueue.map(item=><div className="destruction-row" key={item.id}><div><strong>{item.title}</strong><span>{item.retentionPolicyName} · {item.retainUntil?formatDate(item.retainUntil):''}</span></div><Button tone="danger" disabled={busy} onClick={()=>void destroy(item.id)}>Güvenli imha</Button></div>):<EmptyState title="Kuyruk boş" body="Yüklenen sayfada saklama süresi dolmuş belge yok."/>}</article></aside></section>
+  </>;
+}
+
+const FIRST_RUN_INTRO_KEY='ppt-first-run-intro-v1';
+const BRAND_AUDIO_DISABLED_KEY='ppt-brand-audio-disabled-v1';
+
+function playParsBrandSound(): void {
+  if(globalThis.localStorage?.getItem(BRAND_AUDIO_DISABLED_KEY)==='1')return;
+  const AudioContextCtor=globalThis.AudioContext ?? (globalThis as typeof globalThis & {webkitAudioContext?:typeof AudioContext}).webkitAudioContext;
+  if(!AudioContextCtor)return;
+  const ctx=new AudioContextCtor();
+  const master=ctx.createGain();master.gain.setValueAtTime(0.0001,ctx.currentTime);master.gain.exponentialRampToValueAtTime(0.16,ctx.currentTime+0.05);master.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+0.9);master.connect(ctx.destination);
+  const low=ctx.createOscillator();low.type='sawtooth';low.frequency.setValueAtTime(92,ctx.currentTime);low.frequency.exponentialRampToValueAtTime(48,ctx.currentTime+0.8);const lowGain=ctx.createGain();lowGain.gain.value=0.55;low.connect(lowGain).connect(master);
+  const buffer=ctx.createBuffer(1,Math.floor(ctx.sampleRate*0.9),ctx.sampleRate);const data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*(1-i/data.length);const noise=ctx.createBufferSource();noise.buffer=buffer;const filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=420;const noiseGain=ctx.createGain();noiseGain.gain.value=0.28;noise.connect(filter).connect(noiseGain).connect(master);
+  low.start();noise.start();low.stop(ctx.currentTime+0.9);noise.stop(ctx.currentTime+0.9);globalThis.setTimeout(()=>void ctx.close(),1100);
+}
+
+function FirstRunIntroduction({onComplete}:{onComplete:()=>void}){
+  const [muted,setMuted]=useState(globalThis.localStorage?.getItem(BRAND_AUDIO_DISABLED_KEY)==='1');
+  const [speaking,setSpeaking]=useState(false);
+  const narration='Anadolu Parsı Aile Yaşam Merkezine hoş geldiniz. Bu uygulama aile kayıtlarınızı yerel, kontrollü ve güvenli biçimde yönetmek için tasarlandı. Kişisel verileriniz siz giriş yapmadan açılmaz. İlk kurulumda güçlü bir kimlik ve kurtarma yöntemi oluşturacağız.';
+  const speak=()=>{if(muted||!('speechSynthesis' in globalThis))return;globalThis.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(narration);utterance.lang='tr-TR';utterance.rate=0.9;utterance.pitch=0.82;utterance.onstart=()=>setSpeaking(true);utterance.onend=()=>setSpeaking(false);utterance.onerror=()=>setSpeaking(false);globalThis.speechSynthesis.speak(utterance);};
+  useEffect(()=>{speak();return()=>globalThis.speechSynthesis?.cancel();},[]);
+  const toggleMuted=()=>{const next=!muted;setMuted(next);globalThis.localStorage?.setItem(BRAND_AUDIO_DISABLED_KEY,next?'1':'0');if(next)globalThis.speechSynthesis?.cancel();else globalThis.setTimeout(speak,0);};
+  const complete=()=>{globalThis.speechSynthesis?.cancel();globalThis.localStorage?.setItem(FIRST_RUN_INTRO_KEY,'1');playParsBrandSound();onComplete();};
+  return <main className="first-run-shell"><section className="first-run-card"><div className="first-run-brand"><img src={brandMarkUrl} alt=""/><span className="eyebrow">İlk kurulum</span><h1>Anadolu Parsı<br/><small>Aile Yaşam Merkezi</small></h1></div><p className="first-run-lead">Aile hafızası, belgeler, sağlık, finans ve yaşam kayıtları için güvenli yerel merkez.</p><div className="first-run-points"><div><strong>Gizlilik</strong><span>Kişisel veri kasası giriş yapılmadan açılmaz.</span></div><div><strong>Kontrol</strong><span>Yetkiler kimlik sağlayıcısından bağımsızdır.</span></div><div><strong>Dayanıklılık</strong><span>Yedekleme ve kurtarma güvenlik tasarımının parçasıdır.</span></div></div><div className="first-run-caption" aria-live="polite"><strong>Sesli anlatım</strong><p>{narration}</p></div><div className="first-run-actions"><Button onClick={toggleMuted}>{muted?'Sesi aç':'Sesi kapat'}</Button><Button onClick={speak} disabled={muted||speaking}>{speaking?'Anlatılıyor…':'Yeniden anlat'}</Button><Button tone="primary" onClick={complete}>İlk kuruluma geç</Button></div><button className="first-run-skip" type="button" onClick={complete}>Tanıtımı geç</button></section></main>;
+}
+
+
+function FirstRunSecuritySetup({onComplete}:{onComplete:(state:AuthStateView)=>void}){
+  const [setup,setSetup]=useState<TwoFactorSetupView|null>(null);
+  const [code,setCode]=useState('');
+  const [saved,setSaved]=useState(false);
+  const [message,setMessage]=useState('');
+  const begin=async()=>{try{if(!window.pardus)return;setSetup(await window.pardus.beginTwoFactorSetup());setMessage('Authenticator uygulamanıza anahtarı ekleyin ve kurtarma kodlarını güvenli yerde saklayın.');}catch(error){setMessage(error instanceof Error?error.message:'Güvenlik kurulumu başlatılamadı.');}};
+  const finish=async()=>{try{if(!window.pardus||!setup||!saved||code.trim().length<6)return;const state=await window.pardus.enableTwoFactor({code:code.trim()});onComplete(state);playParsBrandSound();}catch(error){setMessage(error instanceof Error?error.message:'Doğrulama kodu kabul edilmedi.');}};
+  return <main className="first-run-security-shell"><section className="first-run-card panel"><img src={brandMarkUrl} alt="Anadolu Parsı"/><span className="eyebrow">İlk kurulum · Güvenlik</span><h1>Hesabınızı ve kurtarma yolunu güvenceye alın</h1><p>Ana uygulama açılmadan önce iki aşamalı doğrulama ve kurtarma kodları oluşturulur. Bu adım tamamlanmadan kullanıcı verisi oturumu normal kullanıma geçmez.</p>{!setup?<Button tone="primary" onClick={()=>void begin()}>Güvenlik kurulumunu başlat</Button>:<><div className="notes-card"><strong>Authenticator kurulumu</strong><small>Anahtar: {setup.secret}</small><small>Kurulum URI: {setup.otpauthUri}</small><strong>Kurtarma kodları</strong><small>{setup.recoveryCodes.join(' · ')}</small><Button onClick={()=>void navigator.clipboard.writeText(setup.recoveryCodes.join('\n'))}>Kurtarma kodlarını kopyala</Button></div><label>Authenticator doğrulama kodu<input inputMode="numeric" autoComplete="one-time-code" value={code} onChange={event=>setCode(event.target.value.replace(/\s+/g,''))}/></label><label className="check-label"><input type="checkbox" checked={saved} onChange={event=>setSaved(event.target.checked)}/>Kurtarma kodlarını güvenli bir yerde sakladım</label><Button tone="primary" disabled={!saved||code.trim().length<6} onClick={()=>void finish()}>Güvenliği tamamla ve uygulamayı aç</Button></>}{message&&<StatusMessage tone="info">{message}</StatusMessage>}</section></main>;
+}
+
+function InvitationAcceptancePanel({onAccepted}:{onAccepted:(state:AuthStateView)=>Promise<void>}){
+  const [expanded,setExpanded]=useState(false);
+  const [token,setToken]=useState('');
+  const [displayName,setDisplayName]=useState('');
+  const [password,setPassword]=useState('');
+  const [inspection,setInspection]=useState<FamilyInvitationInspectionView>();
+  const [message,setMessage]=useState('');
+  const [busy,setBusy]=useState(false);
+  const assessment=assessPassword(password);
+  const inspect=async()=>{
+    setMessage('');setInspection(undefined);
+    if(!window.pardus||!token.trim()){setMessage('Davet kodunu eksiksiz yazın.');return;}
+    setBusy(true);
+    try{setInspection(await window.pardus.inspectInvitation({token:token.trim()}));}
+    catch(error){setMessage(error instanceof Error?error.message:'Davet kodu doğrulanamadı.');}
+    finally{setBusy(false);}
+  };
+  const accept=async(event:FormEvent<HTMLFormElement>)=>{
+    event.preventDefault();setMessage('');
+    if(!inspection?.canAccept){setMessage('Önce geçerli davet kodunu doğrulayın.');return;}
+    if(displayName.trim().length<2){setMessage('Ad soyad en az 2 karakter olmalıdır.');return;}
+    if(!assessment.valid){setMessage('Parola bütün güvenlik koşullarını karşılamalıdır.');return;}
+    if(!window.pardus)return;
+    setBusy(true);
+    try{const state=await window.pardus.acceptInvitation({token:token.trim(),displayName:displayName.trim(),password});setToken('');setPassword('');await onAccepted(state);}
+    catch(error){setMessage(error instanceof Error?error.message:'Davet kabul edilemedi.');}
+    finally{setBusy(false);}
+  };
+  if(!expanded)return <button type="button" className="invitation-entry-toggle" onClick={()=>setExpanded(true)}>Davet kodum var</button>;
+  return <form className="invitation-accept-card" aria-labelledby="invitation-accept-title" onSubmit={event=>void accept(event)}>
+    <div className="auth-heading"><span className="eyebrow">Aile profili daveti</span><h2 id="invitation-accept-title">Davetle katılın</h2><p>Kodu önce güvenli biçimde doğrulayın; geçerli bir davet yalnız bir kez kabul edilebilir.</p></div>
+    <label>Davet kodu<div className="invitation-token-row"><input autoComplete="one-time-code" value={token} onChange={event=>{setToken(event.target.value);setInspection(undefined);setMessage('');}} placeholder="Davet kodunu yapıştırın"/><Button type="button" disabled={busy||!token.trim()} onClick={()=>void inspect()}>{busy?'Doğrulanıyor…':'Kodu doğrula'}</Button></div></label>
+    {inspection&&<StatusMessage tone={inspection.canAccept?'success':'danger'}>{inspection.message}{inspection.startsAt?` Başlangıç: ${formatDate(inspection.startsAt,{dateStyle:'medium',timeStyle:'short'})}.`:''}{inspection.endsAt?` Son tarih: ${formatDate(inspection.endsAt,{dateStyle:'medium',timeStyle:'short'})}.`:''}</StatusMessage>}
+    {inspection?.canAccept&&<><label>Adınız ve soyadınız<input autoComplete="name" value={displayName} onChange={event=>setDisplayName(event.target.value)} minLength={2} required/></label><label>Yeni yerel parola<input type="password" autoComplete="new-password" value={password} onChange={event=>setPassword(event.target.value)} minLength={12} required/><div className="password-checklist" aria-live="polite"><strong>{assessment.remainingCharacters?`${assessment.remainingCharacters} karakter daha gerekli`:'Uzunluk koşulu tamam'}</strong><span className={assessment.checks.uppercase?'ok':''}>Büyük harf</span><span className={assessment.checks.lowercase?'ok':''}>Küçük harf</span><span className={assessment.checks.digit?'ok':''}>Rakam</span><span className={assessment.checks.symbol?'ok':''}>Sembol</span></div></label><Button tone="primary" type="submit" disabled={busy||displayName.trim().length<2||!assessment.valid}>{busy?'Profil hazırlanıyor…':'Daveti kabul et'}</Button></>}
+    {message&&<StatusMessage tone="danger">{message}</StatusMessage>}
+    <button type="button" className="invitation-entry-toggle" onClick={()=>{setExpanded(false);setInspection(undefined);setMessage('');}}>Normal girişe dön</button>
+  </form>;
+}
+
+const windowsHelloOutcomeMessage = (
+  outcome: WindowsHelloAuthenticationOutcome | WindowsHelloEnrollmentView['outcome']
+): string => ({
+  verified: 'Windows Hello doğrulaması tamamlandı.',
+  enrolled: 'Windows Hello kaydı ve güvenli kasa bağı tamamlandı.',
+  cancelled: 'Windows Hello doğrulaması kullanıcı tarafından iptal edildi.',
+  retries_exhausted: 'Windows Hello deneme hakkı tükendi; parola ile devam edebilirsiniz.',
+  device_not_present: 'Bu cihazda kullanılabilir bir Windows Hello donanımı bulunamadı.',
+  not_configured_for_user: 'Windows Hello bu Windows kullanıcısı için yapılandırılmamış.',
+  disabled_by_policy: 'Windows Hello sistem politikası tarafından kapatılmış.',
+  device_busy: 'Windows Hello şu anda başka bir işlem tarafından kullanılıyor.',
+  platform_not_supported: 'Bu işletim sistemi Windows Hello doğrulamasını desteklemiyor.',
+  fallback_required: 'Windows Hello ile devam edilemedi; güçlü yerel parola kullanılmalı.',
+  device_changed: 'Cihaz güvenlik bağı değişti; parola ile giriş yapıp yeniden kayıt olun.',
+  principal_changed: 'Windows kullanıcı bağı değişti; parola ile giriş yapıp yeniden kayıt olun.',
+  security_epoch_changed: 'Hesap güvenlik dönemi değişti; parola ve 2FA ile yeniden kayıt olun.',
+  registration_not_found: 'Bu cihaz için etkin Windows Hello kaydı bulunamadı.',
+  account_unavailable: 'Bağlı yerel hesap kullanılamıyor.',
+  error: 'Windows Hello işlemi güvenli biçimde tamamlanamadı.'
+})[outcome];
+
+function AuthScreen({ auth, onSetup, onLogin, onWindowsHelloLogin, onInvitationAccepted }: { auth: AuthStateView; onSetup:(input:SetupAdminInput)=>Promise<void>; onLogin:(input:LoginInput)=>Promise<void>; onWindowsHelloLogin:(input:LoginWithWindowsHelloInput)=>Promise<void>; onInvitationAccepted:(state:AuthStateView)=>Promise<void> }) {
+  const [familyName,setFamilyName]=useState('');
+  const [displayName,setDisplayName]=useState('');
+  const [selectedAccountId,setSelectedAccountId]=useState(auth.profiles?.[0]?.id ?? '');
+  const [password,setPassword]=useState('');
+  const [secondFactorCode,setSecondFactorCode]=useState('');
+  const [error,setError]=useState('');
+  const [busy,setBusy]=useState(false);
+  const [helloBusy,setHelloBusy]=useState(false);
+  const [helloState,setHelloState]=useState<WindowsHelloStateView|null>(null);
+  const [externalProviders,setExternalProviders]=useState<ExternalIdentityProviderView[]>([]);
+  const passwordAssessment=assessPassword(password);
+  const profiles=auth.profiles ?? [];
+  useEffect(()=>{if(!selectedAccountId&&profiles[0])setSelectedAccountId(profiles[0].id);},[profiles,selectedAccountId]);
+  useEffect(()=>{void window.pardus?.getExternalIdentityProviders().then(setExternalProviders).catch(()=>setExternalProviders([]));},[]);
+  useEffect(()=>{
+    if(!auth.initialized||!window.pardus)return;
+    let active=true;
+    void window.pardus.getWindowsHelloState().then(state=>{if(active)setHelloState(state);}).catch(()=>{if(active)setHelloState(null);});
+    return()=>{active=false;};
+  },[auth.initialized]);
+  const loginWithHello=async()=>{
+    setError('');setHelloBusy(true);
+    try{await onWindowsHelloLogin(selectedAccountId?{accountId:selectedAccountId}:{});}
+    catch(caught){setError(caught instanceof Error?caught.message:'Windows Hello ile giriş tamamlanamadı.');}
+    finally{setHelloBusy(false);}
+  };
+  const submit=async(e:FormEvent)=>{
+    e.preventDefault();
+    setError('');
+    if(auth.initialized&&profiles.length>0&&!selectedAccountId){setError('Devam etmek için bir profil seçin.');return;}
+    if(!auth.initialized&&(familyName.trim().length<2||displayName.trim().length<2)){setError('Aile adı ve ad soyad en az 2 karakter olmalıdır.');return;}
+    if(!auth.initialized&&!passwordAssessment.valid){setError('Parola bütün güvenlik koşullarını karşılamalıdır.');return;}
+    setBusy(true);
+    try{
+      if(auth.initialized)await onLogin({...(selectedAccountId?{accountId:selectedAccountId}:{}),password,...(secondFactorCode.trim()?{secondFactorCode:secondFactorCode.trim()}:{})});
+      else await onSetup({familyName:familyName.trim(),displayName:displayName.trim(),password});
+    }catch(x){setError(x instanceof Error?x.message:'İşlem başarısız.');}
+    finally{setBusy(false)}
+  };
+  return <main className="auth-shell">
+    <section className="auth-story" aria-label="Anadolu Parsı Aile Yaşam Merkezi">
+      <div className="auth-brand"><img src={brandMarkUrl} alt=""/><div><strong>Anadolu Parsı</strong><small>Aile Yaşam Merkezi</small></div></div>
+      <div className="auth-story-copy"><span className="eyebrow">Yalnız size ait</span><h1>Ailenizin hikâyesi,<br/>tek ve güvenli bir yerde.</h1><p>Soy ağacınızı, anılarınızı, önemli günlerinizi ve aile kayıtlarınızı internet hesabı açmadan yönetin.</p></div>
+      <div className="auth-trust"><span>✓</span><div><strong>Veriler bu bilgisayarda kalır</strong><small>E-posta hesabı veya çevrim içi üyelik gerekmez.</small></div></div>
+    </section>
+    <section className="auth-entry">
+      <form className="auth-form" aria-labelledby="auth-title" noValidate onSubmit={e=>void submit(e)}>
+        <div className="auth-heading"><span className="eyebrow">{auth.initialized?'Tekrar hoş geldiniz':'İlk başlangıç'}</span><h2 id="auth-title">{auth.initialized?'Profilinizi seçin':'Ailenizi oluşturalım'}</h2><p>{auth.initialized?'Aile yaşam alanınıza yerel parolanızla devam edin.':'Birkaç bilgiyle kişisel aile alanınızı hazırlayın.'}</p></div>
+        {!auth.initialized&&<div className="auth-fields"><label>Aile adı<input autoFocus autoComplete="organization" value={familyName} onChange={e=>setFamilyName(e.target.value)} required minLength={2} placeholder="Örn. Yılmaz Ailesi"/></label><label>Adınız ve soyadınız<input autoComplete="name" value={displayName} onChange={e=>setDisplayName(e.target.value)} required minLength={2} placeholder="Aile yöneticisinin adı"/></label></div>}
+        {auth.initialized&&profiles.length>0&&<div className="profile-grid" role="radiogroup" aria-label="Yerel profiller">{profiles.map(profile=><button type="button" role="radio" aria-checked={selectedAccountId===profile.id} className={`profile-card ${selectedAccountId===profile.id?'selected':''}`} key={profile.id} onClick={()=>setSelectedAccountId(profile.id)}><span>{profile.initials}</span><div><strong>{profile.displayName}</strong><small>{profile.role==='family_admin'?'Aile yöneticisi':'Aile üyesi'}</small></div><i>{selectedAccountId===profile.id?'✓':''}</i></button>)}</div>}
+        <div className="auth-fields"><label>Yerel parola<input type="password" autoComplete={auth.initialized?'current-password':'new-password'} value={password} onChange={e=>setPassword(e.target.value)} required minLength={12} placeholder="Parolanızı yazın"/>{!auth.initialized&&<div className="password-checklist" aria-live="polite"><strong>{passwordAssessment.remainingCharacters?`${passwordAssessment.remainingCharacters} karakter daha gerekli`:'Uzunluk koşulu tamam'}</strong><span className={passwordAssessment.checks.uppercase?'ok':''}>Büyük harf</span><span className={passwordAssessment.checks.lowercase?'ok':''}>Küçük harf</span><span className={passwordAssessment.checks.digit?'ok':''}>Rakam</span><span className={passwordAssessment.checks.symbol?'ok':''}>Sembol</span></div>}</label>{auth.initialized&&<label>İki aşamalı doğrulama kodu <small>(etkinse)</small><input value={secondFactorCode} onChange={e=>setSecondFactorCode(e.target.value)} inputMode="numeric" autoComplete="one-time-code" placeholder="6 haneli kod veya kurtarma kodu"/></label>}</div>
+        {externalProviders.some(p=>p.productionReady)&&<div className="external-identity-ready" aria-label="Haricî kimlik sağlayıcıları">{externalProviders.filter(p=>p.productionReady).map(p=><span key={p.id}>{p.label}</span>)}</div>}
+        {error&&<div className="form-error" role="alert">{error}</div>}
+        {auth.initialized&&helloState?.enrolled&&<Button type="button" tone="primary" disabled={busy||helloBusy||helloState.availability!=='available'} onClick={()=>void loginWithHello()}>{helloBusy?'Windows Hello bekleniyor…':'Windows Hello ile devam et'}</Button>}
+        {auth.initialized&&helloState?.enrolled&&helloState.availability!=='available'&&<StatusMessage tone="info">{windowsHelloOutcomeMessage(helloState.availability)}</StatusMessage>}
+        <Button tone="primary" type="submit" disabled={busy||helloBusy}>{busy?'Hazırlanıyor…':auth.initialized?'Aile alanına gir':'Aile alanımı oluştur'}</Button>
+        <small className="auth-footnote">{USER_VISIBLE_APP_INFO.releaseLabel} · {USER_VISIBLE_APP_INFO.stage}</small>
+      </form>
+      {auth.initialized&&<InvitationAcceptancePanel onAccepted={onInvitationAccepted}/>}
+    </section>
+  </main>;
+}
+
+function AddRelationModal({ fallbackPeople = [], onClose, onSave }:{fallbackPeople?:readonly FamilyMemberView[];onClose:()=>void;onSave:(input:CreateFamilyRelationInput)=>Promise<void>}){
+ const [fromPersonId,setFromPersonId]=useState(''); const [toPersonId,setToPersonId]=useState(''); const [relationType,setRelationType]=useState<CreateFamilyRelationInput['relationType']>('parent'); const [error,setError]=useState('');
+ const submit=async(e:FormEvent<HTMLFormElement>)=>{e.preventDefault();setError('');if(!fromPersonId||!toPersonId){setError('İki kişi seçilmelidir.');return;}if(fromPersonId===toPersonId){setError('Aynı kişi iki kez seçilemez.');return;}try{await onSave({fromPersonId,toPersonId,relationType});onClose();}catch(x){setError(x instanceof Error?x.message:'İlişki eklenemedi.')}};
+ return <Modal title="Aile ilişkisi ekle" subtitle="İki kişi arasındaki bağı arama destekli katalogdan seçerek soy ağacına kaydedin." onClose={onClose}><form className="form-grid" onSubmit={e=>void submit(e)}><PersonCatalogSelect label="Birinci kişi" value={fromPersonId} onChange={setFromPersonId} excludeIds={toPersonId?[toPersonId]:[]} fallbackPeople={fallbackPeople}/><PersonCatalogSelect label="İkinci kişi" value={toPersonId} onChange={setToPersonId} excludeIds={fromPersonId?[fromPersonId]:[]} fallbackPeople={fallbackPeople}/><label className="span-2">İlişki<select value={relationType} onChange={event=>setRelationType(event.target.value as CreateFamilyRelationInput['relationType'])}><option value="parent">Ebeveyn</option><option value="spouse">Eş</option><option value="sibling">Kardeş</option><option value="guardian">Vasi</option><option value="other">Diğer</option></select></label>{error&&<div className="form-error span-2">{error}</div>}<div className="modal-actions span-2"><Button type="button" onClick={onClose}>İptal</Button><Button tone="primary" type="submit">Kaydet</Button></div></form></Modal>;
+}
+
+function DigitalLegacyScreen({ snapshot }: { snapshot: FamilyAppSnapshot }) {
+  const [plans,setPlans]=useState<DigitalLegacyPlanView[]>([]); const [accounts,setAccounts]=useState<FamilyAccountView[]>([]); const [grants,setGrants]=useState<LegacyGrantView[]>([]); const [approvals,setApprovals]=useState<LegacyApprovalView[]>([]); const [selectedId,setSelectedId]=useState(''); const [error,setError]=useState(''); const [busy,setBusy]=useState(false); const [nowTick,setNowTick]=useState(Date.now());
+  const reload=async(preferredId?:string)=>{if(!window.pardus)return; const [p,a]=await Promise.all([window.pardus.listDigitalLegacyPlans(),window.pardus.listAccounts()]); setPlans(p);setAccounts(a);const id=preferredId??selectedId??p[0]?.id??''; if(id){setSelectedId(id); const [g,ap]=await Promise.all([window.pardus.listLegacyGrants(id),window.pardus.listLegacyApprovals(id)]);setGrants(g);setApprovals(ap);} else {setGrants([]);setApprovals([]);} };
+  useEffect(()=>{void reload();const timer=window.setInterval(()=>setNowTick(Date.now()),1000);return()=>window.clearInterval(timer);},[]);
+  useEffect(()=>{if(selectedId) void (async()=>{if(!window.pardus)return;setGrants(await window.pardus.listLegacyGrants(selectedId));setApprovals(await window.pardus.listLegacyApprovals(selectedId));})();},[selectedId]);
+  const selected=plans.find(p=>p.id===selectedId); const accountName=(id?:string)=>accounts.find(a=>a.id===id)?.displayName??'Hesap bulunamadı'; const personName=(id:string)=>snapshot.people.find(p=>p.id===id)?.displayName??'Kişi bulunamadı';
+  const statusLabel:Record<DigitalLegacyPlanView['status'],string>={draft:'Taslak',active:'Etkin',suspended:'Askıda',pending_execution:'Yürütme bekliyor',executed:'Yürütüldü',revoked:'İptal edildi'};
+  const countdown=(iso?:string)=>{if(!iso)return '—';const ms=new Date(iso).getTime()-nowTick;if(ms<=0)return 'Süre tamamlandı';const d=Math.floor(ms/86400000),h=Math.floor(ms%86400000/3600000),m=Math.floor(ms%3600000/60000),sec=Math.floor(ms%60000/1000);return `${d}g ${h}s ${m}dk ${sec}sn`;};
+  const run=async(action:()=>Promise<DigitalLegacyPlanView[]>)=>{setBusy(true);setError('');try{const p=await action();setPlans(p);await reload(selectedId);}catch(e){setError(e instanceof Error?e.message:'İşlem başarısız.');}finally{setBusy(false)}};
+  const submitPlan=async(e:FormEvent<HTMLFormElement>)=>{e.preventDefault();if(!window.pardus)return;const d=new FormData(e.currentTarget);const secondary=String(d.get('secondary')); const instructions=String(d.get('instructions')); await run(()=>window.pardus!.upsertDigitalLegacyPlan({ownerPersonId:String(d.get('owner')),title:String(d.get('title')),status:'active',triggerType:'death_confirmation',trusteeAccountId:String(d.get('trustee')),...(secondary?{secondaryTrusteeAccountId:secondary}:{}),...(instructions?{instructions}:{}),waitingDays:Number(d.get('waitingDays')),rollbackHours:Number(d.get('rollbackHours'))}));e.currentTarget.reset();};
+  const submitGrant=async(e:FormEvent<HTMLFormElement>)=>{e.preventDefault();if(!window.pardus||!selected)return;const d=new FormData(e.currentTarget);const actions=['read','create','update','delete','share','record'].filter(x=>d.get(x)==='on') as ObjectPermissionAction[];setBusy(true);setError('');try{setGrants(await window.pardus.upsertLegacyGrant({planId:selected.id,resourceType:String(d.get('resourceType')),resourceId:String(d.get('resourceId'))||'*',actions}));e.currentTarget.reset();}catch(x){setError(x instanceof Error?x.message:'Yetki paketi eklenemedi.');}finally{setBusy(false)}};
+  const approvedCount=new Set(approvals.filter(a=>a.decision==='approved').map(a=>a.approverAccountId)).size; const checklist=selected?[{ok:selected.status==='active'||selected.status==='pending_execution'||selected.status==='executed',text:'Plan etkin durumda'},{ok:!!selected.trusteeAccountId,text:'Birincil emanetçi atanmış'},{ok:grants.length>0,text:'En az bir yetki paketi tanımlanmış'},{ok:selected.instructions?.trim().length?true:false,text:'Talimatlar yazılmış'},{ok:selected.waitingDays>=1,text:'Bekleme süresi tanımlanmış'},{ok:selected.rollbackHours>=1,text:'Geri alma penceresi tanımlanmış'}]:[];
+  return <><PageHeader eyebrow="Kritik güvenlik alanı" title="Dijital Miras Yönetimi" description="Vefat sonrası erişim devrini çift yönetici onayı, zaman kilidi ve geri alma penceresiyle yönetin."/>
+  <section className="legacy-layout"><article className="panel legacy-list"><div className="panel-heading"><div><span className="eyebrow">{plans.length} plan</span><h2>Miras planları</h2></div></div>{plans.length?plans.map(p=><button key={p.id} className={`legacy-plan-row ${p.id===selectedId?'selected':''}`} onClick={()=>setSelectedId(p.id)}><span className={`status-pill ${p.status}`}>{statusLabel[p.status]}</span><strong>{p.title}</strong><small>{personName(p.ownerPersonId)} · {p.waitingDays} gün bekleme</small></button>):<EmptyState title="Plan bulunamadı" body="İlk dijital miras planını oluşturun."/>}</article>
+  <article className="panel legacy-detail">{selected?<><div className="legacy-hero"><div><span className="eyebrow">Plan sahibi</span><h2>{selected.title}</h2><p>{personName(selected.ownerPersonId)} · Birincil emanetçi: {accountName(selected.trusteeAccountId)}</p></div><span className={`status-pill ${selected.status}`}>{statusLabel[selected.status]}</span></div>
+  <div className="legacy-countdowns"><div><small>Bekleme süresi</small><strong>{selected.status==='pending_execution'?countdown(selected.executeAfter):'Başlatılmadı'}</strong></div><div><small>Geri alma penceresi</small><strong>{selected.status==='executed'?countdown(selected.rollbackUntil):'Açık değil'}</strong></div><div><small>Yönetici onayı</small><strong>{approvedCount}/2</strong></div></div>
+  <div className="legacy-columns"><section><span className="eyebrow">Güvenlik kontrol listesi</span>{checklist.map(item=><div className={`security-check ${item.ok?'ok':''}`} key={item.text}><span>{item.ok?'✓':'!'}</span><strong>{item.text}</strong></div>)}</section><section><span className="eyebrow">Onaylayan yöneticiler</span>{approvals.length?approvals.map(a=><div className="approval-row" key={a.id}><span>{a.decision==='approved'?'✓':'×'}</span><div><strong>{accountName(a.approverAccountId)}</strong><small>{a.decision==='approved'?'Onayladı':'Reddetti'} · {formatDate(a.createdAt,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</small>{a.note&&<p>{a.note}</p>}</div></div>):<p className="muted-copy">Henüz onay kaydı yok.</p>}</section></div>
+  <div className="legacy-actions">{selected.status==='active'&&<Button tone="danger" disabled={busy} onClick={()=>{const note=prompt('Vefat doğrulama notu (en az 10 karakter):')??'';if(note&&window.pardus)void run(()=>window.pardus!.executeDigitalLegacyPlan({planId:selected.id,confirmationNote:note}));}}>Yürütme isteği başlat</Button>}{selected.status==='pending_execution'&&<><Button tone="primary" disabled={busy} onClick={()=>window.pardus&&void run(()=>window.pardus!.approveLegacyExecution({planId:selected.id,decision:'approved',note:'Yönetici ekranından onaylandı.'}))}>Yönetici olarak onayla</Button><Button disabled={busy} onClick={()=>window.pardus&&void run(()=>window.pardus!.finalizeLegacyExecution(selected.id))}>Süre dolduysa kesinleştir</Button><Button tone="danger" disabled={busy} onClick={()=>window.pardus&&void run(()=>window.pardus!.cancelLegacyExecution({planId:selected.id,reason:'Yönetim ekranından geri alındı.'}))}>İsteği geri al</Button></>}{selected.status==='executed'&&<Button tone="danger" disabled={busy} onClick={()=>window.pardus&&void run(()=>window.pardus!.cancelLegacyExecution({planId:selected.id,reason:'Geri alma penceresinde iptal edildi.'}))}>Yetki devrini geri al</Button>}</div>
+  <section className="legacy-grants"><div className="panel-heading"><div><span className="eyebrow">{grants.length} paket</span><h3>Aktarılacak yetkiler</h3></div></div>{grants.map(g=><div className="grant-row" key={g.id}><strong>{g.resourceType}:{g.resourceId}</strong><span>{g.actions.join(', ')}</span></div>)}<form className="grant-form" onSubmit={e=>void submitGrant(e)}><input name="resourceType" placeholder="Kaynak türü" required/><input name="resourceId" placeholder="Kayıt kimliği veya *" defaultValue="*"/><div className="check-row">{['read','create','update','delete','share','record'].map(a=><label key={a}><input type="checkbox" name={a} defaultChecked={a==='read'}/>{a}</label>)}</div><Button type="submit" disabled={busy}>Yetki paketi ekle</Button></form></section></>:<EmptyState title="Plan seçilmedi" body="Ayrıntıları görmek için soldan bir plan seçin."/>}</article>
+  <article className="panel legacy-create"><span className="eyebrow">Yeni plan</span><h2>Plan oluştur</h2><form className="form-grid" onSubmit={e=>void submitPlan(e)}><label className="span-2">Başlık<input name="title" required minLength={3}/></label><label>Plan sahibi<select name="owner">{snapshot.people.map(p=><option key={p.id} value={p.id}>{p.displayName}</option>)}</select></label><label>Birincil emanetçi<select name="trustee">{accounts.map(a=><option key={a.id} value={a.id}>{a.displayName}</option>)}</select></label><label>İkincil emanetçi<select name="secondary"><option value="">Yok</option>{accounts.map(a=><option key={a.id} value={a.id}>{a.displayName}</option>)}</select></label><label>Bekleme (gün)<input name="waitingDays" type="number" min="1" max="90" defaultValue="7"/></label><label>Geri alma (saat)<input name="rollbackHours" type="number" min="1" max="168" defaultValue="24"/></label><label className="span-2">Talimatlar<textarea name="instructions" rows={4}/></label><Button tone="primary" type="submit" disabled={busy}>Planı kaydet</Button></form>{error&&<div className="form-error">{error}</div>}</article></section></>;
+}
+
+function AiGovernanceScreen() {
+  const [purpose,setPurpose]=useState<AiConsentPurpose>('search'); const [resourceType,setResourceType]=useState('event'); const [resourceId,setResourceId]=useState('*'); const [consents,setConsents]=useState<AiConsentView[]>([]); const [preview,setPreview]=useState<AiAccessPreviewView>();
+  const reload=async(p:AiConsentPurpose=purpose)=>{if(!window.pardus)return;const [c,v]=await Promise.all([window.pardus.listAiConsents(),window.pardus.previewAiAccess(p)]);setConsents(c);setPreview(v);};
+  useEffect(()=>{void reload();},[]);
+  const save=async(status:'granted'|'revoked')=>{if(!window.pardus)return;setConsents(await window.pardus.upsertAiConsent({purpose,resourceType,resourceId,status}));setPreview(await window.pardus.previewAiAccess(purpose));};
+  return <><PageHeader eyebrow="Açık onay" title="Yapay zekâ izin merkezi" description="Yapay zekânın hangi amaçla hangi kayıtları işleyebileceğini önceden görün ve yönetin."/><section className="workspace-grid"><article className="panel workspace-form"><h2>Onay tanımla</h2><label>Amaç<select value={purpose} onChange={e=>{const p=e.target.value as AiConsentPurpose;setPurpose(p);void reload(p);}}><option value="search">Doğal dil arama</option><option value="summary">Özetleme</option><option value="recommendation">Öneri</option><option value="classification">Sınıflandırma</option></select></label><label>Kaynak<select value={resourceType} onChange={e=>setResourceType(e.target.value)}><option value="event">Zaman tüneli olayları</option><option value="archive_item">Arşiv belgeleri</option></select></label><label>Kayıt kimliği<input value={resourceId} onChange={e=>setResourceId(e.target.value)} placeholder="* tüm izinli kayıtlar"/></label><div className="modal-actions"><Button tone="primary" onClick={()=>void save('granted')}>Onay ver</Button><Button tone="danger" onClick={()=>void save('revoked')}>Onayı geri çek</Button></div></article><article className="panel workspace-summary"><span className="eyebrow">Erişim önizlemesi</span><h2>{preview?.allowedResources.length??0} erişilebilir kayıt</h2><div className="context-stat"><strong>{preview?.blockedCount??0}</strong><span>açıkça engellenmiş kapsam</span></div>{preview?.allowedResources.map(r=><div className="context-stat" key={`${r.resourceType}-${r.resourceId}`}><strong>{r.title}</strong><span>{r.resourceType} · {r.resourceId}</span></div>)}<h3>Onay geçmişi</h3>{consents.slice(0,8).map(c=><small key={c.id}>{c.purpose} · {c.resourceType}:{c.resourceId} · {c.status}</small>)}</article></section></>;
+}
+
+
+function SystemManagementScreen(){
+  const [health,setHealth]=useState<SystemHealthView>(); const [coreServiceHealth,setCoreServiceHealth]=useState<CoreServiceHealthContract>(); const [targets,setTargets]=useState<BackupTargetView[]>([]); const [runs,setRuns]=useState<BackupRunView[]>([]); const [performance,setPerformance]=useState<PerformanceSampleView[]>([]); const [trend,setTrend]=useState<PerformanceTrendView>(); const [tasks,setTasks]=useState<BackgroundTaskView[]>([]); const [scheduler,setScheduler]=useState<SchedulerStatusView>(); const [diagnostics,setDiagnostics]=useState<DiagnosticEntryView[]>([]); const [result,setResult]=useState<MaintenanceResultView>(); const [backupMessage,setBackupMessage]=useState(''); const [queue,setQueue]=useState<QueuedTaskView[]>([]); const [policy,setPolicy]=useState<MaintenancePolicyView>(); const [notifications,setNotifications]=useState<HealthNotificationView[]>([]); const [systemMessage,setSystemMessage]=useState(''); const [healthScore,setHealthScore]=useState<SystemHealthScoreView>(); const [reportHistory,setReportHistory]=useState<DiagnosticReportHistoryView[]>([]); const [diagQuery,setDiagQuery]=useState(''); const [diagSeverity,setDiagSeverity]=useState(''); const [healthHistory,setHealthHistory]=useState<SystemHealthHistoryView[]>([]); const [healthTrend,setHealthTrend]=useState<SystemHealthTrendView>(); const [archives,setArchives]=useState<DiagnosticArchiveView[]>([]); const [anomalies,setAnomalies]=useState<PerformanceAnomalyView[]>([]); const [recommendations,setRecommendations]=useState<MaintenanceRecommendationView[]>([]); const [reportContent,setReportContent]=useState<DiagnosticReportContentView>(); const [verificationMessage,setVerificationMessage]=useState(''); const [healthDays,setHealthDays]=useState(30); const [performanceHours,setPerformanceHours]=useState(24); const [compareLeft,setCompareLeft]=useState(''); const [compareRight,setCompareRight]=useState(''); const [comparison,setComparison]=useState<DiagnosticReportComparisonView>(); const [archiveContent,setArchiveContent]=useState<DiagnosticArchiveContentView>(); const [archiveId,setArchiveId]=useState(''); const [archiveQuery,setArchiveQuery]=useState(''); const [maintenanceHistory,setMaintenanceHistory]=useState<MaintenanceHistoryView[]>([]); const [exportHistory,setExportHistory]=useState<ExportArtifactView[]>([]); const [ipcTelemetry,setIpcTelemetry]=useState<IpcPerformanceTelemetryView>(); const [ipcMaintenanceAuthority,setIpcMaintenanceAuthority]=useState<IpcAdaptiveBudgetMaintenanceAuthorityView>(); const [ipcMaintenanceRecoveryAuthority,setIpcMaintenanceRecoveryAuthority]=useState<IpcAdaptiveBudgetMaintenanceRecoveryAuthorityView>(); const [ipcMaintenancePassword,setIpcMaintenancePassword]=useState(''); const [ipcMaintenanceCode,setIpcMaintenanceCode]=useState(''); const [ipcMaintenanceRecoveryConfirmation,setIpcMaintenanceRecoveryConfirmation]=useState(''); const [ipcMaintenanceBusy,setIpcMaintenanceBusy]=useState(false);
+  const refresh=async()=>{if(!window.pardus)return; const [h,coreHealth,t,r,p,tr,bg,sc,d,q,mp,n,hs,rh,hh,ht,ar,an,mr,mhist,exports,ipc,ipcAuthority,ipcRecoveryAuthority]=await Promise.all([window.pardus.getSystemHealth(),window.pardus.getCoreServiceHealth().catch(()=>undefined),window.pardus.listBackupTargets(),window.pardus.listBackupRuns(30),window.pardus.listPerformance(30),window.pardus.getPerformanceTrend(performanceHours),window.pardus.listBackgroundTasks(30),window.pardus.getSchedulerStatus(),window.pardus.listDiagnostics(50),window.pardus.listQueuedTasks(40),window.pardus.getMaintenancePolicy(),window.pardus.listHealthNotifications(40),window.pardus.getHealthScore(),window.pardus.listDiagnosticReports(20),window.pardus.listHealthHistory(Math.max(30,healthDays*4)),window.pardus.getHealthTrend(healthDays),window.pardus.listDiagnosticArchives(20),window.pardus.getPerformanceAnomalies(performanceHours),window.pardus.getMaintenanceRecommendations(),window.pardus.listMaintenanceHistory(30),window.pardus.listExportArtifacts(30),window.pardus.getIpcPerformanceTelemetry(),window.pardus.getIpcAdaptiveBudgetMaintenanceAuthority(),window.pardus.getIpcAdaptiveBudgetMaintenanceRecoveryAuthority()]);setHealth(h);setCoreServiceHealth(coreHealth);setTargets(t);setRuns(r);setPerformance(p);setTrend(tr);setTasks(bg);setScheduler(sc);setDiagnostics(d);setQueue(q);setPolicy(mp);setNotifications(n);setHealthScore(hs);setReportHistory(rh);setHealthHistory(hh);setHealthTrend(ht);setArchives(ar);setAnomalies(an);setRecommendations(mr);setMaintenanceHistory(mhist);setExportHistory(exports);setIpcTelemetry(ipc);setIpcMaintenanceAuthority(ipcAuthority);setIpcMaintenanceRecoveryAuthority(ipcRecoveryAuthority);};
+  useEffect(()=>{void refresh();const timer=setInterval(()=>void refresh(),30_000);return()=>clearInterval(timer);},[]);
+  const maintain=async(op:MaintenanceResultView['operation'])=>{if(!window.pardus)return;setResult(await window.pardus.runMaintenance(op));await refresh();};
+  const runAllBackups=async()=>{if(!window.pardus)return;const results=await window.pardus.runAllBackups();setBackupMessage(`${results.filter(x=>x.success).length}/${results.length} hedef doğrulandı.`);await refresh();};
+  const runTarget=async(id:string)=>{if(!window.pardus)return;const r=await window.pardus.runBackupTarget(id);setBackupMessage(r.success?'Yedek doğrulandı.':r.run.error??'Yedek başarısız.');await refresh();};
+  const sample=async()=>{if(!window.pardus)return;await window.pardus.capturePerformance();await refresh();};
+  const processQueue=async()=>{if(!window.pardus)return;const r=await window.pardus.processTaskQueue();setSystemMessage(`${r.completed} görev tamamlandı, ${r.deferred} ertelendi.`);await refresh();};
+  const runAutoMaintenance=async()=>{if(!window.pardus)return;const r=await window.pardus.runAutomaticMaintenance();setSystemMessage(r.success?'Otomatik bakım tamamlandı.':'Bakım işlemlerinden biri başarısız oldu.');await refresh();};
+  const evaluateNotifications=async()=>{if(!window.pardus)return;setNotifications(await window.pardus.evaluateHealthNotifications());setSystemMessage('Sistem sağlığı yeniden değerlendirildi.');};
+  const acknowledge=async(id:string)=>{if(!window.pardus)return;setNotifications(await window.pardus.acknowledgeHealthNotification(id));};
+  const exportDiagnostic=async()=>{if(!window.pardus)return;const r=await window.pardus.exportDiagnosticReport();setSystemMessage(r.canceled?'Rapor dışa aktarımı iptal edildi.':`Tanılama raporu: ${r.filePath??''}`);};
+  const archiveOldDiagnostics=async()=>{if(!window.pardus)return;const r=await window.pardus.archiveDiagnostics();setSystemMessage(r.canceled?'Arşivleme iptal edildi.':`${r.archive?.entryCount??0} olay arşivlendi.`);await refresh();};
+  const verifyArchive=async(id:string)=>{if(!window.pardus)return;const r:DiagnosticArchiveVerificationView=await window.pardus.verifyDiagnosticArchive(id);setVerificationMessage(r.valid?'Arşiv bütünlüğü doğrulandı.':r.exists?'Arşiv değiştirilmiş.':'Arşiv dosyası bulunamadı.');};
+  const openReport=async(id:string)=>{if(!window.pardus)return;const r=await window.pardus.readDiagnosticReport(id);setReportContent(r);setVerificationMessage(r.valid?'Rapor doğrulandı ve açıldı.':'Rapor bütünlüğü doğrulanamadı.');};
+  const compareReports=async()=>{if(!window.pardus||!compareLeft||!compareRight||compareLeft===compareRight)return;setComparison(await window.pardus.compareDiagnosticReports(compareLeft,compareRight));};
+  const openArchive=async(id:string)=>{if(!window.pardus)return;try{setArchiveId(id);setArchiveContent(await window.pardus.readDiagnosticArchive(id));setVerificationMessage('Arşiv doğrulandı ve geri yükleme yapılmadan açıldı.');}catch(error){setVerificationMessage(error instanceof Error?error.message:'Arşiv açılamadı.');}};
+  const searchArchiveEvents=async()=>{if(!window.pardus||!archiveId)return;const input:DiagnosticArchiveSearchInput={query:archiveQuery,limit:500};setArchiveContent(await window.pardus.searchDiagnosticArchive(archiveId,input));};
+  const exportArchiveEvents=async(format:'json'|'csv')=>{if(!window.pardus||!archiveId)return;const r=await window.pardus.exportDiagnosticArchiveEntries(archiveId,{query:archiveQuery,limit:2000},format);setVerificationMessage(r.canceled?'Dışa aktarım iptal edildi.':`${r.export?.entryCount??0} olay dışa aktarıldı.`);};
+  const recommendationToTask=async(item:MaintenanceRecommendationView)=>{if(!window.pardus)return;await window.pardus.enqueueTask({taskType:item.recommendedOperation?`maintenance.${item.recommendedOperation}`:'maintenance.review',label:item.title,priority:item.priority==='high'?'high':item.priority==='normal'?'normal':'low',payload:JSON.stringify({code:item.code,message:item.message})});setSystemMessage('Bakım önerisi görev kuyruğuna eklendi.');await refresh();};
+  const filterDiagnostics=async()=>{if(!window.pardus)return;const input:{query?:string;severity?:DiagnosticEntryView['severity'];limit:number}={limit:100};if(diagQuery)input.query=diagQuery;if(diagSeverity)input.severity=diagSeverity as DiagnosticEntryView['severity'];setDiagnostics(await window.pardus.searchDiagnostics(input));};
+  const savePolicy=async(e:FormEvent<HTMLFormElement>)=>{e.preventDefault();if(!window.pardus)return;const d=new FormData(e.currentTarget);setPolicy(await window.pardus.upsertMaintenancePolicy({enabled:d.get('enabled')==='on',intervalHours:Number(d.get('intervalHours')),keepDiagnosticDays:Number(d.get('keepDiagnosticDays')),keepPerformanceDays:Number(d.get('keepPerformanceDays'))}));setSystemMessage('Bakım politikası güncellendi.');await refresh();};
+  const saveTarget=async(e:FormEvent<HTMLFormElement>)=>{e.preventDefault();if(!window.pardus)return;const d=new FormData(e.currentTarget);await window.pardus.upsertBackupTarget({name:String(d.get('name')),kind:String(d.get('kind')) as BackupTargetView['kind'],path:String(d.get('path')),schedule:String(d.get('schedule')) as BackupSchedule,retentionCount:Number(d.get('retention')),retryCount:Number(d.get('retry')),enabled:true});e.currentTarget.reset();await refresh();};
+  const ipcMaintenancePrimaryDenied=ipcMaintenanceAuthority?.allowed!==true;
+  const ipcMaintenanceCredentialsAvailable=!ipcMaintenancePrimaryDenied||ipcMaintenanceRecoveryAuthority?.allowed===true;
+  const ipcMaintenanceCredentialsReady=ipcMaintenanceAuthority?.allowed===true&&ipcMaintenancePassword.length>0&&(!ipcMaintenanceAuthority.twoFactorRequired||ipcMaintenanceCode.length>0);
+  const ipcMaintenanceRecoveryReady=ipcMaintenanceRecoveryAuthority?.allowed===true&&ipcMaintenancePassword.length>0&&(!ipcMaintenanceRecoveryAuthority.twoFactorRequired||ipcMaintenanceCode.length>0)&&ipcMaintenanceRecoveryConfirmation===ipcMaintenanceRecoveryAuthority.confirmationPhrase;
+  const clearIpcMaintenanceCredentials=()=>{setIpcMaintenancePassword('');setIpcMaintenanceCode('');setIpcMaintenanceRecoveryConfirmation('');};
+  const refreshIpcMaintenanceAuthority=async()=>{if(!window.pardus)return;const [authority,recoveryAuthority]=await Promise.all([window.pardus.getIpcAdaptiveBudgetMaintenanceAuthority(),window.pardus.getIpcAdaptiveBudgetMaintenanceRecoveryAuthority()]);setIpcMaintenanceAuthority(authority);setIpcMaintenanceRecoveryAuthority(recoveryAuthority);};
+  const exportIpcAdaptiveDiagnostics=async()=>{if(!window.pardus||!ipcMaintenanceCredentialsReady)return;setIpcMaintenanceBusy(true);try{const exported=await window.pardus.exportIpcAdaptiveBudgetDiagnostics({password:ipcMaintenancePassword,...(ipcMaintenanceCode?{code:ipcMaintenanceCode}:{})});setSystemMessage(exported.canceled?'Tanı paketi dışa aktarılmadı.':`Adaptif IPC tanı paketi kaydedildi · ${exported.sha256?.slice(0,12)??'SHA yok'}`);}catch(error){setSystemMessage(error instanceof Error?error.message:'Güçlü doğrulama başarısız.');}finally{clearIpcMaintenanceCredentials();setIpcMaintenanceBusy(false);await refreshIpcMaintenanceAuthority();}};
+  const resetIpcAdaptiveBudget=async()=>{if(!window.pardus||!ipcMaintenanceCredentialsReady)return;setIpcMaintenanceBusy(true);try{const reset=await window.pardus.resetIpcAdaptiveBudget({password:ipcMaintenancePassword,...(ipcMaintenanceCode?{code:ipcMaintenanceCode}:{})});setSystemMessage(reset.canceled?'Adaptif bütçe sıfırlanmadı.':'Adaptif bütçe baseline moduna sıfırlandı.');if(!reset.canceled)await refresh();}catch(error){setSystemMessage(error instanceof Error?error.message:'Güçlü doğrulama başarısız.');}finally{clearIpcMaintenanceCredentials();setIpcMaintenanceBusy(false);await refreshIpcMaintenanceAuthority();}};
+  const recoverIpcAdaptiveBudgetMaintenanceLock=async()=>{if(!window.pardus||!ipcMaintenanceRecoveryReady)return;setIpcMaintenanceBusy(true);try{const recovered=await window.pardus.recoverIpcAdaptiveBudgetMaintenanceLock({password:ipcMaintenancePassword,...(ipcMaintenanceCode?{code:ipcMaintenanceCode}:{}),confirmation:'BAKIM KİLİDİNİ SIFIRLA'});setSystemMessage(recovered.canceled?'Bakım kilidi kurtarma iptal edildi.':`Bakım kilidi temizlendi · güvenlik dönemi ${recovered.securityEpoch??'—'} · ${recovered.revokedTrustedDeviceCount??0} güvenilir cihaz bağı iptal edildi.`);}catch(error){setSystemMessage(error instanceof Error?error.message:'Bakım kilidi kurtarma doğrulaması başarısız.');}finally{clearIpcMaintenanceCredentials();setIpcMaintenanceBusy(false);await refreshIpcMaintenanceAuthority();}};
+  const bytes=(n:number)=>new Intl.NumberFormat('tr-TR',{style:'unit',unit:'megabyte',maximumFractionDigits:1}).format(n/1048576);
+  const trendLabel=trend?.direction==='improving'?'İyileşiyor':trend?.direction==='degrading'?'Baskı artıyor':'Dengeli';
+  return <section><PageHeader eyebrow="Sistem yönetimi" title="Sistem, bakım ve operasyon" description="Yedek hedeflerini, performansı, bakım görevlerini ve tanılama işlemlerini yönetin." actions={<Button onClick={()=>void refresh()}>Yenile</Button>}/>
+  {health&&<div className="stats-grid"><article className="stat-card"><small>Sistem sağlık puanı</small><strong>{healthScore?.score??0}/100</strong><span>{healthScore?.grade==='excellent'?'Mükemmel':healthScore?.grade==='good'?'İyi':healthScore?.grade==='attention'?'Dikkat':'Kritik'}</span></article><article className="stat-card"><small>Genel durum</small><strong>{health.status==='healthy'?'Sağlıklı':health.status==='warning'?'Uyarı':'Kritik'}</strong><span>{health.integrityOk?'SQLite bütünlüğü doğrulandı':'Bütünlük sorunu'}</span></article><article className="stat-card"><small>Core Service</small><strong>{coreServiceHealth?`${coreServiceHealth.role} · ${coreServiceHealth.lifecycle}`:'Bağlantı yok'}</strong><span>{coreServiceHealth?`${coreServiceHealth.writable?'Yazılabilir':'Salt-okunur'} · ${coreServiceHealth.safeMode?'Güvenli mod':'Normal'} · ${coreServiceHealth.policyVersion}`:'Sağlık yanıtı alınamadı'}</span></article><article className="stat-card"><small>Zamanlayıcı</small><strong>{scheduler?.active?'Etkin':'Kapalı'}</strong><span>{scheduler?.lastCycleAt?`Son tur ${formatDate(scheduler.lastCycleAt,{hour:'2-digit',minute:'2-digit'})}`:'Oturum açılınca çalışır'}</span></article><article className="stat-card"><small>24 saatlik eğilim</small><strong>{trendLabel}</strong><span>CPU %{trend?.averageCpuPercent??0} · RAM %{trend?.averageMemoryPercent??0}</span></article><article className="stat-card"><small>Veri büyümesi</small><strong>{bytes((trend?.databaseGrowthBytes??0)+(trend?.archiveGrowthBytes??0))}</strong><span>{trend?.sampleCount??0} örnek değerlendirildi</span></article></div>}
+  <div className="content-grid two"><article className="panel"><h2>Yedekleme politikası</h2><form className="form-grid" onSubmit={e=>void saveTarget(e)}><label>Hedef adı<input name="name" required/></label><label>Tür<select name="kind"><option value="local">Yerel</option><option value="external">Harici disk</option><option value="cloud">Bulut klasörü</option></select></label><label className="span-2">Klasör yolu<input name="path" required placeholder="C:\\Anadolu-Parsi-Yedek"/></label><label>Zamanlama<select name="schedule"><option value="manual">Manuel</option><option value="hourly">Saatlik</option><option value="daily">Günlük</option><option value="weekly">Haftalık</option><option value="monthly">Aylık</option></select></label><label>Saklanacak yedek<input name="retention" type="number" min="1" max="365" defaultValue="10"/></label><label>Yeniden deneme<input name="retry" type="number" min="0" max="5" defaultValue="2"/></label><Button tone="primary" type="submit">Politikayı kaydet</Button></form></article><article className="panel"><div className="section-heading"><div><h2>Yedek hedefleri</h2><p>Her hedef bağımsız çalışır ve SHA-256 ile doğrulanır.</p></div><Button onClick={()=>void runAllBackups()}>Tümünü çalıştır</Button></div>{backupMessage&&<p className="success-text">{backupMessage}</p>}{targets.length?targets.map(t=><div className="list-row" key={t.id}><div><strong>{t.name}</strong><small>{t.kind} · {t.schedule} · son {t.retentionCount} yedek</small><small>{t.nextRunAt?`Sonraki ${formatDate(t.nextRunAt,{dateStyle:'short',timeStyle:'short'})}`:t.lastError??t.path}</small></div><Button onClick={()=>void runTarget(t.id)} disabled={!t.enabled}>Çalıştır</Button></div>):<EmptyState title="Yedek hedefi tanımlanmadı" body="Yerel, harici veya bulut hedefi ekleyin."/>}</article></div>
+  <div className="content-grid two"><article className="panel"><h2>Performans eğilimi</h2><div className="stats-grid"><div className="context-stat"><strong>%{trend?.peakCpuPercent??0}</strong><span>tepe CPU</span></div><div className="context-stat"><strong>%{trend?.peakMemoryPercent??0}</strong><span>tepe RAM</span></div></div><div className="section-heading"><p>Beş dakikalık otomatik örnekleme geçmişi.</p><Button onClick={()=>void sample()}>Şimdi örnek al</Button></div>{performance.slice(0,8).map(x=><div className="list-row" key={x.id}><div><strong>CPU %{x.cpuLoadPercent} · RAM %{x.memoryUsagePercent}</strong><small>DB {bytes(x.databaseBytes)} · Arşiv {bytes(x.archiveBytes)}</small></div><span>{formatDate(x.sampledAt,{hour:'2-digit',minute:'2-digit'})}</span></div>)}</article><article className="panel"><h2>Arka plan görevleri</h2>{tasks.length?tasks.slice(0,10).map(t=><div className="list-row" key={t.id}><div><strong>{t.label}</strong><small>{t.taskType} · {t.status}{t.details?` · ${t.details}`:''}</small></div><span>{t.durationMs!=null?`${Math.round(t.durationMs/1000)} sn`:'çalışıyor'}</span></div>):<EmptyState title="Görev kaydı yok" body="Yedekleme ve bakım görevleri burada izlenecek."/>}</article></div>
+  <div className="content-grid two"><article className="panel"><h2>Bakım işlemleri</h2><div className="button-row"><Button onClick={()=>void maintain('integrity_check')}>Bütünlük kontrolü</Button><Button onClick={()=>void maintain('wal_checkpoint')}>WAL temizle</Button><Button onClick={()=>void maintain('analyze')}>ANALYZE</Button><Button tone="danger" onClick={()=>void maintain('vacuum')}>VACUUM</Button></div>{result&&<p className={result.success?'success-text':'error-text'}>{result.message}</p>}{health?.warnings.map(w=><p className="warning-text" key={w}>{w}</p>)}</article><article className="panel"><h2>Son yedek çalışmaları</h2>{runs.slice(0,8).map(r=><div className="list-row" key={r.id}><div><strong>{r.status==='success'?'Doğrulandı':'Başarısız'}</strong><small>{r.filePath??r.error}</small></div><span>{r.sizeBytes?bytes(r.sizeBytes):'—'}</span></div>)}</article></div>
+  {systemMessage&&<p className="success-text">{systemMessage}</p>}
+  <div className="content-grid two"><article className="panel"><div className="section-heading"><div><h2>Görev öncelik kuyruğu</h2><p>Kritik görevler adaptif kapasiteye göre önce çalıştırılır.</p></div><Button onClick={()=>void processQueue()}>Kuyruğu çalıştır</Button></div>{queue.length?queue.slice(0,12).map(q=><div className="list-row" key={q.id}><div><strong>{q.label}</strong><small>{q.taskType} · {q.priority} · {q.status}{q.details?` · ${q.details}`:''}</small></div><span>{q.attempts}/{q.maxAttempts}</span></div>):<EmptyState title="Kuyruk boş" body="Zamanlanmış bakım, performans ve yedek görevleri burada görünür."/>}</article><article className="panel"><div className="section-heading"><div><h2>Sistem sağlığı bildirimleri</h2><p>Yeni uyarıları üretin ve incelenen kayıtları onaylayın.</p></div><Button onClick={()=>void evaluateNotifications()}>Sağlığı değerlendir</Button></div>{notifications.length?notifications.slice(0,12).map(n=><div className="list-row" key={n.id}><div><strong>{n.severity==='critical'?'Kritik':n.severity==='warning'?'Uyarı':'Bilgi'} · {n.title}</strong><small>{n.message}</small></div>{n.acknowledgedAt?<span>Onaylandı</span>:<Button onClick={()=>void acknowledge(n.id)}>Onayla</Button>}</div>):<EmptyState title="Aktif sağlık bildirimi yok" body="Sistem sağlığı değerlendirmesi yeni kayıt üretebilir."/>}</article></div>
+  <div className="content-grid two"><article className="panel"><h2>Otomatik bakım politikası</h2>{policy&&<form className="form-grid" onSubmit={e=>void savePolicy(e)}><label><input name="enabled" type="checkbox" defaultChecked={policy.enabled}/> Otomatik bakım etkin</label><label>Çalışma aralığı (saat)<input name="intervalHours" type="number" min="1" max="720" defaultValue={policy.intervalHours}/></label><label>Tanılama saklama (gün)<input name="keepDiagnosticDays" type="number" min="1" max="3650" defaultValue={policy.keepDiagnosticDays}/></label><label>Performans saklama (gün)<input name="keepPerformanceDays" type="number" min="1" max="3650" defaultValue={policy.keepPerformanceDays}/></label><Button tone="primary" type="submit">Politikayı kaydet</Button><Button type="button" onClick={()=>void runAutoMaintenance()}>Bakımı şimdi çalıştır</Button></form>}</article><article className="panel"><h2>Tanılama raporu</h2><p>Donanım, veritabanı, yedekleme, performans, bildirim ve görev kuyruğunu tek JSON raporunda dışa aktarır.</p><div className="button-row"><Button tone="primary" onClick={()=>void exportDiagnostic()}>JSON raporu dışa aktar</Button><Button onClick={()=>void refresh()}>Verileri yenile</Button></div><small>Rapor kişisel kayıt içeriğini değil, sistem ve işletim sağlığı özetlerini içerir.</small>{reportHistory.slice(0,5).map(r=><div className="list-row" key={r.id}><div><strong>Puan {r.healthScore}/100</strong><small>{r.sha256.slice(0,16)}…</small></div><span>{formatDate(r.generatedAt,{dateStyle:'short',timeStyle:'short'})}</span></div>)}</article></div>
+  <article className="panel"><div className="section-heading"><div><h2>IPC performans telemetrisi</h2><p>Son {ipcTelemetry?.windowMinutes??60} dakika · yalnız toplu teknik ölçümler</p></div><div className="button-row"><span className="eyebrow">{ipcTelemetry?.totalSamples??0} örnek</span><Button disabled={!ipcMaintenanceCredentialsReady||ipcMaintenanceBusy} title={ipcMaintenanceAuthority?.allowed?'Parola ve gerekiyorsa 2FA ile güçlü doğrulama gerekir':`Bakım yetkisi: ${ipcMaintenanceAuthority?.reason??'DENETLENIYOR'}`} onClick={()=>void exportIpcAdaptiveDiagnostics()}>Tanı paketini dışa aktar</Button><Button disabled={!ipcMaintenanceCredentialsReady||ipcMaintenanceBusy} title={ipcMaintenanceAuthority?.allowed?'Parola ve gerekiyorsa 2FA ile güçlü doğrulama gerekir':`Bakım yetkisi: ${ipcMaintenanceAuthority?.reason??'DENETLENIYOR'}`} onClick={()=>void resetIpcAdaptiveBudget()}>Bütçeyi sıfırla</Button>{ipcMaintenanceRecoveryAuthority?.recoveryRequired&&<Button tone="danger" disabled={!ipcMaintenanceRecoveryReady||ipcMaintenanceBusy} title={`Kurtarma yetkisi: ${ipcMaintenanceRecoveryAuthority.reason}`} onClick={()=>void recoverIpcAdaptiveBudgetMaintenanceLock()}>Bakım kilidini kurtar</Button>}</div></div><div className="form-grid lifecycle-reauth"><label>Bakım parolası<input type="password" autoComplete="current-password" value={ipcMaintenancePassword} disabled={!ipcMaintenanceCredentialsAvailable||ipcMaintenanceBusy} onChange={event=>setIpcMaintenancePassword(event.target.value)}/></label><label>2FA / kurtarma kodu {(ipcMaintenanceAuthority?.twoFactorRequired||ipcMaintenanceRecoveryAuthority?.twoFactorRequired)?'(zorunlu)':'(etkinse)'}<input inputMode="numeric" autoComplete="one-time-code" maxLength={64} value={ipcMaintenanceCode} disabled={!ipcMaintenanceCredentialsAvailable||ipcMaintenanceBusy} onChange={event=>setIpcMaintenanceCode(event.target.value.replace(/\s+/g,''))}/></label>{ipcMaintenanceRecoveryAuthority?.recoveryRequired&&<label>Kurtarma onayı<input value={ipcMaintenanceRecoveryConfirmation} disabled={ipcMaintenanceRecoveryAuthority.allowed!==true||ipcMaintenanceBusy} placeholder={ipcMaintenanceRecoveryAuthority.confirmationPhrase} onChange={event=>setIpcMaintenanceRecoveryConfirmation(event.target.value)}/></label>}</div><small>Bakım oturumu açılmadan önce güçlü yeniden doğrulama yapılır; parola ve 2FA kodu kaydedilmez, günlüklenmez ve tanı paketine eklenmez; tek kullanımlık kurtarma kodu da aynı gizlilik sınırındadır. Başarısız denemeler sınırlıdır ve işletim sistemi korumasıyla şifrelenerek uygulama yeniden başlatmalarında korunur. Başarılı kurtarma hesap güvenlik dönemini ilerletir, tüm eski güvenilir cihaz bağlarını iptal eder ve yeniden yetkilendirme ister.</small>{ipcMaintenanceAuthority?.reauthenticationLocked&&<p className="warning-text">Güçlü doğrulama geçici olarak kilitli. Normal bekleme süresi yaklaşık {ipcMaintenanceAuthority.reauthenticationRetryAfterSeconds??1} saniye. Yetkili kurtarma, ayrı kalıcı deneme sayacı ve açık onayla kullanılabilir.</p>}{ipcMaintenanceRecoveryAuthority?.recoveryLocked&&<p className="warning-text">Kurtarma doğrulaması da geçici olarak sınırlandı. Yaklaşık {ipcMaintenanceRecoveryAuthority.recoveryRetryAfterSeconds??1} saniye sonra yeniden deneyin.</p>}<div className="metric-row"><span>Bakım yetkisi <strong>{ipcMaintenanceAuthority?.allowed?'Açık':ipcMaintenanceAuthority?.reason??'Denetleniyor'}</strong></span><span>Kurtarma <strong>{ipcMaintenanceRecoveryAuthority?.allowed?'Açık':ipcMaintenanceRecoveryAuthority?.reason??'Denetleniyor'}</strong></span><span>Güçlü doğrulama <strong>{ipcMaintenanceAuthority?.strongReauthenticationRequired?'Zorunlu':'—'}</strong></span><span>Normal deneme <strong>{ipcMaintenanceAuthority?.remainingReauthenticationAttempts??'—'}/{ipcMaintenanceAuthority?.maximumReauthenticationAttempts??'—'}</strong></span><span>Kurtarma denemesi <strong>{ipcMaintenanceRecoveryAuthority?.remainingRecoveryAttempts??'—'}/{ipcMaintenanceRecoveryAuthority?.maximumRecoveryAttempts??'—'}</strong></span><span>Etkin <strong>{ipcTelemetry?.activeRequests??0}</strong></span><span>Kuyruk <strong>{ipcTelemetry?.queuedRequests??0}</strong></span><span>Cache <strong>{ipcTelemetry?.cacheEntries??0}</strong></span></div><div className="list-row"><div><strong>Adaptif kaynak bütçesi</strong><small>{ipcTelemetry?.adaptiveBudget.reason??'startup-baseline'} · nesil {ipcTelemetry?.adaptiveBudget.generation??0} · kalıcılık {ipcTelemetry?.adaptiveBudget.persistence.status??'disabled'}</small></div><span>{ipcTelemetry?.adaptiveBudget.mode??'baseline'}</span></div>{ipcTelemetry?.alerts.length?ipcTelemetry.alerts.slice(0,6).map(alert=><div className={`health-alert ${alert.severity}`} key={`${alert.code}-${alert.channel??'global'}-${alert.metric}`}><strong>{alert.message}</strong><small>{alert.channel??'genel'} · {Math.round(alert.value)} / eşik {Math.round(alert.threshold)}</small></div>):<EmptyState title="IPC darboğazı bulunmadı" body="Yanıt süresi, kuyruk beklemesi ve süre aşımı oranları normal sınırda."/>}{ipcTelemetry?.channels.slice(0,8).map(channel=><div className="list-row" key={channel.channel}><div><strong>{channel.channel}</strong><small>p95 {Math.round(channel.p95DurationMs)} ms · kuyruk {Math.round(channel.p95QueueWaitMs)} ms · cache %{channel.cacheHitRatePercent}</small></div><span>{channel.sampleCount} istek</span></div>)}</article>
+  <article className="panel"><div className="section-heading"><div><h2>Dışa aktarım geçmişi</h2><p>JSON, CSV ve PDF çıktılarının bütünlük kaydı.</p></div></div>{exportHistory.length?exportHistory.map(item=><div className="list-row" key={item.id}><div><strong>{item.kind} · {item.format.toUpperCase()}</strong><small>{item.filePath} · {item.sizeBytes} bayt</small></div><Button onClick={async()=>{const v=await window.pardus?.verifyExportArtifact(item.id);setVerificationMessage(v?.valid?'Dışa aktarım dosyası doğrulandı.':'Dosya kayıp veya değiştirilmiş.');}}>Doğrula</Button></div>):<EmptyState title="Dışa aktarım yok" body="Oluşturulan rapor ve arşiv çıktıları burada listelenecek."/>}</article><article className="panel"><div className="section-heading"><div><h2>Tanılama günlüğü</h2><p>Metin, kod ve önem seviyesine göre filtreleyin.</p></div><div className="button-row"><input value={diagQuery} onChange={e=>setDiagQuery(e.target.value)} placeholder="Ara…"/><select value={diagSeverity} onChange={e=>setDiagSeverity(e.target.value)}><option value="">Tüm seviyeler</option><option value="info">Bilgi</option><option value="warning">Uyarı</option><option value="error">Hata</option></select><Button onClick={()=>void filterDiagnostics()}>Filtrele</Button></div></div>{diagnostics.length?diagnostics.map(d=><div className="list-row" key={d.id}><div><strong>{d.severity.toUpperCase()} · {d.code}</strong><small>{d.message}{d.details?` · ${d.details}`:''}</small></div><span>{formatDate(d.occurredAt,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</span></div>):<EmptyState title="Tanılama kaydı yok" body="Filtreye uyan kayıt bulunamadı."/>}</article><div className="content-grid two"><article className="panel"><div className="section-heading"><div><h2>Sağlık puanı eğilimi</h2><p>{healthTrend?.windowDays??healthDays} günlük görünüm · {healthTrend?.sampleCount??0} ölçüm</p></div><div className="button-row"><select value={healthDays} onChange={e=>setHealthDays(Number(e.target.value))}><option value="7">7 gün</option><option value="30">30 gün</option><option value="90">90 gün</option><option value="365">1 yıl</option></select><Button onClick={async()=>{await window.pardus?.captureHealthScore();await refresh();}}>Ölçüm al</Button></div></div><div className="health-chart">{healthHistory.slice().reverse().map(item=><div className="health-bar" key={item.id} title={`${item.score}/100 · ${formatDate(item.capturedAt,{dateStyle:'short'})}`}><span style={{height:`${Math.max(6,item.score)}%`}} /></div>)}</div><div className="metric-row"><span>Ortalama <strong>{healthTrend?.averageScore??0}</strong></span><span>En düşük <strong>{healthTrend?.minimumScore??0}</strong></span><span>Değişim <strong>{healthTrend?.change??0}</strong></span></div></article><article className="panel"><div className="section-heading"><h2>Performans anomalileri</h2><select value={performanceHours} onChange={e=>setPerformanceHours(Number(e.target.value))}><option value="24">24 saat</option><option value="168">7 gün</option><option value="720">30 gün</option></select></div>{anomalies.length?anomalies.map(a=><div className={`health-alert ${a.severity}`} key={`${a.metric}-${a.detectedAt}`}><strong>{a.message}</strong><small>{a.metric} · {Math.round(a.value)} / eşik {Math.round(a.threshold)}</small></div>):<EmptyState title="Anomali bulunmadı" body="Son 24 saatlik ölçümler normal aralıkta."/>}</article></div>
+  <div className="content-grid two"><article className="panel"><div className="section-heading"><div><h2>Tanılama rapor merkezi</h2><p>Raporu açın, doğrulayın ve iki sürümü karşılaştırın.</p></div><Button onClick={()=>void exportDiagnostic()}>Yeni rapor</Button></div><div className="button-row"><select value={compareLeft} onChange={e=>setCompareLeft(e.target.value)}><option value="">İlk rapor</option>{reportHistory.map(r=><option key={r.id} value={r.id}>{formatDate(r.generatedAt,{dateStyle:'short',timeStyle:'short'})}</option>)}</select><select value={compareRight} onChange={e=>setCompareRight(e.target.value)}><option value="">İkinci rapor</option>{reportHistory.map(r=><option key={r.id} value={r.id}>{formatDate(r.generatedAt,{dateStyle:'short',timeStyle:'short'})}</option>)}</select><Button onClick={()=>void compareReports()}>Karşılaştır</Button></div>{comparison&&<div className="comparison-card"><strong>Sağlık puanı değişimi: {comparison.healthScoreChange>0?'+':''}{comparison.healthScoreChange}</strong><small>Değişen bölümler: {comparison.changedKeys.join(', ')||'Yok'} · Durum değişti: {comparison.statusChanged?'Evet':'Hayır'}</small>{comparison.sectionChanges.slice(0,8).map(x=><div className="comparison-detail" key={`${x.kind}-${x.key}`}><b>{x.kind} · {x.key}</b><code>{x.rightSummary??x.leftSummary}</code></div>)}</div>}{reportHistory.map(r=><div className="report-row" key={r.id}><div><strong>{formatDate(r.generatedAt,{dateStyle:'short',timeStyle:'short'})}</strong><small>Puan {r.healthScore}/100 · {bytes(r.sizeBytes)}</small></div><Button onClick={()=>void openReport(r.id)}>Aç ve doğrula</Button></div>)}{reportContent&&<pre className="report-preview">{reportContent.content.slice(0,12000)}</pre>}{verificationMessage&&<small>{verificationMessage}</small>}</article><article className="panel"><div className="section-heading"><div><h2>Olay arşivleri</h2><p>Eski tanılama kayıtları sıkıştırılmış ve hash doğrulamalı saklanır.</p></div><Button onClick={()=>void archiveOldDiagnostics()}>30 günden eskiyi arşivle</Button></div>{archives.map(a=><div className="report-row" key={a.id}><div><strong>{a.entryCount} olay</strong><small>{formatDate(a.createdAt,{dateStyle:'short'})} · {bytes(a.sizeBytes)}</small></div><div className="button-row"><Button onClick={()=>void verifyArchive(a.id)}>Doğrula</Button><Button onClick={()=>void openArchive(a.id)}>İçeriği aç</Button></div></div>)}{archiveContent&&<div className="archive-preview"><div className="section-heading"><strong>{archiveContent.entryCount} arşiv olayı</strong><div className="button-row"><input value={archiveQuery} onChange={e=>setArchiveQuery(e.target.value)} placeholder="Arşivde ara…"/><Button onClick={()=>void searchArchiveEvents()}>Ara</Button><Button onClick={()=>void exportArchiveEvents('json')}>JSON</Button><Button onClick={()=>void exportArchiveEvents('csv')}>CSV</Button></div></div>{archiveContent.entries.slice(0,20).map(e=><div className="list-row" key={e.id}><div><strong>{e.code}</strong><small>{e.message}</small></div><span>{formatDate(e.occurredAt,{dateStyle:'short',timeStyle:'short'})}</span></div>)}</div>}</article></div>
+  <article className="panel"><h2>Bakım görev sonuç geçmişi</h2>{maintenanceHistory.map(x=><div className="list-row" key={x.id}><div><strong>{x.operation} · {x.success?'Başarılı':'Başarısız'}</strong><small>{x.source} · {x.message}</small></div><span>{x.durationMs} ms</span></div>)}</article>
+  <article className="panel"><h2>Akıllı bakım önerileri</h2><div className="recommendation-grid">{recommendations.map(item=><div className="recommendation-card" key={item.code}><span className={`priority-dot ${item.priority}`} /><div><strong>{item.title}</strong><p>{item.message}</p></div><Button onClick={()=>void recommendationToTask(item)}>Göreve dönüştür</Button></div>)}</div></article></section>;
+}
+
+function PlaceholderScreen({ screen, snapshot, auth }: { screen: ScreenId; snapshot: FamilyAppSnapshot; auth:AuthStateView }) {
+  void snapshot; void auth;
+  return <><PageHeader eyebrow="Gezinme" title="Bölüm bulunamadı" description={`${screen} bölümü bu sürümün gezinme sözleşmesinde yer almıyor.`}/><EmptyState title="Geçersiz menü hedefi" body="Sol menüden kullanılabilir bir bölüm seçin."/></>;
+}
+
+
+const lifecycleTypeLabels:Record<DataLifecycleResourceType,string>={finance_record:'Finans kaydı',health_record:'Sağlık kaydı',medication_plan:'İlaç planı',family_health_history:'Aile sağlık geçmişi',life_record:'Yaşam kaydı'};
+const lifecycleStateLabels:Record<DataLifecycleRecordView['state'],string>={active:'Etkin',archived:'Arşivlendi',purge_scheduled:'İmha bekliyor',purged:'Kalıcı olarak imha edildi'};
+const lifecycleResourceTypes=Object.keys(lifecycleTypeLabels) as DataLifecycleResourceType[];
+
+function DataLifecycleSettings({auth}:{auth:AuthStateView}){
+  const [policies,setPolicies]=useState<DataRetentionPolicyView[]>([]);
+  const [records,setRecords]=useState<DataLifecycleRecordView[]>([]);
+  const [propagationRuns,setPropagationRuns]=useState<BackupPropagationRunView[]>([]);
+  const [cleanRewriteStatus,setCleanRewriteStatus]=useState<BackupCleanRewriteStatusView|null>(null);
+  const [cleanRewriteRuns,setCleanRewriteRuns]=useState<BackupCleanRewriteRunView[]>([]);
+  const [cleanRewriteEnabled,setCleanRewriteEnabled]=useState(true);
+  const [cleanRewriteRetentionDays,setCleanRewriteRetentionDays]=useState(30);
+  const [quarantinePolicy,setQuarantinePolicy]=useState<BackupQuarantinePolicyView|null>(null);
+  const [quarantineBatches,setQuarantineBatches]=useState<BackupQuarantineBatchView[]>([]);
+  const [quarantineRetentionDays,setQuarantineRetentionDays]=useState(90);
+  const [externalCopies,setExternalCopies]=useState<ExternalBackupCopyView[]>([]);
+  const [externalSummary,setExternalSummary]=useState<ExternalBackupInventorySummaryView|null>(null);
+  const [externalEvidenceIssuers,setExternalEvidenceIssuers]=useState<ExternalBackupEvidenceIssuerView[]>([]);
+  const [externalEvidenceRotations,setExternalEvidenceRotations]=useState<ExternalBackupEvidenceIssuerRotationView[]>([]);
+  const [externalEvidenceRevocationLists,setExternalEvidenceRevocationLists]=useState<ExternalBackupEvidenceRevocationListView[]>([]);
+  const [externalRevocationEndpoints,setExternalRevocationEndpoints]=useState<ExternalBackupRevocationEndpointView[]>([]);
+  const [revocationSyncStates,setRevocationSyncStates]=useState<RevocationSyncEndpointStateView[]>([]);
+  const [externalEvidence,setExternalEvidence]=useState<ExternalBackupDestructionEvidenceView[]>([]);
+  const [externalIssuerLabel,setExternalIssuerLabel]=useState('');
+  const [externalIssuerPublicKey,setExternalIssuerPublicKey]=useState('');
+  const [externalIssuerLegalName,setExternalIssuerLegalName]=useState('');
+  const [externalIssuerIdentityEvidence,setExternalIssuerIdentityEvidence]=useState('');
+  const [externalIssuerFingerprintEvidence,setExternalIssuerFingerprintEvidence]=useState('');
+  const [externalIssuerExpectedFingerprint,setExternalIssuerExpectedFingerprint]=useState('');
+  const [externalIssuerWitnessName,setExternalIssuerWitnessName]=useState('');
+  const [externalIssuerWitnessOrganization,setExternalIssuerWitnessOrganization]=useState('');
+  const [externalLabel,setExternalLabel]=useState('');
+  const [externalKind,setExternalKind]=useState<ExternalBackupCopyKind>('offline_disk');
+  const [externalLocation,setExternalLocation]=useState('');
+  const [externalCustodian,setExternalCustodian]=useState('');
+  const [externalReviewDays,setExternalReviewDays]=useState(90);
+  const [externalHistoricalRisk,setExternalHistoricalRisk]=useState(true);
+  const [propagationRunning,setPropagationRunning]=useState(false);
+  const [message,setMessage]=useState('');
+  const [policyName,setPolicyName]=useState('Standart hassas veri saklama');
+  const [retentionDays,setRetentionDays]=useState(365);
+  const [graceDays,setGraceDays]=useState(30);
+  const [selectedTypes,setSelectedTypes]=useState<DataLifecycleResourceType[]>([...lifecycleResourceTypes]);
+  const [password,setPassword]=useState('');
+  const [code,setCode]=useState('');
+  const refresh=async()=>{if(!window.pardus||!auth.authenticated)return;const admin=auth.role==='family_admin';const [nextPolicies,nextRecords,nextPropagationRuns,nextCleanRewriteStatus,nextCleanRewriteRuns,nextQuarantinePolicy,nextQuarantineBatches,nextExternalCopies,nextExternalSummary,nextExternalEvidenceIssuers,nextExternalEvidenceRotations,nextExternalEvidenceRevocationLists,nextExternalRevocationEndpoints,nextRevocationSyncStates,nextExternalEvidence]=await Promise.all([window.pardus.listDataRetentionPolicies(),window.pardus.listDataLifecycleRecords(),admin?window.pardus.listBackupPropagationRuns(10):Promise.resolve([]),admin?window.pardus.getBackupCleanRewriteStatus():Promise.resolve(null),admin?window.pardus.listBackupCleanRewriteRuns(20):Promise.resolve([]),admin?window.pardus.getBackupQuarantinePolicy():Promise.resolve(null),admin?window.pardus.listBackupQuarantineBatches(100):Promise.resolve([]),admin?window.pardus.listExternalBackupCopies(200):Promise.resolve([]),admin?window.pardus.getExternalBackupInventorySummary():Promise.resolve(null),admin?window.pardus.listExternalBackupEvidenceIssuers(100):Promise.resolve([]),admin?window.pardus.listExternalBackupEvidenceIssuerRotations(100):Promise.resolve([]),admin?window.pardus.listExternalBackupEvidenceRevocationLists(100):Promise.resolve([]),admin?window.pardus.listExternalBackupRevocationEndpoints(100):Promise.resolve([]),admin?window.pardus.listRevocationSyncStates():Promise.resolve([]),admin?window.pardus.listExternalBackupDestructionEvidence(undefined,200):Promise.resolve([])]);setPolicies(nextPolicies);setRecords(nextRecords);setPropagationRuns(nextPropagationRuns);setCleanRewriteStatus(nextCleanRewriteStatus);setCleanRewriteRuns(nextCleanRewriteRuns);setQuarantinePolicy(nextQuarantinePolicy);setQuarantineBatches(nextQuarantineBatches);setExternalCopies(nextExternalCopies);setExternalSummary(nextExternalSummary);setExternalEvidenceIssuers(nextExternalEvidenceIssuers);setExternalEvidenceRotations(nextExternalEvidenceRotations);setExternalEvidenceRevocationLists(nextExternalEvidenceRevocationLists);setExternalRevocationEndpoints(nextExternalRevocationEndpoints);setRevocationSyncStates(nextRevocationSyncStates);setExternalEvidence(nextExternalEvidence);if(nextCleanRewriteStatus){setCleanRewriteEnabled(nextCleanRewriteStatus.policy.enabled);setCleanRewriteRetentionDays(nextCleanRewriteStatus.policy.retentionDays);}if(nextQuarantinePolicy)setQuarantineRetentionDays(nextQuarantinePolicy.retentionDays);};
+  useEffect(()=>{void refresh();},[auth.authenticated]);
+  const run=async(action:()=>Promise<DataLifecycleRecordView[]>,success:string)=>{try{setRecords(await action());setMessage(success);}catch(error){setMessage(error instanceof Error?error.message:'Veri yaşam döngüsü işlemi tamamlanamadı.');}};
+  const createPolicy=async(event:FormEvent<HTMLFormElement>)=>{event.preventDefault();if(!window.pardus)return;try{setPolicies(await window.pardus.createDataRetentionPolicy({name:policyName,resourceTypes:selectedTypes,retentionDays,graceDays,requiresStrongAuth:true}));setMessage('Saklama politikası oluşturuldu.');}catch(error){setMessage(error instanceof Error?error.message:'Saklama politikası oluşturulamadı.');}};
+  const policyFor=(record:DataLifecycleRecordView)=>policies.find(policy=>policy.resourceTypes.includes(record.resourceType));
+  const archive=async(record:DataLifecycleRecordView)=>{if(!window.pardus)return;const policy=policyFor(record);await run(()=>window.pardus!.archiveDataResource({resourceType:record.resourceType,resourceId:record.resourceId,...(policy?{policyId:policy.id}:{})}),'Kayıt geri alınabilir biçimde arşivlendi.');};
+  const restore=async(record:DataLifecycleRecordView)=>{if(window.pardus)await run(()=>window.pardus!.restoreDataResource({resourceType:record.resourceType,resourceId:record.resourceId}),'Kayıt etkin duruma geri alındı.');};
+  const requestPurge=async(record:DataLifecycleRecordView)=>{if(!window.pardus)return;const expected=`KALICI İMHA ${record.resourceType}/${record.resourceId}`;const confirmation=window.prompt(`İmha talebi için şu metni birebir yazın:\n${expected}`,'');if(confirmation===null)return;await run(()=>window.pardus!.requestDataPurge({resourceType:record.resourceType,resourceId:record.resourceId,password,...(code.trim()?{code:code.trim()}:{}),confirmation}),'Kalıcı imha talebi oluşturuldu; geri alma süresi boyunca iptal edilebilir.');};
+  const executePurge=async(record:DataLifecycleRecordView)=>{if(!window.pardus)return;const expected=`GERİ ALINAMAZ İMHA ${record.resourceType}/${record.resourceId}`;const confirmation=window.prompt(`Bu işlem uygulamadaki canlı kaydı geri alınamaz biçimde siler. Şu metni birebir yazın:\n${expected}`,'');if(confirmation===null)return;await run(()=>window.pardus!.executeDataPurge({resourceType:record.resourceType,resourceId:record.resourceId,password,...(code.trim()?{code:code.trim()}:{}),confirmation}),'Canlı kayıt kalıcı olarak imha edildi. Önceki yedek kopyalarının süre dolana kadar bulunabileceğini unutmayın.');};
+  const cancelPurge=async(record:DataLifecycleRecordView)=>{if(window.pardus)await run(()=>window.pardus!.cancelDataPurge({resourceType:record.resourceType,resourceId:record.resourceId}),'Kalıcı imha talebi iptal edildi.');};
+  const toggleHold=async(record:DataLifecycleRecordView)=>{if(!window.pardus)return;const enabled=!record.legalHold;const reason=enabled?(window.prompt('Hukuki/koruma bekletmesi gerekçesini yazın (en az 8 karakter):','')??''):'Bekletme kullanıcı tarafından kaldırıldı.';if(enabled&&!reason)return;await run(()=>window.pardus!.setDataLegalHold({resourceType:record.resourceType,resourceId:record.resourceId,enabled,reason,password,...(code.trim()?{code:code.trim()}:{})}),enabled?'Kayıt imhaya karşı bekletmeye alındı.':'Kayıt bekletmesi kaldırıldı.');};
+  const propagateBackups=async()=>{if(!window.pardus||propagationRunning)return;setPropagationRunning(true);try{const result=await window.pardus.runBackupCleanRewrite();const propagation=result.propagationRun;setMessage(result.status==='success'&&propagation?`Temiz yedek yeniden yazımı tamamlandı; ${propagation.quarantinedArtifacts} eski yedek karantinaya alındı.`:`Temiz yedek yeniden yazımı ${result.status}: ${result.reason??'tanı kaydı oluşturuldu.'}`);await refresh();}catch(error){setMessage(error instanceof Error?error.message:'Temiz yedek yeniden yazımı tamamlanamadı.');}finally{setPropagationRunning(false);}};
+  const saveCleanRewritePolicy=async(event:FormEvent<HTMLFormElement>)=>{event.preventDefault();if(!window.pardus)return;try{await window.pardus.updateBackupCleanRewritePolicy({enabled:cleanRewriteEnabled,retentionDays:cleanRewriteRetentionDays,password,...(code.trim()?{code:code.trim()}:{})});setMessage('Otomatik temiz yedek yeniden yazım politikası güncellendi.');await refresh();}catch(error){setMessage(error instanceof Error?error.message:'Temiz yedek yeniden yazım politikası güncellenemedi.');}};
+  const saveQuarantinePolicy=async(event:FormEvent<HTMLFormElement>)=>{event.preventDefault();if(!window.pardus)return;try{const next=await window.pardus.updateBackupQuarantinePolicy({retentionDays:quarantineRetentionDays,password,...(code.trim()?{code:code.trim()}:{})});setQuarantinePolicy(next);setMessage('Yedek karantina saklama politikası güncellendi. Yeni süre yalnız bundan sonra oluşacak karantinalara uygulanır.');}catch(error){setMessage(error instanceof Error?error.message:'Yedek karantina politikası güncellenemedi.');}};
+  const toggleQuarantineHold=async(batch:BackupQuarantineBatchView)=>{if(!window.pardus)return;const enabled=!batch.legalHold;const reason=enabled?(window.prompt('Yedek karantinası için hukuki/koruma bekletmesi gerekçesini yazın:','')??''):undefined;if(enabled&&!reason)return;try{setQuarantineBatches(await window.pardus.setBackupQuarantineLegalHold({batchId:batch.id,enabled,...(reason?{reason}:{}),password,...(code.trim()?{code:code.trim()}:{})}));setMessage(enabled?'Yedek karantinası bekletmeye alındı.':'Yedek karantinası bekletmesi kaldırıldı.');}catch(error){setMessage(error instanceof Error?error.message:'Yedek karantina bekletmesi güncellenemedi.');}};
+  const destroyQuarantine=async(batch:BackupQuarantineBatchView)=>{if(!window.pardus)return;const expected=`KARANTİNA İMHA ${batch.id}`;const confirmation=window.prompt(`Bu işlem doğrulanmış karantina yedeklerini geri alınamaz biçimde yok eder. Şu metni birebir yazın:
+${expected}`,'');if(confirmation===null)return;try{const result=await window.pardus.destroyBackupQuarantineBatch({batchId:batch.id,confirmation,password,...(code.trim()?{code:code.trim()}:{})});setMessage(`${result.destroyedArtifacts} karantina yedeği nihai imha edildi${result.resumed?' ve yarım kalan işlem güvenli biçimde tamamlandı':''}.`);await refresh();}catch(error){setMessage(error instanceof Error?error.message:'Yedek karantinası imha edilemedi.');}};
+  const registerExternalCopy=async(event:FormEvent<HTMLFormElement>)=>{event.preventDefault();if(!window.pardus)return;try{setExternalCopies(await window.pardus.registerExternalBackupCopy({label:externalLabel,kind:externalKind,locationHint:externalLocation,custodian:externalCustodian,reviewIntervalDays:externalReviewDays,containsHistoricalDataRisk:externalHistoricalRisk}));setExternalLabel('');setExternalLocation('');setExternalCustodian('');setMessage('Uygulama dışı yedek kopya envantere eklendi. Fiziksel içerik otomatik doğrulanmış sayılmaz.');setExternalSummary(await window.pardus.getExternalBackupInventorySummary());}catch(error){setMessage(error instanceof Error?error.message:'Uygulama dışı yedek kaydı oluşturulamadı.');}};
+  const reviewExternalCopy=async(copy:ExternalBackupCopyView)=>{if(!window.pardus)return;const status=(window.prompt('Kopyanın güncel durumunu yazın: active, unreachable veya retired',copy.status==='destroyed'?'active':copy.status)??'').trim() as 'active'|'unreachable'|'retired';if(!['active','unreachable','retired'].includes(status))return;const risk=window.confirm('Bu kopyada kalıcı imha öncesi tarihsel veri bulunma riski devam ediyor mu?');const note=window.prompt('Fiziksel konum, erişim ve içerik teyidini açıklayın:','')??'';if(!note)return;const confirmation=window.prompt(`Teyit kaydı için şu metni birebir yazın:
+HARİCİ YEDEK TEYİT ${copy.id}`,'');if(confirmation===null)return;try{setExternalCopies(await window.pardus.reviewExternalBackupCopy({id:copy.id,status,containsHistoricalDataRisk:risk,reviewIntervalDays:copy.reviewIntervalDays,note,confirmation,password,...(code.trim()?{code:code.trim()}:{})}));setExternalSummary(await window.pardus.getExternalBackupInventorySummary());setMessage('Uygulama dışı yedek kopya teyidi kaydedildi.');}catch(error){setMessage(error instanceof Error?error.message:'Kopya teyidi kaydedilemedi.');}};
+  const toggleExternalHold=async(copy:ExternalBackupCopyView)=>{if(!window.pardus)return;const enabled=!copy.legalHold;const reason=enabled?(window.prompt('Hukuki/koruma bekletmesi gerekçesini yazın:','')??''):undefined;if(enabled&&!reason)return;try{setExternalCopies(await window.pardus.setExternalBackupCopyLegalHold({id:copy.id,enabled,...(reason?{reason}:{}),password,...(code.trim()?{code:code.trim()}:{})}));setExternalSummary(await window.pardus.getExternalBackupInventorySummary());setMessage(enabled?'Uygulama dışı yedek kopya bekletmeye alındı.':'Kopya bekletmesi kaldırıldı.');}catch(error){setMessage(error instanceof Error?error.message:'Kopya bekletmesi güncellenemedi.');}};
+  const attestExternalDestroyed=async(copy:ExternalBackupCopyView)=>{if(!window.pardus)return;const note=window.prompt('Fiziksel imha veya güvenli silme yöntemini ayrıntılı açıklayın:','')??'';if(!note)return;const evidenceSha256=(window.prompt('Varsa imha kanıtı dosyasının SHA-256 değerini yazın; yoksa boş bırakın:','')??'').trim();const confirmation=window.prompt(`Bu kayıt yalnız kullanıcı teyididir; otomatik fiziksel imha kanıtı değildir. Şu metni birebir yazın:
+HARİCİ YEDEK İMHA ${copy.id}`,'');if(confirmation===null)return;try{setExternalCopies(await window.pardus.attestExternalBackupCopyDestroyed({id:copy.id,note,...(evidenceSha256?{evidenceSha256}:{}),confirmation,password,...(code.trim()?{code:code.trim()}:{})}));setExternalSummary(await window.pardus.getExternalBackupInventorySummary());setMessage('Uygulama dışı yedek için imha teyidi kaydedildi. Bu kayıt kullanıcı beyanıdır.');}catch(error){setMessage(error instanceof Error?error.message:'İmha teyidi kaydedilemedi.');}};
+  const registerExternalEvidenceIssuer=async(event:FormEvent<HTMLFormElement>)=>{event.preventDefault();if(!window.pardus)return;const label=externalIssuerLabel.trim(),expectedFingerprintSha256=externalIssuerExpectedFingerprint.trim().toLowerCase();const confirmation=window.prompt(`Kurum dışı iki kanıtla doğrulanan kök güveni eklemek için şu metni birebir yazın:
+KÖK GÜVENİNİ DOĞRULA ${expectedFingerprintSha256.slice(0,16)}`,'');if(confirmation===null)return;try{setExternalEvidenceIssuers(await window.pardus.registerExternalBackupEvidenceIssuer({label,publicKeyPem:externalIssuerPublicKey,legalEntityName:externalIssuerLegalName,identityEvidenceReference:externalIssuerIdentityEvidence,keyFingerprintEvidenceReference:externalIssuerFingerprintEvidence,expectedFingerprintSha256,verificationWitnessName:externalIssuerWitnessName,verificationWitnessOrganization:externalIssuerWitnessOrganization,verificationCheckedAt:new Date().toISOString(),confirmation,password,...(code.trim()?{code:code.trim()}:{})}));setExternalIssuerLabel('');setExternalIssuerPublicKey('');setExternalIssuerLegalName('');setExternalIssuerIdentityEvidence('');setExternalIssuerFingerprintEvidence('');setExternalIssuerExpectedFingerprint('');setExternalIssuerWitnessName('');setExternalIssuerWitnessOrganization('');setMessage('Ed25519 kök güveni iki bağımsız kurum dışı kanıt ve tanık kaydıyla eklendi.');}catch(error){setMessage(error instanceof Error?error.message:'Kanıt sağlayıcı eklenemedi.');}};
+  const rotateExternalEvidenceIssuer=async(issuer:ExternalBackupEvidenceIssuerView)=>{if(!window.pardus)return;const label=(window.prompt('Yeni Ed25519 anahtarının sağlayıcı etiketini yazın:',`${issuer.label} · ardıl anahtar`)??'').trim();if(!label)return;const publicKeyPem=window.prompt('Yeni Ed25519 PUBLIC KEY PEM değerini yazın:','')??'';if(!publicKeyPem)return;const effectiveAt=(window.prompt('Yeni anahtarın geçerli olacağı ISO-8601 zamanını yazın:',new Date().toISOString())??'').trim();if(!effectiveAt)return;const receiptId=(window.prompt('Benzersiz anahtar döndürme makbuzu kimliğini yazın:','')??'').trim();if(!receiptId)return;const signatureBase64=(window.prompt('Önceki anahtarın kanonik döndürme makbuzu üzerindeki Ed25519 Base64 imzasını yazın:','')??'').trim();if(!signatureBase64)return;const confirmation=window.prompt(`Anahtar döndürmek için şu metni birebir yazın:
+KANIT ANAHTARI DÖNDÜR ${issuer.id}`,'');if(confirmation===null)return;try{const result=await window.pardus.rotateExternalBackupEvidenceIssuer({predecessorIssuerId:issuer.id,label,publicKeyPem,effectiveAt,receiptId,signatureBase64,confirmation,password,...(code.trim()?{code:code.trim()}:{})});setExternalEvidenceIssuers(result.issuers);setExternalEvidenceRotations(result.rotations);setMessage('Sağlayıcı anahtarı önceki Ed25519 anahtarının imzasıyla güvenli biçimde döndürüldü.');}catch(error){setMessage(error instanceof Error?error.message:'Sağlayıcı anahtarı döndürülemedi.');}};
+  const revokeExternalEvidenceIssuer=async(issuer:ExternalBackupEvidenceIssuerView)=>{if(!window.pardus)return;const reason=window.prompt('Sağlayıcı güvenini iptal etme gerekçesini yazın:','')??'';if(!reason)return;const confirmation=window.prompt(`Sağlayıcı anahtarını iptal etmek için şu metni birebir yazın:
+KANIT SAĞLAYICI İPTAL ${issuer.id}`,'');if(confirmation===null)return;try{setExternalEvidenceIssuers(await window.pardus.revokeExternalBackupEvidenceIssuer({id:issuer.id,reason,confirmation,password,...(code.trim()?{code:code.trim()}:{})}));const [copies,evidence]=await Promise.all([window.pardus.listExternalBackupCopies(200),window.pardus.listExternalBackupDestructionEvidence(undefined,200)]);setExternalCopies(copies);setExternalEvidence(evidence);setMessage('Sağlayıcı anahtarı iptal edildi; bağlı imha kanıtlarının güven durumu düşürüldü.');}catch(error){setMessage(error instanceof Error?error.message:'Sağlayıcı güveni iptal edilemedi.');}};
+  const verifySignedExternalEvidence=async(copy:ExternalBackupCopyView)=>{if(!window.pardus)return;const trusted=externalEvidenceIssuers.filter(issuer=>issuer.trustState==='active');if(trusted.length===0){setMessage('Önce güvenilen bir Ed25519 kanıt sağlayıcısı ekleyin.');return;}const issuerId=(window.prompt(`Güvenilen sağlayıcı kimliğini yazın:
+${trusted.map(issuer=>`${issuer.id} — ${issuer.label}`).join('\n')}`,trusted[0]?.id??'')??'').trim();if(!issuerId)return;const receiptId=(window.prompt('Sağlayıcının benzersiz makbuz kimliğini yazın:','')??'').trim();if(!receiptId)return;const issuedAt=(window.prompt('Makbuz zamanını ISO-8601 biçiminde yazın:',new Date().toISOString())??'').trim();if(!issuedAt)return;const evidenceSha256=(window.prompt('İmha kanıtı veya makbuz dosyasının SHA-256 değerini yazın:','')??'').trim().toLowerCase();if(!evidenceSha256)return;const signatureBase64=(window.prompt('Kanonik makbuzun Ed25519 Base64 imzasını yazın:','')??'').trim();if(!signatureBase64)return;const confirmation=window.prompt(`İmzalı kanıtı doğrulamak için şu metni birebir yazın:
+İMZALI İMHA KANITI ${copy.id}`,'');if(confirmation===null)return;try{const result=await window.pardus.verifyExternalBackupDestructionEvidence({copyId:copy.id,issuerId,receiptId,issuedAt,evidenceSha256,signatureBase64,confirmation,password,...(code.trim()?{code:code.trim()}:{})});setExternalCopies(result.copies);setExternalEvidence(current=>[...result.evidence,...current.filter(item=>item.copyId!==copy.id)]);setExternalSummary(await window.pardus.getExternalBackupInventorySummary());setMessage('Sağlayıcı imzalı imha makbuzu doğrulandı ve kopya kaydına bağlandı.');}catch(error){setMessage(error instanceof Error?error.message:'İmzalı imha kanıtı doğrulanamadı.');}};
+  const configureRevocationEndpoint=async(existing?:ExternalBackupRevocationEndpointView)=>{if(!window.pardus)return;const roots=externalEvidenceIssuers.filter(issuer=>!issuer.predecessorIssuerId&&issuer.status==='trusted');if(roots.length===0){setMessage('Önce güvenilen bir kök Ed25519 sağlayıcı anahtarı ekleyin.');return;}const issuerId=(window.prompt(`HTTPS kaynağının bağlanacağı kök sağlayıcı kimliğini yazın:
+${roots.map(item=>`${item.id} — ${item.label}`).join('\n')}`,existing?.issuerId??roots[0]?.id??'')??'').trim();if(!issuerId)return;const sourceUrl=(window.prompt('İmzalı iptal listesi HTTPS adresini yazın:',existing?.sourceUrl??'https://')??'').trim();if(!sourceUrl)return;const primarySpkiSha256=(window.prompt('Birincil TLS SPKI SHA-256 pinini yazın:',existing?.primarySpkiSha256??'')??'').trim();if(!primarySpkiSha256)return;const secondarySpkiSha256=(window.prompt('Planlı sertifika geçişi varsa ikinci SPKI pinini yazın; yoksa boş bırakın:',existing?.secondarySpkiSha256??'')??'').trim();let secondaryValidFrom:string|undefined,primaryValidUntil:string|undefined;if(secondarySpkiSha256){secondaryValidFrom=(window.prompt('İkinci pinin kabul edilmeye başlayacağı ISO-8601 zamanı:',existing?.secondaryValidFrom??new Date().toISOString())??'').trim();primaryValidUntil=(window.prompt('Eski pinin kabulünün biteceği ISO-8601 zamanı:',existing?.primaryValidUntil??new Date(Date.now()+7*86_400_000).toISOString())??'').trim();if(!secondaryValidFrom||!primaryValidUntil)return;}const enabled=window.confirm('Bu HTTPS kaynak profilini etkinleştirmek istiyor musunuz?');const confirmation=window.prompt(`Kaynak profilini kaydetmek için şu metni birebir yazın:
+KANIT HTTPS KAYNAĞI ${issuerId}`,'');if(confirmation===null)return;try{setExternalRevocationEndpoints(await window.pardus.upsertExternalBackupRevocationEndpoint({issuerId,sourceUrl,primarySpkiSha256,...(secondarySpkiSha256?{secondarySpkiSha256,secondaryValidFrom:secondaryValidFrom!,primaryValidUntil:primaryValidUntil!}:{}),enabled,confirmation,password,...(code.trim()?{code:code.trim()}:{})}));setRevocationSyncStates(await window.pardus.listRevocationSyncStates());setMessage('Sağlayıcı HTTPS kaynağı ve TLS pin geçiş penceresi kaydedildi.');}catch(error){setMessage(error instanceof Error?error.message:'HTTPS kaynak profili kaydedilemedi.');}};
+  const fetchRevocationEndpoint=async(endpoint:ExternalBackupRevocationEndpointView)=>{if(!window.pardus)return;try{await window.pardus.runRevocationSync(endpoint.id);setRevocationSyncStates(await window.pardus.listRevocationSyncStates());const pending=await window.pardus.getPendingRevocationSyncList(endpoint.id);if(!pending){setExternalRevocationEndpoints(await window.pardus.listExternalBackupRevocationEndpoints(100));setMessage('Kaynak güvenli biçimde kontrol edildi; uygulanmayı bekleyen daha yeni bir iptal listesi bulunmuyor.');return;}const proceed=window.confirm(`${endpoint.issuerLabel} kaynağından sıra ${pending.sequenceNumber} ve ${pending.entryCount} iptal kaydı ana süreçte güvenli olarak bekletiliyor. Eşleşen pin: ${pending.matchedPin==='primary'?'birincil':'geçiş'}. Güçlü doğrulamayla uygulansın mı?`);if(!proceed){setMessage('İptal listesi ana süreçte bekletiliyor; renderer içine imzalı liste içeriği aktarılmadı.');return;}const confirmation=window.prompt(`İptal listesini uygulamak için şu metni birebir yazın:
+KANIT İPTAL LİSTESİ ${pending.signerIssuerId} ${pending.sequenceNumber}`,'');if(confirmation===null)return;const result=await window.pardus.applyPendingRevocationSyncList({endpointId:endpoint.id,pendingListId:pending.listId,confirmation,password,...(code.trim()?{code:code.trim()}:{})});setExternalEvidenceRevocationLists(result.lists);setExternalEvidenceIssuers(result.issuers);setExternalRevocationEndpoints(await window.pardus.listExternalBackupRevocationEndpoints(100));setRevocationSyncStates(await window.pardus.listRevocationSyncStates());setMessage(`Ana süreçte bekletilen iptal listesi güçlü doğrulama ve Ed25519 imza denetimiyle uygulandı. ${pending.responseBytes} bayt.`);}catch(error){setExternalRevocationEndpoints(await window.pardus.listExternalBackupRevocationEndpoints(100).catch(()=>externalRevocationEndpoints));setRevocationSyncStates(await window.pardus.listRevocationSyncStates().catch(()=>revocationSyncStates));setMessage(error instanceof Error?error.message:'HTTPS kaynağından iptal listesi alınamadı.');}};
+  const applySignedRevocationList=async()=>{if(!window.pardus)return;const active=externalEvidenceIssuers.filter(issuer=>issuer.trustState==='active');if(active.length===0){setMessage('İptal listesini doğrulamak için etkin bir sağlayıcı anahtarı bulunmuyor.');return;}const signerIssuerId=(window.prompt(`Listeyi imzalayan etkin sağlayıcı kimliğini yazın:
+${active.map(issuer=>`${issuer.id} — ${issuer.label}`).join('\n')}`,active[0]?.id??'')??'').trim();if(!signerIssuerId)return;const latest=externalEvidenceRevocationLists.find(item=>item.signerIssuerId===signerIssuerId);const sequenceNumber=Number(window.prompt('Monoton artan liste sıra numarasını yazın:',String((latest?.sequenceNumber??0)+1))??'');if(!Number.isInteger(sequenceNumber)||sequenceNumber<1)return;const listId=(window.prompt('Benzersiz iptal listesi kimliğini yazın:','')??'').trim();if(!listId)return;const thisUpdate=(window.prompt('Liste oluşturma zamanını ISO-8601 biçiminde yazın:',new Date().toISOString())??'').trim();if(!thisUpdate)return;const nextDefault=new Date(Date.now()+7*24*60*60*1000).toISOString();const nextUpdate=(window.prompt('Liste son geçerlilik zamanını ISO-8601 biçiminde yazın:',nextDefault)??'').trim();if(!nextUpdate)return;const entriesText=window.prompt('İptal kayıtlarını JSON dizi olarak yazın. Her kayıt fingerprintSha256, revokedAt ve reason alanlarını içermelidir:','[]');if(entriesText===null)return;let entries:Array<{fingerprintSha256:string;revokedAt:string;reason:string}>;try{const parsed=JSON.parse(entriesText) as unknown;if(!Array.isArray(parsed))throw new Error();entries=parsed as Array<{fingerprintSha256:string;revokedAt:string;reason:string}>;}catch{setMessage('İptal kayıtları geçerli JSON dizi biçiminde olmalıdır.');return;}const signatureBase64=(window.prompt('Kanonik iptal listesinin Ed25519 Base64 imzasını yazın:','')??'').trim();if(!signatureBase64)return;const sourceUrl=(window.prompt('Kaynak HTTPS adresi (isteğe bağlı):','')??'').trim();const confirmation=window.prompt(`İptal listesini uygulamak için şu metni birebir yazın:
+KANIT İPTAL LİSTESİ ${signerIssuerId} ${sequenceNumber}`,'');if(confirmation===null)return;try{const result=await window.pardus.applyExternalBackupEvidenceRevocationList({signerIssuerId,listId,sequenceNumber,thisUpdate,nextUpdate,entries,signatureBase64,...(sourceUrl?{sourceUrl}:{}),confirmation,password,...(code.trim()?{code:code.trim()}:{})});setExternalEvidenceRevocationLists(result.lists);setExternalEvidenceIssuers(result.issuers);const [evidence,copies]=await Promise.all([window.pardus.listExternalBackupDestructionEvidence(undefined,200),window.pardus.listExternalBackupCopies(200)]);setExternalEvidence(evidence);setExternalCopies(copies);setMessage('İmzalı sağlayıcı iptal listesi doğrulandı; eski sıra numarası ve süresi dolmuş liste korumaları uygulandı.');}catch(error){setMessage(error instanceof Error?error.message:'İmzalı iptal listesi uygulanamadı.');}};
+  const pendingPropagation=records.filter(record=>record.backupPropagationPending).length;
+  const lastPropagation=propagationRuns[0];
+  const revocationFreshnessLabel:Record<RevocationSyncEndpointStateView['listFreshness'],string>={missing:'Doğrulanmış liste yok',fresh:'Liste güncel',expiring_soon:'24 saat içinde sona erecek',expired:'Süresi doldu'};
+  const revocationPersistenceLabel:Record<RevocationSyncEndpointStateView['persistenceStatus'],string>={healthy:'korumalı durum etkin',unavailable:'korumalı durum kullanılamıyor',failed:'durum yazma hatası'};
+  return <section className="data-lifecycle-settings span-2"><h3>Veri saklama ve güvenli silme</h3><p>Varsayılan işlem geri alınabilir arşivlemedir. Kalıcı imha ancak saklama süresi ve geri alma penceresi tamamlandıktan sonra güçlü doğrulamayla çalışır.</p>
+    {auth.role==='family_admin'&&<form className="form-grid" onSubmit={event=>void createPolicy(event)}><label className="span-2">Politika adı<input value={policyName} minLength={3} maxLength={100} onChange={event=>setPolicyName(event.target.value)}/></label><label>Saklama süresi (gün)<input type="number" min={1} max={36500} value={retentionDays} onChange={event=>setRetentionDays(Number(event.target.value))}/></label><label>Geri alma süresi (gün)<input type="number" min={1} max={365} value={graceDays} onChange={event=>setGraceDays(Number(event.target.value))}/></label><fieldset className="span-2 participant-fieldset"><legend>Kayıt türleri</legend>{lifecycleResourceTypes.map(type=><label key={type}><input type="checkbox" checked={selectedTypes.includes(type)} onChange={event=>setSelectedTypes(current=>event.target.checked?[...current,type]:current.filter(value=>value!==type))}/>{lifecycleTypeLabels[type]}</label>)}</fieldset><Button type="submit" disabled={selectedTypes.length===0}>Politika oluştur</Button></form>}
+    <div className="form-grid lifecycle-reauth"><label>Güçlü doğrulama parolası<input type="password" autoComplete="current-password" value={password} onChange={event=>setPassword(event.target.value)}/></label><label>2FA kodu (etkinse)<input inputMode="numeric" autoComplete="one-time-code" value={code} onChange={event=>setCode(event.target.value)}/></label></div>
+    {auth.role==='family_admin'&&<article className="panel"><div className="section-heading"><div><h4>Otomatik temiz yedek yeniden yazımı</h4><p>Yönetilen yedeklerde imha yayılımı, saklama süresi dolmuş kayıtlar için önce doğrulanmış temiz yedek oluşturur; eski kopyayı geri alınabilir karantinaya taşır. Kayıtlı hedefler dışındaki manuel veya yönetilmeyen kopyalara dokunulmaz.</p></div><Button onClick={()=>void propagateBackups()} disabled={propagationRunning||(cleanRewriteStatus?.dueRecords??0)===0}>{propagationRunning?'Yeniden yazılıyor…':'Şimdi çalıştır'}</Button></div>{cleanRewriteStatus&&<div className="stats-grid"><div className="context-stat"><strong>{cleanRewriteStatus.dueRecords}</strong><span>süresi dolan kayıt</span></div><div className="context-stat"><strong>{cleanRewriteStatus.enabledTargets}</strong><span>etkin hedef</span></div><div className="context-stat"><strong>{cleanRewriteStatus.policy.state}</strong><span>kalıcı durum</span></div><div className="context-stat"><strong>{cleanRewriteStatus.policy.nextAttemptAt?formatDate(cleanRewriteStatus.policy.nextAttemptAt,{dateStyle:'short',timeStyle:'short'}):'Hazır'}</strong><span>sonraki deneme</span></div></div>}<form className="form-grid" onSubmit={event=>void saveCleanRewritePolicy(event)}><label><input type="checkbox" checked={cleanRewriteEnabled} onChange={event=>setCleanRewriteEnabled(event.target.checked)}/> Otomatik politika etkin</label><label>Saklama süresi (gün)<input type="number" min={1} max={3650} value={cleanRewriteRetentionDays} onChange={event=>setCleanRewriteRetentionDays(Number(event.target.value))}/></label><Button type="submit">Politikayı kaydet</Button></form><small>Otomatik politika yalnız zamanlanmış çevrimi kontrol eder; “Şimdi çalıştır” manuel komutu politika kapalıyken de kullanılabilir. Manuel hata sonrası 1 saat, otomatik hata sonrası 6 saat geri çekilme uygulanır; yüksek sistem yükünde işlem güvenli biçimde ertelenir.</small>{cleanRewriteStatus?.policy.lastError&&<small className="warning-text">Son tanı: {cleanRewriteStatus.policy.lastError}</small>}{lastPropagation&&<small>Son yayılım: {lastPropagation.status} · {lastPropagation.refreshedTargets}/{lastPropagation.targetCount} hedef · {lastPropagation.quarantinedArtifacts} karantina · {formatDate(lastPropagation.completedAt,{dateStyle:'short',timeStyle:'short'})}</small>}<div className="section-heading"><div><h4>Kalıcı çalışma geçmişi</h4><p>Her sahiplenilmiş deneme, SQLite üzerinde başlangıç ve atomik final durumuyla saklanır.</p></div></div>{cleanRewriteRuns.length?cleanRewriteRuns.slice(0,8).map(run=><div className="list-row" key={run.id}><div><strong>{run.status} · {run.trigger==='manual'?'manuel':'otomatik'}</strong><small>{run.dueRecords} kayıt · {run.enabledTargets} hedef · kesim {formatDate(run.retentionCutoff,{dateStyle:'short',timeStyle:'short'})}</small>{run.error&&<small className="warning-text">{run.error}</small>}</div><span>{formatDate(run.completedAt??run.startedAt,{dateStyle:'short',timeStyle:'short'})}</span></div>):<EmptyState title="Temiz yedek çalışma geçmişi yok" body="İlk sahiplenilmiş deneme başladığında kalıcı çalışma kaydı burada gösterilir."/>}</article>}
+    {auth.role==='family_admin'&&<article className="panel external-backup-inventory">
+      <div className="section-heading"><div><h4>Uygulama dışı yedek envanteri</h4><p>Manuel dosyalar, çevrimdışı diskler ve bulut sürüm geçmişleri otomatik olarak silinmiş sayılmaz.</p></div>{externalSummary&&<span>{externalSummary.reviewRequired?'İnceleme gerekli':'Envanter güncel'}</span>}</div>
+      {externalSummary&&<div className="stats-grid"><div className="context-stat"><strong>{externalSummary.total}</strong><span>kayıtlı kopya</span></div><div className="context-stat"><strong>{externalSummary.historicalDataRisk}</strong><span>tarihsel veri riski</span></div><div className="context-stat"><strong>{externalSummary.overdue}</strong><span>gecikmiş teyit</span></div><div className="context-stat"><strong>{externalSummary.unreachable}</strong><span>erişilemiyor</span></div></div>}
+      <form className="form-grid" onSubmit={event=>void registerExternalCopy(event)}><label>Kopya adı<input value={externalLabel} minLength={3} maxLength={120} required onChange={event=>setExternalLabel(event.target.value)} placeholder="Ev harici diski"/></label><label>Tür<select value={externalKind} onChange={event=>setExternalKind(event.target.value as ExternalBackupCopyKind)}><option value="offline_disk">Çevrimdışı disk</option><option value="manual_file">Manuel dosya</option><option value="cloud_history">Bulut sürüm geçmişi</option><option value="other">Diğer</option></select></label><label className="span-2">Konum açıklaması<input value={externalLocation} minLength={2} maxLength={500} required onChange={event=>setExternalLocation(event.target.value)} placeholder="D: harici disk / kilitli dolap"/></label><label>Sorumlu kişi veya birim<input value={externalCustodian} minLength={2} maxLength={120} required onChange={event=>setExternalCustodian(event.target.value)}/></label><label>Teyit aralığı (gün)<input type="number" min={1} max={3650} value={externalReviewDays} onChange={event=>setExternalReviewDays(Number(event.target.value))}/></label><label className="span-2"><input type="checkbox" checked={externalHistoricalRisk} onChange={event=>setExternalHistoricalRisk(event.target.checked)}/> Kalıcı imha öncesi tarihsel veri içerme riski var</label><Button type="submit">Kopyayı envantere ekle</Button></form>
+      <div className="content-grid two external-evidence-trust">
+        <form className="form-grid" onSubmit={event=>void registerExternalEvidenceIssuer(event)}><div className="section-heading span-2"><div><h4>Güvenilen kanıt sağlayıcısı</h4><p>Kök Ed25519 anahtarı ancak iki bağımsız kurum dışı kanıt, eşleşen SHA-256 parmak izi ve tanık kaydıyla eklenir.</p></div></div><label>Sağlayıcı etiketi<input value={externalIssuerLabel} minLength={3} maxLength={160} required onChange={event=>setExternalIssuerLabel(event.target.value)} placeholder="Bulut veya imha hizmeti"/></label><label>Resmî tüzel kişi adı<input value={externalIssuerLegalName} minLength={3} maxLength={200} required onChange={event=>setExternalIssuerLegalName(event.target.value)}/></label><label className="span-2">Ed25519 PUBLIC KEY PEM<textarea value={externalIssuerPublicKey} required rows={6} maxLength={20000} onChange={event=>setExternalIssuerPublicKey(event.target.value)} placeholder="-----BEGIN PUBLIC KEY-----"/></label><label className="span-2">Bağımsız kanaldan alınan SHA-256 parmak izi<input value={externalIssuerExpectedFingerprint} required pattern="[a-fA-F0-9]{64}" maxLength={64} onChange={event=>setExternalIssuerExpectedFingerprint(event.target.value)} placeholder="64 onaltılık karakter"/></label><label className="span-2">Kurum kimliği kanıt referansı<textarea value={externalIssuerIdentityEvidence} required minLength={12} maxLength={500} rows={2} onChange={event=>setExternalIssuerIdentityEvidence(event.target.value)} placeholder="Ticaret sicili, imzalı sözleşme veya resmî rehber kaydı"/></label><label className="span-2">Anahtar parmak izi kanıt referansı<textarea value={externalIssuerFingerprintEvidence} required minLength={12} maxLength={500} rows={2} onChange={event=>setExternalIssuerFingerprintEvidence(event.target.value)} placeholder="Ayrı telefon görüşmesi, imzalı yazı veya bağımsız güven kanalı"/></label><label>Bağımsız tanık adı<input value={externalIssuerWitnessName} minLength={3} maxLength={160} required onChange={event=>setExternalIssuerWitnessName(event.target.value)}/></label><label>Tanık kurumu/rolü<input value={externalIssuerWitnessOrganization} minLength={3} maxLength={200} required onChange={event=>setExternalIssuerWitnessOrganization(event.target.value)}/></label><Button type="submit">Doğrulanmış kök güveni ekle</Button></form>
+        <div><h4>Sağlayıcı güven zinciri</h4>{externalEvidenceIssuers.length===0?<EmptyState title="Güvenilen sağlayıcı yok" body="İmzalı makbuz doğrulamak için sağlayıcının Ed25519 açık anahtarını ekleyin."/>:externalEvidenceIssuers.map(issuer=><div className="list-row" key={issuer.id}><div><strong>{issuer.label}</strong><small>{issuer.trustState==='active'?'Etkin':issuer.trustState==='pending'?'Başlangıç zamanı bekleniyor':issuer.trustState==='expired'?'Ardıl anahtara devredildi':'İptal edildi'} · {issuer.id}</small><small>Geçerlilik: {formatDate(issuer.validFrom,{dateStyle:'short',timeStyle:'short'})}{issuer.validUntil?` – ${formatDate(issuer.validUntil,{dateStyle:'short',timeStyle:'short'})}`:' – açık uçlu'} · Zincir ${issuer.rotationSequence}</small><small>Parmak izi: {issuer.fingerprintSha256.slice(0,20)}…</small><small className={issuer.verificationMethod==='legacy_unverified'?'warning-text':undefined}>Kök doğrulama: {issuer.verificationMethod==='out_of_band_dual_evidence'?'İki bağımsız kurum dışı kanıt':issuer.verificationMethod==='rotation_inherited'?'İmzalı anahtar döndürmeden miras':'Eski kayıt; kurum dışı doğrulama makbuzu yok'}{issuer.verificationWitnessName?` · Tanık ${issuer.verificationWitnessName}`:''}</small>{issuer.verificationReceiptSha256&&<small>Doğrulama makbuzu SHA-256: {issuer.verificationReceiptSha256.slice(0,20)}…</small>}{issuer.predecessorIssuerId&&<small>Önceki anahtar: {issuer.predecessorIssuerId}</small>}{issuer.revocationReason&&<small>İptal gerekçesi: {issuer.revocationReason}</small>}</div><div className="button-row">{issuer.status==='trusted'&&!issuer.validUntil&&<Button onClick={()=>void rotateExternalEvidenceIssuer(issuer)}>Anahtarı döndür</Button>}{issuer.status==='trusted'&&<Button tone="danger" onClick={()=>void revokeExternalEvidenceIssuer(issuer)}>Güveni iptal et</Button>}</div></div>)}</div>
+      </div>
+      <div><h4>Anahtar döndürme geçmişi</h4>{externalEvidenceRotations.length===0?<EmptyState title="Döndürme kaydı yok" body="Ardıl anahtarlar önceki güvenilen Ed25519 anahtarının imzasıyla yetkilendirildiğinde burada görünür."/>:externalEvidenceRotations.slice(0,20).map(rotation=><div className="list-row" key={rotation.id}><div><strong>{rotation.predecessorLabel} → {rotation.successorLabel}</strong><small>{rotation.receiptId} · {formatDate(rotation.effectiveAt,{dateStyle:'short',timeStyle:'short'})}</small><small>Ardıl parmak izi: {rotation.successorFingerprintSha256.slice(0,20)}…</small></div><span>doğrulandı</span></div>)}</div>
+      <div className="section-heading"><div><h4>Sağlayıcı HTTPS kaynakları</h4><p>Adres ve TLS pinleri güçlü doğrulamayla sağlayıcı köküne bağlanır; geçiş pini yalnız sınırlı zaman penceresinde kabul edilir.</p></div><Button onClick={()=>void configureRevocationEndpoint()}>Kaynak profili ekle</Button></div>
+      <div>{externalRevocationEndpoints.length===0?<EmptyState title="HTTPS kaynak profili yok" body="İmzalı iptal listesini ağdan almak için kök sağlayıcıya bağlı adres ve SPKI pini kaydedin."/>:externalRevocationEndpoints.map(endpoint=>{const sync=revocationSyncStates.find(item=>item.endpointId===endpoint.id);return <div className="list-row" key={endpoint.id}><div><strong>{endpoint.issuerLabel}</strong><small>{endpoint.status==='active'?'Etkin':'Devre dışı'} · {endpoint.sourceUrl}</small><small>Birincil pin: {endpoint.primarySpkiSha256.slice(0,20)}…{endpoint.secondarySpkiSha256?` · Geçiş pini: ${endpoint.secondarySpkiSha256.slice(0,20)}…`:''}</small>{endpoint.secondaryValidFrom&&endpoint.primaryValidUntil&&<small>Çift-pin penceresi: {formatDate(endpoint.secondaryValidFrom,{dateStyle:'short',timeStyle:'short'})} – {formatDate(endpoint.primaryValidUntil,{dateStyle:'short',timeStyle:'short'})}</small>}<small>Son alım: {endpoint.lastFetchStatus==='never'?'Henüz çalıştırılmadı':endpoint.lastFetchStatus==='success'?'Başarılı':'Başarısız'}{endpoint.lastFetchedAt?` · ${formatDate(endpoint.lastFetchedAt,{dateStyle:'short',timeStyle:'short'})}`:''}</small>{sync&&<small className={sync.listFreshness==='expired'||sync.persistenceStatus!=='healthy'?'warning-text':undefined}>Güven durumu: {revocationFreshnessLabel[sync.listFreshness]}{sync.currentSequenceNumber?` · sıra ${sync.currentSequenceNumber}`:''}{sync.currentNextUpdate?` · son ${formatDate(sync.currentNextUpdate,{dateStyle:'short',timeStyle:'short'})}`:''} · {revocationPersistenceLabel[sync.persistenceStatus]}</small>}{sync?.pendingSequenceNumber&&<small className="warning-text">Sıra {sync.pendingSequenceNumber} güçlü onay bekliyor; yeniden başlatmada korumalı olarak saklanır.</small>}{endpoint.lastFetchError&&<small>Hata: {endpoint.lastFetchError}</small>}</div><div className="button-row"><Button onClick={()=>void configureRevocationEndpoint(endpoint)}>Düzenle</Button><Button disabled={endpoint.status!=='active'} onClick={()=>void fetchRevocationEndpoint(endpoint)}>Güvenli al ve uygula</Button></div></div>;})}</div>
+      <div className="section-heading"><div><h4>İmzalı iptal listeleri</h4><p>Sıra numarası geri alınamaz; süresi dolmuş liste güven durumunu yükseltemez.</p></div><Button onClick={()=>void applySignedRevocationList()} disabled={externalEvidenceIssuers.every(issuer=>issuer.trustState!=='active')}>İptal listesi uygula</Button></div>
+      <div>{externalEvidenceRevocationLists.length===0?<EmptyState title="İptal listesi yok" body="Sağlayıcı tarafından Ed25519 ile imzalanmış anahtar durum listeleri burada görünür."/>:externalEvidenceRevocationLists.slice(0,20).map(list=><div className="list-row" key={list.id}><div><strong>{list.signerLabel} · sıra {list.sequenceNumber}</strong><small>{list.listId} · {list.status==='current'?'Güncel':list.status==='expired'?'Süresi doldu':'Yerine yeni liste geldi'}</small><small>Geçerlilik: {formatDate(list.thisUpdate,{dateStyle:'short',timeStyle:'short'})} – {formatDate(list.nextUpdate,{dateStyle:'short',timeStyle:'short'})} · {list.entries.length} iptal</small><small>Payload SHA-256: {list.payloadSha256.slice(0,20)}…{list.sourceUrl?` · ${list.sourceUrl}`:''}</small></div><span>{list.status}</span></div>)}</div>
+      <div className="lifecycle-list">{externalCopies.length===0?<EmptyState title="Uygulama dışı kopya kaydı yok" body="Manuel yedek, çevrimdışı disk ve bulut geçmişlerini burada kayıt altına alın."/>:externalCopies.map(copy=><div className="list-row" key={copy.id}><div><strong>{copy.label}</strong><small>{copy.kind} · {copy.status} · Sorumlu: {copy.custodian}</small><small>{copy.locationHint}</small><small>Sonraki teyit: {formatDate(copy.nextReviewAt,{dateStyle:'short'})}{copy.containsHistoricalDataRisk?' · Tarihsel veri riski açık':' · Risk temiz olarak teyit edildi'}</small>{copy.legalHold&&<small>Bekletme etkin: {copy.holdReason??'Gerekçe kayıtlı'}</small>}{copy.attestationNote&&<small>Son kullanıcı teyidi: {copy.attestationNote}</small>}{copy.evidenceSha256&&<small>Kanıt SHA-256: {copy.evidenceSha256.slice(0,16)}…</small>}<small>{copy.evidenceVerificationStatus==='verified'?`İmzalı kanıt doğrulandı · ${copy.verifiedEvidenceIssuerLabel??'güvenilen sağlayıcı'}`:copy.evidenceVerificationStatus==='revoked'?'İmzalı kanıtın sağlayıcı güveni iptal edildi':'Doğrulanmış sağlayıcı imzası yok'}</small></div><div className="button-row">{copy.status!=='destroyed'&&<Button onClick={()=>void reviewExternalCopy(copy)}>Teyit et</Button>}{copy.status!=='destroyed'&&<Button onClick={()=>void toggleExternalHold(copy)}>{copy.legalHold?'Bekletmeyi kaldır':'Bekletmeye al'}</Button>}{copy.status!=='destroyed'&&<Button tone="danger" disabled={copy.legalHold} onClick={()=>void attestExternalDestroyed(copy)}>Kullanıcı imha teyidi</Button>}<Button disabled={copy.legalHold||externalEvidenceIssuers.every(issuer=>issuer.trustState!=='active')} onClick={()=>void verifySignedExternalEvidence(copy)}>İmzalı kanıt doğrula</Button></div></div>)}</div>
+      <div><h4>Doğrulanmış imha makbuzları</h4>{externalEvidence.length===0?<EmptyState title="İmzalı makbuz yok" body="Güvenilen sağlayıcının sabit kanonik biçimde imzaladığı makbuzlar burada görünür."/>:externalEvidence.slice(0,20).map(item=><div className="list-row" key={item.id}><div><strong>{item.issuerLabel} · {item.receiptId}</strong><small>{item.verificationStatus==='verified'?'İmza doğrulandı':'Sağlayıcı güveni iptal edildi'} · Kopya {item.copyId}</small><small>Kanıt SHA-256: {item.evidenceSha256.slice(0,20)}… · {formatDate(item.issuedAt,{dateStyle:'short',timeStyle:'short'})}</small></div><span>{item.verificationStatus}</span></div>)}</div>
+      <small>Kullanıcı beyanı ile sağlayıcı imzalı makbuz ayrı güven seviyeleridir. Geçerli imza yalnız güvenilen açık anahtar, kopya kimliği, makbuz kimliği, zaman ve SHA-256 değerinin değiştirilmediğini kanıtlar; fiziksel medyanın mutlak yok oluşunu tek başına garanti etmez.</small>
+    </article>}
+    {auth.role==='family_admin'&&quarantinePolicy&&<form className="form-grid quarantine-policy" onSubmit={event=>void saveQuarantinePolicy(event)}><label>Yedek karantina saklama süresi (gün)<input type="number" min={1} max={3650} value={quarantineRetentionDays} onChange={event=>setQuarantineRetentionDays(Number(event.target.value))}/></label><div><small>Operasyonel varsayılan süre hukuki saklama süresi değildir. Süre değişikliği yalnız yeni karantinalara uygulanır.</small><Button type="submit">Karantina politikasını güncelle</Button></div></form>}
+    {auth.role==='family_admin'&&<div className="lifecycle-list quarantine-list">{quarantineBatches.length===0?<EmptyState title="Yedek karantinası bulunmuyor" body="Yönetilen eski yedekler karantinaya taşındığında burada görünür."/>:quarantineBatches.map(batch=><div className="list-row" key={batch.id}><div><strong>{batch.targetName} · {batch.quarantinedArtifacts} yedek</strong><small>{batch.status==='retained'?'Saklanıyor':batch.status==='destroying'?'İmha işlemi devam ettirilmeli':'Nihai imha edildi'} · {batch.id}</small><small>Karantina: {formatDate(batch.quarantinedAt,{dateStyle:'short',timeStyle:'short'})} · Saklama sonu: {formatDate(batch.retainUntil,{dateStyle:'short',timeStyle:'short'})}</small>{batch.legalHold&&<small>Bekletme etkin: {batch.holdReason??'Gerekçe kayıtlı'}</small>}{batch.destroyedAt&&<small>İmha zamanı: {formatDate(batch.destroyedAt,{dateStyle:'short',timeStyle:'short'})}</small>}</div><div className="button-row">{batch.status==='retained'&&<Button onClick={()=>void toggleQuarantineHold(batch)}>{batch.legalHold?'Bekletmeyi kaldır':'Bekletmeye al'}</Button>}{batch.status!=='destroyed'&&<Button tone="danger" onClick={()=>void destroyQuarantine(batch)} disabled={batch.legalHold||Date.parse(batch.retainUntil)>Date.now()}>Nihai imha</Button>}</div></div>)}</div>}
+    <div className="lifecycle-list">{records.length===0?<EmptyState title="Yönetilebilir kayıt bulunamadı" body="Finans, sağlık veya yaşam kaydı oluşturulduğunda yaşam döngüsü burada görünür."/>:records.map(record=><div className="list-row" key={`${record.resourceType}:${record.resourceId}`}><div><strong>{record.title}</strong><small>{lifecycleTypeLabels[record.resourceType]} · {lifecycleStateLabels[record.state]}{record.policyName?` · ${record.policyName}`:''}</small>{record.purgeEligibleAt&&<small>İmha uygunluk tarihi: {formatDate(record.purgeEligibleAt,{dateStyle:'medium'})}</small>}{record.purgeExecuteAfter&&<small>Geri alma penceresi sonu: {formatDate(record.purgeExecuteAfter,{dateStyle:'medium',timeStyle:'short'})}</small>}{record.legalHold&&<small>Bekletme etkin: {record.holdReason??'Gerekçe kayıtlı'}</small>}{record.backupPropagationPending&&<small>Uyarı: Önceki yedeklerde kopya bulunabilir.</small>}</div><div className="button-row">{record.state==='active'&&<Button onClick={()=>void archive(record)}>Arşivle</Button>}{record.state==='archived'&&<><Button onClick={()=>void restore(record)}>Geri al</Button><Button tone="danger" onClick={()=>void requestPurge(record)}>İmha talebi</Button></>}{record.state==='purge_scheduled'&&<><Button onClick={()=>void cancelPurge(record)}>Talebi iptal et</Button><Button tone="danger" onClick={()=>void executePurge(record)}>Kalıcı imha</Button></>}{record.state!=='purged'&&<Button onClick={()=>void toggleHold(record)}>{record.legalHold?'Bekletmeyi kaldır':'Bekletmeye al'}</Button>}</div></div>)}</div>
+    <small>SQLite güvenli silme ve WAL temizliği en iyi çaba yaklaşımıdır. SSD, dosya sistemi, bulut eşitlemesi ve yedekler fiziksel kopyaları bir süre tutabilir.</small>{message&&<StatusMessage>{message}</StatusMessage>}
+  </section>;
+}
+
+const windowsHelloAvailabilityLabel: Record<WindowsHelloStateView['availability'],string> = {
+  available:'Kullanılabilir',
+  device_not_present:'Donanım bulunamadı',
+  not_configured_for_user:'Windows Hello yapılandırılmamış',
+  disabled_by_policy:'Sistem politikasıyla kapalı',
+  device_busy:'Başka işlem kullanıyor',
+  platform_not_supported:'Platform desteklemiyor',
+  error:'Uygunluk belirlenemedi'
+};
+
+function WindowsHelloScreen({auth}:{auth:AuthStateView}) {
+  const [state,setState]=useState<WindowsHelloStateView|null>(null);
+  const [enrollmentPassword,setEnrollmentPassword]=useState('');
+  const [enrollmentCode,setEnrollmentCode]=useState('');
+  const [displayName,setDisplayName]=useState('Bu bilgisayar');
+  const [fallbackPassword,setFallbackPassword]=useState('');
+  const [fallbackCode,setFallbackCode]=useState('');
+  const [busy,setBusy]=useState<'state'|'enroll'|'reauth'|'fallback'|''>('state');
+  const [message,setMessage]=useState('');
+  const [messageTone,setMessageTone]=useState<'info'|'success'|'danger'>('info');
+  const refresh=async()=>{
+    if(!window.pardus)return;
+    setBusy('state');
+    try{setState(await window.pardus.getWindowsHelloState());}
+    catch(error){setMessageTone('danger');setMessage(error instanceof Error?error.message:'Windows Hello durumu okunamadı.');}
+    finally{setBusy('');}
+  };
+  useEffect(()=>{void refresh();},[]);
+  const enroll=async()=>{
+    if(!window.pardus||!enrollmentPassword)return;
+    setBusy('enroll');setMessage('');
+    try{
+      const result=await window.pardus.enrollWindowsHello({password:enrollmentPassword,...(enrollmentCode.trim()?{secondFactorCode:enrollmentCode.trim()}:{}),...(displayName.trim()?{displayName:displayName.trim()}:{} )});
+      setMessageTone(result.enrolled?'success':result.outcome==='cancelled'?'info':'danger');
+      setMessage(windowsHelloOutcomeMessage(result.outcome));
+      if(result.enrolled){setEnrollmentPassword('');setEnrollmentCode('');await refresh();}
+    }catch(error){setMessageTone('danger');setMessage(error instanceof Error?error.message:'Windows Hello kaydı tamamlanamadı.');}
+    finally{setBusy('');}
+  };
+  const reauthenticate=async(useFallback:boolean)=>{
+    if(!window.pardus||useFallback&&!fallbackPassword)return;
+    setBusy(useFallback?'fallback':'reauth');setMessage('');
+    try{
+      const result=await window.pardus.reauthenticateWithWindowsHello(useFallback?{fallback:{password:fallbackPassword,...(fallbackCode.trim()?{secondFactorCode:fallbackCode.trim()}:{} )}}:{});
+      const success=result.authenticated;
+      setMessageTone(success?'success':result.outcome==='cancelled'?'info':'danger');
+      setMessage(result.method==='password_fallback'&&success?'Güçlü yerel parola ile yedek doğrulama tamamlandı.':windowsHelloOutcomeMessage(result.outcome));
+      if(success&&result.method==='password_fallback'){setFallbackPassword('');setFallbackCode('');}
+      await refresh();
+    }catch(error){setMessageTone('danger');setMessage(error instanceof Error?error.message:'Yeniden doğrulama tamamlanamadı.');}
+    finally{setBusy('');}
+  };
+  return <>
+    <PageHeader eyebrow="Cihaz bağlı kimlik" title="Windows Hello" description="Windows Hello doğrulamasını bu cihazdaki şifreli veri kasasına bağlayın; güçlü yerel parola her zaman yedek erişim yöntemi olarak kalır."/>
+    <section className="workspace-grid windows-hello-workspace">
+      <Surface className="workspace-summary"><SectionHeader eyebrow="Uygunluk ve kayıt" title={state?windowsHelloAvailabilityLabel[state.availability]:'Kontrol ediliyor…'}/>{state&&<div className="windows-hello-status-list"><StatRow value={state.enrolled?'Etkin':'Kayıtlı değil'} label="Kasa bağı"/><StatRow value={state.passwordFallbackAvailable?'Hazır':'Kullanılamıyor'} label="Parola yedeği"/><StatRow value={state.deviceChanged?'Değişti':'Eşleşiyor'} label="Cihaz bağı"/><StatRow value={state.principalChanged?'Değişti':'Eşleşiyor'} label="Windows kullanıcısı"/><StatRow value={state.securityEpochChanged?'Değişti':'Eşleşiyor'} label="Güvenlik dönemi"/>{state.registration&&<small>Kayıt: {state.registration.displayName} · {formatDate(state.registration.enrolledAt,{dateStyle:'medium',timeStyle:'short'})}</small>}{state.diagnosticCode&&<small>Tanılama: {state.diagnosticCode}</small>}</div>}<Button onClick={()=>void refresh()} disabled={busy!==''}>{busy==='state'?'Kontrol ediliyor…':'Durumu yenile'}</Button></Surface>
+      <Surface className="workspace-form"><SectionHeader eyebrow="Kayıt" title={state?.enrolled?'Windows Hello kaydını yenile':'Windows Hello’yu etkinleştir'}/><p>Kayıt için mevcut yerel parola ve hesabınızda etkinse 2FA kodu doğrulanır. Ardından Windows Hello penceresi yalnız bu düğmeye bastığınızda açılır.</p><label>Cihaz adı<input value={displayName} maxLength={120} onChange={event=>setDisplayName(event.target.value)}/></label><label>Mevcut yerel parola<input type="password" autoComplete="current-password" maxLength={1024} value={enrollmentPassword} onChange={event=>setEnrollmentPassword(event.target.value)}/></label><label>2FA / kurtarma kodu <small>{auth.twoFactorEnabled?'gerekli':'etkin değil'}</small><input autoComplete="one-time-code" maxLength={256} value={enrollmentCode} onChange={event=>setEnrollmentCode(event.target.value)}/></label><Button tone="primary" disabled={busy!==''||!enrollmentPassword||(auth.twoFactorEnabled&&!enrollmentCode.trim())||state?.availability!=='available'} onClick={()=>void enroll()}>{busy==='enroll'?'Windows Hello bekleniyor…':state?.enrolled?'Kaydı güvenli biçimde yenile':'Windows Hello’yu kaydet'}</Button></Surface>
+      <Surface className="span-2 windows-hello-reauth"><SectionHeader eyebrow="Kritik işlem doğrulaması" title="Yeniden doğrula"/><p>Windows Hello iptal edilirse parola otomatik gönderilmez. Yedek doğrulama yalnız aşağıdaki ayrı düğmeyle ve açıkça yazdığınız bilgilerle çalışır.</p><div className="button-row"><Button tone="primary" disabled={busy!==''||!state?.enrolled||state.availability!=='available'} onClick={()=>void reauthenticate(false)}>{busy==='reauth'?'Windows Hello bekleniyor…':'Windows Hello ile yeniden doğrula'}</Button></div><div className="windows-hello-fallback"><label>Yerel parola<input type="password" autoComplete="current-password" maxLength={1024} value={fallbackPassword} onChange={event=>setFallbackPassword(event.target.value)}/></label><label>2FA / kurtarma kodu<input autoComplete="one-time-code" maxLength={256} value={fallbackCode} onChange={event=>setFallbackCode(event.target.value)}/></label><Button disabled={busy!==''||!fallbackPassword||(auth.twoFactorEnabled&&!fallbackCode.trim())} onClick={()=>void reauthenticate(true)}>{busy==='fallback'?'Doğrulanıyor…':'Hello olmazsa parola ile devam et'}</Button></div></Surface>
+    </section>
+    {message&&<StatusMessage tone={messageTone}>{message}</StatusMessage>}
+  </>;
+}
+
+function SettingsSecurity({auth,accessibility,onAccessibilityChange,onFamilyDataChanged}:{auth:AuthStateView;accessibility:AccessibilityPreferences;onAccessibilityChange:(next:AccessibilityPreferences)=>void;onFamilyDataChanged:()=>Promise<void>}) {
+  const [message,setMessage]=useState('');
+  const [backupInspection,setBackupInspection]=useState<BackupInspectionView|null>(null);
+  const [backupPassword,setBackupPassword]=useState('');
+  const [backupPasswordConfirmation,setBackupPasswordConfirmation]=useState('');
+  const [audit,setAudit]=useState<AuditEntryView[]>([]);
+  const [auditIntegrity,setAuditIntegrity]=useState<AuditIntegrityView|null>(null);
+  const [currentPassword,setCurrentPassword]=useState('');
+  const [newPassword,setNewPassword]=useState('');
+  const [twoFactor,setTwoFactor]=useState<TwoFactorSetupView|null>(null);
+  const [twoFactorCode,setTwoFactorCode]=useState('');
+  const [devices,setDevices]=useState<TrustedDeviceView[]>([]);
+  const [deviceName,setDeviceName]=useState('Bu bilgisayar');
+  const [deviceReauthorizationConfirmation,setDeviceReauthorizationConfirmation]=useState('');
+  const [securityReceipt,setSecurityReceipt]=useState<SecurityEventReceiptView|null>(null);
+  const [securityReceiptHistory,setSecurityReceiptHistory]=useState<SecurityEventReceiptArchiveItemView[]>([]);
+  const [securityReceiptJson,setSecurityReceiptJson]=useState('');
+  const [securityReceiptVerification,setSecurityReceiptVerification]=useState<SecurityEventReceiptVerificationView|null>(null);
+  const [deviceReauthorized,setDeviceReauthorized]=useState(false);
+  const [importPreview,setImportPreview]=useState<FamilyDataImportPreviewView|null>(null);
+  const [importBatches,setImportBatches]=useState<FamilyDataImportBatchView[]>([]);
+  const [importPassword,setImportPassword]=useState('');
+  const [importCode,setImportCode]=useState('');
+  const [importBusy,setImportBusy]=useState(false);
+
+  const refreshImports=async()=>{if(window.pardus)setImportBatches(await window.pardus.listFamilyDataImports(20));};
+  useEffect(()=>{
+    if(window.pardus&&auth.authenticated)void Promise.all([window.pardus.listTrustedDevices().then(setDevices),window.pardus.listSecurityEventReceipts(20).then(setSecurityReceiptHistory),refreshImports()]);
+  },[auth.authenticated]);
+
+  const validateBackupPassword=(confirmationRequired:boolean):boolean=>{
+    if(backupPassword.length<12){
+      setMessage('Yedek parolası en az 12 karakter olmalıdır.');
+      return false;
+    }
+    if(confirmationRequired&&backupPassword!==backupPasswordConfirmation){
+      setMessage('Yedek parolaları eşleşmiyor.');
+      return false;
+    }
+    return true;
+  };
+
+  const exportDb=async()=>{
+    if(!window.pardus)return;
+    const r=await window.pardus.exportBackup();
+    setMessage(r.canceled?'Yedekleme iptal edildi.':`Veritabanı yedeği: ${r.filePath??''}`);
+  };
+  const exportFull=async()=>{
+    if(!window.pardus||!validateBackupPassword(true))return;
+    try{
+      const r=await window.pardus.exportFullBackup({password:backupPassword});
+      setMessage(r.canceled?'Yedekleme iptal edildi.':`Parola korumalı tam yedek: ${r.filePath??''}`);
+      if(!r.canceled)setBackupPasswordConfirmation('');
+    }catch(err){
+      setMessage(err instanceof Error?err.message:'Tam yedek oluşturulamadı.');
+    }
+  };
+  const inspectFull=async()=>{
+    if(!window.pardus)return;
+    try{
+      const r=await window.pardus.inspectFullBackup(backupPassword?{password:backupPassword}:{});
+      if(r.canceled){setMessage('Yedek incelemesi iptal edildi.');return;}
+      setBackupInspection(r.inspection??null);
+      setMessage(r.inspection?.recommendation??'Yedek incelendi.');
+    }catch(err){
+      setBackupInspection(null);
+      setMessage(err instanceof Error?err.message:'Yedek incelenemedi.');
+    }
+  };
+  const restoreFull=async()=>{
+    if(!window.pardus)return;
+    if(!confirm('Geri yükleme mevcut verilerin yerine yedekteki verileri koyacak. İşlem öncesi otomatik güvenlik yedeği alınır; tüm güvenilir cihaz kayıtları iptal edilir ve yeniden giriş gerekir. Devam edilsin mi?'))return;
+    try{
+      const r=await window.pardus.restoreFullBackup(backupPassword?{password:backupPassword}:{});
+      setMessage(r.canceled?'Geri yükleme iptal edildi.':'Yedek geri yüklendi. Uygulama yeniden başlatılıyor; tüm cihaz güvenleri iptal edildiği için parola ve gerekiyorsa 2FA ile tekrar giriş istenecek.');
+    }catch(err){
+      setMessage(err instanceof Error?err.message:'Geri yükleme başarısız.');
+    }
+  };
+  const changePassword=async(e:FormEvent)=>{e.preventDefault();try{if(!window.pardus)return;await window.pardus.changePassword({currentPassword,newPassword});setCurrentPassword('');setNewPassword('');setMessage('Parola başarıyla değiştirildi.');}catch(err){setMessage(err instanceof Error?err.message:'Parola değiştirilemedi.');}};
+  const begin2fa=async()=>{try{if(window.pardus)setTwoFactor(await window.pardus.beginTwoFactorSetup());}catch(err){setMessage(err instanceof Error?err.message:'2FA başlatılamadı.');}};
+  const enable2fa=async()=>{try{if(!window.pardus)return;await window.pardus.enableTwoFactor({code:twoFactorCode});setTwoFactor(null);setTwoFactorCode('');setMessage('İki aşamalı doğrulama etkinleştirildi. Kurtarma kodlarını güvenli yerde saklayın.');}catch(err){setMessage(err instanceof Error?err.message:'2FA etkinleştirilemedi.');}};
+  const disable2fa=async()=>{try{if(!window.pardus)return;await window.pardus.disableTwoFactor({password:currentPassword,code:twoFactorCode});setTwoFactorCode('');setMessage('İki aşamalı doğrulama kapatıldı.');}catch(err){setMessage(err instanceof Error?err.message:'2FA kapatılamadı.');}};
+  const trustDevice=async()=>{try{if(!window.pardus)return;setDevices(await window.pardus.trustCurrentDevice({password:currentPassword,code:twoFactorCode,displayName:deviceName.trim()||'Bu bilgisayar'}));setMessage('Bu cihaz güvenilir cihaz olarak kaydedildi.');}catch(err){setMessage(err instanceof Error?err.message:'Cihaz güvenilir olarak kaydedilemedi.');}};
+  const reauthorizeDeviceAfterRecovery=async()=>{try{if(!window.pardus)return;const result=await window.pardus.reauthorizeCurrentDeviceAfterRecovery({password:currentPassword,code:twoFactorCode,confirmation:DEVICE_REAUTHORIZATION_CONFIRMATION,displayName:deviceName.trim()||'Bu bilgisayar'});setDevices(result.devices);setSecurityReceipt(result.receipt);setDeviceReauthorized(true);setDeviceReauthorizationConfirmation('');setCurrentPassword('');setTwoFactorCode('');setSecurityReceiptHistory(await window.pardus.listSecurityEventReceipts(20));setMessage(`Cihaz güvenlik dönemi ${result.receipt.securityEpoch} için yeniden yetkilendirildi. İmzalı güvenlik makbuzu oluşturuldu${result.receiptArchived?' ve yerel geçmişe kaydedildi':' ancak yerel geçmişe kaydedilemedi'}.`);}catch(err){setMessage(err instanceof Error?err.message:'Cihaz yeniden yetkilendirilemedi.');}};
+  const revokeDevice=async(id:string)=>{if(window.pardus)setDevices(await window.pardus.revokeTrustedDevice(id));};
+  const refreshSecurityReceipts=async()=>{if(window.pardus)setSecurityReceiptHistory(await window.pardus.listSecurityEventReceipts(20));};
+  const verifySecurityReceiptJson=async()=>{if(!window.pardus)return;const result=await window.pardus.verifySecurityEventReceipt(securityReceiptJson);setSecurityReceiptVerification(result);setMessage(result.message);};
+  const loadAudit=async()=>{if(window.pardus)setAudit(await window.pardus.listAudit(25));};
+  const verifyAudit=async()=>{if(window.pardus)setAuditIntegrity(await window.pardus.verifyAuditIntegrity());};
+  const previewFamilyImport=async()=>{
+    if(!window.pardus)return;
+    setImportBusy(true);setMessage('');
+    try{
+      const result=await window.pardus.previewFamilyDataImport();
+      if(result.canceled){setMessage('Aile verisi seçimi iptal edildi.');return;}
+      setImportPreview(result.preview??null);
+      setMessage(result.preview?.valid?'Dosya doğrulandı. Uygulanmadan önce özet ve uyarıları inceleyin.':'Dosya doğrulama hataları içeriyor; hiçbir kayıt uygulanmadı.');
+    }catch(error){setImportPreview(null);setMessage(error instanceof Error?error.message:'Aile verisi ön izlemesi oluşturulamadı.');}
+    finally{setImportBusy(false);}
+  };
+  const applyFamilyImport=async()=>{
+    if(!window.pardus||!importPreview?.valid||!importPassword)return;
+    if(!confirm(`${importPreview.totalCreateRecords} yeni kayıt oluşturulacak, ${importPreview.totalReuseRecords} mevcut kayıt yeniden kullanılacak. Devam edilsin mi?`))return;
+    setImportBusy(true);setMessage('');
+    try{
+      const batch=await window.pardus.applyFamilyDataImport({previewId:importPreview.previewId,password:importPassword,...(importCode.trim()?{code:importCode.trim()}:{})});
+      setImportPreview(null);setImportPassword('');setImportCode('');
+      await Promise.all([refreshImports(),onFamilyDataChanged()]);
+      setMessage(`Aile verisi atomik olarak uygulandı. ${batch.totalCreatedRecords} yeni, ${batch.totalReusedRecords} yeniden kullanılan kayıt.`);
+    }catch(error){setMessage(error instanceof Error?error.message:'Aile verisi uygulanamadı; işlem geri alındı.');}
+    finally{setImportBusy(false);}
+  };
+  const rollbackFamilyImport=async(batch:FamilyDataImportBatchView)=>{
+    if(!window.pardus||!importPassword)return;
+    if(!confirm(`${batch.sourceFileName} içe aktarması geri alınacak. Sonradan bu kayıtlara bağlanan veriler varsa işlem engellenecek. Devam edilsin mi?`))return;
+    setImportBusy(true);setMessage('');
+    try{
+      const next=await window.pardus.rollbackFamilyDataImport({batchId:batch.id,password:importPassword,...(importCode.trim()?{code:importCode.trim()}:{})});
+      setImportPassword('');setImportCode('');
+      await Promise.all([refreshImports(),onFamilyDataChanged()]);
+      setMessage(next.status==='rolled_back'?'İçe aktarma güvenli biçimde geri alındı.':`Geri alma engellendi: ${next.rollbackBlockers.join(' ')}`);
+    }catch(error){setMessage(error instanceof Error?error.message:'İçe aktarma geri alınamadı.');}
+    finally{setImportBusy(false);}
+  };
+
+  return <Surface className="security-center">
+    <SectionHeader eyebrow="Yerel koruma" title="Güvenlik ve yedekleme"/>
+    <div className="button-row"><Button onClick={()=>globalThis.dispatchEvent(new CustomEvent('ppt-replay-intro'))}>Tanıtımı yeniden oynat</Button><Button onClick={()=>{const disabled=globalThis.localStorage?.getItem(BRAND_AUDIO_DISABLED_KEY)==='1';globalThis.localStorage?.setItem(BRAND_AUDIO_DISABLED_KEY,disabled?'0':'1');setMessage(disabled?'Marka sesi açıldı.':'Marka sesi kapatıldı.');}}>Marka sesini aç/kapat</Button></div>
+    <p>Oturum: {auth.displayName??'Yönetici'} · 2FA {auth.twoFactorEnabled?'açık':'kapalı'}</p>
+    <div className="security-grid">
+      <section>
+        <h3>Yedekleme</h3>
+        <p>Yeni tam yedekler AES-256-GCM ile parola korumalı v3 kapsayıcısında oluşturulur.</p>
+        <label>Yedek parolası
+          <input type="password" minLength={12} maxLength={1024} autoComplete="new-password" value={backupPassword} onChange={e=>setBackupPassword(e.target.value)} placeholder="En az 12 karakter"/>
+        </label>
+        <label>Yedek parolası tekrar
+          <input type="password" minLength={12} maxLength={1024} autoComplete="new-password" value={backupPasswordConfirmation} onChange={e=>setBackupPasswordConfirmation(e.target.value)} placeholder="Yeni yedek oluştururken doğrulayın"/>
+        </label>
+        <small>Bu parola uygulama hesabı parolasından bağımsızdır. Parola kaybedilirse yedek açılamaz.</small>
+        <div className="button-row">
+          <Button tone="primary" onClick={()=>void exportFull()}>Parola korumalı tam yedek</Button>
+          <Button onClick={()=>void exportDb()}>Veritabanı yedeği</Button>
+          <Button onClick={()=>void inspectFull()}>Yedeği incele</Button>
+          <Button onClick={()=>void restoreFull()}>Geri yükle</Button>
+        </div>
+      </section>
+      <section className="family-import-panel">
+        <h3>Aile verisi içe aktarma</h3>
+        <p>JSON dosyası önce yalnız okunur ön izlemeye alınır. Şema, referanslar, dosya özeti ve çakışma planı yeniden doğrulanmadan veritabanına yazılmaz.</p>
+        <div className="button-row"><Button onClick={()=>void previewFamilyImport()} disabled={importBusy}>{importBusy?'İşleniyor…':'JSON seç ve ön izle'}</Button><Button onClick={()=>void refreshImports()} disabled={importBusy}>Geçmişi yenile</Button></div>
+        {importPreview&&<div className={`family-import-preview ${importPreview.valid?'valid':'invalid'}`}>
+          <div className="family-import-heading"><div><strong>{importPreview.fileName}</strong><small>{(importPreview.fileSizeBytes/1048576).toFixed(2)} MB · SHA-256 {importPreview.sha256.slice(0,16)}…</small></div><span>{importPreview.valid?'Doğrulandı':'Engellendi'}</span></div>
+          <div className="family-import-totals"><div><strong>{importPreview.totalSourceRecords}</strong><small>kaynak kayıt</small></div><div><strong>{importPreview.totalCreateRecords}</strong><small>yeni kayıt</small></div><div><strong>{importPreview.totalReuseRecords}</strong><small>yeniden kullanım</small></div></div>
+          <small>{importPreview.sourceFamilyName} → {importPreview.targetFamilyName} · Ön izleme sonu {formatDate(importPreview.expiresAt,{dateStyle:'short',timeStyle:'short'})}</small>
+          <div className="family-import-entities">{importPreview.entities.map(entity=><div key={entity.entityType}><strong>{entity.entityType==='person'?'Kişiler':entity.entityType==='relation'?'Aile bağları':entity.entityType==='location'?'Konumlar':'Etkinlikler'}</strong><small>{entity.sourceCount} kaynak · {entity.createCount} yeni · {entity.reuseCount} eşleşen · {entity.skipCount} atlanan</small></div>)}</div>
+          {importPreview.issues.length>0&&<div className="family-import-issues">{importPreview.issues.slice(0,12).map((item,index)=><small className={item.severity} key={`${item.code}-${index}`}>{item.severity==='error'?'!':'△'} {item.path?`${item.path}: `:''}{item.message}</small>)}</div>}
+          {importPreview.valid&&<><label>Yönetici parolası<input type="password" autoComplete="current-password" value={importPassword} onChange={event=>setImportPassword(event.target.value)}/></label><label>2FA / kurtarma kodu<input value={importCode} onChange={event=>setImportCode(event.target.value)} placeholder={auth.twoFactorEnabled?'Gerekli':'Etkin değil'}/></label><Button tone="primary" disabled={importBusy||!importPassword} onClick={()=>void applyFamilyImport()}>Doğrula ve atomik uygula</Button></>}
+        </div>}
+        <div className="family-import-history"><h4>Son içe aktarmalar</h4>{importBatches.length===0?<small>Henüz içe aktarma yapılmadı.</small>:importBatches.slice(0,8).map(batch=><div className="family-import-batch" key={batch.id}><div><strong>{batch.sourceFileName}</strong><small>{formatDate(batch.appliedAt,{dateStyle:'short',timeStyle:'short'})} · {batch.totalCreatedRecords} yeni · {batch.totalReusedRecords} eşleşen</small><small>Durum: {batch.status==='applied'?'Uygulandı':batch.status==='rolled_back'?'Geri alındı':'Geri alma engellendi'} · SHA {batch.sourceSha256.slice(0,12)}…</small>{batch.rollbackBlockers.map(blocker=><small className="error" key={blocker}>{blocker}</small>)}</div>{batch.rollbackAvailable&&<Button tone="danger" disabled={importBusy||!importPassword} onClick={()=>void rollbackFamilyImport(batch)}>Geri al</Button>}</div>)}</div>
+      </section>
+      <section><h3>Parola ve 2FA</h3><form className="form-grid" onSubmit={(e)=>void changePassword(e)}><label>Mevcut parola<input type="password" value={currentPassword} onChange={e=>setCurrentPassword(e.target.value)} required /></label><label>Yeni parola<input type="password" minLength={12} value={newPassword} onChange={e=>setNewPassword(e.target.value)} required /></label><Button type="submit">Parolayı değiştir</Button></form><div className="button-row">{auth.twoFactorEnabled?<Button onClick={()=>void disable2fa()}>2FA kapat</Button>:<Button onClick={()=>void begin2fa()}>2FA kurulumu başlat</Button>}</div>{twoFactor&&<div className="notes-card"><small>Authenticator anahtarı: {twoFactor.secret}</small><small>Kurulum URI: {twoFactor.otpauthUri}</small><small>Kurtarma kodları: {twoFactor.recoveryCodes.join(' · ')}</small></div>}<label>2FA / kurtarma kodu<input value={twoFactorCode} onChange={e=>setTwoFactorCode(e.target.value)} /></label>{twoFactor&&<Button tone="primary" onClick={()=>void enable2fa()}>2FA’yı doğrula ve aç</Button>}</section>
+      <section><h3>Güvenilir cihazlar</h3><p>Hesap güvenlik dönemi: <strong>{auth.securityEpoch??0}</strong> · Oturum dönemi: <strong>{auth.sessionSecurityEpoch??0}</strong></p><label>Cihaz adı<input value={deviceName} onChange={e=>setDeviceName(e.target.value)}/></label>{auth.deviceReauthorizationRequired&&!deviceReauthorized?<div className="notes-card"><strong>Kurtarma sonrası yeniden yetkilendirme gerekiyor</strong><small>Eski cihaz güveni yeni güvenlik dönemine taşınmaz. Parola, 2FA ve bu cihazın Ed25519 anahtar kanıtı yeniden doğrulanır.</small><label>Onay metni<input value={deviceReauthorizationConfirmation} onChange={e=>setDeviceReauthorizationConfirmation(e.target.value)} placeholder={DEVICE_REAUTHORIZATION_CONFIRMATION}/></label><Button tone="primary" onClick={()=>void reauthorizeDeviceAfterRecovery()} disabled={!canSubmitDeviceReauthorization({twoFactorEnabled:auth.twoFactorEnabled===true,password:currentPassword,code:twoFactorCode,confirmation:deviceReauthorizationConfirmation})}>Cihazı yeniden yetkilendir</Button></div>:<Button onClick={()=>void trustDevice()} disabled={!auth.twoFactorEnabled}>Bu cihazı güvenilir yap</Button>}{securityReceipt&&<div className="notes-card"><strong>İmzalı güvenlik olayı makbuzu</strong><small>Makbuz: {securityReceipt.receiptId}</small><small>Dönem: {securityReceipt.securityEpoch} · Olay: cihaz yeniden yetkilendirildi</small><small>Payload SHA-256: {securityReceipt.payloadSha256}</small><small>Ed25519 imza: {securityReceipt.signatureBase64.slice(0,48)}…</small><Button onClick={()=>void navigator.clipboard.writeText(JSON.stringify(securityReceipt,null,2))}>Makbuzu kopyala</Button></div>}{devices.map(device=><div className="list-row" key={device.id}><div><strong>{device.displayName}{device.current?' · Bu cihaz':''}</strong><small>Güvenlik dönemi: {device.securityEpoch} · Son kullanım: {formatDate(device.lastSeenAt,{dateStyle:'short',timeStyle:'short'})}</small></div>{!device.revokedAt&&<Button tone="danger" onClick={()=>void revokeDevice(device.id)}>Kaldır</Button>}</div>)}</section>
+      <section className="security-receipt-history"><h3>Güvenlik makbuzları</h3><p>Kurtarma sonrası cihaz yeniden yetkilendirme makbuzları bu hesaba göre filtrelenir ve her açılışta Ed25519 imzası yeniden doğrulanır.</p>{auth.securityEpoch!==auth.sessionSecurityEpoch&&<StatusMessage tone="danger">Bu oturum eski güvenlik dönemine ait. Güvenlik geçmişine erişmeden önce yeniden giriş yapın.</StatusMessage>}<div className="button-row"><Button onClick={()=>void refreshSecurityReceipts()}>Geçmişi yenile</Button></div>{securityReceiptHistory.length===0?<small>Bu hesap için arşivlenmiş güvenlik makbuzu yok.</small>:securityReceiptHistory.map(item=><div className="list-row" key={item.receipt.receiptId}><div><strong>{item.verificationStatus==='valid'?'✓ Doğrulandı':'! Geçersiz'} · Dönem {item.receipt.securityEpoch}</strong><small>{formatDate(item.receipt.occurredAt,{dateStyle:'short',timeStyle:'short'})} · {item.receipt.receiptId}</small><small>Payload {item.receipt.payloadSha256.slice(0,24)}…</small></div><Button onClick={()=>void navigator.clipboard.writeText(JSON.stringify(item.receipt,null,2))}>Kopyala</Button></div>)}<label>Haricî makbuz JSON<textarea rows={6} value={securityReceiptJson} onChange={event=>setSecurityReceiptJson(event.target.value)} placeholder="Doğrulanacak güvenlik makbuzunu buraya yapıştırın"/></label><Button onClick={()=>void verifySecurityReceiptJson()} disabled={!securityReceiptJson.trim()}>Makbuzu doğrula</Button>{securityReceiptVerification&&<StatusMessage tone={securityReceiptVerification.valid?'success':'danger'}>{securityReceiptVerification.status} · {securityReceiptVerification.message}</StatusMessage>}</section>
+      <section><h3>Denetim kaydı</h3><div className="button-row"><Button onClick={()=>void loadAudit()}>Kayıtları göster</Button><Button onClick={()=>void verifyAudit()}>Zinciri doğrula</Button></div>{auditIntegrity&&<StatusMessage tone={auditIntegrity.valid?'success':'danger'}>{auditIntegrity.valid?`Denetim zinciri sağlam · ${auditIntegrity.checkedEntries} kayıt`:`Denetim zinciri bozuk · ${auditIntegrity.firstInvalidEntryId??'bilinmeyen kayıt'}`}</StatusMessage>}{audit.slice(0,8).map(x=><small className="audit-line" key={x.id}>{formatDate(x.occurredAt,{dateStyle:'short',timeStyle:'short'})} · {x.action}</small>)}</section>
+      <DataLifecycleSettings auth={auth}/>
+      <section className="accessibility-settings"><h3>Erişilebilirlik</h3><p>Metin boyutu, kontrast ve hareket tercihleri bu cihazdaki yerel profil için saklanır.</p><label>Metin boyutu<select value={accessibility.textScale} onChange={event=>onAccessibilityChange({...accessibility,textScale:event.target.value as AccessibilityPreferences['textScale']})}><option value="standard">Standart</option><option value="large">Büyük</option><option value="extra-large">Çok büyük</option></select></label><label className="toggle-row"><input type="checkbox" checked={accessibility.highContrast} onChange={event=>onAccessibilityChange({...accessibility,highContrast:event.target.checked})}/><span><strong>Yüksek kontrast</strong><small>Metin, kenarlık ve odak göstergelerini belirginleştirir.</small></span></label><label className="toggle-row"><input type="checkbox" checked={accessibility.reduceMotion} onChange={event=>onAccessibilityChange({...accessibility,reduceMotion:event.target.checked})}/><span><strong>Hareketi azalt</strong><small>Geçişleri ve dekoratif hareketleri kapatır.</small></span></label></section>
+    </div>
+    {backupInspection&&<div className="backup-inspection"><strong>{backupInspection.legacy?'Eski açık yedek biçimi':'Parola korumalı yedek doğrulandı'} · v{backupInspection.formatVersion}</strong><small>{backupInspection.archiveCount} arşiv girdisi · {(backupInspection.fileBytes/1048576).toFixed(1)} MB · Risk: {backupInspection.riskLevel==='low'?'Düşük':'Dikkat'}</small>{backupInspection.checks.map(check=><small key={check.code}>{check.valid?'✓':'!'} {check.label}: {check.detail}</small>)}</div>}
+    {message&&<StatusMessage>{message}</StatusMessage>}
+  </Surface>;
+}
+
+const relationshipCategoryLabels: Record<FamilyRelationshipCategory,string> = {
+  core:'Çekirdek aile', ancestor:'Üst soy', descendant:'Alt soy', sibling:'Kardeşler', extended:'Geniş aile', in_law:'Evlilik yoluyla aile', care:'Vasi ve bakım', other:'Diğer'
+};
+
+function AddMemberModal({ fallbackPeople = [], onClose, onSave }: { fallbackPeople?: readonly FamilyMemberView[]; onClose: () => void; onSave: (input: CreateFamilyMemberInput) => Promise<void> }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [relationshipCode,setRelationshipCode]=useState<FamilyRelationshipCode>('child');
+  const [referencePersonId,setReferencePersonId]=useState(fallbackPeople[0]?.id??'');
+  const relationship=getFamilyRelationship(relationshipCode);
+  const categories=useMemo(()=>Array.from(new Set(FAMILY_RELATIONSHIP_CATALOG.map(item=>item.category))),[]);
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); setBusy(true); setError('');
+    const data = new FormData(event.currentTarget);
+    try {
+      const birthDate = String(data.get('birthDate') ?? '').trim();
+      const customRelationshipLabel=String(data.get('customRelationshipLabel')??'').trim();
+      if(relationship?.referenceRequired&&!referencePersonId)throw new Error('Bu yakınlık için kime göre olduğu seçilmelidir.');
+      await onSave({
+        displayName: String(data.get('displayName') ?? ''),
+        ...(birthDate ? { birthDate } : {}),
+        relationshipType: relationshipCode==='other'?(customRelationshipLabel||'Diğer'):(relationship?.label??'Aile üyesi'),
+        relationshipCode,
+        ...(referencePersonId?{referencePersonId}:{}),
+        ...(customRelationshipLabel?{customRelationshipLabel}:{}),
+        generation: Number(data.get('generation') ?? 1),
+        branch: String(data.get('branch') ?? '')
+      });
+      onClose();
+    } catch (caught) { setError(caught instanceof Error ? caught.message : 'Kayıt oluşturulamadı.'); }
+    finally { setBusy(false); }
+  };
+  return <Modal title="Yeni aile üyesi" subtitle="Hazır yakınlık kataloğundan seçim yapın; referans kişiye göre karşılıklı soy ağacı bağlantıları otomatik kurulsun." onClose={onClose}><form className="form-grid" onSubmit={(event) => void submit(event)}><label className="span-2">Ad soyad<input name="displayName" required minLength={2} placeholder="Ad ve soyad" /></label><label>Doğum tarihi<input name="birthDate" type="date" /></label><label>Yakınlık türü<select name="relationshipCode" value={relationshipCode} onChange={event=>setRelationshipCode(event.target.value as FamilyRelationshipCode)}>{categories.map(category=><optgroup key={category} label={relationshipCategoryLabels[category]}>{FAMILY_RELATIONSHIP_CATALOG.filter(item=>item.category===category).map(item=><option key={item.code} value={item.code}>{item.label}</option>)}</optgroup>)}</select></label>{relationshipCode==='other'&&<label className="span-2">Özel yakınlık adı<input name="customRelationshipLabel" required minLength={2} maxLength={80} placeholder="Örn. Aile büyüğü"/></label>}<PersonCatalogSelect label="Kime göre?" value={referencePersonId} onChange={setReferencePersonId} allowEmpty={!relationship?.referenceRequired} fallbackPeople={fallbackPeople}/><label>Nesil<select name="generation" defaultValue="4">{[1,2,3,4,5,6,7,8].map((value) => <option key={value}>{value}</option>)}</select></label><label className="span-2">Aile dalı<input name="branch" defaultValue="Ana Dal" /></label>{relationship&&referencePersonId&&<div className="relationship-preview span-2"><strong>Otomatik bağlantı</strong><small>Yeni kişi, seçilen kişiye göre “{relationship.label}” olarak kaydedilir. Ters yönde “{relationship.reciprocalLabel}” bağı oluşturulur.</small></div>}{error && <div className="form-error span-2">{error}</div>}<div className="modal-actions span-2"><Button type="button" onClick={onClose}>İptal</Button><Button type="submit" tone="primary" disabled={busy}>{busy ? 'Kaydediliyor…' : 'Üyeyi ve bağları kaydet'}</Button></div></form></Modal>;
+}
+
+function AddEventModal({ fallbackPeople = [], locations, onClose, onSave }: { fallbackPeople?: readonly FamilyMemberView[]; locations: FamilyAppSnapshot['locations']; onClose: () => void; onSave: (input: CreateFamilyEventInput) => Promise<void> }) {
+  const [busy, setBusy] = useState(false); const [error, setError] = useState(''); const [participants,setParticipants]=useState<string[]>([]);
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); setBusy(true); setError(''); const data = new FormData(event.currentTarget);
+    const date = String(data.get('date')); const time = String(data.get('time') || '12:00');
+    try {
+      const description = String(data.get('description') ?? '').trim(); const locationLabel = String(data.get('locationLabel') ?? '').trim(); const invitationText = String(data.get('invitationText') ?? '').trim(); const notes = String(data.get('notes') ?? '').trim();
+      await onSave({title:String(data.get('title')??''),...(description?{description}:{}),startAt:new Date(`${date}T${time}:00`).toISOString(),...(String(data.get('locationId')??'')?{locationId:String(data.get('locationId'))}:locationLabel?{locationLabel}:{}),visibility:'family',participantPersonIds:participants,...(invitationText?{invitationText}:{}),...(notes?{notes}:{}),aiProcessingAllowed:data.get('aiProcessingAllowed')==='on',recurrence:data.get('recurrence')==='yearly'?'yearly':'none',reminderDays:data.getAll('reminderDays').map(Number)}); onClose();
+    } catch (caught) { setError(caught instanceof Error ? caught.message : 'Etkinlik oluşturulamadı.'); }
+    finally { setBusy(false); }
+  };
+  const tomorrow = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+  return <Modal title="Önemli gün oluştur" subtitle="Katılımcılar tüm aile listesini yüklemeden arama destekli katalogdan seçilir." onClose={onClose}><form className="form-grid" onSubmit={(event)=>void submit(event)}><label className="span-2">Başlık<input name="title" required minLength={2} placeholder="Örn. Aile buluşması"/></label><label>Tarih<input name="date" type="date" required defaultValue={tomorrow}/></label><label>Saat<input name="time" type="time" defaultValue="14:00"/></label><label>Harita kaydı<select name="locationId" defaultValue=""><option value="">Kayıt seçilmedi</option>{locations.map(location=><option key={location.id} value={location.id}>{location.label}</option>)}</select></label><label>Serbest konum<input name="locationLabel" placeholder="Mekân, şehir veya adres"/></label><label className="span-2">Açıklama<textarea name="description" rows={2} placeholder="Etkinliğin kısa açıklaması"/></label><label className="span-2">Davetiye metni<textarea name="invitationText" rows={2} placeholder="Dijital davetiyede yer alacak metin"/></label><PersonCatalogMultiPicker selectedIds={participants} onChange={setParticipants} fallbackPeople={fallbackPeople}/><label>Tekrar<select name="recurrence" defaultValue="none"><option value="none">Tek sefer</option><option value="yearly">Her yıl</option></select></label><fieldset className="reminder-fieldset"><legend>Hatırlat</legend>{[30,14,7,1,0].map(day=><label key={day}><input type="checkbox" name="reminderDays" value={day} defaultChecked={[7,1].includes(day)}/>{day===0?'Aynı gün':`${day} gün önce`}</label>)}</fieldset><label className="span-2">Notlar ve anılar<textarea name="notes" rows={2} placeholder="Planlama notları, hediyeler veya anılar"/></label><label className="check-row span-2"><input type="checkbox" name="aiProcessingAllowed" defaultChecked/>Bu kaydın izinli yapay zekâ aramalarında kullanılmasına izin ver</label>{error&&<div className="form-error span-2">{error}</div>}<div className="modal-actions span-2"><Button type="button" onClick={onClose}>İptal</Button><Button type="submit" tone="primary" disabled={busy}>{busy?'Kaydediliyor…':'Önemli günü kaydet'}</Button></div></form></Modal>;
+}
+
+function EditEventModal({ event, fallbackPeople = [], locations, onClose, onSave }: { event: FamilyEventView; fallbackPeople?: readonly FamilyMemberView[]; locations: FamilyAppSnapshot['locations']; onClose: () => void; onSave: (input: UpdateFamilyEventInput) => Promise<void> }) {
+  const start = new Date(event.startAt);
+  const localStart = new Date(start.getTime() - start.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
+  const [title,setTitle]=useState(event.title);
+  const [description,setDescription]=useState(event.description??'');
+  const [startAt,setStartAt]=useState(localStart);
+  const [locationId,setLocationId]=useState(event.locationId??'');
+  const [locationLabel,setLocationLabel]=useState(event.locationId?'':event.locationLabel??'');
+  const [visibility,setVisibility]=useState(event.visibility);
+  const [participants,setParticipants]=useState<string[]>(event.participantPersonIds);
+  const [invitationText,setInvitationText]=useState(event.invitationText??'');
+  const [notes,setNotes]=useState(event.notes??'');
+  const [aiAllowed,setAiAllowed]=useState(event.aiProcessingAllowed);
+  const [recurrence,setRecurrence]=useState(event.recurrence);
+  const [reminders,setReminders]=useState<number[]>(event.reminderDays);
+  const [busy,setBusy]=useState(false);
+  const [error,setError]=useState('');
+  const toggleReminder=(day:number)=>setReminders((current)=>current.includes(day)?current.filter((value)=>value!==day):[...current,day].toSorted((a,b)=>b-a));
+  const submit=async(formEvent:FormEvent<HTMLFormElement>)=>{
+    formEvent.preventDefault(); setBusy(true); setError('');
+    try{
+      const selectedLocation=locations.find((location)=>location.id===locationId);
+      await onSave({
+        eventId:event.id,
+        title:title.trim(),
+        ...(description.trim()?{description:description.trim()}:{}),
+        startAt:new Date(startAt).toISOString(),
+        ...(selectedLocation?{locationId:selectedLocation.id,locationLabel:selectedLocation.label}:locationLabel.trim()?{locationLabel:locationLabel.trim()}:{}),
+        visibility,
+        participantPersonIds:participants,
+        ...(invitationText.trim()?{invitationText:invitationText.trim()}:{}),
+        ...(notes.trim()?{notes:notes.trim()}:{}),
+        aiProcessingAllowed:aiAllowed,
+        recurrence,
+        reminderDays:reminders
+      });
+      onClose();
+    }catch(caught){setError(caught instanceof Error?caught.message:'Olay güncellenemedi.');}
+    finally{setBusy(false);}
+  };
+  return <Modal title="Olayı düzenle" subtitle="Tarih, konum, gizlilik, katılımcı, davetiye ve hatırlatmaların tamamı güncellenir." onClose={onClose}>
+    <form className="form-grid event-edit-form" onSubmit={(formEvent)=>void submit(formEvent)}>
+      <label className="span-2">Başlık<input required minLength={2} maxLength={200} value={title} onChange={(input)=>setTitle(input.target.value)}/></label>
+      <label className="span-2">Tarih ve saat<input required type="datetime-local" value={startAt} onChange={(input)=>setStartAt(input.target.value)}/></label>
+      <label>Harita kaydı<select value={locationId} onChange={(input)=>{setLocationId(input.target.value);if(input.target.value)setLocationLabel('');}}><option value="">Kayıt seçilmedi</option>{locations.map((location)=><option key={location.id} value={location.id}>{location.label}</option>)}</select></label>
+      <label>Serbest konum<input value={locationLabel} disabled={Boolean(locationId)} onChange={(input)=>setLocationLabel(input.target.value)} placeholder={locationId?'Harita kaydı kullanılıyor':'Mekân, şehir veya adres'}/></label>
+      <label className="span-2">Açıklama<textarea rows={3} maxLength={4000} value={description} onChange={(input)=>setDescription(input.target.value)}/></label>
+      <label>Gizlilik<select value={visibility} onChange={(input)=>setVisibility(input.target.value as FamilyEventView['visibility'])}><option value="family">Tüm aile</option><option value="selected_members">Seçili üyeler</option><option value="personal">Kişisel</option></select></label>
+      <label>Tekrar<select value={recurrence} onChange={(input)=>setRecurrence(input.target.value as FamilyEventView['recurrence'])}><option value="none">Tek sefer</option><option value="yearly">Her yıl</option></select></label>
+      <PersonCatalogMultiPicker selectedIds={participants} onChange={setParticipants} fallbackPeople={fallbackPeople}/>
+      <fieldset className="span-2 reminder-fieldset horizontal"><legend>Hatırlatmalar</legend>{[30,14,7,1,0].map((day)=><label key={day}><input type="checkbox" checked={reminders.includes(day)} onChange={()=>toggleReminder(day)}/>{day===0?'Aynı gün':`${day} gün önce`}</label>)}</fieldset>
+      <label className="span-2">Davetiye metni<textarea rows={3} maxLength={4000} value={invitationText} onChange={(input)=>setInvitationText(input.target.value)}/></label>
+      <label className="span-2">Notlar ve anılar<textarea rows={4} maxLength={8000} value={notes} onChange={(input)=>setNotes(input.target.value)}/></label>
+      <label className="check-row span-2"><input type="checkbox" checked={aiAllowed} onChange={(input)=>setAiAllowed(input.target.checked)}/>Bu kaydın izinli yapay zekâ aramalarında kullanılmasına izin ver</label>
+      {error&&<div className="form-error span-2">{error}</div>}
+      <div className="modal-actions span-2"><Button type="button" onClick={onClose}>İptal</Button><Button type="submit" tone="primary" disabled={busy||title.trim().length<2||!startAt}>{busy?'Kaydediliyor…':'Tüm değişiklikleri kaydet'}</Button></div>
+    </form>
+  </Modal>;
+}
+
+
+function AddLocationModal({ onClose, onSave }: { onClose: () => void; onSave: (input: CreateFamilyLocationInput) => Promise<void> }) {
+  const [busy, setBusy] = useState(false); const [error, setError] = useState('');
+  const submit = async (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); setBusy(true); setError(''); const data = new FormData(event.currentTarget); try { const latitude = String(data.get('latitude') ?? '').trim(); const longitude = String(data.get('longitude') ?? '').trim(); const address = String(data.get('address') ?? '').trim(); await onSave({ label: String(data.get('label') ?? ''), ...(address ? { address } : {}), ...(latitude ? { latitude: Number(latitude) } : {}), ...(longitude ? { longitude: Number(longitude) } : {}), kind: String(data.get('kind') ?? 'other') as CreateFamilyLocationInput['kind'] }); onClose(); } catch (caught) { setError(caught instanceof Error ? caught.message : 'Konum kaydedilemedi.'); } finally { setBusy(false); } };
+  return <Modal title="Yeni konum" subtitle="Etkinlikler ve aile coğrafi hafızası için harita kaydı oluşturun." onClose={onClose}><form className="form-grid" onSubmit={(event) => void submit(event)}><label className="span-2">Konum adı<input name="label" required minLength={2} placeholder="Örn. Sakarya Aile Evi" /></label><label className="span-2">Adres<input name="address" placeholder="Adres veya açıklama" /></label><label>Enlem<input name="latitude" type="number" step="any" /></label><label>Boylam<input name="longitude" type="number" step="any" /></label><label className="span-2">Tür<select name="kind"><option value="venue">Etkinlik yeri</option><option value="residence">İkamet</option><option value="memory">Anı yeri</option><option value="other">Diğer</option></select></label>{error && <div className="form-error span-2">{error}</div>}<div className="modal-actions span-2"><Button type="button" onClick={onClose}>İptal</Button><Button type="submit" tone="primary" disabled={busy}>{busy ? 'Kaydediliyor…' : 'Konumu kaydet'}</Button></div></form></Modal>;
+}
+
+function LocationScreen({ snapshot, onAdd, onAcknowledge }: { snapshot: FamilyAppSnapshot; onAdd: () => void; onAcknowledge: (notificationId:string) => Promise<void> }) {
+  const activeNotifications = snapshot.notifications.filter((item) => !item.acknowledgedAt);
+  return <><PageHeader eyebrow="Aile coğrafi hafızası" title="Konum ve harita" description="Etkinlik yerlerini, ikametleri ve aile anı noktalarını kayıt altında tutun." actions={<Button tone="primary" onClick={onAdd}>＋ Konum ekle</Button>} /><section className="workspace-grid"><article className="panel workspace-form"><span className="eyebrow">{snapshot.locations.length} konum</span><h2>Kayıtlı yerler</h2>{snapshot.locations.map((location) => <div className="summary-row" key={location.id}><span>⌖</span><strong>{location.label}</strong><i>{location.address ?? location.kind}</i></div>)}</article><article className="panel workspace-summary"><span className="eyebrow">{activeNotifications.length} bekleyen hatırlatma</span><h2>Bildirim merkezi</h2>{activeNotifications.length ? activeNotifications.map((item) => <div className="context-stat" key={item.id}><strong>{item.body}</strong><span>{item.title}</span><Button onClick={()=>void onAcknowledge(item.id)}>Okundu işaretle</Button></div>) : <EmptyState title="Hatırlatma yok" body="Yaklaşan veya okunmamış önemli gün bildirimi bulunmuyor." />}</article></section></>;
+}
+
+const localProfileIdentity=(displayName:string):string=>{
+  const handle=displayName.trim().toLocaleLowerCase('tr-TR').normalize('NFKD').replace(/[\u0300-\u036f]/gu,'').replace(/ı/gu,'i').replace(/[^a-z0-9]+/gu,'.').replace(/^\.+|\.+$/gu,'');
+  return `${handle||'aile-uyesi'}.${Date.now().toString(36)}@local.pardus`;
+};
+
+function HouseholdMembershipScreen({people,workspace,onChanged}:{people:FamilyMemberView[];workspace:HouseholdMembershipWorkspaceView;onChanged:()=>Promise<void>}){
+  const [householdName,setHouseholdName]=useState('');
+  const [householdKind,setHouseholdKind]=useState<HouseholdKind>('primary');
+  const [branchName,setBranchName]=useState('');
+  const [branchHouseholdId,setBranchHouseholdId]=useState('');
+  const [personId,setPersonId]=useState('');
+  const [membershipHouseholdId,setMembershipHouseholdId]=useState('');
+  const [familyBranchId,setFamilyBranchId]=useState('');
+  const [role,setRole]=useState<PersonMembershipRole>('resident');
+  const [validFrom,setValidFrom]=useState(()=>new Date().toISOString().slice(0,10));
+  const [message,setMessage]=useState('');
+  const [tone,setTone]=useState<'success'|'danger'>('success');
+  const [busy,setBusy]=useState(false);
+  const run=async(operation:()=>Promise<unknown>,success:string)=>{setBusy(true);setMessage('');try{await operation();await onChanged();setTone('success');setMessage(success);}catch(error){setTone('danger');setMessage(error instanceof Error?error.message:'İşlem tamamlanamadı.');}finally{setBusy(false);}};
+  const createHousehold=async(event:FormEvent)=>{event.preventDefault();if(!window.pardus)return;await run(()=>window.pardus!.createHousehold({name:householdName,kind:householdKind}), 'Hane oluşturuldu.');setHouseholdName('');};
+  const createBranch=async(event:FormEvent)=>{event.preventDefault();if(!window.pardus)return;const householdId=branchHouseholdId||workspace.households[0]?.id;const command={name:branchName,...(householdId?{householdId}: {})} as CreateFamilyBranchInput;await run(()=>window.pardus!.createFamilyBranch(command), 'Aile dalı oluşturuldu.');setBranchName('');};
+  const assignMembership=async(event:FormEvent)=>{event.preventDefault();if(!window.pardus)return;const selectedPersonId=personId||people[0]?.id;const householdId=membershipHouseholdId||workspace.households[0]?.id;if(!selectedPersonId||!householdId){setTone('danger');setMessage('Kişi ve hane seçilmelidir.');return;}const command={personId:selectedPersonId,householdId,...(familyBranchId?{familyBranchId}:{}),role,validFrom:`${validFrom}T00:00:00.000Z`} as AssignPersonMembershipInput;await run(()=>window.pardus!.assignPersonMembership(command),'Kişi üyeliği kaydedildi.');};
+  const endMembership=async(membershipId:string)=>{if(!window.pardus)return;await run(()=>window.pardus!.endPersonMembership({membershipId,endedAt:new Date().toISOString()}),'Üyelik geçmişe alınarak sonlandırıldı.');};
+  const householdNameOf=(id:string)=>workspace.households.find(item=>item.id===id)?.name??'Bilinmeyen hane';
+  const branchNameOf=(id?:string)=>id?workspace.branches.find(item=>item.id===id)?.name??'Bilinmeyen dal':'Dal seçilmedi';
+  const personNameOf=(id:string)=>people.find(item=>item.id===id)?.displayName??'Bilinmeyen kişi';
+  return <><PageHeader eyebrow="Temel veri modeli" title="Haneler ve aile dalları" description="Kişilerin birden fazla haneye ve aile dalına tarihçeli, yetkili biçimde bağlanmasını yönetin."/><section className="workspace-grid"><Surface className="workspace-form"><SectionHeader eyebrow="Yeni kayıt" title="Hane ve dal oluştur"/><form className="form-grid" onSubmit={createHousehold}><label>Hane adı<input value={householdName} onChange={event=>setHouseholdName(event.target.value)} minLength={2} required/></label><label>Hane türü<select value={householdKind} onChange={event=>setHouseholdKind(event.target.value as HouseholdKind)}><option value="primary">Ana hane</option><option value="shared">Paylaşımlı hane</option><option value="extended">Geniş aile</option><option value="other">Diğer</option></select></label><Button type="submit" tone="primary" disabled={busy||householdName.trim().length<2}>Hane oluştur</Button></form><hr/><form className="form-grid" onSubmit={createBranch}><label>Dal adı<input value={branchName} onChange={event=>setBranchName(event.target.value)} minLength={2} required/></label><label>Bağlı hane<select value={branchHouseholdId} onChange={event=>setBranchHouseholdId(event.target.value)}><option value="">İlk etkin hane</option>{workspace.households.filter(item=>item.status==='active').map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label><Button type="submit" disabled={busy||branchName.trim().length<2||workspace.households.length===0}>Aile dalı oluştur</Button></form>{message&&<StatusMessage tone={tone}>{message}</StatusMessage>}</Surface><Surface className="workspace-summary"><SectionHeader eyebrow="Tarihçeli bağ" title="Kişiyi haneye ata"/><form className="form-grid" onSubmit={assignMembership}><label>Kişi<select value={personId} onChange={event=>setPersonId(event.target.value)}><option value="">İlk aile üyesi</option>{people.map(item=><option key={item.id} value={item.id}>{item.displayName}</option>)}</select></label><label>Hane<select value={membershipHouseholdId} onChange={event=>{setMembershipHouseholdId(event.target.value);setFamilyBranchId('');}}><option value="">İlk etkin hane</option>{workspace.households.filter(item=>item.status==='active').map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label><label>Aile dalı<select value={familyBranchId} onChange={event=>setFamilyBranchId(event.target.value)}><option value="">Dal yok</option>{workspace.branches.filter(item=>item.status==='active'&&(!item.householdId||item.householdId===(membershipHouseholdId||workspace.households[0]?.id))).map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label><label>Rol<select value={role} onChange={event=>setRole(event.target.value as PersonMembershipRole)}><option value="resident">İkamet eden</option><option value="member">Üye</option><option value="guardian">Vasi</option><option value="dependent">Bağımlı</option><option value="other">Diğer</option></select></label><label>Başlangıç<input type="date" value={validFrom} onChange={event=>setValidFrom(event.target.value)} required/></label><Button type="submit" tone="primary" disabled={busy||people.length===0||workspace.households.length===0}>Üyelik ata</Button></form></Surface><Surface className="span-2"><SectionHeader eyebrow="Güncel yapı" title={`${workspace.households.length} hane · ${workspace.branches.length} dal · ${workspace.memberships.length} üyelik`}/><div className="stack-list">{workspace.memberships.length===0?<EmptyState title="Üyelik kaydı yok" body="Bir kişiyi haneye atadığınızda tarihçe burada görünür."/>:workspace.memberships.map(item=><div className="list-row" key={item.id}><div><strong>{personNameOf(item.personId)} · {householdNameOf(item.householdId)}</strong><small>{branchNameOf(item.familyBranchId)} · {item.role} · {formatDate(item.validFrom)}{item.validUntil?` — ${formatDate(item.validUntil)}`:' — devam ediyor'}</small></div>{item.status==='active'&&<Button tone="danger" onClick={()=>void endMembership(item.id)} disabled={busy}>Üyeliği bitir</Button>}</div>)}</div></Surface></section></>;
+}
+
+function PersonLifecycleScreen({people,onChanged}:{people:FamilyMemberView[];onChanged:()=>Promise<void>}){
+  const [selectedPersonId,setSelectedPersonId]=useState(people[0]?.id??'');
+  const [workspace,setWorkspace]=useState<PersonLifecycleWorkspaceView>();
+  const [displayName,setDisplayName]=useState('');
+  const [birthDate,setBirthDate]=useState('');
+  const [relationshipType,setRelationshipType]=useState('');
+  const [generation,setGeneration]=useState(1);
+  const [branch,setBranch]=useState('');
+  const [reason,setReason]=useState('');
+  const [mergeTargetId,setMergeTargetId]=useState('');
+  const [confirmationText,setConfirmationText]=useState('');
+  const [busy,setBusy]=useState(false);
+  const [loading,setLoading]=useState(false);
+  const [message,setMessage]=useState('');
+  const [tone,setTone]=useState<'success'|'danger'>('success');
+
+  const applyWorkspace=(next:PersonLifecycleWorkspaceView)=>{
+    setWorkspace(next);
+    setDisplayName(next.profile.displayName);
+    setBirthDate(next.profile.birthDate??'');
+    setRelationshipType(next.profile.relationshipType);
+    setGeneration(next.profile.generation);
+    setBranch(next.profile.branch);
+  };
+  const loadWorkspace=async(personId:string)=>{
+    if(!window.pardus||!personId){setWorkspace(undefined);return;}
+    setLoading(true);
+    try{applyWorkspace(await window.pardus.getPersonLifecycleWorkspace(personId));}
+    catch(error){setWorkspace(undefined);setTone('danger');setMessage(error instanceof Error?error.message:'Kişi profili yüklenemedi.');}
+    finally{setLoading(false);}
+  };
+  useEffect(()=>{
+    if(selectedPersonId&&people.some(person=>person.id===selectedPersonId))return;
+    setSelectedPersonId(people[0]?.id??'');
+  },[people,selectedPersonId]);
+  useEffect(()=>{setMessage('');void loadWorkspace(selectedPersonId);},[selectedPersonId]);
+
+  const run=async(operation:()=>Promise<unknown>,success:string)=>{
+    if(!selectedPersonId)return;
+    setBusy(true);setMessage('');
+    try{await operation();await onChanged();await loadWorkspace(selectedPersonId);setTone('success');setMessage(success);setReason('');setConfirmationText('');}
+    catch(error){setTone('danger');setMessage(error instanceof Error?error.message:'Kişi profili işlemi tamamlanamadı.');}
+    finally{setBusy(false);}
+  };
+  const update=async(event:FormEvent)=>{
+    event.preventDefault();if(!window.pardus||!workspace)return;
+    const command={personId:workspace.profile.id,expectedVersion:workspace.profile.lifecycleVersion,displayName,...(birthDate?{birthDate}:{}),relationshipType,generation,branch} as UpdatePersonProfileInput;
+    await run(()=>window.pardus!.updatePersonProfile(command),'Kişi profili ve sürüm tarihçesi güncellendi.');
+  };
+  const archive=async()=>{if(!window.pardus||!workspace)return;await run(()=>window.pardus!.archivePersonProfile({personId:workspace.profile.id,expectedVersion:workspace.profile.lifecycleVersion,reason}),'Kişi profili geri alınabilir biçimde arşivlendi.');};
+  const merge=async()=>{
+    if(!window.pardus||!workspace||!mergeTargetId)return;
+    await run(async()=>{
+      const target=await window.pardus!.getPersonLifecycleWorkspace(mergeTargetId);
+      return window.pardus!.mergePersonProfiles({sourcePersonId:workspace.profile.id,targetPersonId:target.profile.id,expectedSourceVersion:workspace.profile.lifecycleVersion,expectedTargetVersion:target.profile.lifecycleVersion,conflictResolution:'KEEP_TARGET',reason});
+    },'Kaynak profil hedef kişiye mantıksal olarak birleştirildi; referanslar korundu.');
+  };
+  const requestDeletion=async()=>{if(!window.pardus||!workspace)return;await run(()=>window.pardus!.requestSafePersonDeletion({personId:workspace.profile.id,expectedVersion:workspace.profile.lifecycleVersion,confirmationText,reason}),'Referanssız kişi profili güvenli silme kuyruğuna alındı.');};
+  const undo=async(operationId:string)=>{if(!window.pardus)return;await run(()=>window.pardus!.undoPersonLifecycleOperation(operationId),'Son kişi profili işlemi geri alındı.');};
+  const statusLabel=(status:PersonLifecycleWorkspaceView['profile']['status'])=>({active:'Etkin',inactive:'Etkin değil',deceased:'Vefat',archived:'Arşivlenmiş',merged:'Birleştirilmiş',pending_deletion:'Silme bekliyor'}[status]);
+  const operationLabel=(type:PersonLifecycleWorkspaceView['operations'][number]['operationType'])=>({profile_updated:'Profil güncelleme',archived:'Arşivleme',merged:'Birleştirme',safe_delete_requested:'Güvenli silme isteği'}[type]);
+  const activeTargets=people.filter(person=>person.id!==selectedPersonId&&person.status==='active');
+
+  return <><PageHeader eyebrow="B1-02 · yönetişimli yaşam döngüsü" title="Kişi profilleri" description="Düzenleme, mantıksal birleştirme, geri alınabilir arşivleme ve referans güvenli silme işlemlerini sürüm denetimiyle yönetin."/>
+    <section className="workspace-grid">
+      <Surface className="workspace-form"><SectionHeader eyebrow="Profil seçimi" title="Kayıt ve sürüm"/>
+        <label>Kişi<select value={selectedPersonId} onChange={event=>setSelectedPersonId(event.target.value)}><option value="">Kişi seçin</option>{people.map(person=><option key={person.id} value={person.id}>{person.displayName}</option>)}</select></label>
+        {loading?<div className="loading-screen"><div className="loader"/><strong>Profil yükleniyor…</strong></div>:workspace?<form className="form-grid" onSubmit={update}>
+          <label className="span-2">Ad soyad<input required minLength={2} maxLength={120} value={displayName} onChange={event=>setDisplayName(event.target.value)}/></label>
+          <label>Doğum tarihi<input type="date" value={birthDate} onChange={event=>setBirthDate(event.target.value)}/></label>
+          <label>Yakınlık türü<input required minLength={2} maxLength={80} value={relationshipType} onChange={event=>setRelationshipType(event.target.value)}/></label>
+          <label>Nesil<input type="number" min={1} max={20} value={generation} onChange={event=>setGeneration(Number(event.target.value))}/></label>
+          <label>Aile dalı<input required minLength={2} maxLength={120} value={branch} onChange={event=>setBranch(event.target.value)}/></label>
+          <Button type="submit" tone="primary" disabled={busy||workspace.profile.status==='merged'||workspace.profile.status==='pending_deletion'}>Profili güncelle</Button>
+        </form>:<EmptyState title="Kişi seçilmedi" body="Yaşam döngüsü işlemleri için bir aile üyesi seçin."/>}
+      </Surface>
+      <Surface className="workspace-summary"><SectionHeader eyebrow="Korunan durum" title={workspace?`${statusLabel(workspace.profile.status)} · sürüm ${workspace.profile.lifecycleVersion}`:'Kişi durumu'}/>
+        {workspace&&<><StatRow value={workspace.profile.displayName} label={`${workspace.profile.relationshipType} · ${workspace.profile.branch} · ${workspace.profile.generation}. nesil`}/><StatRow value={workspace.operations.length} label="Değiştirilemez işlem geçmişi"/>{workspace.profile.mergedIntoPersonId&&<StatRow value={people.find(person=>person.id===workspace.profile.mergedIntoPersonId)?.displayName??workspace.profile.mergedIntoPersonId} label="Birleştirme hedefi"/>}</>}
+        <label>İşlem gerekçesi<textarea rows={3} minLength={5} maxLength={500} value={reason} onChange={event=>setReason(event.target.value)} placeholder="En az 5 karakter"/></label>
+        <div className="modal-actions"><Button tone="danger" disabled={busy||!workspace||reason.trim().length<5||workspace.profile.status==='archived'||workspace.profile.status==='merged'||workspace.profile.status==='pending_deletion'} onClick={()=>void archive()}>Arşivle</Button></div>
+        <hr/>
+        <label>Birleştirme hedefi<select value={mergeTargetId} onChange={event=>setMergeTargetId(event.target.value)}><option value="">Etkin hedef kişi seçin</option>{activeTargets.map(person=><option key={person.id} value={person.id}>{person.displayName}</option>)}</select></label>
+        <Button disabled={busy||!workspace||!mergeTargetId||reason.trim().length<5||workspace.profile.status==='merged'||workspace.profile.status==='pending_deletion'} onClick={()=>void merge()}>Hedefi koruyarak birleştir</Button>
+        <hr/>
+        <label>Güvenli silme onayı<input value={confirmationText} onChange={event=>setConfirmationText(event.target.value)} placeholder={workspace?.profile.displayName??'Kişi adını birebir yazın'}/></label>
+        <Button tone="danger" disabled={busy||!workspace||confirmationText!==workspace.profile.displayName||reason.trim().length<5||workspace.profile.status==='merged'||workspace.profile.status==='pending_deletion'} onClick={()=>void requestDeletion()}>Referansları denetle ve silme iste</Button>
+        {message&&<StatusMessage tone={tone}>{message}</StatusMessage>}
+      </Surface>
+      <Surface className="span-2"><SectionHeader eyebrow="Geri alınabilir kanıt zinciri" title={`${workspace?.operations.length??0} yaşam döngüsü işlemi`}/>
+        {!workspace||workspace.operations.length===0?<EmptyState title="İşlem geçmişi yok" body="Profilde yapılan yönetişimli değişiklikler burada sürüm ve referans sayılarıyla görünür."/>:<div className="stack-list">{workspace.operations.map(operation=><div className="list-row" key={operation.id}><div><strong>{operationLabel(operation.operationType)} · {operation.status==='applied'?'Uygulandı':'Geri alındı'}</strong><small>{formatDate(operation.createdAt,{dateStyle:'medium',timeStyle:'short'})} · sürüm {operation.before.lifecycleVersion} → {operation.after.lifecycleVersion} · {operation.references.total} referans{operation.reason?` · ${operation.reason}`:''}</small></div>{operation.status==='applied'&&operation.after.lifecycleVersion===workspace.profile.lifecycleVersion&&<Button onClick={()=>void undo(operation.id)} disabled={busy}>Geri al</Button>}</div>)}</div>}
+      </Surface>
+    </section>
+  </>;
+}
+
+function InvitationsScreen({snapshot}:{snapshot:FamilyAppSnapshot}){
+  const [invitations,setInvitations]=useState<FamilyInvitationView[]>([]);
+  const [profileName,setProfileName]=useState('');
+  const [role,setRole]=useState<FamilyRole>('adult_member');
+  const [personId,setPersonId]=useState('');
+  const [startsOn,setStartsOn]=useState(()=>new Date().toISOString().slice(0,10));
+  const [endsOn,setEndsOn]=useState(()=>new Date(Date.now()+7*24*60*60*1000).toISOString().slice(0,10));
+  const [issuedToken,setIssuedToken]=useState('');
+  const [message,setMessage]=useState('');
+  const [messageTone,setMessageTone]=useState<'success'|'danger'>('success');
+  const [busyId,setBusyId]=useState('');
+  const [access,setAccess]=useState<'loading'|'allowed'|'denied'>('loading');
+  const refresh=async()=>{if(!window.pardus)return;try{setInvitations(await window.pardus.listInvitations());setAccess('allowed');}catch(error){setAccess('denied');throw error;}};
+  useEffect(()=>{void refresh().catch(error=>{setMessageTone('danger');setMessage(error instanceof Error?error.message:'Davetler yüklenemedi.');});},[]);
+  if(access==='loading')return <div className="loading-screen"><div className="loader"/><strong>Davet yetkisi doğrulanıyor…</strong></div>;
+  if(access==='denied')return <><PageHeader eyebrow="Aile profili güvenliği" title="Davetler" description="Davet yönetimi yalnızca yetkili aile yöneticisi tarafından kullanılabilir."/><EmptyState title="Yönetici yetkisi gerekli" body={message||'Aile profili davetlerini yalnız aile yöneticisi oluşturabilir ve yönetebilir.'}/></>;
+  const create=async()=>{setMessage('');setIssuedToken('');if(!window.pardus)return;if(endsOn<startsOn){setMessageTone('danger');setMessage('Davet bitiş tarihi başlangıç tarihinden önce olamaz.');return;}setBusyId('create');try{const result=await window.pardus.createInvitation({email:localProfileIdentity(profileName),role,...(personId?{personId}:{}),startsAt:`${startsOn}T00:00:00.000Z`,endsAt:`${endsOn}T23:59:59.999Z`});setIssuedToken(result.token);setProfileName('');setMessageTone('success');setMessage('Davet oluşturuldu. Tek kullanımlık kodu şimdi güvenli biçimde paylaşın.');await refresh();}catch(error){setMessageTone('danger');setMessage(error instanceof Error?error.message:'Davet oluşturulamadı.');}finally{setBusyId('');}};
+  const revoke=async(invitationId:string)=>{if(!window.pardus)return;setBusyId(invitationId);setMessage('');try{setInvitations(await window.pardus.revokeInvitation(invitationId));setMessageTone('success');setMessage('Davet iptal edildi; eski kod artık kabul edilemez.');}catch(error){setMessageTone('danger');setMessage(error instanceof Error?error.message:'Davet iptal edilemedi.');}finally{setBusyId('');}};
+  const resend=async(invitationId:string)=>{if(!window.pardus)return;setBusyId(invitationId);setMessage('');setIssuedToken('');try{const result=await window.pardus.resendInvitation({invitationId});setIssuedToken(result.token);setMessageTone('success');setMessage('Yeni davet kodu üretildi; önceki kod geçersiz kılındı.');await refresh();}catch(error){setMessageTone('danger');setMessage(error instanceof Error?error.message:'Davet yeniden gönderilemedi.');}finally{setBusyId('');}};
+  const statusLabel:Record<FamilyInvitationView['status'],string>={pending:'Kullanılabilir',accepted:'Kabul edildi',revoked:'İptal edildi',expired:'Süresi doldu'};
+  const roleLabel:Record<FamilyRole,string>={family_admin:'Aile yöneticisi',adult_member:'Yetişkin üye',limited_member:'Sınırlı üye',caregiver:'Bakım veren',advisor:'Danışman'};
+  return <><PageHeader eyebrow="Tek kullanımlık güvenli katılım" title="Profil Davetleri" description="Davetleri başlangıç ve bitiş tarihiyle oluşturun; kullanım, iptal ve yeniden gönderim zincirini görün."/>
+    <section className="workspace-grid">
+      <Surface className="workspace-form"><SectionHeader eyebrow="Yeni davet" title="Aile profili oluştur"/><label>Profil adı<input value={profileName} onChange={event=>setProfileName(event.target.value)} placeholder="Aile üyesinin adı"/></label><label>Rol<select value={role} onChange={event=>setRole(event.target.value as FamilyRole)}><option value="adult_member">Yetişkin üye</option><option value="limited_member">Sınırlı üye</option><option value="caregiver">Bakım veren</option><option value="advisor">Danışman</option></select></label><PersonCatalogSelect label="Bağlı kişi" value={personId} onChange={setPersonId} allowEmpty fallbackPeople={snapshot.people}/><label>Başlangıç<input type="date" value={startsOn} onChange={event=>setStartsOn(event.target.value)}/></label><label>Bitiş<input type="date" min={startsOn} value={endsOn} onChange={event=>setEndsOn(event.target.value)}/></label><Button tone="primary" disabled={busyId==='create'||profileName.trim().length<2||!startsOn||!endsOn} onClick={()=>void create()}>{busyId==='create'?'Oluşturuluyor…':'Davet oluştur'}</Button>{issuedToken&&<div className="notes-card invitation-token-card"><strong>Tek kullanımlık davet kodu</strong><code>{issuedToken}</code><Button onClick={()=>void navigator.clipboard.writeText(issuedToken)}>Kodu kopyala</Button><small>Bu kod yeniden gösterilmez. Yeni kod üretildiğinde önceki kod otomatik olarak geçersiz olur.</small></div>}{message&&<StatusMessage tone={messageTone}>{message}</StatusMessage>}</Surface>
+      <Surface className="workspace-summary"><SectionHeader eyebrow="Yaşam döngüsü" title={`${invitations.length} davet`}/>{invitations.length===0?<EmptyState title="Henüz davet yok" body="İlk aile profili davetini soldaki formdan oluşturun."/>:<div className="stack-list">{invitations.map(invitation=>{const person=snapshot.people.find(candidate=>candidate.id===invitation.personId);const canResend=invitation.status!=='accepted'&&!invitation.supersededByInvitationId;return <article className="list-row invitation-lifecycle-row" key={invitation.id}><div><span className={`status-pill ${invitation.status}`}>{statusLabel[invitation.status]}</span><strong>{person?.displayName??'Yerel aile profili'} · {roleLabel[invitation.role]}</strong><small>Başlangıç: {formatDate(invitation.startsAt,{dateStyle:'medium',timeStyle:'short'})}{invitation.endsAt?` · Bitiş: ${formatDate(invitation.endsAt,{dateStyle:'medium',timeStyle:'short'})}`:' · Bitiş yok'}</small><small>Oluşturuldu: {formatDate(invitation.createdAt,{dateStyle:'medium',timeStyle:'short'})}{invitation.acceptedAt?` · Kabul: ${formatDate(invitation.acceptedAt,{dateStyle:'medium',timeStyle:'short'})}`:''}{invitation.revokedAt?` · İptal: ${formatDate(invitation.revokedAt,{dateStyle:'medium',timeStyle:'short'})}`:''}</small>{invitation.revocationReason&&<small>{invitation.revocationReason==='resent'?'Yeni kod üretildiği için geçersiz.':'Yönetici tarafından iptal edildi.'}</small>}</div><div className="invitation-actions">{invitation.status==='pending'&&<Button tone="danger" disabled={busyId===invitation.id} onClick={()=>void revoke(invitation.id)}>İptal et</Button>}{canResend&&<Button disabled={busyId===invitation.id} onClick={()=>void resend(invitation.id)}>{busyId===invitation.id?'İşleniyor…':'Yeni kod üret'}</Button>}</div></article>;})}</div>}</Surface>
+    </section>
+  </>;
+}
+
+const dataRepairIssueLabel = (issue: DataRepairIssue): string => ({
+  duplicate_person: 'Olası yinelenen kişi',
+  broken_relation: 'Bozuk aile bağı',
+  inconsistent_family_link: 'Tutarsız aile bağlantısı'
+})[issue.kind];
+
+const dataRepairResolutionLabel = (resolution: DataRepairOperation['resolution']): string => ({
+  merge_duplicate_person: 'Yinelenen kişi kayıtlarını birleştir',
+  remove_broken_relation: 'Bozuk aile bağını kaldır',
+  align_relation_family: 'Aile bağını doğru aileyle eşleştir',
+  remove_cross_family_relation: 'Aileler arası hatalı bağı kaldır',
+  end_inconsistent_membership: 'Tutarsız üyeliği güvenle sonlandır'
+})[resolution];
+
+const dataRepairSnapshotLabel = (snapshot: DataRepairEntitySnapshot): string => {
+  if (snapshot.entityType === 'person') {
+    return `${snapshot.row.displayName} · ${snapshot.row.relationshipType} · kayıt sürümü ${snapshot.row.lifecycleVersion}`;
+  }
+  if (snapshot.entityType === 'relation') {
+    return snapshot.row
+      ? `${snapshot.row.fromPersonId} → ${snapshot.row.toPersonId} · ${snapshot.row.relationType}`
+      : 'Bu aile bağı kaldırılmış olacak.';
+  }
+  return `${snapshot.row.personId} · ${snapshot.row.role} · ${snapshot.row.status}`;
+};
+
+function DataRepairScreen() {
+  const [workspace,setWorkspace]=useState<DataRepairWorkspaceView>({issues:[],operations:[]});
+  const [selectedIssueId,setSelectedIssueId]=useState('');
+  const [reason,setReason]=useState('');
+  const [preview,setPreview]=useState<DataRepairOperation|null>(null);
+  const [confirmed,setConfirmed]=useState(false);
+  const [loading,setLoading]=useState(true);
+  const [busy,setBusy]=useState('');
+  const [message,setMessage]=useState('');
+  const [messageTone,setMessageTone]=useState<'info'|'success'|'warning'|'danger'>('info');
+  const selectedIssue=workspace.issues.find((issue)=>issue.id===selectedIssueId);
+
+  const refresh=async()=>{
+    if(!window.pardus){setMessageTone('danger');setMessage('Veri Onarma Merkezi güvenli masaüstü bağlantısı kullanılamıyor.');setLoading(false);return;}
+    try{
+      const value=await window.pardus.getDataRepairWorkspace();
+      setWorkspace({issues:[...value.issues],operations:[...value.operations]});
+      setMessage('');
+    }catch(error){
+      setWorkspace({issues:[],operations:[]});
+      setMessageTone('danger');
+      setMessage(error instanceof Error?error.message:'Veri Onarma Merkezi açılamadı.');
+    }finally{setLoading(false);}
+  };
+  useEffect(()=>{void refresh();},[]);
+
+  const selectIssue=(issueId:string)=>{
+    setSelectedIssueId(issueId);
+    setPreview(null);
+    setConfirmed(false);
+    setMessage('');
+  };
+  const createPreview=async()=>{
+    if(!window.pardus||!selectedIssue)return;
+    setBusy('preview');setMessage('');setConfirmed(false);
+    try{
+      const operation=await window.pardus.previewDataRepair({issueId:selectedIssue.id,reason});
+      setPreview(operation);
+      setMessageTone('info');
+      setMessage('Önizleme hazır. Uygulamadan önce önceki ve sonraki durumu dikkatle karşılaştırın.');
+      await refresh();
+    }catch(error){setMessageTone('danger');setMessage(error instanceof Error?error.message:'Onarma önizlemesi hazırlanamadı.');}
+    finally{setBusy('');}
+  };
+  const applyPreview=async()=>{
+    if(!window.pardus||!preview||!confirmed)return;
+    setBusy(preview.id);setMessage('');
+    try{
+      await window.pardus.applyDataRepair({operationId:preview.id,expectedRevisionToken:preview.revisionToken});
+      setPreview(null);setSelectedIssueId('');setReason('');setConfirmed(false);
+      setMessageTone('success');setMessage('Onarma güvenle uygulandı ve geri alma kaydı oluşturuldu.');
+      await refresh();
+    }catch(error){setMessageTone('danger');setMessage(error instanceof Error?error.message:'Veri değiştiği için onarma uygulanamadı. Yeniden tarayın.');}
+    finally{setBusy('');}
+  };
+  const undoOperation=async(operationId:string)=>{
+    if(!window.pardus)return;
+    setBusy(operationId);setMessage('');
+    try{
+      await window.pardus.undoDataRepair(operationId);
+      setPreview(null);setConfirmed(false);
+      setMessageTone('success');setMessage('Onarma geri alındı ve veri yeniden tarandı.');
+      await refresh();
+    }catch(error){setMessageTone('danger');setMessage(error instanceof Error?error.message:'Onarma güvenle geri alınamadı.');}
+    finally{setBusy('');}
+  };
+  const inspectExistingPreview=(operation:DataRepairOperation)=>{
+    setPreview(operation);setSelectedIssueId(operation.issueId);setReason(operation.reason);setConfirmed(false);setMessage('');
+  };
+
+  if(loading)return <div className="loading-screen"><div className="loader"/><strong>Veriler güvenle taranıyor…</strong></div>;
+  return <>
+    <PageHeader eyebrow="Yönetici denetimli ve geri alınabilir" title="Veri Onarma Merkezi" description="Olası yinelenen kişileri, bozuk aile bağlarını ve tutarsız üyelikleri önce görün; değişikliği incelemeden hiçbir onarma uygulanmaz."/>
+    {message&&<StatusMessage tone={messageTone}>{message}</StatusMessage>}
+    <section className="workspace-grid data-repair-workspace">
+      <Surface className="workspace-summary">
+        <SectionHeader eyebrow={`${workspace.issues.length} açık bulgu`} title="Güvenli tarama sonuçları"/>
+        <p className="muted-copy">Yalnız otomatik olarak güvenle onarılabilen bulgular işleme açılır. Her uygulama denetim ve geri alma kaydı bırakır.</p>
+        <Button onClick={()=>{setLoading(true);void refresh();}}>Yeniden tara</Button>
+        {workspace.issues.length===0?<EmptyState title="Açık veri sorunu bulunmadı" body="Tarama, desteklenen yinelenen kişi ve aile bağlantısı kontrollerinde temiz sonuç verdi."/>:<div className="stack-list">{workspace.issues.map((issue)=><article className={`list-row data-repair-issue ${selectedIssueId===issue.id?'selected':''}`} key={issue.id}><div><span className={`status-pill ${issue.severity==='critical'?'revoked':'pending'}`}>{issue.severity==='critical'?'Kritik':'İnceleme'}</span><strong>{dataRepairIssueLabel(issue)}</strong><small>{issue.summary}</small><small>Öneri: {dataRepairResolutionLabel(issue.suggestedResolution)}</small></div><Button tone={selectedIssueId===issue.id?'primary':'default'} disabled={!issue.repairable||busy!==''} onClick={()=>selectIssue(issue.id)}>{issue.repairable?'İncele':'Elle inceleme gerekli'}</Button></article>)}</div>}
+      </Surface>
+      <Surface className="workspace-form">
+        <SectionHeader eyebrow="Zorunlu önizleme" title="Onarma kararı"/>
+        {!selectedIssue&&!preview?<EmptyState title="Bir bulgu seçin" body="Sol taraftaki bir bulguyu seçerek gerekçe ve değişiklik önizlemesini hazırlayın."/>:<>
+          {selectedIssue&&<div className="notes-card"><strong>{dataRepairIssueLabel(selectedIssue)}</strong><p>{selectedIssue.summary}</p><small>Planlanan işlem: {dataRepairResolutionLabel(selectedIssue.suggestedResolution)}</small></div>}
+          {!preview&&<><label>Onarma gerekçesi<textarea rows={3} minLength={5} maxLength={500} value={reason} onChange={(event)=>setReason(event.target.value)} placeholder="Bu onarmanın neden gerekli olduğunu açıkça yazın."/></label><Button tone="primary" disabled={!selectedIssue||reason.trim().length<5||busy!==''} onClick={()=>void createPreview()}>{busy==='preview'?'Önizleme hazırlanıyor…':'Değişiklik önizlemesini hazırla'}</Button></>}
+          {preview&&<div className="data-repair-preview" aria-live="polite"><div className="preview-card before"><span className="eyebrow">Önceki durum</span><strong>{dataRepairSnapshotLabel(preview.beforeSnapshot)}</strong></div><div className="preview-arrow" aria-hidden="true">→</div><div className="preview-card after"><span className="eyebrow">Onarma sonrası</span><strong>{dataRepairSnapshotLabel(preview.afterSnapshot)}</strong></div><p><strong>Uygulanacak işlem:</strong> {dataRepairResolutionLabel(preview.resolution)}</p><p><strong>Gerekçe:</strong> {preview.reason}</p><label className="confirmation-row"><input type="checkbox" checked={confirmed} onChange={(event)=>setConfirmed(event.target.checked)}/> Önceki ve sonraki durumu karşılaştırdım; bu onarmayı uygulamak istiyorum.</label><div className="button-row"><Button onClick={()=>{setPreview(null);setConfirmed(false);}}>Önizlemeyi kapat</Button><Button tone="danger" disabled={!confirmed||busy!==''} onClick={()=>void applyPreview()}>{busy===preview.id?'Uygulanıyor…':'Onarmayı uygula'}</Button></div></div>}
+        </>}
+      </Surface>
+      <Surface className="workspace-summary data-repair-history">
+        <SectionHeader eyebrow={`${workspace.operations.length} işlem kaydı`} title="Onarma geçmişi"/>
+        {workspace.operations.length===0?<EmptyState title="Henüz işlem yok" body="Hazırlanan önizlemeler ve uygulanan ya da geri alınan onarmalar burada görünür."/>:<div className="stack-list">{workspace.operations.map((operation)=><article className="list-row" key={operation.id}><div><span className={`status-pill ${operation.status==='applied'?'accepted':operation.status==='undone'?'revoked':'pending'}`}>{operation.status==='applied'?'Uygulandı':operation.status==='undone'?'Geri alındı':'Önizlendi'}</span><strong>{dataRepairResolutionLabel(operation.resolution)}</strong><small>{operation.reason}</small><small>{formatDate(operation.createdAt,{dateStyle:'medium',timeStyle:'short'})}</small></div><div className="invitation-actions">{operation.status==='previewed'&&<Button disabled={busy!==''} onClick={()=>inspectExistingPreview(operation)}>Önizlemeyi aç</Button>}{operation.status==='applied'&&<Button tone="danger" disabled={busy!==''} onClick={()=>void undoOperation(operation.id)}>{busy===operation.id?'Geri alınıyor…':'Geri al'}</Button>}</div></article>)}</div>}
+      </Surface>
+    </section>
+  </>;
+}
+
+function PermissionsScreen({ auth }: { auth: AuthStateView }) {
+  const [accounts,setAccounts]=useState<FamilyAccountView[]>([]);
+  const [permissions,setPermissions]=useState<ObjectPermissionView[]>([]);
+  const [branches,setBranches]=useState<AuthorizationContextWorkspaceView['branches']>([]);
+  const [message,setMessage]=useState('');
+  const [subject,setSubject]=useState(''); const [resourceType,setResourceType]=useState('event'); const [resourceId,setResourceId]=useState('*'); const [effect,setEffect]=useState<'allow'|'deny'>('allow');
+  const [purpose,setPurpose]=useState<AuthorizationPurpose>('general'); const [familyBranchId,setFamilyBranchId]=useState('');
+  const [startsOn,setStartsOn]=useState(()=>new Date().toISOString().slice(0,10)); const [endsOn,setEndsOn]=useState(''); const [denialReason,setDenialReason]=useState('');
+  const [actions,setActions]=useState<ObjectPermissionAction[]>(['read']);
+  const refresh=async()=>{ if(!window.pardus) return;try{const workspace=await window.pardus.getAuthorizationContextWorkspace(); const a=[...workspace.accounts];setAccounts(a);setPermissions([...workspace.permissions]);setBranches(workspace.branches); if(!subject&&a[0]) setSubject(a[0].id);}catch{setAccounts([]);setPermissions([]);setBranches([]);} };
+  useEffect(()=>{void refresh();},[auth.role]);
+  if(auth.role!=='family_admin') return <><PageHeader eyebrow="Veri sahipliği" title="Yetkiler" description="Bu ekran yalnızca aile yöneticisi tarafından kullanılabilir."/><EmptyState title="Yönetici yetkisi gerekli" body="Kendi verileriniz, aileye açık kayıtlar ve size açıkça verilen izinler görünür."/></>;
+  const savePermission=async()=>{try{setMessage(''); if(!window.pardus)return;const reason=denialReason.trim();if(effect==='deny'&&reason.length<5){setMessage('Ret kararı için en az 5 karakterlik açık gerekçe yazın.');return;}if(resourceType==='location'&&familyBranchId){setMessage('Kayıtlı konum izni aile dalına bağlanamaz.');return;}if(resourceType==='location'&&effect==='allow'&&!endsOn){setMessage('Kayıtlı konum erişimi için sonlu bir bitiş tarihi zorunludur.');return;}if(endsOn&&endsOn<startsOn){setMessage('Bitiş tarihi başlangıç tarihinden önce olamaz.');return;}await window.pardus.upsertPermission({subjectAccountId:subject,resourceType,resourceId,actions,effect,purpose,...(familyBranchId?{familyBranchId}:{}),startsAt:`${startsOn}T00:00:00.000Z`,...(endsOn?{endsAt:`${endsOn}T23:59:59.999Z`}:{}),...(effect==='deny'?{denialReason:reason}:{})}); setMessage('Amaç, aile dalı ve geçerlilik aralığıyla bağlamsal izin kaydedildi.'); await refresh();}catch(e){setMessage(e instanceof Error?e.message:'İzin kaydedilemedi.');}};
+  const updateProfile=async(account:FamilyAccountView,changes:Partial<Pick<FamilyAccountView,'role'|'status'|'personId'>>)=>{try{if(!window.pardus)return;setAccounts(await window.pardus.updateAccount({accountId:account.id,role:changes.role??account.role,status:changes.status??account.status,startsAt:account.startsAt,...((changes.personId??account.personId)?{personId:changes.personId??account.personId}:{}),...(account.endsAt?{endsAt:account.endsAt}:{})}));setMessage('Profil yetkileri güncellendi.');}catch(e){setMessage(e instanceof Error?e.message:'Profil güncellenemedi.');}};
+  const toggle=(action:ObjectPermissionAction)=>setActions(current=>current.includes(action)?current.filter(x=>x!==action):[...current,action]);
+  const archiveResourceSelected=['archive_item','archive_retention_policy','archive_category'].includes(resourceType);
+  const locationResourceSelected=resourceType==='location';
+  const changeResourceType=(value:string)=>{setResourceType(value);if(['archive_item','archive_retention_policy','archive_category'].includes(value))setPurpose('archive');else if(value==='location'){setPurpose('general');setActions(['read']);setFamilyBranchId('');}else if(purpose==='archive')setPurpose('general');};
+  const purposeLabel=(value:AuthorizationPurpose)=>({general:'Genel',care:'Bakım',finance:'Finans',health:'Sağlık',archive:'Arşiv',legacy:'Dijital miras',ai_processing:'Yapay zekâ işleme',administration:'Yönetim'} as const)[value];
+  return <><PageHeader eyebrow="Amaç ve aile dalı bağlamı" title="Bağlamsal Yetkiler" description="Her izni amacı, aile dalı, geçerlilik aralığı ve açık ret gerekçesiyle yönetin."/>
+  <section className="workspace-grid">
+    <article className="panel workspace-summary"><span className="eyebrow">{accounts.length} profil</span><h2>Aile profilleri</h2>{accounts.map(a=><div className="profile-admin-row" key={a.id}><strong>{a.displayName}</strong><select aria-label={`${a.displayName} rolü`} value={a.role} onChange={e=>void updateProfile(a,{role:e.target.value as FamilyRole})}><option value="family_admin">Aile yöneticisi</option><option value="adult_member">Yetişkin üye</option><option value="limited_member">Sınırlı üye</option><option value="caregiver">Bakım veren</option><option value="advisor">Danışman</option></select><select aria-label={`${a.displayName} durumu`} value={a.status} onChange={e=>void updateProfile(a,{status:e.target.value as FamilyAccountView['status']})}><option value="active">Aktif</option><option value="suspended">Askıda</option><option value="expired">Süresi doldu</option><option value="invited">Davet edildi</option></select></div>)}</article>
+    <article className="panel workspace-form"><h2>Bağlamsal nesne izni</h2><label>Hesap<select value={subject} onChange={e=>setSubject(e.target.value)}>{accounts.map(a=><option key={a.id} value={a.id}>{a.displayName}</option>)}</select></label><label>Kaynak türü<select value={resourceType} onChange={e=>changeResourceType(e.target.value)}><option value="event">Etkinlik</option><option value="location">Kayıtlı konum</option><option value="archive_item">Arşiv belgesi</option><option value="archive_retention_policy">Arşiv saklama politikası</option><option value="archive_category">Arşiv kategorisi</option><option value="health_record">Sağlık kaydı</option><option value="finance_record">Finans kaydı</option><option value="object_permission">Yetkilendirme kaydı</option></select></label><label>Kaynak kimliği<input value={resourceId} onChange={e=>setResourceId(e.target.value)} placeholder="* tüm kayıtlar"/></label><label>Amaç<select value={purpose} disabled={archiveResourceSelected||locationResourceSelected} onChange={e=>setPurpose(e.target.value as AuthorizationPurpose)}><option value="general">Genel</option><option value="care">Bakım</option><option value="finance">Finans</option><option value="health">Sağlık</option><option value="archive">Arşiv</option><option value="legacy">Dijital miras</option><option value="ai_processing">Yapay zekâ işleme</option><option value="administration">Yönetim</option></select></label><label>Aile dalı<select value={familyBranchId} disabled={locationResourceSelected} onChange={e=>setFamilyBranchId(e.target.value)}><option value="">Tüm aile / dal sınırı yok</option>{branches.filter(branch=>branch.status==='active').map(branch=><option key={branch.id} value={branch.id}>{branch.name}</option>)}</select></label><label>Başlangıç<input type="date" required value={startsOn} onChange={e=>setStartsOn(e.target.value)}/></label><label>Bitiş<input type="date" min={startsOn} required={locationResourceSelected&&effect==='allow'} value={endsOn} onChange={e=>setEndsOn(e.target.value)}/>{locationResourceSelected&&effect==='allow'&&<small>Konum erişimi süresiz verilemez.</small>}</label><label>Karar<select value={effect} onChange={e=>{const next=e.target.value as 'allow'|'deny';setEffect(next);if(next==='allow')setDenialReason('');}}><option value="allow">İzin ver</option><option value="deny">Reddet</option></select></label>{effect==='deny'&&<label className="span-2">Açık ret gerekçesi<textarea minLength={5} maxLength={500} required rows={2} value={denialReason} onChange={e=>setDenialReason(e.target.value)} placeholder="Bu erişimin neden reddedildiğini açıkça yazın."/></label>}<div className="participant-chips span-2">{OBJECT_PERMISSION_ACTIONS.map(a=><button type="button" disabled={locationResourceSelected&&a!=='read'} className={actions.includes(a)?'active':''} key={a} onClick={()=>toggle(a)}>{a}</button>)}</div><Button tone="primary" onClick={()=>void savePermission()} disabled={!subject||!resourceId||!startsOn||actions.length===0||(locationResourceSelected&&effect==='allow'&&!endsOn)||(effect==='deny'&&denialReason.trim().length<5)}>Bağlamsal izni kaydet</Button></article>
+    <article className="panel workspace-summary"><span className="eyebrow">{permissions.length} izin</span><h2>Etkin bağlamsal izinler</h2>{permissions.length===0?<EmptyState title="Bağlamsal izin yok" body="Amaç, aile dalı ve süre sınırı olan izinler burada görünür."/>:permissions.map(p=><div className="context-stat" key={p.id}><strong>{p.effect==='allow'?'İzin':'Ret'} · {p.resourceType}/{p.resourceId}</strong><span>{accounts.find(a=>a.id===p.subjectAccountId)?.displayName??p.subjectAccountId} · {purposeLabel(p.purpose)} · {p.familyBranchId?(branches.find(branch=>branch.id===p.familyBranchId)?.name??p.familyBranchId):'Tüm aile'} · {p.actions.join(', ')}</span><small>{formatDate(p.startsAt)}{p.endsAt?` — ${formatDate(p.endsAt)}`:' — süresiz'}{p.denialReason?` · Gerekçe: ${p.denialReason}`:''}</small><Button onClick={async()=>{if(window.pardus){await window.pardus.deletePermission(p.id);await refresh();}}}>Sil</Button></div>)}</article>
+  </section>{message&&<div className="notes-card">{message}</div>}</>;
+}
+
+
+function FinanceScreen({people,records,valuations,onCreate,onCreateValuation}:{people:FamilyMemberView[];records:FinanceRecordView[];valuations:FinanceValuationView[];onCreate:(input:CreateFinanceRecordInput)=>Promise<void>;onCreateValuation:(input:CreateFinanceValuationInput)=>Promise<void>}){
+  const [ownerPersonId,setOwner]=useState(people[0]?.id??''); const [title,setTitle]=useState(''); const [amount,setAmount]=useState(''); const [kind,setKind]=useState<FinanceRecordView['kind']>('asset'); const [privacy,setPrivacy]=useState<FinanceRecordView['privacy']>('private'); const [currency,setCurrency]=useState('TRY'); const [dueAt,setDueAt]=useState(''); const [remaining,setRemaining]=useState(''); const [symbol,setSymbol]=useState(''); const [valuationRecord,setValuationRecord]=useState(''); const [unitPrice,setUnitPrice]=useState(''); const [quantity,setQuantity]=useState('1'); const [message,setMessage]=useState('');
+  const submit=async()=>{try{await onCreate({ownerPersonId,title,amount:Number(amount),kind,currency,privacy,occurredAt:new Date().toISOString(),...(dueAt?{dueAt:new Date(dueAt).toISOString()}:{}),...(remaining?{remainingPrincipal:Number(remaining)}:{}),...(symbol?{symbol}:{})});setTitle('');setAmount('');setMessage('Finans kaydı eklendi.');}catch(e){setMessage(e instanceof Error?e.message:'Kayıt eklenemedi.');}};
+  const addValuation=async()=>{try{await onCreateValuation({financeRecordId:valuationRecord,valueDate:new Date().toISOString(),unitPrice:Number(unitPrice),quantity:Number(quantity),provider:'Manuel'});setMessage('Günlük değerleme kaydedildi.');}catch(e){setMessage(e instanceof Error?e.message:'Değerleme eklenemedi.');}};
+  const latest=new Map<string,FinanceValuationView>(); for(const v of valuations) if(!latest.has(v.financeRecordId)) latest.set(v.financeRecordId,v);
+  const net=records.reduce((sum,r)=>{const value=latest.get(r.id)?.marketValue??r.remainingPrincipal??r.amount; return sum+(r.kind==='asset'||r.kind==='income'?value:-value);},0);
+  return <><PageHeader eyebrow="Günlük değerleme etkin" title="Aile finansı" description="Varlık, borç, para birimi, vade ve güncel piyasa değerlerini kayıt sahibine göre yönetin."/><section className="workspace-grid"><article className="panel workspace-form"><h2>Yeni finans kaydı</h2><label>Kayıt sahibi<select value={ownerPersonId} onChange={e=>setOwner(e.target.value)}>{people.map(x=><option key={x.id} value={x.id}>{x.displayName}</option>)}</select></label><label>Başlık<input value={title} onChange={e=>setTitle(e.target.value)}/></label><label>Tür<select value={kind} onChange={e=>setKind(e.target.value as FinanceRecordView['kind'])}><option value="asset">Varlık</option><option value="debt">Borç</option><option value="income">Gelir</option><option value="expense">Gider</option></select></label><label>Tutar<input type="number" min="0" value={amount} onChange={e=>setAmount(e.target.value)}/></label><label>Para birimi<input value={currency} onChange={e=>setCurrency(e.target.value.toUpperCase())}/></label><label>Sembol<input value={symbol} onChange={e=>setSymbol(e.target.value.toUpperCase())} placeholder="USD, XAU, THYAO"/></label><label>Vade<input type="date" value={dueAt} onChange={e=>setDueAt(e.target.value)}/></label><label>Kalan anapara<input type="number" min="0" value={remaining} onChange={e=>setRemaining(e.target.value)}/></label><label>Gizlilik<select value={privacy} onChange={e=>setPrivacy(e.target.value as FinanceRecordView['privacy'])}><option value="private">Özel</option><option value="selected_members">Seçili üyeler</option><option value="family">Aile</option></select></label><Button tone="primary" onClick={()=>void submit()} disabled={!ownerPersonId||title.trim().length<2||!amount}>Kaydet</Button><hr/><h3>Günlük değerleme</h3><label>Kayıt<select value={valuationRecord} onChange={e=>setValuationRecord(e.target.value)}><option value="">Seçin</option>{records.filter(r=>r.kind==='asset'||r.kind==='debt').map(r=><option key={r.id} value={r.id}>{r.title}</option>)}</select></label><label>Birim fiyat<input type="number" min="0" step="any" value={unitPrice} onChange={e=>setUnitPrice(e.target.value)}/></label><label>Miktar<input type="number" min="0" step="any" value={quantity} onChange={e=>setQuantity(e.target.value)}/></label><Button onClick={()=>void addValuation()} disabled={!valuationRecord||!unitPrice||!quantity}>Değerlemeyi kaydet</Button>{message&&<small>{message}</small>}</article><article className="panel workspace-summary"><span className="eyebrow">Görüntüleyebildiğiniz kayıtlar</span><h2>Güncel net görünüm: {net.toLocaleString('tr-TR',{maximumFractionDigits:2})}</h2>{records.map(r=>{const v=latest.get(r.id);return <div className="context-stat" key={r.id}><strong>{r.title} · {(v?.marketValue??r.remainingPrincipal??r.amount).toLocaleString('tr-TR')} {r.currency}</strong><span>{people.find(p=>p.id===r.ownerPersonId)?.displayName} · {r.kind}{r.symbol?` · ${r.symbol}`:''}{r.dueAt?` · Vade ${formatDate(r.dueAt)}`:''}{v?` · ${v.provider} değerleme`:''}</span></div>})}</article></section></>;
+}
+
+function HealthScreen({people,records,medications,history,onCreate,onCreateMedication,onCreateHistory}:{people:FamilyMemberView[];records:HealthRecordView[];medications:MedicationPlanView[];history:FamilyHealthHistoryView[];onCreate:(input:CreateHealthRecordInput)=>Promise<void>;onCreateMedication:(input:CreateMedicationPlanInput)=>Promise<void>;onCreateHistory:(input:CreateFamilyHealthHistoryInput)=>Promise<void>}){
+  const [ownerPersonId,setOwner]=useState(people[0]?.id??''); const [title,setTitle]=useState(''); const [kind,setKind]=useState<HealthRecordView['kind']>('appointment'); const [privacy,setPrivacy]=useState<HealthRecordView['privacy']>('private'); const [provider,setProvider]=useState(''); const [medName,setMedName]=useState(''); const [dosage,setDosage]=useState(''); const [schedule,setSchedule]=useState(''); const [condition,setCondition]=useState(''); const [message,setMessage]=useState('');
+  const submit=async()=>{try{await onCreate({ownerPersonId,title,kind,privacy,...(provider?{provider}:{}),occurredAt:new Date().toISOString()});setTitle('');setProvider('');setMessage('Sağlık kaydı eklendi.');}catch(e){setMessage(e instanceof Error?e.message:'Kayıt eklenemedi.');}};
+  const addMedication=async()=>{try{await onCreateMedication({ownerPersonId,name:medName,dosage,schedule,privacy,startsAt:new Date().toISOString(),...(provider?{provider}:{})});setMedName('');setDosage('');setSchedule('');setMessage('İlaç/tedavi planı eklendi.');}catch(e){setMessage(e instanceof Error?e.message:'Plan eklenemedi.');}};
+  const addHistory=async()=>{try{await onCreateHistory({relatedPersonId:ownerPersonId,condition,privacy});setCondition('');setMessage('Aile sağlık geçmişi eklendi.');}catch(e){setMessage(e instanceof Error?e.message:'Geçmiş eklenemedi.');}};
+  return <><PageHeader eyebrow="Yüksek gizlilik" title="Sağlık merkezi" description="Sağlık olayları, ilaç/tedavi planları ve aile sağlık geçmişi tek izin modeli altında tutulur."/><section className="workspace-grid"><article className="panel workspace-form"><h2>Yeni sağlık kaydı</h2><label>Kayıt sahibi<select value={ownerPersonId} onChange={e=>setOwner(e.target.value)}>{people.map(x=><option key={x.id} value={x.id}>{x.displayName}</option>)}</select></label><label>Başlık<input value={title} onChange={e=>setTitle(e.target.value)}/></label><label>Tür<select value={kind} onChange={e=>setKind(e.target.value as HealthRecordView['kind'])}><option value="appointment">Randevu</option><option value="medication">İlaç</option><option value="diagnosis">Tanı</option><option value="vaccine">Aşı</option><option value="note">Not</option></select></label><label>Hekim/Kurum<input value={provider} onChange={e=>setProvider(e.target.value)}/></label><label>Gizlilik<select value={privacy} onChange={e=>setPrivacy(e.target.value as HealthRecordView['privacy'])}><option value="private">Özel</option><option value="selected_members">Seçili üyeler</option><option value="family">Aile</option></select></label><Button tone="primary" onClick={()=>void submit()} disabled={!ownerPersonId||title.trim().length<2}>Kaydet</Button><hr/><h3>İlaç / tedavi planı</h3><label>İlaç veya tedavi<input value={medName} onChange={e=>setMedName(e.target.value)}/></label><label>Doz<input value={dosage} onChange={e=>setDosage(e.target.value)} placeholder="1 tablet"/></label><label>Kullanım planı<input value={schedule} onChange={e=>setSchedule(e.target.value)} placeholder="08:00 ve 20:00"/></label><Button onClick={()=>void addMedication()} disabled={!medName||!dosage||!schedule}>Planı ekle</Button><hr/><h3>Aile sağlık geçmişi</h3><label>Rahatsızlık / durum<input value={condition} onChange={e=>setCondition(e.target.value)}/></label><Button onClick={()=>void addHistory()} disabled={!condition}>Geçmişe ekle</Button>{message&&<small>{message}</small>}</article><article className="panel workspace-summary"><span className="eyebrow">Görüntüleyebildiğiniz sağlık verileri</span><h2>{records.length} kayıt · {medications.length} plan · {history.length} geçmiş</h2>{medications.map(r=><div className="context-stat" key={r.id}><strong>{r.name} · {r.dosage}</strong><span>{people.find(p=>p.id===r.ownerPersonId)?.displayName} · {r.schedule}{r.provider?` · ${r.provider}`:''}</span></div>)}{history.map(r=><div className="context-stat" key={r.id}><strong>{r.condition}</strong><span>{people.find(p=>p.id===r.relatedPersonId)?.displayName} · aile sağlık geçmişi</span></div>)}{records.map(r=><div className="context-stat" key={r.id}><strong>{r.title}</strong><span>{people.find(p=>p.id===r.ownerPersonId)?.displayName} · {r.kind} · {r.privacy}{r.provider?` · ${r.provider}`:''}</span></div>)}</article></section></>;
+}
+
+function LifeCenterScreen({people,records,onCreate}:{people:FamilyMemberView[];records:LifeRecordView[];onCreate:(input:CreateLifeRecordInput)=>Promise<void>}){
+  const [ownerPersonId,setOwner]=useState(people[0]?.id??''); const [category,setCategory]=useState<LifeRecordView['category']>('task'); const [title,setTitle]=useState(''); const [status,setStatus]=useState<LifeRecordView['status']>('active'); const [privacy,setPrivacy]=useState<LifeRecordView['privacy']>('private'); const [dueAt,setDueAt]=useState(''); const [provider,setProvider]=useState(''); const [amount,setAmount]=useState(''); const [message,setMessage]=useState('');
+  const labels:Record<LifeRecordView['category'],string>={task:'Görev',insurance:'Sigorta',education:'Eğitim',subscription:'Abonelik',official_operation:'Resmî işlem',employment:'İş geçmişi',property:'Ev / araç',emergency:'Acil durum'};
+  const submit=async()=>{try{await onCreate({ownerPersonId,category,title,status,privacy,...(dueAt?{dueAt:new Date(dueAt).toISOString()}:{}),...(provider?{provider}:{}),...(amount?{amount:Number(amount),currency:'TRY'}:{})});setTitle('');setMessage('Yaşam kaydı eklendi.');}catch(e){setMessage(e instanceof Error?e.message:'Kayıt eklenemedi.');}};
+  return <><PageHeader eyebrow="Aile operasyon merkezi" title="Yaşam merkezi" description="Görev, sigorta, eğitim, iş geçmişi, ev–araç varlıkları ve acil durum planlarını tek güvenli kayıt modelinde yönetin."/><section className="workspace-grid"><article className="panel workspace-form"><h2>Yeni yaşam kaydı</h2><label>Kayıt sahibi<select value={ownerPersonId} onChange={e=>setOwner(e.target.value)}>{people.map(p=><option key={p.id} value={p.id}>{p.displayName}</option>)}</select></label><label>Kategori<select value={category} onChange={e=>setCategory(e.target.value as LifeRecordView['category'])}>{Object.entries(labels).map(([k,v])=><option key={k} value={k}>{v}</option>)}</select></label><label>Başlık<input value={title} onChange={e=>setTitle(e.target.value)}/></label><label>Durum<select value={status} onChange={e=>setStatus(e.target.value as LifeRecordView['status'])}><option value="planned">Planlandı</option><option value="active">Aktif</option><option value="completed">Tamamlandı</option><option value="expired">Süresi doldu</option><option value="cancelled">İptal</option></select></label><label>Vade / tarih<input type="datetime-local" value={dueAt} onChange={e=>setDueAt(e.target.value)}/></label><label>Kurum / sağlayıcı<input value={provider} onChange={e=>setProvider(e.target.value)}/></label><label>Tutar<input type="number" value={amount} onChange={e=>setAmount(e.target.value)}/></label><label>Gizlilik<select value={privacy} onChange={e=>setPrivacy(e.target.value as LifeRecordView['privacy'])}><option value="private">Özel</option><option value="selected_members">Seçili üyeler</option><option value="family">Aile</option></select></label><Button tone="primary" onClick={()=>void submit()} disabled={!ownerPersonId||title.trim().length<2}>Kaydet</Button>{message&&<small>{message}</small>}</article><article className="panel workspace-summary"><span className="eyebrow">Erişebildiğiniz kayıtlar</span><h2>{records.length} yaşam kaydı</h2>{Object.entries(labels).map(([key,label])=><div className="context-stat" key={key}><strong>{label}</strong><span>{records.filter(r=>r.category===key).length} kayıt</span></div>)}{records.map(r=><div className="context-stat" key={r.id}><strong>{r.title}</strong><span>{labels[r.category]} · {people.find(p=>p.id===r.ownerPersonId)?.displayName} · {r.status}{r.dueAt?` · ${formatDate(r.dueAt)}`:''}</span></div>)}</article></section></>;
+}
+
+function AutomationScreen({rules,onCreate,onToggle}:{rules:AutomationRuleView[];onCreate:(input:CreateAutomationRuleInput)=>Promise<void>;onToggle:(id:string,enabled:boolean)=>Promise<void>}){
+  const [title,setTitle]=useState('Yaklaşan görev hatırlatması'); const [sourceType,setSourceType]=useState<AutomationRuleView['sourceType']>('life_record'); const [daysBefore,setDaysBefore]=useState(3); const [message,setMessage]=useState(''); const [messageTone,setMessageTone]=useState<'success'|'danger'>('success');
+  const [runs,setRuns]=useState<AutomationRunView[]>([]);
+  useEffect(()=>{if(window.pardus)void window.pardus.listAutomationRuns().then(setRuns);},[]);
+  const runNow=async()=>{try{if(!window.pardus)return;setRuns(await window.pardus.runAutomationRules());setMessageTone('success');setMessage('Etkin kurallar şimdi değerlendirildi.');}catch(e){setMessageTone('danger');setMessage(e instanceof Error?e.message:'Kurallar çalıştırılamadı.');}};
+  const submit=async()=>{try{await onCreate({title,sourceType,daysBefore,enabled:true});setMessageTone('success');setMessage('Otomasyon kuralı eklendi.');}catch(e){setMessageTone('danger');setMessage(e instanceof Error?e.message:'Kural eklenemedi.');}};
+  return <><PageHeader eyebrow="Akıllı takip" title="Bildirim ve otomasyon merkezi" description="Önemli gün, görev, finans ve ilaç planları için yerel hatırlatma kuralları oluşturun." actions={<Button tone="primary" onClick={()=>void runNow()}>Kuralları şimdi çalıştır</Button>}/><section className="workspace-grid"><Surface className="workspace-form"><SectionHeader eyebrow="Yeni kural" title="Otomasyon oluştur"/><label>Başlık<input value={title} onChange={e=>setTitle(e.target.value)}/></label><label>Kaynak<select value={sourceType} onChange={e=>setSourceType(e.target.value as AutomationRuleView['sourceType'])}><option value="important_day">Önemli gün</option><option value="life_record">Yaşam kaydı</option><option value="finance_record">Finans kaydı</option><option value="medication_plan">İlaç planı</option></select></label><label>Kaç gün önce<input type="number" min="0" max="365" value={daysBefore} onChange={e=>setDaysBefore(Number(e.target.value))}/></label><Button tone="primary" onClick={()=>void submit()} disabled={!title.trim()}>Kural ekle</Button>{message&&<StatusMessage tone={messageTone}>{message}</StatusMessage>}</Surface><Surface className="workspace-summary"><SectionHeader eyebrow="Kurallar" title={`${rules.length} otomasyon`}/>{rules.length?rules.map(r=><StatRow key={r.id} value={r.title} label={`${r.sourceType} · ${r.daysBefore} gün önce · ${r.enabled?'Etkin':'Kapalı'}`} action={<Button onClick={()=>void onToggle(r.id,!r.enabled)}>{r.enabled?'Kapat':'Etkinleştir'}</Button>}/>):<EmptyState title="Kural yok" body="İlk otomasyon kuralınızı oluşturun."/>}</Surface><Surface className="span-2"><SectionHeader eyebrow="Çalışma geçmişi" title={`${runs.length} sonuç`}/>{runs.length?runs.slice(0,20).map(run=><StatRow key={run.id} value={run.title} label={`${run.status==='generated'?'Görev üretildi':run.status==='skipped'?'Atlandı':'Başarısız'} · ${formatDate(run.createdAt,{dateStyle:'short',timeStyle:'short'})}`}/>):<EmptyState title="Henüz çalışma yok" body="Kuralları şimdi çalıştırdığınızda sonuçlar burada görünür"/>}</Surface></section></>;
+}
+
+function ReportsScreen({report}:{report:ReportSummaryView|undefined}){
+  if(!report) return <div className="loading-screen"><div className="loader"/><strong>Rapor hazırlanıyor…</strong></div>;
+  const exportPdf=async()=>{if(!window.pardus)return;const result=await window.pardus.exportSystemPdf();if(!result.canceled)alert(`PDF raporu kaydedildi:\n${result.filePath??''}`);};
+  return <><PageHeader eyebrow="Aile görünümü" title="Raporlama merkezi" description={`Son üretim: ${formatDate(report.generatedAt,{dateStyle:'medium',timeStyle:'short'})}`} actions={<Button tone="primary" onClick={()=>void exportPdf()}>PDF raporu oluştur</Button>}/><section className="workspace-grid"><Surface className="workspace-form"><SectionHeader eyebrow="Operasyon" title="Aile özeti"/><StatRow value={report.peopleCount} label="Aktif aile üyesi"/><StatRow value={report.upcomingEvents} label="30 gün içindeki etkinlik"/><StatRow value={report.activeTasks} label="Aktif görev"/><StatRow value={report.expiringInsurance} label="30 gün içinde bitecek sigorta"/><StatRow value={report.activeMedicationPlans} label="Aktif ilaç planı"/></Surface><Surface className="workspace-summary"><SectionHeader eyebrow="Finans ve gecikmeler" title="Özet"/>{report.financeByCurrency.map(x=><StatRow key={x.currency} value={`${x.currency} ${x.net.toLocaleString('tr-TR')}`} label={`Varlık ${x.assets.toLocaleString('tr-TR')} · Borç ${x.debts.toLocaleString('tr-TR')}`}/>)}{report.overdueItems.length?report.overdueItems.map(x=><StatRow key={x.id} value={x.title} label={`Gecikmiş · ${formatDate(x.dueAt)}`}/>):<EmptyState title="Gecikmiş kayıt yok" body="Takip edilen tüm kayıtlar güncel görünüyor."/>}</Surface></section></>;
+}
+
+export function App() {
+  const [navigation, dispatchNavigation] = useReducer(navigationReducer, undefined, () => readNavigationState('dashboard', navItems.map((item) => item.id)));
+  const active = navigation.active as ScreenId;
+  const setActive = (id: ScreenId) => dispatchNavigation({ type: 'navigate', screen: id });
+  const [snapshot, setSnapshot] = useState<FamilyAppSnapshot>(fallbackSnapshot);
+  const [dashboardOverview, setDashboardOverview] = useState<DashboardOverviewView>(() => fallbackDashboardOverview(fallbackSnapshot));
+  const [householdWorkspace,setHouseholdWorkspace]=useState<HouseholdMembershipWorkspaceView>({households:[],branches:[],memberships:[]});
+  const [loadedSnapshotSections,setLoadedSnapshotSections]=useState<ReadonlySet<FamilySnapshotSection>>(()=>new Set());
+  const loadedSnapshotSectionsRef=useRef<Set<FamilySnapshotSection>>(new Set());
+  const snapshotSectionLoadsRef=useRef<Partial<Record<FamilySnapshotSection,Promise<void>>>>({});
+  const [loadedAuxiliaryScreens,setLoadedAuxiliaryScreens]=useState<ReadonlySet<ScreenId>>(()=>new Set());
+  const loadedAuxiliaryScreensRef=useRef<Set<ScreenId>>(new Set());
+  const auxiliaryLoadsRef=useRef<Partial<Record<ScreenId,Promise<void>>>>({});
+  const [screenDataError,setScreenDataError]=useState('');
+  const [screenLoadRevision,setScreenLoadRevision]=useState(0);
+  const [loading, setLoading] = useState(!shellPreviewMode);
+  const [firstRunIntroCompleted,setFirstRunIntroCompleted]=useState(shellPreviewMode||globalThis.localStorage?.getItem(FIRST_RUN_INTRO_KEY)==='1');
+  const [auth, setAuth] = useState<AuthStateView>(shellPreviewMode
+    ? {initialized:true,authenticated:true,displayName:'Yerel Kullanıcı',role:'family_admin'}
+    : {initialized:false,authenticated:false});
+  const [archiveRevision,setArchiveRevision]=useState(0);
+  const [catalogRevision,setCatalogRevision]=useState(0);
+  const [archivedEvents,setArchivedEvents]=useState<FamilyEventView[]>([]);
+  const [archiveEventFilter,setArchiveEventFilter]=useState('');
+  const [financeRecords,setFinanceRecords]=useState<FinanceRecordView[]>([]);
+  const [healthRecords,setHealthRecords]=useState<HealthRecordView[]>([]);
+  const [medicationPlans,setMedicationPlans]=useState<MedicationPlanView[]>([]);
+  const [familyHealthHistory,setFamilyHealthHistory]=useState<FamilyHealthHistoryView[]>([]);
+  const [financeValuations,setFinanceValuations]=useState<FinanceValuationView[]>([]);
+  const [lifeRecords,setLifeRecords]=useState<LifeRecordView[]>([]);
+  const [automationRules,setAutomationRules]=useState<AutomationRuleView[]>([]);
+  const [reportSummary,setReportSummary]=useState<ReportSummaryView>();
+  const [memberModal, setMemberModal] = useState(false);
+  const [eventModal, setEventModal] = useState(false);
+  const [editingEvent,setEditingEvent]=useState<FamilyEventView>();
+  const [locationModal, setLocationModal] = useState(false);
+  const [relationModal,setRelationModal]=useState(false);
+  const [appInfo, setAppInfo] = useState<UserVisibleAppInfo>(USER_VISIBLE_APP_INFO);
+  const [theme, setTheme] = useState<ThemeMode>(readTheme);
+  const [accessibility, setAccessibility] = useState<AccessibilityPreferences>(readAccessibilityPreferences);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(readSidebarState);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [familyOpen, setFamilyOpen] = useState(false);
+  const [currentTime, setCurrentTime] = useState(() => new Date());
+  const [searchActiveIndex, setSearchActiveIndex] = useState(0);
+  const mainContentRef = useRef<HTMLElement>(null);
+  const searchDialogRef = useRef<HTMLElement>(null);
+  const searchTriggerRef = useRef<HTMLButtonElement>(null);
+  const searchResultRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const previousSearchFocusRef = useRef<HTMLElement | null>(null);
+  const asyncWriteGuardRef = useRef(new AsyncWriteGuard());
+  const mutationRevisionWatermarkRef = useRef(new MutationRevisionWatermark());
+
+  useEffect(() => { persistNavigationState(navigation); }, [navigation]);
+  useEffect(() => () => asyncWriteGuardRef.current.invalidateAll(), []);
+  useEffect(() => { globalThis.localStorage?.setItem('ppt-theme', theme); }, [theme]);
+  useEffect(() => { globalThis.localStorage?.setItem('ppt-accessibility', serializeAccessibilityPreferences(accessibility)); }, [accessibility]);
+  useEffect(() => { globalThis.localStorage?.setItem('ppt-sidebar-collapsed', String(sidebarCollapsed)); }, [sidebarCollapsed]);
+  useEffect(()=>{const replay=()=>setFirstRunIntroCompleted(false);globalThis.addEventListener('ppt-replay-intro',replay);return()=>globalThis.removeEventListener('ppt-replay-intro',replay);},[]);
+  useEffect(() => {
+    const clock = globalThis.setInterval(() => setCurrentTime(new Date()), 30_000);
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && (event.key.toLocaleLowerCase('tr-TR') === 'k' || event.key.toLocaleLowerCase('tr-TR') === 'f')) {
+        event.preventDefault();
+        setSearchOpen(true);
+      }
+      if (event.key === 'Escape') {
+        setSearchOpen(false);
+        setNotificationOpen(false);
+        setProfileOpen(false);
+        setFamilyOpen(false);
+      }
+    };
+    globalThis.addEventListener('keydown', onKeyDown);
+    return () => {
+      globalThis.clearInterval(clock);
+      globalThis.removeEventListener('keydown', onKeyDown);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (loading || !auth.authenticated) return;
+    mainContentRef.current?.focus({ preventScroll: true });
+  }, [active, auth.authenticated, loading]);
+
+  useEffect(() => {
+    if (!searchOpen) {
+      previousSearchFocusRef.current?.focus();
+      previousSearchFocusRef.current = null;
+      return;
+    }
+    previousSearchFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : searchTriggerRef.current;
+    setSearchActiveIndex(0);
+    const dialog = searchDialogRef.current;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab' || !dialog) return;
+      const focusable = Array.from(dialog.querySelectorAll<HTMLElement>('input, button:not([disabled]), [tabindex]:not([tabindex="-1"])'));
+      if (!focusable.length) return;
+      const first = focusable[0]!;
+      const last = focusable[focusable.length - 1]!;
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [searchOpen]);
+
+  const resetLazyDataState=()=>{
+    asyncWriteGuardRef.current.invalidateAll();
+    mutationRevisionWatermarkRef.current.reset();
+    loadedSnapshotSectionsRef.current=new Set();
+    snapshotSectionLoadsRef.current={};
+    loadedAuxiliaryScreensRef.current=new Set();
+    auxiliaryLoadsRef.current={};
+    setLoadedSnapshotSections(new Set());
+    setLoadedAuxiliaryScreens(new Set());
+    setHouseholdWorkspace({households:[],branches:[],memberships:[]});
+    setScreenDataError('');
+  };
+
+  const applyMutationResult=(result:FamilyMutationResultView)=>{
+    const acceptance=mutationRevisionWatermarkRef.current.accept(result);
+    if(!acceptance.accepted)return false;
+    asyncWriteGuardRef.current.invalidate('session-bootstrap');
+    asyncWriteGuardRef.current.invalidate('family-refresh');
+    asyncWriteGuardRef.current.invalidate('dashboard');
+    const graphLoaded=loadedSnapshotSectionsRef.current.has('graph');
+    const timelineLoaded=loadedSnapshotSectionsRef.current.has('timeline');
+    if(acceptance.advancedKeys.includes('graph')){
+      asyncWriteGuardRef.current.invalidate('snapshot:graph');
+      if(!graphLoaded){delete snapshotSectionLoadsRef.current.graph;setScreenLoadRevision((current)=>current+1);}
+    }
+    if(acceptance.advancedKeys.includes('timeline')||acceptance.advancedKeys.includes('notifications')){
+      asyncWriteGuardRef.current.invalidate('snapshot:timeline');
+      if(!timelineLoaded){delete snapshotSectionLoadsRef.current.timeline;setScreenLoadRevision((current)=>current+1);}
+    }
+    if(acceptance.advancedKeys.includes('archive'))asyncWriteGuardRef.current.invalidate('archived-events');
+    setSnapshot((current)=>{
+      let next:FamilyAppSnapshot={...current,lastUpdatedAt:current.lastUpdatedAt.localeCompare(result.occurredAt)>=0?current.lastUpdatedAt:result.occurredAt};
+      if(graphLoaded&&acceptance.advancedKeys.includes('graph')&&result.person)next={...next,people:mergeCatalogItems(next.people,[result.person])};
+      if(graphLoaded&&acceptance.advancedKeys.includes('graph')&&result.relation)next={...next,relations:mergeCatalogItems(next.relations,[result.relation])};
+      if(timelineLoaded&&acceptance.advancedKeys.includes('timeline')&&result.location)next={...next,locations:mergeCatalogItems(next.locations,[result.location])};
+      if(timelineLoaded&&acceptance.advancedKeys.includes('timeline')&&result.event){
+        next=result.operation==='archived'
+          ? {...next,events:next.events.filter((event)=>event.id!==result.event!.id)}
+          : {...next,events:mergeCatalogItems(next.events,[result.event])};
+      }
+      if(timelineLoaded&&acceptance.advancedKeys.includes('notifications')&&result.notificationId){
+        next={...next,notifications:next.notifications.map((item)=>item.id===result.notificationId?{...item,acknowledgedAt:result.occurredAt}:item)};
+      }
+      return next;
+    });
+    if(acceptance.advancedKeys.includes('personCatalog'))setCatalogRevision((current)=>Math.max(current,acceptance.revisions.personCatalog));
+    if(acceptance.advancedKeys.includes('archive'))setArchiveRevision((current)=>Math.max(current,acceptance.revisions.archive));
+    return true;
+  };
+
+
+  const ensureSnapshotSection=async(section:FamilySnapshotSection):Promise<void>=>{
+    if(!window.pardus||loadedSnapshotSectionsRef.current.has(section))return;
+    const existing=snapshotSectionLoadsRef.current[section];
+    if(existing){await existing;return;}
+    const ticket=asyncWriteGuardRef.current.start(`snapshot:${section}`);
+    let task:Promise<void>;
+    task=(async()=>{
+      const patch=await window.pardus!.getSnapshotSections({sections:[section]});
+      asyncWriteGuardRef.current.commit(ticket,()=>{
+        setSnapshot(current=>mergeSnapshotPatch(current,patch));
+        const loaded=new Set(loadedSnapshotSectionsRef.current);loaded.add(section);
+        loadedSnapshotSectionsRef.current=loaded;setLoadedSnapshotSections(new Set(loaded));
+      });
+    })().finally(()=>{if(snapshotSectionLoadsRef.current[section]===task)delete snapshotSectionLoadsRef.current[section];});
+    snapshotSectionLoadsRef.current[section]=task;
+    await task;
+  };
+
+
+  const ensureSnapshotSections=async(sections:readonly FamilySnapshotSection[]):Promise<void>=>{
+    await Promise.all(sections.map(section=>ensureSnapshotSection(section)));
+  };
+
+  const ensureAuxiliaryScreen=async(screen:ScreenId):Promise<void>=>{
+    if(!window.pardus||loadedAuxiliaryScreensRef.current.has(screen))return;
+    const existing=auxiliaryLoadsRef.current[screen];if(existing){await existing;return;}
+    const ticket=asyncWriteGuardRef.current.start(`auxiliary:${screen}`);
+    let task:Promise<void>;
+    task=(async()=>{
+      if(screen==='finance'){
+        const [records,valuations]=await Promise.all([window.pardus!.listFinance(),window.pardus!.listFinanceValuations()]);
+        asyncWriteGuardRef.current.commit(ticket,()=>{setFinanceRecords(records);setFinanceValuations(valuations);});
+      }else if(screen==='health'){
+        const [records,medications,history]=await Promise.all([window.pardus!.listHealth(),window.pardus!.listMedicationPlans(),window.pardus!.listFamilyHealthHistory()]);
+        asyncWriteGuardRef.current.commit(ticket,()=>{setHealthRecords(records);setMedicationPlans(medications);setFamilyHealthHistory(history);});
+      }else if(screen==='life-center'){
+        const records=await window.pardus!.listLifeRecords();asyncWriteGuardRef.current.commit(ticket,()=>setLifeRecords(records));
+      }else if(screen==='automation'){
+        const rules=await window.pardus!.listAutomationRules();asyncWriteGuardRef.current.commit(ticket,()=>setAutomationRules(rules));
+      }else if(screen==='reports'){
+        const report=await window.pardus!.getReportSummary();asyncWriteGuardRef.current.commit(ticket,()=>setReportSummary(report));
+      }else if(screen==='important-days'){
+        const events=await window.pardus!.listArchivedTimelineEvents();asyncWriteGuardRef.current.commit(ticket,()=>setArchivedEvents(events));
+      }else if(screen==='households'){
+        const workspace=await window.pardus!.getHouseholdMembershipWorkspace();asyncWriteGuardRef.current.commit(ticket,()=>setHouseholdWorkspace(workspace));
+      }
+      asyncWriteGuardRef.current.commit(ticket,()=>{
+        const loaded=new Set(loadedAuxiliaryScreensRef.current);loaded.add(screen);
+        loadedAuxiliaryScreensRef.current=loaded;setLoadedAuxiliaryScreens(new Set(loaded));
+      });
+    })().finally(()=>{if(auxiliaryLoadsRef.current[screen]===task)delete auxiliaryLoadsRef.current[screen];});
+    auxiliaryLoadsRef.current[screen]=task;await task;
+  };
+
+
+  const bootstrapAuthenticatedSession=async()=>{
+    if(!window.pardus)return;
+    resetLazyDataState();
+    const ticket=asyncWriteGuardRef.current.start('session-bootstrap');
+    const dashboard=await window.pardus.getDashboardOverview();
+    asyncWriteGuardRef.current.commit(ticket,()=>{
+      setDashboardOverview(dashboard);
+      setSnapshot(snapshotFromOverview(dashboard));
+    });
+  };
+
+  useEffect(() => {
+    const ticket=asyncWriteGuardRef.current.start('startup');
+    const load = async () => {
+      if (window.pardus) {
+        const [info, authState] = await Promise.all([window.pardus.getAppInfo(), window.pardus.getAuthState()]);
+        if(!asyncWriteGuardRef.current.commit(ticket,()=>{setAppInfo(info);setAuth(authState);})){return;}
+        if(authState.authenticated){await bootstrapAuthenticatedSession();setLoading(false);return;}
+      }
+      asyncWriteGuardRef.current.commit(ticket,()=>setLoading(false));
+    };
+    void load();
+    return()=>asyncWriteGuardRef.current.invalidate('startup');
+  }, []);
+
+  useEffect(()=>{
+    if(loading||!auth.authenticated||!window.pardus||active==='dashboard')return;
+    let cancelled=false;
+    const run=async()=>{
+      setScreenDataError('');
+      try{
+        const graphScreens:readonly ScreenId[]=['households','people-lifecycle','tree','important-days','finance','health','life-center','legacy'];
+        const timelineScreens:readonly ScreenId[]=['timeline','important-days','location'];
+        const sections:FamilySnapshotSection[]=[];
+        if(graphScreens.includes(active))sections.push('graph');
+        if(timelineScreens.includes(active))sections.push('timeline');
+        await ensureSnapshotSections(sections);
+        if(['households','finance','health','life-center','automation','reports','important-days'].includes(active))await ensureAuxiliaryScreen(active);
+      }catch(error){if(!cancelled)setScreenDataError(error instanceof Error?error.message:'Ekran verileri yüklenemedi.');}
+    };
+    void run();return()=>{cancelled=true;};
+  },[active,auth.authenticated,loading,screenLoadRevision]);
+
+  useEffect(()=>{if(notificationOpen&&auth.authenticated&&!loadedSnapshotSectionsRef.current.has('timeline'))void ensureSnapshotSection('timeline').catch(error=>setScreenDataError(error instanceof Error?error.message:'Bildirimler yüklenemedi.'));},[notificationOpen,auth.authenticated]);
+
+  const activeItem = navItems.find((item) => item.id === active) ?? navItems[0]!;
+  const now = useMemo(() => new Intl.DateTimeFormat('tr-TR', { dateStyle: 'full', timeStyle: 'short' }).format(currentTime), [currentTime]);
+  const searchResults = useMemo(() => {
+    const normalized = searchQuery.trim().toLocaleLowerCase('tr-TR');
+    return normalized
+      ? navItems.filter((item) => item.label.toLocaleLowerCase('tr-TR').includes(normalized))
+      : navItems.slice(0, 7);
+  }, [searchQuery]);
+  const activeNotifications = snapshot.notifications.filter((item) => !item.acknowledgedAt);
+  const refreshDashboard = async () => {
+    if(!window.pardus)return;
+    const ticket=asyncWriteGuardRef.current.start('dashboard');
+    const overview=await window.pardus.getDashboardOverview();
+    asyncWriteGuardRef.current.commit(ticket,()=>setDashboardOverview(overview));
+  };
+  const refreshHouseholdWorkspace=async()=>{if(!window.pardus)return;const workspace=await window.pardus.getHouseholdMembershipWorkspace();setHouseholdWorkspace(workspace);};
+  const refreshFamilyData = async () => {
+    if(!window.pardus)return;
+    const ticket=asyncWriteGuardRef.current.start('family-refresh');
+    const [graph,timeline,nextDashboard,nextArchived]=await Promise.all([window.pardus.getSnapshotSections({sections:['graph']}),window.pardus.getSnapshotSections({sections:['timeline']}),window.pardus.getDashboardOverview(),window.pardus.listArchivedTimelineEvents()]);
+    asyncWriteGuardRef.current.commit(ticket,()=>{
+      setSnapshot(current=>mergeSnapshotPatch(mergeSnapshotPatch(current,graph),timeline));
+      const loaded=new Set<FamilySnapshotSection>(['graph','timeline']);loadedSnapshotSectionsRef.current=loaded;setLoadedSnapshotSections(new Set(loaded));
+      setDashboardOverview(nextDashboard);setArchivedEvents(nextArchived);
+    });
+  };
+  const refreshArchivedEvents = async () => {
+    if(!window.pardus)return;
+    const ticket=asyncWriteGuardRef.current.start('archived-events');
+    const events=await window.pardus.listArchivedTimelineEvents();
+    asyncWriteGuardRef.current.commit(ticket,()=>setArchivedEvents(events));
+  };
+  const navigateFromShell = (id: ScreenId) => {
+    if (searchOpen) previousSearchFocusRef.current = null;
+    setActive(id);
+    setSearchOpen(false);
+    setNotificationOpen(false);
+    setProfileOpen(false);
+    setFamilyOpen(false);
+  };
+  const logout = async () => {
+    if (!window.pardus) return;
+    resetLazyDataState();
+    const ticket=asyncWriteGuardRef.current.start('auth-transition');
+    const state = await window.pardus.logout();
+    asyncWriteGuardRef.current.commit(ticket,()=>{
+      setAuth(state);
+      setProfileOpen(false);
+      setSnapshot(fallbackSnapshot);
+      setArchivedEvents([]);
+      setDashboardOverview(fallbackDashboardOverview(fallbackSnapshot));
+      setActive('dashboard');
+    });
+  };
+
+  const createMember = async (input: CreateFamilyMemberInput) => {
+    if (window.pardus) { applyMutationResult(await window.pardus.createMember(input)); await refreshFamilyData(); }
+    else setSnapshot((current) => ({ ...current, people: [...current.people, { id: crypto.randomUUID(), displayName: input.displayName, ...(input.birthDate ? { birthDate: input.birthDate } : {}), relationshipType: input.relationshipType, generation: input.generation, branch: input.branch ?? 'Ana Dal', status: 'active', initials: input.displayName.split(/\s+/).slice(0,2).map((word) => word[0]).join('').toLocaleUpperCase('tr-TR') }], lastUpdatedAt: new Date().toISOString() }));
+  };
+  const createLocation = async (input: CreateFamilyLocationInput) => { if (window.pardus) { applyMutationResult(await window.pardus.createLocation(input)); await refreshDashboard(); } else setSnapshot((current) => ({ ...current, locations: [...current.locations, { ...input, id: crypto.randomUUID() }], lastUpdatedAt: new Date().toISOString() })); };
+  const createEvent = async (input: CreateFamilyEventInput) => {
+    if (window.pardus) { applyMutationResult(await window.pardus.createImportantDay(input)); await refreshDashboard(); }
+    else setSnapshot((current) => ({ ...current, events: [...current.events, { ...input, id: crypto.randomUUID(), kind: 'important_day', attachmentCount: 0, recurrence: input.recurrence ?? 'none', reminderDays: input.reminderDays ?? [7,1], createdAt: new Date().toISOString() }], lastUpdatedAt: new Date().toISOString() }));
+  };
+  const acknowledgeTimelineNotification=async(notificationId:string)=>{if(window.pardus){applyMutationResult(await window.pardus.acknowledgeTimelineNotification({notificationId}));await refreshDashboard();}};
+  const updateImportantDay=async(input:{eventId:string;participantPersonIds:string[];visibility:FamilyEventView['visibility'];invitationText?:string;notes?:string})=>{if(!window.pardus)return;applyMutationResult(await window.pardus.updateImportantDayParticipants({eventId:input.eventId,participantPersonIds:input.participantPersonIds,visibility:input.visibility}));applyMutationResult(await window.pardus.updateImportantDayInvitation({eventId:input.eventId,...(input.invitationText?{invitationText:input.invitationText}:{})}));applyMutationResult(await window.pardus.updateImportantDayNotes({eventId:input.eventId,...(input.notes?{notes:input.notes}:{})}));await refreshDashboard();};
+  const updateFamilyEvent=async(input:UpdateFamilyEventInput)=>{
+    if(window.pardus){applyMutationResult(await window.pardus.updateFamilyEvent(input));await refreshDashboard();return;}
+    setSnapshot((current)=>({...current,events:current.events.map((event)=>event.id===input.eventId?{...event,...input,updatedAt:new Date().toISOString()}:event),lastUpdatedAt:new Date().toISOString()}));
+  };
+  const setFamilyEventArchived=async(eventId:string,archived:boolean)=>{
+    if(window.pardus){const mutation=await window.pardus.setFamilyEventArchived({eventId,archived});applyMutationResult(mutation);if(mutation.event){if(archived)setArchivedEvents((current)=>mergeCatalogItems([mutation.event!],current));else setArchivedEvents((current)=>current.filter((event)=>event.id!==eventId));}await refreshDashboard();return;}
+    if(archived){const target=snapshot.events.find((event)=>event.id===eventId);if(target){setSnapshot((current)=>({...current,events:current.events.filter((event)=>event.id!==eventId),lastUpdatedAt:new Date().toISOString()}));setArchivedEvents((current)=>[{...target,archivedAt:new Date().toISOString()},...current]);}}
+    else{const target=archivedEvents.find((event)=>event.id===eventId);if(target){const {archivedAt:_archivedAt,...restored}=target;setArchivedEvents((current)=>current.filter((event)=>event.id!==eventId));setSnapshot((current)=>({...current,events:[restored,...current.events],lastUpdatedAt:new Date().toISOString()}));}}
+  };
+
+  const setupAdmin=async(input:SetupAdminInput)=>{if(window.pardus){const ticket=asyncWriteGuardRef.current.start('auth-transition');const state=await window.pardus.setupAdmin(input);if(!asyncWriteGuardRef.current.commit(ticket,()=>setAuth(state)))return;await bootstrapAuthenticatedSession();}};
+  const login=async(input:LoginInput)=>{if(window.pardus){const ticket=asyncWriteGuardRef.current.start('auth-transition');const state=await window.pardus.login(input);if(!asyncWriteGuardRef.current.commit(ticket,()=>setAuth(state)))return;await bootstrapAuthenticatedSession();}};
+  const loginWithWindowsHello=async(input:LoginWithWindowsHelloInput)=>{if(window.pardus){const ticket=asyncWriteGuardRef.current.start('auth-transition');const result=await window.pardus.loginWithWindowsHello(input);if(!result.authenticated)throw new Error(windowsHelloOutcomeMessage(result.outcome));const state=await window.pardus.getAuthState();if(!asyncWriteGuardRef.current.commit(ticket,()=>setAuth(state)))return;await bootstrapAuthenticatedSession();}};
+  const completeInvitationAcceptance=async(state:AuthStateView)=>{const ticket=asyncWriteGuardRef.current.start('auth-transition');if(!asyncWriteGuardRef.current.commit(ticket,()=>setAuth(state)))return;await bootstrapAuthenticatedSession();};
+  const createRelation=async(input:CreateFamilyRelationInput)=>{if(window.pardus){applyMutationResult(await window.pardus.createRelation(input));await refreshDashboard();}};
+  const importArchive=async(input:{title:string;linkedEventId?:string})=>{if(window.pardus){await window.pardus.importArchive(input);setArchiveRevision(value=>value+1);await refreshDashboard();}};
+  const openArchive=async(id:string)=>{if(window.pardus)await window.pardus.openArchive(id);};
+  const openEventArchive=(eventId:string)=>{setArchiveEventFilter(eventId);setActive('archive');};
+  const createFinance=async(input:CreateFinanceRecordInput)=>{if(window.pardus){setFinanceRecords(await window.pardus.createFinance(input));await refreshDashboard();}};
+  const createHealth=async(input:CreateHealthRecordInput)=>{if(window.pardus){setHealthRecords(await window.pardus.createHealth(input));await refreshDashboard();}};
+  const createMedicationPlan=async(input:CreateMedicationPlanInput)=>{if(window.pardus){setMedicationPlans(await window.pardus.createMedicationPlan(input));await refreshDashboard();}};
+  const createFamilyHistory=async(input:CreateFamilyHealthHistoryInput)=>{if(window.pardus){setFamilyHealthHistory(await window.pardus.createFamilyHealthHistory(input));await refreshDashboard();}};
+  const createFinanceValuation=async(input:CreateFinanceValuationInput)=>{if(window.pardus)setFinanceValuations(await window.pardus.createFinanceValuation(input));};
+  const createLifeRecord=async(input:CreateLifeRecordInput)=>{if(window.pardus){setLifeRecords(await window.pardus.createLifeRecord(input));setReportSummary(await window.pardus.getReportSummary());await refreshDashboard();}};
+  const createAutomationRule=async(input:CreateAutomationRuleInput)=>{if(window.pardus){setAutomationRules(await window.pardus.createAutomationRule(input));await refreshDashboard();}};
+  const toggleAutomationRule=async(id:string,enabled:boolean)=>{if(window.pardus){setAutomationRules(await window.pardus.toggleAutomationRule(id,enabled));await refreshDashboard();}};
+
+  if(!loading && !firstRunIntroCompleted) return <FirstRunIntroduction onComplete={()=>setFirstRunIntroCompleted(true)}/>;
+  if(!loading && !auth.authenticated) return <AuthScreen auth={auth} onSetup={setupAdmin} onLogin={login} onWindowsHelloLogin={loginWithWindowsHello} onInvitationAccepted={completeInvitationAcceptance}/>;
+  if(!loading && auth.authenticated && !auth.twoFactorEnabled) return <FirstRunSecuritySetup onComplete={(state)=>{setAuth(state);void bootstrapAuthenticatedSession();}}/>;
+
+  const graphRequired=['households','people-lifecycle','tree','important-days','finance','health','life-center','legacy'].includes(active);
+  const timelineRequired=['timeline','important-days','location'].includes(active);
+  const auxiliaryRequired=['households','finance','health','life-center','automation','reports','important-days'].includes(active);
+  const activeScreenDataReady=(!graphRequired||loadedSnapshotSections.has('graph'))
+    &&(!timelineRequired||loadedSnapshotSections.has('timeline'))
+    &&(!auxiliaryRequired||loadedAuxiliaryScreens.has(active));
+  const openImportantDayModal=()=>{void ensureSnapshotSection('timeline').then(()=>setEventModal(true)).catch(error=>setScreenDataError(error instanceof Error?error.message:'Önemli gün verileri yüklenemedi.'));};
+
+  let screen: ReactNode;
+  if (loading) screen = <div className="loading-screen"><div className="loader" /><strong>Aile verileri hazırlanıyor…</strong></div>;
+  else if(screenDataError)screen=<div className="loading-screen"><StatusMessage tone="danger">{screenDataError}</StatusMessage><Button onClick={()=>{setScreenDataError('');setScreenLoadRevision(value=>value+1);}}>Yeniden dene</Button></div>;
+  else if(active!=='dashboard'&&!activeScreenDataReady)screen=<div className="loading-screen"><div className="loader"/><strong>{activeItem.label} verileri yükleniyor…</strong></div>;
+  else if (active === 'dashboard') screen = <Dashboard overview={dashboardOverview} onNavigate={setActive} onAddMember={()=>setMemberModal(true)} onAddImportantDay={openImportantDayModal} />;
+  else if (active === 'family') screen = <FamilyScreen revision={catalogRevision} onAdd={() => setMemberModal(true)} />;
+  else if (active === 'households') screen = <HouseholdMembershipScreen people={snapshot.people} workspace={householdWorkspace} onChanged={refreshHouseholdWorkspace}/>;
+  else if (active === 'people-lifecycle') screen = <PersonLifecycleScreen people={snapshot.people} onChanged={refreshFamilyData}/>;
+  else if (active === 'tree') screen = <TreeScreen snapshot={snapshot} onAddRelation={()=>setRelationModal(true)} />;
+  else if (active === 'timeline') screen = <TimelineScreen snapshot={snapshot} onEdit={setEditingEvent} onArchive={(eventId)=>setFamilyEventArchived(eventId,true)} onOpenArchive={openEventArchive} />;
+  else if (active === 'archive') screen = <ArchiveScreen revision={archiveRevision} snapshot={snapshot} eventFilter={archiveEventFilter} onEventFilterChange={setArchiveEventFilter} onImport={importArchive} onOpen={openArchive} />;
+  else if (active === 'location') screen = <LocationScreen snapshot={snapshot} onAdd={() => setLocationModal(true)} onAcknowledge={acknowledgeTimelineNotification} />;
+  else if (active === 'important-days') screen = <ImportantDaysScreen snapshot={snapshot} archivedEvents={archivedEvents} onAdd={openImportantDayModal} onEdit={setEditingEvent} onArchive={(eventId)=>setFamilyEventArchived(eventId,true)} onRestore={(eventId)=>setFamilyEventArchived(eventId,false)} onOpenArchive={openEventArchive} />;
+  else if (active === 'finance') screen = <FinanceScreen people={snapshot.people} records={financeRecords} valuations={financeValuations} onCreate={createFinance} onCreateValuation={createFinanceValuation} />;
+  else if (active === 'health') screen = <HealthScreen people={snapshot.people} records={healthRecords} medications={medicationPlans} history={familyHealthHistory} onCreate={createHealth} onCreateMedication={createMedicationPlan} onCreateHistory={createFamilyHistory} />;
+  else if (active === 'life-center') screen = <LifeCenterScreen people={snapshot.people} records={lifeRecords} onCreate={createLifeRecord} />;
+  else if (active === 'automation') screen = <AutomationScreen rules={automationRules} onCreate={createAutomationRule} onToggle={toggleAutomationRule} />;
+  else if (active === 'reports') screen = <ReportsScreen report={reportSummary} />;
+  else if (active === 'invitations') screen = <InvitationsScreen snapshot={snapshot}/>;
+  else if (active === 'data-repair') screen = <DataRepairScreen/>;
+  else if (active === 'permissions') screen = <PermissionsScreen auth={auth} />;
+  else if (active === 'ai') screen = <AiGovernanceScreen />;
+  else if (active === 'legacy') screen = <DigitalLegacyScreen snapshot={snapshot} />;
+  else if (active === 'windows-hello') screen = <WindowsHelloScreen auth={auth}/>;
+  else if (active === SECURITY_CENTER_ROUTE) screen = <><PageHeader eyebrow="Hesap ve veri koruması" title={SECURITY_CENTER_LABEL} description="Parola, 2FA, güvenilir cihazlar, imzalı güvenlik makbuzları, denetim zinciri, yedekleme ve veri yaşam döngüsünü yönetin."/><SettingsSecurity auth={auth} accessibility={accessibility} onAccessibilityChange={setAccessibility} onFamilyDataChanged={refreshFamilyData}/></>;
+  else if (active === 'settings') screen = <SystemManagementScreen/>;
+  else screen = <PlaceholderScreen screen={active} snapshot={snapshot} auth={auth} />;
+
+  return (
+    <div className={`app-shell ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`} data-theme={theme} data-release-channel={releaseChannelFromStage(appInfo.stage)} data-text-scale={accessibility.textScale} data-high-contrast={accessibility.highContrast ? 'true' : 'false'} data-reduce-motion={accessibility.reduceMotion ? 'true' : 'false'}>
+      <VisuallyHidden as="div"><div aria-live="polite" aria-atomic="true">{accessibilityAnnouncement(activeItem.label)}</div></VisuallyHidden>
+      <a className="skip-link" href="#main-content">Ana içeriğe geç</a>
+      <aside className="sidebar">
+        <div className="window-brand">
+          <div className="brand-icon"><img src={brandMarkUrl} alt=""/></div>
+          <div className="brand-copy"><strong>Anadolu Parsı</strong><small>Aile Yaşam Merkezi</small></div>
+          <button type="button" className="sidebar-toggle" aria-label={sidebarCollapsed ? 'Menüyü genişlet' : 'Menüyü daralt'} onClick={()=>setSidebarCollapsed((value)=>!value)}>{sidebarCollapsed ? '›' : '‹'}</button>
+        </div>
+        <div className="family-control">
+          <button type="button" className="family-switcher" aria-expanded={familyOpen} aria-controls="family-menu" aria-haspopup="dialog" onClick={()=>{setFamilyOpen((value)=>!value);setProfileOpen(false);setNotificationOpen(false);}}>
+            <span className="family-icon">♙</span><span className="family-copy"><small>Aktif aile</small><strong>{snapshot.family.name}</strong></span><span className="disclosure">⌄</span>
+          </button>
+          {familyOpen && <div id="family-menu" className="sidebar-popover" role="dialog" aria-label="Aktif aile alanı">
+            <span className="eyebrow">Yerel aile alanı</span>
+            <strong>{snapshot.family.name}</strong>
+            <p>Bu sürüm tek, cihazda saklanan aile alanıyla çalışır.</p>
+            <Button onClick={()=>navigateFromShell('settings')}>Aile ayarlarını aç</Button>
+          </div>}
+        </div>
+        <nav aria-label="Ana gezinme">
+          {navGroups.map((group)=><section className="nav-group" key={group.label}>
+            <h2 className="nav-group-label">{group.label}</h2>
+            {group.items.map((id)=>{
+              const item=navItems.find((candidate)=>candidate.id===id)!;
+              return <button type="button" title={sidebarCollapsed ? item.label : undefined} aria-current={active === item.id ? 'page' : undefined} className={active === item.id ? 'active' : ''} key={item.id} onClick={() => navigateFromShell(item.id)}><span aria-hidden="true">{item.icon}</span><span className="nav-label">{item.label}</span>{item.id === 'health' && <i />}{item.id === SECURITY_CENTER_ROUTE && securityCenterNeedsAttention(auth) && <i title="Cihaz yeniden yetkilendirmesi gerekiyor" />}</button>;
+            })}
+          </section>)}
+        </nav>
+        <div className="sidebar-footer"><div className="sync-state"><span>◌</span><div><strong>Yerel veri hazır</strong><small>{formatDate(snapshot.lastUpdatedAt, { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}</small></div><i>✓</i></div><div className="edition-line"><span>{appInfo.releaseLabel}</span><small>{appInfo.stage}</small></div></div>
+      </aside>
+      <main ref={mainContentRef} id="main-content" className="main-area" tabIndex={-1} aria-labelledby="current-section-title">
+        <header className="topbar">
+          <div className="breadcrumb"><span aria-hidden="true">{activeItem.icon}</span><strong id="current-section-title">{activeItem.label}</strong></div>
+          <div className="topbar-center">{now}</div>
+          <div className="topbar-actions">
+            <div className="topbar-control">
+              <button type="button" className="notification" aria-expanded={notificationOpen} aria-controls="notification-menu" aria-haspopup="dialog" aria-label={`${activeNotifications.length} okunmamış bildirim`} onClick={()=>{setNotificationOpen((value)=>!value);setProfileOpen(false);setFamilyOpen(false);}}>♢{activeNotifications.length>0&&<i>{activeNotifications.length}</i>}</button>
+              {notificationOpen&&<div id="notification-menu" className="menu-popover notification-popover" role="dialog" aria-label="Bildirim merkezi">
+                <div className="popover-heading"><div><span className="eyebrow">Bildirim merkezi</span><strong>{activeNotifications.length ? `${activeNotifications.length} yeni bildirim` : 'Her şey güncel'}</strong></div><button type="button" aria-label="Bildirimleri kapat" onClick={()=>setNotificationOpen(false)}>×</button></div>
+                {activeNotifications.length ? activeNotifications.slice(0,5).map((item)=><article key={item.id} className="notification-row"><button type="button" onClick={()=>navigateFromShell('important-days')}><strong>{item.title}</strong><small>{item.body}</small><time>{formatDate(item.dueAt,{dateStyle:'medium'})}</time></button><button type="button" className="acknowledge-button" aria-label={`${item.title} bildirimini okundu işaretle`} onClick={()=>void acknowledgeTimelineNotification(item.id)}>✓</button></article>) : <p className="popover-empty">Bekleyen aile bildirimi bulunmuyor.</p>}
+              </div>}
+            </div>
+            <button ref={searchTriggerRef} type="button" className="search-box" aria-label="Uygulamada ara" onClick={()=>setSearchOpen(true)}><span className="search-icon">⌕</span><span>Ara…</span><kbd>Ctrl+K</kbd></button>
+            <div className="topbar-control">
+              <button type="button" className="user-menu" aria-expanded={profileOpen} aria-controls="profile-menu" aria-haspopup="menu" onClick={()=>{setProfileOpen((value)=>!value);setNotificationOpen(false);setFamilyOpen(false);}}>
+                <span className="person-avatar">{(auth.displayName??'Aile').split(/\s+/u).slice(0,2).map(part=>part[0]?.toLocaleUpperCase('tr-TR')).join('')}</span>
+                <span className="user-copy"><strong>{auth.displayName??'Aile kullanıcısı'}</strong><small>● {auth.role==='family_admin'?'Aile yöneticisi':'Aile üyesi'}</small></span><span className="disclosure">⌄</span>
+              </button>
+              {profileOpen&&<div id="profile-menu" className="menu-popover profile-popover" role="menu">
+                <div className="profile-summary"><span className="person-avatar large">{(auth.displayName??'Aile').split(/\s+/u).slice(0,2).map(part=>part[0]?.toLocaleUpperCase('tr-TR')).join('')}</span><div><strong>{auth.displayName??'Aile kullanıcısı'}</strong><small>{auth.role==='family_admin'?'Aile yöneticisi':'Aile üyesi'} · Yerel profil</small></div></div>
+                <button type="button" role="menuitem" onClick={()=>setTheme((value)=>value==='dark'?'light':'dark')}><span>{theme==='dark'?'☀':'☾'}</span>{theme==='dark'?'Açık görünüme geç':'Koyu görünüme geç'}</button>
+                <button type="button" role="menuitem" onClick={()=>navigateFromShell('windows-hello')}><span>◎</span>Windows Hello</button>
+                <button type="button" role="menuitem" onClick={()=>navigateFromShell(SECURITY_CENTER_ROUTE)}><span>⛨</span>Güvenlik Merkezi</button>
+                <button type="button" role="menuitem" onClick={()=>navigateFromShell('settings')}><span>⚙</span>Sistem ve bakım</button>
+                <button type="button" role="menuitem" className="danger-action" onClick={()=>void logout()}><span>↪</span>Profilden çıkış yap</button>
+              </div>}
+            </div>
+          </div>
+        </header>
+        <div className="page-content">{screen}</div>
+      </main>
+      {searchOpen&&<div className="command-overlay" role="presentation" onMouseDown={()=>setSearchOpen(false)}>
+        <section ref={searchDialogRef} className="command-palette" role="dialog" aria-modal="true" aria-labelledby="command-title" aria-describedby="command-help" onMouseDown={(event)=>event.stopPropagation()} onKeyDown={(event)=>{
+          if(!['ArrowDown','ArrowUp','Home','End'].includes(event.key))return;
+          event.preventDefault();
+          const next=nextRovingIndex(searchActiveIndex,searchResults.length,event.key as 'ArrowDown'|'ArrowUp'|'Home'|'End');
+          setSearchActiveIndex(next);
+          searchResultRefs.current[next]?.focus();
+        }}>
+          <div className="command-input"><span aria-hidden="true">⌕</span><input autoFocus value={searchQuery} onChange={(event)=>{setSearchQuery(event.target.value);setSearchActiveIndex(0);}} onKeyDown={(event)=>{if(event.key==='Enter'&&searchResults[searchActiveIndex]){event.preventDefault();navigateFromShell(searchResults[searchActiveIndex]!.id);}}} placeholder="Bir bölüm veya özellik arayın…" aria-label="Arama metni" aria-controls="command-results" aria-activedescendant={searchResults[searchActiveIndex]?`command-result-${searchResults[searchActiveIndex]!.id}`:undefined}/><kbd aria-hidden="true">ESC</kbd></div>
+          <div id="command-results" className="command-results" role="listbox" aria-label={searchQuery.trim() ? 'Arama sonuçları' : 'Hızlı erişim'}>
+            <span id="command-title" className="eyebrow">{searchQuery.trim() ? 'Arama sonuçları' : 'Hızlı erişim'}</span>
+            {searchResults.length?searchResults.map((item,index)=><button ref={element=>{searchResultRefs.current[index]=element;}} id={`command-result-${item.id}`} type="button" role="option" aria-selected={searchActiveIndex===index} tabIndex={searchActiveIndex===index?0:-1} key={item.id} onFocus={()=>setSearchActiveIndex(index)} onClick={()=>navigateFromShell(item.id)}><span className="command-icon" aria-hidden="true">{item.icon}</span><span><strong>{item.label}</strong><small>{navGroups.find((group)=>group.items.includes(item.id))?.label}</small></span><kbd aria-hidden="true">↵</kbd></button>):<div className="command-empty" role="status"><strong>Sonuç bulunamadı</strong><small>Başka bir bölüm adı deneyin.</small></div>}
+          </div>
+          <footer id="command-help"><span>↑↓ Gezin</span><span>Enter Aç</span><span>Esc Kapat</span></footer>
+        </section>
+      </div>}
+      {memberModal && <AddMemberModal fallbackPeople={snapshot.people} onClose={() => setMemberModal(false)} onSave={createMember} />}
+      {locationModal && <AddLocationModal onClose={() => setLocationModal(false)} onSave={createLocation} />}
+      {relationModal && <AddRelationModal fallbackPeople={snapshot.people} onClose={()=>setRelationModal(false)} onSave={createRelation} />}
+      {eventModal && <AddEventModal fallbackPeople={snapshot.people} locations={snapshot.locations} onClose={() => setEventModal(false)} onSave={createEvent} />}
+      {editingEvent && <EditEventModal event={editingEvent} fallbackPeople={snapshot.people} locations={snapshot.locations} onClose={()=>setEditingEvent(undefined)} onSave={updateFamilyEvent}/>}
+    </div>
+  );
+}

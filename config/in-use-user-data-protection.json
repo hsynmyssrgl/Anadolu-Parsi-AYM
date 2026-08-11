@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "product": "Anadolu Parsı Aile Yaşam Merkezi",
+  "effectiveBuild": 213,
+  "activeVersion": "01.08.2026.213",
+  "activeDatabase": "memory-only",
+  "persistentStore": "aes-256-gcm-user-vault",
+  "checkpointIntervalMs": 30000,
+  "staging": {
+    "windowsProtection": "EFS",
+    "command": "cipher.exe",
+    "arguments": [
+      "/E",
+      "/B",
+      "/H"
+    ],
+    "failClosed": true,
+    "nonWindowsValidationOnly": "0700/0600 private staging"
+  },
+  "snapshot": "VACUUM main INTO protected staging",
+  "restore": "protected staging -> AES-256-GCM vault",
+  "claims": {
+    "plainActiveSqliteOnDisk": false,
+    "sameUserMalwareAbsoluteIsolation": false,
+    "windowsEfsRuntime": "NOT_RUN"
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "30-O",
+  "requirement": "PPK-002",
+  "scope": "ARCHIVE_PRODUCTION_PEP_COMPOSITION_PROTECTED_RECEIPT_JOURNAL_AND_SQLITE_RUNTIME_SLICE",
+  "predecessor": {
+    "step": "30-N",
+    "archiveVerticalSlice": "PASS",
+    "persistentReceiptStatus": "PASS",
+    "completionRecord": "artifacts/checkpoints/30-N_COMPLETION_RECORD.json"
+  },
+  "targets": [
+    {
+      "id": "production-startup-pep-composition",
+      "requiredResult": "Desktop startup explicitly composes the archive adapter with a trusted authority/resource resolver, the last provider-verified cluster fence plus local pre-commit fence detection, Policy Enforcement Point and protected receipt sink; missing composition remains fail-closed."
+    },
+    {
+      "id": "core-service-local-admin-entrypoint-lifecycle",
+      "requiredResult": "The Core Service process entrypoint validates an environment-provisioned local endpoint, token and signing key, starts the authenticated local administration listener before reporting ready, and fences writes before graceful shutdown; installed-service and protected-secret provisioning are not claimed."
+    },
+    {
+      "id": "verified-fresh-admin-archive-authority-bootstrap",
+      "requiredResult": "First-admin setup proves the persisted device identity and atomically writes one trusted-device record plus explicit archive-purpose grants for archive items, retention policies and categories; no role-only archive bypass is introduced."
+    },
+    {
+      "id": "protected-receipt-journal-wiring",
+      "requiredResult": "The production composition wires the encrypted hash-chained receipt journal through the device-secret protector and verifies persisted receipt readback before business mutation."
+    },
+    {
+      "id": "real-sqlite-archive-repository-runtime",
+      "requiredResult": "A real SQLite-backed archive repository transaction executes the governed create/update/delete/record paths with exact resource-action-capability-correlation binding."
+    },
+    {
+      "id": "same-transaction-authority-resource-revalidation",
+      "requiredResult": "After receipt persistence and before repository mutation, the business SQLite transaction reloads and compares the account, person, trusted device, archive permissions and resource state; any change fails closed and rolls back."
+    },
+    {
+      "id": "restart-and-tamper-fail-closed-runtime",
+      "requiredResult": "Controlled production-like restart, journal readback, bit-tamper and partial-record truncation scenarios reject invalid state without legacy authorization fallback; complete-tail rollback is not claimed."
+    }
+  ],
+  "requiredOrder": [
+    "production-composition",
+    "trusted-authority-and-resource-resolution",
+    "replay-reservation",
+    "protected-receipt-persistence-and-readback",
+    "active-policy-context-validation",
+    "sqlite-business-transaction-begin",
+    "same-transaction-authority-and-resource-revalidation",
+    "repository-context-validation",
+    "repository-operation",
+    "local-pre-commit-fence-validation",
+    "sqlite-business-transaction-commit"
+  ],
+  "runtimeProofRequirements": {
+    "actualCompiledDesktopComposition": true,
+    "actualCoreServiceEntrypointListener": true,
+    "wrongLocalAdminTokenRejected": true,
+    "actualProtectedReceiptFileSink": true,
+    "actualSQLiteDatabase": true,
+    "realTransactionBoundary": true,
+    "verifiedFreshAdminDeviceAndExplicitArchiveGrants": true,
+    "receiptBeforeBusinessMutation": true,
+    "sameTransactionAuthorityAndResourceRevalidation": true,
+    "localPreCommitFenceValidation": true,
+    "restartReadback": true,
+    "bitTamperAndPartialRecordTruncationRejection": true,
+    "missingDependencyFailClosed": true,
+    "legacyAuthorizationFallback": false
+  },
+  "evidenceBoundary": {
+    "PPK002": "PARTIAL",
+    "universalRepositoryEnforcement": "NOT_COMPLETE",
+    "durableMultiProcessReplayProtection": "NOT_RUN_NOT_PASS",
+    "completeTailJournalRollbackDetection": "NOT_IMPLEMENTED",
+    "receiptAndBusinessCommitAtomicity": "NOT_IMPLEMENTED",
+    "crossProcessFenceAndSQLiteCommitAtomicity": "NOT_IMPLEMENTED",
+    "installedCoreServiceRegistrationAndScmLifecycle": "NOT_RUN_NOT_PASS",
+    "protectedCoreServiceAuthorityProvisioningRotationAndAcl": "NOT_IMPLEMENTED",
+    "obligationExecution": "NOT_RUN_NOT_PASS",
+    "auditAndOutboxRepositoryEnforcement": "NOT_COMPLETE",
+    "eventAttachmentCrossAggregateReceiptBinding": "NOT_COMPLETE",
+    "secureFileDeletionAndDatabaseCommitAtomicity": "NOT_IMPLEMENTED",
+    "requirementCompletionClaimed": false
+  },
+  "mandatoryTruthSentence": "Bu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır."
+}

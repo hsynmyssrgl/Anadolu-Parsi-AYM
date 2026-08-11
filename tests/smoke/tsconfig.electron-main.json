@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noEmit": true,
+    "types": ["node"],
+    "typeRoots": ["../../node_modules/@types"],
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false
+  },
+  "include": [
+    "../../apps/desktop/src/main/**/*.ts",
+    "./electron-stub.d.ts"
+  ]
+}

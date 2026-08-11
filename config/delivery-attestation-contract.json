@@ -1,0 +1,434 @@
+{
+  "schemaVersion": 1,
+  "product": "Anadolu Parsı Aile Yaşam Merkezi",
+  "stage": "Bronze RC2 Active Development",
+  "attestationFileNameTemplate": "Anadolu_Parsi_Aile_Yasam_Merkezi_Bronze_RC2_Build{build}_Teslim_Kanit_Tasdiki_{version}.json",
+  "evidence": [
+    {
+      "id": "source-preflight",
+      "path": "artifacts/validation/source-preflight.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "source-integrity",
+      "path": "artifacts/validation/build228-source-integrity.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "archive-reproducibility",
+      "path": "artifacts/validation/build228-source-archive-reproducibility.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "archive-verification",
+      "path": "artifacts/validation/build228-source-archive-verification.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "active-version",
+      "path": "artifacts/validation/active-version-contract.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "active-documents",
+      "path": "artifacts/validation/active-delivery-documents.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "master-build-ledger",
+      "path": "artifacts/validation/master-build-ledger.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "attestation-contract",
+      "path": "artifacts/validation/delivery-attestation-contract.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "project-provenance",
+      "path": "artifacts/validation/build228-project-provenance.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "active-version-sweep",
+      "path": "artifacts/validation/build228-active-version-sweep.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "personal-identity-sweep",
+      "path": "artifacts/validation/build228-personal-identity-sweep.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "production-clean-data",
+      "path": "artifacts/validation/build228-production-clean-data.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build209-secure-onboarding-vault",
+      "path": "artifacts/validation/build209-secure-onboarding-vault-contract.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build209-vault-runtime",
+      "path": "artifacts/validation/build209-user-data-vault-runtime.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build209-renderer-syntax",
+      "path": "artifacts/validation/build209-renderer-syntax.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "package-source-typecheck",
+      "path": "artifacts/validation/package-source-typecheck.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "desktop-main-source-typecheck",
+      "path": "artifacts/validation/desktop-main-source-typecheck.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "documentation-closure",
+      "path": "artifacts/validation/build228-documentation-closure.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "validation-boundary",
+      "path": "artifacts/validation/build228-validation-boundary.json",
+      "statusField": "overallStatus",
+      "expectedStatus": "FAIL"
+    },
+    {
+      "id": "build210-terminal-ledger-contract",
+      "path": "artifacts/validation/build210-clean-rewrite-terminal-ledger-immutability-contract.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build210-terminal-ledger-sqlite-runtime",
+      "path": "artifacts/validation/build210-clean-rewrite-terminal-ledger-immutability-sqlite-runtime.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build211-dependency-readiness",
+      "path": "artifacts/validation/build211-dependency-install-readiness-contract.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build212-ui-baseline",
+      "path": "artifacts/validation/build212-ui-visual-baseline-provenance-contract.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build213-in-use-data-protection-contract",
+      "path": "artifacts/validation/build213-in-use-data-protection-contract.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build213-volatile-user-data-runtime",
+      "path": "artifacts/validation/build213-volatile-user-data-runtime.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build214-open022-contract",
+      "path": "artifacts/validation/build214-open022-contract.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build214-protected-side-artifact-runtime",
+      "path": "artifacts/validation/build214-protected-side-artifact-runtime.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build214-side-artifact-integration-runtime",
+      "path": "artifacts/validation/build214-side-artifact-integration-runtime.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build214-pr171-contract",
+      "path": "artifacts/validation/build214-pr171-contract.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build216-windows-evidence-intake-contract",
+      "path": "artifacts/validation/build216-windows-evidence-intake-contract.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build216-windows-evidence-intake-runtime",
+      "path": "artifacts/validation/build216-windows-evidence-intake-runtime.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build217-open021-isolation-contract",
+      "path": "artifacts/validation/build217-open021-isolation-contract.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build217-open021-result-runtime",
+      "path": "artifacts/validation/build217-open021-result-runtime.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build218-open022-result-runtime",
+      "path": "artifacts/validation/build218-open022-result-runtime.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build219-unified-security-runtime",
+      "path": "artifacts/validation/build219-bronze-security-result-runtime.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build220-windows-retry-runtime",
+      "path": "artifacts/validation/build220-bronze-security-result-runtime.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build221-workspace-dist-guard-runtime",
+      "path": "artifacts/validation/build221-workspace-dist-guard-runtime.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build221-windows-retry-runtime",
+      "path": "artifacts/validation/build221-bronze-security-result-runtime.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build222-preload-lifecycle-contract",
+      "path": "artifacts/validation/build222-preload-lifecycle-contract.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build222-preload-typescript-ab-runtime",
+      "path": "artifacts/validation/build222-preload-typescript-ab-runtime.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build222-windows-retry-runtime",
+      "path": "artifacts/validation/build222-bronze-security-result-runtime.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build223-preload-cjs-graph-contract",
+      "path": "artifacts/validation/build223-preload-cjs-graph-contract.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build223-preload-cjs-graph-runtime",
+      "path": "artifacts/validation/build223-preload-cjs-graph-runtime.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build223-windows-retry-runtime",
+      "path": "artifacts/validation/build223-bronze-security-result-runtime.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build225-build224-license-regression",
+      "path": "artifacts/validation/build225-build224-license-regression.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build225-build223-preload-regression",
+      "path": "artifacts/validation/build225-build223-preload-cjs-regression.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build225-open021-contract",
+      "path": "artifacts/validation/build225-open021-efs-contract.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build225-open021-runtime",
+      "path": "artifacts/validation/build225-open021-efs-runtime.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build225-fatal-startup-contract",
+      "path": "artifacts/validation/build225-fatal-startup-contract.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build225-fatal-startup-runtime",
+      "path": "artifacts/validation/build225-fatal-startup-runtime.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build225-pr172-context-policy",
+      "path": "artifacts/validation/build225-pr172-context-policy.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build225-windows-retry-contract",
+      "path": "artifacts/validation/build225-windows-retry-contract.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build225-unified-result-runtime",
+      "path": "artifacts/validation/build225-bronze-security-result-runtime.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build226-fresh-profile-startup-runtime",
+      "path": "artifacts/validation/build226-fresh-profile-startup-runtime.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build226-device-identity-protection-regression",
+      "path": "artifacts/validation/build226-device-identity-protection-regression.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build226-maintenance-reauthentication-persistence-regression",
+      "path": "artifacts/validation/build226-maintenance-reauthentication-persistence-regression.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build226-windows-retry-contract",
+      "path": "artifacts/validation/build226-windows-retry-contract.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build226-unified-result-runtime",
+      "path": "artifacts/validation/build226-bronze-security-result-runtime.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build227-root-cause-contract",
+      "path": "artifacts/validation/build227-root-cause-contract.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build227-dpapi-persistence-runtime",
+      "path": "artifacts/validation/build227-dpapi-persistence-runtime.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build227-workspace-dist-runtime",
+      "path": "artifacts/validation/build227-workspace-dist-prerequisite.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build228-bronze-closure-contract",
+      "path": "artifacts/validation/build228-bronze-closure-contract.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    },
+    {
+      "id": "build228-open021-open022-closure-validation",
+      "path": "artifacts/validation/build228-open021-open022-closure-validation.json",
+      "statusField": "status",
+      "expectedStatus": "PASS"
+    }
+  ],
+  "gateClaims": [
+    {
+      "label": "Source preflight gate",
+      "evidenceId": "source-preflight",
+      "field": "status"
+    },
+    {
+      "label": "Source integrity",
+      "evidenceId": "source-integrity",
+      "field": "status"
+    },
+    {
+      "label": "Clean install gate",
+      "evidenceId": "validation-boundary",
+      "resultId": "clean-npm-ci",
+      "field": "status"
+    },
+    {
+      "label": "Full root `tsc --noEmit`",
+      "evidenceId": "validation-boundary",
+      "resultId": "full-root-tsc-no-emit",
+      "field": "status"
+    },
+    {
+      "label": "Unit and integration tests",
+      "evidenceId": "validation-boundary",
+      "resultId": "full-unit-integration-suite",
+      "field": "status"
+    },
+    {
+      "label": "Electron production build",
+      "evidenceId": "validation-boundary",
+      "resultId": "electron-production-build",
+      "field": "status"
+    },
+    {
+      "label": "Blocking smoke chain",
+      "evidenceId": "validation-boundary",
+      "resultId": "blocking-smoke",
+      "field": "status"
+    },
+    {
+      "label": "Windows launch / installer",
+      "evidenceId": "validation-boundary",
+      "resultId": "unified-real-windows-execution",
+      "field": "status"
+    }
+  ]
+}

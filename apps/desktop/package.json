@@ -1,0 +1,90 @@
+{
+  "name": "@ppt/desktop",
+  "version": "4.8.2026-29",
+  "private": true,
+  "type": "module",
+  "main": "dist/main/main.mjs",
+  "dependencies": {
+    "@ppt/application": "4.8.2026-29",
+    "@ppt/config": "4.8.2026-29",
+    "@ppt/contracts": "4.8.2026-29",
+    "@ppt/core": "4.8.2026-29",
+    "@ppt/core-service-client": "4.8.2026-29",
+    "@ppt/core-service-contracts": "4.8.2026-29",
+    "@ppt/database": "4.8.2026-29",
+    "@ppt/domain": "4.8.2026-29",
+    "@ppt/events": "4.8.2026-29",
+    "@ppt/infrastructure": "4.8.2026-29",
+    "@ppt/logging": "4.8.2026-29",
+    "@ppt/platform-policy": "4.8.2026-29",
+    "@ppt/repositories": "4.8.2026-29",
+    "@ppt/repository-contracts": "4.8.2026-29",
+    "@ppt/security": "4.8.2026-29",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.3",
+    "electron": "43.2.0",
+    "vite": "8.1.5"
+  },
+  "scripts": {
+    "build:electron": "node scripts/build-electron.mjs",
+    "build:renderer": "vite build",
+    "build": "npm run build:electron && npm run build:renderer",
+    "typecheck": "tsc -p tsconfig.electron.json --noEmit && tsc -p tsconfig.renderer.json --noEmit",
+    "dev": "node scripts/dev.mjs",
+    "package:win": "npm run verify:license-sync && npm run build && npm run verify:installer --workspace @ppt/desktop && node scripts/run-electron-builder.mjs",
+    "package:win:dir": "npm run verify:license-sync && npm run build && npm run verify:installer --workspace @ppt/desktop && node scripts/run-electron-builder.mjs --dir",
+    "verify:installer": "node scripts/verify-installer.mjs",
+    "verify:freeze": "node scripts/verify-release-freeze.mjs",
+    "verify": "npm run verify:license-sync && npm run typecheck && npm test && npm run build && npm run verify:installer",
+    "sync:license:rtf": "node scripts/generate-license-rtf.mjs",
+    "verify:license-sync": "node scripts/verify-license-rtf-sync.mjs"
+  },
+  "build": {
+    "appId": "tr.anadoluparsi.aileyasammerkezi",
+    "productName": "Anadolu Parsı Aile Yaşam Merkezi",
+    "asar": true,
+    "electronDownload": {
+      "cache": "../../artifacts/validation/electron-cache"
+    },
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "Anadolu-Parsi-Aile-Yasam-Merkezi-Bronze-04.08.2026.28-${arch}-Kurulum.${ext}",
+      "icon": "build/icon.ico",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "allowElevation": true,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "shortcutName": "Anadolu Parsı Aile Yaşam Merkezi",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false,
+      "license": "build/LICENSE_TR.rtf",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico"
+    },
+    "copyright": "Copyright © 2026 Panthera pardus tulliana",
+    "artifactName": "Anadolu-Parsi-Aile-Yasam-Merkezi-Bronze-04.08.2026.28-${arch}-Kurulum.${ext}"
+  },
+  "description": "Anadolu Parsı yerel öncelikli aile yaşam, güvenlik ve dijital hafıza merkezi.",
+  "author": {
+    "name": "Panthera pardus tulliana"
+  }
+}

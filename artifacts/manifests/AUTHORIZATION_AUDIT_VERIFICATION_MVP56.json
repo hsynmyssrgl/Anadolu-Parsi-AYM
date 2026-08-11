@@ -1,0 +1,27 @@
+{
+  "version": "04.08.2026.29",
+  "status": "passed",
+  "checkedAt": "2026-08-11T06:57:22.931Z",
+  "checks": [
+    "non-admin cannot manage permissions",
+    "owner can read own private record",
+    "explicit allow grants object access",
+    "explicit deny overrides wildcard allow and ownership",
+    "invalid permission interval is rejected atomically",
+    "audit v2 chain verifies",
+    "audit log rejects update and delete mutations",
+    "new audit entries contain monotonic sequence and v2 metadata",
+    "audit verifier detects externally tampered chain"
+  ],
+  "totalChecks": 9,
+  "invariants": {
+    "denyPrecedence": true,
+    "ownerAccess": true,
+    "explicitGrant": true,
+    "adminOnlyManagement": true,
+    "auditAppendOnly": true,
+    "auditSequence": true,
+    "auditHashVersion": 2,
+    "tamperDetection": true
+  }
+}

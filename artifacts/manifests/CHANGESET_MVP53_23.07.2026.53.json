@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "23.07.2026.53",
+  "milestone": "B060-M13 Membership Collaboration & Notifications",
+  "added": [
+    "packages/repositories/src/invitation-repository.ts",
+    "packages/repositories/src/notification-state-repository.ts",
+    "packages/application/src/membership-use-cases.ts",
+    "apps/desktop/src/main/membership-application-adapter.ts",
+    "database/migrations/0008_membership_collaboration_notifications.sql",
+    "scripts/verify-membership-collaboration.mjs"
+  ],
+  "modified": [
+    "packages/domain/src/app-data.ts",
+    "packages/repositories/src/index.ts",
+    "packages/repositories/src/account-repository.ts",
+    "packages/repositories/src/timeline-repository.ts",
+    "packages/application/src/index.ts",
+    "packages/application/src/timeline-use-cases.ts",
+    "apps/desktop/src/main/timeline-application-adapter.ts",
+    "apps/desktop/src/main/data-store.ts",
+    "apps/desktop/src/main/database-migrations.ts",
+    "apps/desktop/src/main/main.ts",
+    "apps/desktop/src/main/preload.ts",
+    "apps/desktop/src/renderer/global.d.ts",
+    "apps/desktop/src/renderer/App.tsx",
+    "package.json",
+    "package-lock.json",
+    "scripts/verify-database-migrations.mjs",
+    "scripts/verify-data-store-smoke.mjs",
+    "scripts/verify-bronze-database.mjs",
+    "scripts/generate-baseline-manifest.mjs",
+    "artifacts/manifests/VERSION_LEDGER.json"
+  ],
+  "removed": [],
+  "generatedAt": "2026-07-23T20:46:11.624006Z"
+}

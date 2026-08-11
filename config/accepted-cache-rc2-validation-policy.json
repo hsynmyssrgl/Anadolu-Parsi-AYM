@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "acceptancePolicyPath": "config/npm-cache-bundle-acceptance-policy.json",
+  "validationGatesPath": "config/rc2-validation-gates.json",
+  "gateRunnerScript": "scripts/run-rc2-validation-gates.mjs",
+  "gateReportPath": "artifacts/validation/build153-rc2-validation-gates.json",
+  "acceptedBundleEnvironmentVariable": "PPT_NPM_CACHE_BUNDLE",
+  "acceptedReceiptEnvironmentVariable": "PPT_NPM_CACHE_ACCEPTANCE_RECEIPT",
+  "requireCompleteImportedCache": true,
+  "verifyBundlePayloadBeforeGates": true,
+  "runnerTimeoutMs": 1800000
+}

@@ -1,0 +1,67 @@
+import { createHash } from 'node:crypto';
+import { readFile, readdir } from 'node:fs/promises';
+import { basename, join, relative, resolve, sep } from 'node:path';
+import { inspectAuthorizedSuccessorLifecycle } from './lib/authorized-successor-lifecycle.mjs';
+
+const root = resolve(process.cwd());
+if (root !== resolve('C:\\PPT\\AYM', '06_KOD', 'app')) throw new Error(`Unsafe source root: ${root}`);
+const verifyExternal = process.argv.slice(2).includes('--external');
+const libraryRoot = 'D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\31-A_PPK-002_Timeline_Event_Policy_Enforcement';
+const paths = {
+  receipt: 'artifacts/checkpoints/31-A_LIBRARY_RECEIPT.json', readback: 'artifacts/validation/31-A_LIBRARY_READBACK_VERIFICATION.json',
+  receiptReadback: 'artifacts/validation/31-A_RECEIPT_READBACK_VERIFICATION.json', persistence: 'artifacts/validation/31-A_RECEIPT_READBACK_PERSISTENCE_VERIFICATION.json',
+  inventory: 'artifacts/validation/31-A_LIBRARY_FINAL_INVENTORY_VERIFICATION.json', completion: 'artifacts/checkpoints/31-A_COMPLETION_RECORD.json',
+  transition: 'artifacts/validation/31-A_COMPLETION_TRANSITION_VALIDATION.json', execution: 'artifacts/checkpoints/31-A_EXECUTION_RECORD.json',
+  scope: 'artifacts/inventory/31-A_SCOPE_AND_STATUS_REPORT.json', plan: 'config/work-segmentation-plan.json', ledger: 'config/active-governance-ledger.json'
+};
+const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
+const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
+const checks = []; const check = (condition, name, detail) => checks.push({ name, status: condition ? 'PASS' : 'FAIL', ...(!condition && detail ? { detail } : {}) });
+const documents = Object.fromEntries(await Promise.all(Object.entries(paths).map(async ([key, path]) => [key, await readJson(path)])));
+for (const key of ['receipt', 'readback', 'receiptReadback', 'persistence', 'inventory']) {
+  const bytes = await readFile(resolve(root, paths[key])); const declared = (await readFile(resolve(root, `${paths[key]}.sha256`), 'utf8')).trim().split(/\s+/u)[0];
+  check(declared === sha256(bytes), `${key} local sidecar binds exact bytes`);
+}
+const { receipt, readback, receiptReadback, persistence, inventory, completion, transition, execution, scope, plan, ledger } = documents;
+const step31A = plan.steps?.find((item) => item.id === '31-A'); const step31B = plan.steps?.find((item) => item.id === '31-B'); const step31C = plan.steps?.find((item) => item.id === '31-C'); const step31D = plan.steps?.find((item) => item.id === '31-D'); const step31E = plan.steps?.find((item) => item.id === '31-E'); const step31F = plan.steps?.find((item) => item.id === '31-F'); const active = plan.steps?.filter((item) => item.status === 'IN_PROGRESS') ?? [];
+const successor31BActive = plan.currentStep === '31-B' && active.length === 1 && active[0]?.id === '31-B' && active[0]?.persistentReceiptStatus === 'PENDING';
+const successor31BCompleted = plan.currentStep === '31-B' && active.length === 0 && step31B?.status === 'COMPLETED' && step31B.persistentReceiptStatus === 'PASS';
+const successor31CActive = plan.currentStep === '31-C' && active.length === 1 && active[0]?.id === '31-C' && active[0]?.persistentReceiptStatus === 'PENDING' && step31B?.status === 'COMPLETED';
+const successor31CCompleted = plan.currentStep === '31-C' && active.length === 0 && step31B?.status === 'COMPLETED' && step31C?.status === 'COMPLETED' && step31C.persistentReceiptStatus === 'PASS';
+const successor31DCompleted = plan.currentStep === '31-D' && active.length === 0 && step31C?.status === 'COMPLETED' && step31D?.status === 'COMPLETED' && step31D.persistentReceiptStatus === 'PASS';
+const successor31ECompleted = plan.currentStep === '31-E' && active.length === 0 && step31D?.status === 'COMPLETED' && step31E?.status === 'COMPLETED' && step31E.persistentReceiptStatus === 'PASS';
+const successor31FCompleted = plan.currentStep === '31-F' && active.length === 0 && step31E?.status === 'COMPLETED' && step31F?.status === 'COMPLETED' && step31F.persistentReceiptStatus === 'PASS';
+const laterSuccessor = inspectAuthorizedSuccessorLifecycle({ plan, ledger, predecessorId: '31-F' });
+check(receipt.status === 'PASS' && receipt.officialStepStatus === 'COMPLETED' && receipt.persistentReceiptStatus === 'PASS', '31-A receipt is official PASS');
+check(receipt.libraryPath === libraryRoot && receipt.storageBackend === 'EXTERNAL_USB_D_DRIVE', '31-A receipt binds D: USB Library');
+check(receipt.PPK002 === 'PARTIAL' && receipt.requirementCompletionClaimed === false && receipt.newBuildIssued === false, '31-A receipt preserves scope and Build boundaries');
+check(readback.status === 'PASS' && readback.failed === 0 && readback.matched === readback.expected, '31-A base package readback is PASS');
+check(receiptReadback.status === 'PASS' && receiptReadback.matched === 4 && receiptReadback.failed === 0, '31-A receipt readback is 4/4 PASS');
+check(persistence.status === 'PASS' && persistence.matched === 2 && persistence.failed === 0, '31-A receipt persistence is 2/2 PASS');
+check(inventory.status === 'PASS' && inventory.actualFilesBeforeInventory === inventory.expectedFilesBeforeInventory, '31-A final inventory is exact');
+check(completion.status === 'PASS' && completion.officialStepStatus === 'COMPLETED' && completion.persistentReceiptStatus === 'PASS', '31-A completion record is PASS');
+check(transition.status === 'PASS' && transition.failed === 0 && transition.passed === transition.expected, '31-A completion transition is PASS');
+check(execution.officialStepStatus === 'COMPLETED' && execution.officialCompletionClaimed === true, '31-A execution record is completed');
+check(scope.officialStepStatus === 'COMPLETED' && scope.PPK002 === 'PARTIAL', '31-A scope report is completed with PPK-002 partial');
+check(step31A?.status === 'COMPLETED' && step31A.persistentReceiptStatus === 'PASS' && ((plan.currentStep === '31-A' && active.length === 0) || successor31BActive || successor31BCompleted || successor31CActive || successor31CCompleted || successor31DCompleted || successor31ECompleted || successor31FCompleted || laterSuccessor.planValid), 'work plan preserves completed 31-A through authorized successors');
+check((plan.currentStep === '31-A' && ledger.libraryUploadStatus === '31-A_COMPLETED_RECEIPT_PASS' && ledger.activeMicroStep === null) || (successor31BActive && ['31-B_IN_PROGRESS_PREDECESSOR_31-A_RECEIPT_CHAIN_PASS', '31-B_LOCAL_PASS_AWAITING_LIBRARY_RECEIPT'].includes(ledger.libraryUploadStatus) && ledger.activeMicroStep === '31-B') || (successor31BCompleted && ledger.libraryUploadStatus === '31-B_COMPLETED_RECEIPT_PASS' && ledger.activeMicroStep === null) || (successor31CActive && ['31-C_IN_PROGRESS_PREDECESSOR_31-B_RECEIPT_CHAIN_PASS', '31-C_LOCAL_PASS_AWAITING_LIBRARY_RECEIPT'].includes(ledger.libraryUploadStatus) && ledger.activeMicroStep === '31-C') || (successor31CCompleted && ledger.libraryUploadStatus === '31-C_COMPLETED_RECEIPT_PASS' && ledger.activeMicroStep === null) || (successor31DCompleted && ledger.libraryUploadStatus === '31-D_COMPLETED_RECEIPT_PASS' && ledger.activeMicroStep === null) || (successor31ECompleted && ledger.libraryUploadStatus === '31-E_COMPLETED_RECEIPT_PASS' && ledger.activeMicroStep === null) || (successor31FCompleted && ledger.libraryUploadStatus === '31-F_COMPLETED_RECEIPT_PASS' && ledger.activeMicroStep === null) || laterSuccessor.ledgerValid, 'ledger preserves completed 31-A receipt chain');
+check((plan.currentStep === '31-A' && ledger.nextOfficialTask === 'AUTO_PRIORITY_SELECTION_AFTER_31-A_PERSISTENT_RECEIPT') || (successor31BActive && String(ledger.nextOfficialTask).startsWith('31-B')) || (successor31BCompleted && ledger.nextOfficialTask === 'AUTO_PRIORITY_SELECTION_AFTER_31-B_PERSISTENT_RECEIPT') || (successor31CActive && String(ledger.nextOfficialTask).startsWith('31-C')) || (successor31CCompleted && ledger.nextOfficialTask === 'AUTO_PRIORITY_SELECTION_AFTER_31-C_PERSISTENT_RECEIPT') || (successor31DCompleted && ledger.nextOfficialTask === 'AUTO_PRIORITY_SELECTION_AFTER_31-D_PERSISTENT_RECEIPT') || (successor31ECompleted && ledger.nextOfficialTask === 'AUTO_PRIORITY_SELECTION_AFTER_31-E_PERSISTENT_RECEIPT') || (successor31FCompleted && ledger.nextOfficialTask === 'AUTO_PRIORITY_SELECTION_AFTER_31-F_PERSISTENT_RECEIPT') || laterSuccessor.nextTaskValid, 'ledger records authorized successor state');
+if (verifyExternal) {
+  const list = async (directory) => { const files = []; const visit = async (current) => { for (const entry of await readdir(current, { withFileTypes: true })) { const path = join(current, entry.name); if (entry.isDirectory()) await visit(path); else if (entry.isFile()) files.push(relative(directory, path).split(sep).join('/')); } }; await visit(directory); return files.sort(); };
+  try {
+    const names = await list(libraryRoot);
+    check(names.length === inventory.finalExpectedFilesIncludingInventoryPair, 'D: final recursive file count is exact', `found=${names.length}`);
+    for (const artifact of readback.artifacts) {
+      const bytes = await readFile(resolve(libraryRoot, artifact.path));
+      check(bytes.length === artifact.sourceSizeBytes && sha256(bytes) === artifact.sourceSha256, `D: base artifact exact: ${artifact.path}`);
+    }
+    for (const key of ['receipt', 'readback', 'receiptReadback', 'persistence', 'inventory']) {
+      const localBytes = await readFile(resolve(root, paths[key])); const externalBytes = await readFile(resolve(libraryRoot, paths[key]));
+      check(localBytes.length === externalBytes.length && sha256(localBytes) === sha256(externalBytes), `D: supplemental artifact exact: ${basename(paths[key])}`);
+    }
+  } catch (error) { check(false, 'D: 31-A Library is readable', String(error)); }
+}
+const failures = checks.filter((item) => item.status === 'FAIL');
+if (failures.length) { console.error(`31-A completion transition: FAIL (${failures.length}/${checks.length}).`); for (const item of failures) console.error(`- ${item.name}${item.detail ? `: ${item.detail}` : ''}`); process.exit(1); }
+console.log(`31-A completion transition: PASS (${checks.length}/${checks.length}${verifyExternal ? '; D: external readback included' : '; durable local evidence'}).`);
+console.log('31-A: COMPLETED; persistent receipt: PASS; PPK-002: PARTIAL; new Build: false.');

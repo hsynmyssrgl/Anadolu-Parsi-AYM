@@ -1,0 +1,66 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": [
+      "node"
+    ],
+    "paths": {
+      "@ppt/application": [
+        "./packages/application/src/index.ts"
+      ],
+      "@ppt/config": [
+        "./packages/config/src/index.ts"
+      ],
+      "@ppt/contracts": [
+        "./packages/contracts/src/index.ts"
+      ],
+      "@ppt/core": [
+        "./packages/core/src/index.ts"
+      ],
+      "@ppt/database": [
+        "./packages/database/src/index.ts"
+      ],
+      "@ppt/domain": [
+        "./packages/domain/src/index.ts"
+      ],
+      "@ppt/events": [
+        "./packages/events/src/index.ts"
+      ],
+      "@ppt/infrastructure": [
+        "./packages/infrastructure/src/index.ts"
+      ],
+      "@ppt/logging": [
+        "./packages/logging/src/index.ts"
+      ],
+      "@ppt/repositories": [
+        "./packages/repositories/src/index.ts"
+      ],
+      "@ppt/repository-contracts": [
+        "./packages/repository-contracts/src/index.ts"
+      ],
+      "@ppt/security": [
+        "./packages/security/src/index.ts"
+      ],
+      "@ppt/test-data": [
+        "./packages/test-data/src/index.ts"
+      ]
+    }
+  },
+  "include": [
+    "packages/*/src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/dist/**",
+    "release",
+    "coverage",
+    ".tmp*",
+    "artifacts"
+  ]
+}

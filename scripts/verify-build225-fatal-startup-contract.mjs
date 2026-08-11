@@ -1,0 +1,15 @@
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+const sourceRoot=resolve(process.argv[2]??'.'),reportPath=resolve(process.argv[3]??'artifacts/validation/build225-fatal-startup-contract.json');
+const main=await readFile(resolve(sourceRoot,'apps/desktop/src/main/main.ts'),'utf8');const results=[];const check=(id,c)=>results.push({id,status:c?'PASS':'FAIL'});
+check('early-diagnostic-env-path',main.includes('PPT_WINDOWS_STARTUP_DIAGNOSTIC_PATH'));
+check('diagnostic-path-must-be-absolute',main.includes('!isAbsolute(outputPath)'));
+check('diagnostic-has-version-build-time',main.includes('applicationVersion: APP_META.version')&&main.includes('packageVersion: APP_META.packageVersion')&&main.includes('generatedAt: new Date().toISOString()'));
+check('diagnostic-has-stage',main.includes('startupStage')&&main.includes("startupStage = 'OPEN021_EFS_PROBE'"));
+check('diagnostic-has-error-stack',main.includes('error.stack')&&main.includes('error: normalized'));
+check('diagnostic-no-runtime-sensitive-payload',!main.includes('diagnosticEvidence.password')&&!main.includes('diagnosticEvidence.secret'));
+check('fatal-process-exit-code-set',main.includes('process.exitCode = 1'));
+check('fatal-electron-exit-nonzero',main.includes('app.exit(1)'));
+check('old-zero-masking-catch-removed',!main.includes("console.error('Anadolu Parsı Aile Yaşam Merkezi başlatılamadı.', error);\n  app.quit();"));
+check('when-ready-catch-routes-fatal',main.includes("exitAfterFatalStartupError(error, 'app.whenReady')"));
+const failures=results.filter(x=>x.status==='FAIL');const report={schemaVersion:1,build:225,status:failures.length?'FAIL':'PASS',checks:results.length,passed:results.length-failures.length,failed:failures.length,results,generatedAt:new Date().toISOString()};await mkdir(resolve(reportPath,'..'),{recursive:true});await writeFile(reportPath,`${JSON.stringify(report,null,2)}\n`);console.log(`Build225 fatal startup contract: ${report.status} (${report.passed}/${report.checks}).`);if(failures.length)process.exitCode=1;

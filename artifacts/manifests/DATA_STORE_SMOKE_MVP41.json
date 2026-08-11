@@ -1,0 +1,7 @@
+{
+  "status": "passed",
+  "checks": 4,
+  "peopleBefore": 6,
+  "peopleAfter": 7,
+  "backupCreated": true
+}

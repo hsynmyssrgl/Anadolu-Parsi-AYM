@@ -1,0 +1,14 @@
+PASS report repository exists
+PASS repository aggregates counts
+PASS repository aggregates finance
+PASS repository lists overdue
+PASS application port exists
+PASS application computes 30-day window
+PASS application computes net
+PASS adapter uses transaction executor
+PASS datastore use case wiring
+PASS direct report SQL removed
+10/10
+PASS report runtime people=1 events=1 tasks=1 insurance=1 meds=1 assets=1000 debts=300 overdue=1
+(node:28737) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)

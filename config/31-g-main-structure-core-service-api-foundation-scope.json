@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "31-G",
+  "requirements": [
+    "DHA-001",
+    "DHA-011",
+    "PPK-001",
+    "PPK-003",
+    "PPK-014",
+    "PPK-026"
+  ],
+  "primaryRequirement": "DHA-001",
+  "decision": "DEC-168",
+  "title": "Main structure Core Service typed API and ownership foundation",
+  "status": "COMPLETED",
+  "targetSliceStatus": "PASS",
+  "targets": {
+    "processBoundary": "HEADLESS_CORE_SERVICE_REMAINS_SINGLE_CLIENT_BOUNDARY",
+    "typedMethodMap": "ONE_COMPILE_TIME_CORE_SERVICE_API_METHOD_MAP",
+    "dispatch": "ONE_CENTRAL_FAIL_CLOSED_SERVER_DISPATCHER",
+    "architectureManifest": "PROTOCOL_API_OWNERSHIP_TRANSITION_AND_SUPPORTED_METHODS",
+    "desktopHandshake": "VERIFY_PROTOCOL_POLICY_OWNERSHIP_AND_REQUIRED_METHODS_AT_STARTUP",
+    "migrationPath": "FUTURE_DOMAIN_APIS_ATTACH_TO_THIS_REGISTRY_WITHOUT_DESKTOP_SQL",
+    "drivePolicy": "NO_GOOGLE_DRIVE_OR_UNUSED_PATHS"
+  },
+  "openBoundaries": {
+    "familyDataOwnershipInCoreService": "TRANSITION_NOT_COMPLETE",
+    "backupAndSyncOwnershipInCoreService": "TRANSITION_NOT_COMPLETE",
+    "httpsWebSocketGrpc": "NOT_COMPLETE",
+    "windowsServiceInstallation": "APPROVAL_BOUND_NOT_RUN_NOT_PASS",
+    "universalClientApiMigration": "NOT_COMPLETE"
+  },
+  "newBuildIssued": false,
+  "validationStatus": "PASS",
+  "persistentReceiptStatus": "PASS",
+  "validatedAt": "2026-08-10T17:37:34.885Z",
+  "officialCompletionClaimed": true,
+  "requirementCompletionClaimed": false,
+  "completedAt": "2026-08-10T17:40:55.300Z"
+}

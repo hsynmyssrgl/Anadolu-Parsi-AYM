@@ -1,0 +1,28 @@
+import { readFile, writeFile, mkdir, stat } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+const failures=[];let checks=0;const check=(c,m)=>{checks++;if(!c)failures.push(m)};
+const text=p=>readFile(p,'utf8');const json=async p=>JSON.parse(await text(p));const exists=async p=>{try{await stat(p);return true}catch{return false}};
+const ledger=await json('config/master-build-ledger.json');const constitution=await json('config/project-constitution.json');const policy=await json('config/master-build-ledger-policy.json');
+const rs=ledger.projectRules.versions.find((entry)=>entry.version==='PROJECT-RULES-2026-08-01-V4');check(Boolean(rs),'historical V4 rule set missing');
+check(rs.version==='PROJECT-RULES-2026-08-01-V4',`rule version=${rs.version}`);check(rs.effectiveBuild===209,`effectiveBuild=${rs.effectiveBuild}`);check(rs.rules.length===170,`rule count=${rs.rules.length}`);check(rs.rules.at(-1)?.id==='PR-170','last rule must be PR-170');
+const canonicalize=v=>Array.isArray(v)?`[${v.map(canonicalize).join(',')}]`:v&&typeof v==='object'?`{${Object.keys(v).sort().map(k=>`${JSON.stringify(k)}:${canonicalize(v[k])}`).join(',')}}`:JSON.stringify(v);
+const expected=createHash('sha256').update(canonicalize({version:rs.version,effectiveBuild:rs.effectiveBuild,rules:rs.rules})).digest('hex');check(rs.sha256===expected,`rule SHA mismatch=${rs.sha256}`);check(rs.sha256==='6259d2c757caf865aedfe99a7bcea0a1a333551415b0912a856ac571876274f9','V4 expected SHA mismatch');
+check(/^PPT-PROJECT-CONSTITUTION-V\d+$/.test(constitution.id) && constitution.effectiveBuild>=209,'current constitution must preserve the Build209 security baseline');check(/^PPT-BUILD-LEDGER-CONTINUITY-V\d+$/.test(policy.policyId) && policy.effectiveBuild>=209,'current ledger policy must preserve the Build209 governance baseline');
+check(constitution.externalIdentityProviders?.join(',')==='apple,google,microsoft','external identity provider set mismatch');check(constitution.preAuthenticationUserDataAccessForbidden===true,'pre-auth data gate disabled');check(constitution.persistentUserDataEncryptionRequired===true,'persistent encryption disabled');check(constitution.internalArchivePreviewRequired===true,'internal archive preview disabled');
+const vault=await text('apps/desktop/src/main/user-data-vault.ts');
+for(const token of ["createCipheriv('aes-256-gcm'","scryptSync(password","maxmem: 64 * 1024 * 1024","this.options.protector.protect","this.options.protector.unprotect","checkpoint(databaseBytes: Buffer)","this.discardSession()"]){check(vault.includes(token),`vault token missing=${token}`)}
+const main=await text('apps/desktop/src/main/main.ts');
+check(!main.includes('legacyProductName'),'automatic legacy product source transfer still present');check(!main.includes('cpSync(legacyUserDataPath'),'legacy user data copy still present');
+check(main.includes("registerIpcHandler('auth:getState', () => dataStore ? dataStore.getAuthState() : lockedAuthState())"),'locked auth state gate missing');
+check(main.includes("if (!session || !vault().isUnlocked()) throw new Error('Kullanıcı veri kasası kilitli.')"),'store does not require unlocked vault');check(main.includes('databaseConnection: session.database'),'current store is not composed over authenticated memory session');check(main.includes("securityEventReceiptPath: join(dirname(databasePath), 'security-event-receipts.json')")||main.includes("securityEventReceiptPath: join(dirname(databasePath), 'security-event-receipts.pptdiag')"),'security receipts are not session-local/protected');check(main.includes("migrationBackupDirectory: join(dirname(databasePath), 'migration-backups')"),'migration backups are not session-local');
+check(main.includes("id: 'apple'")&&main.includes("id: 'google'")&&main.includes("id: 'microsoft'"),'Apple/Google/Microsoft provider registry incomplete');
+check(main.includes('openArchiveInSecurePreview'),'secure archive preview missing');check(!/shell\.openPath\s*\(/.test(main),'external decrypted archive open is still reachable');
+check(main.includes('sealUserDataSession()'),'vault reseal flow missing');check(main.includes('startVaultSessionGuard()'),'session expiry guard missing');
+const renderer=await text('apps/desktop/src/renderer/App.tsx');
+for(const token of ['FirstRunIntroduction','speechSynthesis','playParsBrandSound','FirstRunSecuritySetup','beginTwoFactorSetup','recoveryCodes','getExternalIdentityProviders'])check(renderer.includes(token),`renderer onboarding token missing=${token}`);
+check(renderer.includes("auth.authenticated && !auth.twoFactorEnabled"),'first-run security completion gate missing');
+const domain=await text('packages/domain/src/app-data.ts');check(domain.includes("'apple' | 'google' | 'microsoft'"),'domain identity provider union incomplete');
+for(const p of ['docs/18_PROJECT_CONSTITUTION_V4.md','docs/decisions/DEC-099-secure-onboarding-and-user-data-vault.md','docs/adr/ADR-082-secure-onboarding-user-data-vault.md'])check(await exists(p),`required Build209 constitution artifact missing=${p}`);
+const report={schemaVersion:1,build:209,ruleVersion:rs.version,ruleCount:rs.rules.length,ruleSha256:rs.sha256,checks,status:failures.length?'FAIL':'PASS',failures,generatedAt:new Date().toISOString()};
+await mkdir('artifacts/validation',{recursive:true});await writeFile('artifacts/validation/build209-secure-onboarding-vault-contract.json',JSON.stringify(report,null,2)+'\n');
+if(failures.length){console.error(failures.join('\n'));process.exit(1)}console.log(`Build 209 secure onboarding/vault contract: PASS (${checks} checks / ${rs.rules.length} rules).`);

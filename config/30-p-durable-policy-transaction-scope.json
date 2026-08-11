@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "30-P",
+  "requirement": "PPK-002",
+  "scope": "ARCHIVE_DURABLE_POLICY_TRANSACTION_REPLAY_FENCING_AND_ATOMIC_RECEIPT_SLICE",
+  "predecessor": {
+    "step": "30-O",
+    "productionArchiveCompositionSlice": "PASS",
+    "persistentReceiptStatus": "PASS",
+    "completionRecord": "artifacts/checkpoints/30-O_COMPLETION_RECORD.json"
+  },
+  "targets": [
+    {
+      "id": "durable-sqlite-replay-reservation",
+      "requiredResult": "Policy nonces are reserved in real SQLite with a unique constraint, bounded expiry and multi-process-safe transaction semantics; duplicate or stale replay attempts fail closed."
+    },
+    {
+      "id": "database-enforced-write-fence",
+      "requiredResult": "Archive writes validate a durable writable epoch inside the same SQLite transaction so an old epoch or non-writable fence cannot commit."
+    },
+    {
+      "id": "atomic-policy-receipt-and-business-commit",
+      "requiredResult": "Verified receipt identity and the archive business mutation commit or roll back together in one real SQLite transaction."
+    },
+    {
+      "id": "archive-audit-outbox-receipt-binding",
+      "requiredResult": "Archive audit and outbox rows persist policy version, receipt digest, nonce, correlation, resource, action and capability binding and reject missing or mismatched policy context."
+    },
+    {
+      "id": "durable-protected-journal-projection",
+      "requiredResult": "A committed transactional receipt outbox can be projected idempotently to the protected journal and acknowledged only after trusted readback."
+    },
+    {
+      "id": "crash-restart-recovery",
+      "requiredResult": "Crash boundaries before commit, after commit and during journal projection recover without duplicate business mutation, lost durable receipt or replay acceptance."
+    },
+    {
+      "id": "two-process-race-runtime",
+      "requiredResult": "Two real processes sharing one SQLite database prove duplicate nonce, duplicate correlation and stale fence races are serialized and rejected with real exit codes."
+    }
+  ],
+  "requiredOrder": [
+    "trusted-authority-and-resource-resolution",
+    "durable-replay-reservation",
+    "provider-authorization-and-receipt-verification",
+    "sqlite-business-transaction-begin",
+    "database-fence-validation",
+    "same-transaction-authority-and-resource-revalidation",
+    "atomic-policy-receipt-insert",
+    "archive-mutation",
+    "receipt-bound-audit-and-outbox",
+    "sqlite-business-transaction-commit",
+    "protected-journal-projection-and-readback",
+    "transactional-projection-acknowledgement"
+  ],
+  "runtimeProofRequirements": {
+    "actualSQLiteDatabase": true,
+    "realTransactionBoundary": true,
+    "twoIndependentProcesses": true,
+    "durableReplayAcrossRestart": true,
+    "duplicateNonceRejected": true,
+    "duplicateCorrelationRejected": true,
+    "staleFenceRejected": true,
+    "receiptAndBusinessCommitTogether": true,
+    "auditAndOutboxReceiptBinding": true,
+    "rollbackRemovesAllTransactionalRows": true,
+    "idempotentProtectedJournalProjection": true,
+    "trustedProjectionReadback": true,
+    "legacyAuthorizationFallback": false
+  },
+  "evidenceBoundary": {
+    "PPK002": "PARTIAL",
+    "universalRepositoryEnforcement": "NOT_COMPLETE",
+    "durableMultiProcessReplayProtection": "TARGETED_NOT_YET_PASS",
+    "receiptAndBusinessCommitAtomicity": "TARGETED_NOT_YET_PASS",
+    "crossProcessFenceAndSQLiteCommitAtomicity": "TARGETED_NOT_YET_PASS",
+    "archiveAuditAndOutboxReceiptBinding": "TARGETED_NOT_YET_PASS",
+    "directSqlArchiveTableUniversalFenceEnforcement": "NOT_COMPLETE",
+    "policyBoundProductionRepositoryPath": "TARGETED_NOT_YET_PASS",
+    "deadProjectionLockAndIncompleteTailRecovery": "TARGETED_NOT_YET_PASS",
+    "completeTailJournalRollbackDetection": "NOT_IMPLEMENTED",
+    "journalAcknowledgementCryptographicProofToken": "NOT_IMPLEMENTED",
+    "newCorrelationRetryIdempotencyAfterUnknownCommitOutcome": "NOT_COMPLETE",
+    "expiredUnusedReplayReservationPruning": "NOT_IMPLEMENTED",
+    "obligationExecution": "NOT_RUN_NOT_PASS",
+    "auditAndOutboxRepositoryEnforcement": "NOT_COMPLETE",
+    "eventAttachmentCrossAggregateReceiptBinding": "NOT_COMPLETE",
+    "secureFileDeletionAndDatabaseCommitAtomicity": "NOT_IMPLEMENTED",
+    "installedCoreServiceRegistrationAndScmLifecycle": "NOT_RUN_NOT_PASS",
+    "protectedCoreServiceAuthorityProvisioningRotationAndAcl": "NOT_IMPLEMENTED",
+    "requirementCompletionClaimed": false
+  },
+  "mandatoryTruthSentence": "Bu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır."
+}

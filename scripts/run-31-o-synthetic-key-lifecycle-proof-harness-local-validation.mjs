@@ -1,0 +1,239 @@
+import { spawnSync } from 'node:child_process';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
+import { performance } from 'node:perf_hooks';
+
+const root = resolve(process.cwd());
+if (root !== resolve('C:\\PPT\\AYM', '06_KOD', 'app')) throw new Error(`Unsafe source root: ${root}`);
+const paths = {
+  plan: 'config/work-segmentation-plan.json',
+  ledger: 'config/active-governance-ledger.json',
+  execution: 'artifacts/checkpoints/31-O_EXECUTION_RECORD.json',
+  failures: 'artifacts/checkpoints/31-O_INITIAL_VALIDATION_FAILURES.json',
+  scopeConfig: 'config/31-o-synthetic-key-lifecycle-proof-harness-scope.json',
+  contract: 'artifacts/validation/31-O_SYNTHETIC_KEY_LIFECYCLE_PROOF_HARNESS_CONTRACT.json',
+  typecheck: 'artifacts/validation/31-O_ROOT_TYPESCRIPT.json',
+  targeted: 'artifacts/validation/31-O_TARGETED_VITEST.json',
+  runtime: 'artifacts/validation/31-O_CORE_SERVICE_RUNTIME.json',
+  security: 'artifacts/validation/31-O_SECURITY_AND_PREDECESSOR_REGRESSION.json',
+  regression: 'artifacts/validation/31-O_FULL_VITEST_REGRESSION.json',
+  build: 'artifacts/validation/31-O_PRODUCTION_BUILD.json',
+  platform: 'artifacts/validation/platform-policy-gate.json',
+  scope: 'artifacts/inventory/31-O_SCOPE_AND_STATUS_REPORT.json',
+  audit: 'docs/audit/31-O_SYNTHETIC_KEY_LIFECYCLE_PROOF_HARNESS.md'
+};
+const full = (path) => resolve(root, path);
+const readJson = async (path) => JSON.parse(await readFile(full(path), 'utf8'));
+const writeJson = async (path, value) => {
+  await mkdir(dirname(full(path)), { recursive: true });
+  await writeFile(full(path), `${JSON.stringify(value, null, 2)}\n`, 'utf8');
+};
+const stripAnsi = (value) => value.replace(/\u001b\[[0-9;]*m/gu, '');
+const tail = (value) => stripAnsi(value).trim().split(/\r?\n/u).slice(-30).join('\n');
+const run = (name, args, cwd = root) => {
+  const started = performance.now();
+  const result = spawnSync(process.execPath, args, {
+    cwd,
+    encoding: 'utf8',
+    env: { ...process.env, NO_COLOR: '1', FORCE_COLOR: '0' },
+    windowsHide: true,
+    maxBuffer: 24 * 1024 * 1024
+  });
+  return {
+    name,
+    command: `node ${args.join(' ')}`,
+    status: result.status === 0 ? 'PASS' : 'FAIL',
+    processExitCode: result.status ?? 1,
+    durationSeconds: Number(((performance.now() - started) / 1000).toFixed(2)),
+    outputTail: tail(`${result.stdout ?? ''}\n${result.stderr ?? ''}`),
+    stdout: result.stdout ?? '',
+    stderr: result.stderr ?? ''
+  };
+};
+const publicResult = ({ stdout, stderr, ...result }) => result;
+const pass = (result) => {
+  if (result.status !== 'PASS') {
+    console.error(result.outputTail);
+    throw new Error(`${result.name} failed`);
+  }
+};
+const count = (text, pattern, label) => {
+  const match = stripAnsi(text).match(pattern);
+  if (!match) throw new Error(`Could not parse ${label}`);
+  return Number(match[1]);
+};
+
+const [plan, ledger, execution, scopeConfig, initialFailures] = await Promise.all([
+  readJson(paths.plan), readJson(paths.ledger), readJson(paths.execution), readJson(paths.scopeConfig), readJson(paths.failures)
+]);
+const step = plan.steps.find((item) => item.id === '31-O');
+if (!step || plan.currentStep !== '31-O' || step.status !== 'IN_PROGRESS') throw new Error('31-O is not active');
+const validationPending = execution.status === 'IN_PROGRESS_VALIDATION_PENDING' && scopeConfig.status === 'IN_PROGRESS';
+const cleanRerun = execution.status === 'LOCAL_PASS_AWAITING_LIBRARY_RECEIPT' && execution.validationStatus === 'PASS' && execution.persistentReceiptStatus === 'PENDING' && scopeConfig.status === 'IN_PROGRESS';
+if (!validationPending && !cleanRerun) throw new Error('31-O is not awaiting validation or an idempotent clean rerun');
+if (initialFailures.countsAsPass !== false || !['NO_FAILED_ATTEMPTS', 'FAILED_ATTEMPTS_RETAINED_NOT_COUNTED_AS_PASS'].includes(initialFailures.status)) {
+  throw new Error('31-O failed attempts are not truthfully classified');
+}
+if (!initialFailures.failures.every((failure) => String(failure.rerunStatus).startsWith('PASS') || failure.rerunStatus === 'REMEDIATED_AWAITING_CLEAN_RERUN')) {
+  throw new Error('31-O initial failures do not have clean rerun evidence');
+}
+
+const contractRun = run('31-O contract', ['scripts/verify-31-o-synthetic-key-lifecycle-proof-harness-contract.mjs']);
+pass(contractRun);
+const contract = await readJson(paths.contract);
+if (contract.status !== 'PASS' || contract.failed !== 0 || contract.passed !== contract.expected) throw new Error('31-O contract is not clean PASS');
+
+const typecheck = run('Root TypeScript', ['node_modules/typescript/bin/tsc', '--noEmit']);
+await writeJson(paths.typecheck, {
+  schemaVersion: 1, release: plan.release, step: '31-O', phase: 'ROOT_TYPESCRIPT_NO_EMIT',
+  ...publicResult(typecheck), diagnosticCount: typecheck.status === 'PASS' ? 0 : null, executedAt: new Date().toISOString()
+});
+pass(typecheck);
+
+const buildProjects = ['packages/core-service-contracts/tsconfig.json', 'apps/core-service/tsconfig.json'];
+const packageBuilds = buildProjects.map((project) => run(`Build ${project}`, ['node_modules/typescript/bin/tsc', '-p', project]));
+packageBuilds.forEach(pass);
+
+const targeted = run('Targeted Vitest', [
+  'node_modules/vitest/vitest.mjs', 'run',
+  'apps/core-service/tests/synthetic-key-lifecycle-proof-harness.test.ts',
+  'apps/core-service/tests/synthetic-single-writer-proof-harness.test.ts',
+  'apps/core-service/tests/signed-cutover-readiness-evidence-verifier.test.ts',
+  'apps/core-service/tests/protected-cutover-readiness-journal-port.test.ts',
+  'apps/core-service/tests/family-data-cutover-readiness-ledger.test.ts',
+  'apps/desktop/tests/core-service-cutover-readiness-validation.test.ts',
+  'apps/core-service/tests/core-service-method-dispatcher.test.ts',
+  'apps/core-service/tests/family-data-cutover-guard.test.ts',
+  'apps/core-service/tests/family-data-ownership-runtime.test.ts',
+  'apps/core-service/tests/device-secret-protection-runtime.test.ts'
+]);
+const targetedText = `${targeted.stdout}\n${targeted.stderr}`;
+const targetedFiles = targeted.status === 'PASS' ? count(targetedText, /Test Files\s+(\d+) passed/u, 'targeted files') : null;
+const targetedTests = targeted.status === 'PASS' ? count(targetedText, /Tests\s+(\d+) passed/u, 'targeted tests') : null;
+await writeJson(paths.targeted, {
+  schemaVersion: 1, release: plan.release, step: '31-O', phase: 'TARGETED_VITEST',
+  ...publicResult(targeted), testFilePassCount: targetedFiles, testPassCount: targetedTests,
+  testFileFailCount: targeted.status === 'PASS' ? 0 : null, testFailCount: targeted.status === 'PASS' ? 0 : null,
+  executedAt: new Date().toISOString()
+});
+pass(targeted);
+
+const runtimeCommands = [
+  ['Core Service Local Admin contract', 'scripts/verify-core-service-local-admin-contract.mjs'],
+  ['Core Service Local Admin runtime', 'scripts/verify-core-service-local-admin-runtime-wrapper.mjs'],
+  ['Core Service boundary', 'scripts/verify-core-service-boundary.mjs'],
+  ['Desktop startup contract', 'scripts/verify-desktop-core-service-startup-contract.mjs'],
+  ['Desktop startup runtime', 'scripts/verify-desktop-core-service-startup-runtime-wrapper.mjs'],
+  ['System Health contract', 'scripts/verify-system-health-core-service-ipc-contract.mjs'],
+  ['System Health runtime', 'scripts/verify-system-health-core-service-ipc-runtime-wrapper.mjs'],
+  ['Platform Policy gate', 'scripts/verify-platform-policy-gate.mjs']
+];
+const runtimeResults = runtimeCommands.map(([name, script]) => run(name, [script]));
+runtimeResults.forEach(pass);
+await writeJson(paths.runtime, {
+  schemaVersion: 1, release: plan.release, step: '31-O', phase: 'CORE_SERVICE_DETACHED_SYNTHETIC_KEY_LIFECYCLE_RUNTIME_GATES',
+  status: 'PASS', expected: runtimeResults.length, executed: runtimeResults.length, passed: runtimeResults.length, failed: 0,
+  checks: runtimeResults.map(publicResult), executedAt: new Date().toISOString()
+});
+const platform = await readJson(paths.platform);
+if (platform.status !== 'PASS' || platform.newBypassCount !== 0 || platform.runtimeStatus !== 'PASS') throw new Error('Platform Policy is not clean PASS');
+
+const securityCommands = [
+  ['31-H ownership contract successor regression', 'scripts/verify-31-h-core-service-family-data-session-ownership-control-plane-contract.mjs', '--successor-regression'],
+  ['31-I device-secret contract successor regression', 'scripts/verify-31-i-headless-device-secret-protection-boundary-contract.mjs', '--successor-regression'],
+  ['31-J cutover guard contract successor regression', 'scripts/verify-31-j-family-data-coexistence-default-deny-cutover-gate-contract.mjs', '--successor-regression'],
+  ['31-K readiness contract successor regression', 'scripts/verify-31-k-monotonic-cutover-readiness-evidence-contract.mjs', '--successor-regression'],
+  ['31-L journal-port contract successor regression', 'scripts/verify-31-l-protected-cutover-readiness-journal-port-contract.mjs', '--successor-regression'],
+  ['31-M signed-verifier contract successor regression', 'scripts/verify-31-m-signed-cutover-readiness-evidence-verifier-boundary-contract.mjs', '--successor-regression'],
+  ['31-N single-writer contract successor regression', 'scripts/verify-31-n-synthetic-single-writer-proof-harness-contract.mjs', '--successor-regression'],
+  ['31-H completion regression', 'scripts/verify-31-h-family-data-ownership-completion-transition.mjs'],
+  ['31-I completion regression', 'scripts/verify-31-i-headless-device-secret-protection-completion-transition.mjs'],
+  ['31-J completion regression', 'scripts/verify-31-j-family-data-coexistence-default-deny-cutover-completion-transition.mjs'],
+  ['31-K completion regression', 'scripts/verify-31-k-monotonic-cutover-readiness-completion-transition.mjs'],
+  ['31-L completion regression', 'scripts/verify-31-l-protected-cutover-readiness-journal-port-completion-transition.mjs'],
+  ['31-M completion regression', 'scripts/verify-31-m-signed-cutover-readiness-evidence-verifier-boundary-completion-transition.mjs'],
+  ['31-N completion regression', 'scripts/verify-31-n-synthetic-single-writer-proof-harness-completion-transition.mjs'],
+  ['Device secret protector runtime', 'scripts/verify-device-secret-protector-runtime.mjs'],
+  ['User data vault runtime', 'scripts/verify-build209-user-data-vault-runtime.mjs'],
+  ['Volatile user data runtime', 'scripts/verify-build213-volatile-user-data-runtime.mjs'],
+  ['DPAPI root-cause contract', 'scripts/verify-build227-root-cause-contract.mjs'],
+  ['31-O contract verifier syntax', '--check', 'scripts/verify-31-o-synthetic-key-lifecycle-proof-harness-contract.mjs'],
+  ['31-O local validator syntax', '--check', 'scripts/run-31-o-synthetic-key-lifecycle-proof-harness-local-validation.mjs'],
+  ['31-O finalizer syntax', '--check', 'scripts/finalize-31-o-synthetic-key-lifecycle-proof-harness-external-library-receipt.mjs'],
+  ['31-O completion verifier syntax', '--check', 'scripts/verify-31-o-synthetic-key-lifecycle-proof-harness-completion-transition.mjs']
+];
+const securityResults = securityCommands.map(([name, ...args]) => run(name, args));
+securityResults.forEach(pass);
+await writeJson(paths.security, {
+  schemaVersion: 1, release: plan.release, step: '31-O', phase: 'SYNTHETIC_KEY_LIFECYCLE_SECURITY_AND_PREDECESSOR_REGRESSION',
+  status: 'PASS', expected: securityResults.length, executed: securityResults.length, passed: securityResults.length, failed: 0,
+  checks: securityResults.map(publicResult), executedAt: new Date().toISOString()
+});
+
+const regression = run('Full Vitest regression', ['node_modules/vitest/vitest.mjs', 'run']);
+const regressionText = `${regression.stdout}\n${regression.stderr}`;
+const fullFiles = regression.status === 'PASS' ? count(regressionText, /Test Files\s+(\d+) passed/u, 'full files') : null;
+const fullTests = regression.status === 'PASS' ? count(regressionText, /Tests\s+(\d+) passed/u, 'full tests') : null;
+await writeJson(paths.regression, {
+  schemaVersion: 1, release: plan.release, step: '31-O', phase: 'FULL_VITEST_REGRESSION',
+  ...publicResult(regression), testFilePassCount: fullFiles, testPassCount: fullTests,
+  testFileFailCount: regression.status === 'PASS' ? 0 : null, testFailCount: regression.status === 'PASS' ? 0 : null,
+  executedAt: new Date().toISOString()
+});
+pass(regression);
+
+const electron = run('Electron production compile', ['scripts/build-electron.mjs'], resolve(root, 'apps/desktop'));
+pass(electron);
+const renderer = run('Renderer production build', ['../../node_modules/vite/bin/vite.js', 'build'], resolve(root, 'apps/desktop'));
+pass(renderer);
+await writeJson(paths.build, {
+  schemaVersion: 1, release: plan.release, step: '31-O', phase: 'PRODUCTION_BUILD', status: 'PASS',
+  affectedPackageBuilds: packageBuilds.map(publicResult), electronMain: 'PASS', renderer: 'PASS',
+  commands: [publicResult(electron), publicResult(renderer)], executedAt: new Date().toISOString()
+});
+
+const validatedAt = new Date().toISOString();
+const validation = {
+  contract: `PASS_${contract.passed}_OF_${contract.expected}`,
+  rootTypeScript: 'PASS_0_DIAGNOSTICS',
+  affectedPackageBuilds: `PASS_${packageBuilds.length}_OF_${packageBuilds.length}`,
+  targetedVitest: `PASS_${targetedTests}_OF_${targetedTests}_IN_${targetedFiles}_FILES`,
+  runtimeGates: `PASS_${runtimeResults.length}_OF_${runtimeResults.length}`,
+  securityAndPredecessorRegression: `PASS_${securityResults.length}_OF_${securityResults.length}`,
+  fullVitest: `PASS_${fullTests}_OF_${fullTests}_IN_${fullFiles}_FILES`,
+  productionBuild: 'PASS',
+  platformPolicy: `PASS_LEGACY_${platform.legacyBypassCount}_NEW_BYPASS_0_RUNTIME_PASS`
+};
+const evidence = [paths.contract, paths.typecheck, paths.targeted, paths.runtime, paths.security, paths.regression, paths.build, paths.platform, paths.failures, paths.scope, paths.audit];
+for (const path of evidence) if (!step.localEvidence.includes(path)) step.localEvidence.push(path);
+step.validationStatus = 'PASS';
+step.persistentReceiptStatus = 'PENDING';
+plan.updatedAt = validatedAt;
+plan.segmentationNote = `31-O synthetic key-lifecycle proof harness is LOCAL_PASS_AWAITING_LIBRARY_RECEIPT after ${contract.passed}/${contract.expected} contract, root TypeScript, ${packageBuilds.length}/${packageBuilds.length} affected builds, ${targetedTests}/${targetedTests} targeted tests, ${runtimeResults.length}/${runtimeResults.length} runtime gates, ${securityResults.length}/${securityResults.length} security/predecessor regressions, full Vitest ${fullTests}/${fullTests}, and production build PASS. The harness remains synthetic and non-submittable; no protected provider, real key material, real gate PASS, runtime wiring, real data, SQLite transfer, or cutover authority is attached.`;
+await writeJson(paths.plan, plan);
+ledger.libraryUploadStatus = '31-O_SYNTHETIC_KEY_LIFECYCLE_HARNESS_LOCAL_PASS_AWAITING_LIBRARY_RECEIPT';
+ledger.updatedAt = validatedAt;
+await writeJson(paths.ledger, ledger);
+Object.assign(execution, {
+  status: 'LOCAL_PASS_AWAITING_LIBRARY_RECEIPT', officialStepStatus: 'IN_PROGRESS_AWAITING_LIBRARY_RECEIPT',
+  targetSliceStatus: 'PASS', validationStatus: 'PASS', persistentReceiptStatus: 'PENDING', officialCompletionClaimed: false,
+  validation, evidence, requirementCompletionClaimed: false, newBuildIssued: false, validatedAt
+});
+await writeJson(paths.execution, execution);
+Object.assign(scopeConfig, { status: 'IN_PROGRESS', targetSliceStatus: 'PASS', validationStatus: 'PASS', persistentReceiptStatus: 'PENDING', validatedAt });
+await writeJson(paths.scopeConfig, scopeConfig);
+await writeJson(paths.scope, {
+  schemaVersion: 1, release: plan.release, step: '31-O', primaryRequirement: scopeConfig.primaryRequirement,
+  requirements: scopeConfig.requirements, status: 'LOCAL_PASS_AWAITING_LIBRARY_RECEIPT', officialStepStatus: 'IN_PROGRESS_AWAITING_LIBRARY_RECEIPT',
+  targetSliceStatus: 'PASS', validationStatus: 'PASS', persistentReceiptStatus: 'PENDING', officialCompletionClaimed: false,
+  requirementCompletionClaimed: false, cleanEvidence: validation, deliveredBoundary: scopeConfig.targets,
+  openBoundaries: scopeConfig.openBoundaries, requirementStatuses: Object.fromEntries(scopeConfig.requirements.map((id) => [id, 'OPEN_FOUNDATION_ONLY'])),
+  newBuildIssued: false, generatedAt: validatedAt
+});
+const audit = `# 31-O synthetic key lifecycle proof harness\n\nStatus: \`LOCAL_PASS_AWAITING_LIBRARY_RECEIPT\`\n\n## Delivered boundary\n\n- Pure synthetic lifecycle: detached, protected, session-open, sealing, and sealed.\n- Exact input shapes, safe epochs, distinct opaque identifiers, and never-reused lowercase SHA-256-format proof digests.\n- At most one bounded synthetic plaintext lease; it is released before the sealed candidate is produced.\n- Invalid order, stale epoch, malformed input, ambiguous identifiers, invalid/reused proof, second lease, and post-seal transition fail closed without mutation.\n- Candidate exposes modeledGate only, has no gateId, and remains non-submittable with every production flag false.\n- Exported Core Service boundary with no readiness-ledger or runtime wiring.\n\n## Clean validation\n\n- Contract: ${contract.passed}/${contract.expected} PASS.\n- Root TypeScript: 0 diagnostics.\n- Affected package builds: ${packageBuilds.length}/${packageBuilds.length} PASS.\n- Targeted Vitest: ${targetedTests}/${targetedTests} in ${targetedFiles} files.\n- Runtime gates: ${runtimeResults.length}/${runtimeResults.length} PASS.\n- Security and predecessor regressions: ${securityResults.length}/${securityResults.length} PASS.\n- Full Vitest: ${fullTests}/${fullTests} in ${fullFiles} files.\n- Electron main and renderer production builds: PASS.\n- Platform Policy: PASS; new bypass count 0.\n\n## Open boundaries\n\nReal key material and real family data are not accessed. No production protected provider, process crash/restart proof, memory-clearing proof, stale-lease recovery, rollback recovery, real KEY_LIFECYCLE_PROOF PASS, runtime attachment, SQLite ownership transfer, or cutover authority is attached. DEC-171 remains active and blocked; DEC-172 through DEC-175 remain active. Requirements remain open and no new Build is issued.\n\nInitial failed attempts are retained in \`artifacts/checkpoints/31-O_INITIAL_VALIDATION_FAILURES.json\` and are not counted as PASS.\n`;
+await writeFile(full(paths.audit), audit, 'utf8');
+for (const failure of initialFailures.failures) {
+  if (failure.rerunStatus === 'REMEDIATED_AWAITING_CLEAN_RERUN') failure.rerunStatus = `PASS_WITH_FINAL_CLEAN_VALIDATION_${contract.passed}_OF_${contract.expected}`;
+}
+await writeJson(paths.failures, initialFailures);
+console.log(`31-O local validation: PASS (${contract.passed}/${contract.expected} contract; ${targetedTests}/${targetedTests} targeted; ${runtimeResults.length}/${runtimeResults.length} runtime; ${securityResults.length}/${securityResults.length} security/predecessor; ${fullTests}/${fullTests} full); awaiting D: Library receipt.`);

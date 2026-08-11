@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "23.07.2026.51",
+  "milestone": "B060-M11 MFA Recovery & Trusted Device Identity",
+  "status": "passed",
+  "checks": 14,
+  "peopleBefore": 6,
+  "peopleAfter": 7,
+  "backupCreated": true,
+  "migrationVersions": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "schemaFingerprint": "55c995c19629afc7946adce49172e439e4e862dcd53fb14a0d3b38fc8dcf3759"
+}

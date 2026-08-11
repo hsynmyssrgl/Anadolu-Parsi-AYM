@@ -1,0 +1,307 @@
+{
+  "product": "Anadolu Parsı Aile Yaşam Merkezi",
+  "plannedVisibleRelease": "Bronze 03.08.2026.27",
+  "documentStatus": "BINDING_SCOPE_INPUT_NOT_SOURCE_BUILD",
+  "revisedBronzeCompletionRange": [
+    39,
+    42
+  ],
+  "distributedPlatformAdditionalFocusedWorkdays": [
+    35,
+    50
+  ],
+  "totalBronzeFocusedWorkdays": [
+    90,
+    125
+  ],
+  "silverFocusedWorkdays": [
+    30,
+    45
+  ],
+  "goldFocusedWorkdays": [
+    7,
+    12
+  ],
+  "requirements": [
+    {
+      "id": "DHA-001",
+      "area": "Process architecture",
+      "requirement": "Electron arayüzünden bağımsız, kullanıcı oturumu kapalıyken de çalışan headless Core Service",
+      "priority": "P0",
+      "status": "YOK",
+      "acceptance": "Windows açılışında servis başlar; UI kapanınca veri, yedek, sync ve API çalışmaya devam eder."
+    },
+    {
+      "id": "DHA-002",
+      "area": "Service hosting",
+      "requirement": "TypeScript/Node Core Service ve ince Windows Service Host",
+      "priority": "P0",
+      "status": "YOK",
+      "acceptance": "Domain/application kodu tekrar yazılmaz; servis yaşam döngüsü, event log ve kontrollü restart Windows Service tarafından yönetilir."
+    },
+    {
+      "id": "DHA-003",
+      "area": "Storage safety",
+      "requirement": "SQLite dosyasının ağ paylaşımından veya birden fazla node tarafından doğrudan açılmasının yasaklanması",
+      "priority": "P0",
+      "status": "YOK",
+      "acceptance": "Her node yalnız kendi yerel şifreli kopyasını açar; uzak erişim yalnız API/replication protokolüyle olur."
+    },
+    {
+      "id": "DHA-004",
+      "area": "Consensus",
+      "requirement": "Tek yazıcı lider ve olgun Raft tabanlı çoğunluk mutabakatı",
+      "priority": "P0",
+      "status": "YOK",
+      "acceptance": "Yalnız geçerli lider yazı kabul eder; commit çoğunluk onayından sonra gerçekleşir; özel consensus algoritması yazılmaz."
+    },
+    {
+      "id": "DHA-005",
+      "area": "Quorum",
+      "requirement": "Otomatik failover için 3 oy kullanan üye veya 2 tam node + 1 witness",
+      "priority": "P0",
+      "status": "YOK",
+      "acceptance": "İki nodesuz witness kurulumunda otomatik failover kapalıdır; split-brain oluşmaz."
+    },
+    {
+      "id": "DHA-006",
+      "area": "Fencing",
+      "requirement": "Lider dönemi, fencing token ve eski lider yazı reddi",
+      "priority": "P0",
+      "status": "YOK",
+      "acceptance": "Ağ bölünmesinde eski lider quorum kaybeder kaybetmez yazı kabul etmez; yeniden bağlanınca log uyumlanır."
+    },
+    {
+      "id": "DHA-007",
+      "area": "Replication",
+      "requirement": "Append-only replicated mutation log ve deterministik projection",
+      "priority": "P0",
+      "status": "KISMI ALTYAPI",
+      "acceptance": "Her mutasyon global sıra, mutationId, entityVersion, actor, device, schemaVersion, hash ve idempotencyKey taşır."
+    },
+    {
+      "id": "DHA-008",
+      "area": "Database projection",
+      "requirement": "Her Windows node üzerinde yerel şifreli SQLite projection",
+      "priority": "P0",
+      "status": "MEVCUT TEK NODE",
+      "acceptance": "Committed log aynı migration ve domain kurallarıyla aynı state hash sonucunu üretir."
+    },
+    {
+      "id": "DHA-009",
+      "area": "Large files",
+      "requirement": "İçerik adresli, parçalara bölünmüş, devam ettirilebilir ve hash doğrulamalı kasa replikasyonu",
+      "priority": "P0",
+      "status": "KISMI",
+      "acceptance": "Büyük dosya kaldığı yerden devam eder, dedupe edilir, her chunk ve tam dosya doğrulanır."
+    },
+    {
+      "id": "DHA-010",
+      "area": "Snapshots",
+      "requirement": "Şifreli cluster snapshot, log compaction ve yeni node bootstrap",
+      "priority": "P0",
+      "status": "YOK",
+      "acceptance": "Yeni node doğrulanmış snapshot + kalan log ile katılır; snapshot tek başına otomatik güven vermez."
+    },
+    {
+      "id": "DHA-011",
+      "area": "API",
+      "requirement": "Sürümlü HTTPS Client API, WebSocket değişiklik akışı ve iç node gRPC/protobuf protokolü",
+      "priority": "P0",
+      "status": "YOK",
+      "acceptance": "OpenAPI/Protobuf sözleşmeleri kod üretir; N-1 istemci uyumluluğu ve typed error modeli vardır."
+    },
+    {
+      "id": "DHA-012",
+      "area": "Device pairing",
+      "requirement": "QR/short-code pairing, cihaz anahtar çifti, kısa ömürlü challenge ve mTLS cihaz sertifikası",
+      "priority": "P0",
+      "status": "KISMI CİHAZ GÜVENİ",
+      "acceptance": "Sertifika kullanıcı, aile, cihaz ve izin kapsamına bağlıdır; iptal edilen cihaz yeniden veri alamaz."
+    },
+    {
+      "id": "DHA-013",
+      "area": "Zero trust",
+      "requirement": "LAN dahil hiçbir konuma örtük güven vermeyen kullanıcı+cihaz+servis kimliği",
+      "priority": "P0",
+      "status": "KISMI",
+      "acceptance": "Her istek mTLS, oturum, izin, amaç, süre ve revocation denetiminden geçer."
+    },
+    {
+      "id": "DHA-014",
+      "area": "Discovery",
+      "requirement": "LAN üzerinde Bonjour/mDNS keşfi; manuel IP/QR fallback",
+      "priority": "P1",
+      "status": "YOK",
+      "acceptance": "Apple yerel ağ izni reddedilirse manuel eşleme çalışır; keşif güven değil yalnız adres bulma sağlar."
+    },
+    {
+      "id": "DHA-015",
+      "area": "Remote connectivity",
+      "requirement": "Inbound port açmadan outbound-only remote relay veya kullanıcı yönetimli VPN adapteri",
+      "priority": "P1",
+      "status": "YOK",
+      "acceptance": "Remote varsayılan kapalı; relay aile içeriğini çözemez; bağlantı iptali ve cihaz kaybı desteklenir."
+    },
+    {
+      "id": "DHA-016",
+      "area": "Control plane",
+      "requirement": "Veri düzleminden ayrı minimal control plane: rendezvous, cert revocation, APNs wake, witness ve health metadata",
+      "priority": "P1",
+      "status": "YOK",
+      "acceptance": "Control plane aile içeriği taşımaz; yalnız minimum metadata ve E2E şifreli envelope görür."
+    },
+    {
+      "id": "DHA-017",
+      "area": "Apple clients",
+      "requirement": "macOS/iPhone/iPad ilk sürüm salt-okunur; yerel şifreli cache ve yetki filtreli API",
+      "priority": "P1",
+      "status": "YOK",
+      "acceptance": "Offline son doğrulanmış görünüm, son sync zamanı ve stale uyarısı gösterilir; bağımsız ana veri kaynağı değildir."
+    },
+    {
+      "id": "DHA-018",
+      "area": "Apple background",
+      "requirement": "BGTask, foreground pull, APNs content-free wake ve retry/backoff",
+      "priority": "P1",
+      "status": "YOK",
+      "acceptance": "Push teslimi garanti sayılmaz; app açılışında ve zamanlanmış görevde delta sync yapılır."
+    },
+    {
+      "id": "DHA-019",
+      "area": "Apple security",
+      "requirement": "ATS uyumlu HTTPS, Keychain/Secure Enclave anahtarları ve cert pin/rotation",
+      "priority": "P0",
+      "status": "YOK",
+      "acceptance": "ATS istisnası yok; cihaz sırrı dışarı çıkarılamaz; sertifika yenileme ve iptal çalışır."
+    },
+    {
+      "id": "DHA-020",
+      "area": "Node roles",
+      "requirement": "Leader, follower, read-replica, witness, backup-only ve maintenance rolleri",
+      "priority": "P0",
+      "status": "YOK",
+      "acceptance": "Rol değişimi auditli ve kontrollüdür; Apple cihazlar voter olamaz."
+    },
+    {
+      "id": "DHA-021",
+      "area": "Read consistency",
+      "requirement": "Strong, bounded-stale ve offline-read veri sınıfları",
+      "priority": "P0",
+      "status": "YOK",
+      "acceptance": "Finans, sağlık, yetki ve güvenlik strong; thumbnail ve genel özet bounded-stale olabilir; UI staleness gösterir."
+    },
+    {
+      "id": "DHA-022",
+      "area": "Conflict management",
+      "requirement": "Entity version, optimistic concurrency ve kullanıcı açıklamalı conflict resolution",
+      "priority": "P0",
+      "status": "YOK",
+      "acceptance": "Sessiz son-yazan-kazan yok; otomatik birleştirilebilir ve kullanıcı kararlı çatışmalar ayrılır."
+    },
+    {
+      "id": "DHA-023",
+      "area": "Health",
+      "requirement": "Liveness, readiness, quorum, replication lag, disk, cert, backup age ve dependency health",
+      "priority": "P0",
+      "status": "KISMI",
+      "acceptance": "Health Center node bazında Healthy/Degraded/Unhealthy gösterir; yanlış otomatik restart veri riskine yol açmaz."
+    },
+    {
+      "id": "DHA-024",
+      "area": "Watchdog",
+      "requirement": "Servis watchdog, crash loop limiti, safe mode ve operatör yönlendirmesi",
+      "priority": "P0",
+      "status": "KISMI/YOK",
+      "acceptance": "Stateless bileşen kontrollü restart edilir; data corruption/quorum hatasında safe read-only mode açılır."
+    },
+    {
+      "id": "DHA-025",
+      "area": "Observability",
+      "requirement": "Yerel-first metrics, traces, structured logs ve correlationId",
+      "priority": "P1",
+      "status": "KISMI",
+      "acceptance": "Hassas içerik loglanmaz; telemetri buluta varsayılan gönderilmez; export kullanıcı kontrollüdür."
+    },
+    {
+      "id": "DHA-026",
+      "area": "Backup separation",
+      "requirement": "Replica ile yedeğin ayrılması; immutable/offline/offsite backup",
+      "priority": "P0",
+      "status": "KISMI",
+      "acceptance": "Yazılım hatası/ransomware replikaya yayılsa bile sürümlü, doğrulanmış bağımsız yedek korunur."
+    },
+    {
+      "id": "DHA-027",
+      "area": "Disaster recovery",
+      "requirement": "RPO/RTO profilleri, manual break-glass promotion ve recovery quorum",
+      "priority": "P0",
+      "status": "YOK",
+      "acceptance": "3-node hedef RPO=0 committed events ve RTO 30-120 sn; quorum yoksa manual recovery açık uyarı ve kanıtla yapılır."
+    },
+    {
+      "id": "DHA-028",
+      "area": "Updates",
+      "requirement": "Rolling update: followerlar önce, leader son; schema compatibility ve rollback",
+      "priority": "P0",
+      "status": "YOK",
+      "acceptance": "N-1 rolling compatibility; migration yalnız leader ve quorum health ile; başarısız güncelleme geri alınır."
+    },
+    {
+      "id": "DHA-029",
+      "area": "Security operations",
+      "requirement": "Cluster CA, cert rotation, revocation, key epoch, replay/freshness ve rate limit",
+      "priority": "P0",
+      "status": "KISMI",
+      "acceptance": "Kayıp cihaz ve ele geçirilmiş node hızla iptal edilir; eski epoch yeni veri çözemez."
+    },
+    {
+      "id": "DHA-030",
+      "area": "Time",
+      "requirement": "Monotonic timers, clock-skew tolerance ve güvenilir zaman durumu",
+      "priority": "P1",
+      "status": "YOK",
+      "acceptance": "Lider seçimi ve timeout wall-clock geri/ileri sıçramasından bozulmaz; kullanıcıya saat sorunu bildirilir."
+    },
+    {
+      "id": "DHA-031",
+      "area": "Bandwidth/power",
+      "requirement": "Adaptive sync, metered network, battery, upload limit ve quiet hours",
+      "priority": "P1",
+      "status": "YOK",
+      "acceptance": "Kullanıcı internetini doldurmaz; kritik metadata büyük medyadan önce gelir; gece politikası ayarlanabilir."
+    },
+    {
+      "id": "DHA-032",
+      "area": "Administration UI",
+      "requirement": "Cluster ve cihaz merkezi: node ekle/çıkar, rol, sağlık, lag, failover provası, cert ve backup",
+      "priority": "P0",
+      "status": "YOK",
+      "acceptance": "Tek ekranda anlaşılır durum; tehlikeli işlemler güçlü doğrulama ve geri dönüş planı ister."
+    },
+    {
+      "id": "DHA-033",
+      "area": "Failure testing",
+      "requirement": "Network partition, power loss, disk full, corruption, clock skew, cert expiry ve rolling update fault injection",
+      "priority": "P0",
+      "status": "YOK",
+      "acceptance": "Silver test matrisi gerçek Windows node’larda PASS olmadan Gold yok."
+    },
+    {
+      "id": "DHA-034",
+      "area": "Service levels",
+      "requirement": "Tek node, 2+Witness ve 3 full-node kurulum profilleri",
+      "priority": "P0",
+      "status": "YOK",
+      "acceptance": "Installer donanıma göre profil önerir; otomatik failover yeteneğini dürüstçe gösterir."
+    },
+    {
+      "id": "DHA-035",
+      "area": "Privacy",
+      "requirement": "Her aile için ayrı clusterId, anahtar alanı, API tenancy ve veri izolasyonu",
+      "priority": "P0",
+      "status": "YOK",
+      "acceptance": "Bir aile/cluster kimliği başka aile içeriğine erişemez; backup ve relay metadata ayrıdır."
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "31-T",
+  "primaryRequirement": "PPK-002",
+  "requirements": [
+    "PPK-002"
+  ],
+  "decision": "DEC-181",
+  "deferredBoundaryDecision": "DEC-167",
+  "title": "Family import governed rollback exact delete receipt fence",
+  "status": "COMPLETED",
+  "targetSliceStatus": "PASS",
+  "targets": {
+    "migration": 68,
+    "sourceRows": "EXACT_GOVERNED_EVENT_AND_LOCATION_CREATED_BY_IMPORT_BATCH",
+    "policyIntents": "ONE_FRESH_EXACT_DELETE_RECEIPT_PER_GOVERNED_ROW",
+    "transactionBoundary": "DELETE_RECEIPTS_TOMBSTONES_BUSINESS_ROWS_BATCH_STATE_AND_AUDIT_ONE_SQLITE_TRANSACTION",
+    "databaseFence": "BATCH_MEMBERSHIP_CREATE_RECEIPT_FAMILY_OWNER_DELETE_RECEIPT_LIVE_FENCE_AND_JOURNAL_PROJECTION",
+    "consumption": "IMMUTABLE_SINGLE_USE_ROLLBACK_DELETION_TOMBSTONE",
+    "completionFence": "ALL_CREATED_ROWS_ABSENT_AND_ALL_GOVERNED_TOMBSTONES_CONSUMED_BEFORE_ROLLED_BACK_STATE",
+    "legacyCompatibility": "NULL_RECEIPT_PRE_66_LOCATION_AND_PRE_67_EVENT_ROLLBACK_PRESERVED",
+    "serviceBoundary": "ASYNC_POLICY_BATCH_AUTHORIZATION_WITH_STRONG_AUTHENTICATION",
+    "directSqlBoundary": "GOVERNED_DELETE_WITHOUT_EXACT_TOMBSTONE_REJECTED"
+  },
+  "openBoundaries": {
+    "universalRepositoryEnforcement": "NOT_COMPLETE",
+    "obligationExecution": "NOT_RUN_NOT_PASS",
+    "externalMonotonicRollbackAuthority": "NOT_IMPLEMENTED",
+    "PPK002": "PARTIAL_AFTER_THIS_SLICE"
+  },
+  "requirementCompletionClaimed": false,
+  "newBuildIssued": false,
+  "validationStatus": "PASS",
+  "persistentReceiptStatus": "PASS",
+  "startedAt": "2026-08-11T07:21:36.716Z",
+  "validatedAt": "2026-08-11T07:28:09.910Z",
+  "officialCompletionClaimed": true,
+  "completedAt": "2026-08-11T07:31:27.333Z"
+}

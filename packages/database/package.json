@@ -1,0 +1,19 @@
+{
+  "name": "@ppt/database",
+  "version": "4.8.2026-29",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "dependencies": {
+    "@ppt/contracts": "4.8.2026-29",
+    "@ppt/core": "4.8.2026-29"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}

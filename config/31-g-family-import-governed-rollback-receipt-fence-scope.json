@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "31-G",
+  "requirement": "PPK-002",
+  "decision": "DEC-167",
+  "title": "Family import governed rollback exact delete receipt fence",
+  "status": "SUPERSEDED_BY_DEC_168",
+  "targetSliceStatus": "IMPLEMENTATION_PENDING",
+  "targets": {
+    "sourceRows": "GOVERNED_EVENT_AND_LOCATION_CREATED_BY_EXACT_IMPORT_BATCH",
+    "policyIntents": "ONE_EXACT_DELETE_RECEIPT_PER_GOVERNED_ROW",
+    "transactionBoundary": "DELETE_RECEIPTS_BUSINESS_ROLLBACK_BATCH_STATE_AND_AUDIT_IN_ONE_SQLITE_TRANSACTION",
+    "databaseFence": "BATCH_CREATE_RECEIPT_OWNER_FAMILY_DELETE_RECEIPT_LIVE_FENCE_AND_PROJECTION",
+    "consumption": "IMMUTABLE_SINGLE_USE_ROLLBACK_DELETION_TOMBSTONE",
+    "completionFence": "TARGET_GOVERNED_ROWS_ABSENT_BEFORE_COMMIT",
+    "legacyCompatibility": "NULL_RECEIPT_PRE_66_LOCATION_ROLLBACK_PRESERVED"
+  },
+  "openBoundaries": {
+    "universalRepositoryEnforcement": "NOT_COMPLETE",
+    "obligationExecution": "NOT_RUN_NOT_PASS",
+    "externalMonotonicRollbackAuthority": "NOT_IMPLEMENTED"
+  },
+  "PPK002": "PARTIAL",
+  "newBuildIssued": false,
+  "supersededBy": "DEC-168",
+  "supersessionReason": "USER_PRIORITY_MAIN_STRUCTURE_FIRST"
+}

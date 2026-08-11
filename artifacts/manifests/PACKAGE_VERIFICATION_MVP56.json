@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "24.07.2026.56",
+  "status": "passed",
+  "sourceInventoryCount": 577,
+  "manifestFileCount": 577,
+  "checksumEntryCount": 579,
+  "symbolicLinks": 0,
+  "excludedDirectories": [
+    "node_modules",
+    "dist",
+    "release",
+    ".tmp"
+  ],
+  "generatedAt": "2026-07-24T03:57:22.756846+00:00"
+}

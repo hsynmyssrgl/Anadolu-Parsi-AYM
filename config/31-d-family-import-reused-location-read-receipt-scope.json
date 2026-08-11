@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "31-D",
+  "requirement": "PPK-002",
+  "decision": "DEC-163",
+  "title": "Family import reused-location exact read receipt chain",
+  "status": "IN_PROGRESS",
+  "targetSliceStatus": "IMPLEMENTATION_PENDING",
+  "targets": {
+    "sourceLocationResolution": "REUSED_EXISTING_LOCATION_ONLY",
+    "locationReadIntent": "EXACT_LOCATION_READ",
+    "eventWriteIntent": "EXACT_EVENT_CREATE_WITH_SOURCE_RESOURCE",
+    "transactionBoundary": "SAME_SQLITE_TRANSACTION",
+    "receiptProjection": "SOURCE_LOCATION_RECEIPT_HASH_ON_EVENT"
+  },
+  "openBoundaries": {
+    "newlyCreatedLocationLinkedEventImport": "NOT_COMPLETE_FAIL_CLOSED",
+    "governedImportRollbackReceiptFence": "NOT_COMPLETE",
+    "universalRepositoryEnforcement": "NOT_COMPLETE",
+    "obligationExecution": "NOT_RUN_NOT_PASS",
+    "externalMonotonicRollbackAuthority": "NOT_IMPLEMENTED"
+  },
+  "PPK002": "PARTIAL",
+  "newBuildIssued": false
+}

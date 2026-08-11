@@ -1,0 +1,38 @@
+name: Bronze RC2 Windows Doğrulama Kapıları
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-windows:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+          cache: npm
+          registry-url: 'https://registry.npmjs.org'
+      - name: RC2 kapılarını zorunlu sırada çalıştır
+        run: npm run validate:rc2:gates -- --report artifacts/validation/windows-rc2-validation-report.json
+      - name: Doğrulama kanıtlarını yükle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bronze-rc2-windows-validation
+          if-no-files-found: warn
+          path: |
+            artifacts/validation/windows-rc2-validation-report.json
+            artifacts/validation/source-preflight.json
+            artifacts/validation/source-archive-reproducibility.json
+            artifacts/validation/active-delivery-documents.json
+            artifacts/validation/delivery-attestation-contract.json
+            artifacts/validation/npm-cache-transfer-contract.json
+            artifacts/validation/npm-ci-dependency-access.json
+            artifacts/validation/npm-offline-cache-readiness.json
+            artifacts/validation/active-version-contract.json
+            apps/desktop/release/**

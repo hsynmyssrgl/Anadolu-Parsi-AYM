@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "version": "24.07.2026.55",
+  "milestone": "B060-M15 Finance Records & Valuation Application Migration",
+  "checks": 16,
+  "checkNames": [
+    "admin setup creates authenticated session",
+    "admin email is normalized",
+    "second setup is rejected through application conflict",
+    "logout clears session and writes state",
+    "failed attempts persist and fifth failure locks account",
+    "correct password remains blocked during lock window",
+    "expired lock permits successful login",
+    "successful login clears failure state",
+    "wrong current password rejects password change",
+    "password change preserves active session",
+    "old password no longer authenticates",
+    "new password authenticates",
+    "idle timeout expires session without extending on state read",
+    "auth application layer has no infrastructure dependency",
+    "FamilyDataStore delegates core auth operations to use cases",
+    "password and session audit records are chained"
+  ],
+  "metrics": {
+    "maximumFailedLoginAttempts": 5,
+    "lockMinutes": 15,
+    "sessionIdleTimeoutMinutes": 15
+  },
+  "verifiedAt": "2026-07-24T03:11:24.323Z"
+}

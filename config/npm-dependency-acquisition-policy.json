@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "registry": "https://registry.npmjs.org/",
+  "officialRegistryOnly": true,
+  "concurrency": 4,
+  "maxAttempts": 4,
+  "baseDelayMs": 1000,
+  "maxDelayMs": 8000,
+  "requestTimeoutMs": 180000,
+  "maxTarballBytes": 268435456,
+  "maxBundleBytes": 4294967295,
+  "retryableHttpStatuses": [408, 425, 429, 500, 502, 503, 504],
+  "retryableNetworkCodes": [
+    "EAI_AGAIN",
+    "ECONNRESET",
+    "ECONNREFUSED",
+    "ENETUNREACH",
+    "ETIMEDOUT",
+    "UND_ERR_CONNECT_TIMEOUT",
+    "UND_ERR_SOCKET"
+  ],
+  "redirectPolicy": "SAME_ORIGIN_ONLY",
+  "userAgent": "Anadolu-Parsi-Aile-Yasam-Merkezi-Dependency-Acquisition/1"
+}

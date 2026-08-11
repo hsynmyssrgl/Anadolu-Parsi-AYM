@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "23.07.2026.48",
+  "status": "passed",
+  "checks": 6,
+  "names": [
+    "runtime environment resolution",
+    "configuration overrides and validation",
+    "stored correlation provider propagates async context",
+    "JSONL file logging redacts and rotates",
+    "desktop runtime creates isolated paths and startup log",
+    "IPC wrapper logs success and preserves return value"
+  ],
+  "generatedAt": "2026-07-23T18:35:26.764010Z"
+}

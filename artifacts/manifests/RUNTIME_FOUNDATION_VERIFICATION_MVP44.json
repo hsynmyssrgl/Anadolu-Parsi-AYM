@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "checks": 6,
+  "names": [
+    "runtime environment resolution",
+    "configuration overrides and validation",
+    "stored correlation provider propagates async context",
+    "JSONL file logging redacts and rotates",
+    "desktop runtime creates isolated paths and startup log",
+    "IPC wrapper logs success and preserves return value"
+  ]
+}

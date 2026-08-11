@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "version": "04.08.2026.29",
+  "milestone": "Bronze RC2 Build undefined",
+  "checks": 14,
+  "checkNames": [
+    "dashboard family identity is authoritative",
+    "member and generation metrics are query-backed",
+    "fresh governed dashboard starts without synthetic important days",
+    "timeline and related content totals are centralized",
+    "all planned modules have status records",
+    "member mutation refreshes dashboard metrics",
+    "important day mutation refreshes dashboard calendar",
+    "navigation reducer tracks active and previous modules",
+    "navigation back restores prior module",
+    "duplicate navigation does not grow history",
+    "dashboard application layer has no infrastructure dependency",
+    "FamilyDataStore delegates dashboard to application use case",
+    "renderer consumes centralized dashboard overview",
+    "private dashboard counts are scoped to the signed-in member"
+  ],
+  "metrics": {
+    "initialMembers": 1,
+    "initialGenerations": 1,
+    "initialUpcomingImportantDays": 0,
+    "initialTimelineEvents": 0,
+    "initialRelatedContent": 0,
+    "moduleStatusCount": 15,
+    "finalMembers": 2,
+    "finalUpcomingImportantDays": 1,
+    "finalTimelineEvents": 1,
+    "memberVisibleArchiveCount": 0
+  },
+  "verifiedAt": "2026-08-11T06:57:13.780Z"
+}

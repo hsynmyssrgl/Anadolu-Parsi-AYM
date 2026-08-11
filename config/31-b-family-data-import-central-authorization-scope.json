@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "31-B",
+  "requirement": "PPK-002",
+  "decision": "DEC-160",
+  "title": "Family data import central authorization official checkpoint",
+  "priority": "P0",
+  "status": "IN_PROGRESS",
+  "predecessor": {
+    "step": "31-A",
+    "status": "COMPLETED",
+    "persistentReceiptStatus": "PASS"
+  },
+  "targets": {
+    "resourceType": "family_data_import",
+    "purpose": "administration",
+    "actions": {
+      "preview": "read",
+      "listBatches": "read",
+      "apply": "create",
+      "rollback": "delete"
+    },
+    "service": "apps/desktop/src/main/family-data-import-service.ts",
+    "composition": "apps/desktop/src/main/data-store.ts",
+    "regression": "apps/desktop/tests/location-cross-surface-privacy-runtime.test.ts"
+  },
+  "requiredChecks": [
+    "fresh 12-check central authorization verifier",
+    "targeted location/import Vitest 6/6",
+    "full Vitest regression 158/158",
+    "platform policy bypass gate",
+    "persistent external D: Library receipt and readback"
+  ],
+  "openBoundaries": {
+    "PPK002": "PARTIAL",
+    "familyDataImportMultiReceiptBatch": "NOT_COMPLETE",
+    "governedImportRollbackReceiptFence": "NOT_COMPLETE",
+    "universalRepositoryEnforcement": "NOT_COMPLETE",
+    "obligationExecution": "NOT_RUN_NOT_PASS",
+    "externalMonotonicRollbackAuthority": "NOT_IMPLEMENTED"
+  },
+  "newBuildIssued": false
+}

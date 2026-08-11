@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "PPT-PERSISTENT-ARTIFACT-POLICY-V2",
+  "release": "Bronze 04.08.2026.29",
+  "temporaryWorkspaceRoot": "/mnt/data",
+  "temporaryWorkspaceIsDelivery": false,
+  "libraryRoot": "/Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi",
+  "libraryReleasePath": "/Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi/Bronze 04.08.2026.29",
+  "deliveryCompletionRequiresLibraryEvidence": true,
+  "physicalTargets": {
+    "windowsLocalDisk": {
+      "status": "UNAVAILABLE_WITHOUT_CONNECTOR_OR_USER_SIDE_INSTALLER"
+    },
+    "externalDisk": {
+      "status": "UNAVAILABLE_WITHOUT_CONNECTOR_OR_USER_SIDE_INSTALLER"
+    },
+    "oneDrive": {
+      "status": "UNAVAILABLE_WITHOUT_AUTHORIZED_ADAPTER"
+    }
+  },
+  "forbidUnsupportedSuccessClaims": true
+}

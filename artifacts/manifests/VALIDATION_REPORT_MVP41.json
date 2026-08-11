@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "channel": "Bronze",
+  "version": "23.07.2026.41",
+  "packageVersion": "23.7.2026-41",
+  "revision": "REVİZYON-060",
+  "milestones": [
+    "B060-M1",
+    "B060-M2"
+  ],
+  "generatedAt": "2026-07-23T00:00:00.000Z",
+  "overallStatus": "passed_with_environment_limitation",
+  "passed": {
+    "typescriptPackages": {
+      "count": 12,
+      "names": [
+        "@ppt/core",
+        "@ppt/contracts",
+        "@ppt/config",
+        "@ppt/logging",
+        "@ppt/database",
+        "@ppt/repositories",
+        "@ppt/events",
+        "@ppt/domain",
+        "@ppt/infrastructure",
+        "@ppt/security",
+        "@ppt/test-data",
+        "@ppt/application"
+      ],
+      "compilerUsedForOfflineValidation": "TypeScript 5.8.3 (global)"
+    },
+    "foundationChecks": 14,
+    "foundationCheckNames": [
+      "Result success mapping",
+      "Result error short-circuit",
+      "Result error mapping",
+      "Result flatMap",
+      "Throwable mapping",
+      "Result matching",
+      "Central AppError",
+      "Deterministic clock",
+      "Pagination limits",
+      "Configuration defaults and validation",
+      "Configuration path isolation",
+      "Configuration redaction",
+      "Structured logging redaction",
+      "JSON Lines serialization"
+    ],
+    "dataStoreSmokeChecks": 4,
+    "dataStoreSmoke": {
+      "status": "passed",
+      "checks": 4,
+      "peopleBefore": 6,
+      "peopleAfter": 7,
+      "backupCreated": true
+    },
+    "bronzeFoundationGate": true,
+    "repositoryGate": true,
+    "versionAndLockfileConsistency": true,
+    "forbiddenIntegrationScan": true
+  },
+  "environmentLimitation": {
+    "affectedChecks": [
+      "npm ci",
+      "full Vitest regression suite",
+      "Vite renderer production build",
+      "Electron main/preload production build"
+    ],
+    "reason": "İç npm/artifactory bağımlılık deposu paket indirmelerinde HTTP 503 Service Temporarily Unavailable döndürdü.",
+    "impactAssessment": "Desktop kaynak davranışı değiştirilmedi; data-store TypeScript derlemesi ve gerçek SQLite smoke akışı başarıyla doğrulandı. Tam bağımlılık tabanlı regresyon sonraki erişilebilir ortamda yeniden çalıştırılmalıdır."
+  },
+  "silverDeferred": [
+    "kapsamlı manuel ekran doğrulaması",
+    "ekran görüntüleri",
+    "tam Windows NSIS kurulum testi",
+    "uzun süreli performans ve restore senaryoları"
+  ]
+}

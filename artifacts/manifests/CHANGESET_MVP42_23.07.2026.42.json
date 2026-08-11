@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "from": "23.07.2026.41",
+  "to": "23.07.2026.42",
+  "revision": "REVİZYON-060",
+  "milestone": "B060-M3",
+  "generatedAt": "2026-07-23T16:41:44.044200+00:00",
+  "added": [
+    "apps/desktop/src/main/runtime-bootstrap.ts",
+    "apps/desktop/src/main/ipc-runtime.ts",
+    "scripts/verify-runtime-foundation.mjs",
+    "scripts/verify-bronze-runtime.mjs",
+    "docs/04_BRONZE_RUNTIME_GATE.md",
+    "BUILD_STATUS_MVP42.md",
+    "RELEASE_NOTES_BRONZE_MVP42.md"
+  ],
+  "modified": [
+    "apps/desktop/src/main/main.ts",
+    "packages/core/src/correlation.ts",
+    "packages/config/src/index.ts",
+    "packages/logging/src/index.ts",
+    "apps/desktop/package.json",
+    "package.json",
+    "package-lock.json",
+    "packages/domain/src/app-meta.ts"
+  ],
+  "behavioralCompatibility": {
+    "rendererApiChanged": false,
+    "ipcReturnShapeChanged": false,
+    "databaseFileNameChanged": false,
+    "userDataMigrationRequired": false
+  }
+}

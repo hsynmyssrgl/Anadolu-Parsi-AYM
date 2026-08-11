@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "24.07.2026.57",
+  "milestone": "B060-M17 Digital Legacy Application Migration",
+  "status": "passed",
+  "checks": 12,
+  "scenarios": [
+    "plan created through application layer",
+    "grant created transactionally",
+    "execution request enters waiting state",
+    "request creates first administrator approval",
+    "request has audit and outbox evidence",
+    "finalization blocked before two approvals and waiting period",
+    "pending execution can be cancelled",
+    "invalid trustee rolls back all writes",
+    "rollback leaves no partial plan audit or event",
+    "migration 12 applied",
+    "legacy plans and grants survive restart",
+    "audit chain remains valid"
+  ],
+  "generatedAt": "2026-07-24T04:48:49.224Z"
+}

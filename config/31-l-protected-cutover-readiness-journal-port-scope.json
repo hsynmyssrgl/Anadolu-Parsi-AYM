@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "31-L",
+  "title": "Protected cutover-readiness journal port and detached default-deny boundary",
+  "decision": "DEC-173",
+  "predecessorDecision": "DEC-172",
+  "cutoverDecision": "DEC-171",
+  "primaryRequirement": "DHA-001",
+  "requirements": [
+    "DHA-001",
+    "PPK-003",
+    "PPK-013",
+    "PPK-014"
+  ],
+  "status": "COMPLETED",
+  "targets": {
+    "journalPort": "ASYNC_LOAD_COMPARE_AND_SWAP_SEAL_BOUNDARY",
+    "anchor": "EXACT_EPOCH_ENTRY_COUNT_HEAD_HASH",
+    "defaultComposition": "DETACHED_UNAVAILABLE_FAIL_CLOSED",
+    "unavailableLoad": "REJECT_JOURNAL_UNAVAILABLE_NOT_EMPTY_SUCCESS",
+    "unavailableCompareAndSwap": "REJECT_JOURNAL_UNAVAILABLE",
+    "unavailableSeal": "REJECT_JOURNAL_UNAVAILABLE",
+    "productionAdapter": "NOT_ATTACHED",
+    "runtimeIntegration": "NOT_WIRED",
+    "apiPrivacy": "NO_PATH_SECRET_TOKEN_KEY_OR_FAMILY_DATA"
+  },
+  "openBoundaries": {
+    "realVaultTransfer": "NOT_PERFORMED_BLOCKED",
+    "coreServiceUnlock": "NOT_IMPLEMENTED",
+    "sqliteOwnershipTransfer": "NOT_PERFORMED_BLOCKED",
+    "productionEvidenceSigner": "NOT_ATTACHED_DEFAULT_DENY",
+    "durableReadinessJournal": "PORT_ONLY_NO_PRODUCTION_ADAPTER",
+    "trustedAnchorPersistence": "PORT_ONLY_NO_PRODUCTION_ADAPTER",
+    "crashConsistency": "NOT_PROVEN",
+    "shutdownPersistence": "NOT_PROVEN",
+    "familyApplicationApis": "NOT_COMPLETE",
+    "backupAndSync": "NOT_COMPLETE",
+    "windowsServiceInstallation": "APPROVAL_BOUND_NOT_RUN_NOT_PASS"
+  },
+  "requirementCompletionClaimed": false,
+  "newBuildIssued": false,
+  "startedAt": "2026-08-11T02:51:16.712Z",
+  "targetSliceStatus": "PASS",
+  "validationStatus": "PASS",
+  "persistentReceiptStatus": "PASS",
+  "validatedAt": "2026-08-11T03:06:50.490Z",
+  "officialCompletionClaimed": true,
+  "completedAt": "2026-08-11T03:07:13.958Z"
+}

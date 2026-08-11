@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "policyId": "PPT-LIFECYCLE-STRICT-V1",
+  "classification": "api_heavy_deferred",
+  "targetChannel": "bronze",
+  "integrations": [
+    {
+      "capabilityId": "cloud-backup-onedrive",
+      "title": "OneDrive üretim yedek adaptörü",
+      "externalApiRequired": true,
+      "heavyIntegration": true,
+      "deferralReason": "OAuth, sağlayıcı sertifikasyonu, ağ hata matrisi ve gerçek hesap doğrulaması gerektirir.",
+      "readiness": {"portContract":true,"adapterBoundary":true,"configurationBoundary":true,"localFallback":true,"testDouble":true,"errorContract":true,"securityPrivacyBoundary":true}
+    },
+    {
+      "capabilityId": "cloud-backup-icloud-google-drive",
+      "title": "iCloud ve Google Drive üretim yedek adaptörleri",
+      "externalApiRequired": true,
+      "heavyIntegration": true,
+      "deferralReason": "Birden fazla sağlayıcı OAuth ve platform sertifikasyonu gerektirir.",
+      "readiness": {"portContract":true,"adapterBoundary":true,"configurationBoundary":true,"localFallback":true,"testDouble":true,"errorContract":true,"securityPrivacyBoundary":true}
+    },
+    {
+      "capabilityId": "maps-live-location-provider",
+      "title": "Harita ve açık rızalı canlı konum sağlayıcısı",
+      "externalApiRequired": true,
+      "heavyIntegration": true,
+      "deferralReason": "Harita SDK/API anahtarları, maliyet, kota, rıza ve gerçek cihaz doğrulaması gerektirir.",
+      "readiness": {"portContract":true,"adapterBoundary":true,"configurationBoundary":true,"localFallback":true,"testDouble":true,"errorContract":true,"securityPrivacyBoundary":true}
+    },
+    {
+      "capabilityId": "health-insurance-government-connectors",
+      "title": "Sağlık, sigorta ve resmî kurum bağlantıları",
+      "externalApiRequired": true,
+      "heavyIntegration": true,
+      "deferralReason": "Kurum sözleşmeleri, hukuki inceleme, kimlik federasyonu ve hassas veri API erişimi gerektirir.",
+      "readiness": {"portContract":true,"adapterBoundary":true,"configurationBoundary":true,"localFallback":true,"testDouble":true,"errorContract":true,"securityPrivacyBoundary":true}
+    },
+    {
+      "capabilityId": "external-identity-providers",
+      "title": "Apple ve OIDC haricî kimlik sağlayıcıları",
+      "externalApiRequired": true,
+      "heavyIntegration": true,
+      "deferralReason": "Sağlayıcı kayıtları, redirect alan adları, sertifika ve gerçek hesap doğrulaması gerektirir.",
+      "readiness": {"portContract":true,"adapterBoundary":true,"configurationBoundary":true,"localFallback":true,"testDouble":true,"errorContract":true,"securityPrivacyBoundary":true}
+    },
+    {
+      "capabilityId": "external-ai-provider",
+      "title": "Haricî yapay zekâ sağlayıcısı",
+      "externalApiRequired": true,
+      "heavyIntegration": true,
+      "deferralReason": "Sağlayıcı sözleşmesi, maliyet sınırı, veri işleme politikası ve ağ güvenliği gerektirir.",
+      "readiness": {"portContract":true,"adapterBoundary":true,"configurationBoundary":true,"localFallback":true,"testDouble":true,"errorContract":true,"securityPrivacyBoundary":true}
+    },
+    {
+      "capabilityId": "companion-sync-services",
+      "title": "macOS ve Apple companion cihaz eşitleme servisleri",
+      "externalApiRequired": true,
+      "heavyIntegration": true,
+      "deferralReason": "Platform sertifikaları, cihaz eşitleme protokolü ve çoklu cihaz gerçek ortam testleri gerektirir.",
+      "readiness": {"portContract":true,"adapterBoundary":true,"configurationBoundary":true,"localFallback":true,"testDouble":true,"errorContract":true,"securityPrivacyBoundary":true}
+    }
+  ]
+}

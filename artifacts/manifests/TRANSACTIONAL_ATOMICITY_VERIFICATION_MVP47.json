@@ -1,0 +1,8 @@
+{
+  "status": "passed",
+  "checks": 9,
+  "version": "23.07.2026.47",
+  "milestone": "B060-M7 Genealogy Read Model",
+  "atomicCommit": true,
+  "atomicRollback": true
+}

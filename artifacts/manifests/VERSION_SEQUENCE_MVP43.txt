@@ -1,0 +1,8 @@
+Panthera pardus tulliana
+Kanal: Bronze
+Kural: Gün.Ay.Yıl.AynıAyİçindekiGeliştirmeSırası
+Önceki sürüm: 23.07.2026.42
+Aktif sürüm: 23.07.2026.43
+Takvim ayı: Temmuz 2026
+Geliştirme sırası: 43
+Durum: PASSED

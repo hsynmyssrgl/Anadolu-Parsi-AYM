@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "31-A",
+  "requirement": "PPK-002",
+  "decision": "DEC-159",
+  "title": "Governed timeline-event Policy Enforcement official checkpoint",
+  "priority": "P0",
+  "status": "IN_PROGRESS",
+  "predecessor": {
+    "step": "30-Z",
+    "status": "COMPLETED",
+    "persistentReceiptStatus": "PASS"
+  },
+  "targets": {
+    "migration": 67,
+    "resourceType": "event",
+    "writeCapability": "family.write",
+    "readCapability": "timeline.read",
+    "repository": "packages/repositories/src/timeline-repository.ts",
+    "useCase": "packages/application/src/timeline-use-cases.ts",
+    "productionPep": [
+      "apps/desktop/src/main/timeline-application-adapter.ts",
+      "apps/desktop/src/main/timeline-production-policy-runtime.ts"
+    ],
+    "governedProjection": "governed_timeline_events",
+    "writeFence": "timeline-event-write",
+    "sourceLocationReceipt": "location.read"
+  },
+  "requiredChecks": [
+    "fresh 14-check controlled SQLite runtime",
+    "migration 67 and database migration verification",
+    "timeline use-case verification",
+    "timeline contract source verification",
+    "full Vitest regression",
+    "platform policy bypass gate",
+    "persistent external D: Library receipt and readback"
+  ],
+  "openBoundaries": {
+    "PPK002": "PARTIAL",
+    "familyDataImportCentralAuthorizationOfficialCheckpoint": "NEXT_SEPARATE_SLICE",
+    "timelineDeleteClaimRepairWorkflow": "NOT_COMPLETE",
+    "universalRepositoryEnforcement": "NOT_COMPLETE",
+    "obligationExecution": "NOT_RUN_NOT_PASS",
+    "externalMonotonicRollbackAuthority": "NOT_IMPLEMENTED",
+    "secureFileDeletionAndDatabaseCommitAtomicity": "NOT_IMPLEMENTED",
+    "installedCoreServiceScmLifecycle": "NOT_RUN_NOT_PASS"
+  },
+  "newBuildIssued": false
+}

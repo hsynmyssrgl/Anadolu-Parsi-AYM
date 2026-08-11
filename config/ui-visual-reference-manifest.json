@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 2,
+  "id": "PPT-UI-VISUAL-BASELINE-V2",
+  "effectiveBuild": 212,
+  "image": "docs/ui/UI_VISUAL_REFERENCE_MANIFESTO_ACTIVE.png",
+  "status": "BINDING_BEFORE_SILVER",
+  "product": "Anadolu Parsı Aile Yaşam Merkezi",
+  "brandFamily": "Panthera pardus tulliana",
+  "brandFamilyVisibleInApplicationUi": false,
+  "logoSubject": "Anadolu parsı",
+  "productionPersonalOrDemoContentAllowed": false,
+  "typography": {
+    "sourceOfTruth": "apps/desktop/src/renderer/typography.css",
+    "fontStack": "-apple-system, BlinkMacSystemFont, SF Pro Text, SF Pro Display, Helvetica Neue, Inter, Segoe UI Variable, Segoe UI, sans-serif",
+    "embeddedProprietaryAppleFontAllowed": false,
+    "largeTitlePx": 34,
+    "title1Px": 28,
+    "title2Px": 22,
+    "title3Px": 20,
+    "bodyPx": 17,
+    "controlPx": 15,
+    "footnotePx": 13,
+    "minimumPx": 11
+  },
+  "releaseChannelNavigationColors": {
+    "Bronze": {
+      "text": "#d8ad78",
+      "strong": "#ffd39b",
+      "icon": "#e4a85f",
+      "edge": "#dc9852"
+    },
+    "Silver": {
+      "text": "#bcc8d2",
+      "strong": "#f3f7fa",
+      "icon": "#d4dde4",
+      "edge": "#d7e0e7"
+    },
+    "Gold": {
+      "text": "#d5b85f",
+      "strong": "#ffe9a0",
+      "icon": "#edca62",
+      "edge": "#f0cc58"
+    }
+  },
+  "shell": {
+    "background": "#F4F3F0",
+    "panel": "#FDFDFC",
+    "panelSecondary": "#F7F5F1",
+    "text": "#333537",
+    "muted": "#777B7A",
+    "border": "#DEDCD6",
+    "primary": "#467259",
+    "primarySoft": "#A3AE95",
+    "focus": "#4F91FF",
+    "success": "#467259",
+    "danger": "#C95858",
+    "warning": "#B98335"
+  },
+  "minimumInteractionTargetPx": 44,
+  "keyboardRequired": true,
+  "screenReaderLabelsRequired": true,
+  "colorOnlyStatusForbidden": true,
+  "silverGate": "All real screens must be reviewed against this manifest and the approved post-2026-07-20 visual set before Silver.",
+  "originalUserApprovalDate": "2026-08-01",
+  "correctionBuild": 212,
+  "imageSha256": "f2f2a083fb74a50fc31459c8236eff9be74e01f9b359c5889fdb740395850357",
+  "imageDimensions": {
+    "width": 1491,
+    "height": 1055
+  },
+  "visualDirection": "Açık, sıcak-nötr masaüstü arayüz; Anadolu parsı logo işareti; yeşil/soft yeşil/bej/açık gri taban; kart tabanlı ve yüksek okunabilirlikli düzen.",
+  "approvedReferenceCharacteristics": {
+    "theme": "light",
+    "logo": "Anadolu parsı baş/figür işareti",
+    "layout": "sol modül navigasyonu + merkezi çalışma alanı + bağlamsal sağ panel",
+    "componentLanguage": "ince sınırlar, açık kart yüzeyleri, ölçülü yuvarlatma, düşük gölge, line ikonografi",
+    "paletteSampledFromApprovedImage": {
+      "primaryGreen": "#467259",
+      "softGreen": "#A3AE95",
+      "beige": "#DFD8CA",
+      "lightGray": "#F4F3F0",
+      "white": "#FDFDFC",
+      "softBlue": "#B9C8DA",
+      "neutralGray": "#ABAFB2",
+      "darkGray": "#333537"
+    }
+  },
+  "illustrativeMockContent": {
+    "bindingAsUserData": false,
+    "authorizesProductionSeedOrDemoData": false,
+    "note": "Görsel içindeki örnek değerler yalnız yerleşim ve bileşen yoğunluğunu anlatır; production kişisel/demo veri yasağını değiştirmez."
+  },
+  "driftProtection": {
+    "hashPinned": true,
+    "replacementRequiresNewBuildEvidence": true,
+    "legacyIncorrectBaselineSha256": "637087594134b257105011990dc5de38ee90cc46fc6307565cad6df62fbc35f7"
+  }
+}

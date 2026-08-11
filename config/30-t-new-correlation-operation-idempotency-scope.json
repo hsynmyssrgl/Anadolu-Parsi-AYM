@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "30-T",
+  "requirement": "PPK-002",
+  "scope": "DURABLE_NEW_CORRELATION_OPERATION_IDEMPOTENCY_AFTER_UNKNOWN_COMMIT_OUTCOME",
+  "predecessor": {
+    "step": "30-S",
+    "completionRecord": "artifacts/checkpoints/30-S_COMPLETION_RECORD.json",
+    "persistentReceiptStatus": "PASS"
+  },
+  "targets": [
+    {
+      "id": "caller-stable-operation-identity",
+      "requiredResult": "Each governed archive mutation carries a caller-stable operation identifier that is independent of correlation, nonce and receipt identity."
+    },
+    {
+      "id": "canonical-operation-fingerprint",
+      "requiredResult": "The operation identifier is bound to a canonical SHA-256 fingerprint of the family, actor, mutation intent and semantic input; reuse with different input fails closed."
+    },
+    {
+      "id": "atomic-idempotency-ledger",
+      "requiredResult": "The operation identity, original receipt, canonical fingerprint and serialized successful result commit or roll back in the same SQLite transaction as the protected business mutation."
+    },
+    {
+      "id": "new-correlation-retry-recovery",
+      "requiredResult": "A retry with the same operation identifier and fingerprint but a new correlation, nonce and receipt returns the committed result without repeating business, audit, outbox or attachment mutations."
+    },
+    {
+      "id": "production-ipc-operation-identity",
+      "requiredResult": "The sandboxed renderer-to-main archive mutation boundary supplies and reuses a stable operation identifier across retryable unknown outcomes."
+    },
+    {
+      "id": "real-sqlite-and-process-proof",
+      "requiredResult": "Real SQLite tests cover commit, rollback, fingerprint conflict and a new-correlation retry after an injected unknown outcome with actual process exit codes."
+    }
+  ],
+  "requiredOrder": [
+    "selection-and-scope-lock",
+    "migration-and-repository-contract",
+    "production-archive-application-integration",
+    "renderer-ipc-operation-identity",
+    "real-sqlite-runtime-and-regression",
+    "security-review"
+  ],
+  "evidenceBoundary": {
+    "PPK002": "PARTIAL",
+    "archiveCoreAndAccessoryReceiptFence": "TARGETED_PASS",
+    "newCorrelationRetryIdempotencyAfterUnknownCommitOutcome": "TARGETED_NOT_YET_PASS",
+    "universalRepositoryEnforcement": "NOT_COMPLETE",
+    "externalMonotonicAuthorityAgainstCoordinatedDatabaseAndJournalRollback": "NOT_IMPLEMENTED",
+    "expiredUnusedReplayReservationPruning": "NOT_IMPLEMENTED",
+    "obligationExecution": "NOT_RUN_NOT_PASS",
+    "secureFileDeletionAndDatabaseCommitAtomicity": "NOT_IMPLEMENTED",
+    "requirementCompletionClaimed": false
+  },
+  "mandatoryTruthSentence": "Bu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır."
+}

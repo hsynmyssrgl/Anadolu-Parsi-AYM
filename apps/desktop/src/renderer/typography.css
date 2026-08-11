@@ -1,0 +1,232 @@
+/* Build 126 — Apple system typography contract */
+:root {
+  --font-family-system: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Inter, "Segoe UI Variable", "Segoe UI", sans-serif;
+
+  --font-size-large-title: 34px;
+  --line-height-large-title: 41px;
+  --font-size-title-1: 28px;
+  --line-height-title-1: 34px;
+  --font-size-title-2: 22px;
+  --line-height-title-2: 28px;
+  --font-size-title-3: 20px;
+  --line-height-title-3: 25px;
+  --font-size-headline: 17px;
+  --line-height-headline: 22px;
+  --font-size-body: 17px;
+  --line-height-body: 24px;
+  --font-size-callout: 16px;
+  --line-height-callout: 21px;
+  --font-size-subheadline: 15px;
+  --line-height-subheadline: 20px;
+  --font-size-footnote: 13px;
+  --line-height-footnote: 18px;
+  --font-size-caption-1: 12px;
+  --line-height-caption-1: 16px;
+  --font-size-caption-2: 11px;
+  --line-height-caption-2: 13px;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+}
+
+html,
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-family-system);
+}
+
+body {
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  font-weight: var(--font-weight-regular);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body .app-shell {
+  font-family: var(--font-family-system);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  font-weight: var(--font-weight-regular);
+}
+
+body .app-shell .page-header h1 {
+  margin-block: 4px 6px;
+  font-size: var(--font-size-large-title);
+  line-height: var(--line-height-large-title);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.022em;
+}
+
+body .app-shell :is(h1, .title-1) {
+  font-size: var(--font-size-title-1);
+  line-height: var(--line-height-title-1);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.018em;
+}
+
+body .app-shell :is(h2, .title-2) {
+  font-size: var(--font-size-title-2);
+  line-height: var(--line-height-title-2);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.012em;
+}
+
+body .app-shell :is(h3, .title-3) {
+  font-size: var(--font-size-title-3);
+  line-height: var(--line-height-title-3);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.008em;
+}
+
+body .app-shell :is(h4, h5, h6, strong) {
+  font-size: var(--font-size-headline);
+  line-height: var(--line-height-headline);
+  font-weight: var(--font-weight-semibold);
+}
+
+body .app-shell :is(p, li, dd, dt, blockquote, .body-copy) {
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+
+body .app-shell :is(label, input, select, textarea, button, .button, .text-button, .search-box, .breadcrumb, .topbar-control) {
+  font-size: var(--font-size-subheadline);
+  line-height: var(--line-height-subheadline);
+  font-weight: var(--font-weight-medium);
+}
+
+body .app-shell :is(input, select, textarea) {
+  min-height: 44px;
+}
+
+body .app-shell :is(small, time, kbd, .footnote, .muted-copy, .timeline-meta, .event-milestones, .popover-empty) {
+  font-size: var(--font-size-footnote);
+  line-height: var(--line-height-footnote);
+  font-weight: var(--font-weight-regular);
+}
+
+body .app-shell :is(.eyebrow, .caption, .tag, .status-badge, .nav-group-label, .notification i, .summary-row i, .command-palette footer span) {
+  font-size: var(--font-size-caption-1);
+  line-height: var(--line-height-caption-1);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.01em;
+}
+
+body .app-shell :is(.eyebrow, .timeline-toolbar label, .event-date small, .invitation-preview > span) {
+  text-transform: none;
+}
+
+body .app-shell nav button,
+body .app-shell .nav-label {
+  font-size: var(--font-size-subheadline);
+  line-height: var(--line-height-subheadline);
+  font-weight: var(--font-weight-medium);
+}
+
+body .app-shell .window-brand strong,
+body .app-shell .family-switcher strong,
+body .app-shell .user-menu strong,
+body .app-shell .sync-state strong,
+body .app-shell .event-copy strong,
+body .app-shell .tree-person strong,
+body .app-shell .list-row strong,
+body .app-shell .summary-row strong {
+  font-size: var(--font-size-headline);
+  line-height: var(--line-height-headline);
+}
+
+body .app-shell .window-brand small,
+body .app-shell .family-switcher small,
+body .app-shell .user-menu small,
+body .app-shell .sync-state small,
+body .app-shell .event-copy small,
+body .app-shell .tree-person small,
+body .app-shell .list-row small,
+body .app-shell .summary-row small {
+  font-size: var(--font-size-footnote);
+  line-height: var(--line-height-footnote);
+}
+
+body .app-shell .page-header p,
+body .app-shell .welcome-copy p,
+body .app-shell .modal-header p,
+body .app-shell .notes-card,
+body .app-shell .status-message {
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+
+body .app-shell .panel-heading h2,
+body .app-shell .panel-heading h3,
+body .app-shell .workspace-form h2,
+body .app-shell .workspace-summary h2,
+body .app-shell .timeline-summary h2,
+body .app-shell .event-detail-header h2,
+body .app-shell .modal-header h2 {
+  font-size: var(--font-size-title-2);
+  line-height: var(--line-height-title-2);
+  font-weight: var(--font-weight-semibold);
+}
+
+body .app-shell .metric-card small,
+body .app-shell .metric-card p,
+body .app-shell .summary-stats span,
+body .app-shell .context-stat span,
+body .app-shell .detail-grid small,
+body .app-shell .event-facts small {
+  font-size: var(--font-size-footnote);
+  line-height: var(--line-height-footnote);
+}
+
+body .app-shell .metric-card strong {
+  font-size: var(--font-size-title-1);
+  line-height: var(--line-height-title-1);
+  font-weight: var(--font-weight-bold);
+}
+
+body .app-shell .summary-number {
+  font-size: 52px;
+  line-height: 1;
+  font-weight: var(--font-weight-bold);
+}
+
+body .app-shell .invitation-preview h3,
+body .app-shell .invitation-preview p {
+  font-family: var(--font-family-system);
+}
+
+body .app-shell .invitation-preview > span,
+body .app-shell .participant-chips span,
+body .app-shell .archived-event-list small,
+body .app-shell .backup-box small,
+body .app-shell .empty-state p,
+body .app-shell .empty-state strong {
+  font-size: var(--font-size-footnote);
+  line-height: var(--line-height-footnote);
+}
+
+body .app-shell .button {
+  min-height: 44px;
+  padding-inline: 16px;
+}
+
+body .app-shell .icon-button,
+body .app-shell .notification,
+body .app-shell .sidebar-toggle {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+@media (max-width: 1200px) {
+  body .app-shell .page-header h1 {
+    font-size: var(--font-size-title-1);
+    line-height: var(--line-height-title-1);
+  }
+}

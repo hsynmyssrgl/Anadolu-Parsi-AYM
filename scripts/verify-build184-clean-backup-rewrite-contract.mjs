@@ -1,0 +1,27 @@
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname, join, resolve } from 'node:path';
+const root=process.cwd();const out=resolve(process.argv[2]??'artifacts/validation/build184-clean-backup-rewrite-contract.json');
+const paths={domain:'packages/domain/src/app-data.ts',useCases:'packages/application/src/backup-propagation-use-cases.ts',repoContract:'packages/repository-contracts/src/backup-propagation-repository.ts',repository:'packages/repositories/src/backup-propagation-repository.ts',migration:'packages/database/src/family-database-migrations.ts',service:'apps/desktop/src/main/automatic-clean-backup-rewrite-service.ts',store:'apps/desktop/src/main/data-store.ts',main:'apps/desktop/src/main/main.ts',preload:'apps/desktop/src/main/preload.ts',renderer:'apps/desktop/src/renderer/App.tsx',decision:'docs/10_MASTER_DECISION_REGISTER.md',authority:'docs/11_DOCUMENT_AUTHORITY_MATRIX.md',spec:'docs/CLEAN_BACKUP_REWRITE_FINALIZATION_LEDGER_V1.md',adr:'docs/adr/ADR-057-atomic-clean-backup-rewrite-finalization-ledger.md',policy:'config/product-lifecycle-policy.json',preflight:'config/source-preflight-checks.json',package:'package.json',scope:'docs/00_SCOPE_FREEZE.md',technical:'docs/01_TECHNICAL_STACK.md',security:'docs/02_SECURITY_BASELINE.md',test:'docs/03_TEST_AND_ACCEPTANCE.md',open:'docs/06_OPEN_ITEMS_AFTER_CODING_START.md',trace:'docs/07_BRONZE_REQUIREMENTS_TRACEABILITY.md',ui:'docs/13_UI_UX_ACCESSIBILITY_STANDARD.md',readme:'README.md',contributing:'CONTRIBUTING.md',status:'docs/09_ACTIVE_DEVELOPMENT_STATUS.md'};
+const files=Object.fromEntries(await Promise.all(Object.entries(paths).map(async([k,p])=>[k,await readFile(join(root,p),'utf8')])));
+const failures=[];const checks=[];const check=(label,condition)=>{checks.push(label);if(!condition)failures.push(label);};const has=(k,m)=>files[k].includes(m);
+for(const marker of ['BackupCleanRewriteRunStatus','BackupCleanRewriteRunView','rewriteRun?:BackupCleanRewriteRunView'])check(`domain ${marker}`,has('domain',marker));
+for(const marker of ['listCleanRewriteRuns','ListBackupCleanRewriteRunsUseCase','BackupPropagationQueryPort'])check(`application ${marker}`,has('useCases',marker));
+for(const marker of ['listCleanRewriteRuns','retentionCutoff','dueRecords','enabledTargets','propagationRunId'])check(`repository contract ${marker}`,has('repoContract',marker));
+for(const marker of ['mapCleanRewriteRun','backup_clean_rewrite_runs','policyExists','runExists','Temiz yedek yeniden yazım tamamlama durumu atomik olarak güncellenemedi','input.outcome,input.completedAt,input.nextAttemptAt','status=\'interrupted\''])check(`repository ${marker}`,has('repository',marker));
+for(const marker of ['REVISION-184-CLEAN-BACKUP-REWRITE-FINALIZATION-LEDGER',"createMigrationDefinition(30, 'clean_backup_rewrite_finalization_ledger'",'idx_backup_clean_rewrite_runs_started','idx_backup_clean_rewrite_runs_status'])check(`migration ${marker}`,has('migration',marker));
+for(const marker of ['listRuns(limit=20)','rewriteRun:finalized.run','retentionCutoff','dueRecords:before.dueRecords','enabledTargets:before.enabledTargets','#recordDiagnostic'])check(`service ${marker}`,has('service',marker));
+check('data store run history',has('store','listBackupCleanRewriteRuns'));
+check('IPC run history',has('main','dataLifecycle:listBackupCleanRewriteRuns'));
+check('preload run history',has('preload','listBackupCleanRewriteRuns'));
+check('renderer persistent history',has('renderer','Kalıcı çalışma geçmişi'));
+check('DEC-074 propagated',has('decision','DEC-074'));
+check('ADR-057 authority',has('authority','ADR-057'));
+check('spec atomic finalization',has('spec','Atomik sonuçlandırma sözleşmesi'));
+check('ADR real sqlite gate',has('adr','Gerçek SQLite regresyonu'));
+check('machine policy binding',has('policy','DEC-074'));
+check('preflight sqlite gate',has('preflight','build184-clean-backup-rewrite-sqlite-runtime'));
+check('package sqlite command',has('package','verify:build184:clean-backup-rewrite-sqlite-runtime'));
+for(const [key,marker] of [['scope','Build 184 aktif kapsamı'],['technical','Build 184 teknik sınırı'],['security','Build 184 güvenlik sınırı'],['test','Build 184 kabul sınırı'],['open','Build 184 sonrası açık test işleri'],['trace','Build 184 izlenebilirliği'],['ui','Build 184 UI/UX kararı'],['readme','Build 184'],['contributing','Build 184 bağlayıcı katkı kuralı'],['status','Build 184 bağlayıcı güncellemesi']])check(`document ${key}`,has(key,marker));
+if(checks.length!==49)throw new Error(`Build 184 contract check count drifted: ${checks.length}`);
+const report={schemaVersion:1,product:'Anadolu Parsı Aile Yaşam Merkezi',featureBuild:184,stage:'Bronze RC2 Active Development',scope:'Atomic clean-backup rewrite finalization, real SQLite binding regression and durable run ledger',status:failures.length?'FAIL':'PASS',assertions:checks.length,checks,failures,generatedAt:new Date().toISOString()};
+await mkdir(dirname(out),{recursive:true});await writeFile(out,`${JSON.stringify(report,null,2)}\n`);console.log(`Build 184 clean backup rewrite contract: ${report.status} (${checks.length-failures.length}/${checks.length})`);if(failures.length){for(const failure of failures)console.error(`- ${failure}`);process.exitCode=1;}

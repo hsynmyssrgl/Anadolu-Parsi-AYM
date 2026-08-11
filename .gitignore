@@ -1,0 +1,16 @@
+
+node_modules/
+dist/
+coverage/
+.tmp/
+*.log
+.env
+.DS_Store
+Thumbs.db
+release/
+artifacts/*
+!artifacts/manifests/
+!artifacts/manifests/**
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm

@@ -1,0 +1,27 @@
+import { readFile } from 'node:fs/promises';
+const x=JSON.parse(await readFile('artifacts/validation/build222-windows-failure-intake.json','utf8'));
+const checks=[];const add=(id,c)=>checks.push({id,status:c?'PASS':'FAIL'});
+add('analysis-build',x.analysisBuild===222);
+add('tested-build',x.testedBuild===221&&x.testedApplicationVersion==='02.08.2026.221'&&x.testedPackageVersion==='2.8.2026-221');
+add('bundle-sha',/^[0-9a-f]{64}$/.test(x.evidenceBundle?.sha256??''));
+add('bundle-integrity',x.evidenceBundle?.zipIntegrity==='PASS');
+add('sidecar-match',x.evidenceBundle?.sha256SidecarMatch===true);
+add('source-binding',x.exactSourceBinding?.status==='PASS');
+add('source-integrity',x.windowsRun?.sourceIntegrity==='PASS');
+add('npm-ci',x.windowsRun?.dependencyBootstrapPrerequisite==='PASS');
+add('packager-bootstrap',x.windowsRun?.windowsPackagerBootstrapPrerequisite==='PASS');
+add('workspace-build',x.windowsRun?.workspacePackageBuildPrerequisite==='PASS');
+add('workspace-dist-guard',x.windowsRun?.workspacePackageDistGuard==='PASS');
+add('installer-failed',x.windowsRun?.windowsInstallerBuild?.status==='FAIL'&&x.windowsRun?.windowsInstallerBuild?.exitCode===1);
+add('ts7017',x.windowsRun?.windowsInstallerBuild?.typescriptError==='TS7017'&&x.windowsRun?.windowsInstallerBuild?.sourceFile==='apps/desktop/src/main/preload.ts'&&x.windowsRun?.windowsInstallerBuild?.line===146);
+add('probes-not-run',x.windowsRun?.probeExecution==='NOT_RUN_AFTER_INSTALLER_BUILD_FAILURE');
+add('open021-not-ready',x.windowsRun?.open021==='NOT_READY');
+add('open022-not-ready',x.windowsRun?.open022==='NOT_READY');
+add('source-bug',x.rootCause?.classification==='SOURCE_BUG'&&x.rootCause?.environmentBlocker===false);
+add('globalthis-root-cause',(x.rootCause?.primary??'').includes('globalThis.addEventListener')&&(x.rootCause?.primary??'').includes('TS7017'));
+add('typed-adapter-remediation',x.build222Remediation?.some(v=>v.includes('typed renderer lifecycle target')));
+add('ab-compile-remediation',x.build222Remediation?.some(v=>v.includes('A/B compile regression')));
+add('ledger-unchanged',x.closureDecision?.ledgerMutationPerformed===false&&x.closureDecision?.open021==='IN_PROGRESS'&&x.closureDecision?.open022==='IN_PROGRESS');
+const ok=checks.every(c=>c.status==='PASS');
+console.log(`Build222 Windows failure intake: ${ok?'PASS':'FAIL'} (${checks.filter(c=>c.status==='PASS').length}/${checks.length}).`);
+if(!ok){console.error(JSON.stringify(checks.filter(c=>c.status==='FAIL'),null,2));process.exitCode=1;}

@@ -1,0 +1,32 @@
+import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { extname } from 'node:path';
+import { classifyPath, csvEscape, DOCUMENT_EXTENSIONS, SELF_INDEX_PATHS, sha256File, walkFiles, readJson } from './lib/governance-utils.mjs';
+const release=(await readJson('config/release-ledger.json')).current;
+const activeSet=await readJson('config/active-document-set.json');
+const activeAuthority=new Set(activeSet.authorityOrder??[]);
+const paths=await walkFiles('.');
+const entries=[];
+for(const path of paths){
+  if(SELF_INDEX_PATHS.has(path)) continue;
+  const s=await stat(path);
+  entries.push({path,bytes:s.size,sha256:await sha256File(path),extension:extname(path).toLowerCase(),classification:classifyPath(path,activeAuthority),isDocument:DOCUMENT_EXTENSIONS.has(extname(path).toLowerCase())});
+}
+const selfEntries=[...SELF_INDEX_PATHS].sort().map(path=>({path,bytes:null,sha256:'SELF_GENERATED_AFTER_INVENTORY',extension:extname(path).toLowerCase(),classification:activeAuthority.has(path)?'ACTIVE_AUTHORITY':'GENERATED',isDocument:DOCUMENT_EXTENSIONS.has(extname(path).toLowerCase())}));
+const all=[...entries,...selfEntries].sort((a,b)=>a.path.localeCompare(b.path));
+const docs=all.filter(x=>x.isDocument);
+const summary={totalFiles:all.length,totalDocuments:docs.length,classifications:Object.fromEntries([...new Set(all.map(x=>x.classification))].sort().map(k=>[k,all.filter(x=>x.classification===k).length]))};
+const artifact={schemaVersion:2,release:release.visibleRelease,releaseId:release.releaseId,generatedAt:new Date().toISOString(),selfIndexedPaths:[...SELF_INDEX_PATHS].sort(),summary,files:all};
+const documentIndex={schemaVersion:1,release:release.visibleRelease,releaseId:release.releaseId,generatedAt:artifact.generatedAt,selfIndexedPaths:[...SELF_INDEX_PATHS].sort(),documentCount:docs.length,documents:docs};
+await mkdir('artifacts/manifests',{recursive:true});
+await writeFile('artifacts/manifests/PROJECT_ARTIFACT_INDEX.json',JSON.stringify(artifact,null,2)+'\n');
+await writeFile('artifacts/manifests/ALL_DOCUMENTS_INDEX.json',JSON.stringify(documentIndex,null,2)+'\n');
+const header=['path','bytes','sha256','extension','classification','isDocument'];
+const csv=(rows)=>[header.join(','),...rows.map(x=>header.map(k=>csvEscape(x[k])).join(','))].join('\n')+'\n';
+await writeFile('artifacts/manifests/PROJECT_ARTIFACT_INDEX.csv',csv(all));
+await writeFile('artifacts/manifests/ALL_DOCUMENTS_INDEX.csv',csv(docs));
+const artifactMd=['# Tam Proje Artifact Indexi','',`- Sürüm: **${release.visibleRelease}**`,`- Toplam dosya: **${all.length}**`,`- Toplam belge/config/kanıt: **${docs.length}**`,'',...all.map(x=>`- \`${x.path}\` — ${x.classification} — ${x.bytes??'SELF'} bayt — \`${x.sha256}\``)].join('\n')+'\n';
+const docsMd=['# Tüm Belgeler Dizini','',`- Sürüm: **${release.visibleRelease}**`,`- Eksiksiz belge/config/kanıt sayısı: **${docs.length}**`,'',...docs.map(x=>`- \`${x.path}\` — ${x.classification} — ${x.bytes??'SELF'} bayt — \`${x.sha256}\``)].join('\n')+'\n';
+await writeFile('artifacts/manifests/PROJECT_ARTIFACT_INDEX.md',artifactMd);
+await writeFile('artifacts/manifests/ALL_DOCUMENTS_INDEX.md',docsMd);
+await writeFile('docs/current/08_TUM_BELGELER_DIZINI.md',docsMd);
+console.log(`Artifact indexes generated: ${all.length} files / ${docs.length} documents.`);

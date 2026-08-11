@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "version": "24.07.2026.55",
+  "milestone": "B060-M15 Finance Records & Valuation Application Migration",
+  "checks": 3,
+  "scenarios": [
+    "DataStore publishes member event and writes two receipts",
+    "dispatcher retries retryable handler then publishes",
+    "dispatcher permanently fails non-retryable handler"
+  ]
+}

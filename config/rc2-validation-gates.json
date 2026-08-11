@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 3,
+  "stage": "Bronze RC2 Active Development",
+  "stopOnFailure": true,
+  "gates": [
+    {
+      "id": "source-preflight",
+      "label": "Bağımlılıktan bağımsız kaynak ön-kontrolü",
+      "phase": "source-preflight",
+      "command": "node",
+      "args": [
+        "scripts/run-source-preflight.mjs",
+        "--report",
+        "artifacts/validation/source-preflight.json"
+      ],
+      "platforms": [
+        "linux",
+        "darwin",
+        "win32"
+      ],
+      "timeoutMs": 360000
+    },
+    {
+      "id": "clean-npm-ci",
+      "label": "Temiz ortam npm ci",
+      "phase": "dependency-bootstrap",
+      "command": "node",
+      "args": [
+        "scripts/run-clean-npm-ci.mjs",
+        "--report",
+        "artifacts/validation/npm-ci-dependency-access.json"
+      ],
+      "platforms": [
+        "linux",
+        "darwin",
+        "win32"
+      ],
+      "timeoutMs": 600000
+    },
+    {
+      "id": "tsc-no-emit",
+      "label": "TypeScript tsc --noEmit",
+      "phase": "compile",
+      "command": "npm",
+      "args": [
+        "run",
+        "typecheck"
+      ],
+      "platforms": [
+        "linux",
+        "darwin",
+        "win32"
+      ],
+      "timeoutMs": 300000
+    },
+    {
+      "id": "unit-tests",
+      "label": "Birim ve entegrasyon testleri",
+      "phase": "test",
+      "command": "npm",
+      "args": [
+        "run",
+        "test"
+      ],
+      "platforms": [
+        "linux",
+        "darwin",
+        "win32"
+      ],
+      "timeoutMs": 300000
+    },
+    {
+      "id": "electron-production-build",
+      "label": "Electron production build",
+      "phase": "build",
+      "command": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "platforms": [
+        "linux",
+        "darwin",
+        "win32"
+      ],
+      "timeoutMs": 900000
+    },
+    {
+      "id": "smoke-tests",
+      "label": "Bronze smoke testleri",
+      "phase": "smoke",
+      "command": "npm",
+      "args": [
+        "run",
+        "verify:bronze"
+      ],
+      "platforms": [
+        "linux",
+        "darwin",
+        "win32"
+      ],
+      "timeoutMs": 900000
+    },
+    {
+      "id": "windows-real-launch",
+      "label": "Windows gerçek açılış testi",
+      "phase": "windows-runtime",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/windows-real-launch-test.ps1"
+      ],
+      "platforms": [
+        "win32"
+      ],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "windows-installer",
+      "label": "Windows installer üretimi ve doğrulaması",
+      "phase": "windows-installer",
+      "command": "npm",
+      "args": [
+        "run",
+        "package:win",
+        "--workspace",
+        "@ppt/desktop"
+      ],
+      "platforms": [
+        "win32"
+      ],
+      "timeoutMs": 1200000
+    }
+  ]
+}

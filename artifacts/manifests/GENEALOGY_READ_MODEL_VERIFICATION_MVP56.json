@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "04.08.2026.29",
+  "milestone": "Bronze RC2 Build undefined",
+  "status": "passed",
+  "checks": 6,
+  "scenarios": [
+    "explicit governed genealogy read model",
+    "calculated-generation-applied-to-tree",
+    "parent-link-removes-missing-link",
+    "cycle-is-detected-without-unbounded-generation",
+    "broken-relations-are-ignored-and-reported",
+    "child-relation-is-normalized-to-parent-edge"
+  ],
+  "cycleSafe": true,
+  "brokenRelationSafe": true,
+  "generationCalculationActive": true,
+  "generatedAt": "2026-08-11T06:57:09.069Z"
+}

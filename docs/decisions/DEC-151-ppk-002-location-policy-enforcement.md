@@ -1,0 +1,25 @@
+# DEC-151 — PPK-002 konum politika enforcement dikey dilimi
+
+## Seçim kararı
+
+DEC-137’nin bağlayıcı sırası uygulanmıştır: başlanmış işler yeni işlerden önce, ardından P0/P1/P2, yol haritası bağımlılığı, güvenlik-gizlilik-veri bütünlüğü etkisi ve son olarak kabul edilmiş kapsam sicili sırası değerlendirilir. 30-Y kalıcı receipt ve completion-transition PASS sonrasında PPK-002 hâlâ `PARTIAL` olduğundan aynı P0 politika zincirine devam edilir.
+
+Konum ve timeline-event sınırları aynı merkezi politika bağımlılığını taşır. Konum; aktif güvenlik politikasında yüksek hassasiyetli veri sınıfıdır, PR-011 ayrıca açık rıza, amaç, süre, görünür gösterge, otomatik sona erme ve audit koşulları getirir ve B2-05/B6-03 kayıtları `PARTIAL / P0` durumundadır. Bu nedenle 30-Z için `locationPolicyEnforcementVerticalSlice` seçilmiştir; timeline-event Policy Enforcement ayrı ve daha sonraki bir sınır olarak açık kalır.
+
+## Dar uygulama sınırı
+
+30-Z yalnız mevcut kayıtlı aile konumu yüzeyini kapsar: üretim `location:create` IPC işlemi; `findById`, `insert` ve `listByFamily` repository işlemleri; timeline read-model içindeki konum projection’ı; dashboard konum sayımı ve import/bootstrap ham konum bypass’larının fail-closed kaldırılması. Kayıtlı konum okumaları için mevcut `location.read`, oluşturma için mevcut `family.write` kullanılır; `family.read` konum okumalarında yasaktır. Yeni capability literal’i gerekmez. `windows-desktop` uygulama capability listesine mevcut `location.read` uygulama sırasında eklenmeden hedef PASS olamaz. Kaynak türü `location`, amaç `general` olarak korunur. Mevcut `location.share` yalnız açık rıza gerektiren canlı konum paylaşımına aittir ve bu kayıtlı-konum diliminin kapsamı dışındadır.
+
+Repository erişimi aile, kaynak kimliği, veri sınıfı ve korelasyon bağı taşıyan `PolicyAuthorizedRepositoryExecutionContext` olmadan çalışamaz. `findById` aile sınırına alınır; sabit `family-main` uygulama bağı kaldırılır. `locations` INSERT yazımı, aynı SQLite transaction içindeki exact kalıcı policy receipt, audit ve outbox bağı olmadan doğrudan SQL ile kabul edilmez. Kayıtlı konum satırı nullable `owner_person_id`, sabit `highly_sensitive` policy sınıflandırması ve exact kalıcı receipt alanları taşır. Bağlayıcı otorite bulunmadığı için `locations` tablosuna `privacy` veya `ai_processing_allowed` sütunu eklenmesi yasaktır. Receipt taşımayan ve sahibi olmayan tarihsel satırlar silinmez; sabit `highly_sensitive` olarak karantinada tutulur ve açık grant bulunsa dahi görünmez. Görünürlükten önce ayrı ve açık bir repair/claim workflow gerekir; bu workflow 30-Z kapsamı dışındadır. Çapraz yüzey okuyucuları tam adres veya koordinatı yalnız governed projection üzerinden alır.
+
+Owner olmayan özneye verilen kayıtlı-konum `allow` yetkisi yalnız governed receipt taşıyan ve başka bir aktif kişiye ait satırlar için; `resourceType=location`, `action=read`, `purpose=general` bağı ve sonlu `endsAt` ile kabul edilir. Receiptless/owner-less karantina satırları grant ile açılamaz; `deny` açık uçlu kalabilir. Bu kural `UpsertObjectPermissionUseCase`, yetki UI'si ve hedefli runtime testlerinde doğrulanmadan PASS değildir. Owner erişimi dahi aktif üyelik, güvenilen cihaz ve policy receipt TTL sınırlarına bağlıdır. Bu okuma süresi, ayrı rıza yaşam döngüsü gerektiren gelecekteki `location.share` canlı paylaşımından farklıdır.
+
+Tek transaction içinde çok sayıda konum üreten aile veri aktarımı exact satır-başına receipt için ayrı bir multi-intent/multi-receipt runner gerektirir ve 30-Z bunu tamamlanmış saymaz. Bu dilimde konum veya `locationId` taşıyan import belgeleri fail-closed reddedilir, ham import projection/yazım yolu ile boş production bootstrap konum yazıcısı kaldırılır. Import rollback ön kontrolü governed receipt taşıyan konumların silineceği durumda bütün rollback’i açık bir engelle durdurur; pre-66, null-receipt tarihsel import satırlarının uygun 24 saatlik atomik rollback davranışı korunur. Konum update/delete use-case veya repository sözleşmesi 30-Z ile tamamlanmış sayılmaz.
+
+## Kapsam dışı ve korunmuş gerçekler
+
+Bu dilim kayıtlı aile konumu enforcement’ıdır; canlı konum paylaşımının bütün rıza UI’si, süre sonu, iptal ve görünür gösterge yaşam döngüsü sırf 30-Z ile `COMPLETE` sayılmaz. `locationImportBatchPolicyWorkflow` durumu `NOT_COMPLETE_MULTI_RECEIPT_BATCH_REQUIRED`; `locationDeleteAndImportRollbackWorkflow` durumu `NOT_COMPLETE_GOVERNED_DELETION_REQUIRED` kalır. B2-05 ve B6-03 bütün gereksinimleri tamamlanmış ilan edilmez. Timeline-event Policy Enforcement, evrensel repository enforcement, haricî monoton otorite, obligation execution, güvenli dosya silme/DB commit atomikliği ve kurulu Core Service/SCM kanıtı açık kalır.
+
+Yaşam silme/purge, dashboard-life ve data-lifecycle-life sınırları 30-Y’deki durumlarıyla korunur. PPK-002 `PARTIAL`; Bronze doğrulanmış ilerleme `%25,0`; Silver ve Gold `FORBIDDEN_NOT_READY`; gerçek Windows Hello ve installer kanıtı `NOT_RUN_NOT_PASS` kalır. 30-Z yalnız temiz hedefli doğrulama ve kalıcı Library receipt zinciri PASS olduğunda tamamlanabilir.
+
+Bu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır.

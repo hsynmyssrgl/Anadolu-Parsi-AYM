@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "../../.tmp/data-store-smoke",
+    "rootDir": "../../apps/desktop/src/main",
+    "types": ["node"],
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false
+  },
+  "include": ["../../apps/desktop/src/main/data-store.ts"]
+}

@@ -1,0 +1,23 @@
+import { readFile } from 'node:fs/promises';
+const reportPath=process.argv[2]??'artifacts/validation/build220-windows-failure-intake.json';
+const r=JSON.parse(await readFile(reportPath,'utf8'));
+const checks=[];const add=(id,c,d=undefined)=>checks.push({id,status:c?'PASS':'FAIL',...(d!==undefined?{details:d}:{})});
+add('analysis-build',r.analysisBuild===220,r.analysisBuild);
+add('tested-build',r.testedBuild===219,r.testedBuild);
+add('bundle-sha',r.evidenceBundle?.sha256==='32ea3dfb15ec1bec3de629195ecad6b3e937ec042906a2f3485bdc476e4ea1c2');
+add('bundle-integrity',r.evidenceBundle?.zipIntegrity==='PASS');
+add('exact-source-binding',r.exactSourceBinding?.status==='PASS');
+add('manifest-hash',r.exactSourceBinding?.manifestSha256==='c776956784a315755212c665e593a13e05540ab35e688687cc63544016bc4739');
+add('sha-sums-hash',r.exactSourceBinding?.sha256SumsSha256==='5bea4bf57e28526798eb71d8353c1ed5aad8310a50cbad1bc057c51338e78855');
+add('windows-source-integrity',r.windowsRun?.sourceIntegrity==='PASS');
+add('root-npm-ci-pass',r.windowsRun?.dependencyBootstrapPrerequisite==='PASS');
+add('installer-failed-as-observed',r.windowsRun?.windowsInstallerBuild?.status==='FAIL'&&r.windowsRun?.windowsInstallerBuild?.exitCode===1,r.windowsRun?.windowsInstallerBuild);
+add('probes-not-run',r.windowsRun?.probeExecution==='NOT_RUN_AFTER_INSTALLER_BUILD_FAILURE');
+add('source-bug-classification',r.rootCause?.classification==='SOURCE_BUG');
+add('not-environment-blocker',r.rootCause?.environmentBlocker===false);
+add('open021-not-closed',r.closureDecision?.open021==='IN_PROGRESS');
+add('open022-not-closed',r.closureDecision?.open022==='IN_PROGRESS');
+add('no-ledger-mutation',r.closureDecision?.ledgerMutationPerformed===false);
+const ok=checks.every(x=>x.status==='PASS');
+console.log(`Build220 Windows failure intake: ${ok?'PASS':'FAIL'} (${checks.filter(x=>x.status==='PASS').length}/${checks.length}).`);
+if(!ok){console.error(checks.filter(x=>x.status==='FAIL'));process.exitCode=1;}

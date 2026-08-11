@@ -1,0 +1,12 @@
+Panthera pardus tulliana — Bronze MVP-43 Database Gate
+Sürüm: 23.07.2026.43
+Durum: PASSED
+Uygulama tabloları: 40
+Altyapı tabloları: 2
+Migration sayısı: 3
+IPC main/preload: 124/124
+Foundation: 14/14
+Runtime: 6/6
+Migration: 9/9
+Data-store smoke: 9/9
+Electron main/preload typecheck: PASSED

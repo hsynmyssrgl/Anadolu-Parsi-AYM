@@ -1,0 +1,10 @@
+import { execFileSync } from 'node:child_process';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { dirname } from 'node:path';
+const args=process.argv.slice(2),option=(name,fallback)=>{const i=args.indexOf(name);return i<0?fallback:args[i+1];};
+const reportPath=option('--report','artifacts/validation/build161-ipc-backpressure-syntax.json');
+const files=['apps/desktop/src/main/ipc-request-lifecycle.ts','apps/desktop/src/main/ipc-runtime.ts'];
+for(const file of files)execFileSync('node',['--experimental-strip-types','--check',file],{stdio:'pipe'});
+const report={schemaVersion:1,product:'Anadolu Parsı Aile Yaşam Merkezi',featureBuild:161,stage:'Bronze RC2 Active Development',status:'PASS',fileCount:files.length,files,generatedAt:new Date().toISOString()};
+await mkdir(dirname(reportPath),{recursive:true});await writeFile(reportPath,`${JSON.stringify(report,null,2)}\n`);
+console.log(`Build 161 IPC backpressure syntax: PASS (${files.length}/${files.length}).`);

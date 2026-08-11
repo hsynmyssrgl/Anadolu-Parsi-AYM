@@ -1,0 +1,18 @@
+import { readFile, writeFile, mkdir, mkdtemp, rename, rm } from 'node:fs/promises';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { execFileSync } from 'node:child_process';
+await mkdir('.tmp',{recursive:true});
+const root=await mkdtemp(join('.tmp','ppt-build209-vault-'));
+execFileSync(process.execPath,[join('node_modules','typescript','lib','tsc.js'),'--ignoreConfig','apps/desktop/src/main/user-data-vault.ts','--target','es2022','--module','esnext','--moduleResolution','bundler','--outDir',root,'--types','node','--skipLibCheck'],{stdio:'pipe'});
+const modulePath=join(root,'vault.mjs');await rename(join(root,'user-data-vault.js'),modulePath);
+const {UserDataVault}=await import(pathToFileURL(modulePath).href);
+const protector={protectionId:'test-device-dpapi',isAvailable:()=>true,protect:(v)=>Buffer.from(`device:${v}`,'utf8').toString('base64'),unprotect:(v)=>{const t=Buffer.from(v,'base64').toString('utf8');if(!t.startsWith('device:'))throw new Error('device');return t.slice(7)}};
+const paths={headerPath:join(root,'secrets','header.json'),containerPath:join(root,'data','vault.json'),protector};
+const checks=[];const check=(label,cond)=>{if(!cond)throw new Error(label);checks.push(label)};
+const password='Güçlü-Test-Parola!209';const changed='Yeni-Güçlü-Test-Parola!209';const secret=Buffer.from('SQLITE-SECRET-FAMILY-DATA','utf8');
+let vault=new UserDataVault(paths);const initial=vault.initialize(password);check('new vault starts empty',initial.byteLength===0);vault.markInitializationCommitted();vault.seal(secret);
+const raw=(await readFile(paths.containerPath)).toString('utf8');check('persistent container hides plaintext',!raw.includes('SQLITE-SECRET-FAMILY-DATA'));const header=(await readFile(paths.headerPath)).toString('utf8');check('header hides password',!header.includes(password));
+vault=new UserDataVault(paths);let wrong=false;try{vault.unlock('Yanlış-Parola!209')}catch{wrong=true}check('wrong password rejected',wrong);const unlocked=vault.unlock(password);check('correct password decrypts bytes',unlocked.toString('utf8')==='SQLITE-SECRET-FAMILY-DATA');unlocked.fill(0);vault.replacePassword(changed);vault.checkpoint(secret);vault.discardSession();
+vault=new UserDataVault(paths);let oldRejected=false;try{vault.unlock(password)}catch{oldRejected=true}check('old password rejected after rotation',oldRejected);const unlocked2=vault.unlock(changed);check('new password decrypts after rotation',unlocked2.toString('utf8')==='SQLITE-SECRET-FAMILY-DATA');unlocked2.fill(0);vault.discardSession();secret.fill(0);
+await rm(root,{recursive:true,force:true});await mkdir('artifacts/validation',{recursive:true});await writeFile('artifacts/validation/build209-user-data-vault-runtime.json',JSON.stringify({schemaVersion:1,build:209,status:'PASS',checks:checks.length,results:checks,generatedAt:new Date().toISOString()},null,2)+'\n');console.log(`Build 209 user-data vault runtime: PASS (${checks.length} checks).`);

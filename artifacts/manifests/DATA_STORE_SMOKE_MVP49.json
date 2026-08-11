@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "status": "passed",
+  "version": "23.07.2026.49",
+  "milestone": "B060-M9 Dashboard Query & Navigation State",
+  "checks": 14,
+  "peopleBefore": 6,
+  "peopleAfter": 7,
+  "backupCreated": true,
+  "migrationVersions": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "generatedAt": "2026-07-23T18:51:42.139251Z"
+}

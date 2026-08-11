@@ -1,0 +1,1488 @@
+{
+  "schemaVersion": 1,
+  "id": "PPT-CANONICAL-RULE-REGISTRY-V9",
+  "product": "Anadolu Parsı Aile Yaşam Merkezi",
+  "upperBrand": "Panthera pardus tulliana",
+  "effectiveRelease": "Bronze 04.08.2026.29",
+  "exceptionless": true,
+  "previousRuleSet": {
+    "version": "PROJECT-RULES-2026-08-02-V6",
+    "sha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+  },
+  "ruleCount": 208,
+  "activeRuleCount": 194,
+  "supersededRuleCount": 14,
+  "rules": [
+    {
+      "id": "PR-001",
+      "text": "Tüm proje ailesinin üst markası Latince “Panthera pardus tulliana”dır. Uygulama adı üst markadan ayrıdır ve bu uygulamanın resmî adı “Anadolu Parsı Aile Yaşam Merkezi”dir; yeni uygulamalar “Anadolu Parsı” adına içeriklerini tanımlayan ek ad alır. Üst marka adı normal uygulama kullanıcı arayüzünde gösterilmez.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-002",
+      "text": "Bu projenin tek geçerli kaynak başlangıcı 20 Temmuz 2026’dır. Bu tarihten önceki sohbet, dosya, karar, proje veya yatırım/otomatik alım-satım çalışması bu projeyle ilişkilendirilemez, bağlam kaynağı yapılamaz veya proje geçmişi olarak kullanıcıya sunulamaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-003",
+      "text": "Sistemin kök iş varlığı Aile’dir; kişi, hesap, aile, aile dalı, hane ve üyelik ayrı kavramlardır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-004",
+      "text": "Kullanıcı kapsamı yalnız çekirdek aileyle sınırlı değildir; uygun rol, amaç ve süreyle yetkilendirilen diğer kişiler de sisteme dahil olabilir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-005",
+      "text": "Aktif ana ürün 16 modülden oluşur: Gösterge Paneli, Aile, Soy Ağacı, Zaman Tüneli, Önemli Günler, Arşiv, Finans, Sağlık, Yaşam Merkezi, Bildirim ve Otomasyon, Raporlama, Konum, Yetkiler, Yapay Zekâ, Dijital Miras ve Ayarlar.",
+      "state": "SUPERSEDED",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15",
+      "replacedBy": "PR-175"
+    },
+    {
+      "id": "PR-006",
+      "text": "Her yetişkin kendi özel verisinin sahibidir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-007",
+      "text": "Aile yöneticisi olmak sağlık, finans, konum, özel belge veya kişisel zaman tüneli verilerine otomatik erişim sağlamaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-008",
+      "text": "Yetkilendirme yalnız role göre yapılamaz; veri sahibi, nesne, işlem, aile dalı, amaç, süre ve açık izin/ret birlikte değerlendirilir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-009",
+      "text": "Açık ret, rol veya varsayılan iznin her zaman üzerindedir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-010",
+      "text": "Finans ve sağlık yüksek hassasiyetli veri alanlarıdır; kişisel varlık ve borçlar başka aile üyesine otomatik katılmaz, ortak varlık/borç sahiplik oranıyla ele alınır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-011",
+      "text": "Canlı konum yalnız açık rıza, amaç ve süreyle paylaşılır; görünür gösterge, otomatik sona erme ve audit kaydı zorunludur.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-012",
+      "text": "Başlangıç mimarisi modüler monolittir ve gelecekte servis/platform ayrışmasına açık kalmalıdır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-013",
+      "text": "Temel bağımlılık yönü UI → Application → Domain → Infrastructure şeklindedir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-014",
+      "text": "Renderer ve Application katmanı doğrudan ham SQL veya native SQLite çalıştıramaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-015",
+      "text": "Migration SQL sahipliği database katmanındadır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-016",
+      "text": "Somut repository implementasyonları merkezi composition root üzerinden oluşturulur.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-017",
+      "text": "Ortak servislerin tek otoritesi Core Platform’dur; modüller içinde ikinci bağımsız ortak servis kopyaları oluşturulamaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-018",
+      "text": "Sistem yerel öncelikli (local-first) çalışır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-019",
+      "text": "Birincil veri kullanıcının cihazındadır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-020",
+      "text": "Bulut hesabı temel kullanım için zorunlu değildir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-021",
+      "text": "Çevrimdışı kullanım temel davranıştır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-022",
+      "text": "Büyük dosyalar şifreli kasada, metadata ve ilişkiler SQLite’ta tutulur.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-023",
+      "text": "Veri şeması sürümlüdür.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-024",
+      "text": "Geri döndürülemez migration, gerçek veri silme veya veri mülkiyetini değiştiren işlem açık kullanıcı onayı olmadan yapılamaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-025",
+      "text": "Önemli veri değişiklikleri aktör, zaman, eski/yeni değer ve gerekçeyle izlenebilir olmalıdır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-026",
+      "text": "Temel güvenlik ilkesi varsayılan reddetmedir; açık izin yoksa kritik işlem reddedilir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-027",
+      "text": "En az yetki ilkesi zorunludur.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-028",
+      "text": "Windows Hello tercihli kimlik doğrulamadır; güçlü yerel parola yedek yöntemdir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-029",
+      "text": "TOTP, tek kullanımlık kurtarma kodları ve FIDO2/WebAuthn desteklenir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-030",
+      "text": "Varsayılan boşta kalma oturum süresi 15 dakikadır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-031",
+      "text": "Beş başarısız giriş 15 dakikalık kilit oluşturur.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-032",
+      "text": "Giriş, kilit, parola ve cihaz işlemleri audit edilir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-033",
+      "text": "Yeni cihaz eski cihaz güvenini otomatik devralamaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-034",
+      "text": "Yedekten geri yükleme yeni cihaza otomatik yetki vermez.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-035",
+      "text": "Taşınabilir kullanıcı verisi ile cihaza bağlı güvenlik sırları ayrıdır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-036",
+      "text": "Güvenlik kontrolü sessizce kaldırılamaz veya zayıflatılamaz; karar kaydı, risk/etki analizi ve ürün sahibi onayı gerekir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-037",
+      "text": "Electron renderer nodeIntegration:false, contextIsolation:true ve sandbox:true ile çalışır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-038",
+      "text": "IPC yalnız kayıtlı ana renderer, ana frame ve güvenilir belgeden kabul edilir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-039",
+      "text": "IPC payload’ları merkezi boyut, derinlik ve güvenlik kontrolünden geçer.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-040",
+      "text": "Webview, izinsiz navigation, redirect, download ve permission talepleri varsayılan reddedilir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-041",
+      "text": "AI sağlayıcısı varsayılan kapalıdır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-042",
+      "text": "AI yalnız kullanıcının hem veri erişimine hem AI işlemesine izin verdiği kayıtları kullanabilir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-043",
+      "text": "Sağlık, finans, çocuk ve canlı konum AI açısından yüksek hassasiyetlidir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-044",
+      "text": "AI önerileri insan onayı olmadan kesin veya otoritatif kayıt oluşturamaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-045",
+      "text": "Kullanıcı AI hafızasını görebilmeli, düzeltebilmeli, sınırlandırabilmeli ve silebilmelidir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-046",
+      "text": "Yedek hedefleri yerel disk, harici disk ve bulut sağlayıcı adaptörü olarak birbirinden bağımsız çalışır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-047",
+      "text": "Bir yedek hedefinin arızası diğer hedefleri durduramaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-048",
+      "text": "Her yedek hedefi için bağlantı, boş alan, son başarı, doğrulama, boyut, hash, hız ve hata ayrı izlenir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-049",
+      "text": "Her zaman en az bir tam ve doğrulanmış yedek korunmalıdır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-050",
+      "text": "OneDrive ilk öncelikli bulut hedefidir; mimari iCloud, Google Drive ve diğer sağlayıcılara adapter ile açık kalır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-051",
+      "text": "Yedek şifreli ve doğrulanmış olmak zorundadır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-052",
+      "text": "Restore öncesi bütünlük kontrolü yapılır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-053",
+      "text": "Bozuk veri izole edilir ve rollback imkânı bulunur.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-054",
+      "text": "Yeni cihaz restore işleminden sonra yeniden kimlik ve cihaz yetkilendirmesi gerekir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-055",
+      "text": "İlk içe alınan dosya sürümü değişmez dijital kanıt olarak korunur.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-056",
+      "text": "Arşivleme silme değildir; arşivlenen kayıt aktif görünümden çıkar fakat veri korunur.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-057",
+      "text": "Kalıcı imha işlemleri güçlü doğrulama ve kayıt gerektirir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-058",
+      "text": "SSD/TRIM/wear-leveling gibi teknik sınırlar nedeniyle doğrulanamayan fiziksel silme için mutlak imha iddiası yapılamaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-059",
+      "text": "Dijital miras işlemleri geri döndürülebilir tasarlanır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-060",
+      "text": "Vefat sonrası kritik erişim/içerik işlemleri en az iki yönetici onayı, bekleme süresi, audit ve iptal/geri alma mekanizması gerektirir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-061",
+      "text": "İlk gerçek geliştirme ve kullanım platformu Windows masaüstüdür.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-062",
+      "text": "Mimari macOS, iPhone, iPad, Apple Watch ve Apple Vision Pro’ya genişlemeye uygun tutulur.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-063",
+      "text": "Apple/mobil istemciler ilk aşamada Windows çekirdeğinden veri alan companion istemcilerdir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-064",
+      "text": "Mobil istemci bağımsız ana veri kaynağı veya bağımsız işlem motoru değildir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-065",
+      "text": "Arayüz Apple tasarım ilkelerinden esinlenir ancak özgün Anadolu Parsı marka kimliği kullanır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-066",
+      "text": "Apple font dosyaları uygulamaya gömülmez; yerel sistem fontu ve güvenli fallback zinciri kullanılır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-067",
+      "text": "Klavye kullanımı desteklenmek zorundadır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-068",
+      "text": "Ekran okuyucu etiketleri zorunludur.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-069",
+      "text": "Ölçeklenebilir metin, yüksek kontrast, görünür odak ve renk dışı durum anlatımı zorunludur.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-070",
+      "text": "Hata mesajı sorunu ve kullanıcının yapması gereken eylemi birlikte açıklamalıdır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-071",
+      "text": "Temel etkileşim hedefi en az 44 px olmalıdır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-072",
+      "text": "Geri döndürülebilir teknik iyileştirmeler için her seferinde ayrıca kullanıcı onayı gerekmez.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-073",
+      "text": "Kapsam değişikliği ayrıca açık kullanıcı onayı gerektirir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-074",
+      "text": "Geri döndürülemez işlem ayrıca açık kullanıcı onayı gerektirir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-075",
+      "text": "Gerçek veri silme ayrıca açık kullanıcı onayı gerektirir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-076",
+      "text": "Veri mülkiyetini etkileyen değişiklik ayrıca açık kullanıcı onayı gerektirir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-077",
+      "text": "Hukuki veya finansal taahhüt ayrıca açık kullanıcı onayı gerektirir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-078",
+      "text": "Güvenlik kontrolünü zayıflatma ayrıca açık kullanıcı onayı gerektirir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-079",
+      "text": "Üretim yayını ayrıca açık kullanıcı onayı gerektirir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-080",
+      "text": "Bronze aktif geliştirme kanalıdır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-081",
+      "text": "Silver test, kullanıcı kabulü ve geniş doğrulama kanalıdır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-082",
+      "text": "Gold gerçek üretim ve gerçek kullanım kanalıdır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-083",
+      "text": "Hiçbir yayın aşamasına otomatik terfi yapılmaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-084",
+      "text": "Güncel aşama kullanıcı tarafından değiştirilmedikçe Bronze RC2 Active Development olarak kabul edilir.",
+      "state": "SUPERSEDED",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15",
+      "replacedBy": "PR-173"
+    },
+    {
+      "id": "PR-085",
+      "text": "Bronze Final, Code Freeze, Silver veya Gold kendiliğinden ilan edilemez.",
+      "state": "SUPERSEDED",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15",
+      "replacedBy": "PR-173"
+    },
+    {
+      "id": "PR-086",
+      "text": "Çalıştırılmamış hiçbir test veya doğrulama PASS sayılamaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-087",
+      "text": "Çalıştırılmayan compile, type-check, test, build, smoke, Windows launch, installer, screenshot veya UAT kapısı NOT_RUN kalır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-088",
+      "text": "Tanı amaçlı --no-sandbox çalıştırması resmî PASS değildir; yalnız DIAGNOSTIC_PASS olarak ayrılır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-089",
+      "text": "Ara Bronze buildlerinde hedefli regresyon, mimari ve güvenlik kontrolleri uygulanabilir; tam UAT ve toplu ekran görüntüleri final hazırlığına bırakılabilir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-090",
+      "text": "Final hazırlığında doğrulama sırası: temiz npm ci, tam tsc --noEmit, tüm testler, Electron production build, blocking smoke, sandbox’lı gerçek Windows açılışı, kurulum/açılış/kaldırma, installer doğrulaması, ekran görüntüleri ve kullanıcı dokümantasyonudur.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-091",
+      "text": "Zorunlu doğrulama kapıları geçmeden Final, Silver veya Gold kararı verilmez.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-092",
+      "text": "Her kaynak teslimi manifest ile doğrulanır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-093",
+      "text": "Her kaynak tesliminde SHA256SUMS.txt bulunur.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-094",
+      "text": "Kaynak ZIP deterministik olmalıdır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-095",
+      "text": "Kaynak ZIP’in ayrı dış SHA-256 kanıtı bulunmalıdır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-096",
+      "text": "Aynı kaynak ağacından iki kez üretilen arşiv byte düzeyinde aynı olmalıdır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-097",
+      "text": "Kod ile bağlayıcı belge çelişemez.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-098",
+      "text": "Mimari, veri şeması, güvenlik, UI/UX, platform, kapsam veya sürüm değişikliği ilgili belgelere işlenir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-099",
+      "text": "Her yeni bağlayıcı karar benzersiz DEC-xxx kimliğiyle izlenir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-100",
+      "text": "Karar kaydında tarih, etkilenen belgeler, kod karşılığı ve doğrulama kanıtı bulunur.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-101",
+      "text": "Gerekli belge güncellenmeden ilgili kapsam tamamlandı sayılamaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-102",
+      "text": "Tarihsel belgeler silinmez ancak güncel aktif belgelerin önüne geçemez.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-103",
+      "text": "Ana Build Defteri projenin tek yetkili devam noktasıdır; yeni sohbet veya geliştirme oturumu önce bu dosyayı ve güncel kural setini okumalıdır.",
+      "state": "SUPERSEDED",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15",
+      "replacedBy": "PR-177"
+    },
+    {
+      "id": "PR-104",
+      "text": "Her build Ana Build Defteri’ne işlenmeden, kural seti SHA-256 özetiyle kabul edilmeden ve build sonrası kullanıcı durum bildirimi kaydedilmeden tamamlanmış sayılamaz.",
+      "state": "SUPERSEDED",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15",
+      "replacedBy": "PR-178"
+    },
+    {
+      "id": "PR-105",
+      "text": "Geçmiş build kayıtları geriye dönük değiştirilmez; düzeltme yeni build kaydıyla açıklanır ve yapılan/kalan işler tek Ana Build Defteri üzerinden yürütülür.",
+      "state": "SUPERSEDED",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15",
+      "replacedBy": "PR-177"
+    },
+    {
+      "id": "PR-106",
+      "text": "Her build tamamlandıktan sonra sohbet bağlamının tahmini kullanılan ve kalan yüzdesi hesaplanır, Ana Build Defteri build kaydına yazılır ve build sonu kullanıcı durum bildiriminde açıkça belirtilir.",
+      "state": "SUPERSEDED",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15",
+      "replacedBy": "PR-184"
+    },
+    {
+      "id": "PR-107",
+      "text": "Sohbet bağlamı için yüzde 85-89 tahmini kullanım uyarı bölgesidir; kullanıcıya yaklaşan sohbet devri bildirilir ve uzun yeni işlerin aynı sohbette başlatılmasından kaçınılır.",
+      "state": "SUPERSEDED",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15",
+      "replacedBy": "PR-184"
+    },
+    {
+      "id": "PR-108",
+      "text": "Sohbet bağlamının tahmini kullanımı yüzde 90 veya üzerindeyse yeni build başlatılamaz; mevcut tamamlanmış build devir noktası olarak korunur ve build başlangıç kapısı işlemi reddeder.",
+      "state": "SUPERSEDED",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15",
+      "replacedBy": "PR-184"
+    },
+    {
+      "id": "PR-109",
+      "text": "Yüzde 90 veya üzeri tahmini sohbet kullanımında yeni sohbet için kopyalanabilir devir promptu zorunlu olarak üretilir; prompt son build/sürüm/durum, güncel kural sürümü ve SHA-256, sıradaki açık iş, kalan işler, yetkili Ana Build Defteri ve kaynak paket konumunu içermelidir.",
+      "state": "SUPERSEDED",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15",
+      "replacedBy": "PR-185"
+    },
+    {
+      "id": "PR-110",
+      "text": "Yeni sohbet, üretilmiş devir promptu ve Ana Build Defteri üzerinden devam eder; kullanıcıdan proje kurallarını veya nerede kalındığını yeniden öğretmesi istenmez.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-111",
+      "text": "Yüzde 90 sohbet devri eşiği istisnasızdır; eşik aşıldığında teknik kolaylık, aciliyet veya küçük değişiklik gerekçesiyle aynı sohbette yeni build başlatma yolu açılamaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-112",
+      "text": "20 Temmuz 2026 öncesi bütün sohbet, belge, dosya, karar ve bağlam bu proje için FORBIDDEN_SOURCE kabul edilir; aynı bilgi ancak 20 Temmuz 2026 veya sonrasında açıkça yeniden kabul edilmiş bir kaynakta yer alıyorsa kullanılabilir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-113",
+      "text": "Eski sohbetler veya eski projeler silinemese dahi bu projeyle ilişkilendirilemez, bunlardan bilgi aktarılmaz, proje yanıtlarında gösterilmez ve yeni build planı türetilmez.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-114",
+      "text": "Kullanıcı yeni bir öneri ilettiğinde öneri uygulanmadan önce kapsam, mimari, güvenlik, gizlilik, veri bütünlüğü, performans, UI/UX, erişilebilirlik, yedekleme, migration, rollback, test, platform, belge, süre ve teknik borç etkileri kapsamlı analiz edilir; optimize edilmiş öneri kullanıcıya sunulur ve kesin karar bu analiz üzerinden alınır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-115",
+      "text": "Her build sonunda tahmini kodlama tamamlanma yüzdesi, kalan kodlama yüzdesi, 20.07.2026 başlangıcından geçen süre, yakın dönem geliştirme hızı, tahmini Bronze Final/Silver/Gold veya genel bitiş tarihleri ve tahmin güven düzeyi hesaplanır; build sonu zorunlu bildirime ve Ana Build Defteri kaydına eklenir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-116",
+      "text": "Marka mimarisi zorunludur: üst marka “Panthera pardus tulliana”, kullanıcıya görünen uygulama adı “Anadolu Parsı Aile Yaşam Merkezi”dir; Latin üst marka adı normal uygulama ekranlarında kullanılmaz ve yeni uygulama adları “Anadolu Parsı + işlevsel ad” kuralını izler.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-117",
+      "text": "Her buildde tüm aktif sürüm taşıyan kaynak, paket, APP_META, config, manifest, installer metadata, aktif belge ve teslim yüzeyi aynı build sürümüne yükseltilir; aktif alanda eski sürüm driftine veya build atlamasına izin verilmez. Tarihsel kanıt dosyaları kendi özgün build numarasını korur ve aktif dosyalardan açıkça ayrılır.",
+      "state": "SUPERSEDED",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15",
+      "replacedBy": "PR-173"
+    },
+    {
+      "id": "PR-118",
+      "text": "20 Temmuz 2026 öncesinde geliştirilmiş yatırım/otomatik işlem projesi, broker, Matriks, İş Yatırım, Deniz Yatırım, piyasa verisi veya otomatik emir kararları bu projede bağlam, tasarım veya gereksinim kaynağı olarak kullanılamaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-119",
+      "text": "API geliştirme önceliği yaşamsal ihtiyaca göre P0/P1/P2 olarak sınıflandırılır: yedekleme, yapay zekâ ve sistemin zorunlu çalışması için gerekli API/adapter sınırları P0’dır; çekirdek işlevi tamamlayanlar P1’dir; banka ve diğer kurum entegrasyonları P2’dir ve proje kararlı üretime girdikten yaklaşık 5-6 ay sonra değerlendirilir.",
+      "state": "SUPERSEDED",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15",
+      "replacedBy": "PR-175"
+    },
+    {
+      "id": "PR-120",
+      "text": "UI Görsel Referans Manifestosu ve 20 Temmuz 2026 sonrası onaylanmış görseller bağlayıcı görsel baseline’dır. Silver’a geçmeden önce gerçek ekranlar bu baseline ile doğrulanır; renk, tipografi, hiyerarşi, navigasyon, bileşen ve erişilebilirlik sözleşmeleri karşılanmadan Silver başlatılamaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-121",
+      "text": "Bronze Final’e kadar kullanıcıya sunulan bütün menü, düğme, form, bağlantı ve akış işlevsel olmalıdır. İşlevsiz placeholder UI, boş handler, erişilemeyen özellik veya kullanıcı yüzeyinde atıl işlev bulunamaz. Kararı iptal edilmiş üretim kodu ve UI kaldırılır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-122",
+      "text": "Üretim uygulaması nötr ve boş başlangıçla açılır; production seed/demo aile, kişi, soy ağacı, finans, sağlık, belge, konum veya olay verisi içeremez. Test fixture’ları yalnız test alanında anonim/nötr olabilir ve üretim paketine giremez.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-123",
+      "text": "Her build sonunda bu projeye ait güncel bilgi, belge, kaynak, kural, karar, test, kanıt, görsel ve teslim dosyalarının tamamını indeksleyen PROJECT_ARTIFACT_INDEX.md ve PROJECT_ARTIFACT_INDEX.json üretilir; kullanıcıya ana teslim bağlantıları ve Artifact Index bağlantısı paylaşılır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-124",
+      "text": "Alınan her karar aynı build içinde güncel kural setine, Ana Karar Kaydı’na, etkilenen aktif mimari/güvenlik/UI/kapsam/test belgelerine, makine okunur politikalara, kod karşılığına ve Ana Build Defteri’ne yansıtılır; kod ve belge arasında bilinen drift ile build tamamlanamaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-125",
+      "text": "Her build sonunda güncel Master Proje Dokümantasyonu hem DOCX hem PDF olarak üretilir ve doğrulanır; etkilenmiş aktif belgeler güncellenmeden ve güncel Word/PDF paketi oluşmadan build COMPLETED olamaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-126",
+      "text": "Üretim uygulamasında, aktif kaynakta, aktif belgelerde, görsellerde ve teslim paketlerinde gerçek kişi adı, soyadı, aile adı, kişisel kimlik izi veya özel aile temsili bulunamaz; geçmiş demo aile/kişi kimlikleri de kaynakta tutulamaz. Kullanıcı tarafından sonradan girilen gerçek veriler bu kaynak yasağının dışındadır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-127",
+      "text": "Geliştirici/üretici/owner/author/copyright metadata dahil aktif proje metadata’sında doğal kişi kimliği kullanılmaz; gerekli sahiplik ve üretici ifadeleri yalnız marka kimliği “Panthera pardus tulliana” ve ürün kimliği üzerinden tutulur.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-128",
+      "text": "Bağlayıcı UI baseline gerçek kaynak sözleşmeleriyle tutarlı olmalıdır: Apple uyumlu sistem font zinciri kullanılır, proprietary SF font dosyası gömülmez; aktif kanal menü rengi Bronze için bakır/bronz, Silver için gümüş, Gold için altın tokenlarından gelir ve renk tek başına anlam taşımaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-129",
+      "text": "UI Görsel Referans Manifestosu kişisel/demo içerikten arındırılmış marka ve boş durum referansıdır; örnek kişi, aile, dosya, sağlık, finans veya özel yaşam verisi görsel baseline’a konulamaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-130",
+      "text": "Aktif dosyalar ile tarihsel kanıt dosyaları açıkça sınıflandırılır. Aktif dosyalar güncel build sürümünde olmak zorundadır; tarihsel kanıtlar özgün sürümünü korur ve aktif ürün davranışını belirleyemez.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-131",
+      "text": "Her buildde VERSION_SWEEP_GATE çalıştırılır; aktif sürüm taşıyan dosyalarda eski build/sürüm bulunursa build kapanışı reddedilir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-132",
+      "text": "Her buildde PERSONAL_IDENTITY_SWEEP_GATE çalıştırılır; aktif kaynak, üretim bundle girdileri, aktif belge ve görsel metadata’sında yasak kişisel kimlik bulunursa build kapanışı reddedilir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-133",
+      "text": "Her buildde PRODUCTION_CLEAN_DATA_GATE çalıştırılır; üretim başlangıç seed’i, demo kullanıcı/aile/kişisel kayıt ve production fixture sayısı sıfır olmadan build kapanışı reddedilir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-134",
+      "text": "Bronze Final öncesi DEAD_CODE_DEAD_UI_GATE çalıştırılır; kullanıcıya görünen işlevsiz UI ve açıkça iptal edilmiş/erişilemeyen üretim kodu sıfır hedefidir ve tespit edilen kalıntı Final’den önce kaldırılır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-135",
+      "text": "DOCUMENTATION_CLOSURE_GATE her buildde zorunludur; kararların etkilediği aktif belgeler, Master DOCX/PDF, Ana Build Defteri ve Artifact Index güncel değilse build kapanışı reddedilir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-136",
+      "text": "ARTIFACT_INDEX_GATE her buildde zorunludur; güncel buildin bütün ana teslimleri ve proje bilgi/belge bağlantıları tek indeks üzerinden izlenebilir olmadan teslim tamamlanmış sayılamaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-137",
+      "text": "PROJECT_PROGRESS_MODEL ölçülebilir ve açıklanabilir olmalıdır; kodlama yüzdesi yalnız build sayısından türetilmez, tamamlanan/açık kod işlerinin ağırlıkları ve geliştirme hızıyla hesaplanır; tahminler kesin tarih değil güven düzeyi belirtilmiş yönetim tahminidir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-138",
+      "text": "PROJECT_PROVENANCE_GATE her sohbet ve build başında zorunludur; 20.07.2026 öncesi kaynağa dayanma girişimi fail-closed reddedilir ve yeni sohbet yalnız Ana Build Defteri ile 20 Temmuz sonrası yetkili kaynaklardan devam eder.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-139",
+      "text": "API_PRIORITY_GATE çekirdek projeyi banka/kurum entegrasyonları nedeniyle geciktiremez; P0 yaşamsal adapter/altyapı işleri önce tamamlanır, P2 kurum entegrasyonları kararlı üretim sonrası döneme ertelenir.",
+      "state": "SUPERSEDED",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15",
+      "replacedBy": "PR-175"
+    },
+    {
+      "id": "PR-140",
+      "text": "Bu proje kural seti Proje Anayasasıdır. Güncel anayasa kuralları istisnasız bağlayıcıdır; teknik kolaylık, hız, geçmiş uygulama, eski belge veya sohbet gerekçesiyle aşılamaz, sessizce esnetilemez veya atlanamaz. Değişiklik yalnız açık kullanıcı kararı, yeni build, yeni kural sürümü ve yeni SHA-256 ile yapılabilir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-141",
+      "text": "Windows ilk kurulumunda normal uygulama ekranından önce Anadolu Parsı marka kimliğine uygun tek seferlik tanıtım ve ilk kullanım sihirbazı çalışır; kullanıcı isterse tanıtımı daha sonra Ayarlar üzerinden yeniden açabilir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-142",
+      "text": "İlk kullanım tanıtımı sesli Türkçe anlatım, görünür altyazı, sesi kapatma, anlatımı yeniden oynatma ve tanıtımı geçme seçeneklerini işlevsel olarak sunar; erişilebilirlik kullanıcı kontrolündedir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-143",
+      "text": "Marka anlatım sesi sakin, güven veren ve Anadolu Parsı kimliğine uygun olmalı; kesintisiz veya zorlayıcı ses kullanılmaz, kullanıcı sesleri tamamen kapatabilir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-144",
+      "text": "İlk kurulum tamamlandığında kısa ve rahatsız etmeyen Anadolu Parsı marka sesi ile onaylı geçiş animasyonu çalışır; sonraki açılışlarda bu efekt zorunlu değildir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-145",
+      "text": "İlk kurulum akışı kesintiye dayanıklıdır; tanıtım, kimlik oluşturma, güvenlik, kurtarma ve tamamlama adımları açık durum modeliyle yönetilir ve yarım kurulum normal uygulamaya geçemez.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-146",
+      "text": "İlk kullanıcı yerel güçlü parola ile oluşturulabilir; parola koşulları ve eşleşme durumu yazım sırasında canlı ve erişilebilir biçimde gösterilir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-147",
+      "text": "Apple, Google ve Microsoft haricî kimlik sağlayıcıları aynı sağlayıcı-bağımsız OIDC katmanında tasarlanır; hiçbir sağlayıcı uygulama içi yetkilendirme veya aile verisine otomatik erişim vermez.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-148",
+      "text": "Haricî OIDC akışları Authorization Code, PKCE, state ve nonce kontrolleri olmadan üretime açılamaz; tokenlar düz metin dosyada tutulamaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-149",
+      "text": "Apple, Google veya Microsoft ile kimlik oluşturulsa bile çevrimdışı yerel erişim ve hesap kurtarma için Windows Hello, yerel parola veya eşdeğer cihaz-bağlı güvenli yöntem zorunlu olarak korunur.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-150",
+      "text": "Yapılandırılmamış veya üretim kabulü tamamlanmamış haricî kimlik sağlayıcısı işlevsiz aktif düğme olarak gösterilemez; özellik fail-closed ve görünmez/kapalı kalır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-151",
+      "text": "İlk oluşturulan kullanıcı aile yöneticisi olabilir ancak bu rol diğer yetişkinlerin özel sağlık, finans, belge veya konum verilerine otomatik erişim hakkı vermez.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-152",
+      "text": "İlk kurulumun güvenlik adımında Windows Hello uygun olduğunda önerilir; TOTP, tek kullanımlık kurtarma kodları ve FIDO2/WebAuthn destekleri mevcut anayasal güvenlik sınırlarıyla korunur.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-153",
+      "text": "Kurtarma yöntemi oluşturulmadan ilk kimlik kurulumu güvenlik açısından tamamlanmış sayılmaz; kurtarma materyali kullanıcıya kontrollü biçimde sunulur ve production loglarına yazılmaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-154",
+      "text": "Uygulama açılışında kullanıcı kimliği doğrulanmadan aile veritabanı, arşiv içerikleri, sağlık, finans, soy ağacı, zaman tüneli veya diğer kişisel veri depoları açılamaz ve okunamaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-155",
+      "text": "Kalıcı kullanıcı verisi diskte AES-256-GCM veya eşdeğer güçlü doğrulanmış şifreleme altında tutulur; düz SQLite ana veritabanı uygulama kapalıyken kalıcı dosya olarak bırakılamaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-156",
+      "text": "Kullanıcı veri anahtarının açılması hem kullanıcı sırrına/parolasına hem Windows safeStorage/DPAPI cihaz korumasına bağlanır; yalnız cihaz bağı veya yalnız parola tek başına kalıcı veri kasasını açmaya yetmez.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-157",
+      "text": "Kasa başlığı kişisel veri içeremez; yalnız KDF parametreleri, rastgele tuzlar, anonim anahtar yuvası kimlikleri ve cihaz-korumalı şifreli anahtar zarfları gibi zorunlu kriptografik metadata tutulabilir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-158",
+      "text": "Başarısız parola veya kimlik doğrulama denemesinde şifresi çözülmüş kullanıcı verisi oturumu kalıcılaştırılamaz; geçici çalışma alanı derhal kapatılır ve silinir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-159",
+      "text": "Başarılı oturum kapatma, oturum zaman aşımı veya uygulama kapanışında veri deposu önce güvenli biçimde kapatılır, WAL checkpoint uygulanır, kalıcı kasa yeniden şifrelenir ve geçici düz çalışma dosyaları silinir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-160",
+      "text": "Geçici oturum verisi yalnız kimliği doğrulanmış aktif uygulama oturumu süresince oluşturulabilir; işletim sistemi izinleri mümkün olan en dar kullanıcı erişimiyle ayarlanır ve yol rastgele oturum kimliği taşır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-161",
+      "text": "Aynı Windows kullanıcı hesabı altında çalışan yönetici yetkili zararlı yazılıma karşı mutlak dosya erişim engeli iddia edilemez; Bronze Final öncesi sayfa-seviyesi/in-use şifreleme veya eşdeğer koruma değerlendirilip kanıtlanmalıdır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-162",
+      "text": "Arşiv belgesi şifresi çözülmüş geçici dosya olarak haricî uygulamaya shell/openPath ile verilemez; desteklenen türler yalnız uygulamanın güvenli önizleme yüzeyinde gösterilir ve geçici materyal mümkün olan en kısa sürede silinir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-163",
+      "text": "Desteklenmeyen belge türü güvenlik sınırını aşmak yerine fail-closed reddedilir; haricî uygulama açma ancak gelecekte açık kullanıcı kararı ve ayrı güvenlik tasarımıyla eklenebilir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-164",
+      "text": "Log, cache, diagnostic, export, migration backup, crash/evidence ve diğer yan artifactlar kişisel veya hassas içerik taşımayacak şekilde sanitize edilmeli veya şifrelenmelidir; bu kapanış Bronze Final kapısıdır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-165",
+      "text": "Uygulama öncesi oluşturulan runtime/log dosyaları yalnız kişisel olmayan operasyon metadata içerir; kimlik doğrulama öncesi hiçbir kişisel veri log, cache veya diagnostic alana yazılamaz.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-166",
+      "text": "Parola değiştirildiğinde kullanıcı veri kasasının anahtar sarma bilgisi de atomik olarak yeni parolaya geçirilir; eski parola kasayı açmaya devam edemez.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-167",
+      "text": "Haricî kimlik sağlayıcıları için gerçek üretim PASS iddiası sağlayıcı uygulama kaydı, Client ID/redirect URI, gerçek Windows oturumu, token kasası, iptal/çıkış ve hata senaryoları doğrulanmadan yapılamaz; aksi durum NOT_RUN/PENDING olarak raporlanır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-168",
+      "text": "Kalıcı proje kütüphanesi hiyerarşisi /Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi şeklindedir; bu uygulamaya ait yeni build, kaynak, belge, görsel, hash ve teslim kanıtları yalnız bu dal altında tutulur.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-169",
+      "text": "Üst marka altındaki başka/eski proje dosyaları yalnız ad benzerliği nedeniyle Anadolu Parsı Aile Yaşam Merkezi klasörüne taşınamaz veya bağlam kaynağı sayılamaz; proje provenance sınırı fail-closed uygulanır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-170",
+      "text": "Build209 ve sonrasında onboarding, kimlik, veri kasası ve dosya erişimi güvenlik kapıları Anayasanın ayrılmaz parçasıdır; bu maddeler de diğer anayasa kuralları gibi yalnız açık kullanıcı kararı, yeni build, yeni sürüm ve yeni SHA-256 ile değiştirilebilir.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-171",
+      "text": "Uzun veya zaman aşımı riski taşıyan geliştirme, doğrulama, belge üretimi, paketleme ve teslim işleri mümkün olan en küçük mantıksal ve bağımsız adımlara bölünmelidir. Her adım: 1. uygulanır, 2. doğrulanır, 3. sonucu kalıcı olarak kaydedilir, 4. kısa durum verilir, 5. ancak bundan sonra sonraki adıma geçilir. Tek seferde dev işlem zincirleri çalıştırma. Yalnız teknik olarak atomik olması zorunlu işlemler istisnadır. Bu kural anayasal ve aşılamazdır.",
+      "state": "ACTIVE",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15"
+    },
+    {
+      "id": "PR-172",
+      "text": "PR-172 yalnız platform tarafından sağlanan gerçek sohbet bağlam kapasitesi yüzde 90 veya üzerindeyken HARD_STOP üretir. Tahmin, geçmiş build tahmini veya kullanılamayan platform sayacı HARD_STOP ya da zorunlu handoff sayılmaz. Gerçek kullanım yüzde 90 altındaysa zorunlu devir üretilmez. Gerçek HARD_STOP durumunda aynı sohbette yeni build başlatılmaz; aynı yanıt içinde tam kopyalanabilir devir metni gösterilir ve NEW_CHAT_HANDOFF_BUILDxxx.md oluşturulur.",
+      "state": "SUPERSEDED",
+      "source": "PROJECT-RULES-2026-08-02-V6",
+      "sourceSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15",
+      "replacedBy": "PR-184"
+    },
+    {
+      "id": "PR-173",
+      "text": "Kullanıcıya görünen aktif sürüm ve teslim adları yalnız “Bronze|Silver|Gold gg.aa.yyyy.aylık-sıra” biçimindedir. RC, RC2, MVP ve küresel Build numarası yalnız tarihsel kanıtlarda kalabilir; aktif UI, paket, belge ve teslim yüzeyinde kullanılamaz.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-174",
+      "text": "Aylık derleme sayacı her takvim ayında yeniden başlar; ancak yeni ayın veya günün ilk geliştirmesi keyfî olarak 1 sayılmaz. Aynı ay içinde daha önce tamamlanmış gerçek derlemeler sayılır ve sıradaki sayı bu tarihsel sayının bir fazlasıdır.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-175",
+      "text": "04.08.2026 tarihine kadar kullanıcı tarafından kabul edilen tamamlama sözleşmesi, finans/bankacılık, dağıtık Windows platformu, Apple companion istemcileri, aile iletişimi ve toplantıları, uçtan uca şifreleme, çeviri, OCR, Platform Policy Kernel, hane operasyonları, afet, çocuk/eğitim, bakım/ileri yaş, ev-araç-eşya-evcil hayvan, mahremiyet, AI, aile hafızası, seyahat, Matter/akıllı ev, doğrulanabilir yetki kartları ve imzalı eklenti sistemi bağlayıcı Bronze kapsamıdır. Bu alanlar öneri olarak geri düşürülemez.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-176",
+      "text": "Windows Desktop, Windows Core Service, cluster node/witness, macOS, iPhone, iPad, Apple Watch, Vision Pro, OCR/AI/çeviri workerları, iletişim ve entegrasyon servisleri aynı Platform Policy Kernel kararını ve security/privacy/retention/consent/audit yükümlülüklerini uygular; yerel bypass veya yalnız rol kontrolü yeni kodda yasaktır.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-177",
+      "text": "Tek aktif yönetişim kaynağı config/canonical-rule-registry.json ve config/active-governance-ledger.json ikilisidir. Eski Ana Build Defteri, RC/MVP/Build belgeleri ve eski kural setleri tarihsel kanıttır; aktif kararı veya sürümü geçersiz kılamaz.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-178",
+      "text": "Her geliştirme oturumu ve her aktif sürüm değişikliği, güncel kanonik kural SHA-256 özeti açıkça doğrulanmadan ve GOVERNED_PREFLIGHT PASS olmadan başlayamaz. Kapı başarısızsa işlem fail-closed durur.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-179",
+      "text": "Her geliştirme teslimi GOVERNED_POSTFLIGHT çalıştırılmadan tamamlanamaz. Postflight; kural sicili, karar defteri, sürüm, kapsam gerçekliği, policy, kaynak bütünlüğü, belge envanteri, rapor alanları, kalıcı Library hedefi ve yapılmayan testlerin dürüst durumunu denetler.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-180",
+      "text": "Yeni kaynak, belge, görsel, hash, manifest, doğrulama ve teslim kanıtları kalıcı olarak yalnız /Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi/<Görünür Sürüm>/ dalında tutulur. Library yükleme kanıtı olmadan teslim COMPLETED sayılamaz.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-181",
+      "text": "/mnt/data yalnız geçici çalışma alanıdır. Kullanıcının Windows yerel diski, haricî diski veya OneDrive hedeflerine gerçek erişim ve yazma kanıtı yoksa bu hedeflere kayıt yapıldığı söylenemez; durum NOT_RUN/UNAVAILABLE olarak raporlanır.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-182",
+      "text": "Her sürümde kaynak ağacındaki bütün dosyalar ve bütün belge/config/kanıt dosyaları hash, boyut, sınıf, aktif/tarihsel durumu ve göreli yolu ile eksiksiz indekslenir. Kullanıcıya tam belge dizini ile tam artifact index bağlantısı verilir; seçilmiş birkaç belgeyi “tüm belgeler” diye sunmak yasaktır.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-183",
+      "text": "Her geliştirme sonu bildirimi en az şu alanları taşır: görünür sürüm; yapılan iş; tamamlanan gereksinim ve karar kimlikleri; değişen kaynak alanları; gerçek PASS/FAIL/NOT_RUN/BLOCKED sonuçları; açık hata ve riskler; ağırlıklı Bronze tamamlanma ve kalan yüzdesi; tahmini Bronze bitişi; tahmini Silver ve Gold geçiş tarih aralıkları; tahmin güveni; sohbet kapasitesi platform actual veya UNAVAILABLE; devir promptu durumu; kaynak ZIP/manifest/SHA; kalıcı Library yolu ve yükleme durumu; bütün belge indeksi; sıradaki tek resmî iş; zorunlu doğruluk cümlesi.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-184",
+      "text": "Sohbet kapasitesi için yalnız platformun sağladığı gerçek kullanılan yüzde kabul edilir. Gerçek yüzde mevcut değilse UNAVAILABLE yazılır; tahmin uydurulmaz. Gerçek kullanım yüzde 85-89 ise uyarı, yüzde 90 veya üzerindeyse HARD_STOP uygulanır ve aynı sohbette yeni sürüm başlatılmaz.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-185",
+      "text": "Gerçek sohbet kapasitesi HARD_STOP düzeyine ulaştığında aynı yanıtta eksiksiz kopyalanabilir yeni sohbet devir promptu ve NEW_CHAT_HANDOFF_<görünür-sürüm>.md üretilir. Eşik altında zorunlu devir yapılmaz; her teslimde yalnız devir durumunun GEREKMİYOR/HAZIR/UNAVAILABLE olduğu belirtilir.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-186",
+      "text": "Kullanıcının her bağlayıcı kararı aynı sürüm içinde benzersiz DEC kimliği, tarih/saat, kaynak/provenance, karar özeti, etkilediği kurallar, belgeler, kod alanları ve doğrulama kanıtıyla config/user-decision-ledger.json ve docs/decisions altında kaydedilir.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-187",
+      "text": "Kod, karar, kural, kapsam sicili, aktif belge seti, manifest, sürüm, test kanıtı, durum metni ve teslim raporu arasında bilinen drift varken sürüm tamamlanamaz. Drift kapısı sıfır bilinen çelişki hedefiyle fail-closed çalışır.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-188",
+      "text": "Bütün dosyalar ACTIVE_AUTHORITY, ACTIVE_REFERENCE, SOURCE_CODE, TEST_OR_GATE, EVIDENCE, HISTORICAL veya GENERATED sınıflarından biriyle işaretlenir. Sınıflandırılmamış dosya ve envanter dışı belge teslim kapanışını engeller.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-189",
+      "text": "Hassas veri okuma/yazma işlemleri geçerli policy decision ve doğrulanmış policy receipt olmadan repository/API/IPC transactionına giremez. Politika servisi, imza anahtarı, cihaz kimliği veya sürüm uyumu yoksa işlem varsayılan reddedilir.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-190",
+      "text": "Canlı banka, açık bankacılık, OIDC, OneDrive, harita, AI, APNs, TURN/SFU veya diğer haricî entegrasyonlar yalnız adapter ve capability sınırından çalışır. Sözleşme, yetkili hesap, kimlik bilgisi ve gerçek kabul testi yoksa canlı entegrasyon PASS sayılamaz.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-191",
+      "text": "Mesaj ve dosya içerikleri uçtan uca şifreli saklanır; audit içerikten ayrıdır. Ses, görüntü, transkript ve çeviri kaydı varsayılan kapalıdır ve bütün katılımcıların ayrı, görünür ve geri çekilebilir onayı olmadan başlatılamaz.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-192",
+      "text": "Çoklu Windows cihazlarında aynı SQLite dosyası paylaşılmaz. Her node yerel şifreli projection kullanır; otomatik failover yalnız güvenli quorum/witness, fencing ve çoğunluk onayı ile mümkündür. Replica bağımsız yedek değildir.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-193",
+      "text": "Bronze’da kabul edilmiş bütün özellik, güvenlik, entegrasyon sınırı, erişilebilirlik, UI ve altyapı kodlanıp tamamlanmadan Silver yasaktır. Silver yalnız tam test/UAT/güvenlik/Windows kurulum doğrulaması ve kapsam değiştirmeyen düzeltmedir. Gold yalnız bütün Silver kapıları PASS, üretim operasyonları hazır ve ürün sahibi açıkça onayladığında mümkündür.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-194",
+      "text": "İlerleme yüzdesi ve bitiş tarihleri yalnız ağırlıklı kapsam ve kanıta göre hesaplanır; pazarlama, iyimserlik veya build sayısı kullanılmaz. Belirsizlik ve güven düzeyi açıkça yazılır; çalıştırılmayan kontrol PASS sayılamaz.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-195",
+      "text": "Her teslimin sonunda sohbetin devam edebilirliği kontrol edilir. Gerçek kapasite metriği yoksa bu açıkça belirtilir; kullanıcıdan aynı kuralları yeniden anlatması istenmez ve gerçek HARD_STOP oluştuğunda devir promptu otomatik hazırlanır.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-196",
+      "text": "Kullanıcıya sunulan teslim yanıtında o sürümde üretilen veya değiştirilen belgelerin tamamı listelenir; ayrıca tüm proje belgelerini içeren eksiksiz belge dizinine bağlantı verilir. Belge listesi atlanamaz veya “başlıcaları” ile sınırlandırılamaz.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-197",
+      "text": "Kural ihlali tespit edildiğinde ihlal gizlenmez; türü, nedeni, etkisi, düzeltmesi ve tekrarını önleyen otomatik kapı aynı sürümün durum kaydına yazılır. Sadece sözlü özür, teknik önlem yerine geçmez.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-198",
+      "text": "Tamamlanmış kaynak sürümü yerinde değiştirilmez. Her yeni kod veya kural değişikliği aylık sıradaki yeni görünür sürümde yapılır; önceki kaynak ZIP ve SHA tarihsel olarak değişmez kalır.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-199",
+      "text": "Kullanıcının yazılı olarak kabul ettiği kapsam ve kurallar, daha sonraki bir açık kullanıcı kararı olmadan kaldırılamaz, daraltılamaz veya önceliksiz öneri durumuna döndürülemez.",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-200",
+      "text": "Zorunlu bitiş cümlesi her geliştirme tesliminde aynen kullanılır: “Bu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır.”",
+      "state": "ACTIVE",
+      "source": "USER_DECISIONS_2026-08-04",
+      "effectiveRelease": "Bronze 04.08.2026.28"
+    },
+    {
+      "id": "PR-201",
+      "text": "Her ACTIVE kural config/rule-enforcement-registry.json içinde tam bir ve yalnız bir enforcement kaydına sahip olmak zorundadır; kaydı olmayan veya çift kaydı bulunan kural GOVERNED_PREFLIGHT ve GOVERNED_POSTFLIGHT işlemlerini fail-closed durdurur.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-129",
+      "effectiveRelease": "Bronze 04.08.2026.29"
+    },
+    {
+      "id": "PR-202",
+      "text": "Bütün ACTIVE kural enforcement kayıtlarında failClosed=true ve waiverAllowed=false zorunludur. Skip, ignore, temporary bypass, soft pass veya kullanıcı karar defterine dayanmayan istisna mekanizması yasaktır.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-129",
+      "effectiveRelease": "Bronze 04.08.2026.29"
+    },
+    {
+      "id": "PR-203",
+      "text": "Doğrudan makineyle doğrulanamayan veya dış ortam gerektiren kural sessizce PASS sayılamaz; zorunlu kanıt sağlanıncaya kadar NOT_RUN/BLOCKED olarak izlenir ve kuralın gerektirdiği Silver/Gold veya teslim aşamasını engeller.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-129",
+      "effectiveRelease": "Bronze 04.08.2026.29"
+    },
+    {
+      "id": "PR-204",
+      "text": "PR-171 teknik olarak config/work-segmentation-plan.json durum makinesi ve verify-step-checkpoint-gate ile uygulanır. Bir büyük işte aynı anda en fazla bir adım IN_PROGRESS olabilir; önceki adım PASS ve kalıcı checkpoint kanıtı olmadan sonraki adım başlatılamaz.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-129",
+      "effectiveRelease": "Bronze 04.08.2026.29"
+    },
+    {
+      "id": "PR-205",
+      "text": "Build, test, package ve publish komutları güncel governed preflight ile aktif work-step/checkpoint doğrulamasını geçmeden çalışamaz. Bu pre-hook zinciri aktif kural kararı olmadan kaldırılamaz veya zayıflatılamaz.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-129",
+      "effectiveRelease": "Bronze 04.08.2026.29"
+    },
+    {
+      "id": "PR-206",
+      "text": "ACTIVE bir kuralın metni, durumu, enforcement sınıfı veya kapısı ancak açık kullanıcı kararı, yeni DEC kaydı ve yeni görünür sürümle değiştirilebilir. Sessiz kural silme, daraltma veya enforcement düşürme fail-closed ihlaldir.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-129",
+      "effectiveRelease": "Bronze 04.08.2026.29"
+    },
+    {
+      "id": "PR-207",
+      "text": "Universal Rule Enforcement Gate hem GOVERNED_PREFLIGHT hem GOVERNED_POSTFLIGHT içinde zorunlu ilk sınıf kapıdır; registry kapsamı, gate dosyaları, evidence yolları ve waiver yasağı doğrulanmadan sürüm kapanamaz.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-129",
+      "effectiveRelease": "Bronze 04.08.2026.29"
+    },
+    {
+      "id": "PR-208",
+      "text": "Büyük iş adımlarının kalıcı checkpoint kanıtı zorunlu Library dalında tutulur. Geçici /mnt/data sonucu, sohbet mesajı veya yalnız yerel dosya kalıcı checkpoint yerine geçmez; persistent receipt yoksa sonraki adım BLOCKED kalır.",
+      "state": "ACTIVE",
+      "source": "USER_DECISION_DEC-129",
+      "effectiveRelease": "Bronze 04.08.2026.29"
+    }
+  ],
+  "rulesSha256": "5e7e45b7c2ae9f3c7465866a58d9d389ef6a793dab855a68a1434e003eade081"
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "23.07.2026.49",
+  "milestone": "B060-M9 Dashboard Query & Navigation State",
+  "status": "passed",
+  "checkCount": 9,
+  "checks": [
+    "fresh database applies all migrations",
+    "second run is idempotent",
+    "known legacy baseline is adopted after pre-migration backup",
+    "unknown legacy baseline stops without mutation",
+    "checksum mismatch blocks startup",
+    "database health report confirms WAL and foreign keys",
+    "transaction executor commits success and rolls back Result error",
+    "transaction executor maps unique constraint errors",
+    "failed migration rolls back schema and record"
+  ],
+  "legacyFingerprint": "45fedc9c9dc9d4456a7b5829809cd4e23bb4e837070a57e8e5608f89a0d39569",
+  "migrationVersions": [
+    {
+      "version": 1,
+      "name": "legacy_mvp40_schema",
+      "checksum": "db9f308eb51ec2c5bb8fd8f6099c5faa19ee67c8ab01641108b4b61489e6fd94"
+    },
+    {
+      "version": 2,
+      "name": "legacy_mvp40_compatibility",
+      "checksum": "94042acdaeaaeca58f0bfe948a6ca0d426fc19a099d37538f1796531ff483f43"
+    },
+    {
+      "version": 3,
+      "name": "database_metadata",
+      "checksum": "ec7a4bd4dd573ace03f71afe71146d95e8f27fce03853b8096ae2f44933b23a0"
+    },
+    {
+      "version": 4,
+      "name": "transactional_outbox",
+      "checksum": "f5edb92cc3d0bac80d2477e4732327198d52dfa91e43b9ab737e3fcf8eef0126"
+    },
+    {
+      "version": 5,
+      "name": "event_dispatcher_state",
+      "checksum": "6c55e3bb51e11f3a3ab7fb29c1aa663655e0446506afe249cecbfeace9e67e48"
+    }
+  ],
+  "generatedAt": "2026-07-23T18:55:25.363Z"
+}

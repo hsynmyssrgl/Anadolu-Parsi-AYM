@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "23.07.2026.50",
+  "milestone": "B060-M10 Authentication & Session Application Migration",
+  "status": "passed",
+  "verifiedAt": "2026-07-23T19:10:42.672444Z",
+  "checks": 14
+}

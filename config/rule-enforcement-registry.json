@@ -1,0 +1,2718 @@
+{
+  "schemaVersion": 1,
+  "id": "PPT-RULE-ENFORCEMENT-REGISTRY-V1",
+  "release": "Bronze 04.08.2026.29",
+  "canonicalRulesSha256": "5e7e45b7c2ae9f3c7465866a58d9d389ef6a793dab855a68a1434e003eade081",
+  "activeRuleCount": 194,
+  "defaultPolicy": "FAIL_CLOSED_NO_WAIVER",
+  "entries": [
+    {
+      "ruleId": "PR-001",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-002",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-003",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-004",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-006",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-007",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-008",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-009",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-010",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-011",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-012",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-013",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-014",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-015",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-016",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-017",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-018",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-019",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-020",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-021",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-022",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-023",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-024",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-025",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-026",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-027",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-028",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-029",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-030",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-031",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-032",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-033",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-034",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-035",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-036",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-037",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-038",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-039",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-040",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-041",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-042",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-043",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-044",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-045",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-046",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-047",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-048",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-049",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-050",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-051",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-052",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-053",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-054",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-055",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-056",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-057",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-058",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-059",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-060",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-061",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-062",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-063",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-064",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-065",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-066",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-067",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-068",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-069",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-070",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-071",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-072",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-073",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-074",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-075",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-076",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-077",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-078",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-079",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-080",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-081",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-082",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-083",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-086",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-087",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-088",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-089",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-090",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-091",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-092",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-093",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-094",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-095",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-096",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-097",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-098",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-099",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-100",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-101",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-102",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-110",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-111",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-112",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-113",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-114",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-115",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-116",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-118",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-120",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-121",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-122",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-123",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-124",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-125",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-126",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-127",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-128",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-129",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-130",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-131",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-132",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-133",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-134",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-135",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-136",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-137",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-138",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-140",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-141",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-142",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-143",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-144",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-145",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-146",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-147",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-148",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-149",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-150",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-151",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-152",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-153",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-154",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-155",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-156",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-157",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-158",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-159",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-160",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-161",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-162",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-163",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-164",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-165",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-166",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-167",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-168",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-169",
+      "mode": "SCOPE_AND_RELEASE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-170",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-171",
+      "mode": "WORKFLOW_CHECKPOINT",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-step-checkpoint-gate.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-173",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-174",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-175",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-176",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-177",
+      "mode": "RELEASE_EVIDENCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-feature-reality-gate.mjs",
+        "scripts/verify-project-artifact-index-v2.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-178",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-179",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-180",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-181",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-182",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-183",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-184",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-185",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-186",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-187",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-188",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-189",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-190",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-191",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-192",
+      "mode": "POLICY_OR_SECURITY_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-platform-policy-gate.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-193",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-194",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-195",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-196",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-197",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-198",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-199",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-200",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-201",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-202",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-203",
+      "mode": "GOVERNANCE_GATE",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-canonical-rule-registry.mjs",
+        "scripts/verify-user-decision-ledger.mjs",
+        "scripts/verify-active-release-contract-v2.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-204",
+      "mode": "WORKFLOW_CHECKPOINT",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-step-checkpoint-gate.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-205",
+      "mode": "WORKFLOW_CHECKPOINT",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-step-checkpoint-gate.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-206",
+      "mode": "WORKFLOW_CHECKPOINT",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-step-checkpoint-gate.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-207",
+      "mode": "WORKFLOW_CHECKPOINT",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-step-checkpoint-gate.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    },
+    {
+      "ruleId": "PR-208",
+      "mode": "WORKFLOW_CHECKPOINT",
+      "failClosed": true,
+      "waiverAllowed": false,
+      "skipAllowed": false,
+      "gateScripts": [
+        "scripts/verify-step-checkpoint-gate.mjs",
+        "scripts/verify-universal-rule-enforcement.mjs"
+      ],
+      "evidencePolicy": "MISSING_EVIDENCE_NEVER_PASS",
+      "violationEffect": "BLOCK_CURRENT_REQUIRED_STAGE",
+      "trackedIn": "config/canonical-rule-registry.json"
+    }
+  ]
+}

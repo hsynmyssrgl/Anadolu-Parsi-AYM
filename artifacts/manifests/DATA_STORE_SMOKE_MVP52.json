@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "23.07.2026.52",
+  "milestone": "B060-M12 RBAC & Audit Chain Hardening",
+  "status": "passed",
+  "checks": 14,
+  "peopleBefore": 6,
+  "peopleAfter": 7,
+  "backupCreated": true,
+  "migrationVersions": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "schemaFingerprint": "4a9221f49849a93c572f0c5a07e924338fabd12722d76a012a910b49733b6411"
+}

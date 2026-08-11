@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "PPT-PROJECT-PROGRESS-MODEL-V1",
+  "projectStartDate": "2026-07-20",
+  "codingScope": {
+    "coreModules": 30,
+    "architectureAndData": 15,
+    "securityAndPrivacy": 15,
+    "backupAndRecovery": 15,
+    "uiUxAndAccessibility": 10,
+    "criticalApiAdapters": 10,
+    "governanceAndDeliveryAutomation": 5
+  },
+  "estimationRule": "Completion is a weighted engineering estimate, not build-count division. Historical elapsed time and recent completion velocity inform ETA, with late-stage damping for integration and validation uncertainty.",
+  "lateStageVelocityDamping": 0.35,
+  "requiredBuildReportFields": [
+    "codingCompletionPercent",
+    "codingRemainingPercent",
+    "projectStartDate",
+    "elapsedDays",
+    "historicalBuildsPerElapsedDay",
+    "estimatedBronzeFinalDate",
+    "estimatedSilverDate",
+    "estimatedGoldDate",
+    "confidence"
+  ]
+}

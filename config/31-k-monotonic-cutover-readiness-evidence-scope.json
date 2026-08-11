@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "31-K",
+  "title": "Monotonic cutover-readiness evidence and tamper-evident acceptance state",
+  "decision": "DEC-172",
+  "predecessorDecision": "DEC-171",
+  "primaryRequirement": "DHA-001",
+  "requirements": [
+    "DHA-001",
+    "PPK-003",
+    "PPK-013",
+    "PPK-014"
+  ],
+  "status": "COMPLETED",
+  "targets": {
+    "evidenceLedger": "APPEND_ONLY_EXACT_EPOCH_SHA256_CHAIN",
+    "acceptanceBoundary": "TRUSTED_VERIFIER_REQUIRED_FOR_NEW_PASS",
+    "restoreBoundary": "NON_EMPTY_JOURNAL_REQUIRES_MATCHING_TRUSTED_ANCHOR",
+    "desktopHandshake": "RECOMPUTE_CHAIN_AND_FAIL_CLOSED_ON_TAMPER_OR_PERMISSION",
+    "cutoverDecision": "DEC_171_REMAINS_BLOCKED",
+    "apiPrivacy": "DIGESTS_AND_STATUS_ONLY_NO_PATH_SECRET_TOKEN_OR_FAMILY_DATA"
+  },
+  "requiredGates": [
+    "END_TO_END_SECURITY_VALIDATION",
+    "KEY_LIFECYCLE_PROOF",
+    "SINGLE_WRITER_PROOF",
+    "ROLLBACK_DRILL",
+    "EXPLICIT_USER_CUTOVER_APPROVAL"
+  ],
+  "acceptanceRules": {
+    "epochAdvance": "EXACTLY_ONE",
+    "completedGateReplacement": "REJECT",
+    "evidenceDeletion": "REJECT_BY_TRUSTED_ANCHOR",
+    "evidenceMutation": "REJECT_BY_HASH_CHAIN",
+    "unverifiedPass": "REJECT",
+    "allGatesPassEffect": "CUTOVER_STILL_BLOCKED_SEPARATE_VERSIONED_DECISION_REQUIRED"
+  },
+  "openBoundaries": {
+    "realVaultTransfer": "NOT_PERFORMED_BLOCKED",
+    "coreServiceUnlock": "NOT_IMPLEMENTED",
+    "sqliteOwnershipTransfer": "NOT_PERFORMED_BLOCKED",
+    "productionEvidenceSigner": "NOT_ATTACHED_DEFAULT_DENY",
+    "durableReadinessJournal": "NOT_ATTACHED_IN_MEMORY_CONTROL_PLANE_ONLY",
+    "familyApplicationApis": "NOT_COMPLETE",
+    "backupAndSync": "NOT_COMPLETE",
+    "windowsServiceInstallation": "APPROVAL_BOUND_NOT_RUN_NOT_PASS"
+  },
+  "requirementCompletionClaimed": false,
+  "newBuildIssued": false,
+  "startedAt": "2026-08-10T21:52:35.223Z",
+  "targetSliceStatus": "PASS",
+  "validationStatus": "PASS",
+  "persistentReceiptStatus": "PASS",
+  "validatedAt": "2026-08-10T22:06:57.300Z",
+  "officialCompletionClaimed": true,
+  "completedAt": "2026-08-10T22:07:12.957Z"
+}

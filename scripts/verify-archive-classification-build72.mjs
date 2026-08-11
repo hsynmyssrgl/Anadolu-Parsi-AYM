@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { DatabaseSync } from 'node:sqlite';
+import { FamilyDataStore } from '../.tmp/data-store-smoke/data-store.js';
+import { createArchivePolicyTestOptions } from './lib/archive-policy-test-harness.mjs';
+const root=mkdtempSync(join(tmpdir(),'panthera-build72-classification-'));
+const databasePath=join(root,'family.db'),archivePath=join(root,'archive'),sourcePath=join(root,'belge.txt');
+writeFileSync(sourcePath,'Panthera sınıflandırma doğrulaması','utf8');
+const checks=[];const check=(name,fn)=>{fn();checks.push(name)};let store;
+try{
+ store=new FamilyDataStore({databasePath,archivePath,applicationVersion:'24.07.2026.72',...createArchivePolicyTestOptions()});
+ store.setupAdmin({displayName:'Sınıflandırma Yöneticisi',email:'classification@example.com',password:'GucluSiniflandirma!2026'});
+ const item=(await store.importArchiveFile(sourcePath,{title:'Sınıflandırılacak Belge'}))[0];
+ check('category list starts from repository-backed query',()=>assert.ok(Array.isArray(store.listArchiveCategories())));
+ const categories=await store.createArchiveCategory({name:'Hukuki Belgeler',description:'Aile hukuku kayıtları'});
+ const category=categories.find(x=>x.name==='Hukuki Belgeler');
+ check('admin creates archive category through use case',()=>assert.ok(category));
+ check('category metadata persists',()=>assert.equal(category.description,'Aile hukuku kayıtları'));
+ const updated=await store.updateArchiveClassification({itemId:item.id,categoryId:category.id,tagNames:['Vasiyet','  Önemli  ','vasiyet'],sensitivity:'high',aiProcessingAllowed:true});
+ const classification=updated.find(x=>x.itemId===item.id);
+ check('classification update returns repository read model',()=>assert.ok(classification));
+ check('category assignment persists',()=>assert.equal(classification.categoryName,'Hukuki Belgeler'));
+ check('sensitivity and ai flag persist',()=>{assert.equal(classification.sensitivity,'high');assert.equal(classification.aiProcessingAllowed,true)});
+ check('tags are normalized and deduplicated',()=>assert.deepEqual(classification.tags.map(x=>x.name).sort(),['Vasiyet','Önemli'].sort()));
+ check('classification audit is appended',()=>assert.ok(store.listAudit(100).some(x=>x.action==='archive.classification_updated'&&x.resourceId===item.id)));
+ check('category audit is appended',()=>assert.ok(store.listAudit(100).some(x=>x.action==='archive.category_created'&&x.resourceId===category.id)));
+ check('database rows updated atomically',()=>{const db=new DatabaseSync(databasePath,{readOnly:true});try{const row=db.prepare('SELECT category_id,sensitivity,ai_processing_allowed FROM archive_items WHERE id=?').get(item.id);assert.equal(row.category_id,category.id);assert.equal(row.sensitivity,'high');assert.equal(Number(row.ai_processing_allowed),1);assert.equal(Number(db.prepare('SELECT COUNT(*) c FROM archive_item_tags WHERE archive_item_id=?').get(item.id).c),2);}finally{db.close();}});
+ const report={schemaVersion:1,product:'Panthera pardus tulliana',version:'24.07.2026.72',channel:'Bronze RC2 Aktif Geliştirme',milestone:'Archive Classification Application Migration',status:'passed',checks:checks.length,scenarios:checks,generatedAt:new Date().toISOString()};
+ writeFileSync('artifacts/manifests/ARCHIVE_CLASSIFICATION_VERIFICATION_BUILD72.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
+}finally{store?.close();rmSync(root,{recursive:true,force:true});}

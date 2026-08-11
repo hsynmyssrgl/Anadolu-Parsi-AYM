@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "23.07.2026.46",
+  "milestone": "B060-M6 Family Application Use Cases",
+  "added": [
+    "packages/application/src/family-use-cases.ts",
+    "packages/application/src/timeline-ports.ts",
+    "packages/repositories/src/family-repository.ts",
+    "packages/repositories/src/relation-repository.ts",
+    "apps/desktop/src/main/family-application-adapter.ts",
+    "scripts/verify-family-use-cases.mjs",
+    "tests/smoke/tsconfig.runtime-foundation.json"
+  ],
+  "modified": [
+    "apps/desktop/src/main/data-store.ts",
+    "apps/desktop/src/main/event-handlers.ts",
+    "apps/desktop/src/main/main.ts",
+    "packages/repositories/src/person-repository.ts",
+    "packages/repositories/src/index.ts",
+    "packages/application/src/family-timeline-service.ts",
+    "packages/application/src/index.ts",
+    "packages/infrastructure/src/timeline-repository.ts",
+    "package.json",
+    "package-lock.json",
+    "apps/desktop/package.json",
+    "packages/application/package.json",
+    "packages/infrastructure/package.json",
+    "packages/domain/src/app-meta.ts",
+    "artifacts/manifests/VERSION_LEDGER.json"
+  ],
+  "architecturalOutcomes": [
+    "Application katmanı artık infrastructure paketine bağımlı değil.",
+    "Aile grafiği, üye ve ilişki çekirdeği use-case sınırından geçiyor.",
+    "Üye ve ilişki yazımları audit ve outbox ile aynı transaction içinde.",
+    "Renderer ve IPC contract sayısı değişmedi."
+  ],
+  "verificationStatus": "passed"
+}

@@ -1,0 +1,792 @@
+{
+  "product": "Anadolu Parsı Aile Yaşam Merkezi",
+  "plannedVisibleRelease": "Bronze 03.08.2026.27",
+  "documentStatus": "BINDING_SCOPE_INPUT_NOT_SOURCE_BUILD",
+  "module": "Aile İletişim, Toplantı ve İşbirliği Merkezi",
+  "revisedBronzeCompletionRange": [
+    33,
+    36
+  ],
+  "additionalFocusedWorkdays": [
+    45,
+    65
+  ],
+  "totalBronzeFocusedWorkdays": [
+    130,
+    175
+  ],
+  "silverFocusedWorkdays": [
+    40,
+    60
+  ],
+  "goldFocusedWorkdays": [
+    8,
+    14
+  ],
+  "nativeAppleCommunicationWorkdays": [
+    35,
+    55
+  ],
+  "requirements": [
+    {
+      "id": "COM-001",
+      "area": "Mesajlaşma",
+      "requirement": "Bire bir ve grup mesajlaşması",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "COM-002",
+      "area": "Mesajlaşma",
+      "requirement": "Aile, hane, aile dalı, etkinlik, bakım ve özel konu odaları",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "COM-003",
+      "area": "Mesajlaşma",
+      "requirement": "Yanıt, alıntı, konu dizisi, tepki, sabitleme ve yer imi",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "COM-004",
+      "area": "Mesajlaşma",
+      "requirement": "Metin, sesli mesaj, fotoğraf, video, konum ve belge mesajları",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "COM-005",
+      "area": "Mesajlaşma",
+      "requirement": "Taslak, çevrimdışı kuyruk, yeniden deneme ve teslim durumları",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "COM-006",
+      "area": "Mesajlaşma",
+      "requirement": "Düzenleme/silme geçmişi, geri alma ve değişiklik etiketi",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "COM-007",
+      "area": "Mesajlaşma",
+      "requirement": "Zamanlanmış mesaj, sessiz gönderim ve hatırlat",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "COM-008",
+      "area": "Mesajlaşma",
+      "requirement": "Okundu bilgisi ve yazıyor göstergesinin kullanıcı tarafından kapatılması",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "COM-009",
+      "area": "Mesajlaşma",
+      "requirement": "Arama, filtre, tarih/kişi/dosya kırılımı ve yetki filtreleme",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "COM-010",
+      "area": "Mesajlaşma",
+      "requirement": "Saklama politikası: kalıcı, süreli, otomatik silinen ve hukuki koruma etiketi",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "SEC-COM-001",
+      "area": "İletişim Güvenliği",
+      "requirement": "MLS tabanlı uçtan uca grup anahtar yönetimi",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "SEC-COM-002",
+      "area": "İletişim Güvenliği",
+      "requirement": "İleri gizlilik, saldırı sonrası güvenlik ve anahtar dönemi yenileme",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "SEC-COM-003",
+      "area": "İletişim Güvenliği",
+      "requirement": "Her cihaz için ayrı kimlik anahtarı, doğrulama ve iptal",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "SEC-COM-004",
+      "area": "İletişim Güvenliği",
+      "requirement": "Mesaj, ek, tepki ve düzenleme olaylarının imza/bütünlük doğrulaması",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "SEC-COM-005",
+      "area": "İletişim Güvenliği",
+      "requirement": "Sunucu/relay mesaj içeriğini çözemeyecek teslim hizmeti",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "SEC-COM-006",
+      "area": "İletişim Güvenliği",
+      "requirement": "Metadata minimizasyonu, grup kimliği maskeleme ve trafik günlüğü sınırı",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "SEC-COM-007",
+      "area": "İletişim Güvenliği",
+      "requirement": "Yeni üye eski içerikleri varsayılan göremez; açık geçmiş paylaşım kararı gerekir",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "SEC-COM-008",
+      "area": "İletişim Güvenliği",
+      "requirement": "Kayıp/ele geçirilmiş cihaz sonrası grup anahtarlarının yeniden kurulması",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "PRS-001",
+      "area": "Çevrimiçi Durum",
+      "requirement": "Çevrimiçi, uzakta, meşgul, toplantıda, rahatsız etmeyin, görünmez ve çevrimdışı",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "PRS-002",
+      "area": "Çevrimiçi Durum",
+      "requirement": "Çoklu cihaz durum birleştirme ve hangi cihazın aktif olduğunu gizleyebilme",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "PRS-003",
+      "area": "Çevrimiçi Durum",
+      "requirement": "Son görülme ve çevrimiçi bilgisinin kişi/grup bazında gizlilik kontrolü",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "PRS-004",
+      "area": "Çevrimiçi Durum",
+      "requirement": "Varsayılan olarak yalnız uygun/uygun değil bilgisi; kesin aktivite ifşası yok",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "PRS-005",
+      "area": "Çevrimiçi Durum",
+      "requirement": "Durum süresi, otomatik sona erme, takvimle isteğe bağlı eşleme",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "PRS-006",
+      "area": "Çevrimiçi Durum",
+      "requirement": "Acil ulaşılabilirlik tercihi; sessizce takip veya zorunlu görünürlük yok",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "RTC-001",
+      "area": "Sesli/Görüntülü Görüşme",
+      "requirement": "WebRTC tabanlı bire bir ses ve video araması",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "RTC-002",
+      "area": "Sesli/Görüntülü Görüşme",
+      "requirement": "SFU tabanlı aile grup görüşmesi ve aktif konuşmacı görünümü",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "RTC-003",
+      "area": "Sesli/Görüntülü Görüşme",
+      "requirement": "STUN/TURN bağlantı katmanı, kısa ömürlü kimlik bilgisi ve relay fallback",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "RTC-004",
+      "area": "Sesli/Görüntülü Görüşme",
+      "requirement": "SFrame tabanlı grup medya E2EE ve MLS anahtar entegrasyonu",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "RTC-005",
+      "area": "Sesli/Görüntülü Görüşme",
+      "requirement": "Ön katılım ekranı, kamera/mikrofon/hoparlör testi",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "RTC-006",
+      "area": "Sesli/Görüntülü Görüşme",
+      "requirement": "Ses-only, düşük bant genişliği, simulcast ve otomatik kalite",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "RTC-007",
+      "area": "Sesli/Görüntülü Görüşme",
+      "requirement": "Ekran, uygulama penceresi, fotoğraf, belge ve aile albümü paylaşımı",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "RTC-008",
+      "area": "Sesli/Görüntülü Görüşme",
+      "requirement": "El kaldırma, tepki, konuşmacı sabitleme ve sunucu kontrolü",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "RTC-009",
+      "area": "Sesli/Görüntülü Görüşme",
+      "requirement": "Arka plan bulanıklaştırma/sanal arka plan; yerel işleme ve kapatma seçeneği",
+      "priority": "P2",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "RTC-010",
+      "area": "Sesli/Görüntülü Görüşme",
+      "requirement": "Bekleme odası, davetli listesi, cihaz doğrulama ve toplantı kilidi",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "RTC-011",
+      "area": "Sesli/Görüntülü Görüşme",
+      "requirement": "iOS CallKit/PushKit, Windows çağrı bildirimi ve rahatsız etmeyin uyumu",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "RTC-012",
+      "area": "Sesli/Görüntülü Görüşme",
+      "requirement": "Bağlantı kalitesi, gecikme, paket kaybı ve anlaşılır sorun çözümü",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "RTC-013",
+      "area": "Sesli/Görüntülü Görüşme",
+      "requirement": "Görüşme sırasında anlık mesaj ve gerçek zamanlı metin (RTT)",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "RTC-014",
+      "area": "Sesli/Görüntülü Görüşme",
+      "requirement": "İşaret dili konuşmacısını sabitleme ve ayrı büyütme penceresi",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "REC-001",
+      "area": "Kayıt ve Rıza",
+      "requirement": "Görüşme kaydı varsayılan kapalıdır",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "REC-002",
+      "area": "Kayıt ve Rıza",
+      "requirement": "Kayıt öncesi ayrı aydınlatma ve her katılımcıdan açık onay",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "REC-003",
+      "area": "Kayıt ve Rıza",
+      "requirement": "Görünür kırmızı kayıt göstergesi ve sesli başlat/durdur bildirimi",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "REC-004",
+      "area": "Kayıt ve Rıza",
+      "requirement": "Sonradan katılan kişi onaylayana kadar kaydın otomatik durması",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "REC-005",
+      "area": "Kayıt ve Rıza",
+      "requirement": "Bir kişinin reddinde kayıt olmadan görüşmeye devam edebilme",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "REC-006",
+      "area": "Kayıt ve Rıza",
+      "requirement": "Kayıttan çıkma ve gelecekteki kaydı durdurma; geçmiş kayıt için yetki politikası",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "REC-007",
+      "area": "Kayıt ve Rıza",
+      "requirement": "On-record/off-record bölümleri; altyazı gösterilip transkript kaydedilmeyebilmesi",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "REC-008",
+      "area": "Kayıt ve Rıza",
+      "requirement": "Kayıt katılımcısının E2EE gruba açık rol olarak eklenmesi",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "REC-009",
+      "area": "Kayıt ve Rıza",
+      "requirement": "Ses, video, transkript ve çeviri kayıtlarının ayrı saklama politikaları",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "REC-010",
+      "area": "Kayıt ve Rıza",
+      "requirement": "Kayıt dosyası şifreleme, hash, imza, erişim geçmişi ve güvenli silme",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "REC-011",
+      "area": "Kayıt ve Rıza",
+      "requirement": "Çocuk katılımcılar için yaşa uygun bildirim ve gerekli veli/uzman hukuk politikası",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "AI-LNG-001",
+      "area": "AI Dil ve Çeviri",
+      "requirement": "Mesaj dilini algılama ve kullanıcı tercihine göre isteğe bağlı çeviri",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "AI-LNG-002",
+      "area": "AI Dil ve Çeviri",
+      "requirement": "Orijinal metni her zaman koruma; çeviri ayrı görünüm ve makine çevirisi etiketi",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "AI-LNG-003",
+      "area": "AI Dil ve Çeviri",
+      "requirement": "Canlı konuşmadan yazıya altyazı ve konuşmacı ayrımı",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "AI-LNG-004",
+      "area": "AI Dil ve Çeviri",
+      "requirement": "Canlı altyazının kullanıcının seçtiği dile çevrilmesi",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "AI-LNG-005",
+      "area": "AI Dil ve Çeviri",
+      "requirement": "İsteğe bağlı çevrilmiş metni seslendirme; orijinal sesi susturmama",
+      "priority": "P2",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "AI-LNG-006",
+      "area": "AI Dil ve Çeviri",
+      "requirement": "Aile adları, lakaplar, yerler ve tıbbi terimler için kişisel sözlük",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "AI-LNG-007",
+      "area": "AI Dil ve Çeviri",
+      "requirement": "Belirsiz kelime, düşük güven ve olası hataları görünür işaretleme",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "AI-LNG-008",
+      "area": "AI Dil ve Çeviri",
+      "requirement": "Kullanıcının çeviriyi düzeltmesi ve yalnız izinle sözlüğe eklemesi",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "AI-LNG-009",
+      "area": "AI Dil ve Çeviri",
+      "requirement": "Yerel/offline dil paketi önceliği; dış sağlayıcıya gönderimde ayrı onay ve önizleme",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "AI-LNG-010",
+      "area": "AI Dil ve Çeviri",
+      "requirement": "Belge, mesaj, altyazı ve toplantı özeti için ortak TranslationProviderPort",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "AI-LNG-011",
+      "area": "AI Dil ve Çeviri",
+      "requirement": "Dil ve erişilebilirlik tercihinin cihazlar arasında şifreli senkronizasyonu",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "MTG-001",
+      "area": "Aile Toplantısı",
+      "requirement": "Tekrarlanan veya tek seferlik aile toplantısı planlama",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "MTG-002",
+      "area": "Aile Toplantısı",
+      "requirement": "Gündem, ön okuma belgeleri, katılım durumu ve hatırlatma",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "MTG-003",
+      "area": "Aile Toplantısı",
+      "requirement": "Ev sahibi, kolaylaştırıcı, not tutucu, çevirmen ve bakım veren rolleri",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "MTG-004",
+      "area": "Aile Toplantısı",
+      "requirement": "Anket, oylama, karar, çekimserlik ve görüş notu",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "MTG-005",
+      "area": "Aile Toplantısı",
+      "requirement": "Karar defterine bağlanan toplantı kararları ve sorumlular",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "MTG-006",
+      "area": "Aile Toplantısı",
+      "requirement": "Görev, son tarih, takip ve bir sonraki toplantı gündemi",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "MTG-007",
+      "area": "Aile Toplantısı",
+      "requirement": "Ortak beyaz tahta, fotoğraf/albüm izleme ve belge üzerinde işaretleme",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "MTG-008",
+      "area": "Aile Toplantısı",
+      "requirement": "Rızalı transkriptten AI özet, karar ve görev önerisi; insan onayı zorunlu",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "MTG-009",
+      "area": "Aile Toplantısı",
+      "requirement": "Toplantı sonrası şifreli tutanak paketi ve katılımcı erişim kapsamı",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "MTG-010",
+      "area": "Aile Toplantısı",
+      "requirement": "Katılamayanlar için yetkili özet ve seçilmiş kayıt bölümleri",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "FSH-001",
+      "area": "Dosya Paylaşımı",
+      "requirement": "Mesaj ve toplantıda E2EE dosya paylaşımı",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "FSH-002",
+      "area": "Dosya Paylaşımı",
+      "requirement": "Parçalı, kaldığı yerden devam eden, hash doğrulamalı büyük dosya aktarımı",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "FSH-003",
+      "area": "Dosya Paylaşımı",
+      "requirement": "Dosya sürümü, yorum, ilişkilendirme ve arşive tek kopya kaydetme",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "FSH-004",
+      "area": "Dosya Paylaşımı",
+      "requirement": "Süreli erişim, indirme izni, sadece önizleme ve paylaşım iptali",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "FSH-005",
+      "area": "Dosya Paylaşımı",
+      "requirement": "Yerel zararlı dosya taraması, karantina ve güvenli önizleme",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "FSH-006",
+      "area": "Dosya Paylaşımı",
+      "requirement": "Fotoğraf albümü, ortak seçim, beğeni ve aile hikâyesine aktarma",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "FSH-007",
+      "area": "Dosya Paylaşımı",
+      "requirement": "Haricî link paylaşımının varsayılan kapalı, süreli ve erişim kodlu olması",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "UX-COM-001",
+      "area": "İletişim UX",
+      "requirement": "Yaşlı kullanıcı için tek dokunuşla favori kişiyi ara ve büyük kişi kartları",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "UX-COM-002",
+      "area": "İletişim UX",
+      "requirement": "Genç kullanıcı için hızlı tepki, medya ve güvenli gizlilik kontrolleri",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "UX-COM-003",
+      "area": "İletişim UX",
+      "requirement": "Gürültü azaltma, yankı engelleme, ses seviyesi dengeleme ve test",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "UX-COM-004",
+      "area": "İletişim UX",
+      "requirement": "Canlı altyazı, büyütülebilir metin, ekran okuyucu ve klavye erişimi",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "UX-COM-005",
+      "area": "İletişim UX",
+      "requirement": "Sessiz saatler, kişi/oda bazlı bildirim ve acil olmayan mesaj özeti",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "UX-COM-006",
+      "area": "İletişim UX",
+      "requirement": "Acil aile duyurusu ve herkesin durum bildirmesi; acil servis garantisi değildir",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "UX-COM-007",
+      "area": "İletişim UX",
+      "requirement": "Uzaktan yardım: yalnız tek seferlik onayla ekran paylaşımı ve sınırlı kontrol",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "UX-COM-008",
+      "area": "İletişim UX",
+      "requirement": "Uzaktan yardımda parola/güvenli masaüstü gizleme, görünür gösterge ve anlık iptal",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "UX-COM-009",
+      "area": "İletişim UX",
+      "requirement": "Birlikte fotoğraf/video izleme, aile anısı anlatımı ve SharePlay adapteri",
+      "priority": "P2",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "UX-COM-010",
+      "area": "İletişim UX",
+      "requirement": "Sesli komutla ara, mesaj gönder, toplantıya katıl; işlem öncesi doğrulama",
+      "priority": "P1",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "UX-COM-011",
+      "area": "İletişim UX",
+      "requirement": "Basit mod: yalnız favoriler, ara, mesajlar ve yaklaşan toplantı",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "UX-COM-012",
+      "area": "İletişim UX",
+      "requirement": "Bağlantı koptuğunda görüşmeyi otomatik ses moduna düşürme ve yeniden bağlanma",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "AUD-COM-001",
+      "area": "Denetim ve Arşiv",
+      "requirement": "Her iletişim işlemi için içerikten ayrı değiştirilemez audit olayı",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "AUD-COM-002",
+      "area": "Denetim ve Arşiv",
+      "requirement": "Kim odaya girdi/çıktı, arama başlattı/bitirdi, dosya paylaştı ve izin değiştirdi kaydı",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "AUD-COM-003",
+      "area": "Denetim ve Arşiv",
+      "requirement": "Mesaj içerikleri audit günlüğüne kopyalanmaz; yalnız kimlik/hash/sürüm metadata tutulur",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "AUD-COM-004",
+      "area": "Denetim ve Arşiv",
+      "requirement": "Kayıt rızası, geri çekme, off-record ve saklama değişikliklerinin imzalı kaydı",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "AUD-COM-005",
+      "area": "Denetim ve Arşiv",
+      "requirement": "İletişim arşivinin kasa, yedek, replikasyon ve restore bütünlüğü",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    },
+    {
+      "id": "AUD-COM-006",
+      "area": "Denetim ve Arşiv",
+      "requirement": "Kullanıcıya kendi verisini dışa aktarma, saklama süresini görme ve silme talebi",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır."
+    }
+  ]
+}

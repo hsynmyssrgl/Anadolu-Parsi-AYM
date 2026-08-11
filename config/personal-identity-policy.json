@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "PPT-PERSONAL-IDENTITY-POLICY-V1",
+  "effectiveBuild": 208,
+  "brandOnlyMetadata": true,
+  "productionPersonalIdentityAllowed": false,
+  "forbiddenWordSha256": [
+    "4e98dd1d6cb02d17e3c59346608ec4bae7be3565654d40c14ebbd56e4b1d6e9a",
+    "4e313c77d10f1bbac8dbaa75a806262cadb7e3da24f282b3da1f2193c3ca054c",
+    "009cb433e38eb6e0809575aa273687ad06dea5594809299d5c6f127cdaf44ff1",
+    "b3b0b3743dde3acf7abff544540b1033d7075ee12330c60cd8662cada07136c4",
+    "2f77bb1b61a8e2f6b958759334ed052e540d18ae2d26dcfd52df9b059caea1b6",
+    "370749e90bceb4b51200f92cb75a9d3d5c721c4eb54ed1f93462bed540ea7c69",
+    "085f61772fbab093762c69d8c9140029e568b01854ccd169dfbb7528744f9187",
+    "f5adaf32579d23d86ae764163da1a49e306bb06b55c3257c94a92e247f2bcaf5"
+  ],
+  "forbiddenIdentifierSha256": [
+    "0f142aff2329512eca6eafd5b982d059e083e7c9dc3095f4cbc22fa3434c7d13",
+    "89adfab4f38e08c185007961dcbdc52ebc3498f52e374fbf2be8fd8419d171a9",
+    "2b30ae4790ea2baefb04cf3492c594dc362e4d3964825cc342ca4a25818b5e51",
+    "c917582526c62abb267f4065d0c73827d19fbb5dced8f5a1062f860a48c4a683",
+    "80fc450cc1c8ed74700914e9dfa6343313271a3b90e3a378b1a34bddb7a76141",
+    "03fac18881eaf41676b2585632ce594da9b3bbe9e4fefead8c7bd91888a9aaa0"
+  ],
+  "scanRoots": [
+    "apps/desktop/src",
+    "packages",
+    "config",
+    "docs",
+    "README.md",
+    "START_HERE_TR.md",
+    "DELIVERY_SUMMARY_TR.md",
+    "PAKET_OZETI_TR.md",
+    "SECURITY.md",
+    "COPYRIGHT.md",
+    "CONTRIBUTING.md"
+  ],
+  "excludeGlobs": [
+    "docs/history/**",
+    "artifacts/**",
+    "node_modules/**"
+  ],
+  "note": "Forbidden identities are stored only as SHA-256 fingerprints; natural-person values are not retained in active policy text."
+}

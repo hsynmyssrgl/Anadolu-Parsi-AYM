@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "30-W",
+  "requirement": "PPK-002",
+  "scope": "GOVERNED_FINANCE_POLICY_ENFORCEMENT_REPOSITORY_RECEIPT_AND_DIRECT_WRITE_FENCE_VERTICAL_SLICE",
+  "predecessor": {
+    "step": "30-V",
+    "completion": "artifacts/checkpoints/30-V_COMPLETION_RECORD.json",
+    "receipt": "artifacts/checkpoints/30-V_LIBRARY_RECEIPT.json"
+  },
+  "targets": {
+    "productionIpc": [
+      "finance:create",
+      "finance:createValuation",
+      "finance:list",
+      "finance:listValuations"
+    ],
+    "repositoryOperations": [
+      "listRecords",
+      "findRecord",
+      "insertRecord",
+      "listValuations",
+      "insertValuation"
+    ],
+    "writeTables": [
+      "finance_records",
+      "finance_valuations"
+    ],
+    "requiredControls": [
+      "fail-closed production finance PEP composition",
+      "trusted subject, family, resource and correlation binding",
+      "PolicyAuthorizedRepositoryExecutionContext for finance writes",
+      "exact durable policy receipt binding in the business transaction",
+      "database-enforced direct-write rejection without a matching receipt",
+      "audit and outbox atomicity preservation",
+      "focused runtime, regression, migration and IPC payload-security proof"
+    ]
+  },
+  "nonGoals": [
+    "claiming universal PEP coverage outside the finance vertical slice",
+    "external monotonic authority against coordinated database and journal rollback",
+    "obligation execution",
+    "native interactive Windows Hello or installer/SCM proof",
+    "Silver or Gold work"
+  ],
+  "evidenceBoundary": {
+    "PPK002": "PARTIAL",
+    "archiveCoreAndAccessoryReceiptFence": "TARGETED_PASS",
+    "newCorrelationRetryIdempotencyAfterUnknownCommitOutcome": "TARGETED_PASS",
+    "durableDatabaseLedgerAcrossSqliteRestart": "TARGETED_PASS",
+    "rendererRestartPendingOperationIdentityRecovery": "TARGETED_PASS",
+    "expiredUnusedReplayReservationPruning": "TARGETED_PASS",
+    "financePolicyEnforcementVerticalSlice": "TARGETED_NOT_YET_PASS",
+    "universalRepositoryEnforcement": "NOT_COMPLETE",
+    "externalMonotonicAuthorityAgainstCoordinatedDatabaseAndJournalRollback": "NOT_IMPLEMENTED",
+    "obligationExecution": "NOT_RUN_NOT_PASS",
+    "secureFileDeletionAndDatabaseCommitAtomicity": "NOT_IMPLEMENTED",
+    "installedCoreServiceRegistrationAndScmLifecycle": "NOT_RUN_NOT_PASS",
+    "requirementCompletionClaimed": false
+  },
+  "mandatoryTruthSentence": "Bu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır."
+}

@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "edition": "Bronze",
+  "version": "23.07.2026.46",
+  "packageVersion": "23.7.2026-46",
+  "revision": "REVİZYON-060",
+  "milestone": "B060-M6 Family Application Use Cases",
+  "status": "passed",
+  "generatedAt": "2026-07-23T18:08:46.443673+00:00",
+  "summary": {
+    "workspaceBuildsPassed": 12,
+    "electronMainTypecheck": "passed",
+    "ipcMainChannels": 124,
+    "preloadChannels": 124,
+    "applicationTables": 40,
+    "infrastructureTables": 4,
+    "migrations": 5,
+    "applicationUseCases": 3,
+    "repositoryClasses": 6,
+    "sourceFiles": 329,
+    "typescriptFiles": 67
+  },
+  "verification": {
+    "foundation": {
+      "status": "passed",
+      "checks": 14,
+      "artifact": "FOUNDATION_VERIFICATION_MVP46.json"
+    },
+    "runtime": {
+      "status": "passed",
+      "checks": 6,
+      "artifact": "RUNTIME_FOUNDATION_VERIFICATION_MVP46.json"
+    },
+    "migrations": {
+      "status": "passed",
+      "checks": 9,
+      "artifact": "DATABASE_MIGRATION_VERIFICATION_MVP46.json"
+    },
+    "dataStore": {
+      "status": "passed",
+      "checks": 14,
+      "artifact": "DATA_STORE_SMOKE_MVP46.json"
+    },
+    "repositories": {
+      "status": "passed",
+      "checks": 10,
+      "artifact": "REPOSITORY_OUTBOX_VERIFICATION_MVP46.json"
+    },
+    "atomicity": {
+      "status": "passed",
+      "checks": 9,
+      "artifact": "TRANSACTIONAL_ATOMICITY_VERIFICATION_MVP46.json"
+    },
+    "dispatcher": {
+      "status": "passed",
+      "checks": 3,
+      "artifact": "EVENT_DISPATCHER_VERIFICATION_MVP46.json"
+    },
+    "familyUseCases": {
+      "status": "passed",
+      "checks": 14,
+      "artifact": "FAMILY_USE_CASE_VERIFICATION_MVP46.json"
+    }
+  },
+  "limitations": [
+    "Tam Electron/Vite/Vitest üretim zinciri temiz kaynak paketinde bağımlılık ağı yeniden kurulmadığı için çalıştırılmadı.",
+    "Windows installer, ekran görüntüleri ve kapsamlı manuel doğrulama Silver aşamasına bırakıldı."
+  ]
+}

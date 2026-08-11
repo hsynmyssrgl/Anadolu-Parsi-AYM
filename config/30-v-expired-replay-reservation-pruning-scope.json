@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "30-V",
+  "requirement": "PPK-002",
+  "scope": "EXPIRED_UNUSED_REPLAY_RESERVATION_PRUNING_AND_RETENTION_ENFORCEMENT",
+  "predecessor": {
+    "step": "30-U",
+    "completionRecord": "artifacts/checkpoints/30-U_COMPLETION_RECORD.json",
+    "persistentReceiptStatus": "PASS"
+  },
+  "targets": [
+    {
+      "id": "monotonic-local-pruning-watermark",
+      "requiredResult": "SQLite persists a non-decreasing local pruning cutoff so clock rollback cannot resurrect an older retention boundary; external coordinated-rollback authority remains explicitly open."
+    },
+    {
+      "id": "database-guarded-unused-only-delete",
+      "requiredResult": "Database triggers permit deletion only when a reservation is strictly expired at the durable cutoff and has no transaction receipt; direct SQL cannot remove unexpired or consumed reservations."
+    },
+    {
+      "id": "bounded-deterministic-pruning",
+      "requiredResult": "The repository removes a caller-bounded batch ordered by expiry and nonce, reports the exact durable cutoff and count, and rejects invalid or regressing requests fail closed."
+    },
+    {
+      "id": "production-replay-store-integration",
+      "requiredResult": "Every durable production nonce reservation first advances the local cutoff and performs bounded pruning in the same SQLite transaction before reserving the new nonce."
+    },
+    {
+      "id": "restart-concurrency-and-retention-proof",
+      "requiredResult": "Real SQLite close/reopen and concurrent process tests prove expired unused rows are removed, unexpired and consumed rows survive, and the cutoff never regresses."
+    },
+    {
+      "id": "regression-and-security-proof",
+      "requiredResult": "Existing archive receipt, idempotency and pending-operation identity paths remain PASS while direct-delete bypasses and over-broad pruning fail closed."
+    }
+  ],
+  "requiredOrder": [
+    "selection-and-scope-lock",
+    "migration-and-repository-contract",
+    "production-replay-store-integration",
+    "real-sqlite-restart-and-concurrency-runtime",
+    "regression-and-security-review"
+  ],
+  "evidenceBoundary": {
+    "PPK002": "PARTIAL",
+    "archiveCoreAndAccessoryReceiptFence": "TARGETED_PASS",
+    "newCorrelationRetryIdempotencyAfterUnknownCommitOutcome": "TARGETED_PASS",
+    "durableDatabaseLedgerAcrossSqliteRestart": "TARGETED_PASS",
+    "rendererRestartPendingOperationIdentityRecovery": "TARGETED_PASS",
+    "expiredUnusedReplayReservationPruning": "TARGETED_NOT_YET_PASS",
+    "universalRepositoryEnforcement": "NOT_COMPLETE",
+    "externalMonotonicAuthorityAgainstCoordinatedDatabaseAndJournalRollback": "NOT_IMPLEMENTED",
+    "obligationExecution": "NOT_RUN_NOT_PASS",
+    "secureFileDeletionAndDatabaseCommitAtomicity": "NOT_IMPLEMENTED",
+    "installedCoreServiceRegistrationAndScmLifecycle": "NOT_RUN_NOT_PASS",
+    "requirementCompletionClaimed": false
+  },
+  "mandatoryTruthSentence": "Bu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır."
+}

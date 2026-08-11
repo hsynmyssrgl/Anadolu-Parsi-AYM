@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "product": "Anadolu Parsı Aile Yaşam Merkezi",
+  "build": 228,
+  "applicationVersion": "02.08.2026.228",
+  "packageVersion": "2.8.2026-228",
+  "channel": "Bronze RC2 Active Development",
+  "purpose": "Official governance closure of OPEN-021 and OPEN-022",
+  "closureEvidenceBuild": 227,
+  "closureEvidenceZipSha256": "efa151bb35b4ea0a027327052f735d42048f3e3c1f809175abf0cd5015549564",
+  "exactSourceZipSha256": "131091a153cf3a7eaf78b62f1dc2696761b8bde79cd7e3206264e10cb672d2c0",
+  "notRunIsPass": false,
+  "items": [
+    {
+      "id": "OPEN-021",
+      "status": "CLOSED",
+      "readinessInEvidence": "READY_TO_CLOSE",
+      "developmentWindowsProbe": "PASS",
+      "installedWindowsProbe": "PASS",
+      "protection": "Windows EFS",
+      "closedByBuild": 228
+    },
+    {
+      "id": "OPEN-022",
+      "status": "CLOSED",
+      "readinessInEvidence": "READY_TO_CLOSE",
+      "developmentWindowsProbe": "PASS",
+      "installedWindowsProbe": "PASS",
+      "protection": "Windows CurrentUser DPAPI and protected side artifacts",
+      "closedByBuild": 228
+    }
+  ],
+  "silverBoundary": {
+    "sourceBuild": 227,
+    "fullRootTscNoEmit": "FAIL",
+    "unitIntegration": "FAIL",
+    "blockingSmoke": "FAIL",
+    "unchangedByBuild228": true,
+    "nextOfficialWork": "OPEN-002"
+  }
+}

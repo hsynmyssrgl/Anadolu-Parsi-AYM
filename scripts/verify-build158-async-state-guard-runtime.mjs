@@ -1,0 +1,63 @@
+import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { dirname, join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+
+const root=process.cwd(),tmp=join(root,'.tmp','build158-async-state-guard'),args=process.argv.slice(2);
+const option=(name,fallback)=>{const index=args.indexOf(name);return index<0?fallback:args[index+1];};
+const reportPath=resolve(option('--report','artifacts/validation/build158-async-state-guard-runtime.json'));
+await rm(tmp,{recursive:true,force:true});await mkdir(tmp,{recursive:true});
+const ts=(await import(pathToFileURL(join(execFileSync('npm',['root','-g'],{encoding:'utf8'}).trim(),'typescript','lib','typescript.js')).href)).default;
+const source=await readFile('apps/desktop/src/renderer/async-state-guard.ts','utf8');
+const output=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext},reportDiagnostics:true});
+const diagnostics=(output.diagnostics??[]).filter(item=>item.category===ts.DiagnosticCategory.Error);
+if(diagnostics.length)throw new Error('Async state guard transpilation failed.');
+const modulePath=join(tmp,'async-state-guard.mjs');await writeFile(modulePath,output.outputText);
+const {AsyncWriteGuard,MutationRevisionWatermark}=await import(pathToFileURL(modulePath).href);
+const checks=[];const check=(label,fn)=>{fn();checks.push(label);};
+
+const guard=new AsyncWriteGuard();let writes=0;
+const first=guard.start('catalog');const second=guard.start('catalog');
+check('newer request invalidates older request in same scope',()=>assert.equal(guard.isCurrent(first),false));
+check('latest request remains current',()=>assert.equal(guard.isCurrent(second),true));
+check('stale commit is rejected',()=>assert.equal(guard.commit(first,()=>{writes+=1;}),false));
+check('current commit is accepted',()=>assert.equal(guard.commit(second,()=>{writes+=1;}),true));
+check('only current write executed',()=>assert.equal(writes,1));
+const dashboard=guard.start('dashboard');
+check('different scopes stay independent',()=>assert.equal(guard.isCurrent(dashboard),true));
+guard.invalidate('catalog');
+check('scope invalidation leaves other scope current',()=>assert.equal(guard.isCurrent(dashboard),true));
+const epochBefore=guard.epoch;guard.invalidateAll();
+check('global invalidation advances epoch',()=>assert.equal(guard.epoch,epochBefore+1));
+check('global invalidation rejects prior ticket',()=>assert.equal(guard.isCurrent(dashboard),false));
+check('empty scope rejected',()=>assert.throws(()=>guard.start('  '),/boş olamaz/));
+
+const revisions={graph:0,timeline:0,personCatalog:0,eventCatalog:0,dashboard:0,notifications:0,archive:0};
+const mutation=(overrides={})=>({mutationId:'m-1',entityType:'event',entityId:'event-1',operation:'updated',changedSections:['timeline'],changedRevisions:['timeline','eventCatalog','dashboard'],revisions:{...revisions,timeline:1,eventCatalog:1,dashboard:1},occurredAt:'2026-07-29T07:00:00.000Z',...overrides});
+const watermark=new MutationRevisionWatermark(16);
+const accepted=watermark.accept(mutation());
+check('first mutation accepted',()=>assert.equal(accepted.accepted,true));
+check('first mutation reports advanced keys',()=>assert.deepEqual(accepted.advancedKeys,['timeline','eventCatalog','dashboard']));
+const duplicate=watermark.accept(mutation());
+check('duplicate mutation id rejected',()=>assert.deepEqual({accepted:duplicate.accepted,duplicate:duplicate.duplicate},{accepted:false,duplicate:true}));
+const newer=watermark.accept(mutation({mutationId:'m-2',revisions:{...revisions,timeline:2,eventCatalog:2,dashboard:2}}));
+check('newer revision accepted',()=>assert.equal(newer.accepted,true));
+const stale=watermark.accept(mutation({mutationId:'m-3',revisions:{...revisions,timeline:1,eventCatalog:1,dashboard:1}}));
+check('out of order older mutation rejected',()=>assert.equal(stale.accepted,false));
+const unrelated=watermark.accept(mutation({mutationId:'m-4',entityType:'person',entityId:'person-1',changedSections:['graph'],changedRevisions:['graph','personCatalog','dashboard'],revisions:{...revisions,graph:1,personCatalog:1,dashboard:1,timeline:1,eventCatalog:1}}));
+check('older shared dashboard with newer independent graph accepted',()=>assert.deepEqual(unrelated.advancedKeys,['graph','personCatalog']));
+check('watermark never decreases',()=>assert.deepEqual(watermark.snapshot(),{graph:1,timeline:2,personCatalog:1,eventCatalog:2,dashboard:2,notifications:0,archive:0}));
+check('duplicate changed revision keys rejected',()=>assert.throws(()=>watermark.accept(mutation({mutationId:'m-5',changedRevisions:['timeline','timeline']})),/yinelenemez/));
+check('invalid revision rejected',()=>assert.throws(()=>watermark.accept(mutation({mutationId:'m-6',revisions:{...revisions,timeline:-1}})),/Geçersiz/));
+watermark.reset();
+check('reset clears revision watermark',()=>assert.deepEqual(watermark.snapshot(),revisions));
+check('reset clears mutation id deduplication',()=>assert.equal(watermark.accept(mutation()).accepted,true));
+
+const bounded=new MutationRevisionWatermark(16);
+for(let index=0;index<20;index+=1)bounded.accept(mutation({mutationId:`bounded-${index}`,revisions:{...revisions,timeline:index+1,eventCatalog:index+1,dashboard:index+1}}));
+check('bounded mutation id window evicts oldest safely',()=>assert.equal(bounded.accept(mutation({mutationId:'bounded-0',revisions:{...revisions,timeline:21,eventCatalog:21,dashboard:21}})).duplicate,false));
+
+const report={schemaVersion:1,product:'Anadolu Parsı Aile Yaşam Merkezi',featureBuild:158,stage:'Bronze RC2 Active Development',status:'PASS',checks:checks.length,checkLabels:checks,generatedAt:new Date().toISOString()};
+await mkdir(dirname(reportPath),{recursive:true});await writeFile(reportPath,`${JSON.stringify(report,null,2)}\n`);await rm(tmp,{recursive:true,force:true});
+console.log(`Build 158 async state guard runtime: PASS (${checks.length}/${checks.length}).`);

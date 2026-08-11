@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "23.07.2026.45",
+  "milestone": "B060-M5",
+  "status": "passed",
+  "checks": 14,
+  "peopleBefore": 6,
+  "peopleAfter": 7,
+  "backupCreated": true,
+  "migrationVersions": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "schemaFingerprint": "45fedc9c9dc9d4456a7b5829809cd4e23bb4e837070a57e8e5608f89a0d39569"
+}

@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "version": "23.07.2026.52",
+  "milestone": "B060-M12 RBAC & Audit Chain Hardening",
+  "checks": 3,
+  "scenarios": [
+    "DataStore publishes member event and writes two receipts",
+    "dispatcher retries retryable handler then publishes",
+    "dispatcher permanently fails non-retryable handler"
+  ]
+}

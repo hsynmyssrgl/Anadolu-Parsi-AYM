@@ -1,0 +1,457 @@
+{
+  "product": "Anadolu Parsı Aile Yaşam Merkezi",
+  "plannedVisibleRelease": "Bronze 04.08.2026.27",
+  "documentStatus": "BINDING_SECURITY_SCOPE_NOT_SOURCE_BUILD",
+  "sourceAudit": {
+    "source": "Build228 exact source",
+    "ocrStatus": "NOT_IMPLEMENTED",
+    "applications": [
+      "@ppt/desktop"
+    ],
+    "centralAuthorizationPresent": true,
+    "directFamilyAdminChecksFound": 22,
+    "universalPolicyEnforcement": "PARTIAL_NOT_PROVEN"
+  },
+  "revisedBronzeCompletionRange": [
+    31,
+    34
+  ],
+  "additionalFocusedWorkdays": [
+    25,
+    38
+  ],
+  "requirements": [
+    {
+      "id": "PPK-001",
+      "area": "Politika Çekirdeği",
+      "requirement": "Tek PlatformPolicyKernel; kimlik, yetki, gizlilik, rıza, saklama, AI, kayıt ve dışa aktarım kararlarının tek otoritesi",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-002",
+      "area": "Politika Çekirdeği",
+      "requirement": "Policy Decision Point ve her API/use-case/repository önünde Policy Enforcement Point",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-003",
+      "area": "Politika Çekirdeği",
+      "requirement": "Varsayılan ret; politika kararı alınamazsa işlem fail-closed reddedilir",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-004",
+      "area": "Politika Bağlamı",
+      "requirement": "Kullanıcı, cihaz, uygulama, aile, hane, aile dalı, rol, veri sahibi, amaç, süre ve işlem bağlamı",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-005",
+      "area": "Politika Bağlamı",
+      "requirement": "Veri sınıfı: genel, kişisel, özel, sağlık, finans, çocuk, konum, iletişim, biyometrik, miras",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-006",
+      "area": "Politika Kararı",
+      "requirement": "Allow/deny yanında maskele, local-only, no-cache, no-export, no-AI, no-record, watermark ve retention yükümlülükleri",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-007",
+      "area": "Politika Dağıtımı",
+      "requirement": "İmzalı, sürümlü ve SHA-256 bağlı politika paketi; uygulama/politika sürüm uyuşmazlığında çalışma reddi",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-008",
+      "area": "Uygulama Kimliği",
+      "requirement": "Her Windows/Apple/service/worker için benzersiz appId, cihaz sertifikası ve capability manifest",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-009",
+      "area": "Yetki",
+      "requirement": "UI gizlemenin güvenlik sayılmaması; bütün kararların sunucu/Core Service tarafında yeniden değerlendirilmesi",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-010",
+      "area": "Yetki",
+      "requirement": "Doğrudan rol kontrolü yerine merkezi policy çağrısı; istisna listesi sıfır hedefi",
+      "priority": "P0",
+      "currentStatus": "KISMI",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-011",
+      "area": "Yetki",
+      "requirement": "Amaç, aile dalı, zaman aralığı, açık ret ve sahiplik oranı desteği",
+      "priority": "P0",
+      "currentStatus": "KISMI",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-012",
+      "area": "Yetki",
+      "requirement": "Çevrimdışı capability lease; süresi dolunca hassas cache kilitlenir",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-013",
+      "area": "Veri Erişimi",
+      "requirement": "İstemci uygulamaların repository/SQL/dosya kasasına doğrudan erişiminin yasaklanması",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-014",
+      "area": "Veri Erişimi",
+      "requirement": "Core Service dışındaki uygulamalar yalnız sürümlü güvenli API üzerinden çalışır",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-015",
+      "area": "Ağ Politikası",
+      "requirement": "Yalnız allowlist endpoint, TLS/mTLS, certificate rotation ve egress policy",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-016",
+      "area": "Depolama Politikası",
+      "requirement": "Her türetilmiş veri kaynak verinin hassasiyet ve erişim politikasını en az aynı sıkılıkta devralır",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-017",
+      "area": "Log Politikası",
+      "requirement": "Hassas payload ve OCR metni loglanmaz; yalnız kimlik/hash/sonuç/correlation metadata",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-018",
+      "area": "Audit",
+      "requirement": "Karar, policy sürümü, yükümlülükler ve reddetme nedeni değişmez audit zincirine yazılır",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-019",
+      "area": "Silme",
+      "requirement": "Kaynak silme/retention işlemi türetilmiş OCR, indeks, thumbnail, AI hafızası, cache, replica ve yedeğe yayılır",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-020",
+      "area": "Test",
+      "requirement": "Windows, macOS, iOS/iPadOS ve servisler için aynı policy conformance test suite",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-021",
+      "area": "Build Gate",
+      "requirement": "Doğrudan SQL/repository/crypto/network/role check ve politikasız use-case için AST tabanlı fail gate",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-022",
+      "area": "Build Gate",
+      "requirement": "Capability manifestte olmayan kamera, mikrofon, dosya, OCR, AI, konum ve ağ kullanımının build/runtime reddi",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-023",
+      "area": "Build Gate",
+      "requirement": "Her yeni uygulama için ASVS/MASVS/SSDF eşleme ve tehdit modeli",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-024",
+      "area": "Runtime Gate",
+      "requirement": "Policy service unavailable, invalid signature veya stale policy halinde hassas işlemlerin read-only/deny olması",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-025",
+      "area": "Supply Chain",
+      "requirement": "SBOM, imzalı paket, dependency provenance, lisans ve zafiyet kapıları",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-026",
+      "area": "Geliştirici API",
+      "requirement": "Typed Policy SDK ve generated client; uygulamaların kendi güvenlik yorumunu yazamaması",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-027",
+      "area": "Kural Değişikliği",
+      "requirement": "Politika zayıflatma yalnız açık kullanıcı kararı, yeni sürüm, risk analizi ve rollback ile",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "PPK-028",
+      "area": "İhlal Müdahalesi",
+      "requirement": "Politika ihlali şüphesinde oturum/cihaz/capability iptali, karantina ve güvenli olay paketi",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "OCR-001",
+      "area": "OCR Durumu",
+      "requirement": "Build228’de gerçek OCR motoru ve kullanıcı akışı bulunmaması",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kaynakta provider, use-case, schema, UI ve test zinciri bulunmalıdır."
+    },
+    {
+      "id": "OCR-002",
+      "area": "OCR Giriş",
+      "requirement": "Dosya önce şifreli kasaya alınır, hash ve zararlı dosya kontrolü tamamlanır",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "OCR-003",
+      "area": "OCR Yetki",
+      "requirement": "OCR öncesi kaynak okuma + ocr_process amacı + AI/derived-data rızası değerlendirilir",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "OCR-004",
+      "area": "OCR Yerel Öncelik",
+      "requirement": "Windows yerel OCR ve Apple Vision yerel OCR; dış servis varsayılan kapalı",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "OCR-005",
+      "area": "OCR Fallback",
+      "requirement": "NPU/yerel API yoksa denetlenmiş offline fallback; hiçbir zaman sessiz bulut gönderimi yok",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "OCR-006",
+      "area": "OCR İzolasyon",
+      "requirement": "Belge ayrıştırıcı/OCR worker sandbox, düşük yetki, CPU/RAM/süre/sayfa/piksel limiti",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "OCR-007",
+      "area": "OCR Format",
+      "requirement": "Görüntü OCR, PDF gömülü metin çıkarma ve taranmış PDF OCR yollarının ayrı tutulması",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "OCR-008",
+      "area": "OCR Sonuç",
+      "requirement": "Metin, dil, sayfa, koordinat, confidence, model/provider sürümü ve kaynak SHA ilişkisi",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "OCR-009",
+      "area": "OCR Türev Veri",
+      "requirement": "OCR metni kaynak belgenin hassasiyet, sahiplik, izin, retention ve export politikasını devralır",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "OCR-010",
+      "area": "OCR Depolama",
+      "requirement": "OCR metni ve indeksler şifreli; düz metin temp/log/cache yasak",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "OCR-011",
+      "area": "OCR Arama",
+      "requirement": "Yetki filtreli tam metin indeks; sonuç snippet’i dahi policy ve maskeleme yükümlülüğünden geçer",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "OCR-012",
+      "area": "OCR Kullanıcı Kontrolü",
+      "requirement": "Önizle, düzelt, yeniden çalıştır, dili seç, sil ve OCR’ı tamamen kapat",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "OCR-013",
+      "area": "OCR Hata Güveni",
+      "requirement": "Düşük confidence görünür; OCR sonucu resmî/sağlık/finans gerçeği gibi otomatik kabul edilmez",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "OCR-014",
+      "area": "OCR Dış Sağlayıcı",
+      "requirement": "Ayrı açık onay, veri önizleme/redaksiyon, bölge, saklama, silme ve sözleşme olmadan kapalı",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "OCR-015",
+      "area": "OCR AI",
+      "requirement": "OCR metni AI’ya otomatik verilmez; ayrı ai_process kararı gerekir",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "OCR-016",
+      "area": "OCR Audit",
+      "requirement": "Talep, başlama, tamamlanma, hata, provider/model, kaynak/türev hash; içerik loglanmaz",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "OCR-017",
+      "area": "OCR Senkronizasyon",
+      "requirement": "Yalnız yetkili türetilmiş indeks/özet Apple cihazlara; ham belge ve tam metin ayrı izinli",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "OCR-018",
+      "area": "OCR Erişilebilirlik",
+      "requirement": "Ekran okuyucu için belge metni, sayfa konumu ve kullanıcı düzeltmesi; görsel orijinal korunur",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "OCR-019",
+      "area": "OCR Test",
+      "requirement": "Kötü amaçlı PDF, zip bomb, dev görüntü, bozuk font, çok dil, el yazısı, düşük kalite ve yetki sızıntısı testleri",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "OCR-020",
+      "area": "OCR Silme",
+      "requirement": "Kaynak imha/izin iptalinde OCR metni, indeks, embedding, cache ve türevler karantinaya/silmeye girer",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "XPF-001",
+      "area": "AI/Çeviri",
+      "requirement": "Çeviri, özet, transkript ve embedding türevleri kaynak politika mirasını zorunlu devralır",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "XPF-002",
+      "area": "İletişim",
+      "requirement": "Mesaj/görüşme/kayıt modülü aynı PolicyKernel üzerinden kayıt rızası ve retention uygular",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "XPF-003",
+      "area": "Finans/Sağlık",
+      "requirement": "Finans ve sağlık ekranları ortak policy yükümlülüklerinden sapamaz",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "XPF-004",
+      "area": "Apple",
+      "requirement": "Apple uygulaması yerel UI’da izinli görünse bile Core Service reddini aşamaz",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "XPF-005",
+      "area": "Cluster",
+      "requirement": "Leader/follower değişimi policy sürümünü ve revocation durumunu quorum ile korur",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    },
+    {
+      "id": "XPF-006",
+      "area": "Yedek",
+      "requirement": "Yedek, restore ve yeni cihaz yetkilendirmesi policy bundle ve key epoch uyumunu doğrular",
+      "priority": "P0",
+      "currentStatus": "YOK",
+      "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+    }
+  ]
+}

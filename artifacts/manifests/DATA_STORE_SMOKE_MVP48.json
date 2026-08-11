@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "23.07.2026.48",
+  "milestone": "B060-M8 Timeline & Important Days Application Migration",
+  "status": "passed",
+  "checks": 14,
+  "peopleBefore": 6,
+  "peopleAfter": 7,
+  "backupCreated": true,
+  "migrationVersions": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "generatedAt": "2026-07-23T18:34:09.419326Z"
+}

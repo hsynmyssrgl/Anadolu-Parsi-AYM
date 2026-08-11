@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "version": "23.07.2026.54",
+  "milestone": "B060-M14 Health Records & Medication Application Migration",
+  "checks": 16,
+  "checkNames": [
+    "TOTP setup returns secret and eight recovery codes",
+    "pending recovery codes are stored only as hashes",
+    "invalid TOTP cannot enable MFA",
+    "valid TOTP enables MFA and exposes recovery count",
+    "untrusted device requires a second factor",
+    "current cryptographic device can be trusted",
+    "trusted device login skips MFA after key proof",
+    "revoked device immediately requires MFA again",
+    "recovery code authenticates once and is consumed atomically",
+    "consumed recovery code cannot be reused",
+    "new device receives a different cryptographic identity",
+    "new device does not inherit old device trust",
+    "trusted device inventory identifies current and previous devices",
+    "disabling MFA revokes every trusted device",
+    "password-only login works after MFA is disabled",
+    "device private key is stored outside SQLite and never in audit"
+  ],
+  "metrics": {
+    "recoveryCodeCount": 8,
+    "recoveryCodesRemaining": 7,
+    "trustedDeviceTable": true,
+    "cryptographicIdentity": "Ed25519"
+  },
+  "verifiedAt": "2026-07-23T21:11:50.527Z"
+}

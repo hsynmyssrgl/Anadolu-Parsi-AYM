@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "version": "23.07.2026.54",
+  "milestone": "B060-M14 Health Records & Medication Application Migration",
+  "checks": 3,
+  "scenarios": [
+    "DataStore publishes member event and writes two receipts",
+    "dispatcher retries retryable handler then publishes",
+    "dispatcher permanently fails non-retryable handler"
+  ]
+}

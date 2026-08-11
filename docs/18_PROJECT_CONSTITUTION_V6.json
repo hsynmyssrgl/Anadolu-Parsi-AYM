@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "PPT-PROJECT-CONSTITUTION-V6",
+  "effectiveBuild": 225,
+  "applicationVersion": "02.08.2026.225",
+  "ruleSetVersion": "PROJECT-RULES-2026-08-02-V6",
+  "ruleCount": 172,
+  "ruleSha256": "1387db550dd263e396404503b537808f21a37e446c3cbd8585361531bd983a15",
+  "sourceStartDate": "2026-07-20",
+  "authoritativeLedger": "docs/17_MASTER_BUILD_LEDGER.md",
+  "predecessor": "PPT-PROJECT-CONSTITUTION-V5",
+  "newRule": {
+    "id": "PR-172",
+    "text": "PR-172 yalnız platform tarafından sağlanan gerçek sohbet bağlam kapasitesi yüzde 90 veya üzerindeyken HARD_STOP üretir. Tahmin, geçmiş build tahmini veya kullanılamayan platform sayacı HARD_STOP ya da zorunlu handoff sayılmaz. Gerçek kullanım yüzde 90 altındaysa zorunlu devir üretilmez. Gerçek HARD_STOP durumunda aynı sohbette yeni build başlatılmaz; aynı yanıt içinde tam kopyalanabilir devir metni gösterilir ve NEW_CHAT_HANDOFF_BUILDxxx.md oluşturulur."
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "edition": "Bronze",
+  "version": "23.07.2026.47",
+  "packageVersion": "23.7.2026-47",
+  "revision": "REVİZYON-060",
+  "milestone": "B060-M7 Genealogy Read Model",
+  "status": "passed",
+  "generatedAt": "2026-07-23T18:20:51.743208+00:00",
+  "summary": {
+    "workspaceBuildsPassed": 12,
+    "electronMainTypecheck": "passed",
+    "ipcMainChannels": 124,
+    "preloadChannels": 124,
+    "applicationTables": 40,
+    "infrastructureTables": 4,
+    "migrations": 5,
+    "applicationUseCases": 4,
+    "repositoryClasses": 7,
+    "sourceFiles": 350,
+    "typescriptFiles": 70
+  },
+  "verification": {
+    "foundation": {
+      "status": "passed",
+      "checks": 14,
+      "artifact": "FOUNDATION_VERIFICATION_MVP47.json"
+    },
+    "runtime": {
+      "status": "passed",
+      "checks": 6,
+      "artifact": "RUNTIME_FOUNDATION_VERIFICATION_MVP47.json"
+    },
+    "migrations": {
+      "status": "passed",
+      "checks": 9,
+      "artifact": "DATABASE_MIGRATION_VERIFICATION_MVP47.json"
+    },
+    "dataStore": {
+      "status": "passed",
+      "checks": 14,
+      "artifact": "DATA_STORE_SMOKE_MVP47.json"
+    },
+    "repositories": {
+      "status": "passed",
+      "checks": 10,
+      "artifact": "REPOSITORY_OUTBOX_VERIFICATION_MVP47.json"
+    },
+    "atomicity": {
+      "status": "passed",
+      "checks": 9,
+      "artifact": "TRANSACTIONAL_ATOMICITY_VERIFICATION_MVP47.json"
+    },
+    "dispatcher": {
+      "status": "passed",
+      "checks": 3,
+      "artifact": "EVENT_DISPATCHER_VERIFICATION_MVP47.json"
+    },
+    "familyUseCases": {
+      "status": "passed",
+      "checks": 14,
+      "artifact": "FAMILY_USE_CASE_VERIFICATION_MVP47.json"
+    },
+    "genealogyReadModel": {
+      "status": "passed",
+      "checks": 6,
+      "artifact": "GENEALOGY_READ_MODEL_VERIFICATION_MVP47.json"
+    }
+  },
+  "limitations": [
+    "Tam Electron/Vite/Vitest üretim zinciri temiz kaynak paketinde bağımlılık ağı yeniden kurulmadığı için çalıştırılmadı.",
+    "Windows installer, ekran görüntüleri ve kapsamlı manuel doğrulama Silver aşamasına bırakıldı."
+  ]
+}

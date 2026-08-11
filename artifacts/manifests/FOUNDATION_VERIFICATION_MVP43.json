@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "checks": 14,
+  "names": [
+    "Result success mapping",
+    "Result error short-circuit",
+    "Result error mapping",
+    "Result flatMap",
+    "Throwable mapping",
+    "Result matching",
+    "Central AppError",
+    "Deterministic clock",
+    "Pagination limits",
+    "Configuration defaults and validation",
+    "Configuration path isolation",
+    "Configuration redaction",
+    "Structured logging redaction",
+    "JSON Lines serialization"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "PPT-PROJECT-CONSTITUTION-V5",
+  "effectiveBuild": 214,
+  "applicationVersion": "01.08.2026.214",
+  "ruleSetVersion": "PROJECT-RULES-2026-08-01-V5",
+  "ruleCount": 171,
+  "ruleSha256": "2e342a2e0a982bb19c2e45fb25b67336f70eb71969ce1e0f4e298f3fe6cfe9d1",
+  "sourceStartDate": "2026-07-20",
+  "authoritativeLedger": "docs/17_MASTER_BUILD_LEDGER.md",
+  "predecessor": "PPT-PROJECT-CONSTITUTION-V4",
+  "newRule": {
+    "id": "PR-171",
+    "text": "Uzun veya zaman aşımı riski taşıyan geliştirme, doğrulama, belge üretimi, paketleme ve teslim işleri mümkün olan en küçük mantıksal ve bağımsız adımlara bölünmelidir. Her adım: 1. uygulanır, 2. doğrulanır, 3. sonucu kalıcı olarak kaydedilir, 4. kısa durum verilir, 5. ancak bundan sonra sonraki adıma geçilir. Tek seferde dev işlem zincirleri çalıştırma. Yalnız teknik olarak atomik olması zorunlu işlemler istisnadır. Bu kural anayasal ve aşılamazdır."
+  },
+  "recovery": {
+    "status": "RECOVERED_WITH_CANONICAL_HASH_CORRECTION",
+    "handoffDeclaredSha256": "8798cd8a8f3bdb23234aa4c7533a414fd2beab94eae9e43d990073ade5c843d2",
+    "canonicalRecoveredSha256": "2e342a2e0a982bb19c2e45fb25b67336f70eb71969ce1e0f4e298f3fe6cfe9d1",
+    "evidence": "artifacts/validation/build214-v5-rule-hash-recovery.json"
+  }
+}

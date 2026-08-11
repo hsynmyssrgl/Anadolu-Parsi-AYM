@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "23.07.2026.51",
+  "milestone": "B060-M11 MFA Recovery & Trusted Device Identity",
+  "added": [
+    "packages/security/src/totp.ts",
+    "packages/security/src/device-identity.ts",
+    "packages/repositories/src/trusted-device-repository.ts",
+    "apps/desktop/src/main/device-identity.ts",
+    "database/migrations/0006_trusted_devices.sql",
+    "scripts/verify-mfa-trusted-device.mjs"
+  ],
+  "modified": [
+    "packages/application/src/auth-use-cases.ts",
+    "packages/repositories/src/account-repository.ts",
+    "packages/security/src/index.ts",
+    "packages/repositories/src/index.ts",
+    "packages/core/src/error.ts",
+    "packages/domain/src/app-data.ts",
+    "packages/config/src/index.ts",
+    "apps/desktop/src/main/auth-application-adapter.ts",
+    "apps/desktop/src/main/data-store.ts",
+    "apps/desktop/src/main/database-migrations.ts",
+    "apps/desktop/src/main/runtime-bootstrap.ts",
+    "apps/desktop/src/main/main.ts",
+    "apps/desktop/src/main/preload.ts",
+    "apps/desktop/src/renderer/global.d.ts",
+    "package.json",
+    "package-lock.json",
+    "apps/desktop/package.json",
+    "scripts/verify-bronze-database.mjs",
+    "scripts/verify-bronze-runtime.mjs",
+    "scripts/verify-database-migrations.mjs",
+    "scripts/verify-data-store-smoke.mjs",
+    "artifacts/manifests/VERSION_LEDGER.json"
+  ],
+  "removed": [],
+  "generatedAt": "2026-07-23T19:40:43.367097Z"
+}

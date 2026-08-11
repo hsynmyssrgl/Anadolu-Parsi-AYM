@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "24.07.2026.57",
+  "status": "passed",
+  "executedChecks": [
+    "workspace package build",
+    "electron main/preload smoke typecheck",
+    "legacy use-case 12/12",
+    "authorization/audit regression",
+    "archive regression"
+  ],
+  "migrationCount": 12,
+  "schemaFingerprint": "33b93d5b2479e83d4af415e150ac837c61f58ba9137a89432644527e0246a49b"
+}

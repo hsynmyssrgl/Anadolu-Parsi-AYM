@@ -1,0 +1,727 @@
+{
+  "schemaVersion": 1,
+  "acceptedAt": "2026-08-04",
+  "release": "Bronze 04.08.2026.29",
+  "requirements": [
+    {
+      "id": "EXT-001",
+      "track": "HOUSEHOLD_OPERATIONS",
+      "title": "Ortak alışveriş listeleri ve kişi atama",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-002",
+      "track": "HOUSEHOLD_OPERATIONS",
+      "title": "Gıda/temizlik stok ve son kullanma tarihi",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-003",
+      "track": "HOUSEHOLD_OPERATIONS",
+      "title": "Haftalık yemek planı, tarif ve alerji filtresi",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-004",
+      "track": "HOUSEHOLD_OPERATIONS",
+      "title": "Ev işi/rutin paylaşımı",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-005",
+      "track": "HOUSEHOLD_OPERATIONS",
+      "title": "Fatura, abonelik ve ortak gider bölüşümü",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-006",
+      "track": "HOUSEHOLD_OPERATIONS",
+      "title": "Kargo ve teslimat takibi",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-007",
+      "track": "HOUSEHOLD_OPERATIONS",
+      "title": "Misafir, anahtar ve erişim planı",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-008",
+      "track": "HOUSEHOLD_OPERATIONS",
+      "title": "Evcil hayvan günlük bakım görevleri",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-009",
+      "track": "DISASTER_EMERGENCY",
+      "title": "Aile afet ve tahliye planı",
+      "classification": "CORE_BRONZE",
+      "priority": "P0",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-010",
+      "track": "DISASTER_EMERGENCY",
+      "title": "Buluşma noktaları ve şehir dışı irtibat",
+      "classification": "CORE_BRONZE",
+      "priority": "P0",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-011",
+      "track": "DISASTER_EMERGENCY",
+      "title": "İlk 72 saat/afet çantası envanteri",
+      "classification": "CORE_BRONZE",
+      "priority": "P0",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-012",
+      "track": "DISASTER_EMERGENCY",
+      "title": "Çevrimdışı acil sağlık ve iletişim kartı",
+      "classification": "CORE_BRONZE",
+      "priority": "P0",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-013",
+      "track": "DISASTER_EMERGENCY",
+      "title": "İyiyim/yardım lazım aile durum bildirimi",
+      "classification": "CORE_BRONZE",
+      "priority": "P0",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-014",
+      "track": "DISASTER_EMERGENCY",
+      "title": "Engelli/ileri yaş/evcil hayvan özel yardım planı",
+      "classification": "CORE_BRONZE",
+      "priority": "P0",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-015",
+      "track": "DISASTER_EMERGENCY",
+      "title": "Yangın, sel, deprem ve elektrik kesintisi tatbikatları",
+      "classification": "CORE_BRONZE",
+      "priority": "P0",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-016",
+      "track": "DISASTER_EMERGENCY",
+      "title": "Şifreli acil belge paketi ve düşük pil modu",
+      "classification": "CORE_BRONZE",
+      "priority": "P0",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-017",
+      "track": "CHILD_EDUCATION",
+      "title": "Okul, sınıf, ders programı, ödev ve sınav takibi",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-018",
+      "track": "CHILD_EDUCATION",
+      "title": "Okul etkinlikleri, servis ve teslim yetkileri",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-019",
+      "track": "CHILD_EDUCATION",
+      "title": "Kurs, spor, sertifika ve kitap listesi",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-020",
+      "track": "CHILD_EDUCATION",
+      "title": "Harçlık bütçesi ve eğitim hedefleri",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-021",
+      "track": "CHILD_EDUCATION",
+      "title": "Alerji/sağlık kartı ve ebeveyn koordinasyonu",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-022",
+      "track": "CHILD_EDUCATION",
+      "title": "Yaşa uygun görünüm, açıklanabilir gizlilik ve ergen özel alanları",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-023",
+      "track": "CARE_ELDERLY",
+      "title": "Günlük iyiyim kontrolü ve yardım talebi",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-024",
+      "track": "CARE_ELDERLY",
+      "title": "İlaç teyidi, randevu ve ulaşım organizasyonu",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-025",
+      "track": "CARE_ELDERLY",
+      "title": "Bakım veren vardiyası ve devir notları",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-026",
+      "track": "CARE_ELDERLY",
+      "title": "Tansiyon/şeker/kilo/beslenme/sıvı kayıtları",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-027",
+      "track": "CARE_ELDERLY",
+      "title": "Düşme/acil sensörü adapteri ve sade hatırlatma",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-028",
+      "track": "CARE_ELDERLY",
+      "title": "Tek dokunuşla arama, büyük metin ve uzaktan yardım",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-029",
+      "track": "CARE_ELDERLY",
+      "title": "Bakım verenin minimum gerekli veri erişimi",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-030",
+      "track": "HOME_ASSET_VEHICLE_PET",
+      "title": "Ev/oda/sayaç, enerji-su tüketimi ve bakım geçmişi",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-031",
+      "track": "HOME_ASSET_VEHICLE_PET",
+      "title": "Kira/tapu/DASK/konut sigortası ve servis sağlayıcıları",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-032",
+      "track": "HOME_ASSET_VEHICLE_PET",
+      "title": "Eşya, seri numarası, fatura, garanti ve servis geçmişi",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-033",
+      "track": "HOME_ASSET_VEHICLE_PET",
+      "title": "Taşınma envanteri ve OCR alan önerisi",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-034",
+      "track": "HOME_ASSET_VEHICLE_PET",
+      "title": "Araç ruhsat, sigorta, muayene, bakım, yakıt/şarj ve giderler",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-035",
+      "track": "HOME_ASSET_VEHICLE_PET",
+      "title": "Evcil hayvan aşı, veteriner, mikroçip, mama, sigorta ve seyahat belgeleri",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-036",
+      "track": "PRIVACY_OWNERSHIP",
+      "title": "Kullanıcıya tutulan verileri ve erişen kişileri gösterme",
+      "classification": "CORE_BRONZE",
+      "priority": "P0",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-037",
+      "track": "PRIVACY_OWNERSHIP",
+      "title": "Erişim nedeni ve son erişim geçmişi",
+      "classification": "CORE_BRONZE",
+      "priority": "P0",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-038",
+      "track": "PRIVACY_OWNERSHIP",
+      "title": "Açık cihazlar, Apple senkronu, AI/OCR/çeviri işleme görünümü",
+      "classification": "CORE_BRONZE",
+      "priority": "P0",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-039",
+      "track": "PRIVACY_OWNERSHIP",
+      "title": "Rıza süreleri, tek dokunuşla iptal ve kayıp cihaz kapatma",
+      "classification": "CORE_BRONZE",
+      "priority": "P0",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-040",
+      "track": "PRIVACY_OWNERSHIP",
+      "title": "Şifreli veri dışa aktarma ve veri mirası",
+      "classification": "CORE_BRONZE",
+      "priority": "P0",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-041",
+      "track": "PRIVACY_OWNERSHIP",
+      "title": "Türetilmiş veri zinciri ve kaynak silme yayılımı",
+      "classification": "CORE_BRONZE",
+      "priority": "P0",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-042",
+      "track": "PRIVACY_OWNERSHIP",
+      "title": "İzin simülasyonu: karşı taraf ne görecek",
+      "classification": "CORE_BRONZE",
+      "priority": "P0",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-043",
+      "track": "AI_ASSISTANT",
+      "title": "Günlük/haftalık aile özeti",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-044",
+      "track": "AI_ASSISTANT",
+      "title": "Ödeme, randevu, belge, bakım ve garanti uyarıları",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-045",
+      "track": "AI_ASSISTANT",
+      "title": "Afet çantası ve toplantı gündemi önerileri",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-046",
+      "track": "AI_ASSISTANT",
+      "title": "OCR sınıflandırma ve yinelenen kayıt önerisi",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-047",
+      "track": "AI_ASSISTANT",
+      "title": "Fotoğraf/tarih/kişi ve aile hikâyesi önerileri",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-048",
+      "track": "AI_ASSISTANT",
+      "title": "Harcama, yemek ve alışveriş önerileri",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-049",
+      "track": "AI_ASSISTANT",
+      "title": "Sade açıklama, sesli okuma ve çeviri",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-050",
+      "track": "AI_ASSISTANT",
+      "title": "İnsan onayı olmadan kalıcı işlem yapmama",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-051",
+      "track": "MEMORY_STUDIO",
+      "title": "Sesli hayat hikâyesi ve transkript",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-052",
+      "track": "MEMORY_STUDIO",
+      "title": "Aile fotoğraf kitabı ve yıllık albüm",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-053",
+      "track": "MEMORY_STUDIO",
+      "title": "Bu gün geçmişte ve yinelenen fotoğraf bulma",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-054",
+      "track": "MEMORY_STUDIO",
+      "title": "Onaylı yerel yüz gruplama",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-055",
+      "track": "MEMORY_STUDIO",
+      "title": "Soy ağacına medya bağlama",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-056",
+      "track": "MEMORY_STUDIO",
+      "title": "Tarifler, gelenekler, mektuplar ve gelecek nesil mesajları",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-057",
+      "track": "MEMORY_STUDIO",
+      "title": "Zaman kapsülü, aile belgeseli ve basılabilir kitap",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-058",
+      "track": "TRAVEL",
+      "title": "Seyahat planı, katılımcı ve rezervasyonlar",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-059",
+      "track": "TRAVEL",
+      "title": "Pasaport/vize/sigorta süreleri",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-060",
+      "track": "TRAVEL",
+      "title": "Bütçe, ortak harcama ve valiz listesi",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-061",
+      "track": "TRAVEL",
+      "title": "Sağlık/ilaç/çocuk/evcil hayvan gereksinimleri",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-062",
+      "track": "TRAVEL",
+      "title": "Çevrimdışı seyahat paketi ve yerel dil paketi",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-063",
+      "track": "TRAVEL",
+      "title": "Seyahat albümü ve ortak gider kapatma",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-064",
+      "track": "SMART_HOME_ENERGY",
+      "title": "Matter adapteri ve sağlayıcı bağımsızlığı",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-065",
+      "track": "SMART_HOME_ENERGY",
+      "title": "Duman/CO/su kaçağı/kapı/sıcaklık/nem sensörleri",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-066",
+      "track": "SMART_HOME_ENERGY",
+      "title": "Enerji, termostat, aydınlatma ve akıllı priz",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-067",
+      "track": "SMART_HOME_ENERGY",
+      "title": "Kamera/kapı zili için görünür ve süreli izin",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-068",
+      "track": "SMART_HOME_ENERGY",
+      "title": "Elektrikli araç şarjı ve tüketim raporları",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-069",
+      "track": "SMART_HOME_ENERGY",
+      "title": "Yerel işleme ve gizli gözetim yasağı",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-070",
+      "track": "VERIFIABLE_CREDENTIALS",
+      "title": "Çocuğu okuldan alma yetki kartı",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-071",
+      "track": "VERIFIABLE_CREDENTIALS",
+      "title": "Geçici bakım veren ve evcil hayvan bakım yetkisi",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-072",
+      "track": "VERIFIABLE_CREDENTIALS",
+      "title": "Acil iletişim ve sağlık bilgisi erişim kartı",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-073",
+      "track": "VERIFIABLE_CREDENTIALS",
+      "title": "Etkinlik davetiyesi ve geçici ev erişimi",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-074",
+      "track": "VERIFIABLE_CREDENTIALS",
+      "title": "Minimum açıklamalı QR doğrulama ve süre sonu",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-075",
+      "track": "SIGNED_PLUGIN_PLATFORM",
+      "title": "İmzalı capability manifest ve minimum yetki",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-076",
+      "track": "SIGNED_PLUGIN_PLATFORM",
+      "title": "Sandbox ve ağ allowlist",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-077",
+      "track": "SIGNED_PLUGIN_PLATFORM",
+      "title": "Veri hassasiyeti/amaç/retention beyanı",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-078",
+      "track": "SIGNED_PLUGIN_PLATFORM",
+      "title": "Policy Kernel zorunlu kontrolü",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-079",
+      "track": "SIGNED_PLUGIN_PLATFORM",
+      "title": "Güncelleme, rollback ve acil kapatma",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-080",
+      "track": "SIGNED_PLUGIN_PLATFORM",
+      "title": "Lisans/SBOM/kaynak envanteri",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-081",
+      "track": "SIGNED_PLUGIN_PLATFORM",
+      "title": "Banka, okul, Matter, FHIR, OneDrive, harita, OCR, AI ve tarayıcı adapterleri",
+      "classification": "FIRST_PARTY_SIGNED_EXTENSION_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-082",
+      "track": "UNIVERSAL_UX",
+      "title": "Tek aile gelen kutusu ve evrensel arama",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-083",
+      "track": "UNIVERSAL_UX",
+      "title": "Komut paleti, son kullanılanlar ve favoriler",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-084",
+      "track": "UNIVERSAL_UX",
+      "title": "Kişisel ana ekran kartları ve sürükle bırak",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-085",
+      "track": "UNIVERSAL_UX",
+      "title": "Her kritik işlemde geri al ve otomatik taslak",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-086",
+      "track": "UNIVERSAL_UX",
+      "title": "Haftalık bildirim özeti ve sessiz saatler",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-087",
+      "track": "UNIVERSAL_UX",
+      "title": "Bugün ailede, kolay okuma, misafir/çocuk/ileri yaş/bakım veren modları",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-088",
+      "track": "UNIVERSAL_UX",
+      "title": "Çevrimdışı ve son senkronizasyon göstergeleri",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-089",
+      "track": "UNIVERSAL_UX",
+      "title": "QR/barkod, kamera belge kırpma, sesle form ve sesli okuma",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "EXT-090",
+      "track": "UNIVERSAL_UX",
+      "title": "Windows mini paneli, Apple widget/live activity ve mutfak tableti modu",
+      "classification": "CORE_BRONZE",
+      "priority": "P1",
+      "status": "NOT_IMPLEMENTED"
+    }
+  ]
+}

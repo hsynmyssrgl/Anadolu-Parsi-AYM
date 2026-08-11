@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "30-S",
+  "requirement": "PPK-002",
+  "scope": "DATABASE_ENFORCED_RECEIPT_BINDING_FOR_ARCHIVE_ACCESSORY_AND_EVENT_ATTACHMENT_WRITES",
+  "predecessor": {
+    "step": "30-R",
+    "completionRecord": "artifacts/checkpoints/30-R_COMPLETION_RECORD.json",
+    "persistentReceiptStatus": "PASS"
+  },
+  "targets": [
+    {
+      "id": "retention-policy-and-category-receipt-binding",
+      "requiredResult": "Every archive_retention_policies and archive_categories INSERT carries an exact allowed receipt whose resource, action, correlation and archive.write capability match the created row."
+    },
+    {
+      "id": "classification-accessory-batch-binding",
+      "requiredResult": "Archive tag creation and archive_item_tags replacement execute only inside one exact, single-use archive_item update receipt batch whose desired tag set is immutable and sealed against replay."
+    },
+    {
+      "id": "event-attachment-cross-aggregate-binding",
+      "requiredResult": "An events.attachment_count increment is limited to exactly one and is bound to the create receipt of the newly linked archive item in the same family."
+    },
+    {
+      "id": "immutable-accessory-consumption-ledger",
+      "requiredResult": "SQLite records accessory and cross-aggregate receipt consumption immutably and rejects missing, mismatched, stale, unsealed or replayed bindings."
+    },
+    {
+      "id": "direct-sql-bypass-and-production-regression",
+      "requiredResult": "Real SQLite tests reject direct SQL bypasses while governed category, retention, classification, tag and linked-event import flows continue to pass."
+    }
+  ],
+  "requiredOrder": [
+    "migration-and-trigger-contract",
+    "repository-binding-write-path",
+    "real-sqlite-direct-bypass-tests",
+    "production-archive-regression",
+    "security-review"
+  ],
+  "evidenceBoundary": {
+    "PPK002": "PARTIAL",
+    "archiveCoreTableDirectSqlFence": "TARGETED_PASS",
+    "archiveAccessoryTableReceiptFence": "TARGETED_NOT_YET_PASS",
+    "universalRepositoryEnforcement": "NOT_COMPLETE",
+    "externalMonotonicAuthorityAgainstCoordinatedDatabaseAndJournalRollback": "NOT_IMPLEMENTED",
+    "newCorrelationRetryIdempotencyAfterUnknownCommitOutcome": "NOT_COMPLETE",
+    "expiredUnusedReplayReservationPruning": "NOT_IMPLEMENTED",
+    "obligationExecution": "NOT_RUN_NOT_PASS",
+    "requirementCompletionClaimed": false
+  },
+  "mandatoryTruthSentence": "Bu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır."
+}

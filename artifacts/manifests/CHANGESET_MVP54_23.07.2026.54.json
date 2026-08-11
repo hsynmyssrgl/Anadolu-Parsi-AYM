@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "23.07.2026.54",
+  "milestone": "B060-M14 Health Records & Medication Application Migration",
+  "added": [
+    "packages/repositories/src/health-repository.ts",
+    "packages/application/src/health-use-cases.ts",
+    "apps/desktop/src/main/health-application-adapter.ts",
+    "database/migrations/0009_health_application_indexes.sql",
+    "scripts/verify-health-use-cases.mjs"
+  ],
+  "modified": [
+    "packages/repositories/src/index.ts",
+    "packages/application/src/index.ts",
+    "apps/desktop/src/main/data-store.ts",
+    "apps/desktop/src/main/database-migrations.ts",
+    "packages/domain/src/app-meta.ts",
+    "package.json",
+    "package-lock.json",
+    "apps/desktop/package.json",
+    "apps/desktop/package-lock.json",
+    "scripts/verify-database-migrations.mjs",
+    "scripts/verify-data-store-smoke.mjs",
+    "scripts/verify-bronze-database.mjs",
+    "scripts/generate-baseline-manifest.mjs",
+    "artifacts/manifests/VERSION_LEDGER.json",
+    "README.md",
+    "START_HERE_TR.md",
+    "BUILD_STATUS.md",
+    "DELIVERY_SUMMARY_TR.md"
+  ],
+  "removed": [],
+  "generatedAt": "2026-07-23T21:11:26.324907Z"
+}

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "04.08.2026.29",
+  "milestone": "Bronze RC2 Build undefined",
+  "status": "passed",
+  "checks": 16,
+  "scenarios": [
+    "fresh database applies migration 11",
+    "archive item imported through application use case",
+    "archive metadata preserved",
+    "sha256 is authoritative",
+    "encrypted vault file created",
+    "encrypted item opens with identical bytes",
+    "initial immutable version recorded",
+    "linked event attachment count increments transactionally",
+    "archive audit evidence exists",
+    "archive outbox evidence exists",
+    "archive list delegates to repository query",
+    "invalid linked event rolls back metadata",
+    "failed import removes orphan vault file",
+    "audit chain remains valid",
+    "archive survives application restart",
+    "version stored_name survives migration and restart"
+  ],
+  "sha256": "bbae90ed8490bbe7648298e8700149f080aef6ea4ee339c92a225bb231a1ccf2",
+  "generatedAt": "2026-08-11T06:57:33.444Z"
+}

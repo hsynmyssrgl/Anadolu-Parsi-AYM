@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "product": "Anadolu Parsı Aile Yaşam Merkezi",
+  "counterPolicy": "MONTHLY_RESET_CONTINUE_FROM_HISTORICAL_COUNT",
+  "current": {
+    "channel": "Bronze",
+    "date": "2026-08-04",
+    "displayDate": "04.08.2026",
+    "monthlySequence": 29,
+    "version": "04.08.2026.29",
+    "visibleRelease": "Bronze 04.08.2026.29",
+    "packageVersion": "4.8.2026-29",
+    "releaseId": "bronze-2026-08-04-r29",
+    "status": "IN_PROGRESS",
+    "parentRelease": "Bronze 04.08.2026.28",
+    "parentSourceSha256": "d65e908bf8157d2eff111dcdbbae2762cb48a527021b97c3df26f463e993dea4"
+  },
+  "august2026HistoricalCountBeforeCurrent": 26,
+  "entries": [
+    {
+      "channel": "Bronze",
+      "date": "2026-08-04",
+      "monthlySequence": 27,
+      "version": "04.08.2026.27",
+      "packageVersion": "4.8.2026-27",
+      "releaseId": "bronze-2026-08-04-r27",
+      "status": "IN_PROGRESS",
+      "summary": "Accepted-scope consolidation, Platform Policy Kernel, Core Service process boundary and Feature Reality Gate foundation."
+    },
+    {
+      "channel": "Bronze",
+      "date": "2026-08-04",
+      "monthlySequence": 28,
+      "version": "04.08.2026.28",
+      "packageVersion": "4.8.2026-28",
+      "releaseId": "bronze-2026-08-04-r28",
+      "status": "COMPLETED_SOURCE_CLOSURE_PASS",
+      "summary": "Exceptionless canonical rule registry, governed preflight/postflight, exhaustive document inventory and secure Core Service local administration foundation.",
+      "supersession": {
+        "id": "REL-SUP-29-D3-001",
+        "previousStatus": "IN_PROGRESS",
+        "effectiveStatus": "COMPLETED_SOURCE_CLOSURE_PASS",
+        "reason": "The official recovery authority identifies Bronze 04.08.2026.28 as the last full closed source release.",
+        "evidence": "artifacts/authority/29-D3_RECOVERY_AUTHORITY_SNAPSHOT.json",
+        "historicalSourceFilesRewritten": false,
+        "status": "RESOLVED_WITH_EVIDENCE"
+      }
+    },
+    {
+      "channel": "Bronze",
+      "date": "2026-08-04",
+      "monthlySequence": 29,
+      "version": "04.08.2026.29",
+      "packageVersion": "4.8.2026-29",
+      "releaseId": "bronze-2026-08-04-r29",
+      "status": "IN_PROGRESS",
+      "summary": "Universal fail-closed rule enforcement and PR-171 checkpoint execution lock."
+    }
+  ]
+}

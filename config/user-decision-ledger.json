@@ -1,0 +1,843 @@
+{
+  "schemaVersion": 1,
+  "id": "PPT-USER-DECISION-LEDGER-V1",
+  "release": "Bronze 04.08.2026.29",
+  "decisionCount": 35,
+  "decisions": [
+    {
+      "id": "DEC-121",
+      "date": "2026-08-04",
+      "title": "Accepted scope, monthly release and channel gates",
+      "status": "ACTIVE",
+      "document": "docs/decisions/DEC-121-accepted-scope-monthly-release-and-channel-gates.md"
+    },
+    {
+      "id": "DEC-122",
+      "date": "2026-08-04",
+      "title": "Platform Policy Kernel and Core Service foundation",
+      "status": "ACTIVE",
+      "document": "docs/decisions/DEC-122-platform-policy-kernel-and-core-service-foundation.md"
+    },
+    {
+      "id": "DEC-123",
+      "date": "2026-08-04",
+      "title": "All proposed family capabilities accepted as binding Bronze scope",
+      "status": "ACTIVE",
+      "source": "Current user conversation",
+      "rules": [
+        "PR-175",
+        "PR-199"
+      ],
+      "documents": [
+        "config/accepted-scope-registry.json",
+        "docs/current/05_KABUL_EDILEN_EK_AILE_YETENEKLERI.md"
+      ]
+    },
+    {
+      "id": "DEC-124",
+      "date": "2026-08-04",
+      "title": "Exceptionless canonical rule lock and automatic fail-closed gates",
+      "status": "ACTIVE",
+      "source": "Current user conversation",
+      "rules": [
+        "PR-177",
+        "PR-178",
+        "PR-179",
+        "PR-187",
+        "PR-197"
+      ],
+      "documents": [
+        "config/canonical-rule-registry.json",
+        "config/active-governance-ledger.json"
+      ]
+    },
+    {
+      "id": "DEC-125",
+      "date": "2026-08-04",
+      "title": "Persistent Library hierarchy is mandatory for every delivery",
+      "status": "ACTIVE",
+      "source": "Current user conversation and PR-168",
+      "rules": [
+        "PR-180",
+        "PR-181"
+      ],
+      "documents": [
+        "config/persistent-artifact-policy.json"
+      ]
+    },
+    {
+      "id": "DEC-126",
+      "date": "2026-08-04",
+      "title": "Every delivery reports progress, ETA, Silver/Gold, conversation status and handoff state",
+      "status": "ACTIVE",
+      "source": "Current user conversation",
+      "rules": [
+        "PR-183",
+        "PR-184",
+        "PR-185",
+        "PR-194",
+        "PR-195",
+        "PR-200"
+      ],
+      "documents": [
+        "config/delivery-report-contract.json",
+        "config/conversation-capacity-policy.json"
+      ]
+    },
+    {
+      "id": "DEC-127",
+      "date": "2026-08-04",
+      "title": "All documents and artifacts must be exhaustively indexed and listed",
+      "status": "ACTIVE",
+      "source": "Current user conversation",
+      "rules": [
+        "PR-182",
+        "PR-188",
+        "PR-196"
+      ],
+      "documents": [
+        "config/document-inventory-policy.json",
+        "docs/current/08_TUM_BELGELER_DIZINI.md"
+      ]
+    },
+    {
+      "id": "DEC-128",
+      "date": "2026-08-04",
+      "title": "Completed releases are immutable; new work continues in monthly next sequence",
+      "status": "ACTIVE",
+      "source": "Current user conversation and historical immutability rules",
+      "rules": [
+        "PR-173",
+        "PR-174",
+        "PR-198"
+      ],
+      "documents": [
+        "config/release-ledger.json"
+      ]
+    },
+    {
+      "id": "DEC-129",
+      "status": "ACTIVE",
+      "title": "Tüm aktif kurallar aşılamaz yürütme çekirdeğine bağlanır",
+      "acceptedAt": "2026-08-04T12:55:00+03:00",
+      "source": "Explicit user instruction in current conversation",
+      "document": "docs/decisions/DEC-129-tum-kurallar-asilamaz-yurutme-cekirdegi.md",
+      "documents": [
+        "config/canonical-rule-registry.json",
+        "config/rule-enforcement-registry.json",
+        "config/work-segmentation-plan.json",
+        "docs/current/10_TUM_KURALLAR_ASILAMAZ_YURUTME_SOZLESMESI.md"
+      ],
+      "codeAreas": [
+        "scripts/verify-universal-rule-enforcement.mjs",
+        "scripts/verify-step-checkpoint-gate.mjs",
+        "scripts/require-active-work-step.mjs",
+        "scripts/run-governed-preflight.mjs",
+        "scripts/run-governed-postflight.mjs",
+        "package.json"
+      ],
+      "evidence": [
+        "artifacts/validation/universal-rule-enforcement-gate.json",
+        "artifacts/validation/step-checkpoint-gate.json"
+      ]
+    },
+    {
+      "id": "DEC-137",
+      "date": "2026-08-06",
+      "acceptedAt": "2026-08-06T07:45:38.3898625+03:00",
+      "title": "Incomplete Bronze backlog full-auto prioritization and cancellation of the user-specific 95 percent stop",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction in current conversation",
+      "document": "docs/decisions/DEC-137-incomplete-bronze-backlog-full-auto-prioritization.md",
+      "documents": [
+        "config/bronze-backlog-priority-policy.json",
+        "config/work-segmentation-plan.json",
+        "config/active-governance-ledger.json"
+      ],
+      "codeAreas": [
+        "scripts/verify-30-m-bronze-backlog-priority.mjs",
+        "packages/platform-policy",
+        "apps/core-service"
+      ],
+      "evidence": [
+        "artifacts/authority/30-M_USER_FULL_AUTO_PRIORITY_AUTHORITY.json",
+        "artifacts/validation/30-M-bronze-backlog-priority-contract.json"
+      ]
+    },
+    {
+      "id": "DEC-152",
+      "date": "2026-08-09",
+      "acceptedAt": "2026-08-09",
+      "title": "Single authoritative source, local persistent receipt and gated Build numbering",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction in current conversation",
+      "document": "docs/decisions/DEC-152-authoritative-source-local-receipt-and-build-numbering.md",
+      "documents": [
+        "config/bronze-current-audit-policy.json",
+        "config/user-decision-ledger.json"
+      ],
+      "codeAreas": [
+        "scripts/audit-bronze-current-state.mjs",
+        "scripts/protect-authoritative-source.mjs"
+      ],
+      "evidence": [
+        "artifacts/inventory/BRONZE_CURRENT_COMPLETION_AUDIT.json",
+        "../../05_TEST/30Z_LOCAL_RECEIPT/LATEST.json"
+      ]
+    },
+    {
+      "id": "DEC-153",
+      "date": "2026-08-09",
+      "acceptedAt": "2026-08-09",
+      "title": "B0-01 single governance and feature-reality matrix closure",
+      "status": "ACTIVE",
+      "source": "Explicit current user instruction to close started Bronze slices under DEC-137",
+      "document": "docs/decisions/DEC-153-b0-01-governance-reality-matrix-closure.md",
+      "rules": [
+        "PR-087",
+        "PR-098",
+        "PR-101",
+        "PR-124",
+        "PR-187",
+        "PR-194",
+        "PR-203"
+      ],
+      "requirements": [
+        "B0-01"
+      ],
+      "codeAreas": [
+        "scripts/verify-bronze-governance-reality-matrix.mjs",
+        "scripts/audit-bronze-current-state.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/bronze-governance-reality-matrix.json"
+      ]
+    },
+    {
+      "id": "DEC-154",
+      "date": "2026-08-09",
+      "acceptedAt": "2026-08-09",
+      "title": "GOV-004 current delivery report closure",
+      "status": "ACTIVE",
+      "source": "Explicit current user instruction to close started Bronze slices under DEC-137",
+      "document": "docs/decisions/DEC-154-gov-004-current-delivery-report-closure.md",
+      "rules": [
+        "PR-087",
+        "PR-124",
+        "PR-179",
+        "PR-183",
+        "PR-184",
+        "PR-185",
+        "PR-187",
+        "PR-194",
+        "PR-200",
+        "PR-203"
+      ],
+      "requirements": [
+        "GOV-004"
+      ],
+      "codeAreas": [
+        "scripts/generate-current-delivery-report.mjs",
+        "scripts/verify-delivery-report-contract-v2.mjs",
+        "scripts/run-governed-postflight.mjs"
+      ],
+      "evidence": [
+        "artifacts/reports/DELIVERY_STATUS_04.08.2026.29.json",
+        "artifacts/validation/delivery-report-contract-v2.json",
+        "artifacts/validation/governed-postflight.json"
+      ]
+    },
+    {
+      "id": "DEC-155",
+      "date": "2026-08-09",
+      "acceptedAt": "2026-08-09",
+      "title": "GOV-005 external Library blocker classification",
+      "status": "ACTIVE",
+      "source": "Explicit current user instruction forbidding local receipt from being counted as external PASS",
+      "document": "docs/decisions/DEC-155-gov-005-external-library-blocker-classification.md",
+      "rules": [
+        "PR-087",
+        "PR-180",
+        "PR-181",
+        "PR-194",
+        "PR-203",
+        "PR-208"
+      ],
+      "requirements": [
+        "GOV-005"
+      ],
+      "codeAreas": [
+        "scripts/apply-gov005-external-blocker.mjs",
+        "config/accepted-scope-registry.json"
+      ],
+      "evidence": [
+        "../../05_TEST/30Z_LOCAL_RECEIPT/LATEST.json",
+        "config/persistent-artifact-policy.json"
+      ]
+    },
+    {
+      "id": "DEC-156",
+      "date": "2026-08-10",
+      "acceptedAt": "2026-08-10",
+      "title": "PPK-002 timeline-event policy enforcement local continuation",
+      "status": "ACTIVE",
+      "source": "Explicit user full-auto instruction to continue started PARTIAL work under DEC-137 without advancing 30-Z or issuing a Build",
+      "document": "docs/decisions/DEC-156-ppk-002-timeline-event-policy-local-continuation.md",
+      "rules": [
+        "PR-087",
+        "PR-187",
+        "PR-189",
+        "PR-194",
+        "PR-203",
+        "PR-208"
+      ],
+      "requirements": [
+        "PPK-002"
+      ],
+      "codeAreas": [
+        "packages/application/src/timeline-use-cases.ts",
+        "packages/repository-contracts/src/timeline-repository.ts",
+        "packages/repositories/src/timeline-repository.ts",
+        "packages/database/src/family-database-migrations.ts",
+        "apps/desktop/src/main/timeline-application-adapter.ts",
+        "apps/desktop/src/main/timeline-production-policy-runtime.ts",
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/src/main/family-data-import-service.ts",
+        "scripts/apply-ppk002-timeline-repository-foundation.mjs",
+        "scripts/apply-ppk002-timeline-policy-runtime.mjs",
+        "scripts/verify-ppk002-timeline-policy-local-continuation.mjs"
+      ],
+      "evidence": [
+        "artifacts/authority/PPK002_TIMELINE_LOCAL_CONTINUATION_AUTHORITY.json",
+        "artifacts/validation/PPK002_TIMELINE_POLICY_LOCAL_CONTINUATION.json",
+        "artifacts/manifests/TIMELINE_USE_CASE_VERIFICATION_MVP56.json",
+        "artifacts/manifests/DATABASE_MIGRATION_VERIFICATION_MVP56.json",
+        "docs/audit/PPK-002_TIMELINE_POLICY_LOCAL_CONTINUATION.md"
+      ]
+    },
+    {
+      "id": "DEC-162",
+      "date": "2026-08-10",
+      "acceptedAt": "2026-08-10",
+      "title": "Windows Hello hardware validation temporary non-blocking deferral",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: current machine does not support Windows Hello; keep the code, remove the temporary hardware-test completion requirement, continue non-approval work automatically and leave approval-bound work until last",
+      "document": "docs/decisions/DEC-162-windows-hello-hardware-validation-deferral.md",
+      "rules": [
+        "PR-087",
+        "PR-149",
+        "PR-171",
+        "PR-187",
+        "PR-194",
+        "PR-203"
+      ],
+      "requirements": [
+        "B2-01"
+      ],
+      "codeAreas": [
+        "config/accepted-scope-registry.json",
+        "config/bronze-backlog-priority-policy.json",
+        "scripts/verify-bronze-governance-reality-matrix.mjs",
+        "scripts/generate-current-delivery-report.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/30-K-windows-hello-foundation-runtime.json",
+        "artifacts/validation/30-L-windows-hello-ipc-ui-runtime.json",
+        "artifacts/validation/bronze-governance-reality-matrix.json"
+      ]
+    },
+    {
+      "id": "DEC-163",
+      "date": "2026-08-10",
+      "acceptedAt": "2026-08-10",
+      "title": "PPK-002 family import reused-location exact read receipt chain",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction to continue sequentially and complete all no-approval work before approval-bound external receipt work",
+      "document": "docs/decisions/DEC-163-ppk-002-family-import-reused-location-read-receipt.md",
+      "rules": [
+        "PR-087",
+        "PR-187",
+        "PR-194",
+        "PR-203",
+        "PR-208"
+      ],
+      "requirements": [
+        "PPK-002"
+      ],
+      "codeAreas": [
+        "apps/desktop/src/main/family-data-import-service.ts",
+        "apps/desktop/tests/family-data-import-location-read-receipt-runtime.test.ts",
+        "scripts/finalize-31-d-external-library-receipt.mjs"
+      ],
+      "evidence": [
+        "artifacts/checkpoints/31-D_COMPLETION_RECORD.json",
+        "artifacts/checkpoints/31-D_LIBRARY_RECEIPT.json"
+      ]
+    },
+    {
+      "id": "DEC-164",
+      "date": "2026-08-10",
+      "acceptedAt": "2026-08-10",
+      "title": "GOV-005 external USB authoritative source protection closure",
+      "status": "ACTIVE",
+      "source": "Explicit user approval for permission-bound work and D: external disk selection",
+      "document": "docs/decisions/DEC-164-gov-005-external-usb-source-protection-closure.md",
+      "rules": [
+        "PR-087",
+        "PR-180",
+        "PR-181",
+        "PR-194",
+        "PR-203",
+        "PR-208"
+      ],
+      "requirements": [
+        "GOV-005"
+      ],
+      "codeAreas": [
+        "scripts/protect-authoritative-source.mjs",
+        "scripts/protect-authoritative-source-external.mjs",
+        "config/accepted-scope-registry.json"
+      ],
+      "evidence": [
+        "../../05_TEST/30Z_LOCAL_RECEIPT/LATEST.json",
+        "../../05_TEST/30Z_EXTERNAL_RECEIPT/LATEST.json"
+      ]
+    },
+    {
+      "id": "DEC-165",
+      "date": "2026-08-10",
+      "acceptedAt": "2026-08-10",
+      "title": "B0-02 user-visible release metadata boundary",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction to continue with the next DEC-137-authorized open work item",
+      "document": "docs/decisions/DEC-165-b0-02-user-visible-release-metadata-boundary.md",
+      "rules": [
+        "PR-087",
+        "PR-171",
+        "PR-187",
+        "PR-194",
+        "PR-203",
+        "PR-208"
+      ],
+      "requirements": [
+        "B0-02"
+      ],
+      "codeAreas": [
+        "packages/domain/src/app-meta.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/renderer/App.tsx",
+        "scripts/generate-current-delivery-report.mjs"
+      ],
+      "evidence": [
+        "artifacts/authority/31-E_AUTO_PRIORITY_SELECTION_AUTHORITY.json",
+        "artifacts/validation/31-E_PRIORITY_SELECTION_VALIDATION.json"
+      ]
+    },
+    {
+      "id": "DEC-166",
+      "date": "2026-08-10",
+      "acceptedAt": "2026-08-10",
+      "title": "PPK-002 family import newly-created-location linked event atomic policy chain",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction to continue with the recommended next no-approval PPK-002 slice",
+      "document": "docs/decisions/DEC-166-ppk-002-family-import-created-location-linked-event.md",
+      "rules": [
+        "PR-087",
+        "PR-187",
+        "PR-194",
+        "PR-203",
+        "PR-208"
+      ],
+      "requirements": [
+        "PPK-002"
+      ],
+      "codeAreas": [
+        "apps/desktop/src/main/family-data-import-policy-batch-runner.ts",
+        "apps/desktop/src/main/family-data-import-service.ts",
+        "apps/desktop/src/main/location-production-policy-runtime.ts",
+        "packages/repositories/src/location-repository.ts"
+      ],
+      "evidence": [
+        "artifacts/authority/31-F_AUTO_PRIORITY_SELECTION_AUTHORITY.json",
+        "artifacts/validation/31-F_PRIORITY_SELECTION_VALIDATION.json"
+      ]
+    },
+    {
+      "id": "DEC-167",
+      "date": "2026-08-10",
+      "acceptedAt": "2026-08-10",
+      "title": "PPK-002 family import governed rollback exact delete receipt fence",
+      "status": "SUPERSEDED",
+      "supersededBy": "DEC-168",
+      "source": "Explicit user instruction to continue sequentially with all no-approval work under DEC-137",
+      "document": "docs/decisions/DEC-167-ppk-002-family-import-governed-rollback-receipt-fence.md",
+      "rules": [
+        "PR-087",
+        "PR-187",
+        "PR-194",
+        "PR-203",
+        "PR-208"
+      ],
+      "requirements": [
+        "PPK-002"
+      ],
+      "codeAreas": [
+        "packages/database/src/family-database-migrations.ts",
+        "packages/repositories/src/family-data-import-repository.ts",
+        "apps/desktop/src/main/family-data-import-policy-batch-runner.ts",
+        "apps/desktop/src/main/family-data-import-service.ts"
+      ],
+      "evidence": [
+        "artifacts/authority/31-G_AUTO_PRIORITY_SELECTION_AUTHORITY.json",
+        "artifacts/validation/31-G_PRIORITY_SELECTION_VALIDATION.json"
+      ]
+    },
+    {
+      "id": "DEC-168",
+      "date": "2026-08-10",
+      "acceptedAt": "2026-08-10",
+      "title": "Main structure first: Core Service typed API and ownership foundation",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: Öncelik ana yapının kurulması ona göre ilerle",
+      "document": "docs/decisions/DEC-168-main-structure-first-core-service-api-foundation.md",
+      "rules": [
+        "PR-087",
+        "PR-187",
+        "PR-194",
+        "PR-203",
+        "PR-208"
+      ],
+      "requirements": [
+        "DHA-001",
+        "DHA-011",
+        "PPK-001",
+        "PPK-003",
+        "PPK-014",
+        "PPK-026"
+      ],
+      "codeAreas": [
+        "apps/core-service/src/local-admin-server.ts",
+        "packages/core-service-contracts/src/index.ts",
+        "packages/core-service-client/src/local-admin-client.ts",
+        "apps/desktop/src/main/core-service-startup-connection.ts"
+      ],
+      "evidence": [
+        "artifacts/authority/31-G_MAIN_STRUCTURE_PRIORITY_AUTHORITY.json",
+        "artifacts/validation/31-G_MAIN_STRUCTURE_PRIORITY_VALIDATION.json"
+      ]
+    },
+    {
+      "id": "DEC-169",
+      "date": "2026-08-10",
+      "acceptedAt": "2026-08-10",
+      "title": "Core Service protected family-data session ownership control plane",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction to continue the main-structure-first implementation",
+      "document": "docs/decisions/DEC-169-core-service-protected-family-data-session-ownership-control-plane.md",
+      "requirements": [
+        "DHA-001",
+        "PPK-003",
+        "PPK-014"
+      ],
+      "codeAreas": [
+        "packages/core-service-contracts/src/index.ts",
+        "apps/core-service/src/core-service-runtime.ts",
+        "apps/desktop/src/main/core-service-startup-connection.ts"
+      ],
+      "evidence": [
+        "artifacts/authority/31-H_MAIN_STRUCTURE_PRIORITY_AUTHORITY.json",
+        "artifacts/validation/31-H_PRIORITY_SELECTION_VALIDATION.json"
+      ]
+    },
+    {
+      "id": "DEC-170",
+      "date": "2026-08-10",
+      "acceptedAt": "2026-08-10",
+      "title": "Headless shared device-secret protection boundary",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction to continue the main-structure-first implementation",
+      "document": "docs/decisions/DEC-170-headless-device-secret-protection-boundary.md",
+      "requirements": [
+        "DHA-001",
+        "PPK-013",
+        "PPK-014"
+      ],
+      "codeAreas": [
+        "packages/security/src/device-secret-protector.ts",
+        "apps/desktop/src/main/device-secret-protector.ts",
+        "apps/core-service/src/device-secret-protection-runtime.ts"
+      ],
+      "evidence": [
+        "artifacts/authority/31-I_MAIN_STRUCTURE_PRIORITY_AUTHORITY.json",
+        "artifacts/validation/31-I_PRIORITY_SELECTION_VALIDATION.json"
+      ]
+    },
+    {
+      "id": "DEC-171",
+      "date": "2026-08-10",
+      "acceptedAt": "2026-08-10",
+      "title": "Family-data coexistence and default-deny cutover gate",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: Yeni yapıyı daha güçlü güvenli sağlam yapabiliriz",
+      "document": "docs/decisions/DEC-171-family-data-coexistence-default-deny-cutover-gate.md",
+      "requirements": [
+        "DHA-001",
+        "PPK-003",
+        "PPK-013",
+        "PPK-014"
+      ],
+      "codeAreas": [
+        "packages/core-service-contracts/src/index.ts",
+        "apps/core-service/src/family-data-cutover-guard.ts",
+        "apps/core-service/src/core-service-runtime.ts",
+        "apps/desktop/src/main/core-service-startup-connection.ts"
+      ],
+      "evidence": [
+        "artifacts/authority/31-J_MAIN_STRUCTURE_SECURITY_HARDENING_AUTHORITY.json",
+        "artifacts/validation/31-J_PRIORITY_SELECTION_VALIDATION.json"
+      ]
+    },
+    {
+      "id": "DEC-172",
+      "date": "2026-08-11",
+      "acceptedAt": "2026-08-11",
+      "title": "Monotonic cutover-readiness evidence and tamper-evident acceptance state",
+      "status": "ACTIVE",
+      "source": "Explicit user continuation after verified 31-J handoff",
+      "document": "docs/decisions/DEC-172-monotonic-cutover-readiness-evidence.md",
+      "requirements": [
+        "DHA-001",
+        "PPK-003",
+        "PPK-013",
+        "PPK-014"
+      ],
+      "codeAreas": [
+        "packages/core-service-contracts/src/index.ts",
+        "apps/core-service/src/family-data-cutover-readiness-ledger.ts",
+        "apps/core-service/src/core-service-runtime.ts",
+        "apps/desktop/src/main/core-service-startup-connection.ts"
+      ],
+      "evidence": [
+        "artifacts/authority/31-K_MONOTONIC_CUTOVER_READINESS_AUTHORITY.json",
+        "artifacts/validation/31-K_PRIORITY_SELECTION_VALIDATION.json"
+      ]
+    },
+    {
+      "id": "DEC-173",
+      "date": "2026-08-11",
+      "acceptedAt": "2026-08-11",
+      "title": "Protected cutover-readiness journal port and detached default-deny boundary",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: 31-L yi uygula",
+      "document": "docs/decisions/DEC-173-protected-cutover-readiness-journal-port.md",
+      "requirements": [
+        "DHA-001",
+        "PPK-003",
+        "PPK-013",
+        "PPK-014"
+      ],
+      "codeAreas": [
+        "apps/core-service/src/protected-cutover-readiness-journal-port.ts",
+        "apps/core-service/src/index.ts",
+        "apps/core-service/tests/protected-cutover-readiness-journal-port.test.ts"
+      ],
+      "evidence": [
+        "artifacts/authority/31-L_PROTECTED_READINESS_JOURNAL_PORT_AUTHORITY.json",
+        "artifacts/validation/31-L_PRIORITY_SELECTION_VALIDATION.json"
+      ]
+    },
+    {
+      "id": "DEC-174",
+      "date": "2026-08-11",
+      "acceptedAt": "2026-08-11",
+      "title": "Signed cutover-readiness evidence verifier public-key-only boundary",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: 31 m uygula",
+      "document": "docs/decisions/DEC-174-signed-cutover-readiness-evidence-verifier-boundary.md",
+      "requirements": [
+        "DHA-001",
+        "PPK-003",
+        "PPK-013",
+        "PPK-014"
+      ],
+      "codeAreas": [
+        "apps/core-service/src/signed-cutover-readiness-evidence-verifier.ts",
+        "apps/core-service/src/index.ts",
+        "apps/core-service/tests/signed-cutover-readiness-evidence-verifier.test.ts"
+      ],
+      "evidence": [
+        "artifacts/authority/31-M_SIGNED_EVIDENCE_VERIFIER_BOUNDARY_AUTHORITY.json",
+        "artifacts/validation/31-M_PRIORITY_SELECTION_VALIDATION.json"
+      ]
+    },
+    {
+      "id": "DEC-175",
+      "date": "2026-08-11",
+      "acceptedAt": "2026-08-11",
+      "title": "Synthetic single-writer proof harness detached non-authoritative boundary",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: 31 n iyi uygula",
+      "document": "docs/decisions/DEC-175-synthetic-single-writer-proof-harness-boundary.md",
+      "requirements": [
+        "DHA-001",
+        "PPK-003",
+        "PPK-013",
+        "PPK-014"
+      ],
+      "codeAreas": [
+        "apps/core-service/src/synthetic-single-writer-proof-harness.ts",
+        "apps/core-service/src/index.ts",
+        "apps/core-service/tests/synthetic-single-writer-proof-harness.test.ts"
+      ],
+      "evidence": [
+        "artifacts/authority/31-N_SYNTHETIC_SINGLE_WRITER_PROOF_HARNESS_AUTHORITY.json",
+        "artifacts/validation/31-N_PRIORITY_SELECTION_VALIDATION.json"
+      ]
+    },
+    {
+      "id": "DEC-176",
+      "date": "2026-08-11",
+      "acceptedAt": "2026-08-11",
+      "title": "Synthetic key lifecycle proof harness detached non-submittable boundary",
+      "status": "ACTIVE",
+      "source": "Explicit user continuation: Devam",
+      "document": "docs/decisions/DEC-176-synthetic-key-lifecycle-proof-harness-boundary.md",
+      "requirements": [
+        "DHA-001",
+        "PPK-003",
+        "PPK-013",
+        "PPK-014"
+      ],
+      "codeAreas": [
+        "apps/core-service/src/synthetic-key-lifecycle-proof-harness.ts",
+        "apps/core-service/src/index.ts",
+        "apps/core-service/tests/synthetic-key-lifecycle-proof-harness.test.ts"
+      ],
+      "evidence": [
+        "artifacts/authority/31-O_SYNTHETIC_KEY_LIFECYCLE_PROOF_HARNESS_AUTHORITY.json",
+        "artifacts/validation/31-O_PRIORITY_SELECTION_VALIDATION.json"
+      ]
+    },
+    {
+      "id": "DEC-177",
+      "date": "2026-08-11",
+      "acceptedAt": "2026-08-11",
+      "title": "Synthetic rollback and recovery drill detached non-submittable boundary",
+      "status": "ACTIVE",
+      "source": "Explicit user continuation: Devam",
+      "document": "docs/decisions/DEC-177-synthetic-rollback-recovery-drill-boundary.md",
+      "requirements": [
+        "DHA-001",
+        "PPK-003",
+        "PPK-013",
+        "PPK-014"
+      ],
+      "codeAreas": [
+        "apps/core-service/src/synthetic-rollback-recovery-drill.ts",
+        "apps/core-service/src/index.ts",
+        "apps/core-service/tests/synthetic-rollback-recovery-drill.test.ts"
+      ],
+      "evidence": [
+        "artifacts/authority/31-P_SYNTHETIC_ROLLBACK_RECOVERY_DRILL_AUTHORITY.json",
+        "artifacts/validation/31-P_PRIORITY_SELECTION_VALIDATION.json"
+      ]
+    },
+    {
+      "id": "DEC-178",
+      "date": "2026-08-11",
+      "acceptedAt": "2026-08-11",
+      "title": "End-to-end security evidence aggregator detached non-submittable boundary",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: Uygula",
+      "document": "docs/decisions/DEC-178-end-to-end-security-evidence-aggregator-boundary.md",
+      "requirements": [
+        "DHA-001",
+        "PPK-003",
+        "PPK-013",
+        "PPK-014"
+      ],
+      "codeAreas": [
+        "apps/core-service/src/end-to-end-security-evidence-aggregator.ts",
+        "apps/core-service/src/index.ts",
+        "apps/core-service/tests/end-to-end-security-evidence-aggregator.test.ts"
+      ],
+      "evidence": [
+        "artifacts/authority/31-Q_END_TO_END_SECURITY_EVIDENCE_AGGREGATOR_AUTHORITY.json",
+        "artifacts/validation/31-Q_PRIORITY_SELECTION_VALIDATION.json"
+      ]
+    },
+    {
+      "id": "DEC-179",
+      "date": "2026-08-11",
+      "acceptedAt": "2026-08-11",
+      "title": "Explicit user approval receipt detached no-cutover boundary",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: Uygula (31-R code boundary only; not cutover consent)",
+      "document": "docs/decisions/DEC-179-explicit-user-approval-receipt-boundary.md",
+      "requirements": [
+        "DHA-001",
+        "PPK-003",
+        "PPK-013",
+        "PPK-014"
+      ],
+      "codeAreas": [
+        "apps/core-service/src/explicit-user-cutover-approval-receipt.ts",
+        "apps/core-service/src/index.ts",
+        "apps/core-service/tests/explicit-user-cutover-approval-receipt.test.ts"
+      ],
+      "evidence": [
+        "artifacts/authority/31-R_EXPLICIT_USER_APPROVAL_RECEIPT_BOUNDARY_AUTHORITY.json",
+        "artifacts/validation/31-R_PRIORITY_SELECTION_VALIDATION.json"
+      ]
+    },
+    {
+      "id": "DEC-180",
+      "date": "2026-08-11",
+      "acceptedAt": "2026-08-11",
+      "title": "Versioned cutover decision preflight detached no-authority boundary",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: Uygula (31-S code boundary only; not a successor cutover decision)",
+      "document": "docs/decisions/DEC-180-versioned-cutover-decision-preflight-boundary.md",
+      "requirements": [
+        "DHA-001",
+        "PPK-003",
+        "PPK-013",
+        "PPK-014"
+      ],
+      "codeAreas": [
+        "apps/core-service/src/versioned-cutover-decision-preflight.ts",
+        "apps/core-service/src/index.ts",
+        "apps/core-service/tests/versioned-cutover-decision-preflight.test.ts"
+      ],
+      "evidence": [
+        "artifacts/authority/31-S_VERSIONED_CUTOVER_DECISION_PREFLIGHT_AUTHORITY.json",
+        "artifacts/validation/31-S_PRIORITY_SELECTION_VALIDATION.json"
+      ]
+    },
+    {
+      "id": "DEC-181",
+      "date": "2026-08-11",
+      "acceptedAt": "2026-08-11",
+      "title": "Family import governed rollback exact delete receipt fence",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: Full auto; continue PPK-002 in governed order",
+      "document": "docs/decisions/DEC-181-ppk-002-family-import-governed-rollback-receipt-fence.md",
+      "requirements": [
+        "PPK-002"
+      ],
+      "codeAreas": [
+        "packages/database/src/family-database-migrations.ts",
+        "packages/repository-contracts/src/family-data-import-repository.ts",
+        "packages/repositories/src/family-data-import-repository.ts",
+        "apps/desktop/src/main/family-data-import-service.ts",
+        "apps/desktop/src/main/family-data-import-policy-batch-runner.ts",
+        "apps/desktop/tests/family-data-import-governed-rollback-runtime.test.ts"
+      ],
+      "evidence": [
+        "artifacts/authority/31-T_FAMILY_IMPORT_GOVERNED_ROLLBACK_AUTHORITY.json",
+        "artifacts/validation/31-T_PRIORITY_SELECTION_VALIDATION.json"
+      ]
+    }
+  ]
+}

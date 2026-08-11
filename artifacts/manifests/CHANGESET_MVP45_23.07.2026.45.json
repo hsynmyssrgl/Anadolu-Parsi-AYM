@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "version": "23.07.2026.45",
+  "added": [
+    "database/migrations/0005_event_dispatcher_state.sql",
+    "apps/desktop/src/main/event-handlers.ts",
+    "packages/repositories/src/diagnostic-repository.ts",
+    "scripts/verify-event-dispatcher.mjs"
+  ],
+  "modified": [
+    "packages/events/src/index.ts",
+    "packages/repositories/src/outbox-repository.ts",
+    "packages/repositories/src/index.ts",
+    "apps/desktop/src/main/data-store.ts",
+    "apps/desktop/src/main/main.ts",
+    "apps/desktop/src/main/database-migrations.ts",
+    "packages/domain/src/app-meta.ts",
+    "package.json",
+    "package-lock.json",
+    "apps/desktop/package.json",
+    "artifacts/manifests/VERSION_LEDGER.json"
+  ],
+  "removed": [],
+  "behavioralChanges": [
+    "Pending outbox events are claimed and dispatched.",
+    "Successful handler receipts prevent duplicate execution.",
+    "Retryable failures use exponential backoff.",
+    "Stale processing events are recovered.",
+    "family.member.created has logging and diagnostic handlers."
+  ]
+}

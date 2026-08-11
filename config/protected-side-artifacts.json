@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "build": 214,
+  "version": "01.08.2026.214",
+  "policyId": "PPT-PROTECTED-SIDE-ARTIFACTS-V1",
+  "encryption": "aes-256-gcm",
+  "keyBytes": 32,
+  "keyProtection": "electron-safeStorage/windows-dpapi",
+  "containers": {
+    "log": ".pplog",
+    "diagnostic": ".pptdiag",
+    "healthReport": ".pptreport"
+  },
+  "volatile": ["browser-session", "cache", "temp", "crash"],
+  "failClosedWhenDeviceProtectionRequired": true,
+  "windowsSafeStorageDpapiRuntime": "NOT_RUN"
+}

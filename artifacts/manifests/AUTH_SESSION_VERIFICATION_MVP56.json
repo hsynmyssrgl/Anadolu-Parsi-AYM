@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "version": "04.08.2026.29",
+  "milestone": "Bronze RC2 Build undefined",
+  "checks": 16,
+  "checkNames": [
+    "admin setup creates authenticated session",
+    "admin email is normalized",
+    "second setup is rejected through application conflict",
+    "logout clears session and writes state",
+    "failed attempts persist and fifth failure locks account",
+    "correct password remains blocked during lock window",
+    "expired lock permits successful login",
+    "successful login clears failure state",
+    "wrong current password rejects password change",
+    "password change preserves active session",
+    "old password no longer authenticates",
+    "new password authenticates",
+    "idle timeout expires session without extending on state read",
+    "auth application layer has no infrastructure dependency",
+    "FamilyDataStore delegates core auth operations to use cases",
+    "password and session audit records are chained"
+  ],
+  "metrics": {
+    "maximumFailedLoginAttempts": 5,
+    "lockMinutes": 15,
+    "sessionIdleTimeoutMinutes": 15
+  },
+  "verifiedAt": "2026-08-11T06:57:16.772Z"
+}

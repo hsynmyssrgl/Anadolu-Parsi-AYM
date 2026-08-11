@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "23.07.2026.48",
+  "status": "passed",
+  "checks": 14,
+  "names": [
+    "Result success mapping",
+    "Result error short-circuit",
+    "Result error mapping",
+    "Result flatMap",
+    "Throwable mapping",
+    "Result matching",
+    "Central AppError",
+    "Deterministic clock",
+    "Pagination limits",
+    "Configuration defaults and validation",
+    "Configuration path isolation",
+    "Configuration redaction",
+    "Structured logging redaction",
+    "JSON Lines serialization"
+  ],
+  "generatedAt": "2026-07-23T18:35:26.764010Z"
+}

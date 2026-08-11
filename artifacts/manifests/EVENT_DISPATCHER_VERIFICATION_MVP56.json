@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "version": "04.08.2026.29",
+  "milestone": "Bronze RC2 Build undefined",
+  "checks": 3,
+  "scenarios": [
+    "DataStore publishes member event and writes two receipts",
+    "dispatcher retries retryable handler then publishes",
+    "dispatcher permanently fails non-retryable handler"
+  ]
+}

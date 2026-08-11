@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "31-C",
+  "requirement": "PPK-002",
+  "decision": "DEC-161",
+  "title": "Family import multi-policy receipt atomic batch",
+  "priority": "P0",
+  "status": "IN_PROGRESS",
+  "predecessor": {
+    "step": "31-B",
+    "status": "COMPLETED",
+    "persistentReceiptStatus": "PASS"
+  },
+  "targets": {
+    "batchRunner": "apps/desktop/src/main/family-data-import-policy-batch-runner.ts",
+    "service": "apps/desktop/src/main/family-data-import-service.ts",
+    "locationRunner": "apps/desktop/src/main/location-application-adapter.ts",
+    "timelineRunner": "apps/desktop/src/main/timeline-application-adapter.ts",
+    "composition": "apps/desktop/src/main/data-store.ts",
+    "repositoryContract": "packages/repository-contracts/src/family-data-import-repository.ts",
+    "repository": "packages/repositories/src/family-data-import-repository.ts",
+    "regression": "apps/desktop/tests/family-data-import-policy-batch-runtime.test.ts"
+  },
+  "supportedRows": {
+    "createdLocations": "GOVERNED_ATOMIC_BATCH",
+    "createdLocationlessEvents": "GOVERNED_ATOMIC_BATCH",
+    "reusedLocationsAndEvents": "NO_NEW_CREATE_RECEIPT"
+  },
+  "requiredChecks": [
+    "desktop main TypeScript noEmit",
+    "31-C contract verifier",
+    "targeted family-import and 30-Z regression Vitest 9/9",
+    "full Vitest regression 161/161",
+    "platform policy bypass gate",
+    "persistent external D: Library receipt and readback"
+  ],
+  "openBoundaries": {
+    "PPK002": "PARTIAL",
+    "importedEventLocationReadReceiptChain": "NOT_COMPLETE_FAIL_CLOSED",
+    "governedImportRollbackReceiptFence": "NOT_COMPLETE",
+    "universalRepositoryEnforcement": "NOT_COMPLETE",
+    "obligationExecution": "NOT_RUN_NOT_PASS",
+    "externalMonotonicRollbackAuthority": "NOT_IMPLEMENTED"
+  },
+  "newBuildIssued": false
+}

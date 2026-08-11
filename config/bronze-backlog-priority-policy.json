@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "id": "PPT-BRONZE-BACKLOG-PRIORITY-POLICY-V1",
+  "release": "Bronze 04.08.2026.29",
+  "authorityDecision": "DEC-137",
+  "acceptedScopeRegistry": "config/accepted-scope-registry.json",
+  "mode": "FULL_AUTO_INCOMPLETE_BRONZE_EXECUTION",
+  "startedWorkStatuses": [
+    "PARTIAL",
+    "FOUNDATION_STARTED"
+  ],
+  "unstartedWorkStatuses": [
+    "NOT_IMPLEMENTED"
+  ],
+  "priorityOrder": [
+    "P0",
+    "P1",
+    "P2"
+  ],
+  "tieBreakers": [
+    "ROADMAP_DEPENDENCY_UNBLOCKING",
+    "SECURITY_PRIVACY_DATA_INTEGRITY_IMPACT",
+    "ACCEPTED_SCOPE_REGISTRY_ORDER"
+  ],
+  "externalBlockersDoNotBecomePass": true,
+  "externalBlockersDoNotBlockRunnableQueue": true,
+  "singleActiveWorkStep": true,
+  "persistentReceiptRequiredBeforeAdvance": true,
+  "selectionHistory": [
+    {
+      "step": "30-M",
+      "requirementId": "PPK-002",
+      "title": "Central Policy Enforcement Point and repository policy receipt foundation",
+      "selectionClass": "STARTED_P0_DEPENDENCY_AND_SECURITY_UNBLOCKER",
+      "statusAtSelection": "PARTIAL",
+      "stepOutcome": "COMPLETED_PASS_PERSISTENT_RECEIPT_PASS_REQUIREMENT_REMAINS_PARTIAL",
+      "evidence": "artifacts/checkpoints/30-M_COMPLETION_RECORD.json"
+    },
+    {
+      "step": "30-N",
+      "requirementId": "PPK-002",
+      "title": "Governed archive Policy Enforcement, repository receipt and direct-role migration vertical slice",
+      "selectionClass": "CONTINUING_STARTED_P0_DEPENDENCY_AND_SECURITY_VERTICAL_SLICE",
+      "statusAtSelection": "PARTIAL",
+      "stepOutcome": "COMPLETED_PASS_PERSISTENT_RECEIPT_PASS_REQUIREMENT_REMAINS_PARTIAL",
+      "evidence": "artifacts/checkpoints/30-N_COMPLETION_RECORD.json"
+    },
+    {
+      "step": "30-O",
+      "requirementId": "PPK-002",
+      "title": "Production archive PEP composition, protected receipt journal wiring and real SQLite repository runtime slice",
+      "selectionClass": "CONTINUING_STARTED_P0_PRODUCTION_COMPOSITION_AND_RUNTIME_SLICE",
+      "statusAtSelection": "PARTIAL",
+      "stepOutcome": "COMPLETED_PASS_PERSISTENT_RECEIPT_PASS_REQUIREMENT_REMAINS_PARTIAL",
+      "evidence": "artifacts/checkpoints/30-O_COMPLETION_RECORD.json"
+    },
+    {
+      "step": "30-P",
+      "requirementId": "PPK-002",
+      "title": "Durable archive policy transaction, multi-process replay, database-enforced fencing and receipt/business atomicity slice",
+      "selectionClass": "CONTINUING_STARTED_P0_DURABLE_TRANSACTION_AND_REPLAY_INTEGRITY_SLICE",
+      "statusAtSelection": "PARTIAL",
+      "stepOutcome": "COMPLETED_PASS_PERSISTENT_RECEIPT_PASS_REQUIREMENT_REMAINS_PARTIAL",
+      "evidence": "artifacts/checkpoints/30-P_COMPLETION_RECORD.json"
+    },
+    {
+      "step": "30-Q",
+      "requirementId": "PPK-002",
+      "title": "Protected-journal cryptographic acknowledgement proof and SQLite-anchored complete-tail rollback detection",
+      "selectionClass": "CONTINUING_STARTED_P0_JOURNAL_PROOF_AND_ROLLBACK_INTEGRITY_SLICE",
+      "statusAtSelection": "PARTIAL",
+      "stepOutcome": "COMPLETED_PASS_PERSISTENT_RECEIPT_PASS_REQUIREMENT_REMAINS_PARTIAL",
+      "evidence": "artifacts/checkpoints/30-Q_COMPLETION_RECORD.json"
+    },
+    {
+      "step": "30-R",
+      "requirementId": "PPK-002",
+      "title": "Database-enforced receipt binding for direct writes to core archive business tables",
+      "selectionClass": "CONTINUING_STARTED_P0_DATABASE_ENFORCEMENT_AND_SECURITY_SLICE",
+      "statusAtSelection": "PARTIAL",
+      "stepOutcome": "COMPLETED_PASS_PERSISTENT_RECEIPT_PASS_REQUIREMENT_REMAINS_PARTIAL",
+      "evidence": "artifacts/checkpoints/30-R_COMPLETION_RECORD.json"
+    },
+    {
+      "step": "30-S",
+      "requirementId": "PPK-002",
+      "title": "Database-enforced receipt binding for archive accessory tables and cross-aggregate event attachment updates",
+      "selectionClass": "CONTINUING_STARTED_P0_DATABASE_ENFORCEMENT_AND_SECURITY_SLICE",
+      "statusAtSelection": "PARTIAL",
+      "stepOutcome": "COMPLETED_PASS_PERSISTENT_RECEIPT_PASS_REQUIREMENT_REMAINS_PARTIAL",
+      "evidence": "artifacts/checkpoints/30-S_COMPLETION_RECORD.json"
+    },
+    {
+      "step": "30-T",
+      "requirementId": "PPK-002",
+      "title": "Durable new-correlation operation idempotency after an unknown commit outcome",
+      "selectionClass": "CONTINUING_STARTED_P0_TRANSACTION_IDEMPOTENCY_AND_DATA_INTEGRITY_SLICE",
+      "statusAtSelection": "PARTIAL",
+      "stepOutcome": "COMPLETED_PASS_PERSISTENT_RECEIPT_PASS_REQUIREMENT_REMAINS_PARTIAL",
+      "evidence": "artifacts/checkpoints/30-T_COMPLETION_RECORD.json"
+    },
+    {
+      "step": "30-U",
+      "requirementId": "PPK-002",
+      "title": "Durable renderer and application restart pending-operation identity recovery",
+      "selectionClass": "CONTINUING_STARTED_P0_RESTART_IDENTITY_AND_DATA_INTEGRITY_SLICE",
+      "statusAtSelection": "PARTIAL",
+      "stepOutcome": "COMPLETED_PASS_PERSISTENT_RECEIPT_PASS_REQUIREMENT_REMAINS_PARTIAL",
+      "evidence": "artifacts/checkpoints/30-U_COMPLETION_RECORD.json"
+    },
+    {
+      "step": "30-V",
+      "requirementId": "PPK-002",
+      "title": "Expired unused replay-reservation pruning and retention enforcement",
+      "selectionClass": "CONTINUING_STARTED_P0_REPLAY_RETENTION_AND_RESOURCE_EXHAUSTION_SLICE",
+      "statusAtSelection": "PARTIAL",
+      "stepOutcome": "COMPLETED_PASS_PERSISTENT_RECEIPT_PASS_REQUIREMENT_REMAINS_PARTIAL",
+      "evidence": "artifacts/checkpoints/30-V_COMPLETION_RECORD.json"
+    },
+    {
+      "step": "30-W",
+      "requirementId": "PPK-002",
+      "title": "Governed finance Policy Enforcement, repository receipt and direct-write fence vertical slice",
+      "selectionClass": "CONTINUING_STARTED_P0_FINANCE_SECURITY_AND_DATA_INTEGRITY_SLICE",
+      "statusAtSelection": "PARTIAL",
+      "stepOutcome": "COMPLETED_PASS_PERSISTENT_RECEIPT_PASS_REQUIREMENT_REMAINS_PARTIAL",
+      "evidence": "artifacts/checkpoints/30-W_COMPLETION_RECORD.json"
+    },
+    {
+      "step": "30-X",
+      "requirementId": "PPK-002",
+      "title": "Governed health Policy Enforcement, repository receipt and direct-write fence vertical slice",
+      "selectionClass": "CONTINUING_STARTED_P0_HEALTH_PRIVACY_SECURITY_AND_DATA_INTEGRITY_SLICE",
+      "statusAtSelection": "PARTIAL",
+      "stepOutcome": "COMPLETED_PASS_PERSISTENT_RECEIPT_PASS_REQUIREMENT_REMAINS_PARTIAL",
+      "evidence": "artifacts/checkpoints/30-X_COMPLETION_RECORD.json"
+    },
+    {
+      "step": "30-Y",
+      "requirementId": "PPK-002",
+      "title": "Governed life Policy Enforcement, repository receipt, direct-write fence and cross-surface automation/report privacy vertical slice",
+      "selectionClass": "CONTINUING_STARTED_P0_LIFE_PRIVACY_SECURITY_AND_DATA_INTEGRITY_SLICE",
+      "statusAtSelection": "PARTIAL",
+      "stepOutcome": "COMPLETED_PASS_PERSISTENT_RECEIPT_PASS_REQUIREMENT_REMAINS_PARTIAL",
+      "evidence": "artifacts/checkpoints/30-Y_COMPLETION_RECORD.json"
+    }
+  ],
+  "currentSelection": {
+    "step": "30-Z",
+    "requirementId": "PPK-002",
+    "title": "Governed location Policy Enforcement, family-bound repository receipt, direct-write fence and cross-surface privacy vertical slice",
+    "selectionClass": "CONTINUING_STARTED_P0_LOCATION_PRIVACY_SECURITY_AND_DATA_INTEGRITY_SLICE",
+    "statusAtSelection": "PARTIAL",
+    "selectedAt": "2026-08-08T03:13:13.0311784+03:00",
+    "authority": "artifacts/authority/30-Z_AUTO_PRIORITY_SELECTION_AUTHORITY.json"
+  },
+  "preservedExternalBlockers": [
+    {
+      "requirementId": "B2-01",
+      "status": "COMPLETE",
+      "nativeInteractiveWindowsHello": "NOT_RUN_NOT_PASS",
+      "availability": "device_not_present",
+      "currentDisposition": "USER_DEFERRED_NON_BLOCKING_UNDER_DEC_162",
+      "countsAsCurrentCompletionBlocker": false
+    }
+  ],
+  "userConfiguredCreditStop": {
+    "previousUsedPercent": 95,
+    "status": "CANCELLED_BY_USER",
+    "cancelledAt": "2026-08-06T07:45:38.3898625+03:00"
+  },
+  "canonicalConversationCapacityPolicy": {
+    "path": "config/conversation-capacity-policy.json",
+    "status": "UNCHANGED",
+    "metric": "PLATFORM_ACTUAL_OR_UNAVAILABLE"
+  }
+}

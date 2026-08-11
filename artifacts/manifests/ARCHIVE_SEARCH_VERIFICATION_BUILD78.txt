@@ -1,0 +1,16 @@
+Panthera pardus tulliana Aile — Build 78 Archive Search Verification
+
+PASS Search use case exists
+PASS Search input normalized
+PASS Query port exposes search
+PASS Repository search exists
+PASS Repository owns archive search SQL
+PASS Destroyed items excluded
+PASS Adapter delegates to repository
+PASS Adapter applies read authorization
+PASS DataStore delegates to use case
+PASS Direct search SQL removed from DataStore
+
+Result: 10 / 10 PASS
+Version sequence: 77 -> 78 PASS
+Full TypeScript/Electron production build: not executed; success is not claimed.

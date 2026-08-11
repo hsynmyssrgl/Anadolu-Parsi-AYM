@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "04.08.2026.29",
+  "milestone": "Bronze RC2 Build undefined",
+  "status": "passed",
+  "checks": 18,
+  "scenarios": [
+    "invitation email is normalized and linked to a family person",
+    "pending invitation duplicate is rejected atomically",
+    "pending invitation can be revoked",
+    "weak invitation acceptance password leaves invitation pending",
+    "invitation acceptance creates and authenticates linked account",
+    "accepted invitation token cannot be consumed twice",
+    "non-owner member cannot read the owner governed location without an explicit grant",
+    "participant mutation normalizes duplicates and persists visibility",
+    "event invitation text is updated through application use case",
+    "event notes are updated through application use case",
+    "invalid participant mutation rolls back event audit and outbox",
+    "timeline notification is acknowledged for current account",
+    "notification acknowledgement is idempotent",
+    "membership and collaboration outbox events are publishable",
+    "notification acknowledgement survives application restart",
+    "membership lifecycle writes audit and outbox records",
+    "event collaboration mutations write audit and outbox records",
+    "accepted account preserves person link and membership period"
+  ],
+  "invitationRepositoryActive": true,
+  "collaborationMutationsActive": true,
+  "notificationAcknowledgementPersistent": true,
+  "transactionalAuditOutboxActive": true,
+  "generatedAt": "2026-08-11T06:57:25.671Z"
+}

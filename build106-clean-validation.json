@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 2,
+  "stage": "Bronze RC2 Active Development",
+  "platform": "linux",
+  "nodeVersion": "v22.16.0",
+  "startedAt": "2026-07-25T08:38:51.835Z",
+  "finishedAt": "2026-07-25T08:38:52.978Z",
+  "overallStatus": "INCOMPLETE",
+  "results": [
+    {
+      "id": "clean-npm-ci",
+      "label": "Temiz ortam npm ci",
+      "status": "FAIL",
+      "timedOut": false,
+      "timeoutMs": 60000,
+      "startedAt": "2026-07-25T08:38:51.836Z",
+      "finishedAt": "2026-07-25T08:38:52.973Z",
+      "exitCode": 1,
+      "signal": null,
+      "stdout": "",
+      "stderr": "npm error code E503\nnpm error 503 Service Temporarily Unavailable - GET https://packages.applied-caas-gateway1.internal.api.openai.org/artifactory/api/npm/npm-public/esbuild/-/esbuild-0.25.12.tgz\nnpm error A complete log of this run can be found in: /home/oai/.npm/_logs/2026-07-25T08_38_51_874Z-debug-0.log\n"
+    },
+    {
+      "id": "tsc-no-emit",
+      "label": "TypeScript tsc --noEmit",
+      "status": "NOT_RUN",
+      "reason": "A previous validation gate failed."
+    },
+    {
+      "id": "electron-production-build",
+      "label": "Electron production build",
+      "status": "NOT_RUN",
+      "reason": "A previous validation gate failed."
+    },
+    {
+      "id": "smoke-tests",
+      "label": "Bronze smoke testleri",
+      "status": "NOT_RUN",
+      "reason": "A previous validation gate failed."
+    },
+    {
+      "id": "windows-real-launch",
+      "label": "Windows gerçek açılış testi",
+      "status": "NOT_RUN",
+      "reason": "A previous validation gate failed."
+    },
+    {
+      "id": "windows-installer",
+      "label": "Windows installer üretimi ve doğrulaması",
+      "status": "NOT_RUN",
+      "reason": "A previous validation gate failed."
+    }
+  ]
+}

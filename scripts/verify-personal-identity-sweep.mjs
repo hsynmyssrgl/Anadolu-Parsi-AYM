@@ -1,0 +1,15 @@
+import { createHash } from 'node:crypto';
+import { readFile, readdir, stat, writeFile, mkdir } from 'node:fs/promises';
+import { dirname, extname, join } from 'node:path';
+const policy=JSON.parse(await readFile('config/personal-identity-policy.json','utf8'));
+const forbiddenWords=new Set(policy.forbiddenWordSha256);
+const forbiddenIds=new Set(policy.forbiddenIdentifierSha256);
+const hash=(s)=>createHash('sha256').update(s.toLocaleLowerCase('tr-TR')).digest('hex');
+const textExt=new Set(['.ts','.tsx','.mjs','.js','.json','.md','.sql','.txt','.rtf','.css','.svg','.yml','.yaml','.toml','.ps1','.cmd']);
+const failures=[]; let files=0, tokens=0;
+const skip=(p)=>p.includes('/node_modules/')||p.includes('/artifacts/')||p.includes('/docs/history/');
+const walk=async(p)=>{const st=await stat(p); if(st.isDirectory()){for(const e of await readdir(p)) await walk(join(p,e)); return;} if(skip('/'+p.replaceAll('\\','/')))return; if(!textExt.has(extname(p).toLowerCase())&&!['README.md','START_HERE_TR.md','DELIVERY_SUMMARY_TR.md','PAKET_OZETI_TR.md','SECURITY.md','COPYRIGHT.md','CONTRIBUTING.md'].includes(p))return; files++; const text=await readFile(p,'utf8'); const words=text.match(/[\p{L}]+/gu)??[]; for(const w of words){tokens++;if(forbiddenWords.has(hash(w)))failures.push(`${p}: forbidden natural-person token fingerprint detected`);} const ids=text.match(/[A-Za-z0-9_-]+/g)??[]; for(const id of ids) if(forbiddenIds.has(hash(id))) failures.push(`${p}: forbidden legacy personal identifier fingerprint detected`);};
+for(const root of policy.scanRoots) await walk(root);
+const unique=[...new Set(failures)]; const ledger=JSON.parse(await readFile('config/master-build-ledger.json','utf8')); const build=ledger.currentBuild; const report={schemaVersion:1,build,filesScanned:files,tokensScanned:tokens,status:unique.length?'FAIL':'PASS',failures:unique,generatedAt:new Date().toISOString()};
+await mkdir('artifacts/validation',{recursive:true}); await writeFile(`artifacts/validation/build${build}-personal-identity-sweep.json`,JSON.stringify(report,null,2)+'\n');
+if(unique.length){console.error(unique.join('\n'));process.exit(1);} console.log(`Personal identity sweep: PASS (${files} files, ${tokens} word tokens).`);

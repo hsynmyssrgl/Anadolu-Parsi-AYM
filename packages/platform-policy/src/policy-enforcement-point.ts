@@ -1,0 +1,928 @@
+import { createHash, randomUUID } from 'node:crypto';
+import {
+  PlatformPolicyKernel,
+  type PlatformApplicationId,
+  type PlatformPolicyAuthorization,
+  type PlatformCapability,
+  type PlatformPolicyDecision,
+  type PlatformPolicyReceipt,
+  type PlatformPolicyRequest,
+  type PolicyAction,
+  type PolicyConsent,
+  type PolicyGrant,
+  type PolicyObligation,
+  type PolicyResource
+} from './policy-kernel.js';
+
+export interface PlatformPolicyIntent {
+  readonly correlationId: string;
+  readonly action: PolicyAction;
+  readonly capability: PlatformCapability;
+  readonly resourceType: string;
+  readonly resourceId: string;
+  readonly purpose?: string;
+}
+
+export interface PlatformPolicyConnectionAuthority {
+  readonly policyVersion: string;
+  readonly accountId: string;
+  readonly personId?: string;
+  readonly deviceId: string;
+  readonly applicationId: PlatformApplicationId;
+  readonly deviceTrusted: boolean;
+  readonly membershipActive: boolean;
+  readonly roles: readonly string[];
+  readonly familyIds: readonly string[];
+  readonly householdIds?: readonly string[];
+  readonly familyBranchIds?: readonly string[];
+  readonly online: boolean;
+  readonly grants?: readonly PolicyGrant[];
+  readonly consents?: readonly PolicyConsent[];
+  readonly expiresAt: string;
+}
+
+export interface PlatformPolicyAuthorityResolver {
+  resolve(): Promise<PlatformPolicyConnectionAuthority> | PlatformPolicyConnectionAuthority;
+}
+
+export interface PlatformPolicyResourceResolver {
+  resolve(intent: PlatformPolicyIntent, authority: PlatformPolicyConnectionAuthority): Promise<PolicyResource> | PolicyResource;
+}
+
+export interface PlatformPolicyReceiptRecord {
+  readonly correlationId: string;
+  readonly resourceType: string;
+  readonly resourceId: string;
+  readonly action: PolicyAction;
+  readonly capability: PlatformCapability;
+  readonly request: PlatformPolicyRequest;
+  readonly decision: PlatformPolicyDecision;
+  readonly receipt: PlatformPolicyReceipt;
+  readonly recordedAt: string;
+  /** Present on every receipt issued after the strict obligation executor was introduced. */
+  readonly obligationExecution?: PlatformPolicyObligationExecution;
+}
+
+export interface PlatformPolicyObligationControls {
+  readonly localProcessingOnly: boolean;
+  readonly allowCache: boolean;
+  readonly allowClipboard: boolean;
+  readonly allowExport: boolean;
+  readonly allowAi: boolean;
+  readonly allowRecording: boolean;
+  readonly onlineOnly: boolean;
+  readonly highDetailAudit: boolean;
+  readonly maskedFields: readonly string[];
+  readonly watermark?: string;
+  readonly deleteAfter?: string;
+}
+
+export interface PlatformPolicyExecutedObligation {
+  readonly ordinal: number;
+  readonly type: PolicyObligation['type'];
+  readonly value?: string | readonly string[];
+  readonly enforcement: 'PEP_RUNTIME_CONTROL';
+}
+
+export interface PlatformPolicyObligationExecution {
+  readonly schemaVersion: 1;
+  readonly executorId: 'ppt.platform-policy.strict-obligation-executor.v1';
+  readonly requestHash: string;
+  readonly receiptNonce: string;
+  readonly executedAt: string;
+  readonly executed: readonly PlatformPolicyExecutedObligation[];
+  readonly controls: PlatformPolicyObligationControls;
+  readonly attestationHash: string;
+}
+
+export interface PlatformPolicyJournalProjectionProof {
+  readonly schemaVersion: 1;
+  /** SHA-256 of the exact canonical signed receipt. */
+  readonly receiptHash: string;
+  /** SHA-256 of the complete canonical receipt record. */
+  readonly recordHash: string;
+  readonly receiptNonce: string;
+  readonly entrySequence: number;
+  readonly entryHash: string;
+  readonly headSequence: number;
+  readonly headHash: string;
+  /** Exact byte length of the journal prefix ending at headSequence. */
+  readonly journalSizeBytes: number;
+  readonly issuedAt: string;
+  /** HMAC-SHA256 over every preceding proof field using the protected journal MAC key. */
+  readonly proofMac: string;
+}
+
+export interface PlatformPolicyReceiptSink {
+  append(record: PlatformPolicyReceiptRecord): Promise<void> | void;
+  /**
+   * Idempotently projects an exact receipt. Implementations must only accept an
+   * existing nonce when its complete canonical record is identical. Successful
+   * projection returns a cryptographic proof created only after durable readback.
+   */
+  ensure?(record: PlatformPolicyReceiptRecord): Promise<PlatformPolicyJournalProjectionProof> | PlatformPolicyJournalProjectionProof;
+  /** Verifies a proof and its anchored journal prefix against current protected storage. */
+  verifyProjectionProof?(proof: PlatformPolicyJournalProjectionProof): Promise<boolean> | boolean;
+}
+
+export interface PlatformPolicyReplayReservation {
+  readonly nonce: string;
+  readonly reservedAtMs: number;
+  readonly expiresAtMs: number;
+}
+
+export interface PlatformPolicyReplayStore {
+  reserve(reservation: PlatformPolicyReplayReservation): Promise<boolean> | boolean;
+}
+
+export interface PlatformPolicyClusterFenceSnapshot {
+  readonly writable: boolean;
+  readonly epoch: number;
+}
+
+export type PlatformPolicyClusterFence = () => PlatformPolicyClusterFenceSnapshot;
+
+export interface PlatformPolicyProviderAuthorizationInput {
+  readonly request: PlatformPolicyRequest;
+  readonly nonce: string;
+}
+
+export interface PlatformPolicyProviderAuthorizationResult {
+  readonly effectiveRequest: PlatformPolicyRequest;
+  readonly authorization: PlatformPolicyAuthorization;
+}
+
+export interface PlatformPolicyProviderVerificationInput {
+  readonly request: PlatformPolicyRequest;
+  readonly receipt: PlatformPolicyReceipt;
+}
+
+/**
+ * Trusted policy-decision boundary used when the signing kernel lives in another
+ * process. The provider may only narrow clusterWritable from true to false; the
+ * PEP validates every other request field before accepting the result.
+ */
+export interface PlatformPolicyAuthorizationProvider {
+  authorize(input: PlatformPolicyProviderAuthorizationInput):
+    | Promise<PlatformPolicyProviderAuthorizationResult>
+    | PlatformPolicyProviderAuthorizationResult;
+  verify(input: PlatformPolicyProviderVerificationInput): Promise<boolean> | boolean;
+}
+
+const transactionContextBrand: unique symbol = Symbol('ppt.platform-policy.transaction-context');
+const activeTransactionContexts = new WeakMap<object, {
+  readonly expiresAtMs: number;
+  readonly clock: () => string;
+  readonly clusterFence: PlatformPolicyClusterFence;
+  readonly fenceEpoch: number;
+  readonly fenceWritable: boolean;
+}>();
+const sharedReplayReservations = new Map<string, number>();
+const defaultReplayStore: PlatformPolicyReplayStore = Object.freeze({
+  reserve(reservation: PlatformPolicyReplayReservation): boolean {
+    for (const [nonce, expiresAtMs] of sharedReplayReservations) {
+      if (expiresAtMs < reservation.reservedAtMs) sharedReplayReservations.delete(nonce);
+    }
+    if (sharedReplayReservations.has(reservation.nonce)) return false;
+    sharedReplayReservations.set(reservation.nonce, reservation.expiresAtMs);
+    return true;
+  }
+});
+
+export interface PlatformPolicyTransactionContext {
+  readonly [transactionContextBrand]: true;
+  readonly correlationId: string;
+  readonly requestHash: string;
+  readonly policyVersion: string;
+  readonly subject: PlatformPolicyTransactionSubjectSnapshot;
+  readonly resourceType: string;
+  readonly resourceId: string;
+  readonly resourceFamilyId: string;
+  readonly resourceHouseholdId?: string;
+  readonly resourceFamilyBranchId?: string;
+  readonly action: PolicyAction;
+  readonly capability: PlatformCapability;
+  readonly fenceEpoch: number;
+  readonly fenceWritable: boolean;
+  readonly decision: PlatformPolicyDecision & { readonly allowed: true };
+  readonly receipt: PlatformPolicyReceipt;
+  readonly receiptRecord: PlatformPolicyReceiptRecord;
+  readonly obligationExecution: PlatformPolicyObligationExecution;
+}
+
+export interface PlatformPolicyTransactionSubjectSnapshot {
+  readonly accountId: string;
+  readonly personId?: string;
+  readonly deviceId: string;
+  readonly applicationId: PlatformApplicationId;
+  readonly roles: readonly string[];
+  readonly familyIds: readonly string[];
+  readonly householdIds?: readonly string[];
+  readonly familyBranchIds?: readonly string[];
+}
+
+export interface PlatformPolicyTransactionExpectation {
+  readonly resourceType: string;
+  readonly resourceId: string;
+  readonly action: PolicyAction;
+  readonly capability: PlatformCapability;
+  readonly correlationId?: string;
+  readonly resourceFamilyId?: string;
+  readonly fenceEpoch?: number;
+  readonly fenceWritable?: boolean;
+}
+
+export const assertActivePlatformPolicyTransactionContext: (
+  value: unknown,
+  expected?: PlatformPolicyTransactionExpectation
+) => asserts value is PlatformPolicyTransactionContext = (
+  value: unknown,
+  expected?: PlatformPolicyTransactionExpectation
+): asserts value is PlatformPolicyTransactionContext => {
+  const active = value && typeof value === 'object' ? activeTransactionContexts.get(value) : undefined;
+  if (!value || typeof value !== 'object' || !active) {
+    throw new PlatformPolicyEnforcementError(
+      'TRANSACTION_CONTEXT_INVALID',
+      'Policy-authorized transaction context is forged, expired or outside its execution boundary'
+    );
+  }
+  const now = Date.parse(active.clock());
+  if (!Number.isFinite(now) || now > active.expiresAtMs) {
+    activeTransactionContexts.delete(value);
+    throw new PlatformPolicyEnforcementError('RECEIPT_EXPIRED', 'Policy-authorized transaction context has expired');
+  }
+  const fence = active.clusterFence();
+  if (!fence || typeof fence.writable !== 'boolean' || !Number.isSafeInteger(fence.epoch) || fence.epoch !== active.fenceEpoch || fence.writable !== active.fenceWritable) {
+    activeTransactionContexts.delete(value);
+    throw new PlatformPolicyEnforcementError('CLUSTER_FENCE_CHANGED', 'Cluster writability fence changed during the policy-authorized transaction');
+  }
+  const context = value as PlatformPolicyTransactionContext;
+  assertObligationExecution(context.obligationExecution, context.receipt);
+  if (
+    context.fenceEpoch !== active.fenceEpoch
+    || context.fenceWritable !== active.fenceWritable
+  ) {
+    activeTransactionContexts.delete(value);
+    throw new PlatformPolicyEnforcementError(
+      'TRANSACTION_CONTEXT_INVALID',
+      'Policy-authorized transaction context fence binding is invalid'
+    );
+  }
+  if (
+    expected &&
+    (context.resourceType !== expected.resourceType || context.resourceId !== expected.resourceId ||
+      context.action !== expected.action || context.capability !== expected.capability ||
+      (expected.correlationId !== undefined && context.correlationId !== expected.correlationId) ||
+      (expected.resourceFamilyId !== undefined && context.resourceFamilyId !== expected.resourceFamilyId) ||
+      (expected.fenceEpoch !== undefined && context.fenceEpoch !== expected.fenceEpoch) ||
+      (expected.fenceWritable !== undefined && context.fenceWritable !== expected.fenceWritable))
+  ) {
+    throw new PlatformPolicyEnforcementError('TRANSACTION_CONTEXT_MISMATCH', 'Policy-authorized transaction context does not match the repository operation');
+  }
+};
+
+export type PlatformPolicyEnforcementErrorCode =
+  | 'INTENT_INVALID'
+  | 'AUTHORITY_INVALID'
+  | 'AUTHORITY_RESOLUTION_FAILED'
+  | 'AUTHORITY_EXPIRED'
+  | 'RESOURCE_RESOLUTION_FAILED'
+  | 'RESOURCE_MISMATCH'
+  | 'RECEIPT_VERIFICATION_FAILED'
+  | 'RECEIPT_PERSISTENCE_FAILED'
+  | 'RECEIPT_EXPIRED'
+  | 'RECEIPT_REPLAYED'
+  | 'CLUSTER_FENCE_CHANGED'
+  | 'POLICY_DENIED'
+  | 'OBLIGATION_EXECUTION_FAILED'
+  | 'TRANSACTION_CONTEXT_INVALID'
+  | 'TRANSACTION_CONTEXT_MISMATCH'
+  | 'ENFORCEMENT_UNAVAILABLE';
+
+export class PlatformPolicyEnforcementError extends Error {
+  public readonly code: PlatformPolicyEnforcementErrorCode;
+  public readonly decision: PlatformPolicyDecision | undefined;
+  public readonly receipt: PlatformPolicyReceipt | undefined;
+
+  public constructor(
+    code: PlatformPolicyEnforcementErrorCode,
+    message: string,
+    options?: ErrorOptions & {
+      readonly decision?: PlatformPolicyDecision;
+      readonly receipt?: PlatformPolicyReceipt;
+    }
+  ) {
+    super(message, options);
+    this.name = 'PlatformPolicyEnforcementError';
+    this.code = code;
+    this.decision = options?.decision;
+    this.receipt = options?.receipt;
+  }
+}
+
+interface PlatformPolicyEnforcementPointBaseOptions {
+  readonly authorityResolver: PlatformPolicyAuthorityResolver;
+  readonly resourceResolver: PlatformPolicyResourceResolver;
+  readonly receiptSink: PlatformPolicyReceiptSink;
+  readonly replayStore?: PlatformPolicyReplayStore;
+  readonly clock?: () => string;
+  readonly nonceFactory?: () => string;
+  readonly receiptTtlMs?: number;
+  /**
+   * Production business writes use this mode after recording the exact receipt
+   * and fence in their SQLite transaction. Denied decisions are still appended
+   * immediately; allowed receipts are projected by the production adapter only
+   * after COMMIT and acknowledged from its durable pending-projection row.
+   */
+  readonly deferAllowedReceiptPersistence?: boolean;
+}
+
+export type PlatformPolicyEnforcementPointOptions = PlatformPolicyEnforcementPointBaseOptions & (
+  | { readonly kernel: PlatformPolicyKernel; readonly provider?: never }
+  | { readonly provider: PlatformPolicyAuthorizationProvider; readonly kernel?: never }
+);
+
+const validActions = new Set<PolicyAction>(['read', 'create', 'update', 'delete', 'share', 'process', 'record', 'administer']);
+const validCapabilities = new Set<PlatformCapability>([
+  'family.read', 'family.write', 'health.read', 'health.write',
+  'finance.read', 'finance.write', 'location.read', 'location.share',
+  'archive.read', 'archive.write', 'archive.ocr', 'ai.process',
+  'translation.process', 'communication.message', 'communication.call',
+  'communication.record', 'file.share', 'backup.create', 'backup.restore',
+  'cluster.admin', 'plugin.execute'
+]);
+const validSensitivities = new Set(['public', 'internal', 'personal', 'sensitive', 'highly_sensitive']);
+const validApplications = new Set<PlatformApplicationId>([
+  'windows-desktop', 'windows-core-service', 'windows-cluster-agent', 'macos-companion',
+  'ios-companion', 'ipados-companion', 'watchos-companion', 'visionos-companion',
+  'ocr-worker', 'ai-worker', 'translation-worker', 'communication-service',
+  'backup-worker', 'signed-plugin'
+]);
+
+const nonEmptyBounded = (value: unknown, max: number): value is string => typeof value === 'string' && value.trim() === value && value.length > 0 && value.length <= max;
+const parseTimestamp = (value: unknown): number => typeof value === 'string' ? Date.parse(value) : Number.NaN;
+const stable = (value: unknown): string => {
+  if (Array.isArray(value)) return `[${value.map(stable).join(',')}]`;
+  if (value && typeof value === 'object') {
+    const record = value as Record<string, unknown>;
+    return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${stable(record[key])}`).join(',')}}`;
+  }
+  return JSON.stringify(value);
+};
+const sha256 = (value: string): string => createHash('sha256').update(value, 'utf8').digest('hex');
+const obligationExecutionPayload = (
+  value: Omit<PlatformPolicyObligationExecution, 'attestationHash'>
+): Omit<PlatformPolicyObligationExecution, 'attestationHash'> => ({
+  schemaVersion: value.schemaVersion,
+  executorId: value.executorId,
+  requestHash: value.requestHash,
+  receiptNonce: value.receiptNonce,
+  executedAt: value.executedAt,
+  executed: value.executed,
+  controls: value.controls
+});
+
+const executePolicyObligations = (
+  request: PlatformPolicyRequest,
+  decision: PlatformPolicyDecision & { readonly allowed: true },
+  receipt: PlatformPolicyReceipt,
+  executedAt: string
+): PlatformPolicyObligationExecution => {
+  const seen = new Set<PolicyObligation['type']>();
+  const executed: PlatformPolicyExecutedObligation[] = [];
+  const maskedFields = new Set<string>();
+  let localProcessingOnly = false;
+  let allowCache = true;
+  let allowClipboard = true;
+  let allowExport = true;
+  let allowAi = true;
+  let allowRecording = true;
+  let onlineOnly = false;
+  let highDetailAudit = false;
+  let watermark: string | undefined;
+  let deleteAfter: string | undefined;
+
+  for (const [ordinal, obligation] of decision.obligations.entries()) {
+    if (!obligation || typeof obligation !== 'object' || seen.has(obligation.type)) {
+      throw new PlatformPolicyEnforcementError('OBLIGATION_EXECUTION_FAILED', 'Policy obligation set is invalid or contains duplicates');
+    }
+    seen.add(obligation.type);
+    const value = obligation.value;
+    switch (obligation.type) {
+      case 'mask_fields': {
+        if (!Array.isArray(value) || value.length < 1 || value.some((field) => !nonEmptyBounded(field, 256))) {
+          throw new PlatformPolicyEnforcementError('OBLIGATION_EXECUTION_FAILED', 'mask_fields obligation requires a non-empty bounded field list');
+        }
+        for (const field of value) maskedFields.add(field);
+        break;
+      }
+      case 'local_processing_only': localProcessingOnly = true; break;
+      case 'no_cache': allowCache = false; break;
+      case 'no_clipboard': allowClipboard = false; break;
+      case 'no_export': allowExport = false; break;
+      case 'no_ai': allowAi = false; break;
+      case 'no_recording': allowRecording = false; break;
+      case 'watermark':
+        if (!nonEmptyBounded(value, 512)) throw new PlatformPolicyEnforcementError('OBLIGATION_EXECUTION_FAILED', 'watermark obligation requires a bounded value');
+        watermark = value;
+        break;
+      case 'delete_after':
+        if (!nonEmptyBounded(value, 512)) throw new PlatformPolicyEnforcementError('OBLIGATION_EXECUTION_FAILED', 'delete_after obligation requires a bounded retention directive');
+        deleteAfter = value;
+        break;
+      case 'strong_reauthentication':
+        throw new PlatformPolicyEnforcementError('OBLIGATION_EXECUTION_FAILED', 'Strong reauthentication evidence is not attached to this transaction');
+      case 'online_only':
+        if (!request.online) throw new PlatformPolicyEnforcementError('OBLIGATION_EXECUTION_FAILED', 'online_only obligation cannot be satisfied while offline');
+        onlineOnly = true;
+        break;
+      case 'high_detail_audit': highDetailAudit = true; break;
+      default:
+        throw new PlatformPolicyEnforcementError('OBLIGATION_EXECUTION_FAILED', 'Unsupported policy obligation');
+    }
+    executed.push(Object.freeze({
+      ordinal,
+      type: obligation.type,
+      ...(value === undefined
+        ? {}
+        : { value: Array.isArray(value) ? Object.freeze([...value]) : value }),
+      enforcement: 'PEP_RUNTIME_CONTROL' as const
+    }));
+  }
+  const controls: PlatformPolicyObligationControls = Object.freeze({
+    localProcessingOnly,
+    allowCache,
+    allowClipboard,
+    allowExport,
+    allowAi,
+    allowRecording,
+    onlineOnly,
+    highDetailAudit,
+    maskedFields: Object.freeze([...maskedFields].sort()),
+    ...(watermark === undefined ? {} : { watermark }),
+    ...(deleteAfter === undefined ? {} : { deleteAfter })
+  });
+  const payload = Object.freeze({
+    schemaVersion: 1 as const,
+    executorId: 'ppt.platform-policy.strict-obligation-executor.v1' as const,
+    requestHash: receipt.requestHash,
+    receiptNonce: receipt.nonce,
+    executedAt,
+    executed: Object.freeze(executed),
+    controls
+  });
+  return Object.freeze({ ...payload, attestationHash: sha256(stable(payload)) });
+};
+
+const assertObligationExecution = (
+  execution: PlatformPolicyObligationExecution,
+  receipt: PlatformPolicyReceipt
+): void => {
+  if (
+    execution.schemaVersion !== 1
+    || execution.executorId !== 'ppt.platform-policy.strict-obligation-executor.v1'
+    || execution.requestHash !== receipt.requestHash
+    || execution.receiptNonce !== receipt.nonce
+    || !Number.isFinite(Date.parse(execution.executedAt))
+    || !/^[0-9a-f]{64}$/u.test(execution.attestationHash)
+    || execution.attestationHash !== sha256(stable(obligationExecutionPayload(execution)))
+    || execution.executed.length !== receipt.decision.obligations.length
+    || execution.executed.some((item, index) => item.ordinal !== index || stable(item.value) !== stable(receipt.decision.obligations[index]?.value) || item.type !== receipt.decision.obligations[index]?.type)
+  ) throw new PlatformPolicyEnforcementError('OBLIGATION_EXECUTION_FAILED', 'Policy obligation execution attestation is missing or does not match the signed decision');
+};
+const freezeGrant = (grant: PolicyGrant): PolicyGrant => Object.freeze({
+  ...grant,
+  actions: Object.freeze([...grant.actions]),
+  ...(grant.purposes ? { purposes: Object.freeze([...grant.purposes]) } : {})
+});
+const freezeConsent = (consent: PolicyConsent): PolicyConsent => Object.freeze({ ...consent });
+
+export class PlatformPolicyEnforcementPoint {
+  readonly #kernel: PlatformPolicyKernel | undefined;
+  readonly #provider: PlatformPolicyAuthorizationProvider | undefined;
+  readonly #authorityResolver: PlatformPolicyAuthorityResolver;
+  readonly #resourceResolver: PlatformPolicyResourceResolver;
+  readonly #receiptSink: PlatformPolicyReceiptSink;
+  readonly #replayStore: PlatformPolicyReplayStore;
+  readonly #clock: () => string;
+  readonly #nonceFactory: () => string;
+  readonly #receiptTtlMs: number;
+  readonly #deferAllowedReceiptPersistence: boolean;
+
+  public constructor(options: PlatformPolicyEnforcementPointOptions) {
+    if ((options.kernel === undefined) === (options.provider === undefined)) {
+      throw new PlatformPolicyEnforcementError(
+        'ENFORCEMENT_UNAVAILABLE',
+        'Exactly one policy kernel or authorization provider must be composed'
+      );
+    }
+    this.#kernel = options.kernel;
+    this.#provider = options.provider;
+    this.#authorityResolver = options.authorityResolver;
+    this.#resourceResolver = options.resourceResolver;
+    this.#receiptSink = options.receiptSink;
+    this.#replayStore = options.replayStore ?? defaultReplayStore;
+    this.#clock = options.clock ?? (() => new Date().toISOString());
+    this.#nonceFactory = options.nonceFactory ?? randomUUID;
+    const receiptTtlMs = options.receiptTtlMs ?? 30_000;
+    if (!Number.isSafeInteger(receiptTtlMs) || receiptTtlMs < 1_000 || receiptTtlMs > 300_000) {
+      throw new PlatformPolicyEnforcementError('RECEIPT_VERIFICATION_FAILED', 'Policy receipt TTL must be an integer between 1000 and 300000 milliseconds');
+    }
+    this.#receiptTtlMs = receiptTtlMs;
+    this.#deferAllowedReceiptPersistence = options.deferAllowedReceiptPersistence === true;
+    if (this.#deferAllowedReceiptPersistence && typeof options.receiptSink.ensure !== 'function') {
+      throw new PlatformPolicyEnforcementError(
+        'ENFORCEMENT_UNAVAILABLE',
+        'Deferred policy receipt persistence requires an idempotent exact receipt sink'
+      );
+    }
+  }
+
+  public async execute<T>(
+    intent: PlatformPolicyIntent,
+    clusterFence: PlatformPolicyClusterFence,
+    operation: (context: PlatformPolicyTransactionContext) => Promise<T> | T
+  ): Promise<T> {
+    this.#assertIntent(intent);
+    intent = Object.freeze({
+      correlationId: intent.correlationId,
+      action: intent.action,
+      capability: intent.capability,
+      resourceType: intent.resourceType,
+      resourceId: intent.resourceId,
+      ...(intent.purpose ? { purpose: intent.purpose } : {})
+    });
+    if (typeof clusterFence !== 'function' || typeof operation !== 'function') {
+      throw new PlatformPolicyEnforcementError('INTENT_INVALID', 'Policy transaction boundary is invalid');
+    }
+    let authority: PlatformPolicyConnectionAuthority;
+    try {
+      authority = await this.#authorityResolver.resolve();
+    } catch (error) {
+      throw new PlatformPolicyEnforcementError('AUTHORITY_RESOLUTION_FAILED', 'Trusted policy connection authority could not be resolved', { cause: error });
+    }
+    this.#assertAuthority(authority, parseTimestamp(this.#clock()));
+    authority = Object.freeze({
+      ...authority,
+      roles: Object.freeze([...authority.roles]),
+      familyIds: Object.freeze([...authority.familyIds]),
+      ...(authority.householdIds ? { householdIds: Object.freeze([...authority.householdIds]) } : {}),
+      ...(authority.familyBranchIds ? { familyBranchIds: Object.freeze([...authority.familyBranchIds]) } : {}),
+      ...(authority.grants ? { grants: Object.freeze(authority.grants.map(freezeGrant)) } : {}),
+      ...(authority.consents ? { consents: Object.freeze(authority.consents.map(freezeConsent)) } : {})
+    });
+
+    let resource: PolicyResource;
+    try {
+      resource = await this.#resourceResolver.resolve(intent, authority);
+    } catch (error) {
+      throw new PlatformPolicyEnforcementError('RESOURCE_RESOLUTION_FAILED', 'Policy resource context could not be resolved', { cause: error });
+    }
+    if (!resource || typeof resource !== 'object') {
+      throw new PlatformPolicyEnforcementError('RESOURCE_RESOLUTION_FAILED', 'Policy resource context is missing');
+    }
+    if (resource.type !== intent.resourceType || resource.id !== intent.resourceId) {
+      throw new PlatformPolicyEnforcementError('RESOURCE_MISMATCH', 'Resolved policy resource does not match the requested intent');
+    }
+    if (!nonEmptyBounded(resource.familyId, 256) || !validSensitivities.has(resource.sensitivity)) {
+      throw new PlatformPolicyEnforcementError('RESOURCE_RESOLUTION_FAILED', 'Resolved policy resource context is invalid');
+    }
+    resource = Object.freeze({ ...resource });
+
+    const issuedAt = this.#clock();
+    const issuedAtMs = parseTimestamp(issuedAt);
+    this.#assertAuthority(authority, issuedAtMs);
+    const authorityExpiresAtMs = parseTimestamp(authority.expiresAt);
+    const requestedFence = this.#readFence(clusterFence);
+
+    const subject: PlatformPolicyTransactionSubjectSnapshot = Object.freeze({
+      accountId: authority.accountId,
+      ...(authority.personId ? { personId: authority.personId } : {}),
+      deviceId: authority.deviceId,
+      applicationId: authority.applicationId,
+      roles: Object.freeze([...authority.roles]),
+      familyIds: Object.freeze([...authority.familyIds]),
+      ...(authority.householdIds ? { householdIds: Object.freeze([...authority.householdIds]) } : {}),
+      ...(authority.familyBranchIds ? { familyBranchIds: Object.freeze([...authority.familyBranchIds]) } : {})
+    });
+    const request: PlatformPolicyRequest = Object.freeze({
+      correlationId: intent.correlationId,
+      policyVersion: authority.policyVersion,
+      subject: Object.freeze({
+        ...subject,
+        deviceTrusted: authority.deviceTrusted,
+        membershipActive: authority.membershipActive
+      }),
+      resource: Object.freeze({ ...resource }),
+      action: intent.action,
+      capability: intent.capability,
+      ...(intent.purpose ? { purpose: intent.purpose } : {}),
+      occurredAt: issuedAt,
+      online: authority.online,
+      clusterWritable: requestedFence.writable,
+      enforcementMode: 'strict',
+      ...(authority.grants ? { grants: authority.grants } : {}),
+      ...(authority.consents ? { consents: authority.consents } : {})
+    });
+
+    const nonce = this.#nonceFactory();
+    if (!nonEmptyBounded(nonce, 256)) {
+      throw new PlatformPolicyEnforcementError('RECEIPT_VERIFICATION_FAILED', 'Policy receipt nonce is invalid');
+    }
+    // Reserve before crossing the provider boundary. A provider receipt may be
+    // issued later than the request, so retain the nonce for the longest
+    // receipt lifetime this PEP can accept (one TTL to issue plus one TTL to
+    // execute), bounded by the connection authority.
+    const reservationExpiresAtMs = Math.min(issuedAtMs + (this.#receiptTtlMs * 2), authorityExpiresAtMs);
+    let reserved: boolean;
+    try {
+      reserved = await this.#replayStore.reserve({ nonce, reservedAtMs: issuedAtMs, expiresAtMs: reservationExpiresAtMs });
+    } catch (error) {
+      if (error instanceof PlatformPolicyEnforcementError) throw error;
+      throw new PlatformPolicyEnforcementError(
+        'ENFORCEMENT_UNAVAILABLE',
+        'Policy replay reservation store is unavailable',
+        { cause: error }
+      );
+    }
+    if (!reserved) throw new PlatformPolicyEnforcementError('RECEIPT_REPLAYED', 'Policy receipt nonce was already issued');
+    const provided = await this.#authorize(request, issuedAt, nonce);
+    const effectiveRequest = this.#assertEffectiveRequest(request, provided.effectiveRequest);
+    const authorization = provided.authorization;
+    if (
+      authorization.receipt.nonce !== nonce ||
+      stable(authorization.decision) !== stable(authorization.receipt.decision)
+    ) {
+      throw new PlatformPolicyEnforcementError('RECEIPT_VERIFICATION_FAILED', 'Policy authorization is not bound to the reserved nonce and decision');
+    }
+    const receiptIssuedAtMs = parseTimestamp(authorization.receipt.issuedAt);
+    const providerReturnedAtMs = parseTimestamp(this.#clock());
+    if (
+      !Number.isFinite(receiptIssuedAtMs) || !Number.isFinite(providerReturnedAtMs) ||
+      receiptIssuedAtMs < issuedAtMs || receiptIssuedAtMs > providerReturnedAtMs ||
+      receiptIssuedAtMs - issuedAtMs > this.#receiptTtlMs ||
+      (this.#kernel !== undefined && receiptIssuedAtMs !== issuedAtMs)
+    ) {
+      throw new PlatformPolicyEnforcementError(
+        'RECEIPT_VERIFICATION_FAILED',
+        'Policy receipt issue time is invalid, stale or in the future'
+      );
+    }
+    const effectiveExpiresAtMs = Math.min(receiptIssuedAtMs + this.#receiptTtlMs, authorityExpiresAtMs);
+    if (providerReturnedAtMs > effectiveExpiresAtMs) {
+      throw new PlatformPolicyEnforcementError('RECEIPT_EXPIRED', 'Policy receipt expired before verification', {
+        decision: authorization.decision,
+        receipt: authorization.receipt
+      });
+    }
+    const fence = this.#readFence(clusterFence);
+    if (
+      fence.epoch !== requestedFence.epoch || fence.writable !== requestedFence.writable ||
+      effectiveRequest.clusterWritable !== fence.writable
+    ) {
+      throw new PlatformPolicyEnforcementError(
+        'CLUSTER_FENCE_CHANGED',
+        'Cluster writability fence changed while policy authorization was being issued'
+      );
+    }
+    if (!(await this.#verify(effectiveRequest, authorization.receipt))) {
+      throw new PlatformPolicyEnforcementError('RECEIPT_VERIFICATION_FAILED', 'Policy receipt is not bound to the resolved request');
+    }
+    if (authorization.decision.allowed && !effectiveRequest.clusterWritable) {
+      throw new PlatformPolicyEnforcementError(
+        'RECEIPT_VERIFICATION_FAILED',
+        'Policy provider allowed a transaction after narrowing the cluster fence to read-only'
+      );
+    }
+
+    const allowedDecision = authorization.decision.allowed
+      ? authorization.decision as PlatformPolicyDecision & { readonly allowed: true }
+      : undefined;
+    const obligationExecution = allowedDecision
+      ? executePolicyObligations(effectiveRequest, allowedDecision, authorization.receipt, this.#clock())
+      : undefined;
+    const record: PlatformPolicyReceiptRecord = Object.freeze({
+      correlationId: intent.correlationId,
+      resourceType: resource.type,
+      resourceId: resource.id,
+      action: intent.action,
+      capability: intent.capability,
+      request: effectiveRequest,
+      decision: authorization.decision,
+      receipt: authorization.receipt,
+      recordedAt: authorization.receipt.issuedAt,
+      ...(obligationExecution ? { obligationExecution } : {})
+    });
+    if (!authorization.decision.allowed) {
+      await this.#appendReceipt(
+        record,
+        authorization,
+        'Denied policy receipt could not be persisted before returning the decision'
+      );
+      if (!(await this.#verify(effectiveRequest, authorization.receipt))) {
+        throw new PlatformPolicyEnforcementError('RECEIPT_VERIFICATION_FAILED', 'Persisted policy receipt changed or no longer matches the resolved request');
+      }
+      throw new PlatformPolicyEnforcementError('POLICY_DENIED', `Policy denied the transaction: ${authorization.decision.reason}`, {
+        decision: authorization.decision,
+        receipt: authorization.receipt
+      });
+    }
+    if (!this.#deferAllowedReceiptPersistence) {
+      await this.#appendReceipt(
+        record,
+        authorization,
+        'Policy receipt could not be persisted before transaction execution'
+      );
+      if (!(await this.#verify(effectiveRequest, authorization.receipt))) {
+        throw new PlatformPolicyEnforcementError('RECEIPT_VERIFICATION_FAILED', 'Persisted policy receipt changed or no longer matches the resolved request');
+      }
+    }
+    const executionStartedAtMs = parseTimestamp(this.#clock());
+    if (!Number.isFinite(executionStartedAtMs) || executionStartedAtMs < receiptIssuedAtMs || executionStartedAtMs > effectiveExpiresAtMs) {
+      throw new PlatformPolicyEnforcementError('RECEIPT_EXPIRED', 'Policy receipt expired before transaction execution', {
+        decision: authorization.decision,
+        receipt: authorization.receipt
+      });
+    }
+    const executionFence = this.#readFence(clusterFence);
+    if (executionFence.epoch !== fence.epoch || executionFence.writable !== fence.writable) {
+      throw new PlatformPolicyEnforcementError('CLUSTER_FENCE_CHANGED', 'Cluster writability fence changed before transaction execution', {
+        decision: authorization.decision,
+        receipt: authorization.receipt
+      });
+    }
+
+    const decision = allowedDecision!;
+    assertObligationExecution(obligationExecution!, authorization.receipt);
+    const context: PlatformPolicyTransactionContext = Object.freeze({
+      [transactionContextBrand]: true as const,
+      correlationId: intent.correlationId,
+      requestHash: authorization.receipt.requestHash,
+      policyVersion: decision.policyVersion,
+      subject,
+      resourceType: resource.type,
+      resourceId: resource.id,
+      resourceFamilyId: resource.familyId,
+      ...(resource.householdId ? { resourceHouseholdId: resource.householdId } : {}),
+      ...(resource.familyBranchId ? { resourceFamilyBranchId: resource.familyBranchId } : {}),
+      action: intent.action,
+      capability: intent.capability,
+      fenceEpoch: fence.epoch,
+      fenceWritable: fence.writable,
+      decision,
+      receipt: authorization.receipt,
+      receiptRecord: record,
+      obligationExecution: obligationExecution!
+    });
+    activeTransactionContexts.set(context, {
+      expiresAtMs: effectiveExpiresAtMs,
+      clock: this.#clock,
+      clusterFence,
+      fenceEpoch: fence.epoch,
+      fenceWritable: fence.writable
+    });
+    try {
+      const result = await operation(context);
+      if (!this.#deferAllowedReceiptPersistence) {
+        assertActivePlatformPolicyTransactionContext(context, {
+          resourceType: context.resourceType,
+          resourceId: context.resourceId,
+          action: context.action,
+          capability: context.capability,
+          correlationId: context.correlationId,
+          resourceFamilyId: context.resourceFamilyId,
+          fenceEpoch: context.fenceEpoch,
+          fenceWritable: context.fenceWritable
+        });
+      } else if (activeTransactionContexts.get(context) === undefined) {
+        throw new PlatformPolicyEnforcementError(
+          'TRANSACTION_CONTEXT_INVALID',
+          'Deferred policy transaction context left its trusted execution boundary'
+        );
+      }
+      return result;
+    } finally {
+      activeTransactionContexts.delete(context);
+    }
+  }
+
+  async #appendReceipt(
+    record: PlatformPolicyReceiptRecord,
+    authorization: PlatformPolicyAuthorization,
+    message: string
+  ): Promise<void> {
+    try {
+      await this.#receiptSink.append(record);
+    } catch (error) {
+      throw new PlatformPolicyEnforcementError('RECEIPT_PERSISTENCE_FAILED', message, {
+        cause: error,
+        decision: authorization.decision,
+        receipt: authorization.receipt
+      });
+    }
+  }
+
+  async #authorize(
+    request: PlatformPolicyRequest,
+    issuedAt: string,
+    nonce: string
+  ): Promise<PlatformPolicyProviderAuthorizationResult> {
+    if (this.#kernel) {
+      return Object.freeze({
+        effectiveRequest: request,
+        authorization: this.#kernel.authorizeWithReceipt(request, issuedAt, nonce)
+      });
+    }
+    try {
+      const result = await this.#provider!.authorize(Object.freeze({ request, nonce }));
+      if (!result || typeof result !== 'object' || !result.effectiveRequest || !result.authorization) {
+        throw new Error('Policy provider returned an invalid authorization envelope');
+      }
+      return result;
+    } catch (error) {
+      if (error instanceof PlatformPolicyEnforcementError) throw error;
+      throw new PlatformPolicyEnforcementError('ENFORCEMENT_UNAVAILABLE', 'Policy authorization provider is unavailable', { cause: error });
+    }
+  }
+
+  async #verify(request: PlatformPolicyRequest, receipt: PlatformPolicyReceipt): Promise<boolean> {
+    if (this.#kernel) return this.#kernel.verifyReceiptForRequest(receipt, request);
+    try {
+      return (await this.#provider!.verify(Object.freeze({ request, receipt }))) === true;
+    } catch (error) {
+      throw new PlatformPolicyEnforcementError('RECEIPT_VERIFICATION_FAILED', 'Policy receipt provider verification failed', { cause: error });
+    }
+  }
+
+  #assertEffectiveRequest(request: PlatformPolicyRequest, effectiveRequest: PlatformPolicyRequest): PlatformPolicyRequest {
+    if (!effectiveRequest || typeof effectiveRequest !== 'object') {
+      throw new PlatformPolicyEnforcementError('RECEIPT_VERIFICATION_FAILED', 'Policy provider effective request is missing');
+    }
+    const { clusterWritable: requestedWritable, ...requestedRest } = request;
+    const { clusterWritable: effectiveWritable, ...effectiveRest } = effectiveRequest;
+    if (
+      typeof effectiveWritable !== 'boolean' ||
+      stable(requestedRest) !== stable(effectiveRest) ||
+      (!requestedWritable && effectiveWritable)
+    ) {
+      throw new PlatformPolicyEnforcementError(
+        'RECEIPT_VERIFICATION_FAILED',
+        'Policy provider changed the resolved request outside the allowed clusterWritable narrowing'
+      );
+    }
+    return Object.freeze({ ...effectiveRequest });
+  }
+
+  #assertIntent(intent: PlatformPolicyIntent): void {
+    const allowedKeys = new Set(['correlationId', 'action', 'capability', 'resourceType', 'resourceId', 'purpose']);
+    if (!intent || typeof intent !== 'object' || Object.keys(intent).some((key) => !allowedKeys.has(key))) {
+      throw new PlatformPolicyEnforcementError('INTENT_INVALID', 'Policy intent contains an unsupported field');
+    }
+    if (!nonEmptyBounded(intent.correlationId, 128) || !/^[A-Za-z0-9._:-]+$/u.test(intent.correlationId)) {
+      throw new PlatformPolicyEnforcementError('INTENT_INVALID', 'Policy intent correlationId is invalid');
+    }
+    if (!validActions.has(intent.action) || !validCapabilities.has(intent.capability)) {
+      throw new PlatformPolicyEnforcementError('INTENT_INVALID', 'Policy intent action or capability is invalid');
+    }
+    if (!nonEmptyBounded(intent.resourceType, 128) || !nonEmptyBounded(intent.resourceId, 256)) {
+      throw new PlatformPolicyEnforcementError('INTENT_INVALID', 'Policy intent resource identity is invalid');
+    }
+    if (intent.purpose !== undefined && !nonEmptyBounded(intent.purpose, 128)) {
+      throw new PlatformPolicyEnforcementError('INTENT_INVALID', 'Policy intent purpose is invalid');
+    }
+  }
+
+  #assertAuthority(authority: PlatformPolicyConnectionAuthority, now: number): void {
+    if (
+      !authority || typeof authority !== 'object' || !Number.isFinite(now) ||
+      !nonEmptyBounded(authority.policyVersion, 128) || !nonEmptyBounded(authority.accountId, 256) || !nonEmptyBounded(authority.deviceId, 256) ||
+      (authority.personId !== undefined && !nonEmptyBounded(authority.personId, 256)) ||
+      !validApplications.has(authority.applicationId) || typeof authority.deviceTrusted !== 'boolean' ||
+      typeof authority.membershipActive !== 'boolean' || typeof authority.online !== 'boolean' ||
+      !Array.isArray(authority.roles) || authority.roles.some((role) => !nonEmptyBounded(role, 128)) || authority.roles.length > 64 ||
+      !Array.isArray(authority.familyIds) || authority.familyIds.length === 0 || authority.familyIds.length > 10_000 || authority.familyIds.some((id) => !nonEmptyBounded(id, 256)) ||
+      (authority.householdIds !== undefined && (!Array.isArray(authority.householdIds) || authority.householdIds.length > 10_000 || authority.householdIds.some((id) => !nonEmptyBounded(id, 256)))) ||
+      (authority.familyBranchIds !== undefined && (!Array.isArray(authority.familyBranchIds) || authority.familyBranchIds.length > 10_000 || authority.familyBranchIds.some((id) => !nonEmptyBounded(id, 256)))) ||
+      (authority.grants !== undefined && (!Array.isArray(authority.grants) || authority.grants.length > 10_000)) ||
+      (authority.consents !== undefined && (!Array.isArray(authority.consents) || authority.consents.length > 10_000))
+    ) {
+      throw new PlatformPolicyEnforcementError('AUTHORITY_INVALID', 'Policy connection authority is invalid');
+    }
+    const expiresAt = parseTimestamp(authority.expiresAt);
+    if (!Number.isFinite(expiresAt)) throw new PlatformPolicyEnforcementError('AUTHORITY_INVALID', 'Policy connection authority expiry is invalid');
+    if (expiresAt <= now) throw new PlatformPolicyEnforcementError('AUTHORITY_EXPIRED', 'Policy connection authority has expired');
+  }
+
+  #readFence(clusterFence: PlatformPolicyClusterFence): PlatformPolicyClusterFenceSnapshot {
+    let fence: PlatformPolicyClusterFenceSnapshot;
+    try {
+      fence = clusterFence();
+    } catch (error) {
+      throw new PlatformPolicyEnforcementError('CLUSTER_FENCE_CHANGED', 'Cluster writability fence is unavailable', { cause: error });
+    }
+    if (!fence || typeof fence.writable !== 'boolean' || !Number.isSafeInteger(fence.epoch) || fence.epoch < 0) {
+      throw new PlatformPolicyEnforcementError('CLUSTER_FENCE_CHANGED', 'Cluster writability fence is invalid');
+    }
+    return Object.freeze({ writable: fence.writable, epoch: fence.epoch });
+  }
+}

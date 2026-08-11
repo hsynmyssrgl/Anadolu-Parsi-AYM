@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 2,
+  "createdAt": "2026-08-11",
+  "release": "Bronze 04.08.2026.29",
+  "rule": "Application, main-process and repository authorization may not compare family_admin directly. Renderer-only presentation conditions are reported separately and never grant API access.",
+  "count": 0,
+  "findings": []
+}

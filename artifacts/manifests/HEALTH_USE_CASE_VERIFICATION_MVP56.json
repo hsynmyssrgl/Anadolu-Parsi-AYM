@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "04.08.2026.29",
+  "milestone": "Bronze RC2 Build undefined",
+  "status": "passed",
+  "checks": 14,
+  "scenarios": [
+    "health record is created through application use case",
+    "medication plan preserves schedule and date range",
+    "family health history is created with sensitive privacy",
+    "missing person rejects health creation without partial writes",
+    "invalid medication range is rejected before transaction",
+    "invalid health operations do not add audit or outbox records",
+    "linked member sees own private health records",
+    "linked member cannot create record for another person without grant",
+    "explicit deny overrides health record ownership",
+    "deny on health record does not hide medication plan",
+    "health outbox events are publishable",
+    "health records survive application restart",
+    "health writes contain audit and outbox evidence",
+    "health audit chain remains valid"
+  ],
+  "healthRepositoryActive": true,
+  "applicationUseCasesActive": true,
+  "objectAuthorizationActive": true,
+  "transactionalAuditOutboxActive": true,
+  "generatedAt": "2026-08-11T06:57:28.301Z"
+}

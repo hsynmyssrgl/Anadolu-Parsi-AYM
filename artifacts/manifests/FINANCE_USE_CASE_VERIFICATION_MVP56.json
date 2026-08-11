@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "04.08.2026.29",
+  "milestone": "Bronze RC2 Build undefined",
+  "status": "passed",
+  "checks": 14,
+  "scenarios": [
+    "finance record created through governed use case",
+    "valuation computes market value",
+    "invalid owner fails closed before finance mutation",
+    "invalid amount rejected before PEP execution",
+    "invalid operations leave no partial writes",
+    "owner sees own private finance record",
+    "explicit deny stops collection read at the PEP",
+    "explicit deny blocks valuation at the PEP",
+    "finance outbox events are publishable",
+    "finance data survives restart",
+    "finance writes have audit evidence",
+    "finance writes have outbox evidence",
+    "finance rows carry governed receipt bindings",
+    "audit chain remains valid"
+  ],
+  "generatedAt": "2026-08-11T06:57:31.229Z"
+}

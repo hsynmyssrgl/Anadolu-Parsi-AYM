@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "channel": "Bronze",
+  "version": "23.07.2026.43",
+  "packageVersion": "23.7.2026-43",
+  "revision": "REVİZYON-060",
+  "milestone": "B060-M4 Database Migration Foundation",
+  "status": "passed_with_deferred_silver_checks",
+  "generatedAt": "2026-07-23T17:07:09.458829Z",
+  "results": {
+    "typescriptPackageBuilds": {
+      "passed": 12,
+      "failed": 0
+    },
+    "electronMainPreloadTypecheck": {
+      "status": "passed"
+    },
+    "foundation": {
+      "passed": 14,
+      "total": 14
+    },
+    "runtimeFoundation": {
+      "passed": 6,
+      "total": 6
+    },
+    "databaseMigrations": {
+      "passed": 9,
+      "total": 9
+    },
+    "dataStoreSmoke": {
+      "passed": 9,
+      "total": 9
+    },
+    "versionSequenceGate": {
+      "status": "passed",
+      "month": "2026-07",
+      "sequence": 43
+    },
+    "bronzeDatabaseGate": {
+      "status": "passed"
+    },
+    "ipc": {
+      "main": 124,
+      "preload": 124,
+      "matched": true
+    },
+    "database": {
+      "applicationTables": 40,
+      "infrastructureTables": 2,
+      "migrations": 3
+    },
+    "smokeData": {
+      "peopleBefore": 6,
+      "peopleAfter": 7,
+      "backupCreated": true
+    }
+  },
+  "deferredToSilver": [
+    "complete Vitest regression suite",
+    "Vite renderer production build",
+    "Electron production build and Windows NSIS installer",
+    "comprehensive manual screen verification",
+    "new screenshots",
+    "long-running performance and disaster restore tests"
+  ],
+  "dependencyNote": "No new external npm dependency was added. The desktop app now references the local @ppt/database workspace.",
+  "artifactReferences": [
+    "artifacts/manifests/DATABASE_MIGRATION_VERIFICATION_MVP43.json",
+    "artifacts/manifests/DATA_STORE_SMOKE_MVP43.json",
+    "artifacts/manifests/FOUNDATION_VERIFICATION_MVP43.json",
+    "artifacts/manifests/RUNTIME_FOUNDATION_VERIFICATION_MVP43.json",
+    "artifacts/manifests/VERSION_LEDGER.json"
+  ]
+}

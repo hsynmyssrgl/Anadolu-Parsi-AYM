@@ -1,0 +1,22 @@
+{
+  "status": "passed",
+  "version": "24.07.2026.55",
+  "milestone": "B060-M15 Finance Records & Valuation Application Migration",
+  "checks": 14,
+  "scenarios": [
+    "family graph query returns seeded family",
+    "create member use case writes person",
+    "member event is published by registered handlers",
+    "create relation use case writes relation",
+    "relation event is published by registered handlers",
+    "duplicate relation is rejected without partial write",
+    "self relation is rejected",
+    "unknown member relation is rejected",
+    "invalid member is rejected before transaction",
+    "member transaction contains audit and outbox",
+    "relation transaction contains audit and outbox",
+    "rejected commands leave no extra outbox events",
+    "application package has no infrastructure dependency",
+    "FamilyDataStore delegates core family commands to use cases"
+  ]
+}

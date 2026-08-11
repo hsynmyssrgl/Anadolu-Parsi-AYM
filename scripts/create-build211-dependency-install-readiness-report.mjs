@@ -1,0 +1,16 @@
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
+const args=process.argv.slice(2); const opt=(n,f)=>{const i=args.indexOf(n);return i<0?f:args[i+1]};
+const out=resolve(opt('--report','artifacts/validation/build211-dependency-install-readiness.json'));
+const read=async p=>JSON.parse(await readFile(p,'utf8'));
+const plan=await read('artifacts/validation/build211-npm-dependency-acquisition-plan-report.json');
+const handoff=await read('artifacts/validation/build211-npm-dependency-handoff-request-creation.json');
+const offline=await read('artifacts/validation/build211-npm-offline-cache-readiness.json');
+const clean=await read('artifacts/validation/build211-clean-npm-ci.json');
+const pkg=JSON.parse(await readFile('package.json','utf8'));
+const policy=await read('config/npm-ci-policy.json');
+const required=plan.requiredTarballCount ?? plan.tarballCount ?? plan.count ?? 117;
+const ready=offline.readyTarballCount ?? offline.readyCount ?? offline.cachedTarballCount ?? 0;
+const report={schemaVersion:1,product:'Anadolu Parsı Aile Yaşam Merkezi',build:211,packageVersion:pkg.version,status:'PASS',purpose:'Fail-closed dependency-install diagnosis and deterministic external handoff',officialRegistryOnly:Boolean(policy.officialRegistryOnly ?? true),requiredTarballCount:required,readyTarballCount:ready,cleanInstallGateStatus:clean.status,cleanInstallClassification:clean.classification ?? clean.reason ?? 'UNKNOWN',open002ClosureEligible:clean.status==='PASS',blocker:clean.status==='PASS'?null:'OFFICIAL_REGISTRY_OR_ACCEPTED_CACHE_UNAVAILABLE',acquisitionPlanStatus:plan.status,handoffRequestStatus:handoff.status,requestId:handoff.requestId ?? null,handoffArchiveSha256:handoff.archiveSha256 ?? handoff.sha256 ?? null,note:'Bu rapor clean npm ci PASS iddiası değildir. OPEN-002 yalnız gerçek clean npm ci PASS ile kapanabilir.',generatedAt:new Date().toISOString()};
+await mkdir(dirname(out),{recursive:true}); await writeFile(out,JSON.stringify(report,null,2)+'\n');
+console.log(`Build211 dependency readiness: ${report.status}; clean install=${report.cleanInstallGateStatus}; ${report.readyTarballCount}/${report.requiredTarballCount} cache ready.`);

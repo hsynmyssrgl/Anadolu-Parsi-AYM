@@ -1,0 +1,40 @@
+import { createHash } from 'node:crypto';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+const RELEASE='Bronze 04.08.2026.29';
+const TRUTH='Bu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır.';
+const readJson=async p=>JSON.parse(await readFile(p,'utf8'));
+const sha256=b=>createHash('sha256').update(b).digest('hex');
+const stable=v=>Array.isArray(v)?v.map(stable):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,stable(v[k])])):v;
+const stableStringify=v=>JSON.stringify(stable(v));
+const bind=async(id,path)=>{const b=await readFile(path);return{id,path,sizeBytes:b.length,sha256:sha256(b)}};
+const paths={
+ d2a:'artifacts/inventory/29-D2-A_INPUT_REGISTRY.json',d2b:'artifacts/inventory/29-D2-B_DOCUMENT_INVENTORY.json',d2c:'artifacts/inventory/29-D2-C_CROSSWALK.json',gaps:'artifacts/inventory/29-D2-C_GAP_REGISTER.json',
+ d1:'artifacts/inventory/29-D2-D1_CONSOLIDATED_INVENTORY.json',aReceipt:'artifacts/checkpoints/29-D2-A_FINALIZATION_LIBRARY_RECEIPT.json',bReceipt:'artifacts/checkpoints/29-D2-B_FINALIZATION_LIBRARY_RECEIPT.json',cReceipt:'artifacts/checkpoints/29-D2-C_FINALIZATION_LIBRARY_RECEIPT.json',d1MainReceipt:'artifacts/checkpoints/29-D2-D1_LIBRARY_RECEIPT.json',d1FinalReceipt:'artifacts/checkpoints/29-D2-D1_FINALIZATION_LIBRARY_RECEIPT.json',d1FinalReadback:'artifacts/validation/29-D2-D1-finalization-receipt-readback-verification.json',workPlanSnapshot:'artifacts/inventory/snapshots/29-D2-D2_WORK_PLAN_AT_START.json'
+};
+const [a,b,c,g,d1,ar,br,cr,d1r,d1fr,d1rb,plan]=await Promise.all([readJson(paths.d2a),readJson(paths.d2b),readJson(paths.d2c),readJson(paths.gaps),readJson(paths.d1),readJson(paths.aReceipt),readJson(paths.bReceipt),readJson(paths.cReceipt),readJson(paths.d1MainReceipt),readJson(paths.d1FinalReceipt),readJson(paths.d1FinalReadback),readJson(paths.workPlanSnapshot)]);
+const bindings=[];for(const [id,path] of Object.entries(paths))bindings.push(await bind(id,path));
+const route=(gap)=>['D2C-GAP-006','D2C-GAP-007','D2C-GAP-008','D2C-GAP-009','D2C-GAP-010','D2C-GAP-011'].includes(gap.id)?'29-D3_RULE_GAP_AND_CONFLICT_ANALYSIS':['D2C-GAP-001','D2C-GAP-002','D2C-GAP-003','D2C-GAP-012'].includes(gap.id)?'EXTERNAL_OR_PLATFORM_SOURCE_UNAVAILABLE':'HISTORICAL_EVIDENCE_REMEDIATION';
+const routedGaps=g.gaps.map(x=>({...x,countedAsPass:false,closureTreatment:'EXPLICIT_OPEN_GAP_DOES_NOT_BLOCK_INVENTORY_RECORD_CLOSURE',resolutionRoute:route(x)}));
+const routeCounts=routedGaps.reduce((m,x)=>(m[x.resolutionRoute]=(m[x.resolutionRoute]||0)+1,m),{});
+const contradictions=[
+ {id:'D2D2-CONTR-001',sourceGapId:'D2C-GAP-009',category:'RELEASE_LEDGER',status:'OPEN_EXPLICIT',detail:routedGaps.find(x=>x.id==='D2C-GAP-009').detail,resolutionRoute:'29-D3',countedAsPass:false},
+ {id:'D2D2-CONTR-002',sourceGapId:'D2C-GAP-010',category:'ACTIVE_GOVERNANCE_LEDGER',status:'OPEN_EXPLICIT',detail:routedGaps.find(x=>x.id==='D2C-GAP-010').detail,resolutionRoute:'29-D3',countedAsPass:false},
+ {id:'D2D2-CONTR-003',sourceGapId:'D2C-GAP-011',category:'STALE_TELEMETRY',status:'OPEN_EXPLICIT',detail:routedGaps.find(x=>x.id==='D2C-GAP-011').detail,resolutionRoute:'29-D3',countedAsPass:false},
+ {id:'D2D2-CONTR-004',sourceGapId:null,category:'D1_PROCESS_BINDING',status:'RESOLVED_WITH_EVIDENCE',detail:'The first D1 finalization validation exited 1 because a mutable live work plan was SHA-bound. It remains FAIL and was corrected by immutable snapshot binding.',resolutionRoute:'RESOLVED_IN_29-D2-D1',countedAsPass:false}
+];
+const summary={
+ inputLock:{count:a.summary.inputCount,availabilityCounts:a.summary.availabilityCounts,fingerprint:a.inputSetFingerprintSha256},
+ documentInventory:{count:b.summary.documentCount,activeAuthority:b.summary.activeAuthorityCount,historical:b.summary.historicalDocumentCount,fingerprint:b.inventoryFingerprintSha256},
+ crosswalk:{correspondence:c.summary.correspondenceEventCount,builds:c.summary.buildCount,decisions:c.summary.decisionUnionCount,requirements:c.summary.requirementCount,rules:c.summary.ruleCount,activeRules:c.summary.activeRuleCount,relations:c.summary.relationCount,fingerprint:c.crosswalkFingerprintSha256},
+ consolidatedD1:{fingerprint:d1.consolidatedFingerprintSha256,gapCount:d1.gaps.length,openGapsCountedAsPass:d1.gaps.filter(x=>x.countedAsPass).length},
+ openGaps:{count:routedGaps.length,routeCounts,countedAsPass:routedGaps.filter(x=>x.countedAsPass).length},
+ contradictions:{count:contradictions.length,open:contradictions.filter(x=>x.status==='OPEN_EXPLICIT').length,resolvedWithEvidence:contradictions.filter(x=>x.status==='RESOLVED_WITH_EVIDENCE').length,countedAsPass:contradictions.filter(x=>x.countedAsPass).length}
+};
+const basis={release:RELEASE,bindings:Object.fromEntries(bindings.map(x=>[x.id,x.sha256])),summary,routedGaps,contradictions};
+const matrix={schemaVersion:1,release:RELEASE,workStep:'29-D2-D2',parentStep:'29-D2-D',parentOfficialStep:'29-D2',title:'Independent 29-D2 inventory closure validation and contradiction gate',status:'LOCAL_PASS_AWAITING_LIBRARY_RECEIPT',validationStatus:'PENDING',persistentReceiptStatus:'PENDING',parentCompletionClaimed:false,parentStepStatus:'IN_PROGRESS',nextSubstepOnPass:'29-D2-D3',authorityPolicy:{accessibleSourcesInventoried:true,unavailableSourcesInvented:false,openGapsResolved:false,openGapsCountedAsPass:false,contradictionsSilentlyReinterpreted:false,failedAttemptsCountedAsPass:false,failed29DOverlayApplied:false},sourceBindings:bindings,receiptChain:[ar,br,cr,d1r,d1fr].map(r=>({step:r.step,status:r.status,validationStatus:r.validationStatus,persistentReceiptStatus:r.persistentReceiptStatus,officialStatus:r.officialStepStatus||r.officialSubstepStatus,parentCompletionClaimed:r.officialParentCompletionClaimed??false})),summary,routedGaps,contradictions,closureDecision:{accessibleInventoryScopeValidated:true,explicitGapRegisterValidated:true,openGapsRemain:true,openGapResolutionRequiredInD3:true,parent29D2DCompletionClaimed:false,parentFinalizationEligibleAfterD2PersistentReceipt:true,silverAuthorized:false,goldAuthorized:false},matrixFingerprintSha256:sha256(Buffer.from(stableStringify(basis))),generatedAt:new Date().toISOString(),mandatoryTruthSentence:TRUTH};
+await mkdir('artifacts/inventory',{recursive:true});await mkdir('docs/audit',{recursive:true});
+await writeFile('artifacts/inventory/29-D2-D2_CLOSURE_VALIDATION_MATRIX.json',JSON.stringify(matrix,null,2)+'\n');
+await writeFile('artifacts/inventory/29-D2-D2_CONTRADICTION_REGISTER.json',JSON.stringify({schemaVersion:1,release:RELEASE,workStep:'29-D2-D2',status:'OPEN_CONTRADICTIONS_EXPLICIT_NOT_PASS',contradictionCount:contradictions.length,openContradictionCount:summary.contradictions.open,resolvedWithEvidenceCount:summary.contradictions.resolvedWithEvidence,countedAsPass:0,contradictions,matrixFingerprintSha256:matrix.matrixFingerprintSha256,generatedAt:matrix.generatedAt,mandatoryTruthSentence:TRUTH},null,2)+'\n');
+const md=`# 29-D2-D2 — Bağımsız Envanter Kapanış ve Çelişki Kapısı\n\n- Durum: **LOCAL_PASS_AWAITING_LIBRARY_RECEIPT**\n- Üst adım 29-D2-D: **IN_PROGRESS / TAMAMLANMA İDDİASI YOK**\n- Erişilebilir envanter kapsamı: **DOĞRULANDI**\n- Açık boşluk: **${routedGaps.length}; PASS sayılan: 0**\n- Açık çelişki: **${summary.contradictions.open}; PASS sayılan: 0**\n- D3 yönlendirmesi: **${routeCounts['29-D3_RULE_GAP_AND_CONFLICT_ANALYSIS']} boşluk**\n- Dış/platform kaynağı unavailable: **${routeCounts['EXTERNAL_OR_PLATFORM_SOURCE_UNAVAILABLE']} boşluk**\n- Tarihsel kanıt iyileştirmesi: **${routeCounts['HISTORICAL_EVIDENCE_REMEDIATION']} boşluk**\n- Sonraki alt adım: **29-D2-D3; yalnız kalıcı receipt sonrasında**\n\nBu kapı boşlukları çözmez. Envanterin erişilebilir kaynaklar bakımından kapanışa uygun olduğunu ve bütün sınırlamaların açıkça kaydedildiğini doğrular.\n\n**${TRUTH}**\n`;
+await writeFile('docs/audit/29-D2-D2_BAGIMSIZ_KAPANIS_VE_CELISKI_KAPISI.md',md);
+console.log(`29-D2-D2 matrix generated: ${routedGaps.length} gaps / ${contradictions.length} contradictions / ${matrix.matrixFingerprintSha256}.`);

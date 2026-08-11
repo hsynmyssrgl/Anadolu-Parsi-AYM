@@ -1,0 +1,55 @@
+import assert from 'node:assert/strict';
+import { DatabaseSync } from 'node:sqlite';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
+const out=resolve(process.argv[2]??'artifacts/validation/build189-clean-rewrite-operational-isolation-sqlite-runtime.json');
+const source=await readFile('packages/database/src/family-database-migrations.ts','utf8');
+const extract=(name)=>{const start=`const ${name} = `+'`';const from=source.indexOf(start);if(from<0)throw new Error(`${name} not found`);const bodyStart=from+start.length;const end=source.indexOf('`;\n',bodyStart);if(end<0)throw new Error(`${name} terminator not found`);return source.slice(bodyStart,end);};
+const db=new DatabaseSync(':memory:');
+db.exec(`PRAGMA foreign_keys=ON;CREATE TABLE database_metadata(key TEXT PRIMARY KEY,value TEXT NOT NULL,updated_at TEXT NOT NULL);INSERT INTO database_metadata VALUES('schema_generation','test','2026-07-30T00:00:00.000Z');CREATE TABLE backup_propagation_runs(id TEXT PRIMARY KEY,status TEXT,pending_records INTEGER,target_count INTEGER,refreshed_targets INTEGER,quarantined_artifacts INTEGER,pending_remaining INTEGER,manual_backup_warning INTEGER,target_results TEXT,error TEXT,started_at TEXT,completed_at TEXT);CREATE TABLE backup_clean_rewrite_policy(id TEXT PRIMARY KEY,enabled INTEGER NOT NULL,retention_days INTEGER NOT NULL,manual_failure_backoff_minutes INTEGER NOT NULL,automatic_failure_backoff_minutes INTEGER NOT NULL,high_load_defer_minutes INTEGER NOT NULL,state TEXT NOT NULL,consecutive_failures INTEGER NOT NULL,last_outcome TEXT NOT NULL,last_trigger TEXT,last_attempt_at TEXT,last_success_at TEXT,next_attempt_at TEXT,last_error TEXT,in_progress_run_id TEXT,in_progress_started_at TEXT,created_at TEXT NOT NULL,updated_at TEXT NOT NULL);CREATE TABLE backup_clean_rewrite_runs(id TEXT PRIMARY KEY,trigger TEXT NOT NULL,status TEXT NOT NULL,retention_cutoff TEXT NOT NULL,due_records INTEGER NOT NULL,enabled_targets INTEGER NOT NULL,propagation_run_id TEXT,next_attempt_at TEXT,error TEXT,started_at TEXT NOT NULL,completed_at TEXT,updated_at TEXT NOT NULL);`);
+for(const name of ['cleanBackupRewriteLinkedChronologySql','cleanBackupRewriteRecoveryChronologySql','cleanBackupRewriteClaimChronologySql','cleanBackupRewriteOperationalIsolationSql'])db.exec(extract(name));
+const checks=[];const check=(label,fn)=>{fn();checks.push(label);};const throws=(label,fn,pattern)=>check(label,()=>assert.throws(fn,pattern));
+const trigger=(name)=>db.prepare(`SELECT name FROM sqlite_master WHERE type='trigger' AND name=?`).get(name);
+check('active settings lock trigger exists',()=>assert.ok(trigger('trg_backup_clean_rewrite_policy_active_settings_lock')));
+check('terminal update consistency trigger exists',()=>assert.ok(trigger('trg_backup_clean_rewrite_runs_terminal_consistency_update')));
+check('terminal insert consistency trigger exists',()=>assert.ok(trigger('trg_backup_clean_rewrite_runs_terminal_consistency_insert')));
+check('schema generation advanced',()=>assert.equal(db.prepare(`SELECT value FROM database_metadata WHERE key='schema_generation'`).get().value,'REVISION-189-CLEAN-BACKUP-OPERATIONAL-ISOLATION'));
+const insertPolicy=db.prepare(`INSERT INTO backup_clean_rewrite_policy VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+insertPolicy.run('default',1,30,60,360,30,'idle',0,'never',null,null,null,null,null,null,null,'2026-07-01T00:00:00.000Z','2026-07-30T12:00:00.000Z');
+db.prepare(`UPDATE backup_clean_rewrite_policy SET enabled=0,retention_days=45,updated_at='2026-07-30T12:01:00.000Z'`).run();
+check('idle settings mutation is allowed',()=>assert.deepEqual(Object.values(db.prepare(`SELECT enabled,retention_days FROM backup_clean_rewrite_policy`).get()),[0,45]));
+db.prepare(`UPDATE backup_clean_rewrite_policy SET enabled=1,retention_days=30,state='running',last_trigger='automatic',last_attempt_at='2026-07-30T13:00:00.000Z',in_progress_run_id='run-success',in_progress_started_at='2026-07-30T13:00:00.000Z',updated_at='2026-07-30T13:00:00.000Z'`).run();
+db.prepare(`INSERT INTO backup_clean_rewrite_runs VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`).run('run-success','automatic','running','2026-06-30T13:00:00.000Z',1,1,null,null,null,'2026-07-30T13:00:00.000Z',null,'2026-07-30T13:00:00.000Z');
+throws('running enabled mutation is denied',()=>db.prepare(`UPDATE backup_clean_rewrite_policy SET enabled=0`).run(),/settings are locked/);
+throws('running retention mutation is denied',()=>db.prepare(`UPDATE backup_clean_rewrite_policy SET retention_days=60`).run(),/settings are locked/);
+throws('running backoff setting mutation is denied',()=>db.prepare(`UPDATE backup_clean_rewrite_policy SET automatic_failure_backoff_minutes=361`).run(),/settings are locked/);
+db.prepare(`UPDATE backup_clean_rewrite_policy SET retention_days=30`).run();
+check('running no-op settings write is allowed',()=>assert.equal(db.prepare(`SELECT retention_days FROM backup_clean_rewrite_policy`).get().retention_days,30));
+db.prepare(`INSERT INTO backup_propagation_runs VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`).run('prop-success','success',1,1,1,0,0,0,'[]',null,'2026-07-30T13:00:00.000Z','2026-07-30T13:05:00.000Z');
+throws('terminal ledger update before policy finalization is denied',()=>db.prepare(`UPDATE backup_clean_rewrite_runs SET status='success',propagation_run_id='prop-success',completed_at='2026-07-30T13:05:00.000Z',updated_at='2026-07-30T13:05:00.000Z' WHERE id='run-success'`).run(),/terminal policy and run state differ/);
+db.prepare(`UPDATE backup_clean_rewrite_policy SET state='idle',last_outcome='success',last_success_at='2026-07-30T13:05:00.000Z',in_progress_run_id=NULL,in_progress_started_at=NULL,updated_at='2026-07-30T13:05:00.000Z'`).run();
+db.prepare(`UPDATE backup_clean_rewrite_runs SET status='success',propagation_run_id='prop-success',completed_at='2026-07-30T13:05:00.000Z',updated_at='2026-07-30T13:05:00.000Z' WHERE id='run-success'`).run();
+check('consistent success finalization is allowed',()=>assert.equal(db.prepare(`SELECT status FROM backup_clean_rewrite_runs WHERE id='run-success'`).get().status,'success'));
+check('success policy state is idle',()=>assert.equal(db.prepare(`SELECT state FROM backup_clean_rewrite_policy`).get().state,'idle'));
+
+db.prepare(`UPDATE backup_clean_rewrite_policy SET state='running',last_trigger='automatic',last_attempt_at='2026-07-30T14:00:00.000Z',next_attempt_at=NULL,last_error=NULL,in_progress_run_id='run-partial',in_progress_started_at='2026-07-30T14:00:00.000Z',updated_at='2026-07-30T14:00:00.000Z'`).run();
+db.prepare(`INSERT INTO backup_clean_rewrite_runs VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`).run('run-partial','automatic','running','2026-06-30T14:00:00.000Z',2,2,null,null,null,'2026-07-30T14:00:00.000Z',null,'2026-07-30T14:00:00.000Z');
+db.prepare(`INSERT INTO backup_propagation_runs VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`).run('prop-partial','partial',2,2,1,1,1,0,'[]','target failure','2026-07-30T14:00:00.000Z','2026-07-30T14:05:00.000Z');
+db.exec('BEGIN');
+try{
+  db.prepare(`UPDATE backup_clean_rewrite_policy SET state='attention',last_outcome='partial',next_attempt_at='2026-07-30T20:05:00.000Z',last_error='target failure',in_progress_run_id=NULL,in_progress_started_at=NULL,updated_at='2026-07-30T14:05:00.000Z'`).run();
+  assert.throws(()=>db.prepare(`UPDATE backup_clean_rewrite_runs SET status='partial',propagation_run_id='prop-partial',next_attempt_at='2026-07-30T20:05:00.000Z',error='target failure',completed_at='2026-07-30T14:05:00.000Z',updated_at='2026-07-30T14:05:00.000Z' WHERE id='run-partial'`).run(),/terminal policy and run state differ/);
+  db.exec('ROLLBACK');checks.push('mismatched partial policy state is denied');
+}catch(error){try{db.exec('ROLLBACK');}catch{}throw error;}
+db.prepare(`UPDATE backup_clean_rewrite_policy SET state='backoff',last_outcome='partial',next_attempt_at='2026-07-30T20:05:00.000Z',last_error='target failure',in_progress_run_id=NULL,in_progress_started_at=NULL,updated_at='2026-07-30T14:05:00.000Z'`).run();
+db.prepare(`UPDATE backup_clean_rewrite_runs SET status='partial',propagation_run_id='prop-partial',next_attempt_at='2026-07-30T20:05:00.000Z',error='target failure',completed_at='2026-07-30T14:05:00.000Z',updated_at='2026-07-30T14:05:00.000Z' WHERE id='run-partial'`).run();
+check('consistent partial finalization is allowed',()=>assert.equal(db.prepare(`SELECT status FROM backup_clean_rewrite_runs WHERE id='run-partial'`).get().status,'partial'));
+check('partial retry matches policy',()=>assert.equal(db.prepare(`SELECT next_attempt_at FROM backup_clean_rewrite_runs WHERE id='run-partial'`).get().next_attempt_at,db.prepare(`SELECT next_attempt_at FROM backup_clean_rewrite_policy`).get().next_attempt_at));
+
+db.prepare(`UPDATE backup_clean_rewrite_policy SET state='running',last_trigger='automatic',last_attempt_at='2026-07-30T15:00:00.000Z',next_attempt_at=NULL,last_error=NULL,in_progress_run_id='run-interrupted',in_progress_started_at='2026-07-30T15:00:00.000Z',updated_at='2026-07-30T15:00:00.000Z'`).run();
+db.prepare(`UPDATE backup_clean_rewrite_policy SET state='backoff',last_outcome='failed',next_attempt_at='2026-07-30T21:30:00.000Z',last_error='restart',in_progress_run_id=NULL,in_progress_started_at=NULL,updated_at='2026-07-30T15:30:00.000Z'`).run();
+db.prepare(`INSERT INTO backup_clean_rewrite_runs VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`).run('run-interrupted','automatic','interrupted','2026-06-30T15:00:00.000Z',0,0,null,'2026-07-30T21:30:00.000Z','restart','2026-07-30T15:00:00.000Z','2026-07-30T15:30:00.000Z','2026-07-30T15:30:00.000Z');
+check('consistent interrupted insert is allowed',()=>assert.equal(db.prepare(`SELECT status FROM backup_clean_rewrite_runs WHERE id='run-interrupted'`).get().status,'interrupted'));
+throws('mismatched terminal insert is denied',()=>db.prepare(`INSERT INTO backup_clean_rewrite_runs VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`).run('run-interrupted-bad','automatic','interrupted','2026-06-30T15:00:00.000Z',0,0,null,'2026-07-30T21:30:00.000Z','different','2026-07-30T15:00:00.000Z','2026-07-30T15:30:00.000Z','2026-07-30T15:30:00.000Z'),/terminal policy and run state differ/);
+assert.equal(checks.length,17);
+const report={schemaVersion:1,product:'Anadolu Parsı Aile Yaşam Merkezi',featureBuild:189,stage:'Bronze RC2 Active Development',scope:'Direct SQLite operational isolation and terminal state machine protection',status:'PASS',checks:checks.length,checkLabels:checks,nodeSqlite:'node:sqlite DatabaseSync',generatedAt:new Date().toISOString()};await mkdir(dirname(out),{recursive:true});await writeFile(out,`${JSON.stringify(report,null,2)}\n`);db.close();console.log(`Build 189 clean rewrite operational isolation SQLite runtime: PASS (${checks.length}/${checks.length})`);

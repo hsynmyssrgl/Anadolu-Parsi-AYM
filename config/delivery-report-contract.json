@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "PPT-DELIVERY-REPORT-CONTRACT-V2",
+  "release": "Bronze 04.08.2026.29",
+  "requiredFields": [
+    "visibleRelease",
+    "workCompleted",
+    "completedRequirementIds",
+    "completedDecisionIds",
+    "changedSourceAreas",
+    "validationResults",
+    "openErrorsAndRisks",
+    "bronzeCompletionPercent",
+    "bronzeRemainingPercent",
+    "estimatedBronzeCompletion",
+    "estimatedSilverTransition",
+    "estimatedGoldTransition",
+    "estimateConfidence",
+    "conversationCapacity",
+    "handoffPromptStatus",
+    "sourceArchive",
+    "sourceSha256",
+    "manifest",
+    "persistentLibraryPath",
+    "persistentLibraryUploadStatus",
+    "completeDocumentIndex",
+    "nextOfficialTask",
+    "mandatoryTruthSentence"
+  ],
+  "mandatoryTruthSentence": "Bu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır.",
+  "forbidPassFor": [
+    "NOT_RUN",
+    "BLOCKED",
+    "PENDING",
+    "DIAGNOSTIC_PASS",
+    "UNAVAILABLE"
+  ],
+  "requireAllChangedDocumentsListed": true,
+  "requireCompleteDocumentIndexLink": true
+}

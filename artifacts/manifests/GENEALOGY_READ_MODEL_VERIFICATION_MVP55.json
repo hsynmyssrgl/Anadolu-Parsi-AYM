@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "24.07.2026.55",
+  "milestone": "B060-M15 Finance Records & Valuation Application Migration",
+  "status": "passed",
+  "checks": 6,
+  "scenarios": [
+    "seed-genealogy-read-model",
+    "calculated-generation-applied-to-tree",
+    "parent-link-removes-missing-link",
+    "cycle-is-detected-without-unbounded-generation",
+    "broken-relations-are-ignored-and-reported",
+    "child-relation-is-normalized-to-parent-edge"
+  ],
+  "cycleSafe": true,
+  "brokenRelationSafe": true,
+  "generationCalculationActive": true,
+  "generatedAt": "2026-07-24T03:11:14.493Z"
+}

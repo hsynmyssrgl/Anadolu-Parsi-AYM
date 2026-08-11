@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "maxArchiveBytes": 4294967295,
+  "maxChecksumBytes": 4096,
+  "acceptedRoot": ".tmp/npm-cache-bundle-intake/accepted",
+  "quarantineRoot": ".tmp/npm-cache-bundle-intake/quarantine",
+  "receiptRoot": "artifacts/validation/npm-cache-bundle-receipts",
+  "cacheRoot": ".tmp/npm-cache-bootstrap",
+  "requireChecksumSidecar": true,
+  "importVerifiedBundle": true,
+  "replaceExistingCache": false
+}

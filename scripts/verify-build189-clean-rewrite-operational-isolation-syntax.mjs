@@ -1,0 +1,13 @@
+import { spawnSync } from 'node:child_process';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
+const out=resolve(process.argv[2]??'artifacts/validation/build189-clean-rewrite-operational-isolation-syntax.json');
+const commands=[
+  ['package source typecheck','npm',['run','typecheck:package-source']],
+  ['desktop main source typecheck','npm',['run','typecheck:desktop-main-source']],
+  ['Build 188 claim chronology regression','node',['scripts/verify-build188-clean-rewrite-claim-chronology-runtime.mjs','artifacts/validation/build188-clean-rewrite-claim-chronology-runtime.json']]
+];
+const results=[];let failed=false;
+for(const[label,command,args]of commands){const result=spawnSync(command,args,{cwd:process.cwd(),encoding:'utf8',shell:process.platform==='win32'});const passed=result.status===0;failed||=!passed;results.push({label,status:passed?'PASS':'FAIL',exitCode:result.status,stdout:result.stdout.slice(-6000),stderr:result.stderr.slice(-6000)});}
+const report={schemaVersion:1,product:'Anadolu Parsı Aile Yaşam Merkezi',featureBuild:189,stage:'Bronze RC2 Active Development',status:failed?'FAIL':'PASS',checks:results.length,results,generatedAt:new Date().toISOString()};
+await mkdir(dirname(out),{recursive:true});await writeFile(out,`${JSON.stringify(report,null,2)}\n`);console.log(`Build 189 clean rewrite operational isolation syntax: ${report.status} (${results.filter(item=>item.status==='PASS').length}/${results.length})`);if(failed)process.exitCode=1;

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "status": "passed",
+  "version": "23.07.2026.49",
+  "milestone": "B060-M9 Dashboard Query & Navigation State",
+  "checks": 14,
+  "names": [
+    "Result success mapping",
+    "Result error short-circuit",
+    "Result error mapping",
+    "Result flatMap",
+    "Throwable mapping",
+    "Result matching",
+    "Central AppError",
+    "Deterministic clock",
+    "Pagination limits",
+    "Configuration defaults and validation",
+    "Configuration path isolation",
+    "Configuration redaction",
+    "Structured logging redaction",
+    "JSON Lines serialization"
+  ],
+  "generatedAt": "2026-07-23T18:51:42.139251Z"
+}

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "31-E",
+  "requirement": "B0-02",
+  "decision": "DEC-165",
+  "title": "User-visible release metadata and delivery filename boundary",
+  "status": "COMPLETED",
+  "targetSliceStatus": "PASS",
+  "targets": {
+    "domainSchema": "USER_VISIBLE_APP_INFO_WITHOUT_INTERNAL_VERSION_FIELDS",
+    "ipcBoundary": "APP_GET_INFO_PUBLIC_DTO_ONLY",
+    "uiReleaseLabel": "BRONZE_DD_MM_YYYY_SEQUENCE",
+    "deliveryFilename": "PRODUCT_BRONZE_DD_MM_YYYY_SEQUENCE_JSON",
+    "internalMetadata": "PRESERVED_IN_MANIFESTS_NOT_PUBLIC_DTO"
+  },
+  "forbiddenVisibleTokens": [
+    "RC",
+    "RC2",
+    "MVP",
+    "Build"
+  ],
+  "historicalEvidenceRewritten": false,
+  "newBuildIssued": false,
+  "persistentReceiptStatus": "PASS",
+  "officialCompletionClaimed": true,
+  "completedAt": "2026-08-10T16:15:14.957Z"
+}

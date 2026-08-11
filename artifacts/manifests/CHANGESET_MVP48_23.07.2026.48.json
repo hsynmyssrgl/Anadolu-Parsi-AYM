@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "23.07.2026.48",
+  "milestone": "B060-M8 Timeline & Important Days Application Migration",
+  "status": "completed",
+  "added": [
+    "packages/application/src/timeline-use-cases.ts",
+    "packages/repositories/src/timeline-repository.ts",
+    "packages/repositories/src/location-repository.ts",
+    "apps/desktop/src/main/timeline-application-adapter.ts",
+    "scripts/verify-timeline-use-cases.mjs"
+  ],
+  "modified": [
+    "packages/application/src/index.ts",
+    "packages/repositories/src/index.ts",
+    "apps/desktop/src/main/data-store.ts",
+    "apps/desktop/src/main/event-handlers.ts",
+    "apps/desktop/src/main/main.ts",
+    "package.json",
+    "package-lock.json",
+    "apps/desktop/package.json",
+    "packages/domain/src/app-meta.ts",
+    "scripts/verify-bronze-database.mjs",
+    "artifacts/manifests/VERSION_LEDGER.json"
+  ],
+  "behavior": [
+    "Snapshot etkinlik ve konumları timeline read-model üzerinden okur.",
+    "Önemli gün oluşturma event-audit-outbox atomik transaction’ı kullanır.",
+    "Katılımcı, konum, davetiye, not, görünürlük, tekrar, hatırlatma ve AI izni doğrulanır.",
+    "Important-day event handler’ları idempotent receipt kaydıyla çalışır."
+  ],
+  "generatedAt": "2026-07-23T18:35:26.764010Z"
+}

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "23.07.2026.54",
+  "milestone": "B060-M14 Health Records & Medication Application Migration",
+  "status": "passed",
+  "checks": 14,
+  "peopleBefore": 6,
+  "peopleAfter": 7,
+  "backupCreated": true,
+  "migrationVersions": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "schemaFingerprint": "1792e245001eed0a8e6d293390b9d565adccf2e84f312c82a70280d1ec6ec0c9"
+}

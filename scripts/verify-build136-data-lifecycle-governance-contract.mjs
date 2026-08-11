@@ -1,0 +1,28 @@
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname, join, resolve } from 'node:path';
+const root=process.cwd();const reportPath=resolve(process.argv[2]??'artifacts/validation/build136-data-lifecycle-governance-contract.json');
+const read=path=>readFile(join(root,path),'utf8');
+const [pkg,meta,domain,migrations,repository,useCases,adapter,store,main,preload,globalTypes,app,styles,decision,adr,security,trace,openItems]=await Promise.all([
+  read('package.json'),read('packages/domain/src/app-meta.ts'),read('packages/domain/src/app-data.ts'),read('packages/database/src/family-database-migrations.ts'),read('packages/repositories/src/data-lifecycle-repository.ts'),read('packages/application/src/data-lifecycle-use-cases.ts'),read('apps/desktop/src/main/data-lifecycle-application-adapter.ts'),read('apps/desktop/src/main/data-store.ts'),read('apps/desktop/src/main/main.ts'),read('apps/desktop/src/main/preload.ts'),read('apps/desktop/src/renderer/global.d.ts'),read('apps/desktop/src/renderer/App.tsx'),read('apps/desktop/src/renderer/styles.css'),read('docs/10_MASTER_DECISION_REGISTER.md'),read('docs/adr/ADR-021-data-retention-recoverable-deletion-and-purge.md'),read('docs/14_SECURITY_PRIVACY_BACKUP_STANDARD.md'),read('docs/07_BRONZE_REQUIREMENTS_TRACEABILITY.md'),read('docs/06_OPEN_ITEMS_AFTER_CODING_START.md')
+]);
+const ledger=JSON.parse(await read('artifacts/manifests/VERSION_LEDGER.json'));
+const current=ledger.entries?.at(-1);
+let assertions=0;const failures=[];const verify=(condition,message)=>{assertions+=1;if(!condition)failures.push(message);};
+verify(Boolean(current),'active version ledger entry is missing');
+verify(JSON.parse(pkg).version===current?.packageVersion,'package version does not match active ledger');
+verify(meta.includes(`version: '${current?.version}'`),'application version does not match active ledger');
+for(const marker of ["DataLifecycleResourceType","DataLifecycleState","DataRetentionPolicyView","DataLifecycleRecordView","RequestDataPurgeInput","ExecuteDataPurgeInput","SetDataLegalHoldInput"])verify(domain.includes(marker),`domain contract missing: ${marker}`);
+for(const marker of ["data_lifecycle_governance","CREATE TABLE IF NOT EXISTS data_retention_policies","CREATE TABLE IF NOT EXISTS data_lifecycle","purge_execute_after","legal_hold","backup_propagation_pending","REVISION-136-DATA-LIFECYCLE-GOVERNANCE"])verify(migrations.includes(marker),`migration missing: ${marker}`);
+for(const marker of ["PRAGMA secure_delete=ON","DELETE FROM object_permissions","DELETE FROM ai_consents","RESOURCE_TABLES","upsertLifecycle","purgeResource"])verify(repository.includes(marker),`repository governance missing: ${marker}`);
+for(const marker of ["KALICI İMHA","GERİ ALINAMAZ İMHA","Saklama süresi henüz dolmadı","Geri alma süresi henüz dolmadı","hukuki/koruma bekletmesi","backupPropagationPending:true","ownerPersonId:resource.value.ownerPersonId","privacy:resource.value.privacy"])verify(useCases.includes(marker),`use-case rule missing: ${marker}`);
+for(const marker of ["RepositoryBackedStrongAuthenticationPort","CentralAuthorizationService","listLifecycle","findPolicy","purgeResource"])verify(adapter.includes(marker),`application adapter missing: ${marker}`);
+for(const marker of ["listDataRetentionPolicies","archiveDataResource","requestDataPurge","executeDataPurge","setDataLegalHold","wal_checkpoint"])verify(store.includes(marker),`data store integration missing: ${marker}`);
+for(const channel of ["dataLifecycle:listPolicies","dataLifecycle:createPolicy","dataLifecycle:listRecords","dataLifecycle:archive","dataLifecycle:restore","dataLifecycle:requestPurge","dataLifecycle:cancelPurge","dataLifecycle:executePurge","dataLifecycle:setLegalHold"])verify(main.includes(channel),`IPC channel missing: ${channel}`);
+for(const marker of ["listDataRetentionPolicies","createDataRetentionPolicy","listDataLifecycleRecords","archiveDataResource","executeDataPurge","setDataLegalHold"])verify(preload.includes(marker)&&globalTypes.includes(marker),`bridge contract missing: ${marker}`);
+for(const marker of ["function DataLifecycleSettings","Veri saklama ve güvenli silme","KALICI İMHA","GERİ ALINAMAZ İMHA","Önceki yedeklerde kopya bulunabilir","SQLite güvenli silme"])verify(app.includes(marker),`renderer governance missing: ${marker}`);
+verify(styles.includes('/* Build 136 — data lifecycle governance */'),'Build 136 renderer styles missing');
+for(const [text,label] of [[decision,'DEC-050'],[adr,'ADR-021'],[security,'backupPropagationPending'],[trace,'Build 136'],[openItems,'Build 136']])verify(text.includes(label),`document marker missing: ${label}`);
+verify(security.includes('en iyi çaba'),'secure deletion limitation is not documented');
+verify(security.includes('SSD')&&security.includes('yedek'),'filesystem and backup retention limitation missing');
+const report={schemaVersion:1,product:'Anadolu Parsı Aile Yaşam Merkezi',featureBuild:136,applicationVersion:current?.version??null,packageVersion:current?.packageVersion??null,stage:'Bronze RC2 Active Development',scope:'Retention policies, recoverable archive, legal hold, two-stage permanent purge, strong reauthentication, object authorization, audit/outbox and backup propagation disclosure',assertions,status:failures.length===0?'PASS':'FAIL',failures,generatedAt:new Date().toISOString()};
+await mkdir(dirname(reportPath),{recursive:true});await writeFile(reportPath,`${JSON.stringify(report,null,2)}\n`);console.log(`Build 136 data lifecycle governance contract: ${report.status} (${assertions} assertions)`);if(failures.length){for(const failure of failures)console.error(`- ${failure}`);process.exitCode=1;}

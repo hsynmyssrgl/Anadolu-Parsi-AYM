@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "channel": "Bronze",
+  "version": "23.07.2026.44",
+  "packageVersion": "23.7.2026-44",
+  "revision": "REVİZYON-060",
+  "milestone": "B060-M5 Repository & Outbox Foundation",
+  "generatedAt": "2026-07-23T17:40:14.631718Z",
+  "summary": {
+    "addedFiles": [
+      "database/migrations/0004_transactional_outbox.sql",
+      "packages/repositories/src/sqlite-base.ts",
+      "packages/repositories/src/person-repository.ts",
+      "packages/repositories/src/audit-repository.ts",
+      "packages/repositories/src/outbox-repository.ts",
+      "scripts/verify-repository-outbox.mjs",
+      "scripts/verify-transactional-atomicity.mjs"
+    ],
+    "modifiedAreas": [
+      "FamilyDataStore createMember transaction",
+      "repository package exports and dependencies",
+      "desktop runtime context injection",
+      "database migration catalog",
+      "migration infrastructure table classification",
+      "workspace dependency graph",
+      "Bronze verification scripts",
+      "version and release documentation"
+    ],
+    "removedBehavior": [
+      "createMember direct people INSERT and direct audit call"
+    ]
+  },
+  "database": {
+    "applicationTableCount": 40,
+    "infrastructureTableCount": 4,
+    "migrationCount": 4,
+    "newInfrastructureTables": [
+      "event_outbox",
+      "event_handler_receipts"
+    ],
+    "eventType": "family.member.created"
+  },
+  "transaction": {
+    "writes": [
+      "people",
+      "audit_log",
+      "event_outbox"
+    ],
+    "atomicCommit": true,
+    "atomicRollback": true
+  },
+  "compatibility": {
+    "ipcMainChannels": 124,
+    "preloadInvokeChannels": 124,
+    "rendererContractChanged": false,
+    "existingDatabaseNamePreserved": true,
+    "localDbBackupPreserved": true
+  }
+}

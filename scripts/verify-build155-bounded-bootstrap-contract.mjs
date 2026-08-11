@@ -1,0 +1,45 @@
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname } from 'node:path';
+
+const read=(path)=>readFile(path,'utf8');
+const [domain,dataStore,main,preload,globalTypes,policy,renderer,dashboardContract,dashboardApplication,dashboardRepository,dashboardAdapter,packageText,ledgerText]=await Promise.all([
+  read('packages/domain/src/app-data.ts'),read('apps/desktop/src/main/data-store.ts'),read('apps/desktop/src/main/main.ts'),read('apps/desktop/src/main/preload.ts'),read('apps/desktop/src/renderer/global.d.ts'),read('apps/desktop/src/main/ipc-integration-policy.ts'),read('apps/desktop/src/renderer/App.tsx'),read('packages/repository-contracts/src/dashboard-repository.ts'),read('packages/application/src/dashboard-use-cases.ts'),read('packages/repositories/src/dashboard-repository.ts'),read('apps/desktop/src/main/dashboard-application-adapter.ts'),read('package.json'),read('artifacts/manifests/VERSION_LEDGER.json')
+]);
+let assertions=0;const failures=[];const verify=(condition,label)=>{assertions++;if(!condition)failures.push(label);};
+verify(domain.includes("export type FamilySnapshotSection = 'graph' | 'timeline'"),'snapshot section union');
+verify(domain.includes('interface FamilySnapshotSectionsInput'),'snapshot sections input');
+verify(domain.includes('interface FamilySnapshotPatchView'),'snapshot patch view');
+verify(dataStore.includes('public getSnapshotSections(input: FamilySnapshotSectionsInput)'),'data store scoped snapshot method');
+verify(dataStore.includes("requested.includes('graph')"),'graph loaded only when requested');
+verify(dataStore.includes("requested.includes('timeline')"),'timeline loaded only when requested');
+verify(dataStore.includes('familyRepository.findById'),'timeline-only patch loads family without full graph');
+verify(main.includes("registerIpcHandler('data:getSnapshotSections'"),'scoped snapshot IPC');
+verify(preload.includes('getSnapshotSections: (input:FamilySnapshotSectionsInput)'),'preload scoped bridge');
+verify(globalTypes.includes('getSnapshotSections(input:FamilySnapshotSectionsInput)'),'renderer scoped bridge declaration');
+verify(policy.includes("case 'data:getSnapshotSections'"),'scoped IPC integration policy');
+verify(policy.includes("section === 'graph' || section === 'timeline'"),'scoped IPC whitelist');
+verify(renderer.includes('snapshotFromOverview'),'dashboard bootstrap creates empty bounded snapshot');
+verify(renderer.includes('bootstrapAuthenticatedSession'),'authenticated lightweight bootstrap');
+verify(!renderer.includes('window.pardus.getSnapshot(),window.pardus.getDashboardOverview()'),'eager full snapshot startup removed');
+verify(renderer.includes("ensureSnapshotSection=async(section:FamilySnapshotSection)"),'section load de-duplication');
+verify(renderer.includes("graphScreens:readonly ScreenId[]"),'graph screen lazy mapping');
+verify(renderer.includes("timelineScreens:readonly ScreenId[]"),'timeline screen lazy mapping');
+verify(renderer.includes("screen==='finance'")&&renderer.includes("screen==='health'")&&renderer.includes("screen==='life-center'"),'auxiliary modules lazy loaded');
+verify(renderer.includes('activeScreenDataReady'),'screen loading boundary');
+verify(renderer.includes("notificationOpen&&auth.authenticated"),'notifications trigger timeline lazy load');
+verify(renderer.includes('applyMutationResult')&&!renderer.includes('applyFullSnapshot'),'mutations preserve lazy sections with bounded results');
+verify(dashboardContract.includes('timelineEventCount')&&dashboardContract.includes('upcomingImportantDays')&&dashboardContract.includes('recentEvents'),'dashboard repository bounded summary contract');
+verify(dashboardApplication.includes('loaded.value.timelineEventCount'),'dashboard use case consumes aggregate count');
+verify(!dashboardApplication.includes('visibleEvents.filter'),'dashboard use case no longer filters full event collection');
+verify(dashboardRepository.includes('LIMIT 6')&&dashboardRepository.includes('LIMIT 4'),'dashboard previews bounded in SQL');
+verify(dashboardRepository.includes('COUNT(*) AS value FROM events e'),'dashboard totals use SQL aggregates');
+verify(dashboardRepository.includes("json_each(e.participant_person_ids)"),'participant visibility retained in SQL');
+verify(dashboardRepository.includes("permission.effect='allow'")&&dashboardRepository.includes("permission.effect='deny'"),'explicit permission precedence represented');
+verify(!dashboardAdapter.includes('timelineRepository.listByFamily'),'dashboard adapter no full timeline load');
+const pkg=JSON.parse(packageText),ledger=JSON.parse(ledgerText),current=ledger.entries?.at(-1);
+verify(Number(current?.sequence)>=155,'Build 155 feature evaluated on Build 155 or later');
+verify(pkg.version===current?.packageVersion,'package and ledger aligned');
+verify(current?.stage==='RC2 Aktif Geliştirme','Bronze RC2 active development preserved');
+const report={schemaVersion:1,product:'Anadolu Parsı Aile Yaşam Merkezi',featureBuild:155,stage:'Bronze RC2 Active Development',scope:'Bounded dashboard bootstrap, scoped family snapshot IPC and screen-level lazy data loading',assertions,status:failures.length?'FAIL':'PASS',failures,generatedAt:new Date().toISOString()};
+const reportPath='artifacts/validation/build155-bounded-bootstrap-contract.json';await mkdir(dirname(reportPath),{recursive:true});await writeFile(reportPath,`${JSON.stringify(report,null,2)}\n`);
+if(failures.length){console.error(`Build 155 bounded bootstrap contract: FAIL (${assertions-failures.length}/${assertions})`);for(const failure of failures)console.error(`- ${failure}`);process.exitCode=1;}else console.log(`Build 155 bounded bootstrap contract: PASS (${assertions}/${assertions}).`);

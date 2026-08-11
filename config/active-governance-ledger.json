@@ -1,0 +1,823 @@
+{
+  "schemaVersion": 1,
+  "id": "PPT-ACTIVE-GOVERNANCE-LEDGER-V1",
+  "product": "Anadolu Parsı Aile Yaşam Merkezi",
+  "release": "Bronze 04.08.2026.29",
+  "releaseId": "bronze-2026-08-04-r29",
+  "status": "GOVERNED_BRONZE_DEVELOPMENT_IN_PROGRESS",
+  "startedAt": "2026-08-04T12:55:00+03:00",
+  "parentRelease": "Bronze 04.08.2026.28",
+  "canonicalRules": "config/canonical-rule-registry.json",
+  "canonicalRulesSha256": "5e7e45b7c2ae9f3c7465866a58d9d389ef6a793dab855a68a1434e003eade081",
+  "acceptedScope": "config/accepted-scope-registry.json",
+  "decisionLedger": "config/user-decision-ledger.json",
+  "documentInventory": "artifacts/manifests/ALL_DOCUMENTS_INDEX.json",
+  "artifactInventory": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.json",
+  "persistentLibraryRoot": "/Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi",
+  "persistentLibraryReleasePath": "/Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi/Bronze 04.08.2026.29",
+  "preflightStatus": "PASS",
+  "postflightStatus": "PENDING",
+  "libraryUploadStatus": "31-T_COMPLETED_RECEIPT_PASS",
+  "conversationCapacity": {
+    "method": "platform_actual_or_unavailable",
+    "actualUsedPercent": null,
+    "actualRemainingPercent": null,
+    "status": "UNAVAILABLE",
+    "handoff": "NOT_REQUIRED_WITHOUT_ACTUAL_HARD_STOP",
+    "evidence": "artifacts/authority/29-D3_RECOVERY_AUTHORITY_SNAPSHOT.json"
+  },
+  "userConfiguredCreditStop": {
+    "previousUsedPercent": 95,
+    "status": "CANCELLED_BY_USER",
+    "canonicalPR172Unchanged": true,
+    "recordedAt": "2026-08-06T07:45:38.3898625+03:00"
+  },
+  "nextOfficialTask": "AUTO_PRIORITY_SELECTION_AFTER_31-T_PERSISTENT_RECEIPT",
+  "activeMicroStep": null,
+  "supersessions": [
+    {
+      "id": "GOV-SUP-29-D3-001",
+      "field": "nextOfficialTask",
+      "previousValue": "29-A universal fail-closed rule enforcement and checkpoint lock",
+      "effectiveValue": "29-D3 rule gap and conflict analysis",
+      "evidence": "config/work-segmentation-plan.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EVIDENCE"
+    },
+    {
+      "id": "GOV-SUP-29-D3-002",
+      "field": "conversationCapacity",
+      "previousValue": {
+        "method": "platform_actual",
+        "actualUsedPercent": 9.4,
+        "actualRemainingPercent": 90.6,
+        "status": "OK",
+        "handoff": "NOT_REQUIRED"
+      },
+      "effectiveValue": {
+        "method": "platform_actual_or_unavailable",
+        "actualUsedPercent": null,
+        "actualRemainingPercent": null,
+        "status": "UNAVAILABLE",
+        "handoff": "NOT_REQUIRED_WITHOUT_ACTUAL_HARD_STOP"
+      },
+      "evidence": "artifacts/authority/29-D3_RECOVERY_AUTHORITY_SNAPSHOT.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EVIDENCE"
+    },
+    {
+      "id": "GOV-SUP-29-D4-001",
+      "field": "nextOfficialTask",
+      "previousValue": "29-D3 rule gap and conflict analysis",
+      "effectiveValue": "29-D4 pro-level technical assessment of the latest code",
+      "evidence": "artifacts/checkpoints/29-D3_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EVIDENCE"
+    },
+    {
+      "id": "GOV-SUP-29-D5-001",
+      "field": "nextOfficialTask",
+      "previousValue": "29-D4 pro-level technical assessment of the latest code",
+      "effectiveValue": "29-D5 scope and real progress report",
+      "evidence": "artifacts/checkpoints/29-D4_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EVIDENCE"
+    },
+    {
+      "id": "GOV-SUP-29-D6-001",
+      "field": "nextOfficialTask",
+      "previousValue": "29-D5 scope and real progress report",
+      "effectiveValue": "29-D6 governed final closure of 29-D",
+      "evidence": "artifacts/checkpoints/29-D5_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EVIDENCE"
+    },
+    {
+      "id": "GOV-SUP-29-E-001",
+      "field": "nextOfficialTask",
+      "previousValue": "29-D6 governed final closure of 29-D",
+      "effectiveValue": "29-E targeted tests and security gates",
+      "evidence": "artifacts/checkpoints/29-D6_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EVIDENCE"
+    },
+    {
+      "id": "GOV-SUP-30-A-001",
+      "field": "nextOfficialTask",
+      "previousValue": "UNAVAILABLE_REQUIRES_NEW_OFFICIAL_AUTHORITY_AFTER_29-F",
+      "effectiveValue": "30-A B1-01 household, family branch and historical person membership foundation",
+      "evidence": "artifacts/authority/30-A_USER_CONTINUATION_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_NEW_USER_AUTHORITY"
+    },
+    {
+      "id": "GOV-SUP-30-B-001",
+      "field": "nextOfficialTask",
+      "previousValue": "30-A B1-01 household, family branch and historical person membership foundation",
+      "effectiveValue": "30-B B1-01 governed desktop IPC, renderer UI and menu completion",
+      "evidence": "artifacts/checkpoints/30-A_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT"
+    },
+    {
+      "id": "GOV-SUP-30-C-001",
+      "field": "nextOfficialTask",
+      "previousValue": "30-B B1-01 governed desktop IPC, renderer UI and menu completion",
+      "effectiveValue": "30-C B1-02 person profile lifecycle foundation",
+      "evidence": "artifacts/checkpoints/30-B_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT"
+    },
+    {
+      "id": "GOV-SUP-30-D-001",
+      "field": "nextOfficialTask",
+      "previousValue": "30-C B1-02 person profile lifecycle foundation",
+      "effectiveValue": "30-D B1-02 governed desktop IPC, renderer UI and menu completion",
+      "evidence": "artifacts/checkpoints/30-C_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT"
+    },
+    {
+      "id": "GOV-SUP-30-E-001",
+      "field": "nextOfficialTask",
+      "previousValue": "30-D B1-02 governed desktop IPC, renderer UI and menu completion",
+      "effectiveValue": "30-E B1-03 authorization purpose, family branch, time range and explicit denial context foundation",
+      "evidence": "artifacts/checkpoints/30-D_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT"
+    },
+    {
+      "id": "GOV-SUP-30-F-001",
+      "field": "nextOfficialTask",
+      "previousValue": "30-E B1-03 authorization purpose, family branch, time range and explicit denial context foundation",
+      "effectiveValue": "30-F B1-03 governed desktop IPC, renderer UI and menu completion",
+      "evidence": "artifacts/checkpoints/30-E_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT"
+    },
+    {
+      "id": "GOV-SUP-30-G-001",
+      "field": "nextOfficialTask",
+      "previousValue": "30-F B1-03 governed desktop IPC, renderer UI and menu completion",
+      "effectiveValue": "30-G B1-04 invitation acceptance, expiration, revocation, resend and error-flow foundation",
+      "evidence": "artifacts/checkpoints/30-F_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT"
+    },
+    {
+      "id": "GOV-SUP-30-H-001",
+      "field": "nextOfficialTask",
+      "previousValue": "30-G B1-04 invitation acceptance, expiration, revocation, resend and error-flow foundation",
+      "effectiveValue": "30-H B1-04 governed desktop IPC, renderer UI and menu completion",
+      "evidence": "artifacts/checkpoints/30-G_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT"
+    },
+    {
+      "id": "GOV-SUP-30-I-001",
+      "field": "nextOfficialTask",
+      "previousValue": "30-H B1-04 governed desktop IPC, renderer UI and menu completion",
+      "effectiveValue": "30-I B1-05 governed data repair center foundation",
+      "evidence": "artifacts/checkpoints/30-H_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT"
+    },
+    {
+      "id": "GOV-SUP-30-J-001",
+      "field": "nextOfficialTask",
+      "previousValue": "30-I B1-05 governed data repair center foundation",
+      "effectiveValue": "30-J B1-05 governed desktop IPC, renderer UI and menu completion",
+      "evidence": "artifacts/checkpoints/30-I_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT"
+    },
+    {
+      "id": "GOV-SUP-30-K-001",
+      "field": "nextOfficialTask",
+      "previousValue": "30-J B1-05 governed desktop IPC, renderer UI and menu completion",
+      "effectiveValue": "30-K B2-01 governed Windows Hello foundation",
+      "evidence": "artifacts/checkpoints/30-J_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT"
+    },
+    {
+      "id": "GOV-SUP-30-L-001",
+      "field": "nextOfficialTask",
+      "previousValue": "30-K B2-01 governed Windows Hello foundation",
+      "effectiveValue": "30-L B2-01 governed Windows Hello IPC, UI and menu completion",
+      "evidence": "artifacts/checkpoints/30-K_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT"
+    },
+    {
+      "id": "GOV-SUP-30-L-002",
+      "field": "nextOfficialTask",
+      "previousValue": "30-L B2-01 governed Windows Hello IPC, UI and menu completion",
+      "effectiveValue": "UNAVAILABLE_REQUIRES_NEW_OFFICIAL_AUTHORITY_AFTER_30-L",
+      "evidence": "artifacts/checkpoints/30-L_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT_AWAITING_NEW_AUTHORITY"
+    },
+    {
+      "id": "GOV-SUP-30-M-001",
+      "field": "nextOfficialTask",
+      "previousValue": "UNAVAILABLE_REQUIRES_NEW_OFFICIAL_AUTHORITY_AFTER_30-L",
+      "effectiveValue": "30-M PPK-002 centralized Policy Enforcement and repository policy receipt foundation",
+      "evidence": "artifacts/authority/30-M_USER_FULL_AUTO_PRIORITY_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT"
+    },
+    {
+      "id": "GOV-SUP-30-M-002",
+      "field": "nextOfficialTask",
+      "previousValue": "30-M PPK-002 centralized Policy Enforcement and repository policy receipt foundation",
+      "effectiveValue": "AUTO_PRIORITY_SELECTION_AFTER_30-M_PERSISTENT_RECEIPT",
+      "evidence": "artifacts/checkpoints/30-M_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT_FULL_AUTO_SELECTION_AUTHORIZED"
+    },
+    {
+      "id": "GOV-SUP-30-N-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_30-M_PERSISTENT_RECEIPT",
+      "effectiveValue": "30-N PPK-002 governed archive Policy Enforcement, repository receipt and direct-role migration vertical slice",
+      "evidence": "artifacts/authority/30-N_AUTO_PRIORITY_SELECTION_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT"
+    },
+    {
+      "id": "GOV-SUP-30-N-002",
+      "field": "nextOfficialTask",
+      "previousValue": "30-N PPK-002 governed archive Policy Enforcement, repository receipt and direct-role migration vertical slice",
+      "effectiveValue": "AUTO_PRIORITY_SELECTION_AFTER_30-N_PERSISTENT_RECEIPT",
+      "evidence": "artifacts/checkpoints/30-N_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT_FULL_AUTO_SELECTION_AUTHORIZED"
+    },
+    {
+      "id": "GOV-SUP-30-O-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_30-N_PERSISTENT_RECEIPT",
+      "effectiveValue": "30-O PPK-002 production archive PEP composition, protected receipt journal wiring and real SQLite repository runtime slice",
+      "evidence": "artifacts/authority/30-O_AUTO_PRIORITY_SELECTION_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT"
+    },
+    {
+      "id": "GOV-SUP-30-O-002",
+      "field": "nextOfficialTask",
+      "previousValue": "30-O PPK-002 production archive PEP composition, protected receipt journal wiring and real SQLite repository runtime slice",
+      "effectiveValue": "AUTO_PRIORITY_SELECTION_AFTER_30-O_PERSISTENT_RECEIPT",
+      "evidence": "artifacts/checkpoints/30-O_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT_FULL_AUTO_SELECTION_AUTHORIZED"
+    },
+    {
+      "id": "GOV-SUP-30-P-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_30-O_PERSISTENT_RECEIPT",
+      "effectiveValue": "30-P PPK-002 durable archive policy transaction, multi-process replay, database-enforced fencing and receipt/business atomicity slice",
+      "evidence": "artifacts/authority/30-P_AUTO_PRIORITY_SELECTION_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "ACTIVE_DEC_137_FULL_AUTO_PRIORITY_SELECTION"
+    },
+    {
+      "id": "GOV-SUP-30-P-002",
+      "field": "nextOfficialTask",
+      "previousValue": "30-P PPK-002 durable archive policy transaction, multi-process replay, database-enforced fencing and receipt/business atomicity slice",
+      "effectiveValue": "AUTO_PRIORITY_SELECTION_AFTER_30-P_PERSISTENT_RECEIPT",
+      "evidence": "artifacts/checkpoints/30-P_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT_FULL_AUTO_SELECTION_AUTHORIZED"
+    },
+    {
+      "id": "GOV-SUP-30-Q-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_30-P_PERSISTENT_RECEIPT",
+      "effectiveValue": "30-Q PPK-002 protected-journal cryptographic acknowledgement proof and SQLite-anchored complete-tail rollback detection",
+      "evidence": "artifacts/authority/30-Q_AUTO_PRIORITY_SELECTION_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "ACTIVE_DEC_137_FULL_AUTO_PRIORITY_SELECTION"
+    },
+    {
+      "id": "GOV-SUP-30-Q-002",
+      "field": "nextOfficialTask",
+      "previousValue": "30-Q PPK-002 protected-journal cryptographic acknowledgement proof and SQLite-anchored complete-tail rollback detection",
+      "effectiveValue": "AUTO_PRIORITY_SELECTION_AFTER_30-Q_PERSISTENT_RECEIPT",
+      "evidence": "artifacts/checkpoints/30-Q_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT_FULL_AUTO_SELECTION_AUTHORIZED"
+    },
+    {
+      "id": "GOV-SUP-30-R-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_30-Q_PERSISTENT_RECEIPT",
+      "effectiveValue": "30-R PPK-002 database-enforced receipt binding for direct writes to core archive business tables",
+      "evidence": "artifacts/authority/30-R_AUTO_PRIORITY_SELECTION_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "ACTIVE_DEC_137_FULL_AUTO_PRIORITY_SELECTION"
+    },
+    {
+      "id": "GOV-SUP-30-R-002",
+      "field": "nextOfficialTask",
+      "previousValue": "30-R PPK-002 database-enforced receipt binding for direct writes to core archive business tables",
+      "effectiveValue": "AUTO_PRIORITY_SELECTION_AFTER_30-R_PERSISTENT_RECEIPT",
+      "evidence": "artifacts/checkpoints/30-R_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT_FULL_AUTO_SELECTION_AUTHORIZED"
+    },
+    {
+      "id": "GOV-SUP-30-S-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_30-R_PERSISTENT_RECEIPT",
+      "effectiveValue": "30-S PPK-002 database-enforced receipt binding for archive accessory tables and cross-aggregate event attachment updates",
+      "evidence": "artifacts/authority/30-S_AUTO_PRIORITY_SELECTION_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "ACTIVE_DEC_137_FULL_AUTO_PRIORITY_SELECTION"
+    },
+    {
+      "id": "GOV-SUP-30-S-002",
+      "field": "nextOfficialTask",
+      "previousValue": "30-S PPK-002 database-enforced receipt binding for archive accessory tables and cross-aggregate event attachment updates",
+      "effectiveValue": "AUTO_PRIORITY_SELECTION_AFTER_30-S_PERSISTENT_RECEIPT",
+      "evidence": "artifacts/checkpoints/30-S_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT_FULL_AUTO_SELECTION_AUTHORIZED"
+    },
+    {
+      "id": "GOV-SUP-30-T-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_30-S_PERSISTENT_RECEIPT",
+      "effectiveValue": "30-T PPK-002 durable new-correlation operation idempotency after an unknown commit outcome",
+      "evidence": "artifacts/authority/30-T_AUTO_PRIORITY_SELECTION_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "ACTIVE_DEC_137_FULL_AUTO_PRIORITY_SELECTION"
+    },
+    {
+      "id": "GOV-SUP-30-T-002",
+      "field": "nextOfficialTask",
+      "previousValue": "30-T PPK-002 durable new-correlation operation idempotency after an unknown commit outcome",
+      "effectiveValue": "AUTO_PRIORITY_SELECTION_AFTER_30-T_PERSISTENT_RECEIPT",
+      "evidence": "artifacts/checkpoints/30-T_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT_FULL_AUTO_SELECTION_AUTHORIZED"
+    },
+    {
+      "id": "GOV-SUP-30-U-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_30-T_PERSISTENT_RECEIPT",
+      "effectiveValue": "30-U PPK-002 durable renderer and application restart pending-operation identity recovery",
+      "evidence": "artifacts/authority/30-U_AUTO_PRIORITY_SELECTION_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "ACTIVE_DEC_137_FULL_AUTO_PRIORITY_SELECTION"
+    },
+    {
+      "id": "GOV-SUP-30-U-002",
+      "field": "nextOfficialTask",
+      "previousValue": "30-U PPK-002 durable renderer and application restart pending-operation identity recovery",
+      "effectiveValue": "AUTO_PRIORITY_SELECTION_AFTER_30-U_PERSISTENT_RECEIPT",
+      "evidence": "artifacts/checkpoints/30-U_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT_FULL_AUTO_SELECTION_AUTHORIZED"
+    },
+    {
+      "id": "GOV-SUP-30-V-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_30-U_PERSISTENT_RECEIPT",
+      "effectiveValue": "30-V PPK-002 expired unused replay-reservation pruning and retention enforcement",
+      "evidence": "artifacts/authority/30-V_AUTO_PRIORITY_SELECTION_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "ACTIVE_DEC_137_FULL_AUTO_PRIORITY_SELECTION"
+    },
+    {
+      "id": "GOV-SUP-30-V-002",
+      "field": "nextOfficialTask",
+      "previousValue": "30-V PPK-002 expired unused replay-reservation pruning and retention enforcement",
+      "effectiveValue": "AUTO_PRIORITY_SELECTION_AFTER_30-V_PERSISTENT_RECEIPT",
+      "evidence": "artifacts/checkpoints/30-V_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT"
+    },
+    {
+      "id": "GOV-SUP-30-W-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_30-V_PERSISTENT_RECEIPT",
+      "effectiveValue": "30-W PPK-002 governed finance Policy Enforcement, repository receipt and direct-write fence vertical slice",
+      "evidence": "artifacts/authority/30-W_AUTO_PRIORITY_SELECTION_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT"
+    },
+    {
+      "id": "GOV-SUP-30-W-002",
+      "field": "nextOfficialTask",
+      "previousValue": "30-W PPK-002 governed finance Policy Enforcement, repository receipt and direct-write fence vertical slice",
+      "effectiveValue": "AUTO_PRIORITY_SELECTION_AFTER_30-W_PERSISTENT_RECEIPT",
+      "evidence": "artifacts/checkpoints/30-W_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT_FULL_AUTO_SELECTION_AUTHORIZED"
+    },
+    {
+      "id": "GOV-SUP-30-X-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_30-W_PERSISTENT_RECEIPT",
+      "effectiveValue": "30-X PPK-002 governed health Policy Enforcement, repository receipt and direct-write fence vertical slice",
+      "evidence": "artifacts/authority/30-X_AUTO_PRIORITY_SELECTION_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "ACTIVE_DEC_137_FULL_AUTO_PRIORITY_SELECTION"
+    },
+    {
+      "id": "GOV-SUP-30-X-002",
+      "field": "nextOfficialTask",
+      "previousValue": "30-X PPK-002 governed health Policy Enforcement, repository receipt and direct-write fence vertical slice",
+      "effectiveValue": "AUTO_PRIORITY_SELECTION_AFTER_30-X_PERSISTENT_RECEIPT",
+      "evidence": "artifacts/checkpoints/30-X_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT_FULL_AUTO_SELECTION_AUTHORIZED"
+    },
+    {
+      "id": "GOV-SUP-30-Y-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_30-X_PERSISTENT_RECEIPT",
+      "effectiveValue": "30-Y PPK-002 governed life Policy Enforcement, repository receipt, direct-write fence and cross-surface automation/report privacy vertical slice",
+      "evidence": "artifacts/authority/30-Y_AUTO_PRIORITY_SELECTION_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "ACTIVE_DEC_137_FULL_AUTO_PRIORITY_SELECTION"
+    },
+    {
+      "id": "GOV-SUP-30-Y-002",
+      "field": "30-Y capabilitySemantics",
+      "previousValue": "NEW_LITERAL_LIFE_READ_AND_LIFE_WRITE_CAPABILITY_REGISTRATION",
+      "effectiveValue": "EXISTING_FAMILY_READ_FOR_LIFE_LIST_AND_FAMILY_WRITE_FOR_LIFE_CREATE",
+      "evidence": "artifacts/authority/30-Y_CAPABILITY_SEMANTICS_CORRECTION.json",
+      "historicalSourceFilesRewritten": false,
+      "historicalSelectionAttempt1Status": "PASS_DESIGN_DETAIL_SUPERSEDED_NOT_FAILURE",
+      "status": "ACTIVE_GOVERNED_DESIGN_DETAIL_CORRECTION"
+    },
+    {
+      "id": "GOV-SUP-30-Z-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_30-Y_PERSISTENT_RECEIPT",
+      "effectiveValue": "30-Z PPK-002 governed location Policy Enforcement, family-bound repository receipt, direct-write fence and cross-surface privacy vertical slice",
+      "evidence": "artifacts/authority/30-Z_AUTO_PRIORITY_SELECTION_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "ACTIVE_DEC_137_FULL_AUTO_PRIORITY_SELECTION"
+    },
+    {
+      "id": "GOV-SUP-31-A-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_30-Z_PERSISTENT_RECEIPT",
+      "effectiveValue": "31-A PPK-002 governed timeline-event Policy Enforcement official checkpoint",
+      "evidence": "artifacts/authority/31-A_AUTO_PRIORITY_SELECTION_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EVIDENCE"
+    },
+    {
+      "id": "GOV-SUP-31-B-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_31-A_PERSISTENT_RECEIPT",
+      "effectiveValue": "31-B PPK-002 family data import central authorization official checkpoint",
+      "evidence": "artifacts/authority/31-B_AUTO_PRIORITY_SELECTION_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EVIDENCE"
+    },
+    {
+      "id": "GOV-SUP-31-C-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_31-B_PERSISTENT_RECEIPT",
+      "effectiveValue": "31-C PPK-002 family import multi-policy receipt atomic batch",
+      "evidence": "artifacts/authority/31-C_AUTO_PRIORITY_SELECTION_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EVIDENCE"
+    },
+    {
+      "id": "GOV-SUP-31-D-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_31-C_PERSISTENT_RECEIPT",
+      "effectiveValue": "31-D PPK-002 family import reused-location exact read receipt chain",
+      "evidence": "artifacts/authority/31-D_AUTO_PRIORITY_SELECTION_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EVIDENCE"
+    },
+    {
+      "id": "GOV-SUP-31-E-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_31-D_PERSISTENT_RECEIPT",
+      "effectiveValue": "31-E B0-02 user-visible release metadata and delivery filename boundary",
+      "evidence": "artifacts/authority/31-E_AUTO_PRIORITY_SELECTION_AUTHORITY.json"
+    },
+    {
+      "id": "GOV-SUP-31-F-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_31-E_PERSISTENT_RECEIPT",
+      "effectiveValue": "31-F PPK-002 family import newly-created-location linked event atomic policy chain",
+      "evidence": "artifacts/authority/31-F_AUTO_PRIORITY_SELECTION_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EVIDENCE"
+    },
+    {
+      "id": "GOV-SUP-31-G-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_31-F_PERSISTENT_RECEIPT",
+      "effectiveValue": "31-G PPK-002 family import governed rollback exact delete receipt fence",
+      "evidence": "artifacts/authority/31-G_AUTO_PRIORITY_SELECTION_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EVIDENCE"
+    },
+    {
+      "id": "GOV-SUP-31-G-002",
+      "field": "nextOfficialTask",
+      "previousValue": "31-G PPK-002 family import governed rollback exact delete receipt fence",
+      "effectiveValue": "31-G main structure Core Service typed API and ownership foundation",
+      "evidence": "artifacts/authority/31-G_MAIN_STRUCTURE_PRIORITY_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EXPLICIT_USER_PRIORITY"
+    },
+    {
+      "id": "GOV-SUP-31-H-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_31-G_PERSISTENT_RECEIPT",
+      "effectiveValue": "Core Service protected family-data session ownership control plane",
+      "evidence": "artifacts/authority/31-H_MAIN_STRUCTURE_PRIORITY_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EXPLICIT_USER_CONTINUATION"
+    },
+    {
+      "id": "GOV-SUP-31-I-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_31-H_PERSISTENT_RECEIPT",
+      "effectiveValue": "Headless shared device-secret protection boundary",
+      "evidence": "artifacts/authority/31-I_MAIN_STRUCTURE_PRIORITY_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EXPLICIT_USER_CONTINUATION"
+    },
+    {
+      "id": "GOV-SUP-31-J-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_31-I_PERSISTENT_RECEIPT",
+      "effectiveValue": "Family-data coexistence and default-deny cutover safety gate",
+      "evidence": "artifacts/authority/31-J_MAIN_STRUCTURE_SECURITY_HARDENING_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EXPLICIT_USER_SECURITY_HARDENING"
+    },
+    {
+      "id": "GOV-SUP-31-K-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_31-J_PERSISTENT_RECEIPT",
+      "effectiveValue": "Monotonic cutover-readiness evidence and tamper-evident acceptance state",
+      "evidence": "artifacts/authority/31-K_MONOTONIC_CUTOVER_READINESS_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EXPLICIT_USER_CONTINUATION"
+    },
+    {
+      "id": "GOV-SUP-31-L-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_31-K_PERSISTENT_RECEIPT",
+      "effectiveValue": "Protected cutover-readiness journal port and detached default-deny boundary",
+      "evidence": "artifacts/authority/31-L_PROTECTED_READINESS_JOURNAL_PORT_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EXPLICIT_USER_CONTINUATION"
+    },
+    {
+      "id": "GOV-SUP-31-M-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_31-L_PERSISTENT_RECEIPT",
+      "effectiveValue": "Signed cutover-readiness evidence verifier public-key-only boundary",
+      "evidence": "artifacts/authority/31-M_SIGNED_EVIDENCE_VERIFIER_BOUNDARY_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EXPLICIT_USER_CONTINUATION"
+    },
+    {
+      "id": "GOV-SUP-31-N-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_31-M_PERSISTENT_RECEIPT",
+      "effectiveValue": "Synthetic single-writer proof harness detached non-authoritative boundary",
+      "evidence": "artifacts/authority/31-N_SYNTHETIC_SINGLE_WRITER_PROOF_HARNESS_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EXPLICIT_USER_CONTINUATION"
+    },
+    {
+      "id": "GOV-SUP-31-O-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_31-N_PERSISTENT_RECEIPT",
+      "effectiveValue": "Synthetic key lifecycle proof harness detached non-submittable boundary",
+      "evidence": "artifacts/authority/31-O_SYNTHETIC_KEY_LIFECYCLE_PROOF_HARNESS_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EXPLICIT_USER_CONTINUATION"
+    },
+    {
+      "id": "GOV-SUP-31-P-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_31-O_PERSISTENT_RECEIPT",
+      "effectiveValue": "Synthetic rollback and recovery drill detached non-submittable boundary",
+      "evidence": "artifacts/authority/31-P_SYNTHETIC_ROLLBACK_RECOVERY_DRILL_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EXPLICIT_USER_CONTINUATION"
+    },
+    {
+      "id": "GOV-SUP-31-Q-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_31-P_PERSISTENT_RECEIPT",
+      "effectiveValue": "End-to-end security evidence aggregator detached non-submittable boundary",
+      "evidence": "artifacts/authority/31-Q_END_TO_END_SECURITY_EVIDENCE_AGGREGATOR_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EXPLICIT_USER_CONTINUATION"
+    },
+    {
+      "id": "GOV-SUP-31-R-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_31-Q_PERSISTENT_RECEIPT",
+      "effectiveValue": "Explicit user approval receipt detached no-cutover boundary",
+      "evidence": "artifacts/authority/31-R_EXPLICIT_USER_APPROVAL_RECEIPT_BOUNDARY_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EXPLICIT_USER_CONTINUATION"
+    },
+    {
+      "id": "GOV-SUP-31-S-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_31-R_PERSISTENT_RECEIPT",
+      "effectiveValue": "Versioned cutover decision preflight detached no-authority boundary",
+      "evidence": "artifacts/authority/31-S_VERSIONED_CUTOVER_DECISION_PREFLIGHT_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EXPLICIT_USER_CONTINUATION"
+    },
+    {
+      "id": "GOV-SUP-31-T-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_31-S_PERSISTENT_RECEIPT",
+      "effectiveValue": "Family import governed rollback exact delete receipt fence",
+      "evidence": "artifacts/authority/31-T_FAMILY_IMPORT_GOVERNED_ROLLBACK_AUTHORITY.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EXPLICIT_USER_FULL_AUTO_CONTINUATION"
+    }
+  ],
+  "updatedAt": "2026-08-11T07:31:27.333Z",
+  "externalLibraryAuthority": {
+    "step": "30-Z",
+    "status": "PASS",
+    "storageBackend": "EXTERNAL_USB_D_DRIVE",
+    "path": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\30-Z_PPK-002_Location_Policy_Enforcement",
+    "receipt": "artifacts/checkpoints/30-Z_LIBRARY_RECEIPT.json",
+    "frozenCheckpointOnly": true,
+    "currentAuthoritativeSourceExternalProtectionStatus": "PENDING_SEPARATE_FROM_FROZEN_30_Z_RECEIPT"
+  },
+  "externalLibraryAuthority31A": {
+    "step": "31-A",
+    "status": "PASS",
+    "storageBackend": "EXTERNAL_USB_D_DRIVE",
+    "path": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\31-A_PPK-002_Timeline_Event_Policy_Enforcement",
+    "receipt": "artifacts/checkpoints/31-A_LIBRARY_RECEIPT.json",
+    "focusedCheckpointOnly": true
+  },
+  "externalLibraryAuthority31B": {
+    "step": "31-B",
+    "status": "PASS",
+    "storageBackend": "EXTERNAL_USB_D_DRIVE",
+    "path": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\31-B_PPK-002_Family_Data_Import_Central_Authorization",
+    "receipt": "artifacts/checkpoints/31-B_LIBRARY_RECEIPT.json",
+    "focusedCheckpointOnly": true
+  },
+  "externalLibraryAuthority31C": {
+    "step": "31-C",
+    "status": "PASS",
+    "storageBackend": "EXTERNAL_USB_D_DRIVE",
+    "path": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\31-C_PPK-002_Family_Import_Multi_Policy_Receipt_Batch",
+    "receipt": "artifacts/checkpoints/31-C_LIBRARY_RECEIPT.json",
+    "focusedCheckpointOnly": true
+  },
+  "externalLibraryAuthority31D": {
+    "step": "31-D",
+    "status": "PASS",
+    "storageBackend": "EXTERNAL_USB_D_DRIVE",
+    "path": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\31-D_PPK-002_Family_Import_Reused_Location_Read_Receipt",
+    "receipt": "artifacts/checkpoints/31-D_LIBRARY_RECEIPT.json",
+    "focusedCheckpointOnly": true
+  },
+  "externalLibraryAuthority31E": {
+    "step": "31-E",
+    "status": "PASS",
+    "storageBackend": "EXTERNAL_USB_D_DRIVE",
+    "path": "D:\\AYM_LIBRARY\\31-E_B0-02_User_Visible_Release_Boundary",
+    "receipt": "artifacts/checkpoints/31-E_LIBRARY_RECEIPT.json",
+    "focusedCheckpointOnly": true
+  },
+  "externalLibraryAuthority31F": {
+    "step": "31-F",
+    "status": "PASS",
+    "storageBackend": "EXTERNAL_USB_D_DRIVE",
+    "path": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\31-F_PPK-002_Family_Import_Created_Location_Linked_Event",
+    "receipt": "artifacts/checkpoints/31-F_LIBRARY_RECEIPT.json",
+    "focusedCheckpointOnly": true
+  },
+  "externalLibraryAuthority31G": {
+    "step": "31-G",
+    "status": "PASS",
+    "storageBackend": "EXTERNAL_USB_D_DRIVE",
+    "path": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\31-G_Main_Structure_Core_Service_API_Foundation",
+    "receipt": "artifacts/checkpoints/31-G_LIBRARY_RECEIPT.json",
+    "focusedCheckpointOnly": true
+  },
+  "externalLibraryAuthority31H": {
+    "step": "31-H",
+    "status": "PASS",
+    "storageBackend": "EXTERNAL_USB_D_DRIVE",
+    "path": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\31-H_Core_Service_Family_Data_Session_Ownership_Control_Plane",
+    "receipt": "artifacts/checkpoints/31-H_LIBRARY_RECEIPT.json",
+    "focusedCheckpointOnly": true
+  },
+  "externalLibraryAuthority31I": {
+    "step": "31-I",
+    "status": "PASS",
+    "storageBackend": "EXTERNAL_USB_D_DRIVE",
+    "path": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\31-I_Headless_Device_Secret_Protection_Boundary",
+    "receipt": "artifacts/checkpoints/31-I_LIBRARY_RECEIPT.json",
+    "focusedCheckpointOnly": true
+  },
+  "externalLibraryAuthority31J": {
+    "step": "31-J",
+    "status": "PASS",
+    "storageBackend": "EXTERNAL_USB_D_DRIVE",
+    "path": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\31-J_Family_Data_Coexistence_Default_Deny_Cutover_Gate",
+    "receipt": "artifacts/checkpoints/31-J_LIBRARY_RECEIPT.json",
+    "focusedCheckpointOnly": true
+  },
+  "externalLibraryAuthority31K": {
+    "step": "31-K",
+    "status": "PASS",
+    "storageBackend": "EXTERNAL_USB_D_DRIVE",
+    "path": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\31-K_Monotonic_Cutover_Readiness_Evidence",
+    "receipt": "artifacts/checkpoints/31-K_LIBRARY_RECEIPT.json",
+    "focusedCheckpointOnly": true
+  },
+  "externalLibraryAuthority31L": {
+    "step": "31-L",
+    "status": "PASS",
+    "storageBackend": "EXTERNAL_USB_D_DRIVE",
+    "path": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\31-L_Protected_Cutover_Readiness_Journal_Port",
+    "receipt": "artifacts/checkpoints/31-L_LIBRARY_RECEIPT.json",
+    "focusedCheckpointOnly": true
+  },
+  "externalLibraryAuthority31M": {
+    "step": "31-M",
+    "status": "PASS",
+    "storageBackend": "EXTERNAL_USB_D_DRIVE",
+    "path": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\31-M_Signed_Cutover_Readiness_Evidence_Verifier",
+    "receipt": "artifacts/checkpoints/31-M_LIBRARY_RECEIPT.json",
+    "focusedCheckpointOnly": true
+  },
+  "externalLibraryAuthority31N": {
+    "step": "31-N",
+    "status": "PASS",
+    "storageBackend": "EXTERNAL_USB_D_DRIVE",
+    "path": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\31-N_Synthetic_Single_Writer_Proof_Harness",
+    "receipt": "artifacts/checkpoints/31-N_LIBRARY_RECEIPT.json",
+    "focusedCheckpointOnly": true
+  },
+  "externalLibraryAuthority31O": {
+    "step": "31-O",
+    "status": "PASS",
+    "storageBackend": "EXTERNAL_USB_D_DRIVE",
+    "path": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\31-O_Synthetic_Key_Lifecycle_Proof_Harness",
+    "receipt": "artifacts/checkpoints/31-O_LIBRARY_RECEIPT.json",
+    "focusedCheckpointOnly": true
+  },
+  "externalLibraryAuthority31P": {
+    "step": "31-P",
+    "status": "PASS",
+    "storageBackend": "EXTERNAL_USB_D_DRIVE",
+    "path": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\31-P_Synthetic_Rollback_Recovery_Drill",
+    "receipt": "artifacts/checkpoints/31-P_LIBRARY_RECEIPT.json",
+    "focusedCheckpointOnly": true
+  },
+  "externalLibraryAuthority31Q": {
+    "step": "31-Q",
+    "status": "PASS",
+    "storageBackend": "EXTERNAL_USB_D_DRIVE",
+    "path": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\31-Q_End_To_End_Security_Evidence_Aggregator",
+    "receipt": "artifacts/checkpoints/31-Q_LIBRARY_RECEIPT.json",
+    "focusedCheckpointOnly": true
+  },
+  "externalLibraryAuthority31R": {
+    "step": "31-R",
+    "status": "PASS",
+    "storageBackend": "EXTERNAL_USB_D_DRIVE",
+    "path": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\31-R_Explicit_User_Approval_Receipt_Boundary",
+    "receipt": "artifacts/checkpoints/31-R_LIBRARY_RECEIPT.json",
+    "focusedCheckpointOnly": true
+  },
+  "externalLibraryAuthority31S": {
+    "step": "31-S",
+    "status": "PASS",
+    "storageBackend": "EXTERNAL_USB_D_DRIVE",
+    "path": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\31-S_Versioned_Cutover_Decision_Preflight",
+    "receipt": "artifacts/checkpoints/31-S_LIBRARY_RECEIPT.json",
+    "focusedCheckpointOnly": true
+  },
+  "externalLibraryAuthority31T": {
+    "step": "31-T",
+    "status": "PASS",
+    "storageBackend": "EXTERNAL_USB_D_DRIVE",
+    "path": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\31-T_PPK-002_Family_Import_Governed_Rollback_Receipt_Fence",
+    "receipt": "artifacts/checkpoints/31-T_LIBRARY_RECEIPT.json",
+    "focusedCheckpointOnly": true
+  }
+}

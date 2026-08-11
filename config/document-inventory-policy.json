@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "PPT-DOCUMENT-INVENTORY-POLICY-V1",
+  "release": "Bronze 04.08.2026.29",
+  "allFilesInventory": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.json",
+  "allDocumentsInventory": "artifacts/manifests/ALL_DOCUMENTS_INDEX.json",
+  "markdownDocumentList": "docs/current/08_TUM_BELGELER_DIZINI.md",
+  "unclassifiedFilesAllowed": false,
+  "missingDocumentsAllowed": false,
+  "documentExtensions": [
+    ".md",
+    ".pdf",
+    ".docx",
+    ".txt",
+    ".rtf",
+    ".json",
+    ".csv",
+    ".yml",
+    ".yaml",
+    ".html"
+  ]
+}

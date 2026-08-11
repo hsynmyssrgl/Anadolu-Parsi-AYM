@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "../../.tmp/30-l-windows-hello-desktop",
+    "rootDir": "../../apps/desktop/src/main",
+    "types": ["node"],
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false
+  },
+  "include": [
+    "../../apps/desktop/src/main/ipc-integration-policy.ts",
+    "../../apps/desktop/src/main/windows-hello-platform-coordinator.ts",
+    "../../apps/desktop/src/main/user-data-vault.ts"
+  ]
+}

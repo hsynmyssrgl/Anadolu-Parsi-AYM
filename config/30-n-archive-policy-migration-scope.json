@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "30-N",
+  "requirement": "PPK-002",
+  "scope": "GOVERNED_ARCHIVE_POLICY_ENFORCEMENT_VERTICAL_SLICE",
+  "intentMappings": [
+    { "operation": "archive.import", "action": "create", "capability": "archive.write", "resourceType": "archive_item", "resourceIdSource": "itemId" },
+    { "operation": "archive.opened.audit", "action": "record", "capability": "archive.write", "resourceType": "archive_item", "resourceIdSource": "itemId" },
+    { "operation": "archive.retention.create", "action": "create", "capability": "archive.write", "resourceType": "archive_retention_policy", "resourceIdSource": "policyId" },
+    { "operation": "archive.retention.assign", "action": "update", "capability": "archive.write", "resourceType": "archive_item", "resourceIdSource": "itemId" },
+    { "operation": "archive.destroy.prepare", "action": "delete", "capability": "archive.write", "resourceType": "archive_item", "resourceIdSource": "itemId" },
+    { "operation": "archive.destroy.mark", "action": "delete", "capability": "archive.write", "resourceType": "archive_item", "resourceIdSource": "itemId" },
+    { "operation": "archive.category.create", "action": "create", "capability": "archive.write", "resourceType": "archive_category", "resourceIdSource": "categoryId" },
+    { "operation": "archive.classification.update", "action": "update", "capability": "archive.write", "resourceType": "archive_item", "resourceIdSource": "itemId" }
+  ],
+  "directRoleMigration": {
+    "preStepObservedFindings": 34,
+    "removedFindings": 5,
+    "expectedRemainingFindings": 29,
+    "historicalBaselinePreserved": true,
+    "removedHistoricalFindings": [
+      { "path": "apps/desktop/src/main/archive-application-adapter.ts", "lineSha256": "10894d545bd5fa336b9ab8cd604d936f726a943e920a99fc0771cd7f37b6448b" },
+      { "path": "packages/application/src/archive-use-cases.ts", "lineSha256": "6bfd48b0abcd77b3cc08dd5ab0417de2ce18ec76b4ffa9d023418c8d3c66f8cf" },
+      { "path": "packages/application/src/archive-use-cases.ts", "lineSha256": "04974d7cf01f700c73ccd18e5382ae454a36f640837ffcbbb26c234690e1403e" },
+      { "path": "packages/application/src/archive-use-cases.ts", "lineSha256": "7bdc58dc63c6c90cc2dad78046327e625aa7454294620f8969732f5e8c3a6258" },
+      { "path": "packages/application/src/archive-use-cases.ts", "lineSha256": "3a4ff1ebd1e9009fd3457de6fbbe2953788631139a7718b044127e024139222b" }
+    ]
+  },
+  "requiredOrder": [
+    "trusted-authority-resolution",
+    "resource-resolution",
+    "replay-reservation",
+    "signed-receipt-persistence-and-readback",
+    "active-context-validation",
+    "business-transaction-begin",
+    "repository-context-validation",
+    "repository-operation",
+    "business-transaction-commit"
+  ],
+  "failClosed": {
+    "missingPep": true,
+    "authorityFailure": true,
+    "resourceMismatch": true,
+    "receiptSinkFailure": true,
+    "replayRejection": true,
+    "expiredReceiptOrAuthority": true,
+    "nonWritableOrChangedFence": true,
+    "forgedOrMismatchedRepositoryContext": true,
+    "legacyAuthorizationFallback": false
+  },
+  "evidenceBoundary": {
+    "PPK002": "PARTIAL",
+    "universalRepositoryEnforcement": "NOT_COMPLETE",
+    "productionCompositionWired": false,
+    "durableMultiProcessReplayProtection": "NOT_RUN_NOT_PASS",
+    "receiptAndBusinessCommitAtomicity": "NOT_IMPLEMENTED",
+    "obligationExecution": "NOT_IMPLEMENTED",
+    "auditAndOutboxRepositoryEnforcement": "NOT_COMPLETE",
+    "eventAttachmentCrossAggregateReceiptBinding": "NOT_COMPLETE",
+    "secureFileDeletionAndDatabaseCommitAtomicity": "NOT_IMPLEMENTED",
+    "requirementCompletionClaimed": false
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "31-F",
+  "requirement": "PPK-002",
+  "decision": "DEC-166",
+  "title": "Family import newly-created-location linked event atomic policy chain",
+  "status": "COMPLETED",
+  "targetSliceStatus": "PASS",
+  "targets": {
+    "sourceLocationResolution": "CREATED_IN_SAME_IMPORT_BATCH",
+    "locationCreateIntent": "EXACT_LOCATION_CREATE",
+    "dependentLocationReadIntent": "EXACT_LOCATION_READ_BOUND_TO_CREATE_RECEIPT",
+    "eventWriteIntent": "EXACT_EVENT_CREATE_WITH_SOURCE_RESOURCE",
+    "transactionBoundary": "SAME_SQLITE_TRANSACTION",
+    "completionFence": "CREATED_ROW_FAMILY_OWNER_AND_CREATE_RECEIPT_MATCH_BEFORE_COMMIT",
+    "receiptProjection": "DEPENDENT_LOCATION_READ_RECEIPT_HASH_ON_EVENT"
+  },
+  "openBoundaries": {
+    "governedImportRollbackReceiptFence": "NOT_COMPLETE",
+    "universalRepositoryEnforcement": "NOT_COMPLETE",
+    "obligationExecution": "NOT_RUN_NOT_PASS",
+    "externalMonotonicRollbackAuthority": "NOT_IMPLEMENTED"
+  },
+  "PPK002": "PARTIAL",
+  "newBuildIssued": false,
+  "persistentReceiptStatus": "PASS",
+  "officialCompletionClaimed": true,
+  "completedAt": "2026-08-10T16:48:37.075Z"
+}

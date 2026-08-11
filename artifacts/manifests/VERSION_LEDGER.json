@@ -1,0 +1,1809 @@
+{
+  "schemaVersion": 1,
+  "product": "Anadolu Parsı Aile Yaşam Merkezi",
+  "channel": "Bronze",
+  "rule": "Gun.Ay.Yil.GlobalBuildSirasi",
+  "sequenceScope": "project",
+  "entries": [
+    {
+      "version": "21.07.2026.40",
+      "packageVersion": "21.7.2026-40",
+      "sequence": 40,
+      "milestone": "MVP-40 Code Freeze Baseline"
+    },
+    {
+      "version": "23.07.2026.41",
+      "packageVersion": "23.7.2026-41",
+      "sequence": 41,
+      "milestone": "B060-M2 Foundation"
+    },
+    {
+      "version": "23.07.2026.42",
+      "packageVersion": "23.7.2026-42",
+      "sequence": 42,
+      "milestone": "B060-M3 Runtime Foundation"
+    },
+    {
+      "version": "23.07.2026.43",
+      "packageVersion": "23.7.2026-43",
+      "sequence": 43,
+      "milestone": "B060-M4 Database Migration Foundation"
+    },
+    {
+      "version": "23.07.2026.44",
+      "packageVersion": "23.7.2026-44",
+      "sequence": 44,
+      "milestone": "B060-M5 Repository & Outbox Foundation"
+    },
+    {
+      "version": "23.07.2026.45",
+      "packageVersion": "23.7.2026-45",
+      "sequence": 45,
+      "milestone": "B060-M5 Event Dispatcher & Idempotency"
+    },
+    {
+      "version": "23.07.2026.46",
+      "packageVersion": "23.7.2026-46",
+      "sequence": 46,
+      "milestone": "B060-M6 Family Application Use Cases"
+    },
+    {
+      "version": "23.07.2026.47",
+      "packageVersion": "23.7.2026-47",
+      "sequence": 47,
+      "milestone": "B060-M7 Genealogy Read Model"
+    },
+    {
+      "version": "23.07.2026.48",
+      "packageVersion": "23.7.2026-48",
+      "sequence": 48,
+      "milestone": "B060-M8 Timeline & Important Days Application Migration"
+    },
+    {
+      "version": "23.07.2026.49",
+      "packageVersion": "23.7.2026-49",
+      "sequence": 49,
+      "milestone": "B060-M9 Dashboard Query & Navigation State"
+    },
+    {
+      "version": "23.07.2026.50",
+      "packageVersion": "23.7.2026-50",
+      "sequence": 50,
+      "milestone": "B060-M10 Authentication & Session Application Migration"
+    },
+    {
+      "version": "23.07.2026.51",
+      "packageVersion": "23.7.2026-51",
+      "sequence": 51,
+      "milestone": "B060-M11 MFA Recovery & Trusted Device Identity"
+    },
+    {
+      "version": "23.07.2026.52",
+      "packageVersion": "23.7.2026-52",
+      "sequence": 52,
+      "milestone": "B060-M12 RBAC & Audit Chain Hardening"
+    },
+    {
+      "version": "23.07.2026.53",
+      "packageVersion": "23.7.2026-53",
+      "sequence": 53,
+      "milestone": "B060-M13 Membership Collaboration & Notifications"
+    },
+    {
+      "version": "23.07.2026.54",
+      "packageVersion": "23.7.2026-54",
+      "sequence": 54,
+      "milestone": "B060-M14 Health Records & Medication Application Migration"
+    },
+    {
+      "version": "24.07.2026.55",
+      "packageVersion": "24.7.2026-55",
+      "milestone": "B060-M15 Finance Records & Valuation Application Migration",
+      "sequence": 55
+    },
+    {
+      "version": "24.07.2026.56",
+      "packageVersion": "24.7.2026-56",
+      "sequence": 56,
+      "milestone": "B060-M16 Document Archive & Versioning Application Migration"
+    },
+    {
+      "version": "24.07.2026.57",
+      "packageVersion": "24.7.2026-57",
+      "sequence": 57,
+      "date": "2026-07-24",
+      "channel": "Bronze",
+      "stage": "Development",
+      "summary": "Archive runtime verification"
+    },
+    {
+      "version": "24.07.2026.58",
+      "packageVersion": "24.7.2026-58",
+      "sequence": 58,
+      "date": "2026-07-24",
+      "channel": "Bronze",
+      "stage": "Development",
+      "summary": "Operational health repository migration"
+    },
+    {
+      "version": "24.07.2026.59",
+      "packageVersion": "24.7.2026-59",
+      "sequence": 59,
+      "date": "2026-07-24",
+      "channel": "Bronze",
+      "stage": "Development",
+      "summary": "Operational health migration continuation"
+    },
+    {
+      "version": "24.07.2026.60",
+      "packageVersion": "24.7.2026-60",
+      "sequence": 60,
+      "date": "2026-07-24",
+      "channel": "Bronze",
+      "stage": "Development",
+      "summary": "Foundation and event infrastructure"
+    },
+    {
+      "version": "24.07.2026.61",
+      "packageVersion": "24.7.2026-61",
+      "sequence": 61,
+      "date": "2026-07-24",
+      "channel": "Bronze",
+      "stage": "Development",
+      "summary": "Operational health query migration"
+    },
+    {
+      "version": "24.07.2026.62",
+      "packageVersion": "24.7.2026-62",
+      "sequence": 62,
+      "date": "2026-07-24",
+      "channel": "Bronze",
+      "stage": "Development",
+      "summary": "Operational health maintenance migration"
+    },
+    {
+      "version": "24.07.2026.63",
+      "packageVersion": "24.7.2026-63",
+      "sequence": 63,
+      "date": "2026-07-24",
+      "channel": "Bronze",
+      "stage": "Development",
+      "summary": "Application architecture continuation"
+    },
+    {
+      "version": "24.07.2026.64",
+      "packageVersion": "24.7.2026-64",
+      "sequence": 64,
+      "date": "2026-07-24",
+      "channel": "Bronze",
+      "stage": "Development",
+      "summary": "Export and report migration"
+    },
+    {
+      "version": "24.07.2026.65",
+      "packageVersion": "24.7.2026-65",
+      "sequence": 65,
+      "date": "2026-07-24",
+      "channel": "Bronze",
+      "stage": "Development",
+      "summary": "Diagnostic report migration"
+    },
+    {
+      "version": "24.07.2026.66",
+      "packageVersion": "24.7.2026-66",
+      "sequence": 66,
+      "date": "2026-07-24",
+      "channel": "Bronze",
+      "stage": "Development",
+      "summary": "Authorization audit migration"
+    },
+    {
+      "version": "24.07.2026.67",
+      "packageVersion": "24.7.2026-67",
+      "sequence": 67,
+      "date": "2026-07-24",
+      "channel": "Bronze",
+      "stage": "Development",
+      "summary": "Membership account management migration"
+    },
+    {
+      "version": "24.07.2026.68",
+      "packageVersion": "24.7.2026-68",
+      "sequence": 68,
+      "date": "2026-07-24",
+      "channel": "Bronze",
+      "stage": "Development",
+      "summary": "Automation rule management migration"
+    },
+    {
+      "version": "24.07.2026.69",
+      "packageVersion": "24.7.2026-69",
+      "sequence": 69,
+      "date": "2026-07-24",
+      "channel": "Bronze",
+      "stage": "Development",
+      "summary": "Automation execution migration"
+    },
+    {
+      "version": "24.07.2026.70",
+      "packageVersion": "24.7.2026-70",
+      "sequence": 70,
+      "date": "2026-07-24",
+      "channel": "Bronze",
+      "stage": "Development",
+      "summary": "Archive retention policy migration"
+    },
+    {
+      "version": "24.07.2026.71",
+      "packageVersion": "24.7.2026-71",
+      "sequence": 71,
+      "date": "2026-07-24",
+      "channel": "Bronze",
+      "stage": "RC2 Active Development",
+      "summary": "RC2 active development versioning and package summary"
+    },
+    {
+      "version": "24.07.2026.72",
+      "packageVersion": "24.7.2026-72",
+      "sequence": 72,
+      "date": "2026-07-24",
+      "channel": "Bronze",
+      "stage": "RC2 Active Development",
+      "summary": "Archive classification application/repository migration"
+    },
+    {
+      "version": "24.07.2026.73",
+      "packageVersion": "24.7.2026-73",
+      "sequence": 73,
+      "milestone": "Bronze RC2 Build 73 AI consent migration"
+    },
+    {
+      "version": "24.07.2026.74",
+      "packageVersion": "24.7.2026-74",
+      "sequence": 74,
+      "date": "2026-07-24",
+      "channel": "Bronze",
+      "stage": "RC2 Active Development",
+      "summary": "Report summary application/repository migration"
+    },
+    {
+      "version": "24.07.2026.75",
+      "packageVersion": "24.7.2026-75",
+      "sequence": 75,
+      "date": "2026-07-24",
+      "channel": "Bronze",
+      "stage": "RC2 Active Development",
+      "summary": "Maintenance recommendation application migration"
+    },
+    {
+      "version": "24.07.2026.76",
+      "packageVersion": "24.7.2026-76",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-24",
+      "summary": "Konum oluşturma akışı application/repository katmanına taşındı.",
+      "sequence": 76,
+      "milestone": "Bronze RC2 Build 76 location creation migration"
+    },
+    {
+      "version": "24.07.2026.77",
+      "packageVersion": "24.7.2026-77",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-24",
+      "summary": "Arşiv açma akışı application/repository katmanına taşındı.",
+      "sequence": 77,
+      "milestone": "Bronze RC2 Build 77 archive open migration"
+    },
+    {
+      "version": "24.07.2026.78",
+      "packageVersion": "24.7.2026-78",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-24",
+      "summary": "Arşiv arama akışı application/repository katmanına taşındı.",
+      "sequence": 78,
+      "milestone": "Bronze RC2 Build 78 archive search migration"
+    },
+    {
+      "version": "24.07.2026.79",
+      "packageVersion": "24.7.2026-79",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-24",
+      "summary": "Geçerli hesap yükleme akışı repository katmanına taşındı ve AI izin bağlamındaki doğrudan SQL kaldırıldı.",
+      "sequence": 79,
+      "milestone": "Bronze RC2 Build 79 current account repository migration"
+    },
+    {
+      "version": "24.07.2026.80",
+      "packageVersion": "24.7.2026-80",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-24",
+      "summary": "Aile yöneticisi bütünlük onarımı account repository transaction sınırına taşındı.",
+      "sequence": 80,
+      "milestone": "Bronze RC2 Build 80 family admin invariant repository migration"
+    },
+    {
+      "version": "24.07.2026.81",
+      "packageVersion": "24.7.2026-81",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-24",
+      "summary": "Eski denetim kayıtlarının hash zinciri tamamlama işlemi audit repository transaction sınırına taşındı.",
+      "sequence": 81,
+      "milestone": "Bronze RC2 Build 81 audit chain backfill repository migration"
+    },
+    {
+      "version": "24.07.2026.82",
+      "packageVersion": "24.7.2026-82",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-24",
+      "summary": "Varsayılan aile başlangıç verisi application use-case ve bootstrap repository transaction sınırına taşındı.",
+      "sequence": 82,
+      "milestone": "Bronze RC2 Build 82 default family bootstrap migration"
+    },
+    {
+      "version": "24.07.2026.83",
+      "packageVersion": "24.7.2026-83",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-24",
+      "summary": "Ana ekran son güncelleme zamanı audit query port ve repository sınırına taşındı.",
+      "sequence": 83,
+      "milestone": "Bronze RC2 Build 83 snapshot audit timestamp query migration"
+    },
+    {
+      "version": "24.07.2026.84",
+      "packageVersion": "24.7.2026-84",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-24",
+      "summary": "Bağımsız denetim kaydı yazma akışı application command port ve audit repository transaction sınırına taşındı.",
+      "sequence": 84,
+      "milestone": "Bronze RC2 Build 84 audit write boundary migration"
+    },
+    {
+      "sequence": 85,
+      "version": "24.07.2026.85",
+      "packageVersion": "24.7.2026-85",
+      "edition": "Bronze",
+      "status": "active-development",
+      "revision": "BUILD-85",
+      "date": "2026-07-24",
+      "summary": "System health SQLite runtime inspection moved behind application port and database infrastructure probe."
+    },
+    {
+      "version": "24.07.2026.86",
+      "packageVersion": "24.7.2026-86",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-24",
+      "summary": "Veritabanı bakım komutları application command port ve SQLite database altyapı yürütücüsü arkasına taşındı.",
+      "sequence": 86,
+      "milestone": "Bronze RC2 Build 86 database maintenance boundary migration"
+    },
+    {
+      "version": "24.07.2026.87",
+      "packageVersion": "24.7.2026-87",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-24",
+      "summary": "Yedekleme checkpoint ve sahnelenmiş SQLite bütünlük doğrulaması application portu ile database altyapı sınırına taşındı.",
+      "sequence": 87,
+      "milestone": "Bronze RC2 Build 87 backup database safety boundary migration"
+    },
+    {
+      "version": "24.07.2026.88",
+      "packageVersion": "24.7.2026-88",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-24",
+      "summary": "Audit append-only UPDATE/DELETE koruma tetikleyicileri application command port ve SQLite database altyapı sınırına taşındı.",
+      "sequence": 88,
+      "milestone": "Bronze RC2 Build 88 audit storage protection boundary migration"
+    },
+    {
+      "version": "24.07.2026.89",
+      "packageVersion": "24.7.2026-89",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-24",
+      "summary": "SQLite bağlantı açılışı, başlangıç PRAGMA ayarları, migration yürütümü, transaction executor kurulumu ve kapanış yaşam döngüsü FamilyDataStore dışındaki masaüstü runtime bileşenine taşındı.",
+      "sequence": 89,
+      "milestone": "Bronze RC2 Build 89 SQLite family database runtime boundary migration"
+    },
+    {
+      "version": "24.07.2026.90",
+      "packageVersion": "24.7.2026-90",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-24",
+      "summary": "Arşiv dosyalarının şifreli kasaya alınması, bütünlük doğrulamasıyla açılması ve güvenli silinmesi application portu ile masaüstü dosya sistemi adaptörüne taşındı.",
+      "sequence": 90,
+      "milestone": "Bronze RC2 Build 90 archive vault file boundary migration"
+    },
+    {
+      "version": "24.07.2026.91",
+      "packageVersion": "24.7.2026-91",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-24",
+      "summary": "Tanılama raporu, sıkıştırılmış tanılama arşivi ve bakım dışa aktarım dosyalarının yazma, okuma ve SHA-256 doğrulama işlemleri application portu ile masaüstü dosya sistemi adaptörüne taşındı.",
+      "sequence": 91,
+      "milestone": "Bronze RC2 Build 91 operational artifact file boundary migration"
+    },
+    {
+      "version": "24.07.2026.92",
+      "packageVersion": "24.7.2026-92",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-24",
+      "summary": "Yedek hedefi yazılabilirlik ve boş alan kontrolü, yedek artifact yolu üretimi, SHA-256 geri-okuma doğrulaması ve retention dosya temizliği application portu ile masaüstü dosya sistemi adaptörüne taşındı.",
+      "sequence": 92,
+      "milestone": "Bronze RC2 Build 92 backup target file boundary migration"
+    },
+    {
+      "version": "24.07.2026.93",
+      "packageVersion": "24.7.2026-93",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-24",
+      "summary": "Tam yedek kapsayıcısı oluşturma ve inceleme ile restore staging, atomik dosya değişimi ve rollback işlemleri application portu üzerinden masaüstü dosya sistemi adaptörüne taşındı.",
+      "sequence": 93,
+      "milestone": "Bronze RC2 Build 93 full backup file boundary migration"
+    },
+    {
+      "version": "24.07.2026.94",
+      "packageVersion": "24.7.2026-94",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-24",
+      "summary": "Sistem sağlığı, uyarlanabilir kaynak profili ve performans örneklemesindeki host kaynak ölçümleri application portu ile Node masaüstü adaptörüne taşındı.",
+      "sequence": 94,
+      "milestone": "Bronze RC2 Build 94 system resource snapshot boundary migration"
+    },
+    {
+      "version": "24.07.2026.95",
+      "packageVersion": "24.7.2026-95",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-24",
+      "summary": "Aile daveti token üretimi ve SHA-256 doğrulaması mevcut application portunu uygulayan Node kriptografi adaptörüne taşındı.",
+      "sequence": 95,
+      "milestone": "Bronze RC2 Build 95 invitation token cryptography boundary migration"
+    },
+    {
+      "version": "24.07.2026.96",
+      "packageVersion": "24.7.2026-96",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-24",
+      "summary": "Doğrudan SQLite veritabanı dışa aktarımındaki fiziksel dosya kopyalama işlemi application portu ve masaüstü dosya sistemi adaptörüne taşındı.",
+      "sequence": 96,
+      "milestone": "Bronze RC2 Build 96 database export file boundary migration"
+    },
+    {
+      "version": "24.07.2026.97",
+      "packageVersion": "24.7.2026-97",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-24",
+      "summary": "Parola, çok faktörlü doğrulama, cihaz kanıtı ve bellek içi oturum uygulamaları mevcut application güvenlik portlarını uygulayan masaüstü adaptörlerine taşındı.",
+      "sequence": 97,
+      "milestone": "Bronze RC2 Build 97 authentication security adapter boundary migration"
+    },
+    {
+      "version": "24.07.2026.98",
+      "packageVersion": "24.7.2026-98",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-24",
+      "summary": "Veritabanına bağlı cihaz kimliği, arşiv, kasa anahtarı ve geçici açma yollarının çözümü application portu ile Node path adaptörüne taşındı.",
+      "sequence": 98,
+      "milestone": "Bronze RC2 Build 98 family storage layout boundary migration"
+    },
+    {
+      "version": "25.07.2026.99",
+      "packageVersion": "25.7.2026-99",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "Internal @ppt workspace bağımlılıkları tek aktif sürüm hattına alındı; migration SQL sahipliği @ppt/database katmanına taşındı; somut repository implementasyonları tek composition root altında toplandı ve application adapter bağımlılıkları repository port tiplerine çevrildi.",
+      "sequence": 99,
+      "milestone": "Bronze RC2 Build 99 workspace, migration ownership and repository composition root correction"
+    },
+    {
+      "version": "25.07.2026.100",
+      "packageVersion": "25.7.2026-100",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "Bozuk esbuild lock kaydı düzeltildi; dış tarball sürümleri ile lock sürümlerini doğrulayan kalıcı bütünlük kapısı ve yalnızca workspace/@ppt alanlarını değiştiren güvenli sürüm güncelleyicisi eklendi; kökten tüm kaynakları kapsayan gerçek tsc --noEmit yapılandırması oluşturuldu.",
+      "sequence": 100,
+      "milestone": "Bronze RC2 Build 100 lockfile integrity and root no-emit typecheck contract"
+    },
+    {
+      "version": "25.07.2026.101",
+      "packageVersion": "25.7.2026-101",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "Dış bağımlılık tarball URL’leri ortama özel iç ağ geçidinden taşınabilir resmî npm registry adreslerine kanonikleştirildi; SHA-512 ve kaynak politikası doğrulaması eklendi; npm ci, tsc --noEmit, Electron production build, smoke, Windows açılış ve installer adımlarını ilk hatada durdurarak sonraki kapıları NOT_RUN kaydeden doğrulama orkestrasyonu oluşturuldu.",
+      "sequence": 101,
+      "milestone": "Bronze RC2 Build 101 portable dependency supply and truthful ordered validation gates"
+    },
+    {
+      "version": "25.07.2026.102",
+      "packageVersion": "25.7.2026-102",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "Desktop main katmanındaki node:sqlite ve DatabaseSync tip sızıntısı DatabaseConnection portuyla kaldırıldı; application adapter bağımlılıkları somut SqliteTransactionExecutor ve SqliteRepositoryContext yerine TransactionExecutor ve RepositoryExecutionContext portlarına taşındı.",
+      "sequence": 102,
+      "milestone": "Bronze RC2 Build 102 database and repository execution port boundary completion"
+    },
+    {
+      "version": "25.07.2026.103",
+      "packageVersion": "25.7.2026-103",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "Database’e özgü sağlık, bakım, yedek güvenliği ve audit koruma adapter’ları desktop application katmanından @ppt/infrastructure katmanına taşındı; application adapter transaction bağımlılıkları @ppt/repositories port yüzeyinde birleştirildi; repository metadata sürüm senkronizasyonu otomatikleştirildi.",
+      "sequence": 103,
+      "milestone": "RC2-B103-INFRASTRUCTURE-ADAPTER-BOUNDARY"
+    },
+    {
+      "version": "25.07.2026.104",
+      "packageVersion": "25.7.2026-104",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "Repository portları somut SQLite sınıflarından türetilmek yerine açık arayüzlerle tanımlandı; application adapter sözleşmeleri SQLite adlandırmasından arındırıldı ve yalnızca @ppt/repositories/ports alt yoluna bağlandı; repository context ayrı sözleşme modülüne taşındı.",
+      "sequence": 104,
+      "milestone": "RC2-B104-EXPLICIT-REPOSITORY-PORT-CONTRACTS"
+    },
+    {
+      "version": "25.07.2026.105",
+      "packageVersion": "25.7.2026-105",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "Persistence sözleşmeleri @ppt/contracts katmanına taşındı; transaction callback'leri opak RepositoryTransaction belirteci kullanarak application katmanından SQL yeteneğini kaldırdı.",
+      "sequence": 105,
+      "milestone": "Bronze RC2 Build 105 opaque persistence contracts"
+    },
+    {
+      "version": "25.07.2026.106",
+      "packageVersion": "25.7.2026-106",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "Repository contracts were separated into a dedicated workspace and package import declarations were aligned with manifest dependencies.",
+      "sequence": 106,
+      "milestone": "Bronze RC2 Build 106 repository contract package separation"
+    },
+    {
+      "version": "25.07.2026.107",
+      "packageVersion": "25.7.2026-107",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "Repository contract workspace yönetişimi, bağımlılık doğrulama zinciri ve kontrollü kaynak type-check kapsamı güçlendirildi; Build 106'dan kalan gerçek TypeScript derleme engelleri giderildi.",
+      "sequence": 107,
+      "milestone": "Bronze RC2 Build 107 contract governance and source type safety"
+    },
+    {
+      "version": "25.07.2026.108",
+      "packageVersion": "25.7.2026-108",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "Aktif sürüm bilgisinin package manifestleri, lockfile, APP_META, sürüm defteri, repository metadata, ana build durumu, aktif geliştirme belgesi ve kaynak manifesti arasında kalıcı sözleşmeyle doğrulanması sağlandı; Build 107 paketindeki sürüm driftleri kapatıldı.",
+      "sequence": 108,
+      "milestone": "Bronze RC2 Build 108 active version contract and drift prevention"
+    },
+    {
+      "version": "25.07.2026.109",
+      "packageVersion": "25.7.2026-109",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "RC2 doğrulama zinciri Windows-taşınabilir komut çözümleme, güvenli geçici dizin temizleme ve kesinti tekilleştirme ile güçlendirildi.",
+      "sequence": 109,
+      "milestone": "Bronze RC2 Build 109 Cross-platform Validation Runner Hardening"
+    },
+    {
+      "version": "25.07.2026.110",
+      "packageVersion": "25.7.2026-110",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "Temiz npm ci kapısına resmî registry ile sınırlı geçici hata yeniden denemesi, hata sınıflandırması ve bağımlılık erişim kanıtı eklendi.",
+      "sequence": 110,
+      "milestone": "B110 Deterministic Dependency Access Diagnostics"
+    },
+    {
+      "version": "25.07.2026.111",
+      "packageVersion": "25.7.2026-111",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "Bağımlılıktan bağımsız kaynak ön-kontrolü RC2 zincirinin ilk fazı yapıldı; kaynak/sürüm sözleşmeleri dış npm erişiminden ayrıldı.",
+      "sequence": 111,
+      "milestone": "B111 Source Preflight and Gate Phase Isolation"
+    },
+    {
+      "version": "25.07.2026.112",
+      "packageVersion": "25.7.2026-112",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "Build 112 kaynak manifesti ve SHA-256 teslim bütünlüğü kaynak ön-kontrolünün ilk zorunlu kapısı yapıldı.",
+      "sequence": 112,
+      "milestone": "Bronze RC2 Build 112 source integrity preflight"
+    },
+    {
+      "version": "25.07.2026.113",
+      "packageVersion": "25.7.2026-113",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "Bronze RC2 Build 113 deterministik ve yeniden üretilebilir kaynak ZIP paketleme sözleşmesini ekledi.",
+      "sequence": 113,
+      "milestone": "Bronze RC2 Build 113 deterministic source archive"
+    },
+    {
+      "version": "25.07.2026.114",
+      "packageVersion": "25.7.2026-114",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "Aktif teslim belgeleri güncel sürüm, build referansları ve gerçek doğrulama durumuyla tek sözleşmeye bağlandı.",
+      "sequence": 114,
+      "milestone": "Bronze RC2 Build 114 active delivery document contract"
+    },
+    {
+      "version": "25.07.2026.115",
+      "packageVersion": "25.7.2026-115",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "Makine tarafından üretilen doğrulama kanıtlarını hashlenmiş aktif build kanıt dizinine bağlayan Bronze RC2 geliştirme artırımı.",
+      "sequence": 115,
+      "milestone": "Bronze RC2 Build 115 validation evidence provenance contract"
+    },
+    {
+      "version": "25.07.2026.116",
+      "packageVersion": "25.7.2026-116",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "Build 116, resmî npm registry kökenli yerel cache için bütünlük doğrulamalı offline clean-install hazırlık ve fallback sözleşmesi ekler.",
+      "sequence": 116,
+      "milestone": "Verified offline npm cache readiness and official-registry fallback"
+    },
+    {
+      "version": "25.07.2026.117",
+      "packageVersion": "25.7.2026-117",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "Bronze RC2 Build 117, resmî npm tarball cache içeriğini deterministik taşınabilir paket olarak dışa aktarma, lockfile SHA-512 değerleriyle doğrulama ve yalıtılmış cache köküne güvenli yayımlama zincirini ekler.",
+      "sequence": 117,
+      "milestone": "Bronze RC2 Build 117 portable verified npm cache transfer"
+    },
+    {
+      "version": "25.07.2026.118",
+      "packageVersion": "25.7.2026-118",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "IPC çağrıları yalnızca kayıtlı ana renderer webContents kimliği, ana frame ve tam güvenilir renderer belgesi eşleştiğinde kabul edilir.",
+      "sequence": 118,
+      "milestone": "Bronze RC2 Build 118 IPC renderer trust boundary hardening"
+    },
+    {
+      "version": "25.07.2026.119",
+      "packageVersion": "25.7.2026-119",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "Electron renderer oturumu izin, indirme, yönlendirme ve webview girişimlerine karşı varsayılan reddet güvenlik politikasıyla sertleştirildi.",
+      "sequence": 119,
+      "milestone": "Bronze RC2 Build 119 renderer session deny-by-default hardening"
+    },
+    {
+      "version": "25.07.2026.120",
+      "packageVersion": "25.7.2026-120",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "Electron IPC payloadları merkezi argüman, nesne grafiği, derinlik, düğüm ve tahmini bayt bütçesiyle doğrulanarak güvenli sınırlar dışındaki veriler iş mantığına ulaşmadan reddedilir.",
+      "sequence": 120,
+      "milestone": "Bronze RC2 Build 120 IPC payload resource and object-graph security boundary"
+    },
+    {
+      "version": "25.07.2026.121",
+      "packageVersion": "25.7.2026-121",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-25",
+      "summary": "Windows ve POSIX ortamlarında workspace manifest ve package-lock yolları kanonikleştirildi; aktif sürüm doğrulaması yeniden üretilebilir hale getirildi.",
+      "sequence": 121,
+      "milestone": "Bronze RC2 Build 121 cross-platform workspace path portability contract"
+    },
+    {
+      "version": "26.07.2026.122",
+      "packageVersion": "26.7.2026-122",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-26",
+      "summary": "Bronze RC2 Build 122 Final engellerini kapatma: production build, test ve Windows teslim zinciri.",
+      "sequence": 122,
+      "milestone": "Bronze RC2 Build 122 final blocker recovery"
+    },
+    {
+      "version": "27.07.2026.123",
+      "packageVersion": "27.7.2026-123",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-27",
+      "summary": "Apple benzeri, işlevsel uygulama kabuğu; gruplu menüler, komut araması, bildirim merkezi, tema seçimi ve profil işlemleri eklendi.",
+      "sequence": 123,
+      "milestone": "Build 123 Apple-inspired functional application shell"
+    },
+    {
+      "version": "27.07.2026.124",
+      "packageVersion": "27.7.2026-124",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-27",
+      "summary": "Ürün kimliği Anadolu Parsı Aile Yaşam Merkezi olarak yenilendi; Apple-esintili ortak arayüz, güvenli sentetik veri temizliği ve eksik menü bağlantıları tamamlandı.",
+      "sequence": 124,
+      "milestone": "Build 124 product identity, interface unification and functional completion"
+    },
+    {
+      "version": "27.07.2026.125",
+      "packageVersion": "27.7.2026-125",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-27",
+      "summary": "Zaman tüneli ve önemli günlerde tüm alanları düzenleme, arama ve filtreleme, geri alınabilir arşivleme ve olay-arşiv geçişleri tamamlandı.",
+      "sequence": 125,
+      "milestone": "Build 125 timeline and important-day lifecycle completion"
+    },
+    {
+      "version": "27.07.2026.126",
+      "packageVersion": "27.7.2026-126",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-27",
+      "summary": "Apple sistem yazı ailesi, merkezi tipografi tokenları ve uygulama genelinde okunabilir başlık/metin ölçeği eklendi.",
+      "sequence": 126,
+      "milestone": "Bronze RC2 Build 126 Apple sistem tipografisi ve okunabilirlik standardı"
+    },
+    {
+      "version": "27.07.2026.127",
+      "packageVersion": "27.7.2026-127",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-27",
+      "summary": "Tüm proje sohbetlerinden ve tarihsel belge paketlerinden sonra alınan bağlayıcı kararlar aktif dokümantasyona işlendi; karar önceliği, kapsam, mimari, güvenlik, UI/UX, yedekleme ve sürüm yönetişimi tek izlenebilir sistemde birleştirildi.",
+      "sequence": 127,
+      "milestone": "Bronze RC2 Build 127 master decision consolidation and documentation governance"
+    },
+    {
+      "version": "27.07.2026.128",
+      "packageVersion": "27.7.2026-128",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-27",
+      "summary": "Cihaz kimliği özel anahtarını Electron safeStorage ve Windows DPAPI ile koruyan, eski açık kimlik dosyalarını güvenli ve geri alınabilir biçimde dönüştüren güvenlik artırımı.",
+      "sequence": 128,
+      "milestone": "Bronze RC2 Build 128 OS-protected device identity secret migration"
+    },
+    {
+      "version": "27.07.2026.129",
+      "packageVersion": "27.7.2026-129",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-27",
+      "summary": "TOTP MFA sırlarının işletim sistemi destekli güvenli depolamayla korunması ve legacy açık kayıtların transaction içinde dönüştürülmesi.",
+      "sequence": 129,
+      "milestone": "B060-MFA Secret Protection — Bronze RC2 Build 129"
+    },
+    {
+      "version": "27.07.2026.130",
+      "packageVersion": "27.7.2026-130",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-27",
+      "summary": "Tam yedeklerin parola tabanlı AES-256-GCM v3 kapsayıcısına taşınması, eski açık v1/v2 biçimlerinin riskli legacy olarak ayrılması ve otomatik hedefler için OS korumalı yönetilen yedek parolası.",
+      "sequence": 130,
+      "milestone": "B061 Password-Protected Full Backup Container — Bronze RC2 Build 130"
+    },
+    {
+      "version": "27.07.2026.131",
+      "packageVersion": "27.7.2026-131",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-27",
+      "summary": "Şifreli yedek geri yükleme yaşam döngüsü dayanıklı işlem günlüğü, atomik rollback ve cihaz yeniden yetkilendirme ile güçlendirildi.",
+      "sequence": 131,
+      "milestone": "Bronze RC2 Build 131 restore transaction recovery and device reauthorization"
+    },
+    {
+      "version": "27.07.2026.132",
+      "packageVersion": "27.7.2026-132",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-27",
+      "summary": "Windows DPAPI, sandbox ve paketli açılış için fail-closed başlangıç güvenlik kapısı",
+      "sequence": 132,
+      "milestone": "Bronze RC2 Build 132 startup security preflight"
+    },
+    {
+      "version": "27.07.2026.133",
+      "packageVersion": "27.7.2026-133",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-27",
+      "summary": "Finans ve sağlık kayıtlarında nesne düzeyi mahremiyet, veri sahibi ve açık izin sınırları güçlendirildi.",
+      "sequence": 133,
+      "milestone": "Sensitive finance and health object privacy boundary"
+    },
+    {
+      "version": "27.07.2026.134",
+      "packageVersion": "27.7.2026-134",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-27",
+      "summary": "Erişilebilirlik tercihleri, görünür klavye odağı, ekran değişimi duyuruları ve tam klavye komut araması eklendi.",
+      "sequence": 134,
+      "milestone": "Bronze RC2 Build 134 accessibility and critical user flows"
+    },
+    {
+      "version": "28.07.2026.135",
+      "packageVersion": "28.7.2026-135",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-28",
+      "summary": "Dijital kasa anahtarı işletim sistemi korumasına alındı; legacy açık anahtar atomik dönüştürülüyor ve tam yedek/geri yüklemede taşınabilir anahtar yeni cihaza güvenli biçimde yeniden sarılıyor.",
+      "sequence": 135,
+      "milestone": "Bronze RC2 Build 135 OS-protected archive vault key"
+    },
+    {
+      "version": "28.07.2026.136",
+      "packageVersion": "28.7.2026-136",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-28",
+      "summary": "Bronze RC2 Build 136 veri saklama, geri alınabilir arşivleme, hukuki bekletme ve iki aşamalı kalıcı imha yönetişimi.",
+      "sequence": 136,
+      "milestone": "Bronze RC2 Build 136 data lifecycle governance"
+    },
+    {
+      "version": "28.07.2026.137",
+      "packageVersion": "28.7.2026-137",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-28",
+      "summary": "Kalıcı imha tombstone'larının yönetilen yedek hedeflerine güvenli yayılımı, doğrulanmış taze yedek ve eski yedek karantinası eklendi.",
+      "sequence": 137,
+      "milestone": "Bronze RC2 Build 137 backup purge propagation"
+    },
+    {
+      "version": "28.07.2026.138",
+      "packageVersion": "28.7.2026-138",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-28",
+      "summary": "Karantina yedekleri için süreli saklama, hukuki bekletme ve devam ettirilebilir güçlü doğrulamalı nihai imha yönetişimi.",
+      "sequence": 138,
+      "milestone": "Bronze RC2 Build 138 backup quarantine lifecycle"
+    },
+    {
+      "version": "28.07.2026.139",
+      "packageVersion": "28.7.2026-139",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-28",
+      "summary": "Yönetilmeyen ve çevrimdışı yedek kopyalar için envanter, teyit ve imha kanıt zinciri",
+      "sequence": 139,
+      "milestone": "Bronze RC2 Build 139 unmanaged backup inventory and attestation governance"
+    },
+    {
+      "version": "28.07.2026.140",
+      "packageVersion": "28.7.2026-140",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-28",
+      "summary": "Güvenilen sağlayıcı anahtarları ve imzalı harici yedek imha kanıtı doğrulama geliştirmesi.",
+      "sequence": 140,
+      "milestone": "Bronze RC2 Build 140 signed external backup destruction evidence"
+    },
+    {
+      "version": "28.07.2026.141",
+      "packageVersion": "28.7.2026-141",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-28",
+      "summary": "Güvenilen Ed25519 imha kanıtı sağlayıcıları için imzalı anahtar döndürme, geçerlilik aralıkları ve makbuz-zamanı güven doğrulaması eklendi.",
+      "sequence": 141,
+      "milestone": "Bronze RC2 Build 141 signed evidence key rotation and temporal trust continuity"
+    },
+    {
+      "version": "28.07.2026.142",
+      "packageVersion": "28.7.2026-142",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-28",
+      "summary": "İmzalı sağlayıcı iptal listesi, geri alma koruması ve süreli çevrimdışı güven önbelleği.",
+      "sequence": 142,
+      "milestone": "Bronze RC2 Build 142 signed revocation status list"
+    },
+    {
+      "version": "28.07.2026.143",
+      "packageVersion": "28.7.2026-143",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-28",
+      "summary": "Build 143 — Güvenli HTTPS İptal Listesi Alımı",
+      "sequence": 143,
+      "milestone": "Bronze RC2 Active Development"
+    },
+    {
+      "version": "28.07.2026.144",
+      "packageVersion": "28.7.2026-144",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-28",
+      "summary": "Güvenilen sağlayıcı HTTPS uç noktası profili ve TLS SPKI pin döndürme sözleşmesi eklendi.",
+      "sequence": 144,
+      "milestone": "Bronze RC2 Build 144 active development"
+    },
+    {
+      "version": "28.07.2026.145",
+      "packageVersion": "28.7.2026-145",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-28",
+      "summary": "Periyodik güvenli iptal listesi senkronizasyonu, kontrollü geri çekilme direnci, artan geri çekilme süresi ve kullanıcı bildirimleri eklendi.",
+      "sequence": 145,
+      "milestone": "Bronze RC2 Build 145 secure periodic revocation synchronization"
+    },
+    {
+      "version": "28.07.2026.146",
+      "packageVersion": "28.7.2026-146",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-28",
+      "summary": "Gerçek aile verisi için katı JSON doğrulama, yalnız okunur ön izleme, deterministik çakışma planı, güçlü doğrulamalı atomik uygulama ve kontrollü geri alma eklendi.",
+      "sequence": 146,
+      "milestone": "Bronze RC2 Build 146 validated family data import and rollback"
+    },
+    {
+      "version": "29.07.2026.147",
+      "packageVersion": "29.7.2026-147",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Büyük soy ağacı, zaman tüneli ve arşiv için anahtar tabanlı sayfalama, sınırlı renderer pencereleri, izin filtreli okuma modelleri ve SQLite performans indeksleri eklendi.",
+      "sequence": 147,
+      "milestone": "Bronze RC2 Build 147 large family read-model performance"
+    },
+    {
+      "version": "29.07.2026.148",
+      "packageVersion": "29.7.2026-148",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Build 145–147 entegrasyon sınırları; kanal bazlı IPC doğrulaması, ana süreçte tutulan iptal listesi uygulaması, oturum bağlı içe aktarma ön izlemeleri ve filtre bağlı sayfalama imleçleriyle sertleştirildi.",
+      "sequence": 148,
+      "milestone": "Bronze RC2 Build 148 integration hardening and remaining code gap closure"
+    },
+    {
+      "version": "29.07.2026.149",
+      "packageVersion": "29.7.2026-149",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Toplu temiz doğrulama kapıları gerçekten çalıştırıldı; kullanılmayan doğrudan esbuild bağımlılığı kaldırıldı ve npm hizmeti engeli fail-closed olarak kaydedildi.",
+      "sequence": 149,
+      "milestone": "Bronze RC2 Build 149 clean validation and dependency bootstrap hardening"
+    },
+    {
+      "version": "29.07.2026.150",
+      "packageVersion": "29.7.2026-150",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Doğrulanmış npm cache paketiyle çevrimdışı temiz kurulum, scriptleri kapalı bağımlılık kurulumu ve Windows paketleme aracının kök grafikten ayrılması eklendi; tam kapılar yeniden çalıştırıldı.",
+      "sequence": 150,
+      "milestone": "Bronze RC2 Build 150 reproducible dependency bootstrap and validation retry"
+    },
+    {
+      "version": "29.07.2026.151",
+      "packageVersion": "29.7.2026-151",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Resmî npm tarbalları için kilit dosyasına bağlı, bütünlük kontrollü ve sürdürülebilir çevrimdışı bağımlılık edinme kiti eklendi.",
+      "sequence": 151,
+      "milestone": "Bronze RC2 Build 151 dependency acquisition and validation recovery"
+    },
+    {
+      "version": "29.07.2026.152",
+      "packageVersion": "29.7.2026-152",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Dış makineden dönen doğrulanmış npm cache paketi için fail-closed kabul, atomik cache aktarımı, makbuz bütünlüğü ve karantina zinciri.",
+      "sequence": 152,
+      "milestone": "Air-gapped dependency bundle acceptance and quarantine"
+    },
+    {
+      "version": "29.07.2026.153",
+      "packageVersion": "29.7.2026-153",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Kabul edilmiş doğrulanmış npm cache paketini fail-closed RC2 doğrulama zincirine bağlayan orkestrasyon katmanı eklendi.",
+      "sequence": 153,
+      "milestone": "Bronze RC2 Build 153 accepted-cache validation orchestration"
+    },
+    {
+      "version": "29.07.2026.154",
+      "packageVersion": "29.7.2026-154",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Doğrulanmış npm bağımlılık talep kiti ve talep-yanıt-kabul kimlik zinciri eklendi.",
+      "sequence": 154,
+      "milestone": "Bronze RC2 Build 154 dependency handoff request-response traceability"
+    },
+    {
+      "version": "29.07.2026.155",
+      "packageVersion": "29.7.2026-155",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Büyük aile verilerinde hafif başlangıç, bölüm bazlı tembel yükleme ve SQL ile sınırlandırılmış gösterge paneli ön izlemeleri eklendi.",
+      "sequence": 155,
+      "milestone": "Bounded bootstrap and screen-level lazy data loading"
+    },
+    {
+      "version": "29.07.2026.156",
+      "packageVersion": "29.7.2026-156",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Arama destekli, keyset sayfalı kişi ve olay katalogları; büyük aile ekranı ve ortak seçim alanları sınırlı veriyle çalışır.",
+      "sequence": 156,
+      "milestone": "Bronze RC2 Build 156 searchable entity catalogs"
+    },
+    {
+      "version": "29.07.2026.157",
+      "packageVersion": "29.7.2026-157",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Sınırlı mutasyon sonuçları ve hedefli grafik/katalog revizyon sinyalleri.",
+      "sequence": 157,
+      "milestone": "Bronze RC2 Build 157 bounded mutation results"
+    },
+    {
+      "version": "29.07.2026.158",
+      "packageVersion": "29.7.2026-158",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Gecikmiş IPC yanıtlarının ve sıra dışı mutasyon sonuçlarının yeni oturum/ekran verisini ezmesini engelleyen asenkron state guard ve monoton revizyon filigranı.",
+      "sequence": 158,
+      "milestone": "Bronze RC2 Build 158 session-safe async state and revision ordering"
+    },
+    {
+      "version": "29.07.2026.159",
+      "packageVersion": "29.7.2026-159",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "IPC istekleri renderer oturumu, istek kimliği, oturum çağı ve revizyon bağlamıyla uçtan uca zarf içinde doğrulanır.",
+      "sequence": 159,
+      "milestone": "Uçtan uca IPC taşıma bağlamı ve eski yanıt reddi"
+    },
+    {
+      "version": "29.07.2026.160",
+      "packageVersion": "29.7.2026-160",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "IPC istek yaşam döngüsü süre aşımı, son-istek-kazanır iptali, oturum/pencere temizliği ve kooperatif HTTPS AbortSignal desteğiyle sınırlandırıldı.",
+      "sequence": 160,
+      "milestone": "Bronze RC2 Build 160 cancellable IPC request lifecycle"
+    },
+    {
+      "version": "29.07.2026.161",
+      "packageVersion": "29.7.2026-161",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Ağır IPC okumaları gönderici ve kanal bazlı eşzamanlılık bütçeleri, öncelikli sınırlı kuyruklar ve tipli geri basınç hatalarıyla sınırlandırıldı.",
+      "sequence": 161,
+      "milestone": "Bronze RC2 Build 161 priority-aware IPC backpressure"
+    },
+    {
+      "version": "29.07.2026.162",
+      "packageVersion": "29.7.2026-162",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Build 162, aynı oturum ve revizyon kapsamındaki salt IPC okumalarını birleştirir; kısa ömürlü ve boyutu sınırlı sonuç cache'i mutasyonlarda fail-closed geçersiz kılınır.",
+      "sequence": 162,
+      "milestone": "Bronze RC2 Build 162 revision-scoped IPC read coalescing and bounded cache"
+    },
+    {
+      "version": "29.07.2026.163",
+      "packageVersion": "29.7.2026-163",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "IPC taşıma katmanı yalnız toplu teknik ölçümlerle izlenir; p95 süre, kuyruk beklemesi, cache verimi ve darboğaz alarmları kullanıcı verisi kaydetmeden üretilir.",
+      "sequence": 163,
+      "milestone": "Bronze RC2 Build 163 privacy-safe IPC performance telemetry"
+    },
+    {
+      "version": "29.07.2026.164",
+      "packageVersion": "29.7.2026-164",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "IPC telemetrisi fail-closed adaptif kaynak bütçelerine bağlandı; baskıda eşzamanlılık, kuyruk ve cache sınırları daralır, yalnız zaman kilitli sağlıklı ölçümlerde kademeli olarak tabana döner.",
+      "sequence": 164,
+      "milestone": "Bronze RC2 Build 164 fail-closed adaptive IPC resource budgets"
+    },
+    {
+      "version": "29.07.2026.165",
+      "packageVersion": "29.7.2026-165",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Adaptif IPC kaynak bütçeleri atomik durum dosyası ve SHA-256 zincirli karar günlüğüyle yeniden başlatmalar arasında doğrulanır; bozuk, eski veya farklı politika/sürüm bağları taban bütçeye fail-closed döner.",
+      "sequence": 165,
+      "milestone": "Bronze RC2 Build 165 crash-safe adaptive IPC budget state and tamper-evident decision journal"
+    },
+    {
+      "version": "29.07.2026.166",
+      "packageVersion": "29.7.2026-166",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Adaptif IPC bütçesi yetkili kullanıcı tarafından onaylı biçimde baseline moda sıfırlanabilir; gizlilik güvenli SHA-256 tanı paketi dışa aktarılır ve karantina dosyaları yaş/adet bütçesiyle sınırlandırılır.",
+      "sequence": 166,
+      "milestone": "Bronze RC2 Build 166 authenticated adaptive budget reset, privacy-safe diagnostics export and bounded quarantine retention"
+    },
+    {
+      "version": "29.07.2026.167",
+      "packageVersion": "29.7.2026-167",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Tek kullanımlık, işlem türüne bağlı ve kimlik bağlamıyla doğrulanan adaptif IPC bakım oturumları eklendi.",
+      "sequence": 167,
+      "milestone": "Bronze RC2 Build 167 maintenance session security"
+    },
+    {
+      "version": "29.07.2026.168",
+      "packageVersion": "29.7.2026-168",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Adaptif IPC bakım işlemleri yalnız etkin oturumlu aile yöneticisi ve güvenilir cihaz için açılır; arayüz yetki durumunu fail-closed gösterir.",
+      "sequence": 168,
+      "milestone": "Bronze RC2 Build 168 adaptive IPC maintenance authority policy"
+    },
+    {
+      "version": "29.07.2026.169",
+      "packageVersion": "29.7.2026-169",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Adaptif IPC bakım oturumları, parola ve etkinse TOTP ile güçlü yeniden doğrulama yapılmadan açılamaz; kimlik bilgileri oturum, günlük ve tanı verilerinden ayrılır.",
+      "sequence": 169,
+      "milestone": "Bronze RC2 Build 169 strong reauthentication for adaptive IPC maintenance"
+    },
+    {
+      "version": "29.07.2026.170",
+      "packageVersion": "29.7.2026-170",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Adaptif IPC bakımında güçlü yeniden doğrulama denemeleri oturum bağlamında sınırlandırıldı; beş başarısız denemede beş dakikalık geçici kilit uygulanır ve arayüz kalan deneme ile bekleme durumunu fail-closed gösterir.",
+      "sequence": 170,
+      "milestone": "Bronze RC2 Build 170 bounded adaptive IPC maintenance reauthentication attempts and temporary lockout"
+    },
+    {
+      "version": "29.07.2026.171",
+      "packageVersion": "29.7.2026-171",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Adaptif IPC bakım yeniden doğrulama sayaçları ve geçici kilit, işletim sistemi sır korumasıyla şifrelenmiş atomik durumda yeniden başlatmalar arasında korunur; bozuk kayıt karantinaya alınır ve beş dakikalık güvenli toparlanma kilidi uygulanır.",
+      "sequence": 171,
+      "milestone": "Bronze RC2 Build 171 OS-protected persistent adaptive IPC maintenance reauthentication state"
+    },
+    {
+      "version": "29.07.2026.172",
+      "packageVersion": "29.7.2026-172",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "İşletim sistemi korumalı bakım yeniden doğrulama durumu cihaz kimliği özetine bağlandı; geçici koruma kesintileri kaydı korur, farklı cihaz/sağlayıcı ve çözme hataları sınıflandırılır, eski şema güvenli biçimde yükseltilir ve silme yaşam döngüsü sınırlandırılır.",
+      "sequence": 172,
+      "milestone": "Bronze RC2 Build 172 device-bound protected maintenance reauthentication state lifecycle"
+    },
+    {
+      "version": "29.07.2026.173",
+      "packageVersion": "29.7.2026-173",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Bakım kilidi için ayrı kalıcı deneme sayacına sahip, güçlü doğrulamalı ve açık onaylı yetkili kurtarma akışı.",
+      "sequence": 173,
+      "milestone": "Authorized persistent adaptive IPC maintenance lock recovery"
+    },
+    {
+      "version": "29.07.2026.174",
+      "packageVersion": "29.7.2026-174",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Bakım kilidi kurtarma sonrasında tüm bakım oturumları sonlandırılır, kullanıcı oturumu kapatılır, güvenilir cihaz yeniden değerlendirmesi zorunlu tutulur ve 15 dakikalık kalıcı soğuma süresi uygulanır.",
+      "sequence": 174,
+      "milestone": "Bronze RC2 Build 174 post-recovery session termination and persistent cooldown"
+    },
+    {
+      "version": "29.07.2026.175",
+      "packageVersion": "29.7.2026-175",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-29",
+      "summary": "Bakım kilidi kurtarma sonrası hesap güvenlik dönemi ilerletildi; eski güvenilir cihaz bağları atomik olarak iptal edildi ve yeniden yetkilendirme zorunlu tutuldu.",
+      "sequence": 175,
+      "milestone": "Bronze RC2 Build 175 maintenance recovery account security epoch"
+    },
+    {
+      "version": "30.07.2026.176",
+      "packageVersion": "30.7.2026-176",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-30",
+      "summary": "Güvenlik dönemi sonrası kontrollü cihaz yeniden yetkilendirme, eski oturum reddi ve Ed25519 imzalı güvenlik olayı makbuzu eklendi.",
+      "sequence": 176,
+      "milestone": "Bronze RC2 Build 176 epoch-bound session and signed device reauthorization receipt"
+    },
+    {
+      "version": "30.07.2026.177",
+      "packageVersion": "30.7.2026-177",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-30",
+      "summary": "Güvenlik, cihaz yeniden yetkilendirme, imzalı makbuz, denetim, yedekleme ve veri yaşam döngüsü işlemleri ayrı Güvenlik Merkezi menüsüne bağlandı; renderer bileşen sınırı düzeltildi.",
+      "sequence": 177,
+      "milestone": "Bronze RC2 Build 177 dedicated security center menu and renderer integration"
+    },
+    {
+      "version": "30.07.2026.178",
+      "packageVersion": "30.7.2026-178",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-30",
+      "summary": "Güvenlik Merkezi için hesap bazlı kalıcı imzalı makbuz geçmişi, ana süreçte haricî makbuz doğrulama ve eski güvenlik dönemi oturum uyarıları eklendi.",
+      "sequence": 178,
+      "milestone": "Bronze RC2 Build 178 persistent signed security receipt history and verification"
+    },
+    {
+      "version": "30.07.2026.179",
+      "packageVersion": "30.7.2026-179",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-30",
+      "summary": "Sürüme bağlı menü renkleri ve kapsamlı aile yakınlık kataloğu",
+      "sequence": 179,
+      "milestone": "Bronze Build 179 release-channel menu theming and reciprocal family relationship catalog"
+    },
+    {
+      "version": "30.07.2026.180",
+      "packageVersion": "30.7.2026-180",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-30",
+      "summary": "Katı Bronze geliştirme politikası, ağır API erteleme mimari yeterlilik sözleşmesi ve kararların tüm aktif bilgi/belgelere zorunlu yayılımı.",
+      "sequence": 180,
+      "milestone": "Bronze Build 180 strict lifecycle governance and API deferral readiness"
+    },
+    {
+      "version": "30.07.2026.181",
+      "packageVersion": "30.7.2026-181",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-30",
+      "summary": "İmzalı sağlayıcı iptal listesi eşitleme durumu işletim sistemi korumalı ve yeniden başlatmaya dayanıklı hale getirildi; 24 saatlik süre uyarıları ve kaynak bazlı görünürlük eklendi.",
+      "sequence": 181,
+      "milestone": "Bronze Build 181 protected periodic revocation sync durability and expiry warnings"
+    },
+    {
+      "version": "30.07.2026.182",
+      "packageVersion": "30.7.2026-182",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-30",
+      "summary": "Güvenilen haricî kanıt sağlayıcısı kök anahtarları, iki bağımsız kurum dışı kanıt, birebir SHA-256 parmak izi eşleşmesi ve tanık kaydı olmadan eklenemez.",
+      "sequence": 182,
+      "milestone": "Bronze RC2 Build 182 · Kurum dışı çift kanıtlı sağlayıcı kök güveni doğrulaması"
+    },
+    {
+      "version": "30.07.2026.183",
+      "packageVersion": "30.7.2026-183",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-30",
+      "summary": "Saklama süresi dolmuş imha kayıtlarını içeren eski yönetilen tam yedekler doğrulanmış temiz yedekle otomatik yeniden yazılır ve eski kopya karantinaya alınır.",
+      "sequence": 183,
+      "milestone": "Bronze RC2 Build 183 · Otomatik temiz yedek yeniden yazımı ve karantina"
+    },
+    {
+      "version": "30.07.2026.184",
+      "packageVersion": "30.7.2026-184",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-30",
+      "summary": "Temiz yedek yeniden yazımının SQLite sonuçlandırma bağlayıcıları düzeltildi; politika ve çalışma defteri aynı işlemde atomik olarak sonuçlandırılır ve kalıcı geçmiş kullanıcıya gösterilir.",
+      "sequence": 184,
+      "milestone": "Bronze RC2 Build 184 · Atomik temiz yedek sonuçlandırma ve kalıcı çalışma defteri"
+    },
+    {
+      "version": "30.07.2026.185",
+      "packageVersion": "30.7.2026-185",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-30",
+      "summary": "Yönetilen yedek yayılımı tamamlanma ve karantina zamanları, işlem başında önceden üretilmek yerine monotonik geçen süreye göre gerçek işlem noktasında oluşturulur; geriye giden veya geçersiz saat fail-closed reddedilir.",
+      "sequence": 185,
+      "milestone": "Bronze RC2 Build 185 · Monotonik yedek yayılım kronolojisi ve gerçek tamamlanma zamanı"
+    },
+    {
+      "version": "30.07.2026.186",
+      "packageVersion": "30.7.2026-186",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-30",
+      "summary": "Otomatik temiz yedek çalışma sonucu, bağlı yönetilen yedek yayılımının doğrulanmış tamamlanma zamanına bağlandı; SQLite tetikleyicileri eksik bağlantı ve geriye giden kronolojiyi atomik olarak reddeder.",
+      "sequence": 186,
+      "milestone": "Bronze RC2 Build 186 · Bağlı temiz yedek ve yayılım kronolojisi bütünlüğü"
+    },
+    {
+      "version": "30.07.2026.187",
+      "packageVersion": "30.7.2026-187",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-30",
+      "summary": "Kesintiye uğrayan otomatik temiz-yedek yeniden yazımı, sistem saati geri alınmış olsa bile kalıcı çalışma başlangıcına tabanlanan güvenli kurtarma zamanı ve doğrulanmış geri çekilme kronolojisiyle sonuçlandırılır.",
+      "sequence": 187,
+      "milestone": "Bronze RC2 Build 187 · Kesinti kurtarma ve geri çekilme kronolojisi bütünlüğü"
+    },
+    {
+      "version": "30.07.2026.188",
+      "packageVersion": "30.7.2026-188",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-30",
+      "summary": "Yeni otomatik temiz-yedek çalışması, sistem saati geri alınsa bile kalıcı politika güncellemesi, son deneme ve son başarı kronolojisinin güvenli üst sınırında sahiplenilir; geriye giden claim ve değiştirilen çalışma başlangıcı SQLite düzeyinde fail-closed reddedilir.",
+      "sequence": 188,
+      "milestone": "Bronze RC2 Build 188 · Geri alma güvenli temiz-yedek sahiplenme kronolojisi"
+    },
+    {
+      "version": "30.07.2026.189",
+      "packageVersion": "30.7.2026-189",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-30",
+      "summary": "Build 189 aktif çalışma politika izolasyonunu, çalışma-defteri zaman tabanlı kesinti kurtarmasını ve terminal durum makinesi bütünlüğünü tamamlar.",
+      "sequence": 189,
+      "milestone": "Bronze RC2 Build 189 · Aktif politika izolasyonu ve terminal durum bütünlüğü"
+    },
+    {
+      "version": "31.07.2026.190",
+      "packageVersion": "31.7.2026-190",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-31",
+      "summary": "Yayılım içermeyen temiz-yedek deferred, attention ve failed terminal zamanları duvar saati değişimlerinden bağımsız monotonik geçen süreye bağlandı; geçersiz monotonik saat fail-closed reddedilir.",
+      "sequence": 190,
+      "milestone": "Bronze RC2 Build 190 · Monotonik temiz-yedek terminal kronolojisi"
+    },
+    {
+      "version": "31.07.2026.191",
+      "packageVersion": "31.7.2026-191",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-31",
+      "summary": "Manuel ve otomatik temiz-yedek attention, partial, failed ve interrupted yollarının yeniden deneme süreleri çalışma tetikleyicisine bağlandı; SQLite yanlış gecikmeyi fail-closed reddeder.",
+      "sequence": 191,
+      "milestone": "Bronze RC2 Build 191 · Tetikleyiciye duyarlı temiz-yedek geri çekilme politikası"
+    },
+    {
+      "version": "31.07.2026.192",
+      "packageVersion": "31.7.2026-192",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-31",
+      "summary": "Otomatik planlama kapalıyken yetkili manuel temiz-yedek yeniden yazımı kullanılabilir; otomatik çevrim, geri çekilme ve kronoloji korumaları değişmeden kalır.",
+      "sequence": 192,
+      "milestone": "Bronze RC2 Build 192 · Manuel temiz-yedek kullanılabilirliği ve otomatik politika ayrımı"
+    },
+    {
+      "version": "31.07.2026.193",
+      "packageVersion": "31.7.2026-193",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-31",
+      "summary": "Çalışan temiz-yedek defteri satırı kalıcı politika sahibiyle id, tetikleyici ve claim kronolojisi düzeyinde eşleşir; yetim veya değiştirilen running kayıtlar SQLite tarafından reddedilir.",
+      "sequence": 193,
+      "milestone": "Bronze RC2 Build 193 · Çalışan temiz-yedek defteri sahiplik kimliği bütünlüğü"
+    },
+    {
+      "version": "31.07.2026.194",
+      "packageVersion": "31.7.2026-194",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-31",
+      "summary": "Temiz-yedek claim sahipliği tek kullanımlık kalıcı rezervasyonla politika ve çalışma defterine bağlandı.",
+      "sequence": 194,
+      "milestone": "Bronze RC2 Build 194 · Temiz-yedek claim rezervasyonu"
+    },
+    {
+      "version": "31.07.2026.195",
+      "packageVersion": "31.7.2026-195",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-31",
+      "summary": "Aktif temiz-yedek politika ve çalışma defteri sahiplik anlık görüntüsü terminal geçişe kadar değiştirilemez.",
+      "sequence": 195,
+      "milestone": "Bronze RC2 Build 195 · Aktif temiz-yedek sahiplik anlık görüntüsü bütünlüğü"
+    },
+    {
+      "version": "31.07.2026.196",
+      "packageVersion": "31.7.2026-196",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-31",
+      "summary": "Aktif temiz-yedek çalışması sırasında otomatik etkinlik, saklama günü ve geri çekilme süreleri terminal geçişe kadar değiştirilemez.",
+      "sequence": 196,
+      "milestone": "Bronze RC2 Build 196 · Aktif temiz-yedek politika parametreleri bütünlüğü"
+    },
+    {
+      "version": "31.07.2026.197",
+      "packageVersion": "31.7.2026-197",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-31",
+      "summary": "Temiz-yedek terminal çalışma defteri güncellemesi politika sonuçlandırmasını aynı SQLite cümlesinde atomik olarak tamamlar; politika tek başına running durumundan çıkarılamaz.",
+      "sequence": 197,
+      "milestone": "Bronze RC2 Build 197 · Atomik temiz-yedek terminal geçişi"
+    },
+    {
+      "version": "31.07.2026.198",
+      "packageVersion": "31.7.2026-198",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-31",
+      "summary": "Build 198 terminal kronoloji monotonluğu: tamamlanma zamanı başlangıçtan önce olamaz.",
+      "sequence": 198,
+      "milestone": "Bronze RC2 Build 198 terminal chronology monotonicity"
+    },
+    {
+      "version": "31.07.2026.199",
+      "packageVersion": "31.7.2026-199",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-31",
+      "summary": "Temiz-yedek sonucu ile propagation kimliği arasındaki sonuç varlığı ve sonuç türü bütünlüğü fail-closed uygulanır.",
+      "sequence": 199,
+      "milestone": "Bronze RC2 Build 199 · Propagation sonuç kimliği bütünlüğü"
+    },
+    {
+      "version": "31.07.2026.200",
+      "packageVersion": "31.7.2026-200",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-31",
+      "summary": "Temiz-yedek success ve partial sonuçları yalnız eşleşen propagation durumlarına bağlanabilir.",
+      "sequence": 200,
+      "milestone": "Bronze RC2 Build 200 · Propagation durum eşleşmesi"
+    },
+    {
+      "version": "31.07.2026.201",
+      "packageVersion": "31.7.2026-201",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-31",
+      "summary": "Aynı propagation sonucu yalnız bir temiz-yedek çalışma kaydı tarafından kullanılabilir.",
+      "sequence": 201,
+      "milestone": "Bronze RC2 Build 201 · Propagation tekil sahipliği"
+    },
+    {
+      "version": "31.07.2026.202",
+      "packageVersion": "31.7.2026-202",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-07-31",
+      "summary": "Temiz-yedek çalışma kaydına bağlanan propagation kimliği silinemez veya değiştirilemez.",
+      "sequence": 202,
+      "milestone": "Bronze RC2 Build 202 · Propagation referans kalıcılığı"
+    },
+    {
+      "version": "01.08.2026.203",
+      "packageVersion": "1.8.2026-203",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-01",
+      "summary": "Terminal temiz-yedek çalışma kaydına bağlanan propagation kanıtının sonuç alanları değiştirilemez.",
+      "sequence": 203,
+      "milestone": "Bronze RC2 Build 203 · Propagation kanıtı değiştirilemezliği"
+    },
+    {
+      "version": "01.08.2026.204",
+      "packageVersion": "1.8.2026-204",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-01",
+      "summary": "Referanslanmış propagation kanıtı INSERT OR REPLACE ile yeniden yazılamaz; SQLite REPLACE kaçışı fail-closed kapatıldı.",
+      "sequence": 204,
+      "milestone": "Bronze RC2 Build 204 · Propagation REPLACE kaçışı koruması"
+    },
+    {
+      "version": "01.08.2026.205",
+      "packageVersion": "1.8.2026-205",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-01",
+      "summary": "20 Temmuz 2026’dan itibaren bütün buildleri ve kalan işleri tek yetkili ana defterde birleştiren; her buildde güncelleme ve build sonrası durum bildirimi zorunluluğu getiren süreklilik yönetişimi.",
+      "sequence": 205,
+      "milestone": "Bronze RC2 Build 205 · Ana Build Defteri ve Süreklilik Yönetişimi"
+    },
+    {
+      "version": "01.08.2026.206",
+      "packageVersion": "1.8.2026-206",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-01",
+      "summary": "105 maddelik bağlayıcı proje kural seti Ana Build Defteri içine alındı; yeni sohbet ve her build başlangıcında kural seti SHA-256 kabulü zorunlu hale getirildi.",
+      "sequence": 206,
+      "milestone": "B206 — Project Constitution / Mandatory Rule Acknowledgement"
+    },
+    {
+      "version": "01.08.2026.207",
+      "packageVersion": "1.8.2026-207",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-01",
+      "summary": "Sohbet bağlam kapasitesi izleme, %90 zorunlu devir eşiği ve yeni sohbet handoff promptu yönetişimi",
+      "sequence": 207,
+      "milestone": "Bronze RC2 Build 207 — Conversation Context Handoff Governance"
+    },
+    {
+      "version": "01.08.2026.208",
+      "packageVersion": "1.8.2026-208",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-01",
+      "summary": "Build 208 — Proje Anayasası V3, kaynak kökeni, marka/kişisel veri, UI baseline, ilerleme ve belge kapanış yönetişimi",
+      "sequence": 208,
+      "milestone": "Bronze RC2 Build 208 — Project Constitution V3 Governance"
+    },
+    {
+      "version": "01.08.2026.209",
+      "packageVersion": "1.8.2026-209",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-01",
+      "summary": "İlk kullanım, Apple/Google/Microsoft kimlik mimarisi ve giriş öncesi şifreli kullanıcı veri kasası güvenliği",
+      "sequence": 209,
+      "milestone": "Bronze RC2 Build 209 secure onboarding and user-data vault"
+    },
+    {
+      "version": "01.08.2026.210",
+      "packageVersion": "1.8.2026-210",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-01",
+      "summary": "Terminal clean-backup çalışma defteri terminal satır değişmezliği ve INSERT OR REPLACE bypass koruması",
+      "sequence": 210,
+      "milestone": "Bronze RC2 Build 210 terminal clean-backup ledger immutability"
+    },
+    {
+      "version": "01.08.2026.211",
+      "packageVersion": "1.8.2026-211",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-01",
+      "summary": "Bağımlılık erişim engeli fail-closed teşhis edildi; temiz npm ci için deterministik 117-tarball acquisition/handoff zinciri Build211 kapsamında doğrulanacaktır.",
+      "sequence": 211,
+      "milestone": "Dependency installation reproducibility and connected-machine handoff"
+    },
+    {
+      "version": "01.08.2026.212",
+      "packageVersion": "1.8.2026-212",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-01",
+      "summary": "Onaylı Anadolu parsı açık-tema UI Görsel Referans Manifestosu yanlış aktif baseline yerine yeniden bağlandı; görsel hash sabitlemesi ve baseline drift kapısı eklendi.",
+      "sequence": 212,
+      "milestone": "Bronze RC2 Build 212 — UI visual baseline provenance correction"
+    },
+    {
+      "version": "01.08.2026.213",
+      "packageVersion": "1.8.2026-213",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-01",
+      "summary": "Build 213 aktif oturum kullanıcı verisi koruması: memory-resident SQLite ve Windows EFS korumalı bounded staging.",
+      "sequence": 213,
+      "milestone": "OPEN-021 in-use protection implementation"
+    },
+    {
+      "version": "01.08.2026.214",
+      "packageVersion": "1.8.2026-214",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-01",
+      "summary": "Build 214 başlatıldı: OPEN-022 hassas yan-artifact şifreleme ve sanitizasyon kapanışı yeniden inşa ediliyor.",
+      "sequence": 214,
+      "milestone": "OPEN-022 Protected Side Artifact katmanı ve Bronze Final güvenlik kapanışı"
+    },
+    {
+      "version": "01.08.2026.215",
+      "packageVersion": "1.8.2026-215",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-01",
+      "summary": "Build215 başlatıldı: OPEN-021 ve OPEN-022 için gerçek Windows EFS, Electron safeStorage/DPAPI ve paketli runtime kanıt zinciri güncelleniyor; non-Windows ortamında yalnız kaynak/contract hazırlığı yapılacak ve Windows kanıtları NOT_RUN kalacaktır.",
+      "sequence": 215,
+      "milestone": "OPEN-021/022 Windows security evidence harness"
+    },
+    {
+      "version": "01.08.2026.216",
+      "packageVersion": "1.8.2026-216",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-01",
+      "summary": "Build216 başlatıldı: gerçek Windows kanıt paketinin SHA-manifest ile kaynak snapshotına bağlanması, platform-bağımsız kanıt kabulü ve OPEN-021/OPEN-022 fail-closed closure-readiness kapısı geliştiriliyor.",
+      "sequence": 216,
+      "milestone": "OPEN-021/022 Windows evidence intake and source binding"
+    },
+    {
+      "version": "01.08.2026.217",
+      "packageVersion": "1.8.2026-217",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-01",
+      "summary": "Build217 OPEN-021 Windows-only closure runner isolation and one-click execution preparation.",
+      "sequence": 217,
+      "milestone": "OPEN-021 real Windows closure runner isolation"
+    },
+    {
+      "version": "01.08.2026.218",
+      "packageVersion": "1.8.2026-218",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-01",
+      "summary": "Build218 başlatıldı: OPEN-022 gerçek Windows safeStorage/DPAPI ve protected side-artifact kapanışı OPEN-021/Silver kapsamından ayrılacak.",
+      "sequence": 218,
+      "milestone": "OPEN-022 isolated Windows closure gate"
+    },
+    {
+      "version": "01.08.2026.219",
+      "packageVersion": "1.8.2026-219",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-01",
+      "summary": "Build219: OPEN-021 ve OPEN-022 gerçek Windows kapanışlarını tek güncel kaynak snapshotında ve tek kanıt bundle akışında birleştir.",
+      "sequence": 219,
+      "milestone": "Bronze birleşik Windows güvenlik kapanışı"
+    },
+    {
+      "version": "02.08.2026.220",
+      "packageVersion": "2.8.2026-220",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-02",
+      "summary": "Build220 Windows kanıtında bulunan installer bootstrap eksikliği ve PowerShell 5.1 UTF-8 kanıt metni uyumluluğu düzeltiliyor.",
+      "sequence": 220,
+      "milestone": "OPEN-021/OPEN-022 gerçek Windows kapanış runner düzeltmesi"
+    },
+    {
+      "version": "02.08.2026.221",
+      "packageVersion": "2.8.2026-221",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-02",
+      "summary": "Build221 başlatıldı: Build220 gerçek Windows testinde doğrulanan workspace package build-order eksikliği giderilecek; installer öncesi workspace dist üretimi fail-closed doğrulanacak.",
+      "sequence": 221,
+      "milestone": "Bronze Windows workspace-build prerequisite remediation"
+    },
+    {
+      "version": "02.08.2026.222",
+      "packageVersion": "2.8.2026-222",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-02",
+      "summary": "Build222: gerçek Build221 Windows TypeScript preload TS7017 hatası dar kapsamda düzeltilir.",
+      "sequence": 222,
+      "milestone": "Bronze RC2 Build222 Windows preload TypeScript remediation"
+    },
+    {
+      "version": "02.08.2026.223",
+      "packageVersion": "2.8.2026-223",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-02",
+      "summary": "Build223: exact-source Build222 Windows FAIL kanıtında preload CJS staging grafiği ve .cts generic sözdizimi hataları doğrulandı; dar build-pipeline düzeltmesi başlatıldı.",
+      "sequence": 223,
+      "milestone": "Bronze Windows preload CJS graph remediation"
+    },
+    {
+      "version": "02.08.2026.224",
+      "packageVersion": "2.8.2026-224",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-02",
+      "summary": "Build224 başlatıldı: exact-source Build223 gerçek Windows FAIL kanıtındaki NSIS LICENSE_TR.rtf / LICENSE_TR.txt driftini giderme ve paketleme öncesi deterministik lisans senkronizasyonunu fail-closed doğrulama.",
+      "sequence": 224,
+      "milestone": "Bronze RC2 Build224 NSIS license synchronization remediation"
+    },
+    {
+      "version": "02.08.2026.225",
+      "packageVersion": "2.8.2026-225",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-02",
+      "summary": "Build225 kanıtlanmış OPEN-021 EFS, OPEN-022 safeStorage, fatal startup tanısı ve PR-172 düzeltmelerini uygular.",
+      "sequence": 225,
+      "milestone": "Build225 Windows security root-cause remediation"
+    },
+    {
+      "version": "02.08.2026.226",
+      "packageVersion": "2.8.2026-226",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-02",
+      "summary": "Build226, Build225 gerçek Windows kanıtında doğrulanan fresh-profile device identity initialization-order hatasını fail-closed biçimde düzeltir; Build225 tarihsel kaydı ve PR-172 V6 değişmez.",
+      "sequence": 226,
+      "milestone": "Bronze RC2 Build226 fresh-profile device identity startup ordering remediation"
+    },
+    {
+      "version": "02.08.2026.227",
+      "packageVersion": "2.8.2026-227",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-02",
+      "summary": "Build227 fixes only the four proven Build226 Windows root causes: sandbox preload UUID, cross-process protected key persistence, short Unicode-safe installer validation, and OPEN-022 stale backend contract.",
+      "sequence": 227,
+      "milestone": "Bronze RC2 Build227 Windows closure root-cause remediation"
+    },
+    {
+      "version": "02.08.2026.228",
+      "packageVersion": "2.8.2026-228",
+      "channel": "Bronze",
+      "stage": "RC2 Aktif Geliştirme",
+      "date": "2026-08-02",
+      "summary": "Build228 is the Bronze governance-only closure build: OPEN-021 and OPEN-022 are formally closed against exact Build227 real-Windows evidence; no security feature or Silver validation result is changed.",
+      "sequence": 228,
+      "milestone": "Bronze OPEN-021/OPEN-022 official governance closure"
+    }
+  ]
+}

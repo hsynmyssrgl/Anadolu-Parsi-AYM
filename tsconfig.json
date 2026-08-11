@@ -1,0 +1,92 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "lib": [
+      "ES2024",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "types": [
+      "node",
+      "vite/client"
+    ],
+    "paths": {
+      "@ppt/application": [
+        "./packages/application/src/index.ts"
+      ],
+      "@ppt/config": [
+        "./packages/config/src/index.ts"
+      ],
+      "@ppt/contracts": [
+        "./packages/contracts/src/index.ts"
+      ],
+      "@ppt/core": [
+        "./packages/core/src/index.ts"
+      ],
+      "@ppt/database": [
+        "./packages/database/src/index.ts"
+      ],
+      "@ppt/domain": [
+        "./packages/domain/src/index.ts"
+      ],
+      "@ppt/domain/renderer": [
+        "./packages/domain/src/renderer.ts"
+      ],
+      "@ppt/events": [
+        "./packages/events/src/index.ts"
+      ],
+      "@ppt/infrastructure": [
+        "./packages/infrastructure/src/index.ts"
+      ],
+      "@ppt/logging": [
+        "./packages/logging/src/index.ts"
+      ],
+      "@ppt/repositories": [
+        "./packages/repositories/src/index.ts"
+      ],
+      "@ppt/security": [
+        "./packages/security/src/index.ts"
+      ],
+      "@ppt/test-data": [
+        "./packages/test-data/src/index.ts"
+      ],
+      "@ppt/repository-contracts": [
+        "./packages/repository-contracts/src/index.ts"
+      ],
+      "@ppt/platform-policy": [
+        "./packages/platform-policy/src/index.ts"
+      ],
+      "@ppt/core-service-contracts": [
+        "./packages/core-service-contracts/src/index.ts"
+      ],
+      "@ppt/core-service-client": [
+        "./packages/core-service-client/src/index.ts"
+      ],
+      "@ppt/core-service": [
+        "./apps/core-service/src/index.ts"
+      ]
+    }
+  },
+  "include": [
+    "packages/*/src/**/*.ts",
+    "apps/desktop/src/main/**/*.ts",
+    "apps/desktop/src/renderer/**/*.ts",
+    "apps/desktop/src/renderer/**/*.tsx",
+    "apps/core-service/src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/dist/**",
+    "release",
+    "coverage",
+    ".tmp*",
+    "artifacts"
+  ]
+}

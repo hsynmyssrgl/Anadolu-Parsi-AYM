@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "channel": "Bronze",
+  "version": "23.07.2026.50",
+  "packageVersion": "23.7.2026-50",
+  "milestone": "B060-M10 Authentication & Session Application Migration",
+  "status": "passed",
+  "checks": {
+    "foundation": 14,
+    "runtime": 6,
+    "migration": 9,
+    "sqliteSmoke": 14,
+    "repositoryOutbox": 10,
+    "transactionalAtomicity": 9,
+    "eventDispatcher": 3,
+    "familyUseCases": 14,
+    "genealogy": 6,
+    "timeline": 17,
+    "dashboardNavigation": 14,
+    "authenticationSession": 16
+  },
+  "totalChecks": 132,
+  "typescriptWorkspaces": 12,
+  "electronMainPreloadTypecheck": "passed",
+  "ipc": {
+    "main": 125,
+    "preload": 125,
+    "matched": true
+  },
+  "database": {
+    "applicationTables": 40,
+    "infrastructureTables": 4,
+    "migrations": 5
+  },
+  "limitations": [
+    "Full Electron/Vite/Vitest production build not rerun",
+    "Windows installer deferred to Silver",
+    "Manual UI and screenshot validation deferred to Silver"
+  ],
+  "verifiedAt": "2026-07-23T19:12:40.625913Z"
+}

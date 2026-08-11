@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 2,
+  "electronVersion": "43.2.0",
+  "electronBuilderVersion": "26.15.6",
+  "windowsTarget": "nsis",
+  "windowsPackagerPath": "tools/windows-packager",
+  "rootInstallIsolated": true,
+  "safeOverrides": {
+    "@electron/asar": "4.2.1",
+    "@electron/universal": "3.0.4",
+    "ejs": "6.0.1",
+    "electron-builder-squirrel-windows": "file:../electron-builder-squirrel-windows-stub"
+  },
+  "approvedLocalLinks": [
+    {
+      "packagePath": "node_modules/electron-builder-squirrel-windows",
+      "lockResolved": "../electron-builder-squirrel-windows-stub",
+      "sourcePath": "tools/electron-builder-squirrel-windows-stub",
+      "packageName": "electron-builder-squirrel-windows",
+      "version": "26.15.6"
+    }
+  ],
+  "forbiddenRootPackages": [
+    "node_modules/electron-builder",
+    "node_modules/app-builder-lib",
+    "node_modules/yargs",
+    "node_modules/yargs-parser"
+  ],
+  "forbiddenInstalledPackages": [
+    "node_modules/electron-winstaller",
+    "node_modules/temp",
+    "node_modules/rimraf"
+  ]
+}

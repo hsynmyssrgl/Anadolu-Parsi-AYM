@@ -1,0 +1,20 @@
+{
+  "version":"24.07.2026.56",
+  "added":[
+    "packages/application/src/archive-use-cases.ts",
+    "packages/repositories/src/archive-repository.ts",
+    "apps/desktop/src/main/archive-application-adapter.ts",
+    "database/migrations/0011_archive_application_indexes.sql",
+    "scripts/verify-archive-use-cases.mjs"
+  ],
+  "modified":[
+    "packages/application/src/index.ts",
+    "packages/repositories/src/index.ts",
+    "apps/desktop/src/main/data-store.ts",
+    "apps/desktop/src/main/database-migrations.ts",
+    "packages/domain/src/app-meta.ts",
+    "package.json",
+    "package-lock.json"
+  ],
+  "summary":"Dijital arşiv metadata, ilk sürüm ve içe aktarma işlemleri application/repository mimarisine taşındı."
+}

@@ -1,0 +1,363 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "04.08.2026.29",
+  "milestone": "Bronze RC2 Build undefined",
+  "status": "passed",
+  "checkCount": 9,
+  "checks": [
+    "fresh database applies all migrations",
+    "second run is idempotent",
+    "known legacy baseline is adopted after pre-migration backup",
+    "unknown legacy baseline stops without mutation",
+    "checksum mismatch blocks startup",
+    "database health report confirms WAL and foreign keys",
+    "transaction executor commits success and rolls back Result error",
+    "transaction executor maps unique constraint errors",
+    "failed migration rolls back schema and record"
+  ],
+  "legacyFingerprint": "45fedc9c9dc9d4456a7b5829809cd4e23bb4e837070a57e8e5608f89a0d39569",
+  "migrationVersions": [
+    {
+      "version": 1,
+      "name": "legacy_mvp40_schema",
+      "checksum": "db9f308eb51ec2c5bb8fd8f6099c5faa19ee67c8ab01641108b4b61489e6fd94"
+    },
+    {
+      "version": 2,
+      "name": "legacy_mvp40_compatibility",
+      "checksum": "94042acdaeaaeca58f0bfe948a6ca0d426fc19a099d37538f1796531ff483f43"
+    },
+    {
+      "version": 3,
+      "name": "database_metadata",
+      "checksum": "ec7a4bd4dd573ace03f71afe71146d95e8f27fce03853b8096ae2f44933b23a0"
+    },
+    {
+      "version": 4,
+      "name": "transactional_outbox",
+      "checksum": "f5edb92cc3d0bac80d2477e4732327198d52dfa91e43b9ab737e3fcf8eef0126"
+    },
+    {
+      "version": 5,
+      "name": "event_dispatcher_state",
+      "checksum": "6c55e3bb51e11f3a3ab7fb29c1aa663655e0446506afe249cecbfeace9e67e48"
+    },
+    {
+      "version": 6,
+      "name": "trusted_devices",
+      "checksum": "ca7c11c05a303a9658b3463dedc3d0c97e92c66d6425a3672a5c294742b0fd25"
+    },
+    {
+      "version": 7,
+      "name": "authorization_audit_hardening",
+      "checksum": "bb8c8a09ef309d025a0ddf4ee8b1d3631b8a7c68a30405c3dfa5ff12c87dcfa5"
+    },
+    {
+      "version": 8,
+      "name": "membership_collaboration_notifications",
+      "checksum": "65dc45433df547f73ff3954cf4d99bf3ed1b4ee20675d0879bca0f1f3627baef"
+    },
+    {
+      "version": 9,
+      "name": "health_application_indexes",
+      "checksum": "cb052b4466bd37b5d94540d8b5a2c10165c1f84f506c1f0205f96fb764322dc0"
+    },
+    {
+      "version": 10,
+      "name": "finance_application_indexes",
+      "checksum": "f00a664433a0d107afc1734da4ab456638f653f474c2787e50dd8f903dfc184d"
+    },
+    {
+      "version": 11,
+      "name": "archive_application_indexes",
+      "checksum": "3578e7ca9a629fb7c5f5378b70399311ef3a5027d4f5098e860086f723cdbb6b"
+    },
+    {
+      "version": 12,
+      "name": "legacy_application_indexes",
+      "checksum": "0f80f4ddef08de5e3ccc4fa5edee782b41aa25b436e59feb23d298aff6bb9bc6"
+    },
+    {
+      "version": 13,
+      "name": "remove_untouched_legacy_demo",
+      "checksum": "4f3a0908219d80a1aeb39e5d524a029181441195e7c099b0f17475359de7c56e"
+    },
+    {
+      "version": 14,
+      "name": "remove_known_synthetic_profiles",
+      "checksum": "41a2ee717eb4192814943267d8ce676a176514ac55decd8ead1a88447d2a9439"
+    },
+    {
+      "version": 15,
+      "name": "timeline_event_lifecycle",
+      "checksum": "6f57b33f2de80a749151bde2df8f11355cb82c4b8e6b57c563b617b463fbac4d"
+    },
+    {
+      "version": 16,
+      "name": "data_lifecycle_governance",
+      "checksum": "358c74127480b03bf9ed101700619f7092a68f41a07862d6740f54e5275deab7"
+    },
+    {
+      "version": 17,
+      "name": "backup_purge_propagation",
+      "checksum": "adb8e139baf4183f35fb96d308d05abf6fd579e54d4cedf0ada84dad93122fde"
+    },
+    {
+      "version": 18,
+      "name": "backup_quarantine_lifecycle",
+      "checksum": "418978348f649852eeeeb3acef12dab1c377131ebde433602234e73ae2737e37"
+    },
+    {
+      "version": 19,
+      "name": "external_backup_inventory",
+      "checksum": "132a911b4b336c66814621c7aaaea995bc9fe554dfdb4605a0730217cf3f414c"
+    },
+    {
+      "version": 20,
+      "name": "external_backup_signed_evidence",
+      "checksum": "c1e55f85f5d1828940ccd2a013dca4e1ecf1ebfb715897e3f47c05b7e40f521a"
+    },
+    {
+      "version": 21,
+      "name": "external_backup_evidence_key_rotation",
+      "checksum": "a330f10a15290b275b9b800947d6444146ce2bb750b5a151cc096c02c83b89d4"
+    },
+    {
+      "version": 22,
+      "name": "external_backup_evidence_revocation_list",
+      "checksum": "e94d8003611f5004dab4bc4c975929663c95997135a2b6940806d8a6044ca819"
+    },
+    {
+      "version": 23,
+      "name": "external_backup_revocation_endpoint_pin_rotation",
+      "checksum": "1c273220dc3f4fe7dc67c6940f3b2d3582e4ae42d18d02445d4028d62e400917"
+    },
+    {
+      "version": 24,
+      "name": "family_data_import_preview_and_rollback",
+      "checksum": "cb36db4824097a53256e9baf0216d9173d8cb6f14bec8c5566e013ed14208712"
+    },
+    {
+      "version": 25,
+      "name": "large_family_read_model_performance",
+      "checksum": "1740c6322232f3f6221a03e9101c86d3cff8a0abf12d0ed2ac7ab24319658c81"
+    },
+    {
+      "version": 26,
+      "name": "entity_catalog_pagination",
+      "checksum": "3a84182bbd8fcaacd934559a44c0911348d531ad7cbe3596f4e79beef3bf6823"
+    },
+    {
+      "version": 27,
+      "name": "account_security_epoch",
+      "checksum": "da0869fb6b03c722a9ff63c779d53e7e399cab4356e5ce27e2fd2756e7156421"
+    },
+    {
+      "version": 28,
+      "name": "external_evidence_root_trust_verification",
+      "checksum": "88d284e851facfc74460d881f9b868b7d0af854255203c9d39866353c5c6998f"
+    },
+    {
+      "version": 29,
+      "name": "automatic_clean_backup_rewrite",
+      "checksum": "e62450dd429f8dc7af27db432b256c336d27910f92e1e276f661b171a0b028cd"
+    },
+    {
+      "version": 30,
+      "name": "clean_backup_rewrite_finalization_ledger",
+      "checksum": "3d53bb2c944cfd547b244f532a2428f55ec10c88d3a84ed9fe6410e61e39c11f"
+    },
+    {
+      "version": 31,
+      "name": "clean_backup_rewrite_linked_chronology",
+      "checksum": "c04e52ac87c825e275ba2c17ec76831c78704d6464b8dfcc5707e26897054083"
+    },
+    {
+      "version": 32,
+      "name": "clean_backup_rewrite_recovery_chronology",
+      "checksum": "da2b4752cc98ea6b53a6198c460f1a780ba044951bc59236a6fef6c28c91b768"
+    },
+    {
+      "version": 33,
+      "name": "clean_backup_rewrite_claim_chronology",
+      "checksum": "5877a8ba06463ed26a630afaf425c3a2e1bb2340159a3213582070bbbd8d31db"
+    },
+    {
+      "version": 34,
+      "name": "clean_backup_rewrite_operational_isolation",
+      "checksum": "161bb123774274a7cd3022adbe175ee86b4afd24314fec8178b315349b86fa2a"
+    },
+    {
+      "version": 35,
+      "name": "clean_backup_rewrite_trigger_aware_backoff",
+      "checksum": "794db0cf56ea3df1ecc43f0611457580d0b3ff160e3e6d599cf553c1535ecdeb"
+    },
+    {
+      "version": 36,
+      "name": "clean_backup_rewrite_manual_availability",
+      "checksum": "f0d946d1ce69996e56f5921479fb7d9a3982c4efebe3a99f172b4b459a5c8459"
+    },
+    {
+      "version": 37,
+      "name": "clean_backup_rewrite_running_ledger_identity",
+      "checksum": "59e3e9061d383597b66e27c4d2bc23ddf3a384a0b8054d8f7a805388fb6edf67"
+    },
+    {
+      "version": 38,
+      "name": "clean_backup_rewrite_claim_reservation",
+      "checksum": "1bd78ceba763007f024496dc508e2b94abd935e7ffd0d3e28109e9da498af615"
+    },
+    {
+      "version": 39,
+      "name": "clean_backup_rewrite_active_ownership_snapshot",
+      "checksum": "c3c5ef8763a681cb415d9bd921f16d96cb79e54921e58dacc158afb23d5f2d4e"
+    },
+    {
+      "version": 40,
+      "name": "clean_backup_rewrite_active_policy_parameters",
+      "checksum": "c6e2cf2d8361349abfe31c4d5d7817dd410f7256237d76067e2190e1d0f4bcb6"
+    },
+    {
+      "version": 41,
+      "name": "clean_backup_rewrite_atomic_terminal_transition",
+      "checksum": "8f6179cc3e97b08b1369af18304a3b9c3f5bbf9a9da0a3537e063f915a0de56c"
+    },
+    {
+      "version": 42,
+      "name": "clean_backup_rewrite_terminal_chronology_monotonicity",
+      "checksum": "b1edbf1bd3b25f47781ee85c156c4c81538f9790400c9ca4064c10c4e3e38bd6"
+    },
+    {
+      "version": 43,
+      "name": "clean_backup_rewrite_propagation_outcome_integrity",
+      "checksum": "a6c3386bae095cdea0ff8be55e18e091f4ad540cb3dcc46c56aa383d497f38f7"
+    },
+    {
+      "version": 44,
+      "name": "clean_backup_rewrite_propagation_status_integrity",
+      "checksum": "8b694623aa14966f2cd84df7d703dcf686bd6b80ba6e73ecccb969e8d4235722"
+    },
+    {
+      "version": 45,
+      "name": "clean_backup_rewrite_propagation_uniqueness",
+      "checksum": "aa99c1f2044ac6f89c8b3d3e11783939f30726203b9aee19e513f2984b638331"
+    },
+    {
+      "version": 46,
+      "name": "clean_backup_rewrite_propagation_reference_permanence",
+      "checksum": "ffd0e268cce72a12138d47b098702401d5715ffb64747910a18849b76c708fcf"
+    },
+    {
+      "version": 47,
+      "name": "clean_backup_rewrite_propagation_referenced_evidence_immutability",
+      "checksum": "ba1704f48b400bb772cf29fb368b69e5c085ee7d6c415562ed9155af500aa1ef"
+    },
+    {
+      "version": 48,
+      "name": "clean_backup_rewrite_propagation_replace_bypass_protection",
+      "checksum": "cd091d50a94620231492073294e29778ad37119e02b846f5b14a8e172cd262b2"
+    },
+    {
+      "version": 49,
+      "name": "clean_backup_rewrite_terminal_ledger_immutability",
+      "checksum": "404f67b5aaa000d06eebf9286aed440ccded058fc71cf0a535cc04f01b1d9a39"
+    },
+    {
+      "version": 50,
+      "name": "household_family_branch_person_membership",
+      "checksum": "16fb32d723abdd8e63af5f0140f1262b7b014838dc03ac2e1bba3de58c9de420"
+    },
+    {
+      "version": 51,
+      "name": "person_profile_lifecycle",
+      "checksum": "e52ca9b7e3dc1c131aa66ce5a1454f50a3b834804917e01784a0c72b9b7a8db5"
+    },
+    {
+      "version": 52,
+      "name": "authorization_context",
+      "checksum": "3cd511f06e144e3fb88c724e74709391c9541ab92818052ed0528ade894e6867"
+    },
+    {
+      "version": 53,
+      "name": "invitation_lifecycle",
+      "checksum": "883d917b80038da1f72f5e3ad1af5e2a26d4c50005d3e9051559223911875464"
+    },
+    {
+      "version": 54,
+      "name": "data_repair_center",
+      "checksum": "eae10b1450097080831389ac73d13c70f8bd36b2279ae7b2aecf50431cb4f67c"
+    },
+    {
+      "version": 55,
+      "name": "windows_hello_registrations",
+      "checksum": "7dd1a6b934f0e4744e6ede179005522709fd188290d6674e1382718a519819ae"
+    },
+    {
+      "version": 56,
+      "name": "durable_platform_policy_transactions",
+      "checksum": "afc52b5d5f221e6493cd126dcc56a6aae1e1a0fe4c54b00ae3405c74a71c4b78"
+    },
+    {
+      "version": 57,
+      "name": "protected_journal_projection_proof",
+      "checksum": "7aa7ffa53bb2e7330fbdb578a95f63acae7be9e3e97cc485e8463614a477cb23"
+    },
+    {
+      "version": 58,
+      "name": "archive_core_table_receipt_fence",
+      "checksum": "ddc1156cf3005c87dd565f451e4532870ccb1e66b015262285912e6bd5323bf5"
+    },
+    {
+      "version": 59,
+      "name": "archive_accessory_receipt_fence",
+      "checksum": "583016c7e871fff1817a548fbfc33a34c3d083153445459dcce794b45ea473a6"
+    },
+    {
+      "version": 60,
+      "name": "archive_operation_idempotency",
+      "checksum": "042ca1a2d450d4827bd5df4fd32aee7e8e24a665ccfd7936b9547a30ed34a7c1"
+    },
+    {
+      "version": 61,
+      "name": "archive_pending_operation_identity_recovery",
+      "checksum": "382c06c258318318265a6b03573b34d1c0e3c8729e8adb634edce4b082d54045"
+    },
+    {
+      "version": 62,
+      "name": "expired_replay_reservation_pruning",
+      "checksum": "59876e476ee37d9fd74f00603c686b585b2b0759c728d0e0923605f22ee49983"
+    },
+    {
+      "version": 63,
+      "name": "finance_policy_receipt_fence",
+      "checksum": "44b108bc23786c640dad4d5deac588e401fdd160e6e7e7d3b1bda11437c5a959"
+    },
+    {
+      "version": 64,
+      "name": "health_policy_receipt_fence",
+      "checksum": "23125396bf9edbc0cecad63e4863cdd00b2b52a759533c248e2939a03579a92c"
+    },
+    {
+      "version": 65,
+      "name": "life_policy_receipt_fence",
+      "checksum": "a47e05b0b5249e300b8b001b31314663d90020b921b1049252df13426c58d178"
+    },
+    {
+      "version": 66,
+      "name": "location_policy_receipt_fence",
+      "checksum": "e55b15e48f504fc65452556f6c907b8845bb81b6b6d65caa5c243410d11c9609"
+    },
+    {
+      "version": 67,
+      "name": "local_ppk002_timeline_event_policy_receipt_fence",
+      "checksum": "a67f9807f2a2bb00ada3768d06882a0ca2648d91b19eacb2becf46cf9ef2b528"
+    },
+    {
+      "version": 68,
+      "name": "ppk002_family_import_governed_rollback_receipt_fence",
+      "checksum": "298ffa1c65a65e762904cb913ecb9b45d1dfa5fcd94659c1a3181a5984f71bd6"
+    }
+  ],
+  "generatedAt": "2026-08-11T07:27:09.941Z"
+}

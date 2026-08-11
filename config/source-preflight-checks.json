@@ -1,0 +1,435 @@
+{
+  "schemaVersion": 1,
+  "stage": "Bronze RC2 Active Development",
+  "checks": [
+    {
+      "id": "version-sequence",
+      "label": "Sürüm sıra sözleşmesi",
+      "script": "scripts/verify-version-sequence.mjs",
+      "args": [],
+      "timeoutMs": 60000
+    },
+    {
+      "id": "master-build-ledger",
+      "label": "Ana build defteri süreklilik sözleşmesi",
+      "script": "scripts/verify-master-build-ledger.mjs",
+      "args": [
+        "--report",
+        "artifacts/validation/master-build-ledger.json"
+      ],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "active-version-contract",
+      "label": "Aktif sürüm sözleşmesi",
+      "script": "scripts/verify-active-version-contract.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "active-delivery-documents",
+      "label": "Aktif teslim belgeleri",
+      "script": "scripts/verify-active-delivery-documents.mjs",
+      "args": [
+        "--report",
+        "artifacts/validation/active-delivery-documents.json"
+      ],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "delivery-attestation-contract",
+      "label": "Teslim tasdik sözleşmesi",
+      "script": "scripts/verify-delivery-attestation-contract.mjs",
+      "args": [
+        "--report",
+        "artifacts/validation/delivery-attestation-contract.json"
+      ],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "project-provenance",
+      "label": "20 Temmuz 2026 proje kaynak sınırı",
+      "script": "scripts/verify-project-provenance-gate.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "active-version-sweep",
+      "label": "Aktif dosya sürüm taraması",
+      "script": "scripts/verify-active-version-sweep.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "personal-identity-sweep",
+      "label": "Kişisel kimlik sanitizasyon taraması",
+      "script": "scripts/verify-personal-identity-sweep.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "production-clean-data",
+      "label": "Production temiz ve boş başlangıç",
+      "script": "scripts/verify-production-clean-data-gate.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build209-secure-onboarding-vault",
+      "label": "Build 209 Anayasa V4 güvenli onboarding/kasa sözleşmesi",
+      "script": "scripts/verify-build209-secure-onboarding-vault-contract.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build209-user-data-vault-runtime",
+      "label": "Build 209 kullanıcı veri kasası runtime",
+      "script": "scripts/verify-build209-user-data-vault-runtime.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build209-renderer-syntax",
+      "label": "Build 209 onboarding/preload syntax",
+      "script": "scripts/verify-build209-renderer-syntax.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build210-clean-rewrite-terminal-ledger-immutability-contract",
+      "label": "Build 210 terminal temiz-yedek ledger değişmezlik sözleşmesi",
+      "script": "scripts/verify-build210-clean-rewrite-terminal-ledger-immutability-contract.mjs",
+      "args": [
+        "artifacts/validation/build210-clean-rewrite-terminal-ledger-immutability-contract.json"
+      ],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build210-clean-rewrite-terminal-ledger-immutability-sqlite-runtime",
+      "label": "Build 210 terminal temiz-yedek ledger gerçek SQLite davranışı",
+      "script": "scripts/verify-build210-clean-rewrite-terminal-ledger-immutability-sqlite-runtime.mjs",
+      "args": [
+        "artifacts/validation/build210-clean-rewrite-terminal-ledger-immutability-sqlite-runtime.json"
+      ],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build211-dependency-install-readiness",
+      "label": "Build 211 clean install fail-closed readiness/handoff sözleşmesi",
+      "script": "scripts/verify-build211-dependency-install-readiness-contract.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build212-ui-visual-baseline-provenance",
+      "label": "Build 212 onaylı UI görsel baseline provenance/hash sözleşmesi",
+      "script": "scripts/verify-build212-ui-visual-baseline-provenance-contract.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build213-in-use-data-protection-contract",
+      "label": "Build 213 aktif oturum in-use veri koruma sözleşmesi",
+      "script": "scripts/verify-build213-in-use-data-protection-contract.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build213-volatile-user-data-runtime",
+      "label": "Build 213 bellek-içi SQLite/kasa runtime",
+      "script": "scripts/verify-build213-volatile-user-data-runtime.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build214-open022-contract",
+      "label": "Build 214 OPEN-022 korumalı yan-artifact sözleşmesi",
+      "script": "scripts/verify-build214-open022-contract.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build214-protected-side-artifact-runtime",
+      "label": "Build 214 şifreli yan-artifact runtime",
+      "script": "scripts/verify-build214-protected-side-artifact-runtime.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build214-side-artifact-integration-runtime",
+      "label": "Build 214 yan-artifact entegrasyon runtime",
+      "script": "scripts/verify-build214-side-artifact-integration-runtime.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build214-pr171-contract",
+      "label": "Build 214 PR-171 adımlı çalışma sözleşmesi",
+      "script": "scripts/verify-build214-pr171-contract.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build216-windows-evidence-intake-contract",
+      "label": "Build 216 Windows evidence manifest/source-binding intake sözleşmesi",
+      "script": "scripts/verify-build216-windows-evidence-intake-contract.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build216-windows-evidence-intake-runtime",
+      "label": "Build 216 Windows evidence valid/tamper intake runtime",
+      "script": "scripts/verify-build216-windows-evidence-intake-runtime.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build217-open021-isolation-contract",
+      "label": "Build 217 OPEN-021 Windows-only kapanış izolasyon sözleşmesi",
+      "script": "scripts/verify-build217-open021-isolation-contract.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build217-open021-result-runtime",
+      "label": "Build 217 OPEN-021 valid/tamper result runtime",
+      "script": "scripts/verify-build217-open021-result-runtime.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build218-open022-result-runtime",
+      "label": "Build 218 OPEN-022 valid/tamper result runtime",
+      "script": "scripts/verify-build218-open022-result-runtime.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build219-bronze-security-result-runtime",
+      "label": "Build 219 birleşik valid/partial tamper result runtime",
+      "script": "scripts/verify-build219-bronze-security-result-runtime.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build220-windows-retry-runtime",
+      "label": "Build 220 birleşik readiness fail-closed runtime",
+      "script": "scripts/verify-build220-bronze-security-result-runtime.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build221-workspace-dist-guard-runtime",
+      "label": "Build 221 workspace dist valid/tamper fail-closed runtime",
+      "script": "scripts/verify-build221-workspace-dist-guard-runtime.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build221-windows-retry-runtime",
+      "label": "Build 221 birleşik readiness fail-closed runtime",
+      "script": "scripts/verify-build221-bronze-security-result-runtime.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build222-preload-lifecycle-contract",
+      "label": "Build222 preload lifecycle typing contract",
+      "script": "scripts/verify-build222-preload-lifecycle-contract.mjs",
+      "args": [],
+      "timeoutMs": 30000
+    },
+    {
+      "id": "build222-preload-typescript-ab-runtime",
+      "label": "Build222 preload TypeScript A/B runtime",
+      "script": "scripts/verify-build222-preload-typescript-ab-runtime.mjs",
+      "args": [],
+      "timeoutMs": 30000
+    },
+    {
+      "id": "build222-windows-retry-runtime",
+      "label": "Build222 unified Windows result runtime",
+      "script": "scripts/verify-build222-bronze-security-result-runtime.mjs",
+      "args": [],
+      "timeoutMs": 30000
+    },
+    {
+      "id": "build223-preload-cjs-graph-contract",
+      "label": "Build223 preload CommonJS staging graph contract",
+      "script": "scripts/verify-build223-preload-cjs-graph-contract.mjs",
+      "args": [],
+      "timeoutMs": 30000
+    },
+    {
+      "id": "build223-preload-cjs-graph-runtime",
+      "label": "Build223 preload CommonJS graph compile/tamper runtime",
+      "script": "scripts/verify-build223-preload-cjs-graph-runtime.mjs",
+      "args": [],
+      "timeoutMs": 60000
+    },
+    {
+      "id": "build223-windows-retry-runtime",
+      "label": "Build223 unified Windows result runtime",
+      "script": "scripts/verify-build223-bronze-security-result-runtime.mjs",
+      "args": [],
+      "timeoutMs": 30000
+    },
+    {
+      "id": "build225-build224-license-regression",
+      "label": "Build225 persistence of Build224 license sync runtime",
+      "script": "scripts/verify-build225-build224-license-regression.mjs",
+      "args": [],
+      "timeoutMs": 30000
+    },
+    {
+      "id": "build225-build223-preload-regression",
+      "label": "Build225 persistence of Build223 preload CJS graph",
+      "script": "scripts/verify-build225-build223-preload-cjs-regression.mjs",
+      "args": [],
+      "timeoutMs": 60000
+    },
+    {
+      "id": "build225-open021-contract",
+      "label": "Build225 OPEN-021 EFS fail-closed contract",
+      "script": "scripts/verify-build225-open021-efs-contract.mjs",
+      "args": [],
+      "timeoutMs": 30000
+    },
+    {
+      "id": "build225-open021-runtime",
+      "label": "Build225 OPEN-021 EFS valid/tamper runtime",
+      "script": "scripts/verify-build225-open021-efs-runtime.mjs",
+      "args": [],
+      "timeoutMs": 30000
+    },
+    {
+      "id": "build225-fatal-startup-contract",
+      "label": "Build225 fatal startup non-zero/diagnostic contract",
+      "script": "scripts/verify-build225-fatal-startup-contract.mjs",
+      "args": [],
+      "timeoutMs": 30000
+    },
+    {
+      "id": "build225-fatal-startup-runtime",
+      "label": "Build225 fatal startup valid/tamper runtime",
+      "script": "scripts/verify-build225-fatal-startup-runtime.mjs",
+      "args": [],
+      "timeoutMs": 30000
+    },
+    {
+      "id": "build225-pr172-context-policy",
+      "label": "Build225 PR-172 actual-context policy contract",
+      "script": "scripts/verify-build225-pr172-context-policy.mjs",
+      "args": [],
+      "timeoutMs": 30000
+    },
+    {
+      "id": "build225-windows-retry-contract",
+      "label": "Build225 real Windows retry harness contract",
+      "script": "scripts/verify-build225-windows-retry-contract.mjs",
+      "args": [],
+      "timeoutMs": 30000
+    },
+    {
+      "id": "build225-windows-result-runtime",
+      "label": "Build225 Windows closure valid/tamper runtime",
+      "script": "scripts/verify-build225-bronze-security-result-runtime.mjs",
+      "args": [],
+      "timeoutMs": 30000
+    },
+    {
+      "id": "build226-fresh-profile-startup-runtime",
+      "label": "Build226 fresh-profile first/second launch and tamper runtime",
+      "script": "scripts/verify-build226-fresh-profile-startup-runtime.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build226-device-identity-protection-regression",
+      "label": "Build226 protected device identity regression",
+      "script": "scripts/verify-build226-device-identity-protection-regression.mjs",
+      "args": [],
+      "timeoutMs": 30000
+    },
+    {
+      "id": "build226-maintenance-reauthentication-persistence-regression",
+      "label": "Build226 device-bound maintenance persistence regression",
+      "script": "scripts/verify-build226-maintenance-reauthentication-persistence-regression.mjs",
+      "args": [],
+      "timeoutMs": 30000
+    },
+    {
+      "id": "build226-windows-retry-contract",
+      "label": "Build226 unified real Windows retry contract",
+      "script": "scripts/verify-build226-windows-retry-contract.mjs",
+      "args": [],
+      "timeoutMs": 30000
+    },
+    {
+      "id": "build226-windows-result-runtime",
+      "label": "Build226 unified Windows result runtime/tamper",
+      "script": "scripts/verify-build226-bronze-security-result-runtime.mjs",
+      "args": [],
+      "timeoutMs": 30000
+    },
+    {
+      "id": "build227-root-cause-contract",
+      "label": "Build227 four proven root-cause remediation contract",
+      "script": "scripts/verify-build227-root-cause-contract.mjs",
+      "args": [],
+      "timeoutMs": 30000
+    },
+    {
+      "id": "build227-dpapi-persistence-runtime",
+      "label": "Build227 Windows CurrentUser DPAPI two-process persistence and fail-closed runtime",
+      "script": "scripts/verify-build227-dpapi-persistence-runtime.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "build227-workspace-dist-runtime",
+      "label": "Build227 workspace package dist prerequisite",
+      "script": "scripts/verify-build227-workspace-dist-prerequisite.mjs",
+      "args": [],
+      "timeoutMs": 30000
+    },
+    {
+      "id": "build228-bronze-closure-contract",
+      "label": "Build228 official OPEN-021/OPEN-022 governance closure contract",
+      "script": "scripts/verify-build228-bronze-closure-contract.mjs",
+      "args": [],
+      "timeoutMs": 30000
+    },
+    {
+      "id": "package-source-typecheck",
+      "label": "Paket kaynak TypeScript kontrolü",
+      "script": "scripts/verify-package-source-types.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "desktop-main-source-typecheck",
+      "label": "Desktop main kaynak TypeScript kontrolü",
+      "script": "scripts/verify-desktop-main-source-types.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "documentation-closure",
+      "label": "Master DOCX/PDF ve Artifact Index kapanışı",
+      "script": "scripts/verify-documentation-closure-gate.mjs",
+      "args": [],
+      "timeoutMs": 120000
+    },
+    {
+      "id": "source-integrity",
+      "label": "Kaynak bütünlüğü",
+      "script": "scripts/verify-source-integrity.mjs",
+      "args": [
+        "--report",
+        "artifacts/validation/build228-source-integrity.json"
+      ],
+      "timeoutMs": 300000
+    }
+  ]
+}

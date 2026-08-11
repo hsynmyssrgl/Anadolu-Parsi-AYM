@@ -1,0 +1,46 @@
+name: Kod Kalitesi
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+          cache: npm
+          registry-url: 'https://registry.npmjs.org'
+      - name: Bağımlılıktan bağımsız kaynak ön-kontrolü
+        run: node scripts/run-source-preflight.mjs --report artifacts/validation/ci-source-preflight.json
+      - name: Yerel npm cache hazırlık kanıtı
+        continue-on-error: true
+        run: node scripts/verify-npm-offline-cache-readiness.mjs --report artifacts/validation/ci-npm-offline-cache-readiness.json
+      - name: Temiz bağımlılık kurulumu
+        run: node scripts/run-clean-npm-ci.mjs --report artifacts/validation/ci-npm-ci-dependency-access.json
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+      - name: Tam doğrulama zinciri
+        run: npm run verify
+      - name: Doğrulama kanıtlarını yükle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-quality-validation
+          if-no-files-found: warn
+          path: |
+            artifacts/validation/ci-source-preflight.json
+            artifacts/validation/source-archive-reproducibility.json
+            artifacts/validation/active-delivery-documents.json
+            artifacts/validation/delivery-attestation-contract.json
+            artifacts/validation/npm-cache-transfer-contract.json
+            artifacts/validation/ci-npm-offline-cache-readiness.json
+            artifacts/validation/ci-npm-ci-dependency-access.json
+            artifacts/logs/**

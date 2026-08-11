@@ -1,0 +1,42 @@
+# Kullanıcı Kararları Kaydı
+
+- Görünür sürüm: **Bronze 04.08.2026.29**
+- Makine okunur defter: `config/user-decision-ledger.json`
+- Aktif karar sayısı: **32**
+
+Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağlayıcı kullanıcı kararlarını karar düzeyinde, etkilediği kural/belge/kod alanlarıyla saklar. Ham konuşma erişimi olmadan “tam transcript” iddiası yapılmaz.
+
+## Bu sürümde kaydedilen kararlar
+
+- `DEC-121` — Accepted scope, monthly release and channel gates
+- `DEC-122` — Platform Policy Kernel and Core Service foundation
+- `DEC-123` — All proposed family capabilities accepted as binding Bronze scope
+- `DEC-124` — Exceptionless canonical rule lock and automatic fail-closed gates
+- `DEC-125` — Persistent Library hierarchy is mandatory for every delivery
+- `DEC-126` — Every delivery reports progress, ETA, Silver/Gold, conversation status and handoff state
+- `DEC-127` — All documents and artifacts must be exhaustively indexed and listed
+- `DEC-128` — Completed releases are immutable; new work continues in monthly next sequence
+- `DEC-129` — Tüm aktif kurallar aşılamaz yürütme çekirdeğine bağlanır
+- `DEC-137` — Incomplete Bronze backlog full-auto prioritization and cancellation of the user-specific 95 percent stop
+- `DEC-152` — Single authoritative source, local persistent receipt and gated Build numbering
+- `DEC-153` — B0-01 single governance and feature-reality matrix closure
+- `DEC-154` — GOV-004 current delivery report closure
+- `DEC-155` — GOV-005 external Library blocker classification
+- `DEC-156` — PPK-002 timeline-event policy enforcement local continuation
+- `DEC-162` — Windows Hello hardware validation temporary non-blocking deferral
+- `DEC-163` — PPK-002 family import reused-location exact read receipt chain
+- `DEC-164` — GOV-005 external USB authoritative source protection closure
+- `DEC-165` — B0-02 user-visible release metadata boundary
+- `DEC-166` — PPK-002 family import newly-created-location linked event atomic policy chain
+- `DEC-167` — PPK-002 family import governed rollback exact delete receipt fence
+- `DEC-168` — Main structure first: Core Service typed API and ownership foundation
+- `DEC-169` — Core Service protected family-data session ownership control plane
+- `DEC-170` — Headless shared device-secret protection boundary
+- `DEC-171` — Family-data coexistence and default-deny cutover gate
+- `DEC-172` — Monotonic cutover-readiness evidence and tamper-evident acceptance state
+- `DEC-173` — Protected cutover-readiness journal port and detached default-deny boundary
+- `DEC-174` — Signed cutover-readiness evidence verifier public-key-only boundary
+- `DEC-175` — Synthetic single-writer proof harness detached non-authoritative boundary
+- `DEC-176` — Synthetic key lifecycle proof harness detached non-submittable boundary
+- `DEC-177` — Synthetic rollback and recovery drill detached non-submittable boundary
+- `DEC-178` — End-to-end security evidence aggregator detached non-submittable boundary

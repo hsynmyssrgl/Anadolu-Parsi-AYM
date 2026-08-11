@@ -1,0 +1,22 @@
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname, join, resolve } from 'node:path';
+const root=process.cwd();const out=resolve(process.argv[2]??'artifacts/validation/build183-clean-backup-rewrite-contract.json');
+const paths={domain:'packages/domain/src/app-data.ts',useCases:'packages/application/src/backup-propagation-use-cases.ts',repoContract:'packages/repository-contracts/src/backup-propagation-repository.ts',repository:'packages/repositories/src/backup-propagation-repository.ts',migration:'packages/database/src/family-database-migrations.ts',service:'apps/desktop/src/main/automatic-clean-backup-rewrite-service.ts',main:'apps/desktop/src/main/main.ts',renderer:'apps/desktop/src/renderer/App.tsx',decision:'docs/10_MASTER_DECISION_REGISTER.md',authority:'docs/11_DOCUMENT_AUTHORITY_MATRIX.md',spec:'docs/AUTOMATIC_CLEAN_BACKUP_REWRITE_V1.md',adr:'docs/adr/ADR-056-automatic-clean-backup-rewrite-and-quarantine.md',policy:'config/product-lifecycle-policy.json',preflight:'config/source-preflight-checks.json',package:'package.json'};
+const files=Object.fromEntries(await Promise.all(Object.entries(paths).map(async([k,p])=>[k,await readFile(join(root,p),'utf8')])));
+const failures=[];const checks=[];const check=(label,condition)=>{checks.push(label);if(!condition)failures.push(label);};const has=(k,m)=>files[k].includes(m);
+for(const marker of ['BackupCleanRewritePolicyView','BackupCleanRewriteStatusView','BackupCleanRewriteRunResultView','manualFailureBackoffMinutes:60','automaticFailureBackoffMinutes:360','highLoadDeferMinutes:30'])check(`domain ${marker}`,has('domain',marker));
+for(const marker of ['getCleanRewritePolicy','updateCleanRewritePolicy','claimCleanRewrite','completeCleanRewrite','recoverInterruptedCleanRewrite'])check(`repository contract ${marker}`,has('repoContract',marker));
+for(const marker of ['backup_clean_rewrite_policy','next_attempt_at','in_progress_run_id','state=\'running\'','mapCleanRewritePolicy'])check(`repository ${marker}`,has('repository',marker));
+for(const marker of ['REVISION-183-AUTOMATIC-CLEAN-BACKUP-REWRITE',"createMigrationDefinition(29, 'automatic_clean_backup_rewrite'",'manual_failure_backoff_minutes','automatic_failure_backoff_minutes','idx_data_lifecycle_backup_rewrite_due'])check(`migration ${marker}`,has('migration',marker));
+for(const marker of ['runAutomaticCycle','runManual','recoverInterrupted','backup.clean_rewrite_deferred','backup.clean_rewrite_no_target','manualFailureBackoffMinutes','automaticFailureBackoffMinutes'])check(`service ${marker}`,has('service',marker));
+check('scheduler connection',has('main','cleanBackupRewrite().runAutomaticCycle()'));
+check('visible status IPC',has('main','dataLifecycle:getBackupCleanRewriteStatus'));
+check('renderer policy status',has('renderer','Otomatik temiz yedek yeniden yazımı'));
+check('DEC-073 propagated',has('decision','DEC-073'));
+check('ADR-056 authority',has('authority','ADR-056'));
+check('spec safe rewrite',has('spec','Her hedefte yeni tam yedek oluştur'));
+check('ADR quarantine decision',has('adr','manifestli karantinaya'));
+check('machine policy binding',has('policy','DEC-073'));
+if(checks.length!==36)throw new Error(`Build 183 contract check count drifted: ${checks.length}`);
+const report={schemaVersion:1,product:'Anadolu Parsı Aile Yaşam Merkezi',featureBuild:183,stage:'Bronze RC2 Active Development',scope:'Retention-expired purge tombstones trigger crash-safe verified clean backup rewrite and quarantine',status:failures.length?'FAIL':'PASS',assertions:checks.length,checks,failures,generatedAt:new Date().toISOString()};
+await mkdir(dirname(out),{recursive:true});await writeFile(out,`${JSON.stringify(report,null,2)}\n`);console.log(`Build 183 clean backup rewrite contract: ${report.status} (${checks.length-failures.length}/${checks.length})`);if(failures.length){for(const failure of failures)console.error(`- ${failure}`);process.exitCode=1;}

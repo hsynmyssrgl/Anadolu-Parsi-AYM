@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 2,
+  "release": "Bronze 04.08.2026.29",
+  "authorityOrder": [
+    "config/canonical-rule-registry.json",
+    "config/project-constitution.json",
+    "config/active-governance-ledger.json",
+    "config/user-decision-ledger.json",
+    "config/accepted-scope-registry.json",
+    "docs/current/10_TUM_KURALLAR_ASILAMAZ_YURUTME_SOZLESMESI.md",
+    "config/work-segmentation-plan.json",
+    "config/rule-enforcement-registry.json",
+    "config/release-ledger.json",
+    "config/delivery-report-contract.json",
+    "config/persistent-artifact-policy.json",
+    "config/document-inventory-policy.json",
+    "docs/current/00_AKTIF_ANA_KAPSAM.md",
+    "docs/current/01_AKTIF_GUVENLIK_GIZLILIK_POLITIKASI.md",
+    "docs/current/02_AKTIF_PLATFORM_MIMARISI.md",
+    "docs/current/03_AKTIF_UX_ERISILEBILIRLIK_SOZLESMESI.md",
+    "docs/current/04_AKTIF_BRONZE_YOL_HARITASI.md",
+    "docs/current/05_KABUL_EDILEN_EK_AILE_YETENEKLERI.md",
+    "docs/current/06_KANONIK_KURAL_SICILI.md",
+    "docs/current/07_TESLIM_SOHBET_VE_KALICI_KAYIT_SOZLESMESI.md",
+    "docs/current/08_TUM_BELGELER_DIZINI.md",
+    "docs/current/09_KULLANICI_KARARLARI_KAYDI.md"
+  ],
+  "historicalDocuments": "HISTORY_ONLY_DO_NOT_OVERRIDE_ACTIVE_DOCUMENTS",
+  "exhaustiveInventory": "artifacts/manifests/ALL_DOCUMENTS_INDEX.json"
+}

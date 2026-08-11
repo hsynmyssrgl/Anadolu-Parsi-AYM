@@ -1,0 +1,28 @@
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+
+const sourceRoot = resolve(process.argv[2] ?? '.');
+const reportPath = resolve(process.argv[3] ?? 'artifacts/validation/build225-open022-safestorage-contract.json');
+const probe = await readFile(resolve(sourceRoot, 'apps/desktop/src/main/windows-open022-side-artifact-evidence-probe.ts'), 'utf8');
+const protector = await readFile(resolve(sourceRoot, 'apps/desktop/src/main/device-secret-protector.ts'), 'utf8');
+const results = [];
+const check = (id, condition) => results.push({ id, status: condition ? 'PASS' : 'FAIL' });
+check('windows-platform-required', probe.includes("process.platform !== 'win32'"));
+check('dpapi-backend-name-not-gate', !probe.includes("selectedStorageBackend !== 'dpapi'") && !probe.includes("selectedBackend: 'dpapi'"));
+check('safe-storage-availability-required', probe.includes('!input.protector.isAvailable()'));
+check('actual-protect-called', probe.includes('input.protector.protect(marker)'));
+check('actual-unprotect-called', probe.includes('input.protector.unprotect(protectedMarker)'));
+check('opaque-ciphertext-required', probe.includes('protectedMarker === marker') && probe.includes('protectedMarker.includes(marker)'));
+check('round-trip-required', probe.includes("encryptDecryptRoundTrip: 'PASS'"));
+check('backend-metadata-only', probe.includes('runtimeBackendReported') && probe.includes('selectedBackend: input.selectedStorageBackend'));
+check('provider-platform-contract-explicit', probe.includes("provider: 'windows-dpapi'") && probe.includes("providerBasis: 'electron-safe-storage-windows-platform-contract'"));
+check('basic-text-still-rejected', protector.includes("backend !== 'basic_text'"));
+check('key-envelope-required', probe.includes('protectedDataKey') && probe.includes('keyEnvelope.dataKey !== undefined'));
+check('artifact-ciphertext-and-roundtrip-required', probe.includes('leaked plaintext marker') && probe.includes('decrypt round-trip failed'));
+check('startup-at-rest-required', probe.includes('Protected startup evidence contains plaintext security fields'));
+check('volatile-paths-required', probe.includes('sessionData escaped volatile runtime root') && probe.includes('crashDumps escaped volatile runtime root'));
+const failures = results.filter((item) => item.status === 'FAIL');
+const report = { schemaVersion: 1, build: 225, openWorkId: 'OPEN-022', status: failures.length ? 'FAIL' : 'PASS', checks: results.length, passed: results.length - failures.length, failed: failures.length, results, generatedAt: new Date().toISOString() };
+await mkdir(resolve(reportPath, '..'), { recursive: true }); await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`);
+console.log(`Build225 OPEN-022 safeStorage contract: ${report.status} (${report.passed}/${report.checks}).`);
+if (failures.length) process.exitCode = 1;

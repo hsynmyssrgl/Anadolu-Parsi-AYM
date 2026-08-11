@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "23.07.2026.47",
+  "milestone": "B060-M7 Genealogy Read Model",
+  "status": "completed",
+  "added": [
+    "packages/application/src/genealogy-use-cases.ts",
+    "packages/repositories/src/genealogy-repository.ts",
+    "apps/desktop/src/main/genealogy-application-adapter.ts",
+    "scripts/verify-genealogy-read-model.mjs"
+  ],
+  "modified": [
+    "packages/application/src/family-use-cases.ts",
+    "packages/application/src/index.ts",
+    "packages/repositories/src/index.ts",
+    "packages/domain/src/app-data.ts",
+    "apps/desktop/src/main/data-store.ts",
+    "package.json",
+    "package-lock.json",
+    "apps/desktop/package.json",
+    "packages/domain/src/app-meta.ts",
+    "artifacts/manifests/VERSION_LEDGER.json"
+  ],
+  "behavior": [
+    "Soy ağacı nesilleri ebeveyn grafiğiyle güvenli hesaplanır.",
+    "Çevrimli ve bozuk ilişkiler uygulamayı kilitlemeden raporlanır.",
+    "Genealogy insights doğrudan SQL yerine use-case/repository katmanından sağlanır."
+  ],
+  "generatedAt": "2026-07-23T18:20:51.743369+00:00"
+}

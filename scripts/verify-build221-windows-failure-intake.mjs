@@ -1,0 +1,25 @@
+import { readFile } from 'node:fs/promises';
+const p='artifacts/validation/build221-windows-failure-intake.json';
+const x=JSON.parse(await readFile(p,'utf8'));
+const checks=[];const add=(id,c)=>checks.push({id,status:c?'PASS':'FAIL'});
+add('analysis-build',x.analysisBuild===221);
+add('tested-build',x.testedBuild===220&&x.testedApplicationVersion==='02.08.2026.220');
+add('bundle-sha',/^[0-9a-f]{64}$/.test(x.evidenceBundle?.sha256??''));
+add('bundle-integrity',x.evidenceBundle?.zipIntegrity==='PASS');
+add('sidecar-match',x.evidenceBundle?.sha256SidecarMatch===true);
+add('source-binding',x.exactSourceBinding?.status==='PASS');
+add('source-integrity',x.windowsRun?.sourceIntegrity==='PASS');
+add('npm-ci',x.windowsRun?.dependencyBootstrapPrerequisite==='PASS');
+add('packager-bootstrap',x.windowsRun?.windowsPackagerBootstrapPrerequisite==='PASS');
+add('installer-failed',x.windowsRun?.windowsInstallerBuild?.status==='FAIL'&&x.windowsRun?.windowsInstallerBuild?.exitCode===1);
+add('probes-not-run',x.windowsRun?.probeExecution==='NOT_RUN_AFTER_INSTALLER_BUILD_FAILURE');
+add('open021-not-ready',x.windowsRun?.open021==='NOT_READY');
+add('open022-not-ready',x.windowsRun?.open022==='NOT_READY');
+add('source-bug',x.rootCause?.classification==='SOURCE_BUG'&&x.rootCause?.environmentBlocker===false);
+add('workspace-build-root-cause',(x.rootCause?.primary??'').includes('workspace package dist outputs'));
+add('remediation-build-packages',x.build221Remediation?.some(v=>v.includes('npm run build:packages')));
+add('remediation-dist-guard',x.build221Remediation?.some(v=>v.includes('dist guard')));
+add('ledger-unchanged',x.closureDecision?.ledgerMutationPerformed===false&&x.closureDecision?.open021==='IN_PROGRESS'&&x.closureDecision?.open022==='IN_PROGRESS');
+const ok=checks.every(c=>c.status==='PASS');
+console.log(`Build221 Windows failure intake: ${ok?'PASS':'FAIL'} (${checks.filter(c=>c.status==='PASS').length}/${checks.length}).`);
+if(!ok){console.error(JSON.stringify(checks.filter(c=>c.status==='FAIL'),null,2));process.exitCode=1;}

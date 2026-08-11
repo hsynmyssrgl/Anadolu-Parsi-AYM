@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "version": "24.07.2026.72",
+  "channel": "Bronze RC2 Aktif Geliştirme",
+  "milestone": "Archive Classification Application Migration",
+  "status": "passed",
+  "checks": 10,
+  "scenarios": [
+    "category list starts from repository-backed query",
+    "admin creates archive category through use case",
+    "category metadata persists",
+    "classification update returns repository read model",
+    "category assignment persists",
+    "sensitivity and ai flag persist",
+    "tags are normalized and deduplicated",
+    "classification audit is appended",
+    "category audit is appended",
+    "database rows updated atomically"
+  ],
+  "generatedAt": "2026-08-06T11:22:20.508Z"
+}

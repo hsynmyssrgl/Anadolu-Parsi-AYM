@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "channel": "Bronze",
+  "version": "23.07.2026.49",
+  "packageVersion": "23.7.2026-49",
+  "milestone": "B060-M9 Dashboard Query & Navigation State",
+  "status": "passed",
+  "summary": {
+    "workspaceTypeScriptBuildsPassed": 12,
+    "electronMainPreloadTypecheckPassed": true,
+    "totalAutomatedChecksPassed": 116,
+    "ipcMainChannelCount": 125,
+    "preloadInvokeChannelCount": 125,
+    "applicationTableCount": 40,
+    "infrastructureTableCount": 4,
+    "migrationCount": 5,
+    "dashboardModuleCount": 15,
+    "privateDashboardScopeVerified": true,
+    "sourceInventoryFileCount": 397,
+    "manifestFileCount": 398
+  },
+  "verificationSuites": [
+    {
+      "id": "foundation",
+      "status": "passed",
+      "checks": 14,
+      "report": "artifacts/manifests/FOUNDATION_VERIFICATION_MVP49.json"
+    },
+    {
+      "id": "runtime",
+      "status": "passed",
+      "checks": 6,
+      "report": "artifacts/manifests/RUNTIME_FOUNDATION_VERIFICATION_MVP49.json"
+    },
+    {
+      "id": "migrations",
+      "status": "passed",
+      "checks": 9,
+      "report": "artifacts/manifests/DATABASE_MIGRATION_VERIFICATION_MVP49.json"
+    },
+    {
+      "id": "sqliteSmoke",
+      "status": "passed",
+      "checks": 14,
+      "report": "artifacts/manifests/DATA_STORE_SMOKE_MVP49.json"
+    },
+    {
+      "id": "repositories",
+      "status": "passed",
+      "checks": 10,
+      "report": "artifacts/manifests/REPOSITORY_OUTBOX_VERIFICATION_MVP49.json"
+    },
+    {
+      "id": "atomicity",
+      "status": "passed",
+      "checks": 9,
+      "report": "artifacts/manifests/TRANSACTIONAL_ATOMICITY_VERIFICATION_MVP49.json"
+    },
+    {
+      "id": "dispatcher",
+      "status": "passed",
+      "checks": 3,
+      "report": "artifacts/manifests/EVENT_DISPATCHER_VERIFICATION_MVP49.json"
+    },
+    {
+      "id": "familyUseCases",
+      "status": "passed",
+      "checks": 14,
+      "report": "artifacts/manifests/FAMILY_USE_CASE_VERIFICATION_MVP49.json"
+    },
+    {
+      "id": "genealogy",
+      "status": "passed",
+      "checks": 6,
+      "report": "artifacts/manifests/GENEALOGY_READ_MODEL_VERIFICATION_MVP49.json"
+    },
+    {
+      "id": "timeline",
+      "status": "passed",
+      "checks": 17,
+      "report": "artifacts/manifests/TIMELINE_USE_CASE_VERIFICATION_MVP49.json"
+    },
+    {
+      "id": "dashboard",
+      "status": "passed",
+      "checks": 14,
+      "report": "artifacts/manifests/DASHBOARD_OVERVIEW_VERIFICATION_MVP49.json"
+    }
+  ],
+  "qualityGates": [
+    {
+      "id": "version-sequence",
+      "status": "passed",
+      "detail": "23.07.2026.49 / Temmuz sıra 49"
+    },
+    {
+      "id": "bronze-database",
+      "status": "passed",
+      "detail": "8 use-case, 10 repository class, 5 migration, 40 application table, 125 IPC"
+    },
+    {
+      "id": "repository-source-only",
+      "status": "passed",
+      "detail": "Clean source validation passed"
+    }
+  ],
+  "limitations": [
+    "Tam Electron/Vite/Vitest üretim zinciri bu turda bağımlılık ağacı yeniden kurulmadan çalıştırılmadı.",
+    "Windows installer, ekran görüntüleri ve kapsamlı manuel UI doğrulamaları Silver aşamasına bırakıldı."
+  ],
+  "generatedAt": "2026-07-23T18:57:06.075826Z"
+}

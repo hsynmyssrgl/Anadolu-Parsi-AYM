@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "product": "Panthera pardus tulliana",
+  "channel": "Bronze",
+  "version": "23.07.2026.52",
+  "packageVersion": "23.7.2026-52",
+  "milestone": "B060-M12 RBAC & Audit Chain Hardening",
+  "status": "passed",
+  "checks": {
+    "foundation": 14,
+    "runtime": 6,
+    "migration": 9,
+    "sqliteSmoke": 14,
+    "repositoryOutbox": 10,
+    "transactionalAtomicity": 9,
+    "eventDispatcher": 3,
+    "familyUseCases": 14,
+    "genealogy": 6,
+    "timeline": 17,
+    "dashboardNavigation": 14,
+    "authenticationSession": 16,
+    "mfaTrustedDevice": 16,
+    "authorizationAudit": 9
+  },
+  "totalChecks": 157,
+  "typescriptWorkspaces": 12,
+  "electronMainPreloadTypecheck": "passed",
+  "ipc": {
+    "main": 128,
+    "preload": 128,
+    "matched": true
+  },
+  "database": {
+    "applicationSecurityTables": 41,
+    "infrastructureTables": 4,
+    "migrations": 7,
+    "schemaFingerprint": "4a9221f49849a93c572f0c5a07e924338fabd12722d76a012a910b49733b6411"
+  },
+  "authorization": {
+    "centralService": true,
+    "denyPrecedence": true,
+    "objectLevelPermissions": true,
+    "rolePolicy": true,
+    "ownerPolicy": true,
+    "timeBoundGrants": true,
+    "administrationRestrictedToActiveFamilyAdmin": true
+  },
+  "audit": {
+    "hashVersion": 2,
+    "sequenceMonotonic": true,
+    "correlationIdBound": true,
+    "appendOnlyTriggers": true,
+    "tamperDetection": true
+  },
+  "limitations": [
+    "Full Electron/Vite/Vitest production build not rerun",
+    "Windows installer deferred to Silver",
+    "Comprehensive manual UI and screenshot validation deferred to Silver"
+  ],
+  "verifiedAt": "2026-07-23T20:06:30.638238Z"
+}

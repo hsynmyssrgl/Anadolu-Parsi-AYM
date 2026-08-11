@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "31-J",
+  "title": "Family-data coexistence and default-deny cutover safety gate",
+  "decision": "DEC-171",
+  "primaryRequirement": "DHA-001",
+  "requirements": [
+    "DHA-001",
+    "PPK-003",
+    "PPK-013",
+    "PPK-014"
+  ],
+  "status": "COMPLETED",
+  "targets": {
+    "legacyAuthority": "DESKTOP_VAULT_AND_ACTIVE_SQLITE_REMAIN_AUTHORITATIVE",
+    "coreServiceDefault": "REAL_DATA_AND_WRITE_OWNERSHIP_CUTOVER_BLOCKED",
+    "compositionFence": "CORE_SERVICE_FAMILY_DATA_SESSION_ATTACHMENT_REJECTED",
+    "typedStatus": "FAMILY_DATA_CUTOVER_STATUS_WITHOUT_PATH_OR_SECRET",
+    "desktopHandshake": "FAIL_CLOSED_ON_PERMISSIVE_OR_CONTRADICTORY_CUTOVER_STATUS",
+    "automaticActivation": "FORBIDDEN"
+  },
+  "requiredFutureGates": [
+    "END_TO_END_SECURITY_VALIDATION",
+    "KEY_LIFECYCLE_PROOF",
+    "SINGLE_WRITER_PROOF",
+    "ROLLBACK_DRILL",
+    "EXPLICIT_USER_CUTOVER_APPROVAL"
+  ],
+  "openBoundaries": {
+    "realVaultTransfer": "NOT_PERFORMED_BLOCKED",
+    "coreServiceUnlock": "NOT_IMPLEMENTED",
+    "sqliteOwnershipTransfer": "NOT_PERFORMED_BLOCKED",
+    "familyApplicationApis": "NOT_COMPLETE",
+    "backupAndSync": "NOT_COMPLETE",
+    "windowsServiceInstallation": "APPROVAL_BOUND_NOT_RUN_NOT_PASS"
+  },
+  "requirementCompletionClaimed": false,
+  "newBuildIssued": false,
+  "startedAt": "2026-08-10T20:17:43.272Z",
+  "targetSliceStatus": "PASS",
+  "validationStatus": "PASS",
+  "persistentReceiptStatus": "PASS",
+  "validatedAt": "2026-08-10T20:25:34.370Z",
+  "officialCompletionClaimed": true,
+  "completedAt": "2026-08-10T20:28:55.574Z"
+}

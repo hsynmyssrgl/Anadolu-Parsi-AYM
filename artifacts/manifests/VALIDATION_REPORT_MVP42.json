@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-23T16:41:44.044200+00:00",
+  "version": "23.07.2026.42",
+  "packageVersion": "23.7.2026-42",
+  "revision": "REVİZYON-060",
+  "milestones": [
+    "B060-M3"
+  ],
+  "status": "passed_with_deferred_silver_checks",
+  "checks": {
+    "typescriptWorkspaceBuilds": {
+      "passed": 12,
+      "failed": 0
+    },
+    "foundationChecks": {
+      "passed": 14,
+      "failed": 0
+    },
+    "runtimeFoundationChecks": {
+      "passed": 6,
+      "failed": 0
+    },
+    "sqliteSmokeChecks": {
+      "passed": 4,
+      "failed": 0,
+      "peopleBefore": 6,
+      "peopleAfter": 7,
+      "backupCreated": true
+    },
+    "ipc": {
+      "mainHandlers": 124,
+      "preloadInvocations": 124,
+      "missingChannels": 0
+    },
+    "sqliteTableDeclarations": 40,
+    "electronMainSourceTypecheck": "passed_with_local_type_shim"
+  },
+  "deferredToSilver": [
+    "full Vitest regression",
+    "Vite renderer production build",
+    "Electron production build",
+    "Windows NSIS installer validation",
+    "manual UI validation and screenshots",
+    "long-running performance and restore scenarios"
+  ],
+  "dependencyNote": "No new external npm dependency was added. Desktop uses existing local workspace packages @ppt/core, @ppt/config and @ppt/logging."
+}

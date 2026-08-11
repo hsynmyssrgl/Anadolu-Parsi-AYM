@@ -1,0 +1,13 @@
+import { createHash } from 'node:crypto';
+import { lstat, readFile, writeFile } from 'node:fs/promises';
+import { basename, resolve } from 'node:path';
+const args = process.argv.slice(2);
+const index = args.indexOf('--file');
+if (index < 0 || !args[index + 1]) throw new Error('--file is required.');
+const path = resolve(args[index + 1]);
+const info = await lstat(path);
+if (!info.isFile() || info.isSymbolicLink()) throw new Error('SHA-256 source must be a regular non-symlink file.');
+const digest = createHash('sha256').update(await readFile(path)).digest('hex');
+const sidecar = `${path}.sha256`;
+await writeFile(sidecar, `${digest}  ${basename(path)}\n`);
+console.log(`${digest}  ${basename(path)}`);

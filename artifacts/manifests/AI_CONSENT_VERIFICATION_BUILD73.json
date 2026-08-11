@@ -1,0 +1,40 @@
+{
+  "build": 73,
+  "version": "24.07.2026.73",
+  "checks": [
+    {
+      "name": "repository exists",
+      "status": "PASS"
+    },
+    {
+      "name": "use cases exist",
+      "status": "PASS"
+    },
+    {
+      "name": "adapter exists",
+      "status": "PASS"
+    },
+    {
+      "name": "direct list SQL removed",
+      "status": "PASS"
+    },
+    {
+      "name": "direct upsert SQL removed",
+      "status": "PASS"
+    },
+    {
+      "name": "direct preview SQL removed",
+      "status": "PASS"
+    },
+    {
+      "name": "DataStore use-case wiring",
+      "status": "PASS"
+    },
+    {
+      "name": "application context wiring",
+      "status": "PASS"
+    }
+  ],
+  "passed": 8,
+  "total": 8
+}

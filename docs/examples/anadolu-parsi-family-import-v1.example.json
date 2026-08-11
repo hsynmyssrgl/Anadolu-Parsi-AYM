@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "exportId": "ornek-aile-dis-aktarimi-2026-07-28",
+  "createdAt": "2026-07-28T18:30:00.000Z",
+  "family": {
+    "name": "Örnek Ailesi"
+  },
+  "people": [
+    {
+      "id": "person-anne",
+      "displayName": "Test Kişisi 1",
+      "birthDate": "1980-02-29",
+      "relationshipType": "Anne",
+      "generation": 1,
+      "branch": "Ana Dal",
+      "status": "active"
+    },
+    {
+      "id": "person-baba",
+      "displayName": "Test Kişisi 2",
+      "relationshipType": "Baba",
+      "generation": 1,
+      "branch": "Ana Dal",
+      "status": "active"
+    }
+  ],
+  "relations": [
+    {
+      "id": "relation-es",
+      "fromPersonId": "person-anne",
+      "toPersonId": "person-baba",
+      "relationType": "spouse"
+    }
+  ],
+  "locations": [
+    {
+      "id": "location-ev",
+      "label": "Aile Evi",
+      "address": "Sakarya",
+      "kind": "residence"
+    }
+  ],
+  "events": [
+    {
+      "id": "event-yildonumu",
+      "kind": "important_day",
+      "title": "Evlilik Yıldönümü",
+      "startAt": "2026-08-01T12:00:00.000Z",
+      "locationId": "location-ev",
+      "visibility": "family",
+      "participantPersonIds": ["person-anne", "person-baba"],
+      "aiProcessingAllowed": false,
+      "recurrence": "yearly",
+      "reminderDays": [7, 1]
+    }
+  ]
+}

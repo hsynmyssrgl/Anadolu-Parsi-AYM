@@ -1,0 +1,8 @@
+{
+  "name": "electron-builder-squirrel-windows",
+  "version": "31.7.2026-196",
+  "private": true,
+  "main": "index.cjs",
+  "description": "Intentional compatibility package. Panthera ships only the declared NSIS Windows target.",
+  "license": "UNLICENSED"
+}

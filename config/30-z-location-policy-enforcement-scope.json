@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "30-Z",
+  "requirement": "PPK-002",
+  "scope": "GOVERNED_LOCATION_POLICY_ENFORCEMENT_FAMILY_BOUND_REPOSITORY_RECEIPT_DIRECT_WRITE_FENCE_AND_CROSS_SURFACE_PRIVACY_VERTICAL_SLICE",
+  "predecessor": {
+    "step": "30-Y",
+    "completion": "artifacts/checkpoints/30-Y_COMPLETION_RECORD.json",
+    "receipt": "artifacts/checkpoints/30-Y_LIBRARY_RECEIPT.json",
+    "completionTransition": "artifacts/validation/30-Y_COMPLETION_TRANSITION_VALIDATION.json"
+  },
+  "targets": {
+    "productionIpc": [
+      "location:create"
+    ],
+    "repositoryOperations": [
+      "findById",
+      "insert",
+      "listByFamily"
+    ],
+    "writeTables": [
+      "locations"
+    ],
+    "crossSurfaceReaders": [
+      "timeline read-model location projection",
+      "dashboard location count projection",
+      "family data import raw location projection eliminated fail-closed"
+    ],
+    "crossSurfaceWriters": [
+      "empty production bootstrap location insertion path removed",
+      "family data import documents containing locations or locationId rejected fail-closed and raw write path removed"
+    ],
+    "requiredControls": [
+      "fail-closed production location PEP composition",
+      "existing location.read capability for governed saved-location projections and existing family.write capability for location:create",
+      "family.read is prohibited for saved-location reads",
+      "windows-desktop applicationCapabilities exposes the existing location.read capability before target PASS",
+      "resourceType location and purpose general",
+      "exact family, resource identity, classification and correlation binding",
+      "PolicyAuthorizedRepositoryExecutionContext for all three location repository operations",
+      "family-scoped findById and list SQL without hard-coded family identity",
+      "exact durable policy receipt binding in the location business transaction",
+      "database-enforced unreceipted locations INSERT rejection",
+      "saved rows use nullable owner_person_id, fixed highly_sensitive policy classification and exact durable receipt fields",
+      "privacy and ai_processing_allowed columns are prohibited because no binding authority authorizes them for locations",
+      "receiptless owner-less legacy rows remain preserved, fixed highly_sensitive, quarantined and invisible even when an explicit grant exists; an explicit repair or claim workflow is required before visibility",
+      "non-owner allow grants apply only to governed receipt-bearing rows owned by another active person and require resourceType location, action read, purpose general and finite endsAt in UpsertObjectPermissionUseCase and permission UI; deny grants may remain open-ended",
+      "owner saved-location reads remain bounded by active membership, trusted device and policy receipt TTL",
+      "DELETE is rejected for governed rows whose policy_receipt_hash is non-null; legacy null-receipt import rows remain rollbackable",
+      "family import rollback preflight returns an explicit blocker when governed created locations would be deleted",
+      "governed privacy-preserving timeline and dashboard projections with the import location projection eliminated fail-closed",
+      "bootstrap and family-import raw location write bypasses eliminated fail-closed without claiming import functionality PASS",
+      "audit and outbox atomicity preservation",
+      "focused runtime, adversarial, regression, migration and IPC payload-security proof"
+    ],
+    "policyIntent": {
+      "read": {
+        "operation": "location:read",
+        "action": "read",
+        "capability": "location.read"
+      },
+      "create": {
+        "operation": "location:create",
+        "action": "create",
+        "capability": "family.write"
+      },
+      "share": {
+        "operation": "location:share",
+        "action": "share",
+        "capability": "location.share",
+        "status": "LIVE_LOCATION_CONSENT_REQUIRED_NON_GOAL"
+      },
+      "resourceType": "location",
+      "purpose": "general",
+      "exactBindings": [
+        "family",
+        "resourceIdentity",
+        "classification",
+        "correlation"
+      ],
+      "familyReadForLocationReads": "PROHIBITED",
+      "windowsDesktopLocationReadCapabilityExposureRequired": true,
+      "savedRowSecurityClassification": {
+        "ownerPersonId": "NULLABLE_OWNER_BOUND_WHEN_PRESENT",
+        "policySensitivity": "FIXED_HIGHLY_SENSITIVE",
+        "receiptFields": "REQUIRED_EXACT_DURABLE_POLICY_RECEIPT_BINDING",
+        "privacyColumn": "PROHIBITED_NOT_AUTHORIZED",
+        "aiProcessingAllowedColumn": "PROHIBITED_NOT_AUTHORIZED",
+        "legacyOwnerlessRows": "PRESERVED_FIXED_HIGHLY_SENSITIVE_QUARANTINED_INVISIBLE_EVEN_WITH_EXPLICIT_GRANT",
+        "legacyRepairOrClaimWorkflow": "REQUIRED_BEFORE_VISIBILITY_NOT_IN_SCOPE"
+      },
+      "readGrantDuration": {
+        "resourceType": "location",
+        "action": "read",
+        "purpose": "general",
+        "eligibleTargetRows": "GOVERNED_RECEIPT_BEARING_OWNED_BY_ANOTHER_ACTIVE_PERSON_ONLY",
+        "nonOwnerAllow": "FINITE_ENDS_AT_REQUIRED",
+        "deny": "OPEN_END_ALLOWED",
+        "ownerAccess": "ACTIVE_MEMBERSHIP_TRUSTED_DEVICE_AND_POLICY_RECEIPT_TTL",
+        "implementationSurfaces": [
+          "UpsertObjectPermissionUseCase",
+          "permission UI",
+          "targeted runtime tests"
+        ],
+        "distinctFromLiveLocationShareConsent": true
+      },
+      "platformCapabilityUnionChangeRequired": false,
+      "pepValidSetChangeRequired": false,
+      "immutableReceiptCheckChangeRequired": false
+    }
+  },
+  "nonGoals": [
+    "claiming universal PEP coverage outside the saved-location vertical slice",
+    "timeline-event Policy Enforcement",
+    "claiming the complete live-location consent, visible-sharing, expiry and revocation lifecycle",
+    "claiming a location update or delete use-case or repository contract",
+    "claiming the family-import location rollback deletion workflow complete",
+    "claiming a governed location import batch before a multi-intent multi-receipt transaction runner exists",
+    "marking all of B2-05 or B6-03 COMPLETE",
+    "external monotonic authority against coordinated database and journal rollback",
+    "obligation execution",
+    "native interactive Windows Hello or installer/SCM proof",
+    "Silver or Gold work",
+    "life delete or purge without a separately governed deletion workflow",
+    "dashboard life cross-surface projection",
+    "data-lifecycle life cross-surface enforcement"
+  ],
+  "evidenceBoundary": {
+    "PPK002": "PARTIAL",
+    "archiveCoreAndAccessoryReceiptFence": "TARGETED_PASS",
+    "newCorrelationRetryIdempotencyAfterUnknownCommitOutcome": "TARGETED_PASS",
+    "durableDatabaseLedgerAcrossSqliteRestart": "TARGETED_PASS",
+    "rendererRestartPendingOperationIdentityRecovery": "TARGETED_PASS",
+    "expiredUnusedReplayReservationPruning": "TARGETED_PASS",
+    "financePolicyEnforcementVerticalSlice": "TARGETED_PASS",
+    "healthPolicyEnforcementVerticalSlice": "TARGETED_PASS",
+    "crossSurfaceHealthReadProjection": "TARGETED_PASS",
+    "lifePolicyEnforcementVerticalSlice": "TARGETED_PASS",
+    "crossSurfaceLifeAutomationAndReportPrivacy": "TARGETED_PASS",
+    "locationPolicyEnforcementVerticalSlice": "TARGETED_NOT_YET_PASS",
+    "timelineEventPolicyEnforcementVerticalSlice": "NOT_COMPLETE",
+    "universalRepositoryEnforcement": "NOT_COMPLETE",
+    "externalMonotonicAuthorityAgainstCoordinatedDatabaseAndJournalRollback": "NOT_IMPLEMENTED",
+    "obligationExecution": "NOT_RUN_NOT_PASS",
+    "secureFileDeletionAndDatabaseCommitAtomicity": "NOT_IMPLEMENTED",
+    "installedCoreServiceRegistrationAndScmLifecycle": "NOT_RUN_NOT_PASS",
+    "locationDeleteAndImportRollbackWorkflow": "NOT_COMPLETE_GOVERNED_DELETION_REQUIRED",
+    "locationImportBatchPolicyWorkflow": "NOT_COMPLETE_MULTI_RECEIPT_BATCH_REQUIRED",
+    "requirementCompletionClaimed": false,
+    "lifeDeleteAndPurgeWorkflow": "NOT_COMPLETE_GOVERNED_DELETION_WORKFLOW_REQUIRED",
+    "dashboardLifeCrossSurface": "NOT_COMPLETE",
+    "dataLifecycleLifeCrossSurface": "NOT_COMPLETE"
+  },
+  "mandatoryTruthSentence": "Bu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır."
+}
