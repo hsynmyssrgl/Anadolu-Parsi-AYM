@@ -1,14 +1,25 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { createServer, type Server, type Socket } from 'node:net';
 import {
+  CORE_SERVICE_API_MAXIMUM_FUTURE_SKEW_MS,
+  CORE_SERVICE_API_MAXIMUM_REPLAY_ENTRIES,
+  CORE_SERVICE_API_MAXIMUM_REQUEST_AGE_MS,
+  CORE_SERVICE_APPLICATION_API_VERSION,
+  CORE_SERVICE_APPLICATION_ID,
+  CORE_SERVICE_LOCAL_ADMIN_CLIENT_APPLICATION_ID,
   CORE_SERVICE_LOCAL_ADMIN_MAX_MESSAGE_BYTES,
   CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION,
+  CORE_SERVICE_REQUIRED_DESKTOP_METHODS,
   type CoreServiceLocalAdminFailure,
-  type CoreServiceLocalAdminRequest,
   type CoreServiceLocalAdminResponse
 } from '@ppt/core-service-contracts';
+import { VersionedCoreServiceApiBoundaryPolicy } from '@ppt/platform-policy';
 import type { CoreServiceRuntime } from './core-service-runtime.js';
 import { CoreServiceMethodDispatcher } from './core-service-method-dispatcher.js';
+import {
+  EnforceVersionedCoreServiceApiUseCase,
+  VersionedCoreServiceApiDeniedError
+} from './versioned-core-service-api-use-case.js';
 
 export interface CoreServiceLocalAdminServerOptions {
   readonly endpoint: string;
@@ -17,6 +28,7 @@ export interface CoreServiceLocalAdminServerOptions {
   readonly maxMessageBytes?: number;
   readonly socketIdleTimeoutMs?: number;
   readonly shutdownGraceTimeoutMs?: number;
+  readonly clock?: () => string;
 }
 
 const tokenDigest = (token: string): Buffer => createHash('sha256').update(token, 'utf8').digest();
@@ -29,6 +41,7 @@ export class CoreServiceLocalAdminServer {
   readonly #maxMessageBytes: number;
   readonly #socketIdleTimeoutMs: number;
   readonly #shutdownGraceTimeoutMs: number;
+  readonly #apiBoundary: EnforceVersionedCoreServiceApiUseCase;
   readonly #sockets = new Set<Socket>();
   #server: Server | undefined;
   #stopPromise: Promise<void> | undefined;
@@ -42,6 +55,21 @@ export class CoreServiceLocalAdminServer {
     this.#maxMessageBytes = Math.min(Math.max(options.maxMessageBytes ?? CORE_SERVICE_LOCAL_ADMIN_MAX_MESSAGE_BYTES, 1_024), CORE_SERVICE_LOCAL_ADMIN_MAX_MESSAGE_BYTES);
     this.#socketIdleTimeoutMs = Math.min(Math.max(options.socketIdleTimeoutMs ?? 5_000, 250), 30_000);
     this.#shutdownGraceTimeoutMs = Math.min(Math.max(options.shutdownGraceTimeoutMs ?? 1_000, 100), 5_000);
+    const clock = options.clock ?? (() => new Date().toISOString());
+    this.#apiBoundary = new EnforceVersionedCoreServiceApiUseCase(
+      new VersionedCoreServiceApiBoundaryPolicy(),
+      () => Object.freeze({
+        protocolVersion: CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION,
+        apiVersion: CORE_SERVICE_APPLICATION_API_VERSION,
+        clientApplicationId: CORE_SERVICE_LOCAL_ADMIN_CLIENT_APPLICATION_ID,
+        clientApplicationApiVersion: options.runtime.applicationApiVersionFor(CORE_SERVICE_LOCAL_ADMIN_CLIENT_APPLICATION_ID) ?? 'not-deployed',
+        supportedMethods: CORE_SERVICE_REQUIRED_DESKTOP_METHODS,
+        observedAt: clock(),
+        maximumRequestAgeMs: CORE_SERVICE_API_MAXIMUM_REQUEST_AGE_MS,
+        maximumFutureSkewMs: CORE_SERVICE_API_MAXIMUM_FUTURE_SKEW_MS,
+        maximumReplayEntries: CORE_SERVICE_API_MAXIMUM_REPLAY_ENTRIES
+      })
+    );
   }
 
   public async start(): Promise<void> {
@@ -116,21 +144,51 @@ export class CoreServiceLocalAdminServer {
   }
 
   async #dispatch(raw: string): Promise<CoreServiceLocalAdminResponse> {
-    let request: CoreServiceLocalAdminRequest;
-    try { request = JSON.parse(raw) as CoreServiceLocalAdminRequest; }
+    let parsed: unknown;
+    try { parsed = JSON.parse(raw); }
     catch { return this.#failure('unknown', 'INVALID_REQUEST', 'Local administration request is not valid JSON'); }
-    const requestId = safeRequestId(request.requestId);
-    if (request.protocolVersion !== CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION || requestId === 'unknown' || typeof request.authenticationToken !== 'string') {
+    const request = parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+      ? parsed as Record<string, unknown>
+      : undefined;
+    const requestId = safeRequestId(request?.requestId);
+    if (!request || requestId === 'unknown' || typeof request.authenticationToken !== 'string') {
       return this.#failure(requestId, 'INVALID_REQUEST', 'Local administration request envelope is invalid');
     }
     const actual = tokenDigest(request.authenticationToken);
     if (actual.byteLength !== this.#expectedTokenDigest.byteLength || !timingSafeEqual(actual, this.#expectedTokenDigest)) {
       return this.#failure(requestId, 'AUTHENTICATION_FAILED', 'Local administration authentication failed');
     }
-    return this.#dispatcher.dispatch(requestId, request.method, request.payload);
+    try {
+      return this.#apiBoundary.execute(
+        request,
+        () => this.#dispatcher.dispatch(requestId, request.method, request.payload)
+      );
+    } catch (error) {
+      if (!(error instanceof VersionedCoreServiceApiDeniedError)) throw error;
+      const code: CoreServiceLocalAdminFailure['error']['code'] = ({
+        ALLOW_VERSIONED_API: 'INVALID_REQUEST',
+        API_VERSION_MISMATCH: 'API_VERSION_MISMATCH',
+        CLIENT_APPLICATION_NOT_ALLOWED: 'CLIENT_APPLICATION_NOT_ALLOWED',
+        METHOD_NOT_ALLOWED: 'METHOD_NOT_ALLOWED',
+        REPLAY_DETECTED: 'REPLAY_DETECTED',
+        REQUEST_EXPIRED: 'REQUEST_EXPIRED',
+        REQUEST_FROM_FUTURE: 'REQUEST_EXPIRED',
+        MALFORMED_ENVELOPE: 'INVALID_REQUEST',
+        PROTOCOL_VERSION_MISMATCH: 'INVALID_REQUEST',
+        REPLAY_STATE_CAPACITY_EXCEEDED: 'INTERNAL_ERROR'
+      } as const)[error.reason] ?? 'INVALID_REQUEST';
+      return this.#failure(requestId, code, `Versioned Core Service API request rejected: ${error.reason}`);
+    }
   }
 
   #failure(requestId: string, code: CoreServiceLocalAdminFailure['error']['code'], message: string): CoreServiceLocalAdminFailure {
-    return { protocolVersion: CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION, requestId, ok: false, error: { code, message } };
+    return {
+      protocolVersion: CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION,
+      apiVersion: CORE_SERVICE_APPLICATION_API_VERSION,
+      serverApplicationId: CORE_SERVICE_APPLICATION_ID,
+      requestId,
+      ok: false,
+      error: { code, message }
+    };
   }
 }

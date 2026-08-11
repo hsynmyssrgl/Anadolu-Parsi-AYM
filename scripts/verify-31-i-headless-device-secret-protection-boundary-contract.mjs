@@ -35,10 +35,16 @@ const check = (passed, name) => checks.push({ name, status: passed ? 'PASS' : 'F
 const step = plan.steps.find((item) => item.id === '31-I');
 const requirements = scope.requirements.map((id) => registry.requirements.find((item) => item.id === id));
 const authorizedRequirementState = (item) => item?.status !== 'COMPLETE' || (
-  item.id === 'PPK-013'
-  && Object.values(item.chain ?? {}).every((value) => value === true)
-  && item.evidence?.includes('docs/decisions/DEC-194-ppk-013-client-data-access-boundary.md')
-  && item.evidence?.includes('artifacts/validation/32-I-ppk-013-client-data-access-runtime.json')
+  Object.values(item.chain ?? {}).every((value) => value === true)
+  && ((
+    item.id === 'PPK-013'
+    && item.evidence?.includes('docs/decisions/DEC-194-ppk-013-client-data-access-boundary.md')
+    && item.evidence?.includes('artifacts/validation/32-I-ppk-013-client-data-access-runtime.json')
+  ) || (
+    item.id === 'PPK-014'
+    && item.evidence?.includes('docs/decisions/DEC-195-ppk-014-versioned-core-service-api-boundary.md')
+    && item.evidence?.includes('artifacts/validation/32-J-ppk-014-versioned-core-service-api-runtime.json')
+  ))
 );
 const complete = step?.status === 'COMPLETED' && step.validationStatus === 'PASS' && step.persistentReceiptStatus === 'PASS';
 const laterSuccessor = inspectAuthorizedSuccessorLifecycle({ plan, ledger, predecessorId: '31-I' });

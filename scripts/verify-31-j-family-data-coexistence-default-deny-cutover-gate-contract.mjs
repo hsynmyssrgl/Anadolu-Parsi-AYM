@@ -34,6 +34,10 @@ const authorizedRequirementState = (item) => {
     item.id === 'PPK-013'
     && evidence.includes('docs/decisions/DEC-194-ppk-013-client-data-access-boundary.md')
     && evidence.includes('artifacts/validation/32-I-ppk-013-client-data-access-runtime.json')
+  ) || (
+    item.id === 'PPK-014'
+    && evidence.includes('docs/decisions/DEC-195-ppk-014-versioned-core-service-api-boundary.md')
+    && evidence.includes('artifacts/validation/32-J-ppk-014-versioned-core-service-api-runtime.json')
   );
 };
 const complete = step?.status === 'COMPLETED';

@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-J",
+  "requirement": "PPK-014",
+  "phase": "VERSIONED_CORE_SERVICE_API_BOUNDARY_RUNTIME",
+  "status": "PASS",
+  "checkCount": 12,
+  "passed": 12,
+  "failed": 0,
+  "results": [
+    {
+      "id": "ppk-014-contract",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "PPK-014 contract: PASS",
+      "outputSha256": "0274b3e5a46409c0a20586d2924ccb0ef9cf9d8437bf1db58a7c363cab7b9d2c",
+      "outputTail": "32-J PPK-014 contract: PASS (46/46)."
+    },
+    {
+      "id": "non-core-application-source-fail-gate",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "\"status\": \"PASS\"",
+      "outputSha256": "5d1a07f2c0e4e91aeba97e145c590f3f17c72b4bc58aecce213656763dc177da",
+      "outputTail": "{\n  \"status\": \"PASS\",\n  \"nonCoreApplicationZones\": 1,\n  \"scannedFiles\": 113,\n  \"selfTestAssertions\": 5,\n  \"directImportExceptions\": 0,\n  \"findings\": []\n}"
+    },
+    {
+      "id": "ppk-014-targeted-policy-and-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 17,
+      "minimumTests": 17,
+      "outputSha256": "aa13110113fcec3abaef6e804e34789285e0647414475ba1e695f0e3e5457c9a",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·················\n\n Test Files  1 passed (1)\n      Tests  17 passed (17)\n   Start at  18:45:46\n   Duration  1.02s (transform 295ms, setup 0ms, import 583ms, tests 43ms, environment 0ms)"
+    },
+    {
+      "id": "core-service-local-admin-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "Core Service Local Admin Runtime: PASS",
+      "outputSha256": "9000b58cb26ef99d7f4aba13524f186bc84cf9e12518c8138186a9a8f3f440c4",
+      "outputTail": "Core Service Local Admin Runtime: PASS (50 checks).\n\n(node:8012) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "desktop-core-service-startup-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "Desktop Core Service Startup Runtime: PASS",
+      "outputSha256": "a7e574c80a77cdd671368cb27611e1cedd331ced7c96d5ad2ce0b6a21901eea8",
+      "outputTail": "Desktop Core Service Startup Runtime: PASS (50 checks).\n\n(node:7080) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "ppk-013-direct-data-access-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 20,
+      "minimumTests": 20,
+      "outputSha256": "4251b7de296cf835113a3ba78b0adbb9b220580a1886418a50ba7072423cafe9",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n····················\n\n Test Files  1 passed (1)\n      Tests  20 passed (20)\n   Start at  18:45:50\n   Duration  2.72s (transform 1.17s, setup 0ms, import 2.31s, tests 18ms, environment 0ms)"
+    },
+    {
+      "id": "ppk-012-sensitive-cache-no-cache-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 15,
+      "minimumTests": 15,
+      "outputSha256": "b98fa786216e93a64c88728c341d331939679458c73ba7b03b240e944a5202a4",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n···············\n\n Test Files  2 passed (2)\n      Tests  15 passed (15)\n   Start at  18:45:54\n   Duration  1.30s (transform 238ms, setup 0ms, import 474ms, tests 33ms, environment 0ms)"
+    },
+    {
+      "id": "migration-76-no-new-schema-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "\"version\": 76",
+      "outputSha256": "3b84aabd3b35bc1cf7be426aeb9640cc00a6040f00ff7c528620ceff33136e25",
+      "outputTail": "\"local_ppk002_timeline_event_policy_receipt_fence\",\n      \"checksum\": \"a67f9807f2a2bb00ada3768d06882a0ca2648d91b19eacb2becf46cf9ef2b528\"\n    },\n    {\n      \"version\": 68,\n      \"name\": \"ppk002_family_import_governed_rollback_receipt_fence\",\n      \"checksum\": \"298ffa1c65a65e762904cb913ecb9b45d1dfa5fcd94659c1a3181a5984f71bd6\"\n    },\n    {\n      \"version\": 69,\n      \"name\": \"ppk004_complete_policy_context_binding\",\n      \"checksum\": \"b0eaf8abbf4b45e00404717a1ba767ce64687e9f575a0e11798326cbdbfeeb91\"\n    },\n    {\n      \"version\": 70,\n      \"name\": \"ppk005_complete_data_classification\",\n      \"checksum\": \"bfd3643232c6daa25d85804f08c4580f896fe4d6e81c2ad3d7dcf602649085e9\"\n    },\n    {\n      \"version\": 71,\n      \"name\": \"ppk006_complete_policy_obligation_suite\",\n      \"checksum\": \"ba678463aa0138780d74d2342bcc453ab622e87c7213a4d10078319762c96a90\"\n    },\n    {\n      \"version\": 72,\n      \"name\": \"ppk007_signed_versioned_policy_package\",\n      \"checksum\": \"6660072205bd61c06dd1d4f4b744884f7edb29bf370d44a228c150ebca679a83\"\n    },\n    {\n      \"version\": 73,\n      \"name\": \"ppk008_application_identity_device_certificate_manifest\",\n      \"checksum\": \"0099d0238be94ea6bb95579d2ac9f33c015e99d5c14463442313953c014b87fd\"\n    },\n    {\n      \"version\": 74,\n      \"name\": \"ppk009_core_service_decision_reevaluation\",\n      \"checksum\": \"99c89269ac120adbb387dc796ecf1b837f978e04e375d3d41c4fb605020ea813\"\n    },\n    {\n      \"version\": 75,\n      \"name\": \"ppk011_contextual_ownership_share\",\n      \"checksum\": \"3c59ecd6df8d4bf777a8eee8c4864f19848fb712c85691105320afa17b476337\"\n    },\n    {\n      \"version\": 76,\n      \"name\": \"ppk012_offline_capability_lease_cache_fence\",\n      \"checksum\": \"98546bdde3fe97f9f37f2421dd74ad305ce5301dd23a9954ed54bd53610e9388\"\n    }\n  ],\n  \"generatedAt\": \"2026-08-11T15:45:59.528Z\"\n}"
+    },
+    {
+      "id": "desktop-production-bundle",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "built in",
+      "outputSha256": "286996d3733c1592554d198c10dbde0978c2f869cd9a110fe3d9a62e35938949",
+      "outputTail": "vite v8.1.5 building client environment for production...\n\rtransforming...✓ 48 modules transformed.\nrendering chunks...\ncomputing gzip size...\napps/desktop/dist/renderer/index.html                        0.72 kB │ gzip:   0.43 kB\napps/desktop/dist/renderer/assets/brand-mark-CT8sgeaI.png   35.61 kB\napps/desktop/dist/renderer/assets/index-BlzuUOlu.css        78.27 kB │ gzip:  16.39 kB\napps/desktop/dist/renderer/assets/index-Bt85Zai2.js        493.75 kB │ gzip: 131.15 kB\n\n✓ built in 334ms\n\n[plugin rolldown:vite-resolve] Module \"node:crypto\" has been externalized for browser compatibility, imported by \"C:/PPT/AYM/06_KOD/app/packages/core/dist/audit-chain.js\". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details."
+    },
+    {
+      "id": "root-typescript",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "",
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputTail": ""
+    },
+    {
+      "id": "dependency-lock-integrity",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "Lockfile integrity verified",
+      "outputSha256": "ff87364c8ea28d72af77534da6fda5d9d2824234ff1703eaabf980c32c919cb7",
+      "outputTail": "Lockfile integrity verified: 533 assertions across 18 workspaces."
+    },
+    {
+      "id": "full-vitest-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 442,
+      "minimumTests": 442,
+      "outputSha256": "5388adae71c8fe118b819bd20f4ab33f5cfb9decc686cc4816ed9bad525c9ed8",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n··························································································································································································································································································································································································································································\n\n Test Files  63 passed (63)\n      Tests  442 passed (442)\n   Start at  18:46:07\n   Duration  206.84s (transform 5.05s, setup 0ms, import 20.78s, tests 162.20s, environment 9ms)"
+    }
+  ],
+  "validatedBoundaries": [
+    "ZERO_DIRECT_CORE_SERVICE_IMPORT_EXCEPTIONS",
+    "EXACT_VERSIONED_REQUEST_AND_RESPONSE",
+    "SIGNED_CLIENT_APPLICATION_VERSION_BINDING",
+    "FRESHNESS_AND_REPLAY_FAIL_CLOSED",
+    "AUTHENTICATED_LOCAL_TRANSPORT",
+    "DESKTOP_STARTUP_BOUNDARY_VERIFICATION",
+    "PPK_013_DIRECT_DATA_ACCESS_REGRESSION",
+    "PPK_012_CACHE_AND_NO_CACHE_REGRESSION",
+    "NO_NEW_MIGRATION",
+    "FULL_VITEST_REGRESSION"
+  ],
+  "migrationDecision": "NO_NEW_SCHEMA_MIGRATION_REUSE_EXISTING_VERSIONED_CONTRACTS",
+  "directCoreServiceImportExceptions": 0,
+  "legacyDesktopVaultPreserved": true,
+  "sqliteOwnershipTransferred": false,
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "policySensitiveIpcNoCacheWeakened": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T15:49:34.155Z"
+}

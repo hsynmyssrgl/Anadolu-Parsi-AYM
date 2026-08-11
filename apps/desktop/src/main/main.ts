@@ -1123,6 +1123,7 @@ function registerIpc(): void {
 
   registerIpcHandler('system:health', () => store().getSystemHealth());
   registerIpcHandler('system:getCoreServiceHealth', () => coreServiceConnection().adapter.getHealth());
+  registerIpcHandler('system:getCoreServiceApiBoundary', () => coreServiceConnection().adapter.getApiBoundaryStatus());
   registerIpcHandler('system:listBackupTargets', () => store().listBackupTargets());
   registerIpcHandler('system:upsertBackupTarget', (_event,input:UpsertBackupTargetInput) => store().upsertBackupTarget(input));
   registerIpcHandler('system:listBackupRuns', (_event,limit?:number) => store().listBackupRuns(limit));

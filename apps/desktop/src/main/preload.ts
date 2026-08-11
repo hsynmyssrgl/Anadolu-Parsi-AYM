@@ -36,7 +36,7 @@ import type {
   WindowsHelloEnrollmentView,
   WindowsHelloStateView
 } from '@ppt/domain';
-import type { CoreServiceHealthContract } from '@ppt/core-service-contracts';
+import type { CoreServiceApiBoundaryStatusContract, CoreServiceHealthContract } from '@ppt/core-service-contracts';
 import type { UserVisibleAppInfo } from '@ppt/domain';
 import type { PersonCatalogPageInput, PersonCatalogPageView, EventCatalogPageInput, EventCatalogPageView, EntityCatalogLookupInput, EntityCatalogLookupView } from '@ppt/domain';
 import type { BackupPropagationRunView, BackupCleanRewriteStatusView, BackupCleanRewritePolicyView, BackupCleanRewriteRunView, BackupCleanRewriteRunResultView, UpdateBackupCleanRewritePolicyInput, BackupQuarantinePolicyView, BackupQuarantineBatchView, BackupQuarantineDestructionResultView, UpdateBackupQuarantinePolicyInput, SetBackupQuarantineLegalHoldInput, DestroyBackupQuarantineBatchInput, ExternalBackupCopyView, ExternalBackupInventorySummaryView, RegisterExternalBackupCopyInput, ReviewExternalBackupCopyInput, SetExternalBackupCopyLegalHoldInput, AttestExternalBackupCopyDestroyedInput, ExternalBackupEvidenceIssuerView, ExternalBackupEvidenceIssuerRotationView, ExternalBackupEvidenceRevocationListView, ExternalBackupRevocationEndpointView, ExternalBackupDestructionEvidenceView, RegisterExternalBackupEvidenceIssuerInput, RotateExternalBackupEvidenceIssuerInput, RevokeExternalBackupEvidenceIssuerInput, ApplyExternalBackupEvidenceRevocationListInput, UpsertExternalBackupRevocationEndpointInput, PendingRevocationSyncListView, ApplyPendingRevocationSyncInput, RevocationSyncEndpointStateView, RevocationSyncRunResultView, VerifyExternalBackupDestructionEvidenceInput, FamilyDataImportPreviewView, FamilyDataImportBatchView, ApplyFamilyDataImportInput, RollbackFamilyDataImportInput, GenealogyTreePageInput, GenealogyTreePageView, TimelinePageInput, TimelinePageView, ArchivePageInput, ArchivePageView, DataRetentionPolicyView, DataLifecycleRecordView, CreateDataRetentionPolicyInput, ArchiveDataResourceInput, RestoreDataResourceInput, RequestDataPurgeInput, CancelDataPurgeInput, ExecuteDataPurgeInput, SetDataLegalHoldInput } from '@ppt/domain';
@@ -284,6 +284,7 @@ contextBridge.exposeInMainWorld('pardus', {
   verifyExportArtifact:(id:string):Promise<ExportArtifactVerificationView>=>invoke('system:verifyExportArtifact',id),
   getSystemHealth:():Promise<SystemHealthView>=>invoke('system:health'),
   getCoreServiceHealth:():Promise<CoreServiceHealthContract>=>invoke('system:getCoreServiceHealth'),
+  getCoreServiceApiBoundary:():Promise<CoreServiceApiBoundaryStatusContract>=>invoke('system:getCoreServiceApiBoundary'),
   listBackupTargets:():Promise<BackupTargetView[]>=>invoke('system:listBackupTargets'),
   upsertBackupTarget:(input:UpsertBackupTargetInput):Promise<BackupTargetView[]>=>invoke('system:upsertBackupTarget',input),
   listBackupRuns:(limit?:number):Promise<BackupRunView[]>=>invoke('system:listBackupRuns',limit),

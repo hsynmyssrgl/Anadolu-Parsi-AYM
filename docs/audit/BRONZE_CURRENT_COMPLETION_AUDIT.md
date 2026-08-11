@@ -1,6 +1,6 @@
 # Bronze guncel tamamlama denetimi
 
-Olusturma (UTC): 2026-08-11T14:51:21.886Z
+Olusturma (UTC): 2026-08-11T15:53:11.845Z
 
 ## Sonuc
 
@@ -23,19 +23,19 @@ Olusturma (UTC): 2026-08-11T14:51:21.886Z
 ## Yuzde gercekligi
 
 - Resmi agirlikli Bronze ilerlemesi: **%25**
-- Kati gereksinim kapanisi: **%7.4286** (26/350)
-- Uygulama zinciri kapsami: **%7.7714**
-- Yonetisim ve kanit zinciri kapsami: **%47.1429**
+- Kati gereksinim kapanisi: **%7.7143** (27/350)
+- Uygulama zinciri kapsami: **%7.9714**
+- Yonetisim ve kanit zinciri kapsami: **%47.3333**
 
 Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 
 ## Kapsam durumu
 
-- COMPLETE: 26
-- PARTIAL: 35
+- COMPLETE: 27
+- PARTIAL: 34
 - FOUNDATION_STARTED: 3
 - NOT_IMPLEMENTED: 286
-- Toplam acik gereksinim: 324
+- Toplam acik gereksinim: 323
 
 ## Kural ve kapilar
 
@@ -241,7 +241,6 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | DHA-001 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Process architecture | Electron arayüzünden bağımsız, kullanıcı oturumu kapalıyken de çalışan headless Core Service |
 | DHA-023 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Health | Liveness, readiness, quorum, replication lag, disk, cert, backup age ve dependency health |
 | PPK-001 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Politika Çekirdeği | Tek PlatformPolicyKernel; kimlik, yetki, gizlilik, rıza, saklama, AI, kayıt ve dışa aktarım kararlarının tek otoritesi |
-| PPK-014 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Veri Erişimi | Core Service dışındaki uygulamalar yalnız sürümlü güvenli API üzerinden çalışır |
 | B0-03 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Bronze Kapsam Kilidi | 16/17 modül çelişkisini çöz ve tek navigasyon sözleşmesi oluştur |
 | B2-04 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Kimlik ve Güvenlik | Electron güvenlik checklist, CSP, custom protocol ve fuse kapanışı |
 | B2-05 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Kimlik ve Güvenlik | Çocuk, sağlık, finans ve konum için hassasiyet profilleri |
@@ -267,6 +266,7 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | EXT-078 | STARTED_BEFORE_NEW | P1 | PARTIAL | 2/13 | SIGNED_PLUGIN_PLATFORM | Policy Kernel zorunlu kontrolü |
 | B2-03 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Kimlik ve Güvenlik | Yaşlı/genç kullanıcıya uygun güvenli kilit ve yeniden giriş akışı |
 | B3-02 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Aile ve Hafıza | Taslak, otomatik kaydetme, geri al ve değişiklik geçmişi |
+| B3-03 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Aile ve Hafıza | Doğrudan medya/belge bağlama ve davetiye yaşam döngüsü |
 
 Tam acik-is listesi `artifacts/inventory/BRONZE_CURRENT_COMPLETION_AUDIT.json` icindedir.
 

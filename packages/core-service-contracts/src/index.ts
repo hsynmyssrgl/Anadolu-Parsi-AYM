@@ -3,12 +3,18 @@ import type {
   PlatformPolicyClusterFenceSnapshot,
   PlatformPolicyPackage,
   PlatformPolicyReceipt,
-  PlatformPolicyRequest
+  PlatformPolicyRequest,
+  PlatformApplicationId
 } from '@ppt/platform-policy';
 
 export const CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION = 1 as const;
 export const CORE_SERVICE_LOCAL_ADMIN_MAX_MESSAGE_BYTES = 64 * 1024;
 export const CORE_SERVICE_APPLICATION_API_VERSION = 'v1' as const;
+export const CORE_SERVICE_APPLICATION_ID = 'windows-core-service' as const;
+export const CORE_SERVICE_LOCAL_ADMIN_CLIENT_APPLICATION_ID = 'windows-desktop' as const;
+export const CORE_SERVICE_API_MAXIMUM_REQUEST_AGE_MS = 30_000;
+export const CORE_SERVICE_API_MAXIMUM_FUTURE_SKEW_MS = 5_000;
+export const CORE_SERVICE_API_MAXIMUM_REPLAY_ENTRIES = 4_096;
 
 export interface CoreServiceHealthContract {
   readonly lifecycle: 'starting' | 'ready' | 'degraded' | 'stopping' | 'stopped';
@@ -150,9 +156,34 @@ export interface CoreServiceFamilyDataCutoverStatusContract {
   readonly observedAt: string;
 }
 
+export interface CoreServiceApiBoundaryStatusContract {
+  readonly schemaVersion: 1;
+  readonly enforcement: 'fail-closed';
+  readonly apiVersion: typeof CORE_SERVICE_APPLICATION_API_VERSION;
+  readonly protocolVersion: typeof CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION;
+  readonly serverApplicationId: typeof CORE_SERVICE_APPLICATION_ID;
+  readonly allowedClientApplicationIds: readonly [typeof CORE_SERVICE_LOCAL_ADMIN_CLIENT_APPLICATION_ID];
+  readonly transport: 'authenticated-local-named-pipe-or-socket';
+  readonly exactEnvelopeRequired: true;
+  readonly applicationVersionBindingRequired: true;
+  readonly freshnessRequired: true;
+  readonly replayProtection: 'in-memory-per-process-fail-closed';
+  readonly directCoreServiceImportAllowed: false;
+  readonly directImportExceptionCount: 0;
+  readonly maximumRequestAgeMs: typeof CORE_SERVICE_API_MAXIMUM_REQUEST_AGE_MS;
+  readonly maximumFutureSkewMs: typeof CORE_SERVICE_API_MAXIMUM_FUTURE_SKEW_MS;
+  readonly maximumReplayEntries: typeof CORE_SERVICE_API_MAXIMUM_REPLAY_ENTRIES;
+  readonly persistentPathExposed: false;
+  readonly secretMaterialExposed: false;
+  readonly cutoverAuthorityAttached: false;
+}
+
 export interface CoreServiceLocalAdminRequest<TPayload = unknown> {
   readonly protocolVersion: typeof CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION;
+  readonly apiVersion: typeof CORE_SERVICE_APPLICATION_API_VERSION;
+  readonly clientApplicationId: PlatformApplicationId;
   readonly requestId: string;
+  readonly issuedAt: string;
   readonly method: CoreServiceLocalAdminMethod;
   readonly authenticationToken: string;
   readonly payload: TPayload;
@@ -160,20 +191,30 @@ export interface CoreServiceLocalAdminRequest<TPayload = unknown> {
 
 export interface CoreServiceLocalAdminSuccess<TResult = unknown> {
   readonly protocolVersion: typeof CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION;
+  readonly apiVersion: typeof CORE_SERVICE_APPLICATION_API_VERSION;
+  readonly serverApplicationId: typeof CORE_SERVICE_APPLICATION_ID;
   readonly requestId: string;
   readonly ok: true;
   readonly result: TResult;
 }
 
-export type CoreServiceLocalAdminErrorCode =
-  | 'AUTHENTICATION_FAILED'
-  | 'INVALID_REQUEST'
-  | 'METHOD_NOT_ALLOWED'
-  | 'MESSAGE_TOO_LARGE'
-  | 'INTERNAL_ERROR';
+export const CORE_SERVICE_LOCAL_ADMIN_ERROR_CODES = Object.freeze([
+  'AUTHENTICATION_FAILED',
+  'API_VERSION_MISMATCH',
+  'CLIENT_APPLICATION_NOT_ALLOWED',
+  'INVALID_REQUEST',
+  'METHOD_NOT_ALLOWED',
+  'MESSAGE_TOO_LARGE',
+  'REPLAY_DETECTED',
+  'REQUEST_EXPIRED',
+  'INTERNAL_ERROR'
+] as const);
+export type CoreServiceLocalAdminErrorCode = typeof CORE_SERVICE_LOCAL_ADMIN_ERROR_CODES[number];
 
 export interface CoreServiceLocalAdminFailure {
   readonly protocolVersion: typeof CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION;
+  readonly apiVersion: typeof CORE_SERVICE_APPLICATION_API_VERSION;
+  readonly serverApplicationId: typeof CORE_SERVICE_APPLICATION_ID;
   readonly requestId: string;
   readonly ok: false;
   readonly error: {
@@ -221,6 +262,10 @@ export interface PolicyJournalCheckpointContractResult extends PolicyJournalChec
 }
 
 export interface CoreServiceLocalAdminMethodMap {
+  readonly 'client-api-boundary.status': {
+    readonly payload: Record<string, never>;
+    readonly result: CoreServiceApiBoundaryStatusContract;
+  };
   readonly 'architecture.get': {
     readonly payload: Record<string, never>;
     readonly result: CoreServiceArchitectureContract;
@@ -266,6 +311,7 @@ export type CoreServiceMethodResult<TMethod extends CoreServiceLocalAdminMethod>
   CoreServiceLocalAdminMethodMap[TMethod]['result'];
 
 export const CORE_SERVICE_REQUIRED_DESKTOP_METHODS = Object.freeze([
+  'client-api-boundary.status',
   'architecture.get',
   'health.get',
   'family-data.status',

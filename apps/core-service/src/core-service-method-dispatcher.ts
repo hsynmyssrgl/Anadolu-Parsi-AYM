@@ -1,4 +1,6 @@
 import {
+  CORE_SERVICE_APPLICATION_API_VERSION,
+  CORE_SERVICE_APPLICATION_ID,
   CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION,
   CORE_SERVICE_REQUIRED_DESKTOP_METHODS,
   type CoreServiceLocalAdminFailure,
@@ -54,6 +56,11 @@ export class CoreServiceMethodDispatcher {
       return this.#failure(requestId, 'METHOD_NOT_ALLOWED', 'Local administration method is not allowed');
     }
     const typedMethod = method as CoreServiceLocalAdminMethod;
+    if (typedMethod === 'client-api-boundary.status') {
+      return emptyPayload(payload)
+        ? this.#success(requestId, this.#runtime.clientApiBoundaryStatus())
+        : this.#failure(requestId, 'INVALID_REQUEST', 'Client API boundary request payload must be empty');
+    }
     if (typedMethod === 'architecture.get') {
       return emptyPayload(payload)
         ? this.#success(requestId, this.#runtime.architecture())
@@ -127,10 +134,24 @@ export class CoreServiceMethodDispatcher {
   }
 
   #success<TResult>(requestId: string, result: TResult): CoreServiceLocalAdminSuccess<TResult> {
-    return { protocolVersion: CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION, requestId, ok: true, result };
+    return {
+      protocolVersion: CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION,
+      apiVersion: CORE_SERVICE_APPLICATION_API_VERSION,
+      serverApplicationId: CORE_SERVICE_APPLICATION_ID,
+      requestId,
+      ok: true,
+      result
+    };
   }
 
   #failure(requestId: string, code: CoreServiceLocalAdminFailure['error']['code'], message: string): CoreServiceLocalAdminFailure {
-    return { protocolVersion: CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION, requestId, ok: false, error: { code, message } };
+    return {
+      protocolVersion: CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION,
+      apiVersion: CORE_SERVICE_APPLICATION_API_VERSION,
+      serverApplicationId: CORE_SERVICE_APPLICATION_ID,
+      requestId,
+      ok: false,
+      error: { code, message }
+    };
   }
 }

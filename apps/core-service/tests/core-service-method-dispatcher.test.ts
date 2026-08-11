@@ -49,7 +49,7 @@ describe('31-G Core Service typed method dispatcher', () => {
         automaticCutoverAllowed: false
       }
     });
-    expect(architecture?.supportedMethods).toEqual(['architecture.get', 'health.get', 'family-data.status', 'device-secret-protection.status', 'family-data-cutover.status', 'family-data-cutover-readiness.status', 'policy.authorize', 'policy.verify', 'policy-journal.checkpoint']);
+    expect(architecture?.supportedMethods).toEqual(['client-api-boundary.status', 'architecture.get', 'health.get', 'family-data.status', 'device-secret-protection.status', 'family-data-cutover.status', 'family-data-cutover-readiness.status', 'policy.authorize', 'policy.verify', 'policy-journal.checkpoint']);
   });
 
   it('keeps health on the same dispatcher and rejects malformed or unknown calls', () => {

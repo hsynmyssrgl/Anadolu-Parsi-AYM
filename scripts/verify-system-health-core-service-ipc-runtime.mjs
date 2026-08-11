@@ -9,7 +9,7 @@ import { CoreServiceApplicationAdapter } from '../apps/desktop/src/main/core-ser
 import { evaluateIpcIntegrationPolicy } from '../apps/desktop/src/main/ipc-integration-policy.ts';
 const failures=[];let checks=0;const check=(c,m)=>{checks++;if(!c)failures.push(m)};
 const root=await mkdtemp(join(tmpdir(),'ppt-core-health-ipc-'));const endpoint=process.platform==='win32'?'\\\\.\\pipe\\ppt-core-health-ipc-'+process.pid+'-'+Date.now():join(root,'health.sock');const token=randomBytes(48).toString('base64url');const policyVersion='PPT-PLATFORM-POLICY-2026-08-04-V1';
-const kernel=new PlatformPolicyKernel({policyVersion,signingKey:randomBytes(32),applicationCapabilities:{'windows-core-service':['health.read']},consentRequiredCapabilities:[],onlineOnlyCapabilities:[],writeActions:['create','update','delete']});
+const kernel=new PlatformPolicyKernel({policyVersion,signingKey:randomBytes(32),applicationVersions:{'windows-desktop':'v1','windows-core-service':'v1'},applicationCapabilities:{'windows-desktop':['family.read'],'windows-core-service':['health.read']},consentRequiredCapabilities:[],onlineOnlyCapabilities:[],writeActions:['create','update','delete']});
 const runtime=new CoreServiceRuntime({policyKernel:kernel,policyVersion});runtime.markReady('leader');const server=new CoreServiceLocalAdminServer({endpoint,authenticationToken:token,runtime});await server.start();
 try{
  const adapter=new CoreServiceApplicationAdapter({endpoint,authenticationToken:token});

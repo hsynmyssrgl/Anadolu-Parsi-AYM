@@ -10,6 +10,9 @@
     "@ppt/platform-policy": "4.8.2026-29",
     "@ppt/security": "4.8.2026-29"
   },
+  "devDependencies": {
+    "@ppt/core-service-client": "4.8.2026-29"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",

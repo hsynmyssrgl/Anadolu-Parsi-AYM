@@ -6084,22 +6084,22 @@
       "area": "Veri Erişimi",
       "title": "Core Service dışındaki uygulamalar yalnız sürümlü güvenli API üzerinden çalışır",
       "priority": "P0",
-      "status": "PARTIAL",
+      "status": "COMPLETE",
       "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
       "chain": {
-        "decision": false,
-        "domain": false,
-        "schema": false,
-        "migration": false,
-        "useCase": false,
-        "repository": false,
-        "policy": false,
+        "decision": true,
+        "domain": true,
+        "schema": true,
+        "migration": true,
+        "useCase": true,
+        "repository": true,
+        "policy": true,
         "apiOrIpc": true,
         "ui": true,
-        "menu": false,
+        "menu": true,
         "targetedTest": true,
         "documentation": true,
-        "evidence": false
+        "evidence": true
       },
       "evidence": [
         "artifacts/validation/governed-preflight.json",
@@ -6160,7 +6160,15 @@
         "artifacts/authority/31-S_VERSIONED_CUTOVER_DECISION_PREFLIGHT_AUTHORITY.json",
         "artifacts/validation/31-S_PRIORITY_SELECTION_VALIDATION.json",
         "docs/decisions/DEC-180-versioned-cutover-decision-preflight-boundary.md",
-        "config/31-s-versioned-cutover-decision-preflight-scope.json"
+        "config/31-s-versioned-cutover-decision-preflight-scope.json",
+        "apps/core-service/tests/ppk014-versioned-core-service-api-boundary.test.ts",
+        "scripts/verify-versioned-core-service-api-boundary.mjs",
+        "config/32-j-ppk-014-versioned-core-service-api-scope.json",
+        "docs/decisions/DEC-195-ppk-014-versioned-core-service-api-boundary.md",
+        "artifacts/validation/32-J-ppk-014-versioned-core-service-api-contract.json",
+        "artifacts/validation/32-J-ppk-014-versioned-core-service-api-runtime.json",
+        "docs/security/PPK-014_VERSIONED_CORE_SERVICE_API_THREAT_MODEL.md",
+        "docs/audit/32-J_PPK-014_SURUMLU_CORE_SERVICE_API_UST_KAPANIS.md"
       ]
     },
     {

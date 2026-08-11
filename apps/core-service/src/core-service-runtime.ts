@@ -1,8 +1,14 @@
 import { randomUUID } from 'node:crypto';
 import {
+  CORE_SERVICE_API_MAXIMUM_FUTURE_SKEW_MS,
+  CORE_SERVICE_API_MAXIMUM_REPLAY_ENTRIES,
+  CORE_SERVICE_API_MAXIMUM_REQUEST_AGE_MS,
   CORE_SERVICE_APPLICATION_API_VERSION,
+  CORE_SERVICE_APPLICATION_ID,
+  CORE_SERVICE_LOCAL_ADMIN_CLIENT_APPLICATION_ID,
   CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION,
   CORE_SERVICE_REQUIRED_DESKTOP_METHODS,
+  type CoreServiceApiBoundaryStatusContract,
   type CoreServiceArchitectureContract,
   type CoreServiceDeviceSecretProtectionStatusContract,
   type CoreServiceFamilyDataCutoverReadinessStatusContract,
@@ -15,6 +21,7 @@ import {
   PlatformPolicyEnforcementError,
   PlatformPolicyKernel,
   type PlatformPolicyAuthorization,
+  type PlatformApplicationId,
   type PlatformPolicyClusterFenceSnapshot,
   type PlatformPolicyDecision,
   type PlatformPolicyEnforcementPoint,
@@ -178,6 +185,34 @@ export class CoreServiceRuntime {
       startedAt: this.#startedAt,
       observedAt: this.#clock(),
       reasons: Object.freeze([...this.#reasons])
+    });
+  }
+
+  public applicationApiVersionFor(applicationId: PlatformApplicationId): string | undefined {
+    return this.#kernel.applicationVersionFor(applicationId);
+  }
+
+  public clientApiBoundaryStatus(): CoreServiceApiBoundaryStatusContract {
+    return Object.freeze({
+      schemaVersion: 1,
+      enforcement: 'fail-closed',
+      apiVersion: CORE_SERVICE_APPLICATION_API_VERSION,
+      protocolVersion: CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION,
+      serverApplicationId: CORE_SERVICE_APPLICATION_ID,
+      allowedClientApplicationIds: Object.freeze([CORE_SERVICE_LOCAL_ADMIN_CLIENT_APPLICATION_ID] as const),
+      transport: 'authenticated-local-named-pipe-or-socket',
+      exactEnvelopeRequired: true,
+      applicationVersionBindingRequired: true,
+      freshnessRequired: true,
+      replayProtection: 'in-memory-per-process-fail-closed',
+      directCoreServiceImportAllowed: false,
+      directImportExceptionCount: 0,
+      maximumRequestAgeMs: CORE_SERVICE_API_MAXIMUM_REQUEST_AGE_MS,
+      maximumFutureSkewMs: CORE_SERVICE_API_MAXIMUM_FUTURE_SKEW_MS,
+      maximumReplayEntries: CORE_SERVICE_API_MAXIMUM_REPLAY_ENTRIES,
+      persistentPathExposed: false,
+      secretMaterialExposed: false,
+      cutoverAuthorityAttached: false
     });
   }
 

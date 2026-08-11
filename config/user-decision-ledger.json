@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 48,
+  "decisionCount": 49,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1149,6 +1149,32 @@
         "artifacts/validation/32-I-ppk-013-client-data-access-runtime.json",
         "docs/security/PPK-013_CLIENT_DATA_ACCESS_THREAT_MODEL.md",
         "docs/audit/32-I_PPK-013_ISTEMCI_VERI_ERISIM_UST_KAPANIS.md"
+      ]
+    },
+    {
+      "id": "DEC-195",
+      "date": "2026-08-11",
+      "acceptedAt": "2026-08-11",
+      "title": "PPK-014 zero-exception versioned Core Service client API boundary top closure",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: PPK-013 sonrası tam otomatik devam",
+      "document": "docs/decisions/DEC-195-ppk-014-versioned-core-service-api-boundary.md",
+      "requirements": ["PPK-014"],
+      "codeAreas": [
+        "packages/platform-policy/src/versioned-core-service-api-boundary.ts",
+        "packages/core-service-contracts/src/index.ts",
+        "packages/core-service-client/src/local-admin-client.ts",
+        "apps/core-service/src/versioned-core-service-api-use-case.ts",
+        "apps/core-service/src/local-admin-server.ts",
+        "apps/core-service/src/core-service-method-dispatcher.ts",
+        "apps/desktop/src/main/core-service-startup-connection.ts",
+        "scripts/verify-versioned-core-service-api-boundary.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/32-J-ppk-014-versioned-core-service-api-contract.json",
+        "artifacts/validation/32-J-ppk-014-versioned-core-service-api-runtime.json",
+        "docs/security/PPK-014_VERSIONED_CORE_SERVICE_API_THREAT_MODEL.md",
+        "docs/audit/32-J_PPK-014_SURUMLU_CORE_SERVICE_API_UST_KAPANIS.md"
       ]
     }
   ]

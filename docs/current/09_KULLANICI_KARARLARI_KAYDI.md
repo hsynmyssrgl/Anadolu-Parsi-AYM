@@ -56,3 +56,4 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 - `DEC-192` — PPK-011 contextual authorization and ownership-share top closure
 - `DEC-193` — PPK-012 finite offline capability lease and sensitive-cache fence top closure
 - `DEC-194` — PPK-013 zero-exception client data-access boundary top closure
+- `DEC-195` — PPK-014 zero-exception versioned Core Service client API boundary top closure

@@ -13,7 +13,7 @@ const root=await mkdtemp(join(tmpdir(),'ppt-desktop-core-startup-'));
 const endpoint=process.platform==='win32'?'\\\\.\\pipe\\ppt-desktop-core-startup-'+process.pid+'-'+Date.now():join(root,'core.sock');
 const token=randomBytes(48).toString('base64url');
 const policyVersion='PPT-PLATFORM-POLICY-2026-08-04-V1';
-const kernel=new PlatformPolicyKernel({policyVersion,signingKey:randomBytes(32),applicationCapabilities:{'windows-core-service':['health.read']},consentRequiredCapabilities:[],onlineOnlyCapabilities:[],writeActions:['create','update','delete']});
+const kernel=new PlatformPolicyKernel({policyVersion,signingKey:randomBytes(32),applicationVersions:{'windows-desktop':'v1','windows-core-service':'v1'},applicationCapabilities:{'windows-desktop':['family.read'],'windows-core-service':['health.read']},consentRequiredCapabilities:[],onlineOnlyCapabilities:[],writeActions:['create','update','delete']});
 const runtime=new CoreServiceRuntime({policyKernel:kernel,policyVersion});runtime.markReady('standalone');
 const server=new CoreServiceLocalAdminServer({endpoint,authenticationToken:token,runtime});
 await server.start();
@@ -24,6 +24,10 @@ try{
  check(connection.health.lifecycle==='ready','ready Core Service handshake did not return ready lifecycle');
  check(connection.health.policyVersion===policyVersion,'ready Core Service handshake returned wrong policy version');
  check(connection.health.writable===true,'standalone ready Core Service should be writable');
+ check(connection.apiBoundary.enforcement==='fail-closed'&&connection.apiBoundary.apiVersion==='v1','startup did not verify the versioned API posture');
+ check(connection.apiBoundary.serverApplicationId==='windows-core-service'&&connection.apiBoundary.allowedClientApplicationIds.length===1&&connection.apiBoundary.allowedClientApplicationIds[0]==='windows-desktop','startup did not bind Core Service and Desktop application identities');
+ check(connection.apiBoundary.exactEnvelopeRequired===true&&connection.apiBoundary.applicationVersionBindingRequired===true&&connection.apiBoundary.freshnessRequired===true&&connection.apiBoundary.replayProtection==='in-memory-per-process-fail-closed','startup API safety controls are incomplete');
+ check(connection.apiBoundary.directCoreServiceImportAllowed===false&&connection.apiBoundary.directImportExceptionCount===0&&connection.apiBoundary.persistentPathExposed===false&&connection.apiBoundary.secretMaterialExposed===false&&connection.apiBoundary.cutoverAuthorityAttached===false,'startup API boundary exposes an unsafe capability');
  check(connection.architecture.processBoundary==='headless-core-service','startup did not verify headless process ownership');
  check(connection.architecture.ownership.policyKernel==='core-service','startup did not verify policy ownership');
  check(connection.architecture.supportedMethods.includes('architecture.get'),'startup architecture method registry is incomplete');
@@ -53,6 +57,15 @@ try{
  await expectCode(()=>connectCoreServiceAtStartup({authorityPath:'/protected/missing.pptsecret',authorityReader:{readText:()=>{throw new Error('missing')}},platform:process.platform}),'AUTHORITY_UNAVAILABLE','missing authority');
  await expectCode(()=>connectCoreServiceAtStartup({authorityPath:'/protected/invalid.pptsecret',authorityReader:{readText:()=>JSON.stringify({...authority,authenticationToken:'too-short'})},platform:process.platform}),'AUTHORITY_INVALID','invalid authority');
 } finally {await server.stop();}
+const apiBoundaryMismatchEndpoint=process.platform==='win32'?'\\\\.\\pipe\\ppt-desktop-core-api-boundary-mismatch-'+process.pid+'-'+Date.now():join(root,'api-boundary-mismatch.sock');
+const apiBoundaryMismatchRuntime=new CoreServiceRuntime({policyKernel:kernel,policyVersion});apiBoundaryMismatchRuntime.markReady('standalone');
+const validApiBoundaryStatus=apiBoundaryMismatchRuntime.clientApiBoundaryStatus.bind(apiBoundaryMismatchRuntime);
+apiBoundaryMismatchRuntime.clientApiBoundaryStatus=()=>Object.freeze({...validApiBoundaryStatus(),directCoreServiceImportAllowed:true,directImportExceptionCount:1});
+const apiBoundaryMismatchServer=new CoreServiceLocalAdminServer({endpoint:apiBoundaryMismatchEndpoint,authenticationToken:token,runtime:apiBoundaryMismatchRuntime});await apiBoundaryMismatchServer.start();
+try{
+ const apiBoundaryMismatchAuthority={schemaVersion:1,endpoint:apiBoundaryMismatchEndpoint,authenticationToken:token,expectedPolicyVersion:policyVersion,issuedAt:new Date().toISOString()};
+ await expectCode(()=>connectCoreServiceAtStartup({authorityPath:'/protected/api-boundary-mismatch.pptsecret',authorityReader:{readText:()=>JSON.stringify(apiBoundaryMismatchAuthority)},platform:process.platform}),'API_BOUNDARY_MISMATCH','versioned API boundary mismatch');
+} finally {await apiBoundaryMismatchServer.stop();}
 const mismatchEndpoint=process.platform==='win32'?'\\\\.\\pipe\\ppt-desktop-core-architecture-mismatch-'+process.pid+'-'+Date.now():join(root,'architecture-mismatch.sock');
 const mismatchRuntime=new CoreServiceRuntime({policyKernel:kernel,policyVersion});mismatchRuntime.markReady('standalone');
 const validArchitecture=mismatchRuntime.architecture.bind(mismatchRuntime);

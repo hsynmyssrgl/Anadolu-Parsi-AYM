@@ -1,5 +1,6 @@
 import { CoreServiceLocalAdminClient } from '@ppt/core-service-client';
 import type {
+  CoreServiceApiBoundaryStatusContract,
   CoreServiceArchitectureContract,
   CoreServiceDeviceSecretProtectionStatusContract,
   CoreServiceFamilyDataCutoverReadinessStatusContract,
@@ -67,6 +68,10 @@ export class CoreServiceApplicationAdapter {
     this.#cacheFence({ writable: health.writable, epoch: health.writeFenceEpoch });
     this.#policyPackage = health.policyPackage;
     return health;
+  }
+
+  public getApiBoundaryStatus(): Promise<CoreServiceApiBoundaryStatusContract> {
+    return this.#client.apiBoundaryStatus();
   }
 
   public getArchitecture(): Promise<CoreServiceArchitectureContract> {

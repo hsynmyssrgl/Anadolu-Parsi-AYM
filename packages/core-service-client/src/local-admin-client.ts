@@ -1,8 +1,13 @@
 import { randomUUID } from 'node:crypto';
 import { createConnection, type Socket } from 'node:net';
 import {
+  CORE_SERVICE_APPLICATION_API_VERSION,
+  CORE_SERVICE_APPLICATION_ID,
+  CORE_SERVICE_LOCAL_ADMIN_CLIENT_APPLICATION_ID,
+  CORE_SERVICE_LOCAL_ADMIN_ERROR_CODES,
   CORE_SERVICE_LOCAL_ADMIN_MAX_MESSAGE_BYTES,
   CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION,
+  type CoreServiceApiBoundaryStatusContract,
   type CoreServiceArchitectureContract,
   type CoreServiceDeviceSecretProtectionStatusContract,
   type CoreServiceFamilyDataCutoverReadinessStatusContract,
@@ -27,7 +32,36 @@ export interface CoreServiceLocalAdminClientOptions {
   readonly authenticationToken: string;
   readonly timeoutMs?: number;
   readonly maxResponseBytes?: number;
+  readonly apiVersion?: string;
+  readonly clientApplicationId?: CoreServiceLocalAdminRequest['clientApplicationId'];
+  readonly clock?: () => string;
+  readonly requestIdFactory?: () => string;
 }
+
+const isPlainRecord = (value: unknown): value is Record<string, unknown> => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+};
+const exactKeys = (value: Record<string, unknown>, expected: readonly string[]): boolean => {
+  const actual = Object.keys(value).sort();
+  const canonical = [...expected].sort();
+  return actual.length === canonical.length && actual.every((key, index) => key === canonical[index]);
+};
+const isExactResponse = (value: unknown): value is CoreServiceLocalAdminResponse => {
+  if (!isPlainRecord(value)) return false;
+  const common = value.protocolVersion === CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION
+    && value.apiVersion === CORE_SERVICE_APPLICATION_API_VERSION
+    && value.serverApplicationId === CORE_SERVICE_APPLICATION_ID
+    && typeof value.requestId === 'string' && value.requestId.length > 0 && value.requestId.length <= 128;
+  if (!common || typeof value.ok !== 'boolean') return false;
+  if (value.ok) return exactKeys(value, ['protocolVersion', 'apiVersion', 'serverApplicationId', 'requestId', 'ok', 'result']);
+  if (!exactKeys(value, ['protocolVersion', 'apiVersion', 'serverApplicationId', 'requestId', 'ok', 'error']) || !isPlainRecord(value.error)) return false;
+  return exactKeys(value.error, ['code', 'message'])
+    && typeof value.error.code === 'string'
+    && CORE_SERVICE_LOCAL_ADMIN_ERROR_CODES.includes(value.error.code as typeof CORE_SERVICE_LOCAL_ADMIN_ERROR_CODES[number])
+    && typeof value.error.message === 'string' && value.error.message.length > 0;
+};
 
 export class CoreServiceLocalAdminClientError extends Error {
   public readonly code: string;
@@ -44,6 +78,10 @@ export class CoreServiceLocalAdminClient {
   readonly #token: string;
   readonly #timeoutMs: number;
   readonly #maxResponseBytes: number;
+  readonly #apiVersion: string;
+  readonly #clientApplicationId: CoreServiceLocalAdminRequest['clientApplicationId'];
+  readonly #clock: () => string;
+  readonly #requestIdFactory: () => string;
 
   public constructor(options: CoreServiceLocalAdminClientOptions) {
     if (!options.endpoint.trim()) throw new Error('Core Service endpoint is required');
@@ -52,6 +90,14 @@ export class CoreServiceLocalAdminClient {
     this.#token = options.authenticationToken;
     this.#timeoutMs = Math.min(Math.max(options.timeoutMs ?? 5_000, 250), 30_000);
     this.#maxResponseBytes = Math.min(Math.max(options.maxResponseBytes ?? CORE_SERVICE_LOCAL_ADMIN_MAX_MESSAGE_BYTES, 1_024), CORE_SERVICE_LOCAL_ADMIN_MAX_MESSAGE_BYTES);
+    this.#apiVersion = options.apiVersion ?? CORE_SERVICE_APPLICATION_API_VERSION;
+    this.#clientApplicationId = options.clientApplicationId ?? CORE_SERVICE_LOCAL_ADMIN_CLIENT_APPLICATION_ID;
+    this.#clock = options.clock ?? (() => new Date().toISOString());
+    this.#requestIdFactory = options.requestIdFactory ?? randomUUID;
+  }
+
+  public apiBoundaryStatus(): Promise<CoreServiceApiBoundaryStatusContract> {
+    return this.request('client-api-boundary.status', {});
   }
 
   public health(): Promise<CoreServiceHealthContract> {
@@ -96,10 +142,13 @@ export class CoreServiceLocalAdminClient {
     method: TMethod,
     payload: CoreServiceMethodPayload<TMethod>
   ): Promise<CoreServiceMethodResult<TMethod>> {
-    const requestId = randomUUID();
+    const requestId = this.#requestIdFactory();
     const request: CoreServiceLocalAdminRequest<CoreServiceMethodPayload<TMethod>> = {
       protocolVersion: CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION,
+      apiVersion: this.#apiVersion as typeof CORE_SERVICE_APPLICATION_API_VERSION,
+      clientApplicationId: this.#clientApplicationId,
       requestId,
+      issuedAt: this.#clock(),
       method,
       authenticationToken: this.#token,
       payload
@@ -135,8 +184,8 @@ export class CoreServiceLocalAdminClient {
         const newline = response.indexOf('\n');
         if (newline < 0) return;
         try {
-          const parsed = JSON.parse(response.slice(0, newline)) as CoreServiceLocalAdminResponse<CoreServiceMethodResult<TMethod>>;
-          if (parsed.protocolVersion !== CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION || parsed.requestId !== requestId) {
+          const parsed: unknown = JSON.parse(response.slice(0, newline));
+          if (!isExactResponse(parsed) || parsed.requestId !== requestId) {
             complete(new CoreServiceLocalAdminClientError('Core Service response identity or protocol mismatch', 'INVALID_RESPONSE'));
             return;
           }
@@ -144,7 +193,7 @@ export class CoreServiceLocalAdminClient {
             complete(new CoreServiceLocalAdminClientError(parsed.error.message, parsed.error.code));
             return;
           }
-          complete(undefined, parsed.result);
+          complete(undefined, parsed.result as CoreServiceMethodResult<TMethod>);
         } catch (error) {
           complete(new CoreServiceLocalAdminClientError('Core Service returned invalid JSON', 'INVALID_RESPONSE', { cause: error }));
         }

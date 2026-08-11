@@ -11,6 +11,8 @@ export default defineConfig({
       '@ppt/config': workspaceSource('./packages/config/src/index.ts'),
       '@ppt/contracts': workspaceSource('./packages/contracts/src/index.ts'),
       '@ppt/core': workspaceSource('./packages/core/src/index.ts'),
+      '@ppt/core-service-client': workspaceSource('./packages/core-service-client/src/index.ts'),
+      '@ppt/core-service-contracts': workspaceSource('./packages/core-service-contracts/src/index.ts'),
       '@ppt/database': workspaceSource('./packages/database/src/index.ts'),
       '@ppt/domain': workspaceSource('./packages/domain/src/index.ts'),
       '@ppt/events': workspaceSource('./packages/events/src/index.ts'),

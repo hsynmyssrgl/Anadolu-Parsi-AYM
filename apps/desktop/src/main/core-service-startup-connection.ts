@@ -1,11 +1,17 @@
 import { createHash } from 'node:crypto';
 import { isAbsolute } from 'node:path';
 import {
+  CORE_SERVICE_API_MAXIMUM_FUTURE_SKEW_MS,
+  CORE_SERVICE_API_MAXIMUM_REPLAY_ENTRIES,
+  CORE_SERVICE_API_MAXIMUM_REQUEST_AGE_MS,
   CORE_SERVICE_APPLICATION_API_VERSION,
+  CORE_SERVICE_APPLICATION_ID,
   CORE_SERVICE_CUTOVER_READINESS_GENESIS_HASH,
+  CORE_SERVICE_LOCAL_ADMIN_CLIENT_APPLICATION_ID,
   CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION,
   CORE_SERVICE_REQUIRED_DESKTOP_METHODS,
   canonicalizeCoreServiceCutoverReadinessEntry,
+  type CoreServiceApiBoundaryStatusContract,
   type CoreServiceArchitectureContract,
   type CoreServiceDeviceSecretProtectionStatusContract,
   type CoreServiceFamilyDataCutoverGateId,
@@ -31,6 +37,7 @@ export interface CoreServiceAuthorityReader {
 
 export interface CoreServiceStartupConnectionResult {
   readonly adapter: CoreServiceApplicationAdapter;
+  readonly apiBoundary: CoreServiceApiBoundaryStatusContract;
   readonly health: CoreServiceHealthContract;
   readonly architecture: CoreServiceArchitectureContract;
   readonly familyData: CoreServiceFamilyDataStatusContract;
@@ -47,6 +54,7 @@ export type CoreServiceStartupConnectionErrorCode =
   | 'POLICY_VERSION_MISMATCH'
   | 'POLICY_PACKAGE_MISMATCH'
   | 'APPLICATION_VERSION_MISMATCH'
+  | 'API_BOUNDARY_MISMATCH'
   | 'ARCHITECTURE_MISMATCH'
   | 'SERVICE_NOT_READY';
 
@@ -222,6 +230,7 @@ export const connectCoreServiceAtStartup = async (options: {
   }
   const authority = parseCoreServiceConnectionAuthority(raw, options.platform ?? process.platform);
   const adapter = new CoreServiceApplicationAdapter(authority);
+  let apiBoundary: CoreServiceApiBoundaryStatusContract;
   let health: CoreServiceHealthContract;
   let architecture: CoreServiceArchitectureContract;
   let familyData: CoreServiceFamilyDataStatusContract;
@@ -229,7 +238,8 @@ export const connectCoreServiceAtStartup = async (options: {
   let familyDataCutover: CoreServiceFamilyDataCutoverStatusContract;
   let familyDataCutoverReadiness: CoreServiceFamilyDataCutoverReadinessStatusContract;
   try {
-    [health, architecture, familyData, deviceSecretProtection, familyDataCutover, familyDataCutoverReadiness] = await Promise.all([
+    [apiBoundary, health, architecture, familyData, deviceSecretProtection, familyDataCutover, familyDataCutoverReadiness] = await Promise.all([
+      adapter.getApiBoundaryStatus(),
       adapter.getHealth(),
       adapter.getArchitecture(),
       adapter.getFamilyDataStatus(),
@@ -240,6 +250,36 @@ export const connectCoreServiceAtStartup = async (options: {
   } catch (error) {
     throw new CoreServiceStartupConnectionError('CONNECTION_FAILED', 'Core Service startup health handshake failed', { cause: error });
   }
+  if (
+    !apiBoundary || typeof apiBoundary !== 'object' || !exactKeys(apiBoundary, [
+      'schemaVersion', 'enforcement', 'apiVersion', 'protocolVersion', 'serverApplicationId',
+      'allowedClientApplicationIds', 'transport', 'exactEnvelopeRequired',
+      'applicationVersionBindingRequired', 'freshnessRequired', 'replayProtection',
+      'directCoreServiceImportAllowed', 'directImportExceptionCount', 'maximumRequestAgeMs',
+      'maximumFutureSkewMs', 'maximumReplayEntries', 'persistentPathExposed',
+      'secretMaterialExposed', 'cutoverAuthorityAttached'
+    ])
+    || apiBoundary.schemaVersion !== 1
+    || apiBoundary.enforcement !== 'fail-closed'
+    || apiBoundary.apiVersion !== CORE_SERVICE_APPLICATION_API_VERSION
+    || apiBoundary.protocolVersion !== CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION
+    || apiBoundary.serverApplicationId !== CORE_SERVICE_APPLICATION_ID
+    || apiBoundary.allowedClientApplicationIds.length !== 1
+    || apiBoundary.allowedClientApplicationIds[0] !== CORE_SERVICE_LOCAL_ADMIN_CLIENT_APPLICATION_ID
+    || apiBoundary.transport !== 'authenticated-local-named-pipe-or-socket'
+    || apiBoundary.exactEnvelopeRequired !== true
+    || apiBoundary.applicationVersionBindingRequired !== true
+    || apiBoundary.freshnessRequired !== true
+    || apiBoundary.replayProtection !== 'in-memory-per-process-fail-closed'
+    || apiBoundary.directCoreServiceImportAllowed !== false
+    || apiBoundary.directImportExceptionCount !== 0
+    || apiBoundary.maximumRequestAgeMs !== CORE_SERVICE_API_MAXIMUM_REQUEST_AGE_MS
+    || apiBoundary.maximumFutureSkewMs !== CORE_SERVICE_API_MAXIMUM_FUTURE_SKEW_MS
+    || apiBoundary.maximumReplayEntries !== CORE_SERVICE_API_MAXIMUM_REPLAY_ENTRIES
+    || apiBoundary.persistentPathExposed !== false
+    || apiBoundary.secretMaterialExposed !== false
+    || apiBoundary.cutoverAuthorityAttached !== false
+  ) throw new CoreServiceStartupConnectionError('API_BOUNDARY_MISMATCH', 'Core Service versioned client API boundary is inconsistent or unsafe');
   if (health.policyVersion !== authority.expectedPolicyVersion) {
     throw new CoreServiceStartupConnectionError('POLICY_VERSION_MISMATCH', 'Core Service policy version does not match the protected startup authority');
   }
@@ -334,5 +374,5 @@ export const connectCoreServiceAtStartup = async (options: {
   if (health.lifecycle !== 'ready' && health.lifecycle !== 'degraded') {
     throw new CoreServiceStartupConnectionError('SERVICE_NOT_READY', `Core Service lifecycle ${health.lifecycle} is not safe for Desktop startup`);
   }
-  return Object.freeze({ adapter, health, architecture, familyData, deviceSecretProtection, familyDataCutover, familyDataCutoverReadiness, authorityPath: options.authorityPath });
+  return Object.freeze({ adapter, apiBoundary, health, architecture, familyData, deviceSecretProtection, familyDataCutover, familyDataCutoverReadiness, authorityPath: options.authorityPath });
 };

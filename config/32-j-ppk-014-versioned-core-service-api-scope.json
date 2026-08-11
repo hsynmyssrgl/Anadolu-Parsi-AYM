@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "step": "32-J",
+  "requirement": "PPK-014",
+  "title": "Core Service dışındaki uygulamalar için sürümlü güvenli API sınırı",
+  "status": "COMPLETED",
+  "boundaries": {
+    "zeroDirectCoreServiceImportExceptions": true,
+    "nonCoreApplicationSourceFailGate": true,
+    "singleAuthorizedClientAdapter": true,
+    "authenticatedLocalTransportRequired": true,
+    "exactRequestEnvelopeRequired": true,
+    "exactResponseEnvelopeRequired": true,
+    "protocolVersionBindingRequired": true,
+    "apiVersionBindingRequired": true,
+    "clientApplicationIdentityBindingRequired": true,
+    "signedClientApplicationVersionBindingRequired": true,
+    "methodAllowlistRequired": true,
+    "requestFreshnessRequired": true,
+    "replayProtectionRequired": true,
+    "boundedReplayStateFailClosed": true,
+    "malformedDataFailClosed": true,
+    "desktopStartupBoundaryVerificationRequired": true,
+    "uiAndMenuStatusVisible": true,
+    "newSchemaMigrationRequired": false
+  },
+  "authorizedClientApplications": [
+    "windows-desktop"
+  ],
+  "authorizedClientAdapter": "apps/desktop/src/main/core-service-application-adapter.ts",
+  "nonCoreApplicationSourceZones": [
+    "apps/*/src except apps/core-service/src"
+  ],
+  "validation": {
+    "contract": "artifacts/validation/32-J-ppk-014-versioned-core-service-api-contract.json",
+    "runtime": "artifacts/validation/32-J-ppk-014-versioned-core-service-api-runtime.json",
+    "targetedTest": "apps/core-service/tests/ppk014-versioned-core-service-api-boundary.test.ts",
+    "sourceGate": "scripts/verify-versioned-core-service-api-boundary.mjs",
+    "sourceGateResult": "1 application zone / 113 files / 0 findings / 5 malicious self-tests",
+    "targetedTests": "17/17",
+    "coreServiceLocalAdminRuntime": "50/50 checks",
+    "desktopStartupRuntime": "50/50 checks",
+    "ppk013AndPpk012Regression": "35/35",
+    "fullVitest": "63 files / 442 tests / deterministic single worker",
+    "migration": "76 latest; no new schema migration",
+    "rootTypeScriptDiagnostics": 0,
+    "productionBuild": "18 workspaces + Core Service + Electron main/preload + renderer PASS",
+    "contractChecks": "46/46",
+    "runtimeChecks": "12/12",
+    "state": "COMPLETE"
+  },
+  "threatModel": "docs/security/PPK-014_VERSIONED_CORE_SERVICE_API_THREAT_MODEL.md",
+  "directCoreServiceImportExceptionCount": 0,
+  "legacyDesktopVaultPreserved": true,
+  "sqliteOwnershipTransferred": false,
+  "persistentPathExposed": false,
+  "secretMaterialExposed": false,
+  "policySensitiveIpcNoCacheWeakened": false,
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "requirementCompletionClaimed": true,
+  "mandatoryTruthSentence": "PPK-014 sürümlü ve doğrulanmış istemci API sınırını hazırlar; gerçek kullanıcı verisi taşımaz, Desktop kasa/SQLite sahipliğini değiştirmez ve DEC-171 cutover yasağını kaldırmaz."
+}

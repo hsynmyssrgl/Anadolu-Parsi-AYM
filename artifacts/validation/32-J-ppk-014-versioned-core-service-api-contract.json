@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-J",
+  "requirement": "PPK-014",
+  "phase": "VERSIONED_CORE_SERVICE_API_BOUNDARY_CONTRACT",
+  "status": "PASS",
+  "checkCount": 46,
+  "passed": 46,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "direct Core Service import exception registry is empty and frozen",
+      "status": "PASS"
+    },
+    {
+      "name": "request envelope uses an exact canonical field set",
+      "status": "PASS"
+    },
+    {
+      "name": "malformed and protocol mismatches fail closed",
+      "status": "PASS"
+    },
+    {
+      "name": "client application and API version mismatches fail closed",
+      "status": "PASS"
+    },
+    {
+      "name": "method allowlist mismatch fails closed",
+      "status": "PASS"
+    },
+    {
+      "name": "freshness rejects exact expiry and excessive future skew",
+      "status": "PASS"
+    },
+    {
+      "name": "replay and replay-state capacity both fail closed",
+      "status": "PASS"
+    },
+    {
+      "name": "accepted request IDs are recorded only after all bindings pass",
+      "status": "PASS"
+    },
+    {
+      "name": "boundary snapshot declares fail-closed exact versioned protection",
+      "status": "PASS"
+    },
+    {
+      "name": "platform policy exports the versioned boundary",
+      "status": "PASS"
+    },
+    {
+      "name": "application use case stops operation after any denial",
+      "status": "PASS"
+    },
+    {
+      "name": "contracts define canonical API protocol application and safety limits",
+      "status": "PASS"
+    },
+    {
+      "name": "request contract binds API client identity and issue time",
+      "status": "PASS"
+    },
+    {
+      "name": "response contract binds API and Core Service application identity",
+      "status": "PASS"
+    },
+    {
+      "name": "canonical failure codes include version identity freshness and replay denials",
+      "status": "PASS"
+    },
+    {
+      "name": "safe boundary status statically forbids path secret and cutover authority",
+      "status": "PASS"
+    },
+    {
+      "name": "boundary status is a required typed Core Service method",
+      "status": "PASS"
+    },
+    {
+      "name": "client emits API version application identity and issue time",
+      "status": "PASS"
+    },
+    {
+      "name": "client validates exact response fields version server identity and request identity",
+      "status": "PASS"
+    },
+    {
+      "name": "client rejects response error codes outside the canonical registry",
+      "status": "PASS"
+    },
+    {
+      "name": "client exposes only the typed boundary-status request wrapper",
+      "status": "PASS"
+    },
+    {
+      "name": "server authenticates before invoking the versioned API policy",
+      "status": "PASS"
+    },
+    {
+      "name": "server resolves signed client application version from Core runtime",
+      "status": "PASS"
+    },
+    {
+      "name": "server binds canonical method freshness and replay limits",
+      "status": "PASS"
+    },
+    {
+      "name": "server maps every policy denial to a typed fail-closed response",
+      "status": "PASS"
+    },
+    {
+      "name": "dispatcher exposes boundary status through the central method map",
+      "status": "PASS"
+    },
+    {
+      "name": "runtime reports exact fail-closed zero-exception safety truth",
+      "status": "PASS"
+    },
+    {
+      "name": "runtime application version comes from the signed policy package",
+      "status": "PASS"
+    },
+    {
+      "name": "Desktop adapter is the single typed Core Service client boundary",
+      "status": "PASS"
+    },
+    {
+      "name": "Desktop startup fetches and exactly verifies the API boundary",
+      "status": "PASS"
+    },
+    {
+      "name": "Desktop startup binds server and allowed client identities",
+      "status": "PASS"
+    },
+    {
+      "name": "typed IPC preload and renderer declarations expose only safe boundary status",
+      "status": "PASS"
+    },
+    {
+      "name": "System menu renders the PPK-014 status posture",
+      "status": "PASS"
+    },
+    {
+      "name": "non-Core application syntax gate scans production source with malicious self-tests",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate blocks internals SDK bypass and direct socket primitive",
+      "status": "PASS"
+    },
+    {
+      "name": "current non-Core application source has zero bypass findings",
+      "status": "PASS"
+    },
+    {
+      "name": "typecheck and production build both execute PPK-013 and PPK-014 source gates",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted tests cover every envelope mismatch freshness replay and runtime path",
+      "status": "PASS"
+    },
+    {
+      "name": "threat model records assets trust boundaries threats controls and reality limit",
+      "status": "PASS"
+    },
+    {
+      "name": "no schema migration 77 is added and policy receipt migration 74 remains",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-013 direct data-access source gate remains active",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-012 policy-sensitive IPC no-cache fence remains active",
+      "status": "PASS"
+    },
+    {
+      "name": "accepted registry closes the complete PPK-014 evidence chain",
+      "status": "PASS"
+    },
+    {
+      "name": "scope closes PPK-014 without transfer ownership or cutover",
+      "status": "PASS"
+    },
+    {
+      "name": "DEC-195 is latest and binds PPK-014 evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "decision and audit preserve Desktop vault no-cache and DEC-171",
+      "status": "PASS"
+    }
+  ],
+  "failures": [],
+  "sourceScan": {
+    "zones": 1,
+    "files": 113,
+    "findings": []
+  },
+  "directCoreServiceImportExceptions": 0,
+  "migrationDecision": "NO_NEW_SCHEMA_MIGRATION_REUSE_EXISTING_VERSIONED_CONTRACTS",
+  "legacyDesktopVaultPreserved": true,
+  "sqliteOwnershipTransferred": false,
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "policySensitiveIpcNoCacheWeakened": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T15:49:55.246Z"
+}
