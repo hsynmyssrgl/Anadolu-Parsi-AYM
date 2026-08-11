@@ -85,21 +85,23 @@ contains('decision', 'yeni correlation, nonce ve receipt', 'DEC-145 names indepe
 contains('decision', 'iş mutasyonu, audit, outbox ve bağlı etkinlik artışı yeniden çalıştırılmaz', 'DEC-145 forbids duplicate business effects');
 contains('decision', 'PPK-002 `PARTIAL`', 'DEC-145 preserves the requirement boundary');
 
-check(plan.currentStep === '30-T', 'work plan selects 30-T');
-check(plan.steps.filter((step) => step.status === 'IN_PROGRESS').length === 1, 'work plan has exactly one active step');
-check(plan.steps.find((step) => step.id === '30-T')?.validationStatus === 'PENDING', 'work plan does not pre-claim validation');
+check(plan.steps.find((step) => step.id === '30-T')?.status === 'COMPLETED', 'work plan preserves completed 30-T history');
+check(plan.steps.find((step) => step.id === '30-T')?.persistentReceiptStatus === 'PASS', 'work plan preserves the 30-T persistent receipt');
+check(plan.steps.find((step) => step.id === '30-T')?.validationStatus === 'PASS', 'work plan preserves validated 30-T history');
 check(plan.steps.find((step) => step.id === '30-S')?.persistentReceiptStatus === 'PASS', 'work plan preserves predecessor receipt PASS');
-check(ledger.activeMicroStep === '30-T' && ledger.nextOfficialTask.startsWith('30-T PPK-002'), 'active ledger selects the exact 30-T task');
-check(ledger.libraryUploadStatus === '30-T_IN_PROGRESS_PREDECESSOR_30-S_RECEIPT_CHAIN_PASS', 'active ledger distinguishes predecessor receipt from current work');
-check(registry.requirements?.find((item) => item.id === 'PPK-002')?.status === 'PARTIAL', 'accepted scope registry keeps PPK-002 PARTIAL');
+check(ledger.activeMicroStep !== '30-T' && typeof ledger.nextOfficialTask === 'string', 'active ledger has advanced beyond historical 30-T');
+check(ledger.libraryUploadStatus !== '30-T_IN_PROGRESS_PREDECESSOR_30-S_RECEIPT_CHAIN_PASS', 'active ledger no longer presents 30-T as in progress');
+check(registry.requirements?.find((item) => item.id === 'PPK-002')?.status === 'COMPLETE', 'accepted scope registry preserves the later PPK-002 top closure');
 
 for (const marker of [
   'PlatformPolicyArchiveOperationIdentityInput',
-  'PlatformPolicyArchiveOperationRecord',
+  'PlatformPolicyArchiveOperationMetadataLookupInput',
+  'PlatformPolicyArchiveOperationMetadata',
   'resolveArchiveOperation',
   'recordArchiveOperationResult',
-  'findArchiveOperation'
+  'findArchiveOperationMetadata'
 ]) contains('repositoryContract', marker, `repository contract declares ${marker}`);
+check(!source.repositoryContract.includes('readonly resultJson: string'), 'repository contract exposes no semantic replay payload');
 
 contains('migration', "createMigrationDefinition(60, 'archive_operation_idempotency'", 'migration 60 is registered');
 contains('migration', 'CREATE TABLE platform_policy_archive_operations', 'migration creates the operation ledger');
@@ -112,18 +114,23 @@ contains('migration', 'archive operation retry evidence is durable', 'retry evid
 contains('migration', 'REVISION-30-T-PPK-002-ARCHIVE-OPERATION-IDEMPOTENCY', 'schema generation records 30-T');
 
 contains('repository', 'const OPERATION_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/u', 'repository validates operation identifiers');
-contains('repository', 'canonicalPlatformPolicyJson(parsedResult) !== resultJson', 'repository requires canonical result JSON');
+contains('repository', `const ARCHIVE_OPERATION_COMPLETION_JSON = '{"status":"completed"}'`, 'repository writes a fixed content-free completion envelope');
+contains('repository', 'ARCHIVE_OPERATION_METADATA_SELECT', 'repository exposes only typed content-free metadata');
+check(!source.repository.includes('SELECT operation.*'), 'repository has no full-row operation read');
+check(!source.repository.includes('public findArchiveOperation('), 'repository has no generic full-result finder');
 contains('repository', 'Archive operation identifier was reused with a different semantic mutation', 'repository fails closed on semantic reuse');
 inOrder('repository', [
   'public resolveArchiveOperation(',
+  'assertArchiveOperationResultAccessReceipt(context, currentReceiptRow)',
   'INSERT INTO platform_policy_archive_operation_retries',
-  "state: 'replay'"
-], 'repository durably records a matching retry before replay');
+  "state: 'conflict'"
+], 'repository binds the current receipt and durably records retry evidence before content-free conflict');
 inOrder('repository', [
   'public recordArchiveOperationResult(',
   'INSERT INTO platform_policy_archive_operations',
-  'sha256Utf8(input.resultJson)'
-], 'repository persists canonical result and hash');
+  'ARCHIVE_OPERATION_COMPLETION_JSON',
+  'input.resultHash'
+], 'repository persists only fixed completion status and one-way result hash');
 
 contains('application', 'readonly operationId?:string', 'archive application context carries operation identity');
 contains('application', 'readonly operationFingerprint?:string', 'archive application context carries operation fingerprint');
@@ -131,11 +138,12 @@ contains('adapter', 'requiresDurableOperationIdempotency?: true', 'adapter expos
 inOrder('adapter', [
   'establishGovernedTransaction(enforcementPoint, governedInput)',
   'resolveAuthorizedOperation?.(governedInput)',
-  "resolution.value.state === 'replay'",
+  "resolution.value.state === 'conflict'",
   'operation(new GovernedArchiveWriteScope',
   'recordAuthorizedOperationResult?.({'
-], 'unit of work resolves replay before business mutation and records result afterward');
-contains('adapter', 'deserializeArchiveOperationResult', 'adapter returns the original committed result');
+], 'unit of work resolves committed conflict before business mutation and records content-free completion afterward');
+contains('adapter', "semanticReplay: 'forbidden'", 'adapter returns a fail-closed reload-required conflict instead of semantic replay');
+check(!source.adapter.includes('deserializeArchiveOperationResult'), 'adapter cannot deserialize a committed semantic result');
 
 contains('productionRuntime', 'findMatchingCommittedCreateOperation', 'production resource resolver recognizes an exact completed create retry');
 contains('productionRuntime', 'resolveAuthorizedProductionOperation', 'production runtime resolves a durable operation');
@@ -157,13 +165,14 @@ contains('preload', 'delete state.inflight', 'preload preserves the operation id
 contains('main', 'ArchiveItemMutationInput', 'main IPC receives stable operation identity for primitive archive calls');
 contains('main', 'openArchiveInSecurePreview(input.itemId, input.operationId)', 'main passes the operation id through secure preview');
 
-check((source.focusedTest.match(/\bit\(/gu) ?? []).length === 4, 'focused runtime declares four 30-T tests');
+check((source.focusedTest.match(/\bit\(/gu) ?? []).length === 5, 'focused runtime declares five 30-T tests');
 for (const marker of [
-  'new correlation without repeating business writes',
+  'content-free committed conflict under a new receipt',
   'real SQLite close and restart',
   'semantic identity reuse',
+  'exact current receipt was not persisted',
   'content-idempotent for a stable item identifier',
-  'BUSINESS_MUTATION_MUST_NOT_RUN_ON_REPLAY'
+  'BUSINESS_MUTATION_MUST_NOT_RUN_ON_CONFLICT'
 ]) contains('focusedTest', marker, `focused runtime covers ${marker}`);
 contains('focusedTest', 'platform_policy_archive_operation_retries', 'focused runtime verifies durable retry evidence');
 contains('focusedTest', 'toThrow(/immutable/u)', 'focused runtime verifies immutable ledgers');

@@ -32,11 +32,29 @@ export const IPC_POLICY_SENSITIVE_READ_CHANNELS = Object.freeze([
 ] as const);
 
 export const IPC_SECURITY_POSTURE_NO_CACHE_CHANNELS = Object.freeze([
-  'system:getNetworkEgressBoundary'
+  'system:getNetworkEgressBoundary',
+  'system:getDerivedDataPolicyBoundary'
+] as const);
+
+/**
+ * Read projections are derived data. Until an exact source receipt and
+ * inheritance envelope can cross the renderer boundary, production IPC
+ * responses are never retained by the generic sharing caches.
+ */
+export const IPC_DERIVED_DATA_NO_CACHE_CHANNELS = Object.freeze([
+  'catalog:listPeople',
+  'catalog:listEvents',
+  'catalog:lookup',
+  'largeData:tree',
+  'largeData:archive',
+  'genealogy:insights',
+  'archive:versions',
+  'archive:search'
 ] as const);
 
 const policySensitiveChannels = new Set<string>(IPC_POLICY_SENSITIVE_READ_CHANNELS);
 for (const channel of IPC_SECURITY_POSTURE_NO_CACHE_CHANNELS) policySensitiveChannels.add(channel);
+for (const channel of IPC_DERIVED_DATA_NO_CACHE_CHANNELS) policySensitiveChannels.add(channel);
 
 const interactiveChannels = new Set<string>([
   'catalog:listPeople',

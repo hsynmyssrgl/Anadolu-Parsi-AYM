@@ -6,68 +6,68 @@ const dataStore = read('apps/desktop/src/main/data-store.ts');
 const useCases = read('packages/application/src/database-export-file-use-cases.ts');
 const adapter = read('apps/desktop/src/main/database-export-file-application-adapter.ts');
 const applicationIndex = read('packages/application/src/index.ts');
-const appMeta = read('packages/domain/src/app-meta.ts');
-const metadata = JSON.parse(read('repository-metadata.json'));
+const main = read('apps/desktop/src/main/main.ts');
 
+const exportMethodStart = dataStore.indexOf('public exportBackup(destinationPath: string): void');
 const exportMethod = dataStore.slice(
-  dataStore.indexOf('public exportBackup(destinationPath: string): void'),
-  dataStore.indexOf('public getSystemHealth()', dataStore.indexOf('public exportBackup(destinationPath: string): void'))
+  exportMethodStart,
+  dataStore.indexOf('public getSystemHealth()', exportMethodStart)
 );
+const ipcExportMethodStart = main.indexOf("registerIpcHandler('backup:export',");
+const ipcExportMethod = main.slice(ipcExportMethodStart, main.indexOf('\n}', ipcExportMethodStart));
 
 const checks = [
   [
-    'application database export file port exists',
+    'historical raw database export boundary remains available for source archaeology',
     useCases.includes('export interface DatabaseExportFilePort')
       && useCases.includes('copyDatabase(')
       && useCases.includes('sourcePath: string')
       && useCases.includes('destinationPath: string')
+      && useCases.includes('export class ExportDatabaseFileUseCase')
   ],
   [
-    'database export use case validates the destination',
-    useCases.includes('export class ExportDatabaseFileUseCase')
-      && useCases.includes("endsWith('.db')")
-      && useCases.includes('Kaynak ve hedef veritabanı yolu aynı olamaz.')
+    'historical raw copy adapter is explicitly dormant and fail-closed',
+    adapter.includes('Historical raw-copy adapter retained for source archaeology only.')
+      && adapter.includes('implements DormantDatabaseExportFilePort')
+      && adapter.includes('Korumasız SQLite kopyalama adaptörü kalıcı olarak devre dışıdır.')
+      && adapter.includes('ERROR_CODES.AUTHORIZATION_DENIED')
+      && adapter.includes("replacement: 'protected-full-backup'")
+      && !adapter.includes('copyFileSync')
+      && !adapter.includes("from 'node:fs'")
   ],
   [
-    'filesystem adapter implements the export port',
-    adapter.includes('export class FileSystemDatabaseExportFilePort implements DatabaseExportFilePort')
-      && adapter.includes("from '@ppt/application'")
+    'application root no longer exports the raw database boundary',
+    !applicationIndex.includes("export * from './database-export-file-use-cases.js';")
   ],
   [
-    'filesystem adapter owns the physical database copy',
-    adapter.includes("import { copyFileSync } from 'node:fs';")
-      && adapter.includes('copyFileSync(input.sourcePath, input.destinationPath)')
+    'production datastore does not compose the raw database exporter',
+    !dataStore.includes('ExportDatabaseFileUseCase')
+      && !dataStore.includes('FileSystemDatabaseExportFilePort')
+      && !dataStore.includes('#exportDatabaseFileUseCase')
   ],
   [
-    'application index exports the new boundary',
-    applicationIndex.includes("export * from './database-export-file-use-cases.js';")
+    'legacy exportBackup fails closed for .db and delegates only to protected full backup',
+    exportMethodStart >= 0
+      && exportMethod.indexOf('this.#requireAuth()') >= 0
+      && exportMethod.indexOf("endsWith('.pptbackup')") > exportMethod.indexOf('this.#requireAuth()')
+      && exportMethod.includes('Korumasız .db dışa aktarımı yasaktır')
+      && exportMethod.indexOf('this.exportFullBackup(destinationPath)') > exportMethod.indexOf("endsWith('.pptbackup')")
+      && !exportMethod.includes('withDatabaseSnapshot')
+      && !exportMethod.includes('copyDatabase')
   ],
   [
-    'datastore constructs and delegates to the export use case',
-    dataStore.includes("import { FileSystemDatabaseExportFilePort } from './database-export-file-application-adapter.js';")
-      && dataStore.includes('readonly #exportDatabaseFileUseCase: ExportDatabaseFileUseCase;')
-      && dataStore.includes('new ExportDatabaseFileUseCase(new FileSystemDatabaseExportFilePort())')
-      && exportMethod.includes('this.#exportDatabaseFileUseCase.execute(')
+    'production IPC offers only the protected .pptbackup destination',
+    ipcExportMethodStart >= 0
+      && ipcExportMethod.includes('Cihaz korumalı tam yedeği kaydet')
+      && ipcExportMethod.includes('.pptbackup`')
+      && ipcExportMethod.includes("extensions: ['pptbackup']")
+      && ipcExportMethod.includes('store().exportBackup(result.filePath)')
+      && !ipcExportMethod.includes("extensions: ['db']")
   ],
   [
-    'checkpoint copy and audit sequence is preserved',
-    exportMethod.indexOf("this.#prepareDatabaseForBackup('database-export-checkpoint')") >= 0
-      && exportMethod.indexOf('this.#exportDatabaseFileUseCase.execute(') > exportMethod.indexOf("this.#prepareDatabaseForBackup('database-export-checkpoint')")
-      && exportMethod.indexOf("this.#writeAudit('backup.exported'") > exportMethod.indexOf('this.#exportDatabaseFileUseCase.execute(')
-  ],
-  [
-    'datastore no longer owns the physical copy operation',
+    'datastore never owns a physical raw-copy primitive',
     !dataStore.includes("import { copyFileSync } from 'node:fs';")
       && !exportMethod.includes('copyFileSync(')
-  ],
-  [
-    'build96 version metadata is aligned',
-    metadata.versionSequence === 96
-      && metadata.revision === 'BUILD-96'
-      && metadata.packageVersion === '24.7.2026-96'
-      && appMeta.includes("version: '24.07.2026.96'")
-      && appMeta.includes("packageVersion: '24.7.2026-96'")
-      && appMeta.includes('Build 96')
   ],
   [
     'build96 remains active development',

@@ -118,8 +118,21 @@ check(documents.adapter.includes("resourceType: 'event'") && documents.adapter.i
 check(documents.runtimeSource.includes("const TIMELINE_POLICY_FENCE_NAME = 'timeline-event-write'"), 'production runtime uses exact timeline fence');
 check(documents.importService.includes('timelineRepository.insert(governedRepository') && !documents.importService.includes('timelineRepository.insert(repository'), 'family import has only receipt-authorized timeline write path');
 
+const automationRepository = await readFile(resolve(root, 'packages/repositories/src/automation-repository.ts'), 'utf8');
+const automationAdapter = await readFile(resolve(root, 'apps/desktop/src/main/automation-application-adapter.ts'), 'utf8');
+check(
+  automationRepository.includes('governed_timeline_events')
+  || (
+    automationRepository.includes("WHERE source_type='life_record'")
+    && !automationRepository.includes('timeline_events')
+    && automationAdapter.includes('lifePolicyTransactionRunner.execute(')
+    && automationAdapter.includes('listVisibleAutomationLifeRunSources(')
+  ),
+  'automation repository either uses the governed timeline projection or is LIFE-only behind current PEP'
+);
+
 for (const reader of [
-  'automation-repository.ts', 'ai-consent-repository.ts', 'dashboard-repository.ts',
+  'ai-consent-repository.ts', 'dashboard-repository.ts',
   'entity-catalog-repository.ts', 'genealogy-repository.ts',
   'large-family-read-model-repository.ts', 'report-repository.ts'
 ]) {

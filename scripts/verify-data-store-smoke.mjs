@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
@@ -8,21 +8,35 @@ import { createArchivePolicyTestOptions } from './lib/archive-policy-test-harnes
 
 const directory = mkdtempSync(join(tmpdir(), 'panthera-mvp44-smoke-'));
 const databasePath = join(directory, 'family.db');
-const backupPath = join(directory, 'backup.db');
+const backupPath = join(directory, 'backup.pptbackup');
+const backupPasswordPath = join(directory, 'managed-backup-password.json');
+const backupSecretProtector = Object.freeze({
+  protectionId: 'data-store-smoke-protector-v1',
+  required: false,
+  isAvailable: () => true,
+  protect: (secret) => Buffer.from(`smoke:${secret}`, 'utf8').toString('base64'),
+  unprotect: (protectedBase64) => {
+    const value = Buffer.from(protectedBase64, 'base64').toString('utf8');
+    if (!value.startsWith('smoke:')) throw new Error('Smoke yedek parola zarfı geçersiz.');
+    return value.slice('smoke:'.length);
+  }
+});
 let store;
 let migrationSummary;
 const policyOptions = createArchivePolicyTestOptions();
 try {
   store = new FamilyDataStore({
     databasePath,
+    backupSecretProtector,
+    backupPasswordPath,
     applicationVersion: '24.07.2026.60',
     migrationBackupDirectory: join(directory, 'migration-backups'),
     onMigrationCompleted: (summary) => { migrationSummary = summary; },
     ...policyOptions
   });
   assert.ok(migrationSummary, 'Migration özeti üretilmedi.');
-  assert.deepEqual(migrationSummary.appliedVersions, Array.from({ length: 66 }, (_unused, index) => index + 1));
-  assert.equal(migrationSummary.schemaAfter.tableCount, 79);
+  assert.deepEqual(migrationSummary.appliedVersions, Array.from({ length: 77 }, (_unused, index) => index + 1));
+  assert.equal(migrationSummary.schemaAfter.tableCount, 83);
 
   const initialState = store.getAuthState();
   if (!initialState.initialized) {
@@ -45,14 +59,22 @@ try {
   const after = await store.getSnapshot();
   assert.equal(after.people.length, before.people.length + 1, 'Aile üyesi kalıcı olarak eklenemedi.');
   store.exportBackup(backupPath);
-  assert.equal(existsSync(backupPath), true, 'Yerel .db yedeği oluşturulamadı.');
+  assert.equal(existsSync(backupPath), true, 'Cihaz korumalı .pptbackup yedeği oluşturulamadı.');
+  const backupBytes = readFileSync(backupPath);
+  assert.equal(backupBytes.subarray(0, 16).toString('utf8').includes('SQLite format 3'), false, 'Ham SQLite başlığı yedek hedefinde açığa çıktı.');
+  const backupContainer = JSON.parse(backupBytes.toString('utf8'));
+  assert.equal(backupContainer.format, 'anadolu-parsi-full-backup');
+  assert.equal(backupContainer.version, 3);
+  assert.equal(backupContainer.encryption?.algorithm, 'aes-256-gcm');
+  assert.equal(typeof backupContainer.ciphertext, 'string');
+  assert.equal(Object.hasOwn(backupContainer, 'database'), false, 'Yedek kapsayıcısı plaintext veritabanı alanı taşıyor.');
   store.close();
   store = undefined;
 
   const probe = new DatabaseSync(databasePath, { readOnly: true });
   try {
     const migrations = probe.prepare('SELECT version,success FROM schema_migrations ORDER BY version').all();
-    assert.equal(migrations.length, 66, 'Migration kayıtları eksik.');
+    assert.equal(migrations.length, 77, 'Migration kayıtları eksik.');
     assert.equal(migrations.every((row) => Number(row.success) === 1), true, 'Başarısız migration kaydı bulundu.');
     assert.equal(Boolean(probe.prepare("SELECT 1 AS present FROM sqlite_master WHERE type='table' AND name='database_metadata'").get()), true);
     const outbox = probe.prepare("SELECT event_type,aggregate_type,aggregate_id,status,attempt_count FROM event_outbox WHERE event_type='family.member.created' ORDER BY occurred_at DESC LIMIT 1").get();

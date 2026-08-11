@@ -7,7 +7,7 @@ import {
 import type { DatabaseConnection } from '@ppt/contracts';
 import type { MigrationRunSummary } from '@ppt/database';
 import type {
-  PlatformPolicyArchiveOperationRecord,
+  PlatformPolicyArchiveOperationMetadata,
   PlatformPolicyArchivePendingOperationMutation,
   PlatformPolicyArchivePendingOperationRecord,
   RepositoryExecutionContext,
@@ -63,7 +63,6 @@ import {
   PrepareBackupDatabaseUseCase,
   VerifyBackupDatabaseIntegrityUseCase,
   PrepareRestoredDatabaseForReauthorizationUseCase,
-  ExportDatabaseFileUseCase,
   GetBackupTargetFreeBytesUseCase,
   PrepareBackupTargetUseCase,
   CreateBackupArtifactPathUseCase,
@@ -323,7 +322,6 @@ import { RepositoryBackedAutomationAdapter } from './automation-application-adap
 import { RepositoryBackedReportQueryPort } from './report-application-adapter.js';
 import { RepositoryBackedAuditReadQueryPort } from './audit-read-application-adapter.js';
 import { RepositoryBackedAuditWriteCommandPort } from './audit-write-application-adapter.js';
-import { FileSystemDatabaseExportFilePort } from './database-export-file-application-adapter.js';
 import { FileSystemBackupTargetFilePort } from './backup-target-file-application-adapter.js';
 import {
   FileSystemFullBackupFilePort,
@@ -611,7 +609,6 @@ export class FamilyDataStore {
   readonly #prepareBackupDatabaseUseCase: PrepareBackupDatabaseUseCase;
   readonly #verifyBackupDatabaseIntegrityUseCase: VerifyBackupDatabaseIntegrityUseCase;
   readonly #prepareRestoredDatabaseForReauthorizationUseCase: PrepareRestoredDatabaseForReauthorizationUseCase;
-  readonly #exportDatabaseFileUseCase: ExportDatabaseFileUseCase;
   readonly #getBackupTargetFreeBytesUseCase: GetBackupTargetFreeBytesUseCase;
   readonly #prepareBackupTargetUseCase: PrepareBackupTargetUseCase;
   readonly #createBackupArtifactPathUseCase: CreateBackupArtifactPathUseCase;
@@ -1401,7 +1398,6 @@ export class FamilyDataStore {
     this.#prepareBackupDatabaseUseCase = new PrepareBackupDatabaseUseCase(backupDatabaseSafetyPort);
     this.#verifyBackupDatabaseIntegrityUseCase = new VerifyBackupDatabaseIntegrityUseCase(backupDatabaseSafetyPort);
     this.#prepareRestoredDatabaseForReauthorizationUseCase = new PrepareRestoredDatabaseForReauthorizationUseCase(backupDatabaseSafetyPort);
-    this.#exportDatabaseFileUseCase = new ExportDatabaseFileUseCase(new FileSystemDatabaseExportFilePort());
     const backupTargetFiles = new FileSystemBackupTargetFilePort();
     this.#quarantineManagedBackupArtifactsUseCase = new QuarantineManagedBackupArtifactsUseCase(new FileSystemBackupPurgeQuarantinePort());
     this.#getBackupTargetFreeBytesUseCase = new GetBackupTargetFreeBytesUseCase(backupTargetFiles);
@@ -2121,13 +2117,32 @@ export class FamilyDataStore {
     };
   }
 
-  #findArchiveOperation(context: ArchiveApplicationContext): PlatformPolicyArchiveOperationRecord | undefined {
+  #findArchiveOperation(
+    context: ArchiveApplicationContext,
+    expectation: ArchiveOperationExpectation
+  ): PlatformPolicyArchiveOperationMetadata | undefined {
     if (!context.operationId) return undefined;
+    if (!context.operationFingerprint) {
+      throw new PlatformPolicyEnforcementError(
+        'TRANSACTION_CONTEXT_MISMATCH',
+        'ArÅŸiv iÅŸlem metadata sorgusu geÃ§erli bir fingerprint gerektirir.'
+      );
+    }
     const result = this.#transactionExecutor.execute(
       context.correlationId,
-      (transaction) => this.#repositories.platformPolicyTransactionRepository.findArchiveOperation(
+      (transaction) => this.#repositories.platformPolicyTransactionRepository.findArchiveOperationMetadata(
         this.#archiveRepositoryContext(context, transaction),
-        context.operationId!
+        {
+          operationId: context.operationId!,
+          operationFingerprint: context.operationFingerprint!,
+          resourceFamilyId: String(context.familyId),
+          actorAccountId: String(context.actor.userId),
+          purpose: 'archive',
+          resourceType: expectation.resourceType,
+          resourceId: expectation.resourceId,
+          action: expectation.action,
+          capability: 'archive.write'
+        }
       )
     );
     if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
@@ -2138,7 +2153,7 @@ export class FamilyDataStore {
     context: ArchiveApplicationContext,
     expectation: ArchiveOperationExpectation
   ): boolean {
-    const operation = this.#findArchiveOperation(context);
+    const operation = this.#findArchiveOperation(context, expectation);
     if (!operation) return false;
     if (
       operation.operationFingerprint !== context.operationFingerprint
@@ -4256,13 +4271,11 @@ export class FamilyDataStore {
   }
 
   public exportBackup(destinationPath: string): void {
-    this.#prepareDatabaseForBackup('database-export-checkpoint');
-    const exported = this.#withDatabaseSnapshot((sourcePath) => this.#exportDatabaseFileUseCase.execute(
-      this.#backupSafetyCorrelationId('database-export-file'),
-      { sourcePath, destinationPath }
-    ));
-    if (!exported.ok) throw new Error(`[${exported.error.code}] ${exported.error.message}`);
-    this.#writeAudit('backup.exported', 'database', 'family-main', nowIso());
+    this.#requireAuth();
+    if (!destinationPath.toLowerCase().endsWith('.pptbackup')) {
+      throw new Error('Korumasız .db dışa aktarımı yasaktır; yedek hedefi .pptbackup olmalıdır.');
+    }
+    this.exportFullBackup(destinationPath);
   }
 
   public getSystemHealth(): SystemHealthView {

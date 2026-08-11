@@ -1,34 +1,39 @@
-import { copyFileSync } from 'node:fs';
-import type { DatabaseExportFilePort } from '@ppt/application';
 import {
   ERROR_CODES,
   createAppError,
   err,
-  ok,
   type AppError,
-  type CorrelationId
+  type CorrelationId,
+  type Result
 } from '@ppt/core';
 
-export class FileSystemDatabaseExportFilePort implements DatabaseExportFilePort {
+/**
+ * Historical raw-copy adapter retained for source archaeology only.
+ * It is deliberately absent from the application root export and production
+ * composition; user-facing backups must use the protected full-backup path.
+ */
+interface DormantDatabaseExportFilePort {
+  copyDatabase(
+    input: { readonly sourcePath: string; readonly destinationPath: string },
+    correlationId: CorrelationId
+  ): Result<void, AppError>;
+}
+
+export class FileSystemDatabaseExportFilePort implements DormantDatabaseExportFilePort {
   public copyDatabase(
     input: { readonly sourcePath: string; readonly destinationPath: string },
     correlationId: CorrelationId
-  ): ReturnType<DatabaseExportFilePort['copyDatabase']> {
-    try {
-      copyFileSync(input.sourcePath, input.destinationPath);
-      return ok(undefined);
-    } catch (error) {
-      return err(this.#error(correlationId, 'Veritabanı dışa aktarılamadı.', error));
-    }
-  }
-
-  #error(correlationId: CorrelationId, message: string, error: unknown): AppError {
-    return createAppError({
-      code: ERROR_CODES.CORE_UNEXPECTED,
-      message,
-      category: 'infrastructure',
+  ): Result<void, AppError> {
+    return err(createAppError({
+      code: ERROR_CODES.AUTHORIZATION_DENIED,
+      message: 'Korumasız SQLite kopyalama adaptörü kalıcı olarak devre dışıdır.',
+      category: 'security',
       correlationId,
-      details: { cause: error instanceof Error ? error.message : String(error) }
-    });
+      details: Object.freeze({
+        sourceProvided: input.sourcePath.trim().length > 0,
+        destinationProvided: input.destinationPath.trim().length > 0,
+        replacement: 'protected-full-backup'
+      })
+    }));
   }
 }

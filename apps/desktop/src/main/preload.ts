@@ -28,6 +28,7 @@ import type { AuthorizationContextWorkspaceView } from '@ppt/domain';
 import type { IssueOfflineCapabilityLeaseInput, OfflineCapabilityLeaseWorkspaceView } from '@ppt/domain';
 import type { ClientDataAccessBoundaryView } from '@ppt/domain';
 import type { NetworkEgressBoundaryView } from '@ppt/domain';
+import type { DerivedDataPolicyBoundaryView } from '@ppt/domain';
 import type { DataRepairOperation, DataRepairWorkspaceView } from '@ppt/domain';
 import type {
   EnrollWindowsHelloInput,
@@ -287,6 +288,7 @@ contextBridge.exposeInMainWorld('pardus', {
   getCoreServiceHealth:():Promise<CoreServiceHealthContract>=>invoke('system:getCoreServiceHealth'),
   getCoreServiceApiBoundary:():Promise<CoreServiceApiBoundaryStatusContract>=>invoke('system:getCoreServiceApiBoundary'),
   getNetworkEgressBoundary:():Promise<NetworkEgressBoundaryView>=>invoke('system:getNetworkEgressBoundary'),
+  getDerivedDataPolicyBoundary:():Promise<DerivedDataPolicyBoundaryView>=>invoke('system:getDerivedDataPolicyBoundary'),
   listBackupTargets:():Promise<BackupTargetView[]>=>invoke('system:listBackupTargets'),
   upsertBackupTarget:(input:UpsertBackupTargetInput):Promise<BackupTargetView[]>=>invoke('system:upsertBackupTarget',input),
   listBackupRuns:(limit?:number):Promise<BackupRunView[]>=>invoke('system:listBackupRuns',limit),

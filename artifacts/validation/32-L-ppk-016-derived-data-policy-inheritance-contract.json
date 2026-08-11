@@ -1,0 +1,490 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-L",
+  "requirement": "PPK-016",
+  "phase": "DERIVED_DATA_POLICY_INHERITANCE_CONTRACT",
+  "status": "PASS",
+  "checkCount": 109,
+  "passed": 109,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "derived kinds cover the ten accepted materialization classes",
+      "status": "PASS"
+    },
+    {
+      "name": "production inventory records validated complete controls with zero open owner",
+      "status": "PASS"
+    },
+    {
+      "name": "production inventory defines the governed materialization and five adjacent ownership classes",
+      "status": "PASS"
+    },
+    {
+      "name": "production inventory has thirteen unique reviewed owners and no remaining implementation blocker",
+      "status": "PASS"
+    },
+    {
+      "name": "three unsafe materialization candidates are retired or payload-eliminated",
+      "status": "PASS"
+    },
+    {
+      "name": "production owners retain an explicit candidate or adjacent classification",
+      "status": "PASS"
+    },
+    {
+      "name": "automation life task run ledger and archive journal carry closed dispositions",
+      "status": "PASS"
+    },
+    {
+      "name": "protected backup and diagnostics are separate cryptographic boundaries not inheritance evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "AI timeline helper is absent from public domain exports and production use is fail-closed",
+      "status": "PASS"
+    },
+    {
+      "name": "family import lease retains identity and digests but no semantic payload",
+      "status": "PASS"
+    },
+    {
+      "name": "family import apply re-reads and revalidates source stat hash parse and plan",
+      "status": "PASS"
+    },
+    {
+      "name": "plaintext database replica is rejected and legacy export delegates only to protected backup",
+      "status": "PASS"
+    },
+    {
+      "name": "whole-vault backup is pptbackup-only and encrypts the complete database with vault archive",
+      "status": "PASS"
+    },
+    {
+      "name": "automation accepts only LIFE and revalidates its current policy source before generation",
+      "status": "PASS"
+    },
+    {
+      "name": "generated LIFE task persists no source title or due-at semantic payload",
+      "status": "PASS"
+    },
+    {
+      "name": "automation run persistence contract and list projection are content-free",
+      "status": "PASS"
+    },
+    {
+      "name": "archive journal persists fixed completion metadata and never exposes semantic result JSON",
+      "status": "PASS"
+    },
+    {
+      "name": "archive retry requires a current persisted receipt and returns content-free conflict",
+      "status": "PASS"
+    },
+    {
+      "name": "direct derived-data persistence exception registry is frozen and empty",
+      "status": "PASS"
+    },
+    {
+      "name": "exactly one authorized repository adapter is declared",
+      "status": "PASS"
+    },
+    {
+      "name": "source count and lineage depth are fail-closed bounded",
+      "status": "PASS"
+    },
+    {
+      "name": "canonical ancestor closure is bounded to 512 and exposed by the content-free boundary",
+      "status": "PASS"
+    },
+    {
+      "name": "target source and binding use exact canonical field sets",
+      "status": "PASS"
+    },
+    {
+      "name": "source snapshot binds content receipt context request and policy package hashes",
+      "status": "PASS"
+    },
+    {
+      "name": "inactive receipt fails closed before policy inheritance",
+      "status": "PASS"
+    },
+    {
+      "name": "duplicate self cyclic excessive lineage and ancestor fan-out fail closed",
+      "status": "PASS"
+    },
+    {
+      "name": "family policy version and package hash mismatches fail closed",
+      "status": "PASS"
+    },
+    {
+      "name": "effective sensitivity is the maximum source sensitivity",
+      "status": "PASS"
+    },
+    {
+      "name": "effective data classes are the source union",
+      "status": "PASS"
+    },
+    {
+      "name": "all five access dimensions use source intersections",
+      "status": "PASS"
+    },
+    {
+      "name": "an empty source access intersection fails closed",
+      "status": "PASS"
+    },
+    {
+      "name": "effective obligations are the source union",
+      "status": "PASS"
+    },
+    {
+      "name": "effective retention is the earliest finite source boundary",
+      "status": "PASS"
+    },
+    {
+      "name": "target sensitivity and data-class downgrades fail closed",
+      "status": "PASS"
+    },
+    {
+      "name": "every target access broadening dimension fails closed",
+      "status": "PASS"
+    },
+    {
+      "name": "obligation and retention broadening fail closed",
+      "status": "PASS"
+    },
+    {
+      "name": "source-set and complete binding are SHA-256 bound",
+      "status": "PASS"
+    },
+    {
+      "name": "binding verification recomputes and compares both hashes",
+      "status": "PASS"
+    },
+    {
+      "name": "canonical binding ordering uses locale-independent text comparison",
+      "status": "PASS"
+    },
+    {
+      "name": "boundary snapshot exposes fail-closed content-free truth only",
+      "status": "PASS"
+    },
+    {
+      "name": "platform policy exports derived-data inheritance",
+      "status": "PASS"
+    },
+    {
+      "name": "domain defines a typed content-free PPK-016 boundary view",
+      "status": "PASS"
+    },
+    {
+      "name": "domain exports the derived-data policy view",
+      "status": "PASS"
+    },
+    {
+      "name": "application use case requires a persistence port",
+      "status": "PASS"
+    },
+    {
+      "name": "application use case evaluates and verifies before persistence",
+      "status": "PASS"
+    },
+    {
+      "name": "application use case persists before opening the producer operation",
+      "status": "PASS"
+    },
+    {
+      "name": "application use case has no optional persistence bypass",
+      "status": "PASS"
+    },
+    {
+      "name": "application exports inheritance and boundary use cases",
+      "status": "PASS"
+    },
+    {
+      "name": "repository contract requires policy-authorized transaction context",
+      "status": "PASS"
+    },
+    {
+      "name": "repository contract exposes sealed insert target-authorized full lookup and hash-only source lookup",
+      "status": "PASS"
+    },
+    {
+      "name": "repository contract and implementation are exported",
+      "status": "PASS"
+    },
+    {
+      "name": "repository validates canonical binding and source-set hashes",
+      "status": "PASS"
+    },
+    {
+      "name": "repository binds receipt context request and policy package metadata",
+      "status": "PASS"
+    },
+    {
+      "name": "repository rejects future or more than 30000 ms old source receipts at creation",
+      "status": "PASS"
+    },
+    {
+      "name": "repository revalidates complete producer and source receipt provenance at read time",
+      "status": "PASS"
+    },
+    {
+      "name": "both read APIs require current PEP before returning recursively verified stored bindings",
+      "status": "PASS"
+    },
+    {
+      "name": "read-back revalidates source-to-producer creation chronology without treating history as current authority",
+      "status": "PASS"
+    },
+    {
+      "name": "repository resolves every derived source through exactly one sealed recursive upstream binding",
+      "status": "PASS"
+    },
+    {
+      "name": "historical upstream policy rotation uses monotonic semantics rather than exact version equality",
+      "status": "PASS"
+    },
+    {
+      "name": "stored recursive lineage traversal is independently bounded to 512 distinct bindings",
+      "status": "PASS"
+    },
+    {
+      "name": "repository writes pending metadata sources then seals exactly once",
+      "status": "PASS"
+    },
+    {
+      "name": "repository never exposes or stores derived payload and vault paths",
+      "status": "PASS"
+    },
+    {
+      "name": "Desktop composition root owns the single concrete repository instance",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 77 creates strict binding and source metadata tables",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 77 binds producer and source receipts with restrictive foreign keys",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 77 receipt trigger binds exact source identity context request and package",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 77 starts pending and seals only with a complete source set",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 77 independently binds producer time and the 30000 ms source receipt window",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 77 blocks sensitivity and data-class downgrade while sealing",
+      "status": "PASS"
+    },
+    {
+      "name": "sealed binding and all source rows are immutable",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 77 stores metadata only with no payload path or secret columns",
+      "status": "PASS"
+    },
+    {
+      "name": "main process exposes only the typed boundary snapshot",
+      "status": "PASS"
+    },
+    {
+      "name": "preload and renderer declaration expose typed status only",
+      "status": "PASS"
+    },
+    {
+      "name": "IPC integration policy requires zero arguments for PPK-016 status",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-016 status is security-posture no-cache",
+      "status": "PASS"
+    },
+    {
+      "name": "generic derived renderer projections are explicitly no-cache",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-012 lease-controlled sensitive cache remains active",
+      "status": "PASS"
+    },
+    {
+      "name": "System UI renders fail-closed PPK-016 posture without content",
+      "status": "PASS"
+    },
+    {
+      "name": "profile menu exposes the derived-data security entry",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate scans every production app and package source zone",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate blocks SQL adapter primitive and direct-write bypasses",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate exposes zero producer adapters and blocks no-op enforcement composition",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate permits only the exact policy adapter registry literal and still rejects policy imports",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate carries twenty-three malicious and four benign self-tests",
+      "status": "PASS"
+    },
+    {
+      "name": "current production source has twenty-three relevant files and zero boundary finding",
+      "status": "PASS"
+    },
+    {
+      "name": "typecheck and build both execute the PPK-016 source gate",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted tests cover inheritance downgrade lineage tamper ancestor overflow and operation ordering",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted tests exercise real migration 77 repository sealing hash-only lookup and immutable reads",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted tests cover future stale exact-30000ms receipt boundaries and producer time mismatch",
+      "status": "PASS"
+    },
+    {
+      "name": "runtime requires all seventy-five current PPK-016 targeted tests",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted tests prove the exact 512 allow and 513 ancestor rejection boundary",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted tests reject producer and source provenance tamper through both read APIs",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted tests prove exact upstream reset rejection and safe monotonic policy-package rotation",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted tests prove Unicode input-order invariant source-set and binding hashes",
+      "status": "PASS"
+    },
+    {
+      "name": "threat model records protected boundary threats controls exclusions and reality",
+      "status": "PASS"
+    },
+    {
+      "name": "scope and accepted registry bind the canonical completed production inventory",
+      "status": "PASS"
+    },
+    {
+      "name": "governance documents distinguish retained materialization from all five adjacent classes",
+      "status": "PASS"
+    },
+    {
+      "name": "governance documents record AI import-cache raw-replica and protected-backup controls",
+      "status": "PASS"
+    },
+    {
+      "name": "governance documents record content-free automation/archive closure and reject cryptographic boundary as inheritance proof",
+      "status": "PASS"
+    },
+    {
+      "name": "scope records validated read-time provenance exact lineage monotonic rotation and 512 traversal boundaries",
+      "status": "PASS"
+    },
+    {
+      "name": "decision threat model and audit distinguish historical provenance from current PEP and record validated exact upstream limits",
+      "status": "PASS"
+    },
+    {
+      "name": "audit records the complete executed validation matrix without expanding the reality boundary",
+      "status": "PASS"
+    },
+    {
+      "name": "runtime evidence plan names the new provenance lineage rotation and ancestor boundaries",
+      "status": "PASS"
+    },
+    {
+      "name": "accepted registry closes the complete PPK-016 evidence chain",
+      "status": "PASS"
+    },
+    {
+      "name": "scope closes PPK-016 with migration 77 and no transfer backfill or cutover",
+      "status": "PASS"
+    },
+    {
+      "name": "DEC-197 is latest and binds PPK-016 evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "decision and audit preserve Desktop vault no-cache DEC-171 and zero real data",
+      "status": "PASS"
+    },
+    {
+      "name": "decision and audit limit completion to metadata foundation and require future current-PEP payload binding",
+      "status": "PASS"
+    },
+    {
+      "name": "decision and audit record the fail-closed 30000 ms creation-time receipt window",
+      "status": "PASS"
+    }
+  ],
+  "failures": [],
+  "sourceScan": {
+    "zones": 18,
+    "files": 335,
+    "relevantFiles": 23,
+    "findings": []
+  },
+  "productionInventoryStatus": "COMPLETE",
+  "productionInventoryOwnerCount": 13,
+  "productionInventoryCompletionClaimed": true,
+  "activeUngovernedDerivedPayloadOwners": 0,
+  "openProductionBlockers": [],
+  "directDerivedDataPersistenceExceptions": 0,
+  "authorizedRepositoryAdapters": 1,
+  "authorizedDerivedProducerAdapters": 0,
+  "sourceReceiptMaximumAgeMsAtCreation": 30000,
+  "futureSourceReceiptAllowedAtCreation": false,
+  "targetedTestMinimumTests": 75,
+  "readTimeProducerReceiptProvenanceRequired": true,
+  "readTimeSourceReceiptProvenanceRequired": true,
+  "creationChronologyRevalidatedAtRead": true,
+  "currentPepRequiredAtRead": true,
+  "monotonicUpstreamPolicyRequired": true,
+  "historicalPolicyVersionPackageExactMatchRequired": false,
+  "exactRecursiveUpstreamLineageRequired": true,
+  "ambiguousUpstreamRejected": true,
+  "maximumAncestorCount": 512,
+  "maximumStoredLineageTraversalCount": 512,
+  "migrationDecision": "MIGRATION_77_METADATA_ONLY_IMMUTABLE_RECEIPT_BOUND_LINEAGE",
+  "legacyDesktopVaultPreserved": true,
+  "sqliteOwnershipTransferred": false,
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "realDataBackfillPerformed": false,
+  "derivedPayloadPersistedByValidation": false,
+  "currentDerivedPayloadRepositoryOrReadPathExists": false,
+  "futureCurrentPepReevaluationRequired": true,
+  "historicalReceiptAloneCountsAsRevocationPropagationEvidence": false,
+  "policySensitiveIpcNoCacheWeakened": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T20:12:12.708Z"
+}

@@ -6013,6 +6013,396 @@ SET value='REVISION-32-H-PPK-012-OFFLINE-CAPABILITY-LEASE-CACHE-FENCE',
 WHERE key='schema_generation';
 `;
 
+const derivedDataPolicyInheritanceSql = `CREATE TABLE derived_data_policy_bindings(
+  binding_hash TEXT PRIMARY KEY CHECK(
+    length(binding_hash)=64 AND binding_hash NOT GLOB '*[^0-9a-f]*'
+  ),
+  schema_version INTEGER NOT NULL CHECK(schema_version=1),
+  derived_kind TEXT NOT NULL CHECK(derived_kind IN (
+    'OCR_TEXT','SEARCH_INDEX','THUMBNAIL','AI_MEMORY','SUMMARY',
+    'EMBEDDING','TRANSLATION','TRANSCRIPT','CACHE','REPLICA'
+  )),
+  derived_resource_type TEXT NOT NULL CHECK(length(trim(derived_resource_type)) BETWEEN 1 AND 128),
+  derived_resource_id TEXT NOT NULL CHECK(length(trim(derived_resource_id)) BETWEEN 1 AND 256),
+  derived_resource_version TEXT NOT NULL CHECK(length(trim(derived_resource_version)) BETWEEN 1 AND 128),
+  content_sha256 TEXT NOT NULL CHECK(
+    length(content_sha256)=64 AND content_sha256 NOT GLOB '*[^0-9a-f]*'
+  ),
+  family_id TEXT NOT NULL CHECK(length(trim(family_id)) BETWEEN 1 AND 256),
+  policy_version TEXT NOT NULL CHECK(length(trim(policy_version)) BETWEEN 1 AND 128),
+  policy_package_sha256 TEXT NOT NULL CHECK(
+    length(policy_package_sha256)=64 AND policy_package_sha256 NOT GLOB '*[^0-9a-f]*'
+  ),
+  sensitivity TEXT NOT NULL CHECK(sensitivity IN (
+    'public','internal','personal','sensitive','highly_sensitive'
+  )),
+  data_classes_json TEXT NOT NULL CHECK(
+    json_valid(data_classes_json)
+    AND json_type(data_classes_json)='array'
+    AND json_array_length(data_classes_json) BETWEEN 1 AND 10
+    AND json(data_classes_json)=data_classes_json
+  ),
+  access_policy_json TEXT NOT NULL CHECK(
+    json_valid(access_policy_json)
+    AND json_type(access_policy_json)='object'
+    AND json(access_policy_json)=access_policy_json
+  ),
+  access_policy_sha256 TEXT NOT NULL CHECK(
+    length(access_policy_sha256)=64 AND access_policy_sha256 NOT GLOB '*[^0-9a-f]*'
+  ),
+  obligations_json TEXT NOT NULL CHECK(
+    json_valid(obligations_json)
+    AND json_type(obligations_json)='array'
+    AND json(obligations_json)=obligations_json
+  ),
+  obligations_sha256 TEXT NOT NULL CHECK(
+    length(obligations_sha256)=64 AND obligations_sha256 NOT GLOB '*[^0-9a-f]*'
+  ),
+  source_set_sha256 TEXT NOT NULL CHECK(
+    length(source_set_sha256)=64 AND source_set_sha256 NOT GLOB '*[^0-9a-f]*'
+  ),
+  producer_receipt_hash TEXT NOT NULL
+    REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT
+    CHECK(length(producer_receipt_hash)=64 AND producer_receipt_hash NOT GLOB '*[^0-9a-f]*'),
+  binding_json TEXT NOT NULL CHECK(
+    json_valid(binding_json)
+    AND json_type(binding_json)='object'
+    AND json(binding_json)=binding_json
+  ),
+  source_count INTEGER NOT NULL CHECK(
+    typeof(source_count)='integer' AND source_count BETWEEN 1 AND 32
+  ),
+  lineage_depth INTEGER NOT NULL CHECK(
+    typeof(lineage_depth)='integer' AND lineage_depth BETWEEN 1 AND 16
+  ),
+  retention_until TEXT CHECK(
+    retention_until IS NULL OR (
+      length(retention_until)=24
+      AND retention_until GLOB '????-??-??T??:??:??.???Z'
+      AND julianday(retention_until) IS NOT NULL
+    )
+  ),
+  status TEXT NOT NULL CHECK(status IN ('pending','sealed')),
+  created_at TEXT NOT NULL CHECK(
+    length(created_at)=24
+    AND created_at GLOB '????-??-??T??:??:??.???Z'
+    AND julianday(created_at) IS NOT NULL
+  ),
+  sealed_at TEXT CHECK(
+    sealed_at IS NULL OR (
+      length(sealed_at)=24
+      AND sealed_at GLOB '????-??-??T??:??:??.???Z'
+      AND julianday(sealed_at) IS NOT NULL
+    )
+  ),
+  UNIQUE(derived_resource_type,derived_resource_id,derived_resource_version),
+  CHECK(
+    (status='pending' AND sealed_at IS NULL)
+    OR (
+      status='sealed'
+      AND sealed_at IS NOT NULL
+      AND julianday(sealed_at)>=julianday(created_at)
+    )
+  )
+) STRICT;
+
+CREATE TABLE derived_data_policy_sources(
+  binding_hash TEXT NOT NULL
+    REFERENCES derived_data_policy_bindings(binding_hash) ON DELETE RESTRICT
+    CHECK(length(binding_hash)=64 AND binding_hash NOT GLOB '*[^0-9a-f]*'),
+  source_ordinal INTEGER NOT NULL CHECK(
+    typeof(source_ordinal)='integer' AND source_ordinal BETWEEN 0 AND 31
+  ),
+  source_key TEXT NOT NULL CHECK(
+    length(source_key)=64 AND source_key NOT GLOB '*[^0-9a-f]*'
+  ),
+  source_resource_type TEXT NOT NULL CHECK(length(trim(source_resource_type)) BETWEEN 1 AND 128),
+  source_resource_id TEXT NOT NULL CHECK(length(trim(source_resource_id)) BETWEEN 1 AND 256),
+  source_resource_version TEXT NOT NULL CHECK(length(trim(source_resource_version)) BETWEEN 1 AND 128),
+  content_sha256 TEXT NOT NULL CHECK(
+    length(content_sha256)=64 AND content_sha256 NOT GLOB '*[^0-9a-f]*'
+  ),
+  family_id TEXT NOT NULL CHECK(length(trim(family_id)) BETWEEN 1 AND 256),
+  policy_version TEXT NOT NULL CHECK(length(trim(policy_version)) BETWEEN 1 AND 128),
+  policy_package_sha256 TEXT NOT NULL CHECK(
+    length(policy_package_sha256)=64 AND policy_package_sha256 NOT GLOB '*[^0-9a-f]*'
+  ),
+  sensitivity TEXT NOT NULL CHECK(sensitivity IN (
+    'public','internal','personal','sensitive','highly_sensitive'
+  )),
+  data_classes_json TEXT NOT NULL CHECK(
+    json_valid(data_classes_json)
+    AND json_type(data_classes_json)='array'
+    AND json_array_length(data_classes_json) BETWEEN 1 AND 10
+    AND json(data_classes_json)=data_classes_json
+  ),
+  policy_receipt_hash TEXT NOT NULL
+    REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT
+    CHECK(length(policy_receipt_hash)=64 AND policy_receipt_hash NOT GLOB '*[^0-9a-f]*'),
+  context_hash TEXT NOT NULL CHECK(
+    length(context_hash)=64 AND context_hash NOT GLOB '*[^0-9a-f]*'
+  ),
+  request_hash TEXT NOT NULL CHECK(
+    length(request_hash)=64 AND request_hash NOT GLOB '*[^0-9a-f]*'
+  ),
+  source_snapshot_json TEXT NOT NULL CHECK(
+    json_valid(source_snapshot_json)
+    AND json_type(source_snapshot_json)='object'
+    AND json(source_snapshot_json)=source_snapshot_json
+  ),
+  source_snapshot_sha256 TEXT NOT NULL CHECK(
+    length(source_snapshot_sha256)=64 AND source_snapshot_sha256 NOT GLOB '*[^0-9a-f]*'
+  ),
+  lineage_depth INTEGER NOT NULL CHECK(
+    typeof(lineage_depth)='integer' AND lineage_depth BETWEEN 0 AND 16
+  ),
+  retention_until TEXT CHECK(
+    retention_until IS NULL OR (
+      length(retention_until)=24
+      AND retention_until GLOB '????-??-??T??:??:??.???Z'
+      AND julianday(retention_until) IS NOT NULL
+    )
+  ),
+  authorized_at TEXT NOT NULL CHECK(
+    length(authorized_at)=24
+    AND authorized_at GLOB '????-??-??T??:??:??.???Z'
+    AND julianday(authorized_at) IS NOT NULL
+  ),
+  PRIMARY KEY(binding_hash,source_ordinal),
+  UNIQUE(binding_hash,source_key)
+) STRICT;
+
+CREATE INDEX idx_derived_data_policy_identity
+ON derived_data_policy_bindings(derived_resource_type,derived_resource_id,derived_resource_version);
+
+CREATE INDEX idx_derived_data_policy_source
+ON derived_data_policy_sources(source_key,binding_hash);
+
+CREATE INDEX idx_derived_data_policy_source_resource
+ON derived_data_policy_sources(source_resource_type,source_resource_id,source_resource_version,binding_hash);
+
+CREATE TRIGGER trg_ppk016_derived_binding_pending_insert
+BEFORE INSERT ON derived_data_policy_bindings
+WHEN NEW.status<>'pending' OR NEW.sealed_at IS NOT NULL
+BEGIN
+  SELECT RAISE(ABORT,'derived data policy binding must begin pending');
+END;
+
+CREATE TRIGGER trg_ppk016_derived_binding_canonical_json
+BEFORE INSERT ON derived_data_policy_bindings
+WHEN json_extract(NEW.binding_json,'$.schemaVersion') IS NOT NEW.schema_version
+  OR json_extract(NEW.binding_json,'$.bindingHash') IS NOT NEW.binding_hash
+  OR json_extract(NEW.binding_json,'$.target.kind') IS NOT NEW.derived_kind
+  OR json_extract(NEW.binding_json,'$.target.resourceType') IS NOT NEW.derived_resource_type
+  OR json_extract(NEW.binding_json,'$.target.resourceId') IS NOT NEW.derived_resource_id
+  OR json_extract(NEW.binding_json,'$.target.resourceVersion') IS NOT NEW.derived_resource_version
+  OR json_extract(NEW.binding_json,'$.target.contentSha256') IS NOT NEW.content_sha256
+  OR json_extract(NEW.binding_json,'$.target.familyId') IS NOT NEW.family_id
+  OR json_extract(NEW.binding_json,'$.target.policyVersion') IS NOT NEW.policy_version
+  OR json_extract(NEW.binding_json,'$.target.policyPackageSha256') IS NOT NEW.policy_package_sha256
+  OR json_extract(NEW.binding_json,'$.target.sensitivity') IS NOT NEW.sensitivity
+  OR json_extract(NEW.binding_json,'$.target.dataClasses') IS NOT json(NEW.data_classes_json)
+  OR json_extract(NEW.binding_json,'$.sourceSetHash') IS NOT NEW.source_set_sha256
+  OR json_array_length(json_extract(NEW.binding_json,'$.sources')) IS NOT NEW.source_count
+  OR json_extract(NEW.binding_json,'$.lineageDepth') IS NOT NEW.lineage_depth
+  OR json_extract(NEW.binding_json,'$.effectivePolicy.retentionUntil') IS NOT NEW.retention_until
+  OR json_extract(NEW.binding_json,'$.effectivePolicy.allowedAccountIds')
+     IS NOT json_extract(NEW.access_policy_json,'$.allowedAccountIds')
+  OR json_extract(NEW.binding_json,'$.effectivePolicy.allowedApplicationIds')
+     IS NOT json_extract(NEW.access_policy_json,'$.allowedApplicationIds')
+  OR json_extract(NEW.binding_json,'$.effectivePolicy.allowedCapabilities')
+     IS NOT json_extract(NEW.access_policy_json,'$.allowedCapabilities')
+  OR json_extract(NEW.binding_json,'$.effectivePolicy.allowedActions')
+     IS NOT json_extract(NEW.access_policy_json,'$.allowedActions')
+  OR json_extract(NEW.binding_json,'$.effectivePolicy.allowedPurposes')
+     IS NOT json_extract(NEW.access_policy_json,'$.allowedPurposes')
+  OR json_extract(NEW.binding_json,'$.effectivePolicy.obligations') IS NOT json(NEW.obligations_json)
+BEGIN
+  SELECT RAISE(ABORT,'derived data policy binding JSON does not match structural metadata');
+END;
+
+CREATE TRIGGER trg_ppk016_derived_binding_receipt
+BEFORE INSERT ON derived_data_policy_bindings
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM platform_policy_transaction_receipts receipt
+  WHERE receipt.receipt_hash=NEW.producer_receipt_hash
+    AND json_extract(receipt.record_json,'$.decision.allowed')=1
+    AND receipt.resource_type=NEW.derived_resource_type
+    AND receipt.resource_id=NEW.derived_resource_id
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.sensitivity')=NEW.sensitivity
+    AND json_extract(receipt.record_json,'$.request.resource.dataClasses')=json(NEW.data_classes_json)
+    AND receipt.policy_version=NEW.policy_version
+    AND receipt.policy_package_sha256=NEW.policy_package_sha256
+    AND receipt.issued_at=NEW.created_at
+)
+BEGIN
+  SELECT RAISE(ABORT,'derived data policy binding requires an allowed family-bound producer receipt');
+END;
+
+CREATE TRIGGER trg_ppk016_derived_source_pending_insert
+BEFORE INSERT ON derived_data_policy_sources
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM derived_data_policy_bindings binding
+  WHERE binding.binding_hash=NEW.binding_hash
+    AND binding.status='pending'
+    AND binding.family_id=NEW.family_id
+    AND julianday(binding.created_at)>=julianday(NEW.authorized_at)
+    AND (julianday(binding.created_at)-julianday(NEW.authorized_at))*86400000<=30000
+)
+BEGIN
+  SELECT RAISE(ABORT,'derived data policy source requires a matching pending binding');
+END;
+
+CREATE TRIGGER trg_ppk016_derived_source_receipt
+BEFORE INSERT ON derived_data_policy_sources
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM platform_policy_transaction_receipts receipt
+  WHERE receipt.receipt_hash=NEW.policy_receipt_hash
+    AND receipt.resource_type=NEW.source_resource_type
+    AND receipt.resource_id=NEW.source_resource_id
+    AND receipt.request_hash=NEW.request_hash
+    AND receipt.context_hash=NEW.context_hash
+    AND receipt.policy_version=NEW.policy_version
+    AND receipt.policy_package_sha256=NEW.policy_package_sha256
+    AND json_extract(receipt.record_json,'$.decision.allowed')=1
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.sensitivity')=NEW.sensitivity
+    AND json_extract(receipt.record_json,'$.request.resource.dataClasses')=json(NEW.data_classes_json)
+    AND receipt.issued_at=NEW.authorized_at
+)
+BEGIN
+  SELECT RAISE(ABORT,'derived data policy source receipt does not match the source snapshot');
+END;
+
+CREATE TRIGGER trg_ppk016_derived_source_canonical_json
+BEFORE INSERT ON derived_data_policy_sources
+WHEN json_extract(NEW.source_snapshot_json,'$.schemaVersion') IS NOT 1
+  OR json_extract(NEW.source_snapshot_json,'$.resourceType') IS NOT NEW.source_resource_type
+  OR json_extract(NEW.source_snapshot_json,'$.resourceId') IS NOT NEW.source_resource_id
+  OR json_extract(NEW.source_snapshot_json,'$.resourceVersion') IS NOT NEW.source_resource_version
+  OR json_extract(NEW.source_snapshot_json,'$.contentSha256') IS NOT NEW.content_sha256
+  OR json_extract(NEW.source_snapshot_json,'$.familyId') IS NOT NEW.family_id
+  OR json_extract(NEW.source_snapshot_json,'$.policyVersion') IS NOT NEW.policy_version
+  OR json_extract(NEW.source_snapshot_json,'$.policyPackageSha256') IS NOT NEW.policy_package_sha256
+  OR json_extract(NEW.source_snapshot_json,'$.receiptActive') IS NOT 1
+  OR json_extract(NEW.source_snapshot_json,'$.receiptHash') IS NOT NEW.policy_receipt_hash
+  OR json_extract(NEW.source_snapshot_json,'$.contextHash') IS NOT NEW.context_hash
+  OR json_extract(NEW.source_snapshot_json,'$.requestHash') IS NOT NEW.request_hash
+  OR json_extract(NEW.source_snapshot_json,'$.sensitivity') IS NOT NEW.sensitivity
+  OR json_extract(NEW.source_snapshot_json,'$.dataClasses') IS NOT json(NEW.data_classes_json)
+  OR json_extract(NEW.source_snapshot_json,'$.lineageDepth') IS NOT NEW.lineage_depth
+  OR json_extract(NEW.source_snapshot_json,'$.retentionUntil') IS NOT NEW.retention_until
+BEGIN
+  SELECT RAISE(ABORT,'derived data policy source JSON does not match structural metadata');
+END;
+
+CREATE TRIGGER trg_ppk016_derived_binding_pending_immutable
+BEFORE UPDATE ON derived_data_policy_bindings
+WHEN OLD.status='pending' AND (
+  NEW.binding_hash IS NOT OLD.binding_hash
+  OR NEW.schema_version IS NOT OLD.schema_version
+  OR NEW.derived_kind IS NOT OLD.derived_kind
+  OR NEW.derived_resource_type IS NOT OLD.derived_resource_type
+  OR NEW.derived_resource_id IS NOT OLD.derived_resource_id
+  OR NEW.derived_resource_version IS NOT OLD.derived_resource_version
+  OR NEW.content_sha256 IS NOT OLD.content_sha256
+  OR NEW.family_id IS NOT OLD.family_id
+  OR NEW.policy_version IS NOT OLD.policy_version
+  OR NEW.policy_package_sha256 IS NOT OLD.policy_package_sha256
+  OR NEW.sensitivity IS NOT OLD.sensitivity
+  OR NEW.data_classes_json IS NOT OLD.data_classes_json
+  OR NEW.access_policy_json IS NOT OLD.access_policy_json
+  OR NEW.access_policy_sha256 IS NOT OLD.access_policy_sha256
+  OR NEW.obligations_json IS NOT OLD.obligations_json
+  OR NEW.obligations_sha256 IS NOT OLD.obligations_sha256
+  OR NEW.source_set_sha256 IS NOT OLD.source_set_sha256
+  OR NEW.producer_receipt_hash IS NOT OLD.producer_receipt_hash
+  OR NEW.binding_json IS NOT OLD.binding_json
+  OR NEW.source_count IS NOT OLD.source_count
+  OR NEW.lineage_depth IS NOT OLD.lineage_depth
+  OR NEW.retention_until IS NOT OLD.retention_until
+  OR NEW.created_at IS NOT OLD.created_at
+  OR NEW.status NOT IN ('pending','sealed')
+  OR (NEW.status='pending' AND NEW.sealed_at IS NOT NULL)
+  OR (NEW.status='sealed' AND NEW.sealed_at IS NULL)
+)
+BEGIN
+  SELECT RAISE(ABORT,'pending derived data policy binding metadata is immutable');
+END;
+
+CREATE TRIGGER trg_ppk016_derived_binding_seal_complete
+BEFORE UPDATE OF status,sealed_at ON derived_data_policy_bindings
+WHEN OLD.status='pending' AND NEW.status='sealed' AND (
+  NEW.sealed_at IS NULL
+  OR julianday(NEW.sealed_at)<julianday(OLD.created_at)
+  OR (SELECT COUNT(*) FROM derived_data_policy_sources source
+      WHERE source.binding_hash=OLD.binding_hash)<>OLD.source_count
+  OR (SELECT COALESCE(MIN(source.source_ordinal),-1) FROM derived_data_policy_sources source
+      WHERE source.binding_hash=OLD.binding_hash)<>0
+  OR (SELECT COALESCE(MAX(source.source_ordinal),-1) FROM derived_data_policy_sources source
+      WHERE source.binding_hash=OLD.binding_hash)<>OLD.source_count-1
+  OR EXISTS(
+    SELECT 1
+    FROM derived_data_policy_sources source
+    WHERE source.binding_hash=OLD.binding_hash
+      AND CASE source.sensitivity
+        WHEN 'public' THEN 0 WHEN 'internal' THEN 1 WHEN 'personal' THEN 2
+        WHEN 'sensitive' THEN 3 WHEN 'highly_sensitive' THEN 4 ELSE 99
+      END > CASE OLD.sensitivity
+        WHEN 'public' THEN 0 WHEN 'internal' THEN 1 WHEN 'personal' THEN 2
+        WHEN 'sensitive' THEN 3 WHEN 'highly_sensitive' THEN 4 ELSE -1
+      END
+  )
+  OR EXISTS(
+    SELECT 1
+    FROM derived_data_policy_sources source, json_each(source.data_classes_json) source_class
+    WHERE source.binding_hash=OLD.binding_hash
+      AND NOT EXISTS(
+        SELECT 1 FROM json_each(OLD.data_classes_json) binding_class
+        WHERE binding_class.value=source_class.value
+      )
+  )
+)
+BEGIN
+  SELECT RAISE(ABORT,'derived data policy binding cannot seal without complete non-downgraded sources');
+END;
+
+CREATE TRIGGER trg_ppk016_derived_binding_sealed_update
+BEFORE UPDATE ON derived_data_policy_bindings
+WHEN OLD.status='sealed'
+BEGIN
+  SELECT RAISE(ABORT,'sealed derived data policy binding is immutable');
+END;
+
+CREATE TRIGGER trg_ppk016_derived_binding_sealed_delete
+BEFORE DELETE ON derived_data_policy_bindings
+WHEN OLD.status='sealed'
+BEGIN
+  SELECT RAISE(ABORT,'sealed derived data policy binding cannot be deleted');
+END;
+
+CREATE TRIGGER trg_ppk016_derived_source_update
+BEFORE UPDATE ON derived_data_policy_sources
+BEGIN
+  SELECT RAISE(ABORT,'derived data policy source is immutable');
+END;
+
+CREATE TRIGGER trg_ppk016_derived_source_delete
+BEFORE DELETE ON derived_data_policy_sources
+BEGIN
+  SELECT RAISE(ABORT,'derived data policy source cannot be deleted');
+END;
+
+UPDATE database_metadata
+SET value='REVISION-32-L-PPK-016-DERIVED-DATA-POLICY-INHERITANCE',
+    updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
+WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -6089,7 +6479,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(73, 'ppk008_application_identity_device_certificate_manifest', platformApplicationIdentityBindingSql),
   createMigrationDefinition(74, 'ppk009_core_service_decision_reevaluation', platformPolicyDecisionAuthorityBindingSql),
   createMigrationDefinition(75, 'ppk011_contextual_ownership_share', authorizationOwnershipShareSql),
-  createMigrationDefinition(76, 'ppk012_offline_capability_lease_cache_fence', offlineCapabilityLeaseSql)
+  createMigrationDefinition(76, 'ppk012_offline_capability_lease_cache_fence', offlineCapabilityLeaseSql),
+  createMigrationDefinition(77, 'ppk016_derived_data_policy_inheritance', derivedDataPolicyInheritanceSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

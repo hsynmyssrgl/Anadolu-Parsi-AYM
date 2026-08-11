@@ -12,6 +12,7 @@ import {
   SqliteDataRepairRepository,
   SqliteDataLifecycleRepository,
   SqliteDiagnosticRepository,
+  SqliteDerivedDataPolicyRepository,
   SqliteEntityCatalogRepository,
   SqliteFamilyRepository,
   SqliteFamilyDataImportRepository,
@@ -55,6 +56,7 @@ import type {
   DataRepairRepositoryPort,
   DataLifecycleRepositoryPort,
   DiagnosticRepositoryPort,
+  DerivedDataPolicyRepositoryPort,
   EntityCatalogRepositoryPort,
   FamilyRepositoryPort,
   FamilyDataImportRepositoryPort,
@@ -103,6 +105,7 @@ export interface RepositoryCompositionRoot {
   readonly dataRepairRepository: DataRepairRepositoryPort;
   readonly dataLifecycleRepository: DataLifecycleRepositoryPort;
   readonly diagnosticRepository: DiagnosticRepositoryPort;
+  readonly derivedDataPolicyRepository: DerivedDataPolicyRepositoryPort;
   readonly entityCatalogRepository: EntityCatalogRepositoryPort;
   readonly familyRepository: FamilyRepositoryPort;
   readonly familyDataImportRepository: FamilyDataImportRepositoryPort;
@@ -155,6 +158,7 @@ export const createSqliteRepositoryCompositionRoot = (
     dataRepairRepository: new SqliteDataRepairRepository(repositoryOptions),
     dataLifecycleRepository: new SqliteDataLifecycleRepository(repositoryOptions),
     diagnosticRepository: new SqliteDiagnosticRepository(repositoryOptions),
+    derivedDataPolicyRepository: new SqliteDerivedDataPolicyRepository(repositoryOptions),
     entityCatalogRepository: new SqliteEntityCatalogRepository(repositoryOptions),
     familyRepository: new SqliteFamilyRepository(repositoryOptions),
     familyDataImportRepository: new SqliteFamilyDataImportRepository(repositoryOptions),

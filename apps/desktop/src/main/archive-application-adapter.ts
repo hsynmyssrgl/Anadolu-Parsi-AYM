@@ -1,9 +1,11 @@
+import { createHash } from 'node:crypto';
 import {
   ERROR_CODES,
   asPersonId,
   asUserId,
   createAppError,
   err,
+  ok,
   type AppError,
   type Result
 } from '@ppt/core';
@@ -53,10 +55,10 @@ export interface ArchivePolicyCommittedTransactionInput {
 
 export type ArchivePolicyOperationResolution =
   | Readonly<{ state: 'execute' }>
-  | Readonly<{ state: 'replay'; resultJson: string }>;
+  | Readonly<{ state: 'conflict'; resultHash: string; completedAt: string }>;
 
 export interface ArchivePolicyOperationResultInput extends ArchivePolicyTransactionRevalidationInput {
-  readonly resultJson: string;
+  readonly resultHash: string;
 }
 
 export type ArchivePolicyEnforcementPoint = Pick<PlatformPolicyEnforcementPoint, 'execute'> & {
@@ -262,35 +264,16 @@ const canonicalArchiveOperationJson = (value: unknown): string => {
   return serialized;
 };
 
-const serializeArchiveOperationResult = (value: unknown): string => canonicalArchiveOperationJson({
-  hasValue: value !== undefined,
-  value: value === undefined ? null : value
-});
+const hashArchiveOperationResult = (value: unknown): string => createHash('sha256')
+  .update(canonicalArchiveOperationJson({
+    hasValue: value !== undefined,
+    value: value === undefined ? null : value
+  }), 'utf8')
+  .digest('hex');
 
-const deserializeArchiveOperationResult = (context: ArchiveApplicationContext, value: string): unknown => {
-  let envelope: unknown;
-  try { envelope = JSON.parse(value); }
-  catch { throw new PlatformPolicyEnforcementError('TRANSACTION_CONTEXT_MISMATCH', 'Committed archive operation result is not valid JSON'); }
-  if (!envelope || typeof envelope !== 'object' || Array.isArray(envelope)) {
-    throw new PlatformPolicyEnforcementError('TRANSACTION_CONTEXT_MISMATCH', 'Committed archive operation result envelope is invalid');
-  }
-  const record = envelope as Record<string, unknown>;
-  const keys = Object.keys(record).sort();
-  if (
-    keys.length !== 2
-    || keys[0] !== 'hasValue'
-    || keys[1] !== 'value'
-    || typeof record.hasValue !== 'boolean'
-    || (!record.hasValue && record.value !== null)
-    || canonicalArchiveOperationJson(record) !== value
-  ) {
-    throw new PlatformPolicyEnforcementError(
-      'TRANSACTION_CONTEXT_MISMATCH',
-      `Committed archive operation result does not match ${context.operationId ?? 'the active operation'}`
-    );
-  }
-  return record.hasValue ? record.value : undefined;
-};
+type ArchiveOperationExecution<T> =
+  | Readonly<{ state: 'value'; value: T }>
+  | Readonly<{ state: 'conflict'; resultHash: string; completedAt: string }>;
 
 const establishGovernedTransaction = (
   enforcementPoint: ArchivePolicyEnforcementPoint,
@@ -673,30 +656,35 @@ class GovernedArchiveWriteScope implements ArchiveWriteScope {
 export class RepositoryBackedArchiveUnitOfWork implements ArchiveUnitOfWork {
   public constructor(private readonly dependencies: RepositoryBackedArchiveApplicationDependencies) {}
 
-  public execute<T>(
+  public async execute<T>(
     context: ArchiveApplicationContext,
     intent: ArchivePolicyIntent,
     operation: (scope: ArchiveWriteScope) => Result<T, AppError>
   ): Promise<Result<T, AppError>> {
-    return executeGoverned(this.dependencies, context, intent, (authorization, enforcementPoint) =>
-      this.dependencies.transactionExecutor.execute(context.correlationId, (transaction) => {
+    const governed = await executeGoverned<ArchiveOperationExecution<T>>(
+      this.dependencies,
+      context,
+      intent,
+      (authorization, enforcementPoint) =>
+      this.dependencies.transactionExecutor.execute<ArchiveOperationExecution<T>>(context.correlationId, (transaction) => {
         const governedInput = { context, intent, authorization, transaction };
         const established = establishGovernedTransaction(enforcementPoint, governedInput);
         if (!established.ok) return established;
         const resolution = enforcementPoint.resolveAuthorizedOperation?.(governedInput);
         if (resolution && !resolution.ok) return resolution;
-        if (resolution?.ok && resolution.value.state === 'replay') {
-          return {
-            ok: true as const,
-            value: deserializeArchiveOperationResult(context, resolution.value.resultJson) as T
-          };
+        if (resolution?.ok && resolution.value.state === 'conflict') {
+          return ok(Object.freeze({
+            state: 'conflict' as const,
+            resultHash: resolution.value.resultHash,
+            completedAt: resolution.value.completedAt
+          }));
         }
         const execution = governedRepositoryContext(context, transaction, authorization, intent);
         const result = operation(new GovernedArchiveWriteScope(this.dependencies, execution, transaction.occurredAt));
         if (!result.ok) return result;
         const idempotency = enforcementPoint.recordAuthorizedOperationResult?.({
           ...governedInput,
-          resultJson: serializeArchiveOperationResult(result.value)
+          resultHash: hashArchiveOperationResult(result.value)
         });
         if (idempotency && !idempotency.ok) return idempotency;
         // The exact receipt and monotonically synchronized database fence were
@@ -715,8 +703,26 @@ export class RepositoryBackedArchiveUnitOfWork implements ArchiveUnitOfWork {
           fenceEpoch: authorization.fenceEpoch,
           fenceWritable: authorization.fenceWritable
         });
-        return result;
+        return ok(Object.freeze({ state: 'value' as const, value: result.value }));
       })
     );
+    if (!governed.ok) return governed;
+    if (governed.value.state === 'conflict') {
+      return err(createAppError({
+        code: ERROR_CODES.RESOURCE_CONFLICT,
+        message: 'Arşiv işlemi daha önce tamamlandı; semantik sonuç yeniden oynatılmadı. Güncel durumu yeniden yükleyin.',
+        category: 'conflict',
+        correlationId: context.correlationId,
+        details: Object.freeze({
+          operationId: context.operationId,
+          status: 'completed',
+          resultHash: governed.value.resultHash,
+          completedAt: governed.value.completedAt,
+          semanticReplay: 'forbidden',
+          reloadRequired: true
+        })
+      }));
+    }
+    return ok(governed.value.value);
   }
 }

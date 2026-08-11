@@ -73,19 +73,26 @@ export interface PlatformPolicyArchiveOperationIdentityInput {
 
 export interface RecordPlatformPolicyArchiveOperationResultInput
   extends PlatformPolicyArchiveOperationIdentityInput {
-  /** Canonical JSON envelope containing the successful application result. */
-  readonly resultJson: string;
+  /** One-way integrity identity; semantic result payloads are never persisted. */
+  readonly resultHash: string;
 }
 
-export interface PlatformPolicyArchiveOperationRecord
+/**
+ * Exact non-payload identity used before a create retry is authorized. This
+ * shape deliberately excludes resultJson and receipt/correlation identifiers;
+ * a receiptless repository context must never recover the committed payload.
+ */
+export interface PlatformPolicyArchiveOperationMetadataLookupInput
   extends PlatformPolicyArchiveOperationIdentityInput {
   readonly resourceType: string;
   readonly resourceId: string;
   readonly action: PlatformPolicyReceiptRecord['action'];
   readonly capability: PlatformPolicyReceiptRecord['capability'];
-  readonly originalReceiptHash: string;
-  readonly originalCorrelationId: string;
-  readonly resultJson: string;
+}
+
+export interface PlatformPolicyArchiveOperationMetadata
+  extends PlatformPolicyArchiveOperationMetadataLookupInput {
+  readonly status: 'completed';
   readonly resultHash: string;
   readonly completedAt: IsoDateTime;
   readonly retryCount: number;
@@ -93,7 +100,7 @@ export interface PlatformPolicyArchiveOperationRecord
 
 export type PlatformPolicyArchiveOperationResolution =
   | Readonly<{ state: 'execute' }>
-  | Readonly<{ state: 'replay'; operation: PlatformPolicyArchiveOperationRecord }>;
+  | Readonly<{ state: 'conflict'; operation: PlatformPolicyArchiveOperationMetadata }>;
 
 export type PlatformPolicyArchivePendingOperationMutation =
   | 'archive:import'
@@ -224,23 +231,28 @@ export interface PlatformPolicyTransactionRepositoryPort {
   /**
    * Resolves an operation inside the protected SQLite transaction after the
    * current receipt has been recorded. A matching committed operation records
-   * the current receipt as an immutable retry and returns its original result.
+   * the current receipt as immutable retry evidence and returns content-free
+   * conflict metadata. Semantic result replay is deliberately forbidden.
    */
   resolveArchiveOperation(
     context: PolicyAuthorizedRepositoryExecutionContext,
     input: PlatformPolicyArchiveOperationIdentityInput
   ): RepositoryResult<PlatformPolicyArchiveOperationResolution>;
 
-  /** Persists the first successful result atomically with its business write. */
+  /** Persists content-free completion metadata atomically with the business write. */
   recordArchiveOperationResult(
     context: PolicyAuthorizedRepositoryExecutionContext,
     input: RecordPlatformPolicyArchiveOperationResultInput
-  ): RepositoryResult<PlatformPolicyArchiveOperationRecord>;
+  ): RepositoryResult<PlatformPolicyArchiveOperationMetadata>;
 
-  findArchiveOperation(
+  /**
+   * Returns only non-payload metadata for pre-authorization retry discovery.
+   * Semantic result payloads are unavailable through every repository context.
+   */
+  findArchiveOperationMetadata(
     context: RepositoryExecutionContext,
-    operationId: string
-  ): RepositoryResult<PlatformPolicyArchiveOperationRecord | undefined>;
+    input: PlatformPolicyArchiveOperationMetadataLookupInput
+  ): RepositoryResult<PlatformPolicyArchiveOperationMetadata | undefined>;
 
   /**
    * Creates or recovers the single unacknowledged identity for a canonical

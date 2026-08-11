@@ -113,6 +113,7 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
     case 'system:getCoreServiceHealth':
     case 'system:getCoreServiceApiBoundary':
     case 'system:getNetworkEgressBoundary':
+    case 'system:getDerivedDataPolicyBoundary':
     case 'system:getIpcAdaptiveBudgetMaintenanceAuthority':
     case 'system:getIpcPerformanceTelemetry':
       return zeroArguments(args);

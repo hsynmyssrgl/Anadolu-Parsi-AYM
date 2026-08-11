@@ -15,6 +15,7 @@ export * from './security-epoch.js';
 export * from './authorization-use-cases.js';
 export * from './offline-capability-lease-use-cases.js';
 export * from './client-data-access-use-cases.js';
+export * from './derived-data-inheritance-use-cases.js';
 export * from './membership-use-cases.js';
 
 export * from './health-use-cases.js';
@@ -67,7 +68,6 @@ export * from './full-backup-file-use-cases.js';
 
 export * from './system-resource-snapshot-use-cases.js';
 
-export * from './database-export-file-use-cases.js';
 
 export * from './family-storage-layout-use-cases.js';
 

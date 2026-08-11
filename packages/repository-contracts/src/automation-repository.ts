@@ -16,13 +16,16 @@ export interface AutomationDueSourceRow {
   readonly dueAt: IsoDateTime;
 }
 
-export interface AutomationRunRow {
+/**
+ * Content-free mutation ledger input. Source title and schedule deliberately do
+ * not cross this persistence port. A reader may project them only through the
+ * source-specific live PEP; where no such PEP exists, it must fail closed.
+ */
+export interface AutomationRunLedgerRow {
   readonly id: string;
   readonly ruleId: string;
   readonly sourceType: string;
   readonly sourceId: string;
-  readonly title: string;
-  readonly dueAt: IsoDateTime;
   readonly status: string;
   readonly generatedTaskId?: string;
   readonly createdAt: IsoDateTime;
@@ -46,13 +49,6 @@ export interface AutomationRepositoryPort {
   insertRule(context: RepositoryExecutionContext, input: AutomationRuleRow): RepositoryResult<void>;
   setRuleEnabled(context: RepositoryExecutionContext, id: string, enabled: boolean): RepositoryResult<boolean>;
   listEnabledRules(context: RepositoryExecutionContext): RepositoryResult<readonly AutomationRuleRow[]>;
-  listNonLifeDueSources(
-    context: RepositoryExecutionContext,
-    sourceType: string,
-    familyId: FamilyId,
-    fromAt: IsoDateTime,
-    toAt: IsoDateTime
-  ): RepositoryResult<readonly AutomationDueSourceRow[]>;
   runExists(
     context: RepositoryExecutionContext,
     ruleId: string,
@@ -64,12 +60,7 @@ export interface AutomationRepositoryPort {
     actorId: string,
     familyId: FamilyId
   ): RepositoryResult<string | null>;
-  insertRun(context: RepositoryExecutionContext, input: AutomationRunRow): RepositoryResult<void>;
-  listNonLifeRuns(
-    context: RepositoryExecutionContext,
-    familyId: FamilyId,
-    limit: number
-  ): RepositoryResult<readonly AutomationRunRow[]>;
+  insertRun(context: RepositoryExecutionContext, input: AutomationRunLedgerRow): RepositoryResult<void>;
   listLifeRunCandidates(
     context: RepositoryExecutionContext,
     input: {

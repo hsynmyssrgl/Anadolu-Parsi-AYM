@@ -686,12 +686,29 @@ describe('FamilyDataStore', () => {
     store.close();
   });
 
-  it('veritabanı yedeğini dışarı aktarır', async () => {
+  it('korumasız .db dışa aktarımını reddeder ve cihaz korumalı tam yedek üretir', async () => {
     const { directory, store } = makeStore();
     await authenticate(store);
-    const backupPath = join(directory, 'backup.db');
+    expect(() => store.exportBackup(join(directory, 'backup.db'))).toThrow(/\.pptbackup/u);
+    const backupPath = join(directory, 'backup.pptbackup');
     store.exportBackup(backupPath);
     expect(existsSync(backupPath)).toBe(true);
+    const bytes = readFileSync(backupPath);
+    expect(bytes.subarray(0, 16).toString('utf8')).not.toContain('SQLite format 3');
+    const container = JSON.parse(bytes.toString('utf8')) as {
+      format?: string;
+      version?: number;
+      encryption?: { algorithm?: string };
+      ciphertext?: string;
+      database?: unknown;
+    };
+    expect(container).toMatchObject({
+      format: 'anadolu-parsi-full-backup',
+      version: 3,
+      encryption: { algorithm: 'aes-256-gcm' }
+    });
+    expect(container.ciphertext).toMatch(/^[A-Za-z0-9+/]+=*$/u);
+    expect(container.database).toBeUndefined();
     store.close();
   });
 

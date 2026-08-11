@@ -85,7 +85,7 @@ for (const result of results) {
 check(results.length === 10, 'exactly ten controlled child processes executed');
 check(vitestBytes !== undefined, 'focused Vitest JSON evidence exists');
 check(vitest?.success === true, 'focused Vitest reports success');
-check(vitest?.numTotalTests === 48 && vitest?.numPassedTests === 48 && vitest?.numFailedTests === 0, '30-T, production and DataStore regressions are 48/48 PASS');
+check(vitest?.numTotalTests === 51 && vitest?.numPassedTests === 51 && vitest?.numFailedTests === 0, '30-T, production and DataStore regressions are 51/51 PASS');
 check(vitestBytes !== undefined && /^[0-9a-f]{64}$/u.test(createHash('sha256').update(vitestBytes).digest('hex')), 'focused Vitest evidence has a SHA-256 identity');
 
 const status = failures.length === 0 ? 'PASS' : 'FAIL';
@@ -97,10 +97,10 @@ const report = {
   phase: 'ARCHIVE_OPERATION_IDEMPOTENCY_CONTROLLED_RUNTIME',
   status,
   controlledChecks: {
-    expected: checks.length + 48,
+    expected: checks.length + 51,
     actual: checks.filter((item) => item.status === 'PASS').length + (vitest?.numPassedTests ?? 0),
     processAssertions: checks.length,
-    focusedVitestExpected: 48,
+    focusedVitestExpected: 51,
     focusedVitestActual: vitest?.numTotalTests ?? null
   },
   checks,

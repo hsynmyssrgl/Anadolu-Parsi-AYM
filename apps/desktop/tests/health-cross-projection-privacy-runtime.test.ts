@@ -48,40 +48,31 @@ afterEach(() => {
 });
 
 describe('30-X health cross-projection privacy boundaries', () => {
-  it('keeps medication due sources and prior runs inside actor ownership and active lifecycle', () => {
+  it('keeps automation ledger writes content-free and exposes no generic non-LIFE source projection', () => {
     const database = makeDatabase();
     database.exec(`
       INSERT INTO people VALUES ('person-a','family-a','active'),('person-b','family-a','active');
-      INSERT INTO medication_plans VALUES
-        ('plan-a','family-a','person-a','A kişisinin gizli ilacı','2026-08-12T00:00:00.000Z',NULL),
-        ('plan-b','family-a','person-b','B kişisinin gizli ilacı','2026-08-13T00:00:00.000Z',NULL),
-        ('plan-closed','family-a','person-a','Kapanmış gizli ilaç','2026-08-14T00:00:00.000Z','2026-08-07T23:59:59.000Z'),
-        ('plan-archived','family-a','person-a','Arşivlenmiş gizli ilaç','2026-08-15T00:00:00.000Z',NULL);
-      INSERT INTO data_lifecycle VALUES ('medication_plan','plan-archived','archived');
       INSERT INTO automation_rules VALUES ('rule-med','İlaç hatırlatma','medication_plan',30,1,'2026-08-01T00:00:00.000Z');
-      INSERT INTO automation_runs VALUES
-        ('run-a','rule-med','medication_plan','plan-a','A kişisinin gizli ilacı','2026-08-12T00:00:00.000Z','generated',NULL,'2026-08-08T00:00:01.000Z'),
-        ('run-b','rule-med','medication_plan','plan-b','B kişisinin gizli ilacı','2026-08-13T00:00:00.000Z','generated',NULL,'2026-08-08T00:00:02.000Z'),
-        ('run-closed','rule-med','medication_plan','plan-closed','Kapanmış gizli ilaç','2026-08-14T00:00:00.000Z','generated',NULL,'2026-08-08T00:00:03.000Z'),
-        ('run-archived','rule-med','medication_plan','plan-archived','Arşivlenmiş gizli ilaç','2026-08-15T00:00:00.000Z','generated',NULL,'2026-08-08T00:00:04.000Z');
     `);
 
     const repository = new SqliteAutomationRepository();
     const repositoryContext = context(database, 'person-a');
-    const sources = repository.listNonLifeDueSources(repositoryContext, 'medication_plan', FAMILY_A, NOW, asIsoDateTime('2026-08-20T00:00:00.000Z'));
-    const runs = repository.listNonLifeRuns(repositoryContext, FAMILY_A, 100);
-
-    expect(sources.ok).toBe(true);
-    expect(sources.ok && sources.value).toEqual([{
-      id: 'plan-a',
-      title: 'İlaç planı',
-      dueAt: '2026-08-12T00:00:00.000Z'
-    }]);
-    expect(runs.ok).toBe(true);
-    expect(runs.ok && runs.value.map(run => ({ id: run.id, title: run.title }))).toEqual([{
+    const inserted = repository.insertRun(repositoryContext, {
       id: 'run-a',
-      title: 'İlaç planı'
-    }]);
+      ruleId: 'rule-med',
+      sourceType: 'medication_plan',
+      sourceId: 'plan-a',
+      status: 'generated',
+      createdAt: NOW
+    });
+    expect(inserted.ok).toBe(true);
+    expect(database.prepare('SELECT title,due_at,created_at FROM automation_runs WHERE id=?').get('run-a')).toEqual({
+      title: '__PPK016_SOURCE_CONTENT_REDACTED__',
+      due_at: NOW,
+      created_at: NOW
+    });
+    expect('listNonLifeDueSources' in repository).toBe(false);
+    expect('listNonLifeRuns' in repository).toBe(false);
   });
 
   it('scopes every report query to family and personal aggregates to actor ownership', () => {

@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -21,6 +21,7 @@ import type {
   TimelineApplicationContext
 } from '@ppt/application';
 import type {
+  FamilyDataImportExistingData,
   PolicyAuthorizedRepositoryExecutionContext,
   TransactionContext,
   TransactionExecutor
@@ -156,6 +157,16 @@ const dependentRequests = (): readonly FamilyDataImportPolicyBatchRequest[] => [
 ];
 
 describe('31-C family import multi-policy receipt batch', () => {
+  it('keeps the 15-minute preview lease content-free and reconstructs source payload only during apply', () => {
+    const source = readFileSync(new URL('../src/main/family-data-import-service.ts', import.meta.url), 'utf8');
+    const lease = /interface CachedPreviewLease \{(?<body>[\s\S]*?)\n\}/u.exec(source)?.groups?.body ?? '';
+
+    expect(lease).toContain('sourceSha256');
+    expect(lease).toContain('planDigest');
+    expect(lease).not.toMatch(/\b(?:preview|sourceText|document|plan)\s*:/u);
+    expect(source).toMatch(/const sourceBuffer = readFileSync\(cached\.sourcePath\);[\s\S]*?parseSourceDocument\([\s\S]*?decodeImportSource\(sourceBuffer\)/u);
+  });
+
   it('authorizes every row first, establishes every receipt in one transaction, then runs the import operation', async () => {
     const trace: string[] = [];
     const transaction = { marker: 'single-sqlite-transaction' } as never;
@@ -451,6 +462,8 @@ describe('31-C family import multi-policy receipt batch', () => {
     const insertedLocations: Array<{ context: PolicyAuthorizedRepositoryExecutionContext; id: string }> = [];
     const insertedEvents: Array<{ context: PolicyAuthorizedRepositoryExecutionContext; id: string }> = [];
     const trackedTypes: string[] = [];
+    let loadExistingCalls = 0;
+    let existingData: FamilyDataImportExistingData = { people: [], relations: [], locations: [], events: [] };
     let capturedRequests: readonly FamilyDataImportPolicyBatchRequest[] = [];
     const transactionExecutor = {
       execute: <T>(_correlationId: unknown, operation: (scope: TransactionContext) => Result<T, AppError>) =>
@@ -480,7 +493,7 @@ describe('31-C family import multi-policy receipt batch', () => {
       accountRepository: { findById: () => ok({ id: ACCOUNT_ID, role: 'family_admin', status: 'active', personId: PERSON_ID, startsAt: NOW }) } as never,
       permissionRepository: { listActiveForSubject: () => ok([]) } as never,
       importRepository: {
-        loadExisting: () => ok({ people: [], relations: [], locations: [], events: [] }),
+        loadExisting: () => (loadExistingCalls += 1, ok(existingData)),
         findActiveSource: () => ok(null),
         insertBatch: () => ok(undefined),
         insertItem: (_context: unknown, item: { entityType: string }) => (trackedTypes.push(item.entityType), ok(undefined))
@@ -502,6 +515,18 @@ describe('31-C family import multi-policy receipt batch', () => {
       policyBatchRunner
     });
 
+    const stalePreview = service.preview(sourcePath);
+    existingData = {
+      people: [],
+      relations: [],
+      locations: [{ id: 'location-created-after-preview', label: 'Yeni ev', kind: 'residence' }],
+      events: []
+    };
+    await expect(service.apply({ previewId: stalePreview.previewId, password: 'correct horse battery staple' }))
+      .rejects.toThrow('Aile verileri ön izlemeden sonra değişti');
+    expect(capturedRequests).toEqual([]);
+
+    existingData = { people: [], relations: [], locations: [], events: [] };
     const preview = service.preview(sourcePath);
     expect(preview.valid).toBe(true);
     const applied = await service.apply({ previewId: preview.previewId, password: 'correct horse battery staple' });
@@ -521,5 +546,6 @@ describe('31-C family import multi-policy receipt batch', () => {
     expect(insertedEvents[0]?.context.transaction).toBe(transaction);
     expect(insertedLocations[0]?.context.correlationId).not.toBe(insertedEvents[0]?.context.correlationId);
     expect(trackedTypes).toEqual(['location', 'event']);
+    expect(loadExistingCalls).toBe(5);
   });
 });

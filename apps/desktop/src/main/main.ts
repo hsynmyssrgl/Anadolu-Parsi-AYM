@@ -17,7 +17,7 @@ import type {
   WindowsHelloAuthenticationView,
   WindowsHelloStateView
 } from '@ppt/domain';
-import type { WindowsHelloPlatformPort } from '@ppt/application';
+import { GetDerivedDataPolicyBoundaryUseCase, type WindowsHelloPlatformPort } from '@ppt/application';
 import type { IssueOfflineCapabilityLeaseInput, OfflineCapabilityLeaseWorkspaceView } from '@ppt/domain';
 import {
   FamilyDataStore,
@@ -66,8 +66,8 @@ import { connectCoreServiceAtStartup, type CoreServiceStartupConnectionResult } 
 import { PlatformPolicyReceiptFileSink } from './platform-policy-receipt-file-sink.js';
 import { DesktopUniversalApiPolicyEnforcement } from './desktop-universal-api-policy-enforcement.js';
 import { DesktopRepositoryPolicyScope } from './desktop-repository-policy-scope.js';
-import { NetworkEgressPolicy } from '@ppt/platform-policy';
-import type { NetworkEgressBoundaryView } from '@ppt/domain';
+import { DerivedDataInheritancePolicy, NetworkEgressPolicy } from '@ppt/platform-policy';
+import type { DerivedDataPolicyBoundaryView, NetworkEgressBoundaryView } from '@ppt/domain';
 
 type ArchiveMutationInput<TInput> = TInput & { readonly operationId: string };
 interface ArchiveItemMutationInput {
@@ -77,6 +77,8 @@ interface ArchiveItemMutationInput {
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const networkEgressPolicy = new NetworkEgressPolicy();
+const derivedDataInheritancePolicy = new DerivedDataInheritancePolicy();
+const getDerivedDataPolicyBoundaryUseCase = new GetDerivedDataPolicyBoundaryUseCase(derivedDataInheritancePolicy);
 const currentProductName = 'Anadolu Parsı Aile Yaşam Merkezi';
 const volatileRuntimeRoot = join(app.getPath('temp'), 'Anadolu-Parsi-Aile-Yasam-Merkezi', `runtime-${process.pid}`);
 rmSync(volatileRuntimeRoot, { recursive: true, force: true });
@@ -1128,6 +1130,7 @@ function registerIpc(): void {
   registerIpcHandler('system:getCoreServiceHealth', () => coreServiceConnection().adapter.getHealth());
   registerIpcHandler('system:getCoreServiceApiBoundary', () => coreServiceConnection().adapter.getApiBoundaryStatus());
   registerIpcHandler('system:getNetworkEgressBoundary', ():NetworkEgressBoundaryView => networkEgressPolicy.snapshot());
+  registerIpcHandler('system:getDerivedDataPolicyBoundary', ():DerivedDataPolicyBoundaryView => getDerivedDataPolicyBoundaryUseCase.execute());
   registerIpcHandler('system:listBackupTargets', () => store().listBackupTargets());
   registerIpcHandler('system:upsertBackupTarget', (_event,input:UpsertBackupTargetInput) => store().upsertBackupTarget(input));
   registerIpcHandler('system:listBackupRuns', (_event,limit?:number) => store().listBackupRuns(limit));
@@ -1656,9 +1659,9 @@ function registerIpc(): void {
   });
   registerIpcHandler('backup:export', async () => {
     const result = await dialog.showSaveDialog({
-      title: 'Şifreli yerel veritabanı yedeğini kaydet',
-      defaultPath: `Anadolu_Parsi_Aile_Yedek_${new Date().toISOString().slice(0, 10)}.db`,
-      filters: [{ name: 'Panthera Veritabanı', extensions: ['db'] }]
+      title: 'Cihaz korumalı tam yedeği kaydet',
+      defaultPath: `Anadolu_Parsi_Aile_Yedek_${new Date().toISOString().slice(0, 10)}.pptbackup`,
+      filters: [{ name: 'Anadolu Parsı Korumalı Yedek', extensions: ['pptbackup'] }]
     });
     if (result.canceled || !result.filePath) return { canceled: true };
     store().exportBackup(result.filePath);

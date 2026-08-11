@@ -1,14 +1,15 @@
 import type { FamilyId, IsoDateTime } from '@ppt/core';
 import type {
-  AutomationDueSourceRow,
   AutomationLifeRunCandidateRow,
   AutomationRepositoryPort,
   AutomationRuleRow,
-  AutomationRunRow,
+  AutomationRunLedgerRow,
   RepositoryExecutionContext,
   RepositoryResult
 } from '@ppt/repository-contracts';
 import { SqliteRepository } from './sqlite-base.js';
+
+const REDACTED_RUN_TITLE = '__PPK016_SOURCE_CONTENT_REDACTED__';
 
 const mapRule = (row: Record<string, unknown>): AutomationRuleRow => ({
   id: String(row.id),
@@ -16,18 +17,6 @@ const mapRule = (row: Record<string, unknown>): AutomationRuleRow => ({
   sourceType: String(row.source_type),
   daysBefore: Number(row.days_before),
   enabled: Number(row.enabled) === 1,
-  createdAt: String(row.created_at) as IsoDateTime
-});
-
-const mapRun = (row: Record<string, unknown>): AutomationRunRow => ({
-  id: String(row.id),
-  ruleId: String(row.rule_id),
-  sourceType: String(row.source_type),
-  sourceId: String(row.source_id),
-  title: String(row.title),
-  dueAt: String(row.due_at) as IsoDateTime,
-  status: String(row.status),
-  ...(row.generated_task_id ? { generatedTaskId: String(row.generated_task_id) } : {}),
   createdAt: String(row.created_at) as IsoDateTime
 });
 
@@ -71,37 +60,6 @@ export class SqliteAutomationRepository extends SqliteRepository implements Auto
     ).all() as Array<Record<string, unknown>>).map(mapRule));
   }
 
-  public listNonLifeDueSources(
-    context: RepositoryExecutionContext,
-    sourceType: string,
-    familyId: FamilyId,
-    fromAt: IsoDateTime,
-    toAt: IsoDateTime
-  ): RepositoryResult<readonly AutomationDueSourceRow[]> {
-    return this.execute(context, () => {
-      let sql = '';
-      let args: unknown[] = [familyId, fromAt, toAt];
-      if (sourceType === 'important_day') {
-        sql = 'SELECT id,title,start_at due_at FROM governed_timeline_events WHERE family_id=? AND start_at>=? AND start_at<=?';
-      } else if (sourceType === 'finance_record') {
-        if (!context.actor.personId) return [];
-        sql = 'SELECT id,title,due_at FROM finance_records WHERE family_id=? AND owner_person_id=? AND due_at IS NOT NULL AND due_at>=? AND due_at<=?';
-        args = [familyId, context.actor.personId, fromAt, toAt];
-      } else if (sourceType === 'medication_plan') {
-        if (!context.actor.personId) return [];
-        sql = "SELECT m.id,'İlaç planı' title,m.starts_at due_at FROM medication_plans m WHERE m.family_id=? AND m.owner_person_id=? AND m.starts_at>=? AND m.starts_at<=? AND (m.ends_at IS NULL OR m.ends_at>=?) AND NOT EXISTS (SELECT 1 FROM data_lifecycle dl WHERE dl.resource_type='medication_plan' AND dl.resource_id=m.id AND dl.state<>'active')";
-        args = [familyId, context.actor.personId, fromAt, toAt, fromAt];
-      } else {
-        return [];
-      }
-      return (this.database(context).prepare(sql).all(...args) as Array<Record<string, unknown>>).map((row) => ({
-        id: String(row.id),
-        title: String(row.title),
-        dueAt: String(row.due_at) as IsoDateTime
-      }));
-    });
-  }
-
   public runExists(
     context: RepositoryExecutionContext,
     ruleId: string,
@@ -126,7 +84,7 @@ export class SqliteAutomationRepository extends SqliteRepository implements Auto
     });
   }
 
-  public insertRun(context: RepositoryExecutionContext, input: AutomationRunRow): RepositoryResult<void> {
+  public insertRun(context: RepositoryExecutionContext, input: AutomationRunLedgerRow): RepositoryResult<void> {
     return this.execute(context, () => {
       this.database(context).prepare(
         'INSERT INTO automation_runs (id,rule_id,source_type,source_id,title,due_at,status,generated_task_id,created_at) VALUES (?,?,?,?,?,?,?,?,?)'
@@ -135,48 +93,12 @@ export class SqliteAutomationRepository extends SqliteRepository implements Auto
         input.ruleId,
         input.sourceType,
         input.sourceId,
-        input.title,
-        input.dueAt,
+        REDACTED_RUN_TITLE,
+        input.createdAt,
         input.status,
         input.generatedTaskId ?? null,
         input.createdAt
       );
-    });
-  }
-
-  public listNonLifeRuns(
-    context: RepositoryExecutionContext,
-    familyId: FamilyId,
-    limit: number
-  ): RepositoryResult<readonly AutomationRunRow[]> {
-    return this.execute(context, () => {
-      const actorPersonId = context.actor.personId ?? null;
-      const rows = this.database(context).prepare(`
-        SELECT ar.id, ar.rule_id, ar.source_type, ar.source_id,
-          CASE WHEN ar.source_type='medication_plan' THEN 'İlaç planı' ELSE ar.title END title,
-          ar.due_at, ar.status, ar.generated_task_id, ar.created_at
-        FROM automation_runs ar
-        WHERE ar.source_type<>'life_record' AND (
-          (ar.source_type='important_day' AND EXISTS (
-            SELECT 1 FROM governed_timeline_events e WHERE e.id=ar.source_id AND e.family_id=?
-          ))
-          OR (ar.source_type='finance_record' AND ? IS NOT NULL AND EXISTS (
-            SELECT 1 FROM finance_records f WHERE f.id=ar.source_id AND f.family_id=? AND f.owner_person_id=?
-          ))
-          OR (ar.source_type='medication_plan' AND ? IS NOT NULL AND EXISTS (
-            SELECT 1 FROM medication_plans m WHERE m.id=ar.source_id AND m.family_id=? AND m.owner_person_id=? AND (m.ends_at IS NULL OR m.ends_at>=?)
-              AND NOT EXISTS (SELECT 1 FROM data_lifecycle dl WHERE dl.resource_type='medication_plan' AND dl.resource_id=m.id AND dl.state<>'active')
-          ))
-        )
-        ORDER BY ar.created_at DESC
-        LIMIT ?
-      `).all(
-        familyId,
-        actorPersonId, familyId, actorPersonId,
-        actorPersonId, familyId, actorPersonId, context.occurredAt,
-        limit
-      ) as Array<Record<string, unknown>>;
-      return rows.map(mapRun);
     });
   }
 

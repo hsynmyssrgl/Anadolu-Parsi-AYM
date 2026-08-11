@@ -4,11 +4,11 @@ import {
   asFamilyId,
   asPersonId,
   asUserId,
-  buildAiTimelineContext,
   buildFamilyTimeline,
   buildPersonalTimeline,
   type TimelineEvent
 } from '../src/index.js';
+import { buildAiTimelineContext } from '../src/ai-memory.js';
 
 const familyId = asFamilyId('family-1');
 const personA = asPersonId('person-a');

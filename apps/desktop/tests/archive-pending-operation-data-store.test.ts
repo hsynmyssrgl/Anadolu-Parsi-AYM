@@ -72,18 +72,23 @@ describe('30-U FamilyDataStore pending operation identity handoff', () => {
     const directory = mkdtempSync(join(tmpdir(), 'ppt-30u-data-store-restart-'));
     temporaryDirectories.push(directory);
     const databasePath = join(directory, 'family.db');
-    const firstStore = new FamilyDataStore({ databasePath, ...storeOptions });
+    let firstStore: FamilyDataStore | undefined;
+    let restartedStore: FamilyDataStore | undefined;
+    let operationId = '';
+    const semanticInput = { name: 'Restart Belgeleri', description: 'Kalıcı işlem kimliği testi' };
+    try {
+    firstStore = new FamilyDataStore({ databasePath, ...storeOptions });
     firstStore.setupAdmin({
       familyName: '30-U Test Ailesi',
       displayName: '30-U Yöneticisi',
       password: 'Guclu30UTestParolasi!2026'
     });
     const accountId = firstStore.listAccounts()[0]!.id;
-    const semanticInput = { name: 'Restart Belgeleri', description: 'Kalıcı işlem kimliği testi' };
     const firstIdentity = firstStore.acquireArchivePendingOperationIdentity({
       mutation: 'archive:createCategory',
       semanticInput
     });
+    operationId = firstIdentity.operationId;
     expect(firstIdentity).toMatchObject({ recovered: false, state: 'pending' });
     expect(firstStore.requireArchivePendingOperationIdentity({
       operationId: firstIdentity.operationId,
@@ -98,7 +103,8 @@ describe('30-U FamilyDataStore pending operation identity handoff', () => {
 
     // Simulate an application shutdown after COMMIT but before renderer acknowledgement.
     firstStore.close();
-    const restartedStore = new FamilyDataStore({ databasePath, ...storeOptions });
+    firstStore = undefined;
+    restartedStore = new FamilyDataStore({ databasePath, ...storeOptions });
     restartedStore.login({
       accountId,
       password: 'Guclu30UTestParolasi!2026'
@@ -113,11 +119,14 @@ describe('30-U FamilyDataStore pending operation identity handoff', () => {
       recovered: true,
       state: 'pending'
     });
-    const replayedResult = await restartedStore.createArchiveCategory({
+    await expect(restartedStore.createArchiveCategory({
       ...semanticInput,
       operationId: recoveredIdentity.operationId
-    });
-    expect(replayedResult.filter((item) => item.name === semanticInput.name)).toHaveLength(1);
+    })).rejects.toThrow(
+      /^\[RESOURCE-CONFLICT-001\].*semantik sonuç yeniden oynatılmadı.*Güncel durumu yeniden yükleyin\.$/u
+    );
+    const reloaded = await restartedStore.listArchiveCategories();
+    expect(reloaded.filter((item) => item.name === semanticInput.name)).toHaveLength(1);
     const acknowledged = restartedStore.acknowledgeArchivePendingOperationIdentity({
       operationId: recoveredIdentity.operationId,
       mutation: 'archive:createCategory',
@@ -138,7 +147,10 @@ describe('30-U FamilyDataStore pending operation identity handoff', () => {
     });
     expect(intentionalNext.operationId).not.toBe(firstIdentity.operationId);
     expect(intentionalNext.recovered).toBe(false);
-    restartedStore.close();
+    } finally {
+      restartedStore?.close();
+      firstStore?.close();
+    }
 
     const database = new DatabaseSync(databasePath, { readOnly: true });
     try {
@@ -147,13 +159,16 @@ describe('30-U FamilyDataStore pending operation identity handoff', () => {
       ).get(semanticInput.name)?.count)).toBe(1);
       expect(Number(database.prepare(
         'SELECT COUNT(*) AS count FROM platform_policy_archive_operations WHERE operation_id=?'
-      ).get(firstIdentity.operationId)?.count)).toBe(1);
+      ).get(operationId)?.count)).toBe(1);
       expect(Number(database.prepare(
         'SELECT COUNT(*) AS count FROM platform_policy_archive_operation_retries WHERE operation_id=?'
-      ).get(firstIdentity.operationId)?.count)).toBe(1);
+      ).get(operationId)?.count)).toBe(1);
+      expect(database.prepare(
+        'SELECT result_json FROM platform_policy_archive_operations WHERE operation_id=?'
+      ).get(operationId)?.result_json).toBe('{"status":"completed"}');
       expect(database.prepare(`
         SELECT acknowledgement_kind FROM platform_policy_archive_pending_operations WHERE operation_id=?
-      `).get(firstIdentity.operationId)?.acknowledgement_kind).toBe('completed');
+      `).get(operationId)?.acknowledgement_kind).toBe('completed');
     } finally {
       database.close();
     }

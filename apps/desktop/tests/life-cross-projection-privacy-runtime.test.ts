@@ -1,5 +1,5 @@
 import { DatabaseSync } from 'node:sqlite';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -244,6 +244,65 @@ afterEach(() => {
 });
 
 describe('30-Y LIFE cross-surface privacy and governed automation', () => {
+  it('statically fences source semantic persistence and rejects unsupported producer rules', async () => {
+    const adapterSource = readFileSync(
+      new URL('../src/main/automation-application-adapter.ts', import.meta.url),
+      'utf8'
+    );
+    const repositorySource = readFileSync(
+      new URL('../../../packages/repositories/src/automation-repository.ts', import.meta.url),
+      'utf8'
+    );
+    const taskInsertStart = adapterSource.indexOf('insertLifeRecord(repository, {');
+    const taskInsertEnd = adapterSource.indexOf('const run =', taskInsertStart);
+    const generatedTaskInsert = adapterSource.slice(taskInsertStart, taskInsertEnd);
+    const runInsertStart = repositorySource.indexOf('public insertRun(');
+    const runInsertEnd = repositorySource.indexOf('public listLifeRunCandidates(', runInsertStart);
+    const runLedgerInsert = repositorySource.slice(runInsertStart, runInsertEnd);
+    expect(taskInsertStart).toBeGreaterThan(-1);
+    expect(taskInsertEnd).toBeGreaterThan(taskInsertStart);
+    expect(runInsertStart).toBeGreaterThan(-1);
+    expect(runInsertEnd).toBeGreaterThan(runInsertStart);
+    expect(adapterSource).not.toContain('title: `${rule.title}: ${source.title}`');
+    expect(generatedTaskInsert).not.toContain('source.title');
+    expect(generatedTaskInsert).not.toContain('dueAt:');
+    expect(adapterSource).toContain("title: rule.title");
+    expect(runLedgerInsert).not.toContain('input.title');
+    expect(runLedgerInsert).not.toContain('input.dueAt');
+    expect(repositorySource).not.toContain('listNonLifeDueSources');
+    expect(repositorySource).not.toContain('listNonLifeRuns');
+    expect(repositorySource).toContain('__PPK016_SOURCE_CONTENT_REDACTED__');
+
+    const adapter = new RepositoryBackedAutomationAdapter({
+      transactionExecutor: {} as never,
+      automationRepository: {} as never,
+      lifeRepository: {} as never,
+      auditRepository: {} as never,
+      outboxRepository: {} as never,
+      lifePolicyTransactionRunner: {} as never
+    });
+    const rejected = await adapter.insertRule({
+      actorId: ACCOUNT_A,
+      actorRole: 'adult_member',
+      actorPersonId: PERSON_A,
+      familyId: FAMILY_A,
+      correlationId: asCorrelationId('ppk016-unsupported-automation-rule'),
+      occurredAt: NOW
+    }, {
+      id: 'unsupported-rule',
+      title: 'Desteklenmeyen kaynak',
+      sourceType: 'medication_plan',
+      daysBefore: 1,
+      enabled: true,
+      createdAt: NOW
+    });
+    expect(rejected.ok).toBe(false);
+    if (!rejected.ok) {
+      expect(rejected.error.code).toBe(ERROR_CODES.AUTHORIZATION_DENIED);
+      expect(rejected.error.details?.automationBoundary).toBe('PPK016_SOURCE_BINDING_REQUIRED');
+    }
+  });
+
   it('does not leak cross-family, cross-person, archived or ungoverned ledger titles', async () => {
     const database = new DatabaseSync(':memory:');
     openDatabases.push(database);
@@ -419,7 +478,7 @@ describe('30-Y LIFE cross-surface privacy and governed automation', () => {
     // The due-source seam is controlled below; no receiptless protected row is seeded.
     database.prepare(`
       INSERT INTO automation_rules(id,title,source_type,days_before,enabled,created_at)
-      VALUES('rule-due','Otomatik görev','medication_plan',30,1,?)
+      VALUES('rule-due','Otomatik görev','life_record',30,1,?)
     `).run(NOW);
 
     const platformRepository = new SqlitePlatformPolicyTransactionRepository();
@@ -435,7 +494,24 @@ describe('30-Y LIFE cross-surface privacy and governed automation', () => {
       ));
     expect(fence.ok).toBe(true);
 
-    const lifeRepository = new SqliteLifeRepository();
+    const rawLifeRepository = new SqliteLifeRepository();
+    let currentSourceReadCount = 0;
+    const lifeRepository = new Proxy(rawLifeRepository, {
+      get(target, property, receiver) {
+        if (property === 'listAutomationDueLife') {
+          return () => {
+            currentSourceReadCount += 1;
+            return ok([{
+              id: 'source-due',
+              title: 'Yönetişimli otomasyon kaynağı',
+              dueAt: asIsoDateTime('2026-08-09T03:00:00.000Z')
+            }]);
+          };
+        }
+        const value = Reflect.get(target, property, receiver) as unknown;
+        return typeof value === 'function' ? value.bind(target) : value;
+      }
+    });
     const durableResolver = {
       resolve(context: LifeApplicationContext, intent: LifePolicyIntent): LifePolicyEnforcementPoint {
         const pep = makePep(context, intent, {
@@ -499,19 +575,7 @@ describe('30-Y LIFE cross-surface privacy and governed automation', () => {
       policyEnforcementPointResolver: durableResolver,
       clusterFence: () => ({ writable: true, epoch: 65 })
     });
-    const automationRepository = new Proxy(new SqliteAutomationRepository(), {
-      get(target, property, receiver) {
-        if (property === 'listNonLifeDueSources') {
-          return () => ok([{
-            id: 'source-due',
-            title: 'Yönetişimli otomasyon kaynağı',
-            dueAt: asIsoDateTime('2026-08-09T03:00:00.000Z')
-          }]);
-        }
-        const value = Reflect.get(target, property, receiver) as unknown;
-        return typeof value === 'function' ? value.bind(target) : value;
-      }
-    });
+    const automationRepository = new SqliteAutomationRepository();
     const auditRepository = new SqliteAuditRepository();
     const realOutbox = new SqliteOutboxRepository();
     const failingOutbox = {
@@ -541,7 +605,10 @@ describe('30-Y LIFE cross-surface privacy and governed automation', () => {
       correlationId: asCorrelationId('30-y-automation-root'),
       occurredAt: NOW
     };
-    const failed = await failedAdapter.executeDueRules(context, NOW, {
+    const failed = await failedAdapter.executeDueRules({
+      ...context,
+      correlationId: asCorrelationId('30-y-automation-failed')
+    }, NOW, {
       nextRunId: () => 'run-failed',
       nextTaskId: () => 'task-failed',
       nextAuditId: () => 'audit-failed'
@@ -563,13 +630,19 @@ describe('30-Y LIFE cross-surface privacy and governed automation', () => {
       ...dependencies,
       outboxRepository: realOutbox
     });
-    const first = await adapter.executeDueRules(context, NOW, {
+    const first = await adapter.executeDueRules({
+      ...context,
+      correlationId: asCorrelationId('30-y-automation-success')
+    }, NOW, {
       nextRunId: () => 'run-success',
       nextTaskId: () => 'task-success',
       nextAuditId: () => 'audit-success'
     });
     expect(first).toEqual({ ok: true, value: 1 });
-    const retry = await adapter.executeDueRules(context, NOW, {
+    const retry = await adapter.executeDueRules({
+      ...context,
+      correlationId: asCorrelationId('30-y-automation-retry')
+    }, NOW, {
       nextRunId: () => 'run-retry',
       nextTaskId: () => 'task-retry',
       nextAuditId: () => 'audit-retry'
@@ -577,23 +650,34 @@ describe('30-Y LIFE cross-surface privacy and governed automation', () => {
     expect(retry).toEqual({ ok: true, value: 0 });
 
     const task = database.prepare(`
-      SELECT family_id,owner_person_id,privacy,policy_resource_type,policy_resource_id,
+      SELECT family_id,owner_person_id,title,due_at,notes,privacy,policy_resource_type,policy_resource_id,
         policy_action,policy_capability,policy_correlation_id
       FROM life_records WHERE id='task-success'
     `).get() as Record<string, unknown>;
     expect(task).toMatchObject({
       family_id: 'family-main',
       owner_person_id: account.person_id,
+      title: 'Otomatik görev',
+      due_at: null,
+      notes: 'Otomatik oluşturuldu.',
       privacy: 'private',
       policy_resource_type: 'life_record',
       policy_resource_id: 'task-success',
       policy_action: 'create',
       policy_capability: 'family.write',
-      policy_correlation_id: '30-y-automation-root:life-task:task-success'
+      policy_correlation_id: '30-y-automation-success:life-task:task-success'
     });
     expect(database.prepare(`
       SELECT COUNT(*) count FROM automation_runs WHERE id='run-success'
     `).get()).toEqual({ count: 1 });
+    expect(database.prepare(`
+      SELECT title,due_at,created_at FROM automation_runs WHERE id='run-success'
+    `).get()).toEqual({
+      title: '__PPK016_SOURCE_CONTENT_REDACTED__',
+      due_at: NOW,
+      created_at: NOW
+    });
+    expect(currentSourceReadCount).toBe(5);
     expect(database.prepare(`
       SELECT COUNT(*) count FROM audit_log
       WHERE id='audit-success' AND resource_type='life_record' AND resource_id='task-success'

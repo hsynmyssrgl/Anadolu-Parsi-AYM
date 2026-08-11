@@ -141,16 +141,16 @@ interface ImportPlan {
   readonly digest: string;
 }
 
-interface CachedPreview {
-  readonly preview: FamilyDataImportPreviewView;
+interface CachedPreviewLease {
   readonly familyId: string;
   readonly actorId: string;
   readonly sourcePath: string;
   readonly sourceSize: number;
   readonly sourceModifiedMs: number;
-  readonly sourceText: string;
-  readonly document: SourceDocument;
-  readonly plan: ImportPlan;
+  readonly sourceSha256: string;
+  readonly expiresAt: string;
+  readonly valid: boolean;
+  readonly targetIdSeed: string;
   readonly planDigest: string;
 }
 
@@ -173,6 +173,22 @@ export interface FamilyDataImportServiceDependencies {
 const isObject = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
 const normalizeText = (value: string): string => value.normalize('NFKC').trim().replace(/\s+/gu, ' ').toLocaleLowerCase('tr-TR');
 const sha256 = (value: string | Buffer): string => createHash('sha256').update(value).digest('hex');
+
+const decodeImportSource = (sourceBuffer: Buffer): string => {
+  let sourceText: string;
+  try { sourceText = new TextDecoder('utf-8', { fatal: true }).decode(sourceBuffer); }
+  catch { throw new Error('İçe aktarma dosyası geçerli UTF-8 kodlamasında olmalıdır.'); }
+  if (sourceText.includes('\u0000')) throw new Error('İçe aktarma dosyası NUL karakteri içeremez.');
+  return sourceText;
+};
+
+const deterministicTargetId = (seed: string, entityType: FamilyDataImportEntityType, sourceId: string): string => {
+  const value = sha256(`${seed}\u0000${entityType}\u0000${sourceId}`).slice(0, 32).split('');
+  value[12] = '5';
+  value[16] = ((Number.parseInt(value[16]!, 16) & 0x3) | 0x8).toString(16);
+  const hex = value.join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+};
 const importCorrelation = (parent: string, kind: 'location' | 'location-read' | 'event' | 'rollback-location' | 'rollback-event', index: number, resourceId: string) =>
   asCorrelationId(`${parent.slice(0, 72)}:imp:${kind}:${index}:${sha256(resourceId).slice(0, 12)}`);
 const timelineSensitivity = (visibility: SourceEvent['visibility']): 'personal' | 'sensitive' | 'highly_sensitive' =>
@@ -468,17 +484,16 @@ const summary = (entityType: FamilyDataImportEntityType, sourceCount: number, re
   skipCount
 });
 
-const buildPlan = (document: SourceDocument, existing: FamilyDataImportExistingData, inheritedIssues: readonly FamilyDataImportIssueView[], targetFamilyName: string, baseline?: ImportPlan): ImportPlan => {
+const buildPlan = (document: SourceDocument, existing: FamilyDataImportExistingData, inheritedIssues: readonly FamilyDataImportIssueView[], targetFamilyName: string, targetIdSeed: string): ImportPlan => {
   const issues = [...inheritedIssues];
   if (normalizeText(document.familyName) !== normalizeText(targetFamilyName)) issue(issues, 'warning', 'import.family_name_mismatch', `Kaynak aile adı “${document.familyName}”; veriler mevcut “${targetFamilyName}” alanına eklenecek.`, '$.family.name');
 
   const people: PlannedPerson[] = [];
   const personTargets = new Map<string, string>();
   const personByKey = new Map(existing.people.map((row) => [`${normalizeText(row.displayName)}|${row.birthDate ?? ''}`, row.id]));
-  const baselinePeople = new Map(baseline?.people.map((row) => [row.sourceId, row.targetId]) ?? []);
   for (const record of document.people) {
     const key = `${normalizeText(record.displayName)}|${record.birthDate ?? ''}`;
-    const targetId = personByKey.get(key) ?? baselinePeople.get(record.id) ?? randomUUID();
+    const targetId = personByKey.get(key) ?? deterministicTargetId(targetIdSeed, 'person', record.id);
     const resolution: Resolution = personByKey.has(key) ? 'reused' : 'created';
     if (resolution === 'reused') issue(issues, 'warning', 'import.person_reused', `Mevcut kişi yeniden kullanılacak: ${record.displayName}`, `$.people[id=${record.id}]`);
     else personByKey.set(key, targetId);
@@ -488,7 +503,6 @@ const buildPlan = (document: SourceDocument, existing: FamilyDataImportExistingD
 
   const relations: PlannedRelation[] = [];
   const relationByKey = new Map(existing.relations.map((row) => [`${row.fromPersonId}|${row.toPersonId}|${row.relationType}`, row.id]));
-  const baselineRelations = new Map(baseline?.relations.map((row) => [row.sourceId, row.targetId]) ?? []);
   for (const record of document.relations) {
     const fromTargetId = personTargets.get(record.fromPersonId)!;
     const toTargetId = personTargets.get(record.toPersonId)!;
@@ -497,7 +511,7 @@ const buildPlan = (document: SourceDocument, existing: FamilyDataImportExistingD
       continue;
     }
     const key = `${fromTargetId}|${toTargetId}|${record.relationType}`;
-    const targetId = relationByKey.get(key) ?? baselineRelations.get(record.id) ?? randomUUID();
+    const targetId = relationByKey.get(key) ?? deterministicTargetId(targetIdSeed, 'relation', record.id);
     const resolution: Resolution = relationByKey.has(key) ? 'reused' : 'created';
     if (resolution === 'reused') issue(issues, 'warning', 'import.relation_reused', 'Mevcut aile bağı yeniden kullanılacak.', `$.relations[id=${record.id}]`);
     else relationByKey.set(key, targetId);
@@ -506,10 +520,9 @@ const buildPlan = (document: SourceDocument, existing: FamilyDataImportExistingD
 
   const locations: PlannedLocation[] = [];
   const locationByKey = new Map((existing.locations ?? []).map((row) => [`${normalizeText(row.label)}|${row.kind}`, row.id]));
-  const baselineLocations = new Map(baseline?.locations.map((row) => [row.sourceId, row.targetId]) ?? []);
   for (const record of document.locations) {
     const key = `${normalizeText(record.label)}|${record.kind}`;
-    const targetId = locationByKey.get(key) ?? baselineLocations.get(record.id) ?? randomUUID();
+    const targetId = locationByKey.get(key) ?? deterministicTargetId(targetIdSeed, 'location', record.id);
     const resolution: Resolution = locationByKey.has(key) ? 'reused' : 'created';
     if (resolution === 'reused') issue(issues, 'warning', 'import.location_reused', `Mevcut konum yeniden kullanılacak: ${record.label}`, `$.locations[id=${record.id}]`);
     else locationByKey.set(key, targetId);
@@ -519,10 +532,9 @@ const buildPlan = (document: SourceDocument, existing: FamilyDataImportExistingD
 
   const events: PlannedEvent[] = [];
   const eventByKey = new Map(existing.events.map((row) => [`${normalizeText(row.title)}|${row.startAt}`, row.id]));
-  const baselineEvents = new Map(baseline?.events.map((row) => [row.sourceId, row.targetId]) ?? []);
   for (const record of document.events) {
     const key = `${normalizeText(record.title)}|${record.startAt}`;
-    const targetId = eventByKey.get(key) ?? baselineEvents.get(record.id) ?? randomUUID();
+    const targetId = eventByKey.get(key) ?? deterministicTargetId(targetIdSeed, 'event', record.id);
     const resolution: Resolution = eventByKey.has(key) ? 'reused' : 'created';
     const targetLocation = record.locationId ? plannedLocationsBySource.get(record.locationId) : undefined;
     if (resolution === 'reused') issue(issues, 'warning', 'import.event_reused', `Mevcut etkinlik yeniden kullanılacak: ${record.title}`, `$.events[id=${record.id}]`);
@@ -545,6 +557,7 @@ const buildPlan = (document: SourceDocument, existing: FamilyDataImportExistingD
   ];
   const digest = sha256(JSON.stringify({
     source: document.exportId,
+    targetFamilyName: normalizeText(targetFamilyName),
     people: people.map((row) => [row.sourceId, row.targetId, row.resolution]),
     relations: relations.map((row) => [row.sourceId, row.targetId, row.resolution, row.fromTargetId, row.toTargetId]),
     locations: locations.map((row) => [row.sourceId, row.targetId, row.resolution]),
@@ -559,7 +572,7 @@ const unwrap = <T>(result: Result<T, AppError>): T => {
 };
 
 export class FamilyDataImportService {
-  readonly #previews = new Map<string, CachedPreview>();
+  readonly #previews = new Map<string, CachedPreviewLease>();
   public constructor(private readonly dependencies: FamilyDataImportServiceDependencies) {}
 
   public preview(sourcePath: string): FamilyDataImportPreviewView {
@@ -570,10 +583,7 @@ export class FamilyDataImportService {
     if (extname(sourcePath).toLocaleLowerCase('tr-TR') !== '.json') throw new Error('Aile verisi içe aktarma dosyası .json uzantılı olmalıdır.');
     if (stat.size <= 0 || stat.size > MAX_IMPORT_BYTES) throw new Error(`İçe aktarma dosyası 1 bayt ile ${MAX_IMPORT_BYTES} bayt arasında olmalıdır.`);
     const sourceBuffer = readFileSync(sourcePath);
-    let sourceText: string;
-    try { sourceText = new TextDecoder('utf-8', { fatal: true }).decode(sourceBuffer); }
-    catch { throw new Error('İçe aktarma dosyası geçerli UTF-8 kodlamasında olmalıdır.'); }
-    if (sourceText.includes('\u0000')) throw new Error('İçe aktarma dosyası NUL karakteri içeremez.');
+    const sourceText = decodeImportSource(sourceBuffer);
     const parsed = parseSourceDocument(sourceText, Boolean(this.dependencies.policyBatchRunner && this.dependencies.locationRepository));
     const target = unwrap(this.dependencies.transactionExecutor.execute(context.correlationId, (transaction) => {
       const repository = repositoryContext(context, transaction);
@@ -585,7 +595,8 @@ export class FamilyDataImportService {
       return ok({ existing: existing.value, familyName: family.value.name });
     }));
     const document = parsed.document;
-    const plan = document ? buildPlan(document, target.existing, parsed.issues, target.familyName) : undefined;
+    const targetIdSeed = randomUUID();
+    const plan = document ? buildPlan(document, target.existing, parsed.issues, target.familyName, targetIdSeed) : undefined;
     const previewId = randomUUID();
     const expiresAt = new Date(Date.now() + PREVIEW_TTL_MS).toISOString();
     const summaries = plan?.summaries ?? [summary('person', 0, []), summary('relation', 0, []), summary('location', 0, []), summary('event', 0, [])];
@@ -608,7 +619,18 @@ export class FamilyDataImportService {
       issues: [...issues],
       entities: [...summaries]
     };
-    if (document && plan) this.#previews.set(previewId, { preview, familyId: context.familyId, actorId: context.actor.userId, sourcePath, sourceSize: stat.size, sourceModifiedMs: stat.mtimeMs, sourceText, document, plan, planDigest: plan.digest });
+    if (document && plan) this.#previews.set(previewId, {
+      familyId: context.familyId,
+      actorId: context.actor.userId,
+      sourcePath,
+      sourceSize: stat.size,
+      sourceModifiedMs: stat.mtimeMs,
+      sourceSha256: preview.sha256,
+      expiresAt,
+      valid: preview.valid,
+      targetIdSeed,
+      planDigest: plan.digest
+    });
     this.#removeExpiredPreviews();
     return preview;
   }
@@ -623,24 +645,48 @@ export class FamilyDataImportService {
       this.#previews.delete(input.previewId);
       throw new Error('İçe aktarma ön izlemesi farklı kullanıcı veya aile oturumuna aittir. Dosyayı yeniden ön izleyin.');
     }
-    if (!cached.preview.valid) throw new Error('Hatalı ön izleme uygulanamaz.');
-    if (Date.parse(cached.preview.expiresAt) <= Date.now()) { this.#previews.delete(input.previewId); throw new Error('İçe aktarma ön izlemesinin süresi doldu.'); }
+    if (!cached.valid) throw new Error('Hatalı ön izleme uygulanamaz.');
+    if (Date.parse(cached.expiresAt) <= Date.now()) { this.#previews.delete(input.previewId); throw new Error('İçe aktarma ön izlemesinin süresi doldu.'); }
     const stat = lstatSync(cached.sourcePath);
     if (!stat.isFile() || stat.isSymbolicLink() || stat.size !== cached.sourceSize || stat.mtimeMs !== cached.sourceModifiedMs) throw new Error('İçe aktarma dosyası ön izlemeden sonra değişti. Yeniden ön izleme gereklidir.');
     const sourceBuffer = readFileSync(cached.sourcePath);
-    if (sha256(sourceBuffer) !== cached.preview.sha256 || sourceBuffer.toString('utf8') !== cached.sourceText) throw new Error('İçe aktarma dosyasının SHA-256 değeri ön izlemeyle eşleşmiyor.');
+    const afterReadStat = lstatSync(cached.sourcePath);
+    if (!afterReadStat.isFile() || afterReadStat.isSymbolicLink() || afterReadStat.size !== cached.sourceSize || afterReadStat.mtimeMs !== cached.sourceModifiedMs) throw new Error('İçe aktarma dosyası okunurken değişti. Yeniden ön izleme gereklidir.');
+    if (sha256(sourceBuffer) !== cached.sourceSha256) throw new Error('İçe aktarma dosyasının SHA-256 değeri ön izlemeyle eşleşmiyor.');
+    const reparsed = parseSourceDocument(
+      decodeImportSource(sourceBuffer),
+      Boolean(this.dependencies.policyBatchRunner && this.dependencies.locationRepository)
+    );
+    const document = reparsed.document;
+    if (!document || reparsed.issues.some((entry) => entry.severity === 'error')) {
+      throw new Error('İçe aktarma kaynağı uygulama öncesinde yeniden doğrulanamadı. Dosyayı yeniden ön izleyin.');
+    }
     unwrap(this.dependencies.strongAuthentication.verify(context, { password: input.password, ...(input.code ? { code: input.code } : {}) }));
+
+    const preparedPlan = unwrap(this.dependencies.transactionExecutor.execute(context.correlationId, (transaction) => {
+      const repository = repositoryContext(context, transaction);
+      const existing = this.dependencies.importRepository.loadExisting(repository, context.familyId);
+      if (!existing.ok) return existing;
+      const family = this.dependencies.familyRepository.findById(repository, context.familyId);
+      if (!family.ok) return family;
+      if (!family.value) return err(createAppError({ code: ERROR_CODES.RESOURCE_NOT_FOUND, message: 'Aktif aile alanı bulunamadı.', category: 'not_found', correlationId: context.correlationId }));
+      return ok(buildPlan(document, existing.value, reparsed.issues, family.value.name, cached.targetIdSeed));
+    }));
+    if (preparedPlan.digest !== cached.planDigest) {
+      this.#previews.delete(input.previewId);
+      throw new Error('Aile verileri ön izlemeden sonra değişti. Çakışma planını yenilemek için dosyayı yeniden ön izleyin.');
+    }
 
     const actorPersonId = context.actor.personId;
     const governedRows = [
-      ...cached.plan.locations.filter((row) => row.resolution === 'created'),
-      ...cached.plan.events.filter((row) => row.resolution === 'created')
+      ...preparedPlan.locations.filter((row) => row.resolution === 'created'),
+      ...preparedPlan.events.filter((row) => row.resolution === 'created')
     ];
     if (governedRows.length > 0 && (!this.dependencies.policyBatchRunner || !this.dependencies.locationRepository || !actorPersonId)) {
       throw new Error('Governed konum/etkinlik içe aktarma batch bağı veya etkin kişi kimliği bulunmadığı için işlem fail-closed durduruldu.');
     }
     const requests: FamilyDataImportPolicyBatchRequest[] = [];
-    for (const [index, row] of cached.plan.locations.filter((item) => item.resolution === 'created').entries()) {
+    for (const [index, row] of preparedPlan.locations.filter((item) => item.resolution === 'created').entries()) {
       const childContext: LocationApplicationContext = {
         familyId: context.familyId,
         actor: { userId: context.actor.userId, role: context.actor.role, ...(actorPersonId ? { personId: actorPersonId } : {}) },
@@ -653,7 +699,7 @@ export class FamilyDataImportService {
         intent: { action: 'create', capability: 'family.write', resourceType: 'location', resourceId: row.targetId, purpose: 'general', ...(actorPersonId ? { ownerPersonId: actorPersonId } : {}), sensitivity: 'highly_sensitive' }
       });
     }
-    for (const [index, row] of cached.plan.events.filter((item) => item.resolution === 'created' && item.targetLocationId).entries()) {
+    for (const [index, row] of preparedPlan.events.filter((item) => item.resolution === 'created' && item.targetLocationId).entries()) {
       const childContext: LocationApplicationContext = {
         familyId: context.familyId,
         actor: { userId: context.actor.userId, role: context.actor.role, ...(actorPersonId ? { personId: actorPersonId } : {}) },
@@ -672,7 +718,7 @@ export class FamilyDataImportService {
         intent: { action: 'read', capability: 'location.read', resourceType: 'location', resourceId: row.targetLocationId!, purpose: 'general', sensitivity: 'highly_sensitive' }
       });
     }
-    for (const [index, row] of cached.plan.events.filter((item) => item.resolution === 'created').entries()) {
+    for (const [index, row] of preparedPlan.events.filter((item) => item.resolution === 'created').entries()) {
       const childContext: TimelineApplicationContext = {
         familyId: context.familyId,
         actor: { userId: context.actor.userId, roles: [context.actor.role], ...(actorPersonId ? { personId: actorPersonId } : {}) },
@@ -690,12 +736,15 @@ export class FamilyDataImportService {
       const repository = repositoryContext(context, transaction);
       const authorization = authorizeFamilyDataImport(this.dependencies, context, repository, 'create');
       if (!authorization.ok) return authorization;
-      const existingSource = this.dependencies.importRepository.findActiveSource(repository, context.familyId, cached.preview.sha256, cached.document.exportId);
+      const existingSource = this.dependencies.importRepository.findActiveSource(repository, context.familyId, cached.sourceSha256, document.exportId);
       if (!existingSource.ok) return existingSource;
       if (existingSource.value) return err(createAppError({ code: ERROR_CODES.RESOURCE_CONFLICT, message: 'Bu dışa aktarma paketi daha önce uygulanmış ve geri alınmamış.', category: 'conflict', correlationId: context.correlationId }));
       const existing = this.dependencies.importRepository.loadExisting(repository, context.familyId);
       if (!existing.ok) return existing;
-      const currentPlan = buildPlan(cached.document, existing.value, [], cached.preview.targetFamilyName, cached.plan);
+      const family = this.dependencies.familyRepository.findById(repository, context.familyId);
+      if (!family.ok) return family;
+      if (!family.value) return err(createAppError({ code: ERROR_CODES.RESOURCE_NOT_FOUND, message: 'Aktif aile alanı bulunamadı.', category: 'not_found', correlationId: context.correlationId }));
+      const currentPlan = buildPlan(document, existing.value, reparsed.issues, family.value.name, cached.targetIdSeed);
       if (currentPlan.digest !== cached.planDigest) return err(createAppError({ code: ERROR_CODES.RESOURCE_CONFLICT, message: 'Aile verileri ön izlemeden sonra değişti. Çakışma planını yenilemek için dosyayı yeniden ön izleyin.', category: 'conflict', correlationId: context.correlationId }));
       const now = transaction.occurredAt;
       const batchId = randomUUID();
@@ -703,11 +752,11 @@ export class FamilyDataImportService {
       const batch = this.dependencies.importRepository.insertBatch(repository, {
         id: batchId,
         familyId: context.familyId,
-        sourceFileName: cached.preview.fileName,
-        sourceSha256: cached.preview.sha256,
-        sourceExportId: cached.document.exportId,
-        sourceCreatedAt: asIsoDateTime(cached.document.createdAt),
-        sourceFamilyName: cached.document.familyName,
+        sourceFileName: basename(cached.sourcePath),
+        sourceSha256: cached.sourceSha256,
+        sourceExportId: document.exportId,
+        sourceCreatedAt: asIsoDateTime(document.createdAt),
+        sourceFamilyName: document.familyName,
         schemaVersion: 1,
         status: 'applied',
         appliedAt: now,
@@ -782,7 +831,7 @@ export class FamilyDataImportService {
       }
       const audit = this.dependencies.auditRepository.append(repository, { id: randomUUID(), action: 'family_data.import_applied', resourceType: 'family_data_import', resourceId: batchId, occurredAt: now, actorId: context.actor.userId });
       if (!audit.ok) return audit;
-      return ok(this.#batchView({ id: batchId, familyId: context.familyId, sourceFileName: cached.preview.fileName, sourceSha256: cached.preview.sha256, sourceExportId: cached.document.exportId, sourceCreatedAt: asIsoDateTime(cached.document.createdAt), sourceFamilyName: cached.document.familyName, schemaVersion: 1, status: 'applied', appliedAt: now, rollbackDeadline, actorId: context.actor.userId, summary: currentPlan.summaries }, []));
+      return ok(this.#batchView({ id: batchId, familyId: context.familyId, sourceFileName: basename(cached.sourcePath), sourceSha256: cached.sourceSha256, sourceExportId: document.exportId, sourceCreatedAt: asIsoDateTime(document.createdAt), sourceFamilyName: document.familyName, schemaVersion: 1, status: 'applied', appliedAt: now, rollbackDeadline, actorId: context.actor.userId, summary: currentPlan.summaries }, []));
     };
     const result = requests.length > 0
       ? await this.dependencies.policyBatchRunner!.execute(context.correlationId, requests, ({ transaction, repositories }) => applyTransaction(transaction, repositories))
@@ -972,6 +1021,6 @@ export class FamilyDataImportService {
 
   #removeExpiredPreviews(): void {
     const now = Date.now();
-    for (const [id, cached] of this.#previews) if (Date.parse(cached.preview.expiresAt) <= now) this.#previews.delete(id);
+    for (const [id, cached] of this.#previews) if (Date.parse(cached.expiresAt) <= now) this.#previews.delete(id);
   }
 }

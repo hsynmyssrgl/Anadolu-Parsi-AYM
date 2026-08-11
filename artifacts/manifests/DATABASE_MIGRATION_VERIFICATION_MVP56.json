@@ -397,7 +397,12 @@
       "version": 76,
       "name": "ppk012_offline_capability_lease_cache_fence",
       "checksum": "98546bdde3fe97f9f37f2421dd74ad305ce5301dd23a9954ed54bd53610e9388"
+    },
+    {
+      "version": 77,
+      "name": "ppk016_derived_data_policy_inheritance",
+      "checksum": "de7fbb16719ad427c33d20be3cf564577185d6a1c2eb916cbe0dbdf40724a1da"
     }
   ],
-  "generatedAt": "2026-08-11T16:51:00.531Z"
+  "generatedAt": "2026-08-11T20:13:25.092Z"
 }

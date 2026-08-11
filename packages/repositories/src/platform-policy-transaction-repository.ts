@@ -5,7 +5,8 @@ import {
   type BindPlatformPolicyArchivePendingOperationInput,
   type PlatformPolicyDatabaseFenceSnapshot,
   type PlatformPolicyArchiveOperationIdentityInput,
-  type PlatformPolicyArchiveOperationRecord,
+  type PlatformPolicyArchiveOperationMetadata,
+  type PlatformPolicyArchiveOperationMetadataLookupInput,
   type PlatformPolicyArchiveOperationResolution,
   type PlatformPolicyArchivePendingOperationIdentityInput,
   type PlatformPolicyArchivePendingOperationMutation,
@@ -307,17 +308,16 @@ const mapReceipt = (row: Record<string, unknown>): PlatformPolicyTransactionRece
   record: JSON.parse(String(row.record_json)) as PlatformPolicyReceiptRecord
 });
 
-const mapArchiveOperation = (row: Record<string, unknown>): PlatformPolicyArchiveOperationRecord => {
-  const resultJson = String(row.result_json);
-  let parsedResult: unknown;
-  try { parsedResult = JSON.parse(resultJson); }
-  catch { throw new Error('Archive operation result JSON is invalid'); }
-  if (canonicalPlatformPolicyJson(parsedResult) !== resultJson) {
-    throw new Error('Archive operation result JSON is not canonical');
-  }
+const mapArchiveOperationMetadata = (
+  row: Record<string, unknown>
+): PlatformPolicyArchiveOperationMetadata => {
   const resultHash = String(row.result_hash);
-  if (!SHA256.test(resultHash) || sha256Utf8(resultJson) !== resultHash) {
-    throw new Error('Archive operation result hash does not match its canonical result');
+  const completedAt = String(row.completed_at) as IsoDateTime;
+  const retryCount = Number(row.retry_count ?? 0);
+  if (!SHA256.test(resultHash)) throw new Error('Archive operation result hash is invalid');
+  assertIsoDate(completedAt, 'Archive operation completion time');
+  if (!Number.isSafeInteger(retryCount) || retryCount < 0) {
+    throw new Error('Archive operation retry count is invalid');
   }
   return {
     operationId: String(row.operation_id),
@@ -329,22 +329,37 @@ const mapArchiveOperation = (row: Record<string, unknown>): PlatformPolicyArchiv
     resourceId: String(row.resource_id),
     action: String(row.action) as PlatformPolicyReceiptRecord['action'],
     capability: String(row.capability) as PlatformPolicyReceiptRecord['capability'],
-    originalReceiptHash: String(row.original_receipt_hash),
-    originalCorrelationId: String(row.original_correlation_id),
-    resultJson,
+    status: 'completed',
     resultHash,
-    completedAt: String(row.completed_at) as IsoDateTime,
-    retryCount: Number(row.retry_count ?? 0)
+    completedAt,
+    retryCount
   };
 };
 
-const ARCHIVE_OPERATION_SELECT = `
-  SELECT operation.*,
+/** Never select result_json through the receiptless discovery boundary. */
+const ARCHIVE_OPERATION_METADATA_SELECT = `
+  SELECT operation.operation_id,operation.operation_fingerprint,operation.family_id,
+    operation.actor_account_id,operation.purpose,operation.resource_type,
+    operation.resource_id,operation.action,operation.capability,
+    operation.result_hash,operation.completed_at,
     (SELECT count(*) FROM platform_policy_archive_operation_retries retry
      WHERE retry.operation_id=operation.operation_id) AS retry_count
   FROM platform_policy_archive_operations operation
   WHERE operation.operation_id=?
 `;
+
+const ARCHIVE_OPERATION_RESOLUTION_SELECT = `
+  SELECT operation.operation_id,operation.operation_fingerprint,operation.family_id,
+    operation.actor_account_id,operation.purpose,operation.resource_type,
+    operation.resource_id,operation.action,operation.capability,
+    operation.original_receipt_hash,operation.result_hash,operation.completed_at,
+    (SELECT count(*) FROM platform_policy_archive_operation_retries retry
+     WHERE retry.operation_id=operation.operation_id) AS retry_count
+  FROM platform_policy_archive_operations operation
+  WHERE operation.operation_id=?
+`;
+
+const ARCHIVE_OPERATION_COMPLETION_JSON = '{"status":"completed"}';
 
 const mapArchivePendingOperation = (
   row: Record<string, unknown>
@@ -563,7 +578,14 @@ const assertArchiveOperationIdentity = (
     resourceId: authorization.resourceId,
     action: authorization.action,
     capability: authorization.capability,
-    correlationId: context.correlationId
+    correlationId: context.correlationId,
+    resourceFamilyId: input.resourceFamilyId,
+    purpose: input.purpose,
+    occurredAt: authorization.occurredAt,
+    contextHash: authorization.contextHash,
+    dataClasses: authorization.dataClasses,
+    fenceEpoch: authorization.fenceEpoch,
+    fenceWritable: true
   });
   if (!OPERATION_ID.test(input.operationId)) throw new Error('Archive operation identifier is invalid');
   if (!SHA256.test(input.operationFingerprint)) throw new Error('Archive operation fingerprint is invalid');
@@ -571,6 +593,9 @@ const assertArchiveOperationIdentity = (
   assertNonEmpty(input.actorAccountId, 'Archive operation actor identifier', 128);
   if (
     input.purpose !== 'archive'
+    || context.actor.userId !== authorization.subject.accountId
+    || context.actor.personId !== authorization.subject.personId
+    || canonicalPlatformPolicyJson(context.actor.roles) !== canonicalPlatformPolicyJson(authorization.subject.roles)
     || authorization.resourceFamilyId !== input.resourceFamilyId
     || authorization.subject.accountId !== input.actorAccountId
     || authorization.receiptRecord.request.resource.familyId !== input.resourceFamilyId
@@ -579,10 +604,47 @@ const assertArchiveOperationIdentity = (
   ) throw new Error('Archive operation identity does not match its active policy transaction');
 };
 
+const assertArchiveOperationResultAccessReceipt = (
+  context: PolicyAuthorizedRepositoryExecutionContext,
+  row: Record<string, unknown> | undefined
+): void => {
+  if (!row) throw new Error('Archive operation result access requires a durable current policy receipt');
+  const authorization = context.policyAuthorization;
+  const persisted = mapReceipt(row);
+  const expectedReceiptHash = computePlatformPolicyReceiptHash(authorization.receipt);
+  if (
+    persisted.receiptHash !== expectedReceiptHash
+    || persisted.receiptVersion !== authorization.receipt.receiptVersion
+    || persisted.requestHash !== authorization.requestHash
+    || persisted.contextHash !== authorization.contextHash
+    || canonicalPlatformPolicyJson(persisted.dataClasses) !== canonicalPlatformPolicyJson(authorization.dataClasses)
+    || persisted.obligationExecutionHash !== authorization.obligationExecution.attestationHash
+    || persisted.policyVersion !== authorization.policyVersion
+    || persisted.policyPackageVersion !== authorization.policyPackageVersion
+    || persisted.policyPackageSha256 !== authorization.policyPackageSha256
+    || persisted.applicationVersion !== authorization.applicationVersion
+    || persisted.capabilityManifestSha256 !== authorization.capabilityManifestSha256
+    || persisted.deviceCertificateSha256 !== authorization.deviceCertificateSha256
+    || persisted.decisionAuthorityId !== authorization.decisionAuthorityId
+    || persisted.nonce !== authorization.receipt.nonce
+    || persisted.correlationId !== context.correlationId
+    || persisted.resourceType !== authorization.resourceType
+    || persisted.resourceId !== authorization.resourceId
+    || persisted.action !== authorization.action
+    || persisted.capability !== authorization.capability
+    || persisted.fenceEpoch !== authorization.fenceEpoch
+    || persisted.issuedAt !== authorization.receipt.issuedAt
+    || persisted.recordedAt !== authorization.receiptRecord.recordedAt
+    || canonicalPlatformPolicyJson(persisted.record) !== canonicalPlatformPolicyJson(authorization.receiptRecord)
+  ) {
+    throw new Error('Archive operation result access receipt does not match its active policy transaction');
+  }
+};
+
 const assertArchiveOperationMatches = (
   context: PolicyAuthorizedRepositoryExecutionContext,
   input: PlatformPolicyArchiveOperationIdentityInput,
-  operation: PlatformPolicyArchiveOperationRecord
+  operation: PlatformPolicyArchiveOperationMetadata
 ): void => {
   const authorization = context.policyAuthorization;
   if (
@@ -596,6 +658,45 @@ const assertArchiveOperationMatches = (
     || operation.action !== authorization.action
     || operation.capability !== authorization.capability
   ) throw new Error('Archive operation identifier was reused with a different semantic mutation');
+};
+
+const assertArchiveOperationMetadataLookup = (
+  context: RepositoryExecutionContext,
+  input: PlatformPolicyArchiveOperationMetadataLookupInput
+): void => {
+  if (!OPERATION_ID.test(input.operationId)) throw new Error('Archive operation identifier is invalid');
+  if (!SHA256.test(input.operationFingerprint)) throw new Error('Archive operation fingerprint is invalid');
+  assertNonEmpty(input.resourceFamilyId, 'Archive operation family identifier', 128);
+  assertNonEmpty(input.actorAccountId, 'Archive operation actor identifier', 128);
+  assertNonEmpty(input.resourceId, 'Archive operation resource identifier', 256);
+  if (
+    input.purpose !== 'archive'
+    || context.actor.userId !== input.actorAccountId
+    || !['archive_item', 'archive_retention_policy', 'archive_category'].includes(input.resourceType)
+    || !['create', 'update', 'delete', 'record'].includes(input.action)
+    || input.capability !== 'archive.write'
+  ) {
+    throw new Error('Archive operation metadata lookup identity is invalid');
+  }
+};
+
+const assertArchiveOperationMetadataMatches = (
+  input: PlatformPolicyArchiveOperationMetadataLookupInput,
+  operation: PlatformPolicyArchiveOperationMetadata
+): void => {
+  if (
+    operation.operationId !== input.operationId
+    || operation.operationFingerprint !== input.operationFingerprint
+    || operation.resourceFamilyId !== input.resourceFamilyId
+    || operation.actorAccountId !== input.actorAccountId
+    || operation.purpose !== input.purpose
+    || operation.resourceType !== input.resourceType
+    || operation.resourceId !== input.resourceId
+    || operation.action !== input.action
+    || operation.capability !== input.capability
+  ) {
+    throw new Error('Archive operation metadata belongs to a different semantic mutation');
+  }
 };
 
 const assertArchivePendingOperationIdentity = (
@@ -865,13 +966,18 @@ export class SqlitePlatformPolicyTransactionRepository
     return this.execute(context, () => {
       assertArchiveOperationIdentity(context, input);
       const database = this.database(context);
-      const row = database.prepare(ARCHIVE_OPERATION_SELECT).get(input.operationId) as Record<string, unknown> | undefined;
-      if (!row) return Object.freeze({ state: 'execute' as const });
-      const operation = mapArchiveOperation(row);
-      assertArchiveOperationMatches(context, input, operation);
       const authorization = context.policyAuthorization;
       const retryReceiptHash = computePlatformPolicyReceiptHash(authorization.receipt);
-      if (retryReceiptHash === operation.originalReceiptHash) {
+      const currentReceiptRow = database.prepare(`
+        SELECT * FROM platform_policy_transaction_receipts WHERE receipt_hash=?
+      `).get(retryReceiptHash) as Record<string, unknown> | undefined;
+      assertArchiveOperationResultAccessReceipt(context, currentReceiptRow);
+      const row = database.prepare(ARCHIVE_OPERATION_RESOLUTION_SELECT)
+        .get(input.operationId) as Record<string, unknown> | undefined;
+      if (!row) return Object.freeze({ state: 'execute' as const });
+      const operation = mapArchiveOperationMetadata(row);
+      assertArchiveOperationMatches(context, input, operation);
+      if (retryReceiptHash === String(row.original_receipt_hash)) {
         throw new Error('Archive operation retry cannot reuse its original receipt');
       }
       database.prepare(`
@@ -885,27 +991,22 @@ export class SqlitePlatformPolicyTransactionRepository
         context.correlationId,
         authorization.receiptRecord.recordedAt
       );
-      const replayRow = database.prepare(ARCHIVE_OPERATION_SELECT).get(input.operationId) as Record<string, unknown> | undefined;
+      const replayRow = database.prepare(ARCHIVE_OPERATION_METADATA_SELECT)
+        .get(input.operationId) as Record<string, unknown> | undefined;
       if (!replayRow) throw new Error('Archive operation disappeared while its retry was recorded');
-      return Object.freeze({ state: 'replay' as const, operation: mapArchiveOperation(replayRow) });
+      const conflict = mapArchiveOperationMetadata(replayRow);
+      assertArchiveOperationMatches(context, input, conflict);
+      return Object.freeze({ state: 'conflict' as const, operation: conflict });
     });
   }
 
   public recordArchiveOperationResult(
     context: PolicyAuthorizedRepositoryExecutionContext,
     input: RecordPlatformPolicyArchiveOperationResultInput
-  ): RepositoryResult<PlatformPolicyArchiveOperationRecord> {
+  ): RepositoryResult<PlatformPolicyArchiveOperationMetadata> {
     return this.execute(context, () => {
       assertArchiveOperationIdentity(context, input);
-      if (typeof input.resultJson !== 'string' || input.resultJson.length < 2 || input.resultJson.length > 1_048_576) {
-        throw new Error('Archive operation result JSON is invalid');
-      }
-      let parsedResult: unknown;
-      try { parsedResult = JSON.parse(input.resultJson); }
-      catch { throw new Error('Archive operation result JSON is invalid'); }
-      if (canonicalPlatformPolicyJson(parsedResult) !== input.resultJson) {
-        throw new Error('Archive operation result JSON must be canonical');
-      }
+      if (!SHA256.test(input.resultHash)) throw new Error('Archive operation result hash is invalid');
       const authorization = context.policyAuthorization;
       const receiptHash = computePlatformPolicyReceiptHash(authorization.receipt);
       this.database(context).prepare(`
@@ -926,24 +1027,31 @@ export class SqlitePlatformPolicyTransactionRepository
         authorization.capability,
         receiptHash,
         context.correlationId,
-        input.resultJson,
-        sha256Utf8(input.resultJson),
+        ARCHIVE_OPERATION_COMPLETION_JSON,
+        input.resultHash,
         authorization.receiptRecord.recordedAt
       );
-      const row = this.database(context).prepare(ARCHIVE_OPERATION_SELECT).get(input.operationId) as Record<string, unknown> | undefined;
-      if (!row) throw new Error('Archive operation result was not persisted');
-      return mapArchiveOperation(row);
+      const row = this.database(context).prepare(ARCHIVE_OPERATION_METADATA_SELECT)
+        .get(input.operationId) as Record<string, unknown> | undefined;
+      if (!row) throw new Error('Archive operation completion metadata was not persisted');
+      const metadata = mapArchiveOperationMetadata(row);
+      assertArchiveOperationMatches(context, input, metadata);
+      return metadata;
     });
   }
 
-  public findArchiveOperation(
+  public findArchiveOperationMetadata(
     context: RepositoryExecutionContext,
-    operationId: string
-  ): RepositoryResult<PlatformPolicyArchiveOperationRecord | undefined> {
+    input: PlatformPolicyArchiveOperationMetadataLookupInput
+  ): RepositoryResult<PlatformPolicyArchiveOperationMetadata | undefined> {
     return this.execute(context, () => {
-      if (!OPERATION_ID.test(operationId)) throw new Error('Archive operation identifier is invalid');
-      const row = this.database(context).prepare(ARCHIVE_OPERATION_SELECT).get(operationId) as Record<string, unknown> | undefined;
-      return row ? mapArchiveOperation(row) : undefined;
+      assertArchiveOperationMetadataLookup(context, input);
+      const row = this.database(context).prepare(ARCHIVE_OPERATION_METADATA_SELECT)
+        .get(input.operationId) as Record<string, unknown> | undefined;
+      if (!row) return undefined;
+      const metadata = mapArchiveOperationMetadata(row);
+      assertArchiveOperationMetadataMatches(input, metadata);
+      return metadata;
     });
   }
 

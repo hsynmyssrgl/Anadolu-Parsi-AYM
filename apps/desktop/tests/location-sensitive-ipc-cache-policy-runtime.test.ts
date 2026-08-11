@@ -21,8 +21,8 @@ describe('30-Z location-sensitive IPC cache policy',()=>{
     for(const channel of IPC_POLICY_SENSITIVE_READ_CHANNELS){
       expect(resolveIpcReadSharingPolicy(channel)).toEqual({enabled:false,priority:'standard',ttlMs:0,maxEntries:0,maxResultBytes:0});
     }
-    expect(resolveIpcReadSharingPolicy('catalog:listPeople').enabled).toBe(true);
-    expect(resolveIpcReadSharingPolicy('largeData:tree').enabled).toBe(true);
+    expect(resolveIpcReadSharingPolicy('catalog:listPeople').enabled).toBe(false);
+    expect(resolveIpcReadSharingPolicy('largeData:tree').enabled).toBe(false);
   });
 
   it('forces the preload client to invoke the governed read again after simulated grant expiry',async()=>{

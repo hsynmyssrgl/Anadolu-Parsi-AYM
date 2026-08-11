@@ -13,15 +13,15 @@ if(!process.execArgv.includes('--experimental-strip-types')){
   process.exit(child.status??1);
 }
 const sharing=await import('../apps/desktop/src/main/ipc-read-sharing.ts');
-const {IPC_POLICY_SENSITIVE_READ_CHANNELS,IpcReadSharingClient,IpcReadResultCacheRegistry,createIpcReadSharingKey,resolveIpcReadSharingPolicy,shouldInvalidateIpcReadSharing}=sharing;
+const {IPC_POLICY_SENSITIVE_READ_CHANNELS,IPC_DERIVED_DATA_NO_CACHE_CHANNELS,IpcReadSharingClient,IpcReadResultCacheRegistry,createIpcReadSharingKey,resolveIpcReadSharingPolicy,shouldInvalidateIpcReadSharing}=sharing;
 const checks=[];const check=(label,fn)=>{fn();checks.push(label);};const asyncCheck=async(label,fn)=>{await fn();checks.push(label);};
 const revisions={graph:1,timeline:2,personCatalog:3,eventCatalog:4,dashboard:5,notifications:6,archive:7};
 const base={rendererSessionId:'11111111-1111-4111-8111-111111111111',sessionEpoch:2,channel:'catalog:listPeople',revisions,arguments:[{search:'Ada',limit:30}]};
 const sensitiveChannels=['data:getSnapshot','data:getSnapshotSections','dashboard:getOverview','largeData:timeline','timeline:listArchived'];
 check('policy-sensitive channel list is exact',()=>assert.deepEqual([...IPC_POLICY_SENSITIVE_READ_CHANNELS],sensitiveChannels));
 check('policy-sensitive channels are cache disabled',()=>assert.equal(sensitiveChannels.every(channel=>resolveIpcReadSharingPolicy(channel).enabled===false),true));
-check('non-sensitive interactive sharing remains enabled',()=>assert.equal(resolveIpcReadSharingPolicy('catalog:listPeople').enabled,true));
-check('non-sensitive large data sharing remains standard',()=>assert.equal(resolveIpcReadSharingPolicy('largeData:tree').priority,'standard'));
+check('PPK-016 derived projections are cache disabled without a source-policy envelope',()=>assert.equal(IPC_DERIVED_DATA_NO_CACHE_CHANNELS.every(channel=>resolveIpcReadSharingPolicy(channel).enabled===false),true));
+check('catalog and large-data projections fail closed after the PPK-016 successor control',()=>assert.equal(resolveIpcReadSharingPolicy('catalog:listPeople').enabled===false&&resolveIpcReadSharingPolicy('largeData:tree').enabled===false,true));
 check('network synchronization is excluded',()=>assert.equal(resolveIpcReadSharingPolicy('dataLifecycle:runRevocationSync').enabled,false));
 check('mutation classifier invalidates create calls',()=>assert.equal(shouldInvalidateIpcReadSharing('family:createMember'),true));
 check('ordinary read does not invalidate cache',()=>assert.equal(shouldInvalidateIpcReadSharing('system:health'),false));
@@ -31,7 +31,7 @@ check('canonical object key order is deterministic',()=>assert.equal(key,createI
 check('session epoch changes sharing key',()=>assert.notEqual(key,createIpcReadSharingKey({...base,sessionEpoch:3})));
 check('revision changes sharing key',()=>assert.notEqual(key,createIpcReadSharingKey({...base,revisions:{...revisions,personCatalog:4}})));
 check('arguments change sharing key',()=>assert.notEqual(key,createIpcReadSharingKey({...base,arguments:[{search:'Ali',limit:30}]})));
-let now=1_000;const client=new IpcReadSharingClient(()=>now);const policy=resolveIpcReadSharingPolicy('catalog:listPeople');
+let now=1_000;const client=new IpcReadSharingClient(()=>now);const policy=Object.freeze({enabled:true,priority:'interactive',ttlMs:160,maxEntries:24,maxResultBytes:1_500_000});
 let executions=0;let release;const deferred=new Promise(resolve=>{release=resolve;});
 const first=client.execute(key,policy,async()=>{executions+=1;await deferred;return {items:[{id:'p1',name:'Ada'}]};});
 const second=client.execute(key,policy,async()=>{executions+=1;return {items:[]};});

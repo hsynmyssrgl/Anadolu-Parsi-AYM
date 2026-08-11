@@ -35,7 +35,7 @@ import type {
   ArchivePolicyResourceRepositoryPort,
   ObjectPermissionRepositoryPort,
   ObjectPermissionRow,
-  PlatformPolicyArchiveOperationRecord,
+  PlatformPolicyArchiveOperationMetadata,
   PlatformPolicyTransactionRepositoryPort,
   PersonRecord,
   PersonRepositoryPort,
@@ -371,7 +371,11 @@ const resolveAuthorizedProductionOperation = (
   if (!resolved.ok) return resolved;
   return resolved.value.state === 'execute'
     ? ok(Object.freeze({ state: 'execute' as const }))
-    : ok(Object.freeze({ state: 'replay' as const, resultJson: resolved.value.operation.resultJson }));
+    : ok(Object.freeze({
+        state: 'conflict' as const,
+        resultHash: resolved.value.operation.resultHash,
+        completedAt: resolved.value.operation.completedAt
+      }));
 };
 
 const recordAuthorizedProductionOperationResult = (
@@ -382,7 +386,7 @@ const recordAuthorizedProductionOperationResult = (
   if (!identity.ok) return identity;
   const recorded = dependencies.policyTransactionRepository.recordArchiveOperationResult(
     policyRepositoryContext(input.context, input.transaction, input.authorization),
-    { ...identity.value, resultJson: input.resultJson }
+    { ...identity.value, resultHash: input.resultHash }
   );
   return recorded.ok ? ok(undefined) : recorded;
 };
@@ -765,7 +769,7 @@ const ensureRuntimeConfiguration = (dependencies: ArchiveProductionPolicyRuntime
     || typeof dependencies.policyTransactionRepository?.recordAuthorizedTransaction !== 'function'
     || typeof dependencies.policyTransactionRepository?.resolveArchiveOperation !== 'function'
     || typeof dependencies.policyTransactionRepository?.recordArchiveOperationResult !== 'function'
-    || typeof dependencies.policyTransactionRepository?.findArchiveOperation !== 'function'
+    || typeof dependencies.policyTransactionRepository?.findArchiveOperationMetadata !== 'function'
     || typeof dependencies.policyTransactionRepository?.listPendingJournalProjections !== 'function'
     || typeof dependencies.policyTransactionRepository?.acknowledgeJournalProjection !== 'function'
     || typeof dependencies.policyTransactionRepository?.readJournalAnchor !== 'function'
@@ -796,14 +800,25 @@ const findMatchingCommittedCreateOperation = (
   context: ArchiveApplicationContext,
   intent: ArchiveResourceIntent,
   execution: RepositoryExecutionContext
-): Result<PlatformPolicyArchiveOperationRecord | undefined, AppError> => {
+): Result<PlatformPolicyArchiveOperationMetadata | undefined, AppError> => {
   if (context.operationId === undefined) return ok(undefined);
   if (
     !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/u.test(context.operationId)
     || typeof context.operationFingerprint !== 'string'
     || !/^[0-9a-f]{64}$/u.test(context.operationFingerprint)
   ) return invalidAuthority(context, 'Archive create retry operation identity is invalid');
-  const found = dependencies.policyTransactionRepository.findArchiveOperation(execution, context.operationId);
+  const lookup = Object.freeze({
+    operationId: context.operationId,
+    operationFingerprint: context.operationFingerprint,
+    resourceFamilyId: String(context.familyId),
+    actorAccountId: String(context.actor.userId),
+    purpose: 'archive' as const,
+    resourceType: intent.resourceType,
+    resourceId: intent.resourceId,
+    action: intent.action,
+    capability: 'archive.write' as const
+  });
+  const found = dependencies.policyTransactionRepository.findArchiveOperationMetadata(execution, lookup);
   if (!found.ok || !found.value) return found;
   const operation = found.value;
   if (

@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "requirement": "PPK-016",
+  "assessedAt": "2026-08-11",
+  "status": "COMPLETE",
+  "completionClaimed": true,
+  "definition": {
+    "governedDerivedMaterialization": "Bir veya daha fazla kullanıcı kaynağının semantik içeriğinden üretilen ve kaynak işlemi bittikten sonra bağımsız olarak adreslenebilen ya da yeniden kullanılabilen payload.",
+    "liveProjection": "Aynı yetkili çağrı içinde hesaplanan, backend tarafından saklanmayan ve çağrılar arasında yeniden kullanılmayan görünüm.",
+    "transactionJournal": "Kaynak mutationın atomik geri alma, bütünlük veya audit kanıtı olan; aynı kasa ve aynı ya da daha dar yetki sınırında kalan işlem durumu.",
+    "primaryRecord": "Kendi resource kimliği, güncel yetkilendirmesi ve yaşam döngüsü bulunan yeni iş kaydı; opak cache veya indeks değildir.",
+    "operationalArtifact": "Kullanıcı kaynağının semantik türevi olmayan sistem sağlık ve tanı telemetrisi.",
+    "wholeVaultBackup": "Kaynak payload ve politika kayıtlarını değiştirmeden birlikte taşıyan, dışarıda bağımsız plaintext okuma sağlamayan korumalı kasa konteyneri."
+  },
+  "acceptedDerivedKinds": [
+    "OCR_TEXT",
+    "SEARCH_INDEX",
+    "THUMBNAIL",
+    "AI_MEMORY",
+    "SUMMARY",
+    "EMBEDDING",
+    "TRANSLATION",
+    "TRANSCRIPT",
+    "CACHE",
+    "REPLICA"
+  ],
+  "productionInventory": [
+    {
+      "id": "latent-ai-timeline-memory",
+      "path": "packages/domain/src/ai-memory.ts",
+      "classification": "GOVERNED_DERIVED_MATERIALIZATION_CANDIDATE",
+      "disposition": "RETIRED_FROM_PUBLIC_PRODUCTION_SURFACE",
+      "control": "Kök package exportu kaldırıldı; production kaynaklarında modül veya buildAiTimelineContext kullanımı statik kapıda sıfır istisnayla reddedilir."
+    },
+    {
+      "id": "family-import-preview-cache",
+      "path": "apps/desktop/src/main/family-data-import-service.ts",
+      "classification": "GOVERNED_DERIVED_MATERIALIZATION_CANDIDATE",
+      "disposition": "PAYLOAD_RETENTION_ELIMINATED",
+      "control": "Lease yalnız kimlik, süre, kaynak stat/hash, plan digest ve kaynak-hedef kimlik baz çizgisini tutar; kaynak metni, parse belge, tam plan ve preview payload apply çağrısında yeniden okunup doğrulanır."
+    },
+    {
+      "id": "plaintext-database-export",
+      "path": "apps/desktop/src/main/data-store.ts",
+      "classification": "GOVERNED_DERIVED_MATERIALIZATION_CANDIDATE",
+      "disposition": "PLAINTEXT_REPLICA_RETIRED",
+      "control": "Production export yalnız .pptbackup korumalı tam yedek yolunu kullanır; .db hedefi reddedilir ve eski raw export use-case/adapter production compositiondan çıkarılmıştır."
+    },
+    {
+      "id": "protected-full-backup",
+      "path": "apps/desktop/src/main/full-backup-file-application-adapter.ts",
+      "classification": "WHOLE_VAULT_BACKUP",
+      "disposition": "SEPARATE_PROTECTED_VAULT_BOUNDARY",
+      "control": "Kasa payloadı ile politika metadata ve receipt kayıtları aynı parola/cihaz korumalı konteynerde kalır; restore ayrı yetki, doğrulama ve güvenlik yedeği akışından geçer; bağımsız plaintext source görünümü yoktur. Bu yalnız ayrı kriptografik kasa sınırı kanıtıdır, PPK-016 inheritance kanıtı değildir."
+    },
+    {
+      "id": "operational-diagnostic-report-and-archive",
+      "path": "apps/desktop/src/main/operational-artifact-file-application-adapter.ts",
+      "classification": "OPERATIONAL_ARTIFACT",
+      "disposition": "DEVICE_KEY_PROTECTED",
+      "control": "Production main yalnız ProtectedOperationalArtifactFilePort enjekte eder; tanı ve sağlık artefaktları ProtectedSideArtifactStore üzerinden doğrulanmış şifreli yan artefakt olarak yazılır. Bu yalnız ayrı kriptografik/operasyonel sınır kanıtıdır, PPK-016 inheritance kanıtı değildir."
+    },
+    {
+      "id": "renderer-read-projections",
+      "path": "apps/desktop/src/main/ipc-read-sharing.ts",
+      "classification": "LIVE_PROJECTION",
+      "disposition": "NOT_RETAINED",
+      "control": "Katalog, rapor, genealogy, snapshot ve arama görünümleri her çağrıda güncel backend yetkisiyle hesaplanır; IPC paylaşım önbelleği açık no-cache listesidir."
+    },
+    {
+      "id": "data-repair-before-after-state",
+      "path": "packages/repositories/src/data-repair-repository.ts",
+      "classification": "TRANSACTION_JOURNAL",
+      "disposition": "SOURCE_COLOCATED_STRICTER_ADMIN_BOUNDARY",
+      "control": "Before/after durumu yalnız atomik preview/apply/undo bütünlüğü içindir; aynı aile kasasında kalır ve erişim family_membership administer yetkisi ile sınırlandırılır."
+    },
+    {
+      "id": "person-lifecycle-operation-state",
+      "path": "packages/repositories/src/person-lifecycle-repository.ts",
+      "classification": "TRANSACTION_JOURNAL",
+      "disposition": "SOURCE_COLOCATED_LIFECYCLE_BOUNDARY",
+      "control": "Before/after/reference durumu kişi yaşam döngüsü işleminin geri alma ve bütünlük kaydıdır; ayrı son kullanıcı türev payloadı olarak sunulmaz."
+    },
+    {
+      "id": "family-import-batch-summary",
+      "path": "packages/repositories/src/family-data-import-repository.ts",
+      "classification": "TRANSACTION_JOURNAL",
+      "disposition": "CONTENT_FREE_IMPORT_AUDIT_METADATA",
+      "control": "Batch özeti uygulanan/atlanan/hatalı adetler ve işlem metadata'sıdır; kaynak metni veya parse belge payloadı saklamaz."
+    },
+    {
+      "id": "automation-generated-life-task",
+      "path": "apps/desktop/src/main/automation-application-adapter.ts",
+      "classification": "PRIMARY_RECORD",
+      "disposition": "CLOSED_CONTENT_FREE_PRIMARY_RECORD_CURRENT_LIFE_PEP_REVALIDATED",
+      "control": "Yalnız LIFE kaynağı kabul edilir ve kaynak güncel receipt-bound LIFE PEP üzerinden yeniden doğrulanır. Üretilen private life_record kaynak title/dueAt değerlerini taşımaz; bağımsız rule.title ve sabit notla aynı policy-authorized transaction içinde oluşturulur. Retained kaynak semantiği olmadığı için PPK-016 binding gerektiren türev payload oluşmaz."
+    },
+    {
+      "id": "automation-run-ledger",
+      "path": "packages/repositories/src/automation-repository.ts",
+      "classification": "TRANSACTION_JOURNAL",
+      "disposition": "CLOSED_CONTENT_FREE_LIFE_ONLY_LEDGER",
+      "control": "Non-LIFE rule create/execute ve run projection yolları fail-closed kaldırılmıştır. Ledger portu title/dueAt kabul etmez; kalıcı eski sütunlara redacted sabit title ve transaction createdAt yazılır. List API yalnız kimlik/durum metadata döndürür ve title/dueAt görünümü güncel receipt-bound LIFE PEP joininden üretilir."
+    },
+    {
+      "id": "archive-operation-result-ledger",
+      "path": "packages/repositories/src/platform-policy-transaction-repository.ts",
+      "classification": "TRANSACTION_JOURNAL",
+      "disposition": "CLOSED_CONTENT_FREE_CURRENT_RECEIPT_CONFLICT_METADATA",
+      "control": "Semantik resultJson erişimi ve replay API'si kaldırılmıştır. Yeni yazım yalnız sabit {status:completed}, tek yönlü resultHash ve işlem kimliği taşır; retry exact güncel kalıcı receipt kaydedildikten sonra yalnız content-free conflict metadata döndürür ve semantik replay fail-closed yasaktır."
+    },
+    {
+      "id": "system-health-history",
+      "path": "apps/desktop/src/main/data-store.ts",
+      "classification": "OPERATIONAL_ARTIFACT",
+      "disposition": "NO_USER_SOURCE_SEMANTIC_PAYLOAD",
+      "control": "Sistem sağlık puanı ve geçmişi operasyonel sayaçlardan oluşur; kullanıcı kaynağının metin, görsel, ilişki veya sağlık içeriğini materialize etmez."
+    }
+  ],
+  "closureSummary": {
+    "activeUngovernedDerivedPayloadOwners": 0,
+    "retiredOrPayloadEliminatedCandidates": 3,
+    "classifiedAdjacentOwners": 10,
+    "closedContentFreeOrCurrentPepOwners": 3,
+    "openBlockerCount": 0,
+    "openBlockers": [],
+    "directPersistenceExceptions": 0,
+    "finalValidationPending": false,
+    "futurePayloadOwnerMustUseSealedBinding": true,
+    "futurePayloadReadWriteMustShareCurrentAuthorizedTransaction": true,
+    "historicalReceiptAloneIsNotRevocationEvidence": true
+  }
+}

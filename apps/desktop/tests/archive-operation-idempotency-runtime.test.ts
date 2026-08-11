@@ -105,7 +105,7 @@ const projectionProof = (
   proofMac: fingerprint(`mac:${sequence}:${record.correlationId}`)
 });
 
-const makeHarness = () => {
+const makeHarness = (options: { readonly omitDurableReceiptForCorrelation?: string } = {}) => {
   const directory = mkdtempSync(join(tmpdir(), 'ppt-30t-operation-idempotency-'));
   temporaryDirectories.push(directory);
   const runtime = new SqliteFamilyDatabaseRuntime({
@@ -178,6 +178,23 @@ const makeHarness = () => {
   expect(seeded.ok).toBe(true);
 
   let sequence = 0;
+  const policyTransactionRepository = options.omitDurableReceiptForCorrelation
+    ? new Proxy(repositories.platformPolicyTransactionRepository, {
+        get(target, property, receiver) {
+          if (property === 'recordAuthorizedTransaction') {
+            return (...args: Parameters<typeof target.recordAuthorizedTransaction>) => {
+              const [execution] = args;
+              if (execution.correlationId === options.omitDurableReceiptForCorrelation) {
+                return ok({} as never);
+              }
+              return target.recordAuthorizedTransaction(...args);
+            };
+          }
+          const value = Reflect.get(target, property, receiver) as unknown;
+          return typeof value === 'function' ? value.bind(target) : value;
+        }
+      })
+    : repositories.platformPolicyTransactionRepository;
   const resolver = createArchiveProductionPolicyEnforcementPointResolver({
     transactionExecutor: runtime.transactionExecutor,
     accountRepository: repositories.accountRepository,
@@ -192,7 +209,7 @@ const makeHarness = () => {
       ensure: (record) => projectionProof(record, ++sequence),
       verifyProjectionProof: () => true
     },
-    policyTransactionRepository: repositories.platformPolicyTransactionRepository,
+    policyTransactionRepository,
     clusterFence: () => ({ writable: true, epoch: 30 }),
     policyVersion: POLICY_VERSION,
     clock
@@ -216,7 +233,7 @@ afterEach(() => {
 });
 
 describe('30-T durable archive operation idempotency', () => {
-  it('replays a committed create under a new correlation without repeating business writes', async () => {
+  it('returns a content-free committed conflict under a new receipt without repeating business writes', async () => {
     const harness = makeHarness();
     const operationId = 'archive-op-30t-lost-response';
     const operationFingerprint = fingerprint('archive.create:item-30t-lost-response:title-and-file-hash');
@@ -275,15 +292,25 @@ describe('30-T durable archive operation idempotency', () => {
     expect(first).toEqual({ ok: true, value: expectedResult });
 
     // The first response is intentionally treated as lost/unknown by the caller.
-    const replay = await harness.unitOfWork.execute(
+    const conflict = await harness.unitOfWork.execute(
       context('corr-30t-lost-response-retry', operationId, operationFingerprint),
       intent,
       () => {
         businessExecutions += 1;
-        throw new Error('BUSINESS_MUTATION_MUST_NOT_RUN_ON_REPLAY');
+        throw new Error('BUSINESS_MUTATION_MUST_NOT_RUN_ON_CONFLICT');
       }
     );
-    expect(replay).toEqual({ ok: true, value: expectedResult });
+    expect(conflict.ok).toBe(false);
+    expect(!conflict.ok && conflict.error).toMatchObject({
+      code: ERROR_CODES.RESOURCE_CONFLICT,
+      category: 'conflict',
+      details: {
+        operationId,
+        status: 'completed',
+        semanticReplay: 'forbidden',
+        reloadRequired: true
+      }
+    });
     expect(businessExecutions).toBe(1);
     expect(harness.runtime.database.prepare(
       'SELECT COUNT(*) AS count FROM archive_items WHERE id=?'
@@ -303,6 +330,14 @@ describe('30-T durable archive operation idempotency', () => {
     expect(harness.runtime.database.prepare(
       'SELECT COUNT(*) AS count FROM platform_policy_transaction_receipts WHERE resource_id=?'
     ).get(resourceId)?.count).toBe(2);
+    const storedCompletion = harness.runtime.database.prepare(
+      'SELECT result_json,result_hash FROM platform_policy_archive_operations WHERE operation_id=?'
+    ).get(operationId) as { result_json: string; result_hash: string };
+    expect(storedCompletion.result_json).toBe('{"status":"completed"}');
+    expect(storedCompletion.result_json).not.toContain(resourceId);
+    expect(storedCompletion.result_hash).toBe(fingerprint(
+      '{"hasValue":true,"value":{"accepted":true,"itemId":"archive-item-30t-lost-response"}}'
+    ));
 
     expect(() => harness.runtime.database.prepare(
       'UPDATE platform_policy_archive_operations SET result_hash=? WHERE operation_id=?'
@@ -312,7 +347,7 @@ describe('30-T durable archive operation idempotency', () => {
     ).run('f'.repeat(64), operationId)).toThrow(/immutable/u);
   });
 
-  it('retains the canonical operation result across a real SQLite close and restart', async () => {
+  it('retains only exact content-free operation metadata across a real SQLite close and restart', async () => {
     const harness = makeHarness();
     const operationId = 'archive-op-30t-restart';
     const operationFingerprint = fingerprint('archive.create:restart-durability');
@@ -357,10 +392,21 @@ describe('30-T durable archive operation idempotency', () => {
     activeRuntimes.push(restarted);
     const repositories = createSqliteRepositoryCompositionRoot();
     const readContext = context('corr-30t-restart-read', operationId, operationFingerprint);
+    const lookup = {
+      operationId,
+      operationFingerprint,
+      resourceFamilyId: String(FAMILY_ID),
+      actorAccountId: String(ACCOUNT_ID),
+      purpose: 'archive' as const,
+      resourceType: 'archive_item',
+      resourceId,
+      action: 'create' as const,
+      capability: 'archive.write' as const
+    } as const;
     const found = restarted.transactionExecutor.execute(readContext.correlationId, (transaction) =>
-      repositories.platformPolicyTransactionRepository.findArchiveOperation(
+      repositories.platformPolicyTransactionRepository.findArchiveOperationMetadata(
         repositoryContext(readContext, transaction),
-        operationId
+        lookup
       )
     );
     expect(found.ok).toBe(true);
@@ -368,12 +414,31 @@ describe('30-T durable archive operation idempotency', () => {
       operationId,
       operationFingerprint,
       resourceId,
-      originalCorrelationId: 'corr-30t-restart-first',
+      status: 'completed',
       retryCount: 0
     });
-    expect(found.ok && found.value?.resultJson).toBe(
-      '{"hasValue":true,"value":{"durable":true,"itemId":"archive-item-30t-restart"}}'
-    );
+    expect(found.ok && found.value && Object.hasOwn(found.value, 'resultJson')).toBe(false);
+    expect(found.ok && found.value && Object.hasOwn(found.value, 'originalReceiptHash')).toBe(false);
+    expect(found.ok && found.value && Object.hasOwn(found.value, 'originalCorrelationId')).toBe(false);
+    const persisted = restarted.database.prepare(
+      'SELECT result_json FROM platform_policy_archive_operations WHERE operation_id=?'
+    ).get(operationId) as { result_json: string };
+    expect(persisted.result_json).toBe('{"status":"completed"}');
+    expect(persisted.result_json).not.toContain(resourceId);
+
+    for (const mismatch of [
+      { ...lookup, operationFingerprint: fingerprint('wrong-fingerprint') },
+      { ...lookup, resourceId: 'archive-item-other' },
+      { ...lookup, actorAccountId: 'account-other' }
+    ]) {
+      const denied = restarted.transactionExecutor.execute(readContext.correlationId, (transaction) =>
+        repositories.platformPolicyTransactionRepository.findArchiveOperationMetadata(
+          repositoryContext(readContext, transaction),
+          mismatch
+        )
+      );
+      expect(denied.ok).toBe(false);
+    }
   });
 
   it('fails closed for semantic identity reuse and leaves failed attempts retryable', async () => {
@@ -478,6 +543,57 @@ describe('30-T durable archive operation idempotency', () => {
     expect(harness.runtime.database.prepare(
       'SELECT COUNT(*) AS count FROM platform_policy_transaction_receipts WHERE correlation_id=?'
     ).get('corr-30t-rollback-mismatch')?.count).toBe(0);
+    expect(harness.runtime.database.prepare(
+      'SELECT COUNT(*) AS count FROM platform_policy_archive_operation_retries WHERE operation_id=?'
+    ).get(operationId)?.count).toBe(0);
+  });
+
+  it('denies content-free conflict resolution when the exact current receipt was not persisted', async () => {
+    const retryCorrelationId = 'corr-30t-missing-current-receipt';
+    const harness = makeHarness({ omitDurableReceiptForCorrelation: retryCorrelationId });
+    const operationId = 'archive-op-30t-current-receipt';
+    const operationFingerprint = fingerprint('archive.create:current-receipt');
+    const resourceId = 'archive-item-30t-current-receipt';
+    const intent: ArchivePolicyIntent = {
+      action: 'create',
+      capability: 'archive.write',
+      resourceType: 'archive_item',
+      resourceId,
+      purpose: 'archive'
+    };
+    const committed = await harness.unitOfWork.execute(
+      context('corr-30t-current-receipt-first', operationId, operationFingerprint),
+      intent,
+      (scope) => scope.insertItem({
+        id: resourceId,
+        familyId: FAMILY_ID,
+        title: '30-T current receipt item',
+        originalName: 'current-receipt.txt',
+        storedName: 'current-receipt.vault',
+        mimeType: 'text/plain',
+        sizeBytes: 24,
+        sha256: fingerprint('current-receipt-file'),
+        sensitivity: 'standard',
+        aiProcessingAllowed: false,
+        createdAt: scope.occurredAt
+      })
+    );
+    expect(committed.ok).toBe(true);
+
+    let businessExecutions = 0;
+    const denied = await harness.unitOfWork.execute(
+      context(retryCorrelationId, operationId, operationFingerprint),
+      intent,
+      () => {
+        businessExecutions += 1;
+        return ok('must-not-run');
+      }
+    );
+    expect(denied.ok).toBe(false);
+    expect(businessExecutions).toBe(0);
+    expect(harness.runtime.database.prepare(
+      'SELECT COUNT(*) AS count FROM platform_policy_transaction_receipts WHERE correlation_id=?'
+    ).get(retryCorrelationId)?.count).toBe(0);
     expect(harness.runtime.database.prepare(
       'SELECT COUNT(*) AS count FROM platform_policy_archive_operation_retries WHERE operation_id=?'
     ).get(operationId)?.count).toBe(0);

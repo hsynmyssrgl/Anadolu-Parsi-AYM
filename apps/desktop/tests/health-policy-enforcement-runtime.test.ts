@@ -345,7 +345,7 @@ describe('30-X governed health policy enforcement', () => {
   });
 
   it('does not leak another person medication details through reports or automation', async () => {
-    const { store } = makeProductionStore();
+    const { directory, store } = makeProductionStore();
     const administrator = (await store.getSnapshot()).people[0]!;
     const invitedPerson = store.createMember({
       displayName: '30-X Davetli Uye',
@@ -364,6 +364,17 @@ describe('30-X governed health policy enforcement', () => {
     });
     const administratorPlan = administratorPlans.find(
       (row) => row.name === 'Yonetici gizli ilac adi'
+    )!;
+    const administratorLifeRecords = await store.createLifeRecord({
+      ownerPersonId: administrator.id,
+      category: 'task',
+      title: 'Yonetici gizli yasam gorevi',
+      status: 'active',
+      privacy: 'private',
+      dueAt: '2026-08-07T00:00:00.000Z'
+    });
+    const administratorLifeRecord = administratorLifeRecords.find(
+      (row) => row.title === 'Yonetici gizli yasam gorevi'
     )!;
     const invitation = store.createInvitation({
       email: 'health-30x-invited@example.com',
@@ -393,9 +404,20 @@ describe('30-X governed health policy enforcement', () => {
       privacy: 'private'
     });
     const invitedPlan = invitedPlans.find((row) => row.name === 'Davetli gizli ilac adi')!;
+    const invitedLifeRecords = await store.createLifeRecord({
+      ownerPersonId: invitedPerson.id,
+      category: 'task',
+      title: 'Davetli gizli yasam gorevi',
+      status: 'active',
+      privacy: 'private',
+      dueAt: '2026-08-07T00:00:00.000Z'
+    });
+    const invitedLifeRecord = invitedLifeRecords.find(
+      (row) => row.title === 'Davetli gizli yasam gorevi'
+    )!;
     await store.createAutomationRule({
-      title: 'Ilac zamani',
-      sourceType: 'medication_plan',
+      title: 'Yasam gorevi zamani',
+      sourceType: 'life_record',
       daysBefore: 7
     });
 
@@ -404,11 +426,60 @@ describe('30-X governed health policy enforcement', () => {
       now: '2026-08-06T00:00:00.000Z'
     })).filter((run) => run.status === 'generated');
     expect(generatedRuns).toHaveLength(1);
-    expect(generatedRuns[0]!.sourceId).toBe(invitedPlan.id);
-    expect(generatedRuns[0]!.sourceId).not.toBe(administratorPlan.id);
+    expect(generatedRuns[0]!.sourceId).toBe(invitedLifeRecord.id);
+    expect(generatedRuns[0]!.sourceId).not.toBe(administratorLifeRecord.id);
+    expect(generatedRuns[0]!.title).toBe('Davetli gizli yasam gorevi');
+    expect(generatedRuns[0]!.title).not.toContain('Yonetici gizli yasam gorevi');
     expect(generatedRuns[0]!.title).not.toContain('Yonetici gizli ilac adi');
     expect(generatedRuns[0]!.title).not.toContain('Davetli gizli ilac adi');
+    const generatedTaskId = generatedRuns[0]!.generatedTaskId!;
     closeStore(store);
+
+    const probe = new DatabaseSync(join(directory, 'family.db'), { readOnly: true });
+    try {
+      const receiptColumns = `
+        policy_receipt_hash,policy_receipt_version,policy_resource_type,
+        policy_resource_id,policy_action,policy_capability
+      `;
+      const sourceBinding = probe.prepare(
+        `SELECT ${receiptColumns} FROM life_records WHERE id=?`
+      ).get(invitedLifeRecord.id) as Record<string, unknown>;
+      expect(String(sourceBinding.policy_receipt_hash)).toMatch(/^[0-9a-f]{64}$/u);
+      expect(sourceBinding).toMatchObject({
+        policy_receipt_version: 1,
+        policy_resource_type: 'life_record',
+        policy_resource_id: invitedLifeRecord.id,
+        policy_action: 'create',
+        policy_capability: 'family.write'
+      });
+
+      const generatedTask = probe.prepare(`
+        SELECT title,notes,${receiptColumns}
+        FROM life_records
+        WHERE id=?
+      `).get(generatedTaskId) as Record<string, unknown>;
+      expect(generatedTask).toMatchObject({
+        title: 'Yasam gorevi zamani',
+        notes: 'Otomatik oluşturuldu.',
+        policy_receipt_version: 1,
+        policy_resource_type: 'life_record',
+        policy_resource_id: generatedTaskId,
+        policy_action: 'create',
+        policy_capability: 'family.write'
+      });
+      expect(String(generatedTask.policy_receipt_hash)).toMatch(/^[0-9a-f]{64}$/u);
+      expect(generatedTask.policy_receipt_hash).not.toBe(sourceBinding.policy_receipt_hash);
+
+      const persistedRun = probe.prepare(`
+        SELECT title,due_at,created_at
+        FROM automation_runs
+        WHERE generated_task_id=?
+      `).get(generatedTaskId) as Record<string, unknown>;
+      expect(persistedRun.title).toBe('__PPK016_SOURCE_CONTENT_REDACTED__');
+      expect(persistedRun.due_at).toBe(persistedRun.created_at);
+    } finally {
+      probe.close();
+    }
   });
 
   it('persists exact receipts and rejects missing, copied, stale and deletion writes', async () => {

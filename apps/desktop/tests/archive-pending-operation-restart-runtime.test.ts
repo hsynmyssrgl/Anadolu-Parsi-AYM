@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import type { ArchiveApplicationContext, ArchivePolicyIntent } from '@ppt/application';
 import {
+  ERROR_CODES,
   asCorrelationId,
   asFamilyId,
   asIsoDateTime,
@@ -251,7 +252,7 @@ afterEach(() => {
 });
 
 describe('30-U durable pending archive operation identity recovery', () => {
-  it('recovers the same identity after SQLite restart and replays the business mutation exactly once', async () => {
+  it('recovers the same identity after SQLite restart and returns a content-free conflict without repeating the mutation', async () => {
     const harness = makeHarness();
     const intentFingerprint = fingerprint('30-u:create-category:tax-documents');
     const operationFingerprint = fingerprint('archive.category.create:tax-documents');
@@ -334,7 +335,7 @@ describe('30-U durable pending archive operation identity recovery', () => {
       boundOperationFingerprint: operationFingerprint
     });
 
-    const replay = await createUnitOfWork(harness.directory, restarted, repositories).execute(
+    const conflict = await createUnitOfWork(harness.directory, restarted, repositories).execute(
       applicationContext('corr-30u-restarted-retry', operationId, operationFingerprint),
       policyIntent,
       () => {
@@ -342,7 +343,20 @@ describe('30-U durable pending archive operation identity recovery', () => {
         throw new Error('BUSINESS_MUTATION_MUST_NOT_RUN_AFTER_RESTART');
       }
     );
-    expect(replay).toEqual({ ok: true, value: { categoryId: resourceId, created: true } });
+    expect(conflict.ok).toBe(false);
+    expect(!conflict.ok && conflict.error).toMatchObject({
+      code: ERROR_CODES.RESOURCE_CONFLICT,
+      category: 'conflict',
+      retryable: false,
+      details: {
+        operationId,
+        status: 'completed',
+        semanticReplay: 'forbidden',
+        reloadRequired: true
+      }
+    });
+    expect(!conflict.ok && conflict.error.details?.resultHash).toMatch(/^[0-9a-f]{64}$/u);
+    expect(!conflict.ok && conflict.error.details?.completedAt).toBe(NOW);
     expect(businessExecutions).toBe(1);
 
     const acknowledged = restarted.transactionExecutor.execute(asCorrelationId('30-u-ack-restarted'), (transaction) =>

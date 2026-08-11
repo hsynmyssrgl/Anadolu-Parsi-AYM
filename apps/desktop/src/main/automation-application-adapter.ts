@@ -96,6 +96,27 @@ const idempotentRace = (correlationId: CorrelationId): AppError => createAppErro
   details: { automationIdempotentNoop: true }
 });
 
+const unsupportedSemanticSource = (
+  context: AutomationApplicationContext,
+  sourceType: string
+): Result<never, AppError> => err(createAppError({
+  code: ERROR_CODES.AUTHORIZATION_DENIED,
+  message: 'Kaynak semantiğini devralacak sealed policy binding bulunmadığı için bu otomasyon kaynağı kullanılamaz.',
+  category: 'security',
+  correlationId: context.correlationId,
+  details: { automationBoundary: 'PPK016_SOURCE_BINDING_REQUIRED', sourceType }
+}));
+
+const sourceRevalidationFailed = (
+  context: AutomationApplicationContext
+): Result<never, AppError> => err(createAppError({
+  code: ERROR_CODES.AUTHORIZATION_DENIED,
+  message: 'Otomasyon kaynağı güncel LIFE yetkisi ve yaşam döngüsü altında yeniden doğrulanamadı.',
+  category: 'security',
+  correlationId: context.correlationId,
+  details: { automationBoundary: 'PPK016_CURRENT_SOURCE_REVALIDATION_REQUIRED' }
+}));
+
 const byNewest = (left: AutomationRunRecord, right: AutomationRunRecord): number =>
   right.createdAt.localeCompare(left.createdAt) || right.id.localeCompare(left.id);
 
@@ -121,6 +142,9 @@ export class RepositoryBackedAutomationAdapter implements AutomationPort {
     context: AutomationApplicationContext,
     record: Parameters<AutomationPort['insertRule']>[1]
   ): ReturnType<AutomationPort['insertRule']> {
+    if (record.sourceType !== 'life_record') {
+      return unsupportedSemanticSource(context, record.sourceType);
+    }
     return this.executeRepository(context, (repository) =>
       this.dependencies.automationRepository.insertRule(repository, record));
   }
@@ -139,26 +163,15 @@ export class RepositoryBackedAutomationAdapter implements AutomationPort {
     limit: number
   ): ReturnType<AutomationPort['listRuns']> {
     if (!context.actorPersonId) {
-      // A personless account has no exact LIFE subject. Preserve non-LIFE
-      // results and omit LIFE entirely without entering the LIFE PEP.
-      return this.executeRepository(context, (repository) =>
-        this.dependencies.automationRepository.listNonLifeRuns(
-          repository,
-          context.familyId,
-          limit
-        ));
+      // A personless account has neither an exact LIFE subject nor a governed
+      // source PEP for legacy non-LIFE ledgers.
+      return ok([]);
     }
     const correlationId = asCorrelationId(`${context.correlationId}:life-runs`);
     return this.dependencies.lifePolicyTransactionRunner.execute(
       lifeContext(context, correlationId),
       readIntent,
       ({ repository }) => {
-        const nonLife = this.dependencies.automationRepository.listNonLifeRuns(
-          repository,
-          context.familyId,
-          500
-        );
-        if (!nonLife.ok) return nonLife;
         const lifeRuns: AutomationRunRecord[] = [];
         let before: { readonly createdAt: IsoDateTime; readonly id: string } | undefined;
         const pageSize = 200;
@@ -195,7 +208,7 @@ export class RepositoryBackedAutomationAdapter implements AutomationPort {
           before = { createdAt: last.createdAt, id: last.id };
           if (candidates.value.length < pageSize) break;
         }
-        return ok([...nonLife.value, ...lifeRuns].sort(byNewest).slice(0, limit));
+        return ok(lifeRuns.sort(byNewest).slice(0, limit));
       }
     );
   }
@@ -208,14 +221,7 @@ export class RepositoryBackedAutomationAdapter implements AutomationPort {
     toAt: IsoDateTime
   ): Promise<Result<readonly AutomationDueSourceRow[], AppError>> {
     if (sourceType !== 'life_record') {
-      return this.executeRepository(context, (repository) =>
-        this.dependencies.automationRepository.listNonLifeDueSources(
-          repository,
-          sourceType,
-          context.familyId,
-          fromAt,
-          toAt
-        ));
+      return unsupportedSemanticSource(context, sourceType);
     }
     const correlationId = asCorrelationId(`${context.correlationId}:life-source:${ruleId}`);
     return this.dependencies.lifePolicyTransactionRunner.execute(
@@ -228,6 +234,28 @@ export class RepositoryBackedAutomationAdapter implements AutomationPort {
     );
   }
 
+  private async revalidateLifeSource(
+    context: AutomationApplicationContext,
+    ruleId: string,
+    source: AutomationDueSourceRow
+  ): Promise<Result<void, AppError>> {
+    const correlationId = asCorrelationId(`${context.correlationId}:life-source-revalidate:${ruleId}`);
+    return this.dependencies.lifePolicyTransactionRunner.execute(
+      lifeContext(context, correlationId),
+      readIntent,
+      ({ repository }) => {
+        const current = this.dependencies.lifeRepository.listAutomationDueLife(repository, {
+          fromAt: source.dueAt,
+          toAt: source.dueAt
+        });
+        if (!current.ok) return current;
+        return current.value.some((candidate) => candidate.id === source.id && candidate.dueAt === source.dueAt)
+          ? ok(undefined)
+          : sourceRevalidationFailed(context);
+      }
+    );
+  }
+
   private async createGeneratedTask(
     context: AutomationApplicationContext,
     rule: { readonly id: string; readonly title: string; readonly sourceType: string },
@@ -235,6 +263,11 @@ export class RepositoryBackedAutomationAdapter implements AutomationPort {
     ownerPersonId: string,
     identifiers: AutomationExecutionIdentifiers
   ): Promise<Result<boolean, AppError>> {
+    if (rule.sourceType !== 'life_record') {
+      return unsupportedSemanticSource(context, rule.sourceType);
+    }
+    const revalidated = await this.revalidateLifeSource(context, rule.id, source);
+    if (!revalidated.ok) return revalidated;
     const runId = identifiers.nextRunId();
     const taskId = identifiers.nextTaskId();
     const correlationId = asCorrelationId(`${context.correlationId}:life-task:${taskId}`);
@@ -271,11 +304,12 @@ export class RepositoryBackedAutomationAdapter implements AutomationPort {
           familyId: context.familyId,
           ownerPersonId: owner,
           category: 'task',
-          title: `${rule.title}: ${source.title}`,
+          // The rule is an independently governed primary record. Source title
+          // and schedule remain transient and never enter the generated task.
+          title: rule.title,
           status: 'planned',
           privacy: 'private',
-          dueAt: source.dueAt,
-          notes: `Otomatik üretildi (${rule.sourceType})`,
+          notes: 'Otomatik oluşturuldu.',
           createdAt: occurredAt
         });
         if (!task.ok) return err({
@@ -288,9 +322,6 @@ export class RepositoryBackedAutomationAdapter implements AutomationPort {
           ruleId: rule.id,
           sourceType: rule.sourceType,
           sourceId: source.id,
-          // Never duplicate a LIFE title in the ungoverned run ledger.
-          title: rule.sourceType === 'life_record' ? 'Yaşam kaydı' : source.title,
-          dueAt: source.dueAt,
           status: 'generated',
           generatedTaskId: taskId,
           createdAt: occurredAt

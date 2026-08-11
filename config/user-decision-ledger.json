@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 50,
+  "decisionCount": 51,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1200,6 +1200,33 @@
         "artifacts/validation/32-K-ppk-015-network-egress-runtime.json",
         "docs/security/PPK-015_NETWORK_EGRESS_POLICY_THREAT_MODEL.md",
         "docs/audit/32-K_PPK-015_NETWORK_EGRESS_POLICY_UST_KAPANIS.md"
+      ]
+    },
+    {
+      "id": "DEC-197",
+      "date": "2026-08-11",
+      "acceptedAt": "2026-08-11",
+      "title": "PPK-016 fail-closed derived-data policy inheritance and immutable lineage metadata top closure",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: ajanlarla tam otomatik devam",
+      "document": "docs/decisions/DEC-197-ppk-016-derived-data-policy-inheritance.md",
+      "requirements": ["PPK-016"],
+      "codeAreas": [
+        "packages/platform-policy/src/derived-data-inheritance-policy.ts",
+        "packages/domain/src/derived-data-policy.ts",
+        "packages/application/src/derived-data-inheritance-use-cases.ts",
+        "packages/database/src/family-database-migrations.ts",
+        "packages/repository-contracts/src/derived-data-policy-repository.ts",
+        "packages/repositories/src/derived-data-policy-repository.ts",
+        "apps/desktop/src/main/repository-composition-root.ts",
+        "apps/desktop/src/main/ipc-read-sharing.ts",
+        "scripts/verify-derived-data-policy-boundary.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/32-L-ppk-016-derived-data-policy-inheritance-contract.json",
+        "artifacts/validation/32-L-ppk-016-derived-data-policy-inheritance-runtime.json",
+        "docs/security/PPK-016_DERIVED_DATA_POLICY_INHERITANCE_THREAT_MODEL.md",
+        "docs/audit/32-L_PPK-016_TURETILMIS_VERI_POLITIKA_MIRASI_UST_KAPANIS.md"
       ]
     }
   ]
