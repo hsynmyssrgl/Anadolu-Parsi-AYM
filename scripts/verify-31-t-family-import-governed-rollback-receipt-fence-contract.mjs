@@ -92,7 +92,7 @@ check(docs.decision.includes('Status: ACTIVE') && docs.decision.includes('DEC-16
 check(docs.deferredDecision.includes('31-G'), 'DEC-167 decision document preserved');
 check(authority.status === 'PASS' && authority.selectedBoundary === 'FAMILY_IMPORT_GOVERNED_ROLLBACK_EXACT_DELETE_RECEIPT_FENCE', 'authority selects exact boundary');
 check(authority.authoritativeSourceAtStart.treeSha256 === 'e9a01ad6e102bc2358c2e83f3e1717af2b10cf90e7a964107e65baf749764a96', 'authority binds predecessor source seal');
-check(requirement?.priority === 'P0' && requirement.status === 'PARTIAL', 'PPK-002 remains P0 PARTIAL');
+check(requirement?.priority === 'P0' && (requirement.status === 'PARTIAL' || (requirement.status === 'COMPLETE' && Object.values(requirement.chain ?? {}).every((value) => value === true))), 'PPK-002 remains P0 or has a fully closed successor chain');
 check(!plan.steps.some((item) => item.id === '31-T' && item.status === 'COMPLETED' && scope.status !== 'COMPLETED'), 'plan and scope completion are consistent');
 
 const failed = checks.filter((item) => item.status === 'FAIL');

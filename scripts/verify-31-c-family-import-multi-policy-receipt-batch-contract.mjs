@@ -61,7 +61,7 @@ check(
   || laterSuccessor.ledgerValid,
   'ledger matches pending or completed 31-C receipt lifecycle'
 );
-check(ppk002.priority === 'P0' && ppk002.status === 'PARTIAL', 'PPK-002 remains P0 PARTIAL');
+check(ppk002.priority === 'P0' && (ppk002.status === 'PARTIAL' || (ppk002.status === 'COMPLETE' && Object.values(ppk002.chain ?? {}).every((value) => value === true))), 'PPK-002 remains P0 or has a fully closed successor chain');
 check(execution.step === '31-C' && ((inProgress31C && String(execution.officialStepStatus).startsWith('IN_PROGRESS') && execution.persistentReceiptStatus === 'PENDING') || (completed31C && execution.officialStepStatus === 'COMPLETED' && execution.persistentReceiptStatus === 'PASS')), '31-C execution record matches receipt lifecycle');
 check(locationAdapter.includes('GovernedLocationPolicyAuthorizationLease') && locationAdapter.includes('public authorize<T>(') && locationAdapter.includes('establish: (transaction)'), 'location runner exposes a transaction-independent authorization lease');
 check(timelineAdapter.includes('GovernedTimelinePolicyAuthorizationLease') && timelineAdapter.includes('public authorize<T>(') && timelineAdapter.includes('establish: (transaction)'), 'timeline runner exposes a transaction-independent authorization lease');

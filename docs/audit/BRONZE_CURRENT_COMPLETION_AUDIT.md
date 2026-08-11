@@ -1,6 +1,6 @@
 # Bronze guncel tamamlama denetimi
 
-Olusturma (UTC): 2026-08-11T07:37:31.763Z
+Olusturma (UTC): 2026-08-11T09:27:13.359Z
 
 ## Sonuc
 
@@ -12,19 +12,19 @@ Olusturma (UTC): 2026-08-11T07:37:31.763Z
 ## Yuzde gercekligi
 
 - Resmi agirlikli Bronze ilerlemesi: **%25**
-- Kati gereksinim kapanisi: **%4** (14/350)
-- Uygulama zinciri kapsami: **%4.6571**
+- Kati gereksinim kapanisi: **%4.2857** (15/350)
+- Uygulama zinciri kapsami: **%4.8571**
 - Yonetisim ve kanit zinciri kapsami: **%45.4286**
 
 Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 
 ## Kapsam durumu
 
-- COMPLETE: 14
-- PARTIAL: 39
+- COMPLETE: 15
+- PARTIAL: 38
 - FOUNDATION_STARTED: 5
 - NOT_IMPLEMENTED: 292
-- Toplam acik gereksinim: 336
+- Toplam acik gereksinim: 335
 
 ## Kural ve kapilar
 
@@ -226,7 +226,6 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 
 | Kimlik | Sinif | Oncelik | Durum | Zincir | Alan | Baslik |
 |---|---|---|---|---:|---|---|
-| PPK-002 | STARTED_BEFORE_NEW | P0 | PARTIAL | 6/13 | Politika Çekirdeği | Policy Decision Point ve her API/use-case/repository önünde Policy Enforcement Point |
 | B0-04 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Bronze Kapsam Kilidi | FEATURE_REALITY_GATE ve DEAD_UI/DEAD_API sınıflandırması |
 | DHA-001 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Process architecture | Electron arayüzünden bağımsız, kullanıcı oturumu kapalıyken de çalışan headless Core Service |
 | DHA-023 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Health | Liveness, readiness, quorum, replication lag, disk, cert, backup age ve dependency health |
@@ -256,6 +255,7 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | DHA-029 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Security operations | Cluster CA, cert rotation, revocation, key epoch, replay/freshness ve rate limit |
 | PPK-011 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Yetki | Amaç, aile dalı, zaman aralığı, açık ret ve sahiplik oranı desteği |
 | PPK-018 | STARTED_BEFORE_NEW | P0 | FOUNDATION_STARTED | 1/13 | Audit | Karar, policy sürümü, yükümlülükler ve reddetme nedeni değişmez audit zincirine yazılır |
+| PPK-020 | STARTED_BEFORE_NEW | P0 | FOUNDATION_STARTED | 1/13 | Test | Windows, macOS, iOS/iPadOS ve servisler için aynı policy conformance test suite |
 
 Tam acik-is listesi `artifacts/inventory/BRONZE_CURRENT_COMPLETION_AUDIT.json` icindedir.
 

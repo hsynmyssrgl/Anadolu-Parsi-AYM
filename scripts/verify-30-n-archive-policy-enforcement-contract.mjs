@@ -115,9 +115,9 @@ contains(source.decision, 'Production composition wiring', 'DEC-139 leaves produ
 const ppk002 = registry.requirements?.find((item) => item.id === 'PPK-002');
 check(Boolean(ppk002), 'PPK-002 exists in the accepted-scope registry');
 if (ppk002) {
-  check(ppk002.status === 'PARTIAL', 'accepted-scope registry keeps PPK-002 PARTIAL');
+  check(ppk002.status === 'PARTIAL' || (ppk002.status === 'COMPLETE' && Object.values(ppk002.chain ?? {}).every((value) => value === true)), 'accepted-scope registry preserves 30-N history or a fully closed successor chain');
   check(ppk002.priority === 'P0', 'accepted-scope registry keeps PPK-002 at P0');
-  check(ppk002.chain?.useCase === false && ppk002.chain?.repository === false, 'accepted-scope registry does not convert a bounded slice into universal use-case or repository completion');
+  check((ppk002.chain?.useCase === false && ppk002.chain?.repository === false) || (ppk002.chain?.useCase === true && ppk002.chain?.repository === true && ppk002.evidence?.includes('artifacts/validation/31-X-ppk-002-top-closure-runtime.json')), 'accepted-scope registry keeps the bounded slice honest or binds universal successor evidence');
   check(ppk002.evidence?.includes(paths.decision), 'accepted-scope registry references DEC-139');
   check(ppk002.evidence?.includes(paths.scope), 'accepted-scope registry references the 30-N scope');
   check(ppk002.evidence?.includes(canonicalReportPath), 'accepted-scope registry reserves the 30-N contract evidence path');

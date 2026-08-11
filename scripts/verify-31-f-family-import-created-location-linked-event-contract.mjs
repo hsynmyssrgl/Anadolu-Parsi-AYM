@@ -49,7 +49,7 @@ check(scope.step === '31-F' && scope.decision === 'DEC-166' && scope.targets.sou
 check((plan.currentStep === '31-F' && (pending || completed)) || (completed && laterSuccessor.planValid), 'work plan has a valid 31-F lifecycle');
 check(plan.steps.filter((item) => item.status === 'IN_PROGRESS').length === (laterSuccessor.active || (!completed && pending) ? 1 : 0), 'active-step count matches lifecycle');
 check((pending && ledger.activeMicroStep === '31-F') || (completed && plan.currentStep === '31-F' && ledger.activeMicroStep === null) || (completed && laterSuccessor.ledgerValid), 'ledger matches lifecycle');
-check(ppk002.priority === 'P0' && ppk002.status === 'PARTIAL', 'PPK-002 remains P0 PARTIAL');
+check(ppk002.priority === 'P0' && (ppk002.status === 'PARTIAL' || (ppk002.status === 'COMPLETE' && Object.values(ppk002.chain ?? {}).every((value) => value === true))), 'PPK-002 remains P0 or has a fully closed successor chain');
 check(execution.step === '31-F' && execution.persistentReceiptStatus === (completed ? 'PASS' : 'PENDING'), 'execution record matches lifecycle');
 check(decision.includes('öngörülü kaynak') && decision.includes('Commit öncesi tamamlanma çiti'), 'DEC-166 defines dependency and completion fence');
 check(!service.includes('import.event_new_location_policy_chain_required'), 'preview no longer rejects the completed slice');

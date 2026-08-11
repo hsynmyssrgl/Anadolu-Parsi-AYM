@@ -222,8 +222,8 @@ check(
 );
 
 check(Boolean(ppk002), 'PPK-002 exists in the accepted-scope registry');
-check(ppk002?.status === 'PARTIAL' && ppk002?.priority === 'P0', 'accepted scope keeps PPK-002 P0/PARTIAL');
-check(ppk002?.chain?.useCase === false && ppk002?.chain?.repository === false, 'accepted scope keeps universal use-case/repository enforcement open');
+check(ppk002?.priority === 'P0' && (ppk002.status === 'PARTIAL' || (ppk002.status === 'COMPLETE' && Object.values(ppk002.chain ?? {}).every((value) => value === true))), 'accepted scope keeps PPK-002 P0 and preserves a valid historical or successor state');
+check((ppk002?.chain?.useCase === false && ppk002?.chain?.repository === false) || (ppk002?.chain?.useCase === true && ppk002?.chain?.repository === true && ppk002?.evidence?.includes('artifacts/validation/31-X-ppk-002-top-closure-runtime.json')), 'accepted scope keeps universal enforcement open or binds the 31-X successor closure');
 check(
   ppk002?.evidence?.includes(paths.authority)
     && ppk002?.evidence?.includes(paths.scope)

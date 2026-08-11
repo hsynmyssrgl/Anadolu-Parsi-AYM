@@ -8,12 +8,14 @@ import {
   type PlatformPolicyReceiptSink
 } from '@ppt/platform-policy';
 import type { CorrelationId } from '@ppt/core';
+import { DesktopRepositoryPolicyScope } from './desktop-repository-policy-scope.js';
 
 export interface DesktopUniversalApiPolicyEnforcementDependencies {
   readonly authorizationProvider: PlatformPolicyAuthorizationProvider;
   readonly receiptSink: PlatformPolicyReceiptSink;
   readonly clusterFence: PlatformPolicyClusterFence;
   readonly resolveAuthority: () => PlatformPolicyConnectionAuthority | Promise<PlatformPolicyConnectionAuthority>;
+  readonly repositoryPolicyScope: DesktopRepositoryPolicyScope;
   readonly clock?: () => string;
 }
 
@@ -44,7 +46,7 @@ const nonEmpty = (value: unknown, max = 512): value is string =>
   typeof value === 'string' && value.trim() === value && value.length > 0 && value.length <= max;
 
 export const isDesktopPolicyBootstrapChannel = (channel: string): boolean =>
-  channel.startsWith('auth:') || BOOTSTRAP_CHANNELS.has(channel);
+  BOOTSTRAP_CHANNELS.has(channel);
 
 export const resolveDesktopUniversalApiIntent = (
   channel: string,
@@ -77,12 +79,18 @@ export const resolveDesktopUniversalApiIntent = (
 export class DesktopUniversalApiPolicyEnforcement {
   readonly #enforcementPoint: PlatformPolicyEnforcementPoint;
   readonly #clusterFence: PlatformPolicyClusterFence;
+  readonly #repositoryPolicyScope: DesktopRepositoryPolicyScope;
 
   public constructor(dependencies: DesktopUniversalApiPolicyEnforcementDependencies) {
-    if (!dependencies || typeof dependencies.resolveAuthority !== 'function') {
+    if (
+      !dependencies ||
+      typeof dependencies.resolveAuthority !== 'function' ||
+      !(dependencies.repositoryPolicyScope instanceof DesktopRepositoryPolicyScope)
+    ) {
       throw new Error('DESKTOP_API_POLICY_AUTHORITY_UNAVAILABLE');
     }
     this.#clusterFence = dependencies.clusterFence;
+    this.#repositoryPolicyScope = dependencies.repositoryPolicyScope;
     this.#enforcementPoint = new PlatformPolicyEnforcementPoint({
       provider: dependencies.authorizationProvider,
       receiptSink: dependencies.receiptSink,
@@ -107,9 +115,17 @@ export class DesktopUniversalApiPolicyEnforcement {
   }
 
   public async execute<T>(input: DesktopUniversalApiExecutionInput<T>): Promise<T> {
-    if (isDesktopPolicyBootstrapChannel(input.channel)) return input.operation();
+    if (isDesktopPolicyBootstrapChannel(input.channel)) {
+      return this.#repositoryPolicyScope.runBootstrap({
+        correlationId: input.correlationId,
+        boundary: input.channel
+      }, input.operation);
+    }
     const intent = resolveDesktopUniversalApiIntent(input.channel, input.correlationId);
-    return this.#enforcementPoint.execute(intent, this.#clusterFence, async (authorization) => {
+    return this.#repositoryPolicyScope.runPolicyResolution({
+      correlationId: input.correlationId,
+      boundary: input.channel
+    }, () => this.#enforcementPoint.execute(intent, this.#clusterFence, async (authorization) => {
       assertActivePlatformPolicyTransactionContext(authorization, {
         resourceType: intent.resourceType,
         resourceId: intent.resourceId,
@@ -120,7 +136,7 @@ export class DesktopUniversalApiPolicyEnforcement {
         fenceEpoch: authorization.fenceEpoch,
         fenceWritable: authorization.fenceWritable
       });
-      return input.operation();
-    });
+      return this.#repositoryPolicyScope.runAuthorized(authorization, input.operation);
+    }));
   }
 }

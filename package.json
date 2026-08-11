@@ -174,6 +174,8 @@
     "verify:31-t:family-import-governed-rollback-completion:external": "node scripts/verify-31-t-family-import-governed-rollback-completion-transition.mjs --external",
     "verify:31-u-w:ppk-002-remaining-boundaries-contract": "node scripts/verify-31-u-w-ppk-002-remaining-boundaries-contract.mjs",
     "verify:31-u-w:ppk-002-remaining-boundaries-runtime": "node scripts/verify-31-u-w-ppk-002-remaining-boundaries-runtime.mjs",
+    "verify:31-x:ppk-002-top-closure-contract": "node scripts/verify-31-x-ppk-002-top-closure-contract.mjs",
+    "verify:31-x:ppk-002-top-closure-runtime": "node scripts/verify-31-x-ppk-002-top-closure-runtime.mjs",
     "verify:life": "node scripts/verify-life-use-cases.mjs",
     "verify:authorization": "tsc -p tests/smoke/tsconfig.data-store.json && node scripts/verify-authorization-audit.mjs",
     "verify:collaboration": "tsc -p tests/smoke/tsconfig.data-store.json && node scripts/verify-membership-collaboration.mjs",

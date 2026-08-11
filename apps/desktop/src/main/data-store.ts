@@ -38,6 +38,7 @@ import {
 } from '@ppt/core';
 import { EventDispatcher, createExponentialRetryPolicy, type DomainEvent, type EventDispatchBatchSummary, type EventDispatchStore } from '@ppt/events';
 import type { Logger } from '@ppt/logging';
+import type { RepositoryExecutionPolicyGuard } from '@ppt/repositories';
 import {
   AppendAuditEntryUseCase, type AuditWriteApplicationContext, GetLatestAuditOccurredAtUseCase, type AuditReadApplicationContext, InstallAuditStorageProtectionUseCase, ListAutomationRulesUseCase, CreateAutomationRuleUseCase, ToggleAutomationRuleUseCase, ListAutomationRunsUseCase, RunAutomationRulesUseCase, type AutomationApplicationContext, GetReportSummaryUseCase, type ReportApplicationContext,
   ChangePasswordUseCase,
@@ -438,6 +439,7 @@ interface DataStoreOptions {
   clock?: Clock;
   correlation?: CorrelationContextProvider;
   logger?: Logger;
+  repositoryExecutionPolicyGuard?: RepositoryExecutionPolicyGuard;
   securityConfig?: {
     sessionIdleTimeoutMinutes: number;
     maximumFailedLoginAttempts: number;
@@ -849,7 +851,11 @@ export class FamilyDataStore {
 
   public constructor(options: DataStoreOptions) {
     const productionArchivePolicy = archiveProductionPolicyConfiguration(options);
-    this.#repositories = createSqliteRepositoryCompositionRoot();
+    this.#repositories = createSqliteRepositoryCompositionRoot({
+      ...(options.repositoryExecutionPolicyGuard
+        ? { executionPolicyGuard: options.repositoryExecutionPolicyGuard }
+        : {})
+    });
     this.#clock = options.clock ?? new SystemClock();
     this.#correlation = options.correlation;
     this.#logger = options.logger;
@@ -3421,7 +3427,8 @@ export class FamilyDataStore {
       actorRole: account.role,
       familyId: asFamilyId('family-main'),
       ...(account.personId ? { actorPersonId: asPersonId(account.personId) } : {}),
-      correlationId: asCorrelationId(`${prefix}-${randomUUID()}`),
+      correlationId: this.#correlation?.current()?.correlationId
+        ?? asCorrelationId(`${prefix}-${randomUUID()}`),
       occurredAt: asIsoDateTime(nowIso())
     };
   }
@@ -3460,11 +3467,12 @@ export class FamilyDataStore {
       actorRole: account.role,
       familyId: asFamilyId('family-main'),
       ...(account.personId ? { actorPersonId: asPersonId(account.personId) } : {}),
-      correlationId: asCorrelationId(`${prefix}-${randomUUID()}`),
+      correlationId: this.#correlation?.current()?.correlationId
+        ?? asCorrelationId(`${prefix}-${randomUUID()}`),
       occurredAt: asIsoDateTime(nowIso())
     };
   }
-  #auditReadApplicationContext(prefix:string):AuditReadApplicationContext { return {actorId:asUserId(this.#requireAuth()),correlationId:asCorrelationId(`${prefix}-${randomUUID()}`),occurredAt:asIsoDateTime(nowIso())}; }
+  #auditReadApplicationContext(prefix:string):AuditReadApplicationContext { return {actorId:asUserId(this.#requireAuth()),correlationId:this.#correlation?.current()?.correlationId??asCorrelationId(`${prefix}-${randomUUID()}`),occurredAt:asIsoDateTime(nowIso())}; }
   #auditWriteApplicationContext(prefix:string,occurredAt:string):AuditWriteApplicationContext { return {actorId:asUserId(this.#sessionManager.currentAccountId({touch:false})??''),correlationId:this.#correlation?.current()?.correlationId??asCorrelationId(`${prefix}-${randomUUID()}`),occurredAt:asIsoDateTime(occurredAt)}; }
 
   public async getReportSummary(): Promise<ReportSummaryView> { const result=await this.#getReportSummaryUseCase.execute(this.#reportApplicationContext('report-summary')); if(!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`); return result.value; }

@@ -38,6 +38,7 @@ import {
   SqliteTrustedDeviceRepository,
   SqliteWindowsHelloRegistrationRepository
 } from '@ppt/repositories';
+import type { RepositoryExecutionPolicyGuard, SqliteRepositoryOptions } from '@ppt/repositories';
 import type {
   AccountRepositoryPort,
   AiConsentRepositoryPort,
@@ -127,43 +128,54 @@ export interface RepositoryCompositionRoot {
   readonly windowsHelloRegistrationRepository: WindowsHelloRegistrationRepositoryPort;
 }
 
-export const createSqliteRepositoryCompositionRoot = (): RepositoryCompositionRoot => ({
-  accountRepository: new SqliteAccountRepository(),
-  aiConsentRepository: new SqliteAiConsentRepository(),
-  archiveRepository: new SqliteArchiveRepository(),
-  auditRepository: new SqliteAuditRepository(),
-  automationRepository: new SqliteAutomationRepository(),
-  backupRepository: new SqliteBackupRepository(),
-  backupPropagationRepository: new SqliteBackupPropagationRepository(),
-  backupQuarantineRepository: new SqliteBackupQuarantineRepository(),
-  bootstrapRepository: new SqliteBootstrapRepository(),
-  dashboardRepository: new SqliteDashboardRepository(),
-  dataRepairRepository: new SqliteDataRepairRepository(),
-  dataLifecycleRepository: new SqliteDataLifecycleRepository(),
-  diagnosticRepository: new SqliteDiagnosticRepository(),
-  entityCatalogRepository: new SqliteEntityCatalogRepository(),
-  familyRepository: new SqliteFamilyRepository(),
-  familyDataImportRepository: new SqliteFamilyDataImportRepository(),
-  financeRepository: new SqliteFinanceRepository(),
-  externalBackupInventoryRepository: new SqliteExternalBackupInventoryRepository(),
-  genealogyRepository: new SqliteGenealogyRepository(),
-  healthRepository: new SqliteHealthRepository(),
-  householdMembershipRepository: new SqliteHouseholdMembershipRepository(),
-  invitationRepository: new SqliteInvitationRepository(),
-  legacyRepository: new SqliteLegacyRepository(),
-  lifeRepository: new SqliteLifeRepository(),
-  largeFamilyReadModelRepository: new SqliteLargeFamilyReadModelRepository(),
-  locationRepository: new SqliteLocationRepository(),
-  notificationStateRepository: new SqliteNotificationStateRepository(),
-  objectPermissionRepository: new SqliteObjectPermissionRepository(),
-  outboxRepository: new SqliteOutboxRepository(),
-  personRepository: new SqlitePersonRepository(),
-  personLifecycleRepository: new SqlitePersonLifecycleRepository(),
-  platformPolicyTransactionRepository: new SqlitePlatformPolicyTransactionRepository(),
-  relationRepository: new SqliteRelationRepository(),
-  reportRepository: new SqliteReportRepository(),
-  taskRepository: new SqliteTaskRepository(),
-  timelineRepository: new SqliteTimelineRepository(),
-  trustedDeviceRepository: new SqliteTrustedDeviceRepository(),
-  windowsHelloRegistrationRepository: new SqliteWindowsHelloRegistrationRepository(),
-});
+export interface RepositoryCompositionRootOptions {
+  readonly executionPolicyGuard?: RepositoryExecutionPolicyGuard;
+}
+
+export const createSqliteRepositoryCompositionRoot = (
+  options: RepositoryCompositionRootOptions = {}
+): RepositoryCompositionRoot => {
+  const repositoryOptions: SqliteRepositoryOptions = options.executionPolicyGuard
+    ? { executionPolicyGuard: options.executionPolicyGuard }
+    : {};
+  return {
+    accountRepository: new SqliteAccountRepository(repositoryOptions),
+    aiConsentRepository: new SqliteAiConsentRepository(repositoryOptions),
+    archiveRepository: new SqliteArchiveRepository(repositoryOptions),
+    auditRepository: new SqliteAuditRepository(repositoryOptions),
+    automationRepository: new SqliteAutomationRepository(repositoryOptions),
+    backupRepository: new SqliteBackupRepository(repositoryOptions),
+    backupPropagationRepository: new SqliteBackupPropagationRepository(repositoryOptions),
+    backupQuarantineRepository: new SqliteBackupQuarantineRepository(repositoryOptions),
+    bootstrapRepository: new SqliteBootstrapRepository(repositoryOptions),
+    dashboardRepository: new SqliteDashboardRepository(repositoryOptions),
+    dataRepairRepository: new SqliteDataRepairRepository(repositoryOptions),
+    dataLifecycleRepository: new SqliteDataLifecycleRepository(repositoryOptions),
+    diagnosticRepository: new SqliteDiagnosticRepository(repositoryOptions),
+    entityCatalogRepository: new SqliteEntityCatalogRepository(repositoryOptions),
+    familyRepository: new SqliteFamilyRepository(repositoryOptions),
+    familyDataImportRepository: new SqliteFamilyDataImportRepository(repositoryOptions),
+    financeRepository: new SqliteFinanceRepository(repositoryOptions),
+    externalBackupInventoryRepository: new SqliteExternalBackupInventoryRepository(repositoryOptions),
+    genealogyRepository: new SqliteGenealogyRepository(repositoryOptions),
+    healthRepository: new SqliteHealthRepository(repositoryOptions),
+    householdMembershipRepository: new SqliteHouseholdMembershipRepository(repositoryOptions),
+    invitationRepository: new SqliteInvitationRepository(repositoryOptions),
+    legacyRepository: new SqliteLegacyRepository(repositoryOptions),
+    lifeRepository: new SqliteLifeRepository(repositoryOptions),
+    largeFamilyReadModelRepository: new SqliteLargeFamilyReadModelRepository(repositoryOptions),
+    locationRepository: new SqliteLocationRepository(repositoryOptions),
+    notificationStateRepository: new SqliteNotificationStateRepository(repositoryOptions),
+    objectPermissionRepository: new SqliteObjectPermissionRepository(repositoryOptions),
+    outboxRepository: new SqliteOutboxRepository(repositoryOptions),
+    personRepository: new SqlitePersonRepository(repositoryOptions),
+    personLifecycleRepository: new SqlitePersonLifecycleRepository(repositoryOptions),
+    platformPolicyTransactionRepository: new SqlitePlatformPolicyTransactionRepository(repositoryOptions),
+    relationRepository: new SqliteRelationRepository(repositoryOptions),
+    reportRepository: new SqliteReportRepository(repositoryOptions),
+    taskRepository: new SqliteTaskRepository(repositoryOptions),
+    timelineRepository: new SqliteTimelineRepository(repositoryOptions),
+    trustedDeviceRepository: new SqliteTrustedDeviceRepository(repositoryOptions),
+    windowsHelloRegistrationRepository: new SqliteWindowsHelloRegistrationRepository(repositoryOptions),
+  };
+};

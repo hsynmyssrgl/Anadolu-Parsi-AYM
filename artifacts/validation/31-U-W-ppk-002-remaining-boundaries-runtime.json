@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "31-U-W",
+  "requirement": "PPK-002",
+  "phase": "REMAINING_TECHNICAL_BOUNDARIES_RUNTIME",
+  "status": "PASS",
+  "checkCount": 10,
+  "passed": 10,
+  "failed": 0,
+  "results": [
+    {
+      "id": "root-typecheck",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputTail": ""
+    },
+    {
+      "id": "full-vitest",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "testFiles": 51,
+      "tests": 271,
+      "minimumTestFiles": 51,
+      "minimumTests": 267,
+      "outputSha256": "7ebe9624285a0ec4da3578e61032939404169b802b45e695ae33aa1b0b1a5e03",
+      "outputTail": " any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:13728) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:11692) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:16144) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:26240) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:20244) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:3120) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:2944) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:23040) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:14184) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "30-n-archive-policy-runtime-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputSha256": "9b984f6e6ce5a397c5817cab17baa911dbdc9009affe266864800bf8008d234a",
+      "outputTail": "30-N predecessor archive policy enforcement runtime regression: PASS (26/26; PPK-002 remains PARTIAL)."
+    },
+    {
+      "id": "30-n-archive-policy-contract-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputSha256": "ff69e110246e546d18bba79155a09ea358c6f5baf36c30ea315503a62042ea01",
+      "outputTail": "30-N predecessor archive policy enforcement contract regression: PASS (125/125; PPK-002 remains PARTIAL)."
+    },
+    {
+      "id": "30-o-archive-production-composition-contract-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputSha256": "4471647490b0c5699b01f553d253aa56772cb83c7fe7340247cea18a1cf824c4",
+      "outputTail": "30-O predecessor archive production composition contract regression: PASS (191/191; PPK-002 remains PARTIAL)."
+    },
+    {
+      "id": "30-o-core-service-policy-provider-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputSha256": "cdaf6909009c101fe586f139bac438fd9273252eb8f8f56e8cdb230e14ee60bc",
+      "outputTail": "30-O Core Service policy provider runtime: PASS (29 assertions).\nBu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır.\n\n(node:6080) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "30-o-core-service-entrypoint-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputSha256": "0fca341c1d86d355e0ce38ee389205144d6921b69e81257ad2268a5e86ef1360",
+      "outputTail": "30-O Core Service Entrypoint Runtime: PASS (24 assertions).\n\n(node:8832) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "30-o-protected-receipt-journal-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputSha256": "4764bf0b253173dc83eb61cade8a3bad724bef26ff5b30db1d6ca6964e447bb4",
+      "outputTail": "30-O protected receipt journal runtime: PASS (14 checks).\nBu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır."
+    },
+    {
+      "id": "31-u-w-remaining-boundaries-contract",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputSha256": "256107a6cfc45c28d710e7cccdc92c2138d565004f9d702fff0f7eafb05592f2",
+      "outputTail": "31-U-W PPK-002 remaining-boundaries contract: PASS (22/22)."
+    },
+    {
+      "id": "platform-policy-gate",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputSha256": "c67054a8790fa115778658c197e06fc4d32afd27ae1ad43b77fd9394bdd47307",
+      "outputTail": "Platform Policy Gate: PASS / authorization bypass 0 / presentation conditions 10.\nPlatform Policy runtime: PASS (8 checks)."
+    }
+  ],
+  "validatedBoundaries": [
+    "UNIVERSAL_TRUSTED_RENDERER_API_PEP",
+    "READ_CACHE_REAUTHORIZATION",
+    "ARCHIVE_BUSINESS_READ_REPOSITORY_RECEIPT_BINDING",
+    "STRICT_OBLIGATION_EXECUTION_ATTESTATION",
+    "EXTERNAL_CORE_SERVICE_MONOTONIC_AUTHORITY",
+    "ZERO_DIRECT_AUTHORIZATION_ROLE_COMPARISONS"
+  ],
+  "requirementCompletionClaimed": false,
+  "remainingRequirementBoundary": "INTERNAL_NON_IPC_LEGACY_REPOSITORY_CONTEXTS_AND_IDENTITY_BOOTSTRAP_EXCEPTIONS",
+  "generatedAt": "2026-08-11T09:26:43.204Z"
+}

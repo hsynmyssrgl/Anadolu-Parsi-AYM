@@ -44,7 +44,7 @@ check(
   || laterSuccessor.ledgerValid,
   'ledger matches pending or completed 31-B receipt lifecycle'
 );
-check(ppk002.priority === 'P0' && ppk002.status === 'PARTIAL', 'PPK-002 remains P0 PARTIAL');
+check(ppk002.priority === 'P0' && (ppk002.status === 'PARTIAL' || (ppk002.status === 'COMPLETE' && Object.values(ppk002.chain ?? {}).every((value) => value === true))), 'PPK-002 remains P0 or has a fully closed successor chain');
 check(execution.step === '31-B' && ((inProgress31B && String(execution.officialStepStatus).startsWith('IN_PROGRESS') && execution.persistentReceiptStatus === 'PENDING') || (completed31B && execution.officialStepStatus === 'COMPLETED' && execution.persistentReceiptStatus === 'PASS')), '31-B execution record matches receipt lifecycle');
 check(runtime.status === 'PASS' && runtime.checkCount === 12 && runtime.external30ZReceipt === 'PASS' && runtime.external31AReceipt === 'PASS', 'fresh family import verifier is 12/12 PASS');
 check(platform.status === 'PASS' && platform.newBypassCount === 0 && platform.runtimeStatus === 'PASS', 'platform policy gate is PASS with no new bypass');

@@ -33,7 +33,7 @@ check(docs.scopeReport.status === 'PASS' && docs.scopeReport.officialStepStatus 
 check(docs.scope.status === 'COMPLETED' && docs.scope.targetSliceStatus === 'PASS' && docs.scope.persistentReceiptStatus === 'PASS', 'scope config complete');
 check(step?.status === 'COMPLETED' && step.validationStatus === 'PASS' && step.persistentReceiptStatus === 'PASS', 'work plan complete');
 check(docs.ledger.libraryUploadStatus === '31-T_COMPLETED_RECEIPT_PASS' && docs.ledger.activeMicroStep === null && docs.ledger.nextOfficialTask === 'AUTO_PRIORITY_SELECTION_AFTER_31-T_PERSISTENT_RECEIPT', 'ledger complete');
-check(requirement?.status === 'PARTIAL' && docs.receipt.PPK002 === 'PARTIAL' && docs.completion.PPK002 === 'PARTIAL', 'PPK-002 remains PARTIAL');
+check((requirement?.status === 'PARTIAL' || (requirement?.status === 'COMPLETE' && Object.values(requirement.chain ?? {}).every((value) => value === true))) && docs.receipt.PPK002 === 'PARTIAL' && docs.completion.PPK002 === 'PARTIAL', '31-T remains historically PARTIAL while current PPK-002 may have a closed successor chain');
 check(docs.scope.targets.migration === 68 && docs.scope.targets.policyIntents === 'ONE_FRESH_EXACT_DELETE_RECEIPT_PER_GOVERNED_ROW', 'migration and exact receipt boundary');
 check(docs.scope.targets.transactionBoundary.endsWith('ONE_SQLITE_TRANSACTION') && docs.scope.targets.consumption === 'IMMUTABLE_SINGLE_USE_ROLLBACK_DELETION_TOMBSTONE', 'atomic single-use tombstone boundary');
 check(docs.scope.openBoundaries.universalRepositoryEnforcement === 'NOT_COMPLETE', 'universal repository enforcement remains open');

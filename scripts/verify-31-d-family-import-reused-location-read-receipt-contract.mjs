@@ -51,7 +51,7 @@ check(scope.step === '31-D' && scope.decision === 'DEC-163' && scope.targets.sou
 check((plan.currentStep === '31-D' && (pending || completed)) || successor31ECompleted || successor31FCompleted || laterSuccessor.planValid, 'work plan has a valid 31-D lifecycle');
 check(plan.steps.filter((item) => item.status === 'IN_PROGRESS').length === (laterSuccessor.active || !completed ? 1 : 0), 'active-step count matches lifecycle');
 check((pending && ledger.activeMicroStep === '31-D') || (completed && plan.currentStep === '31-D' && ledger.activeMicroStep === null) || (successor31ECompleted && ledger.activeMicroStep === null && ledger.libraryUploadStatus === '31-E_COMPLETED_RECEIPT_PASS') || (successor31FCompleted && ledger.activeMicroStep === null && ledger.libraryUploadStatus === '31-F_COMPLETED_RECEIPT_PASS') || laterSuccessor.ledgerValid, 'ledger matches lifecycle');
-check(ppk002.priority === 'P0' && ppk002.status === 'PARTIAL', 'PPK-002 remains P0 PARTIAL');
+check(ppk002.priority === 'P0' && (ppk002.status === 'PARTIAL' || (ppk002.status === 'COMPLETE' && Object.values(ppk002.chain ?? {}).every((value) => value === true))), 'PPK-002 remains P0 or has a fully closed successor chain');
 check(execution.step === '31-D' && execution.persistentReceiptStatus === (completed ? 'PASS' : 'PENDING'), 'execution record matches receipt lifecycle');
 check(service.includes("kind: 'location-read'") || service.includes("kind: 'location' | 'location-read' | 'event'"), 'correlation namespace supports location-read');
 check(service.includes('targetLocationId?: string') && service.includes('targetLocationResolution?: Resolution'), 'plan carries target location identity and resolution');

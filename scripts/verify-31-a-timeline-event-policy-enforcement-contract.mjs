@@ -94,7 +94,7 @@ check(
   || laterSuccessor.ledgerValid,
   'ledger distinguishes predecessor, pending and completed 31-A receipt states'
 );
-check(ppk002?.priority === 'P0' && ppk002.status === 'PARTIAL', 'PPK-002 remains a started P0 partial requirement');
+check(ppk002?.priority === 'P0' && (ppk002.status === 'PARTIAL' || (ppk002.status === 'COMPLETE' && Object.values(ppk002.chain ?? {}).every((value) => value === true))), 'PPK-002 remains P0 or has a fully closed successor chain');
 check(
   execution.step === '31-A'
   && ((inProgress31A && String(execution.officialStepStatus).startsWith('IN_PROGRESS') && execution.persistentReceiptStatus === 'PENDING')

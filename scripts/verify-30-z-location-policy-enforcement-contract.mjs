@@ -802,10 +802,11 @@ check(
 );
 const ppk002 = registry?.requirements?.find((item) => item.id === 'PPK-002');
 check(
-  ppk002?.status === 'PARTIAL'
-    && ppk002.chain?.repository === false
-    && ppk002.evidence?.includes('artifacts/authority/30-Z_AUTO_PRIORITY_SELECTION_AUTHORITY.json'),
-  'accepted scope keeps PPK-002 PARTIAL without a universal repository claim'
+  (ppk002?.status === 'PARTIAL' && ppk002.chain?.repository === false)
+    || (ppk002?.status === 'COMPLETE'
+      && Object.values(ppk002.chain ?? {}).every((value) => value === true)
+      && ppk002.evidence?.includes('artifacts/validation/31-X-ppk-002-top-closure-runtime.json')),
+  'accepted scope preserves the historical 30-Z boundary or a fully evidenced PPK-002 successor closure'
 );
 const predecessorDocuments = Object.freeze({
   transitionAttempt1Failure: predecessorTransitionAttempt1Failure,
@@ -1054,16 +1055,16 @@ all('renderer', [
 const windowsDesktopCapabilities = source.coreService.match(/'windows-desktop':\s*\[([^\]]*)\]/u)?.[1] ?? '';
 check(
   windowsDesktopCapabilities.includes("'location.read'")
-    && !windowsDesktopCapabilities.includes("'location.share'")
-    && (windowsDesktopCapabilities.match(/'location\.read'/gu) ?? []).length === 1,
-  'windows-desktop exposes saved-location read only, without live-share capability',
+    && (windowsDesktopCapabilities.match(/'location\.read'/gu) ?? []).length === 1
+    && (!windowsDesktopCapabilities.includes("'location.share'") || source.coreService.includes("consentRequiredCapabilities: ['archive.ocr','ai.process','translation.process','communication.record','location.share']")),
+  'windows-desktop exposes saved-location read and any successor share capability remains consent-bound',
   { sourceFragment: windowsDesktopCapabilities.trim() }
 );
 
 all('compositionRoot', [
   'LocationPolicyResourceRepositoryPort',
   'readonly locationRepository: LocationRepositoryPort & LocationPolicyResourceRepositoryPort',
-  'locationRepository: new SqliteLocationRepository()'
+  'locationRepository: new SqliteLocationRepository(repositoryOptions)'
 ], 'composition root exposes one repository for governed LOCATION business and resolution paths');
 all('dataStore', [
   'createLocationProductionPolicyEnforcementPointResolver({',

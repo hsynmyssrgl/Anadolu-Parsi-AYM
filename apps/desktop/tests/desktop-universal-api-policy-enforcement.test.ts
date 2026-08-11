@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { asCorrelationId } from '@ppt/core';
+import { SqliteRepository } from '@ppt/repositories';
+import type { RepositoryExecutionContext } from '@ppt/repository-contracts';
 import {
   PlatformPolicyKernel,
   type PlatformPolicyReceiptRecord
@@ -9,13 +11,28 @@ import {
   isDesktopPolicyBootstrapChannel,
   resolveDesktopUniversalApiIntent
 } from '../src/main/desktop-universal-api-policy-enforcement.js';
+import { DesktopRepositoryPolicyScope } from '../src/main/desktop-repository-policy-scope.js';
 
 const NOW = '2026-08-11T09:00:00.000Z';
 const EXPIRES = '2026-08-11T10:00:00.000Z';
 const correlationId = asCorrelationId('corr-31-u-universal-api');
 
+class GuardedProbeRepository extends SqliteRepository {
+  public probe(context: RepositoryExecutionContext) {
+    return this.execute(context, () => 'repository-ok');
+  }
+}
+
+const repositoryContext = (value = correlationId): RepositoryExecutionContext => ({
+  transaction: {} as RepositoryExecutionContext['transaction'],
+  actor: { userId: 'account-31-u' as RepositoryExecutionContext['actor']['userId'], roles: ['adult_member'] },
+  correlationId: value,
+  occurredAt: NOW as RepositoryExecutionContext['occurredAt']
+});
+
 const createHarness = (writable = true, trusted = true) => {
   const records: PlatformPolicyReceiptRecord[] = [];
+  const repositoryPolicyScope = new DesktopRepositoryPolicyScope();
   const kernel = new PlatformPolicyKernel({
     policyVersion: 'PPK-31-U',
     signingKey: Buffer.alloc(32, 31),
@@ -44,9 +61,10 @@ const createHarness = (writable = true, trusted = true) => {
       online: true,
       expiresAt: EXPIRES
     }),
+    repositoryPolicyScope,
     clock: () => NOW
   });
-  return { enforcement, records };
+  return { enforcement, records, repositoryPolicyScope };
 };
 
 describe('31-U universal Desktop API policy enforcement', () => {
@@ -54,7 +72,7 @@ describe('31-U universal Desktop API policy enforcement', () => {
     expect(resolveDesktopUniversalApiIntent('dashboard:getOverview', correlationId)).toMatchObject({ action: 'read', capability: 'family.read' });
     expect(resolveDesktopUniversalApiIntent('family:createMember', correlationId)).toMatchObject({ action: 'update', capability: 'family.write' });
     expect(isDesktopPolicyBootstrapChannel('auth:login')).toBe(true);
-    expect(isDesktopPolicyBootstrapChannel('auth:reauthorizeCurrentDeviceAfterRecovery')).toBe(true);
+    expect(isDesktopPolicyBootstrapChannel('auth:reauthorizeCurrentDeviceAfterRecovery')).toBe(false);
     expect(isDesktopPolicyBootstrapChannel('family:createMember')).toBe(false);
   });
 
@@ -94,5 +112,44 @@ describe('31-U universal Desktop API policy enforcement', () => {
     const { enforcement, records } = createHarness();
     await expect(enforcement.execute({ channel: 'auth:login', correlationId, operation: () => 'bootstrap' })).resolves.toBe('bootstrap');
     expect(records).toHaveLength(0);
+  });
+
+  it('fails closed when a guarded repository is called outside every policy scope', () => {
+    const { repositoryPolicyScope } = createHarness();
+    const repository = new GuardedProbeRepository({ executionPolicyGuard: repositoryPolicyScope.guard });
+    expect(() => repository.probe(repositoryContext())).toThrowError(
+      expect.objectContaining({ code: 'TRANSACTION_CONTEXT_INVALID' })
+    );
+  });
+
+  it('keeps guarded repository execution inside the signed API callback', async () => {
+    const { enforcement, repositoryPolicyScope } = createHarness();
+    const repository = new GuardedProbeRepository({ executionPolicyGuard: repositoryPolicyScope.guard });
+    await expect(enforcement.execute({
+      channel: 'dashboard:getOverview',
+      correlationId,
+      operation: () => repository.probe(repositoryContext())
+    })).resolves.toMatchObject({ ok: true, value: 'repository-ok' });
+  });
+
+  it('rejects an unregistered direct repository bootstrap scope', () => {
+    const { repositoryPolicyScope } = createHarness();
+    const repository = new GuardedProbeRepository({ executionPolicyGuard: repositoryPolicyScope.guard });
+    expect(() => repositoryPolicyScope.runBootstrap({
+      correlationId,
+      boundary: 'auth:logout'
+    }, () => repository.probe(repositoryContext()))).toThrowError(
+      expect.objectContaining({ code: 'INTENT_INVALID' })
+    );
+  });
+
+  it('rejects a repository context that changes correlation inside an authorized callback', async () => {
+    const { enforcement, repositoryPolicyScope } = createHarness();
+    const repository = new GuardedProbeRepository({ executionPolicyGuard: repositoryPolicyScope.guard });
+    await expect(enforcement.execute({
+      channel: 'dashboard:getOverview',
+      correlationId,
+      operation: () => repository.probe(repositoryContext(asCorrelationId('corr-mismatch')))
+    })).rejects.toMatchObject({ code: 'TRANSACTION_CONTEXT_MISMATCH' });
   });
 });

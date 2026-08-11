@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "31-X",
+  "requirement": "PPK-002",
+  "phase": "TOP_CLOSURE_RUNTIME",
+  "status": "PASS",
+  "checkCount": 3,
+  "passed": 3,
+  "failed": 0,
+  "results": [
+    {
+      "id": "top-closure-contract",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputSha256": "47a53e6826dd8d97b93108d2a32fb475e0980db255df382ef1ab83cd576fcece",
+      "outputTail": "31-X PPK-002 top-closure contract: PASS (24/24)."
+    },
+    {
+      "id": "remaining-boundaries-full-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputSha256": "a067100681fcd4b33592d421811dab8c643e4fd7da194d357f4621c041205f0d",
+      "outputTail": "31-U-W PPK-002 remaining-boundaries runtime: PASS (10/10; full Vitest 51/271)."
+    },
+    {
+      "id": "focused-repository-policy-scope",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 9,
+      "minimumTests": 9,
+      "outputSha256": "40c354179d59386fb195de2019f7c6870216a6bf79b75014b233f0f7d7c1b0ea",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·········\n\n Test Files  1 passed (1)\n      Tests  9 passed (9)\n   Start at  12:26:43\n   Duration  2.57s (transform 1.14s, setup 0ms, import 2.27s, tests 19ms, environment 0ms)\n\n\n(node:21000) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    }
+  ],
+  "validatedBoundaries": [
+    "UNIVERSAL_RENDERER_API_PEP",
+    "UNIVERSAL_PRODUCTION_REPOSITORY_SCOPE_GATE",
+    "SIGNED_BACKGROUND_SCHEDULER_PEP",
+    "SIGNED_VAULT_SESSION_GUARD_PEP",
+    "EXACT_BOOTSTRAP_REGISTRY",
+    "STRICT_OBLIGATION_EXECUTION",
+    "EXTERNAL_MONOTONIC_RECEIPT_AUTHORITY",
+    "FULL_51_FILE_REGRESSION"
+  ],
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T09:26:46.426Z"
+}

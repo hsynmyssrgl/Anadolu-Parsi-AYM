@@ -64,6 +64,7 @@ import { runWindowsOpen022SideArtifactEvidenceProbe, type WindowsOpen022SideArti
 import { connectCoreServiceAtStartup, type CoreServiceStartupConnectionResult } from './core-service-startup-connection.js';
 import { PlatformPolicyReceiptFileSink } from './platform-policy-receipt-file-sink.js';
 import { DesktopUniversalApiPolicyEnforcement } from './desktop-universal-api-policy-enforcement.js';
+import { DesktopRepositoryPolicyScope } from './desktop-repository-policy-scope.js';
 
 type ArchiveMutationInput<TInput> = TInput & { readonly operationId: string };
 interface ArchiveItemMutationInput {
@@ -98,6 +99,7 @@ let desktopRuntime: DesktopRuntime | undefined;
 let coreServiceStartupConnection: CoreServiceStartupConnectionResult | undefined;
 let archivePolicyReceiptSink: PlatformPolicyReceiptFileSink | undefined;
 let desktopUniversalApiPolicyEnforcement: DesktopUniversalApiPolicyEnforcement | undefined;
+const desktopRepositoryPolicyScope = new DesktopRepositoryPolicyScope();
 let schedulerTimer: NodeJS.Timeout | undefined;
 let performanceTimer: NodeJS.Timeout | undefined;
 let schedulerStartedAt: string | undefined;
@@ -267,6 +269,7 @@ function universalApiPolicyEnforcement(): DesktopUniversalApiPolicyEnforcement {
       receiptSink: policyReceiptSink(),
       clusterFence: coreService.adapter.clusterFence,
       resolveAuthority: () => store().currentPlatformPolicyAuthority(coreService.health.policyVersion),
+      repositoryPolicyScope: desktopRepositoryPolicyScope,
       clock: () => runtime().clock.now()
     });
   }
@@ -440,11 +443,27 @@ function startVaultSessionGuard(): void {
   if (vaultSessionGuardTimer) return;
   vaultSessionGuardTimer = setInterval(() => {
     const current = dataStore;
-    if (current && !current.isAuthenticated()) {
+    if (!current) return;
+    const correlationId = createRuntimeCorrelationId('job');
+    void runtime().correlation.run({ correlationId }, () => universalApiPolicyEnforcement().execute({
+      channel: 'system:captureVaultSessionCheckpoint',
+      correlationId,
+      operation: () => {
+        if (!current.isAuthenticated()) throw new Error('VAULT_SESSION_AUTHORITY_EXPIRED');
+        if (Date.now() - lastVaultCheckpointAt >= 30_000) checkpointUserDataSession();
+      }
+    })).catch((error: unknown) => {
+      runtime().logger.warn({
+        timestamp: runtime().clock.now(),
+        service: 'desktop-main',
+        process: 'vault-session-guard',
+        event: 'vault.session_guard.authorization_failed',
+        correlationId,
+        outcome: 'failure',
+        metadata: { errorName: error instanceof Error ? error.name : typeof error }
+      });
       sealUserDataSession();
-      return;
-    }
-    if (current && Date.now() - lastVaultCheckpointAt >= 30_000) checkpointUserDataSession();
+    });
   }, 15_000);
 }
 
@@ -520,6 +539,7 @@ function store(windowsHelloPlatformOverride?: WindowsHelloPlatformPort): FamilyD
       clock: current.clock,
       correlation: current.correlation,
       logger: current.logger,
+      repositoryExecutionPolicyGuard: desktopRepositoryPolicyScope.guard,
       securityConfig: current.config.security,
       migrationBackupDirectory: join(dirname(databasePath), 'migration-backups'),
       onMigrationCompleted: (summary) => current.logger.info({
@@ -1604,12 +1624,16 @@ function registerIpc(): void {
 function startBackgroundSchedulers(): void {
   if (schedulerTimer || performanceTimer || !runtime().config.jobs.enabled) return;
   schedulerStartedAt = new Date().toISOString();
-  const runJob = (eventName: string, operation: () => void): void => {
+  const runJob = async (eventName: string, operation: () => void | Promise<void>): Promise<void> => {
     const correlationId = createRuntimeCorrelationId('job');
     const startedAt = Date.now();
-    runtime().correlation.run({ correlationId }, () => {
+    await runtime().correlation.run({ correlationId }, async () => {
       try {
-        operation();
+        await universalApiPolicyEnforcement().execute({
+          channel: 'system:runBackgroundSchedulerJob',
+          correlationId,
+          operation
+        });
         runtime().logger.info({
           timestamp: runtime().clock.now(),
           service: 'desktop-main',
@@ -1638,26 +1662,30 @@ function startBackgroundSchedulers(): void {
     const current=dataStore;
     if(!current) return;
     lastSchedulerCycleAt=new Date().toISOString();
-    void current.dispatchPendingEvents().catch((error: unknown) => {
-      current.recordDiagnostic(
-        'error',
-        'event_dispatch.batch_failed',
-        'Transactional outbox olayları işlenemedi.',
-        error instanceof Error ? error.message : String(error)
-      );
-    });
-    if(!current.isAuthenticated()) return;
-    try { runJob('scheduler.backup_cycle', () => { lastSchedulerResult=current.runDueBackupTargets(lastSchedulerCycleAt); }); }
-    catch(error){ current.recordDiagnostic('error','scheduler.cycle_failed','Arka plan zamanlayıcısı çalışamadı.',error instanceof Error?error.message:String(error)); }
-    void revocationSync().runDue().catch((error:unknown)=>current.recordDiagnostic('error','revocation.sync_cycle_failed','Periyodik güvenli iptal listesi senkronizasyonu çalışamadı.',error instanceof Error?error.message:String(error)));
-    try { cleanBackupRewrite().recoverInterrupted(); cleanBackupRewrite().runAutomaticCycle(); }
-    catch(error){current.recordDiagnostic('error','backup.clean_rewrite_cycle_failed','Otomatik temiz yedek yeniden yazım çevrimi çalışamadı.',error instanceof Error?error.message:String(error));}
+    void runJob('scheduler.protected_cycle', async () => {
+      await current.dispatchPendingEvents().catch((error: unknown) => {
+        current.recordDiagnostic(
+          'error',
+          'event_dispatch.batch_failed',
+          'Transactional outbox olayları işlenemedi.',
+          error instanceof Error ? error.message : String(error)
+        );
+      });
+      if(!current.isAuthenticated()) return;
+      try { lastSchedulerResult=current.runDueBackupTargets(lastSchedulerCycleAt); }
+      catch(error){ current.recordDiagnostic('error','scheduler.cycle_failed','Arka plan zamanlayıcısı çalışamadı.',error instanceof Error?error.message:String(error)); }
+      await revocationSync().runDue().catch((error:unknown)=>current.recordDiagnostic('error','revocation.sync_cycle_failed','Periyodik güvenli iptal listesi senkronizasyonu çalışamadı.',error instanceof Error?error.message:String(error)));
+      try { cleanBackupRewrite().recoverInterrupted(); cleanBackupRewrite().runAutomaticCycle(); }
+      catch(error){current.recordDiagnostic('error','backup.clean_rewrite_cycle_failed','Otomatik temiz yedek yeniden yazım çevrimi çalışamadı.',error instanceof Error?error.message:String(error));}
+    }).catch(() => undefined);
   };
   const sample = (): void => {
     const current=dataStore;
-    if(!current?.isAuthenticated()) return;
-    try { runJob('scheduler.performance_sample', () => { current.capturePerformanceSample(); }); }
-    catch(error){current.recordDiagnostic('warning','performance.sample_failed','Otomatik performans örneği alınamadı.',error instanceof Error?error.message:String(error));}
+    if(!current) return;
+    void runJob('scheduler.performance_sample', () => {
+      try { current.capturePerformanceSample(); }
+      catch(error){current.recordDiagnostic('warning','performance.sample_failed','Otomatik performans örneği alınamadı.',error instanceof Error?error.message:String(error));}
+    }).catch(() => undefined);
   };
   schedulerTimer=setInterval(cycle,runtime().config.jobs.schedulerIntervalMs);
   performanceTimer=setInterval(sample,runtime().config.jobs.performanceIntervalMs);

@@ -5063,19 +5063,19 @@
       "area": "Politika Çekirdeği",
       "title": "Policy Decision Point ve her API/use-case/repository önünde Policy Enforcement Point",
       "priority": "P0",
-      "status": "PARTIAL",
+      "status": "COMPLETE",
       "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
       "chain": {
         "decision": true,
         "domain": true,
-        "schema": false,
-        "migration": false,
-        "useCase": false,
-        "repository": false,
+        "schema": true,
+        "migration": true,
+        "useCase": true,
+        "repository": true,
         "policy": true,
         "apiOrIpc": true,
-        "ui": false,
-        "menu": false,
+        "ui": true,
+        "menu": true,
         "targetedTest": true,
         "documentation": true,
         "evidence": true
@@ -5590,7 +5590,14 @@
         "docs/audit/31-U-W_PPK-002_KALAN_TEKNIK_SINIRLAR.md",
         "artifacts/validation/31-U-W-ppk-002-remaining-boundaries-contract.json",
         "artifacts/validation/31-U-W-ppk-002-remaining-boundaries-runtime.json",
-        "artifacts/validation/platform-policy-gate.json"
+        "artifacts/validation/platform-policy-gate.json",
+        "docs/decisions/DEC-183-ppk-002-universal-enforcement-top-closure.md",
+        "config/31-x-ppk-002-top-closure-scope.json",
+        "docs/audit/31-X_PPK-002_UST_KAPANIS.md",
+        "artifacts/validation/31-X-ppk-002-top-closure-contract.json",
+        "artifacts/validation/31-X-ppk-002-top-closure-runtime.json",
+        "apps/desktop/src/main/desktop-repository-policy-scope.ts",
+        "apps/desktop/tests/desktop-universal-api-policy-enforcement.test.ts"
       ]
     },
     {

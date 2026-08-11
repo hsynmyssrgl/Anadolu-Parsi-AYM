@@ -31,7 +31,20 @@ check('Desktop API channel registry contains no duplicate registration', new Set
 check('main process composes the universal policy boundary into every registered API', sources.main.includes('policyEnforcement: universalApiPolicyEnforcement()'));
 check('read-cache hits are reauthorized before response release', sources.ipc.includes('authorizedCachedResult') && sources.ipc.includes('input.policyEnforcement.execute'));
 check('handler execution is enclosed by the same policy boundary', sources.ipc.includes('operation: () => input.handler(event'));
-check('bootstrap exception registry is explicit and identity-lifecycle bounded', sources.universalApi.includes("channel.startsWith('auth:')") && sources.universalApi.includes("'invitations:accept'") && sources.universalApi.includes("'invitations:inspect'"));
+check(
+  'bootstrap exception registry is explicit and identity-lifecycle bounded',
+  !sources.universalApi.includes("channel.startsWith('auth:')") && [
+    'app:getInfo',
+    'auth:getExternalIdentityProviders',
+    'auth:getState',
+    'auth:getWindowsHelloState',
+    'auth:login',
+    'auth:loginWithWindowsHello',
+    'auth:setup',
+    'invitations:accept',
+    'invitations:inspect'
+  ].every((channel) => sources.universalApi.includes(`'${channel}'`))
+);
 check('universal API PEP uses signed Core Service provider and durable receipt sink', sources.universalApi.includes('new PlatformPolicyEnforcementPoint') && sources.main.includes('authorizationProvider: coreService.adapter.policyProvider') && sources.main.includes('receiptSink: policyReceiptSink()'));
 check('trusted authenticated authority is resolved from live account, device and session state', sources.dataStore.includes('currentPlatformPolicyAuthority') && sources.dataStore.includes('auth.trustedDevice !== true') && sources.dataStore.includes('membershipActive: true'));
 
