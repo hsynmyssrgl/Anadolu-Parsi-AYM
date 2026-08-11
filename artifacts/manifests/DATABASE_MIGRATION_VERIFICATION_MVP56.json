@@ -387,7 +387,12 @@
       "version": 74,
       "name": "ppk009_core_service_decision_reevaluation",
       "checksum": "99c89269ac120adbb387dc796ecf1b837f978e04e375d3d41c4fb605020ea813"
+    },
+    {
+      "version": 75,
+      "name": "ppk011_contextual_ownership_share",
+      "checksum": "3c59ecd6df8d4bf777a8eee8c4864f19848fb712c85691105320afa17b476337"
     }
   ],
-  "generatedAt": "2026-08-11T12:55:09.393Z"
+  "generatedAt": "2026-08-11T13:14:39.884Z"
 }

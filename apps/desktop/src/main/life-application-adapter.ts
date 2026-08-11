@@ -170,6 +170,7 @@ const toGrant = (row: ObjectPermissionRow): AuthorizationGrant => ({
   effect: row.effect,
   purpose: row.purpose,
   ...(row.familyBranchId ? { familyBranchId: row.familyBranchId } : {}),
+  ...(row.ownershipBasisPoints === undefined ? {} : { ownershipBasisPoints: row.ownershipBasisPoints }),
   ...(row.denialReason ? { denialReason: row.denialReason } : {}),
   startsAt: row.startsAt,
   ...(row.endsAt ? { endsAt: row.endsAt } : {})

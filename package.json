@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "clean": "node scripts/clean.mjs",
-    "build:packages": "npm run build:foundation && npm run build --workspace @ppt/core-service-contracts && npm run build --workspace @ppt/core-service-client && npm run build --workspace @ppt/security && npm run build --workspace @ppt/application && npm run build --workspace @ppt/infrastructure && npm run build --workspace @ppt/test-data",
+    "build:packages": "npm run build:foundation && npm run build --workspace @ppt/core-service-contracts && npm run build --workspace @ppt/core-service-client && npm run build --workspace @ppt/application && npm run build --workspace @ppt/infrastructure && npm run build --workspace @ppt/test-data",
     "build": "npm run clean && npm run build:packages && npm run build --workspace @ppt/core-service && npm run build --workspace @ppt/desktop",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -25,7 +25,7 @@
     "manifest": "node scripts/generate-manifest.mjs",
     "verify:installer": "node scripts/verify-installer.mjs",
     "verify:freeze": "node scripts/verify-release-freeze.mjs",
-    "build:foundation": "npm run build --workspace @ppt/core && npm run build --workspace @ppt/contracts && npm run build --workspace @ppt/config && npm run build --workspace @ppt/logging && npm run build --workspace @ppt/database && npm run build --workspace @ppt/domain && npm run build --workspace @ppt/events && npm run build --workspace @ppt/platform-policy && npm run build --workspace @ppt/repository-contracts && npm run build --workspace @ppt/repositories",
+    "build:foundation": "npm run build --workspace @ppt/core && npm run build --workspace @ppt/contracts && npm run build --workspace @ppt/config && npm run build --workspace @ppt/logging && npm run build --workspace @ppt/database && npm run build --workspace @ppt/domain && npm run build --workspace @ppt/events && npm run build --workspace @ppt/platform-policy && npm run build --workspace @ppt/repository-contracts && npm run build --workspace @ppt/security && npm run build --workspace @ppt/repositories",
     "baseline:manifest": "node scripts/generate-baseline-manifest.mjs",
     "verify:foundation": "node scripts/verify-foundation.mjs",
     "verify:data-store-smoke": "tsc -p tests/smoke/tsconfig.data-store.json && node scripts/verify-data-store-smoke.mjs",

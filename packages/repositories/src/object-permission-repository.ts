@@ -42,6 +42,7 @@ const mapRow = (row: Record<string, unknown>): ObjectPermissionRow => ({
   effect: String(row.effect) as 'allow' | 'deny',
   purpose: String(row.purpose) as ObjectPermissionRow['purpose'],
   ...(row.family_branch_id ? { familyBranchId: String(row.family_branch_id) as FamilyBranchId } : {}),
+  ...(row.ownership_basis_points === null || row.ownership_basis_points === undefined ? {} : { ownershipBasisPoints: Number(row.ownership_basis_points) }),
   ...(row.denial_reason ? { denialReason: String(row.denial_reason) } : {}),
   startsAt: String(row.starts_at) as IsoDateTime,
   ...(row.ends_at ? { endsAt: String(row.ends_at) as IsoDateTime } : {}),
@@ -51,14 +52,14 @@ const mapRow = (row: Record<string, unknown>): ObjectPermissionRow => ({
 export class SqliteObjectPermissionRepository extends SqliteRepository implements ObjectPermissionRepositoryPort {
   public listAll(context: RepositoryExecutionContext): RepositoryResult<readonly ObjectPermissionRow[]> {
     return this.execute(context, () => (this.database(context).prepare(`
-      SELECT id,subject_account_id,resource_type,resource_id,actions,effect,purpose,family_branch_id,denial_reason,starts_at,ends_at,created_at
+      SELECT id,subject_account_id,resource_type,resource_id,actions,effect,purpose,family_branch_id,ownership_basis_points,denial_reason,starts_at,ends_at,created_at
       FROM object_permissions ORDER BY created_at DESC,id
     `).all() as Array<Record<string, unknown>>).map(mapRow));
   }
 
   public listActiveForSubject(context: RepositoryExecutionContext, accountId: UserId, occurredAt: IsoDateTime): RepositoryResult<readonly ObjectPermissionRow[]> {
     return this.execute(context, () => (this.database(context).prepare(`
-      SELECT id,subject_account_id,resource_type,resource_id,actions,effect,purpose,family_branch_id,denial_reason,starts_at,ends_at,created_at
+      SELECT id,subject_account_id,resource_type,resource_id,actions,effect,purpose,family_branch_id,ownership_basis_points,denial_reason,starts_at,ends_at,created_at
       FROM object_permissions
       WHERE subject_account_id=? AND starts_at<=? AND (ends_at IS NULL OR ends_at>=?)
       ORDER BY CASE effect WHEN 'deny' THEN 0 ELSE 1 END,created_at DESC
@@ -69,12 +70,13 @@ export class SqliteObjectPermissionRepository extends SqliteRepository implement
     return this.execute(context, () => {
       const serializedActions = serializeActions(input.actions);
       this.database(context).prepare(`
-        INSERT INTO object_permissions(id,subject_account_id,resource_type,resource_id,actions,effect,purpose,family_branch_id,denial_reason,starts_at,ends_at,created_at)
-        VALUES(?,?,?,?,?,?,?,?,?,?,?,?)
+        INSERT INTO object_permissions(id,subject_account_id,resource_type,resource_id,actions,effect,purpose,family_branch_id,ownership_basis_points,denial_reason,starts_at,ends_at,created_at)
+        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
         ON CONFLICT(id) DO UPDATE SET subject_account_id=excluded.subject_account_id,resource_type=excluded.resource_type,
           resource_id=excluded.resource_id,actions=excluded.actions,effect=excluded.effect,purpose=excluded.purpose,
-          family_branch_id=excluded.family_branch_id,denial_reason=excluded.denial_reason,starts_at=excluded.starts_at,ends_at=excluded.ends_at
-      `).run(input.id,input.subjectAccountId,input.resourceType,input.resourceId,serializedActions,input.effect,input.purpose,input.familyBranchId??null,input.denialReason??null,input.startsAt,input.endsAt??null,input.createdAt);
+          family_branch_id=excluded.family_branch_id,ownership_basis_points=excluded.ownership_basis_points,
+          denial_reason=excluded.denial_reason,starts_at=excluded.starts_at,ends_at=excluded.ends_at
+      `).run(input.id,input.subjectAccountId,input.resourceType,input.resourceId,serializedActions,input.effect,input.purpose,input.familyBranchId??null,input.ownershipBasisPoints??null,input.denialReason??null,input.startsAt,input.endsAt??null,input.createdAt);
     });
   }
 

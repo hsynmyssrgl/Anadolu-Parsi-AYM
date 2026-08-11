@@ -5920,6 +5920,44 @@ SET value='REVISION-32-E-PPK-009-CORE-SERVICE-DECISION-REEVALUATION',
 WHERE key='schema_generation';
 `;
 
+const authorizationOwnershipShareSql = `ALTER TABLE object_permissions
+ADD COLUMN ownership_basis_points INTEGER CHECK(
+  ownership_basis_points IS NULL
+  OR (typeof(ownership_basis_points)='integer' AND ownership_basis_points BETWEEN 1 AND 10000)
+);
+
+CREATE INDEX idx_object_permissions_ownership_share
+ON object_permissions(subject_account_id,resource_type,resource_id,ownership_basis_points)
+WHERE ownership_basis_points IS NOT NULL;
+
+CREATE TRIGGER trg_ppk011_object_permission_ownership_insert
+BEFORE INSERT ON object_permissions
+WHEN (NEW.effect='deny' AND NEW.ownership_basis_points IS NOT NULL)
+  OR (NEW.ownership_basis_points IS NOT NULL AND (
+    typeof(NEW.ownership_basis_points)<>'integer'
+    OR NEW.ownership_basis_points NOT BETWEEN 1 AND 10000
+  ))
+BEGIN
+  SELECT RAISE(ABORT,'invalid object permission ownership share');
+END;
+
+CREATE TRIGGER trg_ppk011_object_permission_ownership_update
+BEFORE UPDATE OF effect,ownership_basis_points ON object_permissions
+WHEN (NEW.effect='deny' AND NEW.ownership_basis_points IS NOT NULL)
+  OR (NEW.ownership_basis_points IS NOT NULL AND (
+    typeof(NEW.ownership_basis_points)<>'integer'
+    OR NEW.ownership_basis_points NOT BETWEEN 1 AND 10000
+  ))
+BEGIN
+  SELECT RAISE(ABORT,'invalid object permission ownership share');
+END;
+
+UPDATE database_metadata
+SET value='REVISION-32-G-PPK-011-CONTEXTUAL-OWNERSHIP-SHARE',
+    updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
+WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -5994,7 +6032,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(71, 'ppk006_complete_policy_obligation_suite', platformPolicyObligationExecutionSql),
   createMigrationDefinition(72, 'ppk007_signed_versioned_policy_package', platformPolicyPackageBindingSql),
   createMigrationDefinition(73, 'ppk008_application_identity_device_certificate_manifest', platformApplicationIdentityBindingSql),
-  createMigrationDefinition(74, 'ppk009_core_service_decision_reevaluation', platformPolicyDecisionAuthorityBindingSql)
+  createMigrationDefinition(74, 'ppk009_core_service_decision_reevaluation', platformPolicyDecisionAuthorityBindingSql),
+  createMigrationDefinition(75, 'ppk011_contextual_ownership_share', authorizationOwnershipShareSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

@@ -102,6 +102,7 @@ const toGrant = (permission: ObjectPermissionView): AuthorizationGrant => ({
   effect: permission.effect,
   purpose: permission.purpose,
   ...(permission.familyBranchId ? { familyBranchId: permission.familyBranchId } : {}),
+  ...(permission.ownershipBasisPoints === undefined ? {} : { ownershipBasisPoints: permission.ownershipBasisPoints }),
   ...(permission.denialReason ? { denialReason: permission.denialReason } : {}),
   startsAt: permission.startsAt,
   ...(permission.endsAt ? { endsAt: permission.endsAt } : {})
@@ -119,6 +120,7 @@ export class EvaluateAuthorizationUseCase {
     readonly ownerPersonId?: string;
     readonly purpose?: AuthorizationGrant['purpose'];
     readonly resourceBranchId?: FamilyBranchId;
+    readonly minimumOwnershipBasisPoints?: number;
   }): Result<AuthorizationDecision, AppError> {
     const account = this.query.getAccount(input.accountId, input.context);
     if (!account.ok) return account;
@@ -139,6 +141,7 @@ export class EvaluateAuthorizationUseCase {
       purpose: input.purpose ?? 'general',
       actorBranchIds: branches.value,
       ...(input.resourceBranchId ? { resourceBranchId: input.resourceBranchId } : {}),
+      ...(input.minimumOwnershipBasisPoints === undefined ? {} : { minimumOwnershipBasisPoints: input.minimumOwnershipBasisPoints }),
       ...(account.value.personId ? { actorPersonId: account.value.personId } : {}),
       ...(input.ownerPersonId ? { ownerPersonId: input.ownerPersonId } : {}),
       grants: grants.value.map(toGrant)
@@ -211,6 +214,9 @@ export class UpsertObjectPermissionUseCase {
         && !endsAt
       ) return err(invalid(input.context.correlationId, 'Konum okuma izni sonlu bir bitiş tarihi gerektirir.'));
       const denialReason = input.command.denialReason?.trim();
+      const ownershipBasisPoints = input.command.ownershipBasisPoints;
+      if (ownershipBasisPoints !== undefined && (!Number.isInteger(ownershipBasisPoints) || ownershipBasisPoints < 1 || ownershipBasisPoints > 10_000)) return err(invalid(input.context.correlationId, 'Sahiplik oranı 1 ile 10.000 baz puan arasında tam sayı olmalıdır.'));
+      if (input.command.effect === 'deny' && ownershipBasisPoints !== undefined) return err(invalid(input.context.correlationId, 'Açık ret kaydı sahiplik oranı taşıyamaz.'));
       if (input.command.effect === 'deny' && (!denialReason || denialReason.length < 5 || denialReason.length > 500)) return err(invalid(input.context.correlationId, 'Açık ret gerekçesi 5 ile 500 karakter arasında olmalıdır.'));
       if (input.command.effect === 'allow' && denialReason) return err(invalid(input.context.correlationId, 'İzin veren kayıt ret gerekçesi taşıyamaz.'));
       const account = scope.getAccount(input.command.subjectAccountId as UserId);
@@ -225,6 +231,7 @@ export class UpsertObjectPermissionUseCase {
         effect: input.command.effect,
         purpose: input.command.purpose ?? 'general',
         ...(input.command.familyBranchId ? { familyBranchId: input.command.familyBranchId } : {}),
+        ...(ownershipBasisPoints === undefined ? {} : { ownershipBasisPoints }),
         ...(denialReason ? { denialReason } : {}),
         startsAt: startsAt.toISOString(),
         ...(endsAt ? { endsAt: endsAt.toISOString() } : {}),

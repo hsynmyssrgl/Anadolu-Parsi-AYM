@@ -11,6 +11,7 @@ export interface ObjectPermissionRow {
   readonly effect: 'allow' | 'deny';
   readonly purpose: AuthorizationPurpose;
   readonly familyBranchId?: FamilyBranchId;
+  readonly ownershipBasisPoints?: number;
   readonly denialReason?: string;
   readonly startsAt: IsoDateTime;
   readonly endsAt?: IsoDateTime;

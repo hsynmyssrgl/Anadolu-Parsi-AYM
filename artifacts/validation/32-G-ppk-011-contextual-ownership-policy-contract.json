@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-G",
+  "requirement": "PPK-011",
+  "phase": "CONTEXTUAL_OWNERSHIP_POLICY_CONTRACT",
+  "status": "PASS",
+  "checkCount": 32,
+  "passed": 32,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "central grant carries ownership basis points",
+      "status": "PASS"
+    },
+    {
+      "name": "central request carries a minimum ownership threshold",
+      "status": "PASS"
+    },
+    {
+      "name": "central policy validates the 1..10000 basis-point vocabulary",
+      "status": "PASS"
+    },
+    {
+      "name": "central explicit denial is selected before ownership-qualified allow",
+      "status": "PASS"
+    },
+    {
+      "name": "central policy returns a dedicated ownership-threshold denial",
+      "status": "PASS"
+    },
+    {
+      "name": "platform grants carry ownership basis points",
+      "status": "PASS"
+    },
+    {
+      "name": "platform requests carry the minimum ownership threshold",
+      "status": "PASS"
+    },
+    {
+      "name": "platform policy exposes a dedicated ownership denial reason",
+      "status": "PASS"
+    },
+    {
+      "name": "platform grant validation forbids ownership metadata on deny",
+      "status": "PASS"
+    },
+    {
+      "name": "platform context snapshot signs the ownership threshold",
+      "status": "PASS"
+    },
+    {
+      "name": "platform explicit denial precedes the qualifying allow lookup",
+      "status": "PASS"
+    },
+    {
+      "name": "platform decision returns the matched ownership share",
+      "status": "PASS"
+    },
+    {
+      "name": "PEP intent accepts an ownership threshold",
+      "status": "PASS"
+    },
+    {
+      "name": "PEP validates and forwards the ownership threshold",
+      "status": "PASS"
+    },
+    {
+      "name": "domain permission view carries ownership basis points",
+      "status": "PASS"
+    },
+    {
+      "name": "domain upsert input carries ownership basis points",
+      "status": "PASS"
+    },
+    {
+      "name": "use-case validates exact integer basis-point range",
+      "status": "PASS"
+    },
+    {
+      "name": "use-case forbids ownership metadata on explicit denial",
+      "status": "PASS"
+    },
+    {
+      "name": "use-case maps persisted ownership into central grants",
+      "status": "PASS"
+    },
+    {
+      "name": "repository contract carries ownership basis points",
+      "status": "PASS"
+    },
+    {
+      "name": "repository maps ownership share from SQLite",
+      "status": "PASS"
+    },
+    {
+      "name": "repository selects ownership share in all reads",
+      "status": "PASS"
+    },
+    {
+      "name": "repository upsert writes and updates ownership share",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 75 adds the ownership basis-point column",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 75 installs insert and update ownership triggers",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 75 is registered append-only",
+      "status": "PASS"
+    },
+    {
+      "name": "application adapter maps ownership in both directions",
+      "status": "PASS"
+    },
+    {
+      "name": "typed IPC and preload keep the contextual permission route",
+      "status": "PASS"
+    },
+    {
+      "name": "renderer captures and displays ownership percentages",
+      "status": "PASS"
+    },
+    {
+      "name": "production authority validates, grants and fingerprints ownership",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test covers central, platform, denial, threshold and hash binding",
+      "status": "PASS"
+    },
+    {
+      "name": "closure registry, scope and truth boundary are complete without B4-02 overclaim",
+      "status": "PASS"
+    }
+  ],
+  "failures": [],
+  "bankAccountB402CompletionClaimed": false,
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T13:18:38.484Z"
+}

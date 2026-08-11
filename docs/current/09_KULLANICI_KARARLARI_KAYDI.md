@@ -2,7 +2,7 @@
 
 - Görünür sürüm: **Bronze 04.08.2026.29**
 - Makine okunur defter: `config/user-decision-ledger.json`
-- Aktif karar sayısı: **45**
+- Aktif karar sayısı: **46**
 
 Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağlayıcı kullanıcı kararlarını karar düzeyinde, etkilediği kural/belge/kod alanlarıyla saklar. Ham konuşma erişimi olmadan “tam transcript” iddiası yapılmaz.
 
@@ -53,3 +53,4 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 - `DEC-189` — PPK-008 unique application identity, trusted-device certificate and capability manifest top closure
 - `DEC-190` — PPK-009 Core Service policy decision re-evaluation top closure
 - `DEC-191` — PPK-010 central policy and zero direct-role authorization exception top closure
+- `DEC-192` — PPK-011 contextual authorization and ownership-share top closure

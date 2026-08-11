@@ -64,6 +64,7 @@ export type PolicyReason =
   | 'CLUSTER_NOT_WRITABLE'
   | 'RESOURCE_SCOPE_DENIED'
   | 'OWNER_OR_GRANT_REQUIRED'
+  | 'OWNERSHIP_SHARE_REQUIRED'
   | 'DATA_CLASS_CAPABILITY_MISMATCH'
   | 'POLICY_PACKAGE_VERSION_MISMATCH'
   | 'POLICY_PACKAGE_HASH_MISMATCH'
@@ -131,6 +132,8 @@ export interface PolicyGrant {
   readonly actions: readonly PolicyAction[];
   readonly purposes?: readonly string[];
   readonly effect: 'allow' | 'deny';
+  /** Subject ownership share for this resource, expressed as 1..10,000 basis points. */
+  readonly ownershipBasisPoints?: number;
   readonly startsAt: string;
   readonly endsAt?: string;
 }
@@ -169,6 +172,8 @@ export interface PlatformPolicyRequest {
   readonly action: PolicyAction;
   readonly capability: PlatformCapability;
   readonly purpose?: string;
+  /** Minimum ownership share required by the operation, expressed as 1..10,000 basis points. */
+  readonly minimumOwnershipBasisPoints?: number;
   readonly occurredAt: string;
   readonly online: boolean;
   readonly clusterWritable: boolean;
@@ -191,6 +196,7 @@ export interface PlatformPolicyDecision {
   /** SHA-256 binding of the complete validated authorization context. */
   readonly contextHash?: string;
   readonly matchedGrantId?: string;
+  readonly matchedOwnershipBasisPoints?: number;
   readonly matchedConsentId?: string;
   readonly obligations: readonly PolicyObligation[];
 }
@@ -230,6 +236,7 @@ export interface PlatformPolicyContextSnapshot {
     readonly sourceResourceId: string | null;
   };
   readonly purpose: string;
+  readonly minimumOwnershipBasisPoints: number;
   readonly occurredAt: string;
   readonly action: PolicyAction;
   readonly capability: PlatformCapability;
@@ -419,7 +426,9 @@ const capabilityActions: Readonly<Record<PlatformCapability, readonly PolicyActi
 const validGrant = (value: PolicyGrant): boolean =>
   nonEmpty(value.id) && nonEmpty(value.subjectAccountId) && nonEmpty(value.resourceType) && nonEmpty(value.resourceId) &&
   Array.isArray(value.actions) && value.actions.length > 0 && value.actions.every((action) => validActions.has(action)) &&
-  (value.effect === 'allow' || value.effect === 'deny') && Number.isFinite(parseTime(value.startsAt)) &&
+  (value.effect === 'allow' || value.effect === 'deny') &&
+  (value.ownershipBasisPoints === undefined || (value.effect === 'allow' && Number.isInteger(value.ownershipBasisPoints) && value.ownershipBasisPoints >= 1 && value.ownershipBasisPoints <= 10_000)) &&
+  Number.isFinite(parseTime(value.startsAt)) &&
   (!value.endsAt || Number.isFinite(parseTime(value.endsAt)));
 
 const validConsent = (value: PolicyConsent): boolean =>
@@ -525,6 +534,7 @@ export const platformPolicyContextSnapshot = (request: PlatformPolicyRequest): P
     sourceResourceId: request.resource.sourceResourceId ?? null
   }),
   purpose: request.purpose ?? '',
+  minimumOwnershipBasisPoints: request.minimumOwnershipBasisPoints ?? 0,
   occurredAt: request.occurredAt,
   action: request.action,
   capability: request.capability,
@@ -736,6 +746,7 @@ export class PlatformPolicyKernel {
       !validSensitivities.has(request.resource.sensitivity) || !validActions.has(request.action) ||
       (request.enforcementMode !== undefined && request.enforcementMode !== 'legacy' && request.enforcementMode !== 'strict') ||
       (request.purpose !== undefined && !nonEmpty(request.purpose, 256)) ||
+      (request.minimumOwnershipBasisPoints !== undefined && (!Number.isInteger(request.minimumOwnershipBasisPoints) || request.minimumOwnershipBasisPoints < 1 || request.minimumOwnershipBasisPoints > 10_000)) ||
       (strictContext && (
         !nonEmpty(request.correlationId, 128) || !nonEmpty(request.purpose, 256)
         || !Number.isSafeInteger(request.policyPackageVersion) || request.policyPackageVersion! < 1
@@ -841,7 +852,14 @@ export class PlatformPolicyKernel {
     }
 
     const owner = Boolean(request.subject.personId && request.resource.ownerPersonId && request.subject.personId === request.resource.ownerPersonId);
-    const explicitAllow = activeGrants.find((grant) => grant.effect === 'allow');
+    const explicitAllow = activeGrants.find((grant) => grant.effect === 'allow' && (
+      request.minimumOwnershipBasisPoints === undefined
+      || (grant.ownershipBasisPoints !== undefined && grant.ownershipBasisPoints >= request.minimumOwnershipBasisPoints)
+    ));
+    const ownerOwnershipBasisPoints = owner ? 10_000 : undefined;
+    if (request.minimumOwnershipBasisPoints !== undefined && !owner && !explicitAllow) {
+      return deny('OWNERSHIP_SHARE_REQUIRED');
+    }
     if (
       !owner && !explicitAllow &&
       (request.enforcementMode === 'strict' || (request.resource.sensitivity !== 'public' && request.resource.sensitivity !== 'internal'))
@@ -902,6 +920,11 @@ export class PlatformPolicyKernel {
       ...(request.subject.deviceCertificate ? { deviceCertificateSha256: request.subject.deviceCertificate.certificateSha256 } : {}),
       contextHash,
       ...(explicitAllow ? { matchedGrantId: explicitAllow.id } : {}),
+      ...(explicitAllow?.ownershipBasisPoints !== undefined
+        ? { matchedOwnershipBasisPoints: explicitAllow.ownershipBasisPoints }
+        : ownerOwnershipBasisPoints !== undefined && request.minimumOwnershipBasisPoints !== undefined
+          ? { matchedOwnershipBasisPoints: ownerOwnershipBasisPoints }
+          : {}),
       ...(matchedConsentId ? { matchedConsentId } : {}),
       obligations: freezeObligations(obligations)
     });

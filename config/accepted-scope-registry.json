@@ -5947,23 +5947,29 @@
       "area": "Yetki",
       "title": "Amaç, aile dalı, zaman aralığı, açık ret ve sahiplik oranı desteği",
       "priority": "P0",
-      "status": "PARTIAL",
+      "status": "COMPLETE",
       "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
       "chain": {
-        "decision": false,
-        "domain": false,
-        "schema": false,
-        "migration": false,
-        "useCase": false,
-        "repository": false,
-        "policy": false,
-        "apiOrIpc": false,
-        "ui": false,
-        "menu": false,
-        "targetedTest": false,
+        "decision": true,
+        "domain": true,
+        "schema": true,
+        "migration": true,
+        "useCase": true,
+        "repository": true,
+        "policy": true,
+        "apiOrIpc": true,
+        "ui": true,
+        "menu": true,
+        "targetedTest": true,
         "documentation": true,
-        "evidence": false
-      }
+        "evidence": true
+      },
+      "evidence": [
+        "apps/desktop/tests/ppk011-contextual-ownership-policy.test.ts",
+        "artifacts/validation/32-G-ppk-011-contextual-ownership-policy-contract.json",
+        "artifacts/validation/32-G-ppk-011-contextual-ownership-policy-runtime.json",
+        "docs/audit/32-G_PPK-011_BAGLAMSAL_SAHIPLIK_ORANI_UST_KAPANIS.md"
+      ]
     },
     {
       "id": "PPK-012",

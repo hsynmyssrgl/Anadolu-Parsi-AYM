@@ -40,7 +40,7 @@ const repositoryContext=(context:DataLifecycleApplicationContext,transaction:Tra
   correlationId:context.correlationId,occurredAt:transaction.occurredAt
 });
 const activeAccount=(account:AccountRow,occurredAt:string)=>account.status==='active'&&Date.parse(account.startsAt)<=Date.parse(occurredAt)&&(!account.endsAt||Date.parse(account.endsAt)>=Date.parse(occurredAt));
-const toGrant=(row:ObjectPermissionRow):AuthorizationGrant=>({id:row.id,subjectAccountId:row.subjectAccountId,resourceType:row.resourceType,resourceId:row.resourceId,actions:row.actions as readonly AuthorizationAction[],effect:row.effect,purpose:row.purpose,...(row.familyBranchId?{familyBranchId:row.familyBranchId}:{}),...(row.denialReason?{denialReason:row.denialReason}:{}),startsAt:row.startsAt,...(row.endsAt?{endsAt:row.endsAt}:{})});
+const toGrant=(row:ObjectPermissionRow):AuthorizationGrant=>({id:row.id,subjectAccountId:row.subjectAccountId,resourceType:row.resourceType,resourceId:row.resourceId,actions:row.actions as readonly AuthorizationAction[],effect:row.effect,purpose:row.purpose,...(row.familyBranchId?{familyBranchId:row.familyBranchId}:{}),...(row.ownershipBasisPoints===undefined?{}:{ownershipBasisPoints:row.ownershipBasisPoints}),...(row.denialReason?{denialReason:row.denialReason}:{}),startsAt:row.startsAt,...(row.endsAt?{endsAt:row.endsAt}:{})});
 interface Snapshot { readonly account:AccountRow; readonly grants:readonly AuthorizationGrant[]; }
 const load=(dependencies:RepositoryBackedDataLifecycleDependencies,context:DataLifecycleApplicationContext,repository:RepositoryExecutionContext):Result<Snapshot,AppError>=>{
   const account=dependencies.accountRepository.findById(repository,context.actor.userId);if(!account.ok)return account;

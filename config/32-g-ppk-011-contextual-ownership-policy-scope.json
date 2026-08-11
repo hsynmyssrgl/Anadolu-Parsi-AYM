@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "step": "32-G",
+  "requirement": "PPK-011",
+  "title": "Purpose, family branch, time, explicit denial and ownership-share policy closure",
+  "status": "COMPLETED",
+  "boundaries": {
+    "purposeBinding": true,
+    "familyBranchBinding": true,
+    "finiteOrOpenTimeRangeBinding": true,
+    "explicitDenialPrecedence": true,
+    "explicitDenialReasonRequired": true,
+    "ownershipShareBasisPoints": true,
+    "ownershipThresholdFailClosed": true,
+    "ownershipThresholdSignedContextBinding": true,
+    "centralAndPlatformPolicyParity": true,
+    "useCaseValidation": true,
+    "repositoryRoundTrip": true,
+    "durableMigration75": true,
+    "sqliteOwnershipTriggers": true,
+    "typedIpcAndUiInput": true,
+    "productionAuthorityFingerprintBinding": true
+  },
+  "validation": {
+    "contract": "artifacts/validation/32-G-ppk-011-contextual-ownership-policy-contract.json",
+    "runtime": "artifacts/validation/32-G-ppk-011-contextual-ownership-policy-runtime.json",
+    "targetedTest": "apps/desktop/tests/ppk011-contextual-ownership-policy.test.ts",
+    "contractChecks": "32/32",
+    "runtimeChecks": "8/8",
+    "targetedTests": "12/12",
+    "policyRegression": "8 files / 102 tests",
+    "authorizationRepositoryRuntime": "12/12",
+    "migration": "75 PASS",
+    "fullVitest": "60 files / 392 tests",
+    "rootTypeScriptDiagnostics": 0
+  },
+  "requirementCompletionClaimed": true,
+  "bankAccountB402CompletionClaimed": false,
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "mandatoryTruthSentence": "Bu kapanış yalnız PPK-011 politika bağlamını tamamlar; B4-02 banka hesabı/ortak finans modeli ayrıca açık kalır ve çalıştırılmayan hiçbir kontrol PASS sayılmaz."
+}

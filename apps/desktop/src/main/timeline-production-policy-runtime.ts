@@ -513,6 +513,7 @@ const permissionIsValid = (
     && row.actions.length <= 3
     && row.actions.every((action) => action === 'read' || action === 'update' || action === 'delete')
     && (row.effect === 'allow' || row.effect === 'deny')
+    && (row.ownershipBasisPoints === undefined || (row.effect === 'allow' && Number.isInteger(row.ownershipBasisPoints) && row.ownershipBasisPoints >= 1 && row.ownershipBasisPoints <= 10_000))
     && row.purpose === 'general'
     && row.familyBranchId === undefined
     && Number.isFinite(now)
@@ -529,6 +530,7 @@ const toPolicyGrant = (row: ObjectPermissionRow): PolicyGrant => Object.freeze({
   resourceId: row.resourceId,
   actions: Object.freeze([...row.actions]) as readonly PolicyAction[],
   effect: row.effect,
+  ...(row.ownershipBasisPoints === undefined ? {} : { ownershipBasisPoints: row.ownershipBasisPoints }),
   ...(row.purpose === 'general' ? {} : { purposes: Object.freeze([row.purpose]) }),
   startsAt: row.startsAt,
   ...(row.endsAt ? { endsAt: row.endsAt } : {})
@@ -588,6 +590,7 @@ const securityFingerprint = (
       actions: [...row.actions],
       effect: row.effect,
       purpose: row.purpose,
+      ownershipBasisPoints: row.ownershipBasisPoints,
       denialReason: row.denialReason,
       startsAt: row.startsAt,
       endsAt: row.endsAt,

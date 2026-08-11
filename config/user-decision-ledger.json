@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 45,
+  "decisionCount": 46,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1070,6 +1070,33 @@
         "artifacts/validation/32-F-ppk-010-central-policy-zero-exception-contract.json",
         "artifacts/validation/32-F-ppk-010-central-policy-zero-exception-runtime.json",
         "docs/audit/32-F_PPK-010_MERKEZI_POLITIKA_SIFIR_ISTISNA_UST_KAPANIS.md"
+      ]
+    },
+    {
+      "id": "DEC-192",
+      "date": "2026-08-11",
+      "acceptedAt": "2026-08-11",
+      "title": "PPK-011 contextual authorization and ownership-share top closure",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: Paketler bitince diğerine başla",
+      "document": "docs/decisions/DEC-192-ppk-011-contextual-ownership-policy.md",
+      "requirements": ["PPK-011"],
+      "codeAreas": [
+        "packages/security/src/authorization.ts",
+        "packages/platform-policy/src/policy-kernel.ts",
+        "packages/platform-policy/src/policy-enforcement-point.ts",
+        "packages/domain/src/app-data.ts",
+        "packages/application/src/authorization-use-cases.ts",
+        "packages/repository-contracts/src/object-permission-repository.ts",
+        "packages/repositories/src/object-permission-repository.ts",
+        "packages/database/src/family-database-migrations.ts",
+        "apps/desktop/src/main/authorization-application-adapter.ts",
+        "apps/desktop/src/renderer/App.tsx"
+      ],
+      "evidence": [
+        "artifacts/validation/32-G-ppk-011-contextual-ownership-policy-contract.json",
+        "artifacts/validation/32-G-ppk-011-contextual-ownership-policy-runtime.json",
+        "docs/audit/32-G_PPK-011_BAGLAMSAL_SAHIPLIK_ORANI_UST_KAPANIS.md"
       ]
     }
   ]

@@ -22,6 +22,7 @@ let memberPassword = 'Üye!Parola2026';
 let memberAccountId = '';
 let otherFinanceId = '';
 let ownerFinanceId = '';
+let ownershipPermissionId = '';
 let store;
 let database;
 const policyOptions = createFinancePolicyTestOptions();
@@ -116,6 +117,32 @@ try {
 
   store.logout();
   store.login({ email: adminEmail, password });
+  await check('ownership share persists through use-case and repository readback', () => {
+    const permissions = store.upsertPermission({
+      subjectAccountId: memberAccountId,
+      resourceType: 'finance_record',
+      resourceId: otherFinanceId,
+      actions: ['read'],
+      effect: 'allow',
+      purpose: 'finance',
+      ownershipBasisPoints: 3_750
+    });
+    const permission = permissions.find((item) => item.resourceId === otherFinanceId && item.ownershipBasisPoints === 3_750);
+    assert.ok(permission);
+    ownershipPermissionId = permission.id;
+  });
+  await check('deny and out-of-range ownership shares are rejected atomically', () => {
+    const before = store.listPermissions().length;
+    assert.throws(() => store.upsertPermission({
+      subjectAccountId: memberAccountId, resourceType: 'finance_record', resourceId: otherFinanceId,
+      actions: ['read'], effect: 'deny', denialReason: 'Ortak varlık erişimi açıkça reddedildi.', ownershipBasisPoints: 1_000
+    }), /CORE-VALIDATION-001/);
+    assert.throws(() => store.upsertPermission({
+      subjectAccountId: memberAccountId, resourceType: 'finance_record', resourceId: otherFinanceId,
+      actions: ['read'], effect: 'allow', ownershipBasisPoints: 10_001
+    }), /CORE-VALIDATION-001/);
+    assert.equal(store.listPermissions().length, before);
+  });
   await check('invalid permission interval is rejected atomically', () => {
     const before = store.listPermissions().length;
     assert.throws(() => store.upsertPermission({
@@ -134,6 +161,10 @@ try {
   store.close();
   store = undefined;
   database = new DatabaseSync(databasePath);
+  await check('migration 75 blocks converting an ownership grant into a denial', () => {
+    assert.ok(ownershipPermissionId);
+    assert.throws(() => database.prepare('UPDATE object_permissions SET effect=? WHERE id=?').run('deny', ownershipPermissionId), /invalid object permission ownership share/);
+  });
   await check('audit log rejects update and delete mutations', () => {
     assert.throws(() => database.prepare('UPDATE audit_log SET action=? WHERE sequence_no=1').run('tampered'), /AUDIT-APPEND-ONLY/);
     assert.throws(() => database.prepare('DELETE FROM audit_log WHERE sequence_no=1').run(), /AUDIT-APPEND-ONLY/);
@@ -164,6 +195,7 @@ try {
     checks, totalChecks: checks.length,
     invariants: {
       denyPrecedence: true, ownerAccess: true, explicitGrant: true, adminOnlyManagement: true,
+      ownershipBasisPoints: true, ownershipDenySeparation: true,
       auditAppendOnly: true, auditSequence: true, auditHashVersion: 2, tamperDetection: true
     }
   };

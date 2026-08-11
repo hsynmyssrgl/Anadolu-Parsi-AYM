@@ -18,6 +18,7 @@ const kernel = new PlatformPolicyKernel({
 });
 
 const authorizationProvider = Object.freeze({
+  resolvePolicyPackage: () => kernel.policyPackage,
   authorize({ request, nonce }) {
     return Object.freeze({
       effectiveRequest: request,
@@ -144,6 +145,7 @@ const financeKernel = new PlatformPolicyKernel({
   writeActions: ['create', 'update', 'delete', 'record']
 });
 const financeAuthorizationProvider = Object.freeze({
+  resolvePolicyPackage: () => financeKernel.policyPackage,
   authorize({ request, nonce }) {
     return Object.freeze({
       effectiveRequest: request,

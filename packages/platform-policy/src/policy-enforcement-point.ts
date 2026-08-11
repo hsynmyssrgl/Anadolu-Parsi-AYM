@@ -30,6 +30,7 @@ export interface PlatformPolicyIntent {
   readonly resourceType: string;
   readonly resourceId: string;
   readonly purpose: string;
+  readonly minimumOwnershipBasisPoints?: number;
 }
 
 export interface PlatformPolicyConnectionAuthority {
@@ -856,6 +857,7 @@ export class PlatformPolicyEnforcementPoint {
       action: intent.action,
       capability: intent.capability,
       purpose: intent.purpose,
+      ...(intent.minimumOwnershipBasisPoints === undefined ? {} : { minimumOwnershipBasisPoints: intent.minimumOwnershipBasisPoints }),
       occurredAt: issuedAt,
       online: authority.online,
       clusterWritable: requestedFence.writable,
@@ -1208,6 +1210,11 @@ export class PlatformPolicyEnforcementPoint {
     if (!nonEmptyBounded(intent.purpose, 256)) {
       throw new PlatformPolicyEnforcementError('INTENT_INVALID', 'Policy intent purpose is required and invalid');
     }
+    if (intent.minimumOwnershipBasisPoints !== undefined && (
+      !Number.isInteger(intent.minimumOwnershipBasisPoints)
+      || intent.minimumOwnershipBasisPoints < 1
+      || intent.minimumOwnershipBasisPoints > 10_000
+    )) throw new PlatformPolicyEnforcementError('INTENT_INVALID', 'Policy intent ownership threshold is invalid');
   }
 
   #assertAuthority(authority: PlatformPolicyConnectionAuthority, now: number): void {

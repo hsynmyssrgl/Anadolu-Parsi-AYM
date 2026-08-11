@@ -417,8 +417,8 @@ export interface FamilyInvitationInspectionView { resolution:FamilyInvitationRes
 export const OBJECT_PERMISSION_ACTIONS = ['read','create','update','delete','share','record','ai_process','administer'] as const;
 export type ObjectPermissionAction = typeof OBJECT_PERMISSION_ACTIONS[number];
 export type AuthorizationPurpose = 'general'|'care'|'finance'|'health'|'archive'|'legacy'|'ai_processing'|'administration';
-export interface ObjectPermissionView { id:string; subjectAccountId:string; resourceType:string; resourceId:string; actions:ObjectPermissionAction[]; effect:'allow'|'deny'; purpose:AuthorizationPurpose; familyBranchId?:string; denialReason?:string; startsAt:string; endsAt?:string; createdAt:string; }
-export interface UpsertObjectPermissionInput { id?:string; subjectAccountId:string; resourceType:string; resourceId:string; actions:ObjectPermissionAction[]; effect:'allow'|'deny'; purpose?:AuthorizationPurpose; familyBranchId?:string; denialReason?:string; startsAt?:string; endsAt?:string; }
+export interface ObjectPermissionView { id:string; subjectAccountId:string; resourceType:string; resourceId:string; actions:ObjectPermissionAction[]; effect:'allow'|'deny'; purpose:AuthorizationPurpose; familyBranchId?:string; ownershipBasisPoints?:number; denialReason?:string; startsAt:string; endsAt?:string; createdAt:string; }
+export interface UpsertObjectPermissionInput { id?:string; subjectAccountId:string; resourceType:string; resourceId:string; actions:ObjectPermissionAction[]; effect:'allow'|'deny'; purpose?:AuthorizationPurpose; familyBranchId?:string; ownershipBasisPoints?:number; denialReason?:string; startsAt?:string; endsAt?:string; }
 export interface AuthorizationContextWorkspaceView { accounts:readonly FamilyAccountView[]; permissions:readonly ObjectPermissionView[]; branches:readonly FamilyBranch[]; }
 export interface UpdateFamilyAccountInput { accountId:string; role:FamilyRole; status:FamilyMembershipStatus; startsAt?:string; endsAt?:string; personId?:string; }
 

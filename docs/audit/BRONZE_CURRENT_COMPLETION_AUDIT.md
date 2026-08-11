@@ -1,6 +1,6 @@
 # Bronze guncel tamamlama denetimi
 
-Olusturma (UTC): 2026-08-11T12:56:39.890Z
+Olusturma (UTC): 2026-08-11T13:20:01.979Z
 
 ## Sonuc
 
@@ -16,24 +16,25 @@ Olusturma (UTC): 2026-08-11T12:56:39.890Z
 - PPK-008: **COMPLETE**
 - PPK-009: **COMPLETE**
 - PPK-010: **COMPLETE**
+- PPK-011: **COMPLETE**
 - Yeni Build verildi: **Hayir**
 
 ## Yuzde gercekligi
 
 - Resmi agirlikli Bronze ilerlemesi: **%25**
-- Kati gereksinim kapanisi: **%6.5714** (23/350)
-- Uygulama zinciri kapsami: **%6.9143**
-- Yonetisim ve kanit zinciri kapsami: **%46.5714**
+- Kati gereksinim kapanisi: **%6.8571** (24/350)
+- Uygulama zinciri kapsami: **%7.2**
+- Yonetisim ve kanit zinciri kapsami: **%46.7619**
 
 Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 
 ## Kapsam durumu
 
-- COMPLETE: 23
-- PARTIAL: 36
+- COMPLETE: 24
+- PARTIAL: 35
 - FOUNDATION_STARTED: 3
 - NOT_IMPLEMENTED: 288
-- Toplam acik gereksinim: 327
+- Toplam acik gereksinim: 326
 
 ## Kural ve kapilar
 
@@ -258,13 +259,13 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | DHA-013 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Zero trust | LAN dahil hiçbir konuma örtük güven vermeyen kullanıcı+cihaz+servis kimliği |
 | DHA-026 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Backup separation | Replica ile yedeğin ayrılması; immutable/offline/offsite backup |
 | DHA-029 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Security operations | Cluster CA, cert rotation, revocation, key epoch, replay/freshness ve rate limit |
-| PPK-011 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Yetki | Amaç, aile dalı, zaman aralığı, açık ret ve sahiplik oranı desteği |
 | PPK-018 | STARTED_BEFORE_NEW | P0 | FOUNDATION_STARTED | 1/13 | Audit | Karar, policy sürümü, yükümlülükler ve reddetme nedeni değişmez audit zincirine yazılır |
 | PPK-020 | STARTED_BEFORE_NEW | P0 | FOUNDATION_STARTED | 1/13 | Test | Windows, macOS, iOS/iPadOS ve servisler için aynı policy conformance test suite |
 | PPK-024 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Runtime Gate | Policy service unavailable, invalid signature veya stale policy halinde hassas işlemlerin read-only/deny olması |
 | PPK-026 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Geliştirici API | Typed Policy SDK ve generated client; uygulamaların kendi güvenlik yorumunu yazamaması |
 | EXT-078 | STARTED_BEFORE_NEW | P1 | PARTIAL | 2/13 | SIGNED_PLUGIN_PLATFORM | Policy Kernel zorunlu kontrolü |
 | B2-03 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Kimlik ve Güvenlik | Yaşlı/genç kullanıcıya uygun güvenli kilit ve yeniden giriş akışı |
+| B3-02 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Aile ve Hafıza | Taslak, otomatik kaydetme, geri al ve değişiklik geçmişi |
 
 Tam acik-is listesi `artifacts/inventory/BRONZE_CURRENT_COMPLETION_AUDIT.json` icindedir.
 

@@ -16,6 +16,8 @@ export interface AuthorizationGrant {
   readonly effect: 'allow' | 'deny';
   readonly purpose: AuthorizationPurpose;
   readonly familyBranchId?: string;
+  /** Subject ownership share for this resource, expressed as 1..10,000 basis points. */
+  readonly ownershipBasisPoints?: number;
   readonly denialReason?: string;
   readonly startsAt: string;
   readonly endsAt?: string;
@@ -33,6 +35,8 @@ export interface AuthorizationRequest {
   readonly resourceBranchId?: string;
   readonly actorPersonId?: string;
   readonly ownerPersonId?: string;
+  /** Minimum ownership share required by this operation, expressed as 1..10,000 basis points. */
+  readonly minimumOwnershipBasisPoints?: number;
   readonly grants?: readonly AuthorizationGrant[];
   readonly privacy?: SensitiveRecordPrivacy;
   readonly sensitiveDomain?: SensitiveRecordDomain;
@@ -48,10 +52,12 @@ export interface AuthorizationDecision {
     | 'inactive_membership'
     | 'branch_boundary'
     | 'privacy_boundary'
+    | 'ownership_threshold'
     | 'ai_explicit_permission_required'
     | 'no_policy';
   readonly matchedGrantId?: string;
   readonly denialReason?: string;
+  readonly matchedOwnershipBasisPoints?: number;
 }
 
 const rolePolicies = {
@@ -91,7 +97,17 @@ const activeGrant = (grant: AuthorizationGrant, request: AuthorizationRequest): 
   (grant.purpose === 'general' || grant.purpose === (request.purpose ?? 'general')) &&
   (!grant.familyBranchId || grant.familyBranchId === request.resourceBranchId) &&
   Date.parse(grant.startsAt) <= Date.parse(request.occurredAt) &&
-  (!grant.endsAt || Date.parse(grant.endsAt) >= Date.parse(request.occurredAt));
+  (!grant.endsAt || Date.parse(grant.endsAt) >= Date.parse(request.occurredAt)) &&
+  (grant.effect === 'deny' || grant.ownershipBasisPoints === undefined || validOwnershipBasisPoints(grant.ownershipBasisPoints));
+
+const validOwnershipBasisPoints = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 10_000;
+
+const ownershipQualified = (grant: AuthorizationGrant, request: AuthorizationRequest): boolean =>
+  request.minimumOwnershipBasisPoints === undefined
+  || (validOwnershipBasisPoints(request.minimumOwnershipBasisPoints)
+    && validOwnershipBasisPoints(grant.ownershipBasisPoints)
+    && grant.ownershipBasisPoints >= request.minimumOwnershipBasisPoints);
 
 const isOwner = (request: AuthorizationRequest): boolean => Boolean(
   request.actorPersonId && request.ownerPersonId && request.actorPersonId === request.ownerPersonId
@@ -116,7 +132,7 @@ export class CentralAuthorizationService {
       ...(deny.denialReason ? { denialReason: deny.denialReason } : {})
     };
 
-    const allow = grants.find((grant) => grant.effect === 'allow');
+    const allow = grants.find((grant) => grant.effect === 'allow' && ownershipQualified(grant, request));
     const sensitiveRecord = Boolean(request.sensitiveDomain && request.privacy);
     const canAdministerResource = roleDecision({ ...request, action: 'administer' }).allowed;
 
@@ -129,19 +145,20 @@ export class CentralAuthorizationService {
 
     if (sensitiveRecord && request.action === 'ai_process') {
       return allow
-        ? { allowed: true, reason: 'explicit_allow', matchedGrantId: allow.id }
+        ? { allowed: true, reason: 'explicit_allow', matchedGrantId: allow.id, ...(allow.ownershipBasisPoints === undefined ? {} : { matchedOwnershipBasisPoints: allow.ownershipBasisPoints }) }
         : { allowed: false, reason: 'ai_explicit_permission_required' };
     }
 
     if (sensitiveRecord && request.privacy !== 'family') {
-      if (isOwner(request) && request.action !== 'administer') return { allowed: true, reason: 'owner' };
+      if (isOwner(request) && request.action !== 'administer') return { allowed: true, reason: 'owner', ...(request.minimumOwnershipBasisPoints === undefined ? {} : { matchedOwnershipBasisPoints: 10_000 }) };
       return allow
-        ? { allowed: true, reason: 'explicit_allow', matchedGrantId: allow.id }
+        ? { allowed: true, reason: 'explicit_allow', matchedGrantId: allow.id, ...(allow.ownershipBasisPoints === undefined ? {} : { matchedOwnershipBasisPoints: allow.ownershipBasisPoints }) }
         : { allowed: false, reason: 'privacy_boundary' };
     }
 
-    if (isOwner(request) && request.action !== 'administer') return { allowed: true, reason: 'owner' };
-    if (allow) return { allowed: true, reason: 'explicit_allow', matchedGrantId: allow.id };
+    if (isOwner(request) && request.action !== 'administer') return { allowed: true, reason: 'owner', ...(request.minimumOwnershipBasisPoints === undefined ? {} : { matchedOwnershipBasisPoints: 10_000 }) };
+    if (allow) return { allowed: true, reason: 'explicit_allow', matchedGrantId: allow.id, ...(allow.ownershipBasisPoints === undefined ? {} : { matchedOwnershipBasisPoints: allow.ownershipBasisPoints }) };
+    if (request.minimumOwnershipBasisPoints !== undefined) return { allowed: false, reason: 'ownership_threshold' };
 
     return roleDecision(request);
   }
