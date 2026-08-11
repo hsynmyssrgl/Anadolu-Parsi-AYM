@@ -26,6 +26,9 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['packages/**/*.test.ts', 'apps/**/*.test.ts'],
+    // Windows SQLite and durable receipt tests use process-local native resources;
+    // one worker keeps the full regression deterministic without skipping files.
+    maxWorkers: 1,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
