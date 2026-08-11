@@ -26,6 +26,7 @@ const kernel = new PlatformPolicyKernel({
   writeActions: ['create', 'update', 'delete', 'record']
 });
 const authorizationProvider: PlatformPolicyAuthorizationProvider = Object.freeze({
+  resolvePolicyPackage: () => kernel.policyPackage,
   authorize: ({ request, nonce }) => Object.freeze({
     effectiveRequest: request,
     authorization: kernel.authorizeWithReceipt(request, request.occurredAt, nonce)

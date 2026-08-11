@@ -372,7 +372,12 @@
       "version": 71,
       "name": "ppk006_complete_policy_obligation_suite",
       "checksum": "ba678463aa0138780d74d2342bcc453ab622e87c7213a4d10078319762c96a90"
+    },
+    {
+      "version": 72,
+      "name": "ppk007_signed_versioned_policy_package",
+      "checksum": "6660072205bd61c06dd1d4f4b744884f7edb29bf370d44a228c150ebca679a83"
     }
   ],
-  "generatedAt": "2026-08-11T11:13:52.636Z"
+  "generatedAt": "2026-08-11T11:53:05.141Z"
 }

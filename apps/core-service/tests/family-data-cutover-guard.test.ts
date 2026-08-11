@@ -37,7 +37,7 @@ describe('31-J family-data cutover default-deny guard', () => {
       policyKernel: new PlatformPolicyKernel({
         policyVersion,
         signingKey: randomBytes(32),
-        applicationCapabilities: {},
+        applicationCapabilities: { 'windows-core-service': [] },
         consentRequiredCapabilities: [],
         onlineOnlyCapabilities: [],
         writeActions: []

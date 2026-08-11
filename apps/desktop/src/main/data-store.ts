@@ -2493,7 +2493,12 @@ export class FamilyDataStore {
     return this.#requireAuth();
   }
 
-  public currentPlatformPolicyAuthority(policyVersion: string): PlatformPolicyConnectionAuthority {
+  public currentPlatformPolicyAuthority(binding: {
+    readonly policyVersion: string;
+    readonly policyPackageVersion: number;
+    readonly policyPackageSha256: string;
+    readonly applicationVersion: string;
+  }): PlatformPolicyConnectionAuthority {
     const account = this.#currentAccount();
     const auth = this.getAuthState();
     const device = this.#deviceIdentityProvider.snapshot();
@@ -2509,11 +2514,14 @@ export class FamilyDataStore {
       'Authenticated Desktop policy authority is incomplete or untrusted'
     );
     return Object.freeze({
-      policyVersion,
+      policyVersion: binding.policyVersion,
+      policyPackageVersion: binding.policyPackageVersion,
+      policyPackageSha256: binding.policyPackageSha256,
       accountId: account.id,
       ...(account.personId ? { personId: account.personId } : {}),
       deviceId: device.deviceId,
       applicationId: 'windows-desktop',
+      applicationVersion: binding.applicationVersion,
       deviceTrusted: true,
       membershipActive: true,
       roles: Object.freeze([account.role]),

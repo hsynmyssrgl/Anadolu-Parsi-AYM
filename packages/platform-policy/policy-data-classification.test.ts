@@ -16,9 +16,11 @@ const NOW = '2026-08-11T12:00:00.000Z';
 const baseRequest = (dataClasses: readonly PlatformDataClass[] = ['personal']): PlatformPolicyRequest => ({
   correlationId: `corr-32-a-${dataClasses.join('-')}`,
   policyVersion: 'PPK-005',
+  policyPackageVersion: kernel().policyPackage.payload.packageVersion,
+  policyPackageSha256: kernel().policyPackage.payloadSha256,
   subject: {
     accountId: 'account-32-a', personId: 'person-32-a', deviceId: 'device-32-a',
-    applicationId: 'windows-desktop', deviceTrusted: true, membershipActive: true,
+    applicationId: 'windows-desktop', applicationVersion: 'v1', deviceTrusted: true, membershipActive: true,
     roles: ['adult_member'], familyIds: ['family-32-a'], householdIds: [], familyBranchIds: []
   },
   resource: {

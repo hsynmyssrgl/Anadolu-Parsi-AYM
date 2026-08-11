@@ -48,6 +48,7 @@ const archivePolicyTestKernel = new PlatformPolicyKernel({
 });
 
 const archivePolicyTestProvider: PlatformPolicyAuthorizationProvider = Object.freeze({
+  resolvePolicyPackage: () => archivePolicyTestKernel.policyPackage,
   authorize({ request, nonce }) {
     return Object.freeze({
       effectiveRequest: request,
@@ -396,6 +397,7 @@ describe('FamilyDataStore', () => {
       writeActions: ['create', 'update', 'delete', 'record']
     });
     const provider: PlatformPolicyAuthorizationProvider = Object.freeze({
+      resolvePolicyPackage: () => kernel.policyPackage,
       authorize({ request, nonce }) {
         return Object.freeze({
           effectiveRequest: request,

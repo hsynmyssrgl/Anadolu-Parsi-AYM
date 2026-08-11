@@ -1,6 +1,7 @@
 import type {
   PlatformPolicyAuthorization,
   PlatformPolicyClusterFenceSnapshot,
+  PlatformPolicyPackage,
   PlatformPolicyReceipt,
   PlatformPolicyRequest
 } from '@ppt/platform-policy';
@@ -16,6 +17,7 @@ export interface CoreServiceHealthContract {
   readonly safeMode: boolean;
   readonly writeFenceEpoch: number;
   readonly policyVersion: string;
+  readonly policyPackage: PlatformPolicyPackage;
   readonly startedAt: string;
   readonly observedAt: string;
   readonly reasons: readonly string[];

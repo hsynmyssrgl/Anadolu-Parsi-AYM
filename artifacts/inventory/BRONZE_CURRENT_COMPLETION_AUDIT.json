@@ -1,13 +1,14 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-11T11:13:33.164Z",
+  "generatedAt": "2026-08-11T11:57:21.414Z",
   "release": "Bronze 04.08.2026.29",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
   "PPK004": "COMPLETE",
   "PPK005": "COMPLETE",
   "PPK006": "COMPLETE",
+  "PPK007": "COMPLETE",
   "authoritativeSource": "06_KOD/app",
   "currentStep": "31-T",
   "status": "PASS_WITH_OPEN_SCOPE",
@@ -18,22 +19,22 @@
     "checkpointIds": "Checkpoint identifiers preserve work history and are never reused.",
     "buildIds": "A new Build number is assigned only after required current gates, manifest and receipt evidence exist.",
     "newBuildAssigned": false,
-    "reason": "The 31-X, 31-Y, 31-Z, 32-A and 32-B top closures complete PPK-002 universal enforcement, PPK-003 bounded default-deny availability, PPK-004 complete policy-context binding, PPK-005 complete data classification and PPK-006 complete policy obligations. Other Bronze scope remains open."
+    "reason": "The 31-X, 31-Y, 31-Z, 32-A, 32-B and 32-C top closures complete PPK-002 universal enforcement, PPK-003 bounded default-deny availability, PPK-004 complete policy-context binding, PPK-005 complete data classification, PPK-006 complete policy obligations and PPK-007 signed versioned policy packages. Other Bronze scope remains open."
   },
   "percentages": {
     "officialWeightedBronzePercent": 25,
     "officialWeightedEvidenceStep": "31-T",
-    "strictRequirementCompletionPercent": 5.4286,
-    "implementationChainCoveragePercent": 5.8857,
-    "governanceEvidenceChainCoveragePercent": 46,
+    "strictRequirementCompletionPercent": 5.7143,
+    "implementationChainCoveragePercent": 6.1714,
+    "governanceEvidenceChainCoveragePercent": 46.1905,
     "interpretation": "These are separate measures and must not be blended into an invented single completion claim."
   },
   "scope": {
     "total": 350,
     "statusCounts": {
-      "COMPLETE": 19,
+      "COMPLETE": 20,
       "FOUNDATION_STARTED": 3,
-      "NOT_IMPLEMENTED": 290,
+      "NOT_IMPLEMENTED": 289,
       "PARTIAL": 38
     },
     "priorityCounts": {
@@ -42,21 +43,21 @@
       "P2": 5
     },
     "completeByPriority": {
-      "P0": 18,
+      "P0": 19,
       "P1": 1,
       "P2": 0
     },
-    "incompleteCount": 331,
-    "strictComplete": 19,
+    "incompleteCount": 330,
+    "strictComplete": 20,
     "implementationCoverage": {
-      "passed": 206,
+      "passed": 216,
       "total": 3500,
-      "percent": 5.8857
+      "percent": 6.1714
     },
     "governanceCoverage": {
-      "passed": 483,
+      "passed": 485,
       "total": 1050,
-      "percent": 46
+      "percent": 46.1905
     }
   },
   "rules": {
@@ -318,7 +319,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"e18d432a728b5abd3c1a78374bd07a52cbe0467fde9470dabafc4cd95765e86a\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\e18d432a728b5abd3c1a78374bd07a52cbe0467fde9470dabafc4cd95765e86a\",\"files\":9}"
+          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"b0ebd528039c941b30f71127bb78a26bf2a229b525abdf796c63105605639396\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\b0ebd528039c941b30f71127bb78a26bf2a229b525abdf796c63105605639396\",\"files\":9}"
         ]
       },
       {
@@ -997,7 +998,7 @@
     "status": "PASS",
     "officialCompletionClaimed": true,
     "storageBackend": "EXTERNAL_USB_D_DRIVE",
-    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\e18d432a728b5abd3c1a78374bd07a52cbe0467fde9470dabafc4cd95765e86a"
+    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\b0ebd528039c941b30f71127bb78a26bf2a229b525abdf796c63105605639396"
   },
   "remainingWork": [
     {
@@ -4450,30 +4451,6 @@
       "workOrderClass": "NEW_NOT_STARTED",
       "area": "OCR Silme",
       "title": "Kaynak imha/izin iptalinde OCR metni, indeks, embedding, cache ve türevler karantinaya/silmeye girer",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "PPK-007",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Politika Dağıtımı",
-      "title": "İmzalı, sürümlü ve SHA-256 bağlı politika paketi; uygulama/politika sürüm uyuşmazlığında çalışma reddi",
       "completedChainCount": 1,
       "completionBlockers": [],
       "missingChain": [

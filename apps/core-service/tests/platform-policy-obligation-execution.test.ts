@@ -85,13 +85,22 @@ describe('31-V strict policy obligation execution', () => {
   });
 
   it('fails closed when a provider emits an obligation that lacks transaction evidence', async () => {
+    const providerKernel = new PlatformPolicyKernel({
+      policyVersion: 'PPK-31-V', signingKey: Buffer.alloc(32, 31),
+      applicationCapabilities: { 'windows-desktop': ['family.read'] },
+      consentRequiredCapabilities: [], onlineOnlyCapabilities: [], writeActions: []
+    });
     const pep = new PlatformPolicyEnforcementPoint({
       provider: {
+        resolvePolicyPackage: () => providerKernel.policyPackage,
         authorize: ({ request, nonce }) => {
           const decision = Object.freeze({
             allowed: true,
             reason: 'ALLOW_POLICY' as const,
             policyVersion: 'PPK-31-V',
+            policyPackageVersion: providerKernel.policyPackage.payload.packageVersion,
+            policyPackageSha256: providerKernel.policyPackage.payloadSha256,
+            applicationVersion: 'v1',
             contextHash: platformPolicyContextHash(request),
             obligations: Object.freeze([{ type: 'strong_reauthentication' as const }])
           });

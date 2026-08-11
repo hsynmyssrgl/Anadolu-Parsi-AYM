@@ -19,9 +19,11 @@ const LATER = '2026-08-11T15:00:00.000Z';
 const request = (overrides: Partial<PlatformPolicyRequest> = {}): PlatformPolicyRequest => ({
   correlationId: 'corr-32-b',
   policyVersion: 'PPK-006',
+  policyPackageVersion: kernel().policyPackage.payload.packageVersion,
+  policyPackageSha256: kernel().policyPackage.payloadSha256,
   subject: {
     accountId: 'account-32-b', personId: 'person-32-b', deviceId: 'device-32-b',
-    applicationId: 'windows-desktop', deviceTrusted: true, membershipActive: true,
+    applicationId: 'windows-desktop', applicationVersion: 'v1', deviceTrusted: true, membershipActive: true,
     roles: ['adult_member'], familyIds: ['family-32-b'], householdIds: [], familyBranchIds: []
   },
   resource: {
@@ -45,6 +47,8 @@ const kernel = (): PlatformPolicyKernel => new PlatformPolicyKernel({
   writeActions: ['create', 'update', 'delete']
 });
 
+const policyPackage = kernel().policyPackage;
+
 const providerPep = (input: {
   obligation: PolicyObligation;
   capability?: PlatformCapability;
@@ -63,6 +67,9 @@ const providerPep = (input: {
           allowed: true,
           reason: 'ALLOW_POLICY' as const,
           policyVersion: 'PPK-006',
+          policyPackageVersion: policyPackage.payload.packageVersion,
+          policyPackageSha256: policyPackage.payloadSha256,
+          applicationVersion: 'v1',
           contextHash: platformPolicyContextHash(effectiveRequest),
           obligations: Object.freeze([Object.freeze(input.obligation)])
         });
@@ -85,7 +92,9 @@ const providerPep = (input: {
     },
     authorityResolver: { resolve: () => ({
       policyVersion: 'PPK-006', accountId: 'account-32-b', personId: 'person-32-b',
-      deviceId: 'device-32-b', applicationId, deviceTrusted: true, membershipActive: true,
+      policyPackageVersion: policyPackage.payload.packageVersion,
+      policyPackageSha256: policyPackage.payloadSha256,
+      deviceId: 'device-32-b', applicationId, applicationVersion: 'v1', deviceTrusted: true, membershipActive: true,
       roles: ['adult_member'], familyIds: ['family-32-b'], householdIds: [], familyBranchIds: [],
       online: true, expiresAt: LATER
     }) },

@@ -43,6 +43,7 @@ const createHarness = (writable = true, trusted = true) => {
   });
   const enforcement = new DesktopUniversalApiPolicyEnforcement({
     authorizationProvider: {
+      resolvePolicyPackage: () => kernel.policyPackage,
       authorize: ({ request, nonce }) => ({ effectiveRequest: request, authorization: kernel.authorizeWithReceipt(request, NOW, nonce) }),
       verify: ({ request, receipt }) => kernel.verifyReceiptForRequest(receipt, request)
     },

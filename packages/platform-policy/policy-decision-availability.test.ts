@@ -31,13 +31,18 @@ const kernel = (): PlatformPolicyKernel => new PlatformPolicyKernel({
   writeActions: ['create', 'update', 'delete']
 });
 
+const policyPackage = kernel().policyPackage;
+
 const authorityResolver = (): PlatformPolicyAuthorityResolver => ({
   resolve: () => ({
     policyVersion: 'PPK-003',
+    policyPackageVersion: policyPackage.payload.packageVersion,
+    policyPackageSha256: policyPackage.payloadSha256,
     accountId: 'account-31-y',
     personId: 'person-31-y',
     deviceId: 'device-31-y',
     applicationId: 'windows-desktop',
+    applicationVersion: 'v1',
     deviceTrusted: true,
     membershipActive: true,
     roles: ['adult_member'],

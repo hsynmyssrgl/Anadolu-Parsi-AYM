@@ -646,6 +646,8 @@
     "verify:ppk005:classification:runtime": "node scripts/verify-32-a-ppk-005-complete-data-classification-runtime.mjs",
     "verify:ppk006:obligations:contract": "node scripts/verify-32-b-ppk-006-complete-policy-obligation-suite-contract.mjs",
     "verify:ppk006:obligations:runtime": "node scripts/verify-32-b-ppk-006-complete-policy-obligation-suite-runtime.mjs",
+    "verify:ppk007:package:contract": "node scripts/verify-32-c-ppk-007-signed-versioned-policy-package-contract.mjs",
+    "verify:ppk007:package:runtime": "node scripts/verify-32-c-ppk-007-signed-versioned-policy-package-runtime.mjs",
     "audit:bronze:current": "node scripts/audit-bronze-current-state.mjs",
     "governance:update:incremental": "node scripts/update-aym-governance-incrementally.mjs",
     "verify:governance:incremental": "node scripts/verify-aym-governance-incremental-contract.mjs",

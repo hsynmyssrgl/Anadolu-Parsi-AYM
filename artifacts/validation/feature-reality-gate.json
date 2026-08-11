@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "release": "Bronze 04.08.2026.29",
   "requirements": 350,
-  "incompleteRequired": 326,
+  "incompleteRequired": 325,
   "silverReady": false,
   "status": "PASS",
   "failures": [],
-  "generatedAt": "2026-08-11T11:13:26.320Z"
+  "generatedAt": "2026-08-11T11:57:14.504Z"
 }

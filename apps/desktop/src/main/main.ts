@@ -268,7 +268,12 @@ function universalApiPolicyEnforcement(): DesktopUniversalApiPolicyEnforcement {
       authorizationProvider: coreService.adapter.policyProvider,
       receiptSink: policyReceiptSink(),
       clusterFence: coreService.adapter.clusterFence,
-      resolveAuthority: () => store().currentPlatformPolicyAuthority(coreService.health.policyVersion),
+      resolveAuthority: () => store().currentPlatformPolicyAuthority({
+        policyVersion: coreService.health.policyVersion,
+        policyPackageVersion: coreService.health.policyPackage.payload.packageVersion,
+        policyPackageSha256: coreService.health.policyPackage.payloadSha256,
+        applicationVersion: coreService.health.policyPackage.payload.applicationVersions['windows-desktop']!
+      }),
       repositoryPolicyScope: desktopRepositoryPolicyScope,
       clock: () => runtime().clock.now()
     });

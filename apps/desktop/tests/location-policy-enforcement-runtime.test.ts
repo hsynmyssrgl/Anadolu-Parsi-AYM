@@ -248,6 +248,7 @@ const createHarness = (): LocationRuntimeHarness => {
     writeActions: ['create', 'update', 'delete', 'record']
   });
   const authorizationProvider: PlatformPolicyAuthorizationProvider = Object.freeze({
+    resolvePolicyPackage: () => kernel.policyPackage,
     authorize({ request, nonce }: Parameters<PlatformPolicyAuthorizationProvider['authorize']>[0]) {
       requests.push(request);
       const authorization = kernel.authorizeWithReceipt(request, request.occurredAt, nonce);

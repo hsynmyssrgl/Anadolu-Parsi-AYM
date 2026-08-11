@@ -15,6 +15,7 @@ import type {
   PlatformPolicyAuthorizationProvider,
   PlatformPolicyClusterFence,
   PlatformPolicyClusterFenceSnapshot,
+  PlatformPolicyPackage,
   PlatformPolicyProviderAuthorizationInput,
   PlatformPolicyProviderVerificationInput,
   PlatformPolicyRequest
@@ -28,6 +29,7 @@ export interface CoreServiceConnectionAuthority {
 export class CoreServiceApplicationAdapter {
   readonly #client: CoreServiceLocalAdminClient;
   #fence: PlatformPolicyClusterFenceSnapshot | undefined;
+  #policyPackage: PlatformPolicyPackage | undefined;
 
   public readonly clusterFence: PlatformPolicyClusterFence = () => {
     if (!this.#fence) throw new Error('Core Service cluster fence has not been observed');
@@ -35,6 +37,10 @@ export class CoreServiceApplicationAdapter {
   };
 
   public readonly policyProvider: PlatformPolicyAuthorizationProvider = Object.freeze({
+    resolvePolicyPackage: () => {
+      if (!this.#policyPackage) throw new Error('Core Service signed policy package has not been observed');
+      return this.#policyPackage;
+    },
     authorize: async (input: PlatformPolicyProviderAuthorizationInput) => {
       const result = await this.authorize(input.request, input.nonce);
       return Object.freeze({
@@ -58,6 +64,7 @@ export class CoreServiceApplicationAdapter {
   public async getHealth(): Promise<CoreServiceHealthContract> {
     const health = await this.#client.health();
     this.#cacheFence({ writable: health.writable, epoch: health.writeFenceEpoch });
+    this.#policyPackage = health.policyPackage;
     return health;
   }
 

@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-C",
+  "requirement": "PPK-007",
+  "phase": "SIGNED_VERSIONED_POLICY_PACKAGE_CONTRACT",
+  "status": "PASS",
+  "checkCount": 32,
+  "passed": 32,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "policy package payload has one explicit schema",
+      "status": "PASS"
+    },
+    {
+      "name": "signed package publishes payload hash algorithm and signature",
+      "status": "PASS"
+    },
+    {
+      "name": "package payload uses deterministic canonical serialization",
+      "status": "PASS"
+    },
+    {
+      "name": "payload binding uses plain SHA-256",
+      "status": "PASS"
+    },
+    {
+      "name": "package signature uses domain-separated HMAC-SHA-256",
+      "status": "PASS"
+    },
+    {
+      "name": "package version is a positive safe integer",
+      "status": "PASS"
+    },
+    {
+      "name": "capability rules are canonicalized before packaging",
+      "status": "PASS"
+    },
+    {
+      "name": "application versions are inside the signed payload",
+      "status": "PASS"
+    },
+    {
+      "name": "kernel self-verifies its package before use",
+      "status": "PASS"
+    },
+    {
+      "name": "package verification compares signatures in constant time",
+      "status": "PASS"
+    },
+    {
+      "name": "strict request carries package version and SHA-256",
+      "status": "PASS"
+    },
+    {
+      "name": "subject and context snapshot carry application version",
+      "status": "PASS"
+    },
+    {
+      "name": "decision carries the exact package and application binding",
+      "status": "PASS"
+    },
+    {
+      "name": "three mismatch reasons are in the closed reason vocabulary",
+      "status": "PASS"
+    },
+    {
+      "name": "package version mismatch is denied",
+      "status": "PASS"
+    },
+    {
+      "name": "package hash mismatch is denied",
+      "status": "PASS"
+    },
+    {
+      "name": "application version mismatch is denied",
+      "status": "PASS"
+    },
+    {
+      "name": "receipt verification requires package version and hash",
+      "status": "PASS"
+    },
+    {
+      "name": "out-of-process provider exposes trusted package metadata",
+      "status": "PASS"
+    },
+    {
+      "name": "missing provider package metadata fails authority validation",
+      "status": "PASS"
+    },
+    {
+      "name": "PEP builds strict requests with all three bindings",
+      "status": "PASS"
+    },
+    {
+      "name": "PEP checks decision binding before persistence and callback",
+      "status": "PASS"
+    },
+    {
+      "name": "receipt record carries package binding explicitly",
+      "status": "PASS"
+    },
+    {
+      "name": "active transaction context revalidates package binding",
+      "status": "PASS"
+    },
+    {
+      "name": "Core Service health contract publishes the signed package",
+      "status": "PASS"
+    },
+    {
+      "name": "Core Service rejects its application API version mismatch",
+      "status": "PASS"
+    },
+    {
+      "name": "Desktop startup validates package payload SHA-256",
+      "status": "PASS"
+    },
+    {
+      "name": "Desktop startup rejects Desktop or Core application mismatch",
+      "status": "PASS"
+    },
+    {
+      "name": "repository contract preserves migration-72 historical compatibility",
+      "status": "PASS"
+    },
+    {
+      "name": "repository persists and compares the complete package binding",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 72 adds three columns and exact JSON trigger",
+      "status": "PASS"
+    },
+    {
+      "name": "scope registry evidence UI/menu confinement and no-cutover truth are closed",
+      "status": "PASS"
+    }
+  ],
+  "failures": [],
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T11:56:26.153Z"
+}

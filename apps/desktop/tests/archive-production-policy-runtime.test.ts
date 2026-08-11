@@ -81,6 +81,7 @@ const recordingProvider = (
 ): PlatformPolicyAuthorizationProvider => {
   const kernel = policyKernel();
   return Object.freeze({
+    resolvePolicyPackage: () => kernel.policyPackage,
     authorize({ request, nonce }) {
       requests.push(request);
       const authorization = kernel.authorizeWithReceipt(request, request.occurredAt, nonce);

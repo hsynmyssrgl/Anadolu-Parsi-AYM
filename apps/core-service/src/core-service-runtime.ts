@@ -77,6 +77,12 @@ export class CoreServiceRuntime {
   public constructor(options: CoreServiceRuntimeOptions) {
     this.#kernel = options.policyKernel;
     this.#policyVersion = options.policyVersion;
+    if (this.#kernel.policyPackage.payload.policyVersion !== this.#policyVersion) {
+      throw new Error('Core Service policy version does not match the signed policy package');
+    }
+    if (this.#kernel.applicationVersionFor('windows-core-service') !== CORE_SERVICE_APPLICATION_API_VERSION) {
+      throw new Error('Core Service application API version does not match the signed policy package');
+    }
     this.#clock = options.clock ?? (() => new Date().toISOString());
     this.#startedAt = this.#clock();
     this.#nonceFactory = options.nonceFactory ?? randomUUID;
@@ -164,6 +170,7 @@ export class CoreServiceRuntime {
       safeMode: this.#safeMode,
       writeFenceEpoch: this.#writeFenceEpoch,
       policyVersion: this.#policyVersion,
+      policyPackage: this.#kernel.policyPackage,
       startedAt: this.#startedAt,
       observedAt: this.#clock(),
       reasons: Object.freeze([...this.#reasons])

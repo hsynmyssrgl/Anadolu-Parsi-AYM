@@ -45,6 +45,8 @@ export type CoreServiceStartupConnectionErrorCode =
   | 'AUTHORITY_INVALID'
   | 'CONNECTION_FAILED'
   | 'POLICY_VERSION_MISMATCH'
+  | 'POLICY_PACKAGE_MISMATCH'
+  | 'APPLICATION_VERSION_MISMATCH'
   | 'ARCHITECTURE_MISMATCH'
   | 'SERVICE_NOT_READY';
 
@@ -77,6 +79,14 @@ const CUTOVER_READINESS_GATES = Object.freeze([
   'EXPLICIT_USER_CUTOVER_APPROVAL'
 ] as const satisfies readonly CoreServiceFamilyDataCutoverGateId[]);
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
+const stable = (value: unknown): string => {
+  if (Array.isArray(value)) return `[${value.map(stable).join(',')}]`;
+  if (value && typeof value === 'object') {
+    const record = value as Record<string, unknown>;
+    return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${stable(record[key])}`).join(',')}}`;
+  }
+  return JSON.stringify(value);
+};
 const exactKeys = (value: object, expected: readonly string[]): boolean => {
   const actual = Object.keys(value).sort();
   return actual.length === expected.length && actual.every((key, index) => key === [...expected].sort()[index]);
@@ -232,6 +242,27 @@ export const connectCoreServiceAtStartup = async (options: {
   }
   if (health.policyVersion !== authority.expectedPolicyVersion) {
     throw new CoreServiceStartupConnectionError('POLICY_VERSION_MISMATCH', 'Core Service policy version does not match the protected startup authority');
+  }
+  const policyPackage = health.policyPackage;
+  if (
+    !policyPackage || typeof policyPackage !== 'object'
+    || !policyPackage.payload || typeof policyPackage.payload !== 'object'
+    || policyPackage.payload.schemaVersion !== 1
+    || !Number.isSafeInteger(policyPackage.payload.packageVersion)
+    || policyPackage.payload.packageVersion < 1
+    || policyPackage.payload.policyVersion !== health.policyVersion
+    || policyPackage.signatureAlgorithm !== 'HMAC-SHA256'
+    || !SHA256_PATTERN.test(policyPackage.payloadSha256)
+    || !SHA256_PATTERN.test(policyPackage.signature)
+    || createHash('sha256').update(stable(policyPackage.payload), 'utf8').digest('hex') !== policyPackage.payloadSha256
+  ) {
+    throw new CoreServiceStartupConnectionError('POLICY_PACKAGE_MISMATCH', 'Core Service signed policy package is missing, malformed or hash-mismatched');
+  }
+  if (
+    policyPackage.payload.applicationVersions['windows-desktop'] !== CORE_SERVICE_APPLICATION_API_VERSION
+    || policyPackage.payload.applicationVersions['windows-core-service'] !== CORE_SERVICE_APPLICATION_API_VERSION
+  ) {
+    throw new CoreServiceStartupConnectionError('APPLICATION_VERSION_MISMATCH', 'Desktop or Core Service application version does not match the signed policy package');
   }
   if (
     architecture.schemaVersion !== 1

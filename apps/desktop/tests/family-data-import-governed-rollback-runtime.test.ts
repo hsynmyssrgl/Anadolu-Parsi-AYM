@@ -35,6 +35,7 @@ const policyKernel = new PlatformPolicyKernel({
 });
 
 const authorizationProvider: PlatformPolicyAuthorizationProvider = Object.freeze({
+  resolvePolicyPackage: () => policyKernel.policyPackage,
   authorize({ request, nonce }) {
     return Object.freeze({
       effectiveRequest: request,

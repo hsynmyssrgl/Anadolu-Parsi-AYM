@@ -14,11 +14,14 @@ const NOW = '2026-08-11T10:00:00.000Z';
 const baseRequest = (): PlatformPolicyRequest => ({
   correlationId: 'corr-31-z-ppk-004',
   policyVersion: 'PPK-004',
+  policyPackageVersion: kernel().policyPackage.payload.packageVersion,
+  policyPackageSha256: kernel().policyPackage.payloadSha256,
   subject: {
     accountId: 'account-31-z',
     personId: 'person-owner',
     deviceId: 'device-31-z',
     applicationId: 'windows-desktop',
+    applicationVersion: 'v1',
     deviceTrusted: true,
     membershipActive: true,
     roles: ['adult_member'],
@@ -142,7 +145,9 @@ describe('31-Z PPK-004 complete policy context binding', () => {
       provider,
       authorityResolver: { resolve: () => ({
         policyVersion: 'PPK-004', accountId: 'account-31-z', personId: 'person-owner',
-        deviceId: 'device-31-z', applicationId: 'windows-desktop', deviceTrusted: true,
+        policyPackageVersion: signingKernel.policyPackage.payload.packageVersion,
+        policyPackageSha256: signingKernel.policyPackage.payloadSha256,
+        deviceId: 'device-31-z', applicationId: 'windows-desktop', applicationVersion: 'v1', deviceTrusted: true,
         membershipActive: true, roles: ['adult_member'], familyIds: ['family-main'],
         householdIds: ['household-main'], familyBranchIds: ['branch-main'], online: true,
         expiresAt: '2026-08-11T11:00:00.000Z'

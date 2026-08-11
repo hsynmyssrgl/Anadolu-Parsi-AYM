@@ -43,6 +43,7 @@ const kernel = new PlatformPolicyKernel({
 });
 
 const provider: PlatformPolicyAuthorizationProvider = Object.freeze({
+  resolvePolicyPackage: () => kernel.policyPackage,
   authorize({ request, nonce }) {
     return Object.freeze({
       effectiveRequest: request,
@@ -168,6 +169,7 @@ describe('30-Y governed LIFE policy enforcement', () => {
     const databasePath = join(directory, 'family.db');
     let authorizations = 0;
     const driftingProvider: PlatformPolicyAuthorizationProvider = Object.freeze({
+      resolvePolicyPackage: (applicationId) => provider.resolvePolicyPackage!(applicationId),
       authorize(input) {
         const authorization = provider.authorize(input);
         authorizations += 1;
@@ -234,6 +236,7 @@ describe('30-Y governed LIFE policy enforcement', () => {
     type TamperMode = 'subject' | 'family' | 'correlation' | 'capability' | 'resource';
     let mode: TamperMode = 'subject';
     const tamperingProvider: PlatformPolicyAuthorizationProvider = Object.freeze({
+      resolvePolicyPackage: (applicationId) => provider.resolvePolicyPackage!(applicationId),
       authorize({ request, nonce }) {
         const effectiveRequest = mode === 'subject'
           ? { ...request, subject: { ...request.subject, accountId: 'substituted-account' } }
@@ -288,6 +291,7 @@ describe('30-Y governed LIFE policy enforcement', () => {
     let current = asIsoDateTime(new Date(Date.now() + 60_000).toISOString());
     let armed = false;
     const expiringProvider: PlatformPolicyAuthorizationProvider = Object.freeze({
+      resolvePolicyPackage: (applicationId) => provider.resolvePolicyPackage!(applicationId),
       authorize(input) {
         const authorization = provider.authorize(input);
         if (armed) {

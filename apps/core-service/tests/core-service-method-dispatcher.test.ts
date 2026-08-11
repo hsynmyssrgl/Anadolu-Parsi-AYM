@@ -10,7 +10,10 @@ const runtimeFixture = (): CoreServiceRuntime => {
     policyKernel: new PlatformPolicyKernel({
       policyVersion: 'PPT-PLATFORM-POLICY-2026-08-04-V1',
       signingKey: randomBytes(32),
-      applicationCapabilities: { 'windows-desktop': ['family.read'] },
+      applicationCapabilities: {
+        'windows-desktop': ['family.read'],
+        'windows-core-service': []
+      },
       consentRequiredCapabilities: [],
       onlineOnlyCapabilities: [],
       writeActions: ['create', 'update', 'delete']
@@ -95,13 +98,17 @@ describe('31-G Core Service typed method dispatcher', () => {
   });
 
   it('accepts only a complete strict PPK-004 context on authorize and verify boundaries', () => {
-    const dispatcher = new CoreServiceMethodDispatcher(runtimeFixture());
+    const runtime = runtimeFixture();
+    const dispatcher = new CoreServiceMethodDispatcher(runtime);
+    const policyPackage = runtime.health().policyPackage;
     const request = {
       correlationId: 'core-service-ppk-004',
       policyVersion: 'PPT-PLATFORM-POLICY-2026-08-04-V1',
+      policyPackageVersion: policyPackage.payload.packageVersion,
+      policyPackageSha256: policyPackage.payloadSha256,
       subject: {
         accountId: 'account-ppk-004', personId: 'person-ppk-004', deviceId: 'device-ppk-004',
-        applicationId: 'windows-desktop' as const, deviceTrusted: true, membershipActive: true,
+        applicationId: 'windows-desktop' as const, applicationVersion: 'v1', deviceTrusted: true, membershipActive: true,
         roles: ['adult_member'], familyIds: ['family-ppk-004'], householdIds: [], familyBranchIds: []
       },
       resource: {

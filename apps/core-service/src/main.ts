@@ -2,6 +2,7 @@ import { randomBytes } from 'node:crypto';
 import { isAbsolute, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { PlatformPolicyKernel } from '@ppt/platform-policy';
+import { CORE_SERVICE_APPLICATION_API_VERSION } from '@ppt/core-service-contracts';
 import { CoreServiceLocalAdminServer } from './local-admin-server.js';
 import { CoreServiceRuntime } from './core-service-runtime.js';
 import { CoreServicePolicyJournalMonotonicAuthority } from './policy-journal-monotonic-authority.js';
@@ -95,6 +96,10 @@ export class CoreServiceProcessHost {
     const kernel = new PlatformPolicyKernel({
       policyVersion: configuration.policyVersion,
       signingKey: configuration.policySigningKey,
+      applicationVersions: {
+        'windows-desktop': CORE_SERVICE_APPLICATION_API_VERSION,
+        'windows-core-service': CORE_SERVICE_APPLICATION_API_VERSION
+      },
       applicationCapabilities: {
         'windows-desktop': ['family.read', 'family.write', 'health.read', 'health.write', 'finance.read', 'finance.write', 'location.read', 'location.share', 'archive.read', 'archive.write'],
         'windows-core-service': ['health.read','health.write','finance.read','finance.write','archive.read','archive.write','archive.ocr','ai.process','translation.process','communication.message','communication.call','communication.record','file.share','backup.create','backup.restore','cluster.admin','plugin.execute']

@@ -39,6 +39,7 @@ const kernel = new PlatformPolicyKernel({
 });
 
 const provider: PlatformPolicyAuthorizationProvider = Object.freeze({
+  resolvePolicyPackage: () => kernel.policyPackage,
   authorize({ request, nonce }) {
     return Object.freeze({
       effectiveRequest: request,

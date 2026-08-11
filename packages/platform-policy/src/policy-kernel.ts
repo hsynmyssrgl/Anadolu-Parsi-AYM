@@ -55,6 +55,9 @@ export type PolicyReason =
   | 'RESOURCE_SCOPE_DENIED'
   | 'OWNER_OR_GRANT_REQUIRED'
   | 'DATA_CLASS_CAPABILITY_MISMATCH'
+  | 'POLICY_PACKAGE_VERSION_MISMATCH'
+  | 'POLICY_PACKAGE_HASH_MISMATCH'
+  | 'APPLICATION_VERSION_MISMATCH'
   | 'INVALID_REQUEST';
 
 export interface PolicySubject {
@@ -62,6 +65,7 @@ export interface PolicySubject {
   readonly personId?: string;
   readonly deviceId: string;
   readonly applicationId: PlatformApplicationId;
+  readonly applicationVersion?: string;
   readonly deviceTrusted: boolean;
   readonly membershipActive: boolean;
   readonly roles: readonly string[];
@@ -118,6 +122,10 @@ export interface PolicyObligation {
 export interface PlatformPolicyRequest {
   readonly correlationId?: string;
   readonly policyVersion: string;
+  /** Version of the signed policy package used for this authorization. */
+  readonly policyPackageVersion?: number;
+  /** SHA-256 of the exact canonical signed policy package payload. */
+  readonly policyPackageSha256?: string;
   readonly subject: PolicySubject;
   readonly resource: PolicyResource;
   readonly action: PolicyAction;
@@ -136,6 +144,9 @@ export interface PlatformPolicyDecision {
   readonly allowed: boolean;
   readonly reason: PolicyReason;
   readonly policyVersion: string;
+  readonly policyPackageVersion?: number;
+  readonly policyPackageSha256?: string;
+  readonly applicationVersion?: string;
   /** SHA-256 binding of the complete validated authorization context. */
   readonly contextHash?: string;
   readonly matchedGrantId?: string;
@@ -147,11 +158,14 @@ export interface PlatformPolicyContextSnapshot {
   readonly schemaVersion: 1;
   readonly correlationId: string;
   readonly policyVersion: string;
+  readonly policyPackageVersion: number;
+  readonly policyPackageSha256: string;
   readonly subject: {
     readonly accountId: string;
     readonly personId: string | null;
     readonly deviceId: string;
     readonly applicationId: PlatformApplicationId;
+    readonly applicationVersion: string;
     readonly deviceTrusted: boolean;
     readonly membershipActive: boolean;
     readonly roles: readonly string[];
@@ -197,10 +211,30 @@ export interface PlatformPolicyAuthorization {
 export interface PlatformPolicyKernelConfig {
   readonly policyVersion: string;
   readonly signingKey: Uint8Array;
+  readonly policyPackageVersion?: number;
+  readonly applicationVersions?: Readonly<Partial<Record<PlatformApplicationId, string>>>;
   readonly applicationCapabilities: Readonly<Partial<Record<PlatformApplicationId, readonly PlatformCapability[]>>>;
   readonly consentRequiredCapabilities: readonly PlatformCapability[];
   readonly onlineOnlyCapabilities: readonly PlatformCapability[];
   readonly writeActions: readonly PolicyAction[];
+}
+
+export interface PlatformPolicyPackagePayload {
+  readonly schemaVersion: 1;
+  readonly packageVersion: number;
+  readonly policyVersion: string;
+  readonly applicationVersions: Readonly<Partial<Record<PlatformApplicationId, string>>>;
+  readonly applicationCapabilities: Readonly<Partial<Record<PlatformApplicationId, readonly PlatformCapability[]>>>;
+  readonly consentRequiredCapabilities: readonly PlatformCapability[];
+  readonly onlineOnlyCapabilities: readonly PlatformCapability[];
+  readonly writeActions: readonly PolicyAction[];
+}
+
+export interface PlatformPolicyPackage {
+  readonly payload: PlatformPolicyPackagePayload;
+  readonly payloadSha256: string;
+  readonly signatureAlgorithm: 'HMAC-SHA256';
+  readonly signature: string;
 }
 
 const stable = (value: unknown): string => {
@@ -214,6 +248,9 @@ const stable = (value: unknown): string => {
 
 const digest = (value: unknown): string => createHmac('sha256', 'ppt-policy-request-v1').update(stable(value)).digest('hex');
 const sign = (key: Uint8Array, value: unknown): string => createHmac('sha256', key).update(stable(value)).digest('hex');
+const sha256 = (value: unknown): string => createHash('sha256').update(stable(value), 'utf8').digest('hex');
+const signPolicyPackage = (key: Uint8Array, payload: PlatformPolicyPackagePayload): string =>
+  createHmac('sha256', key).update('ppt-policy-package-v1\0', 'utf8').update(stable(payload), 'utf8').digest('hex');
 const parseTime = (value?: string): number => value ? Date.parse(value) : Number.NaN;
 const isSensitive = (sensitivity: DataSensitivity): boolean => sensitivity === 'sensitive' || sensitivity === 'highly_sensitive';
 const freezeObligations = (values: readonly PolicyObligation[]): readonly PolicyObligation[] => Object.freeze(values.map((value) => Object.freeze({
@@ -346,11 +383,14 @@ export const platformPolicyContextSnapshot = (request: PlatformPolicyRequest): P
   schemaVersion: 1 as const,
   correlationId: request.correlationId ?? '',
   policyVersion: request.policyVersion,
+  policyPackageVersion: request.policyPackageVersion ?? 0,
+  policyPackageSha256: request.policyPackageSha256 ?? '',
   subject: Object.freeze({
     accountId: request.subject.accountId,
     personId: request.subject.personId ?? null,
     deviceId: request.subject.deviceId,
     applicationId: request.subject.applicationId,
+    applicationVersion: request.subject.applicationVersion ?? '',
     deviceTrusted: request.subject.deviceTrusted,
     membershipActive: request.subject.membershipActive,
     roles: Object.freeze([...(request.subject.roles ?? [])]),
@@ -384,30 +424,101 @@ export const platformPolicyContextHash = (request: PlatformPolicyRequest): strin
 
 export class PlatformPolicyKernel {
   readonly #config: PlatformPolicyKernelConfig;
+  readonly #policyPackage: PlatformPolicyPackage;
 
   public constructor(config: PlatformPolicyKernelConfig) {
     if (!config.policyVersion.trim()) throw new Error('policyVersion is required');
     if (config.signingKey.byteLength < 32) throw new Error('policy signing key must be at least 256 bits');
+    const packageVersion = config.policyPackageVersion ?? 1;
+    if (!Number.isSafeInteger(packageVersion) || packageVersion < 1) throw new Error('policyPackageVersion must be a positive safe integer');
     const applicationCapabilities = Object.fromEntries(
-      Object.entries(config.applicationCapabilities).map(([applicationId, capabilities]) => [applicationId, Object.freeze([...(capabilities ?? [])])])
+      Object.entries(config.applicationCapabilities).map(([applicationId, capabilities]) => [applicationId, Object.freeze([...(capabilities ?? [])].sort())])
     ) as Partial<Record<PlatformApplicationId, readonly PlatformCapability[]>>;
+    const applicationVersions = Object.fromEntries(
+      Object.keys(applicationCapabilities).sort().map((applicationId) => {
+        const version = config.applicationVersions?.[applicationId as PlatformApplicationId] ?? 'v1';
+        if (!nonEmpty(version, 128)) throw new Error(`application version is invalid: ${applicationId}`);
+        return [applicationId, version];
+      })
+    ) as Partial<Record<PlatformApplicationId, string>>;
     this.#config = Object.freeze({
       policyVersion: config.policyVersion,
       signingKey: Uint8Array.from(config.signingKey),
+      policyPackageVersion: packageVersion,
+      applicationVersions: Object.freeze(applicationVersions),
       applicationCapabilities: Object.freeze(applicationCapabilities),
-      consentRequiredCapabilities: Object.freeze([...config.consentRequiredCapabilities]),
-      onlineOnlyCapabilities: Object.freeze([...config.onlineOnlyCapabilities]),
-      writeActions: Object.freeze([...config.writeActions])
+      consentRequiredCapabilities: Object.freeze([...config.consentRequiredCapabilities].sort()),
+      onlineOnlyCapabilities: Object.freeze([...config.onlineOnlyCapabilities].sort()),
+      writeActions: Object.freeze([...config.writeActions].sort())
     });
+    const payload: PlatformPolicyPackagePayload = Object.freeze({
+      schemaVersion: 1 as const,
+      packageVersion,
+      policyVersion: this.#config.policyVersion,
+      applicationVersions: this.#config.applicationVersions!,
+      applicationCapabilities: this.#config.applicationCapabilities,
+      consentRequiredCapabilities: this.#config.consentRequiredCapabilities,
+      onlineOnlyCapabilities: this.#config.onlineOnlyCapabilities,
+      writeActions: this.#config.writeActions
+    });
+    this.#policyPackage = Object.freeze({
+      payload,
+      payloadSha256: sha256(payload),
+      signatureAlgorithm: 'HMAC-SHA256' as const,
+      signature: signPolicyPackage(this.#config.signingKey, payload)
+    });
+    if (!this.verifyPolicyPackage(this.#policyPackage)) throw new Error('signed policy package self-verification failed');
+  }
+
+  public get policyPackage(): PlatformPolicyPackage {
+    return this.#policyPackage;
+  }
+
+  public applicationVersionFor(applicationId: PlatformApplicationId): string | undefined {
+    return this.#policyPackage.payload.applicationVersions[applicationId];
+  }
+
+  public verifyPolicyPackage(policyPackage: PlatformPolicyPackage): boolean {
+    try {
+      if (
+        policyPackage.signatureAlgorithm !== 'HMAC-SHA256'
+        || policyPackage.payload.schemaVersion !== 1
+        || policyPackage.payload.policyVersion !== this.#config.policyVersion
+        || policyPackage.payload.packageVersion !== this.#config.policyPackageVersion
+        || policyPackage.payloadSha256 !== sha256(policyPackage.payload)
+        || stable(policyPackage.payload) !== stable({
+          schemaVersion: 1,
+          packageVersion: this.#config.policyPackageVersion,
+          policyVersion: this.#config.policyVersion,
+          applicationVersions: this.#config.applicationVersions,
+          applicationCapabilities: this.#config.applicationCapabilities,
+          consentRequiredCapabilities: this.#config.consentRequiredCapabilities,
+          onlineOnlyCapabilities: this.#config.onlineOnlyCapabilities,
+          writeActions: this.#config.writeActions
+        })
+        || !/^[0-9a-f]{64}$/u.test(policyPackage.signature)
+      ) return false;
+      const expected = Buffer.from(signPolicyPackage(this.#config.signingKey, policyPackage.payload), 'hex');
+      const actual = Buffer.from(policyPackage.signature, 'hex');
+      return expected.byteLength === actual.byteLength && timingSafeEqual(expected, actual);
+    } catch {
+      return false;
+    }
   }
 
   public evaluate(request: PlatformPolicyRequest): PlatformPolicyDecision {
     let contextHash: string | undefined;
+    const decisionApplicationVersion = request?.subject?.applicationId
+      ? this.applicationVersionFor(request.subject.applicationId)
+      : undefined;
     const deny = (reason: PolicyReason, obligations: readonly PolicyObligation[] = []): PlatformPolicyDecision =>
       Object.freeze({
         allowed: false,
         reason,
         policyVersion: this.#config.policyVersion,
+        policyPackageVersion: this.#policyPackage.payload.packageVersion,
+        policyPackageSha256: this.#policyPackage.payloadSha256,
+        ...(decisionApplicationVersion === undefined ? {} : { applicationVersion: decisionApplicationVersion }),
         ...(contextHash ? { contextHash } : {}),
         obligations: freezeObligations(obligations)
       });
@@ -417,7 +528,10 @@ export class PlatformPolicyKernel {
     if (
       !request || typeof request !== 'object' ||
       !nonEmpty(request.policyVersion, 128) ||
+      (request.policyPackageVersion !== undefined && (!Number.isSafeInteger(request.policyPackageVersion) || request.policyPackageVersion < 1)) ||
+      (request.policyPackageSha256 !== undefined && !/^[0-9a-f]{64}$/u.test(request.policyPackageSha256)) ||
       !nonEmpty(request.subject?.accountId) || !nonEmpty(request.subject?.deviceId) ||
+      (request.subject.applicationVersion !== undefined && !nonEmpty(request.subject.applicationVersion, 128)) ||
       (request.subject.personId !== undefined && !nonEmpty(request.subject.personId)) ||
       !nonEmpty(request.resource?.type) || !nonEmpty(request.resource?.id) || !nonEmpty(request.resource?.familyId) ||
       (request.resource.householdId !== undefined && !nonEmpty(request.resource.householdId)) ||
@@ -448,15 +562,30 @@ export class PlatformPolicyKernel {
       !validSensitivities.has(request.resource.sensitivity) || !validActions.has(request.action) ||
       (request.enforcementMode !== undefined && request.enforcementMode !== 'legacy' && request.enforcementMode !== 'strict') ||
       (request.purpose !== undefined && !nonEmpty(request.purpose, 256)) ||
-      (strictContext && (!nonEmpty(request.correlationId, 128) || !nonEmpty(request.purpose, 256))) ||
+      (strictContext && (
+        !nonEmpty(request.correlationId, 128) || !nonEmpty(request.purpose, 256)
+        || !Number.isSafeInteger(request.policyPackageVersion) || request.policyPackageVersion! < 1
+        || !/^[0-9a-f]{64}$/u.test(request.policyPackageSha256 ?? '')
+        || !nonEmpty(request.subject.applicationVersion, 128)
+      )) ||
       (request.requestedFields !== undefined && !validUniqueStrings(request.requestedFields, 0, 10_000, 256)) ||
       (request.grants !== undefined && (!Array.isArray(request.grants) || !request.grants.every(validGrant))) ||
       (request.consents !== undefined && (!Array.isArray(request.consents) || !request.consents.every(validConsent)))
     ) return deny('INVALID_REQUEST');
     contextHash = platformPolicyContextHash(request);
     if (request.policyVersion !== this.#config.policyVersion) return deny('POLICY_VERSION_MISMATCH');
+    if (request.policyPackageVersion !== undefined && request.policyPackageVersion !== this.#policyPackage.payload.packageVersion) {
+      return deny('POLICY_PACKAGE_VERSION_MISMATCH');
+    }
+    if (request.policyPackageSha256 !== undefined && request.policyPackageSha256 !== this.#policyPackage.payloadSha256) {
+      return deny('POLICY_PACKAGE_HASH_MISMATCH');
+    }
     const capabilities = this.#config.applicationCapabilities[request.subject.applicationId];
     if (!capabilities) return deny('APPLICATION_NOT_REGISTERED');
+    if (
+      request.subject.applicationVersion !== undefined
+      && request.subject.applicationVersion !== this.applicationVersionFor(request.subject.applicationId)
+    ) return deny('APPLICATION_VERSION_MISMATCH');
     if (!capabilities.includes(request.capability)) return deny('CAPABILITY_NOT_DECLARED');
     if (!capabilityActions[request.capability]?.includes(request.action)) return deny('ACTION_CAPABILITY_MISMATCH');
     if (!(request.resource.dataClasses ?? []).every((dataClass) => dataClassCapabilityCompatible(dataClass, request.capability))) {
@@ -488,6 +617,9 @@ export class PlatformPolicyKernel {
       allowed: false,
       reason: 'EXPLICIT_DENY',
       policyVersion: this.#config.policyVersion,
+      policyPackageVersion: this.#policyPackage.payload.packageVersion,
+      policyPackageSha256: this.#policyPackage.payloadSha256,
+      applicationVersion: decisionApplicationVersion!,
       contextHash,
       matchedGrantId: explicitDeny.id,
       obligations: freezeObligations([])
@@ -564,6 +696,9 @@ export class PlatformPolicyKernel {
       allowed: true,
       reason: 'ALLOW_POLICY',
       policyVersion: this.#config.policyVersion,
+      policyPackageVersion: this.#policyPackage.payload.packageVersion,
+      policyPackageSha256: this.#policyPackage.payloadSha256,
+      applicationVersion: decisionApplicationVersion!,
       contextHash,
       ...(explicitAllow ? { matchedGrantId: explicitAllow.id } : {}),
       ...(matchedConsentId ? { matchedConsentId } : {}),
@@ -588,7 +723,12 @@ export class PlatformPolicyKernel {
 
   public verifyReceipt(receipt: PlatformPolicyReceipt): boolean {
     try {
-      if (receipt.receiptVersion !== 1 || receipt.decision.policyVersion !== this.#config.policyVersion) return false;
+      if (
+        receipt.receiptVersion !== 1
+        || receipt.decision.policyVersion !== this.#config.policyVersion
+        || receipt.decision.policyPackageVersion !== this.#policyPackage.payload.packageVersion
+        || receipt.decision.policyPackageSha256 !== this.#policyPackage.payloadSha256
+      ) return false;
       if (!nonEmpty(receipt.issuedAt, 128) || !Number.isFinite(parseTime(receipt.issuedAt)) || !nonEmpty(receipt.nonce, 256)) return false;
       if (!/^[0-9a-f]{64}$/iu.test(receipt.requestHash) || !/^[0-9a-f]{64}$/iu.test(receipt.signature)) return false;
       const unsigned = { receiptVersion: receipt.receiptVersion, requestHash: receipt.requestHash, decision: receipt.decision, issuedAt: receipt.issuedAt, nonce: receipt.nonce };
@@ -603,6 +743,8 @@ export class PlatformPolicyKernel {
   public verifyReceiptForRequest(receipt: PlatformPolicyReceipt, request: PlatformPolicyRequest): boolean {
     if (receipt.requestHash !== digest(request)) return false;
     if (receipt.decision.policyVersion !== this.#config.policyVersion) return false;
+    if (receipt.decision.policyPackageVersion !== this.#policyPackage.payload.packageVersion) return false;
+    if (receipt.decision.policyPackageSha256 !== this.#policyPackage.payloadSha256) return false;
     if (stable(receipt.decision) !== stable(this.evaluate(request))) return false;
     return this.verifyReceipt(receipt);
   }

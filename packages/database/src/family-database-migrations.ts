@@ -5799,6 +5799,55 @@ SET value='REVISION-32-B-PPK-006-COMPLETE-POLICY-OBLIGATION-SUITE',
 WHERE key='schema_generation';
 `;
 
+const platformPolicyPackageBindingSql = `ALTER TABLE platform_policy_transaction_receipts
+ADD COLUMN policy_package_version INTEGER CHECK(
+  policy_package_version IS NULL OR policy_package_version>=1
+);
+
+ALTER TABLE platform_policy_transaction_receipts
+ADD COLUMN policy_package_sha256 TEXT CHECK(
+  policy_package_sha256 IS NULL OR (
+    length(policy_package_sha256)=64
+    AND policy_package_sha256 NOT GLOB '*[^0-9a-f]*'
+  )
+);
+
+ALTER TABLE platform_policy_transaction_receipts
+ADD COLUMN application_version TEXT CHECK(
+  application_version IS NULL OR length(trim(application_version)) BETWEEN 1 AND 128
+);
+
+CREATE INDEX idx_platform_policy_receipt_package_binding
+ON platform_policy_transaction_receipts(policy_package_version,policy_package_sha256,application_version)
+WHERE policy_package_version IS NOT NULL;
+
+CREATE TRIGGER trg_ppk007_platform_policy_package_binding_insert
+BEFORE INSERT ON platform_policy_transaction_receipts
+WHEN NEW.policy_package_version IS NULL
+  OR NEW.policy_package_sha256 IS NULL
+  OR NEW.application_version IS NULL
+  OR json_extract(NEW.record_json,'$.policyPackageVersion') IS NOT NEW.policy_package_version
+  OR json_extract(NEW.record_json,'$.policyPackageSha256') IS NOT NEW.policy_package_sha256
+  OR json_extract(NEW.record_json,'$.applicationVersion') IS NOT NEW.application_version
+  OR json_extract(NEW.record_json,'$.request.policyPackageVersion') IS NOT NEW.policy_package_version
+  OR json_extract(NEW.record_json,'$.request.policyPackageSha256') IS NOT NEW.policy_package_sha256
+  OR json_extract(NEW.record_json,'$.request.subject.applicationVersion') IS NOT NEW.application_version
+  OR json_extract(NEW.record_json,'$.decision.policyPackageVersion') IS NOT NEW.policy_package_version
+  OR json_extract(NEW.record_json,'$.decision.policyPackageSha256') IS NOT NEW.policy_package_sha256
+  OR json_extract(NEW.record_json,'$.decision.applicationVersion') IS NOT NEW.application_version
+  OR json_extract(NEW.record_json,'$.receipt.decision.policyPackageVersion') IS NOT NEW.policy_package_version
+  OR json_extract(NEW.record_json,'$.receipt.decision.policyPackageSha256') IS NOT NEW.policy_package_sha256
+  OR json_extract(NEW.record_json,'$.receipt.decision.applicationVersion') IS NOT NEW.application_version
+BEGIN
+  SELECT RAISE(ABORT,'platform policy package binding is missing or inconsistent');
+END;
+
+UPDATE database_metadata
+SET value='REVISION-32-C-PPK-007-SIGNED-VERSIONED-POLICY-PACKAGE',
+    updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
+WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -5870,7 +5919,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(68, 'ppk002_family_import_governed_rollback_receipt_fence', familyImportGovernedRollbackReceiptFenceSql),
   createMigrationDefinition(69, 'ppk004_complete_policy_context_binding', platformPolicyContextBindingSql),
   createMigrationDefinition(70, 'ppk005_complete_data_classification', platformPolicyDataClassificationSql),
-  createMigrationDefinition(71, 'ppk006_complete_policy_obligation_suite', platformPolicyObligationExecutionSql)
+  createMigrationDefinition(71, 'ppk006_complete_policy_obligation_suite', platformPolicyObligationExecutionSql),
+  createMigrationDefinition(72, 'ppk007_signed_versioned_policy_package', platformPolicyPackageBindingSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

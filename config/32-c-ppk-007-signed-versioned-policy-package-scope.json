@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "step": "32-C",
+  "requirement": "PPK-007",
+  "title": "Signed, versioned and SHA-256-bound policy package top closure",
+  "status": "COMPLETED",
+  "boundaries": {
+    "deterministicCanonicalPayload": true,
+    "hmacSha256Signature": true,
+    "sha256PayloadBinding": true,
+    "positivePackageVersion": true,
+    "applicationVersionManifest": true,
+    "capabilityManifestBinding": true,
+    "strictRequestPackageBinding": true,
+    "decisionPackageBinding": true,
+    "signedReceiptPackageBinding": true,
+    "contextHashPackageBinding": true,
+    "providerMetadataResolution": true,
+    "providerMismatchDefaultDeny": true,
+    "coreServiceStartupVersionGate": true,
+    "desktopStartupVersionGate": true,
+    "durableMigration72": true,
+    "sqlitePackageBindingTrigger": true,
+    "repositoryPackageBinding": true,
+    "uiAndMenuRemainBehindUniversalPep": true
+  },
+  "validation": {
+    "contract": "artifacts/validation/32-C-ppk-007-signed-versioned-policy-package-contract.json",
+    "runtime": "artifacts/validation/32-C-ppk-007-signed-versioned-policy-package-runtime.json",
+    "targetedTest": "packages/platform-policy/policy-package-version-binding.test.ts",
+    "contractChecks": "32/32",
+    "runtimeChecks": "8/8",
+    "targetedTests": "17/17",
+    "platformPolicyRegression": "78/78",
+    "migration": "72 PASS",
+    "fullVitest": "56 files / 350 tests",
+    "rootTypeScriptDiagnostics": 0
+  },
+  "requirementCompletionClaimed": true,
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "mandatoryTruthSentence": "Bu kapanış yalnız PPK-007 gereksinimini tamamlar; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır."
+}

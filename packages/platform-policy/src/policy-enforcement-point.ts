@@ -9,6 +9,7 @@ import {
   type PlatformCapability,
   type PlatformDataClass,
   type PlatformPolicyDecision,
+  type PlatformPolicyPackage,
   type PlatformPolicyReceipt,
   type PlatformPolicyRequest,
   type PolicyAction,
@@ -29,10 +30,13 @@ export interface PlatformPolicyIntent {
 
 export interface PlatformPolicyConnectionAuthority {
   readonly policyVersion: string;
+  readonly policyPackageVersion?: number;
+  readonly policyPackageSha256?: string;
   readonly accountId: string;
   readonly personId?: string;
   readonly deviceId: string;
   readonly applicationId: PlatformApplicationId;
+  readonly applicationVersion?: string;
   readonly deviceTrusted: boolean;
   readonly membershipActive: boolean;
   readonly roles: readonly string[];
@@ -56,6 +60,9 @@ export interface PlatformPolicyResourceResolver {
 export interface PlatformPolicyReceiptRecord {
   readonly correlationId: string;
   readonly contextHash: string;
+  readonly policyPackageVersion: number;
+  readonly policyPackageSha256: string;
+  readonly applicationVersion: string;
   readonly dataClasses: readonly PlatformDataClass[];
   readonly resourceType: string;
   readonly resourceId: string;
@@ -169,6 +176,8 @@ export interface PlatformPolicyProviderVerificationInput {
  * PEP validates every other request field before accepting the result.
  */
 export interface PlatformPolicyAuthorizationProvider {
+  /** Trusted package metadata for out-of-process kernels; omission fails closed. */
+  readonly resolvePolicyPackage?: (applicationId: PlatformApplicationId) => PlatformPolicyPackage;
   authorize(input: PlatformPolicyProviderAuthorizationInput):
     | Promise<PlatformPolicyProviderAuthorizationResult>
     | PlatformPolicyProviderAuthorizationResult;
@@ -201,6 +210,9 @@ export interface PlatformPolicyTransactionContext {
   readonly requestHash: string;
   readonly contextHash: string;
   readonly policyVersion: string;
+  readonly policyPackageVersion: number;
+  readonly policyPackageSha256: string;
+  readonly applicationVersion: string;
   readonly subject: PlatformPolicyTransactionSubjectSnapshot;
   readonly resourceType: string;
   readonly resourceId: string;
@@ -226,6 +238,7 @@ export interface PlatformPolicyTransactionSubjectSnapshot {
   readonly personId?: string;
   readonly deviceId: string;
   readonly applicationId: PlatformApplicationId;
+  readonly applicationVersion: string;
   readonly roles: readonly string[];
   readonly familyIds: readonly string[];
   readonly householdIds: readonly string[];
@@ -287,11 +300,18 @@ export const assertActivePlatformPolicyTransactionContext: (
     || context.receiptRecord.receipt.decision.contextHash !== boundContextHash
     || context.correlationId !== context.receiptRecord.request.correlationId
     || context.policyVersion !== context.receiptRecord.request.policyVersion
+    || context.policyPackageVersion !== context.receiptRecord.request.policyPackageVersion
+    || context.policyPackageVersion !== context.receiptRecord.policyPackageVersion
+    || context.policyPackageSha256 !== context.receiptRecord.request.policyPackageSha256
+    || context.policyPackageSha256 !== context.receiptRecord.policyPackageSha256
+    || context.applicationVersion !== context.receiptRecord.request.subject.applicationVersion
+    || context.applicationVersion !== context.receiptRecord.applicationVersion
     || stable(context.subject) !== stable({
       accountId: context.receiptRecord.request.subject.accountId,
       ...(context.receiptRecord.request.subject.personId ? { personId: context.receiptRecord.request.subject.personId } : {}),
       deviceId: context.receiptRecord.request.subject.deviceId,
       applicationId: context.receiptRecord.request.subject.applicationId,
+      applicationVersion: context.receiptRecord.request.subject.applicationVersion,
       roles: context.receiptRecord.request.subject.roles,
       familyIds: context.receiptRecord.request.subject.familyIds,
       householdIds: context.receiptRecord.request.subject.householdIds,
@@ -707,6 +727,7 @@ export class PlatformPolicyEnforcementPoint {
       if (error instanceof PlatformPolicyEnforcementError && error.code === 'POLICY_DECISION_UNAVAILABLE') throw error;
       throw new PlatformPolicyEnforcementError('AUTHORITY_RESOLUTION_FAILED', 'Trusted policy connection authority could not be resolved', { cause: error });
     }
+    authority = this.#bindAuthorityPolicyPackage(authority);
     this.#assertAuthority(authority, parseTimestamp(this.#clock()));
     authority = Object.freeze({
       ...authority,
@@ -777,6 +798,7 @@ export class PlatformPolicyEnforcementPoint {
       ...(authority.personId ? { personId: authority.personId } : {}),
       deviceId: authority.deviceId,
       applicationId: authority.applicationId,
+      applicationVersion: authority.applicationVersion!,
       roles: Object.freeze([...authority.roles]),
       familyIds: Object.freeze([...authority.familyIds]),
       householdIds: Object.freeze([...(authority.householdIds ?? [])]),
@@ -785,6 +807,8 @@ export class PlatformPolicyEnforcementPoint {
     const request: PlatformPolicyRequest = Object.freeze({
       correlationId: intent.correlationId,
       policyVersion: authority.policyVersion,
+      policyPackageVersion: authority.policyPackageVersion!,
+      policyPackageSha256: authority.policyPackageSha256!,
       subject: Object.freeze({
         ...subject,
         deviceTrusted: authority.deviceTrusted,
@@ -836,6 +860,10 @@ export class PlatformPolicyEnforcementPoint {
     if (
       authorization.receipt.nonce !== nonce ||
       stable(authorization.decision) !== stable(authorization.receipt.decision) ||
+      authorization.decision.policyVersion !== effectiveRequest.policyVersion ||
+      authorization.decision.policyPackageVersion !== effectiveRequest.policyPackageVersion ||
+      authorization.decision.policyPackageSha256 !== effectiveRequest.policyPackageSha256 ||
+      authorization.decision.applicationVersion !== effectiveRequest.subject.applicationVersion ||
       authorization.decision.contextHash !== contextHash ||
       authorization.receipt.decision.contextHash !== contextHash
     ) {
@@ -891,6 +919,9 @@ export class PlatformPolicyEnforcementPoint {
     const record: PlatformPolicyReceiptRecord = Object.freeze({
       correlationId: intent.correlationId,
       contextHash,
+      policyPackageVersion: effectiveRequest.policyPackageVersion!,
+      policyPackageSha256: effectiveRequest.policyPackageSha256!,
+      applicationVersion: effectiveRequest.subject.applicationVersion!,
       dataClasses: Object.freeze([...(effectiveRequest.resource.dataClasses ?? [])]),
       resourceType: resource.type,
       resourceId: resource.id,
@@ -949,6 +980,9 @@ export class PlatformPolicyEnforcementPoint {
       requestHash: authorization.receipt.requestHash,
       contextHash,
       policyVersion: decision.policyVersion,
+      policyPackageVersion: decision.policyPackageVersion!,
+      policyPackageSha256: decision.policyPackageSha256!,
+      applicationVersion: decision.applicationVersion!,
       subject,
       resourceType: resource.type,
       resourceId: resource.id,
@@ -1123,8 +1157,11 @@ export class PlatformPolicyEnforcementPoint {
     if (
       !authority || typeof authority !== 'object' || !Number.isFinite(now) ||
       !nonEmptyBounded(authority.policyVersion, 128) || !nonEmptyBounded(authority.accountId, 256) || !nonEmptyBounded(authority.deviceId, 256) ||
+      !Number.isSafeInteger(authority.policyPackageVersion) || authority.policyPackageVersion! < 1 ||
+      !/^[0-9a-f]{64}$/u.test(authority.policyPackageSha256 ?? '') ||
       (authority.personId !== undefined && !nonEmptyBounded(authority.personId, 256)) ||
       !validApplications.has(authority.applicationId) || typeof authority.deviceTrusted !== 'boolean' ||
+      !nonEmptyBounded(authority.applicationVersion, 128) ||
       typeof authority.membershipActive !== 'boolean' || typeof authority.online !== 'boolean' ||
       !Array.isArray(authority.roles) || authority.roles.length === 0 || authority.roles.some((role) => !nonEmptyBounded(role, 128)) || authority.roles.length > 64 || !uniqueStrings(authority.roles) ||
       !Array.isArray(authority.familyIds) || authority.familyIds.length === 0 || authority.familyIds.length > 10_000 || authority.familyIds.some((id) => !nonEmptyBounded(id, 256)) ||
@@ -1139,6 +1176,37 @@ export class PlatformPolicyEnforcementPoint {
     const expiresAt = parseTimestamp(authority.expiresAt);
     if (!Number.isFinite(expiresAt)) throw new PlatformPolicyEnforcementError('AUTHORITY_INVALID', 'Policy connection authority expiry is invalid');
     if (expiresAt <= now) throw new PlatformPolicyEnforcementError('AUTHORITY_EXPIRED', 'Policy connection authority has expired');
+  }
+
+  #bindAuthorityPolicyPackage(authority: PlatformPolicyConnectionAuthority): PlatformPolicyConnectionAuthority {
+    if (!authority || typeof authority !== 'object') return authority;
+    let policyPackage: PlatformPolicyPackage | undefined;
+    try {
+      policyPackage = this.#kernel?.policyPackage ?? this.#provider?.resolvePolicyPackage?.(authority.applicationId);
+    } catch (error) {
+      throw new PlatformPolicyEnforcementError('AUTHORITY_INVALID', 'Signed policy package could not be resolved', { cause: error });
+    }
+    if (!policyPackage) return authority;
+    const applicationVersion = policyPackage.payload.applicationVersions[authority.applicationId];
+    if (
+      policyPackage.payload.schemaVersion !== 1
+      || policyPackage.payload.policyVersion !== authority.policyVersion
+      || policyPackage.payloadSha256 !== sha256(stable(policyPackage.payload))
+      || policyPackage.signatureAlgorithm !== 'HMAC-SHA256'
+      || !/^[0-9a-f]{64}$/u.test(policyPackage.signature)
+      || applicationVersion === undefined
+      || (authority.policyPackageVersion !== undefined && authority.policyPackageVersion !== policyPackage.payload.packageVersion)
+      || (authority.policyPackageSha256 !== undefined && authority.policyPackageSha256 !== policyPackage.payloadSha256)
+      || (authority.applicationVersion !== undefined && authority.applicationVersion !== applicationVersion)
+    ) {
+      throw new PlatformPolicyEnforcementError('AUTHORITY_INVALID', 'Policy authority does not match the signed policy package');
+    }
+    return Object.freeze({
+      ...authority,
+      policyPackageVersion: policyPackage.payload.packageVersion,
+      policyPackageSha256: policyPackage.payloadSha256,
+      applicationVersion
+    });
   }
 
   #readFence(clusterFence: PlatformPolicyClusterFence): PlatformPolicyClusterFenceSnapshot {

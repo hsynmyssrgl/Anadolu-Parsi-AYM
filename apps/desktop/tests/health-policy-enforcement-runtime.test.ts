@@ -40,6 +40,7 @@ const kernel = new PlatformPolicyKernel({
 });
 
 const provider: PlatformPolicyAuthorizationProvider = Object.freeze({
+  resolvePolicyPackage: () => kernel.policyPackage,
   authorize({ request, nonce }) {
     return Object.freeze({
       effectiveRequest: request,
@@ -207,6 +208,7 @@ describe('30-X governed health policy enforcement', () => {
     const directory = makeDirectory('ppt-30x-health-fence-race-');
     let writable = true;
     const racingProvider: PlatformPolicyAuthorizationProvider = Object.freeze({
+      resolvePolicyPackage: (applicationId) => provider.resolvePolicyPackage!(applicationId),
       authorize(input) {
         const authorization = provider.authorize(input);
         writable = false;

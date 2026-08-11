@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 41,
+  "decisionCount": 42,
   "decisions": [
     {
       "id": "DEC-121",
@@ -969,6 +969,31 @@
         "artifacts/validation/32-B-ppk-006-complete-policy-obligation-suite-contract.json",
         "artifacts/validation/32-B-ppk-006-complete-policy-obligation-suite-runtime.json",
         "docs/audit/32-B_PPK-006_POLITIKA_YUKUMLULUKLERI_UST_KAPANIS.md"
+      ]
+    },
+    {
+      "id": "DEC-188",
+      "date": "2026-08-11",
+      "acceptedAt": "2026-08-11",
+      "title": "PPK-007 signed, versioned and SHA-256-bound policy package top closure",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: Paketler bitince diğerine başla",
+      "document": "docs/decisions/DEC-188-ppk-007-signed-versioned-policy-package.md",
+      "requirements": ["PPK-007"],
+      "codeAreas": [
+        "packages/platform-policy/src/policy-kernel.ts",
+        "packages/platform-policy/src/policy-enforcement-point.ts",
+        "packages/core-service-contracts/src/index.ts",
+        "apps/core-service/src/core-service-runtime.ts",
+        "apps/desktop/src/main/core-service-startup-connection.ts",
+        "packages/repository-contracts/src/platform-policy-transaction-repository.ts",
+        "packages/repositories/src/platform-policy-transaction-repository.ts",
+        "packages/database/src/family-database-migrations.ts"
+      ],
+      "evidence": [
+        "artifacts/validation/32-C-ppk-007-signed-versioned-policy-package-contract.json",
+        "artifacts/validation/32-C-ppk-007-signed-versioned-policy-package-runtime.json",
+        "docs/audit/32-C_PPK-007_IMZALI_SURUMLU_POLITIKA_PAKETI_UST_KAPANIS.md"
       ]
     }
   ]
