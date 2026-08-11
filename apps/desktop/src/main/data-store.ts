@@ -186,6 +186,7 @@ import {
   RequestDataPurgeUseCase,
   CancelDataPurgeUseCase,
   ExecuteDataPurgeUseCase,
+  EnforceSourceDeletionPropagationUseCase,
   SetDataLegalHoldUseCase,
   ListPendingBackupPropagationUseCase,
   ListBackupPropagationRunsUseCase,
@@ -299,6 +300,7 @@ import {
 import {
   PlatformPolicyEnforcementError,
   SensitiveLogPolicy,
+  SourceDeletionPropagationPolicy,
   type PlatformPolicyAuthorizationProvider,
   type PlatformPolicyClusterFence,
   type PlatformPolicyConnectionAuthority,
@@ -311,6 +313,10 @@ import { createLifeProductionPolicyEnforcementPointResolver } from './life-produ
 import { createLocationProductionPolicyEnforcementPointResolver } from './location-production-policy-runtime.js';
 import { createTimelineProductionPolicyEnforcementPointResolver } from './timeline-production-policy-runtime.js';
 import { RepositoryBackedDataLifecycleQueryPort, RepositoryBackedDataLifecycleUnitOfWork, RepositoryBackedStrongAuthenticationPort } from './data-lifecycle-application-adapter.js';
+import {
+  DesktopSourceDeletionRuntimeCacheInvalidationPort,
+  type DesktopSourceDeletionExternalCacheInvalidator
+} from './source-deletion-propagation-application-adapter.js';
 import { RepositoryBackedBackupPropagationAdapter } from './backup-propagation-application-adapter.js';
 import { RepositoryBackedBackupQuarantineAdapter } from './backup-quarantine-application-adapter.js';
 import { RepositoryBackedExternalBackupInventoryAdapter } from './external-backup-inventory-application-adapter.js';
@@ -444,6 +450,7 @@ interface DataStoreOptions {
   correlation?: CorrelationContextProvider;
   logger?: Logger;
   repositoryExecutionPolicyGuard?: RepositoryExecutionPolicyGuard;
+  sourceDeletionExternalCacheInvalidator?: DesktopSourceDeletionExternalCacheInvalidator;
   securityConfig?: {
     sessionIdleTimeoutMinutes: number;
     maximumFailedLoginAttempts: number;
@@ -1092,7 +1099,14 @@ export class FamilyDataStore {
     this.#restoreDataResourceUseCase = new RestoreDataResourceUseCase(dataLifecycleUnit);
     this.#requestDataPurgeUseCase = new RequestDataPurgeUseCase(dataLifecycleUnit, strongAuthentication);
     this.#cancelDataPurgeUseCase = new CancelDataPurgeUseCase(dataLifecycleUnit);
-    this.#executeDataPurgeUseCase = new ExecuteDataPurgeUseCase(dataLifecycleUnit, strongAuthentication);
+    const sourceDeletionPropagation = new EnforceSourceDeletionPropagationUseCase(
+      new SourceDeletionPropagationPolicy(),
+      new DesktopSourceDeletionRuntimeCacheInvalidationPort(
+        () => this.#familyDataImportService.clearCachedPreviews(),
+        options.sourceDeletionExternalCacheInvalidator
+      )
+    );
+    this.#executeDataPurgeUseCase = new ExecuteDataPurgeUseCase(dataLifecycleUnit, strongAuthentication, sourceDeletionPropagation);
     this.#setDataLegalHoldUseCase = new SetDataLegalHoldUseCase(dataLifecycleUnit, strongAuthentication);
     const backupPropagationAdapter = new RepositoryBackedBackupPropagationAdapter({transactionExecutor:this.#transactionExecutor,repository:this.#repositories.backupPropagationRepository});
     this.#listPendingBackupPropagationUseCase = new ListPendingBackupPropagationUseCase(backupPropagationAdapter);

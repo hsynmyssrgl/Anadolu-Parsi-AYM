@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { stripTypeScriptTypes } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -16,15 +16,14 @@ const asIsoDateTime=(value)=>value;
 const createAppError=(input)=>input;
 const err=(error)=>({ok:false,error});
 const ok=(value)=>({ok:true,value});
+const isAdministrativeRole=(role)=>role==='family_admin'||role==='family_owner';
 type AppError=any; type CorrelationId=string; type EventId=string; type FamilyId=string; type IsoDateTime=string; type PersonId=string; type Result<T,E>=({ok:true,value:T}|{ok:false,error:E}); type UserId=string;
 type ArchiveDataResourceInput=any; type CancelDataPurgeInput=any; type CreateDataRetentionPolicyInput=any; type DataLifecycleRecordView=any; type DataLifecycleResourceType=any; type DataRetentionPolicyView=any; type ExecuteDataPurgeInput=any; type FamilyRole=any; type RecordPrivacy=any; type RequestDataPurgeInput=any; type RestoreDataResourceInput=any; type SetDataLegalHoldInput=any; type DomainEvent<T>=any; type AuthorizationAction=any;
+interface SourceDeletionPropagationWriteScope { inspectSourceDeletionPropagation(inspectedAt:string):any; purgeResourceWithPropagation(plan:any):any; }
+type EnforceSourceDeletionPropagationUseCase=any;
 `;
-const globalRoot=execFileSync('npm',['root','-g'],{encoding:'utf8'}).trim();
-const ts=(await import(pathToFileURL(join(globalRoot,'typescript','lib','typescript.js')).href)).default;
-const transpiled=ts.transpileModule(prelude+body,{fileName:'data-lifecycle-use-cases.ts',compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext},reportDiagnostics:true});
-const diagnostics=(transpiled.diagnostics??[]).filter(item=>item.category===ts.DiagnosticCategory.Error);
-if(diagnostics.length)throw new Error(diagnostics.map(item=>ts.flattenDiagnosticMessageText(item.messageText,'\n')).join('\n'));
-const modulePath=join(tmp,'data-lifecycle-use-cases.mjs');await writeFile(modulePath,transpiled.outputText);
+const transformed=stripTypeScriptTypes(prelude+body,{mode:'transform',sourceMap:false});
+const modulePath=join(tmp,'data-lifecycle-use-cases.mjs');await writeFile(modulePath,transformed);
 const lifecycle=await import(pathToFileURL(modulePath).href);
 
 let now='2026-07-28T00:00:00.000Z';
@@ -40,12 +39,14 @@ const scope={
   authorize:()=>({ok:true,value:authorized}),
   insertPolicy:(policy)=>{policies.set(policy.id,policy);return {ok:true,value:undefined};},
   upsertLifecycle:(record)=>{records.set(key(record.resourceType,record.resourceId),record);return {ok:true,value:undefined};},
-  purgeResource:(type,id)=>{const exists=resources.delete(key(type,id));if(exists)purges+=1;return {ok:true,value:exists};},
+  inspectSourceDeletionPropagation:(inspectedAt)=>({ok:true,value:{schemaVersion:1,inspectedAt,unregisteredPersistentOwners:[],plaintextReplicaEnabled:false,derivedPolicyMetadataOnly:true}}),
+  purgeResourceWithPropagation:(plan)=>{const exists=resources.delete(key(plan.source.resourceType,plan.source.resourceId));if(exists)purges+=1;return exists?{ok:true,value:{schemaVersion:1,planHash:plan.planHash,sourceDeleted:true,deletedAccessMetadataRows:0,localPropagationComplete:true,backupPropagationPending:true}}:{ok:false,error:{message:'missing'}};},
   appendAudit:(entry)=>{audits.push(entry);return {ok:true,value:entry.id};},
   enqueueEvent:(event)=>{events.push(event);return {ok:true,value:undefined};}
 };
 const unit={execute:(_context,operation)=>operation(scope)};
 const strongAuth={verify:(_context,input)=>{authChecks+=1;return input.password==='correct-password'?{ok:true,value:undefined}:{ok:false,error:{message:'bad credentials'}};}};
+const propagation={execute:({scope,source})=>{const plan={schemaVersion:1,policyVersion:'PPK-019-V1',operation:'RETENTION_PURGE',source,persistentInspection:{schemaVersion:1,inspectedAt:source.purgedAt,unregisteredPersistentOwners:[],plaintextReplicaEnabled:false,derivedPolicyMetadataOnly:true},cacheInvalidations:[],ownerOutcomes:[{kind:'BACKUP',disposition:'VERIFIED_REWRITE_PENDING',phase:'asynchronous_backup',completed:false,evidenceSha256:'b'.repeat(64)}],localPropagationComplete:true,backupPropagationPending:true,planHash:'a'.repeat(64)};const persisted=scope.purgeResourceWithPropagation(plan);return persisted.ok?{ok:true,value:{plan,evidence:persisted.value}}:persisted;}};
 const checks=[];const check=(label,fn)=>{fn();checks.push(label);};
 const expectOk=(result)=>{assert.equal(result.ok,true);return result.value;};
 const expectFail=(result)=>assert.equal(result.ok,false);
@@ -55,7 +56,7 @@ const archive=new lifecycle.ArchiveDataResourceUseCase(unit);
 const restore=new lifecycle.RestoreDataResourceUseCase(unit);
 const requestPurge=new lifecycle.RequestDataPurgeUseCase(unit,strongAuth);
 const cancelPurge=new lifecycle.CancelDataPurgeUseCase(unit);
-const executePurge=new lifecycle.ExecuteDataPurgeUseCase(unit,strongAuth);
+const executePurge=new lifecycle.ExecuteDataPurgeUseCase(unit,strongAuth,propagation);
 const legalHold=new lifecycle.SetDataLegalHoldUseCase(unit,strongAuth);
 
 check('invalid policy rejected',()=>expectFail(createPolicy.execute({context,command:{name:'x',resourceTypes:[],retentionDays:0,graceDays:0},identifiers:{policyId:'p0',auditId:'a0'}})));
@@ -102,6 +103,7 @@ check('tombstone retains owner for authorization',()=>assert.equal(purged.ownerP
 check('tombstone retains privacy',()=>assert.equal(purged.privacy,'private'));
 check('backup propagation warning set',()=>assert.equal(purged.backupPropagationPending,true));
 check('purge event queued',()=>assert.equal(events.at(-1).eventType,'data.resource.purged'));
+check('purge event carries propagation plan hash',()=>assert.equal(events.at(-1).payload.propagationPlanHash,'a'.repeat(64)));
 check('purge audit written',()=>assert.equal(audits.at(-1).action,'data.resource_purged'));
 
 const report={schemaVersion:1,product:'Anadolu Parsı Aile Yaşam Merkezi',featureBuild:136,applicationVersion:'28.07.2026.136',packageVersion:'28.7.2026-136',stage:'Bronze RC2 Active Development',scope:'Recoverable archive, retention eligibility, reversible purge scheduling, legal hold, exact confirmations, strong authentication, authorization and purge tombstone governance',status:'PASS',assertions:checks.length,scenarios:checks,generatedAt:new Date().toISOString()};

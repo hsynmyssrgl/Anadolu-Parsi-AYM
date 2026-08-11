@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { stripTypeScriptTypes } from 'node:module';
 
 const root=process.cwd();
 const tmp=join(root,'.tmp','build137-backup-propagation-runtime');
@@ -11,13 +11,9 @@ const args=process.argv.slice(2);
 const option=(name,fallback)=>{const index=args.indexOf(name);if(index<0)return fallback;const value=args[index+1];if(!value||value.startsWith('--'))throw new Error(`${name} requires a value.`);return value;};
 const reportPath=resolve(option('--report','artifacts/validation/build137-backup-purge-propagation-runtime.json'));
 await rm(tmp,{recursive:true,force:true});await mkdir(tmp,{recursive:true});
-const globalRoot=execFileSync('npm',['root','-g'],{encoding:'utf8'}).trim();
-const ts=(await import(pathToFileURL(join(globalRoot,'typescript','lib','typescript.js')).href)).default;
 const compile=async(name,prelude,body)=>{
-  const transpiled=ts.transpileModule(prelude+body,{fileName:`${name}.ts`,compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext},reportDiagnostics:true});
-  const diagnostics=(transpiled.diagnostics??[]).filter(item=>item.category===ts.DiagnosticCategory.Error);
-  if(diagnostics.length)throw new Error(diagnostics.map(item=>ts.flattenDiagnosticMessageText(item.messageText,'\n')).join('\n'));
-  const modulePath=join(tmp,`${name}.mjs`);await writeFile(modulePath,transpiled.outputText);return import(pathToFileURL(modulePath).href);
+  const transformed=stripTypeScriptTypes(prelude+body,{mode:'transform',sourceMap:false});
+  const modulePath=join(tmp,`${name}.mjs`);await writeFile(modulePath,transformed);return import(pathToFileURL(modulePath).href);
 };
 
 const managedSource=await readFile(join(root,'packages/application/src/managed-backup-propagation-use-case.ts'),'utf8');

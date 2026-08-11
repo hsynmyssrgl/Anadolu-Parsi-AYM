@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-11T22:48:34.690Z",
+  "generatedAt": "2026-08-11T23:36:23.701Z",
   "release": "Bronze 04.08.2026.29",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
@@ -29,17 +29,17 @@
   "percentages": {
     "officialWeightedBronzePercent": 25,
     "officialWeightedEvidenceStep": "31-T",
-    "strictRequirementCompletionPercent": 8.8571,
-    "implementationChainCoveragePercent": 9.1143,
-    "governanceEvidenceChainCoveragePercent": 48.0952,
+    "strictRequirementCompletionPercent": 9.1429,
+    "implementationChainCoveragePercent": 9.4,
+    "governanceEvidenceChainCoveragePercent": 48.2857,
     "interpretation": "These are separate measures and must not be blended into an invented single completion claim."
   },
   "scope": {
     "total": 350,
     "statusCounts": {
-      "COMPLETE": 31,
+      "COMPLETE": 32,
       "FOUNDATION_STARTED": 2,
-      "NOT_IMPLEMENTED": 283,
+      "NOT_IMPLEMENTED": 282,
       "PARTIAL": 34
     },
     "priorityCounts": {
@@ -48,21 +48,21 @@
       "P2": 5
     },
     "completeByPriority": {
-      "P0": 30,
+      "P0": 31,
       "P1": 1,
       "P2": 0
     },
-    "incompleteCount": 319,
-    "strictComplete": 31,
+    "incompleteCount": 318,
+    "strictComplete": 32,
     "implementationCoverage": {
-      "passed": 319,
+      "passed": 329,
       "total": 3500,
-      "percent": 9.1143
+      "percent": 9.4
     },
     "governanceCoverage": {
-      "passed": 505,
+      "passed": 507,
       "total": 1050,
-      "percent": 48.0952
+      "percent": 48.2857
     }
   },
   "rules": {
@@ -324,7 +324,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"3ed369aa02087cf74c2cd06c15c4eaa575fd7e5f9a88e84dbce5476b78da0a23\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\3ed369aa02087cf74c2cd06c15c4eaa575fd7e5f9a88e84dbce5476b78da0a23\",\"files\":9}"
+          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"b5eeea26ee3b54bd5afc5c80e3fd7d74d78e8a3ef56495101303b3d677d65f14\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\b5eeea26ee3b54bd5afc5c80e3fd7d74d78e8a3ef56495101303b3d677d65f14\",\"files\":9}"
         ]
       },
       {
@@ -1003,7 +1003,7 @@
     "status": "PASS",
     "officialCompletionClaimed": true,
     "storageBackend": "EXTERNAL_USB_D_DRIVE",
-    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\3ed369aa02087cf74c2cd06c15c4eaa575fd7e5f9a88e84dbce5476b78da0a23"
+    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\b5eeea26ee3b54bd5afc5c80e3fd7d74d78e8a3ef56495101303b3d677d65f14"
   },
   "remainingWork": [
     {
@@ -4345,30 +4345,6 @@
       "workOrderClass": "NEW_NOT_STARTED",
       "area": "OCR Silme",
       "title": "Kaynak imha/izin iptalinde OCR metni, indeks, embedding, cache ve türevler karantinaya/silmeye girer",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "PPK-019",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Silme",
-      "title": "Kaynak silme/retention işlemi türetilmiş OCR, indeks, thumbnail, AI hafızası, cache, replica ve yedeğe yayılır",
       "completedChainCount": 1,
       "completionBlockers": [],
       "missingChain": [

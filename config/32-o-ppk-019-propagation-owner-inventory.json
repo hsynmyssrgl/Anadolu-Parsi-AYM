@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "step": "32-O",
+  "requirement": "PPK-019",
+  "status": "COMPLETE",
+  "completionClaimed": true,
+  "definition": {
+    "semanticDerivedOwner": "Kaynak kullanıcı verisinden yeniden kullanılabilir OCR metni, arama indeksi, thumbnail, AI hafızası, cache veya replica payloadı üreten kalıcı ya da süreç-içi sahip.",
+    "localPropagation": "Zorunlu runtime cache invalidation, kalıcı owner şema taraması ve kaynak/erişim metadata satırlarının aynı yetkili SQLite transactionında kaldırılmasıdır.",
+    "backupPropagation": "Purged tombstone korunurken her etkin yönetilen hedefte fresh korumalı yedek üretimi, hash doğrulaması, eski yönetilen artefakt karantinası ve CAS-benzeri exact pending kapanışıdır.",
+    "externalBoundary": "Uygulamanın fiziksel kontrolünde olmayan yönetilmeyen/harici kopya; otomatik silinmiş sayılmaz ve signed destruction evidence veya açık attestation gerektirir."
+  },
+  "productionInventory": [
+    {
+      "id": "central-source-deletion-propagation-policy",
+      "classification": "CANONICAL_FAIL_CLOSED_POLICY_AND_USE_CASE",
+      "paths": [
+        "packages/platform-policy/src/source-deletion-propagation-policy.ts",
+        "packages/application/src/source-deletion-propagation-use-cases.ts"
+      ],
+      "control": "Yedi owner kind, üç cache registry, kanonik plan hash ve local-before-source-delete sırası merkezi olarak doğrulanır; plan/persistence sapması payload operasyonunu açmaz.",
+      "disposition": "CLOSED_CENTRAL_ENFORCEMENT"
+    },
+    {
+      "id": "local-primary-source-and-access-metadata",
+      "classification": "ATOMIC_LOCAL_DELETE_OWNER",
+      "paths": [
+        "packages/repositories/src/data-lifecycle-repository.ts",
+        "packages/application/src/data-lifecycle-use-cases.ts"
+      ],
+      "control": "İki şema taraması, lifecycle/legal-hold doğrulaması ve secure_delete sonrasında source, object permission ve AI consent satırları aynı transactionda silinir; lifecycle tombstone backup pending kalır.",
+      "disposition": "CLOSED_ATOMIC_LOCAL_PROPAGATION"
+    },
+    {
+      "id": "ocr-index-thumbnail-ai-memory-persistent-payloads",
+      "classification": "ABSENT_TODAY_FUTURE_DEFAULT_DENY",
+      "paths": [
+        "scripts/verify-source-deletion-propagation-boundary.mjs",
+        "packages/repositories/src/data-lifecycle-repository.ts"
+      ],
+      "control": "Aktif üretim persistent semantic owner sayısı sıfırdır. Yeni tablo/writer statik gate ve runtime sqlite_schema taraması tarafından kayıtlı merkezi owner zinciri olmadan reddedilir.",
+      "disposition": "CLOSED_VERIFIED_ABSENT"
+    },
+    {
+      "id": "volatile-runtime-cache-registries",
+      "classification": "VOLATILE_DERIVED_OWNER",
+      "paths": [
+        "apps/desktop/src/main/source-deletion-propagation-application-adapter.ts",
+        "apps/desktop/src/main/family-data-import-service.ts",
+        "apps/desktop/src/main/main.ts"
+      ],
+      "control": "Family import preview lease, IPC main read cache ve offline-sensitive cache kaynak siliminden önce aynı merkezi çağrıda temizlenir/kilitlenir; eksik registry veya temizleme arızası source delete çağrısını engeller.",
+      "disposition": "CLOSED_INVALIDATED_BEFORE_DELETE"
+    },
+    {
+      "id": "plaintext-database-replica",
+      "classification": "RETIRED_UNSUPPORTED_OWNER",
+      "paths": [
+        "apps/desktop/src/main/data-store.ts",
+        "scripts/verify-build96-database-export-file-boundary.mjs"
+      ],
+      "control": "Raw .db export üretim API'sinden kaldırılmıştır; yalnız korumalı .pptbackup desteklenir. Statik gate aktif copyFileSync/databasePath replica kaçışını reddeder.",
+      "disposition": "CLOSED_PLAINTEXT_REPLICA_RETIRED"
+    },
+    {
+      "id": "derived-data-policy-provenance-metadata",
+      "classification": "CONTENT_FREE_IMMUTABLE_PROVENANCE_NOT_PAYLOAD",
+      "paths": [
+        "packages/repositories/src/derived-data-policy-repository.ts",
+        "packages/database/src/family-database-migrations.ts"
+      ],
+      "control": "PPK-016 binding/source tabloları kullanıcı semantik payloadı taşımaz; immutable provenance kaydı olarak korunur ve silinecek türetilmiş payload ownerı sayılmaz.",
+      "disposition": "CLASSIFIED_SEPARATE_PROVENANCE_BOUNDARY"
+    },
+    {
+      "id": "managed-protected-backup-targets",
+      "classification": "ASYNCHRONOUS_VERIFIED_REWRITE_OWNER",
+      "paths": [
+        "packages/application/src/managed-backup-propagation-use-case.ts",
+        "apps/desktop/src/main/data-store.ts",
+        "packages/repositories/src/backup-propagation-repository.ts"
+      ],
+      "control": "Fresh korumalı yedek success/file/hash doğrulaması, eski yönetilen artefakt karantinası ve hedefte yönetilmeyen artefakt kalmaması bütün etkin hedeflerde sağlanmadan exact pending tombstone kapanmaz.",
+      "disposition": "CLOSED_VERIFIED_REWRITE_WITH_PENDING_FENCE"
+    },
+    {
+      "id": "unmanaged-and-external-backup-copies",
+      "classification": "EXTERNAL_EVIDENCE_BOUNDARY",
+      "paths": [
+        "packages/application/src/managed-backup-propagation-use-case.ts",
+        "packages/repositories/src/external-backup-inventory-repository.ts"
+      ],
+      "control": "Yönetilmeyen kopya attention üretir ve pending kapanışını engeller. Harici kopya signed destruction evidence veya açık attestation olmadan fiziksel olarak yok edilmiş sayılmaz; karantina bu kanıtın yerine geçmez.",
+      "disposition": "CLOSED_FAIL_CLOSED_ATTENTION_AND_EVIDENCE"
+    },
+    {
+      "id": "source-deletion-propagation-status-ipc-ui",
+      "classification": "CONTENT_FREE_BOUNDARY_POSTURE",
+      "paths": [
+        "packages/domain/src/source-deletion-propagation.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/main/ipc-read-sharing.ts",
+        "apps/desktop/src/renderer/App.tsx"
+      ],
+      "control": "Sıfır argümanlı no-cache IPC yalnız content-free owner/cache duruşu ve sabit güvenlik booleanlarını gösterir; kaynak, tombstone, path veya kullanıcı payloadı renderer'a çıkmaz.",
+      "disposition": "CLOSED_CONTENT_FREE_NO_CACHE"
+    }
+  ],
+  "closureSummary": {
+    "reviewedOwners": 9,
+    "requiredOwnerKinds": 7,
+    "requiredRuntimeCacheRegistries": 3,
+    "activeSemanticPersistentOwners": 0,
+    "activePlaintextReplicaOwners": 0,
+    "directBypassExceptions": 0,
+    "unregisteredPersistentOwners": 0,
+    "openBlockerCount": 0,
+    "openBlockers": [],
+    "finalValidationPending": false
+  }
+}

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 53,
+  "decisionCount": 54,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1284,6 +1284,35 @@
         "docs/security/PPK-018_IMMUTABLE_POLICY_DECISION_AUDIT_THREAT_MODEL.md",
         "docs/audit/32-N_PPK-018_DEGISMEZ_POLICY_KARAR_AUDIT_UST_KAPANIS.md",
         "config/32-n-ppk-018-policy-decision-audit-inventory.json"
+      ]
+    },
+    {
+      "id": "DEC-200",
+      "date": "2026-08-12",
+      "acceptedAt": "2026-08-12",
+      "title": "PPK-019 fail-closed source deletion and retention propagation top closure",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: tüm işleri full auto olarak sen yap",
+      "document": "docs/decisions/DEC-200-ppk-019-source-deletion-propagation.md",
+      "requirements": ["PPK-019"],
+      "codeAreas": [
+        "packages/platform-policy/src/source-deletion-propagation-policy.ts",
+        "packages/domain/src/source-deletion-propagation.ts",
+        "packages/application/src/source-deletion-propagation-use-cases.ts",
+        "packages/application/src/data-lifecycle-use-cases.ts",
+        "packages/repositories/src/data-lifecycle-repository.ts",
+        "packages/application/src/managed-backup-propagation-use-case.ts",
+        "apps/desktop/src/main/source-deletion-propagation-application-adapter.ts",
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/src/main/main.ts",
+        "scripts/verify-source-deletion-propagation-boundary.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/32-O-ppk-019-source-deletion-propagation-contract.json",
+        "artifacts/validation/32-O-ppk-019-source-deletion-propagation-runtime.json",
+        "docs/security/PPK-019_SOURCE_DELETION_PROPAGATION_THREAT_MODEL.md",
+        "docs/audit/32-O_PPK-019_KAYNAK_SILME_RETENTION_YAYILIMI_UST_KAPANIS.md",
+        "config/32-o-ppk-019-propagation-owner-inventory.json"
       ]
     }
   ]

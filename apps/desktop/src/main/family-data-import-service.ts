@@ -987,8 +987,10 @@ export class FamilyDataImportService {
     return outcome.view;
   }
 
-  public clearCachedPreviews(): void {
+  public clearCachedPreviews(): number {
+    const count = this.#previews.size;
     this.#previews.clear();
+    return count;
   }
 
   #assertAuthorized(context: DataLifecycleApplicationContext, action: AuthorizationAction): void {

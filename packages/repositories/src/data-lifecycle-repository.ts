@@ -1,4 +1,5 @@
 import { asIsoDateTime, asPersonId } from '@ppt/core';
+import type { DatabaseExecutor } from '@ppt/contracts';
 import type {
   DataLifecycleRepositoryPort,
   DataLifecycleResourceDescriptor,
@@ -6,9 +7,15 @@ import type {
   DataRetentionPolicyRow,
   RepositoryExecutionContext,
   RepositoryResult,
+  SourceDeletionPropagationRepositoryEvidence,
   UpsertDataLifecycleInput
 } from '@ppt/repository-contracts';
 import type { DataLifecycleResourceType, DataLifecycleState, RecordPrivacy } from '@ppt/domain';
+import {
+  SourceDeletionPropagationPolicy,
+  type SourceDeletionPersistentOwnerInspection,
+  type SourceDeletionPropagationPlan
+} from '@ppt/platform-policy';
 import { SqliteRepository } from './sqlite-base.js';
 
 const parseResourceTypes=(value:unknown):DataLifecycleResourceType[]=>{
@@ -53,6 +60,21 @@ const RESOURCE_TABLES:Record<DataLifecycleResourceType,string>={
   family_health_history:'family_health_history',life_record:'life_records'
 };
 
+const DERIVED_POLICY_METADATA_TABLES=new Set(['derived_data_policy_bindings','derived_data_policy_sources']);
+const DERIVED_PAYLOAD_TABLE_PATTERN=/(?:^|_)(?:ocr(?:_text)?|search_index|thumbnail|ai_memory|derived_cache|plaintext_replica|replica)(?:_|$)/u;
+const inspectPersistentOwners=(database:DatabaseExecutor,inspectedAt:string):SourceDeletionPersistentOwnerInspection=>{
+  const tableNames=(database.prepare("SELECT name FROM sqlite_schema WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all() as Array<{name:unknown}>).map(row=>String(row.name));
+  const unregisteredPersistentOwners=tableNames.filter(name=>DERIVED_PAYLOAD_TABLE_PATTERN.test(name)&&!DERIVED_POLICY_METADATA_TABLES.has(name));
+  const derivedMetadata=tableNames.filter(name=>name.startsWith('derived_data_'));
+  return Object.freeze({
+    schemaVersion:1,
+    inspectedAt,
+    unregisteredPersistentOwners:Object.freeze(unregisteredPersistentOwners),
+    plaintextReplicaEnabled:unregisteredPersistentOwners.some(name=>/(?:^|_)plaintext_replica(?:_|$)/u.test(name)),
+    derivedPolicyMetadataOnly:derivedMetadata.every(name=>DERIVED_POLICY_METADATA_TABLES.has(name))
+  });
+};
+
 export class SqliteDataLifecycleRepository extends SqliteRepository implements DataLifecycleRepositoryPort {
   listPolicies(context:RepositoryExecutionContext):RepositoryResult<readonly DataRetentionPolicyRow[]>{
     return this.execute(context,()=> (this.database(context).prepare(`SELECT id,name,resource_types,retention_days,grace_days,requires_strong_auth,created_at FROM data_retention_policies ORDER BY name COLLATE NOCASE,id`).all() as Record<string,unknown>[]).map(mapPolicy));
@@ -83,15 +105,36 @@ export class SqliteDataLifecycleRepository extends SqliteRepository implements D
         purged_at=excluded.purged_at,updated_at=excluded.updated_at,backup_propagation_pending=excluded.backup_propagation_pending
     `).run(row.resourceType,row.resourceId,row.ownerPersonId??null,row.privacy??null,row.state,row.policyId??null,row.archivedAt??null,row.purgeEligibleAt??null,row.purgeRequestedAt??null,row.purgeExecuteAfter??null,row.legalHold?1:0,row.holdReason??null,row.purgedAt??null,row.updatedAt,row.backupPropagationPending?1:0);});
   }
-  purgeResource(context:RepositoryExecutionContext,resourceType:DataLifecycleResourceType,resourceId:string):RepositoryResult<boolean>{
+  inspectSourceDeletionPropagation(context:RepositoryExecutionContext,inspectedAt:string):RepositoryResult<SourceDeletionPersistentOwnerInspection>{
+    return this.execute(context,()=>{
+      if(!Number.isFinite(Date.parse(inspectedAt)))throw new Error('Kaynak silme yayılım inceleme zamanı geçersizdir.');
+      return inspectPersistentOwners(this.database(context),inspectedAt);
+    });
+  }
+  purgeResourceWithPropagation(context:RepositoryExecutionContext,plan:SourceDeletionPropagationPlan):RepositoryResult<SourceDeletionPropagationRepositoryEvidence>{
     return this.execute(context,()=>{
       const database=this.database(context);
+      const verification=new SourceDeletionPropagationPolicy().verify(plan);
+      if(!verification.allowed)throw new Error(`SOURCE_DELETION_PROPAGATION_PLAN_REJECTED:${verification.reason}`);
+      const currentInspection=inspectPersistentOwners(database,plan.source.purgedAt);
+      if(JSON.stringify(currentInspection)!==JSON.stringify(plan.persistentInspection))throw new Error('SOURCE_DELETION_PROPAGATION_SCHEMA_CHANGED');
+      const lifecycle=database.prepare("SELECT state,legal_hold FROM data_lifecycle WHERE resource_type=? AND resource_id=?").get(plan.source.resourceType,plan.source.resourceId) as Record<string,unknown>|undefined;
+      if(String(lifecycle?.state??'')!=='purge_scheduled'||Number(lifecycle?.legal_hold??1)!==0)throw new Error('SOURCE_DELETION_PROPAGATION_LIFECYCLE_MISMATCH');
       database.exec('PRAGMA secure_delete=ON;');
-      database.prepare('DELETE FROM object_permissions WHERE resource_type=? AND resource_id=?').run(resourceType,resourceId);
-      database.prepare('DELETE FROM ai_consents WHERE resource_type=? AND resource_id=?').run(resourceType,resourceId);
-      const table=RESOURCE_TABLES[resourceType];
-      const result=database.prepare(`DELETE FROM ${table} WHERE id=?`).run(resourceId) as {changes?:number};
-      return Number(result.changes??0)>0;
+      const permissions=database.prepare('DELETE FROM object_permissions WHERE resource_type=? AND resource_id=?').run(plan.source.resourceType,plan.source.resourceId) as {changes?:number};
+      const consents=database.prepare('DELETE FROM ai_consents WHERE resource_type=? AND resource_id=?').run(plan.source.resourceType,plan.source.resourceId) as {changes?:number};
+      const table=RESOURCE_TABLES[plan.source.resourceType as DataLifecycleResourceType];
+      if(!table)throw new Error('SOURCE_DELETION_PROPAGATION_RESOURCE_TYPE_UNSUPPORTED');
+      const result=database.prepare(`DELETE FROM ${table} WHERE id=?`).run(plan.source.resourceId) as {changes?:number};
+      if(Number(result.changes??0)!==1)throw new Error('SOURCE_DELETION_PROPAGATION_SOURCE_NOT_FOUND');
+      return Object.freeze({
+        schemaVersion:1,
+        planHash:plan.planHash,
+        sourceDeleted:true,
+        deletedAccessMetadataRows:Number(permissions.changes??0)+Number(consents.changes??0),
+        localPropagationComplete:true,
+        backupPropagationPending:true
+      });
     });
   }
 

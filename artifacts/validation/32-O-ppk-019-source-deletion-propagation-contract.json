@@ -1,0 +1,474 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-O",
+  "requirement": "PPK-019",
+  "phase": "SOURCE_DELETION_RETENTION_PROPAGATION_CONTRACT",
+  "status": "PASS",
+  "checkCount": 108,
+  "passed": 108,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "central propagation policy: SOURCE_DELETION_PROPAGATION_POLICY_VERSION = 'PPK-019-V1'",
+      "status": "PASS"
+    },
+    {
+      "name": "central propagation policy: SOURCE_DELETION_PROPAGATION_OWNER_KINDS",
+      "status": "PASS"
+    },
+    {
+      "name": "central propagation policy: 'OCR_TEXT'",
+      "status": "PASS"
+    },
+    {
+      "name": "central propagation policy: 'SEARCH_INDEX'",
+      "status": "PASS"
+    },
+    {
+      "name": "central propagation policy: 'THUMBNAIL'",
+      "status": "PASS"
+    },
+    {
+      "name": "central propagation policy: 'AI_MEMORY'",
+      "status": "PASS"
+    },
+    {
+      "name": "central propagation policy: 'CACHE'",
+      "status": "PASS"
+    },
+    {
+      "name": "central propagation policy: 'REPLICA'",
+      "status": "PASS"
+    },
+    {
+      "name": "central propagation policy: 'BACKUP'",
+      "status": "PASS"
+    },
+    {
+      "name": "central propagation policy: SOURCE_DELETION_REQUIRED_CACHE_REGISTRIES",
+      "status": "PASS"
+    },
+    {
+      "name": "central propagation policy: 'family-import-preview'",
+      "status": "PASS"
+    },
+    {
+      "name": "central propagation policy: 'ipc-main-read'",
+      "status": "PASS"
+    },
+    {
+      "name": "central propagation policy: 'offline-sensitive'",
+      "status": "PASS"
+    },
+    {
+      "name": "central propagation policy: SOURCE_DELETION_DIRECT_BYPASS_EXCEPTIONS",
+      "status": "PASS"
+    },
+    {
+      "name": "central propagation policy: SOURCE_DELETION_AUTHORIZED_REPOSITORY_ADAPTERS",
+      "status": "PASS"
+    },
+    {
+      "name": "direct bypass exception registry is exactly empty",
+      "status": "PASS"
+    },
+    {
+      "name": "authorized repository adapter registry names lifecycle and backup owners",
+      "status": "PASS"
+    },
+    {
+      "name": "policy defines all fail-closed rejection classes",
+      "status": "PASS"
+    },
+    {
+      "name": "policy requires exact cache set and transaction chronology",
+      "status": "PASS"
+    },
+    {
+      "name": "policy rejects unregistered owner plaintext replica and bad metadata class",
+      "status": "PASS"
+    },
+    {
+      "name": "policy emits exact seven owner outcomes and keeps backup pending",
+      "status": "PASS"
+    },
+    {
+      "name": "policy hashes canonical unsigned plan and verifies exact shape",
+      "status": "PASS"
+    },
+    {
+      "name": "policy snapshot tells the quarantine and external backup truth",
+      "status": "PASS"
+    },
+    {
+      "name": "policy is exported from platform-policy root",
+      "status": "PASS"
+    },
+    {
+      "name": "domain exposes content-free propagation boundary only",
+      "status": "PASS"
+    },
+    {
+      "name": "domain boundary does not expose source tombstone path or evidence payload",
+      "status": "PASS"
+    },
+    {
+      "name": "domain and application roots export PPK-019 contracts",
+      "status": "PASS"
+    },
+    {
+      "name": "application enforces cache then inspection then policy then repository order",
+      "status": "PASS"
+    },
+    {
+      "name": "cache or inspection failure short-circuits before payload delete",
+      "status": "PASS"
+    },
+    {
+      "name": "application validates exact repository propagation evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "boundary use case publishes verified content-free posture",
+      "status": "PASS"
+    },
+    {
+      "name": "repository contract removes legacy raw purge and requires inspect plus propagation plan",
+      "status": "PASS"
+    },
+    {
+      "name": "SQLite propagation repository: DERIVED_POLICY_METADATA_TABLES",
+      "status": "PASS"
+    },
+    {
+      "name": "SQLite propagation repository: DERIVED_PAYLOAD_TABLE_PATTERN",
+      "status": "PASS"
+    },
+    {
+      "name": "SQLite propagation repository: sqlite_schema",
+      "status": "PASS"
+    },
+    {
+      "name": "SQLite propagation repository: unregisteredPersistentOwners",
+      "status": "PASS"
+    },
+    {
+      "name": "SQLite propagation repository: SourceDeletionPropagationPolicy().verify(plan)",
+      "status": "PASS"
+    },
+    {
+      "name": "SQLite propagation repository: SOURCE_DELETION_PROPAGATION_SCHEMA_CHANGED",
+      "status": "PASS"
+    },
+    {
+      "name": "SQLite propagation repository: SOURCE_DELETION_PROPAGATION_LIFECYCLE_MISMATCH",
+      "status": "PASS"
+    },
+    {
+      "name": "SQLite propagation repository: PRAGMA secure_delete=ON",
+      "status": "PASS"
+    },
+    {
+      "name": "SQLite propagation repository: DELETE FROM object_permissions",
+      "status": "PASS"
+    },
+    {
+      "name": "SQLite propagation repository: DELETE FROM ai_consents",
+      "status": "PASS"
+    },
+    {
+      "name": "SQLite propagation repository: SOURCE_DELETION_PROPAGATION_SOURCE_NOT_FOUND",
+      "status": "PASS"
+    },
+    {
+      "name": "repository performs second owner inspection after plan verification",
+      "status": "PASS"
+    },
+    {
+      "name": "repository binds lifecycle purge state and legal hold before delete",
+      "status": "PASS"
+    },
+    {
+      "name": "repository enables secure delete before access metadata and source deletion",
+      "status": "PASS"
+    },
+    {
+      "name": "repository requires exactly one source row and content-free evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "authorized DataLifecycle adapter maps both propagation operations",
+      "status": "PASS"
+    },
+    {
+      "name": "ExecuteDataPurge requires central propagation use case",
+      "status": "PASS"
+    },
+    {
+      "name": "purge propagation runs before tombstone audit and event",
+      "status": "PASS"
+    },
+    {
+      "name": "purge outbox binds plan and every owner outcome",
+      "status": "PASS"
+    },
+    {
+      "name": "desktop cache adapter returns all three exact registries",
+      "status": "PASS"
+    },
+    {
+      "name": "desktop cache adapter fails closed on any cache exception",
+      "status": "PASS"
+    },
+    {
+      "name": "family import cache clear reports exact cleared count",
+      "status": "PASS"
+    },
+    {
+      "name": "DataStore composes exactly the central policy and cache adapter",
+      "status": "PASS"
+    },
+    {
+      "name": "main cache invalidator clears main read cache and locks offline sensitive cache",
+      "status": "PASS"
+    },
+    {
+      "name": "managed backup requires verified fresh success path and SHA-256",
+      "status": "PASS"
+    },
+    {
+      "name": "managed backup quarantines old managed artifacts and deletes old run projections",
+      "status": "PASS"
+    },
+    {
+      "name": "managed backup counts unmanaged active artifacts as target failure",
+      "status": "PASS"
+    },
+    {
+      "name": "pending closes only when every enabled target is refreshed",
+      "status": "PASS"
+    },
+    {
+      "name": "no target leaves pending and returns attention",
+      "status": "PASS"
+    },
+    {
+      "name": "backup repository uses exact pending tombstone revision fence",
+      "status": "PASS"
+    },
+    {
+      "name": "main registers typed PPK-019 content-free status handler",
+      "status": "PASS"
+    },
+    {
+      "name": "preload and renderer global expose typed PPK-019 status only",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-019 status IPC is zero argument",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-019 status IPC is policy-sensitive no-cache",
+      "status": "PASS"
+    },
+    {
+      "name": "renderer loads and displays content-free PPK-019 posture",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate passes malicious and benign self-tests with no finding",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate: PRIMARY_DELETE_OUTSIDE_PROPAGATION_REPOSITORY",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate: UNREGISTERED_DERIVED_PAYLOAD_TABLE",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate: UNREGISTERED_DERIVED_PAYLOAD_WRITER",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate: PROPAGATION_REPOSITORY_CALL_OUTSIDE_AUTHORIZED_CHAIN",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate: PROPAGATION_ENFORCEMENT_OUTSIDE_DATASTORE_COMPOSITION",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate: PLAINTEXT_REPLICA_COPY_ACTIVE",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate: EMPTY_RUNTIME_CACHE_INVALIDATOR",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate self-test matrix remains exact",
+      "status": "PASS"
+    },
+    {
+      "name": "pretypecheck and prebuild include PPK-019 source gate",
+      "status": "PASS"
+    },
+    {
+      "name": "root package exposes all four PPK-019 commands",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted suite contains at least twenty executed cases",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test: SourceDeletionPropagationPolicy",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test: EnforceSourceDeletionPropagationUseCase",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test: SqliteDataLifecycleRepository",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test: SqliteBackupPropagationRepository",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test: cache temizleme arızasında inspect ve delete çağrılmaz",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test: repository TOCTOU şema değişimini ikinci taramada reddeder",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test: tüm yönetilen hedefler temiz yedek ve karantina doğrulayınca pending kaydı kapatır",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test: yönetilmeyen yedek kalırsa pending kapanmaz",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test: backup repository yalnız exact pending tombstone sürümünü atomik kapatır",
+      "status": "PASS"
+    },
+    {
+      "name": "legacy lifecycle and backup runtimes use in-process TypeScript stripping rather than ambient npm",
+      "status": "PASS"
+    },
+    {
+      "name": "latest database migration remains 77 and no PPK-019 migration exists",
+      "status": "PASS"
+    },
+    {
+      "name": "scope forbids migration backfill transfer ownership change and cutover",
+      "status": "PASS"
+    },
+    {
+      "name": "scope requires all seven owner kinds and exact three cache registries",
+      "status": "PASS"
+    },
+    {
+      "name": "scope records local-before-delete and two owner inspections",
+      "status": "PASS"
+    },
+    {
+      "name": "scope records managed rewrite unmanaged attention and quarantine truth",
+      "status": "PASS"
+    },
+    {
+      "name": "inventory reviews nine owners with zero open semantic owner or bypass",
+      "status": "PASS"
+    },
+    {
+      "name": "inventory separates immutable provenance from user payload",
+      "status": "PASS"
+    },
+    {
+      "name": "inventory keeps external copies in evidence boundary",
+      "status": "PASS"
+    },
+    {
+      "name": "DEC-200 records local atomicity backup rewrite and no-migration truth",
+      "status": "PASS"
+    },
+    {
+      "name": "threat model records TOCTOU replica unmanaged external and quarantine threats",
+      "status": "PASS"
+    },
+    {
+      "name": "master decision register contains DEC-200",
+      "status": "PASS"
+    },
+    {
+      "name": "audit contains exact executed baseline evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "user decision ledger contains active DEC-200 and exact count",
+      "status": "PASS"
+    },
+    {
+      "name": "prior PPK-012 through PPK-018 packages remain complete",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-020 remains outside PPK-019 closure",
+      "status": "PASS"
+    },
+    {
+      "name": "accepted registry closes the complete PPK-019 evidence chain",
+      "status": "PASS"
+    },
+    {
+      "name": "scope closes PPK-019 with no migration transfer backfill or cutover",
+      "status": "PASS"
+    },
+    {
+      "name": "inventory closes only after final validation",
+      "status": "PASS"
+    },
+    {
+      "name": "audit closes only with final contract and runtime evidence",
+      "status": "PASS"
+    }
+  ],
+  "failures": [],
+  "sourceGate": {
+    "status": "PASS",
+    "productionSourceZones": 18,
+    "scannedFiles": 346,
+    "securityRelevantFiles": 32,
+    "maliciousSelfTestAssertions": 8,
+    "benignFalsePositiveAssertions": 4,
+    "findings": []
+  },
+  "ownerKinds": 7,
+  "requiredRuntimeCacheRegistries": 3,
+  "activeSemanticPersistentOwners": 0,
+  "plaintextReplicaProductionOwners": 0,
+  "directBypassExceptions": 0,
+  "localPropagationMustPrecedeSourceDelete": true,
+  "managedBackupVerifiedRewriteRequired": true,
+  "unmanagedAndExternalBackupAttentionRequired": true,
+  "historicalBackupQuarantineIsNotPhysicalDestruction": true,
+  "latestDatabaseMigration": 77,
+  "schemaMigrationRequired": false,
+  "historicalBackfillPerformed": false,
+  "legacyDesktopVaultPreserved": true,
+  "sqliteOwnershipTransferred": false,
+  "realDataTransferPerformed": false,
+  "cutoverAuthorityAttached": false,
+  "successorRequirementCompletedByThisPackage": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T23:36:40.123Z"
+}

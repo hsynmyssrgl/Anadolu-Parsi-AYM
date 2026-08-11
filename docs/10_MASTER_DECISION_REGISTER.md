@@ -28,6 +28,10 @@ Bir çelişki olduğunda aşağıdaki sıra uygulanır:
 Eski kararlar silinmez; tarihsel kanıt olarak korunur. Ancak aktif ürün davranışını
 belirleyemez. Çelişki sessizce birleştirilmez; değişiklik kaydına işlenir.
 
+## DEC-200 — PPK-019 kaynak silme ve retention yayılımı
+
+32-O ile kaynak kalıcı imhası; OCR metni, arama indeksi, thumbnail, AI hafızası, cache, replica ve yedek owner sınıflarına merkezi fail-closed planla yayılır. Üç runtime cache sahibi silme öncesi temizlenir; SQLite owner taraması iki kez yapılır; kaynak ve erişim metadata'sı aynı transactionda silinir, backup pending tombstone korunur. Yönetilen yedek pending kaydı yalnız doğrulanmış fresh korumalı yeniden yazım ve eski managed artefakt karantinası sonrası kapanır. Yönetilmeyen/harici kopya otomatik fiziksel imha edilmiş sayılmaz; quarantine destruction değildir. Yeni migration, gerçek veri taşıma, backfill, cutover veya SQLite/vault sahiplik değişimi yoktur. Ayrıntılı ve bağlayıcı karar `docs/decisions/DEC-200-ppk-019-source-deletion-propagation.md` dosyasındadır.
+
 ## DEC-199 — PPK-018 değişmez policy karar audit zinciri
 
 32-N ile allow ve deny policy kararları; açık karar/ret nedeni, policy sürümü ve imzalı package bağı, exact yükümlülükler, request/context/receipt/record hashleri ile korumalı append-only journala yazılır. Ret dönüşü ve non-deferred izin operasyonu persistence öncesi açılamaz; yazım arızası fail-closed kalır. Yeni kayıtlar AES-256-GCM audit+receipt zarfı ve HMAC-SHA-256 journal zinciri kullanır; tarihsel direct receipt payloadları okunur fakat backfill edilmez. Yeni migration, gerçek veri taşıma, SQLite/vault sahiplik değişimi veya cutover yoktur; PPK-019 ayrı kapsamdır. Ayrıntılı ve bağlayıcı karar `docs/decisions/DEC-199-ppk-018-immutable-policy-decision-audit.md` dosyasındadır.

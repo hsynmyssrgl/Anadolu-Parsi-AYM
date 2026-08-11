@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-O",
+  "requirement": "PPK-019",
+  "phase": "SOURCE_DELETION_RETENTION_PROPAGATION_RUNTIME",
+  "status": "PASS",
+  "checkCount": 15,
+  "passed": 15,
+  "failed": 0,
+  "results": [
+    {
+      "id": "ppk-019-contract",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "PPK-019 contract: PASS",
+      "outputSha256": "e4cc2bceccb14fa19d2a91025fb4aa47ea63338b44af6f48015c07b5ea6e09eb",
+      "outputTail": "PPK-019 contract: PASS (108/108)."
+    },
+    {
+      "id": "source-deletion-propagation-production-source-gate",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "\"status\": \"PASS\"",
+      "outputSha256": "7131e4f4b45fa8d5256aa1d6f9c520b1a638de302e27ae97040ef8018fb6cb1e",
+      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 346,\n  \"securityRelevantFiles\": 32,\n  \"maliciousSelfTestAssertions\": 8,\n  \"benignFalsePositiveAssertions\": 4,\n  \"ownerKinds\": 7,\n  \"requiredRuntimeCacheRegistries\": 3,\n  \"activeSemanticPersistentOwners\": 0,\n  \"plaintextReplicaProductionOwners\": 0,\n  \"directBypassExceptions\": 0,\n  \"authorizedRepositoryAdapters\": 2,\n  \"findings\": []\n}"
+    },
+    {
+      "id": "ppk-019-policy-repository-cache-backup-targeted",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 20,
+      "minimumTests": 20,
+      "outputSha256": "de4bedc4e76927330e7667151070bf7ce24365dadd0e1e69ca5d5bf503f7a364",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n····················\n\n Test Files  1 passed (1)\n      Tests  20 passed (20)\n   Start at  02:36:42\n   Duration  3.72s (transform 1.77s, setup 0ms, import 3.41s, tests 34ms, environment 0ms)\n\n\n(node:8028) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "build136-data-lifecycle-runtime-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "Build 136 data lifecycle runtime: PASS (31/31)",
+      "outputSha256": "3a3b01a7efcd272ab60ec19fb11d7a4b0082f3efd960549fc3666b5b7c177aad",
+      "outputTail": "Build 136 data lifecycle runtime: PASS (31/31)\n\n(node:23720) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "build137-backup-purge-propagation-runtime-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "Build 137 backup purge propagation runtime: PASS (37/37)",
+      "outputSha256": "47d7f8f080b597ecf48817b3ecbb734ea4dff851fb4c0636e8ac3c2299c224f6",
+      "outputTail": "Build 137 backup purge propagation runtime: PASS (37/37)\n\n(node:16796) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "ppk-012-through-ppk-019-security-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 202,
+      "minimumTests": 202,
+      "outputSha256": "ed08c48e00d03457343bcc4cd9e312938f91adfc591c865c5f984e5a2f711537",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n··········································································································································································································\n\n Test Files  8 passed (8)\n      Tests  202 passed (202)\n   Start at  02:36:47\n   Duration  7.90s (transform 2.04s, setup 0ms, import 4.96s, tests 854ms, environment 1ms)\n\n\n(node:3032) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:10224) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:22100) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "data-store-smoke",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "\"checks\": 14",
+      "outputSha256": "f797b35fa971b421369127603e2ce4a2da2c853e0e9b40cb1ce2d9f8bf7f9497",
+      "outputTail": "{\n  \"schemaVersion\": 1,\n  \"product\": \"Panthera pardus tulliana\",\n  \"version\": \"24.07.2026.60\",\n  \"milestone\": \"B064-M20 Backup Application Migration\",\n  \"status\": \"passed\",\n  \"checks\": 14,\n  \"peopleBefore\": 1,\n  \"peopleAfter\": 2,\n  \"backupCreated\": true,\n  \"migrationVersions\": [\n    1,\n    2,\n    3,\n    4,\n    5,\n    6,\n    7,\n    8,\n    9,\n    10,\n    11,\n    12,\n    13,\n    14,\n    15,\n    16,\n    17,\n    18,\n    19,\n    20,\n    21,\n    22,\n    23,\n    24,\n    25,\n    26,\n    27,\n    28,\n    29,\n    30,\n    31,\n    32,\n    33,\n    34,\n    35,\n    36,\n    37,\n    38,\n    39,\n    40,\n    41,\n    42,\n    43,\n    44,\n    45,\n    46,\n    47,\n    48,\n    49,\n    50,\n    51,\n    52,\n    53,\n    54,\n    55,\n    56,\n    57,\n    58,\n    59,\n    60,\n    61,\n    62,\n    63,\n    64,\n    65,\n    66,\n    67,\n    68,\n    69,\n    70,\n    71,\n    72,\n    73,\n    74,\n    75,\n    76,\n    77\n  ],\n  \"schemaFingerprint\": \"5d36e7fecbbf181b2ea52a98a7c448691f233b820da9aa81326b028592cac5e4\"\n}\n\n(node:26340) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "migration-77-no-ppk019-schema-change",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "\"version\": 77",
+      "outputSha256": "704fa22b86bd704b2a555290fdb319e9c34ea4eb774a0c9c77c00dbb47f43a6c",
+      "outputTail": "1c9609\"\n    },\n    {\n      \"version\": 67,\n      \"name\": \"local_ppk002_timeline_event_policy_receipt_fence\",\n      \"checksum\": \"a67f9807f2a2bb00ada3768d06882a0ca2648d91b19eacb2becf46cf9ef2b528\"\n    },\n    {\n      \"version\": 68,\n      \"name\": \"ppk002_family_import_governed_rollback_receipt_fence\",\n      \"checksum\": \"298ffa1c65a65e762904cb913ecb9b45d1dfa5fcd94659c1a3181a5984f71bd6\"\n    },\n    {\n      \"version\": 69,\n      \"name\": \"ppk004_complete_policy_context_binding\",\n      \"checksum\": \"b0eaf8abbf4b45e00404717a1ba767ce64687e9f575a0e11798326cbdbfeeb91\"\n    },\n    {\n      \"version\": 70,\n      \"name\": \"ppk005_complete_data_classification\",\n      \"checksum\": \"bfd3643232c6daa25d85804f08c4580f896fe4d6e81c2ad3d7dcf602649085e9\"\n    },\n    {\n      \"version\": 71,\n      \"name\": \"ppk006_complete_policy_obligation_suite\",\n      \"checksum\": \"ba678463aa0138780d74d2342bcc453ab622e87c7213a4d10078319762c96a90\"\n    },\n    {\n      \"version\": 72,\n      \"name\": \"ppk007_signed_versioned_policy_package\",\n      \"checksum\": \"6660072205bd61c06dd1d4f4b744884f7edb29bf370d44a228c150ebca679a83\"\n    },\n    {\n      \"version\": 73,\n      \"name\": \"ppk008_application_identity_device_certificate_manifest\",\n      \"checksum\": \"0099d0238be94ea6bb95579d2ac9f33c015e99d5c14463442313953c014b87fd\"\n    },\n    {\n      \"version\": 74,\n      \"name\": \"ppk009_core_service_decision_reevaluation\",\n      \"checksum\": \"99c89269ac120adbb387dc796ecf1b837f978e04e375d3d41c4fb605020ea813\"\n    },\n    {\n      \"version\": 75,\n      \"name\": \"ppk011_contextual_ownership_share\",\n      \"checksum\": \"3c59ecd6df8d4bf777a8eee8c4864f19848fb712c85691105320afa17b476337\"\n    },\n    {\n      \"version\": 76,\n      \"name\": \"ppk012_offline_capability_lease_cache_fence\",\n      \"checksum\": \"98546bdde3fe97f9f37f2421dd74ad305ce5301dd23a9954ed54bd53610e9388\"\n    },\n    {\n      \"version\": 77,\n      \"name\": \"ppk016_derived_data_policy_inheritance\",\n      \"checksum\": \"de7fbb16719ad427c33d20be3cf564577185d6a1c2eb916cbe0dbdf40724a1da\"\n    }\n  ],\n  \"generatedAt\": \"2026-08-11T23:37:01.382Z\"\n}\n\n(node:9504) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "foundation-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "\"checks\": 14",
+      "outputSha256": "fdd4d701971b2e2f532a228fa7af72d1ba312d7f7b6cf12ba2ccdb026b27d035",
+      "outputTail": "{\n  \"status\": \"passed\",\n  \"checks\": 14,\n  \"names\": [\n    \"Result success mapping\",\n    \"Result error short-circuit\",\n    \"Result error mapping\",\n    \"Result flatMap\",\n    \"Throwable mapping\",\n    \"Result matching\",\n    \"Central AppError\",\n    \"Deterministic clock\",\n    \"Pagination limits\",\n    \"Configuration defaults and validation\",\n    \"Configuration path isolation\",\n    \"Configuration redaction\",\n    \"Structured logging fail-closed content boundary\",\n    \"JSON Lines serialization\"\n  ]\n}"
+    },
+    {
+      "id": "runtime-foundation-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "\"checks\": 6",
+      "outputSha256": "c41d390d1c4a13ad38bb9002e3e33dc6b46ab1e47b2be58d8cf5d8c3ba86e251",
+      "outputTail": "{\n  \"status\": \"passed\",\n  \"checks\": 6,\n  \"names\": [\n    \"runtime environment resolution\",\n    \"configuration overrides and validation\",\n    \"stored correlation provider propagates async context\",\n    \"JSONL file logging rejects payload and rotates content-free events\",\n    \"desktop runtime creates isolated paths and startup log\",\n    \"IPC wrapper logs success and preserves return value\"\n  ]\n}"
+    },
+    {
+      "id": "platform-policy-gate",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "Platform Policy runtime: PASS (8 checks).",
+      "outputSha256": "c67054a8790fa115778658c197e06fc4d32afd27ae1ad43b77fd9394bdd47307",
+      "outputTail": "Platform Policy Gate: PASS / authorization bypass 0 / presentation conditions 10.\nPlatform Policy runtime: PASS (8 checks)."
+    },
+    {
+      "id": "platform-policy-enforcement-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "PASS (43 controlled checks",
+      "outputSha256": "75ce01e4cf5a58b3b53e0437ab2e48dd91ca63eda2b09b79b66c327b0534010c",
+      "outputTail": "30-M predecessor runtime regression: PASS (43 controlled checks; PPK-002 remains PARTIAL).\n\n(node:19884) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "core-service-boundary",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "Core Service boundary: PASS (8 checks).",
+      "outputSha256": "55d075584f9f8466eb88cdfdec4b3c012d030a160cc18cd26f24f32f5969011b",
+      "outputTail": "Core Service boundary: PASS (8 checks)."
+    },
+    {
+      "id": "core-service-entrypoint-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "30-O Core Service Entrypoint Runtime: PASS (24 assertions).",
+      "outputSha256": "a47e42f47614cb5c9a2bf6e4c1a011664680ba55285442c5f24ab6adfd89282f",
+      "outputTail": "30-O Core Service Entrypoint Runtime: PASS (24 assertions).\n\n(node:8256) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "root-typescript",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "",
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputTail": ""
+    }
+  ],
+  "validatedBoundaries": [
+    "EXACT_SEVEN_PROPAGATION_OWNER_KINDS",
+    "THREE_RUNTIME_CACHE_REGISTRIES_INVALIDATED_BEFORE_DELETE",
+    "PERSISTENT_OWNER_SCHEMA_SCAN_AND_TOCTOU_RESCAN",
+    "UNREGISTERED_OWNER_AND_PLAINTEXT_REPLICA_DEFAULT_DENY",
+    "CANONICAL_PLAN_HASH_AND_OWNER_EVIDENCE",
+    "LIFECYCLE_LEGAL_HOLD_AND_EXACT_SOURCE_REVALIDATION",
+    "ATOMIC_SOURCE_PERMISSION_AND_AI_CONSENT_DELETE",
+    "BACKUP_PENDING_TOMBSTONE_RETENTION",
+    "MANAGED_PROTECTED_BACKUP_VERIFIED_FRESH_REWRITE",
+    "MANAGED_HISTORICAL_ARTIFACT_RECOVERABLE_QUARANTINE",
+    "UNMANAGED_AND_EXTERNAL_COPY_ATTENTION_EVIDENCE_BOUNDARY",
+    "CONTENT_FREE_NO_CACHE_STATUS_IPC",
+    "ZERO_DIRECT_DELETE_DERIVED_WRITER_REPLICA_CACHE_BYPASS",
+    "PPK_012_TO_PPK_019_SECURITY_REGRESSION",
+    "MIGRATION_77_UNCHANGED_NO_TRANSFER_OR_CUTOVER",
+    "ROOT_TYPESCRIPT"
+  ],
+  "targetedTestsMinimum": 20,
+  "dataLifecycleRuntimeChecks": 31,
+  "backupPropagationRuntimeChecks": 37,
+  "ownerKinds": 7,
+  "requiredRuntimeCacheRegistries": 3,
+  "activeSemanticPersistentOwners": 0,
+  "plaintextReplicaProductionOwners": 0,
+  "directBypassExceptions": 0,
+  "localPropagationMustPrecedeSourceDelete": true,
+  "managedBackupVerifiedRewriteRequired": true,
+  "unmanagedAndExternalBackupAttentionRequired": true,
+  "historicalBackupQuarantineIsNotPhysicalDestruction": true,
+  "schemaMigrationRequired": false,
+  "latestDatabaseMigration": 77,
+  "historicalBackfillPerformed": false,
+  "legacyDesktopVaultPreserved": true,
+  "sqliteOwnershipTransferred": false,
+  "realDataTransferPerformed": false,
+  "cutoverAuthorityAttached": false,
+  "successorRequirementCompletedByThisPackage": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T23:37:11.703Z"
+}

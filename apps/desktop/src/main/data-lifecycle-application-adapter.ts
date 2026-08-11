@@ -102,7 +102,8 @@ class Scope implements DataLifecycleWriteScope {
   }
   insertPolicy(policy:Parameters<DataLifecycleWriteScope['insertPolicy']>[0]):ReturnType<DataLifecycleWriteScope['insertPolicy']>{return this.dependencies.dataLifecycleRepository.insertPolicy(this.repository,policy);}
   upsertLifecycle(record:Parameters<DataLifecycleWriteScope['upsertLifecycle']>[0]):ReturnType<DataLifecycleWriteScope['upsertLifecycle']>{return this.dependencies.dataLifecycleRepository.upsertLifecycle(this.repository,record);}
-  purgeResource(resourceType:Parameters<DataLifecycleWriteScope['purgeResource']>[0],resourceId:string):ReturnType<DataLifecycleWriteScope['purgeResource']>{return this.dependencies.dataLifecycleRepository.purgeResource(this.repository,resourceType,resourceId);}
+  inspectSourceDeletionPropagation(inspectedAt:string):ReturnType<DataLifecycleWriteScope['inspectSourceDeletionPropagation']>{return this.dependencies.dataLifecycleRepository.inspectSourceDeletionPropagation(this.repository,inspectedAt);}
+  purgeResourceWithPropagation(plan:Parameters<DataLifecycleWriteScope['purgeResourceWithPropagation']>[0]):ReturnType<DataLifecycleWriteScope['purgeResourceWithPropagation']>{return this.dependencies.dataLifecycleRepository.purgeResourceWithPropagation(this.repository,plan);}
   appendAudit(input:Parameters<DataLifecycleWriteScope['appendAudit']>[0]):ReturnType<DataLifecycleWriteScope['appendAudit']>{return this.dependencies.auditRepository.append(this.repository,input);}
   enqueueEvent<T>(event:DomainEvent<T>):Result<void,AppError>{return this.dependencies.outboxRepository.enqueue(this.repository,event);}
 }

@@ -1,5 +1,9 @@
 import type { IsoDateTime, PersonId } from '@ppt/core';
 import type { DataLifecycleResourceType, DataLifecycleState, RecordPrivacy } from '@ppt/domain';
+import type {
+  SourceDeletionPersistentOwnerInspection,
+  SourceDeletionPropagationPlan
+} from '@ppt/platform-policy';
 import type { RepositoryExecutionContext, RepositoryResult } from './repository-context.js';
 
 export interface DataRetentionPolicyRow {
@@ -40,6 +44,15 @@ export interface DataLifecycleRow {
 
 export interface UpsertDataLifecycleInput extends DataLifecycleRow {}
 
+export interface SourceDeletionPropagationRepositoryEvidence {
+  readonly schemaVersion:1;
+  readonly planHash:string;
+  readonly sourceDeleted:true;
+  readonly deletedAccessMetadataRows:number;
+  readonly localPropagationComplete:true;
+  readonly backupPropagationPending:true;
+}
+
 export interface DataLifecycleRepositoryPort {
   listPolicies(context:RepositoryExecutionContext):RepositoryResult<readonly DataRetentionPolicyRow[]>;
   findPolicy(context:RepositoryExecutionContext,id:string):RepositoryResult<DataRetentionPolicyRow|null>;
@@ -48,5 +61,6 @@ export interface DataLifecycleRepositoryPort {
   findLifecycle(context:RepositoryExecutionContext,resourceType:DataLifecycleResourceType,resourceId:string):RepositoryResult<DataLifecycleRow|null>;
   findResource(context:RepositoryExecutionContext,resourceType:DataLifecycleResourceType,resourceId:string):RepositoryResult<DataLifecycleResourceDescriptor|null>;
   upsertLifecycle(context:RepositoryExecutionContext,row:UpsertDataLifecycleInput):RepositoryResult<void>;
-  purgeResource(context:RepositoryExecutionContext,resourceType:DataLifecycleResourceType,resourceId:string):RepositoryResult<boolean>;
+  inspectSourceDeletionPropagation(context:RepositoryExecutionContext,inspectedAt:string):RepositoryResult<SourceDeletionPersistentOwnerInspection>;
+  purgeResourceWithPropagation(context:RepositoryExecutionContext,plan:SourceDeletionPropagationPlan):RepositoryResult<SourceDeletionPropagationRepositoryEvidence>;
 }

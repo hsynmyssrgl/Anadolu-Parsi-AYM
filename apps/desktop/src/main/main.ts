@@ -19,7 +19,7 @@ import type {
   WindowsHelloAuthenticationView,
   WindowsHelloStateView
 } from '@ppt/domain';
-import { GetDerivedDataPolicyBoundaryUseCase, GetPolicyDecisionAuditBoundaryUseCase, GetSensitiveLoggingBoundaryUseCase, type WindowsHelloPlatformPort } from '@ppt/application';
+import { GetDerivedDataPolicyBoundaryUseCase, GetPolicyDecisionAuditBoundaryUseCase, GetSensitiveLoggingBoundaryUseCase, GetSourceDeletionPropagationBoundaryUseCase, type WindowsHelloPlatformPort } from '@ppt/application';
 import type { IssueOfflineCapabilityLeaseInput, OfflineCapabilityLeaseWorkspaceView } from '@ppt/domain';
 import {
   FamilyDataStore,
@@ -69,8 +69,8 @@ import { PlatformPolicyReceiptFileSink } from './platform-policy-receipt-file-si
 import { PlatformPolicyDecisionAuditInspectionAdapter } from './policy-decision-audit-application-adapter.js';
 import { DesktopUniversalApiPolicyEnforcement } from './desktop-universal-api-policy-enforcement.js';
 import { DesktopRepositoryPolicyScope } from './desktop-repository-policy-scope.js';
-import { DerivedDataInheritancePolicy, ImmutablePolicyDecisionAuditPolicy, NetworkEgressPolicy, SensitiveLogPolicy } from '@ppt/platform-policy';
-import type { DerivedDataPolicyBoundaryView, NetworkEgressBoundaryView, PolicyDecisionAuditBoundaryView, SensitiveLoggingBoundaryView } from '@ppt/domain';
+import { DerivedDataInheritancePolicy, ImmutablePolicyDecisionAuditPolicy, NetworkEgressPolicy, SensitiveLogPolicy, SourceDeletionPropagationPolicy } from '@ppt/platform-policy';
+import type { DerivedDataPolicyBoundaryView, NetworkEgressBoundaryView, PolicyDecisionAuditBoundaryView, SensitiveLoggingBoundaryView, SourceDeletionPropagationBoundaryView } from '@ppt/domain';
 
 type ArchiveMutationInput<TInput> = TInput & { readonly operationId: string };
 interface ArchiveItemMutationInput {
@@ -83,8 +83,10 @@ const networkEgressPolicy = new NetworkEgressPolicy();
 const derivedDataInheritancePolicy = new DerivedDataInheritancePolicy();
 const sensitiveLogPolicy = new SensitiveLogPolicy();
 const immutablePolicyDecisionAuditPolicy = new ImmutablePolicyDecisionAuditPolicy();
+const sourceDeletionPropagationPolicy = new SourceDeletionPropagationPolicy();
 const getDerivedDataPolicyBoundaryUseCase = new GetDerivedDataPolicyBoundaryUseCase(derivedDataInheritancePolicy);
 const getSensitiveLoggingBoundaryUseCase = new GetSensitiveLoggingBoundaryUseCase(sensitiveLogPolicy);
+const getSourceDeletionPropagationBoundaryUseCase = new GetSourceDeletionPropagationBoundaryUseCase(sourceDeletionPropagationPolicy);
 const currentProductName = 'Anadolu Parsı Aile Yaşam Merkezi';
 const volatileRuntimeRoot = join(app.getPath('temp'), 'Anadolu-Parsi-Aile-Yasam-Merkezi', `runtime-${process.pid}`);
 rmSync(volatileRuntimeRoot, { recursive: true, force: true });
@@ -595,6 +597,18 @@ function store(windowsHelloPlatformOverride?: WindowsHelloPlatformPort): FamilyD
       correlation: current.correlation,
       logger: current.logger,
       repositoryExecutionPolicyGuard: desktopRepositoryPolicyScope.guard,
+      sourceDeletionExternalCacheInvalidator: {
+        invalidate: () => {
+          const mainReadEntries = ipcReadResults.entryCount();
+          ipcReadResults.clearAll();
+          const offlineSensitiveEntries = offlineSensitiveCache.state().entryCount;
+          offlineSensitiveCache.lock('NO_LEASE');
+          return Object.freeze([
+            Object.freeze({ registryId: 'ipc-main-read' as const, invalidatedEntryCount: mainReadEntries }),
+            Object.freeze({ registryId: 'offline-sensitive' as const, invalidatedEntryCount: offlineSensitiveEntries })
+          ]);
+        }
+      },
       securityConfig: current.config.security,
       migrationBackupDirectory: join(dirname(databasePath), 'migration-backups'),
       onMigrationCompleted: (summary) => current.logger.info({
@@ -1165,6 +1179,7 @@ function registerIpc(): void {
     immutablePolicyDecisionAuditPolicy,
     new PlatformPolicyDecisionAuditInspectionAdapter(policyReceiptSink())
   ).execute());
+  registerIpcHandler('system:getSourceDeletionPropagationBoundary', ():SourceDeletionPropagationBoundaryView => getSourceDeletionPropagationBoundaryUseCase.execute());
   registerIpcHandler('system:listBackupTargets', () => store().listBackupTargets());
   registerIpcHandler('system:upsertBackupTarget', (_event,input:UpsertBackupTargetInput) => store().upsertBackupTarget(input));
   registerIpcHandler('system:listBackupRuns', (_event,limit?:number) => store().listBackupRuns(limit));

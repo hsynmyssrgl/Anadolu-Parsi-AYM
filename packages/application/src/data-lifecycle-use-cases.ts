@@ -30,6 +30,10 @@ import type {
 } from '@ppt/domain';
 import type { DomainEvent } from '@ppt/events';
 import type { AuthorizationAction } from '@ppt/security';
+import {
+  EnforceSourceDeletionPropagationUseCase,
+  type SourceDeletionPropagationWriteScope
+} from './source-deletion-propagation-use-cases.js';
 
 export interface DataLifecycleApplicationContext {
   readonly familyId:FamilyId;
@@ -65,7 +69,7 @@ export interface DataLifecycleQueryPort {
   listPolicies(context:DataLifecycleApplicationContext):Result<readonly DataRetentionPolicyView[],AppError>;
   listLifecycle(context:DataLifecycleApplicationContext):Result<readonly DataLifecycleRecordView[],AppError>;
 }
-export interface DataLifecycleWriteScope {
+export interface DataLifecycleWriteScope extends SourceDeletionPropagationWriteScope {
   readonly occurredAt:IsoDateTime;
   findResource(resourceType:DataLifecycleResourceType,resourceId:string):Result<DataLifecycleResourceDescriptor|null,AppError>;
   findPolicy(policyId:string):Result<DataRetentionPolicyRecord|null,AppError>;
@@ -73,7 +77,6 @@ export interface DataLifecycleWriteScope {
   authorize(input:{readonly action:AuthorizationAction;readonly resourceType:DataLifecycleResourceType;readonly resourceId:string;readonly ownerPersonId:PersonId;readonly privacy:RecordPrivacy}):Result<boolean,AppError>;
   insertPolicy(policy:DataRetentionPolicyRecord):Result<void,AppError>;
   upsertLifecycle(record:DataLifecycleRecord):Result<void,AppError>;
-  purgeResource(resourceType:DataLifecycleResourceType,resourceId:string):Result<boolean,AppError>;
   appendAudit(input:{readonly id:string;readonly action:string;readonly resourceType:string;readonly resourceId:string;readonly occurredAt:IsoDateTime;readonly actorId:UserId}):Result<string,AppError>;
   enqueueEvent<T>(event:DomainEvent<T>):Result<void,AppError>;
 }
@@ -201,7 +204,11 @@ export class CancelDataPurgeUseCase {
 }
 
 export class ExecuteDataPurgeUseCase {
-  constructor(private readonly unit:DataLifecycleUnitOfWork,private readonly strongAuth:StrongAuthenticationPort){}
+  constructor(
+    private readonly unit:DataLifecycleUnitOfWork,
+    private readonly strongAuth:StrongAuthenticationPort,
+    private readonly propagation:EnforceSourceDeletionPropagationUseCase
+  ){}
   execute(input:{readonly context:DataLifecycleApplicationContext;readonly command:ExecuteDataPurgeInput;readonly identifiers:{auditId:string;outboxEventId:EventId}}):Result<DataLifecycleRecord,AppError>{
     if(input.command.confirmation!==purgeExecutionConfirmation(input.command.resourceType,input.command.resourceId))return err(invalid(input.context,'Geri alınamaz imha onay metni kayıt kimliğiyle birebir eşleşmelidir.'));
     const reauthenticated=this.strongAuth.verify(input.context,{password:input.command.password,...(input.command.code?{code:input.command.code}:{})});if(!reauthenticated.ok)return reauthenticated;
@@ -211,11 +218,15 @@ export class ExecuteDataPurgeUseCase {
       const current=scope.findLifecycle(resource.value.resourceType,resource.value.resourceId);if(!current.ok)return current;if(!current.value||current.value.state!=='purge_scheduled'||!current.value.purgeExecuteAfter)return err(conflict(input.context,'Kayıt kalıcı imha için planlanmamış.'));
       if(current.value.legalHold)return err(conflict(input.context,'Kayıtta hukuki/koruma bekletmesi bulunduğu için imha gerçekleştirilemez.'));
       if(!elapsed(current.value.purgeExecuteAfter,scope.occurredAt))return err(conflict(input.context,'Geri alma süresi henüz dolmadı.'));
-      const purged=scope.purgeResource(resource.value.resourceType,resource.value.resourceId);if(!purged.ok)return purged;if(!purged.value)return err(missing(input.context,'İmha sırasında kaynak kaydı bulunamadı.'));
+      const propagated=this.propagation.execute({
+        scope,
+        source:{familyId:input.context.familyId,resourceType:resource.value.resourceType,resourceId:resource.value.resourceId,purgedAt:scope.occurredAt},
+        correlationId:input.context.correlationId
+      });if(!propagated.ok)return propagated;
       const next:DataLifecycleRecord={resourceType:resource.value.resourceType,resourceId:resource.value.resourceId,ownerPersonId:resource.value.ownerPersonId,privacy:resource.value.privacy,state:'purged',...(current.value.policyId?{policyId:current.value.policyId}:{}),legalHold:false,purgedAt:scope.occurredAt,updatedAt:scope.occurredAt,backupPropagationPending:true};
       const saved=scope.upsertLifecycle(next);if(!saved.ok)return saved;
       const audit=scope.appendAudit({id:input.identifiers.auditId,action:'data.resource_purged',resourceType:resource.value.resourceType,resourceId:resource.value.resourceId,occurredAt:scope.occurredAt,actorId:input.context.actor.userId});if(!audit.ok)return audit;
-      const event=scope.enqueueEvent({eventId:input.identifiers.outboxEventId,eventType:'data.resource.purged',eventVersion:1,aggregateType:resource.value.resourceType,aggregateId:resource.value.resourceId,occurredAt:scope.occurredAt,actorId:input.context.actor.userId,correlationId:input.context.correlationId,payload:{resourceType:resource.value.resourceType,resourceId:resource.value.resourceId,backupPropagationPending:true}});
+      const event=scope.enqueueEvent({eventId:input.identifiers.outboxEventId,eventType:'data.resource.purged',eventVersion:1,aggregateType:resource.value.resourceType,aggregateId:resource.value.resourceId,occurredAt:scope.occurredAt,actorId:input.context.actor.userId,correlationId:input.context.correlationId,payload:{resourceType:resource.value.resourceType,resourceId:resource.value.resourceId,propagationPlanHash:propagated.value.plan.planHash,localPropagationComplete:propagated.value.evidence.localPropagationComplete,backupPropagationPending:propagated.value.evidence.backupPropagationPending,ownerOutcomes:propagated.value.plan.ownerOutcomes}});
       return event.ok?ok(next):event;
     });
   }
