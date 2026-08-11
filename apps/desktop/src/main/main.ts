@@ -66,6 +66,8 @@ import { connectCoreServiceAtStartup, type CoreServiceStartupConnectionResult } 
 import { PlatformPolicyReceiptFileSink } from './platform-policy-receipt-file-sink.js';
 import { DesktopUniversalApiPolicyEnforcement } from './desktop-universal-api-policy-enforcement.js';
 import { DesktopRepositoryPolicyScope } from './desktop-repository-policy-scope.js';
+import { NetworkEgressPolicy } from '@ppt/platform-policy';
+import type { NetworkEgressBoundaryView } from '@ppt/domain';
 
 type ArchiveMutationInput<TInput> = TInput & { readonly operationId: string };
 interface ArchiveItemMutationInput {
@@ -74,6 +76,7 @@ interface ArchiveItemMutationInput {
 }
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
+const networkEgressPolicy = new NetworkEgressPolicy();
 const currentProductName = 'Anadolu Parsı Aile Yaşam Merkezi';
 const volatileRuntimeRoot = join(app.getPath('temp'), 'Anadolu-Parsi-Aile-Yasam-Merkezi', `runtime-${process.pid}`);
 rmSync(volatileRuntimeRoot, { recursive: true, force: true });
@@ -1124,6 +1127,7 @@ function registerIpc(): void {
   registerIpcHandler('system:health', () => store().getSystemHealth());
   registerIpcHandler('system:getCoreServiceHealth', () => coreServiceConnection().adapter.getHealth());
   registerIpcHandler('system:getCoreServiceApiBoundary', () => coreServiceConnection().adapter.getApiBoundaryStatus());
+  registerIpcHandler('system:getNetworkEgressBoundary', ():NetworkEgressBoundaryView => networkEgressPolicy.snapshot());
   registerIpcHandler('system:listBackupTargets', () => store().listBackupTargets());
   registerIpcHandler('system:upsertBackupTarget', (_event,input:UpsertBackupTargetInput) => store().upsertBackupTarget(input));
   registerIpcHandler('system:listBackupRuns', (_event,limit?:number) => store().listBackupRuns(limit));

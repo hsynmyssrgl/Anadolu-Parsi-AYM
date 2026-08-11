@@ -31,7 +31,12 @@ export const IPC_POLICY_SENSITIVE_READ_CHANNELS = Object.freeze([
   'timeline:listArchived'
 ] as const);
 
+export const IPC_SECURITY_POSTURE_NO_CACHE_CHANNELS = Object.freeze([
+  'system:getNetworkEgressBoundary'
+] as const);
+
 const policySensitiveChannels = new Set<string>(IPC_POLICY_SENSITIVE_READ_CHANNELS);
+for (const channel of IPC_SECURITY_POSTURE_NO_CACHE_CHANNELS) policySensitiveChannels.add(channel);
 
 const interactiveChannels = new Set<string>([
   'catalog:listPeople',

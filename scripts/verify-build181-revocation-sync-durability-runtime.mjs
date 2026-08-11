@@ -21,7 +21,7 @@ const transpile = async (sourcePath, outputName, transform) => {
   return outputPath;
 };
 const statePath = await transpile('apps/desktop/src/main/secure-revocation-sync-state.ts', 'state.mjs', source => source.replace(/^import type .*?;\n/gmu, ''));
-const servicePrelude = `import { createHash } from 'node:crypto';\nconst resolveExternalBackupRevocationEndpointPins=(endpoint)=>endpoint.status==='active'?[{sha256:endpoint.primarySpkiSha256,kind:'primary'}]:[];\nconst fetchExternalBackupEvidenceRevocationList=async()=>{throw new Error('real network disabled in Build 181 runtime');};\n`;
+const servicePrelude = `import { createHash } from 'node:crypto';\nconst resolveExternalBackupRevocationEndpointPins=(endpoint)=>endpoint.status==='active'?[{sha256:endpoint.primarySpkiSha256,kind:'primary'}]:[];\nconst fetchGovernedExternalBackupEvidenceRevocationList=async()=>{throw new Error('real network disabled in Build 181 runtime');};\n`;
 const servicePath = await transpile('apps/desktop/src/main/secure-revocation-sync-service.ts', 'service.mjs', source => servicePrelude + source.replace(/^import[\s\S]*?from '[^']+';\n/gmu, ''));
 const { ProtectedRevocationSyncStateStore } = await import(pathToFileURL(statePath).href);
 const { SecureRevocationSyncService } = await import(pathToFileURL(servicePath).href);

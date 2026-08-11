@@ -32,7 +32,7 @@ check('state bounds file and endpoint counts', has('state', 'maximumEndpoints') 
 check('service restores protected state', has('service', "restore.status === 'RESTORED'") && has('service', 'revocation.sync_state_restored'));
 check('service persists staged pending list', has('service', 'state.pending = { fetched, endpointFingerprint') && has('service', 'this.#persist()'));
 check('service invalidates changed endpoint profile', has('service', 'endpoint-profile-fingerprint-changed'));
-check('service supports injectable offline test adapter', has('service', 'fetchList?') && has('service', 'this.deps.fetchList ?? fetchExternalBackupEvidenceRevocationList'));
+check('service supports injectable offline test adapter', has('service', 'fetchList?') && has('service', 'this.deps.fetchList ?? fetchGovernedExternalBackupEvidenceRevocationList'));
 check('service classifies missing fresh expiring and expired lists', has('service', "'expiring_soon'") && has('service', 'EXPIRING_SOON_MS'));
 check('freshness warnings are deduplicated and persisted', has('service', 'lastFreshnessNoticeKey') && has('service', 'noticeKey'));
 check('expired list notification is critical', has('service', "freshness === 'expired' ? 'critical'"));

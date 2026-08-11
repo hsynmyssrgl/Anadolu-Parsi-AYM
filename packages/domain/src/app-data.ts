@@ -454,6 +454,23 @@ export interface ClientDataAccessBoundaryView {
   persistentPathExposed:false;
   secretMaterialExposed:false;
 }
+export interface NetworkEgressBoundaryView {
+  schemaVersion:1;
+  enforcement:'fail-closed';
+  authorizedApplicationId:'windows-desktop';
+  authorizedPurpose:'external-backup-revocation-list.fetch';
+  authorizedAdapterCount:1;
+  directPrimitiveExceptionCount:0;
+  allowlistRequired:true;
+  minimumTlsVersion:'TLSv1.3';
+  mutualTlsSupported:true;
+  certificatePinRotationSupported:true;
+  privateAddressRejected:true;
+  redirectAllowed:false;
+  persistentPathExposed:false;
+  secretMaterialExposed:false;
+  cutoverAuthorityAttached:false;
+}
 export interface UpdateFamilyAccountInput { accountId:string; role:FamilyRole; status:FamilyMembershipStatus; startsAt?:string; endsAt?:string; personId?:string; }
 
 export type RecordPrivacy = 'private' | 'selected_members' | 'family';

@@ -111,6 +111,8 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
     case 'auth:reauthenticateWithWindowsHello':
       return exactObject(args, ['fallback'], (value) => optionalWindowsHelloFallback(value.fallback));
     case 'system:getCoreServiceHealth':
+    case 'system:getCoreServiceApiBoundary':
+    case 'system:getNetworkEgressBoundary':
     case 'system:getIpcAdaptiveBudgetMaintenanceAuthority':
     case 'system:getIpcPerformanceTelemetry':
       return zeroArguments(args);

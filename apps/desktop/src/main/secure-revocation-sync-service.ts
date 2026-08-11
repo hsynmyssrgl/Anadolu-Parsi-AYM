@@ -10,7 +10,7 @@ import type {
   RevocationSyncRunResultView
 } from '@ppt/domain';
 import { resolveExternalBackupRevocationEndpointPins } from '@ppt/application';
-import { fetchExternalBackupEvidenceRevocationList } from './secure-revocation-list-fetcher.js';
+import { fetchGovernedExternalBackupEvidenceRevocationList, type MutualTlsClientIdentity } from './governed-network-egress-use-case.js';
 import type { PersistedRevocationSyncEndpointState, RevocationSyncStatePersistence } from './secure-revocation-sync-state.js';
 
 const MIN_INTERVAL_MS = 15 * 60_000;
@@ -26,7 +26,8 @@ export interface SecureRevocationSyncDependencies {
   diagnostic(severity: 'info' | 'warning' | 'error', code: string, message: string, details?: string): void;
   now(): Date;
   persistence?: RevocationSyncStatePersistence;
-  fetchList?(input: { endpointId: string; sourceUrl: string; expectedPins: readonly { sha256: string; kind: 'primary' | 'secondary' }[]; signal?: AbortSignal }): Promise<FetchedExternalBackupEvidenceRevocationListView>;
+  resolveMutualTlsIdentity?(endpoint: ExternalBackupRevocationEndpointView): MutualTlsClientIdentity | undefined;
+  fetchList?(input: { endpoint: ExternalBackupRevocationEndpointView; expectedPins: readonly { sha256: string; kind: 'primary' | 'secondary' }[]; observedAt: string; mutualTlsIdentity?: MutualTlsClientIdentity; signal?: AbortSignal }): Promise<FetchedExternalBackupEvidenceRevocationListView>;
 }
 
 interface PendingState {
@@ -224,8 +225,9 @@ export class SecureRevocationSyncService {
         try {
           const pins = resolveExternalBackupRevocationEndpointPins(endpoint, state.lastAttemptAt);
           if (pins.length === 0) throw new Error('Kaynak profilinde şu an geçerli TLS SPKI pini yok.');
-          const fetchList = this.deps.fetchList ?? fetchExternalBackupEvidenceRevocationList;
-          const fetched = await fetchList({ endpointId: endpoint.id, sourceUrl: endpoint.sourceUrl, expectedPins: pins, ...(signal ? { signal } : {}) });
+          const fetchList = this.deps.fetchList ?? fetchGovernedExternalBackupEvidenceRevocationList;
+          const mutualTlsIdentity = this.deps.resolveMutualTlsIdentity?.(endpoint);
+          const fetched = await fetchList({ endpoint, expectedPins: pins, observedAt: state.lastAttemptAt, ...(mutualTlsIdentity ? { mutualTlsIdentity } : {}), ...(signal ? { signal } : {}) });
           const list = fetched.list;
           const thisMs = Date.parse(list.thisUpdate);
           const nextMs = Date.parse(list.nextUpdate);

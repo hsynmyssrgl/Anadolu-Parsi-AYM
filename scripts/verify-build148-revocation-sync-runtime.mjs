@@ -17,7 +17,7 @@ source = source.replace(/^import[\s\S]*?from '[^']+';\n/gmu, '');
 const prelude = `import { createHash } from 'node:crypto';
 type ExternalBackupEvidenceRevocationListView=any;type ExternalBackupRevocationEndpointView=any;type FetchedExternalBackupEvidenceRevocationListView=any;type PendingRevocationSyncListView=any;type RevocationSyncEndpointStateView=any;type RevocationSyncRunResultView=any;
 const resolveExternalBackupRevocationEndpointPins=(endpoint)=>endpoint.status==='active'?[endpoint.primarySpkiSha256]:[];
-const fetchExternalBackupEvidenceRevocationList=async()=>{if(globalThis.__fetchError)throw globalThis.__fetchError;return structuredClone(globalThis.__nextFetch);};
+const fetchGovernedExternalBackupEvidenceRevocationList=async()=>{if(globalThis.__fetchError)throw globalThis.__fetchError;return structuredClone(globalThis.__nextFetch);};
 `;
 const output = ts.transpileModule(prelude + source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext }, reportDiagnostics: true });
 const errors = (output.diagnostics ?? []).filter((item) => item.category === ts.DiagnosticCategory.Error);

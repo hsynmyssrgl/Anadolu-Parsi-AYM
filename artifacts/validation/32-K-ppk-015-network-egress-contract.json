@@ -1,0 +1,232 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-K",
+  "requirement": "PPK-015",
+  "phase": "NETWORK_EGRESS_POLICY_CONTRACT",
+  "status": "PASS",
+  "checkCount": 51,
+  "passed": 51,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "direct network primitive exception registry is empty and immutable",
+      "status": "PASS"
+    },
+    {
+      "name": "exactly one external egress adapter is registered",
+      "status": "PASS"
+    },
+    {
+      "name": "network request requires an exact canonical field set",
+      "status": "PASS"
+    },
+    {
+      "name": "authority requires endpoint status application TLS and pin bindings",
+      "status": "PASS"
+    },
+    {
+      "name": "policy rejects malformed requests and authority contexts",
+      "status": "PASS"
+    },
+    {
+      "name": "application purpose and method mismatches fail closed",
+      "status": "PASS"
+    },
+    {
+      "name": "endpoint identity status and URL mismatches fail closed",
+      "status": "PASS"
+    },
+    {
+      "name": "TLS mode and mTLS identity mismatches fail closed",
+      "status": "PASS"
+    },
+    {
+      "name": "pin set is bounded ordered unique and SHA-256 shaped",
+      "status": "PASS"
+    },
+    {
+      "name": "canonical endpoint URL requires HTTPS standard port without credentials fragment or local name",
+      "status": "PASS"
+    },
+    {
+      "name": "boundary snapshot exposes fail-closed TLS/mTLS rotation truth only",
+      "status": "PASS"
+    },
+    {
+      "name": "platform policy exports the network egress policy",
+      "status": "PASS"
+    },
+    {
+      "name": "central use case is the only caller of the external adapter",
+      "status": "PASS"
+    },
+    {
+      "name": "central use case authorizes before invoking the network adapter",
+      "status": "PASS"
+    },
+    {
+      "name": "central use case binds windows desktop purpose GET endpoint and TLS mode",
+      "status": "PASS"
+    },
+    {
+      "name": "mTLS identity ID is bound while secret material bypasses policy and IPC",
+      "status": "PASS"
+    },
+    {
+      "name": "sync service resolves current pins before governed fetch",
+      "status": "PASS"
+    },
+    {
+      "name": "network payload remains pending and is not auto-applied",
+      "status": "PASS"
+    },
+    {
+      "name": "adapter requires TLS 1.3 and operating-system server trust",
+      "status": "PASS"
+    },
+    {
+      "name": "adapter verifies peer SPKI against the authoritative rotation pins",
+      "status": "PASS"
+    },
+    {
+      "name": "adapter rejects private DNS results and connected remote address",
+      "status": "PASS"
+    },
+    {
+      "name": "adapter rejects every HTTP redirect",
+      "status": "PASS"
+    },
+    {
+      "name": "adapter binds optional mTLS cert key and local certificate proof",
+      "status": "PASS"
+    },
+    {
+      "name": "adapter enforces response size JSON type and schema",
+      "status": "PASS"
+    },
+    {
+      "name": "adapter accepts only standard HTTPS with no credentials or fragment",
+      "status": "PASS"
+    },
+    {
+      "name": "existing domain endpoint schema remains the authoritative allowlist profile",
+      "status": "PASS"
+    },
+    {
+      "name": "endpoint use case normalizes HTTPS and requires strong authentication",
+      "status": "PASS"
+    },
+    {
+      "name": "endpoint use case bounds dual-pin overlap and future scheduling",
+      "status": "PASS"
+    },
+    {
+      "name": "repository contract persists allowlist and rotation metadata without secrets",
+      "status": "PASS"
+    },
+    {
+      "name": "repository reads and writes the existing endpoint allowlist table",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 23 owns endpoint allowlist and dual pin fields",
+      "status": "PASS"
+    },
+    {
+      "name": "no migration 77 or persistent mTLS secret column is added",
+      "status": "PASS"
+    },
+    {
+      "name": "typed domain IPC status never exposes path or secret material",
+      "status": "PASS"
+    },
+    {
+      "name": "main process exposes only boundary posture through typed IPC",
+      "status": "PASS"
+    },
+    {
+      "name": "preload and renderer declarations expose the typed status method",
+      "status": "PASS"
+    },
+    {
+      "name": "IPC integration policy requires zero arguments for egress status",
+      "status": "PASS"
+    },
+    {
+      "name": "network egress status is explicitly security-posture no-cache",
+      "status": "PASS"
+    },
+    {
+      "name": "system UI renders PPK-015 fail-closed TLS mTLS and zero exception posture",
+      "status": "PASS"
+    },
+    {
+      "name": "profile menu exposes the network egress security entry",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate scans all production app and package source zones",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate blocks network modules packages globals and adapter bypass",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate has six malicious self-tests and zero exception reporting",
+      "status": "PASS"
+    },
+    {
+      "name": "current production source has zero egress bypass findings",
+      "status": "PASS"
+    },
+    {
+      "name": "typecheck and production build both execute the egress source gate",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted tests cover TLS mTLS allowlist mismatches pin corruption and no-call denial",
+      "status": "PASS"
+    },
+    {
+      "name": "threat model records assets trust boundaries threats controls remaining risks and reality",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-012 policy-sensitive IPC no-cache fence remains active",
+      "status": "PASS"
+    },
+    {
+      "name": "accepted registry closes the complete PPK-015 evidence chain",
+      "status": "PASS"
+    },
+    {
+      "name": "scope closes PPK-015 without transfer ownership or cutover",
+      "status": "PASS"
+    },
+    {
+      "name": "DEC-196 is latest and binds PPK-015 evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "decision and audit preserve Desktop vault no-cache and DEC-171",
+      "status": "PASS"
+    }
+  ],
+  "failures": [],
+  "sourceScan": {
+    "zones": 18,
+    "files": 330,
+    "findings": []
+  },
+  "directNetworkPrimitiveExceptions": 0,
+  "migrationDecision": "NO_NEW_SCHEMA_MIGRATION_REUSE_MIGRATION_23_ENDPOINT_ALLOWLIST_AND_PIN_ROTATION",
+  "legacyDesktopVaultPreserved": true,
+  "sqliteOwnershipTransferred": false,
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "policySensitiveIpcNoCacheWeakened": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T16:50:45.908Z"
+}

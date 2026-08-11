@@ -1,8 +1,8 @@
 # Tam Proje Artifact Indexi
 
 - Sürüm: **Bronze 04.08.2026.29**
-- Toplam dosya: **4787**
-- Toplam belge/config/kanıt: **3097**
+- Toplam dosya: **4800**
+- Toplam belge/config/kanıt: **3104**
 
 - `.editorconfig` — ACTIVE_REFERENCE — 156 bayt — `251db34e2e35b25bcd7888df2be0f92d56e0e204a405e1374e691710ed583827`
 - `.env.example` — ACTIVE_REFERENCE — 122 bayt — `0ca1fddf2f90e563c9b556da2d9041ca93721ed5404d292cd9f7608f4e40c705`
@@ -309,6 +309,7 @@
 - `apps/desktop/src/main/finance-production-policy-runtime.ts` — SOURCE_CODE — 39439 bayt — `26a5249e22bc52ed45777fd7612fe7de14c3707b48d485dd7c9d3fb757e00942`
 - `apps/desktop/src/main/full-backup-file-application-adapter.ts` — SOURCE_CODE — 27897 bayt — `236b4deed8f9aa6580afb44da68921d73c114cb61eaa38c2e4e3b626bf59f8a6`
 - `apps/desktop/src/main/genealogy-application-adapter.ts` — SOURCE_CODE — 2546 bayt — `985a651cb6065436d37a3d02b26f965a73464e72e1c0aa395cf4c382575800c6`
+- `apps/desktop/src/main/governed-network-egress-use-case.ts` — SOURCE_CODE — 3530 bayt — `7b923a5a269dd03fc37cf5b2db5bf1073e20ca3799f6aeb849ad53b5a1c88aa9`
 - `apps/desktop/src/main/health-application-adapter.ts` — SOURCE_CODE — 21797 bayt — `558720684c71b3048b56d56dd8519c65b5077caf1d2d4d5acfa5352227ac6109`
 - `apps/desktop/src/main/health-production-policy-runtime.ts` — SOURCE_CODE — 41831 bayt — `1bb744426091ccc4310e686d6000e7c8809e438072f30ea42d46cb92ecbc6386`
 - `apps/desktop/src/main/household-membership-application-adapter.ts` — SOURCE_CODE — 7420 bayt — `3f0f374cf6f6776b116943c9239e11747ad11e011b7887cc3a888bb26c4a5a89`
@@ -320,10 +321,10 @@
 - `apps/desktop/src/main/ipc-adaptive-budget-maintenance-session.ts` — SOURCE_CODE — 6967 bayt — `3bdb9f86f5549f07f5fcf85f956d9c7d794e38683b66f4f50202a9694ef08828`
 - `apps/desktop/src/main/ipc-adaptive-resource-budget-state.ts` — SOURCE_CODE — 25425 bayt — `d636438c9d3b1f00ac877e696c4bde16ead5048f48e523d5ed5a285bad0ef96f`
 - `apps/desktop/src/main/ipc-adaptive-resource-budget.ts` — SOURCE_CODE — 17701 bayt — `9217e4e4141d6553a67cb5f75e16a98786a18283cb1242d94aa17c3eff72ff81`
-- `apps/desktop/src/main/ipc-integration-policy.ts` — SOURCE_CODE — 10784 bayt — `9071dd6987da19f1ef1bd9825896ba7c26dbc49073e2df9a495cdbf7bca4fa3e`
+- `apps/desktop/src/main/ipc-integration-policy.ts` — SOURCE_CODE — 10873 bayt — `6451309bfc889e8225ca8f8696a634f50d844a98b3fb08020e69b7586bfd3670`
 - `apps/desktop/src/main/ipc-payload-security.ts` — SOURCE_CODE — 6162 bayt — `be55599b4e89436c54a36021059e4cc202bfb1fcdebf311e33e577454332f2f4`
 - `apps/desktop/src/main/ipc-performance-telemetry.ts` — SOURCE_CODE — 13181 bayt — `0e49b577e5a869ff006d3dcfb4747295411211ef283fbdeb3641328629db4bb6`
-- `apps/desktop/src/main/ipc-read-sharing.ts` — SOURCE_CODE — 17411 bayt — `2c7ab218b8d86fcd6ba9d97394a065b7d12cf8c1eebcbc9f87c74f35260a63fd`
+- `apps/desktop/src/main/ipc-read-sharing.ts` — SOURCE_CODE — 17631 bayt — `1b6e2df3c163dff07f23eea03c699b0e322f3c6c5551fe93063ae1020c141dce`
 - `apps/desktop/src/main/ipc-request-lifecycle.ts` — SOURCE_CODE — 25845 bayt — `2cfa1a1a38290a8ce5dddf28ca7e8226fe7d0c50e9cbe87d19c01343b0e7e5e2`
 - `apps/desktop/src/main/ipc-runtime.ts` — SOURCE_CODE — 20731 bayt — `31bce1654fe267d34b02798e4dfbecff826e59affc77391d2c3da9ee078ce264`
 - `apps/desktop/src/main/ipc-sender-trust.ts` — SOURCE_CODE — 3651 bayt — `714556be65e8f014450efedf1eaf30c7f01d07a170125b37a33634533f584ea2`
@@ -334,7 +335,7 @@
 - `apps/desktop/src/main/life-production-policy-runtime.ts` — SOURCE_CODE — 40224 bayt — `559ab7c07d383db9d50ce5c128e908578efefe00b945ac6ce415efff504c7c5c`
 - `apps/desktop/src/main/location-application-adapter.ts` — SOURCE_CODE — 16380 bayt — `7cd86d6a60ed17d809a05dfbb37746f7dd5712b6b58ef62b06dba35a95e0d90e`
 - `apps/desktop/src/main/location-production-policy-runtime.ts` — SOURCE_CODE — 45051 bayt — `16d4e9844813b6dac5b1a7f15f15bf8b6ebbfe96f2b6f573275b08e158919a96`
-- `apps/desktop/src/main/main.ts` — SOURCE_CODE — 118638 bayt — `095531ff8018b5211cabc0055a45a68a8ba17c628fe0679aa111f8132700ebec`
+- `apps/desktop/src/main/main.ts` — SOURCE_CODE — 118936 bayt — `570e2695a390e28addade9e7b6b25a84e133db052ce8f3b31d402a4b21f92dca`
 - `apps/desktop/src/main/managed-backup-password.ts` — SOURCE_CODE — 2858 bayt — `f11fe683fd23313d162347ce77d24d9fd245a650a289a662287700dabb5376a3`
 - `apps/desktop/src/main/membership-application-adapter.ts` — SOURCE_CODE — 9325 bayt — `29e519bfc8edba1bea120777401387f1aa804edd184061d5167346afcdab5bd1`
 - `apps/desktop/src/main/mfa-secret-protection.ts` — SOURCE_CODE — 2317 bayt — `167768a32495b2a07e93eccb9a60a045c738e94db89eb2a6ce795a90c52562df`
@@ -342,7 +343,7 @@
 - `apps/desktop/src/main/operational-health-application-adapter.ts` — SOURCE_CODE — 7545 bayt — `f4b9f30e0ee47210cc75974cf1b393f2e918014a8c3cba70920b11eab0de16d5`
 - `apps/desktop/src/main/person-lifecycle-application-adapter.ts` — SOURCE_CODE — 5571 bayt — `9ea5f012fcb8a92c5caa1fe883e24f668a6f7a4117fc7c236b96085b5acaf30e`
 - `apps/desktop/src/main/platform-policy-receipt-file-sink.ts` — SOURCE_CODE — 35195 bayt — `56b95a0eab9d2bbf2805bb4acc3cade74508a371d4d07400d504fb06262e940c`
-- `apps/desktop/src/main/preload.ts` — SOURCE_CODE — 46258 bayt — `307585d547e8e3a2f46d138b7436dc7a0dbff2dcc1be3bf3f59ae911bd2c03b8`
+- `apps/desktop/src/main/preload.ts` — SOURCE_CODE — 46429 bayt — `859f01276f73564da902501e0e9a8c1358597a663bcf3ce8b2b54f6bda861fdd`
 - `apps/desktop/src/main/protected-side-artifact-logger.ts` — SOURCE_CODE — 3081 bayt — `a196e6e080e691d605033e1a2948b9eaf05e94d9375e246fe912432a7cad5e3a`
 - `apps/desktop/src/main/protected-side-artifact-store.ts` — SOURCE_CODE — 6947 bayt — `8aaf260248e716b98423314f1835e39abc0ddabc97b57cf98bac4b224993507a`
 - `apps/desktop/src/main/renderer-session-security.ts` — SOURCE_CODE — 3593 bayt — `aedf41b64363ccf73ea94bc57d171d6b5e56700bc9daec6248c7b81ac24a9122`
@@ -350,8 +351,8 @@
 - `apps/desktop/src/main/report-application-adapter.ts` — SOURCE_CODE — 3964 bayt — `8d9d0608d023de4f8e4287db6c306674177bae37f03c170333d63295f4b2187e`
 - `apps/desktop/src/main/repository-composition-root.ts` — SOURCE_CODE — 9090 bayt — `682714e99dc80dde35e4269a83d5cc8d79933e0a01f6930d0a867095c113b2d8`
 - `apps/desktop/src/main/runtime-bootstrap.ts` — SOURCE_CODE — 2957 bayt — `f3b244d3c1af6859ca738918b2fab3e622ce8dcb2bbf8d010d41465b58340b34`
-- `apps/desktop/src/main/secure-revocation-list-fetcher.ts` — SOURCE_CODE — 6230 bayt — `3006e1a6eb9c126996440f74e8a90e5a041f37bb3dd62e93ba39d47ee25259c7`
-- `apps/desktop/src/main/secure-revocation-sync-service.ts` — SOURCE_CODE — 21121 bayt — `edfff9ebab5654e9b32c3d9c70ea93758ec73f3ef58f33367bd3e05347fd5575`
+- `apps/desktop/src/main/secure-revocation-list-fetcher.ts` — SOURCE_CODE — 7388 bayt — `365d1eab575076c628331a8100f10ecefe0771af9ac56f05a682ebbb2eadc878`
+- `apps/desktop/src/main/secure-revocation-sync-service.ts` — SOURCE_CODE — 21481 bayt — `f3c786bf486c30989e36d890eaee80f2eaa95c7dba75e9c4e7fbde6a60293380`
 - `apps/desktop/src/main/secure-revocation-sync-state.ts` — SOURCE_CODE — 14063 bayt — `6a4ebfa341a345ea8ef825953bf811917327e08e8ba9c576e6f425e5808510eb`
 - `apps/desktop/src/main/security-event-receipt-store.ts` — SOURCE_CODE — 5107 bayt — `4ceaeb109b9f028beefc55f6c63316b4fda0f90d6e70ea62dd1b4da9f839b34a`
 - `apps/desktop/src/main/security-event-receipt.ts` — SOURCE_CODE — 3046 bayt — `12556e1ad73edc4027d40676667ad31907c367115cc61d7d156b4596a6133a10`
@@ -369,10 +370,10 @@
 - `apps/desktop/src/main/windows-open022-side-artifact-evidence-probe.ts` — EVIDENCE — 8686 bayt — `98f92c0466541c9e9c49269e7438769137645392402aea171f78c5525d917de3`
 - `apps/desktop/src/main/windows-security-evidence-probe.ts` — EVIDENCE — 7590 bayt — `3538df388672e507c723751cd603c5f06d10b2ac761b0e6f4868ce53032e7985`
 - `apps/desktop/src/renderer/accessibility.ts` — SOURCE_CODE — 2131 bayt — `20369cec57b4f52aa77c87b0364f0a1dd43aa2f5c689f6a6a54261e67a6104f6`
-- `apps/desktop/src/renderer/App.tsx` — SOURCE_CODE — 352145 bayt — `fe952938e48741e1f4994e57c2214da4a578b8ef5e8eafaf562b4b15a847cb8d`
+- `apps/desktop/src/renderer/App.tsx` — SOURCE_CODE — 353560 bayt — `1987a5a32e436a790c00777331882ded177a44a8d2a21e48ca5b438bac455b2e`
 - `apps/desktop/src/renderer/assets/brand-mark.png` — ACTIVE_REFERENCE — 35619 bayt — `9cd16265ddfb9d0c60ca449cb24df8881bcfb1d2b508f8a13c3d09a9b92450b6`
 - `apps/desktop/src/renderer/async-state-guard.ts` — SOURCE_CODE — 4221 bayt — `ed1bd992c40b8ca6ff2fe497d7797b235fb9e78dad63350e4cbea1430106cafb`
-- `apps/desktop/src/renderer/global.d.ts` — SOURCE_CODE — 24767 bayt — `5581660f3c0e21ee37755527f058466e5f0454e26a5c38e59d47d76a73218d71`
+- `apps/desktop/src/renderer/global.d.ts` — SOURCE_CODE — 24894 bayt — `2dc1f6e042b741eb445acb175ef80c08fa7f4ff44de642f65b89d56f70bec5ec`
 - `apps/desktop/src/renderer/main.tsx` — SOURCE_CODE — 262 bayt — `f39eef1457bf42d2d489a0166eeb5b972fd91bb59f589f2f99ddc57c54d9e398`
 - `apps/desktop/src/renderer/navigation.ts` — SOURCE_CODE — 1558 bayt — `54bda635994610701e377bb6f45f3f6efd8a76a919645190f6be092a00bac371`
 - `apps/desktop/src/renderer/security-center-navigation.ts` — SOURCE_CODE — 1190 bayt — `a9ad602e45f7fc67677cc4c802a1579379b72ed82ecf1b156d3f33a8352e8eb6`
@@ -407,6 +408,7 @@
 - `apps/desktop/tests/ppk011-contextual-ownership-policy.test.ts` — TEST_OR_GATE — 6663 bayt — `32827ac79e28c5045b15ac8821a6b0a4e03ade67a494c88eda7e470686df2838`
 - `apps/desktop/tests/ppk012-offline-capability-lease-cache-fence.test.ts` — TEST_OR_GATE — 6249 bayt — `0860016446e87aba7cfd8f96779333b6fbb79ce0790c24b0139d0c57190d20e4`
 - `apps/desktop/tests/ppk013-client-data-access-boundary.test.ts` — TEST_OR_GATE — 8359 bayt — `4bc2a586145d6477cbd46ae33ecbae35ace8ea07c3802d44327928b0128a0256`
+- `apps/desktop/tests/ppk015-network-egress-policy.test.ts` — TEST_OR_GATE — 8797 bayt — `21249dc4e34f3034725d3e078105b7478514670f791e1fcac43014bb2b0f36fb`
 - `apps/desktop/tests/user-visible-release-boundary-runtime.test.ts` — TEST_OR_GATE — 2053 bayt — `50ec9e0b7896925a7caf7019f4a952d216fb21d9189a2ecd2cd10b7fc932bd79`
 - `apps/desktop/tsconfig.electron.json` — ACTIVE_REFERENCE — 211 bayt — `ea4781abdb59766e241d1b7aeb6d10732e0f63e7dd99d53fdbdd27821302552c`
 - `apps/desktop/tsconfig.renderer.json` — ACTIVE_REFERENCE — 314 bayt — `133a79ee3768df3c8163157b10f5aa09a02548c523e19a8c0d5716a8c492dd52`
@@ -1020,7 +1022,7 @@
 - `artifacts/inventory/31-R_SCOPE_AND_STATUS_REPORT.json` — GENERATED — 3544 bayt — `96d292af52d53d946ef20f654a97f3f6614a4b5f1485e8248fbe6cde7442767e`
 - `artifacts/inventory/31-S_SCOPE_AND_STATUS_REPORT.json` — GENERATED — 3745 bayt — `2d337053cce1f9e80301036e4c201de518d9cea5f4e95d6aa0a390cc64d5e0d9`
 - `artifacts/inventory/31-T_SCOPE_AND_STATUS_REPORT.json` — GENERATED — 2397 bayt — `142a2bef9c7d1720437dab39c3f011ce0aff53c83b66340d4b4846e4e38a0045`
-- `artifacts/inventory/BRONZE_CURRENT_COMPLETION_AUDIT.json` — GENERATED — 227940 bayt — `19756f366e0d384f0173d12f762ea3cb0724bd6c2aeaf112eb730b651ccf1f0e`
+- `artifacts/inventory/BRONZE_CURRENT_COMPLETION_AUDIT.json` — GENERATED — 226803 bayt — `2938ff8748dbb35bdd359792a8b787269bd3045dd40cb3dadb227b354aed877a`
 - `artifacts/inventory/snapshots/29-D2-D1_WORK_PLAN_AT_GENERATION.json` — GENERATED — 9632 bayt — `878d4d0779231f0b979d3b6a05a9a09bf222c540346fcd232ba8787c425746e1`
 - `artifacts/inventory/snapshots/29-D2-D2_WORK_PLAN_AT_START.json` — GENERATED — 10592 bayt — `5984bc9bbd73b793b2b27fdbbe602ef565ca927428233c7a7723b64142305bfb`
 - `artifacts/inventory/snapshots/29-D3_WORK_PLAN_AT_GENERATION.json` — GENERATED — 13302 bayt — `ec9c09573fdec34f10824fb9dfd33e4e256e40b4fc853eb45e4017e815356dc9`
@@ -1135,7 +1137,7 @@
 - `artifacts/manifests/DATABASE_MIGRATION_VERIFICATION_MVP53.json` — HISTORICAL — 2143 bayt — `00643bf5b2660c1f0ab1e2ccfeca45c5828d067e4691335878675ad8f9ab986d`
 - `artifacts/manifests/DATABASE_MIGRATION_VERIFICATION_MVP54.json` — HISTORICAL — 2314 bayt — `fd0594769952f42eef2670514ddc51649875b566b4359975b110e5a93453a6d5`
 - `artifacts/manifests/DATABASE_MIGRATION_VERIFICATION_MVP55.json` — HISTORICAL — 2478 bayt — `7ae9270fb23c4b529044430ef376ca1ce95b12983a2ca792e1a6f80e442b12d6`
-- `artifacts/manifests/DATABASE_MIGRATION_VERIFICATION_MVP56.json` — HISTORICAL — 13913 bayt — `94699821130bcc76584c8d76cbd6a6f0a125cc7e0a6f408a83266156f6aaa618`
+- `artifacts/manifests/DATABASE_MIGRATION_VERIFICATION_MVP56.json` — HISTORICAL — 13913 bayt — `774ebe15b20a125d21aaf0e85af1e98083b2c6b67d90d0acb26480f8b91ca9cc`
 - `artifacts/manifests/EVENT_DISPATCHER_VERIFICATION_MVP45.json` — HISTORICAL — 329 bayt — `0e33b35273cb4d5ad8239868c7696b363c9c81ae0bdfd9c782ffc6d2f656ba93`
 - `artifacts/manifests/EVENT_DISPATCHER_VERIFICATION_MVP46.json` — HISTORICAL — 327 bayt — `465e3dd94afb738834ace1aa1f79203aa893804eb6f0709dfb2a0efde6e53346`
 - `artifacts/manifests/EVENT_DISPATCHER_VERIFICATION_MVP47.json` — HISTORICAL — 319 bayt — `80a00f0d161a42ed2aaf1eae8227da8a27d283d41c2cdbccb088cb71399c0f1a`
@@ -1333,7 +1335,7 @@
 - `artifacts/validation/29-D5_LIBRARY_READBACK_VERIFICATION.json` — EVIDENCE — 9088 bayt — `ed0a24305282ec5cb5393a126f45ec7c3b1d8d95c61bd562b43d687f2237ad3f`
 - `artifacts/validation/29-D5_RECEIPT_READBACK_VERIFICATION.json` — EVIDENCE — 3793 bayt — `ade75c6f36c2bb07695e418111fc47e08647bbd86f2b765001934c3b5ac6b203`
 - `artifacts/validation/29-D5_RECEIPT_READBACK_VERIFICATION.json.sha256` — EVIDENCE — 108 bayt — `2b7c55023781a60c0c7bd6994488a8a0bc66ded0b6671a9e36b57793ee50c5fb`
-- `artifacts/validation/29-D5-scope-real-progress-report.json` — EVIDENCE — 1508 bayt — `e39d1781eebcac8baa3a79cc8eeb99f94376c5085ac97bb35581d28e5ccebd15`
+- `artifacts/validation/29-D5-scope-real-progress-report.json` — EVIDENCE — 1508 bayt — `e592ff2abd08b8ba1f53b75c737bf61ff960ec6313a894a0eed999a0d030b5b6`
 - `artifacts/validation/29-D6_LIBRARY_READBACK_VERIFICATION.json` — EVIDENCE — 9068 bayt — `e28d6fa67add21aaa3b0f7e1938e1efbb345f2105c54a6c3577229acbb63b24a`
 - `artifacts/validation/29-D6_RECEIPT_READBACK_VERIFICATION.json` — EVIDENCE — 3788 bayt — `b046053c83b134d090c4c797a707cdadbc58ab83fd51ce263b3d57a45650db5c`
 - `artifacts/validation/29-D6_RECEIPT_READBACK_VERIFICATION.json.sha256` — EVIDENCE — 108 bayt — `7b04d0c0812254303c181b7f3d5f3bc6fe1918159215d5d57990d97b482e96e7`
@@ -1920,7 +1922,7 @@
 - `artifacts/validation/30-Z-full-vitest-final.json` — EVIDENCE — 65193 bayt — `e569cff6259c04abcf27ca9eb749fb54874b53a5f412b8201c435b9b7b60eecf`
 - `artifacts/validation/30-Z-location-policy-enforcement-affected-regression-vitest.json` — EVIDENCE — 22400 bayt — `4680ca0c5de92e30d5f02134dc13d1a4b86b77b39eefe641bee947458ef5fca0`
 - `artifacts/validation/30-Z-location-policy-enforcement-combined-vitest.json` — EVIDENCE — 31091 bayt — `42a88e2fc4e3a6ddaf32fadfcbaa15f87e751c7fcb5171315758a91107cce912`
-- `artifacts/validation/30-Z-location-policy-enforcement-contract.json` — EVIDENCE — 67226 bayt — `4cb3333a96826a5018b2803f1720af07f28b0f30cc1296bdf4b29e6b8c6cdd0b`
+- `artifacts/validation/30-Z-location-policy-enforcement-contract.json` — EVIDENCE — 67226 bayt — `40e3f1d4c65d7d03b2d56f36ccc3d40a4e8470edd9283029fb4f56410e3b29e1`
 - `artifacts/validation/30-Z-location-policy-enforcement-focused-vitest.json` — EVIDENCE — 11508 bayt — `3134e5e4481a8f2929707a55632260bad9659d4671e091cc219c7da3b4ef8a8a`
 - `artifacts/validation/30-Z-location-policy-enforcement-runtime.json` — EVIDENCE — 2652 bayt — `54abd4dfeb42f6b01c61bf50b8a409275766de862dbcc0d9963f7ef688e8266c`
 - `artifacts/validation/31-A_COMPLETION_TRANSITION_VALIDATION.json` — EVIDENCE — 1132 bayt — `e45504233492d1996442523a37c6564c84d49b3f54e464b25ec57b6d01f27e78`
@@ -1934,9 +1936,9 @@
 - `artifacts/validation/31-A_RECEIPT_READBACK_PERSISTENCE_VERIFICATION.json.sha256` — EVIDENCE — 118 bayt — `a6082f1e800bf2cc3b19faedeb45c4d16f88cf31e0e569afa3ab4ed9ee4f0e82`
 - `artifacts/validation/31-A_RECEIPT_READBACK_VERIFICATION.json` — EVIDENCE — 1833 bayt — `67355df05932c168c75df4b402eb616db187f7081ef7b91267c1b0273c659e27`
 - `artifacts/validation/31-A_RECEIPT_READBACK_VERIFICATION.json.sha256` — EVIDENCE — 106 bayt — `cb9e0a2300e5baf469790d691088ffaf9ff3bae618824bf2adebe911c5ed3b57`
-- `artifacts/validation/31-A_TIMELINE_EVENT_POLICY_ENFORCEMENT_CONTRACT.json` — EVIDENCE — 4468 bayt — `d0afa5c3bb0ab1d4f9b19dae98a031c0da3116e819281f80c6c0e97ab522fc28`
+- `artifacts/validation/31-A_TIMELINE_EVENT_POLICY_ENFORCEMENT_CONTRACT.json` — EVIDENCE — 4468 bayt — `9ca78fff4cba6a95cc70d0e08dd21298c9c2cd63296fd64c2f01d733cbf347d5`
 - `artifacts/validation/31-B_COMPLETION_TRANSITION_VALIDATION.json` — EVIDENCE — 1132 bayt — `d263466c0be559ff34e63c132db62f82c6505abce36e209c978648ba41766984`
-- `artifacts/validation/31-B_FAMILY_DATA_IMPORT_CENTRAL_AUTHORIZATION_CONTRACT.json` — EVIDENCE — 2925 bayt — `55577a42b869bbba6d4e00ad2f9cc2509fb84df1621283b73407b01ad741a641`
+- `artifacts/validation/31-B_FAMILY_DATA_IMPORT_CENTRAL_AUTHORIZATION_CONTRACT.json` — EVIDENCE — 2925 bayt — `445f4935724c9ec3677993d8e8a2ce1cd30f20702bed9ed66719f6f181c927e8`
 - `artifacts/validation/31-B_FULL_VITEST_REGRESSION.json` — EVIDENCE — 388 bayt — `b23c5663d712b69ad7fb02e6f630b1a3a6d3ac456d12bd482c914fcd9ea6df53`
 - `artifacts/validation/31-B_LIBRARY_FINAL_INVENTORY_VERIFICATION.json` — EVIDENCE — 7476 bayt — `50729c0521231daf205a692e6ec30ce1372a757b3af0ba3be50ba4fe63a950bb`
 - `artifacts/validation/31-B_LIBRARY_FINAL_INVENTORY_VERIFICATION.json.sha256` — EVIDENCE — 113 bayt — `468e30bf8c58c3608f8936b3ec2675dda0b1daabe8f7d726ad9302477f8b12ed`
@@ -1950,7 +1952,7 @@
 - `artifacts/validation/31-B_TARGETED_VITEST.json` — EVIDENCE — 443 bayt — `cece159c376107434d22a96d781cbf38e2207e2462e36befb1e879d95c9dcf4f`
 - `artifacts/validation/31-C_COMPLETION_TRANSITION_VALIDATION.json` — EVIDENCE — 1132 bayt — `8f3885d960ff5cf86b25042303863a54916baaeb0432db7d4e7fad36c43e3e06`
 - `artifacts/validation/31-C_DESKTOP_MAIN_TYPESCRIPT.json` — EVIDENCE — 365 bayt — `e076503045ef37dbc644312264c809a0574f565d09ba0093b2218aa449ed7ef4`
-- `artifacts/validation/31-C_FAMILY_IMPORT_MULTI_POLICY_RECEIPT_BATCH_CONTRACT.json` — EVIDENCE — 3587 bayt — `87ae55d0b3ba15d2d1726cda24a3539a44e2f62e34c33cd4b51b6ae0b00dbd4c`
+- `artifacts/validation/31-C_FAMILY_IMPORT_MULTI_POLICY_RECEIPT_BATCH_CONTRACT.json` — EVIDENCE — 3587 bayt — `c27ec1b6e51d9cd2c9a80274af49226e5b31d451bf2f48b54019af0b3c0b8cf2`
 - `artifacts/validation/31-C_FULL_VITEST_REGRESSION.json` — EVIDENCE — 388 bayt — `8c41b40d4cb8db2d90dcc3242206f8799ea39d37bb0cbf3c9551b2deb6af32d6`
 - `artifacts/validation/31-C_LIBRARY_FINAL_INVENTORY_VERIFICATION.json` — EVIDENCE — 8221 bayt — `866798f446be5c04b64f44e0c5181320b044243aa3f27d069983e58d6976a118`
 - `artifacts/validation/31-C_LIBRARY_FINAL_INVENTORY_VERIFICATION.json.sha256` — EVIDENCE — 113 bayt — `3aceb0fc609b27901b855f00852e2aa93aa877274eef3879256438d9da2983ee`
@@ -1964,7 +1966,7 @@
 - `artifacts/validation/31-C_TARGETED_VITEST.json` — EVIDENCE — 510 bayt — `7a95cf2ce5c6a7bf26f40b57df6a78dcb80fdabbc647d85a869d4db931a0dbbc`
 - `artifacts/validation/31-D_COMPLETION_TRANSITION_VALIDATION.json` — EVIDENCE — 1132 bayt — `52c85595be78426e6e91aa6628b6200d987558ca760e7f288a4276387cee2287`
 - `artifacts/validation/31-D_DESKTOP_MAIN_TYPESCRIPT.json` — EVIDENCE — 365 bayt — `919c5c4440936acfb8cb0e5d5b28fbd18fb1072ed456abc9651786c9431201ac`
-- `artifacts/validation/31-D_FAMILY_IMPORT_REUSED_LOCATION_READ_RECEIPT_CONTRACT.json` — EVIDENCE — 3787 bayt — `84ffea6bc1a35727561b13ea24484d45cd34a74b0feda2761914e9a054ba6bd4`
+- `artifacts/validation/31-D_FAMILY_IMPORT_REUSED_LOCATION_READ_RECEIPT_CONTRACT.json` — EVIDENCE — 3787 bayt — `2f85deacb90b90330344fe79a309fd4c64e639c1a4e23f0e3053d2ae769eded3`
 - `artifacts/validation/31-D_FULL_VITEST_REGRESSION.json` — EVIDENCE — 410 bayt — `fa88e89e2e80ea6c637802f559b6f7130f6848777e091f75be20d6d8a053d282`
 - `artifacts/validation/31-D_LIBRARY_FINAL_INVENTORY_VERIFICATION.json` — EVIDENCE — 8436 bayt — `586f32f9827e27df27931dc8e9722aa52ca28dfbf02220413d715dd192baad59`
 - `artifacts/validation/31-D_LIBRARY_FINAL_INVENTORY_VERIFICATION.json.sha256` — EVIDENCE — 113 bayt — `e357f184e4ad34591564219111382cdb80ced092d322f302d0c7887fac89dca1`
@@ -1986,9 +1988,9 @@
 - `artifacts/validation/31-E_PRODUCTION_BUILD.json` — EVIDENCE — 359 bayt — `a2fba23b0da8588bf2fd8eab09f181d073c59b4abec5137f0e8075b3056df220`
 - `artifacts/validation/31-E_ROOT_TYPESCRIPT.json` — EVIDENCE — 292 bayt — `df8a4b9ae148e8bc6544a07604308a3110231638be88c78435c9e81a71568ae3`
 - `artifacts/validation/31-E_TARGETED_VITEST.json` — EVIDENCE — 364 bayt — `f4ea7468c01c02688e9f0bc06d07b7001125e6f1d1c4de5eae991eae52bc2a8a`
-- `artifacts/validation/31-E_USER_VISIBLE_RELEASE_BOUNDARY_CONTRACT.json` — EVIDENCE — 2676 bayt — `d4f22c0507576be02324487c2c69ed053b37e6370525dce6a888a9341ceeeda9`
+- `artifacts/validation/31-E_USER_VISIBLE_RELEASE_BOUNDARY_CONTRACT.json` — EVIDENCE — 2676 bayt — `54d19765ed341eca949ad51f0e1a72e1c0a0f6403b41ddc960fe74af047a9783`
 - `artifacts/validation/31-F_COMPLETION_TRANSITION_VALIDATION.json` — EVIDENCE — 1132 bayt — `cecdc55bfab43f77d6604440b4a28ae3420697cf7728b49e9d1358695ae74798`
-- `artifacts/validation/31-F_FAMILY_IMPORT_CREATED_LOCATION_LINKED_EVENT_CONTRACT.json` — EVIDENCE — 4574 bayt — `aa0f791449c64eb1df61a9a797e1888b3400648200056aad409a187572a5c672`
+- `artifacts/validation/31-F_FAMILY_IMPORT_CREATED_LOCATION_LINKED_EVENT_CONTRACT.json` — EVIDENCE — 4574 bayt — `5131b8615de6c4e6449515cfaff3f67939084946dfe9a3ec0900e029041ebfc8`
 - `artifacts/validation/31-F_FULL_VITEST_REGRESSION.json` — EVIDENCE — 388 bayt — `a453d43cfb93c145a0e0e836e3907c54f0612f7b83058587b22531b2f06bc02a`
 - `artifacts/validation/31-F_LIBRARY_FINAL_INVENTORY_VERIFICATION.json` — EVIDENCE — 9211 bayt — `fefb85d142f7f9d272c74dfdfb0f623c8134eabd6dbf9f9c020dce4d208fe511`
 - `artifacts/validation/31-F_LIBRARY_FINAL_INVENTORY_VERIFICATION.json.sha256` — EVIDENCE — 113 bayt — `02e1b876d7685a94d844db8601c9a4a8af9bcf2e9401f31ef015f1ff564cfc2e`
@@ -2009,7 +2011,7 @@
 - `artifacts/validation/31-G_LIBRARY_FINAL_INVENTORY_VERIFICATION.json.sha256` — EVIDENCE — 113 bayt — `7defce1d3245db2aceec4d324a9aa474e5055ba3cd303c7066d89716d9d19106`
 - `artifacts/validation/31-G_LIBRARY_READBACK_VERIFICATION.json` — EVIDENCE — 14117 bayt — `3dc298a6202c367f6796852489496af49464b374f4c40e53fd8b2042cdff18c3`
 - `artifacts/validation/31-G_LIBRARY_READBACK_VERIFICATION.json.sha256` — EVIDENCE — 106 bayt — `0ae191e9782fec7f884be8facce7b08a37628618e23e27867e3193167b9c4cc6`
-- `artifacts/validation/31-G_MAIN_STRUCTURE_CORE_SERVICE_API_CONTRACT.json` — EVIDENCE — 3711 bayt — `da37f5246f03b600c4d9e14f7e22252b0380c3fea91b5de6a8cac660449e2763`
+- `artifacts/validation/31-G_MAIN_STRUCTURE_CORE_SERVICE_API_CONTRACT.json` — EVIDENCE — 3711 bayt — `f6d3d028c053705935218f129ad433d8ed7962666913bc1e0123b51d6453b81d`
 - `artifacts/validation/31-G_MAIN_STRUCTURE_PRIORITY_VALIDATION.json` — EVIDENCE — 959 bayt — `02f2afdf6f3d3893b669fdbc6930c186b24d225556659ea1bc41961f8c825292`
 - `artifacts/validation/31-G_PRIORITY_SELECTION_VALIDATION.json` — EVIDENCE — 792 bayt — `f0bebc9e9c147c65b39935be2ac9ddd631593ba4fb0909fba11a72dd022a18a1`
 - `artifacts/validation/31-G_PRODUCTION_BUILD.json` — EVIDENCE — 1635 bayt — `2da613da1b8e203ebea37b68692599229196726d4444659b75abd63de680acf8`
@@ -2021,7 +2023,7 @@
 - `artifacts/validation/31-G_TARGETED_VITEST.json` — EVIDENCE — 738 bayt — `e305babb015be3120292a845b02b9c4325292cbe0b1b09dc117c6574238ce668`
 - `artifacts/validation/31-H_COMPLETION_TRANSITION_VALIDATION.json` — EVIDENCE — 1156 bayt — `f4700a1f74a5be510a473cb17e9f09e8954ef6d717c5c09596687e353cee2534`
 - `artifacts/validation/31-H_CORE_SERVICE_RUNTIME.json` — EVIDENCE — 4270 bayt — `b01669f94a499d8f734c9e6db26d099f9f3014d1720e0b256e6cbbc88721e05e`
-- `artifacts/validation/31-H_FAMILY_DATA_SESSION_OWNERSHIP_CONTROL_PLANE_CONTRACT.json` — EVIDENCE — 4590 bayt — `a0d234913d543350169bf1339060f6f8e904f7fc592849040542d4e11d738f83`
+- `artifacts/validation/31-H_FAMILY_DATA_SESSION_OWNERSHIP_CONTROL_PLANE_CONTRACT.json` — EVIDENCE — 4590 bayt — `f1f6be304be2d9d2655a651e0d53dc4ad5bfe1e683774df2df80fd7f980365fd`
 - `artifacts/validation/31-H_FULL_VITEST_REGRESSION.json` — EVIDENCE — 2534 bayt — `e925c14f7c5024559214083b229d7b1b2fa3082b8637cf27aa4c3ee64987f0ac`
 - `artifacts/validation/31-H_LIBRARY_FINAL_INVENTORY_VERIFICATION.json` — EVIDENCE — 10667 bayt — `d6bdbcb36cb486747b635f976b5a2979b862ac5846520c6645b8150783df8473`
 - `artifacts/validation/31-H_LIBRARY_FINAL_INVENTORY_VERIFICATION.json.sha256` — EVIDENCE — 113 bayt — `d88e2a4acc71b5869dd85cf712609bf1f623de3cec855cf43c59f829a811b3dc`
@@ -2039,7 +2041,7 @@
 - `artifacts/validation/31-I_CORE_SERVICE_RUNTIME.json` — EVIDENCE — 3823 bayt — `40a185a901a48f5c71bdac4375ff5b0110ff04f552fdf3faf8307e82e4c89c64`
 - `artifacts/validation/31-I_DEVICE_SECRET_REGRESSION.json` — EVIDENCE — 1625 bayt — `e5d6d96ef6deb02fcd02b1f51903a3280def9bb9bac5fec6fa82ffa2b1bfe000`
 - `artifacts/validation/31-I_FULL_VITEST_REGRESSION.json` — EVIDENCE — 2494 bayt — `89d81923e0ca486d0e01d98b0f4420ce035873a9b0e239cbfd67644eb722bed0`
-- `artifacts/validation/31-I_HEADLESS_DEVICE_SECRET_PROTECTION_CONTRACT.json` — EVIDENCE — 5115 bayt — `63001120f3cff5b71ce891ab11b246e3d40491a9f09e06e4e924bef25a30f281`
+- `artifacts/validation/31-I_HEADLESS_DEVICE_SECRET_PROTECTION_CONTRACT.json` — EVIDENCE — 5115 bayt — `906c0640f4c019304097c0f0263a78eddde7dd0300d481cc92b203e625b8146d`
 - `artifacts/validation/31-I_LIBRARY_FINAL_INVENTORY_VERIFICATION.json` — EVIDENCE — 11728 bayt — `bf611fd2bcbd70a08f4c732b355bab53115509c69a8d8610f44f4a36cf06cfba`
 - `artifacts/validation/31-I_LIBRARY_FINAL_INVENTORY_VERIFICATION.json.sha256` — EVIDENCE — 113 bayt — `cda213f65130fb42738707380c8a82815ac0bfc8886e407769b9354ab348c26e`
 - `artifacts/validation/31-I_LIBRARY_READBACK_VERIFICATION.json` — EVIDENCE — 17676 bayt — `f6d5b14fe753e373ed06bfdd1e7cdff22f1440d156014e5050bfd796e16beaa3`
@@ -2054,7 +2056,7 @@
 - `artifacts/validation/31-I_TARGETED_VITEST.json` — EVIDENCE — 823 bayt — `fd8ee2d9f3b00dad613a3a22faf2d387f0e20f4a49801a51e8935aa11d095bba`
 - `artifacts/validation/31-J_COMPLETION_TRANSITION_VALIDATION.json` — EVIDENCE — 1152 bayt — `58227048e92963ae869e35ec6cbdc23e0ee487ed4b062177ff75320ac3ed530c`
 - `artifacts/validation/31-J_CORE_SERVICE_RUNTIME.json` — EVIDENCE — 3833 bayt — `baeb8d67618aa20caadb381d4b31ecac525d7846b25633f5521c13bd6c4fbfee`
-- `artifacts/validation/31-J_FAMILY_DATA_COEXISTENCE_DEFAULT_DENY_CUTOVER_GATE_CONTRACT.json` — EVIDENCE — 6313 bayt — `b8ce819915f1a57cd28c20e134f568dedb0aa1b4d55e77ef6c1320dc9bd1808d`
+- `artifacts/validation/31-J_FAMILY_DATA_COEXISTENCE_DEFAULT_DENY_CUTOVER_GATE_CONTRACT.json` — EVIDENCE — 6313 bayt — `979636af956b1fbe7d45f623b45f36a3623678fe8243dd67f73444fddf829442`
 - `artifacts/validation/31-J_FULL_VITEST_REGRESSION.json` — EVIDENCE — 2490 bayt — `471d027d84d29497b3cf0a19a83493bdb0a4b883b405eb3bda7215ab88e7d086`
 - `artifacts/validation/31-J_LIBRARY_FINAL_INVENTORY_VERIFICATION.json` — EVIDENCE — 11873 bayt — `35b25f803082026a149d9a04a5b9188b93ae32394d0cdc992d9f5031859e87b6`
 - `artifacts/validation/31-J_LIBRARY_FINAL_INVENTORY_VERIFICATION.json.sha256` — EVIDENCE — 113 bayt — `ee23f10dfe7b4fce74f8b969f5eefd509bc36adc06d482033488377acec15832`
@@ -2076,7 +2078,7 @@
 - `artifacts/validation/31-K_LIBRARY_FINAL_INVENTORY_VERIFICATION.json.sha256` — EVIDENCE — 113 bayt — `81b89ac99ade30fbff5950376d5d89613b18ec8cf1b10c2b12bc7881594675fe`
 - `artifacts/validation/31-K_LIBRARY_READBACK_VERIFICATION.json` — EVIDENCE — 19631 bayt — `50731a9dd5fc5c43ae3e8d177df908f30b7a1a315cbd0e79297daa2b32a3c790`
 - `artifacts/validation/31-K_LIBRARY_READBACK_VERIFICATION.json.sha256` — EVIDENCE — 106 bayt — `6ff0088e48efff4575022870605d170dc1fe6d5ff6017c60e7918efe2b58c4c1`
-- `artifacts/validation/31-K_MONOTONIC_CUTOVER_READINESS_EVIDENCE_CONTRACT.json` — EVIDENCE — 9847 bayt — `5c1915eec20eabf955d2e268cb4214f41f7bb92d141f0cac753a80b43ad27489`
+- `artifacts/validation/31-K_MONOTONIC_CUTOVER_READINESS_EVIDENCE_CONTRACT.json` — EVIDENCE — 9847 bayt — `4600dbca5a20ac5b6b8f3fb7ef007eeddf675c11a7b0eaf4227118d6cb3752df`
 - `artifacts/validation/31-K_PRIORITY_SELECTION_VALIDATION.json` — EVIDENCE — 984 bayt — `a4518a6b6ee43db563b5150ab6b273c895f8e6b0e1e28092917488981958c1d6`
 - `artifacts/validation/31-K_PRODUCTION_BUILD.json` — EVIDENCE — 2401 bayt — `0d5efd89963eac2ec9e33e1af326dd3efab40b0c1a5822aafef6e9726f190ccb`
 - `artifacts/validation/31-K_RECEIPT_READBACK_PERSISTENCE_VERIFICATION.json` — EVIDENCE — 1150 bayt — `7d26156fd13678983b5fd6011681d0321beee4c119d886c76a62c7d67e89a9b8`
@@ -2224,7 +2226,7 @@
 - `artifacts/validation/31-S_VERSIONED_CUTOVER_DECISION_PREFLIGHT_CONTRACT.json` — EVIDENCE — 13956 bayt — `468e3b0186f97371ad95934d9db16788bcc55424f724fa609f64b80584bd6781`
 - `artifacts/validation/31-T_COMPLETION_TRANSITION_VALIDATION.json` — EVIDENCE — 1437 bayt — `827680a5a12065bb0a3705d89891024a5120f275cf1d1886504c37756ba76009`
 - `artifacts/validation/31-T_DATABASE_MIGRATION_68.json` — EVIDENCE — 1773 bayt — `a65e5023b2e8ad321375767e77e0ce8e99542577017be5a89b3884af1f8d3b1d`
-- `artifacts/validation/31-T_FAMILY_IMPORT_GOVERNED_ROLLBACK_RECEIPT_FENCE_CONTRACT.json` — EVIDENCE — 8199 bayt — `281e168dafdb0fb9d032c01588d053a66cc91e25b310b0ee29b7e19659647b6d`
+- `artifacts/validation/31-T_FAMILY_IMPORT_GOVERNED_ROLLBACK_RECEIPT_FENCE_CONTRACT.json` — EVIDENCE — 8199 bayt — `cc4f129d1004404c08933db4eb1699853b915e76fb7bdeea459c3ddd0ca71007`
 - `artifacts/validation/31-T_FULL_VITEST_REGRESSION.json` — EVIDENCE — 3418 bayt — `83834a3696c2963d8a9e6050a0e4d922c008b955f38183d38cd75b40b79f746f`
 - `artifacts/validation/31-T_LIBRARY_FINAL_INVENTORY_VERIFICATION.json` — EVIDENCE — 11067 bayt — `0b46c3dddd659cfa082ec3e6801d6e8aef857c20d31f425b3f2369cf445ea6df`
 - `artifacts/validation/31-T_LIBRARY_FINAL_INVENTORY_VERIFICATION.json.sha256` — EVIDENCE — 113 bayt — `af5528906274925df0769b1755ac343faadc3aacd16b830ace40283a9f669978`
@@ -2268,8 +2270,10 @@
 - `artifacts/validation/32-I-ppk-013-client-data-access-runtime.json` — EVIDENCE — 8696 bayt — `bc89ff55ac54c448c1e7bf956ac8287aedae716f5a84532f686a5d0248466e33`
 - `artifacts/validation/32-J-ppk-014-versioned-core-service-api-contract.json` — EVIDENCE — 6088 bayt — `5ffe61c3224621a6cb6d15ee13f2439e3c93e228fb7012531da79321a9c11493`
 - `artifacts/validation/32-J-ppk-014-versioned-core-service-api-runtime.json` — EVIDENCE — 10284 bayt — `fcbbe501b17f47168a21d792e38355addfc7212e7527ce109dd73022cbd16667`
+- `artifacts/validation/32-K-ppk-015-network-egress-contract.json` — EVIDENCE — 6687 bayt — `a77920b6873f9f081009ddf4e9feb150e32912cf28395b76dfa7d5685fb9715c`
+- `artifacts/validation/32-K-ppk-015-network-egress-runtime.json` — EVIDENCE — 11240 bayt — `d7dd8d758b9d00c67f8c9ef578763f3be643f1ca84313d85f735f9249e1c1b52`
 - `artifacts/validation/active-delivery-documents.json` — EVIDENCE — 747 bayt — `06e8d7cced7c63802aedec305df661e1445875fbcb6d861370f42d86b8009ca0`
-- `artifacts/validation/active-release-contract-v2.json` — EVIDENCE — 186 bayt — `8ec979e2ba12d07ae8ca26a42f387468a625a037142abf88e23f883801954354`
+- `artifacts/validation/active-release-contract-v2.json` — EVIDENCE — 186 bayt — `92cae993d736ff49ecf529029fb43be4e570bc8c6b7a0c448ea3f01c1656c1bd`
 - `artifacts/validation/active-version-contract.json` — EVIDENCE — 12304 bayt — `b93982c5703ba8c1e549d0f19eb217095db3f67ca74582110ec1a707f315c4bc`
 - `artifacts/validation/bronze-governance-reality-matrix.json` — EVIDENCE — 2058 bayt — `31d194cbe57848c8c3170076a0c919a879d368e5bcf11ca296576859ac03119c`
 - `artifacts/validation/build112-architecture.json` — HISTORICAL — 61094 bayt — `73d87552cd6b38fafb74c3495a0f41cbeab8c08155f7ffdc988396a31c6bd451`
@@ -2305,7 +2309,7 @@
 - `artifacts/validation/build142-signed-revocation-list-contract.json` — HISTORICAL — 608 bayt — `acd14a0a74bddb012a9975a18e30d8529045316a61bb0018508be9785c2546d8`
 - `artifacts/validation/build146-family-data-import-contract.json` — HISTORICAL — 560 bayt — `d9439236880e6d5be597483049d8efa7dc4d4574c9442f6879d352fe78f4c649`
 - `artifacts/validation/build147-large-data-performance-contract.json` — HISTORICAL — 513 bayt — `330180466cc289d617871e384ccc1b238109cec0c07dbcce4db3566392cf559d`
-- `artifacts/validation/build148-integration-hardening-contract.json` — HISTORICAL — 576 bayt — `72f3cf45cba5d17aaa25595d57e19b0c88a05a2ff4bd5201093ff4de620998a7`
+- `artifacts/validation/build148-integration-hardening-contract.json` — HISTORICAL — 576 bayt — `27f3d5e220316122d7aa2f863ef41ba423a256b708ebd425eebd5394e1413557`
 - `artifacts/validation/build149-clean-validation-contract.json` — HISTORICAL — 1159 bayt — `455c7ee2ebe4464c02601ca0e5ef07809b71a14c4eeb9279b851e65386b7756e`
 - `artifacts/validation/build150-clean-validation-contract.json` — HISTORICAL — 659 bayt — `dacbcbf189bebe733dad3739ce3235c78801f33f46584e8f391469d9fa926b6b`
 - `artifacts/validation/build150-windows-packager-split.json` — HISTORICAL — 400 bayt — `c904574471b88fa853ccca976fce5d3efbe1fb4c78a35fc045f122e3c8122711`
@@ -2313,13 +2317,14 @@
 - `artifacts/validation/build151-dependency-acquisition.json` — HISTORICAL — 1046 bayt — `447727e68e1ecd95440438ee32e280e66578732aacfd399d911b14c1a6240111`
 - `artifacts/validation/build152-cache-bundle-acceptance.json` — HISTORICAL — 1061 bayt — `c4c63cc1d19a62b1c57ca9647283e9e9a945e72cdee8e39c9abb61fb6904d716`
 - `artifacts/validation/build159-ipc-transport-contract.json` — HISTORICAL — 362 bayt — `c9d87116118da88da3022d6a07f53e195b3b801a60e9c4a1041502e88360f7fa`
-- `artifacts/validation/build160-ipc-request-lifecycle-contract.json` — HISTORICAL — 385 bayt — `58430ceadcaeae25778576d5ab2afbac40a1ca3e84d8e3f0c5499a83eb18152e`
+- `artifacts/validation/build160-ipc-request-lifecycle-contract.json` — HISTORICAL — 449 bayt — `865ce278824605df5e8d9c7d010cce888d59018e794cd56a11a3741a094d1436`
 - `artifacts/validation/build160-ipc-request-lifecycle-runtime.json` — HISTORICAL — 1406 bayt — `840a2431653e1f6a0d2d9eb7d62d16b54c0160def9cf8d2ca57e9016cefb76bb`
 - `artifacts/validation/build162-ipc-read-sharing-contract.json` — HISTORICAL — 321 bayt — `08012148c5bc36ac302d59bcee1a9cfdb42c9e9fd928d5fefbbe4eb062e8bffd`
 - `artifacts/validation/build162-ipc-read-sharing-runtime.json` — HISTORICAL — 2041 bayt — `625644c469a32df633042b4d210274293e324c5d9c46f577376ee6a067cf545c`
 - `artifacts/validation/build176-device-reauthorization-contract.json` — HISTORICAL — 5079 bayt — `2dfae622a725e28a07b9dd4b55598e30b97bb40e357ce2c158c57df53d8ca4d1`
 - `artifacts/validation/build176-device-reauthorization-runtime.json` — HISTORICAL — 2335 bayt — `fe413c7b27284c05f7f1ab8d690bae3ec6a9fe158c17c90dc067d7505b9900e0`
 - `artifacts/validation/build176-device-reauthorization-syntax.json` — HISTORICAL — 1541 bayt — `fb1690beb523c9ebe7d91fa6e3e4e92b39ab8a4f1624c42dd4d184ec2b5e561d`
+- `artifacts/validation/build181-revocation-sync-durability-contract.json` — HISTORICAL — 3548 bayt — `5a06621ee8822cfcfa87875befcbce920f81696110a4752ca91d1472639c53f4`
 - `artifacts/validation/build208-project-constitution-contract.json` — HISTORICAL — 580 bayt — `4a3719773301e284e1438931edfa3f42d0fe84a642416b111ca6e76c5f655b7b`
 - `artifacts/validation/build209-secure-onboarding-vault-contract.json` — HISTORICAL — 455 bayt — `d9b2c39a34d95467227c574d0d8cb19349c4fd2ab55efea78940ca7c37c3e7a2`
 - `artifacts/validation/build209-user-data-vault-runtime.json` — HISTORICAL — 401 bayt — `215b9e135d28fc87bfed700eaaa985013fdb2024e5f13ad68332ef403ea4d6dd`
@@ -2328,40 +2333,40 @@
 - `artifacts/validation/build225-build223-preload-cjs-regression.json` — HISTORICAL — 2922 bayt — `ac1554b7a139b3a45a0394c9cbcd38d05e5a98268a7e413486ca9583950b3942`
 - `artifacts/validation/build227-root-cause-contract.json` — HISTORICAL — 1918 bayt — `2f5def3f52d59a212aa116138479da1ecddcdb3e1adc3d62a5753e51699bc9f4`
 - `artifacts/validation/build228-active-version-sweep.json` — HISTORICAL — 205 bayt — `119b17bcaba1dd1df83658636da91a3b5c2381626ddb85526a4623cc4a74e72e`
-- `artifacts/validation/canonical-rule-registry-gate.json` — EVIDENCE — 322 bayt — `56804a946d1e6345902705ad1b7b402f1ac736be8c5918988cec0541a4b21ec3`
+- `artifacts/validation/canonical-rule-registry-gate.json` — EVIDENCE — 322 bayt — `0827e5c7f0df3d318c981366b8fbb3e48a66fb275838bb1822d1577a96d27212`
 - `artifacts/validation/completed-step-build-lock-runtime.json` — EVIDENCE — 407 bayt — `26daedb76ea9f9328a614aa7da88aa06be9fc97f497d59162f8d3b6554dd2b5e`
-- `artifacts/validation/conversation-capacity.json` — EVIDENCE — 241 bayt — `86f8452940f623db8e570706727aa92e3605fbc3c9f99ee85563d3d37543de0f`
-- `artifacts/validation/core-service-boundary.json` — EVIDENCE — 123 bayt — `2ed74c838063be74096e3b1cfab84c89c725d72ba3913a2eed70d5279290cd8c`
-- `artifacts/validation/core-service-local-admin-contract.json` — EVIDENCE — 260 bayt — `8211f9b68bc8d65073863330c1aaa6de1cfbd94905c63cf99062659256a661b0`
+- `artifacts/validation/conversation-capacity.json` — EVIDENCE — 241 bayt — `e53b59425d693a7b9a35e71d143a4c33ba0ce91c19bc12c8522e381d2124228c`
+- `artifacts/validation/core-service-boundary.json` — EVIDENCE — 123 bayt — `10fc6cf5d044345e39591ae04b5b7fb75d475d93a2ed5b4e5f6ce4b3a838461d`
+- `artifacts/validation/core-service-local-admin-contract.json` — EVIDENCE — 260 bayt — `869bcf9cce4eee21632786b3b55bee5cd6c3cb072123afddfec4d955ea6a6354`
 - `artifacts/validation/delivery-attestation-contract.json` — EVIDENCE — 579 bayt — `3b81ab8ec80fa62d941c49be5e345fd0eccd93a775b8c4b1afb5a8da926bf03d`
 - `artifacts/validation/delivery-report-contract-v2.json` — EVIDENCE — 161 bayt — `fa99beddae65d90f5bf6e9f4602a047b32318f3b8f643ac353ebe521f1bc4493`
-- `artifacts/validation/desktop-core-service-startup-contract.json` — EVIDENCE — 161 bayt — `91487d8351ea12b80012b90a7e344ec17c84ea4f530b9793d4c8b68a2ca5d651`
-- `artifacts/validation/desktop-core-service-startup-runtime.json` — EVIDENCE — 161 bayt — `3c51db57c0817bacf1bd8e5a37aa997d47e0601dbae12f3440e501005f32fbe4`
+- `artifacts/validation/desktop-core-service-startup-contract.json` — EVIDENCE — 161 bayt — `c0a63879189443fca160ac31ff2c9e1c8abcd138f864c2f1f25f674bf7594efa`
+- `artifacts/validation/desktop-core-service-startup-runtime.json` — EVIDENCE — 161 bayt — `39faeb983f1b200d1579f603b1c9c130dcb7eee4a4551e8e4a49f4765c88ebbc`
 - `artifacts/validation/desktop-main-source-typecheck.json` — EVIDENCE — 843 bayt — `4327cef1176cfe1287fdb576694d7050a5ecd29cc0fc66ba510cb4ea5709500b`
-- `artifacts/validation/feature-reality-gate.json` — EVIDENCE — 221 bayt — `298b77d3ef21da03cabff4972279e517b104afb1a1abcbc20497b1c245272df8`
+- `artifacts/validation/feature-reality-gate.json` — EVIDENCE — 221 bayt — `c9e4aed40cfb9d4ac73735b8948252d914561d7882043a23b1ac0495c2f24034`
 - `artifacts/validation/governed-postflight.json` — EVIDENCE — 4823 bayt — `1a8ebb27dec764e6cfa5d72b449a83b329c847b920cab409de91677107a4712b`
 - `artifacts/validation/governed-preflight-tamper-runtime.json` — EVIDENCE — 123 bayt — `bb71c69dd058b30d96eaad8d2ae75315e9c49153cb6d1593280c13bbd48c56ef`
-- `artifacts/validation/governed-preflight.json` — EVIDENCE — 6024 bayt — `919558d9f12052ba65cc02d0ff78ba0781ea662420311d2f026e8aa07f73bb20`
+- `artifacts/validation/governed-preflight.json` — EVIDENCE — 5772 bayt — `3ca64522da7cb248d744cd9052f94abe568fa8f0d2f65fdb5001b53e2ab9fccb`
 - `artifacts/validation/ipc-payload-security-contract.json` — EVIDENCE — 410 bayt — `0aa959554cb63b4b353b46d46416c7ea4a1d2b8232789cc82a653afa7fa8e5f9`
 - `artifacts/validation/ipc-sender-trust-contract.json` — EVIDENCE — 398 bayt — `25c0a11350bb1f02178474243cba7c4772d059817d21ac671ab937a6cce4ac43`
 - `artifacts/validation/master-build-ledger.json` — EVIDENCE — 1088 bayt — `d2ce4640699167d8bc697e6b1cf36caa2f55bc3c24b46773d130460dcc9709f6`
 - `artifacts/validation/monthly-release-contract.json` — EVIDENCE — 162 bayt — `ea7aded0b0b3be272a6f8f56c730c684752e4b529449a6b0ac5e1b55fcd22acc`
 - `artifacts/validation/package-source-typecheck.json` — EVIDENCE — 819 bayt — `eeeb567d3c69e7b68c8b858f95a1386b46f1db68244eb63676fad65947ad6964`
-- `artifacts/validation/platform-policy-gate.json` — EVIDENCE — 2029 bayt — `227f4df3cae4cca57941156f4c05662fce05f7fe55e202b9e9b6c9cc3df15970`
+- `artifacts/validation/platform-policy-gate.json` — EVIDENCE — 2029 bayt — `63553a6368d50d7083081f498180589e37d190dafb4287903a2c7ba389df29a1`
 - `artifacts/validation/PPK002_FAMILY_DATA_IMPORT_POLICY_LOCAL_CONTINUATION.json` — EVIDENCE — 1547 bayt — `da5ca2f25bc1f5ad58623933d5577ba57b7f4d04816bcf2a201e912596d166f7`
 - `artifacts/validation/PPK002_TIMELINE_FULL_REGRESSION.json` — EVIDENCE — 572 bayt — `2fc02c8d2385e2a1a45f5a0ca070d0fb78655bbb9c8cebbaf03df24446f34c5a`
 - `artifacts/validation/PPK002_TIMELINE_POLICY_LOCAL_CONTINUATION.json` — EVIDENCE — 1672 bayt — `d0ca8e6314a9e6f3577478b712c4f3970d93d11be0c791cece74011fba53185d`
-- `artifacts/validation/project-artifact-index-gate-v2.json` — EVIDENCE — 212 bayt — `9631858673336ef1d0d8b588d9b9aedbbd1fd0446b571e794d32598c8c3b6d9a`
+- `artifacts/validation/project-artifact-index-gate-v2.json` — EVIDENCE — 212 bayt — `818231def192f0afc2a5d73d6bd7788da7f6d50bd27d30031e4e7a0d69498c38`
 - `artifacts/validation/renderer-session-security-contract.json` — EVIDENCE — 731 bayt — `2bb23d315baa0bef0103d873b8461efec34c805e6a9baae33ce3fcb3a784eebf`
 - `artifacts/validation/source-integrity.json` — EVIDENCE — 342 bayt — `9d40e5f183588f9e79ef03ade94661a54a5816fb196df65c8b942a5306aedf97`
 - `artifacts/validation/source-preflight.json` — EVIDENCE — 21159 bayt — `4268a4b769ad85222913334a9637941b57f1e1316aa76434845bbd54c1507f5d`
-- `artifacts/validation/step-checkpoint-gate.json` — EVIDENCE — 188 bayt — `4370560e51f8799ccac4ff9850c779bdab6c02554de6f023171c40d5ab56e976`
+- `artifacts/validation/step-checkpoint-gate.json` — EVIDENCE — 188 bayt — `1ccd92a9de2e8c3c53f26f5c372de07187dce7913c0f58f0f306b509d38e5cbc`
 - `artifacts/validation/step-checkpoint-tamper-runtime.json` — EVIDENCE — 548 bayt — `f2e7f5f1b8ba19556ee7d276b9b7fdadd3fa4279c388cc31e8566e11e27632dd`
-- `artifacts/validation/system-health-core-service-ipc-contract.json` — EVIDENCE — 161 bayt — `de6a1520d997a4306de873248e53f3405d870b6ddab958a08e706a0cc13f253a`
-- `artifacts/validation/system-health-core-service-ipc-runtime.json` — EVIDENCE — 161 bayt — `36805cadd4af8b94daadd63a933656a0ac930a409b43ad3ce474cc7c7010349f`
-- `artifacts/validation/universal-rule-enforcement-gate.json` — EVIDENCE — 299 bayt — `e3b62a0ec7faffef89ea99b7889ab5d5190dfb13d764ab32ef33132ff237771d`
+- `artifacts/validation/system-health-core-service-ipc-contract.json` — EVIDENCE — 161 bayt — `a6a45763a045e031a40b444ed5dadfebccd6ea16959ac61c501205286c933ee9`
+- `artifacts/validation/system-health-core-service-ipc-runtime.json` — EVIDENCE — 161 bayt — `91086e2d7436edae035ab213a93d4b70575ec5dff7ff17e86b242ee880e308fc`
+- `artifacts/validation/universal-rule-enforcement-gate.json` — EVIDENCE — 299 bayt — `282060ffaabf85be0300fa8e880555c81d3039daff9b6763c5e34d431d30b577`
 - `artifacts/validation/universal-rule-enforcement-tamper-runtime.json` — EVIDENCE — 429 bayt — `64b3088533339b3770cfe8e0b5570a63232f093e4f3cfac2a9a8c87f0559364e`
-- `artifacts/validation/user-decision-ledger-gate.json` — EVIDENCE — 181 bayt — `b8e9bc051e93ebb7d6107c3380be1a30e6d0717d2e64802065847a10d7beb558`
+- `artifacts/validation/user-decision-ledger-gate.json` — EVIDENCE — 181 bayt — `69d10d6cb6e542da435508b056b2f82e3463246d54679d8c7c937f7b074f84b7`
 - `artifacts/validation/work-step-skip-tamper-runtime.json` — EVIDENCE — 323 bayt — `258ff43597f2285d0eb6b63ee269d3ca72f304312df3c6aea51ec4d0e95a23af`
 - `artifacts/validation/workspace-path-portability-contract.json` — EVIDENCE — 297 bayt — `171d05818a7bc8a71a45b7bb6a931486a05df9d0daa6d058718914b419cfbc7b`
 - `BRONZE_04.08.2026.27_BITIS_METNI.md` — ACTIVE_REFERENCE — 1243 bayt — `639a5137d4154eb3051a44375a341e84480ffe4ec4d1e8b386e0a7a3141459b8`
@@ -2899,8 +2904,9 @@
 - `config/32-h-ppk-012-offline-capability-lease-scope.json` — ACTIVE_REFERENCE — 1860 bayt — `a80a427594d5a76c8e3237b9be84f5756a2b42ca42876306097d0878e539e4a6`
 - `config/32-i-ppk-013-client-data-access-boundary-scope.json` — ACTIVE_REFERENCE — 2717 bayt — `26b01e907844b05264e09c5e92113acd956142002baef0ce7c07667bfde9b029`
 - `config/32-j-ppk-014-versioned-core-service-api-scope.json` — ACTIVE_REFERENCE — 2907 bayt — `7b8c203826ff26ae9d1d2a47a9740e019b90fc068ec99237e0e09df4d212290b`
+- `config/32-k-ppk-015-network-egress-policy-scope.json` — ACTIVE_REFERENCE — 3657 bayt — `343aa943907032bf1982e635a774e9aa363c72875d66fe09928d785f9a9aae50`
 - `config/accepted-cache-rc2-validation-policy.json` — HISTORICAL — 554 bayt — `8c2963d70118409a716b49632388b9f0f2dcb967de2792b0b7ad4125b021213e`
-- `config/accepted-scope-registry.json` — ACTIVE_AUTHORITY — 336348 bayt — `cb6e539314183b5232be4a439dc317f496663f48e2469c37e115e2ff99d229cc`
+- `config/accepted-scope-registry.json` — ACTIVE_AUTHORITY — 337100 bayt — `db61673dcba048a3cc3c2fdb50cfd76032ce3d07f912261dee82eca552650a8d`
 - `config/active-document-set.json` — ACTIVE_REFERENCE — 1307 bayt — `3e700aa3bbfbf7cbb2f342b95b886148a810d991c54743ed1d25d84c5d0179b2`
 - `config/active-file-classification.json` — ACTIVE_REFERENCE — 9342 bayt — `94d0a5a07bfdc616edb30c3e64524496de8a6ed0da784c3fe6583d14ba3af3ae`
 - `config/active-governance-ledger.json` — ACTIVE_AUTHORITY — 41158 bayt — `fd09922cf963a4ca8293bc2ef1acc3c46f6a3ec2f0801972a7a8f158220af684`
@@ -2934,7 +2940,7 @@
 - `config/rule-enforcement-registry.json` — ACTIVE_AUTHORITY — 90514 bayt — `c8c418a360b9059643cb1e5b0a03b47190016e85d9bdc425d032b6dfc7f126ba`
 - `config/source-preflight-checks.json` — ACTIVE_REFERENCE — 15017 bayt — `0955f9772e0d75368cacf7e2a318706ffa95f4d7f8b4f71950d38442cfb82dbb`
 - `config/ui-visual-reference-manifest.json` — ACTIVE_REFERENCE — 3385 bayt — `a1dc6481025056d7a56429138f4e10f034c69e6b50ab9776dfc23347e478e701`
-- `config/user-decision-ledger.json` — ACTIVE_AUTHORITY — 46177 bayt — `c7986b860fc19cde678d54af169c4fd618a39223e6297ed27a8bff0aba3a0109`
+- `config/user-decision-ledger.json` — ACTIVE_AUTHORITY — 47404 bayt — `5d69162185a0e5be951730cc0741e9e11e081f14443eba5b039b6a0aa12c8788`
 - `config/work-segmentation-plan.json` — ACTIVE_AUTHORITY — 129828 bayt — `e9307b9d0aea21f496d1d588260af8489bd0223caec869eca1c8405aba85072e`
 - `CONTRIBUTING.md` — ACTIVE_REFERENCE — 8600 bayt — `5d9a514a2080679014c4c013fda9332eb2536531230e0b20b937926be76a4d3b`
 - `COPYRIGHT.md` — ACTIVE_REFERENCE — 374 bayt — `7fbafcf9efc27286c44f958733e256a91ae9281bc8184a2b22a85b25c20a616f`
@@ -3169,7 +3175,8 @@
 - `docs/audit/32-H_PPK-012_CEVRIMDISI_CAPABILITY_LEASE_UST_KAPANIS.md` — ACTIVE_REFERENCE — 1801 bayt — `1321de970ccd1b6fc4d2ca370f2d78f24867b52c389fc3df3d1be0e6a12572cd`
 - `docs/audit/32-I_PPK-013_ISTEMCI_VERI_ERISIM_UST_KAPANIS.md` — ACTIVE_REFERENCE — 2574 bayt — `0f86792a20e5e55635bbd512e4b491d40877558efb96b6fbe6f239db0939b22f`
 - `docs/audit/32-J_PPK-014_SURUMLU_CORE_SERVICE_API_UST_KAPANIS.md` — ACTIVE_REFERENCE — 2734 bayt — `9c0c7cf65cbd992faddf941b0c8b1910bcd1adfb4bd3ae67ad8643c5614943b8`
-- `docs/audit/BRONZE_CURRENT_COMPLETION_AUDIT.md` — ACTIVE_REFERENCE — 10994 bayt — `a1680cc58505bc75ed516c8e50750537925cd717f87cee5d06508d5b46af6a2f`
+- `docs/audit/32-K_PPK-015_NETWORK_EGRESS_POLICY_UST_KAPANIS.md` — ACTIVE_REFERENCE — 2678 bayt — `bd1590f8cb513bd5c59eda0f87f8c0a947f4716d079db58a23ff2ba9e518c326`
+- `docs/audit/BRONZE_CURRENT_COMPLETION_AUDIT.md` — ACTIVE_REFERENCE — 10957 bayt — `3337482f90865e8878fb0cb44a71d645d3a0e8a8f39fc8a8d51df76aab1d163f`
 - `docs/audit/PPK-002_FAMILY_DATA_IMPORT_POLICY_LOCAL_CONTINUATION.md` — ACTIVE_REFERENCE — 1578 bayt — `d7b91924d03fdfa6d30ae9659cdb83d73116e485d032d24829e75ddb9c52e308`
 - `docs/audit/PPK-002_TIMELINE_POLICY_LOCAL_CONTINUATION.md` — ACTIVE_REFERENCE — 2551 bayt — `a06e3cd7040bbc36c3a933cbd664e067120311624d8f5aff2bc6e4101cb9e05c`
 - `docs/AUTOMATIC_CLEAN_BACKUP_REWRITE_V1.md` — ACTIVE_REFERENCE — 2165 bayt — `b57ef020be7ac76000b32f55468157f88699c97274d3dc4cf96a0626524a760b`
@@ -3355,6 +3362,7 @@
 - `docs/decisions/DEC-193-ppk-012-offline-capability-lease-cache-fence.md` — ACTIVE_REFERENCE — 2647 bayt — `da7c77557a194bae31c51ac161eb696d858dd050a0fb3d44d6da40517052dda3`
 - `docs/decisions/DEC-194-ppk-013-client-data-access-boundary.md` — ACTIVE_REFERENCE — 3161 bayt — `3be9a86abb3759aafb94dc38689ee6535c087a76bb01b40933e568f33da6518a`
 - `docs/decisions/DEC-195-ppk-014-versioned-core-service-api-boundary.md` — ACTIVE_REFERENCE — 2930 bayt — `d7c5c29fc0b4104c6527dd65eb67ec4448b26cfb42c10effaa827bf5cced932f`
+- `docs/decisions/DEC-196-ppk-015-network-egress-policy.md` — ACTIVE_REFERENCE — 3090 bayt — `af47dc2009e2f429c875e7c6acd723dfc511c79d7816491c5d5e92ca1f98fe13`
 - `docs/examples/anadolu-parsi-family-import-v1.example.json` — ACTIVE_REFERENCE — 1300 bayt — `fd769c29e37671083eaf6960374fca184e06027b7e0b20c6112b1dc8b6b34494`
 - `docs/EXTERNAL_EVIDENCE_ROOT_TRUST_VERIFICATION_V1.md` — EVIDENCE — 2164 bayt — `2c8986237266d4eec82c9e986957ba347e56014299bbf5b32582b59b6fb0ebf4`
 - `docs/FAMILY_DATA_IMPORT_V1.md` — ACTIVE_REFERENCE — 3130 bayt — `8f708ee6a307c806edb6fd35a99f57243a2cc7af6232b5847a4f4d7208bec40e`
@@ -3385,6 +3393,7 @@
 - `docs/security/OPEN022_WINDOWS_CLOSURE_BUILD218.md` — HISTORICAL — 1872 bayt — `257a4eb58a931de251e853eda1006c78a5ebcedbc3d733d970e85e367777a60c`
 - `docs/security/PPK-013_CLIENT_DATA_ACCESS_THREAT_MODEL.md` — ACTIVE_REFERENCE — 4414 bayt — `60fba609e69eedf5ce69041b5a446b7751b25f53c46371bfe56ab2d852ca0707`
 - `docs/security/PPK-014_VERSIONED_CORE_SERVICE_API_THREAT_MODEL.md` — ACTIVE_REFERENCE — 3974 bayt — `6bc32db73784f5811a1b1f9ab98d59a42c6ca42f241e8eb6374ed04635ccb98b`
+- `docs/security/PPK-015_NETWORK_EGRESS_POLICY_THREAT_MODEL.md` — ACTIVE_REFERENCE — 4902 bayt — `e534af0d26d41f2947360867e457dc54f9299e228cb074525463cb657189b9aa`
 - `docs/security/PROTECTED_SIDE_ARTIFACTS_BUILD214.md` — HISTORICAL — 1336 bayt — `c2a27bfa139e8afc17158998d22b43fe78a19c5dba71343d661d3f20857ff13b`
 - `docs/security/WINDOWS_EVIDENCE_INTAKE_BUILD216.md` — HISTORICAL — 2047 bayt — `38f3fbeedbf6a86687428c9a9423cfcdf203aa1b37415e300ba6a15a9e99a77a`
 - `docs/security/WINDOWS_ROOT_CAUSE_REMEDIATION_BUILD227.md` — HISTORICAL — 1225 bayt — `68210c2028aa2e58f7b779b37c638671603c657084dd2e6e04b7a5adbe55e170`
@@ -3401,7 +3410,7 @@
 - `OPEN021_WINDOWS_KAPAT.cmd` — ACTIVE_REFERENCE — 595 bayt — `79e9330f355bb1bd2eb3581de875f7ad45da1c5716d070687d4b49559aa42404`
 - `OPEN022_WINDOWS_KAPAT.cmd` — ACTIVE_REFERENCE — 595 bayt — `a694706424e70175f1b561a79e543c627dc038d7794f164677bd455c7cb42064`
 - `package-lock.json` — ACTIVE_REFERENCE — 78112 bayt — `40277f5b676960c3ad7b9404bb7ae8d0a169696cb558807a14ea4ad6db693c83`
-- `package.json` — ACTIVE_REFERENCE — 78818 bayt — `b57a1f0d9312a10b9652e9a35c6f26dd8d1a0b0ff96ff66e49e59979b156a982`
+- `package.json` — ACTIVE_REFERENCE — 79120 bayt — `30e3d5c28ac4fb97a313352bf7a2f8eae242401af75e86a94cadde5fd6dc257d`
 - `packages/application/package.json` — ACTIVE_REFERENCE — 577 bayt — `fe7e02006e87cf16d4f89ec6d548d48604940ee0339364296c611ff0e33f9d41`
 - `packages/application/src/ai-consent-use-cases.ts` — SOURCE_CODE — 4537 bayt — `c65ba9693b13ca666c9b84d06b475687e28d0d85d5063d88febb81b11cea7180`
 - `packages/application/src/archive-use-cases.ts` — SOURCE_CODE — 14186 bayt — `3036940578817ebedbfbd23d49f233602784c3ab15ce6d9be299b206a9921e79`
@@ -3501,7 +3510,7 @@
 - `packages/database/tsconfig.json` — ACTIVE_REFERENCE — 250 bayt — `96a26c6736a321c749f63b7cd90b66e45ebba1e9c2f457b56b4c2f602b392640`
 - `packages/domain/package.json` — ACTIVE_REFERENCE — 401 bayt — `a4320fd4f0f7507d53dd0a3805ac3ccf32c42f58c753e3a7305d75ab9dc16c46`
 - `packages/domain/src/ai-memory.ts` — SOURCE_CODE — 753 bayt — `f7bca6c18312da25faf99d2a8d8ece26203c0d13437507ef2d1f5823e932350a`
-- `packages/domain/src/app-data.ts` — SOURCE_CODE — 57769 bayt — `bd4af1712e1f4e0ed841ba7cf17b8f38751abcc3a40bd39d675938a620486a1d`
+- `packages/domain/src/app-data.ts` — SOURCE_CODE — 58309 bayt — `adae0da1b71399a51f36264ab5c926f1eecf33220447495c7198e62612e86c14`
 - `packages/domain/src/app-meta.ts` — SOURCE_CODE — 2618 bayt — `ff9c6b0b789ae5610b8daaf91bd2e0976733b81c9580a875b5c8f6c5c2ac37e2`
 - `packages/domain/src/data-repair.ts` — SOURCE_CODE — 3191 bayt — `779033ba3d82415ee467cbec79853b8ac78827c2092f9fafc7c78373b493675d`
 - `packages/domain/src/entities.ts` — SOURCE_CODE — 2282 bayt — `f86e93be95dceffaa9e31f6a0232a38b512837db31cf9d01915e9e58fdb5309f`
@@ -3541,7 +3550,8 @@
 - `packages/platform-policy/policy-obligation-suite.test.ts` — TEST_OR_GATE — 11170 bayt — `ea62b7febb6214f14bd092705e5e70a37d8c86ce84a227b7ec8c256fea80c628`
 - `packages/platform-policy/policy-package-version-binding.test.ts` — TEST_OR_GATE — 12144 bayt — `71112bad2b7fa7102e1706bf41494f59f22c0120dd3fc53a60926a593aac3658`
 - `packages/platform-policy/src/client-data-access-boundary.ts` — SOURCE_CODE — 12290 bayt — `adc76460f0a6404725106172486ae2dab6a608881e6a8091ff980ce93428a354`
-- `packages/platform-policy/src/index.ts` — SOURCE_CODE — 238 bayt — `b87dbf7772bbe2c566d4fbc27f95910cd65e77b7e83355f5e29ee77b5997b64c`
+- `packages/platform-policy/src/index.ts` — SOURCE_CODE — 282 bayt — `ce7f447f01222a6819325cc6f8ebae5d7bbcad09a4cfe73b50f9a2cb12bf3300`
+- `packages/platform-policy/src/network-egress-policy.ts` — SOURCE_CODE — 9368 bayt — `339e16cbc8dc2078b26934618f3c7040ee7054f7e8d6bdc87f8b4de44ed17e1d`
 - `packages/platform-policy/src/offline-capability-lease.ts` — SOURCE_CODE — 7872 bayt — `f28514147a17ec33437292bc6f12a7a96d199d4afbeff28b97109400ef82cd1c`
 - `packages/platform-policy/src/policy-enforcement-point.ts` — SOURCE_CODE — 65527 bayt — `8b41cb44ce2f987c325f0edad95ed9f6b1bb60ad712c9c44d39a97a80b30374f`
 - `packages/platform-policy/src/policy-kernel.ts` — SOURCE_CODE — 50430 bayt — `2781754cb864ecc23b8448884b4b6bcb9f04d75cbd1bb459664212d86a95a257`
@@ -4296,6 +4306,8 @@
 - `scripts/verify-32-i-ppk-013-client-data-access-runtime.mjs` — TEST_OR_GATE — 5725 bayt — `e0e6261b104baf1b6c8a00aabacb14848cfef7aef8ead5d60828bb3ad16c6094`
 - `scripts/verify-32-j-ppk-014-versioned-core-service-api-contract.mjs` — TEST_OR_GATE — 15031 bayt — `5fe65aa6b7e8d1a1ea343c053620a7dfc643dd0d6a29a8d4ebc74499ea7f4f58`
 - `scripts/verify-32-j-ppk-014-versioned-core-service-api-runtime.mjs` — TEST_OR_GATE — 6270 bayt — `f137ab09b4aeaeb5ffab498a17397ddcb90fe2e3679dc8c96858aea3549cb11d`
+- `scripts/verify-32-k-ppk-015-network-egress-contract.mjs` — TEST_OR_GATE — 14831 bayt — `6e3fbce86737fd96e8650c02ce93035cca22c55804f9af17731c6272beca76bc`
+- `scripts/verify-32-k-ppk-015-network-egress-runtime.mjs` — TEST_OR_GATE — 3304 bayt — `1ac468f7d8c4faa6c0752c99e24051fb49574ab564c53c0af2cd07131913ad15`
 - `scripts/verify-active-delivery-documents.mjs` — TEST_OR_GATE — 5765 bayt — `d8edf2c1dc9baa46df7dd8c03c085b928526e76f87cf505f3acd1db54693fd40`
 - `scripts/verify-active-release-contract-v2.mjs` — TEST_OR_GATE — 3606 bayt — `cd3424243a595f98e41d0f16c02f52192f644ec2357c673658ebd9f48710dc33`
 - `scripts/verify-active-version-contract.mjs` — TEST_OR_GATE — 9493 bayt — `e94ba7d9ea7b9b5dfd90d7e9d7a55a1eb5e63f0aa3aa488c3a1cee48d83039e2`
@@ -4379,7 +4391,7 @@
 - `scripts/verify-build144-revocation-endpoint-contract.mjs` — HISTORICAL — 6451 bayt — `9f2d8c167d058f80639b5b8ac16ad5d240a5102736d88e9b3cb3136a1fac4a14`
 - `scripts/verify-build144-revocation-endpoint-runtime.mjs` — HISTORICAL — 9280 bayt — `15f756b17c2b95f32cfe1772fa6f7395a2d7dab3afa914e26e9356e5bae5b731`
 - `scripts/verify-build145-renderer-bridge-syntax.mjs` — HISTORICAL — 1998 bayt — `1704ec1863918088b1eddce56187b5f40c958ebb3cae9f2ca56b9f5f62ee3e7f`
-- `scripts/verify-build145-secure-revocation-sync-contract.mjs` — HISTORICAL — 3024 bayt — `96cb2e9a7464f28ac3bb085904caf7162259800b10aad6892d715f6bbe703965`
+- `scripts/verify-build145-secure-revocation-sync-contract.mjs` — HISTORICAL — 3034 bayt — `bf2c62e81b04483d2f5e487a82a659904ec4d130355fa8b8289053777c24bed3`
 - `scripts/verify-build146-family-data-import-contract.mjs` — HISTORICAL — 6359 bayt — `359ff6cc5a2231ffa4f8849463ff8de06255b38a2fb0b28f2c4750e514b70075`
 - `scripts/verify-build146-family-data-import-runtime.mjs` — HISTORICAL — 14792 bayt — `bdcffe9f4829143c0d2a0995057579b77952684c5edd70dd5161ec9e420ecbd0`
 - `scripts/verify-build146-family-data-import-sql-runtime.mjs` — HISTORICAL — 9037 bayt — `82ee54aa7970d1a380dd2e85390d8b5763a48c03bb20c6577060b739129bf42f`
@@ -4391,7 +4403,7 @@
 - `scripts/verify-build148-integration-hardening-contract.mjs` — HISTORICAL — 7173 bayt — `a3a92ac12e412f37d2c14b16bc4d4f9fdc9d94ad004b009bda40864a323bd011`
 - `scripts/verify-build148-ipc-integration-policy-runtime.mjs` — HISTORICAL — 5712 bayt — `ca6c24744f97c014e64ffce32f494d1daf68efc8befb9bcc64cf1dc7a2510805`
 - `scripts/verify-build148-renderer-bridge-syntax.mjs` — HISTORICAL — 2497 bayt — `f4d53a27e3f0e37b62e2d2a3a8e3c3f7641d1638a099dab2733f80d3aa385cf8`
-- `scripts/verify-build148-revocation-sync-runtime.mjs` — HISTORICAL — 7268 bayt — `156bfb1b796a159db4bc9c5d831a1131582036087f1673c639154c37a2142b3b`
+- `scripts/verify-build148-revocation-sync-runtime.mjs` — HISTORICAL — 7276 bayt — `ddd20b7d0659d0759e409cbc7070aca732f02a53e8bfaf1168693c36d67dcf4d`
 - `scripts/verify-build149-clean-validation-contract.mjs` — HISTORICAL — 8522 bayt — `012fc5ac1f4c08d4aa9d3f622a3536287cf13e5224f678215b3c14b203114f03`
 - `scripts/verify-build150-clean-validation-contract.mjs` — HISTORICAL — 7288 bayt — `db586a0ec80dd14985adda23597a41b5770d2460a72d7afd7af7899430229fa0`
 - `scripts/verify-build150-dependency-bootstrap.mjs` — HISTORICAL — 8827 bayt — `4c1aa56089e08c5c9311fdf2549bc2c11ff5e53430bdaf356b062ccf1de33c65`
@@ -4481,8 +4493,8 @@
 - `scripts/verify-build180-strict-lifecycle-policy-contract.mjs` — HISTORICAL — 5602 bayt — `34e135fa5f6c04808216cda86bb7c44cbcf5825c70101f693b0d000c6c9ee394`
 - `scripts/verify-build180-strict-lifecycle-policy-runtime.mjs` — HISTORICAL — 4491 bayt — `214a3696f724fae26aca001b54447bf04b82e2cccc21550723a2f43f8762ca9a`
 - `scripts/verify-build180-strict-lifecycle-policy-syntax.mjs` — HISTORICAL — 2329 bayt — `81d40b74231271ffe6af32101f86563941dfbe25ba98204cfbb03b380fe58a63`
-- `scripts/verify-build181-revocation-sync-durability-contract.mjs` — HISTORICAL — 5838 bayt — `08db53fe7ca88d80b680ac01cfbef011baf1f030a80bce7bc61e7e93241b6496`
-- `scripts/verify-build181-revocation-sync-durability-runtime.mjs` — HISTORICAL — 9161 bayt — `5ec656e5492d755726813f664b242bdbfb303025c9352e90fa1a62b28057690c`
+- `scripts/verify-build181-revocation-sync-durability-contract.mjs` — HISTORICAL — 5846 bayt — `0053eda2a6a6ea6fd4b796b80cc766a2431478682e8c9fa60a10527ca811ab9a`
+- `scripts/verify-build181-revocation-sync-durability-runtime.mjs` — HISTORICAL — 9169 bayt — `b87cd804196f2f01415415f03daa37c2044580b621e2a69e9aca51bcc59bbace`
 - `scripts/verify-build181-revocation-sync-durability-syntax.mjs` — HISTORICAL — 2513 bayt — `20e7c29d9ac8cc96a215b48923144f72ea28b28bd0878b96fcaff6ce5c63a462`
 - `scripts/verify-build182-root-trust-verification-contract.mjs` — HISTORICAL — 6123 bayt — `55493e92e2748946f776fdab9ab3e9c745e83c3937b6f22a1fd6ca8e5ad54ec4`
 - `scripts/verify-build182-root-trust-verification-runtime.mjs` — HISTORICAL — 9405 bayt — `8e1849af650dad8e48a614af696ae2bdc1040987da2351b7fe318f12d394a812`
@@ -4716,6 +4728,7 @@
 - `scripts/verify-mvp69-automation-execution.mjs` — HISTORICAL — 1936 bayt — `de43c8f4f119d1970f7081e64ea862320bf69c519c227a1942f163e3f2fb0a13`
 - `scripts/verify-mvp69-automation-runtime.mjs` — HISTORICAL — 2987 bayt — `88917a31de544a7ccb02b6d62cda06690200b89a7e1b5878ae161ff46e1f973c`
 - `scripts/verify-mvp70-archive-retention.mjs` — HISTORICAL — 2150 bayt — `c33d4dd7fa9b5d24cf7839a6fccc6ea92b9f1008aee2d814708f9947677b911f`
+- `scripts/verify-network-egress-boundary.mjs` — TEST_OR_GATE — 6611 bayt — `10e97273020cf265d6670d4e155399b73ef5aa34d2add0fc86d556065d55e80b`
 - `scripts/verify-npm-cache-transfer-bundle.mjs` — TEST_OR_GATE — 1439 bayt — `bf445e8dc25602fbe0a3cfee7a5f3fa956df4c4c381af6c4f30d219324c47f62`
 - `scripts/verify-npm-cache-transfer-contract.mjs` — TEST_OR_GATE — 9407 bayt — `683c2d239c940ee81a3785db5ab50d65a51f352558abb3232c54657e36e87bef`
 - `scripts/verify-npm-dependency-handoff-request.mjs` — TEST_OR_GATE — 2022 bayt — `bdf7bd775dfcffccb0256974fd9d7ec967556f2959df0847297cfe8eddb19497`

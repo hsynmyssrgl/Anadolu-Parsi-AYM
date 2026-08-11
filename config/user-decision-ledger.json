@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 49,
+  "decisionCount": 50,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1175,6 +1175,31 @@
         "artifacts/validation/32-J-ppk-014-versioned-core-service-api-runtime.json",
         "docs/security/PPK-014_VERSIONED_CORE_SERVICE_API_THREAT_MODEL.md",
         "docs/audit/32-J_PPK-014_SURUMLU_CORE_SERVICE_API_UST_KAPANIS.md"
+      ]
+    },
+    {
+      "id": "DEC-196",
+      "date": "2026-08-11",
+      "acceptedAt": "2026-08-11",
+      "title": "PPK-015 zero-exception allowlisted TLS/mTLS network egress policy top closure",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: tam otomatik devam",
+      "document": "docs/decisions/DEC-196-ppk-015-network-egress-policy.md",
+      "requirements": ["PPK-015"],
+      "codeAreas": [
+        "packages/platform-policy/src/network-egress-policy.ts",
+        "apps/desktop/src/main/governed-network-egress-use-case.ts",
+        "apps/desktop/src/main/secure-revocation-list-fetcher.ts",
+        "apps/desktop/src/main/secure-revocation-sync-service.ts",
+        "packages/application/src/external-backup-revocation-endpoint-use-cases.ts",
+        "packages/repositories/src/external-backup-inventory-repository.ts",
+        "scripts/verify-network-egress-boundary.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/32-K-ppk-015-network-egress-contract.json",
+        "artifacts/validation/32-K-ppk-015-network-egress-runtime.json",
+        "docs/security/PPK-015_NETWORK_EGRESS_POLICY_THREAT_MODEL.md",
+        "docs/audit/32-K_PPK-015_NETWORK_EGRESS_POLICY_UST_KAPANIS.md"
       ]
     }
   ]
