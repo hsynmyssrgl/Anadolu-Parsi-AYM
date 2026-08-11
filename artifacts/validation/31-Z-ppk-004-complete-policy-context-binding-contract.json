@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "31-Z",
+  "requirement": "PPK-004",
+  "phase": "COMPLETE_POLICY_CONTEXT_BINDING_CONTRACT",
+  "status": "PASS",
+  "checkCount": 28,
+  "passed": 28,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "canonical context snapshot is a public policy-kernel contract",
+      "status": "PASS"
+    },
+    {
+      "name": "context snapshot covers every PPK-004 identity and operation field",
+      "status": "PASS",
+      "details": {
+        "fieldCount": 13
+      }
+    },
+    {
+      "name": "context hash uses SHA-256 over the canonical snapshot",
+      "status": "PASS"
+    },
+    {
+      "name": "signed decisions carry the computed context hash",
+      "status": "PASS"
+    },
+    {
+      "name": "strict requests require a bounded correlation and purpose",
+      "status": "PASS"
+    },
+    {
+      "name": "roles require a non-empty unique bounded set",
+      "status": "PASS"
+    },
+    {
+      "name": "family scope requires a non-empty unique bounded set",
+      "status": "PASS"
+    },
+    {
+      "name": "strict household and family-branch sets are explicit",
+      "status": "PASS"
+    },
+    {
+      "name": "family, household and branch resource scope are enforced",
+      "status": "PASS"
+    },
+    {
+      "name": "resource owner and source identities are validated when present",
+      "status": "PASS"
+    },
+    {
+      "name": "PEP requires purpose before any dependency resolution",
+      "status": "PASS"
+    },
+    {
+      "name": "PEP emits explicit empty household and branch scopes",
+      "status": "PASS"
+    },
+    {
+      "name": "PEP rejects a provider context-hash mismatch before execution",
+      "status": "PASS"
+    },
+    {
+      "name": "active transaction context carries context hash, owner, purpose and time",
+      "status": "PASS"
+    },
+    {
+      "name": "active transaction assertion recomputes the receipt-record context hash",
+      "status": "PASS"
+    },
+    {
+      "name": "repository context forwards detailed expectations to the PEP assertion",
+      "status": "PASS"
+    },
+    {
+      "name": "repository persistence binding exposes the complete operation binding",
+      "status": "PASS"
+    },
+    {
+      "name": "repository insert persists context_hash with the exact receipt",
+      "status": "PASS"
+    },
+    {
+      "name": "repository rejects mismatched decision, receipt and transaction hashes",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 69 is registered",
+      "status": "PASS"
+    },
+    {
+      "name": "migration adds a backward-compatible context_hash column and index",
+      "status": "PASS"
+    },
+    {
+      "name": "SQLite insert trigger requires context binding on every new receipt",
+      "status": "PASS"
+    },
+    {
+      "name": "SQLite trigger matches record, decision and signed receipt hashes",
+      "status": "PASS"
+    },
+    {
+      "name": "Core Service authorize and verify APIs require strict complete context",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted tests cover hash sensitivity, missing context, scope and tamper denial",
+      "status": "PASS"
+    },
+    {
+      "name": "renderer UI and menu remain confined to authenticated PEP plus preload IPC",
+      "status": "PASS"
+    },
+    {
+      "name": "decision and audit explicitly preserve the no-cutover boundary",
+      "status": "PASS"
+    },
+    {
+      "name": "accepted scope and closure scope mark only PPK-004 complete",
+      "status": "PASS"
+    }
+  ],
+  "failures": [],
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T10:31:30.053Z"
+}

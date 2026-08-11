@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import {
   PlatformPolicyKernel,
+  platformPolicyContextHash,
   type PlatformApplicationId,
   type PlatformPolicyAuthorization,
   type PlatformCapability,
@@ -20,7 +21,7 @@ export interface PlatformPolicyIntent {
   readonly capability: PlatformCapability;
   readonly resourceType: string;
   readonly resourceId: string;
-  readonly purpose?: string;
+  readonly purpose: string;
 }
 
 export interface PlatformPolicyConnectionAuthority {
@@ -51,6 +52,7 @@ export interface PlatformPolicyResourceResolver {
 
 export interface PlatformPolicyReceiptRecord {
   readonly correlationId: string;
+  readonly contextHash: string;
   readonly resourceType: string;
   readonly resourceId: string;
   readonly action: PolicyAction;
@@ -193,6 +195,7 @@ export interface PlatformPolicyTransactionContext {
   readonly [transactionContextBrand]: true;
   readonly correlationId: string;
   readonly requestHash: string;
+  readonly contextHash: string;
   readonly policyVersion: string;
   readonly subject: PlatformPolicyTransactionSubjectSnapshot;
   readonly resourceType: string;
@@ -200,11 +203,14 @@ export interface PlatformPolicyTransactionContext {
   readonly resourceFamilyId: string;
   readonly resourceHouseholdId?: string;
   readonly resourceFamilyBranchId?: string;
+  readonly resourceOwnerPersonId?: string;
+  readonly purpose: string;
+  readonly occurredAt: string;
   readonly action: PolicyAction;
   readonly capability: PlatformCapability;
   readonly fenceEpoch: number;
   readonly fenceWritable: boolean;
-  readonly decision: PlatformPolicyDecision & { readonly allowed: true };
+  readonly decision: PlatformPolicyDecision & { readonly allowed: true; readonly contextHash: string };
   readonly receipt: PlatformPolicyReceipt;
   readonly receiptRecord: PlatformPolicyReceiptRecord;
   readonly obligationExecution: PlatformPolicyObligationExecution;
@@ -217,8 +223,8 @@ export interface PlatformPolicyTransactionSubjectSnapshot {
   readonly applicationId: PlatformApplicationId;
   readonly roles: readonly string[];
   readonly familyIds: readonly string[];
-  readonly householdIds?: readonly string[];
-  readonly familyBranchIds?: readonly string[];
+  readonly householdIds: readonly string[];
+  readonly familyBranchIds: readonly string[];
 }
 
 export interface PlatformPolicyTransactionExpectation {
@@ -228,6 +234,12 @@ export interface PlatformPolicyTransactionExpectation {
   readonly capability: PlatformCapability;
   readonly correlationId?: string;
   readonly resourceFamilyId?: string;
+  readonly resourceHouseholdId?: string;
+  readonly resourceFamilyBranchId?: string;
+  readonly resourceOwnerPersonId?: string;
+  readonly purpose?: string;
+  readonly occurredAt?: string;
+  readonly contextHash?: string;
   readonly fenceEpoch?: number;
   readonly fenceWritable?: boolean;
 }
@@ -258,9 +270,37 @@ export const assertActivePlatformPolicyTransactionContext: (
   }
   const context = value as PlatformPolicyTransactionContext;
   assertObligationExecution(context.obligationExecution, context.receipt);
+  const boundContextHash = platformPolicyContextHash(context.receiptRecord.request);
   if (
     context.fenceEpoch !== active.fenceEpoch
     || context.fenceWritable !== active.fenceWritable
+    || context.contextHash !== boundContextHash
+    || context.decision.contextHash !== boundContextHash
+    || context.receipt.decision.contextHash !== boundContextHash
+    || context.receiptRecord.decision.contextHash !== boundContextHash
+    || context.receiptRecord.receipt.decision.contextHash !== boundContextHash
+    || context.correlationId !== context.receiptRecord.request.correlationId
+    || context.policyVersion !== context.receiptRecord.request.policyVersion
+    || stable(context.subject) !== stable({
+      accountId: context.receiptRecord.request.subject.accountId,
+      ...(context.receiptRecord.request.subject.personId ? { personId: context.receiptRecord.request.subject.personId } : {}),
+      deviceId: context.receiptRecord.request.subject.deviceId,
+      applicationId: context.receiptRecord.request.subject.applicationId,
+      roles: context.receiptRecord.request.subject.roles,
+      familyIds: context.receiptRecord.request.subject.familyIds,
+      householdIds: context.receiptRecord.request.subject.householdIds,
+      familyBranchIds: context.receiptRecord.request.subject.familyBranchIds
+    })
+    || context.resourceType !== context.receiptRecord.request.resource.type
+    || context.resourceId !== context.receiptRecord.request.resource.id
+    || context.resourceFamilyId !== context.receiptRecord.request.resource.familyId
+    || context.resourceHouseholdId !== context.receiptRecord.request.resource.householdId
+    || context.resourceFamilyBranchId !== context.receiptRecord.request.resource.familyBranchId
+    || context.resourceOwnerPersonId !== context.receiptRecord.request.resource.ownerPersonId
+    || context.purpose !== context.receiptRecord.request.purpose
+    || context.occurredAt !== context.receiptRecord.request.occurredAt
+    || context.action !== context.receiptRecord.request.action
+    || context.capability !== context.receiptRecord.request.capability
   ) {
     activeTransactionContexts.delete(value);
     throw new PlatformPolicyEnforcementError(
@@ -274,6 +314,12 @@ export const assertActivePlatformPolicyTransactionContext: (
       context.action !== expected.action || context.capability !== expected.capability ||
       (expected.correlationId !== undefined && context.correlationId !== expected.correlationId) ||
       (expected.resourceFamilyId !== undefined && context.resourceFamilyId !== expected.resourceFamilyId) ||
+      (expected.resourceHouseholdId !== undefined && context.resourceHouseholdId !== expected.resourceHouseholdId) ||
+      (expected.resourceFamilyBranchId !== undefined && context.resourceFamilyBranchId !== expected.resourceFamilyBranchId) ||
+      (expected.resourceOwnerPersonId !== undefined && context.resourceOwnerPersonId !== expected.resourceOwnerPersonId) ||
+      (expected.purpose !== undefined && context.purpose !== expected.purpose) ||
+      (expected.occurredAt !== undefined && context.occurredAt !== expected.occurredAt) ||
+      (expected.contextHash !== undefined && context.contextHash !== expected.contextHash) ||
       (expected.fenceEpoch !== undefined && context.fenceEpoch !== expected.fenceEpoch) ||
       (expected.fenceWritable !== undefined && context.fenceWritable !== expected.fenceWritable))
   ) {
@@ -378,6 +424,7 @@ const validApplications = new Set<PlatformApplicationId>([
 ]);
 
 const nonEmptyBounded = (value: unknown, max: number): value is string => typeof value === 'string' && value.trim() === value && value.length > 0 && value.length <= max;
+const uniqueStrings = (values: readonly string[]): boolean => new Set(values).size === values.length;
 const parseTimestamp = (value: unknown): number => typeof value === 'string' ? Date.parse(value) : Number.NaN;
 const stable = (value: unknown): string => {
   if (Array.isArray(value)) return `[${value.map(stable).join(',')}]`;
@@ -592,7 +639,7 @@ export class PlatformPolicyEnforcementPoint {
       capability: intent.capability,
       resourceType: intent.resourceType,
       resourceId: intent.resourceId,
-      ...(intent.purpose ? { purpose: intent.purpose } : {})
+      purpose: intent.purpose
     });
     if (typeof clusterFence !== 'function' || typeof operation !== 'function') {
       throw new PlatformPolicyEnforcementError('INTENT_INVALID', 'Policy transaction boundary is invalid');
@@ -612,8 +659,8 @@ export class PlatformPolicyEnforcementPoint {
       ...authority,
       roles: Object.freeze([...authority.roles]),
       familyIds: Object.freeze([...authority.familyIds]),
-      ...(authority.householdIds ? { householdIds: Object.freeze([...authority.householdIds]) } : {}),
-      ...(authority.familyBranchIds ? { familyBranchIds: Object.freeze([...authority.familyBranchIds]) } : {}),
+      householdIds: Object.freeze([...(authority.householdIds ?? [])]),
+      familyBranchIds: Object.freeze([...(authority.familyBranchIds ?? [])]),
       ...(authority.grants ? { grants: Object.freeze(authority.grants.map(freezeGrant)) } : {}),
       ...(authority.consents ? { consents: Object.freeze(authority.consents.map(freezeConsent)) } : {})
     });
@@ -634,7 +681,13 @@ export class PlatformPolicyEnforcementPoint {
     if (resource.type !== intent.resourceType || resource.id !== intent.resourceId) {
       throw new PlatformPolicyEnforcementError('RESOURCE_MISMATCH', 'Resolved policy resource does not match the requested intent');
     }
-    if (!nonEmptyBounded(resource.familyId, 256) || !validSensitivities.has(resource.sensitivity)) {
+    if (
+      !nonEmptyBounded(resource.familyId, 256) || !validSensitivities.has(resource.sensitivity)
+      || (resource.householdId !== undefined && !nonEmptyBounded(resource.householdId, 256))
+      || (resource.familyBranchId !== undefined && !nonEmptyBounded(resource.familyBranchId, 256))
+      || (resource.ownerPersonId !== undefined && !nonEmptyBounded(resource.ownerPersonId, 256))
+      || (resource.sourceResourceId !== undefined && !nonEmptyBounded(resource.sourceResourceId, 256))
+    ) {
       throw new PlatformPolicyEnforcementError('RESOURCE_RESOLUTION_FAILED', 'Resolved policy resource context is invalid');
     }
     resource = Object.freeze({ ...resource });
@@ -652,8 +705,8 @@ export class PlatformPolicyEnforcementPoint {
       applicationId: authority.applicationId,
       roles: Object.freeze([...authority.roles]),
       familyIds: Object.freeze([...authority.familyIds]),
-      ...(authority.householdIds ? { householdIds: Object.freeze([...authority.householdIds]) } : {}),
-      ...(authority.familyBranchIds ? { familyBranchIds: Object.freeze([...authority.familyBranchIds]) } : {})
+      householdIds: Object.freeze([...(authority.householdIds ?? [])]),
+      familyBranchIds: Object.freeze([...(authority.familyBranchIds ?? [])])
     });
     const request: PlatformPolicyRequest = Object.freeze({
       correlationId: intent.correlationId,
@@ -666,7 +719,7 @@ export class PlatformPolicyEnforcementPoint {
       resource: Object.freeze({ ...resource }),
       action: intent.action,
       capability: intent.capability,
-      ...(intent.purpose ? { purpose: intent.purpose } : {}),
+      purpose: intent.purpose,
       occurredAt: issuedAt,
       online: authority.online,
       clusterWritable: requestedFence.writable,
@@ -705,9 +758,12 @@ export class PlatformPolicyEnforcementPoint {
     );
     const effectiveRequest = this.#assertEffectiveRequest(request, provided.effectiveRequest);
     const authorization = provided.authorization;
+    const contextHash = platformPolicyContextHash(effectiveRequest);
     if (
       authorization.receipt.nonce !== nonce ||
-      stable(authorization.decision) !== stable(authorization.receipt.decision)
+      stable(authorization.decision) !== stable(authorization.receipt.decision) ||
+      authorization.decision.contextHash !== contextHash ||
+      authorization.receipt.decision.contextHash !== contextHash
     ) {
       throw new PlatformPolicyEnforcementError('RECEIPT_VERIFICATION_FAILED', 'Policy authorization is not bound to the reserved nonce and decision');
     }
@@ -752,13 +808,14 @@ export class PlatformPolicyEnforcementPoint {
     }
 
     const allowedDecision = authorization.decision.allowed
-      ? authorization.decision as PlatformPolicyDecision & { readonly allowed: true }
+      ? authorization.decision as PlatformPolicyDecision & { readonly allowed: true; readonly contextHash: string }
       : undefined;
     const obligationExecution = allowedDecision
       ? executePolicyObligations(effectiveRequest, allowedDecision, authorization.receipt, this.#clock())
       : undefined;
     const record: PlatformPolicyReceiptRecord = Object.freeze({
       correlationId: intent.correlationId,
+      contextHash,
       resourceType: resource.type,
       resourceId: resource.id,
       action: intent.action,
@@ -814,6 +871,7 @@ export class PlatformPolicyEnforcementPoint {
       [transactionContextBrand]: true as const,
       correlationId: intent.correlationId,
       requestHash: authorization.receipt.requestHash,
+      contextHash,
       policyVersion: decision.policyVersion,
       subject,
       resourceType: resource.type,
@@ -821,6 +879,9 @@ export class PlatformPolicyEnforcementPoint {
       resourceFamilyId: resource.familyId,
       ...(resource.householdId ? { resourceHouseholdId: resource.householdId } : {}),
       ...(resource.familyBranchId ? { resourceFamilyBranchId: resource.familyBranchId } : {}),
+      ...(resource.ownerPersonId ? { resourceOwnerPersonId: resource.ownerPersonId } : {}),
+      purpose: intent.purpose,
+      occurredAt: effectiveRequest.occurredAt,
       action: intent.action,
       capability: intent.capability,
       fenceEpoch: fence.epoch,
@@ -959,7 +1020,7 @@ export class PlatformPolicyEnforcementPoint {
         'Policy provider changed the resolved request outside the allowed clusterWritable narrowing'
       );
     }
-    return Object.freeze({ ...effectiveRequest });
+    return Object.freeze({ ...request, clusterWritable: effectiveWritable });
   }
 
   #assertIntent(intent: PlatformPolicyIntent): void {
@@ -976,8 +1037,8 @@ export class PlatformPolicyEnforcementPoint {
     if (!nonEmptyBounded(intent.resourceType, 128) || !nonEmptyBounded(intent.resourceId, 256)) {
       throw new PlatformPolicyEnforcementError('INTENT_INVALID', 'Policy intent resource identity is invalid');
     }
-    if (intent.purpose !== undefined && !nonEmptyBounded(intent.purpose, 128)) {
-      throw new PlatformPolicyEnforcementError('INTENT_INVALID', 'Policy intent purpose is invalid');
+    if (!nonEmptyBounded(intent.purpose, 256)) {
+      throw new PlatformPolicyEnforcementError('INTENT_INVALID', 'Policy intent purpose is required and invalid');
     }
   }
 
@@ -988,10 +1049,11 @@ export class PlatformPolicyEnforcementPoint {
       (authority.personId !== undefined && !nonEmptyBounded(authority.personId, 256)) ||
       !validApplications.has(authority.applicationId) || typeof authority.deviceTrusted !== 'boolean' ||
       typeof authority.membershipActive !== 'boolean' || typeof authority.online !== 'boolean' ||
-      !Array.isArray(authority.roles) || authority.roles.some((role) => !nonEmptyBounded(role, 128)) || authority.roles.length > 64 ||
+      !Array.isArray(authority.roles) || authority.roles.length === 0 || authority.roles.some((role) => !nonEmptyBounded(role, 128)) || authority.roles.length > 64 || !uniqueStrings(authority.roles) ||
       !Array.isArray(authority.familyIds) || authority.familyIds.length === 0 || authority.familyIds.length > 10_000 || authority.familyIds.some((id) => !nonEmptyBounded(id, 256)) ||
-      (authority.householdIds !== undefined && (!Array.isArray(authority.householdIds) || authority.householdIds.length > 10_000 || authority.householdIds.some((id) => !nonEmptyBounded(id, 256)))) ||
-      (authority.familyBranchIds !== undefined && (!Array.isArray(authority.familyBranchIds) || authority.familyBranchIds.length > 10_000 || authority.familyBranchIds.some((id) => !nonEmptyBounded(id, 256)))) ||
+      !uniqueStrings(authority.familyIds) ||
+      (authority.householdIds !== undefined && (!Array.isArray(authority.householdIds) || authority.householdIds.length > 10_000 || authority.householdIds.some((id) => !nonEmptyBounded(id, 256)) || !uniqueStrings(authority.householdIds))) ||
+      (authority.familyBranchIds !== undefined && (!Array.isArray(authority.familyBranchIds) || authority.familyBranchIds.length > 10_000 || authority.familyBranchIds.some((id) => !nonEmptyBounded(id, 256)) || !uniqueStrings(authority.familyBranchIds))) ||
       (authority.grants !== undefined && (!Array.isArray(authority.grants) || authority.grants.length > 10_000)) ||
       (authority.consents !== undefined && (!Array.isArray(authority.consents) || authority.consents.length > 10_000))
     ) {

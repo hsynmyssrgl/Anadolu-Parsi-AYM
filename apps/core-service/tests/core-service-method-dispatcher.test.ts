@@ -93,4 +93,52 @@ describe('31-G Core Service typed method dispatcher', () => {
     expect(dispatcher.dispatch('unknown-1', 'database.query', {})).toMatchObject({ ok: false, error: { code: 'METHOD_NOT_ALLOWED' } });
     expect(dispatcher.dispatch('policy-1', 'policy.authorize', { nonce: '' })).toMatchObject({ ok: false, error: { code: 'INVALID_REQUEST' } });
   });
+
+  it('accepts only a complete strict PPK-004 context on authorize and verify boundaries', () => {
+    const dispatcher = new CoreServiceMethodDispatcher(runtimeFixture());
+    const request = {
+      correlationId: 'core-service-ppk-004',
+      policyVersion: 'PPT-PLATFORM-POLICY-2026-08-04-V1',
+      subject: {
+        accountId: 'account-ppk-004', personId: 'person-ppk-004', deviceId: 'device-ppk-004',
+        applicationId: 'windows-desktop' as const, deviceTrusted: true, membershipActive: true,
+        roles: ['adult_member'], familyIds: ['family-ppk-004'], householdIds: [], familyBranchIds: []
+      },
+      resource: {
+        type: 'family', id: 'family-ppk-004', familyId: 'family-ppk-004',
+        ownerPersonId: 'person-ppk-004', sensitivity: 'personal' as const
+      },
+      action: 'read' as const,
+      capability: 'family.read' as const,
+      purpose: 'family-administration',
+      occurredAt: '2026-08-10T18:00:00.000Z',
+      online: true,
+      clusterWritable: true,
+      enforcementMode: 'strict' as const
+    };
+    expect(dispatcher.dispatch('policy-legacy', 'policy.authorize', {
+      nonce: 'nonce-policy-legacy', request: { ...request, enforcementMode: 'legacy' }
+    })).toMatchObject({ ok: false, error: { code: 'INVALID_REQUEST' } });
+    expect(dispatcher.dispatch('policy-purpose-missing', 'policy.authorize', {
+      nonce: 'nonce-policy-purpose-missing', request: { ...request, purpose: undefined }
+    })).toMatchObject({ ok: false, error: { code: 'INVALID_REQUEST' } });
+
+    const authorization = dispatcher.dispatch('policy-strict', 'policy.authorize', {
+      nonce: 'nonce-policy-strict', request
+    });
+    expect(authorization).toMatchObject({
+      ok: true,
+      result: { authorization: { decision: { allowed: true, contextHash: expect.stringMatching(/^[0-9a-f]{64}$/u) } } }
+    });
+    expect(authorization.ok).toBe(true);
+    if (!authorization.ok) return;
+    const receipt = (authorization.result as { authorization: { receipt: unknown } }).authorization.receipt;
+    expect(dispatcher.dispatch('policy-verify-strict', 'policy.verify', { request, receipt })).toMatchObject({
+      ok: true,
+      result: { valid: true }
+    });
+    expect(dispatcher.dispatch('policy-verify-changed-purpose', 'policy.verify', {
+      request: { ...request, purpose: 'support' }, receipt
+    })).toMatchObject({ ok: true, result: { valid: false } });
+  });
 });

@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 
 export type PlatformApplicationId =
   | 'windows-desktop'
@@ -119,9 +119,46 @@ export interface PlatformPolicyDecision {
   readonly allowed: boolean;
   readonly reason: PolicyReason;
   readonly policyVersion: string;
+  /** SHA-256 binding of the complete validated authorization context. */
+  readonly contextHash?: string;
   readonly matchedGrantId?: string;
   readonly matchedConsentId?: string;
   readonly obligations: readonly PolicyObligation[];
+}
+
+export interface PlatformPolicyContextSnapshot {
+  readonly schemaVersion: 1;
+  readonly correlationId: string;
+  readonly policyVersion: string;
+  readonly subject: {
+    readonly accountId: string;
+    readonly personId: string | null;
+    readonly deviceId: string;
+    readonly applicationId: PlatformApplicationId;
+    readonly deviceTrusted: boolean;
+    readonly membershipActive: boolean;
+    readonly roles: readonly string[];
+    readonly familyIds: readonly string[];
+    readonly householdIds: readonly string[];
+    readonly familyBranchIds: readonly string[];
+  };
+  readonly resource: {
+    readonly type: string;
+    readonly id: string;
+    readonly familyId: string;
+    readonly householdId: string | null;
+    readonly familyBranchId: string | null;
+    readonly ownerPersonId: string | null;
+    readonly sensitivity: DataSensitivity;
+    readonly sourceResourceId: string | null;
+  };
+  readonly purpose: string;
+  readonly occurredAt: string;
+  readonly action: PolicyAction;
+  readonly capability: PlatformCapability;
+  readonly online: boolean;
+  readonly clusterWritable: boolean;
+  readonly requestedFields: readonly string[];
 }
 
 export interface PlatformPolicyReceipt {
@@ -165,6 +202,9 @@ const freezeObligations = (values: readonly PolicyObligation[]): readonly Policy
   ...(Array.isArray(value.value) ? { value: Object.freeze([...value.value]) } : {})
 })));
 const nonEmpty = (value: unknown, max = 512): value is string => typeof value === 'string' && value.trim() === value && value.length > 0 && value.length <= max;
+const validUniqueStrings = (value: unknown, minimum: number, maximum: number, itemMaximum = 512): value is readonly string[] =>
+  Array.isArray(value) && value.length >= minimum && value.length <= maximum &&
+  value.every((item) => nonEmpty(item, itemMaximum)) && new Set(value).size === value.length;
 const validSensitivities = new Set<DataSensitivity>(['public', 'internal', 'personal', 'sensitive', 'highly_sensitive']);
 const validActions = new Set<PolicyAction>(['read', 'create', 'update', 'delete', 'share', 'process', 'record', 'administer']);
 const actions = (...values: PolicyAction[]): readonly PolicyAction[] => Object.freeze(values);
@@ -203,6 +243,44 @@ const validConsent = (value: PolicyConsent): boolean =>
   Number.isFinite(parseTime(value.startsAt)) && (!value.endsAt || Number.isFinite(parseTime(value.endsAt))) &&
   (!value.revokedAt || Number.isFinite(parseTime(value.revokedAt)));
 
+export const platformPolicyContextSnapshot = (request: PlatformPolicyRequest): PlatformPolicyContextSnapshot => Object.freeze({
+  schemaVersion: 1 as const,
+  correlationId: request.correlationId ?? '',
+  policyVersion: request.policyVersion,
+  subject: Object.freeze({
+    accountId: request.subject.accountId,
+    personId: request.subject.personId ?? null,
+    deviceId: request.subject.deviceId,
+    applicationId: request.subject.applicationId,
+    deviceTrusted: request.subject.deviceTrusted,
+    membershipActive: request.subject.membershipActive,
+    roles: Object.freeze([...(request.subject.roles ?? [])]),
+    familyIds: Object.freeze([...(request.subject.familyIds ?? [])]),
+    householdIds: Object.freeze([...(request.subject.householdIds ?? [])]),
+    familyBranchIds: Object.freeze([...(request.subject.familyBranchIds ?? [])])
+  }),
+  resource: Object.freeze({
+    type: request.resource.type,
+    id: request.resource.id,
+    familyId: request.resource.familyId,
+    householdId: request.resource.householdId ?? null,
+    familyBranchId: request.resource.familyBranchId ?? null,
+    ownerPersonId: request.resource.ownerPersonId ?? null,
+    sensitivity: request.resource.sensitivity,
+    sourceResourceId: request.resource.sourceResourceId ?? null
+  }),
+  purpose: request.purpose ?? '',
+  occurredAt: request.occurredAt,
+  action: request.action,
+  capability: request.capability,
+  online: request.online,
+  clusterWritable: request.clusterWritable,
+  requestedFields: Object.freeze([...(request.requestedFields ?? [])])
+});
+
+export const platformPolicyContextHash = (request: PlatformPolicyRequest): string =>
+  createHash('sha256').update(stable(platformPolicyContextSnapshot(request)), 'utf8').digest('hex');
+
 export class PlatformPolicyKernel {
   readonly #config: PlatformPolicyKernelConfig;
 
@@ -223,25 +301,45 @@ export class PlatformPolicyKernel {
   }
 
   public evaluate(request: PlatformPolicyRequest): PlatformPolicyDecision {
+    let contextHash: string | undefined;
     const deny = (reason: PolicyReason, obligations: readonly PolicyObligation[] = []): PlatformPolicyDecision =>
-      Object.freeze({ allowed: false, reason, policyVersion: this.#config.policyVersion, obligations: freezeObligations(obligations) });
+      Object.freeze({
+        allowed: false,
+        reason,
+        policyVersion: this.#config.policyVersion,
+        ...(contextHash ? { contextHash } : {}),
+        obligations: freezeObligations(obligations)
+      });
+
+    const strictContext = request?.enforcementMode === 'strict';
 
     if (
+      !request || typeof request !== 'object' ||
+      !nonEmpty(request.policyVersion, 128) ||
       !nonEmpty(request.subject?.accountId) || !nonEmpty(request.subject?.deviceId) ||
+      (request.subject.personId !== undefined && !nonEmpty(request.subject.personId)) ||
       !nonEmpty(request.resource?.type) || !nonEmpty(request.resource?.id) || !nonEmpty(request.resource?.familyId) ||
+      (request.resource.householdId !== undefined && !nonEmpty(request.resource.householdId)) ||
+      (request.resource.familyBranchId !== undefined && !nonEmpty(request.resource.familyBranchId)) ||
+      (request.resource.ownerPersonId !== undefined && !nonEmpty(request.resource.ownerPersonId)) ||
+      (request.resource.sourceResourceId !== undefined && !nonEmpty(request.resource.sourceResourceId)) ||
       !nonEmpty(request.occurredAt) || !Number.isFinite(parseTime(request.occurredAt)) ||
       typeof request.subject.deviceTrusted !== 'boolean' || typeof request.subject.membershipActive !== 'boolean' ||
-      !Array.isArray(request.subject.roles) || !request.subject.roles.every((role) => nonEmpty(role, 128)) ||
-      (request.subject.familyIds !== undefined && (!Array.isArray(request.subject.familyIds) || !request.subject.familyIds.every((id) => nonEmpty(id)))) ||
-      (request.subject.householdIds !== undefined && (!Array.isArray(request.subject.householdIds) || !request.subject.householdIds.every((id) => nonEmpty(id)))) ||
-      (request.subject.familyBranchIds !== undefined && (!Array.isArray(request.subject.familyBranchIds) || !request.subject.familyBranchIds.every((id) => nonEmpty(id)))) ||
+      !validUniqueStrings(request.subject.roles, 1, 64, 128) ||
+      !validUniqueStrings(request.subject.familyIds, 1, 10_000, 256) ||
+      (request.subject.householdIds !== undefined && !validUniqueStrings(request.subject.householdIds, 0, 10_000, 256)) ||
+      (request.subject.familyBranchIds !== undefined && !validUniqueStrings(request.subject.familyBranchIds, 0, 10_000, 256)) ||
+      (strictContext && (!Array.isArray(request.subject.householdIds) || !Array.isArray(request.subject.familyBranchIds))) ||
       typeof request.online !== 'boolean' || typeof request.clusterWritable !== 'boolean' ||
       !validSensitivities.has(request.resource.sensitivity) || !validActions.has(request.action) ||
       (request.enforcementMode !== undefined && request.enforcementMode !== 'legacy' && request.enforcementMode !== 'strict') ||
       (request.purpose !== undefined && !nonEmpty(request.purpose, 256)) ||
+      (strictContext && (!nonEmpty(request.correlationId, 128) || !nonEmpty(request.purpose, 256))) ||
+      (request.requestedFields !== undefined && !validUniqueStrings(request.requestedFields, 0, 10_000, 256)) ||
       (request.grants !== undefined && (!Array.isArray(request.grants) || !request.grants.every(validGrant))) ||
       (request.consents !== undefined && (!Array.isArray(request.consents) || !request.consents.every(validConsent)))
     ) return deny('INVALID_REQUEST');
+    contextHash = platformPolicyContextHash(request);
     if (request.policyVersion !== this.#config.policyVersion) return deny('POLICY_VERSION_MISMATCH');
     const capabilities = this.#config.applicationCapabilities[request.subject.applicationId];
     if (!capabilities) return deny('APPLICATION_NOT_REGISTERED');
@@ -250,11 +348,11 @@ export class PlatformPolicyKernel {
     if (request.subject.deviceTrusted !== true) return deny('DEVICE_NOT_TRUSTED');
     if (request.subject.membershipActive !== true) return deny('MEMBERSHIP_INACTIVE');
     if (
-      (request.subject.familyIds && !request.subject.familyIds.includes(request.resource.familyId)) ||
+      !request.subject.familyIds!.includes(request.resource.familyId) ||
       (request.resource.householdId && (!request.subject.householdIds || !request.subject.householdIds.includes(request.resource.householdId))) ||
       (request.resource.familyBranchId && (!request.subject.familyBranchIds || !request.subject.familyBranchIds.includes(request.resource.familyBranchId)))
     ) return deny('RESOURCE_SCOPE_DENIED');
-    if (isSensitive(request.resource.sensitivity) && !request.purpose?.trim()) return deny('PURPOSE_REQUIRED');
+    if ((strictContext || isSensitive(request.resource.sensitivity)) && !request.purpose?.trim()) return deny('PURPOSE_REQUIRED');
     if (!request.online && this.#config.onlineOnlyCapabilities.includes(request.capability)) return deny('OFFLINE_OPERATION_FORBIDDEN');
     if (this.#config.writeActions.includes(request.action) && !request.clusterWritable) return deny('CLUSTER_NOT_WRITABLE');
 
@@ -269,7 +367,14 @@ export class PlatformPolicyKernel {
       (!grant.endsAt || parseTime(grant.endsAt) >= at)
     );
     const explicitDeny = activeGrants.find((grant) => grant.effect === 'deny');
-    if (explicitDeny) return Object.freeze({ allowed: false, reason: 'EXPLICIT_DENY', policyVersion: this.#config.policyVersion, matchedGrantId: explicitDeny.id, obligations: freezeObligations([]) });
+    if (explicitDeny) return Object.freeze({
+      allowed: false,
+      reason: 'EXPLICIT_DENY',
+      policyVersion: this.#config.policyVersion,
+      contextHash,
+      matchedGrantId: explicitDeny.id,
+      obligations: freezeObligations([])
+    });
 
     let matchedConsentId: string | undefined;
     if (this.#config.consentRequiredCapabilities.includes(request.capability)) {
@@ -305,6 +410,7 @@ export class PlatformPolicyKernel {
       allowed: true,
       reason: 'ALLOW_POLICY',
       policyVersion: this.#config.policyVersion,
+      contextHash,
       ...(explicitAllow ? { matchedGrantId: explicitAllow.id } : {}),
       ...(matchedConsentId ? { matchedConsentId } : {}),
       obligations: freezeObligations(obligations)

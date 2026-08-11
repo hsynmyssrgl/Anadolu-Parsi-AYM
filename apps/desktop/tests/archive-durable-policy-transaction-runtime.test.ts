@@ -598,10 +598,10 @@ describe('30-P durable archive policy transaction', () => {
     ).get('nonce-30p-direct-baseline') as Record<string, unknown>;
     const insert = harness.runtime.database.prepare(`
       INSERT INTO platform_policy_transaction_receipts(
-        receipt_hash,receipt_version,request_hash,nonce,correlation_id,policy_version,
+        receipt_hash,receipt_version,request_hash,context_hash,nonce,correlation_id,policy_version,
         resource_type,resource_id,action,capability,fence_name,fence_epoch,fence_writable,
         issued_at,recorded_at,record_json
-      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     `);
     const makeCandidate = (suffix: string, overrides: Record<string, unknown> = {}) => {
       const nonce = String(overrides.nonce ?? `nonce-30p-direct-${suffix}`);
@@ -617,6 +617,7 @@ describe('30-P durable archive policy transaction', () => {
         receipt_hash: String(overrides.receipt_hash ?? createHash('sha256').update(`30-p-${suffix}`).digest('hex')),
         receipt_version: 1,
         request_hash: rebound.receipt.requestHash,
+        context_hash: rebound.contextHash,
         nonce,
         correlation_id: correlationId,
         policy_version: rebound.decision.policyVersion,
@@ -633,7 +634,7 @@ describe('30-P durable archive policy transaction', () => {
       };
     };
     const executeInsert = (candidate: ReturnType<typeof makeCandidate>) => insert.run(
-      candidate.receipt_hash, candidate.receipt_version, candidate.request_hash, candidate.nonce,
+      candidate.receipt_hash, candidate.receipt_version, candidate.request_hash, candidate.context_hash, candidate.nonce,
       candidate.correlation_id, candidate.policy_version, candidate.resource_type, candidate.resource_id,
       candidate.action, candidate.capability, candidate.fence_name, candidate.fence_epoch,
       candidate.fence_writable, candidate.issued_at, candidate.recorded_at, candidate.record_json
@@ -676,7 +677,7 @@ describe('30-P durable archive policy transaction', () => {
       ...mismatch,
       correlation_id: 'corr-30p-direct-column-mismatch',
       record_json: JSON.stringify(mismatchRecord)
-    })).toThrow(/platform policy receipt, context or database fence mismatch/u);
+    })).toThrow(/platform policy (receipt, context or database fence mismatch|context binding is missing or inconsistent)/u);
   });
 
   it('lists and acknowledges journal projections idempotently', async () => {

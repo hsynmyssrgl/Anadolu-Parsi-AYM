@@ -357,7 +357,12 @@
       "version": 68,
       "name": "ppk002_family_import_governed_rollback_receipt_fence",
       "checksum": "298ffa1c65a65e762904cb913ecb9b45d1dfa5fcd94659c1a3181a5984f71bd6"
+    },
+    {
+      "version": 69,
+      "name": "ppk004_complete_policy_context_binding",
+      "checksum": "b0eaf8abbf4b45e00404717a1ba767ce64687e9f575a0e11798326cbdbfeeb91"
     }
   ],
-  "generatedAt": "2026-08-11T07:27:09.941Z"
+  "generatedAt": "2026-08-11T10:31:34.284Z"
 }

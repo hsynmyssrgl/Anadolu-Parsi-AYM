@@ -192,7 +192,8 @@ const executeRead = async (
     action: 'read',
     capability: 'health.read',
     resourceType,
-    resourceId: '*'
+    resourceId: '*',
+    purpose: 'health-care'
   }, () => ({ writable: true, epoch: 30 }), (policyAuthorization) => operation(
     new SqliteHealthRepository(),
     {

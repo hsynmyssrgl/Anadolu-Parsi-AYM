@@ -5617,6 +5617,55 @@ SET value='REVISION-31-T-PPK-002-FAMILY-IMPORT-GOVERNED-ROLLBACK-RECEIPT-FENCE',
 WHERE key='schema_generation';
 `;
 
+const platformPolicyContextBindingSql = `ALTER TABLE platform_policy_transaction_receipts
+ADD COLUMN context_hash TEXT CHECK(
+  context_hash IS NULL OR (
+    length(context_hash)=64 AND context_hash NOT GLOB '*[^0-9a-f]*'
+  )
+);
+
+CREATE INDEX idx_platform_policy_receipt_context
+ON platform_policy_transaction_receipts(context_hash)
+WHERE context_hash IS NOT NULL;
+
+CREATE TRIGGER trg_ppk004_platform_policy_context_insert
+BEFORE INSERT ON platform_policy_transaction_receipts
+WHEN NEW.context_hash IS NULL
+  OR length(NEW.context_hash)<>64
+  OR NEW.context_hash GLOB '*[^0-9a-f]*'
+  OR json_extract(NEW.record_json,'$.contextHash') IS NOT NEW.context_hash
+  OR json_extract(NEW.record_json,'$.decision.contextHash') IS NOT NEW.context_hash
+  OR json_extract(NEW.record_json,'$.receipt.decision.contextHash') IS NOT NEW.context_hash
+  OR json_extract(NEW.record_json,'$.request.correlationId') IS NOT NEW.correlation_id
+  OR json_type(NEW.record_json,'$.request.subject.accountId') IS NOT 'text'
+  OR length(trim(json_extract(NEW.record_json,'$.request.subject.accountId'))) < 1
+  OR json_type(NEW.record_json,'$.request.subject.deviceId') IS NOT 'text'
+  OR length(trim(json_extract(NEW.record_json,'$.request.subject.deviceId'))) < 1
+  OR json_type(NEW.record_json,'$.request.subject.applicationId') IS NOT 'text'
+  OR json_type(NEW.record_json,'$.request.subject.roles') IS NOT 'array'
+  OR json_array_length(json_extract(NEW.record_json,'$.request.subject.roles')) < 1
+  OR json_type(NEW.record_json,'$.request.subject.familyIds') IS NOT 'array'
+  OR json_array_length(json_extract(NEW.record_json,'$.request.subject.familyIds')) < 1
+  OR json_type(NEW.record_json,'$.request.subject.householdIds') IS NOT 'array'
+  OR json_type(NEW.record_json,'$.request.subject.familyBranchIds') IS NOT 'array'
+  OR json_type(NEW.record_json,'$.request.resource.familyId') IS NOT 'text'
+  OR length(trim(json_extract(NEW.record_json,'$.request.resource.familyId'))) < 1
+  OR json_type(NEW.record_json,'$.request.purpose') IS NOT 'text'
+  OR length(trim(json_extract(NEW.record_json,'$.request.purpose'))) < 1
+  OR json_type(NEW.record_json,'$.request.occurredAt') IS NOT 'text'
+  OR julianday(json_extract(NEW.record_json,'$.request.occurredAt')) IS NULL
+  OR json_extract(NEW.record_json,'$.request.action') IS NOT NEW.action
+  OR json_extract(NEW.record_json,'$.request.capability') IS NOT NEW.capability
+BEGIN
+  SELECT RAISE(ABORT,'platform policy context binding is missing or inconsistent');
+END;
+
+UPDATE database_metadata
+SET value='REVISION-31-Z-PPK-004-COMPLETE-POLICY-CONTEXT-BINDING',
+    updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
+WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -5685,7 +5734,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(65, 'life_policy_receipt_fence', lifePolicyReceiptFenceSql),
   createMigrationDefinition(66, 'location_policy_receipt_fence', locationPolicyReceiptFenceSql),
   createMigrationDefinition(67, 'local_ppk002_timeline_event_policy_receipt_fence', timelineEventPolicyReceiptFenceSql),
-  createMigrationDefinition(68, 'ppk002_family_import_governed_rollback_receipt_fence', familyImportGovernedRollbackReceiptFenceSql)
+  createMigrationDefinition(68, 'ppk002_family_import_governed_rollback_receipt_fence', familyImportGovernedRollbackReceiptFenceSql),
+  createMigrationDefinition(69, 'ppk004_complete_policy_context_binding', platformPolicyContextBindingSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

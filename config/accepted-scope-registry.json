@@ -5687,23 +5687,36 @@
       "area": "Politika Bağlamı",
       "title": "Kullanıcı, cihaz, uygulama, aile, hane, aile dalı, rol, veri sahibi, amaç, süre ve işlem bağlamı",
       "priority": "P0",
-      "status": "FOUNDATION_STARTED",
+      "status": "COMPLETE",
       "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
       "chain": {
         "decision": true,
         "domain": true,
-        "schema": false,
-        "migration": false,
-        "useCase": false,
-        "repository": false,
+        "schema": true,
+        "migration": true,
+        "useCase": true,
+        "repository": true,
         "policy": true,
-        "apiOrIpc": false,
-        "ui": false,
-        "menu": false,
-        "targetedTest": false,
+        "apiOrIpc": true,
+        "ui": true,
+        "menu": true,
+        "targetedTest": true,
         "documentation": true,
-        "evidence": false
-      }
+        "evidence": true
+      },
+      "evidence": [
+        "docs/decisions/DEC-185-ppk-004-complete-policy-context-binding.md",
+        "config/31-z-ppk-004-complete-policy-context-binding-scope.json",
+        "packages/platform-policy/src/policy-kernel.ts",
+        "packages/platform-policy/src/policy-enforcement-point.ts",
+        "packages/platform-policy/policy-context-binding.test.ts",
+        "apps/core-service/src/core-service-method-dispatcher.ts",
+        "packages/repositories/src/platform-policy-transaction-repository.ts",
+        "packages/database/src/family-database-migrations.ts",
+        "docs/audit/31-Z_PPK-004_TAM_POLITIKA_BAGLAMI_UST_KAPANIS.md",
+        "artifacts/validation/31-Z-ppk-004-complete-policy-context-binding-contract.json",
+        "artifacts/validation/31-Z-ppk-004-complete-policy-context-binding-runtime.json"
+      ]
     },
     {
       "id": "PPK-005",

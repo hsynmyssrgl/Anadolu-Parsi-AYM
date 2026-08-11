@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   PlatformPolicyEnforcementPoint,
   PlatformPolicyKernel,
+  platformPolicyContextHash,
   type PlatformPolicyReceiptRecord,
   type PlatformPolicyTransactionContext
 } from '@ppt/platform-policy';
@@ -83,6 +84,7 @@ describe('31-V strict policy obligation execution', () => {
             allowed: true,
             reason: 'ALLOW_POLICY' as const,
             policyVersion: 'PPK-31-V',
+            contextHash: platformPolicyContextHash(request),
             obligations: Object.freeze([{ type: 'strong_reauthentication' as const }])
           });
           return Object.freeze({

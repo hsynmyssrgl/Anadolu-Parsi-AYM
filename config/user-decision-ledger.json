@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 38,
+  "decisionCount": 39,
   "decisions": [
     {
       "id": "DEC-121",
@@ -901,6 +901,29 @@
         "artifacts/validation/31-Y-ppk-003-default-deny-availability-contract.json",
         "artifacts/validation/31-Y-ppk-003-default-deny-availability-runtime.json",
         "docs/audit/31-Y_PPK-003_VARSAYILAN_RET_UST_KAPANIS.md"
+      ]
+    },
+    {
+      "id": "DEC-185",
+      "date": "2026-08-11",
+      "acceptedAt": "2026-08-11",
+      "title": "PPK-004 complete user-to-operation policy context binding top closure",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: Otomatik devam sıradan",
+      "document": "docs/decisions/DEC-185-ppk-004-complete-policy-context-binding.md",
+      "requirements": ["PPK-004"],
+      "codeAreas": [
+        "packages/platform-policy/src/policy-kernel.ts",
+        "packages/platform-policy/src/policy-enforcement-point.ts",
+        "apps/core-service/src/core-service-method-dispatcher.ts",
+        "packages/repository-contracts/src/repository-context.ts",
+        "packages/repositories/src/platform-policy-transaction-repository.ts",
+        "packages/database/src/family-database-migrations.ts"
+      ],
+      "evidence": [
+        "artifacts/validation/31-Z-ppk-004-complete-policy-context-binding-contract.json",
+        "artifacts/validation/31-Z-ppk-004-complete-policy-context-binding-runtime.json",
+        "docs/audit/31-Z_PPK-004_TAM_POLITIKA_BAGLAMI_UST_KAPANIS.md"
       ]
     }
   ]

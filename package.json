@@ -640,6 +640,8 @@
     "verify:ppk002:family-import:local": "node scripts/verify-ppk002-family-data-import-policy-local-continuation.mjs",
     "verify:ppk003:default-deny:contract": "node scripts/verify-31-y-ppk-003-default-deny-availability-contract.mjs",
     "verify:ppk003:default-deny:runtime": "node scripts/verify-31-y-ppk-003-default-deny-availability-runtime.mjs",
+    "verify:ppk004:context:contract": "node scripts/verify-31-z-ppk-004-complete-policy-context-binding-contract.mjs",
+    "verify:ppk004:context:runtime": "node scripts/verify-31-z-ppk-004-complete-policy-context-binding-runtime.mjs",
     "audit:bronze:current": "node scripts/audit-bronze-current-state.mjs",
     "governance:update:incremental": "node scripts/update-aym-governance-incrementally.mjs",
     "verify:governance:incremental": "node scripts/verify-aym-governance-incremental-contract.mjs",

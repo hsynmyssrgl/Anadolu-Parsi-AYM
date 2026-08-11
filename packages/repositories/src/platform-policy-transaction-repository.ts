@@ -177,11 +177,15 @@ export const computePlatformPolicyReceiptRecordHash = (record: PlatformPolicyRec
 export interface PlatformPolicyPersistenceBinding {
   readonly receiptHash: string;
   readonly receiptVersion: 1;
+  readonly contextHash: string;
   readonly nonce: string;
   readonly resourceType: string;
   readonly resourceId: string;
   readonly action: PlatformPolicyReceiptRecord['action'];
   readonly capability: PlatformPolicyReceiptRecord['capability'];
+  readonly resourceFamilyId: string;
+  readonly purpose: string;
+  readonly occurredAt: string;
 }
 
 /**
@@ -209,11 +213,15 @@ export const platformPolicyPersistenceBinding = (
   return {
     receiptHash: computePlatformPolicyReceiptHash(authorization.receipt),
     receiptVersion: authorization.receipt.receiptVersion,
+    contextHash: authorization.contextHash,
     nonce: authorization.receipt.nonce,
     resourceType: authorization.resourceType,
     resourceId: authorization.resourceId,
     action: authorization.action,
-    capability: authorization.capability
+    capability: authorization.capability,
+    resourceFamilyId: authorization.resourceFamilyId,
+    purpose: authorization.purpose,
+    occurredAt: authorization.occurredAt
   };
 };
 
@@ -244,6 +252,7 @@ const mapReceipt = (row: Record<string, unknown>): PlatformPolicyTransactionRece
   receiptHash: String(row.receipt_hash),
   receiptVersion: 1,
   requestHash: String(row.request_hash),
+  ...(typeof row.context_hash === 'string' ? { contextHash: row.context_hash } : {}),
   nonce: String(row.nonce),
   correlationId: String(row.correlation_id),
   policyVersion: String(row.policy_version),
@@ -412,7 +421,14 @@ const assertRecordMatchesContext = (
     resourceId: record.resourceId,
     action: record.action,
     capability: record.capability,
-    correlationId: context.correlationId
+    correlationId: context.correlationId,
+    resourceFamilyId: record.request.resource.familyId,
+    ...(record.request.resource.householdId ? { resourceHouseholdId: record.request.resource.householdId } : {}),
+    ...(record.request.resource.familyBranchId ? { resourceFamilyBranchId: record.request.resource.familyBranchId } : {}),
+    ...(record.request.resource.ownerPersonId ? { resourceOwnerPersonId: record.request.resource.ownerPersonId } : {}),
+    purpose: record.request.purpose!,
+    occurredAt: record.request.occurredAt,
+    contextHash: record.contextHash
   });
   assertNonEmpty(input.fenceName, 'Platform policy fence name', 128);
   if (!Number.isSafeInteger(input.fenceEpoch) || input.fenceEpoch < 0 || input.fenceWritable !== true) {
@@ -439,6 +455,9 @@ const assertRecordMatchesContext = (
     record.request.policyVersion !== authorization.policyVersion ||
     record.request.clusterWritable !== true ||
     record.request.enforcementMode !== 'strict' ||
+    record.contextHash !== authorization.contextHash ||
+    record.contextHash !== record.decision.contextHash ||
+    record.contextHash !== record.receipt.decision.contextHash ||
     record.receipt.receiptVersion !== 1 ||
     record.receipt.requestHash !== authorization.requestHash ||
     record.receipt.decision.policyVersion !== authorization.policyVersion ||
@@ -453,6 +472,7 @@ const assertRecordMatchesContext = (
   if (
     !SHA256.test(receiptHash) ||
     !SHA256.test(record.receipt.requestHash) ||
+    !SHA256.test(record.contextHash) ||
     !SHA256.test(record.receipt.signature)
   ) {
     throw new Error('Platform policy receipt hashes are invalid');
@@ -719,14 +739,15 @@ export class SqlitePlatformPolicyTransactionRepository
       const recordJson = canonicalPlatformPolicyJson(record);
       this.database(context).prepare(`
         INSERT INTO platform_policy_transaction_receipts(
-          receipt_hash,receipt_version,request_hash,nonce,correlation_id,policy_version,
+          receipt_hash,receipt_version,request_hash,context_hash,nonce,correlation_id,policy_version,
           resource_type,resource_id,action,capability,fence_name,fence_epoch,fence_writable,
           issued_at,recorded_at,record_json
-        ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
       `).run(
         receiptHash,
         record.receipt.receiptVersion,
         record.receipt.requestHash,
+        record.contextHash,
         record.receipt.nonce,
         record.correlationId,
         record.decision.policyVersion,

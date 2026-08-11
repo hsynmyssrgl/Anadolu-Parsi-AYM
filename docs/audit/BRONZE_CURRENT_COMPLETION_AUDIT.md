@@ -1,6 +1,6 @@
 # Bronze guncel tamamlama denetimi
 
-Olusturma (UTC): 2026-08-11T09:54:07.900Z
+Olusturma (UTC): 2026-08-11T10:30:24.326Z
 
 ## Sonuc
 
@@ -9,24 +9,25 @@ Olusturma (UTC): 2026-08-11T09:54:07.900Z
 - Guncel adim: **31-T**
 - PPK-002: **COMPLETE**
 - PPK-003: **COMPLETE**
+- PPK-004: **COMPLETE**
 - Yeni Build verildi: **Hayir**
 
 ## Yuzde gercekligi
 
 - Resmi agirlikli Bronze ilerlemesi: **%25**
-- Kati gereksinim kapanisi: **%4.5714** (16/350)
-- Uygulama zinciri kapsami: **%5.0857**
-- Yonetisim ve kanit zinciri kapsami: **%45.5238**
+- Kati gereksinim kapanisi: **%4.8571** (17/350)
+- Uygulama zinciri kapsami: **%5.3143**
+- Yonetisim ve kanit zinciri kapsami: **%45.619**
 
 Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 
 ## Kapsam durumu
 
-- COMPLETE: 16
+- COMPLETE: 17
 - PARTIAL: 38
-- FOUNDATION_STARTED: 4
+- FOUNDATION_STARTED: 3
 - NOT_IMPLEMENTED: 292
-- Toplam acik gereksinim: 334
+- Toplam acik gereksinim: 333
 
 ## Kural ve kapilar
 
@@ -232,7 +233,6 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | DHA-001 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Process architecture | Electron arayüzünden bağımsız, kullanıcı oturumu kapalıyken de çalışan headless Core Service |
 | DHA-023 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Health | Liveness, readiness, quorum, replication lag, disk, cert, backup age ve dependency health |
 | PPK-001 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Politika Çekirdeği | Tek PlatformPolicyKernel; kimlik, yetki, gizlilik, rıza, saklama, AI, kayıt ve dışa aktarım kararlarının tek otoritesi |
-| PPK-004 | STARTED_BEFORE_NEW | P0 | FOUNDATION_STARTED | 4/13 | Politika Bağlamı | Kullanıcı, cihaz, uygulama, aile, hane, aile dalı, rol, veri sahibi, amaç, süre ve işlem bağlamı |
 | PPK-009 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Yetki | UI gizlemenin güvenlik sayılmaması; bütün kararların sunucu/Core Service tarafında yeniden değerlendirilmesi |
 | PPK-010 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Yetki | Doğrudan rol kontrolü yerine merkezi policy çağrısı; istisna listesi sıfır hedefi |
 | PPK-014 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Veri Erişimi | Core Service dışındaki uygulamalar yalnız sürümlü güvenli API üzerinden çalışır |
@@ -258,6 +258,7 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | PPK-018 | STARTED_BEFORE_NEW | P0 | FOUNDATION_STARTED | 1/13 | Audit | Karar, policy sürümü, yükümlülükler ve reddetme nedeni değişmez audit zincirine yazılır |
 | PPK-020 | STARTED_BEFORE_NEW | P0 | FOUNDATION_STARTED | 1/13 | Test | Windows, macOS, iOS/iPadOS ve servisler için aynı policy conformance test suite |
 | PPK-024 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Runtime Gate | Policy service unavailable, invalid signature veya stale policy halinde hassas işlemlerin read-only/deny olması |
+| PPK-026 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Geliştirici API | Typed Policy SDK ve generated client; uygulamaların kendi güvenlik yorumunu yazamaması |
 
 Tam acik-is listesi `artifacts/inventory/BRONZE_CURRENT_COMPLETION_AUDIT.json` icindedir.
 

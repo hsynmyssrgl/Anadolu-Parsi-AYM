@@ -46,7 +46,16 @@ export function assertPolicyAuthorizedRepositoryContext(
     resourceType: expectation.resourceType,
     resourceId: expectation.resourceId,
     action: expectation.action,
-    capability: expectation.capability
+    capability: expectation.capability,
+    ...(expectation.resourceFamilyId === undefined ? {} : { resourceFamilyId: expectation.resourceFamilyId }),
+    ...(expectation.resourceHouseholdId === undefined ? {} : { resourceHouseholdId: expectation.resourceHouseholdId }),
+    ...(expectation.resourceFamilyBranchId === undefined ? {} : { resourceFamilyBranchId: expectation.resourceFamilyBranchId }),
+    ...(expectation.resourceOwnerPersonId === undefined ? {} : { resourceOwnerPersonId: expectation.resourceOwnerPersonId }),
+    ...(expectation.purpose === undefined ? {} : { purpose: expectation.purpose }),
+    ...(expectation.occurredAt === undefined ? {} : { occurredAt: expectation.occurredAt }),
+    ...(expectation.contextHash === undefined ? {} : { contextHash: expectation.contextHash }),
+    ...(expectation.fenceEpoch === undefined ? {} : { fenceEpoch: expectation.fenceEpoch }),
+    ...(expectation.fenceWritable === undefined ? {} : { fenceWritable: expectation.fenceWritable })
   } : undefined;
 
   assertActivePlatformPolicyTransactionContext(policyAuthorization, policyExpectation);

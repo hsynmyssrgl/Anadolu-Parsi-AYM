@@ -147,6 +147,7 @@ const priorityCounts = countBy(requirements, 'priority');
 const strictComplete = statusCounts.COMPLETE ?? 0;
 const ppk002 = requirements.find((requirement) => requirement.id === 'PPK-002');
 const ppk003 = requirements.find((requirement) => requirement.id === 'PPK-003');
+const ppk004 = requirements.find((requirement) => requirement.id === 'PPK-004');
 const startedStatuses = new Set(['PARTIAL', 'FOUNDATION_STARTED']);
 const chainScore = (requirement) => [
   ...policy.implementationChainFields,
@@ -209,6 +210,7 @@ const report = {
   release: governance.release,
   PPK002: ppk002?.status ?? 'MISSING',
   PPK003: ppk003?.status ?? 'MISSING',
+  PPK004: ppk004?.status ?? 'MISSING',
   authoritativeSource: policy.authoritativeSource,
   currentStep: workPlan.currentStep,
   status: currentGatesPass ? 'PASS_WITH_OPEN_SCOPE' : 'FAIL_CURRENT_GATE',
@@ -217,7 +219,7 @@ const report = {
     ...policy.numberingPolicy,
     newBuildAssigned: false,
     reason: official31TComplete
-      ? 'The 31-X and 31-Y top closures complete PPK-002 universal enforcement and PPK-003 bounded default-deny decision availability. Other Bronze scope remains open.'
+      ? 'The 31-X, 31-Y and 31-Z top closures complete PPK-002 universal enforcement, PPK-003 bounded default-deny availability and PPK-004 complete policy-context binding. Other Bronze scope remains open.'
       : official31SComplete
       ? 'The 31-S detached versioned cutover decision preflight and current authoritative-source protection have verified D: external receipts. No successor decision, real-data transfer, SQLite ownership transfer, automatic activation, or cutover authority exists.'
       : official31RComplete
@@ -450,6 +452,7 @@ Olusturma (UTC): ${report.generatedAt}
 - Guncel adim: **${report.currentStep}**
 - PPK-002: **${report.PPK002}**
 - PPK-003: **${report.PPK003}**
+- PPK-004: **${report.PPK004}**
 - Yeni Build verildi: **Hayir**
 
 ## Yuzde gercekligi

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "step": "31-Z",
+  "requirement": "PPK-004",
+  "title": "Complete user-to-operation policy context binding top closure",
+  "status": "COMPLETED",
+  "boundaries": {
+    "userAccountAndPerson": true,
+    "deviceAndApplication": true,
+    "roleSet": true,
+    "familyScope": true,
+    "householdScope": true,
+    "familyBranchScope": true,
+    "resourceOwner": true,
+    "purpose": true,
+    "occurredAt": true,
+    "actionAndCapability": true,
+    "signedContextHash": true,
+    "activeTransactionContext": true,
+    "strictCoreServiceApi": true,
+    "durableContextHashMigration69": true,
+    "sqliteContextTrigger": true,
+    "rendererUiAndMenuIpcConfinement": true
+  },
+  "validation": {
+    "contract": "artifacts/validation/31-Z-ppk-004-complete-policy-context-binding-contract.json",
+    "runtime": "artifacts/validation/31-Z-ppk-004-complete-policy-context-binding-runtime.json",
+    "targetedTest": "packages/platform-policy/policy-context-binding.test.ts",
+    "contractChecks": "28/28",
+    "runtimeChecks": "7/7",
+    "targetedTests": "13/13",
+    "coreServiceDispatcher": "3/3",
+    "durableRepositoryRegression": "17/17",
+    "migration": "69 PASS",
+    "fullVitest": "53 files / 294 tests",
+    "rootTypeScriptDiagnostics": 0
+  },
+  "requirementCompletionClaimed": true,
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "mandatoryTruthSentence": "Bu kapanış yalnız PPK-004 gereksinimini tamamlar; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır."
+}
