@@ -1,6 +1,6 @@
 # Bronze guncel tamamlama denetimi
 
-Olusturma (UTC): 2026-08-11T12:39:14.450Z
+Olusturma (UTC): 2026-08-11T12:56:39.890Z
 
 ## Sonuc
 
@@ -15,24 +15,25 @@ Olusturma (UTC): 2026-08-11T12:39:14.450Z
 - PPK-007: **COMPLETE**
 - PPK-008: **COMPLETE**
 - PPK-009: **COMPLETE**
+- PPK-010: **COMPLETE**
 - Yeni Build verildi: **Hayir**
 
 ## Yuzde gercekligi
 
 - Resmi agirlikli Bronze ilerlemesi: **%25**
-- Kati gereksinim kapanisi: **%6.2857** (22/350)
-- Uygulama zinciri kapsami: **%6.6857**
-- Yonetisim ve kanit zinciri kapsami: **%46.4762**
+- Kati gereksinim kapanisi: **%6.5714** (23/350)
+- Uygulama zinciri kapsami: **%6.9143**
+- Yonetisim ve kanit zinciri kapsami: **%46.5714**
 
 Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 
 ## Kapsam durumu
 
-- COMPLETE: 22
-- PARTIAL: 37
+- COMPLETE: 23
+- PARTIAL: 36
 - FOUNDATION_STARTED: 3
 - NOT_IMPLEMENTED: 288
-- Toplam acik gereksinim: 328
+- Toplam acik gereksinim: 327
 
 ## Kural ve kapilar
 
@@ -238,7 +239,6 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | DHA-001 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Process architecture | Electron arayüzünden bağımsız, kullanıcı oturumu kapalıyken de çalışan headless Core Service |
 | DHA-023 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Health | Liveness, readiness, quorum, replication lag, disk, cert, backup age ve dependency health |
 | PPK-001 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Politika Çekirdeği | Tek PlatformPolicyKernel; kimlik, yetki, gizlilik, rıza, saklama, AI, kayıt ve dışa aktarım kararlarının tek otoritesi |
-| PPK-010 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Yetki | Doğrudan rol kontrolü yerine merkezi policy çağrısı; istisna listesi sıfır hedefi |
 | PPK-014 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Veri Erişimi | Core Service dışındaki uygulamalar yalnız sürümlü güvenli API üzerinden çalışır |
 | B0-03 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Bronze Kapsam Kilidi | 16/17 modül çelişkisini çöz ve tek navigasyon sözleşmesi oluştur |
 | B2-04 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Kimlik ve Güvenlik | Electron güvenlik checklist, CSP, custom protocol ve fuse kapanışı |
@@ -264,6 +264,7 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | PPK-024 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Runtime Gate | Policy service unavailable, invalid signature veya stale policy halinde hassas işlemlerin read-only/deny olması |
 | PPK-026 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Geliştirici API | Typed Policy SDK ve generated client; uygulamaların kendi güvenlik yorumunu yazamaması |
 | EXT-078 | STARTED_BEFORE_NEW | P1 | PARTIAL | 2/13 | SIGNED_PLUGIN_PLATFORM | Policy Kernel zorunlu kontrolü |
+| B2-03 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Kimlik ve Güvenlik | Yaşlı/genç kullanıcıya uygun güvenli kilit ve yeniden giriş akışı |
 
 Tam acik-is listesi `artifacts/inventory/BRONZE_CURRENT_COMPLETION_AUDIT.json` icindedir.
 

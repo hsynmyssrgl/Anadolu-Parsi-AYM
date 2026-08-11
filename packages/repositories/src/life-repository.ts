@@ -15,6 +15,7 @@ import {
 } from '@ppt/repository-contracts';
 import { platformPolicyPersistenceBinding } from './platform-policy-transaction-repository.js';
 import { SqliteRepository } from './sqlite-base.js';
+import { CentralAuthorizationService, isAuthorizationRole } from '@ppt/security';
 
 const mapLifeRecord = (row: Record<string, unknown>): LifeRecordRow => ({
   id: String(row.id),
@@ -43,7 +44,7 @@ interface LifeReadBinding {
   readonly occurredAt: string;
 }
 
-const lifeFamilyReadRoles = new Set(['family_admin', 'adult_member', 'caregiver']);
+const centralLifeAuthorization = new CentralAuthorizationService();
 
 const assertReceiptSubject = (
   context: PolicyAuthorizedRepositoryExecutionContext,
@@ -89,7 +90,16 @@ const lifeReadBinding = (
     familyId: asFamilyId(familyId),
     accountId: subject.accountId,
     actorPersonId: subject.personId ?? '',
-    familyRoleAllowed: subject.roles.some((role) => lifeFamilyReadRoles.has(role)) ? 1 : 0,
+    familyRoleAllowed: subject.roles.some((role) => isAuthorizationRole(role) && centralLifeAuthorization.authorize({
+      accountId: subject.accountId,
+      role,
+      action: 'read',
+      resourceType: 'life_record',
+      resourceId: '*',
+      occurredAt: context.policyAuthorization.receiptRecord.request.occurredAt,
+      purpose: 'general',
+      ...(subject.personId ? { actorPersonId: subject.personId } : {})
+    }).allowed) ? 1 : 0,
     occurredAt: context.policyAuthorization.receiptRecord.request.occurredAt
   });
 };

@@ -153,6 +153,7 @@ const ppk006 = requirements.find((requirement) => requirement.id === 'PPK-006');
 const ppk007 = requirements.find((requirement) => requirement.id === 'PPK-007');
 const ppk008 = requirements.find((requirement) => requirement.id === 'PPK-008');
 const ppk009 = requirements.find((requirement) => requirement.id === 'PPK-009');
+const ppk010 = requirements.find((requirement) => requirement.id === 'PPK-010');
 const startedStatuses = new Set(['PARTIAL', 'FOUNDATION_STARTED']);
 const chainScore = (requirement) => [
   ...policy.implementationChainFields,
@@ -221,6 +222,7 @@ const report = {
   PPK007: ppk007?.status ?? 'MISSING',
   PPK008: ppk008?.status ?? 'MISSING',
   PPK009: ppk009?.status ?? 'MISSING',
+  PPK010: ppk010?.status ?? 'MISSING',
   authoritativeSource: policy.authoritativeSource,
   currentStep: workPlan.currentStep,
   status: currentGatesPass ? 'PASS_WITH_OPEN_SCOPE' : 'FAIL_CURRENT_GATE',
@@ -229,7 +231,7 @@ const report = {
     ...policy.numberingPolicy,
     newBuildAssigned: false,
     reason: official31TComplete
-      ? 'The 31-X through 32-E top closures complete PPK-002 universal enforcement, PPK-003 bounded default-deny availability, PPK-004 complete policy-context binding, PPK-005 complete data classification, PPK-006 complete policy obligations, PPK-007 signed versioned policy packages, PPK-008 application identity/device-certificate manifests and PPK-009 Core Service decision re-evaluation. Other Bronze scope remains open.'
+      ? 'The 31-X through 32-F top closures complete PPK-002 universal enforcement, PPK-003 bounded default-deny availability, PPK-004 complete policy-context binding, PPK-005 complete data classification, PPK-006 complete policy obligations, PPK-007 signed versioned policy packages, PPK-008 application identity/device-certificate manifests, PPK-009 Core Service decision re-evaluation and PPK-010 central policy zero-exception enforcement. Other Bronze scope remains open.'
       : official31SComplete
       ? 'The 31-S detached versioned cutover decision preflight and current authoritative-source protection have verified D: external receipts. No successor decision, real-data transfer, SQLite ownership transfer, automatic activation, or cutover authority exists.'
       : official31RComplete
@@ -468,6 +470,7 @@ Olusturma (UTC): ${report.generatedAt}
 - PPK-007: **${report.PPK007}**
 - PPK-008: **${report.PPK008}**
 - PPK-009: **${report.PPK009}**
+- PPK-010: **${report.PPK010}**
 - Yeni Build verildi: **Hayir**
 
 ## Yuzde gercekligi

@@ -50,6 +50,7 @@ import type {
   LocationPolicyTransactionRevalidationInput
 } from './location-application-adapter.js';
 import type { FileDeviceIdentityProvider } from './device-identity.js';
+import { authorizationRoleMatches } from '@ppt/security';
 
 type DeviceIdentitySnapshot = ReturnType<FileDeviceIdentityProvider['snapshot']>;
 
@@ -462,7 +463,7 @@ const accountIsActive = (
     && (endsAt === undefined || Number.isFinite(endsAt))
     && account.id === context.actor.userId
     && account.status === 'active'
-    && account.role === context.actor.role
+    && authorizationRoleMatches(account.role, context.actor.role)
     && nonEmpty(account.role, 128)
     && nonEmpty(account.personId, 256)
     && account.personId === context.actor.personId
@@ -931,7 +932,7 @@ const revalidateProductionTransaction = (
   if (
     input.context.actor.userId !== context.actor.userId
     || input.context.actor.personId !== context.actor.personId
-    || input.context.actor.role !== context.actor.role
+    || !authorizationRoleMatches(input.context.actor.role, context.actor.role)
     || input.context.familyId !== context.familyId
     || input.context.correlationId !== context.correlationId
     || stable(input.intent) !== stable(requestedIntent)

@@ -5,7 +5,7 @@ import type {
   PersonLifecycleWriteScope
 } from '@ppt/application';
 import type { DomainEvent } from '@ppt/events';
-import { CentralAuthorizationService, type AuthorizationRole } from '@ppt/security';
+import { CentralAuthorizationService, isAuthorizationRole } from '@ppt/security';
 import type {
   AccountRepositoryPort,
   AuditRepositoryPort,
@@ -23,14 +23,6 @@ export interface RepositoryBackedPersonLifecycleDependencies {
   readonly outboxRepository: OutboxRepositoryPort;
 }
 
-const authorizationRoles = new Set<AuthorizationRole>([
-  'family_admin',
-  'adult_member',
-  'limited_member',
-  'caregiver',
-  'advisor'
-]);
-
 class RepositoryBackedPersonLifecycleWriteScope implements PersonLifecycleWriteScope {
   readonly #authorization = new CentralAuthorizationService();
 
@@ -44,10 +36,10 @@ class RepositoryBackedPersonLifecycleWriteScope implements PersonLifecycleWriteS
     const account = this.dependencies.accountRepository.findById(this.repositoryContext, this.repositoryContext.actor.userId);
     if (!account.ok) return account;
     if (!account.value || account.value.status !== 'active') return { ok: true, value: false };
-    if (!authorizationRoles.has(account.value.role as AuthorizationRole)) return { ok: true, value: false };
+    if (!isAuthorizationRole(account.value.role)) return { ok: true, value: false };
     const decision = this.#authorization.authorize({
       accountId: account.value.id,
-      role: account.value.role as AuthorizationRole,
+      role: account.value.role,
       action: 'administer',
       resourceType: 'family_membership',
       resourceId: '*',

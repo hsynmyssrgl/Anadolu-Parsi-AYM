@@ -46,7 +46,7 @@ import type {
   RollbackFamilyDataImportInput
 } from '@ppt/domain';
 import { computePlatformPolicyReceiptHash } from '@ppt/repositories';
-import { CentralAuthorizationService, type AuthorizationAction, type AuthorizationGrant } from '@ppt/security';
+import { CentralAuthorizationService, authorizationRoleMatches, type AuthorizationAction, type AuthorizationGrant } from '@ppt/security';
 import type { FamilyDataImportPolicyBatchRequest, FamilyDataImportPolicyBatchRunnerPort } from './family-data-import-policy-batch-runner.js';
 
 const MAX_IMPORT_BYTES = 25 * 1024 * 1024;
@@ -225,7 +225,7 @@ const authorizeFamilyDataImport = (
   if (
     !account.value ||
     !activeAccount(account.value, repository.occurredAt) ||
-    account.value.role !== context.actor.role ||
+    !authorizationRoleMatches(account.value.role, context.actor.role) ||
     account.value.personId !== context.actor.personId
   ) {
     return err(createAppError({

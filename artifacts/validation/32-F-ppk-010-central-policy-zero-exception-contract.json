@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-F",
+  "requirement": "PPK-010",
+  "phase": "CENTRAL_POLICY_ZERO_EXCEPTION_CONTRACT",
+  "status": "PASS",
+  "checkCount": 32,
+  "passed": 32,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "direct-role exception registry is exported empty and frozen",
+      "status": "PASS"
+    },
+    {
+      "name": "central role vocabulary guard is exported",
+      "status": "PASS"
+    },
+    {
+      "name": "role identity consistency helper is exported",
+      "status": "PASS"
+    },
+    {
+      "name": "administrative role resolution delegates to central policy vocabulary",
+      "status": "PASS"
+    },
+    {
+      "name": "adult life collection read remains an explicit central policy action",
+      "status": "PASS"
+    },
+    {
+      "name": "caregiver life collection read remains an explicit central policy action",
+      "status": "PASS"
+    },
+    {
+      "name": "central authorization service remains the decision engine",
+      "status": "PASS"
+    },
+    {
+      "name": "data repair administration uses the central service",
+      "status": "PASS"
+    },
+    {
+      "name": "person lifecycle administration uses the central service",
+      "status": "PASS"
+    },
+    {
+      "name": "household membership administration uses the central service",
+      "status": "PASS"
+    },
+    {
+      "name": "dashboard derives the role through the central vocabulary",
+      "status": "PASS"
+    },
+    {
+      "name": "timeline derives the role through the central vocabulary",
+      "status": "PASS"
+    },
+    {
+      "name": "health collection visibility calls central authorization",
+      "status": "PASS"
+    },
+    {
+      "name": "life collection visibility calls central authorization",
+      "status": "PASS"
+    },
+    {
+      "name": "production direct-role authorization scan has zero findings",
+      "status": "PASS"
+    },
+    {
+      "name": "archive identity role comparison uses the non-granting helper",
+      "status": "PASS"
+    },
+    {
+      "name": "finance identity role comparison uses the non-granting helper",
+      "status": "PASS"
+    },
+    {
+      "name": "health identity role comparison uses the non-granting helper",
+      "status": "PASS"
+    },
+    {
+      "name": "life identity role comparison uses the non-granting helper",
+      "status": "PASS"
+    },
+    {
+      "name": "location identity role comparison uses the non-granting helper",
+      "status": "PASS"
+    },
+    {
+      "name": "timeline identity role comparison uses the non-granting helper",
+      "status": "PASS"
+    },
+    {
+      "name": "data store identity role comparison uses the non-granting helper",
+      "status": "PASS"
+    },
+    {
+      "name": "family import identity role comparison uses the non-granting helper",
+      "status": "PASS"
+    },
+    {
+      "name": "repository package declares its central security dependency",
+      "status": "PASS"
+    },
+    {
+      "name": "universal Desktop PEP still requires the Core decision provider",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 74 retains durable Core decision-authority binding",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test enforces an empty exception registry",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test recursively scans production TypeScript",
+      "status": "PASS"
+    },
+    {
+      "name": "accepted registry closes the complete PPK-010 evidence chain",
+      "status": "PASS"
+    },
+    {
+      "name": "scope record claims only the completed PPK-010 boundary",
+      "status": "PASS"
+    },
+    {
+      "name": "decision records migration reuse and no cutover authority",
+      "status": "PASS"
+    },
+    {
+      "name": "audit records zero exceptions and truthful no-transfer boundary",
+      "status": "PASS"
+    }
+  ],
+  "failures": [],
+  "directRoleFindings": [],
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T12:57:00.658Z"
+}

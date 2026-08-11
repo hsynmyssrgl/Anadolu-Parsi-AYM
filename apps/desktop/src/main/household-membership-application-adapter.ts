@@ -5,8 +5,7 @@ import type {
   HouseholdMembershipWriteScope
 } from '@ppt/application';
 import type { DomainEvent } from '@ppt/events';
-import { CentralAuthorizationService } from '@ppt/security';
-import type { AuthorizationRole } from '@ppt/security';
+import { CentralAuthorizationService, isAuthorizationRole } from '@ppt/security';
 import type {
   AccountRepositoryPort,
   AuditRepositoryPort,
@@ -26,14 +25,6 @@ export interface RepositoryBackedHouseholdMembershipDependencies {
   readonly outboxRepository: OutboxRepositoryPort;
 }
 
-const authorizationRoles = new Set<AuthorizationRole>([
-  'family_admin',
-  'adult_member',
-  'limited_member',
-  'caregiver',
-  'advisor'
-]);
-
 class RepositoryBackedHouseholdMembershipWriteScope implements HouseholdMembershipWriteScope {
   readonly #authorization = new CentralAuthorizationService();
 
@@ -50,10 +41,10 @@ class RepositoryBackedHouseholdMembershipWriteScope implements HouseholdMembersh
     );
     if (!account.ok) return account;
     if (!account.value || account.value.status !== 'active') return { ok: true, value: false };
-    if (!authorizationRoles.has(account.value.role as AuthorizationRole)) return { ok: true, value: false };
+    if (!isAuthorizationRole(account.value.role)) return { ok: true, value: false };
     const decision = this.#authorization.authorize({
       accountId: account.value.id,
-      role: account.value.role as AuthorizationRole,
+      role: account.value.role,
       action: 'administer',
       resourceType: 'family_membership',
       resourceId: '*',

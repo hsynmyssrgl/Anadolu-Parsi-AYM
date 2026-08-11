@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "step": "32-F",
+  "requirement": "PPK-010",
+  "title": "Direct-role authorization removal and central-policy zero-exception closure",
+  "status": "COMPLETED",
+  "boundaries": {
+    "centralRoleVocabulary": true,
+    "emptyDirectRoleAuthorizationExceptionRegistry": true,
+    "administrationAdaptersUseCentralAuthorization": true,
+    "dashboardAndTimelineUseCentralRoleVocabulary": true,
+    "healthCollectionVisibilityUsesCentralAuthorization": true,
+    "lifeCollectionVisibilityUsesCentralAuthorization": true,
+    "identityRoleComparisonDoesNotGrantAccess": true,
+    "productionDirectRoleAuthorizationScanIsEmpty": true,
+    "desktopUniversalPepRemainsCoreEvaluated": true,
+    "repositorySecurityDependencyDeclared": true,
+    "migration74DecisionAuthorityBindingReused": true
+  },
+  "validation": {
+    "contract": "artifacts/validation/32-F-ppk-010-central-policy-zero-exception-contract.json",
+    "runtime": "artifacts/validation/32-F-ppk-010-central-policy-zero-exception-runtime.json",
+    "targetedTest": "packages/security/central-policy-zero-exception.test.ts",
+    "contractChecks": "32/32",
+    "runtimeChecks": "8/8",
+    "targetedTests": "10/10",
+    "migration": "74 PASS (reused durable Core decision-authority binding)",
+    "fullVitest": "59 files / 380 tests",
+    "rootTypeScriptDiagnostics": 0
+  },
+  "requirementCompletionClaimed": true,
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "mandatoryTruthSentence": "Bu kapanış yalnız PPK-010 gereksinimini tamamlar; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır."
+}

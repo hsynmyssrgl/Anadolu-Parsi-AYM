@@ -51,6 +51,7 @@ import type {
   TimelinePolicyTransactionRevalidationInput
 } from './timeline-application-adapter.js';
 import type { FileDeviceIdentityProvider } from './device-identity.js';
+import { authorizationRoleMatches } from '@ppt/security';
 
 type DeviceIdentitySnapshot = ReturnType<FileDeviceIdentityProvider['snapshot']>;
 
@@ -463,7 +464,7 @@ const accountIsActive = (
     && account.id === context.actor.userId
     && account.status === 'active'
     && context.actor.roles.length === 1
-    && account.role === context.actor.roles[0]
+    && authorizationRoleMatches(account.role, context.actor.roles[0])
     && nonEmpty(account.role, 128)
     && nonEmpty(account.personId, 256)
     && account.personId === context.actor.personId

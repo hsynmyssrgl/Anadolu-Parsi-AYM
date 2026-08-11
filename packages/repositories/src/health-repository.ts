@@ -18,6 +18,7 @@ import {
 } from '@ppt/repository-contracts';
 import { SqliteRepository } from './sqlite-base.js';
 import { platformPolicyPersistenceBinding } from './platform-policy-transaction-repository.js';
+import { CentralAuthorizationService, isAuthorizationRole } from '@ppt/security';
 
 const mapHealthRecord = (row: Record<string, unknown>): HealthRecordRow => ({
   id: String(row.id),
@@ -69,7 +70,7 @@ interface HealthCollectionVisibilityBinding {
   readonly occurredAt: string;
 }
 
-const healthFamilyReadRoles = new Set(['family_admin', 'adult_member', 'caregiver']);
+const centralHealthAuthorization = new CentralAuthorizationService();
 
 const assertCollectionRead = (
   context: PolicyAuthorizedRepositoryExecutionContext,
@@ -105,7 +106,16 @@ const assertCollectionRead = (
     familyId: asFamilyId(familyId),
     accountId: subject.accountId,
     actorPersonId: subject.personId ?? '',
-    familyRoleAllowed: subject.roles.some((role) => healthFamilyReadRoles.has(role)) ? 1 : 0,
+    familyRoleAllowed: subject.roles.some((role) => isAuthorizationRole(role) && centralHealthAuthorization.authorize({
+      accountId: subject.accountId,
+      role,
+      action: 'read',
+      resourceType,
+      resourceId: '*',
+      occurredAt: context.policyAuthorization.receiptRecord.request.occurredAt,
+      purpose: 'general',
+      ...(subject.personId ? { actorPersonId: subject.personId } : {})
+    }).allowed) ? 1 : 0,
     occurredAt: context.policyAuthorization.receiptRecord.request.occurredAt
   });
 };

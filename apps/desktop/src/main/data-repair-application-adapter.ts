@@ -5,7 +5,7 @@ import type {
   DataRepairWriteScope
 } from '@ppt/application';
 import type { DomainEvent } from '@ppt/events';
-import { CentralAuthorizationService, type AuthorizationRole } from '@ppt/security';
+import { CentralAuthorizationService, isAuthorizationRole } from '@ppt/security';
 import type {
   AccountRepositoryPort,
   AuditRepositoryPort,
@@ -23,8 +23,6 @@ export interface RepositoryBackedDataRepairDependencies {
   readonly outboxRepository: OutboxRepositoryPort;
 }
 
-const administrationRoles = new Set<AuthorizationRole>(['family_admin']);
-
 class RepositoryBackedDataRepairWriteScope implements DataRepairWriteScope {
   readonly #authorization = new CentralAuthorizationService();
 
@@ -38,10 +36,10 @@ class RepositoryBackedDataRepairWriteScope implements DataRepairWriteScope {
     const account = this.dependencies.accountRepository.findById(this.repositoryContext, this.repositoryContext.actor.userId);
     if (!account.ok) return account;
     if (!account.value || account.value.status !== 'active') return { ok: true, value: false };
-    if (!administrationRoles.has(account.value.role as AuthorizationRole)) return { ok: true, value: false };
+    if (!isAuthorizationRole(account.value.role)) return { ok: true, value: false };
     const decision = this.#authorization.authorize({
       accountId: account.value.id,
-      role: account.value.role as AuthorizationRole,
+      role: account.value.role,
       action: 'administer',
       resourceType: 'family_membership',
       resourceId: '*',

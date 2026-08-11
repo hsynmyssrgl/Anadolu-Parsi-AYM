@@ -1,6 +1,6 @@
 import { ERROR_CODES, createAppError, err, type AppError, type Result } from '@ppt/core';
 import type { DashboardApplicationContext, DashboardQueryPort, LocationApplicationContext } from '@ppt/application';
-import type { FamilyRole } from '@ppt/domain';
+import { isAuthorizationRole } from '@ppt/security';
 import type {
   DashboardRepositoryPort,
   LocationRepositoryPort
@@ -16,12 +16,10 @@ export interface RepositoryBackedDashboardDependencies {
   readonly locationPolicyTransactionRunner: RepositoryBackedLocationPolicyTransactionRunner;
 }
 
-const FAMILY_ROLES = new Set<FamilyRole>(['family_admin', 'adult_member', 'limited_member', 'caregiver', 'advisor']);
-
 const locationApplicationContext = (
   context: DashboardApplicationContext
 ): Result<LocationApplicationContext, AppError> => {
-  const role = context.actor.roles.find((candidate): candidate is FamilyRole => FAMILY_ROLES.has(candidate as FamilyRole));
+  const role = context.actor.roles.find(isAuthorizationRole);
   if (!role || !context.actor.personId) {
     return err(createAppError({
       code: ERROR_CODES.AUTHORIZATION_DENIED,

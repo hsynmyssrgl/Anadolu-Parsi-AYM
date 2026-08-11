@@ -5917,27 +5917,28 @@
       "area": "Yetki",
       "title": "Doğrudan rol kontrolü yerine merkezi policy çağrısı; istisna listesi sıfır hedefi",
       "priority": "P0",
-      "status": "PARTIAL",
+      "status": "COMPLETE",
       "acceptance": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
       "chain": {
         "decision": true,
         "domain": true,
-        "schema": false,
-        "migration": false,
-        "useCase": false,
-        "repository": false,
+        "schema": true,
+        "migration": true,
+        "useCase": true,
+        "repository": true,
         "policy": true,
-        "apiOrIpc": false,
-        "ui": false,
-        "menu": false,
-        "targetedTest": false,
+        "apiOrIpc": true,
+        "ui": true,
+        "menu": true,
+        "targetedTest": true,
         "documentation": true,
-        "evidence": false
+        "evidence": true
       },
       "evidence": [
-        "artifacts/validation/governed-preflight.json",
-        "artifacts/validation/core-service-local-admin-contract.json",
-        "artifacts/validation/core-service-local-admin-runtime.json"
+        "packages/security/central-policy-zero-exception.test.ts",
+        "artifacts/validation/32-F-ppk-010-central-policy-zero-exception-contract.json",
+        "artifacts/validation/32-F-ppk-010-central-policy-zero-exception-runtime.json",
+        "docs/audit/32-F_PPK-010_MERKEZI_POLITIKA_SIFIR_ISTISNA_UST_KAPANIS.md"
       ]
     },
     {

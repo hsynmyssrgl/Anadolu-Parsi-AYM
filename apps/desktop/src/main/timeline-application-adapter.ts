@@ -24,7 +24,7 @@ import type {
 } from '@ppt/application';
 import type { DomainEvent } from '@ppt/events';
 import { computePlatformPolicyReceiptHash } from '@ppt/repositories';
-import type { FamilyRole } from '@ppt/domain';
+import { isAuthorizationRole } from '@ppt/security';
 import {
   PlatformPolicyEnforcementError,
   assertActivePlatformPolicyTransactionContext,
@@ -343,19 +343,11 @@ export const timelineExactReadIntent = (eventId: string): TimelinePolicyIntent =
   purpose: 'general'
 });
 
-const FAMILY_ROLES = new Set<FamilyRole>([
-  'family_admin',
-  'adult_member',
-  'limited_member',
-  'caregiver',
-  'advisor'
-]);
-
 const locationApplicationContext = (
   context: TimelineApplicationContext,
   suffix: string
 ): Result<LocationApplicationContext, AppError> => {
-  const role = context.actor.roles.find((candidate): candidate is FamilyRole => FAMILY_ROLES.has(candidate as FamilyRole));
+  const role = context.actor.roles.find(isAuthorizationRole);
   if (!role || !context.actor.personId) {
     return err(createAppError({
       code: ERROR_CODES.AUTHORIZATION_DENIED,

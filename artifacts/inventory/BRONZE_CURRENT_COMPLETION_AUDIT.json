@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-11T12:39:14.450Z",
+  "generatedAt": "2026-08-11T12:56:39.890Z",
   "release": "Bronze 04.08.2026.29",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
@@ -11,6 +11,7 @@
   "PPK007": "COMPLETE",
   "PPK008": "COMPLETE",
   "PPK009": "COMPLETE",
+  "PPK010": "COMPLETE",
   "authoritativeSource": "06_KOD/app",
   "currentStep": "31-T",
   "status": "PASS_WITH_OPEN_SCOPE",
@@ -21,23 +22,23 @@
     "checkpointIds": "Checkpoint identifiers preserve work history and are never reused.",
     "buildIds": "A new Build number is assigned only after required current gates, manifest and receipt evidence exist.",
     "newBuildAssigned": false,
-    "reason": "The 31-X through 32-E top closures complete PPK-002 universal enforcement, PPK-003 bounded default-deny availability, PPK-004 complete policy-context binding, PPK-005 complete data classification, PPK-006 complete policy obligations, PPK-007 signed versioned policy packages, PPK-008 application identity/device-certificate manifests and PPK-009 Core Service decision re-evaluation. Other Bronze scope remains open."
+    "reason": "The 31-X through 32-F top closures complete PPK-002 universal enforcement, PPK-003 bounded default-deny availability, PPK-004 complete policy-context binding, PPK-005 complete data classification, PPK-006 complete policy obligations, PPK-007 signed versioned policy packages, PPK-008 application identity/device-certificate manifests, PPK-009 Core Service decision re-evaluation and PPK-010 central policy zero-exception enforcement. Other Bronze scope remains open."
   },
   "percentages": {
     "officialWeightedBronzePercent": 25,
     "officialWeightedEvidenceStep": "31-T",
-    "strictRequirementCompletionPercent": 6.2857,
-    "implementationChainCoveragePercent": 6.6857,
-    "governanceEvidenceChainCoveragePercent": 46.4762,
+    "strictRequirementCompletionPercent": 6.5714,
+    "implementationChainCoveragePercent": 6.9143,
+    "governanceEvidenceChainCoveragePercent": 46.5714,
     "interpretation": "These are separate measures and must not be blended into an invented single completion claim."
   },
   "scope": {
     "total": 350,
     "statusCounts": {
-      "COMPLETE": 22,
+      "COMPLETE": 23,
       "FOUNDATION_STARTED": 3,
       "NOT_IMPLEMENTED": 288,
-      "PARTIAL": 37
+      "PARTIAL": 36
     },
     "priorityCounts": {
       "P0": 210,
@@ -45,21 +46,21 @@
       "P2": 5
     },
     "completeByPriority": {
-      "P0": 21,
+      "P0": 22,
       "P1": 1,
       "P2": 0
     },
-    "incompleteCount": 328,
-    "strictComplete": 22,
+    "incompleteCount": 327,
+    "strictComplete": 23,
     "implementationCoverage": {
-      "passed": 234,
+      "passed": 242,
       "total": 3500,
-      "percent": 6.6857
+      "percent": 6.9143
     },
     "governanceCoverage": {
-      "passed": 488,
+      "passed": 489,
       "total": 1050,
-      "percent": 46.4762
+      "percent": 46.5714
     }
   },
   "rules": {
@@ -321,7 +322,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"a3b0a43211c78b2f28791164477c013809c313dbfbe5d3a33341b6d259087a98\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\a3b0a43211c78b2f28791164477c013809c313dbfbe5d3a33341b6d259087a98\",\"files\":9}"
+          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"a8f358ee217ff65790d2009abbe98231478e484a82d98daee8e9c6754f022b49\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\a8f358ee217ff65790d2009abbe98231478e484a82d98daee8e9c6754f022b49\",\"files\":9}"
         ]
       },
       {
@@ -1000,7 +1001,7 @@
     "status": "PASS",
     "officialCompletionClaimed": true,
     "storageBackend": "EXTERNAL_USB_D_DRIVE",
-    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\a3b0a43211c78b2f28791164477c013809c313dbfbe5d3a33341b6d259087a98"
+    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\a8f358ee217ff65790d2009abbe98231478e484a82d98daee8e9c6754f022b49"
   },
   "remainingWork": [
     {
@@ -1073,27 +1074,6 @@
       "workOrderClass": "STARTED_BEFORE_NEW",
       "area": "Politika Çekirdeği",
       "title": "Tek PlatformPolicyKernel; kimlik, yetki, gizlilik, rıza, saklama, AI, kayıt ve dışa aktarım kararlarının tek otoritesi",
-      "completedChainCount": 4,
-      "completionBlockers": [],
-      "missingChain": [
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "evidence"
-      ]
-    },
-    {
-      "id": "PPK-010",
-      "priority": "P0",
-      "status": "PARTIAL",
-      "workOrderClass": "STARTED_BEFORE_NEW",
-      "area": "Yetki",
-      "title": "Doğrudan rol kontrolü yerine merkezi policy çağrısı; istisna listesi sıfır hedefi",
       "completedChainCount": 4,
       "completionBlockers": [],
       "missingChain": [

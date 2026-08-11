@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 44,
+  "decisionCount": 45,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1045,6 +1045,31 @@
         "artifacts/validation/32-E-ppk-009-core-service-policy-reevaluation-contract.json",
         "artifacts/validation/32-E-ppk-009-core-service-policy-reevaluation-runtime.json",
         "docs/audit/32-E_PPK-009_CORE_SERVICE_POLITIKA_YENIDEN_DEGERLENDIRME_UST_KAPANIS.md"
+      ]
+    },
+    {
+      "id": "DEC-191",
+      "date": "2026-08-11",
+      "acceptedAt": "2026-08-11",
+      "title": "PPK-010 central policy and zero direct-role authorization exception top closure",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: Paketler bitince diğerine başla",
+      "document": "docs/decisions/DEC-191-ppk-010-central-policy-zero-exception.md",
+      "requirements": ["PPK-010"],
+      "codeAreas": [
+        "packages/security/src/authorization.ts",
+        "apps/desktop/src/main/data-repair-application-adapter.ts",
+        "apps/desktop/src/main/person-lifecycle-application-adapter.ts",
+        "apps/desktop/src/main/household-membership-application-adapter.ts",
+        "apps/desktop/src/main/dashboard-application-adapter.ts",
+        "apps/desktop/src/main/timeline-application-adapter.ts",
+        "packages/repositories/src/health-repository.ts",
+        "packages/repositories/src/life-repository.ts"
+      ],
+      "evidence": [
+        "artifacts/validation/32-F-ppk-010-central-policy-zero-exception-contract.json",
+        "artifacts/validation/32-F-ppk-010-central-policy-zero-exception-runtime.json",
+        "docs/audit/32-F_PPK-010_MERKEZI_POLITIKA_SIFIR_ISTISNA_UST_KAPANIS.md"
       ]
     }
   ]

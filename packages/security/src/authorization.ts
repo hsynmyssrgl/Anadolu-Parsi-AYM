@@ -4,6 +4,9 @@ export type SensitiveRecordPrivacy = 'private' | 'selected_members' | 'family';
 export type SensitiveRecordDomain = 'finance' | 'health' | 'life';
 export type AuthorizationPurpose = 'general'|'care'|'finance'|'health'|'archive'|'legacy'|'ai_processing'|'administration';
 
+/** PPK-010: no production path may bypass central policy with a direct role allow/deny exception. */
+export const DIRECT_ROLE_AUTHORIZATION_EXCEPTIONS = Object.freeze([] as const);
+
 export interface AuthorizationGrant {
   readonly id: string;
   readonly subjectAccountId: string;
@@ -56,22 +59,28 @@ const rolePolicies = {
   adult_member: {
     family: ['read'], person: ['read','create','update'], relation: ['read','create'],
     event: ['read','create','update','share','ai_process'], location: ['read','create','update'],
-    archive_item: [], life_record: [],
+    archive_item: [], life_record: ['read'],
     finance_record: ['read'], finance_valuation: ['read'],
     health_record: ['read'], medication_plan: ['read'], family_health_history: ['read']
   },
   limited_member: { family: ['read'], person: ['read'], event: ['read'] },
   caregiver: {
     family: ['read'], person: ['read'], event: ['read'],
-    health_record: ['read'], medication_plan: ['read'], family_health_history: ['read']
+    health_record: ['read'], medication_plan: ['read'], family_health_history: ['read'], life_record: ['read']
   },
   advisor: { family: ['read'], finance_record: ['read'], finance_valuation: ['read'] }
 } as const satisfies Readonly<Record<AuthorizationRole, Readonly<Record<string, readonly AuthorizationAction[]>>>>;
 
 /** Central role-policy query used by presentation and legacy fine-grained guards. */
+export const isAuthorizationRole = (role: unknown): role is AuthorizationRole =>
+  typeof role === 'string' && Object.prototype.hasOwnProperty.call(rolePolicies, role);
+
+/** Identity consistency only; authorization remains a CentralAuthorizationService decision. */
+export const authorizationRoleMatches = (left: unknown, right: unknown): boolean =>
+  isAuthorizationRole(left) && isAuthorizationRole(right) && left === right;
+
 export const isAdministrativeRole = (role: unknown): role is AuthorizationRole =>
-  typeof role === 'string'
-  && Object.prototype.hasOwnProperty.call(rolePolicies, role)
+  isAuthorizationRole(role)
   && Boolean((rolePolicies as Readonly<Record<string, Readonly<Record<string, readonly AuthorizationAction[]>>>>)[role]?.['*']?.includes('administer'));
 
 const activeGrant = (grant: AuthorizationGrant, request: AuthorizationRequest): boolean =>

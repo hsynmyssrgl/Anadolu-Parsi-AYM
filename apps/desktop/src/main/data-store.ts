@@ -38,6 +38,7 @@ import {
 } from '@ppt/core';
 import { EventDispatcher, createExponentialRetryPolicy, type DomainEvent, type EventDispatchBatchSummary, type EventDispatchStore } from '@ppt/events';
 import type { Logger } from '@ppt/logging';
+import { authorizationRoleMatches } from '@ppt/security';
 import type { RepositoryExecutionPolicyGuard } from '@ppt/repositories';
 import {
   AppendAuditEntryUseCase, type AuditWriteApplicationContext, GetLatestAuditOccurredAtUseCase, type AuditReadApplicationContext, InstallAuditStorageProtectionUseCase, ListAutomationRulesUseCase, CreateAutomationRuleUseCase, ToggleAutomationRuleUseCase, ListAutomationRunsUseCase, RunAutomationRulesUseCase, type AutomationApplicationContext, GetReportSummaryUseCase, type ReportApplicationContext,
@@ -2504,7 +2505,7 @@ export class FamilyDataStore {
     const device = this.#deviceIdentityProvider.snapshot();
     if (
       !auth.authenticated
-      || auth.role !== account.role
+      || !authorizationRoleMatches(auth.role, account.role)
       || auth.currentDeviceId !== device.deviceId
       || auth.trustedDevice !== true
       || typeof auth.sessionExpiresAt !== 'string'
