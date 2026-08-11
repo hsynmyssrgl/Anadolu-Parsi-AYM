@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-A",
+  "requirement": "PPK-005",
+  "phase": "COMPLETE_DATA_CLASSIFICATION_CONTRACT",
+  "status": "PASS",
+  "checkCount": 30,
+  "passed": 30,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "platform data-class domain type exists",
+      "status": "PASS"
+    },
+    {
+      "name": "all ten accepted data classes are modeled",
+      "status": "PASS",
+      "details": {
+        "classCount": 10
+      }
+    },
+    {
+      "name": "sensitivity level and data-class set are separate resource fields",
+      "status": "PASS"
+    },
+    {
+      "name": "classification authority distinguishes declared from policy default",
+      "status": "PASS"
+    },
+    {
+      "name": "class normalization enforces non-empty unique supported values",
+      "status": "PASS"
+    },
+    {
+      "name": "class normalization uses a stable canonical order",
+      "status": "PASS"
+    },
+    {
+      "name": "legacy resolvers receive deterministic class inference",
+      "status": "PASS"
+    },
+    {
+      "name": "strict kernel requires classes and classification source",
+      "status": "PASS"
+    },
+    {
+      "name": "non-canonical strict class sets fail request validation",
+      "status": "PASS"
+    },
+    {
+      "name": "domain-specific capability mismatch has a dedicated deny reason",
+      "status": "PASS"
+    },
+    {
+      "name": "health, finance, location and communication capability boundaries are explicit",
+      "status": "PASS"
+    },
+    {
+      "name": "data classes are included in the signed context snapshot",
+      "status": "PASS"
+    },
+    {
+      "name": "classification source is included in the signed context snapshot",
+      "status": "PASS"
+    },
+    {
+      "name": "non-general special classes force high-detail audit",
+      "status": "PASS"
+    },
+    {
+      "name": "child data forces no-AI and no-export obligations",
+      "status": "PASS"
+    },
+    {
+      "name": "biometric data forces local-only cache clipboard export and AI controls",
+      "status": "PASS"
+    },
+    {
+      "name": "legacy data forces no-export obligation",
+      "status": "PASS"
+    },
+    {
+      "name": "PEP distinguishes declared and policy-default classification",
+      "status": "PASS"
+    },
+    {
+      "name": "PEP classifies before constructing the signed request",
+      "status": "PASS"
+    },
+    {
+      "name": "receipt record and active transaction carry exact classes",
+      "status": "PASS"
+    },
+    {
+      "name": "active context assertion binds request record and expected classes",
+      "status": "PASS"
+    },
+    {
+      "name": "repository context forwards data-class expectations",
+      "status": "PASS"
+    },
+    {
+      "name": "repository persistence binding exposes data classes",
+      "status": "PASS"
+    },
+    {
+      "name": "repository writes canonical data_classes_json beside the receipt",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 70 is registered and adds the classification column",
+      "status": "PASS"
+    },
+    {
+      "name": "SQLite trigger validates all supported unique classes",
+      "status": "PASS"
+    },
+    {
+      "name": "SQLite trigger matches top-level and signed-request class sets",
+      "status": "PASS"
+    },
+    {
+      "name": "Core Service requires strict classified requests",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted and durable tests cover classes obligations inference and missing persistence",
+      "status": "PASS"
+    },
+    {
+      "name": "accepted scope, evidence, UI/menu confinement and no-cutover truth are closed",
+      "status": "PASS"
+    }
+  ],
+  "failures": [],
+  "cutoverAuthorityAttached": false,
+  "realDataTransferPerformed": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-11T10:53:24.512Z"
+}

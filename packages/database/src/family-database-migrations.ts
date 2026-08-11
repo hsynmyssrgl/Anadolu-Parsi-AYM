@@ -5666,6 +5666,49 @@ SET value='REVISION-31-Z-PPK-004-COMPLETE-POLICY-CONTEXT-BINDING',
 WHERE key='schema_generation';
 `;
 
+const platformPolicyDataClassificationSql = `ALTER TABLE platform_policy_transaction_receipts
+ADD COLUMN data_classes_json TEXT CHECK(
+  data_classes_json IS NULL OR (
+    json_valid(data_classes_json)
+    AND json_type(data_classes_json)='array'
+    AND json_array_length(data_classes_json) BETWEEN 1 AND 10
+  )
+);
+
+CREATE INDEX idx_platform_policy_receipt_data_classes
+ON platform_policy_transaction_receipts(data_classes_json)
+WHERE data_classes_json IS NOT NULL;
+
+CREATE TRIGGER trg_ppk005_platform_policy_data_classes_insert
+BEFORE INSERT ON platform_policy_transaction_receipts
+WHEN NEW.data_classes_json IS NULL
+  OR json_type(NEW.data_classes_json) IS NOT 'array'
+  OR json_array_length(NEW.data_classes_json) NOT BETWEEN 1 AND 10
+  OR EXISTS(
+    SELECT 1 FROM json_each(NEW.data_classes_json) item
+    WHERE item.type<>'text' OR item.value NOT IN (
+      'general','personal','special','health','finance','child',
+      'location','communication','biometric','legacy'
+    )
+  )
+  OR (
+    SELECT COUNT(*) FROM json_each(NEW.data_classes_json)
+  )<>(
+    SELECT COUNT(DISTINCT item.value) FROM json_each(NEW.data_classes_json) item
+  )
+  OR json_extract(NEW.record_json,'$.dataClasses') IS NOT json(NEW.data_classes_json)
+  OR json_extract(NEW.record_json,'$.request.resource.dataClasses') IS NOT json(NEW.data_classes_json)
+  OR json_extract(NEW.record_json,'$.request.resource.classificationSource') NOT IN ('declared','policy_default')
+BEGIN
+  SELECT RAISE(ABORT,'platform policy data classification is missing or inconsistent');
+END;
+
+UPDATE database_metadata
+SET value='REVISION-32-A-PPK-005-COMPLETE-DATA-CLASSIFICATION',
+    updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
+WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -5735,7 +5778,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(66, 'location_policy_receipt_fence', locationPolicyReceiptFenceSql),
   createMigrationDefinition(67, 'local_ppk002_timeline_event_policy_receipt_fence', timelineEventPolicyReceiptFenceSql),
   createMigrationDefinition(68, 'ppk002_family_import_governed_rollback_receipt_fence', familyImportGovernedRollbackReceiptFenceSql),
-  createMigrationDefinition(69, 'ppk004_complete_policy_context_binding', platformPolicyContextBindingSql)
+  createMigrationDefinition(69, 'ppk004_complete_policy_context_binding', platformPolicyContextBindingSql),
+  createMigrationDefinition(70, 'ppk005_complete_data_classification', platformPolicyDataClassificationSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

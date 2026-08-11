@@ -33,7 +33,9 @@ const baseRequest = (): PlatformPolicyRequest => ({
     householdId: 'household-main',
     familyBranchId: 'branch-main',
     ownerPersonId: 'person-owner',
-    sensitivity: 'personal'
+    sensitivity: 'personal',
+    dataClasses: ['personal'],
+    classificationSource: 'declared'
   },
   action: 'read',
   capability: 'family.read',

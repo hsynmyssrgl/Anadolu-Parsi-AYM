@@ -1,5 +1,6 @@
 import type { IsoDateTime } from '@ppt/core';
 import type {
+  PlatformDataClass,
   PlatformPolicyJournalProjectionProof,
   PlatformPolicyReceipt,
   PlatformPolicyReceiptRecord
@@ -140,6 +141,8 @@ export interface PlatformPolicyTransactionReceiptRecord {
   readonly requestHash: string;
   /** Absent only on historical rows created before migration 69. */
   readonly contextHash?: string;
+  /** Absent only on historical rows created before migration 70. */
+  readonly dataClasses?: readonly PlatformDataClass[];
   readonly nonce: string;
   readonly correlationId: string;
   readonly policyVersion: string;

@@ -362,7 +362,12 @@
       "version": 69,
       "name": "ppk004_complete_policy_context_binding",
       "checksum": "b0eaf8abbf4b45e00404717a1ba767ce64687e9f575a0e11798326cbdbfeeb91"
+    },
+    {
+      "version": 70,
+      "name": "ppk005_complete_data_classification",
+      "checksum": "bfd3643232c6daa25d85804f08c4580f896fe4d6e81c2ad3d7dcf602649085e9"
     }
   ],
-  "generatedAt": "2026-08-11T10:31:34.284Z"
+  "generatedAt": "2026-08-11T10:53:29.134Z"
 }

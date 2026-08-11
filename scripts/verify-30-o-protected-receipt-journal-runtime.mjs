@@ -135,14 +135,18 @@ const makeRecord = (sequence, nonce) => {
       deviceTrusted: true,
       membershipActive: true,
       roles: Object.freeze(['adult_member']),
-      familyIds: Object.freeze(['family-30o-journal'])
+      familyIds: Object.freeze(['family-30o-journal']),
+      householdIds: Object.freeze([]),
+      familyBranchIds: Object.freeze([])
     }),
     resource: Object.freeze({
       type: 'archive_item',
       id: `archive-30o-journal-${sequence}`,
       familyId: 'family-30o-journal',
       ownerPersonId: 'person-30o-journal',
-      sensitivity: 'personal'
+      sensitivity: 'personal',
+      dataClasses: Object.freeze(['personal']),
+      classificationSource: 'declared'
     }),
     action: 'update',
     capability: 'archive.write',
@@ -156,6 +160,8 @@ const makeRecord = (sequence, nonce) => {
   assert.equal(authorization.decision.allowed, true);
   return Object.freeze({
     correlationId,
+    contextHash: authorization.decision.contextHash,
+    dataClasses: request.resource.dataClasses,
     resourceType: request.resource.type,
     resourceId: request.resource.id,
     action: request.action,

@@ -1,11 +1,12 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-11T10:30:24.326Z",
+  "generatedAt": "2026-08-11T10:52:38.356Z",
   "release": "Bronze 04.08.2026.29",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
   "PPK004": "COMPLETE",
+  "PPK005": "COMPLETE",
   "authoritativeSource": "06_KOD/app",
   "currentStep": "31-T",
   "status": "PASS_WITH_OPEN_SCOPE",
@@ -16,22 +17,22 @@
     "checkpointIds": "Checkpoint identifiers preserve work history and are never reused.",
     "buildIds": "A new Build number is assigned only after required current gates, manifest and receipt evidence exist.",
     "newBuildAssigned": false,
-    "reason": "The 31-X, 31-Y and 31-Z top closures complete PPK-002 universal enforcement, PPK-003 bounded default-deny availability and PPK-004 complete policy-context binding. Other Bronze scope remains open."
+    "reason": "The 31-X, 31-Y, 31-Z and 32-A top closures complete PPK-002 universal enforcement, PPK-003 bounded default-deny availability, PPK-004 complete policy-context binding and PPK-005 complete data classification. Other Bronze scope remains open."
   },
   "percentages": {
     "officialWeightedBronzePercent": 25,
     "officialWeightedEvidenceStep": "31-T",
-    "strictRequirementCompletionPercent": 4.8571,
-    "implementationChainCoveragePercent": 5.3143,
-    "governanceEvidenceChainCoveragePercent": 45.619,
+    "strictRequirementCompletionPercent": 5.1429,
+    "implementationChainCoveragePercent": 5.6,
+    "governanceEvidenceChainCoveragePercent": 45.8095,
     "interpretation": "These are separate measures and must not be blended into an invented single completion claim."
   },
   "scope": {
     "total": 350,
     "statusCounts": {
-      "COMPLETE": 17,
+      "COMPLETE": 18,
       "FOUNDATION_STARTED": 3,
-      "NOT_IMPLEMENTED": 292,
+      "NOT_IMPLEMENTED": 291,
       "PARTIAL": 38
     },
     "priorityCounts": {
@@ -40,21 +41,21 @@
       "P2": 5
     },
     "completeByPriority": {
-      "P0": 16,
+      "P0": 17,
       "P1": 1,
       "P2": 0
     },
-    "incompleteCount": 333,
-    "strictComplete": 17,
+    "incompleteCount": 332,
+    "strictComplete": 18,
     "implementationCoverage": {
-      "passed": 186,
+      "passed": 196,
       "total": 3500,
-      "percent": 5.3143
+      "percent": 5.6
     },
     "governanceCoverage": {
-      "passed": 479,
+      "passed": 481,
       "total": 1050,
-      "percent": 45.619
+      "percent": 45.8095
     }
   },
   "rules": {
@@ -316,7 +317,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"b131508f8b2069feae71397cf4b64d6939ff4a292ecbc75ba228f166969075d2\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\b131508f8b2069feae71397cf4b64d6939ff4a292ecbc75ba228f166969075d2\",\"files\":9}"
+          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"90f6d80dc071d9f90371655a719694cd20e81e33d7dc5530eba46da7597ee0f2\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\90f6d80dc071d9f90371655a719694cd20e81e33d7dc5530eba46da7597ee0f2\",\"files\":9}"
         ]
       },
       {
@@ -995,7 +996,7 @@
     "status": "PASS",
     "officialCompletionClaimed": true,
     "storageBackend": "EXTERNAL_USB_D_DRIVE",
-    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\b131508f8b2069feae71397cf4b64d6939ff4a292ecbc75ba228f166969075d2"
+    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\90f6d80dc071d9f90371655a719694cd20e81e33d7dc5530eba46da7597ee0f2"
   },
   "remainingWork": [
     {
@@ -4448,30 +4449,6 @@
       "workOrderClass": "NEW_NOT_STARTED",
       "area": "OCR Silme",
       "title": "Kaynak imha/izin iptalinde OCR metni, indeks, embedding, cache ve türevler karantinaya/silmeye girer",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "PPK-005",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Politika Bağlamı",
-      "title": "Veri sınıfı: genel, kişisel, özel, sağlık, finans, çocuk, konum, iletişim, biyometrik, miras",
       "completedChainCount": 1,
       "completionBlockers": [],
       "missingChain": [

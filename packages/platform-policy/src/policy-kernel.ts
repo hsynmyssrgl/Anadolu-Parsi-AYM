@@ -25,6 +25,18 @@ export type PlatformCapability =
   | 'backup.create' | 'backup.restore' | 'cluster.admin' | 'plugin.execute';
 
 export type DataSensitivity = 'public' | 'internal' | 'personal' | 'sensitive' | 'highly_sensitive';
+export type PlatformDataClass =
+  | 'general'
+  | 'personal'
+  | 'special'
+  | 'health'
+  | 'finance'
+  | 'child'
+  | 'location'
+  | 'communication'
+  | 'biometric'
+  | 'legacy';
+export type PlatformDataClassificationSource = 'declared' | 'policy_default';
 export type PolicyAction = 'read' | 'create' | 'update' | 'delete' | 'share' | 'process' | 'record' | 'administer';
 export type PolicyReason =
   | 'ALLOW_POLICY'
@@ -42,6 +54,7 @@ export type PolicyReason =
   | 'CLUSTER_NOT_WRITABLE'
   | 'RESOURCE_SCOPE_DENIED'
   | 'OWNER_OR_GRANT_REQUIRED'
+  | 'DATA_CLASS_CAPABILITY_MISMATCH'
   | 'INVALID_REQUEST';
 
 export interface PolicySubject {
@@ -65,6 +78,8 @@ export interface PolicyResource {
   readonly familyBranchId?: string;
   readonly ownerPersonId?: string;
   readonly sensitivity: DataSensitivity;
+  readonly dataClasses?: readonly PlatformDataClass[];
+  readonly classificationSource?: PlatformDataClassificationSource;
   readonly sourceResourceId?: string;
 }
 
@@ -150,6 +165,8 @@ export interface PlatformPolicyContextSnapshot {
     readonly familyBranchId: string | null;
     readonly ownerPersonId: string | null;
     readonly sensitivity: DataSensitivity;
+    readonly dataClasses: readonly PlatformDataClass[];
+    readonly classificationSource: PlatformDataClassificationSource;
     readonly sourceResourceId: string | null;
   };
   readonly purpose: string;
@@ -206,6 +223,13 @@ const validUniqueStrings = (value: unknown, minimum: number, maximum: number, it
   Array.isArray(value) && value.length >= minimum && value.length <= maximum &&
   value.every((item) => nonEmpty(item, itemMaximum)) && new Set(value).size === value.length;
 const validSensitivities = new Set<DataSensitivity>(['public', 'internal', 'personal', 'sensitive', 'highly_sensitive']);
+export const PLATFORM_DATA_CLASSES = Object.freeze([
+  'general', 'personal', 'special', 'health', 'finance', 'child',
+  'location', 'communication', 'biometric', 'legacy'
+] as const satisfies readonly PlatformDataClass[]);
+const validDataClasses = new Set<PlatformDataClass>(PLATFORM_DATA_CLASSES);
+const dataClassOrder = new Map<PlatformDataClass, number>(PLATFORM_DATA_CLASSES.map((value, index) => [value, index]));
+const validClassificationSources = new Set<PlatformDataClassificationSource>(['declared', 'policy_default']);
 const validActions = new Set<PolicyAction>(['read', 'create', 'update', 'delete', 'share', 'process', 'record', 'administer']);
 const actions = (...values: PolicyAction[]): readonly PolicyAction[] => Object.freeze(values);
 const capabilityActions: Readonly<Record<PlatformCapability, readonly PolicyAction[]>> = Object.freeze({
@@ -243,6 +267,54 @@ const validConsent = (value: PolicyConsent): boolean =>
   Number.isFinite(parseTime(value.startsAt)) && (!value.endsAt || Number.isFinite(parseTime(value.endsAt))) &&
   (!value.revokedAt || Number.isFinite(parseTime(value.revokedAt)));
 
+export const normalizePlatformDataClasses = (
+  values: readonly PlatformDataClass[]
+): readonly PlatformDataClass[] => {
+  if (
+    !Array.isArray(values) || values.length < 1 || values.length > PLATFORM_DATA_CLASSES.length
+    || values.some((value) => !validDataClasses.has(value))
+    || new Set(values).size !== values.length
+  ) throw new TypeError('Platform data classes must be a non-empty unique supported set');
+  return Object.freeze([...values].sort((left, right) => (dataClassOrder.get(left) ?? 99) - (dataClassOrder.get(right) ?? 99)));
+};
+
+export const inferPlatformDataClasses = (
+  capability: PlatformCapability,
+  resourceType: string
+): readonly PlatformDataClass[] => {
+  const type = resourceType.trim().toLowerCase();
+  const inferred = new Set<PlatformDataClass>();
+  if (/(?:^|[_:.-])child(?:$|[_:.-])|minor|guardian/u.test(type)) inferred.add('child');
+  if (/health|medical|medication|diagnos/u.test(type)) inferred.add('health');
+  if (/finance|payment|accounting|valuation/u.test(type)) inferred.add('finance');
+  if (/location|geofence|coordinate|address/u.test(type)) inferred.add('location');
+  if (/communication|message|call|recording/u.test(type)) inferred.add('communication');
+  if (/biometric|fingerprint|face|voiceprint/u.test(type)) inferred.add('biometric');
+  if (/legacy|inheritance|estate|will/u.test(type)) inferred.add('legacy');
+  if (inferred.size === 0) {
+    if (capability.startsWith('health.')) inferred.add('health');
+    else if (capability.startsWith('finance.')) inferred.add('finance');
+    else if (capability.startsWith('location.')) inferred.add('location');
+    else if (capability.startsWith('communication.')) inferred.add('communication');
+    else if (capability === 'ai.process' || capability === 'translation.process' || capability === 'plugin.execute') inferred.add('special');
+    else if (capability === 'cluster.admin' || type === 'desktop_ipc_endpoint') inferred.add('general');
+    else inferred.add('personal');
+  }
+  return normalizePlatformDataClasses([...inferred]);
+};
+
+const dataClassCapabilityCompatible = (
+  dataClass: PlatformDataClass,
+  capability: PlatformCapability
+): boolean => {
+  if (capability.startsWith('family.') || capability.startsWith('backup.')) return true;
+  if (dataClass === 'health') return capability.startsWith('health.');
+  if (dataClass === 'finance') return capability.startsWith('finance.');
+  if (dataClass === 'location') return capability.startsWith('location.');
+  if (dataClass === 'communication') return capability.startsWith('communication.');
+  return true;
+};
+
 export const platformPolicyContextSnapshot = (request: PlatformPolicyRequest): PlatformPolicyContextSnapshot => Object.freeze({
   schemaVersion: 1 as const,
   correlationId: request.correlationId ?? '',
@@ -267,6 +339,8 @@ export const platformPolicyContextSnapshot = (request: PlatformPolicyRequest): P
     familyBranchId: request.resource.familyBranchId ?? null,
     ownerPersonId: request.resource.ownerPersonId ?? null,
     sensitivity: request.resource.sensitivity,
+    dataClasses: Object.freeze([...(request.resource.dataClasses ?? [])]),
+    classificationSource: request.resource.classificationSource ?? 'policy_default',
     sourceResourceId: request.resource.sourceResourceId ?? null
   }),
   purpose: request.purpose ?? '',
@@ -322,6 +396,19 @@ export class PlatformPolicyKernel {
       (request.resource.householdId !== undefined && !nonEmpty(request.resource.householdId)) ||
       (request.resource.familyBranchId !== undefined && !nonEmpty(request.resource.familyBranchId)) ||
       (request.resource.ownerPersonId !== undefined && !nonEmpty(request.resource.ownerPersonId)) ||
+      (request.resource.dataClasses !== undefined && (
+        !Array.isArray(request.resource.dataClasses)
+        || request.resource.dataClasses.length < 1
+        || request.resource.dataClasses.length > PLATFORM_DATA_CLASSES.length
+        || request.resource.dataClasses.some((value) => !validDataClasses.has(value))
+        || new Set(request.resource.dataClasses).size !== request.resource.dataClasses.length
+        || stable(request.resource.dataClasses) !== stable(normalizePlatformDataClasses(request.resource.dataClasses))
+      )) ||
+      (request.resource.classificationSource !== undefined && !validClassificationSources.has(request.resource.classificationSource)) ||
+      (strictContext && (
+        !Array.isArray(request.resource.dataClasses)
+        || !validClassificationSources.has(request.resource.classificationSource as PlatformDataClassificationSource)
+      )) ||
       (request.resource.sourceResourceId !== undefined && !nonEmpty(request.resource.sourceResourceId)) ||
       !nonEmpty(request.occurredAt) || !Number.isFinite(parseTime(request.occurredAt)) ||
       typeof request.subject.deviceTrusted !== 'boolean' || typeof request.subject.membershipActive !== 'boolean' ||
@@ -345,6 +432,9 @@ export class PlatformPolicyKernel {
     if (!capabilities) return deny('APPLICATION_NOT_REGISTERED');
     if (!capabilities.includes(request.capability)) return deny('CAPABILITY_NOT_DECLARED');
     if (!capabilityActions[request.capability]?.includes(request.action)) return deny('ACTION_CAPABILITY_MISMATCH');
+    if (!(request.resource.dataClasses ?? []).every((dataClass) => dataClassCapabilityCompatible(dataClass, request.capability))) {
+      return deny('DATA_CLASS_CAPABILITY_MISMATCH');
+    }
     if (request.subject.deviceTrusted !== true) return deny('DEVICE_NOT_TRUSTED');
     if (request.subject.membershipActive !== true) return deny('MEMBERSHIP_INACTIVE');
     if (
@@ -401,10 +491,30 @@ export class PlatformPolicyKernel {
     ) return deny('OWNER_OR_GRANT_REQUIRED');
 
     const obligations: PolicyObligation[] = [];
-    if (isSensitive(request.resource.sensitivity)) obligations.push({ type: 'high_detail_audit' });
-    if (request.capability === 'archive.ocr' || request.capability === 'ai.process' || request.capability === 'translation.process') obligations.push({ type: 'local_processing_only' });
-    if (!request.online) obligations.push({ type: 'no_export' });
-    if (request.capability === 'communication.record') obligations.push({ type: 'delete_after', value: 'consent-retention-policy' });
+    const addObligation = (obligation: PolicyObligation): void => {
+      if (!obligations.some((current) => current.type === obligation.type)) obligations.push(obligation);
+    };
+    const dataClasses = request.resource.dataClasses ?? [];
+    if (isSensitive(request.resource.sensitivity) || dataClasses.some((value) => value !== 'general' && value !== 'personal')) {
+      addObligation({ type: 'high_detail_audit' });
+    }
+    if (request.capability === 'archive.ocr' || request.capability === 'ai.process' || request.capability === 'translation.process') {
+      addObligation({ type: 'local_processing_only' });
+    }
+    if (dataClasses.includes('child')) {
+      addObligation({ type: 'no_ai' });
+      addObligation({ type: 'no_export' });
+    }
+    if (dataClasses.includes('biometric')) {
+      addObligation({ type: 'local_processing_only' });
+      addObligation({ type: 'no_cache' });
+      addObligation({ type: 'no_clipboard' });
+      addObligation({ type: 'no_export' });
+      addObligation({ type: 'no_ai' });
+    }
+    if (dataClasses.includes('legacy')) addObligation({ type: 'no_export' });
+    if (!request.online) addObligation({ type: 'no_export' });
+    if (request.capability === 'communication.record') addObligation({ type: 'delete_after', value: 'consent-retention-policy' });
 
     return Object.freeze({
       allowed: true,

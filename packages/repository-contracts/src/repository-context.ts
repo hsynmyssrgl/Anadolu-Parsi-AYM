@@ -54,6 +54,7 @@ export function assertPolicyAuthorizedRepositoryContext(
     ...(expectation.purpose === undefined ? {} : { purpose: expectation.purpose }),
     ...(expectation.occurredAt === undefined ? {} : { occurredAt: expectation.occurredAt }),
     ...(expectation.contextHash === undefined ? {} : { contextHash: expectation.contextHash }),
+    ...(expectation.dataClasses === undefined ? {} : { dataClasses: expectation.dataClasses }),
     ...(expectation.fenceEpoch === undefined ? {} : { fenceEpoch: expectation.fenceEpoch }),
     ...(expectation.fenceWritable === undefined ? {} : { fenceWritable: expectation.fenceWritable })
   } : undefined;

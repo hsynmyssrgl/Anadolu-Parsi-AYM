@@ -598,10 +598,10 @@ describe('30-P durable archive policy transaction', () => {
     ).get('nonce-30p-direct-baseline') as Record<string, unknown>;
     const insert = harness.runtime.database.prepare(`
       INSERT INTO platform_policy_transaction_receipts(
-        receipt_hash,receipt_version,request_hash,context_hash,nonce,correlation_id,policy_version,
+        receipt_hash,receipt_version,request_hash,context_hash,data_classes_json,nonce,correlation_id,policy_version,
         resource_type,resource_id,action,capability,fence_name,fence_epoch,fence_writable,
         issued_at,recorded_at,record_json
-      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     `);
     const makeCandidate = (suffix: string, overrides: Record<string, unknown> = {}) => {
       const nonce = String(overrides.nonce ?? `nonce-30p-direct-${suffix}`);
@@ -618,6 +618,7 @@ describe('30-P durable archive policy transaction', () => {
         receipt_version: 1,
         request_hash: rebound.receipt.requestHash,
         context_hash: rebound.contextHash,
+        data_classes_json: JSON.stringify(rebound.dataClasses),
         nonce,
         correlation_id: correlationId,
         policy_version: rebound.decision.policyVersion,
@@ -634,11 +635,31 @@ describe('30-P durable archive policy transaction', () => {
       };
     };
     const executeInsert = (candidate: ReturnType<typeof makeCandidate>) => insert.run(
-      candidate.receipt_hash, candidate.receipt_version, candidate.request_hash, candidate.context_hash, candidate.nonce,
+      candidate.receipt_hash, candidate.receipt_version, candidate.request_hash, candidate.context_hash,
+      candidate.data_classes_json, candidate.nonce,
       candidate.correlation_id, candidate.policy_version, candidate.resource_type, candidate.resource_id,
       candidate.action, candidate.capability, candidate.fence_name, candidate.fence_epoch,
       candidate.fence_writable, candidate.issued_at, candidate.recorded_at, candidate.record_json
     );
+
+    const missingClassification = makeCandidate('missing-classification');
+    expect(() => harness.runtime.database.prepare(`
+      INSERT INTO platform_policy_transaction_receipts(
+        receipt_hash,receipt_version,request_hash,context_hash,nonce,correlation_id,policy_version,
+        resource_type,resource_id,action,capability,fence_name,fence_epoch,fence_writable,
+        issued_at,recorded_at,record_json
+      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+    `).run(
+      missingClassification.receipt_hash, missingClassification.receipt_version,
+      missingClassification.request_hash, missingClassification.context_hash,
+      missingClassification.nonce, missingClassification.correlation_id,
+      missingClassification.policy_version, missingClassification.resource_type,
+      missingClassification.resource_id, missingClassification.action,
+      missingClassification.capability, missingClassification.fence_name,
+      missingClassification.fence_epoch, missingClassification.fence_writable,
+      missingClassification.issued_at, missingClassification.recorded_at,
+      missingClassification.record_json
+    )).toThrow(/platform policy data classification is missing or inconsistent/u);
 
     expect(() => executeInsert(makeCandidate('missing-reservation'))).toThrow();
 

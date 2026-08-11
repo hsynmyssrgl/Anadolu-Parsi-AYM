@@ -178,6 +178,7 @@ export interface PlatformPolicyPersistenceBinding {
   readonly receiptHash: string;
   readonly receiptVersion: 1;
   readonly contextHash: string;
+  readonly dataClasses: PlatformPolicyReceiptRecord['dataClasses'];
   readonly nonce: string;
   readonly resourceType: string;
   readonly resourceId: string;
@@ -214,6 +215,7 @@ export const platformPolicyPersistenceBinding = (
     receiptHash: computePlatformPolicyReceiptHash(authorization.receipt),
     receiptVersion: authorization.receipt.receiptVersion,
     contextHash: authorization.contextHash,
+    dataClasses: authorization.dataClasses,
     nonce: authorization.receipt.nonce,
     resourceType: authorization.resourceType,
     resourceId: authorization.resourceId,
@@ -253,6 +255,9 @@ const mapReceipt = (row: Record<string, unknown>): PlatformPolicyTransactionRece
   receiptVersion: 1,
   requestHash: String(row.request_hash),
   ...(typeof row.context_hash === 'string' ? { contextHash: row.context_hash } : {}),
+  ...(typeof row.data_classes_json === 'string'
+    ? { dataClasses: Object.freeze(JSON.parse(row.data_classes_json) as PlatformPolicyReceiptRecord['dataClasses']) }
+    : {}),
   nonce: String(row.nonce),
   correlationId: String(row.correlation_id),
   policyVersion: String(row.policy_version),
@@ -428,7 +433,8 @@ const assertRecordMatchesContext = (
     ...(record.request.resource.ownerPersonId ? { resourceOwnerPersonId: record.request.resource.ownerPersonId } : {}),
     purpose: record.request.purpose!,
     occurredAt: record.request.occurredAt,
-    contextHash: record.contextHash
+    contextHash: record.contextHash,
+    dataClasses: record.dataClasses
   });
   assertNonEmpty(input.fenceName, 'Platform policy fence name', 128);
   if (!Number.isSafeInteger(input.fenceEpoch) || input.fenceEpoch < 0 || input.fenceWritable !== true) {
@@ -458,6 +464,8 @@ const assertRecordMatchesContext = (
     record.contextHash !== authorization.contextHash ||
     record.contextHash !== record.decision.contextHash ||
     record.contextHash !== record.receipt.decision.contextHash ||
+    canonicalPlatformPolicyJson(record.dataClasses) !== canonicalPlatformPolicyJson(authorization.dataClasses) ||
+    canonicalPlatformPolicyJson(record.dataClasses) !== canonicalPlatformPolicyJson(record.request.resource.dataClasses) ||
     record.receipt.receiptVersion !== 1 ||
     record.receipt.requestHash !== authorization.requestHash ||
     record.receipt.decision.policyVersion !== authorization.policyVersion ||
@@ -739,15 +747,16 @@ export class SqlitePlatformPolicyTransactionRepository
       const recordJson = canonicalPlatformPolicyJson(record);
       this.database(context).prepare(`
         INSERT INTO platform_policy_transaction_receipts(
-          receipt_hash,receipt_version,request_hash,context_hash,nonce,correlation_id,policy_version,
+          receipt_hash,receipt_version,request_hash,context_hash,data_classes_json,nonce,correlation_id,policy_version,
           resource_type,resource_id,action,capability,fence_name,fence_epoch,fence_writable,
           issued_at,recorded_at,record_json
-        ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
       `).run(
         receiptHash,
         record.receipt.receiptVersion,
         record.receipt.requestHash,
         record.contextHash,
+        JSON.stringify(record.dataClasses),
         record.receipt.nonce,
         record.correlationId,
         record.decision.policyVersion,

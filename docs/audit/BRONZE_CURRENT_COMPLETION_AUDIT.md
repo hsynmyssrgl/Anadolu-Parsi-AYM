@@ -1,6 +1,6 @@
 # Bronze guncel tamamlama denetimi
 
-Olusturma (UTC): 2026-08-11T10:30:24.326Z
+Olusturma (UTC): 2026-08-11T10:52:38.356Z
 
 ## Sonuc
 
@@ -10,24 +10,25 @@ Olusturma (UTC): 2026-08-11T10:30:24.326Z
 - PPK-002: **COMPLETE**
 - PPK-003: **COMPLETE**
 - PPK-004: **COMPLETE**
+- PPK-005: **COMPLETE**
 - Yeni Build verildi: **Hayir**
 
 ## Yuzde gercekligi
 
 - Resmi agirlikli Bronze ilerlemesi: **%25**
-- Kati gereksinim kapanisi: **%4.8571** (17/350)
-- Uygulama zinciri kapsami: **%5.3143**
-- Yonetisim ve kanit zinciri kapsami: **%45.619**
+- Kati gereksinim kapanisi: **%5.1429** (18/350)
+- Uygulama zinciri kapsami: **%5.6**
+- Yonetisim ve kanit zinciri kapsami: **%45.8095**
 
 Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 
 ## Kapsam durumu
 
-- COMPLETE: 17
+- COMPLETE: 18
 - PARTIAL: 38
 - FOUNDATION_STARTED: 3
-- NOT_IMPLEMENTED: 292
-- Toplam acik gereksinim: 333
+- NOT_IMPLEMENTED: 291
+- Toplam acik gereksinim: 332
 
 ## Kural ve kapilar
 

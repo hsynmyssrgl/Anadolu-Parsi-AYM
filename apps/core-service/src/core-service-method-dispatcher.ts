@@ -37,6 +37,8 @@ const hasStrictPolicyContext = (value: unknown): value is PolicyAuthorizationCon
     && Array.isArray(subject?.familyBranchIds)
     && Boolean(resource)
     && typeof resource?.familyId === 'string' && resource.familyId.trim().length > 0
+    && Array.isArray(resource?.dataClasses) && resource.dataClasses.length > 0
+    && (resource?.classificationSource === 'declared' || resource?.classificationSource === 'policy_default')
     && typeof request.action === 'string' && typeof request.capability === 'string';
 };
 

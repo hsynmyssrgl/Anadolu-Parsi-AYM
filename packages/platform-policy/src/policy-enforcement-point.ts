@@ -1,10 +1,13 @@
 import { createHash, randomUUID } from 'node:crypto';
 import {
   PlatformPolicyKernel,
+  inferPlatformDataClasses,
+  normalizePlatformDataClasses,
   platformPolicyContextHash,
   type PlatformApplicationId,
   type PlatformPolicyAuthorization,
   type PlatformCapability,
+  type PlatformDataClass,
   type PlatformPolicyDecision,
   type PlatformPolicyReceipt,
   type PlatformPolicyRequest,
@@ -53,6 +56,7 @@ export interface PlatformPolicyResourceResolver {
 export interface PlatformPolicyReceiptRecord {
   readonly correlationId: string;
   readonly contextHash: string;
+  readonly dataClasses: readonly PlatformDataClass[];
   readonly resourceType: string;
   readonly resourceId: string;
   readonly action: PolicyAction;
@@ -204,6 +208,7 @@ export interface PlatformPolicyTransactionContext {
   readonly resourceHouseholdId?: string;
   readonly resourceFamilyBranchId?: string;
   readonly resourceOwnerPersonId?: string;
+  readonly dataClasses: readonly PlatformDataClass[];
   readonly purpose: string;
   readonly occurredAt: string;
   readonly action: PolicyAction;
@@ -240,6 +245,7 @@ export interface PlatformPolicyTransactionExpectation {
   readonly purpose?: string;
   readonly occurredAt?: string;
   readonly contextHash?: string;
+  readonly dataClasses?: readonly PlatformDataClass[];
   readonly fenceEpoch?: number;
   readonly fenceWritable?: boolean;
 }
@@ -297,6 +303,8 @@ export const assertActivePlatformPolicyTransactionContext: (
     || context.resourceHouseholdId !== context.receiptRecord.request.resource.householdId
     || context.resourceFamilyBranchId !== context.receiptRecord.request.resource.familyBranchId
     || context.resourceOwnerPersonId !== context.receiptRecord.request.resource.ownerPersonId
+    || stable(context.dataClasses) !== stable(context.receiptRecord.request.resource.dataClasses)
+    || stable(context.dataClasses) !== stable(context.receiptRecord.dataClasses)
     || context.purpose !== context.receiptRecord.request.purpose
     || context.occurredAt !== context.receiptRecord.request.occurredAt
     || context.action !== context.receiptRecord.request.action
@@ -320,6 +328,7 @@ export const assertActivePlatformPolicyTransactionContext: (
       (expected.purpose !== undefined && context.purpose !== expected.purpose) ||
       (expected.occurredAt !== undefined && context.occurredAt !== expected.occurredAt) ||
       (expected.contextHash !== undefined && context.contextHash !== expected.contextHash) ||
+      (expected.dataClasses !== undefined && stable(context.dataClasses) !== stable(expected.dataClasses)) ||
       (expected.fenceEpoch !== undefined && context.fenceEpoch !== expected.fenceEpoch) ||
       (expected.fenceWritable !== undefined && context.fenceWritable !== expected.fenceWritable))
   ) {
@@ -687,10 +696,31 @@ export class PlatformPolicyEnforcementPoint {
       || (resource.familyBranchId !== undefined && !nonEmptyBounded(resource.familyBranchId, 256))
       || (resource.ownerPersonId !== undefined && !nonEmptyBounded(resource.ownerPersonId, 256))
       || (resource.sourceResourceId !== undefined && !nonEmptyBounded(resource.sourceResourceId, 256))
+      || (resource.dataClasses !== undefined && !Array.isArray(resource.dataClasses))
+      || (resource.classificationSource !== undefined && resource.classificationSource !== 'declared' && resource.classificationSource !== 'policy_default')
+      || (resource.dataClasses === undefined && resource.classificationSource !== undefined)
     ) {
       throw new PlatformPolicyEnforcementError('RESOURCE_RESOLUTION_FAILED', 'Resolved policy resource context is invalid');
     }
-    resource = Object.freeze({ ...resource });
+    let dataClasses: readonly PlatformDataClass[];
+    let classificationSource: 'declared' | 'policy_default';
+    try {
+      if (resource.dataClasses !== undefined) {
+        if (resource.classificationSource === 'policy_default') throw new TypeError('Declared data classes cannot claim policy-default authority');
+        dataClasses = normalizePlatformDataClasses(resource.dataClasses);
+        classificationSource = 'declared';
+      } else {
+        dataClasses = inferPlatformDataClasses(intent.capability, resource.type);
+        classificationSource = 'policy_default';
+      }
+    } catch (error) {
+      throw new PlatformPolicyEnforcementError('RESOURCE_RESOLUTION_FAILED', 'Resolved policy data classification is invalid', { cause: error });
+    }
+    resource = Object.freeze({
+      ...resource,
+      dataClasses,
+      classificationSource
+    });
 
     const issuedAt = this.#clock();
     const issuedAtMs = parseTimestamp(issuedAt);
@@ -816,6 +846,7 @@ export class PlatformPolicyEnforcementPoint {
     const record: PlatformPolicyReceiptRecord = Object.freeze({
       correlationId: intent.correlationId,
       contextHash,
+      dataClasses: Object.freeze([...(effectiveRequest.resource.dataClasses ?? [])]),
       resourceType: resource.type,
       resourceId: resource.id,
       action: intent.action,
@@ -880,6 +911,7 @@ export class PlatformPolicyEnforcementPoint {
       ...(resource.householdId ? { resourceHouseholdId: resource.householdId } : {}),
       ...(resource.familyBranchId ? { resourceFamilyBranchId: resource.familyBranchId } : {}),
       ...(resource.ownerPersonId ? { resourceOwnerPersonId: resource.ownerPersonId } : {}),
+      dataClasses: Object.freeze([...(effectiveRequest.resource.dataClasses ?? [])]),
       purpose: intent.purpose,
       occurredAt: effectiveRequest.occurredAt,
       action: intent.action,

@@ -2,7 +2,7 @@
 
 - Görünür sürüm: **Bronze 04.08.2026.29**
 - Makine okunur defter: `config/user-decision-ledger.json`
-- Aktif karar sayısı: **39**
+- Aktif karar sayısı: **40**
 
 Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağlayıcı kullanıcı kararlarını karar düzeyinde, etkilediği kural/belge/kod alanlarıyla saklar. Ham konuşma erişimi olmadan “tam transcript” iddiası yapılmaz.
 
@@ -47,3 +47,4 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 - `DEC-183` — PPK-002 universal enforcement top closure
 - `DEC-184` — PPK-003 bounded default-deny policy decision availability top closure
 - `DEC-185` — PPK-004 complete user-to-operation policy context binding top closure
+- `DEC-186` — PPK-005 complete data classification top closure

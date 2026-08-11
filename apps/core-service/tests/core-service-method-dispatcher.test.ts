@@ -106,7 +106,8 @@ describe('31-G Core Service typed method dispatcher', () => {
       },
       resource: {
         type: 'family', id: 'family-ppk-004', familyId: 'family-ppk-004',
-        ownerPersonId: 'person-ppk-004', sensitivity: 'personal' as const
+        ownerPersonId: 'person-ppk-004', sensitivity: 'personal' as const,
+        dataClasses: ['personal'] as const, classificationSource: 'declared' as const
       },
       action: 'read' as const,
       capability: 'family.read' as const,
