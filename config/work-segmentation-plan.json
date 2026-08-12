@@ -2130,8 +2130,8 @@
       "id": "33-D",
       "title": "B4 controlled finance import and network-free OHVPS adapter closure",
       "scopeRequirement": "B4-13,B4-14",
-      "status": "IN_PROGRESS",
-      "validationStatus": "PENDING",
+      "status": "COMPLETED",
+      "validationStatus": "PASS",
       "localEvidence": [
         "config/33-d-b4-controlled-import-open-banking-scope.json",
         "config/33-d-b4-controlled-import-open-banking-inventory.json",
@@ -2140,10 +2140,19 @@
         "docs/audit/33-D_B4_CONTROLLED_IMPORT_OPEN_BANKING_UST_KAPANIS.md",
         "artifacts/validation/33-D-b4-controlled-import-open-banking-boundary.json",
         "artifacts/validation/33-D-b4-controlled-import-open-banking-contract.json",
-        "artifacts/validation/33-D-b4-controlled-import-open-banking-runtime.json"
+        "artifacts/validation/33-D-b4-controlled-import-open-banking-runtime.json",
+        "artifacts/checkpoints/33-D_LIBRARY_RECEIPT.json",
+        "artifacts/validation/33-D_LIBRARY_READBACK_VERIFICATION.json",
+        "artifacts/validation/33-D_RECEIPT_READBACK_VERIFICATION.json",
+        "artifacts/validation/33-D_RECEIPT_READBACK_PERSISTENCE_VERIFICATION.json",
+        "artifacts/validation/33-D_LIBRARY_FINAL_INVENTORY_VERIFICATION.json",
+        "artifacts/checkpoints/33-D_COMPLETION_RECORD.json",
+        "artifacts/validation/33-D_COMPLETION_TRANSITION_VALIDATION.json",
+        "artifacts/validation/33-D_LIBRARY_CLOSURE_INVENTORY_VERIFICATION.json"
       ],
-      "persistentReceiptStatus": "PENDING",
-      "completionTransitionStatus": "PENDING"
+      "persistentReceiptStatus": "PASS",
+      "completionTransitionStatus": "PASS",
+      "persistentReceiptPath": "artifacts/checkpoints/33-D_LIBRARY_RECEIPT.json"
     },
     {
       "id": "33-E",
@@ -2167,6 +2176,6 @@
   ],
   "recoveryAuthority": "NEW_CHAT_HANDOFF_Bronze_04.08.2026.29.md",
   "recoveryReason": "29-D_FAILED_POSTFLIGHT_EXIT_CODE_1_SPLIT_PER_PR-171",
-  "updatedAt": "2026-08-12T17:31:41.603Z",
-  "segmentationNote": "31-T governed rollback exact delete receipt fence remains immutable COMPLETED/PASS with exact D: USB readback. 33-D is the single active successor step for B4-13/B4-14 controlled import and the network-free OHVPS adapter closure; its persistent receipt and completion transition remain pending until final delivery."
+  "updatedAt": "2026-08-12T19:23:55.474Z",
+  "segmentationNote": "33-D is immutable COMPLETED/PASS with exact D: USB hash/size readback. 33-E remains PENDING until the governed step transition is applied."
 }
