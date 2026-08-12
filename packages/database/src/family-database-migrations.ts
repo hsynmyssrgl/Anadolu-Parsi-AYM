@@ -6743,6 +6743,301 @@ SET value='REVISION-33-A-B4-PAYMENT-CARD-MANAGEMENT',
 WHERE key='schema_generation';
 `;
 
+const loanManagementSql = `CREATE TABLE loan_accounts(
+  id TEXT PRIMARY KEY,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  institution_code TEXT NOT NULL REFERENCES bank_institutions(institution_code) ON DELETE RESTRICT,
+  title TEXT NOT NULL CHECK(length(trim(title)) BETWEEN 2 AND 120),
+  kind TEXT NOT NULL CHECK(kind IN ('consumer','mortgage','vehicle','other')),
+  rate_type TEXT NOT NULL CHECK(rate_type IN ('fixed','variable','profit_share','interest_free')),
+  annual_rate_basis_points INTEGER NOT NULL CHECK(
+    typeof(annual_rate_basis_points)='integer'
+    AND annual_rate_basis_points BETWEEN 0 AND 100000
+    AND (rate_type<>'interest_free' OR annual_rate_basis_points=0)
+  ),
+  term_months INTEGER NOT NULL CHECK(typeof(term_months)='integer' AND term_months BETWEEN 1 AND 600),
+  currency TEXT NOT NULL CHECK(length(currency)=3 AND currency=upper(currency) AND currency GLOB '[A-Z][A-Z][A-Z]'),
+  original_principal REAL NOT NULL CHECK(original_principal>0 AND original_principal<=1000000000000000),
+  installment_amount REAL NOT NULL CHECK(
+    installment_amount>0 AND installment_amount<=1000000000000000
+    AND (installment_amount*term_months)+0.01>=original_principal
+  ),
+  remaining_principal REAL NOT NULL CHECK(remaining_principal>=0 AND remaining_principal<=original_principal),
+  disbursed_at TEXT NOT NULL CHECK(datetime(disbursed_at) IS NOT NULL),
+  first_payment_at TEXT NOT NULL CHECK(
+    datetime(first_payment_at) IS NOT NULL AND datetime(first_payment_at)>=datetime(disbursed_at)
+  ),
+  maturity_at TEXT NOT NULL CHECK(
+    datetime(maturity_at) IS NOT NULL AND datetime(maturity_at)>=datetime(first_payment_at)
+  ),
+  early_settlement_amount REAL NOT NULL CHECK(
+    early_settlement_amount>=0 AND early_settlement_amount<=1000000000000000
+  ),
+  early_settlement_quoted_at TEXT CHECK(
+    (early_settlement_amount=0 AND early_settlement_quoted_at IS NULL)
+    OR (early_settlement_amount>0 AND early_settlement_quoted_at IS NOT NULL
+      AND datetime(early_settlement_quoted_at)>=datetime(disbursed_at))
+  ),
+  overdue_installment_count INTEGER NOT NULL CHECK(
+    typeof(overdue_installment_count)='integer' AND overdue_installment_count BETWEEN 0 AND 600
+  ),
+  overdue_amount REAL NOT NULL CHECK(overdue_amount>=0 AND overdue_amount<=1000000000000000),
+  days_past_due INTEGER NOT NULL CHECK(typeof(days_past_due)='integer' AND days_past_due BETWEEN 0 AND 36500),
+  insurance_status TEXT NOT NULL CHECK(insurance_status IN ('none','active','expired','cancelled')),
+  insurance_provider TEXT CHECK(insurance_provider IS NULL OR length(trim(insurance_provider)) BETWEEN 1 AND 120),
+  insurance_policy_reference TEXT CHECK(
+    insurance_policy_reference IS NULL OR length(trim(insurance_policy_reference)) BETWEEN 1 AND 120
+  ),
+  insurance_premium_amount REAL NOT NULL CHECK(
+    insurance_premium_amount>=0 AND insurance_premium_amount<=1000000000000000
+  ),
+  insurance_ends_at TEXT CHECK(insurance_ends_at IS NULL OR datetime(insurance_ends_at) IS NOT NULL),
+  collateral_type TEXT NOT NULL CHECK(collateral_type IN ('none','vehicle','real_estate','deposit','guarantee','other')),
+  collateral_description TEXT CHECK(
+    collateral_description IS NULL OR length(trim(collateral_description)) BETWEEN 1 AND 240
+  ),
+  collateral_estimated_value REAL NOT NULL CHECK(
+    collateral_estimated_value>=0 AND collateral_estimated_value<=1000000000000000
+  ),
+  status TEXT NOT NULL CHECK(status IN ('active','overdue','restructured','closed')),
+  privacy TEXT NOT NULL CHECK(privacy IN ('private','selected_members','family')),
+  created_at TEXT NOT NULL CHECK(datetime(created_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL,
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version=1),
+  policy_receipt_nonce TEXT NOT NULL,
+  policy_correlation_id TEXT NOT NULL,
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type='finance_record'),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action='create'),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='finance.write'),
+  CHECK(
+    (status='overdue' AND overdue_installment_count>0 AND overdue_amount>0 AND days_past_due>0)
+    OR (status<>'overdue' AND overdue_installment_count=0 AND overdue_amount=0 AND days_past_due=0)
+  ),
+  CHECK((status='closed' AND remaining_principal=0) OR (status<>'closed' AND remaining_principal>0)),
+  CHECK(
+    (insurance_status='none' AND insurance_provider IS NULL AND insurance_policy_reference IS NULL
+      AND insurance_premium_amount=0 AND insurance_ends_at IS NULL)
+    OR (insurance_status<>'none' AND insurance_provider IS NOT NULL
+      AND insurance_policy_reference IS NOT NULL AND insurance_premium_amount>0
+      AND insurance_ends_at IS NOT NULL)
+  ),
+  CHECK(
+    (collateral_type='none' AND collateral_description IS NULL AND collateral_estimated_value=0)
+    OR (collateral_type<>'none' AND collateral_description IS NOT NULL AND collateral_estimated_value>0)
+  ),
+  UNIQUE(policy_receipt_hash)
+);
+
+CREATE TABLE loan_payment_schedule(
+  loan_id TEXT NOT NULL REFERENCES loan_accounts(id) ON DELETE CASCADE,
+  installment_sequence INTEGER NOT NULL CHECK(
+    typeof(installment_sequence)='integer' AND installment_sequence BETWEEN 1 AND 600
+  ),
+  due_at TEXT NOT NULL CHECK(datetime(due_at) IS NOT NULL),
+  scheduled_amount REAL NOT NULL CHECK(scheduled_amount>0 AND scheduled_amount<=1000000000000000),
+  PRIMARY KEY(loan_id,installment_sequence)
+);
+
+CREATE TABLE loan_payment_history(
+  id TEXT PRIMARY KEY,
+  loan_id TEXT NOT NULL REFERENCES loan_accounts(id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  paid_at TEXT NOT NULL CHECK(datetime(paid_at) IS NOT NULL),
+  scheduled_installment_sequence INTEGER CHECK(
+    scheduled_installment_sequence IS NULL
+    OR (typeof(scheduled_installment_sequence)='integer' AND scheduled_installment_sequence BETWEEN 1 AND 600)
+  ),
+  amount REAL NOT NULL CHECK(amount>0 AND amount<=1000000000000000),
+  principal_amount REAL NOT NULL CHECK(principal_amount>=0 AND principal_amount<=1000000000000000),
+  interest_amount REAL NOT NULL CHECK(interest_amount>=0 AND interest_amount<=1000000000000000),
+  late_fee_amount REAL NOT NULL CHECK(late_fee_amount>=0 AND late_fee_amount<=1000000000000000),
+  notes TEXT CHECK(notes IS NULL OR length(trim(notes)) BETWEEN 1 AND 500),
+  created_at TEXT NOT NULL CHECK(datetime(created_at) IS NOT NULL AND datetime(paid_at)<=datetime(created_at)),
+  policy_receipt_hash TEXT NOT NULL,
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version=1),
+  policy_receipt_nonce TEXT NOT NULL,
+  policy_correlation_id TEXT NOT NULL,
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type='finance_record'),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action='update'),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='finance.write'),
+  CHECK(abs(amount-(principal_amount+interest_amount+late_fee_amount))<0.005),
+  UNIQUE(policy_receipt_hash)
+);
+
+CREATE INDEX idx_loan_accounts_family_created ON loan_accounts(family_id,created_at DESC);
+CREATE INDEX idx_loan_accounts_owner_created ON loan_accounts(owner_person_id,created_at DESC);
+CREATE INDEX idx_loan_accounts_institution_status ON loan_accounts(institution_code,status);
+CREATE INDEX idx_loan_accounts_maturity ON loan_accounts(maturity_at,status);
+CREATE INDEX idx_loan_schedule_due ON loan_payment_schedule(due_at,loan_id);
+CREATE INDEX idx_loan_payment_history_loan_paid ON loan_payment_history(loan_id,paid_at DESC);
+
+CREATE TRIGGER trg_b4_loan_account_insert_policy_receipt
+BEFORE INSERT ON loan_accounts
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM platform_policy_transaction_receipts receipt
+  JOIN platform_policy_database_fences fence
+    ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+  WHERE receipt.receipt_hash=NEW.policy_receipt_hash
+    AND receipt.receipt_version=NEW.policy_receipt_version
+    AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id
+    AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id
+    AND receipt.action=NEW.policy_action
+    AND receipt.capability=NEW.policy_capability
+    AND receipt.resource_type='finance_record'
+    AND receipt.resource_id=NEW.id
+    AND receipt.action='create'
+    AND receipt.capability='finance.write'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.purpose')='finance'
+)
+OR EXISTS(SELECT 1 FROM finance_records WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_valuations WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM bank_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM payment_cards WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM loan_payment_history WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'loan account write requires an unused exact durable finance policy receipt');
+END;
+
+CREATE TRIGGER trg_b4_loan_schedule_parent_guard
+BEFORE INSERT ON loan_payment_schedule
+WHEN NOT EXISTS(
+  SELECT 1 FROM loan_accounts loan
+  WHERE loan.id=NEW.loan_id
+    AND NEW.installment_sequence<=loan.term_months
+    AND datetime(NEW.due_at)>=datetime(loan.first_payment_at)
+    AND datetime(NEW.due_at)<=datetime(loan.maturity_at)
+    AND NEW.scheduled_amount=loan.installment_amount
+)
+BEGIN
+  SELECT RAISE(ABORT,'loan schedule requires an exact parent loan plan');
+END;
+
+CREATE TRIGGER trg_b4_loan_payment_insert_policy_receipt
+BEFORE INSERT ON loan_payment_history
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM platform_policy_transaction_receipts receipt
+  JOIN platform_policy_database_fences fence
+    ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+  JOIN loan_accounts loan ON loan.id=NEW.loan_id
+  WHERE receipt.receipt_hash=NEW.policy_receipt_hash
+    AND receipt.receipt_version=NEW.policy_receipt_version
+    AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id
+    AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id
+    AND receipt.action=NEW.policy_action
+    AND receipt.capability=NEW.policy_capability
+    AND receipt.resource_type='finance_record'
+    AND receipt.resource_id=NEW.loan_id
+    AND receipt.action='update'
+    AND receipt.capability='finance.write'
+    AND loan.family_id=NEW.family_id
+    AND loan.owner_person_id=NEW.owner_person_id
+    AND datetime(NEW.paid_at)>=datetime(loan.disbursed_at)
+    AND (NEW.scheduled_installment_sequence IS NULL OR NEW.scheduled_installment_sequence<=loan.term_months)
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.purpose')='finance'
+)
+OR EXISTS(SELECT 1 FROM finance_records WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_valuations WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM bank_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM payment_cards WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM loan_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'loan payment write requires an unused exact durable finance policy receipt');
+END;
+
+CREATE TRIGGER trg_b4_finance_record_loan_receipt_reuse
+BEFORE INSERT ON finance_records
+WHEN NEW.policy_receipt_hash IS NOT NULL AND (
+  EXISTS(SELECT 1 FROM loan_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+  OR EXISTS(SELECT 1 FROM loan_payment_history WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+)
+BEGIN
+  SELECT RAISE(ABORT,'finance policy receipt is already bound to a loan record');
+END;
+
+CREATE TRIGGER trg_b4_finance_valuation_loan_receipt_reuse
+BEFORE INSERT ON finance_valuations
+WHEN NEW.policy_receipt_hash IS NOT NULL AND (
+  EXISTS(SELECT 1 FROM loan_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+  OR EXISTS(SELECT 1 FROM loan_payment_history WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+)
+BEGIN
+  SELECT RAISE(ABORT,'finance policy receipt is already bound to a loan record');
+END;
+
+CREATE TRIGGER trg_b4_bank_account_loan_receipt_reuse
+BEFORE INSERT ON bank_accounts
+WHEN EXISTS(SELECT 1 FROM loan_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+  OR EXISTS(SELECT 1 FROM loan_payment_history WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'finance policy receipt is already bound to a loan record');
+END;
+
+CREATE TRIGGER trg_b4_payment_card_loan_receipt_reuse
+BEFORE INSERT ON payment_cards
+WHEN EXISTS(SELECT 1 FROM loan_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+  OR EXISTS(SELECT 1 FROM loan_payment_history WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'finance policy receipt is already bound to a loan record');
+END;
+
+CREATE TRIGGER trg_b4_loan_account_immutable
+BEFORE UPDATE ON loan_accounts
+BEGIN
+  SELECT RAISE(ABORT,'loan account mutation requires a future governed snapshot workflow');
+END;
+
+CREATE TRIGGER trg_b4_loan_account_delete_guard
+BEFORE DELETE ON loan_accounts
+BEGIN
+  SELECT RAISE(ABORT,'loan account deletion requires a governed deletion workflow');
+END;
+
+CREATE TRIGGER trg_b4_loan_schedule_immutable
+BEFORE UPDATE ON loan_payment_schedule
+BEGIN
+  SELECT RAISE(ABORT,'loan schedule is immutable');
+END;
+
+CREATE TRIGGER trg_b4_loan_schedule_delete_guard
+BEFORE DELETE ON loan_payment_schedule
+BEGIN
+  SELECT RAISE(ABORT,'loan schedule deletion requires a governed deletion workflow');
+END;
+
+CREATE TRIGGER trg_b4_loan_payment_immutable
+BEFORE UPDATE ON loan_payment_history
+BEGIN
+  SELECT RAISE(ABORT,'loan payment history is append-only');
+END;
+
+CREATE TRIGGER trg_b4_loan_payment_delete_guard
+BEFORE DELETE ON loan_payment_history
+BEGIN
+  SELECT RAISE(ABORT,'loan payment deletion requires a governed deletion workflow');
+END;
+
+UPDATE database_metadata
+SET value='REVISION-33-B-B4-LOAN-MANAGEMENT',
+    updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
+WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -6822,7 +7117,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(76, 'ppk012_offline_capability_lease_cache_fence', offlineCapabilityLeaseSql),
   createMigrationDefinition(77, 'ppk016_derived_data_policy_inheritance', derivedDataPolicyInheritanceSql),
   createMigrationDefinition(78, 'b4_banking_foundation', bankingFoundationSql),
-  createMigrationDefinition(79, 'b4_payment_card_management', paymentCardManagementSql)
+  createMigrationDefinition(79, 'b4_payment_card_management', paymentCardManagementSql),
+  createMigrationDefinition(80, 'b4_loan_management', loanManagementSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

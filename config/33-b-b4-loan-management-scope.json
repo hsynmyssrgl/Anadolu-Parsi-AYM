@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "33-B-B4-LOAN-MANAGEMENT",
+  "decision": "DEC-213",
+  "requirements": ["B4-08", "B4-09"],
+  "status": "COMPLETE",
+  "loan": {
+    "kinds": ["consumer", "mortgage", "vehicle", "other"],
+    "rateTypes": ["fixed", "variable", "profit_share", "interest_free"],
+    "fields": [
+      "institutionCode", "title", "kind", "rateType", "annualRateBasisPoints",
+      "termMonths", "currency", "originalPrincipal", "installmentAmount",
+      "remainingPrincipal", "disbursedAt", "firstPaymentAt", "maturityAt",
+      "earlySettlementAmount", "earlySettlementQuotedAt", "overdueInstallmentCount",
+      "overdueAmount", "daysPastDue", "insuranceStatus", "insuranceProvider",
+      "insurancePolicyReference", "insurancePremiumAmount", "insuranceEndsAt",
+      "collateralType", "collateralDescription", "collateralEstimatedValue",
+      "status", "privacy"
+    ],
+    "dataSource": "manual",
+    "bankVerification": "not_performed",
+    "paymentExecution": "not_performed",
+    "remoteSynchronizationPerformed": false
+  },
+  "schedule": {
+    "generatedLocally": true,
+    "monthEndSafe": true,
+    "maximumTermMonths": 600,
+    "bankScheduleClaimed": false
+  },
+  "paymentHistory": {
+    "appendOnly": true,
+    "componentExactTotal": true,
+    "automaticallyChangesRemainingPrincipal": false,
+    "bankTransferPerformed": false
+  },
+  "security": {
+    "rejectedSecrets": ["pan", "cardNumber", "cvv", "cvc", "pin", "internetBankingPassword"],
+    "luhnFullPanDetection": true,
+    "exactIpcPayloadValidation": true,
+    "applicationLayerValidation": true,
+    "financePolicyReceiptRequired": true,
+    "outboxContainsMoneyInsuranceCollateralOrNotes": false,
+    "auditContainsLoanData": false
+  },
+  "schemaDecision": "Migration 80, exact finance PEP receipt ile korunan loan_accounts, loan_payment_schedule ve append-only loan_payment_history tablolarını ekler.",
+  "migrationDecision": "Migration 80 b4_loan_management eklendi; gerçek kullanıcı verisi taşınmadı, banka doğrulaması/senkronizasyonu veya ödeme icrası yapılmadı.",
+  "ratchets": {
+    "ppk021ExactAllowlistEntries": 540,
+    "ppk021UseCaseCompositionSurfaces": 272,
+    "ppk021DirectRoleAuthorizationBypasses": 0,
+    "ppk022CapabilitySurfaces": 238,
+    "networkEgressAdded": false
+  },
+  "validation": {
+    "boundary": "artifacts/validation/33-B-b4-loan-management-boundary.json",
+    "contract": "artifacts/validation/33-B-b4-loan-management-contract.json",
+    "runtime": "artifacts/validation/33-B-b4-loan-management-runtime.json",
+    "targetedTestFiles": [
+      "packages/application/tests/loan-management.test.ts",
+      "apps/desktop/tests/b4-loan-management-ipc-integration.test.ts",
+      "apps/desktop/tests/data-store.test.ts"
+    ]
+  },
+  "excludedClaims": [
+    "Kredi verileri manuel takip değerleridir; banka tarafından doğrulanmış veya senkronize edilmiş sayılmaz.",
+    "Yerel ödeme planı bankanın resmi amortisman planı olduğunu iddia etmez.",
+    "Ödeme geçmişi kaydı bankaya para göndermez ve kalan anaparayı otomatik değiştirmez.",
+    "Erken kapama tutarı teklif takibidir; bankadan teklif alma veya kredi kapatma işlemi yapmaz.",
+    "B4-10 ve sonraki finans gereksinimleri, B9-01, Silver readiness ve Bronze Final tamamlanmış sayılmaz.",
+    "Yeni Build numarası verilmez."
+  ]
+}

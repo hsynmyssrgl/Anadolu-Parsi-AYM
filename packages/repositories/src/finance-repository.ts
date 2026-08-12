@@ -6,6 +6,14 @@ import type {
   BankInstitutionView,
   FinanceRecordView,
   FinanceValuationView,
+  LoanAccountView,
+  LoanCollateralType,
+  LoanInsuranceStatus,
+  LoanKind,
+  LoanPaymentHistoryItemView,
+  LoanPaymentScheduleItemView,
+  LoanRateType,
+  LoanStatus,
   PaymentCardAutomaticPaymentMode,
   PaymentCardFormFactor,
   PaymentCardKind,
@@ -20,7 +28,10 @@ import {
   type FinancePolicyResourceRepositoryPort,
   type FinanceRepositoryPort,
   type FinanceValuationRow,
+  type LoanAccountRow,
   type NewBankAccountRow,
+  type NewLoanAccountRow,
+  type NewLoanPaymentHistoryRow,
   type NewPaymentCardRow,
   type PaymentCardRow,
   type PolicyAuthorizedRepositoryExecutionContext,
@@ -140,6 +151,73 @@ const mapPaymentCard = (row: Record<string, unknown>): PaymentCardRow => ({
   paymentDueAlertDays: Number(row.payment_due_alert_days),
   status: String(row.status) as PaymentCardStatus,
   privacy: String(row.privacy) as RecordPrivacy,
+  createdAt: asIsoDateTime(String(row.created_at))
+});
+
+const mapLoanPaymentScheduleItem = (row: Record<string, unknown>): LoanPaymentScheduleItemView => ({
+  sequence: Number(row.installment_sequence),
+  dueAt: asIsoDateTime(String(row.due_at)),
+  scheduledAmount: Number(row.scheduled_amount)
+});
+
+const mapLoanPaymentHistoryItem = (row: Record<string, unknown>): LoanPaymentHistoryItemView => ({
+  id: String(row.id),
+  loanId: String(row.loan_id),
+  paidAt: asIsoDateTime(String(row.paid_at)),
+  ...(row.scheduled_installment_sequence === null || row.scheduled_installment_sequence === undefined
+    ? {}
+    : { scheduledInstallmentSequence: Number(row.scheduled_installment_sequence) }),
+  amount: Number(row.amount),
+  principalAmount: Number(row.principal_amount),
+  interestAmount: Number(row.interest_amount),
+  lateFeeAmount: Number(row.late_fee_amount),
+  ...(row.notes ? { notes: String(row.notes) } : {}),
+  createdAt: asIsoDateTime(String(row.created_at))
+});
+
+const mapLoanAccount = (
+  row: Record<string, unknown>,
+  paymentSchedule: readonly LoanPaymentScheduleItemView[],
+  paymentHistory: readonly LoanPaymentHistoryItemView[]
+): LoanAccountRow => ({
+  id: String(row.id),
+  familyId: asFamilyId(String(row.family_id)),
+  ownerPersonId: asPersonId(String(row.owner_person_id)),
+  institutionCode: String(row.institution_code),
+  institutionOfficialName: String(row.institution_official_name),
+  institutionIconKey: String(row.institution_icon_key),
+  title: String(row.title),
+  kind: String(row.kind) as LoanKind,
+  rateType: String(row.rate_type) as LoanRateType,
+  annualRateBasisPoints: Number(row.annual_rate_basis_points),
+  termMonths: Number(row.term_months),
+  currency: String(row.currency),
+  originalPrincipal: Number(row.original_principal),
+  installmentAmount: Number(row.installment_amount),
+  remainingPrincipal: Number(row.remaining_principal),
+  disbursedAt: asIsoDateTime(String(row.disbursed_at)),
+  firstPaymentAt: asIsoDateTime(String(row.first_payment_at)),
+  maturityAt: asIsoDateTime(String(row.maturity_at)),
+  earlySettlementAmount: Number(row.early_settlement_amount),
+  ...(row.early_settlement_quoted_at ? { earlySettlementQuotedAt: asIsoDateTime(String(row.early_settlement_quoted_at)) } : {}),
+  overdueInstallmentCount: Number(row.overdue_installment_count),
+  overdueAmount: Number(row.overdue_amount),
+  daysPastDue: Number(row.days_past_due),
+  insuranceStatus: String(row.insurance_status) as LoanInsuranceStatus,
+  ...(row.insurance_provider ? { insuranceProvider: String(row.insurance_provider) } : {}),
+  ...(row.insurance_policy_reference ? { insurancePolicyReference: String(row.insurance_policy_reference) } : {}),
+  insurancePremiumAmount: Number(row.insurance_premium_amount),
+  ...(row.insurance_ends_at ? { insuranceEndsAt: asIsoDateTime(String(row.insurance_ends_at)) } : {}),
+  collateralType: String(row.collateral_type) as LoanCollateralType,
+  ...(row.collateral_description ? { collateralDescription: String(row.collateral_description) } : {}),
+  collateralEstimatedValue: Number(row.collateral_estimated_value),
+  status: String(row.status) as LoanStatus,
+  privacy: String(row.privacy) as RecordPrivacy,
+  dataSource: 'manual',
+  bankVerification: 'not_performed',
+  paymentExecution: 'not_performed',
+  paymentSchedule: Object.freeze([...paymentSchedule]),
+  paymentHistory: Object.freeze([...paymentHistory]),
   createdAt: asIsoDateTime(String(row.created_at))
 });
 
@@ -533,6 +611,236 @@ export class SqliteFinanceRepository extends SqliteRepository implements Finance
         row.paymentDueAlertDays,
         row.status,
         row.privacy,
+        row.createdAt,
+        policy.receiptHash,
+        policy.receiptVersion,
+        policy.nonce,
+        context.correlationId,
+        policy.resourceType,
+        policy.resourceId,
+        policy.action,
+        policy.capability
+      );
+    });
+  }
+
+  public listLoanAccounts(
+    context: PolicyAuthorizedRepositoryExecutionContext
+  ): RepositoryResult<readonly LoanAccountRow[]> {
+    assertCollectionRead(context);
+    return this.execute(context, () => {
+      const database = this.database(context);
+      const loans = database.prepare(`
+        SELECT loan.id,loan.family_id,loan.owner_person_id,loan.institution_code,
+               institution.official_name AS institution_official_name,
+               institution.icon_key AS institution_icon_key,
+               loan.title,loan.kind,loan.rate_type,loan.annual_rate_basis_points,
+               loan.term_months,loan.currency,loan.original_principal,loan.installment_amount,
+               loan.remaining_principal,loan.disbursed_at,loan.first_payment_at,loan.maturity_at,
+               loan.early_settlement_amount,loan.early_settlement_quoted_at,
+               loan.overdue_installment_count,loan.overdue_amount,loan.days_past_due,
+               loan.insurance_status,loan.insurance_provider,loan.insurance_policy_reference,
+               loan.insurance_premium_amount,loan.insurance_ends_at,loan.collateral_type,
+               loan.collateral_description,loan.collateral_estimated_value,loan.status,
+               loan.privacy,loan.created_at
+        FROM loan_accounts loan
+        JOIN bank_institutions institution ON institution.institution_code=loan.institution_code
+        ORDER BY loan.created_at DESC,loan.id
+      `).all() as Array<Record<string, unknown>>;
+      const schedule = database.prepare(`
+        SELECT installment_sequence,due_at,scheduled_amount
+        FROM loan_payment_schedule
+        WHERE loan_id=?
+        ORDER BY installment_sequence
+      `);
+      const history = database.prepare(`
+        SELECT id,loan_id,paid_at,scheduled_installment_sequence,amount,principal_amount,
+               interest_amount,late_fee_amount,notes,created_at
+        FROM loan_payment_history
+        WHERE loan_id=?
+        ORDER BY paid_at DESC,created_at DESC,id
+      `);
+      return loans.map((loan) => mapLoanAccount(
+        loan,
+        (schedule.all(String(loan.id)) as Array<Record<string, unknown>>).map(mapLoanPaymentScheduleItem),
+        (history.all(String(loan.id)) as Array<Record<string, unknown>>).map(mapLoanPaymentHistoryItem)
+      ));
+    });
+  }
+
+  public findLoanAccount(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    id: string
+  ): RepositoryResult<LoanAccountRow | null> {
+    assertRecordAccess(context, id);
+    return this.execute(context, () => {
+      const database = this.database(context);
+      const loan = database.prepare(`
+        SELECT loan.id,loan.family_id,loan.owner_person_id,loan.institution_code,
+               institution.official_name AS institution_official_name,
+               institution.icon_key AS institution_icon_key,
+               loan.title,loan.kind,loan.rate_type,loan.annual_rate_basis_points,
+               loan.term_months,loan.currency,loan.original_principal,loan.installment_amount,
+               loan.remaining_principal,loan.disbursed_at,loan.first_payment_at,loan.maturity_at,
+               loan.early_settlement_amount,loan.early_settlement_quoted_at,
+               loan.overdue_installment_count,loan.overdue_amount,loan.days_past_due,
+               loan.insurance_status,loan.insurance_provider,loan.insurance_policy_reference,
+               loan.insurance_premium_amount,loan.insurance_ends_at,loan.collateral_type,
+               loan.collateral_description,loan.collateral_estimated_value,loan.status,
+               loan.privacy,loan.created_at
+        FROM loan_accounts loan
+        JOIN bank_institutions institution ON institution.institution_code=loan.institution_code
+        WHERE loan.id=?
+      `).get(id) as Record<string, unknown> | undefined;
+      if (!loan) return null;
+      const schedule = database.prepare(`
+        SELECT installment_sequence,due_at,scheduled_amount
+        FROM loan_payment_schedule WHERE loan_id=? ORDER BY installment_sequence
+      `).all(id) as Array<Record<string, unknown>>;
+      const history = database.prepare(`
+        SELECT id,loan_id,paid_at,scheduled_installment_sequence,amount,principal_amount,
+               interest_amount,late_fee_amount,notes,created_at
+        FROM loan_payment_history WHERE loan_id=? ORDER BY paid_at DESC,created_at DESC,id
+      `).all(id) as Array<Record<string, unknown>>;
+      return mapLoanAccount(loan, schedule.map(mapLoanPaymentScheduleItem), history.map(mapLoanPaymentHistoryItem));
+    });
+  }
+
+  public findLoanAccountForPolicyResolution(
+    context: RepositoryExecutionContext,
+    id: string
+  ): RepositoryResult<LoanAccountRow | null> {
+    return this.execute(context, () => {
+      const database = this.database(context);
+      const loan = database.prepare(`
+        SELECT loan.id,loan.family_id,loan.owner_person_id,loan.institution_code,
+               institution.official_name AS institution_official_name,
+               institution.icon_key AS institution_icon_key,
+               loan.title,loan.kind,loan.rate_type,loan.annual_rate_basis_points,
+               loan.term_months,loan.currency,loan.original_principal,loan.installment_amount,
+               loan.remaining_principal,loan.disbursed_at,loan.first_payment_at,loan.maturity_at,
+               loan.early_settlement_amount,loan.early_settlement_quoted_at,
+               loan.overdue_installment_count,loan.overdue_amount,loan.days_past_due,
+               loan.insurance_status,loan.insurance_provider,loan.insurance_policy_reference,
+               loan.insurance_premium_amount,loan.insurance_ends_at,loan.collateral_type,
+               loan.collateral_description,loan.collateral_estimated_value,loan.status,
+               loan.privacy,loan.created_at
+        FROM loan_accounts loan
+        JOIN bank_institutions institution ON institution.institution_code=loan.institution_code
+        WHERE loan.id=?
+      `).get(id) as Record<string, unknown> | undefined;
+      if (!loan) return null;
+      const schedule = database.prepare(`
+        SELECT installment_sequence,due_at,scheduled_amount
+        FROM loan_payment_schedule WHERE loan_id=? ORDER BY installment_sequence
+      `).all(id) as Array<Record<string, unknown>>;
+      const history = database.prepare(`
+        SELECT id,loan_id,paid_at,scheduled_installment_sequence,amount,principal_amount,
+               interest_amount,late_fee_amount,notes,created_at
+        FROM loan_payment_history WHERE loan_id=? ORDER BY paid_at DESC,created_at DESC,id
+      `).all(id) as Array<Record<string, unknown>>;
+      return mapLoanAccount(loan, schedule.map(mapLoanPaymentScheduleItem), history.map(mapLoanPaymentHistoryItem));
+    });
+  }
+
+  public insertLoanAccount(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    row: NewLoanAccountRow
+  ): RepositoryResult<void> {
+    const policy = financeWriteBinding(context, row.id, 'create');
+    return this.execute(context, () => {
+      const database = this.database(context);
+      database.prepare(`
+        INSERT INTO loan_accounts(
+          id,family_id,owner_person_id,institution_code,title,kind,rate_type,
+          annual_rate_basis_points,term_months,currency,original_principal,
+          installment_amount,remaining_principal,disbursed_at,first_payment_at,maturity_at,
+          early_settlement_amount,early_settlement_quoted_at,overdue_installment_count,
+          overdue_amount,days_past_due,insurance_status,insurance_provider,
+          insurance_policy_reference,insurance_premium_amount,insurance_ends_at,
+          collateral_type,collateral_description,collateral_estimated_value,status,privacy,
+          created_at,policy_receipt_hash,policy_receipt_version,policy_receipt_nonce,
+          policy_correlation_id,policy_resource_type,policy_resource_id,policy_action,
+          policy_capability
+        ) VALUES(${Array.from({ length: 40 }, () => '?').join(',')})
+      `).run(
+        row.id,
+        row.familyId,
+        row.ownerPersonId,
+        row.institutionCode,
+        row.title,
+        row.kind,
+        row.rateType,
+        row.annualRateBasisPoints,
+        row.termMonths,
+        row.currency,
+        row.originalPrincipal,
+        row.installmentAmount,
+        row.remainingPrincipal,
+        row.disbursedAt,
+        row.firstPaymentAt,
+        row.maturityAt,
+        row.earlySettlementAmount,
+        row.earlySettlementQuotedAt ?? null,
+        row.overdueInstallmentCount,
+        row.overdueAmount,
+        row.daysPastDue,
+        row.insuranceStatus,
+        row.insuranceProvider ?? null,
+        row.insurancePolicyReference ?? null,
+        row.insurancePremiumAmount,
+        row.insuranceEndsAt ?? null,
+        row.collateralType,
+        row.collateralDescription ?? null,
+        row.collateralEstimatedValue,
+        row.status,
+        row.privacy,
+        row.createdAt,
+        policy.receiptHash,
+        policy.receiptVersion,
+        policy.nonce,
+        context.correlationId,
+        policy.resourceType,
+        policy.resourceId,
+        policy.action,
+        policy.capability
+      );
+      const insertSchedule = database.prepare(`
+        INSERT INTO loan_payment_schedule(loan_id,installment_sequence,due_at,scheduled_amount)
+        VALUES(?,?,?,?)
+      `);
+      for (const installment of row.paymentSchedule) {
+        insertSchedule.run(row.id, installment.sequence, installment.dueAt, installment.scheduledAmount);
+      }
+    });
+  }
+
+  public insertLoanPayment(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    row: NewLoanPaymentHistoryRow
+  ): RepositoryResult<void> {
+    const policy = financeWriteBinding(context, row.loanId, 'update');
+    return this.execute(context, () => {
+      this.database(context).prepare(`
+        INSERT INTO loan_payment_history(
+          id,loan_id,family_id,owner_person_id,paid_at,scheduled_installment_sequence,
+          amount,principal_amount,interest_amount,late_fee_amount,notes,created_at,
+          policy_receipt_hash,policy_receipt_version,policy_receipt_nonce,
+          policy_correlation_id,policy_resource_type,policy_resource_id,policy_action,
+          policy_capability
+        ) VALUES(${Array.from({ length: 20 }, () => '?').join(',')})
+      `).run(
+        row.id,
+        row.loanId,
+        row.familyId,
+        row.ownerPersonId,
+        row.paidAt,
+        row.scheduledInstallmentSequence ?? null,
+        row.amount,
+        row.principalAmount,
+        row.interestAmount,
+        row.lateFeeAmount,
+        row.notes ?? null,
         row.createdAt,
         policy.receiptHash,
         policy.receiptVersion,

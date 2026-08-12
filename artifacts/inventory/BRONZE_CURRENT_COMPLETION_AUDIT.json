@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-12T14:19:13.083Z",
+  "generatedAt": "2026-08-12T15:15:00.373Z",
   "release": "Bronze 04.08.2026.29",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
@@ -29,17 +29,17 @@
   "percentages": {
     "officialWeightedBronzePercent": 25,
     "officialWeightedEvidenceStep": "31-T",
-    "strictRequirementCompletionPercent": 14.8571,
-    "implementationChainCoveragePercent": 15.3429,
-    "governanceEvidenceChainCoveragePercent": 52.0952,
+    "strictRequirementCompletionPercent": 15.4286,
+    "implementationChainCoveragePercent": 15.9143,
+    "governanceEvidenceChainCoveragePercent": 52.4762,
     "interpretation": "These are separate measures and must not be blended into an invented single completion claim."
   },
   "scope": {
     "total": 350,
     "statusCounts": {
-      "COMPLETE": 52,
+      "COMPLETE": 54,
       "FOUNDATION_STARTED": 1,
-      "NOT_IMPLEMENTED": 270,
+      "NOT_IMPLEMENTED": 268,
       "PARTIAL": 27
     },
     "priorityCounts": {
@@ -48,21 +48,21 @@
       "P2": 5
     },
     "completeByPriority": {
-      "P0": 49,
-      "P1": 3,
+      "P0": 50,
+      "P1": 4,
       "P2": 0
     },
-    "incompleteCount": 298,
-    "strictComplete": 52,
+    "incompleteCount": 296,
+    "strictComplete": 54,
     "implementationCoverage": {
-      "passed": 537,
+      "passed": 557,
       "total": 3500,
-      "percent": 15.3429
+      "percent": 15.9143
     },
     "governanceCoverage": {
-      "passed": 547,
+      "passed": 551,
       "total": 1050,
-      "percent": 52.0952
+      "percent": 52.4762
     }
   },
   "rules": {
@@ -324,7 +324,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"96d0a9a2ebc735adffa352f760efb84e91294aad15d499e48b3c545d54b5fcd9\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\96d0a9a2ebc735adffa352f760efb84e91294aad15d499e48b3c545d54b5fcd9\",\"files\":9}"
+          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"6852d83451a5d69597687bfc7f1ecd29c3e833501401838fff31a0bb0c384216\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\6852d83451a5d69597687bfc7f1ecd29c3e833501401838fff31a0bb0c384216\",\"files\":9}"
         ]
       },
       {
@@ -1003,7 +1003,7 @@
     "status": "PASS",
     "officialCompletionClaimed": true,
     "storageBackend": "EXTERNAL_USB_D_DRIVE",
-    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\96d0a9a2ebc735adffa352f760efb84e91294aad15d499e48b3c545d54b5fcd9"
+    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\6852d83451a5d69597687bfc7f1ecd29c3e833501401838fff31a0bb0c384216"
   },
   "remainingWork": [
     {
@@ -2297,30 +2297,6 @@
       "workOrderClass": "NEW_NOT_STARTED",
       "area": "Kimlik ve Güvenlik",
       "title": "FIDO2/WebAuthn güvenlik anahtarı/passkey desteği",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B4-08",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Finans ve Bankacılık",
-      "title": "İhtiyaç/konut/taşıt/diğer kredi, faiz, vade, taksit, kalan anapara ve ödeme planı",
       "completedChainCount": 1,
       "completionBlockers": [],
       "missingChain": [
@@ -6879,30 +6855,6 @@
       "workOrderClass": "NEW_NOT_STARTED",
       "area": "Aile ve Hafıza",
       "title": "Kaynak/kanıt belge bağlantısı ve ilişki tarihçesi",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B4-09",
-      "priority": "P1",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Finans ve Bankacılık",
-      "title": "Erken kapama, gecikme, sigorta, teminat ve ödeme geçmişi",
       "completedChainCount": 1,
       "completionBlockers": [],
       "missingChain": [

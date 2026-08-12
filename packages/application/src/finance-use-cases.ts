@@ -20,18 +20,24 @@ import type {
   CreateBankAccountInput,
   CreateFinanceRecordInput,
   CreateFinanceValuationInput,
+  CreateLoanAccountInput,
   CreatePaymentCardInput,
   FamilyRole,
   FinanceRecordView,
   FinanceValuationView,
   IbanStructuralValidationView,
+  LoanAccountView,
+  LoanPaymentHistoryItemView,
   PaymentCardView,
+  RecordLoanPaymentInput,
   RecordPrivacy
 } from '@ppt/domain';
 import type { DomainEvent } from '@ppt/events';
 import type { AuthorizationAction } from '@ppt/security';
 import {
   inspectBankAccountDataContract,
+  inspectLoanAccountDataContract,
+  inspectLoanPaymentDataContract,
   inspectPaymentCardDataContract,
   inspectProhibitedBankingSecrets,
   maskIban,
@@ -65,6 +71,7 @@ export interface FinanceQueryPort {
   listBankInstitutions(context: FinanceApplicationContext): Promise<Result<readonly BankInstitutionView[], AppError>>;
   listBankAccounts(context: FinanceApplicationContext): Promise<Result<readonly BankAccountView[], AppError>>;
   listPaymentCards(context: FinanceApplicationContext): Promise<Result<readonly PaymentCardView[], AppError>>;
+  listLoanAccounts(context: FinanceApplicationContext): Promise<Result<readonly LoanAccountView[], AppError>>;
   validateIban(context: FinanceApplicationContext, iban: string): Promise<Result<IbanStructuralValidationView, AppError>>;
 }
 
@@ -72,6 +79,7 @@ export interface FinanceWriteScope {
   readonly occurredAt: IsoDateTime;
   findPerson(id: PersonId): Result<{ id: PersonId } | null, AppError>;
   findRecord(id: string): Result<(FinanceRecordView & { ownerPersonId: PersonId }) | null, AppError>;
+  findLoanAccount(id: string): Result<(LoanAccountView & { ownerPersonId: PersonId }) | null, AppError>;
   findBankInstitution(institutionCode: string): Result<BankInstitutionView | null, AppError>;
   authorize(input: {
     action: AuthorizationAction;
@@ -103,6 +111,22 @@ export interface FinanceWriteScope {
     statementClosingAt: IsoDateTime;
     paymentDueAt: IsoDateTime;
     annualFeeDueAt?: IsoDateTime;
+    createdAt: IsoDateTime;
+  }): Result<void, AppError>;
+  insertLoanAccount(row: LoanAccountView & {
+    familyId: FamilyId;
+    ownerPersonId: PersonId;
+    disbursedAt: IsoDateTime;
+    firstPaymentAt: IsoDateTime;
+    maturityAt: IsoDateTime;
+    earlySettlementQuotedAt?: IsoDateTime;
+    insuranceEndsAt?: IsoDateTime;
+    createdAt: IsoDateTime;
+  }): Result<void, AppError>;
+  insertLoanPayment(row: LoanPaymentHistoryItemView & {
+    familyId: FamilyId;
+    ownerPersonId: PersonId;
+    paidAt: IsoDateTime;
     createdAt: IsoDateTime;
   }): Result<void, AppError>;
   appendAudit(input: {
@@ -179,6 +203,11 @@ export class ListBankAccountsUseCase {
 export class ListPaymentCardsUseCase {
   public constructor(private readonly query: FinanceQueryPort) {}
   public execute(context: FinanceApplicationContext) { return this.query.listPaymentCards(context); }
+}
+
+export class ListLoanAccountsUseCase {
+  public constructor(private readonly query: FinanceQueryPort) {}
+  public execute(context: FinanceApplicationContext) { return this.query.listLoanAccounts(context); }
 }
 
 export class ValidateIbanUseCase {
@@ -610,6 +639,372 @@ export class CreatePaymentCardUseCase {
       if (!event.ok) return event;
       const { familyId: _familyId, ...view } = card;
       return ok(view);
+    });
+  }
+}
+
+const loanContractError = (
+  context: FinanceApplicationContext,
+  command: CreateLoanAccountInput
+): AppError | undefined => {
+  const inspection = inspectLoanAccountDataContract(command);
+  if (inspection.prohibitedFields.length > 0 || inspection.panLikeValueDetected) {
+    return invalid(context, 'Tam PAN, kart sırrı, PIN ve internet bankacılığı parolası kredi sözleşmesinde kabul edilmez.');
+  }
+  if (inspection.unknownFields.length > 0) return invalid(context, 'Kredi sözleşmesinde tanımsız alan bulunuyor.');
+  return undefined;
+};
+
+const loanPaymentContractError = (
+  context: FinanceApplicationContext,
+  command: RecordLoanPaymentInput
+): AppError | undefined => {
+  const inspection = inspectLoanPaymentDataContract(command);
+  if (inspection.prohibitedFields.length > 0 || inspection.panLikeValueDetected) {
+    return invalid(context, 'Tam PAN, kart sırrı, PIN ve internet bankacılığı parolası ödeme geçmişinde kabul edilmez.');
+  }
+  if (inspection.unknownFields.length > 0) return invalid(context, 'Kredi ödeme sözleşmesinde tanımsız alan bulunuyor.');
+  return undefined;
+};
+
+const addCalendarMonths = (value: IsoDateTime, months: number): IsoDateTime => {
+  const target = new Date(value);
+  const originalDay = target.getUTCDate();
+  target.setUTCDate(1);
+  target.setUTCMonth(target.getUTCMonth() + months);
+  const lastDay = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0)).getUTCDate();
+  target.setUTCDate(Math.min(originalDay, lastDay));
+  return asIsoDateTime(target.toISOString());
+};
+
+const equalMoney = (left: number, right: number): boolean =>
+  Math.round(left * 100) === Math.round(right * 100);
+
+export class CreateLoanAccountUseCase {
+  public constructor(private readonly unitOfWork: FinanceUnitOfWork) {}
+
+  public async execute(input: {
+    context: FinanceApplicationContext;
+    command: CreateLoanAccountInput;
+    identifiers: { loanId: string; auditId: string; outboxEventId: EventId };
+  }): Promise<Result<LoanAccountView, AppError>> {
+    const contractError = loanContractError(input.context, input.command);
+    if (contractError) return err(contractError);
+    const institutionCode = input.command.institutionCode.trim();
+    const title = input.command.title.trim();
+    const currency = input.command.currency.trim().toUpperCase();
+    const insuranceProvider = input.command.insuranceProvider?.trim();
+    const insurancePolicyReference = input.command.insurancePolicyReference?.trim();
+    const collateralDescription = input.command.collateralDescription?.trim();
+    if (!/^\d{4}$/u.test(institutionCode)) return err(invalid(input.context, 'TCMB kurum kodu dört rakam olmalıdır.'));
+    if (title.length < 2 || title.length > 120) return err(invalid(input.context, 'Kredi başlığı 2-120 karakter olmalıdır.'));
+    if (!/^[A-Z]{3}$/u.test(currency)) return err(invalid(input.context, 'Kredi para birimi üç büyük harfli ISO kodu olmalıdır.'));
+    if (!['consumer','mortgage','vehicle','other'].includes(input.command.kind)) return err(invalid(input.context, 'Kredi türü geçersiz.'));
+    if (!['fixed','variable','profit_share','interest_free'].includes(input.command.rateType)) return err(invalid(input.context, 'Kredi oran türü geçersiz.'));
+    if (!['active','overdue','restructured','closed'].includes(input.command.status)) return err(invalid(input.context, 'Kredi durumu geçersiz.'));
+    if (!['none','active','expired','cancelled'].includes(input.command.insuranceStatus)) return err(invalid(input.context, 'Kredi sigorta durumu geçersiz.'));
+    if (!['none','vehicle','real_estate','deposit','guarantee','other'].includes(input.command.collateralType)) return err(invalid(input.context, 'Kredi teminat türü geçersiz.'));
+    if (!['private','selected_members','family'].includes(input.command.privacy)) return err(invalid(input.context, 'Kredi gizlilik düzeyi geçersiz.'));
+    if (!Number.isInteger(input.command.annualRateBasisPoints) || input.command.annualRateBasisPoints < 0 || input.command.annualRateBasisPoints > 100_000) {
+      return err(invalid(input.context, 'Yıllık oran 0-100.000 baz puan arasında tam sayı olmalıdır.'));
+    }
+    if (input.command.rateType === 'interest_free' && input.command.annualRateBasisPoints !== 0) {
+      return err(invalid(input.context, 'Faizsiz kredi oranı sıfır olmalıdır.'));
+    }
+    if (!Number.isInteger(input.command.termMonths) || input.command.termMonths < 1 || input.command.termMonths > 600) {
+      return err(invalid(input.context, 'Kredi vadesi 1-600 ay arasında tam sayı olmalıdır.'));
+    }
+    const moneyValues = [
+      input.command.originalPrincipal,
+      input.command.installmentAmount,
+      input.command.remainingPrincipal,
+      input.command.earlySettlementAmount,
+      input.command.overdueAmount,
+      input.command.insurancePremiumAmount,
+      input.command.collateralEstimatedValue
+    ];
+    if (!moneyValues.every(finiteMoney)) return err(invalid(input.context, 'Kredi tutarları sonlu, negatif olmayan ve güvenli sınır içinde olmalıdır.'));
+    if (input.command.originalPrincipal <= 0 || input.command.installmentAmount <= 0) return err(invalid(input.context, 'Kredi anaparası ve taksit tutarı pozitif olmalıdır.'));
+    if (input.command.remainingPrincipal > input.command.originalPrincipal) return err(invalid(input.context, 'Kalan anapara ilk anaparayı aşamaz.'));
+    if ((input.command.installmentAmount * input.command.termMonths) + 0.01 < input.command.originalPrincipal) {
+      return err(invalid(input.context, 'Ödeme planı toplamı ilk anaparadan düşük olamaz.'));
+    }
+    if (!Number.isInteger(input.command.overdueInstallmentCount) || input.command.overdueInstallmentCount < 0 || input.command.overdueInstallmentCount > 600) {
+      return err(invalid(input.context, 'Gecikmiş taksit sayısı 0-600 arasında tam sayı olmalıdır.'));
+    }
+    if (!Number.isInteger(input.command.daysPastDue) || input.command.daysPastDue < 0 || input.command.daysPastDue > 36_500) {
+      return err(invalid(input.context, 'Gecikme günü 0-36.500 arasında tam sayı olmalıdır.'));
+    }
+    const hasOverdue = input.command.overdueInstallmentCount > 0 || input.command.overdueAmount > 0 || input.command.daysPastDue > 0;
+    if (hasOverdue && !(input.command.overdueInstallmentCount > 0 && input.command.overdueAmount > 0 && input.command.daysPastDue > 0)) {
+      return err(invalid(input.context, 'Gecikme sayısı, tutarı ve günü birlikte sıfır veya birlikte pozitif olmalıdır.'));
+    }
+    if ((input.command.status === 'overdue') !== hasOverdue) return err(invalid(input.context, 'Kredi durumu ile gecikme alanları tutarlı olmalıdır.'));
+    if (input.command.status === 'closed' && input.command.remainingPrincipal !== 0) return err(invalid(input.context, 'Kapalı kredinin kalan anaparası sıfır olmalıdır.'));
+    if (input.command.status !== 'closed' && input.command.remainingPrincipal <= 0) return err(invalid(input.context, 'Açık kredinin kalan anaparası pozitif olmalıdır.'));
+    const disbursedAt = date(input.command.disbursedAt, input.context, 'Kullandırım tarihi');
+    if (!disbursedAt.ok) return disbursedAt;
+    const firstPaymentAt = date(input.command.firstPaymentAt, input.context, 'İlk ödeme tarihi');
+    if (!firstPaymentAt.ok) return firstPaymentAt;
+    if (firstPaymentAt.value < disbursedAt.value) return err(invalid(input.context, 'İlk ödeme tarihi kullandırım tarihinden önce olamaz.'));
+    const maturityAt = addCalendarMonths(firstPaymentAt.value, input.command.termMonths - 1);
+    const earlySettlementQuotedAt = input.command.earlySettlementQuotedAt
+      ? date(input.command.earlySettlementQuotedAt, input.context, 'Erken kapama teklif tarihi')
+      : undefined;
+    if (earlySettlementQuotedAt && !earlySettlementQuotedAt.ok) return earlySettlementQuotedAt;
+    if ((input.command.earlySettlementAmount > 0) !== Boolean(earlySettlementQuotedAt)) {
+      return err(invalid(input.context, 'Erken kapama tutarı ile teklif tarihi birlikte girilmelidir.'));
+    }
+    if (earlySettlementQuotedAt?.ok && earlySettlementQuotedAt.value < disbursedAt.value) {
+      return err(invalid(input.context, 'Erken kapama teklif tarihi kullandırım tarihinden önce olamaz.'));
+    }
+    const insuranceEndsAt = input.command.insuranceEndsAt
+      ? date(input.command.insuranceEndsAt, input.context, 'Sigorta bitiş tarihi')
+      : undefined;
+    if (insuranceEndsAt && !insuranceEndsAt.ok) return insuranceEndsAt;
+    if (input.command.insuranceStatus === 'none') {
+      if (insuranceProvider || insurancePolicyReference || input.command.insurancePremiumAmount !== 0 || insuranceEndsAt) {
+        return err(invalid(input.context, 'Sigorta yoksa sağlayıcı, poliçe, prim ve bitiş alanları boş olmalıdır.'));
+      }
+    } else if (!insuranceProvider || insuranceProvider.length > 120
+      || !insurancePolicyReference || insurancePolicyReference.length > 120
+      || input.command.insurancePremiumAmount <= 0 || !insuranceEndsAt) {
+      return err(invalid(input.context, 'Sigortalı kredide sağlayıcı, poliçe referansı, pozitif prim ve bitiş tarihi zorunludur.'));
+    }
+    if (input.command.collateralType === 'none') {
+      if (collateralDescription || input.command.collateralEstimatedValue !== 0) {
+        return err(invalid(input.context, 'Teminat yoksa açıklama ve tahmini değer boş olmalıdır.'));
+      }
+    } else if (!collateralDescription || collateralDescription.length > 240 || input.command.collateralEstimatedValue <= 0) {
+      return err(invalid(input.context, 'Teminatlı kredide açıklama ve pozitif tahmini değer zorunludur.'));
+    }
+    const ownerPersonId = asPersonId(input.command.ownerPersonId);
+    const intent: FinancePolicyIntent = {
+      action: 'create',
+      capability: 'finance.write',
+      resourceType: 'finance_record',
+      resourceId: input.identifiers.loanId,
+      purpose: 'finance',
+      ownerPersonId,
+      privacy: input.command.privacy
+    };
+
+    return this.unitOfWork.execute(input.context, intent, (scope) => {
+      const person = scope.findPerson(ownerPersonId);
+      if (!person.ok) return person;
+      if (!person.value) return err(missing(input.context, 'Kredinin bağlanacağı aile üyesi bulunamadı.'));
+      const institution = scope.findBankInstitution(institutionCode);
+      if (!institution.ok) return institution;
+      if (!institution.value || institution.value.status !== 'active' || !institution.value.supportsCustomerAccounts) {
+        return err(missing(input.context, 'Seçilen etkin kredi kurumu katalogda bulunamadı.'));
+      }
+      const authorization = scope.authorize({
+        action: 'create',
+        resourceType: 'finance_record',
+        resourceId: input.identifiers.loanId,
+        ownerPersonId,
+        privacy: input.command.privacy
+      });
+      if (!authorization.ok) return authorization;
+      if (!authorization.value) return err(denied(input.context));
+      const paymentSchedule = Object.freeze(Array.from({ length: input.command.termMonths }, (_unused, index) => Object.freeze({
+        sequence: index + 1,
+        dueAt: addCalendarMonths(firstPaymentAt.value, index),
+        scheduledAmount: input.command.installmentAmount
+      })));
+      const loan: LoanAccountView & {
+        familyId: FamilyId;
+        ownerPersonId: PersonId;
+        disbursedAt: IsoDateTime;
+        firstPaymentAt: IsoDateTime;
+        maturityAt: IsoDateTime;
+        earlySettlementQuotedAt?: IsoDateTime;
+        insuranceEndsAt?: IsoDateTime;
+        createdAt: IsoDateTime;
+      } = {
+        id: input.identifiers.loanId,
+        familyId: input.context.familyId,
+        ownerPersonId,
+        institutionCode,
+        institutionOfficialName: institution.value.officialName,
+        institutionIconKey: institution.value.iconKey,
+        title,
+        kind: input.command.kind,
+        rateType: input.command.rateType,
+        annualRateBasisPoints: input.command.annualRateBasisPoints,
+        termMonths: input.command.termMonths,
+        currency,
+        originalPrincipal: input.command.originalPrincipal,
+        installmentAmount: input.command.installmentAmount,
+        remainingPrincipal: input.command.remainingPrincipal,
+        disbursedAt: disbursedAt.value,
+        firstPaymentAt: firstPaymentAt.value,
+        maturityAt,
+        earlySettlementAmount: input.command.earlySettlementAmount,
+        ...(earlySettlementQuotedAt?.ok ? { earlySettlementQuotedAt: earlySettlementQuotedAt.value } : {}),
+        overdueInstallmentCount: input.command.overdueInstallmentCount,
+        overdueAmount: input.command.overdueAmount,
+        daysPastDue: input.command.daysPastDue,
+        insuranceStatus: input.command.insuranceStatus,
+        ...(insuranceProvider ? { insuranceProvider } : {}),
+        ...(insurancePolicyReference ? { insurancePolicyReference } : {}),
+        insurancePremiumAmount: input.command.insurancePremiumAmount,
+        ...(insuranceEndsAt?.ok ? { insuranceEndsAt: insuranceEndsAt.value } : {}),
+        collateralType: input.command.collateralType,
+        ...(collateralDescription ? { collateralDescription } : {}),
+        collateralEstimatedValue: input.command.collateralEstimatedValue,
+        status: input.command.status,
+        privacy: input.command.privacy,
+        dataSource: 'manual',
+        bankVerification: 'not_performed',
+        paymentExecution: 'not_performed',
+        paymentSchedule,
+        paymentHistory: Object.freeze([]),
+        createdAt: scope.occurredAt
+      };
+      const saved = scope.insertLoanAccount(loan);
+      if (!saved.ok) return saved;
+      const audit = scope.appendAudit({
+        id: input.identifiers.auditId,
+        action: 'finance.loan.created',
+        resourceType: 'finance_record',
+        resourceId: loan.id,
+        occurredAt: scope.occurredAt,
+        actorId: input.context.actor.userId
+      });
+      if (!audit.ok) return audit;
+      const event = scope.enqueueEvent({
+        eventId: input.identifiers.outboxEventId,
+        eventType: 'finance.loan.created',
+        eventVersion: 1,
+        aggregateType: 'finance_record',
+        aggregateId: loan.id,
+        occurredAt: scope.occurredAt,
+        actorId: input.context.actor.userId,
+        correlationId: input.context.correlationId,
+        payload: {
+          loanId: loan.id,
+          ownerPersonId,
+          institutionCode,
+          kind: loan.kind,
+          rateType: loan.rateType,
+          termMonths: loan.termMonths,
+          currency: loan.currency,
+          privacy: loan.privacy
+        }
+      });
+      if (!event.ok) return event;
+      const { familyId: _familyId, ...view } = loan;
+      return ok(view);
+    });
+  }
+}
+
+export class RecordLoanPaymentUseCase {
+  public constructor(private readonly unitOfWork: FinanceUnitOfWork) {}
+
+  public async execute(input: {
+    context: FinanceApplicationContext;
+    command: RecordLoanPaymentInput;
+    identifiers: { paymentId: string; auditId: string; outboxEventId: EventId };
+  }): Promise<Result<LoanPaymentHistoryItemView, AppError>> {
+    const contractError = loanPaymentContractError(input.context, input.command);
+    if (contractError) return err(contractError);
+    const loanId = input.command.loanId.trim();
+    const notes = input.command.notes?.trim();
+    if (loanId.length < 2 || loanId.length > 160) return err(invalid(input.context, 'Kredi kimliği geçersiz.'));
+    if (notes && notes.length > 500) return err(invalid(input.context, 'Ödeme notu en fazla 500 karakter olmalıdır.'));
+    const moneyValues = [input.command.amount, input.command.principalAmount, input.command.interestAmount, input.command.lateFeeAmount];
+    if (!moneyValues.every(finiteMoney) || input.command.amount <= 0) return err(invalid(input.context, 'Ödeme tutarları sonlu, negatif olmayan ve toplam ödeme pozitif olacak biçimde girilmelidir.'));
+    if (!equalMoney(input.command.amount, input.command.principalAmount + input.command.interestAmount + input.command.lateFeeAmount)) {
+      return err(invalid(input.context, 'Ödeme toplamı anapara, oran payı ve gecikme ücretinin toplamına eşit olmalıdır.'));
+    }
+    if (input.command.scheduledInstallmentSequence !== undefined
+      && (!Number.isInteger(input.command.scheduledInstallmentSequence)
+        || input.command.scheduledInstallmentSequence < 1
+        || input.command.scheduledInstallmentSequence > 600)) {
+      return err(invalid(input.context, 'Bağlı taksit sırası 1-600 arasında tam sayı olmalıdır.'));
+    }
+    const paidAt = date(input.command.paidAt, input.context, 'Ödeme tarihi');
+    if (!paidAt.ok) return paidAt;
+    const intent: FinancePolicyIntent = {
+      action: 'update',
+      capability: 'finance.write',
+      resourceType: 'finance_record',
+      resourceId: loanId,
+      purpose: 'finance'
+    };
+
+    return this.unitOfWork.execute(input.context, intent, (scope) => {
+      const loan = scope.findLoanAccount(loanId);
+      if (!loan.ok) return loan;
+      if (!loan.value) return err(missing(input.context, 'Ödeme geçmişinin bağlanacağı kredi bulunamadı.'));
+      if (paidAt.value < loan.value.disbursedAt || paidAt.value > scope.occurredAt) {
+        return err(invalid(input.context, 'Ödeme tarihi kullandırım tarihi ile kayıt zamanı arasında olmalıdır.'));
+      }
+      if (input.command.scheduledInstallmentSequence !== undefined
+        && input.command.scheduledInstallmentSequence > loan.value.termMonths) {
+        return err(invalid(input.context, 'Bağlı taksit sırası kredi vadesini aşamaz.'));
+      }
+      const authorization = scope.authorize({
+        action: 'update',
+        resourceType: 'finance_record',
+        resourceId: loan.value.id,
+        ownerPersonId: loan.value.ownerPersonId,
+        privacy: loan.value.privacy
+      });
+      if (!authorization.ok) return authorization;
+      if (!authorization.value) return err(denied(input.context));
+      const payment: LoanPaymentHistoryItemView & {
+        familyId: FamilyId;
+        ownerPersonId: PersonId;
+        paidAt: IsoDateTime;
+        createdAt: IsoDateTime;
+      } = {
+        id: input.identifiers.paymentId,
+        loanId: loan.value.id,
+        familyId: input.context.familyId,
+        ownerPersonId: loan.value.ownerPersonId,
+        paidAt: paidAt.value,
+        ...(input.command.scheduledInstallmentSequence === undefined
+          ? {}
+          : { scheduledInstallmentSequence: input.command.scheduledInstallmentSequence }),
+        amount: input.command.amount,
+        principalAmount: input.command.principalAmount,
+        interestAmount: input.command.interestAmount,
+        lateFeeAmount: input.command.lateFeeAmount,
+        ...(notes ? { notes } : {}),
+        createdAt: scope.occurredAt
+      };
+      const saved = scope.insertLoanPayment(payment);
+      if (!saved.ok) return saved;
+      const audit = scope.appendAudit({
+        id: input.identifiers.auditId,
+        action: 'finance.loan.payment_recorded',
+        resourceType: 'finance_record',
+        resourceId: loan.value.id,
+        occurredAt: scope.occurredAt,
+        actorId: input.context.actor.userId
+      });
+      if (!audit.ok) return audit;
+      const event = scope.enqueueEvent({
+        eventId: input.identifiers.outboxEventId,
+        eventType: 'finance.loan.payment_recorded',
+        eventVersion: 1,
+        aggregateType: 'finance_record',
+        aggregateId: loan.value.id,
+        occurredAt: scope.occurredAt,
+        actorId: input.context.actor.userId,
+        correlationId: input.context.correlationId,
+        payload: {
+          paymentId: payment.id,
+          loanId: loan.value.id,
+          ownerPersonId: loan.value.ownerPersonId,
+          scheduledInstallmentSequence: payment.scheduledInstallmentSequence,
+          privacy: loan.value.privacy
+        }
+      });
+      return event.ok ? ok(payment) : event;
     });
   }
 }

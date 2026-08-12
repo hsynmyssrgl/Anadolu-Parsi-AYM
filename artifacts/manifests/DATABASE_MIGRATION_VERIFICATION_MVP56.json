@@ -412,7 +412,12 @@
       "version": 79,
       "name": "b4_payment_card_management",
       "checksum": "9fc9bdf60ae89afce50db2fa7c5573aa419d1ee649039af15fbd8b0a8917cfb2"
+    },
+    {
+      "version": 80,
+      "name": "b4_loan_management",
+      "checksum": "4b5c9f38a3e636e46472ba35d2ab3b10bf86f3f3dc0ed20353e4c9d4f0580d23"
     }
   ],
-  "generatedAt": "2026-08-12T14:22:22.615Z"
+  "generatedAt": "2026-08-12T15:14:45.900Z"
 }

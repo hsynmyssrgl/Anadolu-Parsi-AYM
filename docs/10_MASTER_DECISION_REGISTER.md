@@ -28,6 +28,17 @@ Bir çelişki olduğunda aşağıdaki sıra uygulanır:
 Eski kararlar silinmez; tarihsel kanıt olarak korunur. Ancak aktif ürün davranışını
 belirleyemez. Çelişki sessizce birleştirilmez; değişiklik kaydına işlenir.
 
+## DEC-213 — B4 kredi ve ödeme geçmişi yönetimi
+
+33-B ile B4-08 ve B4-09 tek korumalı kredi aggregate'ında tamamlanır. Kredi türü,
+oran, vade, taksit, kalan anapara, yerel ödeme planı, erken kapama teklifi, gecikme,
+sigorta, teminat ve append-only ödeme geçmişi merkezi finance PEP ve exact kalıcı
+receipt altında bağlanır. Veriler manueldir; banka doğrulaması/senkronizasyonu,
+resmi amortisman planı veya ödeme icrası iddia edilmez. Migration 80 eklenir;
+PPK-021 540 exact yüzeye ve 272 use-case composition yüzeyine çıkar, PPK-022 238
+kalır. Ayrıntılı karar:
+`docs/decisions/DEC-213-b4-loan-management.md`
+
 ## DEC-212 — B4 kart ürünü ve takip otomasyonları
 
 33-A ile B4-05 ve B4-06 tek korumalı kart aggregate'ında tamamlanır. Kurum, ürün,

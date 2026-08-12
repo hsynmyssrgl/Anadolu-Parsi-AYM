@@ -74,7 +74,7 @@
       "passed": true
     },
     {
-      "name": "migration 79 is latest and exact",
+      "name": "migration 79 remains the exact payment-card predecessor baseline",
       "passed": true
     },
     {
@@ -159,10 +159,10 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 79,
-  "ppk021ExactAllowlistEntries": 537,
+  "latestDatabaseMigration": 80,
+  "ppk021ExactAllowlistEntries": 540,
   "ppk022CapabilitySurfaces": 238,
   "prohibitedSecretColumns": 0,
   "bankExecutionPerformed": false,
-  "generatedAt": "2026-08-12T14:22:52.416Z"
+  "generatedAt": "2026-08-12T15:05:31.161Z"
 }

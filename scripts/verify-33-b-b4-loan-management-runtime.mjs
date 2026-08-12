@@ -4,23 +4,23 @@ import { mkdir, writeFile } from 'node:fs/promises';
 const node = process.execPath;
 const commands = Object.freeze([
   Object.freeze({
-    id: 'b4-card-boundary',
-    args: ['scripts/verify-b4-payment-card-management-boundary.mjs'],
-    expectOutput: 'B4 payment card management boundary: PASS'
+    id: 'b4-loan-boundary',
+    args: ['scripts/verify-b4-loan-management-boundary.mjs'],
+    expectOutput: 'B4 loan management boundary: PASS'
   }),
   Object.freeze({
-    id: 'b4-card-contract',
-    args: ['scripts/verify-33-a-b4-payment-card-management-contract.mjs'],
-    expectOutput: 'B4 payment card management contract: PASS'
+    id: 'b4-loan-contract',
+    args: ['scripts/verify-33-b-b4-loan-management-contract.mjs'],
+    expectOutput: 'B4 loan management contract: PASS'
   }),
   Object.freeze({
-    id: 'b4-card-targeted-tests',
+    id: 'b4-loan-targeted-tests',
     args: ['node_modules/vitest/vitest.mjs', 'run',
-      'packages/application/tests/payment-card-management.test.ts',
-      'apps/desktop/tests/b4-payment-card-ipc-integration.test.ts',
+      'packages/application/tests/loan-management.test.ts',
+      'apps/desktop/tests/b4-loan-management-ipc-integration.test.ts',
       'apps/desktop/tests/data-store.test.ts',
-      '-t', '33-A|B4-05/B4-06', '--reporter=dot', '--maxWorkers=1'],
-    minimumTests: 19,
+      '-t', '33-B|B4-08/B4-09', '--reporter=dot', '--maxWorkers=1'],
+    minimumTests: 21,
     minimumTestFiles: 3
   }),
   Object.freeze({
@@ -32,9 +32,9 @@ const commands = Object.freeze([
     args: ['node_modules/typescript/bin/tsc', '-p', 'packages/database/tsconfig.json']
   }),
   Object.freeze({
-    id: 'migration-79-runtime',
+    id: 'migration-80-runtime',
     args: ['scripts/verify-database-migrations.mjs'],
-    expectOutput: '"version": 79'
+    expectOutput: '"version": 80'
   }),
   Object.freeze({
     id: 'ppk021-ast-ratchet',
@@ -83,20 +83,22 @@ const results = commands.map((command) => {
   });
 });
 const failures = results.filter((result) => result.status !== 'PASS').map((result) => result.id);
-const targeted = results.find((result) => result.id === 'b4-card-targeted-tests');
+const targeted = results.find((result) => result.id === 'b4-loan-targeted-tests');
 const report = Object.freeze({
   schemaVersion: 1,
-  step: '33-A',
-  requirements: Object.freeze(['B4-05', 'B4-06']),
+  step: '33-B',
+  requirements: Object.freeze(['B4-08', 'B4-09']),
   status: failures.length === 0 ? 'PASS' : 'FAIL',
   checksPassed: results.length - failures.length,
   checksFailed: failures.length,
   targetedTestFilesPassed: targeted?.testFiles ?? 0,
   targetedTestsPassed: targeted?.tests ?? 0,
-  latestDatabaseMigration: 79,
+  latestDatabaseMigration: 80,
   ppk021ExactAllowlistEntries: 540,
+  ppk021UseCaseCompositionSurfaces: 272,
   ppk022CapabilitySurfaces: 238,
   prohibitedSecretColumns: 0,
+  bankVerificationPerformed: false,
   bankExecutionPerformed: false,
   results: Object.freeze(results),
   failures: Object.freeze(failures),
@@ -104,8 +106,8 @@ const report = Object.freeze({
   generatedAt: new Date().toISOString()
 });
 await mkdir('artifacts/validation', { recursive: true });
-await writeFile('artifacts/validation/33-A-b4-payment-card-management-runtime.json', `${JSON.stringify(report, null, 2)}\n`);
-console.log(`B4 payment card management runtime: ${report.status} (${report.checksPassed}/${results.length} checks).`);
+await writeFile('artifacts/validation/33-B-b4-loan-management-runtime.json', `${JSON.stringify(report, null, 2)}\n`);
+console.log(`B4 loan management runtime: ${report.status} (${report.checksPassed}/${results.length} checks).`);
 if (failures.length) {
   console.error(failures.join('\n'));
   process.exitCode = 1;

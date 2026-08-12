@@ -50,22 +50,25 @@ check('both requirements bind DEC-212 implementation and UI areas', requirements
   item?.evidence?.includes('docs/decisions/DEC-212-b4-payment-card-management.md')
   && item?.codeAreas?.includes('packages/application/src/banking-security.ts')
   && item?.codeAreas?.includes('apps/desktop/src/renderer/App.tsx')));
-check('successor B4-08 through B4-14 remain honestly open', inventory.openRequirements?.every((id) => {
+const completedAfter33A = new Set(['B4-08', 'B4-09']);
+check('33-A historical open scope remains truthful while 33-B successors may complete', inventory.openRequirements?.every((id) => {
   const item = registry.requirements?.find((candidate) => candidate.id === id);
-  return item?.status !== 'COMPLETE' && !allChainTrue(item);
+  return completedAfter33A.has(id)
+    ? item?.status === 'COMPLETE' && allChainTrue(item)
+    : item?.status !== 'COMPLETE' && !allChainTrue(item);
 }) && inventory.openRequirements?.length === 7);
 check('scope and inventory bind DEC-212 migration 79 with no network channel', scope.status === 'COMPLETE'
   && scope.decision === 'DEC-212' && inventory.latestDatabaseMigration === 79
   && inventory.networkChannels?.length === 0);
 check('boundary evidence is exact green', boundary.status === 'PASS'
-  && boundary.checksFailed === 0 && boundary.latestDatabaseMigration === 79
-  && boundary.ppk021ExactAllowlistEntries === 537
+  && boundary.checksFailed === 0 && boundary.latestDatabaseMigration >= 79
+  && boundary.ppk021ExactAllowlistEntries === 540
   && boundary.ppk022CapabilitySurfaces === 238
   && boundary.prohibitedSecretColumns === 0 && boundary.bankExecutionPerformed === false);
 check('DEC-212 is active in the user decision ledger', ledger.decisionCount === ledger.decisions?.length
   && ledger.decisions?.some((item) => item.id === 'DEC-212' && item.status === 'ACTIVE'
     && item.requirements?.join(',') === ids.join(',')));
-check('migration 79 remains latest and exact', latestMigration === 79
+check('migration 79 remains an exact predecessor baseline', latestMigration >= 79
   && migrations.includes("createMigrationDefinition(79, 'b4_payment_card_management', paymentCardManagementSql)"));
 check('decision states last-four-only no-payment truth and ratchets', includesAll(decision, [
   'yalnız son dört hane', 'banka talimatı, ödeme veya para', 'transferi başlatmaz',

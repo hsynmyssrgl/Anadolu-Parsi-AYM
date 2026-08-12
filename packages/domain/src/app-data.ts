@@ -629,6 +629,113 @@ export interface CreatePaymentCardInput {
   status:PaymentCardStatus;
   privacy:RecordPrivacy;
 }
+export const LOAN_KINDS = ['consumer','mortgage','vehicle','other'] as const;
+export type LoanKind = typeof LOAN_KINDS[number];
+export const LOAN_RATE_TYPES = ['fixed','variable','profit_share','interest_free'] as const;
+export type LoanRateType = typeof LOAN_RATE_TYPES[number];
+export const LOAN_STATUSES = ['active','overdue','restructured','closed'] as const;
+export type LoanStatus = typeof LOAN_STATUSES[number];
+export const LOAN_INSURANCE_STATUSES = ['none','active','expired','cancelled'] as const;
+export type LoanInsuranceStatus = typeof LOAN_INSURANCE_STATUSES[number];
+export const LOAN_COLLATERAL_TYPES = ['none','vehicle','real_estate','deposit','guarantee','other'] as const;
+export type LoanCollateralType = typeof LOAN_COLLATERAL_TYPES[number];
+export interface LoanPaymentScheduleItemView {
+  sequence:number;
+  dueAt:string;
+  scheduledAmount:number;
+}
+export interface LoanPaymentHistoryItemView {
+  id:string;
+  loanId:string;
+  paidAt:string;
+  scheduledInstallmentSequence?:number;
+  amount:number;
+  principalAmount:number;
+  interestAmount:number;
+  lateFeeAmount:number;
+  notes?:string;
+  createdAt:string;
+}
+export interface LoanAccountView {
+  id:string;
+  ownerPersonId:string;
+  institutionCode:string;
+  institutionOfficialName:string;
+  institutionIconKey:string;
+  title:string;
+  kind:LoanKind;
+  rateType:LoanRateType;
+  annualRateBasisPoints:number;
+  termMonths:number;
+  currency:string;
+  originalPrincipal:number;
+  installmentAmount:number;
+  remainingPrincipal:number;
+  disbursedAt:string;
+  firstPaymentAt:string;
+  maturityAt:string;
+  earlySettlementAmount:number;
+  earlySettlementQuotedAt?:string;
+  overdueInstallmentCount:number;
+  overdueAmount:number;
+  daysPastDue:number;
+  insuranceStatus:LoanInsuranceStatus;
+  insuranceProvider?:string;
+  insurancePolicyReference?:string;
+  insurancePremiumAmount:number;
+  insuranceEndsAt?:string;
+  collateralType:LoanCollateralType;
+  collateralDescription?:string;
+  collateralEstimatedValue:number;
+  status:LoanStatus;
+  privacy:RecordPrivacy;
+  dataSource:'manual';
+  bankVerification:'not_performed';
+  paymentExecution:'not_performed';
+  paymentSchedule:readonly LoanPaymentScheduleItemView[];
+  paymentHistory:readonly LoanPaymentHistoryItemView[];
+  createdAt:string;
+}
+export interface CreateLoanAccountInput {
+  ownerPersonId:string;
+  institutionCode:string;
+  title:string;
+  kind:LoanKind;
+  rateType:LoanRateType;
+  annualRateBasisPoints:number;
+  termMonths:number;
+  currency:string;
+  originalPrincipal:number;
+  installmentAmount:number;
+  remainingPrincipal:number;
+  disbursedAt:string;
+  firstPaymentAt:string;
+  earlySettlementAmount:number;
+  earlySettlementQuotedAt?:string;
+  overdueInstallmentCount:number;
+  overdueAmount:number;
+  daysPastDue:number;
+  insuranceStatus:LoanInsuranceStatus;
+  insuranceProvider?:string;
+  insurancePolicyReference?:string;
+  insurancePremiumAmount:number;
+  insuranceEndsAt?:string;
+  collateralType:LoanCollateralType;
+  collateralDescription?:string;
+  collateralEstimatedValue:number;
+  status:LoanStatus;
+  privacy:RecordPrivacy;
+}
+export interface RecordLoanPaymentInput {
+  loanId:string;
+  paidAt:string;
+  scheduledInstallmentSequence?:number;
+  amount:number;
+  principalAmount:number;
+  interestAmount:number;
+  lateFeeAmount:number;
+  notes?:string;
+}
 export interface HealthRecordView { id:string; ownerPersonId:string; title:string; kind:'appointment'|'medication'|'diagnosis'|'vaccine'|'note'; privacy:RecordPrivacy; provider?:string; notes?:string; occurredAt:string; createdAt:string; }
 export interface CreateHealthRecordInput { ownerPersonId:string; title:string; kind:HealthRecordView['kind']; privacy:RecordPrivacy; provider?:string; notes?:string; occurredAt:string; }
 

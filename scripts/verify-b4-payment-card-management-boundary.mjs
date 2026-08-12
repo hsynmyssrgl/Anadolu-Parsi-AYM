@@ -123,8 +123,8 @@ export const verifyB4PaymentCardManagementBoundary = async () => {
     && !/fieldNames:\[[^\]]*(?:PAN|CVV|PIN)/iu.test(aiRepository));
   check('person lifecycle deletion inspection includes payment cards', personLifecycleRepository.includes(
     'paymentCards: `SELECT COUNT(*) AS total FROM payment_cards WHERE owner_person_id=?`'));
-  check('migration 79 is latest and exact', migrationVersions.includes(79)
-    && Math.max(...migrationVersions) === 79
+  check('migration 79 remains the exact payment-card predecessor baseline', migrationVersions.includes(79)
+    && Math.max(...migrationVersions) >= 79
     && migrations.includes("createMigrationDefinition(79, 'b4_payment_card_management', paymentCardManagementSql)"));
   check('payment-card schema contains only last four and no prohibited secret columns', cardSchema.length > 0
     && cardSchema.includes('last4 TEXT NOT NULL')
@@ -197,7 +197,7 @@ export const verifyB4PaymentCardManagementBoundary = async () => {
   check('PPK-021 exact ratchet reviews both new compositions', [
     'CreatePaymentCardUseCase', 'ListPaymentCardsUseCase'
   ].every((symbol) => astKeys.has(`USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|${symbol}`))
-    && astGate.status === 'PASS' && astGate.exactAllowlistEntries === 537
+    && astGate.status === 'PASS' && astGate.exactAllowlistEntries === 540
     && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
   check('PPK-022 capability ratchet remains unchanged and green', capabilityGate.status === 'PASS'
     && capabilityGate.capabilitySurfaces === 238

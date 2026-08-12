@@ -22,7 +22,7 @@
       "passed": true
     },
     {
-      "name": "successor B4-08 through B4-14 remain honestly open",
+      "name": "33-A historical open scope remains truthful while 33-B successors may complete",
       "passed": true
     },
     {
@@ -38,7 +38,7 @@
       "passed": true
     },
     {
-      "name": "migration 79 remains latest and exact",
+      "name": "migration 79 remains an exact predecessor baseline",
       "passed": true
     },
     {
@@ -67,8 +67,8 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 79,
-  "ppk021ExactAllowlistEntries": 537,
+  "latestDatabaseMigration": 80,
+  "ppk021ExactAllowlistEntries": 540,
   "ppk022CapabilitySurfaces": 238,
-  "generatedAt": "2026-08-12T14:22:10.150Z"
+  "generatedAt": "2026-08-12T15:04:39.773Z"
 }

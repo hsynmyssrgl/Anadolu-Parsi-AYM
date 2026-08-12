@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "step": "33-B",
+  "requirements": [
+    "B4-08",
+    "B4-09"
+  ],
+  "status": "PASS",
+  "checksPassed": 38,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "scope closes exactly B4-08 and B4-09 under DEC-213",
+      "passed": true
+    },
+    {
+      "name": "inventory has no blocker and keeps B4-10 through B4-14 open",
+      "passed": true
+    },
+    {
+      "name": "scope preserves manual unverified non-executing truth",
+      "passed": true
+    },
+    {
+      "name": "domain exposes exact loan enums and aggregate contracts",
+      "passed": true
+    },
+    {
+      "name": "domain covers B4-08 rate term principal installment and schedule",
+      "passed": true
+    },
+    {
+      "name": "domain covers B4-09 settlement overdue insurance collateral and history",
+      "passed": true
+    },
+    {
+      "name": "loan and payment contracts use exact top-level field sets",
+      "passed": true
+    },
+    {
+      "name": "contracts reject canonical secrets and Luhn-valid PAN values",
+      "passed": true
+    },
+    {
+      "name": "application rejects invalid rate term amount status and overdue coherence",
+      "passed": true
+    },
+    {
+      "name": "application validates settlement insurance collateral and date relationships",
+      "passed": true
+    },
+    {
+      "name": "application generates a month-end-safe bounded local schedule",
+      "passed": true
+    },
+    {
+      "name": "payment history enforces component-exact total chronology and term bounds",
+      "passed": true
+    },
+    {
+      "name": "loan writes require owner institution authorization and finance policy",
+      "passed": true
+    },
+    {
+      "name": "audit and outbox redact money insurance collateral and payment notes",
+      "passed": true
+    },
+    {
+      "name": "repository contract exposes loan query write and policy resolution ports",
+      "passed": true
+    },
+    {
+      "name": "repository loads nested schedule and history and persists both writes",
+      "passed": true
+    },
+    {
+      "name": "finance production policy resolves loan create collisions and update ownership",
+      "passed": true
+    },
+    {
+      "name": "sensitive inventory and person lifecycle include loan records",
+      "passed": true
+    },
+    {
+      "name": "migration 80 exists and is current",
+      "passed": true
+    },
+    {
+      "name": "migration creates all three loan tables without prohibited secret columns",
+      "passed": true
+    },
+    {
+      "name": "schema fixes loan status insurance collateral and payment component coherence",
+      "passed": true
+    },
+    {
+      "name": "schedule rows are parent-bound and all aggregates are immutable or append-only",
+      "passed": true
+    },
+    {
+      "name": "migration requires exact create and update finance receipts",
+      "passed": true
+    },
+    {
+      "name": "migration prevents receipt replay across finance records cards and loans",
+      "passed": true
+    },
+    {
+      "name": "production adapter applies governed list filtering and both inserts",
+      "passed": true
+    },
+    {
+      "name": "DataStore composes all three reviewed loan use cases",
+      "passed": true
+    },
+    {
+      "name": "main and preload bind the three exact loan channels",
+      "passed": true
+    },
+    {
+      "name": "IPC validates exact loan and payment payloads before dispatch",
+      "passed": true
+    },
+    {
+      "name": "renderer declaration exposes all typed loan methods",
+      "passed": true
+    },
+    {
+      "name": "finance UI covers B4-08 loan profile rate term principal and schedule",
+      "passed": true
+    },
+    {
+      "name": "finance UI covers B4-09 settlement overdue insurance collateral and history",
+      "passed": true
+    },
+    {
+      "name": "UI states manual unverified no-bank-execution truth",
+      "passed": true
+    },
+    {
+      "name": "targeted tests cover contracts IPC plan persistence receipts and redaction",
+      "passed": true
+    },
+    {
+      "name": "decision and threat model preserve no-bank-execution truth",
+      "passed": true
+    },
+    {
+      "name": "audit binds exact evidence triplet and successor scope",
+      "passed": true
+    },
+    {
+      "name": "PPK-021 exact ratchet reviews all three new compositions",
+      "passed": true
+    },
+    {
+      "name": "PPK-022 capability ratchet remains unchanged and green",
+      "passed": true
+    },
+    {
+      "name": "root lifecycle and explicit package scripts bind 33-B",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "latestDatabaseMigration": 80,
+  "ppk021ExactAllowlistEntries": 540,
+  "ppk021UseCaseCompositionSurfaces": 272,
+  "ppk022CapabilitySurfaces": 238,
+  "prohibitedSecretColumns": 0,
+  "bankVerificationPerformed": false,
+  "bankExecutionPerformed": false,
+  "generatedAt": "2026-08-12T15:13:35.925Z"
+}

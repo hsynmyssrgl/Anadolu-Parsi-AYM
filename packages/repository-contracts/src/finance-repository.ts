@@ -4,6 +4,8 @@ import type {
   BankInstitutionView,
   FinanceRecordView,
   FinanceValuationView,
+  LoanAccountView,
+  LoanPaymentHistoryItemView,
   PaymentCardView
 } from '@ppt/domain';
 import type {
@@ -46,6 +48,28 @@ export interface PaymentCardRow extends PaymentCardView {
 
 export type NewPaymentCardRow = PaymentCardRow;
 
+export interface LoanAccountRow extends LoanAccountView {
+  readonly familyId: FamilyId;
+  readonly ownerPersonId: PersonId;
+  readonly disbursedAt: IsoDateTime;
+  readonly firstPaymentAt: IsoDateTime;
+  readonly maturityAt: IsoDateTime;
+  readonly earlySettlementQuotedAt?: IsoDateTime;
+  readonly insuranceEndsAt?: IsoDateTime;
+  readonly createdAt: IsoDateTime;
+}
+
+export type NewLoanAccountRow = LoanAccountRow;
+
+export interface LoanPaymentHistoryRow extends LoanPaymentHistoryItemView {
+  readonly familyId: FamilyId;
+  readonly ownerPersonId: PersonId;
+  readonly paidAt: IsoDateTime;
+  readonly createdAt: IsoDateTime;
+}
+
+export type NewLoanPaymentHistoryRow = LoanPaymentHistoryRow;
+
 export interface FinanceRepositoryPort {
     listRecords(context: PolicyAuthorizedRepositoryExecutionContext): RepositoryResult<readonly FinanceRecordRow[]>;
     findRecord(context: PolicyAuthorizedRepositoryExecutionContext, id: string): RepositoryResult<FinanceRecordRow | null>;
@@ -58,6 +82,10 @@ export interface FinanceRepositoryPort {
     insertBankAccount(context: PolicyAuthorizedRepositoryExecutionContext, row: NewBankAccountRow): RepositoryResult<void>;
     listPaymentCards(context: PolicyAuthorizedRepositoryExecutionContext): RepositoryResult<readonly PaymentCardRow[]>;
     insertPaymentCard(context: PolicyAuthorizedRepositoryExecutionContext, row: NewPaymentCardRow): RepositoryResult<void>;
+    listLoanAccounts(context: PolicyAuthorizedRepositoryExecutionContext): RepositoryResult<readonly LoanAccountRow[]>;
+    findLoanAccount(context: PolicyAuthorizedRepositoryExecutionContext, id: string): RepositoryResult<LoanAccountRow | null>;
+    insertLoanAccount(context: PolicyAuthorizedRepositoryExecutionContext, row: NewLoanAccountRow): RepositoryResult<void>;
+    insertLoanPayment(context: PolicyAuthorizedRepositoryExecutionContext, row: NewLoanPaymentHistoryRow): RepositoryResult<void>;
 }
 
 /**
@@ -70,4 +98,8 @@ export interface FinancePolicyResourceRepositoryPort {
     context: RepositoryExecutionContext,
     id: string
   ): RepositoryResult<FinanceRecordRow | null>;
+  findLoanAccountForPolicyResolution(
+    context: RepositoryExecutionContext,
+    id: string
+  ): RepositoryResult<LoanAccountRow | null>;
 }

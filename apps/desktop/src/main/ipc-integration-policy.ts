@@ -1,5 +1,7 @@
 import {
   BANK_ACCOUNT_INPUT_KEYS,
+  LOAN_ACCOUNT_INPUT_KEYS,
+  LOAN_PAYMENT_INPUT_KEYS,
   PAYMENT_CARD_INPUT_KEYS,
   FINANCE_RECORD_INPUT_KEYS,
   FINANCE_VALUATION_INPUT_KEYS,
@@ -111,6 +113,11 @@ const paymentCardNetworks = new Set(['troy','visa','mastercard','american_expres
 const paymentCardFormFactors = new Set(['physical','virtual','supplementary']);
 const paymentCardAutomaticPaymentModes = new Set(['none','minimum','full']);
 const paymentCardStatuses = new Set(['active','frozen','closed']);
+const loanKinds = new Set(['consumer','mortgage','vehicle','other']);
+const loanRateTypes = new Set(['fixed','variable','profit_share','interest_free']);
+const loanStatuses = new Set(['active','overdue','restructured','closed']);
+const loanInsuranceStatuses = new Set(['none','active','expired','cancelled']);
+const loanCollateralTypes = new Set(['none','vehicle','real_estate','deposit','guarantee','other']);
 
 const containsProhibitedBankingSecret = (
   value: Record<string, unknown>,
@@ -210,6 +217,117 @@ const paymentCardInput = (args: readonly unknown[]): IpcIntegrationPolicyDecisio
     : rejected('PAYMENT_CARD_ARGUMENT_INVALID', '$[0]');
 };
 
+const loanAccountInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => {
+  if (args.length !== 1) return rejected('ARGUMENT_COUNT_MISMATCH');
+  const value = args[0];
+  if (!isObject(value)) return rejected('OBJECT_ARGUMENT_REQUIRED', '$[0]');
+  const secretRejection = containsProhibitedBankingSecret(value, [
+    'title',
+    'insuranceProvider',
+    'insurancePolicyReference',
+    'collateralDescription'
+  ]);
+  if (secretRejection) return secretRejection;
+  if (!hasOnlyKeys(value, LOAN_ACCOUNT_INPUT_KEYS)) return rejected('UNKNOWN_OBJECT_FIELD', '$[0]');
+  const finiteAmount = (candidate: unknown): candidate is number =>
+    typeof candidate === 'number' && Number.isFinite(candidate) && candidate >= 0 && candidate <= 1_000_000_000_000_000;
+  const amountsValid = [
+    value.originalPrincipal,
+    value.installmentAmount,
+    value.remainingPrincipal,
+    value.earlySettlementAmount,
+    value.overdueAmount,
+    value.insurancePremiumAmount,
+    value.collateralEstimatedValue
+  ].every(finiteAmount);
+  const earlySettlementValid = typeof value.earlySettlementAmount === 'number'
+    && ((value.earlySettlementAmount === 0 && value.earlySettlementQuotedAt === undefined)
+      || (value.earlySettlementAmount > 0 && boundedString(value.earlySettlementQuotedAt, 64)));
+  const overdue = typeof value.overdueInstallmentCount === 'number'
+    && typeof value.overdueAmount === 'number'
+    && typeof value.daysPastDue === 'number'
+    && value.overdueInstallmentCount > 0
+    && value.overdueAmount > 0
+    && value.daysPastDue > 0;
+  const noOverdue = value.overdueInstallmentCount === 0 && value.overdueAmount === 0 && value.daysPastDue === 0;
+  const insuranceValid = value.insuranceStatus === 'none'
+    ? value.insuranceProvider === undefined
+      && value.insurancePolicyReference === undefined
+      && value.insurancePremiumAmount === 0
+      && value.insuranceEndsAt === undefined
+    : boundedString(value.insuranceProvider, 120)
+      && boundedString(value.insurancePolicyReference, 120)
+      && typeof value.insurancePremiumAmount === 'number'
+      && value.insurancePremiumAmount > 0
+      && boundedString(value.insuranceEndsAt, 64);
+  const collateralValid = value.collateralType === 'none'
+    ? value.collateralDescription === undefined && value.collateralEstimatedValue === 0
+    : boundedString(value.collateralDescription, 240)
+      && typeof value.collateralEstimatedValue === 'number'
+      && value.collateralEstimatedValue > 0;
+  return boundedString(value.ownerPersonId, 128)
+    && typeof value.institutionCode === 'string' && /^\d{4}$/u.test(value.institutionCode)
+    && boundedString(value.title, 120)
+    && loanKinds.has(String(value.kind))
+    && loanRateTypes.has(String(value.rateType))
+    && typeof value.annualRateBasisPoints === 'number'
+    && optionalInteger(value.annualRateBasisPoints, 0, 100_000)
+    && (value.rateType !== 'interest_free' || value.annualRateBasisPoints === 0)
+    && typeof value.termMonths === 'number'
+    && optionalInteger(value.termMonths, 1, 600)
+    && typeof value.currency === 'string' && /^[A-Za-z]{3}$/u.test(value.currency)
+    && amountsValid
+    && typeof value.originalPrincipal === 'number' && value.originalPrincipal > 0
+    && typeof value.installmentAmount === 'number' && value.installmentAmount > 0
+    && typeof value.remainingPrincipal === 'number'
+    && value.remainingPrincipal <= value.originalPrincipal
+    && boundedString(value.disbursedAt, 64)
+    && boundedString(value.firstPaymentAt, 64)
+    && earlySettlementValid
+    && typeof value.overdueInstallmentCount === 'number'
+    && optionalInteger(value.overdueInstallmentCount, 0, 600)
+    && typeof value.daysPastDue === 'number'
+    && optionalInteger(value.daysPastDue, 0, 36_500)
+    && (overdue || noOverdue)
+    && loanInsuranceStatuses.has(String(value.insuranceStatus))
+    && optionalBoundedString(value.insuranceProvider, 120)
+    && optionalBoundedString(value.insurancePolicyReference, 120)
+    && optionalBoundedString(value.insuranceEndsAt, 64)
+    && insuranceValid
+    && loanCollateralTypes.has(String(value.collateralType))
+    && optionalBoundedString(value.collateralDescription, 240)
+    && collateralValid
+    && loanStatuses.has(String(value.status))
+    && ((value.status === 'overdue' && overdue) || (value.status !== 'overdue' && noOverdue))
+    && ((value.status === 'closed' && value.remainingPrincipal === 0)
+      || (value.status !== 'closed' && typeof value.remainingPrincipal === 'number' && value.remainingPrincipal > 0))
+    && recordPrivacyValues.has(String(value.privacy))
+    ? accepted()
+    : rejected('LOAN_ACCOUNT_ARGUMENT_INVALID', '$[0]');
+};
+
+const loanPaymentInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => {
+  if (args.length !== 1) return rejected('ARGUMENT_COUNT_MISMATCH');
+  const value = args[0];
+  if (!isObject(value)) return rejected('OBJECT_ARGUMENT_REQUIRED', '$[0]');
+  const secretRejection = containsProhibitedBankingSecret(value, ['notes']);
+  if (secretRejection) return secretRejection;
+  if (!hasOnlyKeys(value, LOAN_PAYMENT_INPUT_KEYS)) return rejected('UNKNOWN_OBJECT_FIELD', '$[0]');
+  const finiteAmount = (candidate: unknown): candidate is number =>
+    typeof candidate === 'number' && Number.isFinite(candidate) && candidate >= 0 && candidate <= 1_000_000_000_000_000;
+  const amountsValid = [value.amount, value.principalAmount, value.interestAmount, value.lateFeeAmount].every(finiteAmount);
+  const components = Number(value.principalAmount) + Number(value.interestAmount) + Number(value.lateFeeAmount);
+  return boundedString(value.loanId, 160)
+    && boundedString(value.paidAt, 64)
+    && optionalInteger(value.scheduledInstallmentSequence, 1, 600)
+    && amountsValid
+    && typeof value.amount === 'number' && value.amount > 0
+    && Math.round(value.amount * 100) === Math.round(components * 100)
+    && optionalBoundedString(value.notes, 500)
+    ? accepted()
+    : rejected('LOAN_PAYMENT_ARGUMENT_INVALID', '$[0]');
+};
+
 const financeRecordInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => {
   if (args.length !== 1) return rejected('ARGUMENT_COUNT_MISMATCH');
   const value = args[0];
@@ -301,6 +419,7 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
     case 'finance:listBankInstitutions':
     case 'finance:listBankAccounts':
     case 'finance:listPaymentCards':
+    case 'finance:listLoanAccounts':
       return zeroArguments(args);
     case 'finance:create':
       return financeRecordInput(args);
@@ -312,6 +431,10 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
       return bankAccountInput(args);
     case 'finance:createPaymentCard':
       return paymentCardInput(args);
+    case 'finance:createLoanAccount':
+      return loanAccountInput(args);
+    case 'finance:recordLoanPayment':
+      return loanPaymentInput(args);
     case 'ai:listConsents':
       return zeroArguments(args);
     case 'ai:upsertConsent':

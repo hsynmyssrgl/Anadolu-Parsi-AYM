@@ -154,15 +154,15 @@
       "passed": true
     },
     {
-      "name": "no persistence migration or cutover was added",
+      "name": "no package-owned persistence migration or cutover was added",
       "passed": true
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 77,
+  "latestDatabaseMigration": 80,
   "requirementCompletionClaimed": true,
   "b202CompletedByThisPackage": false,
   "ppk025CompletedByThisPackage": false,
   "b901CompletedByThisPackage": false,
-  "generatedAt": "2026-08-12T12:23:14.688Z"
+  "generatedAt": "2026-08-12T15:13:23.617Z"
 }

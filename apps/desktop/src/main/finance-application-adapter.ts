@@ -527,6 +527,42 @@ export class RepositoryBackedFinanceQueryPort implements FinanceQueryPort {
     );
   }
 
+  public async listLoanAccounts(
+    context: FinanceApplicationContext
+  ): ReturnType<FinanceQueryPort['listLoanAccounts']> {
+    const intent: FinancePolicyIntent = {
+      action: 'read',
+      capability: 'finance.read',
+      resourceType: 'finance_record',
+      resourceId: '*',
+      purpose: 'finance'
+    };
+    return executeGoverned(this.dependencies, context, intent, (authorization, enforcementPoint) =>
+      this.dependencies.transactionExecutor.execute(context.correlationId, (transaction) => {
+        const governedInput = { context, intent, authorization, transaction };
+        const established = establishGovernedTransaction(enforcementPoint, governedInput);
+        if (!established.ok) return established;
+        const execution = governedRepositoryContext(context, transaction, authorization, intent);
+        const snapshot = loadAuthorizationSnapshot(this.dependencies, context, execution);
+        if (!snapshot.ok) return snapshot;
+        const loans = this.dependencies.financeRepository.listLoanAccounts(execution);
+        return loans.ok
+          ? {
+              ok: true,
+              value: loans.value.filter((loan) => legacyAllowed(this.#authorization, snapshot.value, {
+                action: 'read',
+                resourceType: 'finance_record',
+                resourceId: loan.id,
+                ownerPersonId: loan.ownerPersonId,
+                occurredAt: execution.occurredAt,
+                privacy: loan.privacy
+              }))
+            }
+          : loans;
+      })
+    );
+  }
+
   public async validateIban(
     context: FinanceApplicationContext,
     iban: string
@@ -575,6 +611,10 @@ class GovernedFinanceWriteScope implements FinanceWriteScope {
     return this.dependencies.financeRepository.findRecord(this.execution, id);
   }
 
+  public findLoanAccount(id: string): ReturnType<FinanceWriteScope['findLoanAccount']> {
+    return this.dependencies.financeRepository.findLoanAccount(this.execution, id);
+  }
+
   public findBankInstitution(
     institutionCode: string
   ): ReturnType<FinanceWriteScope['findBankInstitution']> {
@@ -608,6 +648,14 @@ class GovernedFinanceWriteScope implements FinanceWriteScope {
 
   public insertPaymentCard(input: Parameters<FinanceWriteScope['insertPaymentCard']>[0]) {
     return this.dependencies.financeRepository.insertPaymentCard(this.execution, input);
+  }
+
+  public insertLoanAccount(input: Parameters<FinanceWriteScope['insertLoanAccount']>[0]) {
+    return this.dependencies.financeRepository.insertLoanAccount(this.execution, input);
+  }
+
+  public insertLoanPayment(input: Parameters<FinanceWriteScope['insertLoanPayment']>[0]) {
+    return this.dependencies.financeRepository.insertLoanPayment(this.execution, input);
   }
 
   public appendAudit(input: Parameters<FinanceWriteScope['appendAudit']>[0]) {

@@ -1165,6 +1165,115 @@ describe('FamilyDataStore', () => {
     store.close();
   });
 
+  it('B4-08/B4-09 kredi zincirini plan, erken kapama, sigorta, teminat ve append-only ödeme geçmişiyle uygular', async () => {
+    const { store, directory } = makeStore();
+    await authenticate(store);
+    const owner = await getAuthenticatedPerson(store);
+    const loans = await store.createLoanAccount({
+      ownerPersonId: owner.id,
+      institutionCode: '0046',
+      title: 'Aile ihtiyaç kredisi',
+      kind: 'consumer',
+      rateType: 'fixed',
+      annualRateBasisPoints: 3_250,
+      termMonths: 12,
+      currency: 'try',
+      originalPrincipal: 120_000,
+      installmentAmount: 11_000,
+      remainingPrincipal: 100_000,
+      disbursedAt: '2026-01-15T00:00:00.000Z',
+      firstPaymentAt: '2026-02-28T00:00:00.000Z',
+      earlySettlementAmount: 98_000,
+      earlySettlementQuotedAt: '2026-08-01T00:00:00.000Z',
+      overdueInstallmentCount: 0,
+      overdueAmount: 0,
+      daysPastDue: 0,
+      insuranceStatus: 'active',
+      insuranceProvider: 'Aile Sigorta',
+      insurancePolicyReference: 'POL-2026-AYM',
+      insurancePremiumAmount: 2_500,
+      insuranceEndsAt: '2027-01-15T00:00:00.000Z',
+      collateralType: 'none',
+      collateralEstimatedValue: 0,
+      status: 'active',
+      privacy: 'private'
+    });
+    const loan = loans.find((candidate) => candidate.title === 'Aile ihtiyaç kredisi')!;
+    expect(loan).toMatchObject({
+      institutionCode: '0046',
+      institutionOfficialName: 'AKBANK T.A.Ş.',
+      kind: 'consumer',
+      rateType: 'fixed',
+      annualRateBasisPoints: 3_250,
+      termMonths: 12,
+      currency: 'TRY',
+      originalPrincipal: 120_000,
+      installmentAmount: 11_000,
+      remainingPrincipal: 100_000,
+      earlySettlementAmount: 98_000,
+      insuranceStatus: 'active',
+      insuranceProvider: 'Aile Sigorta',
+      collateralType: 'none',
+      dataSource: 'manual',
+      bankVerification: 'not_performed',
+      paymentExecution: 'not_performed'
+    });
+    expect(loan.paymentSchedule).toHaveLength(12);
+    expect(loan.paymentSchedule[0]).toMatchObject({ sequence: 1, dueAt: '2026-02-28T00:00:00.000Z', scheduledAmount: 11_000 });
+    expect(loan.paymentSchedule.at(-1)).toMatchObject({ sequence: 12, dueAt: '2027-01-28T00:00:00.000Z' });
+
+    const afterPayment = await store.recordLoanPayment({
+      loanId: loan.id,
+      paidAt: '2026-08-01T00:00:00.000Z',
+      scheduledInstallmentSequence: 7,
+      amount: 11_000,
+      principalAmount: 9_000,
+      interestAmount: 2_000,
+      lateFeeAmount: 0,
+      notes: 'Manuel ödeme özeti'
+    });
+    expect(afterPayment.find((candidate) => candidate.id === loan.id)?.paymentHistory[0]).toMatchObject({
+      scheduledInstallmentSequence: 7,
+      amount: 11_000,
+      principalAmount: 9_000,
+      interestAmount: 2_000,
+      lateFeeAmount: 0,
+      notes: 'Manuel ödeme özeti'
+    });
+
+    const database = new DatabaseSync(join(directory, 'family.db'));
+    const loanColumns = database.prepare('PRAGMA table_info(loan_accounts)').all() as Array<{ name:string }>;
+    const paymentColumns = database.prepare('PRAGMA table_info(loan_payment_history)').all() as Array<{ name:string }>;
+    expect([...loanColumns, ...paymentColumns].map((column) => column.name)).not.toEqual(expect.arrayContaining([
+      'pan','full_pan','card_number','cvv','cvc','pin','password','internet_banking_password'
+    ]));
+    expect(database.prepare('SELECT COUNT(*) AS total FROM loan_payment_schedule WHERE loan_id=?').get(loan.id)).toEqual({ total: 12 });
+    expect(database.prepare('SELECT COUNT(*) AS total FROM loan_payment_history WHERE loan_id=?').get(loan.id)).toEqual({ total: 1 });
+    const payloads = database.prepare("SELECT payload_json FROM event_outbox WHERE event_type IN ('finance.loan.created','finance.loan.payment_recorded')").all() as Array<{payload_json:string}>;
+    expect(JSON.stringify(payloads)).not.toMatch(/120000|11000|98000|POL-2026-AYM|Manuel ödeme özeti/u);
+    expect(() => database.exec(`
+      INSERT INTO loan_payment_history(
+        id,loan_id,family_id,owner_person_id,paid_at,scheduled_installment_sequence,
+        amount,principal_amount,interest_amount,late_fee_amount,notes,created_at,
+        policy_receipt_hash,policy_receipt_version,policy_receipt_nonce,
+        policy_correlation_id,policy_resource_type,policy_resource_id,policy_action,
+        policy_capability
+      )
+      SELECT 'loan-payment-direct-bypass',id,family_id,owner_person_id,disbursed_at,1,
+             1,1,0,0,NULL,created_at,policy_receipt_hash,policy_receipt_version,
+             policy_receipt_nonce,policy_correlation_id,policy_resource_type,
+             policy_resource_id,'update',policy_capability
+      FROM loan_accounts WHERE id='${loan.id}'
+    `)).toThrow(/unused exact durable finance policy receipt/u);
+    expect(() => database.prepare('UPDATE loan_accounts SET title=? WHERE id=?').run('Değiştirilemez', loan.id))
+      .toThrow(/future governed snapshot workflow/u);
+    database.close();
+    const audit = store.listAudit(200);
+    expect(audit.some((entry) => entry.action === 'finance.loan.created' && entry.resourceId === loan.id)).toBe(true);
+    expect(audit.some((entry) => entry.action === 'finance.loan.payment_recorded' && entry.resourceId === loan.id)).toBe(true);
+    store.close();
+  });
+
   it('görev, sigorta, eğitim, iş, varlık ve acil durum kayıtlarını güvenli biçimde oluşturur', async () => {
     const { store } = makeStore();
     await authenticate(store);

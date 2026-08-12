@@ -727,7 +727,12 @@ const loadFinanceResourceSnapshotInTransaction = (
       requestedIntent.resourceId
     );
     if (!existing.ok) return existing;
-    if (existing.value) return invalidAuthority(context, 'Finance policy create resource already exists');
+    const existingLoan = dependencies.financePolicyResourceRepository.findLoanAccountForPolicyResolution(
+      execution,
+      requestedIntent.resourceId
+    );
+    if (!existingLoan.ok) return existingLoan;
+    if (existing.value || existingLoan.value) return invalidAuthority(context, 'Finance policy create resource already exists');
     const owner = dependencies.personRepository.findById(execution, requestedIntent.ownerPersonId);
     if (!owner.ok) return owner;
     if (!owner.value || owner.value.familyId !== context.familyId || owner.value.status !== 'active') {
@@ -758,17 +763,23 @@ const loadFinanceResourceSnapshotInTransaction = (
       requestedIntent.resourceId
     );
     if (!record.ok) return record;
-    if (!record.value || record.value.familyId !== context.familyId) {
+    const loan = dependencies.financePolicyResourceRepository.findLoanAccountForPolicyResolution(
+      execution,
+      requestedIntent.resourceId
+    );
+    if (!loan.ok) return loan;
+    const resourceRecord = record.value ?? loan.value;
+    if (!resourceRecord || resourceRecord.familyId !== context.familyId) {
       return invalidAuthority(context, 'Finance policy resource does not exist in the active family');
     }
     const resource = Object.freeze({
       type: 'finance_record',
-      id: record.value.id,
-      familyId: record.value.familyId,
-      ownerPersonId: record.value.ownerPersonId,
-      sensitivity: sensitivityFor(record.value.privacy)
+      id: resourceRecord.id,
+      familyId: resourceRecord.familyId,
+      ownerPersonId: resourceRecord.ownerPersonId,
+      sensitivity: sensitivityFor(resourceRecord.privacy)
     });
-    return ok(Object.freeze({ resource, stateFingerprint: stable(record.value) }));
+    return ok(Object.freeze({ resource, stateFingerprint: stable(resourceRecord) }));
   }
 
   return invalidAuthority(context, 'Finance policy intent does not identify a supported operation');
@@ -897,6 +908,7 @@ const ensureRuntimeConfiguration = (dependencies: FinanceProductionPolicyRuntime
     || typeof dependencies.permissionRepository?.listActiveForSubject !== 'function'
     || typeof dependencies.trustedDeviceRepository?.findActive !== 'function'
     || typeof dependencies.financePolicyResourceRepository?.findRecordForPolicyResolution !== 'function'
+    || typeof dependencies.financePolicyResourceRepository?.findLoanAccountForPolicyResolution !== 'function'
     || typeof dependencies.personRepository?.findById !== 'function'
     || typeof dependencies.deviceIdentityProvider?.snapshot !== 'function'
     || typeof dependencies.authorizationProvider?.authorize !== 'function'

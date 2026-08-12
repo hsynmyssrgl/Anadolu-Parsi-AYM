@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "step": "33-B",
+  "requirements": [
+    "B4-08",
+    "B4-09"
+  ],
+  "status": "PASS",
+  "checksPassed": 14,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "both requirements are complete with exact 13-link chains",
+      "passed": true
+    },
+    {
+      "name": "both requirements bind the exact 33-B evidence triplet",
+      "passed": true
+    },
+    {
+      "name": "both requirements bind DEC-213 application security and UI areas",
+      "passed": true
+    },
+    {
+      "name": "successor B4-10 through B4-14 remain honestly open",
+      "passed": true
+    },
+    {
+      "name": "scope and inventory bind DEC-213 migration 80 with no network channel",
+      "passed": true
+    },
+    {
+      "name": "boundary evidence is exact green and truth preserving",
+      "passed": true
+    },
+    {
+      "name": "DEC-213 is active in the user decision ledger",
+      "passed": true
+    },
+    {
+      "name": "migration 80 is current and exact",
+      "passed": true
+    },
+    {
+      "name": "decision states manual no-payment truth and exact ratchets",
+      "passed": true
+    },
+    {
+      "name": "threat model covers secrets coherence receipts append-only and no-bank claims",
+      "passed": true
+    },
+    {
+      "name": "audit binds both IDs exact evidence and open successor scope",
+      "passed": true
+    },
+    {
+      "name": "targeted tests name all security persistence and honesty boundaries",
+      "passed": true
+    },
+    {
+      "name": "root lifecycle and explicit package scripts bind 33-B",
+      "passed": true
+    },
+    {
+      "name": "all contract prerequisites exist",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "latestDatabaseMigration": 80,
+  "ppk021ExactAllowlistEntries": 540,
+  "ppk021UseCaseCompositionSurfaces": 272,
+  "ppk022CapabilitySurfaces": 238,
+  "generatedAt": "2026-08-12T15:13:36.058Z"
+}
