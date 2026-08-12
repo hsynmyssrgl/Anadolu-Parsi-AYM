@@ -146,7 +146,7 @@ describe('32-R PPK-022 signed runtime capability manifest policy', () => {
       gateVersion: 'PPK-022-V1',
       protectedCapabilityCount: 7,
       canonicalApplicationCount: 14,
-      exactAstSurfaceCount: 238,
+      exactAstSurfaceCount: 242,
       bootstrapNetworkCapabilityPinned: true,
       buildManifestAloneGrantsRuntimeAuthority: false,
       latestDatabaseMigration: 77

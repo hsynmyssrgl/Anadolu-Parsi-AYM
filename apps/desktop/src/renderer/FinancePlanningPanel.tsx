@@ -12,11 +12,13 @@ import type {
   RecordPrivacy
 } from '@ppt/domain';
 import { Button, EmptyState, SectionHeader, StatusMessage, Surface } from './ui';
+import { FinanceImportPanel } from './FinanceImportPanel';
 
 interface FinancePlanningPanelProps {
   readonly people: readonly FamilyMemberView[];
   readonly workspace: FinancePlanningWorkspaceView | undefined;
   readonly onRecord: (input: RecordFinancePlanningItemInput) => Promise<void>;
+  readonly onWorkspaceChange: (workspace: FinancePlanningWorkspaceView) => void;
 }
 
 const modeLabels: Record<FinancePlanningItemType, string> = {
@@ -62,7 +64,7 @@ const formatDate = (value: string): string => new Intl.DateTimeFormat('tr-TR', {
 const formatMoney = (value: number, currency: string): string =>
   `${value.toLocaleString('tr-TR', { maximumFractionDigits: 2 })} ${currency}`;
 
-export function FinancePlanningPanel({ people, workspace, onRecord }: FinancePlanningPanelProps) {
+export function FinancePlanningPanel({ people, workspace, onRecord, onWorkspaceChange }: FinancePlanningPanelProps) {
   const [mode, setMode] = useState<FinancePlanningItemType>('category');
   const [scope, setScope] = useState('family');
   const [ownerPersonId, setOwnerPersonId] = useState(people[0]?.id ?? '');
@@ -239,6 +241,8 @@ export function FinancePlanningPanel({ people, workspace, onRecord }: FinancePla
       </div>
       {(activeSummary?.currencySummaries.length ?? 0) === 0 && <EmptyState title="Bu kapsamda finans özeti yok" body="Kategori, nakit akışı veya portföy varlığı eklediğinizde para birimi bazlı özet oluşur."/>}
     </Surface>
+
+    <FinanceImportPanel people={people} workspace={workspace} onWorkspaceChange={onWorkspaceChange}/>
 
     <Surface className="workspace-form">
       <SectionHeader eyebrow="Append-only finans defteri" title="Planlama kaydı ekle"/>

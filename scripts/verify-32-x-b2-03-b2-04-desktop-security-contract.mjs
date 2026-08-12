@@ -234,9 +234,9 @@ check('PPK-021 exact privileged additions remain governed', [
   'USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetSessionLockStateUseCase',
   'USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|LockSessionUseCase',
   'USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|RecordSessionActivityUseCase'
-].every((key) => astKeys.has(key)) && astKeys.size === 542);
+].every((key) => astKeys.has(key)) && astKeys.size === 543);
 check('PPK-022 custom protocol fetch remains governed',
-  capabilityKeys.has('NETWORK_API|apps/desktop/src/main/main.ts|fetch') && capabilityKeys.size === 238);
+  capabilityKeys.has('NETWORK_API|apps/desktop/src/main/main.ts|fetch') && capabilityKeys.size === 242);
 check('no package-owned persistence migration or cutover was added', migrationVersions.includes(77) && latestMigration >= 77
   && scope?.repositoryDecision?.includes('yeni kalıcı session repository')
   && scope?.migrationDecision?.includes('latest migration 77'));

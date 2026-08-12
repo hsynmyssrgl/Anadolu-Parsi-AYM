@@ -405,6 +405,35 @@ const financePlanningInput = (args: readonly unknown[]): IpcIntegrationPolicyDec
   return valid ? accepted() : rejected('FINANCE_PLANNING_ARGUMENT_INVALID', '$[0]');
 };
 
+const financeImportCommitInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => exactObject(
+  args,
+  ['previewId','ownerPersonId','privacy','mapping','defaultCurrency','incomeCategoryId','expenseCategoryId','duplicateStrategy'],
+  (value) => {
+    if (!isObject(value.mapping) || !hasOnlyKeys(value.mapping, [
+      'dateColumn','descriptionColumn','amountColumn','debitColumn','creditColumn',
+      'directionColumn','currencyColumn','externalIdColumn','amountMode'
+    ])) return false;
+    const optionalColumn = (candidate: unknown): boolean => optionalBoundedString(candidate, 120);
+    return boundedString(value.previewId, 160)
+      && boundedString(value.ownerPersonId, 128)
+      && recordPrivacyValues.has(String(value.privacy))
+      && boundedString(value.mapping.dateColumn, 120)
+      && optionalColumn(value.mapping.descriptionColumn)
+      && optionalColumn(value.mapping.amountColumn)
+      && optionalColumn(value.mapping.debitColumn)
+      && optionalColumn(value.mapping.creditColumn)
+      && optionalColumn(value.mapping.directionColumn)
+      && optionalColumn(value.mapping.currencyColumn)
+      && optionalColumn(value.mapping.externalIdColumn)
+      && ['signed','absolute_with_direction','debit_credit_columns'].includes(String(value.mapping.amountMode))
+      && typeof value.defaultCurrency === 'string'
+      && /^[A-Z]{3}$/u.test(value.defaultCurrency)
+      && optionalBoundedString(value.incomeCategoryId, 160)
+      && optionalBoundedString(value.expenseCategoryId, 160)
+      && ['skip','reject'].includes(String(value.duplicateStrategy));
+  }
+);
+
 const financeRecordInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => {
   if (args.length !== 1) return rejected('ARGUMENT_COUNT_MISMATCH');
   const value = args[0];
@@ -498,6 +527,8 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
     case 'finance:listPaymentCards':
     case 'finance:listLoanAccounts':
     case 'finance:getPlanningWorkspace':
+    case 'finance:selectImportFile':
+    case 'finance:previewOpenBankingSandbox':
       return zeroArguments(args);
     case 'finance:create':
       return financeRecordInput(args);
@@ -515,6 +546,8 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
       return loanPaymentInput(args);
     case 'finance:recordPlanningItem':
       return financePlanningInput(args);
+    case 'finance:commitImportPreview':
+      return financeImportCommitInput(args);
     case 'ai:listConsents':
       return zeroArguments(args);
     case 'ai:upsertConsent':

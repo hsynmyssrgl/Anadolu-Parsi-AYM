@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 68,
+  "decisionCount": 69,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1728,6 +1728,38 @@
         "docs/security/THREAT_MODEL_33_C_B4_FINANCE_PLANNING_PORTFOLIO_ANALYTICS.md",
         "docs/audit/33-C_B4_FINANCE_PLANNING_PORTFOLIO_ANALYTICS_UST_KAPANIS.md",
         "config/33-c-b4-finance-planning-portfolio-analytics-inventory.json"
+      ]
+    },
+    {
+      "id": "DEC-215",
+      "date": "2026-08-12",
+      "acceptedAt": "2026-08-12",
+      "title": "B4-13 and B4-14 shared controlled finance import and network-free OHVPS adapter boundary",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: sirayla full auto devam et, onay bekleme ve bir isle birden fazla gereksinim kapat",
+      "document": "docs/decisions/DEC-215-b4-controlled-import-open-banking.md",
+      "requirements": ["B4-13", "B4-14"],
+      "codeAreas": [
+        "packages/domain/src/app-data.ts",
+        "packages/application/src/finance-use-cases.ts",
+        "packages/database/src/family-database-migrations.ts",
+        "packages/repository-contracts/src/finance-repository.ts",
+        "packages/repositories/src/finance-repository.ts",
+        "apps/desktop/src/main/finance-application-adapter.ts",
+        "apps/desktop/src/main/finance-import-file-session.ts",
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/renderer/FinanceImportPanel.tsx",
+        "scripts/verify-b4-controlled-import-open-banking-boundary.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/33-D-b4-controlled-import-open-banking-boundary.json",
+        "artifacts/validation/33-D-b4-controlled-import-open-banking-contract.json",
+        "artifacts/validation/33-D-b4-controlled-import-open-banking-runtime.json",
+        "docs/security/THREAT_MODEL_33_D_B4_CONTROLLED_IMPORT_OPEN_BANKING.md",
+        "docs/audit/33-D_B4_CONTROLLED_IMPORT_OPEN_BANKING_UST_KAPANIS.md",
+        "config/33-d-b4-controlled-import-open-banking-inventory.json"
       ]
     }
   ]

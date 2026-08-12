@@ -32,19 +32,19 @@ const commands = Object.freeze([
     args: ['node_modules/typescript/bin/tsc', '-p', 'packages/database/tsconfig.json']
   }),
   Object.freeze({
-    id: 'migration-81-runtime',
+    id: 'migration-81-successor-runtime',
     args: ['scripts/verify-database-migrations.mjs'],
     expectOutput: '"version": 81'
   }),
   Object.freeze({
     id: 'ppk021-ast-ratchet',
     args: ['scripts/verify-platform-policy-ast-gate.mjs'],
-    expectOutput: '"exactAllowlistEntries": 542'
+    expectOutput: '"exactAllowlistEntries": 543'
   }),
   Object.freeze({
     id: 'ppk022-capability-ratchet',
     args: ['scripts/verify-platform-capability-manifest-gate.mjs'],
-    expectOutput: '"exactManifestSurfaces": 238'
+    expectOutput: '"exactManifestSurfaces": 242'
   }),
   Object.freeze({
     id: 'decision-ledger',
@@ -93,11 +93,11 @@ const report = Object.freeze({
   checksFailed: failures.length,
   targetedTestFilesPassed: targeted?.testFiles ?? 0,
   targetedTestsPassed: targeted?.tests ?? 0,
-  latestDatabaseMigration: 81,
+  latestDatabaseMigration: 82,
   financePlanningLedgerColumns: 39,
-  ppk021ExactAllowlistEntries: 542,
-  ppk021UseCaseCompositionSurfaces: 274,
-  ppk022CapabilitySurfaces: 238,
+  ppk021ExactAllowlistEntries: 543,
+  ppk021UseCaseCompositionSurfaces: 275,
+  ppk022CapabilitySurfaces: 242,
   prohibitedSecretColumns: 0,
   crossCurrencyAggregationPerformed: false,
   externalPricingPerformed: false,

@@ -1,13 +1,13 @@
 import { app, BrowserWindow, dialog, ipcMain, net, protocol, safeStorage, shell, type IpcMainInvokeEvent } from 'electron';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { dirname, extname, isAbsolute, join, resolve } from 'node:path';
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { basename, dirname, extname, isAbsolute, join, resolve } from 'node:path';
+import { closeSync, existsSync, fstatSync, mkdirSync, openSync, readFileSync, readSync, rmSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 import { asCorrelationId, asIsoDateTime } from '@ppt/core';
 import { writeContentFreeConsoleEvent } from '@ppt/logging';
 import { APP_META, USER_VISIBLE_APP_INFO, type CreateArchiveItemInput, CreateFamilyEventInput, UpdateFamilyEventInput, SetFamilyEventArchivedInput, UpdateEventParticipantsInput, UpdateEventInvitationInput, UpdateEventNotesInput, AcknowledgeFamilyNotificationInput, CreateFamilyLocationInput, CreateFamilyMemberInput, CreateFamilyRelationInput, LoginInput, SetupAdminInput, ChangePasswordInput, EnableTwoFactorInput, DisableTwoFactorInput, TrustCurrentDeviceInput, ReauthorizeCurrentDeviceInput, CreateFamilyInvitationInput, InspectFamilyInvitationInput, ResendFamilyInvitationInput, AcceptFamilyInvitationInput, UpsertObjectPermissionInput, UpdateFamilyAccountInput, CreateFinanceRecordInput, CreateBankAccountInput, ValidateIbanInput, CreatePaymentCardInput, CreateHealthRecordInput, CreateMedicationPlanInput, CreateFamilyHealthHistoryInput, CreateFinanceValuationInput, CreateLifeRecordInput, CreateAutomationRuleInput, CreateArchiveCategoryInput, UpdateArchiveClassificationInput, UpsertAiConsentInput, AiConsentPurpose, UpsertSensitiveDataConsentInput, SensitiveExportPreviewInput, RunAutomationInput, UpsertDigitalLegacyPlanInput, UpsertLegacyGrantInput, ExecuteLegacyPlanInput, ApproveLegacyExecutionInput, CancelLegacyExecutionInput, ArchiveSearchInput, CreateArchiveRetentionPolicyInput, AssignArchiveRetentionPolicyInput, UpsertBackupTargetInput, MaintenanceResultView, BackupSchedulerResultView, AdaptiveResourceStateView, EnqueueTaskInput, UpsertMaintenancePolicyInput, DiagnosticFilterInput, DiagnosticArchiveSearchInput, MaintenanceHistoryFilterInput, CreateDataRetentionPolicyInput, ArchiveDataResourceInput, RestoreDataResourceInput, RequestDataPurgeInput, CancelDataPurgeInput, ExecuteDataPurgeInput, SetDataLegalHoldInput, UpdateBackupQuarantinePolicyInput, SetBackupQuarantineLegalHoldInput, DestroyBackupQuarantineBatchInput, RegisterExternalBackupCopyInput, ReviewExternalBackupCopyInput, SetExternalBackupCopyLegalHoldInput, AttestExternalBackupCopyDestroyedInput, RegisterExternalBackupEvidenceIssuerInput, RotateExternalBackupEvidenceIssuerInput, RevokeExternalBackupEvidenceIssuerInput, ApplyExternalBackupEvidenceRevocationListInput, UpsertExternalBackupRevocationEndpointInput, PendingRevocationSyncListView, ApplyPendingRevocationSyncInput, RevocationSyncEndpointStateView, RevocationSyncRunResultView, VerifyExternalBackupDestructionEvidenceInput, ApplyFamilyDataImportInput, RollbackFamilyDataImportInput, GenealogyTreePageInput, TimelinePageInput, ArchivePageInput, PersonCatalogPageInput, EventCatalogPageInput, EntityCatalogLookupInput, FamilySnapshotSectionsInput, IpcAdaptiveBudgetMaintenanceOperation, IpcAdaptiveBudgetMaintenanceAuthorizationInput, IpcAdaptiveBudgetMaintenanceReauthenticationInput, IpcAdaptiveBudgetMaintenanceRecoveryInput, UpdateBackupCleanRewritePolicyInput } from '@ppt/domain';
-import type { CreateLoanAccountInput, RecordLoanPaymentInput, RecordFinancePlanningItemInput } from '@ppt/domain';
+import type { CreateLoanAccountInput, RecordLoanPaymentInput, RecordFinancePlanningItemInput, CommitFinanceImportPreviewInput } from '@ppt/domain';
 import type {
   AssignPersonMembershipInput,
   CreateFamilyBranchInput,
@@ -78,6 +78,7 @@ import type { ApplicationSecurityProfileGateBoundaryView, DerivedDataPolicyBound
 import { GetProductSurfaceGovernanceUseCase } from '@ppt/application';
 import type { ProductSurfaceGovernanceView } from '@ppt/domain';
 import { createProductSurfaceGovernanceRepository } from './repository-composition-root.js';
+import { FinanceImportFileSessionRegistry } from './finance-import-file-session.js';
 
 type ArchiveMutationInput<TInput> = TInput & { readonly operationId: string };
 interface ArchiveItemMutationInput {
@@ -100,6 +101,10 @@ const platformPolicyAstGatePolicy = new PlatformPolicyAstGatePolicy();
 const platformCapabilityManifestPolicy = new PlatformCapabilityManifestPolicy();
 const applicationSecurityProfilePolicy = new ApplicationSecurityProfilePolicy();
 const policyServiceAvailabilityPolicy = new PolicyServiceAvailabilityPolicy();
+const financeImportFileSessions = new FinanceImportFileSessionRegistry(
+  (bytes) => createHash('sha256').update(bytes).digest('hex'),
+  () => createRuntimeCorrelationId('ipc')
+);
 const getDerivedDataPolicyBoundaryUseCase = new GetDerivedDataPolicyBoundaryUseCase(derivedDataInheritancePolicy);
 const getSensitiveLoggingBoundaryUseCase = new GetSensitiveLoggingBoundaryUseCase(sensitiveLogPolicy);
 const getSourceDeletionPropagationBoundaryUseCase = new GetSourceDeletionPropagationBoundaryUseCase(sourceDeletionPropagationPolicy);
@@ -678,6 +683,13 @@ function store(windowsHelloPlatformOverride?: WindowsHelloPlatformPort): FamilyD
   return dataStore;
 }
 
+function financeImportSessionOwnerToken(event: IpcMainInvokeEvent): string {
+  return createHash('sha256').update(
+    `${event.sender.id}\u0000${store().currentAuthenticatedAccountId()}\u0000family-main`,
+    'utf8'
+  ).digest('hex');
+}
+
 function registerIpcHandler<TArguments extends unknown[], TResult>(
   channel: string,
   handler: IpcHandler<TArguments, TResult>
@@ -848,14 +860,22 @@ function registerIpc(): void {
     { id: 'microsoft', label: 'Microsoft ile devam et', configured: Boolean(process.env.PPT_OIDC_MICROSOFT_CLIENT_ID), productionReady: process.env.PPT_OIDC_MICROSOFT_READY === '1' }
   ]));
   registerIpcHandler('auth:getState', () => dataStore ? dataStore.getAuthState() : lockedAuthState());
-  registerIpcHandler('auth:getSessionLockState', () => store().getSessionLockState());
+  registerIpcHandler('auth:getSessionLockState', () => {
+    const state = store().getSessionLockState();
+    if (state.status === 'locked' || state.status === 'signed_out') financeImportFileSessions.clear();
+    return state;
+  });
   registerIpcHandler('auth:recordSessionActivity', () => store().recordSessionActivity());
-  registerIpcHandler('auth:lockSession', () => store().lockSession());
+  registerIpcHandler('auth:lockSession', () => {
+    financeImportFileSessions.clear();
+    return store().lockSession();
+  });
   registerIpcHandler('auth:unlockSession', (_event, input: UnlockSessionInput) => store().unlockSession(input));
   registerIpcHandler('auth:getWindowsHelloState', () =>
     dataStore ? store().getWindowsHelloState() : lockedWindowsHelloState()
   );
   registerIpcHandler('auth:setup', (_event, input: SetupAdminInput) => {
+    financeImportFileSessions.clear();
     const userVault = vault();
     if (userVault.isInitialized()) throw new Error('İlk kurulum daha önce tamamlanmış.');
     const initialDatabaseBytes = userVault.initialize(input.password);
@@ -874,6 +894,7 @@ function registerIpc(): void {
     }
   });
   registerIpcHandler('auth:login', (_event, input: LoginInput) => {
+    financeImportFileSessions.clear();
     if (windowsHelloOperationInProgress) {
       throw new Error('Windows Hello işlemi sürerken parola girişi başlatılamaz.');
     }
@@ -896,6 +917,7 @@ function registerIpc(): void {
     }
   });
   registerIpcHandler('auth:loginWithWindowsHello', async (event, input: LoginWithWindowsHelloInput) => {
+    financeImportFileSessions.clear();
     if (windowsHelloOperationInProgress) {
       return windowsHelloAuthenticationView('device_busy', 'windows_hello_operation_in_progress');
     }
@@ -1011,7 +1033,11 @@ function registerIpc(): void {
       throw new Error('Windows Hello işlemi sürerken oturum kapatılamaz.');
     }
     try { return store().logout(); }
-    finally { offlineSensitiveCache.lock('NO_LEASE'); sealUserDataSession(); }
+    finally {
+      financeImportFileSessions.clear();
+      offlineSensitiveCache.lock('NO_LEASE');
+      sealUserDataSession();
+    }
   });
   registerIpcHandler('auth:changePassword', (_event, input: ChangePasswordInput) => {
     if (windowsHelloOperationInProgress) {
@@ -1574,6 +1600,52 @@ function registerIpc(): void {
   registerIpcHandler('finance:recordLoanPayment', (_event, input:RecordLoanPaymentInput) => store().recordLoanPayment(input));
   registerIpcHandler('finance:getPlanningWorkspace', () => store().getFinancePlanningWorkspace());
   registerIpcHandler('finance:recordPlanningItem', (_event, input:RecordFinancePlanningItemInput) => store().recordFinancePlanningItem(input));
+  registerIpcHandler('finance:selectImportFile', async (event) => {
+    const result = await dialog.showOpenDialog({
+      title: 'KontrollÃ¼ finans hareketi dosyasÄ±nÄ± seÃ§',
+      properties: ['openFile'],
+      filters: [{ name: 'Finans hareketleri', extensions: ['csv','tsv','xlsx','ofx','qfx'] }]
+    });
+    if (result.canceled || !result.filePaths[0]) return { canceled: true };
+    const filePath = result.filePaths[0];
+    const maximumBytes = 5 * 1024 * 1024;
+    const descriptor = openSync(filePath, 'r');
+    let bytes: Buffer;
+    try {
+      const metadata = fstatSync(descriptor);
+      if (!metadata.isFile() || metadata.size < 1 || metadata.size > maximumBytes) {
+        throw new Error('İçe aktarma dosyası normal bir dosya ve 1 bayt–5 MiB aralığında olmalıdır.');
+      }
+      bytes = Buffer.allocUnsafe(metadata.size);
+      let offset = 0;
+      while (offset < bytes.length) {
+        const count = readSync(descriptor, bytes, offset, bytes.length - offset, offset);
+        if (count === 0) throw new Error('İçe aktarma dosyası okunurken beklenmedik biçimde kısaldı.');
+        offset += count;
+      }
+      const changed = fstatSync(descriptor);
+      if (changed.size !== metadata.size || changed.mtimeMs !== metadata.mtimeMs) {
+        throw new Error('İçe aktarma dosyası okunurken değişti; dosyayı yeniden seçin.');
+      }
+    } finally {
+      closeSync(descriptor);
+    }
+    const preview = financeImportFileSessions.createFilePreview({
+      fileName: basename(filePath),
+      bytes,
+      ownerToken: financeImportSessionOwnerToken(event)
+    });
+    return { canceled: false, preview };
+  });
+  registerIpcHandler('finance:previewOpenBankingSandbox', (event) =>
+    financeImportFileSessions.createSandboxPreview(new Date(), financeImportSessionOwnerToken(event)));
+  registerIpcHandler('finance:commitImportPreview', async (event, input: CommitFinanceImportPreviewInput) => {
+    const ownerToken = financeImportSessionOwnerToken(event);
+    const prepared = financeImportFileSessions.resolve(input, new Date(), ownerToken);
+    const workspace = await store().commitFinanceImport(prepared);
+    financeImportFileSessions.consume(input.previewId, ownerToken);
+    return workspace;
+  });
   registerIpcHandler('health:list', async () => store().listHealthRecords());
   registerIpcHandler('health:create', async (_event, input:CreateHealthRecordInput) => store().createHealthRecord(input));
   registerIpcHandler('health:listMedicationPlans', async () => store().listMedicationPlans());
@@ -2204,6 +2276,7 @@ app.whenReady().then(async () => {
 });
 
 app.on('before-quit', () => {
+  financeImportFileSessions.dispose();
   if (desktopRuntime) {
     desktopRuntime.logger.info({
       timestamp: desktopRuntime.clock.now(),

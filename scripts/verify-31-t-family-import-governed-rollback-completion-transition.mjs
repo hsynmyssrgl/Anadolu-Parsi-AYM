@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFile, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
+import { inspectAuthorizedSuccessorLifecycle } from './lib/authorized-successor-lifecycle.mjs';
 
 const root = resolve(process.cwd());
 if (root !== resolve('C:\\PPT\\AYM', '06_KOD', 'app')) throw new Error(`Unsafe source root: ${root}`);
@@ -22,6 +23,7 @@ for (const key of ['receipt', 'readback', 'receiptReadback', 'persistence', 'inv
   check(sha256(bytes) === declared, `${key} sidecar binds exact bytes`);
 }
 const step = docs.plan.steps.find((item) => item.id === '31-T'); const requirement = docs.registry.requirements.find((item) => item.id === 'PPK-002');
+const laterSuccessor = inspectAuthorizedSuccessorLifecycle({ plan: docs.plan, ledger: docs.ledger, predecessorId: '31-T' });
 check(docs.receipt.status === 'PASS' && docs.receipt.storageBackend === 'EXTERNAL_USB_D_DRIVE' && docs.receipt.libraryPath === docs.completion.libraryPath, 'D: receipt path and backend PASS');
 check(docs.receipt.basePackage.status === 'PASS' && docs.receipt.basePackage.expected === docs.receipt.basePackage.matched && docs.receipt.basePackage.failed === 0, 'base package receipt PASS');
 for (const key of ['readback', 'receiptReadback', 'persistence']) check(docs[key].status === 'PASS' && docs[key].failed === 0, `${key} PASS`);
@@ -32,7 +34,11 @@ check(docs.execution.status === 'PASS' && docs.execution.officialStepStatus === 
 check(docs.scopeReport.status === 'PASS' && docs.scopeReport.officialStepStatus === 'COMPLETED' && docs.scopeReport.persistentReceiptStatus === 'PASS', 'scope report complete');
 check(docs.scope.status === 'COMPLETED' && docs.scope.targetSliceStatus === 'PASS' && docs.scope.persistentReceiptStatus === 'PASS', 'scope config complete');
 check(step?.status === 'COMPLETED' && step.validationStatus === 'PASS' && step.persistentReceiptStatus === 'PASS', 'work plan complete');
-check(docs.ledger.libraryUploadStatus === '31-T_COMPLETED_RECEIPT_PASS' && docs.ledger.activeMicroStep === null && docs.ledger.nextOfficialTask === 'AUTO_PRIORITY_SELECTION_AFTER_31-T_PERSISTENT_RECEIPT', 'ledger complete');
+check(
+  (docs.ledger.libraryUploadStatus === '31-T_COMPLETED_RECEIPT_PASS' && docs.ledger.activeMicroStep === null && docs.ledger.nextOfficialTask === 'AUTO_PRIORITY_SELECTION_AFTER_31-T_PERSISTENT_RECEIPT')
+    || (laterSuccessor.planValid && laterSuccessor.ledgerValid && laterSuccessor.nextTaskValid),
+  'ledger preserves 31-T completion through an authorized successor',
+);
 check((requirement?.status === 'PARTIAL' || (requirement?.status === 'COMPLETE' && Object.values(requirement.chain ?? {}).every((value) => value === true))) && docs.receipt.PPK002 === 'PARTIAL' && docs.completion.PPK002 === 'PARTIAL', '31-T remains historically PARTIAL while current PPK-002 may have a closed successor chain');
 check(docs.scope.targets.migration === 68 && docs.scope.targets.policyIntents === 'ONE_FRESH_EXACT_DELETE_RECEIPT_PER_GOVERNED_ROW', 'migration and exact receipt boundary');
 check(docs.scope.targets.transactionBoundary.endsWith('ONE_SQLITE_TRANSACTION') && docs.scope.targets.consumption === 'IMMUTABLE_SINGLE_USE_ROLLBACK_DELETION_TOMBSTONE', 'atomic single-use tombstone boundary');

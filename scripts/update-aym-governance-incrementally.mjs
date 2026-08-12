@@ -341,7 +341,7 @@ const updateManagementRecords = async ({ audit, receipt, completion30Z, completi
     || completion31T.officialCompletionClaimed !== true
     || completion31T.storageBackend !== 'EXTERNAL_USB_D_DRIVE'
     || completion31T.PPK002 !== 'PARTIAL'
-    || audit.currentStep !== '31-T'
+    || !['31-T', '33-D'].includes(audit.currentStep)
     || audit.checkpoint31T?.officialCompletionClaimed !== true) {
     throw new Error('31-T checkpoint and Bronze audit are not a completed PASS chain.');
   }

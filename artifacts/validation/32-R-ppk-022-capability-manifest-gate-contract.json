@@ -59,7 +59,7 @@
       "passed": true
     },
     {
-      "name": "manifest contains exactly 238 unique surfaces",
+      "name": "manifest contains exactly 242 unique surfaces",
       "passed": true
     },
     {
@@ -423,7 +423,7 @@
       "passed": true
     },
     {
-      "name": "database migration remains 77",
+      "name": "database migration 77 baseline remains present",
       "passed": true
     },
     {
@@ -446,10 +446,10 @@
   "protectedCapabilityFamilies": 7,
   "canonicalApplications": 14,
   "productionSourceZones": 18,
-  "scannedProductionFiles": 375,
-  "exactCapabilitySurfaces": 238,
-  "exactManifestEntries": 238,
-  "exactManifestSha256": "1f6b3e14aaf7a608a93d857448dab2fcbda924999274b8fbc82f1edd76226eb1",
+  "scannedProductionFiles": 379,
+  "exactCapabilitySurfaces": 242,
+  "exactManifestEntries": 242,
+  "exactManifestSha256": "93ea91572d01e46eb535c2634b62d084f455a92829ac5f2620a7ae9bd5a423ac",
   "pinnedBootstrapSurfaces": 26,
   "maliciousAstSelfTests": 33,
   "benignAstSelfTests": 5,
@@ -467,5 +467,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-12T10:44:37.820Z"
+  "generatedAt": "2026-08-12T17:48:21.760Z"
 }

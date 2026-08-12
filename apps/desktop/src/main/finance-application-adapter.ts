@@ -581,8 +581,8 @@ export class RepositoryBackedFinanceQueryPort implements FinanceQueryPort {
         const execution = governedRepositoryContext(context, transaction, authorization, intent);
         const snapshot = loadAuthorizationSnapshot(this.dependencies, context, execution);
         if (!snapshot.ok) return snapshot;
-        const allowed = (row: { readonly id: string; readonly ownerPersonId: string; readonly privacy: 'private' | 'selected_members' | 'family' }): boolean =>
-          legacyAllowed(this.#authorization, snapshot.value, {
+        const allowed = (row: { readonly id: string; readonly familyId: string; readonly ownerPersonId: string; readonly privacy: 'private' | 'selected_members' | 'family' }): boolean =>
+          row.familyId === context.familyId && legacyAllowed(this.#authorization, snapshot.value, {
             action: 'read',
             resourceType: 'finance_record',
             resourceId: row.id,
@@ -592,6 +592,10 @@ export class RepositoryBackedFinanceQueryPort implements FinanceQueryPort {
           });
         const planningItems = this.dependencies.financeRepository.listPlanningItems(execution);
         if (!planningItems.ok) return planningItems;
+        const importBatches = this.dependencies.financeRepository.listImportBatches(execution);
+        if (!importBatches.ok) return importBatches;
+        const importedCashFlows = this.dependencies.financeRepository.listImportedCashFlows(execution);
+        if (!importedCashFlows.ok) return importedCashFlows;
         const records = this.dependencies.financeRepository.listRecords(execution);
         if (!records.ok) return records;
         const valuations = this.dependencies.financeRepository.listValuations(execution);
@@ -601,12 +605,21 @@ export class RepositoryBackedFinanceQueryPort implements FinanceQueryPort {
         const loans = this.dependencies.financeRepository.listLoanAccounts(execution);
         if (!loans.ok) return loans;
         const visiblePlanningItems = planningItems.value.filter(allowed);
+        const visibleImportBatches = importBatches.value.filter(allowed).map((batch) => Object.freeze({
+          ...batch,
+          status: 'committed' as const
+        }));
+        const visibleImportBatchIds = new Set(visibleImportBatches.map((batch) => batch.id));
+        const visibleImportedCashFlows = importedCashFlows.value.filter((entry) =>
+          visibleImportBatchIds.has(entry.batchId) && allowed({ ...entry, id: entry.batchId }));
         const visibleRecords = records.value.filter(allowed);
         const visibleRecordIds = new Set(visibleRecords.map((record) => record.id));
         return {
           ok: true,
           value: buildFinancePlanningWorkspace({
             planningItems: visiblePlanningItems,
+            importBatches: visibleImportBatches,
+            importedCashFlowEntries: visibleImportedCashFlows,
             financeRecords: visibleRecords,
             financeValuations: valuations.value.filter((valuation) => visibleRecordIds.has(valuation.financeRecordId)),
             paymentCards: cards.value.filter(allowed),
@@ -674,6 +687,14 @@ class GovernedFinanceWriteScope implements FinanceWriteScope {
     return this.dependencies.financeRepository.findPlanningItem(this.execution, id);
   }
 
+  public findPlanningCategoryForImport(id: string): ReturnType<FinanceWriteScope['findPlanningCategoryForImport']> {
+    return this.dependencies.financeRepository.findPlanningCategoryForImport(this.execution, id);
+  }
+
+  public hasImportedFingerprint(fingerprint: string): ReturnType<FinanceWriteScope['hasImportedFingerprint']> {
+    return this.dependencies.financeRepository.hasImportedFingerprint(this.execution, fingerprint);
+  }
+
   public findBankInstitution(
     institutionCode: string
   ): ReturnType<FinanceWriteScope['findBankInstitution']> {
@@ -719,6 +740,18 @@ class GovernedFinanceWriteScope implements FinanceWriteScope {
 
   public insertPlanningItem(input: Parameters<FinanceWriteScope['insertPlanningItem']>[0]) {
     return this.dependencies.financeRepository.insertPlanningItem(this.execution, input);
+  }
+
+  public insertImportBatch(input: Parameters<FinanceWriteScope['insertImportBatch']>[0]) {
+    return this.dependencies.financeRepository.insertImportBatch(this.execution, input);
+  }
+
+  public insertImportedCashFlow(input: Parameters<FinanceWriteScope['insertImportedCashFlow']>[0]) {
+    return this.dependencies.financeRepository.insertImportedCashFlow(this.execution, input);
+  }
+
+  public sealImportBatch(batchId: string): ReturnType<FinanceWriteScope['sealImportBatch']> {
+    return this.dependencies.financeRepository.sealImportBatch(this.execution, batchId);
   }
 
   public appendAudit(input: Parameters<FinanceWriteScope['appendAudit']>[0]) {

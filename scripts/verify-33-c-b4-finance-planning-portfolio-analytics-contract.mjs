@@ -53,20 +53,24 @@ check('all three requirements bind DEC-214 security repositories and dedicated U
   && item?.codeAreas?.includes('packages/repositories/src/ai-consent-repository.ts')
   && item?.codeAreas?.includes('packages/repositories/src/person-lifecycle-repository.ts')
   && item?.codeAreas?.includes('apps/desktop/src/renderer/FinancePlanningPanel.tsx')));
-check('B4-13 and B4-14 remain honestly open', inventory.openRequirements?.join(',') === 'B4-13,B4-14'
+check('33-C inventory preserves its historical open scope and 33-D completes the successor requirements', inventory.openRequirements?.join(',') === 'B4-13,B4-14'
+  && inventory.successorCompletion?.step === '33-D'
+  && inventory.successorCompletion?.status === 'COMPLETE'
   && inventory.openRequirements.every((id) => {
     const item = registry.requirements?.find((candidate) => candidate.id === id);
-    return item?.status !== 'COMPLETE' && !allChainTrue(item);
+    return item?.status === 'COMPLETE' && allChainTrue(item)
+      && item?.evidence?.includes('artifacts/validation/33-D-b4-controlled-import-open-banking-boundary.json')
+      && item?.evidence?.includes('docs/decisions/DEC-215-b4-controlled-import-open-banking.md');
   }));
 check('scope and inventory bind DEC-214 migration 81 with no network channel', scope.status === 'COMPLETE'
   && scope.decision === 'DEC-214' && inventory.latestDatabaseMigration === 81
   && inventory.networkChannels?.length === 0);
 check('boundary evidence is exact green and truth preserving', boundary.status === 'PASS'
-  && boundary.checksFailed === 0 && boundary.latestDatabaseMigration === 81
+  && boundary.checksFailed === 0 && boundary.latestDatabaseMigration === 82
   && boundary.financePlanningLedgerColumns === 39
-  && boundary.ppk021ExactAllowlistEntries === 542
-  && boundary.ppk021UseCaseCompositionSurfaces === 274
-  && boundary.ppk022CapabilitySurfaces === 238
+  && boundary.ppk021ExactAllowlistEntries === 543
+  && boundary.ppk021UseCaseCompositionSurfaces === 275
+  && boundary.ppk022CapabilitySurfaces === 242
   && boundary.prohibitedSecretColumns === 0
   && boundary.crossCurrencyAggregationPerformed === false
   && boundary.externalPricingPerformed === false
@@ -75,7 +79,7 @@ check('boundary evidence is exact green and truth preserving', boundary.status =
 check('DEC-214 is active in the user decision ledger', ledger.decisionCount === ledger.decisions?.length
   && ledger.decisions?.some((item) => item.id === 'DEC-214' && item.status === 'ACTIVE'
     && item.requirements?.join(',') === ids.join(',')));
-check('migration 81 is current and exact', latestMigration === 81
+check('migration 81 remains present and exact under migration 82 successor', latestMigration >= 81
   && migrations.includes("createMigrationDefinition(81, 'b4_finance_planning_portfolio_analytics', financePlanningLedgerSql)"));
 check('decision states manual no-FX no-price no-sync no-payment truth and exact ratchets', includesAll(decision, [
   'kaynağı manueldir', 'Para birimleri birbirine çevrilmez', 'dış piyasa', 'fiyatı almaz',

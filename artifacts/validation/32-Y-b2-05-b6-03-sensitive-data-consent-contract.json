@@ -150,7 +150,7 @@
       "passed": true
     },
     {
-      "name": "PPK-022 ratchet remains exact green with no added capability",
+      "name": "PPK-022 successor ratchet remains exact green",
       "passed": true
     },
     {
@@ -163,9 +163,9 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 81,
-  "ppk021ExactAllowlistEntries": 542,
-  "ppk022CapabilitySurfaces": 238,
+  "latestDatabaseMigration": 82,
+  "ppk021ExactAllowlistEntries": 543,
+  "ppk022CapabilitySurfaces": 242,
   "outboundTransferPerformed": false,
-  "generatedAt": "2026-08-12T16:11:13.727Z"
+  "generatedAt": "2026-08-12T17:50:56.432Z"
 }

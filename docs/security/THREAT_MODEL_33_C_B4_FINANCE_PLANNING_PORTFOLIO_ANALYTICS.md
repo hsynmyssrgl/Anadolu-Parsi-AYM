@@ -38,4 +38,8 @@
 Manuel değerler güncel veya dış finans gerçeğiyle aynı olmayabilir. Girilen birim
 değer yatırım tavsiyesi ya da doğrulanmış piyasa fiyatı değildir. Kur dönüşümü
 yapılmadığı için farklı para birimlerindeki değerler tek toplamda karşılaştırılmaz.
-CSV/Excel/OFX içe aktarma ve open-banking adapter B4-13/B4-14 kapsamında açıktır.
+33-C kapanış anında CSV/Excel/OFX içe aktarma ve open-banking adapter B4-13/B4-14
+kapsamında açıktı. Bu tarihsel risk, 33-D'de DEC-215 ve Migration 82 altında
+kontrollü CSV/TSV/XLSX/OFX/QFX içe aktarma, tekrar önleme, yerel sentetik sandbox ve
+manuel fallback ile kapatıldı. Canlı banka bağlantısı, kimlik bilgisi/token toplama,
+harici onay ve ağ erişimi hâlâ uygulanmaz.

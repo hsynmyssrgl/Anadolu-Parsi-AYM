@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "step": "33-D",
+  "requirements": [
+    "B4-13",
+    "B4-14"
+  ],
+  "status": "PASS",
+  "checksPassed": 14,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "both requirements are complete with exact 13-link chains",
+      "passed": true
+    },
+    {
+      "name": "both requirements bind the exact 33-D evidence triplet",
+      "passed": true
+    },
+    {
+      "name": "both requirements bind parser repository lifecycle and dedicated UI areas",
+      "passed": true
+    },
+    {
+      "name": "scope and inventory bind exact complete DEC-215 migration 82 package",
+      "passed": true
+    },
+    {
+      "name": "boundary evidence is exact green and truth preserving",
+      "passed": true
+    },
+    {
+      "name": "DEC-215 is active and the decision ledger cardinality is exact",
+      "passed": true
+    },
+    {
+      "name": "migration 82 source and manifest checksum are exact",
+      "passed": true
+    },
+    {
+      "name": "decision records controlled formats duplicate fence and honest local adapter boundary",
+      "passed": true
+    },
+    {
+      "name": "threat model covers all primary parser policy privacy and truth risks",
+      "passed": true
+    },
+    {
+      "name": "audit binds IDs exact evidence and no-live successor truth",
+      "passed": true
+    },
+    {
+      "name": "master register contains active DEC-215 summary",
+      "passed": true
+    },
+    {
+      "name": "targeted tests bind exact application parser IPC and durable runtime package",
+      "passed": true
+    },
+    {
+      "name": "root lifecycle and explicit scripts bind 33-D",
+      "passed": true
+    },
+    {
+      "name": "all contract prerequisites exist",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "latestDatabaseMigration": 82,
+  "migration82Checksum": "be32fbe6a79688ee879fda02a16faa78f6e0d4151e1462b2c9f28a1da44518c8",
+  "ppk021ExactAllowlistEntries": 543,
+  "ppk021UseCaseCompositionSurfaces": 275,
+  "ppk022CapabilitySurfaces": 242,
+  "generatedAt": "2026-08-12T18:03:17.760Z"
+}

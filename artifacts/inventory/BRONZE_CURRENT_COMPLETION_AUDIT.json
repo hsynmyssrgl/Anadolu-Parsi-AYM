@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-12T16:11:56.955Z",
+  "generatedAt": "2026-08-12T18:03:37.124Z",
   "release": "Bronze 04.08.2026.29",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
@@ -15,7 +15,7 @@
   "PPK011": "COMPLETE",
   "PPK012": "COMPLETE",
   "authoritativeSource": "06_KOD/app",
-  "currentStep": "31-T",
+  "currentStep": "33-D",
   "status": "PASS_WITH_OPEN_SCOPE",
   "numberingAssessment": {
     "status": "CORRECT_ONLY_WITH_GATED_APPEND_ONLY_NUMBERING",
@@ -29,17 +29,17 @@
   "percentages": {
     "officialWeightedBronzePercent": 25,
     "officialWeightedEvidenceStep": "31-T",
-    "strictRequirementCompletionPercent": 16.2857,
-    "implementationChainCoveragePercent": 16.7714,
-    "governanceEvidenceChainCoveragePercent": 53.0476,
+    "strictRequirementCompletionPercent": 16.8571,
+    "implementationChainCoveragePercent": 17.3429,
+    "governanceEvidenceChainCoveragePercent": 53.4286,
     "interpretation": "These are separate measures and must not be blended into an invented single completion claim."
   },
   "scope": {
     "total": 350,
     "statusCounts": {
-      "COMPLETE": 57,
+      "COMPLETE": 59,
       "FOUNDATION_STARTED": 1,
-      "NOT_IMPLEMENTED": 265,
+      "NOT_IMPLEMENTED": 263,
       "PARTIAL": 27
     },
     "priorityCounts": {
@@ -49,20 +49,20 @@
     },
     "completeByPriority": {
       "P0": 53,
-      "P1": 4,
+      "P1": 6,
       "P2": 0
     },
-    "incompleteCount": 293,
-    "strictComplete": 57,
+    "incompleteCount": 291,
+    "strictComplete": 59,
     "implementationCoverage": {
-      "passed": 587,
+      "passed": 607,
       "total": 3500,
-      "percent": 16.7714
+      "percent": 17.3429
     },
     "governanceCoverage": {
-      "passed": 557,
+      "passed": 561,
       "total": 1050,
-      "percent": 53.0476
+      "percent": 53.4286
     }
   },
   "rules": {
@@ -320,11 +320,35 @@
         ]
       },
       {
+        "script": "scripts/verify-b4-controlled-import-open-banking-boundary.mjs",
+        "exitCode": 0,
+        "status": "PASS",
+        "tail": [
+          "B4 controlled import open banking boundary: PASS (40/40 checks)."
+        ]
+      },
+      {
+        "script": "scripts/verify-33-d-b4-controlled-import-open-banking-contract.mjs",
+        "exitCode": 0,
+        "status": "PASS",
+        "tail": [
+          "B4 controlled import open banking contract: PASS (14/14 checks)."
+        ]
+      },
+      {
+        "script": "scripts/verify-33-d-b4-controlled-import-open-banking-runtime.mjs",
+        "exitCode": 0,
+        "status": "PASS",
+        "tail": [
+          "B4 controlled import open banking runtime: PASS (11/11 checks)."
+        ]
+      },
+      {
         "script": "scripts/protect-authoritative-source-external.mjs",
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"7805014b20a51b695081f1342482367dc2a55b7b070ee1e37043311e8db8d62f\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\7805014b20a51b695081f1342482367dc2a55b7b070ee1e37043311e8db8d62f\",\"files\":9}"
+          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"858b09af17f9f699591cb71948982189598fd16f317996f783d1a6700c454cb5\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\858b09af17f9f699591cb71948982189598fd16f317996f783d1a6700c454cb5\",\"files\":9}"
         ]
       },
       {
@@ -332,7 +356,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "Step Checkpoint Gate: PASS (1866 checks / current 31-T)."
+          "Step Checkpoint Gate: PASS (1871 checks / current 33-D)."
         ]
       }
     ],
@@ -342,10 +366,10 @@
       "exitCode": 1,
       "status": "FAIL",
       "tail": [
+        "scope status counts mismatch",
         "complete requirement IDs mismatch",
         "promotion completion percent mismatch",
         "chain evidence coverage mismatch",
-        "active top-level step count mismatch",
         "current step must be 29-D6 or a durably authorized forward step after receipt completion",
         "29-D6 active state mismatch",
         "active governance next task mismatch",
@@ -1003,7 +1027,7 @@
     "status": "PASS",
     "officialCompletionClaimed": true,
     "storageBackend": "EXTERNAL_USB_D_DRIVE",
-    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\7805014b20a51b695081f1342482367dc2a55b7b070ee1e37043311e8db8d62f"
+    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\858b09af17f9f699591cb71948982189598fd16f317996f783d1a6700c454cb5"
   },
   "remainingWork": [
     {
@@ -6783,54 +6807,6 @@
       "workOrderClass": "NEW_NOT_STARTED",
       "area": "Aile ve Hafıza",
       "title": "Kaynak/kanıt belge bağlantısı ve ilişki tarihçesi",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B4-13",
-      "priority": "P1",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Finans ve Bankacılık",
-      "title": "CSV/Excel/OFX benzeri kontrollü içe aktarma, eşleme ve tekrar önleme",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B4-14",
-      "priority": "P1",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Finans ve Bankacılık",
-      "title": "ÖHVPS/open-banking adapter sözleşmesi, sandbox ve manuel fallback",
       "completedChainCount": 1,
       "completionBlockers": [],
       "missingChain": [

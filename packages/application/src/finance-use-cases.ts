@@ -31,6 +31,9 @@ import type {
   FinanceGoalLedgerView,
   FinanceGoalProgressView,
   FinanceGoalView,
+  FinanceImportBatchView,
+  FinanceImportedCashFlowView,
+  CommitFinanceImportBatchInput,
   FinancePlanningLedgerItemView,
   FinancePlanningScopeSummaryView,
   FinancePlanningWorkspaceView,
@@ -60,6 +63,7 @@ import {
   inspectPaymentCardDataContract,
   inspectFinancePlanningDataContract,
   inspectProhibitedBankingSecrets,
+  containsLikelyFullPan,
   maskIban,
   normalizeIban,
   validateIbanStructure
@@ -160,6 +164,25 @@ export interface FinanceWriteScope {
     ownerPersonId: PersonId;
     createdAt: IsoDateTime;
   }): Result<void, AppError>;
+  findPlanningCategoryForImport(id: string): Result<(FinancePlanningLedgerItemView & {
+    familyId: FamilyId;
+    ownerPersonId: PersonId;
+    createdAt: IsoDateTime;
+  }) | null, AppError>;
+  hasImportedFingerprint(fingerprint: string): Result<boolean, AppError>;
+  insertImportBatch(row: Omit<FinanceImportBatchView, 'status'> & {
+    familyId: FamilyId;
+    ownerPersonId: PersonId;
+    status: 'staging';
+    createdAt: IsoDateTime;
+  }): Result<void, AppError>;
+  insertImportedCashFlow(row: FinanceImportedCashFlowView & {
+    familyId: FamilyId;
+    ownerPersonId: PersonId;
+    occurredAt: IsoDateTime;
+    createdAt: IsoDateTime;
+  }): Result<void, AppError>;
+  sealImportBatch(batchId: string): Result<void, AppError>;
   appendAudit(input: {
     id: string;
     action: string;
@@ -248,6 +271,8 @@ export class GetFinancePlanningWorkspaceUseCase {
 
 export interface FinancePlanningWorkspaceSource {
   readonly planningItems: readonly FinancePlanningLedgerItemView[];
+  readonly importBatches?: readonly FinanceImportBatchView[];
+  readonly importedCashFlowEntries?: readonly FinanceImportedCashFlowView[];
   readonly financeRecords: readonly FinanceRecordView[];
   readonly financeValuations: readonly FinanceValuationView[];
   readonly paymentCards: readonly PaymentCardView[];
@@ -267,6 +292,11 @@ export const buildFinancePlanningWorkspace = (
   const cashFlowEntries = source.planningItems
     .filter((item): item is FinanceCashFlowEntryView => item.itemType === 'cash_flow')
     .sort((left, right) => right.occurredAt.localeCompare(left.occurredAt) || left.id.localeCompare(right.id));
+  const importedCashFlowEntries = [...(source.importedCashFlowEntries ?? [])]
+    .sort((left, right) => right.occurredAt.localeCompare(left.occurredAt) || left.id.localeCompare(right.id));
+  const importBatches = [...(source.importBatches ?? [])]
+    .sort((left, right) => right.createdAt.localeCompare(left.createdAt) || left.id.localeCompare(right.id));
+  const realizedCashFlowEntries = [...cashFlowEntries, ...importedCashFlowEntries];
   const budgetRevisions = source.planningItems
     .filter((item): item is FinanceBudgetRevisionView => item.itemType === 'budget')
     .sort((left, right) => right.createdAt.localeCompare(left.createdAt) || left.id.localeCompare(right.id));
@@ -333,11 +363,11 @@ export const buildFinancePlanningWorkspace = (
   }
   const budgetVariances = [...latestBudgetByKey.values()].map((budget): FinanceBudgetVarianceView => {
     const category = categoryById.get(budget.categoryId);
-    const realizedAmount = roundMoney(cashFlowEntries
+    const realizedAmount = roundMoney(realizedCashFlowEntries
       .filter((entry) => entry.ownerPersonId === budget.ownerPersonId
         && entry.categoryId === budget.categoryId
         && entry.currency === budget.currency
-        && entry.status === 'realized'
+        && (!('status' in entry) || entry.status === 'realized')
         && entry.occurredAt.slice(0, 7) === budget.periodMonth)
       .reduce((total, entry) => total + entry.amount, 0));
     const varianceAmount = roundMoney(realizedAmount - budget.plannedAmount);
@@ -366,6 +396,8 @@ export const buildFinancePlanningWorkspace = (
   }
   const ownerIds = new Set<string>();
   for (const item of source.planningItems) ownerIds.add(item.ownerPersonId);
+  for (const item of importedCashFlowEntries) ownerIds.add(item.ownerPersonId);
+  for (const batch of importBatches) ownerIds.add(batch.ownerPersonId);
   for (const record of source.financeRecords) ownerIds.add(record.ownerPersonId);
   for (const card of source.paymentCards) ownerIds.add(card.ownerPersonId);
   for (const loan of source.loanAccounts) ownerIds.add(loan.ownerPersonId);
@@ -397,7 +429,7 @@ export const buildFinancePlanningWorkspace = (
     for (const loan of source.loanAccounts.filter((item) => item.status !== 'closed' && (ownerPersonId === undefined || item.ownerPersonId === ownerPersonId))) {
       bucket(loan.currency).liabilityValue += loan.remainingPrincipal;
     }
-    for (const entry of cashFlowEntries.filter((item) => item.status === 'realized' && (ownerPersonId === undefined || item.ownerPersonId === ownerPersonId))) {
+    for (const entry of realizedCashFlowEntries.filter((item) => (!('status' in item) || item.status === 'realized') && (ownerPersonId === undefined || item.ownerPersonId === ownerPersonId))) {
       if (entry.direction === 'income') bucket(entry.currency).realizedIncome += entry.amount;
       else bucket(entry.currency).realizedExpense += entry.amount;
     }
@@ -499,6 +531,8 @@ export const buildFinancePlanningWorkspace = (
   return Object.freeze({
     categories: Object.freeze(categories),
     cashFlowEntries: Object.freeze(cashFlowEntries),
+    importedCashFlowEntries: Object.freeze(importedCashFlowEntries),
+    importBatches: Object.freeze(importBatches),
     budgetRevisions: Object.freeze(budgetRevisions),
     budgetVariances: Object.freeze(budgetVariances),
     recurringRules: Object.freeze(recurringRules),
@@ -513,7 +547,17 @@ export const buildFinancePlanningWorkspace = (
     dataSource: 'manual',
     externalPricing: 'not_performed',
     bankSynchronization: 'not_performed',
-    paymentExecution: 'not_performed'
+    paymentExecution: 'not_performed',
+    openBankingBoundary: Object.freeze({
+      adapterContract: 'ohvps-v1-local',
+      supportedModes: Object.freeze(['sandbox', 'manual_fallback'] as const),
+      sandboxData: 'synthetic_local',
+      manualFallback: 'controlled_file_import',
+      liveBankConnection: 'not_implemented',
+      networkAccess: 'not_performed',
+      credentialCollection: 'prohibited',
+      externalConsent: 'not_performed'
+    })
   });
 };
 
@@ -1639,6 +1683,235 @@ export class RecordFinancePlanningItemUseCase {
         }
       });
       return event.ok ? ok(item) : event;
+    });
+  }
+}
+
+export class CommitFinanceImportBatchUseCase {
+  public constructor(private readonly unitOfWork: FinanceUnitOfWork) {}
+
+  public async execute(input: {
+    context: FinanceApplicationContext;
+    command: CommitFinanceImportBatchInput;
+    identifiers: {
+      batchId: string;
+      entryIds: readonly string[];
+      auditId: string;
+      outboxEventId: EventId;
+    };
+  }): Promise<Result<FinanceImportBatchView, AppError>> {
+    const command = input.command;
+    const mappingRecord = command.mapping !== null && typeof command.mapping === 'object' && !Array.isArray(command.mapping)
+      ? command.mapping as unknown as Record<string, unknown>
+      : undefined;
+    const allowedMappingKeys = new Set([
+      'dateColumn','descriptionColumn','amountColumn','debitColumn','creditColumn',
+      'directionColumn','currencyColumn','externalIdColumn','amountMode'
+    ]);
+    const optionalColumnKeys = [
+      'descriptionColumn','amountColumn','debitColumn','creditColumn',
+      'directionColumn','currencyColumn','externalIdColumn'
+    ] as const;
+    const selectedColumns = mappingRecord === undefined ? [] : [
+      mappingRecord.dateColumn,
+      ...optionalColumnKeys.map((key) => mappingRecord[key])
+    ].filter((value): value is string => typeof value === 'string' && value.length > 0);
+    let mappingJson = '';
+    try { mappingJson = JSON.stringify(mappingRecord) ?? ''; } catch { /* invalid cyclic command */ }
+    const validFileName = command.fileName.length >= 1
+      && command.fileName.length <= 180
+      && !/[\\/\0]/u.test(command.fileName)
+      && (command.sourceMode === 'sandbox' || command.fileName.toLowerCase().endsWith(`.${command.sourceFormat}`));
+    const validSource = command.sourceMode === 'sandbox'
+      ? command.sourceFormat === 'sandbox'
+      : ['csv','tsv','xlsx','ofx','qfx'].includes(command.sourceFormat);
+    const validMapping = mappingRecord !== undefined
+      && mappingJson.length <= 4_096
+      && Object.keys(mappingRecord).every((key) => allowedMappingKeys.has(key))
+      && typeof mappingRecord.dateColumn === 'string'
+      && validPlanningText(mappingRecord.dateColumn, 1, 120)
+      && optionalColumnKeys.every((key) => mappingRecord[key] === undefined
+        || (typeof mappingRecord[key] === 'string' && validPlanningText(mappingRecord[key], 1, 120)))
+      && ['signed','absolute_with_direction','debit_credit_columns'].includes(String(mappingRecord.amountMode))
+      && new Set(selectedColumns).size === selectedColumns.length
+      && (mappingRecord.amountMode === 'debit_credit_columns'
+        ? mappingRecord.debitColumn !== undefined || mappingRecord.creditColumn !== undefined
+        : mappingRecord.amountColumn !== undefined)
+      && (mappingRecord.amountMode !== 'absolute_with_direction' || mappingRecord.directionColumn !== undefined);
+    if (!validPlanningId(command.ownerPersonId)
+      || !['private','selected_members','family'].includes(command.privacy)
+      || !validSource
+      || !validFileName
+      || !/^[a-f0-9]{64}$/u.test(command.fileSha256)
+      || !validPlanningCurrency(command.defaultCurrency)
+      || !['skip','reject'].includes(command.duplicateStrategy)
+      || !validMapping
+      || !Number.isInteger(command.totalRows)
+      || command.totalRows < 1
+      || command.totalRows > 5_000
+      || command.rows.length !== command.totalRows
+      || input.identifiers.entryIds.length !== command.rows.length) {
+      return err(invalid(input.context, 'Finans iÃ§e aktarma paketi, eÅŸlemesi veya kaynak sÄ±nÄ±rÄ± geÃ§ersiz.'));
+    }
+
+    const normalizedRows: Array<Omit<(typeof command.rows)[number], 'occurredAt'> & { occurredAt: IsoDateTime }> = [];
+    for (const row of command.rows) {
+      const occurredAt = date(row.occurredAt, input.context, 'Ä°Ã§e aktarma satÄ±r tarihi');
+      if (!occurredAt.ok) return occurredAt;
+      if (!validPlanningId(row.categoryId)
+        || !['income','expense'].includes(row.direction)
+        || !finiteMoney(row.amount)
+        || row.amount <= 0
+        || !validPlanningCurrency(row.currency)
+        || !Number.isInteger(row.sourceRowNumber)
+        || row.sourceRowNumber < 1
+        || row.sourceRowNumber > 1_000_000
+        || !/^[a-f0-9]{64}$/u.test(row.rowFingerprint)
+        || (row.description !== undefined && !validPlanningText(row.description, 1, 240))
+        || (row.externalId !== undefined && !validPlanningText(row.externalId, 1, 160))
+        || containsLikelyFullPan(row.description)
+        || containsLikelyFullPan(row.externalId)) {
+        return err(invalid(input.context, `Finans iÃ§e aktarma satÄ±rÄ± geÃ§ersiz: ${row.sourceRowNumber}.`));
+      }
+      normalizedRows.push({ ...row, currency: row.currency.toUpperCase(), occurredAt: occurredAt.value });
+    }
+
+    const ownerPersonId = asPersonId(command.ownerPersonId);
+    const intent: FinancePolicyIntent = {
+      action: 'create',
+      capability: 'finance.write',
+      resourceType: 'finance_record',
+      resourceId: input.identifiers.batchId,
+      purpose: 'finance',
+      ownerPersonId,
+      privacy: command.privacy
+    };
+    return this.unitOfWork.execute(input.context, intent, (scope) => {
+      const person = scope.findPerson(ownerPersonId);
+      if (!person.ok) return person;
+      if (!person.value) return err(missing(input.context, 'Finans iÃ§e aktarma sahibinin aile Ã¼yeliÄŸi bulunamadÄ±.'));
+      const authorization = scope.authorize({
+        action: 'create',
+        resourceType: 'finance_record',
+        resourceId: input.identifiers.batchId,
+        ownerPersonId,
+        privacy: command.privacy
+      });
+      if (!authorization.ok) return authorization;
+      if (!authorization.value) return err(denied(input.context));
+
+      const categoryIds = [...new Set(normalizedRows.map((row) => row.categoryId))];
+      const categories = new Map<string, FinanceCategoryView>();
+      for (const categoryId of categoryIds) {
+        const found = scope.findPlanningCategoryForImport(categoryId);
+        if (!found.ok) return found;
+        if (!found.value || found.value.itemType !== 'category') {
+          return err(missing(input.context, 'Ä°Ã§e aktarma satÄ±rÄ±nÄ±n gelir/gider kategorisi bulunamadÄ±.'));
+        }
+        if (found.value.ownerPersonId !== ownerPersonId || found.value.privacy !== command.privacy) {
+          return err(denied(input.context));
+        }
+        categories.set(categoryId, found.value);
+      }
+
+      const acceptedRows: typeof normalizedRows = [];
+      const seenFingerprints = new Set<string>();
+      let duplicateRows = 0;
+      for (const row of normalizedRows) {
+        const category = categories.get(row.categoryId)!;
+        if (category.kind !== row.direction) {
+          return err(invalid(input.context, `Ä°Ã§e aktarma satÄ±rÄ± kategori yÃ¶nÃ¼yle uyuÅŸmuyor: ${row.sourceRowNumber}.`));
+        }
+        if (row.occurredAt > scope.occurredAt) {
+          return err(invalid(input.context, `GerÃ§ekleÅŸmiÅŸ iÃ§e aktarma satÄ±rÄ± gelecekte olamaz: ${row.sourceRowNumber}.`));
+        }
+        const repeatedInBatch = seenFingerprints.has(row.rowFingerprint);
+        seenFingerprints.add(row.rowFingerprint);
+        const alreadyStored = repeatedInBatch ? { ok: true as const, value: true } : scope.hasImportedFingerprint(row.rowFingerprint);
+        if (!alreadyStored.ok) return alreadyStored;
+        if (alreadyStored.value) duplicateRows += 1;
+        else acceptedRows.push(row);
+      }
+      if (duplicateRows > 0 && command.duplicateStrategy === 'reject') {
+        return err(invalid(input.context, `${duplicateRows} tekrar eden finans hareketi bulundu; paket kaydedilmedi.`));
+      }
+
+      const batchCommon = {
+        id: input.identifiers.batchId,
+        familyId: input.context.familyId,
+        ownerPersonId,
+        privacy: command.privacy,
+        sourceMode: command.sourceMode,
+        sourceFormat: command.sourceFormat,
+        fileName: command.fileName,
+        fileSha256: command.fileSha256,
+        mapping: Object.freeze({ ...command.mapping }),
+        defaultCurrency: command.defaultCurrency,
+        duplicateStrategy: command.duplicateStrategy,
+        totalRows: command.totalRows,
+        importedRows: acceptedRows.length,
+        duplicateRows,
+        adapterContract: 'ohvps-v1-local' as const,
+        networkAccess: 'not_performed' as const,
+        credentialExchange: 'not_performed' as const,
+        externalConsent: 'not_performed' as const,
+        createdAt: scope.occurredAt
+      };
+      const insertedBatch = scope.insertImportBatch({ ...batchCommon, status: 'staging' });
+      if (!insertedBatch.ok) return insertedBatch;
+      for (let index = 0; index < acceptedRows.length; index += 1) {
+        const row = acceptedRows[index]!;
+        const inserted = scope.insertImportedCashFlow({
+          id: input.identifiers.entryIds[normalizedRows.indexOf(row)]!,
+          batchId: input.identifiers.batchId,
+          familyId: input.context.familyId,
+          ownerPersonId,
+          categoryId: row.categoryId,
+          direction: row.direction,
+          amount: row.amount,
+          currency: row.currency,
+          occurredAt: row.occurredAt,
+          ...(row.description ? { description: row.description.trim() } : {}),
+          ...(row.externalId ? { externalId: row.externalId.trim() } : {}),
+          sourceRowNumber: row.sourceRowNumber,
+          rowFingerprint: row.rowFingerprint,
+          privacy: command.privacy,
+          dataSource: command.sourceMode === 'sandbox' ? 'sandbox' : 'file_import',
+          externalVerification: 'not_performed',
+          createdAt: scope.occurredAt
+        });
+        if (!inserted.ok) return inserted;
+      }
+      const sealed = scope.sealImportBatch(input.identifiers.batchId);
+      if (!sealed.ok) return sealed;
+      const audit = scope.appendAudit({
+        id: input.identifiers.auditId,
+        action: 'finance.import.batch_committed',
+        resourceType: 'finance_record',
+        resourceId: input.identifiers.batchId,
+        occurredAt: scope.occurredAt,
+        actorId: input.context.actor.userId
+      });
+      if (!audit.ok) return audit;
+      const event = scope.enqueueEvent({
+        eventId: input.identifiers.outboxEventId,
+        eventType: 'finance.import.batch_committed',
+        eventVersion: 1,
+        aggregateType: 'finance_record',
+        aggregateId: input.identifiers.batchId,
+        occurredAt: scope.occurredAt,
+        actorId: input.context.actor.userId,
+        correlationId: input.context.correlationId,
+        payload: {
+          batchId: input.identifiers.batchId,
+          ownerPersonId,
+          sourceMode: command.sourceMode,
+          importedRows: acceptedRows.length,
+          duplicateRows,
+          privacy: command.privacy
+        }
+      });
+      return event.ok ? ok(Object.freeze({ ...batchCommon, status: 'committed' as const })) : event;
     });
   }
 }

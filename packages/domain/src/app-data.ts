@@ -916,6 +916,8 @@ export interface FinanceUpcomingPaymentView {
 export interface FinancePlanningWorkspaceView {
   categories:readonly FinanceCategoryView[];
   cashFlowEntries:readonly FinanceCashFlowEntryView[];
+  importedCashFlowEntries:readonly FinanceImportedCashFlowView[];
+  importBatches:readonly FinanceImportBatchView[];
   budgetRevisions:readonly FinanceBudgetRevisionView[];
   budgetVariances:readonly FinanceBudgetVarianceView[];
   recurringRules:readonly FinanceRecurringRuleView[];
@@ -929,6 +931,7 @@ export interface FinancePlanningWorkspaceView {
   externalPricing:'not_performed';
   bankSynchronization:'not_performed';
   paymentExecution:'not_performed';
+  openBankingBoundary:FinanceOpenBankingBoundaryView;
 }
 
 export type RecordFinancePlanningItemInput =
@@ -941,6 +944,158 @@ export type RecordFinancePlanningItemInput =
   | { itemType:'goal_progress'; goalId:string; currentAmount:number; recordedAt:string; note?:string }
   | { itemType:'asset'; ownerPersonId:string; name:string; assetClass:FinanceAssetClass; currency:string; quantity:number; unitValue:number; valuedAt:string; note?:string; privacy:RecordPrivacy }
   | { itemType:'asset_valuation'; assetId:string; quantity:number; unitValue:number; valuedAt:string; note?:string };
+
+export const FINANCE_IMPORT_SOURCE_FORMATS = ['csv','tsv','xlsx','ofx','qfx','sandbox'] as const;
+export type FinanceImportSourceFormat = typeof FINANCE_IMPORT_SOURCE_FORMATS[number];
+export type FinanceImportSourceMode = 'controlled_file'|'sandbox';
+export type FinanceImportDuplicateStrategy = 'skip'|'reject';
+export type FinanceImportAmountMode = 'signed'|'absolute_with_direction'|'debit_credit_columns';
+
+export interface FinanceImportColumnMappingInput {
+  dateColumn:string;
+  descriptionColumn?:string;
+  amountColumn?:string;
+  debitColumn?:string;
+  creditColumn?:string;
+  directionColumn?:string;
+  currencyColumn?:string;
+  externalIdColumn?:string;
+  amountMode:FinanceImportAmountMode;
+}
+
+export interface FinanceImportPreviewRowView {
+  rowNumber:number;
+  values:readonly string[];
+}
+
+export interface FinanceImportPreviewView {
+  previewId:string;
+  fileName:string;
+  sourceMode:FinanceImportSourceMode;
+  sourceFormat:FinanceImportSourceFormat;
+  fileSha256:string;
+  headers:readonly string[];
+  sampleRows:readonly FinanceImportPreviewRowView[];
+  totalRows:number;
+  expiresAt:string;
+  warnings:readonly string[];
+  rawFileRetained:false;
+  filePathExposed:false;
+  /** Parsed rows remain only in the main-process preview session until expiry/consume/clear. */
+  parsedRowsRetainedUntilExpiry:true;
+  /** A bounded sample of cell values is intentionally exposed to the trusted renderer for mapping. */
+  sampleCellValuesExposed:true;
+}
+
+export interface SelectFinanceImportFileResult {
+  canceled:boolean;
+  preview?:FinanceImportPreviewView;
+}
+
+export interface CommitFinanceImportPreviewInput {
+  previewId:string;
+  ownerPersonId:string;
+  privacy:RecordPrivacy;
+  mapping:FinanceImportColumnMappingInput;
+  defaultCurrency:string;
+  incomeCategoryId?:string;
+  expenseCategoryId?:string;
+  duplicateStrategy:FinanceImportDuplicateStrategy;
+}
+
+export interface FinanceImportNormalizedRowInput {
+  categoryId:string;
+  direction:FinanceCategoryKind;
+  amount:number;
+  currency:string;
+  occurredAt:string;
+  description?:string;
+  externalId?:string;
+  sourceRowNumber:number;
+  rowFingerprint:string;
+}
+
+export type FinanceImportPreparedRowInput = Omit<FinanceImportNormalizedRowInput, 'rowFingerprint'>;
+
+export interface CommitFinanceImportPreparedBatchInput {
+  ownerPersonId:string;
+  privacy:RecordPrivacy;
+  sourceMode:FinanceImportSourceMode;
+  sourceFormat:FinanceImportSourceFormat;
+  fileName:string;
+  fileSha256:string;
+  mapping:FinanceImportColumnMappingInput;
+  defaultCurrency:string;
+  duplicateStrategy:FinanceImportDuplicateStrategy;
+  totalRows:number;
+  rows:readonly FinanceImportPreparedRowInput[];
+}
+
+export interface CommitFinanceImportBatchInput {
+  ownerPersonId:string;
+  privacy:RecordPrivacy;
+  sourceMode:FinanceImportSourceMode;
+  sourceFormat:FinanceImportSourceFormat;
+  fileName:string;
+  fileSha256:string;
+  mapping:FinanceImportColumnMappingInput;
+  defaultCurrency:string;
+  duplicateStrategy:FinanceImportDuplicateStrategy;
+  totalRows:number;
+  rows:readonly FinanceImportNormalizedRowInput[];
+}
+
+export interface FinanceImportBatchView {
+  id:string;
+  ownerPersonId:string;
+  privacy:RecordPrivacy;
+  sourceMode:FinanceImportSourceMode;
+  sourceFormat:FinanceImportSourceFormat;
+  fileName:string;
+  fileSha256:string;
+  mapping:FinanceImportColumnMappingInput;
+  defaultCurrency:string;
+  duplicateStrategy:FinanceImportDuplicateStrategy;
+  totalRows:number;
+  importedRows:number;
+  duplicateRows:number;
+  status:'committed';
+  adapterContract:'ohvps-v1-local';
+  networkAccess:'not_performed';
+  credentialExchange:'not_performed';
+  externalConsent:'not_performed';
+  createdAt:string;
+}
+
+export interface FinanceImportedCashFlowView {
+  id:string;
+  batchId:string;
+  ownerPersonId:string;
+  categoryId:string;
+  direction:FinanceCategoryKind;
+  amount:number;
+  currency:string;
+  occurredAt:string;
+  description?:string;
+  externalId?:string;
+  sourceRowNumber:number;
+  rowFingerprint:string;
+  privacy:RecordPrivacy;
+  dataSource:'file_import'|'sandbox';
+  externalVerification:'not_performed';
+  createdAt:string;
+}
+
+export interface FinanceOpenBankingBoundaryView {
+  adapterContract:'ohvps-v1-local';
+  supportedModes:readonly ['sandbox','manual_fallback'];
+  sandboxData:'synthetic_local';
+  manualFallback:'controlled_file_import';
+  liveBankConnection:'not_implemented';
+  networkAccess:'not_performed';
+  credentialCollection:'prohibited';
+  externalConsent:'not_performed';
+}
 export interface HealthRecordView { id:string; ownerPersonId:string; title:string; kind:'appointment'|'medication'|'diagnosis'|'vaccine'|'note'; privacy:RecordPrivacy; provider?:string; notes?:string; occurredAt:string; createdAt:string; }
 export interface CreateHealthRecordInput { ownerPersonId:string; title:string; kind:HealthRecordView['kind']; privacy:RecordPrivacy; provider?:string; notes?:string; occurredAt:string; }
 

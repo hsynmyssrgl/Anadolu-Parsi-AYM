@@ -14,7 +14,7 @@
       "passed": true
     },
     {
-      "name": "inventory has no blocker and keeps B4-10 through B4-14 open",
+      "name": "inventory preserves historical-at-closure B4-10 through B4-14 scope and current successors complete it",
       "passed": true
     },
     {
@@ -163,12 +163,12 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 81,
-  "ppk021ExactAllowlistEntries": 542,
-  "ppk021UseCaseCompositionSurfaces": 274,
-  "ppk022CapabilitySurfaces": 238,
+  "latestDatabaseMigration": 82,
+  "ppk021ExactAllowlistEntries": 543,
+  "ppk021UseCaseCompositionSurfaces": 275,
+  "ppk022CapabilitySurfaces": 242,
   "prohibitedSecretColumns": 0,
   "bankVerificationPerformed": false,
   "bankExecutionPerformed": false,
-  "generatedAt": "2026-08-12T16:14:53.012Z"
+  "generatedAt": "2026-08-12T18:07:39.671Z"
 }

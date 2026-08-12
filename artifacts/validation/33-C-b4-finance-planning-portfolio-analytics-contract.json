@@ -23,7 +23,7 @@
       "passed": true
     },
     {
-      "name": "B4-13 and B4-14 remain honestly open",
+      "name": "33-C inventory preserves its historical open scope and 33-D completes the successor requirements",
       "passed": true
     },
     {
@@ -39,7 +39,7 @@
       "passed": true
     },
     {
-      "name": "migration 81 is current and exact",
+      "name": "migration 81 remains present and exact under migration 82 successor",
       "passed": true
     },
     {
@@ -68,9 +68,9 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 81,
-  "ppk021ExactAllowlistEntries": 542,
-  "ppk021UseCaseCompositionSurfaces": 274,
-  "ppk022CapabilitySurfaces": 238,
-  "generatedAt": "2026-08-12T16:13:34.526Z"
+  "latestDatabaseMigration": 82,
+  "ppk021ExactAllowlistEntries": 543,
+  "ppk021UseCaseCompositionSurfaces": 275,
+  "ppk022CapabilitySurfaces": 242,
+  "generatedAt": "2026-08-12T17:51:01.934Z"
 }

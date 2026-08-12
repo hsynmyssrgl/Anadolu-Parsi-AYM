@@ -85,7 +85,7 @@ check(audit.checkpoint31D.persistentReceiptStatus === 'PASS', 'focused external 
 check(audit.checkpoint31D.officialCompletionClaimed === true, 'focused 31-D official completion is missing');
 check(audit.checkpoint31E.persistentReceiptStatus === 'PASS', 'focused external 31-E receipt must be PASS');
 check(audit.checkpoint31E.officialCompletionClaimed === true && audit.checkpoint31E.B002 === 'COMPLETE', 'focused 31-E official completion is missing');
-check(audit.currentStep === '31-T' && audit.percentages.officialWeightedEvidenceStep === '31-T', 'Bronze audit current checkpoint is not 31-T');
+check(['31-T', '33-D'].includes(audit.currentStep) && audit.percentages.officialWeightedEvidenceStep === '31-T', 'Bronze audit active checkpoint or historical weighted-evidence checkpoint is invalid');
 for (const letter of ['K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T']) {
   const checkpoint = audit[`checkpoint31${letter}`];
   check(checkpoint?.persistentReceiptStatus === 'PASS', `external 31-${letter} receipt must be PASS`);

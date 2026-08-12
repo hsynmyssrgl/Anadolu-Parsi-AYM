@@ -18,7 +18,7 @@
   "signedManifestRuntimeCheckRequired": true,
   "buildManifestAloneGrantsRuntimeAuthority": false,
   "productionSourceZoneCount": 18,
-  "scannedProductionFiles": 375,
+  "scannedProductionFiles": 379,
   "protectedCapabilityFamilies": [
     "camera",
     "microphone",
@@ -30,11 +30,11 @@
   ],
   "surfaceCounts": {
     "FILE_DIALOG": 2,
-    "FILE_IMPORT": 225,
+    "FILE_IMPORT": 229,
     "NETWORK_API": 3,
     "NETWORK_IMPORT": 8
   },
-  "exactCapabilitySurfaceCount": 238,
+  "exactCapabilitySurfaceCount": 242,
   "applicationRuntimeCapabilities": {
     "windows-desktop": [
       "file.access",
@@ -899,12 +899,28 @@
       "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
     },
     {
+      "key": "FILE_IMPORT|apps/desktop/src/main/main.ts|node:fs:closeSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
       "key": "FILE_IMPORT|apps/desktop/src/main/main.ts|node:fs:existsSync",
       "applicationIds": [
         "windows-desktop"
       ],
       "capability": "file.access",
       "runtimeEnforcement": "PINNED_BOOTSTRAP_THEN_SIGNED"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/main.ts|node:fs:fstatSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
     },
     {
       "key": "FILE_IMPORT|apps/desktop/src/main/main.ts|node:fs:mkdirSync",
@@ -915,12 +931,28 @@
       "runtimeEnforcement": "PINNED_BOOTSTRAP_THEN_SIGNED"
     },
     {
+      "key": "FILE_IMPORT|apps/desktop/src/main/main.ts|node:fs:openSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
       "key": "FILE_IMPORT|apps/desktop/src/main/main.ts|node:fs:readFileSync",
       "applicationIds": [
         "windows-desktop"
       ],
       "capability": "file.access",
       "runtimeEnforcement": "PINNED_BOOTSTRAP_THEN_SIGNED"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/main.ts|node:fs:readSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
     },
     {
       "key": "FILE_IMPORT|apps/desktop/src/main/main.ts|node:fs:rmSync",

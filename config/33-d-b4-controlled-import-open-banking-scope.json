@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "id": "33-D-B4-CONTROLLED-IMPORT-OPEN-BANKING",
+  "decision": "DEC-215",
+  "requirements": ["B4-13", "B4-14"],
+  "status": "COMPLETE",
+  "controlledImport": {
+    "sourceFormats": ["csv", "tsv", "xlsx", "ofx", "qfx"],
+    "workflow": ["main-owned-file-selection", "ephemeral-preview", "exact-column-mapping", "atomic-commit"],
+    "maximumFileBytes": 5242880,
+    "maximumRows": 5000,
+    "maximumColumns": 64,
+    "previewTtlMinutes": 15,
+    "maximumConcurrentPreviews": 8,
+    "timerBackedExpiry": true,
+    "sessionOwnerBinding": ["renderer-sender", "authenticated-account", "family"],
+    "clearOnAuthTransition": true,
+    "rawFileRetained": false,
+    "parsedRowsRetainedUntilExpiry": true,
+    "sampleCellValuesExposedToRenderer": true,
+    "filePathExposedToRenderer": false,
+    "amountModes": ["signed", "absolute_with_direction", "debit_credit_columns"],
+    "duplicateStrategies": ["skip", "reject"],
+    "duplicateFingerprint": "SHA-256(family,owner,source-file-sha256,source-row-number,date,direction,amount,currency,external-id,normalized-description)",
+    "duplicateGuarantee": "exact-source-row-replay-only",
+    "persistentUniqueFence": ["family_id", "row_fingerprint"]
+  },
+  "xlsxSecurity": {
+    "zipEntryLimit": 128,
+    "perEntryUncompressedByteLimit": 10485760,
+    "totalUncompressedByteLimit": 20971520,
+    "crc32Required": true,
+    "formulasAccepted": false,
+    "macrosAccepted": false,
+    "externalLinksAccepted": false,
+    "connectionsAccepted": false,
+    "xmlDoctypeOrEntitiesAccepted": false,
+    "firstWorksheetOnly": true
+  },
+  "openBanking": {
+    "adapterContract": "ohvps-v1-local",
+    "supportedModes": ["sandbox", "manual_fallback"],
+    "sandboxData": "synthetic_local",
+    "manualFallback": "controlled_file_import",
+    "liveBankConnection": "not_implemented",
+    "networkAccess": "not_performed",
+    "credentialCollection": "prohibited",
+    "externalConsent": "not_performed"
+  },
+  "persistence": {
+    "migration": 82,
+    "tables": ["finance_import_batches", "finance_import_entries"],
+    "batchLifecycle": ["staging", "committed"],
+    "entryLedgerAppendOnly": true,
+    "batchExactSealRequired": true,
+    "financePolicyReceiptRequired": true,
+    "crossFinanceReceiptReplayRejected": true,
+    "outboxContainsAmountsDescriptionsOrExternalIds": false
+  },
+  "ratchets": {
+    "ppk021ExactAllowlistEntries": 543,
+    "ppk021UseCaseCompositionSurfaces": 275,
+    "ppk021DirectRoleAuthorizationBypasses": 0,
+    "ppk022CapabilitySurfaces": 242,
+    "networkEgressAdded": false
+  },
+  "validation": {
+    "boundary": "artifacts/validation/33-D-b4-controlled-import-open-banking-boundary.json",
+    "contract": "artifacts/validation/33-D-b4-controlled-import-open-banking-contract.json",
+    "runtime": "artifacts/validation/33-D-b4-controlled-import-open-banking-runtime.json",
+    "targetedTestFiles": [
+      "packages/application/tests/finance-controlled-import-open-banking.test.ts",
+      "apps/desktop/tests/b4-finance-import-ipc-integration.test.ts",
+      "apps/desktop/tests/finance-import-file-session.test.ts",
+      "apps/desktop/tests/data-store.test.ts"
+    ],
+    "finalEvidence": {
+      "boundaryChecksPassed": 40,
+      "contractChecksPassed": 14,
+      "runtimeChecksPassed": 11,
+      "targetedTestFilesPassed": 4,
+      "targetedTestsPassed": 17,
+      "fullVitestFilesPassed": 109,
+      "fullVitestTestsPassed": 931,
+      "productionWorkspaceBuildsPassed": 18,
+      "pretypecheckSecurityGatesPassed": 23,
+      "migrationRuntimeChecksPassed": 9,
+      "latestDatabaseMigration": 82,
+      "decisionLedgerChecksPassed": 368,
+      "decisionLedgerDecisionCount": 69,
+      "governedPreflightCommandsPassed": 18,
+      "bronzeAuditStatus": "PASS_WITH_OPEN_SCOPE",
+      "officialProgressPercent": 25,
+      "strictProgressPercent": 16.8571,
+      "implementationChainProgressPercent": 17.3429,
+      "finalClosureEvidence": true
+    }
+  },
+  "excludedClaims": [
+    "OHVPS sandbox hareketleri tamamen sentetiktir; banka verisi değildir.",
+    "Canlı banka bağlantısı, hesap keşfi, token, kimlik bilgisi, dış onay veya uzaktan eşitleme uygulanmadı.",
+    "İçe aktarılan hareketler banka tarafından doğrulanmış sayılmaz ve ödeme icrası yapmaz.",
+    "Eski XLS, XLSB, parola korumalı/şifreli XLSX ve formüllü çalışma kitapları desteklenmez.",
+    "B5 ve sonraki açık kapsam, B9-01, Silver readiness ve Bronze Final tamamlanmış sayılmaz.",
+    "Yeni Build numarası verilmez."
+  ]
+}

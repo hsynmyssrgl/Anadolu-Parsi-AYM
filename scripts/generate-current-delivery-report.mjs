@@ -69,6 +69,23 @@ if (completion31A.status !== 'PASS'
 }
 const completedRequirementIds = scope.requirements.filter((item) => item.status === 'COMPLETE').map((item) => item.id);
 const completedDecisionIds = decisions.decisions.filter((item) => item.status === 'ACTIVE').map((item) => item.id);
+const requiredFinanceDecisionIds = ['DEC-211', 'DEC-212', 'DEC-213', 'DEC-214', 'DEC-215'];
+const requiredControlledImportRequirementIds = ['B4-13', 'B4-14'];
+const required33DGateScripts = [
+  'scripts/verify-b4-controlled-import-open-banking-boundary.mjs',
+  'scripts/verify-33-d-b4-controlled-import-open-banking-contract.mjs',
+  'scripts/verify-33-d-b4-controlled-import-open-banking-runtime.mjs'
+];
+if (!requiredFinanceDecisionIds.every((id) => completedDecisionIds.includes(id))) {
+  throw new Error('Current delivery report requires active DEC-211 through DEC-215 finance decisions.');
+}
+if (!requiredControlledImportRequirementIds.every((id) => completedRequirementIds.includes(id))) {
+  throw new Error('Current delivery report requires B4-13 and B4-14 COMPLETE.');
+}
+if (!required33DGateScripts.every((script) => audit.gates.current
+  .some((gate) => gate.script === script && gate.status === 'PASS'))) {
+  throw new Error('Current delivery report requires the 33-D boundary, contract and runtime PASS chain.');
+}
 const validationResults = [
   ...audit.gates.current.map((gate) => ({ name: gate.script, actualStatus: gate.status, reportedAs: gate.status })),
   { name: 'B2-01 native interactive Windows Hello', actualStatus: 'USER_DEFERRED_NOT_RUN', reportedAs: 'USER_DEFERRED_NOT_RUN', classification: 'NON_BLOCKING_HARDWARE_VALIDATION_DEC_162' },
@@ -104,13 +121,53 @@ const report = {
     ,'DEC-163 focused 31-D reused-location exact read receipt checkpoint completion'
     ,'DEC-164 current authoritative source D: USB protection closure'
     ,'DEC-165 B0-02 public release DTO, UI and canonical delivery filename boundary closure'
+    ,'DEC-211 B4-01/B4-02/B4-03/B4-04/B4-07 banking foundation closure'
+    ,'DEC-212 B4-05/B4-06 last-four-only payment card management closure'
+    ,'DEC-213 B4-08/B4-09 manual and non-executing loan management closure'
+    ,'DEC-214 B4-10/B4-11/B4-12 finance planning, portfolio and per-currency analytics closure'
+    ,'DEC-215 B4-13/B4-14 controlled import and network-free OHVPS adapter closure'
   ],
   completedRequirementIds,
   completedDecisionIds,
   changedSourceAreas: [
     'config/accepted-scope-registry.json',
     'config/user-decision-ledger.json',
+    'config/bronze-current-audit-policy.json',
+    'config/work-segmentation-plan.json',
+    'config/32-z-b4-banking-foundation-scope.json',
+    'config/33-a-b4-payment-card-management-scope.json',
+    'config/33-b-b4-loan-management-scope.json',
+    'config/33-c-b4-finance-planning-portfolio-analytics-scope.json',
+    'config/33-d-b4-controlled-import-open-banking-scope.json',
+    'config/33-d-b4-controlled-import-open-banking-inventory.json',
     'docs/decisions/DEC-152..DEC-154',
+    'docs/decisions/DEC-211-b4-banking-foundation.md',
+    'docs/decisions/DEC-212-b4-payment-card-management.md',
+    'docs/decisions/DEC-213-b4-loan-management.md',
+    'docs/decisions/DEC-214-b4-finance-planning-portfolio-analytics.md',
+    'docs/decisions/DEC-215-b4-controlled-import-open-banking.md',
+    'docs/security/THREAT_MODEL_33_D_B4_CONTROLLED_IMPORT_OPEN_BANKING.md',
+    'docs/audit/33-D_B4_CONTROLLED_IMPORT_OPEN_BANKING_UST_KAPANIS.md',
+    'packages/domain/src/app-data.ts',
+    'packages/application/src/finance-use-cases.ts',
+    'packages/database/src/family-database-migrations.ts',
+    'packages/repository-contracts/src/finance-repository.ts',
+    'packages/repositories/src/finance-repository.ts',
+    'packages/repositories/src/ai-consent-repository.ts',
+    'packages/repositories/src/person-lifecycle-repository.ts',
+    'apps/desktop/src/main/finance-import-file-session.ts',
+    'apps/desktop/src/main/finance-application-adapter.ts',
+    'apps/desktop/src/main/data-store.ts',
+    'apps/desktop/src/main/main.ts',
+    'apps/desktop/src/main/ipc-integration-policy.ts',
+    'apps/desktop/src/main/preload.ts',
+    'apps/desktop/src/renderer/FinanceImportPanel.tsx',
+    'packages/application/tests/finance-controlled-import-open-banking.test.ts',
+    'apps/desktop/tests/b4-finance-import-ipc-integration.test.ts',
+    'apps/desktop/tests/finance-import-file-session.test.ts',
+    'artifacts/validation/33-D-b4-controlled-import-open-banking-boundary.json',
+    'artifacts/validation/33-D-b4-controlled-import-open-banking-contract.json',
+    'artifacts/validation/33-D-b4-controlled-import-open-banking-runtime.json',
     'scripts/audit-bronze-current-state.mjs',
     'scripts/update-aym-governance-incrementally.mjs',
     'scripts/generate-current-delivery-report.mjs',

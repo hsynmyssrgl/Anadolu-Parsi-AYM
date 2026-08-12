@@ -59,7 +59,7 @@
     "SQL_CALL": 56,
     "SQL_CONSTRUCTOR": 2,
     "SQL_IMPORT": 2,
-    "USE_CASE_COMPOSITION": 274
+    "USE_CASE_COMPOSITION": 275
   },
   "allowedSurfaceKeys": [
     "CRYPTO_GLOBAL|apps/desktop/src/main/preload.ts|randomUUID",
@@ -350,6 +350,7 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ChangePasswordUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ClaimBackupCleanRewriteUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|CleanupOperationalHealthUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|CommitFinanceImportBatchUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|CommitFullBackupRestoreUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|CompleteBackupCleanRewriteUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|CompleteBackupPropagationUseCase",

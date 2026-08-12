@@ -27,6 +27,11 @@ senkronizasyonu, hareket çekme, ödeme icrası ve gerçek zamanlı banka bildir
 pakette yoktur. B9-01, Silver readiness ve Bronze Final tamamlanmış sayılmaz. Yeni
 Build verilmez.
 
+Ardıl durum notu (12.08.2026): Yukarıdaki B4-08 ve sonrası açık kapsam ifadesi
+33-A kapanış anının tarihsel durumudur. 33-B, B4-08/B4-09'u; 33-C,
+B4-10/B4-11/B4-12'yi; 33-D ise B4-13/B4-14'ü ayrı karar, migration ve kanıt
+paketleriyle tamamlamıştır. Canlı banka/kart senkronizasyonu ve ödeme icrası yoktur.
+
 ## Kanıtlar
 
 - `artifacts/validation/33-A-b4-payment-card-management-boundary.json`

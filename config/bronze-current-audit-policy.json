@@ -52,6 +52,9 @@
     "scripts/verify-31-l-through-31-s-cutover-foundation.mjs",
     "scripts/verify-31-t-family-import-governed-rollback-receipt-fence-contract.mjs",
     "scripts/verify-31-t-family-import-governed-rollback-completion-transition.mjs",
+    "scripts/verify-b4-controlled-import-open-banking-boundary.mjs",
+    "scripts/verify-33-d-b4-controlled-import-open-banking-contract.mjs",
+    "scripts/verify-33-d-b4-controlled-import-open-banking-runtime.mjs",
     "scripts/protect-authoritative-source-external.mjs",
     "scripts/verify-step-checkpoint-gate.mjs"
   ],

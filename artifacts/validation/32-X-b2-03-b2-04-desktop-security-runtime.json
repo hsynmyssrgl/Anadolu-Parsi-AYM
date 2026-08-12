@@ -35,14 +35,14 @@
       "status": "PASS",
       "exitCode": 0,
       "signal": null,
-      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 375,\n  \"privilegedSurfaces\": 528,\n  \"exactAllowlistEntries\": 528,\n  \"exactAllowlistSha256\": \"ee8859c5601f606dc096d3ee59ed32f51fc90adf86725c5996d3a22061ed5fbe\",\n  \"surfaceCounts\": {\n    \"CRYPTO_GLOBAL\": 2,\n    \"CRYPTO_IMPORT\": 128,\n    \"DATABASE_IMPORT\": 21,\n    \"NETWORK_IMPORT\": 8,\n    \"REPOSITORY_IMPORT\": 48,\n    \"ROLE_PRESENTATION\": 1,\n    \"SQL_CALL\": 56,\n    \"SQL_CONSTRUCTOR\": 2,\n    \"SQL_IMPORT\": 2,\n    \"USE_CASE_COMPOSITION\": 260\n  },\n  \"maliciousSelfTestAssertions\": 17,\n  \"benignSelfTestAssertions\": 4,\n  \"directRoleAuthorizationBypasses\": 0,\n  \"findings\": []\n}"
+      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 379,\n  \"privilegedSurfaces\": 543,\n  \"exactAllowlistEntries\": 543,\n  \"exactAllowlistSha256\": \"d6cb28c686caa25d9071f9ba1fb221ddeb5fe1b19433551671f6bce5e679fb29\",\n  \"surfaceCounts\": {\n    \"CRYPTO_GLOBAL\": 2,\n    \"CRYPTO_IMPORT\": 128,\n    \"DATABASE_IMPORT\": 21,\n    \"NETWORK_IMPORT\": 8,\n    \"REPOSITORY_IMPORT\": 48,\n    \"ROLE_PRESENTATION\": 1,\n    \"SQL_CALL\": 56,\n    \"SQL_CONSTRUCTOR\": 2,\n    \"SQL_IMPORT\": 2,\n    \"USE_CASE_COMPOSITION\": 275\n  },\n  \"maliciousSelfTestAssertions\": 17,\n  \"benignSelfTestAssertions\": 4,\n  \"directRoleAuthorizationBypasses\": 0,\n  \"findings\": []\n}"
     },
     {
       "id": "ppk022-capability-ratchet",
       "status": "PASS",
       "exitCode": 0,
       "signal": null,
-      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 375,\n  \"capabilitySurfaces\": 238,\n  \"exactManifestSurfaces\": 238,\n  \"exactManifestSha256\": \"1f6b3e14aaf7a608a93d857448dab2fcbda924999274b8fbc82f1edd76226eb1\",\n  \"surfaceCounts\": {\n    \"FILE_DIALOG\": 2,\n    \"FILE_IMPORT\": 225,\n    \"NETWORK_API\": 3,\n    \"NETWORK_IMPORT\": 8\n  },\n  \"pinnedBootstrapSurfaces\": 26,\n  \"maliciousSelfTestAssertions\": 33,\n  \"benignSelfTestAssertions\": 5,\n  \"canonicalApplications\": 14,\n  \"protectedCapabilityFamilies\": 7,\n  \"findings\": []\n}"
+      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 379,\n  \"capabilitySurfaces\": 242,\n  \"exactManifestSurfaces\": 242,\n  \"exactManifestSha256\": \"93ea91572d01e46eb535c2634b62d084f455a92829ac5f2620a7ae9bd5a423ac\",\n  \"surfaceCounts\": {\n    \"FILE_DIALOG\": 2,\n    \"FILE_IMPORT\": 229,\n    \"NETWORK_API\": 3,\n    \"NETWORK_IMPORT\": 8\n  },\n  \"pinnedBootstrapSurfaces\": 26,\n  \"maliciousSelfTestAssertions\": 33,\n  \"benignSelfTestAssertions\": 5,\n  \"canonicalApplications\": 14,\n  \"protectedCapabilityFamilies\": 7,\n  \"findings\": []\n}"
     },
     {
       "id": "desktop-security-targeted-tests",
@@ -51,7 +51,7 @@
       "signal": null,
       "tests": 11,
       "testFiles": 3,
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n···········\n\n Test Files  3 passed (3)\n      Tests  11 passed (11)\n   Start at  14:01:17\n   Duration  1.61s (transform 361ms, setup 0ms, import 878ms, tests 28ms, environment 0ms)"
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n···········\n\n Test Files  3 passed (3)\n      Tests  11 passed (11)\n   Start at  20:50:34\n   Duration  4.45s (transform 1.61s, setup 0ms, import 3.38s, tests 39ms, environment 0ms)"
     },
     {
       "id": "root-typescript",
@@ -72,10 +72,10 @@
       "status": "PASS",
       "exitCode": 0,
       "signal": null,
-      "outputTail": "User Decision Ledger: PASS (338 checks / 63 decisions)."
+      "outputTail": "User Decision Ledger: PASS (368 checks / 69 decisions)."
     }
   ],
   "failures": [],
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-12T11:01:20.799Z"
+  "generatedAt": "2026-08-12T17:50:41.349Z"
 }

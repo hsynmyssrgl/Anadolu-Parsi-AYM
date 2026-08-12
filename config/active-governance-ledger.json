@@ -17,7 +17,7 @@
   "persistentLibraryReleasePath": "/Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi/Bronze 04.08.2026.29",
   "preflightStatus": "PASS",
   "postflightStatus": "PENDING",
-  "libraryUploadStatus": "31-T_COMPLETED_RECEIPT_PASS",
+  "libraryUploadStatus": "33-D_LOCAL_PASS_AWAITING_LIBRARY_RECEIPT",
   "conversationCapacity": {
     "method": "platform_actual_or_unavailable",
     "actualUsedPercent": null,
@@ -32,8 +32,8 @@
     "canonicalPR172Unchanged": true,
     "recordedAt": "2026-08-06T07:45:38.3898625+03:00"
   },
-  "nextOfficialTask": "AUTO_PRIORITY_SELECTION_AFTER_31-T_PERSISTENT_RECEIPT",
-  "activeMicroStep": null,
+  "nextOfficialTask": "33-D B4 controlled finance import and network-free OHVPS adapter closure",
+  "activeMicroStep": "33-D",
   "supersessions": [
     {
       "id": "GOV-SUP-29-D3-001",
@@ -648,9 +648,18 @@
       "evidence": "artifacts/authority/31-T_FAMILY_IMPORT_GOVERNED_ROLLBACK_AUTHORITY.json",
       "historicalSourceFilesRewritten": false,
       "status": "RESOLVED_WITH_EXPLICIT_USER_FULL_AUTO_CONTINUATION"
+    },
+    {
+      "id": "GOV-SUP-33-D-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_31-T_PERSISTENT_RECEIPT",
+      "effectiveValue": "33-D B4 controlled finance import and network-free OHVPS adapter closure",
+      "evidence": "docs/decisions/DEC-215-b4-controlled-import-open-banking.md",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_WITH_EXPLICIT_USER_FULL_AUTO_CONTINUATION"
     }
   ],
-  "updatedAt": "2026-08-11T07:31:27.333Z",
+  "updatedAt": "2026-08-12T18:00:00.000Z",
   "externalLibraryAuthority": {
     "step": "30-Z",
     "status": "PASS",

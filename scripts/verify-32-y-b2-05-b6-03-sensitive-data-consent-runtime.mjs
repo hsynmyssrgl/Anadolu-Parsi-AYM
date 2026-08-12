@@ -16,12 +16,12 @@ const commands = Object.freeze([
   Object.freeze({
     id: 'ppk021-ast-ratchet',
     args: ['scripts/verify-platform-policy-ast-gate.mjs'],
-    expectOutput: '"exactAllowlistEntries": 542'
+    expectOutput: '"exactAllowlistEntries": 543'
   }),
   Object.freeze({
     id: 'ppk022-capability-ratchet',
     args: ['scripts/verify-platform-capability-manifest-gate.mjs'],
-    expectOutput: '"exactManifestSurfaces": 238'
+    expectOutput: '"exactManifestSurfaces": 242'
   }),
   Object.freeze({
     id: 'sensitive-data-consent-targeted-tests',
@@ -96,8 +96,8 @@ const report = Object.freeze({
   targetedTestFilesPassed: targeted?.testFiles ?? 0,
   targetedTestsPassed: targeted?.tests ?? 0,
   latestDatabaseMigration: 77,
-  ppk021ExactAllowlistEntries: 542,
-  ppk022CapabilitySurfaces: 238,
+  ppk021ExactAllowlistEntries: 543,
+  ppk022CapabilitySurfaces: 242,
   outboundTransferPerformed: false,
   results: Object.freeze(results),
   failures: Object.freeze(failures),

@@ -28,6 +28,18 @@ Bir çelişki olduğunda aşağıdaki sıra uygulanır:
 Eski kararlar silinmez; tarihsel kanıt olarak korunur. Ancak aktif ürün davranışını
 belirleyemez. Çelişki sessizce birleştirilmez; değişiklik kaydına işlenir.
 
+## DEC-215 — Kontrollü finans içe aktarma ve ağsız ÖHVPS sınırı
+
+33-D ile B4-13 ve B4-14 tek kontrollü içe aktarma teslimatında tamamlanır. CSV,
+TSV, XLSX, OFX ve QFX dosyaları ana süreçte seçilir; dosya yolu ve ham içerik
+renderer'a verilmez. Exact sütun eşleme, geçici önizleme, SHA-256 tekrar çiti ve
+tek finance PEP işlemi içinde staging→committed seal uygulanır. Yerel
+`ohvps-v1-local` adapter yalnız sentetik sandbox ve kontrollü dosya tabanlı manuel
+fallback sunar; canlı banka bağlantısı, kimlik bilgisi, token, sertifika, dış rıza,
+uzak eşitleme ve ödeme icrası yoktur. Migration 82 eklenir; PPK-021 543 exact
+yüzeye ve 275 use-case composition yüzeyine çıkar, PPK-022 238 kalır. Ayrıntılı
+karar: `docs/decisions/DEC-215-b4-controlled-import-open-banking.md`
+
 ## DEC-214 — B4 finans planlama, portföy ve analiz merkezi
 
 33-C ile B4-10, B4-11 ve B4-12 tek append-only finans planlama defteri ve türetilmiş

@@ -422,7 +422,12 @@
       "version": 81,
       "name": "b4_finance_planning_portfolio_analytics",
       "checksum": "91539a47779af66b7636611838af4ee34c205a413e45b9404391d8e33b82569c"
+    },
+    {
+      "version": 82,
+      "name": "b4_controlled_import_open_banking",
+      "checksum": "be32fbe6a79688ee879fda02a16faa78f6e0d4151e1462b2c9f28a1da44518c8"
     }
   ],
-  "generatedAt": "2026-08-12T16:13:47.799Z"
+  "generatedAt": "2026-08-12T18:03:32.320Z"
 }

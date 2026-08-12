@@ -23,6 +23,12 @@ B4-05 ve B4-06 açık kalır. Uzak banka/hesap/sahiplik doğrulaması, kart ür�
 limit, borç, ekstre, taksit, sanal/ek kart ve kart otomasyonları bu pakette yoktur.
 B9-01, Silver readiness ve Bronze Final tamamlanmış sayılmaz. Yeni Build verilmez.
 
+Ardıl durum notu (12.08.2026): Yukarıdaki B4-05/B4-06 açık kapsam ifadesi 32-Z
+kapanış anının tarihsel durumudur. 33-A kart, 33-B kredi, 33-C planlama/portföy ve
+33-D kontrollü içe aktarma ile yerel sentetik ÖHVPS sınırı gereksinimlerini ayrı
+karar, migration ve kanıt paketleriyle tamamlamıştır. Uzak banka doğrulaması, canlı
+open-banking bağlantısı ve ödeme icrası hâlâ uygulanmaz.
+
 ## Kanıtlar
 
 - `artifacts/validation/32-Z-b4-banking-foundation-boundary.json`

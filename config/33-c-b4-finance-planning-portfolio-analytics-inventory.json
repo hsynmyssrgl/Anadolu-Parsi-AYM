@@ -21,5 +21,11 @@
   "prohibitedPersistedColumns": ["pan", "full_pan", "card_number", "cvv", "cvc", "pin", "password", "internet_banking_password"],
   "latestDatabaseMigration": 81,
   "openRequirements": ["B4-13", "B4-14"],
+  "successorCompletion": {
+    "step": "33-D",
+    "requirements": ["B4-13", "B4-14"],
+    "status": "COMPLETE",
+    "latestDatabaseMigration": 82
+  },
   "openBlockers": []
 }

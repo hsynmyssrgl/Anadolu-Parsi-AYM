@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "step": "33-D",
+  "requirements": [
+    "B4-13",
+    "B4-14"
+  ],
+  "status": "PASS",
+  "checksPassed": 40,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "scope closes exactly B4-13 and B4-14 under DEC-215",
+      "passed": true
+    },
+    {
+      "name": "inventory has no blocker or remaining B4 import requirement",
+      "passed": true
+    },
+    {
+      "name": "scope fixes bounded formats preview mapping and atomic commit",
+      "passed": true
+    },
+    {
+      "name": "scope preserves network-free synthetic and manual fallback truth",
+      "passed": true
+    },
+    {
+      "name": "domain exposes preview mapping normalized rows batch entry and workspace surfaces",
+      "passed": true
+    },
+    {
+      "name": "domain makes raw retention and path exposure impossible in successful previews",
+      "passed": true
+    },
+    {
+      "name": "domain exposes explicit honest open banking boundary fields",
+      "passed": true
+    },
+    {
+      "name": "application validates source mapping ownership money dates currencies and PAN-like text",
+      "passed": true
+    },
+    {
+      "name": "application requires central exact finance create authorization",
+      "passed": true
+    },
+    {
+      "name": "application enforces in-batch and persistent duplicate skip or reject",
+      "passed": true
+    },
+    {
+      "name": "application performs staging entries exact seal in one governed unit of work",
+      "passed": true
+    },
+    {
+      "name": "application import event contains counts but no financial content or fingerprints",
+      "passed": true
+    },
+    {
+      "name": "repository contract binds batch entry category duplicate and exact seal ports",
+      "passed": true
+    },
+    {
+      "name": "repository persists and reads only committed batches with exact write binding",
+      "passed": true
+    },
+    {
+      "name": "persistent duplicate lookup is scoped to the authorized family",
+      "passed": true
+    },
+    {
+      "name": "sensitive inventory and person lifecycle include both import tables",
+      "passed": true
+    },
+    {
+      "name": "migration 82 is current and exact",
+      "passed": true
+    },
+    {
+      "name": "migration creates exactly two import tables with no prohibited columns",
+      "passed": true
+    },
+    {
+      "name": "migration fixes supported sources duplicate strategy counts and synthetic truth",
+      "passed": true
+    },
+    {
+      "name": "migration enforces persistent fingerprint uniqueness and category inheritance",
+      "passed": true
+    },
+    {
+      "name": "migration requires exact receipt and rejects bidirectional finance replay",
+      "passed": true
+    },
+    {
+      "name": "migration enforces complete exact seal and append-only entries",
+      "passed": true
+    },
+    {
+      "name": "parser applies file row column cell session and zip expansion bounds",
+      "passed": true
+    },
+    {
+      "name": "parser supports quoted CSV TSV XLSX CRC32 and OFX STMTTRN",
+      "passed": true
+    },
+    {
+      "name": "XLSX parser fail-closes encryption formulas macros external links connections and XML entities",
+      "passed": true
+    },
+    {
+      "name": "parser defines an explicit local adapter port with no network client",
+      "passed": true
+    },
+    {
+      "name": "preview registry keeps file bytes main-only and returns bounded samples with truth flags",
+      "passed": true
+    },
+    {
+      "name": "production adapter filters import batches and entries through existing read policy",
+      "passed": true
+    },
+    {
+      "name": "DataStore composes one shared import use case and stable family-owner row fingerprint",
+      "passed": true
+    },
+    {
+      "name": "main owns bounded file descriptor read path basename preview resolution and session consumption",
+      "passed": true
+    },
+    {
+      "name": "IPC policy keeps selection and sandbox zero-argument and commit exact",
+      "passed": true
+    },
+    {
+      "name": "preload and renderer declarations expose exactly three typed import methods",
+      "passed": true
+    },
+    {
+      "name": "Finance menu composes the import panel and refreshable workspace",
+      "passed": true
+    },
+    {
+      "name": "UI exposes all mappings duplicate policies categories preview and history",
+      "passed": true
+    },
+    {
+      "name": "UI states synthetic local fallback and no live credentials consent or network truth",
+      "passed": true
+    },
+    {
+      "name": "targeted tests cover application parser IPC persistence and duplicate paths",
+      "passed": true
+    },
+    {
+      "name": "decision threat model audit and master register bind exact honesty boundary",
+      "passed": true
+    },
+    {
+      "name": "PPK-021 reviews the one shared composition at exact 543 and 275",
+      "passed": true
+    },
+    {
+      "name": "PPK-022 explicitly reviews four bounded-read file surfaces at exact 242",
+      "passed": true
+    },
+    {
+      "name": "root lifecycle and explicit package scripts bind 33-D",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "latestDatabaseMigration": 82,
+  "importTables": 2,
+  "persistedImportColumns": 42,
+  "prohibitedPersistedColumns": 0,
+  "supportedFileFormats": 5,
+  "liveBankConnectionImplemented": false,
+  "networkAccessPerformed": false,
+  "credentialsCollected": false,
+  "externalConsentPerformed": false,
+  "ppk021ExactAllowlistEntries": 543,
+  "ppk021UseCaseCompositionSurfaces": 275,
+  "ppk022CapabilitySurfaces": 242,
+  "generatedAt": "2026-08-12T18:07:46.762Z"
+}

@@ -5,10 +5,12 @@ import { runPlatformCapabilityManifestGate } from './verify-platform-capability-
 const text = (path) => readFile(path, 'utf8');
 const json = async (path) => JSON.parse(await text(path));
 const includesAll = (source, markers) => markers.every((marker) => source.includes(marker));
+const allChainTrue = (requirement) => Object.values(requirement?.chain ?? {}).length === 13
+  && Object.values(requirement.chain).every((value) => value === true);
 
 export const verifyB4PaymentCardManagementBoundary = async () => {
   const [
-    scope, inventory, domain, bankingSecurity, application, repositoryContract,
+    scope, inventory, registry, domain, bankingSecurity, application, repositoryContract,
     repository, aiRepository, personLifecycleRepository, migrations, adapter,
     dataStore, main, ipcPolicy, preload, declarations, renderer, rootPackage,
     applicationTest, ipcTest, dataStoreTest, decision, threatModel, auditDocument,
@@ -16,6 +18,7 @@ export const verifyB4PaymentCardManagementBoundary = async () => {
   ] = await Promise.all([
     json('config/33-a-b4-payment-card-management-scope.json'),
     json('config/33-a-b4-payment-card-management-inventory.json'),
+    json('config/accepted-scope-registry.json'),
     text('packages/domain/src/app-data.ts'),
     text('packages/application/src/banking-security.ts'),
     text('packages/application/src/finance-use-cases.ts'),
@@ -64,9 +67,13 @@ export const verifyB4PaymentCardManagementBoundary = async () => {
 
   check('scope closes exactly B4-05 and B4-06 under DEC-212', scope.status === 'COMPLETE'
     && scope.decision === 'DEC-212' && scope.requirements?.join(',') === 'B4-05,B4-06');
-  check('inventory has no package blocker and keeps successor finance scope open', inventory.status === 'COMPLETE'
+  check('inventory preserves historical-at-closure successor scope and the current registry completes it', inventory.status === 'COMPLETE'
     && inventory.openBlockers?.length === 0
-    && inventory.openRequirements?.join(',') === 'B4-08,B4-09,B4-10,B4-11,B4-12,B4-13,B4-14');
+    && inventory.openRequirements?.join(',') === 'B4-08,B4-09,B4-10,B4-11,B4-12,B4-13,B4-14'
+    && inventory.openRequirements.every((id) => {
+      const requirement = registry.requirements?.find((item) => item.id === id);
+      return requirement?.status === 'COMPLETE' && allChainTrue(requirement);
+    }));
   check('scope is last-four-only and claims no bank execution', scope.card?.fullPanStored === false
     && scope.card?.onlyLastFourStored === true
     && scope.card?.bankPaymentExecutionPerformed === false
@@ -197,11 +204,11 @@ export const verifyB4PaymentCardManagementBoundary = async () => {
   check('PPK-021 exact ratchet reviews both new compositions', [
     'CreatePaymentCardUseCase', 'ListPaymentCardsUseCase'
   ].every((symbol) => astKeys.has(`USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|${symbol}`))
-    && astGate.status === 'PASS' && astGate.exactAllowlistEntries === 542
+    && astGate.status === 'PASS' && astGate.exactAllowlistEntries === 543
     && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
   check('PPK-022 capability ratchet remains unchanged and green', capabilityGate.status === 'PASS'
-    && capabilityGate.capabilitySurfaces === 238
-    && capabilityGate.exactManifestSurfaces === 238
+    && capabilityGate.capabilitySurfaces === 242
+    && capabilityGate.exactManifestSurfaces === 242
     && capabilityGate.findings.length === 0);
   check('root lifecycle and explicit package scripts bind 33-A', ['pretypecheck', 'prebuild'].every((name) =>
     rootPackage.scripts?.[name]?.includes('verify-b4-payment-card-management-boundary.mjs'))

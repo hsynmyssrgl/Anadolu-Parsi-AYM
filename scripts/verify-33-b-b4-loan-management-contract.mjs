@@ -52,20 +52,20 @@ check('both requirements bind DEC-213 application security and UI areas', requir
   item?.evidence?.includes('docs/decisions/DEC-213-b4-loan-management.md')
   && item?.codeAreas?.includes('packages/application/src/banking-security.ts')
   && item?.codeAreas?.includes('apps/desktop/src/renderer/App.tsx')));
-check('historical successor scope is preserved while B4-13 and B4-14 remain honestly open',
+check('historical successor scope is preserved while later packages complete B4-13 and B4-14',
   inventory.openRequirements?.join(',') === 'B4-10,B4-11,B4-12,B4-13,B4-14'
   && ['B4-13', 'B4-14'].every((id) => {
     const item = registry.requirements?.find((candidate) => candidate.id === id);
-    return item?.status !== 'COMPLETE' && !allChainTrue(item);
+    return item?.status === 'COMPLETE' && allChainTrue(item);
   }));
 check('scope and inventory bind DEC-213 migration 80 with no network channel', scope.status === 'COMPLETE'
   && scope.decision === 'DEC-213' && inventory.latestDatabaseMigration === 80
   && inventory.networkChannels?.length === 0);
 check('boundary evidence is exact green and truth preserving', boundary.status === 'PASS'
   && boundary.checksFailed === 0 && boundary.latestDatabaseMigration >= 80
-  && boundary.ppk021ExactAllowlistEntries === 542
-  && boundary.ppk021UseCaseCompositionSurfaces === 274
-  && boundary.ppk022CapabilitySurfaces === 238
+  && boundary.ppk021ExactAllowlistEntries === 543
+  && boundary.ppk021UseCaseCompositionSurfaces === 275
+  && boundary.ppk022CapabilitySurfaces === 242
   && boundary.prohibitedSecretColumns === 0
   && boundary.bankVerificationPerformed === false && boundary.bankExecutionPerformed === false);
 check('DEC-213 is active in the user decision ledger', ledger.decisionCount === ledger.decisions?.length

@@ -5,10 +5,12 @@ import { runPlatformCapabilityManifestGate } from './verify-platform-capability-
 const text = (path) => readFile(path, 'utf8');
 const json = async (path) => JSON.parse(await text(path));
 const includesAll = (source, markers) => markers.every((marker) => source.includes(marker));
+const allChainTrue = (requirement) => Object.values(requirement?.chain ?? {}).length === 13
+  && Object.values(requirement.chain).every((value) => value === true);
 
 export const verifyB4LoanManagementBoundary = async () => {
   const [
-    scope, inventory, domain, bankingSecurity, application, repositoryContract,
+    scope, inventory, registry, domain, bankingSecurity, application, repositoryContract,
     repository, aiRepository, personLifecycleRepository, migrations, policyRuntime,
     adapter, dataStore, main, ipcPolicy, preload, declarations, renderer, rootPackage,
     applicationTest, ipcTest, dataStoreTest, decision, threatModel, auditDocument,
@@ -16,6 +18,7 @@ export const verifyB4LoanManagementBoundary = async () => {
   ] = await Promise.all([
     json('config/33-b-b4-loan-management-scope.json'),
     json('config/33-b-b4-loan-management-inventory.json'),
+    json('config/accepted-scope-registry.json'),
     text('packages/domain/src/app-data.ts'),
     text('packages/application/src/banking-security.ts'),
     text('packages/application/src/finance-use-cases.ts'),
@@ -64,9 +67,13 @@ export const verifyB4LoanManagementBoundary = async () => {
 
   check('scope closes exactly B4-08 and B4-09 under DEC-213', scope.status === 'COMPLETE'
     && scope.decision === 'DEC-213' && scope.requirements?.join(',') === 'B4-08,B4-09');
-  check('inventory has no blocker and keeps B4-10 through B4-14 open', inventory.status === 'COMPLETE'
+  check('inventory preserves historical-at-closure B4-10 through B4-14 scope and current successors complete it', inventory.status === 'COMPLETE'
     && inventory.openBlockers?.length === 0
-    && inventory.openRequirements?.join(',') === 'B4-10,B4-11,B4-12,B4-13,B4-14');
+    && inventory.openRequirements?.join(',') === 'B4-10,B4-11,B4-12,B4-13,B4-14'
+    && inventory.openRequirements.every((id) => {
+      const requirement = registry.requirements?.find((item) => item.id === id);
+      return requirement?.status === 'COMPLETE' && allChainTrue(requirement);
+    }));
   check('scope preserves manual unverified non-executing truth', scope.loan?.dataSource === 'manual'
     && scope.loan?.bankVerification === 'not_performed'
     && scope.loan?.paymentExecution === 'not_performed'
@@ -222,12 +229,12 @@ export const verifyB4LoanManagementBoundary = async () => {
   check('PPK-021 exact ratchet reviews all three new compositions', [
     'CreateLoanAccountUseCase', 'ListLoanAccountsUseCase', 'RecordLoanPaymentUseCase'
   ].every((symbol) => astKeys.has(`USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|${symbol}`))
-    && astGate.status === 'PASS' && astGate.exactAllowlistEntries === 542
-    && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 274
+    && astGate.status === 'PASS' && astGate.exactAllowlistEntries === 543
+    && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 275
     && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
   check('PPK-022 capability ratchet remains unchanged and green', capabilityGate.status === 'PASS'
-    && capabilityGate.capabilitySurfaces === 238
-    && capabilityGate.exactManifestSurfaces === 238
+    && capabilityGate.capabilitySurfaces === 242
+    && capabilityGate.exactManifestSurfaces === 242
     && capabilityGate.findings.length === 0);
   check('root lifecycle and explicit package scripts bind 33-B', ['pretypecheck', 'prebuild'].every((name) =>
     rootPackage.scripts?.[name]?.includes('verify-b4-loan-management-boundary.mjs'))

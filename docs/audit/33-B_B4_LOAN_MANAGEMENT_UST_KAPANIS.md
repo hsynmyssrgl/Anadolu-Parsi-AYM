@@ -26,8 +26,9 @@ plan resmi banka amortisman planı değildir. B4-10 ve sonraki finans gereksinim
 B9-01, Silver readiness ve Bronze Final açık kalır. Yeni Build verilmez.
 
 Ardıl durum notu (12.08.2026): 33-C, B4-10/B4-11/B4-12'yi ayrı DEC-214 ve
-kanıt paketiyle tamamlamıştır; B4-13/B4-14 açık kalır. Bu not 33-B'nin tarihsel
-kapanış kapsamını genişletmez.
+kanıt paketiyle; 33-D ise B4-13/B4-14'ü DEC-215 ve Migration 82 ile tamamlamıştır.
+Yukarıdaki açık kapsam ifadeleri yalnız 33-B kapanış anının tarihsel durumudur; bu
+not 33-B'nin tarihsel kapanış kapsamını genişletmez.
 
 ## Kanıtlar
 

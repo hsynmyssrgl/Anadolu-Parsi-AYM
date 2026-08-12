@@ -2,6 +2,8 @@ import type { FamilyId, IsoDateTime, PersonId } from '@ppt/core';
 import type {
   BankAccountView,
   BankInstitutionView,
+  FinanceImportBatchView,
+  FinanceImportedCashFlowView,
   FinancePlanningLedgerItemView,
   FinanceRecordView,
   FinanceValuationView,
@@ -79,6 +81,24 @@ export type FinancePlanningLedgerItemRow = FinancePlanningLedgerItemView & {
 
 export type NewFinancePlanningLedgerItemRow = FinancePlanningLedgerItemRow;
 
+export type FinanceImportBatchRow = Omit<FinanceImportBatchView, 'status'> & {
+  readonly familyId: FamilyId;
+  readonly ownerPersonId: PersonId;
+  readonly status: 'staging' | 'committed';
+  readonly createdAt: IsoDateTime;
+};
+
+export type NewFinanceImportBatchRow = FinanceImportBatchRow;
+
+export type FinanceImportedCashFlowRow = FinanceImportedCashFlowView & {
+  readonly familyId: FamilyId;
+  readonly ownerPersonId: PersonId;
+  readonly occurredAt: IsoDateTime;
+  readonly createdAt: IsoDateTime;
+};
+
+export type NewFinanceImportedCashFlowRow = FinanceImportedCashFlowRow;
+
 export interface FinanceRepositoryPort {
     listRecords(context: PolicyAuthorizedRepositoryExecutionContext): RepositoryResult<readonly FinanceRecordRow[]>;
     findRecord(context: PolicyAuthorizedRepositoryExecutionContext, id: string): RepositoryResult<FinanceRecordRow | null>;
@@ -98,6 +118,13 @@ export interface FinanceRepositoryPort {
     listPlanningItems(context: PolicyAuthorizedRepositoryExecutionContext): RepositoryResult<readonly FinancePlanningLedgerItemRow[]>;
     findPlanningItem(context: PolicyAuthorizedRepositoryExecutionContext, id: string): RepositoryResult<FinancePlanningLedgerItemRow | null>;
     insertPlanningItem(context: PolicyAuthorizedRepositoryExecutionContext, row: NewFinancePlanningLedgerItemRow): RepositoryResult<void>;
+    listImportBatches(context: PolicyAuthorizedRepositoryExecutionContext): RepositoryResult<readonly FinanceImportBatchRow[]>;
+    listImportedCashFlows(context: PolicyAuthorizedRepositoryExecutionContext): RepositoryResult<readonly FinanceImportedCashFlowRow[]>;
+    findPlanningCategoryForImport(context: PolicyAuthorizedRepositoryExecutionContext, id: string): RepositoryResult<FinancePlanningLedgerItemRow | null>;
+    hasImportedFingerprint(context: PolicyAuthorizedRepositoryExecutionContext, fingerprint: string): RepositoryResult<boolean>;
+    insertImportBatch(context: PolicyAuthorizedRepositoryExecutionContext, row: NewFinanceImportBatchRow): RepositoryResult<void>;
+    insertImportedCashFlow(context: PolicyAuthorizedRepositoryExecutionContext, row: NewFinanceImportedCashFlowRow): RepositoryResult<void>;
+    sealImportBatch(context: PolicyAuthorizedRepositoryExecutionContext, batchId: string): RepositoryResult<void>;
 }
 
 /**

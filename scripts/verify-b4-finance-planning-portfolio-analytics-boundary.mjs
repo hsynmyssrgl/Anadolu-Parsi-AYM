@@ -5,10 +5,12 @@ import { runPlatformCapabilityManifestGate } from './verify-platform-capability-
 const text = (path) => readFile(path, 'utf8');
 const json = async (path) => JSON.parse(await text(path));
 const includesAll = (source, markers) => markers.every((marker) => source.includes(marker));
+const allChainTrue = (requirement) => Object.values(requirement?.chain ?? {}).length === 13
+  && Object.values(requirement.chain).every((value) => value === true);
 
 export const verifyB4FinancePlanningPortfolioAnalyticsBoundary = async () => {
   const [
-    scope, inventory, domain, bankingSecurity, application, repositoryContract,
+    scope, inventory, registry, domain, bankingSecurity, application, repositoryContract,
     repository, aiRepository, personLifecycleRepository, migrations, policyRuntime,
     adapter, dataStore, main, ipcPolicy, preload, declarations, appRenderer,
     planningRenderer, rootPackage, applicationTest, ipcTest, dataStoreTest, decision,
@@ -16,6 +18,7 @@ export const verifyB4FinancePlanningPortfolioAnalyticsBoundary = async () => {
   ] = await Promise.all([
     json('config/33-c-b4-finance-planning-portfolio-analytics-scope.json'),
     json('config/33-c-b4-finance-planning-portfolio-analytics-inventory.json'),
+    json('config/accepted-scope-registry.json'),
     text('packages/domain/src/app-data.ts'),
     text('packages/application/src/banking-security.ts'),
     text('packages/application/src/finance-use-cases.ts'),
@@ -72,8 +75,13 @@ export const verifyB4FinancePlanningPortfolioAnalyticsBoundary = async () => {
 
   check('scope closes exactly B4-10 B4-11 and B4-12 under DEC-214', scope.status === 'COMPLETE'
     && scope.decision === 'DEC-214' && scope.requirements?.join(',') === 'B4-10,B4-11,B4-12');
-  check('inventory has no blocker and keeps only B4-13 and B4-14 open', inventory.status === 'COMPLETE'
-    && inventory.openBlockers?.length === 0 && inventory.openRequirements?.join(',') === 'B4-13,B4-14');
+  check('inventory preserves historical-at-closure B4-13/B4-14 scope and 33-D completes the current successors', inventory.status === 'COMPLETE'
+    && inventory.openBlockers?.length === 0 && inventory.openRequirements?.join(',') === 'B4-13,B4-14'
+    && inventory.successorCompletion?.step === '33-D' && inventory.successorCompletion?.status === 'COMPLETE'
+    && inventory.openRequirements.every((id) => {
+      const requirement = registry.requirements?.find((item) => item.id === id);
+      return requirement?.status === 'COMPLETE' && allChainTrue(requirement);
+    }));
   check('scope preserves manual no-FX no-price no-sync no-execution truth', scope.planningLedger?.dataSource === 'manual'
     && scope.planningLedger?.externalVerification === 'not_performed'
     && scope.planningLedger?.remoteSynchronizationPerformed === false
@@ -129,7 +137,7 @@ export const verifyB4FinancePlanningPortfolioAnalyticsBoundary = async () => {
   ]));
   const planningEventSlice = application.slice(
     application.indexOf("eventType: 'finance.planning.item_recorded'"),
-    application.indexOf('export class CreateFinanceValuationUseCase')
+    application.indexOf('export class CommitFinanceImportBatchUseCase')
   );
   check('planning audit and outbox redact amounts descriptions notes and values', includesAll(application, [
     "action: `finance.planning.${item.itemType}.recorded`", "eventType: 'finance.planning.item_recorded'"
@@ -144,7 +152,7 @@ export const verifyB4FinancePlanningPortfolioAnalyticsBoundary = async () => {
   ]) && itemTypes.every((itemType) => repository.includes(`case '${itemType}':`)));
   check('sensitive inventory and person lifecycle include planning rows', aiRepository.includes('SELECT COUNT(*) FROM finance_planning_ledger')
     && personLifecycleRepository.includes('financePlanningItems: `SELECT COUNT(*) AS total FROM finance_planning_ledger'));
-  check('migration 81 is current and exact', Math.max(...migrationVersions) === 81
+  check('migration 81 remains present and exact under its successor', Math.max(...migrationVersions) >= 81
     && migrations.includes("createMigrationDefinition(81, 'b4_finance_planning_portfolio_analytics', financePlanningLedgerSql)"));
   check('migration creates one 39-column planning ledger without secret columns', planningMigration.includes('CREATE TABLE finance_planning_ledger(')
     && persistedColumns.length === 39 && prohibitedSecretColumns === 0);
@@ -235,12 +243,12 @@ export const verifyB4FinancePlanningPortfolioAnalyticsBoundary = async () => {
   check('PPK-021 exact ratchet reviews both new compositions', [
     'GetFinancePlanningWorkspaceUseCase', 'RecordFinancePlanningItemUseCase'
   ].every((symbol) => astKeys.has(`USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|${symbol}`))
-    && astGate.status === 'PASS' && astGate.exactAllowlistEntries === 542
-    && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 274
+    && astGate.status === 'PASS' && astGate.exactAllowlistEntries === 543
+    && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 275
     && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
   check('PPK-022 capability ratchet remains unchanged and green', capabilityGate.status === 'PASS'
-    && capabilityGate.capabilitySurfaces === 238
-    && capabilityGate.exactManifestSurfaces === 238
+    && capabilityGate.capabilitySurfaces === 242
+    && capabilityGate.exactManifestSurfaces === 242
     && capabilityGate.findings.length === 0);
   check('root lifecycle and explicit package scripts bind 33-C', ['pretypecheck', 'prebuild'].every((name) =>
     rootPackage.scripts?.[name]?.includes('verify-b4-finance-planning-portfolio-analytics-boundary.mjs'))

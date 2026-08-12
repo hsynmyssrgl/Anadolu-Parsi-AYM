@@ -159,6 +159,7 @@ import {
   RecordLoanPaymentUseCase,
   GetFinancePlanningWorkspaceUseCase,
   RecordFinancePlanningItemUseCase,
+  CommitFinanceImportBatchUseCase,
   ListArchiveItemsUseCase,
   SearchArchiveItemsUseCase,
   PrepareArchiveOpenUseCase,
@@ -391,7 +392,9 @@ import type {
   CreateLoanAccountInput,
   RecordLoanPaymentInput,
   FinancePlanningWorkspaceView,
-  RecordFinancePlanningItemInput
+  RecordFinancePlanningItemInput,
+  CommitFinanceImportPreparedBatchInput,
+  CommitFinanceImportBatchInput
 } from '@ppt/domain';
 import type {
   EnrollWindowsHelloInput,
@@ -797,6 +800,7 @@ export class FamilyDataStore {
   readonly #recordLoanPaymentUseCase: RecordLoanPaymentUseCase;
   readonly #getFinancePlanningWorkspaceUseCase: GetFinancePlanningWorkspaceUseCase;
   readonly #recordFinancePlanningItemUseCase: RecordFinancePlanningItemUseCase;
+  readonly #commitFinanceImportBatchUseCase: CommitFinanceImportBatchUseCase;
   readonly #listArchiveItemsUseCase: ListArchiveItemsUseCase;
   readonly #searchArchiveItemsUseCase: SearchArchiveItemsUseCase;
   readonly #prepareArchiveOpenUseCase: PrepareArchiveOpenUseCase;
@@ -1630,6 +1634,7 @@ export class FamilyDataStore {
     this.#recordLoanPaymentUseCase = new RecordLoanPaymentUseCase(financeUnitOfWork);
     this.#getFinancePlanningWorkspaceUseCase = new GetFinancePlanningWorkspaceUseCase(financeQuery);
     this.#recordFinancePlanningItemUseCase = new RecordFinancePlanningItemUseCase(financeUnitOfWork);
+    this.#commitFinanceImportBatchUseCase = new CommitFinanceImportBatchUseCase(financeUnitOfWork);
     const archivePolicyEnforcementPointResolver = productionArchivePolicy === undefined
       ? options.archivePolicyEnforcementPointResolver ?? failClosedArchivePolicyEnforcementPointResolver
       : createArchiveProductionPolicyEnforcementPointResolver({
@@ -3432,6 +3437,47 @@ export class FamilyDataStore {
       command: input,
       identifiers: {
         itemId: `finance-planning-${input.itemType}-${randomUUID()}`,
+        auditId: randomUUID(),
+        outboxEventId: asEventId(randomUUID())
+      }
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return this.getFinancePlanningWorkspace();
+  }
+
+  public async commitFinanceImport(
+    input: CommitFinanceImportPreparedBatchInput
+  ): Promise<FinancePlanningWorkspaceView> {
+    const context = this.#financeApplicationContext('finance-import-commit');
+    const normalizeFingerprintText = (value?: string): string => value
+      ? value.normalize('NFKC').trim().toLocaleLowerCase('tr-TR').replace(/\s+/gu, ' ')
+      : '';
+    const command: CommitFinanceImportBatchInput = {
+      ...input,
+      rows: input.rows.map((row) => {
+        return {
+          ...row,
+          rowFingerprint: createHash('sha256').update(JSON.stringify({
+            familyId: context.familyId,
+            ownerPersonId: input.ownerPersonId,
+            sourceFileSha256: input.fileSha256,
+            sourceRowNumber: row.sourceRowNumber,
+            occurredAt: row.occurredAt,
+            direction: row.direction,
+            amount: row.amount.toFixed(2),
+            currency: row.currency,
+            externalId: normalizeFingerprintText(row.externalId),
+            description: normalizeFingerprintText(row.description)
+          }), 'utf8').digest('hex')
+        };
+      })
+    };
+    const result = await this.#commitFinanceImportBatchUseCase.execute({
+      context,
+      command,
+      identifiers: {
+        batchId: `finance-import-batch-${randomUUID()}`,
+        entryIds: command.rows.map(() => `finance-import-entry-${randomUUID()}`),
         auditId: randomUUID(),
         outboxEventId: asEventId(randomUUID())
       }

@@ -94,7 +94,7 @@ check('installed AST parser is locked', lockfile.packages?.['node_modules/@babel
 check('manifest is exact default deny', manifest.defaultDecision === 'DENY' && manifest.exactMatchRequired === true && manifest.wildcardsAllowed === false);
 check('manifest requires signed runtime check without static authority', manifest.signedManifestRuntimeCheckRequired === true && manifest.buildManifestAloneGrantsRuntimeAuthority === false);
 check('manifest binds eighteen production zones', manifest.productionSourceZoneCount === 18 && scope.boundaries?.productionSourceZoneCount === 18);
-check('manifest contains exactly 238 unique surfaces', entries.length === 238 && new Set(keys).size === 238);
+check('manifest contains exactly 242 unique surfaces', entries.length === 242 && new Set(keys).size === 242);
 check('manifest surface keys are stable sorted', keys.every((key, index) => key === sortedKeys[index]));
 check('manifest contains no wildcard keys', keys.every((key) => !/[*?\[\]{}]/u.test(key)));
 check('manifest entries have exact schema', entries.every((entry) => Object.keys(entry).sort().join('|') === 'applicationIds|capability|key|runtimeEnforcement'));
@@ -109,8 +109,8 @@ check('bootstrap entries are bounded and Desktop-owned', pinnedEntries.length ==
 check('manifest preserves no-transfer ownership invariants', manifest.invariants?.realDataTransferPerformed === false && manifest.invariants?.sqliteOwnershipTransferred === false && manifest.invariants?.desktopVaultOwnershipPreserved === true);
 
 check('production capability gate passes', gate.status === 'PASS' && gate.findings.length === 0);
-check('gate scans all current production sources', gate.productionSourceZones === 18 && gate.scannedFiles === 375);
-check('gate and manifest cardinality are exact', gate.capabilitySurfaces === 238 && gate.exactManifestSurfaces === 238);
+check('gate scans all current production sources', gate.productionSourceZones === 18 && gate.scannedFiles === 379);
+check('gate and manifest cardinality are exact', gate.capabilitySurfaces === 242 && gate.exactManifestSurfaces === 242);
 check('gate manifest hash matches canonical file', gate.exactManifestSha256 === manifestSha256);
 check('gate reports seven families and fourteen applications', gate.protectedCapabilityFamilies === 7 && gate.canonicalApplications === 14);
 check('gate executes malicious and benign self tests', gate.maliciousSelfTestAssertions === 33 && gate.benignSelfTestAssertions === 5);
@@ -162,7 +162,7 @@ check('Desktop startup verifies package and application versions first', startup
 check('real Desktop startup runtime fixture carries exact signed capabilities', includesAll(startupRuntime, ["applicationRuntimeCapabilities:{'windows-desktop':['file.access','network.access'],'windows-core-service':['file.access','network.access']}", "runtimeCapabilities.join('|')==='file.access|network.access'"]));
 check('Desktop bootstrap pins file and network capabilities before operational startup', includesAll(desktopMain, ["assertPinnedBootstrapRuntimeCapability('windows-desktop', 'file.access')", "assertPinnedBootstrapRuntimeCapability('windows-desktop', 'network.access')"]));
 
-check('domain boundary is fixed and content free', includesAll(domain, ['PlatformCapabilityManifestGateBoundaryView', 'protectedCapabilityCount: 7', 'canonicalApplicationCount: 14', 'exactAstSurfaceCount: 238', 'sourcePathsExposedToClient: false', 'manifestHashesExposedToClient: false']));
+check('domain boundary is fixed and content free', includesAll(domain, ['PlatformCapabilityManifestGateBoundaryView', 'protectedCapabilityCount: 7', 'canonicalApplicationCount: 14', 'exactAstSurfaceCount: 242', 'sourcePathsExposedToClient: false', 'manifestHashesExposedToClient: false']));
 check('domain exports capability gate boundary', domainIndex.includes("export * from './platform-capability-manifest-gate.js'"));
 check('application use case verifies policy snapshot', includesAll(useCase, ['GetPlatformCapabilityManifestGateBoundaryUseCase', 'this.policy.verifySnapshot(snapshot)', 'PLATFORM_CAPABILITY_MANIFEST_GATE_SNAPSHOT_INVALID']));
 check('application boundary preserves no migration truth', includesAll(useCase, ['schemaMigrationRequired: false', 'latestDatabaseMigration: 77']));
@@ -172,7 +172,7 @@ check('policy tests cover signed hash and seven families', includesAll(policyTes
 check('policy tests cover malformed unverified and identity mismatch', includesAll(policyTest, ['MALFORMED_REQUEST', 'POLICY_PACKAGE_UNVERIFIED', 'POLICY_PACKAGE_HASH_MISMATCH', 'APPLICATION_ID_MISMATCH', 'APPLICATION_VERSION_MISMATCH', 'CAPABILITY_MANIFEST_HASH_MISMATCH']));
 check('policy tests cover missing unexpected and tampered capability', includesAll(policyTest, ['CAPABILITY_REQUIREMENT_MISSING', 'CAPABILITY_REQUIREMENT_UNEXPECTED', 'MALFORMED_AUTHORITY']));
 check('AST tests cover all seven resource families', includesAll(astTest, ['CAMERA_IMPORT', 'MICROPHONE_IMPORT', 'FILE_IMPORT', 'OCR_IMPORT', 'AI_IMPORT', 'LOCATION_API', 'NETWORK_API']));
-check('AST tests cover exact production and drift denial', includesAll(astTest, ['inventoryPlatformCapabilityManifestSurfaces()', 'toHaveLength(238)', 'UNDECLARED_CAPABILITY_SURFACE', 'CAPABILITY_SURFACE_ENTRY_INVALID', 'APPLICATION_CAPABILITY_BASELINE_MISMATCH']));
+check('AST tests cover exact production and drift denial', includesAll(astTest, ['inventoryPlatformCapabilityManifestSurfaces()', 'toHaveLength(242)', 'UNDECLARED_CAPABILITY_SURFACE', 'CAPABILITY_SURFACE_ENTRY_INVALID', 'APPLICATION_CAPABILITY_BASELINE_MISMATCH']));
 check('integration tests bind runtime startup and bootstrap', includesAll(integrationTest, ['applicationRuntimeCapabilities: PLATFORM_APPLICATION_RUNTIME_CAPABILITY_REQUIREMENTS', "source: 'authenticated-core-service-health'", 'assertPinnedBootstrapRuntimeCapability']));
 
 check('main composes exact capability policy and status use case', includesAll(desktopMain, ['new PlatformCapabilityManifestPolicy()', 'new GetPlatformCapabilityManifestGateBoundaryUseCase(platformCapabilityManifestPolicy)']));

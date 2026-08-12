@@ -8,6 +8,9 @@ import type {
   FinanceCategoryKind,
   FinanceCashFlowStatus,
   FinanceGoalKind,
+  FinanceImportBatchView,
+  FinanceImportColumnMappingInput,
+  FinanceImportedCashFlowView,
   FinancePlanningLedgerItemView,
   FinanceRecurringFrequency,
   FinanceRecurringStatus,
@@ -33,6 +36,8 @@ import {
   type BankAccountRow,
   type FinanceRecordRow,
   type FinancePlanningLedgerItemRow,
+  type FinanceImportBatchRow,
+  type FinanceImportedCashFlowRow,
   type FinancePolicyResourceRepositoryPort,
   type FinanceRepositoryPort,
   type FinanceValuationRow,
@@ -41,6 +46,8 @@ import {
   type NewLoanAccountRow,
   type NewLoanPaymentHistoryRow,
   type NewFinancePlanningLedgerItemRow,
+  type NewFinanceImportBatchRow,
+  type NewFinanceImportedCashFlowRow,
   type NewPaymentCardRow,
   type PaymentCardRow,
   type PolicyAuthorizedRepositoryExecutionContext,
@@ -344,6 +351,49 @@ const mapFinancePlanningItem = (row: Record<string, unknown>): FinancePlanningLe
   }
 };
 
+const mapFinanceImportBatch = (row: Record<string, unknown>): FinanceImportBatchRow => ({
+  id: String(row.id),
+  familyId: asFamilyId(String(row.family_id)),
+  ownerPersonId: asPersonId(String(row.owner_person_id)),
+  privacy: String(row.privacy) as RecordPrivacy,
+  sourceMode: String(row.source_mode) as FinanceImportBatchView['sourceMode'],
+  sourceFormat: String(row.source_format) as FinanceImportBatchView['sourceFormat'],
+  fileName: String(row.file_name),
+  fileSha256: String(row.file_sha256),
+  mapping: JSON.parse(String(row.mapping_json)) as FinanceImportColumnMappingInput,
+  defaultCurrency: String(row.default_currency),
+  duplicateStrategy: String(row.duplicate_strategy) as FinanceImportBatchView['duplicateStrategy'],
+  totalRows: Number(row.total_rows),
+  importedRows: Number(row.imported_rows),
+  duplicateRows: Number(row.duplicate_rows),
+  status: String(row.status) as FinanceImportBatchRow['status'],
+  adapterContract: 'ohvps-v1-local',
+  networkAccess: 'not_performed',
+  credentialExchange: 'not_performed',
+  externalConsent: 'not_performed',
+  createdAt: asIsoDateTime(String(row.created_at))
+});
+
+const mapFinanceImportedCashFlow = (row: Record<string, unknown>): FinanceImportedCashFlowRow => ({
+  id: String(row.id),
+  batchId: String(row.batch_id),
+  familyId: asFamilyId(String(row.family_id)),
+  ownerPersonId: asPersonId(String(row.owner_person_id)),
+  categoryId: String(row.category_id),
+  direction: String(row.direction) as FinanceImportedCashFlowView['direction'],
+  amount: Number(row.amount),
+  currency: String(row.currency),
+  occurredAt: asIsoDateTime(String(row.occurred_at)),
+  ...(row.description ? { description: String(row.description) } : {}),
+  ...(row.external_id ? { externalId: String(row.external_id) } : {}),
+  sourceRowNumber: Number(row.source_row_number),
+  rowFingerprint: String(row.row_fingerprint),
+  privacy: String(row.privacy) as RecordPrivacy,
+  dataSource: String(row.source_mode) === 'sandbox' ? 'sandbox' : 'file_import',
+  externalVerification: 'not_performed',
+  createdAt: asIsoDateTime(String(row.created_at))
+});
+
 const assertCollectionRead = (context: PolicyAuthorizedRepositoryExecutionContext): void => {
   assertPolicyAuthorizedRepositoryContext(context, {
     resourceType: 'finance_record',
@@ -368,6 +418,17 @@ const assertBankCatalogAccess = (context: PolicyAuthorizedRepositoryExecutionCon
     resourceId: authorization.resourceId,
     action: authorization.action,
     capability: authorization.capability,
+    correlationId: context.correlationId
+  });
+};
+
+const assertFinanceImportCreateAccess = (context: PolicyAuthorizedRepositoryExecutionContext): void => {
+  const authorization = context.policyAuthorization;
+  assertPolicyAuthorizedRepositoryContext(context, {
+    resourceType: 'finance_record',
+    resourceId: authorization.resourceId,
+    action: 'create',
+    capability: 'finance.write',
     correlationId: context.correlationId
   });
 };
@@ -1147,6 +1208,125 @@ export class SqliteFinanceRepository extends SqliteRepository implements Finance
         policy.action,
         policy.capability
       );
+    });
+  }
+
+  public listImportBatches(
+    context: PolicyAuthorizedRepositoryExecutionContext
+  ): RepositoryResult<readonly FinanceImportBatchRow[]> {
+    assertCollectionRead(context);
+    return this.execute(context, () => (
+      this.database(context).prepare(`
+        SELECT id,family_id,owner_person_id,source_mode,source_format,file_name,file_sha256,
+               mapping_json,default_currency,duplicate_strategy,total_rows,imported_rows,
+               duplicate_rows,status,privacy,created_at
+        FROM finance_import_batches
+        WHERE status='committed' AND family_id=?
+        ORDER BY created_at DESC,id
+      `).all(context.policyAuthorization.resourceFamilyId) as Array<Record<string, unknown>>
+    ).map(mapFinanceImportBatch));
+  }
+
+  public listImportedCashFlows(
+    context: PolicyAuthorizedRepositoryExecutionContext
+  ): RepositoryResult<readonly FinanceImportedCashFlowRow[]> {
+    assertCollectionRead(context);
+    return this.execute(context, () => (
+      this.database(context).prepare(`
+        SELECT entry.id,entry.batch_id,entry.family_id,entry.owner_person_id,entry.category_id,
+               entry.direction,entry.amount,entry.currency,entry.occurred_at,entry.description,
+               entry.external_id,entry.source_row_number,entry.row_fingerprint,entry.privacy,
+               entry.created_at,batch.source_mode
+        FROM finance_import_entries entry
+        JOIN finance_import_batches batch ON batch.id=entry.batch_id AND batch.status='committed'
+        WHERE entry.family_id=?
+        ORDER BY entry.occurred_at DESC,entry.id
+      `).all(context.policyAuthorization.resourceFamilyId) as Array<Record<string, unknown>>
+    ).map(mapFinanceImportedCashFlow));
+  }
+
+  public findPlanningCategoryForImport(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    id: string
+  ): RepositoryResult<FinancePlanningLedgerItemRow | null> {
+    assertFinanceImportCreateAccess(context);
+    return this.execute(context, () => {
+      const row = this.database(context).prepare(`
+        SELECT ${financePlanningColumns}
+        FROM finance_planning_ledger
+        WHERE id=? AND family_id=? AND item_type='category'
+      `).get(id, context.policyAuthorization.resourceFamilyId) as Record<string, unknown> | undefined;
+      return row ? mapFinancePlanningItem(row) : null;
+    });
+  }
+
+  public hasImportedFingerprint(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    fingerprint: string
+  ): RepositoryResult<boolean> {
+    assertFinanceImportCreateAccess(context);
+    return this.execute(context, () => Boolean(this.database(context).prepare(`
+      SELECT 1 FROM finance_import_entries
+      WHERE family_id=? AND row_fingerprint=?
+      LIMIT 1
+    `).get(context.policyAuthorization.resourceFamilyId, fingerprint)));
+  }
+
+  public insertImportBatch(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    row: NewFinanceImportBatchRow
+  ): RepositoryResult<void> {
+    const policy = financeWriteBinding(context, row.id, 'create');
+    return this.execute(context, () => {
+      this.database(context).prepare(`
+        INSERT INTO finance_import_batches(
+          id,family_id,owner_person_id,source_mode,source_format,file_name,file_sha256,
+          mapping_json,default_currency,duplicate_strategy,total_rows,imported_rows,
+          duplicate_rows,status,adapter_contract,network_access,credential_exchange,
+          external_consent,privacy,created_at,policy_receipt_hash,policy_receipt_version,
+          policy_receipt_nonce,policy_correlation_id,policy_resource_type,policy_resource_id,
+          policy_action,policy_capability
+        ) VALUES(${Array.from({ length: 28 }, () => '?').join(',')})
+      `).run(
+        row.id,row.familyId,row.ownerPersonId,row.sourceMode,row.sourceFormat,row.fileName,
+        row.fileSha256,JSON.stringify(row.mapping),row.defaultCurrency,row.duplicateStrategy,
+        row.totalRows,row.importedRows,row.duplicateRows,row.status,row.adapterContract,
+        row.networkAccess,row.credentialExchange,row.externalConsent,row.privacy,row.createdAt,
+        policy.receiptHash,policy.receiptVersion,policy.nonce,context.correlationId,
+        policy.resourceType,policy.resourceId,policy.action,policy.capability
+      );
+    });
+  }
+
+  public insertImportedCashFlow(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    row: NewFinanceImportedCashFlowRow
+  ): RepositoryResult<void> {
+    assertFinanceImportCreateAccess(context);
+    return this.execute(context, () => {
+      this.database(context).prepare(`
+        INSERT INTO finance_import_entries(
+          id,batch_id,family_id,owner_person_id,category_id,direction,amount,currency,
+          occurred_at,description,external_id,source_row_number,row_fingerprint,privacy,created_at
+        ) VALUES(${Array.from({ length: 15 }, () => '?').join(',')})
+      `).run(
+        row.id,row.batchId,row.familyId,row.ownerPersonId,row.categoryId,row.direction,row.amount,
+        row.currency,row.occurredAt,row.description ?? null,row.externalId ?? null,
+        row.sourceRowNumber,row.rowFingerprint,row.privacy,row.createdAt
+      );
+    });
+  }
+
+  public sealImportBatch(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    batchId: string
+  ): RepositoryResult<void> {
+    financeWriteBinding(context, batchId, 'create');
+    return this.execute(context, () => {
+      const result = this.database(context).prepare(`
+        UPDATE finance_import_batches SET status='committed' WHERE id=? AND status='staging'
+      `).run(batchId);
+      if (result.changes !== 1) throw new Error('Finance import batch could not be sealed exactly once');
     });
   }
 }

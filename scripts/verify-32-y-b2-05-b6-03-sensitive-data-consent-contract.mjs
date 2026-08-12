@@ -112,8 +112,8 @@ check('desktop integration test covers policy repository IPC UI and no egress', 
 check('DEC-210 records the exact privacy and migration decision', includesAll(decision, ['DEC-210', 'CentralAuthorizationService', 'outboundTransferPerformed=false', 'latest migration 77']));
 check('threat model covers all four sensitive classes and audit', includesAll(threatModel, ['18 yaş altı', 'Sağlık kayıtları', 'Finans kayıtları', 'koordinat', 'audit']));
 check('upper closure document keeps excluded claims open', includesAll(auditDocument, ['B2-02', 'PPK-025', 'B9-01', 'Silver readiness', 'Bronze Final']));
-check('PPK-021 successor ratchet is exact green with no role bypass', astGate.status === 'PASS' && astGate.privilegedSurfaces === 542 && astGate.exactAllowlistEntries === 542 && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
-check('PPK-022 ratchet remains exact green with no added capability', capabilityGate.status === 'PASS' && capabilityGate.capabilitySurfaces === 238 && capabilityGate.exactManifestSurfaces === 238 && capabilityGate.findings.length === 0);
+check('PPK-021 successor ratchet is exact green with no role bypass', astGate.status === 'PASS' && astGate.privilegedSurfaces === 543 && astGate.exactAllowlistEntries === 543 && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
+check('PPK-022 successor ratchet remains exact green', capabilityGate.status === 'PASS' && capabilityGate.capabilitySurfaces === 242 && capabilityGate.exactManifestSurfaces === 242 && capabilityGate.findings.length === 0);
 check('root lifecycle and explicit package scripts bind 32-Y', ['pretypecheck','prebuild'].every((name) => rootPackage.scripts?.[name]?.includes('verify-sensitive-data-consent-boundary.mjs'))
   && ['verify:sensitive-data-consent:boundary','verify:b2-b6-sensitive-data-consent:targeted','verify:b2-b6-sensitive-data-consent:contract','verify:b2-b6-sensitive-data-consent:runtime'].every((name) => typeof rootPackage.scripts?.[name] === 'string'));
 check('contract prerequisites exist', expectedEvidence.slice(0, 1).every((path) => existsSync(path)));

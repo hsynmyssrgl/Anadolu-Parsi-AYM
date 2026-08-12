@@ -5,7 +5,7 @@
   "rule": "PR-171",
   "policy": "ONE_IN_PROGRESS_PREVIOUS_MUST_HAVE_PASS_AND_PERSISTENT_RECEIPT",
   "workflowStatus": "IN_PROGRESS",
-  "currentStep": "31-T",
+  "currentStep": "33-D",
   "steps": [
     {
       "id": "29-A",
@@ -2125,10 +2125,29 @@
       "persistentReceiptStatus": "PASS",
       "persistentReceiptPath": "artifacts/checkpoints/31-T_LIBRARY_RECEIPT.json",
       "completionTransitionStatus": "PASS"
+    },
+    {
+      "id": "33-D",
+      "title": "B4 controlled finance import and network-free OHVPS adapter closure",
+      "scopeRequirement": "B4-13,B4-14",
+      "status": "IN_PROGRESS",
+      "validationStatus": "PENDING",
+      "localEvidence": [
+        "config/33-d-b4-controlled-import-open-banking-scope.json",
+        "config/33-d-b4-controlled-import-open-banking-inventory.json",
+        "docs/decisions/DEC-215-b4-controlled-import-open-banking.md",
+        "docs/security/THREAT_MODEL_33_D_B4_CONTROLLED_IMPORT_OPEN_BANKING.md",
+        "docs/audit/33-D_B4_CONTROLLED_IMPORT_OPEN_BANKING_UST_KAPANIS.md",
+        "artifacts/validation/33-D-b4-controlled-import-open-banking-boundary.json",
+        "artifacts/validation/33-D-b4-controlled-import-open-banking-contract.json",
+        "artifacts/validation/33-D-b4-controlled-import-open-banking-runtime.json"
+      ],
+      "persistentReceiptStatus": "PENDING",
+      "completionTransitionStatus": "PENDING"
     }
   ],
   "recoveryAuthority": "NEW_CHAT_HANDOFF_Bronze_04.08.2026.29.md",
   "recoveryReason": "29-D_FAILED_POSTFLIGHT_EXIT_CODE_1_SPLIT_PER_PR-171",
-  "updatedAt": "2026-08-11T07:31:27.333Z",
-  "segmentationNote": "31-T governed rollback exact delete receipt fence is immutable COMPLETED/PASS with exact D: USB readback. PPK-002 remains PARTIAL; universal repository enforcement, obligation execution and external monotonic rollback authority remain open."
+  "updatedAt": "2026-08-12T17:31:41.603Z",
+  "segmentationNote": "31-T governed rollback exact delete receipt fence remains immutable COMPLETED/PASS with exact D: USB readback. 33-D is the single active successor step for B4-13/B4-14 controlled import and the network-free OHVPS adapter closure; its persistent receipt and completion transition remain pending until final delivery."
 }

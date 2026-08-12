@@ -51,7 +51,7 @@ check(completion.status === 'PASS' && completion.officialStepStatus === 'COMPLET
 check(transition.status === 'PASS' && transition.failed === 0 && transition.passed === transition.expected, 'completion transition is PASS');
 check(execution.officialStepStatus === 'COMPLETED' && execution.officialCompletionClaimed === true, 'execution record is completed');
 check(scope.officialStepStatus === 'COMPLETED' && scope.PPK002 === 'PARTIAL', 'scope report is completed with PPK-002 partial');
-check(step31D?.status === 'COMPLETED' && step31D.persistentReceiptStatus === 'PASS' && active.length === 0, 'work plan preserves completed 31-D with no active successor');
+check(step31D?.status === 'COMPLETED' && step31D.persistentReceiptStatus === 'PASS' && (active.length === 0 || laterSuccessor.planValid), 'work plan preserves completed 31-D through an authorized active successor');
 check((['31-D_COMPLETED_RECEIPT_PASS', '31-E_COMPLETED_RECEIPT_PASS', '31-F_COMPLETED_RECEIPT_PASS'].includes(ledger.libraryUploadStatus) && ledger.activeMicroStep === null) || laterSuccessor.ledgerValid, 'ledger records completed receipt chain');
 check(laterSuccessor.nextTaskValid || ledger.nextOfficialTask === (successor31FCompleted ? 'AUTO_PRIORITY_SELECTION_AFTER_31-F_PERSISTENT_RECEIPT' : successor31ECompleted ? 'AUTO_PRIORITY_SELECTION_AFTER_31-E_PERSISTENT_RECEIPT' : 'AUTO_PRIORITY_SELECTION_AFTER_31-D_PERSISTENT_RECEIPT'), 'ledger requires next priority selection');
 

@@ -71,12 +71,18 @@
       "apps/desktop/tests/data-store.test.ts"
     ]
   },
+  "successor": {
+    "step": "33-D",
+    "requirementsCompleted": ["B4-13", "B4-14"],
+    "decision": "DEC-215",
+    "latestDatabaseMigration": 82
+  },
   "excludedClaims": [
     "Finans planlama, hedef ve portföy değerlerinin tamamı manuel kullanıcı beyanıdır.",
     "Para birimleri arasında kur dönüşümü veya tek toplam üretilmez.",
     "Uygulama dış piyasa fiyatı almaz, banka hesabını eşitlemez ve ödeme göndermez.",
     "Yaklaşan ödeme görünümü yalnız takip bilgisidir; talimat veya ödeme icrası değildir.",
-    "B4-13 içe aktarma ve B4-14 open-banking adapter gereksinimleri tamamlanmış sayılmaz.",
+    "33-C kapanış anında B4-13 içe aktarma ve B4-14 open-banking adapter gereksinimleri tamamlanmış sayılmamıştır; 33-D halefi bunları tamamlar.",
     "B9-01, Silver readiness ve Bronze Final tamamlanmış sayılmaz.",
     "Yeni Build numarası verilmez."
   ]

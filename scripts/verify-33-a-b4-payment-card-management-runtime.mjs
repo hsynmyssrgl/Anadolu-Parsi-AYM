@@ -39,12 +39,12 @@ const commands = Object.freeze([
   Object.freeze({
     id: 'ppk021-ast-ratchet',
     args: ['scripts/verify-platform-policy-ast-gate.mjs'],
-    expectOutput: '"exactAllowlistEntries": 542'
+    expectOutput: '"exactAllowlistEntries": 543'
   }),
   Object.freeze({
     id: 'ppk022-capability-ratchet',
     args: ['scripts/verify-platform-capability-manifest-gate.mjs'],
-    expectOutput: '"exactManifestSurfaces": 238'
+    expectOutput: '"exactManifestSurfaces": 242'
   }),
   Object.freeze({
     id: 'decision-ledger',
@@ -93,9 +93,9 @@ const report = Object.freeze({
   checksFailed: failures.length,
   targetedTestFilesPassed: targeted?.testFiles ?? 0,
   targetedTestsPassed: targeted?.tests ?? 0,
-  latestDatabaseMigration: 79,
-  ppk021ExactAllowlistEntries: 542,
-  ppk022CapabilitySurfaces: 238,
+  latestDatabaseMigration: 82,
+  ppk021ExactAllowlistEntries: 543,
+  ppk022CapabilitySurfaces: 242,
   prohibitedSecretColumns: 0,
   bankExecutionPerformed: false,
   results: Object.freeze(results),

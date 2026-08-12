@@ -15,7 +15,7 @@
       "passed": true
     },
     {
-      "name": "inventory has no blocker and keeps only B4-13 and B4-14 open",
+      "name": "inventory preserves historical-at-closure B4-13/B4-14 scope and 33-D completes the current successors",
       "passed": true
     },
     {
@@ -87,7 +87,7 @@
       "passed": true
     },
     {
-      "name": "migration 81 is current and exact",
+      "name": "migration 81 remains present and exact under its successor",
       "passed": true
     },
     {
@@ -172,15 +172,15 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 81,
+  "latestDatabaseMigration": 82,
   "financePlanningLedgerColumns": 39,
-  "ppk021ExactAllowlistEntries": 542,
-  "ppk021UseCaseCompositionSurfaces": 274,
-  "ppk022CapabilitySurfaces": 238,
+  "ppk021ExactAllowlistEntries": 543,
+  "ppk021UseCaseCompositionSurfaces": 275,
+  "ppk022CapabilitySurfaces": 242,
   "prohibitedSecretColumns": 0,
   "crossCurrencyAggregationPerformed": false,
   "externalPricingPerformed": false,
   "bankSynchronizationPerformed": false,
   "paymentExecutionPerformed": false,
-  "generatedAt": "2026-08-12T16:14:56.552Z"
+  "generatedAt": "2026-08-12T18:07:43.189Z"
 }

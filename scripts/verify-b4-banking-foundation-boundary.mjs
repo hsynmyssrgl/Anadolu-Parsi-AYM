@@ -162,11 +162,11 @@ export const verifyB4BankingFoundationBoundary = async () => {
   check('PPK-021 exact ratchet reviews the four new compositions', [
     'CreateBankAccountUseCase', 'ListBankAccountsUseCase', 'ListBankInstitutionsUseCase', 'ValidateIbanUseCase'
   ].every((symbol) => astKeys.has(`USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|${symbol}`))
-    && astGate.status === 'PASS' && astGate.exactAllowlistEntries === 542
+    && astGate.status === 'PASS' && astGate.exactAllowlistEntries === 543
     && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
-  check('PPK-022 capability ratchet remains unchanged and green', capabilityGate.status === 'PASS'
-    && capabilityGate.capabilitySurfaces === 238
-    && capabilityGate.exactManifestSurfaces === 238
+  check('PPK-022 successor capability ratchet remains exact and green', capabilityGate.status === 'PASS'
+    && capabilityGate.capabilitySurfaces === 242
+    && capabilityGate.exactManifestSurfaces === 242
     && capabilityGate.findings.length === 0);
   check('root lifecycle and explicit package scripts bind 32-Z', ['pretypecheck', 'prebuild'].every((name) =>
     rootPackage.scripts?.[name]?.includes('verify-b4-banking-foundation-boundary.mjs'))

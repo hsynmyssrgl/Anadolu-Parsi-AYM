@@ -1359,7 +1359,7 @@ describe('FamilyDataStore', () => {
     ]));
     expect(database.prepare('SELECT COUNT(*) AS total FROM finance_planning_ledger').get()).toEqual({ total: 11 });
     expect(database.prepare('SELECT value FROM database_metadata WHERE key=?').get('schema_generation')).toEqual({
-      value: 'REVISION-33-C-B4-FINANCE-PLANNING-PORTFOLIO-ANALYTICS'
+      value: 'REVISION-33-D-B4-CONTROLLED-IMPORT-OPEN-BANKING'
     });
     const payloads = database.prepare("SELECT payload_json FROM event_outbox WHERE event_type='finance.planning.item_recorded'").all() as Array<{payload_json:string}>;
     expect(JSON.stringify(payloads)).not.toMatch(/1200|10000|5500|Ağustos market|Manuel hedef|Manuel değerleme/u);
@@ -1389,6 +1389,75 @@ describe('FamilyDataStore', () => {
       .toThrow(/governed deletion workflow/u);
     database.close();
     expect(store.listAudit(300).some((entry) => entry.action === 'finance.planning.category.recorded' && entry.resourceId === expenseCategory.id)).toBe(true);
+    store.close();
+  });
+
+  it('B4-13/B4-14 kontrollü finans içe aktarma, kalıcı tekrar engeli ve ağsız OHVPS sınırını uygular', async () => {
+    const { store, directory } = makeStore();
+    await authenticate(store);
+    const owner = await getAuthenticatedPerson(store);
+    let workspace = await store.recordFinancePlanningItem({
+      itemType: 'category', ownerPersonId: owner.id, name: 'İçe aktarılan gelir', kind: 'income', privacy: 'private'
+    });
+    workspace = await store.recordFinancePlanningItem({
+      itemType: 'category', ownerPersonId: owner.id, name: 'İçe aktarılan gider', kind: 'expense', privacy: 'private'
+    });
+    const incomeCategory = workspace.categories.find((item) => item.kind === 'income')!;
+    const expenseCategory = workspace.categories.find((item) => item.kind === 'expense')!;
+    const prepared = {
+      ownerPersonId: owner.id,
+      privacy: 'private' as const,
+      sourceMode: 'controlled_file' as const,
+      sourceFormat: 'csv' as const,
+      fileName: 'hareketler.csv',
+      fileSha256: 'c'.repeat(64),
+      mapping: { dateColumn: 'tarih', amountColumn: 'tutar', amountMode: 'signed' as const },
+      defaultCurrency: 'TRY',
+      duplicateStrategy: 'skip' as const,
+      totalRows: 2,
+      rows: [
+        { categoryId: expenseCategory.id, direction: 'expense' as const, amount: 125.5, currency: 'TRY', occurredAt: '2026-08-01T12:00:00.000Z', description: 'Market', externalId: 'row-expense-1', sourceRowNumber: 2 },
+        { categoryId: incomeCategory.id, direction: 'income' as const, amount: 500, currency: 'TRY', occurredAt: '2026-08-02T12:00:00.000Z', description: 'İade', externalId: 'row-income-1', sourceRowNumber: 3 }
+      ]
+    };
+    workspace = await store.commitFinanceImport(prepared);
+    expect(workspace.importBatches[0]).toMatchObject({
+      status: 'committed', importedRows: 2, duplicateRows: 0, sourceFormat: 'csv',
+      networkAccess: 'not_performed', credentialExchange: 'not_performed', externalConsent: 'not_performed'
+    });
+    expect(workspace.importedCashFlowEntries).toEqual(expect.arrayContaining([
+      expect.objectContaining({ direction: 'expense', amount: 125.5, dataSource: 'file_import' }),
+      expect.objectContaining({ direction: 'income', amount: 500, dataSource: 'file_import' })
+    ]));
+    workspace = await store.commitFinanceImport(prepared);
+    expect(workspace.importBatches[0]).toMatchObject({ importedRows: 0, duplicateRows: 2 });
+    expect(workspace.importedCashFlowEntries).toHaveLength(2);
+    workspace = await store.commitFinanceImport({ ...prepared, fileName: 'hareketler-yeni-dis-aktarim.csv', fileSha256: 'd'.repeat(64) });
+    expect(workspace.importBatches[0]).toMatchObject({ importedRows: 2, duplicateRows: 0 });
+    expect(workspace.importedCashFlowEntries).toHaveLength(4);
+    expect(workspace.openBankingBoundary).toMatchObject({
+      adapterContract: 'ohvps-v1-local', sandboxData: 'synthetic_local',
+      manualFallback: 'controlled_file_import', liveBankConnection: 'not_implemented', networkAccess: 'not_performed'
+    });
+
+    const database = new DatabaseSync(join(directory, 'family.db'));
+    expect(database.prepare("SELECT COUNT(*) AS total FROM finance_import_batches WHERE status='committed'").get()).toEqual({ total: 3 });
+    expect(database.prepare('SELECT COUNT(*) AS total FROM finance_import_entries').get()).toEqual({ total: 4 });
+    expect(database.prepare('SELECT COUNT(DISTINCT row_fingerprint) AS total FROM finance_import_entries').get()).toEqual({ total: 4 });
+    const stagingGuard = database.prepare("SELECT sql FROM sqlite_master WHERE type='trigger' AND name='trg_b4_finance_import_batch_staging_guard'").get() as { sql:string };
+    expect(stagingGuard.sql).toContain("NEW.status<>'staging'");
+    const entryId = (database.prepare('SELECT id FROM finance_import_entries LIMIT 1').get() as { id:string }).id;
+    expect(() => database.prepare('UPDATE finance_import_entries SET amount=amount+1 WHERE id=?').run(entryId)).toThrow(/append-only/u);
+    expect(() => database.prepare('DELETE FROM finance_import_entries WHERE id=?').run(entryId)).toThrow(/governed deletion workflow/u);
+    const batchId = (database.prepare('SELECT id FROM finance_import_batches LIMIT 1').get() as { id:string }).id;
+    expect(() => database.prepare("UPDATE finance_import_batches SET status='staging' WHERE id=?").run(batchId)).toThrow(/exact complete staging seal/u);
+    const outbox = database.prepare("SELECT payload_json FROM event_outbox WHERE event_type='finance.import.batch_committed'").all();
+    expect(JSON.stringify(outbox)).not.toMatch(/Market|İade|125\.5|row-expense/u);
+    expect(database.prepare('SELECT value FROM database_metadata WHERE key=?').get('schema_generation')).toEqual({
+      value: 'REVISION-33-D-B4-CONTROLLED-IMPORT-OPEN-BANKING'
+    });
+    database.close();
+    expect(store.listAudit(400).some((entry) => entry.action === 'finance.import.batch_committed')).toBe(true);
     store.close();
   });
 

@@ -159,10 +159,10 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 80,
+  "latestDatabaseMigration": 82,
   "requirementCompletionClaimed": true,
   "b202CompletedByThisPackage": false,
   "ppk025CompletedByThisPackage": false,
   "b901CompletedByThisPackage": false,
-  "generatedAt": "2026-08-12T15:13:23.617Z"
+  "generatedAt": "2026-08-12T17:50:26.265Z"
 }

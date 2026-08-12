@@ -1,5 +1,9 @@
 # 33-C — B4 finans planlama, portföy ve analiz üst kapanışı
 
+> Halef notu (33-D): Bu belgedeki B4-13/B4-14 açık kapsam ifadeleri 33-C kapanış
+> anının tarihsel durumudur. B4-13 ve B4-14, DEC-215 ve Migration 82 ile 33-D'de
+> tamamlanmıştır; 33-C'nin B4-10/B4-11/B4-12 kanıtı değişmeden korunur.
+
 ## Kapanan gereksinimler
 
 - **B4-10:** Gelir/gider kategorileri, bütçe revizyonu, nakit akışı, yinelenen

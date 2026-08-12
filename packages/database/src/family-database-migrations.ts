@@ -7350,6 +7350,234 @@ SET value='REVISION-33-C-B4-FINANCE-PLANNING-PORTFOLIO-ANALYTICS',
 WHERE key='schema_generation';
 `;
 
+const financeControlledImportOpenBankingSql = `CREATE TABLE finance_import_batches(
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 160),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  source_mode TEXT NOT NULL CHECK(source_mode IN ('controlled_file','sandbox')),
+  source_format TEXT NOT NULL CHECK(source_format IN ('csv','tsv','xlsx','ofx','qfx','sandbox')),
+  file_name TEXT NOT NULL CHECK(
+    length(trim(file_name)) BETWEEN 1 AND 180
+    AND instr(file_name,'/')=0 AND instr(file_name,char(92))=0 AND instr(file_name,char(0))=0
+  ),
+  file_sha256 TEXT NOT NULL CHECK(length(file_sha256)=64 AND file_sha256 NOT GLOB '*[^0-9a-f]*'),
+  mapping_json TEXT NOT NULL CHECK(
+    length(mapping_json)<=4096 AND json_valid(mapping_json)=1 AND json_type(mapping_json)='object'
+  ),
+  default_currency TEXT NOT NULL CHECK(
+    length(default_currency)=3 AND default_currency=upper(default_currency)
+    AND default_currency GLOB '[A-Z][A-Z][A-Z]'
+  ),
+  duplicate_strategy TEXT NOT NULL CHECK(duplicate_strategy IN ('skip','reject')),
+  total_rows INTEGER NOT NULL CHECK(typeof(total_rows)='integer' AND total_rows BETWEEN 1 AND 5000),
+  imported_rows INTEGER NOT NULL CHECK(typeof(imported_rows)='integer' AND imported_rows BETWEEN 0 AND 5000),
+  duplicate_rows INTEGER NOT NULL CHECK(typeof(duplicate_rows)='integer' AND duplicate_rows BETWEEN 0 AND 5000),
+  status TEXT NOT NULL CHECK(status IN ('staging','committed')),
+  adapter_contract TEXT NOT NULL CHECK(adapter_contract='ohvps-v1-local'),
+  network_access TEXT NOT NULL CHECK(network_access='not_performed'),
+  credential_exchange TEXT NOT NULL CHECK(credential_exchange='not_performed'),
+  external_consent TEXT NOT NULL CHECK(external_consent='not_performed'),
+  privacy TEXT NOT NULL CHECK(privacy IN ('private','selected_members','family')),
+  created_at TEXT NOT NULL CHECK(datetime(created_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL UNIQUE REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT CHECK(
+    length(policy_receipt_hash)=64 AND policy_receipt_hash NOT GLOB '*[^0-9a-f]*'
+  ),
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version=1),
+  policy_receipt_nonce TEXT NOT NULL,
+  policy_correlation_id TEXT NOT NULL,
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type='finance_record'),
+  policy_resource_id TEXT NOT NULL CHECK(policy_resource_id=id),
+  policy_action TEXT NOT NULL CHECK(policy_action='create'),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='finance.write'),
+  CHECK(imported_rows+duplicate_rows=total_rows),
+  CHECK(
+    (source_mode='sandbox' AND source_format='sandbox')
+    OR (source_mode='controlled_file' AND source_format IN ('csv','tsv','xlsx','ofx','qfx'))
+  )
+);
+
+CREATE TABLE finance_import_entries(
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 160),
+  batch_id TEXT NOT NULL REFERENCES finance_import_batches(id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  category_id TEXT NOT NULL REFERENCES finance_planning_ledger(id) ON DELETE RESTRICT,
+  direction TEXT NOT NULL CHECK(direction IN ('income','expense')),
+  amount REAL NOT NULL CHECK(amount>0 AND amount<=1000000000000000),
+  currency TEXT NOT NULL CHECK(
+    length(currency)=3 AND currency=upper(currency) AND currency GLOB '[A-Z][A-Z][A-Z]'
+  ),
+  occurred_at TEXT NOT NULL CHECK(datetime(occurred_at) IS NOT NULL),
+  description TEXT CHECK(description IS NULL OR length(trim(description)) BETWEEN 1 AND 240),
+  external_id TEXT CHECK(external_id IS NULL OR length(trim(external_id)) BETWEEN 1 AND 160),
+  source_row_number INTEGER NOT NULL CHECK(typeof(source_row_number)='integer' AND source_row_number BETWEEN 1 AND 1000000),
+  row_fingerprint TEXT NOT NULL CHECK(length(row_fingerprint)=64 AND row_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  privacy TEXT NOT NULL CHECK(privacy IN ('private','selected_members','family')),
+  created_at TEXT NOT NULL CHECK(datetime(created_at) IS NOT NULL),
+  UNIQUE(family_id,row_fingerprint),
+  UNIQUE(batch_id,source_row_number)
+);
+
+CREATE INDEX idx_finance_import_batch_family_created
+ON finance_import_batches(family_id,created_at DESC,id);
+CREATE INDEX idx_finance_import_batch_owner_created
+ON finance_import_batches(owner_person_id,created_at DESC,id);
+CREATE INDEX idx_finance_import_entry_batch
+ON finance_import_entries(batch_id,source_row_number,id);
+CREATE INDEX idx_finance_import_entry_owner_occurred
+ON finance_import_entries(owner_person_id,occurred_at DESC,id);
+CREATE INDEX idx_finance_import_entry_category_occurred
+ON finance_import_entries(category_id,occurred_at DESC,id);
+
+CREATE TRIGGER trg_b4_finance_import_batch_staging_guard
+BEFORE INSERT ON finance_import_batches
+WHEN NEW.status<>'staging'
+BEGIN
+  SELECT RAISE(ABORT,'finance import batch must begin in staging state');
+END;
+
+CREATE TRIGGER trg_b4_finance_import_batch_policy_receipt
+BEFORE INSERT ON finance_import_batches
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM platform_policy_transaction_receipts receipt
+  JOIN platform_policy_database_fences fence
+    ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+  WHERE receipt.receipt_hash=NEW.policy_receipt_hash
+    AND receipt.receipt_version=NEW.policy_receipt_version
+    AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id
+    AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.id
+    AND receipt.action='create'
+    AND receipt.capability='finance.write'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.resource.sensitivity')=CASE NEW.privacy
+      WHEN 'private' THEN 'highly_sensitive'
+      WHEN 'selected_members' THEN 'sensitive'
+      ELSE 'personal'
+    END
+    AND json_extract(receipt.record_json,'$.request.purpose')='finance'
+)
+OR EXISTS(SELECT 1 FROM finance_records WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_valuations WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM bank_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM payment_cards WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM loan_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM loan_payment_history WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_planning_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_import_batches WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'finance import batch requires an unused exact durable finance policy receipt');
+END;
+
+CREATE TRIGGER trg_b4_finance_import_entry_parent_guard
+BEFORE INSERT ON finance_import_entries
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM finance_import_batches batch
+  JOIN finance_planning_ledger category ON category.id=NEW.category_id
+  WHERE batch.id=NEW.batch_id
+    AND batch.status='staging'
+    AND batch.family_id=NEW.family_id
+    AND batch.owner_person_id=NEW.owner_person_id
+    AND batch.privacy=NEW.privacy
+    AND NEW.created_at=batch.created_at
+    AND datetime(NEW.occurred_at)<=datetime(batch.created_at)
+    AND category.item_type='category'
+    AND category.family_id=NEW.family_id
+    AND category.owner_person_id=NEW.owner_person_id
+    AND category.privacy=NEW.privacy
+    AND category.category_kind=NEW.direction
+)
+OR (SELECT count(*) FROM finance_import_entries WHERE batch_id=NEW.batch_id)>=(
+  SELECT imported_rows FROM finance_import_batches WHERE id=NEW.batch_id
+)
+BEGIN
+  SELECT RAISE(ABORT,'finance import entry requires an open exact batch and compatible category');
+END;
+
+CREATE TRIGGER trg_b4_finance_import_batch_seal_guard
+BEFORE UPDATE ON finance_import_batches
+WHEN NOT(
+  OLD.status='staging' AND NEW.status='committed'
+  AND NEW.id IS OLD.id AND NEW.family_id IS OLD.family_id
+  AND NEW.owner_person_id IS OLD.owner_person_id AND NEW.source_mode IS OLD.source_mode
+  AND NEW.source_format IS OLD.source_format AND NEW.file_name IS OLD.file_name
+  AND NEW.file_sha256 IS OLD.file_sha256 AND NEW.mapping_json IS OLD.mapping_json
+  AND NEW.default_currency IS OLD.default_currency AND NEW.duplicate_strategy IS OLD.duplicate_strategy
+  AND NEW.total_rows IS OLD.total_rows AND NEW.imported_rows IS OLD.imported_rows
+  AND NEW.duplicate_rows IS OLD.duplicate_rows AND NEW.adapter_contract IS OLD.adapter_contract
+  AND NEW.network_access IS OLD.network_access AND NEW.credential_exchange IS OLD.credential_exchange
+  AND NEW.external_consent IS OLD.external_consent AND NEW.privacy IS OLD.privacy
+  AND NEW.created_at IS OLD.created_at AND NEW.policy_receipt_hash IS OLD.policy_receipt_hash
+  AND NEW.policy_receipt_version IS OLD.policy_receipt_version
+  AND NEW.policy_receipt_nonce IS OLD.policy_receipt_nonce
+  AND NEW.policy_correlation_id IS OLD.policy_correlation_id
+  AND NEW.policy_resource_type IS OLD.policy_resource_type
+  AND NEW.policy_resource_id IS OLD.policy_resource_id
+  AND NEW.policy_action IS OLD.policy_action AND NEW.policy_capability IS OLD.policy_capability
+  AND (SELECT count(*) FROM finance_import_entries WHERE batch_id=OLD.id)=OLD.imported_rows
+)
+BEGIN
+  SELECT RAISE(ABORT,'finance import batch only permits an exact complete staging seal');
+END;
+
+CREATE TRIGGER trg_b4_finance_import_entry_immutable
+BEFORE UPDATE ON finance_import_entries
+BEGIN
+  SELECT RAISE(ABORT,'finance import entries are append-only');
+END;
+CREATE TRIGGER trg_b4_finance_import_entry_delete_guard
+BEFORE DELETE ON finance_import_entries
+BEGIN
+  SELECT RAISE(ABORT,'finance import deletion requires a governed deletion workflow');
+END;
+CREATE TRIGGER trg_b4_finance_import_batch_delete_guard
+BEFORE DELETE ON finance_import_batches
+BEGIN
+  SELECT RAISE(ABORT,'finance import batch deletion requires a governed deletion workflow');
+END;
+
+CREATE TRIGGER trg_b4_finance_record_import_receipt_reuse
+BEFORE INSERT ON finance_records
+WHEN NEW.policy_receipt_hash IS NOT NULL
+  AND EXISTS(SELECT 1 FROM finance_import_batches WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'finance policy receipt is already bound to an import batch'); END;
+CREATE TRIGGER trg_b4_finance_valuation_import_receipt_reuse
+BEFORE INSERT ON finance_valuations
+WHEN NEW.policy_receipt_hash IS NOT NULL
+  AND EXISTS(SELECT 1 FROM finance_import_batches WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'finance policy receipt is already bound to an import batch'); END;
+CREATE TRIGGER trg_b4_bank_account_import_receipt_reuse
+BEFORE INSERT ON bank_accounts
+WHEN EXISTS(SELECT 1 FROM finance_import_batches WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'finance policy receipt is already bound to an import batch'); END;
+CREATE TRIGGER trg_b4_payment_card_import_receipt_reuse
+BEFORE INSERT ON payment_cards
+WHEN EXISTS(SELECT 1 FROM finance_import_batches WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'finance policy receipt is already bound to an import batch'); END;
+CREATE TRIGGER trg_b4_loan_account_import_receipt_reuse
+BEFORE INSERT ON loan_accounts
+WHEN EXISTS(SELECT 1 FROM finance_import_batches WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'finance policy receipt is already bound to an import batch'); END;
+CREATE TRIGGER trg_b4_loan_payment_import_receipt_reuse
+BEFORE INSERT ON loan_payment_history
+WHEN EXISTS(SELECT 1 FROM finance_import_batches WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'finance policy receipt is already bound to an import batch'); END;
+CREATE TRIGGER trg_b4_finance_planning_import_receipt_reuse
+BEFORE INSERT ON finance_planning_ledger
+WHEN EXISTS(SELECT 1 FROM finance_import_batches WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'finance policy receipt is already bound to an import batch'); END;
+
+UPDATE database_metadata
+SET value='REVISION-33-D-B4-CONTROLLED-IMPORT-OPEN-BANKING',
+    updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
+WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -7431,7 +7659,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(78, 'b4_banking_foundation', bankingFoundationSql),
   createMigrationDefinition(79, 'b4_payment_card_management', paymentCardManagementSql),
   createMigrationDefinition(80, 'b4_loan_management', loanManagementSql),
-  createMigrationDefinition(81, 'b4_finance_planning_portfolio_analytics', financePlanningLedgerSql)
+  createMigrationDefinition(81, 'b4_finance_planning_portfolio_analytics', financePlanningLedgerSql),
+  createMigrationDefinition(82, 'b4_controlled_import_open_banking', financeControlledImportOpenBankingSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {
