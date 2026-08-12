@@ -692,10 +692,9 @@ const scanMetadata = async () => {
       const absolute = resolve(directory, entry.name);
       const rel = rootRelative(absolute);
       if (excluded.has(rel)) continue;
-      if (rel.startsWith('06_KOD/app/')) {
-        const activeSourceTopLevel = rel.slice('06_KOD/app/'.length).split('/')[0];
-        if (activeSourceEphemeral.has(activeSourceTopLevel)) continue;
-      }
+      if (rel.startsWith('06_KOD/app/')
+        && entry.isDirectory()
+        && activeSourceEphemeral.has(entry.name)) continue;
       if (entry.isSymbolicLink()) throw new Error(`Symbolic link is forbidden in live manifest: ${rel}`);
       if (entry.isDirectory()) await visit(absolute);
       else if (entry.isFile()) {

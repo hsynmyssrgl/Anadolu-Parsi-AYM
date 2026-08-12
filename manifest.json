@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "packageVersion": "4.8.2026-29",
-  "generatedAt": "2026-08-12T07:08:06.578Z",
+  "generatedAt": "2026-08-12T07:11:11.508Z",
   "fileCount": 3686,
   "files": [
     {
@@ -4356,17 +4356,17 @@
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.csv",
-      "sha256": "3beace6fea47ec68dc80582630fb898cf45b7c3e6cd3a15f70eca5c82bb0ba7e",
+      "sha256": "8ae7115013672b9eaca2aaf83a2fce6ed7e07223dd368cf615c40f9f15936731",
       "bytes": 479917
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.json",
-      "sha256": "de7901dc9aca0091cbcbbc301e0c39c3085d348ba731288734b1bd4ab19ec17c",
+      "sha256": "b3cb0ffb34bbfdd0db9258ede72022aec16bd06f5928c0a5179e370b23a893bb",
       "bytes": 912406
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.md",
-      "sha256": "cdfb61c342eaad6869691896f781d7c665c0583f22b6445df962040a73682b02",
+      "sha256": "c127c7d8a05fea3d3a172cd2fd8cbe522992e6c8012e534011ac6482e140951d",
       "bytes": 521159
     },
     {
@@ -5136,17 +5136,17 @@
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.csv",
-      "sha256": "a5cff2e9555be2f7808a13a7739d83a449dd7991140243e683fb4453e19232fc",
+      "sha256": "05a9d65eb167ddc40e7d1d619c39edbd756d8768fe9a76a0c610dc2be9485bce",
       "bytes": 750670
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.json",
-      "sha256": "145cf8d7d61ec1fe4a0bab3f0fa950b8ea99aac37d6dcfd4a49320803c66139e",
+      "sha256": "2fe904bfd977679861a9478cd4685a82093edfff9299feebb2b7e19085463275",
       "bytes": 1427032
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.md",
-      "sha256": "74cd03389041ae91507485ccb366b69f20fa19f5d72885dab734eb56b7afe014",
+      "sha256": "c944957f98b8be8b023c6d3d5d7db9dc7b03d641fa53302e693a3042ee596a14",
       "bytes": 814305
     },
     {
@@ -9941,7 +9941,7 @@
     },
     {
       "path": "docs/current/08_TUM_BELGELER_DIZINI.md",
-      "sha256": "cdfb61c342eaad6869691896f781d7c665c0583f22b6445df962040a73682b02",
+      "sha256": "c127c7d8a05fea3d3a172cd2fd8cbe522992e6c8012e534011ac6482e140951d",
       "bytes": 521159
     },
     {
@@ -14981,8 +14981,8 @@
     },
     {
       "path": "scripts/update-aym-governance-incrementally.mjs",
-      "sha256": "301a311ff8e6938387f1b427e0d0696930cc0532fa2fa6cf700d9f3276e0e62d",
-      "bytes": 49926
+      "sha256": "02a0171c8c48489630cb4ac347ef3ebb60f448dc7ca7bef8d73f83d58a7357fd",
+      "bytes": 49851
     },
     {
       "path": "scripts/update-master-build-ledger.mjs",
