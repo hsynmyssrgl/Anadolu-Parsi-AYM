@@ -4,34 +4,24 @@ import { mkdir, writeFile } from 'node:fs/promises';
 const node = process.execPath;
 const commands = Object.freeze([
   Object.freeze({
-    id: 'sensitive-data-consent-boundary',
-    args: ['scripts/verify-sensitive-data-consent-boundary.mjs'],
-    expectOutput: 'B2-05/B6-03 sensitive data consent boundary: PASS'
+    id: 'b4-banking-boundary',
+    args: ['scripts/verify-b4-banking-foundation-boundary.mjs'],
+    expectOutput: 'B4 banking foundation boundary: PASS'
   }),
   Object.freeze({
-    id: 'sensitive-data-consent-contract',
-    args: ['scripts/verify-32-y-b2-05-b6-03-sensitive-data-consent-contract.mjs'],
-    expectOutput: 'B2-05/B6-03 sensitive data consent contract: PASS'
+    id: 'b4-banking-contract',
+    args: ['scripts/verify-32-z-b4-banking-foundation-contract.mjs'],
+    expectOutput: 'B4 banking foundation contract: PASS'
   }),
   Object.freeze({
-    id: 'ppk021-ast-ratchet',
-    args: ['scripts/verify-platform-policy-ast-gate.mjs'],
-    expectOutput: '"exactAllowlistEntries": 535'
-  }),
-  Object.freeze({
-    id: 'ppk022-capability-ratchet',
-    args: ['scripts/verify-platform-capability-manifest-gate.mjs'],
-    expectOutput: '"exactManifestSurfaces": 238'
-  }),
-  Object.freeze({
-    id: 'sensitive-data-consent-targeted-tests',
+    id: 'b4-banking-targeted-tests',
     args: ['node_modules/vitest/vitest.mjs', 'run',
-      'packages/application/tests/sensitive-data-consent-use-cases.test.ts',
-      'apps/desktop/tests/b2-b6-sensitive-data-consent-integration.test.ts',
+      'packages/application/tests/banking-foundation.test.ts',
+      'apps/desktop/tests/b4-banking-ipc-integration.test.ts',
       'apps/desktop/tests/data-store.test.ts',
-      '-t', 'B2-05/B6-03|hassas veri profillerini',
+      '-t', '32-Z|B4-01/B4-02/B4-03/B4-04/B4-07',
       '--reporter=dot', '--maxWorkers=1'],
-    minimumTests: 8,
+    minimumTests: 13,
     minimumTestFiles: 3
   }),
   Object.freeze({
@@ -43,9 +33,19 @@ const commands = Object.freeze([
     args: ['node_modules/typescript/bin/tsc', '-p', 'packages/database/tsconfig.json']
   }),
   Object.freeze({
-    id: 'migration-77-regression',
+    id: 'migration-78-runtime',
     args: ['scripts/verify-database-migrations.mjs'],
-    expectOutput: '"version": 77'
+    expectOutput: '"version": 78'
+  }),
+  Object.freeze({
+    id: 'ppk021-ast-ratchet',
+    args: ['scripts/verify-platform-policy-ast-gate.mjs'],
+    expectOutput: '"exactAllowlistEntries": 535'
+  }),
+  Object.freeze({
+    id: 'ppk022-capability-ratchet',
+    args: ['scripts/verify-platform-capability-manifest-gate.mjs'],
+    expectOutput: '"exactManifestSurfaces": 238'
   }),
   Object.freeze({
     id: 'decision-ledger',
@@ -85,28 +85,29 @@ const results = commands.map((command) => {
   });
 });
 const failures = results.filter((result) => result.status !== 'PASS').map((result) => result.id);
-const targeted = results.find((result) => result.id === 'sensitive-data-consent-targeted-tests');
+const targeted = results.find((result) => result.id === 'b4-banking-targeted-tests');
 const report = Object.freeze({
   schemaVersion: 1,
-  step: '32-Y',
-  requirements: Object.freeze(['B2-05', 'B6-03']),
+  step: '32-Z',
+  requirements: Object.freeze(['B4-01', 'B4-02', 'B4-03', 'B4-04', 'B4-07']),
   status: failures.length === 0 ? 'PASS' : 'FAIL',
   checksPassed: results.length - failures.length,
   checksFailed: failures.length,
   targetedTestFilesPassed: targeted?.testFiles ?? 0,
   targetedTestsPassed: targeted?.tests ?? 0,
-  latestDatabaseMigration: 77,
+  latestDatabaseMigration: 78,
+  catalogRows: 71,
   ppk021ExactAllowlistEntries: 535,
   ppk022CapabilitySurfaces: 238,
-  outboundTransferPerformed: false,
+  networkVerificationPerformed: false,
   results: Object.freeze(results),
   failures: Object.freeze(failures),
   requirementCompletionClaimed: failures.length === 0,
   generatedAt: new Date().toISOString()
 });
 await mkdir('artifacts/validation', { recursive: true });
-await writeFile('artifacts/validation/32-Y-b2-05-b6-03-sensitive-data-consent-runtime.json', `${JSON.stringify(report, null, 2)}\n`);
-console.log(`B2-05/B6-03 sensitive data consent runtime: ${report.status} (${report.checksPassed}/${results.length} checks).`);
+await writeFile('artifacts/validation/32-Z-b4-banking-foundation-runtime.json', `${JSON.stringify(report, null, 2)}\n`);
+console.log(`B4 banking foundation runtime: ${report.status} (${report.checksPassed}/${results.length} checks).`);
 if (failures.length) {
   console.error(failures.join('\n'));
   process.exitCode = 1;

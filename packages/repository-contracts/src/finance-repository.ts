@@ -1,5 +1,10 @@
 import type { FamilyId, IsoDateTime, PersonId } from '@ppt/core';
-import type { FinanceRecordView, FinanceValuationView } from '@ppt/domain';
+import type {
+  BankAccountView,
+  BankInstitutionView,
+  FinanceRecordView,
+  FinanceValuationView
+} from '@ppt/domain';
 import type {
   PolicyAuthorizedRepositoryExecutionContext,
   RepositoryExecutionContext,
@@ -19,12 +24,26 @@ export interface FinanceValuationRow extends FinanceValuationView {
   readonly createdAt: IsoDateTime;
 }
 
+export interface BankAccountRow extends BankAccountView {
+  readonly familyId: FamilyId;
+  readonly ownerPersonId: PersonId;
+  readonly createdAt: IsoDateTime;
+}
+
+export interface NewBankAccountRow extends BankAccountRow {
+  readonly normalizedIban: string;
+}
+
 export interface FinanceRepositoryPort {
     listRecords(context: PolicyAuthorizedRepositoryExecutionContext): RepositoryResult<readonly FinanceRecordRow[]>;
     findRecord(context: PolicyAuthorizedRepositoryExecutionContext, id: string): RepositoryResult<FinanceRecordRow | null>;
     insertRecord(context: PolicyAuthorizedRepositoryExecutionContext, row: FinanceRecordRow): RepositoryResult<void>;
     listValuations(context: PolicyAuthorizedRepositoryExecutionContext): RepositoryResult<readonly FinanceValuationRow[]>;
     insertValuation(context: PolicyAuthorizedRepositoryExecutionContext, row: FinanceValuationRow): RepositoryResult<void>;
+    listBankInstitutions(context: PolicyAuthorizedRepositoryExecutionContext): RepositoryResult<readonly BankInstitutionView[]>;
+    findBankInstitution(context: PolicyAuthorizedRepositoryExecutionContext, institutionCode: string): RepositoryResult<BankInstitutionView | null>;
+    listBankAccounts(context: PolicyAuthorizedRepositoryExecutionContext): RepositoryResult<readonly BankAccountRow[]>;
+    insertBankAccount(context: PolicyAuthorizedRepositoryExecutionContext, row: NewBankAccountRow): RepositoryResult<void>;
 }
 
 /**

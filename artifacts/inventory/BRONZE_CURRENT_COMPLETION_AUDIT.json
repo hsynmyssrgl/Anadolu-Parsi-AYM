@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-12T12:29:31.133Z",
+  "generatedAt": "2026-08-12T13:37:58.593Z",
   "release": "Bronze 04.08.2026.29",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
@@ -29,17 +29,17 @@
   "percentages": {
     "officialWeightedBronzePercent": 25,
     "officialWeightedEvidenceStep": "31-T",
-    "strictRequirementCompletionPercent": 12.8571,
-    "implementationChainCoveragePercent": 13.3429,
-    "governanceEvidenceChainCoveragePercent": 50.7619,
+    "strictRequirementCompletionPercent": 14.2857,
+    "implementationChainCoveragePercent": 14.7714,
+    "governanceEvidenceChainCoveragePercent": 51.7143,
     "interpretation": "These are separate measures and must not be blended into an invented single completion claim."
   },
   "scope": {
     "total": 350,
     "statusCounts": {
-      "COMPLETE": 45,
+      "COMPLETE": 50,
       "FOUNDATION_STARTED": 1,
-      "NOT_IMPLEMENTED": 277,
+      "NOT_IMPLEMENTED": 272,
       "PARTIAL": 27
     },
     "priorityCounts": {
@@ -48,21 +48,21 @@
       "P2": 5
     },
     "completeByPriority": {
-      "P0": 43,
+      "P0": 48,
       "P1": 2,
       "P2": 0
     },
-    "incompleteCount": 305,
-    "strictComplete": 45,
+    "incompleteCount": 300,
+    "strictComplete": 50,
     "implementationCoverage": {
-      "passed": 467,
+      "passed": 517,
       "total": 3500,
-      "percent": 13.3429
+      "percent": 14.7714
     },
     "governanceCoverage": {
-      "passed": 533,
+      "passed": 543,
       "total": 1050,
-      "percent": 50.7619
+      "percent": 51.7143
     }
   },
   "rules": {
@@ -324,7 +324,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"3b1a62ee95e5c4456a19e614691fce1e1e99c9c04c918403b52ebf00acb67318\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\3b1a62ee95e5c4456a19e614691fce1e1e99c9c04c918403b52ebf00acb67318\",\"files\":9}"
+          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"0820bf006a7da9c347f20c7104268c22f762eb5b4f349ddfb10887ee5c3f2cb8\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\0820bf006a7da9c347f20c7104268c22f762eb5b4f349ddfb10887ee5c3f2cb8\",\"files\":9}"
         ]
       },
       {
@@ -1003,7 +1003,7 @@
     "status": "PASS",
     "officialCompletionClaimed": true,
     "storageBackend": "EXTERNAL_USB_D_DRIVE",
-    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\3b1a62ee95e5c4456a19e614691fce1e1e99c9c04c918403b52ebf00acb67318"
+    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\0820bf006a7da9c347f20c7104268c22f762eb5b4f349ddfb10887ee5c3f2cb8"
   },
   "remainingWork": [
     {
@@ -2315,132 +2315,12 @@
       ]
     },
     {
-      "id": "B4-01",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Finans ve Bankacılık",
-      "title": "Banka kurumu kataloğu, kurum kodu, resmi ad, güvenli logo/ikon kaynağı",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B4-02",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Finans ve Bankacılık",
-      "title": "Banka hesabı: IBAN, hesap türü, para birimi, alias, şube, sahiplik oranı, durum",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B4-03",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Finans ve Bankacılık",
-      "title": "IBAN normalize etme, ülke/uzunluk/checksum ve Türkiye banka kodu kontrolü",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B4-04",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Finans ve Bankacılık",
-      "title": "IBAN'ın yapısal doğruluğu ile gerçek hesap/sahiplik doğrulamasını UI'da ayır",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
       "id": "B4-05",
       "priority": "P0",
       "status": "NOT_IMPLEMENTED",
       "workOrderClass": "NEW_NOT_STARTED",
       "area": "Finans ve Bankacılık",
       "title": "Banka, ürün, ağ, son dört hane, limit, kullanılabilir limit, borç, ekstre ve son ödeme",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B4-07",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Finans ve Bankacılık",
-      "title": "Tam PAN, CVV/CVC, PIN ve internet bankacılığı parolasını reddeden veri sözleşmesi",
       "completedChainCount": 1,
       "completionBlockers": [],
       "missingChain": [

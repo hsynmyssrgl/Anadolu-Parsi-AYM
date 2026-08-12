@@ -389,7 +389,7 @@ check('release evidence contains exact five external assets and DSSE shape', exa
 check('release decision is bound to exact evidence bytes', releaseDecision?.evidenceSha256 === await hashFile(paths.releaseEvidence));
 
 check('scope preserves no migration data transfer cutover or ownership change', scope?.boundaries?.schemaMigrationRequired === false && scope.boundaries.latestDatabaseMigration === 77 && scope.boundaries.historicalBackfillPerformed === false && scope.boundaries.realDataTransferPerformed === false && scope.boundaries.cutoverPerformed === false && scope.boundaries.desktopVaultOwnershipPreserved === true && scope.boundaries.sqliteOwnershipTransferred === false);
-check('production model preserves no migration and content-free status', latestMigration === 77 && policySource.includes('schemaMigrationRequired: false') && policySource.includes('latestDatabaseMigration: 77'));
+check('production model preserves its migration 77 baseline and content-free status', migrationVersions.includes(77) && latestMigration >= 77 && policySource.includes('schemaMigrationRequired: false') && policySource.includes('latestDatabaseMigration: 77'));
 check('decision and threat model record fail-closed truth boundary', includesAll(decisionDocument, ['DEC-206', 'DSSE', 'Ed25519', 'Authenticode', 'latest migration `77`']) && includesAll(threatModel, ['DSSE/Ed25519', 'Authenti', 'latest migration `77`']));
 
 if (candidateMode) {

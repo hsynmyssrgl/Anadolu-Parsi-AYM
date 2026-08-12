@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 64,
+  "decisionCount": 65,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1602,6 +1602,36 @@
         "docs/security/B2-05_B6-03_SENSITIVE_DATA_CONSENT_THREAT_MODEL.md",
         "docs/audit/32-Y_B2-05_B6-03_SENSITIVE_DATA_CONSENT_UST_KAPANIS.md",
         "config/32-y-b2-05-b6-03-sensitive-data-consent-inventory.json"
+      ]
+    },
+    {
+      "id": "DEC-211",
+      "date": "2026-08-12",
+      "acceptedAt": "2026-08-12",
+      "title": "B4 shared bank institution account IBAN validation and banking-secret rejection foundation",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: sirayla full auto devam et, onay bekleme ve bir isle birden fazla gereksinim kapat",
+      "document": "docs/decisions/DEC-211-b4-banking-foundation.md",
+      "requirements": ["B4-01", "B4-02", "B4-03", "B4-04", "B4-07"],
+      "codeAreas": [
+        "packages/domain/src/app-data.ts",
+        "packages/application/src/banking-security.ts",
+        "packages/application/src/finance-use-cases.ts",
+        "packages/database/src/family-database-migrations.ts",
+        "packages/repositories/src/finance-repository.ts",
+        "apps/desktop/src/main/finance-application-adapter.ts",
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/renderer/App.tsx",
+        "scripts/verify-b4-banking-foundation-boundary.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/32-Z-b4-banking-foundation-boundary.json",
+        "artifacts/validation/32-Z-b4-banking-foundation-contract.json",
+        "artifacts/validation/32-Z-b4-banking-foundation-runtime.json",
+        "docs/security/B4_BANKING_FOUNDATION_THREAT_MODEL.md",
+        "docs/audit/32-Z_B4_BANKING_FOUNDATION_UST_KAPANIS.md",
+        "config/32-z-b4-banking-foundation-inventory.json"
       ]
     }
   ]

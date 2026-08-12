@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "step": "32-Z",
+  "requirements": [
+    "B4-01",
+    "B4-02",
+    "B4-03",
+    "B4-04",
+    "B4-07"
+  ],
+  "status": "PASS",
+  "checksPassed": 14,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "all five requirements are complete with exact 13-link chains",
+      "passed": true
+    },
+    {
+      "name": "all five requirements bind the exact 32-Z evidence triplet",
+      "passed": true
+    },
+    {
+      "name": "all five requirements bind DEC-211 and package implementation areas",
+      "passed": true
+    },
+    {
+      "name": "B4-05 and B4-06 remain honestly open",
+      "passed": true
+    },
+    {
+      "name": "scope and inventory bind DEC-211 migration 78 and no network channel",
+      "passed": true
+    },
+    {
+      "name": "boundary evidence is exact green",
+      "passed": true
+    },
+    {
+      "name": "DEC-211 is active in the user decision ledger",
+      "passed": true
+    },
+    {
+      "name": "migration 78 remains latest and exact",
+      "passed": true
+    },
+    {
+      "name": "decision states structural-only truth and open card scope",
+      "passed": true
+    },
+    {
+      "name": "threat model covers masking receipts legacy bypass and no bank query",
+      "passed": true
+    },
+    {
+      "name": "audit document binds all five IDs and evidence triplet",
+      "passed": true
+    },
+    {
+      "name": "targeted tests exist and name all security boundaries",
+      "passed": true
+    },
+    {
+      "name": "root lifecycle and explicit package scripts bind 32-Z",
+      "passed": true
+    },
+    {
+      "name": "all contract prerequisites exist",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "latestDatabaseMigration": 78,
+  "catalogRows": 71,
+  "ppk021ExactAllowlistEntries": 535,
+  "ppk022CapabilitySurfaces": 238,
+  "generatedAt": "2026-08-12T13:38:58.409Z"
+}

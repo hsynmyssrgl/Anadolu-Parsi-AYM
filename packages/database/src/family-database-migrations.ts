@@ -6403,6 +6403,215 @@ SET value='REVISION-32-L-PPK-016-DERIVED-DATA-POLICY-INHERITANCE',
 WHERE key='schema_generation';
 `;
 
+const bankingFoundationSql = `CREATE TABLE bank_institutions(
+  institution_code TEXT PRIMARY KEY CHECK(
+    length(institution_code)=4 AND institution_code NOT GLOB '*[^0-9]*'
+  ),
+  iban_provider_code TEXT NOT NULL UNIQUE CHECK(
+    length(iban_provider_code)=5 AND iban_provider_code NOT GLOB '*[^0-9]*'
+  ),
+  official_name TEXT NOT NULL CHECK(length(trim(official_name)) BETWEEN 2 AND 200),
+  country_code TEXT NOT NULL CHECK(country_code='TR'),
+  kind TEXT NOT NULL CHECK(kind IN ('bank','central_bank','postal_payment','market_infrastructure')),
+  supports_customer_accounts INTEGER NOT NULL CHECK(supports_customer_accounts IN (0,1)),
+  icon_key TEXT NOT NULL UNIQUE CHECK(length(trim(icon_key)) BETWEEN 2 AND 80),
+  icon_source TEXT NOT NULL CHECK(icon_source='local_lettermark'),
+  source_name TEXT NOT NULL CHECK(source_name='TCMB Ödeme Sistemleri Katılımcıları'),
+  source_version TEXT NOT NULL CHECK(source_version='2026'),
+  source_url TEXT NOT NULL CHECK(source_url LIKE 'https://www.tcmb.gov.tr/%'),
+  source_retrieved_at TEXT NOT NULL CHECK(datetime(source_retrieved_at) IS NOT NULL),
+  status TEXT NOT NULL CHECK(status='active'),
+  UNIQUE(institution_code,iban_provider_code)
+);
+
+INSERT INTO bank_institutions(
+  institution_code,iban_provider_code,official_name,country_code,kind,supports_customer_accounts,
+  icon_key,icon_source,source_name,source_version,source_url,source_retrieved_at,status
+) VALUES
+('0215','00215','ADİL KATILIM BANKASI A.Ş.','TR','bank',1,'bank-00215','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0046','00046','AKBANK T.A.Ş.','TR','bank',1,'bank-00046','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0143','00143','AKTİF YATIRIM BANKASI A.Ş.','TR','bank',1,'bank-00143','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0203','00203','ALBARAKA TÜRK KATILIM BANKASI A.Ş.','TR','bank',1,'bank-00203','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0124','00124','ALTERNATİFBANK A.Ş.','TR','bank',1,'bank-00124','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0135','00135','ANADOLUBANK A.Ş.','TR','bank',1,'bank-00135','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0091','00091','ARAP TÜRK BANKASI','TR','bank',1,'bank-00091','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0161','00161','AYTEMİZ YATIRIM BANKASI A.Ş.','TR','bank',1,'bank-00161','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0129','00129','BANK OF AMERICA YATIRIM BANK A.Ş.','TR','bank',1,'bank-00129','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0149','00149','BANK OF CHINA TURKEY A.Ş.','TR','bank',1,'bank-00149','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0142','00142','BANKPOZİTİF KREDİ VE KALK.BANK.A.Ş.','TR','bank',1,'bank-00142','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0029','00029','BİRLEŞİK FON BANKASI A.Ş.','TR','bank',1,'bank-00029','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0125','00125','BURGAN BANK A.Ş.','TR','bank',1,'bank-00125','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0092','00092','CITIBANK A.Ş.','TR','bank',1,'bank-00092','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0158','00158','COLENDİ BANK A.Ş.','TR','bank',1,'bank-00158','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0151','00151','D YATIRIM BANKASI A.Ş.','TR','bank',1,'bank-00151','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0134','00134','DENİZBANK A.Ş.','TR','bank',1,'bank-00134','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0152','00152','DESTEK YATIRIM BANKASI A.Ş.','TR','bank',1,'bank-00152','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0115','00115','DEUTSCHE BANK A.Ş.','TR','bank',1,'bank-00115','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0138','00138','DİLER YATIRIM BANKASI A.Ş.','TR','bank',1,'bank-00138','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0214','00214','DÜNYA KATILIM BANKASI A.Ş.','TR','bank',1,'bank-00214','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0157','00157','ENPARA BANK A.Ş.','TR','bank',1,'bank-00157','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0103','00103','FİBABANKA A.Ş.','TR','bank',1,'bank-00103','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0159','00159','FUPS BANK A.Ş.','TR','bank',1,'bank-00159','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0150','00150','GOLDEN GLOBAL YATIRIM BANKASI A.Ş.','TR','bank',1,'bank-00150','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0139','00139','GSD YATIRIM BANKASI A.Ş.','TR','bank',1,'bank-00139','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0212','00212','HAYAT FİNANS KATILIM BANKASI','TR','bank',1,'bank-00212','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0156','00156','HEDEF YATIRIM BANKASI A.Ş.','TR','bank',1,'bank-00156','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0123','00123','HSBC BANK A.Ş.','TR','bank',1,'bank-00123','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0109','00109','ICBC TURKEY BANK A.Ş.','TR','bank',1,'bank-00109','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0099','00099','ING BANK A.Ş.','TR','bank',1,'bank-00099','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0148','00148','INTESA SANPAOLO S.P.A.','TR','bank',1,'bank-00148','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0216','00216','İKTİSAT KATILIM BANKASI A.Ş.','TR','bank',1,'bank-00216','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0004','00004','İLLER BANKASI A.Ş.','TR','bank',1,'bank-00004','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0132','00132','İSTANBUL TAKAS VE SAKLAMA BANK. A.Ş.','TR','bank',1,'bank-00132','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0098','00098','JPMORGAN CHASE BANK N.A.','TR','bank',1,'bank-00098','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0205','00205','KUVEYT TÜRK KATILIM BANKASI A.Ş.','TR','bank',1,'bank-00205','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0806','00806','MERKEZİ KAYIT KURULUŞU A.Ş.','TR','market_infrastructure',0,'bank-00806','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0153','00153','MİSYON YATIRIM BANKASI A.Ş.','TR','bank',1,'bank-00153','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0147','00147','MUFG BANK TURKEY A.Ş.','TR','bank',1,'bank-00147','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0141','00141','NUROL YATIRIM BANKASI A.Ş.','TR','bank',1,'bank-00141','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0146','00146','ODEA BANK A.Ş.','TR','bank',1,'bank-00146','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0116','00116','PASHA YATIRIM BANK A.Ş.','TR','bank',1,'bank-00116','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0807','00807','POSTA VE TELGRAF TEŞKİLATI A.Ş.','TR','postal_payment',1,'bank-00807','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0137','00137','RABOBANK A.Ş.','TR','bank',1,'bank-00137','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0122','00122','SOCIETE GENERALE (SA)','TR','bank',1,'bank-00122','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0121','00121','STANDARD CHARTERED YATIRIM BANKASI TÜRK A.Ş.','TR','bank',1,'bank-00121','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0059','00059','ŞEKERBANK T.A.Ş.','TR','bank',1,'bank-00059','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0032','00032','T. EKONOMİ BANKASI A.Ş.','TR','bank',1,'bank-00032','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0016','00016','T. EXİMBANK','TR','bank',1,'bank-00016','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0062','00062','T. GARANTİ BANKASI A.Ş.','TR','bank',1,'bank-00062','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0012','00012','T. HALK BANKASI A.Ş.','TR','bank',1,'bank-00012','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0064','00064','T. İŞ BANKASI A.Ş.','TR','bank',1,'bank-00064','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0017','00017','T. KALKINMA BANKASI A.Ş.','TR','bank',1,'bank-00017','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0014','00014','T. SINAİ KALKINMA BANKASI A.Ş.','TR','bank',1,'bank-00014','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0015','00015','T. VAKIFLAR BANKASI T.A.O.','TR','bank',1,'bank-00015','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0001','00001','T.C. MERKEZ BANKASI','TR','central_bank',0,'bank-00001','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0010','00010','T.C. ZİRAAT BANKASI A.Ş.','TR','bank',1,'bank-00010','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0154','00154','TERA YATIRIM BANKASI A.Ş.','TR','bank',1,'bank-00154','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0213','00213','T.O.M. KATILIM BANKASI A.Ş.','TR','bank',1,'bank-00213','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0096','00096','TURKISH BANK A.Ş.','TR','bank',1,'bank-00096','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0108','00108','TURKLAND BANK A.S.','TR','bank',1,'bank-00108','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0060','00060','TÜRK TİCARET BANKASI A.Ş.','TR','bank',1,'bank-00060','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0211','00211','TÜRKİYE EMLAK KATILIM BANKASI A.Ş.','TR','bank',1,'bank-00211','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0206','00206','TÜRKİYE FİNANS KATILIM BANKASI A.Ş.','TR','bank',1,'bank-00206','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0210','00210','VAKIF KATILIM BANKASI A.Ş.','TR','bank',1,'bank-00210','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0067','00067','YAPI VE KREDİ BANKASI A.Ş.','TR','bank',1,'bank-00067','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0160','00160','ZİRAAT DİNAMİK BANKA A.Ş.','TR','bank',1,'bank-00160','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0209','00209','ZİRAAT KATILIM BANKASI A.Ş.','TR','bank',1,'bank-00209','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0155','00155','Q YATIRIM BANKASI A.Ş.','TR','bank',1,'bank-00155','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active'),
+('0111','00111','QNB FİNANSBANK A.Ş.','TR','bank',1,'bank-00111','local_lettermark','TCMB Ödeme Sistemleri Katılımcıları','2026','https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Odeme+Sistemleri','2026-08-12T00:00:00.000Z','active');
+
+CREATE TABLE bank_accounts(
+  id TEXT PRIMARY KEY,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  institution_code TEXT NOT NULL,
+  normalized_iban TEXT NOT NULL CHECK(
+    length(normalized_iban)=26
+    AND normalized_iban=upper(normalized_iban)
+    AND normalized_iban NOT GLOB '*[^A-Z0-9]*'
+    AND substr(normalized_iban,1,2)='TR'
+    AND substr(normalized_iban,5,5) NOT GLOB '*[^0-9]*'
+    AND substr(normalized_iban,10,1)='0'
+  ),
+  iban_country_code TEXT NOT NULL CHECK(iban_country_code='TR'),
+  iban_provider_code TEXT NOT NULL CHECK(
+    length(iban_provider_code)=5 AND iban_provider_code NOT GLOB '*[^0-9]*'
+  ),
+  account_type TEXT NOT NULL CHECK(account_type IN ('checking','savings','time_deposit','participation','investment','other')),
+  currency TEXT NOT NULL CHECK(length(currency)=3 AND currency=upper(currency) AND currency NOT GLOB '*[^A-Z]*'),
+  alias TEXT NOT NULL CHECK(length(trim(alias)) BETWEEN 2 AND 100),
+  branch TEXT CHECK(branch IS NULL OR length(trim(branch)) BETWEEN 1 AND 120),
+  ownership_basis_points INTEGER NOT NULL CHECK(ownership_basis_points BETWEEN 1 AND 10000),
+  status TEXT NOT NULL CHECK(status IN ('active','inactive','closed')),
+  privacy TEXT NOT NULL CHECK(privacy IN ('private','selected_members','family')),
+  structural_validation TEXT NOT NULL CHECK(structural_validation='valid'),
+  account_verification TEXT NOT NULL CHECK(account_verification='not_performed'),
+  ownership_verification TEXT NOT NULL CHECK(ownership_verification='not_performed'),
+  created_at TEXT NOT NULL CHECK(datetime(created_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT CHECK(
+    length(policy_receipt_hash)=64 AND policy_receipt_hash NOT GLOB '*[^0-9a-f]*'
+  ),
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version=1),
+  policy_receipt_nonce TEXT NOT NULL,
+  policy_correlation_id TEXT NOT NULL,
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type='finance_record'),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action='create'),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='finance.write'),
+  FOREIGN KEY(institution_code,iban_provider_code)
+    REFERENCES bank_institutions(institution_code,iban_provider_code) ON DELETE RESTRICT,
+  UNIQUE(family_id,normalized_iban),
+  UNIQUE(policy_receipt_hash)
+);
+
+CREATE INDEX idx_bank_accounts_family_created ON bank_accounts(family_id,created_at DESC);
+CREATE INDEX idx_bank_accounts_owner_created ON bank_accounts(owner_person_id,created_at DESC);
+CREATE INDEX idx_bank_accounts_institution ON bank_accounts(institution_code,status);
+
+CREATE TRIGGER trg_b4_bank_account_insert_policy_receipt
+BEFORE INSERT ON bank_accounts
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM platform_policy_transaction_receipts receipt
+  JOIN platform_policy_database_fences fence
+    ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+  WHERE receipt.receipt_hash=NEW.policy_receipt_hash
+    AND receipt.receipt_version=NEW.policy_receipt_version
+    AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id
+    AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id
+    AND receipt.action=NEW.policy_action
+    AND receipt.capability=NEW.policy_capability
+    AND receipt.resource_type='finance_record'
+    AND receipt.resource_id=NEW.id
+    AND receipt.action='create'
+    AND receipt.capability='finance.write'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.purpose')='finance'
+)
+OR EXISTS(SELECT 1 FROM finance_records WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_valuations WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'bank account write requires an unused exact durable finance policy receipt');
+END;
+
+CREATE TRIGGER trg_b4_finance_record_bank_receipt_reuse
+BEFORE INSERT ON finance_records
+WHEN NEW.policy_receipt_hash IS NOT NULL
+  AND EXISTS(SELECT 1 FROM bank_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'finance policy receipt is already bound to a bank account');
+END;
+
+CREATE TRIGGER trg_b4_finance_valuation_bank_receipt_reuse
+BEFORE INSERT ON finance_valuations
+WHEN NEW.policy_receipt_hash IS NOT NULL
+  AND EXISTS(SELECT 1 FROM bank_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'finance policy receipt is already bound to a bank account');
+END;
+
+CREATE TRIGGER trg_b4_bank_account_immutable
+BEFORE UPDATE ON bank_accounts
+BEGIN
+  SELECT RAISE(ABORT,'bank account mutation requires a future governed update workflow');
+END;
+
+CREATE TRIGGER trg_b4_bank_account_delete_guard
+BEFORE DELETE ON bank_accounts
+BEGIN
+  SELECT RAISE(ABORT,'bank account deletion requires a governed deletion workflow');
+END;
+
+UPDATE database_metadata
+SET value='REVISION-32-Z-B4-BANKING-FOUNDATION',
+    updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
+WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -6480,7 +6689,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(74, 'ppk009_core_service_decision_reevaluation', platformPolicyDecisionAuthorityBindingSql),
   createMigrationDefinition(75, 'ppk011_contextual_ownership_share', authorizationOwnershipShareSql),
   createMigrationDefinition(76, 'ppk012_offline_capability_lease_cache_fence', offlineCapabilityLeaseSql),
-  createMigrationDefinition(77, 'ppk016_derived_data_policy_inheritance', derivedDataPolicyInheritanceSql)
+  createMigrationDefinition(77, 'ppk016_derived_data_policy_inheritance', derivedDataPolicyInheritanceSql),
+  createMigrationDefinition(78, 'b4_banking_foundation', bankingFoundationSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

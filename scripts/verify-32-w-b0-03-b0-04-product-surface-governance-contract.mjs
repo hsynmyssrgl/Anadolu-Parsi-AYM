@@ -112,7 +112,7 @@ export const verifyB0ProductSurfaceGovernanceContract = async (root = process.cw
   check('root exposes all four B0 package scripts', ['verify:surface-governance:boundary', 'verify:b0-surface-governance:targeted', 'verify:b0-surface-governance:contract', 'verify:b0-surface-governance:runtime'].every((name) => typeof packageJson?.scripts?.[name] === 'string'));
   check('pretypecheck and prebuild execute the product surface gate', packageJson?.scripts?.pretypecheck?.includes('verify-product-surface-governance.mjs') && packageJson?.scripts?.prebuild?.includes('verify-product-surface-governance.mjs'));
   check('build executes the surface gate before governed preflight', packageJson?.scripts?.prebuild?.indexOf('verify-product-surface-governance.mjs') >= 0 && packageJson.scripts.prebuild.indexOf('verify-product-surface-governance.mjs') < packageJson.scripts.prebuild.indexOf('require-current-governed-preflight.mjs'));
-  check('no repository persistence or migration was added', scope?.schemaDecision?.includes('kullanici verisi') && scope?.migrationDecision?.includes("migration'i gerekmez") && latestMigration === 77);
+  check('no package-owned repository persistence or migration was added', scope?.schemaDecision?.includes('kullanici verisi') && scope?.migrationDecision?.includes("migration'i gerekmez") && migrationVersions.includes(77) && latestMigration >= 77);
   check('scope denies data migration, backfill and cutover', scope?.migrationDecision?.includes('veri tasima/backfill/cutover yapilmaz'));
 
   return Object.freeze({

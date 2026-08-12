@@ -91,7 +91,7 @@ export const verifySensitiveDataConsentBoundary = async () => {
   check('existing consent schema retains unique account purpose resource identity', includesAll(migrations, [
     'CREATE TABLE IF NOT EXISTS ai_consents', 'UNIQUE(account_id,purpose,resource_type,resource_id)'
   ]));
-  check('no new migration is introduced', latestMigration === 77 && scope.migrationDecision.includes('latest migration 77'));
+  check('no package-owned migration is introduced', migrationVersions.includes(77) && latestMigration >= 77 && scope.migrationDecision.includes('latest migration 77'));
   check('desktop composition binds all three use cases and authorization adapter', includesAll(dataStore, [
     'ListSensitiveDataProfilesUseCase', 'UpsertSensitiveDataConsentUseCase', 'PreviewSensitiveExportUseCase',
     'RepositoryBackedSensitiveDataAuthorizationPort'
@@ -111,7 +111,7 @@ export const verifySensitiveDataConsentBoundary = async () => {
   check('existing AI route remains reachable from canonical navigation', navigation.includes("id: 'ai'"));
   check('no sensitive send upload or transfer IPC action exists', !/ai:(?:send|upload|transfer)Sensitive/iu.test(`${main}\n${preload}`));
   check('PPK-021 exact ratchet accepts three reviewed compositions and zero direct role bypass',
-    astGate.status === 'PASS' && astGate.privilegedSurfaces === 531 && astGate.exactAllowlistEntries === 531
+    astGate.status === 'PASS' && astGate.privilegedSurfaces === 535 && astGate.exactAllowlistEntries === 535
     && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
   check('PPK-022 capability ratchet stays unchanged and green',
     capabilityGate.status === 'PASS' && capabilityGate.capabilitySurfaces === 238

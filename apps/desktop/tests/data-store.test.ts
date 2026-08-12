@@ -143,6 +143,12 @@ const getAuthenticatedPerson = async (store: FamilyDataStore) => {
   return person;
 };
 
+const createTurkishIban = (providerCode: string, accountNumber = '0000000000000001'): string => {
+  const bban = `${providerCode}0${accountNumber}`;
+  const remainder = BigInt(`${bban}292700`) % 97n;
+  return `TR${String(98n - remainder).padStart(2, '0')}${bban}`;
+};
+
 afterEach(() => {
   for (const store of openStores) {
     try { store.close(); } catch { /* best-effort cleanup for a store already closed by the test */ }
@@ -918,6 +924,139 @@ describe('FamilyDataStore', () => {
     const record = records.find((item) => item.title === 'Altın hesabı')!;
     const valuations = await store.createFinanceValuation({ financeRecordId: record.id, valueDate: '2026-07-21T12:00:00.000Z', unitPrice: 5000, quantity: 25, provider: 'Manuel' });
     expect(valuations.find((item) => item.financeRecordId === record.id)?.marketValue).toBe(125000);
+    store.close();
+  });
+
+  it('B4-01/B4-02/B4-03/B4-04/B4-07 banka hesabı zincirini politika, maskeleme ve sır reddiyle uygular', async () => {
+    const { store, directory } = makeStore();
+    await authenticate(store);
+    const owner = await getAuthenticatedPerson(store);
+    const institutions = await store.listBankInstitutions();
+    const akbank = institutions.find((institution) => institution.institutionCode === '0046')!;
+    expect(institutions).toHaveLength(71);
+    expect(akbank).toMatchObject({
+      ibanProviderCode: '00046',
+      officialName: 'AKBANK T.A.Ş.',
+      iconSource: 'local_lettermark',
+      sourceName: 'TCMB Ödeme Sistemleri Katılımcıları',
+      sourceVersion: '2026',
+      status: 'active'
+    });
+    expect(akbank.iconKey).not.toMatch(/^https?:/u);
+
+    const iban = createTurkishIban(akbank.ibanProviderCode);
+    const validation = await store.validateIban({ iban: iban.match(/.{1,4}/gu)!.join(' ') });
+    expect(validation).toMatchObject({
+      structurallyValid: true,
+      checksumValid: true,
+      institutionMatched: true,
+      institutionCode: '0046',
+      accountVerification: 'not_performed',
+      ownershipVerification: 'not_performed'
+    });
+    expect(validation.maskedIban).not.toContain(iban);
+
+    const accounts = await store.createBankAccount({
+      ownerPersonId: owner.id,
+      institutionCode: akbank.institutionCode,
+      iban,
+      accountType: 'checking',
+      currency: 'try',
+      alias: 'Aile bütçesi',
+      branch: 'Merkez',
+      ownershipBasisPoints: 7_500,
+      status: 'active',
+      privacy: 'private'
+    });
+    const account = accounts.find((candidate) => candidate.alias === 'Aile bütçesi')!;
+    expect(account).toMatchObject({
+      institutionCode: '0046',
+      institutionOfficialName: 'AKBANK T.A.Ş.',
+      ibanLast4: iban.slice(-4),
+      ibanStructurallyValid: true,
+      institutionMatched: true,
+      accountVerification: 'not_performed',
+      ownershipVerification: 'not_performed',
+      currency: 'TRY',
+      ownershipBasisPoints: 7_500
+    });
+    expect(account.ibanMasked).not.toContain(iban);
+    expect(JSON.stringify(accounts)).not.toContain(iban);
+
+    await expect(store.createBankAccount({
+      ownerPersonId: owner.id,
+      institutionCode: akbank.institutionCode,
+      iban: createTurkishIban('00064'),
+      accountType: 'checking',
+      currency: 'TRY',
+      alias: 'Yanlış kurum',
+      ownershipBasisPoints: 10_000,
+      status: 'active',
+      privacy: 'private'
+    })).rejects.toThrow(/TCMB kurum kodu/u);
+    await expect(store.createBankAccount({
+      ownerPersonId: owner.id,
+      institutionCode: akbank.institutionCode,
+      iban: createTurkishIban('00046','0000000000000002'),
+      accountType: 'checking',
+      currency: 'TRY',
+      alias: 'Kart 4111 1111 1111 1111',
+      ownershipBasisPoints: 10_000,
+      status: 'active',
+      privacy: 'private'
+    })).rejects.toThrow(/Tam PAN/u);
+    await expect(store.createBankAccount({
+      ownerPersonId: owner.id,
+      institutionCode: akbank.institutionCode,
+      iban: createTurkishIban('00046','0000000000000003'),
+      accountType: 'checking',
+      currency: 'TRY',
+      alias: 'Sır alanı',
+      ownershipBasisPoints: 10_000,
+      status: 'active',
+      privacy: 'private',
+      cvv: '123'
+    } as never)).rejects.toThrow(/CVV\/CVC/u);
+    await expect(store.createFinanceRecord({
+      ownerPersonId: owner.id,
+      title: 'Kart 4111 1111 1111 1111',
+      kind: 'asset',
+      amount: 1,
+      currency: 'TRY',
+      privacy: 'private',
+      occurredAt: '2026-08-12T10:00:00.000Z'
+    })).rejects.toThrow(/Tam PAN/u);
+    await expect(store.createFinanceRecord({
+      ownerPersonId: owner.id,
+      title: 'Gizli alan',
+      kind: 'asset',
+      amount: 1,
+      currency: 'TRY',
+      privacy: 'private',
+      occurredAt: '2026-08-12T10:00:00.000Z',
+      internetBankingPassword: 'secret'
+    } as never)).rejects.toThrow(/internet bankacılığı parolası/u);
+
+    const database = new DatabaseSync(join(directory, 'family.db'));
+    const columns = database.prepare('PRAGMA table_info(bank_accounts)').all() as Array<{ name:string }>;
+    expect(columns.map((column) => column.name)).not.toEqual(expect.arrayContaining([
+      'pan','card_number','cvv','cvc','pin','password','internet_banking_password'
+    ]));
+    const persisted = database.prepare('SELECT normalized_iban FROM bank_accounts WHERE id=?').get(account.id) as { normalized_iban:string };
+    expect(persisted.normalized_iban).toBe(iban);
+    const outboxPayloads = database.prepare("SELECT payload_json FROM event_outbox WHERE event_type='finance.bank_account.created'").all() as Array<{payload_json:string}>;
+    expect(JSON.stringify(outboxPayloads)).not.toContain(iban);
+    expect(() => database.exec(`
+      INSERT INTO bank_accounts
+      SELECT 'bank-account-direct-bypass',family_id,owner_person_id,institution_code,normalized_iban,
+             iban_country_code,iban_provider_code,account_type,currency,alias,branch,ownership_basis_points,
+             status,privacy,structural_validation,account_verification,ownership_verification,created_at,
+             policy_receipt_hash,policy_receipt_version,policy_receipt_nonce,policy_correlation_id,
+             policy_resource_type,policy_resource_id,policy_action,policy_capability
+      FROM bank_accounts WHERE id='${account.id}'
+    `)).toThrow(/unused exact durable finance policy receipt/u);
+    database.close();
+    expect(store.listAudit(100).some((entry) => entry.action === 'finance.bank_account.created' && entry.resourceId === account.id)).toBe(true);
     store.close();
   });
 

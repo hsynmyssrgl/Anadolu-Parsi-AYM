@@ -188,7 +188,7 @@ requireMarkers('targeted test', files.targetTest, [
 ]);
 check('legacy lifecycle and backup runtimes use in-process TypeScript stripping rather than ambient npm', files.build136Runtime.includes('stripTypeScriptTypes') && files.build137Runtime.includes('stripTypeScriptTypes') && !files.build136Runtime.includes("npm root -g") && !files.build137Runtime.includes("npm root -g"));
 
-check('latest database migration remains 77 and no PPK-019 migration exists', latestMigration === 77 && !files.migrations.toLowerCase().includes('ppk019'));
+check('migration 77 baseline remains present and no PPK-019 migration exists', migrationVersions.includes(77) && latestMigration >= 77 && !files.migrations.toLowerCase().includes('ppk019'));
 check('scope forbids migration backfill transfer ownership change and cutover', scope.boundaries?.schemaMigrationRequired === false && scope.realDataBackfillPerformed === false && scope.realDataTransferPerformed === false && scope.sqliteOwnershipTransferred === false && scope.cutoverAuthorityAttached === false);
 check('scope requires all seven owner kinds and exact three cache registries', scope.boundaries?.ownerKinds?.length === 7 && scope.boundaries?.requiredRuntimeCacheRegistries?.length === 3);
 check('scope records local-before-delete and two owner inspections', scope.boundaries?.localPropagationBeforeSourceDeleteRequired === true && scope.boundaries?.persistentOwnerSchemaInspectionRequired === true && scope.boundaries?.persistentOwnerSecondInspectionRequired === true);

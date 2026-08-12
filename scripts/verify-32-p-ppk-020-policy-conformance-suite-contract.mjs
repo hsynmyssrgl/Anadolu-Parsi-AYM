@@ -74,7 +74,7 @@ check('scope denies runtime authority to the reference harness', scope.boundarie
 check('scope requires content-free no-cache status', scope.boundaries?.contentFreeStatusIpcRequired === true && scope.boundaries?.policyStatusIpcCacheAllowed === false && scope.boundaries?.testPayloadExposedToRenderer === false);
 check('scope forbids persistence and schema change', scope.boundaries?.repositoryPersistenceRequired === false && scope.boundaries?.schemaMigrationRequired === false);
 check('scope forbids transfer backfill ownership change and cutover', scope.realDataTransferPerformed === false && scope.realDataBackfillPerformed === false && scope.sqliteOwnershipTransferred === false && scope.cutoverAuthorityAttached === false);
-check('database migration remains 77', latestMigration === 77 && scope.boundaries?.latestDatabaseMigration === 77);
+check('database migration 77 baseline remains present', versions.includes(77) && latestMigration >= 77 && scope.boundaries?.latestDatabaseMigration === 77);
 check('no PPK-020 migration marker exists', !migrations.toLowerCase().includes('ppk020'));
 
 check('policy publishes one canonical target registry', (policy.match(/export const POLICY_CONFORMANCE_TARGET_PROFILES/gu) ?? []).length === 1);

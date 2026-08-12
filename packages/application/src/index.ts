@@ -29,6 +29,7 @@ export * from './membership-use-cases.js';
 export * from './health-use-cases.js';
 
 export * from './finance-use-cases.js';
+export * from './banking-security.js';
 
 export * from './archive-use-cases.js';
 

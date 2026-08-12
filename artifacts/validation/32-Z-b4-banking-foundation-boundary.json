@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "step": "32-Z",
+  "requirements": [
+    "B4-01",
+    "B4-02",
+    "B4-03",
+    "B4-04",
+    "B4-07"
+  ],
+  "status": "PASS",
+  "checksPassed": 33,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "scope closes exactly five B4 requirements under DEC-211",
+      "passed": true
+    },
+    {
+      "name": "inventory has no open package blocker and leaves card requirements open",
+      "passed": true
+    },
+    {
+      "name": "catalog source is TCMB 2026 with 71 participants and local icons",
+      "passed": true
+    },
+    {
+      "name": "domain exposes institution account and IBAN truth contracts",
+      "passed": true
+    },
+    {
+      "name": "domain fixes account types statuses and ownership fields",
+      "passed": true
+    },
+    {
+      "name": "IBAN normalization and streaming MOD 97-10 are implemented locally",
+      "passed": true
+    },
+    {
+      "name": "TR provider reserved field and institution match fail closed",
+      "passed": true
+    },
+    {
+      "name": "bank account contract rejects canonical secret fields and Luhn-valid PAN",
+      "passed": true
+    },
+    {
+      "name": "legacy finance record and valuation use cases reject banking secrets",
+      "passed": true
+    },
+    {
+      "name": "create account validates person institution authorization and policy write",
+      "passed": true
+    },
+    {
+      "name": "account audit and outbox omit IBAN",
+      "passed": true
+    },
+    {
+      "name": "repository contract carries protected write value and masked public view",
+      "passed": true
+    },
+    {
+      "name": "repository masks persisted IBAN before returning it",
+      "passed": true
+    },
+    {
+      "name": "sensitive inventory counts bank accounts without naming IBAN",
+      "passed": true
+    },
+    {
+      "name": "person lifecycle reference inspection includes bank accounts",
+      "passed": true
+    },
+    {
+      "name": "migration 78 is the latest exact banking migration",
+      "passed": true
+    },
+    {
+      "name": "migration seeds exactly 71 TCMB catalog rows",
+      "passed": true
+    },
+    {
+      "name": "bank account schema contains no prohibited secret columns",
+      "passed": true
+    },
+    {
+      "name": "bank account schema fixes TR length provider reserve privacy and ownership constraints",
+      "passed": true
+    },
+    {
+      "name": "migration requires an unused exact durable finance receipt",
+      "passed": true
+    },
+    {
+      "name": "migration blocks receipt replay mutation and deletion",
+      "passed": true
+    },
+    {
+      "name": "production finance adapter composes governed catalog account and IBAN operations",
+      "passed": true
+    },
+    {
+      "name": "DataStore composes all four banking use cases",
+      "passed": true
+    },
+    {
+      "name": "main and preload bind the four exact banking channels",
+      "passed": true
+    },
+    {
+      "name": "IPC policy validates exact payloads and rejects secret fields and values",
+      "passed": true
+    },
+    {
+      "name": "renderer declarations expose all four typed methods",
+      "passed": true
+    },
+    {
+      "name": "finance UI exposes account entry masked list and separated verification truth",
+      "passed": true
+    },
+    {
+      "name": "targeted tests cover structure IPC secrets masking receipts and no-IBAN payload",
+      "passed": true
+    },
+    {
+      "name": "decision and threat model preserve structural-only truth",
+      "passed": true
+    },
+    {
+      "name": "audit document binds exact evidence triplet and excluded claims",
+      "passed": true
+    },
+    {
+      "name": "PPK-021 exact ratchet reviews the four new compositions",
+      "passed": true
+    },
+    {
+      "name": "PPK-022 capability ratchet remains unchanged and green",
+      "passed": true
+    },
+    {
+      "name": "root lifecycle and explicit package scripts bind 32-Z",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "latestDatabaseMigration": 78,
+  "catalogRows": 71,
+  "ppk021ExactAllowlistEntries": 535,
+  "ppk022CapabilitySurfaces": 238,
+  "networkVerificationPerformed": false,
+  "generatedAt": "2026-08-12T13:39:39.566Z"
+}

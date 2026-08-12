@@ -28,6 +28,21 @@ Bir çelişki olduğunda aşağıdaki sıra uygulanır:
 Eski kararlar silinmez; tarihsel kanıt olarak korunur. Ancak aktif ürün davranışını
 belirleyemez. Çelişki sessizce birleştirilmez; değişiklik kaydına işlenir.
 
+## DEC-211 — B4 banka kurumu, hesap, IBAN ve sır reddi temeli
+
+32-Z ile TCMB 2026 Ödeme Sistemleri Katılımcıları kaynağına bağlı 71 kurum yerel
+katalogda tutulur; uzak logo yerine yerel harf simgesi kullanılır. Banka hesabı
+IBAN, tür, para birimi, alias, şube, sahiplik oranı, durum ve gizlilik alanlarıyla
+merkezi finance PEP ve exact kalıcı receipt altında yazılır. Tam IBAN yalnız
+korumalı SQLite içinde kalır; renderer maskeli görünüm, audit ve outbox içeriksiz
+metadata alır. TR IBAN ülke, 26 karakter, MOD 97-10, beş haneli sağlayıcı, rezerv
+alanı ve TCMB eşleşmesiyle yapısal olarak doğrulanır; gerçek hesap ve sahiplik
+doğrulaması yapılmış sayılmaz. Tam PAN, CVV/CVC, PIN ve internet bankacılığı
+parolası yeni hesap ve eski finans girişlerinde reddedilir. Migration 78 eklenir;
+PPK-021 exact ratchet 535 girdiye çıkar, PPK-022 238 kalır. B4-01/02/03/04/07
+tamamlanır; B4-05/06 açık kalır. Ayrıntılı karar:
+`docs/decisions/DEC-211-b4-banking-foundation.md`
+
 ## DEC-210 — B2-05/B6-03 hassas veri rızası ve dışa gönderim önizlemesi
 
 32-Y ile çocuk, sağlık, finans ve konum profilleri AI işleme ve dışa gönderim

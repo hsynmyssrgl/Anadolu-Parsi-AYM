@@ -110,11 +110,11 @@
       "passed": true
     },
     {
-      "name": "no user schema change is introduced",
+      "name": "migration 77 package baseline remains present",
       "passed": true
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 77,
-  "generatedAt": "2026-08-12T12:21:21.606Z"
+  "latestDatabaseMigration": 78,
+  "generatedAt": "2026-08-12T13:39:32.031Z"
 }

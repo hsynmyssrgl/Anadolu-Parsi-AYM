@@ -162,7 +162,7 @@ requireMarkers('targeted test', files.targetTest, [
 check('targeted tamper matrix covers package context resource reason obligations and execution', ['policy package', 'context hash', 'resource identity', 'decision reason', 'obligations', 'obligation execution'].every((marker) => files.targetTest.includes(marker)));
 check('legacy protected journal runtime now creates canonical records through real PEP', files.oldJournalRuntime.includes('new PlatformPolicyEnforcementPoint({') && files.oldJournalRuntime.includes('assert.ok(capturedRecord)'));
 
-check('latest database migration remains 77 and no PPK-018 migration exists', latestMigration === 77 && !files.migrations.toLowerCase().includes('ppk018'));
+check('migration 77 baseline remains present and no PPK-018 migration exists', migrationVersions.includes(77) && latestMigration >= 77 && !files.migrations.toLowerCase().includes('ppk018'));
 check('scope forbids migration backfill transfer ownership change and cutover', scope.boundaries?.schemaMigrationRequired === false && scope.realDataBackfillPerformed === false && scope.realDataTransferPerformed === false && scope.sqliteOwnershipTransferred === false && scope.cutoverAuthorityAttached === false);
 check('scope records journal entry v2 and protected audit envelope v1', scope.boundaries?.journalEntrySchemaVersion === 2 && scope.boundaries?.protectedAuditEnvelopeSchemaVersion === 1);
 check('scope distinguishes legacy read from new audited writes', scope.boundaries?.legacyDirectReceiptPayloadReadable === true && scope.boundaries?.newLegacyDirectReceiptPayloadWritable === false && scope.boundaries?.historicalBackfillPerformed === false);

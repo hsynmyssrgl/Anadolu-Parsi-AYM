@@ -150,7 +150,7 @@ check('scope and inventory preserve no migration or ownership transfer', scope.b
 check('inventory has eight implemented controls and no open production path', inventory.controls?.length === 8 && inventory.controls.every((item) => item.disposition === 'IMPLEMENTED') && inventory.closureSummary?.openProductionPathCount === 0 && inventory.closureSummary?.openProductionPaths?.length === 0);
 check('decision documents live attestation and exact matrix', includesAll(decision, ['kernel HMAC doğrulayıcısıyla yeniden doğrular', '30.000 ms', '30.001 ms', '5.000 ms', '5.001 ms', 'CLUSTER_NOT_WRITABLE', 'eski allow receipt']));
 check('threat model covers canonical threats and truth boundary', (threatModel.match(/^### /gmu) ?? []).length >= 9 && includesAll(threatModel, ['invalid/stale online policy', 'PPK-012', 'migration, veri taşıma, backfill, cutover']));
-check('database migration remains 77', latestMigration === 77);
+check('database migration 77 baseline remains present', versions.includes(77) && latestMigration >= 77);
 
 if (candidateMode) {
   check('candidate registry remains validation pending', requirement?.status === 'IN_PROGRESS' && requirement?.chain?.evidence === false);

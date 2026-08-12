@@ -132,7 +132,7 @@ export const verifyDesktopSecurityBoundary = async () => {
     capabilityKeys.has('NETWORK_API|apps/desktop/src/main/main.ts|fetch'));
   check('root pretypecheck and prebuild execute this boundary', ['pretypecheck', 'prebuild'].every((name) =>
     rootPackage.scripts?.[name]?.includes('verify-desktop-security-boundary.mjs')));
-  check('no user schema change is introduced', latestMigration === 77);
+  check('migration 77 package baseline remains present', migrationVersions.includes(77) && latestMigration >= 77);
 
   return Object.freeze({
     schemaVersion: 1,

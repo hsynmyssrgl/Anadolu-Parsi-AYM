@@ -95,7 +95,7 @@ check('repository contract is metadata only', includesAll(repositoryContract, ['
 check('repository counts all four categories without SELECT star payload reads', ['child','health','finance','location'].every((category) => repository.includes(`category:'${category}'`))
   && !/SELECT\s+\*\s+FROM\s+(?:people|health_records|medication_plans|family_health_history|finance_records|finance_valuations|locations)/iu.test(repository));
 check('existing ai_consents schema is reused', includesAll(migrations, ['CREATE TABLE IF NOT EXISTS ai_consents', 'UNIQUE(account_id,purpose,resource_type,resource_id)']));
-check('latest migration remains 77 with no new migration', latestMigration === 77 && scope.migrationDecision.includes('Yeni migration'));
+check('migration 77 package baseline remains present with no package-owned migration', migrationVersions.includes(77) && latestMigration >= 77 && scope.migrationDecision.includes('Yeni migration'));
 check('DataStore composes three use cases with central authorization', includesAll(dataStore, ['ListSensitiveDataProfilesUseCase', 'UpsertSensitiveDataConsentUseCase', 'PreviewSensitiveExportUseCase', 'sensitiveDataAuthorization']));
 check('main and preload bind exact channels', ['ai:listSensitiveProfiles','ai:upsertSensitiveConsent','ai:previewSensitiveExport'].every((channel) => main.includes(channel) && preload.includes(channel)));
 check('IPC integration policy rejects unknown fields and implicit grants', includesAll(ipcPolicy, [
@@ -112,7 +112,7 @@ check('desktop integration test covers policy repository IPC UI and no egress', 
 check('DEC-210 records the exact privacy and migration decision', includesAll(decision, ['DEC-210', 'CentralAuthorizationService', 'outboundTransferPerformed=false', 'latest migration 77']));
 check('threat model covers all four sensitive classes and audit', includesAll(threatModel, ['18 yaş altı', 'Sağlık kayıtları', 'Finans kayıtları', 'koordinat', 'audit']));
 check('upper closure document keeps excluded claims open', includesAll(auditDocument, ['B2-02', 'PPK-025', 'B9-01', 'Silver readiness', 'Bronze Final']));
-check('PPK-021 ratchet is exact green with no role bypass', astGate.status === 'PASS' && astGate.privilegedSurfaces === 531 && astGate.exactAllowlistEntries === 531 && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
+check('PPK-021 successor ratchet is exact green with no role bypass', astGate.status === 'PASS' && astGate.privilegedSurfaces === 535 && astGate.exactAllowlistEntries === 535 && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
 check('PPK-022 ratchet remains exact green with no added capability', capabilityGate.status === 'PASS' && capabilityGate.capabilitySurfaces === 238 && capabilityGate.exactManifestSurfaces === 238 && capabilityGate.findings.length === 0);
 check('root lifecycle and explicit package scripts bind 32-Y', ['pretypecheck','prebuild'].every((name) => rootPackage.scripts?.[name]?.includes('verify-sensitive-data-consent-boundary.mjs'))
   && ['verify:sensitive-data-consent:boundary','verify:b2-b6-sensitive-data-consent:targeted','verify:b2-b6-sensitive-data-consent:contract','verify:b2-b6-sensitive-data-consent:runtime'].every((name) => typeof rootPackage.scripts?.[name] === 'string'));

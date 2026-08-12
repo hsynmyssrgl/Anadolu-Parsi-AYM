@@ -62,7 +62,7 @@
       "passed": true
     },
     {
-      "name": "no new migration is introduced",
+      "name": "no package-owned migration is introduced",
       "passed": true
     },
     {
@@ -115,9 +115,9 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 77,
-  "ppk021ExactAllowlistEntries": 531,
+  "latestDatabaseMigration": 78,
+  "ppk021ExactAllowlistEntries": 535,
   "ppk022CapabilitySurfaces": 238,
   "outboundTransferPerformed": false,
-  "generatedAt": "2026-08-12T12:28:46.136Z"
+  "generatedAt": "2026-08-12T13:39:35.939Z"
 }

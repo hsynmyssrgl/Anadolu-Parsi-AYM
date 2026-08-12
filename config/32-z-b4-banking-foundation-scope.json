@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "id": "32-Z-B4-BANKING-FOUNDATION",
+  "decision": "DEC-211",
+  "requirements": ["B4-01", "B4-02", "B4-03", "B4-04", "B4-07"],
+  "status": "COMPLETE",
+  "catalog": {
+    "publisher": "Türkiye Cumhuriyet Merkez Bankası",
+    "sourceName": "TCMB Ödeme Sistemleri Katılımcıları",
+    "sourceVersion": "2026",
+    "sourceUrl": "https://www.tcmb.gov.tr/wps/wcm/connect/9fa62a85-5b6d-46c5-9b01-eb461d43723d/TCMB%20%C3%96deme%20Sistemleri%20Kat%C4%B1l%C4%B1mc%C4%B1lar%C4%B1%20%282025%29.pdf?MOD=AJPERES",
+    "retrievedAt": "2026-08-12T00:00:00.000Z",
+    "participantCount": 71,
+    "remoteLogoFetchAllowed": false,
+    "iconSource": "local_lettermark"
+  },
+  "iban": {
+    "supportedCountries": ["TR"],
+    "turkeyLength": 26,
+    "checksum": "ISO_7064_MOD_97_10",
+    "providerCodeDigits": 5,
+    "reservedField": "0",
+    "institutionMatchRequired": true,
+    "structuralValidationPerformsNetworkQuery": false,
+    "realAccountVerificationPerformed": false,
+    "ownershipVerificationPerformed": false
+  },
+  "account": {
+    "fields": ["iban", "accountType", "currency", "alias", "branch", "ownershipBasisPoints", "status", "privacy"],
+    "fullIbanStoredOnlyInProtectedDatabase": true,
+    "rendererReturnsMaskedIbanOnly": true,
+    "outboxContainsIban": false,
+    "auditContainsIban": false,
+    "financePolicyReceiptRequired": true
+  },
+  "secretContract": {
+    "rejectedSecrets": ["fullPan", "cardNumber", "cvv", "cvc", "pin", "internetBankingPassword"],
+    "luhnFullPanDetection": true,
+    "exactIpcPayloadValidation": true,
+    "applicationLayerValidation": true,
+    "legacyFinanceRecordAndValuationChannelsCovered": true,
+    "secretColumnsAdded": []
+  },
+  "schemaDecision": "Migration 78, resmi kurum kataloğunu ve yalnız finance PEP receipt'iyle yazılabilen banka hesabı tablosunu ekler. Tam IBAN korumalı SQLite içinde tutulur; renderer, audit ve outbox yüzeyine yalnız maskeli veya içeriksiz metadata çıkar.",
+  "migrationDecision": "Migration 78 b4_banking_foundation eklendi; gerçek kullanıcı verisi taşınmadı, historical backfill ve cutover yapılmadı, Desktop vault ve SQLite sahipliği değiştirilmedi.",
+  "ratchets": {
+    "ppk021ExactAllowlistEntries": 535,
+    "ppk021DirectRoleAuthorizationBypasses": 0,
+    "ppk022CapabilitySurfaces": 238,
+    "networkEgressAdded": false
+  },
+  "validation": {
+    "boundary": "artifacts/validation/32-Z-b4-banking-foundation-boundary.json",
+    "contract": "artifacts/validation/32-Z-b4-banking-foundation-contract.json",
+    "runtime": "artifacts/validation/32-Z-b4-banking-foundation-runtime.json",
+    "targetedTestFiles": [
+      "packages/application/tests/banking-foundation.test.ts",
+      "apps/desktop/tests/b4-banking-ipc-integration.test.ts",
+      "apps/desktop/tests/data-store.test.ts"
+    ]
+  },
+  "excludedClaims": [
+    "Yapısal IBAN doğrulaması gerçek hesabın varlığını veya hesap sahipliğini doğrulamaz.",
+    "Bu paket banka ağına sorgu göndermez ve uzaktan banka logosu indirmez.",
+    "B4-05 kredi kartı ürün modeli ve B4-06 kart otomasyonları tamamlanmış sayılmaz.",
+    "B9-01, Silver readiness ve Bronze Final tamamlanmış sayılmaz.",
+    "Yeni Build numarası verilmez."
+  ]
+}

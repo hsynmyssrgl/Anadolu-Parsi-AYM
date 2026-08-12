@@ -1,11 +1,21 @@
 import { asFamilyId, asIsoDateTime, asPersonId } from '@ppt/core';
-import type { FinanceRecordView, FinanceValuationView, RecordPrivacy } from '@ppt/domain';
+import type {
+  BankAccountType,
+  BankAccountStatus,
+  BankInstitutionKind,
+  BankInstitutionView,
+  FinanceRecordView,
+  FinanceValuationView,
+  RecordPrivacy
+} from '@ppt/domain';
 import {
   assertPolicyAuthorizedRepositoryContext,
+  type BankAccountRow,
   type FinanceRecordRow,
   type FinancePolicyResourceRepositoryPort,
   type FinanceRepositoryPort,
   type FinanceValuationRow,
+  type NewBankAccountRow,
   type PolicyAuthorizedRepositoryExecutionContext,
   type RepositoryExecutionContext,
   type RepositoryResult
@@ -43,12 +53,79 @@ const mapValuation = (row: Record<string, unknown>): FinanceValuationRow => ({
   createdAt: asIsoDateTime(String(row.created_at))
 });
 
+const mapInstitution = (row: Record<string, unknown>): BankInstitutionView => ({
+  institutionCode: String(row.institution_code),
+  ibanProviderCode: String(row.iban_provider_code),
+  officialName: String(row.official_name),
+  countryCode: 'TR',
+  kind: String(row.kind) as BankInstitutionKind,
+  supportsCustomerAccounts: Number(row.supports_customer_accounts) === 1,
+  iconKey: String(row.icon_key),
+  iconSource: 'local_lettermark',
+  sourceName: 'TCMB Ödeme Sistemleri Katılımcıları',
+  sourceVersion: '2026',
+  sourceUrl: String(row.source_url),
+  sourceRetrievedAt: String(row.source_retrieved_at),
+  status: 'active'
+});
+
+const maskPersistedIban = (normalizedIban: string): string => {
+  const concealed = '•'.repeat(Math.max(0, normalizedIban.length - 8)).match(/.{1,4}/gu) ?? [];
+  return [normalizedIban.slice(0, 4), ...concealed, normalizedIban.slice(-4)].join(' ');
+};
+
+const mapBankAccount = (row: Record<string, unknown>): BankAccountRow => {
+  const normalizedIban = String(row.normalized_iban);
+  return {
+    id: String(row.id),
+    familyId: asFamilyId(String(row.family_id)),
+    ownerPersonId: asPersonId(String(row.owner_person_id)),
+    institutionCode: String(row.institution_code),
+    institutionOfficialName: String(row.institution_official_name),
+    institutionIconKey: String(row.institution_icon_key),
+    ibanMasked: maskPersistedIban(normalizedIban),
+    ibanLast4: normalizedIban.slice(-4),
+    ibanCountryCode: String(row.iban_country_code),
+    ibanProviderCode: String(row.iban_provider_code),
+    ibanStructurallyValid: true,
+    institutionMatched: true,
+    accountVerification: 'not_performed',
+    ownershipVerification: 'not_performed',
+    accountType: String(row.account_type) as BankAccountType,
+    currency: String(row.currency),
+    alias: String(row.alias),
+    ...(row.branch ? { branch: String(row.branch) } : {}),
+    ownershipBasisPoints: Number(row.ownership_basis_points),
+    status: String(row.status) as BankAccountStatus,
+    privacy: String(row.privacy) as RecordPrivacy,
+    createdAt: asIsoDateTime(String(row.created_at))
+  };
+};
+
 const assertCollectionRead = (context: PolicyAuthorizedRepositoryExecutionContext): void => {
   assertPolicyAuthorizedRepositoryContext(context, {
     resourceType: 'finance_record',
     resourceId: '*',
     action: 'read',
     capability: 'finance.read',
+    correlationId: context.correlationId
+  });
+};
+
+const assertBankCatalogAccess = (context: PolicyAuthorizedRepositoryExecutionContext): void => {
+  const authorization = context.policyAuthorization;
+  if (
+    authorization.resourceType !== 'finance_record'
+    || !(
+      (authorization.action === 'read' && authorization.capability === 'finance.read')
+      || (authorization.action === 'create' && authorization.capability === 'finance.write')
+    )
+  ) throw new Error('Bank institution catalog access requires a governed finance authorization');
+  assertPolicyAuthorizedRepositoryContext(context, {
+    resourceType: authorization.resourceType,
+    resourceId: authorization.resourceId,
+    action: authorization.action,
+    capability: authorization.capability,
     correlationId: context.correlationId
   });
 };
@@ -241,6 +318,98 @@ export class SqliteFinanceRepository extends SqliteRepository implements Finance
         row.quantity,
         row.marketValue,
         row.provider,
+        row.createdAt,
+        policy.receiptHash,
+        policy.receiptVersion,
+        policy.nonce,
+        context.correlationId,
+        policy.resourceType,
+        policy.resourceId,
+        policy.action,
+        policy.capability
+      );
+    });
+  }
+
+  public listBankInstitutions(
+    context: PolicyAuthorizedRepositoryExecutionContext
+  ): RepositoryResult<readonly BankInstitutionView[]> {
+    assertCollectionRead(context);
+    return this.execute(context, () => (
+      this.database(context).prepare(`
+        SELECT institution_code,iban_provider_code,official_name,kind,supports_customer_accounts,
+               icon_key,source_url,source_retrieved_at
+        FROM bank_institutions
+        WHERE country_code='TR' AND status='active'
+        ORDER BY official_name COLLATE NOCASE,institution_code
+      `).all() as Array<Record<string, unknown>>
+    ).map(mapInstitution));
+  }
+
+  public findBankInstitution(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    institutionCode: string
+  ): RepositoryResult<BankInstitutionView | null> {
+    assertBankCatalogAccess(context);
+    return this.execute(context, () => {
+      const row = this.database(context).prepare(`
+        SELECT institution_code,iban_provider_code,official_name,kind,supports_customer_accounts,
+               icon_key,source_url,source_retrieved_at
+        FROM bank_institutions
+        WHERE institution_code=? AND country_code='TR' AND status='active'
+      `).get(institutionCode) as Record<string, unknown> | undefined;
+      return row ? mapInstitution(row) : null;
+    });
+  }
+
+  public listBankAccounts(
+    context: PolicyAuthorizedRepositoryExecutionContext
+  ): RepositoryResult<readonly BankAccountRow[]> {
+    assertCollectionRead(context);
+    return this.execute(context, () => (
+      this.database(context).prepare(`
+        SELECT account.id,account.family_id,account.owner_person_id,account.institution_code,
+               institution.official_name AS institution_official_name,
+               institution.icon_key AS institution_icon_key,
+               account.normalized_iban,account.iban_country_code,account.iban_provider_code,
+               account.account_type,account.currency,account.alias,account.branch,
+               account.ownership_basis_points,account.status,account.privacy,account.created_at
+        FROM bank_accounts account
+        JOIN bank_institutions institution ON institution.institution_code=account.institution_code
+        ORDER BY account.created_at DESC,account.id
+      `).all() as Array<Record<string, unknown>>
+    ).map(mapBankAccount));
+  }
+
+  public insertBankAccount(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    row: NewBankAccountRow
+  ): RepositoryResult<void> {
+    const policy = financeWriteBinding(context, row.id, 'create');
+    return this.execute(context, () => {
+      this.database(context).prepare(`
+        INSERT INTO bank_accounts(
+          id,family_id,owner_person_id,institution_code,normalized_iban,iban_country_code,
+          iban_provider_code,account_type,currency,alias,branch,ownership_basis_points,status,
+          privacy,structural_validation,account_verification,ownership_verification,created_at,
+          policy_receipt_hash,policy_receipt_version,policy_receipt_nonce,policy_correlation_id,
+          policy_resource_type,policy_resource_id,policy_action,policy_capability
+        ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,'valid','not_performed','not_performed',?,?,?,?,?,?,?,?,?)
+      `).run(
+        row.id,
+        row.familyId,
+        row.ownerPersonId,
+        row.institutionCode,
+        row.normalizedIban,
+        row.ibanCountryCode,
+        row.ibanProviderCode,
+        row.accountType,
+        row.currency,
+        row.alias,
+        row.branch ?? null,
+        row.ownershipBasisPoints,
+        row.status,
+        row.privacy,
         row.createdAt,
         policy.receiptHash,
         policy.receiptVersion,

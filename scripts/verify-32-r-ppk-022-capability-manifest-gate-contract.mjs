@@ -195,7 +195,7 @@ check('decision records AST signed runtime and authority separation', includesAl
 check('threat model covers all primary resource and manifest evasions', ['Beyansız statik import', 'Dinamik import/require kaçışı', 'Kamera ve mikrofon kaçışı', 'OCR/AI kaçışı', 'Konum kaçışı', 'Manifest içeriği tamperi', 'İmzalı paket ikamesi', 'Pre-handshake boşluğu'].every((marker) => threat.includes(marker)));
 check('master register contains DEC-203', masterRegister.includes('## DEC-203') && masterRegister.includes('DEC-203-ppk-022-capability-manifest-build-runtime-gate.md'));
 check('decision ledger contains active DEC-203', ledger.decisionCount === ledger.decisions.length && ledger.decisions.some((item) => item.id === 'DEC-203' && item.status === 'ACTIVE' && item.requirements?.includes('PPK-022')));
-check('database migration remains 77', latestMigration === 77 && scope.boundaries?.latestDatabaseMigration === 77);
+check('database migration 77 baseline remains present', versions.includes(77) && latestMigration >= 77 && scope.boundaries?.latestDatabaseMigration === 77);
 
 if (candidateMode) {
   check('candidate registry remains validation pending', requirement?.status === 'IN_PROGRESS' && requirement?.implementationState === 'IMPLEMENTED_VALIDATION_PENDING' && requirement?.chain?.targetedTest === false && requirement?.chain?.evidence === false);

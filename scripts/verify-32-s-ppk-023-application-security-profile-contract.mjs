@@ -148,13 +148,13 @@ check('prebuild runs PPK-023 gate before governed preflight', rootPackage.script
 check('combined platform policy gate invokes PPK-023 gate', includesAll(combinedGate, ['verify-application-security-profile-gate.mjs', 'applicationSecurityProfileGateStatus']));
 check('root package exposes all PPK-023 commands', ['verify:ppk023:profile-gate', 'verify:ppk023:targeted', 'verify:ppk023:contract', 'verify:ppk023:runtime'].every((name) => typeof rootPackage.scripts?.[name] === 'string'));
 
-check('PPK-021 successor AST ratchet remains green', astGate.status === 'PASS' && astGate.productionSourceZones === 18 && astGate.scannedFiles >= 375 && astGate.privilegedSurfaces === 531 && astGate.exactAllowlistEntries === 531 && astGate.findings.length === 0);
+check('PPK-021 successor AST ratchet remains green', astGate.status === 'PASS' && astGate.productionSourceZones === 18 && astGate.scannedFiles >= 376 && astGate.privilegedSurfaces === 535 && astGate.exactAllowlistEntries === 535 && astGate.findings.length === 0);
 check('PPK-022 successor capability ratchet remains green', capabilityGate.status === 'PASS' && capabilityGate.productionSourceZones === 18 && capabilityGate.scannedFiles === 375 && capabilityGate.capabilitySurfaces === 238 && capabilityGate.exactManifestSurfaces === 238 && capabilityGate.findings.length === 0);
 check('scope records exact build and truth boundaries', scope.boundaries?.buildFailGateRequired === true && scope.boundaries?.canonicalApplicationCount === 14 && scope.boundaries?.applicationThreatModelCount === 14 && scope.boundaries?.mappingClaimsCompliance === false && scope.boundaries?.mappingGrantsRuntimeAuthority === false);
 check('scope preserves no-cache and data ownership fences', scope.boundaries?.policyStatusIpcCacheAllowed === false && scope.boundaries?.schemaMigrationRequired === false && scope.boundaries?.realDataTransferPerformed === false && scope.boundaries?.cutoverPerformed === false && scope.boundaries?.desktopVaultOwnershipPreserved === true && scope.boundaries?.sqliteOwnershipTransferred === false);
 check('inventory has seven implemented controls and no blockers', inventory.controls?.length === 7 && inventory.controls.every((item) => item.disposition === 'IMPLEMENTED') && inventory.closureSummary?.openBlockerCount === 0 && inventory.closureSummary?.openBlockers?.length === 0);
 check('decision preserves assurance and successor limits', includesAll(decision, ['DEC-204', 'uygunluk sertifikası', 'PROFILE_ONLY / NOT_DEPLOYED', 'PPK-024']));
-check('database migration remains 77', latestMigration === 77 && scope.boundaries?.latestDatabaseMigration === 77);
+check('database migration 77 baseline remains present', versions.includes(77) && latestMigration >= 77 && scope.boundaries?.latestDatabaseMigration === 77);
 
 if (candidateMode) {
   check('candidate registry remains validation pending', requirement?.status === 'IN_PROGRESS' && requirement?.chain?.evidence === false);

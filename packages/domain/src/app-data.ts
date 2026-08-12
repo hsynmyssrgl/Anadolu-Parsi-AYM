@@ -476,6 +476,89 @@ export interface UpdateFamilyAccountInput { accountId:string; role:FamilyRole; s
 export type RecordPrivacy = 'private' | 'selected_members' | 'family';
 export interface FinanceRecordView { id:string; ownerPersonId:string; title:string; kind:'asset'|'debt'|'income'|'expense'; amount:number; currency:string; privacy:RecordPrivacy; notes?:string; occurredAt:string; dueAt?:string; remainingPrincipal?:number; symbol?:string; createdAt:string; }
 export interface CreateFinanceRecordInput { ownerPersonId:string; title:string; kind:FinanceRecordView['kind']; amount:number; currency:string; privacy:RecordPrivacy; notes?:string; occurredAt:string; dueAt?:string; remainingPrincipal?:number; symbol?:string; }
+export const BANK_ACCOUNT_TYPES = ['checking','savings','time_deposit','participation','investment','other'] as const;
+export type BankAccountType = typeof BANK_ACCOUNT_TYPES[number];
+export const BANK_ACCOUNT_STATUSES = ['active','inactive','closed'] as const;
+export type BankAccountStatus = typeof BANK_ACCOUNT_STATUSES[number];
+export type BankInstitutionKind = 'bank'|'central_bank'|'postal_payment'|'market_infrastructure';
+export interface BankInstitutionView {
+  institutionCode:string;
+  ibanProviderCode:string;
+  officialName:string;
+  countryCode:'TR';
+  kind:BankInstitutionKind;
+  supportsCustomerAccounts:boolean;
+  iconKey:string;
+  iconSource:'local_lettermark';
+  sourceName:'TCMB Ödeme Sistemleri Katılımcıları';
+  sourceVersion:'2026';
+  sourceUrl:string;
+  sourceRetrievedAt:string;
+  status:'active';
+}
+export type IbanStructuralErrorCode =
+  | 'EMPTY'
+  | 'INVALID_CHARACTERS'
+  | 'COUNTRY_UNSUPPORTED'
+  | 'LENGTH_MISMATCH'
+  | 'CHECKSUM_INVALID'
+  | 'TR_PROVIDER_CODE_INVALID'
+  | 'TR_RESERVED_FIELD_INVALID'
+  | 'TR_INSTITUTION_NOT_FOUND';
+export interface IbanStructuralValidationView {
+  countryCode?:string;
+  expectedLength?:number;
+  actualLength:number;
+  structurallyValid:boolean;
+  countryFormatValid:boolean;
+  lengthValid:boolean;
+  checksumValid:boolean;
+  trProviderCode?:string;
+  trReservedFieldValid?:boolean;
+  institutionMatched:boolean;
+  institutionCode?:string;
+  institutionOfficialName?:string;
+  maskedIban?:string;
+  errorCodes:readonly IbanStructuralErrorCode[];
+  accountVerification:'not_performed';
+  ownershipVerification:'not_performed';
+}
+export interface ValidateIbanInput { iban:string; }
+export interface BankAccountView {
+  id:string;
+  ownerPersonId:string;
+  institutionCode:string;
+  institutionOfficialName:string;
+  institutionIconKey:string;
+  ibanMasked:string;
+  ibanLast4:string;
+  ibanCountryCode:string;
+  ibanProviderCode:string;
+  ibanStructurallyValid:true;
+  institutionMatched:true;
+  accountVerification:'not_performed';
+  ownershipVerification:'not_performed';
+  accountType:BankAccountType;
+  currency:string;
+  alias:string;
+  branch?:string;
+  ownershipBasisPoints:number;
+  status:BankAccountStatus;
+  privacy:RecordPrivacy;
+  createdAt:string;
+}
+export interface CreateBankAccountInput {
+  ownerPersonId:string;
+  institutionCode:string;
+  iban:string;
+  accountType:BankAccountType;
+  currency:string;
+  alias:string;
+  branch?:string;
+  ownershipBasisPoints:number;
+  status:BankAccountStatus;
+  privacy:RecordPrivacy;
+}
 export interface HealthRecordView { id:string; ownerPersonId:string; title:string; kind:'appointment'|'medication'|'diagnosis'|'vaccine'|'note'; privacy:RecordPrivacy; provider?:string; notes?:string; occurredAt:string; createdAt:string; }
 export interface CreateHealthRecordInput { ownerPersonId:string; title:string; kind:HealthRecordView['kind']; privacy:RecordPrivacy; provider?:string; notes?:string; occurredAt:string; }
 

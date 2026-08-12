@@ -14,6 +14,7 @@ import type {
   FinanceUnitOfWork,
   FinanceWriteScope
 } from '@ppt/application';
+import { validateIbanStructure } from '@ppt/application';
 import type { DomainEvent } from '@ppt/events';
 import {
   PlatformPolicyEnforcementError,
@@ -430,6 +431,90 @@ export class RepositoryBackedFinanceQueryPort implements FinanceQueryPort {
       })
     );
   }
+
+  public async listBankInstitutions(
+    context: FinanceApplicationContext
+  ): ReturnType<FinanceQueryPort['listBankInstitutions']> {
+    const intent: FinancePolicyIntent = {
+      action: 'read',
+      capability: 'finance.read',
+      resourceType: 'finance_record',
+      resourceId: '*',
+      purpose: 'finance'
+    };
+    return executeGoverned(this.dependencies, context, intent, (authorization, enforcementPoint) =>
+      this.dependencies.transactionExecutor.execute(context.correlationId, (transaction) => {
+        const governedInput = { context, intent, authorization, transaction };
+        const established = establishGovernedTransaction(enforcementPoint, governedInput);
+        if (!established.ok) return established;
+        const execution = governedRepositoryContext(context, transaction, authorization, intent);
+        const snapshot = loadAuthorizationSnapshot(this.dependencies, context, execution);
+        if (!snapshot.ok) return snapshot;
+        return this.dependencies.financeRepository.listBankInstitutions(execution);
+      })
+    );
+  }
+
+  public async listBankAccounts(
+    context: FinanceApplicationContext
+  ): ReturnType<FinanceQueryPort['listBankAccounts']> {
+    const intent: FinancePolicyIntent = {
+      action: 'read',
+      capability: 'finance.read',
+      resourceType: 'finance_record',
+      resourceId: '*',
+      purpose: 'finance'
+    };
+    return executeGoverned(this.dependencies, context, intent, (authorization, enforcementPoint) =>
+      this.dependencies.transactionExecutor.execute(context.correlationId, (transaction) => {
+        const governedInput = { context, intent, authorization, transaction };
+        const established = establishGovernedTransaction(enforcementPoint, governedInput);
+        if (!established.ok) return established;
+        const execution = governedRepositoryContext(context, transaction, authorization, intent);
+        const snapshot = loadAuthorizationSnapshot(this.dependencies, context, execution);
+        if (!snapshot.ok) return snapshot;
+        const accounts = this.dependencies.financeRepository.listBankAccounts(execution);
+        return accounts.ok
+          ? {
+              ok: true,
+              value: accounts.value.filter((account) => legacyAllowed(this.#authorization, snapshot.value, {
+                action: 'read',
+                resourceType: 'finance_record',
+                resourceId: account.id,
+                ownerPersonId: account.ownerPersonId,
+                occurredAt: execution.occurredAt,
+                privacy: account.privacy
+              }))
+            }
+          : accounts;
+      })
+    );
+  }
+
+  public async validateIban(
+    context: FinanceApplicationContext,
+    iban: string
+  ): ReturnType<FinanceQueryPort['validateIban']> {
+    const intent: FinancePolicyIntent = {
+      action: 'read',
+      capability: 'finance.read',
+      resourceType: 'finance_record',
+      resourceId: '*',
+      purpose: 'finance'
+    };
+    return executeGoverned(this.dependencies, context, intent, (authorization, enforcementPoint) =>
+      this.dependencies.transactionExecutor.execute(context.correlationId, (transaction) => {
+        const governedInput = { context, intent, authorization, transaction };
+        const established = establishGovernedTransaction(enforcementPoint, governedInput);
+        if (!established.ok) return established;
+        const execution = governedRepositoryContext(context, transaction, authorization, intent);
+        const snapshot = loadAuthorizationSnapshot(this.dependencies, context, execution);
+        if (!snapshot.ok) return snapshot;
+        const institutions = this.dependencies.financeRepository.listBankInstitutions(execution);
+        return institutions.ok ? { ok: true, value: validateIbanStructure(iban, institutions.value) } : institutions;
+      })
+    );
+  }
 }
 
 class GovernedFinanceWriteScope implements FinanceWriteScope {
@@ -454,6 +539,12 @@ class GovernedFinanceWriteScope implements FinanceWriteScope {
     return this.dependencies.financeRepository.findRecord(this.execution, id);
   }
 
+  public findBankInstitution(
+    institutionCode: string
+  ): ReturnType<FinanceWriteScope['findBankInstitution']> {
+    return this.dependencies.financeRepository.findBankInstitution(this.execution, institutionCode);
+  }
+
   public authorize(
     input: Parameters<FinanceWriteScope['authorize']>[0]
   ): ReturnType<FinanceWriteScope['authorize']> {
@@ -473,6 +564,10 @@ class GovernedFinanceWriteScope implements FinanceWriteScope {
 
   public insertValuation(input: Parameters<FinanceWriteScope['insertValuation']>[0]) {
     return this.dependencies.financeRepository.insertValuation(this.execution, input);
+  }
+
+  public insertBankAccount(input: Parameters<FinanceWriteScope['insertBankAccount']>[0]) {
+    return this.dependencies.financeRepository.insertBankAccount(this.execution, input);
   }
 
   public appendAudit(input: Parameters<FinanceWriteScope['appendAudit']>[0]) {

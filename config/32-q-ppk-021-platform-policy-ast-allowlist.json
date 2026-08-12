@@ -59,7 +59,7 @@
     "SQL_CALL": 56,
     "SQL_CONSTRUCTOR": 2,
     "SQL_IMPORT": 2,
-    "USE_CASE_COMPOSITION": 263
+    "USE_CASE_COMPOSITION": 267
   },
   "allowedSurfaceKeys": [
     "CRYPTO_GLOBAL|apps/desktop/src/main/preload.ts|randomUUID",
@@ -358,6 +358,7 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|CreateArchiveRetentionPolicyUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|CreateAutomationRuleUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|CreateBackupArtifactPathUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|CreateBankAccountUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|CreateDataRetentionPolicyUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|CreateFamilyBranchUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|CreateFamilyHealthHistoryUseCase",
@@ -439,6 +440,8 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ListAuditEntriesUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ListAutomationRulesUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ListAutomationRunsUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ListBankAccountsUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ListBankInstitutionsUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ListBackgroundTasksUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ListBackupArtifactsUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ListBackupCleanRewriteRunsUseCase",
@@ -572,6 +575,7 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|UpsertMaintenancePolicyUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|UpsertObjectPermissionUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|UpsertSensitiveDataConsentUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ValidateIbanUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|VerifyAuditIntegrityUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|VerifyBackupDatabaseIntegrityUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|VerifyExternalBackupDestructionEvidenceUseCase",

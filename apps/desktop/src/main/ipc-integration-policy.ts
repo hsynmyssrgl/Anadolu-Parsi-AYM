@@ -1,3 +1,11 @@
+import {
+  BANK_ACCOUNT_INPUT_KEYS,
+  FINANCE_RECORD_INPUT_KEYS,
+  FINANCE_VALUATION_INPUT_KEYS,
+  containsLikelyFullPan,
+  isProhibitedBankingSecretField
+} from '@ppt/application';
+
 export interface IpcIntegrationPolicyDecision {
   readonly accepted: boolean;
   readonly reason?: string;
@@ -93,6 +101,91 @@ const aiConsentPurposes = new Set(['search', 'summary', 'recommendation', 'class
 const aiConsentResourceTypes = new Set(['event', 'archive_item']);
 const sensitiveCategories = new Set(['child', 'health', 'finance', 'location']);
 const sensitivePurposes = new Set(['sensitive_processing', 'external_export']);
+const bankAccountTypes = new Set(['checking','savings','time_deposit','participation','investment','other']);
+const bankAccountStatuses = new Set(['active','inactive','closed']);
+const recordPrivacyValues = new Set(['private','selected_members','family']);
+const financeRecordKinds = new Set(['asset','debt','income','expense']);
+
+const containsProhibitedBankingSecret = (
+  value: Record<string, unknown>,
+  panSearchFields: readonly string[]
+): IpcIntegrationPolicyDecision | undefined => {
+  if (Object.keys(value).some(isProhibitedBankingSecretField)) {
+    return rejected('BANKING_SECRET_FIELD_PROHIBITED', '$[0]');
+  }
+  if (panSearchFields.some((key) => containsLikelyFullPan(value[key]))) {
+    return rejected('BANKING_SECRET_VALUE_PROHIBITED', '$[0]');
+  }
+  return undefined;
+};
+
+const ibanValidationInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => exactObject(
+  args,
+  ['iban'],
+  (value) => boundedString(value.iban, 64)
+);
+
+const bankAccountInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => {
+  if (args.length !== 1) return rejected('ARGUMENT_COUNT_MISMATCH');
+  const value = args[0];
+  if (!isObject(value)) return rejected('OBJECT_ARGUMENT_REQUIRED', '$[0]');
+  const secretRejection = containsProhibitedBankingSecret(value, ['alias', 'branch']);
+  if (secretRejection) return secretRejection;
+  if (!hasOnlyKeys(value, BANK_ACCOUNT_INPUT_KEYS)) return rejected('UNKNOWN_OBJECT_FIELD', '$[0]');
+  return boundedString(value.ownerPersonId, 128)
+    && typeof value.institutionCode === 'string' && /^\d{4}$/u.test(value.institutionCode)
+    && boundedString(value.iban, 64)
+    && bankAccountTypes.has(String(value.accountType))
+    && typeof value.currency === 'string' && /^[A-Za-z]{3}$/u.test(value.currency)
+    && boundedString(value.alias, 100)
+    && optionalBoundedString(value.branch, 120)
+    && typeof value.ownershipBasisPoints === 'number'
+    && Number.isInteger(value.ownershipBasisPoints)
+    && value.ownershipBasisPoints >= 1
+    && value.ownershipBasisPoints <= 10_000
+    && bankAccountStatuses.has(String(value.status))
+    && recordPrivacyValues.has(String(value.privacy))
+    ? accepted()
+    : rejected('BANK_ACCOUNT_ARGUMENT_INVALID', '$[0]');
+};
+
+const financeRecordInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => {
+  if (args.length !== 1) return rejected('ARGUMENT_COUNT_MISMATCH');
+  const value = args[0];
+  if (!isObject(value)) return rejected('OBJECT_ARGUMENT_REQUIRED', '$[0]');
+  const secretRejection = containsProhibitedBankingSecret(value, ['title', 'notes', 'symbol']);
+  if (secretRejection) return secretRejection;
+  if (!hasOnlyKeys(value, FINANCE_RECORD_INPUT_KEYS)) return rejected('UNKNOWN_OBJECT_FIELD', '$[0]');
+  return boundedString(value.ownerPersonId, 128)
+    && boundedString(value.title, 240)
+    && financeRecordKinds.has(String(value.kind))
+    && typeof value.amount === 'number' && Number.isFinite(value.amount) && value.amount >= 0
+    && typeof value.currency === 'string' && value.currency.length <= 16
+    && recordPrivacyValues.has(String(value.privacy))
+    && optionalBoundedString(value.notes, 4_000)
+    && boundedString(value.occurredAt, 64)
+    && optionalBoundedString(value.dueAt, 64)
+    && (value.remainingPrincipal === undefined || (typeof value.remainingPrincipal === 'number' && Number.isFinite(value.remainingPrincipal) && value.remainingPrincipal >= 0))
+    && optionalBoundedString(value.symbol, 32)
+    ? accepted()
+    : rejected('FINANCE_RECORD_ARGUMENT_INVALID', '$[0]');
+};
+
+const financeValuationInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => {
+  if (args.length !== 1) return rejected('ARGUMENT_COUNT_MISMATCH');
+  const value = args[0];
+  if (!isObject(value)) return rejected('OBJECT_ARGUMENT_REQUIRED', '$[0]');
+  const secretRejection = containsProhibitedBankingSecret(value, ['provider']);
+  if (secretRejection) return secretRejection;
+  if (!hasOnlyKeys(value, FINANCE_VALUATION_INPUT_KEYS)) return rejected('UNKNOWN_OBJECT_FIELD', '$[0]');
+  return boundedString(value.financeRecordId, 128)
+    && boundedString(value.valueDate, 64)
+    && typeof value.unitPrice === 'number' && Number.isFinite(value.unitPrice) && value.unitPrice >= 0
+    && typeof value.quantity === 'number' && Number.isFinite(value.quantity) && value.quantity >= 0
+    && optionalBoundedString(value.provider, 240)
+    ? accepted()
+    : rejected('FINANCE_VALUATION_ARGUMENT_INVALID', '$[0]');
+};
 
 const standardAiConsentInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => exactObject(
   args,
@@ -142,6 +235,19 @@ const optionalWindowsHelloFallback = (value: unknown): boolean => {
 
 export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unknown[]): IpcIntegrationPolicyDecision => {
   switch (channel) {
+    case 'finance:list':
+    case 'finance:listValuations':
+    case 'finance:listBankInstitutions':
+    case 'finance:listBankAccounts':
+      return zeroArguments(args);
+    case 'finance:create':
+      return financeRecordInput(args);
+    case 'finance:createValuation':
+      return financeValuationInput(args);
+    case 'finance:validateIban':
+      return ibanValidationInput(args);
+    case 'finance:createBankAccount':
+      return bankAccountInput(args);
     case 'ai:listConsents':
       return zeroArguments(args);
     case 'ai:upsertConsent':

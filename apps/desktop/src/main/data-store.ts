@@ -148,6 +148,10 @@ import {
   CreateFinanceRecordUseCase,
   ListFinanceValuationsUseCase,
   CreateFinanceValuationUseCase,
+  ListBankInstitutionsUseCase,
+  ListBankAccountsUseCase,
+  ValidateIbanUseCase,
+  CreateBankAccountUseCase,
   ListArchiveItemsUseCase,
   SearchArchiveItemsUseCase,
   PrepareArchiveOpenUseCase,
@@ -373,7 +377,7 @@ import type {
   FamilyMemberView,
   FamilyNotificationView,
   FamilyRelationView,
-  ArchiveItemView, AuthStateView, CreateArchiveItemInput, CreateFamilyRelationInput, LoginInput, SetupAdminInput, ChangePasswordInput, AuditEntryView, TwoFactorSetupView, EnableTwoFactorInput, DisableTwoFactorInput, TrustCurrentDeviceInput, ReauthorizeCurrentDeviceInput, ReauthorizeCurrentDeviceResultView, SecurityEventReceiptArchiveItemView, SecurityEventReceiptVerificationView, TrustedDeviceView, FamilyAccountView, FamilyInvitationView, FamilyInvitationInspectionView, CreateFamilyInvitationInput, InspectFamilyInvitationInput, ResendFamilyInvitationInput, AcceptFamilyInvitationInput, UpdateEventParticipantsInput, UpdateEventInvitationInput, UpdateEventNotesInput, UpdateFamilyEventInput, SetFamilyEventArchivedInput, AcknowledgeFamilyNotificationInput, ObjectPermissionView, UpsertObjectPermissionInput, AuthorizationPurpose, AuthorizationContextWorkspaceView, UpdateFamilyAccountInput, FamilyRole, FinanceRecordView, CreateFinanceRecordInput, HealthRecordView, CreateHealthRecordInput, MedicationPlanView, CreateMedicationPlanInput, FamilyHealthHistoryView, CreateFamilyHealthHistoryInput, FinanceValuationView, CreateFinanceValuationInput, LifeRecordView, CreateLifeRecordInput, AutomationRuleView, CreateAutomationRuleInput, ReportSummaryView, GenealogyInsightView, ArchiveCategoryView, ArchiveClassificationView, CreateArchiveCategoryInput, UpdateArchiveClassificationInput, AiConsentView, UpsertAiConsentInput, AiAccessPreviewView, SensitiveDataProfileView, UpsertSensitiveDataConsentInput, SensitiveExportPreviewInput, SensitiveExportPreviewView, AutomationRunView, RunAutomationInput, DigitalLegacyPlanView, UpsertDigitalLegacyPlanInput, LegacyGrantView, UpsertLegacyGrantInput, ExecuteLegacyPlanInput, LegacyApprovalView, ApproveLegacyExecutionInput, CancelLegacyExecutionInput, ArchiveSearchInput, ArchiveVersionView, ArchiveRetentionPolicyView, CreateArchiveRetentionPolicyInput, AssignArchiveRetentionPolicyInput, ArchiveRetentionStatusView, SystemHealthView, BackupTargetView, UpsertBackupTargetInput, BackupRunView, BackupRunResultView, PerformanceSampleView, DiagnosticEntryView, MaintenanceResultView, BackupSchedulerResultView, AdaptiveResourceStateView, PerformanceTrendView, BackgroundTaskView, QueuedTaskView, EnqueueTaskInput, TaskQueueCycleResultView, MaintenancePolicyView, UpsertMaintenancePolicyInput, MaintenanceCycleResultView, HealthNotificationView, DiagnosticReportView, DiagnosticFilterInput, DiagnosticReportHistoryView, SystemHealthScoreView, SystemHealthHistoryView, SystemHealthTrendView, DiagnosticArchiveView, DiagnosticReportVerificationView, DiagnosticArchiveVerificationView, DiagnosticReportContentView, PerformanceAnomalyView, MaintenanceRecommendationView, DiagnosticReportComparisonView, DiagnosticArchiveContentView, DiagnosticArchiveSearchInput, DiagnosticArchiveExportView, MaintenanceHistoryView, MaintenanceHistoryFilterInput, MaintenanceHistoryExportView, UnifiedDiagnosticArchiveSearchView, SystemHealthStatus, ExportArtifactView, ExportArtifactVerificationView, BackupInspectionView, AuditIntegrityView, BackupPropagationRunView, BackupCleanRewritePolicyView, BackupCleanRewriteStatusView, BackupCleanRewriteRunStatus, BackupCleanRewriteRunView, BackupCleanRewriteTrigger, BackupCleanRewriteState, BackupCleanRewriteOutcome, UpdateBackupCleanRewritePolicyInput, BackupQuarantinePolicyView, BackupQuarantineBatchView, BackupQuarantineDestructionResultView, UpdateBackupQuarantinePolicyInput, SetBackupQuarantineLegalHoldInput, DestroyBackupQuarantineBatchInput, ExternalBackupCopyView, ExternalBackupInventorySummaryView, RegisterExternalBackupCopyInput, ReviewExternalBackupCopyInput, SetExternalBackupCopyLegalHoldInput, AttestExternalBackupCopyDestroyedInput, ExternalBackupEvidenceIssuerView, ExternalBackupEvidenceIssuerRotationView, ExternalBackupEvidenceRevocationListView, ExternalBackupRevocationEndpointView, ExternalBackupDestructionEvidenceView, RegisterExternalBackupEvidenceIssuerInput, RotateExternalBackupEvidenceIssuerInput, RevokeExternalBackupEvidenceIssuerInput, ApplyExternalBackupEvidenceRevocationListInput, UpsertExternalBackupRevocationEndpointInput, VerifyExternalBackupDestructionEvidenceInput, FamilyDataImportPreviewView, FamilyDataImportBatchView, ApplyFamilyDataImportInput, RollbackFamilyDataImportInput, GenealogyTreePageInput, GenealogyTreePageView, TimelinePageInput, TimelinePageView, ArchivePageInput, ArchivePageView, PersonCatalogPageInput, PersonCatalogPageView, EventCatalogPageInput, EventCatalogPageView, EntityCatalogLookupInput, EntityCatalogLookupView, DataRetentionPolicyView, DataLifecycleRecordView, CreateDataRetentionPolicyInput, ArchiveDataResourceInput, RestoreDataResourceInput, RequestDataPurgeInput, CancelDataPurgeInput, ExecuteDataPurgeInput, SetDataLegalHoldInput
+  ArchiveItemView, AuthStateView, CreateArchiveItemInput, CreateFamilyRelationInput, LoginInput, SetupAdminInput, ChangePasswordInput, AuditEntryView, TwoFactorSetupView, EnableTwoFactorInput, DisableTwoFactorInput, TrustCurrentDeviceInput, ReauthorizeCurrentDeviceInput, ReauthorizeCurrentDeviceResultView, SecurityEventReceiptArchiveItemView, SecurityEventReceiptVerificationView, TrustedDeviceView, FamilyAccountView, FamilyInvitationView, FamilyInvitationInspectionView, CreateFamilyInvitationInput, InspectFamilyInvitationInput, ResendFamilyInvitationInput, AcceptFamilyInvitationInput, UpdateEventParticipantsInput, UpdateEventInvitationInput, UpdateEventNotesInput, UpdateFamilyEventInput, SetFamilyEventArchivedInput, AcknowledgeFamilyNotificationInput, ObjectPermissionView, UpsertObjectPermissionInput, AuthorizationPurpose, AuthorizationContextWorkspaceView, UpdateFamilyAccountInput, FamilyRole, FinanceRecordView, CreateFinanceRecordInput, BankInstitutionView, BankAccountView, CreateBankAccountInput, IbanStructuralValidationView, ValidateIbanInput, HealthRecordView, CreateHealthRecordInput, MedicationPlanView, CreateMedicationPlanInput, FamilyHealthHistoryView, CreateFamilyHealthHistoryInput, FinanceValuationView, CreateFinanceValuationInput, LifeRecordView, CreateLifeRecordInput, AutomationRuleView, CreateAutomationRuleInput, ReportSummaryView, GenealogyInsightView, ArchiveCategoryView, ArchiveClassificationView, CreateArchiveCategoryInput, UpdateArchiveClassificationInput, AiConsentView, UpsertAiConsentInput, AiAccessPreviewView, SensitiveDataProfileView, UpsertSensitiveDataConsentInput, SensitiveExportPreviewInput, SensitiveExportPreviewView, AutomationRunView, RunAutomationInput, DigitalLegacyPlanView, UpsertDigitalLegacyPlanInput, LegacyGrantView, UpsertLegacyGrantInput, ExecuteLegacyPlanInput, LegacyApprovalView, ApproveLegacyExecutionInput, CancelLegacyExecutionInput, ArchiveSearchInput, ArchiveVersionView, ArchiveRetentionPolicyView, CreateArchiveRetentionPolicyInput, AssignArchiveRetentionPolicyInput, ArchiveRetentionStatusView, SystemHealthView, BackupTargetView, UpsertBackupTargetInput, BackupRunView, BackupRunResultView, PerformanceSampleView, DiagnosticEntryView, MaintenanceResultView, BackupSchedulerResultView, AdaptiveResourceStateView, PerformanceTrendView, BackgroundTaskView, QueuedTaskView, EnqueueTaskInput, TaskQueueCycleResultView, MaintenancePolicyView, UpsertMaintenancePolicyInput, MaintenanceCycleResultView, HealthNotificationView, DiagnosticReportView, DiagnosticFilterInput, DiagnosticReportHistoryView, SystemHealthScoreView, SystemHealthHistoryView, SystemHealthTrendView, DiagnosticArchiveView, DiagnosticReportVerificationView, DiagnosticArchiveVerificationView, DiagnosticReportContentView, PerformanceAnomalyView, MaintenanceRecommendationView, DiagnosticReportComparisonView, DiagnosticArchiveContentView, DiagnosticArchiveSearchInput, DiagnosticArchiveExportView, MaintenanceHistoryView, MaintenanceHistoryFilterInput, MaintenanceHistoryExportView, UnifiedDiagnosticArchiveSearchView, SystemHealthStatus, ExportArtifactView, ExportArtifactVerificationView, BackupInspectionView, AuditIntegrityView, BackupPropagationRunView, BackupCleanRewritePolicyView, BackupCleanRewriteStatusView, BackupCleanRewriteRunStatus, BackupCleanRewriteRunView, BackupCleanRewriteTrigger, BackupCleanRewriteState, BackupCleanRewriteOutcome, UpdateBackupCleanRewritePolicyInput, BackupQuarantinePolicyView, BackupQuarantineBatchView, BackupQuarantineDestructionResultView, UpdateBackupQuarantinePolicyInput, SetBackupQuarantineLegalHoldInput, DestroyBackupQuarantineBatchInput, ExternalBackupCopyView, ExternalBackupInventorySummaryView, RegisterExternalBackupCopyInput, ReviewExternalBackupCopyInput, SetExternalBackupCopyLegalHoldInput, AttestExternalBackupCopyDestroyedInput, ExternalBackupEvidenceIssuerView, ExternalBackupEvidenceIssuerRotationView, ExternalBackupEvidenceRevocationListView, ExternalBackupRevocationEndpointView, ExternalBackupDestructionEvidenceView, RegisterExternalBackupEvidenceIssuerInput, RotateExternalBackupEvidenceIssuerInput, RevokeExternalBackupEvidenceIssuerInput, ApplyExternalBackupEvidenceRevocationListInput, UpsertExternalBackupRevocationEndpointInput, VerifyExternalBackupDestructionEvidenceInput, FamilyDataImportPreviewView, FamilyDataImportBatchView, ApplyFamilyDataImportInput, RollbackFamilyDataImportInput, GenealogyTreePageInput, GenealogyTreePageView, TimelinePageInput, TimelinePageView, ArchivePageInput, ArchivePageView, PersonCatalogPageInput, PersonCatalogPageView, EventCatalogPageInput, EventCatalogPageView, EntityCatalogLookupInput, EntityCatalogLookupView, DataRetentionPolicyView, DataLifecycleRecordView, CreateDataRetentionPolicyInput, ArchiveDataResourceInput, RestoreDataResourceInput, RequestDataPurgeInput, CancelDataPurgeInput, ExecuteDataPurgeInput, SetDataLegalHoldInput
 } from '@ppt/domain';
 import type {
   EnrollWindowsHelloInput,
@@ -768,6 +772,10 @@ export class FamilyDataStore {
   readonly #createFinanceRecordUseCase: CreateFinanceRecordUseCase;
   readonly #listFinanceValuationsUseCase: ListFinanceValuationsUseCase;
   readonly #createFinanceValuationUseCase: CreateFinanceValuationUseCase;
+  readonly #listBankInstitutionsUseCase: ListBankInstitutionsUseCase;
+  readonly #listBankAccountsUseCase: ListBankAccountsUseCase;
+  readonly #validateIbanUseCase: ValidateIbanUseCase;
+  readonly #createBankAccountUseCase: CreateBankAccountUseCase;
   readonly #listArchiveItemsUseCase: ListArchiveItemsUseCase;
   readonly #searchArchiveItemsUseCase: SearchArchiveItemsUseCase;
   readonly #prepareArchiveOpenUseCase: PrepareArchiveOpenUseCase;
@@ -1590,6 +1598,10 @@ export class FamilyDataStore {
     this.#createFinanceRecordUseCase = new CreateFinanceRecordUseCase(financeUnitOfWork);
     this.#listFinanceValuationsUseCase = new ListFinanceValuationsUseCase(financeQuery);
     this.#createFinanceValuationUseCase = new CreateFinanceValuationUseCase(financeUnitOfWork);
+    this.#listBankInstitutionsUseCase = new ListBankInstitutionsUseCase(financeQuery);
+    this.#listBankAccountsUseCase = new ListBankAccountsUseCase(financeQuery);
+    this.#validateIbanUseCase = new ValidateIbanUseCase(financeQuery);
+    this.#createBankAccountUseCase = new CreateBankAccountUseCase(financeUnitOfWork);
     const archivePolicyEnforcementPointResolver = productionArchivePolicy === undefined
       ? options.archivePolicyEnforcementPointResolver ?? failClosedArchivePolicyEnforcementPointResolver
       : createArchiveProductionPolicyEnforcementPointResolver({
@@ -3285,6 +3297,41 @@ export class FamilyDataStore {
     const result=await this.#createFinanceRecordUseCase.execute({context:this.#financeApplicationContext('finance-create'),command:input,identifiers:{recordId:randomUUID(),auditId:randomUUID(),outboxEventId:asEventId(randomUUID())}});
     if(!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
     return this.listFinanceRecords();
+  }
+
+  public async listBankInstitutions(): Promise<BankInstitutionView[]> {
+    const result = await this.#listBankInstitutionsUseCase.execute(this.#financeApplicationContext('bank-institution-list'));
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return [...result.value];
+  }
+
+  public async listBankAccounts(): Promise<BankAccountView[]> {
+    const result = await this.#listBankAccountsUseCase.execute(this.#financeApplicationContext('bank-account-list'));
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return [...result.value];
+  }
+
+  public async validateIban(input: ValidateIbanInput): Promise<IbanStructuralValidationView> {
+    const result = await this.#validateIbanUseCase.execute({
+      context: this.#financeApplicationContext('iban-validate'),
+      iban: input.iban
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async createBankAccount(input: CreateBankAccountInput): Promise<BankAccountView[]> {
+    const result = await this.#createBankAccountUseCase.execute({
+      context: this.#financeApplicationContext('bank-account-create'),
+      command: input,
+      identifiers: {
+        accountId: `bank-account-${randomUUID()}`,
+        auditId: randomUUID(),
+        outboxEventId: asEventId(randomUUID())
+      }
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return this.listBankAccounts();
   }
 
   public async listHealthRecords(): Promise<HealthRecordView[]> {
