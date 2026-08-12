@@ -7,7 +7,7 @@ const root = resolve(process.cwd());
 if (root !== resolve('C:\\PPT\\AYM', '06_KOD', 'app')) throw new Error(`Unsafe source root: ${root}`);
 const external = process.argv.includes('--external');
 const allowPlanPending = process.argv.includes('--allow-plan-pending');
-const canonicalLibraryRoot = 'D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu ParsÄ± Aile YaÅŸam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\33-F_Home_Inventory_Utility_Belongings';
+const canonicalLibraryRoot = 'D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\33-F_Home_Inventory_Utility_Belongings';
 const canonicalLocalCheckpointRoot = 'C:\\PPT\\AYM\\09_ARSIV\\KAYNAK_AGACI\\checkpoints\\33-F_Home_Inventory_Utility_Belongings';
 const paths = Object.freeze({
   receipt: 'artifacts/checkpoints/33-F_LIBRARY_RECEIPT.json',

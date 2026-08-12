@@ -456,4 +456,4 @@ for (const name of [
   const external = await readFile(resolve(externalDeliveryRoot, immutableFolder, name));
   if (local.length !== external.length || sha256(local) !== sha256(external)) throw new Error(`Delivery local/D: backup mismatch: ${name}`);
 }
-console.log(`Current delivery report: PASS (${contract.requiredFields.length} required fields; 30-Z through 31-E plus 33-D and 33-E receipts PASS; live current-source external protection PASS on D:; delivery backup ${reportSha256}; new Build false).`);
+console.log(`Current delivery report: PASS (${contract.requiredFields.length} required fields; 30-Z through 31-E plus 33-D, 33-E and 33-F receipts PASS; live current-source external protection PASS on D:; delivery backup ${reportSha256}; new Build false).`);

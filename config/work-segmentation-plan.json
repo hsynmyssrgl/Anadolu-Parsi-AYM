@@ -10,8 +10,8 @@
     {
       "id": "29-A",
       "title": "Universal fail-closed rule enforcement lock",
-      "status": "COMPLETED",
-      "validationStatus": "PASS",
+      "status": "IN_PROGRESS",
+      "validationStatus": "PENDING",
       "localEvidence": [
         "artifacts/validation/canonical-rule-registry-gate.json",
         "artifacts/validation/user-decision-ledger-gate.json",
@@ -2196,19 +2196,10 @@
         "docs/audit/33-F_HOME_INVENTORY_UTILITY_BELONGINGS_UST_KAPANIS.md",
         "artifacts/validation/33-F-home-inventory-utility-belongings-boundary.json",
         "artifacts/validation/33-F-home-inventory-utility-belongings-contract.json",
-        "artifacts/validation/33-F-home-inventory-utility-belongings-runtime.json",
-        "artifacts/checkpoints/33-F_LIBRARY_RECEIPT.json",
-        "artifacts/validation/33-F_LIBRARY_READBACK_VERIFICATION.json",
-        "artifacts/validation/33-F_RECEIPT_READBACK_VERIFICATION.json",
-        "artifacts/validation/33-F_RECEIPT_READBACK_PERSISTENCE_VERIFICATION.json",
-        "artifacts/validation/33-F_LIBRARY_FINAL_INVENTORY_VERIFICATION.json",
-        "artifacts/checkpoints/33-F_COMPLETION_RECORD.json",
-        "artifacts/validation/33-F_COMPLETION_TRANSITION_VALIDATION.json",
-        "artifacts/validation/33-F_LIBRARY_CLOSURE_INVENTORY_VERIFICATION.json"
+        "artifacts/validation/33-F-home-inventory-utility-belongings-runtime.json"
       ],
-      "persistentReceiptStatus": "PASS",
-      "completionTransitionStatus": "PASS",
-      "persistentReceiptPath": "artifacts/checkpoints/33-F_LIBRARY_RECEIPT.json"
+      "persistentReceiptStatus": "PENDING",
+      "completionTransitionStatus": "PENDING"
     },
     {
       "id": "33-G",
@@ -2223,6 +2214,6 @@
   ],
   "recoveryAuthority": "NEW_CHAT_HANDOFF_Bronze_04.08.2026.29.md",
   "recoveryReason": "29-D_FAILED_POSTFLIGHT_EXIT_CODE_1_SPLIT_PER_PR-171",
-  "updatedAt": "2026-08-12T21:44:43.818Z",
-  "segmentationNote": "33-F is immutable COMPLETED/PASS with exact D: USB hash/size readback. 33-G remains PENDING until the next governed multi-requirement slice is selected."
+  "updatedAt": "2026-08-12T21:50:00.000Z",
+  "segmentationNote": "33-F remains the sole active local-PASS slice while its persistent receipt is re-sealed at the canonical Unicode Library path. 33-G remains PENDING."
 }

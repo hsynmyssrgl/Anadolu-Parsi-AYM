@@ -17,7 +17,7 @@
   "persistentLibraryReleasePath": "/Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi/Bronze 04.08.2026.29",
   "preflightStatus": "PASS",
   "postflightStatus": "PENDING",
-  "libraryUploadStatus": "33-F_COMPLETED_RECEIPT_PASS",
+  "libraryUploadStatus": "33-F_LOCAL_PASS_AWAITING_LIBRARY_RECEIPT",
   "conversationCapacity": {
     "method": "platform_actual_or_unavailable",
     "actualUsedPercent": null,
@@ -32,8 +32,8 @@
     "canonicalPR172Unchanged": true,
     "recordedAt": "2026-08-06T07:45:38.3898625+03:00"
   },
-  "nextOfficialTask": "AUTO_PRIORITY_SELECTION_AFTER_33-F_PERSISTENT_RECEIPT",
-  "activeMicroStep": null,
+  "nextOfficialTask": "33-F governed home spaces, utility consumption, belongings warranty and service workflow",
+  "activeMicroStep": "33-F",
   "supersessions": [
     {
       "id": "GOV-SUP-29-D3-001",
@@ -677,7 +677,7 @@
       "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT_FULL_AUTO_SELECTION_AUTHORIZED"
     }
   ],
-  "updatedAt": "2026-08-12T21:44:43.818Z",
+  "updatedAt": "2026-08-12T21:50:00.000Z",
   "externalLibraryAuthority": {
     "step": "30-Z",
     "status": "PASS",
@@ -862,15 +862,6 @@
     "path": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\33-E_B5_Category_Life_Home_Vehicle",
     "localCheckpointPath": "C:\\PPT\\AYM\\09_ARSIV\\KAYNAK_AGACI\\checkpoints\\33-E_B5_Category_Life_Home_Vehicle",
     "receipt": "artifacts/checkpoints/33-E_LIBRARY_RECEIPT.json",
-    "focusedCheckpointOnly": true
-  },
-  "externalLibraryAuthority33F": {
-    "step": "33-F",
-    "status": "PASS",
-    "storageBackend": "EXTERNAL_USB_D_DRIVE",
-    "path": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu ParsÄ± Aile YaÅŸam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\33-F_Home_Inventory_Utility_Belongings",
-    "localCheckpointPath": "C:\\PPT\\AYM\\09_ARSIV\\KAYNAK_AGACI\\checkpoints\\33-F_Home_Inventory_Utility_Belongings",
-    "receipt": "artifacts/checkpoints/33-F_LIBRARY_RECEIPT.json",
     "focusedCheckpointOnly": true
   }
 }

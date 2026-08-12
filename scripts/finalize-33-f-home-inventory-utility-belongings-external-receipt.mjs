@@ -9,7 +9,7 @@ if (root !== resolve('C:\\PPT\\AYM', '06_KOD', 'app')) throw new Error(`Unsafe s
 const release = 'Bronze 04.08.2026.29';
 const stepId = '33-F';
 const localPackageRoot = 'C:\\PPT\\AYM\\09_ARSIV\\KAYNAK_AGACI\\checkpoints\\33-F_Home_Inventory_Utility_Belongings';
-const libraryRoot = 'D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu ParsÄ± Aile YaÅŸam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\33-F_Home_Inventory_Utility_Belongings';
+const libraryRoot = 'D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\checkpoints\\33-F_Home_Inventory_Utility_Belongings';
 const truth = 'Bu makbuz yalnız 33-F EXT-030 ve EXT-032 kapsamındaki manuel ev alanı, sayaç-tüketim, eşya, garanti ve servis geçmişini kapatır; akıllı sayaç veya garanti sicili sorgusu, sağlayıcı iletişimi, OCR, ödeme yürütme, belge içeriği gösterimi veya ağ çıkışı iddiası değildir.';
 
 const supportingPayloadPaths = Object.freeze([
