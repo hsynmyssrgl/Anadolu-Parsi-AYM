@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 55,
+  "decisionCount": 56,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1341,6 +1341,35 @@
         "docs/security/PPK-020_CROSS_PLATFORM_POLICY_CONFORMANCE_THREAT_MODEL.md",
         "docs/audit/32-P_PPK-020_COK_PLATFORM_POLICY_CONFORMANCE_UST_KAPANIS.md",
         "config/32-p-ppk-020-policy-conformance-target-inventory.json"
+      ]
+    },
+    {
+      "id": "DEC-202",
+      "date": "2026-08-12",
+      "acceptedAt": "2026-08-12",
+      "title": "PPK-021 fail-closed TypeScript AST platform policy build gate",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: tüm işleri full auto olarak sen yap",
+      "document": "docs/decisions/DEC-202-ppk-021-platform-policy-ast-fail-gate.md",
+      "requirements": ["PPK-021"],
+      "codeAreas": [
+        "scripts/lib/platform-policy-ast-scanner.mjs",
+        "scripts/verify-platform-policy-ast-gate.mjs",
+        "config/32-q-ppk-021-platform-policy-ast-allowlist.json",
+        "packages/platform-policy/src/platform-policy-ast-gate-policy.ts",
+        "packages/domain/src/platform-policy-ast-gate.ts",
+        "packages/application/src/platform-policy-ast-gate-use-cases.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/ipc-read-sharing.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/renderer/App.tsx"
+      ],
+      "evidence": [
+        "artifacts/validation/32-Q-ppk-021-platform-policy-ast-gate-contract.json",
+        "artifacts/validation/32-Q-ppk-021-platform-policy-ast-gate-runtime.json",
+        "docs/security/PPK-021_PLATFORM_POLICY_AST_FAIL_GATE_THREAT_MODEL.md",
+        "docs/audit/32-Q_PPK-021_PLATFORM_POLICY_AST_FAIL_GATE_UST_KAPANIS.md",
+        "config/32-q-ppk-021-platform-policy-ast-gate-inventory.json"
       ]
     }
   ]

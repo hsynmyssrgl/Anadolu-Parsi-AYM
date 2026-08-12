@@ -28,6 +28,10 @@ Bir çelişki olduğunda aşağıdaki sıra uygulanır:
 Eski kararlar silinmez; tarihsel kanıt olarak korunur. Ancak aktif ürün davranışını
 belirleyemez. Çelişki sessizce birleştirilmez; değişiklik kaydına işlenir.
 
+## DEC-202 — PPK-021 AST tabanlı fail-closed Platform Policy build kapısı
+
+32-Q ile üretim TypeScript/JSX ağacındaki doğrudan SQL/SQLite, concrete repository/database, kripto, network, rol yetkilendirmesi ve use-case composition yüzeyleri `@babel/parser` AST üzerinde exact dosya+sembol manifestine bağlanır. Alias, destructuring, computed property, dynamic import, require ve `Reflect.construct` kaçışları taranır; parse hatası, wildcard, yeni veya stale yüzey build'i durdurur. Direct role authorization sıfır istisnalıdır; renderer rol koşulu yalnız presentation'dır. Gate runtime PEP/receipt/policy yerine geçmez. Yeni migration, veri taşıma, backfill, cutover veya SQLite/vault sahiplik değişimi yoktur. Ayrıntılı karar `docs/decisions/DEC-202-ppk-021-platform-policy-ast-fail-gate.md` dosyasındadır.
+
 ## DEC-201 — PPK-020 çok platformlu ortak policy conformance suite
 
 32-P ile 14 kanonik uygulama/servis kimliğine aynı sıralı 22 vaka gerçek `PlatformPolicyKernel` üzerinden uygulanır. Signed package, strict context, application manifest ve device certificate baseline bağları zorunludur; target/case atlama ve sahte native runtime iddiası statik gate ile reddedilir. Yalnız Windows Desktop ile Windows Core Service deployed runtime sayılır; diğer on iki profil açıkça not-deployed/profile-only kalır ve referans harness üretim yetkisi vermez. Yeni migration, veri taşıma, backfill, cutover veya SQLite/vault sahiplik değişimi yoktur. Ayrıntılı ve bağlayıcı karar `docs/decisions/DEC-201-ppk-020-cross-platform-policy-conformance-suite.md` dosyasındadır.

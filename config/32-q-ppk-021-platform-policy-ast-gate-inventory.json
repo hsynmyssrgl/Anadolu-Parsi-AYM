@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "step": "32-Q",
+  "requirement": "PPK-021",
+  "status": "COMPLETE",
+  "completionClaimed": true,
+  "engine": {
+    "parser": "@babel/parser",
+    "parserVersion": "7.29.8",
+    "syntaxModel": "TYPESCRIPT_AST",
+    "productionSourceZones": 18,
+    "scannedFiles": 352,
+    "privilegedSurfaces": 512,
+    "exactAllowlistEntries": 512,
+    "exactAllowlistSha256": "60452048dfcb541d8702ecf86dc451ff4ae99a68d43d5a085e15333ff5242cb5",
+    "maliciousSelfTests": 17,
+    "benignSelfTests": 4,
+    "findings": 0
+  },
+  "controls": [
+    {
+      "id": "typescript-ast-parser",
+      "classification": "SYNTAX_AWARE_FAIL_CLOSED_SCANNER",
+      "paths": ["scripts/lib/platform-policy-ast-scanner.mjs", "scripts/verify-platform-policy-ast-gate.mjs"],
+      "control": "TypeScript ve JSX kaynakları Babel AST ile ayrıştırılır; alias, computed property, dynamic import, require, destructuring, Reflect.construct ve parse failure yolları sözdizim düğümlerinden değerlendirilir.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "exact-privileged-surface-manifest",
+      "classification": "NO_WILDCARD_EXACT_RATCHET",
+      "paths": ["config/32-q-ppk-021-platform-policy-ast-allowlist.json"],
+      "control": "SQL/SQLite, repository/database, crypto, network, renderer presentation role condition ve use-case composition yüzeyleri dosya+sembol exact anahtarıyla bağlanır; yeni ve stale kayıt birlikte reddedilir.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "direct-role-authorization-zero-exception",
+      "classification": "CENTRAL_POLICY_ONLY_AUTHORIZATION",
+      "paths": ["scripts/lib/platform-policy-ast-scanner.mjs", "apps/desktop/src/renderer/App.tsx"],
+      "control": "Renderer rol koşulları yalnız presentation olarak sınıflanır ve yetki vermez; renderer dışındaki doğrudan rol karşılaştırması allowlistte bulunsa bile reddedilir.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "root-build-hooks",
+      "classification": "PRETYPECHECK_AND_PREBUILD_BLOCKER",
+      "paths": ["package.json", "scripts/verify-platform-policy-gate.mjs"],
+      "control": "AST gate root pretypecheck, prebuild ve birleşik Platform Policy gate zincirlerinde zorunludur.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "malicious-and-benign-fixtures",
+      "classification": "AST_EVASION_AND_FALSE_POSITIVE_REGRESSION",
+      "paths": ["apps/desktop/tests/ppk021-platform-policy-ast-gate.test.ts"],
+      "control": "Alias, dynamic import, require, computed SQL, crypto, network, role ve use-case kaçışları ile benign metin/regex/presentation örnekleri gerçek AST üzerinde sınanır.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "content-free-posture-ipc-ui",
+      "classification": "ZERO_ARGUMENT_NO_CACHE_STATUS_BOUNDARY",
+      "paths": ["packages/application/src/platform-policy-ast-gate-use-cases.ts", "apps/desktop/src/main/preload.ts", "apps/desktop/src/main/ipc-read-sharing.ts", "apps/desktop/src/renderer/App.tsx"],
+      "control": "Renderer yalnız sabit kural ve sayı özetini alır; kaynak yolu, allowlist girdisi veya allowlist hash'i taşınmaz ve cevap cache edilmez.",
+      "disposition": "IMPLEMENTED"
+    }
+  ],
+  "closureSummary": {
+    "reviewedProductionSourceZones": 18,
+    "reviewedProductionFiles": 352,
+    "reviewedPrivilegedSurfaces": 512,
+    "exactAllowlistEntries": 512,
+    "directRoleAuthorizationBypasses": 0,
+    "wildcardAllowances": 0,
+    "parseFailures": 0,
+    "unexpectedSurfaces": 0,
+    "staleAllowances": 0,
+    "openBlockerCount": 0,
+    "openBlockers": [],
+    "finalValidationPending": false
+  }
+}

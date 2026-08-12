@@ -9,3 +9,4 @@ export * from './sensitive-log-policy.js';
 export * from './immutable-policy-decision-audit.js';
 export * from './source-deletion-propagation-policy.js';
 export * from './policy-conformance-suite.js';
+export * from './platform-policy-ast-gate-policy.js';

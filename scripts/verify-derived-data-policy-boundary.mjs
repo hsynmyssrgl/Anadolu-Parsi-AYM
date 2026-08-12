@@ -18,6 +18,7 @@ const AUTOMATION_APPLICATION_ADAPTER = 'apps/desktop/src/main/automation-applica
 const AUTOMATION_REPOSITORY = 'packages/repositories/src/automation-repository.ts';
 const ARCHIVE_APPLICATION_ADAPTER = 'apps/desktop/src/main/archive-application-adapter.ts';
 const ARCHIVE_OPERATION_REPOSITORY = 'packages/repositories/src/platform-policy-transaction-repository.ts';
+const SOURCE_DELETION_METADATA_INVENTORY = 'packages/repositories/src/data-lifecycle-repository.ts';
 const ALWAYS_SCANNED_PRODUCTION_SOURCES = new Set([
   RETIRED_RAW_REPLICA_ADAPTER,
   FAMILY_IMPORT_SERVICE,
@@ -240,6 +241,9 @@ export const scanDerivedDataPolicySourceText = (path, source) => {
       const authorizedPolicyRegistryLiteral = normalizedPath === GOVERNED_POLICY
         && value === AUTHORIZED_REPOSITORY
         && /DERIVED_DATA_AUTHORIZED_REPOSITORY_ADAPTERS\s*=\s*Object\.freeze\(\[\s*$/u.test(registryPrefix);
+      const authorizedSourceDeletionMetadataRegistryLiteral = normalizedPath === SOURCE_DELETION_METADATA_INVENTORY
+        && (value === 'derived_data_policy_bindings' || value === 'derived_data_policy_sources')
+        && /const\s+DERIVED_POLICY_METADATA_TABLES\s*=\s*new\s+Set\s*\(\s*\[\s*(?:['"]derived_data_policy_bindings['"]\s*,\s*)?$/u.test(registryPrefix);
       if (
         DERIVED_REPOSITORY_MODULE.test(value)
         && !AUTHORIZED_CONCRETE_REPOSITORY_USERS.has(normalizedPath)
@@ -263,7 +267,7 @@ export const scanDerivedDataPolicySourceText = (path, source) => {
       ) {
         report('DERIVED_REPOSITORY_CONCRETE_SYMBOL_OUTSIDE_COMPOSITION', value, offset);
       }
-      if (DERIVED_BINDING_TABLE.test(value) && !AUTHORIZED_SQL_OWNERS.has(normalizedPath)) {
+      if (DERIVED_BINDING_TABLE.test(value) && !AUTHORIZED_SQL_OWNERS.has(normalizedPath) && !authorizedSourceDeletionMetadataRegistryLiteral) {
         report('DERIVED_BINDING_SQL_OUTSIDE_AUTHORIZED_OWNER', value.slice(0, 160), offset);
       }
       if (
@@ -425,6 +429,20 @@ const selfTest = () => {
   if (registryFindings.length) {
     throw new Error('Derived-data boundary authorized registry literal self-test failed');
   }
+  const sourceDeletionRegistryFindings = scanDerivedDataPolicySourceText(
+    SOURCE_DELETION_METADATA_INVENTORY,
+    "const DERIVED_POLICY_METADATA_TABLES=new Set(['derived_data_policy_bindings','derived_data_policy_sources']);"
+  );
+  if (sourceDeletionRegistryFindings.length) {
+    throw new Error('Derived-data boundary source-deletion metadata inventory literal self-test failed');
+  }
+  const sourceDeletionSqlBypass = scanDerivedDataPolicySourceText(
+    SOURCE_DELETION_METADATA_INVENTORY,
+    "const sql = 'DELETE FROM derived_data_policy_bindings WHERE binding_hash=?';"
+  );
+  if (!sourceDeletionSqlBypass.some((finding) => finding.kind === 'DERIVED_BINDING_SQL_OUTSIDE_AUTHORIZED_OWNER')) {
+    throw new Error('Derived-data boundary source-deletion SQL bypass self-test failed');
+  }
   return { malicious: maliciousCases.length, benign: benignCases.length };
 };
 
@@ -451,6 +469,7 @@ const main = async () => {
     semanticArchiveReplayPayloadFields: 0,
     authorizedRepository: AUTHORIZED_REPOSITORY,
     authorizedSchemaOwner: AUTHORIZED_SCHEMA_OWNER,
+    authorizedSourceDeletionMetadataInventoryReaders: 1,
     directPersistenceExceptions: 0,
     findings: result.findings
   };

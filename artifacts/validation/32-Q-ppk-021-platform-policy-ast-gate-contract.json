@@ -1,0 +1,387 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-Q",
+  "requirement": "PPK-021",
+  "phase": "PLATFORM_POLICY_AST_FAIL_GATE_CONTRACT",
+  "status": "PASS",
+  "checkCount": 83,
+  "passed": 83,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "scope identity is exact",
+      "passed": true
+    },
+    {
+      "name": "inventory identity is exact",
+      "passed": true
+    },
+    {
+      "name": "allowlist identity is exact",
+      "passed": true
+    },
+    {
+      "name": "accepted registry contains PPK-021",
+      "passed": true
+    },
+    {
+      "name": "PPK-012 through PPK-020 remain complete",
+      "passed": true
+    },
+    {
+      "name": "PPK-022 remains outside PPK-021 closure",
+      "passed": true
+    },
+    {
+      "name": "AST parser dependency is explicit and exact",
+      "passed": true
+    },
+    {
+      "name": "lockfile root records exact parser dependency",
+      "passed": true
+    },
+    {
+      "name": "installed parser record is locked",
+      "passed": true
+    },
+    {
+      "name": "manifest requires exact default deny",
+      "passed": true
+    },
+    {
+      "name": "manifest binds eighteen production zones",
+      "passed": true
+    },
+    {
+      "name": "manifest contains exactly 512 surfaces",
+      "passed": true
+    },
+    {
+      "name": "manifest keys are stable sorted",
+      "passed": true
+    },
+    {
+      "name": "manifest keys contain no wildcard",
+      "passed": true
+    },
+    {
+      "name": "manifest count map is exact",
+      "passed": true
+    },
+    {
+      "name": "manifest SHA-256 binds scope and inventory",
+      "passed": true
+    },
+    {
+      "name": "every observed category has a rationale",
+      "passed": true
+    },
+    {
+      "name": "manifest records no persistence or ownership change",
+      "passed": true
+    },
+    {
+      "name": "production AST gate passes",
+      "passed": true
+    },
+    {
+      "name": "gate scans all production zones",
+      "passed": true
+    },
+    {
+      "name": "gate exact surface and allowance cardinality match",
+      "passed": true
+    },
+    {
+      "name": "gate manifest hash matches the canonical file",
+      "passed": true
+    },
+    {
+      "name": "gate has zero direct role authorization bypass",
+      "passed": true
+    },
+    {
+      "name": "gate executes malicious and benign self-tests",
+      "passed": true
+    },
+    {
+      "name": "gate surface counts match manifest",
+      "passed": true
+    },
+    {
+      "name": "scanner uses a real AST parser",
+      "passed": true
+    },
+    {
+      "name": "scanner traverses syntax nodes instead of line regex",
+      "passed": true
+    },
+    {
+      "name": "scanner denies parse failure",
+      "passed": true
+    },
+    {
+      "name": "scanner detects static dynamic and require imports",
+      "passed": true
+    },
+    {
+      "name": "scanner detects SQL constructors calls aliases and templates",
+      "passed": true
+    },
+    {
+      "name": "scanner detects repository and database imports",
+      "passed": true
+    },
+    {
+      "name": "scanner detects node and Web Crypto",
+      "passed": true
+    },
+    {
+      "name": "scanner detects network imports globals and aliases",
+      "passed": true
+    },
+    {
+      "name": "scanner detects role comparison includes and destructuring",
+      "passed": true
+    },
+    {
+      "name": "scanner keeps direct role authorization zero-exception",
+      "passed": true
+    },
+    {
+      "name": "scanner detects new aliased and reflect use-case composition",
+      "passed": true
+    },
+    {
+      "name": "scanner rejects wildcard duplicate stale and new surfaces",
+      "passed": true
+    },
+    {
+      "name": "gate self-tests AST evasions",
+      "passed": true
+    },
+    {
+      "name": "gate self-tests benign false positives",
+      "passed": true
+    },
+    {
+      "name": "root pretypecheck includes AST gate",
+      "passed": true
+    },
+    {
+      "name": "root prebuild includes AST gate before governed preflight",
+      "passed": true
+    },
+    {
+      "name": "combined platform policy gate invokes AST gate",
+      "passed": true
+    },
+    {
+      "name": "root package exposes all four PPK-021 commands",
+      "passed": true
+    },
+    {
+      "name": "policy declares all six exact rule identifiers",
+      "passed": true
+    },
+    {
+      "name": "policy snapshot is exact fail closed",
+      "passed": true
+    },
+    {
+      "name": "policy denies runtime authority inference",
+      "passed": true
+    },
+    {
+      "name": "policy hides source and manifest material",
+      "passed": true
+    },
+    {
+      "name": "policy verify rejects broadened snapshots",
+      "passed": true
+    },
+    {
+      "name": "platform policy exports AST gate policy",
+      "passed": true
+    },
+    {
+      "name": "domain boundary is content free and fixed",
+      "passed": true
+    },
+    {
+      "name": "domain exports AST boundary",
+      "passed": true
+    },
+    {
+      "name": "application use case verifies policy snapshot",
+      "passed": true
+    },
+    {
+      "name": "application use case preserves migration truth",
+      "passed": true
+    },
+    {
+      "name": "application exports AST boundary use case",
+      "passed": true
+    },
+    {
+      "name": "policy test covers snapshot broadening and reorder",
+      "passed": true
+    },
+    {
+      "name": "AST test covers six privileged families",
+      "passed": true
+    },
+    {
+      "name": "AST test covers parse unexpected stale and wildcard denial",
+      "passed": true
+    },
+    {
+      "name": "AST test verifies full production manifest exactness",
+      "passed": true
+    },
+    {
+      "name": "integration test verifies zero argument and no cache",
+      "passed": true
+    },
+    {
+      "name": "integration test verifies no source or hash payload",
+      "passed": true
+    },
+    {
+      "name": "main composes exact AST policy and use case",
+      "passed": true
+    },
+    {
+      "name": "main registers exact AST status handler",
+      "passed": true
+    },
+    {
+      "name": "preload exposes exact AST status channel",
+      "passed": true
+    },
+    {
+      "name": "renderer global type exposes AST status API",
+      "passed": true
+    },
+    {
+      "name": "IPC integration requires zero arguments",
+      "passed": true
+    },
+    {
+      "name": "IPC sharing marks AST status no-cache",
+      "passed": true
+    },
+    {
+      "name": "renderer shows build gate without runtime authority claim",
+      "passed": true
+    },
+    {
+      "name": "renderer does not render allowlist paths or hash",
+      "passed": true
+    },
+    {
+      "name": "scope records six rules and 512 exact surfaces",
+      "passed": true
+    },
+    {
+      "name": "scope records runtime-policy non-substitution",
+      "passed": true
+    },
+    {
+      "name": "scope records content-free no-cache client boundary",
+      "passed": true
+    },
+    {
+      "name": "scope records no persistence transfer or cutover",
+      "passed": true
+    },
+    {
+      "name": "inventory has six implemented controls",
+      "passed": true
+    },
+    {
+      "name": "inventory has zero gate findings and blockers",
+      "passed": true
+    },
+    {
+      "name": "decision records AST exactness and runtime boundary",
+      "passed": true
+    },
+    {
+      "name": "threat model covers all primary evasions",
+      "passed": true
+    },
+    {
+      "name": "master register contains DEC-202",
+      "passed": true
+    },
+    {
+      "name": "decision ledger contains active DEC-202",
+      "passed": true
+    },
+    {
+      "name": "database migration remains 77",
+      "passed": true
+    },
+    {
+      "name": "accepted registry closes complete PPK-021 evidence chain",
+      "passed": true
+    },
+    {
+      "name": "scope closes PPK-021 with no migration transfer or cutover",
+      "passed": true
+    },
+    {
+      "name": "inventory closes only after final validation",
+      "passed": true
+    },
+    {
+      "name": "audit closes only with final contract and runtime evidence",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "sourceGate": {
+    "status": "PASS",
+    "productionSourceZones": 18,
+    "scannedFiles": 352,
+    "privilegedSurfaces": 512,
+    "exactAllowlistEntries": 512,
+    "exactAllowlistSha256": "60452048dfcb541d8702ecf86dc451ff4ae99a68d43d5a085e15333ff5242cb5",
+    "surfaceCounts": {
+      "CRYPTO_GLOBAL": 2,
+      "CRYPTO_IMPORT": 124,
+      "DATABASE_IMPORT": 21,
+      "NETWORK_IMPORT": 7,
+      "REPOSITORY_IMPORT": 47,
+      "ROLE_PRESENTATION": 1,
+      "SQL_CALL": 56,
+      "SQL_CONSTRUCTOR": 2,
+      "SQL_IMPORT": 2,
+      "USE_CASE_COMPOSITION": 250
+    },
+    "maliciousSelfTestAssertions": 17,
+    "benignSelfTestAssertions": 4,
+    "directRoleAuthorizationBypasses": 0,
+    "findings": []
+  },
+  "protectedRuleCount": 6,
+  "exactAllowlistEntries": 512,
+  "exactAllowlistSha256": "60452048dfcb541d8702ecf86dc451ff4ae99a68d43d5a085e15333ff5242cb5",
+  "directRoleAuthorizationBypasses": 0,
+  "syntaxModel": "TYPESCRIPT_AST",
+  "regexOnlyGateAccepted": false,
+  "buildGateReplacesRuntimePolicy": false,
+  "latestDatabaseMigration": 77,
+  "schemaMigrationRequired": false,
+  "historicalBackfillPerformed": false,
+  "legacyDesktopVaultPreserved": true,
+  "sqliteOwnershipTransferred": false,
+  "realDataTransferPerformed": false,
+  "cutoverAuthorityAttached": false,
+  "successorRequirementCompletedByThisPackage": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-12T00:52:59.716Z"
+}

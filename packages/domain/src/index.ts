@@ -21,3 +21,4 @@ export * from './sensitive-logging.js';
 export * from './policy-decision-audit.js';
 export * from './source-deletion-propagation.js';
 export * from './policy-conformance-suite.js';
+export * from './platform-policy-ast-gate.js';
