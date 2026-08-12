@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "step": "33-H",
+  "requirements": ["EXT-011", "EXT-015"],
+  "status": "COMPLETE",
+  "surfaces": [
+    { "id": "domain-contract", "paths": ["packages/domain/src/app-data.ts"], "disposition": "COMPLETE" },
+    { "id": "application-validation-and-use-cases", "paths": ["packages/application/src/life-use-cases.ts", "packages/application/src/life-security.ts"], "disposition": "COMPLETE" },
+    { "id": "repository-contract", "paths": ["packages/repository-contracts/src/life-repository.ts"], "disposition": "COMPLETE" },
+    { "id": "sqlite-repository", "paths": ["packages/repositories/src/life-repository.ts"], "disposition": "COMPLETE" },
+    { "id": "migration-86", "paths": ["packages/database/src/family-database-migrations.ts"], "disposition": "COMPLETE" },
+    { "id": "life-policy-composition", "paths": ["apps/desktop/src/main/life-application-adapter.ts", "apps/desktop/src/main/life-production-policy-runtime.ts"], "disposition": "COMPLETE" },
+    { "id": "typed-ipc", "paths": ["apps/desktop/src/main/ipc-integration-policy.ts"], "disposition": "COMPLETE" },
+    { "id": "life-center-ui", "paths": ["apps/desktop/src/renderer/ManagedLifePanel.tsx", "apps/desktop/src/renderer/styles.css"], "disposition": "COMPLETE" },
+    { "id": "targeted-tests", "paths": ["packages/application/tests/family-emergency-preparedness.test.ts", "packages/repositories/family-emergency-preparedness-repository-policy.test.ts", "apps/desktop/tests/b5-family-emergency-preparedness-ipc-integration.test.ts"], "disposition": "COMPLETE" },
+    { "id": "governance-evidence", "paths": ["docs/decisions/DEC-219-family-emergency-preparedness-kits-and-drills.md", "docs/security/THREAT_MODEL_33_H_FAMILY_EMERGENCY_PREPAREDNESS.md", "docs/audit/33-H_FAMILY_EMERGENCY_PREPAREDNESS_UST_KAPANIS.md"], "disposition": "COMPLETE" }
+  ],
+  "ipcChannels": ["life:getManagedWorkspace", "life:recordManagedItem"],
+  "networkChannels": [],
+  "prohibitedPayloadOrProjectionFields": ["password", "token", "secret", "credential", "pan", "cvv", "pin", "filePath", "base64", "policyReceipt"],
+  "latestDatabaseMigration": 86,
+  "openRequirements": [],
+  "openBlockers": []
+}

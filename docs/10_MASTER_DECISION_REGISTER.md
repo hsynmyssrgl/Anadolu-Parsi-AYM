@@ -28,13 +28,23 @@ Bir çelişki olduğunda aşağıdaki sıra uygulanır:
 Eski kararlar silinmez; tarihsel kanıt olarak korunur. Ancak aktif ürün davranışını
 belirleyemez. Çelişki sessizce birleştirilmez; değişiklik kaydına işlenir.
 
+## DEC-219 — Çevrimdışı 72 saat çantası ve afet tatbikatı defteri
+
+33-H ile EXT-011 ve EXT-015 mevcut aile acil durum planına bağlı tek append-only
+hazırlık defterinde birlikte uygulanır. 72 saat çantası, maddeleri ve en son manuel
+kontrol olayları ile deprem, yangın, sel ve elektrik kesintisi tatbikat geçmişi
+aynı planın family/owner/privacy sınırını miras alır. Mevcut iki LIFE IPC kanalı
+korunur; barkod/son kullanma doğrulaması, bildirim, sensör veya ağ kanalı açılmaz.
+Hazır olma ya da acil müdahale garantisi verilmez. Ayrıntılı karar:
+`docs/decisions/DEC-219-family-emergency-preparedness-kits-and-drills.md`
+
 ## DEC-218 — Çevrimdışı aile acil durum planı ve kişi durumu
 
 33-G ile B5-07, EXT-009, EXT-010 ve EXT-013 tek append-only
 `family_emergency_ledger` üzerinde birlikte uygulanır. Afet/tahliye planı,
 birincil/alternatif buluşma noktaları, şehir dışı irtibat, kontrol listesi ve en son
 üye `safe` / `needs_help` durumu yerel LIFE policy sınırında tutulur. Üye kendi
-durumunu bildirebilir; aile yöneticisinin başkası adına bildirimi makbuz öznesi ve
+durumunu bildirebilir; merkezi politika ile yetkili başkası adına bildirim makbuz öznesi ve
 `reportedByPersonId` ile açıkça bağlanır. Veri manuel ve çevrimdışı yereldir; harita,
 canlı konum, mesaj teslimi veya acil servis çağrısı/garantisi yoktur. Ayrıntılı karar:
 `docs/decisions/DEC-218-family-emergency-planning.md`

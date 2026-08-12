@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "id": "33-H-FAMILY-EMERGENCY-PREPAREDNESS",
+  "decision": "DEC-219",
+  "requirements": ["EXT-011", "EXT-015"],
+  "status": "COMPLETE",
+  "model": {
+    "table": "family_emergency_preparedness_ledger",
+    "rootTable": "family_emergency_ledger",
+    "rootItemType": "emergency_plan",
+    "itemTypes": ["preparedness_kit", "preparedness_kit_item", "preparedness_kit_check", "emergency_drill"],
+    "appendOnly": true,
+    "childScopeInherited": ["family", "owner", "privacy"],
+    "correctionModel": "append_only_latest_event",
+    "quantityRepresentation": "milliunit_safe_integer",
+    "timestampRepresentation": "canonical_utc_iso"
+  },
+  "kit": {
+    "kinds": ["household_72_hour", "vehicle", "workplace", "other"],
+    "checkStatuses": ["ready", "low", "missing", "expired", "replace"],
+    "expiryRepresentation": "exact_iso_calendar_date"
+  },
+  "drill": {
+    "kinds": ["earthquake", "fire", "flood", "power_outage"],
+    "statuses": ["completed", "partial", "cancelled"],
+    "durationRepresentation": "safe_integer_seconds"
+  },
+  "security": {
+    "policyAction": "update",
+    "policyResourceType": "life_record",
+    "policyCapability": "family.write",
+    "crossLedgerReceiptReplayRejected": true,
+    "crossScopeLinksRejected": true,
+    "updatesAllowed": false,
+    "deletesAllowed": false,
+    "secretPanPathBase64InputsRejected": true,
+    "outboxContainsSensitiveDetails": false
+  },
+  "truth": {
+    "dataSource": "manual",
+    "offlineAvailability": "local_only",
+    "barcodeLookup": "not_performed",
+    "expiryVerification": "not_performed",
+    "notificationDelivery": "not_performed",
+    "sensorIntegration": "not_performed",
+    "readinessGuarantee": "not_claimed",
+    "networkEgressAdded": false
+  },
+  "persistence": {
+    "migration": 86,
+    "migrationName": "b5_family_emergency_preparedness_ledger"
+  },
+  "validation": {
+    "boundary": "artifacts/validation/33-H-family-emergency-preparedness-boundary.json",
+    "contract": "artifacts/validation/33-H-family-emergency-preparedness-contract.json",
+    "runtime": "artifacts/validation/33-H-family-emergency-preparedness-runtime.json",
+    "finalEvidence": {
+      "boundaryChecksPassed": 52,
+      "contractChecksPassed": 15,
+      "runtimeChecksPassed": 11,
+      "targetedTestFilesPassed": 3,
+      "targetedTestsPassed": 14,
+      "fullVitestTestFilesPassed": 118,
+      "fullVitestTestsPassed": 997,
+      "productionWorkspaceBuildsPassed": 18,
+      "ppk021ExactAllowlistEntries": 545,
+      "ppk021UseCaseCompositionSurfaces": 277,
+      "ppk022CapabilitySurfaces": 242,
+      "latestDatabaseMigration": 86,
+      "requirementChainsComplete": 2,
+      "finalClosureEvidence": true
+    }
+  },
+  "excludedClaims": [
+    "No barcode, manufacturer, expiry, provider, notification or sensor service is contacted.",
+    "Manual kit state is not certified and readiness is not guaranteed.",
+    "A drill record does not trigger an alarm, message or emergency-service call.",
+    "EXT-014 and other open Bronze requirements remain open.",
+    "Silver readiness, Bronze Final and a new Build number are not claimed."
+  ]
+}

@@ -442,7 +442,12 @@
       "version": 85,
       "name": "b5_family_emergency_planning_ledger",
       "checksum": "73ba7ebb56a98467bccf527a7f7906699e5fb6bb4dad394cd96ec12e77aa3bd2"
+    },
+    {
+      "version": 86,
+      "name": "b5_family_emergency_preparedness_ledger",
+      "checksum": "ba95e841da7a08977d50e0c9cb441e0743af6fdcb1c6dee9c42bb136e20183dc"
     }
   ],
-  "generatedAt": "2026-08-12T23:01:08.643Z"
+  "generatedAt": "2026-08-12T23:36:01.717Z"
 }

@@ -497,12 +497,17 @@ export class RepositoryBackedLifeQueryPort implements LifeQueryPort {
       const visibleEmergencyItems = emergencyItems.value.filter((item) => item.itemType === 'emergency_plan'
         ? visibleEmergencyPlanIds.has(item.id)
         : visibleEmergencyPlanIds.has(item.planId));
+      const preparednessItems = this.dependencies.lifeRepository.listFamilyEmergencyPreparednessItems(repository);
+      if (!preparednessItems.ok) return preparednessItems;
+      const visiblePreparednessItems = preparednessItems.value.filter((item) =>
+        visibleEmergencyPlanIds.has(item.planId));
       return {
         ok: true,
         value: buildManagedLifeWorkspace({
           items: visible,
           homeInventoryItems: visibleHomeInventoryItems,
           emergencyItems: visibleEmergencyItems,
+          preparednessItems: visiblePreparednessItems,
           generatedAt: repository.occurredAt
         })
       };
@@ -598,6 +603,18 @@ class RepositoryBackedLifeWriteScope implements LifeWriteScope {
     record: Parameters<LifeWriteScope['insertFamilyEmergencyItem']>[0]
   ): ReturnType<LifeWriteScope['insertFamilyEmergencyItem']> {
     return this.dependencies.lifeRepository.insertFamilyEmergencyItem(this.repository, record);
+  }
+
+  public findFamilyEmergencyPreparednessItem(
+    id: Parameters<LifeWriteScope['findFamilyEmergencyPreparednessItem']>[0]
+  ): ReturnType<LifeWriteScope['findFamilyEmergencyPreparednessItem']> {
+    return this.dependencies.lifeRepository.findFamilyEmergencyPreparednessItem(this.repository, id);
+  }
+
+  public insertFamilyEmergencyPreparednessItem(
+    record: Parameters<LifeWriteScope['insertFamilyEmergencyPreparednessItem']>[0]
+  ): ReturnType<LifeWriteScope['insertFamilyEmergencyPreparednessItem']> {
+    return this.dependencies.lifeRepository.insertFamilyEmergencyPreparednessItem(this.repository, record);
   }
 
   public appendAudit(input: Parameters<LifeWriteScope['appendAudit']>[0]): ReturnType<LifeWriteScope['appendAudit']> {

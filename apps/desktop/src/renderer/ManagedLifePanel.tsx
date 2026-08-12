@@ -1,10 +1,17 @@
 import { useMemo, useState } from 'react';
 import type {
   FamilyEmergencyChecklistStatus,
+  FamilyEmergencyDrillKind,
+  FamilyEmergencyDrillStatus,
   FamilyEmergencyItemType,
   FamilyEmergencyMeetingPointKind,
   FamilyEmergencyMemberStatus,
   FamilyEmergencyPlanKind,
+  FamilyEmergencyPreparednessCheckStatus,
+  FamilyEmergencyPreparednessItemType,
+  FamilyEmergencyPreparednessKitItemCategory,
+  FamilyEmergencyPreparednessKitKind,
+  FamilyEmergencyPreparednessQuantityUnit,
   FamilyMemberView,
   ManagedHomeInventoryItemType,
   ManagedHomeInventoryLedgerItemView,
@@ -16,6 +23,7 @@ import type {
   ManagedLifeWorkspaceView,
   RecordManagedHomeInventoryItemInput,
   RecordFamilyEmergencyItemInput,
+  RecordFamilyEmergencyPreparednessItemInput,
   RecordManagedLifeItemInput,
   RecordPrivacy
 } from '@ppt/domain';
@@ -38,6 +46,7 @@ type HomeDocumentKind = 'invoice'|'warranty'|'service_receipt'|'meter_document'|
 type HomeServiceTargetType = 'room'|'meter'|'belonging';
 type HomeDocumentTargetType = 'meter'|'belonging'|'warranty'|'service';
 type HomeInventoryTargetType = HomeServiceTargetType|'warranty'|'service';
+type FamilyEmergencyEntryType = FamilyEmergencyItemType|FamilyEmergencyPreparednessItemType;
 
 const categoryLabels: Record<ManagedLifeCategory, string> = {
   insurance: 'Sigorta', subscription: 'Abonelik', education: 'Eğitim', employment: 'İstihdam',
@@ -99,6 +108,14 @@ const emergencyItemLabels: Record<FamilyEmergencyItemType, string> = {
   external_contact: 'Şehir dışı irtibat', checklist_item: 'Kontrol listesi maddesi',
   checklist_status: 'Kontrol listesi durumu', member_status: 'Aile üyesi durumu'
 };
+const preparednessItemLabels: Record<FamilyEmergencyPreparednessItemType, string> = {
+  preparedness_kit: 'Hazırlık kiti', preparedness_kit_item: 'Kit malzemesi',
+  preparedness_kit_check: 'Malzeme kontrolü', emergency_drill: 'Acil durum tatbikatı'
+};
+const emergencyEntryLabels: Record<FamilyEmergencyEntryType, string> = {
+  ...emergencyItemLabels,
+  ...preparednessItemLabels
+};
 const emergencyPlanKindLabels: Record<FamilyEmergencyPlanKind, string> = {
   general: 'Genel acil durum', earthquake: 'Deprem', fire: 'Yangın', flood: 'Sel',
   evacuation: 'Tahliye', other: 'Diğer'
@@ -108,6 +125,26 @@ const emergencyMeetingPointLabels: Record<FamilyEmergencyMeetingPointKind, strin
 };
 const emergencyMemberStatusLabels: Record<FamilyEmergencyMemberStatus, string> = {
   safe: 'İyiyim', needs_help: 'Yardım lazım'
+};
+const preparednessKitKindLabels: Record<FamilyEmergencyPreparednessKitKind, string> = {
+  household_72_hour: 'Ev 72 saat kiti', vehicle: 'Araç kiti', workplace: 'İş yeri kiti', other: 'Diğer kit'
+};
+const preparednessCategoryLabels: Record<FamilyEmergencyPreparednessKitItemCategory, string> = {
+  water: 'Su', food: 'Gıda', first_aid: 'İlk yardım', hygiene: 'Hijyen',
+  lighting_power: 'Aydınlatma / güç', communication: 'İletişim',
+  clothing_shelter: 'Giyim / barınma', document_copy: 'Belge kopyası', tool: 'Araç / gereç', other: 'Diğer'
+};
+const preparednessQuantityUnitLabels: Record<FamilyEmergencyPreparednessQuantityUnit, string> = {
+  item: 'adet', liter: 'litre', kilogram: 'kilogram', dose: 'doz', meter: 'metre', other: 'diğer birim'
+};
+const preparednessCheckStatusLabels: Record<FamilyEmergencyPreparednessCheckStatus, string> = {
+  ready: 'Hazır', low: 'Azaldı', missing: 'Eksik', expired: 'Süresi doldu', replace: 'Değiştirilmeli'
+};
+const emergencyDrillKindLabels: Record<FamilyEmergencyDrillKind, string> = {
+  earthquake: 'Deprem', fire: 'Yangın', flood: 'Sel', power_outage: 'Elektrik kesintisi'
+};
+const emergencyDrillStatusLabels: Record<FamilyEmergencyDrillStatus, string> = {
+  completed: 'Tamamlandı', partial: 'Kısmen tamamlandı', cancelled: 'İptal edildi'
 };
 
 const remindersByCategory: Record<ManagedLifeCategory, readonly ManagedLifeReminderKind[]> = {
@@ -143,10 +180,21 @@ const toIso = (value: string): string => new Date(value).toISOString();
 const formatDate = (value: string): string => new Intl.DateTimeFormat('tr-TR', {
   dateStyle: 'short', timeStyle: 'short'
 }).format(new Date(value));
+const formatDateOnly = (value: string): string => new Intl.DateTimeFormat('tr-TR', {
+  dateStyle: 'short', timeZone: 'UTC'
+}).format(new Date(`${value}T00:00:00.000Z`));
 const amountMinor = (value: string): number | undefined => value.trim()
   ? Math.round(Number(value) * 100)
   : undefined;
 const milliunits = (value: string): number => Math.round(Number(value) * 1_000);
+const exactPreparednessMilliunits = (value:string):number | undefined => {
+  const match = /^(0|[1-9]\d*)(?:\.(\d{1,3}))?$/u.exec(value.trim());
+  if (!match) return undefined;
+  const whole = Number(match[1]);
+  const fraction = Number((match[2] ?? '').padEnd(3, '0'));
+  const result = whole * 1_000 + fraction;
+  return Number.isSafeInteger(result) && result <= 9_000_000_000_000_000 ? result : undefined;
+};
 
 const profileSummary = (profile: ManagedLifeProfileView): string => {
   switch (profile.category) {
@@ -243,7 +291,7 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
   const [homeDocumentKind, setHomeDocumentKind] = useState<HomeDocumentKind>('invoice');
   const [supersedesItemId, setSupersedesItemId] = useState('');
 
-  const [emergencyType, setEmergencyType] = useState<FamilyEmergencyItemType>('emergency_plan');
+  const [emergencyType, setEmergencyType] = useState<FamilyEmergencyEntryType>('emergency_plan');
   const [emergencyPlanId, setEmergencyPlanId] = useState('');
   const [emergencyPlanKind, setEmergencyPlanKind] = useState<FamilyEmergencyPlanKind>('general');
   const [emergencyTitle, setEmergencyTitle] = useState('');
@@ -264,6 +312,21 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
   const [memberStatusAt, setMemberStatusAt] = useState(localDateTime);
   const [emergencyNote, setEmergencyNote] = useState('');
   const [emergencySupersedesItemId, setEmergencySupersedesItemId] = useState('');
+  const [preparednessKitKind, setPreparednessKitKind] = useState<FamilyEmergencyPreparednessKitKind>('household_72_hour');
+  const [preparednessLabel, setPreparednessLabel] = useState('');
+  const [preparednessKitId, setPreparednessKitId] = useState('');
+  const [preparednessCategory, setPreparednessCategory] = useState<FamilyEmergencyPreparednessKitItemCategory>('water');
+  const [preparednessTargetQuantity, setPreparednessTargetQuantity] = useState('1');
+  const [preparednessQuantityUnit, setPreparednessQuantityUnit] = useState<FamilyEmergencyPreparednessQuantityUnit>('item');
+  const [preparednessExpiresOn, setPreparednessExpiresOn] = useState('');
+  const [preparednessKitItemId, setPreparednessKitItemId] = useState('');
+  const [preparednessCheckStatus, setPreparednessCheckStatus] = useState<FamilyEmergencyPreparednessCheckStatus>('ready');
+  const [preparednessActualQuantity, setPreparednessActualQuantity] = useState('1');
+  const [preparednessCheckedAt, setPreparednessCheckedAt] = useState(localDateTime);
+  const [emergencyDrillKind, setEmergencyDrillKind] = useState<FamilyEmergencyDrillKind>('earthquake');
+  const [emergencyDrillStatus, setEmergencyDrillStatus] = useState<FamilyEmergencyDrillStatus>('completed');
+  const [emergencyDrillAt, setEmergencyDrillAt] = useState(localDateTime);
+  const [emergencyDrillDuration, setEmergencyDrillDuration] = useState('');
   const [message, setMessage] = useState('');
   const [messageTone, setMessageTone] = useState<'success'|'danger'>('success');
 
@@ -288,13 +351,24 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
       : targetType === 'warranty' ? warranties : services;
   const personNames = useMemo(() => new Map(people.map((person) => [person.id, person.displayName])), [people]);
   const emergencyPlans = workspace?.emergencyPlans ?? [];
+  const preparednessKitCount = emergencyPlans.reduce((total, plan) => total + plan.preparednessKits.length, 0);
+  const emergencyDrillCount = emergencyPlans.reduce((total, plan) => total + plan.emergencyDrills.length, 0);
   const selectedEmergencyPlan = emergencyPlans.find((plan) => plan.id === emergencyPlanId);
+  const selectedPreparednessKit = selectedEmergencyPlan?.preparednessKits.find((kit) => kit.id === preparednessKitId);
+  const preparednessKitItems = selectedEmergencyPlan?.preparednessKits.flatMap((kit) => kit.items) ?? [];
+  const selectedPreparednessKitItem = preparednessKitItems.find((item) => item.id === preparednessKitItemId);
   const emergencyCorrectionOptions = emergencyType === 'meeting_point'
     ? selectedEmergencyPlan?.meetingPoints ?? []
     : emergencyType === 'external_contact'
       ? selectedEmergencyPlan?.externalContacts ?? []
       : emergencyType === 'checklist_item'
         ? selectedEmergencyPlan?.checklistItems ?? [] : [];
+  const preparednessCorrectionOptions = emergencyType === 'preparedness_kit'
+    ? selectedEmergencyPlan?.preparednessKits ?? []
+    : emergencyType === 'preparedness_kit_item'
+      ? selectedPreparednessKit?.items ?? []
+      : emergencyType === 'emergency_drill'
+        ? selectedEmergencyPlan?.emergencyDrills ?? [] : [];
 
   const changeCategory = (next: ManagedLifeCategory) => {
     setCategory(next);
@@ -317,8 +391,9 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
     if (next === 'service') setTargetType('belonging');
     if (next === 'document') setTargetType('belonging');
   };
-  const changeEmergencyType = (next: FamilyEmergencyItemType) => {
+  const changeEmergencyType = (next: FamilyEmergencyEntryType) => {
     setEmergencyType(next); setEmergencySupersedesItemId(''); setChecklistItemId('');
+    setPreparednessKitId(''); setPreparednessKitItemId('');
   };
 
   const submitProfile = async () => {
@@ -400,7 +475,7 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
   };
   const submitEmergency = async () => {
     const correction = emergencySupersedesItemId ? { supersedesItemId:emergencySupersedesItemId } : {};
-    let input:RecordFamilyEmergencyItemInput;
+    let input:RecordFamilyEmergencyItemInput|RecordFamilyEmergencyPreparednessItemInput;
     switch (emergencyType) {
       case 'emergency_plan': input = {
         itemType:'emergency_plan', planKind:emergencyPlanKind, title:emergencyTitle,
@@ -427,11 +502,48 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
         itemType:'member_status', planId:emergencyPlanId, memberPersonId, status:memberStatus,
         occurredAt:toIso(memberStatusAt), ...(emergencyNote.trim() ? { note:emergencyNote } : {})
       }; break;
+      case 'preparedness_kit': input = {
+        itemType:'preparedness_kit', planId:emergencyPlanId, kitKind:preparednessKitKind,
+        label:preparednessLabel, ...correction
+      }; break;
+      case 'preparedness_kit_item': {
+        const targetQuantityMilliunits = exactPreparednessMilliunits(preparednessTargetQuantity);
+        if (targetQuantityMilliunits === undefined || targetQuantityMilliunits < 1) {
+          throw new Error('Hedef miktar en fazla üç ondalıklı ve sıfırdan büyük olmalıdır.');
+        }
+        input = {
+          itemType:'preparedness_kit_item', planId:emergencyPlanId, kitId:preparednessKitId,
+          category:preparednessCategory, label:preparednessLabel,
+          targetQuantityMilliunits, quantityUnit:preparednessQuantityUnit,
+          ...(preparednessExpiresOn ? { expiresOn:preparednessExpiresOn } : {}), ...correction
+        };
+        break;
+      }
+      case 'preparedness_kit_check': {
+        const actualQuantityMilliunits = exactPreparednessMilliunits(preparednessActualQuantity);
+        if (actualQuantityMilliunits === undefined) {
+          throw new Error('Mevcut miktar en fazla üç ondalıklı ve sıfır veya daha büyük olmalıdır.');
+        }
+        input = {
+          itemType:'preparedness_kit_check', planId:emergencyPlanId, kitItemId:preparednessKitItemId,
+          status:preparednessCheckStatus, actualQuantityMilliunits,
+          checkedAt:toIso(preparednessCheckedAt), ...(emergencyNote.trim() ? { note:emergencyNote } : {})
+        };
+        break;
+      }
+      case 'emergency_drill': input = {
+        itemType:'emergency_drill', planId:emergencyPlanId, drillKind:emergencyDrillKind,
+        status:emergencyDrillStatus, occurredAt:toIso(emergencyDrillAt),
+        ...(emergencyDrillDuration.trim() ? { durationSeconds:Number(emergencyDrillDuration) } : {}),
+        ...(emergencyNote.trim() ? { note:emergencyNote } : {}), ...correction
+      }; break;
     }
     await onRecord(input);
     setEmergencyTitle(''); setEvacuationInstructions(''); setMeetingPointLabel('');
     setMeetingPointAddress(''); setMeetingPointDirections(''); setContactName(''); setContactPhone('');
     setContactCity(''); setChecklistLabel(''); setEmergencyNote(''); setEmergencySupersedesItemId('');
+    setPreparednessLabel(''); setPreparednessTargetQuantity('1'); setPreparednessExpiresOn('');
+    setPreparednessActualQuantity('1'); setEmergencyDrillDuration('');
   };
   const submit = async () => {
     try {
@@ -477,6 +589,18 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
       && Number(checklistSortOrder) <= 10_000)
     || (emergencyType === 'checklist_status' && emergencyPlanId && checklistItemId)
     || (emergencyType === 'member_status' && emergencyPlanId && memberPersonId && memberStatusAt)
+    || (emergencyType === 'preparedness_kit' && emergencyPlanId && preparednessLabel.trim().length >= 2)
+    || (emergencyType === 'preparedness_kit_item' && emergencyPlanId && preparednessKitId
+      && preparednessLabel.trim().length >= 2
+      && (exactPreparednessMilliunits(preparednessTargetQuantity) ?? 0) >= 1)
+    || (emergencyType === 'preparedness_kit_check' && emergencyPlanId && preparednessKitItemId
+      && preparednessCheckedAt && exactPreparednessMilliunits(preparednessActualQuantity) !== undefined
+      && (!emergencyNote.trim() || emergencyNote.trim().length >= 2))
+    || (emergencyType === 'emergency_drill' && emergencyPlanId && emergencyDrillAt
+      && (!emergencyDrillDuration.trim()
+        || (Number.isSafeInteger(Number(emergencyDrillDuration))
+          && Number(emergencyDrillDuration) >= 1 && Number(emergencyDrillDuration) <= 604_800))
+      && (!emergencyNote.trim() || emergencyNote.trim().length >= 2))
   );
   const submitReady = mode === 'profile' ? profileReady
     : mode === 'activity' ? activityReady
@@ -485,7 +609,7 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
 
   return <>
     <Surface className="span-2">
-      <SectionHeader eyebrow="B5 · EXT-009 · EXT-010 · EXT-013 · EXT-030 · EXT-032" title="Yaşam Merkezi, ev envanteri ve acil durum"/>
+      <SectionHeader eyebrow="B5 · EXT-009 · EXT-010 · EXT-011 · EXT-013 · EXT-015 · EXT-030 · EXT-032" title="Yaşam Merkezi, ev envanteri ve acil durum"/>
       <div className="button-row managed-life-mode-grid" role="group" aria-label="Yaşam kaydı türü">
         <Button tone={mode === 'profile' ? 'primary' : 'default'} onClick={() => setMode('profile')}>Profil</Button>
         <Button tone={mode === 'activity' ? 'primary' : 'default'} onClick={() => setMode('activity')}>Etkinlik / gider</Button>
@@ -497,6 +621,7 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
         <strong>Çevrimdışı aile kaydıdır; acil yardım çağrısı değildir.</strong>
         <small>Harita veya canlı konum sorgulanmaz; SMS, e-posta ya da mesaj gönderilmez ve acil servis aranmaz.</small>
         <small>“Yardım lazım” durumu yalnız bu cihazdaki yetkili aile çalışma alanına kaydedilir. Teslim veya acil servis müdahale garantisi verilmez.</small>
+        <small>Hazırlık kiti ve tatbikatlar manuel tutulur; barkod, son kullanma doğrulaması, bildirim veya sensör entegrasyonu yapılmaz. Hazır olma garantisi verilmez.</small>
       </div>}
       <div className="notes-card managed-life-truth-card">
         <strong>Yalnız manuel, yerel takip</strong>
@@ -534,15 +659,20 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
         {inventoryType === 'document' && <><label>Hedef türü<select value={targetType} onChange={(event) => { setTargetType(event.target.value as HomeDocumentTargetType); setTargetItemId(''); }}><option value="belonging">Eşya</option><option value="meter">Sayaç</option><option value="warranty">Garanti</option><option value="service">Servis</option></select></label><label>Belge hedefi<select value={targetItemId} onChange={(event) => setTargetItemId(event.target.value)}><option value="">Seçin</option>{documentTargets.map((item) => <option key={item.id} value={item.id}>{inventoryItemLabel(item)}</option>)}</select></label><label>Belge türü<select value={homeDocumentKind} onChange={(event) => setHomeDocumentKind(event.target.value as HomeDocumentKind)}>{Object.entries(homeDocumentKindLabels).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Opak arşiv öğesi kimliği<input autoComplete="off" spellCheck={false} maxLength={160} value={archiveItemId} onChange={(event) => setArchiveItemId(event.target.value)}/></label><label>Etiket (isteğe bağlı)<input maxLength={120} value={documentLabel} onChange={(event) => setDocumentLabel(event.target.value)}/></label><div className="notes-card"><strong>Belge içeriği bu forma girmez.</strong><small>Yalnız opak arşiv kimliği ilişkilendirilir; dosya seçilmez, yol, ad, hash veya ham içerik taşınmaz.</small></div></>}
         <label>Önceki kaydı düzelt (isteğe bağlı)<select value={supersedesItemId} onChange={(event) => setSupersedesItemId(event.target.value)}><option value="">Yeni kayıt</option>{supersessionOptions.map((item) => <option key={item.id} value={item.id}>{inventoryItemLabel(item)} · {formatDate(item.createdAt)}</option>)}</select></label>
       </> : mode === 'emergency' ? <>
-        {emergencyType !== 'emergency_plan' && <label>Acil durum planı<select value={emergencyPlanId} onChange={(event) => { setEmergencyPlanId(event.target.value); setChecklistItemId(''); setEmergencySupersedesItemId(''); }}><option value="">Seçin</option>{emergencyPlans.map((plan) => <option key={plan.id} value={plan.id}>{emergencyPlanKindLabels[plan.planKind]} · {plan.title}</option>)}</select></label>}
-        <div className="managed-home-inventory-tabs family-emergency-tabs" role="group" aria-label="Acil durum kayıt türü">{(Object.keys(emergencyItemLabels) as FamilyEmergencyItemType[]).map((itemType) => <Button key={itemType} tone={emergencyType === itemType ? 'primary' : 'default'} onClick={() => changeEmergencyType(itemType)}>{emergencyItemLabels[itemType]}</Button>)}</div>
+        {emergencyType !== 'emergency_plan' && <label>Acil durum planı<select value={emergencyPlanId} onChange={(event) => { setEmergencyPlanId(event.target.value); setChecklistItemId(''); setPreparednessKitId(''); setPreparednessKitItemId(''); setEmergencySupersedesItemId(''); }}><option value="">Seçin</option>{emergencyPlans.map((plan) => <option key={plan.id} value={plan.id}>{emergencyPlanKindLabels[plan.planKind]} · {plan.title}</option>)}</select></label>}
+        <div className="managed-home-inventory-tabs family-emergency-tabs" role="group" aria-label="Acil durum kayıt türü">{(Object.keys(emergencyEntryLabels) as FamilyEmergencyEntryType[]).map((itemType) => <Button key={itemType} tone={emergencyType === itemType ? 'primary' : 'default'} onClick={() => changeEmergencyType(itemType)}>{emergencyEntryLabels[itemType]}</Button>)}</div>
         {emergencyType === 'emergency_plan' && <><label>Plan türü<select value={emergencyPlanKind} onChange={(event) => setEmergencyPlanKind(event.target.value as FamilyEmergencyPlanKind)}>{Object.entries(emergencyPlanKindLabels).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Plan başlığı<input maxLength={120} value={emergencyTitle} onChange={(event) => setEmergencyTitle(event.target.value)}/></label><label>Tahliye talimatı<textarea maxLength={2000} value={evacuationInstructions} onChange={(event) => setEvacuationInstructions(event.target.value)} placeholder="Aile için kısa, uygulanabilir adımlar"/></label><small>Plan aile görünürlüğüyle ve oturumunuza bağlı koordinatör kişiyle oluşturulur.</small></>}
         {emergencyType === 'meeting_point' && <><label>Nokta türü<select value={meetingPointKind} onChange={(event) => setMeetingPointKind(event.target.value as FamilyEmergencyMeetingPointKind)}>{Object.entries(emergencyMeetingPointLabels).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Buluşma noktası etiketi<input maxLength={240} value={meetingPointLabel} onChange={(event) => setMeetingPointLabel(event.target.value)} placeholder="Örn. Mahalle parkı kuzey kapısı"/></label><label>Manuel adres (isteğe bağlı)<textarea maxLength={300} value={meetingPointAddress} onChange={(event) => setMeetingPointAddress(event.target.value)}/></label><label>Ulaşım tarifi (isteğe bağlı)<textarea maxLength={500} value={meetingPointDirections} onChange={(event) => setMeetingPointDirections(event.target.value)}/></label><small>Adres yalnız yerel aile planında tutulur; harita ve canlı konum sorgusu yapılmaz.</small></>}
         {emergencyType === 'external_contact' && <><label>Şehir dışı irtibat adı<input maxLength={120} value={contactName} onChange={(event) => setContactName(event.target.value)}/></label><label>Telefon (E.164)<input type="tel" autoComplete="off" spellCheck={false} maxLength={16} value={contactPhone} onChange={(event) => setContactPhone(event.target.value)} placeholder="+905551112233"/></label><label>Şehir<input maxLength={120} value={contactCity} onChange={(event) => setContactCity(event.target.value)}/></label><label>Not (isteğe bağlı)<textarea maxLength={500} value={emergencyNote} onChange={(event) => setEmergencyNote(event.target.value)}/></label><small>Numara yalnız yetkili aile çalışma alanında tam gösterilir; sağlayıcıya, loga veya dışa aktarıma gönderilmez.</small></>}
         {emergencyType === 'checklist_item' && <><label>Kontrol maddesi<input maxLength={240} value={checklistLabel} onChange={(event) => setChecklistLabel(event.target.value)} placeholder="Örn. Gaz vanasını kapat"/></label><label>Sıra<input type="number" min="0" max="10000" step="1" value={checklistSortOrder} onChange={(event) => setChecklistSortOrder(event.target.value)}/></label></>}
         {emergencyType === 'checklist_status' && <><label>Kontrol maddesi<select value={checklistItemId} onChange={(event) => setChecklistItemId(event.target.value)}><option value="">Seçin</option>{selectedEmergencyPlan?.checklistItems.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label><label>Durum<select value={checklistStatus} onChange={(event) => setChecklistStatus(event.target.value as FamilyEmergencyChecklistStatus)}><option value="open">Açık</option><option value="completed">Tamamlandı</option></select></label></>}
         {emergencyType === 'member_status' && <><label>Durumu bildirilen üye<select value={memberPersonId} onChange={(event) => setMemberPersonId(event.target.value)}><option value="">Seçin</option>{people.map((person) => <option key={person.id} value={person.id}>{person.displayName}</option>)}</select></label><label>Durum<select value={memberStatus} onChange={(event) => setMemberStatus(event.target.value as FamilyEmergencyMemberStatus)}><option value="safe">İyiyim</option><option value="needs_help">Yardım lazım</option></select></label><label>Bildirim zamanı<input type="datetime-local" max={localDateTime()} value={memberStatusAt} onChange={(event) => setMemberStatusAt(event.target.value)}/></label><label>Not (isteğe bağlı)<textarea maxLength={500} value={emergencyNote} onChange={(event) => setEmergencyNote(event.target.value)}/></label><div className="notes-card family-emergency-warning"><strong>{memberStatus === 'needs_help' ? 'Bu düğme acil servis çağırmaz.' : 'Durum yalnız yerel plana yazılır.'}</strong><small>Kendi durumunuzu bildirebilirsiniz. Başkası adına bildirim yalnız merkezi yetki denetimi izin verirse kabul edilir ve gerçek bildiren kişi denetim izine bağlanır.</small></div></>}
+        {emergencyType === 'preparedness_kit' && <><label>Kit türü<select value={preparednessKitKind} onChange={(event) => setPreparednessKitKind(event.target.value as FamilyEmergencyPreparednessKitKind)}>{Object.entries(preparednessKitKindLabels).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Kit etiketi<input maxLength={120} value={preparednessLabel} onChange={(event) => setPreparednessLabel(event.target.value)} placeholder="Örn. Antre 72 saat çantası"/></label><small>Kit yalnız seçili aile planında ve cihazdaki yerel çalışma alanında tutulur.</small></>}
+        {emergencyType === 'preparedness_kit_item' && <><label>Hazırlık kiti<select value={preparednessKitId} onChange={(event) => { setPreparednessKitId(event.target.value); setEmergencySupersedesItemId(''); }}><option value="">Seçin</option>{selectedEmergencyPlan?.preparednessKits.map((kit) => <option key={kit.id} value={kit.id}>{preparednessKitKindLabels[kit.kitKind]} · {kit.label}</option>)}</select></label><label>Malzeme kategorisi<select value={preparednessCategory} onChange={(event) => setPreparednessCategory(event.target.value as FamilyEmergencyPreparednessKitItemCategory)}>{Object.entries(preparednessCategoryLabels).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Malzeme etiketi<input maxLength={160} value={preparednessLabel} onChange={(event) => setPreparednessLabel(event.target.value)} placeholder="Örn. İçme suyu"/></label><label>Hedef miktar<input type="number" min="0.001" step="0.001" value={preparednessTargetQuantity} onChange={(event) => setPreparednessTargetQuantity(event.target.value)}/></label><label>Birim<select value={preparednessQuantityUnit} onChange={(event) => setPreparednessQuantityUnit(event.target.value as FamilyEmergencyPreparednessQuantityUnit)}>{Object.entries(preparednessQuantityUnitLabels).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Son kullanma tarihi (isteğe bağlı)<input type="date" value={preparednessExpiresOn} onChange={(event) => setPreparednessExpiresOn(event.target.value)}/></label><small>Barkod aranmaz ve tarih dış sistemden doğrulanmaz; değerler manuel beyan edilir.</small></>}
+        {emergencyType === 'preparedness_kit_check' && <><label>Kit malzemesi<select value={preparednessKitItemId} onChange={(event) => setPreparednessKitItemId(event.target.value)}><option value="">Seçin</option>{preparednessKitItems.map((item) => <option key={item.id} value={item.id}>{preparednessCategoryLabels[item.category]} · {item.label}</option>)}</select></label><label>Kontrol durumu<select value={preparednessCheckStatus} onChange={(event) => setPreparednessCheckStatus(event.target.value as FamilyEmergencyPreparednessCheckStatus)}>{Object.entries(preparednessCheckStatusLabels).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Mevcut miktar{selectedPreparednessKitItem ? ` (${preparednessQuantityUnitLabels[selectedPreparednessKitItem.quantityUnit]})` : ''}<input type="number" min="0" step="0.001" value={preparednessActualQuantity} onChange={(event) => setPreparednessActualQuantity(event.target.value)}/></label><label>Kontrol zamanı<input type="datetime-local" max={localDateTime()} value={preparednessCheckedAt} onChange={(event) => setPreparednessCheckedAt(event.target.value)}/></label><label>Not (isteğe bağlı)<textarea maxLength={500} value={emergencyNote} onChange={(event) => setEmergencyNote(event.target.value)}/></label><small>Durum yalnız manuel kontroldür; sensör okuması, otomatik bildirim veya hazır olma garantisi değildir.</small></>}
+        {emergencyType === 'emergency_drill' && <><label>Tatbikat türü<select value={emergencyDrillKind} onChange={(event) => setEmergencyDrillKind(event.target.value as FamilyEmergencyDrillKind)}>{Object.entries(emergencyDrillKindLabels).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Sonuç<select value={emergencyDrillStatus} onChange={(event) => setEmergencyDrillStatus(event.target.value as FamilyEmergencyDrillStatus)}>{Object.entries(emergencyDrillStatusLabels).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Gerçekleşme zamanı<input type="datetime-local" max={localDateTime()} value={emergencyDrillAt} onChange={(event) => setEmergencyDrillAt(event.target.value)}/></label><label>Süre (saniye, isteğe bağlı)<input type="number" min="1" max="604800" step="1" value={emergencyDrillDuration} onChange={(event) => setEmergencyDrillDuration(event.target.value)}/></label><label>Not (isteğe bağlı)<textarea maxLength={500} value={emergencyNote} onChange={(event) => setEmergencyNote(event.target.value)}/></label><small>Tatbikat kaydı alarm, mesaj, acil servis teması veya müdahale garantisi üretmez.</small></>}
         {(emergencyType === 'meeting_point' || emergencyType === 'external_contact' || emergencyType === 'checklist_item') && <label>Önceki kaydı düzelt (isteğe bağlı)<select value={emergencySupersedesItemId} onChange={(event) => setEmergencySupersedesItemId(event.target.value)}><option value="">Yeni kayıt</option>{emergencyCorrectionOptions.map((item) => <option key={item.id} value={item.id}>{item.itemType === 'meeting_point' ? item.label : item.itemType === 'external_contact' ? item.name : item.label} · {formatDate(item.createdAt)}</option>)}</select></label>}
+        {(emergencyType === 'preparedness_kit' || emergencyType === 'preparedness_kit_item' || emergencyType === 'emergency_drill') && <label>Önceki kaydı düzelt (isteğe bağlı)<select value={emergencySupersedesItemId} onChange={(event) => setEmergencySupersedesItemId(event.target.value)}><option value="">Yeni kayıt</option>{preparednessCorrectionOptions.map((item) => <option key={item.id} value={item.id}>{item.itemType === 'emergency_drill' ? `${emergencyDrillKindLabels[item.drillKind]} · ${emergencyDrillStatusLabels[item.status]}` : item.label} · {formatDate(item.createdAt)}</option>)}</select></label>}
       </> : <>
         <label>Üst yaşam profili<select value={recordId} onChange={(event) => changeProfile(event.target.value)}><option value="">Seçin</option>{workspace?.profiles.map((profile) => <option key={profile.id} value={profile.id}>{categoryLabels[profile.category]} · {profile.title}</option>)}</select></label>
         {mode === 'activity' ? <>
@@ -568,7 +698,7 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
     </Surface>
 
     <Surface className="workspace-summary managed-life-summary">
-      <SectionHeader eyebrow={`${workspace?.profiles.length ?? 0} profil · ${homeItems.length} ev envanteri olayı · ${emergencyPlans.length} acil durum planı`} title="Yönetilen yaşam görünümü"/>
+      <SectionHeader eyebrow={`${workspace?.profiles.length ?? 0} profil · ${homeItems.length} ev envanteri olayı · ${emergencyPlans.length} acil durum planı · ${preparednessKitCount} hazırlık kiti · ${emergencyDrillCount} tatbikat`} title="Yönetilen yaşam görünümü"/>
       {!workspace?.profiles.length ? <EmptyState title="Yönetilen yaşam profili yok" body="Sigorta, abonelik, eğitim, istihdam, resmî işlem, ev veya araç profili ekleyin."/> : workspace.profiles.map((profile) => {
         const profileHomeItems = homeItems.filter((item) => item.recordId === profile.id);
         return <div className="context-stat managed-life-profile-card" key={profile.id}>
@@ -586,6 +716,8 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
         <section><h4>Buluşma noktaları</h4>{plan.meetingPoints.length ? plan.meetingPoints.map((point) => <div className="family-emergency-row" key={point.id}><strong>{emergencyMeetingPointLabels[point.meetingPointKind]} · {point.label}</strong><small>{point.address ?? 'Adres girilmedi'}{point.directions ? ` · ${point.directions}` : ''}</small></div>) : <small>Henüz buluşma noktası yok.</small>}</section>
         <section><h4>Şehir dışı irtibat</h4>{plan.externalContacts.length ? plan.externalContacts.map((contact) => <div className="family-emergency-row" key={contact.id}><strong>{contact.name} · {contact.city}</strong><small>Telefon: {contact.phoneE164}{contact.note ? ` · ${contact.note}` : ''}</small></div>) : <small>Henüz şehir dışı irtibat yok.</small>}</section>
         <section><h4>Kontrol listesi</h4>{plan.checklistItems.length ? plan.checklistItems.map((item) => <div className="family-emergency-row" key={item.id}><strong>{item.latestStatus?.status === 'completed' ? '✓' : '○'} {item.label}</strong><small>{item.latestStatus?.status === 'completed' ? 'Tamamlandı' : 'Açık'} · sıra {item.sortOrder}</small></div>) : <small>Henüz kontrol maddesi yok.</small>}</section>
+        <section><h4>Hazırlık kitleri</h4>{plan.preparednessKits.length ? plan.preparednessKits.map((kit) => <div className="family-emergency-preparedness-kit" key={kit.id}><div className="family-emergency-row"><strong>{preparednessKitKindLabels[kit.kitKind]} · {kit.label}</strong><small>Manuel · yerel aile planı{kit.supersedesItemId ? ' · düzeltme kaydı' : ''}</small></div>{kit.items.length ? kit.items.map((item) => <div className={`family-emergency-row preparedness-status-${item.latestCheck?.status ?? 'unchecked'}`} key={item.id}><strong>{preparednessCategoryLabels[item.category]} · {item.label}</strong><small>Hedef: {(item.targetQuantityMilliunits / 1_000).toLocaleString('tr-TR')} {preparednessQuantityUnitLabels[item.quantityUnit]}{item.latestCheck ? ` · mevcut: ${(item.latestCheck.actualQuantityMilliunits / 1_000).toLocaleString('tr-TR')} · ${preparednessCheckStatusLabels[item.latestCheck.status]} · ${formatDate(item.latestCheck.checkedAt)}` : ' · henüz kontrol edilmedi'}{item.expiresOn ? ` · SKT: ${formatDateOnly(item.expiresOn)} (manuel)` : ''}</small></div>) : <small>Bu kite henüz malzeme eklenmedi.</small>}</div>) : <small>Henüz hazırlık kiti yok.</small>}</section>
+        <section><h4>Tatbikat geçmişi</h4>{plan.emergencyDrills.length ? plan.emergencyDrills.map((drill) => <div className="family-emergency-row" key={drill.id}><strong>{emergencyDrillKindLabels[drill.drillKind]} · {emergencyDrillStatusLabels[drill.status]}</strong><small>{formatDate(drill.occurredAt)}{drill.durationSeconds !== undefined ? ` · ${drill.durationSeconds} saniye` : ''}{drill.note ? ` · ${drill.note}` : ''}{drill.supersedesItemId ? ' · düzeltme kaydı' : ''}</small></div>) : <small>Henüz tatbikat kaydı yok.</small>}</section>
         <section><h4>Son aile üyesi durumları</h4>{plan.latestMemberStatuses.length ? plan.latestMemberStatuses.map((item) => <div className={`family-emergency-row member-status-${item.status}`} key={item.id}><strong>{personNames.get(item.memberPersonId) ?? 'Aile üyesi'} · {emergencyMemberStatusLabels[item.status]}</strong><small>{formatDate(item.occurredAt)} · Bildiren: {personNames.get(item.reportedByPersonId) ?? 'Yetkili aile üyesi'}{item.note ? ` · ${item.note}` : ''}</small></div>) : <small>Henüz üye durum bildirimi yok.</small>}</section>
       </article>)}</div>}
       <div className="notes-card managed-life-truth-card">
@@ -596,6 +728,9 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
         <strong>Acil durum doğruluk sınırı</strong>
         <small>Çevrimdışı kullanılabilirlik: {workspace?.offlineAvailability === 'local_only' ? 'Yalnız yerel veri' : '—'} · Harita: {workspace?.mapLookup === 'not_performed' ? 'Sorgulanmadı' : '—'} · Canlı konum: {workspace?.liveLocation === 'not_performed' ? 'Alınmadı' : '—'}</small>
         <small>Mesaj teslimi: {workspace?.messageDelivery === 'not_performed' ? 'Yapılmadı' : '—'} · Acil servis teması: {workspace?.emergencyServiceContact === 'not_performed' ? 'Kurulmadı' : '—'} · Garanti: {workspace?.emergencyServiceGuarantee === 'not_claimed' ? 'İddia edilmiyor' : '—'} · Ağ çıkışı: {workspace?.networkEgressAdded === false ? 'Eklenmedi' : '—'}</small>
+        <strong>Hazırlık doğruluk sınırı</strong>
+        <small>Barkod araması: {workspace?.barcodeLookup === 'not_performed' ? 'Yapılmadı' : '—'} · Son kullanma doğrulaması: {workspace?.expiryVerification === 'not_performed' ? 'Yapılmadı' : '—'} · Bildirim teslimi: {workspace?.notificationDelivery === 'not_performed' ? 'Yapılmadı' : '—'}</small>
+        <small>Sensör entegrasyonu: {workspace?.sensorIntegration === 'not_performed' ? 'Yapılmadı' : '—'} · Hazır olma garantisi: {workspace?.readinessGuarantee === 'not_claimed' ? 'İddia edilmiyor' : '—'} · Saklama: {workspace?.offlineAvailability === 'local_only' ? 'Yalnız yerel' : '—'}</small>
       </div>
     </Surface>
   </>;

@@ -9023,6 +9023,542 @@ SET value='REVISION-33-G-B5-FAMILY-EMERGENCY-PLANNING',
 WHERE key='schema_generation';
 `;
 
+const familyEmergencyPreparednessLedgerSql = `CREATE TABLE family_emergency_preparedness_ledger(
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 160),
+  plan_id TEXT NOT NULL REFERENCES family_emergency_ledger(id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  item_type TEXT NOT NULL CHECK(item_type IN (
+    'preparedness_kit','preparedness_kit_item','preparedness_kit_check','emergency_drill'
+  )),
+  parent_item_id TEXT REFERENCES family_emergency_preparedness_ledger(id) ON DELETE RESTRICT,
+  supersedes_item_id TEXT REFERENCES family_emergency_preparedness_ledger(id) ON DELETE RESTRICT,
+  kit_kind TEXT CHECK(
+    kit_kind IS NULL OR kit_kind IN ('household_72_hour','vehicle','workplace','other')
+  ),
+  category TEXT CHECK(category IS NULL OR category IN (
+    'water','food','first_aid','hygiene','lighting_power','communication',
+    'clothing_shelter','document_copy','tool','other'
+  )),
+  label TEXT CHECK(label IS NULL OR length(trim(label)) BETWEEN 2 AND 160),
+  target_quantity_milliunits INTEGER CHECK(target_quantity_milliunits IS NULL OR (
+    typeof(target_quantity_milliunits)='integer'
+    AND target_quantity_milliunits BETWEEN 1 AND 9000000000000000
+  )),
+  quantity_unit TEXT CHECK(
+    quantity_unit IS NULL OR quantity_unit IN ('item','liter','kilogram','dose','meter','other')
+  ),
+  expires_on TEXT CHECK(expires_on IS NULL OR (
+    length(expires_on)=10
+    AND expires_on GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]'
+    AND strftime('%Y-%m-%d',expires_on || 'T00:00:00.000Z','+0 days')=expires_on
+  )),
+  check_status TEXT CHECK(
+    check_status IS NULL OR check_status IN ('ready','low','missing','expired','replace')
+  ),
+  actual_quantity_milliunits INTEGER CHECK(actual_quantity_milliunits IS NULL OR (
+    typeof(actual_quantity_milliunits)='integer'
+    AND actual_quantity_milliunits BETWEEN 0 AND 9000000000000000
+  )),
+  checked_at TEXT CHECK(checked_at IS NULL OR (
+    length(checked_at)=24
+    AND checked_at GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9].[0-9][0-9][0-9]Z'
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',checked_at) IS NOT NULL
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',checked_at)=checked_at
+  )),
+  drill_kind TEXT CHECK(
+    drill_kind IS NULL OR drill_kind IN ('earthquake','fire','flood','power_outage')
+  ),
+  drill_status TEXT CHECK(
+    drill_status IS NULL OR drill_status IN ('completed','partial','cancelled')
+  ),
+  occurred_at TEXT CHECK(occurred_at IS NULL OR (
+    length(occurred_at)=24
+    AND occurred_at GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9].[0-9][0-9][0-9]Z'
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',occurred_at) IS NOT NULL
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',occurred_at)=occurred_at
+  )),
+  duration_seconds INTEGER CHECK(duration_seconds IS NULL OR (
+    typeof(duration_seconds)='integer' AND duration_seconds BETWEEN 1 AND 604800
+  )),
+  note TEXT CHECK(note IS NULL OR length(trim(note)) BETWEEN 2 AND 500),
+  privacy TEXT NOT NULL CHECK(privacy='family'),
+  data_source TEXT NOT NULL CHECK(data_source='manual'),
+  created_at TEXT NOT NULL CHECK(
+    length(created_at)=24
+    AND created_at GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9].[0-9][0-9][0-9]Z'
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',created_at) IS NOT NULL
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',created_at)=created_at
+  ),
+  policy_receipt_hash TEXT NOT NULL UNIQUE REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT CHECK(
+    length(policy_receipt_hash)=64 AND policy_receipt_hash NOT GLOB '*[^0-9a-f]*'
+  ),
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version=1),
+  policy_receipt_nonce TEXT NOT NULL,
+  policy_correlation_id TEXT NOT NULL,
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type='life_record'),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action='update'),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='family.write'),
+  CHECK(supersedes_item_id IS NULL OR supersedes_item_id<>id),
+  CHECK(checked_at IS NULL OR checked_at<=created_at),
+  CHECK(occurred_at IS NULL OR occurred_at<=created_at),
+  CHECK(policy_resource_id=plan_id),
+  CHECK(
+    (item_type='preparedness_kit'
+      AND parent_item_id IS NULL
+      AND kit_kind IS NOT NULL AND label IS NOT NULL AND length(trim(label))<=120
+      AND category IS NULL AND target_quantity_milliunits IS NULL AND quantity_unit IS NULL
+      AND expires_on IS NULL AND check_status IS NULL AND actual_quantity_milliunits IS NULL
+      AND checked_at IS NULL AND drill_kind IS NULL AND drill_status IS NULL
+      AND occurred_at IS NULL AND duration_seconds IS NULL AND note IS NULL)
+    OR
+    (item_type='preparedness_kit_item'
+      AND parent_item_id IS NOT NULL
+      AND kit_kind IS NULL AND category IS NOT NULL AND label IS NOT NULL
+      AND target_quantity_milliunits IS NOT NULL AND quantity_unit IS NOT NULL
+      AND check_status IS NULL AND actual_quantity_milliunits IS NULL AND checked_at IS NULL
+      AND drill_kind IS NULL AND drill_status IS NULL AND occurred_at IS NULL
+      AND duration_seconds IS NULL AND note IS NULL)
+    OR
+    (item_type='preparedness_kit_check'
+      AND parent_item_id IS NOT NULL AND supersedes_item_id IS NULL
+      AND kit_kind IS NULL AND category IS NULL AND label IS NULL
+      AND target_quantity_milliunits IS NULL AND quantity_unit IS NULL AND expires_on IS NULL
+      AND check_status IS NOT NULL AND actual_quantity_milliunits IS NOT NULL
+      AND checked_at IS NOT NULL AND drill_kind IS NULL AND drill_status IS NULL
+      AND occurred_at IS NULL AND duration_seconds IS NULL)
+    OR
+    (item_type='emergency_drill'
+      AND parent_item_id IS NULL
+      AND kit_kind IS NULL AND category IS NULL AND label IS NULL
+      AND target_quantity_milliunits IS NULL AND quantity_unit IS NULL AND expires_on IS NULL
+      AND check_status IS NULL AND actual_quantity_milliunits IS NULL AND checked_at IS NULL
+      AND drill_kind IS NOT NULL AND drill_status IS NOT NULL AND occurred_at IS NOT NULL)
+  )
+) STRICT;
+
+CREATE INDEX idx_family_emergency_preparedness_plan_created
+ON family_emergency_preparedness_ledger(plan_id,created_at DESC,id);
+CREATE INDEX idx_family_emergency_preparedness_family_created
+ON family_emergency_preparedness_ledger(family_id,created_at DESC,id);
+CREATE INDEX idx_family_emergency_preparedness_parent_created
+ON family_emergency_preparedness_ledger(parent_item_id,created_at DESC,id)
+WHERE parent_item_id IS NOT NULL;
+CREATE INDEX idx_family_emergency_preparedness_checks
+ON family_emergency_preparedness_ledger(parent_item_id,checked_at DESC,created_at DESC,id)
+WHERE item_type='preparedness_kit_check';
+CREATE INDEX idx_family_emergency_preparedness_drills
+ON family_emergency_preparedness_ledger(plan_id,occurred_at DESC,created_at DESC,id)
+WHERE item_type='emergency_drill';
+CREATE UNIQUE INDEX idx_family_emergency_preparedness_supersedes
+ON family_emergency_preparedness_ledger(supersedes_item_id)
+WHERE supersedes_item_id IS NOT NULL;
+CREATE UNIQUE INDEX idx_family_emergency_preparedness_check_time
+ON family_emergency_preparedness_ledger(parent_item_id,checked_at)
+WHERE item_type='preparedness_kit_check';
+
+CREATE TRIGGER trg_b5_emergency_preparedness_plan_scope
+BEFORE INSERT ON family_emergency_preparedness_ledger
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM family_emergency_ledger plan
+  JOIN people owner ON owner.id=plan.owner_person_id
+  WHERE plan.id=NEW.plan_id
+    AND plan.item_type='emergency_plan'
+    AND plan.family_id=NEW.family_id
+    AND plan.owner_person_id=NEW.owner_person_id
+    AND plan.privacy=NEW.privacy
+    AND owner.family_id=plan.family_id
+    AND owner.status='active'
+    AND NEW.created_at>=plan.created_at
+    AND NOT EXISTS(
+      SELECT 1 FROM data_lifecycle lifecycle
+      WHERE lifecycle.resource_type='life_record'
+        AND lifecycle.resource_id=plan.id
+        AND lifecycle.state<>'active'
+    )
+)
+BEGIN
+  SELECT RAISE(ABORT,'emergency preparedness item requires an active exact-family plan root and inherited owner/privacy');
+END;
+
+CREATE TRIGGER trg_b5_emergency_preparedness_parent_matrix
+BEFORE INSERT ON family_emergency_preparedness_ledger
+WHEN NEW.item_type IN ('preparedness_kit_item','preparedness_kit_check') AND NOT EXISTS(
+  SELECT 1
+  FROM family_emergency_preparedness_ledger parent
+  WHERE parent.id=NEW.parent_item_id
+    AND parent.item_type=CASE
+      WHEN NEW.item_type='preparedness_kit_item' THEN 'preparedness_kit'
+      ELSE 'preparedness_kit_item'
+    END
+    AND parent.plan_id=NEW.plan_id
+    AND parent.family_id=NEW.family_id
+    AND parent.owner_person_id=NEW.owner_person_id
+    AND parent.privacy=NEW.privacy
+    AND NEW.created_at>parent.created_at
+    AND (NEW.item_type<>'preparedness_kit_check' OR NEW.checked_at>=parent.created_at)
+    AND NOT EXISTS(
+      SELECT 1 FROM family_emergency_preparedness_ledger correction
+      WHERE correction.supersedes_item_id=parent.id
+    )
+)
+BEGIN
+  SELECT RAISE(ABORT,'emergency preparedness child requires a current exact-type parent in the same plan scope');
+END;
+
+CREATE TRIGGER trg_b5_emergency_preparedness_event_chronology
+BEFORE INSERT ON family_emergency_preparedness_ledger
+WHEN (NEW.item_type='preparedness_kit_check' AND NOT EXISTS(
+    SELECT 1 FROM family_emergency_ledger plan
+    WHERE plan.id=NEW.plan_id AND NEW.checked_at>=plan.created_at
+  ))
+  OR (NEW.item_type='emergency_drill' AND NOT EXISTS(
+    SELECT 1 FROM family_emergency_ledger plan
+    WHERE plan.id=NEW.plan_id AND NEW.occurred_at>=plan.created_at
+  ))
+BEGIN
+  SELECT RAISE(ABORT,'emergency preparedness event must be within the exact plan chronology');
+END;
+
+CREATE TRIGGER trg_b5_emergency_preparedness_supersession_scope
+BEFORE INSERT ON family_emergency_preparedness_ledger
+WHEN NEW.supersedes_item_id IS NOT NULL AND (
+  NEW.item_type NOT IN ('preparedness_kit','preparedness_kit_item','emergency_drill')
+  OR NOT EXISTS(
+    SELECT 1 FROM family_emergency_preparedness_ledger prior
+    WHERE prior.id=NEW.supersedes_item_id
+      AND prior.item_type=NEW.item_type
+      AND prior.plan_id=NEW.plan_id
+      AND prior.family_id=NEW.family_id
+      AND prior.owner_person_id=NEW.owner_person_id
+      AND prior.privacy=NEW.privacy
+      AND (NEW.item_type<>'preparedness_kit_item' OR prior.parent_item_id=NEW.parent_item_id)
+      AND NEW.created_at>prior.created_at
+  )
+)
+BEGIN
+  SELECT RAISE(ABORT,'emergency preparedness correction requires an older same-type item in the exact plan scope');
+END;
+
+CREATE TRIGGER trg_b5_emergency_preparedness_id_collision
+BEFORE INSERT ON family_emergency_preparedness_ledger
+WHEN EXISTS(SELECT 1 FROM life_records WHERE id=NEW.id)
+  OR EXISTS(SELECT 1 FROM life_managed_ledger WHERE id=NEW.id)
+  OR EXISTS(SELECT 1 FROM life_home_inventory_ledger WHERE id=NEW.id)
+  OR EXISTS(SELECT 1 FROM family_emergency_ledger WHERE id=NEW.id)
+BEGIN SELECT RAISE(ABORT,'emergency preparedness id collides with another life ledger'); END;
+CREATE TRIGGER trg_b5_life_record_preparedness_id_collision
+BEFORE INSERT ON life_records
+WHEN EXISTS(SELECT 1 FROM family_emergency_preparedness_ledger WHERE id=NEW.id)
+BEGIN SELECT RAISE(ABORT,'life record id collides with an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_life_managed_preparedness_id_collision
+BEFORE INSERT ON life_managed_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_preparedness_ledger WHERE id=NEW.id)
+BEGIN SELECT RAISE(ABORT,'managed life id collides with an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_home_inventory_preparedness_id_collision
+BEFORE INSERT ON life_home_inventory_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_preparedness_ledger WHERE id=NEW.id)
+BEGIN SELECT RAISE(ABORT,'home inventory id collides with an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_family_emergency_preparedness_id_collision
+BEFORE INSERT ON family_emergency_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_preparedness_ledger WHERE id=NEW.id)
+BEGIN SELECT RAISE(ABORT,'family emergency id collides with an emergency preparedness item'); END;
+
+CREATE TRIGGER trg_b5_emergency_preparedness_policy_receipt
+BEFORE INSERT ON family_emergency_preparedness_ledger
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM platform_policy_transaction_receipts receipt
+  JOIN platform_policy_database_fences fence
+    ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection
+    ON projection.receipt_hash=receipt.receipt_hash AND projection.record_json=receipt.record_json
+  JOIN accounts actor_account
+    ON actor_account.id=json_extract(receipt.record_json,'$.request.subject.accountId')
+      AND actor_account.status='active'
+  JOIN people actor_person
+    ON actor_person.id=json_extract(receipt.record_json,'$.request.subject.personId')
+      AND actor_person.id=actor_account.person_id
+      AND actor_person.family_id=NEW.family_id
+      AND actor_person.status='active'
+  JOIN family_emergency_ledger plan
+    ON plan.id=NEW.plan_id AND plan.item_type='emergency_plan'
+  WHERE receipt.receipt_hash=NEW.policy_receipt_hash
+    AND receipt.receipt_version=NEW.policy_receipt_version
+    AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id
+    AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id
+    AND receipt.action=NEW.policy_action
+    AND receipt.capability=NEW.policy_capability
+    AND receipt.resource_type='life_record'
+    AND receipt.resource_id=NEW.plan_id
+    AND receipt.action='update'
+    AND receipt.capability='family.write'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.resource.sensitivity')='personal'
+    AND json_extract(receipt.record_json,'$.request.purpose')='general'
+    AND json_extract(receipt.record_json,'$.request.occurredAt')=NEW.created_at
+    AND plan.family_id=NEW.family_id
+    AND plan.owner_person_id=NEW.owner_person_id
+    AND plan.privacy=NEW.privacy
+)
+OR EXISTS(SELECT 1 FROM archive_items WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_versions WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_retention_policies WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_categories WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_tags WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_item_tags WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM events WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM events WHERE timeline_policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_records WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_valuations WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM health_records WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM medication_plans WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM family_health_history WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM life_records WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM locations WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM bank_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM payment_cards WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM loan_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM loan_payment_history WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_planning_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_import_batches WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM life_managed_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM life_home_inventory_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM family_emergency_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'emergency preparedness write requires an unused exact durable life receipt'); END;
+
+CREATE TRIGGER trg_b5_life_record_preparedness_receipt_reuse_insert
+BEFORE INSERT ON life_records
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'life policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_life_record_preparedness_receipt_reuse_update
+BEFORE UPDATE ON life_records
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'life policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_life_managed_preparedness_receipt_reuse
+BEFORE INSERT ON life_managed_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'managed life receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_home_inventory_preparedness_receipt_reuse
+BEFORE INSERT ON life_home_inventory_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'home inventory receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_family_emergency_preparedness_receipt_reuse
+BEFORE INSERT ON family_emergency_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'family emergency receipt is already bound to an emergency preparedness item'); END;
+
+CREATE TRIGGER trg_b5_archive_item_preparedness_receipt_reuse
+BEFORE INSERT ON archive_items
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_archive_item_preparedness_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON archive_items
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_archive_version_preparedness_receipt_reuse
+BEFORE INSERT ON archive_versions
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_archive_version_preparedness_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON archive_versions
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_archive_retention_preparedness_receipt_reuse
+BEFORE INSERT ON archive_retention_policies
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_archive_retention_preparedness_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON archive_retention_policies
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_archive_category_preparedness_receipt_reuse
+BEFORE INSERT ON archive_categories
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_archive_category_preparedness_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON archive_categories
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_archive_tag_preparedness_receipt_reuse
+BEFORE INSERT ON archive_tags
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_archive_tag_preparedness_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON archive_tags
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_archive_item_tag_preparedness_receipt_reuse
+BEFORE INSERT ON archive_item_tags
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_archive_item_tag_preparedness_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON archive_item_tags
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+
+CREATE TRIGGER trg_b5_event_preparedness_receipt_reuse
+BEFORE INSERT ON events
+WHEN (NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)) OR (NEW.timeline_policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.timeline_policy_receipt_hash
+))
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_event_preparedness_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash,timeline_policy_receipt_hash ON events
+WHEN (NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)) OR (NEW.timeline_policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.timeline_policy_receipt_hash
+))
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+
+CREATE TRIGGER trg_b5_finance_record_preparedness_receipt_reuse
+BEFORE INSERT ON finance_records
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_finance_record_preparedness_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON finance_records
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_finance_valuation_preparedness_receipt_reuse
+BEFORE INSERT ON finance_valuations
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_finance_valuation_preparedness_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON finance_valuations
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_health_record_preparedness_receipt_reuse
+BEFORE INSERT ON health_records
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_health_record_preparedness_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON health_records
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_medication_plan_preparedness_receipt_reuse
+BEFORE INSERT ON medication_plans
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_medication_plan_preparedness_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON medication_plans
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_family_health_history_preparedness_receipt_reuse
+BEFORE INSERT ON family_health_history
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_family_health_history_preparedness_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON family_health_history
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_location_preparedness_receipt_reuse
+BEFORE INSERT ON locations
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_location_preparedness_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON locations
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+
+CREATE TRIGGER trg_b5_bank_account_preparedness_receipt_reuse
+BEFORE INSERT ON bank_accounts
+WHEN EXISTS(SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_payment_card_preparedness_receipt_reuse
+BEFORE INSERT ON payment_cards
+WHEN EXISTS(SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_loan_account_preparedness_receipt_reuse
+BEFORE INSERT ON loan_accounts
+WHEN EXISTS(SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_loan_payment_preparedness_receipt_reuse
+BEFORE INSERT ON loan_payment_history
+WHEN EXISTS(SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_finance_planning_preparedness_receipt_reuse
+BEFORE INSERT ON finance_planning_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+CREATE TRIGGER trg_b5_finance_import_preparedness_receipt_reuse
+BEFORE INSERT ON finance_import_batches
+WHEN EXISTS(SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency preparedness item'); END;
+
+CREATE TRIGGER trg_b5_emergency_preparedness_immutable
+BEFORE UPDATE ON family_emergency_preparedness_ledger
+BEGIN SELECT RAISE(ABORT,'emergency preparedness ledger is append-only'); END;
+CREATE TRIGGER trg_b5_emergency_preparedness_delete_guard
+BEFORE DELETE ON family_emergency_preparedness_ledger
+BEGIN SELECT RAISE(ABORT,'emergency preparedness deletion requires a governed deletion workflow'); END;
+
+UPDATE database_metadata
+SET value='REVISION-33-H-FAMILY-EMERGENCY-PREPAREDNESS',
+    updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
+WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -9108,7 +9644,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(82, 'b4_controlled_import_open_banking', financeControlledImportOpenBankingSql),
   createMigrationDefinition(83, 'b5_life_home_vehicle_managed_ledger', lifeHomeVehicleManagedLedgerSql),
   createMigrationDefinition(84, 'b5_life_home_inventory_ledger', lifeHomeInventoryLedgerSql),
-  createMigrationDefinition(85, 'b5_family_emergency_planning_ledger', familyEmergencyPlanningLedgerSql)
+  createMigrationDefinition(85, 'b5_family_emergency_planning_ledger', familyEmergencyPlanningLedgerSql),
+  createMigrationDefinition(86, 'b5_family_emergency_preparedness_ledger', familyEmergencyPreparednessLedgerSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

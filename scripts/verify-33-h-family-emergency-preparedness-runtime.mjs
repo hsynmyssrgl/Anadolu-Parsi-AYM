@@ -4,23 +4,23 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 const node = process.execPath;
 const commands = Object.freeze([
   Object.freeze({
-    id: 'family-emergency-planning-boundary',
-    args: ['scripts/verify-family-emergency-planning-boundary.mjs'],
-    expectOutput: 'Family emergency planning boundary: PASS'
+    id: 'family-emergency-preparedness-boundary',
+    args: ['scripts/verify-family-emergency-preparedness-boundary.mjs'],
+    expectOutput: 'Family emergency preparedness boundary: PASS'
   }),
   Object.freeze({
-    id: 'family-emergency-planning-contract',
-    args: ['scripts/verify-33-g-family-emergency-planning-contract.mjs'],
-    expectOutput: 'Family emergency planning contract: PASS'
+    id: 'family-emergency-preparedness-contract',
+    args: ['scripts/verify-33-h-family-emergency-preparedness-contract.mjs'],
+    expectOutput: 'Family emergency preparedness contract: PASS'
   }),
   Object.freeze({
-    id: 'family-emergency-planning-targeted-tests',
+    id: 'family-emergency-preparedness-targeted-tests',
     args: ['node_modules/vitest/vitest.mjs', 'run',
-      'packages/application/tests/family-emergency-planning.test.ts',
-      'packages/repositories/family-emergency-repository-policy.test.ts',
-      'apps/desktop/tests/b5-family-emergency-ipc-integration.test.ts',
+      'packages/application/tests/family-emergency-preparedness.test.ts',
+      'packages/repositories/family-emergency-preparedness-repository-policy.test.ts',
+      'apps/desktop/tests/b5-family-emergency-preparedness-ipc-integration.test.ts',
       '--reporter=dot', '--maxWorkers=1'],
-    minimumTests: 15,
+    minimumTests: 12,
     minimumTestFiles: 3
   }),
   Object.freeze({
@@ -40,9 +40,9 @@ const commands = Object.freeze([
     args: ['node_modules/typescript/bin/tsc', '-p', 'packages/database/tsconfig.json']
   }),
   Object.freeze({
-    id: 'migration-85-runtime',
+    id: 'migration-86-runtime',
     args: ['scripts/verify-database-migrations.mjs'],
-    expectOutput: '"version": 85'
+    expectOutput: '"version": 86'
   }),
   Object.freeze({
     id: 'ppk021-ast-ratchet',
@@ -91,37 +91,40 @@ const results = commands.map((command) => {
   });
 });
 const failures = results.filter((result) => result.status !== 'PASS').map((result) => result.id);
-const targeted = results.find((result) => result.id === 'family-emergency-planning-targeted-tests');
+const targeted = results.find((result) => result.id === 'family-emergency-preparedness-targeted-tests');
 let boundary = {};
 let contract = {};
 try {
-  boundary = JSON.parse(await readFile('artifacts/validation/33-G-family-emergency-planning-boundary.json', 'utf8'));
-  contract = JSON.parse(await readFile('artifacts/validation/33-G-family-emergency-planning-contract.json', 'utf8'));
+  boundary = JSON.parse(await readFile(
+    'artifacts/validation/33-H-family-emergency-preparedness-boundary.json', 'utf8'
+  ));
+  contract = JSON.parse(await readFile(
+    'artifacts/validation/33-H-family-emergency-preparedness-contract.json', 'utf8'
+  ));
 } catch {
-  // Failed prerequisites stay visible in command output and keep the runtime red.
+  // Failed prerequisites remain visible in command output and keep the runtime red.
 }
 const report = Object.freeze({
   schemaVersion: 1,
-  step: '33-G',
-  requirements: Object.freeze(['B5-07', 'EXT-009', 'EXT-010', 'EXT-013']),
+  step: '33-H',
+  requirements: Object.freeze(['EXT-011', 'EXT-015']),
   status: failures.length === 0 ? 'PASS' : 'FAIL',
   checksPassed: results.length - failures.length,
   checksFailed: failures.length,
   targetedTestFilesPassed: targeted?.testFiles ?? 0,
   targetedTestsPassed: targeted?.tests ?? 0,
-  latestDatabaseMigration: boundary.latestDatabaseMigration ?? 85,
-  closureDatabaseMigration: 85,
-  familyEmergencyTables: 1,
-  emergencyItemTypes: 6,
+  latestDatabaseMigration: 86,
+  familyEmergencyPreparednessTables: 1,
+  preparednessItemTypes: 4,
   ipcChannels: 2,
   networkChannels: 0,
   dataSource: 'manual',
   offlineAvailability: 'local_only',
-  mapLookup: 'not_performed',
-  liveLocation: 'not_performed',
-  messageDelivery: 'not_performed',
-  emergencyServiceContact: 'not_performed',
-  emergencyServiceGuarantee: 'not_claimed',
+  barcodeLookup: 'not_performed',
+  expiryVerification: 'not_performed',
+  notificationDelivery: 'not_performed',
+  sensorIntegration: 'not_performed',
+  readinessGuarantee: 'not_claimed',
   networkEgressAdded: false,
   ppk021ExactAllowlistEntries: boundary.ppk021ExactAllowlistEntries,
   ppk021UseCaseCompositionSurfaces: boundary.ppk021UseCaseCompositionSurfaces,
@@ -134,8 +137,11 @@ const report = Object.freeze({
   generatedAt: new Date().toISOString()
 });
 await mkdir('artifacts/validation', { recursive: true });
-await writeFile('artifacts/validation/33-G-family-emergency-planning-runtime.json', `${JSON.stringify(report, null, 2)}\n`);
-console.log(`Family emergency planning runtime: ${report.status} (${report.checksPassed}/${results.length} checks).`);
+await writeFile(
+  'artifacts/validation/33-H-family-emergency-preparedness-runtime.json',
+  `${JSON.stringify(report, null, 2)}\n`
+);
+console.log(`Family emergency preparedness runtime: ${report.status} (${report.checksPassed}/${results.length} checks).`);
 if (failures.length) {
   console.error(failures.join('\n'));
   process.exitCode = 1;

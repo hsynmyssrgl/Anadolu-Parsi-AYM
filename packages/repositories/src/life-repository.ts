@@ -1,10 +1,17 @@
 import { asFamilyId, asIsoDateTime, asPersonId } from '@ppt/core';
 import type {
   FamilyEmergencyChecklistStatus,
+  FamilyEmergencyDrillKind,
+  FamilyEmergencyDrillStatus,
   FamilyEmergencyItemType,
   FamilyEmergencyMeetingPointKind,
   FamilyEmergencyMemberStatus,
   FamilyEmergencyPlanKind,
+  FamilyEmergencyPreparednessCheckStatus,
+  FamilyEmergencyPreparednessItemType,
+  FamilyEmergencyPreparednessKitItemCategory,
+  FamilyEmergencyPreparednessKitKind,
+  FamilyEmergencyPreparednessQuantityUnit,
   LifeRecordView,
   ManagedHomeBelongingKind,
   ManagedHomeDocumentKind,
@@ -27,6 +34,7 @@ import {
   assertPolicyAuthorizedRepositoryContext,
   type FamilyEmergencyLedgerItemRow,
   type FamilyEmergencyPlanLedgerItemRow,
+  type FamilyEmergencyPreparednessLedgerItemRow,
   type LifeAutomationDueProjectionRow,
   type LifeAutomationRunSourceProjectionRow,
   type ManagedHomeInventoryLedgerItemRow,
@@ -332,6 +340,70 @@ const mapFamilyEmergencyItem = (row:Record<string, unknown>):FamilyEmergencyLedg
     status: String(row.member_status) as FamilyEmergencyMemberStatus,
     occurredAt: asIsoDateTime(String(row.occurred_at)),
     ...(row.note ? { note: String(row.note) } : {})
+  };
+};
+
+const familyEmergencyPreparednessColumns = `
+  preparedness.id,preparedness.plan_id,preparedness.family_id,preparedness.owner_person_id,
+  preparedness.item_type,preparedness.parent_item_id,preparedness.supersedes_item_id,
+  preparedness.kit_kind,preparedness.category,preparedness.label,
+  preparedness.target_quantity_milliunits,preparedness.quantity_unit,preparedness.expires_on,
+  preparedness.check_status,preparedness.actual_quantity_milliunits,preparedness.checked_at,
+  preparedness.drill_kind,preparedness.drill_status,preparedness.occurred_at,
+  preparedness.duration_seconds,preparedness.note,preparedness.privacy,
+  preparedness.data_source,preparedness.created_at
+`;
+
+const mapFamilyEmergencyPreparednessItem = (
+  row:Record<string, unknown>
+):FamilyEmergencyPreparednessLedgerItemRow => {
+  const common = {
+    id:String(row.id),
+    planId:String(row.plan_id),
+    familyId:asFamilyId(String(row.family_id)),
+    ownerPersonId:asPersonId(String(row.owner_person_id)),
+    privacy:'family' as const,
+    dataSource:'manual' as const,
+    createdAt:asIsoDateTime(String(row.created_at))
+  };
+  const itemType = String(row.item_type) as FamilyEmergencyPreparednessItemType;
+  if (itemType === 'preparedness_kit') return {
+    ...common,
+    itemType,
+    ...(row.supersedes_item_id ? { supersedesItemId:String(row.supersedes_item_id) } : {}),
+    kitKind:String(row.kit_kind) as FamilyEmergencyPreparednessKitKind,
+    label:String(row.label)
+  };
+  if (itemType === 'preparedness_kit_item') return {
+    ...common,
+    itemType,
+    kitId:String(row.parent_item_id),
+    ...(row.supersedes_item_id ? { supersedesItemId:String(row.supersedes_item_id) } : {}),
+    category:String(row.category) as FamilyEmergencyPreparednessKitItemCategory,
+    label:String(row.label),
+    targetQuantityMilliunits:Number(row.target_quantity_milliunits),
+    quantityUnit:String(row.quantity_unit) as FamilyEmergencyPreparednessQuantityUnit,
+    ...(row.expires_on ? { expiresOn:String(row.expires_on) } : {})
+  };
+  if (itemType === 'preparedness_kit_check') return {
+    ...common,
+    itemType,
+    kitItemId:String(row.parent_item_id),
+    status:String(row.check_status) as FamilyEmergencyPreparednessCheckStatus,
+    actualQuantityMilliunits:Number(row.actual_quantity_milliunits),
+    checkedAt:asIsoDateTime(String(row.checked_at)),
+    ...(row.note ? { note:String(row.note) } : {})
+  };
+  return {
+    ...common,
+    itemType:'emergency_drill',
+    ...(row.supersedes_item_id ? { supersedesItemId:String(row.supersedes_item_id) } : {}),
+    drillKind:String(row.drill_kind) as FamilyEmergencyDrillKind,
+    status:String(row.drill_status) as FamilyEmergencyDrillStatus,
+    occurredAt:asIsoDateTime(String(row.occurred_at)),
+    ...(row.duration_seconds === null || row.duration_seconds === undefined
+      ? {} : { durationSeconds:Number(row.duration_seconds) }),
+    ...(row.note ? { note:String(row.note) } : {})
   };
 };
 
@@ -1151,6 +1223,117 @@ export class SqliteLifeRepository extends SqliteRepository implements
           "INSERT INTO data_lifecycle(resource_type,resource_id,owner_person_id,privacy,state,updated_at) VALUES('life_record',?,?,?,'active',?)"
         ).run(row.id, row.ownerPersonId, row.privacy, row.createdAt);
       }
+    });
+  }
+
+  public listFamilyEmergencyPreparednessItems(
+    context:PolicyAuthorizedRepositoryExecutionContext
+  ):RepositoryResult<readonly FamilyEmergencyPreparednessLedgerItemRow[]> {
+    const visibility = lifeReadBinding(context);
+    return this.execute(context, () => (
+      this.database(context).prepare(`
+        SELECT ${familyEmergencyPreparednessColumns}
+        FROM family_emergency_preparedness_ledger preparedness
+        JOIN family_emergency_ledger profile
+          ON profile.id=preparedness.plan_id AND profile.item_type='emergency_plan'
+        WHERE profile.family_id=?
+          ${managedLifeVisibilitySql}
+        ORDER BY preparedness.created_at DESC,preparedness.id
+      `).all(
+        visibility.familyId,
+        ...lifeVisibilityParameters(visibility)
+      ) as ReadonlyArray<Record<string, unknown>>
+    ).map(mapFamilyEmergencyPreparednessItem));
+  }
+
+  public findFamilyEmergencyPreparednessItem(
+    context:PolicyAuthorizedRepositoryExecutionContext,
+    id:string
+  ):RepositoryResult<FamilyEmergencyPreparednessLedgerItemRow | null> {
+    return this.execute(context, () => {
+      const row = this.database(context).prepare(`
+        SELECT ${familyEmergencyPreparednessColumns}
+        FROM family_emergency_preparedness_ledger preparedness
+        JOIN family_emergency_ledger profile
+          ON profile.id=preparedness.plan_id AND profile.item_type='emergency_plan'
+        WHERE preparedness.id=?
+          AND NOT EXISTS (
+            SELECT 1 FROM data_lifecycle lifecycle
+            WHERE lifecycle.resource_type='life_record'
+              AND lifecycle.resource_id=profile.id
+              AND lifecycle.state<>'active'
+          )
+      `).get(id) as Record<string, unknown> | undefined;
+      if (!row) return null;
+      assertFamilyEmergencyLookupAccess(context, String(row.family_id), String(row.plan_id));
+      return mapFamilyEmergencyPreparednessItem(row);
+    });
+  }
+
+  public insertFamilyEmergencyPreparednessItem(
+    context:PolicyAuthorizedRepositoryExecutionContext,
+    row:FamilyEmergencyPreparednessLedgerItemRow
+  ):RepositoryResult<void> {
+    if (row.privacy !== 'family' || row.dataSource !== 'manual') {
+      throw new Error('Emergency preparedness item contains a non-local or non-family execution claim');
+    }
+    if (context.policyAuthorization.resourceOwnerPersonId !== String(row.ownerPersonId)) {
+      throw new Error('Emergency preparedness receipt owner does not match the exact plan root');
+    }
+    const policy = lifeWriteBinding(context, {
+      familyId:row.familyId,
+      resourceId:row.planId,
+      action:'update'
+    });
+    const parentItemId = row.itemType === 'preparedness_kit_item' ? row.kitId
+      : row.itemType === 'preparedness_kit_check' ? row.kitItemId
+        : undefined;
+    return this.execute(context, () => {
+      this.database(context).prepare(`
+        INSERT INTO family_emergency_preparedness_ledger(
+          id,plan_id,family_id,owner_person_id,item_type,parent_item_id,supersedes_item_id,
+          kit_kind,category,label,target_quantity_milliunits,quantity_unit,expires_on,
+          check_status,actual_quantity_milliunits,checked_at,drill_kind,drill_status,
+          occurred_at,duration_seconds,note,privacy,data_source,created_at,
+          policy_receipt_hash,policy_receipt_version,policy_receipt_nonce,policy_correlation_id,
+          policy_resource_type,policy_resource_id,policy_action,policy_capability
+        ) VALUES(${Array.from({ length:32 }, () => '?').join(',')})
+      `).run(
+        row.id,
+        row.planId,
+        row.familyId,
+        row.ownerPersonId,
+        row.itemType,
+        parentItemId ?? null,
+        'supersedesItemId' in row ? row.supersedesItemId ?? null : null,
+        row.itemType === 'preparedness_kit' ? row.kitKind : null,
+        row.itemType === 'preparedness_kit_item' ? row.category : null,
+        row.itemType === 'preparedness_kit' || row.itemType === 'preparedness_kit_item'
+          ? row.label : null,
+        row.itemType === 'preparedness_kit_item' ? row.targetQuantityMilliunits : null,
+        row.itemType === 'preparedness_kit_item' ? row.quantityUnit : null,
+        row.itemType === 'preparedness_kit_item' ? row.expiresOn ?? null : null,
+        row.itemType === 'preparedness_kit_check' ? row.status : null,
+        row.itemType === 'preparedness_kit_check' ? row.actualQuantityMilliunits : null,
+        row.itemType === 'preparedness_kit_check' ? row.checkedAt : null,
+        row.itemType === 'emergency_drill' ? row.drillKind : null,
+        row.itemType === 'emergency_drill' ? row.status : null,
+        row.itemType === 'emergency_drill' ? row.occurredAt : null,
+        row.itemType === 'emergency_drill' ? row.durationSeconds ?? null : null,
+        row.itemType === 'preparedness_kit_check' || row.itemType === 'emergency_drill'
+          ? row.note ?? null : null,
+        row.privacy,
+        row.dataSource,
+        row.createdAt,
+        policy.receiptHash,
+        policy.receiptVersion,
+        policy.nonce,
+        context.correlationId,
+        policy.resourceType,
+        policy.resourceId,
+        policy.action,
+        policy.capability
+      );
     });
   }
 

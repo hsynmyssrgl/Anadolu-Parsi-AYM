@@ -68,6 +68,10 @@
     "scripts/verify-33-g-family-emergency-planning-contract.mjs",
     "scripts/verify-33-g-family-emergency-planning-runtime.mjs",
     "scripts/verify-33-g-family-emergency-planning-completion.mjs",
+    "scripts/verify-family-emergency-preparedness-boundary.mjs",
+    "scripts/verify-33-h-family-emergency-preparedness-contract.mjs",
+    "scripts/verify-33-h-family-emergency-preparedness-runtime.mjs",
+    "scripts/verify-33-h-family-emergency-preparedness-completion.mjs",
     "scripts/verify-step-checkpoint-gate.mjs"
   ],
   "historicalProgressVerifier": "scripts/verify-29-d5-scope-real-progress-report.mjs",

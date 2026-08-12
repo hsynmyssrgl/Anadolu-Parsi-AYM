@@ -8,6 +8,7 @@ import {
   FINANCE_VALUATION_INPUT_KEYS,
   containsLikelyFullPan,
   inspectManagedLifeDataContract,
+  isExactManagedLifeIsoCalendarDate,
   isExactManagedLifeIsoDateTime,
   isProhibitedBankingSecretField
 } from '@ppt/application';
@@ -145,10 +146,26 @@ const managedHomeInventoryItemTypes = new Set([
 const familyEmergencyItemTypes = new Set([
   'emergency_plan','meeting_point','external_contact','checklist_item','checklist_status','member_status'
 ]);
+const familyEmergencyPreparednessItemTypes = new Set([
+  'preparedness_kit','preparedness_kit_item','preparedness_kit_check','emergency_drill'
+]);
 const familyEmergencyPlanKinds = new Set(['general','earthquake','fire','flood','evacuation','other']);
 const familyEmergencyMeetingPointKinds = new Set(['primary','alternate']);
 const familyEmergencyChecklistStatuses = new Set(['open','completed']);
 const familyEmergencyMemberStatuses = new Set(['safe','needs_help']);
+const familyEmergencyPreparednessKitKinds = new Set(['household_72_hour','vehicle','workplace','other']);
+const familyEmergencyPreparednessKitItemCategories = new Set([
+  'water','food','first_aid','hygiene','lighting_power','communication',
+  'clothing_shelter','document_copy','tool','other'
+]);
+const familyEmergencyPreparednessQuantityUnits = new Set([
+  'item','liter','kilogram','dose','meter','other'
+]);
+const familyEmergencyPreparednessCheckStatuses = new Set([
+  'ready','low','missing','expired','replace'
+]);
+const familyEmergencyDrillKinds = new Set(['earthquake','fire','flood','power_outage']);
+const familyEmergencyDrillStatuses = new Set(['completed','partial','cancelled']);
 const familyEmergencyText = (value: unknown, maximum: number): boolean =>
   boundedString(value, maximum) && String(value).trim().length >= 2;
 const optionalFamilyEmergencyText = (value: unknown, maximum: number): boolean =>
@@ -174,6 +191,9 @@ const validManagedLifeTimestamp = (value: unknown): boolean =>
 
 const optionalManagedLifeTimestamp = (value: unknown): boolean =>
   value === undefined || validManagedLifeTimestamp(value);
+
+const optionalExactIsoDate = (value: unknown): boolean =>
+  value === undefined || isExactManagedLifeIsoCalendarDate(value);
 
 const optionalManagedLifeCount = (value: unknown): boolean =>
   value === undefined
@@ -233,7 +253,8 @@ const managedLifeInput = (args: readonly unknown[]): IpcIntegrationPolicyDecisio
   if (value.itemType !== 'profile'
     && value.itemType !== 'activity'
     && !managedHomeInventoryItemTypes.has(String(value.itemType))
-    && !familyEmergencyItemTypes.has(String(value.itemType))) {
+    && !familyEmergencyItemTypes.has(String(value.itemType))
+    && !familyEmergencyPreparednessItemTypes.has(String(value.itemType))) {
     return rejected('MANAGED_LIFE_ITEM_TYPE_INVALID', '$[0].itemType');
   }
   const inspection = inspectManagedLifeDataContract(value);
@@ -351,6 +372,53 @@ const managedLifeInput = (args: readonly unknown[]): IpcIntegrationPolicyDecisio
       && familyEmergencyMemberStatuses.has(String(value.status))
       && validManagedLifeTimestamp(value.occurredAt)
       && optionalFamilyEmergencyText(value.note, 500);
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'preparedness_kit') {
+    const valid = validManagedLifeId(value.planId)
+      && familyEmergencyPreparednessKitKinds.has(String(value.kitKind))
+      && familyEmergencyText(value.label, 120)
+      && validManagedHomeSupersession(value);
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'preparedness_kit_item') {
+    const valid = validManagedLifeId(value.planId)
+      && validManagedLifeId(value.kitId)
+      && familyEmergencyPreparednessKitItemCategories.has(String(value.category))
+      && familyEmergencyText(value.label, 160)
+      && value.targetQuantityMilliunits !== undefined
+      && optionalManagedLifePositiveCount(value.targetQuantityMilliunits)
+      && familyEmergencyPreparednessQuantityUnits.has(String(value.quantityUnit))
+      && optionalExactIsoDate(value.expiresOn)
+      && validManagedHomeSupersession(value);
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'preparedness_kit_check') {
+    const valid = validManagedLifeId(value.planId)
+      && validManagedLifeId(value.kitItemId)
+      && familyEmergencyPreparednessCheckStatuses.has(String(value.status))
+      && value.actualQuantityMilliunits !== undefined
+      && optionalManagedLifeCount(value.actualQuantityMilliunits)
+      && validManagedLifeTimestamp(value.checkedAt)
+      && optionalFamilyEmergencyText(value.note, 500);
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'emergency_drill') {
+    const valid = validManagedLifeId(value.planId)
+      && familyEmergencyDrillKinds.has(String(value.drillKind))
+      && familyEmergencyDrillStatuses.has(String(value.status))
+      && validManagedLifeTimestamp(value.occurredAt)
+      && (value.durationSeconds === undefined
+        || (typeof value.durationSeconds === 'number'
+          && Number.isSafeInteger(value.durationSeconds)
+          && value.durationSeconds >= 1
+          && value.durationSeconds <= 604_800))
+      && optionalFamilyEmergencyText(value.note, 500)
+      && validManagedHomeSupersession(value);
     return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
   }
 

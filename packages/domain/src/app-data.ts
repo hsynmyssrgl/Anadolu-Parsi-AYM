@@ -1627,12 +1627,136 @@ export type RecordFamilyEmergencyItemInput =
   | RecordFamilyEmergencyChecklistStatusInput
   | RecordFamilyEmergencyMemberStatusInput;
 
+export const FAMILY_EMERGENCY_PREPAREDNESS_ITEM_TYPES = [
+  'preparedness_kit','preparedness_kit_item','preparedness_kit_check','emergency_drill'
+] as const;
+export type FamilyEmergencyPreparednessItemType = typeof FAMILY_EMERGENCY_PREPAREDNESS_ITEM_TYPES[number];
+export const FAMILY_EMERGENCY_PREPAREDNESS_KIT_KINDS = [
+  'household_72_hour','vehicle','workplace','other'
+] as const;
+export type FamilyEmergencyPreparednessKitKind = typeof FAMILY_EMERGENCY_PREPAREDNESS_KIT_KINDS[number];
+export const FAMILY_EMERGENCY_PREPAREDNESS_KIT_ITEM_CATEGORIES = [
+  'water','food','first_aid','hygiene','lighting_power','communication',
+  'clothing_shelter','document_copy','tool','other'
+] as const;
+export type FamilyEmergencyPreparednessKitItemCategory =
+  typeof FAMILY_EMERGENCY_PREPAREDNESS_KIT_ITEM_CATEGORIES[number];
+export const FAMILY_EMERGENCY_PREPAREDNESS_QUANTITY_UNITS = [
+  'item','liter','kilogram','dose','meter','other'
+] as const;
+export type FamilyEmergencyPreparednessQuantityUnit =
+  typeof FAMILY_EMERGENCY_PREPAREDNESS_QUANTITY_UNITS[number];
+export const FAMILY_EMERGENCY_PREPAREDNESS_CHECK_STATUSES = [
+  'ready','low','missing','expired','replace'
+] as const;
+export type FamilyEmergencyPreparednessCheckStatus =
+  typeof FAMILY_EMERGENCY_PREPAREDNESS_CHECK_STATUSES[number];
+export const FAMILY_EMERGENCY_DRILL_KINDS = ['earthquake','fire','flood','power_outage'] as const;
+export type FamilyEmergencyDrillKind = typeof FAMILY_EMERGENCY_DRILL_KINDS[number];
+export const FAMILY_EMERGENCY_DRILL_STATUSES = ['completed','partial','cancelled'] as const;
+export type FamilyEmergencyDrillStatus = typeof FAMILY_EMERGENCY_DRILL_STATUSES[number];
+
+export interface FamilyEmergencyPreparednessLedgerItemCommonView {
+  readonly id:string;
+  readonly ownerPersonId:string;
+  readonly planId:string;
+  readonly privacy:'family';
+  readonly dataSource:'manual';
+  readonly createdAt:string;
+}
+export interface FamilyEmergencyPreparednessKitLedgerItemView
+  extends FamilyEmergencyPreparednessLedgerItemCommonView {
+  readonly itemType:'preparedness_kit';
+  readonly supersedesItemId?:string;
+  readonly kitKind:FamilyEmergencyPreparednessKitKind;
+  readonly label:string;
+}
+export interface FamilyEmergencyPreparednessKitItemLedgerItemView
+  extends FamilyEmergencyPreparednessLedgerItemCommonView {
+  readonly itemType:'preparedness_kit_item';
+  readonly kitId:string;
+  readonly supersedesItemId?:string;
+  readonly category:FamilyEmergencyPreparednessKitItemCategory;
+  readonly label:string;
+  readonly targetQuantityMilliunits:number;
+  readonly quantityUnit:FamilyEmergencyPreparednessQuantityUnit;
+  readonly expiresOn?:string;
+}
+export interface FamilyEmergencyPreparednessKitCheckLedgerItemView
+  extends FamilyEmergencyPreparednessLedgerItemCommonView {
+  readonly itemType:'preparedness_kit_check';
+  readonly kitItemId:string;
+  readonly status:FamilyEmergencyPreparednessCheckStatus;
+  readonly actualQuantityMilliunits:number;
+  readonly checkedAt:string;
+  readonly note?:string;
+}
+export interface FamilyEmergencyDrillLedgerItemView
+  extends FamilyEmergencyPreparednessLedgerItemCommonView {
+  readonly itemType:'emergency_drill';
+  readonly supersedesItemId?:string;
+  readonly drillKind:FamilyEmergencyDrillKind;
+  readonly status:FamilyEmergencyDrillStatus;
+  readonly occurredAt:string;
+  readonly durationSeconds?:number;
+  readonly note?:string;
+}
+export type FamilyEmergencyPreparednessLedgerItemView =
+  | FamilyEmergencyPreparednessKitLedgerItemView
+  | FamilyEmergencyPreparednessKitItemLedgerItemView
+  | FamilyEmergencyPreparednessKitCheckLedgerItemView
+  | FamilyEmergencyDrillLedgerItemView;
+
+export interface RecordFamilyEmergencyPreparednessKitInput {
+  readonly itemType:'preparedness_kit';
+  readonly planId:string;
+  readonly supersedesItemId?:string;
+  readonly kitKind:FamilyEmergencyPreparednessKitKind;
+  readonly label:string;
+}
+export interface RecordFamilyEmergencyPreparednessKitItemInput {
+  readonly itemType:'preparedness_kit_item';
+  readonly planId:string;
+  readonly kitId:string;
+  readonly supersedesItemId?:string;
+  readonly category:FamilyEmergencyPreparednessKitItemCategory;
+  readonly label:string;
+  readonly targetQuantityMilliunits:number;
+  readonly quantityUnit:FamilyEmergencyPreparednessQuantityUnit;
+  readonly expiresOn?:string;
+}
+export interface RecordFamilyEmergencyPreparednessKitCheckInput {
+  readonly itemType:'preparedness_kit_check';
+  readonly planId:string;
+  readonly kitItemId:string;
+  readonly status:FamilyEmergencyPreparednessCheckStatus;
+  readonly actualQuantityMilliunits:number;
+  readonly checkedAt:string;
+  readonly note?:string;
+}
+export interface RecordFamilyEmergencyDrillInput {
+  readonly itemType:'emergency_drill';
+  readonly planId:string;
+  readonly supersedesItemId?:string;
+  readonly drillKind:FamilyEmergencyDrillKind;
+  readonly status:FamilyEmergencyDrillStatus;
+  readonly occurredAt:string;
+  readonly durationSeconds?:number;
+  readonly note?:string;
+}
+export type RecordFamilyEmergencyPreparednessItemInput =
+  | RecordFamilyEmergencyPreparednessKitInput
+  | RecordFamilyEmergencyPreparednessKitItemInput
+  | RecordFamilyEmergencyPreparednessKitCheckInput
+  | RecordFamilyEmergencyDrillInput;
+
 export type RecordManagedLifeItemInput =
   | RecordManagedLifeProfileInput
   | RecordManagedLifeActivityInput
   | RecordManagedLifeDocumentInput
   | RecordManagedHomeInventoryItemInput
-  | RecordFamilyEmergencyItemInput;
+  | RecordFamilyEmergencyItemInput
+  | RecordFamilyEmergencyPreparednessItemInput;
 
 export interface ManagedLifeCurrentReminderView {
   readonly sourceId:string;
@@ -1654,11 +1778,21 @@ export type FamilyEmergencyChecklistItemView = FamilyEmergencyChecklistItemLedge
   readonly latestStatus?:FamilyEmergencyChecklistStatusLedgerItemView;
 };
 
+export type FamilyEmergencyPreparednessKitItemView = FamilyEmergencyPreparednessKitItemLedgerItemView & {
+  readonly latestCheck?:FamilyEmergencyPreparednessKitCheckLedgerItemView;
+};
+
+export type FamilyEmergencyPreparednessKitView = FamilyEmergencyPreparednessKitLedgerItemView & {
+  readonly items:readonly FamilyEmergencyPreparednessKitItemView[];
+};
+
 export type FamilyEmergencyPlanView = FamilyEmergencyPlanLedgerItemView & {
   readonly meetingPoints:readonly FamilyEmergencyMeetingPointLedgerItemView[];
   readonly externalContacts:readonly FamilyEmergencyExternalContactLedgerItemView[];
   readonly checklistItems:readonly FamilyEmergencyChecklistItemView[];
   readonly latestMemberStatuses:readonly FamilyEmergencyMemberStatusLedgerItemView[];
+  readonly preparednessKits:readonly FamilyEmergencyPreparednessKitView[];
+  readonly emergencyDrills:readonly FamilyEmergencyDrillLedgerItemView[];
 };
 
 export interface ManagedLifeWorkspaceView {
@@ -1681,6 +1815,11 @@ export interface ManagedLifeWorkspaceView {
   readonly messageDelivery:'not_performed';
   readonly emergencyServiceContact:'not_performed';
   readonly emergencyServiceGuarantee:'not_claimed';
+  readonly barcodeLookup:'not_performed';
+  readonly expiryVerification:'not_performed';
+  readonly notificationDelivery:'not_performed';
+  readonly sensorIntegration:'not_performed';
+  readonly readinessGuarantee:'not_claimed';
   readonly networkEgressAdded:false;
 }
 

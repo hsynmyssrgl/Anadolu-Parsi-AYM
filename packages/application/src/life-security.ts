@@ -1,5 +1,6 @@
 import type {
   FamilyEmergencyItemType,
+  FamilyEmergencyPreparednessItemType,
   ManagedHomeInventoryItemType,
   ManagedLifeCategory
 } from '@ppt/domain';
@@ -106,10 +107,46 @@ export const FAMILY_EMERGENCY_REQUIRED_INPUT_KEYS = Object.freeze({
   member_status: Object.freeze(['itemType','planId','memberPersonId','status','occurredAt'])
 } satisfies Readonly<Record<FamilyEmergencyItemType, readonly string[]>>);
 
+export const FAMILY_EMERGENCY_PREPAREDNESS_INPUT_KEYS = Object.freeze({
+  preparedness_kit: Object.freeze([
+    'itemType','planId','supersedesItemId','kitKind','label'
+  ]),
+  preparedness_kit_item: Object.freeze([
+    'itemType','planId','kitId','supersedesItemId','category','label',
+    'targetQuantityMilliunits','quantityUnit','expiresOn'
+  ]),
+  preparedness_kit_check: Object.freeze([
+    'itemType','planId','kitItemId','status','actualQuantityMilliunits','checkedAt','note'
+  ]),
+  emergency_drill: Object.freeze([
+    'itemType','planId','supersedesItemId','drillKind','status','occurredAt','durationSeconds','note'
+  ])
+} satisfies Readonly<Record<FamilyEmergencyPreparednessItemType, readonly string[]>>);
+
+export const FAMILY_EMERGENCY_PREPAREDNESS_REQUIRED_INPUT_KEYS = Object.freeze({
+  preparedness_kit: Object.freeze(['itemType','planId','kitKind','label']),
+  preparedness_kit_item: Object.freeze([
+    'itemType','planId','kitId','category','label','targetQuantityMilliunits','quantityUnit'
+  ]),
+  preparedness_kit_check: Object.freeze([
+    'itemType','planId','kitItemId','status','actualQuantityMilliunits','checkedAt'
+  ]),
+  emergency_drill: Object.freeze(['itemType','planId','drillKind','status','occurredAt'])
+} satisfies Readonly<Record<FamilyEmergencyPreparednessItemType, readonly string[]>>);
+
 export interface ManagedLifeDataContractInspection {
   readonly accepted:boolean;
-  readonly itemType?:'profile'|'activity'|ManagedHomeInventoryItemType|FamilyEmergencyItemType;
-  readonly contractFamily?:'managed_life'|'home_inventory'|'family_emergency';
+  readonly itemType?:
+    | 'profile'
+    | 'activity'
+    | ManagedHomeInventoryItemType
+    | FamilyEmergencyItemType
+    | FamilyEmergencyPreparednessItemType;
+  readonly contractFamily?:
+    | 'managed_life'
+    | 'home_inventory'
+    | 'family_emergency'
+    | 'family_emergency_preparedness';
   readonly exactShape:boolean;
   readonly unknownFields:readonly string[];
   readonly missingFields:readonly string[];
@@ -264,7 +301,23 @@ export const inspectManagedLifeDataContract = (input: unknown): ManagedLifeDataC
     && typeof input.itemType === 'string'
     && Object.hasOwn(FAMILY_EMERGENCY_INPUT_KEYS, input.itemType);
 
-  if (familyEmergencyItem) {
+  const familyEmergencyPreparednessItem = isPlainObject(input)
+    && typeof input.itemType === 'string'
+    && Object.hasOwn(FAMILY_EMERGENCY_PREPAREDNESS_INPUT_KEYS, input.itemType);
+
+  if (familyEmergencyPreparednessItem) {
+    const preparednessItemType = input.itemType as FamilyEmergencyPreparednessItemType;
+    itemType = preparednessItemType;
+    contractFamily = 'family_emergency_preparedness';
+    compareKeys(
+      input,
+      '$',
+      FAMILY_EMERGENCY_PREPAREDNESS_INPUT_KEYS[preparednessItemType],
+      FAMILY_EMERGENCY_PREPAREDNESS_REQUIRED_INPUT_KEYS[preparednessItemType],
+      unknownFields,
+      missingFields
+    );
+  } else if (familyEmergencyItem) {
     const emergencyItemType = input.itemType as FamilyEmergencyItemType;
     itemType = emergencyItemType;
     contractFamily = 'family_emergency';

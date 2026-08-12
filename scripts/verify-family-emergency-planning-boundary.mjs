@@ -96,7 +96,7 @@ export const verifyFamilyEmergencyPlanningBoundary = async () => {
   ]));
   check('recursive security contract covers every emergency variant', includesAll(security, [
     'FAMILY_EMERGENCY_INPUT_KEYS', 'FAMILY_EMERGENCY_REQUIRED_INPUT_KEYS',
-    "'managed_life'|'home_inventory'|'family_emergency'"
+    "'managed_life'", "'home_inventory'", "'family_emergency'"
   ]) && itemTypes.every((item) => security.includes(`${item}: Object.freeze(`)));
   check('security contract rejects secrets PAN paths and base64 while allowing exact E164', includesAll(security, [
     'password', 'token', 'credential', 'containsLikelyManagedLifePan', 'isPathLike',
@@ -126,7 +126,9 @@ export const verifyFamilyEmergencyPlanningBoundary = async () => {
     'listFamilyEmergencyItems', 'findFamilyEmergencyPlan', 'findFamilyEmergencyItem',
     'insertFamilyEmergencyItem', 'findFamilyEmergencyPlanForPolicyResolution'
   ]));
-  check('migration 85 is exact latest and additive', migrationVersions.at(-1) === 85
+  check('migration 85 remains present through authorized successor migrations',
+    (migrationVersions.at(-1) ?? 0) >= 85
+    && migrationVersions.includes(85)
     && includesAll(migrations, ["createMigrationDefinition(85, 'b5_family_emergency_planning_ledger'", 'CREATE TABLE family_emergency_ledger']));
   check('migration stores all exact emergency variants', itemTypes.every((item) => migration85.includes(`'${item}'`)));
   check('migration enforces exact family plan owner and child scope', includesAll(migration85, [
@@ -232,6 +234,7 @@ export const verifyFamilyEmergencyPlanningBoundary = async () => {
     checks,
     failures,
     latestDatabaseMigration: migrationVersions.at(-1),
+    closureDatabaseMigration: 85,
     familyEmergencyTables: (migrations.match(/CREATE TABLE family_emergency_ledger/gu) ?? []).length,
     emergencyItemTypes: itemTypes.length,
     ipcChannels: inventory.ipcChannels?.length ?? 0,

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 72,
+  "decisionCount": 73,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1857,6 +1857,37 @@
         "docs/security/THREAT_MODEL_33_G_FAMILY_EMERGENCY_PLANNING.md",
         "docs/audit/33-G_FAMILY_EMERGENCY_PLANNING_UST_KAPANIS.md",
         "config/33-g-family-emergency-planning-inventory.json"
+      ]
+    },
+    {
+      "id": "DEC-219",
+      "date": "2026-08-13",
+      "acceptedAt": "2026-08-13",
+      "title": "EXT-011 and EXT-015 shared offline append-only preparedness kit and emergency drill workflow",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: continue full auto and close multiple requirements in one operation",
+      "document": "docs/decisions/DEC-219-family-emergency-preparedness-kits-and-drills.md",
+      "requirements": ["EXT-011", "EXT-015"],
+      "codeAreas": [
+        "packages/domain/src/app-data.ts",
+        "packages/application/src/life-security.ts",
+        "packages/application/src/life-use-cases.ts",
+        "packages/database/src/family-database-migrations.ts",
+        "packages/repository-contracts/src/life-repository.ts",
+        "packages/repositories/src/life-repository.ts",
+        "apps/desktop/src/main/life-production-policy-runtime.ts",
+        "apps/desktop/src/main/life-application-adapter.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/renderer/ManagedLifePanel.tsx",
+        "scripts/verify-family-emergency-preparedness-boundary.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/33-H-family-emergency-preparedness-boundary.json",
+        "artifacts/validation/33-H-family-emergency-preparedness-contract.json",
+        "artifacts/validation/33-H-family-emergency-preparedness-runtime.json",
+        "docs/security/THREAT_MODEL_33_H_FAMILY_EMERGENCY_PREPAREDNESS.md",
+        "docs/audit/33-H_FAMILY_EMERGENCY_PREPAREDNESS_UST_KAPANIS.md",
+        "config/33-h-family-emergency-preparedness-inventory.json"
       ]
     }
   ]
