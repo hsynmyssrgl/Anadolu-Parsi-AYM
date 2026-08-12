@@ -172,7 +172,7 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 84,
+  "latestDatabaseMigration": 85,
   "financePlanningLedgerColumns": 39,
   "ppk021ExactAllowlistEntries": 545,
   "ppk021UseCaseCompositionSurfaces": 277,
@@ -182,5 +182,5 @@
   "externalPricingPerformed": false,
   "bankSynchronizationPerformed": false,
   "paymentExecutionPerformed": false,
-  "generatedAt": "2026-08-12T21:33:45.813Z"
+  "generatedAt": "2026-08-12T22:49:55.366Z"
 }

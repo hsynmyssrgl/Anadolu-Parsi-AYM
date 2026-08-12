@@ -1,4 +1,8 @@
-import type { ManagedHomeInventoryItemType, ManagedLifeCategory } from '@ppt/domain';
+import type {
+  FamilyEmergencyItemType,
+  ManagedHomeInventoryItemType,
+  ManagedLifeCategory
+} from '@ppt/domain';
 
 export const MANAGED_LIFE_INPUT_KEYS = Object.freeze({
   profile: Object.freeze([
@@ -80,10 +84,32 @@ export const MANAGED_HOME_INVENTORY_REQUIRED_INPUT_KEYS = Object.freeze({
   document: Object.freeze(['itemType','recordId','targetItemId','targetType','archiveItemId','documentKind'])
 } satisfies Readonly<Record<ManagedHomeInventoryItemType, readonly string[]>>);
 
+export const FAMILY_EMERGENCY_INPUT_KEYS = Object.freeze({
+  emergency_plan: Object.freeze(['itemType','planKind','title','evacuationInstructions']),
+  meeting_point: Object.freeze([
+    'itemType','planId','supersedesItemId','meetingPointKind','label','address','directions'
+  ]),
+  external_contact: Object.freeze([
+    'itemType','planId','supersedesItemId','name','phoneE164','city','note'
+  ]),
+  checklist_item: Object.freeze(['itemType','planId','supersedesItemId','label','sortOrder']),
+  checklist_status: Object.freeze(['itemType','planId','checklistItemId','status']),
+  member_status: Object.freeze(['itemType','planId','memberPersonId','status','occurredAt','note'])
+} satisfies Readonly<Record<FamilyEmergencyItemType, readonly string[]>>);
+
+export const FAMILY_EMERGENCY_REQUIRED_INPUT_KEYS = Object.freeze({
+  emergency_plan: Object.freeze(['itemType','planKind','title','evacuationInstructions']),
+  meeting_point: Object.freeze(['itemType','planId','meetingPointKind','label']),
+  external_contact: Object.freeze(['itemType','planId','name','phoneE164','city']),
+  checklist_item: Object.freeze(['itemType','planId','label','sortOrder']),
+  checklist_status: Object.freeze(['itemType','planId','checklistItemId','status']),
+  member_status: Object.freeze(['itemType','planId','memberPersonId','status','occurredAt'])
+} satisfies Readonly<Record<FamilyEmergencyItemType, readonly string[]>>);
+
 export interface ManagedLifeDataContractInspection {
   readonly accepted:boolean;
-  readonly itemType?:'profile'|'activity'|ManagedHomeInventoryItemType;
-  readonly contractFamily?:'managed_life'|'home_inventory';
+  readonly itemType?:'profile'|'activity'|ManagedHomeInventoryItemType|FamilyEmergencyItemType;
+  readonly contractFamily?:'managed_life'|'home_inventory'|'family_emergency';
   readonly exactShape:boolean;
   readonly unknownFields:readonly string[];
   readonly missingFields:readonly string[];
@@ -169,10 +195,12 @@ const collectRecursiveSignals = (
   value: unknown,
   path: string,
   signals: RecursiveSignals,
-  seen: Set<object>
+  seen: Set<object>,
+  fieldName?:string
 ): void => {
   if (typeof value === 'string') {
-    signals.panLikeValueDetected ||= containsLikelyManagedLifePan(value);
+    const exactE164Phone = fieldName === 'phoneE164' && /^\+[1-9][0-9]{7,14}$/u.test(value);
+    signals.panLikeValueDetected ||= !exactE164Phone && containsLikelyManagedLifePan(value);
     signals.pathLikeValueDetected ||= isPathLike(value);
     signals.base64LikeValueDetected ||= isBase64Like(value);
     return;
@@ -186,7 +214,7 @@ const collectRecursiveSignals = (
   for (const [key, child] of Object.entries(value)) {
     const childPath = `${path}.${key}`;
     if (isProhibitedKey(key)) signals.prohibitedFields.push(childPath);
-    collectRecursiveSignals(child, childPath, signals, seen);
+    collectRecursiveSignals(child, childPath, signals, seen, key);
   }
 };
 
@@ -232,7 +260,23 @@ export const inspectManagedLifeDataContract = (input: unknown): ManagedLifeDataC
     && Object.hasOwn(MANAGED_HOME_INVENTORY_INPUT_KEYS, input.itemType)
     && (input.itemType !== 'document' || homeInventoryDocument);
 
-  if (homeInventoryItem) {
+  const familyEmergencyItem = isPlainObject(input)
+    && typeof input.itemType === 'string'
+    && Object.hasOwn(FAMILY_EMERGENCY_INPUT_KEYS, input.itemType);
+
+  if (familyEmergencyItem) {
+    const emergencyItemType = input.itemType as FamilyEmergencyItemType;
+    itemType = emergencyItemType;
+    contractFamily = 'family_emergency';
+    compareKeys(
+      input,
+      '$',
+      FAMILY_EMERGENCY_INPUT_KEYS[emergencyItemType],
+      FAMILY_EMERGENCY_REQUIRED_INPUT_KEYS[emergencyItemType],
+      unknownFields,
+      missingFields
+    );
+  } else if (homeInventoryItem) {
     const managedHomeItemType = input.itemType as ManagedHomeInventoryItemType;
     itemType = managedHomeItemType;
     contractFamily = 'home_inventory';

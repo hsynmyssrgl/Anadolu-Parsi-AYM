@@ -1492,11 +1492,147 @@ export type RecordManagedHomeInventoryItemInput =
   | RecordManagedHomeInventoryServiceInput
   | RecordManagedHomeInventoryDocumentInput;
 
+export const FAMILY_EMERGENCY_ITEM_TYPES = [
+  'emergency_plan','meeting_point','external_contact','checklist_item','checklist_status','member_status'
+] as const;
+export type FamilyEmergencyItemType = typeof FAMILY_EMERGENCY_ITEM_TYPES[number];
+export const FAMILY_EMERGENCY_PLAN_KINDS = [
+  'general','earthquake','fire','flood','evacuation','other'
+] as const;
+export type FamilyEmergencyPlanKind = typeof FAMILY_EMERGENCY_PLAN_KINDS[number];
+export const FAMILY_EMERGENCY_MEETING_POINT_KINDS = ['primary','alternate'] as const;
+export type FamilyEmergencyMeetingPointKind = typeof FAMILY_EMERGENCY_MEETING_POINT_KINDS[number];
+export const FAMILY_EMERGENCY_CHECKLIST_STATUSES = ['open','completed'] as const;
+export type FamilyEmergencyChecklistStatus = typeof FAMILY_EMERGENCY_CHECKLIST_STATUSES[number];
+export const FAMILY_EMERGENCY_MEMBER_STATUSES = ['safe','needs_help'] as const;
+export type FamilyEmergencyMemberStatus = typeof FAMILY_EMERGENCY_MEMBER_STATUSES[number];
+
+export interface FamilyEmergencyLedgerItemCommonView {
+  readonly id:string;
+  readonly ownerPersonId:string;
+  readonly privacy:'family';
+  readonly dataSource:'manual';
+  readonly createdAt:string;
+}
+
+export interface FamilyEmergencyPlanLedgerItemView extends FamilyEmergencyLedgerItemCommonView {
+  readonly itemType:'emergency_plan';
+  readonly planKind:FamilyEmergencyPlanKind;
+  readonly title:string;
+  readonly evacuationInstructions:string;
+}
+
+interface FamilyEmergencyChildLedgerItemCommonView extends FamilyEmergencyLedgerItemCommonView {
+  readonly planId:string;
+}
+
+export interface FamilyEmergencyMeetingPointLedgerItemView extends FamilyEmergencyChildLedgerItemCommonView {
+  readonly itemType:'meeting_point';
+  readonly supersedesItemId?:string;
+  readonly meetingPointKind:FamilyEmergencyMeetingPointKind;
+  readonly label:string;
+  readonly address?:string;
+  readonly directions?:string;
+}
+
+export interface FamilyEmergencyExternalContactLedgerItemView extends FamilyEmergencyChildLedgerItemCommonView {
+  readonly itemType:'external_contact';
+  readonly supersedesItemId?:string;
+  readonly name:string;
+  readonly phoneE164:string;
+  readonly city:string;
+  readonly note?:string;
+}
+
+export interface FamilyEmergencyChecklistItemLedgerItemView extends FamilyEmergencyChildLedgerItemCommonView {
+  readonly itemType:'checklist_item';
+  readonly supersedesItemId?:string;
+  readonly label:string;
+  readonly sortOrder:number;
+}
+
+export interface FamilyEmergencyChecklistStatusLedgerItemView extends FamilyEmergencyChildLedgerItemCommonView {
+  readonly itemType:'checklist_status';
+  readonly checklistItemId:string;
+  readonly status:FamilyEmergencyChecklistStatus;
+}
+
+export interface FamilyEmergencyMemberStatusLedgerItemView extends FamilyEmergencyChildLedgerItemCommonView {
+  readonly itemType:'member_status';
+  readonly memberPersonId:string;
+  readonly reportedByPersonId:string;
+  readonly status:FamilyEmergencyMemberStatus;
+  readonly occurredAt:string;
+  readonly note?:string;
+}
+
+export type FamilyEmergencyLedgerItemView =
+  | FamilyEmergencyPlanLedgerItemView
+  | FamilyEmergencyMeetingPointLedgerItemView
+  | FamilyEmergencyExternalContactLedgerItemView
+  | FamilyEmergencyChecklistItemLedgerItemView
+  | FamilyEmergencyChecklistStatusLedgerItemView
+  | FamilyEmergencyMemberStatusLedgerItemView;
+
+export interface RecordFamilyEmergencyPlanInput {
+  readonly itemType:'emergency_plan';
+  readonly planKind:FamilyEmergencyPlanKind;
+  readonly title:string;
+  readonly evacuationInstructions:string;
+}
+export interface RecordFamilyEmergencyMeetingPointInput {
+  readonly itemType:'meeting_point';
+  readonly planId:string;
+  readonly supersedesItemId?:string;
+  readonly meetingPointKind:FamilyEmergencyMeetingPointKind;
+  readonly label:string;
+  readonly address?:string;
+  readonly directions?:string;
+}
+export interface RecordFamilyEmergencyExternalContactInput {
+  readonly itemType:'external_contact';
+  readonly planId:string;
+  readonly supersedesItemId?:string;
+  readonly name:string;
+  readonly phoneE164:string;
+  readonly city:string;
+  readonly note?:string;
+}
+export interface RecordFamilyEmergencyChecklistItemInput {
+  readonly itemType:'checklist_item';
+  readonly planId:string;
+  readonly supersedesItemId?:string;
+  readonly label:string;
+  readonly sortOrder:number;
+}
+export interface RecordFamilyEmergencyChecklistStatusInput {
+  readonly itemType:'checklist_status';
+  readonly planId:string;
+  readonly checklistItemId:string;
+  readonly status:FamilyEmergencyChecklistStatus;
+}
+export interface RecordFamilyEmergencyMemberStatusInput {
+  readonly itemType:'member_status';
+  readonly planId:string;
+  readonly memberPersonId:string;
+  readonly status:FamilyEmergencyMemberStatus;
+  readonly occurredAt:string;
+  readonly note?:string;
+}
+export type RecordFamilyEmergencyItemInput =
+  | RecordFamilyEmergencyPlanInput
+  | RecordFamilyEmergencyMeetingPointInput
+  | RecordFamilyEmergencyExternalContactInput
+  | RecordFamilyEmergencyChecklistItemInput
+  | RecordFamilyEmergencyChecklistStatusInput
+  | RecordFamilyEmergencyMemberStatusInput;
+
 export type RecordManagedLifeItemInput =
   | RecordManagedLifeProfileInput
   | RecordManagedLifeActivityInput
   | RecordManagedLifeDocumentInput
-  | RecordManagedHomeInventoryItemInput;
+  | RecordManagedHomeInventoryItemInput
+  | RecordFamilyEmergencyItemInput;
 
 export interface ManagedLifeCurrentReminderView {
   readonly sourceId:string;
@@ -1514,9 +1650,21 @@ export type ManagedLifeProfileView = ManagedLifeProfileLedgerItemView & {
   readonly currentReminder?:ManagedLifeCurrentReminderView;
 };
 
+export type FamilyEmergencyChecklistItemView = FamilyEmergencyChecklistItemLedgerItemView & {
+  readonly latestStatus?:FamilyEmergencyChecklistStatusLedgerItemView;
+};
+
+export type FamilyEmergencyPlanView = FamilyEmergencyPlanLedgerItemView & {
+  readonly meetingPoints:readonly FamilyEmergencyMeetingPointLedgerItemView[];
+  readonly externalContacts:readonly FamilyEmergencyExternalContactLedgerItemView[];
+  readonly checklistItems:readonly FamilyEmergencyChecklistItemView[];
+  readonly latestMemberStatuses:readonly FamilyEmergencyMemberStatusLedgerItemView[];
+};
+
 export interface ManagedLifeWorkspaceView {
   readonly profiles:readonly ManagedLifeProfileView[];
   readonly homeInventoryItems:readonly ManagedHomeInventoryLedgerItemView[];
+  readonly emergencyPlans:readonly FamilyEmergencyPlanView[];
   readonly upcomingReminders:readonly ManagedLifeCurrentReminderView[];
   readonly generatedAt:string;
   readonly dataSource:'manual';
@@ -1527,6 +1675,13 @@ export interface ManagedLifeWorkspaceView {
   readonly ocr:'not_performed';
   readonly paymentExecution:'not_performed';
   readonly documentContentExposure:'not_performed';
+  readonly offlineAvailability:'local_only';
+  readonly mapLookup:'not_performed';
+  readonly liveLocation:'not_performed';
+  readonly messageDelivery:'not_performed';
+  readonly emergencyServiceContact:'not_performed';
+  readonly emergencyServiceGuarantee:'not_claimed';
+  readonly networkEgressAdded:false;
 }
 
 

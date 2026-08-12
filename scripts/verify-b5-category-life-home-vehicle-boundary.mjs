@@ -112,8 +112,9 @@ export const verifyB5CategoryLifeHomeVehicleBoundary = async () => {
   check('application exposes get workspace and record item use cases', includesAll(application, [
     'GetManagedLifeWorkspaceUseCase', 'RecordManagedLifeItemUseCase', 'getManagedLifeWorkspace', 'insertManagedLifeItem'
   ]));
-  check('profile write uses create while child writes use update on the root', includesAll(application, [
-    "input.command.itemType === 'profile'", "action: isProfile ? 'create' : 'update'", 'resourceId: rootId'
+  check('historical managed profile write uses create while child writes use update on the root', includesAll(application, [
+    "input.command.itemType === 'profile'", 'const createOperation = isProfile',
+    "action: createOperation ? 'create' : 'update'", 'resourceId: rootId'
   ]));
   check('application inherits child owner and privacy from resolved profile', includesAll(application, [
     'findManagedLifeProfile', 'ownerPersonId', 'privacy'

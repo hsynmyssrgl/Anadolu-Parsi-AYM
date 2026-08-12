@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 71,
+  "decisionCount": 72,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1826,6 +1826,37 @@
         "docs/security/THREAT_MODEL_33_F_HOME_INVENTORY_UTILITY_BELONGINGS.md",
         "docs/audit/33-F_HOME_INVENTORY_UTILITY_BELONGINGS_UST_KAPANIS.md",
         "config/33-f-home-inventory-utility-belongings-inventory.json"
+      ]
+    },
+    {
+      "id": "DEC-218",
+      "date": "2026-08-13",
+      "acceptedAt": "2026-08-13",
+      "title": "B5-07 EXT-009 EXT-010 and EXT-013 shared offline append-only family emergency planning workflow",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: continue full auto, use agents and close multiple requirements in one operation",
+      "document": "docs/decisions/DEC-218-family-emergency-planning.md",
+      "requirements": ["B5-07", "EXT-009", "EXT-010", "EXT-013"],
+      "codeAreas": [
+        "packages/domain/src/app-data.ts",
+        "packages/application/src/life-security.ts",
+        "packages/application/src/life-use-cases.ts",
+        "packages/database/src/family-database-migrations.ts",
+        "packages/repository-contracts/src/life-repository.ts",
+        "packages/repositories/src/life-repository.ts",
+        "apps/desktop/src/main/life-production-policy-runtime.ts",
+        "apps/desktop/src/main/life-application-adapter.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/renderer/ManagedLifePanel.tsx",
+        "scripts/verify-family-emergency-planning-boundary.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/33-G-family-emergency-planning-boundary.json",
+        "artifacts/validation/33-G-family-emergency-planning-contract.json",
+        "artifacts/validation/33-G-family-emergency-planning-runtime.json",
+        "docs/security/THREAT_MODEL_33_G_FAMILY_EMERGENCY_PLANNING.md",
+        "docs/audit/33-G_FAMILY_EMERGENCY_PLANNING_UST_KAPANIS.md",
+        "config/33-g-family-emergency-planning-inventory.json"
       ]
     }
   ]

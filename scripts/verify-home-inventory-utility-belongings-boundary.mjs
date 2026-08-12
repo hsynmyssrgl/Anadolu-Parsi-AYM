@@ -102,9 +102,9 @@ export const verifyHomeInventoryUtilityBelongingsBoundary = async () => {
     'managedHomeMeterUnitMatrix', "natural_gas: 'milliliter_cubic_meter_equivalent'",
     "'reading','reset','replacement'", 'Normal sayaç okuması monoton ilerlemelidir'
   ]));
-  check('application binds inventory writes to an existing home root', includesAll(application, [
+  check('historical application binds inventory writes to an existing home root', includesAll(application, [
     'isManagedHomeInventoryCommand', "parent!.category !== 'home'", 'findManagedLifeProfile',
-    "action: isProfile ? 'create' : 'update'"
+    'const createOperation = isProfile', "action: createOperation ? 'create' : 'update'"
   ]));
   check('application validates parent and supersession scope', includesAll(application, [
     'validateManagedHomeInventoryRelations', 'findManagedHomeInventoryItem',
@@ -122,7 +122,7 @@ export const verifyHomeInventoryUtilityBelongingsBoundary = async () => {
     'listManagedHomeInventoryItems', 'findManagedHomeInventoryItem',
     'findLatestManagedHomeMeterReading', 'insertManagedHomeInventoryItem'
   ]));
-  check('migration 84 is exact latest and additive', migrationVersions.at(-1) === 84
+  check('migration 84 remains present through authorized successor migrations', (migrationVersions.at(-1) ?? 0) >= 84
     && includesAll(migrations, ["createMigrationDefinition(84, 'b5_life_home_inventory_ledger'", 'CREATE TABLE life_home_inventory_ledger']));
   check('migration stores all exact item variants', itemTypes.every((item) => migration84.includes(`'${item}'`)));
   check('migration enforces exact home root family owner privacy scope', includesAll(migration84, [

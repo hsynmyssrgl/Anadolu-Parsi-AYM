@@ -725,12 +725,23 @@ const findLifeResourceForPolicyResolution = (
       resourceId
     );
     if (!managed.ok) return managed;
-    return ok(managed.value
+    if (managed.value) {
+      return ok(Object.freeze({
+        familyId: managed.value.familyId,
+        ownerPersonId: managed.value.ownerPersonId,
+        privacy: managed.value.privacy,
+        stateFingerprint: stable(managed.value)
+      }));
+    }
+    const emergencyPlan = dependencies.lifePolicyResourceRepository
+      .findFamilyEmergencyPlanForPolicyResolution(execution, resourceId);
+    if (!emergencyPlan.ok) return emergencyPlan;
+    return ok(emergencyPlan.value
       ? Object.freeze({
-          familyId: managed.value.familyId,
-          ownerPersonId: managed.value.ownerPersonId,
-          privacy: managed.value.privacy,
-          stateFingerprint: stable(managed.value)
+          familyId: emergencyPlan.value.familyId,
+          ownerPersonId: emergencyPlan.value.ownerPersonId,
+          privacy: emergencyPlan.value.privacy,
+          stateFingerprint: stable(emergencyPlan.value)
         })
       : null);
   }
@@ -966,6 +977,7 @@ const ensureRuntimeConfiguration = (dependencies: LifeProductionPolicyRuntimeDep
     || typeof dependencies.trustedDeviceRepository?.findActive !== 'function'
     || typeof dependencies.lifePolicyResourceRepository?.findLifeRecordForPolicyResolution !== 'function'
     || typeof dependencies.lifePolicyResourceRepository?.findManagedLifeProfileForPolicyResolution !== 'function'
+    || typeof dependencies.lifePolicyResourceRepository?.findFamilyEmergencyPlanForPolicyResolution !== 'function'
     || typeof dependencies.personRepository?.findById !== 'function'
     || typeof dependencies.deviceIdentityProvider?.snapshot !== 'function'
     || typeof dependencies.authorizationProvider?.authorize !== 'function'

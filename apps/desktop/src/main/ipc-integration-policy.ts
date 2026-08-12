@@ -142,6 +142,17 @@ const managedLifeEnergyTypes = new Set(['fuel','electric','hybrid','other']);
 const managedHomeInventoryItemTypes = new Set([
   'room','meter','meter_reading','belonging','warranty','service','document'
 ]);
+const familyEmergencyItemTypes = new Set([
+  'emergency_plan','meeting_point','external_contact','checklist_item','checklist_status','member_status'
+]);
+const familyEmergencyPlanKinds = new Set(['general','earthquake','fire','flood','evacuation','other']);
+const familyEmergencyMeetingPointKinds = new Set(['primary','alternate']);
+const familyEmergencyChecklistStatuses = new Set(['open','completed']);
+const familyEmergencyMemberStatuses = new Set(['safe','needs_help']);
+const familyEmergencyText = (value: unknown, maximum: number): boolean =>
+  boundedString(value, maximum) && String(value).trim().length >= 2;
+const optionalFamilyEmergencyText = (value: unknown, maximum: number): boolean =>
+  value === undefined || familyEmergencyText(value, maximum);
 const managedHomeRoomKinds = new Set([
   'living_room','bedroom','kitchen','bathroom','storage','garage','garden','other'
 ]);
@@ -221,7 +232,8 @@ const managedLifeInput = (args: readonly unknown[]): IpcIntegrationPolicyDecisio
   if (!isObject(value)) return rejected('OBJECT_ARGUMENT_REQUIRED', '$[0]');
   if (value.itemType !== 'profile'
     && value.itemType !== 'activity'
-    && !managedHomeInventoryItemTypes.has(String(value.itemType))) {
+    && !managedHomeInventoryItemTypes.has(String(value.itemType))
+    && !familyEmergencyItemTypes.has(String(value.itemType))) {
     return rejected('MANAGED_LIFE_ITEM_TYPE_INVALID', '$[0].itemType');
   }
   const inspection = inspectManagedLifeDataContract(value);
@@ -284,6 +296,61 @@ const managedLifeInput = (args: readonly unknown[]): IpcIntegrationPolicyDecisio
         || !isObject(value.reminderMutation)
         || value.reminderMutation.action !== 'set'
         || Date.parse(String(value.reminderMutation.dueAt)) >= Date.parse(String(value.occurredAt)));
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'emergency_plan') {
+    const valid = familyEmergencyPlanKinds.has(String(value.planKind))
+      && familyEmergencyText(value.title, 120)
+      && familyEmergencyText(value.evacuationInstructions, 2_000);
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'meeting_point') {
+    const valid = validManagedLifeId(value.planId)
+      && familyEmergencyMeetingPointKinds.has(String(value.meetingPointKind))
+      && familyEmergencyText(value.label, 240)
+      && optionalFamilyEmergencyText(value.address, 300)
+      && optionalFamilyEmergencyText(value.directions, 500)
+      && validManagedHomeSupersession(value);
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'external_contact') {
+    const valid = validManagedLifeId(value.planId)
+      && familyEmergencyText(value.name, 120)
+      && typeof value.phoneE164 === 'string'
+      && /^\+[1-9][0-9]{7,14}$/u.test(value.phoneE164)
+      && familyEmergencyText(value.city, 120)
+      && optionalFamilyEmergencyText(value.note, 500)
+      && validManagedHomeSupersession(value);
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'checklist_item') {
+    const valid = validManagedLifeId(value.planId)
+      && familyEmergencyText(value.label, 240)
+      && typeof value.sortOrder === 'number'
+      && Number.isSafeInteger(value.sortOrder)
+      && value.sortOrder >= 0
+      && value.sortOrder <= 10_000
+      && validManagedHomeSupersession(value);
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'checklist_status') {
+    const valid = validManagedLifeId(value.planId)
+      && validManagedLifeId(value.checklistItemId)
+      && familyEmergencyChecklistStatuses.has(String(value.status));
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'member_status') {
+    const valid = validManagedLifeId(value.planId)
+      && validManagedLifeId(value.memberPersonId)
+      && familyEmergencyMemberStatuses.has(String(value.status))
+      && validManagedLifeTimestamp(value.occurredAt)
+      && optionalFamilyEmergencyText(value.note, 500);
     return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
   }
 

@@ -1,5 +1,10 @@
 import { useMemo, useState } from 'react';
 import type {
+  FamilyEmergencyChecklistStatus,
+  FamilyEmergencyItemType,
+  FamilyEmergencyMeetingPointKind,
+  FamilyEmergencyMemberStatus,
+  FamilyEmergencyPlanKind,
   FamilyMemberView,
   ManagedHomeInventoryItemType,
   ManagedHomeInventoryLedgerItemView,
@@ -10,6 +15,7 @@ import type {
   ManagedLifeReminderKind,
   ManagedLifeWorkspaceView,
   RecordManagedHomeInventoryItemInput,
+  RecordFamilyEmergencyItemInput,
   RecordManagedLifeItemInput,
   RecordPrivacy
 } from '@ppt/domain';
@@ -21,7 +27,7 @@ interface ManagedLifePanelProps {
   readonly onRecord: (input: RecordManagedLifeItemInput) => Promise<void>;
 }
 
-type PanelMode = 'profile'|'activity'|'life_document'|'home_inventory';
+type PanelMode = 'profile'|'activity'|'life_document'|'home_inventory'|'emergency';
 type HomeRoomKind = 'living_room'|'bedroom'|'kitchen'|'bathroom'|'storage'|'garage'|'garden'|'other';
 type HomeMeterKind = 'electricity'|'water'|'natural_gas'|'other';
 type HomeReadingUnit = 'wh'|'milliliter'|'milliliter_cubic_meter_equivalent'|'custom_milliunit';
@@ -87,6 +93,21 @@ const readingUnitFor: Record<HomeMeterKind, HomeReadingUnit> = {
 const readingUnitLabels: Record<HomeReadingUnit, string> = {
   wh: 'Wh', milliliter: 'ml', milliliter_cubic_meter_equivalent: 'ml (m³ eşdeğeri)',
   custom_milliunit: 'özel mili-birim'
+};
+const emergencyItemLabels: Record<FamilyEmergencyItemType, string> = {
+  emergency_plan: 'Afet / tahliye planı', meeting_point: 'Buluşma noktası',
+  external_contact: 'Şehir dışı irtibat', checklist_item: 'Kontrol listesi maddesi',
+  checklist_status: 'Kontrol listesi durumu', member_status: 'Aile üyesi durumu'
+};
+const emergencyPlanKindLabels: Record<FamilyEmergencyPlanKind, string> = {
+  general: 'Genel acil durum', earthquake: 'Deprem', fire: 'Yangın', flood: 'Sel',
+  evacuation: 'Tahliye', other: 'Diğer'
+};
+const emergencyMeetingPointLabels: Record<FamilyEmergencyMeetingPointKind, string> = {
+  primary: 'Birincil buluşma noktası', alternate: 'Alternatif buluşma noktası'
+};
+const emergencyMemberStatusLabels: Record<FamilyEmergencyMemberStatus, string> = {
+  safe: 'İyiyim', needs_help: 'Yardım lazım'
 };
 
 const remindersByCategory: Record<ManagedLifeCategory, readonly ManagedLifeReminderKind[]> = {
@@ -221,6 +242,28 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
   const [serviceKind, setServiceKind] = useState<HomeServiceKind>('maintenance');
   const [homeDocumentKind, setHomeDocumentKind] = useState<HomeDocumentKind>('invoice');
   const [supersedesItemId, setSupersedesItemId] = useState('');
+
+  const [emergencyType, setEmergencyType] = useState<FamilyEmergencyItemType>('emergency_plan');
+  const [emergencyPlanId, setEmergencyPlanId] = useState('');
+  const [emergencyPlanKind, setEmergencyPlanKind] = useState<FamilyEmergencyPlanKind>('general');
+  const [emergencyTitle, setEmergencyTitle] = useState('');
+  const [evacuationInstructions, setEvacuationInstructions] = useState('');
+  const [meetingPointKind, setMeetingPointKind] = useState<FamilyEmergencyMeetingPointKind>('primary');
+  const [meetingPointLabel, setMeetingPointLabel] = useState('');
+  const [meetingPointAddress, setMeetingPointAddress] = useState('');
+  const [meetingPointDirections, setMeetingPointDirections] = useState('');
+  const [contactName, setContactName] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
+  const [contactCity, setContactCity] = useState('');
+  const [checklistLabel, setChecklistLabel] = useState('');
+  const [checklistSortOrder, setChecklistSortOrder] = useState('0');
+  const [checklistItemId, setChecklistItemId] = useState('');
+  const [checklistStatus, setChecklistStatus] = useState<FamilyEmergencyChecklistStatus>('open');
+  const [memberPersonId, setMemberPersonId] = useState(people[0]?.id ?? '');
+  const [memberStatus, setMemberStatus] = useState<FamilyEmergencyMemberStatus>('safe');
+  const [memberStatusAt, setMemberStatusAt] = useState(localDateTime);
+  const [emergencyNote, setEmergencyNote] = useState('');
+  const [emergencySupersedesItemId, setEmergencySupersedesItemId] = useState('');
   const [message, setMessage] = useState('');
   const [messageTone, setMessageTone] = useState<'success'|'danger'>('success');
 
@@ -244,6 +287,14 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
     : targetType === 'belonging' ? belongings
       : targetType === 'warranty' ? warranties : services;
   const personNames = useMemo(() => new Map(people.map((person) => [person.id, person.displayName])), [people]);
+  const emergencyPlans = workspace?.emergencyPlans ?? [];
+  const selectedEmergencyPlan = emergencyPlans.find((plan) => plan.id === emergencyPlanId);
+  const emergencyCorrectionOptions = emergencyType === 'meeting_point'
+    ? selectedEmergencyPlan?.meetingPoints ?? []
+    : emergencyType === 'external_contact'
+      ? selectedEmergencyPlan?.externalContacts ?? []
+      : emergencyType === 'checklist_item'
+        ? selectedEmergencyPlan?.checklistItems ?? [] : [];
 
   const changeCategory = (next: ManagedLifeCategory) => {
     setCategory(next);
@@ -265,6 +316,9 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
     setInventoryType(next); setSupersedesItemId(''); setTargetItemId('');
     if (next === 'service') setTargetType('belonging');
     if (next === 'document') setTargetType('belonging');
+  };
+  const changeEmergencyType = (next: FamilyEmergencyItemType) => {
+    setEmergencyType(next); setEmergencySupersedesItemId(''); setChecklistItemId('');
   };
 
   const submitProfile = async () => {
@@ -344,13 +398,49 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
     setWarrantyStartsAt(''); setWarrantyEndsAt(''); setWarrantyReminderAt('');
     setArchiveItemId(''); setDocumentLabel(''); setSupersedesItemId('');
   };
+  const submitEmergency = async () => {
+    const correction = emergencySupersedesItemId ? { supersedesItemId:emergencySupersedesItemId } : {};
+    let input:RecordFamilyEmergencyItemInput;
+    switch (emergencyType) {
+      case 'emergency_plan': input = {
+        itemType:'emergency_plan', planKind:emergencyPlanKind, title:emergencyTitle,
+        evacuationInstructions
+      }; break;
+      case 'meeting_point': input = {
+        itemType:'meeting_point', planId:emergencyPlanId, meetingPointKind,
+        label:meetingPointLabel, ...(meetingPointAddress.trim() ? { address:meetingPointAddress } : {}),
+        ...(meetingPointDirections.trim() ? { directions:meetingPointDirections } : {}), ...correction
+      }; break;
+      case 'external_contact': input = {
+        itemType:'external_contact', planId:emergencyPlanId, name:contactName,
+        phoneE164:contactPhone, city:contactCity, ...(emergencyNote.trim() ? { note:emergencyNote } : {}),
+        ...correction
+      }; break;
+      case 'checklist_item': input = {
+        itemType:'checklist_item', planId:emergencyPlanId, label:checklistLabel,
+        sortOrder:Number(checklistSortOrder), ...correction
+      }; break;
+      case 'checklist_status': input = {
+        itemType:'checklist_status', planId:emergencyPlanId, checklistItemId, status:checklistStatus
+      }; break;
+      case 'member_status': input = {
+        itemType:'member_status', planId:emergencyPlanId, memberPersonId, status:memberStatus,
+        occurredAt:toIso(memberStatusAt), ...(emergencyNote.trim() ? { note:emergencyNote } : {})
+      }; break;
+    }
+    await onRecord(input);
+    setEmergencyTitle(''); setEvacuationInstructions(''); setMeetingPointLabel('');
+    setMeetingPointAddress(''); setMeetingPointDirections(''); setContactName(''); setContactPhone('');
+    setContactCity(''); setChecklistLabel(''); setEmergencyNote(''); setEmergencySupersedesItemId('');
+  };
   const submit = async () => {
     try {
       setMessage('');
       if (mode === 'profile') await submitProfile();
       else if (mode === 'activity') await submitActivity();
       else if (mode === 'life_document') await submitLifeDocument();
-      else await submitHomeInventory();
+      else if (mode === 'home_inventory') await submitHomeInventory();
+      else await submitEmergency();
       setMessageTone('success'); setMessage('Kayıt güvenli yerel deftere eklendi.');
     } catch (error) {
       setMessageTone('danger'); setMessage(error instanceof Error ? error.message : 'Kayıt eklenemedi.');
@@ -376,19 +466,38 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
     || (inventoryType === 'document' && targetItemId
       && /^[A-Za-z0-9][A-Za-z0-9._-]{0,159}$/u.test(archiveItemId))
   ));
+  const emergencyReady = Boolean(
+    (emergencyType === 'emergency_plan' && emergencyTitle.trim().length >= 2
+      && evacuationInstructions.trim().length >= 2)
+    || (emergencyType === 'meeting_point' && emergencyPlanId && meetingPointLabel.trim().length >= 2)
+    || (emergencyType === 'external_contact' && emergencyPlanId && contactName.trim().length >= 2
+      && /^\+[1-9][0-9]{7,14}$/u.test(contactPhone) && contactCity.trim().length >= 2)
+    || (emergencyType === 'checklist_item' && emergencyPlanId && checklistLabel.trim().length >= 2
+      && Number.isSafeInteger(Number(checklistSortOrder)) && Number(checklistSortOrder) >= 0
+      && Number(checklistSortOrder) <= 10_000)
+    || (emergencyType === 'checklist_status' && emergencyPlanId && checklistItemId)
+    || (emergencyType === 'member_status' && emergencyPlanId && memberPersonId && memberStatusAt)
+  );
   const submitReady = mode === 'profile' ? profileReady
     : mode === 'activity' ? activityReady
-      : mode === 'life_document' ? lifeDocumentReady : homeInventoryReady;
+      : mode === 'life_document' ? lifeDocumentReady
+        : mode === 'home_inventory' ? homeInventoryReady : emergencyReady;
 
   return <>
     <Surface className="span-2">
-      <SectionHeader eyebrow="B5 · EXT-030 · EXT-032" title="Yaşam Merkezi ve ev envanteri"/>
+      <SectionHeader eyebrow="B5 · EXT-009 · EXT-010 · EXT-013 · EXT-030 · EXT-032" title="Yaşam Merkezi, ev envanteri ve acil durum"/>
       <div className="button-row managed-life-mode-grid" role="group" aria-label="Yaşam kaydı türü">
         <Button tone={mode === 'profile' ? 'primary' : 'default'} onClick={() => setMode('profile')}>Profil</Button>
         <Button tone={mode === 'activity' ? 'primary' : 'default'} onClick={() => setMode('activity')}>Etkinlik / gider</Button>
         <Button tone={mode === 'life_document' ? 'primary' : 'default'} onClick={() => setMode('life_document')}>Profil belgesi</Button>
         <Button tone={mode === 'home_inventory' ? 'primary' : 'default'} onClick={() => setMode('home_inventory')}>Ev alanı ve envanter</Button>
+        <Button tone={mode === 'emergency' ? 'primary' : 'default'} onClick={() => setMode('emergency')}>Acil durum merkezi</Button>
       </div>
+      {mode === 'emergency' && <div className="notes-card family-emergency-warning" role="note">
+        <strong>Çevrimdışı aile kaydıdır; acil yardım çağrısı değildir.</strong>
+        <small>Harita veya canlı konum sorgulanmaz; SMS, e-posta ya da mesaj gönderilmez ve acil servis aranmaz.</small>
+        <small>“Yardım lazım” durumu yalnız bu cihazdaki yetkili aile çalışma alanına kaydedilir. Teslim veya acil servis müdahale garantisi verilmez.</small>
+      </div>}
       <div className="notes-card managed-life-truth-card">
         <strong>Yalnız manuel, yerel takip</strong>
         <small>Akıllı sayaç, sağlayıcı veya garanti sicili sorgulanmaz; OCR, servis rezervasyonu, ödeme ve ağ erişimi yapılmaz.</small>
@@ -397,7 +506,7 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
     </Surface>
 
     <Surface className="workspace-form managed-life-form">
-      <SectionHeader eyebrow="Yeni kayıt" title={mode === 'profile' ? 'Yaşam profili' : mode === 'activity' ? 'Etkinlik ve hatırlatma' : mode === 'life_document' ? 'Profil arşiv bağlantısı' : 'Ev envanteri olayı'}/>
+      <SectionHeader eyebrow="Yeni kayıt" title={mode === 'profile' ? 'Yaşam profili' : mode === 'activity' ? 'Etkinlik ve hatırlatma' : mode === 'life_document' ? 'Profil arşiv bağlantısı' : mode === 'home_inventory' ? 'Ev envanteri olayı' : 'Çevrimdışı acil durum kaydı'}/>
       {mode === 'profile' ? <>
         <label>Kayıt sahibi<select value={ownerPersonId} onChange={(event) => setOwnerPersonId(event.target.value)}>{people.map((person) => <option key={person.id} value={person.id}>{person.displayName}</option>)}</select></label>
         <label>Kategori<select value={category} onChange={(event) => changeCategory(event.target.value as ManagedLifeCategory)}>{Object.entries(categoryLabels).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label>
@@ -424,6 +533,16 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
         {inventoryType === 'service' && <><label>Hedef türü<select value={targetType} onChange={(event) => { setTargetType(event.target.value as HomeServiceTargetType); setTargetItemId(''); }}><option value="room">Ev alanı / oda</option><option value="belonging">Eşya</option><option value="meter">Sayaç</option></select></label><label>Servis hedefi<select value={targetItemId} onChange={(event) => setTargetItemId(event.target.value)}><option value="">Seçin</option>{serviceTargets.map((item) => <option key={item.id} value={item.id}>{inventoryItemLabel(item)}</option>)}</select></label><label>Servis türü<select value={serviceKind} onChange={(event) => setServiceKind(event.target.value as HomeServiceKind)}>{Object.entries(serviceKindLabels).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Gerçekleşme zamanı<input type="datetime-local" max={localDateTime()} value={occurredAt} onChange={(event) => setOccurredAt(event.target.value)}/></label><label>Sağlayıcı (isteğe bağlı)<input maxLength={160} value={provider} onChange={(event) => setProvider(event.target.value)}/></label><label>Manuel tutar<input type="number" min="0.01" step="0.01" disabled={Boolean(financeExpenseId)} value={amount} onChange={(event) => setAmount(event.target.value)}/></label><label>Para birimi<input maxLength={3} disabled={Boolean(financeExpenseId)} value={currency} onChange={(event) => setCurrency(event.target.value.toUpperCase())}/></label><label>Opak finans gideri kimliği (isteğe bağlı)<input maxLength={160} disabled={Boolean(amount)} value={financeExpenseId} onChange={(event) => setFinanceExpenseId(event.target.value)}/></label><label>Not (isteğe bağlı)<textarea maxLength={500} value={note} onChange={(event) => setNote(event.target.value)}/></label></>}
         {inventoryType === 'document' && <><label>Hedef türü<select value={targetType} onChange={(event) => { setTargetType(event.target.value as HomeDocumentTargetType); setTargetItemId(''); }}><option value="belonging">Eşya</option><option value="meter">Sayaç</option><option value="warranty">Garanti</option><option value="service">Servis</option></select></label><label>Belge hedefi<select value={targetItemId} onChange={(event) => setTargetItemId(event.target.value)}><option value="">Seçin</option>{documentTargets.map((item) => <option key={item.id} value={item.id}>{inventoryItemLabel(item)}</option>)}</select></label><label>Belge türü<select value={homeDocumentKind} onChange={(event) => setHomeDocumentKind(event.target.value as HomeDocumentKind)}>{Object.entries(homeDocumentKindLabels).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Opak arşiv öğesi kimliği<input autoComplete="off" spellCheck={false} maxLength={160} value={archiveItemId} onChange={(event) => setArchiveItemId(event.target.value)}/></label><label>Etiket (isteğe bağlı)<input maxLength={120} value={documentLabel} onChange={(event) => setDocumentLabel(event.target.value)}/></label><div className="notes-card"><strong>Belge içeriği bu forma girmez.</strong><small>Yalnız opak arşiv kimliği ilişkilendirilir; dosya seçilmez, yol, ad, hash veya ham içerik taşınmaz.</small></div></>}
         <label>Önceki kaydı düzelt (isteğe bağlı)<select value={supersedesItemId} onChange={(event) => setSupersedesItemId(event.target.value)}><option value="">Yeni kayıt</option>{supersessionOptions.map((item) => <option key={item.id} value={item.id}>{inventoryItemLabel(item)} · {formatDate(item.createdAt)}</option>)}</select></label>
+      </> : mode === 'emergency' ? <>
+        {emergencyType !== 'emergency_plan' && <label>Acil durum planı<select value={emergencyPlanId} onChange={(event) => { setEmergencyPlanId(event.target.value); setChecklistItemId(''); setEmergencySupersedesItemId(''); }}><option value="">Seçin</option>{emergencyPlans.map((plan) => <option key={plan.id} value={plan.id}>{emergencyPlanKindLabels[plan.planKind]} · {plan.title}</option>)}</select></label>}
+        <div className="managed-home-inventory-tabs family-emergency-tabs" role="group" aria-label="Acil durum kayıt türü">{(Object.keys(emergencyItemLabels) as FamilyEmergencyItemType[]).map((itemType) => <Button key={itemType} tone={emergencyType === itemType ? 'primary' : 'default'} onClick={() => changeEmergencyType(itemType)}>{emergencyItemLabels[itemType]}</Button>)}</div>
+        {emergencyType === 'emergency_plan' && <><label>Plan türü<select value={emergencyPlanKind} onChange={(event) => setEmergencyPlanKind(event.target.value as FamilyEmergencyPlanKind)}>{Object.entries(emergencyPlanKindLabels).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Plan başlığı<input maxLength={120} value={emergencyTitle} onChange={(event) => setEmergencyTitle(event.target.value)}/></label><label>Tahliye talimatı<textarea maxLength={2000} value={evacuationInstructions} onChange={(event) => setEvacuationInstructions(event.target.value)} placeholder="Aile için kısa, uygulanabilir adımlar"/></label><small>Plan aile görünürlüğüyle ve oturumunuza bağlı koordinatör kişiyle oluşturulur.</small></>}
+        {emergencyType === 'meeting_point' && <><label>Nokta türü<select value={meetingPointKind} onChange={(event) => setMeetingPointKind(event.target.value as FamilyEmergencyMeetingPointKind)}>{Object.entries(emergencyMeetingPointLabels).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Buluşma noktası etiketi<input maxLength={240} value={meetingPointLabel} onChange={(event) => setMeetingPointLabel(event.target.value)} placeholder="Örn. Mahalle parkı kuzey kapısı"/></label><label>Manuel adres (isteğe bağlı)<textarea maxLength={300} value={meetingPointAddress} onChange={(event) => setMeetingPointAddress(event.target.value)}/></label><label>Ulaşım tarifi (isteğe bağlı)<textarea maxLength={500} value={meetingPointDirections} onChange={(event) => setMeetingPointDirections(event.target.value)}/></label><small>Adres yalnız yerel aile planında tutulur; harita ve canlı konum sorgusu yapılmaz.</small></>}
+        {emergencyType === 'external_contact' && <><label>Şehir dışı irtibat adı<input maxLength={120} value={contactName} onChange={(event) => setContactName(event.target.value)}/></label><label>Telefon (E.164)<input type="tel" autoComplete="off" spellCheck={false} maxLength={16} value={contactPhone} onChange={(event) => setContactPhone(event.target.value)} placeholder="+905551112233"/></label><label>Şehir<input maxLength={120} value={contactCity} onChange={(event) => setContactCity(event.target.value)}/></label><label>Not (isteğe bağlı)<textarea maxLength={500} value={emergencyNote} onChange={(event) => setEmergencyNote(event.target.value)}/></label><small>Numara yalnız yetkili aile çalışma alanında tam gösterilir; sağlayıcıya, loga veya dışa aktarıma gönderilmez.</small></>}
+        {emergencyType === 'checklist_item' && <><label>Kontrol maddesi<input maxLength={240} value={checklistLabel} onChange={(event) => setChecklistLabel(event.target.value)} placeholder="Örn. Gaz vanasını kapat"/></label><label>Sıra<input type="number" min="0" max="10000" step="1" value={checklistSortOrder} onChange={(event) => setChecklistSortOrder(event.target.value)}/></label></>}
+        {emergencyType === 'checklist_status' && <><label>Kontrol maddesi<select value={checklistItemId} onChange={(event) => setChecklistItemId(event.target.value)}><option value="">Seçin</option>{selectedEmergencyPlan?.checklistItems.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label><label>Durum<select value={checklistStatus} onChange={(event) => setChecklistStatus(event.target.value as FamilyEmergencyChecklistStatus)}><option value="open">Açık</option><option value="completed">Tamamlandı</option></select></label></>}
+        {emergencyType === 'member_status' && <><label>Durumu bildirilen üye<select value={memberPersonId} onChange={(event) => setMemberPersonId(event.target.value)}><option value="">Seçin</option>{people.map((person) => <option key={person.id} value={person.id}>{person.displayName}</option>)}</select></label><label>Durum<select value={memberStatus} onChange={(event) => setMemberStatus(event.target.value as FamilyEmergencyMemberStatus)}><option value="safe">İyiyim</option><option value="needs_help">Yardım lazım</option></select></label><label>Bildirim zamanı<input type="datetime-local" max={localDateTime()} value={memberStatusAt} onChange={(event) => setMemberStatusAt(event.target.value)}/></label><label>Not (isteğe bağlı)<textarea maxLength={500} value={emergencyNote} onChange={(event) => setEmergencyNote(event.target.value)}/></label><div className="notes-card family-emergency-warning"><strong>{memberStatus === 'needs_help' ? 'Bu düğme acil servis çağırmaz.' : 'Durum yalnız yerel plana yazılır.'}</strong><small>Kendi durumunuzu bildirebilirsiniz. Başkası adına bildirim yalnız merkezi yetki denetimi izin verirse kabul edilir ve gerçek bildiren kişi denetim izine bağlanır.</small></div></>}
+        {(emergencyType === 'meeting_point' || emergencyType === 'external_contact' || emergencyType === 'checklist_item') && <label>Önceki kaydı düzelt (isteğe bağlı)<select value={emergencySupersedesItemId} onChange={(event) => setEmergencySupersedesItemId(event.target.value)}><option value="">Yeni kayıt</option>{emergencyCorrectionOptions.map((item) => <option key={item.id} value={item.id}>{item.itemType === 'meeting_point' ? item.label : item.itemType === 'external_contact' ? item.name : item.label} · {formatDate(item.createdAt)}</option>)}</select></label>}
       </> : <>
         <label>Üst yaşam profili<select value={recordId} onChange={(event) => changeProfile(event.target.value)}><option value="">Seçin</option>{workspace?.profiles.map((profile) => <option key={profile.id} value={profile.id}>{categoryLabels[profile.category]} · {profile.title}</option>)}</select></label>
         {mode === 'activity' ? <>
@@ -449,7 +568,7 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
     </Surface>
 
     <Surface className="workspace-summary managed-life-summary">
-      <SectionHeader eyebrow={`${workspace?.profiles.length ?? 0} profil · ${homeItems.length} ev envanteri olayı`} title="Yönetilen yaşam görünümü"/>
+      <SectionHeader eyebrow={`${workspace?.profiles.length ?? 0} profil · ${homeItems.length} ev envanteri olayı · ${emergencyPlans.length} acil durum planı`} title="Yönetilen yaşam görünümü"/>
       {!workspace?.profiles.length ? <EmptyState title="Yönetilen yaşam profili yok" body="Sigorta, abonelik, eğitim, istihdam, resmî işlem, ev veya araç profili ekleyin."/> : workspace.profiles.map((profile) => {
         const profileHomeItems = homeItems.filter((item) => item.recordId === profile.id);
         return <div className="context-stat managed-life-profile-card" key={profile.id}>
@@ -461,11 +580,22 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
           {profileHomeItems.length > 0 && <div className="managed-home-inventory-list">{profileHomeItems.map((item) => <article className="managed-home-inventory-row" key={item.id}><div><b>{homeInventoryLabels[item.itemType]}</b><strong>{inventoryItemLabel(item)}</strong><small>{inventoryItemDetail(item, profileHomeItems)}</small></div><span>Manuel · {item.externalVerification === 'not_performed' ? 'doğrulanmadı' : '—'}</span></article>)}</div>}
         </div>;
       })}
+      {emergencyPlans.length === 0 ? <EmptyState title="Acil durum planı yok" body="Çevrimdışı afet/tahliye planı oluşturarak buluşma, irtibat, kontrol ve üye durumunu aynı yerel çalışma alanında yönetin."/> : <div className="family-emergency-plan-list">{emergencyPlans.map((plan) => <article className="family-emergency-plan-card" key={plan.id}>
+        <header><div><b>{emergencyPlanKindLabels[plan.planKind]}</b><strong>{plan.title}</strong></div><span>Yerel · Aile</span></header>
+        <p>{plan.evacuationInstructions}</p>
+        <section><h4>Buluşma noktaları</h4>{plan.meetingPoints.length ? plan.meetingPoints.map((point) => <div className="family-emergency-row" key={point.id}><strong>{emergencyMeetingPointLabels[point.meetingPointKind]} · {point.label}</strong><small>{point.address ?? 'Adres girilmedi'}{point.directions ? ` · ${point.directions}` : ''}</small></div>) : <small>Henüz buluşma noktası yok.</small>}</section>
+        <section><h4>Şehir dışı irtibat</h4>{plan.externalContacts.length ? plan.externalContacts.map((contact) => <div className="family-emergency-row" key={contact.id}><strong>{contact.name} · {contact.city}</strong><small>Telefon: {contact.phoneE164}{contact.note ? ` · ${contact.note}` : ''}</small></div>) : <small>Henüz şehir dışı irtibat yok.</small>}</section>
+        <section><h4>Kontrol listesi</h4>{plan.checklistItems.length ? plan.checklistItems.map((item) => <div className="family-emergency-row" key={item.id}><strong>{item.latestStatus?.status === 'completed' ? '✓' : '○'} {item.label}</strong><small>{item.latestStatus?.status === 'completed' ? 'Tamamlandı' : 'Açık'} · sıra {item.sortOrder}</small></div>) : <small>Henüz kontrol maddesi yok.</small>}</section>
+        <section><h4>Son aile üyesi durumları</h4>{plan.latestMemberStatuses.length ? plan.latestMemberStatuses.map((item) => <div className={`family-emergency-row member-status-${item.status}`} key={item.id}><strong>{personNames.get(item.memberPersonId) ?? 'Aile üyesi'} · {emergencyMemberStatusLabels[item.status]}</strong><small>{formatDate(item.occurredAt)} · Bildiren: {personNames.get(item.reportedByPersonId) ?? 'Yetkili aile üyesi'}{item.note ? ` · ${item.note}` : ''}</small></div>) : <small>Henüz üye durum bildirimi yok.</small>}</section>
+      </article>)}</div>}
       <div className="notes-card managed-life-truth-card">
         <strong>Çalışma alanı doğruluk beyanı</strong>
         <small>Kaynak: {workspace?.dataSource === 'manual' ? 'Manuel' : '—'} · Akıllı sayaç: {workspace?.smartMeterLookup === 'not_performed' ? 'Sorgulanmadı' : '—'} · Sağlayıcı teması: {workspace?.providerContact === 'not_performed' ? 'Yapılmadı' : '—'}</small>
         <small>Garanti sicili: {workspace?.warrantyLookup === 'not_performed' ? 'Sorgulanmadı' : '—'} · OCR: {workspace?.ocr === 'not_performed' ? 'Yapılmadı' : '—'} · Ödeme: {workspace?.paymentExecution === 'not_performed' ? 'Yapılmadı' : '—'}</small>
         <small>Belge içeriği açığa çıkarma: {workspace?.documentContentExposure === 'not_performed' ? 'Yapılmadı' : '—'} · Ağ gerçeği üretilmez</small>
+        <strong>Acil durum doğruluk sınırı</strong>
+        <small>Çevrimdışı kullanılabilirlik: {workspace?.offlineAvailability === 'local_only' ? 'Yalnız yerel veri' : '—'} · Harita: {workspace?.mapLookup === 'not_performed' ? 'Sorgulanmadı' : '—'} · Canlı konum: {workspace?.liveLocation === 'not_performed' ? 'Alınmadı' : '—'}</small>
+        <small>Mesaj teslimi: {workspace?.messageDelivery === 'not_performed' ? 'Yapılmadı' : '—'} · Acil servis teması: {workspace?.emergencyServiceContact === 'not_performed' ? 'Kurulmadı' : '—'} · Garanti: {workspace?.emergencyServiceGuarantee === 'not_claimed' ? 'İddia edilmiyor' : '—'} · Ağ çıkışı: {workspace?.networkEgressAdded === false ? 'Eklenmedi' : '—'}</small>
       </div>
     </Surface>
   </>;

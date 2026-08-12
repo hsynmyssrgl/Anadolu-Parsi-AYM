@@ -1,5 +1,10 @@
 import { asFamilyId, asIsoDateTime, asPersonId } from '@ppt/core';
 import type {
+  FamilyEmergencyChecklistStatus,
+  FamilyEmergencyItemType,
+  FamilyEmergencyMeetingPointKind,
+  FamilyEmergencyMemberStatus,
+  FamilyEmergencyPlanKind,
   LifeRecordView,
   ManagedHomeBelongingKind,
   ManagedHomeDocumentKind,
@@ -20,6 +25,8 @@ import type {
 } from '@ppt/domain';
 import {
   assertPolicyAuthorizedRepositoryContext,
+  type FamilyEmergencyLedgerItemRow,
+  type FamilyEmergencyPlanLedgerItemRow,
   type LifeAutomationDueProjectionRow,
   type LifeAutomationRunSourceProjectionRow,
   type ManagedHomeInventoryLedgerItemRow,
@@ -257,6 +264,77 @@ const mapManagedHomeInventoryItem = (
   };
 };
 
+const familyEmergencyColumns = `
+  emergency.id,emergency.family_id,emergency.owner_person_id,emergency.item_type,
+  emergency.plan_id,emergency.parent_item_id,emergency.supersedes_item_id,
+  emergency.plan_kind,emergency.title,emergency.evacuation_instructions,
+  emergency.meeting_point_kind,emergency.label,emergency.address,emergency.directions,
+  emergency.contact_name,emergency.phone_e164,emergency.city,emergency.sort_order,
+  emergency.checklist_status,emergency.member_person_id,emergency.reported_by_person_id,
+  emergency.member_status,emergency.occurred_at,emergency.note,emergency.privacy,
+  emergency.data_source,emergency.created_at
+`;
+
+const mapFamilyEmergencyItem = (row:Record<string, unknown>):FamilyEmergencyLedgerItemRow => {
+  const common = {
+    id: String(row.id),
+    familyId: asFamilyId(String(row.family_id)),
+    ownerPersonId: asPersonId(String(row.owner_person_id)),
+    privacy: 'family' as const,
+    dataSource: 'manual' as const,
+    createdAt: asIsoDateTime(String(row.created_at))
+  };
+  const itemType = String(row.item_type) as FamilyEmergencyItemType;
+  if (itemType === 'emergency_plan') return {
+    ...common,
+    itemType,
+    planKind: String(row.plan_kind) as FamilyEmergencyPlanKind,
+    title: String(row.title),
+    evacuationInstructions: String(row.evacuation_instructions)
+  };
+  const child = { ...common, planId: String(row.plan_id) };
+  if (itemType === 'meeting_point') return {
+    ...child,
+    itemType,
+    ...(row.supersedes_item_id ? { supersedesItemId: String(row.supersedes_item_id) } : {}),
+    meetingPointKind: String(row.meeting_point_kind) as FamilyEmergencyMeetingPointKind,
+    label: String(row.label),
+    ...(row.address ? { address: String(row.address) } : {}),
+    ...(row.directions ? { directions: String(row.directions) } : {})
+  };
+  if (itemType === 'external_contact') return {
+    ...child,
+    itemType,
+    ...(row.supersedes_item_id ? { supersedesItemId: String(row.supersedes_item_id) } : {}),
+    name: String(row.contact_name),
+    phoneE164: String(row.phone_e164),
+    city: String(row.city),
+    ...(row.note ? { note: String(row.note) } : {})
+  };
+  if (itemType === 'checklist_item') return {
+    ...child,
+    itemType,
+    ...(row.supersedes_item_id ? { supersedesItemId: String(row.supersedes_item_id) } : {}),
+    label: String(row.label),
+    sortOrder: Number(row.sort_order)
+  };
+  if (itemType === 'checklist_status') return {
+    ...child,
+    itemType,
+    checklistItemId: String(row.parent_item_id),
+    status: String(row.checklist_status) as FamilyEmergencyChecklistStatus
+  };
+  return {
+    ...child,
+    itemType: 'member_status',
+    memberPersonId: asPersonId(String(row.member_person_id)),
+    reportedByPersonId: asPersonId(String(row.reported_by_person_id)),
+    status: String(row.member_status) as FamilyEmergencyMemberStatus,
+    occurredAt: asIsoDateTime(String(row.occurred_at)),
+    ...(row.note ? { note: String(row.note) } : {})
+  };
+};
+
 interface LifeReadBinding {
   readonly familyId: string;
   readonly accountId: string;
@@ -466,6 +544,36 @@ const lifeWriteBinding = (
   const binding = platformPolicyPersistenceBinding(context, 'life_record', input.resourceId);
   if (!binding) throw new Error('LIFE write requires an active platform policy receipt binding');
   return binding;
+};
+
+const assertFamilyEmergencyLookupAccess = (
+  context:PolicyAuthorizedRepositoryExecutionContext,
+  familyId:string,
+  planId:string
+):void => {
+  const authorization = context.policyAuthorization;
+  if (authorization.action === 'update') {
+    assertPolicyAuthorizedRepositoryContext(context, {
+      resourceType: 'life_record',
+      resourceId: planId,
+      action: 'update',
+      capability: 'family.write',
+      correlationId: context.correlationId,
+      resourceFamilyId: familyId
+    });
+  } else if (authorization.action === 'create') {
+    assertPolicyAuthorizedRepositoryContext(context, {
+      resourceType: 'life_record',
+      resourceId: authorization.resourceId,
+      action: 'create',
+      capability: 'family.write',
+      correlationId: context.correlationId,
+      resourceFamilyId: familyId
+    });
+  } else {
+    throw new Error('Family emergency write lookup requires create or root-bound update authorization');
+  }
+  assertReceiptSubject(context, familyId);
 };
 
 export class SqliteLifeRepository extends SqliteRepository implements
@@ -867,6 +975,182 @@ export class SqliteLifeRepository extends SqliteRepository implements
         policy.action,
         policy.capability
       );
+    });
+  }
+
+  public listFamilyEmergencyItems(
+    context:PolicyAuthorizedRepositoryExecutionContext
+  ):RepositoryResult<readonly FamilyEmergencyLedgerItemRow[]> {
+    const visibility = lifeReadBinding(context);
+    return this.execute(context, () => (
+      this.database(context).prepare(`
+        SELECT ${familyEmergencyColumns}
+        FROM family_emergency_ledger emergency
+        JOIN family_emergency_ledger profile
+          ON profile.id=CASE
+            WHEN emergency.item_type='emergency_plan' THEN emergency.id
+            ELSE emergency.plan_id
+          END
+          AND profile.item_type='emergency_plan'
+        WHERE profile.family_id=?
+          ${managedLifeVisibilitySql}
+        ORDER BY emergency.created_at DESC,emergency.id
+      `).all(
+        visibility.familyId,
+        ...lifeVisibilityParameters(visibility)
+      ) as ReadonlyArray<Record<string, unknown>>
+    ).map(mapFamilyEmergencyItem));
+  }
+
+  public findFamilyEmergencyPlan(
+    context:PolicyAuthorizedRepositoryExecutionContext,
+    id:string
+  ):RepositoryResult<FamilyEmergencyPlanLedgerItemRow | null> {
+    return this.execute(context, () => {
+      const row = this.database(context).prepare(`
+        SELECT ${familyEmergencyColumns}
+        FROM family_emergency_ledger emergency
+        WHERE emergency.id=? AND emergency.item_type='emergency_plan'
+          AND NOT EXISTS (
+            SELECT 1 FROM data_lifecycle lifecycle
+            WHERE lifecycle.resource_type='life_record'
+              AND lifecycle.resource_id=emergency.id
+              AND lifecycle.state<>'active'
+          )
+      `).get(id) as Record<string, unknown> | undefined;
+      if (!row) return null;
+      assertFamilyEmergencyLookupAccess(context, String(row.family_id), String(row.id));
+      return mapFamilyEmergencyItem(row) as FamilyEmergencyPlanLedgerItemRow;
+    });
+  }
+
+  public findFamilyEmergencyItem(
+    context:PolicyAuthorizedRepositoryExecutionContext,
+    id:string
+  ):RepositoryResult<FamilyEmergencyLedgerItemRow | null> {
+    return this.execute(context, () => {
+      const row = this.database(context).prepare(`
+        SELECT ${familyEmergencyColumns}
+        FROM family_emergency_ledger emergency
+        WHERE emergency.id=?
+          AND NOT EXISTS (
+            SELECT 1 FROM data_lifecycle lifecycle
+            WHERE lifecycle.resource_type='life_record'
+              AND lifecycle.resource_id=CASE
+                WHEN emergency.item_type='emergency_plan' THEN emergency.id
+                ELSE emergency.plan_id
+              END
+              AND lifecycle.state<>'active'
+          )
+      `).get(id) as Record<string, unknown> | undefined;
+      if (!row) return null;
+      const planId = row.item_type === 'emergency_plan' ? String(row.id) : String(row.plan_id);
+      assertFamilyEmergencyLookupAccess(context, String(row.family_id), planId);
+      return mapFamilyEmergencyItem(row);
+    });
+  }
+
+  public findFamilyEmergencyPlanForPolicyResolution(
+    context:RepositoryExecutionContext,
+    id:string
+  ):RepositoryResult<FamilyEmergencyPlanLedgerItemRow | null> {
+    return this.execute(context, () => {
+      const row = this.database(context).prepare(`
+        SELECT ${familyEmergencyColumns}
+        FROM family_emergency_ledger emergency
+        WHERE emergency.id=? AND emergency.item_type='emergency_plan'
+          AND NOT EXISTS (
+            SELECT 1 FROM data_lifecycle lifecycle
+            WHERE lifecycle.resource_type='life_record'
+              AND lifecycle.resource_id=emergency.id
+              AND lifecycle.state<>'active'
+          )
+      `).get(id) as Record<string, unknown> | undefined;
+      return row ? mapFamilyEmergencyItem(row) as FamilyEmergencyPlanLedgerItemRow : null;
+    });
+  }
+
+  public insertFamilyEmergencyItem(
+    context:PolicyAuthorizedRepositoryExecutionContext,
+    row:FamilyEmergencyLedgerItemRow
+  ):RepositoryResult<void> {
+    if (row.privacy !== 'family' || row.dataSource !== 'manual') {
+      throw new Error('Family emergency item contains a non-local or non-family execution claim');
+    }
+    const isCreate = row.itemType === 'emergency_plan' || row.itemType === 'member_status';
+    const resourceId = isCreate ? row.id : row.planId;
+    const expectedOwner = row.itemType === 'member_status' ? row.memberPersonId : row.ownerPersonId;
+    const authorization = context.policyAuthorization;
+    if (authorization.resourceOwnerPersonId !== String(expectedOwner)) {
+      throw new Error('Family emergency receipt owner does not match the exact write target');
+    }
+    if (row.itemType === 'emergency_plan'
+      && authorization.subject.personId !== String(row.ownerPersonId)) {
+      throw new Error('Family emergency plan owner must be the receipt subject');
+    }
+    if (row.itemType === 'member_status') {
+      if (authorization.subject.personId !== String(row.reportedByPersonId)) {
+        throw new Error('Family emergency reporter must be the receipt subject');
+      }
+    }
+    const policy = lifeWriteBinding(context, {
+      familyId: row.familyId,
+      resourceId,
+      action: isCreate ? 'create' : 'update'
+    });
+    const parentItemId = row.itemType === 'checklist_status' ? row.checklistItemId : undefined;
+    return this.execute(context, () => {
+      this.database(context).prepare(`
+        INSERT INTO family_emergency_ledger(
+          id,family_id,owner_person_id,item_type,plan_id,parent_item_id,supersedes_item_id,
+          plan_kind,title,evacuation_instructions,meeting_point_kind,label,address,directions,
+          contact_name,phone_e164,city,sort_order,checklist_status,member_person_id,
+          reported_by_person_id,member_status,occurred_at,note,privacy,data_source,created_at,
+          policy_receipt_hash,policy_receipt_version,policy_receipt_nonce,policy_correlation_id,
+          policy_resource_type,policy_resource_id,policy_action,policy_capability
+        ) VALUES(${Array.from({ length: 35 }, () => '?').join(',')})
+      `).run(
+        row.id,
+        row.familyId,
+        row.ownerPersonId,
+        row.itemType,
+        row.itemType === 'emergency_plan' ? null : row.planId,
+        parentItemId ?? null,
+        'supersedesItemId' in row ? row.supersedesItemId ?? null : null,
+        row.itemType === 'emergency_plan' ? row.planKind : null,
+        row.itemType === 'emergency_plan' ? row.title : null,
+        row.itemType === 'emergency_plan' ? row.evacuationInstructions : null,
+        row.itemType === 'meeting_point' ? row.meetingPointKind : null,
+        row.itemType === 'meeting_point' || row.itemType === 'checklist_item' ? row.label : null,
+        row.itemType === 'meeting_point' ? row.address ?? null : null,
+        row.itemType === 'meeting_point' ? row.directions ?? null : null,
+        row.itemType === 'external_contact' ? row.name : null,
+        row.itemType === 'external_contact' ? row.phoneE164 : null,
+        row.itemType === 'external_contact' ? row.city : null,
+        row.itemType === 'checklist_item' ? row.sortOrder : null,
+        row.itemType === 'checklist_status' ? row.status : null,
+        row.itemType === 'member_status' ? row.memberPersonId : null,
+        row.itemType === 'member_status' ? row.reportedByPersonId : null,
+        row.itemType === 'member_status' ? row.status : null,
+        row.itemType === 'member_status' ? row.occurredAt : null,
+        row.itemType === 'external_contact' || row.itemType === 'member_status' ? row.note ?? null : null,
+        row.privacy,
+        row.dataSource,
+        row.createdAt,
+        policy.receiptHash,
+        policy.receiptVersion,
+        policy.nonce,
+        context.correlationId,
+        policy.resourceType,
+        policy.resourceId,
+        policy.action,
+        policy.capability
+      );
+      if (row.itemType === 'emergency_plan') {
+        this.database(context).prepare(
+          "INSERT INTO data_lifecycle(resource_type,resource_id,owner_person_id,privacy,state,updated_at) VALUES('life_record',?,?,?,'active',?)"
+        ).run(row.id, row.ownerPersonId, row.privacy, row.createdAt);
+      }
     });
   }
 

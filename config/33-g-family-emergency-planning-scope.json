@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "33-G-FAMILY-EMERGENCY-PLANNING",
+  "decision": "DEC-218",
+  "requirements": ["B5-07", "EXT-009", "EXT-010", "EXT-013"],
+  "status": "COMPLETE",
+  "model": {
+    "table": "family_emergency_ledger",
+    "itemTypes": ["emergency_plan", "meeting_point", "external_contact", "checklist_item", "checklist_status", "member_status"],
+    "appendOnly": true,
+    "planPrivacy": "family",
+    "correctionModel": "append_only_latest_event",
+    "timestampRepresentation": "canonical_utc_iso"
+  },
+  "authorization": {
+    "planCreate": "life_record/create",
+    "planChildMutation": "life_record/update",
+    "memberStatusCreate": "life_record/create",
+    "memberStatusOwner": "memberPersonId",
+    "reporterBoundToReceiptSubject": true,
+    "capability": "family.write",
+    "crossLedgerReceiptReplayRejected": true,
+    "updatesAllowed": false,
+    "deletesAllowed": false
+  },
+  "truth": {
+    "dataSource": "manual",
+    "offlineAvailability": "local_only",
+    "mapLookup": "not_performed",
+    "liveLocation": "not_performed",
+    "messageDelivery": "not_performed",
+    "emergencyServiceContact": "not_performed",
+    "emergencyServiceGuarantee": "not_claimed",
+    "networkEgressAdded": false
+  },
+  "persistence": {
+    "migration": 85,
+    "migrationName": "b5_family_emergency_planning_ledger"
+  },
+  "validation": {
+    "boundary": "artifacts/validation/33-G-family-emergency-planning-boundary.json",
+    "contract": "artifacts/validation/33-G-family-emergency-planning-contract.json",
+    "runtime": "artifacts/validation/33-G-family-emergency-planning-runtime.json",
+    "finalEvidence": {
+      "boundaryChecksPassed": 49,
+      "contractChecksPassed": 15,
+      "runtimeChecksPassed": 11,
+      "targetedTestFilesPassed": 3,
+      "targetedTestsPassed": 15,
+      "fullVitestTestFilesPassed": 115,
+      "fullVitestTestsPassed": 983,
+      "productionWorkspaceBuildsPassed": 18,
+      "ppk021ExactAllowlistEntries": 545,
+      "ppk021UseCaseCompositionSurfaces": 277,
+      "ppk022CapabilitySurfaces": 242,
+      "latestDatabaseMigration": 85,
+      "requirementChainsComplete": 4,
+      "finalClosureEvidence": true
+    }
+  },
+  "excludedClaims": [
+    "No map, live-location, SMS, email or messaging provider is contacted.",
+    "No emergency service is contacted and no delivery or emergency-response guarantee is claimed.",
+    "EXT-011 and other open Bronze requirements remain open.",
+    "Silver readiness, Bronze Final and a new Build number are not claimed."
+  ]
+}

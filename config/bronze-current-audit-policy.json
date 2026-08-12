@@ -64,6 +64,10 @@
     "scripts/verify-33-f-home-inventory-utility-belongings-contract.mjs",
     "scripts/verify-33-f-home-inventory-utility-belongings-runtime.mjs",
     "scripts/verify-33-f-home-inventory-utility-belongings-completion.mjs",
+    "scripts/verify-family-emergency-planning-boundary.mjs",
+    "scripts/verify-33-g-family-emergency-planning-contract.mjs",
+    "scripts/verify-33-g-family-emergency-planning-runtime.mjs",
+    "scripts/verify-33-g-family-emergency-planning-completion.mjs",
     "scripts/verify-step-checkpoint-gate.mjs"
   ],
   "historicalProgressVerifier": "scripts/verify-29-d5-scope-real-progress-report.mjs",

@@ -16,6 +16,18 @@ import {
 } from '@ppt/core';
 import type {
   CreateLifeRecordInput,
+  FamilyEmergencyChecklistItemLedgerItemView,
+  FamilyEmergencyChecklistStatus,
+  FamilyEmergencyChecklistStatusLedgerItemView,
+  FamilyEmergencyExternalContactLedgerItemView,
+  FamilyEmergencyLedgerItemView,
+  FamilyEmergencyMeetingPointKind,
+  FamilyEmergencyMeetingPointLedgerItemView,
+  FamilyEmergencyMemberStatus,
+  FamilyEmergencyMemberStatusLedgerItemView,
+  FamilyEmergencyPlanKind,
+  FamilyEmergencyPlanLedgerItemView,
+  FamilyEmergencyPlanView,
   FamilyRole,
   LifeRecordView,
   LifeRecordStatus,
@@ -60,6 +72,7 @@ import type {
   RecordManagedHomeInventoryRoomInput,
   RecordManagedHomeInventoryServiceInput,
   RecordManagedHomeInventoryWarrantyInput,
+  RecordFamilyEmergencyItemInput,
   RecordPrivacy
 } from '@ppt/domain';
 import type { DomainEvent } from '@ppt/events';
@@ -67,6 +80,8 @@ import type { AuthorizationAction } from '@ppt/security';
 import { inspectManagedLifeDataContract } from './life-security.js';
 
 export {
+  FAMILY_EMERGENCY_INPUT_KEYS,
+  FAMILY_EMERGENCY_REQUIRED_INPUT_KEYS,
   MANAGED_LIFE_INITIAL_REMINDER_KEYS,
   MANAGED_HOME_INVENTORY_INPUT_KEYS,
   MANAGED_HOME_INVENTORY_REQUIRED_INPUT_KEYS,
@@ -183,9 +198,46 @@ export type ManagedHomeInventoryWriteRecord =
   | ManagedHomeInventoryServiceWriteRecord
   | ManagedHomeInventoryDocumentWriteRecord;
 
+interface FamilyEmergencyWriteRecordCommon {
+  readonly familyId:FamilyId;
+  readonly ownerPersonId:PersonId;
+  readonly privacy:'family';
+  readonly dataSource:'manual';
+  readonly createdAt:IsoDateTime;
+}
+export type FamilyEmergencyPlanWriteRecord =
+  FamilyEmergencyPlanLedgerItemView & FamilyEmergencyWriteRecordCommon;
+export type FamilyEmergencyMeetingPointWriteRecord =
+  FamilyEmergencyMeetingPointLedgerItemView & FamilyEmergencyWriteRecordCommon;
+export type FamilyEmergencyExternalContactWriteRecord =
+  FamilyEmergencyExternalContactLedgerItemView & FamilyEmergencyWriteRecordCommon;
+export type FamilyEmergencyChecklistItemWriteRecord =
+  FamilyEmergencyChecklistItemLedgerItemView & FamilyEmergencyWriteRecordCommon;
+export type FamilyEmergencyChecklistStatusWriteRecord =
+  FamilyEmergencyChecklistStatusLedgerItemView & FamilyEmergencyWriteRecordCommon;
+export type FamilyEmergencyMemberStatusWriteRecord =
+  Omit<FamilyEmergencyMemberStatusLedgerItemView, 'occurredAt'|'ownerPersonId'|'memberPersonId'|'reportedByPersonId'>
+  & FamilyEmergencyWriteRecordCommon
+  & {
+    readonly memberPersonId:PersonId;
+    readonly occurredAt:IsoDateTime;
+    readonly reportedByPersonId:PersonId;
+  };
+export type FamilyEmergencyWriteRecord =
+  | FamilyEmergencyPlanWriteRecord
+  | FamilyEmergencyMeetingPointWriteRecord
+  | FamilyEmergencyExternalContactWriteRecord
+  | FamilyEmergencyChecklistItemWriteRecord
+  | FamilyEmergencyChecklistStatusWriteRecord
+  | FamilyEmergencyMemberStatusWriteRecord;
+
 export interface LifeWriteScope {
   readonly occurredAt: IsoDateTime;
-  findPerson(personId: PersonId): Result<{ readonly id: PersonId } | null, AppError>;
+  findPerson(personId: PersonId): Result<{
+    readonly id:PersonId;
+    readonly familyId:FamilyId;
+    readonly status:string;
+  } | null, AppError>;
   authorize(input: {
     readonly action: AuthorizationAction;
     readonly resourceType: 'life_record';
@@ -208,6 +260,9 @@ export interface LifeWriteScope {
     meterId:string
   ): Result<ManagedHomeInventoryMeterReadingWriteRecord | null, AppError>;
   insertManagedHomeInventoryItem(record: ManagedHomeInventoryWriteRecord): Result<void, AppError>;
+  findFamilyEmergencyPlan(id:string): Result<FamilyEmergencyPlanWriteRecord | null, AppError>;
+  findFamilyEmergencyItem(id:string): Result<FamilyEmergencyWriteRecord | null, AppError>;
+  insertFamilyEmergencyItem(record:FamilyEmergencyWriteRecord): Result<void, AppError>;
   appendAudit(input: {
     readonly id: string;
     readonly action: string;
@@ -623,6 +678,79 @@ const validateManagedHomeInventoryCommand = (
   }
 };
 
+const familyEmergencyPlanKinds = new Set<FamilyEmergencyPlanKind>([
+  'general','earthquake','fire','flood','evacuation','other'
+]);
+const familyEmergencyMeetingPointKinds = new Set<FamilyEmergencyMeetingPointKind>([
+  'primary','alternate'
+]);
+const familyEmergencyChecklistStatuses = new Set<FamilyEmergencyChecklistStatus>([
+  'open','completed'
+]);
+const familyEmergencyMemberStatuses = new Set<FamilyEmergencyMemberStatus>([
+  'safe','needs_help'
+]);
+const familyEmergencyE164 = (value:unknown): value is string =>
+  typeof value === 'string' && /^\+[1-9][0-9]{7,14}$/u.test(value);
+
+const isFamilyEmergencyCommand = (
+  command:RecordManagedLifeItemInput,
+  inspection:ReturnType<typeof inspectManagedLifeDataContract>
+): command is RecordFamilyEmergencyItemInput => inspection.contractFamily === 'family_emergency';
+
+const validateFamilyEmergencyCommand = (
+  context:LifeApplicationContext,
+  command:RecordFamilyEmergencyItemInput
+): Result<void, AppError> => {
+  if (command.itemType === 'emergency_plan') {
+    return familyEmergencyPlanKinds.has(command.planKind)
+      && managedLifeText(command.title, 2, 120)
+      && managedLifeText(command.evacuationInstructions, 2, 2000)
+      ? ok(undefined)
+      : err(invalid(context, 'Acil durum planı türü, başlığı veya tahliye talimatı geçersiz.'));
+  }
+  if (!managedLifeId(command.planId)) {
+    return err(invalid(context, 'Acil durum plan kimliği geçersiz.'));
+  }
+  switch (command.itemType) {
+    case 'meeting_point':
+      return managedHomeOptionalId(command.supersedesItemId)
+        && familyEmergencyMeetingPointKinds.has(command.meetingPointKind)
+        && managedLifeText(command.label, 2, 240)
+        && (command.address === undefined || managedLifeText(command.address, 2, 300))
+        && (command.directions === undefined || managedLifeText(command.directions, 2, 500))
+        ? ok(undefined)
+        : err(invalid(context, 'Buluşma noktası alanları geçersiz.'));
+    case 'external_contact':
+      return managedHomeOptionalId(command.supersedesItemId)
+        && managedLifeText(command.name, 2, 120)
+        && familyEmergencyE164(command.phoneE164)
+        && managedLifeText(command.city, 2, 120)
+        && (command.note === undefined || managedLifeText(command.note, 2, 500))
+        ? ok(undefined)
+        : err(invalid(context, 'Şehir dışı irtibat alanları veya E.164 telefonu geçersiz.'));
+    case 'checklist_item':
+      return managedHomeOptionalId(command.supersedesItemId)
+        && managedLifeText(command.label, 2, 240)
+        && managedLifeInteger(command.sortOrder)
+        && command.sortOrder <= 10_000
+        ? ok(undefined)
+        : err(invalid(context, 'Kontrol listesi maddesi veya sırası geçersiz.'));
+    case 'checklist_status':
+      return managedLifeId(command.checklistItemId)
+        && familyEmergencyChecklistStatuses.has(command.status)
+        ? ok(undefined)
+        : err(invalid(context, 'Kontrol listesi durum hedefi veya değeri geçersiz.'));
+    case 'member_status':
+      return managedLifeId(command.memberPersonId)
+        && familyEmergencyMemberStatuses.has(command.status)
+        && isExactManagedLifeIsoDateTime(command.occurredAt)
+        && (command.note === undefined || managedLifeText(command.note, 2, 500))
+        ? ok(undefined)
+        : err(invalid(context, 'Aile üyesi durum bildirimi geçersiz.'));
+  }
+};
+
 const validateManagedProfileDetails = (command: RecordManagedLifeProfileInput): boolean => {
   const details = command.details as unknown as Record<string, unknown>;
   switch (command.category) {
@@ -707,6 +835,9 @@ const validateManagedLifeCommand = (
   }
   if (isManagedHomeInventoryCommand(command, inspection)) {
     return validateManagedHomeInventoryCommand(context, command);
+  }
+  if (isFamilyEmergencyCommand(command, inspection)) {
+    return validateFamilyEmergencyCommand(context, command);
   }
   if (command.itemType === 'profile') {
     if (!managedLifeId(command.ownerPersonId)
@@ -901,9 +1032,128 @@ const projectManagedHomeInventoryItem = (
   }
 };
 
+const familyEmergencyPublicCommon = (item:FamilyEmergencyWriteRecord) => Object.freeze({
+  id: item.id,
+  ownerPersonId: item.ownerPersonId,
+  privacy: 'family' as const,
+  dataSource: 'manual' as const,
+  createdAt: item.createdAt
+});
+
+const projectFamilyEmergencyItem = (item:FamilyEmergencyWriteRecord): FamilyEmergencyLedgerItemView => {
+  const common = familyEmergencyPublicCommon(item);
+  switch (item.itemType) {
+    case 'emergency_plan': return Object.freeze({
+      ...common,
+      itemType: 'emergency_plan',
+      planKind: item.planKind,
+      title: item.title,
+      evacuationInstructions: item.evacuationInstructions
+    });
+    case 'meeting_point': return Object.freeze({
+      ...common,
+      itemType: 'meeting_point',
+      planId: item.planId,
+      ...(item.supersedesItemId ? { supersedesItemId: item.supersedesItemId } : {}),
+      meetingPointKind: item.meetingPointKind,
+      label: item.label,
+      ...(item.address ? { address: item.address } : {}),
+      ...(item.directions ? { directions: item.directions } : {})
+    });
+    case 'external_contact': return Object.freeze({
+      ...common,
+      itemType: 'external_contact',
+      planId: item.planId,
+      ...(item.supersedesItemId ? { supersedesItemId: item.supersedesItemId } : {}),
+      name: item.name,
+      phoneE164: item.phoneE164,
+      city: item.city,
+      ...(item.note ? { note: item.note } : {})
+    });
+    case 'checklist_item': return Object.freeze({
+      ...common,
+      itemType: 'checklist_item',
+      planId: item.planId,
+      ...(item.supersedesItemId ? { supersedesItemId: item.supersedesItemId } : {}),
+      label: item.label,
+      sortOrder: item.sortOrder
+    });
+    case 'checklist_status': return Object.freeze({
+      ...common,
+      itemType: 'checklist_status',
+      planId: item.planId,
+      checklistItemId: item.checklistItemId,
+      status: item.status
+    });
+    case 'member_status': return Object.freeze({
+      ...common,
+      itemType: 'member_status',
+      planId: item.planId,
+      memberPersonId: item.memberPersonId,
+      reportedByPersonId: item.reportedByPersonId,
+      status: item.status,
+      occurredAt: item.occurredAt,
+      ...(item.note ? { note: item.note } : {})
+    });
+  }
+};
+
+const buildFamilyEmergencyPlans = (
+  items:readonly FamilyEmergencyWriteRecord[]
+): readonly FamilyEmergencyPlanView[] => {
+  const plans = items.filter((item): item is FamilyEmergencyPlanWriteRecord => item.itemType === 'emergency_plan');
+  const visiblePlanIds = new Set(plans.map((plan) => plan.id));
+  const children = items.filter((item): item is Exclude<FamilyEmergencyWriteRecord, FamilyEmergencyPlanWriteRecord> =>
+    item.itemType !== 'emergency_plan' && visiblePlanIds.has(item.planId));
+  const supersededIds = new Set(children.flatMap((item) =>
+    'supersedesItemId' in item && item.supersedesItemId ? [item.supersedesItemId] : []));
+  return Object.freeze(plans.map((plan):FamilyEmergencyPlanView => {
+    const planChildren = children.filter((child) => child.planId === plan.id);
+    const meetingPoints = planChildren
+      .filter((child): child is FamilyEmergencyMeetingPointWriteRecord => child.itemType === 'meeting_point')
+      .filter((child) => !supersededIds.has(child.id))
+      .map(projectFamilyEmergencyItem) as FamilyEmergencyMeetingPointLedgerItemView[];
+    const externalContacts = planChildren
+      .filter((child): child is FamilyEmergencyExternalContactWriteRecord => child.itemType === 'external_contact')
+      .filter((child) => !supersededIds.has(child.id))
+      .map(projectFamilyEmergencyItem) as FamilyEmergencyExternalContactLedgerItemView[];
+    const statuses = planChildren
+      .filter((child): child is FamilyEmergencyChecklistStatusWriteRecord => child.itemType === 'checklist_status')
+      .sort((left, right) => right.createdAt.localeCompare(left.createdAt) || right.id.localeCompare(left.id));
+    const checklistItems = planChildren
+      .filter((child): child is FamilyEmergencyChecklistItemWriteRecord => child.itemType === 'checklist_item')
+      .filter((child) => !supersededIds.has(child.id))
+      .sort((left, right) => left.sortOrder - right.sortOrder || left.id.localeCompare(right.id))
+      .map((child) => {
+        const projected = projectFamilyEmergencyItem(child) as FamilyEmergencyChecklistItemLedgerItemView;
+        const latest = statuses.find((status) => status.checklistItemId === child.id);
+        return Object.freeze({
+          ...projected,
+          ...(latest ? { latestStatus: projectFamilyEmergencyItem(latest) as FamilyEmergencyChecklistStatusLedgerItemView } : {})
+        });
+      });
+    const latestMemberByPerson = new Map<string, FamilyEmergencyMemberStatusWriteRecord>();
+    for (const status of planChildren
+      .filter((child): child is FamilyEmergencyMemberStatusWriteRecord => child.itemType === 'member_status')
+      .sort((left, right) => right.occurredAt.localeCompare(left.occurredAt)
+        || right.createdAt.localeCompare(left.createdAt) || right.id.localeCompare(left.id))) {
+      if (!latestMemberByPerson.has(status.memberPersonId)) latestMemberByPerson.set(status.memberPersonId, status);
+    }
+    return Object.freeze({
+      ...(projectFamilyEmergencyItem(plan) as FamilyEmergencyPlanLedgerItemView),
+      meetingPoints: Object.freeze(meetingPoints),
+      externalContacts: Object.freeze(externalContacts),
+      checklistItems: Object.freeze(checklistItems),
+      latestMemberStatuses: Object.freeze([...latestMemberByPerson.values()].map((status) =>
+        projectFamilyEmergencyItem(status) as FamilyEmergencyMemberStatusLedgerItemView))
+    });
+  }).sort((left, right) => right.createdAt.localeCompare(left.createdAt) || right.id.localeCompare(left.id)));
+};
+
 export const buildManagedLifeWorkspace = (input: {
   readonly items:readonly ManagedLifeLedgerItemView[];
   readonly homeInventoryItems?:readonly ManagedHomeInventoryWriteRecord[];
+  readonly emergencyItems?:readonly FamilyEmergencyWriteRecord[];
   readonly generatedAt:string;
 }): ManagedLifeWorkspaceView => {
   const profiles = input.items.filter((item): item is ManagedLifeProfileLedgerItemView => item.itemType === 'profile');
@@ -959,6 +1209,7 @@ export const buildManagedLifeWorkspace = (input: {
   return Object.freeze({
     profiles: Object.freeze(profileViews),
     homeInventoryItems: Object.freeze(homeInventoryItems),
+    emergencyPlans: buildFamilyEmergencyPlans(input.emergencyItems ?? []),
     upcomingReminders: Object.freeze(reminders
       .filter((reminder) => reminder.dueAt >= input.generatedAt)
       .sort((left, right) => left.dueAt.localeCompare(right.dueAt) || left.sourceId.localeCompare(right.sourceId))
@@ -971,7 +1222,14 @@ export const buildManagedLifeWorkspace = (input: {
     warrantyLookup: 'not_performed',
     ocr: 'not_performed',
     paymentExecution: 'not_performed',
-    documentContentExposure: 'not_performed'
+    documentContentExposure: 'not_performed',
+    offlineAvailability: 'local_only',
+    mapLookup: 'not_performed',
+    liveLocation: 'not_performed',
+    messageDelivery: 'not_performed',
+    emergencyServiceContact: 'not_performed',
+    emergencyServiceGuarantee: 'not_claimed',
+    networkEgressAdded: false
   });
 };
 
@@ -1288,6 +1546,140 @@ const validateManagedHomeInventoryRelations = (input: {
   }
 };
 
+const buildFamilyEmergencyRecord = (input: {
+  readonly context:LifeApplicationContext;
+  readonly command:RecordFamilyEmergencyItemInput;
+  readonly itemId:string;
+  readonly occurredAt:IsoDateTime;
+  readonly plan?:FamilyEmergencyPlanWriteRecord;
+  readonly reporterPersonId:PersonId;
+}): FamilyEmergencyWriteRecord => {
+  const base = {
+    id: input.itemId,
+    familyId: input.context.familyId,
+    privacy: 'family' as const,
+    dataSource: 'manual' as const,
+    createdAt: input.occurredAt
+  };
+  switch (input.command.itemType) {
+    case 'emergency_plan': return {
+      ...base,
+      ownerPersonId: input.reporterPersonId,
+      itemType: 'emergency_plan',
+      planKind: input.command.planKind,
+      title: input.command.title.trim(),
+      evacuationInstructions: input.command.evacuationInstructions.trim()
+    };
+    case 'meeting_point': return {
+      ...base,
+      ownerPersonId: input.plan!.ownerPersonId,
+      itemType: 'meeting_point',
+      planId: input.plan!.id,
+      ...(input.command.supersedesItemId ? { supersedesItemId: input.command.supersedesItemId } : {}),
+      meetingPointKind: input.command.meetingPointKind,
+      label: input.command.label.trim(),
+      ...(input.command.address?.trim() ? { address: input.command.address.trim() } : {}),
+      ...(input.command.directions?.trim() ? { directions: input.command.directions.trim() } : {})
+    };
+    case 'external_contact': return {
+      ...base,
+      ownerPersonId: input.plan!.ownerPersonId,
+      itemType: 'external_contact',
+      planId: input.plan!.id,
+      ...(input.command.supersedesItemId ? { supersedesItemId: input.command.supersedesItemId } : {}),
+      name: input.command.name.trim(),
+      phoneE164: input.command.phoneE164,
+      city: input.command.city.trim(),
+      ...(input.command.note?.trim() ? { note: input.command.note.trim() } : {})
+    };
+    case 'checklist_item': return {
+      ...base,
+      ownerPersonId: input.plan!.ownerPersonId,
+      itemType: 'checklist_item',
+      planId: input.plan!.id,
+      ...(input.command.supersedesItemId ? { supersedesItemId: input.command.supersedesItemId } : {}),
+      label: input.command.label.trim(),
+      sortOrder: input.command.sortOrder
+    };
+    case 'checklist_status': return {
+      ...base,
+      ownerPersonId: input.plan!.ownerPersonId,
+      itemType: 'checklist_status',
+      planId: input.plan!.id,
+      checklistItemId: input.command.checklistItemId,
+      status: input.command.status
+    };
+    case 'member_status': return {
+      ...base,
+      ownerPersonId: asPersonId(input.command.memberPersonId),
+      itemType: 'member_status',
+      planId: input.plan!.id,
+      memberPersonId: asPersonId(input.command.memberPersonId),
+      reportedByPersonId: input.reporterPersonId,
+      status: input.command.status,
+      occurredAt: asIsoDateTime(input.command.occurredAt),
+      ...(input.command.note?.trim() ? { note: input.command.note.trim() } : {})
+    };
+  }
+};
+
+const validateFamilyEmergencyRelations = (input: {
+  readonly context:LifeApplicationContext;
+  readonly command:Exclude<RecordFamilyEmergencyItemInput, { readonly itemType:'emergency_plan' }>;
+  readonly plan:FamilyEmergencyPlanWriteRecord;
+  readonly scope:LifeWriteScope;
+  readonly itemId:string;
+  readonly reporterPersonId:PersonId;
+}): Result<void, AppError> => {
+  if (input.plan.familyId !== input.context.familyId || input.plan.privacy !== 'family') {
+    return err(invalid(input.context, 'Acil durum alt kaydı aynı ailedeki family planına bağlanmalıdır.'));
+  }
+  const findItem = (id:string): Result<FamilyEmergencyWriteRecord, AppError> => {
+    const found = input.scope.findFamilyEmergencyItem(id);
+    if (!found.ok) return found;
+    if (!found.value
+      || found.value.familyId !== input.context.familyId
+      || found.value.privacy !== 'family'
+      || (found.value.itemType !== 'emergency_plan' && found.value.planId !== input.plan.id)) {
+      return err(invalid(input.context, 'Acil durum bağlantısı aynı plan kökünde bulunmalıdır.'));
+    }
+    return ok(found.value);
+  };
+  if ('supersedesItemId' in input.command && input.command.supersedesItemId) {
+    if (input.command.supersedesItemId === input.itemId) {
+      return err(invalid(input.context, 'Acil durum kaydı kendisini supersede edemez.'));
+    }
+    const prior = findItem(input.command.supersedesItemId);
+    if (!prior.ok) return prior;
+    if (prior.value.itemType !== input.command.itemType
+      || prior.value.ownerPersonId !== input.plan.ownerPersonId
+      || prior.value.createdAt >= input.scope.occurredAt) {
+      return err(invalid(input.context, 'Supersession aynı türdeki daha eski plan kaydını hedeflemelidir.'));
+    }
+  }
+  if (input.command.itemType === 'checklist_status') {
+    const checklist = findItem(input.command.checklistItemId);
+    return checklist.ok && checklist.value.itemType === 'checklist_item'
+      ? ok(undefined)
+      : err(invalid(input.context, 'Kontrol listesi durumu aynı plandaki maddeyi hedeflemelidir.'));
+  }
+  if (input.command.itemType === 'member_status') {
+    if (input.command.occurredAt < input.plan.createdAt
+      || input.command.occurredAt > input.scope.occurredAt) {
+      return err(invalid(input.context, 'Kişi durum zamanı plan oluşturulduktan sonra ve işlem zamanından geç olmayacak şekilde verilmelidir.'));
+    }
+    const reporter = input.scope.findPerson(input.reporterPersonId);
+    if (!reporter.ok) return reporter;
+    const member = input.scope.findPerson(asPersonId(input.command.memberPersonId));
+    if (!member.ok) return member;
+    if (!reporter.value || reporter.value.familyId !== input.context.familyId || reporter.value.status !== 'active'
+      || !member.value || member.value.familyId !== input.context.familyId || member.value.status !== 'active') {
+      return err(invalid(input.context, 'Durum bildirimi yalnız etkin aile üyeleri için yapılabilir.'));
+    }
+  }
+  return ok(undefined);
+};
+
 export class RecordManagedLifeItemUseCase {
   public constructor(private readonly unitOfWork: LifeUnitOfWork) {}
 
@@ -1299,7 +1691,7 @@ export class RecordManagedLifeItemUseCase {
       readonly auditId:string;
       readonly outboxEventId:EventId;
     };
-  }): Promise<Result<ManagedLifeLedgerItemView | ManagedHomeInventoryLedgerItemView, AppError>> {
+  }): Promise<Result<ManagedLifeLedgerItemView | ManagedHomeInventoryLedgerItemView | FamilyEmergencyLedgerItemView, AppError>> {
     const commandValidation = validateManagedLifeCommand(input.context, input.command);
     if (!commandValidation.ok) return Promise.resolve(commandValidation);
     if (!managedLifeId(input.identifiers.itemId)) {
@@ -1307,21 +1699,47 @@ export class RecordManagedLifeItemUseCase {
     }
     const inspection = inspectManagedLifeDataContract(input.command);
     const isHomeInventory = isManagedHomeInventoryCommand(input.command, inspection);
-    const isProfile = !isHomeInventory && input.command.itemType === 'profile';
-    const rootId = isProfile ? input.identifiers.itemId : input.command.recordId;
+    const isEmergency = isFamilyEmergencyCommand(input.command, inspection);
+    const isEmergencyPlan = isEmergency && input.command.itemType === 'emergency_plan';
+    const isEmergencyMemberStatus = isEmergency && input.command.itemType === 'member_status';
+    const isProfile = !isHomeInventory && !isEmergency && input.command.itemType === 'profile';
+    const rootId = isProfile || isEmergencyPlan || isEmergencyMemberStatus
+      ? input.identifiers.itemId
+      : isEmergency ? input.command.planId : input.command.recordId;
+    const aggregateRootId = isEmergency && !isEmergencyPlan ? input.command.planId : rootId;
     const profileOwner = isProfile ? asPersonId(input.command.ownerPersonId) : undefined;
     const profilePrivacy = isProfile ? input.command.privacy : undefined;
+    if (isEmergency && !input.context.actor.personId) {
+      return Promise.resolve(err(denied(input.context)));
+    }
+    const emergencyOwner = isEmergency
+      ? asPersonId(isEmergencyMemberStatus ? input.command.memberPersonId : input.context.actor.personId!)
+      : undefined;
+    const createOperation = isProfile || isEmergencyPlan || isEmergencyMemberStatus;
     const intent: LifePolicyIntent = {
-      action: isProfile ? 'create' : 'update',
+      action: createOperation ? 'create' : 'update',
       capability: 'family.write',
       resourceType: 'life_record',
       resourceId: rootId,
       purpose: 'general',
-      ...(profileOwner ? { ownerPersonId: profileOwner, privacy: profilePrivacy! } : {})
+      ...(profileOwner ? { ownerPersonId: profileOwner, privacy: profilePrivacy! } : {}),
+      ...(emergencyOwner && createOperation ? { ownerPersonId: emergencyOwner, privacy: 'family' as const } : {})
     };
     return this.unitOfWork.execute(input.context, intent, (scope) => {
       let parent: ManagedLifeProfileWriteRecord | undefined;
-      if (isProfile) {
+      let emergencyPlan:FamilyEmergencyPlanWriteRecord | undefined;
+      if (isEmergencyPlan) {
+        const reporter = scope.findPerson(emergencyOwner!);
+        if (!reporter.ok) return reporter;
+        if (!reporter.value
+          || reporter.value.familyId !== input.context.familyId
+          || reporter.value.status !== 'active') return err(missing(input.context));
+      } else if (isEmergency) {
+        const found = scope.findFamilyEmergencyPlan(input.command.planId);
+        if (!found.ok) return found;
+        if (!found.value) return err(missing(input.context));
+        emergencyPlan = found.value;
+      } else if (isProfile) {
         const person = scope.findPerson(profileOwner!);
         if (!person.ok) return person;
         if (!person.value) return err(missing(input.context));
@@ -1336,10 +1754,14 @@ export class RecordManagedLifeItemUseCase {
         }));
         parent = found.value;
       }
-      const ownerPersonId = profileOwner ?? parent!.ownerPersonId;
-      const privacy = profilePrivacy ?? parent!.privacy;
+      const ownerPersonId = isEmergency
+        ? isEmergencyPlan || isEmergencyMemberStatus
+          ? emergencyOwner!
+          : emergencyPlan!.ownerPersonId
+        : profileOwner ?? parent!.ownerPersonId;
+      const privacy:RecordPrivacy = isEmergency ? 'family' : profilePrivacy ?? parent!.privacy;
       const authorization = scope.authorize({
-        action: isProfile ? 'create' : 'update',
+        action: createOperation ? 'create' : 'update',
         resourceType: 'life_record',
         resourceId: rootId,
         ownerPersonId,
@@ -1348,8 +1770,28 @@ export class RecordManagedLifeItemUseCase {
       if (!authorization.ok) return authorization;
       if (!authorization.value) return err(denied(input.context));
 
-      let item: ManagedLifeWriteRecord | ManagedHomeInventoryWriteRecord;
-      if (isHomeInventory) {
+      let item: ManagedLifeWriteRecord | ManagedHomeInventoryWriteRecord | FamilyEmergencyWriteRecord;
+      if (isEmergency) {
+        if (!isEmergencyPlan) {
+          const relationValidation = validateFamilyEmergencyRelations({
+            context: input.context,
+            command: input.command,
+            plan: emergencyPlan!,
+            scope,
+            itemId: input.identifiers.itemId,
+            reporterPersonId: asPersonId(input.context.actor.personId!)
+          });
+          if (!relationValidation.ok) return relationValidation;
+        }
+        item = buildFamilyEmergencyRecord({
+          context: input.context,
+          command: input.command,
+          ...(emergencyPlan ? { plan: emergencyPlan } : {}),
+          itemId: input.identifiers.itemId,
+          occurredAt: scope.occurredAt,
+          reporterPersonId: asPersonId(input.context.actor.personId!)
+        });
+      } else if (isHomeInventory) {
         if (parent!.category !== 'home') {
           return err(invalid(input.context, 'Ev envanteri yalnız yönetilen home profiline bağlanabilir.'));
         }
@@ -1411,9 +1853,11 @@ export class RecordManagedLifeItemUseCase {
           occurredAt: scope.occurredAt
         });
       }
-      const saved = isHomeInventory
-        ? scope.insertManagedHomeInventoryItem(item as ManagedHomeInventoryWriteRecord)
-        : scope.insertManagedLifeItem(item as ManagedLifeWriteRecord);
+      const saved = isEmergency
+        ? scope.insertFamilyEmergencyItem(item as FamilyEmergencyWriteRecord)
+        : isHomeInventory
+          ? scope.insertManagedHomeInventoryItem(item as ManagedHomeInventoryWriteRecord)
+          : scope.insertManagedLifeItem(item as ManagedLifeWriteRecord);
       if (!saved.ok) return saved;
       const audit = scope.appendAudit({
         id: input.identifiers.auditId,
@@ -1435,16 +1879,17 @@ export class RecordManagedLifeItemUseCase {
         correlationId: input.context.correlationId,
         payload: {
           itemId: item.id,
-          recordId: rootId,
+          recordId: aggregateRootId,
           itemType: item.itemType,
-          category: isProfile ? input.command.category : parent!.category,
           privacy
         }
       });
       if (!event.ok) return event;
-      return ok(isHomeInventory
-        ? projectManagedHomeInventoryItem(item as ManagedHomeInventoryWriteRecord)
-        : item as ManagedLifeWriteRecord);
+      return ok(isEmergency
+        ? projectFamilyEmergencyItem(item as FamilyEmergencyWriteRecord)
+        : isHomeInventory
+          ? projectManagedHomeInventoryItem(item as ManagedHomeInventoryWriteRecord)
+          : item as ManagedLifeWriteRecord);
     });
   }
 }

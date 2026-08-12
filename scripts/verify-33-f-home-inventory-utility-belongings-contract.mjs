@@ -71,7 +71,7 @@ check('scope truth remains manual local no-lookup no-OCR no-payment', scope.trut
   && scope.truth?.documentContentExposure === 'not_performed'
   && scope.truth?.networkEgressAdded === false);
 check('boundary evidence is exact green and preserves platform ratchets', boundary.status === 'PASS'
-  && boundary.checksFailed === 0 && boundary.latestDatabaseMigration === 84
+  && boundary.checksFailed === 0 && boundary.latestDatabaseMigration >= 84
   && boundary.homeInventoryTables === 1 && boundary.inventoryItemTypes === 7
   && boundary.ipcChannels === 2 && boundary.networkChannels === 0
   && boundary.smartMeterLookup === 'not_performed'
@@ -83,7 +83,7 @@ check('DEC-217 is active and decision cardinality is exact', ledger.decisionCoun
   && ledger.decisions?.some((item) => item.id === 'DEC-217' && item.status === 'ACTIVE'
     && item.requirements?.join(',') === ids.join(',')
     && item.document === 'docs/decisions/DEC-217-home-inventory-utility-belongings.md'));
-check('migration 84 is latest and source-manifest identity is exact', migrationVersions.at(-1) === 84
+check('migration 84 remains exact while authorized successor migrations may be current', (migrationVersions.at(-1) ?? 0) >= 84
   && migrations.includes("createMigrationDefinition(84, 'b5_life_home_inventory_ledger'")
   && migrationManifest.status === 'passed' && migrationManifest.checkCount === 9
   && migration84?.name === 'b5_life_home_inventory_ledger'

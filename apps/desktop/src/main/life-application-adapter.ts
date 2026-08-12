@@ -482,11 +482,27 @@ export class RepositoryBackedLifeQueryPort implements LifeQueryPort {
           privacy: item.privacy
         }
       ));
+      const emergencyItems = this.dependencies.lifeRepository.listFamilyEmergencyItems(repository);
+      if (!emergencyItems.ok) return emergencyItems;
+      const visibleEmergencyPlans = emergencyItems.value.filter((item) => item.itemType === 'emergency_plan'
+        && authorize(this.#authorization, auth.value, {
+          action: 'read',
+          resourceType: 'life_record',
+          resourceId: item.id,
+          ownerPersonId: item.ownerPersonId,
+          occurredAt: repository.occurredAt,
+          privacy: item.privacy
+        }));
+      const visibleEmergencyPlanIds = new Set(visibleEmergencyPlans.map((item) => item.id));
+      const visibleEmergencyItems = emergencyItems.value.filter((item) => item.itemType === 'emergency_plan'
+        ? visibleEmergencyPlanIds.has(item.id)
+        : visibleEmergencyPlanIds.has(item.planId));
       return {
         ok: true,
         value: buildManagedLifeWorkspace({
           items: visible,
           homeInventoryItems: visibleHomeInventoryItems,
+          emergencyItems: visibleEmergencyItems,
           generatedAt: repository.occurredAt
         })
       };
@@ -509,7 +525,14 @@ class RepositoryBackedLifeWriteScope implements LifeWriteScope {
 
   public findPerson(personId: Parameters<LifeWriteScope['findPerson']>[0]): ReturnType<LifeWriteScope['findPerson']> {
     const result = this.dependencies.personRepository.findById(this.repository, personId);
-    return result.ok ? { ok: true, value: result.value ? { id: result.value.id } : null } : result;
+    return result.ok ? {
+      ok: true,
+      value: result.value ? {
+        id: result.value.id,
+        familyId: result.value.familyId,
+        status: result.value.status
+      } : null
+    } : result;
   }
 
   public authorize(input: Parameters<LifeWriteScope['authorize']>[0]): ReturnType<LifeWriteScope['authorize']> {
@@ -557,6 +580,24 @@ class RepositoryBackedLifeWriteScope implements LifeWriteScope {
     record: Parameters<LifeWriteScope['insertManagedHomeInventoryItem']>[0]
   ): ReturnType<LifeWriteScope['insertManagedHomeInventoryItem']> {
     return this.dependencies.lifeRepository.insertManagedHomeInventoryItem(this.repository, record);
+  }
+
+  public findFamilyEmergencyPlan(
+    id: Parameters<LifeWriteScope['findFamilyEmergencyPlan']>[0]
+  ): ReturnType<LifeWriteScope['findFamilyEmergencyPlan']> {
+    return this.dependencies.lifeRepository.findFamilyEmergencyPlan(this.repository, id);
+  }
+
+  public findFamilyEmergencyItem(
+    id: Parameters<LifeWriteScope['findFamilyEmergencyItem']>[0]
+  ): ReturnType<LifeWriteScope['findFamilyEmergencyItem']> {
+    return this.dependencies.lifeRepository.findFamilyEmergencyItem(this.repository, id);
+  }
+
+  public insertFamilyEmergencyItem(
+    record: Parameters<LifeWriteScope['insertFamilyEmergencyItem']>[0]
+  ): ReturnType<LifeWriteScope['insertFamilyEmergencyItem']> {
+    return this.dependencies.lifeRepository.insertFamilyEmergencyItem(this.repository, record);
   }
 
   public appendAudit(input: Parameters<LifeWriteScope['appendAudit']>[0]): ReturnType<LifeWriteScope['appendAudit']> {
