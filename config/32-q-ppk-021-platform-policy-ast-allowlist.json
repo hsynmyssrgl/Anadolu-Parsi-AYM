@@ -51,7 +51,7 @@
   },
   "expectedSurfaceCounts": {
     "CRYPTO_GLOBAL": 2,
-    "CRYPTO_IMPORT": 124,
+    "CRYPTO_IMPORT": 125,
     "DATABASE_IMPORT": 21,
     "NETWORK_IMPORT": 7,
     "REPOSITORY_IMPORT": 47,
@@ -59,7 +59,7 @@
     "SQL_CALL": 56,
     "SQL_CONSTRUCTOR": 2,
     "SQL_IMPORT": 2,
-    "USE_CASE_COMPOSITION": 251
+    "USE_CASE_COMPOSITION": 252
   },
   "allowedSurfaceKeys": [
     "CRYPTO_GLOBAL|apps/desktop/src/main/preload.ts|randomUUID",
@@ -159,6 +159,7 @@
     "CRYPTO_IMPORT|packages/core-service-client/src/local-admin-client.ts|node:crypto:randomUUID",
     "CRYPTO_IMPORT|packages/core/src/audit-chain.ts|node:crypto:createHash",
     "CRYPTO_IMPORT|packages/database/src/migration-runner.ts|node:crypto:createHash",
+    "CRYPTO_IMPORT|packages/platform-policy/src/application-security-profile-policy.ts|node:crypto:createHash",
     "CRYPTO_IMPORT|packages/platform-policy/src/derived-data-inheritance-policy.ts|node:crypto:createHash",
     "CRYPTO_IMPORT|packages/platform-policy/src/immutable-policy-decision-audit.ts|node:crypto:createHash",
     "CRYPTO_IMPORT|packages/platform-policy/src/immutable-policy-decision-audit.ts|node:crypto:createHmac",
@@ -568,6 +569,7 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/desktop-universal-api-policy-enforcement.ts|EnforceClientDataAccessUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/desktop-universal-api-policy-enforcement.ts|GetClientDataAccessBoundaryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/governed-network-egress-use-case.ts|GovernedRevocationListFetchUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetApplicationSecurityProfileGateBoundaryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetDerivedDataPolicyBoundaryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetPlatformCapabilityManifestGateBoundaryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetPlatformPolicyAstGateBoundaryUseCase",

@@ -28,6 +28,10 @@ Bir çelişki olduğunda aşağıdaki sıra uygulanır:
 Eski kararlar silinmez; tarihsel kanıt olarak korunur. Ancak aktif ürün davranışını
 belirleyemez. Çelişki sessizce birleştirilmez; değişiklik kaydına işlenir.
 
+## DEC-204 — PPK-023 uygulama güvenlik profili build kapısı
+
+32-S ile on dört kanonik uygulama, exact `PlatformApplicationId` AST envanteri üzerinden ASVS 5.0.0, MASVS 2.1.0 ve final NIST SSDF 1.1 kontrol profillerine ve uygulama başına hash-bağlı threat model bölümüne bağlanır. Dört mobil Apple profili tam MASVS setini taşır; diğer profiller yalnız exact gerekçeli N/A kullanabilir. Yeni, eksik, duplicate, stale, sahipsiz workspace'li, sürümü/kontrolü sapmış veya hash'i bozuk profil build'i fail-closed durdurur. Eşleme uygunluk sertifikası, penetrasyon testi, native runtime PASS veya çalışma yetkisi değildir. Yeni migration, veri taşıma, backfill, cutover veya SQLite/vault sahiplik değişimi yoktur. Ayrıntılı karar `docs/decisions/DEC-204-ppk-023-application-security-profile-gate.md` dosyasındadır.
+
 ## DEC-203 — PPK-022 imzalı capability manifest build/runtime kapısı
 
 32-R ile kamera, mikrofon, dosya, OCR, AI, konum ve ağ kaynakları TypeScript/JSX AST üzerinde exact kaynak yüzeyi manifestine; çalışma zamanında ise imzalı uygulama manifestindeki exact capability kümesine bağlanır. On dört kanonik uygulama eksiksiz listelenir; yalnız deployed Windows Desktop ve Windows Core Service `file.access` ile `network.access` taşır, diğer profiller boş ve yetkisizdir. Eksik, beklenmeyen, bozuk, hash/paket/uygulama/sürüm uyuşmazlıklı veya doğrulanmamış manifest fail-closed reddedilir. Desktop’ın Core Service el sıkışmasından önceki dosya bootstrap’ı ayrı sabit pin ile sınırlıdır; build manifesti tek başına runtime yetkisi değildir. Yeni migration, veri taşıma, backfill, cutover veya SQLite/vault sahiplik değişimi yoktur. Ayrıntılı karar `docs/decisions/DEC-203-ppk-022-capability-manifest-build-runtime-gate.md` dosyasındadır.

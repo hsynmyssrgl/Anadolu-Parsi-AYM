@@ -1,0 +1,327 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-S",
+  "requirement": "PPK-023",
+  "phase": "APPLICATION_SECURITY_PROFILE_CONTRACT",
+  "status": "PASS",
+  "checkCount": 71,
+  "passed": 71,
+  "failed": 0,
+  "failures": [],
+  "checks": [
+    {
+      "name": "scope identity is exact",
+      "passed": true
+    },
+    {
+      "name": "inventory identity is exact",
+      "passed": true
+    },
+    {
+      "name": "accepted registry contains PPK-023",
+      "passed": true
+    },
+    {
+      "name": "PPK-012 through PPK-022 remain complete",
+      "passed": true
+    },
+    {
+      "name": "PPK-024 remains a separate unfinished successor",
+      "passed": true
+    },
+    {
+      "name": "DEC-204 is active and ledger count is exact",
+      "passed": true
+    },
+    {
+      "name": "master decision register contains DEC-204",
+      "passed": true
+    },
+    {
+      "name": "application profile production gate passes",
+      "passed": true
+    },
+    {
+      "name": "gate maps all fourteen canonical applications",
+      "passed": true
+    },
+    {
+      "name": "gate owns both current application workspaces",
+      "passed": true
+    },
+    {
+      "name": "gate validates fourteen threat models",
+      "passed": true
+    },
+    {
+      "name": "gate pins exact standard cardinalities",
+      "passed": true
+    },
+    {
+      "name": "gate runs malicious and benign self tests",
+      "passed": true
+    },
+    {
+      "name": "gate denies compliance and profile-only native claims",
+      "passed": true
+    },
+    {
+      "name": "gate hashes bind manifest and threat model",
+      "passed": true
+    },
+    {
+      "name": "manifest is exact default deny",
+      "passed": true
+    },
+    {
+      "name": "manifest makes no certification claim",
+      "passed": true
+    },
+    {
+      "name": "manifest pins ASVS 5.0.0 stable",
+      "passed": true
+    },
+    {
+      "name": "manifest pins MASVS 2.1.0 stable",
+      "passed": true
+    },
+    {
+      "name": "manifest pins final SSDF 1.1",
+      "passed": true
+    },
+    {
+      "name": "manifest uses authoritative standard sources",
+      "passed": true
+    },
+    {
+      "name": "manifest contains fourteen unique exact profiles",
+      "passed": true
+    },
+    {
+      "name": "manifest has exactly two assurance profiles",
+      "passed": true
+    },
+    {
+      "name": "four mobile profiles use full MASVS mapping",
+      "passed": true
+    },
+    {
+      "name": "non-mobile assurance has bounded N/A rationale",
+      "passed": true
+    },
+    {
+      "name": "profile-only targets never claim native validation",
+      "passed": true
+    },
+    {
+      "name": "only current deployed targets claim current validation",
+      "passed": true
+    },
+    {
+      "name": "workspace owners are exact",
+      "passed": true
+    },
+    {
+      "name": "threat document hash is exact",
+      "passed": true
+    },
+    {
+      "name": "threat document has exactly fourteen application sections",
+      "passed": true
+    },
+    {
+      "name": "each threat section has six required fields",
+      "passed": true
+    },
+    {
+      "name": "threat model preserves no-certification truth",
+      "passed": true
+    },
+    {
+      "name": "policy pins all three standard versions",
+      "passed": true
+    },
+    {
+      "name": "policy pins exact control sets",
+      "passed": true
+    },
+    {
+      "name": "policy canonicalizes and verifies manifest hash",
+      "passed": true
+    },
+    {
+      "name": "policy fails closed for unknown malformed and incomplete mappings",
+      "passed": true
+    },
+    {
+      "name": "policy snapshot denies runtime and compliance inference",
+      "passed": true
+    },
+    {
+      "name": "platform policy exports profile policy exactly once",
+      "passed": true
+    },
+    {
+      "name": "domain boundary is content free",
+      "passed": true
+    },
+    {
+      "name": "domain exports profile boundary",
+      "passed": true
+    },
+    {
+      "name": "application use case verifies policy snapshot",
+      "passed": true
+    },
+    {
+      "name": "application boundary records no migration",
+      "passed": true
+    },
+    {
+      "name": "application exports profile use case",
+      "passed": true
+    },
+    {
+      "name": "Desktop composes policy and boundary use case",
+      "passed": true
+    },
+    {
+      "name": "Desktop registers exact zero-payload status channel",
+      "passed": true
+    },
+    {
+      "name": "preload exposes exact status method",
+      "passed": true
+    },
+    {
+      "name": "renderer global contract is typed",
+      "passed": true
+    },
+    {
+      "name": "IPC policy accepts only zero arguments",
+      "passed": true
+    },
+    {
+      "name": "IPC sharing marks profile status no-cache",
+      "passed": true
+    },
+    {
+      "name": "renderer states mapping and authority limits",
+      "passed": true
+    },
+    {
+      "name": "renderer does not expose manifest or threat hashes",
+      "passed": true
+    },
+    {
+      "name": "policy tests cover allow hash and denial matrix",
+      "passed": true
+    },
+    {
+      "name": "gate tests cover target drift and threat tamper",
+      "passed": true
+    },
+    {
+      "name": "integration tests cover IPC and no-cache policy",
+      "passed": true
+    },
+    {
+      "name": "gate uses real AST inventory and exact manifest checks",
+      "passed": true
+    },
+    {
+      "name": "pretypecheck runs PPK-023 gate",
+      "passed": true
+    },
+    {
+      "name": "prebuild runs PPK-023 gate before governed preflight",
+      "passed": true
+    },
+    {
+      "name": "combined platform policy gate invokes PPK-023 gate",
+      "passed": true
+    },
+    {
+      "name": "root package exposes all PPK-023 commands",
+      "passed": true
+    },
+    {
+      "name": "PPK-021 successor AST ratchet remains green",
+      "passed": true
+    },
+    {
+      "name": "PPK-022 successor capability ratchet remains green",
+      "passed": true
+    },
+    {
+      "name": "scope records exact build and truth boundaries",
+      "passed": true
+    },
+    {
+      "name": "scope preserves no-cache and data ownership fences",
+      "passed": true
+    },
+    {
+      "name": "inventory has seven implemented controls and no blockers",
+      "passed": true
+    },
+    {
+      "name": "decision preserves assurance and successor limits",
+      "passed": true
+    },
+    {
+      "name": "database migration remains 77",
+      "passed": true
+    },
+    {
+      "name": "accepted registry closes complete PPK-023 evidence chain",
+      "passed": true
+    },
+    {
+      "name": "scope closes PPK-023 after final validation",
+      "passed": true
+    },
+    {
+      "name": "inventory closes only after final validation",
+      "passed": true
+    },
+    {
+      "name": "threat model is final without expanding assurance claim",
+      "passed": true
+    },
+    {
+      "name": "audit closes only with final contract and runtime evidence",
+      "passed": true
+    }
+  ],
+  "canonicalApplications": 14,
+  "mappedApplications": 14,
+  "applicationThreatModels": 14,
+  "applicationWorkspaces": 2,
+  "assuranceProfiles": 2,
+  "asvsVersion": "5.0.0",
+  "asvsControls": 21,
+  "masvsVersion": "2.1.0",
+  "masvsControls": 24,
+  "ssdfVersion": "1.1",
+  "ssdfPractices": 19,
+  "maliciousSelfTests": 17,
+  "benignSelfTests": 4,
+  "findings": 0,
+  "manifestSha256": "f3d2cbfaa0c7496606dfc1078d96684d0d6f5435128e6f806ed6e60f38919863",
+  "threatModelSha256": "35c2d415ea267325e877337d36e0d2e3f47a1d791c6376eff97c596eab3b34c8",
+  "mappingClaimsCompliance": false,
+  "profileOnlyNativeRuntimeValidationClaimed": false,
+  "mappingGrantsRuntimeAuthority": false,
+  "schemaMigrationRequired": false,
+  "latestDatabaseMigration": 77,
+  "historicalBackfillPerformed": false,
+  "realDataTransferPerformed": false,
+  "cutoverPerformed": false,
+  "legacyDesktopVaultPreserved": true,
+  "sqliteOwnershipTransferred": false,
+  "successorRequirementCompletedByThisPackage": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-12T02:53:53.453Z"
+}

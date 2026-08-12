@@ -120,6 +120,7 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
     case 'system:getPolicyConformanceSuiteBoundary':
     case 'system:getPlatformPolicyAstGateBoundary':
     case 'system:getPlatformCapabilityManifestGateBoundary':
+    case 'system:getApplicationSecurityProfileGateBoundary':
     case 'system:getIpcAdaptiveBudgetMaintenanceAuthority':
     case 'system:getIpcPerformanceTelemetry':
       return zeroArguments(args);

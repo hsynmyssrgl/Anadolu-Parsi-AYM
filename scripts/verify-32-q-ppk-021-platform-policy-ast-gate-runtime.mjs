@@ -98,7 +98,7 @@ const report = {
   securityRegressionTestsMinimum: 245,
   productionSourceZones: 18,
   scannedProductionFilesMinimum: 352,
-  exactAllowlistEntries: 513,
+  exactAllowlistEntries: 515,
   maliciousAstSelfTests: 17,
   benignAstSelfTests: 4,
   directRoleAuthorizationBypasses: 0,

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 57,
+  "decisionCount": 58,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1399,6 +1399,34 @@
         "docs/security/PPK-022_CAPABILITY_MANIFEST_BUILD_RUNTIME_GATE_THREAT_MODEL.md",
         "docs/audit/32-R_PPK-022_CAPABILITY_MANIFEST_BUILD_RUNTIME_GATE_UST_KAPANIS.md",
         "config/32-r-ppk-022-capability-manifest-gate-inventory.json"
+      ]
+    },
+    {
+      "id": "DEC-204",
+      "date": "2026-08-12",
+      "acceptedAt": "2026-08-12",
+      "title": "PPK-023 fail-closed application security profile and threat-model build gate",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: tüm işleri full auto olarak sen yap",
+      "document": "docs/decisions/DEC-204-ppk-023-application-security-profile-gate.md",
+      "requirements": ["PPK-023"],
+      "codeAreas": [
+        "config/32-s-ppk-023-application-security-profile-manifest.json",
+        "scripts/verify-application-security-profile-gate.mjs",
+        "packages/platform-policy/src/application-security-profile-policy.ts",
+        "packages/domain/src/application-security-profile-gate.ts",
+        "packages/application/src/application-security-profile-gate-use-cases.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/ipc-read-sharing.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/renderer/App.tsx"
+      ],
+      "evidence": [
+        "artifacts/validation/32-S-ppk-023-application-security-profile-contract.json",
+        "artifacts/validation/32-S-ppk-023-application-security-profile-runtime.json",
+        "docs/security/PPK-023_APPLICATION_SECURITY_PROFILES_THREAT_MODEL.md",
+        "docs/audit/32-S_PPK-023_UYGULAMA_GUVENLIK_PROFILI_UST_KAPANIS.md",
+        "config/32-s-ppk-023-application-security-profile-gate-inventory.json"
       ]
     }
   ]

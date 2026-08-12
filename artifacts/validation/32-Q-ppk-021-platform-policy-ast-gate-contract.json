@@ -54,7 +54,7 @@
       "passed": true
     },
     {
-      "name": "manifest contains exactly 513 surfaces",
+      "name": "manifest contains exactly 515 surfaces",
       "passed": true
     },
     {
@@ -282,7 +282,7 @@
       "passed": true
     },
     {
-      "name": "scope records six rules and 513 exact surfaces",
+      "name": "scope records six rules and 515 exact surfaces",
       "passed": true
     },
     {
@@ -346,13 +346,13 @@
   "sourceGate": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 355,
-    "privilegedSurfaces": 513,
-    "exactAllowlistEntries": 513,
-    "exactAllowlistSha256": "de2634efa3ea011757c57b10d67c46e0d19a05a4b189e8bb7bb13b2923ededb0",
+    "scannedFiles": 358,
+    "privilegedSurfaces": 515,
+    "exactAllowlistEntries": 515,
+    "exactAllowlistSha256": "74ccf33c14b38af6618e4129320a4566c85571e33ac8f93eeaa9b2486e5c71f4",
     "surfaceCounts": {
       "CRYPTO_GLOBAL": 2,
-      "CRYPTO_IMPORT": 124,
+      "CRYPTO_IMPORT": 125,
       "DATABASE_IMPORT": 21,
       "NETWORK_IMPORT": 7,
       "REPOSITORY_IMPORT": 47,
@@ -360,7 +360,7 @@
       "SQL_CALL": 56,
       "SQL_CONSTRUCTOR": 2,
       "SQL_IMPORT": 2,
-      "USE_CASE_COMPOSITION": 251
+      "USE_CASE_COMPOSITION": 252
     },
     "maliciousSelfTestAssertions": 17,
     "benignSelfTestAssertions": 4,
@@ -368,8 +368,8 @@
     "findings": []
   },
   "protectedRuleCount": 6,
-  "exactAllowlistEntries": 513,
-  "exactAllowlistSha256": "de2634efa3ea011757c57b10d67c46e0d19a05a4b189e8bb7bb13b2923ededb0",
+  "exactAllowlistEntries": 515,
+  "exactAllowlistSha256": "74ccf33c14b38af6618e4129320a4566c85571e33ac8f93eeaa9b2486e5c71f4",
   "directRoleAuthorizationBypasses": 0,
   "syntaxModel": "TYPESCRIPT_AST",
   "regexOnlyGateAccepted": false,
@@ -383,5 +383,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-12T01:51:05.056Z"
+  "generatedAt": "2026-08-12T02:43:42.637Z"
 }

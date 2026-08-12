@@ -79,7 +79,7 @@ check('lockfile root records exact parser dependency', lockfile.packages?.['']?.
 check('installed parser record is locked', lockfile.packages?.['node_modules/@babel/parser']?.version === '7.29.8');
 check('manifest requires exact default deny', allowlist.defaultDecision === 'DENY' && allowlist.exactMatchRequired === true && allowlist.wildcardsAllowed === false);
 check('manifest binds eighteen production zones', allowlist.productionSourceZoneCount === 18 && scope.boundaries?.productionSourceZoneCount === 18);
-check('manifest contains exactly 513 surfaces', keys.length === 513 && uniqueKeys.size === 513);
+check('manifest contains exactly 515 surfaces', keys.length === 515 && uniqueKeys.size === 515);
 check('manifest keys are stable sorted', keys.every((key, index) => key === sortedKeys[index]));
 check('manifest keys contain no wildcard', keys.every((key) => !/[*?\[\]{}]/u.test(key)));
 check('manifest count map is exact', JSON.stringify(keyCounts) === JSON.stringify(allowlist.expectedSurfaceCounts));
@@ -89,7 +89,7 @@ check('manifest records no persistence or ownership change', allowlist.invariant
 
 check('production AST gate passes', gate.status === 'PASS' && gate.findings.length === 0);
 check('gate scans all production zones', gate.productionSourceZones === 18 && gate.scannedFiles >= 352);
-check('gate exact surface and allowance cardinality match', gate.privilegedSurfaces === 513 && gate.exactAllowlistEntries === 513);
+check('gate exact surface and allowance cardinality match', gate.privilegedSurfaces === 515 && gate.exactAllowlistEntries === 515);
 check('gate manifest hash matches the canonical file', gate.exactAllowlistSha256 === manifestSha256);
 check('gate has zero direct role authorization bypass', gate.directRoleAuthorizationBypasses === 0);
 check('gate executes malicious and benign self-tests', gate.maliciousSelfTestAssertions === 17 && gate.benignSelfTestAssertions === 4);
@@ -116,13 +116,13 @@ check('combined platform policy gate invokes AST gate', includesAll(legacyGate, 
 check('root package exposes all four PPK-021 commands', ['verify:ppk021:ast-gate', 'verify:ppk021:targeted', 'verify:ppk021:contract', 'verify:ppk021:runtime'].every((name) => typeof rootPackage.scripts?.[name] === 'string'));
 
 check('policy declares all six exact rule identifiers', includesAll(policy, ['PLATFORM_POLICY_AST_GATE_RULE_IDS', 'DIRECT_SQL_SQLITE_DENIED', 'DIRECT_REPOSITORY_DATABASE_DENIED', 'DIRECT_CRYPTO_DENIED', 'DIRECT_NETWORK_DENIED', 'DIRECT_ROLE_AUTHORIZATION_DENIED', 'UNAPPROVED_USE_CASE_COMPOSITION_DENIED']));
-check('policy snapshot is exact fail closed', includesAll(policy, ["syntaxModel: 'TYPESCRIPT_AST'", "enforcement: 'fail-closed'", "defaultDecision: 'DENY'", 'exactAllowlistEntries: 513']));
+check('policy snapshot is exact fail closed', includesAll(policy, ["syntaxModel: 'TYPESCRIPT_AST'", "enforcement: 'fail-closed'", "defaultDecision: 'DENY'", 'exactAllowlistEntries: 515']));
 check('policy denies runtime authority inference', includesAll(policy, ['allowlistMutationGrantsRuntimeAuthority: false', 'buildGateReplacesRuntimePolicy: false', 'rendererRoleConditionGrantsAuthority: false']));
 check('policy hides source and manifest material', includesAll(policy, ['sourcePathsExposedToClient: false', 'allowlistHashExposedToClient: false']));
 check('policy verify rejects broadened snapshots', includesAll(policy, ['snapshot.wildcardsAllowed === false', 'snapshot.directRoleAuthorizationBypasses === 0', 'snapshot.protectedRules.every']));
 check('platform policy exports AST gate policy', policyIndex.includes("export * from './platform-policy-ast-gate-policy.js'"));
 
-check('domain boundary is content free and fixed', includesAll(domain, ['PlatformPolicyAstGateBoundaryView', 'protectedRuleCount: 6', 'exactAllowlistEntries: 513', 'sourcePathsExposedToClient: false', 'allowlistHashExposedToClient: false']));
+check('domain boundary is content free and fixed', includesAll(domain, ['PlatformPolicyAstGateBoundaryView', 'protectedRuleCount: 6', 'exactAllowlistEntries: 515', 'sourcePathsExposedToClient: false', 'allowlistHashExposedToClient: false']));
 check('domain exports AST boundary', domainIndex.includes("export * from './platform-policy-ast-gate.js'"));
 check('application use case verifies policy snapshot', includesAll(useCase, ['GetPlatformPolicyAstGateBoundaryUseCase', 'this.policy.verify(snapshot)', 'PLATFORM_POLICY_AST_GATE_SNAPSHOT_INVALID']));
 check('application use case preserves migration truth', includesAll(useCase, ['schemaMigrationRequired: false', 'latestDatabaseMigration: 77']));
@@ -131,7 +131,7 @@ check('application exports AST boundary use case', applicationIndex.includes("ex
 check('policy test covers snapshot broadening and reorder', includesAll(policyTest, ['wildcardsAllowed: true', 'directRoleAuthorizationBypasses: 1', '.reverse()']));
 check('AST test covers six privileged families', includesAll(astTest, ['SQL_IMPORT', 'REPOSITORY_IMPORT', 'DATABASE_IMPORT', 'CRYPTO_IMPORT', 'NETWORK_IMPORT', 'ROLE_CHECK', 'USE_CASE_COMPOSITION']));
 check('AST test covers parse unexpected stale and wildcard denial', includesAll(astTest, ['AST_PARSE_ERROR', 'UNAPPROVED_PRIVILEGED_SURFACE', 'STALE_ALLOWLIST_ENTRY', 'ALLOWLIST_WILDCARD_FORBIDDEN']));
-check('AST test verifies full production manifest exactness', includesAll(astTest, ['inventoryPlatformPolicyAstSurfaces()', 'result.findings).toEqual([])', 'result.allowedCount).toBe(513)']));
+check('AST test verifies full production manifest exactness', includesAll(astTest, ['inventoryPlatformPolicyAstSurfaces()', 'result.findings).toEqual([])', 'result.allowedCount).toBe(515)']));
 check('integration test verifies zero argument and no cache', includesAll(integrationTest, ["evaluateIpcIntegrationPolicy('system:getPlatformPolicyAstGateBoundary', [])", "resolveIpcReadSharingPolicy('system:getPlatformPolicyAstGateBoundary')"]));
 check('integration test verifies no source or hash payload', includesAll(integrationTest, ["Object.hasOwn(view, 'sourcePaths')", "Object.hasOwn(view, 'allowlistHash')"]));
 
@@ -144,7 +144,7 @@ check('IPC sharing marks AST status no-cache', ipcCache.includes("'system:getPla
 check('renderer shows build gate without runtime authority claim', includesAll(renderer, ['PPK-021 · AST güvenlik kapısı', 'AST gate runtime politikasının yerine geçmez', 'doğrudan rol yetkilendirmesi:']));
 check('renderer does not render allowlist paths or hash', !renderer.includes('exactAllowlistSha256') && !renderer.includes('allowedSurfaceKeys'));
 
-check('scope records six rules and 513 exact surfaces', scope.boundaries?.protectedRuleCount === 6 && scope.protectedRules?.length === 6 && scope.boundaries?.exactPrivilegedSurfaceCount === 513);
+check('scope records six rules and 515 exact surfaces', scope.boundaries?.protectedRuleCount === 6 && scope.protectedRules?.length === 6 && scope.boundaries?.exactPrivilegedSurfaceCount === 515);
 check('scope records runtime-policy non-substitution', scope.boundaries?.allowlistMutationGrantsRuntimeAuthority === false && scope.boundaries?.buildGateReplacesRuntimePolicy === false);
 check('scope records content-free no-cache client boundary', scope.boundaries?.contentFreeStatusIpcRequired === true && scope.boundaries?.policyStatusIpcCacheAllowed === false && scope.boundaries?.sourcePathsExposedToRenderer === false);
 check('scope records no persistence transfer or cutover', scope.boundaries?.schemaMigrationRequired === false && scope.boundaries?.realDataTransferPerformed === false && scope.boundaries?.cutoverPerformed === false && scope.boundaries?.sqliteOwnershipTransferred === false);
@@ -182,7 +182,7 @@ const report = {
   failures,
   sourceGate: gate,
   protectedRuleCount: 6,
-  exactAllowlistEntries: 513,
+  exactAllowlistEntries: 515,
   exactAllowlistSha256: manifestSha256,
   directRoleAuthorizationBypasses: 0,
   syntaxModel: 'TYPESCRIPT_AST',

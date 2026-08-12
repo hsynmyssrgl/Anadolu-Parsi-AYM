@@ -11,3 +11,4 @@ export * from './source-deletion-propagation-policy.js';
 export * from './policy-conformance-suite.js';
 export * from './platform-policy-ast-gate-policy.js';
 export * from './platform-capability-manifest-policy.js';
+export * from './application-security-profile-policy.js';

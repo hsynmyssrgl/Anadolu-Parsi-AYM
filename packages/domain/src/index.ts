@@ -23,3 +23,4 @@ export * from './source-deletion-propagation.js';
 export * from './policy-conformance-suite.js';
 export * from './platform-policy-ast-gate.js';
 export * from './platform-capability-manifest-gate.js';
+export * from './application-security-profile-gate.js';

@@ -35,6 +35,7 @@ import type { SourceDeletionPropagationBoundaryView } from '@ppt/domain';
 import type { PolicyConformanceSuiteBoundaryView } from '@ppt/domain';
 import type { PlatformPolicyAstGateBoundaryView } from '@ppt/domain';
 import type { PlatformCapabilityManifestGateBoundaryView } from '@ppt/domain';
+import type { ApplicationSecurityProfileGateBoundaryView } from '@ppt/domain';
 import type { DataRepairOperation, DataRepairWorkspaceView } from '@ppt/domain';
 import type {
   EnrollWindowsHelloInput,
@@ -301,6 +302,7 @@ contextBridge.exposeInMainWorld('pardus', {
   getPolicyConformanceSuiteBoundary:():Promise<PolicyConformanceSuiteBoundaryView>=>invoke('system:getPolicyConformanceSuiteBoundary'),
   getPlatformPolicyAstGateBoundary:():Promise<PlatformPolicyAstGateBoundaryView>=>invoke('system:getPlatformPolicyAstGateBoundary'),
   getPlatformCapabilityManifestGateBoundary:():Promise<PlatformCapabilityManifestGateBoundaryView>=>invoke('system:getPlatformCapabilityManifestGateBoundary'),
+  getApplicationSecurityProfileGateBoundary:():Promise<ApplicationSecurityProfileGateBoundaryView>=>invoke('system:getApplicationSecurityProfileGateBoundary'),
   listBackupTargets:():Promise<BackupTargetView[]>=>invoke('system:listBackupTargets'),
   upsertBackupTarget:(input:UpsertBackupTargetInput):Promise<BackupTargetView[]>=>invoke('system:upsertBackupTarget',input),
   listBackupRuns:(limit?:number):Promise<BackupRunView[]>=>invoke('system:listBackupRuns',limit),

@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "step": "32-S",
+  "requirement": "PPK-023",
+  "status": "COMPLETE",
+  "completionClaimed": true,
+  "engine": {
+    "canonicalApplications": 14,
+    "mappedApplications": 14,
+    "applicationWorkspaces": 2,
+    "assuranceProfiles": 2,
+    "applicationThreatModels": 14,
+    "mobileMasvsApplications": 4,
+    "asvsControls": 21,
+    "masvsControls": 24,
+    "ssdfPractices": 19,
+    "maliciousSelfTests": 17,
+    "benignSelfTests": 4,
+    "findings": 0,
+    "manifestSha256": "f3d2cbfaa0c7496606dfc1078d96684d0d6f5435128e6f806ed6e60f38919863",
+    "threatModelSha256": "35c2d415ea267325e877337d36e0d2e3f47a1d791c6376eff97c596eab3b34c8"
+  },
+  "controls": [
+    {
+      "id": "canonical-application-ast-inventory",
+      "classification": "NEW_APPLICATION_FAIL_GATE",
+      "paths": ["packages/platform-policy/src/policy-kernel.ts", "scripts/verify-application-security-profile-gate.mjs"],
+      "control": "PlatformApplicationId AST envanteri ve PPK-020 target envanteri exact eşleşir; manifestte olmayan yeni uygulama build'i reddeder.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "versioned-standard-control-catalog",
+      "classification": "ASVS_MASVS_SSDF_EXACT_MAPPING",
+      "paths": ["config/32-s-ppk-023-application-security-profile-manifest.json", "packages/platform-policy/src/application-security-profile-policy.ts"],
+      "control": "ASVS 5.0.0, MASVS 2.1.0 ve final SSDF 1.1 sürüm ve kontrol kimlikleri exact olarak sabitlenir.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "per-application-threat-model",
+      "classification": "HASH_BOUND_STRUCTURED_THREAT_MODEL",
+      "paths": ["docs/security/PPK-023_APPLICATION_SECURITY_PROFILES_THREAT_MODEL.md"],
+      "control": "On dört uygulamanın her biri varlık, sınır, giriş, abuse, kontrol ve kalan risk bölümüne sahiptir; doküman SHA-256 ile manifeste bağlıdır.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "mobile-masvs-applicability",
+      "classification": "EXACT_APPLICABILITY_NO_SILENT_NA",
+      "paths": ["config/32-s-ppk-023-application-security-profile-manifest.json"],
+      "control": "Dört mobil Apple profili tam MASVS kontrol setini taşır; mobil olmayan profiller yalnız exact gerekçeli N/A kullanır.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "workspace-owner-coverage",
+      "classification": "ALL_APPS_WORKSPACES_OWNED",
+      "paths": ["apps/core-service/package.json", "apps/desktop/package.json"],
+      "control": "Her apps/* workspace'i tek kanonik uygulama kimliğine exact bağlıdır; sahipsiz yeni workspace reddedilir.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "content-free-no-cache-status",
+      "classification": "ZERO_ARGUMENT_STATUS_IPC",
+      "paths": ["packages/application/src/application-security-profile-gate-use-cases.ts", "apps/desktop/src/main/preload.ts", "apps/desktop/src/renderer/App.tsx"],
+      "control": "Renderer yalnız sürüm ve sayaç özeti alır; kaynak yolu/hash taşınmaz ve IPC cache edilmez.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "truthful-non-certification-boundary",
+      "classification": "NO_COMPLIANCE_OR_RUNTIME_AUTHORITY_CLAIM",
+      "paths": ["packages/platform-policy/src/application-security-profile-policy.ts", "docs/security/PPK-023_APPLICATION_SECURITY_PROFILES_THREAT_MODEL.md"],
+      "control": "Eşleme sertifika, penetrasyon testi veya çalışma yetkisi sayılmaz; on iki profile-only hedef native doğrulanmış gösterilmez.",
+      "disposition": "IMPLEMENTED"
+    }
+  ],
+  "closureSummary": {
+    "reviewedApplications": 14,
+    "mappedApplications": 14,
+    "unmappedApplications": 0,
+    "duplicateProfiles": 0,
+    "staleProfiles": 0,
+    "unownedApplicationWorkspaces": 0,
+    "missingThreatModels": 0,
+    "unjustifiedNotApplicableMappings": 0,
+    "profileOnlyNativeFalseClaims": 0,
+    "openBlockerCount": 0,
+    "openBlockers": [],
+    "finalValidationPending": false
+  }
+}

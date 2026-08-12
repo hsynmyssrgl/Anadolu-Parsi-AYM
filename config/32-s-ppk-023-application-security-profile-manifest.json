@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "gateVersion": "PPK-023-V1",
+  "defaultDecision": "DENY",
+  "mappingState": "REQUIREMENTS_MAPPED_NOT_CERTIFIED",
+  "complianceClaimed": false,
+  "standards": {
+    "asvs": {
+      "name": "OWASP ASVS",
+      "version": "5.0.0",
+      "publicationState": "STABLE",
+      "officialSource": "https://owasp.org/www-project-application-security-verification-standard/",
+      "controlIds": [
+        "v5.0.0-1.2.4", "v5.0.0-1.2.5", "v5.0.0-2.2.2", "v5.0.0-2.3.3",
+        "v5.0.0-5.3.2", "v5.0.0-6.8.2", "v5.0.0-7.2.1", "v5.0.0-7.4.1",
+        "v5.0.0-8.2.1", "v5.0.0-8.2.2", "v5.0.0-8.3.1", "v5.0.0-9.1.1",
+        "v5.0.0-11.6.1", "v5.0.0-12.3.1", "v5.0.0-13.2.4", "v5.0.0-14.1.1",
+        "v5.0.0-14.2.4", "v5.0.0-15.1.2", "v5.0.0-15.4.2", "v5.0.0-16.2.5",
+        "v5.0.0-16.3.2"
+      ]
+    },
+    "masvs": {
+      "name": "OWASP MASVS",
+      "version": "2.1.0",
+      "publicationState": "STABLE",
+      "officialSource": "https://mas.owasp.org/MASVS/",
+      "controlIds": [
+        "MASVS-AUTH-1", "MASVS-AUTH-2", "MASVS-AUTH-3",
+        "MASVS-CODE-1", "MASVS-CODE-2", "MASVS-CODE-3", "MASVS-CODE-4",
+        "MASVS-CRYPTO-1", "MASVS-CRYPTO-2",
+        "MASVS-NETWORK-1", "MASVS-NETWORK-2",
+        "MASVS-PLATFORM-1", "MASVS-PLATFORM-2", "MASVS-PLATFORM-3",
+        "MASVS-PRIVACY-1", "MASVS-PRIVACY-2", "MASVS-PRIVACY-3", "MASVS-PRIVACY-4",
+        "MASVS-RESILIENCE-1", "MASVS-RESILIENCE-2", "MASVS-RESILIENCE-3", "MASVS-RESILIENCE-4",
+        "MASVS-STORAGE-1", "MASVS-STORAGE-2"
+      ]
+    },
+    "ssdf": {
+      "name": "NIST SSDF",
+      "version": "1.1",
+      "publicationState": "FINAL",
+      "officialSource": "https://csrc.nist.gov/pubs/sp/800/218/final",
+      "controlIds": [
+        "PO.1", "PO.2", "PO.3", "PO.4", "PO.5",
+        "PS.1", "PS.2", "PS.3",
+        "PW.1", "PW.2", "PW.4", "PW.5", "PW.6", "PW.7", "PW.8", "PW.9",
+        "RV.1", "RV.2", "RV.3"
+      ]
+    }
+  },
+  "threatModelDocument": {
+    "path": "docs/security/PPK-023_APPLICATION_SECURITY_PROFILES_THREAT_MODEL.md",
+    "sha256": "35c2d415ea267325e877337d36e0d2e3f47a1d791c6376eff97c596eab3b34c8",
+    "modelCount": 14,
+    "reviewState": "REVIEWED"
+  },
+  "workspaceOwners": [
+    { "path": "apps/core-service", "applicationId": "windows-core-service" },
+    { "path": "apps/desktop", "applicationId": "windows-desktop" }
+  ],
+  "assuranceProfiles": [
+    {
+      "id": "GENERAL_APPLICATION",
+      "asvsControlIds": [
+        "v5.0.0-1.2.4", "v5.0.0-1.2.5", "v5.0.0-2.2.2", "v5.0.0-2.3.3",
+        "v5.0.0-5.3.2", "v5.0.0-6.8.2", "v5.0.0-7.2.1", "v5.0.0-7.4.1",
+        "v5.0.0-8.2.1", "v5.0.0-8.2.2", "v5.0.0-8.3.1", "v5.0.0-9.1.1",
+        "v5.0.0-11.6.1", "v5.0.0-12.3.1", "v5.0.0-13.2.4", "v5.0.0-14.1.1",
+        "v5.0.0-14.2.4", "v5.0.0-15.1.2", "v5.0.0-15.4.2", "v5.0.0-16.2.5",
+        "v5.0.0-16.3.2"
+      ],
+      "masvs": {
+        "applicability": "NOT_APPLICABLE",
+        "controlIds": [],
+        "notApplicableReason": "OWASP MASVS is mobile-specific; this profile records an explicit non-mobile applicability decision."
+      },
+      "ssdfPracticeIds": [
+        "PO.1", "PO.2", "PO.3", "PO.4", "PO.5", "PS.1", "PS.2", "PS.3",
+        "PW.1", "PW.2", "PW.4", "PW.5", "PW.6", "PW.7", "PW.8", "PW.9",
+        "RV.1", "RV.2", "RV.3"
+      ]
+    },
+    {
+      "id": "MOBILE_COMPANION",
+      "asvsControlIds": [
+        "v5.0.0-1.2.4", "v5.0.0-1.2.5", "v5.0.0-2.2.2", "v5.0.0-2.3.3",
+        "v5.0.0-5.3.2", "v5.0.0-6.8.2", "v5.0.0-7.2.1", "v5.0.0-7.4.1",
+        "v5.0.0-8.2.1", "v5.0.0-8.2.2", "v5.0.0-8.3.1", "v5.0.0-9.1.1",
+        "v5.0.0-11.6.1", "v5.0.0-12.3.1", "v5.0.0-13.2.4", "v5.0.0-14.1.1",
+        "v5.0.0-14.2.4", "v5.0.0-15.1.2", "v5.0.0-15.4.2", "v5.0.0-16.2.5",
+        "v5.0.0-16.3.2"
+      ],
+      "masvs": {
+        "applicability": "APPLICABLE",
+        "controlIds": [
+          "MASVS-AUTH-1", "MASVS-AUTH-2", "MASVS-AUTH-3",
+          "MASVS-CODE-1", "MASVS-CODE-2", "MASVS-CODE-3", "MASVS-CODE-4",
+          "MASVS-CRYPTO-1", "MASVS-CRYPTO-2",
+          "MASVS-NETWORK-1", "MASVS-NETWORK-2",
+          "MASVS-PLATFORM-1", "MASVS-PLATFORM-2", "MASVS-PLATFORM-3",
+          "MASVS-PRIVACY-1", "MASVS-PRIVACY-2", "MASVS-PRIVACY-3", "MASVS-PRIVACY-4",
+          "MASVS-RESILIENCE-1", "MASVS-RESILIENCE-2", "MASVS-RESILIENCE-3", "MASVS-RESILIENCE-4",
+          "MASVS-STORAGE-1", "MASVS-STORAGE-2"
+        ],
+        "notApplicableReason": null
+      },
+      "ssdfPracticeIds": [
+        "PO.1", "PO.2", "PO.3", "PO.4", "PO.5", "PS.1", "PS.2", "PS.3",
+        "PW.1", "PW.2", "PW.4", "PW.5", "PW.6", "PW.7", "PW.8", "PW.9",
+        "RV.1", "RV.2", "RV.3"
+      ]
+    }
+  ],
+  "profiles": [
+    { "applicationId": "windows-desktop", "platformGroup": "WINDOWS", "deploymentState": "DEPLOYED", "nativeRuntimeExecution": "CURRENT_RUNTIME", "assuranceProfileId": "GENERAL_APPLICATION", "threatModelId": "APP-THREAT-windows-desktop", "threatModelSection": "## APP-THREAT-windows-desktop", "mappingState": "MAPPED", "complianceClaimed": false, "nativeRuntimeValidated": true },
+    { "applicationId": "windows-core-service", "platformGroup": "SERVICE", "deploymentState": "DEPLOYED", "nativeRuntimeExecution": "CURRENT_RUNTIME", "assuranceProfileId": "GENERAL_APPLICATION", "threatModelId": "APP-THREAT-windows-core-service", "threatModelSection": "## APP-THREAT-windows-core-service", "mappingState": "MAPPED", "complianceClaimed": false, "nativeRuntimeValidated": true },
+    { "applicationId": "windows-cluster-agent", "platformGroup": "SERVICE", "deploymentState": "NOT_DEPLOYED", "nativeRuntimeExecution": "PROFILE_ONLY", "assuranceProfileId": "GENERAL_APPLICATION", "threatModelId": "APP-THREAT-windows-cluster-agent", "threatModelSection": "## APP-THREAT-windows-cluster-agent", "mappingState": "MAPPED", "complianceClaimed": false, "nativeRuntimeValidated": false },
+    { "applicationId": "macos-companion", "platformGroup": "MACOS", "deploymentState": "NOT_DEPLOYED", "nativeRuntimeExecution": "PROFILE_ONLY", "assuranceProfileId": "GENERAL_APPLICATION", "threatModelId": "APP-THREAT-macos-companion", "threatModelSection": "## APP-THREAT-macos-companion", "mappingState": "MAPPED", "complianceClaimed": false, "nativeRuntimeValidated": false },
+    { "applicationId": "ios-companion", "platformGroup": "IOS", "deploymentState": "NOT_DEPLOYED", "nativeRuntimeExecution": "PROFILE_ONLY", "assuranceProfileId": "MOBILE_COMPANION", "threatModelId": "APP-THREAT-ios-companion", "threatModelSection": "## APP-THREAT-ios-companion", "mappingState": "MAPPED", "complianceClaimed": false, "nativeRuntimeValidated": false },
+    { "applicationId": "ipados-companion", "platformGroup": "IPADOS", "deploymentState": "NOT_DEPLOYED", "nativeRuntimeExecution": "PROFILE_ONLY", "assuranceProfileId": "MOBILE_COMPANION", "threatModelId": "APP-THREAT-ipados-companion", "threatModelSection": "## APP-THREAT-ipados-companion", "mappingState": "MAPPED", "complianceClaimed": false, "nativeRuntimeValidated": false },
+    { "applicationId": "watchos-companion", "platformGroup": "APPLE_ADJACENT", "deploymentState": "NOT_DEPLOYED", "nativeRuntimeExecution": "PROFILE_ONLY", "assuranceProfileId": "MOBILE_COMPANION", "threatModelId": "APP-THREAT-watchos-companion", "threatModelSection": "## APP-THREAT-watchos-companion", "mappingState": "MAPPED", "complianceClaimed": false, "nativeRuntimeValidated": false },
+    { "applicationId": "visionos-companion", "platformGroup": "APPLE_ADJACENT", "deploymentState": "NOT_DEPLOYED", "nativeRuntimeExecution": "PROFILE_ONLY", "assuranceProfileId": "MOBILE_COMPANION", "threatModelId": "APP-THREAT-visionos-companion", "threatModelSection": "## APP-THREAT-visionos-companion", "mappingState": "MAPPED", "complianceClaimed": false, "nativeRuntimeValidated": false },
+    { "applicationId": "ocr-worker", "platformGroup": "SERVICE", "deploymentState": "NOT_DEPLOYED", "nativeRuntimeExecution": "PROFILE_ONLY", "assuranceProfileId": "GENERAL_APPLICATION", "threatModelId": "APP-THREAT-ocr-worker", "threatModelSection": "## APP-THREAT-ocr-worker", "mappingState": "MAPPED", "complianceClaimed": false, "nativeRuntimeValidated": false },
+    { "applicationId": "ai-worker", "platformGroup": "SERVICE", "deploymentState": "NOT_DEPLOYED", "nativeRuntimeExecution": "PROFILE_ONLY", "assuranceProfileId": "GENERAL_APPLICATION", "threatModelId": "APP-THREAT-ai-worker", "threatModelSection": "## APP-THREAT-ai-worker", "mappingState": "MAPPED", "complianceClaimed": false, "nativeRuntimeValidated": false },
+    { "applicationId": "translation-worker", "platformGroup": "SERVICE", "deploymentState": "NOT_DEPLOYED", "nativeRuntimeExecution": "PROFILE_ONLY", "assuranceProfileId": "GENERAL_APPLICATION", "threatModelId": "APP-THREAT-translation-worker", "threatModelSection": "## APP-THREAT-translation-worker", "mappingState": "MAPPED", "complianceClaimed": false, "nativeRuntimeValidated": false },
+    { "applicationId": "communication-service", "platformGroup": "SERVICE", "deploymentState": "NOT_DEPLOYED", "nativeRuntimeExecution": "PROFILE_ONLY", "assuranceProfileId": "GENERAL_APPLICATION", "threatModelId": "APP-THREAT-communication-service", "threatModelSection": "## APP-THREAT-communication-service", "mappingState": "MAPPED", "complianceClaimed": false, "nativeRuntimeValidated": false },
+    { "applicationId": "backup-worker", "platformGroup": "SERVICE", "deploymentState": "NOT_DEPLOYED", "nativeRuntimeExecution": "PROFILE_ONLY", "assuranceProfileId": "GENERAL_APPLICATION", "threatModelId": "APP-THREAT-backup-worker", "threatModelSection": "## APP-THREAT-backup-worker", "mappingState": "MAPPED", "complianceClaimed": false, "nativeRuntimeValidated": false },
+    { "applicationId": "signed-plugin", "platformGroup": "PLUGIN", "deploymentState": "NOT_DEPLOYED", "nativeRuntimeExecution": "PROFILE_ONLY", "assuranceProfileId": "GENERAL_APPLICATION", "threatModelId": "APP-THREAT-signed-plugin", "threatModelSection": "## APP-THREAT-signed-plugin", "mappingState": "MAPPED", "complianceClaimed": false, "nativeRuntimeValidated": false }
+  ],
+  "manifestSha256": "f3d2cbfaa0c7496606dfc1078d96684d0d6f5435128e6f806ed6e60f38919863"
+}

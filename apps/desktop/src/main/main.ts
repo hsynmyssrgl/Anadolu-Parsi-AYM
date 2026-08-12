@@ -19,7 +19,7 @@ import type {
   WindowsHelloAuthenticationView,
   WindowsHelloStateView
 } from '@ppt/domain';
-import { GetDerivedDataPolicyBoundaryUseCase, GetPlatformCapabilityManifestGateBoundaryUseCase, GetPlatformPolicyAstGateBoundaryUseCase, GetPolicyConformanceSuiteBoundaryUseCase, GetPolicyDecisionAuditBoundaryUseCase, GetSensitiveLoggingBoundaryUseCase, GetSourceDeletionPropagationBoundaryUseCase, type WindowsHelloPlatformPort } from '@ppt/application';
+import { GetApplicationSecurityProfileGateBoundaryUseCase, GetDerivedDataPolicyBoundaryUseCase, GetPlatformCapabilityManifestGateBoundaryUseCase, GetPlatformPolicyAstGateBoundaryUseCase, GetPolicyConformanceSuiteBoundaryUseCase, GetPolicyDecisionAuditBoundaryUseCase, GetSensitiveLoggingBoundaryUseCase, GetSourceDeletionPropagationBoundaryUseCase, type WindowsHelloPlatformPort } from '@ppt/application';
 import type { IssueOfflineCapabilityLeaseInput, OfflineCapabilityLeaseWorkspaceView } from '@ppt/domain';
 import {
   FamilyDataStore,
@@ -69,8 +69,8 @@ import { PlatformPolicyReceiptFileSink } from './platform-policy-receipt-file-si
 import { PlatformPolicyDecisionAuditInspectionAdapter } from './policy-decision-audit-application-adapter.js';
 import { DesktopUniversalApiPolicyEnforcement } from './desktop-universal-api-policy-enforcement.js';
 import { DesktopRepositoryPolicyScope } from './desktop-repository-policy-scope.js';
-import { DerivedDataInheritancePolicy, ImmutablePolicyDecisionAuditPolicy, NetworkEgressPolicy, PlatformCapabilityManifestPolicy, PlatformPolicyAstGatePolicy, PlatformPolicyConformanceSuite, SensitiveLogPolicy, SourceDeletionPropagationPolicy, assertPinnedBootstrapRuntimeCapability } from '@ppt/platform-policy';
-import type { DerivedDataPolicyBoundaryView, NetworkEgressBoundaryView, PlatformCapabilityManifestGateBoundaryView, PlatformPolicyAstGateBoundaryView, PolicyConformanceSuiteBoundaryView, PolicyDecisionAuditBoundaryView, SensitiveLoggingBoundaryView, SourceDeletionPropagationBoundaryView } from '@ppt/domain';
+import { ApplicationSecurityProfilePolicy, DerivedDataInheritancePolicy, ImmutablePolicyDecisionAuditPolicy, NetworkEgressPolicy, PlatformCapabilityManifestPolicy, PlatformPolicyAstGatePolicy, PlatformPolicyConformanceSuite, SensitiveLogPolicy, SourceDeletionPropagationPolicy, assertPinnedBootstrapRuntimeCapability } from '@ppt/platform-policy';
+import type { ApplicationSecurityProfileGateBoundaryView, DerivedDataPolicyBoundaryView, NetworkEgressBoundaryView, PlatformCapabilityManifestGateBoundaryView, PlatformPolicyAstGateBoundaryView, PolicyConformanceSuiteBoundaryView, PolicyDecisionAuditBoundaryView, SensitiveLoggingBoundaryView, SourceDeletionPropagationBoundaryView } from '@ppt/domain';
 
 type ArchiveMutationInput<TInput> = TInput & { readonly operationId: string };
 interface ArchiveItemMutationInput {
@@ -87,12 +87,14 @@ const sourceDeletionPropagationPolicy = new SourceDeletionPropagationPolicy();
 const platformPolicyConformanceSuite = new PlatformPolicyConformanceSuite();
 const platformPolicyAstGatePolicy = new PlatformPolicyAstGatePolicy();
 const platformCapabilityManifestPolicy = new PlatformCapabilityManifestPolicy();
+const applicationSecurityProfilePolicy = new ApplicationSecurityProfilePolicy();
 const getDerivedDataPolicyBoundaryUseCase = new GetDerivedDataPolicyBoundaryUseCase(derivedDataInheritancePolicy);
 const getSensitiveLoggingBoundaryUseCase = new GetSensitiveLoggingBoundaryUseCase(sensitiveLogPolicy);
 const getSourceDeletionPropagationBoundaryUseCase = new GetSourceDeletionPropagationBoundaryUseCase(sourceDeletionPropagationPolicy);
 const getPolicyConformanceSuiteBoundaryUseCase = new GetPolicyConformanceSuiteBoundaryUseCase(platformPolicyConformanceSuite);
 const getPlatformPolicyAstGateBoundaryUseCase = new GetPlatformPolicyAstGateBoundaryUseCase(platformPolicyAstGatePolicy);
 const getPlatformCapabilityManifestGateBoundaryUseCase = new GetPlatformCapabilityManifestGateBoundaryUseCase(platformCapabilityManifestPolicy);
+const getApplicationSecurityProfileGateBoundaryUseCase = new GetApplicationSecurityProfileGateBoundaryUseCase(applicationSecurityProfilePolicy);
 const currentProductName = 'Anadolu Parsı Aile Yaşam Merkezi';
 assertPinnedBootstrapRuntimeCapability('windows-desktop', 'file.access');
 assertPinnedBootstrapRuntimeCapability('windows-desktop', 'network.access');
@@ -1191,6 +1193,7 @@ function registerIpc(): void {
   registerIpcHandler('system:getPolicyConformanceSuiteBoundary', ():PolicyConformanceSuiteBoundaryView => getPolicyConformanceSuiteBoundaryUseCase.execute());
   registerIpcHandler('system:getPlatformPolicyAstGateBoundary', ():PlatformPolicyAstGateBoundaryView => getPlatformPolicyAstGateBoundaryUseCase.execute());
   registerIpcHandler('system:getPlatformCapabilityManifestGateBoundary', ():PlatformCapabilityManifestGateBoundaryView => getPlatformCapabilityManifestGateBoundaryUseCase.execute());
+  registerIpcHandler('system:getApplicationSecurityProfileGateBoundary', ():ApplicationSecurityProfileGateBoundaryView => getApplicationSecurityProfileGateBoundaryUseCase.execute());
   registerIpcHandler('system:listBackupTargets', () => store().listBackupTargets());
   registerIpcHandler('system:upsertBackupTarget', (_event,input:UpsertBackupTargetInput) => store().upsertBackupTarget(input));
   registerIpcHandler('system:listBackupRuns', (_event,limit?:number) => store().listBackupRuns(limit));

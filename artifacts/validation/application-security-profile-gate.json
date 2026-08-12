@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "requirement": "PPK-023",
+  "gateVersion": "PPK-023-V1",
+  "status": "PASS",
+  "canonicalApplications": 14,
+  "mappedApplications": 14,
+  "applicationWorkspaces": 2,
+  "assuranceProfiles": 2,
+  "threatModels": 14,
+  "mobileMasvsApplications": 4,
+  "asvsControls": 21,
+  "masvsControls": 24,
+  "ssdfPractices": 19,
+  "maliciousSelfTestAssertions": 17,
+  "benignSelfTestAssertions": 4,
+  "manifestSha256": "f3d2cbfaa0c7496606dfc1078d96684d0d6f5435128e6f806ed6e60f38919863",
+  "threatModelSha256": "35c2d415ea267325e877337d36e0d2e3f47a1d791c6376eff97c596eab3b34c8",
+  "complianceClaimed": false,
+  "nativeRuntimeValidationClaimedForProfileOnlyTargets": false,
+  "findings": []
+}
