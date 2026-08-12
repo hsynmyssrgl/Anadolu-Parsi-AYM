@@ -11,6 +11,7 @@ import {
   writeFile
 } from 'node:fs/promises';
 import { basename, dirname, relative, resolve, sep } from 'node:path';
+import { DERIVED_DOCUMENT_INDEX_PATHS } from './lib/governance-utils.mjs';
 
 const mode = process.argv[2] ?? 'verify';
 const sourceRoot = resolve(process.cwd());
@@ -24,7 +25,8 @@ const excludedRelativePaths = new Set([
   'artifacts/deliveries/Anadolu_Parsi_Aile_Yasam_Merkezi_Bronze_04.08.2026.29.json',
   'artifacts/reports/DELIVERY_STATUS_04.08.2026.29.json',
   'artifacts/validation/bronze-governance-reality-matrix.json',
-  'artifacts/validation/delivery-report-contract-v2.json'
+  'artifacts/validation/delivery-report-contract-v2.json',
+  ...DERIVED_DOCUMENT_INDEX_PATHS
 ]);
 const fixedDosDate = 33;
 const utf8Flag = 0x0800;

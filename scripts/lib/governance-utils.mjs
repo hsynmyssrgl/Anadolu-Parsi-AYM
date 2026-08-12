@@ -14,6 +14,22 @@ export const SELF_INDEX_PATHS = new Set([
   'SHA256SUMS.txt'
 ]);
 
+// These files describe the complete live tree and therefore change whenever a
+// delivery report changes.  They cannot be part of the authoritative source
+// hash that the report itself cites without creating a hash cycle.  They stay
+// tracked and are regenerated/verified immediately before every report backup.
+export const DERIVED_DOCUMENT_INDEX_PATHS = new Set([
+  'artifacts/manifests/PROJECT_ARTIFACT_INDEX.json',
+  'artifacts/manifests/PROJECT_ARTIFACT_INDEX.csv',
+  'artifacts/manifests/PROJECT_ARTIFACT_INDEX.md',
+  'artifacts/manifests/ALL_DOCUMENTS_INDEX.json',
+  'artifacts/manifests/ALL_DOCUMENTS_INDEX.csv',
+  'artifacts/manifests/ALL_DOCUMENTS_INDEX.md',
+  'docs/current/08_TUM_BELGELER_DIZINI.md',
+  'manifest.json',
+  'SHA256SUMS.txt'
+]);
+
 export const DOCUMENT_EXTENSIONS = new Set(['.md','.pdf','.docx','.txt','.rtf','.json','.csv','.yml','.yaml','.html']);
 export const EXCLUDED_DIRECTORIES = new Set(['node_modules','dist','release','coverage','.git','.idea','.vscode']);
 

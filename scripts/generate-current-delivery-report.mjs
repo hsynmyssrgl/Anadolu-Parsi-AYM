@@ -22,6 +22,11 @@ const verifyProtection = (script) => {
     throw new Error(`Current-source protection freshness verification failed (${script}): ${result.stderr || result.stdout}`);
   }
 };
+const runRequired = (script, args = []) => {
+  const result = spawnSync(process.execPath, [script, ...args], { cwd: sourceRoot, encoding: 'utf8', windowsHide: true });
+  if (result.status !== 0) throw new Error(`Required delivery gate failed (${script}): ${result.stderr || result.stdout}`);
+};
+runRequired('scripts/require-current-governed-preflight.mjs');
 verifyProtection('scripts/protect-authoritative-source.mjs');
 verifyProtection('scripts/protect-authoritative-source-external.mjs');
 
@@ -57,7 +62,16 @@ const expectedDerivedDeliveryExclusions = [
   'artifacts/deliveries/Anadolu_Parsi_Aile_Yasam_Merkezi_Bronze_04.08.2026.29.json',
   'artifacts/reports/DELIVERY_STATUS_04.08.2026.29.json',
   'artifacts/validation/bronze-governance-reality-matrix.json',
-  'artifacts/validation/delivery-report-contract-v2.json'
+  'artifacts/validation/delivery-report-contract-v2.json',
+  'artifacts/manifests/PROJECT_ARTIFACT_INDEX.json',
+  'artifacts/manifests/PROJECT_ARTIFACT_INDEX.csv',
+  'artifacts/manifests/PROJECT_ARTIFACT_INDEX.md',
+  'artifacts/manifests/ALL_DOCUMENTS_INDEX.json',
+  'artifacts/manifests/ALL_DOCUMENTS_INDEX.csv',
+  'artifacts/manifests/ALL_DOCUMENTS_INDEX.md',
+  'docs/current/08_TUM_BELGELER_DIZINI.md',
+  'manifest.json',
+  'SHA256SUMS.txt'
 ].sort();
 if (JSON.stringify(receipt.excludedDerivedDeliveryFiles) !== JSON.stringify(expectedDerivedDeliveryExclusions)) {
   throw new Error('Current-source protection does not exclude only the exact self-referential delivery outputs.');
@@ -502,6 +516,10 @@ const userVisibleTarget = resolve(sourceRoot, 'artifacts', 'deliveries', report.
 await mkdir(dirname(userVisibleTarget), { recursive: true });
 await writeFile(userVisibleTarget, content, 'utf8');
 if (await readFile(userVisibleTarget, 'utf8') !== content) throw new Error('User-visible delivery report readback mismatch.');
+runRequired('scripts/generate-project-artifact-index-v2.mjs');
+runRequired('scripts/verify-project-artifact-index-v2.mjs');
+runRequired('scripts/generate-manifest.mjs');
+runRequired('scripts/verify-source-integrity.mjs');
 const contentBytes = Buffer.from(content, 'utf8');
 const reportSha256 = sha256(contentBytes);
 const localDeliveryRoot = resolve(report.deliveryBackupRoots.local);
@@ -509,12 +527,25 @@ const externalDeliveryRoot = resolve(report.deliveryBackupRoots.external);
 const immutableFolder = reportSha256;
 const reportFiles = [
   `DELIVERY_STATUS_${release.current.version}.json`,
-  report.userVisibleDeliveryFileName
+  report.userVisibleDeliveryFileName,
+  'artifacts/manifests/PROJECT_ARTIFACT_INDEX.json',
+  'artifacts/manifests/PROJECT_ARTIFACT_INDEX.csv',
+  'artifacts/manifests/PROJECT_ARTIFACT_INDEX.md',
+  'artifacts/manifests/ALL_DOCUMENTS_INDEX.json',
+  'artifacts/manifests/ALL_DOCUMENTS_INDEX.csv',
+  'artifacts/manifests/ALL_DOCUMENTS_INDEX.md',
+  'docs/current/08_TUM_BELGELER_DIZINI.md',
+  'manifest.json',
+  'SHA256SUMS.txt'
 ];
 for (const root of [localDeliveryRoot, externalDeliveryRoot]) {
   for (const name of reportFiles) {
-    await writeVerified(resolve(root, immutableFolder, name), contentBytes);
-    await writeVerified(resolve(root, immutableFolder, `${name}.sha256`), Buffer.from(`${reportSha256}  ${name}\n`, 'ascii'));
+    const bytes = name === `DELIVERY_STATUS_${release.current.version}.json` || name === report.userVisibleDeliveryFileName
+      ? contentBytes
+      : await readFile(resolve(sourceRoot, name));
+    const digest = sha256(bytes);
+    await writeVerified(resolve(root, immutableFolder, name), bytes);
+    await writeVerified(resolve(root, immutableFolder, `${name}.sha256`), Buffer.from(`${digest}  ${name}\n`, 'ascii'));
   }
 }
 const backupReceipt = {
@@ -526,7 +557,12 @@ const backupReceipt = {
   sourceTreeSha256: receipt.treeSha256,
   reportSha256,
   immutableFolder,
-  files: reportFiles.map((path) => ({ path, sizeBytes: contentBytes.length, sha256: reportSha256 })),
+  files: await Promise.all(reportFiles.map(async (path) => {
+    const bytes = path === `DELIVERY_STATUS_${release.current.version}.json` || path === report.userVisibleDeliveryFileName
+      ? contentBytes
+      : await readFile(resolve(sourceRoot, path));
+    return { path, sizeBytes: bytes.length, sha256: sha256(bytes) };
+  })),
   localRoot: localDeliveryRoot,
   externalRoot: externalDeliveryRoot,
   verificationBasis: 'EXACT_BYTES_SHA256_AND_SIDECAR_READBACK',
@@ -541,7 +577,17 @@ for (const root of [localDeliveryRoot, externalDeliveryRoot]) {
   await writeVerified(`${receiptPath}.sha256`, Buffer.from(`${backupReceiptSha256}  DELIVERY_REPORT_BACKUP_RECEIPT.json\n`, 'ascii'));
   await writeVerified(resolve(root, 'LATEST_33-H.json'), backupReceiptBytes);
   await writeVerified(resolve(root, 'LATEST_33-H.json.sha256'), Buffer.from(`${backupReceiptSha256}  LATEST_33-H.json\n`, 'ascii'));
-  const exact = (await readdir(resolve(root, immutableFolder))).sort();
+  const listFiles = async (directory, prefix = '') => {
+    const files = [];
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      const relativePath = prefix ? `${prefix}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) files.push(...await listFiles(resolve(directory, entry.name), relativePath));
+      else if (entry.isFile()) files.push(relativePath);
+      else throw new Error(`Delivery backup contains a special filesystem entry: ${relativePath}`);
+    }
+    return files.sort();
+  };
+  const exact = await listFiles(resolve(root, immutableFolder));
   const expected = [
     ...reportFiles.flatMap((name) => [name, `${name}.sha256`]),
     'DELIVERY_REPORT_BACKUP_RECEIPT.json',
