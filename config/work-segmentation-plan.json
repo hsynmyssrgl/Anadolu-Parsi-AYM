@@ -2144,6 +2144,25 @@
       ],
       "persistentReceiptStatus": "PENDING",
       "completionTransitionStatus": "PENDING"
+    },
+    {
+      "id": "33-E",
+      "title": "B5 category-specific life, home and vehicle renewal and document workflow",
+      "scopeRequirement": "B5-04,EXT-031,EXT-034",
+      "status": "PENDING",
+      "validationStatus": "PENDING",
+      "localEvidence": [
+        "config/33-e-b5-category-life-home-vehicle-inventory.json",
+        "config/33-e-b5-category-life-home-vehicle-scope.json",
+        "docs/decisions/DEC-216-b5-category-life-home-vehicle.md",
+        "docs/security/THREAT_MODEL_33_E_B5_CATEGORY_LIFE_HOME_VEHICLE.md",
+        "docs/audit/33-E_B5_CATEGORY_LIFE_HOME_VEHICLE_UST_KAPANIS.md",
+        "artifacts/validation/33-E-b5-category-life-home-vehicle-boundary.json",
+        "artifacts/validation/33-E-b5-category-life-home-vehicle-contract.json",
+        "artifacts/validation/33-E-b5-category-life-home-vehicle-runtime.json"
+      ],
+      "persistentReceiptStatus": "PENDING",
+      "completionTransitionStatus": "PENDING"
     }
   ],
   "recoveryAuthority": "NEW_CHAT_HANDOFF_Bronze_04.08.2026.29.md",
