@@ -7038,6 +7038,318 @@ SET value='REVISION-33-B-B4-LOAN-MANAGEMENT',
 WHERE key='schema_generation';
 `;
 
+const financePlanningLedgerSql = `CREATE TABLE finance_planning_ledger(
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 160),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  item_type TEXT NOT NULL CHECK(item_type IN (
+    'category','cash_flow','budget','recurring_rule','recurring_state',
+    'goal','goal_progress','asset','asset_valuation'
+  )),
+  parent_item_id TEXT REFERENCES finance_planning_ledger(id) ON DELETE RESTRICT,
+  name TEXT,
+  category_kind TEXT,
+  description TEXT,
+  cash_flow_status TEXT,
+  amount REAL,
+  currency TEXT,
+  occurred_at TEXT,
+  period_month TEXT,
+  frequency TEXT,
+  interval_count INTEGER,
+  starts_at TEXT,
+  next_occurrence_at TEXT,
+  ends_at TEXT,
+  recurring_status TEXT,
+  goal_kind TEXT,
+  target_amount REAL,
+  current_amount REAL,
+  due_at TEXT,
+  asset_class TEXT,
+  quantity REAL,
+  unit_value REAL,
+  market_value REAL,
+  valued_at TEXT,
+  note TEXT,
+  privacy TEXT NOT NULL CHECK(privacy IN ('private','selected_members','family')),
+  created_at TEXT NOT NULL CHECK(datetime(created_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT CHECK(
+    length(policy_receipt_hash)=64 AND policy_receipt_hash NOT GLOB '*[^0-9a-f]*'
+  ),
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version=1),
+  policy_receipt_nonce TEXT NOT NULL,
+  policy_correlation_id TEXT NOT NULL,
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type='finance_record'),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action IN ('create','update')),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='finance.write'),
+  CHECK(
+    (item_type IN ('category','goal','asset') AND parent_item_id IS NULL
+      AND policy_action='create' AND policy_resource_id=id)
+    OR
+    (item_type IN ('cash_flow','budget','recurring_rule','recurring_state','goal_progress','asset_valuation')
+      AND parent_item_id IS NOT NULL AND policy_action='update' AND policy_resource_id=parent_item_id)
+  ),
+  CHECK(
+    (item_type IN ('category','goal','asset') AND name IS NOT NULL
+      AND length(trim(name)) BETWEEN 2 AND 120)
+    OR (item_type NOT IN ('category','goal','asset') AND name IS NULL)
+  ),
+  CHECK(
+    (item_type IN ('category','cash_flow','recurring_rule')
+      AND category_kind IN ('income','expense'))
+    OR (item_type NOT IN ('category','cash_flow','recurring_rule') AND category_kind IS NULL)
+  ),
+  CHECK(
+    item_type IN ('cash_flow','recurring_rule')
+    OR description IS NULL
+  ),
+  CHECK(description IS NULL OR length(trim(description)) BETWEEN 1 AND 240),
+  CHECK(
+    (item_type='cash_flow' AND cash_flow_status IN ('planned','realized'))
+    OR (item_type<>'cash_flow' AND cash_flow_status IS NULL)
+  ),
+  CHECK(
+    (item_type IN ('cash_flow','recurring_rule') AND amount>0 AND amount<=1000000000000000)
+    OR (item_type='budget' AND amount>=0 AND amount<=1000000000000000)
+    OR (item_type NOT IN ('cash_flow','budget','recurring_rule') AND amount IS NULL)
+  ),
+  CHECK(
+    (item_type IN ('cash_flow','budget','recurring_rule','goal','asset')
+      AND length(currency)=3 AND currency=upper(currency) AND currency GLOB '[A-Z][A-Z][A-Z]')
+    OR (item_type NOT IN ('cash_flow','budget','recurring_rule','goal','asset') AND currency IS NULL)
+  ),
+  CHECK(
+    (item_type IN ('cash_flow','recurring_state','goal_progress') AND datetime(occurred_at) IS NOT NULL)
+    OR (item_type NOT IN ('cash_flow','recurring_state','goal_progress') AND occurred_at IS NULL)
+  ),
+  CHECK(
+    (item_type='budget' AND length(period_month)=7
+      AND period_month GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]'
+      AND substr(period_month,6,2) BETWEEN '01' AND '12')
+    OR (item_type<>'budget' AND period_month IS NULL)
+  ),
+  CHECK(
+    (item_type='recurring_rule'
+      AND frequency IN ('weekly','monthly','quarterly','yearly')
+      AND typeof(interval_count)='integer' AND interval_count BETWEEN 1 AND 120
+      AND datetime(starts_at) IS NOT NULL
+      AND datetime(next_occurrence_at) IS NOT NULL
+      AND datetime(next_occurrence_at)>=datetime(starts_at)
+      AND (ends_at IS NULL OR (datetime(ends_at) IS NOT NULL AND datetime(ends_at)>=datetime(next_occurrence_at)))
+      AND recurring_status='active')
+    OR
+    (item_type='recurring_state'
+      AND frequency IS NULL AND interval_count IS NULL AND starts_at IS NULL
+      AND next_occurrence_at IS NULL AND ends_at IS NULL
+      AND recurring_status IN ('active','paused','ended'))
+    OR
+    (item_type NOT IN ('recurring_rule','recurring_state')
+      AND frequency IS NULL AND interval_count IS NULL AND starts_at IS NULL
+      AND next_occurrence_at IS NULL AND ends_at IS NULL AND recurring_status IS NULL)
+  ),
+  CHECK(
+    (item_type='goal'
+      AND goal_kind IN ('savings','debt_reduction','investment','purchase','emergency_fund','other')
+      AND target_amount>0 AND target_amount<=1000000000000000
+      AND current_amount>=0 AND current_amount<=1000000000000000
+      AND (due_at IS NULL OR datetime(due_at) IS NOT NULL))
+    OR
+    (item_type='goal_progress'
+      AND goal_kind IS NULL AND target_amount IS NULL
+      AND current_amount>=0 AND current_amount<=1000000000000000 AND due_at IS NULL)
+    OR
+    (item_type NOT IN ('goal','goal_progress')
+      AND goal_kind IS NULL AND target_amount IS NULL AND current_amount IS NULL AND due_at IS NULL)
+  ),
+  CHECK(
+    (item_type='asset'
+      AND asset_class IN ('cash','deposit','precious_metal_fx','investment','pension','real_estate','vehicle')
+      AND quantity>0 AND quantity<=1000000000000000
+      AND unit_value>=0 AND unit_value<=1000000000000000
+      AND market_value>=0 AND market_value<=1000000000000000
+      AND abs(market_value-(quantity*unit_value))<0.005
+      AND datetime(valued_at) IS NOT NULL)
+    OR
+    (item_type='asset_valuation'
+      AND asset_class IS NULL
+      AND quantity>0 AND quantity<=1000000000000000
+      AND unit_value>=0 AND unit_value<=1000000000000000
+      AND market_value>=0 AND market_value<=1000000000000000
+      AND abs(market_value-(quantity*unit_value))<0.005
+      AND datetime(valued_at) IS NOT NULL)
+    OR
+    (item_type NOT IN ('asset','asset_valuation')
+      AND asset_class IS NULL AND quantity IS NULL AND unit_value IS NULL
+      AND market_value IS NULL AND valued_at IS NULL)
+  ),
+  CHECK(
+    item_type IN ('goal_progress','asset','asset_valuation')
+    OR note IS NULL
+  ),
+  CHECK(note IS NULL OR length(trim(note)) BETWEEN 1 AND 500),
+  UNIQUE(policy_receipt_hash)
+);
+
+CREATE INDEX idx_finance_planning_family_created
+ON finance_planning_ledger(family_id,created_at DESC,id);
+CREATE INDEX idx_finance_planning_owner_created
+ON finance_planning_ledger(owner_person_id,created_at DESC,id);
+CREATE INDEX idx_finance_planning_type_created
+ON finance_planning_ledger(item_type,created_at DESC,id);
+CREATE INDEX idx_finance_planning_parent_created
+ON finance_planning_ledger(parent_item_id,created_at DESC,id)
+WHERE parent_item_id IS NOT NULL;
+CREATE INDEX idx_finance_planning_period
+ON finance_planning_ledger(period_month,category_kind,parent_item_id)
+WHERE period_month IS NOT NULL;
+CREATE INDEX idx_finance_planning_occurred
+ON finance_planning_ledger(occurred_at,item_type)
+WHERE occurred_at IS NOT NULL;
+CREATE INDEX idx_finance_planning_due
+ON finance_planning_ledger(due_at,item_type)
+WHERE due_at IS NOT NULL;
+CREATE INDEX idx_finance_planning_next_occurrence
+ON finance_planning_ledger(next_occurrence_at,recurring_status)
+WHERE next_occurrence_at IS NOT NULL;
+CREATE INDEX idx_finance_planning_valued
+ON finance_planning_ledger(valued_at,item_type)
+WHERE valued_at IS NOT NULL;
+
+CREATE TRIGGER trg_b4_finance_planning_parent_guard
+BEFORE INSERT ON finance_planning_ledger
+WHEN NEW.parent_item_id IS NOT NULL AND NOT EXISTS(
+  SELECT 1
+  FROM finance_planning_ledger parent
+  WHERE parent.id=NEW.parent_item_id
+    AND parent.family_id=NEW.family_id
+    AND parent.owner_person_id=NEW.owner_person_id
+    AND parent.privacy=NEW.privacy
+    AND datetime(NEW.created_at)>=datetime(parent.created_at)
+    AND (
+      (NEW.item_type IN ('cash_flow','budget','recurring_rule') AND parent.item_type='category')
+      OR (NEW.item_type='recurring_state' AND parent.item_type='recurring_rule')
+      OR (NEW.item_type='goal_progress' AND parent.item_type='goal')
+      OR (NEW.item_type='asset_valuation' AND parent.item_type='asset')
+    )
+    AND (
+      NEW.item_type NOT IN ('cash_flow','recurring_rule')
+      OR NEW.category_kind=parent.category_kind
+    )
+    AND (
+      NEW.item_type<>'recurring_state'
+      OR datetime(NEW.occurred_at)>=datetime(parent.starts_at)
+    )
+    AND (
+      NEW.item_type<>'goal_progress'
+      OR datetime(NEW.occurred_at)>=datetime(parent.created_at)
+    )
+    AND (
+      NEW.item_type<>'asset_valuation'
+      OR datetime(NEW.valued_at)>=datetime(parent.valued_at)
+    )
+)
+BEGIN
+  SELECT RAISE(ABORT,'finance planning child requires an exact compatible parent');
+END;
+
+CREATE TRIGGER trg_b4_finance_planning_insert_policy_receipt
+BEFORE INSERT ON finance_planning_ledger
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM platform_policy_transaction_receipts receipt
+  JOIN platform_policy_database_fences fence
+    ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+  WHERE receipt.receipt_hash=NEW.policy_receipt_hash
+    AND receipt.receipt_version=NEW.policy_receipt_version
+    AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id
+    AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id
+    AND receipt.action=NEW.policy_action
+    AND receipt.capability=NEW.policy_capability
+    AND receipt.resource_type='finance_record'
+    AND receipt.resource_id=CASE WHEN NEW.parent_item_id IS NULL THEN NEW.id ELSE NEW.parent_item_id END
+    AND receipt.action=CASE WHEN NEW.parent_item_id IS NULL THEN 'create' ELSE 'update' END
+    AND receipt.capability='finance.write'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.purpose')='finance'
+)
+OR EXISTS(SELECT 1 FROM finance_records WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_valuations WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM bank_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM payment_cards WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM loan_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM loan_payment_history WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_planning_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'finance planning write requires an unused exact durable finance policy receipt');
+END;
+
+CREATE TRIGGER trg_b4_finance_record_planning_receipt_reuse
+BEFORE INSERT ON finance_records
+WHEN NEW.policy_receipt_hash IS NOT NULL
+  AND EXISTS(SELECT 1 FROM finance_planning_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'finance policy receipt is already bound to a planning record');
+END;
+
+CREATE TRIGGER trg_b4_finance_valuation_planning_receipt_reuse
+BEFORE INSERT ON finance_valuations
+WHEN NEW.policy_receipt_hash IS NOT NULL
+  AND EXISTS(SELECT 1 FROM finance_planning_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'finance policy receipt is already bound to a planning record');
+END;
+
+CREATE TRIGGER trg_b4_bank_account_planning_receipt_reuse
+BEFORE INSERT ON bank_accounts
+WHEN EXISTS(SELECT 1 FROM finance_planning_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'finance policy receipt is already bound to a planning record');
+END;
+
+CREATE TRIGGER trg_b4_payment_card_planning_receipt_reuse
+BEFORE INSERT ON payment_cards
+WHEN EXISTS(SELECT 1 FROM finance_planning_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'finance policy receipt is already bound to a planning record');
+END;
+
+CREATE TRIGGER trg_b4_loan_account_planning_receipt_reuse
+BEFORE INSERT ON loan_accounts
+WHEN EXISTS(SELECT 1 FROM finance_planning_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'finance policy receipt is already bound to a planning record');
+END;
+
+CREATE TRIGGER trg_b4_loan_payment_planning_receipt_reuse
+BEFORE INSERT ON loan_payment_history
+WHEN EXISTS(SELECT 1 FROM finance_planning_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'finance policy receipt is already bound to a planning record');
+END;
+
+CREATE TRIGGER trg_b4_finance_planning_immutable
+BEFORE UPDATE ON finance_planning_ledger
+BEGIN
+  SELECT RAISE(ABORT,'finance planning ledger is append-only');
+END;
+
+CREATE TRIGGER trg_b4_finance_planning_delete_guard
+BEFORE DELETE ON finance_planning_ledger
+BEGIN
+  SELECT RAISE(ABORT,'finance planning deletion requires a governed deletion workflow');
+END;
+
+UPDATE database_metadata
+SET value='REVISION-33-C-B4-FINANCE-PLANNING-PORTFOLIO-ANALYTICS',
+    updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
+WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -7118,7 +7430,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(77, 'ppk016_derived_data_policy_inheritance', derivedDataPolicyInheritanceSql),
   createMigrationDefinition(78, 'b4_banking_foundation', bankingFoundationSql),
   createMigrationDefinition(79, 'b4_payment_card_management', paymentCardManagementSql),
-  createMigrationDefinition(80, 'b4_loan_management', loanManagementSql)
+  createMigrationDefinition(80, 'b4_loan_management', loanManagementSql),
+  createMigrationDefinition(81, 'b4_finance_planning_portfolio_analytics', financePlanningLedgerSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

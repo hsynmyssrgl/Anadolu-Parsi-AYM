@@ -28,6 +28,17 @@ Bir çelişki olduğunda aşağıdaki sıra uygulanır:
 Eski kararlar silinmez; tarihsel kanıt olarak korunur. Ancak aktif ürün davranışını
 belirleyemez. Çelişki sessizce birleştirilmez; değişiklik kaydına işlenir.
 
+## DEC-214 — B4 finans planlama, portföy ve analiz merkezi
+
+33-C ile B4-10, B4-11 ve B4-12 tek append-only finans planlama defteri ve türetilmiş
+okuma modelinde tamamlanır. Kategori, bütçe, nakit akışı, yinelenen işlem, hedef,
+portföy ve değerleme geçmişi merkezi finance PEP ve exact kalıcı receipt altında
+bağlanır. Net değer, borç oranı, bütçe sapması ve yaklaşan ödeme aile/kişi ile para
+birimi bazında hesaplanır; kur dönüşümü, dış fiyat, banka eşitlemesi veya ödeme
+icrası yapılmaz. Migration 81 eklenir; PPK-021 542 exact yüzeye ve 274 use-case
+composition yüzeyine çıkar, PPK-022 238 kalır. Ayrıntılı karar:
+`docs/decisions/DEC-214-b4-finance-planning-portfolio-analytics.md`
+
 ## DEC-213 — B4 kredi ve ödeme geçmişi yönetimi
 
 33-B ile B4-08 ve B4-09 tek korumalı kredi aggregate'ında tamamlanır. Kredi türü,

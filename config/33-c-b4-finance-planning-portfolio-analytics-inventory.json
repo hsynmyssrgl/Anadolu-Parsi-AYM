@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "step": "33-C",
+  "requirements": ["B4-10", "B4-11", "B4-12"],
+  "status": "COMPLETE",
+  "surfaces": [
+    { "id": "domain-contract", "paths": ["packages/domain/src/app-data.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "exact-secret-contract", "paths": ["packages/application/src/banking-security.ts", "packages/application/src/finance-use-cases.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "repository-contract", "paths": ["packages/repository-contracts/src/finance-repository.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "sqlite-repository", "paths": ["packages/repositories/src/finance-repository.ts", "packages/repositories/src/ai-consent-repository.ts", "packages/repositories/src/person-lifecycle-repository.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "migration-81", "paths": ["packages/database/src/family-database-migrations.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "finance-policy-resolution", "paths": ["apps/desktop/src/main/finance-production-policy-runtime.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "finance-policy-composition", "paths": ["apps/desktop/src/main/finance-application-adapter.ts", "apps/desktop/src/main/data-store.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "typed-ipc-preload", "paths": ["apps/desktop/src/main/main.ts", "apps/desktop/src/main/ipc-integration-policy.ts", "apps/desktop/src/main/preload.ts", "apps/desktop/src/renderer/global.d.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "finance-menu-ui", "paths": ["apps/desktop/src/renderer/App.tsx", "apps/desktop/src/renderer/FinancePlanningPanel.tsx"], "disposition": "IMPLEMENTED" },
+    { "id": "targeted-runtime-tests", "paths": ["packages/application/tests/finance-planning-portfolio-analytics.test.ts", "apps/desktop/tests/b4-finance-planning-ipc-integration.test.ts", "apps/desktop/tests/data-store.test.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "governance-evidence", "paths": ["docs/decisions/DEC-214-b4-finance-planning-portfolio-analytics.md", "docs/security/THREAT_MODEL_33_C_B4_FINANCE_PLANNING_PORTFOLIO_ANALYTICS.md", "docs/audit/33-C_B4_FINANCE_PLANNING_PORTFOLIO_ANALYTICS_UST_KAPANIS.md"], "disposition": "IMPLEMENTED" }
+  ],
+  "ipcChannels": ["finance:getPlanningWorkspace", "finance:recordPlanningItem"],
+  "networkChannels": [],
+  "prohibitedPersistedColumns": ["pan", "full_pan", "card_number", "cvv", "cvc", "pin", "password", "internet_banking_password"],
+  "latestDatabaseMigration": 81,
+  "openRequirements": ["B4-13", "B4-14"],
+  "openBlockers": []
+}

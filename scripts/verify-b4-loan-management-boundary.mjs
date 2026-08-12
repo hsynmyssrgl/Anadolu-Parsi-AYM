@@ -119,7 +119,10 @@ export const verifyB4LoanManagementBoundary = async () => {
   ]));
   const loanEventSlice = application.slice(application.indexOf("eventType: 'finance.loan.created'"),
     application.indexOf('export class RecordLoanPaymentUseCase'));
-  const paymentEventSlice = application.slice(application.indexOf("eventType: 'finance.loan.payment_recorded'"));
+  const paymentEventSlice = application.slice(
+    application.indexOf("eventType: 'finance.loan.payment_recorded'"),
+    application.indexOf('export class RecordFinancePlanningItemUseCase')
+  );
   check('audit and outbox redact money insurance collateral and payment notes', includesAll(application, [
     "action: 'finance.loan.created'", "action: 'finance.loan.payment_recorded'",
     "eventType: 'finance.loan.created'", "eventType: 'finance.loan.payment_recorded'"
@@ -142,8 +145,8 @@ export const verifyB4LoanManagementBoundary = async () => {
     && aiRepository.includes('SELECT COUNT(*) FROM loan_payment_history')
     && personLifecycleRepository.includes('loanAccounts: `SELECT COUNT(*) AS total FROM loan_accounts')
     && personLifecycleRepository.includes('loanPayments: `SELECT COUNT(*) AS total FROM loan_payment_history'));
-  check('migration 80 exists and is current', migrationVersions.includes(80)
-    && Math.max(...migrationVersions) === 80
+  check('migration 80 remains an exact predecessor baseline', migrationVersions.includes(80)
+    && Math.max(...migrationVersions) >= 80
     && migrations.includes("createMigrationDefinition(80, 'b4_loan_management', loanManagementSql)"));
   check('migration creates all three loan tables without prohibited secret columns', includesAll(loanMigration, [
     'CREATE TABLE loan_accounts(', 'CREATE TABLE loan_payment_schedule(', 'CREATE TABLE loan_payment_history('
@@ -219,8 +222,8 @@ export const verifyB4LoanManagementBoundary = async () => {
   check('PPK-021 exact ratchet reviews all three new compositions', [
     'CreateLoanAccountUseCase', 'ListLoanAccountsUseCase', 'RecordLoanPaymentUseCase'
   ].every((symbol) => astKeys.has(`USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|${symbol}`))
-    && astGate.status === 'PASS' && astGate.exactAllowlistEntries === 540
-    && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 272
+    && astGate.status === 'PASS' && astGate.exactAllowlistEntries === 542
+    && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 274
     && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
   check('PPK-022 capability ratchet remains unchanged and green', capabilityGate.status === 'PASS'
     && capabilityGate.capabilitySurfaces === 238

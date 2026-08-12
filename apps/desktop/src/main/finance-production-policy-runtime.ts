@@ -732,7 +732,14 @@ const loadFinanceResourceSnapshotInTransaction = (
       requestedIntent.resourceId
     );
     if (!existingLoan.ok) return existingLoan;
-    if (existing.value || existingLoan.value) return invalidAuthority(context, 'Finance policy create resource already exists');
+    const existingPlanningItem = dependencies.financePolicyResourceRepository.findPlanningItemForPolicyResolution(
+      execution,
+      requestedIntent.resourceId
+    );
+    if (!existingPlanningItem.ok) return existingPlanningItem;
+    if (existing.value || existingLoan.value || existingPlanningItem.value) {
+      return invalidAuthority(context, 'Finance policy create resource already exists');
+    }
     const owner = dependencies.personRepository.findById(execution, requestedIntent.ownerPersonId);
     if (!owner.ok) return owner;
     if (!owner.value || owner.value.familyId !== context.familyId || owner.value.status !== 'active') {
@@ -768,7 +775,12 @@ const loadFinanceResourceSnapshotInTransaction = (
       requestedIntent.resourceId
     );
     if (!loan.ok) return loan;
-    const resourceRecord = record.value ?? loan.value;
+    const planningItem = dependencies.financePolicyResourceRepository.findPlanningItemForPolicyResolution(
+      execution,
+      requestedIntent.resourceId
+    );
+    if (!planningItem.ok) return planningItem;
+    const resourceRecord = record.value ?? loan.value ?? planningItem.value;
     if (!resourceRecord || resourceRecord.familyId !== context.familyId) {
       return invalidAuthority(context, 'Finance policy resource does not exist in the active family');
     }
@@ -909,6 +921,7 @@ const ensureRuntimeConfiguration = (dependencies: FinanceProductionPolicyRuntime
     || typeof dependencies.trustedDeviceRepository?.findActive !== 'function'
     || typeof dependencies.financePolicyResourceRepository?.findRecordForPolicyResolution !== 'function'
     || typeof dependencies.financePolicyResourceRepository?.findLoanAccountForPolicyResolution !== 'function'
+    || typeof dependencies.financePolicyResourceRepository?.findPlanningItemForPolicyResolution !== 'function'
     || typeof dependencies.personRepository?.findById !== 'function'
     || typeof dependencies.deviceIdentityProvider?.snapshot !== 'function'
     || typeof dependencies.authorizationProvider?.authorize !== 'function'

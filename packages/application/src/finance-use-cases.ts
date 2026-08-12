@@ -23,13 +23,32 @@ import type {
   CreateLoanAccountInput,
   CreatePaymentCardInput,
   FamilyRole,
+  FinanceBudgetRevisionView,
+  FinanceBudgetVarianceView,
+  FinanceCategoryView,
+  FinanceCashFlowEntryView,
+  FinanceCurrencySummaryView,
+  FinanceGoalLedgerView,
+  FinanceGoalProgressView,
+  FinanceGoalView,
+  FinancePlanningLedgerItemView,
+  FinancePlanningScopeSummaryView,
+  FinancePlanningWorkspaceView,
+  FinancePortfolioAssetLedgerView,
+  FinancePortfolioAssetView,
+  FinancePortfolioValuationView,
   FinanceRecordView,
+  FinanceRecurringRuleLedgerView,
+  FinanceRecurringRuleView,
+  FinanceRecurringStateView,
+  FinanceUpcomingPaymentView,
   FinanceValuationView,
   IbanStructuralValidationView,
   LoanAccountView,
   LoanPaymentHistoryItemView,
   PaymentCardView,
   RecordLoanPaymentInput,
+  RecordFinancePlanningItemInput,
   RecordPrivacy
 } from '@ppt/domain';
 import type { DomainEvent } from '@ppt/events';
@@ -39,6 +58,7 @@ import {
   inspectLoanAccountDataContract,
   inspectLoanPaymentDataContract,
   inspectPaymentCardDataContract,
+  inspectFinancePlanningDataContract,
   inspectProhibitedBankingSecrets,
   maskIban,
   normalizeIban,
@@ -72,6 +92,7 @@ export interface FinanceQueryPort {
   listBankAccounts(context: FinanceApplicationContext): Promise<Result<readonly BankAccountView[], AppError>>;
   listPaymentCards(context: FinanceApplicationContext): Promise<Result<readonly PaymentCardView[], AppError>>;
   listLoanAccounts(context: FinanceApplicationContext): Promise<Result<readonly LoanAccountView[], AppError>>;
+  getPlanningWorkspace(context: FinanceApplicationContext): Promise<Result<FinancePlanningWorkspaceView, AppError>>;
   validateIban(context: FinanceApplicationContext, iban: string): Promise<Result<IbanStructuralValidationView, AppError>>;
 }
 
@@ -80,6 +101,11 @@ export interface FinanceWriteScope {
   findPerson(id: PersonId): Result<{ id: PersonId } | null, AppError>;
   findRecord(id: string): Result<(FinanceRecordView & { ownerPersonId: PersonId }) | null, AppError>;
   findLoanAccount(id: string): Result<(LoanAccountView & { ownerPersonId: PersonId }) | null, AppError>;
+  findPlanningItem(id: string): Result<(FinancePlanningLedgerItemView & {
+    familyId: FamilyId;
+    ownerPersonId: PersonId;
+    createdAt: IsoDateTime;
+  }) | null, AppError>;
   findBankInstitution(institutionCode: string): Result<BankInstitutionView | null, AppError>;
   authorize(input: {
     action: AuthorizationAction;
@@ -127,6 +153,11 @@ export interface FinanceWriteScope {
     familyId: FamilyId;
     ownerPersonId: PersonId;
     paidAt: IsoDateTime;
+    createdAt: IsoDateTime;
+  }): Result<void, AppError>;
+  insertPlanningItem(row: FinancePlanningLedgerItemView & {
+    familyId: FamilyId;
+    ownerPersonId: PersonId;
     createdAt: IsoDateTime;
   }): Result<void, AppError>;
   appendAudit(input: {
@@ -209,6 +240,282 @@ export class ListLoanAccountsUseCase {
   public constructor(private readonly query: FinanceQueryPort) {}
   public execute(context: FinanceApplicationContext) { return this.query.listLoanAccounts(context); }
 }
+
+export class GetFinancePlanningWorkspaceUseCase {
+  public constructor(private readonly query: FinanceQueryPort) {}
+  public execute(context: FinanceApplicationContext) { return this.query.getPlanningWorkspace(context); }
+}
+
+export interface FinancePlanningWorkspaceSource {
+  readonly planningItems: readonly FinancePlanningLedgerItemView[];
+  readonly financeRecords: readonly FinanceRecordView[];
+  readonly financeValuations: readonly FinanceValuationView[];
+  readonly paymentCards: readonly PaymentCardView[];
+  readonly loanAccounts: readonly LoanAccountView[];
+  readonly generatedAt: string;
+}
+
+const roundMoney = (value: number): number => Math.round((value + Number.EPSILON) * 100) / 100;
+
+export const buildFinancePlanningWorkspace = (
+  source: FinancePlanningWorkspaceSource
+): FinancePlanningWorkspaceView => {
+  const categories = source.planningItems
+    .filter((item): item is FinanceCategoryView => item.itemType === 'category')
+    .sort((left, right) => left.name.localeCompare(right.name, 'tr'));
+  const categoryById = new Map(categories.map((category) => [category.id, category]));
+  const cashFlowEntries = source.planningItems
+    .filter((item): item is FinanceCashFlowEntryView => item.itemType === 'cash_flow')
+    .sort((left, right) => right.occurredAt.localeCompare(left.occurredAt) || left.id.localeCompare(right.id));
+  const budgetRevisions = source.planningItems
+    .filter((item): item is FinanceBudgetRevisionView => item.itemType === 'budget')
+    .sort((left, right) => right.createdAt.localeCompare(left.createdAt) || left.id.localeCompare(right.id));
+  const recurringStates = source.planningItems
+    .filter((item): item is FinanceRecurringStateView => item.itemType === 'recurring_state');
+  const recurringRules = source.planningItems
+    .filter((item): item is FinanceRecurringRuleLedgerView => item.itemType === 'recurring_rule')
+    .map((rule): FinanceRecurringRuleView => {
+      const stateHistory = recurringStates
+        .filter((state) => state.recurringRuleId === rule.id)
+        .sort((left, right) => right.effectiveAt.localeCompare(left.effectiveAt) || right.createdAt.localeCompare(left.createdAt));
+      return Object.freeze({
+        ...rule,
+        currentStatus: stateHistory[0]?.status ?? rule.initialStatus,
+        stateHistory: Object.freeze(stateHistory)
+      });
+    })
+    .sort((left, right) => left.nextOccurrenceAt.localeCompare(right.nextOccurrenceAt));
+  const goalProgress = source.planningItems
+    .filter((item): item is FinanceGoalProgressView => item.itemType === 'goal_progress');
+  const goals = source.planningItems
+    .filter((item): item is FinanceGoalLedgerView => item.itemType === 'goal')
+    .map((goal): FinanceGoalView => {
+      const progressHistory = goalProgress
+        .filter((progress) => progress.goalId === goal.id)
+        .sort((left, right) => right.recordedAt.localeCompare(left.recordedAt) || right.createdAt.localeCompare(left.createdAt));
+      const currentAmount = progressHistory[0]?.currentAmount ?? goal.initialAmount;
+      return Object.freeze({
+        ...goal,
+        currentAmount,
+        completionBasisPoints: Math.max(0, Math.round((currentAmount / goal.targetAmount) * 10_000)),
+        achieved: currentAmount >= goal.targetAmount,
+        progressHistory: Object.freeze(progressHistory)
+      });
+    })
+    .sort((left, right) => (left.dueAt ?? '9999').localeCompare(right.dueAt ?? '9999') || left.title.localeCompare(right.title, 'tr'));
+  const portfolioValuations = source.planningItems
+    .filter((item): item is FinancePortfolioValuationView => item.itemType === 'asset_valuation');
+  const portfolioAssets = source.planningItems
+    .filter((item): item is FinancePortfolioAssetLedgerView => item.itemType === 'asset')
+    .map((asset): FinancePortfolioAssetView => {
+      const valuationHistory = portfolioValuations
+        .filter((valuation) => valuation.assetId === asset.id)
+        .sort((left, right) => right.valuedAt.localeCompare(left.valuedAt) || right.createdAt.localeCompare(left.createdAt));
+      const latest = valuationHistory[0];
+      return Object.freeze({
+        ...asset,
+        currentQuantity: latest?.quantity ?? asset.initialQuantity,
+        currentUnitValue: latest?.unitValue ?? asset.initialUnitValue,
+        currentMarketValue: latest?.marketValue ?? asset.initialMarketValue,
+        currentValuedAt: latest?.valuedAt ?? asset.initiallyValuedAt,
+        valuationHistory: Object.freeze(valuationHistory)
+      });
+    })
+    .sort((left, right) => left.assetClass.localeCompare(right.assetClass) || left.name.localeCompare(right.name, 'tr'));
+
+  const latestBudgetByKey = new Map<string, FinanceBudgetRevisionView>();
+  for (const revision of budgetRevisions) {
+    const key = [revision.ownerPersonId, revision.categoryId, revision.periodMonth, revision.currency].join('|');
+    const current = latestBudgetByKey.get(key);
+    if (!current || `${revision.createdAt}|${revision.id}` > `${current.createdAt}|${current.id}`) {
+      latestBudgetByKey.set(key, revision);
+    }
+  }
+  const budgetVariances = [...latestBudgetByKey.values()].map((budget): FinanceBudgetVarianceView => {
+    const category = categoryById.get(budget.categoryId);
+    const realizedAmount = roundMoney(cashFlowEntries
+      .filter((entry) => entry.ownerPersonId === budget.ownerPersonId
+        && entry.categoryId === budget.categoryId
+        && entry.currency === budget.currency
+        && entry.status === 'realized'
+        && entry.occurredAt.slice(0, 7) === budget.periodMonth)
+      .reduce((total, entry) => total + entry.amount, 0));
+    const varianceAmount = roundMoney(realizedAmount - budget.plannedAmount);
+    return Object.freeze({
+      budgetRevisionId: budget.id,
+      ownerPersonId: budget.ownerPersonId,
+      categoryId: budget.categoryId,
+      categoryName: category?.name ?? 'Erişilebilir kategori',
+      categoryKind: category?.kind ?? 'expense',
+      periodMonth: budget.periodMonth,
+      currency: budget.currency,
+      plannedAmount: budget.plannedAmount,
+      realizedAmount,
+      varianceAmount,
+      overBudget: category?.kind === 'expense' && varianceAmount > 0,
+      belowIncomeTarget: category?.kind === 'income' && varianceAmount < 0
+    });
+  }).sort((left, right) => right.periodMonth.localeCompare(left.periodMonth) || left.categoryName.localeCompare(right.categoryName, 'tr'));
+
+  const latestValuationByRecord = new Map<string, FinanceValuationView>();
+  for (const valuation of source.financeValuations) {
+    const current = latestValuationByRecord.get(valuation.financeRecordId);
+    if (!current || `${valuation.valueDate}|${valuation.id}` > `${current.valueDate}|${current.id}`) {
+      latestValuationByRecord.set(valuation.financeRecordId, valuation);
+    }
+  }
+  const ownerIds = new Set<string>();
+  for (const item of source.planningItems) ownerIds.add(item.ownerPersonId);
+  for (const record of source.financeRecords) ownerIds.add(record.ownerPersonId);
+  for (const card of source.paymentCards) ownerIds.add(card.ownerPersonId);
+  for (const loan of source.loanAccounts) ownerIds.add(loan.ownerPersonId);
+  const summarize = (ownerPersonId?: string): FinancePlanningScopeSummaryView => {
+    const amounts = new Map<string, Omit<FinanceCurrencySummaryView, 'currency' | 'debtRatioBasisPoints' | 'netWorth' | 'cashFlowBalance'>>();
+    const bucket = (currency: string) => {
+      const normalized = currency.toUpperCase();
+      const current = amounts.get(normalized) ?? {
+        assetValue: 0,
+        liabilityValue: 0,
+        realizedIncome: 0,
+        realizedExpense: 0
+      };
+      amounts.set(normalized, current);
+      return current;
+    };
+    for (const asset of portfolioAssets.filter((item) => ownerPersonId === undefined || item.ownerPersonId === ownerPersonId)) {
+      bucket(asset.currency).assetValue += asset.currentMarketValue;
+    }
+    for (const record of source.financeRecords.filter((item) => ownerPersonId === undefined || item.ownerPersonId === ownerPersonId)) {
+      if (record.kind === 'asset') bucket(record.currency).assetValue += latestValuationByRecord.get(record.id)?.marketValue ?? record.amount;
+      if (record.kind === 'debt') bucket(record.currency).liabilityValue += record.remainingPrincipal ?? record.amount;
+      if (record.kind === 'income') bucket(record.currency).realizedIncome += record.amount;
+      if (record.kind === 'expense') bucket(record.currency).realizedExpense += record.amount;
+    }
+    for (const card of source.paymentCards.filter((item) => item.status !== 'closed' && (ownerPersonId === undefined || item.ownerPersonId === ownerPersonId))) {
+      bucket(card.currency).liabilityValue += card.currentDebt;
+    }
+    for (const loan of source.loanAccounts.filter((item) => item.status !== 'closed' && (ownerPersonId === undefined || item.ownerPersonId === ownerPersonId))) {
+      bucket(loan.currency).liabilityValue += loan.remainingPrincipal;
+    }
+    for (const entry of cashFlowEntries.filter((item) => item.status === 'realized' && (ownerPersonId === undefined || item.ownerPersonId === ownerPersonId))) {
+      if (entry.direction === 'income') bucket(entry.currency).realizedIncome += entry.amount;
+      else bucket(entry.currency).realizedExpense += entry.amount;
+    }
+    const currencySummaries = [...amounts.entries()].map(([currency, value]): FinanceCurrencySummaryView => {
+      const assetValue = roundMoney(value.assetValue);
+      const liabilityValue = roundMoney(value.liabilityValue);
+      const realizedIncome = roundMoney(value.realizedIncome);
+      const realizedExpense = roundMoney(value.realizedExpense);
+      return Object.freeze({
+        currency,
+        assetValue,
+        liabilityValue,
+        netWorth: roundMoney(assetValue - liabilityValue),
+        ...(assetValue > 0 ? { debtRatioBasisPoints: Math.round((liabilityValue / assetValue) * 10_000) } : {}),
+        realizedIncome,
+        realizedExpense,
+        cashFlowBalance: roundMoney(realizedIncome - realizedExpense)
+      });
+    }).sort((left, right) => left.currency.localeCompare(right.currency));
+    return Object.freeze({
+      scope: ownerPersonId === undefined ? 'family' : 'person',
+      ...(ownerPersonId === undefined ? {} : { ownerPersonId }),
+      currencySummaries: Object.freeze(currencySummaries),
+      crossCurrencyAggregationPerformed: false
+    });
+  };
+
+  const upcomingPayments: FinanceUpcomingPaymentView[] = [];
+  const now = source.generatedAt;
+  const addUpcoming = (payment: FinanceUpcomingPaymentView) => {
+    if (payment.dueAt >= now && payment.amount > 0) upcomingPayments.push(Object.freeze(payment));
+  };
+  for (const card of source.paymentCards) {
+    if (card.status !== 'closed') addUpcoming({
+      id: `payment-card:${card.id}`,
+      ownerPersonId: card.ownerPersonId,
+      source: 'payment_card',
+      title: `${card.productName} kart ödemesi`,
+      dueAt: card.paymentDueAt,
+      amount: card.statementBalance > 0 ? card.statementBalance : card.currentDebt,
+      currency: card.currency,
+      paymentExecution: 'not_performed'
+    });
+  }
+  for (const loan of source.loanAccounts) {
+    if (loan.status === 'closed') continue;
+    const paidSequences = new Set(loan.paymentHistory.flatMap((payment) =>
+      payment.scheduledInstallmentSequence === undefined ? [] : [payment.scheduledInstallmentSequence]));
+    for (const installment of loan.paymentSchedule) {
+      if (!paidSequences.has(installment.sequence)) addUpcoming({
+        id: `loan:${loan.id}:${installment.sequence}`,
+        ownerPersonId: loan.ownerPersonId,
+        source: 'loan',
+        title: `${loan.title} · ${installment.sequence}. taksit`,
+        dueAt: installment.dueAt,
+        amount: installment.scheduledAmount,
+        currency: loan.currency,
+        paymentExecution: 'not_performed'
+      });
+    }
+  }
+  for (const record of source.financeRecords) {
+    if (record.kind === 'debt' && record.dueAt) addUpcoming({
+      id: `finance-record:${record.id}`,
+      ownerPersonId: record.ownerPersonId,
+      source: 'finance_record',
+      title: record.title,
+      dueAt: record.dueAt,
+      amount: record.remainingPrincipal ?? record.amount,
+      currency: record.currency,
+      paymentExecution: 'not_performed'
+    });
+  }
+  for (const rule of recurringRules) {
+    if (rule.direction === 'expense' && rule.currentStatus === 'active') addUpcoming({
+      id: `recurring-rule:${rule.id}`,
+      ownerPersonId: rule.ownerPersonId,
+      source: 'recurring_rule',
+      title: rule.description ?? categoryById.get(rule.categoryId)?.name ?? 'Yinelenen gider',
+      dueAt: rule.nextOccurrenceAt,
+      amount: rule.amount,
+      currency: rule.currency,
+      paymentExecution: 'not_performed'
+    });
+  }
+  for (const entry of cashFlowEntries) {
+    if (entry.direction === 'expense' && entry.status === 'planned') addUpcoming({
+      id: `planned-cash-flow:${entry.id}`,
+      ownerPersonId: entry.ownerPersonId,
+      source: 'planned_cash_flow',
+      title: entry.description ?? categoryById.get(entry.categoryId)?.name ?? 'Planlı gider',
+      dueAt: entry.occurredAt,
+      amount: entry.amount,
+      currency: entry.currency,
+      paymentExecution: 'not_performed'
+    });
+  }
+
+  return Object.freeze({
+    categories: Object.freeze(categories),
+    cashFlowEntries: Object.freeze(cashFlowEntries),
+    budgetRevisions: Object.freeze(budgetRevisions),
+    budgetVariances: Object.freeze(budgetVariances),
+    recurringRules: Object.freeze(recurringRules),
+    goals: Object.freeze(goals),
+    portfolioAssets: Object.freeze(portfolioAssets),
+    upcomingPayments: Object.freeze(upcomingPayments
+      .sort((left, right) => left.dueAt.localeCompare(right.dueAt) || left.id.localeCompare(right.id))
+      .slice(0, 250)),
+    familySummary: summarize(),
+    personSummaries: Object.freeze([...ownerIds].sort().map((ownerPersonId) => summarize(ownerPersonId))),
+    generatedAt: source.generatedAt,
+    dataSource: 'manual',
+    externalPricing: 'not_performed',
+    bankSynchronization: 'not_performed',
+    paymentExecution: 'not_performed'
+  });
+};
 
 export class ValidateIbanUseCase {
   public constructor(private readonly query: FinanceQueryPort) {}
@@ -1005,6 +1312,333 @@ export class RecordLoanPaymentUseCase {
         }
       });
       return event.ok ? ok(payment) : event;
+    });
+  }
+}
+
+const financePlanningContractError = (
+  context: FinanceApplicationContext,
+  command: RecordFinancePlanningItemInput
+): AppError | undefined => {
+  const inspection = inspectFinancePlanningDataContract(command);
+  if (inspection.prohibitedFields.length > 0 || inspection.panLikeValueDetected) {
+    return invalid(context, 'Tam PAN, kart sırrı, PIN ve internet bankacılığı parolası finans planlama sözleşmesinde kabul edilmez.');
+  }
+  if (inspection.unknownFields.length > 0) return invalid(context, 'Finans planlama sözleşmesinde tanımsız alan bulunuyor.');
+  return undefined;
+};
+
+const validPlanningCurrency = (value: string): boolean => /^[A-Z]{3}$/u.test(value);
+const validPlanningId = (value: string): boolean => value.trim().length >= 2 && value.trim().length <= 160;
+const validPlanningText = (value: string, minimum: number, maximum: number): boolean => {
+  const length = value.trim().length;
+  return length >= minimum && length <= maximum;
+};
+
+export class RecordFinancePlanningItemUseCase {
+  public constructor(private readonly unitOfWork: FinanceUnitOfWork) {}
+
+  public async execute(input: {
+    context: FinanceApplicationContext;
+    command: RecordFinancePlanningItemInput;
+    identifiers: { itemId: string; auditId: string; outboxEventId: EventId };
+  }): Promise<Result<FinancePlanningLedgerItemView, AppError>> {
+    const contractError = financePlanningContractError(input.context, input.command);
+    if (contractError) return err(contractError);
+    const command = input.command;
+    const normalizedDates = new Map<string, IsoDateTime>();
+    const captureDate = (key: string, value: string, label: string): AppError | undefined => {
+      const parsed = date(value, input.context, label);
+      if (!parsed.ok) return parsed.error;
+      normalizedDates.set(key, parsed.value);
+      return undefined;
+    };
+    const currency = 'currency' in command ? command.currency.trim().toUpperCase() : undefined;
+    let validationError: AppError | undefined;
+    switch (command.itemType) {
+      case 'category':
+        if (!validPlanningId(command.ownerPersonId) || !validPlanningText(command.name, 2, 80)
+          || !['income','expense'].includes(command.kind)
+          || !['private','selected_members','family'].includes(command.privacy)) {
+          validationError = invalid(input.context, 'Kategori sahibi, adı, türü veya gizliliği geçersiz.');
+        }
+        break;
+      case 'cash_flow':
+        if (!validPlanningId(command.categoryId) || !finiteMoney(command.amount) || command.amount <= 0
+          || !currency || !validPlanningCurrency(currency)
+          || !['planned','realized'].includes(command.status)
+          || (command.description !== undefined && !validPlanningText(command.description, 1, 240))) {
+          validationError = invalid(input.context, 'Nakit akışı kategori, tutar, para birimi, durum veya açıklaması geçersiz.');
+        } else validationError = captureDate('occurredAt', command.occurredAt, 'Nakit akışı tarihi');
+        break;
+      case 'budget':
+        if (!validPlanningId(command.categoryId) || !finiteMoney(command.plannedAmount)
+          || !currency || !validPlanningCurrency(currency)
+          || !/^\d{4}-(?:0[1-9]|1[0-2])$/u.test(command.periodMonth)) {
+          validationError = invalid(input.context, 'Bütçe kategori, dönem, tutar veya para birimi geçersiz.');
+        }
+        break;
+      case 'recurring_rule':
+        if (!validPlanningId(command.categoryId) || !finiteMoney(command.amount) || command.amount <= 0
+          || !currency || !validPlanningCurrency(currency)
+          || !['weekly','monthly','quarterly','yearly'].includes(command.frequency)
+          || !Number.isInteger(command.intervalCount) || command.intervalCount < 1 || command.intervalCount > 120
+          || (command.description !== undefined && !validPlanningText(command.description, 1, 240))) {
+          validationError = invalid(input.context, 'Yinelenen işlem kategori, tutar, sıklık, aralık veya açıklaması geçersiz.');
+          break;
+        }
+        validationError = captureDate('startsAt', command.startsAt, 'Yinelenen işlem başlangıcı')
+          ?? captureDate('nextOccurrenceAt', command.nextOccurrenceAt, 'Sonraki yinelenen işlem tarihi')
+          ?? (command.endsAt ? captureDate('endsAt', command.endsAt, 'Yinelenen işlem bitişi') : undefined);
+        if (!validationError && normalizedDates.get('nextOccurrenceAt')! < normalizedDates.get('startsAt')!) {
+          validationError = invalid(input.context, 'Sonraki yinelenen işlem tarihi başlangıçtan önce olamaz.');
+        }
+        if (!validationError && normalizedDates.has('endsAt')
+          && normalizedDates.get('endsAt')! < normalizedDates.get('nextOccurrenceAt')!) {
+          validationError = invalid(input.context, 'Yinelenen işlem bitişi sonraki işlem tarihinden önce olamaz.');
+        }
+        break;
+      case 'recurring_state':
+        if (!validPlanningId(command.recurringRuleId) || !['active','paused','ended'].includes(command.status)) {
+          validationError = invalid(input.context, 'Yinelenen işlem kimliği veya durumu geçersiz.');
+        } else validationError = captureDate('effectiveAt', command.effectiveAt, 'Yinelenen işlem durum tarihi');
+        break;
+      case 'goal':
+        if (!validPlanningId(command.ownerPersonId) || !validPlanningText(command.title, 2, 120)
+          || !['savings','debt_reduction','investment','purchase','emergency_fund','other'].includes(command.kind)
+          || !finiteMoney(command.targetAmount) || command.targetAmount <= 0
+          || !finiteMoney(command.initialAmount)
+          || !currency || !validPlanningCurrency(currency)
+          || !['private','selected_members','family'].includes(command.privacy)) {
+          validationError = invalid(input.context, 'Hedef sahibi, başlığı, türü, tutarı, para birimi veya gizliliği geçersiz.');
+        } else if (command.dueAt) validationError = captureDate('dueAt', command.dueAt, 'Hedef tarihi');
+        break;
+      case 'goal_progress':
+        if (!validPlanningId(command.goalId) || !finiteMoney(command.currentAmount)
+          || (command.note !== undefined && !validPlanningText(command.note, 1, 500))) {
+          validationError = invalid(input.context, 'Hedef kimliği, ilerleme tutarı veya notu geçersiz.');
+        } else validationError = captureDate('recordedAt', command.recordedAt, 'Hedef ilerleme tarihi');
+        break;
+      case 'asset':
+        if (!validPlanningId(command.ownerPersonId) || !validPlanningText(command.name, 2, 120)
+          || !['cash','deposit','precious_metal_fx','investment','pension','real_estate','vehicle'].includes(command.assetClass)
+          || !currency || !validPlanningCurrency(currency)
+          || !finiteMoney(command.quantity) || command.quantity <= 0
+          || !finiteMoney(command.unitValue)
+          || !finiteMoney(roundMoney(command.quantity * command.unitValue))
+          || (command.note !== undefined && !validPlanningText(command.note, 1, 500))
+          || !['private','selected_members','family'].includes(command.privacy)) {
+          validationError = invalid(input.context, 'Varlık sahibi, adı, sınıfı, miktarı, birim değeri, para birimi veya gizliliği geçersiz.');
+        } else validationError = captureDate('valuedAt', command.valuedAt, 'Varlık değerleme tarihi');
+        break;
+      case 'asset_valuation':
+        if (!validPlanningId(command.assetId)
+          || !finiteMoney(command.quantity) || command.quantity <= 0
+          || !finiteMoney(command.unitValue)
+          || !finiteMoney(roundMoney(command.quantity * command.unitValue))
+          || (command.note !== undefined && !validPlanningText(command.note, 1, 500))) {
+          validationError = invalid(input.context, 'Varlık kimliği, miktarı, birim değeri veya değerleme notu geçersiz.');
+        } else validationError = captureDate('valuedAt', command.valuedAt, 'Portföy değerleme tarihi');
+        break;
+    }
+    if (validationError) return err(validationError);
+
+    const parentId = command.itemType === 'cash_flow' || command.itemType === 'budget' || command.itemType === 'recurring_rule'
+      ? command.categoryId.trim()
+      : command.itemType === 'recurring_state'
+        ? command.recurringRuleId.trim()
+        : command.itemType === 'goal_progress'
+          ? command.goalId.trim()
+          : command.itemType === 'asset_valuation'
+            ? command.assetId.trim()
+            : undefined;
+    const isBase = command.itemType === 'category' || command.itemType === 'goal' || command.itemType === 'asset';
+    const baseOwnerPersonId = 'ownerPersonId' in command ? asPersonId(command.ownerPersonId) : undefined;
+    const basePrivacy = 'privacy' in command ? command.privacy : undefined;
+    const intent: FinancePolicyIntent = {
+      action: isBase ? 'create' : 'update',
+      capability: 'finance.write',
+      resourceType: 'finance_record',
+      resourceId: isBase ? input.identifiers.itemId : parentId!,
+      purpose: 'finance',
+      ...(baseOwnerPersonId ? { ownerPersonId: baseOwnerPersonId, privacy: basePrivacy! } : {})
+    };
+
+    return this.unitOfWork.execute(input.context, intent, (scope) => {
+      let ownerPersonId: PersonId;
+      let privacy: RecordPrivacy;
+      let parent: FinancePlanningLedgerItemView | undefined;
+      if (isBase) {
+        ownerPersonId = baseOwnerPersonId!;
+        privacy = basePrivacy!;
+        const person = scope.findPerson(ownerPersonId);
+        if (!person.ok) return person;
+        if (!person.value) return err(missing(input.context, 'Finans planlama kaydının bağlanacağı aile üyesi bulunamadı.'));
+      } else {
+        const found = scope.findPlanningItem(parentId!);
+        if (!found.ok) return found;
+        if (!found.value) return err(missing(input.context, 'Finans planlama üst kaydı bulunamadı.'));
+        parent = found.value;
+        ownerPersonId = found.value.ownerPersonId;
+        privacy = found.value.privacy;
+        const expectedParent = command.itemType === 'cash_flow' || command.itemType === 'budget' || command.itemType === 'recurring_rule'
+          ? 'category'
+          : command.itemType === 'recurring_state'
+            ? 'recurring_rule'
+            : command.itemType === 'goal_progress'
+              ? 'goal'
+              : 'asset';
+        if (found.value.itemType !== expectedParent) return err(invalid(input.context, 'Finans planlama üst kayıt türü uyumsuz.'));
+      }
+      const authorization = scope.authorize({
+        action: isBase ? 'create' : 'update',
+        resourceType: 'finance_record',
+        resourceId: isBase ? input.identifiers.itemId : parentId!,
+        ownerPersonId,
+        privacy
+      });
+      if (!authorization.ok) return authorization;
+      if (!authorization.value) return err(denied(input.context));
+      const occursAfterTransaction = (key: string): boolean =>
+        normalizedDates.has(key) && normalizedDates.get(key)! > scope.occurredAt;
+      if ((command.itemType === 'cash_flow' && command.status === 'realized' && occursAfterTransaction('occurredAt'))
+        || (command.itemType === 'recurring_state' && occursAfterTransaction('effectiveAt'))
+        || (command.itemType === 'goal_progress' && occursAfterTransaction('recordedAt'))
+        || ((command.itemType === 'asset' || command.itemType === 'asset_valuation') && occursAfterTransaction('valuedAt'))) {
+        return err(invalid(input.context, 'Gerçekleşmiş kayıt veya değerleme tarihi işlem zamanından sonra olamaz.'));
+      }
+      const common = {
+        id: input.identifiers.itemId,
+        familyId: input.context.familyId,
+        ownerPersonId,
+        privacy,
+        dataSource: 'manual' as const,
+        externalVerification: 'not_performed' as const,
+        createdAt: scope.occurredAt
+      };
+      let item: FinancePlanningLedgerItemView & typeof common;
+      switch (command.itemType) {
+        case 'category':
+          item = { ...common, itemType: 'category', name: command.name.trim(), kind: command.kind };
+          break;
+        case 'cash_flow':
+          item = {
+            ...common,
+            itemType: 'cash_flow',
+            categoryId: parentId!,
+            direction: (parent as FinanceCategoryView).kind,
+            amount: command.amount,
+            currency: currency!,
+            occurredAt: normalizedDates.get('occurredAt')!,
+            status: command.status,
+            ...(command.description?.trim() ? { description: command.description.trim() } : {})
+          };
+          break;
+        case 'budget':
+          item = { ...common, itemType: 'budget', categoryId: parentId!, periodMonth: command.periodMonth, plannedAmount: command.plannedAmount, currency: currency! };
+          break;
+        case 'recurring_rule':
+          item = {
+            ...common,
+            itemType: 'recurring_rule',
+            categoryId: parentId!,
+            direction: (parent as FinanceCategoryView).kind,
+            amount: command.amount,
+            currency: currency!,
+            frequency: command.frequency,
+            intervalCount: command.intervalCount,
+            startsAt: normalizedDates.get('startsAt')!,
+            nextOccurrenceAt: normalizedDates.get('nextOccurrenceAt')!,
+            ...(normalizedDates.has('endsAt') ? { endsAt: normalizedDates.get('endsAt')! } : {}),
+            initialStatus: 'active',
+            ...(command.description?.trim() ? { description: command.description.trim() } : {})
+          };
+          break;
+        case 'recurring_state':
+          item = { ...common, itemType: 'recurring_state', recurringRuleId: parentId!, status: command.status, effectiveAt: normalizedDates.get('effectiveAt')! };
+          break;
+        case 'goal':
+          item = {
+            ...common,
+            itemType: 'goal',
+            title: command.title.trim(),
+            kind: command.kind,
+            targetAmount: command.targetAmount,
+            initialAmount: command.initialAmount,
+            currency: currency!,
+            ...(normalizedDates.has('dueAt') ? { dueAt: normalizedDates.get('dueAt')! } : {})
+          };
+          break;
+        case 'goal_progress':
+          item = {
+            ...common,
+            itemType: 'goal_progress',
+            goalId: parentId!,
+            currentAmount: command.currentAmount,
+            recordedAt: normalizedDates.get('recordedAt')!,
+            ...(command.note?.trim() ? { note: command.note.trim() } : {})
+          };
+          break;
+        case 'asset': {
+          const marketValue = roundMoney(command.quantity * command.unitValue);
+          item = {
+            ...common,
+            itemType: 'asset',
+            name: command.name.trim(),
+            assetClass: command.assetClass,
+            currency: currency!,
+            initialQuantity: command.quantity,
+            initialUnitValue: command.unitValue,
+            initialMarketValue: marketValue,
+            initiallyValuedAt: normalizedDates.get('valuedAt')!,
+            ...(command.note?.trim() ? { note: command.note.trim() } : {})
+          };
+          break;
+        }
+        case 'asset_valuation': {
+          const marketValue = roundMoney(command.quantity * command.unitValue);
+          item = {
+            ...common,
+            itemType: 'asset_valuation',
+            assetId: parentId!,
+            quantity: command.quantity,
+            unitValue: command.unitValue,
+            marketValue,
+            valuedAt: normalizedDates.get('valuedAt')!,
+            ...(command.note?.trim() ? { note: command.note.trim() } : {})
+          };
+          break;
+        }
+      }
+      const saved = scope.insertPlanningItem(item);
+      if (!saved.ok) return saved;
+      const audit = scope.appendAudit({
+        id: input.identifiers.auditId,
+        action: `finance.planning.${item.itemType}.recorded`,
+        resourceType: 'finance_record',
+        resourceId: isBase ? item.id : parentId!,
+        occurredAt: scope.occurredAt,
+        actorId: input.context.actor.userId
+      });
+      if (!audit.ok) return audit;
+      const event = scope.enqueueEvent({
+        eventId: input.identifiers.outboxEventId,
+        eventType: 'finance.planning.item_recorded',
+        eventVersion: 1,
+        aggregateType: 'finance_record',
+        aggregateId: isBase ? item.id : parentId!,
+        occurredAt: scope.occurredAt,
+        actorId: input.context.actor.userId,
+        correlationId: input.context.correlationId,
+        payload: {
+          itemId: item.id,
+          itemType: item.itemType,
+          ...(parentId ? { parentId } : {}),
+          ownerPersonId,
+          privacy
+        }
+      });
+      return event.ok ? ok(item) : event;
     });
   }
 }

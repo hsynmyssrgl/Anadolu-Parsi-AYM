@@ -82,7 +82,7 @@
       "passed": true
     },
     {
-      "name": "migration 80 exists and is current",
+      "name": "migration 80 remains an exact predecessor baseline",
       "passed": true
     },
     {
@@ -163,12 +163,12 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 80,
-  "ppk021ExactAllowlistEntries": 540,
-  "ppk021UseCaseCompositionSurfaces": 272,
+  "latestDatabaseMigration": 81,
+  "ppk021ExactAllowlistEntries": 542,
+  "ppk021UseCaseCompositionSurfaces": 274,
   "ppk022CapabilitySurfaces": 238,
   "prohibitedSecretColumns": 0,
   "bankVerificationPerformed": false,
   "bankExecutionPerformed": false,
-  "generatedAt": "2026-08-12T15:13:35.925Z"
+  "generatedAt": "2026-08-12T16:14:53.012Z"
 }

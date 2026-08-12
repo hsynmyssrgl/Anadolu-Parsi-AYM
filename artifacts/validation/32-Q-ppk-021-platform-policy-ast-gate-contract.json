@@ -54,7 +54,7 @@
       "passed": true
     },
     {
-      "name": "manifest contains exactly 540 surfaces",
+      "name": "manifest contains exactly 542 surfaces",
       "passed": true
     },
     {
@@ -282,7 +282,7 @@
       "passed": true
     },
     {
-      "name": "scope records six rules and 540 exact surfaces",
+      "name": "scope records six rules and 542 exact surfaces",
       "passed": true
     },
     {
@@ -346,10 +346,10 @@
   "sourceGate": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 376,
-    "privilegedSurfaces": 540,
-    "exactAllowlistEntries": 540,
-    "exactAllowlistSha256": "ae33930016198fc523723e6a83db6929683f70b03f70a4487be7d50e8b45fb59",
+    "scannedFiles": 377,
+    "privilegedSurfaces": 542,
+    "exactAllowlistEntries": 542,
+    "exactAllowlistSha256": "4450fec9e3c920d71ff6727f841eae88ef674bcd4dbb11882f7b008d799a88a8",
     "surfaceCounts": {
       "CRYPTO_GLOBAL": 2,
       "CRYPTO_IMPORT": 128,
@@ -360,7 +360,7 @@
       "SQL_CALL": 56,
       "SQL_CONSTRUCTOR": 2,
       "SQL_IMPORT": 2,
-      "USE_CASE_COMPOSITION": 272
+      "USE_CASE_COMPOSITION": 274
     },
     "maliciousSelfTestAssertions": 17,
     "benignSelfTestAssertions": 4,
@@ -368,13 +368,13 @@
     "findings": []
   },
   "protectedRuleCount": 6,
-  "exactAllowlistEntries": 540,
-  "exactAllowlistSha256": "ae33930016198fc523723e6a83db6929683f70b03f70a4487be7d50e8b45fb59",
+  "exactAllowlistEntries": 542,
+  "exactAllowlistSha256": "4450fec9e3c920d71ff6727f841eae88ef674bcd4dbb11882f7b008d799a88a8",
   "directRoleAuthorizationBypasses": 0,
   "syntaxModel": "TYPESCRIPT_AST",
   "regexOnlyGateAccepted": false,
   "buildGateReplacesRuntimePolicy": false,
-  "latestDatabaseMigration": 80,
+  "latestDatabaseMigration": 81,
   "schemaMigrationRequired": false,
   "historicalBackfillPerformed": false,
   "legacyDesktopVaultPreserved": true,
@@ -383,5 +383,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-12T15:12:54.809Z"
+  "generatedAt": "2026-08-12T16:10:16.460Z"
 }

@@ -736,6 +736,211 @@ export interface RecordLoanPaymentInput {
   lateFeeAmount:number;
   notes?:string;
 }
+export const FINANCE_PLANNING_ITEM_TYPES = [
+  'category','cash_flow','budget','recurring_rule','recurring_state',
+  'goal','goal_progress','asset','asset_valuation'
+] as const;
+export type FinancePlanningItemType = typeof FINANCE_PLANNING_ITEM_TYPES[number];
+export const FINANCE_CATEGORY_KINDS = ['income','expense'] as const;
+export type FinanceCategoryKind = typeof FINANCE_CATEGORY_KINDS[number];
+export const FINANCE_CASH_FLOW_STATUSES = ['planned','realized'] as const;
+export type FinanceCashFlowStatus = typeof FINANCE_CASH_FLOW_STATUSES[number];
+export const FINANCE_RECURRING_FREQUENCIES = ['weekly','monthly','quarterly','yearly'] as const;
+export type FinanceRecurringFrequency = typeof FINANCE_RECURRING_FREQUENCIES[number];
+export const FINANCE_RECURRING_STATUSES = ['active','paused','ended'] as const;
+export type FinanceRecurringStatus = typeof FINANCE_RECURRING_STATUSES[number];
+export const FINANCE_GOAL_KINDS = [
+  'savings','debt_reduction','investment','purchase','emergency_fund','other'
+] as const;
+export type FinanceGoalKind = typeof FINANCE_GOAL_KINDS[number];
+export const FINANCE_ASSET_CLASSES = [
+  'cash','deposit','precious_metal_fx','investment','pension','real_estate','vehicle'
+] as const;
+export type FinanceAssetClass = typeof FINANCE_ASSET_CLASSES[number];
+
+interface FinancePlanningLedgerCommonView {
+  id:string;
+  ownerPersonId:string;
+  privacy:RecordPrivacy;
+  dataSource:'manual';
+  externalVerification:'not_performed';
+  createdAt:string;
+}
+export interface FinanceCategoryView extends FinancePlanningLedgerCommonView {
+  itemType:'category';
+  name:string;
+  kind:FinanceCategoryKind;
+}
+export interface FinanceCashFlowEntryView extends FinancePlanningLedgerCommonView {
+  itemType:'cash_flow';
+  categoryId:string;
+  direction:FinanceCategoryKind;
+  amount:number;
+  currency:string;
+  occurredAt:string;
+  status:FinanceCashFlowStatus;
+  description?:string;
+}
+export interface FinanceBudgetRevisionView extends FinancePlanningLedgerCommonView {
+  itemType:'budget';
+  categoryId:string;
+  periodMonth:string;
+  plannedAmount:number;
+  currency:string;
+}
+export interface FinanceRecurringRuleLedgerView extends FinancePlanningLedgerCommonView {
+  itemType:'recurring_rule';
+  categoryId:string;
+  direction:FinanceCategoryKind;
+  amount:number;
+  currency:string;
+  frequency:FinanceRecurringFrequency;
+  intervalCount:number;
+  startsAt:string;
+  nextOccurrenceAt:string;
+  endsAt?:string;
+  initialStatus:FinanceRecurringStatus;
+  description?:string;
+}
+export interface FinanceRecurringStateView extends FinancePlanningLedgerCommonView {
+  itemType:'recurring_state';
+  recurringRuleId:string;
+  status:FinanceRecurringStatus;
+  effectiveAt:string;
+}
+export interface FinanceGoalLedgerView extends FinancePlanningLedgerCommonView {
+  itemType:'goal';
+  title:string;
+  kind:FinanceGoalKind;
+  targetAmount:number;
+  initialAmount:number;
+  currency:string;
+  dueAt?:string;
+}
+export interface FinanceGoalProgressView extends FinancePlanningLedgerCommonView {
+  itemType:'goal_progress';
+  goalId:string;
+  currentAmount:number;
+  recordedAt:string;
+  note?:string;
+}
+export interface FinancePortfolioAssetLedgerView extends FinancePlanningLedgerCommonView {
+  itemType:'asset';
+  name:string;
+  assetClass:FinanceAssetClass;
+  currency:string;
+  initialQuantity:number;
+  initialUnitValue:number;
+  initialMarketValue:number;
+  initiallyValuedAt:string;
+  note?:string;
+}
+export interface FinancePortfolioValuationView extends FinancePlanningLedgerCommonView {
+  itemType:'asset_valuation';
+  assetId:string;
+  quantity:number;
+  unitValue:number;
+  marketValue:number;
+  valuedAt:string;
+  note?:string;
+}
+export type FinancePlanningLedgerItemView =
+  | FinanceCategoryView
+  | FinanceCashFlowEntryView
+  | FinanceBudgetRevisionView
+  | FinanceRecurringRuleLedgerView
+  | FinanceRecurringStateView
+  | FinanceGoalLedgerView
+  | FinanceGoalProgressView
+  | FinancePortfolioAssetLedgerView
+  | FinancePortfolioValuationView;
+
+export interface FinanceRecurringRuleView extends FinanceRecurringRuleLedgerView {
+  currentStatus:FinanceRecurringStatus;
+  stateHistory:readonly FinanceRecurringStateView[];
+}
+export interface FinanceGoalView extends FinanceGoalLedgerView {
+  currentAmount:number;
+  completionBasisPoints:number;
+  achieved:boolean;
+  progressHistory:readonly FinanceGoalProgressView[];
+}
+export interface FinancePortfolioAssetView extends FinancePortfolioAssetLedgerView {
+  currentQuantity:number;
+  currentUnitValue:number;
+  currentMarketValue:number;
+  currentValuedAt:string;
+  valuationHistory:readonly FinancePortfolioValuationView[];
+}
+export interface FinanceCurrencySummaryView {
+  currency:string;
+  assetValue:number;
+  liabilityValue:number;
+  netWorth:number;
+  debtRatioBasisPoints?:number;
+  realizedIncome:number;
+  realizedExpense:number;
+  cashFlowBalance:number;
+}
+export interface FinancePlanningScopeSummaryView {
+  scope:'family'|'person';
+  ownerPersonId?:string;
+  currencySummaries:readonly FinanceCurrencySummaryView[];
+  crossCurrencyAggregationPerformed:false;
+}
+export interface FinanceBudgetVarianceView {
+  budgetRevisionId:string;
+  ownerPersonId:string;
+  categoryId:string;
+  categoryName:string;
+  categoryKind:FinanceCategoryKind;
+  periodMonth:string;
+  currency:string;
+  plannedAmount:number;
+  realizedAmount:number;
+  varianceAmount:number;
+  overBudget:boolean;
+  belowIncomeTarget:boolean;
+}
+export type FinanceUpcomingPaymentSource = 'payment_card'|'loan'|'finance_record'|'recurring_rule'|'planned_cash_flow';
+export interface FinanceUpcomingPaymentView {
+  id:string;
+  ownerPersonId:string;
+  source:FinanceUpcomingPaymentSource;
+  title:string;
+  dueAt:string;
+  amount:number;
+  currency:string;
+  paymentExecution:'not_performed';
+}
+export interface FinancePlanningWorkspaceView {
+  categories:readonly FinanceCategoryView[];
+  cashFlowEntries:readonly FinanceCashFlowEntryView[];
+  budgetRevisions:readonly FinanceBudgetRevisionView[];
+  budgetVariances:readonly FinanceBudgetVarianceView[];
+  recurringRules:readonly FinanceRecurringRuleView[];
+  goals:readonly FinanceGoalView[];
+  portfolioAssets:readonly FinancePortfolioAssetView[];
+  upcomingPayments:readonly FinanceUpcomingPaymentView[];
+  familySummary:FinancePlanningScopeSummaryView;
+  personSummaries:readonly FinancePlanningScopeSummaryView[];
+  generatedAt:string;
+  dataSource:'manual';
+  externalPricing:'not_performed';
+  bankSynchronization:'not_performed';
+  paymentExecution:'not_performed';
+}
+
+export type RecordFinancePlanningItemInput =
+  | { itemType:'category'; ownerPersonId:string; name:string; kind:FinanceCategoryKind; privacy:RecordPrivacy }
+  | { itemType:'cash_flow'; categoryId:string; amount:number; currency:string; occurredAt:string; status:FinanceCashFlowStatus; description?:string }
+  | { itemType:'budget'; categoryId:string; periodMonth:string; plannedAmount:number; currency:string }
+  | { itemType:'recurring_rule'; categoryId:string; amount:number; currency:string; frequency:FinanceRecurringFrequency; intervalCount:number; startsAt:string; nextOccurrenceAt:string; endsAt?:string; description?:string }
+  | { itemType:'recurring_state'; recurringRuleId:string; status:FinanceRecurringStatus; effectiveAt:string }
+  | { itemType:'goal'; ownerPersonId:string; title:string; kind:FinanceGoalKind; targetAmount:number; initialAmount:number; currency:string; dueAt?:string; privacy:RecordPrivacy }
+  | { itemType:'goal_progress'; goalId:string; currentAmount:number; recordedAt:string; note?:string }
+  | { itemType:'asset'; ownerPersonId:string; name:string; assetClass:FinanceAssetClass; currency:string; quantity:number; unitValue:number; valuedAt:string; note?:string; privacy:RecordPrivacy }
+  | { itemType:'asset_valuation'; assetId:string; quantity:number; unitValue:number; valuedAt:string; note?:string };
 export interface HealthRecordView { id:string; ownerPersonId:string; title:string; kind:'appointment'|'medication'|'diagnosis'|'vaccine'|'note'; privacy:RecordPrivacy; provider?:string; notes?:string; occurredAt:string; createdAt:string; }
 export interface CreateHealthRecordInput { ownerPersonId:string; title:string; kind:HealthRecordView['kind']; privacy:RecordPrivacy; provider?:string; notes?:string; occurredAt:string; }
 

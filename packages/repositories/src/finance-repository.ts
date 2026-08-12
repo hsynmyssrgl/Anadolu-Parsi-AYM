@@ -4,6 +4,13 @@ import type {
   BankAccountStatus,
   BankInstitutionKind,
   BankInstitutionView,
+  FinanceAssetClass,
+  FinanceCategoryKind,
+  FinanceCashFlowStatus,
+  FinanceGoalKind,
+  FinancePlanningLedgerItemView,
+  FinanceRecurringFrequency,
+  FinanceRecurringStatus,
   FinanceRecordView,
   FinanceValuationView,
   LoanAccountView,
@@ -25,6 +32,7 @@ import {
   assertPolicyAuthorizedRepositoryContext,
   type BankAccountRow,
   type FinanceRecordRow,
+  type FinancePlanningLedgerItemRow,
   type FinancePolicyResourceRepositoryPort,
   type FinanceRepositoryPort,
   type FinanceValuationRow,
@@ -32,6 +40,7 @@ import {
   type NewBankAccountRow,
   type NewLoanAccountRow,
   type NewLoanPaymentHistoryRow,
+  type NewFinancePlanningLedgerItemRow,
   type NewPaymentCardRow,
   type PaymentCardRow,
   type PolicyAuthorizedRepositoryExecutionContext,
@@ -220,6 +229,120 @@ const mapLoanAccount = (
   paymentHistory: Object.freeze([...paymentHistory]),
   createdAt: asIsoDateTime(String(row.created_at))
 });
+
+const financePlanningColumns = `
+  id,family_id,owner_person_id,item_type,parent_item_id,name,category_kind,
+  description,cash_flow_status,amount,currency,occurred_at,period_month,
+  frequency,interval_count,starts_at,next_occurrence_at,ends_at,recurring_status,
+  goal_kind,target_amount,current_amount,due_at,asset_class,quantity,unit_value,
+  market_value,valued_at,note,privacy,created_at
+`;
+
+const mapFinancePlanningItem = (row: Record<string, unknown>): FinancePlanningLedgerItemRow => {
+  const common = {
+    id: String(row.id),
+    familyId: asFamilyId(String(row.family_id)),
+    ownerPersonId: asPersonId(String(row.owner_person_id)),
+    privacy: String(row.privacy) as RecordPrivacy,
+    dataSource: 'manual' as const,
+    externalVerification: 'not_performed' as const,
+    createdAt: asIsoDateTime(String(row.created_at))
+  };
+  const itemType = String(row.item_type) as FinancePlanningLedgerItemView['itemType'];
+  switch (itemType) {
+    case 'category':
+      return { ...common, itemType, name: String(row.name), kind: String(row.category_kind) as FinanceCategoryKind };
+    case 'cash_flow':
+      return {
+        ...common,
+        itemType,
+        categoryId: String(row.parent_item_id),
+        direction: String(row.category_kind) as FinanceCategoryKind,
+        amount: Number(row.amount),
+        currency: String(row.currency),
+        occurredAt: asIsoDateTime(String(row.occurred_at)),
+        status: String(row.cash_flow_status) as FinanceCashFlowStatus,
+        ...(row.description ? { description: String(row.description) } : {})
+      };
+    case 'budget':
+      return {
+        ...common,
+        itemType,
+        categoryId: String(row.parent_item_id),
+        periodMonth: String(row.period_month),
+        plannedAmount: Number(row.amount),
+        currency: String(row.currency)
+      };
+    case 'recurring_rule':
+      return {
+        ...common,
+        itemType,
+        categoryId: String(row.parent_item_id),
+        direction: String(row.category_kind) as FinanceCategoryKind,
+        amount: Number(row.amount),
+        currency: String(row.currency),
+        frequency: String(row.frequency) as FinanceRecurringFrequency,
+        intervalCount: Number(row.interval_count),
+        startsAt: asIsoDateTime(String(row.starts_at)),
+        nextOccurrenceAt: asIsoDateTime(String(row.next_occurrence_at)),
+        ...(row.ends_at ? { endsAt: asIsoDateTime(String(row.ends_at)) } : {}),
+        initialStatus: String(row.recurring_status) as FinanceRecurringStatus,
+        ...(row.description ? { description: String(row.description) } : {})
+      };
+    case 'recurring_state':
+      return {
+        ...common,
+        itemType,
+        recurringRuleId: String(row.parent_item_id),
+        status: String(row.recurring_status) as FinanceRecurringStatus,
+        effectiveAt: asIsoDateTime(String(row.occurred_at))
+      };
+    case 'goal':
+      return {
+        ...common,
+        itemType,
+        title: String(row.name),
+        kind: String(row.goal_kind) as FinanceGoalKind,
+        targetAmount: Number(row.target_amount),
+        initialAmount: Number(row.current_amount),
+        currency: String(row.currency),
+        ...(row.due_at ? { dueAt: asIsoDateTime(String(row.due_at)) } : {})
+      };
+    case 'goal_progress':
+      return {
+        ...common,
+        itemType,
+        goalId: String(row.parent_item_id),
+        currentAmount: Number(row.current_amount),
+        recordedAt: asIsoDateTime(String(row.occurred_at)),
+        ...(row.note ? { note: String(row.note) } : {})
+      };
+    case 'asset':
+      return {
+        ...common,
+        itemType,
+        name: String(row.name),
+        assetClass: String(row.asset_class) as FinanceAssetClass,
+        currency: String(row.currency),
+        initialQuantity: Number(row.quantity),
+        initialUnitValue: Number(row.unit_value),
+        initialMarketValue: Number(row.market_value),
+        initiallyValuedAt: asIsoDateTime(String(row.valued_at)),
+        ...(row.note ? { note: String(row.note) } : {})
+      };
+    case 'asset_valuation':
+      return {
+        ...common,
+        itemType,
+        assetId: String(row.parent_item_id),
+        quantity: Number(row.quantity),
+        unitValue: Number(row.unit_value),
+        marketValue: Number(row.market_value),
+        valuedAt: asIsoDateTime(String(row.valued_at)),
+        ...(row.note ? { note: String(row.note) } : {})
+      };
+  }
+};
 
 const assertCollectionRead = (context: PolicyAuthorizedRepositoryExecutionContext): void => {
   assertPolicyAuthorizedRepositoryContext(context, {
@@ -841,6 +964,179 @@ export class SqliteFinanceRepository extends SqliteRepository implements Finance
         row.interestAmount,
         row.lateFeeAmount,
         row.notes ?? null,
+        row.createdAt,
+        policy.receiptHash,
+        policy.receiptVersion,
+        policy.nonce,
+        context.correlationId,
+        policy.resourceType,
+        policy.resourceId,
+        policy.action,
+        policy.capability
+      );
+    });
+  }
+
+  public listPlanningItems(
+    context: PolicyAuthorizedRepositoryExecutionContext
+  ): RepositoryResult<readonly FinancePlanningLedgerItemRow[]> {
+    assertCollectionRead(context);
+    return this.execute(context, () => (
+      this.database(context).prepare(`
+        SELECT ${financePlanningColumns}
+        FROM finance_planning_ledger
+        ORDER BY created_at DESC,id
+      `).all() as Array<Record<string, unknown>>
+    ).map(mapFinancePlanningItem));
+  }
+
+  public findPlanningItem(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    id: string
+  ): RepositoryResult<FinancePlanningLedgerItemRow | null> {
+    assertRecordAccess(context, id);
+    return this.execute(context, () => {
+      const row = this.database(context).prepare(`
+        SELECT ${financePlanningColumns}
+        FROM finance_planning_ledger
+        WHERE id=?
+      `).get(id) as Record<string, unknown> | undefined;
+      return row ? mapFinancePlanningItem(row) : null;
+    });
+  }
+
+  public findPlanningItemForPolicyResolution(
+    context: RepositoryExecutionContext,
+    id: string
+  ): RepositoryResult<FinancePlanningLedgerItemRow | null> {
+    return this.execute(context, () => {
+      const row = this.database(context).prepare(`
+        SELECT ${financePlanningColumns}
+        FROM finance_planning_ledger
+        WHERE id=?
+      `).get(id) as Record<string, unknown> | undefined;
+      return row ? mapFinancePlanningItem(row) : null;
+    });
+  }
+
+  public insertPlanningItem(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    row: NewFinancePlanningLedgerItemRow
+  ): RepositoryResult<void> {
+    const parentItemId = row.itemType === 'cash_flow' || row.itemType === 'budget' || row.itemType === 'recurring_rule'
+      ? row.categoryId
+      : row.itemType === 'recurring_state'
+        ? row.recurringRuleId
+        : row.itemType === 'goal_progress'
+          ? row.goalId
+          : row.itemType === 'asset_valuation'
+            ? row.assetId
+            : undefined;
+    const action = row.itemType === 'category' || row.itemType === 'goal' || row.itemType === 'asset'
+      ? 'create'
+      : 'update';
+    const policy = financeWriteBinding(context, parentItemId ?? row.id, action);
+    const name = row.itemType === 'category' || row.itemType === 'asset'
+      ? row.name
+      : row.itemType === 'goal'
+        ? row.title
+        : null;
+    const categoryKind = row.itemType === 'category'
+      ? row.kind
+      : row.itemType === 'cash_flow' || row.itemType === 'recurring_rule'
+        ? row.direction
+        : null;
+    const description = row.itemType === 'cash_flow' || row.itemType === 'recurring_rule'
+      ? row.description ?? null
+      : null;
+    const amount = row.itemType === 'cash_flow' || row.itemType === 'recurring_rule'
+      ? row.amount
+      : row.itemType === 'budget'
+        ? row.plannedAmount
+        : null;
+    const currency = 'currency' in row ? row.currency : null;
+    const occurredAt = row.itemType === 'cash_flow'
+      ? row.occurredAt
+      : row.itemType === 'recurring_state'
+        ? row.effectiveAt
+        : row.itemType === 'goal_progress'
+          ? row.recordedAt
+          : null;
+    const recurringStatus = row.itemType === 'recurring_rule'
+      ? row.initialStatus
+      : row.itemType === 'recurring_state'
+        ? row.status
+        : null;
+    const currentAmount = row.itemType === 'goal'
+      ? row.initialAmount
+      : row.itemType === 'goal_progress'
+        ? row.currentAmount
+        : null;
+    const quantity = row.itemType === 'asset'
+      ? row.initialQuantity
+      : row.itemType === 'asset_valuation'
+        ? row.quantity
+        : null;
+    const unitValue = row.itemType === 'asset'
+      ? row.initialUnitValue
+      : row.itemType === 'asset_valuation'
+        ? row.unitValue
+        : null;
+    const marketValue = row.itemType === 'asset'
+      ? row.initialMarketValue
+      : row.itemType === 'asset_valuation'
+        ? row.marketValue
+        : null;
+    const valuedAt = row.itemType === 'asset'
+      ? row.initiallyValuedAt
+      : row.itemType === 'asset_valuation'
+        ? row.valuedAt
+        : null;
+    const note = row.itemType === 'goal_progress' || row.itemType === 'asset' || row.itemType === 'asset_valuation'
+      ? row.note ?? null
+      : null;
+    return this.execute(context, () => {
+      this.database(context).prepare(`
+        INSERT INTO finance_planning_ledger(
+          id,family_id,owner_person_id,item_type,parent_item_id,name,category_kind,
+          description,cash_flow_status,amount,currency,occurred_at,period_month,
+          frequency,interval_count,starts_at,next_occurrence_at,ends_at,recurring_status,
+          goal_kind,target_amount,current_amount,due_at,asset_class,quantity,unit_value,
+          market_value,valued_at,note,privacy,created_at,policy_receipt_hash,
+          policy_receipt_version,policy_receipt_nonce,policy_correlation_id,
+          policy_resource_type,policy_resource_id,policy_action,policy_capability
+        ) VALUES(${Array.from({ length: 39 }, () => '?').join(',')})
+      `).run(
+        row.id,
+        row.familyId,
+        row.ownerPersonId,
+        row.itemType,
+        parentItemId ?? null,
+        name,
+        categoryKind,
+        description,
+        row.itemType === 'cash_flow' ? row.status : null,
+        amount,
+        currency,
+        occurredAt,
+        row.itemType === 'budget' ? row.periodMonth : null,
+        row.itemType === 'recurring_rule' ? row.frequency : null,
+        row.itemType === 'recurring_rule' ? row.intervalCount : null,
+        row.itemType === 'recurring_rule' ? row.startsAt : null,
+        row.itemType === 'recurring_rule' ? row.nextOccurrenceAt : null,
+        row.itemType === 'recurring_rule' ? row.endsAt ?? null : null,
+        recurringStatus,
+        row.itemType === 'goal' ? row.kind : null,
+        row.itemType === 'goal' ? row.targetAmount : null,
+        currentAmount,
+        row.itemType === 'goal' ? row.dueAt ?? null : null,
+        row.itemType === 'asset' ? row.assetClass : null,
+        quantity,
+        unitValue,
+        marketValue,
+        valuedAt,
+        note,
+        row.privacy,
         row.createdAt,
         policy.receiptHash,
         policy.receiptVersion,

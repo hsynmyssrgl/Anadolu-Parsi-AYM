@@ -3,6 +3,7 @@ import {
   LOAN_ACCOUNT_INPUT_KEYS,
   LOAN_PAYMENT_INPUT_KEYS,
   PAYMENT_CARD_INPUT_KEYS,
+  FINANCE_PLANNING_INPUT_KEYS,
   FINANCE_RECORD_INPUT_KEYS,
   FINANCE_VALUATION_INPUT_KEYS,
   containsLikelyFullPan,
@@ -118,6 +119,13 @@ const loanRateTypes = new Set(['fixed','variable','profit_share','interest_free'
 const loanStatuses = new Set(['active','overdue','restructured','closed']);
 const loanInsuranceStatuses = new Set(['none','active','expired','cancelled']);
 const loanCollateralTypes = new Set(['none','vehicle','real_estate','deposit','guarantee','other']);
+const financePlanningItemTypes = new Set(Object.keys(FINANCE_PLANNING_INPUT_KEYS));
+const financeCategoryKinds = new Set(['income','expense']);
+const financeCashFlowStatuses = new Set(['planned','realized']);
+const financeRecurringFrequencies = new Set(['weekly','monthly','quarterly','yearly']);
+const financeRecurringStatuses = new Set(['active','paused','ended']);
+const financeGoalKinds = new Set(['savings','debt_reduction','investment','purchase','emergency_fund','other']);
+const financeAssetClasses = new Set(['cash','deposit','precious_metal_fx','investment','pension','real_estate','vehicle']);
 
 const containsProhibitedBankingSecret = (
   value: Record<string, unknown>,
@@ -328,6 +336,75 @@ const loanPaymentInput = (args: readonly unknown[]): IpcIntegrationPolicyDecisio
     : rejected('LOAN_PAYMENT_ARGUMENT_INVALID', '$[0]');
 };
 
+const financePlanningInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => {
+  if (args.length !== 1) return rejected('ARGUMENT_COUNT_MISMATCH');
+  const value = args[0];
+  if (!isObject(value)) return rejected('OBJECT_ARGUMENT_REQUIRED', '$[0]');
+  const itemType = typeof value.itemType === 'string' ? value.itemType : '';
+  if (!financePlanningItemTypes.has(itemType)) return rejected('FINANCE_PLANNING_ITEM_TYPE_INVALID', '$[0].itemType');
+  const secretRejection = containsProhibitedBankingSecret(value, Object.keys(value));
+  if (secretRejection) return secretRejection;
+  const keys = FINANCE_PLANNING_INPUT_KEYS[itemType as keyof typeof FINANCE_PLANNING_INPUT_KEYS];
+  if (!hasOnlyKeys(value, keys)) return rejected('UNKNOWN_OBJECT_FIELD', '$[0]');
+  const finiteMoney = (candidate: unknown): candidate is number =>
+    typeof candidate === 'number' && Number.isFinite(candidate) && candidate >= 0 && candidate <= 1_000_000_000_000_000;
+  const currency = (candidate: unknown): boolean => typeof candidate === 'string' && /^[A-Za-z]{3}$/u.test(candidate);
+  const identifier = (candidate: unknown): boolean => boundedString(candidate, 160);
+  const dateValue = (candidate: unknown): boolean => boundedString(candidate, 64);
+  const privacy = (candidate: unknown): boolean => recordPrivacyValues.has(String(candidate));
+  let valid = false;
+  switch (itemType) {
+    case 'category':
+      valid = identifier(value.ownerPersonId) && boundedString(value.name, 80)
+        && financeCategoryKinds.has(String(value.kind)) && privacy(value.privacy);
+      break;
+    case 'cash_flow':
+      valid = identifier(value.categoryId) && finiteMoney(value.amount) && value.amount > 0
+        && currency(value.currency) && dateValue(value.occurredAt)
+        && financeCashFlowStatuses.has(String(value.status)) && optionalBoundedString(value.description, 240);
+      break;
+    case 'budget':
+      valid = identifier(value.categoryId) && finiteMoney(value.plannedAmount)
+        && currency(value.currency) && typeof value.periodMonth === 'string'
+        && /^\d{4}-(?:0[1-9]|1[0-2])$/u.test(value.periodMonth);
+      break;
+    case 'recurring_rule':
+      valid = identifier(value.categoryId) && finiteMoney(value.amount) && value.amount > 0
+        && currency(value.currency) && financeRecurringFrequencies.has(String(value.frequency))
+        && typeof value.intervalCount === 'number' && Number.isInteger(value.intervalCount)
+        && value.intervalCount >= 1 && value.intervalCount <= 120
+        && dateValue(value.startsAt) && dateValue(value.nextOccurrenceAt)
+        && (value.endsAt === undefined || dateValue(value.endsAt))
+        && optionalBoundedString(value.description, 240);
+      break;
+    case 'recurring_state':
+      valid = identifier(value.recurringRuleId) && financeRecurringStatuses.has(String(value.status))
+        && dateValue(value.effectiveAt);
+      break;
+    case 'goal':
+      valid = identifier(value.ownerPersonId) && boundedString(value.title, 120)
+        && financeGoalKinds.has(String(value.kind)) && finiteMoney(value.targetAmount) && value.targetAmount > 0
+        && finiteMoney(value.initialAmount) && currency(value.currency)
+        && (value.dueAt === undefined || dateValue(value.dueAt)) && privacy(value.privacy);
+      break;
+    case 'goal_progress':
+      valid = identifier(value.goalId) && finiteMoney(value.currentAmount) && dateValue(value.recordedAt)
+        && optionalBoundedString(value.note, 500);
+      break;
+    case 'asset':
+      valid = identifier(value.ownerPersonId) && boundedString(value.name, 120)
+        && financeAssetClasses.has(String(value.assetClass)) && currency(value.currency)
+        && finiteMoney(value.quantity) && value.quantity > 0 && finiteMoney(value.unitValue)
+        && dateValue(value.valuedAt) && optionalBoundedString(value.note, 500) && privacy(value.privacy);
+      break;
+    case 'asset_valuation':
+      valid = identifier(value.assetId) && finiteMoney(value.quantity) && value.quantity > 0
+        && finiteMoney(value.unitValue) && dateValue(value.valuedAt) && optionalBoundedString(value.note, 500);
+      break;
+  }
+  return valid ? accepted() : rejected('FINANCE_PLANNING_ARGUMENT_INVALID', '$[0]');
+};
+
 const financeRecordInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => {
   if (args.length !== 1) return rejected('ARGUMENT_COUNT_MISMATCH');
   const value = args[0];
@@ -420,6 +497,7 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
     case 'finance:listBankAccounts':
     case 'finance:listPaymentCards':
     case 'finance:listLoanAccounts':
+    case 'finance:getPlanningWorkspace':
       return zeroArguments(args);
     case 'finance:create':
       return financeRecordInput(args);
@@ -435,6 +513,8 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
       return loanAccountInput(args);
     case 'finance:recordLoanPayment':
       return loanPaymentInput(args);
+    case 'finance:recordPlanningItem':
+      return financePlanningInput(args);
     case 'ai:listConsents':
       return zeroArguments(args);
     case 'ai:upsertConsent':

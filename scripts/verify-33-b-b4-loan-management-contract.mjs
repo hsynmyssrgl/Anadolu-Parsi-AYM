@@ -52,24 +52,26 @@ check('both requirements bind DEC-213 application security and UI areas', requir
   item?.evidence?.includes('docs/decisions/DEC-213-b4-loan-management.md')
   && item?.codeAreas?.includes('packages/application/src/banking-security.ts')
   && item?.codeAreas?.includes('apps/desktop/src/renderer/App.tsx')));
-check('successor B4-10 through B4-14 remain honestly open', inventory.openRequirements?.every((id) => {
-  const item = registry.requirements?.find((candidate) => candidate.id === id);
-  return item?.status !== 'COMPLETE' && !allChainTrue(item);
-}) && inventory.openRequirements?.length === 5);
+check('historical successor scope is preserved while B4-13 and B4-14 remain honestly open',
+  inventory.openRequirements?.join(',') === 'B4-10,B4-11,B4-12,B4-13,B4-14'
+  && ['B4-13', 'B4-14'].every((id) => {
+    const item = registry.requirements?.find((candidate) => candidate.id === id);
+    return item?.status !== 'COMPLETE' && !allChainTrue(item);
+  }));
 check('scope and inventory bind DEC-213 migration 80 with no network channel', scope.status === 'COMPLETE'
   && scope.decision === 'DEC-213' && inventory.latestDatabaseMigration === 80
   && inventory.networkChannels?.length === 0);
 check('boundary evidence is exact green and truth preserving', boundary.status === 'PASS'
-  && boundary.checksFailed === 0 && boundary.latestDatabaseMigration === 80
-  && boundary.ppk021ExactAllowlistEntries === 540
-  && boundary.ppk021UseCaseCompositionSurfaces === 272
+  && boundary.checksFailed === 0 && boundary.latestDatabaseMigration >= 80
+  && boundary.ppk021ExactAllowlistEntries === 542
+  && boundary.ppk021UseCaseCompositionSurfaces === 274
   && boundary.ppk022CapabilitySurfaces === 238
   && boundary.prohibitedSecretColumns === 0
   && boundary.bankVerificationPerformed === false && boundary.bankExecutionPerformed === false);
 check('DEC-213 is active in the user decision ledger', ledger.decisionCount === ledger.decisions?.length
   && ledger.decisions?.some((item) => item.id === 'DEC-213' && item.status === 'ACTIVE'
     && item.requirements?.join(',') === ids.join(',')));
-check('migration 80 is current and exact', latestMigration === 80
+check('migration 80 remains an exact predecessor baseline', latestMigration >= 80
   && migrations.includes("createMigrationDefinition(80, 'b4_loan_management', loanManagementSql)"));
 check('decision states manual no-payment truth and exact ratchets', includesAll(decision, [
   'kaynağı manueldir', 'ödeme göndermez', "537'den 540'a", "269'dan 272'ye", 'PPK-022 238'

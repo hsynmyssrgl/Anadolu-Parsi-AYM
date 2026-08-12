@@ -13,7 +13,7 @@ describe('32-Q PPK-021 AST gate policy snapshot', () => {
       defaultDecision: 'DENY',
       protectedRuleCount: 6,
       productionSourceZones: 18,
-      exactAllowlistEntries: 540,
+      exactAllowlistEntries: 542,
       directRoleAuthorizationBypasses: 0,
       wildcardsAllowed: false,
       buildGateReplacesRuntimePolicy: false,

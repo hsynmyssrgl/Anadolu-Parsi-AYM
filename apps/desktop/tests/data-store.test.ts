@@ -1274,6 +1274,124 @@ describe('FamilyDataStore', () => {
     store.close();
   });
 
+  it('B4-10/B4-11/B4-12 finans planlama zincirini append-only bütçe, hedef, portföy ve ayrı para birimi analitiğiyle uygular', async () => {
+    const { store, directory } = makeStore();
+    await authenticate(store);
+    const owner = await getAuthenticatedPerson(store);
+
+    let workspace = await store.recordFinancePlanningItem({
+      itemType: 'category', ownerPersonId: owner.id, name: 'Market', kind: 'expense', privacy: 'private'
+    });
+    const expenseCategory = workspace.categories.find((item) => item.name === 'Market')!;
+    workspace = await store.recordFinancePlanningItem({
+      itemType: 'budget', categoryId: expenseCategory.id, periodMonth: '2026-08', plannedAmount: 1_000, currency: 'try'
+    });
+    workspace = await store.recordFinancePlanningItem({
+      itemType: 'cash_flow', categoryId: expenseCategory.id, amount: 1_200, currency: 'try',
+      occurredAt: '2026-08-05T00:00:00.000Z', status: 'realized', description: 'Ağustos market harcaması'
+    });
+    workspace = await store.recordFinancePlanningItem({
+      itemType: 'cash_flow', categoryId: expenseCategory.id, amount: 300, currency: 'try',
+      occurredAt: '2026-09-01T00:00:00.000Z', status: 'planned', description: 'Eylül market planı'
+    });
+    workspace = await store.recordFinancePlanningItem({
+      itemType: 'recurring_rule', categoryId: expenseCategory.id, amount: 500, currency: 'try',
+      frequency: 'monthly', intervalCount: 1, startsAt: '2026-08-01T00:00:00.000Z',
+      nextOccurrenceAt: '2026-09-01T00:00:00.000Z', description: 'Düzenli market bütçesi'
+    });
+    const recurring = workspace.recurringRules.find((item) => item.description === 'Düzenli market bütçesi')!;
+    workspace = await store.recordFinancePlanningItem({
+      itemType: 'recurring_state', recurringRuleId: recurring.id, status: 'paused', effectiveAt: '2026-08-10T00:00:00.000Z'
+    });
+
+    workspace = await store.recordFinancePlanningItem({
+      itemType: 'goal', ownerPersonId: owner.id, title: 'Acil durum fonu', kind: 'emergency_fund',
+      targetAmount: 10_000, initialAmount: 1_000, currency: 'try', privacy: 'private'
+    });
+    const goal = workspace.goals.find((item) => item.title === 'Acil durum fonu')!;
+    workspace = await store.recordFinancePlanningItem({
+      itemType: 'goal_progress', goalId: goal.id, currentAmount: 4_000,
+      recordedAt: new Date().toISOString(), note: 'Manuel hedef ilerlemesi'
+    });
+
+    workspace = await store.recordFinancePlanningItem({
+      itemType: 'asset', ownerPersonId: owner.id, name: 'Aile altını', assetClass: 'precious_metal_fx',
+      currency: 'try', quantity: 2, unitValue: 5_000, valuedAt: '2026-08-01T00:00:00.000Z', privacy: 'private'
+    });
+    const tryAsset = workspace.portfolioAssets.find((item) => item.name === 'Aile altını')!;
+    workspace = await store.recordFinancePlanningItem({
+      itemType: 'asset_valuation', assetId: tryAsset.id, quantity: 2, unitValue: 5_500,
+      valuedAt: '2026-08-10T00:00:00.000Z', note: 'Manuel değerleme'
+    });
+    workspace = await store.recordFinancePlanningItem({
+      itemType: 'asset', ownerPersonId: owner.id, name: 'Döviz birikimi', assetClass: 'precious_metal_fx',
+      currency: 'usd', quantity: 100, unitValue: 1, valuedAt: '2026-08-01T00:00:00.000Z', privacy: 'private'
+    });
+
+    expect(workspace.budgetVariances).toEqual([expect.objectContaining({
+      categoryName: 'Market', currency: 'TRY', plannedAmount: 1_000,
+      realizedAmount: 1_200, varianceAmount: 200, overBudget: true
+    })]);
+    expect(workspace.recurringRules.find((item) => item.id === recurring.id)).toMatchObject({ currentStatus: 'paused' });
+    expect(workspace.goals.find((item) => item.id === goal.id)).toMatchObject({
+      currentAmount: 4_000, completionBasisPoints: 4_000, achieved: false
+    });
+    expect(workspace.portfolioAssets.find((item) => item.id === tryAsset.id)).toMatchObject({
+      currentQuantity: 2, currentUnitValue: 5_500, currentMarketValue: 11_000
+    });
+    expect(workspace.familySummary.currencySummaries).toEqual(expect.arrayContaining([
+      expect.objectContaining({ currency: 'TRY', assetValue: 11_000, realizedExpense: 1_200 }),
+      expect.objectContaining({ currency: 'USD', assetValue: 100, liabilityValue: 0, netWorth: 100 })
+    ]));
+    expect(workspace.familySummary.crossCurrencyAggregationPerformed).toBe(false);
+    expect(workspace.upcomingPayments.some((item) => item.source === 'planned_cash_flow' && item.amount === 300)).toBe(true);
+    expect(workspace.upcomingPayments.some((item) => item.source === 'recurring_rule')).toBe(false);
+    expect(workspace).toMatchObject({
+      dataSource: 'manual', externalPricing: 'not_performed',
+      bankSynchronization: 'not_performed', paymentExecution: 'not_performed'
+    });
+
+    const database = new DatabaseSync(join(directory, 'family.db'));
+    const columns = database.prepare('PRAGMA table_info(finance_planning_ledger)').all() as Array<{ name:string }>;
+    expect(columns).toHaveLength(39);
+    expect(columns.map((column) => column.name)).not.toEqual(expect.arrayContaining([
+      'pan','full_pan','card_number','cvv','cvc','pin','password','internet_banking_password'
+    ]));
+    expect(database.prepare('SELECT COUNT(*) AS total FROM finance_planning_ledger').get()).toEqual({ total: 11 });
+    expect(database.prepare('SELECT value FROM database_metadata WHERE key=?').get('schema_generation')).toEqual({
+      value: 'REVISION-33-C-B4-FINANCE-PLANNING-PORTFOLIO-ANALYTICS'
+    });
+    const payloads = database.prepare("SELECT payload_json FROM event_outbox WHERE event_type='finance.planning.item_recorded'").all() as Array<{payload_json:string}>;
+    expect(JSON.stringify(payloads)).not.toMatch(/1200|10000|5500|Ağustos market|Manuel hedef|Manuel değerleme/u);
+    expect(() => database.exec(`
+      INSERT INTO finance_planning_ledger(
+        id,family_id,owner_person_id,item_type,parent_item_id,name,category_kind,
+        description,cash_flow_status,amount,currency,occurred_at,period_month,
+        frequency,interval_count,starts_at,next_occurrence_at,ends_at,recurring_status,
+        goal_kind,target_amount,current_amount,due_at,asset_class,quantity,unit_value,
+        market_value,valued_at,note,privacy,created_at,policy_receipt_hash,
+        policy_receipt_version,policy_receipt_nonce,policy_correlation_id,
+        policy_resource_type,policy_resource_id,policy_action,policy_capability
+      )
+      SELECT 'finance-planning-direct-bypass',family_id,owner_person_id,item_type,parent_item_id,
+             name,category_kind,description,cash_flow_status,amount,currency,occurred_at,
+             period_month,frequency,interval_count,starts_at,next_occurrence_at,ends_at,
+             recurring_status,goal_kind,target_amount,current_amount,due_at,asset_class,
+             quantity,unit_value,market_value,valued_at,note,privacy,created_at,
+             policy_receipt_hash,policy_receipt_version,policy_receipt_nonce,
+             policy_correlation_id,policy_resource_type,policy_resource_id,policy_action,
+             policy_capability
+      FROM finance_planning_ledger WHERE id='${expenseCategory.id}'
+    `)).toThrow(/unused exact durable finance policy receipt/u);
+    expect(() => database.prepare('UPDATE finance_planning_ledger SET name=? WHERE id=?').run('Değiştirilemez', expenseCategory.id))
+      .toThrow(/append-only/u);
+    expect(() => database.prepare('DELETE FROM finance_planning_ledger WHERE id=?').run(expenseCategory.id))
+      .toThrow(/governed deletion workflow/u);
+    database.close();
+    expect(store.listAudit(300).some((entry) => entry.action === 'finance.planning.category.recorded' && entry.resourceId === expenseCategory.id)).toBe(true);
+    store.close();
+  });
+
   it('görev, sigorta, eğitim, iş, varlık ve acil durum kayıtlarını güvenli biçimde oluşturur', async () => {
     const { store } = makeStore();
     await authenticate(store);

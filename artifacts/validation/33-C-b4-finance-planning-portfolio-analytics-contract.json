@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "step": "33-C",
+  "requirements": [
+    "B4-10",
+    "B4-11",
+    "B4-12"
+  ],
+  "status": "PASS",
+  "checksPassed": 14,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "all three requirements are complete with exact 13-link chains",
+      "passed": true
+    },
+    {
+      "name": "all three requirements bind the exact 33-C evidence triplet",
+      "passed": true
+    },
+    {
+      "name": "all three requirements bind DEC-214 security repositories and dedicated UI",
+      "passed": true
+    },
+    {
+      "name": "B4-13 and B4-14 remain honestly open",
+      "passed": true
+    },
+    {
+      "name": "scope and inventory bind DEC-214 migration 81 with no network channel",
+      "passed": true
+    },
+    {
+      "name": "boundary evidence is exact green and truth preserving",
+      "passed": true
+    },
+    {
+      "name": "DEC-214 is active in the user decision ledger",
+      "passed": true
+    },
+    {
+      "name": "migration 81 is current and exact",
+      "passed": true
+    },
+    {
+      "name": "decision states manual no-FX no-price no-sync no-payment truth and exact ratchets",
+      "passed": true
+    },
+    {
+      "name": "threat model covers secrets parent receipts append-only FX and external claims",
+      "passed": true
+    },
+    {
+      "name": "audit binds all IDs exact evidence and open successor scope",
+      "passed": true
+    },
+    {
+      "name": "targeted tests name exact contracts IPC persistence receipts and honesty boundaries",
+      "passed": true
+    },
+    {
+      "name": "root lifecycle and explicit package scripts bind 33-C",
+      "passed": true
+    },
+    {
+      "name": "all contract prerequisites exist",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "latestDatabaseMigration": 81,
+  "ppk021ExactAllowlistEntries": 542,
+  "ppk021UseCaseCompositionSurfaces": 274,
+  "ppk022CapabilitySurfaces": 238,
+  "generatedAt": "2026-08-12T16:13:34.526Z"
+}

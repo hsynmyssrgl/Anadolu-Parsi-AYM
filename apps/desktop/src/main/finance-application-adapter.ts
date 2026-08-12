@@ -14,7 +14,7 @@ import type {
   FinanceUnitOfWork,
   FinanceWriteScope
 } from '@ppt/application';
-import { validateIbanStructure } from '@ppt/application';
+import { buildFinancePlanningWorkspace, validateIbanStructure } from '@ppt/application';
 import type { DomainEvent } from '@ppt/events';
 import {
   PlatformPolicyEnforcementError,
@@ -563,6 +563,61 @@ export class RepositoryBackedFinanceQueryPort implements FinanceQueryPort {
     );
   }
 
+  public async getPlanningWorkspace(
+    context: FinanceApplicationContext
+  ): ReturnType<FinanceQueryPort['getPlanningWorkspace']> {
+    const intent: FinancePolicyIntent = {
+      action: 'read',
+      capability: 'finance.read',
+      resourceType: 'finance_record',
+      resourceId: '*',
+      purpose: 'finance'
+    };
+    return executeGoverned(this.dependencies, context, intent, (authorization, enforcementPoint) =>
+      this.dependencies.transactionExecutor.execute(context.correlationId, (transaction) => {
+        const governedInput = { context, intent, authorization, transaction };
+        const established = establishGovernedTransaction(enforcementPoint, governedInput);
+        if (!established.ok) return established;
+        const execution = governedRepositoryContext(context, transaction, authorization, intent);
+        const snapshot = loadAuthorizationSnapshot(this.dependencies, context, execution);
+        if (!snapshot.ok) return snapshot;
+        const allowed = (row: { readonly id: string; readonly ownerPersonId: string; readonly privacy: 'private' | 'selected_members' | 'family' }): boolean =>
+          legacyAllowed(this.#authorization, snapshot.value, {
+            action: 'read',
+            resourceType: 'finance_record',
+            resourceId: row.id,
+            ownerPersonId: asPersonId(row.ownerPersonId),
+            occurredAt: execution.occurredAt,
+            privacy: row.privacy
+          });
+        const planningItems = this.dependencies.financeRepository.listPlanningItems(execution);
+        if (!planningItems.ok) return planningItems;
+        const records = this.dependencies.financeRepository.listRecords(execution);
+        if (!records.ok) return records;
+        const valuations = this.dependencies.financeRepository.listValuations(execution);
+        if (!valuations.ok) return valuations;
+        const cards = this.dependencies.financeRepository.listPaymentCards(execution);
+        if (!cards.ok) return cards;
+        const loans = this.dependencies.financeRepository.listLoanAccounts(execution);
+        if (!loans.ok) return loans;
+        const visiblePlanningItems = planningItems.value.filter(allowed);
+        const visibleRecords = records.value.filter(allowed);
+        const visibleRecordIds = new Set(visibleRecords.map((record) => record.id));
+        return {
+          ok: true,
+          value: buildFinancePlanningWorkspace({
+            planningItems: visiblePlanningItems,
+            financeRecords: visibleRecords,
+            financeValuations: valuations.value.filter((valuation) => visibleRecordIds.has(valuation.financeRecordId)),
+            paymentCards: cards.value.filter(allowed),
+            loanAccounts: loans.value.filter(allowed),
+            generatedAt: execution.occurredAt
+          })
+        };
+      })
+    );
+  }
+
   public async validateIban(
     context: FinanceApplicationContext,
     iban: string
@@ -615,6 +670,10 @@ class GovernedFinanceWriteScope implements FinanceWriteScope {
     return this.dependencies.financeRepository.findLoanAccount(this.execution, id);
   }
 
+  public findPlanningItem(id: string): ReturnType<FinanceWriteScope['findPlanningItem']> {
+    return this.dependencies.financeRepository.findPlanningItem(this.execution, id);
+  }
+
   public findBankInstitution(
     institutionCode: string
   ): ReturnType<FinanceWriteScope['findBankInstitution']> {
@@ -656,6 +715,10 @@ class GovernedFinanceWriteScope implements FinanceWriteScope {
 
   public insertLoanPayment(input: Parameters<FinanceWriteScope['insertLoanPayment']>[0]) {
     return this.dependencies.financeRepository.insertLoanPayment(this.execution, input);
+  }
+
+  public insertPlanningItem(input: Parameters<FinanceWriteScope['insertPlanningItem']>[0]) {
+    return this.dependencies.financeRepository.insertPlanningItem(this.execution, input);
   }
 
   public appendAudit(input: Parameters<FinanceWriteScope['appendAudit']>[0]) {

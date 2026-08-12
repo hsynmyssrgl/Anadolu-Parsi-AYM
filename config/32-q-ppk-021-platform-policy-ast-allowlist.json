@@ -59,7 +59,7 @@
     "SQL_CALL": 56,
     "SQL_CONSTRUCTOR": 2,
     "SQL_IMPORT": 2,
-    "USE_CASE_COMPOSITION": 272
+    "USE_CASE_COMPOSITION": 274
   },
   "allowedSurfaceKeys": [
     "CRYPTO_GLOBAL|apps/desktop/src/main/preload.ts|randomUUID",
@@ -410,6 +410,7 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetDesktopSecurityPostureUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetExternalBackupInventorySummaryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetFamilyGraphUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetFinancePlanningWorkspaceUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetGenealogyReadModelUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetHouseholdMembershipWorkspaceUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetImportantDayDetailsUseCase",
@@ -522,6 +523,7 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|RecordDiagnosticUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|RecordExportArtifactUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|RecordExternalBackupRevocationEndpointFetchUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|RecordFinancePlanningItemUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|RecordHealthNotificationUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|RecordLoanPaymentUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|RecordMaintenanceHistoryUseCase",

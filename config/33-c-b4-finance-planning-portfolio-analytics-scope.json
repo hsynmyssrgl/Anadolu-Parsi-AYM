@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "33-C-B4-FINANCE-PLANNING-PORTFOLIO-ANALYTICS",
+  "decision": "DEC-214",
+  "requirements": ["B4-10", "B4-11", "B4-12"],
+  "status": "COMPLETE",
+  "planningLedger": {
+    "itemTypes": [
+      "category", "cash_flow", "budget", "recurring_rule", "recurring_state",
+      "goal", "goal_progress", "asset", "asset_valuation"
+    ],
+    "appendOnly": true,
+    "parentOwnershipAndPrivacyInherited": true,
+    "dataSource": "manual",
+    "externalVerification": "not_performed",
+    "remoteSynchronizationPerformed": false
+  },
+  "budgetAndGoals": {
+    "incomeExpenseCategories": true,
+    "plannedAndRealizedCashFlow": true,
+    "monthlyBudgetRevisions": true,
+    "recurringFrequencies": ["weekly", "monthly", "quarterly", "yearly"],
+    "recurringStatusHistory": ["active", "paused", "ended"],
+    "goalProgressHistory": true
+  },
+  "portfolio": {
+    "assetClasses": [
+      "cash", "deposit", "precious_metal_fx", "investment", "pension",
+      "real_estate", "vehicle"
+    ],
+    "valuationHistory": true,
+    "externalPricing": "not_performed"
+  },
+  "analytics": {
+    "familyAndPersonViews": true,
+    "perCurrencyNetWorth": true,
+    "perCurrencyDebtRatio": true,
+    "budgetVariance": true,
+    "upcomingPaymentSources": [
+      "payment_card", "loan", "finance_record", "recurring_rule", "planned_cash_flow"
+    ],
+    "crossCurrencyAggregationPerformed": false,
+    "paymentExecution": "not_performed"
+  },
+  "security": {
+    "rejectedSecrets": ["pan", "cardNumber", "cvv", "cvc", "pin", "internetBankingPassword"],
+    "luhnFullPanDetection": true,
+    "exactDiscriminatedIpcPayloadValidation": true,
+    "applicationLayerValidation": true,
+    "financePolicyReceiptRequired": true,
+    "crossFinanceReceiptReplayRejected": true,
+    "outboxContainsAmountsDescriptionsOrNotes": false,
+    "auditContainsPlanningPayload": false
+  },
+  "schemaDecision": "Migration 81, exact finance PEP receipt ile korunan tek append-only finance_planning_ledger tablosunu ekler.",
+  "migrationDecision": "Migration 81 b4_finance_planning_portfolio_analytics eklendi; gerçek kullanıcı verisi taşınmadı, dış fiyat alınmadı, banka senkronizasyonu veya ödeme icrası yapılmadı.",
+  "ratchets": {
+    "ppk021ExactAllowlistEntries": 542,
+    "ppk021UseCaseCompositionSurfaces": 274,
+    "ppk021DirectRoleAuthorizationBypasses": 0,
+    "ppk022CapabilitySurfaces": 238,
+    "networkEgressAdded": false
+  },
+  "validation": {
+    "boundary": "artifacts/validation/33-C-b4-finance-planning-portfolio-analytics-boundary.json",
+    "contract": "artifacts/validation/33-C-b4-finance-planning-portfolio-analytics-contract.json",
+    "runtime": "artifacts/validation/33-C-b4-finance-planning-portfolio-analytics-runtime.json",
+    "targetedTestFiles": [
+      "packages/application/tests/finance-planning-portfolio-analytics.test.ts",
+      "apps/desktop/tests/b4-finance-planning-ipc-integration.test.ts",
+      "apps/desktop/tests/data-store.test.ts"
+    ]
+  },
+  "excludedClaims": [
+    "Finans planlama, hedef ve portföy değerlerinin tamamı manuel kullanıcı beyanıdır.",
+    "Para birimleri arasında kur dönüşümü veya tek toplam üretilmez.",
+    "Uygulama dış piyasa fiyatı almaz, banka hesabını eşitlemez ve ödeme göndermez.",
+    "Yaklaşan ödeme görünümü yalnız takip bilgisidir; talimat veya ödeme icrası değildir.",
+    "B4-13 içe aktarma ve B4-14 open-banking adapter gereksinimleri tamamlanmış sayılmaz.",
+    "B9-01, Silver readiness ve Bronze Final tamamlanmış sayılmaz.",
+    "Yeni Build numarası verilmez."
+  ]
+}

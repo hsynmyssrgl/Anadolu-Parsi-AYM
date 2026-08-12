@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-12T15:15:00.373Z",
+  "generatedAt": "2026-08-12T16:11:56.955Z",
   "release": "Bronze 04.08.2026.29",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
@@ -29,17 +29,17 @@
   "percentages": {
     "officialWeightedBronzePercent": 25,
     "officialWeightedEvidenceStep": "31-T",
-    "strictRequirementCompletionPercent": 15.4286,
-    "implementationChainCoveragePercent": 15.9143,
-    "governanceEvidenceChainCoveragePercent": 52.4762,
+    "strictRequirementCompletionPercent": 16.2857,
+    "implementationChainCoveragePercent": 16.7714,
+    "governanceEvidenceChainCoveragePercent": 53.0476,
     "interpretation": "These are separate measures and must not be blended into an invented single completion claim."
   },
   "scope": {
     "total": 350,
     "statusCounts": {
-      "COMPLETE": 54,
+      "COMPLETE": 57,
       "FOUNDATION_STARTED": 1,
-      "NOT_IMPLEMENTED": 268,
+      "NOT_IMPLEMENTED": 265,
       "PARTIAL": 27
     },
     "priorityCounts": {
@@ -48,21 +48,21 @@
       "P2": 5
     },
     "completeByPriority": {
-      "P0": 50,
+      "P0": 53,
       "P1": 4,
       "P2": 0
     },
-    "incompleteCount": 296,
-    "strictComplete": 54,
+    "incompleteCount": 293,
+    "strictComplete": 57,
     "implementationCoverage": {
-      "passed": 557,
+      "passed": 587,
       "total": 3500,
-      "percent": 15.9143
+      "percent": 16.7714
     },
     "governanceCoverage": {
-      "passed": 551,
+      "passed": 557,
       "total": 1050,
-      "percent": 52.4762
+      "percent": 53.0476
     }
   },
   "rules": {
@@ -324,7 +324,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"6852d83451a5d69597687bfc7f1ecd29c3e833501401838fff31a0bb0c384216\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\6852d83451a5d69597687bfc7f1ecd29c3e833501401838fff31a0bb0c384216\",\"files\":9}"
+          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"7805014b20a51b695081f1342482367dc2a55b7b070ee1e37043311e8db8d62f\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\7805014b20a51b695081f1342482367dc2a55b7b070ee1e37043311e8db8d62f\",\"files\":9}"
         ]
       },
       {
@@ -1003,7 +1003,7 @@
     "status": "PASS",
     "officialCompletionClaimed": true,
     "storageBackend": "EXTERNAL_USB_D_DRIVE",
-    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\6852d83451a5d69597687bfc7f1ecd29c3e833501401838fff31a0bb0c384216"
+    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\7805014b20a51b695081f1342482367dc2a55b7b070ee1e37043311e8db8d62f"
   },
   "remainingWork": [
     {
@@ -2297,78 +2297,6 @@
       "workOrderClass": "NEW_NOT_STARTED",
       "area": "Kimlik ve Güvenlik",
       "title": "FIDO2/WebAuthn güvenlik anahtarı/passkey desteği",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B4-10",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Finans ve Bankacılık",
-      "title": "Gelir-gider kategorileri, bütçe, nakit akışı, yinelenen işlemler ve hedefler",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B4-11",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Finans ve Bankacılık",
-      "title": "Nakit, mevduat, altın/döviz, yatırım, emeklilik, gayrimenkul ve araç değerleri",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B4-12",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Finans ve Bankacılık",
-      "title": "Net değer, borç oranı, yaklaşan ödeme, bütçe sapması ve aile/kişi görünümü",
       "completedChainCount": 1,
       "completionBlockers": [],
       "missingChain": [

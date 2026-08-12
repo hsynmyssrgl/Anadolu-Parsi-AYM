@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 67,
+  "decisionCount": 68,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1693,6 +1693,41 @@
         "docs/security/B4_LOAN_MANAGEMENT_THREAT_MODEL.md",
         "docs/audit/33-B_B4_LOAN_MANAGEMENT_UST_KAPANIS.md",
         "config/33-b-b4-loan-management-inventory.json"
+      ]
+    },
+    {
+      "id": "DEC-214",
+      "date": "2026-08-12",
+      "acceptedAt": "2026-08-12",
+      "title": "B4-10 B4-11 and B4-12 shared append-only finance planning portfolio and per-currency analytics",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: sirayla full auto devam et, onay bekleme ve bir isle birden fazla gereksinim kapat",
+      "document": "docs/decisions/DEC-214-b4-finance-planning-portfolio-analytics.md",
+      "requirements": ["B4-10", "B4-11", "B4-12"],
+      "codeAreas": [
+        "packages/domain/src/app-data.ts",
+        "packages/application/src/banking-security.ts",
+        "packages/application/src/finance-use-cases.ts",
+        "packages/database/src/family-database-migrations.ts",
+        "packages/repository-contracts/src/finance-repository.ts",
+        "packages/repositories/src/finance-repository.ts",
+        "packages/repositories/src/ai-consent-repository.ts",
+        "packages/repositories/src/person-lifecycle-repository.ts",
+        "apps/desktop/src/main/finance-production-policy-runtime.ts",
+        "apps/desktop/src/main/finance-application-adapter.ts",
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/renderer/App.tsx",
+        "apps/desktop/src/renderer/FinancePlanningPanel.tsx",
+        "scripts/verify-b4-finance-planning-portfolio-analytics-boundary.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/33-C-b4-finance-planning-portfolio-analytics-boundary.json",
+        "artifacts/validation/33-C-b4-finance-planning-portfolio-analytics-contract.json",
+        "artifacts/validation/33-C-b4-finance-planning-portfolio-analytics-runtime.json",
+        "docs/security/THREAT_MODEL_33_C_B4_FINANCE_PLANNING_PORTFOLIO_ANALYTICS.md",
+        "docs/audit/33-C_B4_FINANCE_PLANNING_PORTFOLIO_ANALYTICS_UST_KAPANIS.md",
+        "config/33-c-b4-finance-planning-portfolio-analytics-inventory.json"
       ]
     }
   ]

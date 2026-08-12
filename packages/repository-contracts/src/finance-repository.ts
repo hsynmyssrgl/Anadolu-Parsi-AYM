@@ -2,6 +2,7 @@ import type { FamilyId, IsoDateTime, PersonId } from '@ppt/core';
 import type {
   BankAccountView,
   BankInstitutionView,
+  FinancePlanningLedgerItemView,
   FinanceRecordView,
   FinanceValuationView,
   LoanAccountView,
@@ -70,6 +71,14 @@ export interface LoanPaymentHistoryRow extends LoanPaymentHistoryItemView {
 
 export type NewLoanPaymentHistoryRow = LoanPaymentHistoryRow;
 
+export type FinancePlanningLedgerItemRow = FinancePlanningLedgerItemView & {
+  readonly familyId: FamilyId;
+  readonly ownerPersonId: PersonId;
+  readonly createdAt: IsoDateTime;
+};
+
+export type NewFinancePlanningLedgerItemRow = FinancePlanningLedgerItemRow;
+
 export interface FinanceRepositoryPort {
     listRecords(context: PolicyAuthorizedRepositoryExecutionContext): RepositoryResult<readonly FinanceRecordRow[]>;
     findRecord(context: PolicyAuthorizedRepositoryExecutionContext, id: string): RepositoryResult<FinanceRecordRow | null>;
@@ -86,6 +95,9 @@ export interface FinanceRepositoryPort {
     findLoanAccount(context: PolicyAuthorizedRepositoryExecutionContext, id: string): RepositoryResult<LoanAccountRow | null>;
     insertLoanAccount(context: PolicyAuthorizedRepositoryExecutionContext, row: NewLoanAccountRow): RepositoryResult<void>;
     insertLoanPayment(context: PolicyAuthorizedRepositoryExecutionContext, row: NewLoanPaymentHistoryRow): RepositoryResult<void>;
+    listPlanningItems(context: PolicyAuthorizedRepositoryExecutionContext): RepositoryResult<readonly FinancePlanningLedgerItemRow[]>;
+    findPlanningItem(context: PolicyAuthorizedRepositoryExecutionContext, id: string): RepositoryResult<FinancePlanningLedgerItemRow | null>;
+    insertPlanningItem(context: PolicyAuthorizedRepositoryExecutionContext, row: NewFinancePlanningLedgerItemRow): RepositoryResult<void>;
 }
 
 /**
@@ -102,4 +114,8 @@ export interface FinancePolicyResourceRepositoryPort {
     context: RepositoryExecutionContext,
     id: string
   ): RepositoryResult<LoanAccountRow | null>;
+  findPlanningItemForPolicyResolution(
+    context: RepositoryExecutionContext,
+    id: string
+  ): RepositoryResult<FinancePlanningLedgerItemRow | null>;
 }

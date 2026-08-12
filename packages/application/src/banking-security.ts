@@ -88,6 +88,25 @@ export const LOAN_PAYMENT_INPUT_KEYS = Object.freeze([
   'notes'
 ] as const);
 
+export const FINANCE_PLANNING_INPUT_KEYS = Object.freeze({
+  category: Object.freeze(['itemType','ownerPersonId','name','kind','privacy'] as const),
+  cash_flow: Object.freeze(['itemType','categoryId','amount','currency','occurredAt','status','description'] as const),
+  budget: Object.freeze(['itemType','categoryId','periodMonth','plannedAmount','currency'] as const),
+  recurring_rule: Object.freeze([
+    'itemType','categoryId','amount','currency','frequency','intervalCount',
+    'startsAt','nextOccurrenceAt','endsAt','description'
+  ] as const),
+  recurring_state: Object.freeze(['itemType','recurringRuleId','status','effectiveAt'] as const),
+  goal: Object.freeze([
+    'itemType','ownerPersonId','title','kind','targetAmount','initialAmount','currency','dueAt','privacy'
+  ] as const),
+  goal_progress: Object.freeze(['itemType','goalId','currentAmount','recordedAt','note'] as const),
+  asset: Object.freeze([
+    'itemType','ownerPersonId','name','assetClass','currency','quantity','unitValue','valuedAt','note','privacy'
+  ] as const),
+  asset_valuation: Object.freeze(['itemType','assetId','quantity','unitValue','valuedAt','note'] as const)
+});
+
 export const FINANCE_RECORD_INPUT_KEYS = Object.freeze([
   'ownerPersonId',
   'title',
@@ -141,6 +160,17 @@ const allowedBankAccountFieldNames = new Set(BANK_ACCOUNT_INPUT_KEYS);
 const allowedPaymentCardFieldNames = new Set(PAYMENT_CARD_INPUT_KEYS);
 const allowedLoanAccountFieldNames = new Set(LOAN_ACCOUNT_INPUT_KEYS);
 const allowedLoanPaymentFieldNames = new Set(LOAN_PAYMENT_INPUT_KEYS);
+const financePlanningPanSearchFields = Object.freeze({
+  category: Object.freeze(['name']),
+  cash_flow: Object.freeze(['description']),
+  budget: Object.freeze([]),
+  recurring_rule: Object.freeze(['description']),
+  recurring_state: Object.freeze([]),
+  goal: Object.freeze(['title']),
+  goal_progress: Object.freeze(['note']),
+  asset: Object.freeze(['name','note']),
+  asset_valuation: Object.freeze(['note'])
+} satisfies Record<keyof typeof FINANCE_PLANNING_INPUT_KEYS, readonly string[]>);
 
 export const isProhibitedBankingSecretField = (value: string): boolean =>
   prohibitedFieldNames.has(canonicalFieldName(value));
@@ -260,6 +290,37 @@ export const inspectLoanPaymentDataContract = (input: unknown): BankingDataContr
   return Object.freeze({
     accepted: prohibitedFields.length === 0 && unknownFields.length === 0 && !secretInspection.panLikeValueDetected,
     prohibitedFields: Object.freeze(prohibitedFields),
+    unknownFields: Object.freeze(unknownFields),
+    panLikeValueDetected: secretInspection.panLikeValueDetected
+  });
+};
+
+export const inspectFinancePlanningDataContract = (input: unknown): BankingDataContractInspection => {
+  if (typeof input !== 'object' || input === null || Array.isArray(input)) {
+    return Object.freeze({ accepted: false, prohibitedFields: [], unknownFields: ['$'], panLikeValueDetected: false });
+  }
+  const record = input as Record<string, unknown>;
+  const itemType = typeof record.itemType === 'string'
+    && Object.hasOwn(FINANCE_PLANNING_INPUT_KEYS, record.itemType)
+    ? record.itemType as keyof typeof FINANCE_PLANNING_INPUT_KEYS
+    : undefined;
+  if (!itemType) {
+    const secretInspection = inspectProhibitedBankingSecrets(record, []);
+    return Object.freeze({
+      accepted: false,
+      prohibitedFields: Object.freeze(secretInspection.prohibitedFields),
+      unknownFields: Object.freeze(['itemType']),
+      panLikeValueDetected: secretInspection.panLikeValueDetected
+    });
+  }
+  const secretInspection = inspectProhibitedBankingSecrets(record, financePlanningPanSearchFields[itemType]);
+  const allowedFields = new Set<string>(FINANCE_PLANNING_INPUT_KEYS[itemType]);
+  const unknownFields = Object.keys(record).filter((key) => !allowedFields.has(key));
+  return Object.freeze({
+    accepted: secretInspection.prohibitedFields.length === 0
+      && unknownFields.length === 0
+      && !secretInspection.panLikeValueDetected,
+    prohibitedFields: Object.freeze(secretInspection.prohibitedFields),
     unknownFields: Object.freeze(unknownFields),
     panLikeValueDetected: secretInspection.panLikeValueDetected
   });

@@ -55,6 +55,7 @@ const referenceQueries: Readonly<Record<string, string>> = {
   paymentCards: `SELECT COUNT(*) AS total FROM payment_cards WHERE owner_person_id=?`,
   loanAccounts: `SELECT COUNT(*) AS total FROM loan_accounts WHERE owner_person_id=?`,
   loanPayments: `SELECT COUNT(*) AS total FROM loan_payment_history WHERE owner_person_id=?`,
+  financePlanningItems: `SELECT COUNT(*) AS total FROM finance_planning_ledger WHERE owner_person_id=?`,
   healthRecords: `SELECT COUNT(*) AS total FROM health_records WHERE owner_person_id=?`,
   medicationPlans: `SELECT COUNT(*) AS total FROM medication_plans WHERE owner_person_id=?`,
   familyHealthHistory: `SELECT COUNT(*) AS total FROM family_health_history WHERE related_person_id=?`,

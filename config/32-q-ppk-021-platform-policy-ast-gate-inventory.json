@@ -10,9 +10,9 @@
     "syntaxModel": "TYPESCRIPT_AST",
     "productionSourceZones": 18,
     "scannedFiles": 376,
-    "privilegedSurfaces": 540,
-    "exactAllowlistEntries": 540,
-    "exactAllowlistSha256": "ae33930016198fc523723e6a83db6929683f70b03f70a4487be7d50e8b45fb59",
+    "privilegedSurfaces": 542,
+    "exactAllowlistEntries": 542,
+    "exactAllowlistSha256": "4450fec9e3c920d71ff6727f841eae88ef674bcd4dbb11882f7b008d799a88a8",
     "maliciousSelfTests": 17,
     "benignSelfTests": 4,
     "findings": 0
@@ -64,8 +64,8 @@
   "closureSummary": {
     "reviewedProductionSourceZones": 18,
     "reviewedProductionFiles": 376,
-    "reviewedPrivilegedSurfaces": 540,
-    "exactAllowlistEntries": 540,
+    "reviewedPrivilegedSurfaces": 542,
+    "exactAllowlistEntries": 542,
     "directRoleAuthorizationBypasses": 0,
     "wildcardAllowances": 0,
     "parseFailures": 0,

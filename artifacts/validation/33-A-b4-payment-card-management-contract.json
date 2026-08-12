@@ -22,7 +22,7 @@
       "passed": true
     },
     {
-      "name": "33-A historical open scope remains truthful while 33-B successors may complete",
+      "name": "33-A historical open scope remains truthful while later successors may complete",
       "passed": true
     },
     {
@@ -67,8 +67,8 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 80,
-  "ppk021ExactAllowlistEntries": 540,
+  "latestDatabaseMigration": 81,
+  "ppk021ExactAllowlistEntries": 542,
   "ppk022CapabilitySurfaces": 238,
-  "generatedAt": "2026-08-12T15:04:39.773Z"
+  "generatedAt": "2026-08-12T16:07:01.578Z"
 }

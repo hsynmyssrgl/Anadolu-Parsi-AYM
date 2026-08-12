@@ -50,8 +50,8 @@ check('both requirements bind DEC-212 implementation and UI areas', requirements
   item?.evidence?.includes('docs/decisions/DEC-212-b4-payment-card-management.md')
   && item?.codeAreas?.includes('packages/application/src/banking-security.ts')
   && item?.codeAreas?.includes('apps/desktop/src/renderer/App.tsx')));
-const completedAfter33A = new Set(['B4-08', 'B4-09']);
-check('33-A historical open scope remains truthful while 33-B successors may complete', inventory.openRequirements?.every((id) => {
+const completedAfter33A = new Set(['B4-08', 'B4-09', 'B4-10', 'B4-11', 'B4-12']);
+check('33-A historical open scope remains truthful while later successors may complete', inventory.openRequirements?.every((id) => {
   const item = registry.requirements?.find((candidate) => candidate.id === id);
   return completedAfter33A.has(id)
     ? item?.status === 'COMPLETE' && allChainTrue(item)
@@ -62,7 +62,7 @@ check('scope and inventory bind DEC-212 migration 79 with no network channel', s
   && inventory.networkChannels?.length === 0);
 check('boundary evidence is exact green', boundary.status === 'PASS'
   && boundary.checksFailed === 0 && boundary.latestDatabaseMigration >= 79
-  && boundary.ppk021ExactAllowlistEntries === 540
+  && boundary.ppk021ExactAllowlistEntries === 542
   && boundary.ppk022CapabilitySurfaces === 238
   && boundary.prohibitedSecretColumns === 0 && boundary.bankExecutionPerformed === false);
 check('DEC-212 is active in the user decision ledger', ledger.decisionCount === ledger.decisions?.length

@@ -22,7 +22,7 @@
       "passed": true
     },
     {
-      "name": "successor B4-10 through B4-14 remain honestly open",
+      "name": "historical successor scope is preserved while B4-13 and B4-14 remain honestly open",
       "passed": true
     },
     {
@@ -38,7 +38,7 @@
       "passed": true
     },
     {
-      "name": "migration 80 is current and exact",
+      "name": "migration 80 remains an exact predecessor baseline",
       "passed": true
     },
     {
@@ -67,9 +67,9 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 80,
-  "ppk021ExactAllowlistEntries": 540,
-  "ppk021UseCaseCompositionSurfaces": 272,
+  "latestDatabaseMigration": 81,
+  "ppk021ExactAllowlistEntries": 542,
+  "ppk021UseCaseCompositionSurfaces": 274,
   "ppk022CapabilitySurfaces": 238,
-  "generatedAt": "2026-08-12T15:13:36.058Z"
+  "generatedAt": "2026-08-12T16:13:56.027Z"
 }

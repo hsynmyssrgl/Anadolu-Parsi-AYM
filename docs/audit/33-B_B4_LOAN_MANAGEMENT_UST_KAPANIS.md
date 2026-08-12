@@ -25,6 +25,10 @@ Tüm bilgiler manuel, banka tarafından doğrulanmamış ve senkronize edilmemi�
 plan resmi banka amortisman planı değildir. B4-10 ve sonraki finans gereksinimleri,
 B9-01, Silver readiness ve Bronze Final açık kalır. Yeni Build verilmez.
 
+Ardıl durum notu (12.08.2026): 33-C, B4-10/B4-11/B4-12'yi ayrı DEC-214 ve
+kanıt paketiyle tamamlamıştır; B4-13/B4-14 açık kalır. Bu not 33-B'nin tarihsel
+kapanış kapsamını genişletmez.
+
 ## Kanıtlar
 
 - `artifacts/validation/33-B-b4-loan-management-boundary.json`

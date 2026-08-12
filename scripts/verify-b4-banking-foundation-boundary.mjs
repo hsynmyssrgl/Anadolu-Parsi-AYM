@@ -162,7 +162,7 @@ export const verifyB4BankingFoundationBoundary = async () => {
   check('PPK-021 exact ratchet reviews the four new compositions', [
     'CreateBankAccountUseCase', 'ListBankAccountsUseCase', 'ListBankInstitutionsUseCase', 'ValidateIbanUseCase'
   ].every((symbol) => astKeys.has(`USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|${symbol}`))
-    && astGate.status === 'PASS' && astGate.exactAllowlistEntries === 540
+    && astGate.status === 'PASS' && astGate.exactAllowlistEntries === 542
     && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
   check('PPK-022 capability ratchet remains unchanged and green', capabilityGate.status === 'PASS'
     && capabilityGate.capabilitySurfaces === 238
