@@ -10,3 +10,4 @@ export * from './immutable-policy-decision-audit.js';
 export * from './source-deletion-propagation-policy.js';
 export * from './policy-conformance-suite.js';
 export * from './platform-policy-ast-gate-policy.js';
+export * from './platform-capability-manifest-policy.js';

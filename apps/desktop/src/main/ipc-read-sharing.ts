@@ -38,7 +38,8 @@ export const IPC_SECURITY_POSTURE_NO_CACHE_CHANNELS = Object.freeze([
   'system:getPolicyDecisionAuditBoundary',
   'system:getSourceDeletionPropagationBoundary',
   'system:getPolicyConformanceSuiteBoundary',
-  'system:getPlatformPolicyAstGateBoundary'
+  'system:getPlatformPolicyAstGateBoundary',
+  'system:getPlatformCapabilityManifestGateBoundary'
 ] as const);
 
 /**

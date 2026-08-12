@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 56,
+  "decisionCount": 57,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1370,6 +1370,35 @@
         "docs/security/PPK-021_PLATFORM_POLICY_AST_FAIL_GATE_THREAT_MODEL.md",
         "docs/audit/32-Q_PPK-021_PLATFORM_POLICY_AST_FAIL_GATE_UST_KAPANIS.md",
         "config/32-q-ppk-021-platform-policy-ast-gate-inventory.json"
+      ]
+    },
+    {
+      "id": "DEC-203",
+      "date": "2026-08-12",
+      "acceptedAt": "2026-08-12",
+      "title": "PPK-022 signed runtime capability manifest and AST resource gate",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: tüm işleri full auto olarak sen yap",
+      "document": "docs/decisions/DEC-203-ppk-022-capability-manifest-build-runtime-gate.md",
+      "requirements": ["PPK-022"],
+      "codeAreas": [
+        "packages/platform-policy/src/policy-kernel.ts",
+        "packages/platform-policy/src/platform-capability-manifest-policy.ts",
+        "packages/domain/src/platform-capability-manifest-gate.ts",
+        "packages/application/src/platform-capability-manifest-gate-use-cases.ts",
+        "apps/core-service/src/main.ts",
+        "apps/desktop/src/main/core-service-startup-connection.ts",
+        "apps/desktop/src/main/main.ts",
+        "scripts/lib/platform-capability-manifest-ast-scanner.mjs",
+        "scripts/verify-platform-capability-manifest-gate.mjs",
+        "config/32-r-ppk-022-capability-surface-manifest.json"
+      ],
+      "evidence": [
+        "artifacts/validation/32-R-ppk-022-capability-manifest-gate-contract.json",
+        "artifacts/validation/32-R-ppk-022-capability-manifest-gate-runtime.json",
+        "docs/security/PPK-022_CAPABILITY_MANIFEST_BUILD_RUNTIME_GATE_THREAT_MODEL.md",
+        "docs/audit/32-R_PPK-022_CAPABILITY_MANIFEST_BUILD_RUNTIME_GATE_UST_KAPANIS.md",
+        "config/32-r-ppk-022-capability-manifest-gate-inventory.json"
       ]
     }
   ]

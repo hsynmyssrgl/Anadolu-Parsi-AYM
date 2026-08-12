@@ -32,6 +32,26 @@ export type PlatformCapability =
   | 'communication.call' | 'communication.record' | 'file.share'
   | 'backup.create' | 'backup.restore' | 'cluster.admin' | 'plugin.execute';
 
+export type PlatformRuntimeCapability =
+  | 'camera.access'
+  | 'microphone.access'
+  | 'file.access'
+  | 'ocr.process'
+  | 'ai.process'
+  | 'location.access'
+  | 'network.access';
+
+export const PLATFORM_RUNTIME_CAPABILITIES = Object.freeze([
+  'camera.access',
+  'microphone.access',
+  'file.access',
+  'ocr.process',
+  'ai.process',
+  'location.access',
+  'network.access'
+] as const satisfies readonly PlatformRuntimeCapability[]);
+const platformRuntimeCapabilitySet = new Set<PlatformRuntimeCapability>(PLATFORM_RUNTIME_CAPABILITIES);
+
 export type PlatformPolicyDecisionAuthorityId = 'local-policy-kernel' | 'windows-core-service';
 
 export type DataSensitivity = 'public' | 'internal' | 'personal' | 'sensitive' | 'highly_sensitive';
@@ -79,6 +99,7 @@ export interface PlatformApplicationIdentityManifest {
   readonly applicationId: PlatformApplicationId;
   readonly applicationVersion: string;
   readonly capabilities: readonly PlatformCapability[];
+  readonly runtimeCapabilities: readonly PlatformRuntimeCapability[];
   readonly deviceCertificateRequired: boolean;
   readonly capabilityManifestSha256: string;
 }
@@ -267,6 +288,7 @@ export interface PlatformPolicyKernelConfig {
   readonly applicationVersions?: Readonly<Partial<Record<PlatformApplicationId, string>>>;
   readonly deviceCertificateRequiredApplications?: readonly PlatformApplicationId[];
   readonly applicationCapabilities: Readonly<Partial<Record<PlatformApplicationId, readonly PlatformCapability[]>>>;
+  readonly applicationRuntimeCapabilities?: Readonly<Partial<Record<PlatformApplicationId, readonly PlatformRuntimeCapability[]>>>;
   readonly consentRequiredCapabilities: readonly PlatformCapability[];
   readonly onlineOnlyCapabilities: readonly PlatformCapability[];
   readonly writeActions: readonly PolicyAction[];
@@ -310,12 +332,14 @@ export const platformCapabilityManifestHash = (input: {
   readonly applicationId: PlatformApplicationId;
   readonly applicationVersion: string;
   readonly capabilities: readonly PlatformCapability[];
+  readonly runtimeCapabilities?: readonly PlatformRuntimeCapability[];
   readonly deviceCertificateRequired: boolean;
 }): string => sha256({
   schemaVersion: 1,
   applicationId: input.applicationId,
   applicationVersion: input.applicationVersion,
   capabilities: [...input.capabilities].sort(),
+  runtimeCapabilities: [...(input.runtimeCapabilities ?? [])].sort(),
   deviceCertificateRequired: input.deviceCertificateRequired
 });
 
@@ -550,6 +574,7 @@ export class PlatformPolicyKernel {
   readonly #config: PlatformPolicyKernelConfig & {
     readonly policyPackageVersion: number;
     readonly applicationVersions: Readonly<Partial<Record<PlatformApplicationId, string>>>;
+    readonly applicationRuntimeCapabilities: Readonly<Partial<Record<PlatformApplicationId, readonly PlatformRuntimeCapability[]>>>;
     readonly applicationManifests: Readonly<Partial<Record<PlatformApplicationId, PlatformApplicationIdentityManifest>>>;
   };
   readonly #policyPackage: PlatformPolicyPackage;
@@ -570,6 +595,22 @@ export class PlatformPolicyKernel {
     if (Object.keys(applicationCapabilities).some((applicationId) => !platformApplicationIdSet.has(applicationId as PlatformApplicationId))) {
       throw new Error('application capability registry contains an invalid applicationId');
     }
+    const configuredRuntimeCapabilities = config.applicationRuntimeCapabilities ?? {};
+    if (Object.keys(configuredRuntimeCapabilities).some((applicationId) => (
+      !platformApplicationIdSet.has(applicationId as PlatformApplicationId)
+      || applicationCapabilities[applicationId as PlatformApplicationId] === undefined
+    ))) throw new Error('application runtime capability registry contains an unregistered applicationId');
+    const applicationRuntimeCapabilities = Object.fromEntries(
+      Object.keys(applicationCapabilities).sort().map((applicationIdValue) => {
+        const applicationId = applicationIdValue as PlatformApplicationId;
+        const values = [...(configuredRuntimeCapabilities[applicationId] ?? [])];
+        if (
+          values.length !== new Set(values).size
+          || values.some((value) => !platformRuntimeCapabilitySet.has(value))
+        ) throw new Error(`application runtime capability registry is invalid: ${applicationId}`);
+        return [applicationId, Object.freeze(values.sort())];
+      })
+    ) as Partial<Record<PlatformApplicationId, readonly PlatformRuntimeCapability[]>>;
     const applicationVersions = Object.fromEntries(
       Object.keys(applicationCapabilities).sort().map((applicationId) => {
         const version = config.applicationVersions?.[applicationId as PlatformApplicationId] ?? 'v1';
@@ -587,17 +628,20 @@ export class PlatformPolicyKernel {
         const applicationId = applicationIdValue as PlatformApplicationId;
         const applicationVersion = applicationVersions[applicationId]!;
         const capabilities = applicationCapabilities[applicationId]!;
+        const runtimeCapabilities = applicationRuntimeCapabilities[applicationId]!;
         const deviceCertificateRequired = certificateRequired.has(applicationId);
         const manifest = Object.freeze({
           schemaVersion: 1 as const,
           applicationId,
           applicationVersion,
           capabilities,
+          runtimeCapabilities,
           deviceCertificateRequired,
           capabilityManifestSha256: platformCapabilityManifestHash({
             applicationId,
             applicationVersion,
             capabilities,
+            runtimeCapabilities,
             deviceCertificateRequired
           })
         });
@@ -611,6 +655,7 @@ export class PlatformPolicyKernel {
       ...(config.decisionAuthorityId ? { decisionAuthorityId: config.decisionAuthorityId } : {}),
       applicationVersions: Object.freeze(applicationVersions),
       applicationCapabilities: Object.freeze(applicationCapabilities),
+      applicationRuntimeCapabilities: Object.freeze(applicationRuntimeCapabilities),
       applicationManifests: Object.freeze(applicationManifests),
       deviceCertificateRequiredApplications: Object.freeze([...certificateRequired].sort()),
       consentRequiredCapabilities: Object.freeze([...config.consentRequiredCapabilities].sort()),

@@ -20,6 +20,10 @@ import {
   type CoreServiceFamilyDataStatusContract,
   type CoreServiceHealthContract
 } from '@ppt/core-service-contracts';
+import {
+  PlatformCapabilityManifestPolicy,
+  createPlatformCapabilityManifestAuthority
+} from '@ppt/platform-policy';
 import { CoreServiceApplicationAdapter, type CoreServiceConnectionAuthority } from './core-service-application-adapter.js';
 
 export const CORE_SERVICE_CONNECTION_AUTHORITY_SCHEMA_VERSION = 1 as const;
@@ -303,6 +307,24 @@ export const connectCoreServiceAtStartup = async (options: {
     || policyPackage.payload.applicationVersions['windows-core-service'] !== CORE_SERVICE_APPLICATION_API_VERSION
   ) {
     throw new CoreServiceStartupConnectionError('APPLICATION_VERSION_MISMATCH', 'Desktop or Core Service application version does not match the signed policy package');
+  }
+  const desktopCapabilityManifest = policyPackage.payload.applicationManifests['windows-desktop'];
+  const desktopCapabilityCoverage = new PlatformCapabilityManifestPolicy().evaluateCoverage(
+    'windows-desktop',
+    desktopCapabilityManifest
+      ? createPlatformCapabilityManifestAuthority({
+          source: 'authenticated-core-service-health',
+          policyPackageVerified: true,
+          policyPackageSha256: policyPackage.payloadSha256,
+          manifest: desktopCapabilityManifest
+        })
+      : undefined
+  );
+  if (!desktopCapabilityCoverage.allowed) {
+    throw new CoreServiceStartupConnectionError(
+      'POLICY_PACKAGE_MISMATCH',
+      `Desktop runtime capability manifest coverage was denied: ${desktopCapabilityCoverage.reason}`
+    );
   }
   if (
     architecture.schemaVersion !== 1

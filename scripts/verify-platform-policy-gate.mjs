@@ -36,12 +36,14 @@ await walk('packages');
 
 const runtime = spawnSync(process.execPath, ['--experimental-strip-types', 'scripts/verify-platform-policy-runtime.mjs'], { encoding: 'utf8' });
 const astGate = spawnSync(process.execPath, ['scripts/verify-platform-policy-ast-gate.mjs'], { encoding: 'utf8' });
+const capabilityManifestGate = spawnSync(process.execPath, ['scripts/verify-platform-capability-manifest-gate.mjs'], { encoding: 'utf8' });
 const failures = [];
 if (authorizationFindings.length > 0) failures.push(`direct authorization role bypasses=${authorizationFindings.length}`);
 if (runtime.status !== 0) failures.push(runtime.stderr || runtime.stdout || 'policy runtime failed');
 if (astGate.status !== 0) failures.push(astGate.stderr || astGate.stdout || 'AST policy gate failed');
+if (capabilityManifestGate.status !== 0) failures.push(capabilityManifestGate.stderr || capabilityManifestGate.stdout || 'capability manifest gate failed');
 const report = {
-  schemaVersion: 3,
+  schemaVersion: 4,
   release: baseline.release,
   legacyBypassCount: authorizationFindings.length,
   newBypassCount: authorizationFindings.length,
@@ -49,6 +51,7 @@ const report = {
   presentationConditions,
   runtimeStatus: runtime.status === 0 ? 'PASS' : 'FAIL',
   astGateStatus: astGate.status === 0 ? 'PASS' : 'FAIL',
+  capabilityManifestGateStatus: capabilityManifestGate.status === 0 ? 'PASS' : 'FAIL',
   status: failures.length ? 'FAIL' : 'PASS',
   failures,
   authorizationFindings,
@@ -60,4 +63,4 @@ if (failures.length) {
   console.error(failures.join('\n'));
   process.exit(1);
 }
-console.log(`Platform Policy Gate: PASS / authorization bypass 0 / presentation conditions ${presentationConditions.length} / AST gate PASS.\n${runtime.stdout.trim()}`);
+console.log(`Platform Policy Gate: PASS / authorization bypass 0 / presentation conditions ${presentationConditions.length} / AST gate PASS / capability manifest gate PASS.\n${runtime.stdout.trim()}`);

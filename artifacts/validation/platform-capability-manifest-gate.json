@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "productionSourceZones": 18,
+  "scannedFiles": 355,
+  "capabilitySurfaces": 237,
+  "exactManifestSurfaces": 237,
+  "exactManifestSha256": "f51bad1cac6f8bdc97fa2559ce10a5a65198fd705cf414d7d29af94948708cbf",
+  "surfaceCounts": {
+    "FILE_DIALOG": 2,
+    "FILE_IMPORT": 225,
+    "NETWORK_API": 2,
+    "NETWORK_IMPORT": 8
+  },
+  "pinnedBootstrapSurfaces": 26,
+  "maliciousSelfTestAssertions": 33,
+  "benignSelfTestAssertions": 5,
+  "canonicalApplications": 14,
+  "protectedCapabilityFamilies": 7,
+  "findings": []
+}

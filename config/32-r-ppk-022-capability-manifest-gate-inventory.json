@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "step": "32-R",
+  "requirement": "PPK-022",
+  "status": "COMPLETE",
+  "completionClaimed": true,
+  "engine": {
+    "parser": "@babel/parser",
+    "parserVersion": "7.29.8",
+    "syntaxModel": "TYPESCRIPT_AST",
+    "productionSourceZones": 18,
+    "scannedFiles": 355,
+    "capabilitySurfaces": 237,
+    "exactManifestEntries": 237,
+    "exactManifestSha256": "f51bad1cac6f8bdc97fa2559ce10a5a65198fd705cf414d7d29af94948708cbf",
+    "pinnedBootstrapSurfaces": 26,
+    "pinnedBootstrapFileSurfaces": 24,
+    "pinnedBootstrapNetworkSurfaces": 2,
+    "maliciousSelfTests": 33,
+    "benignSelfTests": 5,
+    "findings": 0
+  },
+  "controls": [
+    {
+      "id": "seven-family-ast-resource-inventory",
+      "classification": "SYNTAX_AWARE_EXACT_BUILD_RATCHET",
+      "paths": ["scripts/lib/platform-capability-manifest-ast-scanner.mjs", "scripts/verify-platform-capability-manifest-gate.mjs"],
+      "control": "Kamera, mikrofon, dosya, OCR, AI, konum ve ağ import/API yüzeyleri TypeScript/JSX AST ile taranır; alias, computed property, dynamic import, require ve process.getBuiltinModule kaçışları değerlendirilir.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "exact-capability-surface-manifest",
+      "classification": "NO_WILDCARD_DEFAULT_DENY_MANIFEST",
+      "paths": ["config/32-r-ppk-022-capability-surface-manifest.json"],
+      "control": "Her yüzey exact kind|path|symbol anahtarı, kanonik uygulama kimliği, tek runtime capability ve enforcement aşamasıyla kayıtlıdır; yeni, stale, duplicate ve wildcard kayıtlar reddedilir.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "signed-application-runtime-capabilities",
+      "classification": "POLICY_PACKAGE_AND_MANIFEST_HASH_BINDING",
+      "paths": ["packages/platform-policy/src/policy-kernel.ts", "packages/platform-policy/src/platform-capability-manifest-policy.ts"],
+      "control": "Runtime capability kümesi uygulama manifest hash'ine ve imzalı Platform Policy paketine dahildir; malformed, unverified, package/hash/application/version uyuşmazlığı fail-closed reddedilir.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "fourteen-application-exact-coverage",
+      "classification": "MISSING_AND_UNEXPECTED_CAPABILITY_DENIAL",
+      "paths": ["apps/core-service/src/main.ts", "packages/platform-policy/src/platform-capability-manifest-policy.ts"],
+      "control": "Core Service on dört kanonik uygulamanın tamamında signed manifest capability kümesini exact baseline ile karşılaştırır; eksik veya beklenmeyen capability servis açılmadan reddedilir.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "authenticated-desktop-startup-coverage",
+      "classification": "AUTHENTICATED_CORE_SERVICE_HEALTH_AUTHORITY",
+      "paths": ["apps/desktop/src/main/core-service-startup-connection.ts", "apps/desktop/src/main/main.ts"],
+      "control": "Desktop, authenticated yerel Core Service sağlık paketindeki kendi uygulama manifestini uygulama sürümü, paket hash'i ve exact capability coverage ile doğrulamadan kullanıcı penceresini açmaz.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "pre-handshake-file-and-network-bootstrap-pin",
+      "classification": "COMPILE_PIN_THEN_SIGNED_STARTUP",
+      "paths": ["apps/desktop/src/main/main.ts", "config/32-r-ppk-022-capability-surface-manifest.json"],
+      "control": "Core Service el sıkışmasından önce gereken Desktop dosya bootstrap ve authenticated yerel bağlantı network capability'leri sabit üretim baseline'ına pinlenir; çalışma devamı signed startup coverage sonrasındadır.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "root-build-hooks-and-combined-policy-gate",
+      "classification": "PRETYPECHECK_PREBUILD_FAIL_GATE",
+      "paths": ["package.json", "scripts/verify-platform-policy-gate.mjs"],
+      "control": "Capability AST gate root pretypecheck, prebuild ve birleşik Platform Policy gate zincirlerinde zorunludur.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "content-free-no-cache-status-boundary",
+      "classification": "ZERO_ARGUMENT_STATUS_IPC",
+      "paths": ["packages/application/src/platform-capability-manifest-gate-use-cases.ts", "apps/desktop/src/main/preload.ts", "apps/desktop/src/main/ipc-read-sharing.ts", "apps/desktop/src/renderer/App.tsx"],
+      "control": "Renderer yalnız sabit aile ve sayaç özetini alır; kaynak yolu ve manifest hash'i taşınmaz, IPC sıfır argümanlıdır ve cache edilmez.",
+      "disposition": "IMPLEMENTED"
+    }
+  ],
+  "closureSummary": {
+    "reviewedProductionSourceZones": 18,
+    "reviewedProductionFiles": 355,
+    "reviewedCapabilitySurfaces": 237,
+    "exactManifestEntries": 237,
+    "undeclaredCapabilities": 0,
+    "unexpectedApplicationCapabilities": 0,
+    "wildcardEntries": 0,
+    "parseFailures": 0,
+    "staleEntries": 0,
+    "openBlockerCount": 0,
+    "openBlockers": [],
+    "finalValidationPending": false
+  }
+}

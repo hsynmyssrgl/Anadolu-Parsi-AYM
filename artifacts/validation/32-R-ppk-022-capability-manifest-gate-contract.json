@@ -1,0 +1,471 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-R",
+  "requirement": "PPK-022",
+  "phase": "CAPABILITY_MANIFEST_BUILD_RUNTIME_GATE_CONTRACT",
+  "status": "PASS",
+  "checkCount": 108,
+  "passed": 108,
+  "failed": 0,
+  "failures": [],
+  "checks": [
+    {
+      "name": "scope identity is exact",
+      "passed": true
+    },
+    {
+      "name": "inventory identity is exact",
+      "passed": true
+    },
+    {
+      "name": "surface manifest identity is exact",
+      "passed": true
+    },
+    {
+      "name": "accepted registry contains PPK-022",
+      "passed": true
+    },
+    {
+      "name": "PPK-012 through PPK-021 remain complete",
+      "passed": true
+    },
+    {
+      "name": "PPK-023 remains a distinct successor requirement",
+      "passed": true
+    },
+    {
+      "name": "AST parser dependency remains exact",
+      "passed": true
+    },
+    {
+      "name": "lockfile root records exact AST parser",
+      "passed": true
+    },
+    {
+      "name": "installed AST parser is locked",
+      "passed": true
+    },
+    {
+      "name": "manifest is exact default deny",
+      "passed": true
+    },
+    {
+      "name": "manifest requires signed runtime check without static authority",
+      "passed": true
+    },
+    {
+      "name": "manifest binds eighteen production zones",
+      "passed": true
+    },
+    {
+      "name": "manifest contains exactly 237 unique surfaces",
+      "passed": true
+    },
+    {
+      "name": "manifest surface keys are stable sorted",
+      "passed": true
+    },
+    {
+      "name": "manifest contains no wildcard keys",
+      "passed": true
+    },
+    {
+      "name": "manifest entries have exact schema",
+      "passed": true
+    },
+    {
+      "name": "manifest entries bind valid runtime capabilities",
+      "passed": true
+    },
+    {
+      "name": "manifest entries bind canonical sorted applications",
+      "passed": true
+    },
+    {
+      "name": "manifest surface counts are exact",
+      "passed": true
+    },
+    {
+      "name": "manifest hash binds scope and inventory",
+      "passed": true
+    },
+    {
+      "name": "application registry lists all fourteen exact profiles",
+      "passed": true
+    },
+    {
+      "name": "only two deployed applications hold capabilities",
+      "passed": true
+    },
+    {
+      "name": "only file and network are deployed",
+      "passed": true
+    },
+    {
+      "name": "bootstrap entries are bounded and Desktop-owned",
+      "passed": true
+    },
+    {
+      "name": "manifest preserves no-transfer ownership invariants",
+      "passed": true
+    },
+    {
+      "name": "production capability gate passes",
+      "passed": true
+    },
+    {
+      "name": "gate scans all current production sources",
+      "passed": true
+    },
+    {
+      "name": "gate and manifest cardinality are exact",
+      "passed": true
+    },
+    {
+      "name": "gate manifest hash matches canonical file",
+      "passed": true
+    },
+    {
+      "name": "gate reports seven families and fourteen applications",
+      "passed": true
+    },
+    {
+      "name": "gate executes malicious and benign self tests",
+      "passed": true
+    },
+    {
+      "name": "gate reports exact bootstrap and surface counts",
+      "passed": true
+    },
+    {
+      "name": "scanner uses TypeScript JSX AST",
+      "passed": true
+    },
+    {
+      "name": "scanner covers seven resource capability families",
+      "passed": true
+    },
+    {
+      "name": "scanner covers static dynamic require and builtin imports",
+      "passed": true
+    },
+    {
+      "name": "scanner covers protected re-export and TypeScript import equals",
+      "passed": true
+    },
+    {
+      "name": "scanner covers createRequire aliases",
+      "passed": true
+    },
+    {
+      "name": "scanner rejects unresolved dynamic resource imports",
+      "passed": true
+    },
+    {
+      "name": "scanner tracks aliases computed APIs and browser globals",
+      "passed": true
+    },
+    {
+      "name": "scanner covers destructuring assignment and Reflect invocation aliases",
+      "passed": true
+    },
+    {
+      "name": "scanner covers JSX file and capture inputs",
+      "passed": true
+    },
+    {
+      "name": "scanner covers camera microphone and desktop capture APIs",
+      "passed": true
+    },
+    {
+      "name": "scanner covers Electron file and network APIs",
+      "passed": true
+    },
+    {
+      "name": "scanner covers geolocation OCR and AI aliases",
+      "passed": true
+    },
+    {
+      "name": "gate rejects malformed duplicate new stale and wildcard entries",
+      "passed": true
+    },
+    {
+      "name": "gate binds exact application ownership by source prefix",
+      "passed": true
+    },
+    {
+      "name": "gate binds exact bootstrap versus signed-startup enforcement stage",
+      "passed": true
+    },
+    {
+      "name": "gate rejects exact application baseline drift",
+      "passed": true
+    },
+    {
+      "name": "gate self-tests all seven families and dynamic escape",
+      "passed": true
+    },
+    {
+      "name": "root pretypecheck includes capability gate",
+      "passed": true
+    },
+    {
+      "name": "root prebuild includes capability gate before governed preflight",
+      "passed": true
+    },
+    {
+      "name": "combined platform policy gate invokes capability gate",
+      "passed": true
+    },
+    {
+      "name": "root package exposes all four PPK-022 commands",
+      "passed": true
+    },
+    {
+      "name": "kernel declares seven exact runtime capability values",
+      "passed": true
+    },
+    {
+      "name": "kernel manifest includes runtime capabilities",
+      "passed": true
+    },
+    {
+      "name": "kernel hash canonicalizes runtime capabilities",
+      "passed": true
+    },
+    {
+      "name": "kernel rejects invalid runtime capability registry",
+      "passed": true
+    },
+    {
+      "name": "kernel includes manifests in signed policy payload",
+      "passed": true
+    },
+    {
+      "name": "policy binds fourteen exact application requirements",
+      "passed": true
+    },
+    {
+      "name": "policy validates exact authority and request schemas",
+      "passed": true
+    },
+    {
+      "name": "policy rejects unverified package and all identity mismatches",
+      "passed": true
+    },
+    {
+      "name": "policy rejects undeclared missing and unexpected capability",
+      "passed": true
+    },
+    {
+      "name": "policy exact coverage verifies missing and broadening",
+      "passed": true
+    },
+    {
+      "name": "policy snapshot is exact and denies static authority inference",
+      "passed": true
+    },
+    {
+      "name": "policy pins pre-handshake file and network bootstrap capabilities",
+      "passed": true
+    },
+    {
+      "name": "platform policy exports capability policy",
+      "passed": true
+    },
+    {
+      "name": "Core Service config uses exact shared baseline",
+      "passed": true
+    },
+    {
+      "name": "Core Service verifies signed package coverage before server construction",
+      "passed": true
+    },
+    {
+      "name": "Core Service fails closed on missing or denied manifest",
+      "passed": true
+    },
+    {
+      "name": "Desktop startup reads only authenticated Core Service authority",
+      "passed": true
+    },
+    {
+      "name": "Desktop startup verifies package and application versions first",
+      "passed": true
+    },
+    {
+      "name": "real Desktop startup runtime fixture carries exact signed capabilities",
+      "passed": true
+    },
+    {
+      "name": "Desktop bootstrap pins file and network capabilities before operational startup",
+      "passed": true
+    },
+    {
+      "name": "domain boundary is fixed and content free",
+      "passed": true
+    },
+    {
+      "name": "domain exports capability gate boundary",
+      "passed": true
+    },
+    {
+      "name": "application use case verifies policy snapshot",
+      "passed": true
+    },
+    {
+      "name": "application boundary preserves no migration truth",
+      "passed": true
+    },
+    {
+      "name": "application exports capability gate use case",
+      "passed": true
+    },
+    {
+      "name": "policy tests cover signed hash and seven families",
+      "passed": true
+    },
+    {
+      "name": "policy tests cover malformed unverified and identity mismatch",
+      "passed": true
+    },
+    {
+      "name": "policy tests cover missing unexpected and tampered capability",
+      "passed": true
+    },
+    {
+      "name": "AST tests cover all seven resource families",
+      "passed": true
+    },
+    {
+      "name": "AST tests cover exact production and drift denial",
+      "passed": true
+    },
+    {
+      "name": "integration tests bind runtime startup and bootstrap",
+      "passed": true
+    },
+    {
+      "name": "main composes exact capability policy and status use case",
+      "passed": true
+    },
+    {
+      "name": "main registers exact status handler",
+      "passed": true
+    },
+    {
+      "name": "preload exposes exact status channel",
+      "passed": true
+    },
+    {
+      "name": "renderer type exposes exact status method",
+      "passed": true
+    },
+    {
+      "name": "IPC integration accepts only zero arguments",
+      "passed": true
+    },
+    {
+      "name": "IPC sharing marks status no-cache",
+      "passed": true
+    },
+    {
+      "name": "renderer explains seven families and runtime authority truth",
+      "passed": true
+    },
+    {
+      "name": "renderer does not expose source or manifest hash material",
+      "passed": true
+    },
+    {
+      "name": "scope records all seven exact protected families",
+      "passed": true
+    },
+    {
+      "name": "scope records exact signed runtime authority chain",
+      "passed": true
+    },
+    {
+      "name": "scope denies missing unexpected malformed and unverified authority",
+      "passed": true
+    },
+    {
+      "name": "scope preserves offline cache and no-cache fences",
+      "passed": true
+    },
+    {
+      "name": "scope records no persistence transfer or cutover",
+      "passed": true
+    },
+    {
+      "name": "inventory has eight implemented controls",
+      "passed": true
+    },
+    {
+      "name": "inventory has zero findings and blockers",
+      "passed": true
+    },
+    {
+      "name": "decision records AST signed runtime and authority separation",
+      "passed": true
+    },
+    {
+      "name": "threat model covers all primary resource and manifest evasions",
+      "passed": true
+    },
+    {
+      "name": "master register contains DEC-203",
+      "passed": true
+    },
+    {
+      "name": "decision ledger contains active DEC-203",
+      "passed": true
+    },
+    {
+      "name": "database migration remains 77",
+      "passed": true
+    },
+    {
+      "name": "accepted registry closes complete PPK-022 evidence chain",
+      "passed": true
+    },
+    {
+      "name": "scope closes PPK-022 with no migration transfer or cutover",
+      "passed": true
+    },
+    {
+      "name": "inventory closes only after final validation",
+      "passed": true
+    },
+    {
+      "name": "audit closes only with final contract and runtime evidence",
+      "passed": true
+    }
+  ],
+  "protectedCapabilityFamilies": 7,
+  "canonicalApplications": 14,
+  "productionSourceZones": 18,
+  "scannedProductionFiles": 355,
+  "exactCapabilitySurfaces": 237,
+  "exactManifestEntries": 237,
+  "exactManifestSha256": "f51bad1cac6f8bdc97fa2559ce10a5a65198fd705cf414d7d29af94948708cbf",
+  "pinnedBootstrapSurfaces": 26,
+  "maliciousAstSelfTests": 33,
+  "benignAstSelfTests": 5,
+  "gateFindings": 0,
+  "signedManifestHashBindingRequired": true,
+  "authenticatedRuntimeAuthorityRequired": true,
+  "exactRuntimeCoverageRequired": true,
+  "buildManifestAloneGrantsRuntimeAuthority": false,
+  "schemaMigrationRequired": false,
+  "latestDatabaseMigration": 77,
+  "historicalBackfillPerformed": false,
+  "legacyDesktopVaultPreserved": true,
+  "sqliteOwnershipTransferred": false,
+  "realDataTransferPerformed": false,
+  "cutoverAuthorityAttached": false,
+  "successorRequirementCompletedByThisPackage": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-12T02:01:01.931Z"
+}

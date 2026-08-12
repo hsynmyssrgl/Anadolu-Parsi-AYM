@@ -37,6 +37,8 @@ PPK-021; doğrudan SQL/SQLite, concrete repository/database, kripto, network, ro
 
 Root lifecycle doğrulaması sırasında PPK-019 `data-lifecycle-repository` içindeki salt okunur derived-policy metadata owner envanteri, eski PPK-016 source gate tarafından SQL sahibi sanılmıştır. Gate yalnız exact `DERIVED_POLICY_METADATA_TABLES` registry literalini kabul edecek biçimde daraltıldı; aynı dosyadaki gerçek `DELETE FROM derived_data_policy_*` kötü niyetli self-testte hâlâ fail-closed reddedilir. Persistence yetkisi veya doğrudan SQL istisnası eklenmemiştir.
 
+PPK-022 ardıl entegrasyonu `GetPlatformCapabilityManifestGateBoundaryUseCase` composition yüzeyini exact manifest ratchet'ine eklemiştir. Güncel PPK-021 gate durumu `18 zone / 355 dosya / 513 exact yüzey / 0 bulgu PASS` olup tarihsel 32-Q kapanış matrisi 512 yüzey olarak korunur.
+
 ## Güvenlik gerçeği
 
 Allowlist girdisi runtime capability veya erişim yetkisi değildir. AST build gate; Platform Policy Kernel, current PEP, signed receipt, obligation, repository transaction ve policy-sensitive no-cache kontrollerinin yerini almaz. Kaynak yolları, allowlist anahtarları ve manifest hash'i renderer'a açılmaz.

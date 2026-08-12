@@ -3,7 +3,13 @@ import { isAbsolute, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { asCorrelationId, asIsoDateTime } from '@ppt/core';
 import { writeContentFreeConsoleEvent, type LogLevel } from '@ppt/logging';
-import { PlatformPolicyKernel } from '@ppt/platform-policy';
+import {
+  PLATFORM_APPLICATION_IDS,
+  PLATFORM_APPLICATION_RUNTIME_CAPABILITY_REQUIREMENTS,
+  PlatformCapabilityManifestPolicy,
+  PlatformPolicyKernel,
+  createPlatformCapabilityManifestAuthority
+} from '@ppt/platform-policy';
 import { CORE_SERVICE_APPLICATION_API_VERSION } from '@ppt/core-service-contracts';
 import { CoreServiceLocalAdminServer } from './local-admin-server.js';
 import { CoreServiceRuntime } from './core-service-runtime.js';
@@ -137,10 +143,25 @@ export class CoreServiceProcessHost {
         'backup-worker': [],
         'signed-plugin': []
       },
+      applicationRuntimeCapabilities: PLATFORM_APPLICATION_RUNTIME_CAPABILITY_REQUIREMENTS,
       consentRequiredCapabilities: ['archive.ocr','ai.process','translation.process','communication.record','location.share'],
       onlineOnlyCapabilities: ['communication.call','communication.record','cluster.admin'],
       writeActions: ['create','update','delete','share','record','administer']
     });
+    const capabilityManifestPolicy = new PlatformCapabilityManifestPolicy();
+    for (const applicationId of PLATFORM_APPLICATION_IDS) {
+      const manifest = kernel.policyPackage.payload.applicationManifests[applicationId];
+      if (!manifest) throw new Error(`Core Service signed capability manifest is missing: ${applicationId}`);
+      const coverage = capabilityManifestPolicy.evaluateCoverage(applicationId, createPlatformCapabilityManifestAuthority({
+        source: 'core-service-kernel',
+        policyPackageVerified: kernel.verifyPolicyPackage(kernel.policyPackage),
+        policyPackageSha256: kernel.policyPackage.payloadSha256,
+        manifest
+      }));
+      if (!coverage.allowed) {
+        throw new Error(`Core Service runtime capability coverage denied: ${applicationId}:${coverage.reason}`);
+      }
+    }
     const policyJournalMonotonicAuthority = new CoreServicePolicyJournalMonotonicAuthority({
       filePath: configuration.policyJournalAuthorityPath,
       authorityKey: configuration.policySigningKey

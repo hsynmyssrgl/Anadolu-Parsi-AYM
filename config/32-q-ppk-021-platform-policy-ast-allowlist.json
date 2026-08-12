@@ -59,7 +59,7 @@
     "SQL_CALL": 56,
     "SQL_CONSTRUCTOR": 2,
     "SQL_IMPORT": 2,
-    "USE_CASE_COMPOSITION": 250
+    "USE_CASE_COMPOSITION": 251
   },
   "allowedSurfaceKeys": [
     "CRYPTO_GLOBAL|apps/desktop/src/main/preload.ts|randomUUID",
@@ -569,6 +569,7 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/desktop-universal-api-policy-enforcement.ts|GetClientDataAccessBoundaryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/governed-network-egress-use-case.ts|GovernedRevocationListFetchUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetDerivedDataPolicyBoundaryUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetPlatformCapabilityManifestGateBoundaryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetPlatformPolicyAstGateBoundaryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetPolicyConformanceSuiteBoundaryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetPolicyDecisionAuditBoundaryUseCase",

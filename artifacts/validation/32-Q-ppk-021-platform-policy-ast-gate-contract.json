@@ -30,7 +30,7 @@
       "passed": true
     },
     {
-      "name": "PPK-022 remains outside PPK-021 closure",
+      "name": "PPK-022 remains a distinct successor requirement",
       "passed": true
     },
     {
@@ -54,7 +54,7 @@
       "passed": true
     },
     {
-      "name": "manifest contains exactly 512 surfaces",
+      "name": "manifest contains exactly 513 surfaces",
       "passed": true
     },
     {
@@ -282,7 +282,7 @@
       "passed": true
     },
     {
-      "name": "scope records six rules and 512 exact surfaces",
+      "name": "scope records six rules and 513 exact surfaces",
       "passed": true
     },
     {
@@ -346,10 +346,10 @@
   "sourceGate": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 352,
-    "privilegedSurfaces": 512,
-    "exactAllowlistEntries": 512,
-    "exactAllowlistSha256": "60452048dfcb541d8702ecf86dc451ff4ae99a68d43d5a085e15333ff5242cb5",
+    "scannedFiles": 355,
+    "privilegedSurfaces": 513,
+    "exactAllowlistEntries": 513,
+    "exactAllowlistSha256": "de2634efa3ea011757c57b10d67c46e0d19a05a4b189e8bb7bb13b2923ededb0",
     "surfaceCounts": {
       "CRYPTO_GLOBAL": 2,
       "CRYPTO_IMPORT": 124,
@@ -360,7 +360,7 @@
       "SQL_CALL": 56,
       "SQL_CONSTRUCTOR": 2,
       "SQL_IMPORT": 2,
-      "USE_CASE_COMPOSITION": 250
+      "USE_CASE_COMPOSITION": 251
     },
     "maliciousSelfTestAssertions": 17,
     "benignSelfTestAssertions": 4,
@@ -368,8 +368,8 @@
     "findings": []
   },
   "protectedRuleCount": 6,
-  "exactAllowlistEntries": 512,
-  "exactAllowlistSha256": "60452048dfcb541d8702ecf86dc451ff4ae99a68d43d5a085e15333ff5242cb5",
+  "exactAllowlistEntries": 513,
+  "exactAllowlistSha256": "de2634efa3ea011757c57b10d67c46e0d19a05a4b189e8bb7bb13b2923ededb0",
   "directRoleAuthorizationBypasses": 0,
   "syntaxModel": "TYPESCRIPT_AST",
   "regexOnlyGateAccepted": false,
@@ -383,5 +383,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-12T00:52:59.716Z"
+  "generatedAt": "2026-08-12T01:51:05.056Z"
 }

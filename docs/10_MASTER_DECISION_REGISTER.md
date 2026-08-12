@@ -28,6 +28,10 @@ Bir çelişki olduğunda aşağıdaki sıra uygulanır:
 Eski kararlar silinmez; tarihsel kanıt olarak korunur. Ancak aktif ürün davranışını
 belirleyemez. Çelişki sessizce birleştirilmez; değişiklik kaydına işlenir.
 
+## DEC-203 — PPK-022 imzalı capability manifest build/runtime kapısı
+
+32-R ile kamera, mikrofon, dosya, OCR, AI, konum ve ağ kaynakları TypeScript/JSX AST üzerinde exact kaynak yüzeyi manifestine; çalışma zamanında ise imzalı uygulama manifestindeki exact capability kümesine bağlanır. On dört kanonik uygulama eksiksiz listelenir; yalnız deployed Windows Desktop ve Windows Core Service `file.access` ile `network.access` taşır, diğer profiller boş ve yetkisizdir. Eksik, beklenmeyen, bozuk, hash/paket/uygulama/sürüm uyuşmazlıklı veya doğrulanmamış manifest fail-closed reddedilir. Desktop’ın Core Service el sıkışmasından önceki dosya bootstrap’ı ayrı sabit pin ile sınırlıdır; build manifesti tek başına runtime yetkisi değildir. Yeni migration, veri taşıma, backfill, cutover veya SQLite/vault sahiplik değişimi yoktur. Ayrıntılı karar `docs/decisions/DEC-203-ppk-022-capability-manifest-build-runtime-gate.md` dosyasındadır.
+
 ## DEC-202 — PPK-021 AST tabanlı fail-closed Platform Policy build kapısı
 
 32-Q ile üretim TypeScript/JSX ağacındaki doğrudan SQL/SQLite, concrete repository/database, kripto, network, rol yetkilendirmesi ve use-case composition yüzeyleri `@babel/parser` AST üzerinde exact dosya+sembol manifestine bağlanır. Alias, destructuring, computed property, dynamic import, require ve `Reflect.construct` kaçışları taranır; parse hatası, wildcard, yeni veya stale yüzey build'i durdurur. Direct role authorization sıfır istisnalıdır; renderer rol koşulu yalnız presentation'dır. Gate runtime PEP/receipt/policy yerine geçmez. Yeni migration, veri taşıma, backfill, cutover veya SQLite/vault sahiplik değişimi yoktur. Ayrıntılı karar `docs/decisions/DEC-202-ppk-021-platform-policy-ast-fail-gate.md` dosyasındadır.

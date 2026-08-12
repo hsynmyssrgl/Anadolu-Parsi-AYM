@@ -13,7 +13,7 @@ const root=await mkdtemp(join(tmpdir(),'ppt-desktop-core-startup-'));
 const endpoint=process.platform==='win32'?'\\\\.\\pipe\\ppt-desktop-core-startup-'+process.pid+'-'+Date.now():join(root,'core.sock');
 const token=randomBytes(48).toString('base64url');
 const policyVersion='PPT-PLATFORM-POLICY-2026-08-04-V1';
-const kernel=new PlatformPolicyKernel({policyVersion,signingKey:randomBytes(32),applicationVersions:{'windows-desktop':'v1','windows-core-service':'v1'},applicationCapabilities:{'windows-desktop':['family.read'],'windows-core-service':['health.read']},consentRequiredCapabilities:[],onlineOnlyCapabilities:[],writeActions:['create','update','delete']});
+const kernel=new PlatformPolicyKernel({policyVersion,signingKey:randomBytes(32),applicationVersions:{'windows-desktop':'v1','windows-core-service':'v1'},applicationCapabilities:{'windows-desktop':['family.read'],'windows-core-service':['health.read']},applicationRuntimeCapabilities:{'windows-desktop':['file.access','network.access'],'windows-core-service':['file.access','network.access']},consentRequiredCapabilities:[],onlineOnlyCapabilities:[],writeActions:['create','update','delete']});
 const runtime=new CoreServiceRuntime({policyKernel:kernel,policyVersion});runtime.markReady('standalone');
 const server=new CoreServiceLocalAdminServer({endpoint,authenticationToken:token,runtime});
 await server.start();
@@ -23,6 +23,7 @@ try{
  const connection=await connectCoreServiceAtStartup({authorityPath:'/protected/core-service.pptsecret',authorityReader:reader,platform:process.platform});
  check(connection.health.lifecycle==='ready','ready Core Service handshake did not return ready lifecycle');
  check(connection.health.policyVersion===policyVersion,'ready Core Service handshake returned wrong policy version');
+ check(connection.health.policyPackage.payload.applicationManifests['windows-desktop']?.runtimeCapabilities.join('|')==='file.access|network.access','startup did not preserve exact signed Desktop runtime capability coverage');
  check(connection.health.writable===true,'standalone ready Core Service should be writable');
  check(connection.apiBoundary.enforcement==='fail-closed'&&connection.apiBoundary.apiVersion==='v1','startup did not verify the versioned API posture');
  check(connection.apiBoundary.serverApplicationId==='windows-core-service'&&connection.apiBoundary.allowedClientApplicationIds.length===1&&connection.apiBoundary.allowedClientApplicationIds[0]==='windows-desktop','startup did not bind Core Service and Desktop application identities');
