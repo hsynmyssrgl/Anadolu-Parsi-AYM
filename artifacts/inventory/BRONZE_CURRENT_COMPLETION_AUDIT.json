@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-12T21:53:45.578Z",
+  "generatedAt": "2026-08-12T23:01:14.119Z",
   "release": "Bronze 04.08.2026.29",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
@@ -15,7 +15,7 @@
   "PPK011": "COMPLETE",
   "PPK012": "COMPLETE",
   "authoritativeSource": "06_KOD/app",
-  "currentStep": "33-F",
+  "currentStep": "33-G",
   "status": "PASS_WITH_OPEN_SCOPE",
   "numberingAssessment": {
     "status": "CORRECT_ONLY_WITH_GATED_APPEND_ONLY_NUMBERING",
@@ -29,17 +29,17 @@
   "percentages": {
     "officialWeightedBronzePercent": 25,
     "officialWeightedEvidenceStep": "31-T",
-    "strictRequirementCompletionPercent": 18.2857,
-    "implementationChainCoveragePercent": 18.7714,
-    "governanceEvidenceChainCoveragePercent": 54,
+    "strictRequirementCompletionPercent": 19.4286,
+    "implementationChainCoveragePercent": 19.9143,
+    "governanceEvidenceChainCoveragePercent": 54.4762,
     "interpretation": "These are separate measures and must not be blended into an invented single completion claim."
   },
   "scope": {
     "total": 350,
     "statusCounts": {
-      "COMPLETE": 64,
+      "COMPLETE": 68,
       "FOUNDATION_STARTED": 1,
-      "NOT_IMPLEMENTED": 259,
+      "NOT_IMPLEMENTED": 255,
       "PARTIAL": 26
     },
     "priorityCounts": {
@@ -48,21 +48,21 @@
       "P2": 5
     },
     "completeByPriority": {
-      "P0": 53,
-      "P1": 11,
+      "P0": 56,
+      "P1": 12,
       "P2": 0
     },
-    "incompleteCount": 286,
-    "strictComplete": 64,
+    "incompleteCount": 282,
+    "strictComplete": 68,
     "implementationCoverage": {
-      "passed": 657,
+      "passed": 697,
       "total": 3500,
-      "percent": 18.7714
+      "percent": 19.9143
     },
     "governanceCoverage": {
-      "passed": 567,
+      "passed": 572,
       "total": 1050,
-      "percent": 54
+      "percent": 54.4762
     }
   },
   "rules": {
@@ -416,11 +416,43 @@
         ]
       },
       {
+        "script": "scripts/verify-family-emergency-planning-boundary.mjs",
+        "exitCode": 0,
+        "status": "PASS",
+        "tail": [
+          "Family emergency planning boundary: PASS (49/49 checks)."
+        ]
+      },
+      {
+        "script": "scripts/verify-33-g-family-emergency-planning-contract.mjs",
+        "exitCode": 0,
+        "status": "PASS",
+        "tail": [
+          "Family emergency planning contract: PASS (15/15 checks)."
+        ]
+      },
+      {
+        "script": "scripts/verify-33-g-family-emergency-planning-runtime.mjs",
+        "exitCode": 0,
+        "status": "PASS",
+        "tail": [
+          "Family emergency planning runtime: PASS (11/11 checks)."
+        ]
+      },
+      {
+        "script": "scripts/verify-33-g-family-emergency-planning-completion.mjs",
+        "exitCode": 0,
+        "status": "PASS",
+        "tail": [
+          "33-G completion verification: PASS (64/64; local archive readback included)."
+        ]
+      },
+      {
         "script": "scripts/verify-step-checkpoint-gate.mjs",
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "Step Checkpoint Gate: PASS (1946 checks / current 33-F)."
+          "Step Checkpoint Gate: PASS (1972 checks / current 33-G)."
         ]
       }
     ],
@@ -1094,7 +1126,7 @@
     "freshnessVerifier": "scripts/generate-current-delivery-report.mjs invokes local and external live source-protection verification",
     "officialCompletionClaimed": true,
     "storageBackend": "EXTERNAL_USB_D_DRIVE",
-    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\e8bed366b873f5694139ba472ad0933c6ec0b98e2bcd1e149c11dcc0fee60946"
+    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\5e88d6b82ac5c23131af5e08bcabb1042dbe5e12423209ea31d444d3e37bf0ab"
   },
   "remainingWork": [
     {
@@ -1725,52 +1757,6 @@
       ]
     },
     {
-      "id": "EXT-009",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "DISASTER_EMERGENCY",
-      "title": "Aile afet ve tahliye planı",
-      "completedChainCount": 2,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "evidence"
-      ]
-    },
-    {
-      "id": "EXT-010",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "DISASTER_EMERGENCY",
-      "title": "Buluşma noktaları ve şehir dışı irtibat",
-      "completedChainCount": 2,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "evidence"
-      ]
-    },
-    {
       "id": "EXT-011",
       "priority": "P0",
       "status": "NOT_IMPLEMENTED",
@@ -1800,29 +1786,6 @@
       "workOrderClass": "NEW_NOT_STARTED",
       "area": "DISASTER_EMERGENCY",
       "title": "Çevrimdışı acil sağlık ve iletişim kartı",
-      "completedChainCount": 2,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "evidence"
-      ]
-    },
-    {
-      "id": "EXT-013",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "DISASTER_EMERGENCY",
-      "title": "İyiyim/yardım lazım aile durum bildirimi",
       "completedChainCount": 2,
       "completionBlockers": [],
       "missingChain": [
@@ -6830,30 +6793,6 @@
       "workOrderClass": "NEW_NOT_STARTED",
       "area": "Sağlık ve Yaşam",
       "title": "Harita, kayıtlı yerler ve çevrimdışı fallback",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B5-07",
-      "priority": "P1",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Sağlık ve Yaşam",
-      "title": "Aile acil durum planı, buluşma noktası, kontrol listesi ve kişi durumu",
       "completedChainCount": 1,
       "completionBlockers": [],
       "missingChain": [

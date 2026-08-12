@@ -1,12 +1,12 @@
 # Bronze guncel tamamlama denetimi
 
-Olusturma (UTC): 2026-08-12T21:53:45.578Z
+Olusturma (UTC): 2026-08-12T23:01:14.119Z
 
 ## Sonuc
 
 - Denetim durumu: **PASS_WITH_OPEN_SCOPE**
 - Yetkili kaynak: `06_KOD/app`
-- Guncel adim: **33-F**
+- Guncel adim: **33-G**
 - PPK-002: **COMPLETE**
 - PPK-003: **COMPLETE**
 - PPK-004: **COMPLETE**
@@ -23,19 +23,19 @@ Olusturma (UTC): 2026-08-12T21:53:45.578Z
 ## Yuzde gercekligi
 
 - Resmi agirlikli Bronze ilerlemesi: **%25**
-- Kati gereksinim kapanisi: **%18.2857** (64/350)
-- Uygulama zinciri kapsami: **%18.7714**
-- Yonetisim ve kanit zinciri kapsami: **%54**
+- Kati gereksinim kapanisi: **%19.4286** (68/350)
+- Uygulama zinciri kapsami: **%19.9143**
+- Yonetisim ve kanit zinciri kapsami: **%54.4762**
 
 Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 
 ## Kapsam durumu
 
-- COMPLETE: 64
+- COMPLETE: 68
 - PARTIAL: 26
 - FOUNDATION_STARTED: 1
-- NOT_IMPLEMENTED: 259
-- Toplam acik gereksinim: 286
+- NOT_IMPLEMENTED: 255
+- Toplam acik gereksinim: 282
 
 ## Kural ve kapilar
 
@@ -266,9 +266,9 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | B6-06 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | AI, Miras ve Entegrasyon | Apple/Google/Microsoft Authorization Code+PKCE+state+nonce+token vault |
 | B8-05 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Dayanıklılık ve Windows | 10k kişi/100k olay/10k belge metadata senaryosu ve 7 günlük soak hedefi |
 | DHA-025 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Observability | Yerel-first metrics, traces, structured logs ve correlationId |
-| EXT-009 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | DISASTER_EMERGENCY | Aile afet ve tahliye planı |
-| EXT-010 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | DISASTER_EMERGENCY | Buluşma noktaları ve şehir dışı irtibat |
 | EXT-011 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | DISASTER_EMERGENCY | İlk 72 saat/afet çantası envanteri |
+| EXT-012 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | DISASTER_EMERGENCY | Çevrimdışı acil sağlık ve iletişim kartı |
+| EXT-014 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | DISASTER_EMERGENCY | Engelli/ileri yaş/evcil hayvan özel yardım planı |
 
 Tam acik-is listesi `artifacts/inventory/BRONZE_CURRENT_COMPLETION_AUDIT.json` icindedir.
 
