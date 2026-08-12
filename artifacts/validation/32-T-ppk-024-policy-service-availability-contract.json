@@ -1,0 +1,324 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-T",
+  "requirement": "PPK-024",
+  "phase": "POLICY_SERVICE_AVAILABILITY_CONTRACT",
+  "status": "PASS",
+  "checkCount": 71,
+  "passed": 71,
+  "failed": 0,
+  "failures": [],
+  "checks": [
+    {
+      "name": "scope identity is exact",
+      "passed": true
+    },
+    {
+      "name": "inventory identity is exact",
+      "passed": true
+    },
+    {
+      "name": "accepted registry contains PPK-024",
+      "passed": true
+    },
+    {
+      "name": "PPK-023 predecessor remains complete",
+      "passed": true
+    },
+    {
+      "name": "PPK-025 remains a separate unfinished successor",
+      "passed": true
+    },
+    {
+      "name": "DEC-205 is active and decision count is exact",
+      "passed": true
+    },
+    {
+      "name": "master decision register contains DEC-205",
+      "passed": true
+    },
+    {
+      "name": "source gate scans clean production boundary",
+      "passed": true
+    },
+    {
+      "name": "source gate covers eighteen production zones",
+      "passed": true
+    },
+    {
+      "name": "source gate has exact canonical reference coverage",
+      "passed": true
+    },
+    {
+      "name": "source gate denies legacy and broad model escapes",
+      "passed": true
+    },
+    {
+      "name": "combined platform policy gate invokes availability gate",
+      "passed": true
+    },
+    {
+      "name": "policy pins exact freshness thresholds",
+      "passed": true
+    },
+    {
+      "name": "policy has exact read-write read-only deny modes",
+      "passed": true
+    },
+    {
+      "name": "policy denies unavailable malformed and invalid signature",
+      "passed": true
+    },
+    {
+      "name": "policy denies version and hash mismatch",
+      "passed": true
+    },
+    {
+      "name": "policy denies stale future not-ready and unsafe states",
+      "passed": true
+    },
+    {
+      "name": "policy separates sensitive read and mutation operation gate",
+      "passed": true
+    },
+    {
+      "name": "policy snapshot denies mapping and historical authority",
+      "passed": true
+    },
+    {
+      "name": "platform policy exports canonical availability exactly once",
+      "passed": true
+    },
+    {
+      "name": "domain boundary is content free and non-authoritative",
+      "passed": true
+    },
+    {
+      "name": "domain exports availability boundary",
+      "passed": true
+    },
+    {
+      "name": "application catches observer failure as unavailable",
+      "passed": true
+    },
+    {
+      "name": "application asserts operation before callback",
+      "passed": true
+    },
+    {
+      "name": "application publishes a verified content-free boundary",
+      "passed": true
+    },
+    {
+      "name": "application exports availability use cases",
+      "passed": true
+    },
+    {
+      "name": "Core health contract exposes verification and observation time",
+      "passed": true
+    },
+    {
+      "name": "Core state exposes verification and observation time",
+      "passed": true
+    },
+    {
+      "name": "Core runtime uses actual kernel HMAC self-verification",
+      "passed": true
+    },
+    {
+      "name": "Core runtime fails authorization closed when unavailable or invalid",
+      "passed": true
+    },
+    {
+      "name": "Core degraded mutation returns signed cluster non-writable decision path",
+      "passed": true
+    },
+    {
+      "name": "Desktop live observer calls authenticated health every observation",
+      "passed": true
+    },
+    {
+      "name": "Desktop live observer uses startup package only as exact pin",
+      "passed": true
+    },
+    {
+      "name": "Core application adapter exposes live observation to PEP",
+      "passed": true
+    },
+    {
+      "name": "startup validates hash and availability before connection",
+      "passed": true
+    },
+    {
+      "name": "universal gate keeps one exact status exception",
+      "passed": true
+    },
+    {
+      "name": "universal gate runs availability before bootstrap",
+      "passed": true
+    },
+    {
+      "name": "universal gate restricts caches and asserts bootstrap operation",
+      "passed": true
+    },
+    {
+      "name": "PEP has direct live availability defense",
+      "passed": true
+    },
+    {
+      "name": "PEP requires observer only for explicit Core Service provider",
+      "passed": true
+    },
+    {
+      "name": "PEP permits only read on narrowed fence and persists signed deny",
+      "passed": true
+    },
+    {
+      "name": "Desktop composes live observer and cache lock",
+      "passed": true
+    },
+    {
+      "name": "Desktop registers exact zero-argument status handler",
+      "passed": true
+    },
+    {
+      "name": "preload status method is exact zero argument",
+      "passed": true
+    },
+    {
+      "name": "renderer global status method is exact zero argument",
+      "passed": true
+    },
+    {
+      "name": "IPC contract accepts only zero arguments",
+      "passed": true
+    },
+    {
+      "name": "availability status channel is policy-sensitive no-cache",
+      "passed": true
+    },
+    {
+      "name": "renderer shows posture without package hashes",
+      "passed": true
+    },
+    {
+      "name": "policy tests cover exact 30000 and 30001 millisecond boundary",
+      "passed": true
+    },
+    {
+      "name": "policy tests cover exact future-skew boundary and integration covers fail-closed use cases",
+      "passed": true
+    },
+    {
+      "name": "Core tests cover HMAC self-verification and signed non-writable denial",
+      "passed": true
+    },
+    {
+      "name": "Desktop tests cover bootstrap and cache restriction",
+      "passed": true
+    },
+    {
+      "name": "integration tests cover unavailable invalid signature stale and IPC",
+      "passed": true
+    },
+    {
+      "name": "root pretypecheck and prebuild run availability gate",
+      "passed": true
+    },
+    {
+      "name": "root package has exact PPK-024 source gate command",
+      "passed": true
+    },
+    {
+      "name": "root package has exact four-file targeted command",
+      "passed": true
+    },
+    {
+      "name": "root package has exact contract and runtime commands",
+      "passed": true
+    },
+    {
+      "name": "scope records exact fail-closed matrix",
+      "passed": true
+    },
+    {
+      "name": "scope records exact freshness edges",
+      "passed": true
+    },
+    {
+      "name": "scope records exact read-only and read-write boundary",
+      "passed": true
+    },
+    {
+      "name": "scope preserves cache lease and status fences",
+      "passed": true
+    },
+    {
+      "name": "scope and inventory preserve no migration or ownership transfer",
+      "passed": true
+    },
+    {
+      "name": "inventory has eight implemented controls and no open production path",
+      "passed": true
+    },
+    {
+      "name": "decision documents live attestation and exact matrix",
+      "passed": true
+    },
+    {
+      "name": "threat model covers canonical threats and truth boundary",
+      "passed": true
+    },
+    {
+      "name": "database migration remains 77",
+      "passed": true
+    },
+    {
+      "name": "accepted registry closes complete PPK-024 chain",
+      "passed": true
+    },
+    {
+      "name": "scope closes only after final validation",
+      "passed": true
+    },
+    {
+      "name": "inventory closes only after final validation",
+      "passed": true
+    },
+    {
+      "name": "decision and threat model close only after final validation",
+      "passed": true
+    },
+    {
+      "name": "audit closes only with real final evidence",
+      "passed": true
+    }
+  ],
+  "productionSourceZones": 18,
+  "scannedProductionFiles": 362,
+  "securityRelevantFiles": 20,
+  "exactCanonicalReferenceFiles": 17,
+  "canonicalPolicyClassDefinitions": 1,
+  "sourceGateFindings": 0,
+  "targetedTestFiles": 4,
+  "targetedTestsMinimum": 71,
+  "observationMaximumAgeMs": 30000,
+  "maximumFutureSkewMs": 5000,
+  "unavailableInvalidAndStaleSensitiveReadsAllowed": false,
+  "freshVerifiedNonWritableSensitiveReadsAllowed": true,
+  "freshVerifiedNonWritableMutationsAllowed": false,
+  "readOnlyMutationSignedReason": "CLUSTER_NOT_WRITABLE",
+  "historicalReceiptGrantsCurrentAuthority": false,
+  "startupSnapshotGrantsCurrentAuthority": false,
+  "schemaMigrationRequired": false,
+  "latestDatabaseMigration": 77,
+  "historicalBackfillPerformed": false,
+  "realDataTransferPerformed": false,
+  "cutoverPerformed": false,
+  "legacyDesktopVaultPreserved": true,
+  "sqliteOwnershipTransferred": false,
+  "successorRequirementCompletedByThisPackage": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-12T04:13:35.139Z"
+}

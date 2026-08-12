@@ -23,6 +23,7 @@ export * from './policy-conformance-suite-use-cases.js';
 export * from './platform-policy-ast-gate-use-cases.js';
 export * from './platform-capability-manifest-gate-use-cases.js';
 export * from './application-security-profile-gate-use-cases.js';
+export * from './policy-service-availability-use-cases.js';
 export * from './membership-use-cases.js';
 
 export * from './health-use-cases.js';

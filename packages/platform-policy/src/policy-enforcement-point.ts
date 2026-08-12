@@ -22,6 +22,12 @@ import {
   type PolicyObligation,
   type PolicyResource
 } from './policy-kernel.js';
+import {
+  PolicyServiceAvailabilityPolicy,
+  type PolicyServiceAvailabilityMode,
+  type PolicyServiceAvailabilityObservation,
+  type PolicyServiceAvailabilityReason
+} from './policy-service-availability-policy.js';
 
 export interface PlatformPolicyIntent {
   readonly correlationId: string;
@@ -192,6 +198,11 @@ export interface PlatformPolicyProviderVerificationInput {
 export interface PlatformPolicyAuthorizationProvider {
   /** Production Desktop providers must cross the Windows Core Service process boundary. */
   readonly decisionAuthority?: 'windows-core-service';
+  /** Fresh Core Service lifecycle and signed-package observation; omission on the Windows Core Service path fails closed. */
+  readonly observePolicyServiceAvailability?: () =>
+    | Promise<PolicyServiceAvailabilityObservation | undefined>
+    | PolicyServiceAvailabilityObservation
+    | undefined;
   /** Trusted package metadata for out-of-process kernels; omission fails closed. */
   readonly resolvePolicyPackage?: (applicationId: PlatformApplicationId) => PlatformPolicyPackage;
   authorize(input: PlatformPolicyProviderAuthorizationInput):
@@ -408,9 +419,11 @@ export type PlatformPolicyEnforcementErrorCode =
   | 'TRANSACTION_CONTEXT_INVALID'
   | 'TRANSACTION_CONTEXT_MISMATCH'
   | 'POLICY_DECISION_UNAVAILABLE'
+  | 'POLICY_SERVICE_AVAILABILITY_DENIED'
   | 'ENFORCEMENT_UNAVAILABLE';
 
 export type PlatformPolicyAvailabilityStage =
+  | 'POLICY_SERVICE_AVAILABILITY'
   | 'AUTHORITY_RESOLUTION'
   | 'RESOURCE_RESOLUTION'
   | 'REPLAY_RESERVATION'
@@ -423,6 +436,8 @@ export class PlatformPolicyEnforcementError extends Error {
   public readonly decision: PlatformPolicyDecision | undefined;
   public readonly receipt: PlatformPolicyReceipt | undefined;
   public readonly availabilityStage: PlatformPolicyAvailabilityStage | undefined;
+  public readonly policyServiceAvailabilityReason: PolicyServiceAvailabilityReason | undefined;
+  public readonly policyServiceAvailabilityMode: PolicyServiceAvailabilityMode | undefined;
 
   public constructor(
     code: PlatformPolicyEnforcementErrorCode,
@@ -431,6 +446,8 @@ export class PlatformPolicyEnforcementError extends Error {
       readonly decision?: PlatformPolicyDecision;
       readonly receipt?: PlatformPolicyReceipt;
       readonly availabilityStage?: PlatformPolicyAvailabilityStage;
+      readonly policyServiceAvailabilityReason?: PolicyServiceAvailabilityReason;
+      readonly policyServiceAvailabilityMode?: PolicyServiceAvailabilityMode;
     }
   ) {
     super(message, options);
@@ -439,6 +456,8 @@ export class PlatformPolicyEnforcementError extends Error {
     this.decision = options?.decision;
     this.receipt = options?.receipt;
     this.availabilityStage = options?.availabilityStage;
+    this.policyServiceAvailabilityReason = options?.policyServiceAvailabilityReason;
+    this.policyServiceAvailabilityMode = options?.policyServiceAvailabilityMode;
   }
 }
 
@@ -682,6 +701,7 @@ export class PlatformPolicyEnforcementPoint {
   readonly #receiptTtlMs: number;
   readonly #decisionTimeoutMs: number;
   readonly #deferAllowedReceiptPersistence: boolean;
+  readonly #policyServiceAvailability = new PolicyServiceAvailabilityPolicy();
 
   public constructor(options: PlatformPolicyEnforcementPointOptions) {
     if (!options || typeof options !== 'object') {
@@ -699,7 +719,12 @@ export class PlatformPolicyEnforcementPoint {
       || !options.receiptSink || typeof options.receiptSink.append !== 'function'
       || (options.replayStore !== undefined && typeof options.replayStore.reserve !== 'function')
       || (options.provider !== undefined
-        && (typeof options.provider.authorize !== 'function' || typeof options.provider.verify !== 'function'))
+        && (
+          typeof options.provider.authorize !== 'function'
+          || typeof options.provider.verify !== 'function'
+          || (options.provider.decisionAuthority === 'windows-core-service'
+            && typeof options.provider.observePolicyServiceAvailability !== 'function')
+        ))
       || (options.kernel !== undefined
         && (typeof options.kernel.authorizeWithReceipt !== 'function' || typeof options.kernel.verifyReceiptForRequest !== 'function'))
     ) {
@@ -752,6 +777,7 @@ export class PlatformPolicyEnforcementPoint {
     if (typeof clusterFence !== 'function' || typeof operation !== 'function') {
       throw new PlatformPolicyEnforcementError('INTENT_INVALID', 'Policy transaction boundary is invalid');
     }
+    await this.#assertPolicyServiceAvailability(intent.action);
     let authority: PlatformPolicyConnectionAuthority;
     try {
       authority = await this.#withinDecisionDeadline(
@@ -947,10 +973,10 @@ export class PlatformPolicyEnforcementPoint {
     if (!(await this.#verifyWithinDecisionDeadline(effectiveRequest, authorization.receipt))) {
       throw new PlatformPolicyEnforcementError('RECEIPT_VERIFICATION_FAILED', 'Policy receipt is not bound to the resolved request');
     }
-    if (authorization.decision.allowed && !effectiveRequest.clusterWritable) {
+    if (authorization.decision.allowed && !effectiveRequest.clusterWritable && effectiveRequest.action !== 'read') {
       throw new PlatformPolicyEnforcementError(
         'RECEIPT_VERIFICATION_FAILED',
-        'Policy provider allowed a transaction after narrowing the cluster fence to read-only'
+        'Policy provider allowed a non-read transaction after narrowing the cluster fence to read-only'
       );
     }
 
@@ -1171,6 +1197,49 @@ export class PlatformPolicyEnforcementPoint {
       return await Promise.race([Promise.resolve().then(operation), unavailable]);
     } finally {
       if (timer !== undefined) clearTimeout(timer);
+    }
+  }
+
+  async #assertPolicyServiceAvailability(action: PolicyAction): Promise<void> {
+    if (!this.#provider || this.#provider.decisionAuthority !== 'windows-core-service') return;
+    let observation: PolicyServiceAvailabilityObservation | undefined;
+    try {
+      observation = await this.#withinDecisionDeadline(
+        'POLICY_SERVICE_AVAILABILITY',
+        () => this.#provider!.observePolicyServiceAvailability?.()
+      );
+    } catch (error) {
+      if (error instanceof PlatformPolicyEnforcementError && error.code === 'POLICY_DECISION_UNAVAILABLE') throw error;
+      const unavailable = this.#policyServiceAvailability.evaluate(undefined);
+      throw new PlatformPolicyEnforcementError(
+        'POLICY_SERVICE_AVAILABILITY_DENIED',
+        'Policy Service availability could not be observed',
+        {
+          cause: error,
+          availabilityStage: 'POLICY_SERVICE_AVAILABILITY',
+          policyServiceAvailabilityReason: unavailable.reason,
+          policyServiceAvailabilityMode: unavailable.mode
+        }
+      );
+    }
+    const availability = this.#policyServiceAvailability.evaluate(observation === undefined
+      ? undefined
+      : Object.freeze({ ...observation, checkedAt: this.#clock() }));
+    try {
+      if (availability.mode === 'deny' || action === 'read') {
+        this.#policyServiceAvailability.assertOperationAllowed(action === 'read' ? 'read' : 'mutation', availability);
+      }
+    } catch (error) {
+      throw new PlatformPolicyEnforcementError(
+        'POLICY_SERVICE_AVAILABILITY_DENIED',
+        'Policy Service availability does not permit the protected operation',
+        {
+          cause: error,
+          availabilityStage: 'POLICY_SERVICE_AVAILABILITY',
+          policyServiceAvailabilityReason: availability.reason,
+          policyServiceAvailabilityMode: availability.mode
+        }
+      );
     }
   }
 

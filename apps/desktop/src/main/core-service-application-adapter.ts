@@ -19,7 +19,8 @@ import type {
   PlatformPolicyPackage,
   PlatformPolicyProviderAuthorizationInput,
   PlatformPolicyProviderVerificationInput,
-  PlatformPolicyRequest
+  PlatformPolicyRequest,
+  PolicyServiceAvailabilityObservation
 } from '@ppt/platform-policy';
 
 export interface CoreServiceConnectionAuthority {
@@ -31,6 +32,7 @@ export class CoreServiceApplicationAdapter {
   readonly #client: CoreServiceLocalAdminClient;
   #fence: PlatformPolicyClusterFenceSnapshot | undefined;
   #policyPackage: PlatformPolicyPackage | undefined;
+  #observePolicyServiceAvailability: (() => Promise<PolicyServiceAvailabilityObservation | undefined>) | undefined;
 
   public readonly clusterFence: PlatformPolicyClusterFence = () => {
     if (!this.#fence) throw new Error('Core Service cluster fence has not been observed');
@@ -39,6 +41,7 @@ export class CoreServiceApplicationAdapter {
 
   public readonly policyProvider: PlatformPolicyAuthorizationProvider = Object.freeze({
     decisionAuthority: 'windows-core-service' as const,
+    observePolicyServiceAvailability: () => this.#observePolicyServiceAvailability?.(),
     resolvePolicyPackage: () => {
       if (!this.#policyPackage) throw new Error('Core Service signed policy package has not been observed');
       return this.#policyPackage;
@@ -65,9 +68,22 @@ export class CoreServiceApplicationAdapter {
 
   public async getHealth(): Promise<CoreServiceHealthContract> {
     const health = await this.#client.health();
-    this.#cacheFence({ writable: health.writable, epoch: health.writeFenceEpoch });
-    this.#policyPackage = health.policyPackage;
+    if (health.policyPackageVerified === true) {
+      this.#cacheFence({ writable: health.writable, epoch: health.writeFenceEpoch });
+      this.#policyPackage = health.policyPackage;
+    } else {
+      this.#policyPackage = undefined;
+    }
     return health;
+  }
+
+  public bindPolicyServiceAvailabilityObserver(
+    observer: () => Promise<PolicyServiceAvailabilityObservation | undefined>
+  ): void {
+    if (this.#observePolicyServiceAvailability) {
+      throw new Error('Core Service policy availability observer is already bound');
+    }
+    this.#observePolicyServiceAvailability = observer;
   }
 
   public getApiBoundaryStatus(): Promise<CoreServiceApiBoundaryStatusContract> {

@@ -109,7 +109,7 @@ check('bootstrap entries are bounded and Desktop-owned', pinnedEntries.length ==
 check('manifest preserves no-transfer ownership invariants', manifest.invariants?.realDataTransferPerformed === false && manifest.invariants?.sqliteOwnershipTransferred === false && manifest.invariants?.desktopVaultOwnershipPreserved === true);
 
 check('production capability gate passes', gate.status === 'PASS' && gate.findings.length === 0);
-check('gate scans all current production sources', gate.productionSourceZones === 18 && gate.scannedFiles === 358);
+check('gate scans all current production sources', gate.productionSourceZones === 18 && gate.scannedFiles === 362);
 check('gate and manifest cardinality are exact', gate.capabilitySurfaces === 237 && gate.exactManifestSurfaces === 237);
 check('gate manifest hash matches canonical file', gate.exactManifestSha256 === manifestSha256);
 check('gate reports seven families and fourteen applications', gate.protectedCapabilityFamilies === 7 && gate.canonicalApplications === 14);

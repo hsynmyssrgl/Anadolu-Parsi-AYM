@@ -6,6 +6,7 @@ import {
   PlatformPolicyEnforcementPoint,
   PlatformPolicyKernel,
   type PlatformPolicyAuthorizationProvider,
+  type PolicyServiceAvailabilityObservation,
   type PlatformPolicyReceiptRecord,
   type PlatformPolicyRequest
 } from '@ppt/platform-policy';
@@ -65,6 +66,16 @@ const authority = () => ({
   familyIds: ['family-32-e'], online: true, expiresAt: EXPIRES
 });
 
+const availability = (policyKernel: PlatformPolicyKernel): PolicyServiceAvailabilityObservation => ({
+  schemaVersion: 1,
+  lifecycle: 'ready', writable: true, safeMode: false, policyPackageVerified: true,
+  policyVersion: 'PPK-009', policyPackageVersion: policyKernel.policyPackage.payload.packageVersion,
+  policyPackageSha256: policyKernel.policyPackage.payloadSha256,
+  expectedPolicyVersion: 'PPK-009', expectedPolicyPackageVersion: policyKernel.policyPackage.payload.packageVersion,
+  expectedPolicyPackageSha256: policyKernel.policyPackage.payloadSha256,
+  observedAt: NOW, checkedAt: NOW
+});
+
 describe('32-E PPK-009 Core Service policy decision re-evaluation', () => {
   it('signs the Core Service decision authority into the policy package', () => {
     expect(kernel().policyPackage.payload).toMatchObject({
@@ -107,6 +118,7 @@ describe('32-E PPK-009 Core Service policy decision re-evaluation', () => {
     const records: PlatformPolicyReceiptRecord[] = [];
     const provider: PlatformPolicyAuthorizationProvider = {
       decisionAuthority: 'windows-core-service',
+      observePolicyServiceAvailability: () => availability(policyKernel),
       resolvePolicyPackage: () => policyKernel.policyPackage,
       authorize: ({ request: resolved, nonce }) => ({
         effectiveRequest: resolved, authorization: policyKernel.authorizeWithReceipt(resolved, NOW, nonce)
@@ -135,6 +147,7 @@ describe('32-E PPK-009 Core Service policy decision re-evaluation', () => {
     const pep = new PlatformPolicyEnforcementPoint({
       provider: {
         decisionAuthority: 'windows-core-service',
+        observePolicyServiceAvailability: () => availability(policyKernel),
         resolvePolicyPackage: () => policyKernel.policyPackage,
         authorize: ({ request: resolved, nonce }) => {
           const valid = policyKernel.authorizeWithReceipt(resolved, NOW, nonce);

@@ -19,7 +19,7 @@ import type {
   WindowsHelloAuthenticationView,
   WindowsHelloStateView
 } from '@ppt/domain';
-import { GetApplicationSecurityProfileGateBoundaryUseCase, GetDerivedDataPolicyBoundaryUseCase, GetPlatformCapabilityManifestGateBoundaryUseCase, GetPlatformPolicyAstGateBoundaryUseCase, GetPolicyConformanceSuiteBoundaryUseCase, GetPolicyDecisionAuditBoundaryUseCase, GetSensitiveLoggingBoundaryUseCase, GetSourceDeletionPropagationBoundaryUseCase, type WindowsHelloPlatformPort } from '@ppt/application';
+import { EvaluatePolicyServiceAvailabilityUseCase, GetApplicationSecurityProfileGateBoundaryUseCase, GetDerivedDataPolicyBoundaryUseCase, GetPlatformCapabilityManifestGateBoundaryUseCase, GetPlatformPolicyAstGateBoundaryUseCase, GetPolicyConformanceSuiteBoundaryUseCase, GetPolicyDecisionAuditBoundaryUseCase, GetPolicyServiceAvailabilityBoundaryUseCase, GetSensitiveLoggingBoundaryUseCase, GetSourceDeletionPropagationBoundaryUseCase, type WindowsHelloPlatformPort } from '@ppt/application';
 import type { IssueOfflineCapabilityLeaseInput, OfflineCapabilityLeaseWorkspaceView } from '@ppt/domain';
 import {
   FamilyDataStore,
@@ -69,8 +69,9 @@ import { PlatformPolicyReceiptFileSink } from './platform-policy-receipt-file-si
 import { PlatformPolicyDecisionAuditInspectionAdapter } from './policy-decision-audit-application-adapter.js';
 import { DesktopUniversalApiPolicyEnforcement } from './desktop-universal-api-policy-enforcement.js';
 import { DesktopRepositoryPolicyScope } from './desktop-repository-policy-scope.js';
-import { ApplicationSecurityProfilePolicy, DerivedDataInheritancePolicy, ImmutablePolicyDecisionAuditPolicy, NetworkEgressPolicy, PlatformCapabilityManifestPolicy, PlatformPolicyAstGatePolicy, PlatformPolicyConformanceSuite, SensitiveLogPolicy, SourceDeletionPropagationPolicy, assertPinnedBootstrapRuntimeCapability } from '@ppt/platform-policy';
-import type { ApplicationSecurityProfileGateBoundaryView, DerivedDataPolicyBoundaryView, NetworkEgressBoundaryView, PlatformCapabilityManifestGateBoundaryView, PlatformPolicyAstGateBoundaryView, PolicyConformanceSuiteBoundaryView, PolicyDecisionAuditBoundaryView, SensitiveLoggingBoundaryView, SourceDeletionPropagationBoundaryView } from '@ppt/domain';
+import { PolicyServiceAvailabilityApplicationAdapter } from './policy-service-availability-application-adapter.js';
+import { ApplicationSecurityProfilePolicy, DerivedDataInheritancePolicy, ImmutablePolicyDecisionAuditPolicy, NetworkEgressPolicy, PlatformCapabilityManifestPolicy, PlatformPolicyAstGatePolicy, PlatformPolicyConformanceSuite, PolicyServiceAvailabilityPolicy, SensitiveLogPolicy, SourceDeletionPropagationPolicy, assertPinnedBootstrapRuntimeCapability } from '@ppt/platform-policy';
+import type { ApplicationSecurityProfileGateBoundaryView, DerivedDataPolicyBoundaryView, NetworkEgressBoundaryView, PlatformCapabilityManifestGateBoundaryView, PlatformPolicyAstGateBoundaryView, PolicyConformanceSuiteBoundaryView, PolicyDecisionAuditBoundaryView, PolicyServiceAvailabilityBoundaryView, SensitiveLoggingBoundaryView, SourceDeletionPropagationBoundaryView } from '@ppt/domain';
 
 type ArchiveMutationInput<TInput> = TInput & { readonly operationId: string };
 interface ArchiveItemMutationInput {
@@ -88,6 +89,7 @@ const platformPolicyConformanceSuite = new PlatformPolicyConformanceSuite();
 const platformPolicyAstGatePolicy = new PlatformPolicyAstGatePolicy();
 const platformCapabilityManifestPolicy = new PlatformCapabilityManifestPolicy();
 const applicationSecurityProfilePolicy = new ApplicationSecurityProfilePolicy();
+const policyServiceAvailabilityPolicy = new PolicyServiceAvailabilityPolicy();
 const getDerivedDataPolicyBoundaryUseCase = new GetDerivedDataPolicyBoundaryUseCase(derivedDataInheritancePolicy);
 const getSensitiveLoggingBoundaryUseCase = new GetSensitiveLoggingBoundaryUseCase(sensitiveLogPolicy);
 const getSourceDeletionPropagationBoundaryUseCase = new GetSourceDeletionPropagationBoundaryUseCase(sourceDeletionPropagationPolicy);
@@ -123,6 +125,8 @@ let desktopRuntime: DesktopRuntime | undefined;
 let coreServiceStartupConnection: CoreServiceStartupConnectionResult | undefined;
 let archivePolicyReceiptSink: PlatformPolicyReceiptFileSink | undefined;
 let desktopUniversalApiPolicyEnforcement: DesktopUniversalApiPolicyEnforcement | undefined;
+let evaluatePolicyServiceAvailabilityUseCase: EvaluatePolicyServiceAvailabilityUseCase | undefined;
+let getPolicyServiceAvailabilityBoundaryUseCase: GetPolicyServiceAvailabilityBoundaryUseCase | undefined;
 const desktopRepositoryPolicyScope = new DesktopRepositoryPolicyScope();
 let schedulerTimer: NodeJS.Timeout | undefined;
 let performanceTimer: NodeJS.Timeout | undefined;
@@ -302,6 +306,20 @@ function coreServiceConnection(): CoreServiceStartupConnectionResult {
   return coreServiceStartupConnection;
 }
 
+function policyServiceAvailabilityEvaluation(): EvaluatePolicyServiceAvailabilityUseCase {
+  if (!evaluatePolicyServiceAvailabilityUseCase) {
+    throw new Error('Policy Service availability gate has not completed trusted startup');
+  }
+  return evaluatePolicyServiceAvailabilityUseCase;
+}
+
+function policyServiceAvailabilityBoundary(): GetPolicyServiceAvailabilityBoundaryUseCase {
+  if (!getPolicyServiceAvailabilityBoundaryUseCase) {
+    throw new Error('Policy Service availability boundary has not completed trusted startup');
+  }
+  return getPolicyServiceAvailabilityBoundaryUseCase;
+}
+
 function policyReceiptSink(): PlatformPolicyReceiptFileSink {
   if (!archivePolicyReceiptSink) {
     throw new Error('Platform policy receipt journal has not passed trusted startup verification');
@@ -323,6 +341,11 @@ function universalApiPolicyEnforcement(): DesktopUniversalApiPolicyEnforcement {
         applicationVersion: coreService.health.policyPackage.payload.applicationVersions['windows-desktop']!
       }),
       repositoryPolicyScope: desktopRepositoryPolicyScope,
+      evaluatePolicyServiceAvailability: () => policyServiceAvailabilityEvaluation().execute(),
+      onAvailabilityRestricted: () => {
+        ipcReadResults.clearAll();
+        offlineSensitiveCache.lock('CONTEXT_MISMATCH');
+      },
       resolveBootstrapClientContext: () => {
         const health = coreServiceConnection().health;
         const manifest = health.policyPackage.payload.applicationManifests['windows-desktop'];
@@ -1194,6 +1217,7 @@ function registerIpc(): void {
   registerIpcHandler('system:getPlatformPolicyAstGateBoundary', ():PlatformPolicyAstGateBoundaryView => getPlatformPolicyAstGateBoundaryUseCase.execute());
   registerIpcHandler('system:getPlatformCapabilityManifestGateBoundary', ():PlatformCapabilityManifestGateBoundaryView => getPlatformCapabilityManifestGateBoundaryUseCase.execute());
   registerIpcHandler('system:getApplicationSecurityProfileGateBoundary', ():ApplicationSecurityProfileGateBoundaryView => getApplicationSecurityProfileGateBoundaryUseCase.execute());
+  registerIpcHandler('system:getPolicyServiceAvailabilityBoundary', ():Promise<PolicyServiceAvailabilityBoundaryView> => policyServiceAvailabilityBoundary().execute());
   registerIpcHandler('system:listBackupTargets', () => store().listBackupTargets());
   registerIpcHandler('system:upsertBackupTarget', (_event,input:UpsertBackupTargetInput) => store().upsertBackupTarget(input));
   registerIpcHandler('system:listBackupRuns', (_event,limit?:number) => store().listBackupRuns(limit));
@@ -1970,8 +1994,25 @@ app.whenReady().then(async () => {
   startupStage = 'CORE_SERVICE_CONNECTION';
   coreServiceStartupConnection = await connectCoreServiceAtStartup({
     authorityPath: join(runtime().config.paths.secrets, 'core-service-connection.pptsecret'),
-    authorityReader: runtime().protectedArtifacts
+    authorityReader: runtime().protectedArtifacts,
+    clock: () => runtime().clock.now()
   });
+  const policyServiceObservation = new PolicyServiceAvailabilityApplicationAdapter({
+    adapter: coreServiceStartupConnection.adapter,
+    startupHealth: coreServiceStartupConnection.health,
+    clock: () => runtime().clock.now()
+  });
+  coreServiceStartupConnection.adapter.bindPolicyServiceAvailabilityObserver(
+    () => policyServiceObservation.observe()
+  );
+  evaluatePolicyServiceAvailabilityUseCase = new EvaluatePolicyServiceAvailabilityUseCase(
+    policyServiceAvailabilityPolicy,
+    policyServiceObservation
+  );
+  getPolicyServiceAvailabilityBoundaryUseCase = new GetPolicyServiceAvailabilityBoundaryUseCase(
+    policyServiceAvailabilityPolicy,
+    policyServiceObservation
+  );
   runtime().logger.info({
     timestamp: runtime().clock.now(),
     service: 'desktop-main',
@@ -2151,6 +2192,8 @@ app.on('before-quit', () => {
     finally {
       archivePolicyReceiptSink = undefined;
       desktopUniversalApiPolicyEnforcement = undefined;
+      evaluatePolicyServiceAvailabilityUseCase = undefined;
+      getPolicyServiceAvailabilityBoundaryUseCase = undefined;
     }
     try { desktopRuntime?.protectedArtifacts.dispose(); }
     finally { rmSync(volatileRuntimeRoot, { recursive: true, force: true }); }

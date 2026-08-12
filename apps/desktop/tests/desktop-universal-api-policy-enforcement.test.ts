@@ -4,6 +4,7 @@ import { SqliteRepository } from '@ppt/repositories';
 import type { RepositoryExecutionContext } from '@ppt/repository-contracts';
 import {
   PlatformPolicyKernel,
+  PolicyServiceAvailabilityPolicy,
   type PlatformPolicyReceiptRecord
 } from '@ppt/platform-policy';
 import {
@@ -46,6 +47,17 @@ const createHarness = (writable = true, trusted = true) => {
   const enforcement = new DesktopUniversalApiPolicyEnforcement({
     authorizationProvider: {
       decisionAuthority: 'windows-core-service',
+      observePolicyServiceAvailability: () => ({
+        schemaVersion: 1,
+        lifecycle: writable ? 'ready' : 'degraded', writable, safeMode: !writable,
+        policyPackageVerified: true, policyVersion: 'PPK-31-U',
+        policyPackageVersion: kernel.policyPackage.payload.packageVersion,
+        policyPackageSha256: kernel.policyPackage.payloadSha256,
+        expectedPolicyVersion: 'PPK-31-U',
+        expectedPolicyPackageVersion: kernel.policyPackage.payload.packageVersion,
+        expectedPolicyPackageSha256: kernel.policyPackage.payloadSha256,
+        observedAt: NOW, checkedAt: NOW
+      }),
       resolvePolicyPackage: () => kernel.policyPackage,
       authorize: ({ request, nonce }) => ({ effectiveRequest: request, authorization: kernel.authorizeWithReceipt(request, NOW, nonce) }),
       verify: ({ request, receipt }) => kernel.verifyReceiptForRequest(receipt, request)
@@ -69,6 +81,21 @@ const createHarness = (writable = true, trusted = true) => {
       expiresAt: EXPIRES
     }),
     repositoryPolicyScope,
+    evaluatePolicyServiceAvailability: () => new PolicyServiceAvailabilityPolicy().evaluate({
+      schemaVersion: 1,
+      lifecycle: writable ? 'ready' : 'degraded',
+      writable,
+      safeMode: !writable,
+      policyPackageVerified: true,
+      policyVersion: 'PPK-31-U',
+      policyPackageVersion: kernel.policyPackage.payload.packageVersion,
+      policyPackageSha256: kernel.policyPackage.payloadSha256,
+      expectedPolicyVersion: 'PPK-31-U',
+      expectedPolicyPackageVersion: kernel.policyPackage.payload.packageVersion,
+      expectedPolicyPackageSha256: kernel.policyPackage.payloadSha256,
+      observedAt: NOW,
+      checkedAt: NOW
+    }),
     resolveBootstrapClientContext: () => ({
       applicationId: 'windows-desktop',
       deviceId: 'device-31-u',

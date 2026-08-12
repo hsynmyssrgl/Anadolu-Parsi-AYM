@@ -1,0 +1,477 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-T",
+  "requirement": "PPK-024",
+  "phase": "POLICY_SERVICE_AVAILABILITY_RUNTIME",
+  "status": "PASS",
+  "checkCount": 28,
+  "passed": 28,
+  "failed": 0,
+  "results": [
+    {
+      "id": "ppk-024-contract",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-32-t-ppk-024-policy-service-availability-contract.mjs"
+      ],
+      "expectedOutput": "PPK-024 contract: PASS",
+      "outputSha256": "2294035af67e84276f245d7d3018ae1efd89516ba89559e13f5c462a05f62c74",
+      "outputTail": "PPK-024 contract: PASS (71/71)."
+    },
+    {
+      "id": "ppk-024-production-source-gate",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-policy-service-availability-boundary.mjs"
+      ],
+      "expectedOutput": "\"status\": \"PASS\"",
+      "outputSha256": "b03ae5d68ea382038cf4b348ccc36208890858ab737839137e784149c3ed6be8",
+      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 362,\n  \"securityRelevantFiles\": 20,\n  \"canonicalAvailabilityReferenceFiles\": 17,\n  \"exactCanonicalReferenceAllowlistEntries\": 17,\n  \"exactStatusChannelAllowlistEntries\": 5,\n  \"canonicalPolicyClassDefinitions\": 1,\n  \"legacyPolicyServiceRuntimeReferences\": 0,\n  \"broadAllowlistExceptions\": 0,\n  \"maliciousSelfTestAssertions\": 13,\n  \"benignFalsePositiveAssertions\": 5,\n  \"canonicalReferencePaths\": [\n    \"apps/desktop/src/main/core-service-application-adapter.ts\",\n    \"apps/desktop/src/main/core-service-startup-connection.ts\",\n    \"apps/desktop/src/main/desktop-universal-api-policy-enforcement.ts\",\n    \"apps/desktop/src/main/ipc-integration-policy.ts\",\n    \"apps/desktop/src/main/ipc-read-sharing.ts\",\n    \"apps/desktop/src/main/main.ts\",\n    \"apps/desktop/src/main/policy-service-availability-application-adapter.ts\",\n    \"apps/desktop/src/main/preload.ts\",\n    \"apps/desktop/src/renderer/App.tsx\",\n    \"apps/desktop/src/renderer/global.d.ts\",\n    \"packages/application/src/index.ts\",\n    \"packages/application/src/policy-service-availability-use-cases.ts\",\n    \"packages/domain/src/index.ts\",\n    \"packages/domain/src/policy-service-availability.ts\",\n    \"packages/platform-policy/src/index.ts\",\n    \"packages/platform-policy/src/policy-enforcement-point.ts\",\n    \"packages/platform-policy/src/policy-service-availability-policy.ts\"\n  ],\n  \"findings\": []\n}"
+    },
+    {
+      "id": "combined-platform-policy-gate",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-platform-policy-gate.mjs"
+      ],
+      "expectedOutput": "policy service availability gate PASS",
+      "outputSha256": "2197627b8b8be9b30fd10cbe77e3e0a37f12554e510448ffa0040a0f9815692b",
+      "outputTail": "Platform Policy Gate: PASS / authorization bypass 0 / presentation conditions 10 / AST gate PASS / capability manifest gate PASS / application security profile gate PASS / policy service availability gate PASS.\nPlatform Policy runtime: PASS (8 checks)."
+    },
+    {
+      "id": "ppk-024-four-file-targeted",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/vitest/vitest.mjs run packages/platform-policy/policy-service-availability-policy.test.ts apps/core-service/tests/ppk024-policy-service-availability-runtime.test.ts apps/desktop/tests/ppk024-policy-service-availability.test.ts apps/desktop/tests/ppk024-policy-service-availability-integration.test.ts --reporter=dot --maxWorkers=1"
+      ],
+      "tests": 71,
+      "testFiles": 4,
+      "minimumTests": 71,
+      "outputSha256": "ecd9c08c001e4510496c7beb30d6b2a426384abe4f764f8c2c97ffc982ebcdf2",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·······································································\n\n Test Files  4 passed (4)\n      Tests  71 passed (71)\n   Start at  07:09:30\n   Duration  4.45s (transform 1.43s, setup 0ms, import 3.16s, tests 101ms, environment 0ms)"
+    },
+    {
+      "id": "ppk-024-focused-policy-reevaluation-and-universal-gate-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/vitest/vitest.mjs run packages/platform-policy/policy-service-availability-policy.test.ts apps/core-service/tests/ppk024-policy-service-availability-runtime.test.ts apps/desktop/tests/ppk024-policy-service-availability.test.ts apps/desktop/tests/ppk024-policy-service-availability-integration.test.ts apps/desktop/tests/core-service-policy-reevaluation.test.ts apps/desktop/tests/desktop-universal-api-policy-enforcement.test.ts --reporter=dot --maxWorkers=1"
+      ],
+      "tests": 90,
+      "testFiles": 6,
+      "minimumTests": 90,
+      "outputSha256": "01ec7d12cdc89236961169d33f0be3e66dda9dfb3c27f0b1babf5810b527654d",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n··························································································\n\n Test Files  6 passed (6)\n      Tests  90 passed (90)\n   Start at  07:09:35\n   Duration  7.63s (transform 2.19s, setup 0ms, import 5.38s, tests 184ms, environment 1ms)\n\n\n(node:19068) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "ppk-003-007-008-009-policy-foundation-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/vitest/vitest.mjs run packages/platform-policy/policy-decision-availability.test.ts packages/platform-policy/policy-package-version-binding.test.ts packages/platform-policy/application-identity-device-certificate.test.ts apps/desktop/tests/core-service-policy-reevaluation.test.ts apps/desktop/tests/desktop-universal-api-policy-enforcement.test.ts --reporter=dot --maxWorkers=1"
+      ],
+      "tests": 55,
+      "testFiles": 5,
+      "minimumTests": 52,
+      "outputSha256": "5c6a9012a3a7fa04e4d918a773366cc3864d6b141ca27e1814b2bdb70681cddb",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·······················································\n\n Test Files  5 passed (5)\n      Tests  55 passed (55)\n   Start at  07:09:43\n   Duration  7.07s (transform 2.22s, setup 0ms, import 5.01s, tests 402ms, environment 1ms)\n\n\n(node:21628) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "ppk-012-through-ppk-024-security-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/vitest/vitest.mjs run apps/desktop/tests/ppk012-offline-capability-lease-cache-fence.test.ts apps/desktop/tests/ppk013-client-data-access-boundary.test.ts apps/core-service/tests/ppk014-versioned-core-service-api-boundary.test.ts apps/desktop/tests/ppk015-network-egress-policy.test.ts apps/desktop/tests/ppk016-derived-data-policy-inheritance.test.ts apps/desktop/tests/ppk017-sensitive-log-policy.test.ts apps/desktop/tests/ppk018-immutable-policy-decision-audit.test.ts apps/desktop/tests/ppk019-source-deletion-propagation.test.ts packages/platform-policy/policy-conformance-suite.test.ts apps/desktop/tests/ppk020-policy-conformance-integration.test.ts packages/platform-policy/platform-policy-ast-gate-policy.test.ts apps/desktop/tests/ppk021-platform-policy-ast-gate.test.ts apps/desktop/tests/ppk021-platform-policy-ast-gate-integration.test.ts packages/platform-policy/platform-capability-manifest-policy.test.ts apps/desktop/tests/ppk022-capability-manifest-gate.test.ts apps/desktop/tests/ppk022-capability-manifest-integration.test.ts packages/platform-policy/application-security-profile-policy.test.ts apps/desktop/tests/ppk023-application-security-profile-gate.test.ts apps/desktop/tests/ppk023-application-security-profile-integration.test.ts packages/platform-policy/policy-service-availability-policy.test.ts apps/core-service/tests/ppk024-policy-service-availability-runtime.test.ts apps/desktop/tests/ppk024-policy-service-availability.test.ts apps/desktop/tests/ppk024-policy-service-availability-integration.test.ts --reporter=dot --maxWorkers=1"
+      ],
+      "tests": 351,
+      "testFiles": 23,
+      "minimumTests": 351,
+      "outputSha256": "b93e808b0f2997781980613b1e58c0266bb998754d8fd1acddb66290a9702fbe",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·······························································································································································································································································································································································\n\n Test Files  23 passed (23)\n      Tests  351 passed (351)\n   Start at  07:09:51\n   Duration  24.10s (transform 2.68s, setup 0ms, import 8.30s, tests 8.96s, environment 3ms)\n\n\n(node:9268) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:18480) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:8940) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "client-data-access-boundary-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-client-data-access-boundary.mjs"
+      ],
+      "expectedOutput": "\"status\": \"PASS\"",
+      "outputSha256": "748a8fbb322b482cca122ef80108ad86fc42a04f284b9fce74aebd33932b817d",
+      "outputTail": "{\n  \"status\": \"PASS\",\n  \"clientZones\": 3,\n  \"scannedFiles\": 11,\n  \"selfTestAssertions\": 6,\n  \"directAccessExceptions\": 0,\n  \"findings\": []\n}"
+    },
+    {
+      "id": "versioned-core-service-api-boundary-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-versioned-core-service-api-boundary.mjs"
+      ],
+      "expectedOutput": "\"status\": \"PASS\"",
+      "outputSha256": "f207143fef22636d958775f9318648e472be3c967d4046449efbf5da7d61778c",
+      "outputTail": "{\n  \"status\": \"PASS\",\n  \"nonCoreApplicationZones\": 1,\n  \"scannedFiles\": 117,\n  \"selfTestAssertions\": 5,\n  \"directImportExceptions\": 0,\n  \"findings\": []\n}"
+    },
+    {
+      "id": "migration-77-no-ppk024-schema-change",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 3,
+      "expectedSteps": 3,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p packages/database/tsconfig.json",
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p tests/smoke/tsconfig.data-store.json",
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-database-migrations.mjs"
+      ],
+      "expectedOutput": "\"version\": 77",
+      "outputSha256": "23062a7a3e94678c6a34684ea3a890dbb9ee7f026d571990cb720aafcadbf159",
+      "outputTail": "1314663d90020b921b1049252df13426c58d178\"\n    },\n    {\n      \"version\": 66,\n      \"name\": \"location_policy_receipt_fence\",\n      \"checksum\": \"e55b15e48f504fc65452556f6c907b8845bb81b6b6d65caa5c243410d11c9609\"\n    },\n    {\n      \"version\": 67,\n      \"name\": \"local_ppk002_timeline_event_policy_receipt_fence\",\n      \"checksum\": \"a67f9807f2a2bb00ada3768d06882a0ca2648d91b19eacb2becf46cf9ef2b528\"\n    },\n    {\n      \"version\": 68,\n      \"name\": \"ppk002_family_import_governed_rollback_receipt_fence\",\n      \"checksum\": \"298ffa1c65a65e762904cb913ecb9b45d1dfa5fcd94659c1a3181a5984f71bd6\"\n    },\n    {\n      \"version\": 69,\n      \"name\": \"ppk004_complete_policy_context_binding\",\n      \"checksum\": \"b0eaf8abbf4b45e00404717a1ba767ce64687e9f575a0e11798326cbdbfeeb91\"\n    },\n    {\n      \"version\": 70,\n      \"name\": \"ppk005_complete_data_classification\",\n      \"checksum\": \"bfd3643232c6daa25d85804f08c4580f896fe4d6e81c2ad3d7dcf602649085e9\"\n    },\n    {\n      \"version\": 71,\n      \"name\": \"ppk006_complete_policy_obligation_suite\",\n      \"checksum\": \"ba678463aa0138780d74d2342bcc453ab622e87c7213a4d10078319762c96a90\"\n    },\n    {\n      \"version\": 72,\n      \"name\": \"ppk007_signed_versioned_policy_package\",\n      \"checksum\": \"6660072205bd61c06dd1d4f4b744884f7edb29bf370d44a228c150ebca679a83\"\n    },\n    {\n      \"version\": 73,\n      \"name\": \"ppk008_application_identity_device_certificate_manifest\",\n      \"checksum\": \"0099d0238be94ea6bb95579d2ac9f33c015e99d5c14463442313953c014b87fd\"\n    },\n    {\n      \"version\": 74,\n      \"name\": \"ppk009_core_service_decision_reevaluation\",\n      \"checksum\": \"99c89269ac120adbb387dc796ecf1b837f978e04e375d3d41c4fb605020ea813\"\n    },\n    {\n      \"version\": 75,\n      \"name\": \"ppk011_contextual_ownership_share\",\n      \"checksum\": \"3c59ecd6df8d4bf777a8eee8c4864f19848fb712c85691105320afa17b476337\"\n    },\n    {\n      \"version\": 76,\n      \"name\": \"ppk012_offline_capability_lease_cache_fence\",\n      \"checksum\": \"98546bdde3fe97f9f37f2421dd74ad305ce5301dd23a9954ed54bd53610e9388\"\n    },\n    {\n      \"version\": 77,\n      \"name\": \"ppk016_derived_data_policy_inheritance\",\n      \"checksum\": \"de7fbb16719ad427c33d20be3cf564577185d6a1c2eb916cbe0dbdf40724a1da\"\n    }\n  ],\n  \"generatedAt\": \"2026-08-12T04:10:19.788Z\"\n}\n\n(node:11136) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "platform-policy-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe --experimental-strip-types scripts/verify-platform-policy-runtime.mjs"
+      ],
+      "expectedOutput": "Platform Policy runtime: PASS (8 checks).",
+      "outputSha256": "1fa0ddeccd71b50b9044d5734cf5453216029f1f36d44f6f999212bd56c75047",
+      "outputTail": "Platform Policy runtime: PASS (8 checks)."
+    },
+    {
+      "id": "platform-policy-enforcement-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe --experimental-strip-types --experimental-loader ./scripts/ts-workspace-loader.mjs scripts/verify-30-m-policy-enforcement-runtime.mjs --no-report"
+      ],
+      "expectedOutput": "PASS (43 controlled checks",
+      "outputSha256": "ac9b636f1ba5014fa89f8895c3a70e5f4241c236db19960b4de45dcc3126d113",
+      "outputTail": "30-M predecessor runtime regression: PASS (43 controlled checks; PPK-002 remains PARTIAL).\n\n(node:6744) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "core-service-boundary",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-core-service-boundary.mjs"
+      ],
+      "expectedOutput": "Core Service boundary: PASS (8 checks).",
+      "outputSha256": "55d075584f9f8466eb88cdfdec4b3c012d030a160cc18cd26f24f32f5969011b",
+      "outputTail": "Core Service boundary: PASS (8 checks)."
+    },
+    {
+      "id": "core-service-entrypoint-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe --experimental-strip-types --experimental-loader ./scripts/ts-workspace-loader.mjs scripts/verify-30-o-core-service-entrypoint-runtime.mjs"
+      ],
+      "expectedOutput": "30-O Core Service Entrypoint Runtime: PASS (24 assertions).",
+      "outputSha256": "1f6bb73f561811feb73c20a45e7b3717461298063526b400818d2f022085c84a",
+      "outputTail": "30-O Core Service Entrypoint Runtime: PASS (24 assertions).\n\n(node:17320) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "desktop-core-service-startup-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-desktop-core-service-startup-runtime-wrapper.mjs"
+      ],
+      "expectedOutput": "Desktop Core Service Startup Runtime: PASS",
+      "outputSha256": "e9c26ac410bd86b2fb6b173be75d7e55793bfb25d8ca19e99fe7ed49489766fe",
+      "outputTail": "Desktop Core Service Startup Runtime: PASS (51 checks).\n\n(node:29548) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "platform-policy-typescript",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p packages/platform-policy/tsconfig.json --noEmit"
+      ],
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputTail": ""
+    },
+    {
+      "id": "domain-typescript",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p packages/domain/tsconfig.json --noEmit"
+      ],
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputTail": ""
+    },
+    {
+      "id": "application-typescript",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p packages/application/tsconfig.json --noEmit"
+      ],
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputTail": ""
+    },
+    {
+      "id": "core-service-contracts-typescript",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p packages/core-service-contracts/tsconfig.json --noEmit"
+      ],
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputTail": ""
+    },
+    {
+      "id": "core-service-typescript",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p apps/core-service/tsconfig.json --noEmit"
+      ],
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputTail": ""
+    },
+    {
+      "id": "desktop-electron-typescript",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p apps/desktop/tsconfig.electron.json --noEmit"
+      ],
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputTail": ""
+    },
+    {
+      "id": "desktop-renderer-typescript",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p apps/desktop/tsconfig.renderer.json --noEmit"
+      ],
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputTail": ""
+    },
+    {
+      "id": "root-typescript",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p tsconfig.json --noEmit"
+      ],
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputTail": ""
+    },
+    {
+      "id": "full-vitest",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/vitest/vitest.mjs run --reporter=dot --maxWorkers=1"
+      ],
+      "tests": 759,
+      "testFiles": 84,
+      "minimumTests": 759,
+      "minimumTestFiles": 84,
+      "outputSha256": "37f7cc2f5f28923b3b1535510279357efeb05fec068f9ab0635bdb51128b49ef",
+      "outputTail": " to show where the warning was created)\n(node:4144) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:6744) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:3652) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:29844) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:9816) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:29780) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:24136) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:27144) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:6604) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:21816) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:28940) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:21496) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:21220) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:29556) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "production-workspace-builds",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 19,
+      "expectedSteps": 19,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p packages/core/tsconfig.json",
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p packages/contracts/tsconfig.json",
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p packages/config/tsconfig.json",
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p packages/platform-policy/tsconfig.json",
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p packages/logging/tsconfig.json",
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p packages/database/tsconfig.json",
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p packages/domain/tsconfig.json",
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p packages/events/tsconfig.json",
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p packages/repository-contracts/tsconfig.json",
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p packages/security/tsconfig.json",
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p packages/repositories/tsconfig.json",
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p packages/core-service-contracts/tsconfig.json",
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p packages/core-service-client/tsconfig.json",
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p packages/application/tsconfig.json",
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p packages/infrastructure/tsconfig.json",
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p packages/test-data/tsconfig.json",
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/typescript/bin/tsc -p apps/core-service/tsconfig.json",
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe apps/desktop/scripts/build-electron.mjs",
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe node_modules/vite/bin/vite.js build --config apps/desktop/vite.config.ts"
+      ],
+      "outputSha256": "97b6c2cd4765b84e365d0d954fe4e0bd4ed55395f9b5e2843895ab7d3f00b640",
+      "outputTail": "Electron main and preload compiled with the workspace TypeScript compiler.\n\n\n\u001b[36mvite v8.1.5 \u001b[32mbuilding client environment for production...\u001b[36m\u001b[39m\n\u001b[2K\rtransforming...✓ 56 modules transformed.\nrendering chunks...\ncomputing gzip size...\napps/desktop/dist/renderer/index.html                        0.72 kB │ gzip:   0.43 kB\napps/desktop/dist/renderer/assets/brand-mark-CT8sgeaI.png   35.61 kB\napps/desktop/dist/renderer/assets/index-BlzuUOlu.css        78.27 kB │ gzip:  16.39 kB\napps/desktop/dist/renderer/assets/index-D9vKNOXi.js        505.30 kB │ gzip: 134.26 kB\n\n\u001b[32m✓ built in 212ms\u001b[39m\n\n\u001b[33m[plugin rolldown:vite-resolve] Module \"node:crypto\" has been externalized for browser compatibility, imported by \"C:/PPT/AYM/06_KOD/app/packages/core/dist/audit-chain.js\". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.\u001b[39m\n\u001b[33m[plugin builtin:vite-reporter] \n(!) Some chunks are larger than 500 kB after minification. Consider:\n- Using dynamic import() to code-split the application\n- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.\u001b[39m"
+    },
+    {
+      "id": "lockfile-dependency-supply-and-workspace-graph",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 3,
+      "expectedSteps": 3,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-lockfile-integrity.mjs",
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-dependency-supply.mjs",
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-workspace-dependencies.mjs"
+      ],
+      "expectedOutput": "acyclic production graph",
+      "outputSha256": "550e4200b71150a19d29e9afc4548cd1d58e11e41973b6813ebb4a391271e76f",
+      "outputTail": "Lockfile integrity verified: 542 assertions across 18 workspaces.\n\n\nDependency supply verified: 436 assertions / 135 canonical external tarballs.\n\n\nWorkspace dependency contracts verified: 516 assertions / 18 workspaces / acyclic production graph."
+    },
+    {
+      "id": "decision-ledger",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-user-decision-ledger.mjs"
+      ],
+      "expectedOutput": "59 decisions",
+      "outputSha256": "70419144a6302fbc0ccde05d529f78ace96d47d94a8e801ddcb905000c073eb2",
+      "outputTail": "User Decision Ledger: PASS (318 checks / 59 decisions)."
+    },
+    {
+      "id": "bronze-current-audit",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/audit-bronze-current-state.mjs"
+      ],
+      "expectedOutput": "Bronze current audit: PASS_WITH_OPEN_SCOPE",
+      "outputSha256": "1feacdd4f9b3e7ebe6b9945419de6f429bfee3c88c862811d6a55892475b9f8b",
+      "outputTail": "Bronze current audit: PASS_WITH_OPEN_SCOPE; official=25%; strict=10.5714%; implementation-chain=10.8286%."
+    }
+  ],
+  "validatedBoundaries": [
+    "AUTHENTICATED_LIVE_CORE_HEALTH_PER_EVALUATION",
+    "CORE_KERNEL_HMAC_SELF_VERIFICATION_ATTESTATION",
+    "STARTUP_POLICY_VERSION_PACKAGE_VERSION_AND_SHA256_PIN",
+    "EXACT_30000_MS_FRESH_AND_30001_MS_STALE_BOUNDARY",
+    "EXACT_5000_MS_FUTURE_SKEW_AND_5001_MS_DENY_BOUNDARY",
+    "UNAVAILABLE_MALFORMED_INVALID_MISMATCH_FUTURE_STALE_NOT_READY_AND_UNSAFE_DENY_READ_AND_WRITE",
+    "FRESH_VERIFIED_COHERENT_NON_WRITABLE_READ_ONLY",
+    "READ_ONLY_MUTATION_SIGNED_CLUSTER_NOT_WRITABLE_DENIAL",
+    "UNIVERSAL_BOOTSTRAP_GATE_AND_DIRECT_PEP_DEFENSE",
+    "CORE_PROVIDER_OBSERVER_REQUIRED_NON_CORE_PROVIDER_REGRESSION_PRESERVED",
+    "CONTENT_FREE_ZERO_ARGUMENT_NO_CACHE_STATUS_IPC",
+    "RESTRICTED_MODE_SHARED_AND_OFFLINE_SENSITIVE_CACHE_LOCK",
+    "HISTORICAL_RECEIPT_AND_STARTUP_SNAPSHOT_NOT_CURRENT_AUTHORITY",
+    "PPK_003_007_008_009_FOUNDATION_REGRESSION",
+    "PPK_012_TO_PPK_024_SECURITY_REGRESSION",
+    "MIGRATION_77_UNCHANGED_NO_TRANSFER_OR_CUTOVER",
+    "ROOT_AND_CONSTITUENT_TYPESCRIPT",
+    "FULL_VITEST_AND_EIGHTEEN_PRODUCTION_WORKSPACE_BUILDS",
+    "LOCKFILE_SUPPLY_WORKSPACE_DECISION_AND_BRONZE_GOVERNANCE"
+  ],
+  "targetedTestFiles": 4,
+  "targetedTests": 71,
+  "focusedRegressionTestFiles": 6,
+  "focusedRegressionTests": 90,
+  "securityRegressionTestFiles": 23,
+  "securityRegressionTests": 351,
+  "fullVitestFiles": 84,
+  "fullVitestTests": 759,
+  "productionWorkspaceCount": 18,
+  "observationMaximumAgeMs": 30000,
+  "maximumFutureSkewMs": 5000,
+  "unavailableInvalidAndStaleSensitiveReadsAllowed": false,
+  "freshVerifiedNonWritableSensitiveReadsAllowed": true,
+  "freshVerifiedNonWritableMutationsAllowed": false,
+  "readOnlyMutationSignedReason": "CLUSTER_NOT_WRITABLE",
+  "historicalReceiptGrantsCurrentAuthority": false,
+  "startupSnapshotGrantsCurrentAuthority": false,
+  "schemaMigrationRequired": false,
+  "latestDatabaseMigration": 77,
+  "historicalBackfillPerformed": false,
+  "realDataTransferPerformed": false,
+  "cutoverPerformed": false,
+  "legacyDesktopVaultPreserved": true,
+  "sqliteOwnershipTransferred": false,
+  "successorRequirementCompletedByThisPackage": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-12T04:13:25.851Z"
+}

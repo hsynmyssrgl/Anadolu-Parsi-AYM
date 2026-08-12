@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 58,
+  "decisionCount": 59,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1427,6 +1427,37 @@
         "docs/security/PPK-023_APPLICATION_SECURITY_PROFILES_THREAT_MODEL.md",
         "docs/audit/32-S_PPK-023_UYGULAMA_GUVENLIK_PROFILI_UST_KAPANIS.md",
         "config/32-s-ppk-023-application-security-profile-gate-inventory.json"
+      ]
+    },
+    {
+      "id": "DEC-205",
+      "date": "2026-08-12",
+      "acceptedAt": "2026-08-12",
+      "title": "PPK-024 fail-closed live policy-service availability runtime gate",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: tüm işleri full auto olarak sen yap",
+      "document": "docs/decisions/DEC-205-ppk-024-policy-service-availability-runtime-gate.md",
+      "requirements": ["PPK-024"],
+      "codeAreas": [
+        "packages/platform-policy/src/policy-service-availability-policy.ts",
+        "packages/platform-policy/src/policy-enforcement-point.ts",
+        "packages/domain/src/policy-service-availability.ts",
+        "packages/application/src/policy-service-availability-use-cases.ts",
+        "apps/core-service/src/core-service-runtime.ts",
+        "apps/desktop/src/main/policy-service-availability-application-adapter.ts",
+        "apps/desktop/src/main/desktop-universal-api-policy-enforcement.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/ipc-read-sharing.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/renderer/App.tsx",
+        "scripts/verify-policy-service-availability-boundary.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/32-T-ppk-024-policy-service-availability-contract.json",
+        "artifacts/validation/32-T-ppk-024-policy-service-availability-runtime.json",
+        "docs/security/PPK-024_POLICY_SERVICE_AVAILABILITY_THREAT_MODEL.md",
+        "docs/audit/32-T_PPK-024_POLICY_SERVICE_AVAILABILITY_UST_KAPANIS.md",
+        "config/32-t-ppk-024-policy-service-availability-inventory.json"
       ]
     }
   ]

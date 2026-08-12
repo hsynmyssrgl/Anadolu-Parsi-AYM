@@ -22,8 +22,10 @@ import {
 } from '@ppt/core-service-contracts';
 import {
   PlatformCapabilityManifestPolicy,
+  PolicyServiceAvailabilityPolicy,
   createPlatformCapabilityManifestAuthority
 } from '@ppt/platform-policy';
+import type { PolicyServiceAvailabilityDecision } from '@ppt/platform-policy';
 import { CoreServiceApplicationAdapter, type CoreServiceConnectionAuthority } from './core-service-application-adapter.js';
 
 export const CORE_SERVICE_CONNECTION_AUTHORITY_SCHEMA_VERSION = 1 as const;
@@ -48,6 +50,7 @@ export interface CoreServiceStartupConnectionResult {
   readonly deviceSecretProtection: CoreServiceDeviceSecretProtectionStatusContract;
   readonly familyDataCutover: CoreServiceFamilyDataCutoverStatusContract;
   readonly familyDataCutoverReadiness: CoreServiceFamilyDataCutoverReadinessStatusContract;
+  readonly policyServiceAvailability: PolicyServiceAvailabilityDecision;
   readonly authorityPath: string;
 }
 
@@ -60,6 +63,7 @@ export type CoreServiceStartupConnectionErrorCode =
   | 'APPLICATION_VERSION_MISMATCH'
   | 'API_BOUNDARY_MISMATCH'
   | 'ARCHITECTURE_MISMATCH'
+  | 'POLICY_SERVICE_AVAILABILITY_DENIED'
   | 'SERVICE_NOT_READY';
 
 export class CoreServiceStartupConnectionError extends Error {
@@ -225,6 +229,7 @@ export const connectCoreServiceAtStartup = async (options: {
   readonly authorityPath: string;
   readonly authorityReader: CoreServiceAuthorityReader;
   readonly platform?: NodeJS.Platform;
+  readonly clock?: () => string;
 }): Promise<CoreServiceStartupConnectionResult> => {
   let raw: string;
   try {
@@ -396,5 +401,30 @@ export const connectCoreServiceAtStartup = async (options: {
   if (health.lifecycle !== 'ready' && health.lifecycle !== 'degraded') {
     throw new CoreServiceStartupConnectionError('SERVICE_NOT_READY', `Core Service lifecycle ${health.lifecycle} is not safe for Desktop startup`);
   }
-  return Object.freeze({ adapter, apiBoundary, health, architecture, familyData, deviceSecretProtection, familyDataCutover, familyDataCutoverReadiness, authorityPath: options.authorityPath });
+  const policyServiceAvailability = new PolicyServiceAvailabilityPolicy().evaluate(Object.freeze({
+    schemaVersion: 1 as const,
+    lifecycle: health.lifecycle,
+    writable: health.writable,
+    safeMode: health.safeMode,
+    policyPackageVerified: health.policyPackageVerified,
+    policyVersion: health.policyVersion,
+    policyPackageVersion: policyPackage.payload.packageVersion,
+    policyPackageSha256: policyPackage.payloadSha256,
+    expectedPolicyVersion: authority.expectedPolicyVersion,
+    expectedPolicyPackageVersion: policyPackage.payload.packageVersion,
+    expectedPolicyPackageSha256: policyPackage.payloadSha256,
+    observedAt: health.observedAt,
+    checkedAt: options.clock?.() ?? new Date().toISOString()
+  }));
+  if (policyServiceAvailability.mode === 'deny') {
+    throw new CoreServiceStartupConnectionError(
+      'POLICY_SERVICE_AVAILABILITY_DENIED',
+      `Core Service policy availability was denied at startup: ${policyServiceAvailability.reason}`
+    );
+  }
+  return Object.freeze({
+    adapter, apiBoundary, health, architecture, familyData, deviceSecretProtection,
+    familyDataCutover, familyDataCutoverReadiness, policyServiceAvailability,
+    authorityPath: options.authorityPath
+  });
 };

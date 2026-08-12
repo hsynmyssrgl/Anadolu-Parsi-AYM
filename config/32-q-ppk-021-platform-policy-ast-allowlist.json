@@ -59,7 +59,7 @@
     "SQL_CALL": 56,
     "SQL_CONSTRUCTOR": 2,
     "SQL_IMPORT": 2,
-    "USE_CASE_COMPOSITION": 252
+    "USE_CASE_COMPOSITION": 255
   },
   "allowedSurfaceKeys": [
     "CRYPTO_GLOBAL|apps/desktop/src/main/preload.ts|randomUUID",
@@ -569,14 +569,17 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/desktop-universal-api-policy-enforcement.ts|EnforceClientDataAccessUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/desktop-universal-api-policy-enforcement.ts|GetClientDataAccessBoundaryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/governed-network-egress-use-case.ts|GovernedRevocationListFetchUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|EvaluatePolicyServiceAvailabilityUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetApplicationSecurityProfileGateBoundaryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetDerivedDataPolicyBoundaryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetPlatformCapabilityManifestGateBoundaryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetPlatformPolicyAstGateBoundaryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetPolicyConformanceSuiteBoundaryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetPolicyDecisionAuditBoundaryUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetPolicyServiceAvailabilityBoundaryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetSensitiveLoggingBoundaryUseCase",
-    "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetSourceDeletionPropagationBoundaryUseCase"
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetSourceDeletionPropagationBoundaryUseCase",
+    "USE_CASE_COMPOSITION|packages/application/src/policy-service-availability-use-cases.ts|EvaluatePolicyServiceAvailabilityUseCase"
   ],
   "invariants": {
     "parseFailureDenied": true,

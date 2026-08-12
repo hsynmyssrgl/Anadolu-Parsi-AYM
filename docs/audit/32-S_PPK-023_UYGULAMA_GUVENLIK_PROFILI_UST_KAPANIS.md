@@ -22,8 +22,8 @@
 - Tam Vitest: `80/80 dosya / 688/688 test PASS`.
 - Production workspace build: `18/18 PASS`.
 - Domain, application, platform-policy, Desktop/Core Service ve root TypeScript: `0 hata`.
-- PPK-021 ardıl kanıt: `83/83 contract / 20/20 runtime / 18 zone / 358 dosya / 515 exact yüzey / 0 bulgu PASS`.
-- PPK-022 ardıl kanıt: `108/108 contract / 24/24 runtime / 18 zone / 358 dosya / 237 capability yüzeyi / 0 bulgu PASS`.
+- PPK-021 ardıl kanıt: `18 zone / 362 dosya / 518 exact yüzey / 0 bulgu PASS`; tarihsel PPK-023 kapanış contract/runtime sayıları ayrıca korunur.
+- PPK-022 ardıl kaynak ratchet'i: `18 zone / 362 dosya / 237 capability yüzeyi / 0 bulgu PASS`; PPK-023 kapanışındaki `108/108 contract / 24/24 runtime` kanıtı tarihsel olarak korunur.
 - Lockfile: `542 doğrulama / 18 workspace PASS`.
 - Dependency supply: `436 doğrulama / 135 canonical external tarball PASS`.
 - Workspace bağımlılıkları: `516 doğrulama / 18 workspace / döngüsüz PASS`.
@@ -33,6 +33,6 @@
 
 ## Gerçeklik sınırı
 
-Bu eşleme standart uygunluk sertifikası, dış audit, penetrasyon testi, native Apple uygulama testi veya runtime yetkisi değildir. On iki profile-only hedef deploy edilmiş sayılmaz. PPK-024 ve sonraki Bronze kapsamı açıktır. Yeni migration, gerçek veri taşıma, backfill, cutover veya SQLite/Desktop vault sahiplik değişimi yapılmamıştır.
+Bu eşleme standart uygunluk sertifikası, dış audit, penetrasyon testi, native Apple uygulama testi veya runtime yetkisi değildir. On iki profile-only hedef deploy edilmiş sayılmaz. PPK-024 ayrı ardıl gereksinim olarak sonradan tamamlanmıştır; PPK-025 ve sonraki Bronze kapsamı açıktır. Yeni migration, gerçek veri taşıma, backfill, cutover veya SQLite/Desktop vault sahiplik değişimi yapılmamıştır.
 
 Bu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır.

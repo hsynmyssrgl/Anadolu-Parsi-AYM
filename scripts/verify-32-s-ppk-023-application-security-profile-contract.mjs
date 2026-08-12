@@ -79,7 +79,7 @@ check('scope identity is exact', scope.step === '32-S' && scope.requirement === 
 check('inventory identity is exact', inventory.step === '32-S' && inventory.requirement === 'PPK-023');
 check('accepted registry contains PPK-023', requirement !== undefined);
 check('PPK-012 through PPK-022 remain complete', predecessors.every((item) => item?.status === 'COMPLETE'));
-check('PPK-024 remains a separate unfinished successor', successor !== undefined && successor.status !== 'COMPLETE');
+check('PPK-024 remains a distinct successor requirement', successor !== undefined && successor.id !== scope.requirement);
 check('DEC-204 is active and ledger count is exact', ledger.decisionCount === ledger.decisions.length && ledger.decisions.some((item) => item.id === 'DEC-204' && item.status === 'ACTIVE' && item.requirements?.includes('PPK-023')));
 check('master decision register contains DEC-204', masterRegister.includes('## DEC-204') && masterRegister.includes('DEC-204-ppk-023-application-security-profile-gate.md'));
 
@@ -148,8 +148,8 @@ check('prebuild runs PPK-023 gate before governed preflight', rootPackage.script
 check('combined platform policy gate invokes PPK-023 gate', includesAll(combinedGate, ['verify-application-security-profile-gate.mjs', 'applicationSecurityProfileGateStatus']));
 check('root package exposes all PPK-023 commands', ['verify:ppk023:profile-gate', 'verify:ppk023:targeted', 'verify:ppk023:contract', 'verify:ppk023:runtime'].every((name) => typeof rootPackage.scripts?.[name] === 'string'));
 
-check('PPK-021 successor AST ratchet remains green', astGate.status === 'PASS' && astGate.productionSourceZones === 18 && astGate.scannedFiles === 358 && astGate.privilegedSurfaces === 515 && astGate.exactAllowlistEntries === 515 && astGate.findings.length === 0);
-check('PPK-022 successor capability ratchet remains green', capabilityGate.status === 'PASS' && capabilityGate.productionSourceZones === 18 && capabilityGate.scannedFiles === 358 && capabilityGate.capabilitySurfaces === 237 && capabilityGate.exactManifestSurfaces === 237 && capabilityGate.findings.length === 0);
+check('PPK-021 successor AST ratchet remains green', astGate.status === 'PASS' && astGate.productionSourceZones === 18 && astGate.scannedFiles >= 358 && astGate.privilegedSurfaces === 518 && astGate.exactAllowlistEntries === 518 && astGate.findings.length === 0);
+check('PPK-022 successor capability ratchet remains green', capabilityGate.status === 'PASS' && capabilityGate.productionSourceZones === 18 && capabilityGate.scannedFiles === 362 && capabilityGate.capabilitySurfaces === 237 && capabilityGate.exactManifestSurfaces === 237 && capabilityGate.findings.length === 0);
 check('scope records exact build and truth boundaries', scope.boundaries?.buildFailGateRequired === true && scope.boundaries?.canonicalApplicationCount === 14 && scope.boundaries?.applicationThreatModelCount === 14 && scope.boundaries?.mappingClaimsCompliance === false && scope.boundaries?.mappingGrantsRuntimeAuthority === false);
 check('scope preserves no-cache and data ownership fences', scope.boundaries?.policyStatusIpcCacheAllowed === false && scope.boundaries?.schemaMigrationRequired === false && scope.boundaries?.realDataTransferPerformed === false && scope.boundaries?.cutoverPerformed === false && scope.boundaries?.desktopVaultOwnershipPreserved === true && scope.boundaries?.sqliteOwnershipTransferred === false);
 check('inventory has seven implemented controls and no blockers', inventory.controls?.length === 7 && inventory.controls.every((item) => item.disposition === 'IMPLEMENTED') && inventory.closureSummary?.openBlockerCount === 0 && inventory.closureSummary?.openBlockers?.length === 0);

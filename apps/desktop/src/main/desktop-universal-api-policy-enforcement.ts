@@ -1,12 +1,14 @@
 import {
   ClientDataAccessBoundaryPolicy,
   PlatformPolicyEnforcementPoint,
+  PolicyServiceAvailabilityPolicy,
   assertActivePlatformPolicyTransactionContext,
   type ClientDataAccessBootstrapRequest,
   type PlatformPolicyAuthorizationProvider,
   type PlatformPolicyClusterFence,
   type PlatformPolicyConnectionAuthority,
   type PlatformPolicyIntent,
+  type PolicyServiceAvailabilityDecision,
   type PlatformPolicyReceiptSink
 } from '@ppt/platform-policy';
 import { EnforceClientDataAccessUseCase, GetClientDataAccessBoundaryUseCase } from '@ppt/application';
@@ -21,6 +23,8 @@ export interface DesktopUniversalApiPolicyEnforcementDependencies {
   readonly resolveAuthority: () => PlatformPolicyConnectionAuthority | Promise<PlatformPolicyConnectionAuthority>;
   readonly repositoryPolicyScope: DesktopRepositoryPolicyScope;
   readonly resolveBootstrapClientContext: () => Omit<ClientDataAccessBootstrapRequest, 'schemaVersion' | 'channel' | 'method' | 'transport'>;
+  readonly evaluatePolicyServiceAvailability: () => Promise<PolicyServiceAvailabilityDecision>;
+  readonly onAvailabilityRestricted?: (decision: PolicyServiceAvailabilityDecision) => void;
   readonly clock?: () => string;
 }
 
@@ -47,11 +51,16 @@ const BOOTSTRAP_CHANNELS = new Set([
   'invitations:inspect'
 ]);
 
+export const POLICY_SERVICE_AVAILABILITY_STATUS_CHANNEL = 'system:getPolicyServiceAvailabilityBoundary' as const;
+
 const nonEmpty = (value: unknown, max = 512): value is string =>
   typeof value === 'string' && value.trim() === value && value.length > 0 && value.length <= max;
 
 export const isDesktopPolicyBootstrapChannel = (channel: string): boolean =>
   BOOTSTRAP_CHANNELS.has(channel);
+
+export const isDesktopPolicyServiceAvailabilityStatusChannel = (channel: string): boolean =>
+  channel === POLICY_SERVICE_AVAILABILITY_STATUS_CHANNEL;
 
 export const resolveDesktopUniversalApiIntent = (
   channel: string,
@@ -88,6 +97,9 @@ export class DesktopUniversalApiPolicyEnforcement {
   readonly #clientDataAccessPolicy = new ClientDataAccessBoundaryPolicy();
   readonly #clientDataAccessEnforcement: EnforceClientDataAccessUseCase;
   readonly #clientDataAccessStatus: GetClientDataAccessBoundaryUseCase;
+  readonly #policyServiceAvailabilityPolicy = new PolicyServiceAvailabilityPolicy();
+  readonly #evaluatePolicyServiceAvailability: DesktopUniversalApiPolicyEnforcementDependencies['evaluatePolicyServiceAvailability'];
+  readonly #onAvailabilityRestricted: DesktopUniversalApiPolicyEnforcementDependencies['onAvailabilityRestricted'];
   readonly #resolveBootstrapClientContext: DesktopUniversalApiPolicyEnforcementDependencies['resolveBootstrapClientContext'];
 
   public constructor(dependencies: DesktopUniversalApiPolicyEnforcementDependencies) {
@@ -95,6 +107,7 @@ export class DesktopUniversalApiPolicyEnforcement {
       !dependencies ||
       typeof dependencies.resolveAuthority !== 'function' ||
       typeof dependencies.resolveBootstrapClientContext !== 'function' ||
+      typeof dependencies.evaluatePolicyServiceAvailability !== 'function' ||
       dependencies.authorizationProvider?.decisionAuthority !== 'windows-core-service' ||
       !(dependencies.repositoryPolicyScope instanceof DesktopRepositoryPolicyScope)
     ) {
@@ -103,6 +116,8 @@ export class DesktopUniversalApiPolicyEnforcement {
     this.#clusterFence = dependencies.clusterFence;
     this.#repositoryPolicyScope = dependencies.repositoryPolicyScope;
     this.#resolveBootstrapClientContext = dependencies.resolveBootstrapClientContext;
+    this.#evaluatePolicyServiceAvailability = dependencies.evaluatePolicyServiceAvailability;
+    this.#onAvailabilityRestricted = dependencies.onAvailabilityRestricted;
     this.#clientDataAccessEnforcement = new EnforceClientDataAccessUseCase(this.#clientDataAccessPolicy);
     this.#clientDataAccessStatus = new GetClientDataAccessBoundaryUseCase(this.#clientDataAccessPolicy);
     this.#enforcementPoint = new PlatformPolicyEnforcementPoint({
@@ -131,7 +146,7 @@ export class DesktopUniversalApiPolicyEnforcement {
   public registerClientApplicationServiceChannel(channel: string): void {
     this.#clientDataAccessPolicy.registerApplicationServiceChannel(
       channel,
-      isDesktopPolicyBootstrapChannel(channel)
+      isDesktopPolicyBootstrapChannel(channel) || isDesktopPolicyServiceAvailabilityStatusChannel(channel)
     );
   }
 
@@ -140,7 +155,18 @@ export class DesktopUniversalApiPolicyEnforcement {
   }
 
   public async execute<T>(input: DesktopUniversalApiExecutionInput<T>): Promise<T> {
+    if (isDesktopPolicyServiceAvailabilityStatusChannel(input.channel)) return input.operation();
+    const availability = await this.#evaluatePolicyServiceAvailability();
+    if (availability.mode !== 'read-write') this.#onAvailabilityRestricted?.(availability);
+    if (availability.mode === 'deny') {
+      this.#policyServiceAvailabilityPolicy.assertOperationAllowed('read', availability);
+    }
     if (isDesktopPolicyBootstrapChannel(input.channel)) {
+      const bootstrapIntent = resolveDesktopUniversalApiIntent(input.channel, input.correlationId);
+      this.#policyServiceAvailabilityPolicy.assertOperationAllowed(
+        bootstrapIntent.action === 'read' ? 'read' : 'mutation',
+        availability
+      );
       const binding = this.#resolveBootstrapClientContext();
       return this.#clientDataAccessEnforcement.executeBootstrap({
         correlationId: input.correlationId,

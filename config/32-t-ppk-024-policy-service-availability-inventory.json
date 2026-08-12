@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "step": "32-T",
+  "requirement": "PPK-024",
+  "status": "COMPLETE",
+  "completionClaimed": true,
+  "engine": {
+    "canonicalModel": "policy-service-availability",
+    "modes": ["read-write", "read-only", "deny"],
+    "observationMaximumAgeMs": 30000,
+    "maximumFutureSkewMs": 5000,
+    "statusChannel": "system:getPolicyServiceAvailabilityBoundary",
+    "latestDatabaseMigration": 77
+  },
+  "controls": [
+    {
+      "id": "live-authenticated-core-health-attestation",
+      "classification": "PER_EVALUATION_KERNEL_HMAC_SELF_VERIFICATION",
+      "paths": [
+        "apps/core-service/src/core-service-runtime.ts",
+        "apps/desktop/src/main/core-service-application-adapter.ts",
+        "apps/desktop/src/main/policy-service-availability-application-adapter.ts"
+      ],
+      "control": "Her availability değerlendirmesi authenticated Core Service health çağrısından canlı gözlem alır; Core Service kendi policy paketini kernel HMAC doğrulayıcısıyla yeniden doğrular ve gözlem zamanı aynı doğrulama çağrısından gelir.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "exact-freshness-and-package-pin",
+      "classification": "THIRTY_SECOND_FRESHNESS_AND_STARTUP_PIN",
+      "paths": [
+        "packages/platform-policy/src/policy-service-availability-policy.ts",
+        "apps/desktop/src/main/core-service-startup-connection.ts"
+      ],
+      "control": "30.000 ms kabul edilir, 30.001 ms stale olarak reddedilir; 5.000 ms gelecek sapması sınırdır. Policy sürümü, paket sürümü ve paket SHA-256 değeri authenticated startup pininden sapamaz.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "fail-closed-deny-matrix",
+      "classification": "SENSITIVE_READ_AND_MUTATION_DENY",
+      "paths": [
+        "packages/platform-policy/src/policy-service-availability-policy.ts",
+        "packages/application/src/policy-service-availability-use-cases.ts"
+      ],
+      "control": "Unavailable, malformed, invalid-signature, version/hash mismatch, future, stale, not-ready ve unsafe durumlar hassas okuma ile mutation callback'ini açmadan DENY edilir.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "coherent-read-only-mode",
+      "classification": "FRESH_VERIFIED_NON_WRITABLE_ONLY",
+      "paths": [
+        "packages/platform-policy/src/policy-service-availability-policy.ts",
+        "packages/platform-policy/src/policy-enforcement-point.ts",
+        "apps/core-service/src/core-service-runtime.ts"
+      ],
+      "control": "READ_ONLY yalnız fresh, imzası doğrulanmış ve tutarlı ready/degraded non-writable durumda hassas okumayı açar; mutation Core Service'in imzalı CLUSTER_NOT_WRITABLE kararıyla reddedilir.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "universal-desktop-and-pep-defense",
+      "classification": "BOOTSTRAP_INCLUDED_DOUBLE_ENFORCEMENT",
+      "paths": [
+        "apps/desktop/src/main/desktop-universal-api-policy-enforcement.ts",
+        "packages/platform-policy/src/policy-enforcement-point.ts",
+        "apps/desktop/src/main/main.ts"
+      ],
+      "control": "Status istisnası dışındaki normal ve bootstrap işlemleri universal availability kapısından geçer; PEP doğrudan kullanım için ikinci fail-closed savunmayı uygular. Observer yalnız explicit windows-core-service provider'ında zorunludur; eksikliği composition sırasında reddedilir.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "cache-and-offline-lease-fence",
+      "classification": "RESTRICTED_MODE_CACHE_LOCK",
+      "paths": [
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/ipc-read-sharing.ts"
+      ],
+      "control": "READ_ONLY veya DENY geçişinde paylaşılmış IPC sonuçları temizlenir ve hassas offline cache kilitlenir; PPK-012 lease'i invalid/stale online policy'yi yetkili hale getirmez.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "content-free-status-boundary",
+      "classification": "EXACT_ZERO_ARGUMENT_NO_CACHE_IPC",
+      "paths": [
+        "packages/domain/src/policy-service-availability.ts",
+        "packages/application/src/policy-service-availability-use-cases.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/main/ipc-read-sharing.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/renderer/App.tsx"
+      ],
+      "control": "Renderer yalnız content-free mode/reason/freshness göstergesi alır. Exact status kanalı sıfır argümanlıdır, cache edilmez ve policy paket hash'i ya da kaynak yolu taşımaz.",
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "non-authority-and-no-schema-change",
+      "classification": "VOLATILE_RUNTIME_POSTURE_ONLY",
+      "paths": [
+        "packages/domain/src/policy-service-availability.ts",
+        "packages/database/src/family-database-migrations.ts"
+      ],
+      "control": "Availability görünümü, tarihsel receipt ve başlangıç snapshotı çalışma yetkisi vermez. Yeni persistence/migration, veri taşıma, backfill, cutover veya SQLite/vault sahiplik değişimi yapılmaz.",
+      "disposition": "IMPLEMENTED"
+    }
+  ],
+  "closureSummary": {
+    "implementedControls": 8,
+    "openProductionPathCount": 0,
+    "openProductionPaths": [],
+    "openBlockerCount": 0,
+    "openBlockers": [],
+    "finalValidationPending": false
+  }
+}

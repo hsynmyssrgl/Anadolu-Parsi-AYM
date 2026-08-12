@@ -106,6 +106,10 @@ export class CoreServiceRuntime {
   }
 
   public markReady(role: ClusterRole = 'standalone'): void {
+    if (!this.#policyPackageVerified()) {
+      this.enterSafeMode('POLICY_PACKAGE_SIGNATURE_INVALID');
+      return;
+    }
     this.#writeFenceEpoch += 1;
     this.#role = role;
     this.#lifecycle = 'ready';
@@ -143,10 +147,12 @@ export class CoreServiceRuntime {
   }
 
   public authorize(request: PlatformPolicyRequest): PlatformPolicyDecision {
+    this.#assertPolicyDecisionServiceAvailable();
     return this.#kernel.evaluate({ ...request, clusterWritable: request.clusterWritable && this.#writable });
   }
 
   public authorizeWithReceipt(request: PlatformPolicyRequest, nonce: string = this.#nonceFactory()): AuthorizedPolicyResult {
+    this.#assertPolicyDecisionServiceAvailable();
     const fence = this.#fenceSnapshot();
     const effectiveRequest = Object.freeze({ ...request, clusterWritable: request.clusterWritable && fence.writable });
     return Object.freeze({
@@ -157,6 +163,9 @@ export class CoreServiceRuntime {
   }
 
   public verifyReceiptForRequest(request: PlatformPolicyRequest, receipt: PlatformPolicyReceipt): PolicyReceiptVerificationResult {
+    if (!this.#policyDecisionServiceAvailable()) {
+      return Object.freeze({ valid: false, fence: this.#fenceSnapshot() });
+    }
     return Object.freeze({
       valid: this.#kernel.verifyReceiptForRequest(receipt, request),
       fence: this.#fenceSnapshot()
@@ -182,6 +191,7 @@ export class CoreServiceRuntime {
       writeFenceEpoch: this.#writeFenceEpoch,
       policyVersion: this.#policyVersion,
       policyPackage: this.#kernel.policyPackage,
+      policyPackageVerified: this.#policyPackageVerified(),
       startedAt: this.#startedAt,
       observedAt: this.#clock(),
       reasons: Object.freeze([...this.#reasons])
@@ -287,5 +297,27 @@ export class CoreServiceRuntime {
 
   #fenceSnapshot(): PlatformPolicyClusterFenceSnapshot {
     return Object.freeze({ writable: this.#writable, epoch: this.#writeFenceEpoch });
+  }
+
+  #policyPackageVerified(): boolean {
+    try {
+      return this.#kernel.verifyPolicyPackage(this.#kernel.policyPackage) === true;
+    } catch {
+      return false;
+    }
+  }
+
+  #policyDecisionServiceAvailable(): boolean {
+    return (this.#lifecycle === 'ready' || this.#lifecycle === 'degraded')
+      && this.#policyPackageVerified();
+  }
+
+  #assertPolicyDecisionServiceAvailable(): void {
+    if (this.#policyDecisionServiceAvailable()) return;
+    throw new PlatformPolicyEnforcementError(
+      'POLICY_DECISION_UNAVAILABLE',
+      'Core Service policy decision authority is unavailable or its signed package is invalid',
+      { availabilityStage: 'POLICY_AUTHORIZATION' }
+    );
   }
 }

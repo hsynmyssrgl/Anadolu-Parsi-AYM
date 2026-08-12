@@ -24,6 +24,7 @@ export interface CoreServiceHealthContract {
   readonly writeFenceEpoch: number;
   readonly policyVersion: string;
   readonly policyPackage: PlatformPolicyPackage;
+  readonly policyPackageVerified: boolean;
   readonly startedAt: string;
   readonly observedAt: string;
   readonly reasons: readonly string[];
