@@ -10,8 +10,8 @@
     {
       "id": "29-A",
       "title": "Universal fail-closed rule enforcement lock",
-      "status": "IN_PROGRESS",
-      "validationStatus": "PENDING",
+      "status": "COMPLETED",
+      "validationStatus": "PASS",
       "localEvidence": [
         "artifacts/validation/canonical-rule-registry-gate.json",
         "artifacts/validation/user-decision-ledger-gate.json",
@@ -2186,8 +2186,8 @@
       "id": "33-F",
       "title": "Governed home spaces, utility consumption, belongings warranty and service workflow",
       "scopeRequirement": "EXT-030,EXT-032",
-      "status": "COMPLETED",
-      "validationStatus": "PASS",
+      "status": "IN_PROGRESS",
+      "validationStatus": "PENDING",
       "localEvidence": [
         "config/33-f-home-inventory-utility-belongings-scope.json",
         "config/33-f-home-inventory-utility-belongings-inventory.json",
