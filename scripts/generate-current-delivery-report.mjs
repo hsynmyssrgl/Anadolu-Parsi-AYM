@@ -1,3 +1,4 @@
+import { spawnSync } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 
@@ -7,7 +8,16 @@ if (sourceRoot !== resolve('C:\\PPT\\AYM', '06_KOD', 'app')) throw new Error(`Un
 
 const readJson = async (path) => JSON.parse(await readFile(path, 'utf8'));
 const truth = 'Bu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır.';
-const [contract, release, scope, decisions, audit, capacity, receipt, manifestSummary, completion30Z, completion31A, completion31B, completion31C, completion31D, completion31E] = await Promise.all([
+const verifyProtection = (script) => {
+  const result = spawnSync(process.execPath, [script, 'verify'], { cwd: sourceRoot, encoding: 'utf8', windowsHide: true });
+  if (result.status !== 0) {
+    throw new Error(`Current-source protection freshness verification failed (${script}): ${result.stderr || result.stdout}`);
+  }
+};
+verifyProtection('scripts/protect-authoritative-source.mjs');
+verifyProtection('scripts/protect-authoritative-source-external.mjs');
+
+const [contract, release, scope, decisions, audit, capacity, receipt, manifestSummary, completion30Z, completion31A, completion31B, completion31C, completion31D, completion31E, completion33D, completion33E] = await Promise.all([
   readJson(resolve(sourceRoot, 'config', 'delivery-report-contract.json')),
   readJson(resolve(sourceRoot, 'config', 'release-ledger.json')),
   readJson(resolve(sourceRoot, 'config', 'accepted-scope-registry.json')),
@@ -21,7 +31,9 @@ const [contract, release, scope, decisions, audit, capacity, receipt, manifestSu
   readJson(resolve(sourceRoot, 'artifacts', 'checkpoints', '31-B_COMPLETION_RECORD.json')),
   readJson(resolve(sourceRoot, 'artifacts', 'checkpoints', '31-C_COMPLETION_RECORD.json')),
   readJson(resolve(sourceRoot, 'artifacts', 'checkpoints', '31-D_COMPLETION_RECORD.json')),
-  readJson(resolve(sourceRoot, 'artifacts', 'checkpoints', '31-E_COMPLETION_RECORD.json'))
+  readJson(resolve(sourceRoot, 'artifacts', 'checkpoints', '31-E_COMPLETION_RECORD.json')),
+  readJson(resolve(sourceRoot, 'artifacts', 'checkpoints', '33-D_COMPLETION_RECORD.json')),
+  readJson(resolve(sourceRoot, 'artifacts', 'checkpoints', '33-E_COMPLETION_RECORD.json'))
 ]);
 
 if (release.current.status !== 'IN_PROGRESS') throw new Error('Current release must remain IN_PROGRESS.');
@@ -29,6 +41,14 @@ if (receipt.externalLibraryReceiptStatus !== 'PASS' || receipt.officialCompletio
   || receipt.externalReceipt?.storageBackend !== 'EXTERNAL_USB_D_DRIVE'
   || !String(receipt.externalReceipt?.externalPath ?? '').startsWith('D:\\AYM_LIBRARY\\')) {
   throw new Error('Current-source external protection truth boundary mismatch.');
+}
+const expectedDerivedDeliveryExclusions = [
+  'artifacts/deliveries/Anadolu_Parsi_Aile_Yasam_Merkezi_Bronze_04.08.2026.29.json',
+  'artifacts/reports/DELIVERY_STATUS_04.08.2026.29.json',
+  'artifacts/validation/delivery-report-contract-v2.json'
+].sort();
+if (JSON.stringify(receipt.excludedDerivedDeliveryFiles) !== JSON.stringify(expectedDerivedDeliveryExclusions)) {
+  throw new Error('Current-source protection does not exclude only the exact self-referential delivery outputs.');
 }
 if (completion31D.status !== 'PASS'
   || completion31D.officialStepStatus !== 'COMPLETED'
@@ -42,6 +62,30 @@ if (completion31E.status !== 'PASS'
   || completion31E.officialCompletionClaimed !== true
   || completion31E.storageBackend !== 'EXTERNAL_USB_D_DRIVE') {
   throw new Error('Focused 31-E external Library receipt truth boundary mismatch.');
+}
+if (completion33D.status !== 'PASS'
+  || completion33D.officialStepStatus !== 'COMPLETED'
+  || completion33D.persistentReceiptStatus !== 'PASS'
+  || completion33D.officialCompletionClaimed !== true
+  || completion33D.requirementCompletionClaimed !== true
+  || completion33D.storageBackend !== 'EXTERNAL_USB_D_DRIVE'
+  || completion33D.externalInventory?.closureSealRequired !== true) {
+  throw new Error('Focused 33-D controlled-import external Library receipt truth boundary mismatch.');
+}
+if (completion33E.status !== 'PASS'
+  || completion33E.officialStepStatus !== 'COMPLETED'
+  || completion33E.persistentReceiptStatus !== 'PASS'
+  || completion33E.officialCompletionClaimed !== true
+  || completion33E.requirementCompletionClaimed !== true
+  || completion33E.storageBackend !== 'EXTERNAL_USB_D_DRIVE'
+  || completion33E.externalInventory?.closureSealRequired !== true
+  || completion33E.dataSource !== 'manual'
+  || completion33E.externalRegistryLookup !== 'not_performed'
+  || completion33E.providerContact !== 'not_performed'
+  || completion33E.paymentExecution !== 'not_performed'
+  || completion33E.documentContentExposure !== 'not_performed'
+  || completion33E.networkEgressAdded !== false) {
+  throw new Error('Focused 33-E managed-life external Library receipt truth boundary mismatch.');
 }
 if (completion31B.status !== 'PASS'
   || completion31B.officialStepStatus !== 'COMPLETED'
@@ -69,22 +113,37 @@ if (completion31A.status !== 'PASS'
 }
 const completedRequirementIds = scope.requirements.filter((item) => item.status === 'COMPLETE').map((item) => item.id);
 const completedDecisionIds = decisions.decisions.filter((item) => item.status === 'ACTIVE').map((item) => item.id);
-const requiredFinanceDecisionIds = ['DEC-211', 'DEC-212', 'DEC-213', 'DEC-214', 'DEC-215'];
+const requiredLifecycleDecisionIds = ['DEC-211', 'DEC-212', 'DEC-213', 'DEC-214', 'DEC-215', 'DEC-216'];
 const requiredControlledImportRequirementIds = ['B4-13', 'B4-14'];
+const requiredManagedLifeRequirementIds = ['B5-04', 'EXT-031', 'EXT-034'];
 const required33DGateScripts = [
   'scripts/verify-b4-controlled-import-open-banking-boundary.mjs',
   'scripts/verify-33-d-b4-controlled-import-open-banking-contract.mjs',
-  'scripts/verify-33-d-b4-controlled-import-open-banking-runtime.mjs'
+  'scripts/verify-33-d-b4-controlled-import-open-banking-runtime.mjs',
+  'scripts/verify-33-d-controlled-import-open-banking-completion.mjs'
 ];
-if (!requiredFinanceDecisionIds.every((id) => completedDecisionIds.includes(id))) {
-  throw new Error('Current delivery report requires active DEC-211 through DEC-215 finance decisions.');
+const required33EGateScripts = [
+  'scripts/verify-b5-category-life-home-vehicle-boundary.mjs',
+  'scripts/verify-33-e-b5-category-life-home-vehicle-contract.mjs',
+  'scripts/verify-33-e-b5-category-life-home-vehicle-runtime.mjs',
+  'scripts/verify-33-e-b5-category-life-home-vehicle-completion.mjs'
+];
+if (!requiredLifecycleDecisionIds.every((id) => completedDecisionIds.includes(id))) {
+  throw new Error('Current delivery report requires active DEC-211 through DEC-216 decisions.');
 }
 if (!requiredControlledImportRequirementIds.every((id) => completedRequirementIds.includes(id))) {
   throw new Error('Current delivery report requires B4-13 and B4-14 COMPLETE.');
 }
+if (!requiredManagedLifeRequirementIds.every((id) => completedRequirementIds.includes(id))) {
+  throw new Error('Current delivery report requires B5-04, EXT-031 and EXT-034 COMPLETE.');
+}
 if (!required33DGateScripts.every((script) => audit.gates.current
   .some((gate) => gate.script === script && gate.status === 'PASS'))) {
   throw new Error('Current delivery report requires the 33-D boundary, contract and runtime PASS chain.');
+}
+if (!required33EGateScripts.every((script) => audit.gates.current
+  .some((gate) => gate.script === script && gate.status === 'PASS'))) {
+  throw new Error('Current delivery report requires the 33-E boundary, contract, runtime and completion PASS chain.');
 }
 const validationResults = [
   ...audit.gates.current.map((gate) => ({ name: gate.script, actualStatus: gate.status, reportedAs: gate.status })),
@@ -95,6 +154,8 @@ const validationResults = [
   { name: 'Focused 31-C external persistent USB Library receipt', actualStatus: 'PASS', reportedAs: 'PASS' },
   { name: 'Focused 31-D external persistent USB Library receipt', actualStatus: 'PASS', reportedAs: 'PASS' },
   { name: 'Focused 31-E external persistent USB Library receipt', actualStatus: 'PASS', reportedAs: 'PASS' },
+  { name: 'Focused 33-D controlled-import external persistent USB Library receipt', actualStatus: 'PASS', reportedAs: 'PASS' },
+  { name: 'Focused 33-E managed-life external persistent USB Library receipt', actualStatus: 'PASS', reportedAs: 'PASS' },
   { name: 'Current authoritative source external protection', actualStatus: 'PASS', reportedAs: 'PASS' },
   { name: 'Historical 29-D5 verifier', actualStatus: audit.gates.historical29D5.status, reportedAs: audit.gates.historical29D5.status, classification: 'HISTORICAL_ONLY' }
 ];
@@ -126,6 +187,7 @@ const report = {
     ,'DEC-213 B4-08/B4-09 manual and non-executing loan management closure'
     ,'DEC-214 B4-10/B4-11/B4-12 finance planning, portfolio and per-currency analytics closure'
     ,'DEC-215 B4-13/B4-14 controlled import and network-free OHVPS adapter closure'
+    ,'DEC-216 B5-04/EXT-031/EXT-034 category-specific life, home and vehicle workflow closure'
   ],
   completedRequirementIds,
   completedDecisionIds,
@@ -140,34 +202,64 @@ const report = {
     'config/33-c-b4-finance-planning-portfolio-analytics-scope.json',
     'config/33-d-b4-controlled-import-open-banking-scope.json',
     'config/33-d-b4-controlled-import-open-banking-inventory.json',
+    'config/33-e-b5-category-life-home-vehicle-scope.json',
+    'config/33-e-b5-category-life-home-vehicle-inventory.json',
     'docs/decisions/DEC-152..DEC-154',
     'docs/decisions/DEC-211-b4-banking-foundation.md',
     'docs/decisions/DEC-212-b4-payment-card-management.md',
     'docs/decisions/DEC-213-b4-loan-management.md',
     'docs/decisions/DEC-214-b4-finance-planning-portfolio-analytics.md',
     'docs/decisions/DEC-215-b4-controlled-import-open-banking.md',
+    'docs/decisions/DEC-216-b5-category-life-home-vehicle.md',
     'docs/security/THREAT_MODEL_33_D_B4_CONTROLLED_IMPORT_OPEN_BANKING.md',
+    'docs/security/THREAT_MODEL_33_E_B5_CATEGORY_LIFE_HOME_VEHICLE.md',
     'docs/audit/33-D_B4_CONTROLLED_IMPORT_OPEN_BANKING_UST_KAPANIS.md',
+    'docs/audit/33-E_B5_CATEGORY_LIFE_HOME_VEHICLE_UST_KAPANIS.md',
     'packages/domain/src/app-data.ts',
     'packages/application/src/finance-use-cases.ts',
+    'packages/application/src/life-use-cases.ts',
+    'packages/application/src/life-security.ts',
     'packages/database/src/family-database-migrations.ts',
     'packages/repository-contracts/src/finance-repository.ts',
+    'packages/repository-contracts/src/life-repository.ts',
     'packages/repositories/src/finance-repository.ts',
+    'packages/repositories/src/life-repository.ts',
     'packages/repositories/src/ai-consent-repository.ts',
     'packages/repositories/src/person-lifecycle-repository.ts',
     'apps/desktop/src/main/finance-import-file-session.ts',
     'apps/desktop/src/main/finance-application-adapter.ts',
+    'apps/desktop/src/main/life-application-adapter.ts',
+    'apps/desktop/src/main/life-production-policy-runtime.ts',
     'apps/desktop/src/main/data-store.ts',
     'apps/desktop/src/main/main.ts',
     'apps/desktop/src/main/ipc-integration-policy.ts',
     'apps/desktop/src/main/preload.ts',
     'apps/desktop/src/renderer/FinanceImportPanel.tsx',
+    'apps/desktop/src/renderer/ManagedLifePanel.tsx',
     'packages/application/tests/finance-controlled-import-open-banking.test.ts',
     'apps/desktop/tests/b4-finance-import-ipc-integration.test.ts',
     'apps/desktop/tests/finance-import-file-session.test.ts',
+    'packages/application/tests/managed-life-assets.test.ts',
+    'packages/repositories/managed-life-repository-policy.test.ts',
+    'apps/desktop/tests/b5-managed-life-ipc-integration.test.ts',
     'artifacts/validation/33-D-b4-controlled-import-open-banking-boundary.json',
     'artifacts/validation/33-D-b4-controlled-import-open-banking-contract.json',
     'artifacts/validation/33-D-b4-controlled-import-open-banking-runtime.json',
+    'scripts/finalize-33-d-controlled-import-open-banking-external-receipt.mjs',
+    'scripts/verify-33-d-controlled-import-open-banking-completion.mjs',
+    'artifacts/validation/33-E-b5-category-life-home-vehicle-boundary.json',
+    'artifacts/validation/33-E-b5-category-life-home-vehicle-contract.json',
+    'artifacts/validation/33-E-b5-category-life-home-vehicle-runtime.json',
+    'scripts/finalize-33-e-b5-category-life-home-vehicle-external-receipt.mjs',
+    'scripts/verify-33-e-b5-category-life-home-vehicle-completion.mjs',
+    'artifacts/checkpoints/33-D_LIBRARY_RECEIPT.json',
+    'artifacts/checkpoints/33-D_COMPLETION_RECORD.json',
+    'artifacts/validation/33-D_LIBRARY_CLOSURE_INVENTORY_VERIFICATION.json',
+    'artifacts/checkpoints/33-E_LIBRARY_RECEIPT.json',
+    'artifacts/checkpoints/33-E_COMPLETION_RECORD.json',
+    'artifacts/validation/33-E_LIBRARY_CLOSURE_INVENTORY_VERIFICATION.json',
+    'scripts/protect-authoritative-source.mjs',
+    'scripts/protect-authoritative-source-external.mjs',
     'scripts/audit-bronze-current-state.mjs',
     'scripts/update-aym-governance-incrementally.mjs',
     'scripts/generate-current-delivery-report.mjs',
@@ -205,14 +297,14 @@ const report = {
   handoffPromptStatus: capacity.handoff ?? 'NOT_REQUIRED_WITHOUT_ACTUAL_HARD_STOP',
   sourceArchive: receipt.backup.path,
   sourceSha256: receipt.treeSha256,
-  sourceReceiptBoundary: 'The focused official 30-Z through 31-E checkpoints and the latest editable C: source tree are independently externally bound on D:.',
+  sourceReceiptBoundary: 'The focused official 30-Z through 31-E checkpoints, the official 33-D controlled-import closure, the official 33-E managed-life closure, and the current editable C: source tree are independently externally bound on D:. The delivery report files are derived outputs excluded from the source hash to prevent self-reference.',
   manifest: '00_PROJE/MASTER_MANIFEST.json',
   manifestSummary: {
     path: '00_PROJE/MANIFEST_OZETI.json',
     updateMode: manifestSummary.updateMode,
     liveFileCount: manifestSummary.liveFileCount
   },
-  persistentLibraryPath: completion31E.libraryPath,
+  persistentLibraryPath: completion33E.libraryPath,
   persistentLibraryUploadStatus: 'PASS',
   completeDocumentIndex: 'artifacts/manifests/ALL_DOCUMENTS_INDEX.json',
   nextOfficialTask: nextTask,
@@ -222,7 +314,11 @@ const report = {
   official31CCompletionClaimed: true,
   official31DCompletionClaimed: true,
   official31ECompletionClaimed: true,
+  official33DCompletionClaimed: true,
+  official33ECompletionClaimed: true,
   currentSourceExternalProtectionStatus: 'PASS',
+  currentSourceExternalProtectionVerification: 'LIVE_LOCAL_TREE_AND_EXTERNAL_D_READBACK_PASS',
+  sourceProtectionExcludedDerivedFiles: receipt.excludedDerivedDeliveryFiles,
   newBuildAssigned: false,
   mandatoryTruthSentence: truth
 };
@@ -242,4 +338,4 @@ const userVisibleTarget = resolve(sourceRoot, 'artifacts', 'deliveries', report.
 await mkdir(dirname(userVisibleTarget), { recursive: true });
 await writeFile(userVisibleTarget, content, 'utf8');
 if (await readFile(userVisibleTarget, 'utf8') !== content) throw new Error('User-visible delivery report readback mismatch.');
-console.log(`Current delivery report: PASS (${contract.requiredFields.length} required fields; 30-Z through 31-E receipts PASS; current-source external protection PASS on D:; new Build false).`);
+console.log(`Current delivery report: PASS (${contract.requiredFields.length} required fields; 30-Z through 31-E plus 33-D and 33-E receipts PASS; live current-source external protection PASS on D:; new Build false).`);

@@ -419,7 +419,10 @@ const report = {
   checkpoint31S: advancedCheckpoint(step31SReport, official31SComplete),
   checkpoint31T: advancedCheckpoint(step31TReport, official31TComplete),
   currentSourceExternalProtection: {
-    status: sourceProtection.externalLibraryReceiptStatus,
+    status: 'SEPARATE_LIVE_DELIVERY_GATE_REQUIRED',
+    snapshotReceiptStatus: sourceProtection.externalLibraryReceiptStatus,
+    freshnessVerifiedInThisAudit: false,
+    freshnessVerifier: 'scripts/generate-current-delivery-report.mjs invokes local and external live source-protection verification',
     officialCompletionClaimed: sourceProtection.officialCompletionClaimed,
     storageBackend: sourceProtection.externalReceipt?.storageBackend ?? 'UNAVAILABLE',
     externalPath: sourceProtection.externalReceipt?.externalPath ?? null
@@ -512,6 +515,8 @@ Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 - Harici persistent receipt: ${report.checkpoint30Z.persistentReceiptStatus}
 - Resmi 30-Z tamamlanma iddiasi: ${report.checkpoint30Z.officialCompletionClaimed}
 - Guncel C kaynak agaci harici koruma: ${report.currentSourceExternalProtection.status}
+- Kayitli makbuz snapshot durumu: ${report.currentSourceExternalProtection.snapshotReceiptStatus}
+- Bu audit icinde canli tazelik dogrulamasi: ${report.currentSourceExternalProtection.freshnessVerifiedInThisAudit}
 - Harici kaynak backend: ${report.currentSourceExternalProtection.storageBackend}
 
 ## 31-A siniri

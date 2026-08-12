@@ -5,7 +5,7 @@
   "rule": "PR-171",
   "policy": "ONE_IN_PROGRESS_PREVIOUS_MUST_HAVE_PASS_AND_PERSISTENT_RECEIPT",
   "workflowStatus": "IN_PROGRESS",
-  "currentStep": "33-D",
+  "currentStep": "33-E",
   "steps": [
     {
       "id": "29-A",
@@ -2158,7 +2158,7 @@
       "id": "33-E",
       "title": "B5 category-specific life, home and vehicle renewal and document workflow",
       "scopeRequirement": "B5-04,EXT-031,EXT-034",
-      "status": "PENDING",
+      "status": "IN_PROGRESS",
       "validationStatus": "PENDING",
       "localEvidence": [
         "config/33-e-b5-category-life-home-vehicle-inventory.json",
@@ -2172,10 +2172,20 @@
       ],
       "persistentReceiptStatus": "PENDING",
       "completionTransitionStatus": "PENDING"
+    },
+    {
+      "id": "33-F",
+      "title": "Next governed multi-requirement Bronze slice after 33-E",
+      "scopeRequirement": "AUTO_PRIORITY_SELECTION",
+      "status": "PENDING",
+      "validationStatus": "PENDING",
+      "localEvidence": [],
+      "persistentReceiptStatus": "PENDING",
+      "completionTransitionStatus": "PENDING"
     }
   ],
   "recoveryAuthority": "NEW_CHAT_HANDOFF_Bronze_04.08.2026.29.md",
   "recoveryReason": "29-D_FAILED_POSTFLIGHT_EXIT_CODE_1_SPLIT_PER_PR-171",
-  "updatedAt": "2026-08-12T19:23:55.474Z",
-  "segmentationNote": "33-D is immutable COMPLETED/PASS with exact D: USB hash/size readback. 33-E remains PENDING until the governed step transition is applied."
+  "updatedAt": "2026-08-12T20:27:52.601Z",
+  "segmentationNote": "33-D is immutable COMPLETED/PASS with exact D: USB hash/size readback. 33-E is the sole IN_PROGRESS successor for the B5-04, EXT-031 and EXT-034 category-specific life, home and vehicle workflow; its persistent receipt and completion transition remain pending."
 }

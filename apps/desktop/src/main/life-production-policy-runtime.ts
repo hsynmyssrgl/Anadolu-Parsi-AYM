@@ -712,12 +712,25 @@ const findLifeResourceForPolicyResolution = (
       resourceId
     );
     if (!found.ok) return found;
-    return ok(found.value
+    if (found.value) {
+      return ok(Object.freeze({
+        familyId: found.value.familyId,
+        ownerPersonId: found.value.ownerPersonId,
+        privacy: found.value.privacy,
+        stateFingerprint: stable(found.value)
+      }));
+    }
+    const managed = dependencies.lifePolicyResourceRepository.findManagedLifeProfileForPolicyResolution(
+      execution,
+      resourceId
+    );
+    if (!managed.ok) return managed;
+    return ok(managed.value
       ? Object.freeze({
-          familyId: found.value.familyId,
-          ownerPersonId: found.value.ownerPersonId,
-          privacy: found.value.privacy,
-          stateFingerprint: stable(found.value)
+          familyId: managed.value.familyId,
+          ownerPersonId: managed.value.ownerPersonId,
+          privacy: managed.value.privacy,
+          stateFingerprint: stable(managed.value)
         })
       : null);
   }
@@ -799,6 +812,31 @@ const loadLifeResourceSnapshotInTransaction = (
         familyId: context.familyId
       })
     }));
+  }
+
+  const intent = requestedIntent;
+  if (intent.action === 'update') {
+    if (requestedIntent.ownerPersonId !== undefined || requestedIntent.privacy !== undefined) {
+      return invalidAuthority(context, 'Life update policy metadata must be resolved from the durable parent profile');
+    }
+    const existing = findLifeResourceForPolicyResolution(
+      dependencies,
+      execution,
+      requestedIntent.resourceType,
+      requestedIntent.resourceId
+    );
+    if (!existing.ok) return existing;
+    if (!existing.value || existing.value.familyId !== context.familyId) {
+      return invalidAuthority(context, 'Life policy update parent does not exist in the active family');
+    }
+    const resource = Object.freeze({
+      type: requestedIntent.resourceType,
+      id: requestedIntent.resourceId,
+      familyId: existing.value.familyId,
+      ownerPersonId: existing.value.ownerPersonId,
+      sensitivity: sensitivityFor(existing.value.privacy)
+    });
+    return ok(Object.freeze({ resource, stateFingerprint: existing.value.stateFingerprint }));
   }
 
   return invalidAuthority(context, 'Life policy intent does not identify a supported operation');
@@ -927,6 +965,7 @@ const ensureRuntimeConfiguration = (dependencies: LifeProductionPolicyRuntimeDep
     || typeof dependencies.permissionRepository?.listActiveForSubject !== 'function'
     || typeof dependencies.trustedDeviceRepository?.findActive !== 'function'
     || typeof dependencies.lifePolicyResourceRepository?.findLifeRecordForPolicyResolution !== 'function'
+    || typeof dependencies.lifePolicyResourceRepository?.findManagedLifeProfileForPolicyResolution !== 'function'
     || typeof dependencies.personRepository?.findById !== 'function'
     || typeof dependencies.deviceIdentityProvider?.snapshot !== 'function'
     || typeof dependencies.authorizationProvider?.authorize !== 'function'

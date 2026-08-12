@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "step": "33-E",
+  "requirements": ["B5-04", "EXT-031", "EXT-034"],
+  "status": "COMPLETE",
+  "surfaces": [
+    { "id": "domain-contract", "paths": ["packages/domain/src/app-data.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "application-validation-and-use-cases", "paths": ["packages/application/src/life-use-cases.ts", "packages/application/src/life-security.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "repository-contract", "paths": ["packages/repository-contracts/src/life-repository.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "sqlite-repository", "paths": ["packages/repositories/src/life-repository.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "migration-83", "paths": ["packages/database/src/family-database-migrations.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "life-policy-composition", "paths": ["apps/desktop/src/main/life-application-adapter.ts", "apps/desktop/src/main/life-production-policy-runtime.ts", "apps/desktop/src/main/data-store.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "typed-ipc-preload", "paths": ["apps/desktop/src/main/main.ts", "apps/desktop/src/main/ipc-integration-policy.ts", "apps/desktop/src/main/preload.ts", "apps/desktop/src/renderer/global.d.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "life-center-ui", "paths": ["apps/desktop/src/renderer/App.tsx", "apps/desktop/src/renderer/ManagedLifePanel.tsx"], "disposition": "IMPLEMENTED" },
+    { "id": "targeted-tests", "paths": ["packages/application/tests/managed-life-assets.test.ts", "packages/repositories/managed-life-repository-policy.test.ts", "apps/desktop/tests/b5-managed-life-ipc-integration.test.ts", "apps/desktop/tests/life-policy-enforcement-runtime.test.ts", "apps/desktop/tests/life-cross-projection-privacy-runtime.test.ts", "apps/desktop/tests/data-store.test.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "governance-evidence", "paths": ["docs/decisions/DEC-216-b5-category-life-home-vehicle.md", "docs/security/THREAT_MODEL_33_E_B5_CATEGORY_LIFE_HOME_VEHICLE.md", "docs/audit/33-E_B5_CATEGORY_LIFE_HOME_VEHICLE_UST_KAPANIS.md"], "disposition": "IMPLEMENTED" }
+  ],
+  "ipcChannels": ["life:getManagedWorkspace", "life:recordManagedItem"],
+  "networkChannels": [],
+  "prohibitedPayloadOrProjectionFields": ["password", "token", "secret", "credential", "pan", "cvv", "pin", "filePath", "base64", "archivePath", "archiveFileName", "archiveHash", "policyReceipt"],
+  "latestDatabaseMigration": 83,
+  "openRequirements": [],
+  "openBlockers": []
+}

@@ -28,6 +28,21 @@ Bir çelişki olduğunda aşağıdaki sıra uygulanır:
 Eski kararlar silinmez; tarihsel kanıt olarak korunur. Ancak aktif ürün davranışını
 belirleyemez. Çelişki sessizce birleştirilmez; değişiklik kaydına işlenir.
 
+## DEC-216 — Kategoriye özgü yaşam, ev ve araç defteri
+
+33-E ile B5-04, EXT-031 ve EXT-034 Migration 83 ile tek append-only
+`life_managed_ledger` üzerinde
+kök profil, faaliyet ve opaque belge bağlantısı olarak birlikte uygulanır. Kök kayıt
+exact `life_record/create`, alt kayıtlar exact `life_record/update` makbuzuna
+bağlanır; family/owner/privacy kapsamı aynen miras alınır. Ev için kira, tapu, DASK,
+konut sigortası ve servis; araç için ruhsat, sigorta, muayene, bakım, yakıt, şarj ve
+gider akışları manual-only çalışır. Dış sicil sorgusu, sağlayıcı iletişimi, belge
+içeriği ifşası veya ödeme icrası yapılmaz. Ayrıntılı karar:
+`docs/decisions/DEC-216-b5-category-life-home-vehicle.md`
+
+PPK-021 güncel ratchet 545 exact yüzey ve 277 use-case composition yüzeyidir;
+PPK-022 yeni yetenek açılmadan 242'de kalır.
+
 ## DEC-215 — Kontrollü finans içe aktarma ve ağsız ÖHVPS sınırı
 
 33-D ile B4-13 ve B4-14 tek kontrollü içe aktarma teslimatında tamamlanır. CSV,

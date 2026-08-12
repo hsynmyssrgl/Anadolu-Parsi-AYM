@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 69,
+  "decisionCount": 70,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1760,6 +1760,42 @@
         "docs/security/THREAT_MODEL_33_D_B4_CONTROLLED_IMPORT_OPEN_BANKING.md",
         "docs/audit/33-D_B4_CONTROLLED_IMPORT_OPEN_BANKING_UST_KAPANIS.md",
         "config/33-d-b4-controlled-import-open-banking-inventory.json"
+      ]
+    },
+    {
+      "id": "DEC-216",
+      "date": "2026-08-12",
+      "acceptedAt": "2026-08-12",
+      "title": "B5-04 EXT-031 and EXT-034 shared append-only category life home and vehicle workflow",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: full auto continue, use agents and close multiple requirements in one operation",
+      "document": "docs/decisions/DEC-216-b5-category-life-home-vehicle.md",
+      "requirements": ["B5-04", "EXT-031", "EXT-034"],
+      "codeAreas": [
+        "packages/domain/src/app-data.ts",
+        "packages/application/src/life-security.ts",
+        "packages/application/src/life-use-cases.ts",
+        "packages/database/src/family-database-migrations.ts",
+        "packages/repository-contracts/src/life-repository.ts",
+        "packages/repositories/src/life-repository.ts",
+        "apps/desktop/src/main/life-production-policy-runtime.ts",
+        "apps/desktop/src/main/life-application-adapter.ts",
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/renderer/global.d.ts",
+        "apps/desktop/src/renderer/App.tsx",
+        "apps/desktop/src/renderer/ManagedLifePanel.tsx",
+        "scripts/verify-b5-category-life-home-vehicle-boundary.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/33-E-b5-category-life-home-vehicle-boundary.json",
+        "artifacts/validation/33-E-b5-category-life-home-vehicle-contract.json",
+        "artifacts/validation/33-E-b5-category-life-home-vehicle-runtime.json",
+        "docs/security/THREAT_MODEL_33_E_B5_CATEGORY_LIFE_HOME_VEHICLE.md",
+        "docs/audit/33-E_B5_CATEGORY_LIFE_HOME_VEHICLE_UST_KAPANIS.md",
+        "config/33-e-b5-category-life-home-vehicle-inventory.json"
       ]
     }
   ]

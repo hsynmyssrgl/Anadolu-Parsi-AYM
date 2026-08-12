@@ -147,8 +147,9 @@ export const verifyB4ControlledImportOpenBankingBoundary = async () => {
   check('sensitive inventory and person lifecycle include both import tables', includesAll(aiRepository, [
     'SELECT COUNT(*) FROM finance_import_batches', 'SELECT COUNT(*) FROM finance_import_entries'
   ]) && includesAll(personLifecycleRepository, ['financeImportBatches:', 'financeImportEntries:']));
-  check('migration 82 is current and exact', Math.max(...migrationVersions) === 82
-    && migrations.includes("createMigrationDefinition(82, 'b4_controlled_import_open_banking', financeControlledImportOpenBankingSql)"));
+  check('historical migration 82 remains exact under the authorized migration 83 successor', Math.max(...migrationVersions) === 83
+    && migrations.includes("createMigrationDefinition(82, 'b4_controlled_import_open_banking', financeControlledImportOpenBankingSql)")
+    && migrations.includes("createMigrationDefinition(83, 'b5_life_home_vehicle_managed_ledger'"));
   check('migration creates exactly two import tables with no prohibited columns', tableDefinitions.length === 2
     && persistedColumns.length > 30 && prohibitedPersistedColumns.length === 0);
   check('migration fixes supported sources duplicate strategy counts and synthetic truth', includesAll(importMigration, [
@@ -246,7 +247,7 @@ export const verifyB4ControlledImportOpenBankingBoundary = async () => {
   ]) && includesAll(ipcTest, [
     '33-D B4-13/B4-14 finance import IPC boundary', 'zero-argument', 'exact mapping contract'
   ]) && includesAll(dataStoreTest, [
-    'B4-13/B4-14', 'REVISION-33-D-B4-CONTROLLED-IMPORT-OPEN-BANKING'
+    'B4-13/B4-14', 'finance_import_entries'
   ]));
   check('decision threat model audit and master register bind exact honesty boundary', includesAll(decision, [
     'DEC-215', 'FinanceOpenBankingAdapterPort', 'LocalOhvpsSandboxAdapter', 'Migration 82',
@@ -258,10 +259,10 @@ export const verifyB4ControlledImportOpenBankingBoundary = async () => {
     'B4-13', 'B4-14', '33-D-b4-controlled-import-open-banking-boundary.json',
     '33-D-b4-controlled-import-open-banking-contract.json', '33-D-b4-controlled-import-open-banking-runtime.json'
   ]) && includesAll(masterRegister, ['## DEC-215', 'DEC-215-b4-controlled-import-open-banking.md']));
-  check('PPK-021 reviews the one shared composition at exact 543 and 275',
+  check('PPK-021 preserves the historical shared composition under the current exact 545 and 277 successor ratchet',
     astKeys.has('USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|CommitFinanceImportBatchUseCase')
-    && astGate.status === 'PASS' && astGate.privilegedSurfaces === 543
-    && astGate.exactAllowlistEntries === 543 && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 275
+    && astGate.status === 'PASS' && astGate.privilegedSurfaces === 545
+    && astGate.exactAllowlistEntries === 545 && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 277
     && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
   check('PPK-022 explicitly reviews four bounded-read file surfaces at exact 242', capabilityGate.status === 'PASS'
     && capabilityGate.capabilitySurfaces === 242 && capabilityGate.exactManifestSurfaces === 242

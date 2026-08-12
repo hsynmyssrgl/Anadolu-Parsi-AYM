@@ -66,10 +66,10 @@ check('scope and inventory bind DEC-214 migration 81 with no network channel', s
   && scope.decision === 'DEC-214' && inventory.latestDatabaseMigration === 81
   && inventory.networkChannels?.length === 0);
 check('boundary evidence is exact green and truth preserving', boundary.status === 'PASS'
-  && boundary.checksFailed === 0 && boundary.latestDatabaseMigration === 82
+  && boundary.checksFailed === 0 && boundary.latestDatabaseMigration === 83
   && boundary.financePlanningLedgerColumns === 39
-  && boundary.ppk021ExactAllowlistEntries === 543
-  && boundary.ppk021UseCaseCompositionSurfaces === 275
+  && boundary.ppk021ExactAllowlistEntries === 545
+  && boundary.ppk021UseCaseCompositionSurfaces === 277
   && boundary.ppk022CapabilitySurfaces === 242
   && boundary.prohibitedSecretColumns === 0
   && boundary.crossCurrencyAggregationPerformed === false

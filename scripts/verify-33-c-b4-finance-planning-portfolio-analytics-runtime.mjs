@@ -39,7 +39,7 @@ const commands = Object.freeze([
   Object.freeze({
     id: 'ppk021-ast-ratchet',
     args: ['scripts/verify-platform-policy-ast-gate.mjs'],
-    expectOutput: '"exactAllowlistEntries": 543'
+    expectOutput: '"exactAllowlistEntries": 545'
   }),
   Object.freeze({
     id: 'ppk022-capability-ratchet',
@@ -95,8 +95,8 @@ const report = Object.freeze({
   targetedTestsPassed: targeted?.tests ?? 0,
   latestDatabaseMigration: 82,
   financePlanningLedgerColumns: 39,
-  ppk021ExactAllowlistEntries: 543,
-  ppk021UseCaseCompositionSurfaces: 275,
+  ppk021ExactAllowlistEntries: 545,
+  ppk021UseCaseCompositionSurfaces: 277,
   ppk022CapabilitySurfaces: 242,
   prohibitedSecretColumns: 0,
   crossCurrencyAggregationPerformed: false,

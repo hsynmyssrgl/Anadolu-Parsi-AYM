@@ -7578,6 +7578,413 @@ SET value='REVISION-33-D-B4-CONTROLLED-IMPORT-OPEN-BANKING',
 WHERE key='schema_generation';
 `;
 
+const lifeHomeVehicleManagedLedgerSql = `CREATE TABLE life_managed_ledger(
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 160),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  item_type TEXT NOT NULL CHECK(item_type IN ('profile','activity','document')),
+  parent_record_id TEXT REFERENCES life_managed_ledger(id) ON DELETE RESTRICT,
+  category TEXT CHECK(category IS NULL OR category IN (
+    'insurance','subscription','education','employment','official_operation','home','vehicle'
+  )),
+  title TEXT CHECK(title IS NULL OR length(trim(title)) BETWEEN 2 AND 160),
+  status TEXT CHECK(status IS NULL OR status IN ('planned','active','completed','expired','cancelled')),
+  details_json TEXT CHECK(details_json IS NULL OR json_valid(details_json)=1),
+  starts_at TEXT CHECK(starts_at IS NULL OR (
+    length(starts_at)=24
+    AND starts_at GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9].[0-9][0-9][0-9]Z'
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',starts_at)=starts_at
+  )),
+  ends_at TEXT CHECK(ends_at IS NULL OR (
+    length(ends_at)=24
+    AND ends_at GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9].[0-9][0-9][0-9]Z'
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',ends_at)=ends_at
+  )),
+  reminder_mutation TEXT CHECK(reminder_mutation IS NULL OR reminder_mutation IN ('set','clear')),
+  reminder_kind TEXT CHECK(reminder_kind IS NULL OR reminder_kind IN (
+    'renewal','expiry','payment','term','contract_end','official_deadline',
+    'rent','insurance','inspection','maintenance','other'
+  )),
+  next_reminder_at TEXT CHECK(next_reminder_at IS NULL OR (
+    length(next_reminder_at)=24
+    AND next_reminder_at GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9].[0-9][0-9][0-9]Z'
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',next_reminder_at)=next_reminder_at
+  )),
+  finance_asset_id TEXT REFERENCES finance_planning_ledger(id) ON DELETE RESTRICT,
+  activity_kind TEXT CHECK(activity_kind IS NULL OR activity_kind IN (
+    'renewal','rent_payment','insurance_premium','inspection','maintenance',
+    'service','fuel','charging','expense'
+  )),
+  occurred_at TEXT CHECK(occurred_at IS NULL OR (
+    length(occurred_at)=24
+    AND occurred_at GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9].[0-9][0-9][0-9]Z'
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',occurred_at)=occurred_at
+  )),
+  provider TEXT CHECK(provider IS NULL OR length(trim(provider)) BETWEEN 1 AND 160),
+  amount_minor INTEGER CHECK(amount_minor IS NULL OR (
+    typeof(amount_minor)='integer' AND amount_minor BETWEEN 1 AND 1000000000000000
+  )),
+  currency TEXT CHECK(currency IS NULL OR (
+    length(currency)=3 AND currency=upper(currency) AND currency GLOB '[A-Z][A-Z][A-Z]'
+  )),
+  quantity_milliunits INTEGER CHECK(quantity_milliunits IS NULL OR (
+    typeof(quantity_milliunits)='integer' AND quantity_milliunits BETWEEN 1 AND 1000000000000000
+  )),
+  odometer_km INTEGER CHECK(odometer_km IS NULL OR (
+    typeof(odometer_km)='integer' AND odometer_km BETWEEN 0 AND 10000000
+  )),
+  finance_expense_id TEXT REFERENCES finance_planning_ledger(id) ON DELETE RESTRICT,
+  note TEXT CHECK(note IS NULL OR length(trim(note)) BETWEEN 1 AND 500),
+  archive_item_id TEXT REFERENCES archive_items(id) ON DELETE RESTRICT,
+  document_kind TEXT CHECK(document_kind IS NULL OR document_kind IN (
+    'policy','contract','certificate','application_receipt','invoice','lease','deed',
+    'dask_policy','home_insurance_policy','vehicle_registration','vehicle_insurance_policy',
+    'inspection_report','service_receipt','fuel_receipt','charging_receipt','other'
+  )),
+  label TEXT CHECK(label IS NULL OR length(trim(label)) BETWEEN 1 AND 160),
+  privacy TEXT NOT NULL CHECK(privacy IN ('private','selected_members','family')),
+  data_source TEXT NOT NULL CHECK(data_source='manual'),
+  external_verification TEXT NOT NULL CHECK(external_verification='not_performed'),
+  payment_execution TEXT NOT NULL CHECK(payment_execution='not_performed'),
+  created_at TEXT NOT NULL CHECK(
+    length(created_at)=24
+    AND created_at GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9].[0-9][0-9][0-9]Z'
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',created_at)=created_at
+  ),
+  policy_receipt_hash TEXT NOT NULL UNIQUE REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT CHECK(
+    length(policy_receipt_hash)=64 AND policy_receipt_hash NOT GLOB '*[^0-9a-f]*'
+  ),
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version=1),
+  policy_receipt_nonce TEXT NOT NULL,
+  policy_correlation_id TEXT NOT NULL,
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type='life_record'),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action IN ('create','update')),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='family.write'),
+  CHECK((amount_minor IS NULL AND currency IS NULL) OR (amount_minor IS NOT NULL AND currency IS NOT NULL)),
+  CHECK(starts_at IS NULL OR ends_at IS NULL OR datetime(ends_at)>=datetime(starts_at)),
+  CHECK(occurred_at IS NULL OR datetime(occurred_at)<=datetime(created_at)),
+  CHECK(
+    (item_type='profile'
+      AND parent_record_id IS NULL
+      AND category IS NOT NULL AND title IS NOT NULL AND status IS NOT NULL AND details_json IS NOT NULL
+      AND activity_kind IS NULL AND occurred_at IS NULL AND provider IS NULL
+      AND amount_minor IS NULL AND currency IS NULL AND quantity_milliunits IS NULL
+      AND odometer_km IS NULL AND finance_expense_id IS NULL AND note IS NULL
+      AND archive_item_id IS NULL AND document_kind IS NULL AND label IS NULL
+      AND (reminder_mutation IS NULL OR reminder_mutation='set')
+      AND ((reminder_mutation IS NULL AND reminder_kind IS NULL AND next_reminder_at IS NULL)
+        OR (reminder_mutation='set' AND reminder_kind IS NOT NULL AND next_reminder_at IS NOT NULL))
+      AND (finance_asset_id IS NULL OR category IN ('home','vehicle'))
+      AND policy_action='create' AND policy_resource_id=id)
+    OR
+    (item_type='activity'
+      AND parent_record_id IS NOT NULL
+      AND category IS NULL AND title IS NULL AND status IS NULL AND details_json IS NULL
+      AND starts_at IS NULL AND ends_at IS NULL AND finance_asset_id IS NULL
+      AND activity_kind IS NOT NULL AND occurred_at IS NOT NULL
+      AND archive_item_id IS NULL AND document_kind IS NULL AND label IS NULL
+      AND ((reminder_mutation IS NULL AND reminder_kind IS NULL AND next_reminder_at IS NULL)
+        OR (reminder_mutation='set' AND reminder_kind IS NOT NULL AND next_reminder_at IS NOT NULL)
+        OR (reminder_mutation='clear' AND reminder_kind IS NULL AND next_reminder_at IS NULL))
+      AND policy_action='update' AND policy_resource_id=parent_record_id)
+    OR
+    (item_type='document'
+      AND parent_record_id IS NOT NULL
+      AND category IS NULL AND title IS NULL AND status IS NULL AND details_json IS NULL
+      AND starts_at IS NULL AND ends_at IS NULL AND reminder_mutation IS NULL
+      AND reminder_kind IS NULL AND next_reminder_at IS NULL AND finance_asset_id IS NULL
+      AND activity_kind IS NULL AND occurred_at IS NULL AND provider IS NULL
+      AND amount_minor IS NULL AND currency IS NULL AND quantity_milliunits IS NULL
+      AND odometer_km IS NULL AND finance_expense_id IS NULL AND note IS NULL
+      AND archive_item_id IS NOT NULL AND document_kind IS NOT NULL
+      AND policy_action='update' AND policy_resource_id=parent_record_id)
+  ),
+  CHECK(
+    item_type<>'activity'
+    OR (activity_kind IN ('fuel','charging')
+      AND amount_minor IS NOT NULL AND quantity_milliunits IS NOT NULL)
+    OR (activity_kind IN ('rent_payment','insurance_premium','expense')
+      AND amount_minor IS NOT NULL AND quantity_milliunits IS NULL AND odometer_km IS NULL)
+    OR (activity_kind IN ('renewal','inspection','maintenance','service')
+      AND quantity_milliunits IS NULL)
+  ),
+  CHECK(item_type<>'activity' OR activity_kind IN ('inspection','maintenance','service','fuel','charging') OR odometer_km IS NULL),
+  CHECK(finance_expense_id IS NULL OR amount_minor IS NOT NULL)
+);
+
+CREATE INDEX idx_life_managed_family_created
+ON life_managed_ledger(family_id,created_at DESC,id);
+CREATE INDEX idx_life_managed_owner_created
+ON life_managed_ledger(owner_person_id,created_at DESC,id);
+CREATE INDEX idx_life_managed_profile_category_status
+ON life_managed_ledger(family_id,category,status,created_at DESC,id)
+WHERE item_type='profile';
+CREATE INDEX idx_life_managed_parent_created
+ON life_managed_ledger(parent_record_id,created_at DESC,id)
+WHERE parent_record_id IS NOT NULL;
+CREATE INDEX idx_life_managed_reminder_due
+ON life_managed_ledger(next_reminder_at,parent_record_id,id)
+WHERE reminder_mutation='set';
+CREATE INDEX idx_life_managed_activity_occurred
+ON life_managed_ledger(parent_record_id,occurred_at DESC,id)
+WHERE item_type='activity';
+CREATE UNIQUE INDEX idx_life_managed_archive_item
+ON life_managed_ledger(archive_item_id)
+WHERE archive_item_id IS NOT NULL;
+CREATE UNIQUE INDEX idx_life_managed_finance_asset
+ON life_managed_ledger(finance_asset_id)
+WHERE finance_asset_id IS NOT NULL;
+CREATE UNIQUE INDEX idx_life_managed_finance_expense
+ON life_managed_ledger(finance_expense_id)
+WHERE finance_expense_id IS NOT NULL;
+
+CREATE TRIGGER trg_b5_life_managed_details_matrix
+BEFORE INSERT ON life_managed_ledger
+WHEN NEW.item_type='profile' AND CASE
+  WHEN json_valid(NEW.details_json)<>1 OR json_type(NEW.details_json)<>'object' THEN 1
+  ELSE NOT (
+    (NEW.category='insurance'
+      AND (SELECT count(*) FROM json_each(NEW.details_json))=2
+      AND NOT EXISTS(SELECT 1 FROM json_each(NEW.details_json) WHERE key NOT IN ('insuranceKind','provider'))
+      AND json_extract(NEW.details_json,'$.insuranceKind') IN ('dask','home','vehicle_compulsory','vehicle_comprehensive','other')
+      AND json_type(NEW.details_json,'$.provider')='text'
+      AND length(trim(json_extract(NEW.details_json,'$.provider'))) BETWEEN 1 AND 160)
+    OR (NEW.category='subscription'
+      AND (SELECT count(*) FROM json_each(NEW.details_json))=3
+      AND NOT EXISTS(SELECT 1 FROM json_each(NEW.details_json) WHERE key NOT IN ('provider','planName','billingCycle'))
+      AND json_type(NEW.details_json,'$.provider')='text'
+      AND length(trim(json_extract(NEW.details_json,'$.provider'))) BETWEEN 1 AND 160
+      AND json_type(NEW.details_json,'$.planName')='text'
+      AND length(trim(json_extract(NEW.details_json,'$.planName'))) BETWEEN 1 AND 160
+      AND json_extract(NEW.details_json,'$.billingCycle') IN ('monthly','quarterly','yearly','other'))
+    OR (NEW.category='education'
+      AND (SELECT count(*) FROM json_each(NEW.details_json))=2
+      AND NOT EXISTS(SELECT 1 FROM json_each(NEW.details_json) WHERE key NOT IN ('institution','program'))
+      AND json_type(NEW.details_json,'$.institution')='text'
+      AND length(trim(json_extract(NEW.details_json,'$.institution'))) BETWEEN 1 AND 160
+      AND json_type(NEW.details_json,'$.program')='text'
+      AND length(trim(json_extract(NEW.details_json,'$.program'))) BETWEEN 1 AND 160)
+    OR (NEW.category='employment'
+      AND (SELECT count(*) FROM json_each(NEW.details_json))=2
+      AND NOT EXISTS(SELECT 1 FROM json_each(NEW.details_json) WHERE key NOT IN ('employer','position'))
+      AND json_type(NEW.details_json,'$.employer')='text'
+      AND length(trim(json_extract(NEW.details_json,'$.employer'))) BETWEEN 1 AND 160
+      AND json_type(NEW.details_json,'$.position')='text'
+      AND length(trim(json_extract(NEW.details_json,'$.position'))) BETWEEN 1 AND 160)
+    OR (NEW.category='official_operation'
+      AND (SELECT count(*) FROM json_each(NEW.details_json))=2
+      AND NOT EXISTS(SELECT 1 FROM json_each(NEW.details_json) WHERE key NOT IN ('authority','operationType'))
+      AND json_type(NEW.details_json,'$.authority')='text'
+      AND length(trim(json_extract(NEW.details_json,'$.authority'))) BETWEEN 1 AND 160
+      AND json_type(NEW.details_json,'$.operationType')='text'
+      AND length(trim(json_extract(NEW.details_json,'$.operationType'))) BETWEEN 1 AND 160)
+    OR (NEW.category='home'
+      AND (SELECT count(*) FROM json_each(NEW.details_json))=3
+      AND NOT EXISTS(SELECT 1 FROM json_each(NEW.details_json) WHERE key NOT IN ('tenure','propertyType','addressLabel'))
+      AND json_extract(NEW.details_json,'$.tenure') IN ('owner','tenant')
+      AND json_extract(NEW.details_json,'$.propertyType') IN ('residence','workplace','land','other')
+      AND json_type(NEW.details_json,'$.addressLabel')='text'
+      AND length(trim(json_extract(NEW.details_json,'$.addressLabel'))) BETWEEN 1 AND 240)
+    OR (NEW.category='vehicle'
+      AND (SELECT count(*) FROM json_each(NEW.details_json)) BETWEEN 2 AND 3
+      AND NOT EXISTS(SELECT 1 FROM json_each(NEW.details_json) WHERE key NOT IN ('vehicleType','energyType','plate'))
+      AND json_extract(NEW.details_json,'$.vehicleType') IN ('car','motorcycle','commercial','other')
+      AND json_extract(NEW.details_json,'$.energyType') IN ('fuel','electric','hybrid','other')
+      AND (json_type(NEW.details_json,'$.plate') IS NULL OR (
+        json_type(NEW.details_json,'$.plate')='text'
+        AND length(trim(json_extract(NEW.details_json,'$.plate'))) BETWEEN 2 AND 32)))
+  )
+END
+BEGIN
+  SELECT RAISE(ABORT,'managed life profile requires exact category details');
+END;
+
+CREATE TRIGGER trg_b5_life_managed_parent_matrix
+BEFORE INSERT ON life_managed_ledger
+WHEN NEW.item_type IN ('activity','document') AND NOT EXISTS(
+  SELECT 1
+  FROM life_managed_ledger parent
+  WHERE parent.id=NEW.parent_record_id
+    AND parent.item_type='profile'
+    AND parent.family_id=NEW.family_id
+    AND parent.owner_person_id=NEW.owner_person_id
+    AND parent.privacy=NEW.privacy
+    AND datetime(NEW.created_at)>=datetime(parent.created_at)
+    AND (
+      (NEW.item_type='activity' AND (
+        NEW.activity_kind='renewal'
+        OR (NEW.activity_kind='rent_payment' AND parent.category='home')
+        OR (NEW.activity_kind='insurance_premium' AND parent.category IN ('insurance','home','vehicle'))
+        OR (NEW.activity_kind='inspection' AND parent.category='vehicle')
+        OR (NEW.activity_kind IN ('maintenance','service','expense') AND parent.category IN ('home','vehicle'))
+        OR (NEW.activity_kind IN ('fuel','charging') AND parent.category='vehicle')
+      ))
+      OR (NEW.item_type='document' AND (
+        NEW.document_kind='other'
+        OR (NEW.document_kind='policy' AND parent.category='insurance')
+        OR (NEW.document_kind='contract' AND parent.category IN ('subscription','education','employment','official_operation'))
+        OR (NEW.document_kind='certificate' AND parent.category IN ('education','employment','official_operation'))
+        OR (NEW.document_kind='application_receipt' AND parent.category='official_operation')
+        OR (NEW.document_kind='invoice' AND parent.category IN ('subscription','home','vehicle'))
+        OR (NEW.document_kind='service_receipt' AND parent.category IN ('home','vehicle'))
+        OR (NEW.document_kind IN ('lease','deed','dask_policy','home_insurance_policy') AND parent.category='home')
+        OR (NEW.document_kind IN (
+          'vehicle_registration','vehicle_insurance_policy','inspection_report',
+          'fuel_receipt','charging_receipt'
+        ) AND parent.category='vehicle')
+      ))
+    )
+)
+BEGIN
+  SELECT RAISE(ABORT,'managed life child requires exact compatible parent family owner privacy and category');
+END;
+
+CREATE TRIGGER trg_b5_life_managed_external_link_scope
+BEFORE INSERT ON life_managed_ledger
+WHEN (
+  NEW.item_type='document' AND NOT EXISTS(
+    SELECT 1 FROM archive_items archive
+    WHERE archive.id=NEW.archive_item_id
+      AND archive.family_id=NEW.family_id
+      AND archive.destroyed_at IS NULL
+      AND archive.sensitivity=CASE NEW.privacy
+        WHEN 'private' THEN 'high'
+        WHEN 'selected_members' THEN 'personal'
+        ELSE 'standard'
+      END
+      AND datetime(archive.created_at)<=datetime(NEW.created_at)
+  )
+) OR (
+  NEW.finance_asset_id IS NOT NULL AND NOT EXISTS(
+    SELECT 1 FROM finance_planning_ledger asset
+    WHERE asset.id=NEW.finance_asset_id
+      AND asset.item_type='asset'
+      AND asset.asset_class=CASE NEW.category WHEN 'home' THEN 'real_estate' ELSE 'vehicle' END
+      AND asset.family_id=NEW.family_id
+      AND asset.owner_person_id=NEW.owner_person_id
+      AND asset.privacy=NEW.privacy
+      AND datetime(asset.created_at)<=datetime(NEW.created_at)
+  )
+) OR (
+  NEW.finance_expense_id IS NOT NULL AND NOT EXISTS(
+    SELECT 1 FROM finance_planning_ledger expense
+    WHERE expense.id=NEW.finance_expense_id
+      AND expense.item_type='cash_flow'
+      AND expense.category_kind='expense'
+      AND expense.family_id=NEW.family_id
+      AND expense.owner_person_id=NEW.owner_person_id
+      AND expense.privacy=NEW.privacy
+      AND expense.currency=NEW.currency
+      AND CAST(round(expense.amount*100) AS INTEGER)=NEW.amount_minor
+      AND expense.occurred_at=NEW.occurred_at
+      AND datetime(expense.created_at)<=datetime(NEW.created_at)
+  )
+)
+BEGIN
+  SELECT RAISE(ABORT,'managed life archive or finance link is outside exact scope');
+END;
+
+CREATE TRIGGER trg_b5_life_managed_id_collision
+BEFORE INSERT ON life_managed_ledger
+WHEN EXISTS(SELECT 1 FROM life_records WHERE id=NEW.id)
+BEGIN
+  SELECT RAISE(ABORT,'managed life id collides with a legacy life record');
+END;
+
+CREATE TRIGGER trg_b5_life_record_managed_id_collision
+BEFORE INSERT ON life_records
+WHEN EXISTS(SELECT 1 FROM life_managed_ledger WHERE id=NEW.id)
+BEGIN
+  SELECT RAISE(ABORT,'life record id collides with a managed life ledger item');
+END;
+
+CREATE TRIGGER trg_b5_life_managed_policy_receipt
+BEFORE INSERT ON life_managed_ledger
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM platform_policy_transaction_receipts receipt
+  JOIN platform_policy_database_fences fence
+    ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+  WHERE receipt.receipt_hash=NEW.policy_receipt_hash
+    AND receipt.receipt_version=NEW.policy_receipt_version
+    AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id
+    AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id
+    AND receipt.action=NEW.policy_action
+    AND receipt.capability=NEW.policy_capability
+    AND receipt.resource_type='life_record'
+    AND receipt.resource_id=CASE WHEN NEW.item_type='profile' THEN NEW.id ELSE NEW.parent_record_id END
+    AND receipt.action=CASE WHEN NEW.item_type='profile' THEN 'create' ELSE 'update' END
+    AND receipt.capability='family.write'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.resource.sensitivity')=CASE NEW.privacy
+      WHEN 'private' THEN 'highly_sensitive'
+      WHEN 'selected_members' THEN 'sensitive'
+      ELSE 'personal'
+    END
+    AND json_extract(receipt.record_json,'$.request.purpose')='general'
+)
+OR EXISTS(SELECT 1 FROM archive_items WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_versions WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_retention_policies WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_categories WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_tags WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_item_tags WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM events WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_records WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_valuations WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM health_records WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM medication_plans WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM family_health_history WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM life_records WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM locations WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM bank_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM payment_cards WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM loan_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM loan_payment_history WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_planning_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_import_batches WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM life_managed_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'managed life write requires an unused exact durable life policy receipt');
+END;
+
+CREATE TRIGGER trg_b5_life_record_managed_receipt_reuse_insert
+BEFORE INSERT ON life_records
+WHEN NEW.policy_receipt_hash IS NOT NULL
+  AND EXISTS(SELECT 1 FROM life_managed_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'life policy receipt is already bound to a managed life item');
+END;
+CREATE TRIGGER trg_b5_life_record_managed_receipt_reuse_update
+BEFORE UPDATE ON life_records
+WHEN NEW.policy_receipt_hash IS NOT NULL
+  AND EXISTS(SELECT 1 FROM life_managed_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'life policy receipt is already bound to a managed life item');
+END;
+
+CREATE TRIGGER trg_b5_life_managed_immutable
+BEFORE UPDATE ON life_managed_ledger
+BEGIN
+  SELECT RAISE(ABORT,'managed life ledger is append-only');
+END;
+CREATE TRIGGER trg_b5_life_managed_delete_guard
+BEFORE DELETE ON life_managed_ledger
+BEGIN
+  SELECT RAISE(ABORT,'managed life deletion requires a governed deletion workflow');
+END;
+
+UPDATE database_metadata
+SET value='REVISION-33-E-B5-LIFE-HOME-VEHICLE-MANAGED-LEDGER',
+    updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
+WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -7660,7 +8067,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(79, 'b4_payment_card_management', paymentCardManagementSql),
   createMigrationDefinition(80, 'b4_loan_management', loanManagementSql),
   createMigrationDefinition(81, 'b4_finance_planning_portfolio_analytics', financePlanningLedgerSql),
-  createMigrationDefinition(82, 'b4_controlled_import_open_banking', financeControlledImportOpenBankingSql)
+  createMigrationDefinition(82, 'b4_controlled_import_open_banking', financeControlledImportOpenBankingSql),
+  createMigrationDefinition(83, 'b5_life_home_vehicle_managed_ledger', lifeHomeVehicleManagedLedgerSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

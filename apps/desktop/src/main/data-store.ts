@@ -144,6 +144,8 @@ import {
   CreateFamilyHealthHistoryUseCase,
   ListLifeRecordsUseCase,
   CreateLifeRecordUseCase,
+  GetManagedLifeWorkspaceUseCase,
+  RecordManagedLifeItemUseCase,
   ListFinanceRecordsUseCase,
   CreateFinanceRecordUseCase,
   ListFinanceValuationsUseCase,
@@ -396,6 +398,7 @@ import type {
   CommitFinanceImportPreparedBatchInput,
   CommitFinanceImportBatchInput
 } from '@ppt/domain';
+import type { ManagedLifeWorkspaceView, RecordManagedLifeItemInput } from '@ppt/domain';
 import type {
   EnrollWindowsHelloInput,
   LoginWithWindowsHelloInput,
@@ -785,6 +788,8 @@ export class FamilyDataStore {
   readonly #createFamilyHealthHistoryUseCase: CreateFamilyHealthHistoryUseCase;
   readonly #listLifeRecordsUseCase: ListLifeRecordsUseCase;
   readonly #createLifeRecordUseCase: CreateLifeRecordUseCase;
+  readonly #getManagedLifeWorkspaceUseCase: GetManagedLifeWorkspaceUseCase;
+  readonly #recordManagedLifeItemUseCase: RecordManagedLifeItemUseCase;
   readonly #listFinanceRecordsUseCase: ListFinanceRecordsUseCase;
   readonly #createFinanceRecordUseCase: CreateFinanceRecordUseCase;
   readonly #listFinanceValuationsUseCase: ListFinanceValuationsUseCase;
@@ -1587,6 +1592,8 @@ export class FamilyDataStore {
     );
     this.#listLifeRecordsUseCase = new ListLifeRecordsUseCase(lifeQuery);
     this.#createLifeRecordUseCase = new CreateLifeRecordUseCase(lifeUnitOfWork);
+    this.#getManagedLifeWorkspaceUseCase = new GetManagedLifeWorkspaceUseCase(lifeQuery);
+    this.#recordManagedLifeItemUseCase = new RecordManagedLifeItemUseCase(lifeUnitOfWork);
     const financePolicyEnforcementPointResolver = productionArchivePolicy === undefined
       ? options.financePolicyEnforcementPointResolver ?? failClosedFinancePolicyEnforcementPointResolver
       : createFinanceProductionPolicyEnforcementPointResolver({
@@ -3318,6 +3325,30 @@ export class FamilyDataStore {
           .localeCompare(left.dueAt ?? left.startsAt ?? left.createdAt)
         || left.id.localeCompare(right.id)
       ));
+  }
+
+  public async getManagedLifeWorkspace(): Promise<ManagedLifeWorkspaceView> {
+    const result = await this.#getManagedLifeWorkspaceUseCase.execute(
+      this.#lifeApplicationContext('life-managed-workspace')
+    );
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async recordManagedLifeItem(
+    input: RecordManagedLifeItemInput
+  ): Promise<ManagedLifeWorkspaceView> {
+    const result = await this.#recordManagedLifeItemUseCase.execute({
+      context: this.#lifeApplicationContext('life-managed-record'),
+      command: input,
+      identifiers: {
+        itemId: randomUUID(),
+        auditId: randomUUID(),
+        outboxEventId: asEventId(randomUUID())
+      }
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return this.getManagedLifeWorkspace();
   }
 
   public async listFinanceRecords(): Promise<FinanceRecordView[]> {

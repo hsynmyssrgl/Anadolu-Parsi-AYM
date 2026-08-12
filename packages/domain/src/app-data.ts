@@ -1113,6 +1113,210 @@ export type LifeRecordStatus = 'planned'|'active'|'completed'|'expired'|'cancell
 export interface LifeRecordView { id:string; ownerPersonId:string; category:LifeRecordCategory; title:string; status:LifeRecordStatus; privacy:RecordPrivacy; startsAt?:string; dueAt?:string; provider?:string; referenceNo?:string; amount?:number; currency?:string; location?:string; notes?:string; createdAt:string; }
 export interface CreateLifeRecordInput { ownerPersonId:string; category:LifeRecordCategory; title:string; status:LifeRecordStatus; privacy:RecordPrivacy; startsAt?:string; dueAt?:string; provider?:string; referenceNo?:string; amount?:number; currency?:string; location?:string; notes?:string; }
 
+export const MANAGED_LIFE_CATEGORIES = [
+  'insurance','subscription','education','employment','official_operation','home','vehicle'
+] as const;
+export type ManagedLifeCategory = typeof MANAGED_LIFE_CATEGORIES[number];
+
+export const MANAGED_LIFE_REMINDER_KINDS = [
+  'renewal','expiry','payment','term','contract_end','official_deadline',
+  'rent','insurance','inspection','maintenance','other'
+] as const;
+export type ManagedLifeReminderKind = typeof MANAGED_LIFE_REMINDER_KINDS[number];
+
+export const MANAGED_LIFE_ACTIVITY_KINDS = [
+  'renewal','rent_payment','insurance_premium','inspection','maintenance',
+  'service','fuel','charging','expense'
+] as const;
+export type ManagedLifeActivityKind = typeof MANAGED_LIFE_ACTIVITY_KINDS[number];
+
+export const MANAGED_LIFE_DOCUMENT_KINDS = [
+  'policy','contract','certificate','application_receipt','invoice','lease','deed',
+  'dask_policy','home_insurance_policy','vehicle_registration','vehicle_insurance_policy',
+  'inspection_report','service_receipt','fuel_receipt','charging_receipt','other'
+] as const;
+export type ManagedLifeDocumentKind = typeof MANAGED_LIFE_DOCUMENT_KINDS[number];
+
+export interface ManagedLifeInsuranceDetails {
+  readonly insuranceKind:'dask'|'home'|'vehicle_compulsory'|'vehicle_comprehensive'|'other';
+  readonly provider:string;
+}
+export interface ManagedLifeSubscriptionDetails {
+  readonly provider:string;
+  readonly planName:string;
+  readonly billingCycle:'monthly'|'quarterly'|'yearly'|'other';
+}
+export interface ManagedLifeEducationDetails {
+  readonly institution:string;
+  readonly program:string;
+}
+export interface ManagedLifeEmploymentDetails {
+  readonly employer:string;
+  readonly position:string;
+}
+export interface ManagedLifeOfficialOperationDetails {
+  readonly authority:string;
+  readonly operationType:string;
+}
+export interface ManagedLifeHomeDetails {
+  readonly tenure:'owner'|'tenant';
+  readonly propertyType:'residence'|'workplace'|'land'|'other';
+  readonly addressLabel:string;
+}
+export interface ManagedLifeVehicleDetails {
+  readonly vehicleType:'car'|'motorcycle'|'commercial'|'other';
+  readonly energyType:'fuel'|'electric'|'hybrid'|'other';
+  readonly plate?:string;
+}
+
+export interface ManagedLifeProfileDetailsByCategory {
+  readonly insurance:ManagedLifeInsuranceDetails;
+  readonly subscription:ManagedLifeSubscriptionDetails;
+  readonly education:ManagedLifeEducationDetails;
+  readonly employment:ManagedLifeEmploymentDetails;
+  readonly official_operation:ManagedLifeOfficialOperationDetails;
+  readonly home:ManagedLifeHomeDetails;
+  readonly vehicle:ManagedLifeVehicleDetails;
+}
+export type ManagedLifeProfileDetails = ManagedLifeProfileDetailsByCategory[ManagedLifeCategory];
+
+export type ManagedLifeReminderMutation =
+  | { readonly action:'set'; readonly kind:ManagedLifeReminderKind; readonly dueAt:string }
+  | { readonly action:'clear' };
+
+export interface ManagedLifeLedgerItemCommonView {
+  readonly id:string;
+  readonly ownerPersonId:string;
+  readonly privacy:RecordPrivacy;
+  readonly dataSource:'manual';
+  readonly externalVerification:'not_performed';
+  readonly paymentExecution:'not_performed';
+  readonly createdAt:string;
+}
+
+export type ManagedLifeProfileLedgerItemView = {
+  readonly [K in ManagedLifeCategory]: ManagedLifeLedgerItemCommonView & {
+    readonly itemType:'profile';
+    readonly category:K;
+    readonly title:string;
+    readonly status:LifeRecordStatus;
+    readonly details:ManagedLifeProfileDetailsByCategory[K];
+    readonly startsAt?:string;
+    readonly endsAt?:string;
+    readonly initialReminder?:{
+      readonly kind:ManagedLifeReminderKind;
+      readonly dueAt:string;
+    };
+    readonly financeAssetId?:string;
+  }
+}[ManagedLifeCategory];
+
+export interface ManagedLifeActivityLedgerItemView extends ManagedLifeLedgerItemCommonView {
+  readonly itemType:'activity';
+  readonly recordId:string;
+  readonly activityKind:ManagedLifeActivityKind;
+  readonly occurredAt:string;
+  readonly provider?:string;
+  readonly amountMinor?:number;
+  readonly currency?:string;
+  readonly quantityMilliunits?:number;
+  readonly odometerKm?:number;
+  readonly financeExpenseId?:string;
+  readonly financePosting:'linked'|'not_performed';
+  readonly reminderMutation?:ManagedLifeReminderMutation;
+  readonly note?:string;
+}
+
+export interface ManagedLifeDocumentLedgerItemView extends ManagedLifeLedgerItemCommonView {
+  readonly itemType:'document';
+  readonly recordId:string;
+  readonly archiveItemId:string;
+  readonly documentKind:ManagedLifeDocumentKind;
+  readonly label?:string;
+}
+
+export type ManagedLifeLedgerItemView =
+  | ManagedLifeProfileLedgerItemView
+  | ManagedLifeActivityLedgerItemView
+  | ManagedLifeDocumentLedgerItemView;
+
+interface RecordManagedLifeProfileInputCommon {
+  readonly itemType:'profile';
+  readonly ownerPersonId:string;
+  readonly title:string;
+  readonly status:LifeRecordStatus;
+  readonly privacy:RecordPrivacy;
+  readonly startsAt?:string;
+  readonly endsAt?:string;
+  readonly initialReminder?:{
+    readonly kind:ManagedLifeReminderKind;
+    readonly dueAt:string;
+  };
+  readonly financeAssetId?:string;
+}
+
+export type RecordManagedLifeProfileInput = {
+  readonly [K in ManagedLifeCategory]: RecordManagedLifeProfileInputCommon & {
+    readonly category:K;
+    readonly details:ManagedLifeProfileDetailsByCategory[K];
+  }
+}[ManagedLifeCategory];
+
+export interface RecordManagedLifeActivityInput {
+  readonly itemType:'activity';
+  readonly recordId:string;
+  readonly activityKind:ManagedLifeActivityKind;
+  readonly occurredAt:string;
+  readonly provider?:string;
+  readonly amountMinor?:number;
+  readonly currency?:string;
+  readonly quantityMilliunits?:number;
+  readonly odometerKm?:number;
+  readonly financeExpenseId?:string;
+  readonly reminderMutation?:ManagedLifeReminderMutation;
+  readonly note?:string;
+}
+
+export interface RecordManagedLifeDocumentInput {
+  readonly itemType:'document';
+  readonly recordId:string;
+  readonly archiveItemId:string;
+  readonly documentKind:ManagedLifeDocumentKind;
+  readonly label?:string;
+}
+
+export type RecordManagedLifeItemInput =
+  | RecordManagedLifeProfileInput
+  | RecordManagedLifeActivityInput
+  | RecordManagedLifeDocumentInput;
+
+export interface ManagedLifeCurrentReminderView {
+  readonly sourceId:string;
+  readonly recordId:string;
+  readonly ownerPersonId:string;
+  readonly category:ManagedLifeCategory;
+  readonly title:string;
+  readonly kind:ManagedLifeReminderKind;
+  readonly dueAt:string;
+}
+
+export type ManagedLifeProfileView = ManagedLifeProfileLedgerItemView & {
+  readonly activities:readonly ManagedLifeActivityLedgerItemView[];
+  readonly documents:readonly ManagedLifeDocumentLedgerItemView[];
+  readonly currentReminder?:ManagedLifeCurrentReminderView;
+};
+
+export interface ManagedLifeWorkspaceView {
+  readonly profiles:readonly ManagedLifeProfileView[];
+  readonly upcomingReminders:readonly ManagedLifeCurrentReminderView[];
+  readonly generatedAt:string;
+  readonly dataSource:'manual';
+  readonly externalRegistryLookup:'not_performed';
+  readonly providerContact:'not_performed';
+  readonly paymentExecution:'not_performed';
+  readonly documentContentExposure:'not_performed';
+}
+
 
 export type AutomationSourceType = 'important_day'|'life_record'|'finance_record'|'medication_plan';
 export interface AutomationRuleView { id:string; title:string; sourceType:AutomationSourceType; daysBefore:number; enabled:boolean; createdAt:string; }

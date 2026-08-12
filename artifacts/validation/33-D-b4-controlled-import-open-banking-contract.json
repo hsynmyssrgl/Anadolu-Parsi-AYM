@@ -34,7 +34,7 @@
       "passed": true
     },
     {
-      "name": "migration 82 source and manifest checksum are exact",
+      "name": "migration 82 source and manifest checksum remain exact under migration 83 successor",
       "passed": true
     },
     {
@@ -67,10 +67,10 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 82,
+  "latestDatabaseMigration": 83,
   "migration82Checksum": "be32fbe6a79688ee879fda02a16faa78f6e0d4151e1462b2c9f28a1da44518c8",
-  "ppk021ExactAllowlistEntries": 543,
-  "ppk021UseCaseCompositionSurfaces": 275,
+  "ppk021ExactAllowlistEntries": 545,
+  "ppk021UseCaseCompositionSurfaces": 277,
   "ppk022CapabilitySurfaces": 242,
-  "generatedAt": "2026-08-12T19:14:11.659Z"
+  "generatedAt": "2026-08-12T20:00:47.404Z"
 }

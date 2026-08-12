@@ -56,6 +56,7 @@ import type { ArchiveItemView, AuthStateView, ExternalIdentityProviderView, Crea
 import type { BankInstitutionView, BankAccountView, CreateBankAccountInput, IbanStructuralValidationView, ValidateIbanInput, PaymentCardView, CreatePaymentCardInput } from '@ppt/domain';
 import type { LoanAccountView, CreateLoanAccountInput, RecordLoanPaymentInput } from '@ppt/domain';
 import type { FinancePlanningWorkspaceView, RecordFinancePlanningItemInput, FinanceImportPreviewView, SelectFinanceImportFileResult, CommitFinanceImportPreviewInput } from '@ppt/domain';
+import type { ManagedLifeWorkspaceView, RecordManagedLifeItemInput } from '@ppt/domain';
 export type AppInfo = UserVisibleAppInfo;
 
 const rendererCrypto = globalThis.crypto;
@@ -484,6 +485,7 @@ contextBridge.exposeInMainWorld('pardus', {
   listEventCatalog:(input:EventCatalogPageInput={}):Promise<EventCatalogPageView>=>invoke('catalog:listEvents',input),
   lookupEntityCatalog:(input:EntityCatalogLookupInput={}):Promise<EntityCatalogLookupView>=>invoke('catalog:lookup',input),
   listLifeRecords:():Promise<LifeRecordView[]>=>invoke('life:list'),
+  getManagedLifeWorkspace:():Promise<ManagedLifeWorkspaceView>=>invoke('life:getManagedWorkspace'),
   listAutomationRules:():Promise<AutomationRuleView[]>=>invoke('automation:list'),
   createAutomationRule:(input:CreateAutomationRuleInput):Promise<AutomationRuleView[]>=>invoke('automation:create',input),
   toggleAutomationRule:(id:string,enabled:boolean):Promise<AutomationRuleView[]>=>invoke('automation:toggle',id,enabled),
@@ -500,6 +502,7 @@ contextBridge.exposeInMainWorld('pardus', {
   cancelLegacyExecution:(input:CancelLegacyExecutionInput):Promise<DigitalLegacyPlanView[]>=>invoke('legacy:cancel',input),
   getReportSummary:():Promise<ReportSummaryView>=>invoke('reports:summary'),
   createLifeRecord:(input:CreateLifeRecordInput):Promise<LifeRecordView[]>=>invoke('life:create',input),
+  recordManagedLifeItem:(input:RecordManagedLifeItemInput):Promise<ManagedLifeWorkspaceView>=>invoke('life:recordManagedItem',input),
   listFinance:():Promise<FinanceRecordView[]>=>invoke('finance:list'),
   createFinance:(input:CreateFinanceRecordInput):Promise<FinanceRecordView[]>=>invoke('finance:create',input),
   listBankInstitutions:():Promise<BankInstitutionView[]>=>invoke('finance:listBankInstitutions'),

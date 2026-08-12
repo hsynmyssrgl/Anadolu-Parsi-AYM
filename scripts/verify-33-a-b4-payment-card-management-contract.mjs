@@ -62,7 +62,7 @@ check('scope and inventory bind DEC-212 migration 79 with no network channel', s
   && inventory.networkChannels?.length === 0);
 check('boundary evidence is exact green', boundary.status === 'PASS'
   && boundary.checksFailed === 0 && boundary.latestDatabaseMigration >= 79
-  && boundary.ppk021ExactAllowlistEntries === 543
+  && boundary.ppk021ExactAllowlistEntries === 545
   && boundary.ppk022CapabilitySurfaces === 242
   && boundary.prohibitedSecretColumns === 0 && boundary.bankExecutionPerformed === false);
 check('DEC-212 is active in the user decision ledger', ledger.decisionCount === ledger.decisions?.length

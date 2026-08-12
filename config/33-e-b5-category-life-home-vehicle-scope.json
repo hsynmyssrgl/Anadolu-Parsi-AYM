@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "33-E-B5-CATEGORY-LIFE-HOME-VEHICLE",
+  "decision": "DEC-216",
+  "requirements": ["B5-04", "EXT-031", "EXT-034"],
+  "status": "COMPLETE",
+  "model": {
+    "table": "life_managed_ledger",
+    "itemTypes": ["profile", "activity", "document"],
+    "categories": ["insurance", "subscription", "education", "employment", "official_operation", "home", "vehicle"],
+    "appendOnly": true,
+    "childScopeInherited": ["family", "owner", "privacy"],
+    "moneyRepresentation": "minor_unit_safe_integer",
+    "quantityRepresentation": "milliunit_safe_integer",
+    "timestampRepresentation": "canonical_utc_iso"
+  },
+  "home": {
+    "profiles": ["owner", "tenant"],
+    "documents": ["lease", "deed", "dask_policy", "home_insurance_policy", "service_receipt"],
+    "activities": ["renewal", "rent_payment", "insurance_premium", "maintenance", "service", "expense"]
+  },
+  "vehicle": {
+    "documents": ["vehicle_registration", "vehicle_insurance_policy", "inspection_report", "service_receipt", "fuel_receipt", "charging_receipt"],
+    "activities": ["renewal", "insurance_premium", "inspection", "maintenance", "service", "fuel", "charging", "expense"]
+  },
+  "security": {
+    "profilePolicyAction": "create",
+    "childPolicyAction": "update",
+    "policyResourceType": "life_record",
+    "policyCapability": "family.write",
+    "crossLegacyReceiptReplayRejected": true,
+    "crossScopeLinksRejected": true,
+    "updatesAllowed": false,
+    "deletesAllowed": false,
+    "secretPanPathBase64InputsRejected": true,
+    "outboxContainsSensitiveDetails": false
+  },
+  "truth": {
+    "dataSource": "manual",
+    "externalRegistryLookup": "not_performed",
+    "providerContact": "not_performed",
+    "paymentExecution": "not_performed",
+    "documentContentExposure": "not_performed",
+    "networkEgressAdded": false
+  },
+  "persistence": {
+    "migration": 83,
+    "migrationName": "b5_life_home_vehicle_managed_ledger"
+  },
+  "validation": {
+    "boundary": "artifacts/validation/33-E-b5-category-life-home-vehicle-boundary.json",
+    "contract": "artifacts/validation/33-E-b5-category-life-home-vehicle-contract.json",
+    "runtime": "artifacts/validation/33-E-b5-category-life-home-vehicle-runtime.json",
+    "finalEvidence": {
+      "boundaryChecksPassed": 51,
+      "contractChecksPassed": 15,
+      "runtimeChecksPassed": 11,
+      "targetedTestFilesPassed": 3,
+      "targetedTestsPassed": 25,
+      "fullVitestTestFilesPassed": 112,
+      "fullVitestTestsPassed": 956,
+      "productionWorkspaceBuildsPassed": 18,
+      "ppk021ExactAllowlistEntries": 545,
+      "ppk021UseCaseCompositionSurfaces": 277,
+      "ppk022CapabilitySurfaces": 242,
+      "latestDatabaseMigration": 83,
+      "requirementChainsComplete": 3,
+      "finalClosureEvidence": true
+    }
+  },
+  "excludedClaims": [
+    "No tapu, DASK, EGM, insurance, school, employer or provider registry lookup is performed.",
+    "No provider contact, quote, reservation, policy issuance or payment execution is performed.",
+    "Archive document contents, paths, names and hashes are not exposed by the managed life workspace.",
+    "Other B5 or EXT requirements, Silver readiness and Bronze Final are not completed.",
+    "No new Build number is assigned."
+  ]
+}

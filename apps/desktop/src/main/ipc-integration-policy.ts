@@ -7,6 +7,8 @@ import {
   FINANCE_RECORD_INPUT_KEYS,
   FINANCE_VALUATION_INPUT_KEYS,
   containsLikelyFullPan,
+  inspectManagedLifeDataContract,
+  isExactManagedLifeIsoDateTime,
   isProhibitedBankingSecretField
 } from '@ppt/application';
 
@@ -126,6 +128,156 @@ const financeRecurringFrequencies = new Set(['weekly','monthly','quarterly','yea
 const financeRecurringStatuses = new Set(['active','paused','ended']);
 const financeGoalKinds = new Set(['savings','debt_reduction','investment','purchase','emergency_fund','other']);
 const financeAssetClasses = new Set(['cash','deposit','precious_metal_fx','investment','pension','real_estate','vehicle']);
+const managedLifeCategories = new Set(['insurance','subscription','education','employment','official_operation','home','vehicle']);
+const managedLifeStatuses = new Set(['planned','active','completed','expired','cancelled']);
+const managedLifeReminderKinds = new Set(['renewal','expiry','payment','term','contract_end','official_deadline','rent','insurance','inspection','maintenance','other']);
+const managedLifeActivityKinds = new Set(['renewal','rent_payment','insurance_premium','inspection','maintenance','service','fuel','charging','expense']);
+const managedLifeDocumentKinds = new Set(['policy','contract','certificate','application_receipt','invoice','lease','deed','dask_policy','home_insurance_policy','vehicle_registration','vehicle_insurance_policy','inspection_report','service_receipt','fuel_receipt','charging_receipt','other']);
+const managedLifeInsuranceKinds = new Set(['dask','home','vehicle_compulsory','vehicle_comprehensive','other']);
+const managedLifeBillingCycles = new Set(['monthly','quarterly','yearly','other']);
+const managedLifeTenures = new Set(['owner','tenant']);
+const managedLifePropertyTypes = new Set(['residence','workplace','land','other']);
+const managedLifeVehicleTypes = new Set(['car','motorcycle','commercial','other']);
+const managedLifeEnergyTypes = new Set(['fuel','electric','hybrid','other']);
+
+const validManagedLifeTimestamp = (value: unknown): boolean =>
+  isExactManagedLifeIsoDateTime(value);
+
+const optionalManagedLifeTimestamp = (value: unknown): boolean =>
+  value === undefined || validManagedLifeTimestamp(value);
+
+const optionalManagedLifeCount = (value: unknown): boolean =>
+  value === undefined
+  || (typeof value === 'number' && Number.isSafeInteger(value) && value >= 0);
+const optionalManagedLifePositiveCount = (value: unknown): boolean =>
+  value === undefined
+  || (typeof value === 'number' && Number.isSafeInteger(value) && value >= 1);
+const optionalManagedLifeText = (value: unknown, maximum: number): boolean =>
+  value === undefined || boundedString(value, maximum);
+const validManagedLifeId = (value: unknown): boolean =>
+  typeof value === 'string'
+  && value === value.trim()
+  && value.length >= 2
+  && value.length <= 160
+  && !/[\\/\0]/u.test(value);
+
+const validManagedLifeReminder = (value: unknown): boolean =>
+  value === undefined
+  || (isObject(value)
+    && managedLifeReminderKinds.has(String(value.kind))
+    && validManagedLifeTimestamp(value.dueAt));
+
+const validManagedLifeDetails = (category: unknown, details: unknown): boolean => {
+  if (!isObject(details)) return false;
+  switch (category) {
+    case 'insurance':
+      return managedLifeInsuranceKinds.has(String(details.insuranceKind))
+        && boundedString(details.provider, 160);
+    case 'subscription':
+      return boundedString(details.provider, 160)
+        && boundedString(details.planName, 120)
+        && managedLifeBillingCycles.has(String(details.billingCycle));
+    case 'education':
+      return boundedString(details.institution, 160) && boundedString(details.program, 160);
+    case 'employment':
+      return boundedString(details.employer, 160) && boundedString(details.position, 120);
+    case 'official_operation':
+      return boundedString(details.authority, 160) && boundedString(details.operationType, 120);
+    case 'home':
+      return managedLifeTenures.has(String(details.tenure))
+        && managedLifePropertyTypes.has(String(details.propertyType))
+        && boundedString(details.addressLabel, 240);
+    case 'vehicle':
+      return managedLifeVehicleTypes.has(String(details.vehicleType))
+        && managedLifeEnergyTypes.has(String(details.energyType))
+        && (details.plate === undefined
+          || (boundedString(details.plate, 20) && /^[\p{L}\p{N} -]+$/u.test(String(details.plate))));
+    default:
+      return false;
+  }
+};
+
+const managedLifeInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => {
+  if (args.length !== 1) return rejected('ARGUMENT_COUNT_MISMATCH');
+  const value = args[0];
+  if (!isObject(value)) return rejected('OBJECT_ARGUMENT_REQUIRED', '$[0]');
+  if (value.itemType !== 'profile' && value.itemType !== 'activity' && value.itemType !== 'document') {
+    return rejected('MANAGED_LIFE_ITEM_TYPE_INVALID', '$[0].itemType');
+  }
+  const inspection = inspectManagedLifeDataContract(value);
+  if (inspection.prohibitedFields.length > 0) {
+    return rejected('MANAGED_LIFE_SECRET_FIELD_PROHIBITED', inspection.prohibitedFields[0]);
+  }
+  if (inspection.panLikeValueDetected || inspection.base64LikeValueDetected) {
+    return rejected('MANAGED_LIFE_SECRET_VALUE_PROHIBITED', '$[0]');
+  }
+  if (inspection.pathLikeValueDetected) {
+    return rejected('MANAGED_LIFE_PATH_VALUE_PROHIBITED', '$[0]');
+  }
+  if (inspection.unknownFields.length > 0) {
+    return rejected('UNKNOWN_OBJECT_FIELD', inspection.unknownFields[0]);
+  }
+  if (!inspection.exactShape || inspection.missingFields.length > 0) {
+    return rejected('MANAGED_LIFE_ARGUMENT_INVALID', inspection.missingFields[0] ?? '$[0]');
+  }
+
+  if (value.itemType === 'profile') {
+    const valid = validManagedLifeId(value.ownerPersonId)
+      && managedLifeCategories.has(String(value.category))
+      && boundedString(value.title, 120) && String(value.title).trim().length >= 2
+      && managedLifeStatuses.has(String(value.status))
+      && recordPrivacyValues.has(String(value.privacy))
+      && validManagedLifeDetails(value.category, value.details)
+      && optionalManagedLifeTimestamp(value.startsAt)
+      && optionalManagedLifeTimestamp(value.endsAt)
+      && validManagedLifeReminder(value.initialReminder)
+      && (value.financeAssetId === undefined || validManagedLifeId(value.financeAssetId))
+      && (value.startsAt === undefined || value.endsAt === undefined
+        || Date.parse(String(value.endsAt)) >= Date.parse(String(value.startsAt)));
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'activity') {
+    const reminderValid = value.reminderMutation === undefined
+      || (isObject(value.reminderMutation)
+        && (value.reminderMutation.action === 'clear'
+          || (value.reminderMutation.action === 'set'
+            && managedLifeReminderKinds.has(String(value.reminderMutation.kind))
+            && validManagedLifeTimestamp(value.reminderMutation.dueAt))));
+    const amountCurrencyPairValid = (value.amountMinor === undefined) === (value.currency === undefined);
+    const valid = validManagedLifeId(value.recordId)
+      && managedLifeActivityKinds.has(String(value.activityKind))
+      && validManagedLifeTimestamp(value.occurredAt)
+      && optionalManagedLifeText(value.provider, 160)
+      && optionalManagedLifePositiveCount(value.amountMinor)
+      && (value.currency === undefined || (typeof value.currency === 'string' && /^[A-Za-z]{3}$/u.test(value.currency)))
+      && amountCurrencyPairValid
+      && optionalManagedLifePositiveCount(value.quantityMilliunits)
+      && optionalManagedLifeCount(value.odometerKm)
+      && (value.financeExpenseId === undefined || validManagedLifeId(value.financeExpenseId))
+      && reminderValid
+      && optionalManagedLifeText(value.note, 500)
+      && ((value.activityKind === 'fuel' || value.activityKind === 'charging')
+        === (value.quantityMilliunits !== undefined))
+      && !(value.financeExpenseId !== undefined && (value.amountMinor !== undefined || value.currency !== undefined))
+      && (value.reminderMutation === undefined
+        || !isObject(value.reminderMutation)
+        || value.reminderMutation.action !== 'set'
+        || Date.parse(String(value.reminderMutation.dueAt)) >= Date.parse(String(value.occurredAt)));
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'document') {
+    const valid = validManagedLifeId(value.recordId)
+      && typeof value.archiveItemId === 'string'
+      && /^[A-Za-z0-9][A-Za-z0-9._-]{0,159}$/u.test(value.archiveItemId)
+      && managedLifeDocumentKinds.has(String(value.documentKind))
+      && optionalBoundedString(value.label, 240);
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  return rejected('MANAGED_LIFE_ITEM_TYPE_INVALID', '$[0].itemType');
+};
 
 const containsProhibitedBankingSecret = (
   value: Record<string, unknown>,
@@ -520,6 +672,10 @@ const optionalWindowsHelloFallback = (value: unknown): boolean => {
 
 export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unknown[]): IpcIntegrationPolicyDecision => {
   switch (channel) {
+    case 'life:getManagedWorkspace':
+      return zeroArguments(args);
+    case 'life:recordManagedItem':
+      return managedLifeInput(args);
     case 'finance:list':
     case 'finance:listValuations':
     case 'finance:listBankInstitutions':

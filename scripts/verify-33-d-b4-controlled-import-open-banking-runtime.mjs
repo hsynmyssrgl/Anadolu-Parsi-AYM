@@ -41,14 +41,14 @@ const commands = Object.freeze([
     args: ['node_modules/typescript/bin/tsc', '-p', 'packages/database/tsconfig.json']
   }),
   Object.freeze({
-    id: 'migration-82-runtime',
+    id: 'migration-82-successor-runtime',
     args: ['scripts/verify-database-migrations.mjs'],
-    expectOutput: '"version": 82'
+    expectOutput: '"version": 83'
   }),
   Object.freeze({
     id: 'ppk021-ast-ratchet',
     args: ['scripts/verify-platform-policy-ast-gate.mjs'],
-    expectOutput: '"exactAllowlistEntries": 543'
+    expectOutput: '"exactAllowlistEntries": 545'
   }),
   Object.freeze({
     id: 'ppk022-capability-ratchet',
@@ -102,10 +102,10 @@ const report = Object.freeze({
   checksFailed: failures.length,
   targetedTestFilesPassed: targeted?.testFiles ?? 0,
   targetedTestsPassed: targeted?.tests ?? 0,
-  latestDatabaseMigration: 82,
+  latestDatabaseMigration: 83,
   importTables: 2,
-  ppk021ExactAllowlistEntries: 543,
-  ppk021UseCaseCompositionSurfaces: 275,
+  ppk021ExactAllowlistEntries: 545,
+  ppk021UseCaseCompositionSurfaces: 277,
   ppk022CapabilitySurfaces: 242,
   supportedFileFormats: 5,
   liveBankConnectionImplemented: false,

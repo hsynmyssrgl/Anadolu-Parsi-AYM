@@ -60,7 +60,7 @@ check('boundary evidence is exact green', boundary.status === 'PASS'
   && boundary.checksFailed === 0
   && boundary.catalogRows === 71
   && boundary.latestDatabaseMigration >= 78
-  && boundary.ppk021ExactAllowlistEntries === 543
+  && boundary.ppk021ExactAllowlistEntries === 545
   && boundary.ppk022CapabilitySurfaces === 242
   && boundary.networkVerificationPerformed === false);
 check('DEC-211 is active in the user decision ledger', ledger.decisionCount === ledger.decisions?.length

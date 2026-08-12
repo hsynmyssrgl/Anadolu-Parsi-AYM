@@ -59,7 +59,7 @@
     "SQL_CALL": 56,
     "SQL_CONSTRUCTOR": 2,
     "SQL_IMPORT": 2,
-    "USE_CASE_COMPOSITION": 275
+    "USE_CASE_COMPOSITION": 277
   },
   "allowedSurfaceKeys": [
     "CRYPTO_GLOBAL|apps/desktop/src/main/preload.ts|randomUUID",
@@ -418,6 +418,7 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetLatestAuditOccurredAtUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetMaintenancePolicyUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetMaintenanceRecommendationsUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetManagedLifeWorkspaceUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetOperationalHealthCountsUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetPerformanceTrendUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetPersonLifecycleWorkspaceUseCase",
@@ -528,6 +529,7 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|RecordHealthNotificationUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|RecordLoanPaymentUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|RecordMaintenanceHistoryUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|RecordManagedLifeItemUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|RecordPerformanceSampleUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|RecordSessionActivityUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|RecordSystemHealthHistoryUseCase",

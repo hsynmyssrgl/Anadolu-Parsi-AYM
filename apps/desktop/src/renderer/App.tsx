@@ -6,6 +6,7 @@ import { accessibilityAnnouncement, nextRovingIndex, parseAccessibilityPreferenc
 import { AsyncWriteGuard, MutationRevisionWatermark } from './async-state-guard';
 import { DEVICE_REAUTHORIZATION_CONFIRMATION, SECURITY_CENTER_LABEL, SECURITY_CENTER_ROUTE, canSubmitDeviceReauthorization, securityCenterNeedsAttention } from './security-center-navigation';
 import { FinancePlanningPanel } from './FinancePlanningPanel';
+import { ManagedLifePanel } from './ManagedLifePanel';
 import {
   FAMILY_RELATIONSHIP_CATALOG,
   OBJECT_PERMISSION_ACTIONS,
@@ -68,6 +69,7 @@ import type { SensitiveDataCategory, SensitiveDataConsentPurpose, SensitiveDataP
 import type { BankInstitutionView, BankAccountView, CreateBankAccountInput, IbanStructuralValidationView, ValidateIbanInput, PaymentCardView, CreatePaymentCardInput } from '@ppt/domain';
 import type { LoanAccountView, CreateLoanAccountInput, RecordLoanPaymentInput } from '@ppt/domain';
 import type { FinancePlanningWorkspaceView, RecordFinancePlanningItemInput } from '@ppt/domain';
+import type { ManagedLifeWorkspaceView, RecordManagedLifeItemInput } from '@ppt/domain';
 
 type ReleaseChannel = 'bronze' | 'silver' | 'gold';
 const releaseChannelFromStage = (stage: string): ReleaseChannel => {
@@ -1927,6 +1929,7 @@ export function App() {
   const [familyHealthHistory,setFamilyHealthHistory]=useState<FamilyHealthHistoryView[]>([]);
   const [financeValuations,setFinanceValuations]=useState<FinanceValuationView[]>([]);
   const [lifeRecords,setLifeRecords]=useState<LifeRecordView[]>([]);
+  const [managedLifeWorkspace,setManagedLifeWorkspace]=useState<ManagedLifeWorkspaceView>();
   const [automationRules,setAutomationRules]=useState<AutomationRuleView[]>([]);
   const [reportSummary,setReportSummary]=useState<ReportSummaryView>();
   const [memberModal, setMemberModal] = useState(false);
@@ -2130,7 +2133,8 @@ export function App() {
         const [records,medications,history]=await Promise.all([window.pardus!.listHealth(),window.pardus!.listMedicationPlans(),window.pardus!.listFamilyHealthHistory()]);
         asyncWriteGuardRef.current.commit(ticket,()=>{setHealthRecords(records);setMedicationPlans(medications);setFamilyHealthHistory(history);});
       }else if(screen==='life-center'){
-        const records=await window.pardus!.listLifeRecords();asyncWriteGuardRef.current.commit(ticket,()=>setLifeRecords(records));
+        const [records,managedWorkspace]=await Promise.all([window.pardus!.listLifeRecords(),window.pardus!.getManagedLifeWorkspace()]);
+        asyncWriteGuardRef.current.commit(ticket,()=>{setLifeRecords(records);setManagedLifeWorkspace(managedWorkspace);});
       }else if(screen==='automation'){
         const rules=await window.pardus!.listAutomationRules();asyncWriteGuardRef.current.commit(ticket,()=>setAutomationRules(rules));
       }else if(screen==='reports'){
@@ -2299,6 +2303,7 @@ export function App() {
   const createFamilyHistory=async(input:CreateFamilyHealthHistoryInput)=>{if(window.pardus){setFamilyHealthHistory(await window.pardus.createFamilyHealthHistory(input));await refreshDashboard();}};
   const createFinanceValuation=async(input:CreateFinanceValuationInput)=>{if(window.pardus)setFinanceValuations(await window.pardus.createFinanceValuation(input));};
   const createLifeRecord=async(input:CreateLifeRecordInput)=>{if(window.pardus){setLifeRecords(await window.pardus.createLifeRecord(input));setReportSummary(await window.pardus.getReportSummary());await refreshDashboard();}};
+  const recordManagedLifeItem=async(input:RecordManagedLifeItemInput)=>{if(window.pardus)setManagedLifeWorkspace(await window.pardus.recordManagedLifeItem(input));};
   const createAutomationRule=async(input:CreateAutomationRuleInput)=>{if(window.pardus){setAutomationRules(await window.pardus.createAutomationRule(input));await refreshDashboard();}};
   const toggleAutomationRule=async(id:string,enabled:boolean)=>{if(window.pardus){setAutomationRules(await window.pardus.toggleAutomationRule(id,enabled));await refreshDashboard();}};
 
@@ -2339,7 +2344,7 @@ export function App() {
   else if (active === 'important-days') screen = <ImportantDaysScreen snapshot={snapshot} archivedEvents={archivedEvents} onAdd={openImportantDayModal} onEdit={setEditingEvent} onArchive={(eventId)=>setFamilyEventArchived(eventId,true)} onRestore={(eventId)=>setFamilyEventArchived(eventId,false)} onOpenArchive={openEventArchive} />;
   else if (active === 'finance') screen = <FinanceScreen people={snapshot.people} records={financeRecords} valuations={financeValuations} institutions={bankInstitutions} bankAccounts={bankAccounts} paymentCards={paymentCards} loanAccounts={loanAccounts} planningWorkspace={financePlanningWorkspace} onCreate={createFinance} onCreateValuation={createFinanceValuation} onValidateIban={validateIban} onCreateBankAccount={createBankAccount} onCreatePaymentCard={createPaymentCard} onCreateLoanAccount={createLoanAccount} onRecordLoanPayment={recordLoanPayment} onRecordPlanning={recordFinancePlanningItem} onPlanningWorkspaceChange={setFinancePlanningWorkspace} />;
   else if (active === 'health') screen = <HealthScreen people={snapshot.people} records={healthRecords} medications={medicationPlans} history={familyHealthHistory} onCreate={createHealth} onCreateMedication={createMedicationPlan} onCreateHistory={createFamilyHistory} />;
-  else if (active === 'life-center') screen = <LifeCenterScreen people={snapshot.people} records={lifeRecords} onCreate={createLifeRecord} />;
+  else if (active === 'life-center') screen = <><LifeCenterScreen people={snapshot.people} records={lifeRecords} onCreate={createLifeRecord} /><section className="workspace-grid"><ManagedLifePanel people={snapshot.people} workspace={managedLifeWorkspace} onRecord={recordManagedLifeItem}/></section></>;
   else if (active === 'automation') screen = <AutomationScreen rules={automationRules} onCreate={createAutomationRule} onToggle={toggleAutomationRule} />;
   else if (active === 'reports') screen = <ReportsScreen report={reportSummary} />;
   else if (active === 'invitations') screen = <InvitationsScreen snapshot={snapshot}/>;

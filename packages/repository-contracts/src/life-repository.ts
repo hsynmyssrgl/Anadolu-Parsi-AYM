@@ -1,5 +1,11 @@
 import type { FamilyId, IsoDateTime, PersonId } from '@ppt/core';
-import type { LifeRecordView } from '@ppt/domain';
+import type {
+  LifeRecordView,
+  ManagedLifeActivityLedgerItemView,
+  ManagedLifeDocumentLedgerItemView,
+  ManagedLifeProfileLedgerItemView,
+  ManagedLifeReminderKind
+} from '@ppt/domain';
 import type {
   PolicyAuthorizedRepositoryExecutionContext,
   RepositoryExecutionContext,
@@ -14,6 +20,39 @@ export interface LifeRecordRow extends LifeRecordView {
   readonly createdAt: IsoDateTime;
 }
 
+export type ManagedLifeProfileLedgerItemRow = ManagedLifeProfileLedgerItemView & {
+  readonly familyId: FamilyId;
+  readonly ownerPersonId: PersonId;
+  readonly startsAt?: IsoDateTime;
+  readonly endsAt?: IsoDateTime;
+  readonly initialReminder?: {
+    readonly kind: ManagedLifeReminderKind;
+    readonly dueAt: IsoDateTime;
+  };
+  readonly createdAt: IsoDateTime;
+};
+
+export type ManagedLifeActivityLedgerItemRow = ManagedLifeActivityLedgerItemView & {
+  readonly familyId: FamilyId;
+  readonly ownerPersonId: PersonId;
+  readonly occurredAt: IsoDateTime;
+  readonly reminderMutation?:
+    | { readonly action: 'set'; readonly kind: ManagedLifeReminderKind; readonly dueAt: IsoDateTime }
+    | { readonly action: 'clear' };
+  readonly createdAt: IsoDateTime;
+};
+
+export type ManagedLifeDocumentLedgerItemRow = ManagedLifeDocumentLedgerItemView & {
+  readonly familyId: FamilyId;
+  readonly ownerPersonId: PersonId;
+  readonly createdAt: IsoDateTime;
+};
+
+export type ManagedLifeLedgerItemRow =
+  | ManagedLifeProfileLedgerItemRow
+  | ManagedLifeActivityLedgerItemRow
+  | ManagedLifeDocumentLedgerItemRow;
+
 export interface LifeRepositoryPort {
   listLifeRecords(
     context: PolicyAuthorizedRepositoryExecutionContext
@@ -21,6 +60,17 @@ export interface LifeRepositoryPort {
   insertLifeRecord(
     context: PolicyAuthorizedRepositoryExecutionContext,
     row: LifeRecordRow
+  ): RepositoryResult<void>;
+  listManagedLifeItems(
+    context: PolicyAuthorizedRepositoryExecutionContext
+  ): RepositoryResult<readonly ManagedLifeLedgerItemRow[]>;
+  findManagedLifeProfile(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    id: string
+  ): RepositoryResult<ManagedLifeProfileLedgerItemRow | null>;
+  insertManagedLifeItem(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    row: ManagedLifeLedgerItemRow
   ): RepositoryResult<void>;
 }
 
@@ -33,6 +83,10 @@ export interface LifePolicyResourceRepositoryPort {
     context: RepositoryExecutionContext,
     id: string
   ): RepositoryResult<LifeRecordRow | null>;
+  findManagedLifeProfileForPolicyResolution(
+    context: RepositoryExecutionContext,
+    id: string
+  ): RepositoryResult<ManagedLifeProfileLedgerItemRow | null>;
 }
 
 export interface LifeAutomationDueProjectionRow {

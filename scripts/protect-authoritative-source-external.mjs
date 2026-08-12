@@ -35,8 +35,10 @@ const listFiles = async (directory) => {
   const visit = async (current) => {
     for (const entry of await readdir(current, { withFileTypes: true })) {
       const path = join(current, entry.name);
+      if (entry.isSymbolicLink()) throw new Error(`Symbolic link is forbidden in external source protection: ${path}`);
       if (entry.isDirectory()) await visit(path);
       else if (entry.isFile()) files.push(posix(relative(directory, path)));
+      else throw new Error(`Special filesystem entry is forbidden in external source protection: ${path}`);
     }
   };
   await visit(directory);

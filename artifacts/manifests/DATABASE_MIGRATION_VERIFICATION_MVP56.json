@@ -427,7 +427,12 @@
       "version": 82,
       "name": "b4_controlled_import_open_banking",
       "checksum": "be32fbe6a79688ee879fda02a16faa78f6e0d4151e1462b2c9f28a1da44518c8"
+    },
+    {
+      "version": 83,
+      "name": "b5_life_home_vehicle_managed_ledger",
+      "checksum": "f648e5f8b6f685222bc26c3ce6fc9edcc37eeebc8ea69a44fc2c0951ff8057dc"
     }
   ],
-  "generatedAt": "2026-08-12T19:14:27.971Z"
+  "generatedAt": "2026-08-12T20:28:56.162Z"
 }

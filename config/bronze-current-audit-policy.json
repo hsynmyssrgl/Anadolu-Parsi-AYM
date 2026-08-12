@@ -55,7 +55,11 @@
     "scripts/verify-b4-controlled-import-open-banking-boundary.mjs",
     "scripts/verify-33-d-b4-controlled-import-open-banking-contract.mjs",
     "scripts/verify-33-d-b4-controlled-import-open-banking-runtime.mjs",
-    "scripts/protect-authoritative-source-external.mjs",
+    "scripts/verify-33-d-controlled-import-open-banking-completion.mjs",
+    "scripts/verify-b5-category-life-home-vehicle-boundary.mjs",
+    "scripts/verify-33-e-b5-category-life-home-vehicle-contract.mjs",
+    "scripts/verify-33-e-b5-category-life-home-vehicle-runtime.mjs",
+    "scripts/verify-33-e-b5-category-life-home-vehicle-completion.mjs",
     "scripts/verify-step-checkpoint-gate.mjs"
   ],
   "historicalProgressVerifier": "scripts/verify-29-d5-scope-real-progress-report.mjs",

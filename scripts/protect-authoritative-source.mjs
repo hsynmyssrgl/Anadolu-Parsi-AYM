@@ -20,6 +20,11 @@ const backupRoot = resolve(aymRoot, '10_YEDEK');
 const excludedDirectoryNames = new Set([
   '.git', '.cache', '.tmp', '.turbo', 'coverage', 'dist', 'node_modules', 'temp', 'tmp'
 ]);
+const excludedRelativePaths = new Set([
+  'artifacts/deliveries/Anadolu_Parsi_Aile_Yasam_Merkezi_Bronze_04.08.2026.29.json',
+  'artifacts/reports/DELIVERY_STATUS_04.08.2026.29.json',
+  'artifacts/validation/delivery-report-contract-v2.json'
+]);
 const fixedDosDate = 33;
 const utf8Flag = 0x0800;
 
@@ -51,6 +56,7 @@ const scan = async () => {
       const absolute = resolve(directory, entry.name);
       const rel = normalizePath(relative(sourceRoot, absolute));
       if (entry.isSymbolicLink()) throw new Error(`Symbolic link is forbidden in authoritative source: ${rel}`);
+      if (excludedRelativePaths.has(rel)) continue;
       if (entry.isDirectory()) {
         await visit(absolute);
       } else if (entry.isFile()) {
@@ -204,6 +210,7 @@ const createProtection = async () => {
     id: `AYM-AUTHORITATIVE-SOURCE-${inventory.treeSha256}`,
     source: '06_KOD/app',
     exclusions: [...excludedDirectoryNames].sort(),
+    excludedDerivedDeliveryFiles: [...excludedRelativePaths].sort(),
     fileCount: inventory.fileCount,
     totalBytes: inventory.totalBytes,
     treeSha256: inventory.treeSha256,
@@ -232,6 +239,7 @@ const createProtection = async () => {
     treeSha256: inventory.treeSha256,
     fileCount: inventory.fileCount,
     totalBytes: inventory.totalBytes,
+    excludedDerivedDeliveryFiles: [...excludedRelativePaths].sort(),
     receipt: {
       path: `05_TEST/30Z_LOCAL_RECEIPT/${receiptName}`,
       sha256: receiptHash
@@ -264,6 +272,11 @@ const verifyProtection = async () => {
   const receipt = JSON.parse(receiptBytes.toString('utf8'));
   const receiptHash = sha256(receiptBytes);
   if (receiptHash !== protection.receipt.sha256) throw new Error('Receipt SHA-256 mismatch.');
+  const expectedDerivedExclusions = JSON.stringify([...excludedRelativePaths].sort());
+  if (JSON.stringify(receipt.excludedDerivedDeliveryFiles) !== expectedDerivedExclusions
+    || JSON.stringify(protection.excludedDerivedDeliveryFiles) !== expectedDerivedExclusions) {
+    throw new Error('Derived delivery report exclusion boundary mismatch.');
+  }
   const inventory = await scan();
   if (inventory.treeSha256 !== receipt.treeSha256) throw new Error('Authoritative source tree mismatch.');
   if (inventory.fileCount !== receipt.fileCount || inventory.totalBytes !== receipt.totalBytes) {

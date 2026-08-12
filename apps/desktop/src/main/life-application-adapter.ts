@@ -15,6 +15,7 @@ import type {
   LifeUnitOfWork,
   LifeWriteScope
 } from '@ppt/application';
+import { buildManagedLifeWorkspace } from '@ppt/application';
 import {
   PlatformPolicyEnforcementError,
   assertActivePlatformPolicyTransactionContext,
@@ -443,6 +444,36 @@ export class RepositoryBackedLifeQueryPort implements LifeQueryPort {
         : records;
     });
   }
+
+  public async getManagedLifeWorkspace(
+    context: LifeApplicationContext
+  ): ReturnType<LifeQueryPort['getManagedLifeWorkspace']> {
+    const intent: LifePolicyIntent = {
+      action: 'read',
+      capability: 'family.read',
+      resourceType: 'life_record',
+      resourceId: '*',
+      purpose: 'general'
+    };
+    return this.#runner.execute(context, intent, ({ repository }) => {
+      const auth = loadAuthorization(this.dependencies, context, repository);
+      if (!auth.ok) return auth;
+      const items = this.dependencies.lifeRepository.listManagedLifeItems(repository);
+      if (!items.ok) return items;
+      const visible = items.value.filter((item) => authorize(this.#authorization, auth.value, {
+        action: 'read',
+        resourceType: 'life_record',
+        resourceId: item.itemType === 'profile' ? item.id : item.recordId,
+        ownerPersonId: item.ownerPersonId,
+        occurredAt: repository.occurredAt,
+        privacy: item.privacy
+      }));
+      return {
+        ok: true,
+        value: buildManagedLifeWorkspace({ items: visible, generatedAt: repository.occurredAt })
+      };
+    });
+  }
 }
 
 class RepositoryBackedLifeWriteScope implements LifeWriteScope {
@@ -473,6 +504,18 @@ class RepositoryBackedLifeWriteScope implements LifeWriteScope {
 
   public insertLifeRecord(record: Parameters<LifeWriteScope['insertLifeRecord']>[0]): ReturnType<LifeWriteScope['insertLifeRecord']> {
     return this.dependencies.lifeRepository.insertLifeRecord(this.repository, record);
+  }
+
+  public findManagedLifeProfile(
+    id: Parameters<LifeWriteScope['findManagedLifeProfile']>[0]
+  ): ReturnType<LifeWriteScope['findManagedLifeProfile']> {
+    return this.dependencies.lifeRepository.findManagedLifeProfile(this.repository, id);
+  }
+
+  public insertManagedLifeItem(
+    record: Parameters<LifeWriteScope['insertManagedLifeItem']>[0]
+  ): ReturnType<LifeWriteScope['insertManagedLifeItem']> {
+    return this.dependencies.lifeRepository.insertManagedLifeItem(this.repository, record);
   }
 
   public appendAudit(input: Parameters<LifeWriteScope['appendAudit']>[0]): ReturnType<LifeWriteScope['appendAudit']> {

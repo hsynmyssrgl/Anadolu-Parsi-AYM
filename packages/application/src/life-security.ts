@@ -1,0 +1,267 @@
+import type { ManagedLifeCategory } from '@ppt/domain';
+
+export const MANAGED_LIFE_INPUT_KEYS = Object.freeze({
+  profile: Object.freeze([
+    'itemType','ownerPersonId','category','title','status','privacy','details',
+    'startsAt','endsAt','initialReminder','financeAssetId'
+  ]),
+  activity: Object.freeze([
+    'itemType','recordId','activityKind','occurredAt','provider','amountMinor','currency',
+    'quantityMilliunits','odometerKm','financeExpenseId','reminderMutation','note'
+  ]),
+  document: Object.freeze([
+    'itemType','recordId','archiveItemId','documentKind','label'
+  ])
+} as const);
+
+export const MANAGED_LIFE_REQUIRED_INPUT_KEYS = Object.freeze({
+  profile: Object.freeze(['itemType','ownerPersonId','category','title','status','privacy','details']),
+  activity: Object.freeze(['itemType','recordId','activityKind','occurredAt']),
+  document: Object.freeze(['itemType','recordId','archiveItemId','documentKind'])
+} as const);
+
+export const MANAGED_LIFE_PROFILE_DETAIL_KEYS = Object.freeze({
+  insurance: Object.freeze(['insuranceKind','provider']),
+  subscription: Object.freeze(['provider','planName','billingCycle']),
+  education: Object.freeze(['institution','program']),
+  employment: Object.freeze(['employer','position']),
+  official_operation: Object.freeze(['authority','operationType']),
+  home: Object.freeze(['tenure','propertyType','addressLabel']),
+  vehicle: Object.freeze(['vehicleType','energyType','plate'])
+} satisfies Readonly<Record<ManagedLifeCategory, readonly string[]>>);
+
+export const MANAGED_LIFE_PROFILE_REQUIRED_DETAIL_KEYS = Object.freeze({
+  insurance: Object.freeze(['insuranceKind','provider']),
+  subscription: Object.freeze(['provider','planName','billingCycle']),
+  education: Object.freeze(['institution','program']),
+  employment: Object.freeze(['employer','position']),
+  official_operation: Object.freeze(['authority','operationType']),
+  home: Object.freeze(['tenure','propertyType','addressLabel']),
+  vehicle: Object.freeze(['vehicleType','energyType'])
+} satisfies Readonly<Record<ManagedLifeCategory, readonly string[]>>);
+
+export const MANAGED_LIFE_INITIAL_REMINDER_KEYS = Object.freeze(['kind','dueAt'] as const);
+export const MANAGED_LIFE_REMINDER_MUTATION_KEYS = Object.freeze({
+  set: Object.freeze(['action','kind','dueAt']),
+  clear: Object.freeze(['action'])
+} as const);
+
+export interface ManagedLifeDataContractInspection {
+  readonly accepted:boolean;
+  readonly itemType?:'profile'|'activity'|'document';
+  readonly exactShape:boolean;
+  readonly unknownFields:readonly string[];
+  readonly missingFields:readonly string[];
+  readonly prohibitedFields:readonly string[];
+  readonly panLikeValueDetected:boolean;
+  readonly pathLikeValueDetected:boolean;
+  readonly base64LikeValueDetected:boolean;
+}
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> => {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+};
+
+const normalizedKey = (key: string): string => key.toLocaleLowerCase('en-US').replace(/[^a-z0-9]/gu, '');
+const prohibitedKeyTokens = Object.freeze([
+  'password','passcode','secret','token','credential','cvv','cvc','pin','pan',
+  'cardnumber','internetbanking','filepath','filename','storedname','originalname',
+  'base64','binary','buffer','blob'
+]);
+const explicitlyAllowedOpaqueIdentifierKeys = new Set([
+  'archiveitemid','financeassetid','financeexpenseid'
+]);
+
+const isProhibitedKey = (key: string): boolean => {
+  const normalized = normalizedKey(key);
+  if (explicitlyAllowedOpaqueIdentifierKeys.has(normalized)) return false;
+  return prohibitedKeyTokens.some((token) => normalized === token || normalized.endsWith(token));
+};
+
+const isPathLike = (value: string): boolean =>
+  /^[a-zA-Z]:[\\/]/u.test(value)
+  || /^\\\\[^\\]+\\/u.test(value)
+  || /^file:\/\//iu.test(value)
+  || /^\/(?:home|users?|var|tmp|etc|opt|mnt|private)\//iu.test(value)
+  || /(?:^|[\\/])\.\.(?:[\\/]|$)/u.test(value);
+
+const isBase64Like = (value: string): boolean => {
+  if (/^data:[^,]{1,160};base64,/iu.test(value)) return true;
+  const compact = value.replace(/\s/gu, '');
+  return compact.length >= 128
+    && compact.length % 4 === 0
+    && /^[A-Za-z0-9+/]+={0,2}$/u.test(compact);
+};
+
+const passesLuhn = (digits: string): boolean => {
+  let sum = 0;
+  let doubleDigit = false;
+  for (let index = digits.length - 1; index >= 0; index -= 1) {
+    let digit = Number(digits[index]);
+    if (doubleDigit) {
+      digit *= 2;
+      if (digit > 9) digit -= 9;
+    }
+    sum += digit;
+    doubleDigit = !doubleDigit;
+  }
+  return sum % 10 === 0;
+};
+
+export const containsLikelyManagedLifePan = (value: unknown): boolean => {
+  if (typeof value !== 'string') return false;
+  const candidates = value.match(/(?:\d[ -]?){13,19}/gu) ?? [];
+  return candidates.some((candidate) => {
+    const digits = candidate.replace(/\D/gu, '');
+    return digits.length >= 13
+      && digits.length <= 19
+      && !/^(\d)\1+$/u.test(digits)
+      && passesLuhn(digits);
+  });
+};
+
+interface RecursiveSignals {
+  readonly prohibitedFields:string[];
+  panLikeValueDetected:boolean;
+  pathLikeValueDetected:boolean;
+  base64LikeValueDetected:boolean;
+  unsupportedContainerDetected:boolean;
+}
+
+const collectRecursiveSignals = (
+  value: unknown,
+  path: string,
+  signals: RecursiveSignals,
+  seen: Set<object>
+): void => {
+  if (typeof value === 'string') {
+    signals.panLikeValueDetected ||= containsLikelyManagedLifePan(value);
+    signals.pathLikeValueDetected ||= isPathLike(value);
+    signals.base64LikeValueDetected ||= isBase64Like(value);
+    return;
+  }
+  if (value === null || typeof value !== 'object') return;
+  if (!isPlainObject(value) || seen.has(value)) {
+    signals.unsupportedContainerDetected = true;
+    return;
+  }
+  seen.add(value);
+  for (const [key, child] of Object.entries(value)) {
+    const childPath = `${path}.${key}`;
+    if (isProhibitedKey(key)) signals.prohibitedFields.push(childPath);
+    collectRecursiveSignals(child, childPath, signals, seen);
+  }
+};
+
+const compareKeys = (
+  value: Record<string, unknown>,
+  path: string,
+  allowed: readonly string[],
+  required: readonly string[],
+  unknownFields: string[],
+  missingFields: string[]
+): void => {
+  const allowedSet = new Set(allowed);
+  for (const key of Object.keys(value)) {
+    if (!allowedSet.has(key)) unknownFields.push(`${path}.${key}`);
+  }
+  for (const key of required) {
+    if (!Object.hasOwn(value, key)) missingFields.push(`${path}.${key}`);
+  }
+};
+
+export const inspectManagedLifeDataContract = (input: unknown): ManagedLifeDataContractInspection => {
+  const signals: RecursiveSignals = {
+    prohibitedFields: [],
+    panLikeValueDetected: false,
+    pathLikeValueDetected: false,
+    base64LikeValueDetected: false,
+    unsupportedContainerDetected: false
+  };
+  collectRecursiveSignals(input, '$', signals, new Set<object>());
+  const unknownFields: string[] = [];
+  const missingFields: string[] = [];
+  let exactShape = isPlainObject(input);
+  let itemType: ManagedLifeDataContractInspection['itemType'];
+
+  if (isPlainObject(input) && (input.itemType === 'profile' || input.itemType === 'activity' || input.itemType === 'document')) {
+    itemType = input.itemType;
+    compareKeys(
+      input,
+      '$',
+      MANAGED_LIFE_INPUT_KEYS[itemType],
+      MANAGED_LIFE_REQUIRED_INPUT_KEYS[itemType],
+      unknownFields,
+      missingFields
+    );
+    if (itemType === 'profile') {
+      const category = input.category;
+      if (typeof category !== 'string' || !Object.hasOwn(MANAGED_LIFE_PROFILE_DETAIL_KEYS, category)) {
+        exactShape = false;
+      } else if (!isPlainObject(input.details)) {
+        exactShape = false;
+      } else {
+        const managedCategory = category as ManagedLifeCategory;
+        compareKeys(
+          input.details,
+          '$.details',
+          MANAGED_LIFE_PROFILE_DETAIL_KEYS[managedCategory],
+          MANAGED_LIFE_PROFILE_REQUIRED_DETAIL_KEYS[managedCategory],
+          unknownFields,
+          missingFields
+        );
+      }
+      if (input.initialReminder !== undefined) {
+        if (!isPlainObject(input.initialReminder)) exactShape = false;
+        else compareKeys(
+          input.initialReminder,
+          '$.initialReminder',
+          MANAGED_LIFE_INITIAL_REMINDER_KEYS,
+          MANAGED_LIFE_INITIAL_REMINDER_KEYS,
+          unknownFields,
+          missingFields
+        );
+      }
+    } else if (itemType === 'activity' && input.reminderMutation !== undefined) {
+      if (!isPlainObject(input.reminderMutation)
+        || (input.reminderMutation.action !== 'set' && input.reminderMutation.action !== 'clear')) {
+        exactShape = false;
+      } else {
+        const action = input.reminderMutation.action;
+        compareKeys(
+          input.reminderMutation,
+          '$.reminderMutation',
+          MANAGED_LIFE_REMINDER_MUTATION_KEYS[action],
+          MANAGED_LIFE_REMINDER_MUTATION_KEYS[action],
+          unknownFields,
+          missingFields
+        );
+      }
+    }
+  } else {
+    exactShape = false;
+  }
+
+  exactShape = exactShape
+    && !signals.unsupportedContainerDetected
+    && unknownFields.length === 0
+    && missingFields.length === 0;
+  const accepted = exactShape
+    && signals.prohibitedFields.length === 0
+    && !signals.panLikeValueDetected
+    && !signals.pathLikeValueDetected
+    && !signals.base64LikeValueDetected;
+  return Object.freeze({
+    accepted,
+    ...(itemType ? { itemType } : {}),
+    exactShape,
+    unknownFields: Object.freeze(unknownFields.sort()),
+    missingFields: Object.freeze(missingFields.sort()),
+    prohibitedFields: Object.freeze(signals.prohibitedFields.sort()),
+    panLikeValueDetected: signals.panLikeValueDetected,
+    pathLikeValueDetected: signals.pathLikeValueDetected,
+    base64LikeValueDetected: signals.base64LikeValueDetected
+  });
+};
