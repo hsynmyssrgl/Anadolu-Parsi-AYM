@@ -1,0 +1,346 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-P",
+  "requirement": "PPK-020",
+  "phase": "CROSS_PLATFORM_POLICY_CONFORMANCE_CONTRACT",
+  "status": "PASS",
+  "checkCount": 76,
+  "passed": 76,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "scope identity is exact",
+      "passed": true
+    },
+    {
+      "name": "inventory identity is exact",
+      "passed": true
+    },
+    {
+      "name": "suite version is PPK-020-V1",
+      "passed": true
+    },
+    {
+      "name": "inventory has fourteen unique canonical targets",
+      "passed": true
+    },
+    {
+      "name": "target order matches the canonical platform registry",
+      "passed": true
+    },
+    {
+      "name": "exact two deployed runtime targets are recorded",
+      "passed": true
+    },
+    {
+      "name": "exact twelve profile-only targets are recorded",
+      "passed": true
+    },
+    {
+      "name": "macOS iOS and iPadOS remain not deployed",
+      "passed": true
+    },
+    {
+      "name": "scope requires the exact shared matrix",
+      "passed": true
+    },
+    {
+      "name": "scope requires signed package strict context and certificate binding",
+      "passed": true
+    },
+    {
+      "name": "scope forbids target exclusions and case subsets",
+      "passed": true
+    },
+    {
+      "name": "scope does not claim native Apple execution",
+      "passed": true
+    },
+    {
+      "name": "scope denies runtime authority to the reference harness",
+      "passed": true
+    },
+    {
+      "name": "scope requires content-free no-cache status",
+      "passed": true
+    },
+    {
+      "name": "scope forbids persistence and schema change",
+      "passed": true
+    },
+    {
+      "name": "scope forbids transfer backfill ownership change and cutover",
+      "passed": true
+    },
+    {
+      "name": "database migration remains 77",
+      "passed": true
+    },
+    {
+      "name": "no PPK-020 migration marker exists",
+      "passed": true
+    },
+    {
+      "name": "policy publishes one canonical target registry",
+      "passed": true
+    },
+    {
+      "name": "policy publishes one canonical case registry",
+      "passed": true
+    },
+    {
+      "name": "policy contains exactly twenty-two case identifiers",
+      "passed": true
+    },
+    {
+      "name": "policy applies every case definition without a target branch",
+      "passed": true
+    },
+    {
+      "name": "policy verifies the signed package before execution",
+      "passed": true
+    },
+    {
+      "name": "policy requires strict baseline context",
+      "passed": true
+    },
+    {
+      "name": "policy binds target application and canonical manifest",
+      "passed": true
+    },
+    {
+      "name": "policy requires device certificate in the reference manifest",
+      "passed": true
+    },
+    {
+      "name": "policy executes the real kernel",
+      "passed": true
+    },
+    {
+      "name": "policy re-computes exact context hashes",
+      "passed": true
+    },
+    {
+      "name": "invalid request cannot mint a context hash",
+      "passed": true
+    },
+    {
+      "name": "report includes canonical SHA-256 binding",
+      "passed": true
+    },
+    {
+      "name": "report verification requires every case to pass",
+      "passed": true
+    },
+    {
+      "name": "policy snapshot denies native false claims and harness authority",
+      "passed": true
+    },
+    {
+      "name": "platform policy exports the suite",
+      "passed": true
+    },
+    {
+      "name": "domain boundary exposes content-free fixed counts",
+      "passed": true
+    },
+    {
+      "name": "domain boundary records deployment truth",
+      "passed": true
+    },
+    {
+      "name": "domain exports the boundary",
+      "passed": true
+    },
+    {
+      "name": "application use case maps only the suite snapshot",
+      "passed": true
+    },
+    {
+      "name": "application boundary keeps migration 77 and no persistence",
+      "passed": true
+    },
+    {
+      "name": "application exports the use case",
+      "passed": true
+    },
+    {
+      "name": "target test iterates every canonical target",
+      "passed": true
+    },
+    {
+      "name": "target test compares the exact case sequence",
+      "passed": true
+    },
+    {
+      "name": "target test requires twenty-two passed cases",
+      "passed": true
+    },
+    {
+      "name": "target test constructs real signed policy kernels",
+      "passed": true
+    },
+    {
+      "name": "target test covers target and report tamper",
+      "passed": true
+    },
+    {
+      "name": "target test asserts no native Apple execution claim",
+      "passed": true
+    },
+    {
+      "name": "integration test verifies no test payload exposure",
+      "passed": true
+    },
+    {
+      "name": "integration test verifies zero-argument IPC",
+      "passed": true
+    },
+    {
+      "name": "integration test verifies no-cache behavior",
+      "passed": true
+    },
+    {
+      "name": "main composes one content-free suite status use case",
+      "passed": true
+    },
+    {
+      "name": "main registers the exact status handler",
+      "passed": true
+    },
+    {
+      "name": "preload exposes the exact status channel",
+      "passed": true
+    },
+    {
+      "name": "renderer global type exposes the status API",
+      "passed": true
+    },
+    {
+      "name": "IPC integration policy requires zero arguments",
+      "passed": true
+    },
+    {
+      "name": "IPC read sharing marks status no-cache",
+      "passed": true
+    },
+    {
+      "name": "renderer truthfully labels profile-only targets",
+      "passed": true
+    },
+    {
+      "name": "renderer explicitly denies native Apple execution claim",
+      "passed": true
+    },
+    {
+      "name": "source gate passes with no finding",
+      "passed": true
+    },
+    {
+      "name": "source gate scans all eighteen production zones",
+      "passed": true
+    },
+    {
+      "name": "source gate scans at least 349 source files",
+      "passed": true
+    },
+    {
+      "name": "source gate sees at least thirteen relevant files",
+      "passed": true
+    },
+    {
+      "name": "root pretypecheck includes the conformance gate",
+      "passed": true
+    },
+    {
+      "name": "root prebuild includes the conformance gate",
+      "passed": true
+    },
+    {
+      "name": "root package exposes all four PPK-020 commands",
+      "passed": true
+    },
+    {
+      "name": "inventory records five implemented controls",
+      "passed": true
+    },
+    {
+      "name": "inventory has zero exclusions false claims and bypasses",
+      "passed": true
+    },
+    {
+      "name": "inventory has no open production blocker",
+      "passed": true
+    },
+    {
+      "name": "DEC-201 records the deployment and no-migration truth",
+      "passed": true
+    },
+    {
+      "name": "threat model covers skip mock native cache and tamper threats",
+      "passed": true
+    },
+    {
+      "name": "master decision register contains DEC-201",
+      "passed": true
+    },
+    {
+      "name": "decision ledger contains active DEC-201 with exact count",
+      "passed": true
+    },
+    {
+      "name": "prior PPK-012 through PPK-019 packages remain complete",
+      "passed": true
+    },
+    {
+      "name": "PPK-021 remains outside PPK-020 closure",
+      "passed": true
+    },
+    {
+      "name": "accepted registry closes the complete PPK-020 evidence chain",
+      "passed": true
+    },
+    {
+      "name": "scope closes PPK-020 without migration transfer or cutover",
+      "passed": true
+    },
+    {
+      "name": "inventory closes only after final validation",
+      "passed": true
+    },
+    {
+      "name": "audit closes only with final contract and runtime evidence",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "sourceGate": {
+    "status": "PASS",
+    "productionSourceZones": 18,
+    "scannedFiles": 349,
+    "securityRelevantFiles": 13,
+    "maliciousSelfTestAssertions": 8,
+    "benignFalsePositiveAssertions": 4,
+    "findings": []
+  },
+  "canonicalTargets": 14,
+  "identicalCasesPerTarget": 22,
+  "totalKernelEvaluations": 308,
+  "deployedRuntimeTargets": 2,
+  "profileOnlyTargets": 12,
+  "perTargetExclusions": 0,
+  "nativeRuntimeFalseClaims": 0,
+  "referenceHarnessGrantsRuntimeAuthority": false,
+  "nativeAppleRuntimeExecutionClaimed": false,
+  "latestDatabaseMigration": 77,
+  "schemaMigrationRequired": false,
+  "historicalBackfillPerformed": false,
+  "legacyDesktopVaultPreserved": true,
+  "sqliteOwnershipTransferred": false,
+  "realDataTransferPerformed": false,
+  "cutoverAuthorityAttached": false,
+  "successorRequirementCompletedByThisPackage": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-12T00:08:02.611Z"
+}

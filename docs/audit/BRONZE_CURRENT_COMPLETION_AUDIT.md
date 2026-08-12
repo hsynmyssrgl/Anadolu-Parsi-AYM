@@ -1,6 +1,6 @@
 # Bronze guncel tamamlama denetimi
 
-Olusturma (UTC): 2026-08-11T23:36:23.701Z
+Olusturma (UTC): 2026-08-12T00:06:18.633Z
 
 ## Sonuc
 
@@ -23,19 +23,19 @@ Olusturma (UTC): 2026-08-11T23:36:23.701Z
 ## Yuzde gercekligi
 
 - Resmi agirlikli Bronze ilerlemesi: **%25**
-- Kati gereksinim kapanisi: **%9.1429** (32/350)
-- Uygulama zinciri kapsami: **%9.4**
-- Yonetisim ve kanit zinciri kapsami: **%48.2857**
+- Kati gereksinim kapanisi: **%9.4286** (33/350)
+- Uygulama zinciri kapsami: **%9.6857**
+- Yonetisim ve kanit zinciri kapsami: **%48.4762**
 
 Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 
 ## Kapsam durumu
 
-- COMPLETE: 32
+- COMPLETE: 33
 - PARTIAL: 34
-- FOUNDATION_STARTED: 2
+- FOUNDATION_STARTED: 1
 - NOT_IMPLEMENTED: 282
-- Toplam acik gereksinim: 318
+- Toplam acik gereksinim: 317
 
 ## Kural ve kapilar
 
@@ -259,7 +259,6 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | DHA-013 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Zero trust | LAN dahil hiçbir konuma örtük güven vermeyen kullanıcı+cihaz+servis kimliği |
 | DHA-026 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Backup separation | Replica ile yedeğin ayrılması; immutable/offline/offsite backup |
 | DHA-029 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Security operations | Cluster CA, cert rotation, revocation, key epoch, replay/freshness ve rate limit |
-| PPK-020 | STARTED_BEFORE_NEW | P0 | FOUNDATION_STARTED | 1/13 | Test | Windows, macOS, iOS/iPadOS ve servisler için aynı policy conformance test suite |
 | PPK-024 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Runtime Gate | Policy service unavailable, invalid signature veya stale policy halinde hassas işlemlerin read-only/deny olması |
 | PPK-026 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Geliştirici API | Typed Policy SDK ve generated client; uygulamaların kendi güvenlik yorumunu yazamaması |
 | EXT-078 | STARTED_BEFORE_NEW | P1 | PARTIAL | 2/13 | SIGNED_PLUGIN_PLATFORM | Policy Kernel zorunlu kontrolü |
@@ -267,6 +266,7 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | B3-02 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Aile ve Hafıza | Taslak, otomatik kaydetme, geri al ve değişiklik geçmişi |
 | B3-03 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Aile ve Hafıza | Doğrudan medya/belge bağlama ve davetiye yaşam döngüsü |
 | B3-05 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Aile ve Hafıza | Tüm modüllerde yetki filtreli birleşik arama |
+| B5-01 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Sağlık ve Yaşam | Alerji, kronik durum, kan grubu, aşı, ölçüm, randevu ve belge ilişkisi |
 
 Tam acik-is listesi `artifacts/inventory/BRONZE_CURRENT_COMPLETION_AUDIT.json` icindedir.
 

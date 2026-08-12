@@ -20,3 +20,4 @@ export * from './derived-data-policy.js';
 export * from './sensitive-logging.js';
 export * from './policy-decision-audit.js';
 export * from './source-deletion-propagation.js';
+export * from './policy-conformance-suite.js';

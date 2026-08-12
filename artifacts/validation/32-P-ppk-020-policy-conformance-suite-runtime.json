@@ -1,0 +1,207 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-P",
+  "requirement": "PPK-020",
+  "phase": "CROSS_PLATFORM_POLICY_CONFORMANCE_RUNTIME",
+  "status": "PASS",
+  "checkCount": 17,
+  "passed": 17,
+  "failed": 0,
+  "results": [
+    {
+      "id": "ppk-020-contract",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "PPK-020 contract: PASS",
+      "outputSha256": "ee1221d25a9d6c3d3878f6b11ed98f3ccee2410428cd8489cb65a674268a7e58",
+      "outputTail": "PPK-020 contract: PASS (76/76)."
+    },
+    {
+      "id": "policy-conformance-production-source-gate",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "\"status\": \"PASS\"",
+      "outputSha256": "323d2b25c284303787ce65c5e1e5f41a4e6ec31b47016e0bd03445e49794909b",
+      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 349,\n  \"securityRelevantFiles\": 13,\n  \"maliciousSelfTestAssertions\": 8,\n  \"benignFalsePositiveAssertions\": 4,\n  \"canonicalTargets\": 14,\n  \"identicalCasesPerTarget\": 22,\n  \"totalMatrixAssertions\": 308,\n  \"deployedRuntimeTargets\": 2,\n  \"profileOnlyTargets\": 12,\n  \"nativeAppleRuntimeExecutionClaimed\": false,\n  \"findings\": []\n}"
+    },
+    {
+      "id": "ppk-020-real-kernel-matrix-and-ipc-integration",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 26,
+      "minimumTests": 26,
+      "outputSha256": "4794c90552c95e75c6ad2aea0f0a89cfebd724299564d149f6bdd6c03546e07d",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n··························\n\n Test Files  2 passed (2)\n      Tests  26 passed (26)\n   Start at  03:08:04\n   Duration  2.53s (transform 971ms, setup 0ms, import 1.93s, tests 60ms, environment 0ms)"
+    },
+    {
+      "id": "ppk-012-through-ppk-020-security-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 228,
+      "minimumTests": 228,
+      "outputSha256": "6e72884721a952caa9822d020ec74f9e94654d31405dc1667986dd9e7b3e1fff",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n····································································································································································································································\n\n Test Files  10 passed (10)\n      Tests  228 passed (228)\n   Start at  03:08:08\n   Duration  8.58s (transform 2.07s, setup 0ms, import 5.24s, tests 829ms, environment 1ms)\n\n\n(node:8020) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:28560) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:13612) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "data-store-smoke",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "\"checks\": 14",
+      "outputSha256": "59003c4d26ea47cb771fd3ffe933da908ccb7e9061649df821b74e3926f2c117",
+      "outputTail": "{\n  \"schemaVersion\": 1,\n  \"product\": \"Panthera pardus tulliana\",\n  \"version\": \"24.07.2026.60\",\n  \"milestone\": \"B064-M20 Backup Application Migration\",\n  \"status\": \"passed\",\n  \"checks\": 14,\n  \"peopleBefore\": 1,\n  \"peopleAfter\": 2,\n  \"backupCreated\": true,\n  \"migrationVersions\": [\n    1,\n    2,\n    3,\n    4,\n    5,\n    6,\n    7,\n    8,\n    9,\n    10,\n    11,\n    12,\n    13,\n    14,\n    15,\n    16,\n    17,\n    18,\n    19,\n    20,\n    21,\n    22,\n    23,\n    24,\n    25,\n    26,\n    27,\n    28,\n    29,\n    30,\n    31,\n    32,\n    33,\n    34,\n    35,\n    36,\n    37,\n    38,\n    39,\n    40,\n    41,\n    42,\n    43,\n    44,\n    45,\n    46,\n    47,\n    48,\n    49,\n    50,\n    51,\n    52,\n    53,\n    54,\n    55,\n    56,\n    57,\n    58,\n    59,\n    60,\n    61,\n    62,\n    63,\n    64,\n    65,\n    66,\n    67,\n    68,\n    69,\n    70,\n    71,\n    72,\n    73,\n    74,\n    75,\n    76,\n    77\n  ],\n  \"schemaFingerprint\": \"5d36e7fecbbf181b2ea52a98a7c448691f233b820da9aa81326b028592cac5e4\"\n}\n\n(node:7104) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "migration-77-no-ppk020-schema-change",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "\"version\": 77",
+      "outputSha256": "029b56dce6b2fe33fdf7bdd65f2976809ccdc5cc27144b2291d6c693034ae4d5",
+      "outputTail": "c9609\"\n    },\n    {\n      \"version\": 67,\n      \"name\": \"local_ppk002_timeline_event_policy_receipt_fence\",\n      \"checksum\": \"a67f9807f2a2bb00ada3768d06882a0ca2648d91b19eacb2becf46cf9ef2b528\"\n    },\n    {\n      \"version\": 68,\n      \"name\": \"ppk002_family_import_governed_rollback_receipt_fence\",\n      \"checksum\": \"298ffa1c65a65e762904cb913ecb9b45d1dfa5fcd94659c1a3181a5984f71bd6\"\n    },\n    {\n      \"version\": 69,\n      \"name\": \"ppk004_complete_policy_context_binding\",\n      \"checksum\": \"b0eaf8abbf4b45e00404717a1ba767ce64687e9f575a0e11798326cbdbfeeb91\"\n    },\n    {\n      \"version\": 70,\n      \"name\": \"ppk005_complete_data_classification\",\n      \"checksum\": \"bfd3643232c6daa25d85804f08c4580f896fe4d6e81c2ad3d7dcf602649085e9\"\n    },\n    {\n      \"version\": 71,\n      \"name\": \"ppk006_complete_policy_obligation_suite\",\n      \"checksum\": \"ba678463aa0138780d74d2342bcc453ab622e87c7213a4d10078319762c96a90\"\n    },\n    {\n      \"version\": 72,\n      \"name\": \"ppk007_signed_versioned_policy_package\",\n      \"checksum\": \"6660072205bd61c06dd1d4f4b744884f7edb29bf370d44a228c150ebca679a83\"\n    },\n    {\n      \"version\": 73,\n      \"name\": \"ppk008_application_identity_device_certificate_manifest\",\n      \"checksum\": \"0099d0238be94ea6bb95579d2ac9f33c015e99d5c14463442313953c014b87fd\"\n    },\n    {\n      \"version\": 74,\n      \"name\": \"ppk009_core_service_decision_reevaluation\",\n      \"checksum\": \"99c89269ac120adbb387dc796ecf1b837f978e04e375d3d41c4fb605020ea813\"\n    },\n    {\n      \"version\": 75,\n      \"name\": \"ppk011_contextual_ownership_share\",\n      \"checksum\": \"3c59ecd6df8d4bf777a8eee8c4864f19848fb712c85691105320afa17b476337\"\n    },\n    {\n      \"version\": 76,\n      \"name\": \"ppk012_offline_capability_lease_cache_fence\",\n      \"checksum\": \"98546bdde3fe97f9f37f2421dd74ad305ce5301dd23a9954ed54bd53610e9388\"\n    },\n    {\n      \"version\": 77,\n      \"name\": \"ppk016_derived_data_policy_inheritance\",\n      \"checksum\": \"de7fbb16719ad427c33d20be3cf564577185d6a1c2eb916cbe0dbdf40724a1da\"\n    }\n  ],\n  \"generatedAt\": \"2026-08-12T00:08:21.834Z\"\n}\n\n(node:30192) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "foundation-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "\"checks\": 14",
+      "outputSha256": "fdd4d701971b2e2f532a228fa7af72d1ba312d7f7b6cf12ba2ccdb026b27d035",
+      "outputTail": "{\n  \"status\": \"passed\",\n  \"checks\": 14,\n  \"names\": [\n    \"Result success mapping\",\n    \"Result error short-circuit\",\n    \"Result error mapping\",\n    \"Result flatMap\",\n    \"Throwable mapping\",\n    \"Result matching\",\n    \"Central AppError\",\n    \"Deterministic clock\",\n    \"Pagination limits\",\n    \"Configuration defaults and validation\",\n    \"Configuration path isolation\",\n    \"Configuration redaction\",\n    \"Structured logging fail-closed content boundary\",\n    \"JSON Lines serialization\"\n  ]\n}"
+    },
+    {
+      "id": "runtime-foundation-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "\"checks\": 6",
+      "outputSha256": "c41d390d1c4a13ad38bb9002e3e33dc6b46ab1e47b2be58d8cf5d8c3ba86e251",
+      "outputTail": "{\n  \"status\": \"passed\",\n  \"checks\": 6,\n  \"names\": [\n    \"runtime environment resolution\",\n    \"configuration overrides and validation\",\n    \"stored correlation provider propagates async context\",\n    \"JSONL file logging rejects payload and rotates content-free events\",\n    \"desktop runtime creates isolated paths and startup log\",\n    \"IPC wrapper logs success and preserves return value\"\n  ]\n}"
+    },
+    {
+      "id": "platform-policy-gate",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "Platform Policy runtime: PASS (8 checks).",
+      "outputSha256": "c67054a8790fa115778658c197e06fc4d32afd27ae1ad43b77fd9394bdd47307",
+      "outputTail": "Platform Policy Gate: PASS / authorization bypass 0 / presentation conditions 10.\nPlatform Policy runtime: PASS (8 checks)."
+    },
+    {
+      "id": "platform-policy-enforcement-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "PASS (43 controlled checks",
+      "outputSha256": "a9f05cfdb32422e8857b08da3baddc312c607cef4c70542cfac0af37d6c410c8",
+      "outputTail": "30-M predecessor runtime regression: PASS (43 controlled checks; PPK-002 remains PARTIAL).\n\n(node:1716) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "core-service-boundary",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "Core Service boundary: PASS (8 checks).",
+      "outputSha256": "55d075584f9f8466eb88cdfdec4b3c012d030a160cc18cd26f24f32f5969011b",
+      "outputTail": "Core Service boundary: PASS (8 checks)."
+    },
+    {
+      "id": "core-service-entrypoint-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "30-O Core Service Entrypoint Runtime: PASS (24 assertions).",
+      "outputSha256": "d67390a1ad46d5beed1b97017bb1a384b839c1c5fccf2e60c553ebcc62d92d08",
+      "outputTail": "30-O Core Service Entrypoint Runtime: PASS (24 assertions).\n\n(node:28136) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "platform-policy-typescript",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "",
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputTail": ""
+    },
+    {
+      "id": "application-typescript",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "",
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputTail": ""
+    },
+    {
+      "id": "desktop-electron-typescript",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "",
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputTail": ""
+    },
+    {
+      "id": "desktop-renderer-typescript",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "",
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputTail": ""
+    },
+    {
+      "id": "root-typescript",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "expectedOutput": "",
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputTail": ""
+    }
+  ],
+  "validatedBoundaries": [
+    "FOURTEEN_CANONICAL_APPLICATION_AND_SERVICE_TARGETS",
+    "IDENTICAL_TWENTY_TWO_CASE_SET_PER_TARGET",
+    "THREE_HUNDRED_EIGHT_REAL_POLICY_KERNEL_EVALUATIONS",
+    "SIGNED_POLICY_PACKAGE_SELF_VERIFICATION",
+    "STRICT_CONTEXT_APPLICATION_MANIFEST_AND_DEVICE_CERTIFICATE_BINDING",
+    "POLICY_PACKAGE_AUTHORITY_APPLICATION_AND_CONTEXT_MISMATCH_DEFAULT_DENY",
+    "CAPABILITY_ACTION_DATA_CLASS_DEVICE_MEMBERSHIP_SCOPE_DEFAULT_DENY",
+    "PURPOSE_OFFLINE_CLUSTER_EXPLICIT_DENY_AND_OWNER_GRANT_DEFAULT_DENY",
+    "EXACT_REPORT_HASH_AND_TAMPER_REJECTION",
+    "DEPLOYED_VS_PROFILE_ONLY_TRUTH",
+    "NO_NATIVE_APPLE_RUNTIME_FALSE_CLAIM",
+    "REFERENCE_HARNESS_HAS_NO_RUNTIME_AUTHORITY",
+    "CONTENT_FREE_ZERO_ARGUMENT_NO_CACHE_STATUS_IPC",
+    "ZERO_SKIP_ONLY_TARGET_CASE_SUBSET_OR_UNAUTHORIZED_COMPOSITION",
+    "PPK_012_TO_PPK_020_SECURITY_REGRESSION",
+    "MIGRATION_77_UNCHANGED_NO_TRANSFER_OR_CUTOVER",
+    "ROOT_AND_CONSTITUENT_TYPESCRIPT"
+  ],
+  "targetedTestsMinimum": 26,
+  "matrixKernelEvaluations": 308,
+  "canonicalTargets": 14,
+  "identicalCasesPerTarget": 22,
+  "deployedRuntimeTargets": 2,
+  "profileOnlyTargets": 12,
+  "perTargetExclusions": 0,
+  "nativeRuntimeFalseClaims": 0,
+  "nativeAppleRuntimeExecutionClaimed": false,
+  "referenceHarnessGrantsRuntimeAuthority": false,
+  "schemaMigrationRequired": false,
+  "latestDatabaseMigration": 77,
+  "historicalBackfillPerformed": false,
+  "legacyDesktopVaultPreserved": true,
+  "sqliteOwnershipTransferred": false,
+  "realDataTransferPerformed": false,
+  "cutoverAuthorityAttached": false,
+  "successorRequirementCompletedByThisPackage": false,
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-12T00:08:33.935Z"
+}

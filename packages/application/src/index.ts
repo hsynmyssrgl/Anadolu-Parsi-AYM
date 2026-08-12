@@ -19,6 +19,7 @@ export * from './derived-data-inheritance-use-cases.js';
 export * from './sensitive-logging-use-cases.js';
 export * from './policy-decision-audit-use-cases.js';
 export * from './source-deletion-propagation-use-cases.js';
+export * from './policy-conformance-suite-use-cases.js';
 export * from './membership-use-cases.js';
 
 export * from './health-use-cases.js';

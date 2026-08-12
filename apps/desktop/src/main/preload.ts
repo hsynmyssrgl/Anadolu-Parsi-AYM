@@ -32,6 +32,7 @@ import type { DerivedDataPolicyBoundaryView } from '@ppt/domain';
 import type { SensitiveLoggingBoundaryView } from '@ppt/domain';
 import type { PolicyDecisionAuditBoundaryView } from '@ppt/domain';
 import type { SourceDeletionPropagationBoundaryView } from '@ppt/domain';
+import type { PolicyConformanceSuiteBoundaryView } from '@ppt/domain';
 import type { DataRepairOperation, DataRepairWorkspaceView } from '@ppt/domain';
 import type {
   EnrollWindowsHelloInput,
@@ -295,6 +296,7 @@ contextBridge.exposeInMainWorld('pardus', {
   getSensitiveLoggingBoundary:():Promise<SensitiveLoggingBoundaryView>=>invoke('system:getSensitiveLoggingBoundary'),
   getPolicyDecisionAuditBoundary:():Promise<PolicyDecisionAuditBoundaryView>=>invoke('system:getPolicyDecisionAuditBoundary'),
   getSourceDeletionPropagationBoundary:():Promise<SourceDeletionPropagationBoundaryView>=>invoke('system:getSourceDeletionPropagationBoundary'),
+  getPolicyConformanceSuiteBoundary:():Promise<PolicyConformanceSuiteBoundaryView>=>invoke('system:getPolicyConformanceSuiteBoundary'),
   listBackupTargets:():Promise<BackupTargetView[]>=>invoke('system:listBackupTargets'),
   upsertBackupTarget:(input:UpsertBackupTargetInput):Promise<BackupTargetView[]>=>invoke('system:upsertBackupTarget',input),
   listBackupRuns:(limit?:number):Promise<BackupRunView[]>=>invoke('system:listBackupRuns',limit),

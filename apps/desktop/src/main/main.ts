@@ -19,7 +19,7 @@ import type {
   WindowsHelloAuthenticationView,
   WindowsHelloStateView
 } from '@ppt/domain';
-import { GetDerivedDataPolicyBoundaryUseCase, GetPolicyDecisionAuditBoundaryUseCase, GetSensitiveLoggingBoundaryUseCase, GetSourceDeletionPropagationBoundaryUseCase, type WindowsHelloPlatformPort } from '@ppt/application';
+import { GetDerivedDataPolicyBoundaryUseCase, GetPolicyConformanceSuiteBoundaryUseCase, GetPolicyDecisionAuditBoundaryUseCase, GetSensitiveLoggingBoundaryUseCase, GetSourceDeletionPropagationBoundaryUseCase, type WindowsHelloPlatformPort } from '@ppt/application';
 import type { IssueOfflineCapabilityLeaseInput, OfflineCapabilityLeaseWorkspaceView } from '@ppt/domain';
 import {
   FamilyDataStore,
@@ -69,8 +69,8 @@ import { PlatformPolicyReceiptFileSink } from './platform-policy-receipt-file-si
 import { PlatformPolicyDecisionAuditInspectionAdapter } from './policy-decision-audit-application-adapter.js';
 import { DesktopUniversalApiPolicyEnforcement } from './desktop-universal-api-policy-enforcement.js';
 import { DesktopRepositoryPolicyScope } from './desktop-repository-policy-scope.js';
-import { DerivedDataInheritancePolicy, ImmutablePolicyDecisionAuditPolicy, NetworkEgressPolicy, SensitiveLogPolicy, SourceDeletionPropagationPolicy } from '@ppt/platform-policy';
-import type { DerivedDataPolicyBoundaryView, NetworkEgressBoundaryView, PolicyDecisionAuditBoundaryView, SensitiveLoggingBoundaryView, SourceDeletionPropagationBoundaryView } from '@ppt/domain';
+import { DerivedDataInheritancePolicy, ImmutablePolicyDecisionAuditPolicy, NetworkEgressPolicy, PlatformPolicyConformanceSuite, SensitiveLogPolicy, SourceDeletionPropagationPolicy } from '@ppt/platform-policy';
+import type { DerivedDataPolicyBoundaryView, NetworkEgressBoundaryView, PolicyConformanceSuiteBoundaryView, PolicyDecisionAuditBoundaryView, SensitiveLoggingBoundaryView, SourceDeletionPropagationBoundaryView } from '@ppt/domain';
 
 type ArchiveMutationInput<TInput> = TInput & { readonly operationId: string };
 interface ArchiveItemMutationInput {
@@ -84,9 +84,11 @@ const derivedDataInheritancePolicy = new DerivedDataInheritancePolicy();
 const sensitiveLogPolicy = new SensitiveLogPolicy();
 const immutablePolicyDecisionAuditPolicy = new ImmutablePolicyDecisionAuditPolicy();
 const sourceDeletionPropagationPolicy = new SourceDeletionPropagationPolicy();
+const platformPolicyConformanceSuite = new PlatformPolicyConformanceSuite();
 const getDerivedDataPolicyBoundaryUseCase = new GetDerivedDataPolicyBoundaryUseCase(derivedDataInheritancePolicy);
 const getSensitiveLoggingBoundaryUseCase = new GetSensitiveLoggingBoundaryUseCase(sensitiveLogPolicy);
 const getSourceDeletionPropagationBoundaryUseCase = new GetSourceDeletionPropagationBoundaryUseCase(sourceDeletionPropagationPolicy);
+const getPolicyConformanceSuiteBoundaryUseCase = new GetPolicyConformanceSuiteBoundaryUseCase(platformPolicyConformanceSuite);
 const currentProductName = 'Anadolu Parsı Aile Yaşam Merkezi';
 const volatileRuntimeRoot = join(app.getPath('temp'), 'Anadolu-Parsi-Aile-Yasam-Merkezi', `runtime-${process.pid}`);
 rmSync(volatileRuntimeRoot, { recursive: true, force: true });
@@ -1180,6 +1182,7 @@ function registerIpc(): void {
     new PlatformPolicyDecisionAuditInspectionAdapter(policyReceiptSink())
   ).execute());
   registerIpcHandler('system:getSourceDeletionPropagationBoundary', ():SourceDeletionPropagationBoundaryView => getSourceDeletionPropagationBoundaryUseCase.execute());
+  registerIpcHandler('system:getPolicyConformanceSuiteBoundary', ():PolicyConformanceSuiteBoundaryView => getPolicyConformanceSuiteBoundaryUseCase.execute());
   registerIpcHandler('system:listBackupTargets', () => store().listBackupTargets());
   registerIpcHandler('system:upsertBackupTarget', (_event,input:UpsertBackupTargetInput) => store().upsertBackupTarget(input));
   registerIpcHandler('system:listBackupRuns', (_event,limit?:number) => store().listBackupRuns(limit));

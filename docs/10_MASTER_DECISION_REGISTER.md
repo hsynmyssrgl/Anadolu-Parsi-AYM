@@ -28,6 +28,10 @@ Bir çelişki olduğunda aşağıdaki sıra uygulanır:
 Eski kararlar silinmez; tarihsel kanıt olarak korunur. Ancak aktif ürün davranışını
 belirleyemez. Çelişki sessizce birleştirilmez; değişiklik kaydına işlenir.
 
+## DEC-201 — PPK-020 çok platformlu ortak policy conformance suite
+
+32-P ile 14 kanonik uygulama/servis kimliğine aynı sıralı 22 vaka gerçek `PlatformPolicyKernel` üzerinden uygulanır. Signed package, strict context, application manifest ve device certificate baseline bağları zorunludur; target/case atlama ve sahte native runtime iddiası statik gate ile reddedilir. Yalnız Windows Desktop ile Windows Core Service deployed runtime sayılır; diğer on iki profil açıkça not-deployed/profile-only kalır ve referans harness üretim yetkisi vermez. Yeni migration, veri taşıma, backfill, cutover veya SQLite/vault sahiplik değişimi yoktur. Ayrıntılı ve bağlayıcı karar `docs/decisions/DEC-201-ppk-020-cross-platform-policy-conformance-suite.md` dosyasındadır.
+
 ## DEC-200 — PPK-019 kaynak silme ve retention yayılımı
 
 32-O ile kaynak kalıcı imhası; OCR metni, arama indeksi, thumbnail, AI hafızası, cache, replica ve yedek owner sınıflarına merkezi fail-closed planla yayılır. Üç runtime cache sahibi silme öncesi temizlenir; SQLite owner taraması iki kez yapılır; kaynak ve erişim metadata'sı aynı transactionda silinir, backup pending tombstone korunur. Yönetilen yedek pending kaydı yalnız doğrulanmış fresh korumalı yeniden yazım ve eski managed artefakt karantinası sonrası kapanır. Yönetilmeyen/harici kopya otomatik fiziksel imha edilmiş sayılmaz; quarantine destruction değildir. Yeni migration, gerçek veri taşıma, backfill, cutover veya SQLite/vault sahiplik değişimi yoktur. Ayrıntılı ve bağlayıcı karar `docs/decisions/DEC-200-ppk-019-source-deletion-propagation.md` dosyasındadır.
