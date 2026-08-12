@@ -17,7 +17,9 @@ uymalıdır.
 - Legacy açık TOTP sırlarının transaction içi atomik ve fail-closed geçişi
 - Recovery code’ların yalnız hash olarak saklanması ve atomik tüketimi
 - FIDO2/WebAuthn için genişletilebilir kimlik sözleşmesi
-- 15 dakika boşta kalma sonrası oturum kilidi
+- 15 dakika gerçek kullanıcı etkinliği görülmediğinde oturum kilidi; son 60 saniyede erişilebilir uyarı
+- Yalnız `pointerdown`, `keydown` ve `touchstart` etkinliği süreyi uzatır; arka plan işleri uzatmaz
+- Kilitte açık form ve modal durumu korunur; aynı hesap parola ve etkinse TOTP ile yeniden doğrulanır
 - 5 başarısız giriş sonrası 15 dakika hesap kilidi
 - Giriş, kilit, parola, MFA ve cihaz olaylarının denetimi
 
@@ -67,6 +69,12 @@ başlangıç/bitiş zamanı, allow/deny ve AI izni.
 - Renderer güvenlik tercihleri tek fabrikadan üretilir ve başlangıçta doğrulanır.
 - Normal çalışmada `--no-sandbox`, `--single-process`, `--disable-gpu-sandbox`, RendererCodeIntegrity veya AppContainer kapatma seçenekleri fail-closed reddedilir.
 - Tanısal güvenlik istisnası yalnız açık test ortamında çalışır ve `DIAGNOSTIC_PASS` sayılır.
+- Production renderer `file://` yerine yalnız `pardus-app://renderer` özel protokolünden yüklenir; handler renderer kökü dışındaki yolu, yanlış hostu, credentials ve bozuk URL'yi reddeder.
+- CSP response header ile `default-src 'none'` tabanında uygulanır.
+- Electron 43'ün dokuz fuse'u `@electron/fuses 2.1.3` ve `strictlyRequireAllFuses` ile afterPack aşamasında, kod imzalamadan önce yazılır ve bağımsız readback edilir.
+
+Bu oturum ve Electron kuralları için DEC-209 ile
+`docs/current/DESKTOP_SESSION_AND_ELECTRON_SECURITY_CONTRACT.md` bağlayıcıdır.
 
 ## 6. Veri ve denetim
 

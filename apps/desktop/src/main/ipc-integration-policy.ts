@@ -98,8 +98,15 @@ const optionalWindowsHelloFallback = (value: unknown): boolean => {
 
 export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unknown[]): IpcIntegrationPolicyDecision => {
   switch (channel) {
+    case 'auth:getSessionLockState':
+    case 'auth:recordSessionActivity':
+    case 'auth:lockSession':
     case 'auth:getWindowsHelloState':
       return zeroArguments(args);
+    case 'auth:unlockSession':
+      return exactObject(args, ['password', 'secondFactorCode'], (value) =>
+        boundedString(value.password, 1024)
+        && optionalBoundedString(value.secondFactorCode, 256));
     case 'auth:enrollWindowsHello':
       return exactObject(args, ['password', 'secondFactorCode', 'displayName'], (value) =>
         boundedString(value.password, 1024)
@@ -123,6 +130,7 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
     case 'system:getApplicationSecurityProfileGateBoundary':
     case 'system:getPolicyServiceAvailabilityBoundary':
     case 'system:getProductSurfaceGovernance':
+    case 'system:getDesktopSecurityPosture':
     case 'system:getIpcAdaptiveBudgetMaintenanceAuthority':
     case 'system:getIpcPerformanceTelemetry':
       return zeroArguments(args);

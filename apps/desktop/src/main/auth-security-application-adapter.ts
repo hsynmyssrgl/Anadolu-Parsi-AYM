@@ -95,8 +95,8 @@ export class NodeDeviceProofVerifier implements DeviceProofVerifier {
 export class InMemoryAuthSessionPort implements AuthSessionPort {
   readonly #manager: InMemorySessionManager;
 
-  public constructor(clock: Clock, idleTimeoutMinutes: number) {
-    this.#manager = new InMemorySessionManager(clock, idleTimeoutMinutes);
+  public constructor(clock: Clock, idleTimeoutMinutes: number, warningBeforeSeconds = 60) {
+    this.#manager = new InMemorySessionManager(clock, idleTimeoutMinutes, warningBeforeSeconds);
   }
 
   public start(accountId: ReturnType<typeof asUserId>, securityEpoch = 0): void {
@@ -114,13 +114,28 @@ export class InMemoryAuthSessionPort implements AuthSessionPort {
 
   public snapshot(): AuthSessionSnapshot {
     const snapshot = this.#manager.snapshot();
-    return snapshot.active
-      ? {
-          active: true,
-          ...(snapshot.accountId === undefined ? {} : { accountId: snapshot.accountId }),
-          ...(snapshot.expiresAt === undefined ? {} : { expiresAt: snapshot.expiresAt }),
-          ...(snapshot.securityEpoch === undefined ? {} : { securityEpoch: snapshot.securityEpoch })
-        }
-      : { active: false };
+    return {
+      active: snapshot.active,
+      status: snapshot.status,
+      idleTimeoutMinutes: snapshot.idleTimeoutMinutes,
+      warningBeforeSeconds: snapshot.warningBeforeSeconds,
+      secondsRemaining: snapshot.secondsRemaining,
+      ...(snapshot.accountId === undefined ? {} : { accountId: snapshot.accountId }),
+      ...(snapshot.expiresAt === undefined ? {} : { expiresAt: snapshot.expiresAt }),
+      ...(snapshot.warningAt === undefined ? {} : { warningAt: snapshot.warningAt }),
+      ...(snapshot.lockedAt === undefined ? {} : { lockedAt: snapshot.lockedAt }),
+      ...(snapshot.lockReason === undefined ? {} : { lockReason: snapshot.lockReason }),
+      ...(snapshot.securityEpoch === undefined ? {} : { securityEpoch: snapshot.securityEpoch })
+    };
+  }
+
+  public recordActivity(): AuthSessionSnapshot {
+    this.#manager.recordActivity();
+    return this.snapshot();
+  }
+
+  public lock(reason: 'idle_timeout' | 'manual' = 'manual'): AuthSessionSnapshot {
+    this.#manager.lock(reason);
+    return this.snapshot();
   }
 }

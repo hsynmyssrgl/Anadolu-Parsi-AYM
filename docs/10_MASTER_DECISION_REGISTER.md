@@ -28,6 +28,24 @@ Bir çelişki olduğunda aşağıdaki sıra uygulanır:
 Eski kararlar silinmez; tarihsel kanıt olarak korunur. Ancak aktif ürün davranışını
 belirleyemez. Çelişki sessizce birleştirilmez; değişiklik kaydına işlenir.
 
+## DEC-209 — B2-03/B2-04 masaüstü oturum ve Electron güvenliği
+
+32-X ile masaüstü oturumu 15 dakika gerçek kullanıcı etkinliği görülmediğinde
+kilitlenir; son 60 saniye erişilebilir uyarı gösterilir. Arka plan işleri süreyi
+uzatmaz, kilit React ağacını unmount etmez ve aynı hesap parola ile, etkinse TOTP
+kodu da kullanılarak yeniden doğrulanır. Production renderer yalnız
+`pardus-app://renderer` özel protokolünden ve köke hapsolmuş handler üzerinden
+yüklenir; response CSP, sandbox/context isolation, Node kapatma ve izin/gezinme/
+pencere varsayılan retleri zorunludur. Electron 43.2.0'ın dokuz fuse'u
+`@electron/fuses 2.1.3` ile `strictlyRequireAllFuses` altında afterPack sırasında
+yazılır ve bağımsız okunur. Eski sekiz-fuse aracının gerçek ikilide verdiği ret
+maskelenmeden düzeltilmiş, dokuzuncu `WasmTrapHandlers` dahil 9/9 ikili kanıtı
+alınmıştır. Yeni migration veya session tablosu yoktur; latest migration 77 kalır.
+B2-03 ve B2-04 tamamlanır; B2-02, PPK-025, B9-01 ve genel Bronze kapanışı açık
+kalır. Ayrıntılı karar
+`docs/decisions/DEC-209-b2-03-b2-04-desktop-session-electron-security.md`
+dosyasındadır.
+
 ## DEC-208 — B0-03/B0-04 ürün yüzeyi ve Feature Reality Gate
 
 32-W ile masaüstü ürün yüzeyi tek domain sözleşmesinde 17 ürün modülü + 5 yönetişim yüzeyi = 22 rota olarak sabitlenir; renderer menüsü ve ekran dispatch zinciri aynı kaynaktan türetilir. Tarihsel 16 modül ifadesi, kontrol yüzeyleri ile kullanıcı iş akışlarını karıştırdığı için superseded kabul edilir. Main/preload'da kayıtlı fakat renderer tarafından çağrılmayan exact 14 API kapalı taksonomiyle sınıflandırılır; yeni, eksik, duplicate veya sınıflandırılmamış rota/API drift'i pretypecheck ve prebuild'i fail-closed durdurur. Feature Reality Gate, `COMPLETE` gereksinimlerin 13 zincir alanının tamamını zorunlu tutar ve eksik zincir/sahte API/eksik rota negatif öz-testlerini çalıştırır. Yeni migration, veri taşıma, backfill, cutover veya sahiplik değişimi yoktur. B0-03 ve B0-04 birlikte tamamlanır; B9-01 ve genel Bronze kapanışı açık kalır. Ayrıntılı karar `docs/decisions/DEC-208-b0-03-b0-04-product-surface-governance.md` dosyasındadır.

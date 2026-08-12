@@ -232,8 +232,15 @@ export interface DeviceProofVerifier {
 
 export interface AuthSessionSnapshot {
   readonly active: boolean;
+  readonly status: 'signed_out' | 'active' | 'warning' | 'locked';
   readonly accountId?: string;
   readonly expiresAt?: IsoDateTime;
+  readonly warningAt?: IsoDateTime;
+  readonly lockedAt?: IsoDateTime;
+  readonly lockReason?: 'idle_timeout' | 'manual';
+  readonly idleTimeoutMinutes: number;
+  readonly warningBeforeSeconds: number;
+  readonly secondsRemaining: number;
   readonly securityEpoch?: number;
 }
 
@@ -242,6 +249,8 @@ export interface AuthSessionPort {
   clear(): void;
   currentAccountId(options?: { readonly touch?: boolean }): UserId | undefined;
   snapshot(): AuthSessionSnapshot;
+  recordActivity(): AuthSessionSnapshot;
+  lock(reason?: 'idle_timeout' | 'manual'): AuthSessionSnapshot;
 }
 
 export interface AuthIdentifiers {

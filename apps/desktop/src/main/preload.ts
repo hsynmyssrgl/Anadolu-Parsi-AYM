@@ -38,6 +38,7 @@ import type { PlatformCapabilityManifestGateBoundaryView } from '@ppt/domain';
 import type { ApplicationSecurityProfileGateBoundaryView } from '@ppt/domain';
 import type { PolicyServiceAvailabilityBoundaryView } from '@ppt/domain';
 import type { ProductSurfaceGovernanceView } from '@ppt/domain';
+import type { DesktopSecurityPostureView, SessionLockStateView, UnlockSessionInput } from '@ppt/domain';
 import type { DataRepairOperation, DataRepairWorkspaceView } from '@ppt/domain';
 import type {
   EnrollWindowsHelloInput,
@@ -90,6 +91,8 @@ const sessionBoundaryChannels = new Set([
   'auth:setup',
   'auth:login',
   'auth:loginWithWindowsHello',
+  'auth:lockSession',
+  'auth:unlockSession',
   'auth:logout',
   'auth:reauthorizeCurrentDeviceAfterRecovery',
   'invitations:accept',
@@ -307,6 +310,7 @@ contextBridge.exposeInMainWorld('pardus', {
   getApplicationSecurityProfileGateBoundary:():Promise<ApplicationSecurityProfileGateBoundaryView>=>invoke('system:getApplicationSecurityProfileGateBoundary'),
   getPolicyServiceAvailabilityBoundary:():Promise<PolicyServiceAvailabilityBoundaryView>=>invoke('system:getPolicyServiceAvailabilityBoundary'),
   getProductSurfaceGovernance:():Promise<ProductSurfaceGovernanceView>=>invoke('system:getProductSurfaceGovernance'),
+  getDesktopSecurityPosture:():Promise<DesktopSecurityPostureView>=>invoke('system:getDesktopSecurityPosture'),
   listBackupTargets:():Promise<BackupTargetView[]>=>invoke('system:listBackupTargets'),
   upsertBackupTarget:(input:UpsertBackupTargetInput):Promise<BackupTargetView[]>=>invoke('system:upsertBackupTarget',input),
   listBackupRuns:(limit?:number):Promise<BackupRunView[]>=>invoke('system:listBackupRuns',limit),
@@ -366,6 +370,10 @@ contextBridge.exposeInMainWorld('pardus', {
   upsertAiConsent: (input:UpsertAiConsentInput):Promise<AiConsentView[]> => invoke('ai:upsertConsent',input),
   previewAiAccess: (purpose:AiConsentPurpose):Promise<AiAccessPreviewView> => invoke('ai:previewAccess',purpose),
   getAuthState: (): Promise<AuthStateView> => invoke('auth:getState'),
+  getSessionLockState:():Promise<SessionLockStateView>=>invoke('auth:getSessionLockState'),
+  recordSessionActivity:():Promise<SessionLockStateView>=>invoke('auth:recordSessionActivity'),
+  lockSession:():Promise<SessionLockStateView>=>invoke('auth:lockSession'),
+  unlockSession:(input:UnlockSessionInput):Promise<AuthStateView>=>invoke('auth:unlockSession',input),
   getExternalIdentityProviders: (): Promise<ExternalIdentityProviderView[]> => invoke('auth:getExternalIdentityProviders'),
   setupAdmin: (input:SetupAdminInput):Promise<AuthStateView> => invoke('auth:setup',input),
   login: (input:LoginInput):Promise<AuthStateView> => invoke('auth:login',input),

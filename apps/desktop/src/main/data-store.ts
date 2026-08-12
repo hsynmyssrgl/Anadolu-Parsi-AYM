@@ -44,6 +44,10 @@ import {
   AppendAuditEntryUseCase, type AuditWriteApplicationContext, GetLatestAuditOccurredAtUseCase, type AuditReadApplicationContext, InstallAuditStorageProtectionUseCase, ListAutomationRulesUseCase, CreateAutomationRuleUseCase, ToggleAutomationRuleUseCase, ListAutomationRunsUseCase, RunAutomationRulesUseCase, type AutomationApplicationContext, GetReportSummaryUseCase, type ReportApplicationContext,
   ChangePasswordUseCase,
   GetAuthStateUseCase,
+  GetSessionLockStateUseCase,
+  RecordSessionActivityUseCase,
+  LockSessionUseCase,
+  GetDesktopSecurityPostureUseCase,
   LoginUseCase,
   LogoutUseCase,
   SetupAdminUseCase,
@@ -378,6 +382,7 @@ import type {
   WindowsHelloEnrollmentView,
   WindowsHelloStateView
 } from '@ppt/domain';
+import type { DesktopSecurityPostureView, SessionLockStateView, UnlockSessionInput } from '@ppt/domain';
 import { SqliteFamilyDatabaseRuntime } from './family-database-runtime.js';
 import { createSqliteRepositoryCompositionRoot, type RepositoryCompositionRoot } from './repository-composition-root.js';
 import type { IssueOfflineCapabilityLeaseInput, OfflineCapabilityLeaseView } from '@ppt/domain';
@@ -670,6 +675,11 @@ export class FamilyDataStore {
   readonly #findDiagnosticArchiveUseCase: FindDiagnosticArchiveUseCase;
   readonly #deleteDiagnosticsThroughUseCase: DeleteDiagnosticsThroughUseCase;
   readonly #getAuthStateUseCase: GetAuthStateUseCase;
+  readonly #getSessionLockStateUseCase: GetSessionLockStateUseCase;
+  readonly #recordSessionActivityUseCase: RecordSessionActivityUseCase;
+  readonly #lockSessionUseCase: LockSessionUseCase;
+  readonly #getDesktopSecurityPostureUseCase: GetDesktopSecurityPostureUseCase;
+  #auditedSessionLockAt: string | undefined;
   readonly #setupAdminUseCase: SetupAdminUseCase;
   readonly #loginUseCase: LoginUseCase;
   readonly #logoutUseCase: LogoutUseCase;
@@ -976,6 +986,10 @@ export class FamilyDataStore {
       options.securityConfig?.sessionIdleTimeoutMinutes ?? 15
     );
     this.#sessionManager = authSessionPort;
+    this.#getSessionLockStateUseCase = new GetSessionLockStateUseCase(authSessionPort);
+    this.#recordSessionActivityUseCase = new RecordSessionActivityUseCase(authSessionPort);
+    this.#lockSessionUseCase = new LockSessionUseCase(authSessionPort);
+    this.#getDesktopSecurityPostureUseCase = new GetDesktopSecurityPostureUseCase();
     const authUnitOfWork = new RepositoryBackedAuthApplicationUnitOfWork({
       transactionExecutor: this.#transactionExecutor,
       accountRepository: this.#repositories.accountRepository,
@@ -1779,7 +1793,7 @@ export class FamilyDataStore {
   }
 
   public close(): void { this.#databaseRuntime.close(); }
-  public isAuthenticated(): boolean { try { this.#requireAuth(); return true; } catch { return false; } }
+  public isAuthenticated(): boolean { try { this.#requireAuth({ touch: false }); return true; } catch { return false; } }
 
 
   public async dispatchPendingEvents(limit = 50): Promise<EventDispatchBatchSummary> {
@@ -1891,7 +1905,7 @@ export class FamilyDataStore {
   public getMaintenanceRecommendations(): MaintenanceRecommendationView[] { this.#requireAuth(); const result=this.#getMaintenanceRecommendationsUseCase.execute(this.#operationalHealthApplicationContext('maintenance-recommendations'),{health:this.getSystemHealth(),trend:this.getPerformanceTrend(168)});if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return [...result.value]; }
 
 
-  #requireAuth(): string {
+  #requireAuth(options: { readonly touch?: boolean } = {}): string {
     const snapshot = this.#sessionManager.snapshot();
     if (!snapshot.active || !snapshot.accountId || snapshot.securityEpoch === undefined) throw new Error('Bu işlem için oturum açılmalıdır.');
     const accountId = asUserId(snapshot.accountId);
@@ -1907,7 +1921,7 @@ export class FamilyDataStore {
       this.#sessionManager.clear();
       throw new Error('[AUTH_SESSION_STALE] Oturum güvenlik dönemi değişti. Lütfen yeniden giriş yapın.');
     }
-    this.#sessionManager.currentAccountId();
+    this.#sessionManager.currentAccountId({ touch: options.touch ?? false });
     return accountId;
   }
   #operationalHealthApplicationContext(prefix:string): OperationalHealthApplicationContext { const actorId=asUserId(this.#requireAuth()); return {actorId,correlationId:this.#correlation?.current()?.correlationId??asCorrelationId(`${prefix}-${randomUUID()}`)}; }
@@ -3052,6 +3066,48 @@ export class FamilyDataStore {
     const result = this.#getAuthStateUseCase.execute(context, this.#currentDeviceContext('auth-state', context.correlationId));
     if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
     return result.value;
+  }
+
+  public getSessionLockState(): SessionLockStateView {
+    const internal = this.#sessionManager.snapshot();
+    if (internal.status === 'locked' && internal.accountId && internal.lockedAt && internal.lockedAt !== this.#auditedSessionLockAt) {
+      this.#writeAuditAs(internal.accountId, `session.locked_${internal.lockReason ?? 'idle_timeout'}`, 'account', internal.accountId, internal.lockedAt);
+      this.#auditedSessionLockAt = internal.lockedAt;
+    }
+    return this.#getSessionLockStateUseCase.execute();
+  }
+
+  public recordSessionActivity(): SessionLockStateView {
+    return this.#recordSessionActivityUseCase.execute();
+  }
+
+  public lockSession(): SessionLockStateView {
+    const current = this.#sessionManager.snapshot();
+    const view = this.#lockSessionUseCase.execute('manual');
+    if (current.active && current.accountId && view.lockedAt) {
+      this.#writeAuditAs(current.accountId, 'session.locked_manual', 'account', current.accountId, view.lockedAt);
+      this.#auditedSessionLockAt = view.lockedAt;
+    }
+    return view;
+  }
+
+  public unlockSession(input: UnlockSessionInput): AuthStateView {
+    const current = this.#sessionManager.snapshot();
+    if (current.status !== 'locked' || !current.accountId) {
+      throw new Error('[AUTH_SESSION_NOT_LOCKED] Yeniden doğrulama yalnız kilitli oturum için kullanılabilir.');
+    }
+    const state = this.login({
+      accountId: current.accountId,
+      password: input.password,
+      ...(input.secondFactorCode ? { secondFactorCode: input.secondFactorCode } : {})
+    });
+    this.#writeAudit('session.unlocked', 'account', current.accountId, nowIso());
+    this.#auditedSessionLockAt = undefined;
+    return state;
+  }
+
+  public getDesktopSecurityPosture(): DesktopSecurityPostureView {
+    return this.#getDesktopSecurityPostureUseCase.execute();
   }
 
   public setupAdmin(input: SetupAdminInput): AuthStateView {
@@ -4542,6 +4598,15 @@ export class FamilyDataStore {
   #writeAudit(action: string, resourceType: string, resourceId: string, occurredAt: string): void {
     const id=randomUUID();
     const result=this.#appendAuditEntryUseCase.execute(this.#auditWriteApplicationContext('audit-write',occurredAt),{id,action,resourceType,resourceId});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+  }
+
+  #writeAuditAs(actorId: string, action: string, resourceType: string, resourceId: string, occurredAt: string): void {
+    const result=this.#appendAuditEntryUseCase.execute({
+      actorId: asUserId(actorId),
+      correlationId:this.#correlation?.current()?.correlationId??asCorrelationId(`audit-write-${randomUUID()}`),
+      occurredAt:asIsoDateTime(occurredAt)
+    },{id:randomUUID(),action,resourceType,resourceId});
     if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
   }
 }

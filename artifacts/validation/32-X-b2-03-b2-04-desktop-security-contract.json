@@ -1,0 +1,168 @@
+{
+  "schemaVersion": 1,
+  "step": "32-X",
+  "requirements": [
+    "B2-03",
+    "B2-04"
+  ],
+  "status": "PASS",
+  "checksPassed": 37,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "scope identity and two-requirement completion are exact",
+      "passed": true
+    },
+    {
+      "name": "scope fixes idle warning activity preservation and reauthentication",
+      "passed": true
+    },
+    {
+      "name": "scope fixes custom protocol and Electron 43 nine-fuse policy",
+      "passed": true
+    },
+    {
+      "name": "scope records final validation truth",
+      "passed": true
+    },
+    {
+      "name": "scope honestly excludes external and final claims",
+      "passed": true
+    },
+    {
+      "name": "inventory has exact session and Electron control sets",
+      "passed": true
+    },
+    {
+      "name": "inventory has nine unique exact fuses",
+      "passed": true
+    },
+    {
+      "name": "domain owns content-free session and posture schema",
+      "passed": true
+    },
+    {
+      "name": "application owns all session security use cases",
+      "passed": true
+    },
+    {
+      "name": "security session distinguishes passive checks from real activity",
+      "passed": true
+    },
+    {
+      "name": "application adapter implements expanded auth session port",
+      "passed": true
+    },
+    {
+      "name": "data store reuses account and audit repositories without passive touch",
+      "passed": true
+    },
+    {
+      "name": "main binds five exact desktop security IPC handlers",
+      "passed": true
+    },
+    {
+      "name": "protocol is privileged root-confined and replaces loadFile",
+      "passed": true
+    },
+    {
+      "name": "sender trust and session security remain default deny",
+      "passed": true
+    },
+    {
+      "name": "IPC payload policy is exact",
+      "passed": true
+    },
+    {
+      "name": "preload and declarations expose exact typed API",
+      "passed": true
+    },
+    {
+      "name": "renderer implements accessible state-preserving lock UI",
+      "passed": true
+    },
+    {
+      "name": "renderer browser-safe entry excludes the Node crypto export graph",
+      "passed": true
+    },
+    {
+      "name": "fuse policy contains all nine reviewed values",
+      "passed": true
+    },
+    {
+      "name": "afterPack strictly requires and reads back all fuses",
+      "passed": true
+    },
+    {
+      "name": "fuse tooling is Electron 43 compatible and lock-pinned",
+      "passed": true
+    },
+    {
+      "name": "static and binary fuse verifiers are fail closed",
+      "passed": true
+    },
+    {
+      "name": "real Electron binary proof is complete and changed",
+      "passed": true
+    },
+    {
+      "name": "targeted tests cover timeout passive activity reauth protocol CSP and fuses",
+      "passed": true
+    },
+    {
+      "name": "B2-03 registry is COMPLETE with full chain and evidence",
+      "passed": true
+    },
+    {
+      "name": "B2-04 registry is COMPLETE with full chain and binary evidence",
+      "passed": true
+    },
+    {
+      "name": "external hardware signing and final requirements remain open",
+      "passed": true
+    },
+    {
+      "name": "DEC-209 is active and decision count is exact",
+      "passed": true
+    },
+    {
+      "name": "decision documentation records the first fail-closed binary finding",
+      "passed": true
+    },
+    {
+      "name": "threat model covers background touch traversal and fuse drift",
+      "passed": true
+    },
+    {
+      "name": "audit and current contract record both requirements and honest exclusions",
+      "passed": true
+    },
+    {
+      "name": "master traceability and security standard publish DEC-209 behavior",
+      "passed": true
+    },
+    {
+      "name": "root scripts and mandatory pre-gates are bound",
+      "passed": true
+    },
+    {
+      "name": "PPK-021 exact privileged additions remain governed",
+      "passed": true
+    },
+    {
+      "name": "PPK-022 custom protocol fetch remains governed",
+      "passed": true
+    },
+    {
+      "name": "no persistence migration or cutover was added",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "latestDatabaseMigration": 77,
+  "requirementCompletionClaimed": true,
+  "b202CompletedByThisPackage": false,
+  "ppk025CompletedByThisPackage": false,
+  "b901CompletedByThisPackage": false,
+  "generatedAt": "2026-08-12T11:01:12.600Z"
+}

@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "step": "32-X",
+  "requirements": [
+    "B2-03",
+    "B2-04"
+  ],
+  "status": "PASS",
+  "checksPassed": 26,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "domain fixes the 15 minute timeout and 60 second warning",
+      "passed": true
+    },
+    {
+      "name": "domain publishes a content-free lock view",
+      "passed": true
+    },
+    {
+      "name": "session manager locks passively without background touch",
+      "passed": true
+    },
+    {
+      "name": "application owns get activity lock and posture use cases",
+      "passed": true
+    },
+    {
+      "name": "data store keeps repository operations passive and audits lock transitions",
+      "passed": true
+    },
+    {
+      "name": "unlock requires the exact locked account and explicit login reauthentication",
+      "passed": true
+    },
+    {
+      "name": "custom protocol is registered privileged before app ready",
+      "passed": true
+    },
+    {
+      "name": "production renderer loads only the custom application URL",
+      "passed": true
+    },
+    {
+      "name": "protocol path resolver confines host credentials and traversal",
+      "passed": true
+    },
+    {
+      "name": "sender trust accepts custom origin and rejects file as primary origin",
+      "passed": true
+    },
+    {
+      "name": "renderer session uses restrictive response CSP",
+      "passed": true
+    },
+    {
+      "name": "permission navigation redirect download and webview fences remain default deny",
+      "passed": true
+    },
+    {
+      "name": "renderer preferences enforce sandbox isolation and no Node integration",
+      "passed": true
+    },
+    {
+      "name": "lock IPC validation is exact and fail closed",
+      "passed": true
+    },
+    {
+      "name": "typed preload and renderer declarations expose the complete lock boundary",
+      "passed": true
+    },
+    {
+      "name": "renderer records only real interaction events",
+      "passed": true
+    },
+    {
+      "name": "renderer warning and lock overlay preserve the mounted application state",
+      "passed": true
+    },
+    {
+      "name": "renderer requires password and supports second factor on unlock",
+      "passed": true
+    },
+    {
+      "name": "renderer runtime uses the browser-safe domain entry without the Node crypto export graph",
+      "passed": true
+    },
+    {
+      "name": "manual lock is reachable from the profile menu",
+      "passed": true
+    },
+    {
+      "name": "all nine Electron fuses have exact reviewed values",
+      "passed": true
+    },
+    {
+      "name": "packaging requires ASAR and afterPack fuse mutation",
+      "passed": true
+    },
+    {
+      "name": "new privileged surfaces are exact PPK-021 allowances",
+      "passed": true
+    },
+    {
+      "name": "custom protocol transport is an exact PPK-022 network capability surface",
+      "passed": true
+    },
+    {
+      "name": "root pretypecheck and prebuild execute this boundary",
+      "passed": true
+    },
+    {
+      "name": "no user schema change is introduced",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "latestDatabaseMigration": 77,
+  "generatedAt": "2026-08-12T11:02:30.583Z"
+}

@@ -1,6 +1,6 @@
 # Bronze guncel tamamlama denetimi
 
-Olusturma (UTC): 2026-08-12T09:47:17.704Z
+Olusturma (UTC): 2026-08-12T11:01:37.100Z
 
 ## Sonuc
 
@@ -23,19 +23,19 @@ Olusturma (UTC): 2026-08-12T09:47:17.704Z
 ## Yuzde gercekligi
 
 - Resmi agirlikli Bronze ilerlemesi: **%25**
-- Kati gereksinim kapanisi: **%11.7143** (41/350)
-- Uygulama zinciri kapsami: **%12.2**
-- Yonetisim ve kanit zinciri kapsami: **%50**
+- Kati gereksinim kapanisi: **%12.2857** (43/350)
+- Uygulama zinciri kapsami: **%12.7714**
+- Yonetisim ve kanit zinciri kapsami: **%50.381**
 
 Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 
 ## Kapsam durumu
 
-- COMPLETE: 41
-- PARTIAL: 31
+- COMPLETE: 43
+- PARTIAL: 29
 - FOUNDATION_STARTED: 1
 - NOT_IMPLEMENTED: 277
-- Toplam acik gereksinim: 309
+- Toplam acik gereksinim: 307
 
 ## Kural ve kapilar
 
@@ -241,7 +241,6 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | DHA-001 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Process architecture | Electron arayüzünden bağımsız, kullanıcı oturumu kapalıyken de çalışan headless Core Service |
 | DHA-023 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Health | Liveness, readiness, quorum, replication lag, disk, cert, backup age ve dependency health |
 | PPK-001 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Politika Çekirdeği | Tek PlatformPolicyKernel; kimlik, yetki, gizlilik, rıza, saklama, AI, kayıt ve dışa aktarım kararlarının tek otoritesi |
-| B2-04 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Kimlik ve Güvenlik | Electron güvenlik checklist, CSP, custom protocol ve fuse kapanışı |
 | B2-05 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Kimlik ve Güvenlik | Çocuk, sağlık, finans ve konum için hassasiyet profilleri |
 | B6-03 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | AI, Miras ve Entegrasyon | Çocuk/sağlık/finans/konum için ayrı onay ve dışa gönderim önizlemesi |
 | B8-01 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Dayanıklılık ve Windows | Crash-safe transaction, autosave, açılış kurtarma ve tutarlı hata raporu |
@@ -259,7 +258,6 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | DHA-026 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Backup separation | Replica ile yedeğin ayrılması; immutable/offline/offsite backup |
 | DHA-029 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Security operations | Cluster CA, cert rotation, revocation, key epoch, replay/freshness ve rate limit |
 | EXT-078 | STARTED_BEFORE_NEW | P1 | PARTIAL | 2/13 | SIGNED_PLUGIN_PLATFORM | Policy Kernel zorunlu kontrolü |
-| B2-03 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Kimlik ve Güvenlik | Yaşlı/genç kullanıcıya uygun güvenli kilit ve yeniden giriş akışı |
 | B3-02 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Aile ve Hafıza | Taslak, otomatik kaydetme, geri al ve değişiklik geçmişi |
 | B3-03 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Aile ve Hafıza | Doğrudan medya/belge bağlama ve davetiye yaşam döngüsü |
 | B3-05 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Aile ve Hafıza | Tüm modüllerde yetki filtreli birleşik arama |
@@ -267,6 +265,8 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | B5-04 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Sağlık ve Yaşam | Sigorta, abonelik, eğitim, iş, resmi işlem, ev ve araç için kategoriye özgü alanlar |
 | B6-05 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | AI, Miras ve Entegrasyon | OneDrive gerçek adapter + yerel/harici hedeflerle bağımsız çalışma |
 | B6-06 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | AI, Miras ve Entegrasyon | Apple/Google/Microsoft Authorization Code+PKCE+state+nonce+token vault |
+| B8-05 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Dayanıklılık ve Windows | 10k kişi/100k olay/10k belge metadata senaryosu ve 7 günlük soak hedefi |
+| DHA-025 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Observability | Yerel-first metrics, traces, structured logs ve correlationId |
 
 Tam acik-is listesi `artifacts/inventory/BRONZE_CURRENT_COMPLETION_AUDIT.json` icindedir.
 

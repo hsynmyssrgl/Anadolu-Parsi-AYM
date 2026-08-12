@@ -8,6 +8,19 @@ export type RendererSessionViolationReason =
   | 'PERMISSION_CHECK_REJECTED'
   | 'DOWNLOAD_REJECTED';
 
+export const DESKTOP_RENDERER_CSP = [
+  "default-src 'none'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "font-src 'self'",
+  "connect-src 'self'",
+  "object-src 'none'",
+  "base-uri 'none'",
+  "form-action 'self'",
+  "frame-ancestors 'none'"
+].join('; ');
+
 export interface RendererSessionViolation {
   readonly reason: RendererSessionViolationReason;
   readonly permission?: string;
@@ -37,6 +50,14 @@ export interface RendererSessionLike {
     event: 'will-download',
     listener: (event: PreventableEventLike, item: DownloadItemLike, webContents: unknown) => void
   ): void;
+  webRequest?: {
+    onHeadersReceived(
+      listener: (
+        details: { readonly url: string; readonly responseHeaders?: Record<string, string[]> },
+        callback: (response: { readonly responseHeaders: Record<string, string[]> }) => void
+      ) => void
+    ): void;
+  };
 }
 
 export interface RendererSecurityWebContentsLike {
@@ -58,6 +79,7 @@ export interface InstallRendererSessionSecurityInput {
 }
 
 const downloadProtectedSessions = new WeakSet<object>();
+const headerProtectedSessions = new WeakSet<object>();
 
 const rejectEvent = (
   event: PreventableEventLike,
@@ -80,6 +102,16 @@ export const installRendererSessionSecurity = (input: InstallRendererSessionSecu
     onViolation?.({ reason: 'PERMISSION_CHECK_REJECTED', permission });
     return false;
   });
+
+  if (webContents.session.webRequest && !headerProtectedSessions.has(webContents.session as object)) {
+    webContents.session.webRequest.onHeadersReceived((details, callback) => callback({
+      responseHeaders: {
+        ...(details.responseHeaders ?? {}),
+        'Content-Security-Policy': [DESKTOP_RENDERER_CSP]
+      }
+    }));
+    headerProtectedSessions.add(webContents.session as object);
+  }
 
   if (!downloadProtectedSessions.has(webContents.session as object)) {
     webContents.session.on('will-download', (event, item) => {

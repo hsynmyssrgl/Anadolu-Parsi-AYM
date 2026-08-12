@@ -31,6 +31,8 @@ Bu matris, aktif kararları kaynak, kullanıcı akışı ve gerçek kanıtla eş
 | Varsayılan reddetme | Karşılandı | Authz, Electron session, IPC | Build 118–120 sözleşmeleri |
 | IPC sender ve payload sınırı | Karşılandı | Main-frame/document/payload validation | Build 118/120 assertions |
 | Webview/download/navigation reddi | Karşılandı | Renderer session policy | Build 119 — 33 assertion |
+| B2-03 erişilebilir idle lock ve yeniden doğrulama | Karşılandı | 15 dakika/60 saniye session state, gerçek input activity IPC, mounted lock overlay, parola ve etkin TOTP yeniden doğrulaması | DEC-209 ve 32-X session unit/application/integration kanıtları |
+| B2-04 Electron özel protokol, CSP ve fuse kapanışı | Karşılandı | `pardus-app://renderer`, kök yol hapsi, response CSP, sandbox/context isolation ve Electron 43 dokuz-fuse afterPack/readback | DEC-209 ve 32-X gerçek Electron ikili 9/9 kanıtı |
 | TOTP ve güvenilir cihaz | Karşılandı | Auth security adapter/repositories | MFA/trusted-device tests |
 | Cihaz özel anahtarının OS korumalı saklanması | Kaynakta karşılandı | `device-secret-protector.ts`, şifreli zarf ve legacy migration | Build 128 güvenlik sözleşmesi; gerçek Windows DPAPI açılışı bekliyor |
 | TOTP sırrının OS korumalı saklanması | Kaynakta karşılandı | `mfa-secret-protection.ts`, auth adapter ve atomik repository migration | Build 129 sözleşmesi; gerçek Windows DPAPI migration kanıtı bekliyor |

@@ -1,6 +1,6 @@
-import { app, BrowserWindow, dialog, ipcMain, safeStorage, shell, type IpcMainInvokeEvent } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, net, protocol, safeStorage, shell, type IpcMainInvokeEvent } from 'electron';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { dirname, extname, isAbsolute, join } from 'node:path';
+import { dirname, extname, isAbsolute, join, resolve } from 'node:path';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
@@ -14,6 +14,7 @@ import type {
   EnrollWindowsHelloInput,
   LoginWithWindowsHelloInput,
   ReauthenticateWithWindowsHelloInput,
+  UnlockSessionInput,
   UpdatePersonProfileInput,
   WindowsHelloAuthenticationOutcome,
   WindowsHelloAuthenticationView,
@@ -41,6 +42,7 @@ import { IpcAdaptiveBudgetMaintenanceReauthenticationStateStore } from './ipc-ad
 import { deriveIpcAdaptiveBudgetMaintenanceRecoveryContextKey, deriveIpcAdaptiveBudgetMaintenanceRecoveryCooldownContextKey, evaluateIpcAdaptiveBudgetMaintenanceRecoveryAuthority, parseIpcAdaptiveBudgetMaintenanceRecoveryInput } from './ipc-adaptive-budget-maintenance-lock-recovery.js';
 import { isSafeExternalHttpsUrl, normalizeTrustedRendererDocumentUrl, type TrustedRendererDescriptor } from './ipc-sender-trust.js';
 import { installRendererSessionSecurity, type RendererSecurityWebContentsLike } from './renderer-session-security.js';
+import { PRIMARY_RENDERER_DOCUMENT_URL, PRIMARY_RENDERER_SCHEME, resolvePrimaryRendererAssetPath } from './renderer-protocol.js';
 import {
   ElectronSafeStorageDeviceSecretProtector,
   WindowsDpapiDeviceSecretProtector,
@@ -83,6 +85,10 @@ interface ArchiveItemMutationInput {
 }
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
+protocol.registerSchemesAsPrivileged([{
+  scheme: PRIMARY_RENDERER_SCHEME,
+  privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: false }
+}]);
 const networkEgressPolicy = new NetworkEgressPolicy();
 const derivedDataInheritancePolicy = new DerivedDataInheritancePolicy();
 const sensitiveLogPolicy = new SensitiveLogPolicy();
@@ -841,6 +847,10 @@ function registerIpc(): void {
     { id: 'microsoft', label: 'Microsoft ile devam et', configured: Boolean(process.env.PPT_OIDC_MICROSOFT_CLIENT_ID), productionReady: process.env.PPT_OIDC_MICROSOFT_READY === '1' }
   ]));
   registerIpcHandler('auth:getState', () => dataStore ? dataStore.getAuthState() : lockedAuthState());
+  registerIpcHandler('auth:getSessionLockState', () => store().getSessionLockState());
+  registerIpcHandler('auth:recordSessionActivity', () => store().recordSessionActivity());
+  registerIpcHandler('auth:lockSession', () => store().lockSession());
+  registerIpcHandler('auth:unlockSession', (_event, input: UnlockSessionInput) => store().unlockSession(input));
   registerIpcHandler('auth:getWindowsHelloState', () =>
     dataStore ? store().getWindowsHelloState() : lockedWindowsHelloState()
   );
@@ -1225,6 +1235,7 @@ function registerIpc(): void {
   registerIpcHandler('system:getApplicationSecurityProfileGateBoundary', ():ApplicationSecurityProfileGateBoundaryView => getApplicationSecurityProfileGateBoundaryUseCase.execute());
   registerIpcHandler('system:getPolicyServiceAvailabilityBoundary', ():Promise<PolicyServiceAvailabilityBoundaryView> => policyServiceAvailabilityBoundary().execute());
   registerIpcHandler('system:getProductSurfaceGovernance', ():ProductSurfaceGovernanceView => getProductSurfaceGovernanceUseCase.execute());
+  registerIpcHandler('system:getDesktopSecurityPosture', () => store().getDesktopSecurityPosture());
   registerIpcHandler('system:listBackupTargets', () => store().listBackupTargets());
   registerIpcHandler('system:upsertBackupTarget', (_event,input:UpsertBackupTargetInput) => store().upsertBackupTarget(input));
   registerIpcHandler('system:listBackupRuns', (_event,limit?:number) => store().listBackupRuns(limit));
@@ -1879,11 +1890,10 @@ async function openArchiveInSecurePreview(itemId: string, operationId: string): 
 }
 
 function createWindow(): void {
-  const rendererFilePath = join(currentDir, '../renderer/index.html');
   const configuredRendererUrl = process.env.PPT_RENDERER_URL;
   const rendererDocumentUrl = configuredRendererUrl
     ? normalizeTrustedRendererDocumentUrl(configuredRendererUrl, { allowLocalDevelopmentServer: !app.isPackaged })
-    : normalizeTrustedRendererDocumentUrl(pathToFileURL(rendererFilePath).toString(), { allowLocalDevelopmentServer: false });
+    : normalizeTrustedRendererDocumentUrl(PRIMARY_RENDERER_DOCUMENT_URL, { allowLocalDevelopmentServer: false });
   const window = new BrowserWindow({
     width: 1600,
     height: 980,
@@ -1967,8 +1977,7 @@ function createWindow(): void {
       }, null, 2)}\n`);
     }
   });
-  if (configuredRendererUrl) void window.loadURL(rendererDocumentUrl);
-  else void window.loadFile(rendererFilePath);
+  void window.loadURL(rendererDocumentUrl);
 }
 
 app.on('second-instance', () => {
@@ -1980,6 +1989,14 @@ app.on('second-instance', () => {
 });
 
 app.whenReady().then(async () => {
+  const rendererRoot = resolve(currentDir, '../renderer');
+  const fetchRendererAsset = net.fetch.bind(net);
+  protocol.handle(PRIMARY_RENDERER_SCHEME, (request) => {
+    if (request.method !== 'GET') return new Response('Not found', { status: 404 });
+    const candidate = resolvePrimaryRendererAssetPath(request.url, rendererRoot);
+    if (!candidate) return new Response('Not found', { status: 404 });
+    return fetchRendererAsset(pathToFileURL(candidate).toString());
+  });
   startupStage = 'SAFE_STORAGE_INITIALIZATION';
   osSecretProtector = process.platform === 'win32'
     ? new WindowsDpapiDeviceSecretProtector({ required: true })

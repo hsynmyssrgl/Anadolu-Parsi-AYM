@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 62,
+  "decisionCount": 63,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1544,6 +1544,35 @@
         "artifacts/validation/32-W-b0-03-b0-04-product-surface-governance-runtime.json",
         "docs/security/B0-03_B0-04_PRODUCT_SURFACE_GOVERNANCE_THREAT_MODEL.md",
         "docs/audit/32-W_B0-03_B0-04_PRODUCT_SURFACE_GOVERNANCE_UST_KAPANIS.md"
+      ]
+    },
+    {
+      "id": "DEC-209",
+      "date": "2026-08-12",
+      "acceptedAt": "2026-08-12",
+      "title": "B2-03 and B2-04 shared desktop session lock and Electron security closure",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: sirayla full auto devam et, onay bekleme ve bir isle birden fazla gereksinim kapat",
+      "document": "docs/decisions/DEC-209-b2-03-b2-04-desktop-session-electron-security.md",
+      "requirements": ["B2-03", "B2-04"],
+      "codeAreas": [
+        "packages/domain/src/desktop-security.ts",
+        "packages/security/src/session.ts",
+        "packages/application/src/desktop-security-use-cases.ts",
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/src/main/renderer-protocol.ts",
+        "apps/desktop/src/main/renderer-session-security.ts",
+        "apps/desktop/src/renderer/App.tsx",
+        "apps/desktop/scripts/apply-electron-fuses.mjs",
+        "scripts/verify-desktop-security-boundary.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/32-X-b2-03-b2-04-desktop-security-boundary.json",
+        "artifacts/validation/32-X-electron-fuse-binary-proof.json",
+        "artifacts/validation/32-X-b2-03-b2-04-desktop-security-contract.json",
+        "artifacts/validation/32-X-b2-03-b2-04-desktop-security-runtime.json",
+        "docs/security/B2-03_B2-04_DESKTOP_SECURITY_THREAT_MODEL.md",
+        "docs/audit/32-X_B2-03_B2-04_DESKTOP_SECURITY_UST_KAPANIS.md"
       ]
     }
   ]

@@ -1,14 +1,14 @@
 {
   "status": "PASS",
   "productionSourceZones": 18,
-  "scannedFiles": 372,
-  "capabilitySurfaces": 237,
-  "exactManifestSurfaces": 237,
-  "exactManifestSha256": "bb384a5c94fc88761e557d98d893778911f045e64f66cacdc5d2afdbc6849453",
+  "scannedFiles": 375,
+  "capabilitySurfaces": 238,
+  "exactManifestSurfaces": 238,
+  "exactManifestSha256": "1f6b3e14aaf7a608a93d857448dab2fcbda924999274b8fbc82f1edd76226eb1",
   "surfaceCounts": {
     "FILE_DIALOG": 2,
     "FILE_IMPORT": 225,
-    "NETWORK_API": 2,
+    "NETWORK_API": 3,
     "NETWORK_IMPORT": 8
   },
   "pinnedBootstrapSurfaces": 26,

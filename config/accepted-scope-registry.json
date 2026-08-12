@@ -442,23 +442,39 @@
       "area": "Kimlik ve Güvenlik",
       "title": "Yaşlı/genç kullanıcıya uygun güvenli kilit ve yeniden giriş akışı",
       "priority": "P1",
-      "status": "PARTIAL",
+      "status": "COMPLETE",
       "acceptance": "15 dakika varsayılan; erişilebilir uyarı, kaydedilmemiş veri koruması ve yeniden doğrulama.",
       "chain": {
-        "decision": false,
-        "domain": false,
-        "schema": false,
-        "migration": false,
-        "useCase": false,
-        "repository": false,
-        "policy": false,
-        "apiOrIpc": false,
-        "ui": false,
-        "menu": false,
-        "targetedTest": false,
+        "decision": true,
+        "domain": true,
+        "schema": true,
+        "migration": true,
+        "useCase": true,
+        "repository": true,
+        "policy": true,
+        "apiOrIpc": true,
+        "ui": true,
+        "menu": true,
+        "targetedTest": true,
         "documentation": true,
-        "evidence": false
-      }
+        "evidence": true
+      },
+      "codeAreas": [
+        "packages/domain/src/desktop-security.ts",
+        "packages/security/src/session.ts",
+        "packages/application/src/desktop-security-use-cases.ts",
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/renderer/App.tsx"
+      ],
+      "evidence": [
+        "artifacts/validation/32-X-b2-03-b2-04-desktop-security-boundary.json",
+        "artifacts/validation/32-X-b2-03-b2-04-desktop-security-contract.json",
+        "artifacts/validation/32-X-b2-03-b2-04-desktop-security-runtime.json",
+        "packages/security/tests/session-lock.test.ts",
+        "docs/security/B2-03_B2-04_DESKTOP_SECURITY_THREAT_MODEL.md",
+        "docs/audit/32-X_B2-03_B2-04_DESKTOP_SECURITY_UST_KAPANIS.md"
+      ]
     },
     {
       "id": "B2-04",
@@ -466,23 +482,40 @@
       "area": "Kimlik ve Güvenlik",
       "title": "Electron güvenlik checklist, CSP, custom protocol ve fuse kapanışı",
       "priority": "P0",
-      "status": "PARTIAL",
+      "status": "COMPLETE",
       "acceptance": "Electron resmî checklist maddeleri kod ve doğrulama kapılarıyla PASS.",
       "chain": {
-        "decision": false,
-        "domain": false,
-        "schema": false,
-        "migration": false,
-        "useCase": false,
-        "repository": false,
-        "policy": false,
-        "apiOrIpc": false,
-        "ui": false,
-        "menu": false,
-        "targetedTest": false,
+        "decision": true,
+        "domain": true,
+        "schema": true,
+        "migration": true,
+        "useCase": true,
+        "repository": true,
+        "policy": true,
+        "apiOrIpc": true,
+        "ui": true,
+        "menu": true,
+        "targetedTest": true,
         "documentation": true,
-        "evidence": false
-      }
+        "evidence": true
+      },
+      "codeAreas": [
+        "apps/desktop/src/main/renderer-protocol.ts",
+        "apps/desktop/src/main/renderer-session-security.ts",
+        "apps/desktop/src/main/renderer-window-security.ts",
+        "apps/desktop/scripts/electron-fuse-policy.mjs",
+        "apps/desktop/scripts/apply-electron-fuses.mjs",
+        "scripts/verify-desktop-security-boundary.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/32-X-b2-03-b2-04-desktop-security-boundary.json",
+        "artifacts/validation/32-X-electron-fuse-binary-proof.json",
+        "artifacts/validation/32-X-b2-03-b2-04-desktop-security-contract.json",
+        "artifacts/validation/32-X-b2-03-b2-04-desktop-security-runtime.json",
+        "apps/desktop/tests/b2-desktop-security-integration.test.ts",
+        "docs/security/B2-03_B2-04_DESKTOP_SECURITY_THREAT_MODEL.md",
+        "docs/audit/32-X_B2-03_B2-04_DESKTOP_SECURITY_UST_KAPANIS.md"
+      ]
     },
     {
       "id": "B2-05",

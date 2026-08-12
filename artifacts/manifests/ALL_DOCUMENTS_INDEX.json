@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "release": "Bronze 04.08.2026.29",
   "releaseId": "bronze-2026-08-04-r29",
-  "generatedAt": "2026-08-12T09:48:59.836Z",
+  "generatedAt": "2026-08-12T11:04:48.129Z",
   "selfIndexedPaths": [
     "SHA256SUMS.txt",
     "artifacts/manifests/ALL_DOCUMENTS_INDEX.csv",
@@ -14,7 +14,7 @@
     "docs/current/08_TUM_BELGELER_DIZINI.md",
     "manifest.json"
   ],
-  "documentCount": 3242,
+  "documentCount": 3424,
   "documents": [
     {
       "path": ".github/workflows/ci.yml",
@@ -38,6 +38,1382 @@
       "sha256": "1a4d23b82a83ddd544d76d8d6c4fdc8ef6ae17e3176a338b921df83ac5ac8060",
       "extension": ".json",
       "classification": "HISTORICAL",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/electron-v43.2.0-win32-x64/LICENSES.chromium.html",
+      "bytes": 20313957,
+      "sha256": "b911161e6594ec76b872498b423c54406168f2974e0d407a847f7de1e5ff94dd",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/electron-v43.2.0-win32-x64/vk_swiftshader_icd.json",
+      "bytes": 106,
+      "sha256": "32d83ff113fef532a9f97e0d2831f8656628ab1c99e9060f0332b1532839afd9",
+      "extension": ".json",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-access.md",
+      "bytes": 3664,
+      "sha256": "9bed45cc470a641f8547effbd42c56532bad389a53e5ad476e13b652c929e003",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-adduser.md",
+      "bytes": 1847,
+      "sha256": "6336a1dd7d10f9ebac6c63e50efa26972ef98a67487f36a0d4c312e1d1dfd424",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-audit.md",
+      "bytes": 15656,
+      "sha256": "02ec56ff5b4e0d4844a4d853d050d91aecb2048bc37d36771fdd35e55a8417d4",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-bugs.md",
+      "bytes": 2996,
+      "sha256": "4bc9eaa17e062e8951b1ed4c0ca1a3d2643d945e622259e45326bc6f5b52d74e",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-cache.md",
+      "bytes": 2962,
+      "sha256": "297f8d37336788840cd8f704555dbf1bb78e3069549e5812936b25e44ad8c1d1",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-ci.md",
+      "bytes": 9125,
+      "sha256": "b581dc2e34c23cb24dd675cd7a2424f1bf3322d9556b0fa8da53378455c9fb95",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-completion.md",
+      "bytes": 909,
+      "sha256": "4411bb315b5ba43bd49093d706377e6f8d584f3fa8ce0c8dc154f3eb646edb92",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-config.md",
+      "bytes": 4093,
+      "sha256": "fdd84f305c78c1ba0a81dbdba81b4f621aeb66bfeb6f83af43eb91a164a72862",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-dedupe.md",
+      "bytes": 8895,
+      "sha256": "6a3a4ea972df3ff8b54efe1f885057dcc0808206761a0a83f9a2516064d202ca",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-deprecate.md",
+      "bytes": 1741,
+      "sha256": "d5f3e76782efa893542760c35e9b0d7bbad308215cbac5e54b80ec2ff406c937",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-diff.md",
+      "bytes": 9109,
+      "sha256": "5e41e4678a8e5b7a75d0dded72f7e995758763d1b641fa5fdf2e356db176ccd5",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-dist-tag.md",
+      "bytes": 5181,
+      "sha256": "5202de93f65c367e19cc080950360ef5e0c34f1ad5298aad53b95c2a82152d8b",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-docs.md",
+      "bytes": 2974,
+      "sha256": "fd702e68439d3ca8c42ef5373e3074747f1aa6b96a78b017e03abeb3af5a66c6",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-doctor.md",
+      "bytes": 5057,
+      "sha256": "9fd66a257e1302b1d3934a38dac5689a11fd49edede47b9b88125e84bd9d1499",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-edit.md",
+      "bytes": 1091,
+      "sha256": "0c963c7173235a2ed13a9b3805dd22846141d37b6292763aff34f6c6184cea66",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-exec.md",
+      "bytes": 11401,
+      "sha256": "f4f13c63519522a403e5f18d673b3b01e7bb9439483e06f6271c7c0777af5530",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-explain.md",
+      "bytes": 2795,
+      "sha256": "d91b6ca57ff183ddeef4d9f266dd722ba8fd14807ffb7fb507b32507bbb8735f",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-explore.md",
+      "bytes": 1006,
+      "sha256": "c64b90730fbb1a38cdb7588ee138788631813718c441b5149fe032072d77bad0",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-find-dupes.md",
+      "bytes": 6797,
+      "sha256": "4972f44483b49ef2aa7d4b00a6e51261c8381660e39f3c6c7d1da9d9534d68b2",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-fund.md",
+      "bytes": 3673,
+      "sha256": "515a69961231c3e97c9c71c6b60bce08730610c61e5297acc52a23bb7ba8073f",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-help-search.md",
+      "bytes": 756,
+      "sha256": "1c16f53fa1f443a84cb0fc7cc2d7d1a7ce695d973c9608a1fdb8b648379f21d1",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-help.md",
+      "bytes": 1004,
+      "sha256": "c8484fe0f3f65d8a385de8803cc7159a4569f980496d2317fa72a8afdf1d234d",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-hook.md",
+      "bytes": 2394,
+      "sha256": "4356065a8cf501bcdd1fb5df1c0f814fcd11eb5b3dd931bb5759f571390b6640",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-init.md",
+      "bytes": 9855,
+      "sha256": "11f84967de1d16b4b0def66738c2c9a75767680b3054f2f9fa060ecfe0cece11",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-install-ci-test.md",
+      "bytes": 7434,
+      "sha256": "85277610fec7227ed4e4a45f8ea5e3a190bc8736e900a1706182a5e88d9c6e5f",
+      "extension": ".md",
+      "classification": "TEST_OR_GATE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-install-test.md",
+      "bytes": 9814,
+      "sha256": "dfe931478e2cafa60b3015baef7e21a8f7658a52ad116f836b33a05f8491819b",
+      "extension": ".md",
+      "classification": "TEST_OR_GATE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-install.md",
+      "bytes": 24985,
+      "sha256": "d0bac6211516cb696f1c2448190aa5a52d481dbfa33f87d04e0c0df8f4e5ec99",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-link.md",
+      "bytes": 11742,
+      "sha256": "43eed851bfea925a66d5d36f3e3789c39421fd6268e5abad603535ff9d02d2c5",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-login.md",
+      "bytes": 2171,
+      "sha256": "35e5fb73fa24a969791a5f89c9b8e994527955c3786a02438f7f449c5f375aec",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-logout.md",
+      "bytes": 1749,
+      "sha256": "818dbaf9f62cc4346730df0b8d27932ed9d682afd83454a1629865f9815fd554",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-ls.md",
+      "bytes": 8547,
+      "sha256": "4417f0b7057cf18db0b118e045ad7e3e4d80c9d098e51f26531230372844a9b1",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-org.md",
+      "bytes": 1975,
+      "sha256": "484137b8385cd316f28a3c10aee4888050c9fd52e3a6c13195448d7e03f641c2",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-outdated.md",
+      "bytes": 5779,
+      "sha256": "3262e6aafdb506ee3b439a885ff9d9e9856593fe20beb62ce5eae6b0e60262a7",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-owner.md",
+      "bytes": 3093,
+      "sha256": "1d847cafefbbb7318baa150d86fda528c5232cebd497121eb953b5c7206645cf",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-pack.md",
+      "bytes": 3448,
+      "sha256": "a4c88e5397699f6ad7b4380d307c222b838987edc8691dc500abed7456ed0057",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-ping.md",
+      "bytes": 769,
+      "sha256": "73a4fb43b5bf524b46e7e3f94e1cafc11e91c9dffd7b5b4cb46bd9ad6a29f46e",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-pkg.md",
+      "bytes": 8129,
+      "sha256": "b02a444a0231135b5fac2414cf31a373c340ef899252131470d2b62d1b2b94bd",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-prefix.md",
+      "bytes": 1211,
+      "sha256": "67e8363284fc39163c8a26151432cc38997912ffa434d46b94dc9c03892ebb6c",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-profile.md",
+      "bytes": 3102,
+      "sha256": "1c422dafcde0750d40e04a0d7e7bff0cde20a6fa845f5678fe0dd5d0b29d4fb5",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-prune.md",
+      "bytes": 5745,
+      "sha256": "1cd70b892df25b7ff0596d916baddbe6b239fdcff19e5b48be410c9934d32ceb",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-publish.md",
+      "bytes": 7622,
+      "sha256": "a8baea016301aeb3b64d7b618bb957d20e4c221869188e5a542999a1c3b6d647",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-query.md",
+      "bytes": 6959,
+      "sha256": "28157236c43b938bda1f1cfde8019cd3fb238f221e71157020dcd7116f403183",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-rebuild.md",
+      "bytes": 5001,
+      "sha256": "7ea1f23fc1abe55937c7e5ad941b57be1ce5379a17842a0d3389aeaabeae441d",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-repo.md",
+      "bytes": 2754,
+      "sha256": "08192b0ccf3e531be8bdeb56918009dd51b0a787730367fd7fa028d654181e66",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-restart.md",
+      "bytes": 1473,
+      "sha256": "bc9c3440203b1bdcca575ffb3725555171d13fffcb537b9ba3367f4c6252be2a",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-root.md",
+      "bytes": 1097,
+      "sha256": "0a45501f99737d8c794d33f634ed0b37e82b9bec23764c4673594df6e837bb0f",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-run-script.md",
+      "bytes": 7561,
+      "sha256": "a8929982aa2dba6a0c8079e76aefa3cd6e956eb455878abba81d9e71a8d15da0",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-sbom.md",
+      "bytes": 8338,
+      "sha256": "229dc531d5bff8099538a8e6cc445f15bc21aac0e0a58ee74ee7d212a13bee5d",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-search.md",
+      "bytes": 3464,
+      "sha256": "ccf46c65b291dd1313872b432e1fc8b3a8450cc6fb8e0a433ca02da55096bb14",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-shrinkwrap.md",
+      "bytes": 923,
+      "sha256": "28954ad7d148cfb76c8299815afb13bb7ad299ae1a3707b73ba9ae7dfe951584",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-star.md",
+      "bytes": 1713,
+      "sha256": "8f20446a5dc85c0b2b91809d73dee64d44443f6be6d27a5fce4acbff59d9116d",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-stars.md",
+      "bytes": 743,
+      "sha256": "f42889da229a2c49cbd26145b414c71a8f31d54b597fcf91f84e59681888e7ae",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-start.md",
+      "bytes": 1667,
+      "sha256": "ac47a0cbf6e83328528c7d8e479d3f3da0e050eb4ce34064e3f9bde746c1beb4",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-stop.md",
+      "bytes": 1341,
+      "sha256": "c0d945aa6049e1c71bcde146e706d9036f6cd37313862e81c5a796ad02c4f3f3",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-team.md",
+      "bytes": 4090,
+      "sha256": "8c07bbd46928afc21795a5a121afe69af19a4a35afc63f827df38b1d850355fb",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-test.md",
+      "bytes": 1234,
+      "sha256": "c4c4038313838604bc32f45d4304bd4b4eb1a406b9e4b432f827ba50a8dca75c",
+      "extension": ".md",
+      "classification": "TEST_OR_GATE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-token.md",
+      "bytes": 2893,
+      "sha256": "b3a4095bb8986b8271b375d7ba63bcc820053105666699fbb0ebcb68044be0ab",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-uninstall.md",
+      "bytes": 4447,
+      "sha256": "2e427a5bfe52f226104b11e1c4bc0340dc23a951fc48446c547fc47825d3c89a",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-unpublish.md",
+      "bytes": 4491,
+      "sha256": "3f2df0e564a79a93a75a10461d04c5f7f4cffd2713dffad8c4b59ce181ac6405",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-unstar.md",
+      "bytes": 1574,
+      "sha256": "5380eb51ea823196f221937de5b85e5db1730f8c0e8aa9dfa4c680ff63739245",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-update.md",
+      "bytes": 11871,
+      "sha256": "332115994e69d1a3998587cffd0068c29e16ca71b0b30e344e5c4870f437369a",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-version.md",
+      "bytes": 6902,
+      "sha256": "d3fb7b687cbf53b089049640183a5219c1f3d85aa90127d21466a273ff5c18e0",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-view.md",
+      "bytes": 5612,
+      "sha256": "ff6c14b4a8a66b56de020d9a13aac190c4a31cb7da7a02e2e277272b1a8a0ea5",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-whoami.md",
+      "bytes": 800,
+      "sha256": "e302860e0bfb1c43a00a575c705f0b1f036793af1c4654e360b2d2f65b459580",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm.md",
+      "bytes": 5670,
+      "sha256": "7b0fef24e67cf0b1eb3a36d01868c97a7d384ab2311c589eecfdead81ae67163",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npx.md",
+      "bytes": 5896,
+      "sha256": "bba3d288daed1267bdf9b3e83524a35a76aa3006df3530581a437fd3a8f92302",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/configuring-npm/folders.md",
+      "bytes": 8142,
+      "sha256": "c63a0283b16a9b43fb4aa0562a58f31537029237185ee097d2cfaa91d9c7b2e3",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/configuring-npm/install.md",
+      "bytes": 2810,
+      "sha256": "6ecbee745eff913e326367a80794bacef624590d7fcd0903a5972ed3d672e683",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/configuring-npm/npm-shrinkwrap-json.md",
+      "bytes": 1251,
+      "sha256": "951ba5c3a35c84e986a75ad008b8d3df169de1694e394a8c0ec9524e8d4018d5",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/configuring-npm/npmrc.md",
+      "bytes": 4081,
+      "sha256": "376d23b77315c6aaba4fa02f0a488de4d3b7094cf5cccdf0f6d5ac620ee8b3ca",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/configuring-npm/package-json.md",
+      "bytes": 34521,
+      "sha256": "ea69e0a46b4f931c29a69ba5065470006751b0f682ed11e1a17e6655272d8228",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/configuring-npm/package-lock-json.md",
+      "bytes": 10215,
+      "sha256": "df60da5a96d86f0b449939730e0f200d09b0d20ac4534f7b60053e4b96de8433",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/using-npm/config.md",
+      "bytes": 46443,
+      "sha256": "b81b537edbde314f7a4422c44d5313dc501a598ae1ed8ac10e06e1cd2229961c",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/using-npm/dependency-selectors.md",
+      "bytes": 12144,
+      "sha256": "2bf63caf04eb3161a3c66090028bbeb3b49610d082205c72e8ae12cb17ec8b02",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/using-npm/developers.md",
+      "bytes": 7826,
+      "sha256": "1c12a06c8dffc55064ddb360d03ba169d82900fb9fa46688d863fad0682c1fb1",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/using-npm/logging.md",
+      "bytes": 3896,
+      "sha256": "93e1cfaef738d47b0a5d9f7c1ec38be94d5ca65764a35f604048c88597536999",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/using-npm/orgs.md",
+      "bytes": 2246,
+      "sha256": "69ef2cdcc7215534d8c0dd9a779889d9253adee797bdc8bda7bf03f66076290a",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/using-npm/package-spec.md",
+      "bytes": 2885,
+      "sha256": "e8304ce6d781353cba18fc93bbbdc78686696250ad78eef963c62908ceb65d83",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/using-npm/registry.md",
+      "bytes": 3634,
+      "sha256": "1b0eb0c21f0e14e4840ff560149d213db475be5799ae3aae644208b73bf9c843",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/using-npm/removal.md",
+      "bytes": 1651,
+      "sha256": "8710a668c9c19d479525a0ee9c79342bace401ec9c33c0f5fcc009ec74ee9c2f",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/using-npm/scope.md",
+      "bytes": 5159,
+      "sha256": "684bb13d70095cd4ad1050b2dcf6e72366ae209f2ce7c534dbc253c3bbd25e46",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/using-npm/scripts.md",
+      "bytes": 12265,
+      "sha256": "9c43b7ebb28bce4e4267092554419c2b1d1cde56cfbe46d74ece728fb64392e2",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/content/using-npm/workspaces.md",
+      "bytes": 6115,
+      "sha256": "ecea82b761999c0fac8ddcc844b55523039770a80448a9e1f73ba35fc087fa11",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-access.html",
+      "bytes": 8605,
+      "sha256": "88ab4011e84b5ef8c812f06ce23f5b6391eaaa63dc35851faf54027b5afc6dcf",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-adduser.html",
+      "bytes": 6554,
+      "sha256": "348b88b36e98db2b4fe8367b0cabf328d87201faac14cde085337bd4d9008daa",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-audit.html",
+      "bytes": 24698,
+      "sha256": "d9226c3233f0805ef9e14a131957fb35f10776f89fe76195b0e3e12b63006aaf",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-bugs.html",
+      "bytes": 8121,
+      "sha256": "e16291ab39896d838a6a7b3ca19c14542efa925ceaed552e41069ccd7fe4cdf4",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-cache.html",
+      "bytes": 7822,
+      "sha256": "76c29c5639864e5ac40686f6813d7fbc0ce52f1d96ef7aedd11de04b5268871a",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-ci.html",
+      "bytes": 16401,
+      "sha256": "57cb304eff09ef18352a9b54394b14bd3bbc9c46c22d56abf8813a85a034c57e",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-completion.html",
+      "bytes": 5006,
+      "sha256": "dd395031df08b32f121e339d1efd1a2ba8b901d5b9da7f8b3faa5a14449657c3",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-config.html",
+      "bytes": 9903,
+      "sha256": "864aa25364aa5fc9b3e138bed8d7d3ab3568f33eef641039798fac7cd6c49d97",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-dedupe.html",
+      "bytes": 16013,
+      "sha256": "3305c1c7ed1ad21e4d1b5e10766a460263d7ac4eef356cf9561dc8759cc7d55b",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-deprecate.html",
+      "bytes": 6304,
+      "sha256": "43508d1a66ea190312bda0f56c3e0ed408e7a30df46cbb513734703909e12fee",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-diff.html",
+      "bytes": 14891,
+      "sha256": "a4f69668ddaff6ddd0a2606571ab7f1300af8b40a1051f912c2d3d7cb100789c",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-dist-tag.html",
+      "bytes": 10780,
+      "sha256": "668df51fa8496eb0110e59e1e98e245ab93aa2ebc0121ee7933ae04720bc2ada",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-docs.html",
+      "bytes": 8063,
+      "sha256": "aa51f80ec120f0c1537f4c51848a60a15186a7c8b09d54b2d20af3e45f8e225f",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-doctor.html",
+      "bytes": 10560,
+      "sha256": "2ae06ed4654f85bff854d566f03614ad31125da5c1ca374070be35de37f8108d",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-edit.html",
+      "bytes": 5392,
+      "sha256": "3461f9ab1039512fa7ba0e6be284b60d85899a6e5b16cd05823eeeb812316b0f",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-exec.html",
+      "bytes": 18959,
+      "sha256": "533eee2d38be61436711b9d4cd4b40e949b7e40bf93db59becd8cae76fa9c955",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-explain.html",
+      "bytes": 7467,
+      "sha256": "3f294d31903d868077e8922e2123518b78df36f25b7772e8c06c75a206e540ee",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-explore.html",
+      "bytes": 5297,
+      "sha256": "49a9d5baf30bb32a4ed6eae8fba39961c0e385171979e5d9fe2db3b2ede9a590",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-find-dupes.html",
+      "bytes": 13416,
+      "sha256": "1a1ea943cf5b8c83c693b82ba8283f28a3a9676a4409cf402634765fa66336ac",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-fund.html",
+      "bytes": 8399,
+      "sha256": "9e8d558024147607f6ae92e73ad36a41e791ab725adbd85368595fb911812950",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-help-search.html",
+      "bytes": 4971,
+      "sha256": "46eff41c47a63985fd2c70f7ad5ff6bf961dbb8a2717a60e1614059c213ec108",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-help.html",
+      "bytes": 5299,
+      "sha256": "10d2c71ceac7c835b6c9ce7d84e8440d7f27c76f6fd3eb4cb7fcd807ad874297",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-hook.html",
+      "bytes": 7201,
+      "sha256": "f451717bd9c5e38d14a7c3919afcba0084c9b98096e48536a08ee8b526f325fb",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-init.html",
+      "bytes": 17422,
+      "sha256": "5bfb1eadef4e974ca7a5475035a98036bec68ff85a6389ad1e1c1692d780dce6",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-install-ci-test.html",
+      "bytes": 14304,
+      "sha256": "7a47ff24af8bcc9bd27461e2378256d3da6adf98e59790b8662c23608c4cc80a",
+      "extension": ".html",
+      "classification": "TEST_OR_GATE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-install-test.html",
+      "bytes": 18065,
+      "sha256": "b3b454fbb6d3041f8e45ab8fbdf67a281ab0e4a855093f8519218b8353848e91",
+      "extension": ".html",
+      "classification": "TEST_OR_GATE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-install.html",
+      "bytes": 36713,
+      "sha256": "8dc4e20aae0319e854b0f7e738fb77e2c1b4121456cfa10070b0d009d6c54c7a",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-link.html",
+      "bytes": 19953,
+      "sha256": "378a320af4bd08b8ce79d2bcdaa915407c37389c5bbec940241c037e9573ac27",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-login.html",
+      "bytes": 6976,
+      "sha256": "28b931d843eaee1c86e177245c0965a97e1a5e60d13c951f17ada56680894711",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-logout.html",
+      "bytes": 6194,
+      "sha256": "95228239724799cc654d39d24b57ec39ad1aaf0a5205db73c3eccd6ac2aa39e1",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-ls.html",
+      "bytes": 15690,
+      "sha256": "a42928db67b3e62023c3b8d529fd0119c209a5f5c57e19233c7a083013bd66c1",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-org.html",
+      "bytes": 6830,
+      "sha256": "1cf33ebb2d6366570636a21fe9c32064f7faf84cc53805f23d431f5dd4a66de2",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-outdated.html",
+      "bytes": 11475,
+      "sha256": "6b984c4ded162a3edd6fe2cb21f48f06abfbfeecf00ecba73d1eafd3de208e8b",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-owner.html",
+      "bytes": 7965,
+      "sha256": "20f79990f21381e2e1f6d25e1bbf175c94fc7b9c53242f32bef0c062c9497f93",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-pack.html",
+      "bytes": 8669,
+      "sha256": "6629a992fcf1b0dcd5e00609d4f655e08ed68cb9d802779fba0193558a33e604",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-ping.html",
+      "bytes": 5045,
+      "sha256": "d8027de59e8d127eeb146b5ffdbb00ba9d90d4955ee78f1d26957906184f5744",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-pkg.html",
+      "bytes": 13621,
+      "sha256": "f7a6e75f1fbb649c964a16b0a4d9058fe0a4f7fb1e6f78f17bcb9c4acd901c46",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-prefix.html",
+      "bytes": 5688,
+      "sha256": "1ccb4514cfa0c333dbf2fb0c47bcecb88649e1e01e8b1fc7c6ad3a7f93ef09c3",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-profile.html",
+      "bytes": 8113,
+      "sha256": "47a6eb8b109fdc1793687d0255d0c1e938b9011ed209c8550ed6f76d11e58bb4",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-prune.html",
+      "bytes": 11776,
+      "sha256": "97169269794539100718d0d9616e0699133ea0d790304d0f71f6dc2c181016ea",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-publish.html",
+      "bytes": 14191,
+      "sha256": "3cd4d323b4591725691dcdf8621cc61885cccc3364c11f84d83dfbc66532a46b",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-query.html",
+      "bytes": 12166,
+      "sha256": "de007dd48823e05c4f9e1801982c882cfb3c2a15372e3048fd93b61e41cd0551",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-rebuild.html",
+      "bytes": 10751,
+      "sha256": "7a9daec57272f6a09440c7fb301c5ebb6e886fd2898f3b57a4399558b677a459",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-repo.html",
+      "bytes": 7743,
+      "sha256": "e5f12a8f22d71462eb9b51c9a50ab28bec3ba18daac72dcb9399be418c08b5c6",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-restart.html",
+      "bytes": 6144,
+      "sha256": "786978d5ba5615c7b38c2f0b02e495e60177cf76179dfe45d3f66ac14a23bfa7",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-root.html",
+      "bytes": 5427,
+      "sha256": "df57a2af566b4303fcaa3b8ee2561121619531c199b42404d39e14007521eb7a",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-run-script.html",
+      "bytes": 14089,
+      "sha256": "5cc2d8795b7a117918d13d7276a04da95417ba965530f415cca002c756d34629",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-sbom.html",
+      "bytes": 13203,
+      "sha256": "ad713d76b457d54e7ee6ce1c265e204f60db4bd34ada239187a8b83e75cc59b3",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-search.html",
+      "bytes": 9144,
+      "sha256": "374372d837c32301afe4d6cbd7e5d296a727fbb3f389449761f77d65c010f46d",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-shrinkwrap.html",
+      "bytes": 5057,
+      "sha256": "731dd1451bec92844f2af4778db59b717bf97c98c51fe1cbab4dd6519dbd0bf5",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-star.html",
+      "bytes": 6513,
+      "sha256": "480242af537dbdaac6def34ccbc9d6cbe1e9cc5075444c6b92eaadb2920b9cf5",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-stars.html",
+      "bytes": 5008,
+      "sha256": "0b62c9f410aea0d82f0ce63c174d6e390f58ee8f48a512254aa19e1d605f8eae",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-start.html",
+      "bytes": 6412,
+      "sha256": "8bf7c9462461b9f4f7f6851a1c97ec52bff7bfbe716e88d585093097549de2c4",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-stop.html",
+      "bytes": 5972,
+      "sha256": "a65e3cfe102f5e69f2c70689abf7b7083350ae8dd819f5512bea252bf994449b",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-team.html",
+      "bytes": 9366,
+      "sha256": "afd651bceb97df8955d1d3a6cc8c2032f72dd069c1e25fc6ca82b952dc618d93",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-test.html",
+      "bytes": 5852,
+      "sha256": "ee53276fd345a3aad7e0a21e5cc41cac00e35657fd24f91920ab35056d124727",
+      "extension": ".html",
+      "classification": "TEST_OR_GATE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-token.html",
+      "bytes": 7753,
+      "sha256": "1a7433f78324c59c3b6f8a23b2ca0b0fbc4076a60364d95705542dd68b706abb",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-uninstall.html",
+      "bytes": 10190,
+      "sha256": "935d8c9f55e653d69820dc3f290e2f0dfbf330b3f88edadfe449dbed80ac5cba",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-unpublish.html",
+      "bytes": 9698,
+      "sha256": "7a956cf95622ab733e36c7cf5a164b58a210eae57870fecc83dc6db34439a1ac",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-unstar.html",
+      "bytes": 6365,
+      "sha256": "48396fd54aaeda6c18f0e720025659eeb6a682d8a1adc16332a1f7616c9bd277",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-update.html",
+      "bytes": 20904,
+      "sha256": "0f88c09a8e66573a96e53703e1862b71759cbb9293ada492be12a7e4b8263025",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-version.html",
+      "bytes": 13307,
+      "sha256": "1f64e523378e59aa3d6dc3ead43e298ee0cdd5c28179cb5ddd608db7baed310e",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-view.html",
+      "bytes": 11236,
+      "sha256": "268d6b931c5517e609f04eb5049d30d6b51530266b938e4e552b75afc7ae6602",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-whoami.html",
+      "bytes": 5040,
+      "sha256": "57ec37d66b6bd3fa6c339410f7145a24eab5af1fd88612b64b1eac7ab468df15",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm.html",
+      "bytes": 11426,
+      "sha256": "7c0a1a125dc99a826f575aefea019371be3a5cf0352f55e0728da16ff87fd7fd",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npx.html",
+      "bytes": 11304,
+      "sha256": "462ee9ec79c5e7188ef4acf865b4589e10c35e58e8e1dac0129cfee0ae40f564",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/configuring-npm/folders.html",
+      "bytes": 14297,
+      "sha256": "1aa6d161eac124c7dcb62baa5b57532dbc0e1c945dd271595754f22a771f6a0b",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/configuring-npm/install.html",
+      "bytes": 7821,
+      "sha256": "66d130cdbb6c9aef604479bf4e83488084febb97d5643165e5c11e9203ca00df",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/configuring-npm/npm-global.html",
+      "bytes": 14297,
+      "sha256": "1aa6d161eac124c7dcb62baa5b57532dbc0e1c945dd271595754f22a771f6a0b",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/configuring-npm/npm-json.html",
+      "bytes": 47915,
+      "sha256": "7df892d8e3bb2ebb66f318396bd027d9e192d9b8c04d324c03b7a52d9dc40447",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/configuring-npm/npm-shrinkwrap-json.html",
+      "bytes": 5367,
+      "sha256": "f27d409df8c2c83dab7345262f7a0aba35aa677e42a77ffdb1b81c2c4744efe8",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/configuring-npm/npmrc.html",
+      "bytes": 9357,
+      "sha256": "9525e181d9a950df9f60cf71dd237de669d935da7143092595f4bcbd234823cf",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/configuring-npm/package-json.html",
+      "bytes": 47915,
+      "sha256": "7df892d8e3bb2ebb66f318396bd027d9e192d9b8c04d324c03b7a52d9dc40447",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/configuring-npm/package-lock-json.html",
+      "bytes": 16263,
+      "sha256": "ecc48d31bd3505621d27d25eb69407e95b08e3f57c12e31b4d29013d98127f1d",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/using-npm/config.html",
+      "bytes": 75798,
+      "sha256": "bd9b76debdd6e652e985b399d5d8941b05cd4706d7bddb69ffb691836f0fa63d",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/using-npm/dependency-selectors.html",
+      "bytes": 20044,
+      "sha256": "974e683d51a66b817aa555f3d266063c52995b4a60c1799c2b1c8b67a4ec2f73",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/using-npm/developers.html",
+      "bytes": 14672,
+      "sha256": "1678a772cbe89615ee65e8da522457c05721bcee49f7e8ebd44af93a00c6cefe",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/using-npm/logging.html",
+      "bytes": 9466,
+      "sha256": "240f99e3a90e31551ec4b1948e280eb522e0e7f434848ee3c7d2e030457e5025",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/using-npm/orgs.html",
+      "bytes": 7239,
+      "sha256": "80ae75d5949c5cc0f0afb9efb8095aa6090f1385e3463a977c7ac6baf3cede15",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/using-npm/package-spec.html",
+      "bytes": 8041,
+      "sha256": "926808a8665e2ab1ddd4a130d3bef0dc587e8e7c1cb8a9acfa35030ba8927aff",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/using-npm/registry.html",
+      "bytes": 8744,
+      "sha256": "4971586700e254052f30975ecad9caf0f1bd7bd4ac0486ef600fbb654adee7fc",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/using-npm/removal.html",
+      "bytes": 5812,
+      "sha256": "b2cdef324557ae894d1a3f30b0a9612c8d03538bb908a31b24c3ec8946b640e5",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/using-npm/scope.html",
+      "bytes": 10670,
+      "sha256": "de4003759cf3436d28b89dadfdbbe767d871d207a615b5dfa75f926804b8752b",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/using-npm/scripts.html",
+      "bytes": 22625,
+      "sha256": "af3765347f1eee802cb71e5dd63ab6cac7fd00bb38ef8fe6cbc62b04797c1eea",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/docs/output/using-npm/workspaces.html",
+      "bytes": 11866,
+      "sha256": "bcb1eb7b48bffd2a3d95e0322d06692e62d37852a35483afc1f29d99d78492fa",
+      "extension": ".html",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/package.json",
+      "bytes": 6647,
+      "sha256": "9147a2f60170daeb373e6410793668cdb9528bd2860aef1a77619714b3dfb85e",
+      "extension": ".json",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": ".tmp/npm-10.9.2/package/README.md",
+      "bytes": 4043,
+      "sha256": "ec67df6a6b31f9641b74bbcbea148e29e0f2bb27a1479f601de0722e28cc25b0",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
@@ -154,16 +1530,16 @@
     },
     {
       "path": "apps/desktop/index.html",
-      "bytes": 629,
-      "sha256": "add28d4c40eed3a8bf37fddd4e6ac4a79865d3dee25e5d5f1aaf4b929e45918b",
+      "bytes": 607,
+      "sha256": "1fa43ed0251de387e33715403e6026e2fb28acb8bde63074d26076cca3680131",
       "extension": ".html",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "apps/desktop/package.json",
-      "bytes": 3332,
-      "sha256": "a86f6ab2fab120b1761d68b076a831da997af244e3906afb5be1a344fd828d26",
+      "bytes": 3385,
+      "sha256": "c7908270e04efa8e7e76f70137b8ece44e9a77853feb408b9a569b448a1b4a56",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -4826,8 +6202,8 @@
     },
     {
       "path": "artifacts/inventory/BRONZE_CURRENT_COMPLETION_AUDIT.json",
-      "bytes": 218867,
-      "sha256": "b8089b0f5fd2ec0a222bcdb90af47997d9a60157869cdbe2cfc7b5cf196aa869",
+      "bytes": 217712,
+      "sha256": "807078e22d8b62d4e1f542d06cf75bada48d1b0ff8245db5e16669488ec33b0b",
       "extension": ".json",
       "classification": "GENERATED",
       "isDocument": true
@@ -7347,7 +8723,7 @@
     {
       "path": "artifacts/validation/29-D5-scope-real-progress-report.json",
       "bytes": 1508,
-      "sha256": "6ca73c85b3877014c22d548db852b32580a5086afca10232bc89c01722d141ba",
+      "sha256": "ed2d10141e89f9a5aa219efccaf383f9e74ebf677776038954df40ab34d893e2",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -11755,7 +13131,7 @@
     {
       "path": "artifacts/validation/30-Z-location-policy-enforcement-contract.json",
       "bytes": 67226,
-      "sha256": "1605ee935543254a8761cc4477ded6a02fc05b90f21dc33d85f6bc97413b555e",
+      "sha256": "547c1f6ddbcca64ae6e4332b33a953b1ed504165a7b70e748a9eeabb61f12eaf",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -11835,7 +13211,7 @@
     {
       "path": "artifacts/validation/31-A_TIMELINE_EVENT_POLICY_ENFORCEMENT_CONTRACT.json",
       "bytes": 4511,
-      "sha256": "cd3a4570919adfd954293e159d4915cc9a404e9a935669c7afc7812fd817f443",
+      "sha256": "19b72cb23f6542728f429dd52182690fb3f5e6ad83b96b7130ebf79870d31374",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -11851,7 +13227,7 @@
     {
       "path": "artifacts/validation/31-B_FAMILY_DATA_IMPORT_CENTRAL_AUTHORIZATION_CONTRACT.json",
       "bytes": 2925,
-      "sha256": "bc68ceb73bbf1853fa4ddc3ef718d401dda042010998d27abd653357d664d44b",
+      "sha256": "c9d6e5866520876260a5153551b7cc15bd288936b0ada851e4752967caaa541b",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -11931,7 +13307,7 @@
     {
       "path": "artifacts/validation/31-C_FAMILY_IMPORT_MULTI_POLICY_RECEIPT_BATCH_CONTRACT.json",
       "bytes": 3587,
-      "sha256": "29d98bba48db77a78576cb046f6e594af83c6be8dce565e6340b9125d1d66ba4",
+      "sha256": "04eeb757eac4591def22aacdb5c05953fe314caa0a9848c8b2315f3b5317de23",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -12011,7 +13387,7 @@
     {
       "path": "artifacts/validation/31-D_FAMILY_IMPORT_REUSED_LOCATION_READ_RECEIPT_CONTRACT.json",
       "bytes": 3787,
-      "sha256": "48a860c3b793af427ee0f71e6aecccd759da72885be8ea4af6435ac2cfa31360",
+      "sha256": "9d8481e9318ef313c309eda41bedfcb69d53bc4bb6a008c3f1a1165dfc75e645",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -12139,7 +13515,7 @@
     {
       "path": "artifacts/validation/31-E_USER_VISIBLE_RELEASE_BOUNDARY_CONTRACT.json",
       "bytes": 2676,
-      "sha256": "d838c9fe4b4323d61c107d5d6d12ae6fb88847e94702d78045a5ecd3a220e7b0",
+      "sha256": "04cf9896cdc668cf6efeb61057d016885c031ca2a72cb196bc8afea8bf66fda6",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -12155,7 +13531,7 @@
     {
       "path": "artifacts/validation/31-F_FAMILY_IMPORT_CREATED_LOCATION_LINKED_EVENT_CONTRACT.json",
       "bytes": 4574,
-      "sha256": "685f27ff233822e6cccae8c470aa6459fd057be7d314415b369866cf356751d9",
+      "sha256": "aac2cd0d0066ca1257ad004a122207f8c6076d2c725e056798aa0ab8a37bc78c",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -12275,7 +13651,7 @@
     {
       "path": "artifacts/validation/31-G_MAIN_STRUCTURE_CORE_SERVICE_API_CONTRACT.json",
       "bytes": 3711,
-      "sha256": "2c474b6ce7b9d4c5584416f9439d09b79d7bba9e261c358cc8dc47bc5fe894c3",
+      "sha256": "eab2fc13c1e13c1cdea53519ea36c80dc714462860ba006fbb4fceeef1883fa1",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -12355,7 +13731,7 @@
     {
       "path": "artifacts/validation/31-H_FAMILY_DATA_SESSION_OWNERSHIP_CONTROL_PLANE_CONTRACT.json",
       "bytes": 4590,
-      "sha256": "f24f62a31ea50853ca38ca09e22d77407db209312a3ba151a956ad7b116a1210",
+      "sha256": "46c100f3a97dfe369304a9a65efde5f8d8d51a040f4c52c9c21851aa869acf65",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -12467,7 +13843,7 @@
     {
       "path": "artifacts/validation/31-I_HEADLESS_DEVICE_SECRET_PROTECTION_CONTRACT.json",
       "bytes": 5115,
-      "sha256": "ee5a990a567f55c862a48643de7cc5cf82c41512eaebfab4459e4c4bdd95869a",
+      "sha256": "5933b5fc1231c949dd353bac96b24b6f65109627398273f933e4b49d54cca118",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -12555,7 +13931,7 @@
     {
       "path": "artifacts/validation/31-J_FAMILY_DATA_COEXISTENCE_DEFAULT_DENY_CUTOVER_GATE_CONTRACT.json",
       "bytes": 6313,
-      "sha256": "6f2641d53374db28e261d076a5c8bd636a9f8d8717b7230b7a3be38378cbad92",
+      "sha256": "09c68a0b62a5c85ae96a7a99e1d5eb64c18e14e9e4ffdc135a82088d24d8eb28",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -12683,7 +14059,7 @@
     {
       "path": "artifacts/validation/31-K_MONOTONIC_CUTOVER_READINESS_EVIDENCE_CONTRACT.json",
       "bytes": 9847,
-      "sha256": "d1213957e5c1477aa6371f7b31f693f25ca6b6db0b68b53b7f7ea857da699aa2",
+      "sha256": "881af7a284cdd8cc5b26c0aedcc43e90b76ba85e320dbf7df21288af2799906c",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -13595,7 +14971,7 @@
     {
       "path": "artifacts/validation/31-T_FAMILY_IMPORT_GOVERNED_ROLLBACK_RECEIPT_FENCE_CONTRACT.json",
       "bytes": 8199,
-      "sha256": "4ab7fe6c54f76693a5dcfd5da809f8311bc9c37cfe545506d4579606e9ac9fda",
+      "sha256": "499ef845f5b510f90cab9987dad267666669cc372d3e4400d473639589bd1d1e",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14011,7 +15387,7 @@
     {
       "path": "artifacts/validation/32-Q-ppk-021-platform-policy-ast-gate-contract.json",
       "bytes": 9535,
-      "sha256": "135b620b0801eff52a270502f66cbd878b61a160f9b91373982e3079a6936804",
+      "sha256": "7c4e5f4dfded878806c774e78968ab037199dda3b17d733293f37dbc569804ef",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14027,7 +15403,7 @@
     {
       "path": "artifacts/validation/32-R-ppk-022-capability-manifest-gate-contract.json",
       "bytes": 12082,
-      "sha256": "1eaf57207f2a0f1ca0793122a4750b69a70c586281bba4fb627a768359e0b421",
+      "sha256": "0320e7f5923252c559d6aa4f3bc93be79730e252d48049551897eb9948efdf35",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14243,7 +15619,7 @@
     {
       "path": "artifacts/validation/32-V-ppk-026-typed-policy-sdk-boundary.json",
       "bytes": 246,
-      "sha256": "606c14d0eeeba46715afb018b41c9f889d5d11bcc70cb0dc8855e5d722edbda8",
+      "sha256": "0c84e4637c752b7b920e4ac119210e8c3d1e330817eae53700e5a78a2118e6ae",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14267,7 +15643,7 @@
     {
       "path": "artifacts/validation/32-W-b0-03-b0-04-product-surface-boundary.json",
       "bytes": 2106,
-      "sha256": "bf088067f3465ed9d98cf5956269ad02ac2172db4a9ff9dc99621c2fc499baac",
+      "sha256": "45674eae09b6d5138a494f59eff2a2d8a0653cbac26635e613b09c7d71456ea0",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14289,6 +15665,38 @@
       "isDocument": true
     },
     {
+      "path": "artifacts/validation/32-X-b2-03-b2-04-desktop-security-boundary.json",
+      "bytes": 3163,
+      "sha256": "8436041b7627c3760e449e0332d7adfad49c396530f5ced75d54597f332a99c3",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/32-X-b2-03-b2-04-desktop-security-contract.json",
+      "bytes": 4355,
+      "sha256": "448069c587968eaff5ba16fd25cc6162d1dc750d5676209d5f3d97cf982cc1e2",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/32-X-b2-03-b2-04-desktop-security-runtime.json",
+      "bytes": 3885,
+      "sha256": "51f5311929e354b11d160346bb2090305c9ede7269bdafb85166b426a3907346",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/32-X-electron-fuse-binary-proof.json",
+      "bytes": 953,
+      "sha256": "9c5461f1e9367efbad96b8d6cecde536f840235e98f93909ddca7c23092e3420",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
       "path": "artifacts/validation/active-delivery-documents.json",
       "bytes": 747,
       "sha256": "06e8d7cced7c63802aedec305df661e1445875fbcb6d861370f42d86b8009ca0",
@@ -14299,7 +15707,7 @@
     {
       "path": "artifacts/validation/active-release-contract-v2.json",
       "bytes": 186,
-      "sha256": "8c40c8fa577a693db8401fdb4b2d84d60ac7eb19d45cf51b5ffa7a15c27e6f7b",
+      "sha256": "a94c3bc2b7360eaef333f0dca1831ef9b6f040414fc6b08983b07d1ecaf4ddff",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14322,8 +15730,8 @@
     },
     {
       "path": "artifacts/validation/bronze-governance-reality-matrix.json",
-      "bytes": 2052,
-      "sha256": "b773030b0ad48ab0847677ae0f7845eedb6be3fa13974c7dde1b077dbec55b7a",
+      "bytes": 2059,
+      "sha256": "b69b0e4f163e068a5aacce7e42d6cf16f465dfd83ed92ea8264d8894a72165dc",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14859,7 +16267,7 @@
     {
       "path": "artifacts/validation/canonical-rule-registry-gate.json",
       "bytes": 322,
-      "sha256": "11d06216852e9f594cb2c4a33f12e79320335f1d9776a265432630992b16c3bc",
+      "sha256": "29a47943e1337439b6eb185af7ec5ef9e88a84c18f7ada9685e6eab1f4e596ac",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14875,7 +16283,7 @@
     {
       "path": "artifacts/validation/conversation-capacity.json",
       "bytes": 241,
-      "sha256": "5d39a978da39d2244f823d76a5fe036a5681cad1b1d233bbd1c1796a1f6f917b",
+      "sha256": "87110c6add52012e1ebb4008e1e917bd39b158c4b6d0cb915be1d62ffeb43c6d",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14883,7 +16291,7 @@
     {
       "path": "artifacts/validation/core-service-boundary.json",
       "bytes": 123,
-      "sha256": "f26c4497a850a3a2d56d89ed309e3af1b363a84aec2c3d29e1dd3882f599049b",
+      "sha256": "4479d20f9521029d91888d552d39bd3e903691fe8b521ad9673f82b9eda8fe6d",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14891,7 +16299,7 @@
     {
       "path": "artifacts/validation/core-service-local-admin-contract.json",
       "bytes": 260,
-      "sha256": "5dadfdc97da1d23d831af6298adc722916e1a1af2573ef4023bd371a857a2c77",
+      "sha256": "d98436571e6d9c951a9766087f5c4bb7a739d475353321bd9bcb3b6d26e44fbf",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14915,7 +16323,7 @@
     {
       "path": "artifacts/validation/desktop-core-service-startup-contract.json",
       "bytes": 161,
-      "sha256": "ade996e92ff7a6b3ec263c6bac0cde63972db55b2a27b553dfd3f972a846ee85",
+      "sha256": "dca2d15178eb5c0732aac44e77d549817371b8a83b835d1f8fc7bb1b4b1fc19a",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14923,7 +16331,7 @@
     {
       "path": "artifacts/validation/desktop-core-service-startup-runtime.json",
       "bytes": 161,
-      "sha256": "8ca31f03bcf9b816cb112071b464b52871c0ac84cbb1de7cd4b51d4b2115d693",
+      "sha256": "e77bdd2e30fdb7fe124bad858209869d9af41413186d2872dc969aa02a59f5a4",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14939,7 +16347,7 @@
     {
       "path": "artifacts/validation/feature-reality-gate.json",
       "bytes": 673,
-      "sha256": "48e3da4052f436f5b2325831c0c2a69184e117e20ce6e85ba3c09483ce4e33d0",
+      "sha256": "82d2d5a1ecb952c80c47355c59230e997e52eff3bf2b6fe54e99691b8fa7c52c",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -14963,7 +16371,7 @@
     {
       "path": "artifacts/validation/governed-preflight.json",
       "bytes": 5938,
-      "sha256": "e8081540e569484dbf69be8a93749615a885164a4aa91bd5e2951eb444acd54e",
+      "sha256": "054c0a6e4ccf68094c12cd6980aa917a7dc2f994f9ac4bd93ef0a21882cfa7b2",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15011,7 +16419,7 @@
     {
       "path": "artifacts/validation/platform-capability-manifest-gate.json",
       "bytes": 537,
-      "sha256": "62796a5c3d69fef566a951a9a8d14d35304a3fb7a5ecf00bfd74939e0e1f85a8",
+      "sha256": "923cc733f047167613d5f90522bf86260890038a7cc7a1656c6622e72149bd07",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15019,7 +16427,7 @@
     {
       "path": "artifacts/validation/platform-policy-ast-gate.json",
       "bytes": 644,
-      "sha256": "ea8daada68c92bdb3880e100391746e462413b86d964c63bbdc39161ca683e15",
+      "sha256": "d74928fb0df438792c7a35afe638dfe74244e777fe88f825ada2815070e32303",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15027,7 +16435,7 @@
     {
       "path": "artifacts/validation/platform-policy-gate.json",
       "bytes": 2197,
-      "sha256": "bc719ae23547a4017192a9703ad2f5694a78d8c0cc4cb0814b72522da9b3ef27",
+      "sha256": "8a91e8f237ba5a99d31e96b0d6533ebd067757ed852fb5a52e89c41ed934d77a",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15059,7 +16467,7 @@
     {
       "path": "artifacts/validation/project-artifact-index-gate-v2.json",
       "bytes": 212,
-      "sha256": "79d084b1e6e0ae961b43623ea0d240c439878a3d242916d2ce2b69408b95fa9f",
+      "sha256": "6aeaf8ce8d595f37fa027f5041f0afe76e7bb5e1db91d86ef4b7d7fcc1b748ba",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15091,7 +16499,7 @@
     {
       "path": "artifacts/validation/step-checkpoint-gate.json",
       "bytes": 188,
-      "sha256": "cdd6287251263ea98f7c42f8a924f610dbf6d13b14dc3768280c2be681bacd0d",
+      "sha256": "779a0daeee4b82f936900b38ca0f968041cbf87d52ffac2c4ee1bc04b25116ee",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15107,7 +16515,7 @@
     {
       "path": "artifacts/validation/system-health-core-service-ipc-contract.json",
       "bytes": 161,
-      "sha256": "da9ab4cd06e2121df0eb109989733273834162afa1d6003443848ca3a643e688",
+      "sha256": "7bc126d5338a241dc1f88be063b29e0b984a1377ddc5475e6ebee9143bc4db99",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15115,7 +16523,7 @@
     {
       "path": "artifacts/validation/system-health-core-service-ipc-runtime.json",
       "bytes": 161,
-      "sha256": "804b77746703e426d75dfbdf8c8266e9f065d5a7165eb54d1ed5f0b57325ebe6",
+      "sha256": "65f4ce917cf57303b73df385e64217275dc2a449b71874b8df7919a05388507d",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15123,7 +16531,7 @@
     {
       "path": "artifacts/validation/universal-rule-enforcement-gate.json",
       "bytes": 299,
-      "sha256": "af8c8a1082fbc2cea5aff589f2fdbe9b280f1cd077f134632f152910bbd23a2b",
+      "sha256": "06de10ff82eabab1868ca7465dfd00738574e6fd77962a67bf8bf719fad012fe",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15139,7 +16547,7 @@
     {
       "path": "artifacts/validation/user-decision-ledger-gate.json",
       "bytes": 181,
-      "sha256": "8623f8d91136a5bcea8f216d94442f2eebb86eaa041c0433391e47b22ea0cfe4",
+      "sha256": "7e1e9123c9e264cfe24c57e6b8f3c1da13d45f474a5600091373c70ed0afe1aa",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -19434,8 +20842,8 @@
     },
     {
       "path": "config/32-q-ppk-021-platform-policy-ast-allowlist.json",
-      "bytes": 54092,
-      "sha256": "1a00855ae7911a838ade75ebc8ce7697baac12a2c2bb51570ee8f03f94ee582b",
+      "bytes": 54521,
+      "sha256": "ee8859c5601f606dc096d3ee59ed32f51fc90adf86725c5996d3a22061ed5fbe",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -19443,7 +20851,7 @@
     {
       "path": "config/32-q-ppk-021-platform-policy-ast-gate-inventory.json",
       "bytes": 3669,
-      "sha256": "eae1d546bdf15bc70fe381111cf6ed1f22f675311c8b7d93e5205fe44f709fdd",
+      "sha256": "5def646c278ba68385cd8d5a1202739733b3301e4c7c3b6f41b5230c99aba8c5",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -19451,7 +20859,7 @@
     {
       "path": "config/32-q-ppk-021-platform-policy-ast-gate-scope.json",
       "bytes": 6619,
-      "sha256": "90ce4eb668b4467641c7395235bc928c71b99ca7370cbe298817d4292834dadb",
+      "sha256": "1a681b70153b89949b5db5d7d8d0705d2abf9f41271b501c2c3c6978ef2dc7a5",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -19459,7 +20867,7 @@
     {
       "path": "config/32-r-ppk-022-capability-manifest-gate-inventory.json",
       "bytes": 4998,
-      "sha256": "79371942ae97e516c9f56364a1fb8bdb706fc89fa45b6cdfd3b38d867ee53558",
+      "sha256": "e32a4030e6db537a107a23bccc743eae69ae0dd8af2228e613f16bd295b33a41",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -19467,15 +20875,15 @@
     {
       "path": "config/32-r-ppk-022-capability-manifest-gate-scope.json",
       "bytes": 7672,
-      "sha256": "4e18738efafd7b5fbed154b852dd7f744f26686332c6f97ba9cb093b0e8a917f",
+      "sha256": "655f3cb6b210e2eb465c0d7ef08ef8c2986abb6b6ce1e27772f39cb02d74b77f",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "config/32-r-ppk-022-capability-surface-manifest.json",
-      "bytes": 65727,
-      "sha256": "bb384a5c94fc88761e557d98d893778911f045e64f66cacdc5d2afdbc6849453",
+      "bytes": 65957,
+      "sha256": "1f6b3e14aaf7a608a93d857448dab2fcbda924999274b8fbc82f1edd76226eb1",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -19601,6 +21009,22 @@
       "isDocument": true
     },
     {
+      "path": "config/32-x-b2-03-b2-04-desktop-security-inventory.json",
+      "bytes": 2819,
+      "sha256": "21d207948196b283e4e155df09a5db75dd4a595156145953235cec0985df1a7a",
+      "extension": ".json",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": "config/32-x-b2-03-b2-04-desktop-security-scope.json",
+      "bytes": 2809,
+      "sha256": "6c0d86e7c447060c6ee7700efcc27633008e2ac31b580767fa961a50e654b1ae",
+      "extension": ".json",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
       "path": "config/accepted-cache-rc2-validation-policy.json",
       "bytes": 554,
       "sha256": "8c2963d70118409a716b49632388b9f0f2dcb967de2792b0b7ad4125b021213e",
@@ -19610,8 +21034,8 @@
     },
     {
       "path": "config/accepted-scope-registry.json",
-      "bytes": 353296,
-      "sha256": "c6ea81f0094af4f7198f487e459133e5a9a37167c7a1f14e90faaef0caaf0bb6",
+      "bytes": 354987,
+      "sha256": "1ff47207aaa316a2d66b1835c207539a27d0032496734ba6d26856edb47281b6",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -19882,8 +21306,8 @@
     },
     {
       "path": "config/user-decision-ledger.json",
-      "bytes": 65028,
-      "sha256": "e673bdc7256e38dba26a4b225feabb1c03142d99ce3a2a33d48873ba231f9e60",
+      "bytes": 66495,
+      "sha256": "368d16c97f15d402d0838b7d9fed1a6717743385b30fdcb627835c118bcb69f6",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -20146,8 +21570,8 @@
     },
     {
       "path": "docs/07_BRONZE_REQUIREMENTS_TRACEABILITY.md",
-      "bytes": 37189,
-      "sha256": "98b8e446bed9976810eade6b87ac52a89b06d65631cb53f99e693fc6d8ccdc93",
+      "bytes": 37715,
+      "sha256": "3c59d797560456c45675c15243b0254d8756ee8f2fca27065fc25f48af0189d8",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -20162,8 +21586,8 @@
     },
     {
       "path": "docs/10_MASTER_DECISION_REGISTER.md",
-      "bytes": 92827,
-      "sha256": "77a7e3a9f68a7295da4170c20b7ba2bb9ab0e37447c9fa5cdfd835dce1f9c32b",
+      "bytes": 94016,
+      "sha256": "2ef97f58998c0327820955da4408e27331d55ff9635a41f5683e934f56ace6d2",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -20194,8 +21618,8 @@
     },
     {
       "path": "docs/14_SECURITY_PRIVACY_BACKUP_STANDARD.md",
-      "bytes": 28894,
-      "sha256": "cd9baa7322da24f9b6153df5b42b44c44531729c6a2420c217b8e715fe3eb490",
+      "bytes": 29752,
+      "sha256": "de3b15f4d78f5a889f2d57eaf296c24ad5ff8158f9430af6dc149a977379a811",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -21713,9 +23137,17 @@
       "isDocument": true
     },
     {
+      "path": "docs/audit/32-X_B2-03_B2-04_DESKTOP_SECURITY_UST_KAPANIS.md",
+      "bytes": 2406,
+      "sha256": "0f156ee5f31964de90f6ec438b5ffc7b3e5a9f0c5d954317c4b58e465fb6b94a",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
       "path": "docs/audit/BRONZE_CURRENT_COMPLETION_AUDIT.md",
       "bytes": 10878,
-      "sha256": "144223ce958dabf4c65264ccdbf44b3b2c395f784a87ef6ed9f2f8a308ef3a65",
+      "sha256": "fb198e9ea5cf3ba2ebaa46758910cbd53bcdfdeb8b1c06327e6ff0a741873489",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -22029,6 +23461,14 @@
       "bytes": 18331,
       "sha256": "1f558ccbd9a181656727bee72ade286ca3a4de2f53ba7397348c7efc22c0d415",
       "extension": ".json",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": "docs/current/DESKTOP_SESSION_AND_ELECTRON_SECURITY_CONTRACT.md",
+      "bytes": 2113,
+      "sha256": "fe031f166a1fa2131d045ae7eeabe56d487e950935333c3efc87f3ce3a1e584c",
+      "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
@@ -23313,6 +24753,14 @@
       "isDocument": true
     },
     {
+      "path": "docs/decisions/DEC-209-b2-03-b2-04-desktop-session-electron-security.md",
+      "bytes": 2368,
+      "sha256": "f8246ac17c7a3b9048e6946d5b66a64cb89ce8e1261f6e79ac73f0bee49abfce",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
       "path": "docs/examples/anadolu-parsi-family-import-v1.example.json",
       "bytes": 1300,
       "sha256": "fd769c29e37671083eaf6960374fca184e06027b7e0b20c6112b1dc8b6b34494",
@@ -23444,6 +24892,14 @@
       "path": "docs/security/B0-03_B0-04_PRODUCT_SURFACE_GOVERNANCE_THREAT_MODEL.md",
       "bytes": 1950,
       "sha256": "dd0f05eebc6b8190e8f962650ec4c7656a672f1183ce54362461cbed18d3e099",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": "docs/security/B2-03_B2-04_DESKTOP_SECURITY_THREAT_MODEL.md",
+      "bytes": 2516,
+      "sha256": "27ab4747ca695b1057740909b9d8d1814da39b10cd96c3aaced7eacb264ef381",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23722,8 +25178,8 @@
     },
     {
       "path": "package.json",
-      "bytes": 87645,
-      "sha256": "44bfea488bbcd003e48b98e44f7b7b952fae4c7a54fb7f7cd3eac037766a2517",
+      "bytes": 88306,
+      "sha256": "04ed03f03c1ece508df9cd4859496bce1f488c8dceae56e7764dbc1d5262728e",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -25906,16 +27362,16 @@
     },
     {
       "path": "tools/windows-packager/package-lock.json",
-      "bytes": 107487,
-      "sha256": "f794c976da71d7457e7358759b18b388f335d3b15d281a9a8ded8b5a2e2fa558",
+      "bytes": 108941,
+      "sha256": "8690e463f4891677088e15c855cba98be8ed09a7e69de8614677ab0a857f7bcd",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "tools/windows-packager/package.json",
-      "bytes": 448,
-      "sha256": "8b7abfcacc199fe0b086b225c24c9e8fbe149527af7c6126bbc27dd649becb9d",
+      "bytes": 480,
+      "sha256": "bda3db94bb30a836f6178d28f36ba7bd7fcb9f86aaf83af6ee65c0585defa4b7",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true

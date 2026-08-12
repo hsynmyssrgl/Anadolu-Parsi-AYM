@@ -94,3 +94,4 @@ export * from './external-backup-revocation-list-use-cases.js';
 export * from './external-backup-revocation-endpoint-use-cases.js';
 export * from './supply-chain-release-use-cases.js';
 export * from './product-surface-governance-use-cases.js';
+export * from './desktop-security-use-cases.js';

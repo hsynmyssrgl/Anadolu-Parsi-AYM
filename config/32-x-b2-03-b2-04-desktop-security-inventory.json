@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "32-X-DESKTOP-SECURITY-INVENTORY",
+  "requirements": ["B2-03", "B2-04"],
+  "sessionControls": [
+    { "id": "idle-timeout", "value": "15m", "enforcement": "main-process-monotonic-session-state" },
+    { "id": "warning-window", "value": "60s", "enforcement": "accessible-alertdialog-countdown" },
+    { "id": "real-activity-only", "value": ["pointerdown", "keydown", "touchstart"], "enforcement": "throttled-explicit-activity-ipc" },
+    { "id": "background-no-touch", "value": true, "enforcement": "repository-auth-check-touch-false" },
+    { "id": "state-preservation", "value": true, "enforcement": "mounted-react-tree-plus-modal-overlay" },
+    { "id": "explicit-reauthentication", "value": "password-plus-enabled-mfa", "enforcement": "existing-login-use-case-same-account" },
+    { "id": "manual-lock", "value": true, "enforcement": "profile-menu-and-warning-dialog" },
+    { "id": "audit", "value": ["idle-lock", "manual-lock", "unlock"], "enforcement": "existing-append-only-audit-repository" }
+  ],
+  "electronControls": [
+    { "id": "custom-protocol", "value": "pardus-app://renderer", "enforcement": "privileged-protocol-handler-root-confinement" },
+    { "id": "file-primary-origin", "value": false, "enforcement": "sender-trust-and-loader-denial" },
+    { "id": "csp", "value": "default-src 'none'", "enforcement": "response-header-and-index-meta" },
+    { "id": "sandbox", "value": true },
+    { "id": "context-isolation", "value": true },
+    { "id": "node-integration", "value": false },
+    { "id": "web-security", "value": true },
+    { "id": "webview", "value": false },
+    { "id": "permission-download-navigation-redirect-window", "value": "DENY" }
+  ],
+  "fuses": [
+    { "name": "RunAsNode", "value": false },
+    { "name": "EnableCookieEncryption", "value": true },
+    { "name": "EnableNodeOptionsEnvironmentVariable", "value": false },
+    { "name": "EnableNodeCliInspectArguments", "value": false },
+    { "name": "EnableEmbeddedAsarIntegrityValidation", "value": true },
+    { "name": "OnlyLoadAppFromAsar", "value": true },
+    { "name": "LoadBrowserProcessSpecificV8Snapshot", "value": true },
+    { "name": "GrantFileProtocolExtraPrivileges", "value": false },
+    { "name": "WasmTrapHandlers", "value": true }
+  ],
+  "typedIpcMethods": [
+    "getSessionLockState",
+    "recordSessionActivity",
+    "lockSession",
+    "unlockSession",
+    "getDesktopSecurityPosture"
+  ],
+  "negativeCases": [
+    "file primary renderer URL",
+    "custom protocol wrong host or credentials",
+    "encoded traversal and malformed URL",
+    "background IPC session extension",
+    "unlock while session is not locked",
+    "wrong password or second factor",
+    "missing or unknown Electron fuse",
+    "permission, download, navigation, redirect, webview or new window"
+  ]
+}

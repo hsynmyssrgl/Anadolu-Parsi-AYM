@@ -6,11 +6,17 @@ import { accessibilityAnnouncement, nextRovingIndex, parseAccessibilityPreferenc
 import { AsyncWriteGuard, MutationRevisionWatermark } from './async-state-guard';
 import { DEVICE_REAUTHORIZATION_CONFIRMATION, SECURITY_CENTER_LABEL, SECURITY_CENTER_ROUTE, canSubmitDeviceReauthorization, securityCenterNeedsAttention } from './security-center-navigation';
 import {
+  FAMILY_RELATIONSHIP_CATALOG,
+  OBJECT_PERMISSION_ACTIONS,
+  PRODUCT_NAVIGATION_GROUPS,
+  PRODUCT_NAVIGATION_ROUTES,
   USER_VISIBLE_APP_INFO,
+  getFamilyRelationship,
+  type FamilyRelationshipCategory,
+  type FamilyRelationshipCode,
   type UserVisibleAppInfo,
   assessPassword
 } from '@ppt/domain/renderer';
-import { FAMILY_RELATIONSHIP_CATALOG, OBJECT_PERMISSION_ACTIONS, PRODUCT_NAVIGATION_GROUPS, PRODUCT_NAVIGATION_ROUTES, getFamilyRelationship, type FamilyRelationshipCategory, type FamilyRelationshipCode } from '@ppt/domain';
 import type {
   CreateFamilyEventInput,
   UpdateFamilyEventInput,
@@ -53,6 +59,7 @@ import type { PlatformCapabilityManifestGateBoundaryView } from '@ppt/domain';
 import type { ApplicationSecurityProfileGateBoundaryView } from '@ppt/domain';
 import type { PolicyServiceAvailabilityBoundaryView } from '@ppt/domain';
 import type { ProductScreenId, ProductSurfaceGovernanceView } from '@ppt/domain';
+import type { DesktopSecurityPostureView, SessionLockStateView, UnlockSessionInput } from '@ppt/domain';
 import type { DataRepairEntitySnapshot, DataRepairIssue, DataRepairOperation, DataRepairWorkspaceView } from '@ppt/domain';
 import type { LoginWithWindowsHelloInput, WindowsHelloAuthenticationOutcome, WindowsHelloEnrollmentView, WindowsHelloStateView } from '@ppt/domain';
 import type { CoreServiceApiBoundaryStatusContract, CoreServiceHealthContract } from '@ppt/core-service-contracts';
@@ -721,6 +728,7 @@ function SystemManagementScreen(){
   const [applicationSecurityProfileGateBoundary,setApplicationSecurityProfileGateBoundary]=useState<ApplicationSecurityProfileGateBoundaryView>();
   const [policyServiceAvailabilityBoundary,setPolicyServiceAvailabilityBoundary]=useState<PolicyServiceAvailabilityBoundaryView>();
   const [productSurfaceGovernance,setProductSurfaceGovernance]=useState<ProductSurfaceGovernanceView>();
+  const [desktopSecurityPosture,setDesktopSecurityPosture]=useState<DesktopSecurityPostureView>();
   const [health,setHealth]=useState<SystemHealthView>(); const [coreServiceHealth,setCoreServiceHealth]=useState<CoreServiceHealthContract>(); const [coreServiceApiBoundary,setCoreServiceApiBoundary]=useState<CoreServiceApiBoundaryStatusContract>(); const [targets,setTargets]=useState<BackupTargetView[]>([]); const [runs,setRuns]=useState<BackupRunView[]>([]); const [performance,setPerformance]=useState<PerformanceSampleView[]>([]); const [trend,setTrend]=useState<PerformanceTrendView>(); const [tasks,setTasks]=useState<BackgroundTaskView[]>([]); const [scheduler,setScheduler]=useState<SchedulerStatusView>(); const [diagnostics,setDiagnostics]=useState<DiagnosticEntryView[]>([]); const [result,setResult]=useState<MaintenanceResultView>(); const [backupMessage,setBackupMessage]=useState(''); const [queue,setQueue]=useState<QueuedTaskView[]>([]); const [policy,setPolicy]=useState<MaintenancePolicyView>(); const [notifications,setNotifications]=useState<HealthNotificationView[]>([]); const [systemMessage,setSystemMessage]=useState(''); const [healthScore,setHealthScore]=useState<SystemHealthScoreView>(); const [reportHistory,setReportHistory]=useState<DiagnosticReportHistoryView[]>([]); const [diagQuery,setDiagQuery]=useState(''); const [diagSeverity,setDiagSeverity]=useState(''); const [healthHistory,setHealthHistory]=useState<SystemHealthHistoryView[]>([]); const [healthTrend,setHealthTrend]=useState<SystemHealthTrendView>(); const [archives,setArchives]=useState<DiagnosticArchiveView[]>([]); const [anomalies,setAnomalies]=useState<PerformanceAnomalyView[]>([]); const [recommendations,setRecommendations]=useState<MaintenanceRecommendationView[]>([]); const [reportContent,setReportContent]=useState<DiagnosticReportContentView>(); const [verificationMessage,setVerificationMessage]=useState(''); const [healthDays,setHealthDays]=useState(30); const [performanceHours,setPerformanceHours]=useState(24); const [compareLeft,setCompareLeft]=useState(''); const [compareRight,setCompareRight]=useState(''); const [comparison,setComparison]=useState<DiagnosticReportComparisonView>(); const [archiveContent,setArchiveContent]=useState<DiagnosticArchiveContentView>(); const [archiveId,setArchiveId]=useState(''); const [archiveQuery,setArchiveQuery]=useState(''); const [maintenanceHistory,setMaintenanceHistory]=useState<MaintenanceHistoryView[]>([]); const [exportHistory,setExportHistory]=useState<ExportArtifactView[]>([]); const [ipcTelemetry,setIpcTelemetry]=useState<IpcPerformanceTelemetryView>(); const [ipcMaintenanceAuthority,setIpcMaintenanceAuthority]=useState<IpcAdaptiveBudgetMaintenanceAuthorityView>(); const [ipcMaintenanceRecoveryAuthority,setIpcMaintenanceRecoveryAuthority]=useState<IpcAdaptiveBudgetMaintenanceRecoveryAuthorityView>(); const [ipcMaintenancePassword,setIpcMaintenancePassword]=useState(''); const [ipcMaintenanceCode,setIpcMaintenanceCode]=useState(''); const [ipcMaintenanceRecoveryConfirmation,setIpcMaintenanceRecoveryConfirmation]=useState(''); const [ipcMaintenanceBusy,setIpcMaintenanceBusy]=useState(false);
   const refresh=async()=>{if(!window.pardus)return; const [h,coreHealth,apiBoundary,t,r,p,tr,bg,sc,d,q,mp,n,hs,rh,hh,ht,ar,an,mr,mhist,exports,ipc,ipcAuthority,ipcRecoveryAuthority]=await Promise.all([window.pardus.getSystemHealth(),window.pardus.getCoreServiceHealth().catch(()=>undefined),window.pardus.getCoreServiceApiBoundary().catch(()=>undefined),window.pardus.listBackupTargets(),window.pardus.listBackupRuns(30),window.pardus.listPerformance(30),window.pardus.getPerformanceTrend(performanceHours),window.pardus.listBackgroundTasks(30),window.pardus.getSchedulerStatus(),window.pardus.listDiagnostics(50),window.pardus.listQueuedTasks(40),window.pardus.getMaintenancePolicy(),window.pardus.listHealthNotifications(40),window.pardus.getHealthScore(),window.pardus.listDiagnosticReports(20),window.pardus.listHealthHistory(Math.max(30,healthDays*4)),window.pardus.getHealthTrend(healthDays),window.pardus.listDiagnosticArchives(20),window.pardus.getPerformanceAnomalies(performanceHours),window.pardus.getMaintenanceRecommendations(),window.pardus.listMaintenanceHistory(30),window.pardus.listExportArtifacts(30),window.pardus.getIpcPerformanceTelemetry(),window.pardus.getIpcAdaptiveBudgetMaintenanceAuthority(),window.pardus.getIpcAdaptiveBudgetMaintenanceRecoveryAuthority()]);setHealth(h);setCoreServiceHealth(coreHealth);setCoreServiceApiBoundary(apiBoundary);setTargets(t);setRuns(r);setPerformance(p);setTrend(tr);setTasks(bg);setScheduler(sc);setDiagnostics(d);setQueue(q);setPolicy(mp);setNotifications(n);setHealthScore(hs);setReportHistory(rh);setHealthHistory(hh);setHealthTrend(ht);setArchives(ar);setAnomalies(an);setRecommendations(mr);setMaintenanceHistory(mhist);setExportHistory(exports);setIpcTelemetry(ipc);setIpcMaintenanceAuthority(ipcAuthority);setIpcMaintenanceRecoveryAuthority(ipcRecoveryAuthority);};
   useEffect(()=>{void refresh();const timer=setInterval(()=>void refresh(),30_000);return()=>clearInterval(timer);},[]);
@@ -735,6 +743,7 @@ function SystemManagementScreen(){
   useEffect(()=>{void window.pardus?.getApplicationSecurityProfileGateBoundary().then(setApplicationSecurityProfileGateBoundary).catch(()=>setApplicationSecurityProfileGateBoundary(undefined));},[]);
   useEffect(()=>{const load=()=>void window.pardus?.getPolicyServiceAvailabilityBoundary().then(setPolicyServiceAvailabilityBoundary).catch(()=>setPolicyServiceAvailabilityBoundary(undefined));load();const timer=setInterval(load,15_000);return()=>clearInterval(timer);},[]);
   useEffect(()=>{void window.pardus?.getProductSurfaceGovernance().then(setProductSurfaceGovernance).catch(()=>setProductSurfaceGovernance(undefined));},[]);
+  useEffect(()=>{void window.pardus?.getDesktopSecurityPosture().then(setDesktopSecurityPosture).catch(()=>setDesktopSecurityPosture(undefined));},[]);
   const maintain=async(op:MaintenanceResultView['operation'])=>{if(!window.pardus)return;setResult(await window.pardus.runMaintenance(op));await refresh();};
   const runAllBackups=async()=>{if(!window.pardus)return;const results=await window.pardus.runAllBackups();setBackupMessage(`${results.filter(x=>x.success).length}/${results.length} hedef doğrulandı.`);await refresh();};
   const runTarget=async(id:string)=>{if(!window.pardus)return;const r=await window.pardus.runBackupTarget(id);setBackupMessage(r.success?'Yedek doğrulandı.':r.run.error??'Yedek başarısız.');await refresh();};
@@ -767,6 +776,7 @@ function SystemManagementScreen(){
   const bytes=(n:number)=>new Intl.NumberFormat('tr-TR',{style:'unit',unit:'megabyte',maximumFractionDigits:1}).format(n/1048576);
   const trendLabel=trend?.direction==='improving'?'İyileşiyor':trend?.direction==='degrading'?'Baskı artıyor':'Dengeli';
   return <section><PageHeader eyebrow="Sistem yönetimi" title="Sistem, bakım ve operasyon" description="Yedek hedeflerini, performansı, bakım görevlerini ve tanılama işlemlerini yönetin." actions={<Button onClick={()=>void refresh()}>Yenile</Button>}/>
+  <Surface className="workspace-summary"><SectionHeader eyebrow="B2-03 / B2-04 · masaüstü güvenlik kapanışı" title="Oturum kilidi ve Electron sertleştirmesi"/><div className="notes-card"><strong>{desktopSecurityPosture?.enforcement==='fail-closed'?'Fail-closed masaüstü güvenlik sözleşmesi etkin':'Masaüstü güvenlik durumu doğrulanamadı'}</strong><small>Boşta kilit {desktopSecurityPosture?.session.idleTimeoutMinutes??15} dakika · erişilebilir uyarı {desktopSecurityPosture?.session.warningBeforeSeconds??60} saniye · açık form durumu kilitte korunur</small><small>Renderer {desktopSecurityPosture?.electron.primaryRendererProtocol??'doğrulanamadı'} · sandbox/context isolation etkin · gezinme, yeni pencere ve izinler varsayılan reddedilir</small><small>Fuse doğrulaması zorunlu · RunAsNode/Node seçenekleri kapalı · ASAR bütünlüğü ve yalnız ASAR yükleme açık</small></div></Surface>
   <Surface className="workspace-summary"><SectionHeader eyebrow="B0-03 / B0-04 · ürün yüzeyi gerçeklik kapısı" title="Belge, rota, menü, ekran ve API envanteri tek sözleşmede"/><div className="notes-card"><strong>{productSurfaceGovernance?.enforcement==='fail-closed'&&productSurfaceGovernance.unresolvedUnusedRendererApiCount===0?'Ürün yüzeyi zinciri doğrulandı':'Ürün yüzeyi zinciri doğrulanamadı'}</strong><small>{productSurfaceGovernance?.productModuleCount??0} ürün modülü + {productSurfaceGovernance?.governanceSurfaceCount??0} yönetişim yüzeyi = {productSurfaceGovernance?.navigationRouteCount??0} kanonik rota</small><small>Menü {productSurfaceGovernance?.menuEntryCount??0} · ekran {productSurfaceGovernance?.renderedScreenCount??0} · sınıflandırılmış kullanılmayan renderer API {productSurfaceGovernance?.classifiedUnusedRendererApiCount??0}</small><small>Çözümlenmemiş API {productSurfaceGovernance?.unresolvedUnusedRendererApiCount??0} · eksik zincir build kapanışını fail-closed durdurur · veritabanı göçü gerekmez</small></div></Surface>
   {policyServiceAvailabilityBoundary&&<article className={`panel health-alert ${policyServiceAvailabilityBoundary.mode==='read-write'?'info':policyServiceAvailabilityBoundary.mode==='read-only'?'warning':'critical'}`}><h2>PPK-024 · Politika servisi çalışma modu</h2><strong>{policyServiceAvailabilityBoundary.mode==='read-write'?'Okuma ve yazma açık':policyServiceAvailabilityBoundary.mode==='read-only'?'Salt okunur — değişiklikler kapalı':'Erişim güvenli biçimde durduruldu'}</strong><p>{policyServiceAvailabilityBoundary.reason}</p><small>İmza {policyServiceAvailabilityBoundary.policyPackageVerified?'doğrulandı':'doğrulanamadı'} · canlılık {policyServiceAvailabilityBoundary.observationFresh?'güncel':'güncel değil'} · istemci bu göstergeden ek yetki türetemez.</small></article>}
   {health&&<div className="stats-grid"><article className="stat-card"><small>Sistem sağlık puanı</small><strong>{healthScore?.score??0}/100</strong><span>{healthScore?.grade==='excellent'?'Mükemmel':healthScore?.grade==='good'?'İyi':healthScore?.grade==='attention'?'Dikkat':'Kritik'}</span></article><article className="stat-card"><small>Genel durum</small><strong>{health.status==='healthy'?'Sağlıklı':health.status==='warning'?'Uyarı':'Kritik'}</strong><span>{health.integrityOk?'SQLite bütünlüğü doğrulandı':'Bütünlük sorunu'}</span></article><article className="stat-card"><small>Core Service</small><strong>{coreServiceHealth?`${coreServiceHealth.role} · ${coreServiceHealth.lifecycle}`:'Bağlantı yok'}</strong><span>{coreServiceHealth?`${coreServiceHealth.writable?'Yazılabilir':'Salt-okunur'} · ${coreServiceHealth.safeMode?'Güvenli mod':'Normal'} · ${coreServiceHealth.policyVersion}`:'Sağlık yanıtı alınamadı'}</span></article><article className="stat-card"><small>PPK-014 Core API</small><strong>{coreServiceApiBoundary?`${coreServiceApiBoundary.apiVersion} · ${coreServiceApiBoundary.enforcement}`:'Doğrulanamadı'}</strong><span>{coreServiceApiBoundary?'Sürümlü zarf · uygulama bağı · freshness · replay koruması':'API sınırı yanıtı alınamadı'}</span></article><article className="stat-card"><small>Zamanlayıcı</small><strong>{scheduler?.active?'Etkin':'Kapalı'}</strong><span>{scheduler?.lastCycleAt?`Son tur ${formatDate(scheduler.lastCycleAt,{hour:'2-digit',minute:'2-digit'})}`:'Oturum açılınca çalışır'}</span></article><article className="stat-card"><small>24 saatlik eğilim</small><strong>{trendLabel}</strong><span>CPU %{trend?.averageCpuPercent??0} · RAM %{trend?.averageMemoryPercent??0}</span></article><article className="stat-card"><small>Veri büyümesi</small><strong>{bytes((trend?.databaseGrowthBytes??0)+(trend?.archiveGrowthBytes??0))}</strong><span>{trend?.sampleCount??0} örnek değerlendirildi</span></article></div>}
@@ -1626,6 +1636,64 @@ function ReportsScreen({report}:{report:ReportSummaryView|undefined}){
   return <><PageHeader eyebrow="Aile görünümü" title="Raporlama merkezi" description={`Son üretim: ${formatDate(report.generatedAt,{dateStyle:'medium',timeStyle:'short'})}`} actions={<Button tone="primary" onClick={()=>void exportPdf()}>PDF raporu oluştur</Button>}/><section className="workspace-grid"><Surface className="workspace-form"><SectionHeader eyebrow="Operasyon" title="Aile özeti"/><StatRow value={report.peopleCount} label="Aktif aile üyesi"/><StatRow value={report.upcomingEvents} label="30 gün içindeki etkinlik"/><StatRow value={report.activeTasks} label="Aktif görev"/><StatRow value={report.expiringInsurance} label="30 gün içinde bitecek sigorta"/><StatRow value={report.activeMedicationPlans} label="Aktif ilaç planı"/></Surface><Surface className="workspace-summary"><SectionHeader eyebrow="Finans ve gecikmeler" title="Özet"/>{report.financeByCurrency.map(x=><StatRow key={x.currency} value={`${x.currency} ${x.net.toLocaleString('tr-TR')}`} label={`Varlık ${x.assets.toLocaleString('tr-TR')} · Borç ${x.debts.toLocaleString('tr-TR')}`}/>)}{report.overdueItems.length?report.overdueItems.map(x=><StatRow key={x.id} value={x.title} label={`Gecikmiş · ${formatDate(x.dueAt)}`}/>):<EmptyState title="Gecikmiş kayıt yok" body="Takip edilen tüm kayıtlar güncel görünüyor."/>}</Surface></section></>;
 }
 
+function SessionLockOverlay({state,twoFactorEnabled,onContinue,onLockNow,onUnlock}:{
+  state:SessionLockStateView;
+  twoFactorEnabled:boolean;
+  onContinue:()=>Promise<void>;
+  onLockNow:()=>Promise<void>;
+  onUnlock:(input:UnlockSessionInput)=>Promise<void>;
+}){
+  const rootRef=useRef<HTMLDivElement>(null);
+  const [password,setPassword]=useState('');
+  const [secondFactorCode,setSecondFactorCode]=useState('');
+  const [busy,setBusy]=useState(false);
+  const [error,setError]=useState('');
+  useEffect(()=>{
+    const trap=(event:KeyboardEvent)=>{
+      if(event.key!=='Tab'||!rootRef.current)return;
+      const focusable=Array.from(rootRef.current.querySelectorAll<HTMLElement>('input,button:not([disabled])'));
+      if(!focusable.length)return;
+      const first=focusable[0]!,last=focusable[focusable.length-1]!;
+      if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+    };
+    document.addEventListener('keydown',trap);
+    return()=>document.removeEventListener('keydown',trap);
+  },[state.status]);
+  const submitUnlock=async(event:FormEvent)=>{
+    event.preventDefault();
+    if(!password||twoFactorEnabled&&!secondFactorCode.trim())return;
+    setBusy(true);setError('');
+    try{
+      await onUnlock({password,...(secondFactorCode.trim()?{secondFactorCode:secondFactorCode.trim()}:{} )});
+      setPassword('');setSecondFactorCode('');
+    }catch(caught){setError(caught instanceof Error?caught.message:'Oturum yeniden açılamadı.');}
+    finally{setBusy(false);}
+  };
+  if(state.status==='warning')return <div ref={rootRef} className="session-lock-backdrop warning" role="alertdialog" aria-modal="true" aria-labelledby="session-warning-title" aria-describedby="session-warning-description">
+    <section className="session-lock-card">
+      <span className="session-lock-icon" aria-hidden="true">⌛</span>
+      <span className="eyebrow">Güvenli oturum uyarısı</span>
+      <h2 id="session-warning-title">Oturum {state.secondsRemaining} saniye içinde kilitlenecek</h2>
+      <p id="session-warning-description">Kaydedilmemiş form bilgileriniz ekranda korunacak. Devam etmek için etkinliğinizi doğrulayın veya şimdi kilitleyin.</p>
+      <div className="button-row"><Button tone="primary" autoFocus onClick={()=>void onContinue()}>Oturuma devam et</Button><Button onClick={()=>void onLockNow()}>Şimdi kilitle</Button></div>
+    </section>
+  </div>;
+  return <div ref={rootRef} className="session-lock-backdrop locked" role="dialog" aria-modal="true" aria-labelledby="session-lock-title" aria-describedby="session-lock-description">
+    <form className="session-lock-card" onSubmit={event=>void submitUnlock(event)}>
+      <span className="session-lock-icon" aria-hidden="true">▣</span>
+      <span className="eyebrow">Oturum güvenli biçimde kilitlendi</span>
+      <h2 id="session-lock-title">Yeniden doğrulama gerekli</h2>
+      <p id="session-lock-description">{state.reason==='idle_timeout'?'15 dakikalık hareketsizlik süresi doldu.':'Oturum isteğinizle kilitlendi.'} Açık çalışmalarınız korunuyor; erişim için parolanızı yeniden doğrulayın.</p>
+      <label>Yerel parola<input autoFocus type="password" autoComplete="current-password" maxLength={1024} value={password} onChange={event=>setPassword(event.target.value)} required/></label>
+      {twoFactorEnabled&&<label>2FA / kurtarma kodu<input autoComplete="one-time-code" maxLength={256} value={secondFactorCode} onChange={event=>setSecondFactorCode(event.target.value)} required/></label>}
+      {error&&<div className="form-error" role="alert">{error}</div>}
+      <Button tone="primary" type="submit" disabled={busy||!password||(twoFactorEnabled&&!secondFactorCode.trim())}>{busy?'Doğrulanıyor…':'Kilidi aç ve devam et'}</Button>
+      <small aria-live="polite">Kilit sırasında arka plan işlemleri oturum süresini uzatamaz.</small>
+    </form>
+  </div>;
+}
+
 export function App() {
   const [navigation, dispatchNavigation] = useReducer(navigationReducer, undefined, () => readNavigationState('dashboard', navItems.map((item) => item.id)));
   const active = navigation.active as ScreenId;
@@ -1644,8 +1712,10 @@ export function App() {
   const [loading, setLoading] = useState(!shellPreviewMode);
   const [firstRunIntroCompleted,setFirstRunIntroCompleted]=useState(shellPreviewMode||globalThis.localStorage?.getItem(FIRST_RUN_INTRO_KEY)==='1');
   const [auth, setAuth] = useState<AuthStateView>(shellPreviewMode
-    ? {initialized:true,authenticated:true,displayName:'Yerel Kullanıcı',role:'family_admin'}
+    ? {initialized:true,authenticated:true,displayName:'Yerel Kullanıcı',role:'family_admin',twoFactorEnabled:true}
     : {initialized:false,authenticated:false});
+  const [sessionLock,setSessionLock]=useState<SessionLockStateView>();
+  const lastSessionActivitySentAtRef=useRef(0);
   const [archiveRevision,setArchiveRevision]=useState(0);
   const [catalogRevision,setCatalogRevision]=useState(0);
   const [archivedEvents,setArchivedEvents]=useState<FamilyEventView[]>([]);
@@ -1708,6 +1778,42 @@ export function App() {
       globalThis.removeEventListener('keydown', onKeyDown);
     };
   }, []);
+
+  useEffect(()=>{
+    if(shellPreviewMode||loading||!auth.authenticated||!window.pardus){setSessionLock(undefined);return;}
+    let disposed=false;
+    const poll=async()=>{
+      try{const state=await window.pardus!.getSessionLockState();if(!disposed)setSessionLock(state);}
+      catch{if(!disposed)setSessionLock(current=>current?.status==='locked'?current:undefined);}
+    };
+    void poll();
+    const timer=globalThis.setInterval(()=>void poll(),1_000);
+    return()=>{disposed=true;globalThis.clearInterval(timer);};
+  },[auth.authenticated,loading]);
+
+  useEffect(()=>{
+    if(shellPreviewMode||loading||!auth.authenticated||sessionLock?.status==='locked'||!window.pardus)return;
+    const record=()=>{
+      const now=Date.now();
+      if(now-lastSessionActivitySentAtRef.current<5_000)return;
+      lastSessionActivitySentAtRef.current=now;
+      void window.pardus!.recordSessionActivity().then(setSessionLock).catch(()=>undefined);
+    };
+    globalThis.addEventListener('pointerdown',record,{passive:true});
+    globalThis.addEventListener('keydown',record);
+    globalThis.addEventListener('touchstart',record,{passive:true});
+    return()=>{
+      globalThis.removeEventListener('pointerdown',record);
+      globalThis.removeEventListener('keydown',record);
+      globalThis.removeEventListener('touchstart',record);
+    };
+  },[auth.authenticated,loading,sessionLock?.status]);
+
+  useEffect(()=>{
+    if(sessionLock?.status!=='locked')return;
+    asyncWriteGuardRef.current.invalidateAll();
+    setSearchOpen(false);setNotificationOpen(false);setProfileOpen(false);setFamilyOpen(false);
+  },[sessionLock?.status]);
 
   useEffect(() => {
     if (loading || !auth.authenticated) return;
@@ -1941,6 +2047,15 @@ export function App() {
       setActive('dashboard');
     });
   };
+  const continueSession=async()=>{if(window.pardus)setSessionLock(await window.pardus.recordSessionActivity());};
+  const lockSessionNow=async()=>{if(window.pardus)setSessionLock(await window.pardus.lockSession());};
+  const unlockSession=async(input:UnlockSessionInput)=>{
+    if(!window.pardus)return;
+    const state=await window.pardus.unlockSession(input);
+    setAuth(state);
+    lastSessionActivitySentAtRef.current=Date.now();
+    setSessionLock(await window.pardus.getSessionLockState());
+  };
 
   const createMember = async (input: CreateFamilyMemberInput) => {
     if (window.pardus) { applyMutationResult(await window.pardus.createMember(input)); await refreshFamilyData(); }
@@ -1980,9 +2095,19 @@ export function App() {
   const createAutomationRule=async(input:CreateAutomationRuleInput)=>{if(window.pardus){setAutomationRules(await window.pardus.createAutomationRule(input));await refreshDashboard();}};
   const toggleAutomationRule=async(id:string,enabled:boolean)=>{if(window.pardus){setAutomationRules(await window.pardus.toggleAutomationRule(id,enabled));await refreshDashboard();}};
 
-  if(!loading && !firstRunIntroCompleted) return <FirstRunIntroduction onComplete={()=>setFirstRunIntroCompleted(true)}/>;
+  const sessionOverlayVisible=sessionLock?.status==='warning'||sessionLock?.status==='locked';
+  const sessionOverlay=sessionOverlayVisible&&sessionLock
+    ? <SessionLockOverlay state={sessionLock} twoFactorEnabled={Boolean(auth.twoFactorEnabled)} onContinue={continueSession} onLockNow={lockSessionNow} onUnlock={unlockSession}/>
+    : null;
+
+  if(!loading && !firstRunIntroCompleted) return auth.authenticated&&sessionOverlay
+    ? <><div aria-hidden="true"><FirstRunIntroduction onComplete={()=>setFirstRunIntroCompleted(true)}/></div>{sessionOverlay}</>
+    : <FirstRunIntroduction onComplete={()=>setFirstRunIntroCompleted(true)}/>;
   if(!loading && !auth.authenticated) return <AuthScreen auth={auth} onSetup={setupAdmin} onLogin={login} onWindowsHelloLogin={loginWithWindowsHello} onInvitationAccepted={completeInvitationAcceptance}/>;
-  if(!loading && auth.authenticated && !auth.twoFactorEnabled) return <FirstRunSecuritySetup onComplete={(state)=>{setAuth(state);void bootstrapAuthenticatedSession();}}/>;
+  if(!loading && auth.authenticated && !auth.twoFactorEnabled) {
+    const setup=<FirstRunSecuritySetup onComplete={(state)=>{setAuth(state);void bootstrapAuthenticatedSession();}}/>;
+    return sessionOverlay?<><div aria-hidden="true">{setup}</div>{sessionOverlay}</>:setup;
+  }
 
   const graphRequired=['households','people-lifecycle','tree','important-days','finance','health','life-center','legacy'].includes(active);
   const timelineRequired=['timeline','important-days','location'].includes(active);
@@ -2020,8 +2145,8 @@ export function App() {
   else if (active === 'settings') screen = <SystemManagementScreen/>;
   else screen = <PlaceholderScreen screen={active} snapshot={snapshot} auth={auth} />;
 
-  return (
-    <div className={`app-shell ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`} data-theme={theme} data-release-channel={releaseChannelFromStage(appInfo.stage)} data-text-scale={accessibility.textScale} data-high-contrast={accessibility.highContrast ? 'true' : 'false'} data-reduce-motion={accessibility.reduceMotion ? 'true' : 'false'}>
+  return (<>
+    <div aria-hidden={sessionOverlayVisible?true:undefined} className={`app-shell ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`} data-theme={theme} data-release-channel={releaseChannelFromStage(appInfo.stage)} data-text-scale={accessibility.textScale} data-high-contrast={accessibility.highContrast ? 'true' : 'false'} data-reduce-motion={accessibility.reduceMotion ? 'true' : 'false'}>
       <VisuallyHidden as="div"><div aria-live="polite" aria-atomic="true">{accessibilityAnnouncement(activeItem.label)}</div></VisuallyHidden>
       <a className="skip-link" href="#main-content">Ana içeriğe geç</a>
       <aside className="sidebar">
@@ -2079,6 +2204,7 @@ export function App() {
                 <button type="button" role="menuitem" onClick={()=>navigateFromShell('settings')}><span>⛓</span>Türetilmiş veri güvenliği</button>
                 <button type="button" role="menuitem" onClick={()=>navigateFromShell('settings')}><span>◈</span>Hassas log güvenliği</button>
                 <button type="button" role="menuitem" onClick={()=>navigateFromShell('settings')}><span>⚙</span>Sistem ve bakım</button>
+                <button type="button" role="menuitem" onClick={()=>void lockSessionNow()}><span>▣</span>Şimdi kilitle</button>
                 <button type="button" role="menuitem" className="danger-action" onClick={()=>void logout()}><span>↪</span>Profilden çıkış yap</button>
               </div>}
             </div>
@@ -2108,5 +2234,6 @@ export function App() {
       {eventModal && <AddEventModal fallbackPeople={snapshot.people} locations={snapshot.locations} onClose={() => setEventModal(false)} onSave={createEvent} />}
       {editingEvent && <EditEventModal event={editingEvent} fallbackPeople={snapshot.people} locations={snapshot.locations} onClose={()=>setEditingEvent(undefined)} onSave={updateFamilyEvent}/>}
     </div>
-  );
+    {sessionOverlay}
+  </>);
 }

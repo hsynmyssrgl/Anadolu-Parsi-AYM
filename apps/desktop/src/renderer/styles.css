@@ -1153,3 +1153,9 @@ linear-gradient(145deg,#071a2d 0%,#0b2744 52%,#0b1c31 100%)}
 .windows-hello-fallback input{width:100%}
 @media(max-width:900px){.windows-hello-workspace{grid-template-columns:1fr}.windows-hello-workspace>.span-2{grid-column:auto}.windows-hello-fallback{grid-template-columns:1fr 1fr}.windows-hello-fallback>button{justify-self:start}}
 @media(max-width:620px){.windows-hello-fallback{grid-template-columns:1fr}}
+
+/* B2-03 — accessible idle warning and state-preserving session lock */
+.session-lock-backdrop{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:24px;background:rgba(2,10,18,.84);backdrop-filter:blur(18px);color:#f7f2e8}.session-lock-backdrop.warning{background:rgba(19,13,5,.76)}
+.session-lock-card{width:min(560px,100%);display:grid;gap:16px;padding:clamp(24px,5vw,44px);border:1px solid rgba(218,171,88,.45);border-radius:24px;background:#10202c;box-shadow:0 32px 100px rgba(0,0,0,.55)}
+.session-lock-card h2,.session-lock-card p{margin:0}.session-lock-card p,.session-lock-card small{color:#ced8df;line-height:1.55}.session-lock-card label{display:grid;gap:7px;font-weight:700}.session-lock-card input{width:100%;min-height:46px;border:1px solid rgba(255,255,255,.22);border-radius:10px;padding:10px 12px;background:#07131d;color:#fff}.session-lock-card input:focus{outline:3px solid #e4aa4f;outline-offset:2px}.session-lock-icon{display:grid;place-items:center;width:58px;height:58px;border-radius:18px;background:rgba(218,171,88,.16);font-size:30px;color:#f1bd68}.session-lock-card .button-row{display:flex;flex-wrap:wrap;gap:10px}
+@media(max-width:620px){.session-lock-backdrop{padding:14px}.session-lock-card{padding:24px;border-radius:18px}}

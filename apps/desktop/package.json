@@ -48,6 +48,7 @@
     "appId": "tr.anadoluparsi.aileyasammerkezi",
     "productName": "Anadolu Parsı Aile Yaşam Merkezi",
     "asar": true,
+    "afterPack": "scripts/apply-electron-fuses.mjs",
     "forceCodeSigning": true,
     "electronDownload": {
       "cache": "../../artifacts/validation/electron-cache"

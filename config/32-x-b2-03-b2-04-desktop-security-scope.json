@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "32-X-B2-03-B2-04-DESKTOP-SECURITY",
+  "decision": "DEC-209",
+  "requirements": [
+    "B2-03",
+    "B2-04"
+  ],
+  "status": "COMPLETE",
+  "acceptance": {
+    "B2-03": "15 dakika varsayılan boşta kalma süresi, son 60 saniyede erişilebilir uyarı, gerçek kullanıcı etkinliğiyle uzatma, açık form durumunu koruyan kilit ve parola/MFA ile yeniden doğrulama birlikte uygulanır.",
+    "B2-04": "Renderer özel pardus-app: protokolünden sunulur; CSP, sandbox, context isolation, izin/gezinme/pencere reddi ve Electron 43 ile uyumlu dokuz fuse paketleme öncesi fail-closed doğrulanır."
+  },
+  "sessionPolicy": {
+    "idleTimeoutMinutes": 15,
+    "warningBeforeSeconds": 60,
+    "activitySignals": ["pointerdown", "keydown", "touchstart"],
+    "backgroundWorkExtendsSession": false,
+    "unsavedRendererStatePreservedOnLock": true,
+    "explicitPasswordReauthentication": true,
+    "secondFactorUsedWhenEnabled": true,
+    "lockAndUnlockAudited": true
+  },
+  "electronPolicy": {
+    "primaryRendererOrigin": "pardus-app://renderer",
+    "fileProtocolPrimaryRendererAllowed": false,
+    "cspResponseHeaderRequired": true,
+    "sandbox": true,
+    "contextIsolation": true,
+    "nodeIntegration": false,
+    "webSecurity": true,
+    "webviewAllowed": false,
+    "permissionNavigationDownloadWindowDefault": "DENY",
+    "fusePolicyId": "B2-04-ELECTRON-FUSE-V1",
+    "electronVersion": "43.2.0",
+    "electronFuseToolVersion": "2.1.3",
+    "strictlyRequireAllFuses": true,
+    "exactFuseCount": 9,
+    "binaryReadbackRequired": true
+  },
+  "schemaDecision": "SessionLockStateView ve DesktopSecurityPostureView içeriksiz çalışma sözleşmeleridir; hesap, parola, MFA kodu veya kullanıcı verisi renderer durum yanıtına eklenmez.",
+  "repositoryDecision": "Mevcut hesap ve audit repository zinciri yeniden doğrulama ile kilit/açma denetimi için yeniden kullanılır; yeni kalıcı session repository'si eklenmez.",
+  "migrationDecision": "Yeni SQLite migration, backfill, veri taşıma veya cutover gerekmez; latest migration 77 korunur.",
+  "validation": {
+    "boundaryChecksPassed": 26,
+    "staticFuseChecksPassed": 11,
+    "binaryFuseReadbackPassed": 9,
+    "targetedTestFilesPassed": 3,
+    "targetedTestsPassed": 11,
+    "fullVitestFilesPassed": 96,
+    "fullVitestTestsPassed": 840,
+    "pretypecheckSecurityGatesPassed": 17,
+    "rootTypeScriptDiagnostics": 0,
+    "productionWorkspaceBuildsPassed": 18,
+    "latestDatabaseMigration": 77
+  },
+  "excludedClaims": [
+    "B2-02 fiziksel WebAuthn/FIDO2 donanım kabulü bu paketle tamamlanmaz.",
+    "PPK-025 production code-signing sertifikası ve release eligibility bu paketle açılmaz.",
+    "B9-01, Silver readiness veya Bronze Final tamamlanmış sayılmaz.",
+    "Yeni Build numarası verilmez."
+  ]
+}

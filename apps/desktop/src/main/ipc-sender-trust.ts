@@ -43,7 +43,7 @@ const canonicalDocumentUrl = (value: string): string | undefined => {
   const parsed = parseUrl(value);
   if (!parsed) return undefined;
   if (parsed.username || parsed.password) return undefined;
-  if (!['file:', 'http:', 'https:'].includes(parsed.protocol)) return undefined;
+  if (!['pardus-app:', 'http:', 'https:'].includes(parsed.protocol)) return undefined;
   parsed.hash = '';
   return parsed.toString();
 };
@@ -55,12 +55,12 @@ export const normalizeTrustedRendererDocumentUrl = (
   const parsed = parseUrl(value);
   if (!parsed) throw new Error('Renderer URL geçerli bir mutlak URL olmalıdır.');
   if (parsed.username || parsed.password) throw new Error('Renderer URL kullanıcı bilgisi içeremez.');
-  if (parsed.protocol === 'file:') {
+  if (parsed.protocol === 'pardus-app:' && parsed.hostname === 'renderer') {
     parsed.hash = '';
     return parsed.toString();
   }
   if (!options.allowLocalDevelopmentServer || !['http:', 'https:'].includes(parsed.protocol)) {
-    throw new Error('Renderer URL yalnızca file: veya izin verilmiş yerel geliştirme http(s) kaynağı olabilir.');
+    throw new Error('Renderer URL yalnızca pardus-app: veya izin verilmiş yerel geliştirme http(s) kaynağı olabilir.');
   }
   if (!loopbackHostnames.has(parsed.hostname)) {
     throw new Error('Geliştirme renderer URL kaynağı yalnızca loopback host kullanabilir.');

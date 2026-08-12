@@ -18,7 +18,7 @@
   "signedManifestRuntimeCheckRequired": true,
   "buildManifestAloneGrantsRuntimeAuthority": false,
   "productionSourceZoneCount": 18,
-  "scannedProductionFiles": 365,
+  "scannedProductionFiles": 375,
   "protectedCapabilityFamilies": [
     "camera",
     "microphone",
@@ -31,10 +31,10 @@
   "surfaceCounts": {
     "FILE_DIALOG": 2,
     "FILE_IMPORT": 225,
-    "NETWORK_API": 2,
+    "NETWORK_API": 3,
     "NETWORK_IMPORT": 8
   },
-  "exactCapabilitySurfaceCount": 237,
+  "exactCapabilitySurfaceCount": 238,
   "applicationRuntimeCapabilities": {
     "windows-desktop": [
       "file.access",
@@ -1880,6 +1880,14 @@
       ],
       "capability": "file.access",
       "runtimeEnforcement": "PINNED_BOOTSTRAP_THEN_SIGNED"
+    },
+    {
+      "key": "NETWORK_API|apps/desktop/src/main/main.ts|fetch",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "network.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
     },
     {
       "key": "NETWORK_API|apps/desktop/src/main/main.ts|loadURL",
