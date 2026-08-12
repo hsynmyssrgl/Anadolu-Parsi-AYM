@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "32-Y-B2-05-B6-03-SENSITIVE-DATA-CONSENT",
+  "decision": "DEC-210",
+  "requirements": ["B2-05", "B6-03"],
+  "status": "COMPLETE",
+  "acceptance": {
+    "B2-05": "Çocuk, sağlık, finans ve konum profilleri AI işleme ve dışa gönderim amaçlarında varsayılan reddedilir; yalnız açık rıza ve 15 dakika-30 gün arası süreyle açılır, görünür kalır ve anında iptal edilir.",
+    "B6-03": "Dışa gönderim onayı AI işleme onayından ayrı saklanır; önizleme yalnız kategori, kayıt sayısı ve alan adlarını gösterir, onaysız kategoriyi engeller ve hiçbir veri aktarımı yapmaz."
+  },
+  "policy": {
+    "categories": ["child", "health", "finance", "location"],
+    "purposes": ["sensitive_processing", "external_export"],
+    "defaultDecision": "DENY",
+    "explicitConsentRequired": true,
+    "boundedDurationRequired": true,
+    "minimumDurationMinutes": 15,
+    "maximumDurationMinutes": 43200,
+    "revocationImmediate": true,
+    "visibleSharingIndicator": true,
+    "externalExportApprovalSeparate": true,
+    "previewBeforeTransfer": true,
+    "previewContainsSensitivePayload": false,
+    "previewPerformsOutboundTransfer": false,
+    "exactIpcPayloadValidation": true,
+    "genericAiConsentBypassRejected": true,
+    "centralAuthorizationAction": "administer"
+  },
+  "schemaDecision": "Mevcut ai_consents tablosunun account_id+purpose+resource_type+resource_id benzersiz kimliği, süre ve iptal alanları yeniden kullanılır. Hassas kayıt içerikleri izin tablosuna veya önizlemeye kopyalanmaz.",
+  "repositoryDecision": "SqliteAiConsentRepository yalnız dört kategori için kayıt sayılarını ve sabit alan etiketlerini projekte eder; sağlık, finans, çocuk veya konum payload değeri renderer'a taşınmaz.",
+  "migrationDecision": "Yeni migration, backfill, veri taşıma veya cutover gerekmez; canonical ai_consents şeması yeniden kullanılır ve latest migration 77 korunur.",
+  "ratchets": {
+    "ppk021ExactAllowlistEntries": 531,
+    "ppk021DirectRoleAuthorizationBypasses": 0,
+    "ppk022CapabilityManifestChanged": false,
+    "networkEgressAdded": false
+  },
+  "validation": {
+    "boundary": "artifacts/validation/32-Y-b2-05-b6-03-sensitive-data-consent-boundary.json",
+    "contract": "artifacts/validation/32-Y-b2-05-b6-03-sensitive-data-consent-contract.json",
+    "runtime": "artifacts/validation/32-Y-b2-05-b6-03-sensitive-data-consent-runtime.json",
+    "targetedTestFiles": [
+      "packages/application/tests/sensitive-data-consent-use-cases.test.ts",
+      "apps/desktop/tests/b2-b6-sensitive-data-consent-integration.test.ts",
+      "apps/desktop/tests/data-store.test.ts"
+    ]
+  },
+  "excludedClaims": [
+    "Önizleme gerçek bir dışa aktarım, ağ gönderimi, yükleme veya dosya üretimi değildir.",
+    "B2-02 fiziksel WebAuthn/FIDO2 donanım kabulü bu paketle tamamlanmaz.",
+    "PPK-025 production code-signing sertifikası ve release eligibility bu paketle açılmaz.",
+    "B9-01, Silver readiness veya Bronze Final tamamlanmış sayılmaz.",
+    "Yeni Build numarası verilmez."
+  ]
+}

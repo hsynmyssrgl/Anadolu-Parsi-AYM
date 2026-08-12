@@ -28,6 +28,20 @@ Bir çelişki olduğunda aşağıdaki sıra uygulanır:
 Eski kararlar silinmez; tarihsel kanıt olarak korunur. Ancak aktif ürün davranışını
 belirleyemez. Çelişki sessizce birleştirilmez; değişiklik kaydına işlenir.
 
+## DEC-210 — B2-05/B6-03 hassas veri rızası ve dışa gönderim önizlemesi
+
+32-Y ile çocuk, sağlık, finans ve konum profilleri AI işleme ve dışa gönderim
+amaçlarında ayrı, süreli, görünür ve varsayılan-ret izinlere bağlanır. Açık rıza
+olmadan veya 15 dakika–30 gün sınırı dışında grant oluşmaz; iptal anında audit
+edilir. Dışa gönderim önizlemesi yalnız kategori, kayıt sayısı ve alan etiketini
+gösterir, hassas payload taşımaz ve `outboundTransferPerformed=false` kalır.
+Yetki mevcut merkezi authorization service'in `administer` kararıdır; PPK-021
+exact ratchet 531 girdiye ilerler ve doğrudan rol bypass sayısı sıfırdır. Mevcut
+`ai_consents` şeması kullanılır; migration 77, Desktop vault ve SQLite sahipliği
+değişmez. B2-05 ve B6-03 tamamlanır; gerçek dış aktarım, B2-02, PPK-025, B9-01,
+Silver ve Bronze Final kapsam dışıdır. Ayrıntılı karar:
+`docs/decisions/DEC-210-b2-05-b6-03-sensitive-data-consent-and-export-preview.md`
+
 ## DEC-209 — B2-03/B2-04 masaüstü oturum ve Electron güvenliği
 
 32-X ile masaüstü oturumu 15 dakika gerçek kullanıcı etkinliği görülmediğinde

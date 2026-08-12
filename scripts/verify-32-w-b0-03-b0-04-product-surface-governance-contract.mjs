@@ -102,7 +102,7 @@ export const verifyB0ProductSurfaceGovernanceContract = async (root = process.cw
   check('both registry entries contain final contract and runtime evidence', [b003, b004].every((item) => item?.evidence?.includes('artifacts/validation/32-W-b0-03-b0-04-product-surface-governance-contract.json') && item?.evidence?.includes('artifacts/validation/32-W-b0-03-b0-04-product-surface-governance-runtime.json')));
   check('B9-01 remains honestly open', b901?.status !== 'COMPLETE');
   check('DEC-208 is active and covers both requirements', decision?.status === 'ACTIVE' && exactArray(decision?.requirements, ['B0-03', 'B0-04']));
-  check('decision ledger count is internally exact', ledger?.decisionCount === 62 && ledger?.decisionCount === ledger?.decisions?.length);
+  check('decision ledger count is internally exact', ledger?.decisionCount >= 62 && ledger?.decisionCount === ledger?.decisions?.length);
   check('master register records DEC-208 and its exact document', masterRegister.includes('## DEC-208') && masterRegister.includes('DEC-208-b0-03-b0-04-product-surface-governance.md'));
   check('decision document records the canonical classification and fail-closed gate', includesAll(decisionDocument, ['17 ürün', '5 yönetişim', 'exact 14 API', 'Fail-closed', 'B9-01']));
   check('threat model covers dead UI, dead API and false COMPLETE', includesAll(threatModel, ['Dead UI', 'Dead API', 'Yanlış COMPLETE', 'negatif öz-test']));

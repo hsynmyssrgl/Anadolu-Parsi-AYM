@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "step": "32-Y",
+  "requirements": [
+    "B2-05",
+    "B6-03"
+  ],
+  "status": "PASS",
+  "checksPassed": 38,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "B2-05 is complete with the exact 13-link chain",
+      "passed": true
+    },
+    {
+      "name": "B6-03 is complete with the exact 13-link chain",
+      "passed": true
+    },
+    {
+      "name": "both requirements bind the 32-Y evidence triplet",
+      "passed": true
+    },
+    {
+      "name": "scope binds DEC-210 and both exact requirements",
+      "passed": true
+    },
+    {
+      "name": "scope locks default deny explicit duration revoke visibility and separation",
+      "passed": true
+    },
+    {
+      "name": "scope fixes duration bounds to 15 minutes and 30 days",
+      "passed": true
+    },
+    {
+      "name": "inventory lists implementation surfaces and no outbound transfer channel",
+      "passed": true
+    },
+    {
+      "name": "source boundary evidence is green",
+      "passed": true
+    },
+    {
+      "name": "domain exposes exact four categories",
+      "passed": true
+    },
+    {
+      "name": "domain separates standard AI from sensitive processing and external export purposes",
+      "passed": true
+    },
+    {
+      "name": "domain fixes no-transfer preview truth",
+      "passed": true
+    },
+    {
+      "name": "application implements default deny state projection",
+      "passed": true
+    },
+    {
+      "name": "application enforces explicit bounded consent and rejects the generic-route bypass",
+      "passed": true
+    },
+    {
+      "name": "application handles revoked scheduled expired and granted states",
+      "passed": true
+    },
+    {
+      "name": "application keeps external export preview payload-free",
+      "passed": true
+    },
+    {
+      "name": "application audits consent and preview decisions",
+      "passed": true
+    },
+    {
+      "name": "application authorization is a required port with no direct role bypass",
+      "passed": true
+    },
+    {
+      "name": "production adapter routes administer through central authorization",
+      "passed": true
+    },
+    {
+      "name": "repository contract is metadata only",
+      "passed": true
+    },
+    {
+      "name": "repository counts all four categories without SELECT star payload reads",
+      "passed": true
+    },
+    {
+      "name": "existing ai_consents schema is reused",
+      "passed": true
+    },
+    {
+      "name": "latest migration remains 77 with no new migration",
+      "passed": true
+    },
+    {
+      "name": "DataStore composes three use cases with central authorization",
+      "passed": true
+    },
+    {
+      "name": "main and preload bind exact channels",
+      "passed": true
+    },
+    {
+      "name": "IPC integration policy rejects unknown fields and implicit grants",
+      "passed": true
+    },
+    {
+      "name": "renderer declaration binds exact typed methods",
+      "passed": true
+    },
+    {
+      "name": "AI menu route and screen remain canonical",
+      "passed": true
+    },
+    {
+      "name": "UI exposes category purpose duration explicit consent revoke and preview",
+      "passed": true
+    },
+    {
+      "name": "UI has no outbound send action",
+      "passed": true
+    },
+    {
+      "name": "targeted application tests cover deny grant preview and expiry",
+      "passed": true
+    },
+    {
+      "name": "desktop integration test covers policy repository IPC UI and no egress",
+      "passed": true
+    },
+    {
+      "name": "DEC-210 records the exact privacy and migration decision",
+      "passed": true
+    },
+    {
+      "name": "threat model covers all four sensitive classes and audit",
+      "passed": true
+    },
+    {
+      "name": "upper closure document keeps excluded claims open",
+      "passed": true
+    },
+    {
+      "name": "PPK-021 ratchet is exact green with no role bypass",
+      "passed": true
+    },
+    {
+      "name": "PPK-022 ratchet remains exact green with no added capability",
+      "passed": true
+    },
+    {
+      "name": "root lifecycle and explicit package scripts bind 32-Y",
+      "passed": true
+    },
+    {
+      "name": "contract prerequisites exist",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "latestDatabaseMigration": 77,
+  "ppk021ExactAllowlistEntries": 531,
+  "ppk022CapabilitySurfaces": 238,
+  "outboundTransferPerformed": false,
+  "generatedAt": "2026-08-12T12:28:49.607Z"
+}

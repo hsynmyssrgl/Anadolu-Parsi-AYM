@@ -507,10 +507,66 @@ export interface ArchiveTagView { id:string; name:string; createdAt:string; }
 export interface ArchiveClassificationView { itemId:string; categoryId?:string; categoryName?:string; tags:ArchiveTagView[]; sensitivity:ArchiveSensitivity; aiProcessingAllowed:boolean; }
 export interface CreateArchiveCategoryInput { name:string; description?:string; }
 export interface UpdateArchiveClassificationInput { itemId:string; categoryId?:string; tagNames:string[]; sensitivity:ArchiveSensitivity; aiProcessingAllowed:boolean; }
-export type AiConsentPurpose = 'search'|'summary'|'recommendation'|'classification';
-export interface AiConsentView { id:string; accountId:string; purpose:AiConsentPurpose; resourceType:string; resourceId:string; status:'granted'|'revoked'; startsAt:string; endsAt?:string; createdAt:string; }
+export const AI_CONSENT_PURPOSES = ['search','summary','recommendation','classification'] as const;
+export type AiConsentPurpose = typeof AI_CONSENT_PURPOSES[number];
+export type SensitiveDataConsentPurpose = 'sensitive_processing'|'external_export';
+export type StoredAiConsentPurpose = AiConsentPurpose|SensitiveDataConsentPurpose;
+export interface AiConsentView { id:string; accountId:string; purpose:StoredAiConsentPurpose; resourceType:string; resourceId:string; status:'granted'|'revoked'; startsAt:string; endsAt?:string; createdAt:string; }
 export interface UpsertAiConsentInput { purpose:AiConsentPurpose; resourceType:string; resourceId:string; status:'granted'|'revoked'; startsAt?:string; endsAt?:string; }
 export interface AiAccessPreviewView { purpose:AiConsentPurpose; allowedResources:Array<{resourceType:string;resourceId:string;title:string}>; blockedCount:number; generatedAt:string; }
+
+export const SENSITIVE_DATA_CATEGORIES = ['child','health','finance','location'] as const;
+export type SensitiveDataCategory = typeof SENSITIVE_DATA_CATEGORIES[number];
+export type SensitiveDataConsentEffectiveStatus = 'default_denied'|'granted'|'revoked'|'expired'|'scheduled';
+export interface SensitiveDataPurposeConsentView {
+  purpose:SensitiveDataConsentPurpose;
+  effectiveStatus:SensitiveDataConsentEffectiveStatus;
+  visibleSharing:boolean;
+  startsAt?:string;
+  endsAt?:string;
+  consentId?:string;
+}
+export interface SensitiveDataProfileView {
+  category:SensitiveDataCategory;
+  label:string;
+  description:string;
+  defaultDenied:true;
+  aiProcessing:SensitiveDataPurposeConsentView;
+  externalExport:SensitiveDataPurposeConsentView;
+}
+export interface UpsertSensitiveDataConsentInput {
+  category:SensitiveDataCategory;
+  purpose:SensitiveDataConsentPurpose;
+  status:'granted'|'revoked';
+  durationMinutes?:number;
+  explicitConsent:boolean;
+}
+export interface SensitiveExportPreviewInput {
+  categories:SensitiveDataCategory[];
+  destinationLabel:string;
+  businessPurpose:string;
+}
+export interface SensitiveExportPreviewCategoryView {
+  category:SensitiveDataCategory;
+  label:string;
+  effectiveStatus:SensitiveDataConsentEffectiveStatus;
+  approved:boolean;
+  recordCount:number;
+  fieldNames:string[];
+  consentEndsAt?:string;
+}
+export interface SensitiveExportPreviewView {
+  previewId:string;
+  destinationLabel:string;
+  businessPurpose:string;
+  categories:SensitiveExportPreviewCategoryView[];
+  totalRecordCount:number;
+  allApproved:boolean;
+  transferAllowed:boolean;
+  outboundTransferPerformed:false;
+  generatedAt:string;
+  warning:string;
+}
 
 
 export type AutomationRunStatus = 'generated'|'skipped'|'failed';

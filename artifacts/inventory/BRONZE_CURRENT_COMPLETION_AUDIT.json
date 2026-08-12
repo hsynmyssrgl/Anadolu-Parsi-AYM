@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-12T11:01:37.100Z",
+  "generatedAt": "2026-08-12T12:29:31.133Z",
   "release": "Bronze 04.08.2026.29",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
@@ -29,18 +29,18 @@
   "percentages": {
     "officialWeightedBronzePercent": 25,
     "officialWeightedEvidenceStep": "31-T",
-    "strictRequirementCompletionPercent": 12.2857,
-    "implementationChainCoveragePercent": 12.7714,
-    "governanceEvidenceChainCoveragePercent": 50.381,
+    "strictRequirementCompletionPercent": 12.8571,
+    "implementationChainCoveragePercent": 13.3429,
+    "governanceEvidenceChainCoveragePercent": 50.7619,
     "interpretation": "These are separate measures and must not be blended into an invented single completion claim."
   },
   "scope": {
     "total": 350,
     "statusCounts": {
-      "COMPLETE": 43,
+      "COMPLETE": 45,
       "FOUNDATION_STARTED": 1,
       "NOT_IMPLEMENTED": 277,
-      "PARTIAL": 29
+      "PARTIAL": 27
     },
     "priorityCounts": {
       "P0": 210,
@@ -48,21 +48,21 @@
       "P2": 5
     },
     "completeByPriority": {
-      "P0": 41,
+      "P0": 43,
       "P1": 2,
       "P2": 0
     },
-    "incompleteCount": 307,
-    "strictComplete": 43,
+    "incompleteCount": 305,
+    "strictComplete": 45,
     "implementationCoverage": {
-      "passed": 447,
+      "passed": 467,
       "total": 3500,
-      "percent": 12.7714
+      "percent": 13.3429
     },
     "governanceCoverage": {
-      "passed": 529,
+      "passed": 533,
       "total": 1050,
-      "percent": 50.381
+      "percent": 50.7619
     }
   },
   "rules": {
@@ -324,7 +324,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"b7cb9f00db953d404823a2added7bd7b83690847a8df1d46d62d1fb28073e8ea\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\b7cb9f00db953d404823a2added7bd7b83690847a8df1d46d62d1fb28073e8ea\",\"files\":9}"
+          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"3b1a62ee95e5c4456a19e614691fce1e1e99c9c04c918403b52ebf00acb67318\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\3b1a62ee95e5c4456a19e614691fce1e1e99c9c04c918403b52ebf00acb67318\",\"files\":9}"
         ]
       },
       {
@@ -1003,7 +1003,7 @@
     "status": "PASS",
     "officialCompletionClaimed": true,
     "storageBackend": "EXTERNAL_USB_D_DRIVE",
-    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\b7cb9f00db953d404823a2added7bd7b83690847a8df1d46d62d1fb28073e8ea"
+    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\3b1a62ee95e5c4456a19e614691fce1e1e99c9c04c918403b52ebf00acb67318"
   },
   "remainingWork": [
     {
@@ -1079,54 +1079,6 @@
         "ui",
         "menu",
         "targetedTest",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B2-05",
-      "priority": "P0",
-      "status": "PARTIAL",
-      "workOrderClass": "STARTED_BEFORE_NEW",
-      "area": "Kimlik ve Güvenlik",
-      "title": "Çocuk, sağlık, finans ve konum için hassasiyet profilleri",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B6-03",
-      "priority": "P0",
-      "status": "PARTIAL",
-      "workOrderClass": "STARTED_BEFORE_NEW",
-      "area": "AI, Miras ve Entegrasyon",
-      "title": "Çocuk/sağlık/finans/konum için ayrı onay ve dışa gönderim önizlemesi",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
         "evidence"
       ]
     },

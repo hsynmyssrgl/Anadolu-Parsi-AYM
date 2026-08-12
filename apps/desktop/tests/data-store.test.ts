@@ -965,6 +965,56 @@ describe('FamilyDataStore', () => {
     store.close();
   });
 
+  it('hassas veri profillerini varsayılan reddeder, süreli onaylar ve dışa gönderimi yalnız önizler', async () => {
+    const { store } = makeStore();
+    await authenticate(store);
+    const owner = await getAuthenticatedPerson(store);
+    await store.createHealthRecord({ ownerPersonId: owner.id, title: 'Kontrol', kind: 'checkup', privacy: 'private', occurredAt: '2026-08-12T08:00:00.000Z' });
+    await store.createFinanceRecord({ ownerPersonId: owner.id, title: 'Aile bütçesi', kind: 'asset', amount: 1000, currency: 'TRY', privacy: 'private', occurredAt: '2026-08-12T08:00:00.000Z' });
+    await store.createLocation({ label: 'Aile evi', address: 'Test adresi', kind: 'residence' });
+
+    const initialProfiles = store.listSensitiveDataProfiles();
+    expect(initialProfiles).toHaveLength(4);
+    expect(initialProfiles.every((profile) => profile.defaultDenied && profile.externalExport.effectiveStatus === 'default_denied')).toBe(true);
+    const deniedPreview = store.previewSensitiveExport({
+      categories: ['child','health','finance','location'],
+      destinationLabel: 'Kullanıcının seçtiği hedef',
+      businessPurpose: 'Aile bilgilerinin kullanıcı isteğiyle paylaşılması'
+    });
+    expect(deniedPreview.transferAllowed).toBe(false);
+    expect(deniedPreview.outboundTransferPerformed).toBe(false);
+    expect(deniedPreview.categories.every((category) => !category.approved)).toBe(true);
+
+    store.upsertSensitiveDataConsent({ category: 'health', purpose: 'sensitive_processing', status: 'granted', durationMinutes: 60, explicitConsent: true });
+    expect(store.listSensitiveDataProfiles().find((profile) => profile.category === 'health')).toMatchObject({
+      aiProcessing: { effectiveStatus: 'granted', visibleSharing: true },
+      externalExport: { effectiveStatus: 'default_denied', visibleSharing: false }
+    });
+
+    for (const category of ['child','health','finance','location'] as const) {
+      store.upsertSensitiveDataConsent({ category, purpose: 'external_export', status: 'granted', durationMinutes: 60, explicitConsent: true });
+    }
+    const approvedPreview = store.previewSensitiveExport({
+      categories: ['child','health','finance','location'],
+      destinationLabel: 'Kullanıcının seçtiği hedef',
+      businessPurpose: 'Aile bilgilerinin kullanıcı isteğiyle paylaşılması'
+    });
+    expect(approvedPreview.transferAllowed).toBe(true);
+    expect(approvedPreview.totalRecordCount).toBeGreaterThanOrEqual(4);
+    expect(approvedPreview.categories.every((category) => category.approved && category.fieldNames.length > 0)).toBe(true);
+    expect(approvedPreview.outboundTransferPerformed).toBe(false);
+
+    store.upsertSensitiveDataConsent({ category: 'location', purpose: 'external_export', status: 'revoked', explicitConsent: false });
+    expect(store.previewSensitiveExport({
+      categories: ['location'], destinationLabel: 'Kullanıcının seçtiği hedef',
+      businessPurpose: 'Konum paylaşım izninin iptal sonrası doğrulanması'
+    }).transferAllowed).toBe(false);
+    expect(store.listAudit(50).map((entry) => entry.action)).toEqual(expect.arrayContaining([
+      'ai.sensitive_consent_granted', 'ai.sensitive_consent_revoked', 'ai.sensitive_export_previewed'
+    ]));
+    store.close();
+  });
+
   it('önemli güne bağlı arşiv içeriğini yalnız ilgili etkinlik için getirir', async () => {
     const { store, directory } = makeStore();
     await authenticate(store);

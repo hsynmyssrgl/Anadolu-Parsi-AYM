@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "step": "32-Y",
+  "requirements": ["B2-05", "B6-03"],
+  "status": "COMPLETE",
+  "surfaces": [
+    { "id": "domain-contract", "paths": ["packages/domain/src/app-data.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "default-deny-policy-and-use-cases", "paths": ["packages/application/src/ai-consent-use-cases.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "central-authorization-adapter", "paths": ["apps/desktop/src/main/ai-consent-application-adapter.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "sqlite-consent-and-metadata-inventory", "paths": ["packages/repository-contracts/src/ai-consent-repository.ts", "packages/repositories/src/ai-consent-repository.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "desktop-composition", "paths": ["apps/desktop/src/main/data-store.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "typed-ipc-preload", "paths": ["apps/desktop/src/main/main.ts", "apps/desktop/src/main/ipc-integration-policy.ts", "apps/desktop/src/main/preload.ts", "apps/desktop/src/renderer/global.d.ts"], "disposition": "IMPLEMENTED" },
+    { "id": "ai-menu-ui", "paths": ["packages/domain/src/product-surface-governance.ts", "apps/desktop/src/renderer/App.tsx"], "disposition": "IMPLEMENTED" },
+    { "id": "targeted-runtime-tests", "paths": ["packages/application/tests/sensitive-data-consent-use-cases.test.ts", "apps/desktop/tests/b2-b6-sensitive-data-consent-integration.test.ts", "apps/desktop/tests/data-store.test.ts"], "disposition": "IMPLEMENTED" }
+  ],
+  "ipcChannels": ["ai:listSensitiveProfiles", "ai:upsertSensitiveConsent", "ai:previewSensitiveExport"],
+  "outboundTransferChannels": [],
+  "persistedSensitivePayloadColumnsAdded": [],
+  "schemaMigrationRequired": false,
+  "latestDatabaseMigration": 77,
+  "openBlockers": []
+}

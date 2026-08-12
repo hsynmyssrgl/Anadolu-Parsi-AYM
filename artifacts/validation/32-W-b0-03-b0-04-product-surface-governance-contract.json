@@ -184,8 +184,8 @@
     "routeCount": 22,
     "menuEntryCount": 22,
     "renderedScreenCount": 22,
-    "preloadPairCount": 227,
-    "registeredPreloadPairCount": 227,
+    "preloadPairCount": 235,
+    "registeredPreloadPairCount": 235,
     "classifiedUnusedRendererApiCount": 14,
     "unresolvedUnusedRendererApiCount": 0,
     "unusedRendererApis": [
@@ -253,10 +253,10 @@
     },
     "b901CompletedByThisPackage": false,
     "databaseMigrationRequired": false,
-    "generatedAt": "2026-08-12T09:47:04.632Z"
+    "generatedAt": "2026-08-12T12:23:14.570Z"
   },
   "latestDatabaseMigration": 77,
   "requirementCompletionClaimed": true,
   "b901CompletedByThisPackage": false,
-  "generatedAt": "2026-08-12T09:47:04.635Z"
+  "generatedAt": "2026-08-12T12:23:14.572Z"
 }

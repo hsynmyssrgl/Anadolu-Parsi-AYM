@@ -160,7 +160,7 @@ try {
       });
       const handlers = new Map();
       const ipcMain = { handle: (channel, listener) => handlers.set(channel, listener) };
-      const frame = { url: 'file:///runtime-test/index.html' };
+      const frame = { url: 'pardus-app://renderer/index.html' };
       registerCorrelatedIpcHandler({
         ipcMain,
         runtime,

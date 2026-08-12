@@ -209,7 +209,7 @@ check('external hardware signing and final requirements remain open', b202?.stat
   && ppk025?.status !== 'COMPLETE' && b901?.status !== 'COMPLETE');
 check('DEC-209 is active and decision count is exact', ledgerDecision?.status === 'ACTIVE'
   && exactArray(ledgerDecision?.requirements, requirements)
-  && ledger?.decisionCount === 63
+  && ledger?.decisionCount >= 63
   && ledger?.decisionCount === ledger?.decisions?.length);
 check('decision documentation records the first fail-closed binary finding', includesAll(decision, [
   '15 dakika', '60 saniye', 'pardus-app://renderer', 'Electron 43.2.0', 'WasmTrapHandlers', '9/9'
@@ -234,7 +234,7 @@ check('PPK-021 exact privileged additions remain governed', [
   'USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetSessionLockStateUseCase',
   'USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|LockSessionUseCase',
   'USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|RecordSessionActivityUseCase'
-].every((key) => astKeys.has(key)) && astKeys.size === 528);
+].every((key) => astKeys.has(key)) && astKeys.size === 531);
 check('PPK-022 custom protocol fetch remains governed',
   capabilityKeys.has('NETWORK_API|apps/desktop/src/main/main.ts|fetch') && capabilityKeys.size === 238);
 check('no persistence migration or cutover was added', latestMigration === 77

@@ -89,6 +89,50 @@ const catalogLookupInput = (args: readonly unknown[]): IpcIntegrationPolicyDecis
   return validIds(value.personIds) && validIds(value.eventIds);
 });
 
+const aiConsentPurposes = new Set(['search', 'summary', 'recommendation', 'classification']);
+const aiConsentResourceTypes = new Set(['event', 'archive_item']);
+const sensitiveCategories = new Set(['child', 'health', 'finance', 'location']);
+const sensitivePurposes = new Set(['sensitive_processing', 'external_export']);
+
+const standardAiConsentInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => exactObject(
+  args,
+  ['purpose', 'resourceType', 'resourceId', 'status', 'startsAt', 'endsAt'],
+  (value) => aiConsentPurposes.has(String(value.purpose))
+    && aiConsentResourceTypes.has(String(value.resourceType))
+    && boundedString(value.resourceId, 128)
+    && (value.status === 'granted' || value.status === 'revoked')
+    && optionalBoundedString(value.startsAt, 64)
+    && optionalBoundedString(value.endsAt, 64)
+);
+
+const standardAiPreviewPurpose = (args: readonly unknown[]): IpcIntegrationPolicyDecision =>
+  args.length === 1 && aiConsentPurposes.has(String(args[0]))
+    ? accepted()
+    : rejected('AI_CONSENT_PURPOSE_INVALID', '$[0]');
+
+const sensitiveConsentInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => exactObject(
+  args,
+  ['category', 'purpose', 'status', 'durationMinutes', 'explicitConsent'],
+  (value) => sensitiveCategories.has(String(value.category))
+    && sensitivePurposes.has(String(value.purpose))
+    && (value.status === 'granted' || value.status === 'revoked')
+    && typeof value.explicitConsent === 'boolean'
+    && optionalInteger(value.durationMinutes, 15, 43_200)
+    && (value.status !== 'granted' || (value.explicitConsent === true && typeof value.durationMinutes === 'number'))
+);
+
+const sensitiveExportPreviewInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => exactObject(
+  args,
+  ['categories', 'destinationLabel', 'businessPurpose'],
+  (value) => Array.isArray(value.categories)
+    && value.categories.length >= 1
+    && value.categories.length <= 4
+    && value.categories.every((category) => sensitiveCategories.has(String(category)))
+    && new Set(value.categories).size === value.categories.length
+    && boundedString(value.destinationLabel, 100)
+    && boundedString(value.businessPurpose, 240)
+);
+
 const optionalWindowsHelloFallback = (value: unknown): boolean => {
   if (value === undefined) return true;
   if (!isObject(value) || !hasOnlyKeys(value, ['password', 'secondFactorCode'])) return false;
@@ -98,6 +142,18 @@ const optionalWindowsHelloFallback = (value: unknown): boolean => {
 
 export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unknown[]): IpcIntegrationPolicyDecision => {
   switch (channel) {
+    case 'ai:listConsents':
+      return zeroArguments(args);
+    case 'ai:upsertConsent':
+      return standardAiConsentInput(args);
+    case 'ai:previewAccess':
+      return standardAiPreviewPurpose(args);
+    case 'ai:listSensitiveProfiles':
+      return zeroArguments(args);
+    case 'ai:upsertSensitiveConsent':
+      return sensitiveConsentInput(args);
+    case 'ai:previewSensitiveExport':
+      return sensitiveExportPreviewInput(args);
     case 'auth:getSessionLockState':
     case 'auth:recordSessionActivity':
     case 'auth:lockSession':

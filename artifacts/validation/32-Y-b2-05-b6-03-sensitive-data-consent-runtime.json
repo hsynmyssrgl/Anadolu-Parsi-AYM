@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "step": "32-Y",
+  "requirements": [
+    "B2-05",
+    "B6-03"
+  ],
+  "status": "PASS",
+  "checksPassed": 9,
+  "checksFailed": 0,
+  "targetedTestFilesPassed": 3,
+  "targetedTestsPassed": 9,
+  "latestDatabaseMigration": 77,
+  "ppk021ExactAllowlistEntries": 531,
+  "ppk022CapabilitySurfaces": 238,
+  "outboundTransferPerformed": false,
+  "results": [
+    {
+      "id": "sensitive-data-consent-boundary",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputTail": "B2-05/B6-03 sensitive data consent boundary: PASS (26/26 checks)."
+    },
+    {
+      "id": "sensitive-data-consent-contract",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputTail": "B2-05/B6-03 sensitive data consent contract: PASS (38/38 checks)."
+    },
+    {
+      "id": "ppk021-ast-ratchet",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 375,\n  \"privilegedSurfaces\": 531,\n  \"exactAllowlistEntries\": 531,\n  \"exactAllowlistSha256\": \"fc444e8654784d316d35eb90636686065be96e4d6da5128f31a58778f986e5cc\",\n  \"surfaceCounts\": {\n    \"CRYPTO_GLOBAL\": 2,\n    \"CRYPTO_IMPORT\": 128,\n    \"DATABASE_IMPORT\": 21,\n    \"NETWORK_IMPORT\": 8,\n    \"REPOSITORY_IMPORT\": 48,\n    \"ROLE_PRESENTATION\": 1,\n    \"SQL_CALL\": 56,\n    \"SQL_CONSTRUCTOR\": 2,\n    \"SQL_IMPORT\": 2,\n    \"USE_CASE_COMPOSITION\": 263\n  },\n  \"maliciousSelfTestAssertions\": 17,\n  \"benignSelfTestAssertions\": 4,\n  \"directRoleAuthorizationBypasses\": 0,\n  \"findings\": []\n}"
+    },
+    {
+      "id": "ppk022-capability-ratchet",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 375,\n  \"capabilitySurfaces\": 238,\n  \"exactManifestSurfaces\": 238,\n  \"exactManifestSha256\": \"1f6b3e14aaf7a608a93d857448dab2fcbda924999274b8fbc82f1edd76226eb1\",\n  \"surfaceCounts\": {\n    \"FILE_DIALOG\": 2,\n    \"FILE_IMPORT\": 225,\n    \"NETWORK_API\": 3,\n    \"NETWORK_IMPORT\": 8\n  },\n  \"pinnedBootstrapSurfaces\": 26,\n  \"maliciousSelfTestAssertions\": 33,\n  \"benignSelfTestAssertions\": 5,\n  \"canonicalApplications\": 14,\n  \"protectedCapabilityFamilies\": 7,\n  \"findings\": []\n}"
+    },
+    {
+      "id": "sensitive-data-consent-targeted-tests",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 9,
+      "testFiles": 3,
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n---------------------·-----------------------········\n\n Test Files  3 passed (3)\n      Tests  9 passed | 44 skipped (53)\n   Start at  15:28:54\n   Duration  7.75s (transform 2.98s, setup 0ms, import 5.91s, tests 1.15s, environment 0ms)\n\n\n(node:10820) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "root-typescript",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputTail": ""
+    },
+    {
+      "id": "database-package-build",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputTail": ""
+    },
+    {
+      "id": "migration-77-regression",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputTail": "\"durable_platform_policy_transactions\",\n      \"checksum\": \"afc52b5d5f221e6493cd126dcc56a6aae1e1a0fe4c54b00ae3405c74a71c4b78\"\n    },\n    {\n      \"version\": 57,\n      \"name\": \"protected_journal_projection_proof\",\n      \"checksum\": \"7aa7ffa53bb2e7330fbdb578a95f63acae7be9e3e97cc485e8463614a477cb23\"\n    },\n    {\n      \"version\": 58,\n      \"name\": \"archive_core_table_receipt_fence\",\n      \"checksum\": \"ddc1156cf3005c87dd565f451e4532870ccb1e66b015262285912e6bd5323bf5\"\n    },\n    {\n      \"version\": 59,\n      \"name\": \"archive_accessory_receipt_fence\",\n      \"checksum\": \"583016c7e871fff1817a548fbfc33a34c3d083153445459dcce794b45ea473a6\"\n    },\n    {\n      \"version\": 60,\n      \"name\": \"archive_operation_idempotency\",\n      \"checksum\": \"042ca1a2d450d4827bd5df4fd32aee7e8e24a665ccfd7936b9547a30ed34a7c1\"\n    },\n    {\n      \"version\": 61,\n      \"name\": \"archive_pending_operation_identity_recovery\",\n      \"checksum\": \"382c06c258318318265a6b03573b34d1c0e3c8729e8adb634edce4b082d54045\"\n    },\n    {\n      \"version\": 62,\n      \"name\": \"expired_replay_reservation_pruning\",\n      \"checksum\": \"59876e476ee37d9fd74f00603c686b585b2b0759c728d0e0923605f22ee49983\"\n    },\n    {\n      \"version\": 63,\n      \"name\": \"finance_policy_receipt_fence\",\n      \"checksum\": \"44b108bc23786c640dad4d5deac588e401fdd160e6e7e7d3b1bda11437c5a959\"\n    },\n    {\n      \"version\": 64,\n      \"name\": \"health_policy_receipt_fence\",\n      \"checksum\": \"23125396bf9edbc0cecad63e4863cdd00b2b52a759533c248e2939a03579a92c\"\n    },\n    {\n      \"version\": 65,\n      \"name\": \"life_policy_receipt_fence\",\n      \"checksum\": \"a47e05b0b5249e300b8b001b31314663d90020b921b1049252df13426c58d178\"\n    },\n    {\n      \"version\": 66,\n      \"name\": \"location_policy_receipt_fence\",\n      \"checksum\": \"e55b15e48f504fc65452556f6c907b8845bb81b6b6d65caa5c243410d11c9609\"\n    },\n    {\n      \"version\": 67,\n      \"name\": \"local_ppk002_timeline_event_policy_receipt_fence\",\n      \"checksum\": \"a67f9807f2a2bb00ada3768d06882a0ca2648d91b19eacb2becf46cf9ef2b528\"\n    },\n    {\n      \"version\": 68,\n      \"name\": \"ppk002_family_import_governed_rollback_receipt_fence\",\n      \"checksum\": \"298ffa1c65a65e762904cb913ecb9b45d1dfa5fcd94659c1a3181a5984f71bd6\"\n    },\n    {\n      \"version\": 69,\n      \"name\": \"ppk004_complete_policy_context_binding\",\n      \"checksum\": \"b0eaf8abbf4b45e00404717a1ba767ce64687e9f575a0e11798326cbdbfeeb91\"\n    },\n    {\n      \"version\": 70,\n      \"name\": \"ppk005_complete_data_classification\",\n      \"checksum\": \"bfd3643232c6daa25d85804f08c4580f896fe4d6e81c2ad3d7dcf602649085e9\"\n    },\n    {\n      \"version\": 71,\n      \"name\": \"ppk006_complete_policy_obligation_suite\",\n      \"checksum\": \"ba678463aa0138780d74d2342bcc453ab622e87c7213a4d10078319762c96a90\"\n    },\n    {\n      \"version\": 72,\n      \"name\": \"ppk007_signed_versioned_policy_package\",\n      \"checksum\": \"6660072205bd61c06dd1d4f4b744884f7edb29bf370d44a228c150ebca679a83\"\n    },\n    {\n      \"version\": 73,\n      \"name\": \"ppk008_application_identity_device_certificate_manifest\",\n      \"checksum\": \"0099d0238be94ea6bb95579d2ac9f33c015e99d5c14463442313953c014b87fd\"\n    },\n    {\n      \"version\": 74,\n      \"name\": \"ppk009_core_service_decision_reevaluation\",\n      \"checksum\": \"99c89269ac120adbb387dc796ecf1b837f978e04e375d3d41c4fb605020ea813\"\n    },\n    {\n      \"version\": 75,\n      \"name\": \"ppk011_contextual_ownership_share\",\n      \"checksum\": \"3c59ecd6df8d4bf777a8eee8c4864f19848fb712c85691105320afa17b476337\"\n    },\n    {\n      \"version\": 76,\n      \"name\": \"ppk012_offline_capability_lease_cache_fence\",\n      \"checksum\": \"98546bdde3fe97f9f37f2421dd74ad305ce5301dd23a9954ed54bd53610e9388\"\n    },\n    {\n      \"version\": 77,\n      \"name\": \"ppk016_derived_data_policy_inheritance\",\n      \"checksum\": \"de7fbb16719ad427c33d20be3cf564577185d6a1c2eb916cbe0dbdf40724a1da\"\n    }\n  ],\n  \"generatedAt\": \"2026-08-12T12:29:06.112Z\"\n}\n\n(node:16428) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "decision-ledger",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputTail": "User Decision Ledger: PASS (343 checks / 64 decisions)."
+    }
+  ],
+  "failures": [],
+  "requirementCompletionClaimed": true,
+  "generatedAt": "2026-08-12T12:29:06.252Z"
+}

@@ -523,23 +523,40 @@
       "area": "Kimlik ve Güvenlik",
       "title": "Çocuk, sağlık, finans ve konum için hassasiyet profilleri",
       "priority": "P0",
-      "status": "PARTIAL",
+      "status": "COMPLETE",
       "acceptance": "Varsayılan reddet, açık rıza, amaç, süre, görünür paylaşım ve iptal.",
       "chain": {
-        "decision": false,
-        "domain": false,
-        "schema": false,
-        "migration": false,
-        "useCase": false,
-        "repository": false,
-        "policy": false,
-        "apiOrIpc": false,
-        "ui": false,
-        "menu": false,
-        "targetedTest": false,
+        "decision": true,
+        "domain": true,
+        "schema": true,
+        "migration": true,
+        "useCase": true,
+        "repository": true,
+        "policy": true,
+        "apiOrIpc": true,
+        "ui": true,
+        "menu": true,
+        "targetedTest": true,
         "documentation": true,
-        "evidence": false
-      }
+        "evidence": true
+      },
+      "codeAreas": [
+        "packages/domain/src/app-data.ts",
+        "packages/application/src/ai-consent-use-cases.ts",
+        "packages/repositories/src/ai-consent-repository.ts",
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/src/renderer/App.tsx"
+      ],
+      "evidence": [
+        "artifacts/validation/32-Y-b2-05-b6-03-sensitive-data-consent-boundary.json",
+        "artifacts/validation/32-Y-b2-05-b6-03-sensitive-data-consent-contract.json",
+        "artifacts/validation/32-Y-b2-05-b6-03-sensitive-data-consent-runtime.json",
+        "packages/application/tests/sensitive-data-consent-use-cases.test.ts",
+        "apps/desktop/tests/b2-b6-sensitive-data-consent-integration.test.ts",
+        "apps/desktop/tests/data-store.test.ts",
+        "docs/security/B2-05_B6-03_SENSITIVE_DATA_CONSENT_THREAT_MODEL.md",
+        "docs/audit/32-Y_B2-05_B6-03_SENSITIVE_DATA_CONSENT_UST_KAPANIS.md"
+      ]
     },
     {
       "id": "B3-01",
@@ -1219,23 +1236,41 @@
       "area": "AI, Miras ve Entegrasyon",
       "title": "Çocuk/sağlık/finans/konum için ayrı onay ve dışa gönderim önizlemesi",
       "priority": "P0",
-      "status": "PARTIAL",
+      "status": "COMPLETE",
       "acceptance": "Hiçbir hassas veri sessiz gönderilmez.",
       "chain": {
-        "decision": false,
-        "domain": false,
-        "schema": false,
-        "migration": false,
-        "useCase": false,
-        "repository": false,
-        "policy": false,
-        "apiOrIpc": false,
-        "ui": false,
-        "menu": false,
-        "targetedTest": false,
+        "decision": true,
+        "domain": true,
+        "schema": true,
+        "migration": true,
+        "useCase": true,
+        "repository": true,
+        "policy": true,
+        "apiOrIpc": true,
+        "ui": true,
+        "menu": true,
+        "targetedTest": true,
         "documentation": true,
-        "evidence": false
-      }
+        "evidence": true
+      },
+      "codeAreas": [
+        "packages/domain/src/app-data.ts",
+        "packages/application/src/ai-consent-use-cases.ts",
+        "packages/repositories/src/ai-consent-repository.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/renderer/App.tsx"
+      ],
+      "evidence": [
+        "artifacts/validation/32-Y-b2-05-b6-03-sensitive-data-consent-boundary.json",
+        "artifacts/validation/32-Y-b2-05-b6-03-sensitive-data-consent-contract.json",
+        "artifacts/validation/32-Y-b2-05-b6-03-sensitive-data-consent-runtime.json",
+        "packages/application/tests/sensitive-data-consent-use-cases.test.ts",
+        "apps/desktop/tests/b2-b6-sensitive-data-consent-integration.test.ts",
+        "apps/desktop/tests/data-store.test.ts",
+        "docs/security/B2-05_B6-03_SENSITIVE_DATA_CONSENT_THREAT_MODEL.md",
+        "docs/audit/32-Y_B2-05_B6-03_SENSITIVE_DATA_CONSENT_UST_KAPANIS.md"
+      ]
     },
     {
       "id": "B6-04",

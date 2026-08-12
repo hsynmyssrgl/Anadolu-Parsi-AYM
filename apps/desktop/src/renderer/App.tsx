@@ -63,6 +63,7 @@ import type { DesktopSecurityPostureView, SessionLockStateView, UnlockSessionInp
 import type { DataRepairEntitySnapshot, DataRepairIssue, DataRepairOperation, DataRepairWorkspaceView } from '@ppt/domain';
 import type { LoginWithWindowsHelloInput, WindowsHelloAuthenticationOutcome, WindowsHelloEnrollmentView, WindowsHelloStateView } from '@ppt/domain';
 import type { CoreServiceApiBoundaryStatusContract, CoreServiceHealthContract } from '@ppt/core-service-contracts';
+import type { SensitiveDataCategory, SensitiveDataConsentPurpose, SensitiveDataProfileView, SensitiveExportPreviewView } from '@ppt/domain';
 
 type ReleaseChannel = 'bronze' | 'silver' | 'gold';
 const releaseChannelFromStage = (stage: string): ReleaseChannel => {
@@ -708,11 +709,80 @@ function DigitalLegacyScreen({ snapshot }: { snapshot: FamilyAppSnapshot }) {
 }
 
 function AiGovernanceScreen() {
-  const [purpose,setPurpose]=useState<AiConsentPurpose>('search'); const [resourceType,setResourceType]=useState('event'); const [resourceId,setResourceId]=useState('*'); const [consents,setConsents]=useState<AiConsentView[]>([]); const [preview,setPreview]=useState<AiAccessPreviewView>();
-  const reload=async(p:AiConsentPurpose=purpose)=>{if(!window.pardus)return;const [c,v]=await Promise.all([window.pardus.listAiConsents(),window.pardus.previewAiAccess(p)]);setConsents(c);setPreview(v);};
-  useEffect(()=>{void reload();},[]);
-  const save=async(status:'granted'|'revoked')=>{if(!window.pardus)return;setConsents(await window.pardus.upsertAiConsent({purpose,resourceType,resourceId,status}));setPreview(await window.pardus.previewAiAccess(purpose));};
-  return <><PageHeader eyebrow="Açık onay" title="Yapay zekâ izin merkezi" description="Yapay zekânın hangi amaçla hangi kayıtları işleyebileceğini önceden görün ve yönetin."/><section className="workspace-grid"><article className="panel workspace-form"><h2>Onay tanımla</h2><label>Amaç<select value={purpose} onChange={e=>{const p=e.target.value as AiConsentPurpose;setPurpose(p);void reload(p);}}><option value="search">Doğal dil arama</option><option value="summary">Özetleme</option><option value="recommendation">Öneri</option><option value="classification">Sınıflandırma</option></select></label><label>Kaynak<select value={resourceType} onChange={e=>setResourceType(e.target.value)}><option value="event">Zaman tüneli olayları</option><option value="archive_item">Arşiv belgeleri</option></select></label><label>Kayıt kimliği<input value={resourceId} onChange={e=>setResourceId(e.target.value)} placeholder="* tüm izinli kayıtlar"/></label><div className="modal-actions"><Button tone="primary" onClick={()=>void save('granted')}>Onay ver</Button><Button tone="danger" onClick={()=>void save('revoked')}>Onayı geri çek</Button></div></article><article className="panel workspace-summary"><span className="eyebrow">Erişim önizlemesi</span><h2>{preview?.allowedResources.length??0} erişilebilir kayıt</h2><div className="context-stat"><strong>{preview?.blockedCount??0}</strong><span>açıkça engellenmiş kapsam</span></div>{preview?.allowedResources.map(r=><div className="context-stat" key={`${r.resourceType}-${r.resourceId}`}><strong>{r.title}</strong><span>{r.resourceType} · {r.resourceId}</span></div>)}<h3>Onay geçmişi</h3>{consents.slice(0,8).map(c=><small key={c.id}>{c.purpose} · {c.resourceType}:{c.resourceId} · {c.status}</small>)}</article></section></>;
+  const [purpose,setPurpose]=useState<AiConsentPurpose>('search');
+  const [resourceType,setResourceType]=useState('event');
+  const [resourceId,setResourceId]=useState('*');
+  const [consents,setConsents]=useState<AiConsentView[]>([]);
+  const [preview,setPreview]=useState<AiAccessPreviewView>();
+  const [profiles,setProfiles]=useState<SensitiveDataProfileView[]>([]);
+  const [sensitiveCategory,setSensitiveCategory]=useState<SensitiveDataCategory>('child');
+  const [sensitivePurpose,setSensitivePurpose]=useState<SensitiveDataConsentPurpose>('sensitive_processing');
+  const [durationMinutes,setDurationMinutes]=useState(1_440);
+  const [explicitConsent,setExplicitConsent]=useState(false);
+  const [exportCategories,setExportCategories]=useState<SensitiveDataCategory[]>(['child','health','finance','location']);
+  const [destinationLabel,setDestinationLabel]=useState('Kullanıcının seçtiği dış hedef');
+  const [businessPurpose,setBusinessPurpose]=useState('Aile yöneticisinin açıkça belirttiği paylaşım amacı');
+  const [exportPreview,setExportPreview]=useState<SensitiveExportPreviewView>();
+  const [error,setError]=useState('');
+  const [busy,setBusy]=useState(false);
+  const categories:readonly SensitiveDataCategory[]=['child','health','finance','location'];
+  const effectiveLabel:Record<SensitiveDataProfileView['aiProcessing']['effectiveStatus'],string>={default_denied:'Varsayılan ret',granted:'Etkin onay',revoked:'İptal edildi',expired:'Süresi doldu',scheduled:'Planlandı'};
+
+  const reload=async(p:AiConsentPurpose=purpose)=>{
+    if(!window.pardus)return;
+    const [c,v,s]=await Promise.all([window.pardus.listAiConsents(),window.pardus.previewAiAccess(p),window.pardus.listSensitiveDataProfiles()]);
+    setConsents(c);setPreview(v);setProfiles(s);
+  };
+  useEffect(()=>{void reload().catch(e=>setError(e instanceof Error?e.message:'İzin merkezi yüklenemedi.'));},[]);
+
+  const run=async(action:()=>Promise<void>)=>{setBusy(true);setError('');try{await action();}catch(e){setError(e instanceof Error?e.message:'İşlem tamamlanamadı.');}finally{setBusy(false)}};
+  const save=async(status:'granted'|'revoked')=>run(async()=>{if(!window.pardus)return;setConsents(await window.pardus.upsertAiConsent({purpose,resourceType,resourceId,status}));setPreview(await window.pardus.previewAiAccess(purpose));});
+  const saveSensitive=async(status:'granted'|'revoked')=>run(async()=>{if(!window.pardus)return;setProfiles(await window.pardus.upsertSensitiveDataConsent({category:sensitiveCategory,purpose:sensitivePurpose,status,durationMinutes,explicitConsent}));setExplicitConsent(false);setExportPreview(undefined);});
+  const createExportPreview=async()=>run(async()=>{if(!window.pardus)return;setExportPreview(await window.pardus.previewSensitiveExport({categories:exportCategories,destinationLabel,businessPurpose}));});
+  const toggleExportCategory=(category:SensitiveDataCategory)=>setExportCategories(current=>current.includes(category)?current.filter(item=>item!==category):[...current,category]);
+
+  return <>
+    <PageHeader eyebrow="Açık onay ve varsayılan ret" title="Yapay zekâ izin merkezi" description="Yapay zekâ işleme izinlerini ve çocuk, sağlık, finans, konum verilerinin dışa gönderim onaylarını birbirinden bağımsız yönetin."/>
+    {error&&<StatusMessage tone="danger">{error}</StatusMessage>}
+    <section className="workspace-grid">
+      <article className="panel workspace-form">
+        <span className="eyebrow">Standart AI kapsamı</span><h2>Kayıt onayı tanımla</h2>
+        <label>Amaç<select value={purpose} onChange={e=>{const p=e.target.value as AiConsentPurpose;setPurpose(p);void reload(p);}}><option value="search">Doğal dil arama</option><option value="summary">Özetleme</option><option value="recommendation">Öneri</option><option value="classification">Sınıflandırma</option></select></label>
+        <label>Kaynak<select value={resourceType} onChange={e=>setResourceType(e.target.value)}><option value="event">Zaman tüneli olayları</option><option value="archive_item">Arşiv belgeleri</option></select></label>
+        <label>Kayıt kimliği<input value={resourceId} onChange={e=>setResourceId(e.target.value)} placeholder="* tüm izinli kayıtlar"/></label>
+        <div className="modal-actions"><Button tone="primary" disabled={busy} onClick={()=>void save('granted')}>Onay ver</Button><Button tone="danger" disabled={busy} onClick={()=>void save('revoked')}>Onayı geri çek</Button></div>
+      </article>
+      <article className="panel workspace-summary">
+        <span className="eyebrow">Erişim önizlemesi</span><h2>{preview?.allowedResources.length??0} erişilebilir kayıt</h2>
+        <div className="context-stat"><strong>{preview?.blockedCount??0}</strong><span>açıkça engellenmiş kapsam</span></div>
+        {preview?.allowedResources.map(r=><div className="context-stat" key={`${r.resourceType}-${r.resourceId}`}><strong>{r.title}</strong><span>{r.resourceType} · {r.resourceId}</span></div>)}
+        <h3>Onay geçmişi</h3>{consents.filter(c=>c.resourceType!=='sensitive_data_profile').slice(0,8).map(c=><small key={c.id}>{c.purpose} · {c.resourceType}:{c.resourceId} · {c.status}</small>)}
+      </article>
+      <article className="panel workspace-form">
+        <span className="eyebrow">B2-05 hassasiyet profili</span><h2>Süreli ve açık rıza</h2>
+        <label>Kategori<select value={sensitiveCategory} onChange={e=>setSensitiveCategory(e.target.value as SensitiveDataCategory)}>{profiles.map(profile=><option key={profile.category} value={profile.category}>{profile.label}</option>)}</select></label>
+        <label>Kullanım amacı<select value={sensitivePurpose} onChange={e=>setSensitivePurpose(e.target.value as SensitiveDataConsentPurpose)}><option value="sensitive_processing">Yapay zekâ ile işleme</option><option value="external_export">Dışa gönderim</option></select></label>
+        <label>Onay süresi<select value={durationMinutes} onChange={e=>setDurationMinutes(Number(e.target.value))}><option value={60}>1 saat</option><option value={1440}>24 saat</option><option value={10080}>7 gün</option><option value={43200}>30 gün</option></select></label>
+        <label className="check-row"><input type="checkbox" checked={explicitConsent} onChange={e=>setExplicitConsent(e.target.checked)}/><span>Seçilen kategori, amaç ve süre için açık rıza veriyorum.</span></label>
+        <div className="modal-actions"><Button tone="primary" disabled={busy||!explicitConsent} onClick={()=>void saveSensitive('granted')}>Süreli onay ver</Button><Button tone="danger" disabled={busy} onClick={()=>void saveSensitive('revoked')}>Derhal iptal et</Button></div>
+      </article>
+      <article className="panel workspace-summary">
+        <span className="eyebrow">Görünür paylaşım durumu</span><h2>Dört korumalı kategori</h2>
+        {profiles.map(profile=><div className="context-stat" key={profile.category}><strong>{profile.label}</strong><span>AI: {effectiveLabel[profile.aiProcessing.effectiveStatus]}{profile.aiProcessing.endsAt?` · ${formatDate(profile.aiProcessing.endsAt)}`:''}</span><span>Dışa gönderim: {effectiveLabel[profile.externalExport.effectiveStatus]}{profile.externalExport.endsAt?` · ${formatDate(profile.externalExport.endsAt)}`:''}</span></div>)}
+      </article>
+      <article className="panel workspace-form">
+        <span className="eyebrow">B6-03 güvenli dışa gönderim</span><h2>Göndermeden önce önizle</h2>
+        <label>Hedef açıklaması<input value={destinationLabel} maxLength={100} onChange={e=>setDestinationLabel(e.target.value)}/></label>
+        <label>İş amacı<textarea value={businessPurpose} rows={3} maxLength={240} onChange={e=>setBusinessPurpose(e.target.value)}/></label>
+        <div className="check-row">{categories.map(category=><label key={category}><input type="checkbox" checked={exportCategories.includes(category)} onChange={()=>toggleExportCategory(category)}/>{profiles.find(profile=>profile.category===category)?.label??category}</label>)}</div>
+        <Button tone="primary" disabled={busy||exportCategories.length===0} onClick={()=>void createExportPreview()}>Veri göndermeden önizleme oluştur</Button>
+      </article>
+      <article className="panel workspace-summary">
+        <span className="eyebrow">Dışa gönderim güvenlik özeti</span><h2>{exportPreview?`${exportPreview.totalRecordCount} kayıt alanı`:'Önizleme bekleniyor'}</h2>
+        {exportPreview&&<><div className="context-stat"><strong>{exportPreview.transferAllowed?'Onaylar tamam':'Aktarım kapalı'}</strong><span>{exportPreview.warning}</span></div>{exportPreview.categories.map(category=><div className="context-stat" key={category.category}><strong>{category.label} · {category.recordCount}</strong><span>{category.approved?'Ayrı dışa gönderim onayı etkin':'Onay yok — engellendi'}</span><small>{category.fieldNames.join(', ')}</small></div>)}<small>Hedef: {exportPreview.destinationLabel} · Bu önizlemede dışa veri aktarımı: {exportPreview.outboundTransferPerformed?'Yapıldı':'Yapılmadı'}</small></>}
+      </article>
+    </section>
+  </>;
 }
 
 

@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "step": "32-Y",
+  "requirements": [
+    "B2-05",
+    "B6-03"
+  ],
+  "status": "PASS",
+  "checksPassed": 26,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "domain fixes the exact four sensitive categories",
+      "passed": true
+    },
+    {
+      "name": "domain separates processing and export purposes",
+      "passed": true
+    },
+    {
+      "name": "domain preview explicitly proves no outbound transfer",
+      "passed": true
+    },
+    {
+      "name": "application defaults absent consent to deny",
+      "passed": true
+    },
+    {
+      "name": "application requires explicit bounded consent",
+      "passed": true
+    },
+    {
+      "name": "application distinguishes expiry revoke and scheduled state",
+      "passed": true
+    },
+    {
+      "name": "application validates export target purpose and category selection",
+      "passed": true
+    },
+    {
+      "name": "application audits grant revoke and preview",
+      "passed": true
+    },
+    {
+      "name": "application depends on central authorization port without direct role check",
+      "passed": true
+    },
+    {
+      "name": "production adapter uses central administer policy",
+      "passed": true
+    },
+    {
+      "name": "repository contract exposes metadata inventory only",
+      "passed": true
+    },
+    {
+      "name": "repository counts all four domains without payload projection",
+      "passed": true
+    },
+    {
+      "name": "existing consent schema retains unique account purpose resource identity",
+      "passed": true
+    },
+    {
+      "name": "no new migration is introduced",
+      "passed": true
+    },
+    {
+      "name": "desktop composition binds all three use cases and authorization adapter",
+      "passed": true
+    },
+    {
+      "name": "main registers exactly the three sensitive consent channels",
+      "passed": true
+    },
+    {
+      "name": "IPC policy validates exact sensitive consent and preview payloads",
+      "passed": true
+    },
+    {
+      "name": "typed preload and declarations expose all three methods",
+      "passed": true
+    },
+    {
+      "name": "renderer exposes visible consent revoke and no-send preview",
+      "passed": true
+    },
+    {
+      "name": "existing AI route remains reachable from canonical navigation",
+      "passed": true
+    },
+    {
+      "name": "no sensitive send upload or transfer IPC action exists",
+      "passed": true
+    },
+    {
+      "name": "PPK-021 exact ratchet accepts three reviewed compositions and zero direct role bypass",
+      "passed": true
+    },
+    {
+      "name": "PPK-022 capability ratchet stays unchanged and green",
+      "passed": true
+    },
+    {
+      "name": "scope and inventory bind both requirements and no outbound channel",
+      "passed": true
+    },
+    {
+      "name": "decision threat model and audit describe the no-transfer boundary",
+      "passed": true
+    },
+    {
+      "name": "root pretypecheck and prebuild execute this boundary",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "latestDatabaseMigration": 77,
+  "ppk021ExactAllowlistEntries": 531,
+  "ppk022CapabilitySurfaces": 238,
+  "outboundTransferPerformed": false,
+  "generatedAt": "2026-08-12T12:28:46.136Z"
+}

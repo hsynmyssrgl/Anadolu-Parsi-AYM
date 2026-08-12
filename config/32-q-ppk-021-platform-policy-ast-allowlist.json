@@ -59,7 +59,7 @@
     "SQL_CALL": 56,
     "SQL_CONSTRUCTOR": 2,
     "SQL_IMPORT": 2,
-    "USE_CASE_COMPOSITION": 260
+    "USE_CASE_COMPOSITION": 263
   },
   "allowedSurfaceKeys": [
     "CRYPTO_GLOBAL|apps/desktop/src/main/preload.ts|randomUUID",
@@ -479,6 +479,7 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ListPerformanceSamplesUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ListQueuedTasksUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ListRunnableQueuedTasksUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ListSensitiveDataProfilesUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ListSuccessfulBackupRunsUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ListSystemHealthHistorySinceUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ListSystemHealthHistoryUseCase",
@@ -500,6 +501,7 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|PrepareRestoredDatabaseForReauthorizationUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|PreviewAiAccessUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|PreviewDataRepairUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|PreviewSensitiveExportUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|QuarantineManagedBackupArtifactsUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ReadOperationalGzipArtifactUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ReadOperationalTextArtifactUseCase",
@@ -569,6 +571,7 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|UpsertLegacyGrantUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|UpsertMaintenancePolicyUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|UpsertObjectPermissionUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|UpsertSensitiveDataConsentUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|VerifyAuditIntegrityUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|VerifyBackupDatabaseIntegrityUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|VerifyExternalBackupDestructionEvidenceUseCase",

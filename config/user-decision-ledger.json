@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 63,
+  "decisionCount": 64,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1573,6 +1573,35 @@
         "artifacts/validation/32-X-b2-03-b2-04-desktop-security-runtime.json",
         "docs/security/B2-03_B2-04_DESKTOP_SECURITY_THREAT_MODEL.md",
         "docs/audit/32-X_B2-03_B2-04_DESKTOP_SECURITY_UST_KAPANIS.md"
+      ]
+    },
+    {
+      "id": "DEC-210",
+      "date": "2026-08-12",
+      "acceptedAt": "2026-08-12",
+      "title": "B2-05 and B6-03 shared sensitive data consent and no-transfer export preview",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: sirayla full auto devam et, onay bekleme ve bir isle birden fazla gereksinim kapat",
+      "document": "docs/decisions/DEC-210-b2-05-b6-03-sensitive-data-consent-and-export-preview.md",
+      "requirements": ["B2-05", "B6-03"],
+      "codeAreas": [
+        "packages/domain/src/app-data.ts",
+        "packages/application/src/ai-consent-use-cases.ts",
+        "packages/repositories/src/ai-consent-repository.ts",
+        "apps/desktop/src/main/ai-consent-application-adapter.ts",
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/renderer/App.tsx",
+        "scripts/verify-sensitive-data-consent-boundary.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/32-Y-b2-05-b6-03-sensitive-data-consent-boundary.json",
+        "artifacts/validation/32-Y-b2-05-b6-03-sensitive-data-consent-contract.json",
+        "artifacts/validation/32-Y-b2-05-b6-03-sensitive-data-consent-runtime.json",
+        "docs/security/B2-05_B6-03_SENSITIVE_DATA_CONSENT_THREAT_MODEL.md",
+        "docs/audit/32-Y_B2-05_B6-03_SENSITIVE_DATA_CONSENT_UST_KAPANIS.md",
+        "config/32-y-b2-05-b6-03-sensitive-data-consent-inventory.json"
       ]
     }
   ]
