@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 
@@ -14,6 +15,11 @@ const check = (condition, message) => {
 const readJson = async (path) => JSON.parse(await readFile(path, 'utf8'));
 const hashFile = async (path) => createHash('sha256').update(await readFile(path)).digest('hex');
 const evidencePath = resolve(sourceRoot, 'artifacts', 'validation', 'bronze-governance-reality-matrix.json');
+const runProtectionVerifier = (script) => spawnSync(process.execPath, [script, 'verify'], {
+  cwd: sourceRoot,
+  encoding: 'utf8',
+  windowsHide: true
+});
 
 check(sourceRoot === resolve('C:\\PPT\\AYM', '06_KOD', 'app'), `authoritative source mismatch: ${sourceRoot}`);
 const [scope, decisions, policy, audit, featureReality] = await Promise.all([
@@ -85,7 +91,7 @@ check(audit.checkpoint31D.persistentReceiptStatus === 'PASS', 'focused external 
 check(audit.checkpoint31D.officialCompletionClaimed === true, 'focused 31-D official completion is missing');
 check(audit.checkpoint31E.persistentReceiptStatus === 'PASS', 'focused external 31-E receipt must be PASS');
 check(audit.checkpoint31E.officialCompletionClaimed === true && audit.checkpoint31E.B002 === 'COMPLETE', 'focused 31-E official completion is missing');
-check(['31-T', '33-D'].includes(audit.currentStep) && audit.percentages.officialWeightedEvidenceStep === '31-T', 'Bronze audit active checkpoint or historical weighted-evidence checkpoint is invalid');
+check(['31-T', '33-D', '33-E'].includes(audit.currentStep) && audit.percentages.officialWeightedEvidenceStep === '31-T', 'Bronze audit active checkpoint or historical weighted-evidence checkpoint is invalid');
 for (const letter of ['K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T']) {
   const checkpoint = audit[`checkpoint31${letter}`];
   check(checkpoint?.persistentReceiptStatus === 'PASS', `external 31-${letter} receipt must be PASS`);
@@ -99,9 +105,14 @@ check(audit.checkpoint31T.PPK002 === undefined || audit.checkpoint31T.primaryReq
 check(audit.checkpoint31T.openBoundaries.universalRepositoryEnforcement === 'NOT_COMPLETE'
   && audit.checkpoint31T.openBoundaries.obligationExecution === 'NOT_RUN_NOT_PASS'
   && audit.checkpoint31T.openBoundaries.externalMonotonicRollbackAuthority === 'NOT_IMPLEMENTED', '31-T open-boundary truth mismatch');
-check(audit.currentSourceExternalProtection.status === 'PASS'
-  && audit.currentSourceExternalProtection.storageBackend === 'EXTERNAL_USB_D_DRIVE'
-  && String(audit.currentSourceExternalProtection.externalPath ?? '').startsWith('D:\\AYM_LIBRARY\\'), 'current authoritative source D: protection must be PASS');
+check(audit.currentSourceExternalProtection.status === 'SEPARATE_LIVE_DELIVERY_GATE_REQUIRED'
+  && audit.currentSourceExternalProtection.snapshotReceiptStatus === 'PASS'
+  && audit.currentSourceExternalProtection.freshnessVerifiedInThisAudit === false,
+'Bronze audit must preserve the separate live source-protection truth boundary');
+const localProtection = runProtectionVerifier('scripts/protect-authoritative-source.mjs');
+const externalProtection = runProtectionVerifier('scripts/protect-authoritative-source-external.mjs');
+check(localProtection.status === 0, `current authoritative local source protection must be live PASS: ${localProtection.stderr || localProtection.stdout}`);
+check(externalProtection.status === 0, `current authoritative D: source protection must be live PASS: ${externalProtection.stderr || externalProtection.stdout}`);
 
 if (mode === 'verify-root') {
   const [rootDecisions, manifest, evidence] = await Promise.all([

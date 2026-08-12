@@ -1,5 +1,6 @@
+import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 
 const sourceRoot = resolve(process.cwd());
@@ -7,6 +8,13 @@ const aymRoot = resolve(sourceRoot, '..', '..');
 if (sourceRoot !== resolve('C:\\PPT\\AYM', '06_KOD', 'app')) throw new Error(`Unsafe source root: ${sourceRoot}`);
 
 const readJson = async (path) => JSON.parse(await readFile(path, 'utf8'));
+const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
+const writeVerified = async (path, bytes) => {
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, bytes);
+  const readback = await readFile(path);
+  if (!readback.equals(bytes)) throw new Error(`Delivery backup readback mismatch: ${path}`);
+};
 const truth = 'Bu teslim, yukarıdaki kanıtlarla sınırlıdır; çalıştırılmayan hiçbir kontrol PASS sayılmamıştır.';
 const verifyProtection = (script) => {
   const result = spawnSync(process.execPath, [script, 'verify'], { cwd: sourceRoot, encoding: 'utf8', windowsHide: true });
@@ -45,6 +53,7 @@ if (receipt.externalLibraryReceiptStatus !== 'PASS' || receipt.officialCompletio
 const expectedDerivedDeliveryExclusions = [
   'artifacts/deliveries/Anadolu_Parsi_Aile_Yasam_Merkezi_Bronze_04.08.2026.29.json',
   'artifacts/reports/DELIVERY_STATUS_04.08.2026.29.json',
+  'artifacts/validation/bronze-governance-reality-matrix.json',
   'artifacts/validation/delivery-report-contract-v2.json'
 ].sort();
 if (JSON.stringify(receipt.excludedDerivedDeliveryFiles) !== JSON.stringify(expectedDerivedDeliveryExclusions)) {
@@ -297,6 +306,11 @@ const report = {
   handoffPromptStatus: capacity.handoff ?? 'NOT_REQUIRED_WITHOUT_ACTUAL_HARD_STOP',
   sourceArchive: receipt.backup.path,
   sourceSha256: receipt.treeSha256,
+  deliveryBackupRoots: {
+    local: `C:\\PPT\\AYM\\09_ARSIV\\TESLIM_RAPORLARI\\${release.current.visibleRelease}`,
+    external: `D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\${release.current.visibleRelease}\\deliveries`,
+    latestReceipt: 'LATEST_33-E.json'
+  },
   sourceReceiptBoundary: 'The focused official 30-Z through 31-E checkpoints, the official 33-D controlled-import closure, the official 33-E managed-life closure, and the current editable C: source tree are independently externally bound on D:. The delivery report files are derived outputs excluded from the source hash to prevent self-reference.',
   manifest: '00_PROJE/MASTER_MANIFEST.json',
   manifestSummary: {
@@ -338,4 +352,60 @@ const userVisibleTarget = resolve(sourceRoot, 'artifacts', 'deliveries', report.
 await mkdir(dirname(userVisibleTarget), { recursive: true });
 await writeFile(userVisibleTarget, content, 'utf8');
 if (await readFile(userVisibleTarget, 'utf8') !== content) throw new Error('User-visible delivery report readback mismatch.');
-console.log(`Current delivery report: PASS (${contract.requiredFields.length} required fields; 30-Z through 31-E plus 33-D and 33-E receipts PASS; live current-source external protection PASS on D:; new Build false).`);
+const contentBytes = Buffer.from(content, 'utf8');
+const reportSha256 = sha256(contentBytes);
+const localDeliveryRoot = resolve(report.deliveryBackupRoots.local);
+const externalDeliveryRoot = resolve(report.deliveryBackupRoots.external);
+const immutableFolder = reportSha256;
+const reportFiles = [
+  `DELIVERY_STATUS_${release.current.version}.json`,
+  report.userVisibleDeliveryFileName
+];
+for (const root of [localDeliveryRoot, externalDeliveryRoot]) {
+  for (const name of reportFiles) {
+    await writeVerified(resolve(root, immutableFolder, name), contentBytes);
+    await writeVerified(resolve(root, immutableFolder, `${name}.sha256`), Buffer.from(`${reportSha256}  ${name}\n`, 'ascii'));
+  }
+}
+const backupReceipt = {
+  schemaVersion: 1,
+  id: `DELIVERY-REPORT-BACKUP-${reportSha256}`,
+  release: release.current.visibleRelease,
+  step: '33-E',
+  status: 'PASS',
+  sourceTreeSha256: receipt.treeSha256,
+  reportSha256,
+  immutableFolder,
+  files: reportFiles.map((path) => ({ path, sizeBytes: contentBytes.length, sha256: reportSha256 })),
+  localRoot: localDeliveryRoot,
+  externalRoot: externalDeliveryRoot,
+  verificationBasis: 'EXACT_BYTES_SHA256_AND_SIDECAR_READBACK',
+  recordedAt: report.generatedAt,
+  mandatoryTruthSentence: truth
+};
+const backupReceiptBytes = Buffer.from(`${JSON.stringify(backupReceipt, null, 2)}\n`, 'utf8');
+const backupReceiptSha256 = sha256(backupReceiptBytes);
+for (const root of [localDeliveryRoot, externalDeliveryRoot]) {
+  const receiptPath = resolve(root, immutableFolder, 'DELIVERY_REPORT_BACKUP_RECEIPT.json');
+  await writeVerified(receiptPath, backupReceiptBytes);
+  await writeVerified(`${receiptPath}.sha256`, Buffer.from(`${backupReceiptSha256}  DELIVERY_REPORT_BACKUP_RECEIPT.json\n`, 'ascii'));
+  await writeVerified(resolve(root, 'LATEST_33-E.json'), backupReceiptBytes);
+  await writeVerified(resolve(root, 'LATEST_33-E.json.sha256'), Buffer.from(`${backupReceiptSha256}  LATEST_33-E.json\n`, 'ascii'));
+  const exact = (await readdir(resolve(root, immutableFolder))).sort();
+  const expected = [
+    ...reportFiles.flatMap((name) => [name, `${name}.sha256`]),
+    'DELIVERY_REPORT_BACKUP_RECEIPT.json',
+    'DELIVERY_REPORT_BACKUP_RECEIPT.json.sha256'
+  ].sort();
+  if (JSON.stringify(exact) !== JSON.stringify(expected)) throw new Error(`Delivery backup exact-set mismatch: ${root}`);
+}
+for (const name of [
+  ...reportFiles.flatMap((path) => [path, `${path}.sha256`]),
+  'DELIVERY_REPORT_BACKUP_RECEIPT.json',
+  'DELIVERY_REPORT_BACKUP_RECEIPT.json.sha256'
+]) {
+  const local = await readFile(resolve(localDeliveryRoot, immutableFolder, name));
+  const external = await readFile(resolve(externalDeliveryRoot, immutableFolder, name));
+  if (local.length !== external.length || sha256(local) !== sha256(external)) throw new Error(`Delivery local/D: backup mismatch: ${name}`);
+}
+console.log(`Current delivery report: PASS (${contract.requiredFields.length} required fields; 30-Z through 31-E plus 33-D and 33-E receipts PASS; live current-source external protection PASS on D:; delivery backup ${reportSha256}; new Build false).`);

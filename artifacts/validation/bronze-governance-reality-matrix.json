@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-GOVERNANCE-REALITY-MATRIX-B0-01",
-  "generatedAt": "2026-08-12T18:03:01.544Z",
+  "generatedAt": "2026-08-12T20:45:01.363Z",
   "status": "PASS_SOURCE_NATIVE_MATRIX",
   "requirement": "B0-01",
   "decision": "DEC-153",
@@ -15,19 +15,19 @@
     "PR-194",
     "PR-203"
   ],
-  "checks": 80,
+  "checks": 82,
   "authoritativeSource": "06_KOD/app",
   "requirementCount": 350,
   "statusCounts": {
-    "COMPLETE": 59,
+    "COMPLETE": 62,
     "FOUNDATION_STARTED": 1,
-    "NOT_IMPLEMENTED": 263,
-    "PARTIAL": 27
+    "NOT_IMPLEMENTED": 261,
+    "PARTIAL": 26
   },
-  "strictComplete": 59,
-  "strictRequirementCompletionPercent": 16.8571,
-  "implementationChainCoveragePercent": 17.3429,
-  "governanceEvidenceChainCoveragePercent": 53.4286,
+  "strictComplete": 62,
+  "strictRequirementCompletionPercent": 17.7143,
+  "implementationChainCoveragePercent": 18.2,
+  "governanceEvidenceChainCoveragePercent": 53.8095,
   "b201RequirementStatus": "COMPLETE",
   "b201NativeStatus": "USER_DEFERRED_NOT_RUN_NOT_PASS",
   "b201NativeCompletionBlocking": false,

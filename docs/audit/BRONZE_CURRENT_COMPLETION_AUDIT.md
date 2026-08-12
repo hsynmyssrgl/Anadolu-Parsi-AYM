@@ -1,12 +1,12 @@
 # Bronze guncel tamamlama denetimi
 
-Olusturma (UTC): 2026-08-12T18:03:37.124Z
+Olusturma (UTC): 2026-08-12T20:39:30.466Z
 
 ## Sonuc
 
 - Denetim durumu: **PASS_WITH_OPEN_SCOPE**
 - Yetkili kaynak: `06_KOD/app`
-- Guncel adim: **33-D**
+- Guncel adim: **33-E**
 - PPK-002: **COMPLETE**
 - PPK-003: **COMPLETE**
 - PPK-004: **COMPLETE**
@@ -23,19 +23,19 @@ Olusturma (UTC): 2026-08-12T18:03:37.124Z
 ## Yuzde gercekligi
 
 - Resmi agirlikli Bronze ilerlemesi: **%25**
-- Kati gereksinim kapanisi: **%16.8571** (59/350)
-- Uygulama zinciri kapsami: **%17.3429**
-- Yonetisim ve kanit zinciri kapsami: **%53.4286**
+- Kati gereksinim kapanisi: **%17.7143** (62/350)
+- Uygulama zinciri kapsami: **%18.2**
+- Yonetisim ve kanit zinciri kapsami: **%53.8095**
 
 Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 
 ## Kapsam durumu
 
-- COMPLETE: 59
-- PARTIAL: 27
+- COMPLETE: 62
+- PARTIAL: 26
 - FOUNDATION_STARTED: 1
-- NOT_IMPLEMENTED: 263
-- Toplam acik gereksinim: 291
+- NOT_IMPLEMENTED: 261
+- Toplam acik gereksinim: 288
 
 ## Kural ve kapilar
 
@@ -52,7 +52,9 @@ Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 - PPK-002: PARTIAL
 - Harici persistent receipt: PASS
 - Resmi 30-Z tamamlanma iddiasi: true
-- Guncel C kaynak agaci harici koruma: PASS
+- Guncel C kaynak agaci harici koruma: SEPARATE_LIVE_DELIVERY_GATE_REQUIRED
+- Kayitli makbuz snapshot durumu: PASS
+- Bu audit icinde canli tazelik dogrulamasi: false
 - Harici kaynak backend: EXTERNAL_USB_D_DRIVE
 
 ## 31-A siniri
@@ -260,13 +262,13 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | B3-03 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Aile ve Hafıza | Doğrudan medya/belge bağlama ve davetiye yaşam döngüsü |
 | B3-05 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Aile ve Hafıza | Tüm modüllerde yetki filtreli birleşik arama |
 | B5-01 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Sağlık ve Yaşam | Alerji, kronik durum, kan grubu, aşı, ölçüm, randevu ve belge ilişkisi |
-| B5-04 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Sağlık ve Yaşam | Sigorta, abonelik, eğitim, iş, resmi işlem, ev ve araç için kategoriye özgü alanlar |
 | B6-05 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | AI, Miras ve Entegrasyon | OneDrive gerçek adapter + yerel/harici hedeflerle bağımsız çalışma |
 | B6-06 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | AI, Miras ve Entegrasyon | Apple/Google/Microsoft Authorization Code+PKCE+state+nonce+token vault |
 | B8-05 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Dayanıklılık ve Windows | 10k kişi/100k olay/10k belge metadata senaryosu ve 7 günlük soak hedefi |
 | DHA-025 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Observability | Yerel-first metrics, traces, structured logs ve correlationId |
 | EXT-009 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | DISASTER_EMERGENCY | Aile afet ve tahliye planı |
 | EXT-010 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | DISASTER_EMERGENCY | Buluşma noktaları ve şehir dışı irtibat |
+| EXT-011 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | DISASTER_EMERGENCY | İlk 72 saat/afet çantası envanteri |
 
 Tam acik-is listesi `artifacts/inventory/BRONZE_CURRENT_COMPLETION_AUDIT.json` icindedir.
 

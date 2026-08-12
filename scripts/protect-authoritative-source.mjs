@@ -23,6 +23,7 @@ const excludedDirectoryNames = new Set([
 const excludedRelativePaths = new Set([
   'artifacts/deliveries/Anadolu_Parsi_Aile_Yasam_Merkezi_Bronze_04.08.2026.29.json',
   'artifacts/reports/DELIVERY_STATUS_04.08.2026.29.json',
+  'artifacts/validation/bronze-governance-reality-matrix.json',
   'artifacts/validation/delivery-report-contract-v2.json'
 ]);
 const fixedDosDate = 33;

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-12T18:03:37.124Z",
+  "generatedAt": "2026-08-12T20:39:30.466Z",
   "release": "Bronze 04.08.2026.29",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
@@ -15,7 +15,7 @@
   "PPK011": "COMPLETE",
   "PPK012": "COMPLETE",
   "authoritativeSource": "06_KOD/app",
-  "currentStep": "33-D",
+  "currentStep": "33-E",
   "status": "PASS_WITH_OPEN_SCOPE",
   "numberingAssessment": {
     "status": "CORRECT_ONLY_WITH_GATED_APPEND_ONLY_NUMBERING",
@@ -29,18 +29,18 @@
   "percentages": {
     "officialWeightedBronzePercent": 25,
     "officialWeightedEvidenceStep": "31-T",
-    "strictRequirementCompletionPercent": 16.8571,
-    "implementationChainCoveragePercent": 17.3429,
-    "governanceEvidenceChainCoveragePercent": 53.4286,
+    "strictRequirementCompletionPercent": 17.7143,
+    "implementationChainCoveragePercent": 18.2,
+    "governanceEvidenceChainCoveragePercent": 53.8095,
     "interpretation": "These are separate measures and must not be blended into an invented single completion claim."
   },
   "scope": {
     "total": 350,
     "statusCounts": {
-      "COMPLETE": 59,
+      "COMPLETE": 62,
       "FOUNDATION_STARTED": 1,
-      "NOT_IMPLEMENTED": 263,
-      "PARTIAL": 27
+      "NOT_IMPLEMENTED": 261,
+      "PARTIAL": 26
     },
     "priorityCounts": {
       "P0": 210,
@@ -49,20 +49,20 @@
     },
     "completeByPriority": {
       "P0": 53,
-      "P1": 6,
+      "P1": 9,
       "P2": 0
     },
-    "incompleteCount": 291,
-    "strictComplete": 59,
+    "incompleteCount": 288,
+    "strictComplete": 62,
     "implementationCoverage": {
-      "passed": 607,
+      "passed": 637,
       "total": 3500,
-      "percent": 17.3429
+      "percent": 18.2
     },
     "governanceCoverage": {
-      "passed": 561,
+      "passed": 565,
       "total": 1050,
-      "percent": 53.4286
+      "percent": 53.8095
     }
   },
   "rules": {
@@ -344,11 +344,43 @@
         ]
       },
       {
-        "script": "scripts/protect-authoritative-source-external.mjs",
+        "script": "scripts/verify-33-d-controlled-import-open-banking-completion.mjs",
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"858b09af17f9f699591cb71948982189598fd16f317996f783d1a6700c454cb5\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\858b09af17f9f699591cb71948982189598fd16f317996f783d1a6700c454cb5\",\"files\":9}"
+          "33-D completion verification: PASS (29/29)."
+        ]
+      },
+      {
+        "script": "scripts/verify-b5-category-life-home-vehicle-boundary.mjs",
+        "exitCode": 0,
+        "status": "PASS",
+        "tail": [
+          "B5 category life home vehicle boundary: PASS (51/51 checks)."
+        ]
+      },
+      {
+        "script": "scripts/verify-33-e-b5-category-life-home-vehicle-contract.mjs",
+        "exitCode": 0,
+        "status": "PASS",
+        "tail": [
+          "B5 category life home vehicle contract: PASS (15/15 checks)."
+        ]
+      },
+      {
+        "script": "scripts/verify-33-e-b5-category-life-home-vehicle-runtime.mjs",
+        "exitCode": 0,
+        "status": "PASS",
+        "tail": [
+          "B5 category life home vehicle runtime: PASS (11/11 checks)."
+        ]
+      },
+      {
+        "script": "scripts/verify-33-e-b5-category-life-home-vehicle-completion.mjs",
+        "exitCode": 0,
+        "status": "PASS",
+        "tail": [
+          "33-E completion verification: PASS (47/47; local archive readback included)."
         ]
       },
       {
@@ -356,7 +388,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "Step Checkpoint Gate: PASS (1871 checks / current 33-D)."
+          "Step Checkpoint Gate: PASS (1920 checks / current 33-E)."
         ]
       }
     ],
@@ -366,10 +398,10 @@
       "exitCode": 1,
       "status": "FAIL",
       "tail": [
-        "scope status counts mismatch",
         "complete requirement IDs mismatch",
         "promotion completion percent mismatch",
         "chain evidence coverage mismatch",
+        "active top-level step count mismatch",
         "current step must be 29-D6 or a durably authorized forward step after receipt completion",
         "29-D6 active state mismatch",
         "active governance next task mismatch",
@@ -1024,10 +1056,13 @@
     }
   },
   "currentSourceExternalProtection": {
-    "status": "PASS",
+    "status": "SEPARATE_LIVE_DELIVERY_GATE_REQUIRED",
+    "snapshotReceiptStatus": "PASS",
+    "freshnessVerifiedInThisAudit": false,
+    "freshnessVerifier": "scripts/generate-current-delivery-report.mjs invokes local and external live source-protection verification",
     "officialCompletionClaimed": true,
     "storageBackend": "EXTERNAL_USB_D_DRIVE",
-    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\858b09af17f9f699591cb71948982189598fd16f317996f783d1a6700c454cb5"
+    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\90a14c1e22db813e4ab45317df3ca874a26bc0c3d5b929c7fd4fefa42a1055d8"
   },
   "remainingWork": [
     {
@@ -1544,30 +1579,6 @@
       "workOrderClass": "STARTED_BEFORE_NEW",
       "area": "Sağlık ve Yaşam",
       "title": "Alerji, kronik durum, kan grubu, aşı, ölçüm, randevu ve belge ilişkisi",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B5-04",
-      "priority": "P1",
-      "status": "PARTIAL",
-      "workOrderClass": "STARTED_BEFORE_NEW",
-      "area": "Sağlık ve Yaşam",
-      "title": "Sigorta, abonelik, eğitim, iş, resmi işlem, ev ve araç için kategoriye özgü alanlar",
       "completedChainCount": 1,
       "completionBlockers": [],
       "missingChain": [
@@ -5509,29 +5520,6 @@
       ]
     },
     {
-      "id": "EXT-031",
-      "priority": "P1",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "HOME_ASSET_VEHICLE_PET",
-      "title": "Kira/tapu/DASK/konut sigortası ve servis sağlayıcıları",
-      "completedChainCount": 2,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "evidence"
-      ]
-    },
-    {
       "id": "EXT-032",
       "priority": "P1",
       "status": "NOT_IMPLEMENTED",
@@ -5561,29 +5549,6 @@
       "workOrderClass": "NEW_NOT_STARTED",
       "area": "HOME_ASSET_VEHICLE_PET",
       "title": "Taşınma envanteri ve OCR alan önerisi",
-      "completedChainCount": 2,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "evidence"
-      ]
-    },
-    {
-      "id": "EXT-034",
-      "priority": "P1",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "HOME_ASSET_VEHICLE_PET",
-      "title": "Araç ruhsat, sigorta, muayene, bakım, yakıt/şarj ve giderler",
       "completedChainCount": 2,
       "completionBlockers": [],
       "missingChain": [
