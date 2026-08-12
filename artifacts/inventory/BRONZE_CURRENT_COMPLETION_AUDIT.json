@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-12T23:01:14.119Z",
+  "generatedAt": "2026-08-12T23:41:19.911Z",
   "release": "Bronze 04.08.2026.29",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
@@ -15,8 +15,8 @@
   "PPK011": "COMPLETE",
   "PPK012": "COMPLETE",
   "authoritativeSource": "06_KOD/app",
-  "currentStep": "33-G",
-  "status": "PASS_WITH_OPEN_SCOPE",
+  "currentStep": "33-H",
+  "status": "FAIL_CURRENT_GATE",
   "numberingAssessment": {
     "status": "CORRECT_ONLY_WITH_GATED_APPEND_ONLY_NUMBERING",
     "ruleIds": "PR identifiers are governance rules, not build numbers.",
@@ -29,17 +29,17 @@
   "percentages": {
     "officialWeightedBronzePercent": 25,
     "officialWeightedEvidenceStep": "31-T",
-    "strictRequirementCompletionPercent": 19.4286,
-    "implementationChainCoveragePercent": 19.9143,
-    "governanceEvidenceChainCoveragePercent": 54.4762,
+    "strictRequirementCompletionPercent": 20,
+    "implementationChainCoveragePercent": 20.4857,
+    "governanceEvidenceChainCoveragePercent": 54.6667,
     "interpretation": "These are separate measures and must not be blended into an invented single completion claim."
   },
   "scope": {
     "total": 350,
     "statusCounts": {
-      "COMPLETE": 68,
+      "COMPLETE": 70,
       "FOUNDATION_STARTED": 1,
-      "NOT_IMPLEMENTED": 255,
+      "NOT_IMPLEMENTED": 253,
       "PARTIAL": 26
     },
     "priorityCounts": {
@@ -48,21 +48,21 @@
       "P2": 5
     },
     "completeByPriority": {
-      "P0": 56,
+      "P0": 58,
       "P1": 12,
       "P2": 0
     },
-    "incompleteCount": 282,
-    "strictComplete": 68,
+    "incompleteCount": 280,
+    "strictComplete": 70,
     "implementationCoverage": {
-      "passed": 697,
+      "passed": 717,
       "total": 3500,
-      "percent": 19.9143
+      "percent": 20.4857
     },
     "governanceCoverage": {
-      "passed": 572,
+      "passed": 574,
       "total": 1050,
-      "percent": 54.4762
+      "percent": 54.6667
     }
   },
   "rules": {
@@ -385,26 +385,30 @@
       },
       {
         "script": "scripts/verify-home-inventory-utility-belongings-boundary.mjs",
-        "exitCode": 0,
-        "status": "PASS",
+        "exitCode": 1,
+        "status": "FAIL",
         "tail": [
-          "Home inventory utility belongings boundary: PASS (51/51 checks)."
+          "Home inventory utility belongings boundary: FAIL (1/51).",
+          "- recursive security contract covers all inventory variants"
         ]
       },
       {
         "script": "scripts/verify-33-f-home-inventory-utility-belongings-contract.mjs",
-        "exitCode": 0,
-        "status": "PASS",
+        "exitCode": 1,
+        "status": "FAIL",
         "tail": [
-          "Home inventory utility belongings contract: PASS (15/15 checks)."
+          "Home inventory utility belongings contract: FAIL (14/15 checks).",
+          "boundary evidence is exact green and preserves platform ratchets"
         ]
       },
       {
         "script": "scripts/verify-33-f-home-inventory-utility-belongings-runtime.mjs",
-        "exitCode": 0,
-        "status": "PASS",
+        "exitCode": 1,
+        "status": "FAIL",
         "tail": [
-          "Home inventory utility belongings runtime: PASS (11/11 checks)."
+          "Home inventory utility belongings runtime: FAIL (9/11 checks).",
+          "home-inventory-utility-belongings-boundary",
+          "home-inventory-utility-belongings-contract"
         ]
       },
       {
@@ -441,10 +445,43 @@
       },
       {
         "script": "scripts/verify-33-g-family-emergency-planning-completion.mjs",
+        "exitCode": 1,
+        "status": "FAIL",
+        "tail": [
+          "33-G completion verification: FAIL (1/64).",
+          "- boundary, contract, runtime, and targeted evidence bind the declared final vector"
+        ]
+      },
+      {
+        "script": "scripts/verify-family-emergency-preparedness-boundary.mjs",
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "33-G completion verification: PASS (64/64; local archive readback included)."
+          "Family emergency preparedness boundary: PASS (52/52 checks)."
+        ]
+      },
+      {
+        "script": "scripts/verify-33-h-family-emergency-preparedness-contract.mjs",
+        "exitCode": 0,
+        "status": "PASS",
+        "tail": [
+          "Family emergency preparedness contract: PASS (15/15 checks)."
+        ]
+      },
+      {
+        "script": "scripts/verify-33-h-family-emergency-preparedness-runtime.mjs",
+        "exitCode": 0,
+        "status": "PASS",
+        "tail": [
+          "Family emergency preparedness runtime: PASS (11/11 checks)."
+        ]
+      },
+      {
+        "script": "scripts/verify-33-h-family-emergency-preparedness-completion.mjs",
+        "exitCode": 0,
+        "status": "PASS",
+        "tail": [
+          "33-H completion verification: PASS (66/66; local archive readback included)."
         ]
       },
       {
@@ -452,11 +489,11 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "Step Checkpoint Gate: PASS (1972 checks / current 33-G)."
+          "Step Checkpoint Gate: PASS (1998 checks / current 33-H)."
         ]
       }
     ],
-    "allCurrentPass": true,
+    "allCurrentPass": false,
     "historical29D5": {
       "script": "scripts/verify-29-d5-scope-real-progress-report.mjs",
       "exitCode": 1,
@@ -1126,7 +1163,7 @@
     "freshnessVerifier": "scripts/generate-current-delivery-report.mjs invokes local and external live source-protection verification",
     "officialCompletionClaimed": true,
     "storageBackend": "EXTERNAL_USB_D_DRIVE",
-    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\5e88d6b82ac5c23131af5e08bcabb1042dbe5e12423209ea31d444d3e37bf0ab"
+    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\fdaf6ebdff3a0a95f0293c5d7f74abd1770f79c71fce9f33b081f72863ad6f63"
   },
   "remainingWork": [
     {
@@ -1757,29 +1794,6 @@
       ]
     },
     {
-      "id": "EXT-011",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "DISASTER_EMERGENCY",
-      "title": "İlk 72 saat/afet çantası envanteri",
-      "completedChainCount": 2,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "evidence"
-      ]
-    },
-    {
       "id": "EXT-012",
       "priority": "P0",
       "status": "NOT_IMPLEMENTED",
@@ -1809,29 +1823,6 @@
       "workOrderClass": "NEW_NOT_STARTED",
       "area": "DISASTER_EMERGENCY",
       "title": "Engelli/ileri yaş/evcil hayvan özel yardım planı",
-      "completedChainCount": 2,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "evidence"
-      ]
-    },
-    {
-      "id": "EXT-015",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "DISASTER_EMERGENCY",
-      "title": "Yangın, sel, deprem ve elektrik kesintisi tatbikatları",
       "completedChainCount": 2,
       "completionBlockers": [],
       "missingChain": [

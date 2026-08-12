@@ -1,12 +1,12 @@
 # Bronze guncel tamamlama denetimi
 
-Olusturma (UTC): 2026-08-12T23:01:14.119Z
+Olusturma (UTC): 2026-08-12T23:41:19.911Z
 
 ## Sonuc
 
-- Denetim durumu: **PASS_WITH_OPEN_SCOPE**
+- Denetim durumu: **FAIL_CURRENT_GATE**
 - Yetkili kaynak: `06_KOD/app`
-- Guncel adim: **33-G**
+- Guncel adim: **33-H**
 - PPK-002: **COMPLETE**
 - PPK-003: **COMPLETE**
 - PPK-004: **COMPLETE**
@@ -23,26 +23,26 @@ Olusturma (UTC): 2026-08-12T23:01:14.119Z
 ## Yuzde gercekligi
 
 - Resmi agirlikli Bronze ilerlemesi: **%25**
-- Kati gereksinim kapanisi: **%19.4286** (68/350)
-- Uygulama zinciri kapsami: **%19.9143**
-- Yonetisim ve kanit zinciri kapsami: **%54.4762**
+- Kati gereksinim kapanisi: **%20** (70/350)
+- Uygulama zinciri kapsami: **%20.4857**
+- Yonetisim ve kanit zinciri kapsami: **%54.6667**
 
 Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 
 ## Kapsam durumu
 
-- COMPLETE: 68
+- COMPLETE: 70
 - PARTIAL: 26
 - FOUNDATION_STARTED: 1
-- NOT_IMPLEMENTED: 255
-- Toplam acik gereksinim: 282
+- NOT_IMPLEMENTED: 253
+- Toplam acik gereksinim: 280
 
 ## Kural ve kapilar
 
 - Kanonik kural: 208
 - Aktif kural: 194
 - Enforcement kaydi: 194
-- Tum guncel kapilar PASS: true
+- Tum guncel kapilar PASS: false
 - 29-D5 dogrulayici: FAIL; yalniz tarihsel baseline, guncel 30-Z kapisi degildir.
 
 ## 30-Z siniri
@@ -266,9 +266,9 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | B6-06 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | AI, Miras ve Entegrasyon | Apple/Google/Microsoft Authorization Code+PKCE+state+nonce+token vault |
 | B8-05 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Dayanıklılık ve Windows | 10k kişi/100k olay/10k belge metadata senaryosu ve 7 günlük soak hedefi |
 | DHA-025 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Observability | Yerel-first metrics, traces, structured logs ve correlationId |
-| EXT-011 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | DISASTER_EMERGENCY | İlk 72 saat/afet çantası envanteri |
 | EXT-012 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | DISASTER_EMERGENCY | Çevrimdışı acil sağlık ve iletişim kartı |
 | EXT-014 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | DISASTER_EMERGENCY | Engelli/ileri yaş/evcil hayvan özel yardım planı |
+| EXT-016 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | DISASTER_EMERGENCY | Şifreli acil belge paketi ve düşük pil modu |
 
 Tam acik-is listesi `artifacts/inventory/BRONZE_CURRENT_COMPLETION_AUDIT.json` icindedir.
 

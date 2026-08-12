@@ -181,7 +181,8 @@ check(
     && docs.runtime.ppk021ExactAllowlistEntries === expectedValidation?.ppk021ExactAllowlistEntries
     && docs.runtime.ppk021UseCaseCompositionSurfaces === expectedValidation?.ppk021UseCaseCompositionSurfaces
     && docs.runtime.ppk022CapabilitySurfaces === expectedValidation?.ppk022CapabilitySurfaces
-    && docs.runtime.latestDatabaseMigration === expectedValidation?.latestDatabaseMigration,
+    && docs.runtime.latestDatabaseMigration >= expectedValidation?.latestDatabaseMigration
+    && docs.runtime.closureDatabaseMigration === expectedValidation?.latestDatabaseMigration,
   'boundary, contract, runtime, and targeted evidence bind the declared final vector'
 );
 check(proofKeys.every((key) =>

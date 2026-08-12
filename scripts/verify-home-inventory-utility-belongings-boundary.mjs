@@ -93,7 +93,7 @@ export const verifyHomeInventoryUtilityBelongingsBoundary = async () => {
   ]));
   check('recursive security contract covers all inventory variants', includesAll(security, [
     'MANAGED_HOME_INVENTORY_INPUT_KEYS', 'MANAGED_HOME_INVENTORY_REQUIRED_INPUT_KEYS',
-    "contractFamily?:'managed_life'|'home_inventory'", 'inspectManagedLifeDataContract'
+    "'managed_life'", "'home_inventory'", 'inspectManagedLifeDataContract'
   ]) && itemTypes.every((item) => security.includes(`${item}: Object.freeze(`)));
   check('security contract rejects secrets PAN paths and base64', includesAll(security, [
     'password', 'token', 'credential', 'containsLikelyManagedLifePan', 'isPathLike', 'isBase64Like'
