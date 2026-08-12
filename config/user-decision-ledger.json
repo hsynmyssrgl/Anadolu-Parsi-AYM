@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 65,
+  "decisionCount": 66,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1632,6 +1632,36 @@
         "docs/security/B4_BANKING_FOUNDATION_THREAT_MODEL.md",
         "docs/audit/32-Z_B4_BANKING_FOUNDATION_UST_KAPANIS.md",
         "config/32-z-b4-banking-foundation-inventory.json"
+      ]
+    },
+    {
+      "id": "DEC-212",
+      "date": "2026-08-12",
+      "acceptedAt": "2026-08-12",
+      "title": "B4-05 and B4-06 shared last-four-only payment card management",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: sirayla full auto devam et, onay bekleme ve bir isle birden fazla gereksinim kapat",
+      "document": "docs/decisions/DEC-212-b4-payment-card-management.md",
+      "requirements": ["B4-05", "B4-06"],
+      "codeAreas": [
+        "packages/domain/src/app-data.ts",
+        "packages/application/src/banking-security.ts",
+        "packages/application/src/finance-use-cases.ts",
+        "packages/database/src/family-database-migrations.ts",
+        "packages/repositories/src/finance-repository.ts",
+        "apps/desktop/src/main/finance-application-adapter.ts",
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/renderer/App.tsx",
+        "scripts/verify-b4-payment-card-management-boundary.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/33-A-b4-payment-card-management-boundary.json",
+        "artifacts/validation/33-A-b4-payment-card-management-contract.json",
+        "artifacts/validation/33-A-b4-payment-card-management-runtime.json",
+        "docs/security/B4_PAYMENT_CARD_MANAGEMENT_THREAT_MODEL.md",
+        "docs/audit/33-A_B4_PAYMENT_CARD_MANAGEMENT_UST_KAPANIS.md",
+        "config/33-a-b4-payment-card-management-inventory.json"
       ]
     }
   ]

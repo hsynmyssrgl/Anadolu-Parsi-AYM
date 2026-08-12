@@ -491,6 +491,42 @@ export class RepositoryBackedFinanceQueryPort implements FinanceQueryPort {
     );
   }
 
+  public async listPaymentCards(
+    context: FinanceApplicationContext
+  ): ReturnType<FinanceQueryPort['listPaymentCards']> {
+    const intent: FinancePolicyIntent = {
+      action: 'read',
+      capability: 'finance.read',
+      resourceType: 'finance_record',
+      resourceId: '*',
+      purpose: 'finance'
+    };
+    return executeGoverned(this.dependencies, context, intent, (authorization, enforcementPoint) =>
+      this.dependencies.transactionExecutor.execute(context.correlationId, (transaction) => {
+        const governedInput = { context, intent, authorization, transaction };
+        const established = establishGovernedTransaction(enforcementPoint, governedInput);
+        if (!established.ok) return established;
+        const execution = governedRepositoryContext(context, transaction, authorization, intent);
+        const snapshot = loadAuthorizationSnapshot(this.dependencies, context, execution);
+        if (!snapshot.ok) return snapshot;
+        const cards = this.dependencies.financeRepository.listPaymentCards(execution);
+        return cards.ok
+          ? {
+              ok: true,
+              value: cards.value.filter((card) => legacyAllowed(this.#authorization, snapshot.value, {
+                action: 'read',
+                resourceType: 'finance_record',
+                resourceId: card.id,
+                ownerPersonId: card.ownerPersonId,
+                occurredAt: execution.occurredAt,
+                privacy: card.privacy
+              }))
+            }
+          : cards;
+      })
+    );
+  }
+
   public async validateIban(
     context: FinanceApplicationContext,
     iban: string
@@ -568,6 +604,10 @@ class GovernedFinanceWriteScope implements FinanceWriteScope {
 
   public insertBankAccount(input: Parameters<FinanceWriteScope['insertBankAccount']>[0]) {
     return this.dependencies.financeRepository.insertBankAccount(this.execution, input);
+  }
+
+  public insertPaymentCard(input: Parameters<FinanceWriteScope['insertPaymentCard']>[0]) {
+    return this.dependencies.financeRepository.insertPaymentCard(this.execution, input);
   }
 
   public appendAudit(input: Parameters<FinanceWriteScope['appendAudit']>[0]) {

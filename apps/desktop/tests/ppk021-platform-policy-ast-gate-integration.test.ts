@@ -16,7 +16,7 @@ describe('32-Q PPK-021 desktop content-free AST gate boundary', () => {
       enforcement: 'fail-closed',
       defaultDecision: 'DENY',
       protectedRuleCount: 6,
-      exactAllowlistEntries: 535,
+      exactAllowlistEntries: 537,
       directRoleAuthorizationBypasses: 0,
       wildcardsAllowed: false,
       buildGateReplacesRuntimePolicy: false,

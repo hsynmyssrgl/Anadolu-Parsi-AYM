@@ -20,16 +20,19 @@ import type {
   CreateBankAccountInput,
   CreateFinanceRecordInput,
   CreateFinanceValuationInput,
+  CreatePaymentCardInput,
   FamilyRole,
   FinanceRecordView,
   FinanceValuationView,
   IbanStructuralValidationView,
+  PaymentCardView,
   RecordPrivacy
 } from '@ppt/domain';
 import type { DomainEvent } from '@ppt/events';
 import type { AuthorizationAction } from '@ppt/security';
 import {
   inspectBankAccountDataContract,
+  inspectPaymentCardDataContract,
   inspectProhibitedBankingSecrets,
   maskIban,
   normalizeIban,
@@ -61,6 +64,7 @@ export interface FinanceQueryPort {
   listValuations(context: FinanceApplicationContext): Promise<Result<readonly FinanceValuationView[], AppError>>;
   listBankInstitutions(context: FinanceApplicationContext): Promise<Result<readonly BankInstitutionView[], AppError>>;
   listBankAccounts(context: FinanceApplicationContext): Promise<Result<readonly BankAccountView[], AppError>>;
+  listPaymentCards(context: FinanceApplicationContext): Promise<Result<readonly PaymentCardView[], AppError>>;
   validateIban(context: FinanceApplicationContext, iban: string): Promise<Result<IbanStructuralValidationView, AppError>>;
 }
 
@@ -91,6 +95,14 @@ export interface FinanceWriteScope {
     familyId: FamilyId;
     ownerPersonId: PersonId;
     normalizedIban: string;
+    createdAt: IsoDateTime;
+  }): Result<void, AppError>;
+  insertPaymentCard(row: PaymentCardView & {
+    familyId: FamilyId;
+    ownerPersonId: PersonId;
+    statementClosingAt: IsoDateTime;
+    paymentDueAt: IsoDateTime;
+    annualFeeDueAt?: IsoDateTime;
     createdAt: IsoDateTime;
   }): Result<void, AppError>;
   appendAudit(input: {
@@ -162,6 +174,11 @@ export class ListBankInstitutionsUseCase {
 export class ListBankAccountsUseCase {
   public constructor(private readonly query: FinanceQueryPort) {}
   public execute(context: FinanceApplicationContext) { return this.query.listBankAccounts(context); }
+}
+
+export class ListPaymentCardsUseCase {
+  public constructor(private readonly query: FinanceQueryPort) {}
+  public execute(context: FinanceApplicationContext) { return this.query.listPaymentCards(context); }
 }
 
 export class ValidateIbanUseCase {
@@ -414,6 +431,184 @@ export class CreateBankAccountUseCase {
       });
       if (!event.ok) return event;
       const { familyId: _familyId, normalizedIban: _normalizedIban, ...view } = account;
+      return ok(view);
+    });
+  }
+}
+
+const paymentCardContractError = (
+  context: FinanceApplicationContext,
+  command: CreatePaymentCardInput
+): AppError | undefined => {
+  const inspection = inspectPaymentCardDataContract(command);
+  if (inspection.prohibitedFields.length > 0 || inspection.panLikeValueDetected) {
+    return invalid(context, 'Tam PAN, kart numarası, CVV/CVC, PIN ve internet bankacılığı parolası kart sözleşmesinde kesinlikle kabul edilmez.');
+  }
+  if (inspection.unknownFields.length > 0) return invalid(context, 'Kart sözleşmesinde tanımsız alan bulunuyor.');
+  return undefined;
+};
+
+const finiteMoney = (value: number): boolean => Number.isFinite(value) && value >= 0 && value <= 1_000_000_000_000_000;
+
+export class CreatePaymentCardUseCase {
+  public constructor(private readonly unitOfWork: FinanceUnitOfWork) {}
+
+  public async execute(input: {
+    context: FinanceApplicationContext;
+    command: CreatePaymentCardInput;
+    identifiers: { cardId: string; auditId: string; outboxEventId: EventId };
+  }): Promise<Result<PaymentCardView, AppError>> {
+    const contractError = paymentCardContractError(input.context, input.command);
+    if (contractError) return err(contractError);
+    const productName = input.command.productName.trim();
+    const institutionCode = input.command.institutionCode.trim();
+    const currency = input.command.currency.trim().toUpperCase();
+    if (productName.length < 2 || productName.length > 120) return err(invalid(input.context, 'Kart ürün adı 2-120 karakter olmalıdır.'));
+    if (!/^\d{4}$/u.test(institutionCode)) return err(invalid(input.context, 'TCMB kurum kodu dört rakam olmalıdır.'));
+    if (!/^\d{4}$/u.test(input.command.last4)) return err(invalid(input.context, 'Kart için yalnız dört haneli son bölüm kabul edilir.'));
+    if (!/^[A-Z]{3}$/u.test(currency)) return err(invalid(input.context, 'Kart para birimi üç büyük harfli ISO kodu olmalıdır.'));
+    if (!['credit','debit','prepaid'].includes(input.command.kind)) return err(invalid(input.context, 'Kart türü geçersiz.'));
+    if (!['troy','visa','mastercard','american_express','unionpay','other'].includes(input.command.network)) return err(invalid(input.context, 'Kart ağı geçersiz.'));
+    if (!['physical','virtual','supplementary'].includes(input.command.formFactor)) return err(invalid(input.context, 'Kart biçimi geçersiz.'));
+    if (!['none','minimum','full'].includes(input.command.automaticPaymentMode)) return err(invalid(input.context, 'Otomatik ödeme modu geçersiz.'));
+    if (!['active','frozen','closed'].includes(input.command.status)) return err(invalid(input.context, 'Kart durumu geçersiz.'));
+    if (!['private','selected_members','family'].includes(input.command.privacy)) return err(invalid(input.context, 'Kart gizlilik düzeyi geçersiz.'));
+    const moneyValues = [
+      input.command.creditLimit,
+      input.command.availableLimit,
+      input.command.currentDebt,
+      input.command.statementBalance,
+      input.command.installmentOutstandingAmount,
+      input.command.rewardPoints,
+      input.command.rewardMiles,
+      input.command.annualFeeAmount
+    ];
+    if (!moneyValues.every(finiteMoney)) return err(invalid(input.context, 'Kart tutarları sonlu, negatif olmayan ve güvenli sınır içinde olmalıdır.'));
+    if (input.command.availableLimit > input.command.creditLimit) return err(invalid(input.context, 'Kullanılabilir limit toplam kart limitini aşamaz.'));
+    if (!Number.isInteger(input.command.activeInstallmentCount) || input.command.activeInstallmentCount < 0 || input.command.activeInstallmentCount > 999) {
+      return err(invalid(input.context, 'Aktif taksit sayısı 0-999 arasında tam sayı olmalıdır.'));
+    }
+    if ((input.command.activeInstallmentCount === 0) !== (input.command.installmentOutstandingAmount === 0)) {
+      return err(invalid(input.context, 'Taksit sayısı ile kalan taksit tutarı birlikte sıfır veya birlikte pozitif olmalıdır.'));
+    }
+    if (!Number.isInteger(input.command.utilizationAlertBasisPoints) || input.command.utilizationAlertBasisPoints < 1 || input.command.utilizationAlertBasisPoints > 10_000) {
+      return err(invalid(input.context, 'Limit kullanım uyarısı 1-10.000 baz puan arasında olmalıdır.'));
+    }
+    if (!Number.isInteger(input.command.paymentDueAlertDays) || input.command.paymentDueAlertDays < 0 || input.command.paymentDueAlertDays > 365) {
+      return err(invalid(input.context, 'Son ödeme uyarısı 0-365 gün arasında olmalıdır.'));
+    }
+    if (typeof input.command.alertsEnabled !== 'boolean') return err(invalid(input.context, 'Kart uyarı durumu boolean olmalıdır.'));
+    const statementClosingAt = date(input.command.statementClosingAt, input.context, 'Ekstre kesim tarihi');
+    if (!statementClosingAt.ok) return statementClosingAt;
+    const paymentDueAt = date(input.command.paymentDueAt, input.context, 'Son ödeme tarihi');
+    if (!paymentDueAt.ok) return paymentDueAt;
+    if (paymentDueAt.value < statementClosingAt.value) return err(invalid(input.context, 'Son ödeme tarihi ekstre kesim tarihinden önce olamaz.'));
+    const annualFeeDueAt = input.command.annualFeeDueAt
+      ? date(input.command.annualFeeDueAt, input.context, 'Yıllık ücret tarihi')
+      : undefined;
+    if (annualFeeDueAt && !annualFeeDueAt.ok) return annualFeeDueAt;
+    if (input.command.annualFeeAmount > 0 && !annualFeeDueAt) return err(invalid(input.context, 'Yıllık ücret pozitifse ücret tarihi zorunludur.'));
+    const ownerPersonId = asPersonId(input.command.ownerPersonId);
+    const intent: FinancePolicyIntent = {
+      action: 'create',
+      capability: 'finance.write',
+      resourceType: 'finance_record',
+      resourceId: input.identifiers.cardId,
+      purpose: 'finance',
+      ownerPersonId,
+      privacy: input.command.privacy
+    };
+
+    return this.unitOfWork.execute(input.context, intent, (scope) => {
+      const person = scope.findPerson(ownerPersonId);
+      if (!person.ok) return person;
+      if (!person.value) return err(missing(input.context, 'Kartın bağlanacağı aile üyesi bulunamadı.'));
+      const institution = scope.findBankInstitution(institutionCode);
+      if (!institution.ok) return institution;
+      if (!institution.value || institution.value.status !== 'active' || !institution.value.supportsCustomerAccounts) {
+        return err(missing(input.context, 'Seçilen etkin kart kurumu katalogda bulunamadı.'));
+      }
+      const authorization = scope.authorize({
+        action: 'create',
+        resourceType: 'finance_record',
+        resourceId: input.identifiers.cardId,
+        ownerPersonId,
+        privacy: input.command.privacy
+      });
+      if (!authorization.ok) return authorization;
+      if (!authorization.value) return err(denied(input.context));
+      const card: PaymentCardView & {
+        familyId: FamilyId;
+        ownerPersonId: PersonId;
+        statementClosingAt: IsoDateTime;
+        paymentDueAt: IsoDateTime;
+        annualFeeDueAt?: IsoDateTime;
+        createdAt: IsoDateTime;
+      } = {
+        id: input.identifiers.cardId,
+        familyId: input.context.familyId,
+        ownerPersonId,
+        institutionCode,
+        institutionOfficialName: institution.value.officialName,
+        institutionIconKey: institution.value.iconKey,
+        productName,
+        kind: input.command.kind,
+        network: input.command.network,
+        formFactor: input.command.formFactor,
+        last4: input.command.last4,
+        currency,
+        creditLimit: input.command.creditLimit,
+        availableLimit: input.command.availableLimit,
+        currentDebt: input.command.currentDebt,
+        statementBalance: input.command.statementBalance,
+        statementClosingAt: statementClosingAt.value,
+        paymentDueAt: paymentDueAt.value,
+        activeInstallmentCount: input.command.activeInstallmentCount,
+        installmentOutstandingAmount: input.command.installmentOutstandingAmount,
+        automaticPaymentMode: input.command.automaticPaymentMode,
+        rewardPoints: input.command.rewardPoints,
+        rewardMiles: input.command.rewardMiles,
+        annualFeeAmount: input.command.annualFeeAmount,
+        ...(annualFeeDueAt?.ok ? { annualFeeDueAt: annualFeeDueAt.value } : {}),
+        alertsEnabled: input.command.alertsEnabled,
+        utilizationAlertBasisPoints: input.command.utilizationAlertBasisPoints,
+        paymentDueAlertDays: input.command.paymentDueAlertDays,
+        status: input.command.status,
+        privacy: input.command.privacy,
+        createdAt: scope.occurredAt
+      };
+      const saved = scope.insertPaymentCard(card);
+      if (!saved.ok) return saved;
+      const audit = scope.appendAudit({
+        id: input.identifiers.auditId,
+        action: 'finance.payment_card.created',
+        resourceType: 'finance_record',
+        resourceId: card.id,
+        occurredAt: scope.occurredAt,
+        actorId: input.context.actor.userId
+      });
+      if (!audit.ok) return audit;
+      const event = scope.enqueueEvent({
+        eventId: input.identifiers.outboxEventId,
+        eventType: 'finance.payment_card.created',
+        eventVersion: 1,
+        aggregateType: 'finance_record',
+        aggregateId: card.id,
+        occurredAt: scope.occurredAt,
+        actorId: input.context.actor.userId,
+        correlationId: input.context.correlationId,
+        payload: {
+          cardId: card.id,
+          ownerPersonId,
+          institutionCode,
+          kind: card.kind,
+          formFactor: card.formFactor,
+          currency: card.currency,
+          privacy: card.privacy
+        }
+      });
+      if (!event.ok) return event;
+      const { familyId: _familyId, ...view } = card;
       return ok(view);
     });
   }

@@ -8,7 +8,19 @@ export default defineConfig({
   base: './',
   build: {
     outDir: 'dist/renderer',
-    emptyOutDir: false
+    emptyOutDir: false,
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            {
+              name: 'vendor',
+              test: /node_modules/
+            }
+          ]
+        }
+      }
+    }
   },
   server: {
     host: '127.0.0.1',

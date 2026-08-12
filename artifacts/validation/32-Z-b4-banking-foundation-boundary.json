@@ -73,7 +73,7 @@
       "passed": true
     },
     {
-      "name": "migration 78 is the latest exact banking migration",
+      "name": "migration 78 remains the exact banking foundation baseline",
       "passed": true
     },
     {
@@ -146,10 +146,10 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 78,
+  "latestDatabaseMigration": 79,
   "catalogRows": 71,
-  "ppk021ExactAllowlistEntries": 535,
+  "ppk021ExactAllowlistEntries": 537,
   "ppk022CapabilitySurfaces": 238,
   "networkVerificationPerformed": false,
-  "generatedAt": "2026-08-12T13:39:39.566Z"
+  "generatedAt": "2026-08-12T14:22:49.015Z"
 }

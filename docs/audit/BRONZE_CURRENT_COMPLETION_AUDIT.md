@@ -1,6 +1,6 @@
 # Bronze guncel tamamlama denetimi
 
-Olusturma (UTC): 2026-08-12T13:37:58.593Z
+Olusturma (UTC): 2026-08-12T14:19:13.083Z
 
 ## Sonuc
 
@@ -23,19 +23,19 @@ Olusturma (UTC): 2026-08-12T13:37:58.593Z
 ## Yuzde gercekligi
 
 - Resmi agirlikli Bronze ilerlemesi: **%25**
-- Kati gereksinim kapanisi: **%14.2857** (50/350)
-- Uygulama zinciri kapsami: **%14.7714**
-- Yonetisim ve kanit zinciri kapsami: **%51.7143**
+- Kati gereksinim kapanisi: **%14.8571** (52/350)
+- Uygulama zinciri kapsami: **%15.3429**
+- Yonetisim ve kanit zinciri kapsami: **%52.0952**
 
 Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 
 ## Kapsam durumu
 
-- COMPLETE: 50
+- COMPLETE: 52
 - PARTIAL: 27
 - FOUNDATION_STARTED: 1
-- NOT_IMPLEMENTED: 272
-- Toplam acik gereksinim: 300
+- NOT_IMPLEMENTED: 270
+- Toplam acik gereksinim: 298
 
 ## Kural ve kapilar
 

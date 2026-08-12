@@ -28,6 +28,16 @@ Bir çelişki olduğunda aşağıdaki sıra uygulanır:
 Eski kararlar silinmez; tarihsel kanıt olarak korunur. Ancak aktif ürün davranışını
 belirleyemez. Çelişki sessizce birleştirilmez; değişiklik kaydına işlenir.
 
+## DEC-212 — B4 kart ürünü ve takip otomasyonları
+
+33-A ile B4-05 ve B4-06 tek korumalı kart aggregate'ında tamamlanır. Kurum, ürün,
+kart ağı, tür/biçim, yalnız son dört hane, limit, kullanılabilir limit, borç,
+ekstre, son ödeme, taksit özeti, otomatik ödeme takip modu, puan/mil, yıllık ücret
+ve yerel uyarılar bağlanır. Tam PAN, CVV/CVC, PIN ve parola reddedilir; banka
+talimatı veya ödeme icrası yapılmaz. Migration 79 eklenir; PPK-021 537 girdiye
+çıkar ve PPK-022 238 kalır. Ayrıntılı karar:
+`docs/decisions/DEC-212-b4-payment-card-management.md`
+
 ## DEC-211 — B4 banka kurumu, hesap, IBAN ve sır reddi temeli
 
 32-Z ile TCMB 2026 Ödeme Sistemleri Katılımcıları kaynağına bağlı 71 kurum yerel

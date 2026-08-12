@@ -559,6 +559,76 @@ export interface CreateBankAccountInput {
   status:BankAccountStatus;
   privacy:RecordPrivacy;
 }
+export const PAYMENT_CARD_KINDS = ['credit','debit','prepaid'] as const;
+export type PaymentCardKind = typeof PAYMENT_CARD_KINDS[number];
+export const PAYMENT_CARD_NETWORKS = ['troy','visa','mastercard','american_express','unionpay','other'] as const;
+export type PaymentCardNetwork = typeof PAYMENT_CARD_NETWORKS[number];
+export const PAYMENT_CARD_FORM_FACTORS = ['physical','virtual','supplementary'] as const;
+export type PaymentCardFormFactor = typeof PAYMENT_CARD_FORM_FACTORS[number];
+export const PAYMENT_CARD_AUTOMATIC_PAYMENT_MODES = ['none','minimum','full'] as const;
+export type PaymentCardAutomaticPaymentMode = typeof PAYMENT_CARD_AUTOMATIC_PAYMENT_MODES[number];
+export const PAYMENT_CARD_STATUSES = ['active','frozen','closed'] as const;
+export type PaymentCardStatus = typeof PAYMENT_CARD_STATUSES[number];
+export interface PaymentCardView {
+  id:string;
+  ownerPersonId:string;
+  institutionCode:string;
+  institutionOfficialName:string;
+  institutionIconKey:string;
+  productName:string;
+  kind:PaymentCardKind;
+  network:PaymentCardNetwork;
+  formFactor:PaymentCardFormFactor;
+  last4:string;
+  currency:string;
+  creditLimit:number;
+  availableLimit:number;
+  currentDebt:number;
+  statementBalance:number;
+  statementClosingAt:string;
+  paymentDueAt:string;
+  activeInstallmentCount:number;
+  installmentOutstandingAmount:number;
+  automaticPaymentMode:PaymentCardAutomaticPaymentMode;
+  rewardPoints:number;
+  rewardMiles:number;
+  annualFeeAmount:number;
+  annualFeeDueAt?:string;
+  alertsEnabled:boolean;
+  utilizationAlertBasisPoints:number;
+  paymentDueAlertDays:number;
+  status:PaymentCardStatus;
+  privacy:RecordPrivacy;
+  createdAt:string;
+}
+export interface CreatePaymentCardInput {
+  ownerPersonId:string;
+  institutionCode:string;
+  productName:string;
+  kind:PaymentCardKind;
+  network:PaymentCardNetwork;
+  formFactor:PaymentCardFormFactor;
+  last4:string;
+  currency:string;
+  creditLimit:number;
+  availableLimit:number;
+  currentDebt:number;
+  statementBalance:number;
+  statementClosingAt:string;
+  paymentDueAt:string;
+  activeInstallmentCount:number;
+  installmentOutstandingAmount:number;
+  automaticPaymentMode:PaymentCardAutomaticPaymentMode;
+  rewardPoints:number;
+  rewardMiles:number;
+  annualFeeAmount:number;
+  annualFeeDueAt?:string;
+  alertsEnabled:boolean;
+  utilizationAlertBasisPoints:number;
+  paymentDueAlertDays:number;
+  status:PaymentCardStatus;
+  privacy:RecordPrivacy;
+}
 export interface HealthRecordView { id:string; ownerPersonId:string; title:string; kind:'appointment'|'medication'|'diagnosis'|'vaccine'|'note'; privacy:RecordPrivacy; provider?:string; notes?:string; occurredAt:string; createdAt:string; }
 export interface CreateHealthRecordInput { ownerPersonId:string; title:string; kind:HealthRecordView['kind']; privacy:RecordPrivacy; provider?:string; notes?:string; occurredAt:string; }
 

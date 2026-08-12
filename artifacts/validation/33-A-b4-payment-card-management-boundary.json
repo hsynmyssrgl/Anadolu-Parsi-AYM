@@ -1,0 +1,168 @@
+{
+  "schemaVersion": 1,
+  "step": "33-A",
+  "requirements": [
+    "B4-05",
+    "B4-06"
+  ],
+  "status": "PASS",
+  "checksPassed": 37,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "scope closes exactly B4-05 and B4-06 under DEC-212",
+      "passed": true
+    },
+    {
+      "name": "inventory has no package blocker and keeps successor finance scope open",
+      "passed": true
+    },
+    {
+      "name": "scope is last-four-only and claims no bank execution",
+      "passed": true
+    },
+    {
+      "name": "domain exposes exact payment-card types and create/view contracts",
+      "passed": true
+    },
+    {
+      "name": "domain covers B4-05 limit debt statement and due fields",
+      "passed": true
+    },
+    {
+      "name": "domain covers B4-06 installment form factor payment reward fee and alerts",
+      "passed": true
+    },
+    {
+      "name": "card contract has an exact field set and repeats secret inspection",
+      "passed": true
+    },
+    {
+      "name": "card contract rejects canonical secret fields and Luhn-valid PAN values",
+      "passed": true
+    },
+    {
+      "name": "application validates last four and never accepts a complete PAN",
+      "passed": true
+    },
+    {
+      "name": "application validates finite summaries limit relation installment pairing and dates",
+      "passed": true
+    },
+    {
+      "name": "application requires person institution authorization and finance policy write",
+      "passed": true
+    },
+    {
+      "name": "card audit and outbox omit last four and financial summaries",
+      "passed": true
+    },
+    {
+      "name": "repository contract carries typed payment-card rows and operations",
+      "passed": true
+    },
+    {
+      "name": "repository maps all B4-05 and B4-06 tracked values",
+      "passed": true
+    },
+    {
+      "name": "sensitive inventory counts cards as last-four-only",
+      "passed": true
+    },
+    {
+      "name": "person lifecycle deletion inspection includes payment cards",
+      "passed": true
+    },
+    {
+      "name": "migration 79 is latest and exact",
+      "passed": true
+    },
+    {
+      "name": "payment-card schema contains only last four and no prohibited secret columns",
+      "passed": true
+    },
+    {
+      "name": "schema fixes card kind network form factor status and privacy enums",
+      "passed": true
+    },
+    {
+      "name": "schema constrains finance summaries, dates, installments, fees and alerts",
+      "passed": true
+    },
+    {
+      "name": "migration requires an unused exact durable finance receipt",
+      "passed": true
+    },
+    {
+      "name": "migration prevents receipt reuse across all finance owners",
+      "passed": true
+    },
+    {
+      "name": "migration blocks direct mutation and deletion",
+      "passed": true
+    },
+    {
+      "name": "production adapter applies governed list filtering and insert",
+      "passed": true
+    },
+    {
+      "name": "DataStore composes both reviewed payment-card use cases",
+      "passed": true
+    },
+    {
+      "name": "main and preload bind the two exact payment-card channels",
+      "passed": true
+    },
+    {
+      "name": "IPC validates exact card payload and secret values before dispatch",
+      "passed": true
+    },
+    {
+      "name": "renderer declaration exposes both typed payment-card methods",
+      "passed": true
+    },
+    {
+      "name": "finance UI covers B4-05 tracked card fields and last-four truth",
+      "passed": true
+    },
+    {
+      "name": "finance UI covers B4-06 installments forms rewards fees and alerts",
+      "passed": true
+    },
+    {
+      "name": "UI states automatic payment is tracking only and no bank execution occurs",
+      "passed": true
+    },
+    {
+      "name": "targeted tests cover contract IPC persistence receipts and no-card-data payload",
+      "passed": true
+    },
+    {
+      "name": "decision and threat model preserve no-bank-execution truth",
+      "passed": true
+    },
+    {
+      "name": "audit document binds exact evidence triplet and successor scope",
+      "passed": true
+    },
+    {
+      "name": "PPK-021 exact ratchet reviews both new compositions",
+      "passed": true
+    },
+    {
+      "name": "PPK-022 capability ratchet remains unchanged and green",
+      "passed": true
+    },
+    {
+      "name": "root lifecycle and explicit package scripts bind 33-A",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "latestDatabaseMigration": 79,
+  "ppk021ExactAllowlistEntries": 537,
+  "ppk022CapabilitySurfaces": 238,
+  "prohibitedSecretColumns": 0,
+  "bankExecutionPerformed": false,
+  "generatedAt": "2026-08-12T14:22:52.416Z"
+}

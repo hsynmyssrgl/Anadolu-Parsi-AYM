@@ -3,7 +3,8 @@ import type {
   BankAccountView,
   BankInstitutionView,
   FinanceRecordView,
-  FinanceValuationView
+  FinanceValuationView,
+  PaymentCardView
 } from '@ppt/domain';
 import type {
   PolicyAuthorizedRepositoryExecutionContext,
@@ -34,6 +35,17 @@ export interface NewBankAccountRow extends BankAccountRow {
   readonly normalizedIban: string;
 }
 
+export interface PaymentCardRow extends PaymentCardView {
+  readonly familyId: FamilyId;
+  readonly ownerPersonId: PersonId;
+  readonly statementClosingAt: IsoDateTime;
+  readonly paymentDueAt: IsoDateTime;
+  readonly annualFeeDueAt?: IsoDateTime;
+  readonly createdAt: IsoDateTime;
+}
+
+export type NewPaymentCardRow = PaymentCardRow;
+
 export interface FinanceRepositoryPort {
     listRecords(context: PolicyAuthorizedRepositoryExecutionContext): RepositoryResult<readonly FinanceRecordRow[]>;
     findRecord(context: PolicyAuthorizedRepositoryExecutionContext, id: string): RepositoryResult<FinanceRecordRow | null>;
@@ -44,6 +56,8 @@ export interface FinanceRepositoryPort {
     findBankInstitution(context: PolicyAuthorizedRepositoryExecutionContext, institutionCode: string): RepositoryResult<BankInstitutionView | null>;
     listBankAccounts(context: PolicyAuthorizedRepositoryExecutionContext): RepositoryResult<readonly BankAccountRow[]>;
     insertBankAccount(context: PolicyAuthorizedRepositoryExecutionContext, row: NewBankAccountRow): RepositoryResult<void>;
+    listPaymentCards(context: PolicyAuthorizedRepositoryExecutionContext): RepositoryResult<readonly PaymentCardRow[]>;
+    insertPaymentCard(context: PolicyAuthorizedRepositoryExecutionContext, row: NewPaymentCardRow): RepositoryResult<void>;
 }
 
 /**

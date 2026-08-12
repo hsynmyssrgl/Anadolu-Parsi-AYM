@@ -1,5 +1,6 @@
 import {
   BANK_ACCOUNT_INPUT_KEYS,
+  PAYMENT_CARD_INPUT_KEYS,
   FINANCE_RECORD_INPUT_KEYS,
   FINANCE_VALUATION_INPUT_KEYS,
   containsLikelyFullPan,
@@ -105,6 +106,11 @@ const bankAccountTypes = new Set(['checking','savings','time_deposit','participa
 const bankAccountStatuses = new Set(['active','inactive','closed']);
 const recordPrivacyValues = new Set(['private','selected_members','family']);
 const financeRecordKinds = new Set(['asset','debt','income','expense']);
+const paymentCardKinds = new Set(['credit','debit','prepaid']);
+const paymentCardNetworks = new Set(['troy','visa','mastercard','american_express','unionpay','other']);
+const paymentCardFormFactors = new Set(['physical','virtual','supplementary']);
+const paymentCardAutomaticPaymentModes = new Set(['none','minimum','full']);
+const paymentCardStatuses = new Set(['active','frozen','closed']);
 
 const containsProhibitedBankingSecret = (
   value: Record<string, unknown>,
@@ -147,6 +153,61 @@ const bankAccountInput = (args: readonly unknown[]): IpcIntegrationPolicyDecisio
     && recordPrivacyValues.has(String(value.privacy))
     ? accepted()
     : rejected('BANK_ACCOUNT_ARGUMENT_INVALID', '$[0]');
+};
+
+const paymentCardInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => {
+  if (args.length !== 1) return rejected('ARGUMENT_COUNT_MISMATCH');
+  const value = args[0];
+  if (!isObject(value)) return rejected('OBJECT_ARGUMENT_REQUIRED', '$[0]');
+  const secretRejection = containsProhibitedBankingSecret(value, ['productName']);
+  if (secretRejection) return secretRejection;
+  if (!hasOnlyKeys(value, PAYMENT_CARD_INPUT_KEYS)) return rejected('UNKNOWN_OBJECT_FIELD', '$[0]');
+  const finiteAmount = (candidate: unknown): candidate is number =>
+    typeof candidate === 'number' && Number.isFinite(candidate) && candidate >= 0 && candidate <= 1_000_000_000_000_000;
+  const amountsValid = [
+    value.creditLimit,
+    value.availableLimit,
+    value.currentDebt,
+    value.statementBalance,
+    value.installmentOutstandingAmount,
+    value.rewardPoints,
+    value.rewardMiles,
+    value.annualFeeAmount
+  ].every(finiteAmount);
+  const installmentPairValid = typeof value.activeInstallmentCount === 'number'
+    && typeof value.installmentOutstandingAmount === 'number'
+    && ((value.activeInstallmentCount === 0 && value.installmentOutstandingAmount === 0)
+      || (value.activeInstallmentCount > 0 && value.installmentOutstandingAmount > 0));
+  const annualFeePairValid = typeof value.annualFeeAmount === 'number'
+    && (value.annualFeeAmount === 0 || boundedString(value.annualFeeDueAt, 64));
+  return boundedString(value.ownerPersonId, 128)
+    && typeof value.institutionCode === 'string' && /^\d{4}$/u.test(value.institutionCode)
+    && boundedString(value.productName, 120)
+    && paymentCardKinds.has(String(value.kind))
+    && paymentCardNetworks.has(String(value.network))
+    && paymentCardFormFactors.has(String(value.formFactor))
+    && typeof value.last4 === 'string' && /^\d{4}$/u.test(value.last4)
+    && typeof value.currency === 'string' && /^[A-Za-z]{3}$/u.test(value.currency)
+    && amountsValid
+    && typeof value.availableLimit === 'number'
+    && typeof value.creditLimit === 'number'
+    && value.availableLimit <= value.creditLimit
+    && boundedString(value.statementClosingAt, 64)
+    && boundedString(value.paymentDueAt, 64)
+    && optionalInteger(value.activeInstallmentCount, 0, 999)
+    && installmentPairValid
+    && paymentCardAutomaticPaymentModes.has(String(value.automaticPaymentMode))
+    && optionalBoundedString(value.annualFeeDueAt, 64)
+    && annualFeePairValid
+    && typeof value.alertsEnabled === 'boolean'
+    && typeof value.utilizationAlertBasisPoints === 'number'
+    && optionalInteger(value.utilizationAlertBasisPoints, 1, 10_000)
+    && typeof value.paymentDueAlertDays === 'number'
+    && optionalInteger(value.paymentDueAlertDays, 0, 365)
+    && paymentCardStatuses.has(String(value.status))
+    && recordPrivacyValues.has(String(value.privacy))
+    ? accepted()
+    : rejected('PAYMENT_CARD_ARGUMENT_INVALID', '$[0]');
 };
 
 const financeRecordInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => {
@@ -239,6 +300,7 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
     case 'finance:listValuations':
     case 'finance:listBankInstitutions':
     case 'finance:listBankAccounts':
+    case 'finance:listPaymentCards':
       return zeroArguments(args);
     case 'finance:create':
       return financeRecordInput(args);
@@ -248,6 +310,8 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
       return ibanValidationInput(args);
     case 'finance:createBankAccount':
       return bankAccountInput(args);
+    case 'finance:createPaymentCard':
+      return paymentCardInput(args);
     case 'ai:listConsents':
       return zeroArguments(args);
     case 'ai:upsertConsent':

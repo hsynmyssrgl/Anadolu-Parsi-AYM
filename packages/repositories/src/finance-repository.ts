@@ -6,6 +6,11 @@ import type {
   BankInstitutionView,
   FinanceRecordView,
   FinanceValuationView,
+  PaymentCardAutomaticPaymentMode,
+  PaymentCardFormFactor,
+  PaymentCardKind,
+  PaymentCardNetwork,
+  PaymentCardStatus,
   RecordPrivacy
 } from '@ppt/domain';
 import {
@@ -16,6 +21,8 @@ import {
   type FinanceRepositoryPort,
   type FinanceValuationRow,
   type NewBankAccountRow,
+  type NewPaymentCardRow,
+  type PaymentCardRow,
   type PolicyAuthorizedRepositoryExecutionContext,
   type RepositoryExecutionContext,
   type RepositoryResult
@@ -101,6 +108,40 @@ const mapBankAccount = (row: Record<string, unknown>): BankAccountRow => {
     createdAt: asIsoDateTime(String(row.created_at))
   };
 };
+
+const mapPaymentCard = (row: Record<string, unknown>): PaymentCardRow => ({
+  id: String(row.id),
+  familyId: asFamilyId(String(row.family_id)),
+  ownerPersonId: asPersonId(String(row.owner_person_id)),
+  institutionCode: String(row.institution_code),
+  institutionOfficialName: String(row.institution_official_name),
+  institutionIconKey: String(row.institution_icon_key),
+  productName: String(row.product_name),
+  kind: String(row.kind) as PaymentCardKind,
+  network: String(row.network) as PaymentCardNetwork,
+  formFactor: String(row.form_factor) as PaymentCardFormFactor,
+  last4: String(row.last4),
+  currency: String(row.currency),
+  creditLimit: Number(row.credit_limit),
+  availableLimit: Number(row.available_limit),
+  currentDebt: Number(row.current_debt),
+  statementBalance: Number(row.statement_balance),
+  statementClosingAt: asIsoDateTime(String(row.statement_closing_at)),
+  paymentDueAt: asIsoDateTime(String(row.payment_due_at)),
+  activeInstallmentCount: Number(row.active_installment_count),
+  installmentOutstandingAmount: Number(row.installment_outstanding_amount),
+  automaticPaymentMode: String(row.automatic_payment_mode) as PaymentCardAutomaticPaymentMode,
+  rewardPoints: Number(row.reward_points),
+  rewardMiles: Number(row.reward_miles),
+  annualFeeAmount: Number(row.annual_fee_amount),
+  ...(row.annual_fee_due_at ? { annualFeeDueAt: asIsoDateTime(String(row.annual_fee_due_at)) } : {}),
+  alertsEnabled: Number(row.alerts_enabled) === 1,
+  utilizationAlertBasisPoints: Number(row.utilization_alert_basis_points),
+  paymentDueAlertDays: Number(row.payment_due_alert_days),
+  status: String(row.status) as PaymentCardStatus,
+  privacy: String(row.privacy) as RecordPrivacy,
+  createdAt: asIsoDateTime(String(row.created_at))
+});
 
 const assertCollectionRead = (context: PolicyAuthorizedRepositoryExecutionContext): void => {
   assertPolicyAuthorizedRepositoryContext(context, {
@@ -408,6 +449,88 @@ export class SqliteFinanceRepository extends SqliteRepository implements Finance
         row.alias,
         row.branch ?? null,
         row.ownershipBasisPoints,
+        row.status,
+        row.privacy,
+        row.createdAt,
+        policy.receiptHash,
+        policy.receiptVersion,
+        policy.nonce,
+        context.correlationId,
+        policy.resourceType,
+        policy.resourceId,
+        policy.action,
+        policy.capability
+      );
+    });
+  }
+
+  public listPaymentCards(
+    context: PolicyAuthorizedRepositoryExecutionContext
+  ): RepositoryResult<readonly PaymentCardRow[]> {
+    assertCollectionRead(context);
+    return this.execute(context, () => (
+      this.database(context).prepare(`
+        SELECT card.id,card.family_id,card.owner_person_id,card.institution_code,
+               institution.official_name AS institution_official_name,
+               institution.icon_key AS institution_icon_key,
+               card.product_name,card.kind,card.network,card.form_factor,card.last4,card.currency,
+               card.credit_limit,card.available_limit,card.current_debt,card.statement_balance,
+               card.statement_closing_at,card.payment_due_at,card.active_installment_count,
+               card.installment_outstanding_amount,card.automatic_payment_mode,
+               card.reward_points,card.reward_miles,card.annual_fee_amount,card.annual_fee_due_at,
+               card.alerts_enabled,card.utilization_alert_basis_points,card.payment_due_alert_days,
+               card.status,card.privacy,card.created_at
+        FROM payment_cards card
+        JOIN bank_institutions institution ON institution.institution_code=card.institution_code
+        ORDER BY card.created_at DESC,card.id
+      `).all() as Array<Record<string, unknown>>
+    ).map(mapPaymentCard));
+  }
+
+  public insertPaymentCard(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    row: NewPaymentCardRow
+  ): RepositoryResult<void> {
+    const policy = financeWriteBinding(context, row.id, 'create');
+    return this.execute(context, () => {
+      this.database(context).prepare(`
+        INSERT INTO payment_cards(
+          id,family_id,owner_person_id,institution_code,product_name,kind,network,form_factor,
+          last4,currency,credit_limit,available_limit,current_debt,statement_balance,
+          statement_closing_at,payment_due_at,active_installment_count,
+          installment_outstanding_amount,automatic_payment_mode,reward_points,reward_miles,
+          annual_fee_amount,annual_fee_due_at,alerts_enabled,utilization_alert_basis_points,
+          payment_due_alert_days,status,privacy,created_at,policy_receipt_hash,
+          policy_receipt_version,policy_receipt_nonce,policy_correlation_id,policy_resource_type,
+          policy_resource_id,policy_action,policy_capability
+        ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+      `).run(
+        row.id,
+        row.familyId,
+        row.ownerPersonId,
+        row.institutionCode,
+        row.productName,
+        row.kind,
+        row.network,
+        row.formFactor,
+        row.last4,
+        row.currency,
+        row.creditLimit,
+        row.availableLimit,
+        row.currentDebt,
+        row.statementBalance,
+        row.statementClosingAt,
+        row.paymentDueAt,
+        row.activeInstallmentCount,
+        row.installmentOutstandingAmount,
+        row.automaticPaymentMode,
+        row.rewardPoints,
+        row.rewardMiles,
+        row.annualFeeAmount,
+        row.annualFeeDueAt ?? null,
+        row.alertsEnabled ? 1 : 0,
+        row.utilizationAlertBasisPoints,
+        row.paymentDueAlertDays,
         row.status,
         row.privacy,
         row.createdAt,

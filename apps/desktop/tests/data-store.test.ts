@@ -1060,6 +1060,111 @@ describe('FamilyDataStore', () => {
     store.close();
   });
 
+  it('B4-05/B4-06 kart zincirini yalnız son dört hane, exact receipt ve tam takip özetiyle uygular', async () => {
+    const { store, directory } = makeStore();
+    await authenticate(store);
+    const owner = await getAuthenticatedPerson(store);
+    const cards = await store.createPaymentCard({
+      ownerPersonId: owner.id,
+      institutionCode: '0046',
+      productName: 'Aile sanal kartı',
+      kind: 'credit',
+      network: 'troy',
+      formFactor: 'virtual',
+      last4: '7392',
+      currency: 'try',
+      creditLimit: 50_000,
+      availableLimit: 30_000,
+      currentDebt: 20_000,
+      statementBalance: 15_000,
+      statementClosingAt: '2026-08-10T00:00:00.000Z',
+      paymentDueAt: '2026-08-20T00:00:00.000Z',
+      activeInstallmentCount: 3,
+      installmentOutstandingAmount: 9_000,
+      automaticPaymentMode: 'full',
+      rewardPoints: 1_250,
+      rewardMiles: 400,
+      annualFeeAmount: 750,
+      annualFeeDueAt: '2027-08-10T00:00:00.000Z',
+      alertsEnabled: true,
+      utilizationAlertBasisPoints: 8_000,
+      paymentDueAlertDays: 3,
+      status: 'active',
+      privacy: 'private'
+    });
+    const card = cards.find((candidate) => candidate.productName === 'Aile sanal kartı')!;
+    expect(card).toMatchObject({
+      institutionCode: '0046',
+      institutionOfficialName: 'AKBANK T.A.Ş.',
+      kind: 'credit',
+      network: 'troy',
+      formFactor: 'virtual',
+      last4: '7392',
+      currency: 'TRY',
+      creditLimit: 50_000,
+      availableLimit: 30_000,
+      currentDebt: 20_000,
+      statementBalance: 15_000,
+      activeInstallmentCount: 3,
+      installmentOutstandingAmount: 9_000,
+      automaticPaymentMode: 'full',
+      rewardPoints: 1_250,
+      rewardMiles: 400,
+      annualFeeAmount: 750,
+      alertsEnabled: true,
+      utilizationAlertBasisPoints: 8_000,
+      paymentDueAlertDays: 3
+    });
+
+    await expect(store.createPaymentCard({
+      ownerPersonId: owner.id,
+      institutionCode: '0046',
+      productName: 'Kart 4111 1111 1111 1111',
+      kind: 'credit', network: 'visa', formFactor: 'physical', last4: '1111', currency: 'TRY',
+      creditLimit: 1_000, availableLimit: 1_000, currentDebt: 0, statementBalance: 0,
+      statementClosingAt: '2026-08-10T00:00:00.000Z', paymentDueAt: '2026-08-20T00:00:00.000Z',
+      activeInstallmentCount: 0, installmentOutstandingAmount: 0, automaticPaymentMode: 'none',
+      rewardPoints: 0, rewardMiles: 0, annualFeeAmount: 0, alertsEnabled: true,
+      utilizationAlertBasisPoints: 8_000, paymentDueAlertDays: 3, status: 'active', privacy: 'private'
+    })).rejects.toThrow(/Tam PAN/u);
+    await expect(store.createPaymentCard({
+      ownerPersonId: owner.id,
+      institutionCode: '0046',
+      productName: 'Sır alanı',
+      kind: 'credit', network: 'visa', formFactor: 'physical', last4: '1234', currency: 'TRY',
+      creditLimit: 1_000, availableLimit: 1_000, currentDebt: 0, statementBalance: 0,
+      statementClosingAt: '2026-08-10T00:00:00.000Z', paymentDueAt: '2026-08-20T00:00:00.000Z',
+      activeInstallmentCount: 0, installmentOutstandingAmount: 0, automaticPaymentMode: 'none',
+      rewardPoints: 0, rewardMiles: 0, annualFeeAmount: 0, alertsEnabled: true,
+      utilizationAlertBasisPoints: 8_000, paymentDueAlertDays: 3, status: 'active', privacy: 'private', cvv: '123'
+    } as never)).rejects.toThrow(/CVV\/CVC/u);
+
+    const database = new DatabaseSync(join(directory, 'family.db'));
+    const columns = database.prepare('PRAGMA table_info(payment_cards)').all() as Array<{ name:string }>;
+    expect(columns.map((column) => column.name)).not.toEqual(expect.arrayContaining([
+      'pan','full_pan','card_number','cvv','cvc','pin','password','internet_banking_password'
+    ]));
+    const persisted = database.prepare('SELECT last4,product_name FROM payment_cards WHERE id=?').get(card.id) as { last4:string; product_name:string };
+    expect(persisted).toEqual({ last4: '7392', product_name: 'Aile sanal kartı' });
+    const payloads = database.prepare("SELECT payload_json FROM event_outbox WHERE event_type='finance.payment_card.created'").all() as Array<{payload_json:string}>;
+    expect(JSON.stringify(payloads)).not.toContain('7392');
+    expect(() => database.exec(`
+      INSERT INTO payment_cards
+      SELECT 'payment-card-direct-bypass',family_id,owner_person_id,institution_code,product_name,
+             kind,network,form_factor,last4,currency,credit_limit,available_limit,current_debt,
+             statement_balance,statement_closing_at,payment_due_at,active_installment_count,
+             installment_outstanding_amount,automatic_payment_mode,reward_points,reward_miles,
+             annual_fee_amount,annual_fee_due_at,alerts_enabled,utilization_alert_basis_points,
+             payment_due_alert_days,status,privacy,created_at,policy_receipt_hash,
+             policy_receipt_version,policy_receipt_nonce,policy_correlation_id,policy_resource_type,
+             policy_resource_id,policy_action,policy_capability
+      FROM payment_cards WHERE id='${card.id}'
+    `)).toThrow(/unused exact durable finance policy receipt/u);
+    database.close();
+    expect(store.listAudit(100).some((entry) => entry.action === 'finance.payment_card.created' && entry.resourceId === card.id)).toBe(true);
+    store.close();
+  });
+
   it('görev, sigorta, eğitim, iş, varlık ve acil durum kayıtlarını güvenli biçimde oluşturur', async () => {
     const { store } = makeStore();
     await authenticate(store);

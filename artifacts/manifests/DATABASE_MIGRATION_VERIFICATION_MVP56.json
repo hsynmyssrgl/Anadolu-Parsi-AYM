@@ -407,7 +407,12 @@
       "version": 78,
       "name": "b4_banking_foundation",
       "checksum": "4a6eb72b4ac35024a63328c6f98580cf91508f4313ed078c5c9cba62b87cc329"
+    },
+    {
+      "version": 79,
+      "name": "b4_payment_card_management",
+      "checksum": "9fc9bdf60ae89afce50db2fa7c5573aa419d1ee649039af15fbd8b0a8917cfb2"
     }
   ],
-  "generatedAt": "2026-08-12T13:39:11.536Z"
+  "generatedAt": "2026-08-12T14:22:22.615Z"
 }

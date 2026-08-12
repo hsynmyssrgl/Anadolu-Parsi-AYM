@@ -6612,6 +6612,137 @@ SET value='REVISION-32-Z-B4-BANKING-FOUNDATION',
 WHERE key='schema_generation';
 `;
 
+const paymentCardManagementSql = `CREATE TABLE payment_cards(
+  id TEXT PRIMARY KEY,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  institution_code TEXT NOT NULL REFERENCES bank_institutions(institution_code) ON DELETE RESTRICT,
+  product_name TEXT NOT NULL CHECK(length(trim(product_name)) BETWEEN 2 AND 120),
+  kind TEXT NOT NULL CHECK(kind IN ('credit','debit','prepaid')),
+  network TEXT NOT NULL CHECK(network IN ('troy','visa','mastercard','american_express','unionpay','other')),
+  form_factor TEXT NOT NULL CHECK(form_factor IN ('physical','virtual','supplementary')),
+  last4 TEXT NOT NULL CHECK(length(last4)=4 AND last4 NOT GLOB '*[^0-9]*'),
+  currency TEXT NOT NULL CHECK(length(currency)=3 AND currency=upper(currency) AND currency GLOB '[A-Z][A-Z][A-Z]'),
+  credit_limit REAL NOT NULL CHECK(credit_limit>=0 AND credit_limit<=1000000000000000),
+  available_limit REAL NOT NULL CHECK(available_limit>=0 AND available_limit<=credit_limit),
+  current_debt REAL NOT NULL CHECK(current_debt>=0 AND current_debt<=1000000000000000),
+  statement_balance REAL NOT NULL CHECK(statement_balance>=0 AND statement_balance<=1000000000000000),
+  statement_closing_at TEXT NOT NULL CHECK(datetime(statement_closing_at) IS NOT NULL),
+  payment_due_at TEXT NOT NULL CHECK(datetime(payment_due_at) IS NOT NULL AND datetime(payment_due_at)>=datetime(statement_closing_at)),
+  active_installment_count INTEGER NOT NULL CHECK(
+    typeof(active_installment_count)='integer' AND active_installment_count BETWEEN 0 AND 999
+  ),
+  installment_outstanding_amount REAL NOT NULL CHECK(
+    installment_outstanding_amount>=0 AND installment_outstanding_amount<=1000000000000000
+    AND ((active_installment_count=0 AND installment_outstanding_amount=0)
+      OR (active_installment_count>0 AND installment_outstanding_amount>0))
+  ),
+  automatic_payment_mode TEXT NOT NULL CHECK(automatic_payment_mode IN ('none','minimum','full')),
+  reward_points REAL NOT NULL CHECK(reward_points>=0 AND reward_points<=1000000000000000),
+  reward_miles REAL NOT NULL CHECK(reward_miles>=0 AND reward_miles<=1000000000000000),
+  annual_fee_amount REAL NOT NULL CHECK(annual_fee_amount>=0 AND annual_fee_amount<=1000000000000000),
+  annual_fee_due_at TEXT CHECK(
+    (annual_fee_amount=0 AND (annual_fee_due_at IS NULL OR datetime(annual_fee_due_at) IS NOT NULL))
+    OR (annual_fee_amount>0 AND annual_fee_due_at IS NOT NULL AND datetime(annual_fee_due_at) IS NOT NULL)
+  ),
+  alerts_enabled INTEGER NOT NULL CHECK(alerts_enabled IN (0,1)),
+  utilization_alert_basis_points INTEGER NOT NULL CHECK(
+    typeof(utilization_alert_basis_points)='integer' AND utilization_alert_basis_points BETWEEN 1 AND 10000
+  ),
+  payment_due_alert_days INTEGER NOT NULL CHECK(
+    typeof(payment_due_alert_days)='integer' AND payment_due_alert_days BETWEEN 0 AND 365
+  ),
+  status TEXT NOT NULL CHECK(status IN ('active','frozen','closed')),
+  privacy TEXT NOT NULL CHECK(privacy IN ('private','selected_members','family')),
+  created_at TEXT NOT NULL CHECK(datetime(created_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL,
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version=1),
+  policy_receipt_nonce TEXT NOT NULL,
+  policy_correlation_id TEXT NOT NULL,
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type='finance_record'),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action='create'),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='finance.write'),
+  UNIQUE(policy_receipt_hash)
+);
+
+CREATE INDEX idx_payment_cards_family_created ON payment_cards(family_id,created_at DESC);
+CREATE INDEX idx_payment_cards_owner_created ON payment_cards(owner_person_id,created_at DESC);
+CREATE INDEX idx_payment_cards_institution_status ON payment_cards(institution_code,status);
+CREATE INDEX idx_payment_cards_due ON payment_cards(payment_due_at,status);
+
+CREATE TRIGGER trg_b4_payment_card_insert_policy_receipt
+BEFORE INSERT ON payment_cards
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM platform_policy_transaction_receipts receipt
+  JOIN platform_policy_database_fences fence
+    ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+  WHERE receipt.receipt_hash=NEW.policy_receipt_hash
+    AND receipt.receipt_version=NEW.policy_receipt_version
+    AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id
+    AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id
+    AND receipt.action=NEW.policy_action
+    AND receipt.capability=NEW.policy_capability
+    AND receipt.resource_type='finance_record'
+    AND receipt.resource_id=NEW.id
+    AND receipt.action='create'
+    AND receipt.capability='finance.write'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.purpose')='finance'
+)
+OR EXISTS(SELECT 1 FROM finance_records WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_valuations WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM bank_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'payment card write requires an unused exact durable finance policy receipt');
+END;
+
+CREATE TRIGGER trg_b4_finance_record_card_receipt_reuse
+BEFORE INSERT ON finance_records
+WHEN NEW.policy_receipt_hash IS NOT NULL
+  AND EXISTS(SELECT 1 FROM payment_cards WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'finance policy receipt is already bound to a payment card');
+END;
+
+CREATE TRIGGER trg_b4_finance_valuation_card_receipt_reuse
+BEFORE INSERT ON finance_valuations
+WHEN NEW.policy_receipt_hash IS NOT NULL
+  AND EXISTS(SELECT 1 FROM payment_cards WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'finance policy receipt is already bound to a payment card');
+END;
+
+CREATE TRIGGER trg_b4_bank_account_card_receipt_reuse
+BEFORE INSERT ON bank_accounts
+WHEN EXISTS(SELECT 1 FROM payment_cards WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'finance policy receipt is already bound to a payment card');
+END;
+
+CREATE TRIGGER trg_b4_payment_card_immutable
+BEFORE UPDATE ON payment_cards
+BEGIN
+  SELECT RAISE(ABORT,'payment card mutation requires a future governed update workflow');
+END;
+
+CREATE TRIGGER trg_b4_payment_card_delete_guard
+BEFORE DELETE ON payment_cards
+BEGIN
+  SELECT RAISE(ABORT,'payment card deletion requires a governed deletion workflow');
+END;
+
+UPDATE database_metadata
+SET value='REVISION-33-A-B4-PAYMENT-CARD-MANAGEMENT',
+    updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
+WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -6690,7 +6821,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(75, 'ppk011_contextual_ownership_share', authorizationOwnershipShareSql),
   createMigrationDefinition(76, 'ppk012_offline_capability_lease_cache_fence', offlineCapabilityLeaseSql),
   createMigrationDefinition(77, 'ppk016_derived_data_policy_inheritance', derivedDataPolicyInheritanceSql),
-  createMigrationDefinition(78, 'b4_banking_foundation', bankingFoundationSql)
+  createMigrationDefinition(78, 'b4_banking_foundation', bankingFoundationSql),
+  createMigrationDefinition(79, 'b4_payment_card_management', paymentCardManagementSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

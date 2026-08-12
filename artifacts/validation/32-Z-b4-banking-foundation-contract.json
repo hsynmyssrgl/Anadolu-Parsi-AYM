@@ -25,7 +25,7 @@
       "passed": true
     },
     {
-      "name": "B4-05 and B4-06 remain honestly open",
+      "name": "32-Z historically excludes B4-05 and B4-06 from its completion claim",
       "passed": true
     },
     {
@@ -41,7 +41,7 @@
       "passed": true
     },
     {
-      "name": "migration 78 remains latest and exact",
+      "name": "migration 78 remains an exact predecessor baseline",
       "passed": true
     },
     {
@@ -70,9 +70,9 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 78,
+  "latestDatabaseMigration": 79,
   "catalogRows": 71,
-  "ppk021ExactAllowlistEntries": 535,
+  "ppk021ExactAllowlistEntries": 537,
   "ppk022CapabilitySurfaces": 238,
-  "generatedAt": "2026-08-12T13:38:58.409Z"
+  "generatedAt": "2026-08-12T14:14:08.764Z"
 }

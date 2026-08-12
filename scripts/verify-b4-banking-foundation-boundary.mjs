@@ -111,8 +111,8 @@ export const verifyB4BankingFoundationBoundary = async () => {
     && aiRepository.includes('Banka hesabı (maskeli)')
     && !/fieldNames:\[[^\]]*IBAN/iu.test(aiRepository));
   check('person lifecycle reference inspection includes bank accounts', personLifecycleRepository.includes('bankAccounts: `SELECT COUNT(*) AS total FROM bank_accounts WHERE owner_person_id=?`'));
-  check('migration 78 is the latest exact banking migration', migrationVersions.includes(78)
-    && Math.max(...migrationVersions) === 78
+  check('migration 78 remains the exact banking foundation baseline', migrationVersions.includes(78)
+    && Math.max(...migrationVersions) >= 78
     && migrations.includes("createMigrationDefinition(78, 'b4_banking_foundation', bankingFoundationSql)"));
   check('migration seeds exactly 71 TCMB catalog rows', catalogRows.length === 71
     && bankingMigration.includes('CREATE TABLE bank_institutions(')
@@ -162,7 +162,7 @@ export const verifyB4BankingFoundationBoundary = async () => {
   check('PPK-021 exact ratchet reviews the four new compositions', [
     'CreateBankAccountUseCase', 'ListBankAccountsUseCase', 'ListBankInstitutionsUseCase', 'ValidateIbanUseCase'
   ].every((symbol) => astKeys.has(`USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|${symbol}`))
-    && astGate.status === 'PASS' && astGate.exactAllowlistEntries === 535
+    && astGate.status === 'PASS' && astGate.exactAllowlistEntries === 537
     && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
   check('PPK-022 capability ratchet remains unchanged and green', capabilityGate.status === 'PASS'
     && capabilityGate.capabilitySurfaces === 238

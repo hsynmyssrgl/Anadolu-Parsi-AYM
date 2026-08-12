@@ -49,10 +49,9 @@ check('all five requirements bind the exact 32-Z evidence triplet', requirements
 check('all five requirements bind DEC-211 and package implementation areas', requirements.every((item) => item?.evidence?.includes('docs/decisions/DEC-211-b4-banking-foundation.md')
   && item?.codeAreas?.includes('packages/application/src/banking-security.ts')
   && item?.codeAreas?.includes('apps/desktop/src/renderer/App.tsx')));
-check('B4-05 and B4-06 remain honestly open', ['B4-05', 'B4-06'].every((id) => {
-  const item = registry.requirements?.find((candidate) => candidate.id === id);
-  return item?.status !== 'COMPLETE' && !allChainTrue(item);
-}));
+check('32-Z historically excludes B4-05 and B4-06 from its completion claim',
+  inventory.openRequirements?.join(',') === 'B4-05,B4-06'
+  && scope.excludedClaims?.some((claim) => claim.includes('B4-05') && claim.includes('B4-06')));
 check('scope and inventory bind DEC-211 migration 78 and no network channel', scope.status === 'COMPLETE'
   && scope.decision === 'DEC-211'
   && inventory.latestDatabaseMigration === 78
@@ -60,14 +59,14 @@ check('scope and inventory bind DEC-211 migration 78 and no network channel', sc
 check('boundary evidence is exact green', boundary.status === 'PASS'
   && boundary.checksFailed === 0
   && boundary.catalogRows === 71
-  && boundary.latestDatabaseMigration === 78
-  && boundary.ppk021ExactAllowlistEntries === 535
+  && boundary.latestDatabaseMigration >= 78
+  && boundary.ppk021ExactAllowlistEntries === 537
   && boundary.ppk022CapabilitySurfaces === 238
   && boundary.networkVerificationPerformed === false);
 check('DEC-211 is active in the user decision ledger', ledger.decisionCount === ledger.decisions?.length
   && ledger.decisions?.some((item) => item.id === 'DEC-211' && item.status === 'ACTIVE'
     && item.requirements?.join(',') === ids.join(',')));
-check('migration 78 remains latest and exact', latestMigration === 78
+check('migration 78 remains an exact predecessor baseline', latestMigration >= 78
   && migrations.includes("createMigrationDefinition(78, 'b4_banking_foundation', bankingFoundationSql)"));
 check('decision states structural-only truth and open card scope', includesAll(decision, [
   'varlığı ve hesap sahipliği', 'B4-05', 'B4-06', "531'den 535'e"

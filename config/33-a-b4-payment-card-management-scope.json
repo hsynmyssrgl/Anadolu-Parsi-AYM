@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "33-A-B4-PAYMENT-CARD-MANAGEMENT",
+  "decision": "DEC-212",
+  "requirements": ["B4-05", "B4-06"],
+  "status": "COMPLETE",
+  "card": {
+    "fields": [
+      "institutionCode", "productName", "kind", "network", "formFactor", "last4", "currency",
+      "creditLimit", "availableLimit", "currentDebt", "statementBalance", "statementClosingAt",
+      "paymentDueAt", "activeInstallmentCount", "installmentOutstandingAmount",
+      "automaticPaymentMode", "rewardPoints", "rewardMiles", "annualFeeAmount", "annualFeeDueAt",
+      "alertsEnabled", "utilizationAlertBasisPoints", "paymentDueAlertDays", "status", "privacy"
+    ],
+    "fullPanStored": false,
+    "onlyLastFourStored": true,
+    "secretColumnsAdded": [],
+    "financePolicyReceiptRequired": true,
+    "bankPaymentExecutionPerformed": false,
+    "automaticPaymentModeIsTrackingOnly": true
+  },
+  "security": {
+    "rejectedSecrets": ["pan", "cardNumber", "cvv", "cvc", "pin", "internetBankingPassword"],
+    "luhnFullPanDetection": true,
+    "exactIpcPayloadValidation": true,
+    "applicationLayerValidation": true,
+    "outboxContainsLastFour": false,
+    "auditContainsCardData": false
+  },
+  "schemaDecision": "Migration 79, yalnız finance PEP receipt ile yazılabilen payment_cards tablosunu ekler; tam PAN ve banka sırları için sütun oluşturmaz.",
+  "migrationDecision": "Migration 79 b4_payment_card_management eklendi; gerçek kullanıcı verisi taşınmadı, kart ağına bağlanılmadı ve ödeme talimatı gönderilmedi.",
+  "ratchets": {
+    "ppk021ExactAllowlistEntries": 537,
+    "ppk021DirectRoleAuthorizationBypasses": 0,
+    "ppk022CapabilitySurfaces": 238,
+    "networkEgressAdded": false
+  },
+  "validation": {
+    "boundary": "artifacts/validation/33-A-b4-payment-card-management-boundary.json",
+    "contract": "artifacts/validation/33-A-b4-payment-card-management-contract.json",
+    "runtime": "artifacts/validation/33-A-b4-payment-card-management-runtime.json",
+    "targetedTestFiles": [
+      "packages/application/tests/payment-card-management.test.ts",
+      "apps/desktop/tests/b4-payment-card-ipc-integration.test.ts",
+      "apps/desktop/tests/data-store.test.ts"
+    ]
+  },
+  "excludedClaims": [
+    "Kart ağına veya bankaya bağlanılmaz; bakiye, borç, limit ve ödül bilgileri manuel takip değerleridir.",
+    "Otomatik ödeme modu banka talimatı veya para transferi oluşturmaz.",
+    "Kart hareketleri, işlem içe aktarma, banka senkronizasyonu ve gerçek zamanlı bildirim yapılmaz.",
+    "B4-08 ve sonraki finans gereksinimleri, B9-01, Silver readiness ve Bronze Final tamamlanmış sayılmaz.",
+    "Yeni Build numarası verilmez."
+  ]
+}

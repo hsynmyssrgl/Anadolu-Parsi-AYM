@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "step": "33-A",
+  "requirements": [
+    "B4-05",
+    "B4-06"
+  ],
+  "status": "PASS",
+  "checksPassed": 14,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "both requirements are complete with exact 13-link chains",
+      "passed": true
+    },
+    {
+      "name": "both requirements bind the exact 33-A evidence triplet",
+      "passed": true
+    },
+    {
+      "name": "both requirements bind DEC-212 implementation and UI areas",
+      "passed": true
+    },
+    {
+      "name": "successor B4-08 through B4-14 remain honestly open",
+      "passed": true
+    },
+    {
+      "name": "scope and inventory bind DEC-212 migration 79 with no network channel",
+      "passed": true
+    },
+    {
+      "name": "boundary evidence is exact green",
+      "passed": true
+    },
+    {
+      "name": "DEC-212 is active in the user decision ledger",
+      "passed": true
+    },
+    {
+      "name": "migration 79 remains latest and exact",
+      "passed": true
+    },
+    {
+      "name": "decision states last-four-only no-payment truth and ratchets",
+      "passed": true
+    },
+    {
+      "name": "threat model covers secrets receipts payload limits and tracking-only automation",
+      "passed": true
+    },
+    {
+      "name": "audit binds both IDs exact evidence and open successor scope",
+      "passed": true
+    },
+    {
+      "name": "targeted tests name all security and persistence boundaries",
+      "passed": true
+    },
+    {
+      "name": "root lifecycle and explicit package scripts bind 33-A",
+      "passed": true
+    },
+    {
+      "name": "all contract prerequisites exist",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "latestDatabaseMigration": 79,
+  "ppk021ExactAllowlistEntries": 537,
+  "ppk022CapabilitySurfaces": 238,
+  "generatedAt": "2026-08-12T14:22:10.150Z"
+}

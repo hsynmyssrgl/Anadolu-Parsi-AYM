@@ -17,6 +17,35 @@ export const BANK_ACCOUNT_INPUT_KEYS = Object.freeze([
   'privacy'
 ] as const);
 
+export const PAYMENT_CARD_INPUT_KEYS = Object.freeze([
+  'ownerPersonId',
+  'institutionCode',
+  'productName',
+  'kind',
+  'network',
+  'formFactor',
+  'last4',
+  'currency',
+  'creditLimit',
+  'availableLimit',
+  'currentDebt',
+  'statementBalance',
+  'statementClosingAt',
+  'paymentDueAt',
+  'activeInstallmentCount',
+  'installmentOutstandingAmount',
+  'automaticPaymentMode',
+  'rewardPoints',
+  'rewardMiles',
+  'annualFeeAmount',
+  'annualFeeDueAt',
+  'alertsEnabled',
+  'utilizationAlertBasisPoints',
+  'paymentDueAlertDays',
+  'status',
+  'privacy'
+] as const);
+
 export const FINANCE_RECORD_INPUT_KEYS = Object.freeze([
   'ownerPersonId',
   'title',
@@ -67,6 +96,7 @@ const canonicalFieldName = (value: string): string => value
 
 const prohibitedFieldNames = new Set(PROHIBITED_BANKING_SECRET_FIELDS.map(canonicalFieldName));
 const allowedBankAccountFieldNames = new Set(BANK_ACCOUNT_INPUT_KEYS);
+const allowedPaymentCardFieldNames = new Set(PAYMENT_CARD_INPUT_KEYS);
 
 export const isProhibitedBankingSecretField = (value: string): boolean =>
   prohibitedFieldNames.has(canonicalFieldName(value));
@@ -135,6 +165,22 @@ export const inspectBankAccountDataContract = (input: unknown): BankingDataContr
     prohibitedFields: Object.freeze(prohibitedFields),
     unknownFields: Object.freeze(unknownFields),
     panLikeValueDetected
+  });
+};
+
+export const inspectPaymentCardDataContract = (input: unknown): BankingDataContractInspection => {
+  if (typeof input !== 'object' || input === null || Array.isArray(input)) {
+    return Object.freeze({ accepted: false, prohibitedFields: [], unknownFields: ['$'], panLikeValueDetected: false });
+  }
+  const record = input as Record<string, unknown>;
+  const secretInspection = inspectProhibitedBankingSecrets(record, ['productName']);
+  const prohibitedFields = secretInspection.prohibitedFields;
+  const unknownFields = Object.keys(record).filter((key) => !allowedPaymentCardFieldNames.has(key as typeof PAYMENT_CARD_INPUT_KEYS[number]));
+  return Object.freeze({
+    accepted: prohibitedFields.length === 0 && unknownFields.length === 0 && !secretInspection.panLikeValueDetected,
+    prohibitedFields: Object.freeze(prohibitedFields),
+    unknownFields: Object.freeze(unknownFields),
+    panLikeValueDetected: secretInspection.panLikeValueDetected
   });
 };
 
