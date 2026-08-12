@@ -773,7 +773,7 @@ const transitionChecks = [
     && step.persistentReceiptStatus === 'PASS'],
   ['ledger complete', ledger.libraryUploadStatus === '33-G_COMPLETED_RECEIPT_PASS'
     && ledger.activeMicroStep === null],
-  ['manual offline truth', exactTruth(receipt)],
+  ['manual offline truth', exactTruth(proofCommon)],
   ['next step pending', plan.steps.find((item) => item.id === successorId)?.status === 'PENDING']
 ].map(([name, passed]) => ({ name, status: passed ? 'PASS' : 'FAIL' }));
 const transitionFailures = transitionChecks.filter((item) => item.status !== 'PASS');
