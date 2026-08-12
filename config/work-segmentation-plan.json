@@ -2214,8 +2214,8 @@
       "id": "33-G",
       "title": "Governed offline family emergency evacuation meeting checklist and member status workflow",
       "scopeRequirement": "B5-07,EXT-009,EXT-010,EXT-013",
-      "status": "IN_PROGRESS",
-      "validationStatus": "PENDING",
+      "status": "COMPLETED",
+      "validationStatus": "PASS",
       "localEvidence": [
         "config/33-g-family-emergency-planning-scope.json",
         "config/33-g-family-emergency-planning-inventory.json",
@@ -2224,10 +2224,19 @@
         "docs/audit/33-G_FAMILY_EMERGENCY_PLANNING_UST_KAPANIS.md",
         "artifacts/validation/33-G-family-emergency-planning-boundary.json",
         "artifacts/validation/33-G-family-emergency-planning-contract.json",
-        "artifacts/validation/33-G-family-emergency-planning-runtime.json"
+        "artifacts/validation/33-G-family-emergency-planning-runtime.json",
+        "artifacts/checkpoints/33-G_LIBRARY_RECEIPT.json",
+        "artifacts/validation/33-G_LIBRARY_READBACK_VERIFICATION.json",
+        "artifacts/validation/33-G_RECEIPT_READBACK_VERIFICATION.json",
+        "artifacts/validation/33-G_RECEIPT_READBACK_PERSISTENCE_VERIFICATION.json",
+        "artifacts/validation/33-G_LIBRARY_FINAL_INVENTORY_VERIFICATION.json",
+        "artifacts/checkpoints/33-G_COMPLETION_RECORD.json",
+        "artifacts/validation/33-G_COMPLETION_TRANSITION_VALIDATION.json",
+        "artifacts/validation/33-G_LIBRARY_CLOSURE_INVENTORY_VERIFICATION.json"
       ],
-      "persistentReceiptStatus": "PENDING",
-      "completionTransitionStatus": "PENDING"
+      "persistentReceiptStatus": "PASS",
+      "completionTransitionStatus": "PASS",
+      "persistentReceiptPath": "artifacts/checkpoints/33-G_LIBRARY_RECEIPT.json"
     },
     {
       "id": "33-H",
@@ -2242,6 +2251,6 @@
   ],
   "recoveryAuthority": "NEW_CHAT_HANDOFF_Bronze_04.08.2026.29.md",
   "recoveryReason": "29-D_FAILED_POSTFLIGHT_EXIT_CODE_1_SPLIT_PER_PR-171",
-  "updatedAt": "2026-08-12T22:06:19.889Z",
-  "segmentationNote": "33-F is immutable COMPLETED/PASS with exact D: USB hash/size readback. 33-G is the sole active governed slice for B5-07, EXT-009, EXT-010 and EXT-013; 33-H remains PENDING."
+  "updatedAt": "2026-08-12T22:58:38.875Z",
+  "segmentationNote": "33-G is immutable COMPLETED/PASS with exact local and D: USB hash/size readback. 33-H remains PENDING for governed successor selection."
 }
