@@ -1,12 +1,12 @@
 # Bronze guncel tamamlama denetimi
 
-Olusturma (UTC): 2026-08-12T20:39:30.466Z
+Olusturma (UTC): 2026-08-12T21:46:38.756Z
 
 ## Sonuc
 
 - Denetim durumu: **PASS_WITH_OPEN_SCOPE**
 - Yetkili kaynak: `06_KOD/app`
-- Guncel adim: **33-E**
+- Guncel adim: **33-F**
 - PPK-002: **COMPLETE**
 - PPK-003: **COMPLETE**
 - PPK-004: **COMPLETE**
@@ -23,19 +23,19 @@ Olusturma (UTC): 2026-08-12T20:39:30.466Z
 ## Yuzde gercekligi
 
 - Resmi agirlikli Bronze ilerlemesi: **%25**
-- Kati gereksinim kapanisi: **%17.7143** (62/350)
-- Uygulama zinciri kapsami: **%18.2**
-- Yonetisim ve kanit zinciri kapsami: **%53.8095**
+- Kati gereksinim kapanisi: **%18.2857** (64/350)
+- Uygulama zinciri kapsami: **%18.7714**
+- Yonetisim ve kanit zinciri kapsami: **%54**
 
 Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 
 ## Kapsam durumu
 
-- COMPLETE: 62
+- COMPLETE: 64
 - PARTIAL: 26
 - FOUNDATION_STARTED: 1
-- NOT_IMPLEMENTED: 261
-- Toplam acik gereksinim: 288
+- NOT_IMPLEMENTED: 259
+- Toplam acik gereksinim: 286
 
 ## Kural ve kapilar
 

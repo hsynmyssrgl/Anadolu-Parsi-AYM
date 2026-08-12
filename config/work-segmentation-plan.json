@@ -2186,8 +2186,8 @@
       "id": "33-F",
       "title": "Governed home spaces, utility consumption, belongings warranty and service workflow",
       "scopeRequirement": "EXT-030,EXT-032",
-      "status": "IN_PROGRESS",
-      "validationStatus": "PENDING",
+      "status": "COMPLETED",
+      "validationStatus": "PASS",
       "localEvidence": [
         "config/33-f-home-inventory-utility-belongings-scope.json",
         "config/33-f-home-inventory-utility-belongings-inventory.json",
@@ -2196,10 +2196,19 @@
         "docs/audit/33-F_HOME_INVENTORY_UTILITY_BELONGINGS_UST_KAPANIS.md",
         "artifacts/validation/33-F-home-inventory-utility-belongings-boundary.json",
         "artifacts/validation/33-F-home-inventory-utility-belongings-contract.json",
-        "artifacts/validation/33-F-home-inventory-utility-belongings-runtime.json"
+        "artifacts/validation/33-F-home-inventory-utility-belongings-runtime.json",
+        "artifacts/checkpoints/33-F_LIBRARY_RECEIPT.json",
+        "artifacts/validation/33-F_LIBRARY_READBACK_VERIFICATION.json",
+        "artifacts/validation/33-F_RECEIPT_READBACK_VERIFICATION.json",
+        "artifacts/validation/33-F_RECEIPT_READBACK_PERSISTENCE_VERIFICATION.json",
+        "artifacts/validation/33-F_LIBRARY_FINAL_INVENTORY_VERIFICATION.json",
+        "artifacts/checkpoints/33-F_COMPLETION_RECORD.json",
+        "artifacts/validation/33-F_COMPLETION_TRANSITION_VALIDATION.json",
+        "artifacts/validation/33-F_LIBRARY_CLOSURE_INVENTORY_VERIFICATION.json"
       ],
-      "persistentReceiptStatus": "PENDING",
-      "completionTransitionStatus": "PENDING"
+      "persistentReceiptStatus": "PASS",
+      "completionTransitionStatus": "PASS",
+      "persistentReceiptPath": "artifacts/checkpoints/33-F_LIBRARY_RECEIPT.json"
     },
     {
       "id": "33-G",
@@ -2214,6 +2223,6 @@
   ],
   "recoveryAuthority": "NEW_CHAT_HANDOFF_Bronze_04.08.2026.29.md",
   "recoveryReason": "29-D_FAILED_POSTFLIGHT_EXIT_CODE_1_SPLIT_PER_PR-171",
-  "updatedAt": "2026-08-12T20:55:08.398Z",
-  "segmentationNote": "33-E remains immutable COMPLETED/PASS with exact local and D: receipt readback. User-authorized full-auto selection activates 33-F for EXT-030 and EXT-032 as one governed, manual-only home inventory and utility vertical slice; 33-G remains PENDING."
+  "updatedAt": "2026-08-12T21:44:43.818Z",
+  "segmentationNote": "33-F is immutable COMPLETED/PASS with exact D: USB hash/size readback. 33-G remains PENDING until the next governed multi-requirement slice is selected."
 }
