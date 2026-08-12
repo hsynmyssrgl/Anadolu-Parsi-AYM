@@ -1,13 +1,13 @@
 {
   "status": "PASS",
   "productionSourceZones": 18,
-  "scannedFiles": 362,
-  "privilegedSurfaces": 518,
-  "exactAllowlistEntries": 518,
-  "exactAllowlistSha256": "d024d3cf390bf3dfbf0989acaad28f4681813ec88b7080fbcefafad8d76d7085",
+  "scannedFiles": 365,
+  "privilegedSurfaces": 521,
+  "exactAllowlistEntries": 521,
+  "exactAllowlistSha256": "4a2268bbea8aee9baa11f3fcf11898a8a32792049673dbb6a289b76ef4bd1ebb",
   "surfaceCounts": {
     "CRYPTO_GLOBAL": 2,
-    "CRYPTO_IMPORT": 125,
+    "CRYPTO_IMPORT": 128,
     "DATABASE_IMPORT": 21,
     "NETWORK_IMPORT": 7,
     "REPOSITORY_IMPORT": 47,

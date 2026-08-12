@@ -21,7 +21,7 @@ PPK-022; capability manifestte bulunmayan kamera, mikrofon, dosya, OCR, AI, konu
 
 ## Final doğrulama
 
-- Capability production gate: PPK-022 kapanışında `18 zone / 355 dosya`; PPK-024 ardıl kaynak ratchet'iyle güncel olarak `18 zone / 362 dosya / 237 capability surface / 237 exact manifest / 26 bootstrap pin (24 file + 2 local network) / 33 malicious / 5 benign / 0 bulgu PASS`.
+- Capability production gate: PPK-022 kapanışında `18 zone / 355 dosya`; PPK-025 ardıl kaynak ratchet'iyle güncel olarak `18 zone / 365 dosya / 237 capability surface / 237 exact manifest / 26 bootstrap pin (24 file + 2 local network) / 33 malicious / 5 benign / 0 bulgu PASS`.
 - PPK-022 hedefli test: `3/3 dosya / 19/19 test PASS`.
 - Seçili PPK-008/014/021/022 regresyonu: `8/8 dosya / 63/63 test PASS`.
 - PPK-012–PPK-022 birleşik güvenlik regresyonu: `16/16 dosya / 264/264 test PASS`.

@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "step": "32-U",
+  "requirement": "PPK-025",
+  "status": "EXTERNAL_SIGNING_PENDING",
+  "defaultDecision": "DENY",
+  "releaseVersion": "4.8.2026-29",
+  "releaseChannel": "Bronze",
+  "publisher": "Panthera pardus tulliana",
+  "publisherCertificateSha256": null,
+  "publisherCertificateThumbprint": null,
+  "privateSigningMaterialInRepositoryAllowed": false,
+  "privateMaterialInRepositoryAllowed": false,
+  "privateMaterialInArtifactsAllowed": false,
+  "privateMaterialInLogsAllowed": false,
+  "productionCertificate": {
+    "required": true,
+    "state": "PENDING_EXTERNAL_INPUT",
+    "certificateSha256": null,
+    "thumbprint": null,
+    "subject": null,
+    "issuer": null,
+    "codeSigningEkuRequired": true,
+    "trustedChainRequired": true,
+    "selfSignedAllowed": false
+  },
+  "production": {
+    "expectedPublisherSubject": "",
+    "allowedLeafCertificateThumbprints": [],
+    "allowedLeafCertificateSha256": [],
+    "publisherCertificateSha256": null,
+    "codeSigningCertificateProvisionedExternally": false,
+    "configurationState": "PENDING_EXTERNAL_INPUT"
+  },
+  "productionPrivateKey": {
+    "required": true,
+    "state": "PENDING_EXTERNAL_SECRET_PROVIDER",
+    "repositoryPath": null,
+    "artifactPath": null,
+    "secretReference": null,
+    "passwordEnvironmentVariableNameRecorded": false
+  },
+  "provenanceTrust": {
+    "envelope": "DSSE",
+    "algorithm": "Ed25519",
+    "trustedKeyIds": [],
+    "trustedKeys": [],
+    "state": "TRUST_ROOT_PENDING",
+    "testKeysAcceptedForProduction": false
+  },
+  "registrySignatureTrust": {
+    "trustedKeyIds": [],
+    "state": "TRUST_ROOT_PENDING",
+    "missingSignatureDecision": "DENY",
+    "invalidSignatureDecision": "DENY"
+  },
+  "authenticodeVerification": {
+    "requiredStatus": "Valid",
+    "publisherExactMatchRequired": true,
+    "certificateSha256ExactMatchRequired": true,
+    "thumbprintExactMatchRequired": true,
+    "codeSigningEkuRequired": true,
+    "trustedCertificateChainRequired": true,
+    "rfc3161TimestampRequired": true,
+    "timestampChainTrustedRequired": true,
+    "certificateValidAtSigningTimeRequired": true,
+    "verifyAfterFinalArtifactWriteRequired": true,
+    "verifyInstalledMainExecutableRequired": true
+  },
+  "requiredArtifacts": [
+    {
+      "id": "windows-installer",
+      "expectedAuthenticodeStatus": "Valid",
+      "publisher": "Panthera pardus tulliana",
+      "publisherCertificateSha256": null,
+      "timestamped": true,
+      "productionTrusted": true,
+      "selfSigned": false,
+      "state": "SIGNED_ARTIFACT_EVIDENCE_PENDING"
+    },
+    {
+      "id": "installed-main-executable",
+      "expectedAuthenticodeStatus": "Valid",
+      "publisher": "Panthera pardus tulliana",
+      "publisherCertificateSha256": null,
+      "timestamped": true,
+      "productionTrusted": true,
+      "selfSigned": false,
+      "state": "SIGNED_ARTIFACT_EVIDENCE_PENDING"
+    }
+  ],
+  "rejectedStatuses": [
+    "NotSigned",
+    "HashMismatch",
+    "NotTrusted",
+    "UnknownError"
+  ],
+  "releaseDecision": {
+    "productionReleaseEligible": false,
+    "reason": "EXTERNAL_PRODUCTION_CERTIFICATE_AND_SIGNED_ARTIFACT_EVIDENCE_PENDING",
+    "historicalSignatureEvidenceAccepted": false,
+    "checksumOnlyAccepted": false,
+    "selfSignedAccepted": false,
+    "testCertificateAccepted": false
+  }
+}

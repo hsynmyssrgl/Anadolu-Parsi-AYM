@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-12T04:13:45.264Z",
+  "generatedAt": "2026-08-12T07:07:45.092Z",
   "release": "Bronze 04.08.2026.29",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
@@ -30,8 +30,8 @@
     "officialWeightedBronzePercent": 25,
     "officialWeightedEvidenceStep": "31-T",
     "strictRequirementCompletionPercent": 10.5714,
-    "implementationChainCoveragePercent": 10.8286,
-    "governanceEvidenceChainCoveragePercent": 49.2381,
+    "implementationChainCoveragePercent": 11.1143,
+    "governanceEvidenceChainCoveragePercent": 49.3333,
     "interpretation": "These are separate measures and must not be blended into an invented single completion claim."
   },
   "scope": {
@@ -39,8 +39,8 @@
     "statusCounts": {
       "COMPLETE": 37,
       "FOUNDATION_STARTED": 1,
-      "NOT_IMPLEMENTED": 279,
-      "PARTIAL": 33
+      "NOT_IMPLEMENTED": 278,
+      "PARTIAL": 34
     },
     "priorityCounts": {
       "P0": 210,
@@ -55,14 +55,14 @@
     "incompleteCount": 313,
     "strictComplete": 37,
     "implementationCoverage": {
-      "passed": 379,
+      "passed": 389,
       "total": 3500,
-      "percent": 10.8286
+      "percent": 11.1143
     },
     "governanceCoverage": {
-      "passed": 517,
+      "passed": 518,
       "total": 1050,
-      "percent": 49.2381
+      "percent": 49.3333
     }
   },
   "rules": {
@@ -324,7 +324,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"7796c24866dd8abea5be7597f7de50f5a95283750429aefb9265f5f473d66568\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\7796c24866dd8abea5be7597f7de50f5a95283750429aefb9265f5f473d66568\",\"files\":9}"
+          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"70949415f2ec3961d2efa21d625b1633e005425933daf336aff1ff5083b50273\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\70949415f2ec3961d2efa21d625b1633e005425933daf336aff1ff5083b50273\",\"files\":9}"
         ]
       },
       {
@@ -1003,9 +1003,22 @@
     "status": "PASS",
     "officialCompletionClaimed": true,
     "storageBackend": "EXTERNAL_USB_D_DRIVE",
-    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\7796c24866dd8abea5be7597f7de50f5a95283750429aefb9265f5f473d66568"
+    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\70949415f2ec3961d2efa21d625b1633e005425933daf336aff1ff5083b50273"
   },
   "remainingWork": [
+    {
+      "id": "PPK-025",
+      "priority": "P0",
+      "status": "PARTIAL",
+      "workOrderClass": "STARTED_BEFORE_NEW",
+      "area": "Supply Chain",
+      "title": "SBOM, imzalı paket, dependency provenance, lisans ve zafiyet kapıları",
+      "completedChainCount": 12,
+      "completionBlockers": [],
+      "missingChain": [
+        "evidence"
+      ]
+    },
     {
       "id": "B0-04",
       "priority": "P0",
@@ -4297,30 +4310,6 @@
       "workOrderClass": "NEW_NOT_STARTED",
       "area": "OCR Silme",
       "title": "Kaynak imha/izin iptalinde OCR metni, indeks, embedding, cache ve türevler karantinaya/silmeye girer",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "PPK-025",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Supply Chain",
-      "title": "SBOM, imzalı paket, dependency provenance, lisans ve zafiyet kapıları",
       "completedChainCount": 1,
       "completionBlockers": [],
       "missingChain": [

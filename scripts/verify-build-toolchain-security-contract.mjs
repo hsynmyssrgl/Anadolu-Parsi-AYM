@@ -54,12 +54,15 @@ const canonicalPackage = (path, version, sourceLock = lock) => {
   verify(/^sha512-[A-Za-z0-9+/]+={0,2}$/.test(String(entry.integrity ?? '')), `${path} lacks SHA-512 integrity`);
 };
 
-verify(contract.schemaVersion === 2, `Unsupported contract schemaVersion=${contract.schemaVersion}`);
+verify(contract.schemaVersion === 3, `Unsupported contract schemaVersion=${contract.schemaVersion}`);
 verify(desktopPackage.devDependencies?.electron === contract.electronVersion, 'Electron is not exactly pinned');
 verify(desktopPackage.devDependencies?.['electron-builder'] === undefined, 'electron-builder must not remain in the root desktop install graph');
 verify(packagerPackage.devDependencies?.['electron-builder'] === contract.electronBuilderVersion, 'isolated electron-builder is not exactly pinned');
-verify(rootPackage.scripts?.['audit:production:evidence']?.includes('run-npm-audit-evidence.mjs --scope production'), 'Production audit evidence command is missing');
-verify(rootPackage.scripts?.['audit:toolchain:evidence']?.includes('run-npm-audit-evidence.mjs --scope build-toolchain'), 'Toolchain audit evidence command is missing');
+verify(packagerPackage.version === rootPackage.version, 'isolated Windows packager release version differs from the root package');
+verify(lock.version === packagerPackage.version && lock.packages?.['']?.version === packagerPackage.version, 'isolated Windows packager lock version differs from its manifest');
+verify(rootPackage.scripts?.['audit:production:evidence']?.includes('run-npm-audit-evidence.mjs --scope root-production'), 'Production audit evidence command is missing');
+verify(rootPackage.scripts?.['audit:toolchain:evidence']?.includes('run-npm-audit-evidence.mjs --scope root-build-toolchain'), 'Root build-toolchain audit evidence command is missing');
+verify(rootPackage.scripts?.['audit:windows-packager:evidence']?.includes('run-npm-audit-evidence.mjs --scope windows-packager'), 'Isolated Windows packager audit evidence command is missing');
 verify(
   JSON.stringify(packagerPackage.overrides) === JSON.stringify(contract.safeOverrides),
   'Isolated Windows packager overrides differ from the reviewed toolchain contract'
@@ -85,7 +88,10 @@ verify(!/\brequire\s*\(|\bimport\s*\(/u.test(stubEntry), 'Stub must not load exe
 for (const packagePath of contract.forbiddenRootPackages ?? []) {
   verify(rootLock.packages?.[packagePath] === undefined, `Windows-only package leaked into root lockfile: ${packagePath}`);
 }
-verify(rootPackage.overrides === undefined, 'Windows-only overrides remain in the root package manifest');
+verify(
+  JSON.stringify(rootPackage.overrides) === JSON.stringify(contract.approvedRootOverrides),
+  'Root dependency overrides differ from the exact reviewed security allowlist'
+);
 verify(rootPackage.scripts?.['windows-packager:install']?.includes('--prefix tools/windows-packager'), 'isolated Windows packager install command is missing');
 
 const linkEntry = lock.packages?.[approvedLink?.packagePath];
@@ -101,7 +107,9 @@ canonicalPackage('node_modules/@electron/universal', contract.safeOverrides['@el
 canonicalPackage('node_modules/ejs', contract.safeOverrides.ejs);
 canonicalPackage('node_modules/glob', '13.0.6');
 canonicalPackage('node_modules/minimatch', '10.2.5');
-canonicalPackage('node_modules/brace-expansion', '5.0.8');
+for (const [name, version] of Object.entries(contract.reviewedTransitiveSecurityPins ?? {})) {
+  canonicalPackage(`node_modules/${name}`, version);
+}
 
 for (const packagePath of contract.forbiddenInstalledPackages ?? []) {
   verify(lock.packages?.[packagePath] === undefined, `Forbidden unused toolchain package is installed: ${packagePath}`);

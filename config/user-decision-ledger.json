@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 59,
+  "decisionCount": 60,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1458,6 +1458,36 @@
         "docs/security/PPK-024_POLICY_SERVICE_AVAILABILITY_THREAT_MODEL.md",
         "docs/audit/32-T_PPK-024_POLICY_SERVICE_AVAILABILITY_UST_KAPANIS.md",
         "config/32-t-ppk-024-policy-service-availability-inventory.json"
+      ]
+    },
+    {
+      "id": "DEC-206",
+      "date": "2026-08-12",
+      "acceptedAt": "2026-08-12",
+      "title": "PPK-025 fail-closed software supply-chain release gates",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: tum isleri full auto olarak sen yap",
+      "document": "docs/decisions/DEC-206-ppk-025-software-supply-chain-gates.md",
+      "requirements": ["PPK-025"],
+      "codeAreas": [
+        "packages/platform-policy/src/supply-chain-release-policy.ts",
+        "packages/domain/src/supply-chain-release.ts",
+        "packages/application/src/supply-chain-release-use-cases.ts",
+        "apps/desktop/scripts/build-signed-windows-release.mjs",
+        "scripts/verify-software-supply-chain-boundary.mjs",
+        "scripts/generate-ppk025-sbom.mjs",
+        "scripts/generate-ppk025-third-party-notices.mjs",
+        "scripts/verify-ppk025-vulnerability-gate.mjs",
+        "scripts/verify-ppk025-registry-signature-evidence.mjs",
+        "scripts/verify-ppk025-external-build-assets.mjs",
+        "scripts/verify-ppk025-windows-package-signature.ps1"
+      ],
+      "evidence": [
+        "artifacts/validation/32-U-ppk-025-software-supply-chain-contract.json",
+        "artifacts/validation/32-U-ppk-025-software-supply-chain-runtime.json",
+        "docs/security/PPK-025_SOFTWARE_SUPPLY_CHAIN_THREAT_MODEL.md",
+        "docs/audit/32-U_PPK-025_SOFTWARE_SUPPLY_CHAIN_UST_KAPANIS.md",
+        "config/32-u-ppk-025-software-supply-chain-inventory.json"
       ]
     }
   ]

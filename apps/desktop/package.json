@@ -36,7 +36,7 @@
     "build": "npm run build:electron && npm run build:renderer",
     "typecheck": "tsc -p tsconfig.electron.json --noEmit && tsc -p tsconfig.renderer.json --noEmit",
     "dev": "node scripts/dev.mjs",
-    "package:win": "npm run verify:license-sync && npm run build && npm run verify:installer --workspace @ppt/desktop && node scripts/run-electron-builder.mjs",
+    "package:win": "node scripts/build-signed-windows-release.mjs",
     "package:win:dir": "npm run verify:license-sync && npm run build && npm run verify:installer --workspace @ppt/desktop && node scripts/run-electron-builder.mjs --dir",
     "verify:installer": "node scripts/verify-installer.mjs",
     "verify:freeze": "node scripts/verify-release-freeze.mjs",
@@ -48,6 +48,7 @@
     "appId": "tr.anadoluparsi.aileyasammerkezi",
     "productName": "Anadolu Parsı Aile Yaşam Merkezi",
     "asar": true,
+    "forceCodeSigning": true,
     "electronDownload": {
       "cache": "../../artifacts/validation/electron-cache"
     },
@@ -62,7 +63,7 @@
       "target": [
         "nsis"
       ],
-      "artifactName": "Anadolu-Parsi-Aile-Yasam-Merkezi-Bronze-04.08.2026.28-${arch}-Kurulum.${ext}",
+      "artifactName": "Anadolu-Parsi-Aile-Yasam-Merkezi-Bronze-04.08.2026.29-${arch}-Kurulum.${ext}",
       "icon": "build/icon.ico",
       "requestedExecutionLevel": "asInvoker"
     },
@@ -81,7 +82,7 @@
       "uninstallerIcon": "build/icon.ico"
     },
     "copyright": "Copyright © 2026 Panthera pardus tulliana",
-    "artifactName": "Anadolu-Parsi-Aile-Yasam-Merkezi-Bronze-04.08.2026.28-${arch}-Kurulum.${ext}"
+    "artifactName": "Anadolu-Parsi-Aile-Yasam-Merkezi-Bronze-04.08.2026.29-${arch}-Kurulum.${ext}"
   },
   "description": "Anadolu Parsı yerel öncelikli aile yaşam, güvenlik ve dijital hafıza merkezi.",
   "author": {

@@ -92,3 +92,4 @@ export * from './external-backup-evidence-use-cases.js';
 export * from './external-backup-revocation-list-use-cases.js';
 
 export * from './external-backup-revocation-endpoint-use-cases.js';
+export * from './supply-chain-release-use-cases.js';

@@ -12,7 +12,7 @@ Durum: `COMPLETE / PASS` — PPK-024 uygulama, test, build, yönetişim ve kanı
 
 ## Final doğrulama
 
-- Policy Service availability kaynak kapısı: `18 zone / 362 dosya / 20 güvenlik ilgili dosya / 17 exact referans / 13 malicious / 5 benign / 0 bulgu PASS`.
+- Policy Service availability kaynak kapısı: `18 zone / 365 dosya / 20 güvenlik ilgili dosya / 17 exact referans / 13 malicious / 5 benign / 0 bulgu PASS`.
 - Combined Platform Policy gate: `8/8 PASS`; PPK-021 AST, PPK-022 capability ve PPK-023 uygulama profili ardıl ratchet'leri korunmuştur.
 - Hedefli PPK-024: `4 dosya / 71 test PASS`.
 - Odak PPK-024 ve etkilenen entegrasyon regresyonu: `6 dosya / 90 test PASS`.

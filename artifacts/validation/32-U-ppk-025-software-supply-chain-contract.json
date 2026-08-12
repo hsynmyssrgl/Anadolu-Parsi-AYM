@@ -1,0 +1,447 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-U",
+  "requirement": "PPK-025",
+  "phase": "SOFTWARE_SUPPLY_CHAIN_CANDIDATE_CONTRACT",
+  "status": "PASS",
+  "checkCount": 94,
+  "passed": 94,
+  "failed": 0,
+  "failures": [],
+  "checks": [
+    {
+      "name": "scope identity is exact",
+      "passed": true
+    },
+    {
+      "name": "inventory identity is exact",
+      "passed": true
+    },
+    {
+      "name": "policy identity and default deny are exact",
+      "passed": true
+    },
+    {
+      "name": "signing trust identity and default deny are exact",
+      "passed": true
+    },
+    {
+      "name": "accepted registry contains PPK-025 after complete predecessor",
+      "passed": true
+    },
+    {
+      "name": "PPK-026 remains a separate unfinished successor",
+      "passed": true
+    },
+    {
+      "name": "DEC-206 is active and ledger count is exact",
+      "passed": true
+    },
+    {
+      "name": "master register contains DEC-206 and exact decision path",
+      "passed": true
+    },
+    {
+      "name": "source boundary scan has no production finding",
+      "passed": true,
+      "detail": "0 finding(s)"
+    },
+    {
+      "name": "source boundary has one canonical policy class",
+      "passed": true
+    },
+    {
+      "name": "source gate detects six malicious escape classes",
+      "passed": true
+    },
+    {
+      "name": "root pretypecheck and prebuild include the source gate",
+      "passed": true
+    },
+    {
+      "name": "root source gate command is exact",
+      "passed": true
+    },
+    {
+      "name": "domain boundary is content-free and non-authoritative",
+      "passed": true
+    },
+    {
+      "name": "domain exports the canonical release boundary",
+      "passed": true
+    },
+    {
+      "name": "application maps unavailable or malformed evidence to fail-closed evaluation",
+      "passed": true
+    },
+    {
+      "name": "application authorizes before invoking release callback",
+      "passed": true
+    },
+    {
+      "name": "application verifies and narrows the content-free snapshot",
+      "passed": true
+    },
+    {
+      "name": "application exports canonical release use cases",
+      "passed": true
+    },
+    {
+      "name": "platform policy pins exact scope and asset counts",
+      "passed": true
+    },
+    {
+      "name": "platform policy pins exact freshness thresholds",
+      "passed": true
+    },
+    {
+      "name": "platform policy denies malformed identity material and coverage drift",
+      "passed": true
+    },
+    {
+      "name": "platform policy denies vulnerability signature asset provenance and Authenticode failures",
+      "passed": true
+    },
+    {
+      "name": "platform policy requires exact evidence keys and cryptographic DSSE verification",
+      "passed": true
+    },
+    {
+      "name": "platform snapshot exposes no component vulnerability hash or certificate details",
+      "passed": true
+    },
+    {
+      "name": "platform policy exports the canonical release authority exactly once",
+      "passed": true
+    },
+    {
+      "name": "root and packager lockfiles are npm lockfile version three",
+      "passed": true
+    },
+    {
+      "name": "two lock graphs contain exact 414 component nodes",
+      "passed": true,
+      "detail": "414"
+    },
+    {
+      "name": "root lock contains exact 18 workspaces",
+      "passed": true,
+      "detail": "18"
+    },
+    {
+      "name": "two lock graphs contain exact 374 registry tarballs",
+      "passed": true,
+      "detail": "374"
+    },
+    {
+      "name": "all external dependency tarballs use canonical HTTPS npm registry and SHA-512 integrity",
+      "passed": true
+    },
+    {
+      "name": "policy declares exact two lock graphs and 18 workspaces",
+      "passed": true
+    },
+    {
+      "name": "policy pins exact 414 374 and 357 coverage",
+      "passed": true
+    },
+    {
+      "name": "CycloneDX 1.6 SBOM has exact 414 unique components",
+      "passed": true
+    },
+    {
+      "name": "SBOM has exact 414 dependency nodes with known refs",
+      "passed": true
+    },
+    {
+      "name": "third-party notice inventory has exact 357 components",
+      "passed": true,
+      "detail": "357"
+    },
+    {
+      "name": "third-party notice text is non-empty and separately material-bound",
+      "passed": true
+    },
+    {
+      "name": "license verification is a real exact-coverage PASS artifact",
+      "passed": true
+    },
+    {
+      "name": "approved licenses are exact and waivers remain forbidden",
+      "passed": true
+    },
+    {
+      "name": "policy has exact three vulnerability scopes and fail-closed feed rules",
+      "passed": true
+    },
+    {
+      "name": "three current vulnerability evidence artifacts pass with zero findings",
+      "passed": true
+    },
+    {
+      "name": "aggregate vulnerability gate records exact three-scope PASS",
+      "passed": true
+    },
+    {
+      "name": "policy has exact two registry signature graphs and zero missing or invalid tolerance",
+      "passed": true
+    },
+    {
+      "name": "two current registry signature evidence artifacts pass with zero missing or invalid signatures",
+      "passed": true
+    },
+    {
+      "name": "aggregate registry signature gate records exact two-graph PASS",
+      "passed": true
+    },
+    {
+      "name": "external asset manifest has exact five ordered assets",
+      "passed": true
+    },
+    {
+      "name": "external assets use exact HTTPS source and SHA-256 pins",
+      "passed": true
+    },
+    {
+      "name": "external asset gate records exact five-asset PASS",
+      "passed": true
+    },
+    {
+      "name": "build toolchain evidence is a real PASS artifact",
+      "passed": true
+    },
+    {
+      "name": "DSSE Ed25519 helper completes a real ephemeral sign and verify round-trip",
+      "passed": true
+    },
+    {
+      "name": "DSSE Ed25519 helper rejects a tampered signature",
+      "passed": true
+    },
+    {
+      "name": "DSSE implementation uses node crypto and canonical pre-auth encoding",
+      "passed": true
+    },
+    {
+      "name": "provenance policy requires trusted Ed25519 DSSE and exact subject hash set",
+      "passed": true
+    },
+    {
+      "name": "SBOM generator and verifier bind deterministic two-lock output",
+      "passed": true
+    },
+    {
+      "name": "license generator and verifier bind exact inventory and notice output",
+      "passed": true
+    },
+    {
+      "name": "vulnerability scripts cover three live audit scopes and freshness bindings",
+      "passed": true
+    },
+    {
+      "name": "registry signature scripts cover exact root and packager evidence",
+      "passed": true
+    },
+    {
+      "name": "external asset verifier binds installed upstream sources",
+      "passed": true
+    },
+    {
+      "name": "Authenticode verifier evaluates both exact PE targets",
+      "passed": true
+    },
+    {
+      "name": "Authenticode verifier requires Valid status publisher thumbprint and certificate SHA-256",
+      "passed": true
+    },
+    {
+      "name": "Authenticode verifier requires code-signing EKU trusted chain and timestamp",
+      "passed": true
+    },
+    {
+      "name": "Authenticode verifier rejects self-signed and test fixtures for production",
+      "passed": true
+    },
+    {
+      "name": "signing trust forbids private material in repository artifacts and logs",
+      "passed": true
+    },
+    {
+      "name": "signing trust requires both final artifacts and rejects self-signed certificates",
+      "passed": true
+    },
+    {
+      "name": "package:win uses only the signed release orchestrator",
+      "passed": true
+    },
+    {
+      "name": "Windows package config forces code signing",
+      "passed": true
+    },
+    {
+      "name": "signed orchestrator runs both-lock supply workspace and toolchain preflights before SBOM",
+      "passed": true
+    },
+    {
+      "name": "signed orchestrator runs governed and source preflights before supply gates",
+      "passed": true
+    },
+    {
+      "name": "signed orchestrator runs source SBOM audit registry TypeScript and build gates in order",
+      "passed": true
+    },
+    {
+      "name": "signed orchestrator blocks before unsigned builder execution",
+      "passed": true
+    },
+    {
+      "name": "signed orchestrator installs and verifies both final PE files before release evidence",
+      "passed": true
+    },
+    {
+      "name": "release evidence creator keeps candidate blocked and production fail-closed",
+      "passed": true
+    },
+    {
+      "name": "root package has exact three-file targeted command",
+      "passed": true
+    },
+    {
+      "name": "root package has exact contract and runtime commands",
+      "passed": true
+    },
+    {
+      "name": "root package exposes exact SBOM license vulnerability and governance commands",
+      "passed": true
+    },
+    {
+      "name": "targeted tests cover policy application and Desktop packaging gates",
+      "passed": true
+    },
+    {
+      "name": "targeted tests exercise 414 374 357 and signed happy path",
+      "passed": true
+    },
+    {
+      "name": "targeted tests exercise provenance tamper and fail-closed application callback",
+      "passed": true
+    },
+    {
+      "name": "Desktop tests cover fail-before-unsigned and full Authenticode trust",
+      "passed": true
+    },
+    {
+      "name": "all current release material hashes are valid and exact",
+      "passed": true
+    },
+    {
+      "name": "release evidence has exact 18 414 414 374 357 coverage",
+      "passed": true
+    },
+    {
+      "name": "release evidence contains exact three vulnerability and two signature records",
+      "passed": true
+    },
+    {
+      "name": "release evidence contains exact five external assets and DSSE shape",
+      "passed": true
+    },
+    {
+      "name": "release decision is bound to exact evidence bytes",
+      "passed": true
+    },
+    {
+      "name": "scope preserves no migration data transfer cutover or ownership change",
+      "passed": true
+    },
+    {
+      "name": "production model preserves no migration and content-free status",
+      "passed": true
+    },
+    {
+      "name": "decision and threat model record fail-closed truth boundary",
+      "passed": true
+    },
+    {
+      "name": "candidate registry truthfully remains partial with only evidence open",
+      "passed": true
+    },
+    {
+      "name": "candidate scope records local validation PASS and external signing pending without completion",
+      "passed": true
+    },
+    {
+      "name": "candidate inventory records exact three external blockers after local validation",
+      "passed": true
+    },
+    {
+      "name": "candidate policy and signing trust remain externally blocked",
+      "passed": true
+    },
+    {
+      "name": "candidate release decision is exact current fail-closed BLOCKED truth",
+      "passed": true,
+      "detail": "[\"AUTHENTICODE_ARTIFACT_MISSING\",\"AUTHENTICODE_CERTIFICATE_UNTRUSTED\",\"AUTHENTICODE_STATUS_INVALID\",\"AUTHENTICODE_TIMESTAMP_MISSING\",\"PRODUCTION_CERTIFICATE_NOT_PROVISIONED\",\"PROVENANCE_KEY_UNTRUSTED\",\"PROVENANCE_SIGNATURE_INVALID\"]"
+    },
+    {
+      "name": "candidate release evidence contains no fake production signing authority",
+      "passed": true
+    },
+    {
+      "name": "candidate documents record local validation without final completion claim",
+      "passed": true
+    }
+  ],
+  "sourceScan": {
+    "zones": 2,
+    "canonicalReferencePaths": [
+      "packages/application/src/index.ts",
+      "packages/application/src/supply-chain-release-use-cases.ts",
+      "packages/application/tests/supply-chain-release-use-cases.test.ts",
+      "packages/domain/src/index.ts",
+      "packages/platform-policy/src/index.ts",
+      "packages/platform-policy/src/supply-chain-release-policy.ts",
+      "packages/platform-policy/supply-chain-release-policy.test.ts"
+    ],
+    "canonicalPolicyClassDefinitions": 1,
+    "findings": []
+  },
+  "coverage": {
+    "lockfiles": 2,
+    "workspaces": 18,
+    "sbomComponents": 414,
+    "dependencyNodes": 414,
+    "registryPackages": 374,
+    "licenseComponents": 357,
+    "vulnerabilityScopes": 3,
+    "registrySignatureScopes": 2,
+    "externalAssets": 5,
+    "authenticodeArtifacts": 2,
+    "targetedTestFiles": 3
+  },
+  "candidateDecisionExpectedReasons": [
+    "AUTHENTICODE_ARTIFACT_MISSING",
+    "AUTHENTICODE_CERTIFICATE_UNTRUSTED",
+    "AUTHENTICODE_STATUS_INVALID",
+    "AUTHENTICODE_TIMESTAMP_MISSING",
+    "PRODUCTION_CERTIFICATE_NOT_PROVISIONED",
+    "PROVENANCE_KEY_UNTRUSTED",
+    "PROVENANCE_SIGNATURE_INVALID"
+  ],
+  "productionReleaseEligible": false,
+  "productionPrivateMaterialPersisted": false,
+  "checksumAloneGrantsReleaseAuthority": false,
+  "selfSignedCertificateGrantsProductionAuthority": false,
+  "historicalEvidenceGrantsCurrentAuthority": false,
+  "schemaMigrationRequired": false,
+  "latestDatabaseMigration": 77,
+  "historicalBackfillPerformed": false,
+  "realDataTransferPerformed": false,
+  "cutoverPerformed": false,
+  "legacyDesktopVaultPreserved": true,
+  "sqliteOwnershipTransferred": false,
+  "successorRequirementCompletedByThisPackage": false,
+  "requirementCompletionClaimed": false,
+  "generatedAt": "2026-08-12T07:07:35.562Z"
+}

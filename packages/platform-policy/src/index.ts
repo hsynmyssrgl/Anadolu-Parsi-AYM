@@ -13,3 +13,4 @@ export * from './platform-policy-ast-gate-policy.js';
 export * from './platform-capability-manifest-policy.js';
 export * from './application-security-profile-policy.js';
 export * from './policy-service-availability-policy.js';
+export * from './supply-chain-release-policy.js';

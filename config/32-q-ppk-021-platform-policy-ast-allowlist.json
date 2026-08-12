@@ -51,7 +51,7 @@
   },
   "expectedSurfaceCounts": {
     "CRYPTO_GLOBAL": 2,
-    "CRYPTO_IMPORT": 125,
+    "CRYPTO_IMPORT": 128,
     "DATABASE_IMPORT": 21,
     "NETWORK_IMPORT": 7,
     "REPOSITORY_IMPORT": 47,
@@ -173,6 +173,9 @@
     "CRYPTO_IMPORT|packages/platform-policy/src/policy-kernel.ts|node:crypto:timingSafeEqual",
     "CRYPTO_IMPORT|packages/platform-policy/src/sensitive-log-policy.ts|node:crypto:createHash",
     "CRYPTO_IMPORT|packages/platform-policy/src/source-deletion-propagation-policy.ts|node:crypto:createHash",
+    "CRYPTO_IMPORT|packages/platform-policy/src/supply-chain-release-policy.ts|node:crypto:createHash",
+    "CRYPTO_IMPORT|packages/platform-policy/src/supply-chain-release-policy.ts|node:crypto:createPublicKey",
+    "CRYPTO_IMPORT|packages/platform-policy/src/supply-chain-release-policy.ts|node:crypto:verify",
     "CRYPTO_IMPORT|packages/repositories/src/derived-data-policy-repository.ts|node:crypto:createHash",
     "CRYPTO_IMPORT|packages/security/src/device-identity.ts|node:crypto:createHash",
     "CRYPTO_IMPORT|packages/security/src/device-identity.ts|node:crypto:generateKeyPairSync",

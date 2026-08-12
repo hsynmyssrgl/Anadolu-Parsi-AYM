@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "step": "32-U",
+  "requirement": "PPK-025",
+  "status": "IN_PROGRESS",
+  "completionClaimed": false,
+  "release": {
+    "releaseVersion": "4.8.2026-29",
+    "channel": "Bronze",
+    "productionReleaseEligible": false,
+    "blockingState": "EXTERNAL_SIGNING_PENDING"
+  },
+  "workspaceAndLockInventory": {
+    "canonicalWorkspaceCount": 18,
+    "lockfiles": [
+      {
+        "id": "root",
+        "path": "package-lock.json",
+        "purpose": "18 workspace ile root production ve build dependency graph",
+        "observedCanonicalRegistryTarballs": 134,
+        "rootPackageLockSha256": "124c01f0f64e28a0566ce0978cd8a6d9cdc61c862e01455901c65a76eb814c7d",
+        "finalHashBindingPending": false
+      },
+      {
+        "id": "windows-packager",
+        "path": "tools/windows-packager/package-lock.json",
+        "purpose": "İzole Electron Builder, NSIS ve Windows paketleme toolchain graph",
+        "observedCanonicalRegistryTarballs": 240,
+        "windowsPackagerLockSha256": "f794c976da71d7457e7358759b18b388f335d3b15d281a9a8ded8b5a2e2fa558",
+        "finalHashBindingPending": false
+      }
+    ],
+    "approvedLocalToolPaths": [
+      "tools/electron-builder-squirrel-windows-stub"
+    ],
+    "requiredRegistryPackageCount": 374,
+    "requiredLicenseComponentCount": 357,
+    "expectedCycloneDxComponentCount": 414,
+    "observationIsClosureEvidence": false
+  },
+  "controls": [
+    {
+      "id": "canonical-root-dependency-supply",
+      "classification": "EXISTING_PARTIAL_CONTROL",
+      "paths": [
+        "scripts/verify-dependency-supply.mjs",
+        "scripts/verify-lockfile-integrity.mjs",
+        "scripts/verify-workspace-dependencies.mjs",
+        "package-lock.json"
+      ],
+      "control": "Kök lockfile için resmî npm registry, HTTPS, SHA-512 integrity, workspace linkleri ve production dependency graph kontrolleri vardır.",
+      "gap": "Production-trusted provenance ve imzalı nihai PE artifactleri dış girdilere bağlıdır.",
+      "disposition": "IMPLEMENTED_LOCAL_VALIDATION_PASS"
+    },
+    {
+      "id": "content-addressed-dependency-acquisition",
+      "classification": "EXISTING_REUSABLE_CONTROL",
+      "paths": [
+        "config/npm-dependency-acquisition-policy.json",
+        "scripts/lib/npm-dependency-acquisition.mjs",
+        "scripts/create-npm-dependency-handoff-request.mjs",
+        "docs/adr/ADR-031-content-addressed-npm-dependency-handoff.md"
+      ],
+      "control": "Resmî npm origin, bounded edinme, same-origin redirect, lockfile SHA-256 ve tarball SHA-512 ile içerik adresli cache/handoff korunur.",
+      "gap": "Bu mekanizma registry package signature, SBOM, lisans, vulnerability veya signed build provenance kanıtı değildir.",
+      "disposition": "REUSE_WITHOUT_AUTHORITY_BROADENING"
+    },
+    {
+      "id": "cyclonedx-sbom",
+      "classification": "NEW_REQUIRED_GATE",
+      "paths": [
+        "package-lock.json",
+        "tools/windows-packager/package-lock.json",
+        "tools/electron-builder-squirrel-windows-stub",
+        "artifacts/manifests/32-U-ppk-025-cyclonedx-sbom.json"
+      ],
+      "control": "CycloneDX 1.6 SBOM iki lockfile, 18 workspace, yerel packager stub, paketlenen Electron runtime ve dış build assetlerini exact bom-ref/dependency edge/hash bağıyla kapsar.",
+      "disposition": "IMPLEMENTED_LOCAL_VALIDATION_PASS"
+    },
+    {
+      "id": "third-party-license-decision",
+      "classification": "NEW_REQUIRED_GATE",
+      "paths": [
+        "apps/desktop/build/LICENSE_TR.txt",
+        "apps/desktop/build/LICENSE_TR.rtf",
+        "artifacts/manifests/32-U-ppk-025-third-party-notices.json",
+        "artifacts/manifests/32-U-ppk-025-third-party-notices.txt"
+      ],
+      "control": "Ürün EULA'sından ayrı olarak her üçüncü taraf bileşenin exact lisans ifadesi, karar durumu ve notice yükümlülüğü doğrulanır.",
+      "gap": "Production release, diğer bütün supply-chain ve imza kapılarıyla birlikte değerlendirilir.",
+      "disposition": "IMPLEMENTED_LOCAL_VALIDATION_PASS"
+    },
+    {
+      "id": "fresh-vulnerability-evidence",
+      "classification": "NEW_REQUIRED_GATE",
+      "paths": [
+        "scripts/run-npm-audit-evidence.mjs",
+        "scripts/summarize-npm-audit-evidence.mjs",
+        "artifacts/validation/32-U-ppk-025-vulnerability-gate.json"
+      ],
+      "control": "root-production, root-build-toolchain ve windows-packager scope'ları kendi lock SHA-256 bağlarıyla, en fazla 24 saat yaşta ve sıfır bulgu şartıyla doğrulanır.",
+      "gap": "Tarihsel rapor güncel yetki değildir; her release için üç scope yeniden çalıştırılır.",
+      "disposition": "IMPLEMENTED_LOCAL_VALIDATION_PASS"
+    },
+    {
+      "id": "registry-package-signature",
+      "classification": "NEW_REQUIRED_GATE",
+      "paths": [
+        "package-lock.json",
+        "tools/windows-packager/package-lock.json",
+        "artifacts/validation/32-U-ppk-025-registry-signature-gate.json"
+      ],
+      "control": "Her gerekli registry package scope'u için signature verified/keyId kanıtı aranır; invalid veya missing toplamı sıfır olmalıdır.",
+      "disposition": "IMPLEMENTED_LOCAL_VALIDATION_PASS"
+    },
+    {
+      "id": "signed-build-provenance",
+      "classification": "NEW_REQUIRED_GATE",
+      "paths": [
+        "scripts/lib/ppk025-software-supply-chain.mjs",
+        "scripts/create-ppk025-release-evidence.mjs",
+        "artifacts/validation/32-U-ppk-025-release-evidence.json"
+      ],
+      "control": "DSSE/Ed25519 doğrulanmış provenance source commit/tree, iki lock, SBOM, lisans, vulnerability, external asset ve release artifact hashlerini subject olarak bağlar.",
+      "gap": "Production trusted public key ve repo dışı private-key erişimi henüz sağlanmamıştır; aday zarfı production yetkisi vermez.",
+      "disposition": "IMPLEMENTED_EXTERNAL_TRUST_KEY_PENDING"
+    },
+    {
+      "id": "external-packaging-assets",
+      "classification": "NEW_REQUIRED_GATE",
+      "paths": [
+        "apps/desktop/scripts/run-electron-builder.mjs",
+        "artifacts/validation/electron-cache",
+        "config/32-u-ppk-025-external-build-assets.json",
+        "artifacts/validation/32-U-ppk-025-external-build-assets.json"
+      ],
+      "control": "electron, 7zip, nsis, nsis-resources ve winCodeSign assetleri exact kimlik, kaynak ve SHA-256 pinleriyle build ve provenance zincirine bağlanır.",
+      "disposition": "IMPLEMENTED_LOCAL_VALIDATION_PASS"
+    },
+    {
+      "id": "authenticode-installer-and-main-executable",
+      "classification": "EXTERNAL_PRODUCTION_EVIDENCE_REQUIRED",
+      "paths": [
+        "apps/desktop/package.json",
+        "apps/desktop/scripts/build-signed-windows-release.mjs",
+        "apps/desktop/scripts/run-electron-builder.mjs",
+        "scripts/verify-ppk025-windows-package-signature.ps1"
+      ],
+      "control": "Nihai installer ve kurulu ana executable ayrı ayrı Authenticode Status=Valid, exact publisher, certificate SHA-256/thumbprint ve güvenilir timestamp ile doğrulanır.",
+      "gap": "Release artifacti ve production code-signing sertifikası/private key erişimi mevcut değildir; self-signed veya test sertifikası üretim PASS sayılmaz.",
+      "disposition": "EXTERNAL_SIGNING_PENDING"
+    },
+    {
+      "id": "content-free-status-and-no-persistence",
+      "classification": "NON_AUTHORITY_STATUS_BOUNDARY",
+      "paths": [
+        "packages/domain",
+        "packages/application",
+        "packages/platform-policy",
+        "apps/desktop/src/main",
+        "apps/desktop/src/renderer"
+      ],
+      "control": "UI yalnız content-free release posture alır; component, CVE, hash, certificate veya secret ayrıntısı renderer'a çıkmaz. Status sıfır argümanlı/no-cache'tir ve release authority değildir. Yeni DB persistence/migration yoktur; latest migration 77 kalır.",
+      "disposition": "IMPLEMENTED_LOCAL_VALIDATION_PASS"
+    }
+  ],
+  "openBlockers": [
+    {
+      "id": "production-code-signing-certificate",
+      "kind": "EXTERNAL_INPUT",
+      "status": "PENDING",
+      "detail": "Beklenen publisher'a ait güvenilir production code-signing sertifikası ve repo dışı private-key erişimi gereklidir."
+    },
+    {
+      "id": "production-provenance-signing-key",
+      "kind": "EXTERNAL_INPUT",
+      "status": "PENDING",
+      "detail": "Production DSSE/Ed25519 provenance için trusted public key ve repo dışı private-key erişimi gereklidir."
+    },
+    {
+      "id": "signed-current-release-artifacts",
+      "kind": "EXTERNAL_RUNTIME_EVIDENCE",
+      "status": "PENDING",
+      "detail": "4.8.2026-29 installer ve gerçek kurulu ana executable için production-trusted Authenticode/timestamp ve provenance kanıtı yoktur."
+    }
+  ],
+  "closureSummary": {
+    "controlCount": 10,
+    "productionReleaseEligible": false,
+    "openBlockerCount": 3,
+    "finalValidationPending": false,
+    "localCandidateValidationPass": true,
+    "externalSigningPending": true,
+    "passClaimed": false
+  }
+}

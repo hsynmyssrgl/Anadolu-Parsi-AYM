@@ -25,3 +25,4 @@ export * from './platform-policy-ast-gate.js';
 export * from './platform-capability-manifest-gate.js';
 export * from './application-security-profile-gate.js';
 export * from './policy-service-availability.js';
+export * from './supply-chain-release.js';

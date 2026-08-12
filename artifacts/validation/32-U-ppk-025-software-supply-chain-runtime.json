@@ -1,0 +1,351 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "32-U",
+  "requirement": "PPK-025",
+  "phase": "SOFTWARE_SUPPLY_CHAIN_CANDIDATE_RUNTIME",
+  "status": "PASS",
+  "checkCount": 16,
+  "passed": 16,
+  "failed": 0,
+  "results": [
+    {
+      "id": "ppk-025-contract-preflight",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/verify-32-u-ppk-025-software-supply-chain-contract.mjs --candidate"
+      ],
+      "expectedOutput": "PPK-025 candidate contract: PASS",
+      "outputSha256": "dbce1364a2ed2ec8db39ed388356c7c417b51df3e8efba99a2417b92593ea769",
+      "outputTail": "PPK-025 candidate contract: PASS (94/94)."
+    },
+    {
+      "id": "ppk-025-three-file-targeted",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe node_modules/vitest/vitest.mjs run packages/platform-policy/supply-chain-release-policy.test.ts packages/application/tests/supply-chain-release-use-cases.test.ts apps/desktop/tests/ppk025-software-supply-chain-gates.test.ts --reporter=dot --maxWorkers=1"
+      ],
+      "tests": 50,
+      "testFiles": 3,
+      "minimumTests": 22,
+      "minimumTestFiles": 3,
+      "outputSha256": "5da42305e2f062d6c72358a7d0b93faf31157bac99562e1ecdbf9567dec1ecd1",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n··················································\n\n Test Files  3 passed (3)\n      Tests  50 passed (50)\n   Start at  10:07:16\n   Duration  1.50s (transform 327ms, setup 0ms, import 655ms, tests 155ms, environment 0ms)"
+    },
+    {
+      "id": "root-typescript",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe node_modules/typescript/bin/tsc -p tsconfig.json --noEmit"
+      ],
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputTail": ""
+    },
+    {
+      "id": "ppk-025-production-source-gate",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/verify-software-supply-chain-boundary.mjs"
+      ],
+      "expectedOutput": "PPK-025 software supply-chain boundary: PASS",
+      "outputSha256": "fc3e0560b5a4120c0f193d42b1ae79b64bac333644f87eca2454f84ecaa5d944",
+      "outputTail": "PPK-025 software supply-chain boundary: PASS (2 zones / 462 files / 7 canonical references / 6 malicious / 4 benign / 0 findings)."
+    },
+    {
+      "id": "ppk-025-deterministic-sbom",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 2,
+      "expectedSteps": 2,
+      "commandLines": [
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/generate-ppk025-sbom.mjs",
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/verify-ppk025-sbom.mjs"
+      ],
+      "expectedOutput": "PPK-025 SBOM verification: PASS",
+      "outputSha256": "0efd23d67670095b3a37b405a711a3ec63aa0b6b9c219d8bbd1e27d5ac631498",
+      "outputTail": "PPK-025 deterministic CycloneDX SBOM: PASS (414 components / 374 external / 414 dependency nodes).\n\n\nPPK-025 SBOM verification: PASS (12/12, sha256=7e2cd77e65b4)."
+    },
+    {
+      "id": "ppk-025-license-and-notices",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 2,
+      "expectedSteps": 2,
+      "commandLines": [
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/generate-ppk025-third-party-notices.mjs",
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/verify-ppk025-license-policy.mjs"
+      ],
+      "expectedOutput": "PPK-025 license policy: PASS",
+      "outputSha256": "ec51299e5f1ebfd9cd874e2892ecced25afc69e3221bb0b7e9cdd9d44c7c0db1",
+      "outputTail": "PPK-025 third-party license gate: PASS (357 components / 13 expressions / 0 denied).\n\n\nPPK-025 license policy: PASS (11/11, 357 components / 13 expressions)."
+    },
+    {
+      "id": "ppk-025-five-external-build-assets",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/verify-ppk025-external-build-assets.mjs"
+      ],
+      "expectedOutput": "5 pinned assets",
+      "outputSha256": "4d0ae2dfce6c64e2c6cf2bfc7d520e9ba527cbd995aa5a29b949c982bde2c207",
+      "outputTail": "PPK-025 external build assets: PASS (12/12, 5 pinned assets)."
+    },
+    {
+      "id": "ppk-025-three-scope-vulnerability-evidence",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 4,
+      "expectedSteps": 4,
+      "commandLines": [
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/run-npm-audit-evidence.mjs --scope root-production --raw artifacts/validation/32-U-ppk-025-root-production-npm-audit-raw.json --report artifacts/validation/32-U-ppk-025-root-production-vulnerability.json",
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/run-npm-audit-evidence.mjs --scope root-build-toolchain --raw artifacts/validation/32-U-ppk-025-root-build-npm-audit-raw.json --report artifacts/validation/32-U-ppk-025-root-build-vulnerability.json",
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/run-npm-audit-evidence.mjs --scope windows-packager --raw artifacts/validation/32-U-ppk-025-windows-packager-npm-audit-raw.json --report artifacts/validation/32-U-ppk-025-windows-packager-vulnerability.json",
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/verify-ppk025-vulnerability-gate.mjs"
+      ],
+      "expectedOutput": "PPK-025 vulnerability gate: PASS",
+      "outputSha256": "caf9eaed05fb553bd92ab521830f6094b03185b663c2730cac8066f801e59cc3",
+      "outputTail": "npm audit evidence (root-production): PASS — 0 finding(s), lock=124c01f0f64e, sbom=7e2cd77e65b4.\n\n\nnpm audit evidence (root-build-toolchain): PASS — 0 finding(s), lock=124c01f0f64e, sbom=7e2cd77e65b4.\n\n\nnpm audit evidence (windows-packager): PASS — 0 finding(s), lock=f794c976da71, sbom=7e2cd77e65b4.\n\n\nPPK-025 vulnerability gate: PASS (25/25, 3 scopes, 0 findings)."
+    },
+    {
+      "id": "ppk-025-two-graph-registry-signature-evidence",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 3,
+      "expectedSteps": 3,
+      "commandLines": [
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/run-ppk025-registry-signature-gate.mjs --scope root --report artifacts/validation/32-U-ppk-025-root-registry-signatures.json",
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/run-ppk025-registry-signature-gate.mjs --scope windows-packager --report artifacts/validation/32-U-ppk-025-windows-packager-registry-signatures.json",
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/verify-ppk025-registry-signature-evidence.mjs"
+      ],
+      "expectedOutput": "PPK-025 registry signature evidence: PASS",
+      "outputSha256": "ce000dea1ae7940fd8a0d07eb2f8cdfb6129aa030dc6989cdb21a45fa90391ce",
+      "outputTail": "PPK-025 npm registry signature gate (root): PASS (0 invalid / 0 missing).\n\n\nPPK-025 npm registry signature gate (windows-packager): PASS (0 invalid / 0 missing).\n\n\nPPK-025 registry signature evidence: PASS (11/11, invalid=0, missing=0)."
+    },
+    {
+      "id": "ppk-025-real-candidate-release-blocked",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 2,
+      "expectedSteps": 2,
+      "commandLines": [
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe node_modules/typescript/bin/tsc -p packages/platform-policy/tsconfig.json",
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/create-ppk025-release-evidence.mjs --candidate"
+      ],
+      "expectedOutput": "PPK-025 candidate release decision: BLOCKED",
+      "decisionSummary": {
+        "mode": "CANDIDATE",
+        "status": "BLOCKED",
+        "releaseEligible": false,
+        "reasons": [
+          "AUTHENTICODE_ARTIFACT_MISSING",
+          "AUTHENTICODE_CERTIFICATE_UNTRUSTED",
+          "AUTHENTICODE_STATUS_INVALID",
+          "AUTHENTICODE_TIMESTAMP_MISSING",
+          "PRODUCTION_CERTIFICATE_NOT_PROVISIONED",
+          "PROVENANCE_KEY_UNTRUSTED",
+          "PROVENANCE_SIGNATURE_INVALID"
+        ],
+        "privateSigningMaterialPersisted": false
+      },
+      "decisionPassed": true,
+      "outputSha256": "027a87bb85750fe8a659582ba776069de65e944c1d3fe857b169484dff94645e",
+      "outputTail": "PPK-025 candidate release decision: BLOCKED (AUTHENTICODE_ARTIFACT_MISSING, AUTHENTICODE_CERTIFICATE_UNTRUSTED, AUTHENTICODE_STATUS_INVALID, AUTHENTICODE_TIMESTAMP_MISSING, PRODUCTION_CERTIFICATE_NOT_PROVISIONED, PROVENANCE_KEY_UNTRUSTED, PROVENANCE_SIGNATURE_INVALID)."
+    },
+    {
+      "id": "lockfile-dependency-supply-and-workspace-graph",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 3,
+      "expectedSteps": 3,
+      "commandLines": [
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/verify-lockfile-integrity.mjs",
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/verify-dependency-supply.mjs",
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/verify-workspace-dependencies.mjs"
+      ],
+      "expectedOutput": "acyclic production graph",
+      "outputSha256": "3ebda1012c966dd3dead6474841ddec0a97a9325933a14f76325758599b1ba6c",
+      "outputTail": "Lockfile integrity verified: 1505 assertions across 18 workspaces.\n\n\nDependency supply verified: 1536 assertions / 374 canonical external tarballs / 2 lock graphs.\n- root: 171 packages / 134 tarballs / 124c01f0f64e\n- windows-packager: 243 packages / 240 tarballs / f794c976da71\n\n\nWorkspace dependency contracts verified: 518 assertions / 18 workspaces / acyclic production graph."
+    },
+    {
+      "id": "ppk-025-build-toolchain-security",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/verify-build-toolchain-security-contract.mjs --report artifacts/validation/32-U-ppk-025-build-toolchain-security.json"
+      ],
+      "expectedOutput": "Build toolchain security contract: PASS",
+      "outputSha256": "08a0532606ef1ca65d2e6e54831e3382c5e8b5d04d2aa3bff0cd9ab1c460d684",
+      "outputTail": "Build toolchain security contract: PASS — 82 assertions."
+    },
+    {
+      "id": "ppk-025-candidate-release-material-reseal",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/create-ppk025-release-evidence.mjs --candidate"
+      ],
+      "expectedOutput": "PPK-025 candidate release decision: BLOCKED",
+      "decisionSummary": {
+        "mode": "CANDIDATE",
+        "status": "BLOCKED",
+        "releaseEligible": false,
+        "reasons": [
+          "AUTHENTICODE_ARTIFACT_MISSING",
+          "AUTHENTICODE_CERTIFICATE_UNTRUSTED",
+          "AUTHENTICODE_STATUS_INVALID",
+          "AUTHENTICODE_TIMESTAMP_MISSING",
+          "PRODUCTION_CERTIFICATE_NOT_PROVISIONED",
+          "PROVENANCE_KEY_UNTRUSTED",
+          "PROVENANCE_SIGNATURE_INVALID"
+        ],
+        "privateSigningMaterialPersisted": false
+      },
+      "decisionPassed": true,
+      "outputSha256": "027a87bb85750fe8a659582ba776069de65e944c1d3fe857b169484dff94645e",
+      "outputTail": "PPK-025 candidate release decision: BLOCKED (AUTHENTICODE_ARTIFACT_MISSING, AUTHENTICODE_CERTIFICATE_UNTRUSTED, AUTHENTICODE_STATUS_INVALID, AUTHENTICODE_TIMESTAMP_MISSING, PRODUCTION_CERTIFICATE_NOT_PROVISIONED, PROVENANCE_KEY_UNTRUSTED, PROVENANCE_SIGNATURE_INVALID)."
+    },
+    {
+      "id": "ppk-025-contract-postflight",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/verify-32-u-ppk-025-software-supply-chain-contract.mjs --candidate"
+      ],
+      "expectedOutput": "PPK-025 candidate contract: PASS",
+      "outputSha256": "dbce1364a2ed2ec8db39ed388356c7c417b51df3e8efba99a2417b92593ea769",
+      "outputTail": "PPK-025 candidate contract: PASS (94/94)."
+    },
+    {
+      "id": "decision-ledger",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/verify-user-decision-ledger.mjs"
+      ],
+      "expectedOutput": "User Decision Ledger: PASS",
+      "outputSha256": "77587498305978e38046775a15ce1220be5db6544d92b29a76e49618e3528de1",
+      "outputTail": "User Decision Ledger: PASS (323 checks / 60 decisions)."
+    },
+    {
+      "id": "bronze-current-audit",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "executedSteps": 1,
+      "expectedSteps": 1,
+      "commandLines": [
+        "C:\\Users\\Husey\\Documents\\Codex\\2026-08-02\\files-mentioned-by-the-user-anadolu\\toolchains\\node-v24.18.0-win-x64\\node.exe scripts/audit-bronze-current-state.mjs"
+      ],
+      "expectedOutput": "Bronze current audit: PASS_WITH_OPEN_SCOPE",
+      "outputSha256": "4880d17fded149fabb52a0833380b943dd0939a5c0f206615e7e364a6303650b",
+      "outputTail": "Bronze current audit: PASS_WITH_OPEN_SCOPE; official=25%; strict=10.5714%; implementation-chain=11.1143%."
+    }
+  ],
+  "validatedBoundaries": [
+    "TWO_EXACT_NPM_LOCK_GRAPHS_AND_EIGHTEEN_WORKSPACES",
+    "CYCLONEDX_1_6_EXACT_414_COMPONENT_AND_DEPENDENCY_COVERAGE",
+    "EXACT_374_CANONICAL_REGISTRY_PACKAGES_WITH_SHA512_INTEGRITY",
+    "EXACT_357_LICENSE_AND_THIRD_PARTY_NOTICE_COMPONENTS",
+    "THREE_FRESH_ZERO_FINDING_VULNERABILITY_SCOPES",
+    "TWO_LIVE_CANONICAL_NPM_REGISTRY_SIGNATURE_GRAPHS_WITH_ZERO_INVALID_OR_MISSING",
+    "FIVE_EXACT_EXTERNAL_BINARY_ASSET_HASH_PINS",
+    "DSSE_ED25519_CRYPTOGRAPHIC_PROVENANCE_AND_EXACT_SUBJECT_BINDING",
+    "INSTALLER_AND_INSTALLED_MAIN_EXECUTABLE_AUTHENTICODE_REQUIRED",
+    "VALID_STATUS_EXACT_PUBLISHER_THUMBPRINT_CERTIFICATE_SHA256_EKU_CHAIN_AND_TIMESTAMP",
+    "SELF_SIGNED_TEST_AND_CHECKSUM_ONLY_AUTHORITY_REJECTED",
+    "PACKAGE_WIN_FAILS_BEFORE_UNSIGNED_ARTIFACT_EMISSION",
+    "CONTENT_FREE_NON_AUTHORITATIVE_STATUS_BOUNDARY",
+    "NO_MIGRATION_DATA_TRANSFER_BACKFILL_CUTOVER_OR_OWNERSHIP_CHANGE",
+    "REAL_CANDIDATE_DECISION_BLOCKED_ON_EXACT_EXTERNAL_TRUST_REASONS"
+  ],
+  "lockfiles": 2,
+  "workspaces": 18,
+  "sbomComponents": 414,
+  "dependencyNodes": 414,
+  "registryPackages": 374,
+  "licenseComponents": 357,
+  "vulnerabilityScopes": 3,
+  "registrySignatureScopes": 2,
+  "externalAssets": 5,
+  "authenticodeArtifacts": 2,
+  "targetedTestFiles": 3,
+  "targetedTests": 50,
+  "candidateExpectedReasons": [
+    "AUTHENTICODE_ARTIFACT_MISSING",
+    "AUTHENTICODE_CERTIFICATE_UNTRUSTED",
+    "AUTHENTICODE_STATUS_INVALID",
+    "AUTHENTICODE_TIMESTAMP_MISSING",
+    "PRODUCTION_CERTIFICATE_NOT_PROVISIONED",
+    "PROVENANCE_KEY_UNTRUSTED",
+    "PROVENANCE_SIGNATURE_INVALID"
+  ],
+  "releaseDecision": {
+    "mode": "CANDIDATE",
+    "status": "BLOCKED",
+    "releaseEligible": false,
+    "reasons": [
+      "AUTHENTICODE_ARTIFACT_MISSING",
+      "AUTHENTICODE_CERTIFICATE_UNTRUSTED",
+      "AUTHENTICODE_STATUS_INVALID",
+      "AUTHENTICODE_TIMESTAMP_MISSING",
+      "PRODUCTION_CERTIFICATE_NOT_PROVISIONED",
+      "PROVENANCE_KEY_UNTRUSTED",
+      "PROVENANCE_SIGNATURE_INVALID"
+    ],
+    "privateSigningMaterialPersisted": false
+  },
+  "fullVitestExecutedByThisRuntime": false,
+  "fullProductionBuildExecutedByThisRuntime": false,
+  "fullValidationDeferredToFinalIntegration": true,
+  "productionPrivateMaterialPersisted": false,
+  "checksumAloneGrantsReleaseAuthority": false,
+  "selfSignedCertificateGrantsProductionAuthority": false,
+  "historicalEvidenceGrantsCurrentAuthority": false,
+  "schemaMigrationRequired": false,
+  "latestDatabaseMigration": 77,
+  "historicalBackfillPerformed": false,
+  "realDataTransferPerformed": false,
+  "cutoverPerformed": false,
+  "legacyDesktopVaultPreserved": true,
+  "sqliteOwnershipTransferred": false,
+  "successorRequirementCompletedByThisPackage": false,
+  "requirementCompletionClaimed": false,
+  "generatedAt": "2026-08-12T07:07:45.116Z"
+}

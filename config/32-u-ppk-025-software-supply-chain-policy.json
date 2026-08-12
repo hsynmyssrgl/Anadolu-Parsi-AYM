@@ -1,0 +1,242 @@
+{
+  "schemaVersion": 1,
+  "step": "32-U",
+  "requirement": "PPK-025",
+  "defaultDecision": "DENY",
+  "release": {
+    "name": "panthera-pardus-tulliana-family-platform",
+    "version": "4.8.2026-29",
+    "channel": "Bronze",
+    "releaseId": "anadolu-parsi-aym-bronze-4.8.2026-29",
+    "productionReleaseEligible": false,
+    "blockingState": "EXTERNAL_SIGNING_PENDING"
+  },
+  "lockfiles": [
+    {
+      "scope": "root",
+      "path": "package-lock.json",
+      "lockfileVersion": 3,
+      "required": true,
+      "workspaceCount": 18
+    },
+    {
+      "scope": "windows-packager",
+      "path": "tools/windows-packager/package-lock.json",
+      "lockfileVersion": 3,
+      "required": true,
+      "isolatedToolchain": true
+    }
+  ],
+  "requiredRegistryPackageCount": 374,
+  "requiredLicenseComponentCount": 357,
+  "requiredSbomComponentCount": 414,
+  "requiredDependencyNodeCount": 414,
+  "requiredVulnerabilityScopes": [
+    "root-production",
+    "root-build-toolchain",
+    "windows-packager"
+  ],
+  "requiredExternalAssets": [
+    "electron",
+    "7zip",
+    "nsis",
+    "nsis-resources",
+    "winCodeSign"
+  ],
+  "sbom": {
+    "required": true,
+    "format": "CycloneDX",
+    "specVersion": "1.6",
+    "mediaType": "application/vnd.cyclonedx+json",
+    "deterministic": true,
+    "componentsRequired": true,
+    "uniqueBomRefsRequired": true,
+    "dependencyEdgesRequired": true,
+    "exactLockBindingsRequired": true,
+    "releaseArtifactHashBindingsRequired": true,
+    "missingComponentDecision": "DENY",
+    "unexpectedComponentDecision": "DENY",
+    "duplicateComponentDecision": "DENY",
+    "malformedDecision": "DENY"
+  },
+  "approvedLicenses": [
+    "0BSD",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "MIT",
+    "MPL-2.0",
+    "BlueOak-1.0.0",
+    "Python-2.0",
+    "WTFPL",
+    "(MIT OR CC0-1.0)",
+    "(WTFPL OR MIT)",
+    "WTFPL OR ISC"
+  ],
+  "licenses": {
+    "exactExpressionRequired": true,
+    "decisionManifestRequired": true,
+    "thirdPartyNoticesRequired": true,
+    "unknownAllowed": false,
+    "missingAllowed": false,
+    "noticeMissingAllowed": false,
+    "unapprovedDecision": "DENY"
+  },
+  "vulnerability": {
+    "scopes": [
+      "root-production",
+      "root-build-toolchain",
+      "windows-packager"
+    ],
+    "maxAgeMs": 86400000,
+    "maxFutureSkewMs": 300000,
+    "zeroFindingsRequired": true,
+    "lockSha256Required": true,
+    "registry": "https://registry.npmjs.org/",
+    "feedUnavailableDecision": "DENY",
+    "missingScopeDecision": "DENY",
+    "malformedDecision": "DENY",
+    "staleDecision": "DENY",
+    "futureDecision": "DENY",
+    "findingDecision": "DENY"
+  },
+  "registrySignature": {
+    "scopes": [
+      "root",
+      "windows-packager"
+    ],
+    "verifiedRequired": true,
+    "keyIdRequired": true,
+    "maximumInvalidSignatures": 0,
+    "maximumMissingSignatures": 0,
+    "trustedKeyIds": [],
+    "trustRootState": "PENDING",
+    "unavailableDecision": "DENY",
+    "invalidDecision": "DENY",
+    "missingDecision": "DENY"
+  },
+  "provenance": {
+    "required": true,
+    "envelope": "DSSE",
+    "signatureAlgorithm": "Ed25519",
+    "verifiedRequired": true,
+    "keyIdRequired": true,
+    "trustedKeyIds": [],
+    "trustRootState": "PENDING",
+    "subjectHashes": [
+      "sourceCommitId",
+      "sourceTreeId",
+      "rootPackageLockSha256",
+      "windowsPackagerLockSha256",
+      "sbomSha256",
+      "thirdPartyNoticesJsonSha256",
+      "thirdPartyNoticesTextSha256",
+      "licenseGateSha256",
+      "vulnerabilityGateSha256",
+      "registrySignatureGateSha256",
+      "externalAssetManifestSha256",
+      "externalAssetVerificationSha256",
+      "buildToolchainSecuritySha256",
+      "installerSha256",
+      "mainExecutableSha256"
+    ],
+    "checksumOnlyAccepted": false,
+    "missingDecision": "DENY",
+    "invalidDecision": "DENY",
+    "subjectMismatchDecision": "DENY"
+  },
+  "externalAssets": {
+    "manifestRequired": true,
+    "exactSourceAndSha256Required": true,
+    "required": [
+      {
+        "id": "electron",
+        "version": "43.2.0",
+        "manifestPath": "config/32-u-ppk-025-external-build-assets.json",
+        "sha256": "eba5f5088af40ecb364fe258809c79a5234c6ece5a75c64722772eba01b02786",
+        "state": "PINNED"
+      },
+      {
+        "id": "7zip",
+        "version": "1.0.0",
+        "manifestPath": "config/32-u-ppk-025-external-build-assets.json",
+        "sha256": "be071f15bd6da2f78fe81c6ddef2009b0c4d8a51f36b780cb806c7e6df95e1b3",
+        "state": "PINNED"
+      },
+      {
+        "id": "nsis",
+        "version": "3.0.4.1",
+        "manifestPath": "config/32-u-ppk-025-external-build-assets.json",
+        "sha256": "9877df902530f96357d13a7a31ae2b9df67f48b11ffc9a1700a7c961574ec5fa",
+        "state": "PINNED"
+      },
+      {
+        "id": "nsis-resources",
+        "version": "3.4.1",
+        "manifestPath": "config/32-u-ppk-025-external-build-assets.json",
+        "sha256": "593a9a92ef958321293ac6a2ee61e64bf1bd543142a5bd6b3d310709cc924103",
+        "state": "PINNED"
+      },
+      {
+        "id": "winCodeSign",
+        "version": "2.6.0",
+        "manifestPath": "config/32-u-ppk-025-external-build-assets.json",
+        "sha256": "cdaec7154dda7cc31f88d886e2489379a0625a737d610b5ae7f62a12f16743a4",
+        "state": "PINNED"
+      }
+    ],
+    "missingDecision": "DENY",
+    "hashMismatchDecision": "DENY",
+    "unexpectedAssetDecision": "DENY"
+  },
+  "authenticode": {
+    "required": true,
+    "artifacts": [
+      {
+        "id": "windows-installer",
+        "status": "Valid",
+        "sha256Required": true,
+        "timestampRequired": true,
+        "publisherRequired": true,
+        "thumbprintRequired": true
+      },
+      {
+        "id": "installed-main-executable",
+        "status": "Valid",
+        "sha256Required": true,
+        "timestampRequired": true,
+        "publisherRequired": true,
+        "thumbprintRequired": true
+      }
+    ],
+    "selfSignedAllowed": false,
+    "testCertificateAllowedForProduction": false,
+    "notSignedDecision": "DENY",
+    "invalidDecision": "DENY",
+    "untrustedDecision": "DENY",
+    "publisherMismatchDecision": "DENY",
+    "certificateMismatchDecision": "DENY",
+    "timestampMissingDecision": "DENY"
+  },
+  "waivers": {
+    "productionReleaseWaiversAllowed": false,
+    "wildcardsAllowed": false,
+    "requiredExactFields": [
+      "component",
+      "reason",
+      "expiresAt",
+      "approver"
+    ],
+    "expiredDecision": "DENY",
+    "malformedDecision": "DENY"
+  },
+  "truthBoundary": {
+    "historicalEvidenceGrantsCurrentAuthority": false,
+    "checksumIsDigitalSignature": false,
+    "testKeyGrantsProductionAuthority": false,
+    "selfSignedCertificateGrantsProductionAuthority": false,
+    "uiStatusGrantsReleaseAuthority": false,
+    "missingOrUnavailableEvidenceDecision": "DENY"
+  }
+}

@@ -1,10 +1,10 @@
 {
   "status": "PASS",
   "productionSourceZones": 18,
-  "scannedFiles": 362,
+  "scannedFiles": 365,
   "capabilitySurfaces": 237,
   "exactManifestSurfaces": 237,
-  "exactManifestSha256": "127e265a657e1e92d540c2205102dc19abe0babe1ba03956268e1fbf8ba95ff1",
+  "exactManifestSha256": "bb384a5c94fc88761e557d98d893778911f045e64f66cacdc5d2afdbc6849453",
   "surfaceCounts": {
     "FILE_DIALOG": 2,
     "FILE_IMPORT": 225,

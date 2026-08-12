@@ -4,6 +4,8 @@ import { join } from 'node:path';
 const readJson = async (path) => JSON.parse(await readFile(path, 'utf8'));
 const rootManifest = await readJson('package.json');
 const lock = await readJson('package-lock.json');
+const packagerManifest = await readJson('tools/windows-packager/package.json');
+const packagerLock = await readJson('tools/windows-packager/package-lock.json');
 const failures = [];
 let checks = 0;
 
@@ -26,6 +28,11 @@ verify(lock.name === rootManifest.name, `Lockfile root name mismatch: ${lock.nam
 verify(lock.version === rootManifest.version, `Lockfile root version mismatch: ${lock.version} !== ${rootManifest.version}`);
 verify(lock.lockfileVersion === 3, `Unsupported lockfileVersion: ${lock.lockfileVersion}`);
 verify(lock.packages?.['']?.version === rootManifest.version, 'Root lock package version does not match package.json.');
+verify(packagerManifest.version === rootManifest.version, `Windows packager version mismatch: ${packagerManifest.version} !== ${rootManifest.version}`);
+verify(packagerLock.name === packagerManifest.name, `Windows packager lock name mismatch: ${packagerLock.name} !== ${packagerManifest.name}`);
+verify(packagerLock.version === packagerManifest.version, `Windows packager lock version mismatch: ${packagerLock.version} !== ${packagerManifest.version}`);
+verify(packagerLock.lockfileVersion === 3, `Unsupported Windows packager lockfileVersion: ${packagerLock.lockfileVersion}`);
+verify(packagerLock.packages?.['']?.version === packagerManifest.version, 'Windows packager root lock entry version mismatch.');
 
 const dependencySections = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'];
 for (const [name, workspace] of workspaceManifests) {
@@ -98,6 +105,16 @@ for (const [packagePath, entry] of Object.entries(lock.packages ?? {})) {
     archiveVersion === entry.version,
     `Resolved tarball/version mismatch for ${packagePath}: version=${entry.version}, tarball=${archiveVersion}`
   );
+}
+
+for (const [packagePath, entry] of Object.entries(packagerLock.packages ?? {})) {
+  if (!entry || typeof entry !== 'object' || !entry.resolved || !entry.version || entry.link === true) continue;
+  let url;
+  try { url = new URL(entry.resolved); } catch { failures.push(`Invalid Windows packager lock URL for ${packagePath}: ${entry.resolved}`); continue; }
+  verify(url.protocol === 'https:', `Windows packager tarball must use HTTPS for ${packagePath}: ${entry.resolved}`);
+  verify(url.hostname === 'registry.npmjs.org', `Windows packager tarball must use registry.npmjs.org for ${packagePath}: ${entry.resolved}`);
+  verify(/^sha512-[A-Za-z0-9+/]+={0,2}$/u.test(String(entry.integrity ?? '')), `Windows packager tarball lacks SHA-512 integrity for ${packagePath}`);
+  verify(typeof entry.license === 'string' && entry.license.length > 0, `Windows packager package lacks declared license metadata for ${packagePath}`);
 }
 
 if (failures.length > 0) {

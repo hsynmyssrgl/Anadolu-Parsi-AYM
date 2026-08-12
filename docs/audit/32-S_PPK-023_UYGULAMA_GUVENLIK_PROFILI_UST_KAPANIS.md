@@ -22,8 +22,8 @@
 - Tam Vitest: `80/80 dosya / 688/688 test PASS`.
 - Production workspace build: `18/18 PASS`.
 - Domain, application, platform-policy, Desktop/Core Service ve root TypeScript: `0 hata`.
-- PPK-021 ardıl kanıt: `18 zone / 362 dosya / 518 exact yüzey / 0 bulgu PASS`; tarihsel PPK-023 kapanış contract/runtime sayıları ayrıca korunur.
-- PPK-022 ardıl kaynak ratchet'i: `18 zone / 362 dosya / 237 capability yüzeyi / 0 bulgu PASS`; PPK-023 kapanışındaki `108/108 contract / 24/24 runtime` kanıtı tarihsel olarak korunur.
+- PPK-021 ardıl kanıt: `18 zone / 365 dosya / 521 exact yüzey / 0 bulgu PASS`; tarihsel PPK-023 kapanış contract/runtime sayıları ayrıca korunur.
+- PPK-022 ardıl kaynak ratchet'i: `18 zone / 365 dosya / 237 capability yüzeyi / 0 bulgu PASS`; PPK-023 kapanışındaki `108/108 contract / 24/24 runtime` kanıtı tarihsel olarak korunur.
 - Lockfile: `542 doğrulama / 18 workspace PASS`.
 - Dependency supply: `436 doğrulama / 135 canonical external tarball PASS`.
 - Workspace bağımlılıkları: `516 doğrulama / 18 workspace / döngüsüz PASS`.

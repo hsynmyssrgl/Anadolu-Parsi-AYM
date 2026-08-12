@@ -32,6 +32,7 @@ const paths = {
   completion31S: resolve(sourceRoot, 'artifacts', 'checkpoints', '31-S_COMPLETION_RECORD.json'),
   completion31T: resolve(sourceRoot, 'artifacts', 'checkpoints', '31-T_COMPLETION_RECORD.json'),
   receipt: resolve(aymRoot, '05_TEST', '30Z_LOCAL_RECEIPT', 'LATEST.json'),
+  localReceiptRoot: resolve(aymRoot, '05_TEST', '30Z_LOCAL_RECEIPT'),
   activeSource: resolve(aymRoot, '06_KOD', 'AKTIF_KAYNAK.json'),
   backupRegister: resolve(aymRoot, '10_YEDEK', 'YEDEK_SICILI.json')
 };
@@ -59,6 +60,69 @@ const toCsv = (rows, columns) => `\uFEFF${columns.map(csvCell).join(',')}\r\n${r
   .join('\r\n')}\r\n`;
 const exists = async (path) => {
   try { await access(path); return true; } catch { return false; }
+};
+
+const reconcileAuthoritativeSourceBackups = async (registeredBackups) => {
+  const backups = [...registeredBackups];
+  const knownPaths = new Set(backups.map((item) => String(item.path ?? '').replaceAll('\\', '/')));
+  const protectionFiles = (await readdir(paths.localReceiptRoot, { withFileTypes: true }))
+    .filter((entry) => entry.isFile() && /^PROTECTION_[a-f0-9]{64}\.json$/u.test(entry.name))
+    .sort((left, right) => left.name.localeCompare(right.name, 'en'));
+
+  for (const entry of protectionFiles) {
+    const protection = await readJson(resolve(paths.localReceiptRoot, entry.name));
+    const backupPath = String(protection.backup?.path ?? '').replaceAll('\\', '/');
+    if (knownPaths.has(backupPath)) continue;
+    if (protection.source !== '06_KOD/app'
+      || !/^[a-f0-9]{64}$/u.test(String(protection.treeSha256 ?? ''))
+      || !/^10_YEDEK\/AYM_AKTIF_KOD_[a-f0-9]{16}\.zip$/u.test(backupPath)
+      || protection.localReceiptStatus !== 'LOCAL_RECEIPT_VERIFIED'
+      || protection.readbackStatus !== 'PASS') {
+      throw new Error(`Malformed immutable source-protection record: ${entry.name}`);
+    }
+
+    const backupAbsolute = resolve(aymRoot, ...backupPath.split('/'));
+    if (!backupAbsolute.startsWith(`${resolve(aymRoot, '10_YEDEK')}${sep}`)) {
+      throw new Error(`Unsafe historical backup path: ${backupPath}`);
+    }
+    const receiptPath = String(protection.receipt?.path ?? '').replaceAll('\\', '/');
+    const receiptAbsolute = resolve(aymRoot, ...receiptPath.split('/'));
+    if (!receiptAbsolute.startsWith(`${paths.localReceiptRoot}${sep}`)) {
+      throw new Error(`Unsafe historical receipt path: ${receiptPath}`);
+    }
+
+    const [backupInfo, backupDigest, backupSidecar, receiptDigest, sourceReceipt] = await Promise.all([
+      stat(backupAbsolute),
+      hashFile(backupAbsolute),
+      readFile(`${backupAbsolute}.sha256`, 'utf8'),
+      hashFile(receiptAbsolute),
+      readJson(receiptAbsolute)
+    ]);
+    const sidecarDigest = backupSidecar.trim().split(/\s+/u)[0]?.toLowerCase();
+    if (backupInfo.size !== protection.backup.bytes
+      || backupDigest !== protection.backup.sha256
+      || sidecarDigest !== protection.backup.sha256
+      || receiptDigest !== protection.receipt.sha256
+      || sourceReceipt.treeSha256 !== protection.treeSha256
+      || sourceReceipt.fileCount !== protection.fileCount
+      || sourceReceipt.totalBytes !== protection.totalBytes) {
+      throw new Error(`Historical source-protection readback mismatch: ${backupPath}`);
+    }
+    backups.push({
+      path: backupPath,
+      role: 'DETERMINISTIC_AUTHORITATIVE_SOURCE_LOCAL_PROTECTION',
+      bytes: protection.backup.bytes,
+      sha256: String(protection.backup.sha256).toUpperCase(),
+      entries: protection.fileCount,
+      sourceTreeSha256: protection.treeSha256,
+      localReceiptStatus: protection.localReceiptStatus,
+      externalLibraryReceiptStatus: protection.externalLibraryReceiptStatus,
+      officialCompletionClaimed: protection.officialCompletionClaimed,
+      coverage: 'Exact 06_KOD/app authoritative source tree; deterministic fixed-timestamp ZIP.'
+    });
+    knownPaths.add(backupPath);
+  }
+  return backups;
 };
 
 const snapshotTargets = [
@@ -575,21 +639,23 @@ const updateManagementRecords = async ({ audit, receipt, completion30Z, completi
   await writeChecked(resolve(aymRoot, '06_KOD', 'AKTIF_KAYNAK.md'), `# AKTIF KAYNAK\n\n- Tek yetkili yol: \`06_KOD/app\`\n- Dosya: ${receipt.fileCount}\n- Bayt: ${receipt.totalBytes}\n- Agac SHA-256: \`${receipt.treeSha256}\`\n- Yerel receipt: **${receipt.localReceiptStatus}**\n- Deterministik yedek: \`${receipt.backup.path}\`\n- Dondurulmus 30-Z ve 31-A..31-T harici receipts: **PASS / COMPLETED**\n- Guncel checkpoint: **31-T**\n- PPK-002: **PARTIAL**\n- Guncel C kaynak agaci harici D: korumasi: **PASS**\n- Yeni Build: **Verilmedi**\n\n${truth}\n`);
 
   const backupRegister = await readJson(paths.backupRegister);
-  const backups = Array.isArray(backupRegister.backups) ? [...backupRegister.backups] : [];
-  if (!backups.some((item) => item.path === receipt.backup.path)) {
-    backups.push({
-      path: receipt.backup.path,
-      role: 'DETERMINISTIC_AUTHORITATIVE_SOURCE_LOCAL_PROTECTION',
-      bytes: receipt.backup.bytes,
-      sha256: receipt.backup.sha256.toUpperCase(),
-      entries: receipt.fileCount,
-      sourceTreeSha256: receipt.treeSha256,
-      localReceiptStatus: receipt.localReceiptStatus,
-      externalLibraryReceiptStatus: receipt.externalLibraryReceiptStatus,
-      officialCompletionClaimed: receipt.officialCompletionClaimed,
-      coverage: 'Exact 06_KOD/app authoritative source tree; deterministic fixed-timestamp ZIP.'
-    });
-  }
+  const backups = await reconcileAuthoritativeSourceBackups(Array.isArray(backupRegister.backups) ? backupRegister.backups : []);
+  const currentBackup = {
+    path: receipt.backup.path,
+    role: 'DETERMINISTIC_AUTHORITATIVE_SOURCE_LOCAL_PROTECTION',
+    bytes: receipt.backup.bytes,
+    sha256: receipt.backup.sha256.toUpperCase(),
+    entries: receipt.fileCount,
+    sourceTreeSha256: receipt.treeSha256,
+    localReceiptStatus: receipt.localReceiptStatus,
+    externalLibraryReceiptStatus: receipt.externalLibraryReceiptStatus,
+    officialCompletionClaimed: receipt.officialCompletionClaimed,
+    coverage: 'Exact 06_KOD/app authoritative source tree; deterministic fixed-timestamp ZIP.'
+  };
+  const currentBackupIndex = backups.findIndex((item) => item.path === currentBackup.path);
+  if (currentBackupIndex >= 0) backups[currentBackupIndex] = { ...backups[currentBackupIndex], ...currentBackup };
+  else backups.push(currentBackup);
+  backups.sort((left, right) => String(left.path).localeCompare(String(right.path), 'en'));
   await writeJson(paths.backupRegister, {
     ...backupRegister,
     schemaVersion: 6,

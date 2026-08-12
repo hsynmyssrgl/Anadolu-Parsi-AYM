@@ -1,6 +1,6 @@
 # Bronze guncel tamamlama denetimi
 
-Olusturma (UTC): 2026-08-12T04:13:45.264Z
+Olusturma (UTC): 2026-08-12T07:07:45.092Z
 
 ## Sonuc
 
@@ -24,17 +24,17 @@ Olusturma (UTC): 2026-08-12T04:13:45.264Z
 
 - Resmi agirlikli Bronze ilerlemesi: **%25**
 - Kati gereksinim kapanisi: **%10.5714** (37/350)
-- Uygulama zinciri kapsami: **%10.8286**
-- Yonetisim ve kanit zinciri kapsami: **%49.2381**
+- Uygulama zinciri kapsami: **%11.1143**
+- Yonetisim ve kanit zinciri kapsami: **%49.3333**
 
 Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 
 ## Kapsam durumu
 
 - COMPLETE: 37
-- PARTIAL: 33
+- PARTIAL: 34
 - FOUNDATION_STARTED: 1
-- NOT_IMPLEMENTED: 279
+- NOT_IMPLEMENTED: 278
 - Toplam acik gereksinim: 313
 
 ## Kural ve kapilar
@@ -237,6 +237,7 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 
 | Kimlik | Sinif | Oncelik | Durum | Zincir | Alan | Baslik |
 |---|---|---|---|---:|---|---|
+| PPK-025 | STARTED_BEFORE_NEW | P0 | PARTIAL | 12/13 | Supply Chain | SBOM, imzalı paket, dependency provenance, lisans ve zafiyet kapıları |
 | B0-04 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Bronze Kapsam Kilidi | FEATURE_REALITY_GATE ve DEAD_UI/DEAD_API sınıflandırması |
 | DHA-001 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Process architecture | Electron arayüzünden bağımsız, kullanıcı oturumu kapalıyken de çalışan headless Core Service |
 | DHA-023 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Health | Liveness, readiness, quorum, replication lag, disk, cert, backup age ve dependency health |
@@ -266,7 +267,6 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | B3-03 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Aile ve Hafıza | Doğrudan medya/belge bağlama ve davetiye yaşam döngüsü |
 | B3-05 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Aile ve Hafıza | Tüm modüllerde yetki filtreli birleşik arama |
 | B5-01 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Sağlık ve Yaşam | Alerji, kronik durum, kan grubu, aşı, ölçüm, randevu ve belge ilişkisi |
-| B5-04 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Sağlık ve Yaşam | Sigorta, abonelik, eğitim, iş, resmi işlem, ev ve araç için kategoriye özgü alanlar |
 
 Tam acik-is listesi `artifacts/inventory/BRONZE_CURRENT_COMPLETION_AUDIT.json` icindedir.
 
