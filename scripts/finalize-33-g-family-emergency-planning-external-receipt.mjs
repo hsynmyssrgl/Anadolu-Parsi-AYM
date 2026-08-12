@@ -776,6 +776,8 @@ const transitionChecks = [
   ['manual offline truth', exactTruth(receipt)],
   ['next step pending', plan.steps.find((item) => item.id === successorId)?.status === 'PENDING']
 ].map(([name, passed]) => ({ name, status: passed ? 'PASS' : 'FAIL' }));
+const transitionFailures = transitionChecks.filter((item) => item.status !== 'PASS');
+for (const failure of transitionFailures) console.error(`33-G transition check failed: ${failure.name}`);
 assert(transitionChecks.every((item) => item.status === 'PASS'),
   '33-G completion transition failed');
 const transition = await writePair(paths.transition, {
