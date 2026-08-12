@@ -7985,6 +7985,465 @@ SET value='REVISION-33-E-B5-LIFE-HOME-VEHICLE-MANAGED-LEDGER',
 WHERE key='schema_generation';
 `;
 
+const lifeHomeInventoryLedgerSql = `CREATE TABLE life_home_inventory_ledger(
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 160),
+  home_profile_id TEXT NOT NULL REFERENCES life_managed_ledger(id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  item_type TEXT NOT NULL CHECK(item_type IN (
+    'room','meter','meter_reading','belonging','warranty','service','document'
+  )),
+  parent_item_id TEXT REFERENCES life_home_inventory_ledger(id) ON DELETE RESTRICT,
+  supersedes_item_id TEXT REFERENCES life_home_inventory_ledger(id) ON DELETE RESTRICT,
+  name TEXT CHECK(name IS NULL OR length(trim(name)) BETWEEN 1 AND 160),
+  room_kind TEXT CHECK(room_kind IS NULL OR room_kind IN (
+    'living_room','bedroom','kitchen','bathroom','storage','garage','garden','other'
+  )),
+  label TEXT CHECK(label IS NULL OR length(trim(label)) BETWEEN 1 AND 160),
+  meter_kind TEXT CHECK(meter_kind IS NULL OR meter_kind IN ('electricity','water','natural_gas','other')),
+  reading_unit TEXT CHECK(reading_unit IS NULL OR reading_unit IN (
+    'wh','milliliter','milliliter_cubic_meter_equivalent','custom_milliunit'
+  )),
+  reading_milliunits INTEGER CHECK(reading_milliunits IS NULL OR (
+    typeof(reading_milliunits)='integer' AND reading_milliunits BETWEEN 0 AND 9000000000000000
+  )),
+  reading_kind TEXT CHECK(reading_kind IS NULL OR reading_kind IN ('reading','reset','replacement')),
+  belonging_kind TEXT CHECK(belonging_kind IS NULL OR belonging_kind IN (
+    'appliance','electronics','furniture','tool','other'
+  )),
+  serial_number TEXT CHECK(serial_number IS NULL OR length(trim(serial_number)) BETWEEN 2 AND 160),
+  purchased_at TEXT CHECK(purchased_at IS NULL OR (
+    length(purchased_at)=24
+    AND purchased_at GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9].[0-9][0-9][0-9]Z'
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',purchased_at) IS NOT NULL
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',purchased_at)=purchased_at
+  )),
+  starts_at TEXT CHECK(starts_at IS NULL OR (
+    length(starts_at)=24
+    AND starts_at GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9].[0-9][0-9][0-9]Z'
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',starts_at) IS NOT NULL
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',starts_at)=starts_at
+  )),
+  ends_at TEXT CHECK(ends_at IS NULL OR (
+    length(ends_at)=24
+    AND ends_at GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9].[0-9][0-9][0-9]Z'
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',ends_at) IS NOT NULL
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',ends_at)=ends_at
+  )),
+  reminder_at TEXT CHECK(reminder_at IS NULL OR (
+    length(reminder_at)=24
+    AND reminder_at GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9].[0-9][0-9][0-9]Z'
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',reminder_at) IS NOT NULL
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',reminder_at)=reminder_at
+  )),
+  target_type TEXT CHECK(target_type IS NULL OR target_type IN ('room','meter','belonging','warranty','service')),
+  service_kind TEXT CHECK(service_kind IS NULL OR service_kind IN (
+    'maintenance','repair','inspection','installation','other'
+  )),
+  occurred_at TEXT CHECK(occurred_at IS NULL OR (
+    length(occurred_at)=24
+    AND occurred_at GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9].[0-9][0-9][0-9]Z'
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',occurred_at) IS NOT NULL
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',occurred_at)=occurred_at
+  )),
+  provider TEXT CHECK(provider IS NULL OR length(trim(provider)) BETWEEN 1 AND 160),
+  amount_minor INTEGER CHECK(amount_minor IS NULL OR (
+    typeof(amount_minor)='integer' AND amount_minor BETWEEN 1 AND 1000000000000000
+  )),
+  currency TEXT CHECK(currency IS NULL OR (
+    length(currency)=3 AND currency=upper(currency) AND currency GLOB '[A-Z][A-Z][A-Z]'
+  )),
+  finance_expense_id TEXT REFERENCES finance_planning_ledger(id) ON DELETE RESTRICT,
+  archive_item_id TEXT REFERENCES archive_items(id) ON DELETE RESTRICT,
+  document_kind TEXT CHECK(document_kind IS NULL OR document_kind IN (
+    'invoice','warranty','service_receipt','meter_document','other'
+  )),
+  note TEXT CHECK(note IS NULL OR length(trim(note)) BETWEEN 1 AND 500),
+  privacy TEXT NOT NULL CHECK(privacy IN ('private','selected_members','family')),
+  data_source TEXT NOT NULL CHECK(data_source='manual'),
+  external_verification TEXT NOT NULL CHECK(external_verification='not_performed'),
+  payment_execution TEXT NOT NULL CHECK(payment_execution='not_performed'),
+  created_at TEXT NOT NULL CHECK(
+    length(created_at)=24
+    AND created_at GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9].[0-9][0-9][0-9]Z'
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',created_at) IS NOT NULL
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',created_at)=created_at
+  ),
+  policy_receipt_hash TEXT NOT NULL UNIQUE REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT CHECK(
+    length(policy_receipt_hash)=64 AND policy_receipt_hash NOT GLOB '*[^0-9a-f]*'
+  ),
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version=1),
+  policy_receipt_nonce TEXT NOT NULL,
+  policy_correlation_id TEXT NOT NULL,
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type='life_record'),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action='update'),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='family.write'),
+  CHECK(policy_resource_id=home_profile_id),
+  CHECK((amount_minor IS NULL AND currency IS NULL) OR (amount_minor IS NOT NULL AND currency IS NOT NULL)),
+  CHECK(finance_expense_id IS NULL OR (amount_minor IS NULL AND currency IS NULL)),
+  CHECK(starts_at IS NULL OR ends_at IS NULL OR datetime(ends_at)>=datetime(starts_at)),
+  CHECK(reminder_at IS NULL OR (
+    starts_at IS NOT NULL AND ends_at IS NOT NULL
+    AND datetime(reminder_at)>=datetime(starts_at)
+    AND datetime(reminder_at)<=datetime(ends_at)
+  )),
+  CHECK(purchased_at IS NULL OR datetime(purchased_at)<=datetime(created_at)),
+  CHECK(occurred_at IS NULL OR datetime(occurred_at)<=datetime(created_at)),
+  CHECK(supersedes_item_id IS NULL OR supersedes_item_id<>id),
+  CHECK(
+    (item_type='room'
+      AND parent_item_id IS NULL AND name IS NOT NULL AND room_kind IS NOT NULL
+      AND label IS NULL AND meter_kind IS NULL AND reading_unit IS NULL
+      AND reading_milliunits IS NULL AND reading_kind IS NULL AND belonging_kind IS NULL
+      AND serial_number IS NULL AND purchased_at IS NULL
+      AND starts_at IS NULL AND ends_at IS NULL AND reminder_at IS NULL AND target_type IS NULL
+      AND service_kind IS NULL AND occurred_at IS NULL AND provider IS NULL
+      AND amount_minor IS NULL AND currency IS NULL AND finance_expense_id IS NULL
+      AND archive_item_id IS NULL AND document_kind IS NULL AND note IS NULL)
+    OR
+    (item_type='meter'
+      AND name IS NULL AND room_kind IS NULL AND label IS NOT NULL
+      AND meter_kind IS NOT NULL AND reading_unit IS NOT NULL
+      AND ((meter_kind='electricity' AND reading_unit='wh')
+        OR (meter_kind='water' AND reading_unit='milliliter')
+        OR (meter_kind='natural_gas' AND reading_unit='milliliter_cubic_meter_equivalent')
+        OR (meter_kind='other' AND reading_unit='custom_milliunit'))
+      AND reading_milliunits IS NULL AND reading_kind IS NULL AND belonging_kind IS NULL
+      AND serial_number IS NULL AND purchased_at IS NULL
+      AND starts_at IS NULL AND ends_at IS NULL AND reminder_at IS NULL AND target_type IS NULL
+      AND service_kind IS NULL AND occurred_at IS NULL
+      AND provider IS NULL AND amount_minor IS NULL AND currency IS NULL AND finance_expense_id IS NULL
+      AND archive_item_id IS NULL AND document_kind IS NULL AND note IS NULL)
+    OR
+    (item_type='meter_reading'
+      AND parent_item_id IS NOT NULL AND name IS NULL AND room_kind IS NULL AND label IS NULL
+      AND meter_kind IS NULL AND reading_unit IS NULL
+      AND reading_milliunits IS NOT NULL AND reading_kind IS NOT NULL
+      AND (reading_kind='reading' OR (reading_kind IN ('reset','replacement') AND note IS NOT NULL AND length(trim(note)) BETWEEN 2 AND 240))
+      AND belonging_kind IS NULL AND serial_number IS NULL AND purchased_at IS NULL
+      AND starts_at IS NULL AND ends_at IS NULL AND reminder_at IS NULL AND target_type IS NULL
+      AND service_kind IS NULL AND occurred_at IS NOT NULL
+      AND provider IS NULL AND amount_minor IS NULL AND currency IS NULL AND finance_expense_id IS NULL
+      AND archive_item_id IS NULL AND document_kind IS NULL)
+    OR
+    (item_type='belonging'
+      AND name IS NOT NULL AND room_kind IS NULL AND label IS NULL
+      AND meter_kind IS NULL AND reading_unit IS NULL AND reading_milliunits IS NULL AND reading_kind IS NULL
+      AND belonging_kind IS NOT NULL
+      AND starts_at IS NULL AND ends_at IS NULL AND reminder_at IS NULL AND target_type IS NULL
+      AND service_kind IS NULL AND occurred_at IS NULL AND provider IS NULL
+      AND archive_item_id IS NULL AND document_kind IS NULL AND note IS NULL)
+    OR
+    (item_type='warranty'
+      AND parent_item_id IS NOT NULL AND name IS NULL AND room_kind IS NULL AND label IS NULL
+      AND meter_kind IS NULL AND reading_unit IS NULL AND reading_milliunits IS NULL AND reading_kind IS NULL
+      AND belonging_kind IS NULL AND serial_number IS NULL AND purchased_at IS NULL
+      AND starts_at IS NOT NULL AND ends_at IS NOT NULL AND target_type IS NULL
+      AND service_kind IS NULL AND occurred_at IS NULL
+      AND amount_minor IS NULL AND currency IS NULL AND finance_expense_id IS NULL
+      AND archive_item_id IS NULL AND document_kind IS NULL)
+    OR
+    (item_type='service'
+      AND parent_item_id IS NOT NULL AND name IS NULL AND room_kind IS NULL AND label IS NULL
+      AND meter_kind IS NULL AND reading_unit IS NULL AND reading_milliunits IS NULL AND reading_kind IS NULL
+      AND belonging_kind IS NULL AND serial_number IS NULL AND purchased_at IS NULL
+      AND starts_at IS NULL AND ends_at IS NULL AND reminder_at IS NULL
+      AND target_type IN ('room','meter','belonging') AND service_kind IS NOT NULL AND occurred_at IS NOT NULL
+      AND archive_item_id IS NULL AND document_kind IS NULL)
+    OR
+    (item_type='document'
+      AND parent_item_id IS NOT NULL AND name IS NULL AND room_kind IS NULL
+      AND meter_kind IS NULL AND reading_unit IS NULL AND reading_milliunits IS NULL AND reading_kind IS NULL
+      AND belonging_kind IS NULL AND serial_number IS NULL AND purchased_at IS NULL
+      AND starts_at IS NULL AND ends_at IS NULL AND reminder_at IS NULL
+      AND target_type IN ('meter','belonging','warranty','service')
+      AND service_kind IS NULL AND occurred_at IS NULL
+      AND provider IS NULL AND amount_minor IS NULL AND currency IS NULL AND finance_expense_id IS NULL
+      AND archive_item_id IS NOT NULL AND document_kind IS NOT NULL AND note IS NULL)
+  )
+);
+
+CREATE INDEX idx_life_home_inventory_profile_created
+ON life_home_inventory_ledger(home_profile_id,created_at DESC,id);
+CREATE INDEX idx_life_home_inventory_family_created
+ON life_home_inventory_ledger(family_id,created_at DESC,id);
+CREATE INDEX idx_life_home_inventory_parent_created
+ON life_home_inventory_ledger(parent_item_id,created_at DESC,id)
+WHERE parent_item_id IS NOT NULL;
+CREATE UNIQUE INDEX idx_life_home_inventory_meter_reading
+ON life_home_inventory_ledger(parent_item_id,occurred_at DESC)
+WHERE item_type='meter_reading';
+CREATE UNIQUE INDEX idx_life_home_inventory_supersedes
+ON life_home_inventory_ledger(supersedes_item_id)
+WHERE supersedes_item_id IS NOT NULL;
+CREATE UNIQUE INDEX idx_life_home_inventory_archive_item
+ON life_home_inventory_ledger(archive_item_id)
+WHERE archive_item_id IS NOT NULL;
+CREATE UNIQUE INDEX idx_life_home_inventory_finance_expense
+ON life_home_inventory_ledger(finance_expense_id)
+WHERE finance_expense_id IS NOT NULL;
+
+CREATE TRIGGER trg_b5_home_inventory_root_scope
+BEFORE INSERT ON life_home_inventory_ledger
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM life_managed_ledger profile
+  WHERE profile.id=NEW.home_profile_id
+    AND profile.item_type='profile'
+    AND profile.category='home'
+    AND profile.family_id=NEW.family_id
+    AND profile.owner_person_id=NEW.owner_person_id
+    AND profile.privacy=NEW.privacy
+    AND datetime(NEW.created_at)>=datetime(profile.created_at)
+    AND NOT EXISTS(
+      SELECT 1 FROM data_lifecycle lifecycle
+      WHERE lifecycle.resource_type='life_record'
+        AND lifecycle.resource_id=profile.id
+        AND lifecycle.state<>'active'
+    )
+)
+BEGIN
+  SELECT RAISE(ABORT,'home inventory item requires an active managed home profile with exact family owner and privacy');
+END;
+
+CREATE TRIGGER trg_b5_home_inventory_parent_matrix
+BEFORE INSERT ON life_home_inventory_ledger
+WHEN NOT (
+  (NEW.item_type='room' AND NEW.parent_item_id IS NULL)
+  OR (NEW.item_type IN ('meter','belonging') AND (
+    NEW.parent_item_id IS NULL OR EXISTS(
+      SELECT 1 FROM life_home_inventory_ledger parent
+      WHERE parent.id=NEW.parent_item_id AND parent.item_type='room'
+        AND parent.home_profile_id=NEW.home_profile_id
+        AND parent.family_id=NEW.family_id AND parent.owner_person_id=NEW.owner_person_id
+        AND parent.privacy=NEW.privacy AND datetime(NEW.created_at)>=datetime(parent.created_at)
+    )
+  ))
+  OR (NEW.item_type='meter_reading' AND EXISTS(
+    SELECT 1 FROM life_home_inventory_ledger parent
+    WHERE parent.id=NEW.parent_item_id AND parent.item_type='meter'
+      AND parent.home_profile_id=NEW.home_profile_id
+      AND parent.family_id=NEW.family_id AND parent.owner_person_id=NEW.owner_person_id
+      AND parent.privacy=NEW.privacy AND datetime(NEW.created_at)>=datetime(parent.created_at)
+  ))
+  OR (NEW.item_type='warranty' AND EXISTS(
+    SELECT 1 FROM life_home_inventory_ledger parent
+    WHERE parent.id=NEW.parent_item_id AND parent.item_type='belonging'
+      AND parent.home_profile_id=NEW.home_profile_id
+      AND parent.family_id=NEW.family_id AND parent.owner_person_id=NEW.owner_person_id
+      AND parent.privacy=NEW.privacy AND datetime(NEW.created_at)>=datetime(parent.created_at)
+  ))
+  OR (NEW.item_type='service' AND EXISTS(
+    SELECT 1 FROM life_home_inventory_ledger parent
+    WHERE parent.id=NEW.parent_item_id AND parent.item_type IN ('room','meter','belonging')
+      AND NEW.target_type=parent.item_type
+      AND parent.home_profile_id=NEW.home_profile_id
+      AND parent.family_id=NEW.family_id AND parent.owner_person_id=NEW.owner_person_id
+      AND parent.privacy=NEW.privacy AND datetime(NEW.created_at)>=datetime(parent.created_at)
+  ))
+  OR (NEW.item_type='document' AND EXISTS(
+    SELECT 1 FROM life_home_inventory_ledger parent
+    WHERE parent.id=NEW.parent_item_id AND parent.item_type IN ('meter','belonging','warranty','service')
+      AND NEW.target_type=parent.item_type
+      AND parent.home_profile_id=NEW.home_profile_id
+      AND parent.family_id=NEW.family_id AND parent.owner_person_id=NEW.owner_person_id
+      AND parent.privacy=NEW.privacy AND datetime(NEW.created_at)>=datetime(parent.created_at)
+  ))
+)
+BEGIN
+  SELECT RAISE(ABORT,'home inventory item requires an exact compatible parent in the same root scope');
+END;
+
+CREATE TRIGGER trg_b5_home_inventory_supersession_scope
+BEFORE INSERT ON life_home_inventory_ledger
+WHEN NEW.supersedes_item_id IS NOT NULL AND NOT EXISTS(
+  SELECT 1 FROM life_home_inventory_ledger prior
+  WHERE prior.id=NEW.supersedes_item_id
+    AND prior.item_type=NEW.item_type
+    AND prior.home_profile_id=NEW.home_profile_id
+    AND prior.family_id=NEW.family_id
+    AND prior.owner_person_id=NEW.owner_person_id
+    AND prior.privacy=NEW.privacy
+    AND datetime(NEW.created_at)>datetime(prior.created_at)
+)
+BEGIN
+  SELECT RAISE(ABORT,'home inventory supersession requires an older item of the same type and root scope');
+END;
+
+CREATE TRIGGER trg_b5_home_inventory_meter_monotonic
+BEFORE INSERT ON life_home_inventory_ledger
+WHEN NEW.item_type='meter_reading' AND EXISTS(
+  SELECT 1
+  FROM life_home_inventory_ledger prior
+  WHERE prior.item_type='meter_reading'
+    AND prior.parent_item_id=NEW.parent_item_id
+    AND prior.home_profile_id=NEW.home_profile_id
+    AND (
+      datetime(NEW.occurred_at)<=datetime(prior.occurred_at)
+      OR (
+        NEW.reading_kind='reading'
+        AND prior.id=(
+          SELECT latest.id FROM life_home_inventory_ledger latest
+          WHERE latest.item_type='meter_reading'
+            AND latest.parent_item_id=NEW.parent_item_id
+            AND latest.home_profile_id=NEW.home_profile_id
+          ORDER BY latest.occurred_at DESC,latest.created_at DESC,latest.id DESC LIMIT 1
+        )
+        AND NEW.reading_milliunits<prior.reading_milliunits
+      )
+    )
+)
+BEGIN
+  SELECT RAISE(ABORT,'home meter readings must be chronological and monotonic unless reset or replacement is explicit');
+END;
+
+CREATE TRIGGER trg_b5_home_inventory_external_link_scope
+BEFORE INSERT ON life_home_inventory_ledger
+WHEN (
+  NEW.archive_item_id IS NOT NULL AND NOT EXISTS(
+    SELECT 1 FROM archive_items archive
+    WHERE archive.id=NEW.archive_item_id
+      AND archive.family_id=NEW.family_id
+      AND archive.destroyed_at IS NULL
+      AND archive.sensitivity=CASE NEW.privacy
+        WHEN 'private' THEN 'high'
+        WHEN 'selected_members' THEN 'personal'
+        ELSE 'standard'
+      END
+      AND datetime(archive.created_at)<=datetime(NEW.created_at)
+  )
+) OR (
+  NEW.finance_expense_id IS NOT NULL AND NOT EXISTS(
+    SELECT 1 FROM finance_planning_ledger expense
+    WHERE expense.id=NEW.finance_expense_id
+      AND expense.item_type='cash_flow'
+      AND expense.category_kind='expense'
+      AND expense.family_id=NEW.family_id
+      AND expense.owner_person_id=NEW.owner_person_id
+      AND expense.privacy=NEW.privacy
+      AND datetime(expense.created_at)<=datetime(NEW.created_at)
+  )
+)
+BEGIN
+  SELECT RAISE(ABORT,'home inventory archive or finance link is outside exact scope');
+END;
+
+CREATE TRIGGER trg_b5_home_inventory_id_collision
+BEFORE INSERT ON life_home_inventory_ledger
+WHEN EXISTS(SELECT 1 FROM life_records WHERE id=NEW.id)
+  OR EXISTS(SELECT 1 FROM life_managed_ledger WHERE id=NEW.id)
+BEGIN
+  SELECT RAISE(ABORT,'home inventory id collides with another life record');
+END;
+
+CREATE TRIGGER trg_b5_life_record_home_inventory_id_collision
+BEFORE INSERT ON life_records
+WHEN EXISTS(SELECT 1 FROM life_home_inventory_ledger WHERE id=NEW.id)
+BEGIN
+  SELECT RAISE(ABORT,'life record id collides with a home inventory item');
+END;
+
+CREATE TRIGGER trg_b5_life_managed_home_inventory_id_collision
+BEFORE INSERT ON life_managed_ledger
+WHEN EXISTS(SELECT 1 FROM life_home_inventory_ledger WHERE id=NEW.id)
+BEGIN
+  SELECT RAISE(ABORT,'managed life id collides with a home inventory item');
+END;
+
+CREATE TRIGGER trg_b5_home_inventory_policy_receipt
+BEFORE INSERT ON life_home_inventory_ledger
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM platform_policy_transaction_receipts receipt
+  JOIN platform_policy_database_fences fence
+    ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+  WHERE receipt.receipt_hash=NEW.policy_receipt_hash
+    AND receipt.receipt_version=NEW.policy_receipt_version
+    AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id
+    AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id
+    AND receipt.action=NEW.policy_action
+    AND receipt.capability=NEW.policy_capability
+    AND receipt.resource_type='life_record'
+    AND receipt.resource_id=NEW.home_profile_id
+    AND receipt.action='update'
+    AND receipt.capability='family.write'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.resource.sensitivity')=CASE NEW.privacy
+      WHEN 'private' THEN 'highly_sensitive'
+      WHEN 'selected_members' THEN 'sensitive'
+      ELSE 'personal'
+    END
+    AND json_extract(receipt.record_json,'$.request.purpose')='general'
+)
+OR EXISTS(SELECT 1 FROM archive_items WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_versions WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_retention_policies WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_categories WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_tags WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_item_tags WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM events WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_records WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_valuations WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM health_records WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM medication_plans WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM family_health_history WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM life_records WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM locations WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM bank_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM payment_cards WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM loan_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM loan_payment_history WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_planning_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_import_batches WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM life_managed_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM life_home_inventory_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'home inventory write requires an unused exact durable life update receipt');
+END;
+
+CREATE TRIGGER trg_b5_life_record_home_inventory_receipt_reuse_insert
+BEFORE INSERT ON life_records
+WHEN NEW.policy_receipt_hash IS NOT NULL
+  AND EXISTS(SELECT 1 FROM life_home_inventory_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'life policy receipt is already bound to a home inventory item');
+END;
+CREATE TRIGGER trg_b5_life_record_home_inventory_receipt_reuse_update
+BEFORE UPDATE ON life_records
+WHEN NEW.policy_receipt_hash IS NOT NULL
+  AND EXISTS(SELECT 1 FROM life_home_inventory_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'life policy receipt is already bound to a home inventory item');
+END;
+CREATE TRIGGER trg_b5_life_managed_home_inventory_receipt_reuse
+BEFORE INSERT ON life_managed_ledger
+WHEN EXISTS(SELECT 1 FROM life_home_inventory_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN
+  SELECT RAISE(ABORT,'life policy receipt is already bound to a home inventory item');
+END;
+
+CREATE TRIGGER trg_b5_home_inventory_immutable
+BEFORE UPDATE ON life_home_inventory_ledger
+BEGIN
+  SELECT RAISE(ABORT,'home inventory ledger is append-only');
+END;
+CREATE TRIGGER trg_b5_home_inventory_delete_guard
+BEFORE DELETE ON life_home_inventory_ledger
+BEGIN
+  SELECT RAISE(ABORT,'home inventory deletion requires a governed deletion workflow');
+END;
+
+UPDATE database_metadata
+SET value='REVISION-33-F-HOME-INVENTORY-UTILITY-BELONGINGS',
+    updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
+WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -8068,7 +8527,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(80, 'b4_loan_management', loanManagementSql),
   createMigrationDefinition(81, 'b4_finance_planning_portfolio_analytics', financePlanningLedgerSql),
   createMigrationDefinition(82, 'b4_controlled_import_open_banking', financeControlledImportOpenBankingSql),
-  createMigrationDefinition(83, 'b5_life_home_vehicle_managed_ledger', lifeHomeVehicleManagedLedgerSql)
+  createMigrationDefinition(83, 'b5_life_home_vehicle_managed_ledger', lifeHomeVehicleManagedLedgerSql),
+  createMigrationDefinition(84, 'b5_life_home_inventory_ledger', lifeHomeInventoryLedgerSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

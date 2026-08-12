@@ -432,7 +432,12 @@
       "version": 83,
       "name": "b5_life_home_vehicle_managed_ledger",
       "checksum": "f648e5f8b6f685222bc26c3ce6fc9edcc37eeebc8ea69a44fc2c0951ff8057dc"
+    },
+    {
+      "version": 84,
+      "name": "b5_life_home_inventory_ledger",
+      "checksum": "0d6bcb5884a7ea2c11c1b1d4e633344e990c18a203e7b6ce6592dcc80f630362"
     }
   ],
-  "generatedAt": "2026-08-12T20:39:25.552Z"
+  "generatedAt": "2026-08-12T21:42:36.467Z"
 }

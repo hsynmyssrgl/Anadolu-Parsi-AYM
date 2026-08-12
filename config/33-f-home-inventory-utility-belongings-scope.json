@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "33-F-HOME-INVENTORY-UTILITY-BELONGINGS",
+  "decision": "DEC-217",
+  "requirements": ["EXT-030", "EXT-032"],
+  "status": "COMPLETE",
+  "model": {
+    "table": "life_home_inventory_ledger",
+    "rootTable": "life_managed_ledger",
+    "rootCategory": "home",
+    "itemTypes": ["room", "meter", "meter_reading", "belonging", "warranty", "service", "document"],
+    "appendOnly": true,
+    "childScopeInherited": ["family", "owner", "privacy"],
+    "correctionModel": "append_only_superseding_event",
+    "moneyRepresentation": "minor_unit_safe_integer",
+    "readingRepresentation": "milliunit_safe_integer",
+    "timestampRepresentation": "canonical_utc_iso"
+  },
+  "utility": {
+    "meterKinds": ["electricity", "water", "natural_gas", "other"],
+    "readingKinds": ["reading", "reset", "replacement"],
+    "normalReadingMonotonic": true,
+    "externalMeterLookup": false
+  },
+  "belongings": {
+    "history": ["warranty", "service", "document"],
+    "serialProjection": "masked",
+    "documentLink": "opaque_archive_id_only"
+  },
+  "security": {
+    "policyAction": "update",
+    "policyResourceType": "life_record",
+    "policyCapability": "family.write",
+    "crossLedgerReceiptReplayRejected": true,
+    "crossScopeLinksRejected": true,
+    "updatesAllowed": false,
+    "deletesAllowed": false,
+    "secretPanPathBase64InputsRejected": true,
+    "outboxContainsSensitiveDetails": false
+  },
+  "truth": {
+    "dataSource": "manual",
+    "smartMeterLookup": "not_performed",
+    "providerContact": "not_performed",
+    "warrantyLookup": "not_performed",
+    "ocr": "not_performed",
+    "paymentExecution": "not_performed",
+    "documentContentExposure": "not_performed",
+    "networkEgressAdded": false
+  },
+  "persistence": {
+    "migration": 84,
+    "migrationName": "b5_life_home_inventory_ledger"
+  },
+  "validation": {
+    "boundary": "artifacts/validation/33-F-home-inventory-utility-belongings-boundary.json",
+    "contract": "artifacts/validation/33-F-home-inventory-utility-belongings-contract.json",
+    "runtime": "artifacts/validation/33-F-home-inventory-utility-belongings-runtime.json",
+    "finalEvidence": {
+      "boundaryChecksPassed": 51,
+      "contractChecksPassed": 15,
+      "runtimeChecksPassed": 11,
+      "targetedTestFilesPassed": 3,
+      "targetedTestsPassed": 37,
+      "fullVitestTestFilesPassed": 112,
+      "fullVitestTestsPassed": 968,
+      "productionWorkspaceBuildsPassed": 18,
+      "ppk021ExactAllowlistEntries": 545,
+      "ppk021UseCaseCompositionSurfaces": 277,
+      "ppk022CapabilitySurfaces": 242,
+      "latestDatabaseMigration": 84,
+      "requirementChainsComplete": 2,
+      "finalClosureEvidence": true
+    }
+  },
+  "excludedClaims": [
+    "No smart-meter, energy, water, manufacturer, warranty or service-provider lookup is performed.",
+    "No OCR, document-content reading, provider contact, reservation or payment execution is performed.",
+    "Archive document contents, paths, names and hashes are not exposed by the workspace.",
+    "B3-01, EXT-033, EXT-044 and other Bronze requirements remain open.",
+    "Silver readiness, Bronze Final and a new Build number are not claimed."
+  ]
+}

@@ -125,7 +125,7 @@ export const verifyB5CategoryLifeHomeVehicleBoundary = async () => {
   check('repository contract exposes managed list find insert and policy lookup', includesAll(repositoryContract, [
     'listManagedLifeItems', 'findManagedLifeProfile', 'insertManagedLifeItem', 'findManagedLifeProfileForPolicyResolution'
   ]));
-  check('migration 83 is the exact latest migration', migrationVersions.at(-1) === 83
+  check('migration 83 remains present through authorized successor migrations', (migrationVersions.at(-1) ?? 0) >= 83
     && includesAll(migrations, ["createMigrationDefinition(83, 'b5_life_home_vehicle_managed_ledger'", 'CREATE TABLE life_managed_ledger']));
   check('migration stores integer money quantity and odometer with manual truth', includesAll(managedMigration, [
     'amount_minor', 'quantity_milliunits', 'odometer_km', 'data_source', 'external_verification', 'payment_execution'
@@ -180,8 +180,8 @@ export const verifyB5CategoryLifeHomeVehicleBoundary = async () => {
   check('managed renderer supports vehicle registration insurance inspection maintenance fuel charge expense', includesAll(managedPanel, [
     'vehicle_registration', 'vehicle_insurance_policy', 'inspection', 'maintenance', 'fuel', 'charging', 'expense'
   ]));
-  check('renderer makes manual no-verification no-payment truth visible', includesAll(managedPanel, [
-    'manual', 'not_performed', 'paymentExecution', 'externalRegistryLookup'
+  check('renderer makes manual no-verification no-payment truth visible through successor fields', includesAll(managedPanel, [
+    'manual', 'not_performed', 'paymentExecution', 'smartMeterLookup', 'warrantyLookup'
   ]));
   check('App mounts managed panel inside the life center', includesAll(appRenderer, ['ManagedLifePanel', '<ManagedLifePanel']));
   check('application tests cover contracts categories security money and reminders', includesAll(applicationTest, [

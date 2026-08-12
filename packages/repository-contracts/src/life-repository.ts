@@ -1,6 +1,13 @@
 import type { FamilyId, IsoDateTime, PersonId } from '@ppt/core';
 import type {
   LifeRecordView,
+  ManagedHomeInventoryBelongingLedgerItemView,
+  ManagedHomeInventoryDocumentLedgerItemView,
+  ManagedHomeInventoryMeterLedgerItemView,
+  ManagedHomeInventoryMeterReadingLedgerItemView,
+  ManagedHomeInventoryRoomLedgerItemView,
+  ManagedHomeInventoryServiceLedgerItemView,
+  ManagedHomeInventoryWarrantyLedgerItemView,
   ManagedLifeActivityLedgerItemView,
   ManagedLifeDocumentLedgerItemView,
   ManagedLifeProfileLedgerItemView,
@@ -53,6 +60,43 @@ export type ManagedLifeLedgerItemRow =
   | ManagedLifeActivityLedgerItemRow
   | ManagedLifeDocumentLedgerItemRow;
 
+type ManagedHomeInventoryRowCommon = {
+  readonly familyId: FamilyId;
+  readonly ownerPersonId: PersonId;
+  readonly createdAt: IsoDateTime;
+};
+
+export type ManagedHomeInventoryRoomLedgerItemRow =
+  Omit<ManagedHomeInventoryRoomLedgerItemView, 'createdAt'> & ManagedHomeInventoryRowCommon;
+export type ManagedHomeInventoryMeterLedgerItemRow =
+  Omit<ManagedHomeInventoryMeterLedgerItemView, 'createdAt'> & ManagedHomeInventoryRowCommon;
+export type ManagedHomeInventoryMeterReadingLedgerItemRow =
+  Omit<ManagedHomeInventoryMeterReadingLedgerItemView, 'createdAt' | 'recordedAt'>
+  & ManagedHomeInventoryRowCommon
+  & { readonly recordedAt: IsoDateTime };
+export type ManagedHomeInventoryBelongingLedgerItemRow =
+  Omit<ManagedHomeInventoryBelongingLedgerItemView, 'createdAt' | 'purchasedAt'>
+  & ManagedHomeInventoryRowCommon
+  & { readonly serialNumber?: string; readonly purchasedAt?: IsoDateTime };
+export type ManagedHomeInventoryWarrantyLedgerItemRow =
+  Omit<ManagedHomeInventoryWarrantyLedgerItemView, 'createdAt' | 'startsAt' | 'endsAt' | 'reminderAt'>
+  & ManagedHomeInventoryRowCommon
+  & { readonly startsAt: IsoDateTime; readonly endsAt: IsoDateTime; readonly reminderAt?: IsoDateTime };
+export type ManagedHomeInventoryServiceLedgerItemRow =
+  Omit<ManagedHomeInventoryServiceLedgerItemView, 'createdAt' | 'occurredAt'>
+  & ManagedHomeInventoryRowCommon
+  & { readonly occurredAt: IsoDateTime };
+export type ManagedHomeInventoryDocumentLedgerItemRow =
+  Omit<ManagedHomeInventoryDocumentLedgerItemView, 'createdAt'> & ManagedHomeInventoryRowCommon;
+export type ManagedHomeInventoryLedgerItemRow =
+  | ManagedHomeInventoryRoomLedgerItemRow
+  | ManagedHomeInventoryMeterLedgerItemRow
+  | ManagedHomeInventoryMeterReadingLedgerItemRow
+  | ManagedHomeInventoryBelongingLedgerItemRow
+  | ManagedHomeInventoryWarrantyLedgerItemRow
+  | ManagedHomeInventoryServiceLedgerItemRow
+  | ManagedHomeInventoryDocumentLedgerItemRow;
+
 export interface LifeRepositoryPort {
   listLifeRecords(
     context: PolicyAuthorizedRepositoryExecutionContext
@@ -71,6 +115,22 @@ export interface LifeRepositoryPort {
   insertManagedLifeItem(
     context: PolicyAuthorizedRepositoryExecutionContext,
     row: ManagedLifeLedgerItemRow
+  ): RepositoryResult<void>;
+  listManagedHomeInventoryItems(
+    context: PolicyAuthorizedRepositoryExecutionContext
+  ): RepositoryResult<readonly ManagedHomeInventoryLedgerItemRow[]>;
+  findManagedHomeInventoryItem(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    id: string
+  ): RepositoryResult<ManagedHomeInventoryLedgerItemRow | null>;
+  findLatestManagedHomeMeterReading(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    recordId: string,
+    meterId: string
+  ): RepositoryResult<ManagedHomeInventoryMeterReadingLedgerItemRow | null>;
+  insertManagedHomeInventoryItem(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    row: ManagedHomeInventoryLedgerItemRow
   ): RepositoryResult<void>;
 }
 

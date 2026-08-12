@@ -147,7 +147,7 @@ export const verifyB4ControlledImportOpenBankingBoundary = async () => {
   check('sensitive inventory and person lifecycle include both import tables', includesAll(aiRepository, [
     'SELECT COUNT(*) FROM finance_import_batches', 'SELECT COUNT(*) FROM finance_import_entries'
   ]) && includesAll(personLifecycleRepository, ['financeImportBatches:', 'financeImportEntries:']));
-  check('historical migration 82 remains exact under the authorized migration 83 successor', Math.max(...migrationVersions) === 83
+  check('historical migration 82 remains exact through authorized successor migrations', Math.max(...migrationVersions) >= 83
     && migrations.includes("createMigrationDefinition(82, 'b4_controlled_import_open_banking', financeControlledImportOpenBankingSql)")
     && migrations.includes("createMigrationDefinition(83, 'b5_life_home_vehicle_managed_ledger'"));
   check('migration creates exactly two import tables with no prohibited columns', tableDefinitions.length === 2

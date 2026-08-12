@@ -1,6 +1,16 @@
 import { asFamilyId, asIsoDateTime, asPersonId } from '@ppt/core';
 import type {
   LifeRecordView,
+  ManagedHomeBelongingKind,
+  ManagedHomeDocumentKind,
+  ManagedHomeDocumentTargetType,
+  ManagedHomeInventoryItemType,
+  ManagedHomeMeterKind,
+  ManagedHomeMeterReadingKind,
+  ManagedHomeMeterReadingUnit,
+  ManagedHomeRoomKind,
+  ManagedHomeServiceKind,
+  ManagedHomeServiceTargetType,
   ManagedLifeActivityKind,
   ManagedLifeCategory,
   ManagedLifeDocumentKind,
@@ -12,6 +22,8 @@ import {
   assertPolicyAuthorizedRepositoryContext,
   type LifeAutomationDueProjectionRow,
   type LifeAutomationRunSourceProjectionRow,
+  type ManagedHomeInventoryLedgerItemRow,
+  type ManagedHomeInventoryMeterReadingLedgerItemRow,
   type ManagedLifeActivityLedgerItemRow,
   type ManagedLifeDocumentLedgerItemRow,
   type ManagedLifeLedgerItemRow,
@@ -130,6 +142,119 @@ const mapManagedLifeItem = (row: Record<string, unknown>): ManagedLifeLedgerItem
     documentKind: String(row.document_kind) as ManagedLifeDocumentKind,
     ...(row.label ? { label: String(row.label) } : {})
   } satisfies ManagedLifeDocumentLedgerItemRow;
+};
+
+const managedHomeInventoryColumns = `
+  inventory.id,inventory.home_profile_id,inventory.family_id,inventory.owner_person_id,
+  inventory.item_type,inventory.parent_item_id,inventory.supersedes_item_id,
+  inventory.name,inventory.room_kind,inventory.label,inventory.meter_kind,
+  inventory.reading_unit,inventory.reading_milliunits,inventory.reading_kind,
+  inventory.belonging_kind,inventory.serial_number,inventory.purchased_at,
+  inventory.starts_at,inventory.ends_at,inventory.reminder_at,inventory.target_type,
+  inventory.service_kind,inventory.occurred_at,inventory.provider,inventory.amount_minor,
+  inventory.currency,inventory.finance_expense_id,inventory.archive_item_id,
+  inventory.document_kind,inventory.note,inventory.privacy,inventory.data_source,
+  inventory.external_verification,inventory.payment_execution,inventory.created_at
+`;
+
+const maskSerialNumber = (serialNumber: string): string => {
+  const suffix = serialNumber.slice(-4);
+  return `${'*'.repeat(Math.max(4, Math.min(12, serialNumber.length - suffix.length)))}${suffix}`;
+};
+
+const mapManagedHomeInventoryItem = (
+  row: Record<string, unknown>,
+  includeRawSerial = false
+): ManagedHomeInventoryLedgerItemRow => {
+  const common = {
+    id: String(row.id),
+    recordId: String(row.home_profile_id),
+    familyId: asFamilyId(String(row.family_id)),
+    ownerPersonId: asPersonId(String(row.owner_person_id)),
+    privacy: String(row.privacy) as RecordPrivacy,
+    ...(row.supersedes_item_id ? { supersedesItemId: String(row.supersedes_item_id) } : {}),
+    dataSource: 'manual' as const,
+    externalVerification: 'not_performed' as const,
+    paymentExecution: 'not_performed' as const,
+    createdAt: asIsoDateTime(String(row.created_at))
+  };
+  const itemType = String(row.item_type) as ManagedHomeInventoryItemType;
+  if (itemType === 'room') return {
+    ...common,
+    itemType,
+    name: String(row.name),
+    roomKind: String(row.room_kind) as ManagedHomeRoomKind
+  };
+  if (itemType === 'meter') return {
+    ...common,
+    itemType,
+    ...(row.parent_item_id ? { roomId: String(row.parent_item_id) } : {}),
+    label: String(row.label),
+    meterKind: String(row.meter_kind) as ManagedHomeMeterKind,
+    readingUnit: String(row.reading_unit) as ManagedHomeMeterReadingUnit
+  };
+  if (itemType === 'meter_reading') return {
+    ...common,
+    itemType,
+    meterId: String(row.parent_item_id),
+    readingKind: String(row.reading_kind) as ManagedHomeMeterReadingKind,
+    readingMilliunits: Number(row.reading_milliunits),
+    recordedAt: asIsoDateTime(String(row.occurred_at)),
+    ...(row.note ? { note: String(row.note) } : {})
+  };
+  if (itemType === 'belonging') return {
+    ...common,
+    itemType,
+    ...(row.parent_item_id ? { roomId: String(row.parent_item_id) } : {}),
+    name: String(row.name),
+    belongingKind: String(row.belonging_kind) as ManagedHomeBelongingKind,
+    ...(row.serial_number ? {
+      ...(includeRawSerial ? { serialNumber: String(row.serial_number) } : {}),
+      serialNumberMasked: maskSerialNumber(String(row.serial_number))
+    } : {}),
+    ...(row.purchased_at ? { purchasedAt: asIsoDateTime(String(row.purchased_at)) } : {}),
+    ...(row.amount_minor !== null && row.amount_minor !== undefined
+      ? { purchaseAmountMinor: Number(row.amount_minor) }
+      : {}),
+    ...(row.currency ? { currency: String(row.currency) } : {}),
+    ...(row.finance_expense_id ? { financeExpenseId: String(row.finance_expense_id) } : {}),
+    financePosting: row.finance_expense_id ? 'linked' : 'not_performed'
+  };
+  if (itemType === 'warranty') return {
+    ...common,
+    itemType,
+    belongingId: String(row.parent_item_id),
+    ...(row.provider ? { provider: String(row.provider) } : {}),
+    startsAt: asIsoDateTime(String(row.starts_at)),
+    endsAt: asIsoDateTime(String(row.ends_at)),
+    ...(row.reminder_at ? { reminderAt: asIsoDateTime(String(row.reminder_at)) } : {}),
+    ...(row.note ? { note: String(row.note) } : {})
+  };
+  if (itemType === 'service') return {
+    ...common,
+    itemType,
+    targetItemId: String(row.parent_item_id),
+    targetType: String(row.target_type) as ManagedHomeServiceTargetType,
+    serviceKind: String(row.service_kind) as ManagedHomeServiceKind,
+    occurredAt: asIsoDateTime(String(row.occurred_at)),
+    ...(row.provider ? { provider: String(row.provider) } : {}),
+    ...(row.amount_minor !== null && row.amount_minor !== undefined
+      ? { amountMinor: Number(row.amount_minor) }
+      : {}),
+    ...(row.currency ? { currency: String(row.currency) } : {}),
+    ...(row.finance_expense_id ? { financeExpenseId: String(row.finance_expense_id) } : {}),
+    financePosting: row.finance_expense_id ? 'linked' : 'not_performed',
+    ...(row.note ? { note: String(row.note) } : {})
+  };
+  return {
+    ...common,
+    itemType: 'document',
+    targetItemId: String(row.parent_item_id),
+    targetType: String(row.target_type) as ManagedHomeDocumentTargetType,
+    archiveItemId: String(row.archive_item_id),
+    documentKind: String(row.document_kind) as ManagedHomeDocumentKind,
+    ...(row.label ? { label: String(row.label) } : {})
+  };
 };
 
 interface LifeReadBinding {
@@ -581,6 +706,167 @@ export class SqliteLifeRepository extends SqliteRepository implements
           "INSERT INTO data_lifecycle(resource_type,resource_id,owner_person_id,privacy,state,updated_at) VALUES('life_record',?,?,?,'active',?)"
         ).run(row.id, row.ownerPersonId, row.privacy, row.createdAt);
       }
+    });
+  }
+
+  public listManagedHomeInventoryItems(
+    context: PolicyAuthorizedRepositoryExecutionContext
+  ): RepositoryResult<readonly ManagedHomeInventoryLedgerItemRow[]> {
+    const visibility = lifeReadBinding(context);
+    return this.execute(context, () => (
+      this.database(context).prepare(`
+        SELECT ${managedHomeInventoryColumns}
+        FROM life_home_inventory_ledger inventory
+        JOIN life_managed_ledger profile
+          ON profile.id=inventory.home_profile_id AND profile.item_type='profile' AND profile.category='home'
+        WHERE profile.family_id=?
+          ${managedLifeVisibilitySql}
+        ORDER BY inventory.created_at DESC,inventory.id
+      `).all(
+        visibility.familyId,
+        ...lifeVisibilityParameters(visibility)
+      ) as ReadonlyArray<Record<string, unknown>>
+    ).map((row) => mapManagedHomeInventoryItem(row)));
+  }
+
+  public findManagedHomeInventoryItem(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    id: string
+  ): RepositoryResult<ManagedHomeInventoryLedgerItemRow | null> {
+    return this.execute(context, () => {
+      const row = this.database(context).prepare(`
+        SELECT ${managedHomeInventoryColumns}
+        FROM life_home_inventory_ledger inventory
+        WHERE inventory.id=?
+      `).get(id) as Record<string, unknown> | undefined;
+      if (!row) return null;
+      lifeWriteBinding(context, {
+        familyId: String(row.family_id),
+        resourceId: String(row.home_profile_id),
+        action: 'update'
+      });
+      return mapManagedHomeInventoryItem(row, true);
+    });
+  }
+
+  public findLatestManagedHomeMeterReading(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    recordId: string,
+    meterId: string
+  ): RepositoryResult<ManagedHomeInventoryMeterReadingLedgerItemRow | null> {
+    return this.execute(context, () => {
+      const meter = this.database(context).prepare(`
+        SELECT family_id,home_profile_id FROM life_home_inventory_ledger
+        WHERE id=? AND item_type='meter' AND home_profile_id=?
+      `).get(meterId, recordId) as Record<string, unknown> | undefined;
+      if (!meter) return null;
+      lifeWriteBinding(context, {
+        familyId: String(meter.family_id),
+        resourceId: recordId,
+        action: 'update'
+      });
+      const row = this.database(context).prepare(`
+        SELECT ${managedHomeInventoryColumns}
+        FROM life_home_inventory_ledger inventory
+        WHERE inventory.item_type='meter_reading'
+          AND inventory.home_profile_id=? AND inventory.parent_item_id=?
+        ORDER BY inventory.occurred_at DESC,inventory.created_at DESC,inventory.id DESC
+        LIMIT 1
+      `).get(recordId, meterId) as Record<string, unknown> | undefined;
+      return row ? mapManagedHomeInventoryItem(row) as ManagedHomeInventoryMeterReadingLedgerItemRow : null;
+    });
+  }
+
+  public insertManagedHomeInventoryItem(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    row: ManagedHomeInventoryLedgerItemRow
+  ): RepositoryResult<void> {
+    if (
+      row.dataSource !== 'manual'
+      || row.externalVerification !== 'not_performed'
+      || row.paymentExecution !== 'not_performed'
+      || ((row.itemType === 'belonging' || row.itemType === 'service')
+        && row.financePosting !== (row.financeExpenseId ? 'linked' : 'not_performed'))
+      || ((row.itemType === 'belonging' || row.itemType === 'service')
+        && row.financeExpenseId !== undefined
+        && (('amountMinor' in row && row.amountMinor !== undefined)
+          || ('purchaseAmountMinor' in row && row.purchaseAmountMinor !== undefined)
+          || row.currency !== undefined))
+    ) {
+      throw new Error('Managed home inventory item contains a non-local or inconsistent execution claim');
+    }
+    const policy = lifeWriteBinding(context, {
+      familyId: row.familyId,
+      resourceId: row.recordId,
+      action: 'update'
+    });
+    const parentItemId = row.itemType === 'meter' ? row.roomId
+      : row.itemType === 'meter_reading' ? row.meterId
+        : row.itemType === 'belonging' ? row.roomId
+          : row.itemType === 'warranty' ? row.belongingId
+            : row.itemType === 'service' || row.itemType === 'document' ? row.targetItemId
+              : undefined;
+    return this.execute(context, () => {
+      this.database(context).prepare(`
+        INSERT INTO life_home_inventory_ledger(
+          id,home_profile_id,family_id,owner_person_id,item_type,parent_item_id,
+          supersedes_item_id,name,room_kind,label,meter_kind,reading_unit,
+          reading_milliunits,reading_kind,belonging_kind,serial_number,purchased_at,
+          starts_at,ends_at,reminder_at,target_type,service_kind,occurred_at,provider,
+          amount_minor,currency,finance_expense_id,archive_item_id,document_kind,note,
+          privacy,data_source,external_verification,payment_execution,created_at,
+          policy_receipt_hash,policy_receipt_version,policy_receipt_nonce,
+          policy_correlation_id,policy_resource_type,policy_resource_id,policy_action,
+          policy_capability
+        ) VALUES(${Array.from({ length: 43 }, () => '?').join(',')})
+      `).run(
+        row.id,
+        row.recordId,
+        row.familyId,
+        row.ownerPersonId,
+        row.itemType,
+        parentItemId ?? null,
+        row.supersedesItemId ?? null,
+        row.itemType === 'room' || row.itemType === 'belonging' ? row.name : null,
+        row.itemType === 'room' ? row.roomKind : null,
+        row.itemType === 'meter' ? row.label : row.itemType === 'document' ? row.label ?? null : null,
+        row.itemType === 'meter' ? row.meterKind : null,
+        row.itemType === 'meter' ? row.readingUnit : null,
+        row.itemType === 'meter_reading' ? row.readingMilliunits : null,
+        row.itemType === 'meter_reading' ? row.readingKind : null,
+        row.itemType === 'belonging' ? row.belongingKind : null,
+        row.itemType === 'belonging' ? row.serialNumber ?? null : null,
+        row.itemType === 'belonging' ? row.purchasedAt ?? null : null,
+        row.itemType === 'warranty' ? row.startsAt : null,
+        row.itemType === 'warranty' ? row.endsAt : null,
+        row.itemType === 'warranty' ? row.reminderAt ?? null : null,
+        row.itemType === 'service' || row.itemType === 'document' ? row.targetType : null,
+        row.itemType === 'service' ? row.serviceKind : null,
+        row.itemType === 'meter_reading' ? row.recordedAt
+          : row.itemType === 'service' ? row.occurredAt : null,
+        row.itemType === 'warranty' || row.itemType === 'service' ? row.provider ?? null : null,
+        row.itemType === 'belonging' ? row.purchaseAmountMinor ?? null
+          : row.itemType === 'service' ? row.amountMinor ?? null : null,
+        row.itemType === 'belonging' || row.itemType === 'service' ? row.currency ?? null : null,
+        row.itemType === 'belonging' || row.itemType === 'service' ? row.financeExpenseId ?? null : null,
+        row.itemType === 'document' ? row.archiveItemId : null,
+        row.itemType === 'document' ? row.documentKind : null,
+        row.itemType === 'meter_reading' || row.itemType === 'warranty' || row.itemType === 'service'
+          ? row.note ?? null : null,
+        row.privacy,
+        row.dataSource,
+        row.externalVerification,
+        row.paymentExecution,
+        row.createdAt,
+        policy.receiptHash,
+        policy.receiptVersion,
+        policy.nonce,
+        context.correlationId,
+        policy.resourceType,
+        policy.resourceId,
+        policy.action,
+        policy.capability
+      );
     });
   }
 

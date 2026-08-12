@@ -62,8 +62,8 @@ check('scope and inventory bind exact complete DEC-215 migration 82 package', sc
   && inventory.status === 'COMPLETE' && inventory.requirements?.join(',') === ids.join(',')
   && inventory.latestDatabaseMigration === 82 && inventory.openRequirements?.length === 0
   && inventory.openBlockers?.length === 0 && inventory.networkChannels?.length === 0);
-check('boundary evidence is exact green and truth preserving', boundary.status === 'PASS'
-  && boundary.checksFailed === 0 && boundary.latestDatabaseMigration === 83
+check('boundary evidence is exact green and truth preserving through successors', boundary.status === 'PASS'
+  && boundary.checksFailed === 0 && boundary.latestDatabaseMigration >= 83
   && boundary.importTables === 2 && boundary.prohibitedPersistedColumns === 0
   && boundary.supportedFileFormats === 5
   && boundary.liveBankConnectionImplemented === false
@@ -77,7 +77,7 @@ check('DEC-215 is active and the decision ledger cardinality is exact', ledger.d
   && ledger.decisions?.some((item) => item.id === 'DEC-215' && item.status === 'ACTIVE'
     && item.requirements?.join(',') === ids.join(',')
     && item.document === 'docs/decisions/DEC-215-b4-controlled-import-open-banking.md'));
-check('migration 82 source and manifest checksum remain exact under migration 83 successor', latestMigration === 83
+check('migration 82 source and manifest checksum remain exact through successor migrations', latestMigration >= 83
   && migrations.includes("createMigrationDefinition(82, 'b4_controlled_import_open_banking', financeControlledImportOpenBankingSql)")
   && migrationManifest.status === 'passed' && migrationManifest.checkCount === 9
   && migration82?.name === 'b4_controlled_import_open_banking'

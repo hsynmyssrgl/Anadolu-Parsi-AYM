@@ -11,6 +11,7 @@ import {
 } from '@ppt/platform-policy';
 import type {
   ManagedLifeLedgerItemRow,
+  ManagedHomeInventoryLedgerItemRow,
   PolicyAuthorizedRepositoryExecutionContext,
   RepositoryExecutionContext,
   RepositoryResult
@@ -97,12 +98,15 @@ const fixtureSchema = `
 
 const migration83 = FAMILY_DATABASE_MIGRATIONS.find(({ version }) => version === 83);
 if (!migration83) throw new Error('MIGRATION_83_NOT_FOUND');
+const migration84 = FAMILY_DATABASE_MIGRATIONS.find(({ version }) => version === 84);
+if (!migration84) throw new Error('MIGRATION_84_NOT_FOUND');
 
 const openFixture = (): DatabaseSync => {
   const database = new DatabaseSync(':memory:');
   databases.push(database);
   database.exec(fixtureSchema);
   database.exec(migration83.sql);
+  database.exec(migration84.sql);
   return database;
 };
 
@@ -237,13 +241,23 @@ const insertItem = async (
   (repository, context) => repository.insertManagedLifeItem(context, row)
 );
 
+const insertHomeInventoryItem = async (
+  database: DatabaseSync,
+  row: ManagedHomeInventoryLedgerItemRow
+): Promise<RepositoryResult<void>> => executePolicy(
+  database,
+  { resourceId: row.recordId, action: 'update', capability: 'family.write' },
+  row.ownerPersonId,
+  (repository, context) => repository.insertManagedHomeInventoryItem(context, row)
+);
+
 describe('33-E managed LIFE repository and migration policy', () => {
   it('creates migration 83 metadata, exact indexes and immutable single-ledger shape', () => {
     const database = openFixture();
     expect(migration83.name).toBe('b5_life_home_vehicle_managed_ledger');
     expect(database.prepare(
       "SELECT value FROM database_metadata WHERE key='schema_generation'"
-    ).get()).toEqual({ value: 'REVISION-33-E-B5-LIFE-HOME-VEHICLE-MANAGED-LEDGER' });
+    ).get()).toEqual({ value: 'REVISION-33-F-HOME-INVENTORY-UTILITY-BELONGINGS' });
     expect((database.prepare("PRAGMA table_info('life_managed_ledger')").all() as Array<{ name: string }>)
       .map(({ name }) => name)).toEqual(expect.arrayContaining([
       'item_type', 'parent_record_id', 'details_json', 'reminder_mutation',
@@ -505,5 +519,291 @@ describe('33-E managed LIFE repository and migration policy', () => {
       ok: true,
       value: null
     });
+  });
+});
+
+describe('33-F managed home inventory repository and migration policy', () => {
+  const homeProfile = {
+    ...common,
+    id: 'inventory-home-profile',
+    itemType: 'profile' as const,
+    category: 'home' as const,
+    title: 'Envanter evi',
+    status: 'active' as const,
+    details: { tenure: 'owner' as const, propertyType: 'residence' as const, addressLabel: 'Ev' }
+  };
+
+  it('persists family-scoped room, meter, reset and masked belonging projections', async () => {
+    const database = openFixture();
+    expect(migration84.name).toBe('b5_life_home_inventory_ledger');
+    expect(await insertItem(database, homeProfile)).toEqual({ ok: true, value: undefined });
+    expect(await insertHomeInventoryItem(database, {
+      ...common,
+      id: 'room-kitchen', recordId: homeProfile.id, itemType: 'room',
+      name: 'Mutfak', roomKind: 'kitchen'
+    })).toEqual({ ok: true, value: undefined });
+    expect(await insertHomeInventoryItem(database, {
+      ...common,
+      id: 'meter-water', recordId: homeProfile.id, itemType: 'meter',
+      roomId: 'room-kitchen', label: 'Su sayacı', meterKind: 'water', readingUnit: 'milliliter'
+    })).toEqual({ ok: true, value: undefined });
+    expect(await insertHomeInventoryItem(database, {
+      ...common,
+      id: 'reading-water-1', recordId: homeProfile.id, itemType: 'meter_reading',
+      meterId: 'meter-water', readingKind: 'reading', readingMilliunits: 15000,
+      recordedAt: asIsoDateTime('2026-08-12T11:00:00.000Z')
+    })).toEqual({ ok: true, value: undefined });
+    expect(await insertHomeInventoryItem(database, {
+      ...common,
+      id: 'reading-water-reset', recordId: homeProfile.id, itemType: 'meter_reading',
+      meterId: 'meter-water', readingKind: 'reset', readingMilliunits: 25,
+      recordedAt: asIsoDateTime('2026-08-12T11:30:00.000Z'), note: 'Sayaç değiştirildi'
+    })).toEqual({ ok: true, value: undefined });
+    expect(await insertHomeInventoryItem(database, {
+      ...common,
+      id: 'belonging-fridge', recordId: homeProfile.id, itemType: 'belonging',
+      roomId: 'room-kitchen', name: 'Buzdolabı', belongingKind: 'appliance',
+      serialNumber: 'SERIAL-12345678', financePosting: 'not_performed'
+    })).toEqual({ ok: true, value: undefined });
+
+    const listed = await executePolicy(
+      database,
+      { resourceId: '*', action: 'read', capability: 'family.read' },
+      PERSON_ID,
+      (repository, context) => repository.listManagedHomeInventoryItems(context)
+    );
+    expect(listed.ok).toBe(true);
+    if (listed.ok) {
+      expect(listed.value.find(({ id }) => id === 'belonging-fridge')).toMatchObject({
+        serialNumberMasked: '***********5678', financePosting: 'not_performed'
+      });
+      expect(listed.value.find(({ id }) => id === 'belonging-fridge')).not.toHaveProperty('serialNumber');
+    }
+    const latest = await executePolicy(
+      database,
+      { resourceId: homeProfile.id, action: 'update', capability: 'family.write' },
+      PERSON_ID,
+      (repository, context) => repository.findLatestManagedHomeMeterReading(
+        context, homeProfile.id, 'meter-water'
+      )
+    );
+    expect(latest).toMatchObject({ ok: true, value: { id: 'reading-water-reset', readingMilliunits: 25 } });
+  });
+
+  it('rejects decreasing normal readings, incompatible parents, receipt reuse and mutation', async () => {
+    const database = openFixture();
+    expect(await insertItem(database, homeProfile)).toEqual({ ok: true, value: undefined });
+    expect(await insertHomeInventoryItem(database, {
+      ...common,
+      id: 'room-living', recordId: homeProfile.id, itemType: 'room',
+      name: 'Salon', roomKind: 'living_room'
+    })).toEqual({ ok: true, value: undefined });
+    expect(await insertHomeInventoryItem(database, {
+      ...common,
+      id: 'meter-electric', recordId: homeProfile.id, itemType: 'meter',
+      roomId: 'room-living', label: 'Elektrik', meterKind: 'electricity', readingUnit: 'wh'
+    })).toEqual({ ok: true, value: undefined });
+    expect(await insertHomeInventoryItem(database, {
+      ...common,
+      id: 'reading-electric-1', recordId: homeProfile.id, itemType: 'meter_reading',
+      meterId: 'meter-electric', readingKind: 'reading', readingMilliunits: 100,
+      recordedAt: asIsoDateTime('2026-08-12T11:00:00.000Z')
+    })).toEqual({ ok: true, value: undefined });
+    expect((await insertHomeInventoryItem(database, {
+      ...common,
+      id: 'reading-electric-lower', recordId: homeProfile.id, itemType: 'meter_reading',
+      meterId: 'meter-electric', readingKind: 'reading', readingMilliunits: 99,
+      recordedAt: asIsoDateTime('2026-08-12T11:30:00.000Z')
+    })).ok).toBe(false);
+    expect((await insertHomeInventoryItem(database, {
+      ...common,
+      id: 'bad-warranty', recordId: homeProfile.id, itemType: 'warranty',
+      belongingId: 'meter-electric', startsAt: asIsoDateTime('2026-08-01T00:00:00.000Z'),
+      endsAt: asIsoDateTime('2027-08-01T00:00:00.000Z')
+    })).ok).toBe(false);
+    expect(() => database.prepare(
+      "UPDATE life_home_inventory_ledger SET name='changed' WHERE id='room-living'"
+    ).run()).toThrow(/append-only/i);
+    expect(() => database.prepare(
+      "DELETE FROM life_home_inventory_ledger WHERE id='room-living'"
+    ).run()).toThrow(/governed deletion workflow/i);
+
+    const receipt = database.prepare(
+      "SELECT policy_receipt_hash FROM life_home_inventory_ledger WHERE id='room-living'"
+    ).get() as { policy_receipt_hash: string };
+    expect(() => database.prepare(`
+      INSERT INTO life_records(
+        id,family_id,owner_person_id,category,title,status,privacy,created_at,
+        policy_receipt_hash,policy_receipt_version,policy_receipt_nonce,
+        policy_correlation_id,policy_resource_type,policy_resource_id,policy_action,policy_capability
+      ) SELECT 'receipt-reuse',family_id,owner_person_id,'task','Reuse','active',privacy,created_at,
+        policy_receipt_hash,policy_receipt_version,policy_receipt_nonce,policy_correlation_id,
+        policy_resource_type,policy_resource_id,policy_action,policy_capability
+      FROM life_home_inventory_ledger WHERE id='room-living'
+    `).run()).toThrow(/already bound to a home inventory item/i);
+    expect(receipt.policy_receipt_hash).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it('rejects cross-family owner privacy roots, wrong targets and invalid supersessions', async () => {
+    const database = openFixture();
+    database.exec(`
+      INSERT INTO families VALUES('family-managed-other');
+      INSERT INTO people VALUES('person-other-family','family-managed-other');
+    `);
+    expect(await insertItem(database, homeProfile)).toEqual({ ok: true, value: undefined });
+    expect(await insertItem(database, { ...homeProfile, id: 'inventory-home-profile-2' }))
+      .toEqual({ ok: true, value: undefined });
+
+    await expect(insertHomeInventoryItem(database, {
+      ...common,
+      familyId: asFamilyId('family-managed-other'),
+      ownerPersonId: asPersonId('person-other-family'),
+      id: 'cross-family-room', recordId: homeProfile.id, itemType: 'room',
+      name: 'Başka aile', roomKind: 'other'
+    })).rejects.toThrow(/does not match the repository operation/i);
+    expect((await insertHomeInventoryItem(database, {
+      ...common,
+      ownerPersonId: asPersonId('person-managed-other'),
+      id: 'cross-owner-room', recordId: homeProfile.id, itemType: 'room',
+      name: 'Başka sahip', roomKind: 'other'
+    })).ok).toBe(false);
+    expect((await insertHomeInventoryItem(database, {
+      ...common,
+      privacy: 'family',
+      id: 'cross-privacy-room', recordId: homeProfile.id, itemType: 'room',
+      name: 'Başka gizlilik', roomKind: 'other'
+    })).ok).toBe(false);
+
+    expect(await insertHomeInventoryItem(database, {
+      ...common,
+      id: 'root-one-room', recordId: homeProfile.id, itemType: 'room',
+      name: 'Birinci oda', roomKind: 'living_room'
+    })).toEqual({ ok: true, value: undefined });
+    expect(await insertHomeInventoryItem(database, {
+      ...common,
+      id: 'root-two-room', recordId: 'inventory-home-profile-2', itemType: 'room',
+      name: 'İkinci oda', roomKind: 'bedroom'
+    })).toEqual({ ok: true, value: undefined });
+    expect(await insertHomeInventoryItem(database, {
+      ...common,
+      id: 'root-one-meter', recordId: homeProfile.id, itemType: 'meter',
+      roomId: 'root-one-room', label: 'Elektrik', meterKind: 'electricity', readingUnit: 'wh'
+    })).toEqual({ ok: true, value: undefined });
+
+    expect((await insertHomeInventoryItem(database, {
+      ...common,
+      id: 'wrong-root-service', recordId: homeProfile.id, itemType: 'service',
+      targetItemId: 'root-two-room', targetType: 'room', serviceKind: 'maintenance',
+      occurredAt: asIsoDateTime('2026-08-12T11:30:00.000Z'), financePosting: 'not_performed'
+    })).ok).toBe(false);
+    expect((await insertHomeInventoryItem(database, {
+      ...common,
+      id: 'wrong-target-type-service', recordId: homeProfile.id, itemType: 'service',
+      targetItemId: 'root-one-room', targetType: 'meter', serviceKind: 'maintenance',
+      occurredAt: asIsoDateTime('2026-08-12T11:30:00.000Z'), financePosting: 'not_performed'
+    })).ok).toBe(false);
+    expect((await insertHomeInventoryItem(database, {
+      ...common,
+      createdAt: asIsoDateTime('2026-08-12T12:01:00.000Z'),
+      id: 'wrong-root-supersession', recordId: 'inventory-home-profile-2', itemType: 'room',
+      supersedesItemId: 'root-one-room', name: 'Yanlış kök', roomKind: 'other'
+    })).ok).toBe(false);
+    expect((await insertHomeInventoryItem(database, {
+      ...common,
+      createdAt: asIsoDateTime('2026-08-12T12:01:00.000Z'),
+      id: 'wrong-type-supersession', recordId: homeProfile.id, itemType: 'room',
+      supersedesItemId: 'root-one-meter', name: 'Yanlış tür', roomKind: 'other'
+    })).ok).toBe(false);
+    expect((await insertHomeInventoryItem(database, {
+      ...common,
+      id: 'non-chronological-supersession', recordId: homeProfile.id, itemType: 'room',
+      supersedesItemId: 'root-one-room', name: 'Aynı an', roomKind: 'other'
+    })).ok).toBe(false);
+  });
+
+  it('rejects archive and finance scope drift, invalid scalars, id collisions and reverse receipt reuse', async () => {
+    const database = openFixture();
+    expect(await insertItem(database, homeProfile)).toEqual({ ok: true, value: undefined });
+    expect(await insertHomeInventoryItem(database, {
+      ...common,
+      id: 'scope-room', recordId: homeProfile.id, itemType: 'room',
+      name: 'Depo', roomKind: 'storage'
+    })).toEqual({ ok: true, value: undefined });
+    expect(await insertHomeInventoryItem(database, {
+      ...common,
+      id: 'scope-meter', recordId: homeProfile.id, itemType: 'meter',
+      roomId: 'scope-room', label: 'Su', meterKind: 'water', readingUnit: 'milliliter'
+    })).toEqual({ ok: true, value: undefined });
+    expect(await insertHomeInventoryItem(database, {
+      ...common,
+      id: 'scope-belonging', recordId: homeProfile.id, itemType: 'belonging',
+      roomId: 'scope-room', name: 'Alet', belongingKind: 'tool', financePosting: 'not_performed'
+    })).toEqual({ ok: true, value: undefined });
+
+    database.exec(`
+      INSERT INTO archive_items VALUES('archive-wrong-family','other-family',NULL,'high','2026-08-12T11:00:00.000Z',NULL);
+      INSERT INTO archive_items VALUES('archive-wrong-sensitivity','${FAMILY_ID}',NULL,'standard','2026-08-12T11:00:00.000Z',NULL);
+      INSERT INTO archive_items VALUES('archive-destroyed','${FAMILY_ID}','2026-08-12T11:30:00.000Z','high','2026-08-12T11:00:00.000Z',NULL);
+      INSERT INTO finance_planning_ledger VALUES('expense-wrong-family','cash_flow',NULL,'expense','other-family','${PERSON_ID}','private',1,'TRY','2026-08-12T11:00:00.000Z','2026-08-12T11:00:00.000Z',NULL);
+      INSERT INTO finance_planning_ledger VALUES('expense-wrong-owner','cash_flow',NULL,'expense','${FAMILY_ID}','person-managed-other','private',1,'TRY','2026-08-12T11:00:00.000Z','2026-08-12T11:00:00.000Z',NULL);
+      INSERT INTO finance_planning_ledger VALUES('expense-wrong-privacy','cash_flow',NULL,'expense','${FAMILY_ID}','${PERSON_ID}','family',1,'TRY','2026-08-12T11:00:00.000Z','2026-08-12T11:00:00.000Z',NULL);
+      INSERT INTO finance_planning_ledger VALUES('expense-wrong-type','asset','real_estate',NULL,'${FAMILY_ID}','${PERSON_ID}','private',1,'TRY','2026-08-12T11:00:00.000Z','2026-08-12T11:00:00.000Z',NULL);
+    `);
+    for (const archiveItemId of ['archive-wrong-family', 'archive-wrong-sensitivity', 'archive-destroyed']) {
+      expect((await insertHomeInventoryItem(database, {
+        ...common,
+        id: `document-${archiveItemId}`, recordId: homeProfile.id, itemType: 'document',
+        targetItemId: 'scope-belonging', targetType: 'belonging', archiveItemId,
+        documentKind: 'invoice'
+      })).ok).toBe(false);
+    }
+    for (const financeExpenseId of [
+      'expense-wrong-family', 'expense-wrong-owner', 'expense-wrong-privacy', 'expense-wrong-type'
+    ]) {
+      expect((await insertHomeInventoryItem(database, {
+        ...common,
+        id: `belonging-${financeExpenseId}`, recordId: homeProfile.id, itemType: 'belonging',
+        roomId: 'scope-room', name: 'Finans kapsamı', belongingKind: 'other',
+        financeExpenseId, financePosting: 'linked'
+      })).ok).toBe(false);
+    }
+
+    expect((await insertHomeInventoryItem(database, {
+      ...common,
+      id: 'invalid-calendar-room', recordId: homeProfile.id, itemType: 'room',
+      name: 'Takvim', roomKind: 'other', createdAt: asIsoDateTime('2026-02-30T12:00:00.000Z')
+    })).ok).toBe(false);
+    for (const readingMilliunits of [1.5, 9000000000000001]) {
+      expect((await insertHomeInventoryItem(database, {
+        ...common,
+        id: `invalid-reading-${readingMilliunits}`, recordId: homeProfile.id, itemType: 'meter_reading',
+        meterId: 'scope-meter', readingKind: 'reading', readingMilliunits,
+        recordedAt: asIsoDateTime('2026-08-12T11:45:00.000Z')
+      })).ok).toBe(false);
+    }
+    expect((await insertHomeInventoryItem(database, {
+      ...common,
+      id: homeProfile.id, recordId: homeProfile.id, itemType: 'room',
+      name: 'Kimlik çakışması', roomKind: 'other'
+    })).ok).toBe(false);
+
+    expect(await insertItem(database, {
+      ...common,
+      id: 'managed-update-receipt', itemType: 'activity', recordId: homeProfile.id,
+      activityKind: 'maintenance', occurredAt: asIsoDateTime('2026-08-12T11:30:00.000Z'),
+      financePosting: 'not_performed'
+    })).toEqual({ ok: true, value: undefined });
+    expect(() => database.prepare(`
+      INSERT INTO life_home_inventory_ledger(
+        id,home_profile_id,family_id,owner_person_id,item_type,name,room_kind,privacy,
+        data_source,external_verification,payment_execution,created_at,
+        policy_receipt_hash,policy_receipt_version,policy_receipt_nonce,
+        policy_correlation_id,policy_resource_type,policy_resource_id,policy_action,policy_capability
+      ) SELECT 'reverse-receipt-reuse',parent_record_id,family_id,owner_person_id,'room','Reuse','other',privacy,
+        'manual','not_performed','not_performed',created_at,
+        policy_receipt_hash,policy_receipt_version,policy_receipt_nonce,
+        policy_correlation_id,policy_resource_type,policy_resource_id,policy_action,policy_capability
+      FROM life_managed_ledger WHERE id='managed-update-receipt'
+    `).run()).toThrow(/unused exact durable life update receipt/i);
   });
 });

@@ -468,9 +468,27 @@ export class RepositoryBackedLifeQueryPort implements LifeQueryPort {
         occurredAt: repository.occurredAt,
         privacy: item.privacy
       }));
+      const homeInventoryItems = this.dependencies.lifeRepository.listManagedHomeInventoryItems(repository);
+      if (!homeInventoryItems.ok) return homeInventoryItems;
+      const visibleHomeInventoryItems = homeInventoryItems.value.filter((item) => authorize(
+        this.#authorization,
+        auth.value,
+        {
+          action: 'read',
+          resourceType: 'life_record',
+          resourceId: item.recordId,
+          ownerPersonId: item.ownerPersonId,
+          occurredAt: repository.occurredAt,
+          privacy: item.privacy
+        }
+      ));
       return {
         ok: true,
-        value: buildManagedLifeWorkspace({ items: visible, generatedAt: repository.occurredAt })
+        value: buildManagedLifeWorkspace({
+          items: visible,
+          homeInventoryItems: visibleHomeInventoryItems,
+          generatedAt: repository.occurredAt
+        })
       };
     });
   }
@@ -516,6 +534,29 @@ class RepositoryBackedLifeWriteScope implements LifeWriteScope {
     record: Parameters<LifeWriteScope['insertManagedLifeItem']>[0]
   ): ReturnType<LifeWriteScope['insertManagedLifeItem']> {
     return this.dependencies.lifeRepository.insertManagedLifeItem(this.repository, record);
+  }
+
+  public findManagedHomeInventoryItem(
+    id: Parameters<LifeWriteScope['findManagedHomeInventoryItem']>[0]
+  ): ReturnType<LifeWriteScope['findManagedHomeInventoryItem']> {
+    return this.dependencies.lifeRepository.findManagedHomeInventoryItem(this.repository, id);
+  }
+
+  public findLatestManagedHomeMeterReading(
+    recordId: Parameters<LifeWriteScope['findLatestManagedHomeMeterReading']>[0],
+    meterId: Parameters<LifeWriteScope['findLatestManagedHomeMeterReading']>[1]
+  ): ReturnType<LifeWriteScope['findLatestManagedHomeMeterReading']> {
+    return this.dependencies.lifeRepository.findLatestManagedHomeMeterReading(
+      this.repository,
+      recordId,
+      meterId
+    );
+  }
+
+  public insertManagedHomeInventoryItem(
+    record: Parameters<LifeWriteScope['insertManagedHomeInventoryItem']>[0]
+  ): ReturnType<LifeWriteScope['insertManagedHomeInventoryItem']> {
+    return this.dependencies.lifeRepository.insertManagedHomeInventoryItem(this.repository, record);
   }
 
   public appendAudit(input: Parameters<LifeWriteScope['appendAudit']>[0]): ReturnType<LifeWriteScope['appendAudit']> {

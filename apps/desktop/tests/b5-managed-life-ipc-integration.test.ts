@@ -99,3 +99,73 @@ describe('33-E B5 managed life IPC integration boundary', () => {
     }])).toMatchObject({ accepted:false, reason:'MANAGED_LIFE_ARGUMENT_INVALID' });
   });
 });
+
+const homeInventoryInputs = [
+  { itemType:'room', recordId:'home-profile-1', name:'Salon', roomKind:'living_room' },
+  { itemType:'meter', recordId:'home-profile-1', roomId:'room-1', label:'Salon elektrik', meterKind:'electricity', readingUnit:'wh' },
+  { itemType:'meter_reading', recordId:'home-profile-1', meterId:'meter-1', readingKind:'reading', readingMilliunits:145_250, recordedAt:'2026-08-12T18:00:00.000Z' },
+  { itemType:'belonging', recordId:'home-profile-1', roomId:'room-1', name:'Buzdolabı', belongingKind:'appliance', serialNumber:'SN-LOCAL-9001', purchasedAt:'2026-08-01T09:00:00.000Z', purchaseAmountMinor:125_000, currency:'TRY' },
+  { itemType:'warranty', recordId:'home-profile-1', belongingId:'belonging-1', provider:'Yerel garanti kaydı', startsAt:'2026-08-01T09:00:00.000Z', endsAt:'2028-08-01T09:00:00.000Z', reminderAt:'2028-07-01T09:00:00.000Z' },
+  { itemType:'service', recordId:'home-profile-1', targetItemId:'room-1', targetType:'room', serviceKind:'maintenance', occurredAt:'2026-08-12T09:00:00.000Z', amountMinor:2_500, currency:'TRY', note:'Manuel bakım geçmişi' },
+  { itemType:'document', recordId:'home-profile-1', targetItemId:'belonging-1', targetType:'belonging', archiveItemId:'archive-opaque-invoice-01', documentKind:'invoice', label:'Fatura bağı' }
+] as const;
+
+describe('33-F EXT-030/EXT-032 home inventory IPC integration boundary', () => {
+  it('keeps the existing exact two-channel API and accepts all seven inventory variants', () => {
+    expect(evaluateIpcIntegrationPolicy('life:getManagedWorkspace', [])).toEqual({ accepted:true });
+    for (const input of homeInventoryInputs) {
+      expect(evaluateIpcIntegrationPolicy('life:recordManagedItem', [input])).toEqual({ accepted:true });
+    }
+    expect(evaluateIpcIntegrationPolicy('life:recordManagedItem', [{
+      ...homeInventoryInputs[0], name:'Salon düzeltmesi', supersedesItemId:'room-previous-1'
+    }])).toEqual({ accepted:true });
+  });
+
+  it('accepts the exact meter kind-unit matrix and explicit reset or replacement evidence', () => {
+    expect(evaluateIpcIntegrationPolicy('life:recordManagedItem', [{
+      itemType:'meter', recordId:'home-profile-1', label:'Doğal gaz', meterKind:'natural_gas',
+      readingUnit:'milliliter_cubic_meter_equivalent'
+    }])).toEqual({ accepted:true });
+    expect(evaluateIpcIntegrationPolicy('life:recordManagedItem', [{
+      itemType:'meter_reading', recordId:'home-profile-1', meterId:'meter-1', readingKind:'replacement',
+      readingMilliunits:0, recordedAt:'2026-08-12T19:00:00.000Z', note:'Sayaç değiştirildi'
+    }])).toEqual({ accepted:true });
+  });
+
+  it('rejects unit drift, implicit reset and unsafe money-link combinations', () => {
+    expect(evaluateIpcIntegrationPolicy('life:recordManagedItem', [{
+      itemType:'meter', recordId:'home-profile-1', label:'Su', meterKind:'water', readingUnit:'wh'
+    }])).toMatchObject({ accepted:false, reason:'MANAGED_LIFE_ARGUMENT_INVALID' });
+    expect(evaluateIpcIntegrationPolicy('life:recordManagedItem', [{
+      itemType:'meter_reading', recordId:'home-profile-1', meterId:'meter-1', readingKind:'reset',
+      readingMilliunits:0, recordedAt:'2026-08-12T19:00:00.000Z'
+    }])).toMatchObject({ accepted:false, reason:'MANAGED_LIFE_ARGUMENT_INVALID' });
+    expect(evaluateIpcIntegrationPolicy('life:recordManagedItem', [{
+      ...homeInventoryInputs[3], financeExpenseId:'finance-expense-1'
+    }])).toMatchObject({ accepted:false, reason:'MANAGED_LIFE_ARGUMENT_INVALID' });
+    expect(evaluateIpcIntegrationPolicy('life:recordManagedItem', [{
+      ...homeInventoryInputs[4], reminderAt:'2026-07-01T09:00:00.000Z'
+    }])).toMatchObject({ accepted:false, reason:'MANAGED_LIFE_ARGUMENT_INVALID' });
+    expect(evaluateIpcIntegrationPolicy('life:recordManagedItem', [{
+      ...homeInventoryInputs[3], purchaseAmountMinor:9_000_000_000_000_001
+    }])).toMatchObject({ accepted:false, reason:'MANAGED_LIFE_ARGUMENT_INVALID' });
+  });
+
+  it('rejects unknown, secret, PAN, path and raw document content before dispatch', () => {
+    expect(evaluateIpcIntegrationPolicy('life:recordManagedItem', [{
+      ...homeInventoryInputs[0], futureField:true
+    }])).toMatchObject({ accepted:false, reason:'UNKNOWN_OBJECT_FIELD' });
+    expect(evaluateIpcIntegrationPolicy('life:recordManagedItem', [{
+      ...homeInventoryInputs[3], token:'unsafe'
+    }])).toMatchObject({ accepted:false, reason:'MANAGED_LIFE_SECRET_FIELD_PROHIBITED' });
+    expect(evaluateIpcIntegrationPolicy('life:recordManagedItem', [{
+      ...homeInventoryInputs[3], serialNumber:'4111 1111 1111 1111'
+    }])).toMatchObject({ accepted:false, reason:'MANAGED_LIFE_SECRET_VALUE_PROHIBITED' });
+    expect(evaluateIpcIntegrationPolicy('life:recordManagedItem', [{
+      ...homeInventoryInputs[6], archiveItemId:'C:\\Users\\person\\invoice.pdf'
+    }])).toMatchObject({ accepted:false, reason:'MANAGED_LIFE_PATH_VALUE_PROHIBITED' });
+    expect(evaluateIpcIntegrationPolicy('life:recordManagedItem', [{
+      ...homeInventoryInputs[6], rawDocumentContent:'unsafe'
+    }])).toMatchObject({ accepted:false, reason:'UNKNOWN_OBJECT_FIELD' });
+  });
+});

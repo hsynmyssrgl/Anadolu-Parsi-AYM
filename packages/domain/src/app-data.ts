@@ -1235,6 +1235,132 @@ export interface ManagedLifeDocumentLedgerItemView extends ManagedLifeLedgerItem
   readonly label?:string;
 }
 
+export const MANAGED_HOME_INVENTORY_ITEM_TYPES = [
+  'room','meter','meter_reading','belonging','warranty','service','document'
+] as const;
+export type ManagedHomeInventoryItemType = typeof MANAGED_HOME_INVENTORY_ITEM_TYPES[number];
+
+export const MANAGED_HOME_ROOM_KINDS = [
+  'living_room','bedroom','kitchen','bathroom','storage','garage','garden','other'
+] as const;
+export type ManagedHomeRoomKind = typeof MANAGED_HOME_ROOM_KINDS[number];
+
+export const MANAGED_HOME_METER_KINDS = ['electricity','water','natural_gas','other'] as const;
+export type ManagedHomeMeterKind = typeof MANAGED_HOME_METER_KINDS[number];
+export const MANAGED_HOME_METER_READING_UNITS = [
+  'wh','milliliter','milliliter_cubic_meter_equivalent','custom_milliunit'
+] as const;
+export type ManagedHomeMeterReadingUnit = typeof MANAGED_HOME_METER_READING_UNITS[number];
+export const MANAGED_HOME_METER_READING_KINDS = ['reading','reset','replacement'] as const;
+export type ManagedHomeMeterReadingKind = typeof MANAGED_HOME_METER_READING_KINDS[number];
+
+export const MANAGED_HOME_BELONGING_KINDS = [
+  'appliance','electronics','furniture','tool','other'
+] as const;
+export type ManagedHomeBelongingKind = typeof MANAGED_HOME_BELONGING_KINDS[number];
+export const MANAGED_HOME_SERVICE_TARGET_TYPES = ['room','meter','belonging'] as const;
+export type ManagedHomeServiceTargetType = typeof MANAGED_HOME_SERVICE_TARGET_TYPES[number];
+export const MANAGED_HOME_SERVICE_KINDS = [
+  'maintenance','repair','inspection','installation','other'
+] as const;
+export type ManagedHomeServiceKind = typeof MANAGED_HOME_SERVICE_KINDS[number];
+export const MANAGED_HOME_DOCUMENT_TARGET_TYPES = ['meter','belonging','warranty','service'] as const;
+export type ManagedHomeDocumentTargetType = typeof MANAGED_HOME_DOCUMENT_TARGET_TYPES[number];
+export const MANAGED_HOME_DOCUMENT_KINDS = [
+  'invoice','warranty','service_receipt','meter_document','other'
+] as const;
+export type ManagedHomeDocumentKind = typeof MANAGED_HOME_DOCUMENT_KINDS[number];
+
+export interface ManagedHomeInventoryLedgerItemCommonView {
+  readonly id:string;
+  readonly recordId:string;
+  readonly ownerPersonId:string;
+  readonly privacy:RecordPrivacy;
+  readonly supersedesItemId?:string;
+  readonly dataSource:'manual';
+  readonly externalVerification:'not_performed';
+  readonly paymentExecution:'not_performed';
+  readonly createdAt:string;
+}
+
+export interface ManagedHomeInventoryRoomLedgerItemView extends ManagedHomeInventoryLedgerItemCommonView {
+  readonly itemType:'room';
+  readonly name:string;
+  readonly roomKind:ManagedHomeRoomKind;
+}
+
+export interface ManagedHomeInventoryMeterLedgerItemView extends ManagedHomeInventoryLedgerItemCommonView {
+  readonly itemType:'meter';
+  readonly roomId?:string;
+  readonly label:string;
+  readonly meterKind:ManagedHomeMeterKind;
+  readonly readingUnit:ManagedHomeMeterReadingUnit;
+}
+
+export interface ManagedHomeInventoryMeterReadingLedgerItemView extends ManagedHomeInventoryLedgerItemCommonView {
+  readonly itemType:'meter_reading';
+  readonly meterId:string;
+  readonly readingKind:ManagedHomeMeterReadingKind;
+  readonly readingMilliunits:number;
+  readonly recordedAt:string;
+  readonly note?:string;
+}
+
+export interface ManagedHomeInventoryBelongingLedgerItemView extends ManagedHomeInventoryLedgerItemCommonView {
+  readonly itemType:'belonging';
+  readonly roomId?:string;
+  readonly name:string;
+  readonly belongingKind:ManagedHomeBelongingKind;
+  readonly serialNumberMasked?:string;
+  readonly purchasedAt?:string;
+  readonly purchaseAmountMinor?:number;
+  readonly currency?:string;
+  readonly financeExpenseId?:string;
+  readonly financePosting:'linked'|'not_performed';
+}
+
+export interface ManagedHomeInventoryWarrantyLedgerItemView extends ManagedHomeInventoryLedgerItemCommonView {
+  readonly itemType:'warranty';
+  readonly belongingId:string;
+  readonly provider?:string;
+  readonly startsAt:string;
+  readonly endsAt:string;
+  readonly reminderAt?:string;
+  readonly note?:string;
+}
+
+export interface ManagedHomeInventoryServiceLedgerItemView extends ManagedHomeInventoryLedgerItemCommonView {
+  readonly itemType:'service';
+  readonly targetItemId:string;
+  readonly targetType:ManagedHomeServiceTargetType;
+  readonly serviceKind:ManagedHomeServiceKind;
+  readonly occurredAt:string;
+  readonly provider?:string;
+  readonly amountMinor?:number;
+  readonly currency?:string;
+  readonly financeExpenseId?:string;
+  readonly financePosting:'linked'|'not_performed';
+  readonly note?:string;
+}
+
+export interface ManagedHomeInventoryDocumentLedgerItemView extends ManagedHomeInventoryLedgerItemCommonView {
+  readonly itemType:'document';
+  readonly targetItemId:string;
+  readonly targetType:ManagedHomeDocumentTargetType;
+  readonly archiveItemId:string;
+  readonly documentKind:ManagedHomeDocumentKind;
+  readonly label?:string;
+}
+
+export type ManagedHomeInventoryLedgerItemView =
+  | ManagedHomeInventoryRoomLedgerItemView
+  | ManagedHomeInventoryMeterLedgerItemView
+  | ManagedHomeInventoryMeterReadingLedgerItemView
+  | ManagedHomeInventoryBelongingLedgerItemView
+  | ManagedHomeInventoryWarrantyLedgerItemView
+  | ManagedHomeInventoryServiceLedgerItemView
+  | ManagedHomeInventoryDocumentLedgerItemView;
+
 export type ManagedLifeLedgerItemView =
   | ManagedLifeProfileLedgerItemView
   | ManagedLifeActivityLedgerItemView
@@ -1285,10 +1411,92 @@ export interface RecordManagedLifeDocumentInput {
   readonly label?:string;
 }
 
+interface RecordManagedHomeInventoryItemInputCommon {
+  readonly recordId:string;
+  readonly supersedesItemId?:string;
+}
+
+export interface RecordManagedHomeInventoryRoomInput extends RecordManagedHomeInventoryItemInputCommon {
+  readonly itemType:'room';
+  readonly name:string;
+  readonly roomKind:ManagedHomeRoomKind;
+}
+
+export interface RecordManagedHomeInventoryMeterInput extends RecordManagedHomeInventoryItemInputCommon {
+  readonly itemType:'meter';
+  readonly roomId?:string;
+  readonly label:string;
+  readonly meterKind:ManagedHomeMeterKind;
+  readonly readingUnit:ManagedHomeMeterReadingUnit;
+}
+
+export interface RecordManagedHomeInventoryMeterReadingInput extends RecordManagedHomeInventoryItemInputCommon {
+  readonly itemType:'meter_reading';
+  readonly meterId:string;
+  readonly readingKind:ManagedHomeMeterReadingKind;
+  readonly readingMilliunits:number;
+  readonly recordedAt:string;
+  readonly note?:string;
+}
+
+export interface RecordManagedHomeInventoryBelongingInput extends RecordManagedHomeInventoryItemInputCommon {
+  readonly itemType:'belonging';
+  readonly roomId?:string;
+  readonly name:string;
+  readonly belongingKind:ManagedHomeBelongingKind;
+  readonly serialNumber?:string;
+  readonly purchasedAt?:string;
+  readonly purchaseAmountMinor?:number;
+  readonly currency?:string;
+  readonly financeExpenseId?:string;
+}
+
+export interface RecordManagedHomeInventoryWarrantyInput extends RecordManagedHomeInventoryItemInputCommon {
+  readonly itemType:'warranty';
+  readonly belongingId:string;
+  readonly provider?:string;
+  readonly startsAt:string;
+  readonly endsAt:string;
+  readonly reminderAt?:string;
+  readonly note?:string;
+}
+
+export interface RecordManagedHomeInventoryServiceInput extends RecordManagedHomeInventoryItemInputCommon {
+  readonly itemType:'service';
+  readonly targetItemId:string;
+  readonly targetType:ManagedHomeServiceTargetType;
+  readonly serviceKind:ManagedHomeServiceKind;
+  readonly occurredAt:string;
+  readonly provider?:string;
+  readonly amountMinor?:number;
+  readonly currency?:string;
+  readonly financeExpenseId?:string;
+  readonly note?:string;
+}
+
+export interface RecordManagedHomeInventoryDocumentInput extends RecordManagedHomeInventoryItemInputCommon {
+  readonly itemType:'document';
+  readonly targetItemId:string;
+  readonly targetType:ManagedHomeDocumentTargetType;
+  readonly archiveItemId:string;
+  readonly documentKind:ManagedHomeDocumentKind;
+  readonly label?:string;
+}
+
+export type RecordManagedHomeInventoryItemInput =
+  | RecordManagedHomeInventoryRoomInput
+  | RecordManagedHomeInventoryMeterInput
+  | RecordManagedHomeInventoryMeterReadingInput
+  | RecordManagedHomeInventoryBelongingInput
+  | RecordManagedHomeInventoryWarrantyInput
+  | RecordManagedHomeInventoryServiceInput
+  | RecordManagedHomeInventoryDocumentInput;
+
 export type RecordManagedLifeItemInput =
   | RecordManagedLifeProfileInput
   | RecordManagedLifeActivityInput
-  | RecordManagedLifeDocumentInput;
+  | RecordManagedLifeDocumentInput
+  | RecordManagedHomeInventoryItemInput;
 
 export interface ManagedLifeCurrentReminderView {
   readonly sourceId:string;
@@ -1308,11 +1516,15 @@ export type ManagedLifeProfileView = ManagedLifeProfileLedgerItemView & {
 
 export interface ManagedLifeWorkspaceView {
   readonly profiles:readonly ManagedLifeProfileView[];
+  readonly homeInventoryItems:readonly ManagedHomeInventoryLedgerItemView[];
   readonly upcomingReminders:readonly ManagedLifeCurrentReminderView[];
   readonly generatedAt:string;
   readonly dataSource:'manual';
   readonly externalRegistryLookup:'not_performed';
+  readonly smartMeterLookup:'not_performed';
   readonly providerContact:'not_performed';
+  readonly warrantyLookup:'not_performed';
+  readonly ocr:'not_performed';
   readonly paymentExecution:'not_performed';
   readonly documentContentExposure:'not_performed';
 }

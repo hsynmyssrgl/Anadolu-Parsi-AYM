@@ -139,6 +139,24 @@ const managedLifeTenures = new Set(['owner','tenant']);
 const managedLifePropertyTypes = new Set(['residence','workplace','land','other']);
 const managedLifeVehicleTypes = new Set(['car','motorcycle','commercial','other']);
 const managedLifeEnergyTypes = new Set(['fuel','electric','hybrid','other']);
+const managedHomeInventoryItemTypes = new Set([
+  'room','meter','meter_reading','belonging','warranty','service','document'
+]);
+const managedHomeRoomKinds = new Set([
+  'living_room','bedroom','kitchen','bathroom','storage','garage','garden','other'
+]);
+const managedHomeMeterKinds = new Set(['electricity','water','natural_gas','other']);
+const managedHomeReadingUnits = new Set([
+  'wh','milliliter','milliliter_cubic_meter_equivalent','custom_milliunit'
+]);
+const managedHomeReadingKinds = new Set(['reading','reset','replacement']);
+const managedHomeBelongingKinds = new Set(['appliance','electronics','furniture','tool','other']);
+const managedHomeServiceTargetTypes = new Set(['room','meter','belonging']);
+const managedHomeServiceKinds = new Set(['maintenance','repair','inspection','installation','other']);
+const managedHomeDocumentTargetTypes = new Set(['meter','belonging','warranty','service']);
+const managedHomeDocumentKinds = new Set(['invoice','warranty','service_receipt','meter_document','other']);
+const validManagedHomeSupersession = (value: Record<string, unknown>): boolean =>
+  value.supersedesItemId === undefined || validManagedLifeId(value.supersedesItemId);
 
 const validManagedLifeTimestamp = (value: unknown): boolean =>
   isExactManagedLifeIsoDateTime(value);
@@ -148,10 +166,10 @@ const optionalManagedLifeTimestamp = (value: unknown): boolean =>
 
 const optionalManagedLifeCount = (value: unknown): boolean =>
   value === undefined
-  || (typeof value === 'number' && Number.isSafeInteger(value) && value >= 0);
+  || (typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 && value <= 9_000_000_000_000_000);
 const optionalManagedLifePositiveCount = (value: unknown): boolean =>
   value === undefined
-  || (typeof value === 'number' && Number.isSafeInteger(value) && value >= 1);
+  || (typeof value === 'number' && Number.isSafeInteger(value) && value >= 1 && value <= 9_000_000_000_000_000);
 const optionalManagedLifeText = (value: unknown, maximum: number): boolean =>
   value === undefined || boundedString(value, maximum);
 const validManagedLifeId = (value: unknown): boolean =>
@@ -201,7 +219,9 @@ const managedLifeInput = (args: readonly unknown[]): IpcIntegrationPolicyDecisio
   if (args.length !== 1) return rejected('ARGUMENT_COUNT_MISMATCH');
   const value = args[0];
   if (!isObject(value)) return rejected('OBJECT_ARGUMENT_REQUIRED', '$[0]');
-  if (value.itemType !== 'profile' && value.itemType !== 'activity' && value.itemType !== 'document') {
+  if (value.itemType !== 'profile'
+    && value.itemType !== 'activity'
+    && !managedHomeInventoryItemTypes.has(String(value.itemType))) {
     return rejected('MANAGED_LIFE_ITEM_TYPE_INVALID', '$[0].itemType');
   }
   const inspection = inspectManagedLifeDataContract(value);
@@ -267,12 +287,108 @@ const managedLifeInput = (args: readonly unknown[]): IpcIntegrationPolicyDecisio
     return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
   }
 
+  if (value.itemType === 'room') {
+    const valid = validManagedLifeId(value.recordId)
+      && boundedString(value.name, 120)
+      && managedHomeRoomKinds.has(String(value.roomKind))
+      && validManagedHomeSupersession(value);
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'meter') {
+    const valid = validManagedLifeId(value.recordId)
+      && (value.roomId === undefined || validManagedLifeId(value.roomId))
+      && boundedString(value.label, 120)
+      && managedHomeMeterKinds.has(String(value.meterKind))
+      && managedHomeReadingUnits.has(String(value.readingUnit))
+      && ((value.meterKind === 'electricity' && value.readingUnit === 'wh')
+        || (value.meterKind === 'water' && value.readingUnit === 'milliliter')
+        || (value.meterKind === 'natural_gas' && value.readingUnit === 'milliliter_cubic_meter_equivalent')
+        || (value.meterKind === 'other' && value.readingUnit === 'custom_milliunit'))
+      && validManagedHomeSupersession(value);
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'meter_reading') {
+    const valid = validManagedLifeId(value.recordId)
+      && validManagedLifeId(value.meterId)
+      && managedHomeReadingKinds.has(String(value.readingKind))
+      && optionalManagedLifeCount(value.readingMilliunits)
+      && value.readingMilliunits !== undefined
+      && validManagedLifeTimestamp(value.recordedAt)
+      && optionalManagedLifeText(value.note, 500)
+      && (value.readingKind === 'reading' || boundedString(value.note, 500))
+      && validManagedHomeSupersession(value);
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'belonging') {
+    const amountCurrencyPairValid = (value.purchaseAmountMinor === undefined) === (value.currency === undefined);
+    const valid = validManagedLifeId(value.recordId)
+      && (value.roomId === undefined || validManagedLifeId(value.roomId))
+      && boundedString(value.name, 120)
+      && managedHomeBelongingKinds.has(String(value.belongingKind))
+      && (value.serialNumber === undefined
+        || (boundedString(value.serialNumber, 160)
+          && String(value.serialNumber).trim().length >= 2
+          && /^[\p{L}\p{N}][\p{L}\p{N} ._:/+()-]*$/u.test(String(value.serialNumber).trim())))
+      && optionalManagedLifeTimestamp(value.purchasedAt)
+      && optionalManagedLifePositiveCount(value.purchaseAmountMinor)
+      && (value.currency === undefined || (typeof value.currency === 'string' && /^[A-Za-z]{3}$/u.test(value.currency)))
+      && amountCurrencyPairValid
+      && (value.financeExpenseId === undefined || validManagedLifeId(value.financeExpenseId))
+      && !(value.financeExpenseId !== undefined
+        && (value.purchaseAmountMinor !== undefined || value.currency !== undefined))
+      && validManagedHomeSupersession(value);
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'warranty') {
+    const valid = validManagedLifeId(value.recordId)
+      && validManagedLifeId(value.belongingId)
+      && optionalManagedLifeText(value.provider, 160)
+      && validManagedLifeTimestamp(value.startsAt)
+      && validManagedLifeTimestamp(value.endsAt)
+      && optionalManagedLifeTimestamp(value.reminderAt)
+      && optionalManagedLifeText(value.note, 500)
+      && Date.parse(String(value.endsAt)) >= Date.parse(String(value.startsAt))
+      && (value.reminderAt === undefined
+        || (Date.parse(String(value.reminderAt)) >= Date.parse(String(value.startsAt))
+          && Date.parse(String(value.reminderAt)) <= Date.parse(String(value.endsAt))))
+      && validManagedHomeSupersession(value);
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'service') {
+    const amountCurrencyPairValid = (value.amountMinor === undefined) === (value.currency === undefined);
+    const valid = validManagedLifeId(value.recordId)
+      && validManagedLifeId(value.targetItemId)
+      && managedHomeServiceTargetTypes.has(String(value.targetType))
+      && managedHomeServiceKinds.has(String(value.serviceKind))
+      && validManagedLifeTimestamp(value.occurredAt)
+      && optionalManagedLifeText(value.provider, 160)
+      && optionalManagedLifePositiveCount(value.amountMinor)
+      && (value.currency === undefined || (typeof value.currency === 'string' && /^[A-Za-z]{3}$/u.test(value.currency)))
+      && amountCurrencyPairValid
+      && (value.financeExpenseId === undefined || validManagedLifeId(value.financeExpenseId))
+      && !(value.financeExpenseId !== undefined && (value.amountMinor !== undefined || value.currency !== undefined))
+      && optionalManagedLifeText(value.note, 500)
+      && validManagedHomeSupersession(value);
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
   if (value.itemType === 'document') {
+    const inventoryDocument = value.targetItemId !== undefined || value.targetType !== undefined;
     const valid = validManagedLifeId(value.recordId)
       && typeof value.archiveItemId === 'string'
       && /^[A-Za-z0-9][A-Za-z0-9._-]{0,159}$/u.test(value.archiveItemId)
-      && managedLifeDocumentKinds.has(String(value.documentKind))
-      && optionalBoundedString(value.label, 240);
+      && (inventoryDocument
+        ? validManagedLifeId(value.targetItemId)
+          && managedHomeDocumentTargetTypes.has(String(value.targetType))
+          && managedHomeDocumentKinds.has(String(value.documentKind))
+        : managedLifeDocumentKinds.has(String(value.documentKind)))
+      && optionalBoundedString(value.label, inventoryDocument ? 120 : 240)
+      && (!inventoryDocument || validManagedHomeSupersession(value));
     return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
   }
 

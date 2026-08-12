@@ -26,7 +26,7 @@
       "passed": true
     },
     {
-      "name": "boundary evidence is exact green and truth preserving",
+      "name": "boundary evidence is exact green and truth preserving through successors",
       "passed": true
     },
     {
@@ -34,7 +34,7 @@
       "passed": true
     },
     {
-      "name": "migration 82 source and manifest checksum remain exact under migration 83 successor",
+      "name": "migration 82 source and manifest checksum remain exact through successor migrations",
       "passed": true
     },
     {
@@ -67,10 +67,10 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 83,
+  "latestDatabaseMigration": 84,
   "migration82Checksum": "be32fbe6a79688ee879fda02a16faa78f6e0d4151e1462b2c9f28a1da44518c8",
   "ppk021ExactAllowlistEntries": 545,
   "ppk021UseCaseCompositionSurfaces": 277,
   "ppk022CapabilitySurfaces": 242,
-  "generatedAt": "2026-08-12T20:38:48.108Z"
+  "generatedAt": "2026-08-12T21:31:38.791Z"
 }

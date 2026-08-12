@@ -17,7 +17,7 @@
   "persistentLibraryReleasePath": "/Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi/Bronze 04.08.2026.29",
   "preflightStatus": "PASS",
   "postflightStatus": "PENDING",
-  "libraryUploadStatus": "33-E_COMPLETED_RECEIPT_PASS",
+  "libraryUploadStatus": "33-F_LOCAL_PASS_AWAITING_LIBRARY_RECEIPT",
   "conversationCapacity": {
     "method": "platform_actual_or_unavailable",
     "actualUsedPercent": null,
@@ -32,8 +32,8 @@
     "canonicalPR172Unchanged": true,
     "recordedAt": "2026-08-06T07:45:38.3898625+03:00"
   },
-  "nextOfficialTask": "AUTO_PRIORITY_SELECTION_AFTER_33-E_PERSISTENT_RECEIPT",
-  "activeMicroStep": null,
+  "nextOfficialTask": "33-F governed home spaces, utility consumption, belongings warranty and service workflow",
+  "activeMicroStep": "33-F",
   "supersessions": [
     {
       "id": "GOV-SUP-29-D3-001",
@@ -666,9 +666,18 @@
       "evidence": "artifacts/checkpoints/33-D_COMPLETION_RECORD.json",
       "historicalSourceFilesRewritten": false,
       "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT_FULL_AUTO_SELECTION_AUTHORIZED"
+    },
+    {
+      "id": "GOV-SUP-33-F-001",
+      "field": "nextOfficialTask",
+      "previousValue": "AUTO_PRIORITY_SELECTION_AFTER_33-E_PERSISTENT_RECEIPT",
+      "effectiveValue": "33-F governed home spaces, utility consumption, belongings warranty and service workflow",
+      "evidence": "artifacts/checkpoints/33-E_COMPLETION_RECORD.json",
+      "historicalSourceFilesRewritten": false,
+      "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT_FULL_AUTO_SELECTION_AUTHORIZED"
     }
   ],
-  "updatedAt": "2026-08-12T20:38:05.431Z",
+  "updatedAt": "2026-08-12T21:40:31.775Z",
   "externalLibraryAuthority": {
     "step": "30-Z",
     "status": "PASS",

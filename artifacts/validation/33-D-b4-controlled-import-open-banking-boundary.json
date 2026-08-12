@@ -74,7 +74,7 @@
       "passed": true
     },
     {
-      "name": "historical migration 82 remains exact under the authorized migration 83 successor",
+      "name": "historical migration 82 remains exact through authorized successor migrations",
       "passed": true
     },
     {
@@ -171,7 +171,7 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 83,
+  "latestDatabaseMigration": 84,
   "importTables": 2,
   "persistedImportColumns": 42,
   "prohibitedPersistedColumns": 0,
@@ -183,5 +183,5 @@
   "ppk021ExactAllowlistEntries": 545,
   "ppk021UseCaseCompositionSurfaces": 277,
   "ppk022CapabilitySurfaces": 242,
-  "generatedAt": "2026-08-12T20:38:47.983Z"
+  "generatedAt": "2026-08-12T21:33:49.321Z"
 }

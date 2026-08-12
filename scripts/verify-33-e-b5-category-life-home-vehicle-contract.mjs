@@ -68,8 +68,8 @@ check('scope truth remains manual local document-content-free and payment-free',
   && scope.truth?.paymentExecution === 'not_performed'
   && scope.truth?.documentContentExposure === 'not_performed'
   && scope.truth?.networkEgressAdded === false);
-check('boundary evidence is exact green and preserves platform ratchets', boundary.status === 'PASS'
-  && boundary.checksFailed === 0 && boundary.latestDatabaseMigration === 83
+check('boundary evidence is exact green and preserves platform ratchets through successors', boundary.status === 'PASS'
+  && boundary.checksFailed === 0 && boundary.latestDatabaseMigration >= 83
   && boundary.managedLedgerTables === 1 && boundary.managedCategories === 7
   && boundary.ipcChannels === 2 && boundary.networkChannels === 0
   && boundary.externalRegistryLookup === 'not_performed'
@@ -81,7 +81,7 @@ check('DEC-216 is active and decision ledger cardinality is exact', ledger.decis
   && ledger.decisions?.some((item) => item.id === 'DEC-216' && item.status === 'ACTIVE'
     && item.requirements?.join(',') === ids.join(',')
     && item.document === 'docs/decisions/DEC-216-b5-category-life-home-vehicle.md'));
-check('migration 83 is latest and source-manifest identity is exact', migrationVersions.at(-1) === 83
+check('migration 83 remains exact while successor migrations may be current', (migrationVersions.at(-1) ?? 0) >= 83
   && migrations.includes("createMigrationDefinition(83, 'b5_life_home_vehicle_managed_ledger'")
   && migrationManifest.status === 'passed' && migrationManifest.checkCount === 9
   && migration83?.name === 'b5_life_home_vehicle_managed_ledger'

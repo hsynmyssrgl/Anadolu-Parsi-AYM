@@ -19,6 +19,23 @@ import type {
   FamilyRole,
   LifeRecordView,
   LifeRecordStatus,
+  ManagedHomeBelongingKind,
+  ManagedHomeDocumentKind,
+  ManagedHomeDocumentTargetType,
+  ManagedHomeInventoryBelongingLedgerItemView,
+  ManagedHomeInventoryDocumentLedgerItemView,
+  ManagedHomeInventoryLedgerItemView,
+  ManagedHomeInventoryMeterLedgerItemView,
+  ManagedHomeInventoryMeterReadingLedgerItemView,
+  ManagedHomeInventoryRoomLedgerItemView,
+  ManagedHomeInventoryServiceLedgerItemView,
+  ManagedHomeInventoryWarrantyLedgerItemView,
+  ManagedHomeMeterKind,
+  ManagedHomeMeterReadingKind,
+  ManagedHomeMeterReadingUnit,
+  ManagedHomeRoomKind,
+  ManagedHomeServiceKind,
+  ManagedHomeServiceTargetType,
   ManagedLifeActivityKind,
   ManagedLifeActivityLedgerItemView,
   ManagedLifeCategory,
@@ -35,6 +52,14 @@ import type {
   RecordManagedLifeDocumentInput,
   RecordManagedLifeItemInput,
   RecordManagedLifeProfileInput,
+  RecordManagedHomeInventoryBelongingInput,
+  RecordManagedHomeInventoryDocumentInput,
+  RecordManagedHomeInventoryItemInput,
+  RecordManagedHomeInventoryMeterInput,
+  RecordManagedHomeInventoryMeterReadingInput,
+  RecordManagedHomeInventoryRoomInput,
+  RecordManagedHomeInventoryServiceInput,
+  RecordManagedHomeInventoryWarrantyInput,
   RecordPrivacy
 } from '@ppt/domain';
 import type { DomainEvent } from '@ppt/events';
@@ -43,6 +68,8 @@ import { inspectManagedLifeDataContract } from './life-security.js';
 
 export {
   MANAGED_LIFE_INITIAL_REMINDER_KEYS,
+  MANAGED_HOME_INVENTORY_INPUT_KEYS,
+  MANAGED_HOME_INVENTORY_REQUIRED_INPUT_KEYS,
   MANAGED_LIFE_INPUT_KEYS,
   MANAGED_LIFE_PROFILE_DETAIL_KEYS,
   MANAGED_LIFE_PROFILE_REQUIRED_DETAIL_KEYS,
@@ -113,6 +140,49 @@ export type ManagedLifeWriteRecord =
   | ManagedLifeActivityWriteRecord
   | ManagedLifeDocumentWriteRecord;
 
+interface ManagedHomeInventoryWriteRecordCommon {
+  readonly familyId:FamilyId;
+  readonly ownerPersonId:PersonId;
+  readonly recordId:string;
+  readonly privacy:RecordPrivacy;
+  readonly supersedesItemId?:string;
+  readonly dataSource:'manual';
+  readonly externalVerification:'not_performed';
+  readonly paymentExecution:'not_performed';
+  readonly createdAt:IsoDateTime;
+}
+
+export type ManagedHomeInventoryRoomWriteRecord =
+  ManagedHomeInventoryRoomLedgerItemView & ManagedHomeInventoryWriteRecordCommon;
+export type ManagedHomeInventoryMeterWriteRecord =
+  ManagedHomeInventoryMeterLedgerItemView & ManagedHomeInventoryWriteRecordCommon;
+export type ManagedHomeInventoryMeterReadingWriteRecord =
+  Omit<ManagedHomeInventoryMeterReadingLedgerItemView, 'recordedAt'>
+  & ManagedHomeInventoryWriteRecordCommon
+  & { readonly recordedAt:IsoDateTime };
+export type ManagedHomeInventoryBelongingWriteRecord =
+  Omit<ManagedHomeInventoryBelongingLedgerItemView, 'createdAt'|'purchasedAt'>
+  & ManagedHomeInventoryWriteRecordCommon
+  & { readonly serialNumber?:string; readonly purchasedAt?:IsoDateTime };
+export type ManagedHomeInventoryWarrantyWriteRecord =
+  Omit<ManagedHomeInventoryWarrantyLedgerItemView, 'startsAt'|'endsAt'|'reminderAt'>
+  & ManagedHomeInventoryWriteRecordCommon
+  & { readonly startsAt:IsoDateTime; readonly endsAt:IsoDateTime; readonly reminderAt?:IsoDateTime };
+export type ManagedHomeInventoryServiceWriteRecord =
+  Omit<ManagedHomeInventoryServiceLedgerItemView, 'occurredAt'>
+  & ManagedHomeInventoryWriteRecordCommon
+  & { readonly occurredAt:IsoDateTime };
+export type ManagedHomeInventoryDocumentWriteRecord =
+  ManagedHomeInventoryDocumentLedgerItemView & ManagedHomeInventoryWriteRecordCommon;
+export type ManagedHomeInventoryWriteRecord =
+  | ManagedHomeInventoryRoomWriteRecord
+  | ManagedHomeInventoryMeterWriteRecord
+  | ManagedHomeInventoryMeterReadingWriteRecord
+  | ManagedHomeInventoryBelongingWriteRecord
+  | ManagedHomeInventoryWarrantyWriteRecord
+  | ManagedHomeInventoryServiceWriteRecord
+  | ManagedHomeInventoryDocumentWriteRecord;
+
 export interface LifeWriteScope {
   readonly occurredAt: IsoDateTime;
   findPerson(personId: PersonId): Result<{ readonly id: PersonId } | null, AppError>;
@@ -132,6 +202,12 @@ export interface LifeWriteScope {
   }): Result<void, AppError>;
   findManagedLifeProfile(id: string): Result<ManagedLifeProfileWriteRecord | null, AppError>;
   insertManagedLifeItem(record: ManagedLifeWriteRecord): Result<void, AppError>;
+  findManagedHomeInventoryItem(id: string): Result<ManagedHomeInventoryWriteRecord | null, AppError>;
+  findLatestManagedHomeMeterReading(
+    recordId:string,
+    meterId:string
+  ): Result<ManagedHomeInventoryMeterReadingWriteRecord | null, AppError>;
+  insertManagedHomeInventoryItem(record: ManagedHomeInventoryWriteRecord): Result<void, AppError>;
   appendAudit(input: {
     readonly id: string;
     readonly action: string;
@@ -398,6 +474,155 @@ const optionalManagedLifeText = (value: unknown, maximum: number): boolean =>
 const managedLifeCurrency = (value: unknown): value is string =>
   typeof value === 'string' && /^[A-Za-z]{3}$/u.test(value);
 
+const managedHomeRoomKinds = new Set<ManagedHomeRoomKind>([
+  'living_room','bedroom','kitchen','bathroom','storage','garage','garden','other'
+]);
+const managedHomeMeterKinds = new Set<ManagedHomeMeterKind>([
+  'electricity','water','natural_gas','other'
+]);
+const managedHomeMeterReadingKinds = new Set<ManagedHomeMeterReadingKind>([
+  'reading','reset','replacement'
+]);
+const managedHomeBelongingKinds = new Set<ManagedHomeBelongingKind>([
+  'appliance','electronics','furniture','tool','other'
+]);
+const managedHomeServiceTargetTypes = new Set<ManagedHomeServiceTargetType>([
+  'room','meter','belonging'
+]);
+const managedHomeServiceKinds = new Set<ManagedHomeServiceKind>([
+  'maintenance','repair','inspection','installation','other'
+]);
+const managedHomeDocumentTargetTypes = new Set<ManagedHomeDocumentTargetType>([
+  'meter','belonging','warranty','service'
+]);
+const managedHomeDocumentKinds = new Set<ManagedHomeDocumentKind>([
+  'invoice','warranty','service_receipt','meter_document','other'
+]);
+const managedHomeMeterUnitMatrix: Readonly<Record<ManagedHomeMeterKind, ManagedHomeMeterReadingUnit>> = {
+  electricity: 'wh',
+  water: 'milliliter',
+  natural_gas: 'milliliter_cubic_meter_equivalent',
+  other: 'custom_milliunit'
+};
+
+const managedHomeSerial = (value: unknown): value is string =>
+  managedLifeText(value, 2, 160)
+  && /^[\p{L}\p{N}][\p{L}\p{N} ._:/+()-]*$/u.test(value.trim());
+
+export const maskManagedHomeSerial = (value:string): string => {
+  const normalized = value.trim();
+  if (normalized.length <= 4) return '*'.repeat(normalized.length);
+  return `${'*'.repeat(Math.min(12, normalized.length - 4))}${normalized.slice(-4)}`;
+};
+
+const managedHomeOptionalId = (value: unknown): boolean =>
+  value === undefined || managedLifeId(value);
+
+const managedHomeAmount = (input: {
+  readonly amountMinor?:number | undefined;
+  readonly currency?:string | undefined;
+  readonly financeExpenseId?:string | undefined;
+}): boolean => {
+  const hasAmount = input.amountMinor !== undefined;
+  const hasCurrency = input.currency !== undefined;
+  if (input.financeExpenseId !== undefined) {
+    return managedLifeId(input.financeExpenseId) && !hasAmount && !hasCurrency;
+  }
+  return hasAmount === hasCurrency
+    && (!hasAmount || (managedLifeInteger(input.amountMinor, 1) && managedLifeCurrency(input.currency)));
+};
+
+const isManagedHomeInventoryCommand = (
+  command:RecordManagedLifeItemInput,
+  inspection:ReturnType<typeof inspectManagedLifeDataContract>
+): command is RecordManagedHomeInventoryItemInput => inspection.contractFamily === 'home_inventory';
+
+const validateManagedHomeInventoryCommand = (
+  context:LifeApplicationContext,
+  command:RecordManagedHomeInventoryItemInput
+): Result<void, AppError> => {
+  if (!managedLifeId(command.recordId)
+    || !managedHomeOptionalId(command.supersedesItemId)) {
+    return err(invalid(context, 'Ev envanteri kök veya supersede kimliği geçersiz.'));
+  }
+  switch (command.itemType) {
+    case 'room':
+      return managedLifeText(command.name, 1, 120) && managedHomeRoomKinds.has(command.roomKind)
+        ? ok(undefined)
+        : err(invalid(context, 'Oda adı veya türü geçersiz.'));
+    case 'meter':
+      return managedHomeOptionalId(command.roomId)
+        && managedLifeText(command.label, 1, 120)
+        && managedHomeMeterKinds.has(command.meterKind)
+        && command.readingUnit === managedHomeMeterUnitMatrix[command.meterKind]
+        ? ok(undefined)
+        : err(invalid(context, 'Sayaç alanı, türü veya ölçü birimi geçersiz.'));
+    case 'meter_reading': {
+      if (!managedLifeId(command.meterId)
+        || !managedHomeMeterReadingKinds.has(command.readingKind)
+        || !managedLifeInteger(command.readingMilliunits)
+        || !optionalManagedLifeText(command.note, 240)
+        || (command.readingKind !== 'reading' && !managedLifeText(command.note, 2, 240))) {
+        return err(invalid(context, 'Sayaç okuması veya reset/değişim açıklaması geçersiz.'));
+      }
+      return managedLifeDate(command.recordedAt, context, 'Sayaç okuma tarihi').ok
+        ? ok(undefined)
+        : err(invalid(context, 'Sayaç okuma tarihi tam UTC ISO-8601 biçiminde olmalıdır.'));
+    }
+    case 'belonging': {
+      if (!managedHomeOptionalId(command.roomId)
+        || !managedLifeText(command.name, 1, 120)
+        || !managedHomeBelongingKinds.has(command.belongingKind)
+        || (command.serialNumber !== undefined && !managedHomeSerial(command.serialNumber))
+        || !managedHomeAmount({
+          amountMinor: command.purchaseAmountMinor,
+          currency: command.currency,
+          financeExpenseId: command.financeExpenseId
+        })) {
+        return err(invalid(context, 'Eşya alanı, seri veya finans bağlantısı geçersiz.'));
+      }
+      if (command.purchasedAt !== undefined && !isExactManagedLifeIsoDateTime(command.purchasedAt)) {
+        return err(invalid(context, 'Satın alma tarihi tam UTC ISO-8601 biçiminde olmalıdır.'));
+      }
+      return ok(undefined);
+    }
+    case 'warranty': {
+      if (!managedLifeId(command.belongingId)
+        || !optionalManagedLifeText(command.provider, 160)
+        || !optionalManagedLifeText(command.note, 500)
+        || !isExactManagedLifeIsoDateTime(command.startsAt)
+        || !isExactManagedLifeIsoDateTime(command.endsAt)
+        || command.endsAt < command.startsAt
+        || (command.reminderAt !== undefined
+          && (!isExactManagedLifeIsoDateTime(command.reminderAt)
+            || command.reminderAt < command.startsAt
+            || command.reminderAt > command.endsAt))) {
+        return err(invalid(context, 'Garanti tarihleri, sağlayıcısı veya açıklaması geçersiz.'));
+      }
+      return ok(undefined);
+    }
+    case 'service':
+      if (!managedLifeId(command.targetItemId)
+        || !managedHomeServiceTargetTypes.has(command.targetType)
+        || !managedHomeServiceKinds.has(command.serviceKind)
+        || !isExactManagedLifeIsoDateTime(command.occurredAt)
+        || !optionalManagedLifeText(command.provider, 160)
+        || !optionalManagedLifeText(command.note, 500)
+        || !managedHomeAmount(command)) {
+        return err(invalid(context, 'Servis alanı, tarihi veya finans bağlantısı geçersiz.'));
+      }
+      return ok(undefined);
+    case 'document':
+      return managedLifeId(command.targetItemId)
+        && managedHomeDocumentTargetTypes.has(command.targetType)
+        && managedLifeId(command.archiveItemId)
+        && managedHomeDocumentKinds.has(command.documentKind)
+        && optionalManagedLifeText(command.label, 120)
+        ? ok(undefined)
+        : err(invalid(context, 'Ev envanteri belge bağlantısı geçersiz.'));
+  }
+};
+
 const validateManagedProfileDetails = (command: RecordManagedLifeProfileInput): boolean => {
   const details = command.details as unknown as Record<string, unknown>;
   switch (command.category) {
@@ -480,6 +705,9 @@ const validateManagedLifeCommand = (
       'Yönetilen yaşam kaydı yalnız tanımlı alanları içerebilir; gizli bilgi, PAN, dosya yolu ve base64 veri kabul edilmez.'
     ));
   }
+  if (isManagedHomeInventoryCommand(command, inspection)) {
+    return validateManagedHomeInventoryCommand(context, command);
+  }
   if (command.itemType === 'profile') {
     if (!managedLifeId(command.ownerPersonId)
       || !managedLifeCategories.has(command.category)
@@ -556,8 +784,126 @@ const validateManagedLifeCommand = (
   return ok(undefined);
 };
 
+const stripManagedLifePersistenceFields = <T extends object>(value:T): T => {
+  const {
+    familyId: _familyId,
+    policyReceiptHash: _policyReceiptHash,
+    policyReceiptVersion: _policyReceiptVersion,
+    policyReceiptNonce: _policyReceiptNonce,
+    policyCorrelationId: _policyCorrelationId,
+    policyResourceType: _policyResourceType,
+    policyResourceId: _policyResourceId,
+    policyAction: _policyAction,
+    policyCapability: _policyCapability,
+    ...safe
+  } = value as T & {
+    readonly familyId?:unknown;
+    readonly policyReceiptHash?:unknown;
+    readonly policyReceiptVersion?:unknown;
+    readonly policyReceiptNonce?:unknown;
+    readonly policyCorrelationId?:unknown;
+    readonly policyResourceType?:unknown;
+    readonly policyResourceId?:unknown;
+    readonly policyAction?:unknown;
+    readonly policyCapability?:unknown;
+  };
+  return safe as T;
+};
+
+const managedHomePublicCommon = (item:ManagedHomeInventoryWriteRecord) => ({
+  id: item.id,
+  recordId: item.recordId,
+  ownerPersonId: item.ownerPersonId,
+  privacy: item.privacy,
+  ...(item.supersedesItemId ? { supersedesItemId: item.supersedesItemId } : {}),
+  dataSource: item.dataSource,
+  externalVerification: item.externalVerification,
+  paymentExecution: item.paymentExecution,
+  createdAt: item.createdAt
+});
+
+const projectManagedHomeInventoryItem = (
+  item:ManagedHomeInventoryWriteRecord
+): ManagedHomeInventoryLedgerItemView => {
+  const common = managedHomePublicCommon(item);
+  switch (item.itemType) {
+    case 'room': return Object.freeze({
+      ...common,
+      itemType: 'room',
+      name: item.name,
+      roomKind: item.roomKind
+    });
+    case 'meter': return Object.freeze({
+      ...common,
+      itemType: 'meter',
+      ...(item.roomId ? { roomId: item.roomId } : {}),
+      label: item.label,
+      meterKind: item.meterKind,
+      readingUnit: item.readingUnit
+    });
+    case 'meter_reading': return Object.freeze({
+      ...common,
+      itemType: 'meter_reading',
+      meterId: item.meterId,
+      readingKind: item.readingKind,
+      readingMilliunits: item.readingMilliunits,
+      recordedAt: item.recordedAt,
+      ...(item.note ? { note: item.note } : {})
+    });
+    case 'belonging': return Object.freeze({
+      ...common,
+      itemType: 'belonging',
+      ...(item.roomId ? { roomId: item.roomId } : {}),
+      name: item.name,
+      belongingKind: item.belongingKind,
+      ...(item.serialNumber
+        ? { serialNumberMasked: maskManagedHomeSerial(item.serialNumber) }
+        : item.serialNumberMasked ? { serialNumberMasked: item.serialNumberMasked } : {}),
+      ...(item.purchasedAt ? { purchasedAt: item.purchasedAt } : {}),
+      ...(item.purchaseAmountMinor !== undefined ? { purchaseAmountMinor: item.purchaseAmountMinor } : {}),
+      ...(item.currency ? { currency: item.currency } : {}),
+      ...(item.financeExpenseId ? { financeExpenseId: item.financeExpenseId } : {}),
+      financePosting: item.financePosting
+    });
+    case 'warranty': return Object.freeze({
+      ...common,
+      itemType: 'warranty',
+      belongingId: item.belongingId,
+      ...(item.provider ? { provider: item.provider } : {}),
+      startsAt: item.startsAt,
+      endsAt: item.endsAt,
+      ...(item.reminderAt ? { reminderAt: item.reminderAt } : {}),
+      ...(item.note ? { note: item.note } : {})
+    });
+    case 'service': return Object.freeze({
+      ...common,
+      itemType: 'service',
+      targetItemId: item.targetItemId,
+      targetType: item.targetType,
+      serviceKind: item.serviceKind,
+      occurredAt: item.occurredAt,
+      ...(item.provider ? { provider: item.provider } : {}),
+      ...(item.amountMinor !== undefined ? { amountMinor: item.amountMinor } : {}),
+      ...(item.currency ? { currency: item.currency } : {}),
+      ...(item.financeExpenseId ? { financeExpenseId: item.financeExpenseId } : {}),
+      financePosting: item.financePosting,
+      ...(item.note ? { note: item.note } : {})
+    });
+    case 'document': return Object.freeze({
+      ...common,
+      itemType: 'document',
+      targetItemId: item.targetItemId,
+      targetType: item.targetType,
+      archiveItemId: item.archiveItemId,
+      documentKind: item.documentKind,
+      ...(item.label ? { label: item.label } : {})
+    });
+  }
+};
+
 export const buildManagedLifeWorkspace = (input: {
   readonly items:readonly ManagedLifeLedgerItemView[];
+  readonly homeInventoryItems?:readonly ManagedHomeInventoryWriteRecord[];
   readonly generatedAt:string;
 }): ManagedLifeWorkspaceView => {
   const profiles = input.items.filter((item): item is ManagedLifeProfileLedgerItemView => item.itemType === 'profile');
@@ -597,14 +943,22 @@ export const buildManagedLifeWorkspace = (input: {
         : undefined;
     if (activeReminder) reminders.push(Object.freeze(activeReminder));
     return Object.freeze({
-      ...profile,
-      activities: Object.freeze(profileActivities),
-      documents: Object.freeze(profileDocuments),
+      ...stripManagedLifePersistenceFields(profile),
+      activities: Object.freeze(profileActivities.map(stripManagedLifePersistenceFields)),
+      documents: Object.freeze(profileDocuments.map(stripManagedLifePersistenceFields)),
       ...(activeReminder ? { currentReminder: Object.freeze(activeReminder) } : {})
     }) as ManagedLifeProfileView;
   }).sort((left, right) => right.createdAt.localeCompare(left.createdAt) || right.id.localeCompare(left.id));
+  const visibleRootIds = new Set(profileViews
+    .filter((profile) => profile.category === 'home')
+    .map((profile) => profile.id));
+  const homeInventoryItems = (input.homeInventoryItems ?? [])
+    .filter((item) => visibleRootIds.has(item.recordId))
+    .map(projectManagedHomeInventoryItem)
+    .sort((left, right) => right.createdAt.localeCompare(left.createdAt) || right.id.localeCompare(left.id));
   return Object.freeze({
     profiles: Object.freeze(profileViews),
+    homeInventoryItems: Object.freeze(homeInventoryItems),
     upcomingReminders: Object.freeze(reminders
       .filter((reminder) => reminder.dueAt >= input.generatedAt)
       .sort((left, right) => left.dueAt.localeCompare(right.dueAt) || left.sourceId.localeCompare(right.sourceId))
@@ -612,7 +966,10 @@ export const buildManagedLifeWorkspace = (input: {
     generatedAt: input.generatedAt,
     dataSource: 'manual',
     externalRegistryLookup: 'not_performed',
+    smartMeterLookup: 'not_performed',
     providerContact: 'not_performed',
+    warrantyLookup: 'not_performed',
+    ocr: 'not_performed',
     paymentExecution: 'not_performed',
     documentContentExposure: 'not_performed'
   });
@@ -722,6 +1079,215 @@ const buildManagedDocumentRecord = (input: {
   createdAt: input.occurredAt
 });
 
+const managedHomeCommon = (input: {
+  readonly context:LifeApplicationContext;
+  readonly command:RecordManagedHomeInventoryItemInput;
+  readonly parent:ManagedLifeProfileWriteRecord;
+  readonly itemId:string;
+  readonly occurredAt:IsoDateTime;
+}) => ({
+  id: input.itemId,
+  familyId: input.context.familyId,
+  recordId: input.parent.id,
+  ownerPersonId: input.parent.ownerPersonId,
+  privacy: input.parent.privacy,
+  ...(input.command.supersedesItemId ? { supersedesItemId: input.command.supersedesItemId } : {}),
+  dataSource: 'manual' as const,
+  externalVerification: 'not_performed' as const,
+  paymentExecution: 'not_performed' as const,
+  createdAt: input.occurredAt
+});
+
+const buildManagedHomeInventoryRecord = (input: {
+  readonly context:LifeApplicationContext;
+  readonly command:RecordManagedHomeInventoryItemInput;
+  readonly parent:ManagedLifeProfileWriteRecord;
+  readonly itemId:string;
+  readonly occurredAt:IsoDateTime;
+}): ManagedHomeInventoryWriteRecord => {
+  const common = managedHomeCommon(input);
+  switch (input.command.itemType) {
+    case 'room': return {
+      ...common,
+      itemType: 'room',
+      name: input.command.name.trim(),
+      roomKind: input.command.roomKind
+    };
+    case 'meter': return {
+      ...common,
+      itemType: 'meter',
+      ...(input.command.roomId ? { roomId: input.command.roomId } : {}),
+      label: input.command.label.trim(),
+      meterKind: input.command.meterKind,
+      readingUnit: input.command.readingUnit
+    };
+    case 'meter_reading': return {
+      ...common,
+      itemType: 'meter_reading',
+      meterId: input.command.meterId,
+      readingKind: input.command.readingKind,
+      readingMilliunits: input.command.readingMilliunits,
+      recordedAt: asIsoDateTime(input.command.recordedAt),
+      ...(input.command.note?.trim() ? { note: input.command.note.trim() } : {})
+    };
+    case 'belonging': return {
+      ...common,
+      itemType: 'belonging',
+      ...(input.command.roomId ? { roomId: input.command.roomId } : {}),
+      name: input.command.name.trim(),
+      belongingKind: input.command.belongingKind,
+      ...(input.command.serialNumber?.trim() ? { serialNumber: input.command.serialNumber.trim() } : {}),
+      ...(input.command.purchasedAt ? { purchasedAt: asIsoDateTime(input.command.purchasedAt) } : {}),
+      ...(input.command.purchaseAmountMinor !== undefined
+        ? { purchaseAmountMinor: input.command.purchaseAmountMinor } : {}),
+      ...(input.command.currency ? { currency: input.command.currency.toUpperCase() } : {}),
+      ...(input.command.financeExpenseId ? { financeExpenseId: input.command.financeExpenseId } : {}),
+      financePosting: input.command.financeExpenseId ? 'linked' : 'not_performed'
+    };
+    case 'warranty': return {
+      ...common,
+      itemType: 'warranty',
+      belongingId: input.command.belongingId,
+      ...(input.command.provider?.trim() ? { provider: input.command.provider.trim() } : {}),
+      startsAt: asIsoDateTime(input.command.startsAt),
+      endsAt: asIsoDateTime(input.command.endsAt),
+      ...(input.command.reminderAt ? { reminderAt: asIsoDateTime(input.command.reminderAt) } : {}),
+      ...(input.command.note?.trim() ? { note: input.command.note.trim() } : {})
+    };
+    case 'service': return {
+      ...common,
+      itemType: 'service',
+      targetItemId: input.command.targetItemId,
+      targetType: input.command.targetType,
+      serviceKind: input.command.serviceKind,
+      occurredAt: asIsoDateTime(input.command.occurredAt),
+      ...(input.command.provider?.trim() ? { provider: input.command.provider.trim() } : {}),
+      ...(input.command.amountMinor !== undefined ? { amountMinor: input.command.amountMinor } : {}),
+      ...(input.command.currency ? { currency: input.command.currency.toUpperCase() } : {}),
+      ...(input.command.financeExpenseId ? { financeExpenseId: input.command.financeExpenseId } : {}),
+      financePosting: input.command.financeExpenseId ? 'linked' : 'not_performed',
+      ...(input.command.note?.trim() ? { note: input.command.note.trim() } : {})
+    };
+    case 'document': return {
+      ...common,
+      itemType: 'document',
+      targetItemId: input.command.targetItemId,
+      targetType: input.command.targetType,
+      archiveItemId: input.command.archiveItemId,
+      documentKind: input.command.documentKind,
+      ...(input.command.label?.trim() ? { label: input.command.label.trim() } : {})
+    };
+  }
+};
+
+const managedHomeExpectedTargetType = (
+  item:ManagedHomeInventoryWriteRecord
+): ManagedHomeServiceTargetType | ManagedHomeDocumentTargetType | undefined => {
+  switch (item.itemType) {
+    case 'room': return 'room';
+    case 'meter': return 'meter';
+    case 'belonging': return 'belonging';
+    case 'warranty': return 'warranty';
+    case 'service': return 'service';
+    default: return undefined;
+  }
+};
+
+const validateManagedHomeInventoryRelations = (input: {
+  readonly context:LifeApplicationContext;
+  readonly command:RecordManagedHomeInventoryItemInput;
+  readonly parent:ManagedLifeProfileWriteRecord;
+  readonly scope:LifeWriteScope;
+  readonly itemId:string;
+}): Result<void, AppError> => {
+  const findItem = (id:string): Result<ManagedHomeInventoryWriteRecord, AppError> => {
+    const found = input.scope.findManagedHomeInventoryItem(id);
+    if (!found.ok) return found;
+    if (!found.value
+      || found.value.recordId !== input.parent.id
+      || found.value.familyId !== input.context.familyId
+      || found.value.ownerPersonId !== input.parent.ownerPersonId
+      || found.value.privacy !== input.parent.privacy) {
+      return err(invalid(input.context, 'Ev envanteri üst bağlantısı aynı home kökünde bulunmalıdır.'));
+    }
+    return ok(found.value);
+  };
+  if (input.command.supersedesItemId) {
+    if (input.command.supersedesItemId === input.itemId) {
+      return err(invalid(input.context, 'Ev envanteri kaydı kendisini supersede edemez.'));
+    }
+    const superseded = findItem(input.command.supersedesItemId);
+    if (!superseded.ok) return superseded;
+    if (superseded.value.itemType !== input.command.itemType) {
+      return err(invalid(input.context, 'Supersede edilen kayıt aynı türde olmalıdır.'));
+    }
+  }
+  switch (input.command.itemType) {
+    case 'room': return ok(undefined);
+    case 'meter':
+      if (!input.command.roomId) return ok(undefined);
+      {
+        const room = findItem(input.command.roomId);
+        return room.ok && room.value.itemType === 'room'
+          ? ok(undefined)
+          : err(invalid(input.context, 'Sayaç yalnız aynı home kökündeki odaya bağlanabilir.'));
+      }
+    case 'meter_reading': {
+      const meter = findItem(input.command.meterId);
+      if (!meter.ok) return meter;
+      if (meter.value.itemType !== 'meter') {
+        return err(invalid(input.context, 'Sayaç okuması geçerli bir sayaç kaydına bağlanmalıdır.'));
+      }
+      const latest = input.scope.findLatestManagedHomeMeterReading(input.parent.id, input.command.meterId);
+      if (!latest.ok) return latest;
+      if (latest.value && input.command.recordedAt <= latest.value.recordedAt) {
+        return err(invalid(input.context, 'Sayaç okuması önceki olaydan sonra olmalıdır.'));
+      }
+      if (input.command.recordedAt > input.scope.occurredAt) {
+        return err(invalid(input.context, 'Sayaç okuma tarihi işlem zamanından sonra olamaz.'));
+      }
+      if (input.command.readingKind === 'reading'
+        && latest.value
+        && input.command.readingMilliunits < latest.value.readingMilliunits) {
+        return err(invalid(input.context, 'Normal sayaç okuması monoton ilerlemelidir; düşüş reset veya replacement ister.'));
+      }
+      return ok(undefined);
+    }
+    case 'belonging':
+      if (input.command.purchasedAt && input.command.purchasedAt > input.scope.occurredAt) {
+        return err(invalid(input.context, 'Satın alma tarihi işlem zamanından sonra olamaz.'));
+      }
+      if (!input.command.roomId) return ok(undefined);
+      {
+        const room = findItem(input.command.roomId);
+        return room.ok && room.value.itemType === 'room'
+          ? ok(undefined)
+          : err(invalid(input.context, 'Eşya yalnız aynı home kökündeki odaya bağlanabilir.'));
+      }
+    case 'warranty': {
+      const belonging = findItem(input.command.belongingId);
+      return belonging.ok && belonging.value.itemType === 'belonging'
+        ? ok(undefined)
+        : err(invalid(input.context, 'Garanti yalnız aynı home kökündeki eşyaya bağlanabilir.'));
+    }
+    case 'service': {
+      if (input.command.occurredAt > input.scope.occurredAt) {
+        return err(invalid(input.context, 'Servis tarihi işlem zamanından sonra olamaz.'));
+      }
+      const target = findItem(input.command.targetItemId);
+      return target.ok && managedHomeExpectedTargetType(target.value) === input.command.targetType
+        ? ok(undefined)
+        : err(invalid(input.context, 'Servis hedef türü aynı home kökündeki kayıtla eşleşmelidir.'));
+    }
+    case 'document': {
+      const target = findItem(input.command.targetItemId);
+      return target.ok && managedHomeExpectedTargetType(target.value) === input.command.targetType
+        ? ok(undefined)
+        : err(invalid(input.context, 'Belge hedef türü aynı home kökündeki kayıtla eşleşmelidir.'));
+    }
+  }
+};
+
 export class RecordManagedLifeItemUseCase {
   public constructor(private readonly unitOfWork: LifeUnitOfWork) {}
 
@@ -733,13 +1299,15 @@ export class RecordManagedLifeItemUseCase {
       readonly auditId:string;
       readonly outboxEventId:EventId;
     };
-  }): Promise<Result<ManagedLifeLedgerItemView, AppError>> {
+  }): Promise<Result<ManagedLifeLedgerItemView | ManagedHomeInventoryLedgerItemView, AppError>> {
     const commandValidation = validateManagedLifeCommand(input.context, input.command);
     if (!commandValidation.ok) return Promise.resolve(commandValidation);
     if (!managedLifeId(input.identifiers.itemId)) {
       return Promise.resolve(err(invalid(input.context, 'Yönetilen yaşam kayıt kimliği geçersiz.')));
     }
-    const isProfile = input.command.itemType === 'profile';
+    const inspection = inspectManagedLifeDataContract(input.command);
+    const isHomeInventory = isManagedHomeInventoryCommand(input.command, inspection);
+    const isProfile = !isHomeInventory && input.command.itemType === 'profile';
     const rootId = isProfile ? input.identifiers.itemId : input.command.recordId;
     const profileOwner = isProfile ? asPersonId(input.command.ownerPersonId) : undefined;
     const profilePrivacy = isProfile ? input.command.privacy : undefined;
@@ -780,8 +1348,27 @@ export class RecordManagedLifeItemUseCase {
       if (!authorization.ok) return authorization;
       if (!authorization.value) return err(denied(input.context));
 
-      let item: ManagedLifeWriteRecord;
-      if (input.command.itemType === 'profile') {
+      let item: ManagedLifeWriteRecord | ManagedHomeInventoryWriteRecord;
+      if (isHomeInventory) {
+        if (parent!.category !== 'home') {
+          return err(invalid(input.context, 'Ev envanteri yalnız yönetilen home profiline bağlanabilir.'));
+        }
+        const relationValidation = validateManagedHomeInventoryRelations({
+          context: input.context,
+          command: input.command,
+          parent: parent!,
+          scope,
+          itemId: input.identifiers.itemId
+        });
+        if (!relationValidation.ok) return relationValidation;
+        item = buildManagedHomeInventoryRecord({
+          context: input.context,
+          command: input.command,
+          parent: parent!,
+          itemId: input.identifiers.itemId,
+          occurredAt: scope.occurredAt
+        });
+      } else if (input.command.itemType === 'profile') {
         item = buildManagedProfileRecord({
           context: input.context,
           command: input.command,
@@ -824,7 +1411,9 @@ export class RecordManagedLifeItemUseCase {
           occurredAt: scope.occurredAt
         });
       }
-      const saved = scope.insertManagedLifeItem(item);
+      const saved = isHomeInventory
+        ? scope.insertManagedHomeInventoryItem(item as ManagedHomeInventoryWriteRecord)
+        : scope.insertManagedLifeItem(item as ManagedLifeWriteRecord);
       if (!saved.ok) return saved;
       const audit = scope.appendAudit({
         id: input.identifiers.auditId,
@@ -852,7 +1441,10 @@ export class RecordManagedLifeItemUseCase {
           privacy
         }
       });
-      return event.ok ? ok(item) : event;
+      if (!event.ok) return event;
+      return ok(isHomeInventory
+        ? projectManagedHomeInventoryItem(item as ManagedHomeInventoryWriteRecord)
+        : item as ManagedLifeWriteRecord);
     });
   }
 }

@@ -115,6 +115,6 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 83,
-  "generatedAt": "2026-08-12T20:15:24.746Z"
+  "latestDatabaseMigration": 84,
+  "generatedAt": "2026-08-12T21:33:28.106Z"
 }

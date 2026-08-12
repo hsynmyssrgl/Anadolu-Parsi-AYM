@@ -1,4 +1,4 @@
-import type { ManagedLifeCategory } from '@ppt/domain';
+import type { ManagedHomeInventoryItemType, ManagedLifeCategory } from '@ppt/domain';
 
 export const MANAGED_LIFE_INPUT_KEYS = Object.freeze({
   profile: Object.freeze([
@@ -46,9 +46,44 @@ export const MANAGED_LIFE_REMINDER_MUTATION_KEYS = Object.freeze({
   clear: Object.freeze(['action'])
 } as const);
 
+export const MANAGED_HOME_INVENTORY_INPUT_KEYS = Object.freeze({
+  room: Object.freeze(['itemType','recordId','supersedesItemId','name','roomKind']),
+  meter: Object.freeze(['itemType','recordId','supersedesItemId','roomId','label','meterKind','readingUnit']),
+  meter_reading: Object.freeze([
+    'itemType','recordId','supersedesItemId','meterId','readingKind','readingMilliunits','recordedAt','note'
+  ]),
+  belonging: Object.freeze([
+    'itemType','recordId','supersedesItemId','roomId','name','belongingKind','serialNumber',
+    'purchasedAt','purchaseAmountMinor','currency','financeExpenseId'
+  ]),
+  warranty: Object.freeze([
+    'itemType','recordId','supersedesItemId','belongingId','provider','startsAt','endsAt','reminderAt','note'
+  ]),
+  service: Object.freeze([
+    'itemType','recordId','supersedesItemId','targetItemId','targetType','serviceKind','occurredAt',
+    'provider','amountMinor','currency','financeExpenseId','note'
+  ]),
+  document: Object.freeze([
+    'itemType','recordId','supersedesItemId','targetItemId','targetType','archiveItemId','documentKind','label'
+  ])
+} satisfies Readonly<Record<ManagedHomeInventoryItemType, readonly string[]>>);
+
+export const MANAGED_HOME_INVENTORY_REQUIRED_INPUT_KEYS = Object.freeze({
+  room: Object.freeze(['itemType','recordId','name','roomKind']),
+  meter: Object.freeze(['itemType','recordId','label','meterKind','readingUnit']),
+  meter_reading: Object.freeze([
+    'itemType','recordId','meterId','readingKind','readingMilliunits','recordedAt'
+  ]),
+  belonging: Object.freeze(['itemType','recordId','name','belongingKind']),
+  warranty: Object.freeze(['itemType','recordId','belongingId','startsAt','endsAt']),
+  service: Object.freeze(['itemType','recordId','targetItemId','targetType','serviceKind','occurredAt']),
+  document: Object.freeze(['itemType','recordId','targetItemId','targetType','archiveItemId','documentKind'])
+} satisfies Readonly<Record<ManagedHomeInventoryItemType, readonly string[]>>);
+
 export interface ManagedLifeDataContractInspection {
   readonly accepted:boolean;
-  readonly itemType?:'profile'|'activity'|'document';
+  readonly itemType?:'profile'|'activity'|ManagedHomeInventoryItemType;
+  readonly contractFamily?:'managed_life'|'home_inventory';
   readonly exactShape:boolean;
   readonly unknownFields:readonly string[];
   readonly missingFields:readonly string[];
@@ -185,9 +220,34 @@ export const inspectManagedLifeDataContract = (input: unknown): ManagedLifeDataC
   const missingFields: string[] = [];
   let exactShape = isPlainObject(input);
   let itemType: ManagedLifeDataContractInspection['itemType'];
+  let contractFamily: ManagedLifeDataContractInspection['contractFamily'];
 
-  if (isPlainObject(input) && (input.itemType === 'profile' || input.itemType === 'activity' || input.itemType === 'document')) {
+  const homeInventoryDocument = isPlainObject(input)
+    && input.itemType === 'document'
+    && (Object.hasOwn(input, 'targetItemId')
+      || Object.hasOwn(input, 'targetType')
+      || Object.hasOwn(input, 'supersedesItemId'));
+  const homeInventoryItem = isPlainObject(input)
+    && typeof input.itemType === 'string'
+    && Object.hasOwn(MANAGED_HOME_INVENTORY_INPUT_KEYS, input.itemType)
+    && (input.itemType !== 'document' || homeInventoryDocument);
+
+  if (homeInventoryItem) {
+    const managedHomeItemType = input.itemType as ManagedHomeInventoryItemType;
+    itemType = managedHomeItemType;
+    contractFamily = 'home_inventory';
+    compareKeys(
+      input,
+      '$',
+      MANAGED_HOME_INVENTORY_INPUT_KEYS[managedHomeItemType],
+      MANAGED_HOME_INVENTORY_REQUIRED_INPUT_KEYS[managedHomeItemType],
+      unknownFields,
+      missingFields
+    );
+  } else if (isPlainObject(input)
+    && (input.itemType === 'profile' || input.itemType === 'activity' || input.itemType === 'document')) {
     itemType = input.itemType;
+    contractFamily = 'managed_life';
     compareKeys(
       input,
       '$',
@@ -256,6 +316,7 @@ export const inspectManagedLifeDataContract = (input: unknown): ManagedLifeDataC
   return Object.freeze({
     accepted,
     ...(itemType ? { itemType } : {}),
+    ...(contractFamily ? { contractFamily } : {}),
     exactShape,
     unknownFields: Object.freeze(unknownFields.sort()),
     missingFields: Object.freeze(missingFields.sort()),

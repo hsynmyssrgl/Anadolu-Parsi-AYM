@@ -28,6 +28,17 @@ Bir çelişki olduğunda aşağıdaki sıra uygulanır:
 Eski kararlar silinmez; tarihsel kanıt olarak korunur. Ancak aktif ürün davranışını
 belirleyemez. Çelişki sessizce birleştirilmez; değişiklik kaydına işlenir.
 
+## DEC-217 — Ev envanteri, sayaç, tüketim, eşya, garanti ve servis defteri
+
+33-F ile EXT-030 ve EXT-032, mevcut yönetilen `home` yaşam profilinin altında
+append-only bir ev envanteri defteriyle birlikte uygulanır. Oda/alan, sayaç ve
+integer milliunit okuma geçmişi; eşya, garanti, servis ve opaque belge bağlantısı
+aynı kökün family/owner/privacy sınırını miras alır. Alt kayıtlar exact
+`life_record/update` makbuzuna bağlanır; update/delete yerine yeni superseding olay
+kullanılır. Veri yalnız manuel girilir; akıllı sayaç/garanti sicili sorgusu, OCR,
+belge içeriği ifşası, servis sağlayıcı iletişimi ve ödeme icrası yapılmaz. Ayrıntılı
+karar: `docs/decisions/DEC-217-home-inventory-utility-belongings.md`
+
 ## DEC-216 — Kategoriye özgü yaşam, ev ve araç defteri
 
 33-E ile B5-04, EXT-031 ve EXT-034 Migration 83 ile tek append-only
