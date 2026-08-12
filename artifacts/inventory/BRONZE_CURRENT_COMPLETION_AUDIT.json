@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-12T23:41:19.911Z",
+  "generatedAt": "2026-08-12T23:45:30.465Z",
   "release": "Bronze 04.08.2026.29",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
@@ -16,7 +16,7 @@
   "PPK012": "COMPLETE",
   "authoritativeSource": "06_KOD/app",
   "currentStep": "33-H",
-  "status": "FAIL_CURRENT_GATE",
+  "status": "PASS_WITH_OPEN_SCOPE",
   "numberingAssessment": {
     "status": "CORRECT_ONLY_WITH_GATED_APPEND_ONLY_NUMBERING",
     "ruleIds": "PR identifiers are governance rules, not build numbers.",
@@ -385,30 +385,26 @@
       },
       {
         "script": "scripts/verify-home-inventory-utility-belongings-boundary.mjs",
-        "exitCode": 1,
-        "status": "FAIL",
+        "exitCode": 0,
+        "status": "PASS",
         "tail": [
-          "Home inventory utility belongings boundary: FAIL (1/51).",
-          "- recursive security contract covers all inventory variants"
+          "Home inventory utility belongings boundary: PASS (51/51 checks)."
         ]
       },
       {
         "script": "scripts/verify-33-f-home-inventory-utility-belongings-contract.mjs",
-        "exitCode": 1,
-        "status": "FAIL",
+        "exitCode": 0,
+        "status": "PASS",
         "tail": [
-          "Home inventory utility belongings contract: FAIL (14/15 checks).",
-          "boundary evidence is exact green and preserves platform ratchets"
+          "Home inventory utility belongings contract: PASS (15/15 checks)."
         ]
       },
       {
         "script": "scripts/verify-33-f-home-inventory-utility-belongings-runtime.mjs",
-        "exitCode": 1,
-        "status": "FAIL",
+        "exitCode": 0,
+        "status": "PASS",
         "tail": [
-          "Home inventory utility belongings runtime: FAIL (9/11 checks).",
-          "home-inventory-utility-belongings-boundary",
-          "home-inventory-utility-belongings-contract"
+          "Home inventory utility belongings runtime: PASS (11/11 checks)."
         ]
       },
       {
@@ -445,11 +441,10 @@
       },
       {
         "script": "scripts/verify-33-g-family-emergency-planning-completion.mjs",
-        "exitCode": 1,
-        "status": "FAIL",
+        "exitCode": 0,
+        "status": "PASS",
         "tail": [
-          "33-G completion verification: FAIL (1/64).",
-          "- boundary, contract, runtime, and targeted evidence bind the declared final vector"
+          "33-G completion verification: PASS (64/64; local archive readback included)."
         ]
       },
       {
@@ -493,7 +488,7 @@
         ]
       }
     ],
-    "allCurrentPass": false,
+    "allCurrentPass": true,
     "historical29D5": {
       "script": "scripts/verify-29-d5-scope-real-progress-report.mjs",
       "exitCode": 1,

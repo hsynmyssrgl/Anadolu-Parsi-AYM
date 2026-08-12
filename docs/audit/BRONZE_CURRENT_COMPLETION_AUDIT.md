@@ -1,10 +1,10 @@
 # Bronze guncel tamamlama denetimi
 
-Olusturma (UTC): 2026-08-12T23:41:19.911Z
+Olusturma (UTC): 2026-08-12T23:45:30.465Z
 
 ## Sonuc
 
-- Denetim durumu: **FAIL_CURRENT_GATE**
+- Denetim durumu: **PASS_WITH_OPEN_SCOPE**
 - Yetkili kaynak: `06_KOD/app`
 - Guncel adim: **33-H**
 - PPK-002: **COMPLETE**
@@ -42,7 +42,7 @@ Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 - Kanonik kural: 208
 - Aktif kural: 194
 - Enforcement kaydi: 194
-- Tum guncel kapilar PASS: false
+- Tum guncel kapilar PASS: true
 - 29-D5 dogrulayici: FAIL; yalniz tarihsel baseline, guncel 30-Z kapisi degildir.
 
 ## 30-Z siniri
