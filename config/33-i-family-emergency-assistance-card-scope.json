@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "33-I-FAMILY-EMERGENCY-ASSISTANCE-CARD",
+  "decision": "DEC-220",
+  "requirements": ["EXT-012", "EXT-014"],
+  "status": "IN_PROGRESS",
+  "model": {
+    "table": "family_emergency_assistance_ledger",
+    "planTable": "family_emergency_ledger",
+    "planItemType": "emergency_plan",
+    "itemTypes": ["emergency_profile", "health_fact", "emergency_contact", "assistance_instruction"],
+    "appendOnly": true,
+    "independentPolicyRoot": true,
+    "childScopeInherited": ["family", "owner", "privacy"],
+    "correctionModel": "append_only_single_supersession",
+    "timestampRepresentation": "canonical_utc_iso"
+  },
+  "subjects": {
+    "kinds": ["person", "pet"],
+    "personOwnerBinding": "owner_equals_subject_person",
+    "petOwnerBinding": "owner_equals_responsible_person",
+    "petIdentity": "opaque_subject_pet_id",
+    "planLinkGrantsVisibility": false
+  },
+  "security": {
+    "policyResourceType": "life_record",
+    "policyCapability": "family.write",
+    "rootPolicyAction": "create",
+    "childPolicyAction": "update",
+    "fixedPrivacy": "private",
+    "crossLedgerReceiptReplayRejected": true,
+    "crossScopeLinksRejected": true,
+    "updatesAllowed": false,
+    "deletesAllowed": false,
+    "auditContainsSensitiveDetails": false,
+    "outboxContainsSensitiveDetails": false
+  },
+  "truth": {
+    "dataSource": "manual",
+    "offlineAvailability": "local_only",
+    "medicalVerification": "not_performed",
+    "healthRegistryLookup": "not_performed",
+    "messageDelivery": "not_performed",
+    "emergencyServiceContact": "not_performed",
+    "exportSharing": "not_performed",
+    "emergencyServiceGuarantee": "not_claimed",
+    "networkEgressAdded": false
+  },
+  "persistence": {
+    "migration": 87,
+    "migrationName": "b5_family_emergency_assistance_card_ledger"
+  },
+  "validation": {
+    "boundary": "artifacts/validation/33-I-family-emergency-assistance-card-boundary.json",
+    "contract": "artifacts/validation/33-I-family-emergency-assistance-card-contract.json",
+    "runtime": "artifacts/validation/33-I-family-emergency-assistance-card-runtime.json",
+    "status": "PENDING"
+  },
+  "excludedClaims": [
+    "No health registry, provider, message, emergency-service, export or network service is contacted.",
+    "Manual health facts are not clinically verified and do not constitute medical advice.",
+    "The family emergency plan link does not grant access to a private emergency profile.",
+    "B5-01, B5-03, B5-06, EXT-016 and other open Bronze requirements remain open.",
+    "Silver readiness, Bronze Final and a new Build number are not claimed."
+  ]
+}

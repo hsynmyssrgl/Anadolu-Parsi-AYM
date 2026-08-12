@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 73,
+  "decisionCount": 74,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1888,6 +1888,37 @@
         "docs/security/THREAT_MODEL_33_H_FAMILY_EMERGENCY_PREPAREDNESS.md",
         "docs/audit/33-H_FAMILY_EMERGENCY_PREPAREDNESS_UST_KAPANIS.md",
         "config/33-h-family-emergency-preparedness-inventory.json"
+      ]
+    },
+    {
+      "id": "DEC-220",
+      "date": "2026-08-13",
+      "acceptedAt": "2026-08-13",
+      "title": "EXT-012 and EXT-014 shared offline private-root emergency card and assistance workflow",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: continue full auto, use agents and close multiple requirements in one operation",
+      "document": "docs/decisions/DEC-220-family-emergency-assistance-card.md",
+      "requirements": ["EXT-012", "EXT-014"],
+      "codeAreas": [
+        "packages/domain/src/app-data.ts",
+        "packages/application/src/life-security.ts",
+        "packages/application/src/life-use-cases.ts",
+        "packages/database/src/family-database-migrations.ts",
+        "packages/repository-contracts/src/life-repository.ts",
+        "packages/repositories/src/life-repository.ts",
+        "apps/desktop/src/main/life-production-policy-runtime.ts",
+        "apps/desktop/src/main/life-application-adapter.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/renderer/ManagedLifePanel.tsx",
+        "scripts/verify-family-emergency-assistance-card-boundary.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/33-I-family-emergency-assistance-card-boundary.json",
+        "artifacts/validation/33-I-family-emergency-assistance-card-contract.json",
+        "artifacts/validation/33-I-family-emergency-assistance-card-runtime.json",
+        "docs/security/THREAT_MODEL_33_I_FAMILY_EMERGENCY_ASSISTANCE_CARD.md",
+        "docs/audit/33-I_FAMILY_EMERGENCY_ASSISTANCE_CARD_UST_KAPANIS.md",
+        "config/33-i-family-emergency-assistance-card-inventory.json"
       ]
     }
   ]

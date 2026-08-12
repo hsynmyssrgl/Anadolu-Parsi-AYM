@@ -28,6 +28,16 @@ Bir çelişki olduğunda aşağıdaki sıra uygulanır:
 Eski kararlar silinmez; tarihsel kanıt olarak korunur. Ancak aktif ürün davranışını
 belirleyemez. Çelişki sessizce birleştirilmez; değişiklik kaydına işlenir.
 
+## DEC-220 — Çevrimdışı özel acil sağlık/iletişim kartı ve yardım profili
+
+33-I ile EXT-012 ve EXT-014 mevcut aile acil durum planına ilişkisel olarak bağlanan,
+ancak planın aile görünürlüğünü yetki olarak miras almayan ayrı bir append-only LIFE
+kökünde birlikte uygulanır. Bütün kartlar exact `private`; evcil hayvan profili aynı
+ailedeki sorumlu kişiye aittir. Sağlık özeti, iletişim kişisi ve özel yardım talimatları
+yalnız manuel/yerel veridir. Mevcut iki LIFE IPC kanalı korunur; sağlık sağlayıcısı,
+mesaj/acil servis, dışa aktarım, PIN paylaşımı veya ağ kanalı açılmaz. Ayrıntılı karar:
+`docs/decisions/DEC-220-family-emergency-assistance-card.md`
+
 ## DEC-219 — Çevrimdışı 72 saat çantası ve afet tatbikatı defteri
 
 33-H ile EXT-011 ve EXT-015 mevcut aile acil durum planına bağlı tek append-only
