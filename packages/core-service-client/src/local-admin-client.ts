@@ -19,12 +19,8 @@ import {
   type CoreServiceMethodResult,
   type CoreServiceLocalAdminRequest,
   type CoreServiceLocalAdminResponse,
-  type PolicyAuthorizationContractPayload,
-  type PolicyAuthorizationContractResult,
-  type PolicyReceiptVerificationContractPayload,
-  type PolicyReceiptVerificationContractResult
-  , type PolicyJournalCheckpointContractPayload
-  , type PolicyJournalCheckpointContractResult
+  type PolicyJournalCheckpointContractPayload,
+  type PolicyJournalCheckpointContractResult
 } from '@ppt/core-service-contracts';
 
 export interface CoreServiceLocalAdminClientOptions {
@@ -122,14 +118,6 @@ export class CoreServiceLocalAdminClient {
 
   public familyDataCutoverReadinessStatus(): Promise<CoreServiceFamilyDataCutoverReadinessStatusContract> {
     return this.request('family-data-cutover-readiness.status', {});
-  }
-
-  public authorize(payload: PolicyAuthorizationContractPayload): Promise<PolicyAuthorizationContractResult> {
-    return this.request('policy.authorize', payload);
-  }
-
-  public verify(payload: PolicyReceiptVerificationContractPayload): Promise<PolicyReceiptVerificationContractResult> {
-    return this.request('policy.verify', payload);
   }
 
   public checkpointPolicyJournal(

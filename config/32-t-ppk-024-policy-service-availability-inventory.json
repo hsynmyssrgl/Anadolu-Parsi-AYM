@@ -19,6 +19,7 @@
       "paths": [
         "apps/core-service/src/core-service-runtime.ts",
         "apps/desktop/src/main/core-service-application-adapter.ts",
+        "packages/core-service-client/src/core-service-policy-sdk.ts",
         "apps/desktop/src/main/policy-service-availability-application-adapter.ts"
       ],
       "control": "Her availability değerlendirmesi authenticated Core Service health çağrısından canlı gözlem alır; Core Service kendi policy paketini kernel HMAC doğrulayıcısıyla yeniden doğrular ve gözlem zamanı aynı doğrulama çağrısından gelir.",

@@ -7,6 +7,17 @@ import type {
   PlatformApplicationId
 } from '@ppt/platform-policy';
 
+export type {
+  PlatformPolicyAuthorizationProvider,
+  PlatformPolicyClusterFence,
+  PlatformPolicyClusterFenceSnapshot,
+  PlatformPolicyPackage,
+  PlatformPolicyProviderAuthorizationInput,
+  PlatformPolicyProviderAuthorizationResult,
+  PlatformPolicyProviderVerificationInput,
+  PolicyServiceAvailabilityObservation
+} from '@ppt/platform-policy';
+
 export const CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION = 1 as const;
 export const CORE_SERVICE_LOCAL_ADMIN_MAX_MESSAGE_BYTES = 64 * 1024;
 export const CORE_SERVICE_APPLICATION_API_VERSION = 'v1' as const;

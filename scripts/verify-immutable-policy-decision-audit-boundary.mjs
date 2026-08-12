@@ -4,6 +4,9 @@ import { pathToFileURL } from 'node:url';
 
 const root = process.cwd();
 const normalize = (value) => value.split(sep).join('/');
+const TYPED_POLICY_FACTORY = 'packages/platform-policy/src/typed-policy-sdk.ts';
+const directPepPattern = /new\s+PlatformPolicyEnforcementPoint\s*\(/gu;
+const typedPepFactoryPattern = /createTypedPolicyEnforcementPoint\s*\(/gu;
 
 const listFiles = async (directory) => {
   const output = [];
@@ -69,7 +72,11 @@ const noOpSinkPattern = /receiptSink\s*:\s*(?:undefined|null|\{\s*append\s*:\s*(
 const scanSource = (file, source) => {
   const findings = [];
   const add = (rule) => findings.push({ file, rule });
-  for (const match of source.matchAll(/new\s+PlatformPolicyEnforcementPoint\s*\(/gu)) {
+  const matches = [
+    ...(file === TYPED_POLICY_FACTORY ? [] : source.matchAll(directPepPattern)),
+    ...source.matchAll(typedPepFactoryPattern)
+  ];
+  for (const match of matches) {
     const composition = findBalancedObject(source, match.index ?? 0);
     if (!composition) { add('PEP_COMPOSITION_UNPARSEABLE'); continue; }
     if (!/\breceiptSink\s*:/u.test(composition)) add('PEP_RECEIPT_SINK_MISSING');
@@ -105,6 +112,7 @@ const scanSource = (file, source) => {
 
 const malicious = [
   "new PlatformPolicyEnforcementPoint({kernel,authorityResolver,resourceResolver})",
+  "createTypedPolicyEnforcementPoint({provider,authorityResolver,resourceResolver})",
   "new PlatformPolicyEnforcementPoint({kernel,authorityResolver,resourceResolver,receiptSink:{append:()=>undefined}})",
   "new PlatformPolicyEnforcementPoint({kernel,authorityResolver,resourceResolver,receiptSink:dependencies.receiptSink,deferAllowedReceiptPersistence:true})",
   "if (!authorization.decision.allowed) { throw new PlatformPolicyEnforcementError('POLICY_DENIED'); await this.#appendReceipt(record); } if (!this.#deferAllowedReceiptPersistence) { await this.#appendReceipt(record); } await operation(context);",
@@ -113,6 +121,7 @@ const malicious = [
 ];
 const benign = [
   "new PlatformPolicyEnforcementPoint({kernel,authorityResolver,resourceResolver,receiptSink:dependencies.receiptSink})",
+  "createTypedPolicyEnforcementPoint({provider,authorityResolver,resourceResolver,receiptSink:dependencies.receiptSink})",
   "const protectedPayload={auditRecord,receiptRecord}; protectedArtifactStore.sealBuffer('platform-policy-receipt',bytes)",
   "getPolicyDecisionAuditBoundary():Promise<PolicyDecisionAuditBoundaryView>"
 ];
@@ -135,8 +144,9 @@ export const scanImmutablePolicyDecisionAuditBoundary = async () => {
     const file = normalize(relative(root, absolute));
     const source = await readFile(absolute, 'utf8');
     sources.set(file, source);
-    if (/PolicyReceipt|PolicyDecisionAudit|policy receipt|policy decision audit|PlatformPolicyEnforcementPoint/u.test(source)) relevantFiles += 1;
-    enforcementPointCompositions += [...source.matchAll(/new\s+PlatformPolicyEnforcementPoint\s*\(/gu)].length;
+    if (/PolicyReceipt|PolicyDecisionAudit|policy receipt|policy decision audit|PlatformPolicyEnforcementPoint|createTypedPolicyEnforcementPoint/u.test(source)) relevantFiles += 1;
+    enforcementPointCompositions += (file === TYPED_POLICY_FACTORY ? 0 : [...source.matchAll(directPepPattern)].length)
+      + [...source.matchAll(typedPepFactoryPattern)].length;
     findings.push(...scanSource(file, source));
   }
 

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "step": "32-V",
+  "requirement": "PPK-026",
+  "title": "Typed Policy SDK and deterministic generated Core Service policy client",
+  "generatorVersion": "1.0.0",
+  "generatedSource": "packages/core-service-client/src/generated-policy-client.ts",
+  "generatedManifest": "artifacts/manifests/32-V-ppk-026-generated-policy-client.json",
+  "transportInterface": "GeneratedPolicyClientTransport",
+  "clientClass": "GeneratedPolicyServiceClient",
+  "methods": [
+    {
+      "operation": "authorize",
+      "wireMethod": "policy.authorize",
+      "payloadType": "PolicyAuthorizationContractPayload",
+      "resultType": "PolicyAuthorizationContractResult"
+    },
+    {
+      "operation": "verify",
+      "wireMethod": "policy.verify",
+      "payloadType": "PolicyReceiptVerificationContractPayload",
+      "resultType": "PolicyReceiptVerificationContractResult"
+    }
+  ],
+  "invariants": {
+    "deterministicGeneration": true,
+    "manualGeneratedSourceEditsDenied": true,
+    "unknownPolicyMethodsDenied": true,
+    "rawContractResultsHiddenFromApplications": true,
+    "unobservedPolicyPackageDenied": true,
+    "unobservedClusterFenceDenied": true,
+    "regressingClusterFenceDenied": true,
+    "directProductionPepConstructionDenied": true
+  }
+}

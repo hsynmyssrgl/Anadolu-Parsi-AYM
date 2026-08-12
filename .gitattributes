@@ -1,0 +1,4 @@
+# PPK-026 deterministic code-generation inputs and outputs are byte-stable on every platform.
+/config/32-v-ppk-026-typed-policy-sdk-schema.json text eol=lf
+/packages/core-service-client/src/generated-policy-client.ts text eol=lf
+/artifacts/manifests/32-V-ppk-026-generated-policy-client.json text eol=lf

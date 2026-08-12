@@ -10,7 +10,7 @@ const exactArray = (actual, expected) =>
 
 const [
   scope, inventory, registry, ledger, rootPackage, policy, policyIndex, domain, domainIndex,
-  useCases, applicationIndex, coreContracts, coreState, coreRuntime, coreApplicationAdapter,
+  useCases, applicationIndex, coreContracts, coreState, coreRuntime, coreApplicationAdapter, corePolicySdk,
   liveObserver, startupConnection, universalGate, enforcementPoint, desktopMain, preload,
   rendererGlobal, renderer, ipcIntegration, ipcReadSharing, policyTest, coreTest, desktopTest,
   integrationTest, sourceGate, combinedGate, decision, threatModel, audit, masterRegister,
@@ -31,6 +31,7 @@ const [
   readText('apps/core-service/src/service-state.ts'),
   readText('apps/core-service/src/core-service-runtime.ts'),
   readText('apps/desktop/src/main/core-service-application-adapter.ts'),
+  readText('packages/core-service-client/src/core-service-policy-sdk.ts'),
   readText('apps/desktop/src/main/policy-service-availability-application-adapter.ts'),
   readText('apps/desktop/src/main/core-service-startup-connection.ts'),
   readText('apps/desktop/src/main/desktop-universal-api-policy-enforcement.ts'),
@@ -84,7 +85,7 @@ check('master decision register contains DEC-205', masterRegister.includes('## D
 
 check('source gate scans clean production boundary', sourceScan.findings.length === 0 && sourceScan.canonicalPolicyClassDefinitions === 1);
 check('source gate covers eighteen production zones', sourceScan.zones === 18);
-check('source gate has exact canonical reference coverage', sourceScan.canonicalReferencePaths.length === 17);
+check('source gate has exact canonical reference coverage', sourceScan.canonicalReferencePaths.length === 19);
 check('source gate denies legacy and broad model escapes', includesAll(sourceGate, ['LEGACY_POLICY_SERVICE_RUNTIME_MODEL', 'BROAD_OR_MISSING_STATUS_EXCEPTION', 'CANONICAL_AVAILABILITY_REFERENCE_OUTSIDE_EXACT_ALLOWLIST']));
 check('combined platform policy gate invokes availability gate', includesAll(combinedGate, ['verify-policy-service-availability-boundary.mjs', 'policy service availability gate PASS']));
 
@@ -112,7 +113,7 @@ check('Core degraded mutation returns signed cluster non-writable decision path'
 
 check('Desktop live observer calls authenticated health every observation', includesAll(liveObserver, ['public async observe()', 'const health = await this.#adapter.getHealth();', 'policyPackageVerified: health.policyPackageVerified', 'observedAt: health.observedAt', 'checkedAt: this.#clock()', 'return undefined;']));
 check('Desktop live observer uses startup package only as exact pin', includesAll(liveObserver, ['this.#expectedPolicyVersion = options.startupHealth.policyVersion;', 'this.#expectedPolicyPackageVersion = options.startupHealth.policyPackage.payload.packageVersion;', 'this.#expectedPolicyPackageSha256 = options.startupHealth.policyPackage.payloadSha256;']));
-check('Core application adapter exposes live observation to PEP', includesAll(coreApplicationAdapter, ['observePolicyServiceAvailability:', 'bindPolicyServiceAvailabilityObserver(', 'const health = await this.#client.health();', 'health.policyPackageVerified === true']));
+check('Core application adapter exposes live observation to PEP', includesAll(coreApplicationAdapter, ['new CoreServicePolicySdk(new GeneratedPolicyServiceClient(this.#client))', 'bindPolicyServiceAvailabilityObserver(', 'const health = await this.#client.health();', 'this.#policySdk.observeHealth(health);']) && includesAll(corePolicySdk, ['observePolicyServiceAvailability:', 'health.policyPackageVerified !== true', 'this.#observePolicyServiceAvailability = observer;']));
 check('startup validates hash and availability before connection', includesAll(startupConnection, ["createHash('sha256').update(stable(policyPackage.payload), 'utf8').digest('hex') !== policyPackage.payloadSha256", 'policyPackageVerified: health.policyPackageVerified', "if (policyServiceAvailability.mode === 'deny')"]));
 
 check('universal gate keeps one exact status exception', includesAll(universalGate, ["POLICY_SERVICE_AVAILABILITY_STATUS_CHANNEL = 'system:getPolicyServiceAvailabilityBoundary'", 'channel === POLICY_SERVICE_AVAILABILITY_STATUS_CHANNEL', 'if (isDesktopPolicyServiceAvailabilityStatusChannel(input.channel)) return input.operation();']));

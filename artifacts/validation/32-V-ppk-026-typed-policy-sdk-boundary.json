@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "step": "32-V",
+  "requirement": "PPK-026",
+  "status": "PASS",
+  "scannedProductionFiles": 367,
+  "canonicalFactoryConsumers": 7,
+  "maliciousSelfTestAssertions": 14,
+  "benignSelfTestAssertions": 4,
+  "findings": []
+}

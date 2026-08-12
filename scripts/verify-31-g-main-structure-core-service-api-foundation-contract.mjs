@@ -5,7 +5,7 @@ import { inspectAuthorizedSuccessorLifecycle } from './lib/authorized-successor-
 const root = resolve(process.cwd());
 const readText = (path) => readFile(resolve(root, path), 'utf8');
 const readJson = async (path) => JSON.parse(await readText(path));
-const [scope, authority, priority, plan, ledger, registry, decision, contracts, runtime, dispatcher, server, client, adapter, startup, test] = await Promise.all([
+const [scope, authority, priority, plan, ledger, registry, decision, contracts, runtime, dispatcher, server, client, generatedPolicyClient, adapter, startup, test] = await Promise.all([
   readJson('config/31-g-main-structure-core-service-api-foundation-scope.json'),
   readJson('artifacts/authority/31-G_MAIN_STRUCTURE_PRIORITY_AUTHORITY.json'),
   readJson('artifacts/validation/31-G_MAIN_STRUCTURE_PRIORITY_VALIDATION.json'),
@@ -18,6 +18,7 @@ const [scope, authority, priority, plan, ledger, registry, decision, contracts, 
   readText('apps/core-service/src/core-service-method-dispatcher.ts'),
   readText('apps/core-service/src/local-admin-server.ts'),
   readText('packages/core-service-client/src/local-admin-client.ts'),
+  readText('packages/core-service-client/src/generated-policy-client.ts'),
   readText('apps/desktop/src/main/core-service-application-adapter.ts'),
   readText('apps/desktop/src/main/core-service-startup-connection.ts'),
   readText('apps/core-service/tests/core-service-method-dispatcher.test.ts')
@@ -36,6 +37,10 @@ const authorizedRequirementState = (item) => item?.status !== 'COMPLETE' || (
     item.id === 'PPK-014'
     && item.evidence?.includes('docs/decisions/DEC-195-ppk-014-versioned-core-service-api-boundary.md')
     && item.evidence?.includes('artifacts/validation/32-J-ppk-014-versioned-core-service-api-runtime.json')
+  ) || (
+    item.id === 'PPK-026'
+    && item.evidence?.includes('docs/decisions/DEC-207-ppk-026-typed-policy-sdk-and-xpf003.md')
+    && item.evidence?.includes('artifacts/validation/32-V-ppk-026-typed-policy-sdk-runtime.json')
   ))
 );
 const completed = step?.status === 'COMPLETED' && step.persistentReceiptStatus === 'PASS';
@@ -67,7 +72,7 @@ check(!dispatcher.includes('node:fs') && !dispatcher.includes('node:sqlite') && 
 check(server.includes('new CoreServiceMethodDispatcher(options.runtime)') && server.includes('this.#dispatcher.dispatch(requestId, request.method, request.payload)'), 'server delegates after envelope authentication');
 check(!server.includes("request.method === 'health.get'") && !server.includes("request.method === 'policy.authorize'"), 'server has no duplicated method routing');
 check(client.includes('public async request<TMethod extends CoreServiceLocalAdminMethod>') && client.includes('CoreServiceMethodPayload<TMethod>') && client.includes('CoreServiceMethodResult<TMethod>'), 'client request API is compile-time typed');
-check(client.includes("this.request('architecture.get', {})") && client.includes("this.request('policy.authorize', payload)"), 'client wrappers use typed registry');
+check(client.includes("this.request('architecture.get', {})") && generatedPolicyClient.includes("this.#transport.request('policy.authorize', payload)"), 'client wrappers use typed registry');
 check(adapter.includes('getArchitecture(): Promise<CoreServiceArchitectureContract>'), 'Desktop adapter exposes architecture');
 check(startup.includes('Promise.all([') && ['adapter.getHealth()', 'adapter.getArchitecture()', 'adapter.getFamilyDataStatus()', 'adapter.getDeviceSecretProtectionStatus()'].every((marker) => startup.includes(marker)), 'Desktop obtains health, architecture, family-data ownership, and device-secret protection at startup');
 check(startup.includes("architecture.ownership.policyKernel !== 'core-service'") && startup.includes("architecture.ownership.applicationApi !== 'core-service'"), 'Desktop verifies Core Service ownership');
@@ -92,4 +97,4 @@ if (failed.length) {
   for (const item of failed) console.error(`- ${item.name}`);
   process.exit(1);
 }
-console.log(`31-G main-structure contract: PASS (${checks.length}/${checks.length}; open foundation plus authorized PPK-003 successor closure).`);
+console.log(`31-G main-structure contract: PASS (${checks.length}/${checks.length}; open foundation plus authorized PPK-003, PPK-014 and PPK-026 successor closures).`);

@@ -1,6 +1,6 @@
 # Bronze guncel tamamlama denetimi
 
-Olusturma (UTC): 2026-08-12T07:07:45.092Z
+Olusturma (UTC): 2026-08-12T08:17:47.552Z
 
 ## Sonuc
 
@@ -23,19 +23,19 @@ Olusturma (UTC): 2026-08-12T07:07:45.092Z
 ## Yuzde gercekligi
 
 - Resmi agirlikli Bronze ilerlemesi: **%25**
-- Kati gereksinim kapanisi: **%10.5714** (37/350)
-- Uygulama zinciri kapsami: **%11.1143**
-- Yonetisim ve kanit zinciri kapsami: **%49.3333**
+- Kati gereksinim kapanisi: **%11.1429** (39/350)
+- Uygulama zinciri kapsami: **%11.6857**
+- Yonetisim ve kanit zinciri kapsami: **%49.7143**
 
 Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 
 ## Kapsam durumu
 
-- COMPLETE: 37
-- PARTIAL: 34
+- COMPLETE: 39
+- PARTIAL: 33
 - FOUNDATION_STARTED: 1
-- NOT_IMPLEMENTED: 278
-- Toplam acik gereksinim: 313
+- NOT_IMPLEMENTED: 277
+- Toplam acik gereksinim: 311
 
 ## Kural ve kapilar
 
@@ -260,13 +260,13 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | DHA-013 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Zero trust | LAN dahil hiçbir konuma örtük güven vermeyen kullanıcı+cihaz+servis kimliği |
 | DHA-026 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Backup separation | Replica ile yedeğin ayrılması; immutable/offline/offsite backup |
 | DHA-029 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Security operations | Cluster CA, cert rotation, revocation, key epoch, replay/freshness ve rate limit |
-| PPK-026 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Geliştirici API | Typed Policy SDK ve generated client; uygulamaların kendi güvenlik yorumunu yazamaması |
 | EXT-078 | STARTED_BEFORE_NEW | P1 | PARTIAL | 2/13 | SIGNED_PLUGIN_PLATFORM | Policy Kernel zorunlu kontrolü |
 | B2-03 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Kimlik ve Güvenlik | Yaşlı/genç kullanıcıya uygun güvenli kilit ve yeniden giriş akışı |
 | B3-02 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Aile ve Hafıza | Taslak, otomatik kaydetme, geri al ve değişiklik geçmişi |
 | B3-03 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Aile ve Hafıza | Doğrudan medya/belge bağlama ve davetiye yaşam döngüsü |
 | B3-05 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Aile ve Hafıza | Tüm modüllerde yetki filtreli birleşik arama |
 | B5-01 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Sağlık ve Yaşam | Alerji, kronik durum, kan grubu, aşı, ölçüm, randevu ve belge ilişkisi |
+| B5-04 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Sağlık ve Yaşam | Sigorta, abonelik, eğitim, iş, resmi işlem, ev ve araç için kategoriye özgü alanlar |
 
 Tam acik-is listesi `artifacts/inventory/BRONZE_CURRENT_COMPLETION_AUDIT.json` icindedir.
 

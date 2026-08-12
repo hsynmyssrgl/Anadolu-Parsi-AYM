@@ -184,7 +184,7 @@ const commands = [
   {
     id: 'decision-ledger',
     steps: [nodeStep(['scripts/verify-user-decision-ledger.mjs'])],
-    expectOutput: '60 decisions'
+    expectOutput: '61 decisions'
   },
   {
     id: 'bronze-current-audit',

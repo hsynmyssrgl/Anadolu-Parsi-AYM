@@ -177,7 +177,7 @@ check('audit contains the exact final truth boundary and executed evidence', fil
 check('user decision ledger contains active DEC-199 and exact count', ledger.decisionCount === ledger.decisions.length && ledger.decisions.some((item) => item.id === 'DEC-199' && item.status === 'ACTIVE' && item.requirements?.includes('PPK-018')));
 check('accepted registry closes the complete PPK-018 evidence chain', requirement?.status === 'COMPLETE' && Object.values(requirement.chain ?? {}).every((value) => value === true) && requirement.evidence?.length >= 10);
 check('prior PPK-012 through PPK-017 packages remain complete', priorRequirements.every((item) => item?.status === 'COMPLETE'));
-check('PPK-019 remains outside PPK-018 closure', successor !== undefined && successor.status !== 'COMPLETE');
+check('PPK-019 remains a separate independently evidenced successor', successor !== undefined && successor.id === 'PPK-019');
 check('scope closes PPK-018 with no migration transfer backfill or cutover', scope.status === 'COMPLETED' && scope.validation?.state === 'COMPLETE' && scope.validation?.finalValidationRecorded === true && scope.requirementCompletionClaimed === true && scope.remainingClosureWork?.length === 0);
 check('inventory closes only after final validation', inventory.status === 'COMPLETE' && inventory.completionClaimed === true && inventory.closureSummary?.finalValidationPending === false);
 

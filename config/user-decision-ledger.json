@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 60,
+  "decisionCount": 61,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1488,6 +1488,34 @@
         "docs/security/PPK-025_SOFTWARE_SUPPLY_CHAIN_THREAT_MODEL.md",
         "docs/audit/32-U_PPK-025_SOFTWARE_SUPPLY_CHAIN_UST_KAPANIS.md",
         "config/32-u-ppk-025-software-supply-chain-inventory.json"
+      ]
+    },
+    {
+      "id": "DEC-207",
+      "date": "2026-08-12",
+      "acceptedAt": "2026-08-12",
+      "title": "PPK-026 typed policy SDK and XPF-003 shared finance-health policy path",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: full auto devam et ve bir isle birden fazla gereksinimi kapat",
+      "document": "docs/decisions/DEC-207-ppk-026-typed-policy-sdk-and-xpf003.md",
+      "requirements": ["PPK-026", "XPF-003"],
+      "codeAreas": [
+        "config/32-v-ppk-026-typed-policy-sdk-schema.json",
+        "packages/core-service-client/src/generated-policy-client.ts",
+        "packages/core-service-client/src/core-service-policy-sdk.ts",
+        "packages/platform-policy/src/typed-policy-sdk.ts",
+        "apps/desktop/src/main/core-service-application-adapter.ts",
+        "apps/desktop/src/main/finance-production-policy-runtime.ts",
+        "apps/desktop/src/main/health-production-policy-runtime.ts",
+        "scripts/verify-typed-policy-sdk-boundary.mjs",
+        "scripts/verify-ppk026-policy-client.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/32-V-ppk-026-typed-policy-sdk-contract.json",
+        "artifacts/validation/32-V-ppk-026-typed-policy-sdk-runtime.json",
+        "docs/security/PPK-026_TYPED_POLICY_SDK_THREAT_MODEL.md",
+        "docs/audit/32-V_PPK-026_TYPED_POLICY_SDK_UST_KAPANIS.md",
+        "config/32-v-ppk-026-typed-policy-sdk-inventory.json"
       ]
     }
   ]

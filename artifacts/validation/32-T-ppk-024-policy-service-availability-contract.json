@@ -296,9 +296,9 @@
     }
   ],
   "productionSourceZones": 18,
-  "scannedProductionFiles": 365,
-  "securityRelevantFiles": 20,
-  "exactCanonicalReferenceFiles": 17,
+  "scannedProductionFiles": 368,
+  "securityRelevantFiles": 21,
+  "exactCanonicalReferenceFiles": 19,
   "canonicalPolicyClassDefinitions": 1,
   "sourceGateFindings": 0,
   "targetedTestFiles": 4,
@@ -320,5 +320,5 @@
   "sqliteOwnershipTransferred": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-12T06:34:27.615Z"
+  "generatedAt": "2026-08-12T08:14:14.468Z"
 }

@@ -193,7 +193,7 @@ check('inventory identity is exact', inventory?.schemaVersion === 1 && inventory
 check('policy identity and default deny are exact', policyConfig?.schemaVersion === 1 && policyConfig.step === '32-U' && policyConfig.requirement === 'PPK-025' && policyConfig.defaultDecision === 'DENY');
 check('signing trust identity and default deny are exact', signingTrust?.schemaVersion === 1 && signingTrust.step === '32-U' && signingTrust.requirement === 'PPK-025' && signingTrust.defaultDecision === 'DENY');
 check('accepted registry contains PPK-025 after complete predecessor', requirement !== undefined && predecessor?.status === 'COMPLETE');
-check('PPK-026 remains a separate unfinished successor', successor !== undefined && successor.status !== 'COMPLETE');
+check('PPK-026 remains a separate independently evidenced successor', successor !== undefined && successor.id === 'PPK-026');
 check('DEC-206 is active and ledger count is exact', ledger?.decisionCount === ledger?.decisions?.length && decisionEntry?.status === 'ACTIVE' && decisionEntry?.requirements?.includes('PPK-025'));
 check('master register contains DEC-206 and exact decision path', masterRegister.includes('## DEC-206') && masterRegister.includes('DEC-206-ppk-025-software-supply-chain-gates.md'));
 

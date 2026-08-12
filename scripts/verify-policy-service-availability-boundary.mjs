@@ -12,6 +12,7 @@ const CORE_CONTRACTS = 'packages/core-service-contracts/src/index.ts';
 const CORE_STATE = 'apps/core-service/src/service-state.ts';
 const CORE_RUNTIME = 'apps/core-service/src/core-service-runtime.ts';
 const CORE_APPLICATION_ADAPTER = 'apps/desktop/src/main/core-service-application-adapter.ts';
+const CORE_POLICY_SDK = 'packages/core-service-client/src/core-service-policy-sdk.ts';
 const LIVE_OBSERVER = 'apps/desktop/src/main/policy-service-availability-application-adapter.ts';
 const STARTUP_CONNECTION = 'apps/desktop/src/main/core-service-startup-connection.ts';
 const UNIVERSAL_GATE = 'apps/desktop/src/main/desktop-universal-api-policy-enforcement.ts';
@@ -29,6 +30,8 @@ const STATUS_CHANNEL = 'system:getPolicyServiceAvailabilityBoundary';
 // would let a sibling bypass silently acquire policy authority.
 const CANONICAL_REFERENCE_ALLOWLIST = new Set([
   CORE_APPLICATION_ADAPTER,
+  CORE_POLICY_SDK,
+  CORE_CONTRACTS,
   STARTUP_CONNECTION,
   UNIVERSAL_GATE,
   IPC_INTEGRATION,
@@ -252,11 +255,22 @@ export const scanPolicyServiceAvailabilitySourceText = (path, source) => {
 
   if (normalizedPath === CORE_APPLICATION_ADAPTER) {
     requireMarkers('CORE_PROVIDER_LIVE_OBSERVER_BINDING_MISSING', [
+      'CoreServicePolicySdk,',
+      'new CoreServicePolicySdk(new GeneratedPolicyServiceClient(this.#client))',
+      'const health = await this.#client.health();',
+      'this.#policySdk.observeHealth(health);',
+      'public bindPolicyServiceAvailabilityObserver(',
+      'this.#policySdk.bindPolicyServiceAvailabilityObserver(observer);'
+    ]);
+  }
+
+  if (normalizedPath === CORE_POLICY_SDK) {
+    requireMarkers('CORE_SDK_LIVE_OBSERVER_BINDING_MISSING', [
       "decisionAuthority: 'windows-core-service' as const",
       'observePolicyServiceAvailability: () => this.#observePolicyServiceAvailability?.()',
-      'const health = await this.#client.health();',
-      'if (health.policyPackageVerified === true)',
-      'public bindPolicyServiceAvailabilityObserver(',
+      'resolvePolicyPackage: () => {',
+      'health.policyPackageVerified !== true',
+      'this.#clearObservedState();',
       'this.#observePolicyServiceAvailability = observer;'
     ]);
   }
@@ -478,6 +492,7 @@ const selfTest = () => {
     [IPC_INTEGRATION, `case '${STATUS_CHANNEL}': return accepted();`, 'STATUS_IPC_NOT_ZERO_ARGUMENT'],
     [IPC_READ_SHARING, `const status = '${STATUS_CHANNEL}';`, 'STATUS_IPC_NO_CACHE_FENCE_MISSING'],
     [CORE_RUNTIME, 'return { policyPackageVerified: true };', 'CORE_HEALTH_ACTUAL_PACKAGE_VERIFY_MISSING'],
+    [CORE_POLICY_SDK, "export class CoreServicePolicySdk { public readonly policyProvider = {}; }", 'CORE_SDK_LIVE_OBSERVER_BINDING_MISSING'],
     [POLICY_ENFORCEMENT_POINT, "if (authorization.decision.allowed && !effectiveRequest.clusterWritable) throw error;", 'PEP_AVAILABILITY_OR_READ_ONLY_FENCE_MISSING'],
     [DESKTOP_MAIN, `registerIpcHandler('${STATUS_CHANNEL}', (_event, input) => input);`, 'DESKTOP_AVAILABILITY_COMPOSITION_INCOMPLETE']
   ];

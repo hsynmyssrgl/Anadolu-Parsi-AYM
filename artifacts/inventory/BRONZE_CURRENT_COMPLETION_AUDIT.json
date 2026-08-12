@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-12T07:07:45.092Z",
+  "generatedAt": "2026-08-12T08:17:47.552Z",
   "release": "Bronze 04.08.2026.29",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
@@ -29,18 +29,18 @@
   "percentages": {
     "officialWeightedBronzePercent": 25,
     "officialWeightedEvidenceStep": "31-T",
-    "strictRequirementCompletionPercent": 10.5714,
-    "implementationChainCoveragePercent": 11.1143,
-    "governanceEvidenceChainCoveragePercent": 49.3333,
+    "strictRequirementCompletionPercent": 11.1429,
+    "implementationChainCoveragePercent": 11.6857,
+    "governanceEvidenceChainCoveragePercent": 49.7143,
     "interpretation": "These are separate measures and must not be blended into an invented single completion claim."
   },
   "scope": {
     "total": 350,
     "statusCounts": {
-      "COMPLETE": 37,
+      "COMPLETE": 39,
       "FOUNDATION_STARTED": 1,
-      "NOT_IMPLEMENTED": 278,
-      "PARTIAL": 34
+      "NOT_IMPLEMENTED": 277,
+      "PARTIAL": 33
     },
     "priorityCounts": {
       "P0": 210,
@@ -48,21 +48,21 @@
       "P2": 5
     },
     "completeByPriority": {
-      "P0": 36,
+      "P0": 38,
       "P1": 1,
       "P2": 0
     },
-    "incompleteCount": 313,
-    "strictComplete": 37,
+    "incompleteCount": 311,
+    "strictComplete": 39,
     "implementationCoverage": {
-      "passed": 389,
+      "passed": 409,
       "total": 3500,
-      "percent": 11.1143
+      "percent": 11.6857
     },
     "governanceCoverage": {
-      "passed": 518,
+      "passed": 522,
       "total": 1050,
-      "percent": 49.3333
+      "percent": 49.7143
     }
   },
   "rules": {
@@ -220,7 +220,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "31-G main-structure contract: PASS (35/35; open foundation plus authorized PPK-003 successor closure)."
+          "31-G main-structure contract: PASS (35/35; open foundation plus authorized PPK-003, PPK-014 and PPK-026 successor closures)."
         ]
       },
       {
@@ -324,7 +324,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"70949415f2ec3961d2efa21d625b1633e005425933daf336aff1ff5083b50273\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\70949415f2ec3961d2efa21d625b1633e005425933daf336aff1ff5083b50273\",\"files\":9}"
+          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"c49cd7e32baa41b9462ad8c91e36229e5a69a7ddf869b4cc6ce9b90fb2cf6797\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\c49cd7e32baa41b9462ad8c91e36229e5a69a7ddf869b4cc6ce9b90fb2cf6797\",\"files\":9}"
         ]
       },
       {
@@ -1003,7 +1003,7 @@
     "status": "PASS",
     "officialCompletionClaimed": true,
     "storageBackend": "EXTERNAL_USB_D_DRIVE",
-    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\70949415f2ec3961d2efa21d625b1633e005425933daf336aff1ff5083b50273"
+    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\c49cd7e32baa41b9462ad8c91e36229e5a69a7ddf869b4cc6ce9b90fb2cf6797"
   },
   "remainingWork": [
     {
@@ -1518,30 +1518,6 @@
       "workOrderClass": "STARTED_BEFORE_NEW",
       "area": "Security operations",
       "title": "Cluster CA, cert rotation, revocation, key epoch, replay/freshness ve rate limit",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "PPK-026",
-      "priority": "P0",
-      "status": "PARTIAL",
-      "workOrderClass": "STARTED_BEFORE_NEW",
-      "area": "Geliştirici API",
-      "title": "Typed Policy SDK ve generated client; uygulamaların kendi güvenlik yorumunu yazamaması",
       "completedChainCount": 1,
       "completionBlockers": [],
       "missingChain": [
@@ -5294,30 +5270,6 @@
       "workOrderClass": "NEW_NOT_STARTED",
       "area": "İletişim",
       "title": "Mesaj/görüşme/kayıt modülü aynı PolicyKernel üzerinden kayıt rızası ve retention uygular",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "XPF-003",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Finans/Sağlık",
-      "title": "Finans ve sağlık ekranları ortak policy yükümlülüklerinden sapamaz",
       "completedChainCount": 1,
       "completionBlockers": [],
       "missingChain": [

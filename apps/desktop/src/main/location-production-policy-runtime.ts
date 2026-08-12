@@ -13,7 +13,7 @@ import {
 } from '@ppt/core';
 import {
   PlatformPolicyEnforcementError,
-  PlatformPolicyEnforcementPoint,
+  createTypedPolicyEnforcementPoint,
   type PlatformPolicyAuthorizationProvider,
   type PlatformPolicyClusterFence,
   type PlatformPolicyConnectionAuthority,
@@ -1096,7 +1096,7 @@ export const createLocationProductionPolicyEnforcementPointResolver = (
       }
 
       let capturedResource: LocationResourceSnapshot | undefined;
-      const enforcementPoint = new PlatformPolicyEnforcementPoint({
+      const enforcementPoint = createTypedPolicyEnforcementPoint({
         provider: dependencies.authorizationProvider,
         authorityResolver: { resolve: () => snapshot.value.authority },
         resourceResolver: {

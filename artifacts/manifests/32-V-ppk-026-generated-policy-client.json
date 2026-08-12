@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "step": "32-V",
+  "requirement": "PPK-026",
+  "generatorVersion": "1.0.0",
+  "generationMode": "deterministic-no-timestamp",
+  "schemaPath": "config/32-v-ppk-026-typed-policy-sdk-schema.json",
+  "schemaSha256": "8787c960d0e2169e722fb91046572cf65b084ae8552efc8565a7cb3534676cb2",
+  "generatedSource": "packages/core-service-client/src/generated-policy-client.ts",
+  "generatedSourceSha256": "fc1a368e748878fac9ffc0d73438119f9b8bf0ada09b2821fcb8d7d1a06cdc87",
+  "methodCount": 2,
+  "wireMethods": [
+    "policy.authorize",
+    "policy.verify"
+  ],
+  "manualEditsAllowed": false
+}

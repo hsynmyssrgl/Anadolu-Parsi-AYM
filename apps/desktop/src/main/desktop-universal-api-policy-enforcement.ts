@@ -1,8 +1,8 @@
 import {
   ClientDataAccessBoundaryPolicy,
-  PlatformPolicyEnforcementPoint,
   PolicyServiceAvailabilityPolicy,
   assertActivePlatformPolicyTransactionContext,
+  createTypedPolicyEnforcementPoint,
   type ClientDataAccessBootstrapRequest,
   type PlatformPolicyAuthorizationProvider,
   type PlatformPolicyClusterFence,
@@ -91,7 +91,7 @@ export const resolveDesktopUniversalApiIntent = (
  * outer API receipt boundary.
  */
 export class DesktopUniversalApiPolicyEnforcement {
-  readonly #enforcementPoint: PlatformPolicyEnforcementPoint;
+  readonly #enforcementPoint: ReturnType<typeof createTypedPolicyEnforcementPoint>;
   readonly #clusterFence: PlatformPolicyClusterFence;
   readonly #repositoryPolicyScope: DesktopRepositoryPolicyScope;
   readonly #clientDataAccessPolicy = new ClientDataAccessBoundaryPolicy();
@@ -120,7 +120,7 @@ export class DesktopUniversalApiPolicyEnforcement {
     this.#onAvailabilityRestricted = dependencies.onAvailabilityRestricted;
     this.#clientDataAccessEnforcement = new EnforceClientDataAccessUseCase(this.#clientDataAccessPolicy);
     this.#clientDataAccessStatus = new GetClientDataAccessBoundaryUseCase(this.#clientDataAccessPolicy);
-    this.#enforcementPoint = new PlatformPolicyEnforcementPoint({
+    this.#enforcementPoint = createTypedPolicyEnforcementPoint({
       provider: dependencies.authorizationProvider,
       receiptSink: dependencies.receiptSink,
       authorityResolver: { resolve: dependencies.resolveAuthority },

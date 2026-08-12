@@ -31,7 +31,7 @@
       "passed": true
     },
     {
-      "name": "PPK-026 remains a separate unfinished successor",
+      "name": "PPK-026 remains a separate independently evidenced successor",
       "passed": true
     },
     {
@@ -443,5 +443,5 @@
   "sqliteOwnershipTransferred": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": false,
-  "generatedAt": "2026-08-12T07:07:35.562Z"
+  "generatedAt": "2026-08-12T08:14:14.870Z"
 }

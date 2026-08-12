@@ -1,0 +1,265 @@
+{
+  "schemaVersion": 1,
+  "step": "32-V",
+  "requirements": [
+    "PPK-026",
+    "XPF-003"
+  ],
+  "status": "PASS",
+  "checksPassed": 57,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "scope identity and completed state are exact",
+      "passed": true
+    },
+    {
+      "name": "scope closes exactly PPK-026 and XPF-003",
+      "passed": true
+    },
+    {
+      "name": "inventory identity and completed state are exact",
+      "passed": true
+    },
+    {
+      "name": "inventory contains six exact controls",
+      "passed": true
+    },
+    {
+      "name": "schema identity is exact",
+      "passed": true
+    },
+    {
+      "name": "schema contains exact two policy methods",
+      "passed": true
+    },
+    {
+      "name": "schema output paths are canonical",
+      "passed": true
+    },
+    {
+      "name": "all schema invariants are true",
+      "passed": true
+    },
+    {
+      "name": "deterministic code generation passes exact source and manifest",
+      "passed": true
+    },
+    {
+      "name": "generated manifest binds schema and source hashes",
+      "passed": true
+    },
+    {
+      "name": "generated manifest has no timestamp and forbids manual edits",
+      "passed": true
+    },
+    {
+      "name": "generated schema source and manifest are pinned to LF bytes across platforms",
+      "passed": true
+    },
+    {
+      "name": "generated client contains exact typed operations",
+      "passed": true
+    },
+    {
+      "name": "generated client is exported by package index",
+      "passed": true
+    },
+    {
+      "name": "typed SDK is exported by package index",
+      "passed": true
+    },
+    {
+      "name": "local admin transport exposes no manual policy convenience methods",
+      "passed": true
+    },
+    {
+      "name": "contracts re-export provider boundary types",
+      "passed": true
+    },
+    {
+      "name": "SDK owns generated client and provider mapping",
+      "passed": true
+    },
+    {
+      "name": "SDK denies unobserved package and fence",
+      "passed": true
+    },
+    {
+      "name": "SDK clears trusted state on unverified health",
+      "passed": true
+    },
+    {
+      "name": "SDK denies invalid remote responses",
+      "passed": true
+    },
+    {
+      "name": "SDK denies invalid and regressing fences",
+      "passed": true
+    },
+    {
+      "name": "SDK prevents duplicate availability observer binding",
+      "passed": true
+    },
+    {
+      "name": "typed enforcement factory accepts provider path only",
+      "passed": true
+    },
+    {
+      "name": "typed enforcement factory is exported by platform package",
+      "passed": true
+    },
+    {
+      "name": "application adapter composes generated client and SDK",
+      "passed": true
+    },
+    {
+      "name": "application adapter exposes no raw authorize or verify methods",
+      "passed": true
+    },
+    {
+      "name": "production SDK boundary passes with zero findings",
+      "passed": true
+    },
+    {
+      "name": "boundary scans at least 360 production files",
+      "passed": true,
+      "detail": 367
+    },
+    {
+      "name": "boundary binds exact seven production factory consumers",
+      "passed": true
+    },
+    {
+      "name": "boundary self-tests fourteen malicious and four benign cases",
+      "passed": true
+    },
+    {
+      "name": "finance production runtime uses only the typed factory",
+      "passed": true
+    },
+    {
+      "name": "health production runtime uses only the typed factory",
+      "passed": true
+    },
+    {
+      "name": "PPK-026 tests cover generated client, SDK, factory and integration",
+      "passed": true
+    },
+    {
+      "name": "XPF-003 finance and health regression tests remain present",
+      "passed": true
+    },
+    {
+      "name": "integration test asserts malicious escape detection",
+      "passed": true
+    },
+    {
+      "name": "integration test binds finance and health to shared factory",
+      "passed": true
+    },
+    {
+      "name": "PPK-026 registry entry is complete with full chain",
+      "passed": true
+    },
+    {
+      "name": "XPF-003 registry entry is complete with full chain",
+      "passed": true
+    },
+    {
+      "name": "PPK-026 evidence contains final contract and runtime paths",
+      "passed": true
+    },
+    {
+      "name": "XPF-003 evidence contains finance and health production paths",
+      "passed": true
+    },
+    {
+      "name": "DHA-011 remains honestly open",
+      "passed": true
+    },
+    {
+      "name": "scope explicitly denies DHA-011 completion",
+      "passed": true
+    },
+    {
+      "name": "DEC-207 is active and covers both requirements",
+      "passed": true
+    },
+    {
+      "name": "decision ledger count is internally exact",
+      "passed": true
+    },
+    {
+      "name": "master register contains DEC-207 and exact decision path",
+      "passed": true
+    },
+    {
+      "name": "decision document records generated client and fail-closed state",
+      "passed": true
+    },
+    {
+      "name": "threat model covers raw interpretation, fence and finance-health drift",
+      "passed": true
+    },
+    {
+      "name": "audit document records two closed requirements and DHA-011 boundary",
+      "passed": true
+    },
+    {
+      "name": "pretypecheck includes both PPK-026 gates",
+      "passed": true
+    },
+    {
+      "name": "prebuild includes both PPK-026 gates",
+      "passed": true
+    },
+    {
+      "name": "root exposes six PPK-026 scripts",
+      "passed": true
+    },
+    {
+      "name": "final targeted and full Vitest evidence is exact",
+      "passed": true
+    },
+    {
+      "name": "final build and governance evidence is exact",
+      "passed": true
+    },
+    {
+      "name": "PPK-025 predecessor contract no longer asserts unfinished successor",
+      "passed": true
+    },
+    {
+      "name": "no repository persistence or migration was added",
+      "passed": true
+    },
+    {
+      "name": "no data transfer, backfill or ownership cutover is claimed",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "codegen": {
+    "status": "PASS",
+    "methodCount": 2,
+    "sourceExact": true,
+    "manifestExact": true,
+    "findings": []
+  },
+  "boundary": {
+    "schemaVersion": 1,
+    "step": "32-V",
+    "requirement": "PPK-026",
+    "status": "PASS",
+    "scannedProductionFiles": 367,
+    "canonicalFactoryConsumers": 7,
+    "maliciousSelfTestAssertions": 14,
+    "benignSelfTestAssertions": 4,
+    "findings": []
+  },
+  "latestDatabaseMigration": 77,
+  "requirementCompletionClaimed": true,
+  "dha011CompletedByThisPackage": false,
+  "generatedAt": "2026-08-12T08:17:07.421Z"
+}

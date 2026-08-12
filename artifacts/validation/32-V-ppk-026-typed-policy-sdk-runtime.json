@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "step": "32-V",
+  "requirements": [
+    "PPK-026",
+    "XPF-003"
+  ],
+  "status": "PASS",
+  "checksPassed": 6,
+  "checksFailed": 0,
+  "results": [
+    {
+      "id": "ppk-026-contract",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputTail": "PPK-026/XPF-003 contract: PASS (57/57 checks)."
+    },
+    {
+      "id": "ppk-026-deterministic-codegen",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputTail": "{\n  \"status\": \"PASS\",\n  \"methodCount\": 2,\n  \"sourceExact\": true,\n  \"manifestExact\": true,\n  \"findings\": []\n}"
+    },
+    {
+      "id": "ppk-026-static-sdk-boundary",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputTail": "{\n  \"schemaVersion\": 1,\n  \"step\": \"32-V\",\n  \"requirement\": \"PPK-026\",\n  \"status\": \"PASS\",\n  \"scannedProductionFiles\": 367,\n  \"canonicalFactoryConsumers\": 7,\n  \"maliciousSelfTestAssertions\": 14,\n  \"benignSelfTestAssertions\": 4,\n  \"findings\": []\n}"
+    },
+    {
+      "id": "ppk-026-six-file-targeted-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 26,
+      "testFiles": 6,
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n··························\n\n Test Files  6 passed (6)\n      Tests  26 passed (26)\n   Start at  11:17:09\n   Duration  17.89s (transform 2.98s, setup 0ms, import 6.33s, tests 10.20s, environment 1ms)\n\n\n(node:12520) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:1036) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+    },
+    {
+      "id": "root-typescript",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputTail": ""
+    },
+    {
+      "id": "decision-ledger",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputTail": "User Decision Ledger: PASS (328 checks / 61 decisions)."
+    }
+  ],
+  "failures": [],
+  "requirementCompletionClaimed": true,
+  "dha011CompletedByThisPackage": false,
+  "generatedAt": "2026-08-12T08:17:28.623Z"
+}
