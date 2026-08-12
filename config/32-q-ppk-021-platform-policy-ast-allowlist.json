@@ -54,12 +54,12 @@
     "CRYPTO_IMPORT": 128,
     "DATABASE_IMPORT": 21,
     "NETWORK_IMPORT": 7,
-    "REPOSITORY_IMPORT": 47,
+    "REPOSITORY_IMPORT": 48,
     "ROLE_PRESENTATION": 1,
     "SQL_CALL": 56,
     "SQL_CONSTRUCTOR": 2,
     "SQL_IMPORT": 2,
-    "USE_CASE_COMPOSITION": 255
+    "USE_CASE_COMPOSITION": 256
   },
   "allowedSurfaceKeys": [
     "CRYPTO_GLOBAL|apps/desktop/src/main/preload.ts|randomUUID",
@@ -266,6 +266,7 @@
     "REPOSITORY_IMPORT|apps/desktop/src/main/repository-composition-root.ts|@ppt/repositories:SqliteTimelineRepository",
     "REPOSITORY_IMPORT|apps/desktop/src/main/repository-composition-root.ts|@ppt/repositories:SqliteTrustedDeviceRepository",
     "REPOSITORY_IMPORT|apps/desktop/src/main/repository-composition-root.ts|@ppt/repositories:SqliteWindowsHelloRegistrationRepository",
+    "REPOSITORY_IMPORT|apps/desktop/src/main/repository-composition-root.ts|@ppt/repositories:StaticProductSurfaceGovernanceRepository",
     "REPOSITORY_IMPORT|apps/desktop/src/main/timeline-application-adapter.ts|@ppt/repositories:computePlatformPolicyReceiptHash",
     "ROLE_PRESENTATION|apps/desktop/src/renderer/App.tsx|family_admin",
     "SQL_CALL|apps/desktop/src/main/family-database-runtime.ts|exec",
@@ -580,6 +581,7 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetPolicyConformanceSuiteBoundaryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetPolicyDecisionAuditBoundaryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetPolicyServiceAvailabilityBoundaryUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetProductSurfaceGovernanceUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetSensitiveLoggingBoundaryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/main.ts|GetSourceDeletionPropagationBoundaryUseCase",
     "USE_CASE_COMPOSITION|packages/application/src/policy-service-availability-use-cases.ts|EvaluatePolicyServiceAvailabilityUseCase"

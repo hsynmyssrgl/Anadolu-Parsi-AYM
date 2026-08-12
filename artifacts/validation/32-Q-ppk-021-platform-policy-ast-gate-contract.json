@@ -54,7 +54,7 @@
       "passed": true
     },
     {
-      "name": "manifest contains exactly 521 surfaces",
+      "name": "manifest contains exactly 523 surfaces",
       "passed": true
     },
     {
@@ -282,7 +282,7 @@
       "passed": true
     },
     {
-      "name": "scope records six rules and 521 exact surfaces",
+      "name": "scope records six rules and 523 exact surfaces",
       "passed": true
     },
     {
@@ -346,21 +346,21 @@
   "sourceGate": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 365,
-    "privilegedSurfaces": 521,
-    "exactAllowlistEntries": 521,
-    "exactAllowlistSha256": "4a2268bbea8aee9baa11f3fcf11898a8a32792049673dbb6a289b76ef4bd1ebb",
+    "scannedFiles": 372,
+    "privilegedSurfaces": 523,
+    "exactAllowlistEntries": 523,
+    "exactAllowlistSha256": "1a00855ae7911a838ade75ebc8ce7697baac12a2c2bb51570ee8f03f94ee582b",
     "surfaceCounts": {
       "CRYPTO_GLOBAL": 2,
       "CRYPTO_IMPORT": 128,
       "DATABASE_IMPORT": 21,
       "NETWORK_IMPORT": 7,
-      "REPOSITORY_IMPORT": 47,
+      "REPOSITORY_IMPORT": 48,
       "ROLE_PRESENTATION": 1,
       "SQL_CALL": 56,
       "SQL_CONSTRUCTOR": 2,
       "SQL_IMPORT": 2,
-      "USE_CASE_COMPOSITION": 255
+      "USE_CASE_COMPOSITION": 256
     },
     "maliciousSelfTestAssertions": 17,
     "benignSelfTestAssertions": 4,
@@ -368,8 +368,8 @@
     "findings": []
   },
   "protectedRuleCount": 6,
-  "exactAllowlistEntries": 521,
-  "exactAllowlistSha256": "4a2268bbea8aee9baa11f3fcf11898a8a32792049673dbb6a289b76ef4bd1ebb",
+  "exactAllowlistEntries": 523,
+  "exactAllowlistSha256": "1a00855ae7911a838ade75ebc8ce7697baac12a2c2bb51570ee8f03f94ee582b",
   "directRoleAuthorizationBypasses": 0,
   "syntaxModel": "TYPESCRIPT_AST",
   "regexOnlyGateAccepted": false,
@@ -383,5 +383,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-12T06:26:26.172Z"
+  "generatedAt": "2026-08-12T09:47:59.618Z"
 }

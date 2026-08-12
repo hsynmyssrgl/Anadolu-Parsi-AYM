@@ -13,7 +13,7 @@ Bu matris, aktif kararları kaynak, kullanıcı akışı ve gerçek kanıtla eş
 | Yatırım uygulaması kapsam dışı | Belgelendi | Aktif kapsam ve ana karar kaydı | Build 127 belge sözleşmesi |
 | Aile, kişi, hesap, hane, dal ve üyelik ayrımı | Karşılandı | Domain/repository ve family-membership akışları | Family/membership testleri |
 | Yetişkin özel veri sahipliği | Karşılandı | Nesne düzeyi authorization | Authorization/audit testleri |
-| 16 modüllü gerçek uygulama kabuğu | Karşılandı | `App.tsx` navigasyon ve modül akışları | Build 123/124 sözleşmeleri |
+| 17 ürün modülü + 5 yönetişim yüzeyi = 22 rotalı gerçek uygulama kabuğu | Karşılandı | Paylaşılan domain navigasyon sözleşmesi, `App.tsx` menü ve ekran dispatch akışları | DEC-208 ve 32-W fail-closed ürün yüzeyi kanıtları |
 | Kişisel/aile ortak olay ağı | Karşılandı | Timeline domain/use-case/repository | Timeline testleri ve ADR-006 |
 | Olay tam yaşam döngüsü | Karşılandı | Create/edit/search/filter/archive/restore | Build 125 — 42 assertion, 60 test |
 | Etkinlik–arşiv bağlantısı | Karşılandı | Event filtreli arşiv sorgusu | Build 122 regresyon testi |

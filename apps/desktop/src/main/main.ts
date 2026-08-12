@@ -72,6 +72,9 @@ import { DesktopRepositoryPolicyScope } from './desktop-repository-policy-scope.
 import { PolicyServiceAvailabilityApplicationAdapter } from './policy-service-availability-application-adapter.js';
 import { ApplicationSecurityProfilePolicy, DerivedDataInheritancePolicy, ImmutablePolicyDecisionAuditPolicy, NetworkEgressPolicy, PlatformCapabilityManifestPolicy, PlatformPolicyAstGatePolicy, PlatformPolicyConformanceSuite, PolicyServiceAvailabilityPolicy, SensitiveLogPolicy, SourceDeletionPropagationPolicy, assertPinnedBootstrapRuntimeCapability } from '@ppt/platform-policy';
 import type { ApplicationSecurityProfileGateBoundaryView, DerivedDataPolicyBoundaryView, NetworkEgressBoundaryView, PlatformCapabilityManifestGateBoundaryView, PlatformPolicyAstGateBoundaryView, PolicyConformanceSuiteBoundaryView, PolicyDecisionAuditBoundaryView, PolicyServiceAvailabilityBoundaryView, SensitiveLoggingBoundaryView, SourceDeletionPropagationBoundaryView } from '@ppt/domain';
+import { GetProductSurfaceGovernanceUseCase } from '@ppt/application';
+import type { ProductSurfaceGovernanceView } from '@ppt/domain';
+import { createProductSurfaceGovernanceRepository } from './repository-composition-root.js';
 
 type ArchiveMutationInput<TInput> = TInput & { readonly operationId: string };
 interface ArchiveItemMutationInput {
@@ -97,6 +100,9 @@ const getPolicyConformanceSuiteBoundaryUseCase = new GetPolicyConformanceSuiteBo
 const getPlatformPolicyAstGateBoundaryUseCase = new GetPlatformPolicyAstGateBoundaryUseCase(platformPolicyAstGatePolicy);
 const getPlatformCapabilityManifestGateBoundaryUseCase = new GetPlatformCapabilityManifestGateBoundaryUseCase(platformCapabilityManifestPolicy);
 const getApplicationSecurityProfileGateBoundaryUseCase = new GetApplicationSecurityProfileGateBoundaryUseCase(applicationSecurityProfilePolicy);
+const getProductSurfaceGovernanceUseCase = new GetProductSurfaceGovernanceUseCase(
+  createProductSurfaceGovernanceRepository()
+);
 const currentProductName = 'Anadolu Parsı Aile Yaşam Merkezi';
 assertPinnedBootstrapRuntimeCapability('windows-desktop', 'file.access');
 assertPinnedBootstrapRuntimeCapability('windows-desktop', 'network.access');
@@ -1218,6 +1224,7 @@ function registerIpc(): void {
   registerIpcHandler('system:getPlatformCapabilityManifestGateBoundary', ():PlatformCapabilityManifestGateBoundaryView => getPlatformCapabilityManifestGateBoundaryUseCase.execute());
   registerIpcHandler('system:getApplicationSecurityProfileGateBoundary', ():ApplicationSecurityProfileGateBoundaryView => getApplicationSecurityProfileGateBoundaryUseCase.execute());
   registerIpcHandler('system:getPolicyServiceAvailabilityBoundary', ():Promise<PolicyServiceAvailabilityBoundaryView> => policyServiceAvailabilityBoundary().execute());
+  registerIpcHandler('system:getProductSurfaceGovernance', ():ProductSurfaceGovernanceView => getProductSurfaceGovernanceUseCase.execute());
   registerIpcHandler('system:listBackupTargets', () => store().listBackupTargets());
   registerIpcHandler('system:upsertBackupTarget', (_event,input:UpsertBackupTargetInput) => store().upsertBackupTarget(input));
   registerIpcHandler('system:listBackupRuns', (_event,limit?:number) => store().listBackupRuns(limit));

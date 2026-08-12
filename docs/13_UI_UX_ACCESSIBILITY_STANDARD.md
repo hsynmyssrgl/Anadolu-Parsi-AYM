@@ -10,7 +10,7 @@ ilkelerinden esinlenir; birebir kopya değildir. Anadolu Parsı marka işareti,
 
 ## 2. Uygulama kabuğu
 
-- 16 modül dört mantıksal grup altında sunulur.
+- 17 ürün modülü ve 5 yönetişim yüzeyi, toplam 22 kanonik rota olarak dört mantıksal grup altında sunulur.
 - Kenar menüsü daraltılabilir ve tercih yerel olarak saklanır.
 - Açık/koyu tema kullanıcı tercihidir.
 - `Ctrl+K` / `Ctrl+F` komut araması gerçek modül gezinmesi sağlar.

@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "32-W-PRODUCT-SURFACE-GOVERNANCE-INVENTORY",
+  "routeCounts": {
+    "productModules": 17,
+    "governanceSurfaces": 5,
+    "total": 22
+  },
+  "routes": [
+    { "id": "dashboard", "groupId": "main", "kind": "product-module" },
+    { "id": "family", "groupId": "family-memory", "kind": "product-module" },
+    { "id": "households", "groupId": "family-memory", "kind": "product-module" },
+    { "id": "people-lifecycle", "groupId": "family-memory", "kind": "product-module" },
+    { "id": "tree", "groupId": "family-memory", "kind": "product-module" },
+    { "id": "timeline", "groupId": "family-memory", "kind": "product-module" },
+    { "id": "important-days", "groupId": "family-memory", "kind": "product-module" },
+    { "id": "archive", "groupId": "family-memory", "kind": "product-module" },
+    { "id": "finance", "groupId": "life", "kind": "product-module" },
+    { "id": "health", "groupId": "life", "kind": "product-module" },
+    { "id": "life-center", "groupId": "life", "kind": "product-module" },
+    { "id": "automation", "groupId": "life", "kind": "product-module" },
+    { "id": "reports", "groupId": "life", "kind": "product-module" },
+    { "id": "location", "groupId": "life", "kind": "product-module" },
+    { "id": "invitations", "groupId": "privacy-system", "kind": "product-module" },
+    { "id": "data-repair", "groupId": "privacy-system", "kind": "governance-surface" },
+    { "id": "permissions", "groupId": "privacy-system", "kind": "governance-surface" },
+    { "id": "ai", "groupId": "privacy-system", "kind": "product-module" },
+    { "id": "legacy", "groupId": "privacy-system", "kind": "product-module" },
+    { "id": "windows-hello", "groupId": "privacy-system", "kind": "governance-surface" },
+    { "id": "security", "groupId": "privacy-system", "kind": "governance-surface" },
+    { "id": "settings", "groupId": "privacy-system", "kind": "governance-surface" }
+  ],
+  "unusedRendererApiCounts": {
+    "classified": 14,
+    "unresolved": 0
+  },
+  "unusedRendererApis": [
+    { "method": "getDiagnosticReport", "channel": "system:getDiagnosticReport", "classification": "DIAGNOSTIC_OPERATOR_API" },
+    { "method": "runDueBackups", "channel": "system:runDueBackups", "classification": "BACKGROUND_OPERATIONAL" },
+    { "method": "getAdaptiveState", "channel": "system:adaptiveState", "classification": "BACKGROUND_OPERATIONAL" },
+    { "method": "verifyDiagnosticReport", "channel": "system:verifyDiagnosticReport", "classification": "SUPERSEDED_READ_MODEL" },
+    { "method": "searchMaintenanceHistory", "channel": "system:searchMaintenanceHistory", "classification": "DIAGNOSTIC_OPERATOR_API" },
+    { "method": "exportMaintenanceHistory", "channel": "system:exportMaintenanceHistory", "classification": "DIAGNOSTIC_OPERATOR_API" },
+    { "method": "searchAllDiagnosticArchives", "channel": "system:searchAllDiagnosticArchives", "classification": "DIAGNOSTIC_OPERATOR_API" },
+    { "method": "listArchiveClassifications", "channel": "archive:listClassifications", "classification": "SUPERSEDED_READ_MODEL" },
+    { "method": "listPermissions", "channel": "permissions:list", "classification": "SUPERSEDED_READ_MODEL" },
+    { "method": "propagatePurgedBackups", "channel": "dataLifecycle:propagatePurgedBackups", "classification": "BACKGROUND_OPERATIONAL" },
+    { "method": "getSnapshot", "channel": "data:getSnapshot", "classification": "SUPERSEDED_READ_MODEL" },
+    { "method": "listArchive", "channel": "archive:list", "classification": "SUPERSEDED_READ_MODEL" },
+    { "method": "searchArchive", "channel": "archive:search", "classification": "SUPERSEDED_READ_MODEL" },
+    { "method": "listArchiveRetentionStatus", "channel": "archive:listRetentionStatus", "classification": "SUPERSEDED_READ_MODEL" }
+  ]
+}

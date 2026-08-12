@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 61,
+  "decisionCount": 62,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1516,6 +1516,34 @@
         "docs/security/PPK-026_TYPED_POLICY_SDK_THREAT_MODEL.md",
         "docs/audit/32-V_PPK-026_TYPED_POLICY_SDK_UST_KAPANIS.md",
         "config/32-v-ppk-026-typed-policy-sdk-inventory.json"
+      ]
+    },
+    {
+      "id": "DEC-208",
+      "date": "2026-08-12",
+      "acceptedAt": "2026-08-12",
+      "title": "B0-03 and B0-04 shared product surface governance and Feature Reality Gate",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: birden fazla gereksinim kapatacak full auto ilerle",
+      "document": "docs/decisions/DEC-208-b0-03-b0-04-product-surface-governance.md",
+      "requirements": ["B0-03", "B0-04"],
+      "codeAreas": [
+        "config/32-w-b0-03-b0-04-product-surface-governance-inventory.json",
+        "packages/domain/src/product-surface-governance.ts",
+        "packages/application/src/product-surface-governance-use-cases.ts",
+        "packages/repositories/src/product-surface-governance-repository.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/renderer/App.tsx",
+        "scripts/lib/product-surface-governance-analysis.mjs",
+        "scripts/verify-feature-reality-gate.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/32-W-b0-03-b0-04-product-surface-boundary.json",
+        "artifacts/validation/32-W-b0-03-b0-04-product-surface-governance-contract.json",
+        "artifacts/validation/32-W-b0-03-b0-04-product-surface-governance-runtime.json",
+        "docs/security/B0-03_B0-04_PRODUCT_SURFACE_GOVERNANCE_THREAT_MODEL.md",
+        "docs/audit/32-W_B0-03_B0-04_PRODUCT_SURFACE_GOVERNANCE_UST_KAPANIS.md"
       ]
     }
   ]

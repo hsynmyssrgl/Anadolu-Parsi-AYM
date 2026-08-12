@@ -17,7 +17,13 @@ biçimde yöneten modüler masaüstü platformudur.
 - Çocuk, vasi, bakıcı, danışman, misafir ve profesyonel destek erişimleri amaç ve süreyle sınırlandırılır.
 - Davet, üyelik, hesap ve yetki yaşam döngüleri birbirinden bağımsızdır.
 
-## Aktif 16 modül
+## Aktif ürün yüzeyi: 17 ürün modülü + 5 yönetişim yüzeyi
+
+Kanonik gezinti sözleşmesi 22 rota taşır. Bunların 17'si kullanıcı iş akışını
+temsil eden ürün modülü, 5'i ise güvenlik ve işletim kontrollerini taşıyan
+yönetişim yüzeyidir. Bu ayrım, tarihsel 16 modül ifadesinin Ayarlar ve Yetkiler
+gibi kontrol yüzeylerini ürün modülü saymasından doğan 16/17 çelişkisini
+sonlandırır.
 
 ### 1. Gösterge Paneli
 
@@ -27,64 +33,90 @@ Aile durumu, yaklaşan olaylar, modül hazırlığı, son kayıtlar ve hızlı i
 
 Kişi, üyelik, aile dalı, temel ilişki, davet ve profil yönetimi.
 
-### 3. Soy Ağacı
+### 3. Haneler ve Dallar
+
+Hane, aile dalı ve kişi üyeliğinin ayrı yaşam döngüleri; başlangıç/bitiş tarihi ve rol yönetimi.
+
+### 4. Kişi Profilleri
+
+Kişi profili güncelleme, arşivleme, birleştirme, güvenli silme talebi ve işlem geri alma.
+
+### 5. Soy Ağacı
 
 Ebeveyn, eş, kardeş, vasi ve diğer ilişkiler; nesil görünümü; kaynak ve kanıt bağlantıları.
 
-### 4. Zaman Tüneli
+### 6. Zaman Tüneli
 
 Kişisel ve aile olaylarının yetki filtreli görünümü; arama, filtre, düzenleme,
 arşivleme ve geri alma.
 
-### 5. Önemli Günler
+### 7. Önemli Günler
 
 Tarih-saat, yer, katılımcı, davetiye, not, tekrar, hatırlatma, medya, belge ve AI izni.
 
-### 6. Arşiv
+### 8. Arşiv
 
 Fotoğraf, video, ses ve belge içe aktarma; hash, sürüm, kategori, ilişki ve olay bağlantısı.
 
-### 7. Finans
+### 9. Finans
 
 Kişisel ve ortak varlık/borçlar, sahiplik yüzdesi, para birimi, hedef ve özetler.
 Özel finans verisi açık izin olmadan aile toplamına katılmaz.
 
-### 8. Sağlık
+### 10. Sağlık
 
 Sağlık kaydı, ilaç ve tedavi planı, bakım, sigorta ve yüksek hassasiyetli gizlilik.
 
-### 9. Yaşam Merkezi
+### 11. Yaşam Merkezi
 
 Görev, sigorta, eğitim, abonelik, resmî işlem, iş geçmişi, ev/araç ve acil durum kayıtları.
 
-### 10. Bildirim ve Otomasyon
+### 12. Bildirim ve Otomasyon
 
 Önemli gün, yaşam, finans ve ilaç kayıtlarından yerel hatırlatma/görev üretimi;
 çalıştırma geçmişi ve etkin/pasif kurallar.
 
-### 11. Raporlama
+### 13. Raporlama
 
 Yetkiye göre aile özeti, finans, gecikmeler ve PDF dışa aktarımı. Dışa aktarım
 veri sahipliği ve görünürlük filtresini aşamaz.
 
-### 12. Konum
+### 14. Konum
 
 Olay ve ikamet konumları, harita ve rızaya bağlı süreli canlı konum için adapter sınırı.
 
-### 13. Yetkiler
+### 15. Davetler
 
-Rol, nesne, sahip, işlem, süre, allow/deny ve denetim yönetimi.
+Aile hesabı daveti oluşturma, inceleme, yeniden gönderme, iptal ve güvenli kabul akışları.
 
-### 14. Yapay Zekâ
+### 16. Yapay Zekâ
 
 İzinli veriyle arama, ilişkilendirme, özetleme ve öneri. AI kesin kayıt oluşturmaz;
 insan onayı gerekir.
 
-### 15. Dijital Miras
+### 17. Dijital Miras
 
 Zaman kapsülü, hak paketi, bekleme süresi, çoklu yönetici onayı, iptal ve geri alma.
 
-### 16. Ayarlar
+## Yönetişim yüzeyleri
+
+### Veri Onarma Merkezi
+
+Tutarsız veri tespiti, değişiklik önizlemesi, kontrollü uygulama ve geri alma.
+
+### Bağlamsal Yetkiler
+
+Rol, nesne, sahip, işlem, süre, allow/deny ve denetim yönetimi.
+
+### Windows Hello
+
+Cihaza bağlı kimlik doğrulama kaydı, durum ve yeniden doğrulama kontrolleri.
+
+### Güvenlik Merkezi
+
+Parola, 2FA, güvenilir cihaz, veri yaşam döngüsü, yedek ve güvenlik denetimleri.
+
+### Sistem ve Bakım
 
 Tema, tipografi tercihi, güvenlik, güvenilir cihaz, 2FA, yedekleme, operasyonel sağlık ve uygulama bilgisi.
 
@@ -109,7 +141,7 @@ verisini okuyan, bağımsız veri/işlem üretmeyen istemcilerdir.
 
 ## Teslim kanalı sınıflandırması — Build 182
 
-16 modülün kullanıcıya dönük bütün işlevleri Bronze kapsamındadır. Silver veya Gold için özellik rezervi oluşturulamaz. Ağır haricî API üretim adaptörü askıya alınabilir; ancak modülün yerel iş akışı, ekranı, veri modeli, portu, adaptör sınırı, yapılandırması, fallback’i, test ikizi, hata ve güvenlik/gizlilik sözleşmesi Bronze’da tamamlanır. Politika: `PPT-LIFECYCLE-STRICT-V1`.
+17 ürün modülünün ve 5 yönetişim yüzeyinin kullanıcıya dönük bütün işlevleri Bronze kapsamındadır. Silver veya Gold için özellik rezervi oluşturulamaz. Ağır haricî API üretim adaptörü askıya alınabilir; ancak modülün yerel iş akışı, ekranı, veri modeli, portu, adaptör sınırı, yapılandırması, fallback’i, test ikizi, hata ve güvenlik/gizlilik sözleşmesi Bronze’da tamamlanır. Politika: `PPT-LIFECYCLE-STRICT-V1`.
 
 ## Build 181 bağlayıcı güncellemesi
 

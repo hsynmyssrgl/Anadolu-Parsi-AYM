@@ -38,7 +38,8 @@ import {
   SqliteTaskRepository,
   SqliteTimelineRepository,
   SqliteTrustedDeviceRepository,
-  SqliteWindowsHelloRegistrationRepository
+  SqliteWindowsHelloRegistrationRepository,
+  StaticProductSurfaceGovernanceRepository
 } from '@ppt/repositories';
 import type { RepositoryExecutionPolicyGuard, SqliteRepositoryOptions } from '@ppt/repositories';
 import type {
@@ -82,6 +83,7 @@ import type {
   PersonRepositoryPort,
   PersonLifecycleRepositoryPort,
   PlatformPolicyTransactionRepositoryPort,
+  ProductSurfaceGovernanceRepositoryPort,
   RelationRepositoryPort,
   ReportRepositoryPort,
   TaskRepositoryPort,
@@ -137,6 +139,9 @@ export interface RepositoryCompositionRoot {
 export interface RepositoryCompositionRootOptions {
   readonly executionPolicyGuard?: RepositoryExecutionPolicyGuard;
 }
+
+export const createProductSurfaceGovernanceRepository = (): ProductSurfaceGovernanceRepositoryPort =>
+  new StaticProductSurfaceGovernanceRepository();
 
 export const createSqliteRepositoryCompositionRoot = (
   options: RepositoryCompositionRootOptions = {}

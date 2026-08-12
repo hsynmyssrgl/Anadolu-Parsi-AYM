@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "requirements": [
+    "B0-03",
+    "B0-04"
+  ],
+  "enforcement": "fail-closed",
+  "status": "PASS",
+  "checksPassed": 21,
+  "checksFailed": 0,
+  "failures": [],
+  "productModuleCount": 17,
+  "governanceSurfaceCount": 5,
+  "routeCount": 22,
+  "menuEntryCount": 22,
+  "renderedScreenCount": 22,
+  "preloadPairCount": 227,
+  "registeredPreloadPairCount": 227,
+  "classifiedUnusedRendererApiCount": 14,
+  "unresolvedUnusedRendererApiCount": 0,
+  "unusedRendererApis": [
+    {
+      "method": "getDiagnosticReport",
+      "channel": "system:getDiagnosticReport"
+    },
+    {
+      "method": "runDueBackups",
+      "channel": "system:runDueBackups"
+    },
+    {
+      "method": "getAdaptiveState",
+      "channel": "system:adaptiveState"
+    },
+    {
+      "method": "verifyDiagnosticReport",
+      "channel": "system:verifyDiagnosticReport"
+    },
+    {
+      "method": "searchMaintenanceHistory",
+      "channel": "system:searchMaintenanceHistory"
+    },
+    {
+      "method": "exportMaintenanceHistory",
+      "channel": "system:exportMaintenanceHistory"
+    },
+    {
+      "method": "searchAllDiagnosticArchives",
+      "channel": "system:searchAllDiagnosticArchives"
+    },
+    {
+      "method": "listArchiveClassifications",
+      "channel": "archive:listClassifications"
+    },
+    {
+      "method": "listPermissions",
+      "channel": "permissions:list"
+    },
+    {
+      "method": "propagatePurgedBackups",
+      "channel": "dataLifecycle:propagatePurgedBackups"
+    },
+    {
+      "method": "getSnapshot",
+      "channel": "data:getSnapshot"
+    },
+    {
+      "method": "listArchive",
+      "channel": "archive:list"
+    },
+    {
+      "method": "searchArchive",
+      "channel": "archive:search"
+    },
+    {
+      "method": "listArchiveRetentionStatus",
+      "channel": "archive:listRetentionStatus"
+    }
+  ],
+  "selfTests": {
+    "incompleteCompleteChainRejected": true,
+    "unclassifiedApiRejected": true,
+    "missingRouteRejected": true
+  },
+  "b901CompletedByThisPackage": false,
+  "databaseMigrationRequired": false,
+  "generatedAt": "2026-08-12T09:47:04.785Z"
+}

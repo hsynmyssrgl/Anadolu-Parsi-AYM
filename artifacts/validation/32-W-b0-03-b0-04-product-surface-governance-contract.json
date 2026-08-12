@@ -1,0 +1,262 @@
+{
+  "schemaVersion": 1,
+  "step": "32-W",
+  "requirements": [
+    "B0-03",
+    "B0-04"
+  ],
+  "status": "PASS",
+  "checksPassed": 39,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "scope identity and status are exact",
+      "passed": true
+    },
+    {
+      "name": "scope closes exactly B0-03 and B0-04",
+      "passed": true
+    },
+    {
+      "name": "scope canonical counts are exact",
+      "passed": true
+    },
+    {
+      "name": "scope explicitly excludes B9-01 and records final validation truth",
+      "passed": true
+    },
+    {
+      "name": "inventory identity is exact",
+      "passed": true
+    },
+    {
+      "name": "inventory contains exact 22 unique routes",
+      "passed": true
+    },
+    {
+      "name": "inventory contains exact 17 product and 5 governance routes",
+      "passed": true
+    },
+    {
+      "name": "inventory contains exact 14 unique unused APIs",
+      "passed": true
+    },
+    {
+      "name": "source analyzer passes all fail-closed checks",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "source analyzer proves route-menu-screen equality",
+      "passed": true
+    },
+    {
+      "name": "source analyzer proves 14 classified and zero unresolved APIs",
+      "passed": true
+    },
+    {
+      "name": "source analyzer negative self-tests all pass",
+      "passed": true
+    },
+    {
+      "name": "domain owns immutable route and API contracts",
+      "passed": true
+    },
+    {
+      "name": "application use case enforces count and unresolved invariants",
+      "passed": true
+    },
+    {
+      "name": "repository contract and implementation are explicit",
+      "passed": true
+    },
+    {
+      "name": "all package indexes export the new boundary",
+      "passed": true
+    },
+    {
+      "name": "main composes use case through the authorized repository composition root",
+      "passed": true
+    },
+    {
+      "name": "preload and declarations expose the exact typed method",
+      "passed": true
+    },
+    {
+      "name": "IPC integration policy permits zero arguments only",
+      "passed": true
+    },
+    {
+      "name": "renderer derives menu and consumes governance state",
+      "passed": true
+    },
+    {
+      "name": "renderer has no duplicate literal route or menu registry",
+      "passed": true
+    },
+    {
+      "name": "targeted tests cover success and fail-closed mutation paths",
+      "passed": true
+    },
+    {
+      "name": "B0-03 registry entry is COMPLETE with full chain",
+      "passed": true
+    },
+    {
+      "name": "B0-04 registry entry is COMPLETE with full chain",
+      "passed": true
+    },
+    {
+      "name": "both registry entries contain final contract and runtime evidence",
+      "passed": true
+    },
+    {
+      "name": "B9-01 remains honestly open",
+      "passed": true
+    },
+    {
+      "name": "DEC-208 is active and covers both requirements",
+      "passed": true
+    },
+    {
+      "name": "decision ledger count is internally exact",
+      "passed": true
+    },
+    {
+      "name": "master register records DEC-208 and its exact document",
+      "passed": true
+    },
+    {
+      "name": "decision document records the canonical classification and fail-closed gate",
+      "passed": true
+    },
+    {
+      "name": "threat model covers dead UI, dead API and false COMPLETE",
+      "passed": true
+    },
+    {
+      "name": "audit document records two closed requirements and honest B9-01 boundary",
+      "passed": true
+    },
+    {
+      "name": "current contract contains all 22 routes and 14 API rows",
+      "passed": true
+    },
+    {
+      "name": "current product documents agree on 17 + 5 = 22",
+      "passed": true
+    },
+    {
+      "name": "root exposes all four B0 package scripts",
+      "passed": true
+    },
+    {
+      "name": "pretypecheck and prebuild execute the product surface gate",
+      "passed": true
+    },
+    {
+      "name": "build executes the surface gate before governed preflight",
+      "passed": true
+    },
+    {
+      "name": "no repository persistence or migration was added",
+      "passed": true
+    },
+    {
+      "name": "scope denies data migration, backfill and cutover",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "analysis": {
+    "schemaVersion": 1,
+    "requirements": [
+      "B0-03",
+      "B0-04"
+    ],
+    "enforcement": "fail-closed",
+    "status": "PASS",
+    "checksPassed": 21,
+    "checksFailed": 0,
+    "failures": [],
+    "productModuleCount": 17,
+    "governanceSurfaceCount": 5,
+    "routeCount": 22,
+    "menuEntryCount": 22,
+    "renderedScreenCount": 22,
+    "preloadPairCount": 227,
+    "registeredPreloadPairCount": 227,
+    "classifiedUnusedRendererApiCount": 14,
+    "unresolvedUnusedRendererApiCount": 0,
+    "unusedRendererApis": [
+      {
+        "method": "getDiagnosticReport",
+        "channel": "system:getDiagnosticReport"
+      },
+      {
+        "method": "runDueBackups",
+        "channel": "system:runDueBackups"
+      },
+      {
+        "method": "getAdaptiveState",
+        "channel": "system:adaptiveState"
+      },
+      {
+        "method": "verifyDiagnosticReport",
+        "channel": "system:verifyDiagnosticReport"
+      },
+      {
+        "method": "searchMaintenanceHistory",
+        "channel": "system:searchMaintenanceHistory"
+      },
+      {
+        "method": "exportMaintenanceHistory",
+        "channel": "system:exportMaintenanceHistory"
+      },
+      {
+        "method": "searchAllDiagnosticArchives",
+        "channel": "system:searchAllDiagnosticArchives"
+      },
+      {
+        "method": "listArchiveClassifications",
+        "channel": "archive:listClassifications"
+      },
+      {
+        "method": "listPermissions",
+        "channel": "permissions:list"
+      },
+      {
+        "method": "propagatePurgedBackups",
+        "channel": "dataLifecycle:propagatePurgedBackups"
+      },
+      {
+        "method": "getSnapshot",
+        "channel": "data:getSnapshot"
+      },
+      {
+        "method": "listArchive",
+        "channel": "archive:list"
+      },
+      {
+        "method": "searchArchive",
+        "channel": "archive:search"
+      },
+      {
+        "method": "listArchiveRetentionStatus",
+        "channel": "archive:listRetentionStatus"
+      }
+    ],
+    "selfTests": {
+      "incompleteCompleteChainRejected": true,
+      "unclassifiedApiRejected": true,
+      "missingRouteRejected": true
+    },
+    "b901CompletedByThisPackage": false,
+    "databaseMigrationRequired": false,
+    "generatedAt": "2026-08-12T09:47:04.632Z"
+  },
+  "latestDatabaseMigration": 77,
+  "requirementCompletionClaimed": true,
+  "b901CompletedByThisPackage": false,
+  "generatedAt": "2026-08-12T09:47:04.635Z"
+}

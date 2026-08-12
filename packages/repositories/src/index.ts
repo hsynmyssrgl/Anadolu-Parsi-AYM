@@ -60,3 +60,4 @@ export * from './family-data-import-repository.js';
 export * from './large-family-read-model-repository.js';
 
 export * from './entity-catalog-repository.js';
+export * from './product-surface-governance-repository.js';

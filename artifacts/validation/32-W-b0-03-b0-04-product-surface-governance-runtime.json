@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "step": "32-W",
+  "requirements": [
+    "B0-03",
+    "B0-04"
+  ],
+  "status": "PASS",
+  "checksPassed": 6,
+  "checksFailed": 0,
+  "results": [
+    {
+      "id": "b0-surface-contract",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputTail": "B0-03/B0-04 product surface contract: PASS (39/39 checks)."
+    },
+    {
+      "id": "b0-surface-source-boundary",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputTail": "B0-03/B0-04 product surface boundary: PASS (21/21 checks)."
+    },
+    {
+      "id": "feature-reality-gate",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputTail": "Feature Reality Gate: PASS honesty / 350 requirements / surface 17+5=22 / unused API 14+0 / Silver BLOCKED."
+    },
+    {
+      "id": "b0-surface-targeted-runtime",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 6,
+      "testFiles": 2,
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n······\n\n Test Files  2 passed (2)\n      Tests  6 passed (6)\n   Start at  12:47:05\n   Duration  1.15s (transform 301ms, setup 0ms, import 668ms, tests 13ms, environment 0ms)"
+    },
+    {
+      "id": "root-typescript",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputTail": ""
+    },
+    {
+      "id": "decision-ledger",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "outputTail": "User Decision Ledger: PASS (333 checks / 62 decisions)."
+    }
+  ],
+  "failures": [],
+  "requirementCompletionClaimed": true,
+  "b901CompletedByThisPackage": false,
+  "generatedAt": "2026-08-12T09:47:08.133Z"
+}

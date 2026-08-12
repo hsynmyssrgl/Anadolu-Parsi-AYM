@@ -10,7 +10,7 @@ import {
   type UserVisibleAppInfo,
   assessPassword
 } from '@ppt/domain/renderer';
-import { FAMILY_RELATIONSHIP_CATALOG, OBJECT_PERMISSION_ACTIONS, getFamilyRelationship, type FamilyRelationshipCategory, type FamilyRelationshipCode } from '@ppt/domain';
+import { FAMILY_RELATIONSHIP_CATALOG, OBJECT_PERMISSION_ACTIONS, PRODUCT_NAVIGATION_GROUPS, PRODUCT_NAVIGATION_ROUTES, getFamilyRelationship, type FamilyRelationshipCategory, type FamilyRelationshipCode } from '@ppt/domain';
 import type {
   CreateFamilyEventInput,
   UpdateFamilyEventInput,
@@ -52,6 +52,7 @@ import type { PlatformPolicyAstGateBoundaryView } from '@ppt/domain';
 import type { PlatformCapabilityManifestGateBoundaryView } from '@ppt/domain';
 import type { ApplicationSecurityProfileGateBoundaryView } from '@ppt/domain';
 import type { PolicyServiceAvailabilityBoundaryView } from '@ppt/domain';
+import type { ProductScreenId, ProductSurfaceGovernanceView } from '@ppt/domain';
 import type { DataRepairEntitySnapshot, DataRepairIssue, DataRepairOperation, DataRepairWorkspaceView } from '@ppt/domain';
 import type { LoginWithWindowsHelloInput, WindowsHelloAuthenticationOutcome, WindowsHelloEnrollmentView, WindowsHelloStateView } from '@ppt/domain';
 import type { CoreServiceApiBoundaryStatusContract, CoreServiceHealthContract } from '@ppt/core-service-contracts';
@@ -64,61 +65,18 @@ const releaseChannelFromStage = (stage: string): ReleaseChannel => {
   return 'bronze';
 };
 
-type ScreenId =
-  | 'dashboard'
-  | 'family'
-  | 'households'
-  | 'people-lifecycle'
-  | 'tree'
-  | 'timeline'
-  | 'important-days'
-  | 'archive'
-  | 'finance'
-  | 'health'
-  | 'life-center'
-  | 'automation'
-  | 'reports'
-  | 'location'
-  | 'invitations'
-  | 'data-repair'
-  | 'windows-hello'
-  | 'permissions'
-  | 'ai'
-  | 'legacy'
-  | 'security'
-  | 'settings';
+type ScreenId = ProductScreenId;
 
-const navItems: Array<{ id: ScreenId; label: string; icon: string }> = [
-  { id: 'dashboard', label: 'Gösterge Paneli', icon: '⌂' },
-  { id: 'family', label: 'Aile', icon: '♙' },
-  { id: 'households', label: 'Haneler ve Dallar', icon: '⌑' },
-  { id: 'people-lifecycle', label: 'Kişi Profilleri', icon: '♙' },
-  { id: 'tree', label: 'Soy Ağacı', icon: '⌘' },
-  { id: 'timeline', label: 'Zaman Tüneli', icon: '◷' },
-  { id: 'important-days', label: 'Önemli Günler', icon: '□' },
-  { id: 'archive', label: 'Arşiv', icon: '▣' },
-  { id: 'finance', label: 'Finans', icon: '₺' },
-  { id: 'health', label: 'Sağlık', icon: '♡' },
-  { id: 'life-center', label: 'Yaşam Merkezi', icon: '◇' },
-  { id: 'automation', label: 'Bildirim ve Otomasyon', icon: '◉' },
-  { id: 'reports', label: 'Raporlama', icon: '▤' },
-  { id: 'location', label: 'Konum', icon: '⌖' },
-  { id: 'invitations', label: 'Davetler', icon: '✉' },
-  { id: 'data-repair', label: 'Veri Onarma Merkezi', icon: '⌁' },
-  { id: 'windows-hello', label: 'Windows Hello', icon: '◎' },
-  { id: 'permissions', label: 'Bağlamsal Yetkiler', icon: '♧' },
-  { id: 'ai', label: 'Yapay Zekâ', icon: '✣' },
-  { id: 'legacy', label: 'Dijital Miras', icon: '♜' },
-  { id: SECURITY_CENTER_ROUTE, label: SECURITY_CENTER_LABEL, icon: '⛨' },
-  { id: 'settings', label: 'Sistem ve Bakım', icon: '⚙' }
-];
+const navItems: ReadonlyArray<{ readonly id: ScreenId; readonly label: string; readonly icon: string }> =
+  PRODUCT_NAVIGATION_ROUTES.map(({ id, label, icon }) => ({ id, label, icon }));
 
-const navGroups: Array<{ label: string; items: ScreenId[] }> = [
-  { label: 'Ana Merkez', items: ['dashboard'] },
-  { label: 'Aile Hafızası', items: ['family', 'households', 'people-lifecycle', 'tree', 'timeline', 'important-days', 'archive'] },
-  { label: 'Yaşam', items: ['finance', 'health', 'life-center', 'automation', 'reports', 'location'] },
-  { label: 'Gizlilik ve Sistem', items: ['invitations', 'data-repair', 'permissions', 'ai', 'legacy', 'windows-hello', 'security', 'settings'] }
-];
+const navGroups: ReadonlyArray<{ readonly label: string; readonly items: readonly ScreenId[] }> =
+  PRODUCT_NAVIGATION_GROUPS.map((group) => ({
+    label: group.label,
+    items: PRODUCT_NAVIGATION_ROUTES
+      .filter((route) => route.groupId === group.id)
+      .map((route) => route.id)
+  }));
 
 type ThemeMode = 'dark' | 'light';
 
@@ -762,6 +720,7 @@ function SystemManagementScreen(){
   const [platformCapabilityManifestGateBoundary,setPlatformCapabilityManifestGateBoundary]=useState<PlatformCapabilityManifestGateBoundaryView>();
   const [applicationSecurityProfileGateBoundary,setApplicationSecurityProfileGateBoundary]=useState<ApplicationSecurityProfileGateBoundaryView>();
   const [policyServiceAvailabilityBoundary,setPolicyServiceAvailabilityBoundary]=useState<PolicyServiceAvailabilityBoundaryView>();
+  const [productSurfaceGovernance,setProductSurfaceGovernance]=useState<ProductSurfaceGovernanceView>();
   const [health,setHealth]=useState<SystemHealthView>(); const [coreServiceHealth,setCoreServiceHealth]=useState<CoreServiceHealthContract>(); const [coreServiceApiBoundary,setCoreServiceApiBoundary]=useState<CoreServiceApiBoundaryStatusContract>(); const [targets,setTargets]=useState<BackupTargetView[]>([]); const [runs,setRuns]=useState<BackupRunView[]>([]); const [performance,setPerformance]=useState<PerformanceSampleView[]>([]); const [trend,setTrend]=useState<PerformanceTrendView>(); const [tasks,setTasks]=useState<BackgroundTaskView[]>([]); const [scheduler,setScheduler]=useState<SchedulerStatusView>(); const [diagnostics,setDiagnostics]=useState<DiagnosticEntryView[]>([]); const [result,setResult]=useState<MaintenanceResultView>(); const [backupMessage,setBackupMessage]=useState(''); const [queue,setQueue]=useState<QueuedTaskView[]>([]); const [policy,setPolicy]=useState<MaintenancePolicyView>(); const [notifications,setNotifications]=useState<HealthNotificationView[]>([]); const [systemMessage,setSystemMessage]=useState(''); const [healthScore,setHealthScore]=useState<SystemHealthScoreView>(); const [reportHistory,setReportHistory]=useState<DiagnosticReportHistoryView[]>([]); const [diagQuery,setDiagQuery]=useState(''); const [diagSeverity,setDiagSeverity]=useState(''); const [healthHistory,setHealthHistory]=useState<SystemHealthHistoryView[]>([]); const [healthTrend,setHealthTrend]=useState<SystemHealthTrendView>(); const [archives,setArchives]=useState<DiagnosticArchiveView[]>([]); const [anomalies,setAnomalies]=useState<PerformanceAnomalyView[]>([]); const [recommendations,setRecommendations]=useState<MaintenanceRecommendationView[]>([]); const [reportContent,setReportContent]=useState<DiagnosticReportContentView>(); const [verificationMessage,setVerificationMessage]=useState(''); const [healthDays,setHealthDays]=useState(30); const [performanceHours,setPerformanceHours]=useState(24); const [compareLeft,setCompareLeft]=useState(''); const [compareRight,setCompareRight]=useState(''); const [comparison,setComparison]=useState<DiagnosticReportComparisonView>(); const [archiveContent,setArchiveContent]=useState<DiagnosticArchiveContentView>(); const [archiveId,setArchiveId]=useState(''); const [archiveQuery,setArchiveQuery]=useState(''); const [maintenanceHistory,setMaintenanceHistory]=useState<MaintenanceHistoryView[]>([]); const [exportHistory,setExportHistory]=useState<ExportArtifactView[]>([]); const [ipcTelemetry,setIpcTelemetry]=useState<IpcPerformanceTelemetryView>(); const [ipcMaintenanceAuthority,setIpcMaintenanceAuthority]=useState<IpcAdaptiveBudgetMaintenanceAuthorityView>(); const [ipcMaintenanceRecoveryAuthority,setIpcMaintenanceRecoveryAuthority]=useState<IpcAdaptiveBudgetMaintenanceRecoveryAuthorityView>(); const [ipcMaintenancePassword,setIpcMaintenancePassword]=useState(''); const [ipcMaintenanceCode,setIpcMaintenanceCode]=useState(''); const [ipcMaintenanceRecoveryConfirmation,setIpcMaintenanceRecoveryConfirmation]=useState(''); const [ipcMaintenanceBusy,setIpcMaintenanceBusy]=useState(false);
   const refresh=async()=>{if(!window.pardus)return; const [h,coreHealth,apiBoundary,t,r,p,tr,bg,sc,d,q,mp,n,hs,rh,hh,ht,ar,an,mr,mhist,exports,ipc,ipcAuthority,ipcRecoveryAuthority]=await Promise.all([window.pardus.getSystemHealth(),window.pardus.getCoreServiceHealth().catch(()=>undefined),window.pardus.getCoreServiceApiBoundary().catch(()=>undefined),window.pardus.listBackupTargets(),window.pardus.listBackupRuns(30),window.pardus.listPerformance(30),window.pardus.getPerformanceTrend(performanceHours),window.pardus.listBackgroundTasks(30),window.pardus.getSchedulerStatus(),window.pardus.listDiagnostics(50),window.pardus.listQueuedTasks(40),window.pardus.getMaintenancePolicy(),window.pardus.listHealthNotifications(40),window.pardus.getHealthScore(),window.pardus.listDiagnosticReports(20),window.pardus.listHealthHistory(Math.max(30,healthDays*4)),window.pardus.getHealthTrend(healthDays),window.pardus.listDiagnosticArchives(20),window.pardus.getPerformanceAnomalies(performanceHours),window.pardus.getMaintenanceRecommendations(),window.pardus.listMaintenanceHistory(30),window.pardus.listExportArtifacts(30),window.pardus.getIpcPerformanceTelemetry(),window.pardus.getIpcAdaptiveBudgetMaintenanceAuthority(),window.pardus.getIpcAdaptiveBudgetMaintenanceRecoveryAuthority()]);setHealth(h);setCoreServiceHealth(coreHealth);setCoreServiceApiBoundary(apiBoundary);setTargets(t);setRuns(r);setPerformance(p);setTrend(tr);setTasks(bg);setScheduler(sc);setDiagnostics(d);setQueue(q);setPolicy(mp);setNotifications(n);setHealthScore(hs);setReportHistory(rh);setHealthHistory(hh);setHealthTrend(ht);setArchives(ar);setAnomalies(an);setRecommendations(mr);setMaintenanceHistory(mhist);setExportHistory(exports);setIpcTelemetry(ipc);setIpcMaintenanceAuthority(ipcAuthority);setIpcMaintenanceRecoveryAuthority(ipcRecoveryAuthority);};
   useEffect(()=>{void refresh();const timer=setInterval(()=>void refresh(),30_000);return()=>clearInterval(timer);},[]);
@@ -775,6 +734,7 @@ function SystemManagementScreen(){
   useEffect(()=>{void window.pardus?.getPlatformCapabilityManifestGateBoundary().then(setPlatformCapabilityManifestGateBoundary).catch(()=>setPlatformCapabilityManifestGateBoundary(undefined));},[]);
   useEffect(()=>{void window.pardus?.getApplicationSecurityProfileGateBoundary().then(setApplicationSecurityProfileGateBoundary).catch(()=>setApplicationSecurityProfileGateBoundary(undefined));},[]);
   useEffect(()=>{const load=()=>void window.pardus?.getPolicyServiceAvailabilityBoundary().then(setPolicyServiceAvailabilityBoundary).catch(()=>setPolicyServiceAvailabilityBoundary(undefined));load();const timer=setInterval(load,15_000);return()=>clearInterval(timer);},[]);
+  useEffect(()=>{void window.pardus?.getProductSurfaceGovernance().then(setProductSurfaceGovernance).catch(()=>setProductSurfaceGovernance(undefined));},[]);
   const maintain=async(op:MaintenanceResultView['operation'])=>{if(!window.pardus)return;setResult(await window.pardus.runMaintenance(op));await refresh();};
   const runAllBackups=async()=>{if(!window.pardus)return;const results=await window.pardus.runAllBackups();setBackupMessage(`${results.filter(x=>x.success).length}/${results.length} hedef doğrulandı.`);await refresh();};
   const runTarget=async(id:string)=>{if(!window.pardus)return;const r=await window.pardus.runBackupTarget(id);setBackupMessage(r.success?'Yedek doğrulandı.':r.run.error??'Yedek başarısız.');await refresh();};
@@ -807,6 +767,7 @@ function SystemManagementScreen(){
   const bytes=(n:number)=>new Intl.NumberFormat('tr-TR',{style:'unit',unit:'megabyte',maximumFractionDigits:1}).format(n/1048576);
   const trendLabel=trend?.direction==='improving'?'İyileşiyor':trend?.direction==='degrading'?'Baskı artıyor':'Dengeli';
   return <section><PageHeader eyebrow="Sistem yönetimi" title="Sistem, bakım ve operasyon" description="Yedek hedeflerini, performansı, bakım görevlerini ve tanılama işlemlerini yönetin." actions={<Button onClick={()=>void refresh()}>Yenile</Button>}/>
+  <Surface className="workspace-summary"><SectionHeader eyebrow="B0-03 / B0-04 · ürün yüzeyi gerçeklik kapısı" title="Belge, rota, menü, ekran ve API envanteri tek sözleşmede"/><div className="notes-card"><strong>{productSurfaceGovernance?.enforcement==='fail-closed'&&productSurfaceGovernance.unresolvedUnusedRendererApiCount===0?'Ürün yüzeyi zinciri doğrulandı':'Ürün yüzeyi zinciri doğrulanamadı'}</strong><small>{productSurfaceGovernance?.productModuleCount??0} ürün modülü + {productSurfaceGovernance?.governanceSurfaceCount??0} yönetişim yüzeyi = {productSurfaceGovernance?.navigationRouteCount??0} kanonik rota</small><small>Menü {productSurfaceGovernance?.menuEntryCount??0} · ekran {productSurfaceGovernance?.renderedScreenCount??0} · sınıflandırılmış kullanılmayan renderer API {productSurfaceGovernance?.classifiedUnusedRendererApiCount??0}</small><small>Çözümlenmemiş API {productSurfaceGovernance?.unresolvedUnusedRendererApiCount??0} · eksik zincir build kapanışını fail-closed durdurur · veritabanı göçü gerekmez</small></div></Surface>
   {policyServiceAvailabilityBoundary&&<article className={`panel health-alert ${policyServiceAvailabilityBoundary.mode==='read-write'?'info':policyServiceAvailabilityBoundary.mode==='read-only'?'warning':'critical'}`}><h2>PPK-024 · Politika servisi çalışma modu</h2><strong>{policyServiceAvailabilityBoundary.mode==='read-write'?'Okuma ve yazma açık':policyServiceAvailabilityBoundary.mode==='read-only'?'Salt okunur — değişiklikler kapalı':'Erişim güvenli biçimde durduruldu'}</strong><p>{policyServiceAvailabilityBoundary.reason}</p><small>İmza {policyServiceAvailabilityBoundary.policyPackageVerified?'doğrulandı':'doğrulanamadı'} · canlılık {policyServiceAvailabilityBoundary.observationFresh?'güncel':'güncel değil'} · istemci bu göstergeden ek yetki türetemez.</small></article>}
   {health&&<div className="stats-grid"><article className="stat-card"><small>Sistem sağlık puanı</small><strong>{healthScore?.score??0}/100</strong><span>{healthScore?.grade==='excellent'?'Mükemmel':healthScore?.grade==='good'?'İyi':healthScore?.grade==='attention'?'Dikkat':'Kritik'}</span></article><article className="stat-card"><small>Genel durum</small><strong>{health.status==='healthy'?'Sağlıklı':health.status==='warning'?'Uyarı':'Kritik'}</strong><span>{health.integrityOk?'SQLite bütünlüğü doğrulandı':'Bütünlük sorunu'}</span></article><article className="stat-card"><small>Core Service</small><strong>{coreServiceHealth?`${coreServiceHealth.role} · ${coreServiceHealth.lifecycle}`:'Bağlantı yok'}</strong><span>{coreServiceHealth?`${coreServiceHealth.writable?'Yazılabilir':'Salt-okunur'} · ${coreServiceHealth.safeMode?'Güvenli mod':'Normal'} · ${coreServiceHealth.policyVersion}`:'Sağlık yanıtı alınamadı'}</span></article><article className="stat-card"><small>PPK-014 Core API</small><strong>{coreServiceApiBoundary?`${coreServiceApiBoundary.apiVersion} · ${coreServiceApiBoundary.enforcement}`:'Doğrulanamadı'}</strong><span>{coreServiceApiBoundary?'Sürümlü zarf · uygulama bağı · freshness · replay koruması':'API sınırı yanıtı alınamadı'}</span></article><article className="stat-card"><small>Zamanlayıcı</small><strong>{scheduler?.active?'Etkin':'Kapalı'}</strong><span>{scheduler?.lastCycleAt?`Son tur ${formatDate(scheduler.lastCycleAt,{hour:'2-digit',minute:'2-digit'})}`:'Oturum açılınca çalışır'}</span></article><article className="stat-card"><small>24 saatlik eğilim</small><strong>{trendLabel}</strong><span>CPU %{trend?.averageCpuPercent??0} · RAM %{trend?.averageMemoryPercent??0}</span></article><article className="stat-card"><small>Veri büyümesi</small><strong>{bytes((trend?.databaseGrowthBytes??0)+(trend?.archiveGrowthBytes??0))}</strong><span>{trend?.sampleCount??0} örnek değerlendirildi</span></article></div>}
   <Surface className="workspace-summary"><SectionHeader eyebrow="PPK-015 · ağ çıkış güvenliği" title="Allowlist, TLS/mTLS ve sertifika rotasyonu"/><div className="notes-card"><strong>{networkEgressBoundary?.enforcement==='fail-closed'?'Fail-closed egress politikası etkin':'Ağ çıkış sınırı doğrulanamadı'}</strong><small>Yalnız kayıtlı iptal-listesi uç noktası · {networkEgressBoundary?.minimumTlsVersion??'TLS doğrulanamadı'} · SPKI çift-pin rotasyonu</small><small>mTLS {networkEgressBoundary?.mutualTlsSupported?'destekleniyor':'doğrulanamadı'} · yönlendirme {networkEgressBoundary?.redirectAllowed===false?'kapalı':'bilinmiyor'} · özel/yerel adresler {networkEgressBoundary?.privateAddressRejected?'reddediliyor':'bilinmiyor'}</small><small>{networkEgressBoundary?.authorizedAdapterCount??0} yetkili adaptör · {networkEgressBoundary?.directPrimitiveExceptionCount??0} doğrudan ağ istisnası</small></div></Surface>

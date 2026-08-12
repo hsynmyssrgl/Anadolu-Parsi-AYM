@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-12T08:17:47.552Z",
+  "generatedAt": "2026-08-12T09:47:17.704Z",
   "release": "Bronze 04.08.2026.29",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
@@ -29,18 +29,18 @@
   "percentages": {
     "officialWeightedBronzePercent": 25,
     "officialWeightedEvidenceStep": "31-T",
-    "strictRequirementCompletionPercent": 11.1429,
-    "implementationChainCoveragePercent": 11.6857,
-    "governanceEvidenceChainCoveragePercent": 49.7143,
+    "strictRequirementCompletionPercent": 11.7143,
+    "implementationChainCoveragePercent": 12.2,
+    "governanceEvidenceChainCoveragePercent": 50,
     "interpretation": "These are separate measures and must not be blended into an invented single completion claim."
   },
   "scope": {
     "total": 350,
     "statusCounts": {
-      "COMPLETE": 39,
+      "COMPLETE": 41,
       "FOUNDATION_STARTED": 1,
       "NOT_IMPLEMENTED": 277,
-      "PARTIAL": 33
+      "PARTIAL": 31
     },
     "priorityCounts": {
       "P0": 210,
@@ -48,21 +48,21 @@
       "P2": 5
     },
     "completeByPriority": {
-      "P0": 38,
+      "P0": 40,
       "P1": 1,
       "P2": 0
     },
-    "incompleteCount": 311,
-    "strictComplete": 39,
+    "incompleteCount": 309,
+    "strictComplete": 41,
     "implementationCoverage": {
-      "passed": 409,
+      "passed": 427,
       "total": 3500,
-      "percent": 11.6857
+      "percent": 12.2
     },
     "governanceCoverage": {
-      "passed": 522,
+      "passed": 525,
       "total": 1050,
-      "percent": 49.7143
+      "percent": 50
     }
   },
   "rules": {
@@ -94,7 +94,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "Feature Reality Gate: PASS honesty / 350 requirements / Silver BLOCKED."
+          "Feature Reality Gate: PASS honesty / 350 requirements / surface 17+5=22 / unused API 14+0 / Silver BLOCKED."
         ]
       },
       {
@@ -324,7 +324,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"c49cd7e32baa41b9462ad8c91e36229e5a69a7ddf869b4cc6ce9b90fb2cf6797\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\c49cd7e32baa41b9462ad8c91e36229e5a69a7ddf869b4cc6ce9b90fb2cf6797\",\"files\":9}"
+          "{\"status\":\"PASS\",\"requirement\":\"GOV-005\",\"treeSha256\":\"95ff04d856038d20d2fcab742ee9f515e03e4f295dbcea54be8934f01a0686dd\",\"externalPath\":\"D:\\\\AYM_LIBRARY\\\\Panthera pardus tulliana\\\\Anadolu Parsı Aile Yaşam Merkezi\\\\Bronze 04.08.2026.29\\\\authoritative-source\\\\95ff04d856038d20d2fcab742ee9f515e03e4f295dbcea54be8934f01a0686dd\",\"files\":9}"
         ]
       },
       {
@@ -1003,7 +1003,7 @@
     "status": "PASS",
     "officialCompletionClaimed": true,
     "storageBackend": "EXTERNAL_USB_D_DRIVE",
-    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\c49cd7e32baa41b9462ad8c91e36229e5a69a7ddf869b4cc6ce9b90fb2cf6797"
+    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\95ff04d856038d20d2fcab742ee9f515e03e4f295dbcea54be8934f01a0686dd"
   },
   "remainingWork": [
     {
@@ -1016,27 +1016,6 @@
       "completedChainCount": 12,
       "completionBlockers": [],
       "missingChain": [
-        "evidence"
-      ]
-    },
-    {
-      "id": "B0-04",
-      "priority": "P0",
-      "status": "PARTIAL",
-      "workOrderClass": "STARTED_BEFORE_NEW",
-      "area": "Bronze Kapsam Kilidi",
-      "title": "FEATURE_REALITY_GATE ve DEAD_UI/DEAD_API sınıflandırması",
-      "completedChainCount": 4,
-      "completionBlockers": [],
-      "missingChain": [
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
         "evidence"
       ]
     },
@@ -1100,30 +1079,6 @@
         "ui",
         "menu",
         "targetedTest",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B0-03",
-      "priority": "P0",
-      "status": "PARTIAL",
-      "workOrderClass": "STARTED_BEFORE_NEW",
-      "area": "Bronze Kapsam Kilidi",
-      "title": "16/17 modül çelişkisini çöz ve tek navigasyon sözleşmesi oluştur",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
         "evidence"
       ]
     },

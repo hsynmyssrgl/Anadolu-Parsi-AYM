@@ -1,6 +1,6 @@
 # Bronze guncel tamamlama denetimi
 
-Olusturma (UTC): 2026-08-12T08:17:47.552Z
+Olusturma (UTC): 2026-08-12T09:47:17.704Z
 
 ## Sonuc
 
@@ -23,19 +23,19 @@ Olusturma (UTC): 2026-08-12T08:17:47.552Z
 ## Yuzde gercekligi
 
 - Resmi agirlikli Bronze ilerlemesi: **%25**
-- Kati gereksinim kapanisi: **%11.1429** (39/350)
-- Uygulama zinciri kapsami: **%11.6857**
-- Yonetisim ve kanit zinciri kapsami: **%49.7143**
+- Kati gereksinim kapanisi: **%11.7143** (41/350)
+- Uygulama zinciri kapsami: **%12.2**
+- Yonetisim ve kanit zinciri kapsami: **%50**
 
 Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 
 ## Kapsam durumu
 
-- COMPLETE: 39
-- PARTIAL: 33
+- COMPLETE: 41
+- PARTIAL: 31
 - FOUNDATION_STARTED: 1
 - NOT_IMPLEMENTED: 277
-- Toplam acik gereksinim: 311
+- Toplam acik gereksinim: 309
 
 ## Kural ve kapilar
 
@@ -238,11 +238,9 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | Kimlik | Sinif | Oncelik | Durum | Zincir | Alan | Baslik |
 |---|---|---|---|---:|---|---|
 | PPK-025 | STARTED_BEFORE_NEW | P0 | PARTIAL | 12/13 | Supply Chain | SBOM, imzalı paket, dependency provenance, lisans ve zafiyet kapıları |
-| B0-04 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Bronze Kapsam Kilidi | FEATURE_REALITY_GATE ve DEAD_UI/DEAD_API sınıflandırması |
 | DHA-001 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Process architecture | Electron arayüzünden bağımsız, kullanıcı oturumu kapalıyken de çalışan headless Core Service |
 | DHA-023 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Health | Liveness, readiness, quorum, replication lag, disk, cert, backup age ve dependency health |
 | PPK-001 | STARTED_BEFORE_NEW | P0 | PARTIAL | 4/13 | Politika Çekirdeği | Tek PlatformPolicyKernel; kimlik, yetki, gizlilik, rıza, saklama, AI, kayıt ve dışa aktarım kararlarının tek otoritesi |
-| B0-03 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Bronze Kapsam Kilidi | 16/17 modül çelişkisini çöz ve tek navigasyon sözleşmesi oluştur |
 | B2-04 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Kimlik ve Güvenlik | Electron güvenlik checklist, CSP, custom protocol ve fuse kapanışı |
 | B2-05 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Kimlik ve Güvenlik | Çocuk, sağlık, finans ve konum için hassasiyet profilleri |
 | B6-03 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | AI, Miras ve Entegrasyon | Çocuk/sağlık/finans/konum için ayrı onay ve dışa gönderim önizlemesi |
@@ -267,6 +265,8 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | B3-05 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Aile ve Hafıza | Tüm modüllerde yetki filtreli birleşik arama |
 | B5-01 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Sağlık ve Yaşam | Alerji, kronik durum, kan grubu, aşı, ölçüm, randevu ve belge ilişkisi |
 | B5-04 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Sağlık ve Yaşam | Sigorta, abonelik, eğitim, iş, resmi işlem, ev ve araç için kategoriye özgü alanlar |
+| B6-05 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | AI, Miras ve Entegrasyon | OneDrive gerçek adapter + yerel/harici hedeflerle bağımsız çalışma |
+| B6-06 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | AI, Miras ve Entegrasyon | Apple/Google/Microsoft Authorization Code+PKCE+state+nonce+token vault |
 
 Tam acik-is listesi `artifacts/inventory/BRONZE_CURRENT_COMPLETION_AUDIT.json` icindedir.
 

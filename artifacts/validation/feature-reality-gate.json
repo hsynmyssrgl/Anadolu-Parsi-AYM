@@ -1,10 +1,27 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "release": "Bronze 04.08.2026.29",
   "requirements": 350,
-  "incompleteRequired": 306,
+  "incompleteRequired": 304,
   "silverReady": false,
+  "enforcement": "fail-closed",
+  "productSurface": {
+    "productModules": 17,
+    "governanceSurfaces": 5,
+    "routes": 22,
+    "menuEntries": 22,
+    "renderedScreens": 22,
+    "classifiedUnusedRendererApis": 14,
+    "unresolvedUnusedRendererApis": 0,
+    "selfTests": {
+      "incompleteCompleteChainRejected": true,
+      "unclassifiedApiRejected": true,
+      "missingRouteRejected": true
+    }
+  },
+  "checksPassed": 1797,
+  "checksFailed": 0,
   "status": "PASS",
   "failures": [],
-  "generatedAt": "2026-08-12T08:25:26.980Z"
+  "generatedAt": "2026-08-12T09:48:50.915Z"
 }

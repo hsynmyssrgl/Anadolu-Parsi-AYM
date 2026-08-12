@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "32-W-B0-03-B0-04-PRODUCT-SURFACE-GOVERNANCE",
+  "decision": "DEC-208",
+  "requirements": [
+    "B0-03",
+    "B0-04"
+  ],
+  "status": "COMPLETE",
+  "acceptance": {
+    "B0-03": "Belge, route, menu ve ekran sayisi ayni; tarihsel 16/17 celiskisi tek kanonik siniflandirmayla cozulur.",
+    "B0-04": "Eksik COMPLETE zinciri fail-closed reddedilir ve renderer tarafindan kullanilmayan 14 aktif API eksiksiz siniflandirilir."
+  },
+  "canonicalCounts": {
+    "productModules": 17,
+    "governanceSurfaces": 5,
+    "navigationRoutes": 22,
+    "menuEntries": 22,
+    "renderedScreens": 22,
+    "classifiedUnusedRendererApis": 14,
+    "unresolvedUnusedRendererApis": 0
+  },
+  "schemaDecision": "Kanonik route ve API siniflandirmasi kaynak-kod yonetisim semasidir; kullanici verisi veya SQLite tablosu degildir.",
+  "migrationDecision": "Yeni veritabani migration'i gerekmez; mevcut latest migration 77 korunur ve veri tasima/backfill/cutover yapilmaz.",
+  "enforcement": [
+    "Renderer menu girdileri paylasilan domain navigation contract'indan uretilir.",
+    "Her kanonik route exact bir renderer screen dispatch koluna sahiptir.",
+    "Preload ile kayitli olup renderer'da cagrilmayan API kumesi exact inventory ile eslesir.",
+    "Yeni, silinen, duplicate veya siniflandirilmamis route/API drift'i pretypecheck ve prebuild'i durdurur.",
+    "COMPLETE gereksinimde false/eksik chain alani Feature Reality Gate tarafindan reddedilir."
+  ],
+  "validation": {
+    "boundaryChecksPassed": 21,
+    "contractChecksPassed": 39,
+    "runtimeChecksPassed": 6,
+    "targetedTestFilesPassed": 2,
+    "targetedTestsPassed": 6,
+    "fullVitestFilesPassed": 93,
+    "fullVitestTestsPassed": 829,
+    "pretypecheckSecurityGatesPassed": 16,
+    "rootTypeScriptDiagnostics": 0,
+    "productionWorkspaceBuildsPassed": 18,
+    "governedPreflightPassed": true,
+    "bronzeGovernanceRealityMatrixPassed": true
+  },
+  "excludedClaims": [
+    "B9-01 tamamlanmis sayilmaz.",
+    "Siniflandirma, uyumluluk API'lerini otomatik olarak kaldirma yetkisi vermez.",
+    "Silver veya Bronze Final hazirligi iddia edilmez.",
+    "Yeni Build numarasi verilmez."
+  ]
+}

@@ -16,7 +16,7 @@
 | `docs/06_OPEN_ITEMS_AFTER_CODING_START.md` | Açık, ertelenmiş ve dış bağımlı maddeler | Aktif risk/gap kaydı |
 | `docs/07_BRONZE_REQUIREMENTS_TRACEABILITY.md` | Gereksinim → kod → kanıt eşleştirmesi | Bronze izlenebilirlik |
 | `docs/09_ACTIVE_DEVELOPMENT_STATUS.md` | Güncel kanal ve build davranışı | Aktif geliştirme durumu |
-| `docs/12_PRODUCT_SCOPE_AND_MODULE_CATALOG.md` | 16 modül ve fonksiyon sınırları | Ürün kataloğu |
+| `docs/12_PRODUCT_SCOPE_AND_MODULE_CATALOG.md` | 17 ürün modülü, 5 yönetişim yüzeyi ve fonksiyon sınırları | Ürün kataloğu |
 | `docs/13_UI_UX_ACCESSIBILITY_STANDARD.md` | Görsel dil, tipografi ve erişilebilirlik | UI kabul standardı |
 | `docs/14_SECURITY_PRIVACY_BACKUP_STANDARD.md` | Güvenlik, mahremiyet, yedek ve kurtarma | Uzmanlık standardı |
 | `docs/15_RELEASE_VALIDATION_GOVERNANCE.md` | PASS/FAIL/NOT_RUN ve kapı sırası | Kanıt yönetişimi |
