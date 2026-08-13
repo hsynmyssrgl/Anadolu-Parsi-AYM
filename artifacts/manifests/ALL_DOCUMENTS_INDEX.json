@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "release": "Bronze 04.08.2026.29",
   "releaseId": "bronze-2026-08-04-r29",
-  "generatedAt": "2026-08-13T01:00:53.825Z",
+  "generatedAt": "2026-08-13T01:01:56.680Z",
   "selfIndexedPaths": [
     "SHA256SUMS.txt",
     "artifacts/manifests/ALL_DOCUMENTS_INDEX.csv",
@@ -4906,8 +4906,8 @@
     },
     {
       "path": "artifacts/deliveries/Anadolu_Parsi_Aile_Yasam_Merkezi_Bronze_04.08.2026.29.json",
-      "bytes": 26576,
-      "sha256": "30938fb5193a5f9aef3ba00ffa0ddc17da9a30ada2f8dd3f381caa551b8f4135",
+      "bytes": 29151,
+      "sha256": "f7be27120a612be4bb4a68149a0d7dcf82bb2d846ececef5754e4b2f4b615827",
       "extension": ".json",
       "classification": "GENERATED",
       "isDocument": true
@@ -8482,8 +8482,8 @@
     },
     {
       "path": "artifacts/reports/DELIVERY_STATUS_04.08.2026.29.json",
-      "bytes": 26576,
-      "sha256": "30938fb5193a5f9aef3ba00ffa0ddc17da9a30ada2f8dd3f381caa551b8f4135",
+      "bytes": 29151,
+      "sha256": "f7be27120a612be4bb4a68149a0d7dcf82bb2d846ececef5754e4b2f4b615827",
       "extension": ".json",
       "classification": "GENERATED",
       "isDocument": true
@@ -17027,7 +17027,7 @@
     {
       "path": "artifacts/validation/governed-preflight.json",
       "bytes": 5939,
-      "sha256": "c0ce16d7597516b990cacbcb49243a1c2468bdcdeb7f183f19e1342a7ca4b1a3",
+      "sha256": "4e8452741a5a8ce26c2c02884ce5a68ea7582b6670e3f7d82e709df7c7fca92c",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17123,7 +17123,7 @@
     {
       "path": "artifacts/validation/project-artifact-index-gate-v2.json",
       "bytes": 212,
-      "sha256": "187bc62c68e8a6b5c78fbf51a60148be1a461a78cdfab7b1fb5eeb7f980cd52f",
+      "sha256": "18b62f8c6932c4ae54698500d48639dd21b802b856be1ac0e784ba3fb1d8a8c0",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
