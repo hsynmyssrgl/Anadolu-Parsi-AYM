@@ -70,9 +70,9 @@ check('boundary evidence is exact green and truth preserving through successors'
   && boundary.networkAccessPerformed === false
   && boundary.credentialsCollected === false
   && boundary.externalConsentPerformed === false
-  && boundary.ppk021ExactAllowlistEntries === 545
-  && boundary.ppk021UseCaseCompositionSurfaces === 277
-  && boundary.ppk022CapabilitySurfaces === 242);
+  && boundary.ppk021ExactAllowlistEntries === 554
+  && boundary.ppk021UseCaseCompositionSurfaces === 281
+  && boundary.ppk022CapabilitySurfaces === 246);
 check('DEC-215 is active and the decision ledger cardinality is exact', ledger.decisionCount === ledger.decisions?.length
   && ledger.decisions?.some((item) => item.id === 'DEC-215' && item.status === 'ACTIVE'
     && item.requirements?.join(',') === ids.join(',')

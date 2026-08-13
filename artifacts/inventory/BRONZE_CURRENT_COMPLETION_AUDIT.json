@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-13T01:00:13.120Z",
+  "generatedAt": "2026-08-13T03:17:34.970Z",
   "release": "Bronze 04.08.2026.29",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
@@ -15,7 +15,7 @@
   "PPK011": "COMPLETE",
   "PPK012": "COMPLETE",
   "authoritativeSource": "06_KOD/app",
-  "currentStep": "33-I",
+  "currentStep": "33-J",
   "status": "PASS_WITH_OPEN_SCOPE",
   "numberingAssessment": {
     "status": "CORRECT_ONLY_WITH_GATED_APPEND_ONLY_NUMBERING",
@@ -29,17 +29,17 @@
   "percentages": {
     "officialWeightedBronzePercent": 25,
     "officialWeightedEvidenceStep": "31-T",
-    "strictRequirementCompletionPercent": 20.5714,
-    "implementationChainCoveragePercent": 21.0571,
-    "governanceEvidenceChainCoveragePercent": 54.8571,
+    "strictRequirementCompletionPercent": 21.1429,
+    "implementationChainCoveragePercent": 21.6286,
+    "governanceEvidenceChainCoveragePercent": 55.1429,
     "interpretation": "These are separate measures and must not be blended into an invented single completion claim."
   },
   "scope": {
     "total": 350,
     "statusCounts": {
-      "COMPLETE": 72,
+      "COMPLETE": 74,
       "FOUNDATION_STARTED": 1,
-      "NOT_IMPLEMENTED": 251,
+      "NOT_IMPLEMENTED": 249,
       "PARTIAL": 26
     },
     "priorityCounts": {
@@ -48,21 +48,21 @@
       "P2": 5
     },
     "completeByPriority": {
-      "P0": 60,
-      "P1": 12,
+      "P0": 61,
+      "P1": 13,
       "P2": 0
     },
-    "incompleteCount": 278,
-    "strictComplete": 72,
+    "incompleteCount": 276,
+    "strictComplete": 74,
     "implementationCoverage": {
-      "passed": 737,
+      "passed": 757,
       "total": 3500,
-      "percent": 21.0571
+      "percent": 21.6286
     },
     "governanceCoverage": {
-      "passed": 576,
+      "passed": 579,
       "total": 1050,
-      "percent": 54.8571
+      "percent": 55.1429
     }
   },
   "rules": {
@@ -516,7 +516,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "Step Checkpoint Gate: PASS (2024 checks / current 33-I)."
+          "Step Checkpoint Gate: PASS (2050 checks / current 33-J)."
         ]
       }
     ],
@@ -1190,7 +1190,7 @@
     "freshnessVerifier": "scripts/generate-current-delivery-report.mjs invokes local and external live source-protection verification",
     "officialCompletionClaimed": true,
     "storageBackend": "EXTERNAL_USB_D_DRIVE",
-    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\e33da0b88fc8fd16e669e9acfbdf2721ca0c5cc257e1ef02bd39ccf9c719f61b"
+    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\7a84878afccee4326b2bfebdfd5cd68bb19e4ec280f8e6798effbe5b1610bde8"
   },
   "remainingWork": [
     {
@@ -1817,29 +1817,6 @@
         "menu",
         "targetedTest",
         "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "EXT-016",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "DISASTER_EMERGENCY",
-      "title": "Şifreli acil belge paketi ve düşük pil modu",
-      "completedChainCount": 2,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
         "evidence"
       ]
     },
@@ -6717,30 +6694,6 @@
       "workOrderClass": "NEW_NOT_STARTED",
       "area": "Sağlık ve Yaşam",
       "title": "Bakım planı, bakım veren görevi, ilaç teyidi ve acil iletişim",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B5-03",
-      "priority": "P1",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Sağlık ve Yaşam",
-      "title": "Çevrimdışı acil durum kartı ve yazdırılabilir/PDF çıktı",
       "completedChainCount": 1,
       "completionBlockers": [],
       "missingChain": [

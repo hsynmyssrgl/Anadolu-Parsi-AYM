@@ -8,7 +8,7 @@ const jsonPaths = {
   authority: 'artifacts/authority/31-B_AUTO_PRIORITY_SELECTION_AUTHORITY.json', priority: 'artifacts/validation/31-B_PRIORITY_SELECTION_VALIDATION.json',
   scope: 'config/31-b-family-data-import-central-authorization-scope.json', plan: 'config/work-segmentation-plan.json', ledger: 'config/active-governance-ledger.json',
   registry: 'config/accepted-scope-registry.json', execution: 'artifacts/checkpoints/31-B_EXECUTION_RECORD.json',
-  runtime: 'artifacts/validation/PPK002_FAMILY_DATA_IMPORT_POLICY_LOCAL_CONTINUATION.json', platform: 'artifacts/validation/platform-policy-gate.json', packageJson: 'package.json'
+  runtime: 'artifacts/validation/PPK002_FAMILY_DATA_IMPORT_POLICY_LOCAL_CONTINUATION.json', platform: 'artifacts/validation/platform-policy-ast-gate.json', packageJson: 'package.json'
 };
 const documents = Object.fromEntries(await Promise.all(Object.entries(jsonPaths).map(async ([key, path]) => [key, JSON.parse(await readFile(resolve(root, path), 'utf8'))])));
 const service = await readFile(resolve(root, 'apps/desktop/src/main/family-data-import-service.ts'), 'utf8');
@@ -47,7 +47,11 @@ check(
 check(ppk002.priority === 'P0' && (ppk002.status === 'PARTIAL' || (ppk002.status === 'COMPLETE' && Object.values(ppk002.chain ?? {}).every((value) => value === true))), 'PPK-002 remains P0 or has a fully closed successor chain');
 check(execution.step === '31-B' && ((inProgress31B && String(execution.officialStepStatus).startsWith('IN_PROGRESS') && execution.persistentReceiptStatus === 'PENDING') || (completed31B && execution.officialStepStatus === 'COMPLETED' && execution.persistentReceiptStatus === 'PASS')), '31-B execution record matches receipt lifecycle');
 check(runtime.status === 'PASS' && runtime.checkCount === 12 && runtime.external30ZReceipt === 'PASS' && runtime.external31AReceipt === 'PASS', 'fresh family import verifier is 12/12 PASS');
-check(platform.status === 'PASS' && platform.newBypassCount === 0 && platform.runtimeStatus === 'PASS', 'platform policy gate is PASS with no new bypass');
+check(platform.status === 'PASS'
+  && platform.directRoleAuthorizationBypasses === 0
+  && platform.exactAllowlistEntries === 554
+  && platform.surfaceCounts?.USE_CASE_COMPOSITION === 281,
+'current platform policy AST gate is PASS with no direct-role bypass and exact successor ratchet');
 check(service.includes('CentralAuthorizationService') && service.includes("resourceType: 'family_data_import'") && service.includes("purpose: 'administration'"), 'service uses exact central authorization intent');
 check(!service.includes("context.actor.role !== 'family_admin'"), 'direct family_admin gate is absent');
 check(service.includes('listActiveForSubject') && service.includes('grants: grants.value.map(toAuthorizationGrant)'), 'active object grants participate in authorization');

@@ -76,9 +76,9 @@ check('boundary evidence is exact green and preserves platform ratchets', bounda
   && boundary.ipcChannels === 2 && boundary.networkChannels === 0
   && boundary.smartMeterLookup === 'not_performed'
   && boundary.warrantyLookup === 'not_performed' && boundary.ocr === 'not_performed'
-  && Number.isInteger(boundary.ppk021ExactAllowlistEntries)
-  && Number.isInteger(boundary.ppk021UseCaseCompositionSurfaces)
-  && boundary.ppk022CapabilitySurfaces === 242);
+  && boundary.ppk021ExactAllowlistEntries === 554
+  && boundary.ppk021UseCaseCompositionSurfaces === 281
+  && boundary.ppk022CapabilitySurfaces === 246);
 check('DEC-217 is active and decision cardinality is exact', ledger.decisionCount === ledger.decisions?.length
   && ledger.decisions?.some((item) => item.id === 'DEC-217' && item.status === 'ACTIVE'
     && item.requirements?.join(',') === ids.join(',')

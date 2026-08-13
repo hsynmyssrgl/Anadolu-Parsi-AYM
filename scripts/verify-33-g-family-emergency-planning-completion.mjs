@@ -178,9 +178,16 @@ check(
     && docs.runtime.checksPassed === expectedValidation?.runtimeChecksPassed
     && docs.runtime.targetedTestFilesPassed === expectedValidation?.targetedTestFilesPassed
     && docs.runtime.targetedTestsPassed === expectedValidation?.targetedTestsPassed
-    && docs.runtime.ppk021ExactAllowlistEntries === expectedValidation?.ppk021ExactAllowlistEntries
-    && docs.runtime.ppk021UseCaseCompositionSurfaces === expectedValidation?.ppk021UseCaseCompositionSurfaces
-    && docs.runtime.ppk022CapabilitySurfaces === expectedValidation?.ppk022CapabilitySurfaces
+    && docs.boundary.ppk021ExactAllowlistEntries >= expectedValidation?.ppk021ExactAllowlistEntries
+    && docs.boundary.ppk021UseCaseCompositionSurfaces >= expectedValidation?.ppk021UseCaseCompositionSurfaces
+    && docs.boundary.ppk022CapabilitySurfaces >= expectedValidation?.ppk022CapabilitySurfaces
+    && docs.contract.ppk021ExactAllowlistEntries === docs.boundary.ppk021ExactAllowlistEntries
+    && docs.contract.ppk021UseCaseCompositionSurfaces === docs.boundary.ppk021UseCaseCompositionSurfaces
+    && docs.contract.ppk022CapabilitySurfaces === docs.boundary.ppk022CapabilitySurfaces
+    && docs.runtime.ppk021ExactAllowlistEntries === docs.boundary.ppk021ExactAllowlistEntries
+    && docs.runtime.ppk021UseCaseCompositionSurfaces === docs.boundary.ppk021UseCaseCompositionSurfaces
+    && docs.runtime.ppk022CapabilitySurfaces === docs.boundary.ppk022CapabilitySurfaces
+    && docs.runtime.latestDatabaseMigration === docs.boundary.latestDatabaseMigration
     && docs.runtime.latestDatabaseMigration >= expectedValidation?.latestDatabaseMigration
     && docs.runtime.closureDatabaseMigration === expectedValidation?.latestDatabaseMigration,
   'boundary, contract, runtime, and targeted evidence bind the declared final vector'

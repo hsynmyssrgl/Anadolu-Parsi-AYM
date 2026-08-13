@@ -67,10 +67,10 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 87,
+  "latestDatabaseMigration": 88,
   "migration82Checksum": "be32fbe6a79688ee879fda02a16faa78f6e0d4151e1462b2c9f28a1da44518c8",
-  "ppk021ExactAllowlistEntries": 545,
-  "ppk021UseCaseCompositionSurfaces": 277,
-  "ppk022CapabilitySurfaces": 242,
-  "generatedAt": "2026-08-13T00:57:48.890Z"
+  "ppk021ExactAllowlistEntries": 554,
+  "ppk021UseCaseCompositionSurfaces": 281,
+  "ppk022CapabilitySurfaces": 246,
+  "generatedAt": "2026-08-13T03:15:02.579Z"
 }

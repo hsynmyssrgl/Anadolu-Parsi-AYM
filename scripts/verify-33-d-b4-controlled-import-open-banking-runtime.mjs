@@ -43,17 +43,17 @@ const commands = Object.freeze([
   Object.freeze({
     id: 'migration-82-successor-runtime',
     args: ['scripts/verify-database-migrations.mjs'],
-    expectOutput: '"version": 83'
+    expectOutput: '"version": 88'
   }),
   Object.freeze({
     id: 'ppk021-ast-ratchet',
     args: ['scripts/verify-platform-policy-ast-gate.mjs'],
-    expectOutput: '"exactAllowlistEntries": 545'
+    expectOutput: '"exactAllowlistEntries": 554'
   }),
   Object.freeze({
     id: 'ppk022-capability-ratchet',
     args: ['scripts/verify-platform-capability-manifest-gate.mjs'],
-    expectOutput: '"exactManifestSurfaces": 242'
+    expectOutput: '"exactManifestSurfaces": 246'
   }),
   Object.freeze({
     id: 'decision-ledger',
@@ -102,11 +102,12 @@ const report = Object.freeze({
   checksFailed: failures.length,
   targetedTestFilesPassed: targeted?.testFiles ?? 0,
   targetedTestsPassed: targeted?.tests ?? 0,
-  latestDatabaseMigration: 83,
+  latestDatabaseMigration: 88,
+  closureDatabaseMigration: 82,
   importTables: 2,
-  ppk021ExactAllowlistEntries: 545,
-  ppk021UseCaseCompositionSurfaces: 277,
-  ppk022CapabilitySurfaces: 242,
+  ppk021ExactAllowlistEntries: 554,
+  ppk021UseCaseCompositionSurfaces: 281,
+  ppk022CapabilitySurfaces: 246,
   supportedFileFormats: 5,
   liveBankConnectionImplemented: false,
   networkAccessPerformed: false,

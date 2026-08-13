@@ -1,12 +1,12 @@
 # Bronze guncel tamamlama denetimi
 
-Olusturma (UTC): 2026-08-13T01:00:13.120Z
+Olusturma (UTC): 2026-08-13T03:17:34.970Z
 
 ## Sonuc
 
 - Denetim durumu: **PASS_WITH_OPEN_SCOPE**
 - Yetkili kaynak: `06_KOD/app`
-- Guncel adim: **33-I**
+- Guncel adim: **33-J**
 - PPK-002: **COMPLETE**
 - PPK-003: **COMPLETE**
 - PPK-004: **COMPLETE**
@@ -23,19 +23,19 @@ Olusturma (UTC): 2026-08-13T01:00:13.120Z
 ## Yuzde gercekligi
 
 - Resmi agirlikli Bronze ilerlemesi: **%25**
-- Kati gereksinim kapanisi: **%20.5714** (72/350)
-- Uygulama zinciri kapsami: **%21.0571**
-- Yonetisim ve kanit zinciri kapsami: **%54.8571**
+- Kati gereksinim kapanisi: **%21.1429** (74/350)
+- Uygulama zinciri kapsami: **%21.6286**
+- Yonetisim ve kanit zinciri kapsami: **%55.1429**
 
 Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 
 ## Kapsam durumu
 
-- COMPLETE: 72
+- COMPLETE: 74
 - PARTIAL: 26
 - FOUNDATION_STARTED: 1
-- NOT_IMPLEMENTED: 251
-- Toplam acik gereksinim: 278
+- NOT_IMPLEMENTED: 249
+- Toplam acik gereksinim: 276
 
 ## Kural ve kapilar
 
@@ -266,9 +266,9 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | B6-06 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | AI, Miras ve Entegrasyon | Apple/Google/Microsoft Authorization Code+PKCE+state+nonce+token vault |
 | B8-05 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Dayanıklılık ve Windows | 10k kişi/100k olay/10k belge metadata senaryosu ve 7 günlük soak hedefi |
 | DHA-025 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Observability | Yerel-first metrics, traces, structured logs ve correlationId |
-| EXT-016 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | DISASTER_EMERGENCY | Şifreli acil belge paketi ve düşük pil modu |
 | EXT-036 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | PRIVACY_OWNERSHIP | Kullanıcıya tutulan verileri ve erişen kişileri gösterme |
 | EXT-037 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | PRIVACY_OWNERSHIP | Erişim nedeni ve son erişim geçmişi |
+| EXT-038 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | PRIVACY_OWNERSHIP | Açık cihazlar, Apple senkronu, AI/OCR/çeviri işleme görünümü |
 
 Tam acik-is listesi `artifacts/inventory/BRONZE_CURRENT_COMPLETION_AUDIT.json` icindedir.
 
