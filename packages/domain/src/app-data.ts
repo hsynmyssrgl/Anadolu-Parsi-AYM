@@ -1750,13 +1750,150 @@ export type RecordFamilyEmergencyPreparednessItemInput =
   | RecordFamilyEmergencyPreparednessKitCheckInput
   | RecordFamilyEmergencyDrillInput;
 
+export const FAMILY_EMERGENCY_ASSISTANCE_ITEM_TYPES = [
+  'emergency_profile','health_fact','emergency_contact','assistance_instruction'
+] as const;
+export type FamilyEmergencyAssistanceItemType = typeof FAMILY_EMERGENCY_ASSISTANCE_ITEM_TYPES[number];
+export const FAMILY_EMERGENCY_ASSISTANCE_SUBJECT_KINDS = ['person','pet'] as const;
+export type FamilyEmergencyAssistanceSubjectKind = typeof FAMILY_EMERGENCY_ASSISTANCE_SUBJECT_KINDS[number];
+export const FAMILY_EMERGENCY_HEALTH_FACT_KINDS = [
+  'blood_type','allergy','chronic_condition','medication','medical_device','other'
+] as const;
+export type FamilyEmergencyHealthFactKind = typeof FAMILY_EMERGENCY_HEALTH_FACT_KINDS[number];
+export const FAMILY_EMERGENCY_BLOOD_TYPES = [
+  'a_positive','a_negative','b_positive','b_negative','ab_positive','ab_negative',
+  'o_positive','o_negative','unknown'
+] as const;
+export type FamilyEmergencyBloodType = typeof FAMILY_EMERGENCY_BLOOD_TYPES[number];
+export const FAMILY_EMERGENCY_ASSISTANCE_INSTRUCTION_KINDS = [
+  'mobility','vision','hearing','communication','cognitive','medication_support',
+  'evacuation','pet_care','other'
+] as const;
+export type FamilyEmergencyAssistanceInstructionKind =
+  typeof FAMILY_EMERGENCY_ASSISTANCE_INSTRUCTION_KINDS[number];
+
+export interface FamilyEmergencyAssistanceLedgerItemCommonView {
+  readonly id:string;
+  readonly planId:string;
+  readonly ownerPersonId:string;
+  readonly privacy:'private';
+  readonly dataSource:'manual';
+  readonly createdAt:string;
+}
+interface FamilyEmergencyAssistanceProfileLedgerItemCommonView
+  extends FamilyEmergencyAssistanceLedgerItemCommonView {
+  readonly itemType:'emergency_profile';
+  readonly label:string;
+}
+export type FamilyEmergencyAssistanceProfileLedgerItemView =
+  | (FamilyEmergencyAssistanceProfileLedgerItemCommonView & {
+      readonly subjectKind:'person';
+      readonly subjectPersonId:string;
+    })
+  | (FamilyEmergencyAssistanceProfileLedgerItemCommonView & {
+      readonly subjectKind:'pet';
+      readonly subjectPetId:string;
+      readonly responsiblePersonId:string;
+    });
+interface FamilyEmergencyAssistanceChildLedgerItemCommonView
+  extends FamilyEmergencyAssistanceLedgerItemCommonView {
+  readonly profileId:string;
+  readonly supersedesItemId?:string;
+}
+export type FamilyEmergencyHealthFactLedgerItemView =
+  | (FamilyEmergencyAssistanceChildLedgerItemCommonView & {
+      readonly itemType:'health_fact';
+      readonly factKind:'blood_type';
+      readonly bloodType:FamilyEmergencyBloodType;
+      readonly note?:string;
+    })
+  | (FamilyEmergencyAssistanceChildLedgerItemCommonView & {
+      readonly itemType:'health_fact';
+      readonly factKind:Exclude<FamilyEmergencyHealthFactKind, 'blood_type'>;
+      readonly value:string;
+      readonly note?:string;
+    });
+export interface FamilyEmergencyContactLedgerItemView
+  extends FamilyEmergencyAssistanceChildLedgerItemCommonView {
+  readonly itemType:'emergency_contact';
+  readonly name:string;
+  readonly phoneE164:string;
+  readonly relationship?:string;
+  readonly note?:string;
+}
+export interface FamilyEmergencyAssistanceInstructionLedgerItemView
+  extends FamilyEmergencyAssistanceChildLedgerItemCommonView {
+  readonly itemType:'assistance_instruction';
+  readonly instructionKind:FamilyEmergencyAssistanceInstructionKind;
+  readonly instruction:string;
+  readonly note?:string;
+}
+export type FamilyEmergencyAssistanceLedgerItemView =
+  | FamilyEmergencyAssistanceProfileLedgerItemView
+  | FamilyEmergencyHealthFactLedgerItemView
+  | FamilyEmergencyContactLedgerItemView
+  | FamilyEmergencyAssistanceInstructionLedgerItemView;
+
+interface RecordFamilyEmergencyAssistanceProfileCommonInput {
+  readonly itemType:'emergency_profile';
+  readonly planId:string;
+  readonly label:string;
+}
+export type RecordFamilyEmergencyAssistanceProfileInput =
+  | (RecordFamilyEmergencyAssistanceProfileCommonInput & {
+      readonly subjectKind:'person';
+      readonly subjectPersonId:string;
+    })
+  | (RecordFamilyEmergencyAssistanceProfileCommonInput & {
+      readonly subjectKind:'pet';
+      readonly subjectPetId:string;
+      readonly responsiblePersonId:string;
+    });
+interface RecordFamilyEmergencyAssistanceChildCommonInput {
+  readonly profileId:string;
+  readonly supersedesItemId?:string;
+}
+export type RecordFamilyEmergencyHealthFactInput =
+  | (RecordFamilyEmergencyAssistanceChildCommonInput & {
+      readonly itemType:'health_fact';
+      readonly factKind:'blood_type';
+      readonly bloodType:FamilyEmergencyBloodType;
+      readonly note?:string;
+    })
+  | (RecordFamilyEmergencyAssistanceChildCommonInput & {
+      readonly itemType:'health_fact';
+      readonly factKind:Exclude<FamilyEmergencyHealthFactKind, 'blood_type'>;
+      readonly value:string;
+      readonly note?:string;
+    });
+export interface RecordFamilyEmergencyContactInput extends RecordFamilyEmergencyAssistanceChildCommonInput {
+  readonly itemType:'emergency_contact';
+  readonly name:string;
+  readonly phoneE164:string;
+  readonly relationship?:string;
+  readonly note?:string;
+}
+export interface RecordFamilyEmergencyAssistanceInstructionInput
+  extends RecordFamilyEmergencyAssistanceChildCommonInput {
+  readonly itemType:'assistance_instruction';
+  readonly instructionKind:FamilyEmergencyAssistanceInstructionKind;
+  readonly instruction:string;
+  readonly note?:string;
+}
+export type RecordFamilyEmergencyAssistanceItemInput =
+  | RecordFamilyEmergencyAssistanceProfileInput
+  | RecordFamilyEmergencyHealthFactInput
+  | RecordFamilyEmergencyContactInput
+  | RecordFamilyEmergencyAssistanceInstructionInput;
+
 export type RecordManagedLifeItemInput =
   | RecordManagedLifeProfileInput
   | RecordManagedLifeActivityInput
   | RecordManagedLifeDocumentInput
   | RecordManagedHomeInventoryItemInput
   | RecordFamilyEmergencyItemInput
-  | RecordFamilyEmergencyPreparednessItemInput;
+  | RecordFamilyEmergencyPreparednessItemInput
+  | RecordFamilyEmergencyAssistanceItemInput;
 
 export interface ManagedLifeCurrentReminderView {
   readonly sourceId:string;
@@ -1795,10 +1932,17 @@ export type FamilyEmergencyPlanView = FamilyEmergencyPlanLedgerItemView & {
   readonly emergencyDrills:readonly FamilyEmergencyDrillLedgerItemView[];
 };
 
+export type FamilyEmergencyAssistanceProfileView = FamilyEmergencyAssistanceProfileLedgerItemView & {
+  readonly healthFacts:readonly FamilyEmergencyHealthFactLedgerItemView[];
+  readonly emergencyContacts:readonly FamilyEmergencyContactLedgerItemView[];
+  readonly assistanceInstructions:readonly FamilyEmergencyAssistanceInstructionLedgerItemView[];
+};
+
 export interface ManagedLifeWorkspaceView {
   readonly profiles:readonly ManagedLifeProfileView[];
   readonly homeInventoryItems:readonly ManagedHomeInventoryLedgerItemView[];
   readonly emergencyPlans:readonly FamilyEmergencyPlanView[];
+  readonly emergencyAssistanceProfiles:readonly FamilyEmergencyAssistanceProfileView[];
   readonly upcomingReminders:readonly ManagedLifeCurrentReminderView[];
   readonly generatedAt:string;
   readonly dataSource:'manual';
@@ -1820,6 +1964,9 @@ export interface ManagedLifeWorkspaceView {
   readonly notificationDelivery:'not_performed';
   readonly sensorIntegration:'not_performed';
   readonly readinessGuarantee:'not_claimed';
+  readonly medicalVerification:'not_performed';
+  readonly healthRegistryLookup:'not_performed';
+  readonly exportSharing:'not_performed';
   readonly networkEgressAdded:false;
 }
 

@@ -1,11 +1,16 @@
 import { asFamilyId, asIsoDateTime, asPersonId } from '@ppt/core';
 import type {
+  FamilyEmergencyAssistanceInstructionKind,
+  FamilyEmergencyAssistanceItemType,
+  FamilyEmergencyAssistanceSubjectKind,
+  FamilyEmergencyBloodType,
   FamilyEmergencyChecklistStatus,
   FamilyEmergencyDrillKind,
   FamilyEmergencyDrillStatus,
   FamilyEmergencyItemType,
   FamilyEmergencyMeetingPointKind,
   FamilyEmergencyMemberStatus,
+  FamilyEmergencyHealthFactKind,
   FamilyEmergencyPlanKind,
   FamilyEmergencyPreparednessCheckStatus,
   FamilyEmergencyPreparednessItemType,
@@ -32,6 +37,8 @@ import type {
 } from '@ppt/domain';
 import {
   assertPolicyAuthorizedRepositoryContext,
+  type FamilyEmergencyAssistanceLedgerItemRow,
+  type FamilyEmergencyAssistanceProfileLedgerItemRow,
   type FamilyEmergencyLedgerItemRow,
   type FamilyEmergencyPlanLedgerItemRow,
   type FamilyEmergencyPreparednessLedgerItemRow,
@@ -407,6 +414,86 @@ const mapFamilyEmergencyPreparednessItem = (
   };
 };
 
+const familyEmergencyAssistanceColumns = `
+  assistance.id,assistance.plan_id,assistance.profile_id,assistance.family_id,
+  assistance.owner_person_id,assistance.item_type,assistance.supersedes_item_id,
+  assistance.subject_kind,assistance.subject_person_id,assistance.subject_pet_id,
+  assistance.responsible_person_id,assistance.label,assistance.fact_kind,
+  assistance.blood_type,assistance.fact_value,assistance.contact_name,
+  assistance.phone_e164,assistance.relationship,assistance.instruction_kind,
+  assistance.instruction,assistance.note,assistance.privacy,assistance.data_source,
+  assistance.created_at
+`;
+
+const mapFamilyEmergencyAssistanceItem = (
+  row:Record<string, unknown>
+):FamilyEmergencyAssistanceLedgerItemRow => {
+  const common = {
+    id:String(row.id),
+    planId:String(row.plan_id),
+    familyId:asFamilyId(String(row.family_id)),
+    ownerPersonId:asPersonId(String(row.owner_person_id)),
+    privacy:'private' as const,
+    dataSource:'manual' as const,
+    createdAt:asIsoDateTime(String(row.created_at))
+  };
+  const itemType = String(row.item_type) as FamilyEmergencyAssistanceItemType;
+  if (itemType === 'emergency_profile') {
+    const profile = {
+      ...common,
+      itemType,
+      label:String(row.label),
+      subjectKind:String(row.subject_kind) as FamilyEmergencyAssistanceSubjectKind
+    };
+    return profile.subjectKind === 'person'
+      ? { ...profile, subjectKind:'person', subjectPersonId:String(row.subject_person_id) }
+      : {
+          ...profile,
+          subjectKind:'pet',
+          subjectPetId:String(row.subject_pet_id),
+          responsiblePersonId:String(row.responsible_person_id)
+        };
+  }
+  const child = {
+    ...common,
+    profileId:String(row.profile_id),
+    ...(row.supersedes_item_id ? { supersedesItemId:String(row.supersedes_item_id) } : {})
+  };
+  if (itemType === 'health_fact') {
+    const factKind = String(row.fact_kind) as FamilyEmergencyHealthFactKind;
+    return factKind === 'blood_type'
+      ? {
+          ...child,
+          itemType,
+          factKind:'blood_type',
+          bloodType:String(row.blood_type) as FamilyEmergencyBloodType,
+          ...(row.note ? { note:String(row.note) } : {})
+        }
+      : {
+          ...child,
+          itemType,
+          factKind:factKind as Exclude<FamilyEmergencyHealthFactKind, 'blood_type'>,
+          value:String(row.fact_value),
+          ...(row.note ? { note:String(row.note) } : {})
+        };
+  }
+  if (itemType === 'emergency_contact') return {
+    ...child,
+    itemType,
+    name:String(row.contact_name),
+    phoneE164:String(row.phone_e164),
+    ...(row.relationship ? { relationship:String(row.relationship) } : {}),
+    ...(row.note ? { note:String(row.note) } : {})
+  };
+  return {
+    ...child,
+    itemType:'assistance_instruction',
+    instructionKind:String(row.instruction_kind) as FamilyEmergencyAssistanceInstructionKind,
+    instruction:String(row.instruction),
+    ...(row.note ? { note:String(row.note) } : {})
+  };
+};
+
 interface LifeReadBinding {
   readonly familyId: string;
   readonly accountId: string;
@@ -764,19 +851,23 @@ export class SqliteLifeRepository extends SqliteRepository implements
     context: PolicyAuthorizedRepositoryExecutionContext,
     id: string
   ): RepositoryResult<ManagedLifeProfileLedgerItemRow | null> {
-    const visibility = lifeReadBinding(context, id);
     return this.execute(context, () => {
       const row = this.database(context).prepare(`
         SELECT ${managedLifeColumns}
         FROM life_managed_ledger ledger
-        JOIN life_managed_ledger profile ON profile.id=ledger.id AND profile.item_type='profile'
-        WHERE ledger.id=? AND profile.family_id=?
-          ${managedLifeVisibilitySql}
-      `).get(
-        id,
-        visibility.familyId,
-        ...lifeVisibilityParameters(visibility)
-      ) as Record<string, unknown> | undefined;
+        WHERE ledger.id=? AND ledger.item_type='profile'
+          AND NOT EXISTS (
+            SELECT 1 FROM data_lifecycle lifecycle
+            WHERE lifecycle.resource_type='life_record'
+              AND lifecycle.resource_id=ledger.id
+              AND lifecycle.state<>'active'
+          )
+      `).get(id) as Record<string, unknown> | undefined;
+      if (row) lifeWriteBinding(context, {
+        familyId:String(row.family_id),
+        resourceId:String(row.id),
+        action:'update'
+      });
       return row ? mapManagedLifeItem(row) as ManagedLifeProfileLedgerItemRow : null;
     });
   }
@@ -1334,6 +1425,213 @@ export class SqliteLifeRepository extends SqliteRepository implements
         policy.action,
         policy.capability
       );
+    });
+  }
+
+  public listFamilyEmergencyAssistanceItems(
+    context:PolicyAuthorizedRepositoryExecutionContext
+  ):RepositoryResult<readonly FamilyEmergencyAssistanceLedgerItemRow[]> {
+    const visibility = lifeReadBinding(context);
+    return this.execute(context, () => (
+      this.database(context).prepare(`
+        SELECT ${familyEmergencyAssistanceColumns}
+        FROM family_emergency_assistance_ledger assistance
+        JOIN family_emergency_assistance_ledger profile
+          ON profile.id=CASE
+            WHEN assistance.item_type='emergency_profile' THEN assistance.id
+            ELSE assistance.profile_id
+          END
+          AND profile.item_type='emergency_profile'
+        WHERE profile.family_id=?
+          ${managedLifeVisibilitySql}
+        ORDER BY assistance.created_at DESC,assistance.id
+      `).all(
+        visibility.familyId,
+        ...lifeVisibilityParameters(visibility)
+      ) as ReadonlyArray<Record<string, unknown>>
+    ).map(mapFamilyEmergencyAssistanceItem));
+  }
+
+  public findFamilyEmergencyAssistanceProfile(
+    context:PolicyAuthorizedRepositoryExecutionContext,
+    id:string
+  ):RepositoryResult<FamilyEmergencyAssistanceProfileLedgerItemRow | null> {
+    return this.execute(context, () => {
+      const row = this.database(context).prepare(`
+        SELECT ${familyEmergencyAssistanceColumns}
+        FROM family_emergency_assistance_ledger assistance
+        WHERE assistance.id=? AND assistance.item_type='emergency_profile'
+          AND NOT EXISTS (
+            SELECT 1 FROM data_lifecycle lifecycle
+            WHERE lifecycle.resource_type='life_record'
+              AND lifecycle.resource_id=assistance.id
+              AND lifecycle.state<>'active'
+          )
+          AND EXISTS (
+            SELECT 1 FROM family_emergency_ledger plan
+            WHERE plan.id=assistance.plan_id AND plan.item_type='emergency_plan'
+              AND NOT EXISTS (
+                SELECT 1 FROM data_lifecycle lifecycle
+                WHERE lifecycle.resource_type='life_record'
+                  AND lifecycle.resource_id=plan.id
+                  AND lifecycle.state<>'active'
+              )
+          )
+      `).get(id) as Record<string, unknown> | undefined;
+      if (row) lifeWriteBinding(context, {
+        familyId:String(row.family_id),
+        resourceId:String(row.id),
+        action:'update'
+      });
+      return row
+        ? mapFamilyEmergencyAssistanceItem(row) as FamilyEmergencyAssistanceProfileLedgerItemRow
+        : null;
+    });
+  }
+
+  public findFamilyEmergencyAssistanceProfileForPolicyResolution(
+    context:RepositoryExecutionContext,
+    id:string
+  ):RepositoryResult<FamilyEmergencyAssistanceProfileLedgerItemRow | null> {
+    return this.execute(context, () => {
+      const row = this.database(context).prepare(`
+        SELECT ${familyEmergencyAssistanceColumns}
+        FROM family_emergency_assistance_ledger assistance
+        WHERE assistance.id=? AND assistance.item_type='emergency_profile'
+          AND NOT EXISTS (
+            SELECT 1 FROM data_lifecycle lifecycle
+            WHERE lifecycle.resource_type='life_record'
+              AND lifecycle.resource_id=assistance.id
+              AND lifecycle.state<>'active'
+          )
+          AND EXISTS (
+            SELECT 1 FROM family_emergency_ledger plan
+            WHERE plan.id=assistance.plan_id AND plan.item_type='emergency_plan'
+              AND NOT EXISTS (
+                SELECT 1 FROM data_lifecycle lifecycle
+                WHERE lifecycle.resource_type='life_record'
+                  AND lifecycle.resource_id=plan.id
+                  AND lifecycle.state<>'active'
+              )
+          )
+      `).get(id) as Record<string, unknown> | undefined;
+      return row
+        ? mapFamilyEmergencyAssistanceItem(row) as FamilyEmergencyAssistanceProfileLedgerItemRow
+        : null;
+    });
+  }
+
+  public findFamilyEmergencyAssistanceItem(
+    context:PolicyAuthorizedRepositoryExecutionContext,
+    id:string
+  ):RepositoryResult<FamilyEmergencyAssistanceLedgerItemRow | null> {
+    return this.execute(context, () => {
+      const row = this.database(context).prepare(`
+        SELECT ${familyEmergencyAssistanceColumns}
+        FROM family_emergency_assistance_ledger assistance
+        JOIN family_emergency_assistance_ledger profile
+          ON profile.id=CASE
+            WHEN assistance.item_type='emergency_profile' THEN assistance.id
+            ELSE assistance.profile_id
+          END
+          AND profile.item_type='emergency_profile'
+        WHERE assistance.id=?
+          AND NOT EXISTS (
+            SELECT 1 FROM data_lifecycle lifecycle
+            WHERE lifecycle.resource_type='life_record'
+              AND lifecycle.resource_id=profile.id
+              AND lifecycle.state<>'active'
+          )
+          AND EXISTS (
+            SELECT 1 FROM family_emergency_ledger plan
+            WHERE plan.id=profile.plan_id AND plan.item_type='emergency_plan'
+              AND NOT EXISTS (
+                SELECT 1 FROM data_lifecycle lifecycle
+                WHERE lifecycle.resource_type='life_record'
+                  AND lifecycle.resource_id=plan.id
+                  AND lifecycle.state<>'active'
+              )
+          )
+      `).get(id) as Record<string, unknown> | undefined;
+      if (!row) return null;
+      const profileId = String(row.item_type) === 'emergency_profile'
+        ? String(row.id)
+        : String(row.profile_id);
+      lifeWriteBinding(context, {
+        familyId:String(row.family_id),
+        resourceId:profileId,
+        action:'update'
+      });
+      return mapFamilyEmergencyAssistanceItem(row);
+    });
+  }
+
+  public insertFamilyEmergencyAssistanceItem(
+    context:PolicyAuthorizedRepositoryExecutionContext,
+    row:FamilyEmergencyAssistanceLedgerItemRow
+  ):RepositoryResult<void> {
+    if (row.privacy !== 'private' || row.dataSource !== 'manual') {
+      throw new Error('Emergency assistance item must remain manual and fixed private');
+    }
+    if (context.policyAuthorization.resourceOwnerPersonId !== String(row.ownerPersonId)) {
+      throw new Error('Emergency assistance receipt owner does not match the private profile root');
+    }
+    const isProfile = row.itemType === 'emergency_profile';
+    const resourceId = isProfile ? row.id : row.profileId;
+    const policy = lifeWriteBinding(context, {
+      familyId:row.familyId,
+      resourceId,
+      action:isProfile ? 'create' : 'update'
+    });
+    return this.execute(context, () => {
+      this.database(context).prepare(`
+        INSERT INTO family_emergency_assistance_ledger(
+          id,plan_id,profile_id,family_id,owner_person_id,item_type,supersedes_item_id,
+          subject_kind,subject_person_id,subject_pet_id,responsible_person_id,label,
+          fact_kind,blood_type,fact_value,contact_name,phone_e164,relationship,
+          instruction_kind,instruction,note,privacy,data_source,created_at,
+          policy_receipt_hash,policy_receipt_version,policy_receipt_nonce,policy_correlation_id,
+          policy_resource_type,policy_resource_id,policy_action,policy_capability
+        ) VALUES(${Array.from({ length:32 }, () => '?').join(',')})
+      `).run(
+        row.id,
+        row.planId,
+        isProfile ? null : row.profileId,
+        row.familyId,
+        row.ownerPersonId,
+        row.itemType,
+        isProfile ? null : row.supersedesItemId ?? null,
+        isProfile ? row.subjectKind : null,
+        isProfile && row.subjectKind === 'person' ? row.subjectPersonId : null,
+        isProfile && row.subjectKind === 'pet' ? row.subjectPetId : null,
+        isProfile && row.subjectKind === 'pet' ? row.responsiblePersonId : null,
+        isProfile ? row.label : null,
+        row.itemType === 'health_fact' ? row.factKind : null,
+        row.itemType === 'health_fact' && row.factKind === 'blood_type' ? row.bloodType : null,
+        row.itemType === 'health_fact' && row.factKind !== 'blood_type' ? row.value : null,
+        row.itemType === 'emergency_contact' ? row.name : null,
+        row.itemType === 'emergency_contact' ? row.phoneE164 : null,
+        row.itemType === 'emergency_contact' ? row.relationship ?? null : null,
+        row.itemType === 'assistance_instruction' ? row.instructionKind : null,
+        row.itemType === 'assistance_instruction' ? row.instruction : null,
+        isProfile ? null : row.note ?? null,
+        row.privacy,
+        row.dataSource,
+        row.createdAt,
+        policy.receiptHash,
+        policy.receiptVersion,
+        policy.nonce,
+        context.correlationId,
+        policy.resourceType,
+        policy.resourceId,
+        policy.action,
+        policy.capability
+      );
+      if (isProfile) {
+        this.database(context).prepare(
+          "INSERT INTO data_lifecycle(resource_type,resource_id,owner_person_id,privacy,state,updated_at) VALUES('life_record',?,?,?,'active',?)"
+        ).run(row.id, row.ownerPersonId, row.privacy, row.createdAt);
+      }
     });
   }
 

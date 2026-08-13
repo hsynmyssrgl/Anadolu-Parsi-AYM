@@ -1,5 +1,6 @@
 import {
   ERROR_CODES,
+  asIsoDateTime,
   asPersonId,
   asUserId,
   createAppError,
@@ -153,7 +154,7 @@ const governedRepositoryContext = (
         : {})
     },
     correlationId: context.correlationId,
-    occurredAt: transaction.occurredAt,
+    occurredAt: asIsoDateTime(authorization.occurredAt),
     policyAuthorization: authorization
   };
 };
@@ -391,7 +392,11 @@ export class RepositoryBackedLifePolicyTransactionRunner {
         const repository = governedRepositoryContext(context, transaction, authorization, intent);
         const result = operation({
           repository,
-          occurredAt: transaction.occurredAt,
+          // Every governed LIFE row, audit entry and outbox event must bind to
+          // the exact immutable timestamp in the durable authorization receipt.
+          // A fresh transaction clock read can differ by milliseconds and is
+          // correctly rejected by the SQLite receipt triggers.
+          occurredAt: asIsoDateTime(authorization.occurredAt),
           authorization
         });
         if (!result.ok) return result;
@@ -501,6 +506,22 @@ export class RepositoryBackedLifeQueryPort implements LifeQueryPort {
       if (!preparednessItems.ok) return preparednessItems;
       const visiblePreparednessItems = preparednessItems.value.filter((item) =>
         visibleEmergencyPlanIds.has(item.planId));
+      const assistanceItems = this.dependencies.lifeRepository.listFamilyEmergencyAssistanceItems(repository);
+      if (!assistanceItems.ok) return assistanceItems;
+      const visibleAssistanceProfiles = assistanceItems.value.filter((item) =>
+        item.itemType === 'emergency_profile'
+        && authorize(this.#authorization, auth.value, {
+          action: 'read',
+          resourceType: 'life_record',
+          resourceId: item.id,
+          ownerPersonId: item.ownerPersonId,
+          occurredAt: repository.occurredAt,
+          privacy: item.privacy
+        }));
+      const visibleAssistanceProfileIds = new Set(visibleAssistanceProfiles.map((item) => item.id));
+      const visibleAssistanceItems = assistanceItems.value.filter((item) => item.itemType === 'emergency_profile'
+        ? visibleAssistanceProfileIds.has(item.id)
+        : visibleAssistanceProfileIds.has(item.profileId));
       return {
         ok: true,
         value: buildManagedLifeWorkspace({
@@ -508,6 +529,7 @@ export class RepositoryBackedLifeQueryPort implements LifeQueryPort {
           homeInventoryItems: visibleHomeInventoryItems,
           emergencyItems: visibleEmergencyItems,
           preparednessItems: visiblePreparednessItems,
+          assistanceItems: visibleAssistanceItems,
           generatedAt: repository.occurredAt
         })
       };
@@ -615,6 +637,24 @@ class RepositoryBackedLifeWriteScope implements LifeWriteScope {
     record: Parameters<LifeWriteScope['insertFamilyEmergencyPreparednessItem']>[0]
   ): ReturnType<LifeWriteScope['insertFamilyEmergencyPreparednessItem']> {
     return this.dependencies.lifeRepository.insertFamilyEmergencyPreparednessItem(this.repository, record);
+  }
+
+  public findFamilyEmergencyAssistanceProfile(
+    id: Parameters<LifeWriteScope['findFamilyEmergencyAssistanceProfile']>[0]
+  ): ReturnType<LifeWriteScope['findFamilyEmergencyAssistanceProfile']> {
+    return this.dependencies.lifeRepository.findFamilyEmergencyAssistanceProfile(this.repository, id);
+  }
+
+  public findFamilyEmergencyAssistanceItem(
+    id: Parameters<LifeWriteScope['findFamilyEmergencyAssistanceItem']>[0]
+  ): ReturnType<LifeWriteScope['findFamilyEmergencyAssistanceItem']> {
+    return this.dependencies.lifeRepository.findFamilyEmergencyAssistanceItem(this.repository, id);
+  }
+
+  public insertFamilyEmergencyAssistanceItem(
+    record: Parameters<LifeWriteScope['insertFamilyEmergencyAssistanceItem']>[0]
+  ): ReturnType<LifeWriteScope['insertFamilyEmergencyAssistanceItem']> {
+    return this.dependencies.lifeRepository.insertFamilyEmergencyAssistanceItem(this.repository, record);
   }
 
   public appendAudit(input: Parameters<LifeWriteScope['appendAudit']>[0]): ReturnType<LifeWriteScope['appendAudit']> {

@@ -1,9 +1,13 @@
 import type { FamilyId, IsoDateTime, PersonId } from '@ppt/core';
 import type {
+  FamilyEmergencyAssistanceInstructionLedgerItemView,
+  FamilyEmergencyAssistanceProfileLedgerItemView,
   FamilyEmergencyChecklistItemLedgerItemView,
   FamilyEmergencyChecklistStatusLedgerItemView,
   FamilyEmergencyDrillLedgerItemView,
   FamilyEmergencyExternalContactLedgerItemView,
+  FamilyEmergencyContactLedgerItemView,
+  FamilyEmergencyHealthFactLedgerItemView,
   FamilyEmergencyMeetingPointLedgerItemView,
   FamilyEmergencyMemberStatusLedgerItemView,
   FamilyEmergencyPlanLedgerItemView,
@@ -168,6 +172,28 @@ export type FamilyEmergencyPreparednessLedgerItemRow =
   | FamilyEmergencyPreparednessKitCheckLedgerItemRow
   | FamilyEmergencyDrillLedgerItemRow;
 
+type FamilyEmergencyAssistanceRowCommon = {
+  readonly familyId:FamilyId;
+  readonly ownerPersonId:PersonId;
+  readonly createdAt:IsoDateTime;
+};
+type FamilyEmergencyAssistanceRow<T> = T extends unknown
+  ? Omit<T, 'ownerPersonId' | 'createdAt'> & FamilyEmergencyAssistanceRowCommon
+  : never;
+export type FamilyEmergencyAssistanceProfileLedgerItemRow =
+  FamilyEmergencyAssistanceRow<FamilyEmergencyAssistanceProfileLedgerItemView>;
+export type FamilyEmergencyHealthFactLedgerItemRow =
+  FamilyEmergencyAssistanceRow<FamilyEmergencyHealthFactLedgerItemView>;
+export type FamilyEmergencyContactLedgerItemRow =
+  FamilyEmergencyAssistanceRow<FamilyEmergencyContactLedgerItemView>;
+export type FamilyEmergencyAssistanceInstructionLedgerItemRow =
+  FamilyEmergencyAssistanceRow<FamilyEmergencyAssistanceInstructionLedgerItemView>;
+export type FamilyEmergencyAssistanceLedgerItemRow =
+  | FamilyEmergencyAssistanceProfileLedgerItemRow
+  | FamilyEmergencyHealthFactLedgerItemRow
+  | FamilyEmergencyContactLedgerItemRow
+  | FamilyEmergencyAssistanceInstructionLedgerItemRow;
+
 export interface LifeRepositoryPort {
   listLifeRecords(
     context: PolicyAuthorizedRepositoryExecutionContext
@@ -229,6 +255,21 @@ export interface LifeRepositoryPort {
     context:PolicyAuthorizedRepositoryExecutionContext,
     row:FamilyEmergencyPreparednessLedgerItemRow
   ):RepositoryResult<void>;
+  listFamilyEmergencyAssistanceItems(
+    context:PolicyAuthorizedRepositoryExecutionContext
+  ):RepositoryResult<readonly FamilyEmergencyAssistanceLedgerItemRow[]>;
+  findFamilyEmergencyAssistanceProfile(
+    context:PolicyAuthorizedRepositoryExecutionContext,
+    id:string
+  ):RepositoryResult<FamilyEmergencyAssistanceProfileLedgerItemRow | null>;
+  findFamilyEmergencyAssistanceItem(
+    context:PolicyAuthorizedRepositoryExecutionContext,
+    id:string
+  ):RepositoryResult<FamilyEmergencyAssistanceLedgerItemRow | null>;
+  insertFamilyEmergencyAssistanceItem(
+    context:PolicyAuthorizedRepositoryExecutionContext,
+    row:FamilyEmergencyAssistanceLedgerItemRow
+  ):RepositoryResult<void>;
 }
 
 /**
@@ -248,6 +289,10 @@ export interface LifePolicyResourceRepositoryPort {
     context: RepositoryExecutionContext,
     id: string
   ): RepositoryResult<FamilyEmergencyPlanLedgerItemRow | null>;
+  findFamilyEmergencyAssistanceProfileForPolicyResolution(
+    context:RepositoryExecutionContext,
+    id:string
+  ):RepositoryResult<FamilyEmergencyAssistanceProfileLedgerItemRow | null>;
 }
 
 export interface LifeAutomationDueProjectionRow {

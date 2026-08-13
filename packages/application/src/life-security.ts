@@ -1,4 +1,5 @@
 import type {
+  FamilyEmergencyAssistanceItemType,
   FamilyEmergencyItemType,
   FamilyEmergencyPreparednessItemType,
   ManagedHomeInventoryItemType,
@@ -134,6 +135,28 @@ export const FAMILY_EMERGENCY_PREPAREDNESS_REQUIRED_INPUT_KEYS = Object.freeze({
   emergency_drill: Object.freeze(['itemType','planId','drillKind','status','occurredAt'])
 } satisfies Readonly<Record<FamilyEmergencyPreparednessItemType, readonly string[]>>);
 
+export const FAMILY_EMERGENCY_ASSISTANCE_INPUT_KEYS = Object.freeze({
+  emergency_profile: Object.freeze([
+    'itemType','planId','label','subjectKind','subjectPersonId','subjectPetId','responsiblePersonId'
+  ]),
+  health_fact: Object.freeze([
+    'itemType','profileId','supersedesItemId','factKind','bloodType','value','note'
+  ]),
+  emergency_contact: Object.freeze([
+    'itemType','profileId','supersedesItemId','name','phoneE164','relationship','note'
+  ]),
+  assistance_instruction: Object.freeze([
+    'itemType','profileId','supersedesItemId','instructionKind','instruction','note'
+  ])
+} satisfies Readonly<Record<FamilyEmergencyAssistanceItemType, readonly string[]>>);
+
+export const FAMILY_EMERGENCY_ASSISTANCE_REQUIRED_INPUT_KEYS = Object.freeze({
+  emergency_profile: Object.freeze(['itemType','planId','label','subjectKind']),
+  health_fact: Object.freeze(['itemType','profileId','factKind']),
+  emergency_contact: Object.freeze(['itemType','profileId','name','phoneE164']),
+  assistance_instruction: Object.freeze(['itemType','profileId','instructionKind','instruction'])
+} satisfies Readonly<Record<FamilyEmergencyAssistanceItemType, readonly string[]>>);
+
 export interface ManagedLifeDataContractInspection {
   readonly accepted:boolean;
   readonly itemType?:
@@ -141,12 +164,14 @@ export interface ManagedLifeDataContractInspection {
     | 'activity'
     | ManagedHomeInventoryItemType
     | FamilyEmergencyItemType
-    | FamilyEmergencyPreparednessItemType;
+    | FamilyEmergencyPreparednessItemType
+    | FamilyEmergencyAssistanceItemType;
   readonly contractFamily?:
     | 'managed_life'
     | 'home_inventory'
     | 'family_emergency'
-    | 'family_emergency_preparedness';
+    | 'family_emergency_preparedness'
+    | 'family_emergency_assistance';
   readonly exactShape:boolean;
   readonly unknownFields:readonly string[];
   readonly missingFields:readonly string[];
@@ -305,7 +330,43 @@ export const inspectManagedLifeDataContract = (input: unknown): ManagedLifeDataC
     && typeof input.itemType === 'string'
     && Object.hasOwn(FAMILY_EMERGENCY_PREPAREDNESS_INPUT_KEYS, input.itemType);
 
-  if (familyEmergencyPreparednessItem) {
+  const familyEmergencyAssistanceItem = isPlainObject(input)
+    && typeof input.itemType === 'string'
+    && Object.hasOwn(FAMILY_EMERGENCY_ASSISTANCE_INPUT_KEYS, input.itemType);
+
+  if (familyEmergencyAssistanceItem) {
+    const assistanceItemType = input.itemType as FamilyEmergencyAssistanceItemType;
+    itemType = assistanceItemType;
+    contractFamily = 'family_emergency_assistance';
+    let allowed = FAMILY_EMERGENCY_ASSISTANCE_INPUT_KEYS[assistanceItemType];
+    let required = FAMILY_EMERGENCY_ASSISTANCE_REQUIRED_INPUT_KEYS[assistanceItemType];
+    if (assistanceItemType === 'emergency_profile') {
+      if (input.subjectKind === 'person') {
+        allowed = Object.freeze(['itemType','planId','label','subjectKind','subjectPersonId']);
+        required = allowed;
+      } else if (input.subjectKind === 'pet') {
+        allowed = Object.freeze([
+          'itemType','planId','label','subjectKind','subjectPetId','responsiblePersonId'
+        ]);
+        required = allowed;
+      } else {
+        exactShape = false;
+      }
+    } else if (assistanceItemType === 'health_fact') {
+      if (input.factKind === 'blood_type') {
+        allowed = Object.freeze([
+          'itemType','profileId','supersedesItemId','factKind','bloodType','note'
+        ]);
+        required = Object.freeze(['itemType','profileId','factKind','bloodType']);
+      } else {
+        allowed = Object.freeze([
+          'itemType','profileId','supersedesItemId','factKind','value','note'
+        ]);
+        required = Object.freeze(['itemType','profileId','factKind','value']);
+      }
+    }
+    compareKeys(input, '$', allowed, required, unknownFields, missingFields);
+  } else if (familyEmergencyPreparednessItem) {
     const preparednessItemType = input.itemType as FamilyEmergencyPreparednessItemType;
     itemType = preparednessItemType;
     contractFamily = 'family_emergency_preparedness';

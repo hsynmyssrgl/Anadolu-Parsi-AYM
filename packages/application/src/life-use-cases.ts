@@ -16,6 +16,15 @@ import {
 } from '@ppt/core';
 import type {
   CreateLifeRecordInput,
+  FamilyEmergencyAssistanceInstructionKind,
+  FamilyEmergencyAssistanceInstructionLedgerItemView,
+  FamilyEmergencyAssistanceLedgerItemView,
+  FamilyEmergencyAssistanceProfileLedgerItemView,
+  FamilyEmergencyAssistanceProfileView,
+  FamilyEmergencyBloodType,
+  FamilyEmergencyContactLedgerItemView,
+  FamilyEmergencyHealthFactKind,
+  FamilyEmergencyHealthFactLedgerItemView,
   FamilyEmergencyChecklistItemLedgerItemView,
   FamilyEmergencyChecklistStatus,
   FamilyEmergencyChecklistStatusLedgerItemView,
@@ -86,6 +95,7 @@ import type {
   RecordManagedHomeInventoryServiceInput,
   RecordManagedHomeInventoryWarrantyInput,
   RecordFamilyEmergencyItemInput,
+  RecordFamilyEmergencyAssistanceItemInput,
   RecordFamilyEmergencyPreparednessItemInput,
   RecordPrivacy
 } from '@ppt/domain';
@@ -94,6 +104,8 @@ import type { AuthorizationAction } from '@ppt/security';
 import { inspectManagedLifeDataContract } from './life-security.js';
 
 export {
+  FAMILY_EMERGENCY_ASSISTANCE_INPUT_KEYS,
+  FAMILY_EMERGENCY_ASSISTANCE_REQUIRED_INPUT_KEYS,
   FAMILY_EMERGENCY_INPUT_KEYS,
   FAMILY_EMERGENCY_PREPAREDNESS_INPUT_KEYS,
   FAMILY_EMERGENCY_PREPAREDNESS_REQUIRED_INPUT_KEYS,
@@ -273,6 +285,28 @@ export type FamilyEmergencyPreparednessWriteRecord =
   | FamilyEmergencyPreparednessKitCheckWriteRecord
   | FamilyEmergencyDrillWriteRecord;
 
+interface FamilyEmergencyAssistanceWriteRecordCommon {
+  readonly familyId:FamilyId;
+  readonly ownerPersonId:PersonId;
+  readonly planId:string;
+  readonly privacy:'private';
+  readonly dataSource:'manual';
+  readonly createdAt:IsoDateTime;
+}
+export type FamilyEmergencyAssistanceProfileWriteRecord =
+  FamilyEmergencyAssistanceProfileLedgerItemView & FamilyEmergencyAssistanceWriteRecordCommon;
+export type FamilyEmergencyHealthFactWriteRecord =
+  FamilyEmergencyHealthFactLedgerItemView & FamilyEmergencyAssistanceWriteRecordCommon;
+export type FamilyEmergencyContactWriteRecord =
+  FamilyEmergencyContactLedgerItemView & FamilyEmergencyAssistanceWriteRecordCommon;
+export type FamilyEmergencyAssistanceInstructionWriteRecord =
+  FamilyEmergencyAssistanceInstructionLedgerItemView & FamilyEmergencyAssistanceWriteRecordCommon;
+export type FamilyEmergencyAssistanceWriteRecord =
+  | FamilyEmergencyAssistanceProfileWriteRecord
+  | FamilyEmergencyHealthFactWriteRecord
+  | FamilyEmergencyContactWriteRecord
+  | FamilyEmergencyAssistanceInstructionWriteRecord;
+
 export interface LifeWriteScope {
   readonly occurredAt: IsoDateTime;
   findPerson(personId: PersonId): Result<{
@@ -310,6 +344,15 @@ export interface LifeWriteScope {
   ): Result<FamilyEmergencyPreparednessWriteRecord | null, AppError>;
   insertFamilyEmergencyPreparednessItem(
     record:FamilyEmergencyPreparednessWriteRecord
+  ): Result<void, AppError>;
+  findFamilyEmergencyAssistanceProfile(
+    id:string
+  ): Result<FamilyEmergencyAssistanceProfileWriteRecord | null, AppError>;
+  findFamilyEmergencyAssistanceItem(
+    id:string
+  ): Result<FamilyEmergencyAssistanceWriteRecord | null, AppError>;
+  insertFamilyEmergencyAssistanceItem(
+    record:FamilyEmergencyAssistanceWriteRecord
   ): Result<void, AppError>;
   appendAudit(input: {
     readonly id: string;
@@ -769,6 +812,21 @@ const familyEmergencyDrillStatuses = new Set<FamilyEmergencyDrillStatus>([
   'completed','partial','cancelled'
 ]);
 
+const familyEmergencyHealthFactKinds = new Set<FamilyEmergencyHealthFactKind>([
+  'blood_type','allergy','chronic_condition','medication','medical_device','other'
+]);
+const familyEmergencyBloodTypes = new Set<FamilyEmergencyBloodType>([
+  'a_positive','a_negative','b_positive','b_negative','ab_positive','ab_negative',
+  'o_positive','o_negative','unknown'
+]);
+const familyEmergencyAssistanceInstructionKinds =
+  new Set<FamilyEmergencyAssistanceInstructionKind>([
+    'mobility','vision','hearing','communication','cognitive','medication_support',
+    'evacuation','pet_care','other'
+  ]);
+const optionalFamilyEmergencyAssistanceText = (value:unknown, maximum:number):boolean =>
+  value === undefined || managedLifeText(value, 2, maximum);
+
 const isFamilyEmergencyCommand = (
   command:RecordManagedLifeItemInput,
   inspection:ReturnType<typeof inspectManagedLifeDataContract>
@@ -779,6 +837,60 @@ const isFamilyEmergencyPreparednessCommand = (
   inspection:ReturnType<typeof inspectManagedLifeDataContract>
 ): command is RecordFamilyEmergencyPreparednessItemInput =>
   inspection.contractFamily === 'family_emergency_preparedness';
+
+const isFamilyEmergencyAssistanceCommand = (
+  command:RecordManagedLifeItemInput,
+  inspection:ReturnType<typeof inspectManagedLifeDataContract>
+): command is RecordFamilyEmergencyAssistanceItemInput =>
+  inspection.contractFamily === 'family_emergency_assistance';
+
+const validateFamilyEmergencyAssistanceCommand = (
+  context:LifeApplicationContext,
+  command:RecordFamilyEmergencyAssistanceItemInput
+):Result<void, AppError> => {
+  if (command.itemType === 'emergency_profile') {
+    if (!managedLifeId(command.planId) || !managedLifeText(command.label, 2, 120)) {
+      return err(invalid(context, 'Acil durum destek profili planÄ± veya etiketi geÃ§ersiz.'));
+    }
+    return command.subjectKind === 'person'
+      ? managedLifeId(command.subjectPersonId)
+        ? ok(undefined)
+        : err(invalid(context, 'Acil durum destek profili kiÅŸi hedefi geÃ§ersiz.'))
+      : managedLifeId(command.subjectPetId) && managedLifeId(command.responsiblePersonId)
+        ? ok(undefined)
+        : err(invalid(context, 'Evcil hayvan hedefi veya sorumlu aile Ã¼yesi geÃ§ersiz.'));
+  }
+  if (!managedLifeId(command.profileId) || !managedHomeOptionalId(command.supersedesItemId)) {
+    return err(invalid(context, 'Acil durum destek profili veya dÃ¼zeltme hedefi geÃ§ersiz.'));
+  }
+  switch (command.itemType) {
+    case 'health_fact':
+      if (!familyEmergencyHealthFactKinds.has(command.factKind)
+        || !optionalFamilyEmergencyAssistanceText(command.note, 500)) {
+        return err(invalid(context, 'SaÄŸlÄ±k bilgisi tÃ¼rÃ¼ veya notu geÃ§ersiz.'));
+      }
+      return command.factKind === 'blood_type'
+        ? familyEmergencyBloodTypes.has(command.bloodType)
+          ? ok(undefined)
+          : err(invalid(context, 'Kan grubu deÄŸeri geÃ§ersiz.'))
+        : managedLifeText(command.value, 2, 240)
+          ? ok(undefined)
+          : err(invalid(context, 'SaÄŸlÄ±k bilgisi deÄŸeri geÃ§ersiz.'));
+    case 'emergency_contact':
+      return managedLifeText(command.name, 2, 120)
+        && familyEmergencyE164(command.phoneE164)
+        && optionalFamilyEmergencyAssistanceText(command.relationship, 120)
+        && optionalFamilyEmergencyAssistanceText(command.note, 500)
+        ? ok(undefined)
+        : err(invalid(context, 'Acil durum irtibatÄ± adÄ±, telefonu veya notu geÃ§ersiz.'));
+    case 'assistance_instruction':
+      return familyEmergencyAssistanceInstructionKinds.has(command.instructionKind)
+        && managedLifeText(command.instruction, 2, 1000)
+        && optionalFamilyEmergencyAssistanceText(command.note, 500)
+        ? ok(undefined)
+        : err(invalid(context, 'Destek talimatÄ± tÃ¼rÃ¼, metni veya notu geÃ§ersiz.'));
+  }
+};
 
 const validateFamilyEmergencyPreparednessCommand = (
   context:LifeApplicationContext,
@@ -968,6 +1080,9 @@ const validateManagedLifeCommand = (
   }
   if (isFamilyEmergencyPreparednessCommand(command, inspection)) {
     return validateFamilyEmergencyPreparednessCommand(context, command);
+  }
+  if (isFamilyEmergencyAssistanceCommand(command, inspection)) {
+    return validateFamilyEmergencyAssistanceCommand(context, command);
   }
   if (command.itemType === 'profile') {
     if (!managedLifeId(command.ownerPersonId)
@@ -1280,6 +1395,106 @@ const projectFamilyEmergencyPreparednessItem = (
   }
 };
 
+const projectFamilyEmergencyAssistanceItem = (
+  item:FamilyEmergencyAssistanceWriteRecord
+):FamilyEmergencyAssistanceLedgerItemView => {
+  const common = {
+    id: item.id,
+    planId: item.planId,
+    ownerPersonId: item.ownerPersonId,
+    privacy: 'private' as const,
+    dataSource: 'manual' as const,
+    createdAt: item.createdAt
+  };
+  switch (item.itemType) {
+    case 'emergency_profile':
+      return item.subjectKind === 'person'
+        ? Object.freeze({
+            ...common,
+            itemType: 'emergency_profile' as const,
+            label: item.label,
+            subjectKind: 'person' as const,
+            subjectPersonId: item.subjectPersonId
+          })
+        : Object.freeze({
+            ...common,
+            itemType: 'emergency_profile' as const,
+            label: item.label,
+            subjectKind: 'pet' as const,
+            subjectPetId: item.subjectPetId,
+            responsiblePersonId: item.responsiblePersonId
+          });
+    case 'health_fact': {
+      const child = {
+        ...common,
+        itemType: 'health_fact' as const,
+        profileId: item.profileId,
+        ...(item.supersedesItemId ? { supersedesItemId: item.supersedesItemId } : {}),
+        factKind: item.factKind,
+        ...(item.note ? { note: item.note } : {})
+      };
+      return item.factKind === 'blood_type'
+        ? Object.freeze({ ...child, factKind: 'blood_type' as const, bloodType: item.bloodType })
+        : Object.freeze({ ...child, factKind: item.factKind, value: item.value });
+    }
+    case 'emergency_contact': return Object.freeze({
+      ...common,
+      itemType: 'emergency_contact',
+      profileId: item.profileId,
+      ...(item.supersedesItemId ? { supersedesItemId: item.supersedesItemId } : {}),
+      name: item.name,
+      phoneE164: item.phoneE164,
+      ...(item.relationship ? { relationship: item.relationship } : {}),
+      ...(item.note ? { note: item.note } : {})
+    });
+    case 'assistance_instruction': return Object.freeze({
+      ...common,
+      itemType: 'assistance_instruction',
+      profileId: item.profileId,
+      ...(item.supersedesItemId ? { supersedesItemId: item.supersedesItemId } : {}),
+      instructionKind: item.instructionKind,
+      instruction: item.instruction,
+      ...(item.note ? { note: item.note } : {})
+    });
+  }
+};
+
+const buildFamilyEmergencyAssistanceProfiles = (
+  items:readonly FamilyEmergencyAssistanceWriteRecord[]
+):readonly FamilyEmergencyAssistanceProfileView[] => {
+  const profiles = items.filter((item):item is FamilyEmergencyAssistanceProfileWriteRecord =>
+    item.itemType === 'emergency_profile');
+  return Object.freeze(profiles.map((profile):FamilyEmergencyAssistanceProfileView => {
+    const children = items.filter((item):item is Exclude<
+      FamilyEmergencyAssistanceWriteRecord,
+      FamilyEmergencyAssistanceProfileWriteRecord
+    > => item.itemType !== 'emergency_profile'
+      && item.profileId === profile.id
+      && item.planId === profile.planId
+      && item.ownerPersonId === profile.ownerPersonId
+      && item.privacy === 'private');
+    const supersededIds = new Set(children.flatMap((item) =>
+      item.supersedesItemId ? [item.supersedesItemId] : []));
+    const current = children
+      .filter((item) => !supersededIds.has(item.id))
+      .sort((left, right) => right.createdAt.localeCompare(left.createdAt) || right.id.localeCompare(left.id));
+    return Object.freeze({
+      ...(projectFamilyEmergencyAssistanceItem(profile) as FamilyEmergencyAssistanceProfileLedgerItemView),
+      healthFacts: Object.freeze(current
+        .filter((item):item is FamilyEmergencyHealthFactWriteRecord => item.itemType === 'health_fact')
+        .map((item) => projectFamilyEmergencyAssistanceItem(item) as FamilyEmergencyHealthFactLedgerItemView)),
+      emergencyContacts: Object.freeze(current
+        .filter((item):item is FamilyEmergencyContactWriteRecord => item.itemType === 'emergency_contact')
+        .map((item) => projectFamilyEmergencyAssistanceItem(item) as FamilyEmergencyContactLedgerItemView)),
+      assistanceInstructions: Object.freeze(current
+        .filter((item):item is FamilyEmergencyAssistanceInstructionWriteRecord =>
+          item.itemType === 'assistance_instruction')
+        .map((item) => projectFamilyEmergencyAssistanceItem(item) as
+          FamilyEmergencyAssistanceInstructionLedgerItemView))
+    });
+  }).sort((left, right) => left.label.localeCompare(right.label) || left.id.localeCompare(right.id)));
+};
+
 const buildFamilyEmergencyPlans = (
   items:readonly FamilyEmergencyWriteRecord[],
   preparednessItems:readonly FamilyEmergencyPreparednessWriteRecord[]
@@ -1378,6 +1593,7 @@ export const buildManagedLifeWorkspace = (input: {
   readonly homeInventoryItems?:readonly ManagedHomeInventoryWriteRecord[];
   readonly emergencyItems?:readonly FamilyEmergencyWriteRecord[];
   readonly preparednessItems?:readonly FamilyEmergencyPreparednessWriteRecord[];
+  readonly assistanceItems?:readonly FamilyEmergencyAssistanceWriteRecord[];
   readonly generatedAt:string;
 }): ManagedLifeWorkspaceView => {
   const profiles = input.items.filter((item): item is ManagedLifeProfileLedgerItemView => item.itemType === 'profile');
@@ -1434,6 +1650,7 @@ export const buildManagedLifeWorkspace = (input: {
     profiles: Object.freeze(profileViews),
     homeInventoryItems: Object.freeze(homeInventoryItems),
     emergencyPlans: buildFamilyEmergencyPlans(input.emergencyItems ?? [], input.preparednessItems ?? []),
+    emergencyAssistanceProfiles: buildFamilyEmergencyAssistanceProfiles(input.assistanceItems ?? []),
     upcomingReminders: Object.freeze(reminders
       .filter((reminder) => reminder.dueAt >= input.generatedAt)
       .sort((left, right) => left.dueAt.localeCompare(right.dueAt) || left.sourceId.localeCompare(right.sourceId))
@@ -1458,6 +1675,9 @@ export const buildManagedLifeWorkspace = (input: {
     notificationDelivery: 'not_performed',
     sensorIntegration: 'not_performed',
     readinessGuarantee: 'not_claimed',
+    medicalVerification: 'not_performed',
+    healthRegistryLookup: 'not_performed',
+    exportSharing: 'not_performed',
     networkEgressAdded: false
   });
 };
@@ -2030,6 +2250,181 @@ const validateFamilyEmergencyPreparednessRelations = (input: {
   }
 };
 
+const buildFamilyEmergencyAssistanceRecord = (input:{
+  readonly context:LifeApplicationContext;
+  readonly command:RecordFamilyEmergencyAssistanceItemInput;
+  readonly itemId:string;
+  readonly occurredAt:IsoDateTime;
+  readonly profile?:FamilyEmergencyAssistanceProfileWriteRecord;
+}):FamilyEmergencyAssistanceWriteRecord => {
+  if (input.command.itemType === 'emergency_profile') {
+    const ownerPersonId = asPersonId(input.command.subjectKind === 'person'
+      ? input.command.subjectPersonId
+      : input.command.responsiblePersonId);
+    const common = {
+      id: input.itemId,
+      familyId: input.context.familyId,
+      ownerPersonId,
+      planId: input.command.planId,
+      privacy: 'private' as const,
+      dataSource: 'manual' as const,
+      createdAt: input.occurredAt,
+      itemType: 'emergency_profile' as const,
+      label: input.command.label.trim()
+    };
+    return input.command.subjectKind === 'person'
+      ? { ...common, subjectKind: 'person', subjectPersonId: input.command.subjectPersonId }
+      : {
+          ...common,
+          subjectKind: 'pet',
+          subjectPetId: input.command.subjectPetId,
+          responsiblePersonId: input.command.responsiblePersonId
+        };
+  }
+  const profile = input.profile!;
+  const common = {
+    id: input.itemId,
+    familyId: input.context.familyId,
+    ownerPersonId: profile.ownerPersonId,
+    planId: profile.planId,
+    profileId: profile.id,
+    privacy: 'private' as const,
+    dataSource: 'manual' as const,
+    createdAt: input.occurredAt,
+    ...(input.command.supersedesItemId
+      ? { supersedesItemId: input.command.supersedesItemId }
+      : {})
+  };
+  switch (input.command.itemType) {
+    case 'health_fact':
+      return input.command.factKind === 'blood_type'
+        ? {
+            ...common,
+            itemType: 'health_fact',
+            factKind: 'blood_type',
+            bloodType: input.command.bloodType,
+            ...(input.command.note?.trim() ? { note: input.command.note.trim() } : {})
+          }
+        : {
+            ...common,
+            itemType: 'health_fact',
+            factKind: input.command.factKind,
+            value: input.command.value.trim(),
+            ...(input.command.note?.trim() ? { note: input.command.note.trim() } : {})
+          };
+    case 'emergency_contact': return {
+      ...common,
+      itemType: 'emergency_contact',
+      name: input.command.name.trim(),
+      phoneE164: input.command.phoneE164,
+      ...(input.command.relationship?.trim()
+        ? { relationship: input.command.relationship.trim() }
+        : {}),
+      ...(input.command.note?.trim() ? { note: input.command.note.trim() } : {})
+    };
+    case 'assistance_instruction': return {
+      ...common,
+      itemType: 'assistance_instruction',
+      instructionKind: input.command.instructionKind,
+      instruction: input.command.instruction.trim(),
+      ...(input.command.note?.trim() ? { note: input.command.note.trim() } : {})
+    };
+  }
+};
+
+const validateFamilyEmergencyAssistanceAuthorizationRoot = (input:{
+  readonly context:LifeApplicationContext;
+  readonly command:RecordFamilyEmergencyAssistanceItemInput;
+  readonly scope:LifeWriteScope;
+  readonly plan?:FamilyEmergencyPlanWriteRecord;
+  readonly profile?:FamilyEmergencyAssistanceProfileWriteRecord;
+}):Result<void, AppError> => {
+  if (input.command.itemType === 'emergency_profile') {
+    if (!input.plan
+      || input.plan.familyId !== input.context.familyId
+      || input.plan.privacy !== 'family') {
+      return err(invalid(input.context, 'Emergency assistance root requires a live same-family plan.'));
+    }
+    const ownerPersonId = asPersonId(input.command.subjectKind === 'person'
+      ? input.command.subjectPersonId
+      : input.command.responsiblePersonId);
+    const owner = input.scope.findPerson(ownerPersonId);
+    if (!owner.ok) return owner;
+    return owner.value
+      && owner.value.familyId === input.context.familyId
+      && owner.value.status === 'active'
+      ? ok(undefined)
+      : err(invalid(input.context, 'Emergency assistance owner must be an active family member.'));
+  }
+  if (!input.profile
+    || input.profile.familyId !== input.context.familyId
+    || input.profile.privacy !== 'private') {
+    return err(invalid(input.context, 'Emergency assistance child requires a same-family private root.'));
+  }
+  return ok(undefined);
+};
+
+const validateFamilyEmergencyAssistanceRelations = (input:{
+  readonly context:LifeApplicationContext;
+  readonly command:RecordFamilyEmergencyAssistanceItemInput;
+  readonly scope:LifeWriteScope;
+  readonly itemId:string;
+  readonly plan?:FamilyEmergencyPlanWriteRecord;
+  readonly profile?:FamilyEmergencyAssistanceProfileWriteRecord;
+}):Result<void, AppError> => {
+  if (input.command.itemType === 'emergency_profile') {
+    if (!input.plan
+      || input.plan.familyId !== input.context.familyId
+      || input.plan.privacy !== 'family') {
+      return err(invalid(input.context, 'Acil durum destek profili aynÄ± ailedeki geÃ§erli bir plana baÄŸlanmalÄ±dÄ±r.'));
+    }
+    const ownerPersonId = asPersonId(input.command.subjectKind === 'person'
+      ? input.command.subjectPersonId
+      : input.command.responsiblePersonId);
+    const owner = input.scope.findPerson(ownerPersonId);
+    if (!owner.ok) return owner;
+    return owner.value
+      && owner.value.familyId === input.context.familyId
+      && owner.value.status === 'active'
+      ? ok(undefined)
+      : err(invalid(input.context, 'Destek profili sahibi etkin bir aile Ã¼yesi olmalÄ±dÄ±r.'));
+  }
+  const profile = input.profile;
+  if (!profile
+    || profile.familyId !== input.context.familyId
+    || profile.privacy !== 'private') {
+    return err(invalid(input.context, 'Destek kaydÄ± aynÄ± ailedeki Ã¶zel destek profiline baÄŸlanmalÄ±dÄ±r.'));
+  }
+  if (!input.command.supersedesItemId) return ok(undefined);
+  if (input.command.supersedesItemId === input.itemId) {
+    return err(invalid(input.context, 'Destek kaydÄ± kendisini dÃ¼zeltemez.'));
+  }
+  const prior = input.scope.findFamilyEmergencyAssistanceItem(input.command.supersedesItemId);
+  if (!prior.ok) return prior;
+  if (!prior.value
+    || prior.value.itemType === 'emergency_profile'
+    || prior.value.familyId !== input.context.familyId
+    || prior.value.profileId !== profile.id
+    || prior.value.planId !== profile.planId
+    || prior.value.ownerPersonId !== profile.ownerPersonId
+    || prior.value.privacy !== 'private'
+    || prior.value.itemType !== input.command.itemType
+    || prior.value.createdAt >= input.scope.occurredAt) {
+    return err(invalid(input.context, 'DÃ¼zeltme yalnÄ±z aynÄ± Ã¶zel profildeki daha eski kaydÄ± hedefleyebilir.'));
+  }
+  if (input.command.itemType === 'health_fact'
+    && prior.value.itemType === 'health_fact'
+    && prior.value.factKind !== input.command.factKind) {
+    return err(invalid(input.context, 'SaÄŸlÄ±k bilgisi dÃ¼zeltmesi aynÄ± bilgi tÃ¼rÃ¼nÃ¼ korumalÄ±dÄ±r.'));
+  }
+  if (input.command.itemType === 'assistance_instruction'
+    && prior.value.itemType === 'assistance_instruction'
+    && prior.value.instructionKind !== input.command.instructionKind) {
+    return err(invalid(input.context, 'Destek talimatÄ± dÃ¼zeltmesi aynÄ± talimat tÃ¼rÃ¼nÃ¼ korumalÄ±dÄ±r.'));
+  }
+  return ok(undefined);
+};
+
 export class RecordManagedLifeItemUseCase {
   public constructor(private readonly unitOfWork: LifeUnitOfWork) {}
 
@@ -2045,7 +2440,8 @@ export class RecordManagedLifeItemUseCase {
     | ManagedLifeLedgerItemView
     | ManagedHomeInventoryLedgerItemView
     | FamilyEmergencyLedgerItemView
-    | FamilyEmergencyPreparednessLedgerItemView,
+    | FamilyEmergencyPreparednessLedgerItemView
+    | FamilyEmergencyAssistanceLedgerItemView,
     AppError
   >> {
     const commandValidation = validateManagedLifeCommand(input.context, input.command);
@@ -2057,15 +2453,30 @@ export class RecordManagedLifeItemUseCase {
     const isHomeInventory = isManagedHomeInventoryCommand(input.command, inspection);
     const isEmergency = isFamilyEmergencyCommand(input.command, inspection);
     const isPreparedness = isFamilyEmergencyPreparednessCommand(input.command, inspection);
+    const isAssistance = isFamilyEmergencyAssistanceCommand(input.command, inspection);
     const isEmergencyPlan = isEmergency && input.command.itemType === 'emergency_plan';
     const isEmergencyMemberStatus = isEmergency && input.command.itemType === 'member_status';
-    const isProfile = !isHomeInventory && !isEmergency && !isPreparedness && input.command.itemType === 'profile';
-    const rootId = isProfile || isEmergencyPlan || isEmergencyMemberStatus
-      ? input.identifiers.itemId
-      : isEmergency || isPreparedness ? input.command.planId : input.command.recordId;
-    const aggregateRootId = (isEmergency && !isEmergencyPlan) || isPreparedness
-      ? input.command.planId
-      : rootId;
+    const isAssistanceProfile = isAssistance && input.command.itemType === 'emergency_profile';
+    const isProfile = !isHomeInventory
+      && !isEmergency
+      && !isPreparedness
+      && !isAssistance
+      && input.command.itemType === 'profile';
+    let rootId:string;
+    if (isProfile || isEmergencyPlan || isEmergencyMemberStatus || isAssistanceProfile) {
+      rootId = input.identifiers.itemId;
+    } else if (isEmergency || isPreparedness) {
+      rootId = input.command.planId;
+    } else if (isAssistance) {
+      rootId = input.command.profileId;
+    } else {
+      rootId = input.command.recordId;
+    }
+    const aggregateRootId = isAssistance
+      ? rootId
+      : (isEmergency && !isEmergencyPlan) || isPreparedness
+        ? input.command.planId
+        : rootId;
     const profileOwner = isProfile ? asPersonId(input.command.ownerPersonId) : undefined;
     const profilePrivacy = isProfile ? input.command.privacy : undefined;
     if ((isEmergency || isPreparedness) && !input.context.actor.personId) {
@@ -2074,7 +2485,12 @@ export class RecordManagedLifeItemUseCase {
     const emergencyOwner = isEmergency
       ? asPersonId(isEmergencyMemberStatus ? input.command.memberPersonId : input.context.actor.personId!)
       : undefined;
-    const createOperation = isProfile || isEmergencyPlan || isEmergencyMemberStatus;
+    const assistanceOwner = isAssistanceProfile
+      ? asPersonId(input.command.subjectKind === 'person'
+        ? input.command.subjectPersonId
+        : input.command.responsiblePersonId)
+      : undefined;
+    const createOperation = isProfile || isEmergencyPlan || isEmergencyMemberStatus || isAssistanceProfile;
     const intent: LifePolicyIntent = isPreparedness
       ? {
           action: 'update',
@@ -2090,12 +2506,25 @@ export class RecordManagedLifeItemUseCase {
           resourceId: rootId,
           purpose: 'general',
           ...(profileOwner ? { ownerPersonId: profileOwner, privacy: profilePrivacy! } : {}),
-          ...(emergencyOwner && createOperation ? { ownerPersonId: emergencyOwner, privacy: 'family' as const } : {})
+          ...(emergencyOwner && createOperation ? { ownerPersonId: emergencyOwner, privacy: 'family' as const } : {}),
+          ...(assistanceOwner ? { ownerPersonId: assistanceOwner, privacy: 'private' as const } : {})
         };
     return this.unitOfWork.execute(input.context, intent, (scope) => {
       let parent: ManagedLifeProfileWriteRecord | undefined;
       let emergencyPlan:FamilyEmergencyPlanWriteRecord | undefined;
-      if (isEmergencyPlan) {
+      let assistancePlan:FamilyEmergencyPlanWriteRecord | undefined;
+      let assistanceProfile:FamilyEmergencyAssistanceProfileWriteRecord | undefined;
+      if (isAssistanceProfile) {
+        const found = scope.findFamilyEmergencyPlan(input.command.planId);
+        if (!found.ok) return found;
+        if (!found.value) return err(missing(input.context));
+        assistancePlan = found.value;
+      } else if (isAssistance) {
+        const found = scope.findFamilyEmergencyAssistanceProfile(input.command.profileId);
+        if (!found.ok) return found;
+        if (!found.value) return err(missing(input.context));
+        assistanceProfile = found.value;
+      } else if (isEmergencyPlan) {
         const reporter = scope.findPerson(emergencyOwner!);
         if (!reporter.ok) return reporter;
         if (!reporter.value
@@ -2126,14 +2555,30 @@ export class RecordManagedLifeItemUseCase {
         }));
         parent = found.value;
       }
-      const ownerPersonId = isPreparedness
-        ? emergencyPlan!.ownerPersonId
-        : isEmergency
-        ? isEmergencyPlan || isEmergencyMemberStatus
-          ? emergencyOwner!
-          : emergencyPlan!.ownerPersonId
-        : profileOwner ?? parent!.ownerPersonId;
-      const privacy:RecordPrivacy = isEmergency || isPreparedness ? 'family' : profilePrivacy ?? parent!.privacy;
+      if (isAssistance) {
+        const rootValidation = validateFamilyEmergencyAssistanceAuthorizationRoot({
+          context: input.context,
+          command: input.command,
+          scope,
+          ...(assistancePlan ? { plan: assistancePlan } : {}),
+          ...(assistanceProfile ? { profile: assistanceProfile } : {})
+        });
+        if (!rootValidation.ok) return rootValidation;
+      }
+      const ownerPersonId = isAssistance
+        ? assistanceOwner ?? assistanceProfile!.ownerPersonId
+        : isPreparedness
+          ? emergencyPlan!.ownerPersonId
+          : isEmergency
+            ? isEmergencyPlan || isEmergencyMemberStatus
+              ? emergencyOwner!
+              : emergencyPlan!.ownerPersonId
+            : profileOwner ?? parent!.ownerPersonId;
+      const privacy:RecordPrivacy = isAssistance
+        ? 'private'
+        : isEmergency || isPreparedness
+          ? 'family'
+          : profilePrivacy ?? parent!.privacy;
       const authorization = scope.authorize({
         action: createOperation ? 'create' : 'update',
         resourceType: 'life_record',
@@ -2148,8 +2593,26 @@ export class RecordManagedLifeItemUseCase {
         | ManagedLifeWriteRecord
         | ManagedHomeInventoryWriteRecord
         | FamilyEmergencyWriteRecord
-        | FamilyEmergencyPreparednessWriteRecord;
-      if (isPreparedness) {
+        | FamilyEmergencyPreparednessWriteRecord
+        | FamilyEmergencyAssistanceWriteRecord;
+      if (isAssistance) {
+        const relationValidation = validateFamilyEmergencyAssistanceRelations({
+          context: input.context,
+          command: input.command,
+          scope,
+          itemId: input.identifiers.itemId,
+          ...(assistancePlan ? { plan: assistancePlan } : {}),
+          ...(assistanceProfile ? { profile: assistanceProfile } : {})
+        });
+        if (!relationValidation.ok) return relationValidation;
+        item = buildFamilyEmergencyAssistanceRecord({
+          context: input.context,
+          command: input.command,
+          itemId: input.identifiers.itemId,
+          occurredAt: scope.occurredAt,
+          ...(assistanceProfile ? { profile: assistanceProfile } : {})
+        });
+      } else if (isPreparedness) {
         const relationValidation = validateFamilyEmergencyPreparednessRelations({
           context: input.context,
           command: input.command,
@@ -2247,7 +2710,9 @@ export class RecordManagedLifeItemUseCase {
           occurredAt: scope.occurredAt
         });
       }
-      const saved = isPreparedness
+      const saved = isAssistance
+        ? scope.insertFamilyEmergencyAssistanceItem(item as FamilyEmergencyAssistanceWriteRecord)
+        : isPreparedness
         ? scope.insertFamilyEmergencyPreparednessItem(item as FamilyEmergencyPreparednessWriteRecord)
         : isEmergency
         ? scope.insertFamilyEmergencyItem(item as FamilyEmergencyWriteRecord)
@@ -2257,7 +2722,9 @@ export class RecordManagedLifeItemUseCase {
       if (!saved.ok) return saved;
       const audit = scope.appendAudit({
         id: input.identifiers.auditId,
-        action: `life.managed.${item.itemType}.recorded`,
+        action: isAssistance
+          ? 'life.managed.private_item.recorded'
+          : `life.managed.${item.itemType}.recorded`,
         resourceType: 'life_record',
         resourceId: rootId,
         occurredAt: scope.occurredAt,
@@ -2273,15 +2740,23 @@ export class RecordManagedLifeItemUseCase {
         occurredAt: scope.occurredAt,
         actorId: input.context.actor.userId,
         correlationId: input.context.correlationId,
-        payload: {
-          itemId: item.id,
-          recordId: aggregateRootId,
-          itemType: item.itemType,
-          privacy
-        }
+        payload: isAssistance
+          ? {
+              itemId: item.id,
+              recordId: aggregateRootId,
+              privacy
+            }
+          : {
+              itemId: item.id,
+              recordId: aggregateRootId,
+              itemType: item.itemType,
+              privacy
+            }
       });
       if (!event.ok) return event;
-      return ok(isPreparedness
+      return ok(isAssistance
+        ? projectFamilyEmergencyAssistanceItem(item as FamilyEmergencyAssistanceWriteRecord)
+        : isPreparedness
         ? projectFamilyEmergencyPreparednessItem(item as FamilyEmergencyPreparednessWriteRecord)
         : isEmergency
         ? projectFamilyEmergencyItem(item as FamilyEmergencyWriteRecord)

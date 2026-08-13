@@ -9559,6 +9559,546 @@ SET value='REVISION-33-H-FAMILY-EMERGENCY-PREPAREDNESS',
 WHERE key='schema_generation';
 `;
 
+const familyEmergencyAssistanceCardLedgerSql = `CREATE TABLE family_emergency_assistance_ledger(
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 160),
+  plan_id TEXT NOT NULL REFERENCES family_emergency_ledger(id) ON DELETE RESTRICT,
+  profile_id TEXT REFERENCES family_emergency_assistance_ledger(id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  item_type TEXT NOT NULL CHECK(item_type IN (
+    'emergency_profile','health_fact','emergency_contact','assistance_instruction'
+  )),
+  supersedes_item_id TEXT REFERENCES family_emergency_assistance_ledger(id) ON DELETE RESTRICT,
+  subject_kind TEXT CHECK(subject_kind IS NULL OR subject_kind IN ('person','pet')),
+  subject_person_id TEXT REFERENCES people(id) ON DELETE RESTRICT,
+  subject_pet_id TEXT CHECK(subject_pet_id IS NULL OR length(trim(subject_pet_id)) BETWEEN 2 AND 160),
+  responsible_person_id TEXT REFERENCES people(id) ON DELETE RESTRICT,
+  label TEXT CHECK(label IS NULL OR length(trim(label)) BETWEEN 2 AND 120),
+  fact_kind TEXT CHECK(fact_kind IS NULL OR fact_kind IN (
+    'blood_type','allergy','chronic_condition','medication','medical_device','other'
+  )),
+  blood_type TEXT CHECK(blood_type IS NULL OR blood_type IN (
+    'a_positive','a_negative','b_positive','b_negative','ab_positive','ab_negative',
+    'o_positive','o_negative','unknown'
+  )),
+  fact_value TEXT CHECK(fact_value IS NULL OR length(trim(fact_value)) BETWEEN 2 AND 240),
+  contact_name TEXT CHECK(contact_name IS NULL OR length(trim(contact_name)) BETWEEN 2 AND 120),
+  phone_e164 TEXT CHECK(phone_e164 IS NULL OR (
+    length(phone_e164) BETWEEN 9 AND 16
+    AND substr(phone_e164,1,1)='+'
+    AND substr(phone_e164,2,1) GLOB '[1-9]'
+    AND substr(phone_e164,2) NOT GLOB '*[^0-9]*'
+  )),
+  relationship TEXT CHECK(relationship IS NULL OR length(trim(relationship)) BETWEEN 2 AND 120),
+  instruction_kind TEXT CHECK(instruction_kind IS NULL OR instruction_kind IN (
+    'mobility','vision','hearing','communication','cognitive','medication_support',
+    'evacuation','pet_care','other'
+  )),
+  instruction TEXT CHECK(instruction IS NULL OR length(trim(instruction)) BETWEEN 2 AND 1000),
+  note TEXT CHECK(note IS NULL OR length(trim(note)) BETWEEN 2 AND 500),
+  privacy TEXT NOT NULL CHECK(privacy='private'),
+  data_source TEXT NOT NULL CHECK(data_source='manual'),
+  created_at TEXT NOT NULL CHECK(
+    length(created_at)=24
+    AND created_at GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9].[0-9][0-9][0-9]Z'
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',created_at) IS NOT NULL
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',created_at)=created_at
+  ),
+  policy_receipt_hash TEXT NOT NULL UNIQUE REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT CHECK(
+    length(policy_receipt_hash)=64 AND policy_receipt_hash NOT GLOB '*[^0-9a-f]*'
+  ),
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version=1),
+  policy_receipt_nonce TEXT NOT NULL,
+  policy_correlation_id TEXT NOT NULL,
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type='life_record'),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action IN ('create','update')),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='family.write'),
+  CHECK(supersedes_item_id IS NULL OR supersedes_item_id<>id),
+  CHECK(
+    (item_type='emergency_profile'
+      AND profile_id IS NULL AND supersedes_item_id IS NULL
+      AND subject_kind IS NOT NULL AND label IS NOT NULL
+      AND fact_kind IS NULL AND blood_type IS NULL AND fact_value IS NULL
+      AND contact_name IS NULL AND phone_e164 IS NULL AND relationship IS NULL
+      AND instruction_kind IS NULL AND instruction IS NULL AND note IS NULL
+      AND policy_action='create' AND policy_resource_id=id
+      AND (
+        (subject_kind='person' AND subject_person_id IS NOT NULL
+          AND owner_person_id=subject_person_id
+          AND subject_pet_id IS NULL AND responsible_person_id IS NULL)
+        OR
+        (subject_kind='pet' AND subject_person_id IS NULL
+          AND subject_pet_id IS NOT NULL AND responsible_person_id IS NOT NULL
+          AND owner_person_id=responsible_person_id)
+      ))
+    OR
+    (item_type='health_fact'
+      AND profile_id IS NOT NULL AND subject_kind IS NULL AND subject_person_id IS NULL
+      AND subject_pet_id IS NULL AND responsible_person_id IS NULL AND label IS NULL
+      AND fact_kind IS NOT NULL
+      AND ((fact_kind='blood_type' AND blood_type IS NOT NULL AND fact_value IS NULL)
+        OR (fact_kind<>'blood_type' AND blood_type IS NULL AND fact_value IS NOT NULL))
+      AND contact_name IS NULL AND phone_e164 IS NULL AND relationship IS NULL
+      AND instruction_kind IS NULL AND instruction IS NULL
+      AND policy_action='update' AND policy_resource_id=profile_id)
+    OR
+    (item_type='emergency_contact'
+      AND profile_id IS NOT NULL AND subject_kind IS NULL AND subject_person_id IS NULL
+      AND subject_pet_id IS NULL AND responsible_person_id IS NULL AND label IS NULL
+      AND fact_kind IS NULL AND blood_type IS NULL AND fact_value IS NULL
+      AND contact_name IS NOT NULL AND phone_e164 IS NOT NULL
+      AND instruction_kind IS NULL AND instruction IS NULL
+      AND policy_action='update' AND policy_resource_id=profile_id)
+    OR
+    (item_type='assistance_instruction'
+      AND profile_id IS NOT NULL AND subject_kind IS NULL AND subject_person_id IS NULL
+      AND subject_pet_id IS NULL AND responsible_person_id IS NULL AND label IS NULL
+      AND fact_kind IS NULL AND blood_type IS NULL AND fact_value IS NULL
+      AND contact_name IS NULL AND phone_e164 IS NULL AND relationship IS NULL
+      AND instruction_kind IS NOT NULL AND instruction IS NOT NULL
+      AND policy_action='update' AND policy_resource_id=profile_id)
+  )
+) STRICT;
+
+CREATE INDEX idx_family_emergency_assistance_family_created
+ON family_emergency_assistance_ledger(family_id,created_at DESC,id);
+CREATE INDEX idx_family_emergency_assistance_plan_created
+ON family_emergency_assistance_ledger(plan_id,created_at DESC,id);
+CREATE INDEX idx_family_emergency_assistance_profile_created
+ON family_emergency_assistance_ledger(profile_id,created_at DESC,id)
+WHERE profile_id IS NOT NULL;
+CREATE INDEX idx_family_emergency_assistance_person_subject
+ON family_emergency_assistance_ledger(subject_person_id,created_at DESC,id)
+WHERE item_type='emergency_profile' AND subject_kind='person';
+CREATE INDEX idx_family_emergency_assistance_pet_subject
+ON family_emergency_assistance_ledger(family_id,subject_pet_id,created_at DESC,id)
+WHERE item_type='emergency_profile' AND subject_kind='pet';
+CREATE UNIQUE INDEX idx_family_emergency_assistance_supersedes
+ON family_emergency_assistance_ledger(supersedes_item_id)
+WHERE supersedes_item_id IS NOT NULL;
+
+CREATE TRIGGER trg_b5_emergency_assistance_profile_scope
+BEFORE INSERT ON family_emergency_assistance_ledger
+WHEN NEW.item_type='emergency_profile' AND (
+  NOT EXISTS(
+    SELECT 1
+    FROM family_emergency_ledger plan
+    WHERE plan.id=NEW.plan_id
+      AND plan.item_type='emergency_plan'
+      AND plan.family_id=NEW.family_id
+      AND NEW.created_at>=plan.created_at
+      AND NOT EXISTS(
+        SELECT 1 FROM data_lifecycle lifecycle
+        WHERE lifecycle.resource_type='life_record'
+          AND lifecycle.resource_id=plan.id
+          AND lifecycle.state<>'active'
+      )
+  )
+  OR NOT EXISTS(
+    SELECT 1 FROM people owner
+    WHERE owner.id=NEW.owner_person_id
+      AND owner.family_id=NEW.family_id
+      AND owner.status='active'
+  )
+  OR (NEW.subject_kind='person' AND NOT EXISTS(
+    SELECT 1 FROM people subject
+    WHERE subject.id=NEW.subject_person_id
+      AND subject.id=NEW.owner_person_id
+      AND subject.family_id=NEW.family_id
+      AND subject.status='active'
+  ))
+  OR (NEW.subject_kind='pet' AND NOT EXISTS(
+    SELECT 1 FROM people responsible
+    WHERE responsible.id=NEW.responsible_person_id
+      AND responsible.id=NEW.owner_person_id
+      AND responsible.family_id=NEW.family_id
+      AND responsible.status='active'
+  ))
+)
+BEGIN
+  SELECT RAISE(ABORT,'emergency assistance profile requires an active same-family plan and exact person/pet owner binding');
+END;
+
+CREATE TRIGGER trg_b5_emergency_assistance_child_scope
+BEFORE INSERT ON family_emergency_assistance_ledger
+WHEN NEW.item_type<>'emergency_profile' AND NOT EXISTS(
+  SELECT 1
+  FROM family_emergency_assistance_ledger profile
+  JOIN family_emergency_ledger plan
+    ON plan.id=profile.plan_id AND plan.item_type='emergency_plan'
+  JOIN people owner
+    ON owner.id=profile.owner_person_id AND owner.family_id=profile.family_id AND owner.status='active'
+  WHERE profile.id=NEW.profile_id
+    AND profile.item_type='emergency_profile'
+    AND profile.plan_id=NEW.plan_id
+    AND profile.family_id=NEW.family_id
+    AND profile.owner_person_id=NEW.owner_person_id
+    AND profile.privacy=NEW.privacy
+    AND profile.privacy='private'
+    AND plan.family_id=NEW.family_id
+    AND NEW.created_at>=profile.created_at
+    AND NOT EXISTS(
+      SELECT 1 FROM data_lifecycle lifecycle
+      WHERE lifecycle.resource_type='life_record'
+        AND lifecycle.resource_id=profile.id
+        AND lifecycle.state<>'active'
+    )
+    AND NOT EXISTS(
+      SELECT 1 FROM data_lifecycle lifecycle
+      WHERE lifecycle.resource_type='life_record'
+        AND lifecycle.resource_id=plan.id
+        AND lifecycle.state<>'active'
+    )
+)
+BEGIN
+  SELECT RAISE(ABORT,'emergency assistance child requires an active exact private profile root and plan scope');
+END;
+
+CREATE TRIGGER trg_b5_emergency_assistance_supersession_scope
+BEFORE INSERT ON family_emergency_assistance_ledger
+WHEN NEW.supersedes_item_id IS NOT NULL AND (
+  NEW.item_type='emergency_profile'
+  OR NOT EXISTS(
+    SELECT 1 FROM family_emergency_assistance_ledger prior
+    WHERE prior.id=NEW.supersedes_item_id
+      AND prior.item_type=NEW.item_type
+      AND prior.profile_id=NEW.profile_id
+      AND prior.plan_id=NEW.plan_id
+      AND prior.family_id=NEW.family_id
+      AND prior.owner_person_id=NEW.owner_person_id
+      AND prior.privacy=NEW.privacy
+      AND NEW.created_at>prior.created_at
+      AND (NEW.item_type<>'health_fact' OR prior.fact_kind=NEW.fact_kind)
+      AND (NEW.item_type<>'assistance_instruction' OR prior.instruction_kind=NEW.instruction_kind)
+  )
+)
+BEGIN
+  SELECT RAISE(ABORT,'emergency assistance correction requires an older same-profile item with exact subtype scope');
+END;
+
+CREATE TRIGGER trg_b5_emergency_assistance_id_collision
+BEFORE INSERT ON family_emergency_assistance_ledger
+WHEN EXISTS(SELECT 1 FROM life_records WHERE id=NEW.id)
+  OR EXISTS(SELECT 1 FROM life_managed_ledger WHERE id=NEW.id)
+  OR EXISTS(SELECT 1 FROM life_home_inventory_ledger WHERE id=NEW.id)
+  OR EXISTS(SELECT 1 FROM family_emergency_ledger WHERE id=NEW.id)
+  OR EXISTS(SELECT 1 FROM family_emergency_preparedness_ledger WHERE id=NEW.id)
+BEGIN SELECT RAISE(ABORT,'emergency assistance id collides with another life ledger'); END;
+CREATE TRIGGER trg_b5_life_record_assistance_id_collision
+BEFORE INSERT ON life_records
+WHEN EXISTS(SELECT 1 FROM family_emergency_assistance_ledger WHERE id=NEW.id)
+BEGIN SELECT RAISE(ABORT,'life record id collides with an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_life_managed_assistance_id_collision
+BEFORE INSERT ON life_managed_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_assistance_ledger WHERE id=NEW.id)
+BEGIN SELECT RAISE(ABORT,'managed life id collides with an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_home_inventory_assistance_id_collision
+BEFORE INSERT ON life_home_inventory_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_assistance_ledger WHERE id=NEW.id)
+BEGIN SELECT RAISE(ABORT,'home inventory id collides with an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_family_emergency_assistance_id_collision
+BEFORE INSERT ON family_emergency_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_assistance_ledger WHERE id=NEW.id)
+BEGIN SELECT RAISE(ABORT,'family emergency id collides with an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_preparedness_assistance_id_collision
+BEFORE INSERT ON family_emergency_preparedness_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_assistance_ledger WHERE id=NEW.id)
+BEGIN SELECT RAISE(ABORT,'emergency preparedness id collides with an emergency assistance item'); END;
+
+CREATE TRIGGER trg_b5_emergency_assistance_policy_receipt
+BEFORE INSERT ON family_emergency_assistance_ledger
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM platform_policy_transaction_receipts receipt
+  JOIN platform_policy_database_fences fence
+    ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection
+    ON projection.receipt_hash=receipt.receipt_hash AND projection.record_json=receipt.record_json
+  JOIN accounts actor_account
+    ON actor_account.id=json_extract(receipt.record_json,'$.request.subject.accountId')
+      AND actor_account.status='active'
+  JOIN people actor_person
+    ON actor_person.id=json_extract(receipt.record_json,'$.request.subject.personId')
+      AND actor_person.id=actor_account.person_id
+      AND actor_person.family_id=NEW.family_id
+      AND actor_person.status='active'
+  WHERE receipt.receipt_hash=NEW.policy_receipt_hash
+    AND receipt.receipt_version=NEW.policy_receipt_version
+    AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id
+    AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id
+    AND receipt.action=NEW.policy_action
+    AND receipt.capability=NEW.policy_capability
+    AND receipt.resource_type='life_record'
+    AND receipt.resource_id=CASE WHEN NEW.item_type='emergency_profile' THEN NEW.id ELSE NEW.profile_id END
+    AND receipt.action=CASE WHEN NEW.item_type='emergency_profile' THEN 'create' ELSE 'update' END
+    AND receipt.capability='family.write'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.resource.sensitivity')='highly_sensitive'
+    AND json_extract(receipt.record_json,'$.request.purpose')='general'
+    AND json_extract(receipt.record_json,'$.request.occurredAt')=NEW.created_at
+)
+OR EXISTS(SELECT 1 FROM archive_items WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_versions WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_retention_policies WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_categories WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_tags WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_item_tags WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM events WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM events WHERE timeline_policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_records WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_valuations WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM health_records WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM medication_plans WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM family_health_history WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM life_records WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM locations WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM bank_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM payment_cards WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM loan_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM loan_payment_history WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_planning_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_import_batches WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM life_managed_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM life_home_inventory_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM family_emergency_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'emergency assistance write requires an unused exact durable private life receipt'); END;
+
+CREATE TRIGGER trg_b5_life_record_assistance_receipt_reuse_insert
+BEFORE INSERT ON life_records
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'life policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_life_record_assistance_receipt_reuse_update
+BEFORE UPDATE ON life_records
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'life policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_life_managed_assistance_receipt_reuse
+BEFORE INSERT ON life_managed_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'managed life receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_home_inventory_assistance_receipt_reuse
+BEFORE INSERT ON life_home_inventory_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'home inventory receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_family_emergency_assistance_receipt_reuse
+BEFORE INSERT ON family_emergency_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'family emergency receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_preparedness_assistance_receipt_reuse
+BEFORE INSERT ON family_emergency_preparedness_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'preparedness receipt is already bound to an emergency assistance item'); END;
+
+CREATE TRIGGER trg_b5_archive_item_assistance_receipt_reuse
+BEFORE INSERT ON archive_items
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_archive_item_assistance_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON archive_items
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_archive_version_assistance_receipt_reuse
+BEFORE INSERT ON archive_versions
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_archive_version_assistance_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON archive_versions
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_archive_retention_assistance_receipt_reuse
+BEFORE INSERT ON archive_retention_policies
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_archive_retention_assistance_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON archive_retention_policies
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_archive_category_assistance_receipt_reuse
+BEFORE INSERT ON archive_categories
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_archive_category_assistance_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON archive_categories
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_archive_tag_assistance_receipt_reuse
+BEFORE INSERT ON archive_tags
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_archive_tag_assistance_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON archive_tags
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_archive_item_tag_assistance_receipt_reuse
+BEFORE INSERT ON archive_item_tags
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_archive_item_tag_assistance_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON archive_item_tags
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+
+CREATE TRIGGER trg_b5_event_assistance_receipt_reuse
+BEFORE INSERT ON events
+WHEN (NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)) OR (NEW.timeline_policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.timeline_policy_receipt_hash
+))
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_event_assistance_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash,timeline_policy_receipt_hash ON events
+WHEN (NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)) OR (NEW.timeline_policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.timeline_policy_receipt_hash
+))
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+
+CREATE TRIGGER trg_b5_finance_record_assistance_receipt_reuse
+BEFORE INSERT ON finance_records
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_finance_record_assistance_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON finance_records
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_finance_valuation_assistance_receipt_reuse
+BEFORE INSERT ON finance_valuations
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_finance_valuation_assistance_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON finance_valuations
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_health_record_assistance_receipt_reuse
+BEFORE INSERT ON health_records
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_health_record_assistance_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON health_records
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_medication_plan_assistance_receipt_reuse
+BEFORE INSERT ON medication_plans
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_medication_plan_assistance_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON medication_plans
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_family_health_history_assistance_receipt_reuse
+BEFORE INSERT ON family_health_history
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_family_health_history_assistance_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON family_health_history
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_location_assistance_receipt_reuse
+BEFORE INSERT ON locations
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_location_assistance_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON locations
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+
+CREATE TRIGGER trg_b5_bank_account_assistance_receipt_reuse
+BEFORE INSERT ON bank_accounts
+WHEN EXISTS(SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_payment_card_assistance_receipt_reuse
+BEFORE INSERT ON payment_cards
+WHEN EXISTS(SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_loan_account_assistance_receipt_reuse
+BEFORE INSERT ON loan_accounts
+WHEN EXISTS(SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_loan_payment_assistance_receipt_reuse
+BEFORE INSERT ON loan_payment_history
+WHEN EXISTS(SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_finance_planning_assistance_receipt_reuse
+BEFORE INSERT ON finance_planning_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+CREATE TRIGGER trg_b5_finance_import_assistance_receipt_reuse
+BEFORE INSERT ON finance_import_batches
+WHEN EXISTS(SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency assistance item'); END;
+
+CREATE TRIGGER trg_b5_emergency_assistance_immutable
+BEFORE UPDATE ON family_emergency_assistance_ledger
+BEGIN SELECT RAISE(ABORT,'emergency assistance ledger is append-only'); END;
+CREATE TRIGGER trg_b5_emergency_assistance_delete_guard
+BEFORE DELETE ON family_emergency_assistance_ledger
+BEGIN SELECT RAISE(ABORT,'emergency assistance deletion requires a governed deletion workflow'); END;
+
+UPDATE database_metadata
+SET value='REVISION-33-I-FAMILY-EMERGENCY-ASSISTANCE-CARD',
+    updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
+WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -9645,7 +10185,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(83, 'b5_life_home_vehicle_managed_ledger', lifeHomeVehicleManagedLedgerSql),
   createMigrationDefinition(84, 'b5_life_home_inventory_ledger', lifeHomeInventoryLedgerSql),
   createMigrationDefinition(85, 'b5_family_emergency_planning_ledger', familyEmergencyPlanningLedgerSql),
-  createMigrationDefinition(86, 'b5_family_emergency_preparedness_ledger', familyEmergencyPreparednessLedgerSql)
+  createMigrationDefinition(86, 'b5_family_emergency_preparedness_ledger', familyEmergencyPreparednessLedgerSql),
+  createMigrationDefinition(87, 'b5_family_emergency_assistance_card_ledger', familyEmergencyAssistanceCardLedgerSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

@@ -149,6 +149,9 @@ const familyEmergencyItemTypes = new Set([
 const familyEmergencyPreparednessItemTypes = new Set([
   'preparedness_kit','preparedness_kit_item','preparedness_kit_check','emergency_drill'
 ]);
+const familyEmergencyAssistanceItemTypes = new Set([
+  'emergency_profile','health_fact','emergency_contact','assistance_instruction'
+]);
 const familyEmergencyPlanKinds = new Set(['general','earthquake','fire','flood','evacuation','other']);
 const familyEmergencyMeetingPointKinds = new Set(['primary','alternate']);
 const familyEmergencyChecklistStatuses = new Set(['open','completed']);
@@ -166,6 +169,18 @@ const familyEmergencyPreparednessCheckStatuses = new Set([
 ]);
 const familyEmergencyDrillKinds = new Set(['earthquake','fire','flood','power_outage']);
 const familyEmergencyDrillStatuses = new Set(['completed','partial','cancelled']);
+const familyEmergencyAssistanceSubjectKinds = new Set(['person','pet']);
+const familyEmergencyAssistanceFactKinds = new Set([
+  'blood_type','allergy','chronic_condition','medication','medical_device','other'
+]);
+const familyEmergencyAssistanceBloodTypes = new Set([
+  'a_positive','a_negative','b_positive','b_negative','ab_positive','ab_negative',
+  'o_positive','o_negative','unknown'
+]);
+const familyEmergencyAssistanceInstructionKinds = new Set([
+  'mobility','vision','hearing','communication','cognitive','medication_support',
+  'evacuation','pet_care','other'
+]);
 const familyEmergencyText = (value: unknown, maximum: number): boolean =>
   boundedString(value, maximum) && String(value).trim().length >= 2;
 const optionalFamilyEmergencyText = (value: unknown, maximum: number): boolean =>
@@ -254,7 +269,8 @@ const managedLifeInput = (args: readonly unknown[]): IpcIntegrationPolicyDecisio
     && value.itemType !== 'activity'
     && !managedHomeInventoryItemTypes.has(String(value.itemType))
     && !familyEmergencyItemTypes.has(String(value.itemType))
-    && !familyEmergencyPreparednessItemTypes.has(String(value.itemType))) {
+    && !familyEmergencyPreparednessItemTypes.has(String(value.itemType))
+    && !familyEmergencyAssistanceItemTypes.has(String(value.itemType))) {
     return rejected('MANAGED_LIFE_ITEM_TYPE_INVALID', '$[0].itemType');
   }
   const inspection = inspectManagedLifeDataContract(value);
@@ -417,6 +433,52 @@ const managedLifeInput = (args: readonly unknown[]): IpcIntegrationPolicyDecisio
           && Number.isSafeInteger(value.durationSeconds)
           && value.durationSeconds >= 1
           && value.durationSeconds <= 604_800))
+      && optionalFamilyEmergencyText(value.note, 500)
+      && validManagedHomeSupersession(value);
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'emergency_profile') {
+    const personSubject = value.subjectKind === 'person'
+      && validManagedLifeId(value.subjectPersonId);
+    const petSubject = value.subjectKind === 'pet'
+      && validManagedLifeId(value.subjectPetId)
+      && validManagedLifeId(value.responsiblePersonId);
+    const valid = validManagedLifeId(value.planId)
+      && familyEmergencyText(value.label, 120)
+      && familyEmergencyAssistanceSubjectKinds.has(String(value.subjectKind))
+      && (personSubject || petSubject);
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'health_fact') {
+    const bloodFact = value.factKind === 'blood_type'
+      && familyEmergencyAssistanceBloodTypes.has(String(value.bloodType));
+    const textFact = value.factKind !== 'blood_type'
+      && familyEmergencyAssistanceFactKinds.has(String(value.factKind))
+      && familyEmergencyText(value.value, 240);
+    const valid = validManagedLifeId(value.profileId)
+      && (bloodFact || textFact)
+      && optionalFamilyEmergencyText(value.note, 500)
+      && validManagedHomeSupersession(value);
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'emergency_contact') {
+    const valid = validManagedLifeId(value.profileId)
+      && familyEmergencyText(value.name, 120)
+      && typeof value.phoneE164 === 'string'
+      && /^\+[1-9][0-9]{7,14}$/u.test(value.phoneE164)
+      && optionalFamilyEmergencyText(value.relationship, 120)
+      && optionalFamilyEmergencyText(value.note, 500)
+      && validManagedHomeSupersession(value);
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'assistance_instruction') {
+    const valid = validManagedLifeId(value.profileId)
+      && familyEmergencyAssistanceInstructionKinds.has(String(value.instructionKind))
+      && familyEmergencyText(value.instruction, 1_000)
       && optionalFamilyEmergencyText(value.note, 500)
       && validManagedHomeSupersession(value);
     return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');

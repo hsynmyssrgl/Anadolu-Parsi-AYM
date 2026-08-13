@@ -733,6 +733,17 @@ const findLifeResourceForPolicyResolution = (
         stateFingerprint: stable(managed.value)
       }));
     }
+    const assistanceProfile = dependencies.lifePolicyResourceRepository
+      .findFamilyEmergencyAssistanceProfileForPolicyResolution(execution, resourceId);
+    if (!assistanceProfile.ok) return assistanceProfile;
+    if (assistanceProfile.value) {
+      return ok(Object.freeze({
+        familyId: assistanceProfile.value.familyId,
+        ownerPersonId: assistanceProfile.value.ownerPersonId,
+        privacy: assistanceProfile.value.privacy,
+        stateFingerprint: stable(assistanceProfile.value)
+      }));
+    }
     const emergencyPlan = dependencies.lifePolicyResourceRepository
       .findFamilyEmergencyPlanForPolicyResolution(execution, resourceId);
     if (!emergencyPlan.ok) return emergencyPlan;
@@ -977,6 +988,7 @@ const ensureRuntimeConfiguration = (dependencies: LifeProductionPolicyRuntimeDep
     || typeof dependencies.trustedDeviceRepository?.findActive !== 'function'
     || typeof dependencies.lifePolicyResourceRepository?.findLifeRecordForPolicyResolution !== 'function'
     || typeof dependencies.lifePolicyResourceRepository?.findManagedLifeProfileForPolicyResolution !== 'function'
+    || typeof dependencies.lifePolicyResourceRepository?.findFamilyEmergencyAssistanceProfileForPolicyResolution !== 'function'
     || typeof dependencies.lifePolicyResourceRepository?.findFamilyEmergencyPlanForPolicyResolution !== 'function'
     || typeof dependencies.personRepository?.findById !== 'function'
     || typeof dependencies.deviceIdentityProvider?.snapshot !== 'function'

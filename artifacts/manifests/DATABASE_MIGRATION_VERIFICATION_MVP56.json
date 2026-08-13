@@ -447,7 +447,12 @@
       "version": 86,
       "name": "b5_family_emergency_preparedness_ledger",
       "checksum": "ba95e841da7a08977d50e0c9cb441e0743af6fdcb1c6dee9c42bb136e20183dc"
+    },
+    {
+      "version": 87,
+      "name": "b5_family_emergency_assistance_card_ledger",
+      "checksum": "b424f1fa2d89d6e0b645912444d9d8639de3d6a3ff0a61fa829b1e14c5206097"
     }
   ],
-  "generatedAt": "2026-08-12T23:45:24.480Z"
+  "generatedAt": "2026-08-13T00:30:42.437Z"
 }
