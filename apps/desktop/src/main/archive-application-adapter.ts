@@ -425,7 +425,7 @@ class RepositoryBackedArchiveQueryPort implements ArchiveQueryPort {
   public constructor(private readonly dependencies: RepositoryBackedArchiveApplicationDependencies) {}
 
   public getOpenPlan(context: ArchiveApplicationContext, itemId: string): ReturnType<ArchiveQueryPort['getOpenPlan']> {
-    return this.dependencies.transactionExecutor.execute<{ storedName: string; sha256: string; originalName: string }>(context.correlationId, (transaction) => {
+    return this.dependencies.transactionExecutor.execute<{ storedName: string; sha256: string; originalName: string; mimeType: string; sizeBytes: number; sensitivity: 'standard' | 'personal' | 'high' }>(context.correlationId, (transaction) => {
       const execution = repositoryContext(context, transaction);
       const snapshot = loadAuthorizationSnapshot(this.dependencies, context, execution);
       if (!snapshot.ok) return snapshot;
@@ -435,7 +435,7 @@ class RepositoryBackedArchiveQueryPort implements ArchiveQueryPort {
       const row = this.dependencies.archiveRepository.find(execution, itemId);
       if (!row.ok) return row;
       if (!row.value) return err(createAppError({ code: ERROR_CODES.RESOURCE_NOT_FOUND, message: 'Arşiv kaydı bulunamadı.', category: 'not_found', correlationId: context.correlationId }));
-      return { ok: true, value: { storedName: row.value.storedName, sha256: row.value.sha256, originalName: row.value.originalName } };
+      return { ok: true, value: { storedName: row.value.storedName, sha256: row.value.sha256, originalName: row.value.originalName, mimeType: row.value.mimeType, sizeBytes: row.value.sizeBytes, sensitivity: row.value.sensitivity } };
     });
   }
 
@@ -544,14 +544,14 @@ export class RepositoryBackedArchiveQueryPort implements ArchiveQueryPort {
   public constructor(private readonly dependencies: RepositoryBackedArchiveApplicationDependencies) {}
 
   public getOpenPlan(context: ArchiveApplicationContext, itemId: string): ReturnType<ArchiveQueryPort['getOpenPlan']> {
-    return executeGovernedRead<{ storedName: string; sha256: string; originalName: string }>(this.dependencies, context, archiveReadIntent(context, 'archive_item', itemId), (execution, snapshot) => {
+    return executeGovernedRead<{ storedName: string; sha256: string; originalName: string; mimeType: string; sizeBytes: number; sensitivity: 'standard' | 'personal' | 'high' }>(this.dependencies, context, archiveReadIntent(context, 'archive_item', itemId), (execution, snapshot) => {
       if (!legacyReadAllowed(this.#authorization, snapshot, { action: 'read', resourceId: itemId, occurredAt: execution.occurredAt })) {
         return err(createAppError({ code: ERROR_CODES.AUTHORIZATION_DENIED, message: 'Bu arşiv kaydını görüntüleme yetkiniz yok.', category: 'authorization', correlationId: context.correlationId }));
       }
       const row = this.dependencies.archiveRepository.find(execution, itemId);
       if (!row.ok) return row;
       if (!row.value) return err(createAppError({ code: ERROR_CODES.RESOURCE_NOT_FOUND, message: 'Arşiv kaydı bulunamadı.', category: 'not_found', correlationId: context.correlationId }));
-      return { ok: true, value: { storedName: row.value.storedName, sha256: row.value.sha256, originalName: row.value.originalName } };
+      return { ok: true, value: { storedName: row.value.storedName, sha256: row.value.sha256, originalName: row.value.originalName, mimeType: row.value.mimeType, sizeBytes: row.value.sizeBytes, sensitivity: row.value.sensitivity } };
     });
   }
 
@@ -640,6 +640,20 @@ class GovernedArchiveWriteScope implements ArchiveWriteScope {
     private readonly execution: PolicyAuthorizedRepositoryExecutionContext,
     public readonly occurredAt: ArchiveWriteScope['occurredAt']
   ) {}
+
+  public findOpenPlan(itemId: string): ReturnType<ArchiveWriteScope['findOpenPlan']> {
+    const row = this.dependencies.archiveRepository.findForPolicyResolution(this.execution, itemId);
+    if (!row.ok || !row.value) return row;
+    if (row.value.familyId !== this.execution.policyAuthorization.resourceFamilyId) return ok(null);
+    return ok({
+      storedName:row.value.storedName,
+      sha256:row.value.sha256,
+      originalName:row.value.originalName,
+      mimeType:row.value.mimeType,
+      sizeBytes:row.value.sizeBytes,
+      sensitivity:row.value.sensitivity
+    });
+  }
 
   public insertRetentionPolicy(input: Parameters<ArchiveWriteScope['insertRetentionPolicy']>[0]) { return this.dependencies.archiveRepository.insertRetentionPolicy(this.execution, input); }
   public assignRetentionPolicy(itemId: string, policyId: string | null) { return this.dependencies.archiveRepository.assignRetentionPolicy(this.execution, itemId, policyId); }

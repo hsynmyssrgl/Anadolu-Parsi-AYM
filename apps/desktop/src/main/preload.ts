@@ -57,6 +57,32 @@ import type { BankInstitutionView, BankAccountView, CreateBankAccountInput, Iban
 import type { LoanAccountView, CreateLoanAccountInput, RecordLoanPaymentInput } from '@ppt/domain';
 import type { FinancePlanningWorkspaceView, RecordFinancePlanningItemInput, FinanceImportPreviewView, SelectFinanceImportFileResult, CommitFinanceImportPreviewInput } from '@ppt/domain';
 import type { ManagedLifeWorkspaceView, RecordManagedLifeItemInput } from '@ppt/domain';
+
+interface EmergencyCardExportIpcInput {
+  readonly profileId:string;
+  readonly configurationId:string;
+  readonly mode:'print'|'pdf'|'encrypted_pack';
+  readonly selectedFieldIds:readonly string[];
+  readonly documentLinkIds:readonly string[];
+  readonly password:string;
+  readonly code?:string;
+  readonly packagePassphrase?:string;
+  readonly plaintextWarningConfirmed:boolean;
+}
+type EmergencyCardExportIpcResult =
+  | { readonly canceled:true }
+  | {
+      readonly canceled:false;
+      readonly mode:'print'|'pdf'|'encrypted_pack';
+      readonly artifactSha256:string;
+      readonly artifactSizeBytes:number;
+      readonly powerSource:'battery'|'ac'|'unknown';
+      readonly batteryLevel:'not_measured';
+      readonly automaticLowBatteryDetection:'not_performed';
+      readonly lowBatteryClaimed:false;
+      readonly artifactReadbackStatus:'verified'|'not_applicable_print';
+      readonly printerDispatchStatus?:'confirmed';
+    };
 export type AppInfo = UserVisibleAppInfo;
 
 const rendererCrypto = globalThis.crypto;
@@ -503,6 +529,7 @@ contextBridge.exposeInMainWorld('pardus', {
   getReportSummary:():Promise<ReportSummaryView>=>invoke('reports:summary'),
   createLifeRecord:(input:CreateLifeRecordInput):Promise<LifeRecordView[]>=>invoke('life:create',input),
   recordManagedLifeItem:(input:RecordManagedLifeItemInput):Promise<ManagedLifeWorkspaceView>=>invoke('life:recordManagedItem',input),
+  exportEmergencyCard:(input:EmergencyCardExportIpcInput):Promise<EmergencyCardExportIpcResult>=>invoke('life:exportEmergencyCard',input),
   listFinance:():Promise<FinanceRecordView[]>=>invoke('finance:list'),
   createFinance:(input:CreateFinanceRecordInput):Promise<FinanceRecordView[]>=>invoke('finance:create',input),
   listBankInstitutions:():Promise<BankInstitutionView[]>=>invoke('finance:listBankInstitutions'),

@@ -37,6 +37,11 @@ export interface PlatformPolicyIntent {
   readonly resourceId: string;
   readonly purpose: string;
   readonly minimumOwnershipBasisPoints?: number;
+  /**
+   * Canonical, content-free field identifiers that must be covered by the
+   * signed policy request. Values are never interpreted as payload data.
+   */
+  readonly requestedFields?: readonly string[];
 }
 
 export interface PlatformPolicyConnectionAuthority {
@@ -772,7 +777,13 @@ export class PlatformPolicyEnforcementPoint {
       capability: intent.capability,
       resourceType: intent.resourceType,
       resourceId: intent.resourceId,
-      purpose: intent.purpose
+      purpose: intent.purpose,
+      ...(intent.minimumOwnershipBasisPoints === undefined
+        ? {}
+        : { minimumOwnershipBasisPoints: intent.minimumOwnershipBasisPoints }),
+      ...(intent.requestedFields === undefined
+        ? {}
+        : { requestedFields: Object.freeze([...intent.requestedFields]) })
     });
     if (typeof clusterFence !== 'function' || typeof operation !== 'function') {
       throw new PlatformPolicyEnforcementError('INTENT_INVALID', 'Policy transaction boundary is invalid');
@@ -884,6 +895,7 @@ export class PlatformPolicyEnforcementPoint {
       capability: intent.capability,
       purpose: intent.purpose,
       ...(intent.minimumOwnershipBasisPoints === undefined ? {} : { minimumOwnershipBasisPoints: intent.minimumOwnershipBasisPoints }),
+      ...(intent.requestedFields === undefined ? {} : { requestedFields: intent.requestedFields }),
       occurredAt: issuedAt,
       online: authority.online,
       clusterWritable: requestedFence.writable,
@@ -1263,7 +1275,10 @@ export class PlatformPolicyEnforcementPoint {
   }
 
   #assertIntent(intent: PlatformPolicyIntent): void {
-    const allowedKeys = new Set(['correlationId', 'action', 'capability', 'resourceType', 'resourceId', 'purpose']);
+    const allowedKeys = new Set([
+      'correlationId','action','capability','resourceType','resourceId','purpose',
+      'minimumOwnershipBasisPoints','requestedFields'
+    ]);
     if (!intent || typeof intent !== 'object' || Object.keys(intent).some((key) => !allowedKeys.has(key))) {
       throw new PlatformPolicyEnforcementError('INTENT_INVALID', 'Policy intent contains an unsupported field');
     }
@@ -1284,6 +1299,14 @@ export class PlatformPolicyEnforcementPoint {
       || intent.minimumOwnershipBasisPoints < 1
       || intent.minimumOwnershipBasisPoints > 10_000
     )) throw new PlatformPolicyEnforcementError('INTENT_INVALID', 'Policy intent ownership threshold is invalid');
+    if (intent.requestedFields !== undefined && (
+      !Array.isArray(intent.requestedFields)
+      || intent.requestedFields.length < 1
+      || intent.requestedFields.length > 256
+      || intent.requestedFields.some((field) => !nonEmptyBounded(field, 256))
+      || !uniqueStrings(intent.requestedFields)
+      || stable(intent.requestedFields) !== stable([...intent.requestedFields].sort())
+    )) throw new PlatformPolicyEnforcementError('INTENT_INVALID', 'Policy intent requested fields are not a canonical bounded set');
   }
 
   #assertAuthority(authority: PlatformPolicyConnectionAuthority, now: number): void {

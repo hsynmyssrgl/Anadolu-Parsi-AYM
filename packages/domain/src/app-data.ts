@@ -1886,6 +1886,171 @@ export type RecordFamilyEmergencyAssistanceItemInput =
   | RecordFamilyEmergencyContactInput
   | RecordFamilyEmergencyAssistanceInstructionInput;
 
+export const FAMILY_EMERGENCY_CARD_PORTABILITY_ITEM_TYPES = [
+  'card_configuration','selected_field','document_link','export_event','power_mode_event'
+] as const;
+export type FamilyEmergencyCardPortabilityItemType =
+  typeof FAMILY_EMERGENCY_CARD_PORTABILITY_ITEM_TYPES[number];
+export const FAMILY_EMERGENCY_CARD_OUTPUT_MODES = ['print','pdf','encrypted_pack'] as const;
+export type FamilyEmergencyCardOutputMode = typeof FAMILY_EMERGENCY_CARD_OUTPUT_MODES[number];
+export const FAMILY_EMERGENCY_CARD_SOURCE_ITEM_TYPES = [
+  'emergency_profile','health_fact','emergency_contact','assistance_instruction'
+] as const;
+export type FamilyEmergencyCardSourceItemType =
+  typeof FAMILY_EMERGENCY_CARD_SOURCE_ITEM_TYPES[number];
+export const FAMILY_EMERGENCY_CARD_FIELD_CODES = [
+  'fact_value','instruction','instruction_kind','label','name','note','phone_e164',
+  'relationship','subject_display'
+] as const;
+export type FamilyEmergencyCardFieldCode = typeof FAMILY_EMERGENCY_CARD_FIELD_CODES[number];
+export const FAMILY_EMERGENCY_CARD_POWER_SOURCES = ['battery','ac','unknown'] as const;
+export type FamilyEmergencyCardPowerSource = typeof FAMILY_EMERGENCY_CARD_POWER_SOURCES[number];
+export const FAMILY_EMERGENCY_CARD_POWER_MODES = ['enabled','disabled'] as const;
+export type FamilyEmergencyCardPowerMode = typeof FAMILY_EMERGENCY_CARD_POWER_MODES[number];
+export const FAMILY_EMERGENCY_CARD_POWER_ACTIVATION_SOURCES = ['manual','battery_prompt'] as const;
+export type FamilyEmergencyCardPowerActivationSource =
+  typeof FAMILY_EMERGENCY_CARD_POWER_ACTIVATION_SOURCES[number];
+
+export const FAMILY_EMERGENCY_CARD_FIELD_MATRIX = Object.freeze({
+  emergency_profile: Object.freeze(['label','subject_display'] as const),
+  health_fact: Object.freeze(['fact_value','note'] as const),
+  emergency_contact: Object.freeze(['name','phone_e164','relationship','note'] as const),
+  assistance_instruction: Object.freeze(['instruction_kind','instruction','note'] as const)
+} satisfies Readonly<Record<FamilyEmergencyCardSourceItemType, readonly FamilyEmergencyCardFieldCode[]>>);
+
+export interface FamilyEmergencyCardPortabilityLedgerItemCommonView {
+  readonly id:string;
+  readonly profileId:string;
+  readonly ownerPersonId:string;
+  readonly privacy:'private';
+  readonly dataSource:'manual';
+  readonly createdAt:string;
+}
+export interface FamilyEmergencyCardConfigurationLedgerItemView
+  extends FamilyEmergencyCardPortabilityLedgerItemCommonView {
+  readonly itemType:'card_configuration';
+  readonly label:string;
+  readonly locale:'tr-TR';
+}
+export interface FamilyEmergencyCardSelectedFieldLedgerItemView
+  extends FamilyEmergencyCardPortabilityLedgerItemCommonView {
+  readonly itemType:'selected_field';
+  readonly configurationId:string;
+  readonly sourceItemId:string;
+  readonly sourceItemType:FamilyEmergencyCardSourceItemType;
+  readonly fieldCode:FamilyEmergencyCardFieldCode;
+}
+export interface FamilyEmergencyCardDocumentLinkLedgerItemView
+  extends FamilyEmergencyCardPortabilityLedgerItemCommonView {
+  readonly itemType:'document_link';
+  readonly configurationId:string;
+  readonly archiveItemId:string;
+}
+interface FamilyEmergencyCardExportEventLedgerItemCommonView
+  extends FamilyEmergencyCardPortabilityLedgerItemCommonView {
+  readonly itemType:'export_event';
+  readonly configurationId:string;
+  readonly selectedFieldCount:number;
+  readonly documentCount:number;
+  readonly selectionSha256:string;
+  readonly artifactSha256:string;
+  readonly artifactSizeBytes:number;
+  readonly powerSource:FamilyEmergencyCardPowerSource;
+  readonly batteryLevel:'not_measured';
+  readonly automaticLowBatteryDetection:'not_performed';
+  readonly lowBatteryClaimed:false;
+}
+export type FamilyEmergencyCardExportEventLedgerItemView =
+  | (FamilyEmergencyCardExportEventLedgerItemCommonView & {
+      readonly mode:'print';
+      readonly artifactReadbackStatus:'not_applicable_print';
+      readonly printerDispatchStatus:'confirmed';
+    })
+  | (FamilyEmergencyCardExportEventLedgerItemCommonView & {
+      readonly mode:'pdf'|'encrypted_pack';
+      readonly artifactReadbackStatus:'verified';
+    });
+export interface FamilyEmergencyCardPowerModeEventLedgerItemView
+  extends FamilyEmergencyCardPortabilityLedgerItemCommonView {
+  readonly itemType:'power_mode_event';
+  readonly configurationId:string;
+  readonly mode:FamilyEmergencyCardPowerMode;
+  readonly activationSource:FamilyEmergencyCardPowerActivationSource;
+  readonly powerSource:FamilyEmergencyCardPowerSource;
+  readonly batteryLevel:'not_measured';
+  readonly automaticLowBatteryDetection:'not_performed';
+  readonly lowBatteryClaimed:false;
+}
+export type FamilyEmergencyCardPortabilityLedgerItemView =
+  | FamilyEmergencyCardConfigurationLedgerItemView
+  | FamilyEmergencyCardSelectedFieldLedgerItemView
+  | FamilyEmergencyCardDocumentLinkLedgerItemView
+  | FamilyEmergencyCardExportEventLedgerItemView
+  | FamilyEmergencyCardPowerModeEventLedgerItemView;
+
+export interface RecordFamilyEmergencyCardConfigurationInput {
+  readonly itemType:'card_configuration';
+  readonly profileId:string;
+  readonly label:string;
+  readonly locale:'tr-TR';
+}
+export interface RecordFamilyEmergencyCardSelectedFieldInput {
+  readonly itemType:'selected_field';
+  readonly profileId:string;
+  readonly configurationId:string;
+  readonly sourceItemId:string;
+  readonly sourceItemType:FamilyEmergencyCardSourceItemType;
+  readonly fieldCode:FamilyEmergencyCardFieldCode;
+}
+export interface RecordFamilyEmergencyCardDocumentLinkInput {
+  readonly itemType:'document_link';
+  readonly profileId:string;
+  readonly configurationId:string;
+  readonly archiveItemId:string;
+}
+interface RecordFamilyEmergencyCardExportEventCommonInput {
+  readonly itemType:'export_event';
+  readonly profileId:string;
+  readonly configurationId:string;
+  readonly selectedFieldCount:number;
+  readonly documentCount:number;
+  readonly selectionSha256:string;
+  readonly shareReceiptHash:string;
+  readonly artifactSha256:string;
+  readonly artifactSizeBytes:number;
+  readonly powerSource:FamilyEmergencyCardPowerSource;
+  readonly batteryLevel:'not_measured';
+  readonly automaticLowBatteryDetection:'not_performed';
+  readonly lowBatteryClaimed:false;
+}
+export type RecordFamilyEmergencyCardExportEventInput =
+  | (RecordFamilyEmergencyCardExportEventCommonInput & {
+      readonly mode:'print';
+      readonly artifactReadbackStatus:'not_applicable_print';
+      readonly printerDispatchStatus:'confirmed';
+    })
+  | (RecordFamilyEmergencyCardExportEventCommonInput & {
+      readonly mode:'pdf'|'encrypted_pack';
+      readonly artifactReadbackStatus:'verified';
+    });
+export interface RecordFamilyEmergencyCardPowerModeEventInput {
+  readonly itemType:'power_mode_event';
+  readonly profileId:string;
+  readonly configurationId:string;
+  readonly mode:FamilyEmergencyCardPowerMode;
+  readonly activationSource:FamilyEmergencyCardPowerActivationSource;
+  readonly powerSource:FamilyEmergencyCardPowerSource;
+  readonly batteryLevel:'not_measured';
+  readonly automaticLowBatteryDetection:'not_performed';
+  readonly lowBatteryClaimed:false;
+}
+export type RecordFamilyEmergencyCardPortabilityItemInput =
+  | RecordFamilyEmergencyCardConfigurationInput
+  | RecordFamilyEmergencyCardSelectedFieldInput
+  | RecordFamilyEmergencyCardDocumentLinkInput
+  | RecordFamilyEmergencyCardExportEventInput
+  | RecordFamilyEmergencyCardPowerModeEventInput;
+
 export type RecordManagedLifeItemInput =
   | RecordManagedLifeProfileInput
   | RecordManagedLifeActivityInput
@@ -1893,7 +2058,8 @@ export type RecordManagedLifeItemInput =
   | RecordManagedHomeInventoryItemInput
   | RecordFamilyEmergencyItemInput
   | RecordFamilyEmergencyPreparednessItemInput
-  | RecordFamilyEmergencyAssistanceItemInput;
+  | RecordFamilyEmergencyAssistanceItemInput
+  | RecordFamilyEmergencyCardPortabilityItemInput;
 
 export interface ManagedLifeCurrentReminderView {
   readonly sourceId:string;
@@ -1936,6 +2102,14 @@ export type FamilyEmergencyAssistanceProfileView = FamilyEmergencyAssistanceProf
   readonly healthFacts:readonly FamilyEmergencyHealthFactLedgerItemView[];
   readonly emergencyContacts:readonly FamilyEmergencyContactLedgerItemView[];
   readonly assistanceInstructions:readonly FamilyEmergencyAssistanceInstructionLedgerItemView[];
+  readonly cardConfigurations:readonly FamilyEmergencyCardConfigurationView[];
+};
+
+export type FamilyEmergencyCardConfigurationView = FamilyEmergencyCardConfigurationLedgerItemView & {
+  readonly selectedFields:readonly FamilyEmergencyCardSelectedFieldLedgerItemView[];
+  readonly documentLinks:readonly FamilyEmergencyCardDocumentLinkLedgerItemView[];
+  readonly exportEvents:readonly FamilyEmergencyCardExportEventLedgerItemView[];
+  readonly latestPowerModeEvent?:FamilyEmergencyCardPowerModeEventLedgerItemView;
 };
 
 export interface ManagedLifeWorkspaceView {
@@ -1966,7 +2140,15 @@ export interface ManagedLifeWorkspaceView {
   readonly readinessGuarantee:'not_claimed';
   readonly medicalVerification:'not_performed';
   readonly healthRegistryLookup:'not_performed';
-  readonly exportSharing:'not_performed';
+  readonly externalDelivery:'not_performed';
+  readonly localExport:'user_authorized_only';
+  readonly cloudUpload:'not_performed';
+  readonly pdfEncryption:'not_claimed';
+  readonly portablePackEncryption:'application_specific_container';
+  readonly plaintextTemporaryFiles:'not_created';
+  readonly batteryLevel:'not_measured';
+  readonly automaticLowBatteryDetection:'not_performed';
+  readonly lowBatteryClaimed:false;
   readonly networkEgressAdded:false;
 }
 

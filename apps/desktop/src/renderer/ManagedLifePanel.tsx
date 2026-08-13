@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react';
 import type {
   FamilyEmergencyChecklistStatus,
+  FamilyEmergencyCardFieldCode,
+  FamilyEmergencyCardOutputMode,
+  FamilyEmergencyCardSourceItemType,
   FamilyEmergencyAssistanceInstructionKind,
   FamilyEmergencyAssistanceItemType,
   FamilyEmergencyAssistanceSubjectKind,
@@ -174,6 +177,19 @@ const assistanceInstructionLabels: Record<FamilyEmergencyAssistanceInstructionKi
   communication: 'İletişim desteği', cognitive: 'Bilişsel destek',
   medication_support: 'İlaç desteği', evacuation: 'Tahliye desteği',
   pet_care: 'Evcil hayvan bakımı', other: 'Diğer özel yardım'
+};
+const emergencyCardFieldLabels:Record<FamilyEmergencyCardFieldCode,string> = {
+  label:'Kart etiketi', subject_display:'Kart konusu', fact_value:'Sağlık bilgisi',
+  name:'İrtibat adı', phone_e164:'Telefon', relationship:'Yakınlık', note:'Not',
+  instruction_kind:'Yardım türü', instruction:'Yardım talimatı'
+};
+const emergencyCardFieldsBySource:Record<FamilyEmergencyCardSourceItemType,readonly FamilyEmergencyCardFieldCode[]> = {
+  emergency_profile:['label','subject_display'], health_fact:['fact_value','note'],
+  emergency_contact:['name','phone_e164','relationship','note'],
+  assistance_instruction:['instruction_kind','instruction','note']
+};
+const emergencyCardOutputLabels:Record<FamilyEmergencyCardOutputMode,string> = {
+  print:'Yazdır', pdf:'Düz PDF', encrypted_pack:'Şifreli belge paketi'
 };
 
 const remindersByCategory: Record<ManagedLifeCategory, readonly ManagedLifeReminderKind[]> = {
@@ -368,6 +384,22 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
   const [assistanceRelationship, setAssistanceRelationship] = useState('');
   const [assistanceInstructionKind, setAssistanceInstructionKind] = useState<FamilyEmergencyAssistanceInstructionKind>('mobility');
   const [assistanceInstruction, setAssistanceInstruction] = useState('');
+  const [cardProfileId, setCardProfileId] = useState('');
+  const [cardConfigurationId, setCardConfigurationId] = useState('');
+  const [cardConfigurationLabel, setCardConfigurationLabel] = useState('');
+  const [cardSourceItemId, setCardSourceItemId] = useState('');
+  const [cardFieldCode, setCardFieldCode] = useState<FamilyEmergencyCardFieldCode>('label');
+  const [cardArchiveItemId, setCardArchiveItemId] = useState('');
+  const [cardOutputMode, setCardOutputMode] = useState<FamilyEmergencyCardOutputMode>('encrypted_pack');
+  const [cardSelectedFieldIds, setCardSelectedFieldIds] = useState<readonly string[]>([]);
+  const [cardDocumentLinkIds, setCardDocumentLinkIds] = useState<readonly string[]>([]);
+  const [cardPassword, setCardPassword] = useState('');
+  const [cardSecondFactorCode, setCardSecondFactorCode] = useState('');
+  const [cardPackagePassphrase, setCardPackagePassphrase] = useState('');
+  const [cardPlaintextWarningConfirmed, setCardPlaintextWarningConfirmed] = useState(false);
+  const [cardBusy, setCardBusy] = useState(false);
+  const [cardMessage, setCardMessage] = useState('');
+  const [cardMessageTone, setCardMessageTone] = useState<'success'|'danger'>('success');
   const [message, setMessage] = useState('');
   const [messageTone, setMessageTone] = useState<'success'|'danger'>('success');
 
@@ -400,6 +432,26 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
   const preparednessKitItems = selectedEmergencyPlan?.preparednessKits.flatMap((kit) => kit.items) ?? [];
   const selectedPreparednessKitItem = preparednessKitItems.find((item) => item.id === preparednessKitItemId);
   const selectedAssistanceProfile = assistanceProfiles.find((item) => item.id === assistanceProfileId);
+  const selectedCardProfile = assistanceProfiles.find((item) => item.id === cardProfileId);
+  const cardConfigurations = selectedCardProfile?.cardConfigurations ?? [];
+  const selectedCardConfiguration = cardConfigurations.find((item) => item.id === cardConfigurationId);
+  const cardSourceOptions:{id:string;sourceItemType:FamilyEmergencyCardSourceItemType;label:string}[] = selectedCardProfile ? [
+    { id:selectedCardProfile.id, sourceItemType:'emergency_profile', label:`Kart · ${selectedCardProfile.label}` },
+    ...selectedCardProfile.healthFacts.map((item) => ({
+      id:item.id, sourceItemType:'health_fact' as const, label:`Sağlık · ${healthFactLabels[item.factKind]}`
+    })),
+    ...selectedCardProfile.emergencyContacts.map((item) => ({
+      id:item.id, sourceItemType:'emergency_contact' as const, label:`İrtibat · ${item.name}`
+    })),
+    ...selectedCardProfile.assistanceInstructions.map((item) => ({
+      id:item.id, sourceItemType:'assistance_instruction' as const,
+      label:`Yardım · ${assistanceInstructionLabels[item.instructionKind]}`
+    }))
+  ] : [];
+  const selectedCardSource = cardSourceOptions.find((item) => item.id === cardSourceItemId);
+  const availableCardFields = selectedCardSource
+    ? emergencyCardFieldsBySource[selectedCardSource.sourceItemType]
+    : emergencyCardFieldsBySource.emergency_profile;
   const emergencyCorrectionOptions = emergencyType === 'meeting_point'
     ? selectedEmergencyPlan?.meetingPoints ?? []
     : emergencyType === 'external_contact'
@@ -449,6 +501,100 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
     setEmergencyType(next); setEmergencySupersedesItemId(''); setChecklistItemId('');
     setPreparednessKitId(''); setPreparednessKitItemId('');
     setAssistanceProfileId('');
+  };
+  const changeCardProfile = (profileId:string) => {
+    setCardProfileId(profileId); setCardConfigurationId(''); setCardSourceItemId('');
+    setCardSelectedFieldIds([]); setCardDocumentLinkIds([]); setCardMessage('');
+  };
+  const changeCardConfiguration = (configurationId:string) => {
+    setCardConfigurationId(configurationId); setCardSelectedFieldIds([]);
+    setCardDocumentLinkIds([]); setCardMessage('');
+  };
+  const changeCardSource = (sourceItemId:string) => {
+    setCardSourceItemId(sourceItemId);
+    const source = cardSourceOptions.find((item) => item.id === sourceItemId);
+    setCardFieldCode(source ? emergencyCardFieldsBySource[source.sourceItemType][0]! : 'label');
+  };
+  const toggleCardSelection = (
+    id:string,
+    current:readonly string[],
+    update:(value:readonly string[])=>void
+  ) => update(current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+  const recordCardConfiguration = async () => {
+    try {
+      setCardMessage('');
+      await onRecord({
+        itemType:'card_configuration', profileId:cardProfileId,
+        label:cardConfigurationLabel, locale:'tr-TR'
+      });
+      setCardConfigurationLabel(''); setCardMessageTone('success');
+      setCardMessage('Çevrimdışı kart yapılandırması kaydedildi.');
+    } catch (error) {
+      setCardMessageTone('danger'); setCardMessage(error instanceof Error ? error.message : 'Yapılandırma kaydedilemedi.');
+    }
+  };
+  const recordCardSelectedField = async () => {
+    if (!selectedCardSource) return;
+    try {
+      setCardMessage('');
+      await onRecord({
+        itemType:'selected_field', profileId:cardProfileId, configurationId:cardConfigurationId,
+        sourceItemId:selectedCardSource.id, sourceItemType:selectedCardSource.sourceItemType, fieldCode:cardFieldCode
+      });
+      setCardMessageTone('success'); setCardMessage('Kapalı matristen seçilen alan kaydedildi.');
+    } catch (error) {
+      setCardMessageTone('danger'); setCardMessage(error instanceof Error ? error.message : 'Alan seçimi kaydedilemedi.');
+    }
+  };
+  const recordCardDocumentLink = async () => {
+    try {
+      setCardMessage('');
+      await onRecord({
+        itemType:'document_link', profileId:cardProfileId,
+        configurationId:cardConfigurationId, archiveItemId:cardArchiveItemId
+      });
+      setCardArchiveItemId(''); setCardMessageTone('success');
+      setCardMessage('Opak arşiv belge bağı kaydedildi; içerik bu aşamada okunmadı.');
+    } catch (error) {
+      setCardMessageTone('danger'); setCardMessage(error instanceof Error ? error.message : 'Belge bağı kaydedilemedi.');
+    }
+  };
+  const recordCardPowerMode = async (enabled:boolean) => {
+    try {
+      setCardMessage('');
+      await onRecord({
+        itemType:'power_mode_event', profileId:cardProfileId, configurationId:cardConfigurationId,
+        mode:enabled ? 'enabled' : 'disabled', activationSource:'manual', powerSource:'unknown',
+        batteryLevel:'not_measured', automaticLowBatteryDetection:'not_performed', lowBatteryClaimed:false
+      });
+      setCardMessageTone('success');
+      setCardMessage(`Pil-duyarlı görünüm ${enabled ? 'açıldı' : 'kapatıldı'}; pil yüzdesi ölçülmedi.`);
+    } catch (error) {
+      setCardMessageTone('danger'); setCardMessage(error instanceof Error ? error.message : 'Güç kipi kaydedilemedi.');
+    }
+  };
+  const exportEmergencyCard = async () => {
+    if (!window.pardus || !selectedCardConfiguration) return;
+    setCardBusy(true); setCardMessage('');
+    try {
+      const result = await window.pardus.exportEmergencyCard({
+        profileId:cardProfileId, configurationId:selectedCardConfiguration.id, mode:cardOutputMode,
+        selectedFieldIds:cardSelectedFieldIds,
+        documentLinkIds:cardOutputMode === 'encrypted_pack' ? cardDocumentLinkIds : [],
+        password:cardPassword,
+        ...(cardSecondFactorCode.trim() ? { code:cardSecondFactorCode } : {}),
+        ...(cardOutputMode === 'encrypted_pack' ? { packagePassphrase:cardPackagePassphrase } : {}),
+        plaintextWarningConfirmed:cardOutputMode === 'encrypted_pack' ? false : cardPlaintextWarningConfirmed
+      });
+      setCardMessageTone('success');
+      setCardMessage(result.canceled
+        ? 'Dışa aktarma kullanıcı tarafından iptal edildi.'
+        : `${emergencyCardOutputLabels[result.mode]} tamamlandı · ${result.artifactSizeBytes.toLocaleString('tr-TR')} bayt · ${result.artifactReadbackStatus === 'verified' ? 'okuma doğrulandı' : 'yazıcıya gönderim doğrulandı'}.`);
+    } catch (error) {
+      setCardMessageTone('danger'); setCardMessage(error instanceof Error ? error.message : 'Acil kart dışa aktarılamadı.');
+    } finally {
+      setCardPassword(''); setCardSecondFactorCode(''); setCardPackagePassphrase(''); setCardBusy(false);
+    }
   };
 
   const submitProfile = async () => {
@@ -706,7 +852,7 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
 
   return <>
     <Surface className="span-2">
-      <SectionHeader eyebrow="B5 · EXT-009 · EXT-010 · EXT-011 · EXT-012 · EXT-013 · EXT-014 · EXT-015 · EXT-030 · EXT-032" title="Yaşam Merkezi, ev envanteri ve acil durum"/>
+      <SectionHeader eyebrow="B5-03 · B5 · EXT-009 · EXT-010 · EXT-011 · EXT-012 · EXT-013 · EXT-014 · EXT-015 · EXT-016 · EXT-030 · EXT-032" title="Yaşam Merkezi, ev envanteri ve acil durum"/>
       <div className="button-row managed-life-mode-grid" role="group" aria-label="Yaşam kaydı türü">
         <Button tone={mode === 'profile' ? 'primary' : 'default'} onClick={() => setMode('profile')}>Profil</Button>
         <Button tone={mode === 'activity' ? 'primary' : 'default'} onClick={() => setMode('activity')}>Etkinlik / gider</Button>
@@ -720,7 +866,7 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
         <small>“Yardım lazım” durumu yalnız bu cihazdaki yetkili aile çalışma alanına kaydedilir. Teslim veya acil servis müdahale garantisi verilmez.</small>
         <small>Hazırlık kiti ve tatbikatlar manuel tutulur; barkod, son kullanma doğrulaması, bildirim veya sensör entegrasyonu yapılmaz. Hazır olma garantisi verilmez.</small>
         <small>Acil sağlık kartı ve özel yardım planı özeldir. Plan bağlantısı erişim vermez; görünürlük yalnız merkezi yetki kararıyla açılır.</small>
-        <small>Sağlık bilgisi manuel beyan edilir, klinik olarak doğrulanmaz; telefon veya sağlık içeriği loga, outbox olayına, dışa aktarıma ya da sağlayıcıya gönderilmez.</small>
+        <small>Sağlık bilgisi manuel beyan edilir ve klinik olarak doğrulanmaz. Telefon veya sağlık içeriği otomatik paylaşılmaz; yalnız açık alan seçimi, güçlü yeniden doğrulama ve yerel dosya politikasıyla kullanıcıya verilebilir.</small>
       </div>}
       <div className="notes-card managed-life-truth-card">
         <strong>Yalnız manuel, yerel takip</strong>
@@ -773,7 +919,7 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
         {emergencyType === 'emergency_drill' && <><label>Tatbikat türü<select value={emergencyDrillKind} onChange={(event) => setEmergencyDrillKind(event.target.value as FamilyEmergencyDrillKind)}>{Object.entries(emergencyDrillKindLabels).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Sonuç<select value={emergencyDrillStatus} onChange={(event) => setEmergencyDrillStatus(event.target.value as FamilyEmergencyDrillStatus)}>{Object.entries(emergencyDrillStatusLabels).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Gerçekleşme zamanı<input type="datetime-local" max={localDateTime()} value={emergencyDrillAt} onChange={(event) => setEmergencyDrillAt(event.target.value)}/></label><label>Süre (saniye, isteğe bağlı)<input type="number" min="1" max="604800" step="1" value={emergencyDrillDuration} onChange={(event) => setEmergencyDrillDuration(event.target.value)}/></label><label>Not (isteğe bağlı)<textarea maxLength={500} value={emergencyNote} onChange={(event) => setEmergencyNote(event.target.value)}/></label><small>Tatbikat kaydı alarm, mesaj, acil servis teması veya müdahale garantisi üretmez.</small></>}
         {emergencyType === 'emergency_profile' && <fieldset className="family-emergency-assistance-fieldset"><legend>Acil sağlık ve iletişim kartı</legend><label>Kart etiketi<input maxLength={120} value={assistanceLabel} onChange={(event) => setAssistanceLabel(event.target.value)} placeholder="Örn. Evden çıkış acil kartı"/></label><label>Kart konusu<select value={assistanceSubjectKind} onChange={(event) => setAssistanceSubjectKind(event.target.value as FamilyEmergencyAssistanceSubjectKind)}>{Object.entries(assistanceSubjectLabels).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label>{assistanceSubjectKind === 'person' ? <label>Aile üyesi<select value={assistanceSubjectPersonId} onChange={(event) => setAssistanceSubjectPersonId(event.target.value)}><option value="">Seçin</option>{people.map((person) => <option key={person.id} value={person.id}>{person.displayName}</option>)}</select></label> : <><label>Opak evcil hayvan kimliği<input autoComplete="off" spellCheck={false} maxLength={160} value={assistanceSubjectPetId} onChange={(event) => setAssistanceSubjectPetId(event.target.value)} placeholder="Örn. pet-yerel-01"/></label><label>Sorumlu aile üyesi<select value={assistanceResponsiblePersonId} onChange={(event) => setAssistanceResponsiblePersonId(event.target.value)}><option value="">Seçin</option>{people.map((person) => <option key={person.id} value={person.id}>{person.displayName}</option>)}</select></label></>}<small>Yeni kart her zaman özel oluşturulur. Plan bağlantısı kartı aileye açmaz; kişi veya sorumlu sahipliği merkezi PEP tarafından doğrulanır.</small></fieldset>}
         {emergencyType === 'health_fact' && <fieldset className="family-emergency-assistance-fieldset"><legend>Acil sağlık kartı bilgisi</legend><label>Bilgi türü<select value={healthFactKind} onChange={(event) => { setHealthFactKind(event.target.value as FamilyEmergencyHealthFactKind); setEmergencySupersedesItemId(''); }}>{Object.entries(healthFactLabels).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label>{healthFactKind === 'blood_type' ? <label>Kan grubu<select value={bloodType} onChange={(event) => setBloodType(event.target.value as FamilyEmergencyBloodType)}>{Object.entries(bloodTypeLabels).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label> : <label>Manuel bilgi<textarea maxLength={240} value={healthFactValue} onChange={(event) => setHealthFactValue(event.target.value)}/></label>}<label>Not (isteğe bağlı)<textarea maxLength={500} value={emergencyNote} onChange={(event) => setEmergencyNote(event.target.value)}/></label><small>Bu bilgi klinik doğrulama veya tıbbi tavsiye değildir; sağlık sicili sorgulanmaz.</small></fieldset>}
-        {emergencyType === 'emergency_contact' && <fieldset className="family-emergency-assistance-fieldset"><legend>Acil kart irtibatı</legend><label>İrtibat adı<input maxLength={120} value={contactName} onChange={(event) => setContactName(event.target.value)}/></label><label>Telefon (E.164)<input type="tel" autoComplete="off" spellCheck={false} maxLength={16} value={contactPhone} onChange={(event) => setContactPhone(event.target.value)} placeholder="+905551112233"/></label><label>Yakınlık (isteğe bağlı)<input maxLength={120} value={assistanceRelationship} onChange={(event) => setAssistanceRelationship(event.target.value)}/></label><label>Not (isteğe bağlı)<textarea maxLength={500} value={emergencyNote} onChange={(event) => setEmergencyNote(event.target.value)}/></label><small>Numara yalnız yetkili özel kartta gösterilir; mesaj gönderilmez, aranmaz, loglanmaz veya dışa aktarılmaz.</small></fieldset>}
+        {emergencyType === 'emergency_contact' && <fieldset className="family-emergency-assistance-fieldset"><legend>Acil kart irtibatı</legend><label>İrtibat adı<input maxLength={120} value={contactName} onChange={(event) => setContactName(event.target.value)}/></label><label>Telefon (E.164)<input type="tel" autoComplete="off" spellCheck={false} maxLength={16} value={contactPhone} onChange={(event) => setContactPhone(event.target.value)} placeholder="+905551112233"/></label><label>Yakınlık (isteğe bağlı)<input maxLength={120} value={assistanceRelationship} onChange={(event) => setAssistanceRelationship(event.target.value)}/></label><label>Not (isteğe bağlı)<textarea maxLength={500} value={emergencyNote} onChange={(event) => setEmergencyNote(event.target.value)}/></label><small>Numara yalnız yetkili özel kartta gösterilir; mesaj gönderilmez, aranmaz veya loglanmaz. Yerel çıktıya ancak ayrıca açıkça seçilip güçlü yeniden doğrulama yapılırsa eklenir.</small></fieldset>}
         {emergencyType === 'assistance_instruction' && <fieldset className="family-emergency-assistance-fieldset"><legend>Özel yardım planı</legend><label>Yardım türü<select value={assistanceInstructionKind} onChange={(event) => { setAssistanceInstructionKind(event.target.value as FamilyEmergencyAssistanceInstructionKind); setEmergencySupersedesItemId(''); }}>{Object.entries(assistanceInstructionLabels).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Uygulanacak manuel talimat<textarea maxLength={1000} value={assistanceInstruction} onChange={(event) => setAssistanceInstruction(event.target.value)} placeholder="Kısa, uygulanabilir ve kişiye/evcil hayvana özel yardım adımları"/></label><label>Not (isteğe bağlı)<textarea maxLength={500} value={emergencyNote} onChange={(event) => setEmergencyNote(event.target.value)}/></label><small>Talimat yalnız yerel özel profildir; mesaj, sağlık sağlayıcısı veya acil servis çağrısı üretmez.</small></fieldset>}
         {(emergencyType === 'meeting_point' || emergencyType === 'external_contact' || emergencyType === 'checklist_item') && <label>Önceki kaydı düzelt (isteğe bağlı)<select value={emergencySupersedesItemId} onChange={(event) => setEmergencySupersedesItemId(event.target.value)}><option value="">Yeni kayıt</option>{emergencyCorrectionOptions.map((item) => <option key={item.id} value={item.id}>{item.itemType === 'meeting_point' ? item.label : item.itemType === 'external_contact' ? item.name : item.label} · {formatDate(item.createdAt)}</option>)}</select></label>}
         {(emergencyType === 'preparedness_kit' || emergencyType === 'preparedness_kit_item' || emergencyType === 'emergency_drill') && <label>Önceki kaydı düzelt (isteğe bağlı)<select value={emergencySupersedesItemId} onChange={(event) => setEmergencySupersedesItemId(event.target.value)}><option value="">Yeni kayıt</option>{preparednessCorrectionOptions.map((item) => <option key={item.id} value={item.id}>{item.itemType === 'emergency_drill' ? `${emergencyDrillKindLabels[item.drillKind]} · ${emergencyDrillStatusLabels[item.status]}` : item.label} · {formatDate(item.createdAt)}</option>)}</select></label>}
@@ -800,6 +946,63 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
       </>}
       <Button tone="primary" onClick={() => void submit()} disabled={!submitReady}>Yerel deftere kaydet</Button>
       {message && <StatusMessage tone={messageTone}>{message}</StatusMessage>}
+    </Surface>
+
+    <Surface className="workspace-form emergency-card-portability-panel">
+      <SectionHeader eyebrow="B5-03 · EXT-016" title="Çevrimdışı acil kart çıktısı"/>
+      <div className="notes-card family-emergency-warning" role="note">
+        <strong>Bu işlem özel sağlık ve iletişim verisinin yerel bir kopyasını oluşturabilir.</strong>
+        <small>Yazdırma ve düz PDF şifreli değildir. Şifreli paket ayrı, en az 12 karakterli paket parolası kullanır; hesap parolası paket parolası olarak saklanmaz veya yeniden kullanılmaz.</small>
+        <small>Dosya yolu renderer tarafından verilmez veya geri dönmez. Seçilen arşiv belgeleri ayrı yetki kararıyla, en çok 10 MiB/dosya ve 25 MiB toplam olacak biçimde bellekte okunur; düz metin geçici dosya oluşturulmaz.</small>
+        <small>Ağ, bulut, mesaj veya acil servis teslimi yapılmaz. Pil kaynağı yalnız ana süreçte gözlenir; pil yüzdesi ölçülmez ve otomatik düşük pil iddiası kurulmaz.</small>
+      </div>
+      <label>Yetkili özel acil kart
+        <select value={cardProfileId} onChange={(event) => changeCardProfile(event.target.value)}>
+          <option value="">Seçin</option>
+          {assistanceProfiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.label} · {assistanceSubjectLabels[profile.subjectKind]}</option>)}
+        </select>
+      </label>
+      <fieldset className="emergency-card-config-group">
+        <legend>1. Yapılandırma</legend>
+        <label>Yapılandırma etiketi<input maxLength={120} value={cardConfigurationLabel} onChange={(event) => setCardConfigurationLabel(event.target.value)} placeholder="Örn. Cüzdan acil kartı"/></label>
+        <Button onClick={() => void recordCardConfiguration()} disabled={!cardProfileId || cardConfigurationLabel.trim().length < 2}>Yapılandırmayı kaydet</Button>
+        <label>Kayıtlı yapılandırma
+          <select value={cardConfigurationId} onChange={(event) => changeCardConfiguration(event.target.value)}>
+            <option value="">Seçin</option>
+            {cardConfigurations.map((configuration) => <option key={configuration.id} value={configuration.id}>{configuration.label}</option>)}
+          </select>
+        </label>
+      </fieldset>
+      <fieldset className="emergency-card-config-group">
+        <legend>2. Kapalı alan ve belge seçimi</legend>
+        <label>Kaynak kayıt<select value={cardSourceItemId} onChange={(event) => changeCardSource(event.target.value)}><option value="">Seçin</option>{cardSourceOptions.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
+        <label>Alan<select value={cardFieldCode} onChange={(event) => setCardFieldCode(event.target.value as FamilyEmergencyCardFieldCode)}>{availableCardFields.map((field) => <option key={field} value={field}>{emergencyCardFieldLabels[field]}</option>)}</select></label>
+        <Button onClick={() => void recordCardSelectedField()} disabled={!cardConfigurationId || !selectedCardSource}>Alanı yapılandırmaya ekle</Button>
+        <label>Yüksek hassasiyetli opak arşiv kimliği<input autoComplete="off" spellCheck={false} maxLength={160} value={cardArchiveItemId} onChange={(event) => setCardArchiveItemId(event.target.value)} placeholder="archive-item-01"/></label>
+        <Button onClick={() => void recordCardDocumentLink()} disabled={!cardConfigurationId || !/^[A-Za-z0-9][A-Za-z0-9._-]{1,159}$/u.test(cardArchiveItemId)}>Belge bağını ekle</Button>
+        {selectedCardConfiguration && <div className="emergency-card-selection-list" aria-label="Bu çıktı için açık seçimler">
+          <strong>Bu işlemde dışa aktarılacak alanlar</strong>
+          {selectedCardConfiguration.selectedFields.map((field) => <label className="emergency-card-check" key={field.id}><input type="checkbox" checked={cardSelectedFieldIds.includes(field.id)} onChange={() => toggleCardSelection(field.id,cardSelectedFieldIds,setCardSelectedFieldIds)}/><span>{emergencyCardFieldLabels[field.fieldCode]} · {field.sourceItemType}</span></label>)}
+          {selectedCardConfiguration.selectedFields.length === 0 && <small>Henüz alan seçimi kaydedilmedi.</small>}
+          <strong>Yalnız şifreli pakete eklenecek belgeler</strong>
+          {selectedCardConfiguration.documentLinks.map((link) => <label className="emergency-card-check" key={link.id}><input type="checkbox" disabled={cardOutputMode !== 'encrypted_pack'} checked={cardOutputMode === 'encrypted_pack' && cardDocumentLinkIds.includes(link.id)} onChange={() => toggleCardSelection(link.id,cardDocumentLinkIds,setCardDocumentLinkIds)}/><span>Opak arşiv bağı · {link.archiveItemId}</span></label>)}
+          {selectedCardConfiguration.documentLinks.length === 0 && <small>Henüz belge bağı kaydedilmedi.</small>}
+        </div>}
+      </fieldset>
+      <fieldset className="emergency-card-config-group">
+        <legend>3. Pil-duyarlı görünüm</legend>
+        <div className="button-row"><Button onClick={() => void recordCardPowerMode(true)} disabled={!cardConfigurationId}>Manuel aç</Button><Button onClick={() => void recordCardPowerMode(false)} disabled={!cardConfigurationId}>Kapat</Button></div>
+        <small>{selectedCardConfiguration?.latestPowerModeEvent ? `Son kip: ${selectedCardConfiguration.latestPowerModeEvent.mode === 'enabled' ? 'açık' : 'kapalı'} · güç kaynağı ${selectedCardConfiguration.latestPowerModeEvent.powerSource} · pil seviyesi ölçülmedi` : 'Henüz pil-duyarlı kip olayı yok.'}</small>
+      </fieldset>
+      <fieldset className="emergency-card-config-group">
+        <legend>4. Güçlü doğrulama ve yerel çıktı</legend>
+        <label>Çıktı biçimi<select value={cardOutputMode} onChange={(event) => { setCardOutputMode(event.target.value as FamilyEmergencyCardOutputMode); setCardPlaintextWarningConfirmed(false); }}>{Object.entries(emergencyCardOutputLabels).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select><small>Arşiv belgesi içeriği düz metin PDF/yazıcı çıktısına eklenmez; yalnız bağımsız parolalı şifreli pakete alınır.</small></label>
+        <label>Hesap parolası<input type="password" autoComplete="current-password" maxLength={1024} value={cardPassword} onChange={(event) => setCardPassword(event.target.value)}/></label>
+        <label>İkinci faktör kodu (etkinse)<input type="password" inputMode="numeric" autoComplete="one-time-code" maxLength={256} value={cardSecondFactorCode} onChange={(event) => setCardSecondFactorCode(event.target.value)}/></label>
+        {cardOutputMode === 'encrypted_pack' ? <label>Paket parolası (en az 12 karakter)<input type="password" autoComplete="new-password" maxLength={1024} value={cardPackagePassphrase} onChange={(event) => setCardPackagePassphrase(event.target.value)}/><small>Bu parola yalnız bu çağrıda kullanılır; saklanmaz, loglanmaz, denetime veya sonuca eklenmez.</small></label> : <label className="emergency-card-check plaintext-warning"><input type="checkbox" checked={cardPlaintextWarningConfirmed} onChange={(event) => setCardPlaintextWarningConfirmed(event.target.checked)}/><span>Bu {cardOutputMode === 'pdf' ? 'PDF dosyasının' : 'yazıcı çıktısının'} düz metin olduğunu ve erişebilen kişilerin özel içeriği görebileceğini anlıyorum.</span></label>}
+        <Button tone="primary" onClick={() => void exportEmergencyCard()} disabled={cardBusy || !selectedCardConfiguration || cardPassword.length < 1 || cardSelectedFieldIds.length + (cardOutputMode === 'encrypted_pack' ? cardDocumentLinkIds.length : 0) < 1 || (cardOutputMode === 'encrypted_pack' ? cardPackagePassphrase.normalize('NFKC').length < 12 : !cardPlaintextWarningConfirmed)}>{cardBusy ? 'Güvenli çıktı hazırlanıyor…' : emergencyCardOutputLabels[cardOutputMode]}</Button>
+      </fieldset>
+      {cardMessage && <StatusMessage tone={cardMessageTone}>{cardMessage}</StatusMessage>}
     </Surface>
 
     <Surface className="workspace-summary managed-life-summary">
@@ -855,8 +1058,13 @@ export function ManagedLifePanel({ people, workspace, onRecord }: ManagedLifePan
         <small>Barkod araması: {workspace?.barcodeLookup === 'not_performed' ? 'Yapılmadı' : '—'} · Son kullanma doğrulaması: {workspace?.expiryVerification === 'not_performed' ? 'Yapılmadı' : '—'} · Bildirim teslimi: {workspace?.notificationDelivery === 'not_performed' ? 'Yapılmadı' : '—'}</small>
         <small>Sensör entegrasyonu: {workspace?.sensorIntegration === 'not_performed' ? 'Yapılmadı' : '—'} · Hazır olma garantisi: {workspace?.readinessGuarantee === 'not_claimed' ? 'İddia edilmiyor' : '—'} · Saklama: {workspace?.offlineAvailability === 'local_only' ? 'Yalnız yerel' : '—'}</small>
         <strong>Özel acil sağlık ve yardım doğruluk sınırı</strong>
-        <small>Tıbbi doğrulama: {workspace?.medicalVerification === 'not_performed' ? 'Yapılmadı' : '—'} · Sağlık sicili: {workspace?.healthRegistryLookup === 'not_performed' ? 'Sorgulanmadı' : '—'} · Dışa aktarım/paylaşım: {workspace?.exportSharing === 'not_performed' ? 'Yapılmadı' : '—'}</small>
+         <small>Tıbbi doğrulama: {workspace?.medicalVerification === 'not_performed' ? 'Yapılmadı' : '—'} · Sağlık sicili: {workspace?.healthRegistryLookup === 'not_performed' ? 'Sorgulanmadı' : '—'} · Dış teslim: {workspace?.externalDelivery === 'not_performed' ? 'Yapılmadı' : '—'} · Yerel çıktı: {workspace?.localExport === 'user_authorized_only' ? 'Yalnız kullanıcı yetkisiyle' : '—'}</small>
+          <small>Dışa paylaşım (exportSharing): yalnız yeni güçlü doğrulama, kapalı alan seçimi ve yerel çıktı onayıyla; varsayılan paylaşım yapılmaz.</small>
+          <small>telefon veya sağlık içeriği loga, dış sağlayıcıya ya da kendiliğinden dışa aktarıma verilmez.</small>
         <small>İletişim teslimi: {workspace?.messageDelivery === 'not_performed' ? 'Yapılmadı' : '—'} · Acil servis teması: {workspace?.emergencyServiceContact === 'not_performed' ? 'Kurulmadı' : '—'} · Ağ çıkışı: {workspace?.networkEgressAdded === false ? 'Eklenmedi' : '—'}</small>
+        <strong>Acil kart taşınabilirlik doğruluk sınırı</strong>
+        <small>Bulut yükleme: {workspace?.cloudUpload === 'not_performed' ? 'Yapılmadı' : '—'} · PDF şifreleme: {workspace?.pdfEncryption === 'not_claimed' ? 'İddia edilmiyor' : '—'} · Şifreli paket: {workspace?.portablePackEncryption === 'application_specific_container' ? 'Uygulamaya özel konteyner' : '—'}</small>
+        <small>Düz metin geçici dosya: {workspace?.plaintextTemporaryFiles === 'not_created' ? 'Oluşturulmadı' : '—'} · Pil düzeyi: {workspace?.batteryLevel === 'not_measured' ? 'Ölçülmedi' : '—'} · Otomatik düşük pil: {workspace?.automaticLowBatteryDetection === 'not_performed' ? 'Yapılmadı' : '—'}</small>
       </div>
     </Surface>
   </>;

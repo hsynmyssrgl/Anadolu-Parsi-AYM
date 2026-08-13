@@ -31,12 +31,12 @@ belirleyemez. Çelişki sessizce birleştirilmez; değişiklik kaydına işlenir
 ## DEC-221 — Yönetişimli çevrimdışı acil kart, yazdırılabilir/PDF çıktı, şifreli belge paketi ve pil-duyarlı kip
 
 33-J ile B5-03 ve EXT-016, 33-I'nin bağımsız `private` acil yardım profilini kaynak alan
-tek bir yönetişimli çıktı diliminde birlikte uygulanacaktır. Kapalı alan seçimi,
-yazdırılabilir/PDF çıktı, bağımsız parola anahtarlı şifreli belge paketi ve manuel ya da
-pil gücü gözlemine dayanan pil-duyarlı kip Migration 88 ile planlanır. Pil yüzdesi veya
+tek bir yönetişimli çıktı diliminde birlikte uygulanmıştır. Kapalı alan seçimi,
+yazdırılabilir/PDF çıktı, bağımsız parola anahtarlı şifreli belge paketi ve manuel
+pil-duyarlı kip Migration 88 ile kalıcılaştırılır. Pil yüzdesi veya
 otomatik düşük-pil tespiti iddia edilmez. Gerçek dosya çıktısı genel `no_export` ilkesini
 gevşetmeden exact `file.share`, işleme bağlı güçlü kimlik doğrulama ve ayrı arşiv PEP
-kararı çözülmeden açılamaz. Ağ, mesaj veya bulut teslim kanalı eklenmez. Ayrıntılı karar:
+kararıyla sınırlandırılır. Ağ, mesaj veya bulut teslim kanalı eklenmez. Ayrıntılı karar:
 `docs/decisions/DEC-221-family-emergency-card-portability.md`
 
 ## DEC-220 — Çevrimdışı özel acil sağlık/iletişim kartı ve yardım profili
@@ -93,8 +93,8 @@ gider akışları manual-only çalışır. Dış sicil sorgusu, sağlayıcı ile
 içeriği ifşası veya ödeme icrası yapılmaz. Ayrıntılı karar:
 `docs/decisions/DEC-216-b5-category-life-home-vehicle.md`
 
-PPK-021 güncel ratchet 545 exact yüzey ve 277 use-case composition yüzeyidir;
-PPK-022 yeni yetenek açılmadan 242'de kalır.
+PPK-021 güncel ratchet 554 exact yüzey ve 281 use-case composition yüzeyidir;
+PPK-022 güncel exact capability ratchet 246'dır.
 
 ## DEC-215 — Kontrollü finans içe aktarma ve ağsız ÖHVPS sınırı
 

@@ -1,5 +1,12 @@
 import { asFamilyId, asIsoDateTime, asPersonId } from '@ppt/core';
 import type {
+  FamilyEmergencyCardFieldCode,
+  FamilyEmergencyCardOutputMode,
+  FamilyEmergencyCardPortabilityItemType,
+  FamilyEmergencyCardPowerActivationSource,
+  FamilyEmergencyCardPowerMode,
+  FamilyEmergencyCardPowerSource,
+  FamilyEmergencyCardSourceItemType,
   FamilyEmergencyAssistanceInstructionKind,
   FamilyEmergencyAssistanceItemType,
   FamilyEmergencyAssistanceSubjectKind,
@@ -37,6 +44,8 @@ import type {
 } from '@ppt/domain';
 import {
   assertPolicyAuthorizedRepositoryContext,
+  type FamilyEmergencyCardConfigurationLedgerItemRow,
+  type FamilyEmergencyCardPortabilityLedgerItemRow,
   type FamilyEmergencyAssistanceLedgerItemRow,
   type FamilyEmergencyAssistanceProfileLedgerItemRow,
   type FamilyEmergencyLedgerItemRow,
@@ -494,6 +503,98 @@ const mapFamilyEmergencyAssistanceItem = (
   };
 };
 
+const familyEmergencyCardPortabilityColumns = `
+  portability.id,portability.profile_id,portability.configuration_id,
+  portability.family_id,portability.owner_person_id,portability.item_type,
+  portability.configuration_label,portability.locale,portability.source_item_id,
+  portability.source_item_type,portability.field_code,portability.archive_item_id,
+  portability.export_mode,portability.selected_field_count,portability.document_count,
+  portability.selection_sha256,portability.share_receipt_hash,
+  portability.artifact_sha256,portability.artifact_size_bytes,
+  portability.artifact_readback_status,portability.printer_dispatch_status,
+  portability.power_mode,portability.activation_source,portability.power_source,
+  portability.battery_level,portability.automatic_low_battery_detection,
+  portability.low_battery_claimed,portability.privacy,portability.data_source,
+  portability.created_at
+`;
+
+const mapFamilyEmergencyCardPortabilityItem = (
+  row:Record<string, unknown>
+):FamilyEmergencyCardPortabilityLedgerItemRow => {
+  const common = {
+    id:String(row.id),
+    profileId:String(row.profile_id),
+    familyId:asFamilyId(String(row.family_id)),
+    ownerPersonId:asPersonId(String(row.owner_person_id)),
+    privacy:'private' as const,
+    dataSource:'manual' as const,
+    createdAt:asIsoDateTime(String(row.created_at))
+  };
+  const itemType = String(row.item_type) as FamilyEmergencyCardPortabilityItemType;
+  if (itemType === 'card_configuration') return {
+    ...common,
+    itemType,
+    label:String(row.configuration_label),
+    locale:'tr-TR'
+  };
+  const configurationId = String(row.configuration_id);
+  if (itemType === 'selected_field') return {
+    ...common,
+    itemType,
+    configurationId,
+    sourceItemId:String(row.source_item_id),
+    sourceItemType:String(row.source_item_type) as FamilyEmergencyCardSourceItemType,
+    fieldCode:String(row.field_code) as FamilyEmergencyCardFieldCode
+  };
+  if (itemType === 'document_link') return {
+    ...common,
+    itemType,
+    configurationId,
+    archiveItemId:String(row.archive_item_id)
+  };
+  if (itemType === 'export_event') {
+    const exportCommon = {
+      ...common,
+      itemType,
+      configurationId,
+      selectedFieldCount:Number(row.selected_field_count),
+      documentCount:Number(row.document_count),
+      selectionSha256:String(row.selection_sha256),
+      shareReceiptHash:String(row.share_receipt_hash),
+      artifactSha256:String(row.artifact_sha256),
+      artifactSizeBytes:Number(row.artifact_size_bytes),
+      powerSource:String(row.power_source) as FamilyEmergencyCardPowerSource,
+      batteryLevel:'not_measured' as const,
+      automaticLowBatteryDetection:'not_performed' as const,
+      lowBatteryClaimed:false as const
+    };
+    const mode = String(row.export_mode) as FamilyEmergencyCardOutputMode;
+    return mode === 'print'
+      ? {
+          ...exportCommon,
+          mode,
+          artifactReadbackStatus:'not_applicable_print',
+          printerDispatchStatus:'confirmed'
+        }
+      : {
+          ...exportCommon,
+          mode,
+          artifactReadbackStatus:'verified'
+        };
+  }
+  return {
+    ...common,
+    itemType:'power_mode_event',
+    configurationId,
+    mode:String(row.power_mode) as FamilyEmergencyCardPowerMode,
+    activationSource:String(row.activation_source) as FamilyEmergencyCardPowerActivationSource,
+    powerSource:String(row.power_source) as FamilyEmergencyCardPowerSource,
+    batteryLevel:'not_measured',
+    automaticLowBatteryDetection:'not_performed',
+    lowBatteryClaimed:false
+  };
+};
+
 interface LifeReadBinding {
   readonly familyId: string;
   readonly accountId: string;
@@ -703,6 +804,63 @@ const lifeWriteBinding = (
   const binding = platformPolicyPersistenceBinding(context, 'life_record', input.resourceId);
   if (!binding) throw new Error('LIFE write requires an active platform policy receipt binding');
   return binding;
+};
+
+const emergencyCardSelectionHashPattern = /^selection_sha256:[0-9a-f]{64}$/u;
+const emergencyCardShareFieldCodes = new Set([
+  'fact_value','instruction','instruction_kind','label','name','note',
+  'phone_e164','relationship','subject_display'
+]);
+
+const emergencyCardPortabilityVisibilityBinding = (
+  context:PolicyAuthorizedRepositoryExecutionContext,
+  profileId:string
+):LifeReadBinding => {
+  const authorization = context.policyAuthorization;
+  if (authorization.action === 'read') {
+    return lifeReadBinding(context, authorization.resourceId);
+  }
+  if (!authorization.resourceOwnerPersonId) {
+    throw new Error('Emergency card export read requires an exact owner-bound resource');
+  }
+  assertPolicyAuthorizedRepositoryContext(context, {
+    resourceType:'life_record',
+    resourceId:profileId,
+    action:'share',
+    capability:'file.share',
+    correlationId:context.correlationId,
+    resourceFamilyId:authorization.resourceFamilyId,
+    resourceOwnerPersonId:authorization.resourceOwnerPersonId,
+    purpose:'emergency-offline-portability'
+  });
+  const subject = authorization.subject;
+  const actorPersonId = context.actor.personId === undefined ? undefined : String(context.actor.personId);
+  const requestedFields = authorization.receiptRecord.request.requestedFields;
+  const selectionHashes = requestedFields?.filter((field) => emergencyCardSelectionHashPattern.test(field)) ?? [];
+  if (
+    subject.accountId !== String(context.actor.userId)
+    || !subject.personId
+    || subject.personId !== actorPersonId
+    || subject.personId !== authorization.resourceOwnerPersonId
+    || !subject.familyIds.includes(authorization.resourceFamilyId)
+    || !requestedFields
+    || requestedFields.length < 1
+    || requestedFields.length > emergencyCardShareFieldCodes.size + 1
+    || new Set(requestedFields).size !== requestedFields.length
+    || JSON.stringify(requestedFields) !== JSON.stringify([...requestedFields].sort())
+    || selectionHashes.length !== 1
+    || !requestedFields.every((field) =>
+      emergencyCardSelectionHashPattern.test(field) || emergencyCardShareFieldCodes.has(field))
+  ) {
+    throw new Error('Emergency card export read requires an exact owner-bound sorted selection receipt');
+  }
+  return Object.freeze({
+    familyId:asFamilyId(authorization.resourceFamilyId),
+    accountId:subject.accountId,
+    actorPersonId:subject.personId,
+    familyRoleAllowed:0,
+    occurredAt:authorization.receiptRecord.request.occurredAt
+  });
 };
 
 const assertFamilyEmergencyLookupAccess = (
@@ -1478,11 +1636,17 @@ export class SqliteLifeRepository extends SqliteRepository implements
               )
           )
       `).get(id) as Record<string, unknown> | undefined;
-      if (row) lifeWriteBinding(context, {
-        familyId:String(row.family_id),
-        resourceId:String(row.id),
-        action:'update'
-      });
+      if (row) {
+        if (context.policyAuthorization.action === 'share') {
+          emergencyCardPortabilityVisibilityBinding(context, String(row.id));
+        } else {
+          lifeWriteBinding(context, {
+            familyId:String(row.family_id),
+            resourceId:String(row.id),
+            action:'update'
+          });
+        }
+      }
       return row
         ? mapFamilyEmergencyAssistanceItem(row) as FamilyEmergencyAssistanceProfileLedgerItemRow
         : null;
@@ -1557,11 +1721,15 @@ export class SqliteLifeRepository extends SqliteRepository implements
       const profileId = String(row.item_type) === 'emergency_profile'
         ? String(row.id)
         : String(row.profile_id);
-      lifeWriteBinding(context, {
-        familyId:String(row.family_id),
-        resourceId:profileId,
-        action:'update'
-      });
+      if (context.policyAuthorization.action === 'share') {
+        emergencyCardPortabilityVisibilityBinding(context, profileId);
+      } else {
+        lifeWriteBinding(context, {
+          familyId:String(row.family_id),
+          resourceId:profileId,
+          action:'update'
+        });
+      }
       return mapFamilyEmergencyAssistanceItem(row);
     });
   }
@@ -1632,6 +1800,223 @@ export class SqliteLifeRepository extends SqliteRepository implements
           "INSERT INTO data_lifecycle(resource_type,resource_id,owner_person_id,privacy,state,updated_at) VALUES('life_record',?,?,?,'active',?)"
         ).run(row.id, row.ownerPersonId, row.privacy, row.createdAt);
       }
+    });
+  }
+
+  public listFamilyEmergencyCardPortabilityItems(
+    context:PolicyAuthorizedRepositoryExecutionContext,
+    profileId:string
+  ):RepositoryResult<readonly FamilyEmergencyCardPortabilityLedgerItemRow[]> {
+    const visibility = emergencyCardPortabilityVisibilityBinding(context, profileId);
+    return this.execute(context, () => (
+      this.database(context).prepare(`
+        SELECT ${familyEmergencyCardPortabilityColumns}
+        FROM family_emergency_card_portability_ledger portability
+        JOIN family_emergency_assistance_ledger profile
+          ON profile.id=portability.profile_id AND profile.item_type='emergency_profile'
+        JOIN family_emergency_ledger plan
+          ON plan.id=profile.plan_id AND plan.item_type='emergency_plan'
+        WHERE portability.profile_id=?
+          AND profile.family_id=?
+          AND portability.family_id=profile.family_id
+          AND portability.owner_person_id=profile.owner_person_id
+          AND portability.privacy=profile.privacy
+          AND (
+            portability.item_type<>'selected_field'
+            OR EXISTS (
+              SELECT 1 FROM family_emergency_assistance_ledger source
+              WHERE source.id=portability.source_item_id
+                AND source.item_type=portability.source_item_type
+                AND source.family_id=profile.family_id
+                AND source.owner_person_id=profile.owner_person_id
+                AND source.privacy=profile.privacy
+                AND (
+                  (source.item_type='emergency_profile' AND source.id=profile.id)
+                  OR (source.item_type<>'emergency_profile' AND source.profile_id=profile.id)
+                )
+                AND NOT EXISTS (
+                  SELECT 1 FROM family_emergency_assistance_ledger correction
+                  WHERE correction.supersedes_item_id=source.id
+                )
+            )
+          )
+          AND (
+            portability.item_type<>'document_link'
+            OR EXISTS (
+              SELECT 1 FROM archive_items archive
+              WHERE archive.id=portability.archive_item_id
+                AND archive.family_id=profile.family_id
+                AND archive.destroyed_at IS NULL
+                AND archive.sensitivity='high'
+            )
+          )
+          AND NOT EXISTS (
+            SELECT 1 FROM data_lifecycle lifecycle
+            WHERE lifecycle.resource_type='life_record'
+              AND lifecycle.resource_id=plan.id
+              AND lifecycle.state<>'active'
+          )
+          ${managedLifeVisibilitySql}
+        ORDER BY portability.created_at DESC,portability.id
+      `).all(
+        profileId,
+        visibility.familyId,
+        ...lifeVisibilityParameters(visibility)
+      ) as ReadonlyArray<Record<string, unknown>>
+    ).map(mapFamilyEmergencyCardPortabilityItem));
+  }
+
+  public findFamilyEmergencyCardConfiguration(
+    context:PolicyAuthorizedRepositoryExecutionContext,
+    id:string
+  ):RepositoryResult<FamilyEmergencyCardConfigurationLedgerItemRow | null> {
+    return this.execute(context, () => {
+      const row = this.database(context).prepare(`
+        SELECT ${familyEmergencyCardPortabilityColumns}
+        FROM family_emergency_card_portability_ledger portability
+        JOIN family_emergency_assistance_ledger profile
+          ON profile.id=portability.profile_id AND profile.item_type='emergency_profile'
+        JOIN family_emergency_ledger plan
+          ON plan.id=profile.plan_id AND plan.item_type='emergency_plan'
+        WHERE portability.id=? AND portability.item_type='card_configuration'
+          AND portability.family_id=profile.family_id
+          AND portability.owner_person_id=profile.owner_person_id
+          AND portability.privacy=profile.privacy
+          AND NOT EXISTS (
+            SELECT 1 FROM data_lifecycle lifecycle
+            WHERE lifecycle.resource_type='life_record'
+              AND lifecycle.resource_id=profile.id
+              AND lifecycle.state<>'active'
+          )
+          AND NOT EXISTS (
+            SELECT 1 FROM data_lifecycle lifecycle
+            WHERE lifecycle.resource_type='life_record'
+              AND lifecycle.resource_id=plan.id
+              AND lifecycle.state<>'active'
+          )
+      `).get(id) as Record<string, unknown> | undefined;
+      if (!row) return null;
+      lifeWriteBinding(context, {
+        familyId:String(row.family_id),
+        resourceId:String(row.profile_id),
+        action:'update'
+      });
+      return mapFamilyEmergencyCardPortabilityItem(row) as
+        FamilyEmergencyCardConfigurationLedgerItemRow;
+    });
+  }
+
+  public findFamilyEmergencyCardPortabilityItem(
+    context:PolicyAuthorizedRepositoryExecutionContext,
+    id:string
+  ):RepositoryResult<FamilyEmergencyCardPortabilityLedgerItemRow | null> {
+    return this.execute(context, () => {
+      const row = this.database(context).prepare(`
+        SELECT ${familyEmergencyCardPortabilityColumns}
+        FROM family_emergency_card_portability_ledger portability
+        JOIN family_emergency_assistance_ledger profile
+          ON profile.id=portability.profile_id AND profile.item_type='emergency_profile'
+        JOIN family_emergency_ledger plan
+          ON plan.id=profile.plan_id AND plan.item_type='emergency_plan'
+        WHERE portability.id=?
+          AND portability.family_id=profile.family_id
+          AND portability.owner_person_id=profile.owner_person_id
+          AND portability.privacy=profile.privacy
+          AND NOT EXISTS (
+            SELECT 1 FROM data_lifecycle lifecycle
+            WHERE lifecycle.resource_type='life_record'
+              AND lifecycle.resource_id=profile.id
+              AND lifecycle.state<>'active'
+          )
+          AND NOT EXISTS (
+            SELECT 1 FROM data_lifecycle lifecycle
+            WHERE lifecycle.resource_type='life_record'
+              AND lifecycle.resource_id=plan.id
+              AND lifecycle.state<>'active'
+          )
+      `).get(id) as Record<string, unknown> | undefined;
+      if (!row) return null;
+      lifeWriteBinding(context, {
+        familyId:String(row.family_id),
+        resourceId:String(row.profile_id),
+        action:'update'
+      });
+      return mapFamilyEmergencyCardPortabilityItem(row);
+    });
+  }
+
+  public insertFamilyEmergencyCardPortabilityItem(
+    context:PolicyAuthorizedRepositoryExecutionContext,
+    row:FamilyEmergencyCardPortabilityLedgerItemRow
+  ):RepositoryResult<void> {
+    if (row.privacy !== 'private' || row.dataSource !== 'manual') {
+      throw new Error('Emergency card portability item must remain manual and fixed private');
+    }
+    if (context.policyAuthorization.resourceOwnerPersonId !== String(row.ownerPersonId)) {
+      throw new Error('Emergency card portability receipt owner does not match the private profile root');
+    }
+    const policy = lifeWriteBinding(context, {
+      familyId:row.familyId,
+      resourceId:row.profileId,
+      action:'update'
+    });
+    return this.execute(context, () => {
+      this.database(context).prepare(`
+        INSERT INTO family_emergency_card_portability_ledger(
+          id,profile_id,configuration_id,family_id,owner_person_id,item_type,
+          configuration_label,locale,source_item_id,source_item_type,field_code,
+          archive_item_id,export_mode,selected_field_count,document_count,
+          selection_sha256,share_receipt_hash,artifact_sha256,artifact_size_bytes,artifact_readback_status,
+          printer_dispatch_status,power_mode,activation_source,power_source,
+          battery_level,automatic_low_battery_detection,low_battery_claimed,
+          privacy,data_source,created_at,policy_receipt_hash,policy_receipt_version,
+          policy_receipt_nonce,policy_correlation_id,policy_resource_type,
+          policy_resource_id,policy_action,policy_capability
+        ) VALUES(${Array.from({ length:38 }, () => '?').join(',')})
+      `).run(
+        row.id,
+        row.profileId,
+        row.itemType === 'card_configuration' ? null : row.configurationId,
+        row.familyId,
+        row.ownerPersonId,
+        row.itemType,
+        row.itemType === 'card_configuration' ? row.label : null,
+        row.itemType === 'card_configuration' ? row.locale : null,
+        row.itemType === 'selected_field' ? row.sourceItemId : null,
+        row.itemType === 'selected_field' ? row.sourceItemType : null,
+        row.itemType === 'selected_field' ? row.fieldCode : null,
+        row.itemType === 'document_link' ? row.archiveItemId : null,
+        row.itemType === 'export_event' ? row.mode : null,
+        row.itemType === 'export_event' ? row.selectedFieldCount : null,
+        row.itemType === 'export_event' ? row.documentCount : null,
+        row.itemType === 'export_event' ? row.selectionSha256 : null,
+        row.itemType === 'export_event' ? row.shareReceiptHash : null,
+        row.itemType === 'export_event' ? row.artifactSha256 : null,
+        row.itemType === 'export_event' ? row.artifactSizeBytes : null,
+        row.itemType === 'export_event' ? row.artifactReadbackStatus : null,
+        row.itemType === 'export_event' && row.mode === 'print'
+          ? row.printerDispatchStatus : null,
+        row.itemType === 'power_mode_event' ? row.mode : null,
+        row.itemType === 'power_mode_event' ? row.activationSource : null,
+        row.itemType === 'export_event' || row.itemType === 'power_mode_event'
+          ? row.powerSource : null,
+        row.itemType === 'export_event' || row.itemType === 'power_mode_event'
+          ? row.batteryLevel : null,
+        row.itemType === 'export_event' || row.itemType === 'power_mode_event'
+          ? row.automaticLowBatteryDetection : null,
+        row.itemType === 'export_event' || row.itemType === 'power_mode_event' ? 0 : null,
+        row.privacy,
+        row.dataSource,
+        row.createdAt,
+        policy.receiptHash,
+        policy.receiptVersion,
+        policy.nonce,
+        context.correlationId,
+        policy.resourceType,
+        policy.resourceId,
+        policy.action,
+        policy.capability
+      );
     });
   }
 

@@ -152,6 +152,15 @@ const familyEmergencyPreparednessItemTypes = new Set([
 const familyEmergencyAssistanceItemTypes = new Set([
   'emergency_profile','health_fact','emergency_contact','assistance_instruction'
 ]);
+const familyEmergencyCardPortabilityItemTypes = new Set([
+  'card_configuration','selected_field','document_link','export_event','power_mode_event'
+]);
+const familyEmergencyCardSourceFieldMatrix = new Map<string, ReadonlySet<string>>([
+  ['emergency_profile', new Set(['label','subject_display'])],
+  ['health_fact', new Set(['fact_value','note'])],
+  ['emergency_contact', new Set(['name','phone_e164','relationship','note'])],
+  ['assistance_instruction', new Set(['instruction_kind','instruction','note'])]
+]);
 const familyEmergencyPlanKinds = new Set(['general','earthquake','fire','flood','evacuation','other']);
 const familyEmergencyMeetingPointKinds = new Set(['primary','alternate']);
 const familyEmergencyChecklistStatuses = new Set(['open','completed']);
@@ -270,8 +279,12 @@ const managedLifeInput = (args: readonly unknown[]): IpcIntegrationPolicyDecisio
     && !managedHomeInventoryItemTypes.has(String(value.itemType))
     && !familyEmergencyItemTypes.has(String(value.itemType))
     && !familyEmergencyPreparednessItemTypes.has(String(value.itemType))
-    && !familyEmergencyAssistanceItemTypes.has(String(value.itemType))) {
+    && !familyEmergencyAssistanceItemTypes.has(String(value.itemType))
+    && !familyEmergencyCardPortabilityItemTypes.has(String(value.itemType))) {
     return rejected('MANAGED_LIFE_ITEM_TYPE_INVALID', '$[0].itemType');
+  }
+  if (value.itemType === 'export_event') {
+    return rejected('MANAGED_LIFE_MAIN_PROCESS_ONLY', '$[0].itemType');
   }
   const inspection = inspectManagedLifeDataContract(value);
   if (inspection.prohibitedFields.length > 0) {
@@ -484,6 +497,73 @@ const managedLifeInput = (args: readonly unknown[]): IpcIntegrationPolicyDecisio
     return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
   }
 
+  if (value.itemType === 'card_configuration') {
+    const valid = validManagedLifeId(value.profileId)
+      && familyEmergencyText(value.label, 120)
+      && value.locale === 'tr-TR';
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'selected_field') {
+    const sourceFields = familyEmergencyCardSourceFieldMatrix.get(String(value.sourceItemType));
+    const valid = validManagedLifeId(value.profileId)
+      && validManagedLifeId(value.configurationId)
+      && validManagedLifeId(value.sourceItemId)
+      && sourceFields !== undefined
+      && sourceFields.has(String(value.fieldCode));
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'document_link') {
+    const valid = validManagedLifeId(value.profileId)
+      && validManagedLifeId(value.configurationId)
+      && typeof value.archiveItemId === 'string'
+      && /^[A-Za-z0-9][A-Za-z0-9._-]{1,159}$/u.test(value.archiveItemId);
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'export_event') {
+    const commonValid = validManagedLifeId(value.profileId)
+      && validManagedLifeId(value.configurationId)
+      && ['print','pdf','encrypted_pack'].includes(String(value.mode))
+      && typeof value.selectedFieldCount === 'number'
+      && Number.isSafeInteger(value.selectedFieldCount)
+      && value.selectedFieldCount >= 0 && value.selectedFieldCount <= 64
+      && typeof value.documentCount === 'number'
+      && Number.isSafeInteger(value.documentCount)
+      && value.documentCount >= 0 && value.documentCount <= 10
+      && typeof value.artifactSha256 === 'string'
+      && /^[a-f0-9]{64}$/u.test(value.artifactSha256)
+      && typeof value.selectionSha256 === 'string'
+      && /^[a-f0-9]{64}$/u.test(value.selectionSha256)
+      && typeof value.artifactSizeBytes === 'number'
+      && Number.isSafeInteger(value.artifactSizeBytes)
+      && value.artifactSizeBytes >= 1 && value.artifactSizeBytes <= 50 * 1024 * 1024
+      && ['battery','ac','unknown'].includes(String(value.powerSource))
+      && value.batteryLevel === 'not_measured'
+      && value.automaticLowBatteryDetection === 'not_performed'
+      && value.lowBatteryClaimed === false;
+    const modeValid = value.mode === 'print'
+      ? value.artifactReadbackStatus === 'not_applicable_print'
+        && value.printerDispatchStatus === 'confirmed'
+      : (value.mode === 'pdf' || value.mode === 'encrypted_pack')
+        && value.artifactReadbackStatus === 'verified'
+        && value.printerDispatchStatus === undefined;
+    return commonValid && modeValid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
+  if (value.itemType === 'power_mode_event') {
+    const valid = validManagedLifeId(value.profileId)
+      && validManagedLifeId(value.configurationId)
+      && ['enabled','disabled'].includes(String(value.mode))
+      && value.activationSource === 'manual'
+      && ['battery','ac','unknown'].includes(String(value.powerSource))
+      && value.batteryLevel === 'not_measured'
+      && value.automaticLowBatteryDetection === 'not_performed'
+      && value.lowBatteryClaimed === false;
+    return valid ? accepted() : rejected('MANAGED_LIFE_ARGUMENT_INVALID', '$[0]');
+  }
+
   if (value.itemType === 'room') {
     const valid = validManagedLifeId(value.recordId)
       && boundedString(value.name, 120)
@@ -591,6 +671,36 @@ const managedLifeInput = (args: readonly unknown[]): IpcIntegrationPolicyDecisio
 
   return rejected('MANAGED_LIFE_ITEM_TYPE_INVALID', '$[0].itemType');
 };
+
+const emergencyCardExportInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => exactObject(
+  args,
+  ['profileId','configurationId','mode','selectedFieldIds','documentLinkIds','password','code','packagePassphrase','plaintextWarningConfirmed'],
+  (value) => {
+    const mode = String(value.mode);
+    const ids = (candidate: unknown, maximum: number): candidate is readonly string[] =>
+      Array.isArray(candidate)
+      && candidate.length <= maximum
+      && candidate.every(validManagedLifeId)
+      && new Set(candidate).size === candidate.length;
+    return validManagedLifeId(value.profileId)
+      && validManagedLifeId(value.configurationId)
+      && ['print','pdf','encrypted_pack'].includes(mode)
+      && ids(value.selectedFieldIds, 64)
+      && ids(value.documentLinkIds, 10)
+      && (mode === 'encrypted_pack' || (value.documentLinkIds as readonly string[]).length === 0)
+      && (value.selectedFieldIds as readonly string[]).length + (value.documentLinkIds as readonly string[]).length > 0
+      && boundedString(value.password, 1024)
+      && optionalBoundedString(value.code, 256)
+      && (mode === 'encrypted_pack'
+        ? typeof value.packagePassphrase === 'string'
+          && value.packagePassphrase.normalize('NFKC').length >= 12
+          && value.packagePassphrase.length <= 1024
+        : value.packagePassphrase === undefined)
+      && (mode === 'encrypted_pack'
+        ? value.plaintextWarningConfirmed === false
+        : value.plaintextWarningConfirmed === true);
+  }
+);
 
 const containsProhibitedBankingSecret = (
   value: Record<string, unknown>,
@@ -989,6 +1099,8 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
       return zeroArguments(args);
     case 'life:recordManagedItem':
       return managedLifeInput(args);
+    case 'life:exportEmergencyCard':
+      return emergencyCardExportInput(args);
     case 'finance:list':
     case 'finance:listValuations':
     case 'finance:listBankInstitutions':

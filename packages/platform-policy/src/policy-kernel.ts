@@ -508,6 +508,30 @@ const dataClassCapabilityCompatible = (
   return true;
 };
 
+export const EMERGENCY_LOCAL_PORTABILITY_PURPOSE = 'emergency-offline-portability' as const;
+const emergencyLocalSelectionPattern = /^selection_sha256:[0-9a-f]{64}$/u;
+const emergencyLocalFieldCodes = new Set([
+  'fact_value', 'instruction', 'instruction_kind', 'label', 'name', 'note',
+  'phone_e164', 'relationship', 'subject_display'
+]);
+const isExactEmergencyLocalPortabilityRequest = (request: PlatformPolicyRequest): boolean =>
+  request.subject.applicationId === 'windows-desktop'
+  && request.resource.type === 'life_record'
+  && request.resource.ownerPersonId === request.subject.personId
+  && request.resource.sensitivity === 'highly_sensitive'
+  && request.resource.classificationSource === 'declared'
+  && stable(request.resource.dataClasses) === stable(['personal', 'special', 'health'])
+  && request.action === 'share'
+  && request.capability === 'file.share'
+  && request.purpose === EMERGENCY_LOCAL_PORTABILITY_PURPOSE
+  && request.online === true
+  && Array.isArray(request.requestedFields)
+  && request.requestedFields.length >= 1
+  && request.requestedFields.length <= emergencyLocalFieldCodes.size + 1
+  && stable(request.requestedFields) === stable([...request.requestedFields].sort())
+  && request.requestedFields.filter((field) => emergencyLocalSelectionPattern.test(field)).length === 1
+  && request.requestedFields.every((field) => emergencyLocalSelectionPattern.test(field) || emergencyLocalFieldCodes.has(field));
+
 const obligationDataClassSets = Object.freeze({
   localProcessingOnly: new Set<PlatformDataClass>(['special', 'health', 'finance', 'biometric']),
   noCache: new Set<PlatformDataClass>(['special', 'health', 'finance', 'child', 'location', 'communication', 'biometric', 'legacy']),
@@ -839,7 +863,11 @@ export class PlatformPolicyKernel {
     }
     if (!capabilities.includes(request.capability)) return deny('CAPABILITY_NOT_DECLARED');
     if (!capabilityActions[request.capability]?.includes(request.action)) return deny('ACTION_CAPABILITY_MISMATCH');
-    if (!(request.resource.dataClasses ?? []).every((dataClass) => dataClassCapabilityCompatible(dataClass, request.capability))) {
+    const exactEmergencyLocalPortability = isExactEmergencyLocalPortabilityRequest(request);
+    if (
+      !(request.resource.dataClasses ?? []).every((dataClass) => dataClassCapabilityCompatible(dataClass, request.capability))
+      && !exactEmergencyLocalPortability
+    ) {
       return deny('DATA_CLASS_CAPABILITY_MISMATCH');
     }
     if (request.subject.deviceTrusted !== true) return deny('DEVICE_NOT_TRUSTED');
@@ -940,7 +968,12 @@ export class PlatformPolicyKernel {
     if (dataClasses.includes('biometric')) {
       addObligation({ type: 'no_clipboard' });
     }
-    if (hasObligationClass(dataClasses, obligationDataClassSets.noExport)) addObligation({ type: 'no_export' });
+    // PPK-006's general no-export rule remains unchanged. The sole exception is
+    // a signed, owner-only Windows Desktop request for a local emergency card,
+    // bound to an exact selection digest and the dedicated purpose above.
+    if (hasObligationClass(dataClasses, obligationDataClassSets.noExport) && !exactEmergencyLocalPortability) {
+      addObligation({ type: 'no_export' });
+    }
     if (!request.online) addObligation({ type: 'no_export' });
     if (hasObligationClass(dataClasses, obligationDataClassSets.noAi)) addObligation({ type: 'no_ai' });
     if (hasObligationClass(dataClasses, obligationDataClassSets.noRecording)) addObligation({ type: 'no_recording' });

@@ -229,12 +229,12 @@ export const verifyB4LoanManagementBoundary = async () => {
   check('PPK-021 exact ratchet reviews all three new compositions', [
     'CreateLoanAccountUseCase', 'ListLoanAccountsUseCase', 'RecordLoanPaymentUseCase'
   ].every((symbol) => astKeys.has(`USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|${symbol}`))
-    && astGate.status === 'PASS' && astGate.exactAllowlistEntries === 545
-    && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 277
+    && astGate.status === 'PASS' && astGate.exactAllowlistEntries === 554
+    && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 281
     && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
   check('PPK-022 capability ratchet remains unchanged and green', capabilityGate.status === 'PASS'
-    && capabilityGate.capabilitySurfaces === 242
-    && capabilityGate.exactManifestSurfaces === 242
+    && capabilityGate.capabilitySurfaces === 246
+    && capabilityGate.exactManifestSurfaces === 246
     && capabilityGate.findings.length === 0);
   check('root lifecycle and explicit package scripts bind 33-B', ['pretypecheck', 'prebuild'].every((name) =>
     rootPackage.scripts?.[name]?.includes('verify-b4-loan-management-boundary.mjs'))

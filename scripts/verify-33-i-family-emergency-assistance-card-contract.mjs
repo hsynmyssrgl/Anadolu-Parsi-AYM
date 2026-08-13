@@ -70,8 +70,9 @@ check('scope truth remains manual private local offline and no-service',
     .every((field) => scope.truth?.[field] === 'not_performed')
   && scope.truth?.emergencyServiceGuarantee === 'not_claimed'
   && scope.truth?.networkEgressAdded === false);
-check('boundary evidence is exact green and preserves platform ratchets', boundary.status === 'PASS'
-  && boundary.checksFailed === 0 && boundary.latestDatabaseMigration === 87
+check('boundary evidence is exact green under current successor ratchets', boundary.status === 'PASS'
+  && boundary.checksFailed === 0 && boundary.closureDatabaseMigration === 87
+  && boundary.latestDatabaseMigration >= 87
   && boundary.familyEmergencyAssistanceTables === 1 && boundary.assistanceItemTypes === 4
   && boundary.ipcChannels === 2 && boundary.networkChannels === 0
   && boundary.offlineAvailability === 'local_only'
@@ -81,12 +82,15 @@ check('boundary evidence is exact green and preserves platform ratchets', bounda
   && boundary.emergencyServiceGuarantee === 'not_claimed'
   && Number.isInteger(boundary.ppk021ExactAllowlistEntries)
   && Number.isInteger(boundary.ppk021UseCaseCompositionSurfaces)
-  && boundary.ppk022CapabilitySurfaces === 242);
+  && boundary.ppk021ExactAllowlistEntries === 554
+  && boundary.ppk021UseCaseCompositionSurfaces === 281
+  && boundary.ppk022CapabilitySurfaces === 246);
 check('DEC-220 is active and decision cardinality is exact', ledger.decisionCount === ledger.decisions?.length
   && ledger.decisions?.some((item) => item.id === 'DEC-220' && item.status === 'ACTIVE'
     && item.requirements?.join(',') === ids.join(',')
     && item.document === 'docs/decisions/DEC-220-family-emergency-assistance-card.md'));
-check('migration 87 is latest and source-manifest identity is exact', migrationVersions.at(-1) === 87
+check('migration 87 closure identity remains exact under additive successors', migrationVersions.includes(87)
+  && (migrationVersions.at(-1) ?? 0) >= 87
   && migrations.includes("createMigrationDefinition(87, 'b5_family_emergency_assistance_card_ledger'")
   && migrationManifest.status === 'passed' && migrationManifest.checkCount === 9
   && migration87?.name === 'b5_family_emergency_assistance_card_ledger'
@@ -137,6 +141,7 @@ const report = Object.freeze({
   checksFailed: failures.length,
   checks: Object.freeze(checks),
   failures: Object.freeze(failures),
+  closureDatabaseMigration: 87,
   latestDatabaseMigration: migrationVersions.at(-1),
   migration87Checksum: migration87?.checksum,
   ppk021ExactAllowlistEntries: boundary.ppk021ExactAllowlistEntries,

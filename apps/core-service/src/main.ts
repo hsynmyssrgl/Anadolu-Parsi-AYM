@@ -103,6 +103,10 @@ export class CoreServiceProcessHost {
   public constructor(configuration: CoreServiceProcessConfiguration) {
     const kernel = new PlatformPolicyKernel({
       policyVersion: configuration.policyVersion,
+      // 33-J adds the sole signed, owner-bound local file.share capability to
+      // the Windows Desktop manifest. Ratchet the signed package so a runtime
+      // pinned to the predecessor manifest cannot accept the expanded surface.
+      policyPackageVersion: 2,
       signingKey: configuration.policySigningKey,
       decisionAuthorityId: 'windows-core-service',
       applicationVersions: {
@@ -128,7 +132,7 @@ export class CoreServiceProcessHost {
         'communication-service', 'backup-worker', 'signed-plugin'
       ],
       applicationCapabilities: {
-        'windows-desktop': ['family.read', 'family.write', 'health.read', 'health.write', 'finance.read', 'finance.write', 'location.read', 'location.share', 'archive.read', 'archive.write'],
+        'windows-desktop': ['family.read', 'family.write', 'health.read', 'health.write', 'finance.read', 'finance.write', 'location.read', 'location.share', 'archive.read', 'archive.write', 'file.share'],
         'windows-core-service': ['health.read','health.write','finance.read','finance.write','archive.read','archive.write','archive.ocr','ai.process','translation.process','communication.message','communication.call','communication.record','file.share','backup.create','backup.restore','cluster.admin','plugin.execute'],
         'windows-cluster-agent': [],
         'macos-companion': [],

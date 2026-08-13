@@ -23,10 +23,10 @@
     "deployedApplicationCount": 2,
     "applicationsWithDeclaredRuntimeCapabilities": 2,
     "productionSourceZoneCount": 18,
-    "scannedProductionFiles": 379,
-    "exactCapabilitySurfaceCount": 242,
-    "exactCapabilityManifestEntryCount": 242,
-    "exactCapabilityManifestSha256": "93ea91572d01e46eb535c2634b62d084f455a92829ac5f2620a7ae9bd5a423ac",
+    "scannedProductionFiles": 381,
+    "exactCapabilitySurfaceCount": 246,
+    "exactCapabilityManifestEntryCount": 246,
+    "exactCapabilityManifestSha256": "89d200337738ec518e8d380cb6b8d026203a4b6e0dc5567e32444fcb5eb412aa",
     "pinnedBootstrapSurfaceCount": 26,
     "pinnedBootstrapFileSurfaceCount": 24,
     "pinnedBootstrapNetworkSurfaceCount": 2,
@@ -80,7 +80,7 @@
   },
   "surfaceCounts": {
     "FILE_DIALOG": 2,
-    "FILE_IMPORT": 229,
+    "FILE_IMPORT": 233,
     "NETWORK_API": 3,
     "NETWORK_IMPORT": 8
   },

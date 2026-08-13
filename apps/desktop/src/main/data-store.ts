@@ -81,6 +81,7 @@ import {
   DiscardFullBackupRestoreUseCase,
   StoreArchiveFileUseCase,
   MaterializeArchiveFileUseCase,
+  ReadArchiveFileBytesUseCase,
   DestroyArchiveFileUseCase,
   WriteOperationalTextArtifactUseCase,
   WriteOperationalGzipArtifactUseCase,
@@ -146,6 +147,11 @@ import {
   CreateLifeRecordUseCase,
   GetManagedLifeWorkspaceUseCase,
   RecordManagedLifeItemUseCase,
+  PrepareFamilyEmergencyCardExportUseCase,
+  RecordFamilyEmergencyCardExportCompletionUseCase,
+  createFamilyEmergencyCardExportAuthorizationProof,
+  familyEmergencyCardSelectionSha256,
+  type PreparedFamilyEmergencyCardExport,
   ListFinanceRecordsUseCase,
   CreateFinanceRecordUseCase,
   ListFinanceValuationsUseCase,
@@ -166,6 +172,7 @@ import {
   SearchArchiveItemsUseCase,
   PrepareArchiveOpenUseCase,
   RecordArchiveOpenedUseCase,
+  AuthorizeEmergencyArchiveReadUseCase,
   ListArchiveVersionsUseCase,
   ImportArchiveItemUseCase,
   ListArchiveRetentionPoliciesUseCase,
@@ -661,6 +668,7 @@ export class FamilyDataStore {
   readonly #discardFullBackupRestoreUseCase: DiscardFullBackupRestoreUseCase;
   readonly #storeArchiveFileUseCase: StoreArchiveFileUseCase;
   readonly #materializeArchiveFileUseCase: MaterializeArchiveFileUseCase;
+  readonly #readArchiveFileBytesUseCase: ReadArchiveFileBytesUseCase;
   readonly #destroyArchiveFileUseCase: DestroyArchiveFileUseCase;
   readonly #writeOperationalTextArtifactUseCase: WriteOperationalTextArtifactUseCase;
   readonly #writeOperationalGzipArtifactUseCase: WriteOperationalGzipArtifactUseCase;
@@ -790,6 +798,8 @@ export class FamilyDataStore {
   readonly #createLifeRecordUseCase: CreateLifeRecordUseCase;
   readonly #getManagedLifeWorkspaceUseCase: GetManagedLifeWorkspaceUseCase;
   readonly #recordManagedLifeItemUseCase: RecordManagedLifeItemUseCase;
+  readonly #prepareFamilyEmergencyCardExportUseCase: PrepareFamilyEmergencyCardExportUseCase;
+  readonly #recordFamilyEmergencyCardExportCompletionUseCase: RecordFamilyEmergencyCardExportCompletionUseCase;
   readonly #listFinanceRecordsUseCase: ListFinanceRecordsUseCase;
   readonly #createFinanceRecordUseCase: CreateFinanceRecordUseCase;
   readonly #listFinanceValuationsUseCase: ListFinanceValuationsUseCase;
@@ -810,6 +820,7 @@ export class FamilyDataStore {
   readonly #searchArchiveItemsUseCase: SearchArchiveItemsUseCase;
   readonly #prepareArchiveOpenUseCase: PrepareArchiveOpenUseCase;
   readonly #recordArchiveOpenedUseCase: RecordArchiveOpenedUseCase;
+  readonly #authorizeEmergencyArchiveReadUseCase: AuthorizeEmergencyArchiveReadUseCase;
   readonly #listArchiveVersionsUseCase: ListArchiveVersionsUseCase;
   readonly #importArchiveItemUseCase: ImportArchiveItemUseCase;
   readonly #listArchiveRetentionPoliciesUseCase: ListArchiveRetentionPoliciesUseCase;
@@ -1000,6 +1011,7 @@ export class FamilyDataStore {
     });
     this.#storeArchiveFileUseCase = new StoreArchiveFileUseCase(archiveVaultFiles);
     this.#materializeArchiveFileUseCase = new MaterializeArchiveFileUseCase(archiveVaultFiles);
+    this.#readArchiveFileBytesUseCase = new ReadArchiveFileBytesUseCase(archiveVaultFiles);
     this.#destroyArchiveFileUseCase = new DestroyArchiveFileUseCase(archiveVaultFiles);
     const operationalArtifactFiles = options.operationalArtifactFiles ?? new FileSystemOperationalArtifactFilePort();
     this.#writeOperationalTextArtifactUseCase = new WriteOperationalTextArtifactUseCase(operationalArtifactFiles);
@@ -1594,6 +1606,12 @@ export class FamilyDataStore {
     this.#createLifeRecordUseCase = new CreateLifeRecordUseCase(lifeUnitOfWork);
     this.#getManagedLifeWorkspaceUseCase = new GetManagedLifeWorkspaceUseCase(lifeQuery);
     this.#recordManagedLifeItemUseCase = new RecordManagedLifeItemUseCase(lifeUnitOfWork);
+    this.#prepareFamilyEmergencyCardExportUseCase = new PrepareFamilyEmergencyCardExportUseCase(
+      lifeUnitOfWork,
+      () => Date.parse(this.#clock.now())
+    );
+    this.#recordFamilyEmergencyCardExportCompletionUseCase =
+      new RecordFamilyEmergencyCardExportCompletionUseCase(lifeUnitOfWork);
     const financePolicyEnforcementPointResolver = productionArchivePolicy === undefined
       ? options.financePolicyEnforcementPointResolver ?? failClosedFinancePolicyEnforcementPointResolver
       : createFinanceProductionPolicyEnforcementPointResolver({
@@ -1675,6 +1693,7 @@ export class FamilyDataStore {
     this.#searchArchiveItemsUseCase = new SearchArchiveItemsUseCase(archiveQuery);
     this.#prepareArchiveOpenUseCase = new PrepareArchiveOpenUseCase(archiveQuery);
     this.#recordArchiveOpenedUseCase = new RecordArchiveOpenedUseCase(archiveUnitOfWork);
+    this.#authorizeEmergencyArchiveReadUseCase = new AuthorizeEmergencyArchiveReadUseCase(archiveUnitOfWork);
     this.#listArchiveVersionsUseCase = new ListArchiveVersionsUseCase(archiveQuery);
     this.#importArchiveItemUseCase = new ImportArchiveItemUseCase(archiveUnitOfWork);
     this.#listArchiveRetentionPoliciesUseCase = new ListArchiveRetentionPoliciesUseCase(archiveQuery);
@@ -2546,6 +2565,77 @@ export class FamilyDataStore {
     return materialized.value;
   }
 
+  public async readArchiveItemBytesForEmergencyExport(
+    id: string,
+    requestedOperationId?: string,
+    requestedCorrelationId?: string
+  ): Promise<{
+    readonly itemId: string;
+    readonly originalName: string;
+    readonly mimeType: string;
+    readonly sizeBytes: number;
+    readonly sha256: string;
+    readonly bytes: Buffer;
+  }> {
+    const itemId = id.trim();
+    if (!itemId) throw new Error('Acil kart arşiv belgesi kimliği zorunludur.');
+    const pendingInput = { mutation: 'archive:open' as const, semanticInput: { itemId } };
+    const operationId = requestedOperationId === undefined
+      ? this.acquireArchivePendingOperationIdentity(pendingInput).operationId
+      : this.#archiveOperationId(requestedOperationId);
+    this.requireArchivePendingOperationIdentity({ ...pendingInput, operationId });
+    const context = this.#archiveMutationContext(
+      'archive.open',
+      operationId,
+      { itemId },
+      requestedCorrelationId === undefined ? undefined : asCorrelationId(requestedCorrelationId)
+    );
+    this.#assertArchiveOperationIdentity(context, {
+      resourceType: 'archive_item',
+      resourceId: itemId,
+      action: 'record'
+    });
+    let bytes:Buffer | undefined;
+    try {
+      const plan = await this.#authorizeEmergencyArchiveReadUseCase.execute({
+        context,
+        itemId,
+        identifiers:{ auditId:deterministicArchiveIdentifier(operationId, 'audit') }
+      });
+      if (!plan.ok) throw new Error(`[${plan.error.code}] ${plan.error.message}`);
+      if (plan.value.state === 'denied') {
+        if (plan.value.reason === 'not_found') throw new Error('Acil kart arşiv belgesi bulunamadı.');
+        if (plan.value.reason === 'sensitivity') throw new Error('Acil kart için yalnız yüksek hassasiyetli arşiv belgesi okunabilir.');
+        throw new Error('Acil kart arşiv belgesi 10 MiB güvenli boyut sınırını aşıyor.');
+      }
+      const read = this.#readArchiveFileBytesUseCase.execute(context.correlationId, {
+        itemId,
+        storedName: plan.value.storedName,
+        expectedSha256: plan.value.sha256,
+        expectedSizeBytes: plan.value.sizeBytes,
+        maximumBytes: 10 * 1024 * 1024
+      });
+      if (!read.ok) throw new Error(`[${read.error.code}] ${read.error.message}`);
+      bytes = Buffer.from(read.value);
+      read.value.fill(0);
+      return {
+        itemId,
+        originalName: plan.value.originalName,
+        mimeType: plan.value.mimeType,
+        sizeBytes: plan.value.sizeBytes,
+        sha256: plan.value.sha256,
+        bytes
+      };
+    } finally {
+      try {
+        this.acknowledgeArchivePendingOperationIdentity({ ...pendingInput, operationId });
+      } catch (error) {
+        bytes?.fill(0);
+        throw error;
+      }
+    }
+  }
+
   #resolveBackupPassword(explicitPassword?: string): string {
     if (explicitPassword !== undefined && explicitPassword.length > 0) return explicitPassword;
     if (this.#managedBackupPasswordProvider) return this.#managedBackupPasswordProvider.getOrCreate();
@@ -3349,6 +3439,107 @@ export class FamilyDataStore {
     });
     if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
     return this.getManagedLifeWorkspace();
+  }
+
+  public async prepareEmergencyCardExport(input: {
+    readonly profileId:string;
+    readonly configurationId:string;
+    readonly mode:'print'|'pdf'|'encrypted_pack';
+    readonly selectedFieldIds:readonly string[];
+    readonly documentLinkIds:readonly string[];
+    readonly credentials:{ readonly password:string; readonly code?:string };
+    readonly rendererSessionId:string;
+    readonly operationId:string;
+    readonly correlationId:string;
+    readonly onStrongAuthenticationVerified?:()=>void;
+  }): Promise<PreparedFamilyEmergencyCardExport> {
+    const context:LifeApplicationContext = {
+      ...this.#lifeApplicationContext('life-emergency-card-export'),
+      correlationId:asCorrelationId(input.correlationId)
+    };
+    const verified = this.#strongAuthentication.verify(context, {
+      password:input.credentials.password,
+      ...(input.credentials.code ? { code:input.credentials.code } : {})
+    });
+    if (!verified.ok) throw new Error(`[${verified.error.code}] ${verified.error.message}`);
+    const verifiedAt = this.#clock.now();
+    input.onStrongAuthenticationVerified?.();
+    const workspace = await this.#getManagedLifeWorkspaceUseCase.execute({
+      ...context,
+      correlationId:asCorrelationId(`life-emergency-card-selection-${randomUUID()}`)
+    });
+    if (!workspace.ok) throw new Error(`[${workspace.error.code}] ${workspace.error.message}`);
+    const profile = workspace.value.emergencyAssistanceProfiles.find((candidate) => candidate.id === input.profileId);
+    const configuration = profile?.cardConfigurations.find((candidate) => candidate.id === input.configurationId);
+    if (!profile || !configuration || configuration.profileId !== profile.id) {
+      throw new Error('[CORE_NOT_FOUND] Acil durum kartı yapılandırması görünür özel profilde bulunamadı.');
+    }
+    const selectedFields = input.selectedFieldIds.map((selectedFieldId) => {
+      const selected = configuration.selectedFields.find((candidate) => candidate.id === selectedFieldId);
+      if (!selected) throw new Error('[CORE_INVALID_ARGUMENT] Seçili acil durum kartı alanı yapılandırmada bulunamadı.');
+      return Object.freeze({ selectedFieldId:selected.id, fieldCode:selected.fieldCode });
+    });
+    for (const documentLinkId of input.documentLinkIds) {
+      if (!configuration.documentLinks.some((candidate) => candidate.id === documentLinkId)) {
+        throw new Error('[CORE_INVALID_ARGUMENT] Seçili acil durum kartı belgesi yapılandırmada bulunamadı.');
+      }
+    }
+    const selection = Object.freeze({
+      selectedFields:Object.freeze(selectedFields),
+      documentLinkIds:Object.freeze([...input.documentLinkIds])
+    });
+    const selectionSha256 = familyEmergencyCardSelectionSha256({
+      profileId:profile.id,
+      configurationId:configuration.id,
+      mode:input.mode,
+      selection
+    });
+    const authorizationProof = createFamilyEmergencyCardExportAuthorizationProof({
+      rendererSessionId:input.rendererSessionId,
+      operationId:input.operationId,
+      correlationId:context.correlationId,
+      profileId:profile.id,
+      configurationId:configuration.id,
+      mode:input.mode,
+      selectionSha256,
+      verifiedAt,
+      expiresAt:asIsoDateTime(new Date(Date.parse(verifiedAt) + 60_000).toISOString())
+    });
+    const prepared = await this.#prepareFamilyEmergencyCardExportUseCase.execute({
+      context,
+      command:{
+        profileId:profile.id,
+        configurationId:configuration.id,
+        mode:input.mode,
+        rendererSessionId:input.rendererSessionId,
+        operationId:input.operationId,
+        selection
+      },
+      authorizationProof
+    });
+    if (!prepared.ok) throw new Error(`[${prepared.error.code}] ${prepared.error.message}`);
+    return prepared.value;
+  }
+
+  public async completeEmergencyCardExport(
+    prepared:PreparedFamilyEmergencyCardExport,
+    command:Parameters<RecordFamilyEmergencyCardExportCompletionUseCase['execute']>[0]['command'],
+    correlationId:string
+  ): Promise<void> {
+    const result = await this.#recordFamilyEmergencyCardExportCompletionUseCase.execute({
+      context:{
+        ...this.#lifeApplicationContext('life-emergency-card-export-completion'),
+        correlationId:asCorrelationId(correlationId)
+      },
+      command,
+      completionProof:prepared.completionProof,
+      identifiers:{
+        itemId:randomUUID(),
+        auditId:randomUUID(),
+        outboxEventId:asEventId(randomUUID())
+      }
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
   }
 
   public async listFinanceRecords(): Promise<FinanceRecordView[]> {

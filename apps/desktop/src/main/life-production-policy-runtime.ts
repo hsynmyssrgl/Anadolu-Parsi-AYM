@@ -769,14 +769,24 @@ const loadLifeResourceSnapshotInTransaction = (
   transaction: TransactionContext
 ): Result<LifeResourceSnapshot, AppError> => {
   const execution = repositoryContext(context, transaction);
+  const exportIntent = requestedIntent.action === 'share'
+    && requestedIntent.capability === 'file.share'
+    && requestedIntent.purpose === 'emergency-offline-portability'
+    && requestedIntent.resourceId !== '*'
+    && requestedIntent.ownerPersonId === undefined
+    && requestedIntent.privacy === undefined
+    && Array.isArray(requestedIntent.requestedFields)
+    && requestedIntent.requestedFields.length >= 1;
   if (
     !lifeResourceTypes.has(requestedIntent.resourceType)
-    || requestedIntent.purpose !== 'general'
+    || (!exportIntent && requestedIntent.purpose !== 'general')
     || !nonEmpty(requestedIntent.resourceId, 256)
     || (
-      requestedIntent.action === 'read'
-        ? requestedIntent.capability !== 'family.read' || requestedIntent.resourceId !== '*'
-        : requestedIntent.capability !== 'family.write' || requestedIntent.resourceId === '*'
+      exportIntent
+        ? false
+        : requestedIntent.action === 'read'
+          ? requestedIntent.capability !== 'family.read' || requestedIntent.resourceId !== '*'
+          : requestedIntent.capability !== 'family.write' || requestedIntent.resourceId === '*'
     )
   ) return invalidAuthority(context, 'Life policy intent is not a supported exact operation');
   if (requestedIntent.action === 'read' && requestedIntent.resourceId === '*') {
@@ -834,6 +844,32 @@ const loadLifeResourceSnapshotInTransaction = (
         familyId: context.familyId
       })
     }));
+  }
+
+  if (exportIntent) {
+    const existing = findLifeResourceForPolicyResolution(
+      dependencies,
+      execution,
+      requestedIntent.resourceType,
+      requestedIntent.resourceId
+    );
+    if (!existing.ok) return existing;
+    if (!existing.value
+      || existing.value.familyId !== context.familyId
+      || existing.value.privacy !== 'private'
+      || existing.value.ownerPersonId !== context.actor.personId) {
+      return invalidAuthority(context, 'Acil kart yerel dışa aktarımı yalnız özel profil sahibi tarafından yapılabilir');
+    }
+    const resource = Object.freeze({
+      type: requestedIntent.resourceType,
+      id: requestedIntent.resourceId,
+      familyId: existing.value.familyId,
+      ownerPersonId: existing.value.ownerPersonId,
+      sensitivity: 'highly_sensitive' as const,
+      dataClasses: Object.freeze(['personal','special','health'] as const),
+      classificationSource: 'declared' as const
+    });
+    return ok(Object.freeze({ resource, stateFingerprint:existing.value.stateFingerprint }));
   }
 
   const intent = requestedIntent;

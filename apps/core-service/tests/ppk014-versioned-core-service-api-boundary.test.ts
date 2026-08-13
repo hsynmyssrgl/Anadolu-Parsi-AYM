@@ -18,6 +18,7 @@ import {
 } from '@ppt/platform-policy';
 import { CoreServiceLocalAdminServer } from '../src/local-admin-server.js';
 import { CoreServiceRuntime } from '../src/core-service-runtime.js';
+import { createCoreServiceProcessHost } from '../src/main.js';
 import {
   EnforceVersionedCoreServiceApiUseCase,
   VersionedCoreServiceApiDeniedError
@@ -50,6 +51,33 @@ const request = (overrides: Partial<VersionedCoreServiceApiRequestEnvelope> = {}
 });
 
 describe('32-J PPK-014 versioned Core Service API boundary policy', () => {
+  it('binds the 33-J desktop file-share surface to signed policy package version 2', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'ppt-33j-core-manifest-'));
+    const endpoint = process.platform === 'win32'
+      ? `\\\\.\\pipe\\ppt-33j-core-manifest-${process.pid}-${Date.now()}`
+      : join(directory, 'core-service.sock');
+    const host = createCoreServiceProcessHost({
+      PPT_CORE_SERVICE_LOCAL_ADMIN_ENDPOINT: endpoint,
+      PPT_CORE_SERVICE_LOCAL_ADMIN_TOKEN: randomBytes(48).toString('base64url'),
+      PPT_POLICY_SIGNING_KEY_HEX: randomBytes(32).toString('hex'),
+      PPT_POLICY_JOURNAL_AUTHORITY_PATH: join(directory, 'policy-journal-authority.json'),
+      PPT_POLICY_VERSION: 'PPT-PLATFORM-POLICY-2026-08-04-V1'
+    });
+    try {
+      const policyPackage = host.runtime.health().policyPackage;
+      const desktopManifest = policyPackage.payload.applicationManifests['windows-desktop'];
+      expect(policyPackage.payload.packageVersion).toBe(2);
+      expect(desktopManifest?.capabilities).toContain('file.share');
+      expect(policyPackage.payload.applicationCapabilities['windows-desktop']).toEqual(
+        desktopManifest?.capabilities
+      );
+      expect(host.runtime.health().policyPackageVerified).toBe(true);
+    } finally {
+      await host.stop();
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
   it('publishes an immutable zero-exception fail-closed boundary snapshot', () => {
     const policy = new VersionedCoreServiceApiBoundaryPolicy();
     expect(VERSIONED_CORE_SERVICE_API_DIRECT_IMPORT_EXCEPTIONS).toEqual([]);

@@ -1,5 +1,10 @@
 import type { FamilyId, IsoDateTime, PersonId } from '@ppt/core';
 import type {
+  FamilyEmergencyCardConfigurationLedgerItemView,
+  FamilyEmergencyCardDocumentLinkLedgerItemView,
+  FamilyEmergencyCardExportEventLedgerItemView,
+  FamilyEmergencyCardPowerModeEventLedgerItemView,
+  FamilyEmergencyCardSelectedFieldLedgerItemView,
   FamilyEmergencyAssistanceInstructionLedgerItemView,
   FamilyEmergencyAssistanceProfileLedgerItemView,
   FamilyEmergencyChecklistItemLedgerItemView,
@@ -194,6 +199,34 @@ export type FamilyEmergencyAssistanceLedgerItemRow =
   | FamilyEmergencyContactLedgerItemRow
   | FamilyEmergencyAssistanceInstructionLedgerItemRow;
 
+interface FamilyEmergencyCardPortabilityRowCommon {
+  readonly familyId:FamilyId;
+  readonly ownerPersonId:PersonId;
+  readonly createdAt:IsoDateTime;
+}
+type FamilyEmergencyCardPortabilityRow<T> = T extends unknown
+  ? Omit<T, 'ownerPersonId' | 'createdAt'> & FamilyEmergencyCardPortabilityRowCommon
+  : never;
+export type FamilyEmergencyCardConfigurationLedgerItemRow =
+  FamilyEmergencyCardPortabilityRow<FamilyEmergencyCardConfigurationLedgerItemView>;
+export type FamilyEmergencyCardSelectedFieldLedgerItemRow =
+  FamilyEmergencyCardPortabilityRow<FamilyEmergencyCardSelectedFieldLedgerItemView>;
+export type FamilyEmergencyCardDocumentLinkLedgerItemRow =
+  FamilyEmergencyCardPortabilityRow<FamilyEmergencyCardDocumentLinkLedgerItemView>;
+export type FamilyEmergencyCardExportEventLedgerItemRow =
+  FamilyEmergencyCardPortabilityRow<FamilyEmergencyCardExportEventLedgerItemView> & {
+    readonly shareReceiptHash:string;
+  };
+export type FamilyEmergencyCardPowerModeEventLedgerItemRow =
+  FamilyEmergencyCardPortabilityRow<FamilyEmergencyCardPowerModeEventLedgerItemView>;
+
+export type FamilyEmergencyCardPortabilityLedgerItemRow =
+  | FamilyEmergencyCardConfigurationLedgerItemRow
+  | FamilyEmergencyCardSelectedFieldLedgerItemRow
+  | FamilyEmergencyCardDocumentLinkLedgerItemRow
+  | FamilyEmergencyCardExportEventLedgerItemRow
+  | FamilyEmergencyCardPowerModeEventLedgerItemRow;
+
 export interface LifeRepositoryPort {
   listLifeRecords(
     context: PolicyAuthorizedRepositoryExecutionContext
@@ -269,6 +302,22 @@ export interface LifeRepositoryPort {
   insertFamilyEmergencyAssistanceItem(
     context:PolicyAuthorizedRepositoryExecutionContext,
     row:FamilyEmergencyAssistanceLedgerItemRow
+  ):RepositoryResult<void>;
+  listFamilyEmergencyCardPortabilityItems(
+    context:PolicyAuthorizedRepositoryExecutionContext,
+    profileId:string
+  ):RepositoryResult<readonly FamilyEmergencyCardPortabilityLedgerItemRow[]>;
+  findFamilyEmergencyCardConfiguration(
+    context:PolicyAuthorizedRepositoryExecutionContext,
+    id:string
+  ):RepositoryResult<FamilyEmergencyCardConfigurationLedgerItemRow | null>;
+  findFamilyEmergencyCardPortabilityItem(
+    context:PolicyAuthorizedRepositoryExecutionContext,
+    id:string
+  ):RepositoryResult<FamilyEmergencyCardPortabilityLedgerItemRow | null>;
+  insertFamilyEmergencyCardPortabilityItem(
+    context:PolicyAuthorizedRepositoryExecutionContext,
+    row:FamilyEmergencyCardPortabilityLedgerItemRow
   ):RepositoryResult<void>;
 }
 

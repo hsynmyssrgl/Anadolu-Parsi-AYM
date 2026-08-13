@@ -100,7 +100,8 @@ export const verifyFamilyEmergencyAssistanceCardBoundary = async () => {
   ]));
   check('domain fixes private manual truth and no external claims', includesAll(domain, [
     "privacy:'private'", "dataSource:'manual'", "medicalVerification:'not_performed'",
-    "healthRegistryLookup:'not_performed'", "exportSharing:'not_performed'"
+    "healthRegistryLookup:'not_performed'", "externalDelivery:'not_performed'",
+    "localExport:'user_authorized_only'"
   ]));
   check('recursive security contract covers every assistance variant', includesAll(security, [
     'FAMILY_EMERGENCY_ASSISTANCE_INPUT_KEYS',
@@ -147,7 +148,8 @@ export const verifyFamilyEmergencyAssistanceCardBoundary = async () => {
     'FamilyEmergencyAssistanceRowCommon', 'familyId:FamilyId', 'ownerPersonId:PersonId',
     'createdAt:IsoDateTime', 'FamilyEmergencyAssistanceLedgerItemRow'
   ]));
-  check('migration 87 is exact latest and additive', migrationVersions.at(-1) === 87
+  check('migration 87 closure identity remains exact under additive successors', migrationVersions.includes(87)
+    && (migrationVersions.at(-1) ?? 0) >= 87
     && includesAll(migrations, [
       "createMigrationDefinition(87, 'b5_family_emergency_assistance_card_ledger'",
       'CREATE TABLE family_emergency_assistance_ledger'
@@ -282,7 +284,7 @@ export const verifyFamilyEmergencyAssistanceCardBoundary = async () => {
     && Object.values(item.chain).every((value) => value === true)));
   check('platform policy and capability gates remain exact PASS', astGate.status === 'PASS'
     && capabilityGate.status === 'PASS' && astGate.directRoleAuthorizationBypasses === 0);
-  check('PPK-022 adds no capability surface', capabilityGate.exactManifestSurfaces === 242);
+  check('PPK-022 current successor ratchet remains exact', capabilityGate.exactManifestSurfaces === 246);
   check('root package exposes boundary targeted contract and runtime commands', includesAll(
     JSON.stringify(rootPackage.scripts), [
       'verify:b5-family-emergency-assistance:boundary',
@@ -305,6 +307,7 @@ export const verifyFamilyEmergencyAssistanceCardBoundary = async () => {
     checksFailed: failures.length,
     checks,
     failures,
+    closureDatabaseMigration: 87,
     latestDatabaseMigration: migrationVersions.at(-1),
     familyEmergencyAssistanceTables:
       (migrations.match(/CREATE TABLE family_emergency_assistance_ledger/gu) ?? []).length,

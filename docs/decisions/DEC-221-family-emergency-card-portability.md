@@ -1,76 +1,82 @@
-# DEC-221 — Yönetişimli çevrimdışı acil kart, yazdırılabilir/PDF çıktı, şifreli belge paketi ve pil-duyarlı kip
+# DEC-221 — Governed offline emergency card portability
 
-- Tarih: 13.08.2026
-- Durum: ACTIVE
-- Gereksinimler: B5-03, EXT-016
-- Uygulama paketi: 33-J
-- Kalıcılık hedefi: Migration 88 (`family_emergency_card_portability_ledger`, planlanan)
+- Date: 13.08.2026
+- Status: ACTIVE / IMPLEMENTED, FINAL LOCAL COUNTS PENDING
+- Requirements: B5-03, EXT-016
+- Delivery slice: 33-J
+- Persistence: Migration 88 (`family_emergency_card_portability_ledger`)
 
-## Karar
+## Decision
 
-B5-03 ve EXT-016, 33-I'nin bağımsız `private` acil yardım profilini kaynak alan tek
-yönetişimli dikey dilimde uygulanacaktır. Kullanıcı yalnız kapalı bir alan kodu
-matrisinden seçtiği profil alanlarını, güncel çocuk kayıtlarını ve ayrıca yetkilendirilmiş
-arşiv belgelerini karta ekleyebilir. Seçim/configuration, belge bağlantısı, başarılı
-çıktı olayı ve pil-duyarlı kip olayı Migration 88 ile planlanan append-only
-`family_emergency_card_portability_ledger` içinde tutulacaktır. Kök yetki kaynağı
-33-I profilidir; aile acil planı görünürlüğü bu `private` profile veya çıktıya erişim
-vermez.
+33-J implements B5-03 and EXT-016 as one vertical slice rooted in the independent
+`private` emergency profile introduced by 33-I. The append-only ledger contains exactly
+`card_configuration`, `selected_field`, `document_link`, `export_event`, and
+`power_mode_event`. Every row inherits the profile family, owner and private scope.
 
-Çıktı kipleri `print`, `pdf` ve `encrypted_pack` ile kapalıdır. Yazdırma ve düz PDF
-çıktısı açık kullanıcı onayı ve düz metin uyarısı gerektirir. Electron `printToPDF`
-çıktısı parola korumalı PDF olarak sunulamaz. Şifreli paket, PDF/belge yükünü ayrı bir
-uygulama konteynerinde taşıyacaktır: her paket için rastgele DEK, normalize edilmiş en
-az 12 karakterlik paket parolasından benzersiz salt ve scrypt ile türetilen KEK,
-AES-256-GCM ve bağlam verisi kullanılacaktır. Cihaz kasası veya arşiv anahtarı taşınabilir
-paket anahtarı olarak yeniden kullanılmayacak; düz metin geçici dosya oluşturulmayacak;
-atomik yazım ile parse/decrypt/hash readback tamamlanmadan başarı kaydedilmeyecektir.
+Selection is closed and explicit. `emergency_profile` exposes only `label` and
+`subject_display`; `health_fact` exposes only `fact_value` and `note`;
+`emergency_contact` exposes only `name`, `phone_e164`, `relationship`, and `note`; and
+`assistance_instruction` exposes only `instruction_kind`, `instruction`, and `note`.
+A configuration is bounded to 64 selected fields and 10 documents. Selected sources
+must be current. Linked archive documents must belong to the same family, remain
+undestroyed, have exact `high` archive sensitivity, and receive their own read decision.
 
-## Politika ve güçlü kimlik doğrulama sınırı
+## Policy, strong authentication and completion bridge
 
-Configuration ve seçim yazımları exact `update/profileId` + `family.write` makbuzuna
-bağlanır. Gerçek dosya dışa aktarımı, genel `no_export` kuralını gevşetmeden yalnız
-yerel, açıkça seçilmiş, güçlü biçimde yeniden doğrulanmış acil çıktı için exact
-`share/profileId` + `file.share` kararı gerektirir. Mevcut politika modeli bu özel yerel
-istisnayı henüz temsil etmediği için bu kararın güvenli uygulaması tamamlanmadan çıktı
-özelliği açılmayacaktır.
+Configuration ledger writes use exact `update/profileId`, `family.write`,
+`life_record`, `highly_sensitive` durable receipts. Export preparation uses a separate
+exact `share/profileId`, `file.share` receipt with purpose
+`emergency-offline-portability`, one lowercase `selection_sha256` marker and only the
+closed content-free field codes.
 
-Parola/TOTP doğrulaması ayrı ve tekrar kullanılabilir bir “yeniden doğrulandı” bayrağı
-olarak tutulmaz; renderer session, işlem, profil ve seçili alan özetiyle aynı sunucu
-işlemine bağlanır ve dosya seçimi/yazımı öncesinde yeniden kontrol edilir. Windows Hello
-ileride kullanılırsa aynı bağlara sahip kısa ömürlü, tek kullanımlık main-process grant
-olmadan kabul edilmez. PIN etiketi çevrimdışı kaba kuvvete dayanıklı şifreleme iddiası
-taşımaz; şifreli paket için varsayılan en az 12 karakterlik paket parolasıdır.
+The successful side effect is recorded by a fresh update receipt and an internal-only
+`shareReceiptHash`. SQLite requires that hash to identify an unused durable share
+receipt for the same family, owner, profile and selection digest within five minutes.
+The hash is not projected to the renderer, audit or outbox. This bridge avoids reusing a
+globally unique correlation id while still rejecting replay, cross-selection and
+confused-deputy completion.
 
-Arşiv belgesi eklenecekse belge aynı ailede, yok edilmemiş ve izin verilen hassasiyet
-sınıfında olmalı; her belge için ayrıca exact arşiv okuma PEP kararı alınmalıdır.
-Mevcut düz metin geçici dosya üreten materialize yolu kullanılmayacak, içerik bellekte
-yetkili ve sınırlandırılmış biçimde çözülecektir. Audit/outbox seçilen sağlık içeriğini,
-telefonu, belge içeriğini, parolayı veya çıktı yolunu taşımaz.
+Strong authentication is operation-bound to the renderer session, profile, exact
+selection and export operation. It expires after at most 120 seconds and is not stored
+as a reusable “reauthenticated” flag.
 
-## Pil-duyarlı kip ve gerçeklik sınırı
+## Local artifacts and encryption truth
 
-Desktop çalışma zamanı yalnız `battery`, `ac` veya `unknown` güç kaynağını gözleyebilir;
-pil yüzdesi ölçmez. Bu nedenle kip kullanıcı tarafından manuel açılır veya cihazın pil
-gücünde olduğu görüldüğünde önerilir. `batteryLevel` exact `not_measured`,
-`automaticLowBatteryDetection` exact `not_performed` ve `lowBatteryClaimed` `false`
-kalır. Kip görsel/işlemsel maliyeti azaltabilir, ancak kalan süre, düşük pil eşiği,
-çalışma garantisi veya acil müdahale garantisi vermez.
+Output modes are exactly `print`, `pdf`, and `encrypted_pack`. PDF and encrypted-pack
+files use atomic publication and byte/hash readback. Native print has exact
+`not_applicable_print` artifact readback plus confirmed printer dispatch, while the
+canonical generated bytes remain hash/size bound. Print and plain PDF contain no
+linked documents; only `encrypted_pack` may contain authorized archive documents.
 
-Tek yeni desktop IPC adayı `life:exportEmergencyCard` olacaktır; kapalı girdi, boyut ve
-seçim sınırı uygular, çıktı yolu renderer tarafından verilmez ve save/print işlemi main
-process tarafından yönetilir. Ağ, mesaj, bulut yükleme veya acil servis kanalı açılmaz.
+The encrypted pack uses a fresh random DEK, a password-derived scrypt KEK, AES-256-GCM,
+and authenticated container metadata. It never reuses the device vault key and writes
+no plaintext temporary file. The produced pack must parse, decrypt and match the
+expected payload hash before success is recorded. Electron PDF output is not claimed to
+be password-encrypted.
 
-Migration ratchet 87'den 88'e planlanır. Uygulama öncesi güncel PPK-021 tabanı
-545 exact allowlist ve 277 use-case composition yüzeyi, PPK-022 tabanı 242 capability
-yüzeyidir. Yeni doğrudan `node:fs`/dialog yüzeyi açmak yerine onaylı main-process dosya
-yazım yüzeyleri yeniden kullanılacak; yine de gerçek uygulama sonrasında exact PPK
-yeniden sayımı, `file.share` signed application manifest/policy-package ratchet'i ve
-bağımsız boundary kanıtı zorunludur. Bu aktivasyon yeni bir PPK sayısını PASS saymaz.
+## Power and delivery truth
 
-## Etkinleştirme durumu
+Power source is only `battery`, `ac`, or `unknown`. `batteryLevel` is
+`not_measured`, `automaticLowBatteryDetection` is `not_performed`, and
+`lowBatteryClaimed` is always `false`. The production channel exposes manual activation
+only; the `battery_prompt` enum is reserved and not exposed. The mode makes no
+remaining-time or low-battery guarantee.
 
-Bu belge 33-J yönetişim aktivasyonudur. Migration 88, domain/application/repository,
-policy, IPC/UI, yazdırma/PDF, şifreli paket, test, tehdit modeli ve kapanış kanıtları
-henüz `PENDING` durumundadır. B5-03 ve EXT-016, tam karar-kod-ekran-test-belge-kanıt
-zinciri ve kalıcı Library makbuzu oluşmadan uygulanmış veya tamamlanmış sayılmaz.
+No new network channel exists. `externalDelivery`, `cloudUpload`, message delivery and
+emergency-service contact remain `not_performed`; local export is
+`user_authorized_only`. The sole new desktop IPC channel is
+`life:exportEmergencyCard`.
+
+## Ratchets and lifecycle
+
+Migration 88 is bound to checksum
+`8785551a6ce0facd609e374e7ba65c70d35b552e6f63a7f0b3d790bfbffa2b04`.
+PPK-021 is ratcheted to 554 exact surfaces and 281 use-case compositions; PPK-022 is
+ratcheted to 246 exact capability surfaces. Both gates remain fail-closed and green.
+
+Implementation and local evidence are present: 62/62 boundary, 16/16 contract, 12/12
+runtime and 24/24 targeted tests across four files. Full Vitest is PASS at 125/125 test
+files and 1038/1038 tests; all 18/18 production workspace builds are PASS, including
+the Electron and Vite desktop production build.
+Persistent Library receipt and 33-J completion transition remain separate lifecycle
+steps and are not claimed here.

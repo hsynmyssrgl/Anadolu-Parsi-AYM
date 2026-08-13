@@ -186,6 +186,50 @@ describe('32-B PPK-006 complete policy obligation suite', () => {
     });
   });
 
+  it('allows only the exact owner-bound local emergency portability exception while retaining restrictive controls', () => {
+    const base = request();
+    const exact = request({
+      subject: { ...base.subject, personId: 'person-32-b' },
+      resource: {
+        type: 'life_record', id: 'profile-32-j', familyId: 'family-32-b',
+        ownerPersonId: 'person-32-b', sensitivity: 'highly_sensitive',
+        dataClasses: ['personal', 'special', 'health'], classificationSource: 'declared'
+      },
+      action: 'share', capability: 'file.share', purpose: 'emergency-offline-portability',
+      requestedFields: ['fact_value', 'phone_e164', `selection_sha256:${'a'.repeat(64)}`]
+    });
+    const decision = kernel().evaluate(exact);
+    expect(decision.allowed).toBe(true);
+    expect(decision.obligations).toEqual(expect.arrayContaining([
+      { type: 'high_detail_audit' },
+      { type: 'local_processing_only' },
+      { type: 'no_cache' },
+      { type: 'no_ai' },
+      { type: 'no_recording' },
+      { type: 'watermark', value: 'policy:PPK-006;correlation:corr-32-b' },
+      { type: 'delete_after', value: 'retention:data-class:special' }
+    ]));
+    expect(decision.obligations).not.toContainEqual({ type: 'no_export' });
+
+    const nearMisses: PlatformPolicyRequest[] = [
+      { ...exact, purpose: 'general' },
+      { ...exact, online: false },
+      { ...exact, requestedFields: [] },
+      { ...exact, requestedFields: [`selection_sha256:${'A'.repeat(64)}`] },
+      { ...exact, requestedFields: [`selection_sha256:${'a'.repeat(64)}`, 'fact_value'] },
+      { ...exact, requestedFields: ['raw_health_payload', `selection_sha256:${'a'.repeat(64)}`] },
+      { ...exact, requestedFields: [`selection_sha256:${'a'.repeat(64)}`, `selection_sha256:${'b'.repeat(64)}`] },
+      { ...exact, resource: { ...exact.resource, type: 'health_record' } },
+      { ...exact, subject: { ...exact.subject, personId: 'other-person' } }
+    ];
+    for (const nearMiss of nearMisses) {
+      const denied = kernel().evaluate(nearMiss);
+      expect(denied.allowed).toBe(false);
+      expect(['DATA_CLASS_CAPABILITY_MISMATCH', 'INVALID_REQUEST', 'OWNER_OR_GRANT_REQUIRED'])
+        .toContain(denied.reason);
+    }
+  });
+
   it('binds communication recording to the consent retention policy', () => {
     const base = request();
     const decision = kernel().evaluate(request({

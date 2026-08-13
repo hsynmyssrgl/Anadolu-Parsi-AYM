@@ -2,30 +2,25 @@
   "schemaVersion": 1,
   "step": "33-J",
   "requirements": ["B5-03", "EXT-016"],
-  "status": "IN_PROGRESS",
+  "status": "COMPLETE",
   "surfaces": [
-    { "id": "governance-activation", "paths": ["docs/decisions/DEC-221-family-emergency-card-portability.md", "config/33-j-family-emergency-card-portability-scope.json", "config/33-j-family-emergency-card-portability-inventory.json"], "disposition": "IN_PROGRESS" },
-    { "id": "domain-contract", "paths": ["packages/domain/src/app-data.ts"], "disposition": "PENDING" },
-    { "id": "application-validation-and-use-cases", "paths": ["packages/application/src/life-use-cases.ts", "packages/application/src/life-security.ts"], "disposition": "PENDING" },
-    { "id": "portable-encryption", "paths": ["packages/security/src/encryption.ts"], "disposition": "PENDING" },
-    { "id": "repository-contract", "paths": ["packages/repository-contracts/src/life-repository.ts"], "disposition": "PENDING" },
-    { "id": "sqlite-repository", "paths": ["packages/repositories/src/life-repository.ts"], "disposition": "PENDING" },
-    { "id": "migration-88", "paths": ["packages/database/src/family-database-migrations.ts"], "disposition": "PENDING" },
-    { "id": "policy-and-desktop-export", "paths": ["apps/desktop/src/main/life-production-policy-runtime.ts", "apps/desktop/src/main/life-application-adapter.ts", "apps/desktop/src/main/ipc-integration-policy.ts", "apps/desktop/src/main/ipc-request-lifecycle.ts", "apps/desktop/src/main/main.ts", "apps/desktop/src/main/preload.ts"], "disposition": "PENDING" },
-    { "id": "life-center-ui", "paths": ["apps/desktop/src/renderer/ManagedLifePanel.tsx", "apps/desktop/src/renderer/styles.css"], "disposition": "PENDING" },
-    { "id": "targeted-tests", "paths": ["packages/application/tests/family-emergency-card-portability.test.ts", "packages/repositories/family-emergency-card-portability-repository-policy.test.ts", "apps/desktop/tests/b5-family-emergency-card-portability-ipc-integration.test.ts"], "disposition": "PENDING" },
-    { "id": "governance-evidence", "paths": ["docs/security/THREAT_MODEL_33_J_FAMILY_EMERGENCY_CARD_PORTABILITY.md", "docs/audit/33-J_FAMILY_EMERGENCY_CARD_PORTABILITY_UST_KAPANIS.md", "scripts/verify-family-emergency-card-portability-boundary.mjs"], "disposition": "PENDING" }
+    { "id": "governance", "paths": ["docs/decisions/DEC-221-family-emergency-card-portability.md", "config/33-j-family-emergency-card-portability-scope.json", "config/33-j-family-emergency-card-portability-inventory.json"], "disposition": "COMPLETE" },
+    { "id": "domain-contract", "paths": ["packages/domain/src/app-data.ts"], "disposition": "COMPLETE" },
+    { "id": "application-validation-and-use-cases", "paths": ["packages/application/src/life-use-cases.ts", "packages/application/src/life-security.ts"], "disposition": "COMPLETE" },
+    { "id": "portable-encryption", "paths": ["packages/security/src/encryption.ts"], "disposition": "COMPLETE" },
+    { "id": "repository-contract", "paths": ["packages/repository-contracts/src/life-repository.ts"], "disposition": "COMPLETE" },
+    { "id": "sqlite-repository", "paths": ["packages/repositories/src/life-repository.ts"], "disposition": "COMPLETE" },
+    { "id": "migration-88", "paths": ["packages/database/src/family-database-migrations.ts", "artifacts/manifests/DATABASE_MIGRATION_VERIFICATION_MVP56.json"], "disposition": "COMPLETE" },
+    { "id": "policy-and-desktop-export", "paths": ["apps/desktop/src/main/life-production-policy-runtime.ts", "apps/desktop/src/main/life-application-adapter.ts", "apps/desktop/src/main/ipc-integration-policy.ts", "apps/desktop/src/main/ipc-request-lifecycle.ts", "apps/desktop/src/main/main.ts", "apps/desktop/src/main/preload.ts"], "disposition": "COMPLETE" },
+    { "id": "life-center-ui", "paths": ["apps/desktop/src/renderer/ManagedLifePanel.tsx", "apps/desktop/src/renderer/styles.css"], "disposition": "COMPLETE" },
+    { "id": "targeted-tests", "paths": ["packages/application/tests/family-emergency-card-portability.test.ts", "packages/repositories/family-emergency-card-portability-repository-policy.test.ts", "packages/security/tests/emergency-portable-pack.test.ts", "apps/desktop/tests/b5-family-emergency-card-portability-ipc-integration.test.ts"], "disposition": "COMPLETE" },
+    { "id": "governance-evidence", "paths": ["docs/security/THREAT_MODEL_33_J_FAMILY_EMERGENCY_CARD_PORTABILITY.md", "docs/audit/33-J_FAMILY_EMERGENCY_CARD_PORTABILITY_UST_KAPANIS.md", "scripts/verify-family-emergency-card-portability-boundary.mjs", "scripts/verify-33-j-family-emergency-card-portability-contract.mjs", "scripts/verify-33-j-family-emergency-card-portability-runtime.mjs"], "disposition": "COMPLETE" }
   ],
-  "existingIpcChannels": ["life:getManagedWorkspace", "life:recordManagedItem"],
-  "plannedIpcChannels": ["life:exportEmergencyCard"],
+  "ipcChannels": ["life:getManagedWorkspace", "life:recordManagedItem", "life:exportEmergencyCard"],
   "networkChannels": [],
-  "prohibitedPersistentOrProjectedFields": ["password", "passphrase", "totp", "token", "secret", "credential", "pin", "plaintextFilePath", "selectedHealthContent", "policyReceipt"],
-  "targetDatabaseMigration": 88,
-  "openRequirements": ["B5-03", "EXT-016"],
-  "openBlockers": [
-    "IMPLEMENTATION_AND_EVIDENCE_PENDING",
-    "EXACT_LOCAL_FILE_SHARE_POLICY_PATH_PENDING",
-    "OPERATION_BOUND_STRONG_AUTHENTICATION_PENDING",
-    "PORTABLE_ENCRYPTION_AND_READBACK_PENDING"
-  ]
+  "prohibitedPersistentOrProjectedFields": ["password", "passphrase", "totp", "token", "secret", "credential", "pin", "plaintextFilePath", "selectedHealthContent", "policyReceipt", "shareReceiptHash"],
+  "latestDatabaseMigration": 88,
+  "migration88Checksum": "8785551a6ce0facd609e374e7ba65c70d35b552e6f63a7f0b3d790bfbffa2b04",
+  "openRequirements": [],
+  "openBlockers": []
 }

@@ -1181,3 +1181,17 @@ linear-gradient(145deg,#071a2d 0%,#0b2744 52%,#0b1c31 100%)}
 .session-lock-card{width:min(560px,100%);display:grid;gap:16px;padding:clamp(24px,5vw,44px);border:1px solid rgba(218,171,88,.45);border-radius:24px;background:#10202c;box-shadow:0 32px 100px rgba(0,0,0,.55)}
 .session-lock-card h2,.session-lock-card p{margin:0}.session-lock-card p,.session-lock-card small{color:#ced8df;line-height:1.55}.session-lock-card label{display:grid;gap:7px;font-weight:700}.session-lock-card input{width:100%;min-height:46px;border:1px solid rgba(255,255,255,.22);border-radius:10px;padding:10px 12px;background:#07131d;color:#fff}.session-lock-card input:focus{outline:3px solid #e4aa4f;outline-offset:2px}.session-lock-icon{display:grid;place-items:center;width:58px;height:58px;border-radius:18px;background:rgba(218,171,88,.16);font-size:30px;color:#f1bd68}.session-lock-card .button-row{display:flex;flex-wrap:wrap;gap:10px}
 @media(max-width:620px){.session-lock-backdrop{padding:14px}.session-lock-card{padding:24px;border-radius:18px}}
+
+/* 33-J — governed offline emergency card portability */
+.emergency-card-portability-panel{align-content:start;display:grid;gap:14px}
+.emergency-card-config-group{display:grid;gap:11px;min-width:0;margin:0;padding:15px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.025)}
+.emergency-card-config-group legend{padding:0 7px;font-weight:800;color:var(--release-menu-text-strong)}
+.emergency-card-config-group>label{display:grid;gap:6px;min-width:0}
+.emergency-card-config-group input,.emergency-card-config-group select{width:100%}
+.emergency-card-selection-list{display:grid;gap:8px;padding:12px;border-radius:12px;background:rgba(0,0,0,.12)}
+.emergency-card-selection-list>strong+strong{margin-top:6px}
+.emergency-card-check{display:grid!important;grid-template-columns:18px minmax(0,1fr);align-items:start;gap:9px;text-transform:none!important;letter-spacing:normal!important}
+.emergency-card-check input{width:17px!important;height:17px!important;min-height:0!important;margin-top:2px}
+.emergency-card-check span{line-height:1.45;overflow-wrap:anywhere}
+.plaintext-warning{padding:12px;border:1px solid rgba(255,180,40,.42);border-radius:11px;background:rgba(255,180,40,.08)}
+@media(max-width:900px){.emergency-card-portability-panel{grid-column:auto}}

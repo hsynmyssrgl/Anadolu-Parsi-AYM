@@ -36,13 +36,15 @@ import type {
   AccountRow,
   ObjectPermissionRow,
   PolicyAuthorizedRepositoryExecutionContext,
-  RepositoryExecutionContext
+  RepositoryExecutionContext,
+  FamilyEmergencyCardPortabilityLedgerItemRow
 } from '@ppt/repository-contracts';
 import {
   CentralAuthorizationService,
   type AuthorizationAction,
   type AuthorizationGrant
 } from '@ppt/security';
+import { computePlatformPolicyReceiptHash } from '@ppt/repositories';
 
 export interface LifePolicyTransactionRevalidationInput {
   readonly context: LifeApplicationContext;
@@ -309,7 +311,10 @@ const executeGoverned = async <T>(
         capability: intent.capability,
         resourceType: intent.resourceType,
         resourceId: intent.resourceId,
-        purpose: intent.purpose
+        purpose: intent.purpose,
+        ...('requestedFields' in intent && intent.requestedFields
+          ? { requestedFields:intent.requestedFields }
+          : {})
       },
       dependencies.clusterFence,
       async (authorization) => {
@@ -522,6 +527,15 @@ export class RepositoryBackedLifeQueryPort implements LifeQueryPort {
       const visibleAssistanceItems = assistanceItems.value.filter((item) => item.itemType === 'emergency_profile'
         ? visibleAssistanceProfileIds.has(item.id)
         : visibleAssistanceProfileIds.has(item.profileId));
+      const portabilityItems: FamilyEmergencyCardPortabilityLedgerItemRow[] = [];
+      for (const profileId of [...visibleAssistanceProfileIds].sort()) {
+        const listed = this.dependencies.lifeRepository.listFamilyEmergencyCardPortabilityItems(
+          repository,
+          profileId
+        );
+        if (!listed.ok) return listed;
+        portabilityItems.push(...listed.value);
+      }
       return {
         ok: true,
         value: buildManagedLifeWorkspace({
@@ -530,6 +544,7 @@ export class RepositoryBackedLifeQueryPort implements LifeQueryPort {
           emergencyItems: visibleEmergencyItems,
           preparednessItems: visiblePreparednessItems,
           assistanceItems: visibleAssistanceItems,
+          portabilityItems,
           generatedAt: repository.occurredAt
         })
       };
@@ -540,6 +555,7 @@ export class RepositoryBackedLifeQueryPort implements LifeQueryPort {
 class RepositoryBackedLifeWriteScope implements LifeWriteScope {
   readonly #authorization = new CentralAuthorizationService();
   readonly #authorizationSnapshot: Result<AuthorizationSnapshot, AppError>;
+  public readonly authorizationReceiptHash:string;
 
   public constructor(
     private readonly dependencies: RepositoryBackedLifeApplicationDependencies,
@@ -548,6 +564,9 @@ class RepositoryBackedLifeWriteScope implements LifeWriteScope {
     public readonly occurredAt: LifeWriteScope['occurredAt']
   ) {
     this.#authorizationSnapshot = loadAuthorization(dependencies, applicationContext, repository);
+    this.authorizationReceiptHash = computePlatformPolicyReceiptHash(
+      repository.policyAuthorization.receiptRecord.receipt
+    );
   }
 
   public findPerson(personId: Parameters<LifeWriteScope['findPerson']>[0]): ReturnType<LifeWriteScope['findPerson']> {
@@ -655,6 +674,28 @@ class RepositoryBackedLifeWriteScope implements LifeWriteScope {
     record: Parameters<LifeWriteScope['insertFamilyEmergencyAssistanceItem']>[0]
   ): ReturnType<LifeWriteScope['insertFamilyEmergencyAssistanceItem']> {
     return this.dependencies.lifeRepository.insertFamilyEmergencyAssistanceItem(this.repository, record);
+  }
+
+  public findFamilyEmergencyCardConfiguration(
+    id: Parameters<LifeWriteScope['findFamilyEmergencyCardConfiguration']>[0]
+  ): ReturnType<LifeWriteScope['findFamilyEmergencyCardConfiguration']> {
+    return this.dependencies.lifeRepository.findFamilyEmergencyCardConfiguration(this.repository, id);
+  }
+
+  public listFamilyEmergencyCardPortabilityItems(profileId: string) {
+    return this.dependencies.lifeRepository.listFamilyEmergencyCardPortabilityItems(this.repository, profileId);
+  }
+
+  public findFamilyEmergencyCardPortabilityItem(
+    id: Parameters<LifeWriteScope['findFamilyEmergencyCardPortabilityItem']>[0]
+  ): ReturnType<LifeWriteScope['findFamilyEmergencyCardPortabilityItem']> {
+    return this.dependencies.lifeRepository.findFamilyEmergencyCardPortabilityItem(this.repository, id);
+  }
+
+  public insertFamilyEmergencyCardPortabilityItem(
+    record: Parameters<LifeWriteScope['insertFamilyEmergencyCardPortabilityItem']>[0]
+  ): ReturnType<LifeWriteScope['insertFamilyEmergencyCardPortabilityItem']> {
+    return this.dependencies.lifeRepository.insertFamilyEmergencyCardPortabilityItem(this.repository, record);
   }
 
   public appendAudit(input: Parameters<LifeWriteScope['appendAudit']>[0]): ReturnType<LifeWriteScope['appendAudit']> {

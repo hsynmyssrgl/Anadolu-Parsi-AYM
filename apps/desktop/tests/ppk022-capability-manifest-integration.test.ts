@@ -14,7 +14,7 @@ describe('32-R PPK-022 Desktop/Core Service capability manifest integration', ()
       enforcement: 'build-and-runtime-fail-closed',
       protectedCapabilityCount: 7,
       canonicalApplicationCount: 14,
-      exactAstSurfaceCount: 242,
+      exactAstSurfaceCount: 246,
       signedManifestHashBindingRequired: true,
       authenticatedRuntimeAuthorityRequired: true,
       bootstrapNetworkCapabilityPinned: true,

@@ -123,6 +123,84 @@ export class FileSystemArchiveVaultFilePort implements ArchiveVaultFilePort {
     }
   }
 
+  public readBytes(
+    input: {
+      readonly itemId: string;
+      readonly storedName: string;
+      readonly expectedSha256: string;
+      readonly expectedSizeBytes: number;
+      readonly maximumBytes: number;
+    },
+    correlationId: CorrelationId
+  ): ReturnType<ArchiveVaultFilePort['readBytes']> {
+    let serializedEnvelope: Buffer | undefined;
+    let vaultKey: Buffer | undefined;
+    let plain: Buffer | undefined;
+    try {
+      if (
+        !Number.isSafeInteger(input.expectedSizeBytes)
+        || input.expectedSizeBytes < 1
+        || !Number.isSafeInteger(input.maximumBytes)
+        || input.maximumBytes < 1
+        || input.expectedSizeBytes > input.maximumBytes
+        || !/^[a-f0-9]{64}$/iu.test(input.expectedSha256)
+      ) {
+        return err(createAppError({
+          code: ERROR_CODES.CORE_INVALID_ARGUMENT,
+          message: 'Arşiv dosyası izin verilen bellek içi okuma sınırını aşıyor.',
+          category: 'security',
+          correlationId
+        }));
+      }
+      const targetPath = this.#resolveStoredPath(input.storedName, correlationId);
+      const stat = statSync(targetPath);
+      const maximumEnvelopeBytes = Math.ceil(input.maximumBytes * 4 / 3) + 64 * 1024;
+      if (!stat.isFile() || stat.size < 1 || stat.size > maximumEnvelopeBytes) {
+        return err(createAppError({
+          code: ERROR_CODES.CORE_INVALID_ARGUMENT,
+          message: 'Şifreli arşiv zarfı izin verilen okuma sınırını aşıyor.',
+          category: 'security',
+          correlationId
+        }));
+      }
+      serializedEnvelope = readFileSync(targetPath);
+      if (serializedEnvelope.length !== stat.size || serializedEnvelope.length > maximumEnvelopeBytes) {
+        return err(createAppError({
+          code: ERROR_CODES.CORE_UNEXPECTED,
+          message: 'Şifreli arşiv zarfı okuma sırasında değişti.',
+          category: 'security',
+          correlationId
+        }));
+      }
+      const envelope = JSON.parse(serializedEnvelope.toString('utf8')) as EncryptedEnvelope;
+      vaultKey = this.#vaultKey();
+      plain = decryptBytes(envelope, vaultKey);
+      const actualSha256 = createHash('sha256').update(plain).digest('hex');
+      if (
+        plain.length !== input.expectedSizeBytes
+        || plain.length > input.maximumBytes
+        || actualSha256 !== input.expectedSha256.toLowerCase()
+      ) {
+        return err(createAppError({
+          code: ERROR_CODES.CORE_UNEXPECTED,
+          message: 'Arşiv dosyası boyut veya bütünlük doğrulamasını geçemedi.',
+          category: 'security',
+          correlationId
+        }));
+      }
+      const result = Buffer.from(plain);
+      plain.fill(0);
+      plain = undefined;
+      return ok(result);
+    } catch (error) {
+      return err(this.#error(correlationId, 'Arşiv dosyası bellek içinde okunamadı.', error));
+    } finally {
+      serializedEnvelope?.fill(0);
+      vaultKey?.fill(0);
+      plain?.fill(0);
+    }
+  }
+
   public destroy(
     input: { readonly storedName: string; readonly secureDestroy: boolean },
     correlationId: CorrelationId

@@ -1,5 +1,6 @@
 import type {
   FamilyEmergencyAssistanceItemType,
+  FamilyEmergencyCardPortabilityItemType,
   FamilyEmergencyItemType,
   FamilyEmergencyPreparednessItemType,
   ManagedHomeInventoryItemType,
@@ -157,6 +158,40 @@ export const FAMILY_EMERGENCY_ASSISTANCE_REQUIRED_INPUT_KEYS = Object.freeze({
   assistance_instruction: Object.freeze(['itemType','profileId','instructionKind','instruction'])
 } satisfies Readonly<Record<FamilyEmergencyAssistanceItemType, readonly string[]>>);
 
+export const FAMILY_EMERGENCY_CARD_PORTABILITY_INPUT_KEYS = Object.freeze({
+  card_configuration: Object.freeze(['itemType','profileId','label','locale']),
+  selected_field: Object.freeze([
+    'itemType','profileId','configurationId','sourceItemId','sourceItemType','fieldCode'
+  ]),
+  document_link: Object.freeze(['itemType','profileId','configurationId','archiveItemId']),
+  export_event: Object.freeze([
+    'itemType','profileId','configurationId','mode','selectedFieldCount','documentCount','selectionSha256','shareReceiptHash',
+    'artifactSha256','artifactSizeBytes','powerSource','batteryLevel',
+    'automaticLowBatteryDetection','lowBatteryClaimed','artifactReadbackStatus','printerDispatchStatus'
+  ]),
+  power_mode_event: Object.freeze([
+    'itemType','profileId','configurationId','mode','activationSource','powerSource',
+    'batteryLevel','automaticLowBatteryDetection','lowBatteryClaimed'
+  ])
+} satisfies Readonly<Record<FamilyEmergencyCardPortabilityItemType, readonly string[]>>);
+
+export const FAMILY_EMERGENCY_CARD_PORTABILITY_REQUIRED_INPUT_KEYS = Object.freeze({
+  card_configuration: Object.freeze(['itemType','profileId','label','locale']),
+  selected_field: Object.freeze([
+    'itemType','profileId','configurationId','sourceItemId','sourceItemType','fieldCode'
+  ]),
+  document_link: Object.freeze(['itemType','profileId','configurationId','archiveItemId']),
+  export_event: Object.freeze([
+    'itemType','profileId','configurationId','mode','selectedFieldCount','documentCount','selectionSha256','shareReceiptHash',
+    'artifactSha256','artifactSizeBytes','powerSource','batteryLevel',
+    'automaticLowBatteryDetection','lowBatteryClaimed','artifactReadbackStatus'
+  ]),
+  power_mode_event: Object.freeze([
+    'itemType','profileId','configurationId','mode','activationSource','powerSource',
+    'batteryLevel','automaticLowBatteryDetection','lowBatteryClaimed'
+  ])
+} satisfies Readonly<Record<FamilyEmergencyCardPortabilityItemType, readonly string[]>>);
+
 export interface ManagedLifeDataContractInspection {
   readonly accepted:boolean;
   readonly itemType?:
@@ -165,13 +200,15 @@ export interface ManagedLifeDataContractInspection {
     | ManagedHomeInventoryItemType
     | FamilyEmergencyItemType
     | FamilyEmergencyPreparednessItemType
-    | FamilyEmergencyAssistanceItemType;
+    | FamilyEmergencyAssistanceItemType
+    | FamilyEmergencyCardPortabilityItemType;
   readonly contractFamily?:
     | 'managed_life'
     | 'home_inventory'
     | 'family_emergency'
     | 'family_emergency_preparedness'
-    | 'family_emergency_assistance';
+    | 'family_emergency_assistance'
+    | 'family_emergency_card_portability';
   readonly exactShape:boolean;
   readonly unknownFields:readonly string[];
   readonly missingFields:readonly string[];
@@ -189,8 +226,8 @@ const isPlainObject = (value: unknown): value is Record<string, unknown> => {
 
 const normalizedKey = (key: string): string => key.toLocaleLowerCase('en-US').replace(/[^a-z0-9]/gu, '');
 const prohibitedKeyTokens = Object.freeze([
-  'password','passcode','secret','token','credential','cvv','cvc','pin','pan',
-  'cardnumber','internetbanking','filepath','filename','storedname','originalname',
+  'password','passphrase','passcode','secret','token','totp','credential','cvv','cvc','pin','pan',
+  'cardnumber','internetbanking','filepath','outputpath','filename','storedname','originalname',
   'base64','binary','buffer','blob'
 ]);
 const explicitlyAllowedOpaqueIdentifierKeys = new Set([
@@ -334,7 +371,27 @@ export const inspectManagedLifeDataContract = (input: unknown): ManagedLifeDataC
     && typeof input.itemType === 'string'
     && Object.hasOwn(FAMILY_EMERGENCY_ASSISTANCE_INPUT_KEYS, input.itemType);
 
-  if (familyEmergencyAssistanceItem) {
+  const familyEmergencyCardPortabilityItem = isPlainObject(input)
+    && typeof input.itemType === 'string'
+    && Object.hasOwn(FAMILY_EMERGENCY_CARD_PORTABILITY_INPUT_KEYS, input.itemType);
+
+  if (familyEmergencyCardPortabilityItem) {
+    const portabilityItemType = input.itemType as FamilyEmergencyCardPortabilityItemType;
+    itemType = portabilityItemType;
+    contractFamily = 'family_emergency_card_portability';
+    let allowed = FAMILY_EMERGENCY_CARD_PORTABILITY_INPUT_KEYS[portabilityItemType];
+    let required = FAMILY_EMERGENCY_CARD_PORTABILITY_REQUIRED_INPUT_KEYS[portabilityItemType];
+    if (portabilityItemType === 'export_event') {
+      if (input.mode === 'print') {
+        required = Object.freeze([...required, 'printerDispatchStatus']);
+      } else if (input.mode === 'pdf' || input.mode === 'encrypted_pack') {
+        allowed = Object.freeze(allowed.filter((key) => key !== 'printerDispatchStatus'));
+      } else {
+        exactShape = false;
+      }
+    }
+    compareKeys(input, '$', allowed, required, unknownFields, missingFields);
+  } else if (familyEmergencyAssistanceItem) {
     const assistanceItemType = input.itemType as FamilyEmergencyAssistanceItemType;
     itemType = assistanceItemType;
     contractFamily = 'family_emergency_assistance';

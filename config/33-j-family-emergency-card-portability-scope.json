@@ -3,7 +3,7 @@
   "id": "33-J-FAMILY-EMERGENCY-CARD-PORTABILITY",
   "decision": "DEC-221",
   "requirements": ["B5-03", "EXT-016"],
-  "status": "IN_PROGRESS",
+  "status": "COMPLETE",
   "model": {
     "table": "family_emergency_card_portability_ledger",
     "sourceTable": "family_emergency_assistance_ledger",
@@ -12,13 +12,27 @@
     "appendOnly": true,
     "policyRoot": "independent_private_emergency_profile",
     "selectionModel": "closed_source_item_and_field_code_matrix",
-    "sourceScopeInherited": ["family", "owner", "privacy"],
+    "sourceScopeInherited": ["family", "owner", "private"],
     "timestampRepresentation": "canonical_utc_iso"
+  },
+  "selection": {
+    "maximumSelectedFields": 64,
+    "maximumDocuments": 10,
+    "sourceMustBeCurrent": true,
+    "sourceFieldMatrix": {
+      "emergency_profile": ["label", "subject_display"],
+      "health_fact": ["fact_value", "note"],
+      "emergency_contact": ["name", "phone_e164", "relationship", "note"],
+      "assistance_instruction": ["instruction_kind", "instruction", "note"]
+    }
   },
   "artifacts": {
     "modes": ["print", "pdf", "encrypted_pack"],
+    "maximumArtifactBytes": 67108864,
+    "printReadbackStatus": "not_applicable_print",
+    "fileReadbackStatus": "verified",
     "pdfEncryptionClaimed": false,
-    "encryptedPackFormat": "application_specific_portable_container",
+    "encryptedPackFormat": "application_specific_container",
     "plaintextTemporaryFilesAllowed": false,
     "externalDelivery": "not_performed",
     "networkTransfer": "not_performed"
@@ -29,13 +43,17 @@
     "configurationPolicyAction": "update",
     "exportPolicyCapability": "file.share",
     "exportPolicyAction": "share",
-    "exportPolicyStatus": "PLANNED_EXACT_LOCAL_EXPORT_EXCEPTION_REQUIRED",
+    "exportPolicyPurpose": "emergency-offline-portability",
+    "shareReceiptBridge": "internal_unique_hash_exact_selection_and_five_minute_completion_window",
+    "shareReceiptHashProjectedToRenderer": false,
     "strongAuthenticationRequired": true,
     "strongAuthenticationBoundToOperation": true,
+    "strongAuthenticationMaximumAgeSeconds": 120,
     "explicitFieldSelectionRequired": true,
     "portablePackKeySource": "independent_passphrase_derived_kek_and_random_dek",
     "deviceVaultKeyReuseAllowed": false,
     "archiveDocumentAuthorizationRequired": true,
+    "archiveDocumentSensitivity": "high",
     "auditContainsSelectedSensitiveContent": false,
     "outboxContainsSelectedSensitiveContent": false,
     "updatesAllowed": false,
@@ -43,7 +61,8 @@
     "crossLedgerReceiptReplayRejected": true
   },
   "power": {
-    "mode": "manual_or_battery_power_prompt",
+    "mode": "manual_only",
+    "batteryPromptEnum": "reserved_not_exposed",
     "observedPowerSources": ["battery", "ac", "unknown"],
     "batteryLevel": "not_measured",
     "automaticLowBatteryDetection": "not_performed",
@@ -56,47 +75,64 @@
     "healthRegistryLookup": "not_performed",
     "messageDelivery": "not_performed",
     "cloudUpload": "not_performed",
+    "externalDelivery": "not_performed",
+    "localExport": "user_authorized_only",
+    "portablePackEncryption": "application_specific_container",
+    "pdfEncryption": "not_claimed",
     "emergencyServiceContact": "not_performed",
     "networkEgressAdded": false
   },
   "persistence": {
     "migration": 88,
     "migrationName": "b5_family_emergency_card_portability_ledger",
-    "status": "PLANNED"
+    "checksum": "8785551a6ce0facd609e374e7ba65c70d35b552e6f63a7f0b3d790bfbffa2b04",
+    "status": "PASS"
   },
   "ratchets": {
-    "databaseMigration": { "from": 87, "to": 88 },
+    "databaseMigration": { "from": 87, "to": 88, "status": "PASS" },
     "ppk021": {
-      "currentExactAllowlistEntries": 545,
-      "currentUseCaseCompositionSurfaces": 277,
-      "status": "RECOUNT_REQUIRED_AFTER_IMPLEMENTATION"
+      "exactAllowlistEntries": 554,
+      "useCaseCompositionSurfaces": 281,
+      "status": "PASS"
     },
     "ppk022": {
-      "currentCapabilitySurfaces": 242,
-      "target": "PRESERVE_BY_REUSING_APPROVED_MAIN_PROCESS_FILE_IO_SURFACES",
-      "status": "RECOUNT_REQUIRED_AFTER_IMPLEMENTATION"
+      "capabilitySurfaces": 246,
+      "status": "PASS"
     },
     "signedApplicationCapability": {
       "capability": "file.share",
-      "status": "PLANNED_MANIFEST_AND_POLICY_PACKAGE_RATCHET_REQUIRED"
+      "status": "PASS"
     }
   },
   "validation": {
     "boundary": "artifacts/validation/33-J-family-emergency-card-portability-boundary.json",
     "contract": "artifacts/validation/33-J-family-emergency-card-portability-contract.json",
     "runtime": "artifacts/validation/33-J-family-emergency-card-portability-runtime.json",
-    "status": "PENDING"
+    "status": "PASS",
+    "finalEvidence": {
+      "boundaryChecksPassed": 62,
+      "contractChecksPassed": 16,
+      "runtimeChecksPassed": 12,
+      "targetedTestFilesPassed": 4,
+      "targetedTestsPassed": 24,
+      "fullVitestTestFilesPassed": 125,
+      "fullVitestTestsPassed": 1038,
+      "productionWorkspaceBuildsPassed": 18,
+      "ppk021ExactAllowlistEntries": 554,
+      "ppk021UseCaseCompositionSurfaces": 281,
+      "ppk022CapabilitySurfaces": 246,
+      "latestDatabaseMigration": 88,
+      "migration88Checksum": "8785551a6ce0facd609e374e7ba65c70d35b552e6f63a7f0b3d790bfbffa2b04",
+      "requirementChainsComplete": 2,
+      "finalClosureEvidence": true
+    }
   },
-  "implementationBlockers": [
-    "EXACT_LOCAL_FILE_SHARE_POLICY_PATH_REQUIRED_WITHOUT_WEAKENING_GENERAL_NO_EXPORT",
-    "OPERATION_BOUND_STRONG_AUTHENTICATION_AND_EXPLICIT_SELECTION_RECEIPT_REQUIRED",
-    "IN_MEMORY_ARCHIVE_DOCUMENT_AUTHORIZATION_AND_DECRYPTION_REQUIRED"
-  ],
+  "implementationBlockers": [],
   "excludedClaims": [
-    "Governance activation does not claim B5-03 or EXT-016 implementation or completion.",
-    "Battery percentage and automatic low-battery detection are not available and are not claimed.",
-    "A PDF produced by Electron is not claimed to be password-encrypted; encryption belongs to the separate portable pack.",
+    "Battery percentage and automatic low-battery detection are not performed or claimed.",
+    "Electron PDF output is not claimed to be password encrypted; encryption belongs to the separate portable container.",
     "No message, upload, cloud, emergency-service or other network delivery is performed.",
+    "A successful local implementation is not a persistent Library receipt or completion transition.",
     "Silver readiness, Bronze Final and a new Build number are not claimed."
   ]
 }

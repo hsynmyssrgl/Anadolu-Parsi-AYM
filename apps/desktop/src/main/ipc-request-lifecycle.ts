@@ -1,4 +1,5 @@
 import type { IpcMainInvokeEvent } from 'electron';
+import { ERROR_CODES } from '@ppt/core';
 import {
   IpcTransportProtocolError,
   assertIpcTransportRequestContext,
@@ -8,6 +9,15 @@ import {
 export const IPC_REQUEST_CANCEL_CHANNEL = 'transport:cancel' as const;
 export const IPC_REQUEST_CANCEL_ALL_CHANNEL = 'transport:cancelAll' as const;
 export const IPC_REQUEST_LIFECYCLE_SCHEMA_VERSION = 1 as const;
+
+export const countedStrongAuthenticationFailureCode = (
+  error:unknown
+):typeof ERROR_CODES.AUTH_INVALID_CREDENTIALS | typeof ERROR_CODES.AUTH_SECOND_FACTOR_INVALID | undefined => {
+  const message = error instanceof Error ? error.message : String(error);
+  if (message.startsWith(`[${ERROR_CODES.AUTH_INVALID_CREDENTIALS}]`)) return ERROR_CODES.AUTH_INVALID_CREDENTIALS;
+  if (message.startsWith(`[${ERROR_CODES.AUTH_SECOND_FACTOR_INVALID}]`)) return ERROR_CODES.AUTH_SECOND_FACTOR_INVALID;
+  return undefined;
+};
 
 export type IpcRequestCancellationReason =
   | 'superseded'
@@ -96,7 +106,8 @@ const interactiveAdmissionChannels = new Set<string>([
   'dashboard:getOverview',
   'catalog:listPeople',
   'catalog:listEvents',
-  'catalog:lookup'
+  'catalog:lookup',
+  'life:exportEmergencyCard'
 ]);
 
 const standardAdmissionChannels = new Set<string>([

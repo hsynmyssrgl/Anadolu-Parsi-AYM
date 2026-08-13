@@ -10099,6 +10099,707 @@ SET value='REVISION-33-I-FAMILY-EMERGENCY-ASSISTANCE-CARD',
 WHERE key='schema_generation';
 `;
 
+const familyEmergencyCardPortabilityLedgerSql = `CREATE TABLE family_emergency_card_portability_ledger(
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 160),
+  profile_id TEXT NOT NULL REFERENCES family_emergency_assistance_ledger(id) ON DELETE RESTRICT,
+  configuration_id TEXT REFERENCES family_emergency_card_portability_ledger(id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  item_type TEXT NOT NULL CHECK(item_type IN (
+    'card_configuration','selected_field','document_link','export_event','power_mode_event'
+  )),
+  configuration_label TEXT CHECK(
+    configuration_label IS NULL OR length(trim(configuration_label)) BETWEEN 2 AND 120
+  ),
+  locale TEXT CHECK(locale IS NULL OR locale='tr-TR'),
+  source_item_id TEXT REFERENCES family_emergency_assistance_ledger(id) ON DELETE RESTRICT,
+  source_item_type TEXT CHECK(source_item_type IS NULL OR source_item_type IN (
+    'emergency_profile','health_fact','emergency_contact','assistance_instruction'
+  )),
+  field_code TEXT CHECK(field_code IS NULL OR field_code IN (
+    'label','subject_display','fact_value','note','name','phone_e164','relationship',
+    'instruction_kind','instruction'
+  )),
+  archive_item_id TEXT REFERENCES archive_items(id) ON DELETE RESTRICT,
+  export_mode TEXT CHECK(export_mode IS NULL OR export_mode IN ('print','pdf','encrypted_pack')),
+  selected_field_count INTEGER CHECK(
+    selected_field_count IS NULL OR (selected_field_count BETWEEN 0 AND 64)
+  ),
+  document_count INTEGER CHECK(document_count IS NULL OR (document_count BETWEEN 0 AND 10)) ,
+  selection_sha256 TEXT CHECK(
+    selection_sha256 IS NULL OR (
+      length(selection_sha256)=64 AND selection_sha256 NOT GLOB '*[^0-9a-f]*'
+    )
+  ),
+  share_receipt_hash TEXT UNIQUE REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT CHECK(
+    share_receipt_hash IS NULL OR (
+      length(share_receipt_hash)=64 AND share_receipt_hash NOT GLOB '*[^0-9a-f]*'
+    )
+  ),
+  artifact_sha256 TEXT CHECK(
+    artifact_sha256 IS NULL OR (
+      length(artifact_sha256)=64 AND artifact_sha256 NOT GLOB '*[^0-9a-f]*'
+    )
+  ),
+  artifact_size_bytes INTEGER CHECK(
+    artifact_size_bytes IS NULL OR (artifact_size_bytes BETWEEN 1 AND 67108864)
+  ),
+  artifact_readback_status TEXT CHECK(
+    artifact_readback_status IS NULL
+    OR artifact_readback_status IN ('verified','not_applicable_print')
+  ),
+  printer_dispatch_status TEXT CHECK(
+    printer_dispatch_status IS NULL OR printer_dispatch_status='confirmed'
+  ),
+  power_mode TEXT CHECK(power_mode IS NULL OR power_mode IN ('enabled','disabled')),
+  activation_source TEXT CHECK(
+    activation_source IS NULL OR activation_source IN ('manual','battery_prompt')
+  ),
+  power_source TEXT CHECK(power_source IS NULL OR power_source IN ('battery','ac','unknown')),
+  battery_level TEXT CHECK(battery_level IS NULL OR battery_level='not_measured'),
+  automatic_low_battery_detection TEXT CHECK(
+    automatic_low_battery_detection IS NULL OR automatic_low_battery_detection='not_performed'
+  ),
+  low_battery_claimed INTEGER CHECK(low_battery_claimed IS NULL OR low_battery_claimed=0),
+  privacy TEXT NOT NULL CHECK(privacy='private'),
+  data_source TEXT NOT NULL CHECK(data_source='manual'),
+  created_at TEXT NOT NULL CHECK(
+    length(created_at)=24
+    AND created_at GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9].[0-9][0-9][0-9]Z'
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',created_at) IS NOT NULL
+    AND strftime('%Y-%m-%dT%H:%M:%fZ',created_at)=created_at
+  ),
+  policy_receipt_hash TEXT NOT NULL UNIQUE REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT CHECK(
+    length(policy_receipt_hash)=64 AND policy_receipt_hash NOT GLOB '*[^0-9a-f]*'
+  ),
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version=1),
+  policy_receipt_nonce TEXT NOT NULL,
+  policy_correlation_id TEXT NOT NULL,
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type='life_record'),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action='update'),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='family.write'),
+  CHECK(
+    (item_type='card_configuration'
+      AND configuration_id IS NULL
+      AND configuration_label IS NOT NULL AND locale='tr-TR'
+      AND source_item_id IS NULL AND source_item_type IS NULL AND field_code IS NULL
+      AND archive_item_id IS NULL AND export_mode IS NULL
+      AND selected_field_count IS NULL AND document_count IS NULL
+      AND selection_sha256 IS NULL
+      AND share_receipt_hash IS NULL
+      AND artifact_sha256 IS NULL AND artifact_size_bytes IS NULL
+      AND artifact_readback_status IS NULL AND printer_dispatch_status IS NULL
+      AND power_mode IS NULL AND activation_source IS NULL AND power_source IS NULL
+      AND battery_level IS NULL AND automatic_low_battery_detection IS NULL
+      AND low_battery_claimed IS NULL)
+    OR
+    (item_type='selected_field'
+      AND configuration_id IS NOT NULL
+      AND configuration_label IS NULL AND locale IS NULL
+      AND source_item_id IS NOT NULL AND source_item_type IS NOT NULL AND field_code IS NOT NULL
+      AND archive_item_id IS NULL AND export_mode IS NULL
+      AND selected_field_count IS NULL AND document_count IS NULL
+      AND selection_sha256 IS NULL
+      AND share_receipt_hash IS NULL
+      AND artifact_sha256 IS NULL AND artifact_size_bytes IS NULL
+      AND artifact_readback_status IS NULL AND printer_dispatch_status IS NULL
+      AND power_mode IS NULL AND activation_source IS NULL AND power_source IS NULL
+      AND battery_level IS NULL AND automatic_low_battery_detection IS NULL
+      AND low_battery_claimed IS NULL
+      AND (
+        (source_item_type='emergency_profile' AND field_code IN ('label','subject_display'))
+        OR (source_item_type='health_fact' AND field_code IN ('fact_value','note'))
+        OR (source_item_type='emergency_contact'
+          AND field_code IN ('name','phone_e164','relationship','note'))
+        OR (source_item_type='assistance_instruction'
+          AND field_code IN ('instruction_kind','instruction','note'))
+      ))
+    OR
+    (item_type='document_link'
+      AND configuration_id IS NOT NULL
+      AND configuration_label IS NULL AND locale IS NULL
+      AND source_item_id IS NULL AND source_item_type IS NULL AND field_code IS NULL
+      AND archive_item_id IS NOT NULL AND export_mode IS NULL
+      AND selected_field_count IS NULL AND document_count IS NULL
+      AND selection_sha256 IS NULL
+      AND share_receipt_hash IS NULL
+      AND artifact_sha256 IS NULL AND artifact_size_bytes IS NULL
+      AND artifact_readback_status IS NULL AND printer_dispatch_status IS NULL
+      AND power_mode IS NULL AND activation_source IS NULL AND power_source IS NULL
+      AND battery_level IS NULL AND automatic_low_battery_detection IS NULL
+      AND low_battery_claimed IS NULL)
+    OR
+    (item_type='export_event'
+      AND configuration_id IS NOT NULL
+      AND configuration_label IS NULL AND locale IS NULL
+      AND source_item_id IS NULL AND source_item_type IS NULL AND field_code IS NULL
+      AND archive_item_id IS NULL AND export_mode IS NOT NULL
+      AND selected_field_count IS NOT NULL AND document_count IS NOT NULL
+      AND selection_sha256 IS NOT NULL
+      AND share_receipt_hash IS NOT NULL
+      AND artifact_sha256 IS NOT NULL AND artifact_size_bytes IS NOT NULL
+      AND power_mode IS NULL AND activation_source IS NULL AND power_source IS NOT NULL
+      AND battery_level='not_measured' AND automatic_low_battery_detection='not_performed'
+      AND low_battery_claimed=0
+      AND selected_field_count+document_count>=1
+      AND (export_mode='encrypted_pack' OR document_count=0)
+      AND (
+        (export_mode='print' AND artifact_readback_status='not_applicable_print'
+          AND printer_dispatch_status='confirmed')
+        OR (export_mode IN ('pdf','encrypted_pack') AND artifact_readback_status='verified'
+          AND printer_dispatch_status IS NULL)
+      ))
+    OR
+    (item_type='power_mode_event'
+      AND configuration_id IS NOT NULL
+      AND configuration_label IS NULL AND locale IS NULL
+      AND source_item_id IS NULL AND source_item_type IS NULL AND field_code IS NULL
+      AND archive_item_id IS NULL AND export_mode IS NULL
+      AND selected_field_count IS NULL AND document_count IS NULL
+      AND selection_sha256 IS NULL
+      AND share_receipt_hash IS NULL
+      AND artifact_sha256 IS NULL AND artifact_size_bytes IS NULL
+      AND artifact_readback_status IS NULL AND printer_dispatch_status IS NULL
+      AND power_mode IS NOT NULL AND activation_source IS NOT NULL AND power_source IS NOT NULL
+      AND battery_level='not_measured' AND automatic_low_battery_detection='not_performed'
+      AND low_battery_claimed=0)
+  ),
+  UNIQUE(configuration_id,source_item_id,field_code),
+  UNIQUE(configuration_id,archive_item_id)
+) STRICT;
+
+CREATE INDEX idx_family_emergency_card_portability_profile_created
+ON family_emergency_card_portability_ledger(profile_id,created_at DESC,id);
+CREATE INDEX idx_family_emergency_card_portability_configuration_created
+ON family_emergency_card_portability_ledger(configuration_id,created_at DESC,id)
+WHERE configuration_id IS NOT NULL;
+CREATE INDEX idx_family_emergency_card_portability_archive
+ON family_emergency_card_portability_ledger(archive_item_id)
+WHERE archive_item_id IS NOT NULL;
+CREATE TRIGGER trg_b5_emergency_card_portability_profile_scope
+BEFORE INSERT ON family_emergency_card_portability_ledger
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM family_emergency_assistance_ledger profile
+  JOIN family_emergency_ledger plan
+    ON plan.id=profile.plan_id AND plan.item_type='emergency_plan'
+  JOIN people owner
+    ON owner.id=profile.owner_person_id AND owner.family_id=profile.family_id AND owner.status='active'
+  WHERE profile.id=NEW.profile_id
+    AND profile.item_type='emergency_profile'
+    AND profile.family_id=NEW.family_id
+    AND profile.owner_person_id=NEW.owner_person_id
+    AND profile.privacy=NEW.privacy AND profile.privacy='private'
+    AND plan.family_id=NEW.family_id
+    AND NEW.created_at>=profile.created_at
+    AND NOT EXISTS(
+      SELECT 1 FROM data_lifecycle lifecycle
+      WHERE lifecycle.resource_type='life_record'
+        AND lifecycle.resource_id=profile.id AND lifecycle.state<>'active'
+    )
+    AND NOT EXISTS(
+      SELECT 1 FROM data_lifecycle lifecycle
+      WHERE lifecycle.resource_type='life_record'
+        AND lifecycle.resource_id=plan.id AND lifecycle.state<>'active'
+    )
+)
+BEGIN
+  SELECT RAISE(ABORT,'emergency card portability requires an active exact private assistance profile root');
+END;
+
+CREATE TRIGGER trg_b5_emergency_card_portability_configuration_scope
+BEFORE INSERT ON family_emergency_card_portability_ledger
+WHEN NEW.item_type<>'card_configuration' AND NOT EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger configuration
+  WHERE configuration.id=NEW.configuration_id
+    AND configuration.item_type='card_configuration'
+    AND configuration.profile_id=NEW.profile_id
+    AND configuration.family_id=NEW.family_id
+    AND configuration.owner_person_id=NEW.owner_person_id
+    AND configuration.privacy=NEW.privacy
+    AND NEW.created_at>=configuration.created_at
+)
+BEGIN
+  SELECT RAISE(ABORT,'emergency card portability child requires an exact immutable configuration root');
+END;
+
+CREATE TRIGGER trg_b5_emergency_card_portability_selected_field_scope
+BEFORE INSERT ON family_emergency_card_portability_ledger
+WHEN NEW.item_type='selected_field' AND NOT EXISTS(
+  SELECT 1 FROM family_emergency_assistance_ledger source
+  WHERE source.id=NEW.source_item_id
+    AND source.item_type=NEW.source_item_type
+    AND source.family_id=NEW.family_id
+    AND source.owner_person_id=NEW.owner_person_id
+    AND source.privacy=NEW.privacy AND source.privacy='private'
+    AND NEW.created_at>=source.created_at
+    AND (
+      (source.item_type='emergency_profile' AND source.id=NEW.profile_id)
+      OR (source.item_type<>'emergency_profile' AND source.profile_id=NEW.profile_id)
+    )
+    AND (NEW.field_code<>'fact_value' OR (
+      source.item_type='health_fact' AND (source.blood_type IS NOT NULL OR source.fact_value IS NOT NULL)
+    ))
+    AND (NEW.field_code<>'note' OR source.note IS NOT NULL)
+    AND (NEW.field_code<>'relationship' OR source.relationship IS NOT NULL)
+    AND NOT EXISTS(
+      SELECT 1 FROM family_emergency_assistance_ledger correction
+      WHERE correction.supersedes_item_id=source.id
+    )
+)
+BEGIN
+  SELECT RAISE(ABORT,'selected emergency card field requires a current exact same-profile source item');
+END;
+
+CREATE TRIGGER trg_b5_emergency_card_portability_selected_field_limit
+BEFORE INSERT ON family_emergency_card_portability_ledger
+WHEN NEW.item_type='selected_field' AND (
+  SELECT count(*) FROM family_emergency_card_portability_ledger selected
+  WHERE selected.configuration_id=NEW.configuration_id AND selected.item_type='selected_field'
+)>=64
+BEGIN
+  SELECT RAISE(ABORT,'emergency card configuration is limited to 64 selected fields');
+END;
+
+CREATE TRIGGER trg_b5_emergency_card_portability_document_scope
+BEFORE INSERT ON family_emergency_card_portability_ledger
+WHEN NEW.item_type='document_link' AND NOT EXISTS(
+  SELECT 1 FROM archive_items archive
+  WHERE archive.id=NEW.archive_item_id
+    AND archive.family_id=NEW.family_id
+    AND archive.destroyed_at IS NULL
+    AND archive.sensitivity='high'
+    AND archive.created_at<=NEW.created_at
+)
+BEGIN
+  SELECT RAISE(ABORT,'emergency document link requires an existing same-family active high-sensitivity archive item');
+END;
+
+CREATE TRIGGER trg_b5_emergency_card_portability_document_limit
+BEFORE INSERT ON family_emergency_card_portability_ledger
+WHEN NEW.item_type='document_link' AND (
+  SELECT count(*) FROM family_emergency_card_portability_ledger document
+  WHERE document.configuration_id=NEW.configuration_id AND document.item_type='document_link'
+)>=10
+BEGIN
+  SELECT RAISE(ABORT,'emergency card configuration is limited to 10 document links');
+END;
+
+CREATE TRIGGER trg_b5_emergency_card_portability_export_counts
+BEFORE INSERT ON family_emergency_card_portability_ledger
+WHEN NEW.item_type='export_event' AND (
+  NEW.selected_field_count>(
+    SELECT count(*) FROM family_emergency_card_portability_ledger selected
+    WHERE selected.configuration_id=NEW.configuration_id AND selected.item_type='selected_field'
+  )
+  OR NEW.document_count>(
+    SELECT count(*) FROM family_emergency_card_portability_ledger document
+    WHERE document.configuration_id=NEW.configuration_id AND document.item_type='document_link'
+  )
+)
+BEGIN
+  SELECT RAISE(ABORT,'emergency export metadata counts must be bounded by the exact immutable configuration');
+END;
+
+CREATE TRIGGER trg_b5_emergency_card_portability_id_collision
+BEFORE INSERT ON family_emergency_card_portability_ledger
+WHEN EXISTS(SELECT 1 FROM life_records WHERE id=NEW.id)
+  OR EXISTS(SELECT 1 FROM life_managed_ledger WHERE id=NEW.id)
+  OR EXISTS(SELECT 1 FROM life_home_inventory_ledger WHERE id=NEW.id)
+  OR EXISTS(SELECT 1 FROM family_emergency_ledger WHERE id=NEW.id)
+  OR EXISTS(SELECT 1 FROM family_emergency_preparedness_ledger WHERE id=NEW.id)
+  OR EXISTS(SELECT 1 FROM family_emergency_assistance_ledger WHERE id=NEW.id)
+BEGIN SELECT RAISE(ABORT,'emergency card portability id collides with another life ledger'); END;
+CREATE TRIGGER trg_b5_life_record_portability_id_collision
+BEFORE INSERT ON life_records
+WHEN EXISTS(SELECT 1 FROM family_emergency_card_portability_ledger WHERE id=NEW.id)
+BEGIN SELECT RAISE(ABORT,'life record id collides with an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_life_managed_portability_id_collision
+BEFORE INSERT ON life_managed_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_card_portability_ledger WHERE id=NEW.id)
+BEGIN SELECT RAISE(ABORT,'managed life id collides with an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_home_inventory_portability_id_collision
+BEFORE INSERT ON life_home_inventory_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_card_portability_ledger WHERE id=NEW.id)
+BEGIN SELECT RAISE(ABORT,'home inventory id collides with an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_family_emergency_portability_id_collision
+BEFORE INSERT ON family_emergency_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_card_portability_ledger WHERE id=NEW.id)
+BEGIN SELECT RAISE(ABORT,'family emergency id collides with an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_preparedness_portability_id_collision
+BEFORE INSERT ON family_emergency_preparedness_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_card_portability_ledger WHERE id=NEW.id)
+BEGIN SELECT RAISE(ABORT,'emergency preparedness id collides with an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_assistance_portability_id_collision
+BEFORE INSERT ON family_emergency_assistance_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_card_portability_ledger WHERE id=NEW.id)
+BEGIN SELECT RAISE(ABORT,'emergency assistance id collides with an emergency card portability item'); END;
+
+CREATE TRIGGER trg_b5_emergency_card_portability_policy_receipt
+BEFORE INSERT ON family_emergency_card_portability_ledger
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM platform_policy_transaction_receipts receipt
+  JOIN platform_policy_database_fences fence
+    ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection
+    ON projection.receipt_hash=receipt.receipt_hash AND projection.record_json=receipt.record_json
+  JOIN accounts actor_account
+    ON actor_account.id=json_extract(receipt.record_json,'$.request.subject.accountId')
+      AND actor_account.status='active'
+  JOIN people actor_person
+    ON actor_person.id=json_extract(receipt.record_json,'$.request.subject.personId')
+      AND actor_person.id=actor_account.person_id
+      AND actor_person.family_id=NEW.family_id
+      AND actor_person.status='active'
+  WHERE receipt.receipt_hash=NEW.policy_receipt_hash
+    AND receipt.receipt_version=NEW.policy_receipt_version
+    AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id
+    AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id
+    AND receipt.action=NEW.policy_action
+    AND receipt.capability=NEW.policy_capability
+    AND receipt.resource_type='life_record'
+    AND receipt.resource_id=NEW.profile_id
+    AND receipt.action='update'
+    AND receipt.capability='family.write'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.resource.sensitivity')='highly_sensitive'
+    AND json_extract(receipt.record_json,'$.request.purpose')='general'
+    AND json_extract(receipt.record_json,'$.request.occurredAt')=NEW.created_at
+)
+OR EXISTS(SELECT 1 FROM archive_items WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_versions WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_retention_policies WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_categories WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_tags WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM archive_item_tags WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM events WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM events WHERE timeline_policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_records WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_valuations WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM health_records WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM medication_plans WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM family_health_history WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM life_records WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM locations WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM bank_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM payment_cards WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM loan_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM loan_payment_history WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_planning_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_import_batches WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM life_managed_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM life_home_inventory_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM family_emergency_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM family_emergency_preparedness_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM family_emergency_assistance_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'emergency card portability write requires an unused exact durable private life update receipt'); END;
+
+CREATE TRIGGER trg_b5_emergency_card_portability_export_share_receipt
+BEFORE INSERT ON family_emergency_card_portability_ledger
+WHEN NEW.item_type='export_event' AND NOT EXISTS(
+  SELECT 1
+  FROM platform_policy_transaction_receipts share_receipt
+  JOIN platform_policy_database_fences share_fence
+    ON share_fence.fence_name=share_receipt.fence_name
+      AND share_fence.epoch=share_receipt.fence_epoch
+      AND share_fence.writable=1
+  JOIN platform_policy_journal_projection_outbox share_projection
+    ON share_projection.receipt_hash=share_receipt.receipt_hash
+      AND share_projection.record_json=share_receipt.record_json
+  JOIN accounts share_account
+    ON share_account.id=json_extract(share_receipt.record_json,'$.request.subject.accountId')
+      AND share_account.status='active'
+  JOIN people share_person
+    ON share_person.id=json_extract(share_receipt.record_json,'$.request.subject.personId')
+      AND share_person.id=share_account.person_id
+      AND share_person.id=NEW.owner_person_id
+      AND share_person.family_id=NEW.family_id
+      AND share_person.status='active'
+  WHERE share_receipt.receipt_hash=NEW.share_receipt_hash
+    AND share_receipt.resource_type='life_record'
+    AND share_receipt.resource_id=NEW.profile_id
+    AND share_receipt.action='share'
+    AND share_receipt.capability='file.share'
+    AND json_extract(share_receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(share_receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(share_receipt.record_json,'$.request.resource.sensitivity')='highly_sensitive'
+    AND json_extract(share_receipt.record_json,'$.request.purpose')='emergency-offline-portability'
+    AND json_type(share_receipt.record_json,'$.request.requestedFields')='array'
+    AND json_array_length(share_receipt.record_json,'$.request.requestedFields') BETWEEN 1 AND 10
+    AND NOT EXISTS(
+      SELECT 1 FROM json_each(share_receipt.record_json,'$.request.requestedFields') field
+      WHERE field.type<>'text' OR (
+        field.value NOT IN (
+          'fact_value','instruction','instruction_kind','label','name','note',
+          'phone_e164','relationship','subject_display'
+        )
+        AND field.value<>'selection_sha256:'||NEW.selection_sha256
+      )
+    )
+    AND NOT EXISTS(
+      SELECT 1
+      FROM json_each(share_receipt.record_json,'$.request.requestedFields') current_field
+      JOIN json_each(share_receipt.record_json,'$.request.requestedFields') next_field
+        ON CAST(next_field.key AS INTEGER)=CAST(current_field.key AS INTEGER)+1
+      WHERE current_field.value>=next_field.value
+    )
+    AND EXISTS(
+      SELECT 1 FROM json_each(share_receipt.record_json,'$.request.requestedFields') field
+      WHERE field.type='text' AND field.value='selection_sha256:'||NEW.selection_sha256
+    )
+    AND 1=(
+      SELECT count(*) FROM json_each(share_receipt.record_json,'$.request.requestedFields') field
+      WHERE field.type='text' AND substr(field.value,1,17)='selection_sha256:'
+    )
+    AND julianday(json_extract(share_receipt.record_json,'$.request.occurredAt'))
+      <=julianday(NEW.created_at)
+    AND julianday(NEW.created_at)
+      <=julianday(json_extract(share_receipt.record_json,'$.request.occurredAt'))+(300.0/86400.0)
+)
+BEGIN
+  SELECT RAISE(ABORT,'emergency export event requires the exact prior local share receipt and selection digest');
+END;
+
+CREATE TRIGGER trg_b5_life_record_portability_receipt_reuse_insert
+BEFORE INSERT ON life_records
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'life policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_life_record_portability_receipt_reuse_update
+BEFORE UPDATE ON life_records
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'life policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_life_managed_portability_receipt_reuse
+BEFORE INSERT ON life_managed_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'managed life receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_home_inventory_portability_receipt_reuse
+BEFORE INSERT ON life_home_inventory_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'home inventory receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_family_emergency_portability_receipt_reuse
+BEFORE INSERT ON family_emergency_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'family emergency receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_preparedness_portability_receipt_reuse
+BEFORE INSERT ON family_emergency_preparedness_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'preparedness receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_assistance_portability_receipt_reuse
+BEFORE INSERT ON family_emergency_assistance_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'assistance receipt is already bound to an emergency card portability item'); END;
+
+CREATE TRIGGER trg_b5_archive_item_portability_receipt_reuse
+BEFORE INSERT ON archive_items
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_archive_item_portability_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON archive_items
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_archive_version_portability_receipt_reuse
+BEFORE INSERT ON archive_versions
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_archive_version_portability_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON archive_versions
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_archive_retention_portability_receipt_reuse
+BEFORE INSERT ON archive_retention_policies
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_archive_retention_portability_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON archive_retention_policies
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_archive_category_portability_receipt_reuse
+BEFORE INSERT ON archive_categories
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_archive_category_portability_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON archive_categories
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_archive_tag_portability_receipt_reuse
+BEFORE INSERT ON archive_tags
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_archive_tag_portability_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON archive_tags
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_archive_item_tag_portability_receipt_reuse
+BEFORE INSERT ON archive_item_tags
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_archive_item_tag_portability_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON archive_item_tags
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+
+CREATE TRIGGER trg_b5_event_portability_receipt_reuse
+BEFORE INSERT ON events
+WHEN (NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)) OR (NEW.timeline_policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.timeline_policy_receipt_hash
+))
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_event_portability_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash,timeline_policy_receipt_hash ON events
+WHEN (NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)) OR (NEW.timeline_policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.timeline_policy_receipt_hash
+))
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+
+CREATE TRIGGER trg_b5_finance_record_portability_receipt_reuse
+BEFORE INSERT ON finance_records
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_finance_record_portability_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON finance_records
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_finance_valuation_portability_receipt_reuse
+BEFORE INSERT ON finance_valuations
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_finance_valuation_portability_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON finance_valuations
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_health_record_portability_receipt_reuse
+BEFORE INSERT ON health_records
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_health_record_portability_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON health_records
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_medication_plan_portability_receipt_reuse
+BEFORE INSERT ON medication_plans
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_medication_plan_portability_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON medication_plans
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_family_health_history_portability_receipt_reuse
+BEFORE INSERT ON family_health_history
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_family_health_history_portability_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON family_health_history
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_location_portability_receipt_reuse
+BEFORE INSERT ON locations
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_location_portability_receipt_reuse_update
+BEFORE UPDATE OF policy_receipt_hash ON locations
+WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(
+  SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+
+CREATE TRIGGER trg_b5_bank_account_portability_receipt_reuse
+BEFORE INSERT ON bank_accounts
+WHEN EXISTS(SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_payment_card_portability_receipt_reuse
+BEFORE INSERT ON payment_cards
+WHEN EXISTS(SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_loan_account_portability_receipt_reuse
+BEFORE INSERT ON loan_accounts
+WHEN EXISTS(SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_loan_payment_portability_receipt_reuse
+BEFORE INSERT ON loan_payment_history
+WHEN EXISTS(SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_finance_planning_portability_receipt_reuse
+BEFORE INSERT ON finance_planning_ledger
+WHEN EXISTS(SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+CREATE TRIGGER trg_b5_finance_import_portability_receipt_reuse
+BEFORE INSERT ON finance_import_batches
+WHEN EXISTS(SELECT 1 FROM family_emergency_card_portability_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'policy receipt is already bound to an emergency card portability item'); END;
+
+CREATE TRIGGER trg_b5_emergency_card_portability_immutable
+BEFORE UPDATE ON family_emergency_card_portability_ledger
+BEGIN SELECT RAISE(ABORT,'emergency card portability ledger is append-only'); END;
+CREATE TRIGGER trg_b5_emergency_card_portability_delete_guard
+BEFORE DELETE ON family_emergency_card_portability_ledger
+BEGIN SELECT RAISE(ABORT,'emergency card portability deletion requires a governed deletion workflow'); END;
+
+UPDATE database_metadata
+SET value='REVISION-33-J-FAMILY-EMERGENCY-CARD-PORTABILITY',
+    updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
+WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -10186,7 +10887,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(84, 'b5_life_home_inventory_ledger', lifeHomeInventoryLedgerSql),
   createMigrationDefinition(85, 'b5_family_emergency_planning_ledger', familyEmergencyPlanningLedgerSql),
   createMigrationDefinition(86, 'b5_family_emergency_preparedness_ledger', familyEmergencyPreparednessLedgerSql),
-  createMigrationDefinition(87, 'b5_family_emergency_assistance_card_ledger', familyEmergencyAssistanceCardLedgerSql)
+  createMigrationDefinition(87, 'b5_family_emergency_assistance_card_ledger', familyEmergencyAssistanceCardLedgerSql),
+  createMigrationDefinition(88, 'b5_family_emergency_card_portability_ledger', familyEmergencyCardPortabilityLedgerSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

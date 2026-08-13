@@ -1,10 +1,11 @@
-import { app, BrowserWindow, dialog, ipcMain, net, protocol, safeStorage, shell, type IpcMainInvokeEvent } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, net, powerMonitor, protocol, safeStorage, shell, type IpcMainInvokeEvent } from 'electron';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { basename, dirname, extname, isAbsolute, join, resolve } from 'node:path';
-import { closeSync, existsSync, fstatSync, mkdirSync, openSync, readFileSync, readSync, rmSync, writeFileSync } from 'node:fs';
-import { createHash } from 'node:crypto';
+import { closeSync, existsSync, fstatSync, fsyncSync, linkSync, lstatSync, mkdirSync, openSync, readFileSync, readSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { createHash, randomUUID } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 import { asCorrelationId, asIsoDateTime } from '@ppt/core';
+import { encryptPortableEmergencyPack, sha256Hex, verifyPortableEmergencyPackReadback } from '@ppt/security';
 import { writeContentFreeConsoleEvent } from '@ppt/logging';
 import { APP_META, USER_VISIBLE_APP_INFO, type CreateArchiveItemInput, CreateFamilyEventInput, UpdateFamilyEventInput, SetFamilyEventArchivedInput, UpdateEventParticipantsInput, UpdateEventInvitationInput, UpdateEventNotesInput, AcknowledgeFamilyNotificationInput, CreateFamilyLocationInput, CreateFamilyMemberInput, CreateFamilyRelationInput, LoginInput, SetupAdminInput, ChangePasswordInput, EnableTwoFactorInput, DisableTwoFactorInput, TrustCurrentDeviceInput, ReauthorizeCurrentDeviceInput, CreateFamilyInvitationInput, InspectFamilyInvitationInput, ResendFamilyInvitationInput, AcceptFamilyInvitationInput, UpsertObjectPermissionInput, UpdateFamilyAccountInput, CreateFinanceRecordInput, CreateBankAccountInput, ValidateIbanInput, CreatePaymentCardInput, CreateHealthRecordInput, CreateMedicationPlanInput, CreateFamilyHealthHistoryInput, CreateFinanceValuationInput, CreateLifeRecordInput, CreateAutomationRuleInput, CreateArchiveCategoryInput, UpdateArchiveClassificationInput, UpsertAiConsentInput, AiConsentPurpose, UpsertSensitiveDataConsentInput, SensitiveExportPreviewInput, RunAutomationInput, UpsertDigitalLegacyPlanInput, UpsertLegacyGrantInput, ExecuteLegacyPlanInput, ApproveLegacyExecutionInput, CancelLegacyExecutionInput, ArchiveSearchInput, CreateArchiveRetentionPolicyInput, AssignArchiveRetentionPolicyInput, UpsertBackupTargetInput, MaintenanceResultView, BackupSchedulerResultView, AdaptiveResourceStateView, EnqueueTaskInput, UpsertMaintenancePolicyInput, DiagnosticFilterInput, DiagnosticArchiveSearchInput, MaintenanceHistoryFilterInput, CreateDataRetentionPolicyInput, ArchiveDataResourceInput, RestoreDataResourceInput, RequestDataPurgeInput, CancelDataPurgeInput, ExecuteDataPurgeInput, SetDataLegalHoldInput, UpdateBackupQuarantinePolicyInput, SetBackupQuarantineLegalHoldInput, DestroyBackupQuarantineBatchInput, RegisterExternalBackupCopyInput, ReviewExternalBackupCopyInput, SetExternalBackupCopyLegalHoldInput, AttestExternalBackupCopyDestroyedInput, RegisterExternalBackupEvidenceIssuerInput, RotateExternalBackupEvidenceIssuerInput, RevokeExternalBackupEvidenceIssuerInput, ApplyExternalBackupEvidenceRevocationListInput, UpsertExternalBackupRevocationEndpointInput, PendingRevocationSyncListView, ApplyPendingRevocationSyncInput, RevocationSyncEndpointStateView, RevocationSyncRunResultView, VerifyExternalBackupDestructionEvidenceInput, ApplyFamilyDataImportInput, RollbackFamilyDataImportInput, GenealogyTreePageInput, TimelinePageInput, ArchivePageInput, PersonCatalogPageInput, EventCatalogPageInput, EntityCatalogLookupInput, FamilySnapshotSectionsInput, IpcAdaptiveBudgetMaintenanceOperation, IpcAdaptiveBudgetMaintenanceAuthorizationInput, IpcAdaptiveBudgetMaintenanceReauthenticationInput, IpcAdaptiveBudgetMaintenanceRecoveryInput, UpdateBackupCleanRewritePolicyInput } from '@ppt/domain';
 import type { RecordManagedLifeItemInput } from '@ppt/domain';
@@ -32,7 +33,7 @@ import {
 import { bootstrapDesktopRuntime, type DesktopRuntime } from './runtime-bootstrap.js';
 import { registerCorrelatedIpcHandler, registerIpcCancellationHandlers, createRuntimeCorrelationId, type IpcHandler } from './ipc-runtime.js';
 import { IpcTransportSessionRegistry } from './ipc-transport-context.js';
-import { getIpcRequestAbortSignal, getIpcRequestContext, IpcRequestLifecycleRegistry } from './ipc-request-lifecycle.js';
+import { countedStrongAuthenticationFailureCode, getIpcRequestAbortSignal, getIpcRequestContext, IpcRequestLifecycleRegistry } from './ipc-request-lifecycle.js';
 import { IpcReadResultCacheRegistry, OfflineSensitiveCacheRegistry } from './ipc-read-sharing.js';
 import { IpcPerformanceTelemetryRegistry } from './ipc-performance-telemetry.js';
 import { IPC_ADAPTIVE_RESOURCE_BUDGET_POLICY_FINGERPRINT, IpcAdaptiveResourceBudgetController } from './ipc-adaptive-resource-budget.js';
@@ -156,6 +157,153 @@ let primaryWindow: BrowserWindow | undefined;
 let trustedRenderer: TrustedRendererDescriptor | undefined;
 let coordinatedWindowsHelloPlatform: WindowsHelloPlatformCoordinator | undefined;
 let windowsHelloOperationInProgress = false;
+
+const observeEmergencyCardPowerSource = (): 'battery'|'ac'|'unknown' => {
+  try {
+    return powerMonitor.isOnBatteryPower() ? 'battery' : 'ac';
+  } catch {
+    return 'unknown';
+  }
+};
+
+interface EmergencyCardExportMainInput {
+  readonly profileId:string;
+  readonly configurationId:string;
+  readonly mode:'print'|'pdf'|'encrypted_pack';
+  readonly selectedFieldIds:readonly string[];
+  readonly documentLinkIds:readonly string[];
+  readonly password:string;
+  readonly code?:string;
+  readonly packagePassphrase?:string;
+  readonly plaintextWarningConfirmed:boolean;
+}
+
+const emergencyCardHtmlEscape = (value:unknown):string => String(value).replace(
+  /[&<>"']/gu,
+  (character) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[character] ?? character
+);
+
+const emergencyCardHtml = (prepared:{
+  readonly configurationLabel:string;
+  readonly selectedFields:readonly { readonly fieldCode:string; readonly value:string }[];
+}):string => `<!doctype html><html lang="tr"><head><meta charset="utf-8"><style>
+@page{size:A4;margin:16mm}body{font-family:Arial,sans-serif;color:#101828;font-size:12pt}h1{font-size:20pt;margin:0 0 5mm}p{margin:0 0 6mm;color:#475467}.field{break-inside:avoid;border:1px solid #d0d5dd;border-radius:8px;padding:4mm;margin:0 0 3mm}.label{font-size:9pt;color:#667085;text-transform:uppercase;letter-spacing:.04em}.value{font-size:13pt;font-weight:600;white-space:pre-wrap;overflow-wrap:anywhere}.warning{margin-top:8mm;border-top:2px solid #b42318;padding-top:4mm;color:#b42318;font-weight:700}
+</style></head><body><h1>${emergencyCardHtmlEscape(prepared.configurationLabel)}</h1><p>Çevrimdışı acil sağlık ve iletişim kartı · yerel, manuel ve kullanıcı seçimiyle oluşturuldu.</p>${prepared.selectedFields.map((field) => `<section class="field"><div class="label">${emergencyCardHtmlEscape(field.fieldCode)}</div><div class="value">${emergencyCardHtmlEscape(field.value)}</div></section>`).join('')}<div class="warning">Harita, canlı konum, mesaj teslimi, sağlık doğrulaması veya acil servis teması yapılmadı; hizmet garantisi değildir.</div></body></html>`;
+
+const emergencyCardCanonicalPayload = (input:{
+  readonly prepared:{
+    readonly profileId:string;
+    readonly configurationId:string;
+    readonly configurationLabel:string;
+    readonly locale:'tr-TR';
+    readonly selectionSha256:string;
+    readonly selectedFields:readonly { readonly selectedFieldId:string; readonly sourceItemId:string; readonly sourceItemType:string; readonly fieldCode:string; readonly value:string }[];
+  };
+  readonly documents:readonly { readonly documentLinkId:string; readonly archiveItemId:string; readonly originalName:string; readonly mimeType:string; readonly sizeBytes:number; readonly sha256:string; readonly content:Buffer }[];
+}):Buffer => {
+  const documents = [...input.documents].sort((left,right) => left.documentLinkId.localeCompare(right.documentLinkId));
+  let contentOffsetBytes = 0;
+  const metadata = Buffer.from(JSON.stringify({
+    format:'ppt-family-emergency-card',version:1,contentEncoding:'length-prefixed-raw',
+    profileId:input.prepared.profileId,
+    configurationId:input.prepared.configurationId,
+    configurationLabel:input.prepared.configurationLabel,
+    locale:input.prepared.locale,
+    selectionSha256:input.prepared.selectionSha256,
+    selectedFields:[...input.prepared.selectedFields].map((field) => ({
+      selectedFieldId:field.selectedFieldId,
+      sourceItemId:field.sourceItemId,
+      sourceItemType:field.sourceItemType,
+      fieldCode:field.fieldCode,
+      value:field.value
+    })).sort((left,right) => left.selectedFieldId.localeCompare(right.selectedFieldId)),
+    documents:documents.map((document) => {
+      const result = {
+        documentLinkId:document.documentLinkId,
+        archiveItemId:document.archiveItemId,
+        originalName:document.originalName,
+        mimeType:document.mimeType,
+        sizeBytes:document.sizeBytes,
+        sha256:document.sha256,
+        contentOffsetBytes,
+        contentSizeBytes:document.content.length
+      };
+      contentOffsetBytes += document.content.length;
+      return result;
+    })
+  }), 'utf8');
+  const prefix = Buffer.alloc(12);
+  prefix.write('PPTEMR01', 0, 'ascii');
+  prefix.writeUInt32BE(metadata.length, 8);
+  const payload = Buffer.alloc(prefix.length + metadata.length + contentOffsetBytes);
+  try {
+    prefix.copy(payload, 0);
+    metadata.copy(payload, prefix.length);
+    let offset = prefix.length + metadata.length;
+    for (const document of documents) {
+      document.content.copy(payload, offset);
+      offset += document.content.length;
+    }
+    return payload;
+  } finally {
+    prefix.fill(0);
+    metadata.fill(0);
+  }
+};
+
+const writeEmergencyCardArtifactAtomically = (destinationPath:string, bytes:Buffer):{
+  readonly artifactSha256:string;
+  readonly artifactSizeBytes:number;
+} => {
+  if (!isAbsolute(destinationPath)) throw new Error('Acil kart çıktı yolu mutlak olmalıdır.');
+  const directory = dirname(destinationPath);
+  const directoryMetadata = lstatSync(directory);
+  if (!directoryMetadata.isDirectory() || directoryMetadata.isSymbolicLink()) {
+    throw new Error('Acil kart çıktı üst dizini normal bir yerel dizin olmalıdır.');
+  }
+  if (existsSync(destinationPath)) {
+    const existing = lstatSync(destinationPath);
+    if (!existing.isFile() || existing.isSymbolicLink()) {
+      throw new Error('Acil kart çıktı hedefi normal bir dosya olmalıdır.');
+    }
+    throw new Error('Acil kart çıktısı mevcut dosyanın üzerine yazılmaz; yeni bir dosya adı seçin.');
+  }
+  const temporaryPath = join(directory, `.${basename(destinationPath)}.${process.pid}.${randomUUID()}.tmp`);
+  let published = false;
+  try {
+    const descriptor = openSync(temporaryPath, 'wx', 0o600);
+    try {
+      writeFileSync(descriptor, bytes);
+      fsyncSync(descriptor);
+    } finally {
+      closeSync(descriptor);
+    }
+    const temporaryReadback = readFileSync(temporaryPath);
+    try {
+      if (temporaryReadback.length !== bytes.length
+        || sha256Hex(temporaryReadback) !== sha256Hex(bytes)) throw new Error('Acil kart geçici çıktı okuma doğrulaması başarısız.');
+    } finally {
+      temporaryReadback.fill(0);
+    }
+    linkSync(temporaryPath, destinationPath);
+    published = true;
+    const metadata = statSync(destinationPath);
+    const finalReadback = readFileSync(destinationPath);
+    try {
+      const artifactSha256 = sha256Hex(bytes);
+      if (!metadata.isFile() || metadata.size !== bytes.length || finalReadback.length !== bytes.length
+        || sha256Hex(finalReadback) !== artifactSha256) throw new Error('Acil kart kalıcı çıktı okuma doğrulaması başarısız.');
+      return Object.freeze({ artifactSha256, artifactSizeBytes:bytes.length });
+    } finally {
+      finalReadback.fill(0);
+    }
+  } catch (error) {
+    if (published) rmSync(destinationPath, { force:true });
+    throw error;
+  } finally {
+    rmSync(temporaryPath, { force:true });
+  }
+};
 
 function currentPrimaryWindowHandle(): string | null {
   if (process.platform !== 'win32' || !primaryWindow || primaryWindow.isDestroyed()) return null;
@@ -313,6 +461,12 @@ const ipcAdaptiveBudgetMaintenanceReauthenticationGuard = new IpcAdaptiveBudgetM
   failureWindowMs: 10 * 60_000,
   maximumTrackedContexts: 256,
   persistence: ipcAdaptiveBudgetMaintenanceReauthenticationStateStore
+});
+const emergencyCardExportReauthenticationGuard = new IpcAdaptiveBudgetMaintenanceReauthenticationGuard({
+  maximumFailedAttempts: 5,
+  lockDurationMs: 5 * 60_000,
+  failureWindowMs: 10 * 60_000,
+  maximumTrackedContexts: 256
 });
 
 function runtime(): DesktopRuntime {
@@ -800,11 +954,7 @@ function adaptiveMaintenanceAuthContext(): { readonly fingerprint: string; reado
   return Object.freeze({ fingerprint: snapshot.fingerprint, authority: snapshot.authority });
 }
 
-const countedMaintenanceReauthenticationFailureCode = (error: unknown): 'AUTH_INVALID_CREDENTIALS' | 'AUTH_SECOND_FACTOR_INVALID' | undefined => {
-  const message = error instanceof Error ? error.message : String(error);
-  const code = /^\[([A-Z0-9_]+)\]/u.exec(message)?.[1];
-  return code === 'AUTH_INVALID_CREDENTIALS' || code === 'AUTH_SECOND_FACTOR_INVALID' ? code : undefined;
-};
+const countedMaintenanceReauthenticationFailureCode = countedStrongAuthenticationFailureCode;
 
 function adaptiveMaintenanceAuthFingerprint(): string {
   return adaptiveMaintenanceAuthContext().fingerprint;
@@ -1036,6 +1186,7 @@ function registerIpc(): void {
     try { return store().logout(); }
     finally {
       financeImportFileSessions.clear();
+      emergencyCardExportReauthenticationGuard.clearAll();
       offlineSensitiveCache.lock('NO_LEASE');
       sealUserDataSession();
     }
@@ -1589,7 +1740,226 @@ function registerIpc(): void {
   registerIpcHandler('ai:upsertSensitiveConsent', (_event,input:UpsertSensitiveDataConsentInput) => store().upsertSensitiveDataConsent(input));
   registerIpcHandler('ai:previewSensitiveExport', (_event,input:SensitiveExportPreviewInput) => store().previewSensitiveExport(input));
   registerIpcHandler('life:create', async (_event, input:CreateLifeRecordInput) => await store().createLifeRecord(input));
-  registerIpcHandler('life:recordManagedItem', async (_event, input:RecordManagedLifeItemInput) => await store().recordManagedLifeItem(input));
+  registerIpcHandler('life:recordManagedItem', async (_event, input:RecordManagedLifeItemInput) => await store().recordManagedLifeItem(
+    input.itemType === 'power_mode_event'
+      ? { ...input, powerSource:observeEmergencyCardPowerSource() }
+      : input
+  ));
+  registerIpcHandler('life:exportEmergencyCard', async (event, input:EmergencyCardExportMainInput) => {
+    const request = getIpcRequestContext(event);
+    const correlationId = runtime().correlation.current()?.correlationId;
+    const senderId = event.sender?.id;
+    if (!request || !correlationId || !Number.isSafeInteger(senderId) || Number(senderId) < 0
+      || request.channel !== 'life:exportEmergencyCard') {
+      throw new Error('Acil durum kartı dışa aktarımının güvenilir IPC bağı bulunamadı.');
+    }
+    if (input.mode !== 'encrypted_pack' && input.documentLinkIds.length > 0) {
+      throw new Error('Düz metin PDF/yazıcı çıktısına arşiv belgesi eklenemez.');
+    }
+    const throttleKey = createHash('sha256').update(
+      `${store().currentAuthenticatedAccountId()}\u0000${senderId}\u0000${request.rendererSessionId}\u0000emergency-card-export`,
+      'utf8'
+    ).digest('hex');
+    const before = emergencyCardExportReauthenticationGuard.status(throttleKey);
+    if (before.locked) {
+      throw new Error(`[AUTH_RATE_LIMITED] Acil kart güçlü doğrulaması geçici olarak kilitlendi. ${before.retryAfterSeconds ?? 1} saniye sonra yeniden deneyin.`);
+    }
+    let prepared:Awaited<ReturnType<FamilyDataStore['prepareEmergencyCardExport']>>;
+    try {
+      prepared = await store().prepareEmergencyCardExport({
+        profileId:input.profileId,
+        configurationId:input.configurationId,
+        mode:input.mode,
+        selectedFieldIds:input.selectedFieldIds,
+        documentLinkIds:input.documentLinkIds,
+        credentials:{ password:input.password, ...(input.code ? { code:input.code } : {}) },
+        rendererSessionId:request.rendererSessionId,
+        operationId:request.requestId,
+        correlationId,
+        onStrongAuthenticationVerified:() => emergencyCardExportReauthenticationGuard.recordSuccess(throttleKey)
+      });
+    } catch (error) {
+      const failureCode = countedMaintenanceReauthenticationFailureCode(error);
+      if (failureCode) {
+        const throttle = emergencyCardExportReauthenticationGuard.recordFailure(throttleKey);
+        runtime().logger.warn({
+          timestamp:runtime().clock.now(), service:'desktop-main', process:'electron-main',
+          event:'life.emergency_card_export_reauthentication_failed', correlationId, outcome:'failure',
+          metadata:{ senderId, failureCode, failedAttempts:throttle.failedAttempts, remainingAttempts:throttle.remainingAttempts, locked:throttle.locked }
+        });
+        if (throttle.locked) {
+          throw new Error(`[AUTH_RATE_LIMITED] Acil kart güçlü doğrulaması geçici olarak kilitlendi. ${throttle.retryAfterSeconds ?? 1} saniye sonra yeniden deneyin.`);
+        }
+      }
+      throw error;
+    }
+
+    const powerSource = observeEmergencyCardPowerSource();
+    let printWindow:BrowserWindow | undefined;
+    let artifactSha256 = '';
+    let artifactSizeBytes = 0;
+    let artifactPath:string | undefined;
+    let artifactCreated = false;
+    let artifactReadbackStatus:'verified'|'not_applicable_print';
+    let printerDispatchStatus:'confirmed'|undefined;
+    const documentBytes:Buffer[] = [];
+    try {
+      if (input.mode === 'print' || input.mode === 'pdf') {
+        const html = emergencyCardHtml(prepared);
+        printWindow = new BrowserWindow({ show:false, webPreferences:{ nodeIntegration:false, contextIsolation:true, sandbox:true, webSecurity:true } });
+        await printWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+      }
+      if (input.mode === 'print' && printWindow) {
+        const activePrintWindow = printWindow;
+        const canonicalPdf = await activePrintWindow.webContents.printToPDF({ printBackground:true, pageSize:'A4' });
+        try {
+          artifactSha256 = sha256Hex(canonicalPdf);
+          artifactSizeBytes = canonicalPdf.length;
+        } finally {
+          canonicalPdf.fill(0);
+        }
+        const printed = await new Promise<boolean>((resolvePrint) => activePrintWindow.webContents.print(
+          { printBackground:true, silent:false },
+          (success) => resolvePrint(success)
+        ));
+        if (!printed) return Object.freeze({ canceled:true as const });
+        artifactReadbackStatus = 'not_applicable_print';
+        printerDispatchStatus = 'confirmed';
+      } else if (input.mode === 'pdf' && printWindow) {
+        const selected = await dialog.showSaveDialog({
+          title:'Özel acil kart PDF dosyasını kaydet',
+          defaultPath:`Acil_Kart_${new Date().toISOString().slice(0,10)}.pdf`,
+          filters:[{ name:'PDF', extensions:['pdf'] }]
+        });
+        if (selected.canceled || !selected.filePath) return Object.freeze({ canceled:true as const });
+        if (!isAbsolute(selected.filePath) || extname(selected.filePath).toLocaleLowerCase('en-US') !== '.pdf') {
+          throw new Error('Acil kart PDF çıktısı mutlak ve .pdf uzantılı bir hedef gerektirir.');
+        }
+        artifactPath = selected.filePath;
+        const pdf = await printWindow.webContents.printToPDF({ printBackground:true, pageSize:'A4' });
+        try {
+          ({ artifactSha256, artifactSizeBytes } = writeEmergencyCardArtifactAtomically(artifactPath, pdf));
+          artifactCreated = true;
+        } finally {
+          pdf.fill(0);
+        }
+        artifactReadbackStatus = 'verified';
+      } else {
+        if (!input.packagePassphrase) throw new Error('Şifreli paket için bağımsız paket parolası zorunludur.');
+        const selected = await dialog.showSaveDialog({
+          title:'Şifreli özel acil kart paketini kaydet',
+          defaultPath:`Acil_Kart_${new Date().toISOString().slice(0,10)}.pptemergency`,
+          filters:[{ name:'Şifreli Acil Kart Paketi', extensions:['pptemergency'] }]
+        });
+        if (selected.canceled || !selected.filePath) return Object.freeze({ canceled:true as const });
+        if (!isAbsolute(selected.filePath) || extname(selected.filePath).toLocaleLowerCase('en-US') !== '.pptemergency') {
+          throw new Error('Şifreli acil kart çıktısı mutlak ve .pptemergency uzantılı bir hedef gerektirir.');
+        }
+        artifactPath = selected.filePath;
+        let totalDocumentBytes = 0;
+        const documents:{ documentLinkId:string; archiveItemId:string; originalName:string; mimeType:string; sizeBytes:number; sha256:string; content:Buffer }[] = [];
+        for (const document of prepared.documents) {
+          const documentCorrelationId = asCorrelationId(`archive-emergency-export-${createHash('sha256').update(
+            `${correlationId}\u0000${document.documentLinkId}`,
+            'utf8'
+          ).digest('hex').slice(0,48)}`);
+          const read = await store().readArchiveItemBytesForEmergencyExport(
+            document.archiveItemId,
+            undefined,
+            documentCorrelationId
+          );
+          documentBytes.push(read.bytes);
+          totalDocumentBytes += read.bytes.length;
+          if (totalDocumentBytes > 25 * 1024 * 1024) throw new Error('Acil kart belgeleri toplam 25 MiB sınırını aşıyor.');
+          documents.push({
+            documentLinkId:document.documentLinkId,
+            archiveItemId:document.archiveItemId,
+            originalName:read.originalName,
+            mimeType:read.mimeType,
+            sizeBytes:read.sizeBytes,
+            sha256:read.sha256,
+            content:read.bytes
+          });
+        }
+        const plaintext = emergencyCardCanonicalPayload({ prepared, documents });
+        let encrypted:Buffer | undefined;
+        try {
+          encrypted = encryptPortableEmergencyPack({
+            plaintext,
+            passphrase:input.packagePassphrase,
+            metadata:{ profileId:prepared.profileId, configurationId:prepared.configurationId, selectionSha256:prepared.selectionSha256 }
+          });
+          ({ artifactSha256, artifactSizeBytes } = writeEmergencyCardArtifactAtomically(artifactPath, encrypted));
+          artifactCreated = true;
+          const readback = readFileSync(artifactPath);
+          try {
+            const verified = verifyPortableEmergencyPackReadback({
+              serialized:readback,
+              passphrase:input.packagePassphrase,
+              expectedPlaintextSha256:sha256Hex(plaintext)
+            });
+            if (verified.artifactSha256 !== artifactSha256 || verified.artifactSizeBytes !== artifactSizeBytes
+              || verified.metadata.selectionSha256 !== prepared.selectionSha256) {
+              throw new Error('Şifreli acil kart paketi exact okuma doğrulamasından geçmedi.');
+            }
+          } finally {
+            readback.fill(0);
+          }
+        } finally {
+          plaintext.fill(0);
+          encrypted?.fill(0);
+        }
+        artifactReadbackStatus = 'verified';
+      }
+
+      const completionCorrelationId = createRuntimeCorrelationId('ipc');
+      const completionCommon = {
+        artifactSha256,
+        artifactSizeBytes,
+        powerSource,
+        batteryLevel:'not_measured',
+        automaticLowBatteryDetection:'not_performed',
+        lowBatteryClaimed:false
+      } as const;
+      try {
+        await store().completeEmergencyCardExport(
+          prepared,
+          input.mode === 'print'
+            ? { ...completionCommon, artifactReadbackStatus:'not_applicable_print', printerDispatchStatus:'confirmed' }
+            : { ...completionCommon, artifactReadbackStatus:'verified' },
+          completionCorrelationId
+        );
+      } catch (error) {
+        if (input.mode === 'print') {
+          runtime().logger.error({
+            timestamp:runtime().clock.now(), service:'desktop-main', process:'electron-main',
+            event:'life.emergency_card_print_dispatched_completion_unrecorded',
+            correlationId:completionCorrelationId, outcome:'failure',
+            metadata:{ mode:'print', printerDispatchStatus:'confirmed', ledgerRecorded:false }
+          });
+        }
+        throw error;
+      }
+      return Object.freeze({
+        canceled:false as const,
+        mode:input.mode,
+        artifactSha256,
+        artifactSizeBytes,
+        powerSource,
+        batteryLevel:'not_measured' as const,
+        automaticLowBatteryDetection:'not_performed' as const,
+        lowBatteryClaimed:false as const,
+        artifactReadbackStatus,
+        ...(printerDispatchStatus ? { printerDispatchStatus } : {})
+      });
+    } catch (error) {
+      if (artifactCreated && artifactPath) rmSync(artifactPath, { force:true });
+      throw error;
+    } finally {
+      for (const bytes of documentBytes) bytes.fill(0);
+      if (printWindow && !printWindow.isDestroyed()) printWindow.destroy();
+    }
+  });
   registerIpcHandler('finance:list', () => store().listFinanceRecords());
   registerIpcHandler('finance:create', (_event, input:CreateFinanceRecordInput) => store().createFinanceRecord(input));
   registerIpcHandler('finance:listBankInstitutions', () => store().listBankInstitutions());
@@ -2033,6 +2403,7 @@ function createWindow(): void {
     ipcRequestLifecycles.clearSender(primaryWebContentsId);
     ipcReadResults.invalidateSender(primaryWebContentsId);
     ipcAdaptiveBudgetMaintenanceSessions.clearSender(primaryWebContentsId);
+    emergencyCardExportReauthenticationGuard.clearAll();
     if (primaryWindow === window) primaryWindow = undefined;
     if (trustedRenderer?.webContentsId === primaryWebContentsId) trustedRenderer = undefined;
   });
@@ -2298,6 +2669,7 @@ app.on('before-quit', () => {
   ipcPerformanceTelemetry.clear();
   ipcAdaptiveBudgetMaintenanceSessions.clearAll();
   ipcAdaptiveBudgetMaintenanceReauthenticationGuard.clearMemory();
+  emergencyCardExportReauthenticationGuard.clearMemory();
   ipcAdaptiveResourceBudget.clear({ persist: false });
   try {
     sealUserDataSession();

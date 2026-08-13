@@ -54,7 +54,7 @@
       "passed": true
     },
     {
-      "name": "manifest contains exactly 545 surfaces",
+      "name": "manifest contains exactly 554 surfaces",
       "passed": true
     },
     {
@@ -282,7 +282,7 @@
       "passed": true
     },
     {
-      "name": "scope records six rules and 545 exact surfaces",
+      "name": "scope records six rules and 554 exact surfaces",
       "passed": true
     },
     {
@@ -347,20 +347,20 @@
     "status": "PASS",
     "productionSourceZones": 18,
     "scannedFiles": 381,
-    "privilegedSurfaces": 545,
-    "exactAllowlistEntries": 545,
-    "exactAllowlistSha256": "06169792596d3f46b93e02b30c7aa8554a0823881564a243a22b097c961a2935",
+    "privilegedSurfaces": 554,
+    "exactAllowlistEntries": 554,
+    "exactAllowlistSha256": "b66fd0aa4ce21557a45be5a0e870e04d59053e77e1c0c3abea7d92f1700908e9",
     "surfaceCounts": {
       "CRYPTO_GLOBAL": 2,
-      "CRYPTO_IMPORT": 128,
+      "CRYPTO_IMPORT": 132,
       "DATABASE_IMPORT": 21,
       "NETWORK_IMPORT": 8,
-      "REPOSITORY_IMPORT": 48,
+      "REPOSITORY_IMPORT": 49,
       "ROLE_PRESENTATION": 1,
       "SQL_CALL": 56,
       "SQL_CONSTRUCTOR": 2,
       "SQL_IMPORT": 2,
-      "USE_CASE_COMPOSITION": 277
+      "USE_CASE_COMPOSITION": 281
     },
     "maliciousSelfTestAssertions": 17,
     "benignSelfTestAssertions": 4,
@@ -368,13 +368,13 @@
     "findings": []
   },
   "protectedRuleCount": 6,
-  "exactAllowlistEntries": 545,
-  "exactAllowlistSha256": "06169792596d3f46b93e02b30c7aa8554a0823881564a243a22b097c961a2935",
+  "exactAllowlistEntries": 554,
+  "exactAllowlistSha256": "b66fd0aa4ce21557a45be5a0e870e04d59053e77e1c0c3abea7d92f1700908e9",
   "directRoleAuthorizationBypasses": 0,
   "syntaxModel": "TYPESCRIPT_AST",
   "regexOnlyGateAccepted": false,
   "buildGateReplacesRuntimePolicy": false,
-  "latestDatabaseMigration": 83,
+  "latestDatabaseMigration": 88,
   "schemaMigrationRequired": false,
   "historicalBackfillPerformed": false,
   "legacyDesktopVaultPreserved": true,
@@ -383,5 +383,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-12T19:51:11.823Z"
+  "generatedAt": "2026-08-13T02:37:29.660Z"
 }

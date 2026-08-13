@@ -23,6 +23,16 @@ import type {
   FamilyEmergencyAssistanceProfileView,
   FamilyEmergencyBloodType,
   FamilyEmergencyContactLedgerItemView,
+  FamilyEmergencyCardConfigurationLedgerItemView,
+  FamilyEmergencyCardConfigurationView,
+  FamilyEmergencyCardDocumentLinkLedgerItemView,
+  FamilyEmergencyCardExportEventLedgerItemView,
+  FamilyEmergencyCardFieldCode,
+  FamilyEmergencyCardOutputMode,
+  FamilyEmergencyCardPortabilityLedgerItemView,
+  FamilyEmergencyCardPowerModeEventLedgerItemView,
+  FamilyEmergencyCardSelectedFieldLedgerItemView,
+  FamilyEmergencyCardSourceItemType,
   FamilyEmergencyHealthFactKind,
   FamilyEmergencyHealthFactLedgerItemView,
   FamilyEmergencyChecklistItemLedgerItemView,
@@ -96,16 +106,20 @@ import type {
   RecordManagedHomeInventoryWarrantyInput,
   RecordFamilyEmergencyItemInput,
   RecordFamilyEmergencyAssistanceItemInput,
+  RecordFamilyEmergencyCardPortabilityItemInput,
   RecordFamilyEmergencyPreparednessItemInput,
   RecordPrivacy
 } from '@ppt/domain';
+import { FAMILY_EMERGENCY_CARD_FIELD_MATRIX } from '@ppt/domain';
 import type { DomainEvent } from '@ppt/events';
-import type { AuthorizationAction } from '@ppt/security';
+import { sha256Hex, type AuthorizationAction } from '@ppt/security';
 import { inspectManagedLifeDataContract } from './life-security.js';
 
 export {
   FAMILY_EMERGENCY_ASSISTANCE_INPUT_KEYS,
   FAMILY_EMERGENCY_ASSISTANCE_REQUIRED_INPUT_KEYS,
+  FAMILY_EMERGENCY_CARD_PORTABILITY_INPUT_KEYS,
+  FAMILY_EMERGENCY_CARD_PORTABILITY_REQUIRED_INPUT_KEYS,
   FAMILY_EMERGENCY_INPUT_KEYS,
   FAMILY_EMERGENCY_PREPAREDNESS_INPUT_KEYS,
   FAMILY_EMERGENCY_PREPAREDNESS_REQUIRED_INPUT_KEYS,
@@ -136,11 +150,12 @@ export interface LifeApplicationContext {
 }
 
 export interface LifePolicyIntent {
-  readonly action: 'read' | 'create' | 'update';
-  readonly capability: 'family.read' | 'family.write';
+  readonly action: 'read' | 'create' | 'update' | 'share';
+  readonly capability: 'family.read' | 'family.write' | 'file.share';
   readonly resourceType: 'life_record';
   readonly resourceId: string;
-  readonly purpose: 'general';
+  readonly purpose: 'general' | 'emergency-offline-portability';
+  readonly requestedFields?: readonly string[];
   readonly ownerPersonId?: PersonId;
   readonly privacy?: RecordPrivacy;
 }
@@ -307,8 +322,37 @@ export type FamilyEmergencyAssistanceWriteRecord =
   | FamilyEmergencyContactWriteRecord
   | FamilyEmergencyAssistanceInstructionWriteRecord;
 
+interface FamilyEmergencyCardPortabilityWriteRecordCommon {
+  readonly familyId:FamilyId;
+  readonly ownerPersonId:PersonId;
+  readonly profileId:string;
+  readonly privacy:'private';
+  readonly dataSource:'manual';
+  readonly createdAt:IsoDateTime;
+}
+export type FamilyEmergencyCardConfigurationWriteRecord =
+  FamilyEmergencyCardConfigurationLedgerItemView & FamilyEmergencyCardPortabilityWriteRecordCommon;
+export type FamilyEmergencyCardSelectedFieldWriteRecord =
+  FamilyEmergencyCardSelectedFieldLedgerItemView & FamilyEmergencyCardPortabilityWriteRecordCommon;
+export type FamilyEmergencyCardDocumentLinkWriteRecord =
+  FamilyEmergencyCardDocumentLinkLedgerItemView & FamilyEmergencyCardPortabilityWriteRecordCommon;
+export type FamilyEmergencyCardExportEventWriteRecord =
+  FamilyEmergencyCardExportEventLedgerItemView & FamilyEmergencyCardPortabilityWriteRecordCommon & {
+    /** Persistence-only bridge to the prior file.share receipt; never project to a workspace/view. */
+    readonly shareReceiptHash:string;
+  };
+export type FamilyEmergencyCardPowerModeEventWriteRecord =
+  FamilyEmergencyCardPowerModeEventLedgerItemView & FamilyEmergencyCardPortabilityWriteRecordCommon;
+export type FamilyEmergencyCardPortabilityWriteRecord =
+  | FamilyEmergencyCardConfigurationWriteRecord
+  | FamilyEmergencyCardSelectedFieldWriteRecord
+  | FamilyEmergencyCardDocumentLinkWriteRecord
+  | FamilyEmergencyCardExportEventWriteRecord
+  | FamilyEmergencyCardPowerModeEventWriteRecord;
+
 export interface LifeWriteScope {
   readonly occurredAt: IsoDateTime;
+  readonly authorizationReceiptHash?:string;
   findPerson(personId: PersonId): Result<{
     readonly id:PersonId;
     readonly familyId:FamilyId;
@@ -354,6 +398,18 @@ export interface LifeWriteScope {
   insertFamilyEmergencyAssistanceItem(
     record:FamilyEmergencyAssistanceWriteRecord
   ): Result<void, AppError>;
+  findFamilyEmergencyCardConfiguration(
+    id:string
+  ):Result<FamilyEmergencyCardConfigurationWriteRecord | null, AppError>;
+  findFamilyEmergencyCardPortabilityItem(
+    id:string
+  ):Result<FamilyEmergencyCardPortabilityWriteRecord | null, AppError>;
+  listFamilyEmergencyCardPortabilityItems(
+    profileId:string
+  ):Result<readonly FamilyEmergencyCardPortabilityWriteRecord[], AppError>;
+  insertFamilyEmergencyCardPortabilityItem(
+    record:FamilyEmergencyCardPortabilityWriteRecord
+  ):Result<void, AppError>;
   appendAudit(input: {
     readonly id: string;
     readonly action: string;
@@ -826,6 +882,18 @@ const familyEmergencyAssistanceInstructionKinds =
   ]);
 const optionalFamilyEmergencyAssistanceText = (value:unknown, maximum:number):boolean =>
   value === undefined || managedLifeText(value, 2, maximum);
+const familyEmergencyCardOutputModes = new Set<FamilyEmergencyCardOutputMode>([
+  'print','pdf','encrypted_pack'
+]);
+const familyEmergencyCardFieldCodes = new Set<FamilyEmergencyCardFieldCode>([
+  'fact_value','instruction','instruction_kind','label','name','note','phone_e164',
+  'relationship','subject_display'
+]);
+const familyEmergencyCardPowerSources = new Set(['battery','ac','unknown']);
+const familyEmergencyCardPowerModes = new Set(['enabled','disabled']);
+const familyEmergencyCardPowerActivationSources = new Set(['manual','battery_prompt']);
+const familyEmergencyCardArtifactSha256 = (value:unknown):value is string =>
+  typeof value === 'string' && /^[0-9a-f]{64}$/u.test(value);
 
 const isFamilyEmergencyCommand = (
   command:RecordManagedLifeItemInput,
@@ -843,6 +911,74 @@ const isFamilyEmergencyAssistanceCommand = (
   inspection:ReturnType<typeof inspectManagedLifeDataContract>
 ): command is RecordFamilyEmergencyAssistanceItemInput =>
   inspection.contractFamily === 'family_emergency_assistance';
+
+const isFamilyEmergencyCardPortabilityCommand = (
+  command:RecordManagedLifeItemInput,
+  inspection:ReturnType<typeof inspectManagedLifeDataContract>
+):command is RecordFamilyEmergencyCardPortabilityItemInput =>
+  inspection.contractFamily === 'family_emergency_card_portability';
+
+const validateFamilyEmergencyCardPortabilityCommand = (
+  context:LifeApplicationContext,
+  command:RecordFamilyEmergencyCardPortabilityItemInput
+):Result<void, AppError> => {
+  if (!managedLifeId(command.profileId)) {
+    return err(invalid(context, 'Acil durum karti profil kimligi gecersiz.'));
+  }
+  if (command.itemType === 'card_configuration') {
+    return managedLifeText(command.label, 2, 120) && command.locale === 'tr-TR'
+      ? ok(undefined)
+      : err(invalid(context, 'Acil durum karti yapilandirma etiketi veya yerel ayari gecersiz.'));
+  }
+  if (!managedLifeId(command.configurationId)) {
+    return err(invalid(context, 'Acil durum karti yapilandirma kimligi gecersiz.'));
+  }
+  switch (command.itemType) {
+    case 'selected_field':
+      return managedLifeId(command.sourceItemId)
+        && Object.hasOwn(FAMILY_EMERGENCY_CARD_FIELD_MATRIX, command.sourceItemType)
+        && (FAMILY_EMERGENCY_CARD_FIELD_MATRIX[command.sourceItemType] as readonly string[])
+          .includes(command.fieldCode)
+        ? ok(undefined)
+        : err(invalid(context, 'Acil durum karti alan secimi veya kaynak matrisi gecersiz.'));
+    case 'document_link':
+      return managedLifeId(command.archiveItemId)
+        ? ok(undefined)
+        : err(invalid(context, 'Acil durum karti belge baglantisi gecersiz.'));
+    case 'export_event':
+      return familyEmergencyCardOutputModes.has(command.mode)
+        && managedLifeInteger(command.selectedFieldCount)
+        && command.selectedFieldCount <= 64
+        && managedLifeInteger(command.documentCount)
+        && command.documentCount <= 10
+        && command.selectedFieldCount + command.documentCount >= 1
+        && familyEmergencyCardArtifactSha256(command.selectionSha256)
+        && familyEmergencyCardArtifactSha256(command.shareReceiptHash)
+        && familyEmergencyCardArtifactSha256(command.artifactSha256)
+        && managedLifeInteger(command.artifactSizeBytes, 1)
+        && command.artifactSizeBytes <= 50 * 1024 * 1024
+        && familyEmergencyCardPowerSources.has(command.powerSource)
+        && command.batteryLevel === 'not_measured'
+        && command.automaticLowBatteryDetection === 'not_performed'
+        && command.lowBatteryClaimed === false
+        && (command.mode === 'print'
+          ? command.artifactReadbackStatus === 'not_applicable_print'
+            && command.printerDispatchStatus === 'confirmed'
+          : command.artifactReadbackStatus === 'verified'
+            && !Object.hasOwn(command, 'printerDispatchStatus'))
+        ? ok(undefined)
+        : err(invalid(context, 'Acil durum karti disa aktarma kaniti gecersiz.'));
+    case 'power_mode_event':
+      return familyEmergencyCardPowerModes.has(command.mode)
+        && familyEmergencyCardPowerActivationSources.has(command.activationSource)
+        && familyEmergencyCardPowerSources.has(command.powerSource)
+        && command.batteryLevel === 'not_measured'
+        && command.automaticLowBatteryDetection === 'not_performed'
+        && command.lowBatteryClaimed === false
+        ? ok(undefined)
+        : err(invalid(context, 'Acil durum karti guc modu kaniti gecersiz.'));
+  }
+};
 
 const validateFamilyEmergencyAssistanceCommand = (
   context:LifeApplicationContext,
@@ -1083,6 +1219,9 @@ const validateManagedLifeCommand = (
   }
   if (isFamilyEmergencyAssistanceCommand(command, inspection)) {
     return validateFamilyEmergencyAssistanceCommand(context, command);
+  }
+  if (isFamilyEmergencyCardPortabilityCommand(command, inspection)) {
+    return validateFamilyEmergencyCardPortabilityCommand(context, command);
   }
   if (command.itemType === 'profile') {
     if (!managedLifeId(command.ownerPersonId)
@@ -1459,8 +1598,128 @@ const projectFamilyEmergencyAssistanceItem = (
   }
 };
 
+const projectFamilyEmergencyCardPortabilityItem = (
+  item:FamilyEmergencyCardPortabilityWriteRecord
+):FamilyEmergencyCardPortabilityLedgerItemView => {
+  const common = {
+    id: item.id,
+    profileId: item.profileId,
+    ownerPersonId: item.ownerPersonId,
+    privacy: 'private' as const,
+    dataSource: 'manual' as const,
+    createdAt: item.createdAt
+  };
+  switch (item.itemType) {
+    case 'card_configuration': return Object.freeze({
+      ...common,
+      itemType: 'card_configuration',
+      label: item.label,
+      locale: 'tr-TR'
+    });
+    case 'selected_field': return Object.freeze({
+      ...common,
+      itemType: 'selected_field',
+      configurationId: item.configurationId,
+      sourceItemId: item.sourceItemId,
+      sourceItemType: item.sourceItemType,
+      fieldCode: item.fieldCode
+    });
+    case 'document_link': return Object.freeze({
+      ...common,
+      itemType: 'document_link',
+      configurationId: item.configurationId,
+      archiveItemId: item.archiveItemId
+    });
+    case 'export_event': {
+      const exportCommon = {
+        ...common,
+        itemType: 'export_event' as const,
+        configurationId: item.configurationId,
+        selectedFieldCount: item.selectedFieldCount,
+        documentCount: item.documentCount,
+        selectionSha256: item.selectionSha256,
+        artifactSha256: item.artifactSha256,
+        artifactSizeBytes: item.artifactSizeBytes,
+        powerSource: item.powerSource,
+        batteryLevel: 'not_measured' as const,
+        automaticLowBatteryDetection: 'not_performed' as const,
+        lowBatteryClaimed: false as const
+      };
+      return item.mode === 'print'
+        ? Object.freeze({
+            ...exportCommon,
+            mode: 'print' as const,
+            artifactReadbackStatus: 'not_applicable_print' as const,
+            printerDispatchStatus: 'confirmed' as const
+          })
+        : Object.freeze({
+            ...exportCommon,
+            mode: item.mode,
+            artifactReadbackStatus: 'verified' as const
+          });
+    }
+    case 'power_mode_event': return Object.freeze({
+      ...common,
+      itemType: 'power_mode_event',
+      configurationId: item.configurationId,
+      mode: item.mode,
+      activationSource: item.activationSource,
+      powerSource: item.powerSource,
+      batteryLevel: 'not_measured',
+      automaticLowBatteryDetection: 'not_performed',
+      lowBatteryClaimed: false
+    });
+  }
+};
+
+const buildFamilyEmergencyCardConfigurations = (
+  profile:FamilyEmergencyAssistanceProfileWriteRecord,
+  items:readonly FamilyEmergencyCardPortabilityWriteRecord[]
+):readonly FamilyEmergencyCardConfigurationView[] => {
+  const profileItems = items.filter((item) => item.profileId === profile.id
+    && item.familyId === profile.familyId
+    && item.ownerPersonId === profile.ownerPersonId
+    && item.privacy === 'private');
+  const configurations = profileItems.filter((item):item is FamilyEmergencyCardConfigurationWriteRecord =>
+    item.itemType === 'card_configuration');
+  return Object.freeze(configurations.map((configuration):FamilyEmergencyCardConfigurationView => {
+    const children = profileItems.filter((item) => item.itemType !== 'card_configuration'
+      && item.configurationId === configuration.id);
+    const powerEvents = children
+      .filter((item):item is FamilyEmergencyCardPowerModeEventWriteRecord => item.itemType === 'power_mode_event')
+      .sort((left, right) => right.createdAt.localeCompare(left.createdAt) || right.id.localeCompare(left.id));
+    const latestPowerModeEvent = powerEvents[0];
+    return Object.freeze({
+      ...(projectFamilyEmergencyCardPortabilityItem(configuration) as
+        FamilyEmergencyCardConfigurationLedgerItemView),
+      selectedFields: Object.freeze(children
+        .filter((item):item is FamilyEmergencyCardSelectedFieldWriteRecord => item.itemType === 'selected_field')
+        .sort((left, right) => left.sourceItemId.localeCompare(right.sourceItemId)
+          || left.fieldCode.localeCompare(right.fieldCode) || left.id.localeCompare(right.id))
+        .map((item) => projectFamilyEmergencyCardPortabilityItem(item) as
+          FamilyEmergencyCardSelectedFieldLedgerItemView)),
+      documentLinks: Object.freeze(children
+        .filter((item):item is FamilyEmergencyCardDocumentLinkWriteRecord => item.itemType === 'document_link')
+        .sort((left, right) => left.archiveItemId.localeCompare(right.archiveItemId)
+          || left.id.localeCompare(right.id))
+        .map((item) => projectFamilyEmergencyCardPortabilityItem(item) as
+          FamilyEmergencyCardDocumentLinkLedgerItemView)),
+      exportEvents: Object.freeze(children
+        .filter((item):item is FamilyEmergencyCardExportEventWriteRecord => item.itemType === 'export_event')
+        .sort((left, right) => right.createdAt.localeCompare(left.createdAt) || right.id.localeCompare(left.id))
+        .map((item) => projectFamilyEmergencyCardPortabilityItem(item) as
+          FamilyEmergencyCardExportEventLedgerItemView)),
+      ...(latestPowerModeEvent
+        ? { latestPowerModeEvent: projectFamilyEmergencyCardPortabilityItem(latestPowerModeEvent) as
+          FamilyEmergencyCardPowerModeEventLedgerItemView }
+        : {})
+    });
+  }).sort((left, right) => right.createdAt.localeCompare(left.createdAt) || right.id.localeCompare(left.id)));
+};
+
 const buildFamilyEmergencyAssistanceProfiles = (
-  items:readonly FamilyEmergencyAssistanceWriteRecord[]
+  items:readonly FamilyEmergencyAssistanceWriteRecord[],
+  portabilityItems:readonly FamilyEmergencyCardPortabilityWriteRecord[]
 ):readonly FamilyEmergencyAssistanceProfileView[] => {
   const profiles = items.filter((item):item is FamilyEmergencyAssistanceProfileWriteRecord =>
     item.itemType === 'emergency_profile');
@@ -1490,7 +1749,8 @@ const buildFamilyEmergencyAssistanceProfiles = (
         .filter((item):item is FamilyEmergencyAssistanceInstructionWriteRecord =>
           item.itemType === 'assistance_instruction')
         .map((item) => projectFamilyEmergencyAssistanceItem(item) as
-          FamilyEmergencyAssistanceInstructionLedgerItemView))
+          FamilyEmergencyAssistanceInstructionLedgerItemView)),
+      cardConfigurations: buildFamilyEmergencyCardConfigurations(profile, portabilityItems)
     });
   }).sort((left, right) => left.label.localeCompare(right.label) || left.id.localeCompare(right.id)));
 };
@@ -1594,6 +1854,7 @@ export const buildManagedLifeWorkspace = (input: {
   readonly emergencyItems?:readonly FamilyEmergencyWriteRecord[];
   readonly preparednessItems?:readonly FamilyEmergencyPreparednessWriteRecord[];
   readonly assistanceItems?:readonly FamilyEmergencyAssistanceWriteRecord[];
+  readonly portabilityItems?:readonly FamilyEmergencyCardPortabilityWriteRecord[];
   readonly generatedAt:string;
 }): ManagedLifeWorkspaceView => {
   const profiles = input.items.filter((item): item is ManagedLifeProfileLedgerItemView => item.itemType === 'profile');
@@ -1650,7 +1911,10 @@ export const buildManagedLifeWorkspace = (input: {
     profiles: Object.freeze(profileViews),
     homeInventoryItems: Object.freeze(homeInventoryItems),
     emergencyPlans: buildFamilyEmergencyPlans(input.emergencyItems ?? [], input.preparednessItems ?? []),
-    emergencyAssistanceProfiles: buildFamilyEmergencyAssistanceProfiles(input.assistanceItems ?? []),
+    emergencyAssistanceProfiles: buildFamilyEmergencyAssistanceProfiles(
+      input.assistanceItems ?? [],
+      input.portabilityItems ?? []
+    ),
     upcomingReminders: Object.freeze(reminders
       .filter((reminder) => reminder.dueAt >= input.generatedAt)
       .sort((left, right) => left.dueAt.localeCompare(right.dueAt) || left.sourceId.localeCompare(right.sourceId))
@@ -1677,7 +1941,15 @@ export const buildManagedLifeWorkspace = (input: {
     readinessGuarantee: 'not_claimed',
     medicalVerification: 'not_performed',
     healthRegistryLookup: 'not_performed',
-    exportSharing: 'not_performed',
+    externalDelivery: 'not_performed',
+    localExport: 'user_authorized_only',
+    cloudUpload: 'not_performed',
+    pdfEncryption: 'not_claimed',
+    portablePackEncryption: 'application_specific_container',
+    plaintextTemporaryFiles: 'not_created',
+    batteryLevel: 'not_measured',
+    automaticLowBatteryDetection: 'not_performed',
+    lowBatteryClaimed: false,
     networkEgressAdded: false
   });
 };
@@ -2425,6 +2697,160 @@ const validateFamilyEmergencyAssistanceRelations = (input:{
   return ok(undefined);
 };
 
+const buildFamilyEmergencyCardPortabilityRecord = (input:{
+  readonly context:LifeApplicationContext;
+  readonly command:RecordFamilyEmergencyCardPortabilityItemInput;
+  readonly profile:FamilyEmergencyAssistanceProfileWriteRecord;
+  readonly itemId:string;
+  readonly createdAt:IsoDateTime;
+}):FamilyEmergencyCardPortabilityWriteRecord => {
+  const common = {
+    id: input.itemId,
+    profileId: input.profile.id,
+    familyId: input.context.familyId,
+    ownerPersonId: input.profile.ownerPersonId,
+    privacy: 'private' as const,
+    dataSource: 'manual' as const,
+    createdAt: input.createdAt
+  };
+  switch (input.command.itemType) {
+    case 'card_configuration': return {
+      ...common,
+      itemType: 'card_configuration',
+      label: input.command.label.trim(),
+      locale: 'tr-TR'
+    };
+    case 'selected_field': return {
+      ...common,
+      itemType: 'selected_field',
+      configurationId: input.command.configurationId,
+      sourceItemId: input.command.sourceItemId,
+      sourceItemType: input.command.sourceItemType,
+      fieldCode: input.command.fieldCode
+    };
+    case 'document_link': return {
+      ...common,
+      itemType: 'document_link',
+      configurationId: input.command.configurationId,
+      archiveItemId: input.command.archiveItemId
+    };
+    case 'export_event': {
+      const exportCommon = {
+        ...common,
+        itemType: 'export_event' as const,
+        configurationId: input.command.configurationId,
+        selectedFieldCount: input.command.selectedFieldCount,
+        documentCount: input.command.documentCount,
+        selectionSha256: input.command.selectionSha256,
+        shareReceiptHash: input.command.shareReceiptHash,
+        artifactSha256: input.command.artifactSha256,
+        artifactSizeBytes: input.command.artifactSizeBytes,
+        powerSource: input.command.powerSource,
+        batteryLevel: 'not_measured' as const,
+        automaticLowBatteryDetection: 'not_performed' as const,
+        lowBatteryClaimed: false as const
+      };
+      return input.command.mode === 'print'
+        ? {
+            ...exportCommon,
+            mode: 'print',
+            artifactReadbackStatus: 'not_applicable_print',
+            printerDispatchStatus: 'confirmed'
+          }
+        : {
+            ...exportCommon,
+            mode: input.command.mode,
+            artifactReadbackStatus: 'verified'
+          };
+    }
+    case 'power_mode_event': return {
+      ...common,
+      itemType: 'power_mode_event',
+      configurationId: input.command.configurationId,
+      mode: input.command.mode,
+      activationSource: input.command.activationSource,
+      powerSource: input.command.powerSource,
+      batteryLevel: 'not_measured',
+      automaticLowBatteryDetection: 'not_performed',
+      lowBatteryClaimed: false
+    };
+  }
+};
+
+const familyEmergencyCardSelectedValueExists = (
+  source:FamilyEmergencyAssistanceWriteRecord,
+  fieldCode:FamilyEmergencyCardFieldCode
+):boolean => {
+  switch (source.itemType) {
+    case 'emergency_profile':
+      return fieldCode === 'label' || fieldCode === 'subject_display';
+    case 'health_fact':
+      return fieldCode === 'fact_value'
+        ? source.factKind === 'blood_type' ? source.bloodType.length > 0 : source.value.trim().length > 0
+        : fieldCode === 'note' && source.note !== undefined;
+    case 'emergency_contact':
+      return fieldCode === 'name'
+        || fieldCode === 'phone_e164'
+        || (fieldCode === 'relationship' && source.relationship !== undefined)
+        || (fieldCode === 'note' && source.note !== undefined);
+    case 'assistance_instruction':
+      return fieldCode === 'instruction_kind'
+        || fieldCode === 'instruction'
+        || (fieldCode === 'note' && source.note !== undefined);
+  }
+};
+
+const validateFamilyEmergencyCardPortabilityRelations = (input:{
+  readonly context:LifeApplicationContext;
+  readonly command:RecordFamilyEmergencyCardPortabilityItemInput;
+  readonly profile:FamilyEmergencyAssistanceProfileWriteRecord;
+  readonly scope:LifeWriteScope;
+  readonly itemId:string;
+}):Result<void, AppError> => {
+  const profile = input.profile;
+  if (profile.familyId !== input.context.familyId || profile.privacy !== 'private') {
+    return err(invalid(input.context, 'Acil durum karti ayni ailedeki ozel destek profiline baglanmalidir.'));
+  }
+  if (profile.createdAt > input.scope.occurredAt) {
+    return err(invalid(input.context, 'Acil durum karti profil olusturulmadan once kaydedilemez.'));
+  }
+  if (input.command.itemType === 'card_configuration') return ok(undefined);
+  const foundConfiguration = input.scope.findFamilyEmergencyCardConfiguration(input.command.configurationId);
+  if (!foundConfiguration.ok) return foundConfiguration;
+  const configuration = foundConfiguration.value;
+  if (!configuration
+    || configuration.itemType !== 'card_configuration'
+    || configuration.profileId !== profile.id
+    || configuration.familyId !== profile.familyId
+    || configuration.ownerPersonId !== profile.ownerPersonId
+    || configuration.privacy !== 'private'
+    || configuration.createdAt > input.scope.occurredAt) {
+    return err(invalid(input.context, 'Acil durum karti alt kaydi exact ozel yapilandirma kokune baglanmalidir.'));
+  }
+  if (input.command.itemType !== 'selected_field') return ok(undefined);
+  if (input.command.sourceItemId === input.itemId) {
+    return err(invalid(input.context, 'Acil durum karti alan secimi kendisini kaynak alamaz.'));
+  }
+  const sourceResult = input.scope.findFamilyEmergencyAssistanceItem(input.command.sourceItemId);
+  if (!sourceResult.ok) return sourceResult;
+  const source = sourceResult.value;
+  if (!source
+    || source.itemType !== input.command.sourceItemType
+    || source.familyId !== profile.familyId
+    || source.ownerPersonId !== profile.ownerPersonId
+    || source.privacy !== 'private'
+    || source.createdAt > input.scope.occurredAt
+    || (source.itemType === 'emergency_profile'
+      ? source.id !== profile.id
+      : source.profileId !== profile.id)
+    || !(FAMILY_EMERGENCY_CARD_FIELD_MATRIX[input.command.sourceItemType] as readonly string[])
+      .includes(input.command.fieldCode)
+    || !familyEmergencyCardSelectedValueExists(source, input.command.fieldCode)) {
+    return err(invalid(input.context, 'Acil durum karti alan secimi exact ayni profil kaynagi ve dolu alan gerektirir.'));
+  }
+  return ok(undefined);
+};
+
 export class RecordManagedLifeItemUseCase {
   public constructor(private readonly unitOfWork: LifeUnitOfWork) {}
 
@@ -2441,7 +2867,8 @@ export class RecordManagedLifeItemUseCase {
     | ManagedHomeInventoryLedgerItemView
     | FamilyEmergencyLedgerItemView
     | FamilyEmergencyPreparednessLedgerItemView
-    | FamilyEmergencyAssistanceLedgerItemView,
+    | FamilyEmergencyAssistanceLedgerItemView
+    | FamilyEmergencyCardPortabilityLedgerItemView,
     AppError
   >> {
     const commandValidation = validateManagedLifeCommand(input.context, input.command);
@@ -2454,6 +2881,13 @@ export class RecordManagedLifeItemUseCase {
     const isEmergency = isFamilyEmergencyCommand(input.command, inspection);
     const isPreparedness = isFamilyEmergencyPreparednessCommand(input.command, inspection);
     const isAssistance = isFamilyEmergencyAssistanceCommand(input.command, inspection);
+    const isPortability = isFamilyEmergencyCardPortabilityCommand(input.command, inspection);
+    if (isPortability && input.command.itemType === 'export_event') {
+      return Promise.resolve(err(invalid(
+        input.context,
+        'Acil durum karti cikti olayi yalniz tek kullanimlik completion kanitiyla kaydedilebilir.'
+      )));
+    }
     const isEmergencyPlan = isEmergency && input.command.itemType === 'emergency_plan';
     const isEmergencyMemberStatus = isEmergency && input.command.itemType === 'member_status';
     const isAssistanceProfile = isAssistance && input.command.itemType === 'emergency_profile';
@@ -2461,6 +2895,7 @@ export class RecordManagedLifeItemUseCase {
       && !isEmergency
       && !isPreparedness
       && !isAssistance
+      && !isPortability
       && input.command.itemType === 'profile';
     let rootId:string;
     if (isProfile || isEmergencyPlan || isEmergencyMemberStatus || isAssistanceProfile) {
@@ -2469,10 +2904,12 @@ export class RecordManagedLifeItemUseCase {
       rootId = input.command.planId;
     } else if (isAssistance) {
       rootId = input.command.profileId;
+    } else if (isPortability) {
+      rootId = input.command.profileId;
     } else {
       rootId = input.command.recordId;
     }
-    const aggregateRootId = isAssistance
+    const aggregateRootId = isAssistance || isPortability
       ? rootId
       : (isEmergency && !isEmergencyPlan) || isPreparedness
         ? input.command.planId
@@ -2524,6 +2961,11 @@ export class RecordManagedLifeItemUseCase {
         if (!found.ok) return found;
         if (!found.value) return err(missing(input.context));
         assistanceProfile = found.value;
+      } else if (isPortability) {
+        const found = scope.findFamilyEmergencyAssistanceProfile(input.command.profileId);
+        if (!found.ok) return found;
+        if (!found.value) return err(missing(input.context));
+        assistanceProfile = found.value;
       } else if (isEmergencyPlan) {
         const reporter = scope.findPerson(emergencyOwner!);
         if (!reporter.ok) return reporter;
@@ -2565,7 +3007,11 @@ export class RecordManagedLifeItemUseCase {
         });
         if (!rootValidation.ok) return rootValidation;
       }
-      const ownerPersonId = isAssistance
+      if (isPortability && (assistanceProfile!.familyId !== input.context.familyId
+        || assistanceProfile!.privacy !== 'private')) {
+        return err(invalid(input.context, 'Acil durum karti ayni ailedeki ozel destek profiline baglanmalidir.'));
+      }
+      const ownerPersonId = isAssistance || isPortability
         ? assistanceOwner ?? assistanceProfile!.ownerPersonId
         : isPreparedness
           ? emergencyPlan!.ownerPersonId
@@ -2574,7 +3020,7 @@ export class RecordManagedLifeItemUseCase {
               ? emergencyOwner!
               : emergencyPlan!.ownerPersonId
             : profileOwner ?? parent!.ownerPersonId;
-      const privacy:RecordPrivacy = isAssistance
+      const privacy:RecordPrivacy = isAssistance || isPortability
         ? 'private'
         : isEmergency || isPreparedness
           ? 'family'
@@ -2594,8 +3040,25 @@ export class RecordManagedLifeItemUseCase {
         | ManagedHomeInventoryWriteRecord
         | FamilyEmergencyWriteRecord
         | FamilyEmergencyPreparednessWriteRecord
-        | FamilyEmergencyAssistanceWriteRecord;
-      if (isAssistance) {
+        | FamilyEmergencyAssistanceWriteRecord
+        | FamilyEmergencyCardPortabilityWriteRecord;
+      if (isPortability) {
+        const relationValidation = validateFamilyEmergencyCardPortabilityRelations({
+          context: input.context,
+          command: input.command,
+          profile: assistanceProfile!,
+          scope,
+          itemId: input.identifiers.itemId
+        });
+        if (!relationValidation.ok) return relationValidation;
+        item = buildFamilyEmergencyCardPortabilityRecord({
+          context: input.context,
+          command: input.command,
+          profile: assistanceProfile!,
+          itemId: input.identifiers.itemId,
+          createdAt: scope.occurredAt
+        });
+      } else if (isAssistance) {
         const relationValidation = validateFamilyEmergencyAssistanceRelations({
           context: input.context,
           command: input.command,
@@ -2710,7 +3173,9 @@ export class RecordManagedLifeItemUseCase {
           occurredAt: scope.occurredAt
         });
       }
-      const saved = isAssistance
+      const saved = isPortability
+        ? scope.insertFamilyEmergencyCardPortabilityItem(item as FamilyEmergencyCardPortabilityWriteRecord)
+        : isAssistance
         ? scope.insertFamilyEmergencyAssistanceItem(item as FamilyEmergencyAssistanceWriteRecord)
         : isPreparedness
         ? scope.insertFamilyEmergencyPreparednessItem(item as FamilyEmergencyPreparednessWriteRecord)
@@ -2722,7 +3187,7 @@ export class RecordManagedLifeItemUseCase {
       if (!saved.ok) return saved;
       const audit = scope.appendAudit({
         id: input.identifiers.auditId,
-        action: isAssistance
+        action: isAssistance || isPortability
           ? 'life.managed.private_item.recorded'
           : `life.managed.${item.itemType}.recorded`,
         resourceType: 'life_record',
@@ -2740,7 +3205,7 @@ export class RecordManagedLifeItemUseCase {
         occurredAt: scope.occurredAt,
         actorId: input.context.actor.userId,
         correlationId: input.context.correlationId,
-        payload: isAssistance
+        payload: isAssistance || isPortability
           ? {
               itemId: item.id,
               recordId: aggregateRootId,
@@ -2754,7 +3219,9 @@ export class RecordManagedLifeItemUseCase {
             }
       });
       if (!event.ok) return event;
-      return ok(isAssistance
+      return ok(isPortability
+        ? projectFamilyEmergencyCardPortabilityItem(item as FamilyEmergencyCardPortabilityWriteRecord)
+        : isAssistance
         ? projectFamilyEmergencyAssistanceItem(item as FamilyEmergencyAssistanceWriteRecord)
         : isPreparedness
         ? projectFamilyEmergencyPreparednessItem(item as FamilyEmergencyPreparednessWriteRecord)
@@ -2764,5 +3231,568 @@ export class RecordManagedLifeItemUseCase {
           ? projectManagedHomeInventoryItem(item as ManagedHomeInventoryWriteRecord)
           : item as ManagedLifeWriteRecord);
     });
+  }
+}
+
+export interface FamilyEmergencyCardExportSelectedFieldReference {
+  readonly selectedFieldId:string;
+  readonly fieldCode:FamilyEmergencyCardFieldCode;
+}
+
+export interface FamilyEmergencyCardExportSelection {
+  readonly selectedFields:readonly FamilyEmergencyCardExportSelectedFieldReference[];
+  readonly documentLinkIds:readonly string[];
+}
+
+export interface PrepareFamilyEmergencyCardExportCommand {
+  readonly profileId:string;
+  readonly configurationId:string;
+  readonly mode:FamilyEmergencyCardOutputMode;
+  readonly rendererSessionId:string;
+  readonly operationId:string;
+  readonly selection:FamilyEmergencyCardExportSelection;
+}
+
+export interface PreparedFamilyEmergencyCardField {
+  readonly selectedFieldId:string;
+  readonly sourceItemId:string;
+  readonly sourceItemType:FamilyEmergencyCardSourceItemType;
+  readonly fieldCode:FamilyEmergencyCardFieldCode;
+  readonly value:string;
+}
+
+export interface PreparedFamilyEmergencyCardDocument {
+  readonly documentLinkId:string;
+  readonly archiveItemId:string;
+}
+
+export interface PreparedFamilyEmergencyCardExport {
+  readonly profileId:string;
+  readonly configurationId:string;
+  readonly configurationLabel:string;
+  readonly locale:'tr-TR';
+  readonly mode:FamilyEmergencyCardOutputMode;
+  readonly selectionSha256:string;
+  readonly shareReceiptHash:string;
+  readonly completionProof:FamilyEmergencyCardExportCompletionProof;
+  readonly selectedFields:readonly PreparedFamilyEmergencyCardField[];
+  readonly documents:readonly PreparedFamilyEmergencyCardDocument[];
+  readonly requestedFields:readonly string[];
+  readonly dataSource:'manual';
+  readonly offlineAvailability:'local_only';
+  readonly externalDelivery:'not_performed';
+  readonly cloudUpload:'not_performed';
+  readonly plaintextTemporaryFiles:'not_created';
+  readonly networkEgressAdded:false;
+}
+
+const familyEmergencyCardExportCompletionProofBrand:unique symbol =
+  Symbol('family-emergency-card-export-completion-proof');
+export interface FamilyEmergencyCardExportCompletionProof {
+  readonly [familyEmergencyCardExportCompletionProofBrand]:true;
+}
+interface FamilyEmergencyCardExportCompletionBinding {
+  readonly profileId:string;
+  readonly configurationId:string;
+  readonly mode:FamilyEmergencyCardOutputMode;
+  readonly selectionSha256:string;
+  readonly shareReceiptHash:string;
+  readonly selectedFieldCount:number;
+  readonly documentCount:number;
+  readonly preparedAt:string;
+}
+const familyEmergencyCardExportCompletionBindings =
+  new WeakMap<FamilyEmergencyCardExportCompletionProof, FamilyEmergencyCardExportCompletionBinding>();
+const activeFamilyEmergencyCardExportCompletions = new WeakSet<FamilyEmergencyCardExportCompletionProof>();
+const consumedFamilyEmergencyCardExportCompletions = new WeakSet<FamilyEmergencyCardExportCompletionProof>();
+
+const createFamilyEmergencyCardExportCompletionProof = (
+  binding:FamilyEmergencyCardExportCompletionBinding
+):FamilyEmergencyCardExportCompletionProof => {
+  const proof = Object.freeze({
+    [familyEmergencyCardExportCompletionProofBrand]: true as const
+  });
+  familyEmergencyCardExportCompletionBindings.set(proof, Object.freeze({ ...binding }));
+  return proof;
+};
+
+const familyEmergencyCardExportProofBrand:unique symbol = Symbol('family-emergency-card-export-proof');
+export interface FamilyEmergencyCardExportAuthorizationProof {
+  readonly [familyEmergencyCardExportProofBrand]:true;
+}
+interface FamilyEmergencyCardExportAuthorizationBinding {
+  readonly rendererSessionId:string;
+  readonly operationId:string;
+  readonly correlationId:string;
+  readonly profileId:string;
+  readonly configurationId:string;
+  readonly mode:FamilyEmergencyCardOutputMode;
+  readonly selectionSha256:string;
+  readonly verifiedAt:string;
+  readonly expiresAt:string;
+}
+const familyEmergencyCardExportProofBindings =
+  new WeakMap<FamilyEmergencyCardExportAuthorizationProof, FamilyEmergencyCardExportAuthorizationBinding>();
+const consumedFamilyEmergencyCardExportProofs = new WeakSet<FamilyEmergencyCardExportAuthorizationProof>();
+
+const canonicalFamilyEmergencyCardExportSelection = (input:{
+  readonly profileId:string;
+  readonly configurationId:string;
+  readonly mode:FamilyEmergencyCardOutputMode;
+  readonly selection:FamilyEmergencyCardExportSelection;
+}):string => JSON.stringify({
+  version: 1,
+  profileId: input.profileId,
+  configurationId: input.configurationId,
+  mode: input.mode,
+  selectedFields: [...input.selection.selectedFields]
+    .map((field) => ({ selectedFieldId: field.selectedFieldId, fieldCode: field.fieldCode }))
+    .sort((left, right) => left.selectedFieldId.localeCompare(right.selectedFieldId)
+      || left.fieldCode.localeCompare(right.fieldCode)),
+  documentLinkIds: [...input.selection.documentLinkIds].sort()
+});
+
+export const familyEmergencyCardSelectionSha256 = (input:{
+  readonly profileId:string;
+  readonly configurationId:string;
+  readonly mode:FamilyEmergencyCardOutputMode;
+  readonly selection:FamilyEmergencyCardExportSelection;
+}):string => sha256Hex(canonicalFamilyEmergencyCardExportSelection(input));
+
+export const createFamilyEmergencyCardExportAuthorizationProof = (
+  input:FamilyEmergencyCardExportAuthorizationBinding
+):FamilyEmergencyCardExportAuthorizationProof => {
+  const verifiedAt = Date.parse(input.verifiedAt);
+  const expiresAt = Date.parse(input.expiresAt);
+  if (!managedLifeId(input.rendererSessionId)
+    || !managedLifeId(input.operationId)
+    || !managedLifeId(input.correlationId)
+    || !managedLifeId(input.profileId)
+    || !managedLifeId(input.configurationId)
+    || !familyEmergencyCardOutputModes.has(input.mode)
+    || !familyEmergencyCardArtifactSha256(input.selectionSha256)
+    || !isExactManagedLifeIsoDateTime(input.verifiedAt)
+    || !isExactManagedLifeIsoDateTime(input.expiresAt)
+    || !Number.isFinite(verifiedAt)
+    || !Number.isFinite(expiresAt)
+    || expiresAt <= verifiedAt
+    || expiresAt - verifiedAt > 120_000) {
+    throw new Error('Acil durum karti guclu kimlik dogrulama kaniti gecersiz.');
+  }
+  const proof = Object.freeze({
+    [familyEmergencyCardExportProofBrand]: true as const
+  });
+  familyEmergencyCardExportProofBindings.set(proof, Object.freeze({ ...input }));
+  return proof;
+};
+
+const validateFamilyEmergencyCardExportSelection = (
+  context:LifeApplicationContext,
+  command:PrepareFamilyEmergencyCardExportCommand
+):Result<{ readonly selectionSha256:string; readonly requestedFields:readonly string[] }, AppError> => {
+  const exactCommandKeys = ['profileId','configurationId','mode','rendererSessionId','operationId','selection'];
+  const exactSelectionKeys = ['selectedFields','documentLinkIds'];
+  if (Object.keys(command).sort().join('|') !== exactCommandKeys.sort().join('|')
+    || !command.selection
+    || Object.keys(command.selection).sort().join('|') !== exactSelectionKeys.sort().join('|')
+    || !managedLifeId(command.profileId)
+    || !managedLifeId(command.configurationId)
+    || !managedLifeId(command.rendererSessionId)
+    || !managedLifeId(command.operationId)
+    || !familyEmergencyCardOutputModes.has(command.mode)
+    || !Array.isArray(command.selection.selectedFields)
+    || !Array.isArray(command.selection.documentLinkIds)
+    || command.selection.selectedFields.length > 64
+    || command.selection.documentLinkIds.length > 10
+    || (command.mode !== 'encrypted_pack' && command.selection.documentLinkIds.length > 0)
+    || command.selection.selectedFields.length + command.selection.documentLinkIds.length < 1) {
+    return err(invalid(context, 'Acil durum karti disa aktarma secimi gecersiz.'));
+  }
+  const selectedIds = new Set<string>();
+  for (const field of command.selection.selectedFields) {
+    if (!field
+      || Object.keys(field).sort().join('|') !== 'fieldCode|selectedFieldId'
+      || !managedLifeId(field.selectedFieldId)
+      || !familyEmergencyCardFieldCodes.has(field.fieldCode)
+      || selectedIds.has(field.selectedFieldId)) {
+      return err(invalid(context, 'Acil durum karti alan secimi canonical ve benzersiz olmalidir.'));
+    }
+    selectedIds.add(field.selectedFieldId);
+  }
+  const documentIds = new Set<string>();
+  for (const id of command.selection.documentLinkIds) {
+    if (!managedLifeId(id) || documentIds.has(id)) {
+      return err(invalid(context, 'Acil durum karti belge secimi canonical ve benzersiz olmalidir.'));
+    }
+    documentIds.add(id);
+  }
+  const selectionSha256 = familyEmergencyCardSelectionSha256(command);
+  const requestedFields = Object.freeze([
+    ...new Set(command.selection.selectedFields.map((field) => field.fieldCode)),
+    `selection_sha256:${selectionSha256}`
+  ].sort());
+  return ok(Object.freeze({ selectionSha256, requestedFields }));
+};
+
+const preparedFamilyEmergencyCardFieldValue = (
+  source:FamilyEmergencyAssistanceWriteRecord,
+  fieldCode:FamilyEmergencyCardFieldCode
+):string | undefined => {
+  switch (source.itemType) {
+    case 'emergency_profile':
+      return fieldCode === 'label' || fieldCode === 'subject_display' ? source.label : undefined;
+    case 'health_fact':
+      if (fieldCode === 'fact_value') return source.factKind === 'blood_type' ? source.bloodType : source.value;
+      return fieldCode === 'note' ? source.note : undefined;
+    case 'emergency_contact':
+      if (fieldCode === 'name') return source.name;
+      if (fieldCode === 'phone_e164') return source.phoneE164;
+      if (fieldCode === 'relationship') return source.relationship;
+      return fieldCode === 'note' ? source.note : undefined;
+    case 'assistance_instruction':
+      if (fieldCode === 'instruction_kind') return source.instructionKind;
+      if (fieldCode === 'instruction') return source.instruction;
+      return fieldCode === 'note' ? source.note : undefined;
+  }
+};
+
+export class PrepareFamilyEmergencyCardExportUseCase {
+  public constructor(
+    private readonly unitOfWork:LifeUnitOfWork,
+    private readonly now:() => number = Date.now
+  ) {}
+
+  public execute(input:{
+    readonly context:LifeApplicationContext;
+    readonly command:PrepareFamilyEmergencyCardExportCommand;
+    readonly authorizationProof:FamilyEmergencyCardExportAuthorizationProof;
+  }):Promise<Result<PreparedFamilyEmergencyCardExport, AppError>> {
+    const selectionValidation = validateFamilyEmergencyCardExportSelection(input.context, input.command);
+    if (!selectionValidation.ok) return Promise.resolve(selectionValidation);
+    const proof = familyEmergencyCardExportProofBindings.get(input.authorizationProof);
+    const now = this.now();
+    if (!proof
+      || consumedFamilyEmergencyCardExportProofs.has(input.authorizationProof)
+      || proof.rendererSessionId !== input.command.rendererSessionId
+      || proof.operationId !== input.command.operationId
+      || proof.correlationId !== input.context.correlationId
+      || proof.profileId !== input.command.profileId
+      || proof.configurationId !== input.command.configurationId
+      || proof.mode !== input.command.mode
+      || proof.selectionSha256 !== selectionValidation.value.selectionSha256
+      || now < Date.parse(proof.verifiedAt)
+      || now >= Date.parse(proof.expiresAt)) {
+      return Promise.resolve(err(denied(input.context)));
+    }
+    consumedFamilyEmergencyCardExportProofs.add(input.authorizationProof);
+    const intent:LifePolicyIntent = {
+      action: 'share',
+      capability: 'file.share',
+      resourceType: 'life_record',
+      resourceId: input.command.profileId,
+      purpose: 'emergency-offline-portability',
+      requestedFields: selectionValidation.value.requestedFields
+    };
+    return this.unitOfWork.execute(input.context, intent, (scope) => {
+      if (!scope.authorizationReceiptHash
+        || !familyEmergencyCardArtifactSha256(scope.authorizationReceiptHash)) {
+        return err(denied(input.context));
+      }
+      const profileResult = scope.findFamilyEmergencyAssistanceProfile(input.command.profileId);
+      if (!profileResult.ok) return profileResult;
+      const profile = profileResult.value;
+      if (!profile
+        || profile.familyId !== input.context.familyId
+        || profile.privacy !== 'private'
+        || !input.context.actor.personId
+        || profile.ownerPersonId !== input.context.actor.personId) {
+        return err(denied(input.context));
+      }
+      const listResult = scope.listFamilyEmergencyCardPortabilityItems(profile.id);
+      if (!listResult.ok) return listResult;
+      const configuration = listResult.value.find((item):item is FamilyEmergencyCardConfigurationWriteRecord =>
+        item.id === input.command.configurationId
+        && item.itemType === 'card_configuration'
+        && item.profileId === profile.id
+        && item.familyId === profile.familyId
+        && item.ownerPersonId === profile.ownerPersonId
+        && item.privacy === 'private');
+      if (!configuration) return err(missing(input.context));
+
+      const preparedFields:PreparedFamilyEmergencyCardField[] = [];
+      for (const reference of input.command.selection.selectedFields) {
+        const selected = listResult.value.find((item):item is FamilyEmergencyCardSelectedFieldWriteRecord =>
+          item.id === reference.selectedFieldId
+          && item.itemType === 'selected_field'
+          && item.configurationId === configuration.id
+          && item.profileId === profile.id
+          && item.fieldCode === reference.fieldCode);
+        if (!selected) return err(invalid(input.context, 'Secili acil durum karti alani guncel yapilandirmada bulunamadi.'));
+        const sourceResult = scope.findFamilyEmergencyAssistanceItem(selected.sourceItemId);
+        if (!sourceResult.ok) return sourceResult;
+        const source = sourceResult.value;
+        const value = source
+          && source.itemType === selected.sourceItemType
+          && source.familyId === profile.familyId
+          && source.ownerPersonId === profile.ownerPersonId
+          && source.privacy === 'private'
+          && (source.itemType === 'emergency_profile' ? source.id === profile.id : source.profileId === profile.id)
+          ? preparedFamilyEmergencyCardFieldValue(source, selected.fieldCode)
+          : undefined;
+        if (value === undefined) {
+          return err(invalid(input.context, 'Secili acil durum karti kaynagi guncel, exact veya dolu degil.'));
+        }
+        preparedFields.push(Object.freeze({
+          selectedFieldId: selected.id,
+          sourceItemId: selected.sourceItemId,
+          sourceItemType: selected.sourceItemType,
+          fieldCode: selected.fieldCode,
+          value
+        }));
+      }
+      const documents:PreparedFamilyEmergencyCardDocument[] = [];
+      for (const documentLinkId of input.command.selection.documentLinkIds) {
+        const link = listResult.value.find((item):item is FamilyEmergencyCardDocumentLinkWriteRecord =>
+          item.id === documentLinkId
+          && item.itemType === 'document_link'
+          && item.configurationId === configuration.id
+          && item.profileId === profile.id);
+        if (!link) return err(invalid(input.context, 'Secili acil durum karti belgesi guncel yapilandirmada bulunamadi.'));
+        documents.push(Object.freeze({ documentLinkId: link.id, archiveItemId: link.archiveItemId }));
+      }
+      const completionProof = createFamilyEmergencyCardExportCompletionProof({
+        profileId: profile.id,
+        configurationId: configuration.id,
+        mode: input.command.mode,
+        selectionSha256: selectionValidation.value.selectionSha256,
+        shareReceiptHash: scope.authorizationReceiptHash,
+        selectedFieldCount: preparedFields.length,
+        documentCount: documents.length,
+        preparedAt: scope.occurredAt
+      });
+      return ok(Object.freeze({
+        profileId: profile.id,
+        configurationId: configuration.id,
+        configurationLabel: configuration.label,
+        locale: 'tr-TR',
+        mode: input.command.mode,
+        selectionSha256: selectionValidation.value.selectionSha256,
+        shareReceiptHash: scope.authorizationReceiptHash,
+        completionProof,
+        selectedFields: Object.freeze(preparedFields),
+        documents: Object.freeze(documents),
+        requestedFields: selectionValidation.value.requestedFields,
+        dataSource: 'manual',
+        offlineAvailability: 'local_only',
+        externalDelivery: 'not_performed',
+        cloudUpload: 'not_performed',
+        plaintextTemporaryFiles: 'not_created',
+        networkEgressAdded: false
+      }));
+    });
+  }
+}
+
+interface CompleteFamilyEmergencyCardExportCommandCommon {
+  readonly artifactSha256:string;
+  readonly artifactSizeBytes:number;
+  readonly powerSource:'battery'|'ac'|'unknown';
+  readonly batteryLevel:'not_measured';
+  readonly automaticLowBatteryDetection:'not_performed';
+  readonly lowBatteryClaimed:false;
+}
+export type CompleteFamilyEmergencyCardExportCommand =
+  | (CompleteFamilyEmergencyCardExportCommandCommon & {
+      readonly artifactReadbackStatus:'verified';
+    })
+  | (CompleteFamilyEmergencyCardExportCommandCommon & {
+      readonly artifactReadbackStatus:'not_applicable_print';
+      readonly printerDispatchStatus:'confirmed';
+    });
+
+const validateFamilyEmergencyCardExportCompletionCommand = (
+  context:LifeApplicationContext,
+  mode:FamilyEmergencyCardOutputMode,
+  command:CompleteFamilyEmergencyCardExportCommand
+):Result<void, AppError> => {
+  const commonKeys = [
+    'artifactSha256','artifactSizeBytes','powerSource','batteryLevel',
+    'automaticLowBatteryDetection','lowBatteryClaimed','artifactReadbackStatus'
+  ];
+  const expectedKeys = mode === 'print' ? [...commonKeys, 'printerDispatchStatus'] : commonKeys;
+  return Object.keys(command).sort().join('|') === expectedKeys.sort().join('|')
+    && familyEmergencyCardArtifactSha256(command.artifactSha256)
+    && managedLifeInteger(command.artifactSizeBytes, 1)
+    && command.artifactSizeBytes <= 50 * 1024 * 1024
+    && familyEmergencyCardPowerSources.has(command.powerSource)
+    && command.batteryLevel === 'not_measured'
+    && command.automaticLowBatteryDetection === 'not_performed'
+    && command.lowBatteryClaimed === false
+    && (mode === 'print'
+      ? command.artifactReadbackStatus === 'not_applicable_print'
+        && command.printerDispatchStatus === 'confirmed'
+      : command.artifactReadbackStatus === 'verified'
+        && !Object.hasOwn(command, 'printerDispatchStatus'))
+    ? ok(undefined)
+    : err(invalid(context, 'Acil durum karti completion cikti kaniti gecersiz.'));
+};
+
+export class RecordFamilyEmergencyCardExportCompletionUseCase {
+  public constructor(private readonly unitOfWork:LifeUnitOfWork) {}
+
+  public async execute(input:{
+    readonly context:LifeApplicationContext;
+    readonly command:CompleteFamilyEmergencyCardExportCommand;
+    readonly completionProof:FamilyEmergencyCardExportCompletionProof;
+    readonly identifiers:{
+      readonly itemId:string;
+      readonly auditId:string;
+      readonly outboxEventId:EventId;
+    };
+  }):Promise<Result<FamilyEmergencyCardExportEventLedgerItemView, AppError>> {
+    const binding = familyEmergencyCardExportCompletionBindings.get(input.completionProof);
+    if (!binding
+      || activeFamilyEmergencyCardExportCompletions.has(input.completionProof)
+      || consumedFamilyEmergencyCardExportCompletions.has(input.completionProof)) {
+      return err(denied(input.context));
+    }
+    const commandValidation = validateFamilyEmergencyCardExportCompletionCommand(
+      input.context,
+      binding.mode,
+      input.command
+    );
+    if (!commandValidation.ok) return commandValidation;
+    if (!managedLifeId(input.identifiers.itemId)) {
+      return err(invalid(input.context, 'Acil durum karti completion kayit kimligi gecersiz.'));
+    }
+    activeFamilyEmergencyCardExportCompletions.add(input.completionProof);
+    let succeeded = false;
+    try {
+      const intent:LifePolicyIntent = {
+        action: 'update',
+        capability: 'family.write',
+        resourceType: 'life_record',
+        resourceId: binding.profileId,
+        purpose: 'general'
+      };
+      const result = await this.unitOfWork.execute(input.context, intent, (scope) => {
+        const preparedAt = Date.parse(binding.preparedAt);
+        const completionAt = Date.parse(scope.occurredAt);
+        if (!Number.isFinite(preparedAt)
+          || !Number.isFinite(completionAt)
+          || completionAt < preparedAt
+          || completionAt - preparedAt > 5 * 60_000) {
+          return err(denied(input.context));
+        }
+        const profileResult = scope.findFamilyEmergencyAssistanceProfile(binding.profileId);
+        if (!profileResult.ok) return profileResult;
+        const profile = profileResult.value;
+        if (!profile
+          || profile.familyId !== input.context.familyId
+          || profile.privacy !== 'private'
+          || !input.context.actor.personId
+          || profile.ownerPersonId !== input.context.actor.personId) {
+          return err(denied(input.context));
+        }
+        const configurationResult = scope.findFamilyEmergencyCardConfiguration(binding.configurationId);
+        if (!configurationResult.ok) return configurationResult;
+        const configuration = configurationResult.value;
+        if (!configuration
+          || configuration.profileId !== profile.id
+          || configuration.familyId !== profile.familyId
+          || configuration.ownerPersonId !== profile.ownerPersonId
+          || configuration.privacy !== 'private') {
+          return err(invalid(input.context, 'Acil durum karti completion yapilandirma kokune bagli degil.'));
+        }
+        const authorization = scope.authorize({
+          action: 'update',
+          resourceType: 'life_record',
+          resourceId: profile.id,
+          ownerPersonId: profile.ownerPersonId,
+          privacy: 'private'
+        });
+        if (!authorization.ok) return authorization;
+        if (!authorization.value) return err(denied(input.context));
+        const common = {
+          itemType: 'export_event' as const,
+          profileId: profile.id,
+          configurationId: configuration.id,
+          selectedFieldCount: binding.selectedFieldCount,
+          documentCount: binding.documentCount,
+          selectionSha256: binding.selectionSha256,
+          shareReceiptHash: binding.shareReceiptHash,
+          artifactSha256: input.command.artifactSha256,
+          artifactSizeBytes: input.command.artifactSizeBytes,
+          powerSource: input.command.powerSource,
+          batteryLevel: 'not_measured' as const,
+          automaticLowBatteryDetection: 'not_performed' as const,
+          lowBatteryClaimed: false as const
+        };
+        const recordCommand:Extract<
+          RecordFamilyEmergencyCardPortabilityItemInput,
+          { readonly itemType:'export_event' }
+        > = binding.mode === 'print'
+          ? {
+              ...common,
+              mode: 'print',
+              artifactReadbackStatus: 'not_applicable_print',
+              printerDispatchStatus: 'confirmed'
+            }
+          : {
+              ...common,
+              mode: binding.mode,
+              artifactReadbackStatus: 'verified'
+            };
+        const relationValidation = validateFamilyEmergencyCardPortabilityRelations({
+          context: input.context,
+          command: recordCommand,
+          profile,
+          scope,
+          itemId: input.identifiers.itemId
+        });
+        if (!relationValidation.ok) return relationValidation;
+        const item = buildFamilyEmergencyCardPortabilityRecord({
+          context: input.context,
+          command: recordCommand,
+          profile,
+          itemId: input.identifiers.itemId,
+          createdAt: scope.occurredAt
+        }) as FamilyEmergencyCardExportEventWriteRecord;
+        const saved = scope.insertFamilyEmergencyCardPortabilityItem(item);
+        if (!saved.ok) return saved;
+        const audit = scope.appendAudit({
+          id: input.identifiers.auditId,
+          action: 'life.managed.private_export.recorded',
+          resourceType: 'life_record',
+          resourceId: profile.id,
+          occurredAt: scope.occurredAt,
+          actorId: input.context.actor.userId
+        });
+        if (!audit.ok) return audit;
+        const event = scope.enqueueEvent({
+          eventId: input.identifiers.outboxEventId,
+          eventType: 'life.managed.item_recorded',
+          eventVersion: 1,
+          aggregateType: 'life_record',
+          aggregateId: profile.id,
+          occurredAt: scope.occurredAt,
+          actorId: input.context.actor.userId,
+          correlationId: input.context.correlationId,
+          payload: {
+            itemId: item.id,
+            recordId: profile.id,
+            privacy: 'private' as const
+          }
+        });
+        if (!event.ok) return event;
+        return ok(projectFamilyEmergencyCardPortabilityItem(item) as
+          FamilyEmergencyCardExportEventLedgerItemView);
+      });
+      succeeded = result.ok;
+      return result;
+    } finally {
+      activeFamilyEmergencyCardExportCompletions.delete(input.completionProof);
+      if (succeeded) consumedFamilyEmergencyCardExportCompletions.add(input.completionProof);
+    }
   }
 }

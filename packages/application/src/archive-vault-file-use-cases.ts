@@ -31,6 +31,16 @@ export interface ArchiveVaultFilePort {
     },
     correlationId: CorrelationId
   ): Result<string, AppError>;
+  readBytes(
+    input: {
+      readonly itemId: string;
+      readonly storedName: string;
+      readonly expectedSha256: string;
+      readonly expectedSizeBytes: number;
+      readonly maximumBytes: number;
+    },
+    correlationId: CorrelationId
+  ): Result<Uint8Array, AppError>;
   destroy(
     input: { readonly storedName: string; readonly secureDestroy: boolean },
     correlationId: CorrelationId
@@ -77,6 +87,37 @@ export class MaterializeArchiveFileUseCase {
       return err(invalid(correlationId, 'Dosya özeti geçersizdir.'));
     }
     return this.files.materialize(input, correlationId);
+  }
+}
+
+export class ReadArchiveFileBytesUseCase {
+  public constructor(private readonly files: ArchiveVaultFilePort) {}
+
+  public execute(
+    correlationId: CorrelationId,
+    input: {
+      readonly itemId: string;
+      readonly storedName: string;
+      readonly expectedSha256: string;
+      readonly expectedSizeBytes: number;
+      readonly maximumBytes: number;
+    }
+  ): Result<Uint8Array, AppError> {
+    if (!input.itemId.trim()) return err(invalid(correlationId, 'Arşiv kaydı kimliği zorunludur.'));
+    if (!input.storedName.trim()) return err(invalid(correlationId, 'Kasa dosyası adı zorunludur.'));
+    if (!/^[a-f0-9]{64}$/i.test(input.expectedSha256)) {
+      return err(invalid(correlationId, 'Dosya özeti geçersizdir.'));
+    }
+    if (!Number.isSafeInteger(input.expectedSizeBytes) || input.expectedSizeBytes < 1) {
+      return err(invalid(correlationId, 'Beklenen dosya boyutu geçersizdir.'));
+    }
+    if (!Number.isSafeInteger(input.maximumBytes) || input.maximumBytes < 1) {
+      return err(invalid(correlationId, 'Dosya okuma üst sınırı geçersizdir.'));
+    }
+    if (input.expectedSizeBytes > input.maximumBytes) {
+      return err(invalid(correlationId, 'Arşiv dosyası izin verilen okuma üst sınırını aşıyor.'));
+    }
+    return this.files.readBytes(input, correlationId);
   }
 }
 

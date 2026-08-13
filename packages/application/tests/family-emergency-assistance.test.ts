@@ -384,7 +384,8 @@ describe('33-I private family emergency assistance boundary', () => {
     expect(workspace).toMatchObject({
       dataSource: 'manual', offlineAvailability: 'local_only',
       medicalVerification: 'not_performed', healthRegistryLookup: 'not_performed',
-      exportSharing: 'not_performed', messageDelivery: 'not_performed',
+      externalDelivery: 'not_performed', localExport: 'user_authorized_only',
+      cloudUpload: 'not_performed', messageDelivery: 'not_performed',
       emergencyServiceContact: 'not_performed', networkEgressAdded: false
     });
     const serialized = JSON.stringify(workspace);

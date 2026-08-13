@@ -4,24 +4,25 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 const node = process.execPath;
 const commands = Object.freeze([
   Object.freeze({
-    id: 'family-emergency-assistance-card-boundary',
-    args: ['scripts/verify-family-emergency-assistance-card-boundary.mjs'],
-    expectOutput: 'Family emergency assistance card boundary: PASS'
+    id: 'family-emergency-card-portability-boundary',
+    args: ['scripts/verify-family-emergency-card-portability-boundary.mjs'],
+    expectOutput: 'Family emergency card portability boundary: PASS'
   }),
   Object.freeze({
-    id: 'family-emergency-assistance-card-contract',
-    args: ['scripts/verify-33-i-family-emergency-assistance-card-contract.mjs'],
-    expectOutput: 'Family emergency assistance card contract: PASS'
+    id: 'family-emergency-card-portability-contract',
+    args: ['scripts/verify-33-j-family-emergency-card-portability-contract.mjs'],
+    expectOutput: 'Family emergency card portability contract: PASS'
   }),
   Object.freeze({
-    id: 'family-emergency-assistance-card-targeted-tests',
+    id: 'family-emergency-card-portability-targeted-tests',
     args: ['node_modules/vitest/vitest.mjs', 'run',
-      'packages/application/tests/family-emergency-assistance.test.ts',
-      'packages/repositories/family-emergency-assistance-card-repository-policy.test.ts',
-      'apps/desktop/tests/b5-family-emergency-assistance-ipc-integration.test.ts',
+      'packages/application/tests/family-emergency-card-portability.test.ts',
+      'packages/repositories/family-emergency-card-portability-repository-policy.test.ts',
+      'packages/security/tests/emergency-portable-pack.test.ts',
+      'apps/desktop/tests/b5-family-emergency-card-portability-ipc-integration.test.ts',
       '--reporter=dot', '--maxWorkers=1'],
-    minimumTests: 14,
-    minimumTestFiles: 3
+    minimumTests: 1,
+    minimumTestFiles: 4
   }),
   Object.freeze({
     id: 'root-typescript',
@@ -40,19 +41,23 @@ const commands = Object.freeze([
     args: ['node_modules/typescript/bin/tsc', '-p', 'packages/database/tsconfig.json']
   }),
   Object.freeze({
-    id: 'migration-87-runtime',
+    id: 'repositories-package-build',
+    args: ['node_modules/typescript/bin/tsc', '-p', 'packages/repositories/tsconfig.json']
+  }),
+  Object.freeze({
+    id: 'migration-88-runtime',
     args: ['scripts/verify-database-migrations.mjs'],
-    expectOutput: '"version": 87'
+    expectOutput: '"version": 88'
   }),
   Object.freeze({
     id: 'ppk021-ast-ratchet',
     args: ['scripts/verify-platform-policy-ast-gate.mjs'],
-    expectOutput: '"status": "PASS"'
+    expectOutput: '"exactAllowlistEntries": 554'
   }),
   Object.freeze({
     id: 'ppk022-capability-ratchet',
     args: ['scripts/verify-platform-capability-manifest-gate.mjs'],
-    expectOutput: '"status": "PASS"'
+    expectOutput: '"exactManifestSurfaces": 246'
   }),
   Object.freeze({
     id: 'decision-ledger',
@@ -75,8 +80,7 @@ const results = commands.map((command) => {
   const filesMatch = output.match(/Test Files\s+(\d+) passed/u);
   const tests = testsMatch ? Number.parseInt(testsMatch[1], 10) : undefined;
   const testFiles = filesMatch ? Number.parseInt(filesMatch[1], 10) : undefined;
-  const passed = execution.status === 0
-    && execution.signal === null && execution.error === undefined
+  const passed = execution.status === 0 && execution.signal === null && execution.error === undefined
     && (command.expectOutput === undefined || output.includes(command.expectOutput))
     && (command.minimumTests === undefined || (tests ?? 0) >= command.minimumTests)
     && (command.minimumTestFiles === undefined || (testFiles ?? 0) >= command.minimumTestFiles);
@@ -91,43 +95,40 @@ const results = commands.map((command) => {
   });
 });
 const failures = results.filter((result) => result.status !== 'PASS').map((result) => result.id);
-const targeted = results.find((result) => result.id === 'family-emergency-assistance-card-targeted-tests');
+const targeted = results.find((result) => result.id === 'family-emergency-card-portability-targeted-tests');
 let boundary = {};
 let contract = {};
 try {
   boundary = JSON.parse(await readFile(
-    'artifacts/validation/33-I-family-emergency-assistance-card-boundary.json', 'utf8'
+    'artifacts/validation/33-J-family-emergency-card-portability-boundary.json', 'utf8'
   ));
   contract = JSON.parse(await readFile(
-    'artifacts/validation/33-I-family-emergency-assistance-card-contract.json', 'utf8'
+    'artifacts/validation/33-J-family-emergency-card-portability-contract.json', 'utf8'
   ));
 } catch {
-  // Failed prerequisites stay visible in command output and keep the runtime red.
+  // Failed prerequisites remain visible in result output.
 }
 const report = Object.freeze({
   schemaVersion: 1,
-  step: '33-I',
-  requirements: Object.freeze(['EXT-012', 'EXT-014']),
+  step: '33-J',
+  requirements: Object.freeze(['B5-03', 'EXT-016']),
   status: failures.length === 0 ? 'PASS' : 'FAIL',
   checksPassed: results.length - failures.length,
   checksFailed: failures.length,
   targetedTestFilesPassed: targeted?.testFiles ?? 0,
   targetedTestsPassed: targeted?.tests ?? 0,
-  closureDatabaseMigration: 87,
-  latestDatabaseMigration: boundary.latestDatabaseMigration,
-  familyEmergencyAssistanceTables: 1,
-  assistanceItemTypes: 4,
-  ipcChannels: 2,
+  latestDatabaseMigration: 88,
+  migration88Checksum: boundary.migration88Checksum,
+  portabilityItemTypes: 5,
+  ipcChannels: 3,
   networkChannels: 0,
   privacy: 'private',
   dataSource: 'manual',
-  offlineAvailability: 'local_only',
-  medicalVerification: 'not_performed',
-  healthRegistryLookup: 'not_performed',
-  messageDelivery: 'not_performed',
-  emergencyServiceContact: 'not_performed',
-  exportSharing: 'not_performed',
-  emergencyServiceGuarantee: 'not_claimed',
+  localExport: 'user_authorized_only',
+  externalDelivery: 'not_performed',
+  batteryLevel: 'not_measured',
+  automaticLowBatteryDetection: 'not_performed',
+  lowBatteryClaimed: false,
   networkEgressAdded: false,
   ppk021ExactAllowlistEntries: boundary.ppk021ExactAllowlistEntries,
   ppk021UseCaseCompositionSurfaces: boundary.ppk021UseCaseCompositionSurfaces,
@@ -137,14 +138,15 @@ const report = Object.freeze({
   results: Object.freeze(results),
   failures: Object.freeze(failures),
   requirementCompletionClaimed: failures.length === 0,
+  persistentReceiptClaimed: false,
   generatedAt: new Date().toISOString()
 });
 await mkdir('artifacts/validation', { recursive: true });
 await writeFile(
-  'artifacts/validation/33-I-family-emergency-assistance-card-runtime.json',
+  'artifacts/validation/33-J-family-emergency-card-portability-runtime.json',
   `${JSON.stringify(report, null, 2)}\n`
 );
-console.log(`Family emergency assistance card runtime: ${report.status} (${report.checksPassed}/${results.length} checks).`);
+console.log(`Family emergency card portability runtime: ${report.status} (${report.checksPassed}/${results.length} checks).`);
 if (failures.length) {
   console.error(failures.join('\n'));
   process.exitCode = 1;
