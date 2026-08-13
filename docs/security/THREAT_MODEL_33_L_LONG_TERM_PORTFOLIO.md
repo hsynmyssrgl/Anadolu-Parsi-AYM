@@ -27,7 +27,7 @@ Renderer yalnız iki dar IPC kanalı kullanır: workspace okuma ve ayrıştırı
 | Receipt yeniden kullanımı | Mutation receipt UNIQUE; önceki finans tabloları ve yeni mutation arasında çift yönlü reuse trigger |
 | Aileler arası FK veya kaynak karışması | Mutation/portfolio/instrument/plan/allocation/event/price scope trigger'ları |
 | Eksik fiyatla sahte kesin sonuç | Eksik fiyat `missing` olarak taşınır; tüm pozisyonlar fiyatlanmadan portföy değeri/net sonuç üretilmez |
-| Senaryoyu garanti gibi sunma | UI ve workspace truth sözleşmesi broker execution/live guarantee/advice/return/tax-legal guarantee alanlarını açıkça reddeder |
+| 2032 senaryosunu garanti gibi sunma | UI ve workspace truth sözleşmesi broker execution/live guarantee/advice/return/tax-legal guarantee alanlarını açıkça reddeder |
 
 ## Kalan riskler
 
