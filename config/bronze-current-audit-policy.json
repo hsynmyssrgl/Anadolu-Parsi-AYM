@@ -76,6 +76,10 @@
     "scripts/verify-33-i-family-emergency-assistance-card-contract.mjs",
     "scripts/verify-33-i-family-emergency-assistance-card-runtime.mjs",
     "scripts/verify-33-i-family-emergency-assistance-card-completion.mjs",
+    "scripts/verify-family-emergency-card-portability-boundary.mjs",
+    "scripts/verify-33-j-family-emergency-card-portability-contract.mjs",
+    "scripts/verify-33-j-family-emergency-card-portability-runtime.mjs",
+    "scripts/verify-33-j-family-emergency-card-portability-completion.mjs",
     "scripts/verify-step-checkpoint-gate.mjs"
   ],
   "historicalProgressVerifier": "scripts/verify-29-d5-scope-real-progress-report.mjs",

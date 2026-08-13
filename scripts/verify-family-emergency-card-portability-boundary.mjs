@@ -3,6 +3,7 @@ import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import { runPlatformPolicyAstGate } from './verify-platform-policy-ast-gate.mjs';
 import { runPlatformCapabilityManifestGate } from './verify-platform-capability-manifest-gate.mjs';
+import { inspectAuthorizedSuccessorLifecycle } from './lib/authorized-successor-lifecycle.mjs';
 
 const text = (path) => readFile(path, 'utf8');
 const json = async (path) => JSON.parse(await text(path));
@@ -283,10 +284,23 @@ export const verifyFamilyEmergencyCardPortabilityBoundary = async () => {
   check('both registry requirements have exact complete 13-link chains', requirements.every((item) =>
     item?.status === 'COMPLETE' && Object.keys(item.chain ?? {}).length === 13
     && Object.values(item.chain).every((value) => value === true)));
-  check('33-J is active and 33-K is sole pending successor', workPlan.currentStep === '33-J'
-    && workPlan.steps?.some((step) => step.id === '33-J' && step.status === 'IN_PROGRESS')
-    && workPlan.steps?.filter((step) => step.status === 'PENDING').map((step) => step.id).join(',') === '33-K'
-    && activeLedger.activeMicroStep === '33-J');
+  const step33J = workPlan.steps?.find((step) => step.id === '33-J');
+  const step33K = workPlan.steps?.find((step) => step.id === '33-K');
+  const laterLifecycle = inspectAuthorizedSuccessorLifecycle({
+    plan: workPlan, ledger: activeLedger, predecessorId: '33-J'
+  });
+  const activeReady = workPlan.currentStep === '33-J' && step33J?.status === 'IN_PROGRESS'
+    && step33J.persistentReceiptStatus === 'PENDING' && step33K?.status === 'PENDING'
+    && activeLedger.activeMicroStep === '33-J';
+  const completedReady = workPlan.currentStep === '33-J' && step33J?.status === 'COMPLETED'
+    && step33J.validationStatus === 'PASS' && step33J.persistentReceiptStatus === 'PASS'
+    && step33J.completionTransitionStatus === 'PASS' && step33K?.status === 'PENDING'
+    && activeLedger.activeMicroStep === null
+    && activeLedger.libraryUploadStatus === '33-J_COMPLETED_RECEIPT_PASS'
+    && activeLedger.externalLibraryAuthority33J?.status === 'PASS';
+  check('33-J is active, receipt-complete, or preserved through an authorized successor',
+    activeReady || completedReady
+      || (laterLifecycle.planValid && laterLifecycle.ledgerValid && laterLifecycle.nextTaskValid));
   check('platform policy AST successor ratchet is exact green', astGate.status === 'PASS'
     && astGate.privilegedSurfaces === 554 && astGate.exactAllowlistEntries === 554
     && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 281 && astGate.directRoleAuthorizationBypasses === 0);

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-13T03:17:34.970Z",
+  "generatedAt": "2026-08-13T03:32:18.305Z",
   "release": "Bronze 04.08.2026.29",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
@@ -509,6 +509,38 @@
         "status": "PASS",
         "tail": [
           "33-I completion verification: PASS (66/66; local archive readback included)."
+        ]
+      },
+      {
+        "script": "scripts/verify-family-emergency-card-portability-boundary.mjs",
+        "exitCode": 0,
+        "status": "PASS",
+        "tail": [
+          "Family emergency card portability boundary: PASS (62/62 checks)."
+        ]
+      },
+      {
+        "script": "scripts/verify-33-j-family-emergency-card-portability-contract.mjs",
+        "exitCode": 0,
+        "status": "PASS",
+        "tail": [
+          "Family emergency card portability contract: PASS (16/16 checks)."
+        ]
+      },
+      {
+        "script": "scripts/verify-33-j-family-emergency-card-portability-runtime.mjs",
+        "exitCode": 0,
+        "status": "PASS",
+        "tail": [
+          "Family emergency card portability runtime: PASS (12/12 checks)."
+        ]
+      },
+      {
+        "script": "scripts/verify-33-j-family-emergency-card-portability-completion.mjs",
+        "exitCode": 0,
+        "status": "PASS",
+        "tail": [
+          "33-J completion verification: PASS (66/66; local archive readback included)."
         ]
       },
       {
@@ -1190,7 +1222,7 @@
     "freshnessVerifier": "scripts/generate-current-delivery-report.mjs invokes local and external live source-protection verification",
     "officialCompletionClaimed": true,
     "storageBackend": "EXTERNAL_USB_D_DRIVE",
-    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\7a84878afccee4326b2bfebdfd5cd68bb19e4ec280f8e6798effbe5b1610bde8"
+    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\a5457c98e3de2e0e31cff5e9a10d1572182f09aa38ebbe56d015585eab2e7d43"
   },
   "remainingWork": [
     {

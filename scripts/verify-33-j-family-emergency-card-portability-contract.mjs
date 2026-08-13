@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { inspectAuthorizedSuccessorLifecycle } from './lib/authorized-successor-lifecycle.mjs';
 
 const text = (path) => readFile(path, 'utf8');
 const json = async (path) => JSON.parse(await text(path));
@@ -16,7 +17,7 @@ const evidence = Object.freeze([
 
 const [
   registry, ledger, scope, inventory, boundary, migrationManifest, migrations,
-  rootPackage, decision, threatModel, auditDocument, masterRegister, workPlan,
+  rootPackage, decision, threatModel, auditDocument, masterRegister, workPlan, activeLedger,
   applicationTest, repositoryTest, encryptionTest, ipcTest
 ] = await Promise.all([
   json('config/accepted-scope-registry.json'),
@@ -32,6 +33,7 @@ const [
   text('docs/audit/33-J_FAMILY_EMERGENCY_CARD_PORTABILITY_UST_KAPANIS.md'),
   text('docs/10_MASTER_DECISION_REGISTER.md'),
   json('config/work-segmentation-plan.json'),
+  json('config/active-governance-ledger.json'),
   text('packages/application/tests/family-emergency-card-portability.test.ts'),
   text('packages/repositories/family-emergency-card-portability-repository-policy.test.ts'),
   text('packages/security/tests/emergency-portable-pack.test.ts'),
@@ -124,10 +126,23 @@ check('root lifecycle and explicit scripts bind current 33-J boundary', ['pretyp
     'verify:b5-family-emergency-card-portability:contract',
     'verify:b5-family-emergency-card-portability:runtime']
     .every((name) => typeof rootPackage.scripts?.[name] === 'string'));
-check('33-J lifecycle stays active while 33-K is sole pending successor', workPlan.currentStep === '33-J'
-  && workPlan.steps?.some((step) => step.id === '33-J' && step.status === 'IN_PROGRESS'
-    && step.validationStatus === 'PENDING' && step.persistentReceiptStatus === 'PENDING')
-  && workPlan.steps?.filter((step) => step.status === 'PENDING').map((step) => step.id).join(',') === '33-K');
+const step33J = workPlan.steps?.find((step) => step.id === '33-J');
+const step33K = workPlan.steps?.find((step) => step.id === '33-K');
+const laterLifecycle = inspectAuthorizedSuccessorLifecycle({
+  plan: workPlan, ledger: activeLedger, predecessorId: '33-J'
+});
+const activeReady = workPlan.currentStep === '33-J' && step33J?.status === 'IN_PROGRESS'
+  && step33J.persistentReceiptStatus === 'PENDING' && step33K?.status === 'PENDING'
+  && activeLedger.activeMicroStep === '33-J';
+const completedReady = workPlan.currentStep === '33-J' && step33J?.status === 'COMPLETED'
+  && step33J.validationStatus === 'PASS' && step33J.persistentReceiptStatus === 'PASS'
+  && step33J.completionTransitionStatus === 'PASS' && step33K?.status === 'PENDING'
+  && activeLedger.activeMicroStep === null
+  && activeLedger.libraryUploadStatus === '33-J_COMPLETED_RECEIPT_PASS'
+  && activeLedger.externalLibraryAuthority33J?.status === 'PASS';
+check('33-J lifecycle is active, receipt-complete, or preserved through an authorized successor',
+  activeReady || completedReady
+    || (laterLifecycle.planValid && laterLifecycle.ledgerValid && laterLifecycle.nextTaskValid));
 check('all contract prerequisites exist', [
   'config/33-j-family-emergency-card-portability-scope.json',
   'config/33-j-family-emergency-card-portability-inventory.json',
