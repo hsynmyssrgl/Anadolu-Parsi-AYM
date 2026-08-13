@@ -28,6 +28,17 @@ Bir çelişki olduğunda aşağıdaki sıra uygulanır:
 Eski kararlar silinmez; tarihsel kanıt olarak korunur. Ancak aktif ürün davranışını
 belirleyemez. Çelişki sessizce birleştirilmez; değişiklik kaydına işlenir.
 
+## DEC-221 — Yönetişimli çevrimdışı acil kart, yazdırılabilir/PDF çıktı, şifreli belge paketi ve pil-duyarlı kip
+
+33-J ile B5-03 ve EXT-016, 33-I'nin bağımsız `private` acil yardım profilini kaynak alan
+tek bir yönetişimli çıktı diliminde birlikte uygulanacaktır. Kapalı alan seçimi,
+yazdırılabilir/PDF çıktı, bağımsız parola anahtarlı şifreli belge paketi ve manuel ya da
+pil gücü gözlemine dayanan pil-duyarlı kip Migration 88 ile planlanır. Pil yüzdesi veya
+otomatik düşük-pil tespiti iddia edilmez. Gerçek dosya çıktısı genel `no_export` ilkesini
+gevşetmeden exact `file.share`, işleme bağlı güçlü kimlik doğrulama ve ayrı arşiv PEP
+kararı çözülmeden açılamaz. Ağ, mesaj veya bulut teslim kanalı eklenmez. Ayrıntılı karar:
+`docs/decisions/DEC-221-family-emergency-card-portability.md`
+
 ## DEC-220 — Çevrimdışı özel acil sağlık/iletişim kartı ve yardım profili
 
 33-I ile EXT-012 ve EXT-014 mevcut aile acil durum planına ilişkisel olarak bağlanan,

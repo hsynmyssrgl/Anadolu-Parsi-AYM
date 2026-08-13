@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "id": "33-J-FAMILY-EMERGENCY-CARD-PORTABILITY",
+  "decision": "DEC-221",
+  "requirements": ["B5-03", "EXT-016"],
+  "status": "IN_PROGRESS",
+  "model": {
+    "table": "family_emergency_card_portability_ledger",
+    "sourceTable": "family_emergency_assistance_ledger",
+    "sourceItemType": "emergency_profile",
+    "itemTypes": ["card_configuration", "selected_field", "document_link", "export_event", "power_mode_event"],
+    "appendOnly": true,
+    "policyRoot": "independent_private_emergency_profile",
+    "selectionModel": "closed_source_item_and_field_code_matrix",
+    "sourceScopeInherited": ["family", "owner", "privacy"],
+    "timestampRepresentation": "canonical_utc_iso"
+  },
+  "artifacts": {
+    "modes": ["print", "pdf", "encrypted_pack"],
+    "pdfEncryptionClaimed": false,
+    "encryptedPackFormat": "application_specific_portable_container",
+    "plaintextTemporaryFilesAllowed": false,
+    "externalDelivery": "not_performed",
+    "networkTransfer": "not_performed"
+  },
+  "security": {
+    "policyResourceType": "life_record",
+    "configurationPolicyCapability": "family.write",
+    "configurationPolicyAction": "update",
+    "exportPolicyCapability": "file.share",
+    "exportPolicyAction": "share",
+    "exportPolicyStatus": "PLANNED_EXACT_LOCAL_EXPORT_EXCEPTION_REQUIRED",
+    "strongAuthenticationRequired": true,
+    "strongAuthenticationBoundToOperation": true,
+    "explicitFieldSelectionRequired": true,
+    "portablePackKeySource": "independent_passphrase_derived_kek_and_random_dek",
+    "deviceVaultKeyReuseAllowed": false,
+    "archiveDocumentAuthorizationRequired": true,
+    "auditContainsSelectedSensitiveContent": false,
+    "outboxContainsSelectedSensitiveContent": false,
+    "updatesAllowed": false,
+    "deletesAllowed": false,
+    "crossLedgerReceiptReplayRejected": true
+  },
+  "power": {
+    "mode": "manual_or_battery_power_prompt",
+    "observedPowerSources": ["battery", "ac", "unknown"],
+    "batteryLevel": "not_measured",
+    "automaticLowBatteryDetection": "not_performed",
+    "lowBatteryClaimed": false
+  },
+  "truth": {
+    "dataSource": "manual",
+    "offlineAvailability": "local_only",
+    "medicalVerification": "not_performed",
+    "healthRegistryLookup": "not_performed",
+    "messageDelivery": "not_performed",
+    "cloudUpload": "not_performed",
+    "emergencyServiceContact": "not_performed",
+    "networkEgressAdded": false
+  },
+  "persistence": {
+    "migration": 88,
+    "migrationName": "b5_family_emergency_card_portability_ledger",
+    "status": "PLANNED"
+  },
+  "ratchets": {
+    "databaseMigration": { "from": 87, "to": 88 },
+    "ppk021": {
+      "currentExactAllowlistEntries": 545,
+      "currentUseCaseCompositionSurfaces": 277,
+      "status": "RECOUNT_REQUIRED_AFTER_IMPLEMENTATION"
+    },
+    "ppk022": {
+      "currentCapabilitySurfaces": 242,
+      "target": "PRESERVE_BY_REUSING_APPROVED_MAIN_PROCESS_FILE_IO_SURFACES",
+      "status": "RECOUNT_REQUIRED_AFTER_IMPLEMENTATION"
+    },
+    "signedApplicationCapability": {
+      "capability": "file.share",
+      "status": "PLANNED_MANIFEST_AND_POLICY_PACKAGE_RATCHET_REQUIRED"
+    }
+  },
+  "validation": {
+    "boundary": "artifacts/validation/33-J-family-emergency-card-portability-boundary.json",
+    "contract": "artifacts/validation/33-J-family-emergency-card-portability-contract.json",
+    "runtime": "artifacts/validation/33-J-family-emergency-card-portability-runtime.json",
+    "status": "PENDING"
+  },
+  "implementationBlockers": [
+    "EXACT_LOCAL_FILE_SHARE_POLICY_PATH_REQUIRED_WITHOUT_WEAKENING_GENERAL_NO_EXPORT",
+    "OPERATION_BOUND_STRONG_AUTHENTICATION_AND_EXPLICIT_SELECTION_RECEIPT_REQUIRED",
+    "IN_MEMORY_ARCHIVE_DOCUMENT_AUTHORIZATION_AND_DECRYPTION_REQUIRED"
+  ],
+  "excludedClaims": [
+    "Governance activation does not claim B5-03 or EXT-016 implementation or completion.",
+    "Battery percentage and automatic low-battery detection are not available and are not claimed.",
+    "A PDF produced by Electron is not claimed to be password-encrypted; encryption belongs to the separate portable pack.",
+    "No message, upload, cloud, emergency-service or other network delivery is performed.",
+    "Silver readiness, Bronze Final and a new Build number are not claimed."
+  ]
+}

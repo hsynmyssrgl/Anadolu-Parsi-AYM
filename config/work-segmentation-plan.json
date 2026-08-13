@@ -5,7 +5,7 @@
   "rule": "PR-171",
   "policy": "ONE_IN_PROGRESS_PREVIOUS_MUST_HAVE_PASS_AND_PERSISTENT_RECEIPT",
   "workflowStatus": "IN_PROGRESS",
-  "currentStep": "33-I",
+  "currentStep": "33-J",
   "steps": [
     {
       "id": "29-A",
@@ -2296,7 +2296,26 @@
     },
     {
       "id": "33-J",
-      "title": "Next governed multi-requirement Bronze slice after 33-I",
+      "title": "Governed offline emergency card printable/PDF encrypted document pack and battery-conscious mode",
+      "scopeRequirement": "B5-03,EXT-016",
+      "status": "IN_PROGRESS",
+      "validationStatus": "PENDING",
+      "localEvidence": [
+        "config/33-j-family-emergency-card-portability-scope.json",
+        "config/33-j-family-emergency-card-portability-inventory.json",
+        "docs/decisions/DEC-221-family-emergency-card-portability.md",
+        "docs/security/THREAT_MODEL_33_J_FAMILY_EMERGENCY_CARD_PORTABILITY.md",
+        "docs/audit/33-J_FAMILY_EMERGENCY_CARD_PORTABILITY_UST_KAPANIS.md",
+        "artifacts/validation/33-J-family-emergency-card-portability-boundary.json",
+        "artifacts/validation/33-J-family-emergency-card-portability-contract.json",
+        "artifacts/validation/33-J-family-emergency-card-portability-runtime.json"
+      ],
+      "persistentReceiptStatus": "PENDING",
+      "completionTransitionStatus": "PENDING"
+    },
+    {
+      "id": "33-K",
+      "title": "Next governed multi-requirement Bronze slice after 33-J",
       "scopeRequirement": "AUTO_PRIORITY_SELECTION",
       "status": "PENDING",
       "validationStatus": "PENDING",
@@ -2307,6 +2326,6 @@
   ],
   "recoveryAuthority": "NEW_CHAT_HANDOFF_Bronze_04.08.2026.29.md",
   "recoveryReason": "29-D_FAILED_POSTFLIGHT_EXIT_CODE_1_SPLIT_PER_PR-171",
-  "updatedAt": "2026-08-13T00:42:51.503Z",
-  "segmentationNote": "33-I is immutable COMPLETED/PASS with exact local and D: USB hash/size readback. 33-J remains PENDING for governed successor selection."
+  "updatedAt": "2026-08-13T01:07:47.073Z",
+  "segmentationNote": "33-I remains immutable COMPLETED/PASS with exact local and D: USB hash/size readback. DEC-221 activates 33-J for B5-03 and EXT-016; 33-K is the sole PENDING successor."
 }

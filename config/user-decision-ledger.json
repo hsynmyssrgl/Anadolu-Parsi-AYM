@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 74,
+  "decisionCount": 75,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1919,6 +1919,41 @@
         "docs/security/THREAT_MODEL_33_I_FAMILY_EMERGENCY_ASSISTANCE_CARD.md",
         "docs/audit/33-I_FAMILY_EMERGENCY_ASSISTANCE_CARD_UST_KAPANIS.md",
         "config/33-i-family-emergency-assistance-card-inventory.json"
+      ]
+    },
+    {
+      "id": "DEC-221",
+      "date": "2026-08-13",
+      "acceptedAt": "2026-08-13",
+      "title": "B5-03 and EXT-016 governed offline emergency card printable/PDF encrypted document pack and battery-conscious mode",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: continue full auto and close multiple requirements in one operation",
+      "document": "docs/decisions/DEC-221-family-emergency-card-portability.md",
+      "requirements": ["B5-03", "EXT-016"],
+      "codeAreas": [
+        "packages/domain/src/app-data.ts",
+        "packages/application/src/life-security.ts",
+        "packages/application/src/life-use-cases.ts",
+        "packages/database/src/family-database-migrations.ts",
+        "packages/repository-contracts/src/life-repository.ts",
+        "packages/repositories/src/life-repository.ts",
+        "packages/security/src/encryption.ts",
+        "apps/desktop/src/main/life-production-policy-runtime.ts",
+        "apps/desktop/src/main/life-application-adapter.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/main/ipc-request-lifecycle.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/renderer/ManagedLifePanel.tsx",
+        "scripts/verify-family-emergency-card-portability-boundary.mjs"
+      ],
+      "evidence": [
+        "artifacts/validation/33-J-family-emergency-card-portability-boundary.json",
+        "artifacts/validation/33-J-family-emergency-card-portability-contract.json",
+        "artifacts/validation/33-J-family-emergency-card-portability-runtime.json",
+        "docs/security/THREAT_MODEL_33_J_FAMILY_EMERGENCY_CARD_PORTABILITY.md",
+        "docs/audit/33-J_FAMILY_EMERGENCY_CARD_PORTABILITY_UST_KAPANIS.md",
+        "config/33-j-family-emergency-card-portability-inventory.json"
       ]
     }
   ]
