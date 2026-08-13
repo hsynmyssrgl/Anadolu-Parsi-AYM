@@ -196,6 +196,8 @@ check(
     && docs.contract.status === 'PASS' && docs.contract.checksFailed === 0
     && docs.contract.checksPassed === expectedValidation?.contractChecksPassed
     && docs.contract.migration86Checksum === expectedMigrationChecksum
+    && docs.contract.latestDatabaseMigration === docs.boundary.latestDatabaseMigration
+    && docs.contract.closureDatabaseMigration === expectedEvidence.latestDatabaseMigration
     && docs.contract.ppk021ExactAllowlistEntries === docs.boundary.ppk021ExactAllowlistEntries
     && docs.contract.ppk021UseCaseCompositionSurfaces
       === docs.boundary.ppk021UseCaseCompositionSurfaces

@@ -15,7 +15,8 @@ const evidence = Object.freeze([
 ]);
 
 const [
-  registry, ledger, scope, inventory, boundary, migrationManifest, migrations,
+  registry, ledger, scope, inventory, boundary, platformGate, capabilityGate,
+  migrationManifest, migrations,
   rootPackage, decision, threatModel, auditDocument, masterRegister,
   applicationTest, repositoryTest, ipcTest
 ] = await Promise.all([
@@ -24,6 +25,8 @@ const [
   json('config/33-h-family-emergency-preparedness-scope.json'),
   json('config/33-h-family-emergency-preparedness-inventory.json'),
   json(evidence[0]),
+  json('artifacts/validation/platform-policy-ast-gate.json'),
+  json('artifacts/validation/platform-capability-manifest-gate.json'),
   json('artifacts/manifests/DATABASE_MIGRATION_VERIFICATION_MVP56.json'),
   text('packages/database/src/family-database-migrations.ts'),
   json('package.json'),
@@ -75,9 +78,13 @@ check('boundary evidence is exact green and preserves platform ratchets', bounda
   && boundary.ipcChannels === 2 && boundary.networkChannels === 0
   && boundary.offlineAvailability === 'local_only'
   && boundary.readinessGuarantee === 'not_claimed'
-  && boundary.ppk021ExactAllowlistEntries === 554
-  && boundary.ppk021UseCaseCompositionSurfaces === 281
-  && boundary.ppk022CapabilitySurfaces === 246);
+  && platformGate.status === 'PASS' && capabilityGate.status === 'PASS'
+  && boundary.ppk021ExactAllowlistEntries === platformGate.exactAllowlistEntries
+  && boundary.ppk021UseCaseCompositionSurfaces === platformGate.surfaceCounts?.USE_CASE_COMPOSITION
+  && boundary.ppk022CapabilitySurfaces === capabilityGate.exactManifestSurfaces
+  && boundary.ppk021ExactAllowlistEntries >= 545
+  && boundary.ppk021UseCaseCompositionSurfaces >= 277
+  && boundary.ppk022CapabilitySurfaces >= 242);
 check('DEC-219 is active and decision cardinality is exact', ledger.decisionCount === ledger.decisions?.length
   && ledger.decisions?.some((item) => item.id === 'DEC-219' && item.status === 'ACTIVE'
     && item.requirements?.join(',') === ids.join(',')

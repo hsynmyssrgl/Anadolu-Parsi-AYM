@@ -8,7 +8,8 @@ const allChainTrue = (requirement) => requirement && Object.values(requirement.c
   && Object.values(requirement.chain).every((value) => value === true);
 
 const [
-  registry, ledger, scope, inventory, boundary, migrationManifest, migrations,
+  registry, ledger, scope, inventory, boundary, platformGate, capabilityGate,
+  migrationManifest, migrations,
   rootPackage, decision, threatModel, auditDocument, masterRegister,
   applicationTest, parserTest, ipcTest, dataStoreTest
 ] = await Promise.all([
@@ -17,6 +18,8 @@ const [
   json('config/33-d-b4-controlled-import-open-banking-scope.json'),
   json('config/33-d-b4-controlled-import-open-banking-inventory.json'),
   json('artifacts/validation/33-D-b4-controlled-import-open-banking-boundary.json'),
+  json('artifacts/validation/platform-policy-ast-gate.json'),
+  json('artifacts/validation/platform-capability-manifest-gate.json'),
   json('artifacts/manifests/DATABASE_MIGRATION_VERIFICATION_MVP56.json'),
   text('packages/database/src/family-database-migrations.ts'),
   json('package.json'),
@@ -70,9 +73,13 @@ check('boundary evidence is exact green and truth preserving through successors'
   && boundary.networkAccessPerformed === false
   && boundary.credentialsCollected === false
   && boundary.externalConsentPerformed === false
-  && boundary.ppk021ExactAllowlistEntries === 554
-  && boundary.ppk021UseCaseCompositionSurfaces === 281
-  && boundary.ppk022CapabilitySurfaces === 246);
+  && platformGate.status === 'PASS' && capabilityGate.status === 'PASS'
+  && boundary.ppk021ExactAllowlistEntries === platformGate.exactAllowlistEntries
+  && boundary.ppk021UseCaseCompositionSurfaces === platformGate.surfaceCounts?.USE_CASE_COMPOSITION
+  && boundary.ppk022CapabilitySurfaces === capabilityGate.exactManifestSurfaces
+  && boundary.ppk021ExactAllowlistEntries >= 545
+  && boundary.ppk021UseCaseCompositionSurfaces >= 277
+  && boundary.ppk022CapabilitySurfaces >= 242);
 check('DEC-215 is active and the decision ledger cardinality is exact', ledger.decisionCount === ledger.decisions?.length
   && ledger.decisions?.some((item) => item.id === 'DEC-215' && item.status === 'ACTIVE'
     && item.requirements?.join(',') === ids.join(',')

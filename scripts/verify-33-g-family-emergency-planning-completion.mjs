@@ -174,6 +174,8 @@ check(
     && docs.boundary.checksPassed === expectedValidation?.boundaryChecksPassed
     && docs.contract.status === 'PASS' && docs.contract.checksFailed === 0
     && docs.contract.checksPassed === expectedValidation?.contractChecksPassed
+    && docs.contract.latestDatabaseMigration === docs.boundary.latestDatabaseMigration
+    && docs.contract.closureDatabaseMigration === expectedValidation?.latestDatabaseMigration
     && docs.runtime.status === 'PASS' && docs.runtime.checksFailed === 0
     && docs.runtime.checksPassed === expectedValidation?.runtimeChecksPassed
     && docs.runtime.targetedTestFilesPassed === expectedValidation?.targetedTestFilesPassed

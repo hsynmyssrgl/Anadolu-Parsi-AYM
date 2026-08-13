@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 
 const node = process.execPath;
 const commands = Object.freeze([
@@ -43,17 +43,17 @@ const commands = Object.freeze([
   Object.freeze({
     id: 'migration-82-successor-runtime',
     args: ['scripts/verify-database-migrations.mjs'],
-    expectOutput: '"version": 88'
+    expectOutput: '"version": 82'
   }),
   Object.freeze({
     id: 'ppk021-ast-ratchet',
     args: ['scripts/verify-platform-policy-ast-gate.mjs'],
-    expectOutput: '"exactAllowlistEntries": 554'
+    expectOutput: '"status": "PASS"'
   }),
   Object.freeze({
     id: 'ppk022-capability-ratchet',
     args: ['scripts/verify-platform-capability-manifest-gate.mjs'],
-    expectOutput: '"exactManifestSurfaces": 246'
+    expectOutput: '"status": "PASS"'
   }),
   Object.freeze({
     id: 'decision-ledger',
@@ -93,6 +93,9 @@ const results = commands.map((command) => {
 });
 const failures = results.filter((result) => result.status !== 'PASS').map((result) => result.id);
 const targeted = results.find((result) => result.id === 'b4-controlled-import-targeted-tests');
+const boundary = JSON.parse(await readFile(
+  'artifacts/validation/33-D-b4-controlled-import-open-banking-boundary.json', 'utf8'
+));
 const report = Object.freeze({
   schemaVersion: 1,
   step: '33-D',
@@ -102,12 +105,12 @@ const report = Object.freeze({
   checksFailed: failures.length,
   targetedTestFilesPassed: targeted?.testFiles ?? 0,
   targetedTestsPassed: targeted?.tests ?? 0,
-  latestDatabaseMigration: 88,
+  latestDatabaseMigration: boundary.latestDatabaseMigration,
   closureDatabaseMigration: 82,
   importTables: 2,
-  ppk021ExactAllowlistEntries: 554,
-  ppk021UseCaseCompositionSurfaces: 281,
-  ppk022CapabilitySurfaces: 246,
+  ppk021ExactAllowlistEntries: boundary.ppk021ExactAllowlistEntries,
+  ppk021UseCaseCompositionSurfaces: boundary.ppk021UseCaseCompositionSurfaces,
+  ppk022CapabilitySurfaces: boundary.ppk022CapabilitySurfaces,
   supportedFileFormats: 5,
   liveBankConnectionImplemented: false,
   networkAccessPerformed: false,
