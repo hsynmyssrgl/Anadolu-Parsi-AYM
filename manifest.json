@@ -1,8 +1,8 @@
 {
   "schemaVersion": 3,
   "packageVersion": "4.8.2026-29",
-  "generatedAt": "2026-08-13T22:07:13.922Z",
-  "fileCount": 3977,
+  "generatedAt": "2026-08-13T22:11:20.636Z",
+  "fileCount": 3981,
   "files": [
     {
       "path": ".editorconfig",
@@ -3625,6 +3625,26 @@
       "bytes": 92
     },
     {
+      "path": "artifacts/checkpoints/33-M_COMPLETION_RECORD.json",
+      "sha256": "0c093bf8cc89a32423583c7b3f1f5a89f2805be3d7a4c85a48b6b650a9ebd398",
+      "bytes": 2586
+    },
+    {
+      "path": "artifacts/checkpoints/33-M_COMPLETION_RECORD.json.sha256",
+      "sha256": "581e0a4f5426c891e9335e3becccd42d5461238440435a4f37b64912019b39e3",
+      "bytes": 94
+    },
+    {
+      "path": "artifacts/checkpoints/33-M_LIBRARY_RECEIPT.json",
+      "sha256": "c2205f59dd9e22ce1e83daebc2e7597d7ae3f2caa5f9ff87ffd934414edcfa25",
+      "bytes": 2774
+    },
+    {
+      "path": "artifacts/checkpoints/33-M_LIBRARY_RECEIPT.json.sha256",
+      "sha256": "8985dfa04a17a463bc2e7c24c7a175ae501b02c773ee3ba7194a56ce8cbd8d94",
+      "bytes": 92
+    },
+    {
       "path": "artifacts/checkpoints/BRONZE_04.08.2026.29_CHECKPOINT_29-B_DURUM.md",
       "sha256": "30a6678d461e223f37662b646c6123d46e255668c8ea28454a34a5e8e5efaff3",
       "bytes": 824
@@ -4696,18 +4716,18 @@
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.csv",
-      "sha256": "41586e03418b543943e4610c4650be0a8a23185cd705c61454fde55db4b60808",
-      "bytes": 541716
+      "sha256": "4f7cd8a4eb1e4c868c87e41d0f8c80461eb380a805a94641bdfd269f5fcf20b0",
+      "bytes": 542930
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.json",
-      "sha256": "cc1f277e973c1cb9d214801b2fcb00b6395f497778d4820eb4fead8f95de572a",
-      "bytes": 1027135
+      "sha256": "28164854bbc8072e32268ddf91421516a75147b28650e8047dbff9929cb99a5f",
+      "bytes": 1029421
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.md",
-      "sha256": "4e26112a5e2e47a6d95667c579cfd1ac5efc2792372bb2eda710ed6ce75e55a9",
-      "bytes": 587978
+      "sha256": "40ce2ff8b0865066d686d285c1d955f547256b4b22aaf7ed868c0068b4087e0b",
+      "bytes": 589288
     },
     {
       "path": "artifacts/manifests/ARCHIVE_CLASSIFICATION_VERIFICATION_BUILD72.json",
@@ -5476,18 +5496,18 @@
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.csv",
-      "sha256": "d650bd1e4cae80e855c0a02bf94909becefef9e1fcb0103a8d95515d11b4402c",
-      "bytes": 889841
+      "sha256": "70cf1b6a37e86da0ae19e4a6eb763aec2d00bb29985ab3315a719bed69b2c5f8",
+      "bytes": 892342
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.json",
-      "sha256": "7e194a6f3a0ec50f97a084b231cb5c04c6e78d221eee26de3d1b7a053e7c243a",
-      "bytes": 1689082
+      "sha256": "66cd16d67c879a472e9b65d4415f88a653167649e1beb33ce56bf35e9b451dc2",
+      "bytes": 1693727
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.md",
-      "sha256": "f42e79e0b95b73593ba83571691b80e52f6c323897776d8a442de8cd03c9a921",
-      "bytes": 964930
+      "sha256": "0c86fd039b1f7c8deed3a55112b98ff9ae6f3776212864e9a2aa62832dbcf9e4",
+      "bytes": 967599
     },
     {
       "path": "artifacts/manifests/REPORT_SUMMARY_VERIFICATION_BUILD74.txt",
@@ -8906,13 +8926,13 @@
     },
     {
       "path": "config/33-m-accessibility-preference-center-inventory.json",
-      "sha256": "dcdf1304c8a37a7f1d1b2122b87ba90b1dc32a1145ca19a5d96a018bac9054d4",
-      "bytes": 3517
+      "sha256": "568af40b4688d0b637bd31bdc280d9f5ef9188428835c958fe60b871c78ad938",
+      "bytes": 3502
     },
     {
       "path": "config/33-m-accessibility-preference-center-scope.json",
-      "sha256": "3e37378cb3005c20183158430656505253fe37cc1ef3ef87198ad4d94a788210",
-      "bytes": 3305
+      "sha256": "7bc2d99d34fe1f5fa100ef53db5ca2d7472d1886abcd12f65c0c1167d3726b09",
+      "bytes": 3368
     },
     {
       "path": "config/accepted-cache-rc2-validation-policy.json",
@@ -8936,8 +8956,8 @@
     },
     {
       "path": "config/active-governance-ledger.json",
-      "sha256": "c41671eba6bdda3addac7b98eea052669ab808b532ca56fa1e5a854c8889ec0e",
-      "bytes": 48957
+      "sha256": "4a57a32e36fe2c2438b6b026dde48246e919ff8aa9307de3354ac0e361cf3f77",
+      "bytes": 49415
     },
     {
       "path": "config/additional-family-capabilities.json",
@@ -9071,8 +9091,8 @@
     },
     {
       "path": "config/remaining-scope-package-roadmap.json",
-      "sha256": "6791704c76d20889a8c339dabc806c4a4ac2352917ca4b14d72730795f7534b7",
-      "bytes": 18743
+      "sha256": "ac1d063d57514e25f548e60e633bc52563f74981bcc75a686d0671adfd130012",
+      "bytes": 18795
     },
     {
       "path": "config/rule-acknowledgement.json",
@@ -9101,8 +9121,8 @@
     },
     {
       "path": "config/work-segmentation-plan.json",
-      "sha256": "6cdd78b1e8b67f85e2254e9cfdffcb89ef65a2741ab752efade72cbb127f3e7a",
-      "bytes": 146588
+      "sha256": "41dd54ecf27062b42c59f54939b171f833b0f8f0ef840b94e1383f8a2f7ec653",
+      "bytes": 147267
     },
     {
       "path": "CONTRIBUTING.md",
@@ -10411,8 +10431,8 @@
     },
     {
       "path": "docs/audit/33-M_ACCESSIBILITY_PREFERENCE_CENTER_UST_KAPANIS.md",
-      "sha256": "3c27419f7021268d776a0462bf8024cafd727602e9c77688998ffeb637268652",
-      "bytes": 1558
+      "sha256": "35b80c09159a1a76c4d60e4f0fca112dd35c1393a959ee43f88de6223783069d",
+      "bytes": 971
     },
     {
       "path": "docs/audit/BRONZE_CURRENT_COMPLETION_AUDIT.md",
@@ -10561,8 +10581,8 @@
     },
     {
       "path": "docs/current/08_TUM_BELGELER_DIZINI.md",
-      "sha256": "4e26112a5e2e47a6d95667c579cfd1ac5efc2792372bb2eda710ed6ce75e55a9",
-      "bytes": 587978
+      "sha256": "40ce2ff8b0865066d686d285c1d955f547256b4b22aaf7ed868c0068b4087e0b",
+      "bytes": 589288
     },
     {
       "path": "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",

@@ -124,9 +124,7 @@
   "operatingSystemWrites": [],
   "manualCertificationEvidence": [],
   "openRequirements": [],
-  "openBlockers": [
-    "Persistent local and D: receipt, source protection and Git remote equality are pending."
-  ],
+  "openBlockers": [],
   "validation": {
     "status": "PASS",
     "boundaryChecks": 27,
@@ -135,5 +133,7 @@
     "targetedTestFiles": 5,
     "targetedTests": 19,
     "preparedAt": "2026-08-13T22:01:10.748Z"
-  }
+  },
+  "persistentReceiptStatus": "PASS",
+  "completedAt": "2026-08-13T22:10:09.423Z"
 }
