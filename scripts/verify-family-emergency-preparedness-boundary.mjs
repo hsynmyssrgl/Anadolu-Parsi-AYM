@@ -149,7 +149,9 @@ export const verifyFamilyEmergencyPreparednessBoundary = async () => {
       'FamilyEmergencyPreparednessRowCommon', 'familyId:FamilyId', 'ownerPersonId:PersonId',
       'FamilyEmergencyPreparednessLedgerItemRow', 'FamilyEmergencyPreparednessKitLedgerItemView'
     ]));
-  check('migration 86 is exact latest and additive', migrationVersions.at(-1) === 86
+  check('migration 86 remains present through authorized successor migrations',
+    (migrationVersions.at(-1) ?? 0) >= 86
+    && migrationVersions.includes(86)
     && includesAll(migrations, [
       "createMigrationDefinition(86, 'b5_family_emergency_preparedness_ledger'",
       'CREATE TABLE family_emergency_preparedness_ledger'
@@ -271,6 +273,7 @@ export const verifyFamilyEmergencyPreparednessBoundary = async () => {
     checks,
     failures,
     latestDatabaseMigration: migrationVersions.at(-1),
+    closureDatabaseMigration: 86,
     familyEmergencyPreparednessTables:
       (migrations.match(/CREATE TABLE family_emergency_preparedness_ledger/gu) ?? []).length,
     preparednessItemTypes: itemTypes.length,

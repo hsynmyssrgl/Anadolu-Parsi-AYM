@@ -1,12 +1,12 @@
 # Bronze guncel tamamlama denetimi
 
-Olusturma (UTC): 2026-08-12T23:45:30.465Z
+Olusturma (UTC): 2026-08-13T00:55:01.806Z
 
 ## Sonuc
 
 - Denetim durumu: **PASS_WITH_OPEN_SCOPE**
 - Yetkili kaynak: `06_KOD/app`
-- Guncel adim: **33-H**
+- Guncel adim: **33-I**
 - PPK-002: **COMPLETE**
 - PPK-003: **COMPLETE**
 - PPK-004: **COMPLETE**
@@ -23,19 +23,19 @@ Olusturma (UTC): 2026-08-12T23:45:30.465Z
 ## Yuzde gercekligi
 
 - Resmi agirlikli Bronze ilerlemesi: **%25**
-- Kati gereksinim kapanisi: **%20** (70/350)
-- Uygulama zinciri kapsami: **%20.4857**
-- Yonetisim ve kanit zinciri kapsami: **%54.6667**
+- Kati gereksinim kapanisi: **%20.5714** (72/350)
+- Uygulama zinciri kapsami: **%21.0571**
+- Yonetisim ve kanit zinciri kapsami: **%54.8571**
 
 Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 
 ## Kapsam durumu
 
-- COMPLETE: 70
+- COMPLETE: 72
 - PARTIAL: 26
 - FOUNDATION_STARTED: 1
-- NOT_IMPLEMENTED: 253
-- Toplam acik gereksinim: 280
+- NOT_IMPLEMENTED: 251
+- Toplam acik gereksinim: 278
 
 ## Kural ve kapilar
 
@@ -266,9 +266,9 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | B6-06 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | AI, Miras ve Entegrasyon | Apple/Google/Microsoft Authorization Code+PKCE+state+nonce+token vault |
 | B8-05 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Dayanıklılık ve Windows | 10k kişi/100k olay/10k belge metadata senaryosu ve 7 günlük soak hedefi |
 | DHA-025 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Observability | Yerel-first metrics, traces, structured logs ve correlationId |
-| EXT-012 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | DISASTER_EMERGENCY | Çevrimdışı acil sağlık ve iletişim kartı |
-| EXT-014 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | DISASTER_EMERGENCY | Engelli/ileri yaş/evcil hayvan özel yardım planı |
 | EXT-016 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | DISASTER_EMERGENCY | Şifreli acil belge paketi ve düşük pil modu |
+| EXT-036 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | PRIVACY_OWNERSHIP | Kullanıcıya tutulan verileri ve erişen kişileri gösterme |
+| EXT-037 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | PRIVACY_OWNERSHIP | Erişim nedeni ve son erişim geçmişi |
 
 Tam acik-is listesi `artifacts/inventory/BRONZE_CURRENT_COMPLETION_AUDIT.json` icindedir.
 

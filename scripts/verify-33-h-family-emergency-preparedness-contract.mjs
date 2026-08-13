@@ -69,7 +69,8 @@ check('scope truth remains manual local offline and no-service', scope.truth?.da
   && scope.truth?.readinessGuarantee === 'not_claimed'
   && scope.truth?.networkEgressAdded === false);
 check('boundary evidence is exact green and preserves platform ratchets', boundary.status === 'PASS'
-  && boundary.checksFailed === 0 && boundary.latestDatabaseMigration === 86
+  && boundary.checksFailed === 0 && boundary.latestDatabaseMigration >= 86
+  && boundary.closureDatabaseMigration === 86
   && boundary.familyEmergencyPreparednessTables === 1 && boundary.preparednessItemTypes === 4
   && boundary.ipcChannels === 2 && boundary.networkChannels === 0
   && boundary.offlineAvailability === 'local_only'
@@ -81,7 +82,8 @@ check('DEC-219 is active and decision cardinality is exact', ledger.decisionCoun
   && ledger.decisions?.some((item) => item.id === 'DEC-219' && item.status === 'ACTIVE'
     && item.requirements?.join(',') === ids.join(',')
     && item.document === 'docs/decisions/DEC-219-family-emergency-preparedness-kits-and-drills.md'));
-check('migration 86 is latest and source-manifest identity is exact', migrationVersions.at(-1) === 86
+check('migration 86 remains exact while authorized successor migrations may be current',
+  (migrationVersions.at(-1) ?? 0) >= 86 && migrationVersions.includes(86)
   && migrations.includes("createMigrationDefinition(86, 'b5_family_emergency_preparedness_ledger'")
   && migrationManifest.status === 'passed' && migrationManifest.checkCount === 9
   && migration86?.name === 'b5_family_emergency_preparedness_ledger'
@@ -135,6 +137,7 @@ const report = Object.freeze({
   checks: Object.freeze(checks),
   failures: Object.freeze(failures),
   latestDatabaseMigration: migrationVersions.at(-1),
+  closureDatabaseMigration: 86,
   migration86Checksum: migration86?.checksum,
   ppk021ExactAllowlistEntries: boundary.ppk021ExactAllowlistEntries,
   ppk021UseCaseCompositionSurfaces: boundary.ppk021UseCaseCompositionSurfaces,

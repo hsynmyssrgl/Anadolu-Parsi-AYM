@@ -191,7 +191,8 @@ check(
     && docs.boundary.ppk021UseCaseCompositionSurfaces
       === expectedEvidence.ppk021UseCaseCompositionSurfaces
     && docs.boundary.ppk022CapabilitySurfaces === expectedEvidence.ppk022CapabilitySurfaces
-    && docs.boundary.latestDatabaseMigration === expectedEvidence.latestDatabaseMigration
+    && docs.boundary.latestDatabaseMigration >= expectedEvidence.latestDatabaseMigration
+    && docs.boundary.closureDatabaseMigration === expectedEvidence.latestDatabaseMigration
     && docs.contract.status === 'PASS' && docs.contract.checksFailed === 0
     && docs.contract.checksPassed === expectedValidation?.contractChecksPassed
     && docs.contract.migration86Checksum === expectedMigrationChecksum
@@ -206,7 +207,8 @@ check(
     && docs.runtime.ppk021ExactAllowlistEntries === expectedValidation?.ppk021ExactAllowlistEntries
     && docs.runtime.ppk021UseCaseCompositionSurfaces === expectedValidation?.ppk021UseCaseCompositionSurfaces
     && docs.runtime.ppk022CapabilitySurfaces === expectedValidation?.ppk022CapabilitySurfaces
-    && docs.runtime.latestDatabaseMigration === expectedValidation?.latestDatabaseMigration,
+    && docs.runtime.latestDatabaseMigration >= expectedValidation?.latestDatabaseMigration
+    && docs.runtime.closureDatabaseMigration === expectedValidation?.latestDatabaseMigration,
   'boundary, contract, runtime, and targeted evidence bind the declared final vector'
 );
 check(proofKeys.every((key) =>

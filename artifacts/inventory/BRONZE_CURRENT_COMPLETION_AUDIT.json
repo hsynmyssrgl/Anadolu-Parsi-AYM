@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-12T23:45:30.465Z",
+  "generatedAt": "2026-08-13T00:55:01.806Z",
   "release": "Bronze 04.08.2026.29",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
@@ -15,7 +15,7 @@
   "PPK011": "COMPLETE",
   "PPK012": "COMPLETE",
   "authoritativeSource": "06_KOD/app",
-  "currentStep": "33-H",
+  "currentStep": "33-I",
   "status": "PASS_WITH_OPEN_SCOPE",
   "numberingAssessment": {
     "status": "CORRECT_ONLY_WITH_GATED_APPEND_ONLY_NUMBERING",
@@ -29,17 +29,17 @@
   "percentages": {
     "officialWeightedBronzePercent": 25,
     "officialWeightedEvidenceStep": "31-T",
-    "strictRequirementCompletionPercent": 20,
-    "implementationChainCoveragePercent": 20.4857,
-    "governanceEvidenceChainCoveragePercent": 54.6667,
+    "strictRequirementCompletionPercent": 20.5714,
+    "implementationChainCoveragePercent": 21.0571,
+    "governanceEvidenceChainCoveragePercent": 54.8571,
     "interpretation": "These are separate measures and must not be blended into an invented single completion claim."
   },
   "scope": {
     "total": 350,
     "statusCounts": {
-      "COMPLETE": 70,
+      "COMPLETE": 72,
       "FOUNDATION_STARTED": 1,
-      "NOT_IMPLEMENTED": 253,
+      "NOT_IMPLEMENTED": 251,
       "PARTIAL": 26
     },
     "priorityCounts": {
@@ -48,21 +48,21 @@
       "P2": 5
     },
     "completeByPriority": {
-      "P0": 58,
+      "P0": 60,
       "P1": 12,
       "P2": 0
     },
-    "incompleteCount": 280,
-    "strictComplete": 70,
+    "incompleteCount": 278,
+    "strictComplete": 72,
     "implementationCoverage": {
-      "passed": 717,
+      "passed": 737,
       "total": 3500,
-      "percent": 20.4857
+      "percent": 21.0571
     },
     "governanceCoverage": {
-      "passed": 574,
+      "passed": 576,
       "total": 1050,
-      "percent": 54.6667
+      "percent": 54.8571
     }
   },
   "rules": {
@@ -480,11 +480,35 @@
         ]
       },
       {
+        "script": "scripts/verify-family-emergency-assistance-card-boundary.mjs",
+        "exitCode": 0,
+        "status": "PASS",
+        "tail": [
+          "Family emergency assistance card boundary: PASS (55/55 checks)."
+        ]
+      },
+      {
+        "script": "scripts/verify-33-i-family-emergency-assistance-card-contract.mjs",
+        "exitCode": 0,
+        "status": "PASS",
+        "tail": [
+          "Family emergency assistance card contract: PASS (15/15 checks)."
+        ]
+      },
+      {
+        "script": "scripts/verify-33-i-family-emergency-assistance-card-runtime.mjs",
+        "exitCode": 0,
+        "status": "PASS",
+        "tail": [
+          "Family emergency assistance card runtime: PASS (11/11 checks)."
+        ]
+      },
+      {
         "script": "scripts/verify-step-checkpoint-gate.mjs",
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "Step Checkpoint Gate: PASS (1998 checks / current 33-H)."
+          "Step Checkpoint Gate: PASS (2024 checks / current 33-I)."
         ]
       }
     ],
@@ -1158,7 +1182,7 @@
     "freshnessVerifier": "scripts/generate-current-delivery-report.mjs invokes local and external live source-protection verification",
     "officialCompletionClaimed": true,
     "storageBackend": "EXTERNAL_USB_D_DRIVE",
-    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\fdaf6ebdff3a0a95f0293c5d7f74abd1770f79c71fce9f33b081f72863ad6f63"
+    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\a8893dabf64880b68a4883e423f747bc6664a173c4c6be1da0131405415ea6d0"
   },
   "remainingWork": [
     {
@@ -1785,52 +1809,6 @@
         "menu",
         "targetedTest",
         "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "EXT-012",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "DISASTER_EMERGENCY",
-      "title": "Çevrimdışı acil sağlık ve iletişim kartı",
-      "completedChainCount": 2,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "evidence"
-      ]
-    },
-    {
-      "id": "EXT-014",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "DISASTER_EMERGENCY",
-      "title": "Engelli/ileri yaş/evcil hayvan özel yardım planı",
-      "completedChainCount": 2,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
         "evidence"
       ]
     },
