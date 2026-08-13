@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "release": "Bronze 04.08.2026.29",
   "releaseId": "bronze-2026-08-04-r29",
-  "generatedAt": "2026-08-13T03:32:49.125Z",
+  "generatedAt": "2026-08-13T03:34:27.103Z",
   "selfIndexedPaths": [
     "SHA256SUMS.txt",
     "artifacts/manifests/ALL_DOCUMENTS_INDEX.csv",
@@ -4922,8 +4922,8 @@
     },
     {
       "path": "artifacts/deliveries/Anadolu_Parsi_Aile_Yasam_Merkezi_Bronze_04.08.2026.29.json",
-      "bytes": 29151,
-      "sha256": "f7be27120a612be4bb4a68149a0d7dcf82bb2d846ececef5754e4b2f4b615827",
+      "bytes": 31719,
+      "sha256": "52fd3a821bf18bb3dbebeaaae70584756b88f5716c598f21184c4704f4ef15f3",
       "extension": ".json",
       "classification": "GENERATED",
       "isDocument": true
@@ -8498,8 +8498,8 @@
     },
     {
       "path": "artifacts/reports/DELIVERY_STATUS_04.08.2026.29.json",
-      "bytes": 29151,
-      "sha256": "f7be27120a612be4bb4a68149a0d7dcf82bb2d846ececef5754e4b2f4b615827",
+      "bytes": 31719,
+      "sha256": "52fd3a821bf18bb3dbebeaaae70584756b88f5716c598f21184c4704f4ef15f3",
       "extension": ".json",
       "classification": "GENERATED",
       "isDocument": true
@@ -16443,7 +16443,7 @@
     {
       "path": "artifacts/validation/active-release-contract-v2.json",
       "bytes": 186,
-      "sha256": "a21d4c201dad6070ea264fc9099d718f4499817aaa526146ef1486aff23ec55e",
+      "sha256": "b393c3a61576715ce235ceaba760a9a9096fd92d7c5f43bfed548b001a05545b",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17011,7 +17011,7 @@
     {
       "path": "artifacts/validation/canonical-rule-registry-gate.json",
       "bytes": 322,
-      "sha256": "a7a21b52a55329c193c3554988a63ed80ed9f6e610fbe531496634920fad1d95",
+      "sha256": "827e35b8d56e7e4b68718c4058ed6c2e17adf756a93ab075499bf88ca40cf7bf",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17027,7 +17027,7 @@
     {
       "path": "artifacts/validation/conversation-capacity.json",
       "bytes": 241,
-      "sha256": "43729e1c2990c230efcc4193f54c7f79c48aef7b0aca415a2acad1c3508b4c88",
+      "sha256": "843326dbb0bd4c40dc5c0058d7fe9b7ca851e0e1e0af5a20a03401c84a57135a",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17035,7 +17035,7 @@
     {
       "path": "artifacts/validation/core-service-boundary.json",
       "bytes": 123,
-      "sha256": "1cb4f97b935fcff28217f5105093bf8af2249b0fe9418c8761b9de68155b4ec2",
+      "sha256": "c330edbce8ba743fabd18a9e1676fe0637da1446fb8b57fc8c0f4093d8e0ec6b",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17043,7 +17043,7 @@
     {
       "path": "artifacts/validation/core-service-local-admin-contract.json",
       "bytes": 260,
-      "sha256": "5de2b8a60566edf8e8d923aef3944681855fc535948cc22dfe63c57d70e7509e",
+      "sha256": "a0ada7e74828151446b1e4b983fa3c42a4b59612545c61239a23fc2f24845de2",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17059,7 +17059,7 @@
     {
       "path": "artifacts/validation/delivery-report-contract-v2.json",
       "bytes": 161,
-      "sha256": "5556109080aa071161c0516905d2a996f44613cac7823680c65462bbfe82e746",
+      "sha256": "2913d9ddff7837f1155f98ffb8c245f229a595f29be61362eec57e6c53a832f1",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17067,7 +17067,7 @@
     {
       "path": "artifacts/validation/desktop-core-service-startup-contract.json",
       "bytes": 161,
-      "sha256": "23e4166839ae5aeaf22e272504c85114c264470fa34a0544cf0d70a59d3a6bdf",
+      "sha256": "7e3404293a1e17ceda8ecca33c822cef24d1a7afb436d988ffc09ad954bb2e5f",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17075,7 +17075,7 @@
     {
       "path": "artifacts/validation/desktop-core-service-startup-runtime.json",
       "bytes": 161,
-      "sha256": "8a6df91924239cec3f399f71e02df1681c69d8cfa24dcf97e5471e110805bf84",
+      "sha256": "c7730fc079a0b6403a31a3ed30fbebb68f3b39da87aca622c5ac3c5015349441",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17091,7 +17091,7 @@
     {
       "path": "artifacts/validation/feature-reality-gate.json",
       "bytes": 673,
-      "sha256": "4df9c6ca411b30afc0aa1e8a497ae3555aabd68c98fecebef331dbe6df1ab717",
+      "sha256": "b306cec7f72cd57a21b98feeab7f546545c09c058759b1252092c9c5330f7485",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17114,8 +17114,8 @@
     },
     {
       "path": "artifacts/validation/governed-preflight.json",
-      "bytes": 5938,
-      "sha256": "5dd7147094a9cf4cbe447f2c9f229878bfd4d469425424c30ba342bda611ce3e",
+      "bytes": 5937,
+      "sha256": "3d737bced74f9b8b8ad1ab292b02b5bddfe9cb9c465fbcb30b4afdf023cf0d69",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17179,7 +17179,7 @@
     {
       "path": "artifacts/validation/platform-policy-gate.json",
       "bytes": 2197,
-      "sha256": "67b519d7d252c315f1d8fe303cb35c0b1a784c1109e09d29f1e9dd01a87cc887",
+      "sha256": "de929b3a10672f9836d606f2f238b94d2b80b991a567857cb870cba4b2a6f768",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17211,7 +17211,7 @@
     {
       "path": "artifacts/validation/project-artifact-index-gate-v2.json",
       "bytes": 212,
-      "sha256": "0c7da646bf2e69252c1e658f689f6826a960a093d3765043bc5e209d6cc8bd77",
+      "sha256": "54ebff11d9b4f2ddd4defa17c83b6cfee009005b98a8d2d3bc2f62141904c017",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17243,7 +17243,7 @@
     {
       "path": "artifacts/validation/step-checkpoint-gate.json",
       "bytes": 188,
-      "sha256": "e49517c19246109f6304b98c6734a25952dcb1521728111f7ee14155372591ca",
+      "sha256": "46fd3e1343905fc8a5ca4c773c8fca00b92c014fdaa6502a157999942a4690d7",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17259,7 +17259,7 @@
     {
       "path": "artifacts/validation/system-health-core-service-ipc-contract.json",
       "bytes": 161,
-      "sha256": "adb1e684f26b4a83a6fb2be33cf7816021965b089726d61c581b2a939bcfce7b",
+      "sha256": "e581a22b0cb57ffd3cc4dc39aee5adc6f7689023c71d9516794e340508410f36",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17267,7 +17267,7 @@
     {
       "path": "artifacts/validation/system-health-core-service-ipc-runtime.json",
       "bytes": 161,
-      "sha256": "62469edc39d9dcfa5afe76c1dcd0756b7313030c4e1b776f933105903f0d4420",
+      "sha256": "cac8858d9855e6f5ea84699493df80f7d570851e55dbb9ac6b95c6899fe0f06c",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17275,7 +17275,7 @@
     {
       "path": "artifacts/validation/universal-rule-enforcement-gate.json",
       "bytes": 299,
-      "sha256": "bec451bd8573e3652b5907be606d643e9e0ce73861ec0d619f81260894443c42",
+      "sha256": "651fc3240615cd34e09a6d7bd53a074bbb4d9983d0a5215b4b777313f05439a7",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17291,7 +17291,7 @@
     {
       "path": "artifacts/validation/user-decision-ledger-gate.json",
       "bytes": 181,
-      "sha256": "7073c4146de5559c1966e2d76393dfc266b17298288505d11a62ceec358db354",
+      "sha256": "92e1ba902b998ee2024fc04dac3273aa975bb3afeea0d036ff6319c07afe9c71",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
