@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "packageVersion": "4.8.2026-29",
-  "generatedAt": "2026-08-13T03:33:58.942Z",
+  "generatedAt": "2026-08-13T03:37:16.358Z",
   "fileCount": 3915,
   "files": [
     {
@@ -3581,7 +3581,7 @@
     },
     {
       "path": "artifacts/deliveries/Anadolu_Parsi_Aile_Yasam_Merkezi_Bronze_04.08.2026.29.json",
-      "sha256": "52fd3a821bf18bb3dbebeaaae70584756b88f5716c598f21184c4704f4ef15f3",
+      "sha256": "b1f418452a176efcaff2c0b431e4b19d746913fa936b3c4de779bd2196426dc5",
       "bytes": 31719
     },
     {
@@ -4616,17 +4616,17 @@
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.csv",
-      "sha256": "294c48831f1c2f3940280ffdca63d040f828b5b5a5b7e2df2b974acc497b0107",
+      "sha256": "ea4ae88d162bb5fdfcfc8a9540747f957bcc8574b987f7dbc6e140e011402ffe",
       "bytes": 535419
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.json",
-      "sha256": "2828fcc81c3868313f9895f9f42e01837275e0be4645c0b2d48ba366fc6a4308",
+      "sha256": "705400ec048fb4fc53441084dc0da9d363a5c547a732aba8e2a12e01db31937f",
       "bytes": 1015344
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.md",
-      "sha256": "b6a9ffb8711e8bb9241deaf1b99a068848c525fc5a959f284f5f538be6890161",
+      "sha256": "cf8ac7ed2abaf6b29e9cb8ca2840784eee008ac1569465c91f689dcf555e962f",
       "bytes": 581171
     },
     {
@@ -5396,17 +5396,17 @@
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.csv",
-      "sha256": "59f984e797c3e2ac85793f9ba8b65d03cdb2e8d857b2a6f685d4c8828f322c7b",
+      "sha256": "e9bcc83f7565ca510ce64183a9cce1497a60fb0211710ee050d4c5712f8d21ba",
       "bytes": 874640
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.json",
-      "sha256": "a72eb9d5429f701c3ca76a534e0359b1e16be73dc9bb95cb405058d3fa0fd8b5",
+      "sha256": "e6edb5f34bcefe81ab5b0c46847e408cf32595009c83a6bcd472e05bf2583036",
       "bytes": 1660749
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.md",
-      "sha256": "0f78ad7caea36fb299119019f7c579048d1b40b07b83e073a767871bb7eca2f1",
+      "sha256": "b3f83243d5ee219f4e6ba0258a2f98d8cbdc08e58b14b421a2b8985e378e0815",
       "bytes": 948559
     },
     {
@@ -5831,7 +5831,7 @@
     },
     {
       "path": "artifacts/reports/DELIVERY_STATUS_04.08.2026.29.json",
-      "sha256": "52fd3a821bf18bb3dbebeaaae70584756b88f5716c598f21184c4704f4ef15f3",
+      "sha256": "b1f418452a176efcaff2c0b431e4b19d746913fa936b3c4de779bd2196426dc5",
       "bytes": 31719
     },
     {
@@ -10431,7 +10431,7 @@
     },
     {
       "path": "docs/current/08_TUM_BELGELER_DIZINI.md",
-      "sha256": "b6a9ffb8711e8bb9241deaf1b99a068848c525fc5a959f284f5f538be6890161",
+      "sha256": "cf8ac7ed2abaf6b29e9cb8ca2840784eee008ac1569465c91f689dcf555e962f",
       "bytes": 581171
     },
     {
