@@ -2298,6 +2298,6 @@
   ],
   "recoveryAuthority": "NEW_CHAT_HANDOFF_Bronze_04.08.2026.29.md",
   "recoveryReason": "29-D_FAILED_POSTFLIGHT_EXIT_CODE_1_SPLIT_PER_PR-171",
-  "updatedAt": "2026-08-12T23:53:14.000Z",
-  "segmentationNote": "33-H remains immutable COMPLETED/PASS with exact local and D: USB hash/size readback. DEC-220 activates 33-I for EXT-012 and EXT-014; 33-J is the sole PENDING successor."
+  "updatedAt": "2026-08-13T00:40:00.000Z",
+  "segmentationNote": "33-H remains immutable COMPLETED/PASS with exact local and D: USB hash/size readback. 33-I is local validation PASS for EXT-012 and EXT-014 and remains IN_PROGRESS pending exact persistent Library receipt/completion; 33-J is the sole PENDING successor."
 }

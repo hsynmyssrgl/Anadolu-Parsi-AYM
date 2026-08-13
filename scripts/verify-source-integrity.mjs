@@ -1,6 +1,7 @@
 import { verifySourceManifestIntegrity, writeIntegrityReport } from './lib/source-manifest.mjs';
 
 const cliArgs = process.argv.slice(2);
+const noReport = cliArgs.includes('--no-report');
 const optionValue = (name, fallback) => {
   const index = cliArgs.indexOf(name);
   if (index < 0) return fallback;
@@ -27,7 +28,7 @@ try {
     failures: [error instanceof Error ? error.message : String(error)]
   };
 }
-await writeIntegrityReport(reportPath, report);
+if (!noReport) await writeIntegrityReport(reportPath, report);
 console.log(`Source integrity: ${report.status} — manifest=${report.manifestFileCount}, source=${report.actualSourceFileCount}, sha256=${report.sha256EntryCount}`);
 for (const failure of report.failures.slice(0, 50)) console.error(`- ${failure}`);
 if (report.status !== 'PASS') process.exitCode = 1;

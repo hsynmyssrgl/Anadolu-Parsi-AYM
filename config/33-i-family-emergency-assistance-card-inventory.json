@@ -2,23 +2,23 @@
   "schemaVersion": 1,
   "step": "33-I",
   "requirements": ["EXT-012", "EXT-014"],
-  "status": "IN_PROGRESS",
+  "status": "COMPLETE",
   "surfaces": [
-    { "id": "domain-contract", "paths": ["packages/domain/src/app-data.ts"], "disposition": "IN_PROGRESS" },
-    { "id": "application-validation-and-use-cases", "paths": ["packages/application/src/life-use-cases.ts", "packages/application/src/life-security.ts"], "disposition": "IN_PROGRESS" },
-    { "id": "repository-contract", "paths": ["packages/repository-contracts/src/life-repository.ts"], "disposition": "IN_PROGRESS" },
-    { "id": "sqlite-repository", "paths": ["packages/repositories/src/life-repository.ts"], "disposition": "IN_PROGRESS" },
-    { "id": "migration-87", "paths": ["packages/database/src/family-database-migrations.ts"], "disposition": "IN_PROGRESS" },
-    { "id": "life-policy-composition", "paths": ["apps/desktop/src/main/life-application-adapter.ts", "apps/desktop/src/main/life-production-policy-runtime.ts"], "disposition": "IN_PROGRESS" },
-    { "id": "typed-ipc", "paths": ["apps/desktop/src/main/ipc-integration-policy.ts"], "disposition": "IN_PROGRESS" },
-    { "id": "life-center-ui", "paths": ["apps/desktop/src/renderer/ManagedLifePanel.tsx", "apps/desktop/src/renderer/styles.css"], "disposition": "IN_PROGRESS" },
-    { "id": "targeted-tests", "paths": ["packages/application/tests/family-emergency-assistance-card.test.ts", "packages/repositories/family-emergency-assistance-card-repository-policy.test.ts", "apps/desktop/tests/b5-family-emergency-assistance-card-ipc-integration.test.ts"], "disposition": "PENDING" },
-    { "id": "governance-evidence", "paths": ["docs/decisions/DEC-220-family-emergency-assistance-card.md", "docs/security/THREAT_MODEL_33_I_FAMILY_EMERGENCY_ASSISTANCE_CARD.md", "docs/audit/33-I_FAMILY_EMERGENCY_ASSISTANCE_CARD_UST_KAPANIS.md"], "disposition": "IN_PROGRESS" }
+    { "id": "domain-contract", "paths": ["packages/domain/src/app-data.ts"], "disposition": "COMPLETE" },
+    { "id": "application-validation-and-use-cases", "paths": ["packages/application/src/life-use-cases.ts", "packages/application/src/life-security.ts"], "disposition": "COMPLETE" },
+    { "id": "repository-contract", "paths": ["packages/repository-contracts/src/life-repository.ts"], "disposition": "COMPLETE" },
+    { "id": "sqlite-repository", "paths": ["packages/repositories/src/life-repository.ts"], "disposition": "COMPLETE" },
+    { "id": "migration-87", "paths": ["packages/database/src/family-database-migrations.ts"], "disposition": "COMPLETE" },
+    { "id": "life-policy-composition", "paths": ["apps/desktop/src/main/life-application-adapter.ts", "apps/desktop/src/main/life-production-policy-runtime.ts"], "disposition": "COMPLETE" },
+    { "id": "typed-ipc", "paths": ["apps/desktop/src/main/ipc-integration-policy.ts"], "disposition": "COMPLETE" },
+    { "id": "life-center-ui", "paths": ["apps/desktop/src/renderer/ManagedLifePanel.tsx", "apps/desktop/src/renderer/styles.css"], "disposition": "COMPLETE" },
+    { "id": "targeted-tests", "paths": ["packages/application/tests/family-emergency-assistance.test.ts", "packages/repositories/family-emergency-assistance-card-repository-policy.test.ts", "apps/desktop/tests/b5-family-emergency-assistance-ipc-integration.test.ts"], "disposition": "COMPLETE" },
+    { "id": "governance-evidence", "paths": ["docs/decisions/DEC-220-family-emergency-assistance-card.md", "docs/security/THREAT_MODEL_33_I_FAMILY_EMERGENCY_ASSISTANCE_CARD.md", "docs/audit/33-I_FAMILY_EMERGENCY_ASSISTANCE_CARD_UST_KAPANIS.md"], "disposition": "COMPLETE" }
   ],
   "ipcChannels": ["life:getManagedWorkspace", "life:recordManagedItem"],
   "networkChannels": [],
   "prohibitedPayloadOrProjectionFields": ["password", "token", "secret", "credential", "pan", "cvv", "pin", "filePath", "base64", "policyReceipt"],
-  "targetDatabaseMigration": 87,
-  "openRequirements": ["EXT-012", "EXT-014"],
-  "openBlockers": ["IMPLEMENTATION_AND_EVIDENCE_PENDING"]
+  "latestDatabaseMigration": 87,
+  "openRequirements": [],
+  "openBlockers": []
 }

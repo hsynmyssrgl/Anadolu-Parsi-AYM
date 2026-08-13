@@ -1,6 +1,7 @@
 import { mkdir, stat, writeFile } from 'node:fs/promises';
 import { DOCUMENT_EXTENSIONS, SELF_INDEX_PATHS, walkFiles, readJson } from './lib/governance-utils.mjs';
 import { extname } from 'node:path';
+const noReport=process.argv.includes('--no-report');
 const failures=[];let checks=0;const check=(c,m)=>{checks++;if(!c)failures.push(m)};
 const artifact=await readJson('artifacts/manifests/PROJECT_ARTIFACT_INDEX.json');
 const documents=await readJson('artifacts/manifests/ALL_DOCUMENTS_INDEX.json');
@@ -19,4 +20,4 @@ check((artifact.files??[]).filter(x=>x.classification==='ACTIVE_AUTHORITY').leng
 check(artifact.summary?.totalFiles===indexed.size,`totalFiles ${artifact.summary?.totalFiles}/${indexed.size}`);
 check(documents.documentCount===indexedDocs.size,`documentCount ${documents.documentCount}/${indexedDocs.size}`);
 check((artifact.files??[]).every(x=>['ACTIVE_AUTHORITY','ACTIVE_REFERENCE','SOURCE_CODE','TEST_OR_GATE','EVIDENCE','HISTORICAL','GENERATED'].includes(x.classification)), 'unclassified artifact exists');
-const report={schemaVersion:1,release:artifact.release,checks,totalFiles:indexed.size,totalDocuments:indexedDocs.size,status:failures.length?'FAIL':'PASS',failures,generatedAt:new Date().toISOString()};await mkdir('artifacts/validation',{recursive:true});await writeFile('artifacts/validation/project-artifact-index-gate-v2.json',JSON.stringify(report,null,2)+'\n');if(failures.length){console.error(failures.join('\n'));process.exit(1)}console.log(`Complete Document/Artifact Index: PASS (${checks} checks / ${indexed.size} files / ${indexedDocs.size} documents).`);
+const report={schemaVersion:1,release:artifact.release,checks,totalFiles:indexed.size,totalDocuments:indexedDocs.size,status:failures.length?'FAIL':'PASS',failures,generatedAt:new Date().toISOString()};if(!noReport){await mkdir('artifacts/validation',{recursive:true});await writeFile('artifacts/validation/project-artifact-index-gate-v2.json',JSON.stringify(report,null,2)+'\n')}if(failures.length){console.error(failures.join('\n'));process.exit(1)}console.log(`Complete Document/Artifact Index: PASS (${checks} checks / ${indexed.size} files / ${indexedDocs.size} documents).`);

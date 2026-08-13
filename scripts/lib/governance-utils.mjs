@@ -18,17 +18,8 @@ export const SELF_INDEX_PATHS = new Set([
 // delivery report changes.  They cannot be part of the authoritative source
 // hash that the report itself cites without creating a hash cycle.  They stay
 // tracked and are regenerated/verified immediately before every report backup.
-export const DERIVED_DOCUMENT_INDEX_PATHS = new Set([
-  'artifacts/manifests/PROJECT_ARTIFACT_INDEX.json',
-  'artifacts/manifests/PROJECT_ARTIFACT_INDEX.csv',
-  'artifacts/manifests/PROJECT_ARTIFACT_INDEX.md',
-  'artifacts/manifests/ALL_DOCUMENTS_INDEX.json',
-  'artifacts/manifests/ALL_DOCUMENTS_INDEX.csv',
-  'artifacts/manifests/ALL_DOCUMENTS_INDEX.md',
-  'docs/current/08_TUM_BELGELER_DIZINI.md',
-  'manifest.json',
-  'SHA256SUMS.txt'
-]);
+// Reuse the preflight self-index boundary so the two exclusion lists cannot drift.
+export const DERIVED_DOCUMENT_INDEX_PATHS = SELF_INDEX_PATHS;
 
 export const DOCUMENT_EXTENSIONS = new Set(['.md','.pdf','.docx','.txt','.rtf','.json','.csv','.yml','.yaml','.html']);
 export const EXCLUDED_DIRECTORIES = new Set(['node_modules','dist','release','coverage','.git','.idea','.vscode']);

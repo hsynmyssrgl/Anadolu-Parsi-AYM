@@ -72,6 +72,9 @@
     "scripts/verify-33-h-family-emergency-preparedness-contract.mjs",
     "scripts/verify-33-h-family-emergency-preparedness-runtime.mjs",
     "scripts/verify-33-h-family-emergency-preparedness-completion.mjs",
+    "scripts/verify-family-emergency-assistance-card-boundary.mjs",
+    "scripts/verify-33-i-family-emergency-assistance-card-contract.mjs",
+    "scripts/verify-33-i-family-emergency-assistance-card-runtime.mjs",
     "scripts/verify-step-checkpoint-gate.mjs"
   ],
   "historicalProgressVerifier": "scripts/verify-29-d5-scope-real-progress-report.mjs",

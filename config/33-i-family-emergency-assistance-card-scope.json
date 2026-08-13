@@ -3,7 +3,7 @@
   "id": "33-I-FAMILY-EMERGENCY-ASSISTANCE-CARD",
   "decision": "DEC-220",
   "requirements": ["EXT-012", "EXT-014"],
-  "status": "IN_PROGRESS",
+  "status": "COMPLETE",
   "model": {
     "table": "family_emergency_assistance_ledger",
     "planTable": "family_emergency_ledger",
@@ -54,7 +54,24 @@
     "boundary": "artifacts/validation/33-I-family-emergency-assistance-card-boundary.json",
     "contract": "artifacts/validation/33-I-family-emergency-assistance-card-contract.json",
     "runtime": "artifacts/validation/33-I-family-emergency-assistance-card-runtime.json",
-    "status": "PENDING"
+    "status": "PASS",
+    "finalEvidence": {
+      "boundaryChecksPassed": 55,
+      "contractChecksPassed": 15,
+      "runtimeChecksPassed": 11,
+      "targetedTestFilesPassed": 3,
+      "targetedTestsPassed": 14,
+      "fullVitestTestFilesPassed": 121,
+      "fullVitestTestsPassed": 1011,
+      "productionWorkspaceBuildsPassed": 18,
+      "ppk021ExactAllowlistEntries": 545,
+      "ppk021UseCaseCompositionSurfaces": 277,
+      "ppk022CapabilitySurfaces": 242,
+      "latestDatabaseMigration": 87,
+      "migration87Checksum": "b424f1fa2d89d6e0b645912444d9d8639de3d6a3ff0a61fa829b1e14c5206097",
+      "requirementChainsComplete": 2,
+      "finalClosureEvidence": true
+    }
   },
   "excludedClaims": [
     "No health registry, provider, message, emergency-service, export or network service is contacted.",
