@@ -2326,11 +2326,25 @@
       "id": "33-K",
       "title": "Gizlilik, süreli rıza ve kayıp cihaz kapatma merkezi",
       "scopeRequirement": "B5-06,EXT-039",
-      "status": "IN_PROGRESS",
-      "validationStatus": "PENDING",
-      "localEvidence": ["config/33-k-privacy-consent-lost-device-control-scope.json","config/33-k-privacy-consent-lost-device-control-inventory.json","docs/decisions/DEC-222-privacy-consent-lost-device-control-center.md","docs/security/THREAT_MODEL_33_K_PRIVACY_CONSENT_LOST_DEVICE_CONTROL.md"],
-      "persistentReceiptStatus": "PENDING",
-      "completionTransitionStatus": "PENDING"
+      "status": "COMPLETED",
+      "validationStatus": "PASS",
+      "localEvidence": [
+        "config/33-k-privacy-consent-lost-device-control-scope.json",
+        "config/33-k-privacy-consent-lost-device-control-inventory.json",
+        "docs/decisions/DEC-222-privacy-consent-lost-device-control-center.md",
+        "docs/security/THREAT_MODEL_33_K_PRIVACY_CONSENT_LOST_DEVICE_CONTROL.md",
+        "artifacts/checkpoints/33-K_LIBRARY_RECEIPT.json",
+        "artifacts/validation/33-K_LIBRARY_READBACK_VERIFICATION.json",
+        "artifacts/validation/33-K_RECEIPT_READBACK_VERIFICATION.json",
+        "artifacts/validation/33-K_RECEIPT_READBACK_PERSISTENCE_VERIFICATION.json",
+        "artifacts/validation/33-K_LIBRARY_FINAL_INVENTORY_VERIFICATION.json",
+        "artifacts/checkpoints/33-K_COMPLETION_RECORD.json",
+        "artifacts/validation/33-K_COMPLETION_TRANSITION_VALIDATION.json",
+        "artifacts/validation/33-K_LIBRARY_CLOSURE_INVENTORY_VERIFICATION.json"
+      ],
+      "persistentReceiptStatus": "PASS",
+      "completionTransitionStatus": "PASS",
+      "persistentReceiptPath": "artifacts/checkpoints/33-K_LIBRARY_RECEIPT.json"
     },
     {
       "id": "33-L",
@@ -2345,6 +2359,6 @@
   ],
   "recoveryAuthority": "NEW_CHAT_HANDOFF_Bronze_04.08.2026.29.md",
   "recoveryReason": "29-D_FAILED_POSTFLIGHT_EXIT_CODE_1_SPLIT_PER_PR-171",
-  "updatedAt": "2026-08-13T16:38:31.761Z",
-  "segmentationNote": "33-J remains immutable COMPLETED/PASS. 33-K DEC-222 is the sole active B5-06/EXT-039 privacy, bounded-consent and local lost-device authority slice; 33-L long-term portfolio is the governed pending successor."
+  "updatedAt": "2026-08-13T16:42:35.835Z",
+  "segmentationNote": "33-K is immutable COMPLETED/PASS with exact local and D: hash/size readback. 33-L remains PENDING as the governed long-term portfolio successor."
 }
