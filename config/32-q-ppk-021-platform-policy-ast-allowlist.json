@@ -59,7 +59,7 @@
     "SQL_CALL": 56,
     "SQL_CONSTRUCTOR": 2,
     "SQL_IMPORT": 2,
-    "USE_CASE_COMPOSITION": 281
+    "USE_CASE_COMPOSITION": 284
   },
   "allowedSurfaceKeys": [
     "CRYPTO_GLOBAL|apps/desktop/src/main/preload.ts|randomUUID",
@@ -427,6 +427,7 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetManagedLifeWorkspaceUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetOperationalHealthCountsUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetPerformanceTrendUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetPrivacyControlCenterUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetPersonLifecycleWorkspaceUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetReportSummaryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetSessionLockStateUseCase",
@@ -569,6 +570,7 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|SetExternalBackupCopyLegalHoldUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|SetFamilyEventArchivedUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|SetupAdminUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ShutdownLostDeviceAuthorityUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|StageFullBackupRestoreUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|StartBackgroundTaskUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|StartQueuedTaskUseCase",
@@ -593,6 +595,7 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|UpsertLegacyGrantUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|UpsertMaintenancePolicyUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|UpsertObjectPermissionUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|UpsertLiveLocationConsentUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|UpsertSensitiveDataConsentUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ValidateIbanUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|VerifyAuditIntegrityUseCase",

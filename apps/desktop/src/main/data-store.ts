@@ -92,6 +92,9 @@ import {
   ListOfflineCapabilityLeasesUseCase,
   IssueOfflineCapabilityLeaseUseCase,
   RevokeOfflineCapabilityLeaseUseCase,
+  GetPrivacyControlCenterUseCase,
+  UpsertLiveLocationConsentUseCase,
+  ShutdownLostDeviceAuthorityUseCase,
   ListObjectPermissionsUseCase,
   UpsertObjectPermissionUseCase,
   DeleteObjectPermissionUseCase,
@@ -350,6 +353,7 @@ import { NodeExternalBackupEvidenceCryptoAdapter } from './external-backup-evide
 import { FileSystemBackupPurgeQuarantinePort } from './backup-purge-propagation-file-application-adapter.js';
 import { FileSystemBackupQuarantineDestructionPort } from './backup-quarantine-file-application-adapter.js';
 import { RepositoryBackedAiConsentQueryPort, RepositoryBackedAiConsentUnitOfWork, RepositoryBackedSensitiveDataAuthorizationPort } from './ai-consent-application-adapter.js';
+import { RepositoryBackedPrivacyControlQueryPort, RepositoryBackedPrivacyControlUnitOfWork } from './privacy-control-application-adapter.js';
 import { RepositoryBackedLegacyQueryPort, RepositoryBackedLegacyUnitOfWork } from './legacy-application-adapter.js';
 import { RepositoryBackedAutomationAdapter } from './automation-application-adapter.js';
 import { RepositoryBackedReportQueryPort } from './report-application-adapter.js';
@@ -417,7 +421,7 @@ import type {
 import type { DesktopSecurityPostureView, SessionLockStateView, UnlockSessionInput } from '@ppt/domain';
 import { SqliteFamilyDatabaseRuntime } from './family-database-runtime.js';
 import { createSqliteRepositoryCompositionRoot, type RepositoryCompositionRoot } from './repository-composition-root.js';
-import type { IssueOfflineCapabilityLeaseInput, OfflineCapabilityLeaseView } from '@ppt/domain';
+import type { IssueOfflineCapabilityLeaseInput, OfflineCapabilityLeaseView, LostDeviceShutdownInput, LostDeviceShutdownResultView, PrivacyControlCenterView, UpsertLiveLocationConsentInput } from '@ppt/domain';
 import { FileDeviceIdentityProvider } from './device-identity.js';
 import type { DeviceSecretProtector } from './device-secret-protector.js';
 import { ManagedBackupPasswordProvider } from './managed-backup-password.js';
@@ -736,6 +740,9 @@ export class FamilyDataStore {
   readonly #listOfflineCapabilityLeasesUseCase: ListOfflineCapabilityLeasesUseCase;
   readonly #issueOfflineCapabilityLeaseUseCase: IssueOfflineCapabilityLeaseUseCase;
   readonly #revokeOfflineCapabilityLeaseUseCase: RevokeOfflineCapabilityLeaseUseCase;
+  readonly #getPrivacyControlCenterUseCase: GetPrivacyControlCenterUseCase;
+  readonly #upsertLiveLocationConsentUseCase: UpsertLiveLocationConsentUseCase;
+  readonly #shutdownLostDeviceAuthorityUseCase: ShutdownLostDeviceAuthorityUseCase;
   readonly #listAuditEntriesUseCase: ListAuditEntriesUseCase;
   readonly #verifyAuditIntegrityUseCase: VerifyAuditIntegrityUseCase;
   readonly #deviceIdentityProvider: FileDeviceIdentityProvider;
@@ -1154,6 +1161,25 @@ export class FamilyDataStore {
     const dataLifecycleUnit = new RepositoryBackedDataLifecycleUnitOfWork(dataLifecycleDependencies);
     const strongAuthentication = new RepositoryBackedStrongAuthenticationPort(authUnitOfWork, passwordService, secondFactorService, authSessionPort);
     this.#strongAuthentication = strongAuthentication;
+    const privacyControlDependencies = {
+      transactionExecutor: this.#transactionExecutor,
+      accountRepository: this.#repositories.accountRepository,
+      permissionRepository: this.#repositories.objectPermissionRepository,
+      trustedDeviceRepository: this.#repositories.trustedDeviceRepository,
+      offlineCapabilityLeaseRepository: this.#repositories.offlineCapabilityLeaseRepository,
+      consentRepository: this.#repositories.aiConsentRepository,
+      auditRepository: this.#repositories.auditRepository,
+      currentDeviceId: () => this.#deviceIdentityProvider.snapshot().deviceId
+    } as const;
+    const privacyControlQuery = new RepositoryBackedPrivacyControlQueryPort(privacyControlDependencies);
+    const privacyControlUnitOfWork = new RepositoryBackedPrivacyControlUnitOfWork(privacyControlDependencies);
+    this.#getPrivacyControlCenterUseCase = new GetPrivacyControlCenterUseCase(privacyControlQuery, authSessionPort);
+    this.#upsertLiveLocationConsentUseCase = new UpsertLiveLocationConsentUseCase(privacyControlUnitOfWork, authSessionPort);
+    this.#shutdownLostDeviceAuthorityUseCase = new ShutdownLostDeviceAuthorityUseCase(
+      privacyControlUnitOfWork,
+      authSessionPort,
+      strongAuthentication
+    );
     this.#entityCatalogService = new EntityCatalogService({
       transactionExecutor: this.#transactionExecutor,
       repository: this.#repositories.entityCatalogRepository,
@@ -2188,6 +2214,11 @@ export class FamilyDataStore {
     return {familyId:asFamilyId('family-main'),actor:{userId:asUserId(authenticatedUserId),role:account.role,...(account.personId?{personId:asPersonId(account.personId)}:{})},correlationId:this.#correlation?.current()?.correlationId??asCorrelationId(`${prefix}-${randomUUID()}`)};
   }
   #aiConsentApplicationContext(prefix: string) { const accountId = this.#requireAuth(); const account = this.#currentAccount(); return { actor: { userId: asUserId(accountId), role: account.role, ...(account.personId ? { personId: account.personId } : {}) }, correlationId: this.#correlation?.current()?.correlationId ?? asCorrelationId(`${prefix}-${randomUUID()}`) }; }
+
+  #privacyControlApplicationContext(prefix:string) {
+    const accountId=this.#requireAuth(); const account=this.#currentAccount();
+    return {familyId:asFamilyId('family-main'),actor:{userId:asUserId(accountId),role:account.role,...(account.personId?{personId:asPersonId(account.personId)}:{})},correlationId:this.#correlation?.current()?.correlationId??asCorrelationId(`${prefix}-${randomUUID()}`)};
+  }
 
   #archiveApplicationContext(prefix: string): ArchiveApplicationContext {
     const authenticatedUserId=this.#requireAuth(); const account=this.#currentAccount();
@@ -4287,6 +4318,9 @@ export class FamilyDataStore {
   public listSensitiveDataProfiles(): SensitiveDataProfileView[] { const result=this.#listSensitiveDataProfilesUseCase.execute(this.#aiConsentApplicationContext('ai-sensitive-profile-list')); if(!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`); return [...result.value]; }
   public upsertSensitiveDataConsent(input:UpsertSensitiveDataConsentInput): SensitiveDataProfileView[] { const result=this.#upsertSensitiveDataConsentUseCase.execute({context:this.#aiConsentApplicationContext('ai-sensitive-consent-upsert'),command:input,identifiers:{consentId:randomUUID(),auditId:randomUUID()}}); if(!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`); return this.listSensitiveDataProfiles(); }
   public previewSensitiveExport(input:SensitiveExportPreviewInput): SensitiveExportPreviewView { const result=this.#previewSensitiveExportUseCase.execute({context:this.#aiConsentApplicationContext('ai-sensitive-export-preview'),command:input,identifiers:{previewId:randomUUID(),auditId:randomUUID()}}); if(!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`); return result.value; }
+  public getPrivacyControlCenter():PrivacyControlCenterView { const result=this.#getPrivacyControlCenterUseCase.execute(this.#privacyControlApplicationContext('privacy-control-center')); if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value; }
+  public upsertLiveLocationConsent(input:UpsertLiveLocationConsentInput):PrivacyControlCenterView { const result=this.#upsertLiveLocationConsentUseCase.execute({context:this.#privacyControlApplicationContext('privacy-live-location-consent'),command:input,identifiers:{consentId:randomUUID(),auditId:randomUUID()}});if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return this.getPrivacyControlCenter(); }
+  public shutdownLostDeviceAuthority(input:LostDeviceShutdownInput):LostDeviceShutdownResultView { const result=this.#shutdownLostDeviceAuthorityUseCase.execute({context:this.#privacyControlApplicationContext('privacy-lost-device-shutdown'),command:input,auditId:randomUUID()});if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value; }
 
   public async getDashboardOverview(): Promise<DashboardOverviewView> {
     const result = await this.#getDashboardOverviewUseCase.execute({

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "step": "33-K",
+  "requirements": ["B5-06", "EXT-039"],
+  "status": "COMPLETE",
+  "surfaces": [
+    {"id":"domain","paths":["packages/domain/src/app-data.ts"]},
+    {"id":"application","paths":["packages/application/src/privacy-control-use-cases.ts"]},
+    {"id":"repository-reuse","paths":["packages/repositories/src/trusted-device-repository.ts","packages/repositories/src/offline-capability-lease-repository.ts","packages/repositories/src/ai-consent-repository.ts"]},
+    {"id":"central-pep-uow","paths":["apps/desktop/src/main/privacy-control-application-adapter.ts"]},
+    {"id":"desktop-ipc-ui","paths":["apps/desktop/src/main/data-store.ts","apps/desktop/src/main/main.ts","apps/desktop/src/main/ipc-integration-policy.ts","apps/desktop/src/main/preload.ts","apps/desktop/src/renderer/global.d.ts","apps/desktop/src/renderer/App.tsx"]},
+    {"id":"tests","paths":["packages/application/tests/privacy-control-use-cases.test.ts","apps/desktop/tests/b5-privacy-control-ipc-integration.test.ts"]}
+  ],
+  "ipcChannels": ["privacyControl:getCenter","privacyControl:setLiveLocationConsent","privacyControl:shutdownLostDevice"],
+  "networkChannels": [],
+  "latestDatabaseMigration": 88,
+  "openRequirements": [],
+  "openBlockers": []
+}

@@ -26,6 +26,7 @@ import type { FamilyEventView, FamilyMutationResultView, SetFamilyEventArchivedI
 import type { AssignPersonMembershipInput, CreateFamilyBranchInput, CreateHouseholdInput, FamilyBranch, Household, HouseholdMembershipWorkspaceView, PersonLifecycleProfile, PersonLifecycleWorkspaceView, PersonMembership, UpdatePersonProfileInput } from '@ppt/domain';
 import type { AuthorizationContextWorkspaceView } from '@ppt/domain';
 import type { IssueOfflineCapabilityLeaseInput, OfflineCapabilityLeaseWorkspaceView } from '@ppt/domain';
+import type { LostDeviceShutdownInput, LostDeviceShutdownResultView, PrivacyControlCenterView, UpsertLiveLocationConsentInput } from '@ppt/domain';
 import type { ClientDataAccessBoundaryView } from '@ppt/domain';
 import type { NetworkEgressBoundaryView } from '@ppt/domain';
 import type { DerivedDataPolicyBoundaryView } from '@ppt/domain';
@@ -425,6 +426,9 @@ contextBridge.exposeInMainWorld('pardus', {
   verifySecurityEventReceipt:(receiptJson:string):Promise<SecurityEventReceiptVerificationView>=>invoke('auth:verifySecurityEventReceipt',receiptJson),
   listTrustedDevices:():Promise<TrustedDeviceView[]>=>invoke('auth:listTrustedDevices'),
   revokeTrustedDevice:(id:string):Promise<TrustedDeviceView[]>=>invoke('auth:revokeTrustedDevice',id),
+  getPrivacyControlCenter:():Promise<PrivacyControlCenterView>=>invoke('privacyControl:getCenter'),
+  setLiveLocationConsent:(input:UpsertLiveLocationConsentInput):Promise<PrivacyControlCenterView>=>invoke('privacyControl:setLiveLocationConsent',input),
+  shutdownLostDevice:(input:LostDeviceShutdownInput):Promise<LostDeviceShutdownResultView>=>invoke('privacyControl:shutdownLostDevice',input),
   listAudit:(limit?:number):Promise<AuditEntryView[]>=>invoke('audit:list',limit),
   verifyAuditIntegrity:():Promise<AuditIntegrityView>=>invoke('audit:verifyIntegrity'),
   listAccounts:():Promise<FamilyAccountView[]>=>invoke('accounts:list'),

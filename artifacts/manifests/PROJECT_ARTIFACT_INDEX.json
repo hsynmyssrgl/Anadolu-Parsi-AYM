@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "release": "Bronze 04.08.2026.29",
   "releaseId": "bronze-2026-08-04-r29",
-  "generatedAt": "2026-08-13T03:37:13.835Z",
+  "generatedAt": "2026-08-13T16:40:23.906Z",
   "selfIndexedPaths": [
     "SHA256SUMS.txt",
     "artifacts/manifests/ALL_DOCUMENTS_INDEX.csv",
@@ -15,16 +15,16 @@
     "manifest.json"
   ],
   "summary": {
-    "totalFiles": 5860,
-    "totalDocuments": 3577,
+    "totalFiles": 5877,
+    "totalDocuments": 3585,
     "classifications": {
       "ACTIVE_AUTHORITY": 22,
-      "ACTIVE_REFERENCE": 1106,
-      "EVIDENCE": 1231,
+      "ACTIVE_REFERENCE": 1111,
+      "EVIDENCE": 1234,
       "GENERATED": 630,
       "HISTORICAL": 1575,
-      "SOURCE_CODE": 595,
-      "TEST_OR_GATE": 701
+      "SOURCE_CODE": 597,
+      "TEST_OR_GATE": 708
     }
   },
   "files": [
@@ -6246,8 +6246,8 @@
     },
     {
       "path": "apps/desktop/src/main/data-store.ts",
-      "bytes": 318409,
-      "sha256": "1df340ca60f6f36c157146450646b766a15ee70ebb535402fb368fea9dd4dd18",
+      "bytes": 321781,
+      "sha256": "db78325f3b7b23a0bdae418aa67f00d361b078cf391741187044fd9a8d57bd55",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -6518,8 +6518,8 @@
     },
     {
       "path": "apps/desktop/src/main/ipc-integration-policy.ts",
-      "bytes": 66651,
-      "sha256": "41fd4fd7fd3dc4c295de78a26b73d7b334caafcd325ed7d1942f363148ec9a45",
+      "bytes": 67698,
+      "sha256": "7b36d9e313263c1df23cbb7eb08b75298b67c0fa011eb6bad9b120138b69e9d8",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -6542,8 +6542,8 @@
     },
     {
       "path": "apps/desktop/src/main/ipc-read-sharing.ts",
-      "bytes": 18619,
-      "sha256": "c99b2e50658e4e3c0e810ff3e7f8f1b253326adcfd58c08118fc1d10c4e43646",
+      "bytes": 18628,
+      "sha256": "3d1d0c759a6c6900eda17ee1d68bf7986e1244cd291abd9764279cf3b03b7dfd",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -6630,8 +6630,8 @@
     },
     {
       "path": "apps/desktop/src/main/main.ts",
-      "bytes": 152002,
-      "sha256": "f15aa188b689637b468ab5ade9504cf432229f67c223400ab12b58da1065515a",
+      "bytes": 152662,
+      "sha256": "b275a681e01577ba709035586f0985284e8b3ede38475cf1e92c5d8b26133200",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -6710,8 +6710,16 @@
     },
     {
       "path": "apps/desktop/src/main/preload.ts",
-      "bytes": 53130,
-      "sha256": "76fa4f36c16b77a1f572f79d6014f4fb85382d652c47362c127a4134121705ea",
+      "bytes": 53675,
+      "sha256": "6d734f2fd787c2ac7b37d942af0f49c974e84fd0fe04c76a132f3c050b0dd70e",
+      "extension": ".ts",
+      "classification": "SOURCE_CODE",
+      "isDocument": false
+    },
+    {
+      "path": "apps/desktop/src/main/privacy-control-application-adapter.ts",
+      "bytes": 9957,
+      "sha256": "b0796ad515e8e369b827dcc9641813bc21383b7b5887873a8b909ae768413928",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -6942,8 +6950,8 @@
     },
     {
       "path": "apps/desktop/src/renderer/App.tsx",
-      "bytes": 423238,
-      "sha256": "7ef962e4b779b7faefb5d3d39a218a2f96ed6e8a957c3408a0cae054212b4288",
+      "bytes": 427267,
+      "sha256": "c90ffcfef9e7386f8ae337bf6efedf26b7ed69e888e9f745d52ded93d63d8195",
       "extension": ".tsx",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -6982,8 +6990,8 @@
     },
     {
       "path": "apps/desktop/src/renderer/global.d.ts",
-      "bytes": 29916,
-      "sha256": "4c80a9c4b56e026c0bd3a7391c1b2d518c868c0d7a04ace7db22715567d4b8a5",
+      "bytes": 30277,
+      "sha256": "c5ea74e748c8a227f094861c000c2c91f07f8e229a9cf51739f4148bf4234c8a",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -7208,6 +7216,14 @@
       "path": "apps/desktop/tests/b5-managed-life-ipc-integration.test.ts",
       "bytes": 11710,
       "sha256": "c18a1c91a3782f4943a4d84865f1b5503c623d62df6d5b06588b95e8b3a94830",
+      "extension": ".ts",
+      "classification": "TEST_OR_GATE",
+      "isDocument": false
+    },
+    {
+      "path": "apps/desktop/tests/b5-privacy-control-ipc-integration.test.ts",
+      "bytes": 2848,
+      "sha256": "f471384a0099a7f10a4042c580397fcd2b853b0924af6eb91b620f6aa5536d88",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -7439,7 +7455,7 @@
     {
       "path": "apps/desktop/tests/ppk021-platform-policy-ast-gate-integration.test.ts",
       "bytes": 2641,
-      "sha256": "afacf767b7e4b83c9b4f828bac7e0477b82d0a6ac62d35f6ad698e6d49dd1bfc",
+      "sha256": "a19c031a4c25994770f8d10bdfbced77d54e9383ab74a71657a9ac34e100dddd",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -7447,7 +7463,7 @@
     {
       "path": "apps/desktop/tests/ppk021-platform-policy-ast-gate.test.ts",
       "bytes": 5164,
-      "sha256": "7af0c698d8a844aa505bb11f04cdcf13e88c9852f268ac541184dc91cb2d928a",
+      "sha256": "d3ca82536de1fe064c28536c41d8429f6631f7d667377bc2a9cda1999f3c7a0e",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -22991,7 +23007,7 @@
     {
       "path": "artifacts/validation/32-V-ppk-026-typed-policy-sdk-boundary.json",
       "bytes": 246,
-      "sha256": "c9c9ef6c461d3b94c9df4ffd7a71496ac7a6c199b082da5541f0e6ca488bdaea",
+      "sha256": "db55dc2375ac7a716e77047d2935620d2bf600d09e5710be83dc28af3a101410",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23015,7 +23031,7 @@
     {
       "path": "artifacts/validation/32-W-b0-03-b0-04-product-surface-boundary.json",
       "bytes": 2106,
-      "sha256": "af2f23f2416608d419e00511f149004682d76211bb9d0321e6d2d7203f0a20eb",
+      "sha256": "82428a75f0ae831cb8387e164978aefed6171eab7f080f671f8089b425bc4f25",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23039,7 +23055,7 @@
     {
       "path": "artifacts/validation/32-X-b2-03-b2-04-desktop-security-boundary.json",
       "bytes": 3173,
-      "sha256": "5683adda217e8b903d215823a46be1d849e6eaf59e1a4004905077fba469eee9",
+      "sha256": "1616edf260c003463a6ce138b72cab89326ee36832d90b694f1c1a566e2be77a",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23070,8 +23086,8 @@
     },
     {
       "path": "artifacts/validation/32-Y-b2-05-b6-03-sensitive-data-consent-boundary.json",
-      "bytes": 3235,
-      "sha256": "33538a1c94fffff5e5d6162b48ae84f799ad180b390fbc095c5a2180a361f2bb",
+      "bytes": 3233,
+      "sha256": "d1053bf458f44701a91a401c3a43fa6d6d470ccc1e367ba582d30986f56235ca",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23095,7 +23111,7 @@
     {
       "path": "artifacts/validation/32-Z-b4-banking-foundation-boundary.json",
       "bytes": 4182,
-      "sha256": "4964e9eaf9f87b8b95309a2bd47916c60c5e0a5e9064dc7230f5e8fdeb6029c8",
+      "sha256": "50e82d5e0a5bd86adae05bc72945d48668a79bd360434fc0a7b59609a4c75437",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23119,7 +23135,7 @@
     {
       "path": "artifacts/validation/33-A-b4-payment-card-management-boundary.json",
       "bytes": 4671,
-      "sha256": "cb9a25b15750dfab47758510f0d698dc8631ba915114409db5c23403940b9bd1",
+      "sha256": "6cee0b1139be9e9f147c9e6756333594bda197519bc99426d2022d0b23d6751d",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23143,7 +23159,7 @@
     {
       "path": "artifacts/validation/33-B-b4-loan-management-boundary.json",
       "bytes": 4915,
-      "sha256": "28049409bff47a7da70a784e44090b94251bd6b6aa3fe43dc5f6da6e5e48f57a",
+      "sha256": "56248ced914b095afc447cbaf6677214ca7dae48948f160f684123b41f2ec13b",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23167,7 +23183,7 @@
     {
       "path": "artifacts/validation/33-C-b4-finance-planning-portfolio-analytics-boundary.json",
       "bytes": 5448,
-      "sha256": "1992242042b575538264379307f459e2e2360dee51e3928b2646e8c5e121b774",
+      "sha256": "06e97820c3fb48d89fec7c378a3562c2fb112a0c98446465685751d3a608b462",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23287,7 +23303,7 @@
     {
       "path": "artifacts/validation/33-D-b4-controlled-import-open-banking-boundary.json",
       "bytes": 5680,
-      "sha256": "99c281fd810366c466b13a10eb607aa92041fb6873a1c1bba8c6383c3a2ba458",
+      "sha256": "321a2f13b46cbd10e171d632aa089f3871135eb5e298a7a53b234a1501807190",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23407,7 +23423,7 @@
     {
       "path": "artifacts/validation/33-E-b5-category-life-home-vehicle-boundary.json",
       "bytes": 6508,
-      "sha256": "b9eb66a64c46c9beacab3c6d4b739e9812b3e8919258e7bc12f1e010c0f85c2e",
+      "sha256": "c2c7b0adf0c76917cfec64b253f1170e7efa0af20e5434703ce7ba4b566f70e5",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23527,7 +23543,7 @@
     {
       "path": "artifacts/validation/33-F-home-inventory-utility-belongings-boundary.json",
       "bytes": 6262,
-      "sha256": "902e52708a5952483213581d0e765cc7d5da0d1aa37411409324866f644c1b54",
+      "sha256": "fa146b5c54973b25297f95755ca714b52edbe905b5be82962e84a86773f944f9",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23647,7 +23663,7 @@
     {
       "path": "artifacts/validation/33-G-family-emergency-planning-boundary.json",
       "bytes": 6280,
-      "sha256": "6ca7f80c41a7d6aef58fe79a67925bc95aa7f3fdf776446bd7756155eaf0f666",
+      "sha256": "8c307c62330c2885c0584dcc13d80b1b3bed5994131d575be413ef0fe7fa467e",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23767,7 +23783,7 @@
     {
       "path": "artifacts/validation/33-H-family-emergency-preparedness-boundary.json",
       "bytes": 6605,
-      "sha256": "0ecfc2bd9bfc520142e1349ef2c8eb83aec9b8cf58b8754fe3beb0331797fafc",
+      "sha256": "005c211944b3e1bccb8e6cd14394b9a05ee720d7eed14685e6f033b07b17cfce",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23887,7 +23903,7 @@
     {
       "path": "artifacts/validation/33-I-family-emergency-assistance-card-boundary.json",
       "bytes": 7222,
-      "sha256": "a103391a899c2b3b93159a150db73b18182e17f4116462e1ad7bcdbe0c654fb7",
+      "sha256": "870a950a52ba5c60a6519fef5aefec988528d4868c861622316beb497db28753",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -24007,7 +24023,7 @@
     {
       "path": "artifacts/validation/33-J-family-emergency-card-portability-boundary.json",
       "bytes": 7760,
-      "sha256": "1fb5b7ebe71fa29f448876d233a1518caa46d5d31a17c86d59fa3817c9c9746e",
+      "sha256": "869dd240bf427b774493082fbdcb4638245a2769c6862f2397f194c3cec79a72",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -24029,6 +24045,30 @@
       "isDocument": true
     },
     {
+      "path": "artifacts/validation/33-K-privacy-consent-lost-device-control-boundary.json",
+      "bytes": 2838,
+      "sha256": "5f1611d491bbb96aeff36425059383a59270fd7e9bede826b39352d229de6aa8",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/33-K-privacy-consent-lost-device-control-contract.json",
+      "bytes": 1858,
+      "sha256": "d93033e738730cdee64bdb1f2dca60f110e2c05cd5e8f8d2361b3bf809de022a",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/33-K-privacy-consent-lost-device-control-runtime.json",
+      "bytes": 3520,
+      "sha256": "f924769909adb38d91499b61b77ba4679243aaa72aa756a82e9fe27e23bfe2f5",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
       "path": "artifacts/validation/active-delivery-documents.json",
       "bytes": 747,
       "sha256": "06e8d7cced7c63802aedec305df661e1445875fbcb6d861370f42d86b8009ca0",
@@ -24039,7 +24079,7 @@
     {
       "path": "artifacts/validation/active-release-contract-v2.json",
       "bytes": 186,
-      "sha256": "b393c3a61576715ce235ceaba760a9a9096fd92d7c5f43bfed548b001a05545b",
+      "sha256": "cc9cc07525c945d7f76ba53c736d76cae5abf8e0609b79054b92c94cec0662ef",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -24607,7 +24647,7 @@
     {
       "path": "artifacts/validation/canonical-rule-registry-gate.json",
       "bytes": 322,
-      "sha256": "827e35b8d56e7e4b68718c4058ed6c2e17adf756a93ab075499bf88ca40cf7bf",
+      "sha256": "3bf6bbf6b2cd49a3ea8819b31d0957f7ae3a258859aee75d3c10515b678104b9",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -24623,7 +24663,7 @@
     {
       "path": "artifacts/validation/conversation-capacity.json",
       "bytes": 241,
-      "sha256": "843326dbb0bd4c40dc5c0058d7fe9b7ca851e0e1e0af5a20a03401c84a57135a",
+      "sha256": "9c66833db8507a6453097d51e9dac7e6d1db53e730b63bbcaecb86c067689187",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -24631,7 +24671,7 @@
     {
       "path": "artifacts/validation/core-service-boundary.json",
       "bytes": 123,
-      "sha256": "c330edbce8ba743fabd18a9e1676fe0637da1446fb8b57fc8c0f4093d8e0ec6b",
+      "sha256": "9d77c4e789835093edc181fa774f24aa1f5cc891569c1f6cd8681b5b5893b182",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -24639,7 +24679,7 @@
     {
       "path": "artifacts/validation/core-service-local-admin-contract.json",
       "bytes": 260,
-      "sha256": "a0ada7e74828151446b1e4b983fa3c42a4b59612545c61239a23fc2f24845de2",
+      "sha256": "1bcc3ecd8ac71eee275e1f16ff81f3a2bcbe3706bea3f68fe64236d0fbbe8ce3",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -24655,7 +24695,7 @@
     {
       "path": "artifacts/validation/delivery-report-contract-v2.json",
       "bytes": 161,
-      "sha256": "2913d9ddff7837f1155f98ffb8c245f229a595f29be61362eec57e6c53a832f1",
+      "sha256": "32a5f353cdcd82c398c2d8eab13ddf01107f22c1027665532458eb9e82624aab",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -24663,7 +24703,7 @@
     {
       "path": "artifacts/validation/desktop-core-service-startup-contract.json",
       "bytes": 161,
-      "sha256": "7e3404293a1e17ceda8ecca33c822cef24d1a7afb436d988ffc09ad954bb2e5f",
+      "sha256": "9e1935e4c4556dff6d746cf23807894a84c8027c83c62a65fad1ecba82234332",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -24671,7 +24711,7 @@
     {
       "path": "artifacts/validation/desktop-core-service-startup-runtime.json",
       "bytes": 161,
-      "sha256": "c7730fc079a0b6403a31a3ed30fbebb68f3b39da87aca622c5ac3c5015349441",
+      "sha256": "5fce203405c5b6a9bcb8f40a8216644208363c8c6c8704a09cb49f7a39c3ae04",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -24687,7 +24727,7 @@
     {
       "path": "artifacts/validation/feature-reality-gate.json",
       "bytes": 673,
-      "sha256": "b306cec7f72cd57a21b98feeab7f546545c09c058759b1252092c9c5330f7485",
+      "sha256": "9faf4b5ef6fabc950877e8b5fd53a4ffb4bc16c666f3fa519628c8e47f8b1713",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -24710,8 +24750,8 @@
     },
     {
       "path": "artifacts/validation/governed-preflight.json",
-      "bytes": 5937,
-      "sha256": "3d737bced74f9b8b8ad1ab292b02b5bddfe9cb9c465fbcb30b4afdf023cf0d69",
+      "bytes": 5939,
+      "sha256": "d3055b1b5208841bc3ff146e1094510c6f882c2f769ba6c940f79ca7318ce8a3",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -24759,7 +24799,7 @@
     {
       "path": "artifacts/validation/platform-capability-manifest-gate.json",
       "bytes": 537,
-      "sha256": "0cd6e45346a8aca67687b1d95e4fe055131cf3a6fc9d005fc644017daa727cb6",
+      "sha256": "fb6f6084d7ea87159f8a431844c6849ba18ee74a513d14d2a9aee99c02bd36f6",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -24767,7 +24807,7 @@
     {
       "path": "artifacts/validation/platform-policy-ast-gate.json",
       "bytes": 644,
-      "sha256": "826861f8e1f5ad04ec2b84f9ede45f94a0130a19260b355882829dba2f896d31",
+      "sha256": "8071c8e43860e854e62755fa3981b04575d204db93ff27c7ee479d412d756545",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -24775,7 +24815,7 @@
     {
       "path": "artifacts/validation/platform-policy-gate.json",
       "bytes": 2197,
-      "sha256": "de929b3a10672f9836d606f2f238b94d2b80b991a567857cb870cba4b2a6f768",
+      "sha256": "011c616ba1862b95e2169541f565209fe01184be3f773e77cf0b72577357f3bb",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -24807,7 +24847,7 @@
     {
       "path": "artifacts/validation/project-artifact-index-gate-v2.json",
       "bytes": 212,
-      "sha256": "7b5108d6c8598e694f9f7619ab5921691430f34bbe6ce510a9963a4218e557f8",
+      "sha256": "f5d289a743dd22f29da9bdbe3694ae04b99f11edb4aec0d48da17801c95a0dde",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -24839,7 +24879,7 @@
     {
       "path": "artifacts/validation/step-checkpoint-gate.json",
       "bytes": 188,
-      "sha256": "46fd3e1343905fc8a5ca4c773c8fca00b92c014fdaa6502a157999942a4690d7",
+      "sha256": "41acbc5bede7348dd956b66336baeffcf828368aca7526a1c426e3e7bf7c99dd",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -24855,7 +24895,7 @@
     {
       "path": "artifacts/validation/system-health-core-service-ipc-contract.json",
       "bytes": 161,
-      "sha256": "e581a22b0cb57ffd3cc4dc39aee5adc6f7689023c71d9516794e340508410f36",
+      "sha256": "9229d754850459bfd96cdb1a47d87033624eafc7e2ee1d28346f8f3c319c5128",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -24863,7 +24903,7 @@
     {
       "path": "artifacts/validation/system-health-core-service-ipc-runtime.json",
       "bytes": 161,
-      "sha256": "cac8858d9855e6f5ea84699493df80f7d570851e55dbb9ac6b95c6899fe0f06c",
+      "sha256": "bd26774e6962b745d38a057894a466bf9b3ad7b11eadd38d40db290a246c8efc",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -24871,7 +24911,7 @@
     {
       "path": "artifacts/validation/universal-rule-enforcement-gate.json",
       "bytes": 299,
-      "sha256": "651fc3240615cd34e09a6d7bd53a074bbb4d9983d0a5215b4b777313f05439a7",
+      "sha256": "de1f0cb37c2f3b31de9455f30c9e861cd24fe19e64be3a264b00c81edbcc99c7",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -24887,7 +24927,7 @@
     {
       "path": "artifacts/validation/user-decision-ledger-gate.json",
       "bytes": 181,
-      "sha256": "92e1ba902b998ee2024fc04dac3273aa975bb3afeea0d036ff6319c07afe9c71",
+      "sha256": "da8f07a8d20377f0ffc719eb565fe9b62494d10ae6e220b06f167efb97d78079",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -29278,8 +29318,8 @@
     },
     {
       "path": "config/32-q-ppk-021-platform-policy-ast-allowlist.json",
-      "bytes": 56941,
-      "sha256": "b66fd0aa4ce21557a45be5a0e870e04d59053e77e1c0c3abea7d92f1700908e9",
+      "bytes": 57232,
+      "sha256": "8a99f1f731298a93e96d7ec490ba19806c9aefdcd9a5fd27fe9af2899d5a21fd",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -29287,7 +29327,7 @@
     {
       "path": "config/32-q-ppk-021-platform-policy-ast-gate-inventory.json",
       "bytes": 3669,
-      "sha256": "cd4310b6f628561b4ba094ef7cf1c72f6bd5206f556f077a08da412b2bca74c6",
+      "sha256": "82f3d6cff6f65fdcdb56cb150991190b66ef4c2e9dcac36bea35b16e1cb1d001",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -29295,7 +29335,7 @@
     {
       "path": "config/32-q-ppk-021-platform-policy-ast-gate-scope.json",
       "bytes": 6619,
-      "sha256": "47ed715ee59b7f27b0c20819678158ff90a5b78148971576c8ce51250bfe8c64",
+      "sha256": "118f864385222cba10f3c6e93e7155af08e9af718396b63cd9bcb1fc3cf01338",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -29653,6 +29693,22 @@
       "isDocument": true
     },
     {
+      "path": "config/33-k-privacy-consent-lost-device-control-inventory.json",
+      "bytes": 1261,
+      "sha256": "d3bd8fc213aef03f725493fb1499c6da99cc57dff2b6b434a284cf67bb5fb880",
+      "extension": ".json",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": "config/33-k-privacy-consent-lost-device-control-scope.json",
+      "bytes": 2234,
+      "sha256": "a27152062076ef99d2a23ffe53687a133d4d1625876366fe25438bbdc7757f4a",
+      "extension": ".json",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
       "path": "config/accepted-cache-rc2-validation-policy.json",
       "bytes": 554,
       "sha256": "8c2963d70118409a716b49632388b9f0f2dcb967de2792b0b7ad4125b021213e",
@@ -29662,8 +29718,8 @@
     },
     {
       "path": "config/accepted-scope-registry.json",
-      "bytes": 402061,
-      "sha256": "cc2305af781ca99d8c65ce2836892d344e9b83a1b2c2f2ddb0f4e2ef1d691a3c",
+      "bytes": 404400,
+      "sha256": "43661b96835615e1232e556c25de55985ef122ae38de5ba1060476ca9fd163b8",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -29686,16 +29742,16 @@
     },
     {
       "path": "config/active-governance-ledger.json",
-      "bytes": 47928,
-      "sha256": "a4f484d432cf22c0293fa4e9c56211f40b80486946adfc3a69c00d370d711935",
+      "bytes": 47968,
+      "sha256": "e0078af6a44e3d1333b381d3f6d70cad0a4ac8c72d329a7c3ee3c6f77ecc5d3a",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
     },
     {
       "path": "config/additional-family-capabilities.json",
-      "bytes": 22038,
-      "sha256": "e8c4a0b80f5ae2a1ace0b284154ef5b127936effd03f57ffa148f24b2e9894b6",
+      "bytes": 22031,
+      "sha256": "f6cfb72cbe2c6b1bbe69df23283825f58a675610138b161584582974b68260bd",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -29934,16 +29990,16 @@
     },
     {
       "path": "config/user-decision-ledger.json",
-      "bytes": 86538,
-      "sha256": "3fa175b700075b54aca22c67c5bfaa196746a791f12e54bcd7d877d43f82203b",
+      "bytes": 87513,
+      "sha256": "0378c8d6ad03aa60f522ef1ac6c3edc9aaa44585cdf3dbe9c6cdeddd3011a801",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
     },
     {
       "path": "config/work-segmentation-plan.json",
-      "bytes": 141457,
-      "sha256": "09545ba07457fe6f253dd29a360d81d7ce90e60c18022d4f44cbc0f018b26662",
+      "bytes": 142241,
+      "sha256": "9e218f2ae020b1e9af5ff65c4499e55c292ead274c02d44a0f33d433e6297af2",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -30366,8 +30422,8 @@
     },
     {
       "path": "docs/10_MASTER_DECISION_REGISTER.md",
-      "bytes": 103407,
-      "sha256": "6b93d22669693409c72d19cc9195996d86488f793d619c53e35effd739ef4d4a",
+      "bytes": 104080,
+      "sha256": "b94832e8e5b981623e0c948c065616fa0125c12f2b7a205d26411ccb37578efa",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -32016,6 +32072,14 @@
       "path": "docs/audit/33-J_FAMILY_EMERGENCY_CARD_PORTABILITY_UST_KAPANIS.md",
       "bytes": 3051,
       "sha256": "a87efdef3781e9c781e0d5a04177e52a7a195c7303d825f7eb890f258f69ec49",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": "docs/audit/33-K_PRIVACY_CONSENT_LOST_DEVICE_CONTROL_UST_KAPANIS.md",
+      "bytes": 2628,
+      "sha256": "5d4cc2f81d759df90d05df148b1b94a2a161520dbfa3543aefad4f4f735f1ae8",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -33733,6 +33797,14 @@
       "isDocument": true
     },
     {
+      "path": "docs/decisions/DEC-222-privacy-consent-lost-device-control-center.md",
+      "bytes": 1464,
+      "sha256": "54d7d9d72ee5027fec4fabfc32fe72af4ad9ee458a39461afdeeee85b3ef93b4",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
       "path": "docs/examples/anadolu-parsi-family-import-v1.example.json",
       "bytes": 1300,
       "sha256": "fd769c29e37671083eaf6960374fca184e06027b7e0b20c6112b1dc8b6b34494",
@@ -34189,6 +34261,14 @@
       "isDocument": true
     },
     {
+      "path": "docs/security/THREAT_MODEL_33_K_PRIVACY_CONSENT_LOST_DEVICE_CONTROL.md",
+      "bytes": 1794,
+      "sha256": "3c99a0f234b4a7b68056df9f1012ec150bd3cd34a3759ccc31a16ec3421ca6b8",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
       "path": "docs/security/WINDOWS_EVIDENCE_INTAKE_BUILD216.md",
       "bytes": 2047,
       "sha256": "38f3fbeedbf6a86687428c9a9423cfcdf203aa1b37415e300ba6a15a9e99a77a",
@@ -34310,8 +34390,8 @@
     },
     {
       "path": "package.json",
-      "bytes": 99927,
-      "sha256": "bc33916ea00ab2a79294aab8bc6208987e0d17a94de0a55e29357c713b269455",
+      "bytes": 101121,
+      "sha256": "28078145560e591b3f2d4075136423410ec530eb1d8ce10459604300526e4120",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -34638,8 +34718,8 @@
     },
     {
       "path": "packages/application/src/index.ts",
-      "bytes": 3137,
-      "sha256": "21f5029e9317b49e561de76d5b928eab12608847f015351d79a44e309137f1ac",
+      "bytes": 3185,
+      "sha256": "a83097e3e83b8db9ba7ef25a50c3c0d3face61478ed6e5d228dcb029cd1b84ee",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -34760,6 +34840,14 @@
       "path": "packages/application/src/policy-service-availability-use-cases.ts",
       "bytes": 3308,
       "sha256": "f28c0d036ae6d2f72eaf49f2f98e2829ce0ed04c772e6247b851d5455013c606",
+      "extension": ".ts",
+      "classification": "SOURCE_CODE",
+      "isDocument": false
+    },
+    {
+      "path": "packages/application/src/privacy-control-use-cases.ts",
+      "bytes": 13956,
+      "sha256": "32cb5554ff582e0cbe2994352362f78d50dba2850159148a076626b54e01beb3",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -34944,6 +35032,14 @@
       "path": "packages/application/tests/payment-card-management.test.ts",
       "bytes": 2880,
       "sha256": "25854cb8cca10cb69038e8392f02e8f0e5e083bb40c657b1940f9c7cefd78dc6",
+      "extension": ".ts",
+      "classification": "TEST_OR_GATE",
+      "isDocument": false
+    },
+    {
+      "path": "packages/application/tests/privacy-control-use-cases.test.ts",
+      "bytes": 8502,
+      "sha256": "6f2b3ddd1ba96ac8551d2c821ddbe06bff8e836e87830b36efa0fa97cf68dfe5",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -35366,8 +35462,8 @@
     },
     {
       "path": "packages/domain/src/app-data.ts",
-      "bytes": 123163,
-      "sha256": "fb1ee0c8fe09505b507044fe9e64251e5ff7050d192e941c784502faff23f092",
+      "bytes": 125631,
+      "sha256": "5f824c57fb3ac021d62c0913abfdee5f47617aaf3537cb769a92ca62fb6186dc",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -35471,7 +35567,7 @@
     {
       "path": "packages/domain/src/platform-policy-ast-gate.ts",
       "bytes": 1423,
-      "sha256": "f638e838816de53fa73f116284924b7cefd8fba9ea99b5cb306bbd6743265396",
+      "sha256": "9394cc249761bf4002128487202f056d2cdc08636a805048bc34e76ea30cb9a3",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -35751,7 +35847,7 @@
     {
       "path": "packages/platform-policy/platform-policy-ast-gate-policy.test.ts",
       "bytes": 1459,
-      "sha256": "d04e0ecbf198f9e1ef291d506941227da6999dd0cf2a1cf672b4bbecbd8058fe",
+      "sha256": "2507fd581a6fc22cc2dc08830343bf36f80bd7647152a103fc403804bf5d1834",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -35879,7 +35975,7 @@
     {
       "path": "packages/platform-policy/src/platform-policy-ast-gate-policy.ts",
       "bytes": 4346,
-      "sha256": "c6ad9d90065292a501945aab7f3377571a205d8260d64b359dcb625a817dff4e",
+      "sha256": "620951bb5a7422b9885fd237cde2eb07648ab182c631fde4ed15ed64062e66d1",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -39781,6 +39877,14 @@
       "isDocument": false
     },
     {
+      "path": "scripts/finalize-33-k-privacy-consent-lost-device-control-external-receipt.mjs",
+      "bytes": 45719,
+      "sha256": "e737a531e1ca9dd2b5e58c56d5e3fbea5d12f3337383a137f198a470788d7212",
+      "extension": ".mjs",
+      "classification": "TEST_OR_GATE",
+      "isDocument": false
+    },
+    {
       "path": "scripts/fix-aym-decision-register-refresh.mjs",
       "bytes": 3913,
       "sha256": "ec5b786e83010aa3de684ef797a7460510d9d829def6dda3c542dfc06cf8a6e1",
@@ -41679,7 +41783,7 @@
     {
       "path": "scripts/verify-31-b-family-data-import-central-authorization-contract.mjs",
       "bytes": 10616,
-      "sha256": "4eb38af5ccb1903a98a5f646796281c6b6bc8c58d09057b831035414141ef9d1",
+      "sha256": "0a62711ef02c4c7f128f0439af3c5c05be349bf90160278fc195326eb631fa55",
       "extension": ".mjs",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -42303,7 +42407,7 @@
     {
       "path": "scripts/verify-32-q-ppk-021-platform-policy-ast-gate-contract.mjs",
       "bytes": 20591,
-      "sha256": "8733c01a353646ef74409366762b5bf6490026c984fc3e1e8348e988c29bbbf8",
+      "sha256": "6bbae8e826edc82e9427e0602840d4e521d7957dac6474c4f7831238bf028256",
       "extension": ".mjs",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -42311,7 +42415,7 @@
     {
       "path": "scripts/verify-32-q-ppk-021-platform-policy-ast-gate-runtime.mjs",
       "bytes": 9356,
-      "sha256": "df6cb9d338a5c7a3b78c13352f0c59bba7b96689e36e09cc1e2fb388477b5f31",
+      "sha256": "a5064e751afa61905b1d9cab631bfa02bcf19e51850c893b86a13ec77a60ba72",
       "extension": ".mjs",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -42677,6 +42781,30 @@
       "isDocument": false
     },
     {
+      "path": "scripts/verify-33-k-privacy-consent-lost-device-control-completion.mjs",
+      "bytes": 24919,
+      "sha256": "b33b54f17e16d4b34960c07a42eb1733c992bd8c341d87b00d42a716719860dc",
+      "extension": ".mjs",
+      "classification": "TEST_OR_GATE",
+      "isDocument": false
+    },
+    {
+      "path": "scripts/verify-33-k-privacy-consent-lost-device-control-contract.mjs",
+      "bytes": 6709,
+      "sha256": "aa7c1a08736fb16dbc76a6beb29accfe8f45801528c6c5bdf784b994fa8f3b8b",
+      "extension": ".mjs",
+      "classification": "TEST_OR_GATE",
+      "isDocument": false
+    },
+    {
+      "path": "scripts/verify-33-k-privacy-consent-lost-device-control-runtime.mjs",
+      "bytes": 4455,
+      "sha256": "ebca0534cc48a2ead25ab8821fa8a33bbd5a26cb6cc3969b20d2eca6afd99f18",
+      "extension": ".mjs",
+      "classification": "TEST_OR_GATE",
+      "isDocument": false
+    },
+    {
       "path": "scripts/verify-active-delivery-documents.mjs",
       "bytes": 5765,
       "sha256": "d8edf2c1dc9baa46df7dd8c03c085b928526e76f87cf505f3acd1db54693fd40",
@@ -42767,7 +42895,7 @@
     {
       "path": "scripts/verify-b4-banking-foundation-boundary.mjs",
       "bytes": 13731,
-      "sha256": "9a5435d425860216e3dd4525b22e789beb3a8011ab8bce694af2e94fe1bc7b73",
+      "sha256": "eec93485774d419443bfc0105e9da20e92ea63e0e932815f7db58e61f696eb21",
       "extension": ".mjs",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -42775,7 +42903,7 @@
     {
       "path": "scripts/verify-b4-controlled-import-open-banking-boundary.mjs",
       "bytes": 22366,
-      "sha256": "d6b766e1b2a38a06d2b524527c011c810d2e8622188605d056ef2bf029b9983e",
+      "sha256": "56563b04236a7c6748ebe58294d71c67f6d189fe5583ff8719ad8278c16bf994",
       "extension": ".mjs",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -42783,7 +42911,7 @@
     {
       "path": "scripts/verify-b4-finance-planning-portfolio-analytics-boundary.mjs",
       "bytes": 20188,
-      "sha256": "d29360447c8b8d77490cc3fd6c7db9feddad2397b2d2d21014b7afaacc75c6cd",
+      "sha256": "38b9078b113c691ba79cc931f27db1a430fafc83530da22c6600dda4671e8d4c",
       "extension": ".mjs",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -42791,7 +42919,7 @@
     {
       "path": "scripts/verify-b4-loan-management-boundary.mjs",
       "bytes": 18228,
-      "sha256": "fd4dad81b93e4e826e527915403d0ab05b11e1186a8bb5a82e65342d178eef3d",
+      "sha256": "a31903734be0e86f5ed5d2a2a18bf11d10dc2a700b15124e1400f40abe163041",
       "extension": ".mjs",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -42799,7 +42927,7 @@
     {
       "path": "scripts/verify-b4-payment-card-management-boundary.mjs",
       "bytes": 16298,
-      "sha256": "e643673759491f7867b4aa69270699170704dd2532fd78f283665ee521484dde",
+      "sha256": "bd78cf70f4748e8023c49c061ef8f6d12db7c431a750672fc4c2fb5154f7791b",
       "extension": ".mjs",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -45919,7 +46047,7 @@
     {
       "path": "scripts/verify-family-emergency-card-portability-boundary.mjs",
       "bytes": 23684,
-      "sha256": "32a1c300a755285d7162c4ddee1f41a2ceb34231c87f5564788c39634101b991",
+      "sha256": "511ae7f6d4fb79a359582436ce8ac1999dd691a6b8e6d9f28cfeecbeef0c363d",
       "extension": ".mjs",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -46349,6 +46477,14 @@
       "isDocument": false
     },
     {
+      "path": "scripts/verify-privacy-consent-lost-device-control-boundary.mjs",
+      "bytes": 9370,
+      "sha256": "61ef402d647d6f3390eaff38f74b7eee43202fbfec4a187786efb9a4b0a36fb0",
+      "extension": ".mjs",
+      "classification": "TEST_OR_GATE",
+      "isDocument": false
+    },
+    {
       "path": "scripts/verify-product-surface-governance.mjs",
       "bytes": 651,
       "sha256": "7c961548ac1faab18851df6bcfd9eced178140171415cafc1ad1031906db3570",
@@ -46422,8 +46558,8 @@
     },
     {
       "path": "scripts/verify-sensitive-data-consent-boundary.mjs",
-      "bytes": 10078,
-      "sha256": "1d84044bb7832a2473c0ebe5b4e89c925ec70d24adefcfcebd125671c9ca56aa",
+      "bytes": 10076,
+      "sha256": "ed7364459e809e0dd181af2233190c499ab69e224038f02b4447975b746216d5",
       "extension": ".mjs",
       "classification": "TEST_OR_GATE",
       "isDocument": false

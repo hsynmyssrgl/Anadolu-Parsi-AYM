@@ -313,7 +313,7 @@
       "title": "Rıza süreleri, tek dokunuşla iptal ve kayıp cihaz kapatma",
       "classification": "CORE_BRONZE",
       "priority": "P0",
-      "status": "NOT_IMPLEMENTED"
+      "status": "COMPLETE"
     },
     {
       "id": "EXT-040",

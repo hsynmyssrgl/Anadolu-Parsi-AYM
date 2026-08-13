@@ -2169,7 +2169,7 @@ export interface UpdateArchiveClassificationInput { itemId:string; categoryId?:s
 export const AI_CONSENT_PURPOSES = ['search','summary','recommendation','classification'] as const;
 export type AiConsentPurpose = typeof AI_CONSENT_PURPOSES[number];
 export type SensitiveDataConsentPurpose = 'sensitive_processing'|'external_export';
-export type StoredAiConsentPurpose = AiConsentPurpose|SensitiveDataConsentPurpose;
+export type StoredAiConsentPurpose = AiConsentPurpose|SensitiveDataConsentPurpose|'live_location_sharing';
 export interface AiConsentView { id:string; accountId:string; purpose:StoredAiConsentPurpose; resourceType:string; resourceId:string; status:'granted'|'revoked'; startsAt:string; endsAt?:string; createdAt:string; }
 export interface UpsertAiConsentInput { purpose:AiConsentPurpose; resourceType:string; resourceId:string; status:'granted'|'revoked'; startsAt?:string; endsAt?:string; }
 export interface AiAccessPreviewView { purpose:AiConsentPurpose; allowedResources:Array<{resourceType:string;resourceId:string;title:string}>; blockedCount:number; generatedAt:string; }
@@ -2824,4 +2824,72 @@ export interface SetDataLegalHoldInput {
   reason:string;
   password:string;
   code?:string;
+}
+
+export const LIVE_LOCATION_CONSENT_PURPOSE = 'live_location_sharing' as const;
+export const LIVE_LOCATION_CONSENT_RESOURCE_TYPE = 'privacy_control' as const;
+export const LIVE_LOCATION_CONSENT_RESOURCE_ID = 'family_live_location' as const;
+export const LOST_DEVICE_SHUTDOWN_CONFIRMATION = 'KAYIP CİHAZ YETKİLERİNİ KAPAT' as const;
+
+export type LiveLocationConsentEffectiveStatus =
+  | 'default_denied'
+  | 'granted'
+  | 'expired'
+  | 'revoked';
+
+export interface LiveLocationConsentView {
+  readonly purpose:typeof LIVE_LOCATION_CONSENT_PURPOSE;
+  readonly resourceType:typeof LIVE_LOCATION_CONSENT_RESOURCE_TYPE;
+  readonly resourceId:typeof LIVE_LOCATION_CONSENT_RESOURCE_ID;
+  readonly defaultDenied:true;
+  readonly effectiveStatus:LiveLocationConsentEffectiveStatus;
+  readonly visibleActiveIndicator:boolean;
+  readonly startsAt?:string;
+  readonly endsAt?:string;
+  readonly evaluatedAt:string;
+}
+
+export interface UpsertLiveLocationConsentInput {
+  readonly status:'granted'|'revoked';
+  readonly durationMinutes?:number;
+  readonly explicitConsent:boolean;
+}
+
+export interface LostDeviceShutdownInput {
+  readonly trustedDeviceId:string;
+  readonly password:string;
+  readonly code?:string;
+  readonly confirmation:typeof LOST_DEVICE_SHUTDOWN_CONFIRMATION;
+}
+
+export interface LostDeviceShutdownResultView {
+  readonly completedAt:string;
+  readonly targetTrustedDeviceId:string;
+  readonly previousSecurityEpoch:number;
+  readonly securityEpoch:number;
+  readonly revokedTrustedDeviceCount:number;
+  readonly revokedOfflineLeaseCount:number;
+  readonly revokedConsentCount:number;
+  readonly currentSessionCleared:true;
+  readonly scope:'local_authority_only';
+  readonly remoteWipePerformed:false;
+  readonly mdmOperationPerformed:false;
+  readonly networkDelivery:'not_performed';
+}
+
+export interface PrivacyControlCenterTruthView {
+  readonly scope:'local_authority_only';
+  readonly remoteWipeAvailable:false;
+  readonly mdmAvailable:false;
+  readonly networkDeliveryGuaranteed:false;
+  readonly locationTransmissionPerformed:false;
+}
+
+export interface PrivacyControlCenterView {
+  readonly liveLocationConsent:LiveLocationConsentView;
+  readonly trustedDevices:readonly TrustedDeviceView[];
+  readonly offlineLeases:readonly OfflineCapabilityLeaseView[];
+  readonly consentDuration:{readonly minimumMinutes:15;readonly maximumMinutes:43_200};
+  readonly truth:PrivacyControlCenterTruthView;
+  readonly generatedAt:string;
 }

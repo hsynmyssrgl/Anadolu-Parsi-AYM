@@ -1,5 +1,9 @@
 # Ana Karar Kaydı — Build 180
 
+## DEC-222 — Gizlilik, süreli rıza ve kayıp cihaz kapatma merkezi
+
+33-K kapsamında B5-06 ve EXT-039 birlikte uygulanır. Canlı konum paylaşım otoritesi varsayılan kapalı, açık rızalı, 15 dakika–30 gün süreli, görünür göstergeli, değerlendirme anında otomatik sona eren ve derhal iptal edilebilir yapıdadır. Kayıp cihaz işlemi güçlü yerel doğrulama ve merkezi PEP/UoW ile security_epoch, trusted_devices, offline lease ve rıza kayıtlarını atomik olarak kapatır. Uzaktan silme, MDM, ağ teslimi/teslim garantisi veya gerçek konum aktarımı değildir. Ayrıntı: `docs/decisions/DEC-222-privacy-consent-lost-device-control-center.md`.
+
 **Aktif sürüm:** 02.08.2026.228
 
 **Belge kimliği:** `PPT-ADR-MASTER-146`  
@@ -93,7 +97,7 @@ gider akışları manual-only çalışır. Dış sicil sorgusu, sağlayıcı ile
 içeriği ifşası veya ödeme icrası yapılmaz. Ayrıntılı karar:
 `docs/decisions/DEC-216-b5-category-life-home-vehicle.md`
 
-PPK-021 güncel ratchet 554 exact yüzey ve 281 use-case composition yüzeyidir;
+PPK-021 güncel ratchet 557 exact yüzey ve 284 use-case composition yüzeyidir;
 PPK-022 güncel exact capability ratchet 246'dır.
 
 ## DEC-215 — Kontrollü finans içe aktarma ve ağsız ÖHVPS sınırı

@@ -48,7 +48,7 @@ import type {
   FamilyAccountView, FamilyInvitationView, FamilyInvitationInspectionView, ObjectPermissionView, FamilyRole, ObjectPermissionAction, FinanceRecordView, HealthRecordView, CreateFinanceRecordInput, CreateHealthRecordInput, MedicationPlanView, CreateMedicationPlanInput, FamilyHealthHistoryView, CreateFamilyHealthHistoryInput, FinanceValuationView, CreateFinanceValuationInput, LifeRecordView, CreateLifeRecordInput, AutomationRuleView, CreateAutomationRuleInput, AutomationRunView, ReportSummaryView, GenealogyInsightView, TrustedDeviceView, SecurityEventReceiptView, SecurityEventReceiptArchiveItemView, SecurityEventReceiptVerificationView, AiConsentView, AiConsentPurpose, AiAccessPreviewView, DigitalLegacyPlanView, LegacyGrantView, LegacyApprovalView, ArchiveSearchInput, ArchiveVersionView, ArchiveRetentionPolicyView, ArchiveRetentionStatusView, ArchiveCategoryView, ArchiveClassificationView, SystemHealthView, BackupTargetView, BackupRunView, PerformanceSampleView, DiagnosticEntryView, MaintenanceResultView, PerformanceTrendView, BackgroundTaskView, SchedulerStatusView, BackupSchedule, QueuedTaskView, MaintenancePolicyView, HealthNotificationView, DiagnosticReportHistoryView, SystemHealthScoreView, SystemHealthHistoryView, SystemHealthTrendView, DiagnosticArchiveView, DiagnosticArchiveVerificationView, DiagnosticReportContentView, DiagnosticReportComparisonView, DiagnosticArchiveContentView, DiagnosticArchiveSearchInput, MaintenanceHistoryView, PerformanceAnomalyView, IpcPerformanceTelemetryView, IpcAdaptiveBudgetMaintenanceAuthorityView, IpcAdaptiveBudgetMaintenanceRecoveryAuthorityView, MaintenanceRecommendationView, ExportArtifactView, BackupInspectionView, BackupPropagationRunView, BackupCleanRewriteStatusView, BackupCleanRewriteRunView, BackupQuarantinePolicyView, BackupQuarantineBatchView, ExternalBackupCopyView, ExternalBackupInventorySummaryView, ExternalBackupCopyKind, ExternalBackupEvidenceIssuerView, ExternalBackupEvidenceIssuerRotationView, ExternalBackupEvidenceRevocationListView, ExternalBackupRevocationEndpointView, RevocationSyncEndpointStateView, ExternalBackupDestructionEvidenceView, DataRetentionPolicyView, DataLifecycleRecordView, DataLifecycleResourceType, FamilyDataImportPreviewView, FamilyDataImportBatchView, GenealogyTreeNodeView, ArchivePageItemView, EventCatalogItemView
 } from '@ppt/domain';
 import type { AuthorizationContextWorkspaceView, AuthorizationPurpose } from '@ppt/domain';
-import type { OfflineCapability, OfflineCapabilityLeaseWorkspaceView } from '@ppt/domain';
+import type { OfflineCapability, OfflineCapabilityLeaseWorkspaceView, PrivacyControlCenterView } from '@ppt/domain';
 import type { ClientDataAccessBoundaryView } from '@ppt/domain';
 import type { NetworkEgressBoundaryView } from '@ppt/domain';
 import type { DerivedDataPolicyBoundaryView } from '@ppt/domain';
@@ -1076,6 +1076,12 @@ function SettingsSecurity({auth,accessibility,onAccessibilityChange,onFamilyData
   const [twoFactor,setTwoFactor]=useState<TwoFactorSetupView|null>(null);
   const [twoFactorCode,setTwoFactorCode]=useState('');
   const [devices,setDevices]=useState<TrustedDeviceView[]>([]);
+  const [privacyCenter,setPrivacyCenter]=useState<PrivacyControlCenterView|null>(null);
+  const [liveLocationDuration,setLiveLocationDuration]=useState(60);
+  const [lostDeviceId,setLostDeviceId]=useState('');
+  const [lostDevicePassword,setLostDevicePassword]=useState('');
+  const [lostDeviceCode,setLostDeviceCode]=useState('');
+  const [lostDeviceConfirmation,setLostDeviceConfirmation]=useState('');
   const [deviceName,setDeviceName]=useState('Bu bilgisayar');
   const [deviceReauthorizationConfirmation,setDeviceReauthorizationConfirmation]=useState('');
   const [securityReceipt,setSecurityReceipt]=useState<SecurityEventReceiptView|null>(null);
@@ -1091,7 +1097,7 @@ function SettingsSecurity({auth,accessibility,onAccessibilityChange,onFamilyData
 
   const refreshImports=async()=>{if(window.pardus)setImportBatches(await window.pardus.listFamilyDataImports(20));};
   useEffect(()=>{
-    if(window.pardus&&auth.authenticated)void Promise.all([window.pardus.listTrustedDevices().then(setDevices),window.pardus.listSecurityEventReceipts(20).then(setSecurityReceiptHistory),refreshImports()]);
+    if(window.pardus&&auth.authenticated)void Promise.all([window.pardus.listTrustedDevices().then(setDevices),window.pardus.getPrivacyControlCenter().then(setPrivacyCenter),window.pardus.listSecurityEventReceipts(20).then(setSecurityReceiptHistory),refreshImports()]);
   },[auth.authenticated]);
 
   const validateBackupPassword=(confirmationRequired:boolean):boolean=>{
@@ -1150,6 +1156,8 @@ function SettingsSecurity({auth,accessibility,onAccessibilityChange,onFamilyData
   const trustDevice=async()=>{try{if(!window.pardus)return;setDevices(await window.pardus.trustCurrentDevice({password:currentPassword,code:twoFactorCode,displayName:deviceName.trim()||'Bu bilgisayar'}));setMessage('Bu cihaz güvenilir cihaz olarak kaydedildi.');}catch(err){setMessage(err instanceof Error?err.message:'Cihaz güvenilir olarak kaydedilemedi.');}};
   const reauthorizeDeviceAfterRecovery=async()=>{try{if(!window.pardus)return;const result=await window.pardus.reauthorizeCurrentDeviceAfterRecovery({password:currentPassword,code:twoFactorCode,confirmation:DEVICE_REAUTHORIZATION_CONFIRMATION,displayName:deviceName.trim()||'Bu bilgisayar'});setDevices(result.devices);setSecurityReceipt(result.receipt);setDeviceReauthorized(true);setDeviceReauthorizationConfirmation('');setCurrentPassword('');setTwoFactorCode('');setSecurityReceiptHistory(await window.pardus.listSecurityEventReceipts(20));setMessage(`Cihaz güvenlik dönemi ${result.receipt.securityEpoch} için yeniden yetkilendirildi. İmzalı güvenlik makbuzu oluşturuldu${result.receiptArchived?' ve yerel geçmişe kaydedildi':' ancak yerel geçmişe kaydedilemedi'}.`);}catch(err){setMessage(err instanceof Error?err.message:'Cihaz yeniden yetkilendirilemedi.');}};
   const revokeDevice=async(id:string)=>{if(window.pardus)setDevices(await window.pardus.revokeTrustedDevice(id));};
+  const setLiveLocationConsent=async(status:'granted'|'revoked')=>{try{if(!window.pardus)return;setPrivacyCenter(await window.pardus.setLiveLocationConsent({status,explicitConsent:true,...(status==='granted'?{durationMinutes:liveLocationDuration}:{})}));setMessage(status==='granted'?'Canlı konum paylaşım yetkisi süreli olarak açıldı; bu uygulama konum iletimi yapmaz.':'Canlı konum paylaşım rızası derhal iptal edildi.');}catch(err){setMessage(err instanceof Error?err.message:'Rıza güncellenemedi.');}};
+  const shutdownLostDevice=async()=>{try{if(!window.pardus||!lostDeviceId)return;const result=await window.pardus.shutdownLostDevice({trustedDeviceId:lostDeviceId,password:lostDevicePassword,...(lostDeviceCode.trim()?{code:lostDeviceCode.trim()}:{}),confirmation:'KAYIP CİHAZ YETKİLERİNİ KAPAT'});setMessage(`Yerel yetki kapatıldı: ${result.revokedTrustedDeviceCount} cihaz, ${result.revokedOfflineLeaseCount} kira ve ${result.revokedConsentCount} rıza. Uzaktan silme/MDM/ağ teslimi yapılmadı.`);setLostDevicePassword('');setLostDeviceCode('');setLostDeviceConfirmation('');globalThis.location.reload();}catch(err){setMessage(err instanceof Error?err.message:'Kayıp cihaz yetkileri kapatılamadı.');}};
   const refreshSecurityReceipts=async()=>{if(window.pardus)setSecurityReceiptHistory(await window.pardus.listSecurityEventReceipts(20));};
   const verifySecurityReceiptJson=async()=>{if(!window.pardus)return;const result=await window.pardus.verifySecurityEventReceipt(securityReceiptJson);setSecurityReceiptVerification(result);setMessage(result.message);};
   const loadAudit=async()=>{if(window.pardus)setAudit(await window.pardus.listAudit(25));};
@@ -1194,6 +1202,16 @@ function SettingsSecurity({auth,accessibility,onAccessibilityChange,onFamilyData
     <SectionHeader eyebrow="Yerel koruma" title="Güvenlik ve yedekleme"/>
     <div className="button-row"><Button onClick={()=>globalThis.dispatchEvent(new CustomEvent('ppt-replay-intro'))}>Tanıtımı yeniden oynat</Button><Button onClick={()=>{const disabled=globalThis.localStorage?.getItem(BRAND_AUDIO_DISABLED_KEY)==='1';globalThis.localStorage?.setItem(BRAND_AUDIO_DISABLED_KEY,disabled?'0':'1');setMessage(disabled?'Marka sesi açıldı.':'Marka sesi kapatıldı.');}}>Marka sesini aç/kapat</Button></div>
     <p>Oturum: {auth.displayName??'Yönetici'} · 2FA {auth.twoFactorEnabled?'açık':'kapalı'}</p>
+    <section className="privacy-control-center">
+      <h3>Gizlilik, süreli rıza ve kayıp cihaz kapatma merkezi</h3>
+      <p>Varsayılan kapalıdır. Bu merkez yalnız yerel yetki, oturum, çevrimdışı kira ve rıza kayıtlarını yönetir; uzaktan silme, MDM veya ağ üzerinden teslim garantisi vermez.</p>
+      <div className="button-row"><label>Canlı konum rıza süresi (dakika)<input type="number" min={15} max={43200} value={liveLocationDuration} onChange={e=>setLiveLocationDuration(Number(e.target.value))}/></label><Button tone="primary" disabled={liveLocationDuration<15||liveLocationDuration>43200} onClick={()=>void setLiveLocationConsent('granted')}>Süreli rızayı aç</Button><Button tone="danger" onClick={()=>void setLiveLocationConsent('revoked')}>Derhal iptal et</Button></div>
+      <p><strong>Gösterge:</strong> {privacyCenter?.liveLocationConsent.visibleActiveIndicator?'AKTİF':'KAPALI'} · {privacyCenter?.liveLocationConsent.effectiveStatus??'default_denied'}{privacyCenter?.liveLocationConsent.endsAt?` · ${formatDate(privacyCenter.liveLocationConsent.endsAt,{dateStyle:'short',timeStyle:'short'})} tarihinde otomatik kapanır`:''}</p>
+      <h4>Kayıp cihaz yerel yetkilerini kapat</h4>
+      <label>Hedef güvenilir cihaz<select value={lostDeviceId} onChange={e=>setLostDeviceId(e.target.value)}><option value="">Cihaz seçin</option>{devices.filter(device=>!device.revokedAt).map(device=><option key={device.id} value={device.id}>{device.displayName}{device.current?' (bu cihaz)':''}</option>)}</select></label>
+      <label>Yerel parola<input type="password" autoComplete="current-password" maxLength={1024} value={lostDevicePassword} onChange={e=>setLostDevicePassword(e.target.value)}/></label><label>2FA / kurtarma kodu<input maxLength={256} value={lostDeviceCode} onChange={e=>setLostDeviceCode(e.target.value)}/></label><label>Onay ifadesi<input value={lostDeviceConfirmation} onChange={e=>setLostDeviceConfirmation(e.target.value)} placeholder="KAYIP CİHAZ YETKİLERİNİ KAPAT"/></label>
+      <Button tone="danger" disabled={!lostDeviceId||!lostDevicePassword||lostDeviceConfirmation!=='KAYIP CİHAZ YETKİLERİNİ KAPAT'} onClick={()=>void shutdownLostDevice()}>Tüm yerel cihaz güvenlerini, kiraları ve rızaları kapat</Button>
+    </section>
     <div className="security-grid">
       <section>
         <h3>Yedekleme</h3>

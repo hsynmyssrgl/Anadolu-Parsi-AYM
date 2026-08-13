@@ -1086,6 +1086,24 @@ const sensitiveExportPreviewInput = (args: readonly unknown[]): IpcIntegrationPo
     && boundedString(value.businessPurpose, 240)
 );
 
+const liveLocationConsentInput = (args:readonly unknown[]):IpcIntegrationPolicyDecision => exactObject(
+  args,
+  ['status','durationMinutes','explicitConsent'],
+  (value) => (value.status === 'granted' || value.status === 'revoked')
+    && value.explicitConsent === true
+    && optionalInteger(value.durationMinutes,15,43_200)
+    && (value.status !== 'granted' || typeof value.durationMinutes === 'number')
+);
+
+const lostDeviceShutdownInput = (args:readonly unknown[]):IpcIntegrationPolicyDecision => exactObject(
+  args,
+  ['trustedDeviceId','password','code','confirmation'],
+  (value) => boundedString(value.trustedDeviceId,128)
+    && boundedString(value.password,1024)
+    && optionalBoundedString(value.code,256)
+    && value.confirmation === 'KAYIP CİHAZ YETKİLERİNİ KAPAT'
+);
+
 const optionalWindowsHelloFallback = (value: unknown): boolean => {
   if (value === undefined) return true;
   if (!isObject(value) || !hasOnlyKeys(value, ['password', 'secondFactorCode'])) return false;
@@ -1141,6 +1159,12 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
       return sensitiveConsentInput(args);
     case 'ai:previewSensitiveExport':
       return sensitiveExportPreviewInput(args);
+    case 'privacyControl:getCenter':
+      return zeroArguments(args);
+    case 'privacyControl:setLiveLocationConsent':
+      return liveLocationConsentInput(args);
+    case 'privacyControl:shutdownLostDevice':
+      return lostDeviceShutdownInput(args);
     case 'auth:getSessionLockState':
     case 'auth:recordSessionActivity':
     case 'auth:lockSession':

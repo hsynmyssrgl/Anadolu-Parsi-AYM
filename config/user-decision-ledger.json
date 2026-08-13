@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 75,
+  "decisionCount": 76,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1920,6 +1920,18 @@
         "docs/audit/33-I_FAMILY_EMERGENCY_ASSISTANCE_CARD_UST_KAPANIS.md",
         "config/33-i-family-emergency-assistance-card-inventory.json"
       ]
+    },
+    {
+      "id": "DEC-222",
+      "date": "2026-08-13",
+      "acceptedAt": "2026-08-13",
+      "title": "B5-06 and EXT-039 privacy, bounded consent and local lost-device authority center",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: activate 33-K / DEC-222 and continue full auto",
+      "document": "docs/decisions/DEC-222-privacy-consent-lost-device-control-center.md",
+      "requirements": ["B5-06", "EXT-039"],
+      "codeAreas": ["packages/domain/src/app-data.ts","packages/application/src/privacy-control-use-cases.ts","apps/desktop/src/main/privacy-control-application-adapter.ts","apps/desktop/src/main/data-store.ts","apps/desktop/src/main/ipc-integration-policy.ts","apps/desktop/src/main/main.ts","apps/desktop/src/main/preload.ts","apps/desktop/src/renderer/App.tsx"],
+      "evidence": ["docs/security/THREAT_MODEL_33_K_PRIVACY_CONSENT_LOST_DEVICE_CONTROL.md","config/33-k-privacy-consent-lost-device-control-inventory.json"]
     },
     {
       "id": "DEC-221",

@@ -109,7 +109,7 @@ export const resolveIpcReadSharingPolicy = (channel: string): IpcReadSharingPoli
   return disabledPolicy;
 };
 
-const MUTATION_ACTION_PATTERN = /^(?:create|update|delete|upsert|set|archive|restore|revoke|accept|apply|run|execute|acknowledge|import|rollback|assign|enable|disable|trust|change|process|evaluate|capture|enqueue|repair|cleanup|purge|destroy|register|rotate|attest|propagate|request|cancel)/i;
+const MUTATION_ACTION_PATTERN = /^(?:create|update|delete|upsert|set|archive|restore|revoke|accept|apply|run|execute|acknowledge|import|rollback|assign|enable|disable|trust|change|process|evaluate|capture|enqueue|repair|cleanup|purge|destroy|register|rotate|attest|propagate|request|cancel|shutdown)/i;
 
 export const shouldInvalidateIpcReadSharing = (channel: string): boolean => {
   if (resolveIpcReadSharingPolicy(channel).enabled) return false;

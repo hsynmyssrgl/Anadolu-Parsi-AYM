@@ -5,7 +5,7 @@
   "rule": "PR-171",
   "policy": "ONE_IN_PROGRESS_PREVIOUS_MUST_HAVE_PASS_AND_PERSISTENT_RECEIPT",
   "workflowStatus": "IN_PROGRESS",
-  "currentStep": "33-J",
+  "currentStep": "33-K",
   "steps": [
     {
       "id": "29-A",
@@ -2324,8 +2324,18 @@
     },
     {
       "id": "33-K",
-      "title": "Next governed multi-requirement Bronze slice after 33-J",
-      "scopeRequirement": "AUTO_PRIORITY_SELECTION",
+      "title": "Gizlilik, süreli rıza ve kayıp cihaz kapatma merkezi",
+      "scopeRequirement": "B5-06,EXT-039",
+      "status": "IN_PROGRESS",
+      "validationStatus": "PENDING",
+      "localEvidence": ["config/33-k-privacy-consent-lost-device-control-scope.json","config/33-k-privacy-consent-lost-device-control-inventory.json","docs/decisions/DEC-222-privacy-consent-lost-device-control-center.md","docs/security/THREAT_MODEL_33_K_PRIVACY_CONSENT_LOST_DEVICE_CONTROL.md"],
+      "persistentReceiptStatus": "PENDING",
+      "completionTransitionStatus": "PENDING"
+    },
+    {
+      "id": "33-L",
+      "title": "Finans - Uzun Vadeli Portföy: sürümlü birikim planı, değişmez kıymet defteri, kurumsal işlemler ve projeksiyonlar",
+      "scopeRequirement": "LTP-001,LTP-002,LTP-003,LTP-004,LTP-005,LTP-006,LTP-007,LTP-008",
       "status": "PENDING",
       "validationStatus": "PENDING",
       "localEvidence": [],
@@ -2335,6 +2345,6 @@
   ],
   "recoveryAuthority": "NEW_CHAT_HANDOFF_Bronze_04.08.2026.29.md",
   "recoveryReason": "29-D_FAILED_POSTFLIGHT_EXIT_CODE_1_SPLIT_PER_PR-171",
-  "updatedAt": "2026-08-13T03:00:28.245Z",
-  "segmentationNote": "33-J is immutable COMPLETED/PASS with exact local and D: USB hash/size readback. 33-K remains PENDING for governed successor selection."
+  "updatedAt": "2026-08-13T16:38:31.761Z",
+  "segmentationNote": "33-J remains immutable COMPLETED/PASS. 33-K DEC-222 is the sole active B5-06/EXT-039 privacy, bounded-consent and local lost-device authority slice; 33-L long-term portfolio is the governed pending successor."
 }

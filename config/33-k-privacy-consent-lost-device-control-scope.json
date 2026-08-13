@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "33-K-PRIVACY-CONSENT-LOST-DEVICE-CONTROL",
+  "decision": "DEC-222",
+  "requirements": ["B5-06", "EXT-039"],
+  "status": "COMPLETE",
+  "model": {
+    "consentPurpose": "live_location_sharing",
+    "defaultDenied": true,
+    "minimumDurationMinutes": 15,
+    "maximumDurationMinutes": 43200,
+    "visibleActiveIndicator": true,
+    "evaluationTimeExpiry": true,
+    "immediateRevocation": true,
+    "lostDeviceScope": "local_authority_only"
+  },
+  "reuse": {
+    "pep": "CentralAuthorizationService",
+    "transaction": "PrivacyControlUnitOfWork",
+    "tables": ["accounts.security_epoch", "trusted_devices", "offline_capability_leases", "ai_consents", "audit_log"],
+    "latestDatabaseMigration": 88,
+    "newMigrationRequired": false
+  },
+  "truth": {
+    "remoteWipePerformed": false,
+    "mdmOperationPerformed": false,
+    "networkDelivery": "not_performed",
+    "networkDeliveryGuaranteed": false,
+    "locationTransmissionPerformed": false
+  },
+  "validation": {
+    "status": "PASS",
+    "boundary": "artifacts/validation/33-K-privacy-consent-lost-device-control-boundary.json",
+    "contract": "artifacts/validation/33-K-privacy-consent-lost-device-control-contract.json",
+    "runtime": "artifacts/validation/33-K-privacy-consent-lost-device-control-runtime.json",
+    "targetedTests": ["packages/application/tests/privacy-control-use-cases.test.ts", "apps/desktop/tests/b5-privacy-control-ipc-integration.test.ts"],
+    "finalEvidence": {"boundaryChecksPassed":19,"contractChecksPassed":13,"runtimeChecksPassed":9,"targetedTestFilesPassed":2,"targetedTestsPassed":6,"fullVitestTestFilesPassed":127,"fullVitestTestsPassed":1044,"productionWorkspaceBuildsPassed":18,"ppk021ExactAllowlistEntries":557,"ppk021UseCaseCompositionSurfaces":284,"ppk022CapabilitySurfaces":246,"networkChannels":0,"latestDatabaseMigration":88,"requirementChainsComplete":2,"finalClosureEvidence":true}
+  },
+  "implementationBlockers": [],
+  "excludedClaims": [
+    "No remote wipe is implemented or claimed.",
+    "No MDM operation is implemented or claimed.",
+    "No network delivery or acknowledgement guarantee is implemented or claimed.",
+    "The consent authority does not itself transmit location data."
+  ]
+}

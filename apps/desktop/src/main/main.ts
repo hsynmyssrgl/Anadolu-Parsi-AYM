@@ -24,7 +24,7 @@ import type {
   WindowsHelloStateView
 } from '@ppt/domain';
 import { EvaluatePolicyServiceAvailabilityUseCase, GetApplicationSecurityProfileGateBoundaryUseCase, GetDerivedDataPolicyBoundaryUseCase, GetPlatformCapabilityManifestGateBoundaryUseCase, GetPlatformPolicyAstGateBoundaryUseCase, GetPolicyConformanceSuiteBoundaryUseCase, GetPolicyDecisionAuditBoundaryUseCase, GetPolicyServiceAvailabilityBoundaryUseCase, GetSensitiveLoggingBoundaryUseCase, GetSourceDeletionPropagationBoundaryUseCase, type WindowsHelloPlatformPort } from '@ppt/application';
-import type { IssueOfflineCapabilityLeaseInput, OfflineCapabilityLeaseWorkspaceView } from '@ppt/domain';
+import type { IssueOfflineCapabilityLeaseInput, OfflineCapabilityLeaseWorkspaceView, LostDeviceShutdownInput, UpsertLiveLocationConsentInput } from '@ppt/domain';
 import {
   FamilyDataStore,
   FullBackupRestoreRestartRequiredError,
@@ -1293,6 +1293,16 @@ function registerIpc(): void {
   registerIpcHandler('auth:verifySecurityEventReceipt', (_event, receiptJson: string) => store().verifySecurityEventReceiptJson(receiptJson));
   registerIpcHandler('auth:listTrustedDevices', () => store().listTrustedDevices());
   registerIpcHandler('auth:revokeTrustedDevice', (_event, id: string) => store().revokeTrustedDevice(id));
+  registerIpcHandler('privacyControl:getCenter', () => store().getPrivacyControlCenter());
+  registerIpcHandler('privacyControl:setLiveLocationConsent', (_event, input:UpsertLiveLocationConsentInput) => store().upsertLiveLocationConsent(input));
+  registerIpcHandler('privacyControl:shutdownLostDevice', (_event, input:LostDeviceShutdownInput) => {
+    const result = store().shutdownLostDeviceAuthority(input);
+    financeImportFileSessions.clear();
+    emergencyCardExportReauthenticationGuard.clearAll();
+    offlineSensitiveCache.lock('REVOKED');
+    sealUserDataSession();
+    return result;
+  });
   registerIpcHandler('audit:list', (_event, limit?:number) => store().listAudit(limit));
   registerIpcHandler('audit:verifyIntegrity', () => store().verifyAuditIntegrity());
   registerIpcHandler('accounts:list', () => store().listAccounts());

@@ -1,10 +1,10 @@
 {
   "status": "PASS",
   "productionSourceZones": 18,
-  "scannedFiles": 381,
-  "privilegedSurfaces": 554,
-  "exactAllowlistEntries": 554,
-  "exactAllowlistSha256": "b66fd0aa4ce21557a45be5a0e870e04d59053e77e1c0c3abea7d92f1700908e9",
+  "scannedFiles": 383,
+  "privilegedSurfaces": 557,
+  "exactAllowlistEntries": 557,
+  "exactAllowlistSha256": "8a99f1f731298a93e96d7ec490ba19806c9aefdcd9a5fd27fe9af2899d5a21fd",
   "surfaceCounts": {
     "CRYPTO_GLOBAL": 2,
     "CRYPTO_IMPORT": 132,
@@ -15,7 +15,7 @@
     "SQL_CALL": 56,
     "SQL_CONSTRUCTOR": 2,
     "SQL_IMPORT": 2,
-    "USE_CASE_COMPOSITION": 281
+    "USE_CASE_COMPOSITION": 284
   },
   "maliciousSelfTestAssertions": 17,
   "benignSelfTestAssertions": 4,
