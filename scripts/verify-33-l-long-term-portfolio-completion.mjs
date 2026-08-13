@@ -68,7 +68,8 @@ if(external){
   const remote=(name)=>gitRun(['ls-remote','--heads',name,'main']).stdout.trim().match(/^([0-9a-f]{40})\s+refs\/heads\/main$/u)?.[1];
   check(remote('github')===head,'GitHub main HEAD equals local HEAD');check(remote('backup')===head,'D Git backup main HEAD equals local HEAD');
   const localProtection=nodeRun(['scripts/protect-authoritative-source.mjs','verify']);
-  check(localProtection.status===0&&localProtection.stdout.includes('"status":"PASS"')&&localProtection.stdout.includes('"requirement":"GOV-005"'),'current authoritative source has verified local protection');
+  let localProtectionResult;try{localProtectionResult=JSON.parse(localProtection.stdout.trim());}catch{localProtectionResult=null;}
+  check(localProtection.status===0&&localProtectionResult?.status==='EXTERNAL_RECEIPT_VERIFIED'&&localProtectionResult?.externalLibraryReceiptStatus==='PASS'&&localProtectionResult?.officialCompletionClaimed===true,'current authoritative source has verified local protection and bound external receipt');
   const protection=nodeRun(['scripts/protect-authoritative-source-external.mjs','verify']);
   check(protection.status===0&&protection.stdout.includes('"status":"PASS"')&&protection.stdout.includes('"requirement":"GOV-005"'),'current authoritative source has verified external D protection');
 }
