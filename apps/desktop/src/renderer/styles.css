@@ -1216,6 +1216,128 @@ linear-gradient(145deg,#071a2d 0%,#0b2744 52%,#0b1c31 100%)}
 .ltp-chart-point{fill:var(--panel);stroke:#6ed796;stroke-width:2}
 .ltp-allocation-row{display:grid;grid-template-columns:minmax(140px,1.3fr) minmax(150px,2fr) auto;gap:10px;align-items:center;margin:8px 0}
 .ltp-allocation-track{height:10px;overflow:hidden;border-radius:999px;background:rgba(130,178,255,.12)}
+
+/* DEC-224 — accessibility preference center and zoom-safe layout contract. */
+.app-shell {
+  max-width: 100%;
+  overflow-x: clip;
+}
+.app-shell :is(main, section, article, aside, header, footer, div, form, fieldset) {
+  min-width: 0;
+}
+.app-shell :is(p, small, span, strong, label, td, th, code) {
+  overflow-wrap: anywhere;
+}
+.app-shell :is(button, a, input, select, textarea, [role="button"], [role="option"], [role="menuitem"]) {
+  min-height: 44px;
+}
+.app-shell :is(button, a, input, select, textarea, [tabindex]):focus-visible {
+  scroll-margin: 96px 32px;
+}
+.app-shell[data-density="comfortable"] :is(.panel, .surface, .workspace-form, .workspace-summary) {
+  padding: clamp(20px, 2.4vw, 32px);
+}
+.app-shell[data-density="comfortable"] :is(.workspace-grid, .form-grid, .button-row, .settings-grid) {
+  gap: clamp(16px, 2vw, 24px);
+}
+.app-shell[data-density="compact"] :is(.panel, .surface, .workspace-form, .workspace-summary) {
+  padding: 14px;
+}
+.app-shell[data-density="compact"] :is(.workspace-grid, .form-grid, .button-row, .settings-grid) {
+  gap: 10px;
+}
+.app-shell[data-reading-mode="easy-read"] .main-area {
+  line-height: 1.75;
+}
+.app-shell[data-reading-mode="easy-read"] :is(.page-header, .workspace-form > p, .workspace-summary > p, .notes-card) {
+  max-width: 72ch;
+}
+.app-shell[data-reading-mode="easy-read"] :is(.eyebrow, .caption, .status-badge) {
+  letter-spacing: normal;
+  text-transform: none;
+}
+.app-shell[data-theme="light"] {
+  --bg: #f2faf8;
+  --bg-soft: #e4f3ef;
+  --sidebar: #073f42;
+  --panel: #ffffff;
+  --panel-2: #edf7f4;
+  --border: rgba(7, 92, 94, .24);
+  --blue: #087f83;
+  --blue-soft: rgba(8, 127, 131, .14);
+  --amber: #9b6b08;
+  --shell-accent: #087f83;
+  --shell-warning: #9b6b08;
+}
+.app-shell[data-theme="light"] :is(.button-primary, [aria-current="page"], [aria-selected="true"]) {
+  border-color: #087f83;
+}
+.app-shell[data-high-contrast="true"] :is(.success, .warning, .error, .danger, .status-badge) {
+  border: 2px solid currentColor;
+  text-decoration-thickness: 2px;
+}
+.app-shell[data-high-contrast="true"] :is(.success, .warning, .error, .danger)::before {
+  content: "● ";
+}
+.accessibility-settings {
+  display: grid;
+  gap: 16px;
+}
+.accessibility-settings .accessibility-profile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+  gap: 12px;
+}
+.accessibility-settings .accessibility-profile-grid button[aria-pressed="true"] {
+  border: 3px solid currentColor;
+}
+.accessibility-settings output {
+  display: block;
+  min-height: 24px;
+  font-weight: 700;
+}
+.accessibility-settings input[type="range"] {
+  width: 100%;
+  min-height: 44px;
+}
+.accessibility-settings .toggle-row {
+  min-height: 44px;
+  grid-template-columns: 44px 1fr;
+}
+.accessibility-settings .toggle-row input {
+  width: 24px;
+  height: 24px;
+  min-height: 24px;
+  margin: 10px;
+}
+@media (max-width: 1280px) {
+  .app-shell :is(.workspace-grid, .settings-grid, .dashboard-grid, .event-content-grid) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .app-shell :is(.span-2, .span-3) { grid-column: auto; }
+}
+@media (max-width: 800px) {
+  .app-shell { grid-template-columns: minmax(0, 1fr); }
+  .app-shell .sidebar { position: relative; width: 100%; max-height: none; }
+  .app-shell .topbar,
+  .app-shell .page-header,
+  .app-shell :is(.button-row, .toolbar, .timeline-toolbar) {
+    align-items: stretch;
+    flex-direction: column;
+    flex-wrap: wrap;
+  }
+  .app-shell :is(.search-box, .person-select, .segmented button) {
+    width: 100%;
+    min-width: 0;
+  }
+  .app-shell table { min-width: 0; width: 100%; }
+}
+@media (forced-colors: active) {
+  .app-shell :is(.success, .warning, .error, .danger, .status-badge) {
+    forced-color-adjust: auto;
+    border: 2px solid CanvasText;
+  }
+}
 .ltp-allocation-fill{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#4f91ff,#6ed796)}
 .ltp-drift-warning{color:#f5b85e}
 .ltp-ledger-table{width:100%;border-collapse:collapse;font-size:.82rem}

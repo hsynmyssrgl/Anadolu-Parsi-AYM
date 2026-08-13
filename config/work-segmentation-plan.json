@@ -4,8 +4,8 @@
   "release": "Bronze 04.08.2026.29",
   "rule": "PR-171",
   "policy": "ONE_IN_PROGRESS_PREVIOUS_MUST_HAVE_PASS_AND_PERSISTENT_RECEIPT",
-  "workflowStatus": "COMPLETED",
-  "currentStep": null,
+  "workflowStatus": "IN_PROGRESS",
+  "currentStep": "33-M",
   "steps": [
     {
       "id": "29-A",
@@ -2381,10 +2381,44 @@
       "persistentReceiptStatus": "PASS",
       "completionTransitionStatus": "PASS",
       "persistentReceiptPath": "artifacts/checkpoints/33-L_LIBRARY_RECEIPT.json"
+    },
+    {
+      "id": "33-M",
+      "title": "Kalıcı erişilebilirlik ve görünüm tercihleri merkezi",
+      "scopeRequirement": "B7-01,B7-02,B7-03,B7-04,B7-05,B7-06,B7-07,B7-08,B7-09,B7-10,B7-11,B7-12,B7-13",
+      "status": "IN_PROGRESS",
+      "validationStatus": "PASS",
+      "localEvidence": [
+        "config/33-m-accessibility-preference-center-scope.json",
+        "config/33-m-accessibility-preference-center-inventory.json",
+        "docs/decisions/DEC-224-accessibility-preference-center.md",
+        "docs/security/THREAT_MODEL_33_M_ACCESSIBILITY_PREFERENCES.md",
+        "packages/domain/src/accessibility-preferences.ts",
+        "packages/application/src/accessibility-preferences-use-cases.ts",
+        "packages/database/src/family-database-migrations.ts",
+        "packages/repository-contracts/src/accessibility-preferences-repository.ts",
+        "packages/repositories/src/accessibility-preferences-repository.ts",
+        "apps/desktop/src/main/accessibility-preferences-application-adapter.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/renderer/accessibility.ts",
+        "apps/desktop/src/renderer/App.tsx",
+        "apps/desktop/src/renderer/styles.css",
+        "apps/desktop/src/renderer/typography.css",
+        "artifacts/validation/33-M-accessibility-boundary.json",
+        "artifacts/validation/33-M-accessibility-contract.json",
+        "artifacts/validation/33-M-accessibility-runtime.json",
+        "docs/audit/33-M_ACCESSIBILITY_PREFERENCE_CENTER_UST_KAPANIS.md",
+        "packages/application/tests/accessibility-preferences-use-cases.test.ts",
+        "packages/repositories/accessibility-preferences-repository-policy.test.ts",
+        "apps/desktop/tests/accessibility-preferences-ipc-integration.test.ts",
+        "apps/desktop/tests/accessibility-preference-center.test.ts"
+      ],
+      "persistentReceiptStatus": "PENDING",
+      "completionTransitionStatus": "PENDING"
     }
   ],
   "recoveryAuthority": "NEW_CHAT_HANDOFF_Bronze_04.08.2026.29.md",
   "recoveryReason": "29-D_FAILED_POSTFLIGHT_EXIT_CODE_1_SPLIT_PER_PR-171",
-  "updatedAt": "2026-08-13T20:23:29.384Z",
-  "segmentationNote": "33-L is immutable COMPLETED/PASS with exact local and D: hash/size readback. All currently defined governed steps are complete; new scope requires a new explicit decision."
+  "updatedAt": "2026-08-13T22:01:10.748Z",
+  "segmentationNote": "33-M is validated PASS and remains fail-closed IN_PROGRESS until exact local and D: persistent receipt finalization."
 }

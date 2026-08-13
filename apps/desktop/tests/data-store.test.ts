@@ -1377,7 +1377,7 @@ describe('FamilyDataStore', () => {
     ]));
     expect(database.prepare('SELECT COUNT(*) AS total FROM finance_planning_ledger').get()).toEqual({ total: 11 });
     expect(database.prepare('SELECT value FROM database_metadata WHERE key=?').get('schema_generation')).toEqual({
-      value: 'REVISION-33-L-LONG-TERM-PORTFOLIO'
+      value: 'REVISION-33-M-ACCESSIBILITY-PREFERENCES'
     });
     const payloads = database.prepare("SELECT payload_json FROM event_outbox WHERE event_type='finance.planning.item_recorded'").all() as Array<{payload_json:string}>;
     expect(JSON.stringify(payloads)).not.toMatch(/1200|10000|5500|Ağustos market|Manuel hedef|Manuel değerleme/u);
@@ -1472,7 +1472,7 @@ describe('FamilyDataStore', () => {
     const outbox = database.prepare("SELECT payload_json FROM event_outbox WHERE event_type='finance.import.batch_committed'").all();
     expect(JSON.stringify(outbox)).not.toMatch(/Market|İade|125\.5|row-expense/u);
     expect(database.prepare('SELECT value FROM database_metadata WHERE key=?').get('schema_generation')).toEqual({
-      value: 'REVISION-33-L-LONG-TERM-PORTFOLIO'
+      value: 'REVISION-33-M-ACCESSIBILITY-PREFERENCES'
     });
     database.close();
     expect(store.listAudit(400).some((entry) => entry.action === 'finance.import.batch_committed')).toBe(true);
@@ -1981,6 +1981,51 @@ describe('FamilyDataStore', () => {
     expect(() => store.revokeOfflineCapabilityLease(issued.leaseId)).not.toThrow();
     expect(() => store.issueOfflineCapabilityLease({ subjectAccountId: account!.id, capability: 'health.read', durationMinutes: 1_441 })).toThrow(/24 saat/u);
     raw.close();
+  });
+
+  it('33-M erişilebilirlik tercihlerini merkezi PEP ve aynı UoW ile kalıcılaştırır', async () => {
+    const { store, directory } = makeStore();
+    await authenticate(store);
+    const initial = await store.getAccessibilityPreferences();
+    expect(initial).toMatchObject({ revision: 0, textScalePercent: 100, theme: 'system' });
+    const command = {
+      expectedRevision: 0,
+      clientOperationId: 'accessibility-store-operation-0001',
+      textScale: 'large' as const,
+      textScalePercent: 150,
+      highContrast: true,
+      reduceMotion: true,
+      theme: 'dark' as const,
+      density: 'comfortable' as const,
+      readingMode: 'easy-read' as const,
+      audienceProfile: 'senior' as const,
+      captionsEnabled: true,
+      audioMuted: true
+    };
+    const created = await store.updateAccessibilityPreferences(command);
+    expect(created).toMatchObject({ revision: 1, textScalePercent: 150, theme: 'dark' });
+    const replay = await store.updateAccessibilityPreferences(command);
+    expect(replay).toEqual(created);
+    const updated = await store.updateAccessibilityPreferences({
+      ...command,
+      expectedRevision: 1,
+      clientOperationId: 'accessibility-store-operation-0002',
+      textScale: 'extra-large',
+      textScalePercent: 225
+    });
+    expect(updated).toMatchObject({ revision: 2, textScalePercent: 225 });
+    const readBack = await store.getAccessibilityPreferences();
+    expect(readBack).toEqual(updated);
+    const probe = new DatabaseSync(join(directory, 'family.db'), { readOnly: true });
+    try {
+      expect(probe.prepare('SELECT revision,text_scale_percent FROM accessibility_preferences').get())
+        .toEqual({ revision: 2, text_scale_percent: 225 });
+      expect(probe.prepare('SELECT COUNT(*) AS count FROM accessibility_preference_mutations').get())
+        .toEqual({ count: 2 });
+      expect(Number(probe.prepare("SELECT COUNT(*) AS count FROM platform_policy_transaction_receipts WHERE resource_type='accessibility_preferences'").get()?.count)).toBeGreaterThanOrEqual(4);
+    } finally {
+      probe.close();
+    }
   });
 
 });

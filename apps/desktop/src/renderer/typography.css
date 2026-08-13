@@ -230,3 +230,30 @@ body .app-shell .sidebar-toggle {
     line-height: var(--line-height-title-1);
   }
 }
+
+/* DEC-224 — governed accessibility scale. No visible copy drops below 16 px. */
+body .app-shell {
+  --accessibility-text-scale: 1;
+  --font-size-large-title: calc(34px * var(--accessibility-text-scale));
+  --line-height-large-title: calc(41px * var(--accessibility-text-scale));
+  --font-size-title-1: calc(28px * var(--accessibility-text-scale));
+  --line-height-title-1: calc(34px * var(--accessibility-text-scale));
+  --font-size-title-2: calc(22px * var(--accessibility-text-scale));
+  --line-height-title-2: calc(28px * var(--accessibility-text-scale));
+  --font-size-title-3: calc(20px * var(--accessibility-text-scale));
+  --line-height-title-3: calc(25px * var(--accessibility-text-scale));
+  --font-size-headline: calc(17px * var(--accessibility-text-scale));
+  --line-height-headline: calc(24px * var(--accessibility-text-scale));
+  --font-size-body: calc(17px * var(--accessibility-text-scale));
+  --line-height-body: calc(26px * var(--accessibility-text-scale));
+  --font-size-callout: calc(16px * var(--accessibility-text-scale));
+  --line-height-callout: calc(24px * var(--accessibility-text-scale));
+  --font-size-subheadline: calc(16px * var(--accessibility-text-scale));
+  --line-height-subheadline: calc(23px * var(--accessibility-text-scale));
+  --font-size-footnote: calc(16px * var(--accessibility-text-scale));
+  --line-height-footnote: calc(23px * var(--accessibility-text-scale));
+  --font-size-caption-1: calc(16px * var(--accessibility-text-scale));
+  --line-height-caption-1: calc(23px * var(--accessibility-text-scale));
+  --font-size-caption-2: calc(16px * var(--accessibility-text-scale));
+  --line-height-caption-2: calc(23px * var(--accessibility-text-scale));
+}

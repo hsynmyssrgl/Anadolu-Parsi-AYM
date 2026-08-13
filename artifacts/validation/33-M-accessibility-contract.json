@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "step": "33-M",
+  "decision": "DEC-224",
+  "requirements": [
+    "B7-01",
+    "B7-02",
+    "B7-03",
+    "B7-04",
+    "B7-05",
+    "B7-06",
+    "B7-07",
+    "B7-08",
+    "B7-09",
+    "B7-10",
+    "B7-11",
+    "B7-12",
+    "B7-13"
+  ],
+  "status": "PASS",
+  "checksPassed": 15,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "scope binds DEC-224 and exact B7-01 through B7-13",
+      "status": "PASS"
+    },
+    {
+      "name": "inventory binds exact requirement set",
+      "status": "PASS"
+    },
+    {
+      "name": "activation or validated receipt-pending state remains coherent and fail closed",
+      "status": "PASS"
+    },
+    {
+      "name": "registry state is coherent across every requirement",
+      "status": "PASS"
+    },
+    {
+      "name": "16px and 100-225 scale contract",
+      "status": "PASS"
+    },
+    {
+      "name": "100-400 DPI and viewport contract",
+      "status": "PASS"
+    },
+    {
+      "name": "44px target and five profiles",
+      "status": "PASS"
+    },
+    {
+      "name": "persistent personal PEP authority with local-only effects",
+      "status": "PASS"
+    },
+    {
+      "name": "optimistic idempotent persistence is required",
+      "status": "PASS"
+    },
+    {
+      "name": "five-layer targeted evidence is declared",
+      "status": "PASS"
+    },
+    {
+      "name": "decision covers all thirteen binding controls",
+      "status": "PASS"
+    },
+    {
+      "name": "threat model covers corrupt preference and hidden information",
+      "status": "PASS"
+    },
+    {
+      "name": "threat model covers non-color, keyboard and local-only boundaries",
+      "status": "PASS"
+    },
+    {
+      "name": "manual certification is truthfully excluded",
+      "status": "PASS"
+    },
+    {
+      "name": "audit truthfully matches activation or validated receipt-pending state",
+      "status": "PASS"
+    }
+  ],
+  "generatedAt": "2026-08-13T22:06:38.341Z"
+}

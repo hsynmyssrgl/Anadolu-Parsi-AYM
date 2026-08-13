@@ -31,6 +31,7 @@ import {
 import type {
   AccountRepositoryPort,
   AccountRow,
+  AccessibilityPreferencesRepositoryPort,
   TimelineEventPolicyResourceRepositoryPort,
   ObjectPermissionRepositoryPort,
   ObjectPermissionRow,
@@ -61,6 +62,7 @@ export interface TimelineProductionPolicyRuntimeDependencies {
   readonly permissionRepository: ObjectPermissionRepositoryPort;
   readonly trustedDeviceRepository: TrustedDeviceRepositoryPort;
   readonly timelinePolicyResourceRepository: TimelineEventPolicyResourceRepositoryPort;
+  readonly accessibilityPreferencesRepository: AccessibilityPreferencesRepositoryPort;
   readonly personRepository: PersonRepositoryPort;
   readonly deviceIdentityProvider: Pick<FileDeviceIdentityProvider, 'snapshot'>;
   readonly authorizationProvider: PlatformPolicyAuthorizationProvider;
@@ -85,7 +87,10 @@ const TIMELINE_POLICY_FENCE_NAME = 'timeline-event-write';
 const MAX_PROJECTION_DRAIN_ROUNDS = 20;
 const PROJECTION_DRAIN_BATCH_SIZE = 500;
 const REPLAY_PRUNING_BATCH_SIZE = 128;
-const timelineResourceTypes = new Set<TimelinePolicyIntent['resourceType']>(['event']);
+const timelineResourceTypes = new Set<TimelinePolicyIntent['resourceType']>([
+  'event',
+  'accessibility_preferences'
+]);
 
 const nonEmpty = (value: unknown, max = 512): value is string =>
   typeof value === 'string'
@@ -688,6 +693,28 @@ const findTimelineResourceForPolicyResolution = (
   resourceType: TimelinePolicyIntent['resourceType'],
   resourceId: string
 ): Result<TimelinePolicyResourceState | null, AppError> => {
+  if (resourceType === 'accessibility_preferences') {
+    const found = dependencies.accessibilityPreferencesRepository.findForPolicyResolution(
+      execution,
+      asUserId(resourceId)
+    );
+    if (!found.ok) return found;
+    return ok(found.value
+      ? Object.freeze({
+          familyId: found.value.familyId,
+          ownerPersonId: found.value.ownerPersonId,
+          sensitivity: 'personal' as const,
+          stateFingerprint: stable({
+            accountId: found.value.accountId,
+            familyId: found.value.familyId,
+            ownerPersonId: found.value.ownerPersonId,
+            revision: found.value.revision,
+            lastMutationId: found.value.lastMutationId,
+            updatedAt: found.value.updatedAt
+          })
+        })
+      : null);
+  }
   if (resourceType !== 'event') {
     throw new PlatformPolicyEnforcementError(
       'RESOURCE_RESOLUTION_FAILED',
@@ -760,7 +787,22 @@ const loadTimelineResourceSnapshotInTransaction = (
       requestedIntent.resourceId
     );
     if (!existing.ok) return existing;
-    if (existing.value) return invalidAuthority(context, 'Timeline policy create resource already exists');
+    if (existing.value && requestedIntent.resourceType !== 'accessibility_preferences') {
+      return invalidAuthority(context, 'Timeline policy create resource already exists');
+    }
+    if (existing.value) {
+      const resource = Object.freeze({
+        type: requestedIntent.resourceType,
+        id: requestedIntent.resourceId,
+        familyId: existing.value.familyId,
+        ownerPersonId: existing.value.ownerPersonId,
+        sensitivity: existing.value.sensitivity
+      });
+      return ok(Object.freeze({
+        resource,
+        stateFingerprint: existing.value.stateFingerprint
+      }));
+    }
     const owner = dependencies.personRepository.findById(execution, requestedIntent.ownerPersonId);
     if (!owner.ok) return owner;
     if (!owner.value || owner.value.familyId !== context.familyId || owner.value.status !== 'active') {
@@ -793,6 +835,30 @@ const loadTimelineResourceSnapshotInTransaction = (
     requestedIntent.resourceId
   );
   if (!existing.ok) return existing;
+  if (
+    !existing.value
+    && requestedIntent.resourceType === 'accessibility_preferences'
+    && requestedIntent.action === 'read'
+    && requestedIntent.resourceId === context.actor.userId
+    && context.actor.personId
+  ) {
+    const resource = Object.freeze({
+      type: requestedIntent.resourceType,
+      id: requestedIntent.resourceId,
+      familyId: context.familyId,
+      ownerPersonId: context.actor.personId,
+      sensitivity: 'personal' as const
+    });
+    return ok(Object.freeze({
+      resource,
+      stateFingerprint: stable({
+        state: 'logical_account_preference_absent',
+        accountId: context.actor.userId,
+        familyId: context.familyId,
+        ownerPersonId: context.actor.personId
+      })
+    }));
+  }
   if (!existing.value || existing.value.familyId !== context.familyId) {
     return invalidAuthority(context, 'Timeline policy resource does not exist in the active family');
   }
@@ -942,6 +1008,7 @@ const ensureRuntimeConfiguration = (dependencies: TimelineProductionPolicyRuntim
     || typeof dependencies.permissionRepository?.listActiveForSubject !== 'function'
     || typeof dependencies.trustedDeviceRepository?.findActive !== 'function'
     || typeof dependencies.timelinePolicyResourceRepository?.findTimelineEventForPolicyResolution !== 'function'
+    || typeof dependencies.accessibilityPreferencesRepository?.findForPolicyResolution !== 'function'
     || typeof dependencies.personRepository?.findById !== 'function'
     || typeof dependencies.deviceIdentityProvider?.snapshot !== 'function'
     || typeof dependencies.authorizationProvider?.authorize !== 'function'

@@ -1,0 +1,727 @@
+{
+  "schemaVersion": 1,
+  "id": "PPT-REMAINING-SCOPE-PACKAGE-ROADMAP-2026-08-13",
+  "sourceRegistry": "config/accepted-scope-registry.json",
+  "snapshotRequirementCount": 358,
+  "snapshotCompleteCount": 84,
+  "snapshotRemainingCount": 274,
+  "packageCount": 26,
+  "assignmentRule": "Every requirement that was non-COMPLETE in the source snapshot is assigned to exactly one package; no COMPLETE requirement is assigned.",
+  "executionRule": "Only one package may be IN_PROGRESS. A successor activates only after its predecessor has PASS validation and an exact persistent receipt.",
+  "priorityRule": "Dependency and shared-infrastructure leverage precede raw P0/P1 ordering; P0 safety gates stay before dependent feature packages.",
+  "packages": [
+    {
+      "order": 1,
+      "step": "33-M",
+      "decision": "DEC-224",
+      "title": "Accessibility preference center and visual interaction foundation",
+      "priority": "P0_P1_FOUNDATION",
+      "risk": "MEDIUM",
+      "dependsOn": [
+        "33-L"
+      ],
+      "requirementIds": [
+        "B7-01",
+        "B7-02",
+        "B7-03",
+        "B7-04",
+        "B7-05",
+        "B7-06",
+        "B7-07",
+        "B7-08",
+        "B7-09",
+        "B7-10",
+        "B7-11",
+        "B7-12",
+        "B7-13"
+      ],
+      "leverage": "One renderer preference model, typography token layer and semantic interaction contract closes thirteen cross-screen requirements.",
+      "status": "VALIDATED_AWAITING_RECEIPT"
+    },
+    {
+      "order": 2,
+      "step": "33-N",
+      "decision": "DEC-225",
+      "title": "Draft undo validation and complete async-state UX",
+      "priority": "P1",
+      "risk": "MEDIUM",
+      "dependsOn": [
+        "33-M"
+      ],
+      "requirementIds": [
+        "B3-02",
+        "B7-14",
+        "B7-15"
+      ],
+      "leverage": "A shared draft/undo state machine and empty-loading-offline-error-retry component set applies to every later module.",
+      "status": "PLANNED_NEXT"
+    },
+    {
+      "order": 3,
+      "step": "33-O",
+      "decision": "DEC-226",
+      "title": "Privacy ownership data rights and incident control center",
+      "priority": "P0",
+      "risk": "HIGH",
+      "dependsOn": [
+        "33-N",
+        "PPK-016",
+        "PPK-019",
+        "33-K"
+      ],
+      "requirementIds": [
+        "B6-02",
+        "PPK-028",
+        "AUD-COM-006",
+        "EXT-036",
+        "EXT-037",
+        "EXT-038",
+        "EXT-040",
+        "EXT-041",
+        "EXT-042"
+      ],
+      "leverage": "Reuses central PEP/UoW, immutable audit, trusted devices, consent, encrypted export, derived-data lineage and deletion propagation.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 4,
+      "step": "33-P",
+      "decision": "DEC-227",
+      "title": "Passkeys federated identity and verifiable temporary credentials",
+      "priority": "P0_P1",
+      "risk": "HIGH",
+      "dependsOn": [
+        "33-O"
+      ],
+      "requirementIds": [
+        "B2-02",
+        "B6-06",
+        "B6-07",
+        "EXT-070",
+        "EXT-071",
+        "EXT-072",
+        "EXT-073",
+        "EXT-074"
+      ],
+      "leverage": "Shares device trust, challenge, strong authentication, encrypted token vault and minimum-disclosure QR credential boundaries.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 5,
+      "step": "33-Q",
+      "decision": "DEC-228",
+      "title": "Local governed OCR and derived-data pipeline",
+      "priority": "P0_P2",
+      "risk": "VERY_HIGH",
+      "dependsOn": [
+        "33-O",
+        "33-P",
+        "PPK-016",
+        "PPK-019",
+        "PPK-022"
+      ],
+      "requirementIds": [
+        "B3-04",
+        "OCR-001",
+        "OCR-002",
+        "OCR-003",
+        "OCR-004",
+        "OCR-005",
+        "OCR-006",
+        "OCR-007",
+        "OCR-008",
+        "OCR-009",
+        "OCR-010",
+        "OCR-011",
+        "OCR-012",
+        "OCR-013",
+        "OCR-014",
+        "OCR-015",
+        "OCR-016",
+        "OCR-017",
+        "OCR-018",
+        "OCR-019",
+        "OCR-020",
+        "XPF-001"
+      ],
+      "leverage": "Uses the encrypted archive vault, capability gates, consent, derived-policy inheritance, deletion propagation, content-free audit and worker isolation.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 6,
+      "step": "33-R",
+      "decision": "DEC-229",
+      "title": "Archive evidence relations media lifecycle and unified authorized search",
+      "priority": "P1",
+      "risk": "HIGH",
+      "dependsOn": [
+        "33-Q"
+      ],
+      "requirementIds": [
+        "B3-01",
+        "B3-03",
+        "B3-05"
+      ],
+      "leverage": "Builds on governed OCR indexes, archive versions, permissions and central read-policy filtering.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 7,
+      "step": "33-S",
+      "decision": "DEC-230",
+      "title": "Health care coordination and elderly support ledger",
+      "priority": "P1",
+      "risk": "HIGH",
+      "dependsOn": [
+        "33-O",
+        "33-N"
+      ],
+      "requirementIds": [
+        "B5-01",
+        "B5-02",
+        "EXT-021",
+        "EXT-023",
+        "EXT-024",
+        "EXT-025",
+        "EXT-026",
+        "EXT-027",
+        "EXT-028",
+        "EXT-029"
+      ],
+      "leverage": "Extends existing life/health records, central PEP/UoW, emergency cards, reminders and minimum-necessary caregiver access.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 8,
+      "step": "33-T",
+      "decision": "DEC-231",
+      "title": "Household operations center",
+      "priority": "P1",
+      "risk": "MEDIUM",
+      "dependsOn": [
+        "33-N"
+      ],
+      "requirementIds": [
+        "EXT-001",
+        "EXT-002",
+        "EXT-003",
+        "EXT-004",
+        "EXT-005",
+        "EXT-006",
+        "EXT-007",
+        "EXT-008"
+      ],
+      "leverage": "One assigned-task/list/schedule ledger supports shopping, inventory, meals, chores, expenses, deliveries, guests and pet care.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 9,
+      "step": "33-U",
+      "decision": "DEC-232",
+      "title": "Child education coordination",
+      "priority": "P1",
+      "risk": "HIGH",
+      "dependsOn": [
+        "33-S",
+        "33-P"
+      ],
+      "requirementIds": [
+        "EXT-017",
+        "EXT-018",
+        "EXT-019",
+        "EXT-020",
+        "EXT-022"
+      ],
+      "leverage": "Reuses schedules, tasks, credentials, finance planning and child-specific privacy obligations.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 10,
+      "step": "33-V",
+      "decision": "DEC-233",
+      "title": "Places travel and remaining asset/pet workflows",
+      "priority": "P1",
+      "risk": "MEDIUM_HIGH",
+      "dependsOn": [
+        "33-R",
+        "33-S"
+      ],
+      "requirementIds": [
+        "B5-05",
+        "EXT-033",
+        "EXT-035",
+        "EXT-058",
+        "EXT-059",
+        "EXT-060",
+        "EXT-061",
+        "EXT-062",
+        "EXT-063"
+      ],
+      "leverage": "Combines stored places/offline fallback, documents, health constraints, budgets, checklists and album linkage.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 11,
+      "step": "33-W",
+      "decision": "DEC-234",
+      "title": "Consent-bound family AI assistant",
+      "priority": "P1",
+      "risk": "HIGH",
+      "dependsOn": [
+        "33-O",
+        "33-Q",
+        "33-R",
+        "33-S",
+        "33-T"
+      ],
+      "requirementIds": [
+        "B6-01",
+        "EXT-043",
+        "EXT-044",
+        "EXT-045",
+        "EXT-046",
+        "EXT-047",
+        "EXT-048",
+        "EXT-049",
+        "EXT-050"
+      ],
+      "leverage": "A single local-first suggestion pipeline serves summaries and reminders while every durable action requires human confirmation.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 12,
+      "step": "33-X",
+      "decision": "DEC-235",
+      "title": "Memory studio and time capsule",
+      "priority": "P1",
+      "risk": "HIGH",
+      "dependsOn": [
+        "33-Q",
+        "33-R",
+        "33-W"
+      ],
+      "requirementIds": [
+        "B6-04",
+        "EXT-051",
+        "EXT-052",
+        "EXT-053",
+        "EXT-054",
+        "EXT-055",
+        "EXT-056",
+        "EXT-057"
+      ],
+      "leverage": "Reuses archive relationships, governed transcription/OCR, consent and append-only release/revocation workflows.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 13,
+      "step": "33-Y",
+      "decision": "DEC-236",
+      "title": "Local-first smart home and energy adapters",
+      "priority": "P1",
+      "risk": "VERY_HIGH",
+      "dependsOn": [
+        "33-O",
+        "33-P"
+      ],
+      "requirementIds": [
+        "EXT-064",
+        "EXT-065",
+        "EXT-066",
+        "EXT-067",
+        "EXT-068",
+        "EXT-069"
+      ],
+      "leverage": "One signed adapter boundary, capability manifest and time-bounded consent model covers Matter, sensors, energy and visible camera permissions.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 14,
+      "step": "33-Z",
+      "decision": "DEC-237",
+      "title": "Signed plugin and external provider platform",
+      "priority": "P0_P1",
+      "risk": "VERY_HIGH",
+      "dependsOn": [
+        "33-O",
+        "33-P",
+        "33-Q"
+      ],
+      "requirementIds": [
+        "B6-05",
+        "PPK-025",
+        "EXT-075",
+        "EXT-076",
+        "EXT-077",
+        "EXT-078",
+        "EXT-079",
+        "EXT-080",
+        "EXT-081"
+      ],
+      "leverage": "Unifies signed manifests, sandboxing, egress allowlists, SBOM/provenance, rollback and provider adapters.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 15,
+      "step": "34-A",
+      "decision": "DEC-238",
+      "title": "Communication policy kernel and MLS security foundation",
+      "priority": "P0",
+      "risk": "VERY_HIGH",
+      "dependsOn": [
+        "33-P",
+        "33-Z"
+      ],
+      "requirementIds": [
+        "PPK-001",
+        "XPF-002",
+        "COM-001",
+        "COM-002",
+        "SEC-COM-001",
+        "SEC-COM-002",
+        "SEC-COM-003",
+        "SEC-COM-004",
+        "SEC-COM-005",
+        "SEC-COM-006",
+        "SEC-COM-007",
+        "SEC-COM-008"
+      ],
+      "leverage": "Establishes one centrally governed encrypted room/device/key epoch foundation before all messaging and calling features.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 16,
+      "step": "34-B",
+      "decision": "DEC-239",
+      "title": "Messaging lifecycle and privacy-preserving presence",
+      "priority": "P0_P1",
+      "risk": "VERY_HIGH",
+      "dependsOn": [
+        "34-A",
+        "33-N"
+      ],
+      "requirementIds": [
+        "COM-003",
+        "COM-004",
+        "COM-005",
+        "COM-006",
+        "COM-007",
+        "COM-008",
+        "COM-009",
+        "COM-010",
+        "PRS-001",
+        "PRS-002",
+        "PRS-003",
+        "PRS-004",
+        "PRS-005",
+        "PRS-006"
+      ],
+      "leverage": "One append-only message event log, offline outbox, retention model and time-bounded visibility policy covers fourteen requirements.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 17,
+      "step": "34-C",
+      "decision": "DEC-240",
+      "title": "Realtime calling media and accessible call UX",
+      "priority": "P0_P1_P2",
+      "risk": "VERY_HIGH",
+      "dependsOn": [
+        "34-A",
+        "34-B",
+        "33-M"
+      ],
+      "requirementIds": [
+        "RTC-001",
+        "RTC-002",
+        "RTC-003",
+        "RTC-004",
+        "RTC-005",
+        "RTC-006",
+        "RTC-007",
+        "RTC-008",
+        "RTC-009",
+        "RTC-010",
+        "RTC-011",
+        "RTC-012",
+        "RTC-013",
+        "RTC-014",
+        "UX-COM-001",
+        "UX-COM-003",
+        "UX-COM-004",
+        "UX-COM-011",
+        "UX-COM-012"
+      ],
+      "leverage": "A shared WebRTC/SFU/SFrame session boundary also supplies preflight, fallback, quality, RTT, captions and accessible controls.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 18,
+      "step": "34-D",
+      "decision": "DEC-241",
+      "title": "Explicit-consent recording and media retention",
+      "priority": "P0",
+      "risk": "VERY_HIGH",
+      "dependsOn": [
+        "34-C",
+        "33-O"
+      ],
+      "requirementIds": [
+        "REC-001",
+        "REC-002",
+        "REC-003",
+        "REC-004",
+        "REC-005",
+        "REC-006",
+        "REC-007",
+        "REC-008",
+        "REC-009",
+        "REC-010",
+        "REC-011",
+        "AUD-COM-004"
+      ],
+      "leverage": "Reuses consent expiry/revocation, E2EE group roles, encrypted vault, retention and content-free signed audit.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 19,
+      "step": "34-E",
+      "decision": "DEC-242",
+      "title": "Local-first translation caption and language provider",
+      "priority": "P0_P1_P2",
+      "risk": "HIGH",
+      "dependsOn": [
+        "33-Q",
+        "33-W",
+        "34-C",
+        "34-D"
+      ],
+      "requirementIds": [
+        "AI-LNG-001",
+        "AI-LNG-002",
+        "AI-LNG-003",
+        "AI-LNG-004",
+        "AI-LNG-005",
+        "AI-LNG-006",
+        "AI-LNG-007",
+        "AI-LNG-008",
+        "AI-LNG-009",
+        "AI-LNG-010",
+        "AI-LNG-011"
+      ],
+      "leverage": "One TranslationProviderPort and inherited-policy result model serves messages, captions, documents and meeting summaries.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 20,
+      "step": "34-F",
+      "decision": "DEC-243",
+      "title": "Family meetings decisions and consent-bound minutes",
+      "priority": "P0_P1",
+      "risk": "HIGH",
+      "dependsOn": [
+        "34-B",
+        "34-D",
+        "34-E",
+        "33-W"
+      ],
+      "requirementIds": [
+        "MTG-001",
+        "MTG-002",
+        "MTG-003",
+        "MTG-004",
+        "MTG-005",
+        "MTG-006",
+        "MTG-007",
+        "MTG-008",
+        "MTG-009",
+        "MTG-010"
+      ],
+      "leverage": "Combines calendar, roles, append-only decisions/tasks, authorized documents and human-approved AI minutes.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 21,
+      "step": "34-G",
+      "decision": "DEC-244",
+      "title": "E2EE file sharing and remaining communication UX",
+      "priority": "P0_P1_P2",
+      "risk": "VERY_HIGH",
+      "dependsOn": [
+        "34-A",
+        "34-B",
+        "34-C",
+        "33-R"
+      ],
+      "requirementIds": [
+        "FSH-001",
+        "FSH-002",
+        "FSH-003",
+        "FSH-004",
+        "FSH-005",
+        "FSH-006",
+        "FSH-007",
+        "UX-COM-002",
+        "UX-COM-005",
+        "UX-COM-006",
+        "UX-COM-007",
+        "UX-COM-008",
+        "UX-COM-009",
+        "UX-COM-010"
+      ],
+      "leverage": "Reuses encrypted content-addressed vault, resumable chunks, malware quarantine, consent and accessible communication surfaces.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 22,
+      "step": "34-H",
+      "decision": "DEC-245",
+      "title": "Communication audit and archive integrity",
+      "priority": "P0",
+      "risk": "HIGH",
+      "dependsOn": [
+        "34-B",
+        "34-C",
+        "34-D",
+        "34-G"
+      ],
+      "requirementIds": [
+        "AUD-COM-001",
+        "AUD-COM-002",
+        "AUD-COM-003",
+        "AUD-COM-005"
+      ],
+      "leverage": "Extends immutable content-free audit and encrypted archive/backup integrity across completed communication surfaces.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 23,
+      "step": "34-I",
+      "decision": "DEC-246",
+      "title": "Distributed core service consensus and tenancy foundation",
+      "priority": "P0_P1",
+      "risk": "EXTREME",
+      "dependsOn": [
+        "33-Z",
+        "34-H"
+      ],
+      "requirementIds": [
+        "DHA-001",
+        "DHA-002",
+        "DHA-003",
+        "DHA-004",
+        "DHA-005",
+        "DHA-006",
+        "DHA-007",
+        "DHA-008",
+        "DHA-009",
+        "DHA-010",
+        "DHA-011",
+        "DHA-012",
+        "DHA-013",
+        "DHA-020",
+        "DHA-021",
+        "DHA-022",
+        "DHA-023",
+        "DHA-024",
+        "DHA-029",
+        "DHA-034",
+        "DHA-035",
+        "XPF-005"
+      ],
+      "leverage": "One service/consensus/log/projection/security architecture establishes the dependency base for clients, failover and operations.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 24,
+      "step": "34-J",
+      "decision": "DEC-247",
+      "title": "Distributed clients connectivity operations and disaster recovery",
+      "priority": "P0_P1",
+      "risk": "EXTREME",
+      "dependsOn": [
+        "34-I"
+      ],
+      "requirementIds": [
+        "B8-02",
+        "B8-03",
+        "DHA-014",
+        "DHA-015",
+        "DHA-016",
+        "DHA-017",
+        "DHA-018",
+        "DHA-019",
+        "DHA-025",
+        "DHA-026",
+        "DHA-027",
+        "DHA-028",
+        "DHA-030",
+        "DHA-031",
+        "DHA-032",
+        "DHA-033",
+        "XPF-004",
+        "XPF-006"
+      ],
+      "leverage": "Builds Apple clients, discovery/relay/control plane, observability, backup/DR, rolling updates and fault injection on the completed cluster base.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 25,
+      "step": "34-K",
+      "decision": "DEC-248",
+      "title": "Windows resilience and universal UX consolidation",
+      "priority": "P0_P1",
+      "risk": "HIGH",
+      "dependsOn": [
+        "33-N",
+        "34-J"
+      ],
+      "requirementIds": [
+        "B8-01",
+        "B8-04",
+        "B8-05",
+        "PPK-027",
+        "EXT-082",
+        "EXT-083",
+        "EXT-084",
+        "EXT-085",
+        "EXT-086",
+        "EXT-087",
+        "EXT-088",
+        "EXT-089",
+        "EXT-090"
+      ],
+      "leverage": "Unifies crash recovery/install/scale validation with shared inbox, search, drafts, modes, offline status and cross-platform shells.",
+      "status": "PLANNED"
+    },
+    {
+      "order": 26,
+      "step": "34-L",
+      "decision": "DEC-249",
+      "title": "Bronze final drift documentation and deterministic delivery closure",
+      "priority": "P0",
+      "risk": "HIGH",
+      "dependsOn": [
+        "34-K"
+      ],
+      "requirementIds": [
+        "B9-01",
+        "B9-02",
+        "B9-03"
+      ],
+      "leverage": "Runs final dead-surface/drift sweep, canonical documentation consolidation and deterministic source/artifact receipt only after all feature packages.",
+      "status": "PLANNED_FINAL"
+    }
+  ],
+  "validationInvariants": {
+    "assignedRequirementCount": 274,
+    "uniqueAssignmentRequired": true,
+    "unassignedAllowed": false,
+    "duplicateAssignmentAllowed": false,
+    "completedRequirementAssignmentAllowed": false,
+    "firstStep": "33-M",
+    "secondStep": "33-N",
+    "finalStep": "34-L"
+  },
+  "updatedAt": "2026-08-13T22:01:10.748Z"
+}

@@ -173,6 +173,8 @@ import {
   CommitFinanceImportBatchUseCase,
   GetLongTermPortfolioWorkspaceUseCase,
   RecordLongTermPortfolioItemUseCase,
+  GetAccessibilityPreferencesUseCase,
+  UpdateAccessibilityPreferencesUseCase,
   ListArchiveItemsUseCase,
   SearchArchiveItemsUseCase,
   PrepareArchiveOpenUseCase,
@@ -205,6 +207,7 @@ import {
   type LifeApplicationContext,
   type FinanceApplicationContext,
   type LongTermPortfolioApplicationContext,
+  type AccessibilityPreferencesApplicationContext,
   type ArchiveApplicationContext,
   type LegacyApplicationContext,
   type MembershipApplicationContext,
@@ -282,6 +285,7 @@ import {
   nonWritableTimelineClusterFence,
   type TimelinePolicyEnforcementPointResolver
 } from './timeline-application-adapter.js';
+import { RepositoryBackedAccessibilityPreferencesUnitOfWork } from './accessibility-preferences-application-adapter.js';
 import { RepositoryBackedDashboardQueryPort } from './dashboard-application-adapter.js';
 import { RepositoryBackedAuthApplicationUnitOfWork } from './auth-application-adapter.js';
 import {
@@ -417,6 +421,7 @@ import type {
   CommitFinanceImportBatchInput
 } from '@ppt/domain';
 import { buildDefaultLongTermPortfolioBootstrap, type LongTermPortfolioWorkspaceView, type RecordLongTermPortfolioItemInput } from '@ppt/domain';
+import type { AccessibilityPreferencesView, UpdateAccessibilityPreferencesInput } from '@ppt/domain';
 import type { ManagedLifeWorkspaceView, RecordManagedLifeItemInput } from '@ppt/domain';
 import type {
   EnrollWindowsHelloInput,
@@ -833,6 +838,8 @@ export class FamilyDataStore {
   readonly #commitFinanceImportBatchUseCase: CommitFinanceImportBatchUseCase;
   readonly #getLongTermPortfolioWorkspaceUseCase: GetLongTermPortfolioWorkspaceUseCase;
   readonly #recordLongTermPortfolioItemUseCase: RecordLongTermPortfolioItemUseCase;
+  readonly #getAccessibilityPreferencesUseCase: GetAccessibilityPreferencesUseCase;
+  readonly #updateAccessibilityPreferencesUseCase: UpdateAccessibilityPreferencesUseCase;
   readonly #listArchiveItemsUseCase: ListArchiveItemsUseCase;
   readonly #searchArchiveItemsUseCase: SearchArchiveItemsUseCase;
   readonly #prepareArchiveOpenUseCase: PrepareArchiveOpenUseCase;
@@ -1438,6 +1445,7 @@ export class FamilyDataStore {
           permissionRepository: this.#repositories.objectPermissionRepository,
           trustedDeviceRepository: this.#repositories.trustedDeviceRepository,
           timelinePolicyResourceRepository: this.#repositories.timelineRepository,
+          accessibilityPreferencesRepository: this.#repositories.accessibilityPreferencesRepository,
           personRepository: this.#repositories.personRepository,
           deviceIdentityProvider: this.#deviceIdentityProvider,
           authorizationProvider: productionArchivePolicy.authorizationProvider,
@@ -1464,6 +1472,19 @@ export class FamilyDataStore {
     } as const;
     const timelinePolicyTransactionRunner = new RepositoryBackedTimelinePolicyTransactionRunner(
       timelineApplicationDependencies
+    );
+    const accessibilityPreferencesUnitOfWork = new RepositoryBackedAccessibilityPreferencesUnitOfWork({
+      transactionExecutor: this.#transactionExecutor,
+      repository: this.#repositories.accessibilityPreferencesRepository,
+      auditRepository: this.#repositories.auditRepository,
+      outboxRepository: this.#repositories.outboxRepository,
+      policyTransactionRunner: timelinePolicyTransactionRunner
+    });
+    this.#getAccessibilityPreferencesUseCase = new GetAccessibilityPreferencesUseCase(
+      accessibilityPreferencesUnitOfWork
+    );
+    this.#updateAccessibilityPreferencesUseCase = new UpdateAccessibilityPreferencesUseCase(
+      accessibilityPreferencesUnitOfWork
     );
     const familyDataImportPolicyBatchRunner = new RepositoryBackedFamilyDataImportPolicyBatchRunner({
       transactionExecutor: this.#transactionExecutor,
@@ -2212,6 +2233,9 @@ export class FamilyDataStore {
     };
   }
   #longTermPortfolioApplicationContext(prefix:string):LongTermPortfolioApplicationContext {
+    return this.#financeApplicationContext(prefix);
+  }
+  #accessibilityPreferencesApplicationContext(prefix:string):AccessibilityPreferencesApplicationContext {
     return this.#financeApplicationContext(prefix);
   }
   #dataLifecycleApplicationContext(prefix:string): DataLifecycleApplicationContext {
@@ -3802,6 +3826,38 @@ export class FamilyDataStore {
     });
     if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
     return this.getLongTermPortfolioWorkspace();
+  }
+
+  public async getAccessibilityPreferences():Promise<AccessibilityPreferencesView> {
+    const result=await this.#getAccessibilityPreferencesUseCase.execute(
+      this.#accessibilityPreferencesApplicationContext('accessibility-preferences-read')
+    );
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async updateAccessibilityPreferences(
+    input:UpdateAccessibilityPreferencesInput
+  ):Promise<AccessibilityPreferencesView> {
+    const context=this.#accessibilityPreferencesApplicationContext('accessibility-preferences-update');
+    const requestFingerprint=createHash('sha256').update(canonicalArchiveOperationValue({
+      familyId:context.familyId,
+      actorUserId:context.actor.userId,
+      actorPersonId:context.actor.personId,
+      input
+    }),'utf8').digest('hex');
+    const result=await this.#updateAccessibilityPreferencesUseCase.execute({
+      context,
+      command:input,
+      identifiers:{
+        mutationId:`accessibility-preferences-${randomUUID()}`,
+        requestFingerprint,
+        auditId:randomUUID(),
+        outboxEventId:asEventId(randomUUID())
+      }
+    });
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
   }
 
   public async listHealthRecords(): Promise<HealthRecordView[]> {

@@ -1,5 +1,9 @@
 # Ana Karar Kaydı — Build 180
 
+## DEC-224 — Erişilebilirlik tercih merkezi
+
+33-M kapsamında B7-01–B7-13 tek kalıcı kişisel tercih merkezi olarak uygulanır. 16 px görünür metin tabanı, yüzde 100–225 uygulama ölçeği, reflow, klavye ve duyuru semantiği, forced-colors, azaltılmış hareket, 44 px hedefler, kolay okuma, beş profil, açık tema ve bilgi saklamayan yoğunluk kipleri aynı modelden yönetilir. Tercihler merkezi PEP/UoW, optimistic revision ve idempotent replay ile saklanır; uygulama işletim sistemi ayarlarına yazmaz ve ağ kanalı açmaz. Narrator, Magnifier, gerçek cihaz ve insan UAT çalıştırılmadıkça sertifika iddiası kurulmaz. Ayrıntı: `docs/decisions/DEC-224-accessibility-preference-center.md`.
+
 ## DEC-223 — Finans / Uzun Vadeli Portföy merkezi
 
 33-L kapsamında LTP-001–LTP-008 tek paket olarak uygulanır. Finans altında ayrı

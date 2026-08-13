@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "step": "33-M",
+  "decision": "DEC-224",
+  "requirements": [
+    "B7-01",
+    "B7-02",
+    "B7-03",
+    "B7-04",
+    "B7-05",
+    "B7-06",
+    "B7-07",
+    "B7-08",
+    "B7-09",
+    "B7-10",
+    "B7-11",
+    "B7-12",
+    "B7-13"
+  ],
+  "status": "COMPLETE",
+  "surfaces": [
+    {
+      "id": "domain",
+      "paths": [
+        "packages/domain/src/accessibility-preferences.ts"
+      ]
+    },
+    {
+      "id": "application",
+      "paths": [
+        "packages/application/src/accessibility-preferences-use-cases.ts"
+      ]
+    },
+    {
+      "id": "repository-contract",
+      "paths": [
+        "packages/repository-contracts/src/accessibility-preferences-repository.ts"
+      ]
+    },
+    {
+      "id": "migration-90",
+      "paths": [
+        "packages/database/src/family-database-migrations.ts"
+      ]
+    },
+    {
+      "id": "repository",
+      "paths": [
+        "packages/repositories/src/accessibility-preferences-repository.ts"
+      ]
+    },
+    {
+      "id": "central-pep-uow",
+      "paths": [
+        "apps/desktop/src/main/accessibility-preferences-application-adapter.ts",
+        "apps/desktop/src/main/timeline-production-policy-runtime.ts"
+      ]
+    },
+    {
+      "id": "composition-ipc-preload",
+      "paths": [
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/renderer/global.d.ts"
+      ]
+    },
+    {
+      "id": "preference-model",
+      "paths": [
+        "apps/desktop/src/renderer/accessibility.ts"
+      ]
+    },
+    {
+      "id": "preference-ui-and-application",
+      "paths": [
+        "apps/desktop/src/renderer/App.tsx"
+      ]
+    },
+    {
+      "id": "typography-and-targets",
+      "paths": [
+        "apps/desktop/src/renderer/typography.css"
+      ]
+    },
+    {
+      "id": "contrast-motion-reflow",
+      "paths": [
+        "apps/desktop/src/renderer/styles.css"
+      ]
+    },
+    {
+      "id": "semantic-components",
+      "paths": [
+        "apps/desktop/src/renderer/ui.tsx"
+      ]
+    },
+    {
+      "id": "runtime-tests",
+      "paths": [
+        "packages/application/tests/accessibility-preferences-use-cases.test.ts",
+        "packages/repositories/accessibility-preferences-repository-policy.test.ts",
+        "apps/desktop/tests/accessibility-preferences-ipc-integration.test.ts",
+        "apps/desktop/tests/accessibility-preference-center.test.ts",
+        "apps/desktop/tests/data-store.test.ts"
+      ]
+    },
+    {
+      "id": "governance",
+      "paths": [
+        "docs/decisions/DEC-224-accessibility-preference-center.md",
+        "docs/security/THREAT_MODEL_33_M_ACCESSIBILITY_PREFERENCES.md",
+        "docs/audit/33-M_ACCESSIBILITY_PREFERENCE_CENTER_UST_KAPANIS.md"
+      ]
+    }
+  ],
+  "evidenceOutputs": [
+    "artifacts/validation/33-M-accessibility-boundary.json",
+    "artifacts/validation/33-M-accessibility-contract.json",
+    "artifacts/validation/33-M-accessibility-runtime.json"
+  ],
+  "networkChannels": [],
+  "operatingSystemWrites": [],
+  "manualCertificationEvidence": [],
+  "openRequirements": [],
+  "openBlockers": [
+    "Persistent local and D: receipt, source protection and Git remote equality are pending."
+  ],
+  "validation": {
+    "status": "PASS",
+    "boundaryChecks": 27,
+    "contractChecks": 15,
+    "runtimeChecks": 9,
+    "targetedTestFiles": 5,
+    "targetedTests": 19,
+    "preparedAt": "2026-08-13T22:01:10.748Z"
+  }
+}

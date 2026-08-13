@@ -1,5 +1,6 @@
 import {
   SqliteAccountRepository,
+  SqliteAccessibilityPreferencesRepository,
   SqliteAiConsentRepository,
   SqliteArchiveRepository,
   SqliteAuditRepository,
@@ -45,6 +46,7 @@ import {
 import type { RepositoryExecutionPolicyGuard, SqliteRepositoryOptions } from '@ppt/repositories';
 import type {
   AccountRepositoryPort,
+  AccessibilityPreferencesRepositoryPort,
   AiConsentRepositoryPort,
   ArchiveRepositoryPort,
   ArchivePolicyResourceRepositoryPort,
@@ -97,6 +99,7 @@ import type {
 
 export interface RepositoryCompositionRoot {
   readonly accountRepository: AccountRepositoryPort;
+  readonly accessibilityPreferencesRepository: AccessibilityPreferencesRepositoryPort;
   readonly aiConsentRepository: AiConsentRepositoryPort;
   readonly archiveRepository: ArchiveRepositoryPort & ArchivePolicyResourceRepositoryPort;
   readonly auditRepository: AuditRepositoryPort;
@@ -154,6 +157,7 @@ export const createSqliteRepositoryCompositionRoot = (
     : {};
   return {
     accountRepository: new SqliteAccountRepository(repositoryOptions),
+    accessibilityPreferencesRepository: new SqliteAccessibilityPreferencesRepository(repositoryOptions),
     aiConsentRepository: new SqliteAiConsentRepository(repositoryOptions),
     archiveRepository: new SqliteArchiveRepository(repositoryOptions),
     auditRepository: new SqliteAuditRepository(repositoryOptions),

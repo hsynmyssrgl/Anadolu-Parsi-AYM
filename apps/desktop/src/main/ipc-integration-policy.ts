@@ -1068,6 +1068,27 @@ const longTermPortfolioInput = (args:readonly unknown[]):IpcIntegrationPolicyDec
   }
 };
 
+const accessibilityPreferencesInput = (args:readonly unknown[]):IpcIntegrationPolicyDecision => {
+  if(args.length!==1)return rejected('ARGUMENT_COUNT_MISMATCH');
+  const value=args[0];
+  if(!isObject(value))return rejected('OBJECT_ARGUMENT_REQUIRED','$[0]');
+  const secretRejection=containsNestedProhibitedBankingSecret(value);
+  if(secretRejection)return secretRejection;
+  const keys=['expectedRevision','clientOperationId','textScale','textScalePercent','highContrast','reduceMotion','theme','density','readingMode','audienceProfile','captionsEnabled','audioMuted'];
+  if(!hasOnlyKeys(value,keys))return rejected('UNKNOWN_OBJECT_FIELD','$[0]');
+  const valid=Number.isSafeInteger(value.expectedRevision)&&Number(value.expectedRevision)>=0&&Number(value.expectedRevision)<2_147_483_647
+    &&typeof value.clientOperationId==='string'&&/^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$/u.test(value.clientOperationId)
+    &&['standard','large','extra-large'].includes(String(value.textScale))
+    &&Number.isInteger(value.textScalePercent)&&Number(value.textScalePercent)>=100&&Number(value.textScalePercent)<=225
+    &&typeof value.highContrast==='boolean'&&typeof value.reduceMotion==='boolean'
+    &&['system','light','dark'].includes(String(value.theme))
+    &&['comfortable','standard','compact'].includes(String(value.density))
+    &&['standard','easy-read'].includes(String(value.readingMode))
+    &&['youth','standard','senior','low-vision','caregiver'].includes(String(value.audienceProfile))
+    &&typeof value.captionsEnabled==='boolean'&&typeof value.audioMuted==='boolean';
+  return valid?accepted():rejected('ACCESSIBILITY_PREFERENCES_ARGUMENT_INVALID','$[0]');
+};
+
 const financeImportCommitInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => exactObject(
   args,
   ['previewId','ownerPersonId','privacy','mapping','defaultCurrency','incomeCategoryId','expenseCategoryId','duplicateStrategy'],
@@ -1201,6 +1222,10 @@ const optionalWindowsHelloFallback = (value: unknown): boolean => {
 
 export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unknown[]): IpcIntegrationPolicyDecision => {
   switch (channel) {
+    case 'accessibility:getPreferences':
+      return zeroArguments(args);
+    case 'accessibility:updatePreferences':
+      return accessibilityPreferencesInput(args);
     case 'life:getManagedWorkspace':
       return zeroArguments(args);
     case 'life:recordManagedItem':

@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "step": "33-M",
+  "decision": "DEC-224",
+  "requirements": [
+    "B7-01",
+    "B7-02",
+    "B7-03",
+    "B7-04",
+    "B7-05",
+    "B7-06",
+    "B7-07",
+    "B7-08",
+    "B7-09",
+    "B7-10",
+    "B7-11",
+    "B7-12",
+    "B7-13"
+  ],
+  "status": "PASS",
+  "checksPassed": 9,
+  "checksFailed": 0,
+  "targetedTestFilesPassed": 5,
+  "targetedTestsPassed": 19,
+  "checks": [
+    {
+      "name": "targeted vitest exits successfully",
+      "status": "PASS"
+    },
+    {
+      "name": "exact targeted test files pass",
+      "status": "PASS"
+    },
+    {
+      "name": "governed preference test floor passes",
+      "status": "PASS"
+    },
+    {
+      "name": "malformed bootstrap negative case is present and suite passes",
+      "status": "PASS"
+    },
+    {
+      "name": "production data-store PEP and UoW persistence passes",
+      "status": "PASS"
+    },
+    {
+      "name": "repository forged receipt and immutable mutation tests pass",
+      "status": "PASS"
+    },
+    {
+      "name": "IPC exact shape and nested secret tests pass",
+      "status": "PASS"
+    },
+    {
+      "name": "no real-device certification claimed",
+      "status": "PASS"
+    },
+    {
+      "name": "no Narrator Magnifier or human UAT certification claimed",
+      "status": "PASS"
+    }
+  ],
+  "manualCertification": {
+    "windowsNarrator": "NOT_RUN",
+    "windowsMagnifier": "NOT_RUN",
+    "realDevice": "NOT_RUN",
+    "humanUat": "NOT_RUN",
+    "certificationClaimed": false
+  },
+  "process": {
+    "exitCode": 0,
+    "signal": null
+  },
+  "generatedAt": "2026-08-13T22:01:38.424Z"
+}

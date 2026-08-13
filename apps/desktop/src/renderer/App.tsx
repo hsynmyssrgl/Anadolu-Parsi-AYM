@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useReducer, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useMemo, useReducer, useRef, useState, type CSSProperties, type FormEvent, type ReactNode } from 'react';
 import { Button, EmptyState, Modal, PageHeader, SectionHeader, StatRow, StatusMessage, Surface, VisuallyHidden } from './ui';
 import { navigationReducer, persistNavigationState, readNavigationState } from './navigation';
 import brandMarkUrl from './assets/brand-mark.png';
-import { accessibilityAnnouncement, nextRovingIndex, parseAccessibilityPreferences, serializeAccessibilityPreferences, type AccessibilityPreferences } from './accessibility';
+import { accessibilityAnnouncement, applyAccessibilityProfile, nextRovingIndex, parseAccessibilityPreferences, resolveAccessibilityTheme, serializeAccessibilityPreferences, type AccessibilityAudienceProfile, type AccessibilityPreferences } from './accessibility';
 import { AsyncWriteGuard, MutationRevisionWatermark } from './async-state-guard';
 import { DEVICE_REAUTHORIZATION_CONFIRMATION, SECURITY_CENTER_LABEL, SECURITY_CENTER_ROUTE, canSubmitDeviceReauthorization, securityCenterNeedsAttention } from './security-center-navigation';
 import { FinancePlanningPanel } from './FinancePlanningPanel';
@@ -50,6 +50,7 @@ import type {
 } from '@ppt/domain';
 import type { AuthorizationContextWorkspaceView, AuthorizationPurpose } from '@ppt/domain';
 import type { OfflineCapability, OfflineCapabilityLeaseWorkspaceView, PrivacyControlCenterView } from '@ppt/domain';
+import type { AccessibilityPreferencesView, UpdateAccessibilityPreferencesInput } from '@ppt/domain';
 import type { ClientDataAccessBoundaryView } from '@ppt/domain';
 import type { NetworkEgressBoundaryView } from '@ppt/domain';
 import type { DerivedDataPolicyBoundaryView } from '@ppt/domain';
@@ -94,19 +95,29 @@ const navGroups: ReadonlyArray<{ readonly label: string; readonly items: readonl
       .map((route) => route.id)
   }));
 
-type ThemeMode = 'dark' | 'light';
-
-const readTheme = (): ThemeMode =>
-  globalThis.localStorage?.getItem('ppt-theme') === 'light' ? 'light' : 'dark';
-
 const readSidebarState = (): boolean =>
   globalThis.localStorage?.getItem('ppt-sidebar-collapsed') === 'true';
 
-const readAccessibilityPreferences = (): AccessibilityPreferences =>
-  parseAccessibilityPreferences(globalThis.localStorage?.getItem('ppt-accessibility') ?? null, {
+const readAccessibilityPreferences = (): AccessibilityPreferences => {
+  const raw = globalThis.localStorage?.getItem('ppt-accessibility') ?? null;
+  const parsed = parseAccessibilityPreferences(raw, {
     highContrast: globalThis.matchMedia?.('(prefers-contrast: more)').matches ?? false,
     reduceMotion: globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
   });
+  const legacyTheme = globalThis.localStorage?.getItem('ppt-theme');
+  return raw && raw.includes('"theme"') || legacyTheme !== 'light' && legacyTheme !== 'dark'
+    ? parsed
+    : { ...parsed, theme: legacyTheme };
+};
+
+const rendererAccessibilityPreferences = (
+  value: AccessibilityPreferencesView
+): AccessibilityPreferences => ({
+  textScale:value.textScale,textScalePercent:value.textScalePercent,
+  highContrast:value.highContrast,reduceMotion:value.reduceMotion,theme:value.theme,
+  density:value.density,readingMode:value.readingMode,audienceProfile:value.audienceProfile,
+  captionsEnabled:value.captionsEnabled,audioMuted:value.audioMuted
+});
 
 const shellPreviewMode = import.meta.env.DEV && new URLSearchParams(globalThis.location?.search ?? '').has('shell-preview');
 
@@ -1251,7 +1262,7 @@ function SettingsSecurity({auth,accessibility,onAccessibilityChange,onFamilyData
       <section className="security-receipt-history"><h3>Güvenlik makbuzları</h3><p>Kurtarma sonrası cihaz yeniden yetkilendirme makbuzları bu hesaba göre filtrelenir ve her açılışta Ed25519 imzası yeniden doğrulanır.</p>{auth.securityEpoch!==auth.sessionSecurityEpoch&&<StatusMessage tone="danger">Bu oturum eski güvenlik dönemine ait. Güvenlik geçmişine erişmeden önce yeniden giriş yapın.</StatusMessage>}<div className="button-row"><Button onClick={()=>void refreshSecurityReceipts()}>Geçmişi yenile</Button></div>{securityReceiptHistory.length===0?<small>Bu hesap için arşivlenmiş güvenlik makbuzu yok.</small>:securityReceiptHistory.map(item=><div className="list-row" key={item.receipt.receiptId}><div><strong>{item.verificationStatus==='valid'?'✓ Doğrulandı':'! Geçersiz'} · Dönem {item.receipt.securityEpoch}</strong><small>{formatDate(item.receipt.occurredAt,{dateStyle:'short',timeStyle:'short'})} · {item.receipt.receiptId}</small><small>Payload {item.receipt.payloadSha256.slice(0,24)}…</small></div><Button onClick={()=>void navigator.clipboard.writeText(JSON.stringify(item.receipt,null,2))}>Kopyala</Button></div>)}<label>Haricî makbuz JSON<textarea rows={6} value={securityReceiptJson} onChange={event=>setSecurityReceiptJson(event.target.value)} placeholder="Doğrulanacak güvenlik makbuzunu buraya yapıştırın"/></label><Button onClick={()=>void verifySecurityReceiptJson()} disabled={!securityReceiptJson.trim()}>Makbuzu doğrula</Button>{securityReceiptVerification&&<StatusMessage tone={securityReceiptVerification.valid?'success':'danger'}>{securityReceiptVerification.status} · {securityReceiptVerification.message}</StatusMessage>}</section>
       <section><h3>Denetim kaydı</h3><div className="button-row"><Button onClick={()=>void loadAudit()}>Kayıtları göster</Button><Button onClick={()=>void verifyAudit()}>Zinciri doğrula</Button></div>{auditIntegrity&&<StatusMessage tone={auditIntegrity.valid?'success':'danger'}>{auditIntegrity.valid?`Denetim zinciri sağlam · ${auditIntegrity.checkedEntries} kayıt`:`Denetim zinciri bozuk · ${auditIntegrity.firstInvalidEntryId??'bilinmeyen kayıt'}`}</StatusMessage>}{audit.slice(0,8).map(x=><small className="audit-line" key={x.id}>{formatDate(x.occurredAt,{dateStyle:'short',timeStyle:'short'})} · {x.action}</small>)}</section>
       <DataLifecycleSettings auth={auth}/>
-      <section className="accessibility-settings"><h3>Erişilebilirlik</h3><p>Metin boyutu, kontrast ve hareket tercihleri bu cihazdaki yerel profil için saklanır.</p><label>Metin boyutu<select value={accessibility.textScale} onChange={event=>onAccessibilityChange({...accessibility,textScale:event.target.value as AccessibilityPreferences['textScale']})}><option value="standard">Standart</option><option value="large">Büyük</option><option value="extra-large">Çok büyük</option></select></label><label className="toggle-row"><input type="checkbox" checked={accessibility.highContrast} onChange={event=>onAccessibilityChange({...accessibility,highContrast:event.target.checked})}/><span><strong>Yüksek kontrast</strong><small>Metin, kenarlık ve odak göstergelerini belirginleştirir.</small></span></label><label className="toggle-row"><input type="checkbox" checked={accessibility.reduceMotion} onChange={event=>onAccessibilityChange({...accessibility,reduceMotion:event.target.checked})}/><span><strong>Hareketi azalt</strong><small>Geçişleri ve dekoratif hareketleri kapatır.</small></span></label></section>
+      <section className="accessibility-settings" aria-labelledby="accessibility-settings-title"><h3 id="accessibility-settings-title">Erişilebilirlik ve görünüm merkezi</h3><p>Oturum açıldıktan sonra tercihleriniz kişisel, yetki kontrollü profilinizde saklanır. Bu cihazdaki yerel kopya yalnız giriş öncesi güvenli görünüm başlangıcıdır.</p><fieldset><legend>Hazır görünüm profili</legend><div className="accessibility-profile-grid">{([['youth','Genç'],['standard','Standart'],['senior','İleri yaş'],['low-vision','Düşük görme'],['caregiver','Bakım veren']] as const).map(([profile,label])=><Button key={profile} aria-pressed={accessibility.audienceProfile===profile} onClick={()=>onAccessibilityChange(applyAccessibilityProfile(profile,{highContrast:globalThis.matchMedia?.('(prefers-contrast: more)').matches??false,reduceMotion:globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches??false}))}>{label}</Button>)}</div></fieldset><label>Metin görünümü<select value={accessibility.textScale} onChange={event=>{const textScale=event.target.value as AccessibilityPreferences['textScale'];onAccessibilityChange({...accessibility,textScale,textScalePercent:textScale==='standard'?100:textScale==='large'?150:200});}}><option value="standard">Normal</option><option value="large">Büyük</option><option value="extra-large">Çok büyük</option></select></label><label htmlFor="accessibility-scale">Özel metin ölçeği: %{accessibility.textScalePercent}<input id="accessibility-scale" type="range" min="100" max="225" step="5" value={accessibility.textScalePercent} onChange={event=>{const textScalePercent=Number(event.target.value);onAccessibilityChange({...accessibility,textScalePercent,textScale:textScalePercent<=110?'standard':textScalePercent<=175?'large':'extra-large'});}}/><output htmlFor="accessibility-scale" aria-live="polite">%{accessibility.textScalePercent} · 100–225 aralığı</output></label><label>Tema<select value={accessibility.theme} onChange={event=>onAccessibilityChange({...accessibility,theme:event.target.value as AccessibilityPreferences['theme']})}><option value="system">Windows tercihini izle</option><option value="light">Açık teal/gold</option><option value="dark">Koyu</option></select></label><label>Bilgi yoğunluğu<select value={accessibility.density} onChange={event=>onAccessibilityChange({...accessibility,density:event.target.value as AccessibilityPreferences['density']})}><option value="comfortable">Rahat</option><option value="standard">Standart</option><option value="compact">Kompakt — bilgi saklanmaz</option></select></label><label>Okuma biçimi<select value={accessibility.readingMode} onChange={event=>onAccessibilityChange({...accessibility,readingMode:event.target.value as AccessibilityPreferences['readingMode']})}><option value="standard">Standart</option><option value="easy-read">Kolay Okuma · sade ve adımlı</option></select></label><label className="toggle-row"><input type="checkbox" checked={accessibility.highContrast} onChange={event=>onAccessibilityChange({...accessibility,highContrast:event.target.checked})}/><span><strong>Yüksek kontrast</strong><small>Metin, kenarlık, odak ve durumları yalnız renge bağlı kalmadan belirginleştirir.</small></span></label><label className="toggle-row"><input type="checkbox" checked={accessibility.reduceMotion} onChange={event=>onAccessibilityChange({...accessibility,reduceMotion:event.target.checked})}/><span><strong>Hareketi azalt</strong><small>Geçişleri ve dekoratif hareketleri kapatır; işlem içeriğini kaldırmaz.</small></span></label><label className="toggle-row"><input type="checkbox" checked={accessibility.captionsEnabled} onChange={event=>onAccessibilityChange({...accessibility,captionsEnabled:event.target.checked})}/><span><strong>Altyazı ve yazılı alternatif</strong><small>Sesli anlatım bulunan yüzeylerde metin eşleniğini görünür tutar.</small></span></label><label className="toggle-row"><input type="checkbox" checked={accessibility.audioMuted} onChange={event=>onAccessibilityChange({...accessibility,audioMuted:event.target.checked})}/><span><strong>Uygulama seslerini kapat</strong><small>Ses kapansa da görsel durum ve yazılı açıklama korunur; anlatım yeniden oynatılabilir.</small></span></label><div className="notes-card"><strong>Klavye ve büyüteç sözleşmesi</strong><small>Tab sırası, görünür odak, Escape ile kapanış, odağın geri dönmesi, en az 44 px hedef ve küçük pencerede tek sütun reflow tüm profillerde etkindir.</small></div></section>
     </div>
     {backupInspection&&<div className="backup-inspection"><strong>{backupInspection.legacy?'Eski açık yedek biçimi':'Parola korumalı yedek doğrulandı'} · v{backupInspection.formatVersion}</strong><small>{backupInspection.archiveCount} arşiv girdisi · {(backupInspection.fileBytes/1048576).toFixed(1)} MB · Risk: {backupInspection.riskLevel==='low'?'Düşük':'Dikkat'}</small>{backupInspection.checks.map(check=><small key={check.code}>{check.valid?'✓':'!'} {check.label}: {check.detail}</small>)}</div>}
     {message&&<StatusMessage>{message}</StatusMessage>}
@@ -1972,8 +1983,13 @@ export function App() {
   const [locationModal, setLocationModal] = useState(false);
   const [relationModal,setRelationModal]=useState(false);
   const [appInfo, setAppInfo] = useState<UserVisibleAppInfo>(USER_VISIBLE_APP_INFO);
-  const [theme, setTheme] = useState<ThemeMode>(readTheme);
   const [accessibility, setAccessibility] = useState<AccessibilityPreferences>(readAccessibilityPreferences);
+  const accessibilityRevisionRef=useRef(0);
+  const accessibilitySaveTimerRef=useRef<ReturnType<typeof globalThis.setTimeout>|undefined>(undefined);
+  const accessibilityOperationRef=useRef<string|undefined>(undefined);
+  const accessibilitySaveChainRef=useRef<Promise<void>>(Promise.resolve());
+  const [systemDark,setSystemDark]=useState(()=>globalThis.matchMedia?.('(prefers-color-scheme: dark)').matches??true);
+  const theme=resolveAccessibilityTheme(accessibility.theme,systemDark);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(readSidebarState);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -1992,8 +2008,10 @@ export function App() {
 
   useEffect(() => { persistNavigationState(navigation); }, [navigation]);
   useEffect(() => () => asyncWriteGuardRef.current.invalidateAll(), []);
+  useEffect(()=>()=>{if(accessibilitySaveTimerRef.current!==undefined)globalThis.clearTimeout(accessibilitySaveTimerRef.current);},[]);
   useEffect(() => { globalThis.localStorage?.setItem('ppt-theme', theme); }, [theme]);
-  useEffect(() => { globalThis.localStorage?.setItem('ppt-accessibility', serializeAccessibilityPreferences(accessibility)); }, [accessibility]);
+  useEffect(() => { globalThis.localStorage?.setItem('ppt-accessibility', serializeAccessibilityPreferences(accessibility));globalThis.localStorage?.setItem(BRAND_AUDIO_DISABLED_KEY,accessibility.audioMuted?'1':'0');if(accessibility.audioMuted)globalThis.speechSynthesis?.cancel(); }, [accessibility]);
+  useEffect(()=>{const query=globalThis.matchMedia?.('(prefers-color-scheme: dark)');if(!query)return;const update=()=>setSystemDark(query.matches);query.addEventListener?.('change',update);return()=>query.removeEventListener?.('change',update);},[]);
   useEffect(() => { globalThis.localStorage?.setItem('ppt-sidebar-collapsed', String(sidebarCollapsed)); }, [sidebarCollapsed]);
   useEffect(()=>{const replay=()=>setFirstRunIntroCompleted(false);globalThis.addEventListener('ppt-replay-intro',replay);return()=>globalThis.removeEventListener('ppt-replay-intro',replay);},[]);
   useEffect(() => {
@@ -2191,11 +2209,43 @@ export function App() {
     if(!window.pardus)return;
     resetLazyDataState();
     const ticket=asyncWriteGuardRef.current.start('session-bootstrap');
-    const dashboard=await window.pardus.getDashboardOverview();
+    const [dashboard,storedAccessibility]=await Promise.all([
+      window.pardus.getDashboardOverview(),
+      window.pardus.getAccessibilityPreferences()
+    ]);
     asyncWriteGuardRef.current.commit(ticket,()=>{
       setDashboardOverview(dashboard);
       setSnapshot(snapshotFromOverview(dashboard));
+      accessibilityRevisionRef.current=storedAccessibility.revision;
+      setAccessibility(rendererAccessibilityPreferences(storedAccessibility));
     });
+  };
+
+  const updateAccessibility= (next:AccessibilityPreferences):void => {
+    setAccessibility(next);
+    if(!auth.authenticated||!window.pardus)return;
+    if(accessibilitySaveTimerRef.current!==undefined)globalThis.clearTimeout(accessibilitySaveTimerRef.current);
+    const operationId=accessibilityOperationRef.current??crypto.randomUUID();
+    accessibilityOperationRef.current=operationId;
+    accessibilitySaveTimerRef.current=globalThis.setTimeout(()=>{
+      if(accessibilityOperationRef.current===operationId)accessibilityOperationRef.current=undefined;
+      accessibilitySaveChainRef.current=accessibilitySaveChainRef.current.catch(()=>undefined).then(async()=>{
+        const command:UpdateAccessibilityPreferencesInput={
+          expectedRevision:accessibilityRevisionRef.current,
+          clientOperationId:operationId,
+          ...next
+        };
+        try{
+          const stored=await window.pardus!.updateAccessibilityPreferences(command);
+          accessibilityRevisionRef.current=stored.revision;
+          setAccessibility(rendererAccessibilityPreferences(stored));
+        }catch{
+          const stored=await window.pardus!.getAccessibilityPreferences();
+          accessibilityRevisionRef.current=stored.revision;
+          setAccessibility(rendererAccessibilityPreferences(stored));
+        }
+      });
+    },300);
   };
 
   useEffect(() => {
@@ -2388,12 +2438,12 @@ export function App() {
   else if (active === 'ai') screen = <AiGovernanceScreen />;
   else if (active === 'legacy') screen = <DigitalLegacyScreen snapshot={snapshot} />;
   else if (active === 'windows-hello') screen = <WindowsHelloScreen auth={auth}/>;
-  else if (active === SECURITY_CENTER_ROUTE) screen = <><PageHeader eyebrow="Hesap ve veri koruması" title={SECURITY_CENTER_LABEL} description="Parola, 2FA, güvenilir cihazlar, imzalı güvenlik makbuzları, denetim zinciri, yedekleme ve veri yaşam döngüsünü yönetin."/><SettingsSecurity auth={auth} accessibility={accessibility} onAccessibilityChange={setAccessibility} onFamilyDataChanged={refreshFamilyData}/></>;
+  else if (active === SECURITY_CENTER_ROUTE) screen = <><PageHeader eyebrow="Hesap ve veri koruması" title={SECURITY_CENTER_LABEL} description="Parola, 2FA, güvenilir cihazlar, imzalı güvenlik makbuzları, denetim zinciri, yedekleme ve veri yaşam döngüsünü yönetin."/><SettingsSecurity auth={auth} accessibility={accessibility} onAccessibilityChange={updateAccessibility} onFamilyDataChanged={refreshFamilyData}/></>;
   else if (active === 'settings') screen = <SystemManagementScreen/>;
   else screen = <PlaceholderScreen screen={active} snapshot={snapshot} auth={auth} />;
 
   return (<>
-    <div aria-hidden={sessionOverlayVisible?true:undefined} className={`app-shell ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`} data-theme={theme} data-release-channel={releaseChannelFromStage(appInfo.stage)} data-text-scale={accessibility.textScale} data-high-contrast={accessibility.highContrast ? 'true' : 'false'} data-reduce-motion={accessibility.reduceMotion ? 'true' : 'false'}>
+    <div aria-hidden={sessionOverlayVisible?true:undefined} className={`app-shell ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`} data-theme={theme} data-release-channel={releaseChannelFromStage(appInfo.stage)} data-text-scale={accessibility.textScale} data-high-contrast={accessibility.highContrast ? 'true' : 'false'} data-reduce-motion={accessibility.reduceMotion ? 'true' : 'false'} data-density={accessibility.density} data-reading-mode={accessibility.readingMode} data-audience-profile={accessibility.audienceProfile} data-captions-enabled={accessibility.captionsEnabled?'true':'false'} data-audio-muted={accessibility.audioMuted?'true':'false'} style={{'--accessibility-text-scale':accessibility.textScalePercent/100} as CSSProperties}>
       <VisuallyHidden as="div"><div aria-live="polite" aria-atomic="true">{accessibilityAnnouncement(activeItem.label)}</div></VisuallyHidden>
       <a className="skip-link" href="#main-content">Ana içeriğe geç</a>
       <aside className="sidebar">
@@ -2444,7 +2494,7 @@ export function App() {
               </button>
               {profileOpen&&<div id="profile-menu" className="menu-popover profile-popover" role="menu">
                 <div className="profile-summary"><span className="person-avatar large">{(auth.displayName??'Aile').split(/\s+/u).slice(0,2).map(part=>part[0]?.toLocaleUpperCase('tr-TR')).join('')}</span><div><strong>{auth.displayName??'Aile kullanıcısı'}</strong><small>{auth.role==='family_admin'?'Aile yöneticisi':'Aile üyesi'} · Yerel profil</small></div></div>
-                <button type="button" role="menuitem" onClick={()=>setTheme((value)=>value==='dark'?'light':'dark')}><span>{theme==='dark'?'☀':'☾'}</span>{theme==='dark'?'Açık görünüme geç':'Koyu görünüme geç'}</button>
+                <button type="button" role="menuitem" onClick={()=>updateAccessibility({...accessibility,theme:theme==='dark'?'light':'dark'})}><span>{theme==='dark'?'☀':'☾'}</span>{theme==='dark'?'Açık görünüme geç':'Koyu görünüme geç'}</button>
                 <button type="button" role="menuitem" onClick={()=>navigateFromShell('windows-hello')}><span>◎</span>Windows Hello</button>
                 <button type="button" role="menuitem" onClick={()=>navigateFromShell(SECURITY_CENTER_ROUTE)}><span>⛨</span>Güvenlik Merkezi</button>
                 <button type="button" role="menuitem" onClick={()=>navigateFromShell('settings')}><span>⇄</span>Ağ çıkış güvenliği</button>

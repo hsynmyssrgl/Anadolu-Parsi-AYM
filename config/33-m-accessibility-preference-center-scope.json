@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "id": "33-M-ACCESSIBILITY-PREFERENCE-CENTER",
+  "decision": "DEC-224",
+  "requirements": [
+    "B7-01",
+    "B7-02",
+    "B7-03",
+    "B7-04",
+    "B7-05",
+    "B7-06",
+    "B7-07",
+    "B7-08",
+    "B7-09",
+    "B7-10",
+    "B7-11",
+    "B7-12",
+    "B7-13"
+  ],
+  "status": "COMPLETE",
+  "model": {
+    "minimumVisibleTextPx": 16,
+    "textScalePercent": {
+      "minimum": 100,
+      "maximum": 225
+    },
+    "dpiRangePercent": {
+      "minimum": 100,
+      "maximum": 400
+    },
+    "viewportRange": [
+      "1280x720",
+      "3840x2160",
+      "small_window_reflow"
+    ],
+    "minimumInteractiveTargetPx": 44,
+    "profiles": [
+      "youth",
+      "standard",
+      "senior",
+      "low-vision",
+      "caregiver"
+    ],
+    "densityModes": [
+      "comfortable",
+      "standard",
+      "compact"
+    ],
+    "readingModes": [
+      "standard",
+      "easy-read"
+    ],
+    "systemSignals": [
+      "prefers-reduced-motion",
+      "prefers-contrast",
+      "forced-colors"
+    ],
+    "preferenceEffectsLocalApplicationOnly": true,
+    "persistentProfileAuthority": "central_pep_uow_personal",
+    "idempotentOptimisticRevision": true
+  },
+  "validation": {
+    "status": "PASS",
+    "boundary": "artifacts/validation/33-M-accessibility-boundary.json",
+    "contract": "artifacts/validation/33-M-accessibility-contract.json",
+    "runtime": "artifacts/validation/33-M-accessibility-runtime.json",
+    "targetedTests": [
+      "packages/application/tests/accessibility-preferences-use-cases.test.ts",
+      "packages/repositories/accessibility-preferences-repository-policy.test.ts",
+      "apps/desktop/tests/accessibility-preferences-ipc-integration.test.ts",
+      "apps/desktop/tests/accessibility-preference-center.test.ts",
+      "apps/desktop/tests/data-store.test.ts"
+    ],
+    "finalEvidence": {
+      "boundaryChecksPassed": 27,
+      "contractChecksPassed": 15,
+      "runtimeChecksPassed": 9,
+      "targetedTestFilesPassed": 5,
+      "targetedTestsPassed": 19,
+      "fullVitestTestFilesPassed": 134,
+      "fullVitestTestsPassed": 1102,
+      "productionWorkspaceBuildsPassed": 18,
+      "ppk021ExactAllowlistEntries": 566,
+      "ppk021UseCaseCompositionSurfaces": 288,
+      "ppk022CapabilitySurfaces": 246,
+      "networkChannels": 0,
+      "operatingSystemWrites": 0,
+      "latestDatabaseMigration": 90,
+      "migration90Checksum": "15f69b6269d0cf2002543ff26df0ddea1844497dff8228141dfb451c0341320c",
+      "requirementChainsComplete": 13,
+      "automatedClosureEvidenceComplete": true,
+      "manualWindowsNarrator": "NOT_RUN",
+      "manualWindowsMagnifier": "NOT_RUN",
+      "realDevice": "NOT_RUN",
+      "humanUat": "NOT_RUN",
+      "certificationClaimed": false
+    },
+    "preparedAt": "2026-08-13T22:01:10.748Z"
+  },
+  "completionBlockers": [
+    "Persistent local and D: receipt, source protection and Git remote equality are pending."
+  ],
+  "excludedClaims": [
+    "Source and automated runtime evidence is not a Windows Narrator certification.",
+    "Source and automated runtime evidence is not a Windows Magnifier certification.",
+    "No real-device, assistive-technology or human UAT certification is claimed until separately executed and recorded.",
+    "The application does not modify operating-system accessibility settings."
+  ]
+}

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 77,
+  "decisionCount": 78,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1944,6 +1944,18 @@
       "requirements": ["LTP-001","LTP-002","LTP-003","LTP-004","LTP-005","LTP-006","LTP-007","LTP-008"],
       "codeAreas": ["packages/domain/src/long-term-portfolio.ts","packages/application/src/long-term-portfolio-use-cases.ts","packages/database/src/family-database-migrations.ts","packages/repository-contracts/src/long-term-portfolio-repository.ts","packages/repositories/src/long-term-portfolio-repository.ts","apps/desktop/src/main/long-term-portfolio-application-adapter.ts","apps/desktop/src/main/data-store.ts","apps/desktop/src/main/ipc-integration-policy.ts","apps/desktop/src/main/main.ts","apps/desktop/src/main/preload.ts","apps/desktop/src/renderer/LongTermPortfolioPanel.tsx"],
       "evidence": ["docs/security/THREAT_MODEL_33_L_LONG_TERM_PORTFOLIO.md"]
+    },
+    {
+      "id": "DEC-224",
+      "date": "2026-08-13",
+      "acceptedAt": "2026-08-13",
+      "title": "B7-01 through B7-13 governed accessibility and view preference center",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: package all remaining requirements and continue full auto without per-package approval",
+      "document": "docs/decisions/DEC-224-accessibility-preference-center.md",
+      "requirements": ["B7-01","B7-02","B7-03","B7-04","B7-05","B7-06","B7-07","B7-08","B7-09","B7-10","B7-11","B7-12","B7-13"],
+      "codeAreas": ["packages/domain/src/accessibility-preferences.ts","packages/application/src/accessibility-preferences-use-cases.ts","packages/database/src/family-database-migrations.ts","packages/repository-contracts/src/accessibility-preferences-repository.ts","packages/repositories/src/accessibility-preferences-repository.ts","apps/desktop/src/main/accessibility-preferences-application-adapter.ts","apps/desktop/src/main/data-store.ts","apps/desktop/src/main/ipc-integration-policy.ts","apps/desktop/src/main/main.ts","apps/desktop/src/main/preload.ts","apps/desktop/src/renderer/accessibility.ts","apps/desktop/src/renderer/App.tsx","apps/desktop/src/renderer/styles.css","apps/desktop/src/renderer/typography.css"],
+      "evidence": ["artifacts/validation/33-M-accessibility-boundary.json","artifacts/validation/33-M-accessibility-contract.json","artifacts/validation/33-M-accessibility-runtime.json","docs/security/THREAT_MODEL_33_M_ACCESSIBILITY_PREFERENCES.md"]
     },
     {
       "id": "DEC-221",

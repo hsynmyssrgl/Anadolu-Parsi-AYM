@@ -15,6 +15,7 @@ export * from './family-repository.js';
 export * from './household-membership-repository.js';
 export * from './finance-repository.js';
 export * from './long-term-portfolio-repository.js';
+export * from './accessibility-preferences-repository.js';
 export * from './genealogy-repository.js';
 export * from './health-repository.js';
 export * from './invitation-repository.js';

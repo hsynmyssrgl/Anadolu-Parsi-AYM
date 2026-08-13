@@ -22,7 +22,7 @@ export interface PlatformPolicyAstGateSnapshot {
   readonly protectedRules: readonly PlatformPolicyAstGateRuleId[];
   readonly protectedRuleCount: 6;
   readonly productionSourceZones: 18;
-  readonly exactAllowlistEntries: 562;
+  readonly exactAllowlistEntries: 566;
   readonly directRoleAuthorizationBypasses: 0;
   readonly wildcardsAllowed: false;
   readonly parseFailureDenied: true;
@@ -50,7 +50,7 @@ const exactSnapshot = (): PlatformPolicyAstGateSnapshot => Object.freeze({
   protectedRules: PLATFORM_POLICY_AST_GATE_RULE_IDS,
   protectedRuleCount: 6,
   productionSourceZones: 18,
-  exactAllowlistEntries: 562,
+  exactAllowlistEntries: 566,
   directRoleAuthorizationBypasses: 0,
   wildcardsAllowed: false,
   parseFailureDenied: true,

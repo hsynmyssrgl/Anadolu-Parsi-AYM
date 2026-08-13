@@ -58,6 +58,7 @@ import type { BankInstitutionView, BankAccountView, CreateBankAccountInput, Iban
 import type { LoanAccountView, CreateLoanAccountInput, RecordLoanPaymentInput } from '@ppt/domain';
 import type { FinancePlanningWorkspaceView, RecordFinancePlanningItemInput, FinanceImportPreviewView, SelectFinanceImportFileResult, CommitFinanceImportPreviewInput } from '@ppt/domain';
 import type { LongTermPortfolioWorkspaceView, RecordLongTermPortfolioItemInput } from '@ppt/domain';
+import type { AccessibilityPreferencesView, UpdateAccessibilityPreferencesInput } from '@ppt/domain';
 import type { ManagedLifeWorkspaceView, RecordManagedLifeItemInput } from '@ppt/domain';
 
 interface EmergencyCardExportIpcInput {
@@ -405,6 +406,8 @@ contextBridge.exposeInMainWorld('pardus', {
   upsertSensitiveDataConsent: (input:UpsertSensitiveDataConsentInput):Promise<SensitiveDataProfileView[]> => invoke('ai:upsertSensitiveConsent',input),
   previewSensitiveExport: (input:SensitiveExportPreviewInput):Promise<SensitiveExportPreviewView> => invoke('ai:previewSensitiveExport',input),
   getAuthState: (): Promise<AuthStateView> => invoke('auth:getState'),
+  getAccessibilityPreferences:():Promise<AccessibilityPreferencesView>=>invoke('accessibility:getPreferences'),
+  updateAccessibilityPreferences:(input:UpdateAccessibilityPreferencesInput):Promise<AccessibilityPreferencesView>=>invoke('accessibility:updatePreferences',input),
   getSessionLockState:():Promise<SessionLockStateView>=>invoke('auth:getSessionLockState'),
   recordSessionActivity:():Promise<SessionLockStateView>=>invoke('auth:recordSessionActivity'),
   lockSession:():Promise<SessionLockStateView>=>invoke('auth:lockSession'),

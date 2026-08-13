@@ -259,10 +259,10 @@ export const verifyB4ControlledImportOpenBankingBoundary = async () => {
     'B4-13', 'B4-14', '33-D-b4-controlled-import-open-banking-boundary.json',
     '33-D-b4-controlled-import-open-banking-contract.json', '33-D-b4-controlled-import-open-banking-runtime.json'
   ]) && includesAll(masterRegister, ['## DEC-215', 'DEC-215-b4-controlled-import-open-banking.md']));
-  check('PPK-021 preserves the historical shared composition under the current exact 562 and 286 successor ratchet',
+  check('PPK-021 preserves the historical shared composition under the current exact 566 and 288 successor ratchet',
     astKeys.has('USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|CommitFinanceImportBatchUseCase')
-    && astGate.status === 'PASS' && astGate.privilegedSurfaces === 562
-    && astGate.exactAllowlistEntries === 562 && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 286
+    && astGate.status === 'PASS' && astGate.privilegedSurfaces === 566
+    && astGate.exactAllowlistEntries === 566 && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 288
     && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
   check('PPK-022 preserves historical bounded-read surfaces under current exact 246 successor ratchet', capabilityGate.status === 'PASS'
     && capabilityGate.capabilitySurfaces === 246 && capabilityGate.exactManifestSurfaces === 246

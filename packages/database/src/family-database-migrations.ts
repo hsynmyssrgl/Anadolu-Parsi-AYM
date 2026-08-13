@@ -11132,6 +11132,197 @@ CREATE TRIGGER trg_ltp_price_delete BEFORE DELETE ON long_term_portfolio_price_o
 UPDATE database_metadata SET value='REVISION-33-L-LONG-TERM-PORTFOLIO',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 
+const accessibilityPreferencesSql = `CREATE TABLE accessibility_preference_mutations(
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 160),
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 8 AND 128),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  previous_revision INTEGER NOT NULL CHECK(previous_revision BETWEEN 0 AND 2147483646),
+  revision INTEGER NOT NULL CHECK(revision=previous_revision+1 AND revision BETWEEN 1 AND 2147483647),
+  text_scale TEXT NOT NULL CHECK(text_scale IN ('standard','large','extra-large')),
+  text_scale_percent INTEGER NOT NULL CHECK(text_scale_percent BETWEEN 100 AND 225),
+  high_contrast INTEGER NOT NULL CHECK(high_contrast IN (0,1)),
+  reduce_motion INTEGER NOT NULL CHECK(reduce_motion IN (0,1)),
+  theme TEXT NOT NULL CHECK(theme IN ('system','light','dark')),
+  density TEXT NOT NULL CHECK(density IN ('comfortable','standard','compact')),
+  reading_mode TEXT NOT NULL CHECK(reading_mode IN ('standard','easy-read')),
+  audience_profile TEXT NOT NULL CHECK(audience_profile IN ('youth','standard','senior','low-vision','caregiver')),
+  captions_enabled INTEGER NOT NULL CHECK(captions_enabled IN (0,1)),
+  audio_muted INTEGER NOT NULL CHECK(audio_muted IN (0,1)),
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z' AND julianday(created_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL UNIQUE REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT CHECK(length(policy_receipt_hash)=64 AND policy_receipt_hash NOT GLOB '*[^0-9a-f]*'),
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version=1),
+  policy_receipt_nonce TEXT NOT NULL UNIQUE CHECK(length(trim(policy_receipt_nonce)) BETWEEN 1 AND 256),
+  policy_correlation_id TEXT NOT NULL CHECK(length(trim(policy_correlation_id)) BETWEEN 1 AND 128),
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type='accessibility_preferences'),
+  policy_resource_id TEXT NOT NULL CHECK(policy_resource_id=account_id),
+  policy_action TEXT NOT NULL CHECK(policy_action IN ('create','update')),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='family.write'),
+  UNIQUE(family_id,account_id,client_operation_id),
+  UNIQUE(account_id,revision)
+) STRICT;
+
+CREATE TABLE accessibility_preferences(
+  account_id TEXT PRIMARY KEY REFERENCES accounts(id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  revision INTEGER NOT NULL CHECK(revision BETWEEN 1 AND 2147483647),
+  text_scale TEXT NOT NULL CHECK(text_scale IN ('standard','large','extra-large')),
+  text_scale_percent INTEGER NOT NULL CHECK(text_scale_percent BETWEEN 100 AND 225),
+  high_contrast INTEGER NOT NULL CHECK(high_contrast IN (0,1)),
+  reduce_motion INTEGER NOT NULL CHECK(reduce_motion IN (0,1)),
+  theme TEXT NOT NULL CHECK(theme IN ('system','light','dark')),
+  density TEXT NOT NULL CHECK(density IN ('comfortable','standard','compact')),
+  reading_mode TEXT NOT NULL CHECK(reading_mode IN ('standard','easy-read')),
+  audience_profile TEXT NOT NULL CHECK(audience_profile IN ('youth','standard','senior','low-vision','caregiver')),
+  captions_enabled INTEGER NOT NULL CHECK(captions_enabled IN (0,1)),
+  audio_muted INTEGER NOT NULL CHECK(audio_muted IN (0,1)),
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z' AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND updated_at GLOB '????-??-??T??:??:??.???Z' AND julianday(updated_at) IS NOT NULL),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES accessibility_preference_mutations(id) ON DELETE RESTRICT,
+  CHECK(julianday(created_at)<=julianday(updated_at))
+) STRICT;
+
+CREATE INDEX idx_accessibility_preference_mutations_account_created
+ON accessibility_preference_mutations(family_id,account_id,created_at DESC,id);
+CREATE INDEX idx_accessibility_preferences_family_owner
+ON accessibility_preferences(family_id,owner_person_id,account_id);
+
+CREATE TRIGGER trg_accessibility_mutation_idempotency_mismatch
+BEFORE INSERT ON accessibility_preference_mutations
+WHEN EXISTS(
+  SELECT 1 FROM accessibility_preference_mutations prior
+  WHERE prior.family_id=NEW.family_id
+    AND prior.account_id=NEW.account_id
+    AND prior.client_operation_id=NEW.client_operation_id
+    AND prior.request_fingerprint<>NEW.request_fingerprint
+)
+BEGIN SELECT RAISE(ABORT,'accessibility preference idempotency fingerprint mismatch'); END;
+
+CREATE TRIGGER trg_accessibility_mutation_revision
+BEFORE INSERT ON accessibility_preference_mutations
+WHEN NOT (
+  (NEW.previous_revision=0 AND NEW.revision=1 AND NOT EXISTS(
+    SELECT 1 FROM accessibility_preferences current WHERE current.account_id=NEW.account_id
+  ))
+  OR EXISTS(
+    SELECT 1 FROM accessibility_preferences current
+    WHERE current.account_id=NEW.account_id
+      AND current.family_id=NEW.family_id
+      AND current.owner_person_id=NEW.owner_person_id
+      AND current.revision=NEW.previous_revision
+      AND NEW.revision=current.revision+1
+  )
+)
+BEGIN SELECT RAISE(ABORT,'accessibility preference optimistic revision mismatch'); END;
+
+CREATE TRIGGER trg_accessibility_mutation_policy_receipt
+BEFORE INSERT ON accessibility_preference_mutations
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM platform_policy_transaction_receipts receipt
+  JOIN platform_policy_database_fences fence
+    ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection
+    ON projection.receipt_hash=receipt.receipt_hash AND projection.record_json=receipt.record_json
+  JOIN accounts active_account
+    ON active_account.id=NEW.account_id
+      AND active_account.status='active'
+      AND active_account.person_id=NEW.owner_person_id
+  JOIN people active_person
+    ON active_person.id=NEW.owner_person_id
+      AND active_person.family_id=NEW.family_id
+      AND active_person.status='active'
+  WHERE receipt.receipt_hash=NEW.policy_receipt_hash
+    AND receipt.receipt_version=NEW.policy_receipt_version
+    AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id
+    AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id
+    AND receipt.action=NEW.policy_action
+    AND receipt.capability=NEW.policy_capability
+    AND receipt.resource_type='accessibility_preferences'
+    AND receipt.resource_id=NEW.account_id
+    AND receipt.action=CASE NEW.previous_revision WHEN 0 THEN 'create' ELSE 'update' END
+    AND receipt.capability='family.write'
+    AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.account_id
+    AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.resource.sensitivity')='personal'
+    AND json_extract(receipt.record_json,'$.request.purpose')='general'
+    AND json_extract(receipt.record_json,'$.request.occurredAt')=NEW.created_at
+)
+BEGIN SELECT RAISE(ABORT,'accessibility preference mutation requires an exact active personal policy receipt'); END;
+
+CREATE TRIGGER trg_accessibility_current_insert
+BEFORE INSERT ON accessibility_preferences
+WHEN NOT EXISTS(
+  SELECT 1 FROM accessibility_preference_mutations mutation
+  WHERE mutation.id=NEW.last_mutation_id
+    AND mutation.account_id=NEW.account_id
+    AND mutation.family_id=NEW.family_id
+    AND mutation.owner_person_id=NEW.owner_person_id
+    AND mutation.previous_revision=0
+    AND mutation.revision=NEW.revision
+    AND mutation.text_scale=NEW.text_scale
+    AND mutation.text_scale_percent=NEW.text_scale_percent
+    AND mutation.high_contrast=NEW.high_contrast
+    AND mutation.reduce_motion=NEW.reduce_motion
+    AND mutation.theme=NEW.theme
+    AND mutation.density=NEW.density
+    AND mutation.reading_mode=NEW.reading_mode
+    AND mutation.audience_profile=NEW.audience_profile
+    AND mutation.captions_enabled=NEW.captions_enabled
+    AND mutation.audio_muted=NEW.audio_muted
+    AND mutation.created_at=NEW.created_at
+    AND mutation.created_at=NEW.updated_at
+)
+BEGIN SELECT RAISE(ABORT,'accessibility preference current row requires its exact initial mutation'); END;
+
+CREATE TRIGGER trg_accessibility_current_update
+BEFORE UPDATE ON accessibility_preferences
+WHEN NEW.account_id<>OLD.account_id
+  OR NEW.family_id<>OLD.family_id
+  OR NEW.owner_person_id<>OLD.owner_person_id
+  OR NEW.created_at<>OLD.created_at
+  OR NOT EXISTS(
+    SELECT 1 FROM accessibility_preference_mutations mutation
+    WHERE mutation.id=NEW.last_mutation_id
+      AND mutation.account_id=OLD.account_id
+      AND mutation.family_id=OLD.family_id
+      AND mutation.owner_person_id=OLD.owner_person_id
+      AND mutation.previous_revision=OLD.revision
+      AND mutation.revision=NEW.revision
+      AND mutation.text_scale=NEW.text_scale
+      AND mutation.text_scale_percent=NEW.text_scale_percent
+      AND mutation.high_contrast=NEW.high_contrast
+      AND mutation.reduce_motion=NEW.reduce_motion
+      AND mutation.theme=NEW.theme
+      AND mutation.density=NEW.density
+      AND mutation.reading_mode=NEW.reading_mode
+      AND mutation.audience_profile=NEW.audience_profile
+      AND mutation.captions_enabled=NEW.captions_enabled
+      AND mutation.audio_muted=NEW.audio_muted
+      AND mutation.created_at=NEW.updated_at
+  )
+BEGIN SELECT RAISE(ABORT,'accessibility preference update requires its exact next mutation'); END;
+
+CREATE TRIGGER trg_accessibility_mutation_update
+BEFORE UPDATE ON accessibility_preference_mutations
+BEGIN SELECT RAISE(ABORT,'accessibility preference mutations are immutable'); END;
+CREATE TRIGGER trg_accessibility_mutation_delete
+BEFORE DELETE ON accessibility_preference_mutations
+BEGIN SELECT RAISE(ABORT,'accessibility preference mutation deletion is forbidden'); END;
+CREATE TRIGGER trg_accessibility_current_delete
+BEFORE DELETE ON accessibility_preferences
+BEGIN SELECT RAISE(ABORT,'accessibility preference deletion is forbidden'); END;
+
+UPDATE database_metadata SET value='REVISION-33-M-ACCESSIBILITY-PREFERENCES',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -11221,7 +11412,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(86, 'b5_family_emergency_preparedness_ledger', familyEmergencyPreparednessLedgerSql),
   createMigrationDefinition(87, 'b5_family_emergency_assistance_card_ledger', familyEmergencyAssistanceCardLedgerSql),
   createMigrationDefinition(88, 'b5_family_emergency_card_portability_ledger', familyEmergencyCardPortabilityLedgerSql),
-  createMigrationDefinition(89, 'b4_long_term_portfolio_ledger', longTermPortfolioLedgerSql)
+  createMigrationDefinition(89, 'b4_long_term_portfolio_ledger', longTermPortfolioLedgerSql),
+  createMigrationDefinition(90, 'b7_accessibility_preferences', accessibilityPreferencesSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

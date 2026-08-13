@@ -1,0 +1,168 @@
+{
+  "schemaVersion": 1,
+  "step": "33-M",
+  "decision": "DEC-224",
+  "requirements": [
+    "B7-01",
+    "B7-02",
+    "B7-03",
+    "B7-04",
+    "B7-05",
+    "B7-06",
+    "B7-07",
+    "B7-08",
+    "B7-09",
+    "B7-10",
+    "B7-11",
+    "B7-12",
+    "B7-13"
+  ],
+  "status": "PASS",
+  "checksPassed": 27,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "bounded preference model",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/renderer/accessibility.ts"
+    },
+    {
+      "name": "public domain view excludes persistence internals",
+      "status": "PASS",
+      "evidence": "packages/domain/src/accessibility-preferences.ts"
+    },
+    {
+      "name": "application has exact validation revision and idempotent replay",
+      "status": "PASS",
+      "evidence": "packages/application/src/accessibility-preferences-use-cases.ts"
+    },
+    {
+      "name": "application strips internal mutation identifiers from public views",
+      "status": "PASS",
+      "evidence": "packages/application/src/accessibility-preferences-use-cases.ts"
+    },
+    {
+      "name": "repository contract separates governed access and policy resolution",
+      "status": "PASS",
+      "evidence": "packages/repository-contracts/src/accessibility-preferences-repository.ts"
+    },
+    {
+      "name": "migration 90 stores strict current and immutable mutation history",
+      "status": "PASS",
+      "evidence": "packages/database/src/family-database-migrations.ts"
+    },
+    {
+      "name": "migration receipt trigger binds active exact personal subject",
+      "status": "PASS",
+      "evidence": "packages/database/src/family-database-migrations.ts"
+    },
+    {
+      "name": "repository enforces exact personal PEP receipt and optimistic revision",
+      "status": "PASS",
+      "evidence": "packages/repositories/src/accessibility-preferences-repository.ts"
+    },
+    {
+      "name": "existing central PEP and UoW runner are reused",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/main/accessibility-preferences-application-adapter.ts;apps/desktop/src/main/timeline-production-policy-runtime.ts"
+    },
+    {
+      "name": "data-store composes governed use cases and policy resource repository",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/main/data-store.ts"
+    },
+    {
+      "name": "IPC rejects shape drift and preload exposes only typed methods",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/main/ipc-integration-policy.ts;apps/desktop/src/main/preload.ts;apps/desktop/src/renderer/global.d.ts"
+    },
+    {
+      "name": "safe malformed preference fallback",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/renderer/accessibility.ts"
+    },
+    {
+      "name": "five audience profiles",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/renderer/accessibility.ts"
+    },
+    {
+      "name": "density never hides information by model",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/renderer/accessibility.ts"
+    },
+    {
+      "name": "system contrast and motion are read only",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/renderer/App.tsx"
+    },
+    {
+      "name": "preference center is visible",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/renderer/App.tsx"
+    },
+    {
+      "name": "application exposes governed data attributes",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/renderer/App.tsx"
+    },
+    {
+      "name": "route change moves focus and announces",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/renderer/App.tsx"
+    },
+    {
+      "name": "keyboard Escape and roving navigation exist",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/renderer/App.tsx;apps/desktop/src/renderer/ui.tsx"
+    },
+    {
+      "name": "all visible typography tokens are governed to 16px floor",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/renderer/typography.css"
+    },
+    {
+      "name": "minimum 44px controls",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/renderer/typography.css;apps/desktop/src/renderer/styles.css"
+    },
+    {
+      "name": "zoom safe overflow and wrapping",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/renderer/styles.css"
+    },
+    {
+      "name": "small window reflow",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/renderer/styles.css"
+    },
+    {
+      "name": "forced colors and non-color status marker",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/renderer/styles.css"
+    },
+    {
+      "name": "reduced motion system and local preference",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/renderer/styles.css"
+    },
+    {
+      "name": "easy read and profile surfaces",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/renderer/styles.css"
+    },
+    {
+      "name": "targeted negative test suite exists",
+      "status": "PASS",
+      "evidence": "apps/desktop/tests/accessibility-preference-center.test.ts"
+    }
+  ],
+  "manualCertification": {
+    "windowsNarrator": "NOT_RUN",
+    "windowsMagnifier": "NOT_RUN",
+    "realDevice": "NOT_RUN",
+    "humanUat": "NOT_RUN",
+    "certificationClaimed": false
+  },
+  "generatedAt": "2026-08-13T22:08:35.157Z"
+}
