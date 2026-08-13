@@ -2270,8 +2270,8 @@
       "id": "33-I",
       "title": "Governed offline emergency health/contact card and special-assistance workflow",
       "scopeRequirement": "EXT-012,EXT-014",
-      "status": "IN_PROGRESS",
-      "validationStatus": "PENDING",
+      "status": "COMPLETED",
+      "validationStatus": "PASS",
       "localEvidence": [
         "config/33-i-family-emergency-assistance-card-scope.json",
         "config/33-i-family-emergency-assistance-card-inventory.json",
@@ -2280,10 +2280,19 @@
         "docs/audit/33-I_FAMILY_EMERGENCY_ASSISTANCE_CARD_UST_KAPANIS.md",
         "artifacts/validation/33-I-family-emergency-assistance-card-boundary.json",
         "artifacts/validation/33-I-family-emergency-assistance-card-contract.json",
-        "artifacts/validation/33-I-family-emergency-assistance-card-runtime.json"
+        "artifacts/validation/33-I-family-emergency-assistance-card-runtime.json",
+        "artifacts/checkpoints/33-I_LIBRARY_RECEIPT.json",
+        "artifacts/validation/33-I_LIBRARY_READBACK_VERIFICATION.json",
+        "artifacts/validation/33-I_RECEIPT_READBACK_VERIFICATION.json",
+        "artifacts/validation/33-I_RECEIPT_READBACK_PERSISTENCE_VERIFICATION.json",
+        "artifacts/validation/33-I_LIBRARY_FINAL_INVENTORY_VERIFICATION.json",
+        "artifacts/checkpoints/33-I_COMPLETION_RECORD.json",
+        "artifacts/validation/33-I_COMPLETION_TRANSITION_VALIDATION.json",
+        "artifacts/validation/33-I_LIBRARY_CLOSURE_INVENTORY_VERIFICATION.json"
       ],
-      "persistentReceiptStatus": "PENDING",
-      "completionTransitionStatus": "PENDING"
+      "persistentReceiptStatus": "PASS",
+      "completionTransitionStatus": "PASS",
+      "persistentReceiptPath": "artifacts/checkpoints/33-I_LIBRARY_RECEIPT.json"
     },
     {
       "id": "33-J",
@@ -2298,6 +2307,6 @@
   ],
   "recoveryAuthority": "NEW_CHAT_HANDOFF_Bronze_04.08.2026.29.md",
   "recoveryReason": "29-D_FAILED_POSTFLIGHT_EXIT_CODE_1_SPLIT_PER_PR-171",
-  "updatedAt": "2026-08-13T00:40:00.000Z",
-  "segmentationNote": "33-H remains immutable COMPLETED/PASS with exact local and D: USB hash/size readback. 33-I is local validation PASS for EXT-012 and EXT-014 and remains IN_PROGRESS pending exact persistent Library receipt/completion; 33-J is the sole PENDING successor."
+  "updatedAt": "2026-08-13T00:42:51.503Z",
+  "segmentationNote": "33-I is immutable COMPLETED/PASS with exact local and D: USB hash/size readback. 33-J remains PENDING for governed successor selection."
 }
