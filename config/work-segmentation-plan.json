@@ -4,8 +4,8 @@
   "release": "Bronze 04.08.2026.29",
   "rule": "PR-171",
   "policy": "ONE_IN_PROGRESS_PREVIOUS_MUST_HAVE_PASS_AND_PERSISTENT_RECEIPT",
-  "workflowStatus": "IN_PROGRESS",
-  "currentStep": "33-L",
+  "workflowStatus": "COMPLETED",
+  "currentStep": null,
   "steps": [
     {
       "id": "29-A",
@@ -2350,7 +2350,7 @@
       "id": "33-L",
       "title": "Finans - Uzun Vadeli Portföy: sürümlü birikim planı, değişmez kıymet defteri, kurumsal işlemler ve projeksiyonlar",
       "scopeRequirement": "LTP-001,LTP-002,LTP-003,LTP-004,LTP-005,LTP-006,LTP-007,LTP-008",
-      "status": "IN_PROGRESS",
+      "status": "COMPLETED",
       "validationStatus": "PASS",
       "localEvidence": [
         "docs/decisions/DEC-223-long-term-portfolio-center.md",
@@ -2368,14 +2368,23 @@
         "artifacts/validation/33-L-long-term-portfolio-boundary.json",
         "artifacts/validation/33-L-long-term-portfolio-contract.json",
         "artifacts/validation/33-L-long-term-portfolio-runtime.json",
-        "docs/audit/33-L_LONG_TERM_PORTFOLIO_UST_KAPANIS.md"
+        "docs/audit/33-L_LONG_TERM_PORTFOLIO_UST_KAPANIS.md",
+        "artifacts/checkpoints/33-L_LIBRARY_RECEIPT.json",
+        "artifacts/validation/33-L_LIBRARY_READBACK_VERIFICATION.json",
+        "artifacts/validation/33-L_RECEIPT_READBACK_VERIFICATION.json",
+        "artifacts/validation/33-L_RECEIPT_READBACK_PERSISTENCE_VERIFICATION.json",
+        "artifacts/validation/33-L_LIBRARY_FINAL_INVENTORY_VERIFICATION.json",
+        "artifacts/checkpoints/33-L_COMPLETION_RECORD.json",
+        "artifacts/validation/33-L_COMPLETION_TRANSITION_VALIDATION.json",
+        "artifacts/validation/33-L_LIBRARY_CLOSURE_INVENTORY_VERIFICATION.json"
       ],
-      "persistentReceiptStatus": "PENDING",
-      "completionTransitionStatus": "PENDING"
+      "persistentReceiptStatus": "PASS",
+      "completionTransitionStatus": "PASS",
+      "persistentReceiptPath": "artifacts/checkpoints/33-L_LIBRARY_RECEIPT.json"
     }
   ],
   "recoveryAuthority": "NEW_CHAT_HANDOFF_Bronze_04.08.2026.29.md",
   "recoveryReason": "29-D_FAILED_POSTFLIGHT_EXIT_CODE_1_SPLIT_PER_PR-171",
-  "updatedAt": "2026-08-13T20:12:50.961Z",
-  "segmentationNote": "33-K is immutable COMPLETED/PASS. 33-L implementation, 130/130 full test files, 1083/1083 tests, 18/18 workspace builds and exact boundary/contract/runtime validation are PASS; official completion remains fail-closed until the persistent local and D: receipt is PASS."
+  "updatedAt": "2026-08-13T20:23:29.384Z",
+  "segmentationNote": "33-L is immutable COMPLETED/PASS with exact local and D: hash/size readback. All currently defined governed steps are complete; new scope requires a new explicit decision."
 }

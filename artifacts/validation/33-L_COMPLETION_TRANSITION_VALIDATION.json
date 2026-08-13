@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "33-L",
+  "decision": "DEC-223",
+  "requirements": [
+    "LTP-001",
+    "LTP-002",
+    "LTP-003",
+    "LTP-004",
+    "LTP-005",
+    "LTP-006",
+    "LTP-007",
+    "LTP-008"
+  ],
+  "sourceCommit": "e8afc73625930e713e16437a168ff0bbab86daec",
+  "predecessorStep": "33-K",
+  "predecessorReceiptPath": "artifacts/checkpoints/33-K_LIBRARY_RECEIPT.json",
+  "predecessorSourceCommit": "34d9d5e3d9f163450272793d6c2e22a8df3a209f",
+  "sourceCommitRange": "34d9d5e3d9f163450272793d6c2e22a8df3a209f..e8afc73625930e713e16437a168ff0bbab86daec",
+  "validation": {
+    "boundaryChecksPassed": 28,
+    "contractChecksPassed": 13,
+    "runtimeChecksPassed": 11,
+    "targetedTestFilesPassed": 3,
+    "targetedTestsPassed": 39,
+    "fullVitestTestFilesPassed": 130,
+    "fullVitestTestsPassed": 1083,
+    "productionWorkspaceBuildsPassed": 18,
+    "ppk021ExactAllowlistEntries": 562,
+    "ppk021UseCaseCompositionSurfaces": 286,
+    "ppk022CapabilitySurfaces": 246,
+    "networkChannels": 0,
+    "latestDatabaseMigration": 89,
+    "requirementChainsComplete": 8,
+    "migration89Checksum": "1e52fa04e4720830ff3300ceb5a71f78aee216c073b4f4786e393fa45063bbe0",
+    "finalClosureEvidence": true
+  },
+  "migration89Checksum": "1e52fa04e4720830ff3300ceb5a71f78aee216c073b4f4786e393fa45063bbe0",
+  "brokerExecutionPerformed": false,
+  "moneyMovementPerformed": false,
+  "livePriceDelivery": "not_performed",
+  "investmentAdviceProvided": false,
+  "returnGuaranteed": false,
+  "taxOrLegalAccuracyGuaranteed": false,
+  "projectionOutcomeGuaranteed": false,
+  "networkChannelsAdded": 0,
+  "currentAuthoritativeSourceExternalProtectionStatus": "SEPARATE_GOV_005_REFRESH_REQUIRED_AFTER_SOURCE_CHANGE",
+  "mandatoryTruthSentence": "Bu makbuz 33-L DEC-223 kapsamındaki yerel uzun vadeli portföy takip, hesaplama ve senaryo yüzeylerini kanıtlar; broker emri veya para hareketi yürütüldüğü, canlı fiyat teslim edildiği, yatırım tavsiyesi verildiği ya da getiri, vergi/hukuk doğruluğu veya 2032 sonucu garanti edildiği iddiası değildir.",
+  "status": "PASS",
+  "expected": 8,
+  "executed": 8,
+  "passed": 8,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "base package exact",
+      "status": "PASS"
+    },
+    {
+      "name": "receipt readback exact",
+      "status": "PASS"
+    },
+    {
+      "name": "receipt persistence exact",
+      "status": "PASS"
+    },
+    {
+      "name": "registry exact",
+      "status": "PASS"
+    },
+    {
+      "name": "validation exact",
+      "status": "PASS"
+    },
+    {
+      "name": "work step complete",
+      "status": "PASS"
+    },
+    {
+      "name": "ledger complete",
+      "status": "PASS"
+    },
+    {
+      "name": "no implicit successor",
+      "status": "PASS"
+    }
+  ],
+  "officialStepStatus": "COMPLETED",
+  "persistentReceiptStatus": "PASS",
+  "officialCompletionClaimed": true,
+  "requirementCompletionClaimed": true,
+  "nextOfficialStep": null,
+  "newBuildIssued": false,
+  "verifiedAt": "2026-08-13T20:23:29.389Z"
+}

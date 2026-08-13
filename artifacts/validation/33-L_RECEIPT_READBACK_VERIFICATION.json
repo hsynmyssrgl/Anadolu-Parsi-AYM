@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "release": "Bronze 04.08.2026.29",
+  "step": "33-L",
+  "decision": "DEC-223",
+  "requirements": [
+    "LTP-001",
+    "LTP-002",
+    "LTP-003",
+    "LTP-004",
+    "LTP-005",
+    "LTP-006",
+    "LTP-007",
+    "LTP-008"
+  ],
+  "sourceCommit": "e8afc73625930e713e16437a168ff0bbab86daec",
+  "predecessorStep": "33-K",
+  "predecessorReceiptPath": "artifacts/checkpoints/33-K_LIBRARY_RECEIPT.json",
+  "predecessorSourceCommit": "34d9d5e3d9f163450272793d6c2e22a8df3a209f",
+  "sourceCommitRange": "34d9d5e3d9f163450272793d6c2e22a8df3a209f..e8afc73625930e713e16437a168ff0bbab86daec",
+  "validation": {
+    "boundaryChecksPassed": 28,
+    "contractChecksPassed": 13,
+    "runtimeChecksPassed": 11,
+    "targetedTestFilesPassed": 3,
+    "targetedTestsPassed": 39,
+    "fullVitestTestFilesPassed": 130,
+    "fullVitestTestsPassed": 1083,
+    "productionWorkspaceBuildsPassed": 18,
+    "ppk021ExactAllowlistEntries": 562,
+    "ppk021UseCaseCompositionSurfaces": 286,
+    "ppk022CapabilitySurfaces": 246,
+    "networkChannels": 0,
+    "latestDatabaseMigration": 89,
+    "requirementChainsComplete": 8,
+    "migration89Checksum": "1e52fa04e4720830ff3300ceb5a71f78aee216c073b4f4786e393fa45063bbe0",
+    "finalClosureEvidence": true
+  },
+  "migration89Checksum": "1e52fa04e4720830ff3300ceb5a71f78aee216c073b4f4786e393fa45063bbe0",
+  "brokerExecutionPerformed": false,
+  "moneyMovementPerformed": false,
+  "livePriceDelivery": "not_performed",
+  "investmentAdviceProvided": false,
+  "returnGuaranteed": false,
+  "taxOrLegalAccuracyGuaranteed": false,
+  "projectionOutcomeGuaranteed": false,
+  "networkChannelsAdded": 0,
+  "currentAuthoritativeSourceExternalProtectionStatus": "SEPARATE_GOV_005_REFRESH_REQUIRED_AFTER_SOURCE_CHANGE",
+  "mandatoryTruthSentence": "Bu makbuz 33-L DEC-223 kapsamındaki yerel uzun vadeli portföy takip, hesaplama ve senaryo yüzeylerini kanıtlar; broker emri veya para hareketi yürütüldüğü, canlı fiyat teslim edildiği, yatırım tavsiyesi verildiği ya da getiri, vergi/hukuk doğruluğu veya 2032 sonucu garanti edildiği iddiası değildir.",
+  "status": "PASS",
+  "expected": 4,
+  "executed": 4,
+  "matched": 4,
+  "failed": 0,
+  "artifacts": [
+    {
+      "path": "artifacts/validation/33-L_LIBRARY_READBACK_VERIFICATION.json",
+      "sourceSizeBytes": 1206189,
+      "librarySizeBytes": 1206189,
+      "sourceSha256": "11fe785565bcaaadbf04ef6756f897f423d82e4d6352ac1b010702bac3b998a3",
+      "librarySha256": "11fe785565bcaaadbf04ef6756f897f423d82e4d6352ac1b010702bac3b998a3",
+      "status": "PASS"
+    },
+    {
+      "path": "artifacts/validation/33-L_LIBRARY_READBACK_VERIFICATION.json.sha256",
+      "sourceSizeBytes": 106,
+      "librarySizeBytes": 106,
+      "sourceSha256": "6517e0375e15e669eefe09b6fc7af55127b62390e39128ea41625ca445cbedc5",
+      "librarySha256": "6517e0375e15e669eefe09b6fc7af55127b62390e39128ea41625ca445cbedc5",
+      "status": "PASS"
+    },
+    {
+      "path": "artifacts/checkpoints/33-L_LIBRARY_RECEIPT.json",
+      "sourceSizeBytes": 3194,
+      "librarySizeBytes": 3194,
+      "sourceSha256": "a687e67af8291eb292f5b62fa18380ed113164d9b9848603c43851710fb7ce55",
+      "librarySha256": "a687e67af8291eb292f5b62fa18380ed113164d9b9848603c43851710fb7ce55",
+      "status": "PASS"
+    },
+    {
+      "path": "artifacts/checkpoints/33-L_LIBRARY_RECEIPT.json.sha256",
+      "sourceSizeBytes": 92,
+      "librarySizeBytes": 92,
+      "sourceSha256": "a638953187ac159fd0d98464d9b237c7ab68174ec65c56274004e71129f1de5f",
+      "librarySha256": "a638953187ac159fd0d98464d9b237c7ab68174ec65c56274004e71129f1de5f",
+      "status": "PASS"
+    }
+  ],
+  "verifiedAt": "2026-08-13T20:23:28.937Z"
+}
