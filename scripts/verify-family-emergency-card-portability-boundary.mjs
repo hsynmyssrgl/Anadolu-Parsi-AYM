@@ -180,10 +180,11 @@ export const verifyFamilyEmergencyCardPortabilityBoundary = async () => {
   check('repository maps internal share hash but never a generic policy receipt field', includesAll(repository, [
     'mapFamilyEmergencyCardPortabilityItem', 'shareReceiptHash:String(row.share_receipt_hash)'
   ]) && !/mapFamilyEmergencyCardPortabilityItem[\s\S]{0,4500}policyReceipt:/u.test(repository));
-  check('migration 88 is exact latest additive identity', migrationVersions.at(-1) === 88
+  check('migration 88 remains exact and additive successor 89 is the latest identity', migrationVersions.at(-1) === 89
     && includesAll(migrations, [
       "createMigrationDefinition(88, 'b5_family_emergency_card_portability_ledger'",
-      'CREATE TABLE family_emergency_card_portability_ledger'
+      'CREATE TABLE family_emergency_card_portability_ledger',
+      "createMigrationDefinition(89, 'b4_long_term_portfolio_ledger'"
     ]));
   check('migration 88 checksum is exact', migrationManifest.status === 'passed'
     && manifest88?.name === 'b5_family_emergency_card_portability_ledger'
@@ -302,8 +303,8 @@ export const verifyFamilyEmergencyCardPortabilityBoundary = async () => {
     activeReady || completedReady
       || (laterLifecycle.planValid && laterLifecycle.ledgerValid && laterLifecycle.nextTaskValid));
   check('platform policy AST successor ratchet is exact green', astGate.status === 'PASS'
-    && astGate.privilegedSurfaces === 557 && astGate.exactAllowlistEntries === 557
-    && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 284 && astGate.directRoleAuthorizationBypasses === 0);
+    && astGate.privilegedSurfaces === 562 && astGate.exactAllowlistEntries === 562
+    && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 286 && astGate.directRoleAuthorizationBypasses === 0);
   check('platform capability successor ratchet is exact green', capabilityGate.status === 'PASS'
     && capabilityGate.capabilitySurfaces === 246 && capabilityGate.exactManifestSurfaces === 246);
   check('root package exposes boundary targeted contract and runtime commands', includesAll(

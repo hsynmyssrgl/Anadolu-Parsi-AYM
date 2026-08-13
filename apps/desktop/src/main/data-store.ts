@@ -171,6 +171,8 @@ import {
   GetFinancePlanningWorkspaceUseCase,
   RecordFinancePlanningItemUseCase,
   CommitFinanceImportBatchUseCase,
+  GetLongTermPortfolioWorkspaceUseCase,
+  RecordLongTermPortfolioItemUseCase,
   ListArchiveItemsUseCase,
   SearchArchiveItemsUseCase,
   PrepareArchiveOpenUseCase,
@@ -202,6 +204,7 @@ import {
   type HealthApplicationContext,
   type LifeApplicationContext,
   type FinanceApplicationContext,
+  type LongTermPortfolioApplicationContext,
   type ArchiveApplicationContext,
   type LegacyApplicationContext,
   type MembershipApplicationContext,
@@ -320,6 +323,10 @@ import {
   type FinancePolicyEnforcementPointResolver
 } from './finance-application-adapter.js';
 import {
+  RepositoryBackedLongTermPortfolioQueryPort,
+  RepositoryBackedLongTermPortfolioUnitOfWork
+} from './long-term-portfolio-application-adapter.js';
+import {
   RepositoryBackedArchiveQueryPort,
   RepositoryBackedArchiveUnitOfWork,
   failClosedArchivePolicyEnforcementPointResolver,
@@ -409,6 +416,7 @@ import type {
   CommitFinanceImportPreparedBatchInput,
   CommitFinanceImportBatchInput
 } from '@ppt/domain';
+import { buildDefaultLongTermPortfolioBootstrap, type LongTermPortfolioWorkspaceView, type RecordLongTermPortfolioItemInput } from '@ppt/domain';
 import type { ManagedLifeWorkspaceView, RecordManagedLifeItemInput } from '@ppt/domain';
 import type {
   EnrollWindowsHelloInput,
@@ -823,6 +831,8 @@ export class FamilyDataStore {
   readonly #getFinancePlanningWorkspaceUseCase: GetFinancePlanningWorkspaceUseCase;
   readonly #recordFinancePlanningItemUseCase: RecordFinancePlanningItemUseCase;
   readonly #commitFinanceImportBatchUseCase: CommitFinanceImportBatchUseCase;
+  readonly #getLongTermPortfolioWorkspaceUseCase: GetLongTermPortfolioWorkspaceUseCase;
+  readonly #recordLongTermPortfolioItemUseCase: RecordLongTermPortfolioItemUseCase;
   readonly #listArchiveItemsUseCase: ListArchiveItemsUseCase;
   readonly #searchArchiveItemsUseCase: SearchArchiveItemsUseCase;
   readonly #prepareArchiveOpenUseCase: PrepareArchiveOpenUseCase;
@@ -1686,6 +1696,14 @@ export class FamilyDataStore {
     this.#getFinancePlanningWorkspaceUseCase = new GetFinancePlanningWorkspaceUseCase(financeQuery);
     this.#recordFinancePlanningItemUseCase = new RecordFinancePlanningItemUseCase(financeUnitOfWork);
     this.#commitFinanceImportBatchUseCase = new CommitFinanceImportBatchUseCase(financeUnitOfWork);
+    const longTermPortfolioDependencies = {
+      ...financeApplicationDependencies,
+      repository: this.#repositories.longTermPortfolioRepository
+    } as const;
+    const longTermPortfolioQuery = new RepositoryBackedLongTermPortfolioQueryPort(longTermPortfolioDependencies);
+    const longTermPortfolioUnitOfWork = new RepositoryBackedLongTermPortfolioUnitOfWork(longTermPortfolioDependencies);
+    this.#getLongTermPortfolioWorkspaceUseCase = new GetLongTermPortfolioWorkspaceUseCase(longTermPortfolioQuery);
+    this.#recordLongTermPortfolioItemUseCase = new RecordLongTermPortfolioItemUseCase(longTermPortfolioUnitOfWork);
     const archivePolicyEnforcementPointResolver = productionArchivePolicy === undefined
       ? options.archivePolicyEnforcementPointResolver ?? failClosedArchivePolicyEnforcementPointResolver
       : createArchiveProductionPolicyEnforcementPointResolver({
@@ -2192,6 +2210,9 @@ export class FamilyDataStore {
       actor: { userId: asUserId(authenticatedUserId), role: account.role, ...(account.personId ? { personId: asPersonId(account.personId) } : {}) },
       correlationId: this.#correlation?.current()?.correlationId ?? asCorrelationId(`${prefix}-${randomUUID()}`)
     };
+  }
+  #longTermPortfolioApplicationContext(prefix:string):LongTermPortfolioApplicationContext {
+    return this.#financeApplicationContext(prefix);
   }
   #dataLifecycleApplicationContext(prefix:string): DataLifecycleApplicationContext {
     const authenticatedUserId=this.#requireAuth();
@@ -3737,6 +3758,50 @@ export class FamilyDataStore {
     });
     if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
     return this.getFinancePlanningWorkspace();
+  }
+
+  public async getLongTermPortfolioWorkspace():Promise<LongTermPortfolioWorkspaceView> {
+    const result=await this.#getLongTermPortfolioWorkspaceUseCase.execute(
+      this.#longTermPortfolioApplicationContext('long-term-portfolio-workspace')
+    );
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async recordLongTermPortfolioItem(input:RecordLongTermPortfolioItemInput):Promise<LongTermPortfolioWorkspaceView> {
+    const mutationId=`long-term-portfolio-mutation-${randomUUID()}`;
+    const context=this.#longTermPortfolioApplicationContext(`long-term-portfolio-${input.itemType}`);
+    const requestFingerprint=createHash('sha256').update(canonicalArchiveOperationValue({familyId:context.familyId,actorUserId:context.actor.userId,actorPersonId:context.actor.personId,input}),'utf8').digest('hex');
+    const seed=input.itemType==='bootstrap_default'?buildDefaultLongTermPortfolioBootstrap():undefined;
+    const allocationCount=input.itemType==='plan_version'?input.allocations.length:seed?.allocations.length??0;
+    const identifiers={
+      mutationId,
+      requestFingerprint,
+      ...(input.itemType==='bootstrap_default'?{
+        portfolioId:`long-term-portfolio-${randomUUID()}`,
+        instrumentIds:seed!.instruments.map(()=>`long-term-instrument-${randomUUID()}`),
+        instrumentRevisionIds:seed!.instruments.map(()=>`long-term-instrument-revision-${randomUUID()}`),
+        planVersionId:`long-term-plan-${randomUUID()}`,
+        allocationIds:Array.from({length:allocationCount},()=>`long-term-allocation-${randomUUID()}`)
+      }:{}),
+      ...(input.itemType==='instrument_revision'?{
+        instrumentId:input.instrumentId??`long-term-instrument-${randomUUID()}`,
+        instrumentRevisionId:`long-term-instrument-revision-${randomUUID()}`
+      }:{}),
+      ...(input.itemType==='plan_version'?{
+        planVersionId:`long-term-plan-${randomUUID()}`,
+        allocationIds:Array.from({length:allocationCount},()=>`long-term-allocation-${randomUUID()}`)
+      }:{}),
+      ...(input.itemType==='ledger_event'?{ledgerEventId:`long-term-event-${randomUUID()}`}:{ }),
+      ...(input.itemType==='price_observation'?{priceObservationId:`long-term-price-${randomUUID()}`}:{ }),
+      auditId:randomUUID(),
+      outboxEventId:asEventId(randomUUID())
+    };
+    const result=await this.#recordLongTermPortfolioItemUseCase.execute({
+      context,command:input,identifiers
+    });
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return this.getLongTermPortfolioWorkspace();
   }
 
   public async listHealthRecords(): Promise<HealthRecordView[]> {

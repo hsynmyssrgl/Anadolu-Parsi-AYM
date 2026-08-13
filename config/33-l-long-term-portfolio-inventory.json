@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "step": "33-L",
+  "requirements": ["LTP-001", "LTP-002", "LTP-003", "LTP-004", "LTP-005", "LTP-006", "LTP-007", "LTP-008"],
+  "status": "COMPLETE",
+  "surfaces": [
+    {"id":"domain","paths":["packages/domain/src/long-term-portfolio.ts"]},
+    {"id":"application","paths":["packages/application/src/long-term-portfolio-use-cases.ts"]},
+    {"id":"schema-migration","paths":["packages/database/src/family-database-migrations.ts"]},
+    {"id":"repository-contract","paths":["packages/repository-contracts/src/long-term-portfolio-repository.ts"]},
+    {"id":"repository","paths":["packages/repositories/src/long-term-portfolio-repository.ts"]},
+    {"id":"central-pep-uow","paths":["apps/desktop/src/main/finance-application-adapter.ts","apps/desktop/src/main/long-term-portfolio-application-adapter.ts"]},
+    {"id":"desktop-ipc","paths":["apps/desktop/src/main/data-store.ts","apps/desktop/src/main/ipc-integration-policy.ts","apps/desktop/src/main/main.ts","apps/desktop/src/main/preload.ts","apps/desktop/src/renderer/global.d.ts"]},
+    {"id":"finance-menu-ui","paths":["apps/desktop/src/renderer/App.tsx","apps/desktop/src/renderer/LongTermPortfolioPanel.tsx","apps/desktop/src/renderer/styles.css"]},
+    {"id":"tests","paths":["packages/application/tests/long-term-portfolio-security.test.ts","packages/repositories/long-term-portfolio-repository-policy.test.ts","apps/desktop/tests/b4-long-term-portfolio-ipc-integration.test.ts"]},
+    {"id":"governance","paths":["docs/decisions/DEC-223-long-term-portfolio-center.md","docs/security/THREAT_MODEL_33_L_LONG_TERM_PORTFOLIO.md","docs/audit/33-L_LONG_TERM_PORTFOLIO_UST_KAPANIS.md"]}
+  ],
+  "ipcChannels": ["finance:getLongTermPortfolioWorkspace", "finance:recordLongTermPortfolioItem"],
+  "networkChannels": [],
+  "latestDatabaseMigration": 89,
+  "openRequirements": [],
+  "openBlockers": []
+}

@@ -5,7 +5,7 @@
   "rule": "PR-171",
   "policy": "ONE_IN_PROGRESS_PREVIOUS_MUST_HAVE_PASS_AND_PERSISTENT_RECEIPT",
   "workflowStatus": "IN_PROGRESS",
-  "currentStep": "33-K",
+  "currentStep": "33-L",
   "steps": [
     {
       "id": "29-A",
@@ -2350,15 +2350,32 @@
       "id": "33-L",
       "title": "Finans - Uzun Vadeli Portföy: sürümlü birikim planı, değişmez kıymet defteri, kurumsal işlemler ve projeksiyonlar",
       "scopeRequirement": "LTP-001,LTP-002,LTP-003,LTP-004,LTP-005,LTP-006,LTP-007,LTP-008",
-      "status": "PENDING",
-      "validationStatus": "PENDING",
-      "localEvidence": [],
+      "status": "IN_PROGRESS",
+      "validationStatus": "PASS",
+      "localEvidence": [
+        "docs/decisions/DEC-223-long-term-portfolio-center.md",
+        "docs/security/THREAT_MODEL_33_L_LONG_TERM_PORTFOLIO.md",
+        "packages/domain/src/long-term-portfolio.ts",
+        "packages/application/src/long-term-portfolio-use-cases.ts",
+        "packages/database/src/family-database-migrations.ts",
+        "packages/repository-contracts/src/long-term-portfolio-repository.ts",
+        "packages/repositories/src/long-term-portfolio-repository.ts",
+        "apps/desktop/src/main/long-term-portfolio-application-adapter.ts",
+        "apps/desktop/src/renderer/LongTermPortfolioPanel.tsx",
+        "apps/desktop/tests/b4-long-term-portfolio-ipc-integration.test.ts",
+        "packages/application/tests/long-term-portfolio-security.test.ts",
+        "packages/repositories/long-term-portfolio-repository-policy.test.ts",
+        "artifacts/validation/33-L-long-term-portfolio-boundary.json",
+        "artifacts/validation/33-L-long-term-portfolio-contract.json",
+        "artifacts/validation/33-L-long-term-portfolio-runtime.json",
+        "docs/audit/33-L_LONG_TERM_PORTFOLIO_UST_KAPANIS.md"
+      ],
       "persistentReceiptStatus": "PENDING",
       "completionTransitionStatus": "PENDING"
     }
   ],
   "recoveryAuthority": "NEW_CHAT_HANDOFF_Bronze_04.08.2026.29.md",
   "recoveryReason": "29-D_FAILED_POSTFLIGHT_EXIT_CODE_1_SPLIT_PER_PR-171",
-  "updatedAt": "2026-08-13T16:42:35.835Z",
-  "segmentationNote": "33-K is immutable COMPLETED/PASS with exact local and D: hash/size readback. 33-L remains PENDING as the governed long-term portfolio successor."
+  "updatedAt": "2026-08-13T20:12:50.961Z",
+  "segmentationNote": "33-K is immutable COMPLETED/PASS. 33-L implementation, 130/130 full test files, 1083/1083 tests, 18/18 workspace builds and exact boundary/contract/runtime validation are PASS; official completion remains fail-closed until the persistent local and D: receipt is PASS."
 }

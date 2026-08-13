@@ -28,3 +28,4 @@ export * from './policy-service-availability.js';
 export * from './supply-chain-release.js';
 export * from './product-surface-governance.js';
 export * from './desktop-security.js';
+export * from './long-term-portfolio.js';

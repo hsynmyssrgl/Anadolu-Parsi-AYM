@@ -457,7 +457,12 @@
       "version": 88,
       "name": "b5_family_emergency_card_portability_ledger",
       "checksum": "8785551a6ce0facd609e374e7ba65c70d35b552e6f63a7f0b3d790bfbffa2b04"
+    },
+    {
+      "version": 89,
+      "name": "b4_long_term_portfolio_ledger",
+      "checksum": "1e52fa04e4720830ff3300ceb5a71f78aee216c073b4f4786e393fa45063bbe0"
     }
   ],
-  "generatedAt": "2026-08-13T03:32:12.557Z"
+  "generatedAt": "2026-08-13T20:19:54.643Z"
 }

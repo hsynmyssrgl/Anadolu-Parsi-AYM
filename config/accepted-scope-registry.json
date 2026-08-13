@@ -13,7 +13,7 @@
     "Anadolu_Parsi_Aile_Yasam_Merkezi_Planlanan_Bronze_04.08.2026.27_Platform_Politika_ve_OCR_Is_Matrisi.json",
     "config/additional-family-capabilities.json"
   ],
-  "requirementCount": 350,
+  "requirementCount": 358,
   "requirements": [
     {
       "id": "B0-01",
@@ -10492,6 +10492,94 @@
         "documentation": true,
         "evidence": false
       }
+    },
+    {
+      "id": "LTP-001",
+      "source": "USER_DECISION_2026-08-13",
+      "area": "Finans / Uzun Vadeli Portföy",
+      "title": "Finans altında ayrı uzun vadeli portföy menüsü ve sürümlü yatırım ürünü kataloğu",
+      "priority": "P0",
+      "status": "COMPLETE",
+      "acceptance": "Stable instrumentId kod/ISIN değişiminden ayrıdır; yerli/yabancı hisse, fon, ETF, tahvil/bono, eurobond, mevduat, döviz, kıymetli maden, BES, halka arz rezervi, nakit, kripto ve özel sınıflar menüden yönetilir.",
+      "chain": {"decision":true,"domain":true,"schema":true,"migration":true,"useCase":true,"repository":true,"policy":true,"apiOrIpc":true,"ui":true,"menu":true,"targetedTest":true,"documentation":true,"evidence":true},
+      "evidence": ["docs/decisions/DEC-223-long-term-portfolio-center.md","packages/domain/src/long-term-portfolio.ts","apps/desktop/src/renderer/LongTermPortfolioPanel.tsx","artifacts/validation/33-L-long-term-portfolio-boundary.json","artifacts/validation/33-L-long-term-portfolio-contract.json","artifacts/validation/33-L-long-term-portfolio-runtime.json"]
+    },
+    {
+      "id": "LTP-002",
+      "source": "USER_DECISION_2026-08-13",
+      "area": "Finans / Uzun Vadeli Portföy",
+      "title": "Değişken aylık birikim, sürümlü dağılım ve aynı kıymete devreden bakiye",
+      "priority": "P0",
+      "status": "COMPLETE",
+      "acceptance": "Aylık tutar ve oranlar geçerlilik ayıyla yeni sürüm olarak eklenir, toplam tam %100 olur, önceki plan değişmez ve kalan tutar aynı kıymete devreder; başka kıymete geçiş açık virman ister.",
+      "chain": {"decision":true,"domain":true,"schema":true,"migration":true,"useCase":true,"repository":true,"policy":true,"apiOrIpc":true,"ui":true,"menu":true,"targetedTest":true,"documentation":true,"evidence":true},
+      "evidence": ["docs/decisions/DEC-223-long-term-portfolio-center.md","packages/application/src/long-term-portfolio-use-cases.ts","packages/database/src/family-database-migrations.ts","artifacts/validation/33-L-long-term-portfolio-boundary.json","artifacts/validation/33-L-long-term-portfolio-contract.json","artifacts/validation/33-L-long-term-portfolio-runtime.json"]
+    },
+    {
+      "id": "LTP-003",
+      "source": "USER_DECISION_2026-08-13",
+      "area": "Finans / Uzun Vadeli Portföy",
+      "title": "Ayrıntılı ve değişmez alım-satım defteri",
+      "priority": "P0",
+      "status": "COMPLETE",
+      "acceptance": "Sipariş, gerçekleşme, takas/valör tarihleri; yön, adet, fiyat, brüt/net, komisyon, vergi, kur, aracı kurum, hesap, lot, kaynak ve kısmi gerçekleşme ayrı olaylarda tutulur; düzeltme yalnız ters kayıttır.",
+      "chain": {"decision":true,"domain":true,"schema":true,"migration":true,"useCase":true,"repository":true,"policy":true,"apiOrIpc":true,"ui":true,"menu":true,"targetedTest":true,"documentation":true,"evidence":true},
+      "evidence": ["packages/domain/src/long-term-portfolio.ts","packages/repositories/src/long-term-portfolio-repository.ts","apps/desktop/src/renderer/LongTermPortfolioPanel.tsx","artifacts/validation/33-L-long-term-portfolio-boundary.json","artifacts/validation/33-L-long-term-portfolio-contract.json","artifacts/validation/33-L-long-term-portfolio-runtime.json"]
+    },
+    {
+      "id": "LTP-004",
+      "source": "USER_DECISION_2026-08-13",
+      "area": "Finans / Uzun Vadeli Portföy",
+      "title": "Temettü, bedelli, bedelsiz ve bütün kurumsal işlem takibi",
+      "priority": "P0",
+      "status": "COMPLETE",
+      "acceptance": "Temettü hak/kayıt/ödeme, bedelli kullanım-satış-süre dolumu, bedelsiz, bölünme/ters bölünme, kupon, faiz, fon dağıtımı, birleşme/değişim ve kod değişimi tarih ve kaynak referanslarıyla izlenir.",
+      "chain": {"decision":true,"domain":true,"schema":true,"migration":true,"useCase":true,"repository":true,"policy":true,"apiOrIpc":true,"ui":true,"menu":true,"targetedTest":true,"documentation":true,"evidence":true},
+      "evidence": ["packages/domain/src/long-term-portfolio.ts","packages/database/src/family-database-migrations.ts","apps/desktop/src/renderer/LongTermPortfolioPanel.tsx","artifacts/validation/33-L-long-term-portfolio-boundary.json","artifacts/validation/33-L-long-term-portfolio-contract.json","artifacts/validation/33-L-long-term-portfolio-runtime.json"]
+    },
+    {
+      "id": "LTP-005",
+      "source": "USER_DECISION_2026-08-13",
+      "area": "Finans / Uzun Vadeli Portföy",
+      "title": "Kıymet bazında maliyet, masraf, vergi, gelir ve net kâr-zarar analizi",
+      "priority": "P0",
+      "status": "COMPLETE",
+      "acceptance": "Her kıymet için adet, yatırılan tutar, gelir, masraf, vergi, devreden bakiye, manuel fiyatla güncel değer ve hesaplanabilen net sonuç ayrı gösterilir; eksik fiyat fail-closed olarak işaretlenir.",
+      "chain": {"decision":true,"domain":true,"schema":true,"migration":true,"useCase":true,"repository":true,"policy":true,"apiOrIpc":true,"ui":true,"menu":true,"targetedTest":true,"documentation":true,"evidence":true},
+      "evidence": ["packages/application/src/long-term-portfolio-use-cases.ts","apps/desktop/src/renderer/LongTermPortfolioPanel.tsx","artifacts/validation/33-L-long-term-portfolio-boundary.json","artifacts/validation/33-L-long-term-portfolio-contract.json","artifacts/validation/33-L-long-term-portfolio-runtime.json"]
+    },
+    {
+      "id": "LTP-006",
+      "source": "USER_DECISION_2026-08-13",
+      "area": "Finans / Uzun Vadeli Portföy",
+      "title": "Aylık grafikler, hedef-gerçekleşen sapması ve altı aylık yeniden dengeleme",
+      "priority": "P0",
+      "status": "COMPLETE",
+      "acceptance": "Anapara/değer, gelir, masraf-vergi, katkı/devreden bakiye serileri ile hedef/gerçekleşen sapması gösterilir; altı aylık kontrol uyarı üretir, otomatik emir vermez.",
+      "chain": {"decision":true,"domain":true,"schema":true,"migration":true,"useCase":true,"repository":true,"policy":true,"apiOrIpc":true,"ui":true,"menu":true,"targetedTest":true,"documentation":true,"evidence":true},
+      "evidence": ["packages/application/src/long-term-portfolio-use-cases.ts","apps/desktop/src/renderer/LongTermPortfolioPanel.tsx","apps/desktop/src/renderer/styles.css","artifacts/validation/33-L-long-term-portfolio-boundary.json","artifacts/validation/33-L-long-term-portfolio-contract.json","artifacts/validation/33-L-long-term-portfolio-runtime.json"]
+    },
+    {
+      "id": "LTP-007",
+      "source": "USER_DECISION_2026-08-13",
+      "area": "Finans / Uzun Vadeli Portföy",
+      "title": "2032 kötümser-temel-iyimser nominal ve reel projeksiyon",
+      "priority": "P0",
+      "status": "COMPLETE",
+      "acceptance": "Getiri, enflasyon ve katkı artışı düzenlenebilir; üç senaryo nominal/reel seri üretir ve sonuçların tavsiye veya getiri garantisi olmadığı görünürdür.",
+      "chain": {"decision":true,"domain":true,"schema":true,"migration":true,"useCase":true,"repository":true,"policy":true,"apiOrIpc":true,"ui":true,"menu":true,"targetedTest":true,"documentation":true,"evidence":true},
+      "evidence": ["packages/domain/src/long-term-portfolio.ts","packages/application/src/long-term-portfolio-use-cases.ts","apps/desktop/src/renderer/LongTermPortfolioPanel.tsx","artifacts/validation/33-L-long-term-portfolio-boundary.json","artifacts/validation/33-L-long-term-portfolio-contract.json","artifacts/validation/33-L-long-term-portfolio-runtime.json"]
+    },
+    {
+      "id": "LTP-008",
+      "source": "USER_DECISION_2026-08-13",
+      "area": "Finans / Uzun Vadeli Portföy",
+      "title": "Merkezî finans PEP/UoW, audit/outbox, veri kalitesi ve doğruluk sınırı",
+      "priority": "P0",
+      "status": "COMPLETE",
+      "acceptance": "Bütün mutasyonlar mevcut merkezî finans PEP/UoW üzerinden aynı işlemde audit/outbox ile bağlanır; aile/kişi kapsamı korunur; canlı fiyat, emir icrası, tavsiye, vergi-hukuk doğruluğu veya getiri garantisi iddia edilmez.",
+      "chain": {"decision":true,"domain":true,"schema":true,"migration":true,"useCase":true,"repository":true,"policy":true,"apiOrIpc":true,"ui":true,"menu":true,"targetedTest":true,"documentation":true,"evidence":true},
+      "evidence": ["apps/desktop/src/main/finance-application-adapter.ts","apps/desktop/src/main/long-term-portfolio-application-adapter.ts","apps/desktop/src/main/ipc-integration-policy.ts","docs/security/THREAT_MODEL_33_L_LONG_TERM_PORTFOLIO.md","artifacts/validation/33-L-long-term-portfolio-boundary.json","artifacts/validation/33-L-long-term-portfolio-contract.json","artifacts/validation/33-L-long-term-portfolio-runtime.json"]
     },
     {
       "id": "GOV-001",

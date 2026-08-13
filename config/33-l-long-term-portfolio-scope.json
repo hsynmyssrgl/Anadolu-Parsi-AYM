@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "id": "33-L-LONG-TERM-PORTFOLIO",
+  "decision": "DEC-223",
+  "requirements": ["LTP-001", "LTP-002", "LTP-003", "LTP-004", "LTP-005", "LTP-006", "LTP-007", "LTP-008"],
+  "status": "COMPLETE",
+  "model": {
+    "menu": "Finans / Uzun Vadeli Portföy",
+    "initialMonthlyContribution": 20000,
+    "initialMonthlyContributionRole": "editable_default",
+    "monthlyContributionPolicy": "positive_user_defined_versioned_per_effective_month",
+    "fixedMonthlyContribution": false,
+    "baseCurrency": "TRY",
+    "targetDate": "2032-08-13",
+    "allocationTotalBasisPoints": 10000,
+    "rebalanceIntervalMonths": 6,
+    "carryoverPolicy": "same_instrument",
+    "correctionPolicy": "append_only_reversal",
+    "costBasisMethod": "weighted_average",
+    "projectionScenarios": ["pessimistic", "base", "optimistic"],
+    "projectionValueModes": ["nominal", "real"]
+  },
+  "transferTruth": {
+    "budgetTransferEvent": "transfer_out",
+    "atomicSingleRecord": true,
+    "sourceAndDifferentTargetRequired": true,
+    "sameCurrencyRequired": true,
+    "quantityForbidden": true,
+    "holdingsChanged": false,
+    "sourceBudgetMayBecomeNegative": false,
+    "externalSecurityEntryEvent": "transfer_in",
+    "externalSecurityEntrySourceDocumentRequired": true
+  },
+  "reuse": {
+    "pep": "CentralAuthorizationService",
+    "transaction": "FinanceWriteUnitOfWork",
+    "durablePolicyReceipt": true,
+    "auditAndOutboxSameTransaction": true,
+    "latestDatabaseMigration": 89,
+    "newMigrationRequired": true
+  },
+  "truth": {
+    "brokerExecutionPerformed": false,
+    "moneyMovementPerformed": false,
+    "livePriceDelivery": "not_performed",
+    "investmentAdviceProvided": false,
+    "returnGuaranteed": false,
+    "taxOrLegalAccuracyGuaranteed": false,
+    "projectionOutcomeGuaranteed": false,
+    "networkChannelsAdded": 0
+  },
+  "validation": {
+    "status": "PASS",
+    "boundary": "artifacts/validation/33-L-long-term-portfolio-boundary.json",
+    "contract": "artifacts/validation/33-L-long-term-portfolio-contract.json",
+    "runtime": "artifacts/validation/33-L-long-term-portfolio-runtime.json",
+    "targetedTests": [
+      "packages/application/tests/long-term-portfolio-security.test.ts",
+      "packages/repositories/long-term-portfolio-repository-policy.test.ts",
+      "apps/desktop/tests/b4-long-term-portfolio-ipc-integration.test.ts"
+    ],
+    "finalEvidence": {
+      "boundaryChecksPassed": 28,
+      "contractChecksPassed": 13,
+      "runtimeChecksPassed": 11,
+      "targetedTestFilesPassed": 3,
+      "targetedTestsPassed": 39,
+      "fullVitestTestFilesPassed": 130,
+      "fullVitestTestsPassed": 1083,
+      "productionWorkspaceBuildsPassed": 18,
+      "ppk021ExactAllowlistEntries": 562,
+      "ppk021UseCaseCompositionSurfaces": 286,
+      "ppk022CapabilitySurfaces": 246,
+      "networkChannels": 0,
+      "latestDatabaseMigration": 89,
+      "requirementChainsComplete": 8,
+      "migration89Checksum": "1e52fa04e4720830ff3300ceb5a71f78aee216c073b4f4786e393fa45063bbe0",
+      "finalClosureEvidence": true
+    }
+  },
+  "implementationBlockers": [],
+  "excludedClaims": [
+    "No broker order or money movement is executed.",
+    "No live market price delivery or delivery guarantee is provided.",
+    "No investment advice, return, tax, legal, or 2032 outcome guarantee is provided.",
+    "A budget transfer does not create, remove, or move security quantity.",
+    "Manual and user-entered data are not represented as externally verified unless explicitly marked."
+  ]
+}

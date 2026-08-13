@@ -799,3 +799,15 @@ export class RepositoryBackedFinanceUnitOfWork implements FinanceUnitOfWork {
     );
   }
 }
+
+// Uzun vadeli portföy, finans alanının mevcut merkezî PEP/UoW sınırını
+// paylaşır. Aşağıdaki dar dışa aktarımlar yeni bağdaştırıcının güvenlik
+// akışını kopyalamadan aynı işlem-içi yeniden doğrulamayı kullanmasını sağlar.
+export {
+  executeGoverned as executeGovernedFinancePolicy,
+  establishGovernedTransaction as establishGovernedFinanceTransaction,
+  governedRepositoryContext as governedFinanceRepositoryContext,
+  legacyAllowed as financeLegacyAllowed,
+  loadAuthorizationSnapshot as loadFinanceAuthorizationSnapshot
+};
+export type { AuthorizationSnapshot as FinanceAuthorizationSnapshot };

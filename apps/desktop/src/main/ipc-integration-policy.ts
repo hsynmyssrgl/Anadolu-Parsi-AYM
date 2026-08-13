@@ -715,6 +715,28 @@ const containsProhibitedBankingSecret = (
   return undefined;
 };
 
+const containsNestedProhibitedBankingSecret = (
+  value: unknown,
+  path = '$[0]',
+  depth = 0
+): IpcIntegrationPolicyDecision | undefined => {
+  if (depth > 8) return rejected('ARGUMENT_NESTING_TOO_DEEP', path);
+  if (Array.isArray(value)) {
+    for (let index = 0; index < value.length; index += 1) {
+      const rejectedValue = containsNestedProhibitedBankingSecret(value[index], `${path}[${index}]`, depth + 1);
+      if (rejectedValue) return rejectedValue;
+    }
+    return undefined;
+  }
+  if (!isObject(value)) return containsLikelyFullPan(value) ? rejected('BANKING_SECRET_VALUE_PROHIBITED', path) : undefined;
+  for (const [key, nested] of Object.entries(value)) {
+    if (isProhibitedBankingSecretField(key)) return rejected('BANKING_SECRET_FIELD_PROHIBITED', `${path}.${key}`);
+    const rejectedValue = containsNestedProhibitedBankingSecret(nested, `${path}.${key}`, depth + 1);
+    if (rejectedValue) return rejectedValue;
+  }
+  return undefined;
+};
+
 const ibanValidationInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => exactObject(
   args,
   ['iban'],
@@ -980,6 +1002,72 @@ const financePlanningInput = (args: readonly unknown[]): IpcIntegrationPolicyDec
   return valid ? accepted() : rejected('FINANCE_PLANNING_ARGUMENT_INVALID', '$[0]');
 };
 
+const longTermPortfolioInput = (args:readonly unknown[]):IpcIntegrationPolicyDecision => {
+  if(args.length!==1)return rejected('ARGUMENT_COUNT_MISMATCH');
+  const value=args[0];if(!isObject(value))return rejected('OBJECT_ARGUMENT_REQUIRED','$[0]');
+  const allowedTypes=new Set(['bootstrap_default','instrument_revision','plan_version','ledger_event','price_observation']);
+  if(!allowedTypes.has(String(value.itemType)))return rejected('LONG_TERM_PORTFOLIO_ITEM_TYPE_INVALID','$[0].itemType');
+  const secretRejection=containsNestedProhibitedBankingSecret(value);
+  if(secretRejection)return secretRejection;
+  const exactKeys:Record<string,readonly string[]>={
+    bootstrap_default:['itemType','clientOperationId','ownerPersonId','portfolioName','effectiveMonth','targetDate','privacy'],
+    instrument_revision:['itemType','clientOperationId','instrumentId','replacesRevisionId','assetClass','groupLabel','code','name','currency','effectiveFrom','status','isin','exchange','countryCode','priceSource','taxProfile','feeProfile','notes'],
+    plan_version:['itemType','clientOperationId','portfolioId','effectiveMonth','monthlyContribution','contributionCurrency','contributionChangeReason','rebalanceIntervalMonths','inflationAdjustment','targetDate','assumptions','allocations'],
+    ledger_event:['itemType','clientOperationId','portfolioId','instrumentId','eventType','direction','currency','orderAt','executedAt','settlementAt','entitlementAt','recordAt','paymentAt','quantity','unitPrice','grossAmount','feeAmount','taxAmount','netCashAmount','fxRate','broker','accountReference','orderReference','executionReference','partialFillSequence','lotReference','costLayerMethod','corporateActionReference','ratioNumerator','ratioDenominator','cashCarryoverInstrumentId','transferCounterpartyInstrumentId','reversalOfEventId','correctionReason','sourceLabel','sourceDocumentReference','notes'],
+    price_observation:['itemType','clientOperationId','instrumentId','observedAt','unitPrice','currency','sourceLabel']
+  };
+  if(!hasOnlyKeys(value,exactKeys[String(value.itemType)]??[]))return rejected('UNKNOWN_OBJECT_FIELD','$[0]');
+  const serialized=JSON.stringify(value);
+  if(serialized.length>100_000)return rejected('LONG_TERM_PORTFOLIO_ARGUMENT_TOO_LARGE','$[0]');
+  if(!boundedString(value.clientOperationId,128)||!/^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$/u.test(String(value.clientOperationId)))return rejected('LONG_TERM_PORTFOLIO_OPERATION_ID_INVALID','$[0].clientOperationId');
+  const finite=(candidate:unknown,min=-1_000_000_000_000_000,max=1_000_000_000_000_000)=>typeof candidate==='number'&&Number.isFinite(candidate)&&candidate>=min&&candidate<=max;
+  const date=(candidate:unknown)=>boundedString(candidate,64)&&!Number.isNaN(Date.parse(String(candidate)));
+  const optionalDate=(candidate:unknown)=>candidate===undefined||date(candidate);
+  const optionalFinite=(candidate:unknown,min=-1_000_000_000_000_000,max=1_000_000_000_000_000)=>candidate===undefined||finite(candidate,min,max);
+  const optionalIdentifier=(candidate:unknown)=>candidate===undefined||boundedString(candidate,160);
+  const assetClasses=new Set(['domestic_equity','foreign_equity','fund','etf','bond_note','eurobond','deposit','foreign_currency','gold','silver','commodity','private_pension','ipo_reserve','cash_savings','crypto_asset','real_estate','vehicle','custom']);
+  const instrumentStatuses=new Set(['active','inactive','matured','merged']);
+  const inflationAdjustments=new Set(['manual_realized_inflation','fixed_assumption','none']);
+  const sleeves=new Set(['core','growth','opportunity','ipo_reserve','liquidity','hedge','custom']);
+  const eventTypes=new Set(['buy','sell','cash_dividend','rights_issue_used','rights_issue_sold','rights_issue_expired','bonus_shares','split','reverse_split','coupon','interest','fund_distribution','merger_exchange','code_change','transfer_in','transfer_out','fee','tax','cash_adjustment','reversal']);
+  const directions=new Set(['cash_in','cash_out','security_in','security_out','non_cash']);
+  const costLayerMethods=new Set(['fifo','weighted_average','specific_lot','not_applicable']);
+  const corporateActions=new Set(['rights_issue_used','rights_issue_sold','rights_issue_expired','bonus_shares','split','reverse_split','merger_exchange','code_change']);
+  const assumptionKeys=['pessimisticAnnualReturnBasisPoints','baseAnnualReturnBasisPoints','optimisticAnnualReturnBasisPoints','annualInflationBasisPoints','annualContributionGrowthBasisPoints'] as const;
+  switch(value.itemType){
+    case 'bootstrap_default':return boundedString(value.ownerPersonId,128)&&boundedString(value.portfolioName,160)&&typeof value.effectiveMonth==='string'&&/^\d{4}-(0[1-9]|1[0-2])$/u.test(value.effectiveMonth)&&date(value.targetDate)&&String(value.targetDate).slice(0,7)>=String(value.effectiveMonth)&&recordPrivacyValues.has(String(value.privacy))?accepted():rejected('LONG_TERM_PORTFOLIO_BOOTSTRAP_INVALID','$[0]');
+    case 'instrument_revision':return assetClasses.has(String(value.assetClass))&&boundedString(value.groupLabel,80)&&boundedString(value.code,32)&&boundedString(value.name,180)&&typeof value.currency==='string'&&/^[A-Za-z]{3}$/u.test(value.currency)&&date(value.effectiveFrom)&&instrumentStatuses.has(String(value.status))&&optionalBoundedString(value.instrumentId,160)&&optionalBoundedString(value.replacesRevisionId,160)&&(value.replacesRevisionId===undefined||boundedString(value.instrumentId,160))&&optionalBoundedString(value.isin,32)&&optionalBoundedString(value.exchange,120)&&(value.countryCode===undefined||typeof value.countryCode==='string'&&/^[A-Za-z]{2}$/u.test(value.countryCode))&&optionalBoundedString(value.priceSource,180)&&optionalBoundedString(value.taxProfile,240)&&optionalBoundedString(value.feeProfile,240)&&optionalBoundedString(value.notes,1000)?accepted():rejected('LONG_TERM_PORTFOLIO_INSTRUMENT_INVALID','$[0]');
+    case 'plan_version':{
+      const assumptions=isObject(value.assumptions)?value.assumptions:undefined;
+      const valid=boundedString(value.portfolioId,160)&&typeof value.effectiveMonth==='string'&&/^\d{4}-(0[1-9]|1[0-2])$/u.test(value.effectiveMonth)&&finite(value.monthlyContribution,0.01)&&typeof value.contributionCurrency==='string'&&/^[A-Za-z]{3}$/u.test(value.contributionCurrency)&&boundedString(value.contributionChangeReason,240)&&typeof value.rebalanceIntervalMonths==='number'&&Number.isInteger(value.rebalanceIntervalMonths)&&value.rebalanceIntervalMonths>=1&&value.rebalanceIntervalMonths<=60&&inflationAdjustments.has(String(value.inflationAdjustment))&&date(value.targetDate)&&String(value.targetDate).slice(0,7)>=String(value.effectiveMonth)&&assumptions!==undefined&&hasOnlyKeys(assumptions,assumptionKeys)&&assumptionKeys.every(key=>typeof assumptions[key]==='number'&&Number.isInteger(assumptions[key])&&finite(assumptions[key],-10000,100000))&&Number(assumptions.pessimisticAnnualReturnBasisPoints)<=Number(assumptions.baseAnnualReturnBasisPoints)&&Number(assumptions.baseAnnualReturnBasisPoints)<=Number(assumptions.optimisticAnnualReturnBasisPoints)&&Array.isArray(value.allocations)&&value.allocations.length>=1&&value.allocations.length<=250&&value.allocations.every(allocation=>isObject(allocation)&&hasOnlyKeys(allocation,['instrumentId','sleeve','targetBasisPoints','displayOrder','note'])&&boundedString(allocation.instrumentId,160)&&sleeves.has(String(allocation.sleeve))&&typeof allocation.targetBasisPoints==='number'&&Number.isInteger(allocation.targetBasisPoints)&&allocation.targetBasisPoints>=0&&allocation.targetBasisPoints<=10000&&typeof allocation.displayOrder==='number'&&Number.isInteger(allocation.displayOrder)&&allocation.displayOrder>=1&&allocation.displayOrder<=10000&&optionalBoundedString(allocation.note,500))&&new Set(value.allocations.map(allocation=>`${String((allocation as Record<string,unknown>).instrumentId)}:${String((allocation as Record<string,unknown>).sleeve)}`)).size===value.allocations.length&&value.allocations.reduce((sum,allocation)=>sum+Number((allocation as Record<string,unknown>).targetBasisPoints),0)===10000;
+      return valid?accepted():rejected('LONG_TERM_PORTFOLIO_PLAN_INVALID','$[0]');
+    }
+    case 'ledger_event':{
+      const trade=value.eventType==='buy'||value.eventType==='sell';const income=['cash_dividend','coupon','interest','fund_distribution'].includes(String(value.eventType));const reversal=value.eventType==='reversal';
+      const directionByType:Record<string,string>={buy:'cash_out',rights_issue_used:'cash_out',fee:'cash_out',tax:'cash_out',sell:'cash_in',cash_dividend:'cash_in',rights_issue_sold:'cash_in',coupon:'cash_in',interest:'cash_in',fund_distribution:'cash_in',bonus_shares:'security_in',transfer_in:'security_in',rights_issue_expired:'security_out',transfer_out:'non_cash',split:'non_cash',reverse_split:'non_cash',merger_exchange:'non_cash',code_change:'non_cash',reversal:'non_cash'};
+      const direction=String(value.direction),eventType=String(value.eventType),gross=Number(value.grossAmount),fees=Number(value.feeAmount),taxes=Number(value.taxAmount),net=Number(value.netCashAmount);
+      const directionValid=eventType==='cash_adjustment'?(direction==='cash_in'||direction==='cash_out'):directionByType[eventType]===direction;
+      const expectedNet=direction==='cash_out'?-(gross+fees+taxes):direction==='cash_in'?gross-fees-taxes:0;
+      const chronological=date(value.executedAt)
+        && (value.orderAt===undefined||Date.parse(String(value.orderAt))<=Date.parse(String(value.executedAt)))
+        && (value.settlementAt===undefined||Date.parse(String(value.executedAt))<=Date.parse(String(value.settlementAt)))
+        && (value.entitlementAt===undefined||value.recordAt===undefined||Date.parse(String(value.entitlementAt))<=Date.parse(String(value.recordAt)))
+        && (value.entitlementAt===undefined||value.paymentAt===undefined||Date.parse(String(value.entitlementAt))<=Date.parse(String(value.paymentAt)))
+        && (value.recordAt===undefined||value.paymentAt===undefined||Date.parse(String(value.recordAt))<=Date.parse(String(value.paymentAt)));
+      const quantityValid=!['buy','sell','rights_issue_used','rights_issue_sold','rights_issue_expired','bonus_shares','split','reverse_split','transfer_in'].includes(eventType)||(boundedString(value.instrumentId,160)&&finite(value.quantity,0.00000001));
+      const transferValid=eventType==='transfer_out'
+        ? boundedString(value.instrumentId,160)&&boundedString(value.transferCounterpartyInstrumentId,160)&&value.transferCounterpartyInstrumentId!==value.instrumentId&&value.quantity===undefined&&finite(value.grossAmount,0.00000001)
+        : value.transferCounterpartyInstrumentId===undefined&&(eventType!=='transfer_in'||boundedString(value.sourceDocumentReference,240));
+      const ratioValid=!['split','reverse_split','merger_exchange'].includes(eventType)||(finite(value.ratioNumerator,0.00000001)&&finite(value.ratioDenominator,0.00000001));
+      const tradeGrossValid=!trade||typeof value.quantity!=='number'||typeof value.unitPrice!=='number'||Math.abs(gross-value.quantity*value.unitPrice)<=0.01;
+      const valid=quantityValid&&transferValid&&ratioValid&&tradeGrossValid&&boundedString(value.portfolioId,160)&&eventTypes.has(eventType)&&directions.has(direction)&&directionValid&&Math.abs(net-expectedNet)<=0.000001&&typeof value.currency==='string'&&/^[A-Za-z]{3}$/u.test(value.currency)&&chronological&&optionalDate(value.orderAt)&&optionalDate(value.settlementAt)&&optionalDate(value.entitlementAt)&&optionalDate(value.recordAt)&&optionalDate(value.paymentAt)&&finite(value.grossAmount,0)&&finite(value.feeAmount,0)&&finite(value.taxAmount,0)&&finite(value.netCashAmount)&&boundedString(value.sourceLabel,180)&&optionalIdentifier(value.instrumentId)&&optionalFinite(value.quantity,0.00000001)&&optionalFinite(value.unitPrice,0)&&optionalFinite(value.fxRate,0.00000001,1_000_000_000)&&optionalInteger(value.partialFillSequence,1,1_000_000)&&optionalFinite(value.ratioNumerator,0.00000001)&&optionalFinite(value.ratioDenominator,0.00000001)&&optionalIdentifier(value.cashCarryoverInstrumentId)&&optionalIdentifier(value.transferCounterpartyInstrumentId)&&optionalBoundedString(value.broker,160)&&optionalBoundedString(value.accountReference,160)&&optionalBoundedString(value.orderReference,160)&&optionalBoundedString(value.executionReference,160)&&optionalBoundedString(value.lotReference,160)&&(value.costLayerMethod===undefined||costLayerMethods.has(String(value.costLayerMethod)))&&optionalBoundedString(value.corporateActionReference,160)&&optionalIdentifier(value.reversalOfEventId)&&optionalBoundedString(value.correctionReason,500)&&optionalBoundedString(value.sourceDocumentReference,240)&&optionalBoundedString(value.notes,1000)&&(!trade||(boundedString(value.instrumentId,160)&&date(value.orderAt)&&date(value.settlementAt)&&finite(value.quantity,0.00000001)&&finite(value.unitPrice,0)))&&(!income||(boundedString(value.instrumentId,160)&&date(value.recordAt)&&date(value.paymentAt)&&value.cashCarryoverInstrumentId===value.instrumentId))&&(value.cashCarryoverInstrumentId===undefined||value.cashCarryoverInstrumentId===value.instrumentId)&&(!corporateActions.has(eventType)||(boundedString(value.instrumentId,160)&&boundedString(value.corporateActionReference,160)))&&(reversal?(boundedString(value.reversalOfEventId,160)&&boundedString(value.correctionReason,500)&&String(value.correctionReason).trim().length>=3):(value.reversalOfEventId===undefined&&value.correctionReason===undefined));
+      return valid?accepted():rejected('LONG_TERM_PORTFOLIO_LEDGER_INVALID','$[0]');
+    }
+    case 'price_observation':return boundedString(value.instrumentId,160)&&date(value.observedAt)&&finite(value.unitPrice,0.00000001)&&typeof value.currency==='string'&&/^[A-Za-z]{3}$/u.test(value.currency)&&boundedString(value.sourceLabel,180)?accepted():rejected('LONG_TERM_PORTFOLIO_PRICE_INVALID','$[0]');
+    default:return rejected('LONG_TERM_PORTFOLIO_ARGUMENT_INVALID','$[0]');
+  }
+};
+
 const financeImportCommitInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => exactObject(
   args,
   ['previewId','ownerPersonId','privacy','mapping','defaultCurrency','incomeCategoryId','expenseCategoryId','duplicateStrategy'],
@@ -1126,6 +1214,7 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
     case 'finance:listPaymentCards':
     case 'finance:listLoanAccounts':
     case 'finance:getPlanningWorkspace':
+    case 'finance:getLongTermPortfolioWorkspace':
     case 'finance:selectImportFile':
     case 'finance:previewOpenBankingSandbox':
       return zeroArguments(args);
@@ -1145,6 +1234,8 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
       return loanPaymentInput(args);
     case 'finance:recordPlanningItem':
       return financePlanningInput(args);
+    case 'finance:recordLongTermPortfolioItem':
+      return longTermPortfolioInput(args);
     case 'finance:commitImportPreview':
       return financeImportCommitInput(args);
     case 'ai:listConsents':

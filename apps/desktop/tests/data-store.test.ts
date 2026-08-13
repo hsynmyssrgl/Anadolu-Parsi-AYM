@@ -16,6 +16,7 @@ import {
   computePlatformPolicyReceiptRecordHash
 } from '@ppt/repositories';
 import type { ObjectPermissionAction } from '@ppt/domain';
+import { asIsoDateTime, type Clock } from '@ppt/core';
 import { FamilyDataStore } from '../src/main/data-store.js';
 import { decryptFullBackupPayloadV3 } from '../src/main/backup-container-v3.js';
 import type { DeviceSecretProtector } from '../src/main/device-secret-protector.js';
@@ -87,6 +88,23 @@ const archivePolicyTestOptions = {
   archiveClusterFence: () => ({ writable: true, epoch: 30 })
 } as const;
 
+const monotonicHostTestClock = (): Clock => {
+  let lastObservedMs = Date.now();
+  return Object.freeze({
+    now: () => {
+      // Windows wall-clock correction may move backwards between the local PEP
+      // request and receipt checks. Keep production fail-closed semantics while
+      // making this integration fixture independent from host clock jitter.
+      lastObservedMs = Math.max(lastObservedMs, Date.now());
+      return asIsoDateTime(new Date(lastObservedMs).toISOString());
+    }
+  });
+};
+const policyStoreOptions = () => Object.freeze({
+  ...archivePolicyTestOptions,
+  clock: monotonicHostTestClock()
+});
+
 const decodeBase32 = (value: string): Buffer => {
   let bits = '';
   for (const char of value) bits += alphabet.indexOf(char).toString(2).padStart(5, '0');
@@ -108,7 +126,7 @@ const makeTotp = (secret: string): string => {
 const makeStore = () => {
   const directory = mkdtempSync(join(tmpdir(), 'panthera-family-'));
   temporaryDirectories.push(directory);
-  return { directory, store: trackStore(new FamilyDataStore({ databasePath: join(directory, 'family.db'), backupSecretProtector: testSecretProtector, backupPasswordPath: join(directory, 'managed-backup-password.json'), ...archivePolicyTestOptions })) };
+  return { directory, store: trackStore(new FamilyDataStore({ databasePath: join(directory, 'family.db'), backupSecretProtector: testSecretProtector, backupPasswordPath: join(directory, 'managed-backup-password.json'), ...policyStoreOptions() })) };
 };
 
 const trackStore = (store: FamilyDataStore): FamilyDataStore => {
@@ -161,7 +179,7 @@ describe('FamilyDataStore', () => {
   it('boş kurulumda e-posta istemeden yalnız yerel aile ve yönetici profilini oluşturur', async () => {
     const directory = mkdtempSync(join(tmpdir(), 'panthera-family-local-profile-'));
     temporaryDirectories.push(directory);
-    const store = trackStore(new FamilyDataStore({ databasePath: join(directory, 'family.db'), seed: false, ...archivePolicyTestOptions }));
+    const store = trackStore(new FamilyDataStore({ databasePath: join(directory, 'family.db'), seed: false, ...policyStoreOptions() }));
     const initial = store.getAuthState();
     expect(initial.initialized).toBe(false);
     expect(initial.authenticated).toBe(false);
@@ -475,7 +493,7 @@ describe('FamilyDataStore', () => {
   it('zaman tüneli olayını tüm alanlarıyla günceller, arşivler ve veri kaybetmeden geri alır', async () => {
     const directory = mkdtempSync(join(tmpdir(), 'panthera-family-timeline-lifecycle-'));
     temporaryDirectories.push(directory);
-    const store = trackStore(new FamilyDataStore({ databasePath: join(directory, 'family.db'), seed: false, ...archivePolicyTestOptions }));
+    const store = trackStore(new FamilyDataStore({ databasePath: join(directory, 'family.db'), seed: false, ...policyStoreOptions() }));
     store.setupAdmin({ familyName:'Test Ailesi', displayName:'Test Yöneticisi', password:'GucluYerelParola!2026' });
     const personId = (await store.getSnapshot()).people[0]!.id;
     const locationMutation = await store.createLocation({ label:'Aile Evi', address:'Ankara', kind:'residence' });
@@ -751,7 +769,7 @@ describe('FamilyDataStore', () => {
     store.restoreFullBackup(backupPath, safetyPath, BACKUP_PASSWORD);
     expect(existsSync(safetyPath)).toBe(true);
 
-    const restored = trackStore(new FamilyDataStore({ databasePath: join(directory, 'family.db'), seed: false, ...archivePolicyTestOptions }));
+    const restored = trackStore(new FamilyDataStore({ databasePath: join(directory, 'family.db'), seed: false, ...policyStoreOptions() }));
     expect(restored.getAuthState().authenticated).toBe(false);
     restored.login({ email: 'test@example.com', password: 'GucluTestParolasi123!' });
     const names = (await restored.getSnapshotSections({ sections: ['graph'] })).people!
@@ -1359,7 +1377,7 @@ describe('FamilyDataStore', () => {
     ]));
     expect(database.prepare('SELECT COUNT(*) AS total FROM finance_planning_ledger').get()).toEqual({ total: 11 });
     expect(database.prepare('SELECT value FROM database_metadata WHERE key=?').get('schema_generation')).toEqual({
-      value: 'REVISION-33-J-FAMILY-EMERGENCY-CARD-PORTABILITY'
+      value: 'REVISION-33-L-LONG-TERM-PORTFOLIO'
     });
     const payloads = database.prepare("SELECT payload_json FROM event_outbox WHERE event_type='finance.planning.item_recorded'").all() as Array<{payload_json:string}>;
     expect(JSON.stringify(payloads)).not.toMatch(/1200|10000|5500|Ağustos market|Manuel hedef|Manuel değerleme/u);
@@ -1454,7 +1472,7 @@ describe('FamilyDataStore', () => {
     const outbox = database.prepare("SELECT payload_json FROM event_outbox WHERE event_type='finance.import.batch_committed'").all();
     expect(JSON.stringify(outbox)).not.toMatch(/Market|İade|125\.5|row-expense/u);
     expect(database.prepare('SELECT value FROM database_metadata WHERE key=?').get('schema_generation')).toEqual({
-      value: 'REVISION-33-J-FAMILY-EMERGENCY-CARD-PORTABILITY'
+      value: 'REVISION-33-L-LONG-TERM-PORTFOLIO'
     });
     database.close();
     expect(store.listAudit(400).some((entry) => entry.action === 'finance.import.batch_committed')).toBe(true);

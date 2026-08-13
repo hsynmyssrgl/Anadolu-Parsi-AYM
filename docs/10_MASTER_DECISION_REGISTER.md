@@ -1,5 +1,16 @@
 # Ana Karar Kaydı — Build 180
 
+## DEC-223 — Finans / Uzun Vadeli Portföy merkezi
+
+33-L kapsamında LTP-001–LTP-008 tek paket olarak uygulanır. Finans altında ayrı
+Uzun Vadeli Portföy menüsü; stable kimlikli ve sürümlü ürün kataloğu, tam %100
+mühürlü aylık katkı/dağılım sürümleri, aynı kıymete devreden bütçe, değişmez
+alım-satım ve kurumsal olay defteri, maliyet/P&L, grafikler ve 13 Ağustos 2032
+nominal/reel senaryolarını içerir. Kıymetler arası aktarım tek atomik, adetsiz ve
+aynı para birimli bütçe virmanıdır. Sistem broker emri, para hareketi veya canlı
+fiyat teslimi yapmaz; yatırım tavsiyesi, getiri, vergi/hukuk doğruluğu ya da sonuç
+garantisi vermez. Ayrıntı: `docs/decisions/DEC-223-long-term-portfolio-center.md`.
+
 ## DEC-222 — Gizlilik, süreli rıza ve kayıp cihaz kapatma merkezi
 
 33-K kapsamında B5-06 ve EXT-039 birlikte uygulanır. Canlı konum paylaşım otoritesi varsayılan kapalı, açık rızalı, 15 dakika–30 gün süreli, görünür göstergeli, değerlendirme anında otomatik sona eren ve derhal iptal edilebilir yapıdadır. Kayıp cihaz işlemi güçlü yerel doğrulama ve merkezi PEP/UoW ile security_epoch, trusted_devices, offline lease ve rıza kayıtlarını atomik olarak kapatır. Uzaktan silme, MDM, ağ teslimi/teslim garantisi veya gerçek konum aktarımı değildir. Ayrıntı: `docs/decisions/DEC-222-privacy-consent-lost-device-control-center.md`.

@@ -10800,6 +10800,338 @@ SET value='REVISION-33-J-FAMILY-EMERGENCY-CARD-PORTABILITY',
 WHERE key='schema_generation';
 `;
 
+const longTermPortfolioLedgerSql = `CREATE TABLE long_term_portfolio_mutations(
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 160),
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 8 AND 128),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  privacy TEXT NOT NULL CHECK(privacy IN ('private','selected_members','family')),
+  operation TEXT NOT NULL CHECK(operation IN ('bootstrap_default','instrument_revision','plan_version','ledger_event','price_observation')),
+  resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 2 AND 160),
+  created_at TEXT NOT NULL CHECK(datetime(created_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL UNIQUE REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT CHECK(length(policy_receipt_hash)=64 AND policy_receipt_hash NOT GLOB '*[^0-9a-f]*'),
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version=1),
+  policy_receipt_nonce TEXT NOT NULL,
+  policy_correlation_id TEXT NOT NULL,
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type='finance_record'),
+  policy_resource_id TEXT NOT NULL CHECK(policy_resource_id=id),
+  policy_action TEXT NOT NULL CHECK(policy_action='create'),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='finance.write'),
+  UNIQUE(family_id,client_operation_id)
+) STRICT;
+
+CREATE TABLE long_term_portfolio_instruments(
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 160),
+  mutation_id TEXT NOT NULL REFERENCES long_term_portfolio_mutations(id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  privacy TEXT NOT NULL CHECK(privacy IN ('private','selected_members','family')),
+  created_at TEXT NOT NULL CHECK(datetime(created_at) IS NOT NULL)
+) STRICT;
+
+CREATE TABLE long_term_portfolio_instrument_revisions(
+  revision_id TEXT PRIMARY KEY CHECK(length(trim(revision_id)) BETWEEN 2 AND 160),
+  instrument_id TEXT NOT NULL REFERENCES long_term_portfolio_instruments(id) ON DELETE RESTRICT,
+  mutation_id TEXT NOT NULL REFERENCES long_term_portfolio_mutations(id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  privacy TEXT NOT NULL CHECK(privacy IN ('private','selected_members','family')),
+  asset_class TEXT NOT NULL CHECK(asset_class IN ('domestic_equity','foreign_equity','fund','etf','bond_note','eurobond','deposit','foreign_currency','gold','silver','commodity','private_pension','ipo_reserve','cash_savings','crypto_asset','real_estate','vehicle','custom')),
+  group_label TEXT NOT NULL CHECK(length(trim(group_label)) BETWEEN 1 AND 80),
+  code TEXT NOT NULL CHECK(length(trim(code)) BETWEEN 1 AND 32),
+  name TEXT NOT NULL CHECK(length(trim(name)) BETWEEN 2 AND 180),
+  currency TEXT NOT NULL CHECK(length(currency)=3 AND currency=upper(currency) AND currency GLOB '[A-Z][A-Z][A-Z]'),
+  effective_from TEXT NOT NULL CHECK(datetime(effective_from) IS NOT NULL),
+  status TEXT NOT NULL CHECK(status IN ('active','inactive','matured','merged')),
+  isin TEXT CHECK(isin IS NULL OR length(trim(isin)) BETWEEN 2 AND 32),
+  exchange_name TEXT CHECK(exchange_name IS NULL OR length(trim(exchange_name)) BETWEEN 1 AND 120),
+  country_code TEXT CHECK(country_code IS NULL OR length(country_code)=2),
+  price_source TEXT CHECK(price_source IS NULL OR length(trim(price_source)) BETWEEN 1 AND 180),
+  tax_profile TEXT CHECK(tax_profile IS NULL OR length(trim(tax_profile)) BETWEEN 1 AND 240),
+  fee_profile TEXT CHECK(fee_profile IS NULL OR length(trim(fee_profile)) BETWEEN 1 AND 240),
+  notes TEXT CHECK(notes IS NULL OR length(trim(notes)) BETWEEN 1 AND 1000),
+  replaces_revision_id TEXT REFERENCES long_term_portfolio_instrument_revisions(revision_id) ON DELETE RESTRICT,
+  data_source TEXT NOT NULL CHECK(data_source IN ('user_entered','manual','csv_import')),
+  external_verification TEXT NOT NULL CHECK(external_verification IN ('not_performed','user_confirmed','source_document_checked')),
+  created_at TEXT NOT NULL CHECK(datetime(created_at) IS NOT NULL),
+  CHECK(datetime(effective_from)<=datetime(created_at)),
+  UNIQUE(instrument_id,effective_from)
+) STRICT;
+
+CREATE TABLE long_term_portfolios(
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 160),
+  mutation_id TEXT NOT NULL UNIQUE REFERENCES long_term_portfolio_mutations(id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  name TEXT NOT NULL CHECK(length(trim(name)) BETWEEN 2 AND 160),
+  base_currency TEXT NOT NULL CHECK(length(base_currency)=3 AND base_currency=upper(base_currency) AND base_currency GLOB '[A-Z][A-Z][A-Z]'),
+  privacy TEXT NOT NULL CHECK(privacy IN ('private','selected_members','family')),
+  target_date TEXT NOT NULL CHECK(datetime(target_date) IS NOT NULL),
+  purpose TEXT NOT NULL CHECK(length(trim(purpose)) BETWEEN 2 AND 240),
+  created_at TEXT NOT NULL CHECK(datetime(created_at) IS NOT NULL),
+  UNIQUE(family_id)
+) STRICT;
+
+CREATE TABLE long_term_portfolio_plan_versions(
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 160),
+  portfolio_id TEXT NOT NULL REFERENCES long_term_portfolios(id) ON DELETE RESTRICT,
+  mutation_id TEXT NOT NULL UNIQUE REFERENCES long_term_portfolio_mutations(id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  privacy TEXT NOT NULL CHECK(privacy IN ('private','selected_members','family')),
+  version INTEGER NOT NULL CHECK(version BETWEEN 1 AND 1000000),
+  effective_month TEXT NOT NULL CHECK(length(effective_month)=7 AND effective_month GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]' AND substr(effective_month,6,2) BETWEEN '01' AND '12'),
+  monthly_contribution REAL NOT NULL CHECK(monthly_contribution>0 AND monthly_contribution<=1000000000000000),
+  contribution_currency TEXT NOT NULL CHECK(length(contribution_currency)=3 AND contribution_currency=upper(contribution_currency) AND contribution_currency GLOB '[A-Z][A-Z][A-Z]'),
+  contribution_change_reason TEXT NOT NULL CHECK(length(trim(contribution_change_reason)) BETWEEN 2 AND 240),
+  rebalance_interval_months INTEGER NOT NULL CHECK(rebalance_interval_months BETWEEN 1 AND 60),
+  inflation_adjustment TEXT NOT NULL CHECK(inflation_adjustment IN ('manual_realized_inflation','fixed_assumption','none')),
+  target_date TEXT NOT NULL CHECK(datetime(target_date) IS NOT NULL),
+  pessimistic_return_bps INTEGER NOT NULL CHECK(pessimistic_return_bps BETWEEN -10000 AND 100000),
+  base_return_bps INTEGER NOT NULL CHECK(base_return_bps BETWEEN -10000 AND 100000),
+  optimistic_return_bps INTEGER NOT NULL CHECK(optimistic_return_bps BETWEEN -10000 AND 100000),
+  annual_inflation_bps INTEGER NOT NULL CHECK(annual_inflation_bps BETWEEN -10000 AND 100000),
+  annual_contribution_growth_bps INTEGER NOT NULL CHECK(annual_contribution_growth_bps BETWEEN -10000 AND 100000),
+  supersedes_plan_version_id TEXT REFERENCES long_term_portfolio_plan_versions(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(datetime(created_at) IS NOT NULL),
+  CHECK(substr(target_date,1,7)>=effective_month),
+  UNIQUE(portfolio_id,version),
+  UNIQUE(portfolio_id,effective_month)
+) STRICT;
+
+CREATE TABLE long_term_portfolio_allocations(
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 160),
+  portfolio_id TEXT NOT NULL REFERENCES long_term_portfolios(id) ON DELETE RESTRICT,
+  plan_version_id TEXT NOT NULL REFERENCES long_term_portfolio_plan_versions(id) ON DELETE RESTRICT,
+  instrument_id TEXT NOT NULL REFERENCES long_term_portfolio_instruments(id) ON DELETE RESTRICT,
+  mutation_id TEXT NOT NULL REFERENCES long_term_portfolio_mutations(id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  privacy TEXT NOT NULL CHECK(privacy IN ('private','selected_members','family')),
+  sleeve TEXT NOT NULL CHECK(sleeve IN ('core','growth','opportunity','ipo_reserve','liquidity','hedge','custom')),
+  target_basis_points INTEGER NOT NULL CHECK(target_basis_points BETWEEN 0 AND 10000),
+  carryover_policy TEXT NOT NULL CHECK(carryover_policy='same_instrument'),
+  display_order INTEGER NOT NULL CHECK(display_order BETWEEN 1 AND 10000),
+  note TEXT CHECK(note IS NULL OR length(trim(note)) BETWEEN 1 AND 500),
+  created_at TEXT NOT NULL CHECK(datetime(created_at) IS NOT NULL),
+  UNIQUE(plan_version_id,instrument_id,sleeve)
+) STRICT;
+
+CREATE TABLE long_term_portfolio_plan_seals(
+  plan_version_id TEXT PRIMARY KEY REFERENCES long_term_portfolio_plan_versions(id) ON DELETE RESTRICT,
+  mutation_id TEXT NOT NULL REFERENCES long_term_portfolio_mutations(id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  privacy TEXT NOT NULL CHECK(privacy IN ('private','selected_members','family')),
+  allocation_count INTEGER NOT NULL CHECK(allocation_count BETWEEN 1 AND 10000),
+  total_basis_points INTEGER NOT NULL CHECK(total_basis_points=10000),
+  created_at TEXT NOT NULL CHECK(datetime(created_at) IS NOT NULL)
+) STRICT;
+
+CREATE TABLE long_term_portfolio_ledger_events(
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 160),
+  portfolio_id TEXT NOT NULL REFERENCES long_term_portfolios(id) ON DELETE RESTRICT,
+  instrument_id TEXT REFERENCES long_term_portfolio_instruments(id) ON DELETE RESTRICT,
+  mutation_id TEXT NOT NULL UNIQUE REFERENCES long_term_portfolio_mutations(id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  privacy TEXT NOT NULL CHECK(privacy IN ('private','selected_members','family')),
+  event_type TEXT NOT NULL CHECK(event_type IN ('buy','sell','cash_dividend','rights_issue_used','rights_issue_sold','rights_issue_expired','bonus_shares','split','reverse_split','coupon','interest','fund_distribution','merger_exchange','code_change','transfer_in','transfer_out','fee','tax','cash_adjustment','reversal')),
+  direction TEXT NOT NULL CHECK(direction IN ('cash_in','cash_out','security_in','security_out','non_cash')),
+  currency TEXT NOT NULL CHECK(length(currency)=3 AND currency=upper(currency) AND currency GLOB '[A-Z][A-Z][A-Z]'),
+  order_at TEXT CHECK(order_at IS NULL OR datetime(order_at) IS NOT NULL),
+  executed_at TEXT NOT NULL CHECK(datetime(executed_at) IS NOT NULL),
+  settlement_at TEXT CHECK(settlement_at IS NULL OR datetime(settlement_at) IS NOT NULL),
+  entitlement_at TEXT CHECK(entitlement_at IS NULL OR datetime(entitlement_at) IS NOT NULL),
+  record_at TEXT CHECK(record_at IS NULL OR datetime(record_at) IS NOT NULL),
+  payment_at TEXT CHECK(payment_at IS NULL OR datetime(payment_at) IS NOT NULL),
+  quantity REAL CHECK(quantity IS NULL OR (quantity>0 AND quantity<=1000000000000000)),
+  unit_price REAL CHECK(unit_price IS NULL OR (unit_price>=0 AND unit_price<=1000000000000000)),
+  gross_amount REAL NOT NULL CHECK(gross_amount>=0 AND gross_amount<=1000000000000000),
+  fee_amount REAL NOT NULL CHECK(fee_amount>=0 AND fee_amount<=1000000000000000),
+  tax_amount REAL NOT NULL CHECK(tax_amount>=0 AND tax_amount<=1000000000000000),
+  net_cash_amount REAL NOT NULL CHECK(abs(net_cash_amount)<=1000000000000000),
+  fx_rate REAL CHECK(fx_rate IS NULL OR (fx_rate>0 AND fx_rate<=1000000000)),
+  broker TEXT CHECK(broker IS NULL OR length(trim(broker)) BETWEEN 1 AND 160),
+  account_reference TEXT CHECK(account_reference IS NULL OR length(trim(account_reference)) BETWEEN 1 AND 160),
+  order_reference TEXT CHECK(order_reference IS NULL OR length(trim(order_reference)) BETWEEN 1 AND 160),
+  execution_reference TEXT CHECK(execution_reference IS NULL OR length(trim(execution_reference)) BETWEEN 1 AND 160),
+  partial_fill_sequence INTEGER CHECK(partial_fill_sequence IS NULL OR partial_fill_sequence BETWEEN 1 AND 1000000),
+  lot_reference TEXT CHECK(lot_reference IS NULL OR length(trim(lot_reference)) BETWEEN 1 AND 160),
+  cost_layer_method TEXT CHECK(cost_layer_method IS NULL OR cost_layer_method IN ('fifo','weighted_average','specific_lot','not_applicable')),
+  corporate_action_reference TEXT CHECK(corporate_action_reference IS NULL OR length(trim(corporate_action_reference)) BETWEEN 1 AND 160),
+  ratio_numerator REAL CHECK(ratio_numerator IS NULL OR ratio_numerator>0),
+  ratio_denominator REAL CHECK(ratio_denominator IS NULL OR ratio_denominator>0),
+  cash_carryover_instrument_id TEXT REFERENCES long_term_portfolio_instruments(id) ON DELETE RESTRICT,
+  transfer_counterparty_instrument_id TEXT REFERENCES long_term_portfolio_instruments(id) ON DELETE RESTRICT,
+  reversal_of_event_id TEXT UNIQUE REFERENCES long_term_portfolio_ledger_events(id) ON DELETE RESTRICT,
+  correction_reason TEXT CHECK(correction_reason IS NULL OR length(trim(correction_reason)) BETWEEN 3 AND 500),
+  source_label TEXT NOT NULL CHECK(length(trim(source_label)) BETWEEN 2 AND 180),
+  source_document_reference TEXT CHECK(source_document_reference IS NULL OR length(trim(source_document_reference)) BETWEEN 1 AND 240),
+  notes TEXT CHECK(notes IS NULL OR length(trim(notes)) BETWEEN 1 AND 1000),
+  data_source TEXT NOT NULL CHECK(data_source IN ('user_entered','manual','csv_import')),
+  external_verification TEXT NOT NULL CHECK(external_verification IN ('not_performed','user_confirmed','source_document_checked')),
+  created_at TEXT NOT NULL CHECK(datetime(created_at) IS NOT NULL),
+  CHECK(datetime(executed_at)<=datetime(created_at)),
+  CHECK(order_at IS NULL OR datetime(order_at)<=datetime(executed_at)),
+  CHECK(settlement_at IS NULL OR datetime(executed_at)<=datetime(settlement_at)),
+  CHECK(entitlement_at IS NULL OR record_at IS NULL OR datetime(entitlement_at)<=datetime(record_at)),
+  CHECK(entitlement_at IS NULL OR payment_at IS NULL OR datetime(entitlement_at)<=datetime(payment_at)),
+  CHECK(record_at IS NULL OR payment_at IS NULL OR datetime(record_at)<=datetime(payment_at)),
+  CHECK((event_type IN ('buy','rights_issue_used','fee','tax') AND direction='cash_out') OR (event_type IN ('sell','cash_dividend','rights_issue_sold','coupon','interest','fund_distribution') AND direction='cash_in') OR (event_type IN ('bonus_shares','transfer_in') AND direction='security_in') OR (event_type='rights_issue_expired' AND direction='security_out') OR (event_type IN ('split','reverse_split','merger_exchange','code_change','transfer_out','reversal') AND direction='non_cash') OR (event_type='cash_adjustment' AND direction IN ('cash_in','cash_out'))),
+  CHECK(abs(net_cash_amount-CASE direction WHEN 'cash_out' THEN -(gross_amount+fee_amount+tax_amount) WHEN 'cash_in' THEN gross_amount-fee_amount-tax_amount ELSE 0 END)<=0.000001),
+  CHECK((event_type='reversal' AND reversal_of_event_id IS NOT NULL AND correction_reason IS NOT NULL) OR (event_type<>'reversal' AND reversal_of_event_id IS NULL AND correction_reason IS NULL)),
+  CHECK(event_type NOT IN ('buy','sell') OR (instrument_id IS NOT NULL AND order_at IS NOT NULL AND settlement_at IS NOT NULL AND quantity IS NOT NULL AND unit_price IS NOT NULL)),
+  CHECK(event_type NOT IN ('buy','sell') OR abs(gross_amount-(quantity*unit_price))<=0.01),
+  CHECK(event_type NOT IN ('buy','sell','rights_issue_used','rights_issue_sold','rights_issue_expired','bonus_shares','split','reverse_split','transfer_in') OR (instrument_id IS NOT NULL AND quantity IS NOT NULL)),
+  CHECK(event_type NOT IN ('split','reverse_split','merger_exchange') OR (ratio_numerator IS NOT NULL AND ratio_denominator IS NOT NULL)),
+  CHECK(event_type NOT IN ('cash_dividend','coupon','interest','fund_distribution') OR (instrument_id IS NOT NULL AND record_at IS NOT NULL AND payment_at IS NOT NULL)),
+  CHECK((event_type='transfer_out' AND instrument_id IS NOT NULL AND transfer_counterparty_instrument_id IS NOT NULL AND transfer_counterparty_instrument_id<>instrument_id AND quantity IS NULL AND gross_amount>0) OR (event_type<>'transfer_out' AND transfer_counterparty_instrument_id IS NULL)),
+  CHECK(event_type<>'transfer_in' OR source_document_reference IS NOT NULL),
+  CHECK(event_type NOT IN ('rights_issue_used','rights_issue_sold','rights_issue_expired','bonus_shares','split','reverse_split','merger_exchange','code_change') OR (instrument_id IS NOT NULL AND corporate_action_reference IS NOT NULL))
+) STRICT;
+
+CREATE TABLE long_term_portfolio_price_observations(
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 160),
+  portfolio_id TEXT NOT NULL REFERENCES long_term_portfolios(id) ON DELETE RESTRICT,
+  instrument_id TEXT NOT NULL REFERENCES long_term_portfolio_instruments(id) ON DELETE RESTRICT,
+  mutation_id TEXT NOT NULL UNIQUE REFERENCES long_term_portfolio_mutations(id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  privacy TEXT NOT NULL CHECK(privacy IN ('private','selected_members','family')),
+  observed_at TEXT NOT NULL CHECK(datetime(observed_at) IS NOT NULL),
+  unit_price REAL NOT NULL CHECK(unit_price>0 AND unit_price<=1000000000000000),
+  currency TEXT NOT NULL CHECK(length(currency)=3 AND currency=upper(currency) AND currency GLOB '[A-Z][A-Z][A-Z]'),
+  source_label TEXT NOT NULL CHECK(length(trim(source_label)) BETWEEN 2 AND 180),
+  data_source TEXT NOT NULL CHECK(data_source IN ('user_entered','manual','csv_import')),
+  external_verification TEXT NOT NULL CHECK(external_verification IN ('not_performed','user_confirmed','source_document_checked')),
+  created_at TEXT NOT NULL CHECK(datetime(created_at) IS NOT NULL),
+  CHECK(datetime(observed_at)<=datetime(created_at)),
+  UNIQUE(instrument_id,observed_at,source_label)
+) STRICT;
+
+CREATE INDEX idx_ltp_mutation_family_created ON long_term_portfolio_mutations(family_id,created_at DESC,id);
+CREATE INDEX idx_ltp_instrument_family ON long_term_portfolio_instruments(family_id,created_at DESC,id);
+CREATE INDEX idx_ltp_revision_current ON long_term_portfolio_instrument_revisions(instrument_id,effective_from DESC,created_at DESC);
+CREATE INDEX idx_ltp_revision_code ON long_term_portfolio_instrument_revisions(family_id,code,effective_from DESC);
+CREATE INDEX idx_ltp_portfolio_owner ON long_term_portfolios(owner_person_id,created_at DESC,id);
+CREATE INDEX idx_ltp_plan_effective ON long_term_portfolio_plan_versions(portfolio_id,effective_month DESC,version DESC);
+CREATE INDEX idx_ltp_allocation_plan ON long_term_portfolio_allocations(plan_version_id,display_order,id);
+CREATE INDEX idx_ltp_plan_seal_family ON long_term_portfolio_plan_seals(family_id,created_at DESC,plan_version_id);
+CREATE INDEX idx_ltp_event_portfolio_time ON long_term_portfolio_ledger_events(portfolio_id,executed_at DESC,id);
+CREATE INDEX idx_ltp_event_instrument_time ON long_term_portfolio_ledger_events(instrument_id,executed_at DESC,id);
+CREATE UNIQUE INDEX uq_ltp_event_execution ON long_term_portfolio_ledger_events(portfolio_id,coalesce(instrument_id,''),execution_reference,coalesce(partial_fill_sequence,0)) WHERE execution_reference IS NOT NULL;
+CREATE INDEX idx_ltp_price_instrument_time ON long_term_portfolio_price_observations(instrument_id,observed_at DESC,id);
+
+CREATE TRIGGER trg_ltp_mutation_policy_receipt BEFORE INSERT ON long_term_portfolio_mutations
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM platform_policy_transaction_receipts receipt
+  JOIN platform_policy_database_fences fence
+    ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection
+    ON projection.receipt_hash=receipt.receipt_hash AND projection.record_json=receipt.record_json
+  JOIN accounts actor_account
+    ON actor_account.id=json_extract(receipt.record_json,'$.request.subject.accountId')
+      AND actor_account.status='active'
+  JOIN people actor_person
+    ON actor_person.id=json_extract(receipt.record_json,'$.request.subject.personId')
+      AND actor_person.id=actor_account.person_id
+      AND actor_person.family_id=NEW.family_id
+      AND actor_person.status='active'
+  JOIN people owner_person
+    ON owner_person.id=NEW.owner_person_id
+      AND owner_person.family_id=NEW.family_id
+      AND owner_person.status='active'
+  WHERE receipt.receipt_hash=NEW.policy_receipt_hash
+    AND receipt.receipt_version=NEW.policy_receipt_version
+    AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id
+    AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id
+    AND receipt.action=NEW.policy_action
+    AND receipt.capability=NEW.policy_capability
+    AND receipt.resource_type='finance_record'
+    AND receipt.resource_id=NEW.id
+    AND receipt.action='create'
+    AND receipt.capability='finance.write'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.resource.sensitivity')=CASE NEW.privacy
+      WHEN 'private' THEN 'highly_sensitive'
+      WHEN 'selected_members' THEN 'sensitive'
+      ELSE 'personal'
+    END
+    AND json_extract(receipt.record_json,'$.request.purpose')='finance'
+    AND json_extract(receipt.record_json,'$.request.occurredAt')=NEW.created_at
+)
+OR EXISTS(SELECT 1 FROM finance_records WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_valuations WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM bank_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM payment_cards WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM loan_accounts WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM loan_payment_history WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_planning_ledger WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+OR EXISTS(SELECT 1 FROM finance_import_batches WHERE policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'long-term portfolio mutation requires an unused exact durable finance policy receipt'); END;
+
+CREATE TRIGGER trg_ltp_finance_record_receipt_reuse BEFORE INSERT ON finance_records WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(SELECT 1 FROM long_term_portfolio_mutations WHERE policy_receipt_hash=NEW.policy_receipt_hash) BEGIN SELECT RAISE(ABORT,'finance policy receipt is already bound to a long-term portfolio mutation'); END;
+CREATE TRIGGER trg_ltp_finance_valuation_receipt_reuse BEFORE INSERT ON finance_valuations WHEN NEW.policy_receipt_hash IS NOT NULL AND EXISTS(SELECT 1 FROM long_term_portfolio_mutations WHERE policy_receipt_hash=NEW.policy_receipt_hash) BEGIN SELECT RAISE(ABORT,'finance policy receipt is already bound to a long-term portfolio mutation'); END;
+CREATE TRIGGER trg_ltp_bank_account_receipt_reuse BEFORE INSERT ON bank_accounts WHEN EXISTS(SELECT 1 FROM long_term_portfolio_mutations WHERE policy_receipt_hash=NEW.policy_receipt_hash) BEGIN SELECT RAISE(ABORT,'finance policy receipt is already bound to a long-term portfolio mutation'); END;
+CREATE TRIGGER trg_ltp_payment_card_receipt_reuse BEFORE INSERT ON payment_cards WHEN EXISTS(SELECT 1 FROM long_term_portfolio_mutations WHERE policy_receipt_hash=NEW.policy_receipt_hash) BEGIN SELECT RAISE(ABORT,'finance policy receipt is already bound to a long-term portfolio mutation'); END;
+CREATE TRIGGER trg_ltp_loan_account_receipt_reuse BEFORE INSERT ON loan_accounts WHEN EXISTS(SELECT 1 FROM long_term_portfolio_mutations WHERE policy_receipt_hash=NEW.policy_receipt_hash) BEGIN SELECT RAISE(ABORT,'finance policy receipt is already bound to a long-term portfolio mutation'); END;
+CREATE TRIGGER trg_ltp_loan_payment_receipt_reuse BEFORE INSERT ON loan_payment_history WHEN EXISTS(SELECT 1 FROM long_term_portfolio_mutations WHERE policy_receipt_hash=NEW.policy_receipt_hash) BEGIN SELECT RAISE(ABORT,'finance policy receipt is already bound to a long-term portfolio mutation'); END;
+CREATE TRIGGER trg_ltp_planning_receipt_reuse BEFORE INSERT ON finance_planning_ledger WHEN EXISTS(SELECT 1 FROM long_term_portfolio_mutations WHERE policy_receipt_hash=NEW.policy_receipt_hash) BEGIN SELECT RAISE(ABORT,'finance policy receipt is already bound to a long-term portfolio mutation'); END;
+CREATE TRIGGER trg_ltp_import_receipt_reuse BEFORE INSERT ON finance_import_batches WHEN EXISTS(SELECT 1 FROM long_term_portfolio_mutations WHERE policy_receipt_hash=NEW.policy_receipt_hash) BEGIN SELECT RAISE(ABORT,'finance policy receipt is already bound to a long-term portfolio mutation'); END;
+
+CREATE TRIGGER trg_ltp_instrument_scope BEFORE INSERT ON long_term_portfolio_instruments WHEN NOT EXISTS(SELECT 1 FROM long_term_portfolio_mutations mutation WHERE mutation.id=NEW.mutation_id AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id AND mutation.privacy=NEW.privacy AND mutation.operation IN ('bootstrap_default','instrument_revision')) BEGIN SELECT RAISE(ABORT,'stable instrument scope does not match its mutation'); END;
+CREATE TRIGGER trg_ltp_revision_linear_history BEFORE INSERT ON long_term_portfolio_instrument_revisions WHEN (NEW.replaces_revision_id IS NULL AND EXISTS(SELECT 1 FROM long_term_portfolio_instrument_revisions prior WHERE prior.instrument_id=NEW.instrument_id)) OR (NEW.replaces_revision_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM long_term_portfolio_instrument_revisions previous WHERE previous.revision_id=NEW.replaces_revision_id AND previous.instrument_id=NEW.instrument_id AND datetime(previous.effective_from)<datetime(NEW.effective_from) AND NOT EXISTS(SELECT 1 FROM long_term_portfolio_instrument_revisions later WHERE later.instrument_id=previous.instrument_id AND datetime(later.effective_from)>datetime(previous.effective_from)))) BEGIN SELECT RAISE(ABORT,'instrument revisions must form one strictly ordered linear history'); END;
+CREATE TRIGGER trg_ltp_revision_scope BEFORE INSERT ON long_term_portfolio_instrument_revisions WHEN NOT EXISTS(SELECT 1 FROM long_term_portfolio_instruments instrument JOIN long_term_portfolio_mutations mutation ON mutation.id=NEW.mutation_id WHERE instrument.id=NEW.instrument_id AND instrument.family_id=NEW.family_id AND instrument.owner_person_id=NEW.owner_person_id AND instrument.privacy=NEW.privacy AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id AND mutation.privacy=NEW.privacy AND mutation.operation IN ('bootstrap_default','instrument_revision')) OR (NEW.replaces_revision_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM long_term_portfolio_instrument_revisions previous WHERE previous.revision_id=NEW.replaces_revision_id AND previous.instrument_id=NEW.instrument_id AND previous.family_id=NEW.family_id AND previous.owner_person_id=NEW.owner_person_id AND previous.privacy=NEW.privacy)) BEGIN SELECT RAISE(ABORT,'instrument revision scope does not match its stable instrument and mutation'); END;
+CREATE TRIGGER trg_ltp_portfolio_scope BEFORE INSERT ON long_term_portfolios WHEN NOT EXISTS(SELECT 1 FROM long_term_portfolio_mutations mutation WHERE mutation.id=NEW.mutation_id AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id AND mutation.privacy=NEW.privacy AND mutation.operation='bootstrap_default') BEGIN SELECT RAISE(ABORT,'portfolio scope does not match bootstrap mutation'); END;
+CREATE TRIGGER trg_ltp_plan_linear_history BEFORE INSERT ON long_term_portfolio_plan_versions WHEN (NEW.version=1 AND (NEW.supersedes_plan_version_id IS NOT NULL OR EXISTS(SELECT 1 FROM long_term_portfolio_plan_versions prior WHERE prior.portfolio_id=NEW.portfolio_id))) OR (NEW.version>1 AND NOT EXISTS(SELECT 1 FROM long_term_portfolio_plan_versions previous WHERE previous.id=NEW.supersedes_plan_version_id AND previous.portfolio_id=NEW.portfolio_id AND previous.version=NEW.version-1 AND previous.effective_month<NEW.effective_month AND NOT EXISTS(SELECT 1 FROM long_term_portfolio_plan_versions later WHERE later.portfolio_id=previous.portfolio_id AND later.version>previous.version))) BEGIN SELECT RAISE(ABORT,'portfolio plans must form one forward effective-month history'); END;
+CREATE TRIGGER trg_ltp_plan_scope BEFORE INSERT ON long_term_portfolio_plan_versions WHEN NOT EXISTS(SELECT 1 FROM long_term_portfolios portfolio JOIN long_term_portfolio_mutations mutation ON mutation.id=NEW.mutation_id WHERE portfolio.id=NEW.portfolio_id AND portfolio.family_id=NEW.family_id AND portfolio.owner_person_id=NEW.owner_person_id AND portfolio.privacy=NEW.privacy AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id AND mutation.privacy=NEW.privacy AND mutation.operation IN ('bootstrap_default','plan_version')) BEGIN SELECT RAISE(ABORT,'plan version scope does not match portfolio and mutation'); END;
+CREATE TRIGGER trg_ltp_allocation_after_seal BEFORE INSERT ON long_term_portfolio_allocations WHEN EXISTS(SELECT 1 FROM long_term_portfolio_plan_seals seal WHERE seal.plan_version_id=NEW.plan_version_id) BEGIN SELECT RAISE(ABORT,'sealed plan allocations cannot be extended'); END;
+CREATE TRIGGER trg_ltp_allocation_scope BEFORE INSERT ON long_term_portfolio_allocations WHEN NOT EXISTS(SELECT 1 FROM long_term_portfolio_plan_versions plan JOIN long_term_portfolios portfolio ON portfolio.id=NEW.portfolio_id JOIN long_term_portfolio_instruments instrument ON instrument.id=NEW.instrument_id JOIN long_term_portfolio_mutations mutation ON mutation.id=NEW.mutation_id WHERE plan.id=NEW.plan_version_id AND plan.portfolio_id=portfolio.id AND plan.family_id=NEW.family_id AND plan.owner_person_id=NEW.owner_person_id AND plan.privacy=NEW.privacy AND portfolio.family_id=NEW.family_id AND portfolio.owner_person_id=NEW.owner_person_id AND portfolio.privacy=NEW.privacy AND instrument.family_id=NEW.family_id AND instrument.owner_person_id=NEW.owner_person_id AND instrument.privacy=NEW.privacy AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id AND mutation.privacy=NEW.privacy AND mutation.operation IN ('bootstrap_default','plan_version')) BEGIN SELECT RAISE(ABORT,'allocation scope does not match plan, instrument and mutation'); END;
+CREATE TRIGGER trg_ltp_plan_seal_scope BEFORE INSERT ON long_term_portfolio_plan_seals WHEN NOT EXISTS(SELECT 1 FROM long_term_portfolio_plan_versions plan JOIN long_term_portfolio_mutations mutation ON mutation.id=NEW.mutation_id WHERE plan.id=NEW.plan_version_id AND plan.mutation_id=NEW.mutation_id AND plan.family_id=NEW.family_id AND plan.owner_person_id=NEW.owner_person_id AND plan.privacy=NEW.privacy AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id AND mutation.privacy=NEW.privacy AND mutation.operation IN ('bootstrap_default','plan_version')) OR NEW.allocation_count<>(SELECT count(*) FROM long_term_portfolio_allocations allocation WHERE allocation.plan_version_id=NEW.plan_version_id AND allocation.family_id=NEW.family_id AND allocation.owner_person_id=NEW.owner_person_id AND allocation.privacy=NEW.privacy) OR NEW.total_basis_points<>(SELECT coalesce(sum(allocation.target_basis_points),0) FROM long_term_portfolio_allocations allocation WHERE allocation.plan_version_id=NEW.plan_version_id AND allocation.family_id=NEW.family_id AND allocation.owner_person_id=NEW.owner_person_id AND allocation.privacy=NEW.privacy) BEGIN SELECT RAISE(ABORT,'plan seal requires an exact non-empty 100 percent allocation aggregate'); END;
+CREATE TRIGGER trg_ltp_event_scope BEFORE INSERT ON long_term_portfolio_ledger_events WHEN NOT EXISTS(SELECT 1 FROM long_term_portfolios portfolio JOIN long_term_portfolio_mutations mutation ON mutation.id=NEW.mutation_id WHERE portfolio.id=NEW.portfolio_id AND portfolio.family_id=NEW.family_id AND portfolio.owner_person_id=NEW.owner_person_id AND portfolio.privacy=NEW.privacy AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id AND mutation.privacy=NEW.privacy AND mutation.operation='ledger_event') OR (NEW.instrument_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM long_term_portfolio_instruments instrument WHERE instrument.id=NEW.instrument_id AND instrument.family_id=NEW.family_id AND instrument.owner_person_id=NEW.owner_person_id AND instrument.privacy=NEW.privacy)) OR (NEW.cash_carryover_instrument_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM long_term_portfolio_instruments instrument WHERE instrument.id=NEW.cash_carryover_instrument_id AND instrument.family_id=NEW.family_id AND instrument.owner_person_id=NEW.owner_person_id AND instrument.privacy=NEW.privacy)) OR (NEW.transfer_counterparty_instrument_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM long_term_portfolio_instruments instrument WHERE instrument.id=NEW.transfer_counterparty_instrument_id AND instrument.family_id=NEW.family_id AND instrument.owner_person_id=NEW.owner_person_id AND instrument.privacy=NEW.privacy)) OR (NEW.reversal_of_event_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM long_term_portfolio_ledger_events original WHERE original.id=NEW.reversal_of_event_id AND original.portfolio_id=NEW.portfolio_id AND original.family_id=NEW.family_id AND original.owner_person_id=NEW.owner_person_id AND original.privacy=NEW.privacy AND original.event_type<>'reversal')) BEGIN SELECT RAISE(ABORT,'ledger event scope or reversal target is invalid'); END;
+CREATE TRIGGER trg_ltp_event_fx_rate BEFORE INSERT ON long_term_portfolio_ledger_events WHEN NEW.currency<>(SELECT portfolio.base_currency FROM long_term_portfolios portfolio WHERE portfolio.id=NEW.portfolio_id) AND NEW.fx_rate IS NULL BEGIN SELECT RAISE(ABORT,'foreign-currency ledger events require an explicit base-currency fx rate'); END;
+CREATE TRIGGER trg_ltp_event_currency BEFORE INSERT ON long_term_portfolio_ledger_events WHEN (NEW.instrument_id IS NULL AND NOT EXISTS(SELECT 1 FROM long_term_portfolios portfolio WHERE portfolio.id=NEW.portfolio_id AND portfolio.base_currency=NEW.currency)) OR (NEW.instrument_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM long_term_portfolio_instrument_revisions revision WHERE revision.instrument_id=NEW.instrument_id AND revision.currency=NEW.currency AND datetime(revision.effective_from)<=datetime(NEW.executed_at) AND NOT EXISTS(SELECT 1 FROM long_term_portfolio_instrument_revisions later WHERE later.instrument_id=revision.instrument_id AND datetime(later.effective_from)<=datetime(NEW.executed_at) AND datetime(later.effective_from)>datetime(revision.effective_from)))) OR (NEW.transfer_counterparty_instrument_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM long_term_portfolio_instrument_revisions revision WHERE revision.instrument_id=NEW.transfer_counterparty_instrument_id AND revision.currency=NEW.currency AND datetime(revision.effective_from)<=datetime(NEW.executed_at) AND NOT EXISTS(SELECT 1 FROM long_term_portfolio_instrument_revisions later WHERE later.instrument_id=revision.instrument_id AND datetime(later.effective_from)<=datetime(NEW.executed_at) AND datetime(later.effective_from)>datetime(revision.effective_from)))) BEGIN SELECT RAISE(ABORT,'ledger currency must match the effective instrument or portfolio base currency'); END;
+CREATE TRIGGER trg_ltp_event_quantity_balance BEFORE INSERT ON long_term_portfolio_ledger_events
+WHEN NEW.instrument_id IS NOT NULL AND NEW.event_type IN ('sell','rights_issue_sold','rights_issue_expired','reverse_split') AND (
+  coalesce((SELECT sum(CASE event.event_type WHEN 'buy' THEN coalesce(event.quantity,0) WHEN 'transfer_in' THEN coalesce(event.quantity,0) WHEN 'bonus_shares' THEN coalesce(event.quantity,0) WHEN 'rights_issue_used' THEN coalesce(event.quantity,0) WHEN 'split' THEN coalesce(event.quantity,0) WHEN 'sell' THEN -coalesce(event.quantity,0) WHEN 'rights_issue_sold' THEN -coalesce(event.quantity,0) WHEN 'rights_issue_expired' THEN -coalesce(event.quantity,0) WHEN 'reverse_split' THEN -coalesce(event.quantity,0) ELSE 0 END) FROM long_term_portfolio_ledger_events event WHERE event.portfolio_id=NEW.portfolio_id AND event.instrument_id=NEW.instrument_id AND datetime(event.executed_at)<=datetime(NEW.executed_at) AND NOT EXISTS(SELECT 1 FROM long_term_portfolio_ledger_events reversal WHERE reversal.reversal_of_event_id=event.id)),0)-NEW.quantity < -0.000001
+  OR EXISTS(SELECT 1 FROM long_term_portfolio_ledger_events pivot WHERE pivot.portfolio_id=NEW.portfolio_id AND pivot.instrument_id=NEW.instrument_id AND datetime(pivot.executed_at)>=datetime(NEW.executed_at) AND coalesce((SELECT sum(CASE event.event_type WHEN 'buy' THEN coalesce(event.quantity,0) WHEN 'transfer_in' THEN coalesce(event.quantity,0) WHEN 'bonus_shares' THEN coalesce(event.quantity,0) WHEN 'rights_issue_used' THEN coalesce(event.quantity,0) WHEN 'split' THEN coalesce(event.quantity,0) WHEN 'sell' THEN -coalesce(event.quantity,0) WHEN 'rights_issue_sold' THEN -coalesce(event.quantity,0) WHEN 'rights_issue_expired' THEN -coalesce(event.quantity,0) WHEN 'reverse_split' THEN -coalesce(event.quantity,0) ELSE 0 END) FROM long_term_portfolio_ledger_events event WHERE event.portfolio_id=NEW.portfolio_id AND event.instrument_id=NEW.instrument_id AND datetime(event.executed_at)<=datetime(pivot.executed_at) AND NOT EXISTS(SELECT 1 FROM long_term_portfolio_ledger_events reversal WHERE reversal.reversal_of_event_id=event.id)),0)-NEW.quantity < -0.000001)
+) BEGIN SELECT RAISE(ABORT,'ledger event would make the instrument quantity negative'); END;
+CREATE TRIGGER trg_ltp_reversal_quantity_balance BEFORE INSERT ON long_term_portfolio_ledger_events
+WHEN NEW.event_type='reversal' AND EXISTS(SELECT 1 FROM long_term_portfolio_ledger_events original WHERE original.id=NEW.reversal_of_event_id AND original.instrument_id IS NOT NULL AND original.event_type IN ('buy','transfer_in','bonus_shares','rights_issue_used','split')) AND EXISTS(
+  SELECT 1 FROM long_term_portfolio_ledger_events pivot JOIN long_term_portfolio_ledger_events original ON original.id=NEW.reversal_of_event_id
+  WHERE pivot.portfolio_id=original.portfolio_id AND pivot.instrument_id=original.instrument_id AND datetime(pivot.executed_at)>=datetime(original.executed_at) AND coalesce((SELECT sum(CASE event.event_type WHEN 'buy' THEN coalesce(event.quantity,0) WHEN 'transfer_in' THEN coalesce(event.quantity,0) WHEN 'bonus_shares' THEN coalesce(event.quantity,0) WHEN 'rights_issue_used' THEN coalesce(event.quantity,0) WHEN 'split' THEN coalesce(event.quantity,0) WHEN 'sell' THEN -coalesce(event.quantity,0) WHEN 'rights_issue_sold' THEN -coalesce(event.quantity,0) WHEN 'rights_issue_expired' THEN -coalesce(event.quantity,0) WHEN 'reverse_split' THEN -coalesce(event.quantity,0) ELSE 0 END) FROM long_term_portfolio_ledger_events event WHERE event.portfolio_id=original.portfolio_id AND event.instrument_id=original.instrument_id AND event.id<>original.id AND datetime(event.executed_at)<=datetime(pivot.executed_at) AND NOT EXISTS(SELECT 1 FROM long_term_portfolio_ledger_events reversal WHERE reversal.reversal_of_event_id=event.id)),0) < -0.000001
+) BEGIN SELECT RAISE(ABORT,'reversal would make the instrument quantity negative'); END;
+CREATE TRIGGER trg_ltp_price_scope BEFORE INSERT ON long_term_portfolio_price_observations WHEN NOT EXISTS(SELECT 1 FROM long_term_portfolios portfolio JOIN long_term_portfolio_instruments instrument ON instrument.id=NEW.instrument_id JOIN long_term_portfolio_mutations mutation ON mutation.id=NEW.mutation_id WHERE portfolio.id=NEW.portfolio_id AND portfolio.family_id=NEW.family_id AND portfolio.owner_person_id=NEW.owner_person_id AND portfolio.privacy=NEW.privacy AND instrument.family_id=NEW.family_id AND instrument.owner_person_id=NEW.owner_person_id AND instrument.privacy=NEW.privacy AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id AND mutation.privacy=NEW.privacy AND mutation.operation='price_observation') BEGIN SELECT RAISE(ABORT,'price observation scope does not match portfolio, instrument and mutation'); END;
+CREATE TRIGGER trg_ltp_price_currency BEFORE INSERT ON long_term_portfolio_price_observations WHEN NOT EXISTS(SELECT 1 FROM long_term_portfolio_instrument_revisions revision WHERE revision.instrument_id=NEW.instrument_id AND revision.currency=NEW.currency AND datetime(revision.effective_from)<=datetime(NEW.observed_at) AND NOT EXISTS(SELECT 1 FROM long_term_portfolio_instrument_revisions later WHERE later.instrument_id=revision.instrument_id AND datetime(later.effective_from)<=datetime(NEW.observed_at) AND datetime(later.effective_from)>datetime(revision.effective_from))) BEGIN SELECT RAISE(ABORT,'price currency must match the effective instrument revision'); END;
+
+CREATE TRIGGER trg_ltp_mutation_update BEFORE UPDATE ON long_term_portfolio_mutations BEGIN SELECT RAISE(ABORT,'long-term portfolio mutation ledger is append-only'); END;
+CREATE TRIGGER trg_ltp_mutation_delete BEFORE DELETE ON long_term_portfolio_mutations BEGIN SELECT RAISE(ABORT,'long-term portfolio mutation deletion requires governed lifecycle'); END;
+CREATE TRIGGER trg_ltp_instrument_update BEFORE UPDATE ON long_term_portfolio_instruments BEGIN SELECT RAISE(ABORT,'long-term portfolio stable instruments are immutable'); END;
+CREATE TRIGGER trg_ltp_instrument_delete BEFORE DELETE ON long_term_portfolio_instruments BEGIN SELECT RAISE(ABORT,'long-term portfolio instrument deletion is forbidden; append a revision'); END;
+CREATE TRIGGER trg_ltp_revision_update BEFORE UPDATE ON long_term_portfolio_instrument_revisions BEGIN SELECT RAISE(ABORT,'long-term portfolio instrument revisions are append-only'); END;
+CREATE TRIGGER trg_ltp_revision_delete BEFORE DELETE ON long_term_portfolio_instrument_revisions BEGIN SELECT RAISE(ABORT,'long-term portfolio instrument revision deletion is forbidden'); END;
+CREATE TRIGGER trg_ltp_portfolio_update BEFORE UPDATE ON long_term_portfolios BEGIN SELECT RAISE(ABORT,'long-term portfolios are immutable'); END;
+CREATE TRIGGER trg_ltp_portfolio_delete BEFORE DELETE ON long_term_portfolios BEGIN SELECT RAISE(ABORT,'long-term portfolio deletion requires governed lifecycle'); END;
+CREATE TRIGGER trg_ltp_plan_update BEFORE UPDATE ON long_term_portfolio_plan_versions BEGIN SELECT RAISE(ABORT,'long-term portfolio plans are versioned and immutable'); END;
+CREATE TRIGGER trg_ltp_plan_delete BEFORE DELETE ON long_term_portfolio_plan_versions BEGIN SELECT RAISE(ABORT,'long-term portfolio plan deletion is forbidden'); END;
+CREATE TRIGGER trg_ltp_allocation_update BEFORE UPDATE ON long_term_portfolio_allocations BEGIN SELECT RAISE(ABORT,'long-term portfolio allocations are versioned and immutable'); END;
+CREATE TRIGGER trg_ltp_allocation_delete BEFORE DELETE ON long_term_portfolio_allocations BEGIN SELECT RAISE(ABORT,'long-term portfolio allocation deletion is forbidden'); END;
+CREATE TRIGGER trg_ltp_plan_seal_update BEFORE UPDATE ON long_term_portfolio_plan_seals BEGIN SELECT RAISE(ABORT,'long-term portfolio plan seals are immutable'); END;
+CREATE TRIGGER trg_ltp_plan_seal_delete BEFORE DELETE ON long_term_portfolio_plan_seals BEGIN SELECT RAISE(ABORT,'long-term portfolio plan seal deletion is forbidden'); END;
+CREATE TRIGGER trg_ltp_event_update BEFORE UPDATE ON long_term_portfolio_ledger_events BEGIN SELECT RAISE(ABORT,'long-term portfolio ledger is append-only; use a reversal'); END;
+CREATE TRIGGER trg_ltp_event_delete BEFORE DELETE ON long_term_portfolio_ledger_events BEGIN SELECT RAISE(ABORT,'long-term portfolio ledger deletion is forbidden; use a reversal'); END;
+CREATE TRIGGER trg_ltp_price_update BEFORE UPDATE ON long_term_portfolio_price_observations BEGIN SELECT RAISE(ABORT,'long-term portfolio price observations are append-only'); END;
+CREATE TRIGGER trg_ltp_price_delete BEFORE DELETE ON long_term_portfolio_price_observations BEGIN SELECT RAISE(ABORT,'long-term portfolio price observation deletion is forbidden'); END;
+
+UPDATE database_metadata SET value='REVISION-33-L-LONG-TERM-PORTFOLIO',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -10888,7 +11220,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(85, 'b5_family_emergency_planning_ledger', familyEmergencyPlanningLedgerSql),
   createMigrationDefinition(86, 'b5_family_emergency_preparedness_ledger', familyEmergencyPreparednessLedgerSql),
   createMigrationDefinition(87, 'b5_family_emergency_assistance_card_ledger', familyEmergencyAssistanceCardLedgerSql),
-  createMigrationDefinition(88, 'b5_family_emergency_card_portability_ledger', familyEmergencyCardPortabilityLedgerSql)
+  createMigrationDefinition(88, 'b5_family_emergency_card_portability_ledger', familyEmergencyCardPortabilityLedgerSql),
+  createMigrationDefinition(89, 'b4_long_term_portfolio_ledger', longTermPortfolioLedgerSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

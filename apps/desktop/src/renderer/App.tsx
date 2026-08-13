@@ -6,6 +6,7 @@ import { accessibilityAnnouncement, nextRovingIndex, parseAccessibilityPreferenc
 import { AsyncWriteGuard, MutationRevisionWatermark } from './async-state-guard';
 import { DEVICE_REAUTHORIZATION_CONFIRMATION, SECURITY_CENTER_LABEL, SECURITY_CENTER_ROUTE, canSubmitDeviceReauthorization, securityCenterNeedsAttention } from './security-center-navigation';
 import { FinancePlanningPanel } from './FinancePlanningPanel';
+import { LongTermPortfolioPanel } from './LongTermPortfolioPanel';
 import { ManagedLifePanel } from './ManagedLifePanel';
 import {
   FAMILY_RELATIONSHIP_CATALOG,
@@ -69,6 +70,7 @@ import type { SensitiveDataCategory, SensitiveDataConsentPurpose, SensitiveDataP
 import type { BankInstitutionView, BankAccountView, CreateBankAccountInput, IbanStructuralValidationView, ValidateIbanInput, PaymentCardView, CreatePaymentCardInput } from '@ppt/domain';
 import type { LoanAccountView, CreateLoanAccountInput, RecordLoanPaymentInput } from '@ppt/domain';
 import type { FinancePlanningWorkspaceView, RecordFinancePlanningItemInput } from '@ppt/domain';
+import type { LongTermPortfolioWorkspaceView, RecordLongTermPortfolioItemInput } from '@ppt/domain';
 import type { ManagedLifeWorkspaceView, RecordManagedLifeItemInput } from '@ppt/domain';
 
 type ReleaseChannel = 'bronze' | 'silver' | 'gold';
@@ -1691,7 +1693,7 @@ function PermissionsScreen({ auth }: { auth: AuthStateView }) {
 }
 
 
-function FinanceScreen({people,records,valuations,institutions,bankAccounts,paymentCards,loanAccounts,planningWorkspace,onCreate,onCreateValuation,onValidateIban,onCreateBankAccount,onCreatePaymentCard,onCreateLoanAccount,onRecordLoanPayment,onRecordPlanning,onPlanningWorkspaceChange}:{people:FamilyMemberView[];records:FinanceRecordView[];valuations:FinanceValuationView[];institutions:BankInstitutionView[];bankAccounts:BankAccountView[];paymentCards:PaymentCardView[];loanAccounts:LoanAccountView[];planningWorkspace:FinancePlanningWorkspaceView|undefined;onCreate:(input:CreateFinanceRecordInput)=>Promise<void>;onCreateValuation:(input:CreateFinanceValuationInput)=>Promise<void>;onValidateIban:(input:ValidateIbanInput)=>Promise<IbanStructuralValidationView>;onCreateBankAccount:(input:CreateBankAccountInput)=>Promise<void>;onCreatePaymentCard:(input:CreatePaymentCardInput)=>Promise<void>;onCreateLoanAccount:(input:CreateLoanAccountInput)=>Promise<void>;onRecordLoanPayment:(input:RecordLoanPaymentInput)=>Promise<void>;onRecordPlanning:(input:RecordFinancePlanningItemInput)=>Promise<void>;onPlanningWorkspaceChange:(workspace:FinancePlanningWorkspaceView)=>void}){
+function FinanceOverviewScreen({people,records,valuations,institutions,bankAccounts,paymentCards,loanAccounts,planningWorkspace,onCreate,onCreateValuation,onValidateIban,onCreateBankAccount,onCreatePaymentCard,onCreateLoanAccount,onRecordLoanPayment,onRecordPlanning,onPlanningWorkspaceChange}:{people:FamilyMemberView[];records:FinanceRecordView[];valuations:FinanceValuationView[];institutions:BankInstitutionView[];bankAccounts:BankAccountView[];paymentCards:PaymentCardView[];loanAccounts:LoanAccountView[];planningWorkspace:FinancePlanningWorkspaceView|undefined;onCreate:(input:CreateFinanceRecordInput)=>Promise<void>;onCreateValuation:(input:CreateFinanceValuationInput)=>Promise<void>;onValidateIban:(input:ValidateIbanInput)=>Promise<IbanStructuralValidationView>;onCreateBankAccount:(input:CreateBankAccountInput)=>Promise<void>;onCreatePaymentCard:(input:CreatePaymentCardInput)=>Promise<void>;onCreateLoanAccount:(input:CreateLoanAccountInput)=>Promise<void>;onRecordLoanPayment:(input:RecordLoanPaymentInput)=>Promise<void>;onRecordPlanning:(input:RecordFinancePlanningItemInput)=>Promise<void>;onPlanningWorkspaceChange:(workspace:FinancePlanningWorkspaceView)=>void}){
   const [ownerPersonId,setOwner]=useState(people[0]?.id??''); const [title,setTitle]=useState(''); const [amount,setAmount]=useState(''); const [kind,setKind]=useState<FinanceRecordView['kind']>('asset'); const [privacy,setPrivacy]=useState<FinanceRecordView['privacy']>('private'); const [currency,setCurrency]=useState('TRY'); const [dueAt,setDueAt]=useState(''); const [remaining,setRemaining]=useState(''); const [symbol,setSymbol]=useState(''); const [valuationRecord,setValuationRecord]=useState(''); const [unitPrice,setUnitPrice]=useState(''); const [quantity,setQuantity]=useState('1'); const [message,setMessage]=useState('');
   const [bankOwnerPersonId,setBankOwner]=useState(people[0]?.id??''); const [institutionCode,setInstitutionCode]=useState(''); const [iban,setIban]=useState(''); const [ibanValidation,setIbanValidation]=useState<IbanStructuralValidationView>(); const [bankAlias,setBankAlias]=useState(''); const [bankBranch,setBankBranch]=useState(''); const [bankType,setBankType]=useState<BankAccountView['accountType']>('checking'); const [bankCurrency,setBankCurrency]=useState('TRY'); const [ownershipPercent,setOwnershipPercent]=useState('100'); const [bankStatus,setBankStatus]=useState<BankAccountView['status']>('active'); const [bankPrivacy,setBankPrivacy]=useState<BankAccountView['privacy']>('private'); const [bankMessage,setBankMessage]=useState('');
   const [cardOwnerPersonId,setCardOwner]=useState(people[0]?.id??''); const [cardInstitutionCode,setCardInstitutionCode]=useState(''); const [cardProductName,setCardProductName]=useState(''); const [cardKind,setCardKind]=useState<PaymentCardView['kind']>('credit'); const [cardNetwork,setCardNetwork]=useState<PaymentCardView['network']>('troy'); const [cardFormFactor,setCardFormFactor]=useState<PaymentCardView['formFactor']>('physical'); const [cardLast4,setCardLast4]=useState(''); const [cardCurrency,setCardCurrency]=useState('TRY'); const [cardLimit,setCardLimit]=useState(''); const [cardAvailable,setCardAvailable]=useState(''); const [cardDebt,setCardDebt]=useState('0'); const [cardStatementBalance,setCardStatementBalance]=useState('0'); const [cardStatementClosing,setCardStatementClosing]=useState(''); const [cardPaymentDue,setCardPaymentDue]=useState(''); const [cardInstallmentCount,setCardInstallmentCount]=useState('0'); const [cardInstallmentAmount,setCardInstallmentAmount]=useState('0'); const [cardAutomaticPayment,setCardAutomaticPayment]=useState<PaymentCardView['automaticPaymentMode']>('none'); const [cardRewardPoints,setCardRewardPoints]=useState('0'); const [cardRewardMiles,setCardRewardMiles]=useState('0'); const [cardAnnualFee,setCardAnnualFee]=useState('0'); const [cardAnnualFeeDue,setCardAnnualFeeDue]=useState(''); const [cardAlertsEnabled,setCardAlertsEnabled]=useState(true); const [cardUtilizationAlert,setCardUtilizationAlert]=useState('80'); const [cardDueAlertDays,setCardDueAlertDays]=useState('3'); const [cardStatus,setCardStatus]=useState<PaymentCardView['status']>('active'); const [cardPrivacy,setCardPrivacy]=useState<PaymentCardView['privacy']>('private'); const [cardMessage,setCardMessage]=useState('');
@@ -1822,6 +1824,19 @@ function FinanceScreen({people,records,valuations,institutions,bankAccounts,paym
     </section><section className="workspace-grid"><FinancePlanningPanel people={people} workspace={planningWorkspace} onRecord={onRecordPlanning} onWorkspaceChange={onPlanningWorkspaceChange}/></section></>;
 }
 
+function FinanceScreen({longTermPortfolioWorkspace,onRecordLongTermPortfolio,...props}: Parameters<typeof FinanceOverviewScreen>[0]&{longTermPortfolioWorkspace:LongTermPortfolioWorkspaceView|undefined;onRecordLongTermPortfolio:(input:RecordLongTermPortfolioItemInput)=>Promise<void>}) {
+  const [section,setSection]=useState<'overview'|'long-term-portfolio'>('overview');
+  return <>
+    <nav className="finance-section-tabs" aria-label="Finans bölümleri">
+      <Button tone={section==='overview'?'primary':'default'} onClick={()=>setSection('overview')}>Genel finans</Button>
+      <Button tone={section==='long-term-portfolio'?'primary':'default'} onClick={()=>setSection('long-term-portfolio')}>Uzun Vadeli Portföy</Button>
+    </nav>
+    {section==='overview'
+      ? <FinanceOverviewScreen {...props}/>
+      : <LongTermPortfolioPanel people={props.people} workspace={longTermPortfolioWorkspace} onRecord={onRecordLongTermPortfolio}/>}
+  </>;
+}
+
 function HealthScreen({people,records,medications,history,onCreate,onCreateMedication,onCreateHistory}:{people:FamilyMemberView[];records:HealthRecordView[];medications:MedicationPlanView[];history:FamilyHealthHistoryView[];onCreate:(input:CreateHealthRecordInput)=>Promise<void>;onCreateMedication:(input:CreateMedicationPlanInput)=>Promise<void>;onCreateHistory:(input:CreateFamilyHealthHistoryInput)=>Promise<void>}){
   const [ownerPersonId,setOwner]=useState(people[0]?.id??''); const [title,setTitle]=useState(''); const [kind,setKind]=useState<HealthRecordView['kind']>('appointment'); const [privacy,setPrivacy]=useState<HealthRecordView['privacy']>('private'); const [provider,setProvider]=useState(''); const [medName,setMedName]=useState(''); const [dosage,setDosage]=useState(''); const [schedule,setSchedule]=useState(''); const [condition,setCondition]=useState(''); const [message,setMessage]=useState('');
   const submit=async()=>{try{await onCreate({ownerPersonId,title,kind,privacy,...(provider?{provider}:{}),occurredAt:new Date().toISOString()});setTitle('');setProvider('');setMessage('Sağlık kaydı eklendi.');}catch(e){setMessage(e instanceof Error?e.message:'Kayıt eklenemedi.');}};
@@ -1942,6 +1957,7 @@ export function App() {
   const [paymentCards,setPaymentCards]=useState<PaymentCardView[]>([]);
   const [loanAccounts,setLoanAccounts]=useState<LoanAccountView[]>([]);
   const [financePlanningWorkspace,setFinancePlanningWorkspace]=useState<FinancePlanningWorkspaceView>();
+  const [longTermPortfolioWorkspace,setLongTermPortfolioWorkspace]=useState<LongTermPortfolioWorkspaceView>();
   const [healthRecords,setHealthRecords]=useState<HealthRecordView[]>([]);
   const [medicationPlans,setMedicationPlans]=useState<MedicationPlanView[]>([]);
   const [familyHealthHistory,setFamilyHealthHistory]=useState<FamilyHealthHistoryView[]>([]);
@@ -2145,8 +2161,8 @@ export function App() {
     let task:Promise<void>;
     task=(async()=>{
       if(screen==='finance'){
-        const [records,valuations,institutions,accounts,cards,loans,planning]=await Promise.all([window.pardus!.listFinance(),window.pardus!.listFinanceValuations(),window.pardus!.listBankInstitutions(),window.pardus!.listBankAccounts(),window.pardus!.listPaymentCards(),window.pardus!.listLoanAccounts(),window.pardus!.getFinancePlanningWorkspace()]);
-        asyncWriteGuardRef.current.commit(ticket,()=>{setFinanceRecords(records);setFinanceValuations(valuations);setBankInstitutions(institutions);setBankAccounts(accounts);setPaymentCards(cards);setLoanAccounts(loans);setFinancePlanningWorkspace(planning);});
+        const [records,valuations,institutions,accounts,cards,loans,planning,longTermPortfolio]=await Promise.all([window.pardus!.listFinance(),window.pardus!.listFinanceValuations(),window.pardus!.listBankInstitutions(),window.pardus!.listBankAccounts(),window.pardus!.listPaymentCards(),window.pardus!.listLoanAccounts(),window.pardus!.getFinancePlanningWorkspace(),window.pardus!.getLongTermPortfolioWorkspace()]);
+        asyncWriteGuardRef.current.commit(ticket,()=>{setFinanceRecords(records);setFinanceValuations(valuations);setBankInstitutions(institutions);setBankAccounts(accounts);setPaymentCards(cards);setLoanAccounts(loans);setFinancePlanningWorkspace(planning);setLongTermPortfolioWorkspace(longTermPortfolio);});
       }else if(screen==='health'){
         const [records,medications,history]=await Promise.all([window.pardus!.listHealth(),window.pardus!.listMedicationPlans(),window.pardus!.listFamilyHealthHistory()]);
         asyncWriteGuardRef.current.commit(ticket,()=>{setHealthRecords(records);setMedicationPlans(medications);setFamilyHealthHistory(history);});
@@ -2316,6 +2332,7 @@ export function App() {
   const createLoanAccount=async(input:CreateLoanAccountInput)=>{if(window.pardus)setLoanAccounts(await window.pardus.createLoanAccount(input));};
   const recordLoanPayment=async(input:RecordLoanPaymentInput)=>{if(window.pardus)setLoanAccounts(await window.pardus.recordLoanPayment(input));};
   const recordFinancePlanningItem=async(input:RecordFinancePlanningItemInput)=>{if(window.pardus)setFinancePlanningWorkspace(await window.pardus.recordFinancePlanningItem(input));};
+  const recordLongTermPortfolioItem=async(input:RecordLongTermPortfolioItemInput)=>{if(window.pardus)setLongTermPortfolioWorkspace(await window.pardus.recordLongTermPortfolioItem(input));};
   const createHealth=async(input:CreateHealthRecordInput)=>{if(window.pardus){setHealthRecords(await window.pardus.createHealth(input));await refreshDashboard();}};
   const createMedicationPlan=async(input:CreateMedicationPlanInput)=>{if(window.pardus){setMedicationPlans(await window.pardus.createMedicationPlan(input));await refreshDashboard();}};
   const createFamilyHistory=async(input:CreateFamilyHealthHistoryInput)=>{if(window.pardus){setFamilyHealthHistory(await window.pardus.createFamilyHealthHistory(input));await refreshDashboard();}};
@@ -2360,7 +2377,7 @@ export function App() {
   else if (active === 'archive') screen = <ArchiveScreen revision={archiveRevision} snapshot={snapshot} eventFilter={archiveEventFilter} onEventFilterChange={setArchiveEventFilter} onImport={importArchive} onOpen={openArchive} />;
   else if (active === 'location') screen = <LocationScreen snapshot={snapshot} onAdd={() => setLocationModal(true)} onAcknowledge={acknowledgeTimelineNotification} />;
   else if (active === 'important-days') screen = <ImportantDaysScreen snapshot={snapshot} archivedEvents={archivedEvents} onAdd={openImportantDayModal} onEdit={setEditingEvent} onArchive={(eventId)=>setFamilyEventArchived(eventId,true)} onRestore={(eventId)=>setFamilyEventArchived(eventId,false)} onOpenArchive={openEventArchive} />;
-  else if (active === 'finance') screen = <FinanceScreen people={snapshot.people} records={financeRecords} valuations={financeValuations} institutions={bankInstitutions} bankAccounts={bankAccounts} paymentCards={paymentCards} loanAccounts={loanAccounts} planningWorkspace={financePlanningWorkspace} onCreate={createFinance} onCreateValuation={createFinanceValuation} onValidateIban={validateIban} onCreateBankAccount={createBankAccount} onCreatePaymentCard={createPaymentCard} onCreateLoanAccount={createLoanAccount} onRecordLoanPayment={recordLoanPayment} onRecordPlanning={recordFinancePlanningItem} onPlanningWorkspaceChange={setFinancePlanningWorkspace} />;
+  else if (active === 'finance') screen = <FinanceScreen people={snapshot.people} records={financeRecords} valuations={financeValuations} institutions={bankInstitutions} bankAccounts={bankAccounts} paymentCards={paymentCards} loanAccounts={loanAccounts} planningWorkspace={financePlanningWorkspace} longTermPortfolioWorkspace={longTermPortfolioWorkspace} onCreate={createFinance} onCreateValuation={createFinanceValuation} onValidateIban={validateIban} onCreateBankAccount={createBankAccount} onCreatePaymentCard={createPaymentCard} onCreateLoanAccount={createLoanAccount} onRecordLoanPayment={recordLoanPayment} onRecordPlanning={recordFinancePlanningItem} onRecordLongTermPortfolio={recordLongTermPortfolioItem} onPlanningWorkspaceChange={setFinancePlanningWorkspace} />;
   else if (active === 'health') screen = <HealthScreen people={snapshot.people} records={healthRecords} medications={medicationPlans} history={familyHealthHistory} onCreate={createHealth} onCreateMedication={createMedicationPlan} onCreateHistory={createFamilyHistory} />;
   else if (active === 'life-center') screen = <><LifeCenterScreen people={snapshot.people} records={lifeRecords} onCreate={createLifeRecord} /><section className="workspace-grid"><ManagedLifePanel people={snapshot.people} workspace={managedLifeWorkspace} onRecord={recordManagedLifeItem}/></section></>;
   else if (active === 'automation') screen = <AutomationScreen rules={automationRules} onCreate={createAutomationRule} onToggle={toggleAutomationRule} />;

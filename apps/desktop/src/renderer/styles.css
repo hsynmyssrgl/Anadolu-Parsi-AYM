@@ -1195,3 +1195,36 @@ linear-gradient(145deg,#071a2d 0%,#0b2744 52%,#0b1c31 100%)}
 .emergency-card-check span{line-height:1.45;overflow-wrap:anywhere}
 .plaintext-warning{padding:12px;border:1px solid rgba(255,180,40,.42);border-radius:11px;background:rgba(255,180,40,.08)}
 @media(max-width:900px){.emergency-card-portability-panel{grid-column:auto}}
+
+/* Uzun vadeli portföy merkezi */
+.finance-section-tabs,.ltp-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;padding:10px;border:1px solid var(--border);border-radius:12px;background:rgba(79,145,255,.035)}
+.finance-section-tabs .button,.ltp-tabs .button{flex:1 1 150px;min-height:38px}
+.ltp-dashboard{display:grid;gap:16px}
+.ltp-metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.ltp-metric{padding:16px;border:1px solid var(--border);border-radius:12px;background:linear-gradient(145deg,rgba(16,36,56,.86),rgba(10,25,40,.82));display:grid;gap:5px}
+.ltp-metric small,.ltp-chart-legend,.ltp-table-note{color:var(--muted);font-size:.78rem}
+.ltp-metric strong{font-size:1.35rem}
+.ltp-chart{min-height:220px;padding:14px;border:1px solid var(--border);border-radius:12px;background:rgba(79,145,255,.025)}
+.ltp-chart svg{display:block;width:100%;height:190px;overflow:visible}
+.ltp-chart-grid{stroke:var(--border);stroke-width:1}
+.ltp-chart-principal{fill:none;stroke:#82b2ff;stroke-width:3}
+.ltp-chart-value{fill:none;stroke:#6ed796;stroke-width:3}
+.ltp-chart-projection{fill:none;stroke:#f5b85e;stroke-width:2;stroke-dasharray:6 5}
+.ltp-chart-income{fill:none;stroke:#6ed796;stroke-width:2.5}
+.ltp-chart-cost{fill:none;stroke:#ff7c89;stroke-width:2.5}
+.ltp-chart-carryover{fill:none;stroke:#b891ff;stroke-width:2.5}
+.ltp-chart-point{fill:var(--panel);stroke:#6ed796;stroke-width:2}
+.ltp-allocation-row{display:grid;grid-template-columns:minmax(140px,1.3fr) minmax(150px,2fr) auto;gap:10px;align-items:center;margin:8px 0}
+.ltp-allocation-track{height:10px;overflow:hidden;border-radius:999px;background:rgba(130,178,255,.12)}
+.ltp-allocation-fill{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#4f91ff,#6ed796)}
+.ltp-drift-warning{color:#f5b85e}
+.ltp-ledger-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.ltp-ledger-table th,.ltp-ledger-table td{padding:9px 8px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+.ltp-ledger-table th{color:var(--muted);font-weight:600}
+.ltp-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ltp-form-grid .span-2{grid-column:span 2}
+.ltp-boundary-note{padding:12px;border-left:3px solid #82b2ff;background:rgba(79,145,255,.07);border-radius:0 9px 9px 0}
+.ltp-empty-action{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.app-shell[data-theme="light"] .ltp-metric{background:linear-gradient(145deg,#fff,#f7f9fc)}
+@media(max-width:1100px){.ltp-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.ltp-metric-grid,.ltp-form-grid{grid-template-columns:1fr}.ltp-form-grid .span-2{grid-column:auto}.ltp-allocation-row{grid-template-columns:1fr}.ltp-ledger-table{display:block;overflow-x:auto;white-space:nowrap}}

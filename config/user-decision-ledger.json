@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 76,
+  "decisionCount": 77,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1932,6 +1932,18 @@
       "requirements": ["B5-06", "EXT-039"],
       "codeAreas": ["packages/domain/src/app-data.ts","packages/application/src/privacy-control-use-cases.ts","apps/desktop/src/main/privacy-control-application-adapter.ts","apps/desktop/src/main/data-store.ts","apps/desktop/src/main/ipc-integration-policy.ts","apps/desktop/src/main/main.ts","apps/desktop/src/main/preload.ts","apps/desktop/src/renderer/App.tsx"],
       "evidence": ["docs/security/THREAT_MODEL_33_K_PRIVACY_CONSENT_LOST_DEVICE_CONTROL.md","config/33-k-privacy-consent-lost-device-control-inventory.json"]
+    },
+    {
+      "id": "DEC-223",
+      "date": "2026-08-13",
+      "acceptedAt": "2026-08-13",
+      "title": "LTP-001 through LTP-008 long-term portfolio, immutable ledger and projection center",
+      "status": "ACTIVE",
+      "source": "Explicit user instruction: add the detailed long-term portfolio work list and continue full auto with grouped requirement closures",
+      "document": "docs/decisions/DEC-223-long-term-portfolio-center.md",
+      "requirements": ["LTP-001","LTP-002","LTP-003","LTP-004","LTP-005","LTP-006","LTP-007","LTP-008"],
+      "codeAreas": ["packages/domain/src/long-term-portfolio.ts","packages/application/src/long-term-portfolio-use-cases.ts","packages/database/src/family-database-migrations.ts","packages/repository-contracts/src/long-term-portfolio-repository.ts","packages/repositories/src/long-term-portfolio-repository.ts","apps/desktop/src/main/long-term-portfolio-application-adapter.ts","apps/desktop/src/main/data-store.ts","apps/desktop/src/main/ipc-integration-policy.ts","apps/desktop/src/main/main.ts","apps/desktop/src/main/preload.ts","apps/desktop/src/renderer/LongTermPortfolioPanel.tsx"],
+      "evidence": ["docs/security/THREAT_MODEL_33_L_LONG_TERM_PORTFOLIO.md"]
     },
     {
       "id": "DEC-221",

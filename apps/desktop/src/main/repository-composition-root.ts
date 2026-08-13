@@ -24,6 +24,7 @@ import {
   SqliteInvitationRepository,
   SqliteLegacyRepository,
   SqliteLifeRepository,
+  SqliteLongTermPortfolioRepository,
   SqliteLargeFamilyReadModelRepository,
   SqliteLocationRepository,
   SqliteNotificationStateRepository,
@@ -74,6 +75,7 @@ import type {
   LifePolicyResourceRepositoryPort,
   LifeProjectionRepositoryPort,
   LifeRepositoryPort,
+  LongTermPortfolioRepository,
   LocationPolicyResourceRepositoryPort,
   LocationRepositoryPort,
   NotificationStateRepositoryPort,
@@ -112,6 +114,7 @@ export interface RepositoryCompositionRoot {
   readonly familyRepository: FamilyRepositoryPort;
   readonly familyDataImportRepository: FamilyDataImportRepositoryPort;
   readonly financeRepository: FinanceRepositoryPort & FinancePolicyResourceRepositoryPort;
+  readonly longTermPortfolioRepository: LongTermPortfolioRepository;
   readonly externalBackupInventoryRepository: ExternalBackupInventoryRepositoryPort;
   readonly genealogyRepository: GenealogyRepositoryPort;
   readonly healthRepository: HealthRepositoryPort & HealthPolicyResourceRepositoryPort;
@@ -168,6 +171,7 @@ export const createSqliteRepositoryCompositionRoot = (
     familyRepository: new SqliteFamilyRepository(repositoryOptions),
     familyDataImportRepository: new SqliteFamilyDataImportRepository(repositoryOptions),
     financeRepository: new SqliteFinanceRepository(repositoryOptions),
+    longTermPortfolioRepository: new SqliteLongTermPortfolioRepository(repositoryOptions),
     externalBackupInventoryRepository: new SqliteExternalBackupInventoryRepository(repositoryOptions),
     genealogyRepository: new SqliteGenealogyRepository(repositoryOptions),
     healthRepository: new SqliteHealthRepository(repositoryOptions),

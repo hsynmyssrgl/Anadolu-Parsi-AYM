@@ -57,6 +57,7 @@ import type { ArchiveItemView, AuthStateView, ExternalIdentityProviderView, Crea
 import type { BankInstitutionView, BankAccountView, CreateBankAccountInput, IbanStructuralValidationView, ValidateIbanInput, PaymentCardView, CreatePaymentCardInput } from '@ppt/domain';
 import type { LoanAccountView, CreateLoanAccountInput, RecordLoanPaymentInput } from '@ppt/domain';
 import type { FinancePlanningWorkspaceView, RecordFinancePlanningItemInput, FinanceImportPreviewView, SelectFinanceImportFileResult, CommitFinanceImportPreviewInput } from '@ppt/domain';
+import type { LongTermPortfolioWorkspaceView, RecordLongTermPortfolioItemInput } from '@ppt/domain';
 import type { ManagedLifeWorkspaceView, RecordManagedLifeItemInput } from '@ppt/domain';
 
 interface EmergencyCardExportIpcInput {
@@ -547,6 +548,8 @@ contextBridge.exposeInMainWorld('pardus', {
   recordLoanPayment:(input:RecordLoanPaymentInput):Promise<LoanAccountView[]>=>invoke('finance:recordLoanPayment',input),
   getFinancePlanningWorkspace:():Promise<FinancePlanningWorkspaceView>=>invoke('finance:getPlanningWorkspace'),
   recordFinancePlanningItem:(input:RecordFinancePlanningItemInput):Promise<FinancePlanningWorkspaceView>=>invoke('finance:recordPlanningItem',input),
+  getLongTermPortfolioWorkspace:():Promise<LongTermPortfolioWorkspaceView>=>invoke('finance:getLongTermPortfolioWorkspace'),
+  recordLongTermPortfolioItem:(input:RecordLongTermPortfolioItemInput):Promise<LongTermPortfolioWorkspaceView>=>invoke('finance:recordLongTermPortfolioItem',input),
   selectFinanceImportFile:():Promise<SelectFinanceImportFileResult>=>invoke('finance:selectImportFile'),
   previewOpenBankingSandbox:():Promise<FinanceImportPreviewView>=>invoke('finance:previewOpenBankingSandbox'),
   commitFinanceImportPreview:(input:CommitFinanceImportPreviewInput):Promise<FinancePlanningWorkspaceView>=>invoke('finance:commitImportPreview',input),
