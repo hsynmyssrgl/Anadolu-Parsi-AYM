@@ -61,7 +61,7 @@ const testMatch = combined.match(/Tests\s+(?:\d+ failed\s+\|\s+)?(\d+) passed/u)
 const filesPassed = fileMatch ? Number(fileMatch[1]) : 0;
 const testsPassed = testMatch ? Number(testMatch[1]) : 0;
 const migration94 = migrationManifest.migrationVersions?.find((item) => item.version === 94);
-const migrationMatch = migrationSource.match(/const localGovernedOcrLedgerSql = `([\s\S]*?)`;\r?\n\r?\nexport const FAMILY_DATABASE_MIGRATIONS/u);
+const migrationMatch = migrationSource.match(/const localGovernedOcrLedgerSql = `([\s\S]*?)`;\r?\n\r?\n(?=const [A-Za-z_$][A-Za-z0-9_$]*Sql =|export const FAMILY_DATABASE_MIGRATIONS)/u);
 const migration94Sha256 = migrationMatch
   ? createHash('sha256').update(`${migrationMatch[1].replace(/\r\n/g, '\n').trim()}\n`).digest('hex')
   : '';

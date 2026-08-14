@@ -87,7 +87,7 @@ const [scope, inventory, registry, roadmap, plan, ledger, pkg, capabilityManifes
 const roadmap33Q = roadmap.packages?.find((item) => item.step === '33-Q');
 const registryItems = requirements.map((id) => registry.requirements?.find((item) => item.id === id));
 const migration94 = migrationManifest.migrationVersions?.find((item) => item.version === 94);
-const migrationMatch = migrationSource.match(/const localGovernedOcrLedgerSql = `([\s\S]*?)`;\r?\n\r?\nexport const FAMILY_DATABASE_MIGRATIONS/u);
+const migrationMatch = migrationSource.match(/const localGovernedOcrLedgerSql = `([\s\S]*?)`;\r?\n\r?\n(?=const [A-Za-z_$][A-Za-z0-9_$]*Sql =|export const FAMILY_DATABASE_MIGRATIONS)/u);
 const migration94Sha256 = migrationMatch
   ? createHash('sha256').update(`${migrationMatch[1].replace(/\r\n/g, '\n').trim()}\n`).digest('hex')
   : '';

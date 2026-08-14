@@ -51,7 +51,7 @@ const source=Object.fromEntries(await Promise.all(Object.entries(productionPaths
 const tests=Object.fromEntries(await Promise.all(testFiles.map(async path=>[path,await readFile(resolve(root,path),'utf8')])));
 const has=(key,...markers)=>markers.every(marker=>source[key].includes(marker));
 const testHas=(path,...markers)=>markers.every(marker=>tests[path].includes(marker));
-const migration93Match=source.migration.match(/const identityAccessCredentialLedgerSql = `([\s\S]*?)`;\r?\n\r?\nexport const FAMILY_DATABASE_MIGRATIONS/u);
+const migration93Match=source.migration.match(/const identityAccessCredentialLedgerSql = `([\s\S]*?)`;\r?\n\r?\n(?=const [A-Za-z_$][A-Za-z0-9_$]*Sql =|export const FAMILY_DATABASE_MIGRATIONS)/u);
 const migration93Sha256=migration93Match?createHash('sha256').update(migration93Match[1].replace(/\r\n/g,'\n').trim()+'\n').digest('hex'):'';
 const truth=scope.truth??{};
 const fileRatchet=scope.validation?.targetedTestFileRatchet??0;
