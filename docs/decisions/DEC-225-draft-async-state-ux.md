@@ -1,7 +1,7 @@
 # DEC-225 — Taslak, geri alma ve asenkron ekran durumu UX'i
 
 - Tarih: 2026-08-14
-- Durum: VALIDATED_RECEIPT_PENDING
+- Durum: COMPLETED
 - İş adımı: 33-N
 - Gereksinimler: B3-02, B7-14, B7-15
 - Doğrulama: PASS_AUTOMATED_MANUAL_NOT_RUN_NO_CERTIFICATION

@@ -1,6 +1,6 @@
 # 33-N Taslak ve Asenkron Durum UX Tehdit Modeli
 
-- Durum: VALIDATED_RECEIPT_PENDING
+- Durum: COMPLETED
 - Doğrulama: PASS_AUTOMATED_MANUAL_NOT_RUN_NO_CERTIFICATION
 
 ## Kapsam ve varlıklar

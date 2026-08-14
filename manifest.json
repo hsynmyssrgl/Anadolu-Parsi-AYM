@@ -1,8 +1,8 @@
 {
   "schemaVersion": 3,
   "packageVersion": "4.8.2026-29",
-  "generatedAt": "2026-08-14T00:10:06.004Z",
-  "fileCount": 4008,
+  "generatedAt": "2026-08-14T00:23:55.329Z",
+  "fileCount": 4012,
   "files": [
     {
       "path": ".editorconfig",
@@ -3680,6 +3680,26 @@
       "bytes": 92
     },
     {
+      "path": "artifacts/checkpoints/33-N_COMPLETION_RECORD.json",
+      "sha256": "a60064022b72fd62a9f8bfed874dd95d3f27e01db761b6eaf68c8710e991a31f",
+      "bytes": 2539
+    },
+    {
+      "path": "artifacts/checkpoints/33-N_COMPLETION_RECORD.json.sha256",
+      "sha256": "62ae429853e024dfe59deee5e7b3dbe4adf8b082246accf2018b970069216915",
+      "bytes": 94
+    },
+    {
+      "path": "artifacts/checkpoints/33-N_LIBRARY_RECEIPT.json",
+      "sha256": "5d7d24750b738e4f9812bb168999ce0d94f9ada549af92b1e12964b74c85ed39",
+      "bytes": 2727
+    },
+    {
+      "path": "artifacts/checkpoints/33-N_LIBRARY_RECEIPT.json.sha256",
+      "sha256": "f29a808d98509438db3a4c1c9630d5feb691b4d5dea6eac9e79c1db15c4c7f16",
+      "bytes": 92
+    },
+    {
       "path": "artifacts/checkpoints/BRONZE_04.08.2026.29_CHECKPOINT_29-B_DURUM.md",
       "sha256": "30a6678d461e223f37662b646c6123d46e255668c8ea28454a34a5e8e5efaff3",
       "bytes": 824
@@ -4751,18 +4771,18 @@
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.csv",
-      "sha256": "a8cf7112d0b4c5aae7f4de9dd2b5a1aca299cfe64741039d792ce9cfaf1c4cd1",
-      "bytes": 544857
+      "sha256": "001f232d259d4472f788da9a8defbf45cbce744acb9ff7ce29dbb1cbffd8780c",
+      "bytes": 546073
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.json",
-      "sha256": "589f7e0b8d4572da9fbdc71139e5803cf5339540ac27565111ee826050aca52d",
-      "bytes": 1033090
+      "sha256": "43507036d8eec9973037efdd38a6523c6c915298dcc011bdbec186a142451b9a",
+      "bytes": 1035378
     },
     {
       "path": "artifacts/manifests/ALL_DOCUMENTS_INDEX.md",
-      "sha256": "f38fe01af014c70b0c714379f4f83f9a7718df6d634dadef818f21502bf53fb8",
-      "bytes": 591377
+      "sha256": "6da388bc9e08381f93741c0e7557330eb24bbba1bad398b998277d2d191ba465",
+      "bytes": 592689
     },
     {
       "path": "artifacts/manifests/ARCHIVE_CLASSIFICATION_VERIFICATION_BUILD72.json",
@@ -5531,18 +5551,18 @@
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.csv",
-      "sha256": "c919ed95dada442d733401fc4b50c42418f79a53444fec90bcd8309079b161d6",
-      "bytes": 897470
+      "sha256": "15489084ac5f6e183e16ff8bd01611b3b3fa93ee750850d25988ca60fb50e351",
+      "bytes": 899973
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.json",
-      "sha256": "1382066b87996d6dc93e60a04f683b31151cb2faab782684975aed4f0e21f3ce",
-      "bytes": 1703545
+      "sha256": "ba13c925be7a6dde76b2e75be149fb6fa5686b87d33cc404bc4658e55383e2dd",
+      "bytes": 1708192
     },
     {
       "path": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.md",
-      "sha256": "d8a3638c590af3d847a02530c3be3dbf53989b9d116d2e2cc611cc8e87da09e0",
-      "bytes": 973166
+      "sha256": "21198dd97b9961379421e3faf6da7a743341ec2c83e02bcccd3f528298afbcb6",
+      "bytes": 975837
     },
     {
       "path": "artifacts/manifests/REPORT_SUMMARY_VERIFICATION_BUILD74.txt",
@@ -8976,13 +8996,13 @@
     },
     {
       "path": "config/33-n-draft-async-state-ux-inventory.json",
-      "sha256": "217c85d80dd45b927caba99e9333f3dbc11860f8eb89e54ef0bb35d7364f8ed6",
-      "bytes": 3255
+      "sha256": "dec1e75bf65e664fbba2674eea4298e7f29777fe640470620d84e288e47fbd8e",
+      "bytes": 3200
     },
     {
       "path": "config/33-n-draft-async-state-ux-scope.json",
-      "sha256": "d71eaac86c5dc388da330f727406e5fc7395b0c2572355175c3d8ff3e1f8e16c",
-      "bytes": 3513
+      "sha256": "aca8cabb08e8842a7d13319f69d8d2a2ad5e9b7158a92d614ad92227b7b5d14c",
+      "bytes": 3536
     },
     {
       "path": "config/accepted-cache-rc2-validation-policy.json",
@@ -9006,8 +9026,8 @@
     },
     {
       "path": "config/active-governance-ledger.json",
-      "sha256": "f85897adae0e04d2a7926231f9998c5edce0359ca11751fc1dd5aeef3060b2e9",
-      "bytes": 49477
+      "sha256": "14cfc051186f64ae97bd9fda1af95a25986aea74cb04b9d8c4aa4af1ba68381d",
+      "bytes": 49913
     },
     {
       "path": "config/additional-family-capabilities.json",
@@ -9141,8 +9161,8 @@
     },
     {
       "path": "config/remaining-scope-package-roadmap.json",
-      "sha256": "88c810089662e7dc0b1be5d2bd29d371dd92bb42fab8b54dbdb2955a2e93127c",
-      "bytes": 18816
+      "sha256": "a320bc0362cbeae1e42f7c2c5bda236a886cedc4902cc02cd5884a4c1051b789",
+      "bytes": 18797
     },
     {
       "path": "config/rule-acknowledgement.json",
@@ -9171,8 +9191,8 @@
     },
     {
       "path": "config/work-segmentation-plan.json",
-      "sha256": "b7698ce5aabadaa5d23df644e30fe5e06b1fb0bbb8b31b31f58f66714143e8ff",
-      "bytes": 149324
+      "sha256": "45547da6609246de3d8a1e6ba24fc8735df8777e6cfb19414400441045e0f5b4",
+      "bytes": 150003
     },
     {
       "path": "CONTRIBUTING.md",
@@ -10486,8 +10506,8 @@
     },
     {
       "path": "docs/audit/33-N_DRAFT_ASYNC_STATE_UX_UST_KAPANIS.md",
-      "sha256": "4a08aad476a4c4e4a87aaf65dd7ac531178182f1e7e074d0c1d420635160ba96",
-      "bytes": 1119
+      "sha256": "15ddd5947ffe1bba612e7b549bf9d86518783068d9702556362266af83904845",
+      "bytes": 901
     },
     {
       "path": "docs/audit/BRONZE_CURRENT_COMPLETION_AUDIT.md",
@@ -10636,8 +10656,8 @@
     },
     {
       "path": "docs/current/08_TUM_BELGELER_DIZINI.md",
-      "sha256": "f38fe01af014c70b0c714379f4f83f9a7718df6d634dadef818f21502bf53fb8",
-      "bytes": 591377
+      "sha256": "6da388bc9e08381f93741c0e7557330eb24bbba1bad398b998277d2d191ba465",
+      "bytes": 592689
     },
     {
       "path": "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
@@ -11576,8 +11596,8 @@
     },
     {
       "path": "docs/decisions/DEC-225-draft-async-state-ux.md",
-      "sha256": "07d013fbe4b23daeffb820bc1c3c91d8b98b39fee800200a4cfcdd4ce22acdee",
-      "bytes": 3440
+      "sha256": "a02a2faeed8ce39538bdf792d6e99463ee859850910c382c2d031e11376bdd1c",
+      "bytes": 3424
     },
     {
       "path": "docs/examples/anadolu-parsi-family-import-v1.example.json",
@@ -11881,8 +11901,8 @@
     },
     {
       "path": "docs/security/THREAT_MODEL_33_N_DRAFT_ASYNC_STATE_UX.md",
-      "sha256": "ea081055ef2e4676dabd73f5c82148c1688a9d910579a71ec04b95a838b582ca",
-      "bytes": 3945
+      "sha256": "b0e63800f124847d83179a6418390738cd0d29fa82735d4439ab9ae34ff29b79",
+      "bytes": 3929
     },
     {
       "path": "docs/security/WINDOWS_EVIDENCE_INTAKE_BUILD216.md",

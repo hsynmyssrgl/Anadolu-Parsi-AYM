@@ -54,7 +54,7 @@
         "B7-15"
       ],
       "leverage": "A shared draft/undo state machine and empty-loading-offline-error-retry component set applies to every later module.",
-      "status": "VALIDATED_AWAITING_RECEIPT"
+      "status": "COMPLETED"
     },
     {
       "order": 3,
@@ -81,7 +81,7 @@
         "EXT-042"
       ],
       "leverage": "Reuses central PEP/UoW, immutable audit, trusted devices, consent, encrypted export, derived-data lineage and deletion propagation.",
-      "status": "PLANNED_NEXT"
+      "status": "READY_NEXT"
     },
     {
       "order": 4,
@@ -723,7 +723,7 @@
     "secondStep": "33-N",
     "finalStep": "34-L"
   },
-  "updatedAt": "2026-08-14T00:03:55.888Z",
-  "completedRequirementCount": 13,
-  "remainingRequirementCount": 261
+  "updatedAt": "2026-08-14T00:11:34.729Z",
+  "completedRequirementCount": 16,
+  "remainingRequirementCount": 258
 }

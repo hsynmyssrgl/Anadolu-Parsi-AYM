@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "release": "Bronze 04.08.2026.29",
   "releaseId": "bronze-2026-08-04-r29",
-  "generatedAt": "2026-08-14T00:10:03.493Z",
+  "generatedAt": "2026-08-14T00:23:53.465Z",
   "selfIndexedPaths": [
     "SHA256SUMS.txt",
     "artifacts/manifests/ALL_DOCUMENTS_INDEX.csv",
@@ -14,7 +14,7 @@
     "docs/current/08_TUM_BELGELER_DIZINI.md",
     "manifest.json"
   ],
-  "documentCount": 3639,
+  "documentCount": 3647,
   "documents": [
     {
       "path": ".github/workflows/ci.yml",
@@ -4932,6 +4932,22 @@
       "path": "artifacts/checkpoints/33-M_LIBRARY_RECEIPT.json",
       "bytes": 2774,
       "sha256": "c2205f59dd9e22ce1e83daebc2e7597d7ae3f2caa5f9ff87ffd934414edcfa25",
+      "extension": ".json",
+      "classification": "GENERATED",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/checkpoints/33-N_COMPLETION_RECORD.json",
+      "bytes": 2539,
+      "sha256": "a60064022b72fd62a9f8bfed874dd95d3f27e01db761b6eaf68c8710e991a31f",
+      "extension": ".json",
+      "classification": "GENERATED",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/checkpoints/33-N_LIBRARY_RECEIPT.json",
+      "bytes": 2727,
+      "sha256": "5d7d24750b738e4f9812bb168999ce0d94f9ada549af92b1e12964b74c85ed39",
       "extension": ".json",
       "classification": "GENERATED",
       "isDocument": true
@@ -16721,6 +16737,54 @@
       "isDocument": true
     },
     {
+      "path": "artifacts/validation/33-N_COMPLETION_TRANSITION_VALIDATION.json",
+      "bytes": 2609,
+      "sha256": "57fdca49614adafc85c3b120a25388c033701c41046743e6eb3a7e8f28633fe1",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/33-N_LIBRARY_CLOSURE_INVENTORY_VERIFICATION.json",
+      "bytes": 2254,
+      "sha256": "baf0c06084734e036fbc361bdacf862e93ffead589607ae9bd5b5380e3b4ba28",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/33-N_LIBRARY_FINAL_INVENTORY_VERIFICATION.json",
+      "bytes": 2217,
+      "sha256": "e0a2cc47b1d3a58a503749deb419e9d91bcc4d36cae71c75c21b795c0b2218bb",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/33-N_LIBRARY_READBACK_VERIFICATION.json",
+      "bytes": 2578,
+      "sha256": "d71688484839116977191e58e5f1e3141a8da08e534001f1f3cdd1f687cc1d4a",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/33-N_RECEIPT_READBACK_PERSISTENCE_VERIFICATION.json",
+      "bytes": 2244,
+      "sha256": "1972c5c383fbf5dfcd621d2e1ed54b3707aecf460ae7ecc6541b9ebe33c56e98",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/33-N_RECEIPT_READBACK_VERIFICATION.json",
+      "bytes": 2244,
+      "sha256": "cdc2c792dc1b139af0206e42e147cf6b05997b1007a0274150d4ee34507a1f2b",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
       "path": "artifacts/validation/33-N-b7-15-route-async-state-governance.json",
       "bytes": 1050,
       "sha256": "9c1615e85a4c324f2983ec01fb3ae57d0f37f8346a99d37c594860fd05f81384",
@@ -17434,8 +17498,8 @@
     },
     {
       "path": "artifacts/validation/governed-preflight.json",
-      "bytes": 5939,
-      "sha256": "58068d165fa05f4c95bc72bb9472fafaa3a18aa50863ffa65a43a7abb2316443",
+      "bytes": 5938,
+      "sha256": "7ea01efc0426d553f26cdca0b95378a9d4a6c550780e9943af85d42241b5f9e0",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17531,7 +17595,7 @@
     {
       "path": "artifacts/validation/project-artifact-index-gate-v2.json",
       "bytes": 212,
-      "sha256": "d892aa1b000ee2a5eee4aa9fe9877ac1d57f4659fa931b0732879d84b3e0f752",
+      "sha256": "371b0f770f42004e046a0f9b56cb00c5620808c8f2b9e3d8e8117d3279e4aded",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17547,7 +17611,7 @@
     {
       "path": "artifacts/validation/source-integrity.json",
       "bytes": 342,
-      "sha256": "3ec9108d72e7cafd396ab1c260f617a484185714ad13fa38150b1ecadc819954",
+      "sha256": "36b28d7dc9a1eec0eeecf06557c6e73d84b4f54488f667daa297a52b65142e7e",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22338,16 +22402,16 @@
     },
     {
       "path": "config/33-n-draft-async-state-ux-inventory.json",
-      "bytes": 3255,
-      "sha256": "217c85d80dd45b927caba99e9333f3dbc11860f8eb89e54ef0bb35d7364f8ed6",
+      "bytes": 3200,
+      "sha256": "dec1e75bf65e664fbba2674eea4298e7f29777fe640470620d84e288e47fbd8e",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "config/33-n-draft-async-state-ux-scope.json",
-      "bytes": 3513,
-      "sha256": "d71eaac86c5dc388da330f727406e5fc7395b0c2572355175c3d8ff3e1f8e16c",
+      "bytes": 3536,
+      "sha256": "aca8cabb08e8842a7d13319f69d8d2a2ad5e9b7158a92d614ad92227b7b5d14c",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -22386,8 +22450,8 @@
     },
     {
       "path": "config/active-governance-ledger.json",
-      "bytes": 49477,
-      "sha256": "f85897adae0e04d2a7926231f9998c5edce0359ca11751fc1dd5aeef3060b2e9",
+      "bytes": 49913,
+      "sha256": "14cfc051186f64ae97bd9fda1af95a25986aea74cb04b9d8c4aa4af1ba68381d",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -22602,8 +22666,8 @@
     },
     {
       "path": "config/remaining-scope-package-roadmap.json",
-      "bytes": 18816,
-      "sha256": "88c810089662e7dc0b1be5d2bd29d371dd92bb42fab8b54dbdb2955a2e93127c",
+      "bytes": 18797,
+      "sha256": "a320bc0362cbeae1e42f7c2c5bda236a886cedc4902cc02cd5884a4c1051b789",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -22650,8 +22714,8 @@
     },
     {
       "path": "config/work-segmentation-plan.json",
-      "bytes": 149324,
-      "sha256": "b7698ce5aabadaa5d23df644e30fe5e06b1fb0bbb8b31b31f58f66714143e8ff",
+      "bytes": 150003,
+      "sha256": "45547da6609246de3d8a1e6ba24fc8735df8777e6cfb19414400441045e0f5b4",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -24602,8 +24666,8 @@
     },
     {
       "path": "docs/audit/33-N_DRAFT_ASYNC_STATE_UX_UST_KAPANIS.md",
-      "bytes": 1119,
-      "sha256": "4a08aad476a4c4e4a87aaf65dd7ac531178182f1e7e074d0c1d420635160ba96",
+      "bytes": 901,
+      "sha256": "15ddd5947ffe1bba612e7b549bf9d86518783068d9702556362266af83904845",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -26346,8 +26410,8 @@
     },
     {
       "path": "docs/decisions/DEC-225-draft-async-state-ux.md",
-      "bytes": 3440,
-      "sha256": "07d013fbe4b23daeffb820bc1c3c91d8b98b39fee800200a4cfcdd4ce22acdee",
+      "bytes": 3424,
+      "sha256": "a02a2faeed8ce39538bdf792d6e99463ee859850910c382c2d031e11376bdd1c",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -26834,8 +26898,8 @@
     },
     {
       "path": "docs/security/THREAT_MODEL_33_N_DRAFT_ASYNC_STATE_UX.md",
-      "bytes": 3945,
-      "sha256": "ea081055ef2e4676dabd73f5c82148c1688a9d910579a71ec04b95a838b582ca",
+      "bytes": 3929,
+      "sha256": "b0e63800f124847d83179a6418390738cd0d29fa82735d4439ab9ae34ff29b79",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true

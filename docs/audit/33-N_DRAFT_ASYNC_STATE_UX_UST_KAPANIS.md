@@ -2,23 +2,25 @@
 
 ## Durum
 
-VALIDATED / RECEIPT_PENDING. Kod ve otomatik kanitlar PASS; persistent receipt tamamlanmadan resmi adim IN_PROGRESS kalir.
+COMPLETED / PASS. DEC-225 ve B3-02, B7-14, B7-15 otomatik kaynak, guvenlik, migration, build, test ve persistent receipt kanitlariyla kapandi.
 
-## Kapsam
+## Dogrulama
 
-DEC-225 altinda B3-02, B7-14 ve B7-15; merkezi form_draft PEP/UoW, migration 91 immutable history, optimistic revision, idempotent replay, immediate undo, exact IPC, canli dogrulama ve empty/loading/offline/error/retry yuzeyleriyle dogrulandi.
+- Boundary 28/28, contract 17/17, runtime 11/11.
+- Hedefli test 7 dosya / 40 test.
+- Tam regresyon 140 dosya / 1142 test.
+- Production build 18 workspace.
+- Migration 91 checksum 7107cbdbe66f05ac6e208bfac39bc4bcc884c679e63af4e49c4a15bacda1b611.
+- Yerel ve D: checkpoint SHA-256/size readback ile esit; persistent receipt PASS.
 
-## Otomatik kanit
+## Dürüst kanıt sınırı
 
-- Boundary: PASS 28/28.
-- Contract: PASS 17/17.
-- Runtime: PASS 11/11; 7 dosya ve 40 hedefli test.
-- Manuel kanit: Windows Narrator NOT_RUN; Windows Magnifier NOT_RUN; gercek cihaz NOT_RUN; insan UAT NOT_RUN; certificationClaimed=false.
-- Otomatik uygulama kapanisi COMPLETE olabilir; bu durum manuel erisilebilirlik sertifikasyonu iddiasi degildir.
-- Tam regresyon: PASS 140 dosya / 1142 test.
-- Production build: PASS, 18 workspace.
-- Migration 91 checksum: 7107cbdbe66f05ac6e208bfac39bc4bcc884c679e63af4e49c4a15bacda1b611.
+- Windows Narrator: NOT_RUN.
+- Windows Magnifier: NOT_RUN.
+- Gerçek cihaz: NOT_RUN.
+- İnsan UAT: NOT_RUN.
+- Kaynak koruma: NOT_RUN_BY_FINALIZER; final teslim ancak external completion verification PASS sonrasında geçerlidir.
 
-## Kalan kapi
+## Ardil
 
-Persistent receipt, exact readback, source protection ve Git remote esitligi PASS olmadan COMPLETED iddiasi kurulmaz.
+Siradaki acik paket 33-O / DEC-226'dir; ayri aktivasyon ve kanit zinciri gerektirir.

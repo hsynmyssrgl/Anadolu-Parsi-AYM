@@ -110,8 +110,7 @@
     "targetedTests": 40,
     "preparedAt": "2026-08-14T00:03:55.888Z"
   },
-  "openBlockers": [
-    "Persistent local and D: receipt, source protection and Git remote equality are pending."
-  ],
-  "persistentReceiptStatus": "NOT_RUN"
+  "openBlockers": [],
+  "persistentReceiptStatus": "PASS",
+  "completedAt": "2026-08-14T00:11:34.729Z"
 }
