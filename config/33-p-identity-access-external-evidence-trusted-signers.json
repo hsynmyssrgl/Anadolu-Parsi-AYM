@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "33-p-identity-access-external-evidence-trusted-signers",
+  "step": "33-P",
+  "decision": "DEC-227",
+  "status": "NOT_CONFIGURED",
+  "signers": [],
+  "configurationTruth": {
+    "defaultSignerTrusted": false,
+    "selfSignedEvidenceAccepted": false,
+    "sourceCommitBindingRequired": true,
+    "activationRequiresGovernedReview": true
+  }
+}

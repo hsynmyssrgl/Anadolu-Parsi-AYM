@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "step": "33-P",
   "status": "PASS",
-  "checks": 7,
-  "passed": 7,
+  "checks": 8,
+  "passed": 8,
   "failed": 0,
   "results": [
     {
@@ -14,10 +14,14 @@
         "step": "33-P",
         "decision": "DEC-227",
         "status": "PASS",
-        "checks": 32,
-        "passed": 32,
+        "checks": 33,
+        "passed": 33,
         "failed": 0,
         "results": [
+          {
+            "id": "trusted-signer-authority",
+            "status": "PASS"
+          },
           {
             "id": "manifest-exact-shape",
             "status": "PASS"
@@ -182,6 +186,10 @@
       "status": "PASS"
     },
     {
+      "id": "self-signed-untrusted-bundle-rejected",
+      "status": "PASS"
+    },
+    {
       "id": "foreign-source-commit-rejected",
       "status": "PASS"
     },
@@ -194,5 +202,5 @@
   "requirementPassGranted": false,
   "registryMutationPerformed": false,
   "persistentReceiptWritten": false,
-  "generatedAt": "2026-08-14T11:17:12.205Z"
+  "generatedAt": "2026-08-14T11:28:23.394Z"
 }

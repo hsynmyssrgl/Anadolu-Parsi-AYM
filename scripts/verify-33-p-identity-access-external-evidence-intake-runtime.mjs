@@ -149,6 +149,7 @@ try {
     evidenceRoot,
     manifestPath,
     trustedSignerPublicKeyPem: publicKeyPem,
+    trustedSignerKeyIdsSha256: [signerKeyIdSha256],
     expectedSourceCommit: COMMIT,
     expectedSourceTree: TREE,
     observedAt: NOW
@@ -177,10 +178,11 @@ try {
   check('tampered-evidence-byte-and-semantic-rejected', rejectedTamper.status === 'FAIL'
     && rejectedTamper.results.some((item) => item.id === 'human-uat-byte-hash-binding' && item.status === 'FAIL'));
 
-  const { publicKey: foreignPublicKey } = generateKeyPairSync('ed25519');
+  const { publicKey: foreignPublicKey, privateKey: foreignPrivateKey } = generateKeyPairSync('ed25519');
   const foreignPem = foreignPublicKey.export({ type: 'spki', format: 'pem' }).toString();
   const foreignSigner = await verifyIdentityAccessExternalEvidenceIntake({
     evidenceRoot, manifestPath, trustedSignerPublicKeyPem: foreignPem,
+    trustedSignerKeyIdsSha256: [signerKeyIdSha256],
     expectedSourceCommit: COMMIT, expectedSourceTree: TREE, observedAt: NOW
   });
   check('foreign-signer-rejected', foreignSigner.status === 'FAIL'
@@ -191,6 +193,7 @@ try {
     await verifyIdentityAccessExternalEvidenceIntake({
       evidenceRoot, manifestPath,
       trustedSignerPublicKeyPem: privateKey.export({ type: 'pkcs8', format: 'pem' }).toString(),
+      trustedSignerKeyIdsSha256: [signerKeyIdSha256],
       expectedSourceCommit: COMMIT, expectedSourceTree: TREE, observedAt: NOW
     });
   } catch (error) {
@@ -199,8 +202,30 @@ try {
   }
   check('private-key-material-rejected-before-parse', privateKeyMaterialRejected);
 
+  const foreignSignerKeyIdSha256 = sha256(foreignPublicKey.export({ type: 'spki', format: 'der' }));
+  const foreignUnsignedManifest = { ...unsignedManifest, signerKeyIdSha256: foreignSignerKeyIdSha256 };
+  const foreignPayload = Buffer.from(canonicalIdentityAccessEvidenceManifestPayload(foreignUnsignedManifest), 'utf8');
+  const foreignSignature = sign(null, foreignPayload, foreignPrivateKey);
+  const selfSignedForeignManifest = {
+    ...foreignUnsignedManifest,
+    signatureBase64Url: foreignSignature.toString('base64url')
+  };
+  foreignPayload.fill(0);
+  foreignSignature.fill(0);
+  await writeFile(manifestPath, `${JSON.stringify(selfSignedForeignManifest, null, 2)}\n`, 'utf8');
+  const rejectedSelfSignedForeign = await verifyIdentityAccessExternalEvidenceIntake({
+    evidenceRoot, manifestPath, trustedSignerPublicKeyPem: foreignPem,
+    trustedSignerKeyIdsSha256: [signerKeyIdSha256],
+    expectedSourceCommit: COMMIT, expectedSourceTree: TREE, observedAt: NOW
+  });
+  check('self-signed-untrusted-bundle-rejected', rejectedSelfSignedForeign.status === 'FAIL'
+    && rejectedSelfSignedForeign.results.some((item) => item.id === 'trusted-signer-authority' && item.status === 'FAIL')
+    && rejectedSelfSignedForeign.results.some((item) => item.id === 'manifest-ed25519-signature' && item.status === 'PASS'));
+  await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+
   const wrongSource = await verifyIdentityAccessExternalEvidenceIntake({
     evidenceRoot, manifestPath, trustedSignerPublicKeyPem: publicKeyPem,
+    trustedSignerKeyIdsSha256: [signerKeyIdSha256],
     expectedSourceCommit: 'e'.repeat(40), expectedSourceTree: TREE, observedAt: NOW
   });
   check('foreign-source-commit-rejected', wrongSource.status === 'FAIL'
@@ -208,6 +233,7 @@ try {
 
   const expired = await verifyIdentityAccessExternalEvidenceIntake({
     evidenceRoot, manifestPath, trustedSignerPublicKeyPem: publicKeyPem,
+    trustedSignerKeyIdsSha256: [signerKeyIdSha256],
     expectedSourceCommit: COMMIT, expectedSourceTree: TREE, observedAt: '2026-09-30T12:00:00.000Z'
   });
   check('expired-bundle-rejected', expired.status === 'FAIL'

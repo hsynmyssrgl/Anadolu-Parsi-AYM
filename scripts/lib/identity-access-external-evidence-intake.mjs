@@ -179,6 +179,7 @@ export const verifyIdentityAccessExternalEvidenceIntake = async ({
   evidenceRoot,
   manifestPath,
   trustedSignerPublicKeyPem,
+  trustedSignerKeyIdsSha256,
   expectedSourceCommit,
   expectedSourceTree,
   observedAt = new Date().toISOString()
@@ -195,11 +196,18 @@ export const verifyIdentityAccessExternalEvidenceIntake = async ({
     || trustedSignerPublicKeyPem.includes('PRIVATE KEY')) {
     throw new Error('Kanıt signer girdisi yalnız bounded public-key PEM içerebilir.');
   }
+  if (!Array.isArray(trustedSignerKeyIdsSha256) || trustedSignerKeyIdsSha256.length < 1
+    || trustedSignerKeyIdsSha256.length > 16
+    || trustedSignerKeyIdsSha256.some((keyId) => !validSha256(keyId))
+    || new Set(trustedSignerKeyIdsSha256).size !== trustedSignerKeyIdsSha256.length) {
+    throw new Error('Kanıt signer güven kümesi exact, benzersiz ve kaynak-yönetimli olmalıdır.');
+  }
   const publicKey = createPublicKey(trustedSignerPublicKeyPem);
   if (publicKey.type !== 'public' || publicKey.asymmetricKeyType !== 'ed25519') {
     throw new Error('Kanıt signer anahtarı Ed25519 public key olmalıdır.');
   }
   const signerKeyIdSha256 = sha256(publicKey.export({ type: 'spki', format: 'der' }));
+  pass(checks, 'trusted-signer-authority', trustedSignerKeyIdsSha256.includes(signerKeyIdSha256));
   const manifestRelativePath = relative(root, resolve(manifestPath)).split(sep).join('/');
   const manifestFilePath = await resolveEvidencePath(root, manifestRelativePath);
   const manifestRead = await readBoundedJson(manifestFilePath, MAX_MANIFEST_BYTES);
