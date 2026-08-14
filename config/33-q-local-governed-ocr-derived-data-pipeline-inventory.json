@@ -112,7 +112,7 @@
         "packages/database/src/family-database-migrations.ts",
         "artifacts/manifests/DATABASE_MIGRATION_VERIFICATION_MVP56.json"
       ],
-      "sha256": "2ac0ddd2bb9db3b2be117e9b623d875ed9baa41f57f48f16cd0f28719801633b",
+      "sha256": "08fef61dc21062134716dfae8e78c2256eb5da275eedaf1fe3502a3c2450cb65",
       "truth": "Migration 94 ve metadata repository; rolling retention, source-delete batch/item ledger ve rollback dahil yerel testlerde doğrulanmıştır. Owner-bound şifreli sealed-result vault/runtime production facade içinde yerel testtedir; tam metin indeks, gerçek cihaz ve uçtan uca kabul değildir."
     },
     {
@@ -259,8 +259,8 @@
     "ppk021": {
       "status": "PASS",
       "scannedProductionFiles": 441,
-      "exactPrivilegedSurfaceCount": 680,
-      "exactAllowlistSha256": "e27c91d81b7196f68e6d26714b793a7ca1a278382007559f704e9d44f362218d",
+      "exactPrivilegedSurfaceCount": 682,
+      "exactAllowlistSha256": "79c2780d7ef80da7b0646389a9fb618cb81ea26925a8cf5286bcc7d37336c9ff",
       "targetedTestsPassed": 17,
       "contractChecksPassed": 84,
       "runtimeChecksPassed": 20,
@@ -311,8 +311,8 @@
     "localProductionUseCaseAndDataStoreCompositionTested": true,
     "endToEndProductionRepositoryUseCaseAcceptanceValidated": false,
     "localRuntimeAuthorityLeaseTested": true,
-    "scheduledOrphanSweepProductionWiringValidated": false,
-    "retentionExpiryPurgeValidated": false,
+    "scheduledOrphanSweepProductionWiringValidated": true,
+    "retentionExpiryPurgeValidated": true,
     "productionIpcComponentImplementedAndTested": true,
     "productionIpcEndToEndValidated": false,
     "rendererUiComponentImplementedAndTested": true,
@@ -327,7 +327,7 @@
     "localComponentOcrTestsImplemented": true,
     "fullAcceptanceOcrTestMatrixImplemented": false,
     "localComponentTestFilesPassed": 14,
-    "localComponentTestsPassed": 110,
+    "localComponentTestsPassed": 113,
     "isolatedWindowsMediaOcrSmokeExecuted": true,
     "externalOcrProviderConfigured": false,
     "physicalSecureEraseGuaranteed": false,
@@ -344,8 +344,6 @@
     "Automatic quarantine/purge across future OCR index, embedding, cache and managed-backup owners after object-permission or sensitive_processing consent revocation/expiry; current sealed result cleanup alone is insufficient",
     "Desktop IPC/UI real accessibility, privacy, security and human UAT",
     "Real-device concurrent cancellation and accessibility/human UAT; local two-phase production-executor probe passes but external/manual acceptance remains NOT_RUN",
-    "Distinct maintenance PEP/authority and scheduled production orphan sweep",
-    "Scheduled owner-bound purge after OCR result retention expiry",
     "Legacy archive receipts with ownerPersonId=null fail closed; no ownership re-attestation or backfill authority is available",
     "Real-device Windows UAT, Apple Vision, offline fallback and full malicious-document runtime matrix",
     "External provider privacy contract, region, retention and deletion evidence"
@@ -354,11 +352,11 @@
     "boundary": "STARTER_NOT_RUN",
     "contract": "STARTER_NOT_RUN",
     "runtime": "LOCAL_COMPOSED_COMPONENT_MATRIX_PASS",
-    "targetedTests": "14_FILES_110_TESTS_PASS",
+    "targetedTests": "14_FILES_113_TESTS_PASS",
     "sourceStabilizationStatus": "STABLE_LOCAL_SNAPSHOT",
     "ratchetSemantics": "EXACT_LOCAL_SNAPSHOT_NOT_REQUIREMENT_CLOSURE",
     "targetedTestFileRatchet": 14,
-    "targetedTestRatchet": 110,
+    "targetedTestRatchet": 113,
     "countsAsRequirementPass": false
   },
   "persistentReceiptStatus": "NOT_RUN"

@@ -133,6 +133,13 @@ const authorizationReconciliationPlan = (): LocalGovernedOcrAuthorizationPlan =>
   primary: policyIntent({ action: 'delete', capability: 'archive.write' })
 });
 
+const maintenancePlan = (): LocalGovernedOcrAuthorizationPlan => Object.freeze({
+  primary: policyIntent({
+    action: 'update', capability: 'family.write', resourceType: 'local_ocr_settings',
+    resourceId: SETTINGS_ID, purpose: 'administration'
+  })
+});
+
 const sourceDeletionPlan = (): LocalGovernedOcrAuthorizationPlan => Object.freeze({
   primary: policyIntent({
     action: 'delete', capability: 'archive.write', resourceType: 'archive_item', resourceId: SOURCE_ID
@@ -205,7 +212,10 @@ class TestAsyncTransactionExecutor implements AsyncTransactionExecutor {
     _correlationId: typeof CORRELATION,
     operation: (transaction: TransactionContext) => Result<T, AppError>
   ): Result<T, AppError> {
-    return operation(this.transaction);
+    if (this.active) throw new Error('overlapping transaction');
+    this.active = true;
+    try { return operation(this.transaction); }
+    finally { this.active = false; }
   }
 
   public async executeAsync<T>(
@@ -381,9 +391,28 @@ const dependencies = (
       return ok(Object.freeze(limit < 1 ? [] : [{ jobId: JOB_ID, revision: currentJobState.revision,
         stateFingerprint: currentJobState.stateFingerprint, reason: 'permission_revoked' as const }]));
     },
+    listRetentionReconciliationCandidates: (_repository: unknown, _key: unknown, _at: string, limit: number) => {
+      return ok(Object.freeze(limit < 1 ? [] : [{ jobId: JOB_ID, revision: currentJobState.revision,
+        stateFingerprint: currentJobState.stateFingerprint, retentionUntil: NOW }]));
+    },
     resolveAuthorizationRevocation: (repository: PolicyAuthorizedRepositoryExecutionContext) => {
       assertRoute('authorization-revocation', repository);
       return ok('permission_revoked' as const);
+    },
+    resolveRetentionExpiry: (repository: PolicyAuthorizedRepositoryExecutionContext) => {
+      assertRoute('retention-expiry', repository);
+      return ok(NOW);
+    },
+    resolveMaintenanceJobBinding: (repository: PolicyAuthorizedRepositoryExecutionContext, _key: unknown, jobId: string) => {
+      assertRoute('maintenance-job', repository);
+      return ok(jobId === JOB_ID ? {
+        key: currentJobState.key,
+        jobId: currentJobState.id,
+        derivedResourceId: currentJobState.derivedResourceId,
+        sourceResourceId: currentJobState.source.resourceId,
+        inputSha256: currentJobState.source.inputSha256,
+        currentSealedResultId: currentJobState.sealedResultId ?? null
+      } : null);
     },
     findMutationByClientOperationId: (repository: PolicyAuthorizedRepositoryExecutionContext, _key: unknown,
       clientOperationId: string) => {
@@ -632,9 +661,9 @@ describe('33-Q repository-backed local governed OCR UoW', () => {
       expect(unitOfWork.resolveAuthorizedJobBinding({
         operation: 'correct', ...bindingInput, jobId: 'foreign-job'
       }).ok).toBe(false);
-      expect(unitOfWork.resolveAuthorizedJobBinding({
+      expect((await unitOfWork.resolveAuthorizedJobBinding({
         operation: 'orphan_sweep', ...bindingInput
-      }).ok).toBe(false);
+      })).ok).toBe(false);
       return ok('correct');
     });
     expect(corrected).toEqual(ok('correct'));
@@ -686,6 +715,48 @@ describe('33-Q repository-backed local governed OCR UoW', () => {
     expect(unitOfWork.resolveAuthorizedJobBinding(bindingInput).ok).toBe(false);
     expect(fixture.routed).toContain(`authorization-revocation:local_ocr_job:${JOB_ID}`);
     expect(fixture.recorded).toEqual([`local_ocr_job:${JOB_ID}`]);
+  });
+
+  it('opens a distinct settings maintenance lease, resolves every orphan against live owner state and revokes finally', async () => {
+    const fixture = dependencies();
+    const unitOfWork = new RepositoryBackedLocalGovernedOcrUnitOfWork(fixture.value);
+    const input = Object.freeze({
+      operation: 'orphan_sweep' as const,
+      jobId: JOB_ID,
+      sealedResultId: SEALED_RESULT_ID,
+      correlationId: CORRELATION
+    });
+    expect((await unitOfWork.resolveAuthorizedJobBinding(input)).ok).toBe(false);
+    const maintained = await unitOfWork.executeMaintenance(
+      context,
+      maintenancePlan(),
+      (scope) => {
+        expect(scope.loadCenter(jobRow.key).ok).toBe(true);
+        return ok(undefined);
+      },
+      async () => {
+        const exact = await unitOfWork.resolveAuthorizedJobBinding(input);
+        expect(exact).toEqual(expect.objectContaining({ ok: true, value: expect.objectContaining({
+          authority: 'central_pep_authorized_local_ocr_job',
+          familyId: FAMILY,
+          accountId: ACCOUNT,
+          ownerPersonId: PERSON,
+          currentSealedResultId: SEALED_RESULT_ID
+        }) }));
+        expect((await unitOfWork.resolveAuthorizedJobBinding({ ...input, jobId: 'foreign-job' })).ok).toBe(false);
+        expect((await unitOfWork.resolveAuthorizedJobBinding({ ...input, correlationId: FOREIGN_CORRELATION })).ok).toBe(false);
+        return ok('maintained');
+      }
+    );
+    expect(maintained).toEqual(ok('maintained'));
+    expect((await unitOfWork.resolveAuthorizedJobBinding(input)).ok).toBe(false);
+    expect(fixture.recorded).toEqual([
+      `local_ocr_settings:${SETTINGS_ID}`,
+      `local_ocr_settings:${SETTINGS_ID}`,
+      `local_ocr_settings:${SETTINGS_ID}`
+    ]);
+    expect(fixture.projected).toEqual(fixture.recorded);
+    expect(fixture.routed).toContain(`maintenance-job:local_ocr_settings:${SETTINGS_ID}`);
   });
 
   it('revokes the runtime lease on rollback and never projects a rolled-back receipt', async () => {

@@ -101,26 +101,29 @@ const definitions = [
       && registryItems.every((item) => item?.status === 'NOT_IMPLEMENTED' && item.chain?.evidence === false)],
   ['implemented targeted inventory is the exact 14-file local snapshot',
     allTestsExist && exact(inventory.implementedTargetedTests, testFiles)
-      && scope.validation?.targetedTestFileRatchet === 14 && scope.validation?.targetedTestRatchet === 110
-      && inventory.validation?.targetedTestFileRatchet === 14 && inventory.validation?.targetedTestRatchet === 110],
+      && scope.validation?.targetedTestFileRatchet === 14 && scope.validation?.targetedTestRatchet === 113
+      && inventory.validation?.targetedTestFileRatchet === 14 && inventory.validation?.targetedTestRatchet === 113],
   ['domain and application contracts bind limits local execution and no low-privilege overclaim',
     has('domain', 'LOCAL_GOVERNED_OCR_MAX_SOURCE_BYTES = 16 * 1_024 * 1_024',
       'LOCAL_GOVERNED_OCR_MAX_RESULT_CHARACTERS = 250_000', 'LOCAL_GOVERNED_OCR_MAX_PAGES = 50',
       "executionScope: 'bounded_child_process'", 'lowPrivilegeSandboxVerified: false',
-      'sourceDeletionAutoResumeGuaranteed: true', 'authorizationRevocationPropagatesToSealedResult: true')
-      && has('application', 'LocalGovernedOcrRuntimePort', 'runAndSeal', 'purgeSealedResult',
+      'sourceDeletionAutoResumeGuaranteed: true', 'authorizationRevocationPropagatesToSealedResult: true',
+      'retentionExpiryPropagatesToSealedResult: true', 'scheduledOrphanSweepUsesDistinctMaintenanceAuthority: true')
+      && has('application', 'LocalGovernedOcrRuntimePort', 'runAndSeal', 'purgeSealedResult', 'sweepOrphans',
+        'ReconcileLocalGovernedOcrRetentionUseCase', 'SweepLocalGovernedOcrOrphansUseCase',
         "executionScope: 'bounded_child_process'", 'lowPrivilegeSandboxVerified: false')
       && has('repositoryContract', 'LocalGovernedOcrRepositoryPort', 'LocalGovernedOcrSourceDeletionBatch')],
   ['repository and migration bind metadata lineage retention and immutable source-delete child ledger',
     migration94?.name === 'local_governed_ocr' && migration94?.checksum === migration94Sha256
-      && migration94Sha256 === '2ac0ddd2bb9db3b2be117e9b623d875ed9baa41f57f48f16cd0f28719801633b'
+      && migration94Sha256 === '08fef61dc21062134716dfae8e78c2256eb5da275eedaf1fe3502a3c2450cb65'
       && has('migration', 'local_governed_ocr_jobs', 'local_governed_ocr_mutations',
         'local_governed_ocr_source_deletion_items', 'trg_33q_source_deletion_item_insert', 'trg_33q_mutation_delete',
         'local_governed_ocr_source_deletion_recovery_intents', 'trg_33q_source_deletion_recovery_insert',
-        'authorization_revoke_propagate')
+        'authorization_revoke_propagate', 'retention_expire_propagate', 'trg_33q_retention_expiry_transition')
       && has('repository', 'SqliteLocalGovernedOcrRepository', 'assertPolicyAuthorizedRepositoryContext',
         'public propagateSourceDeletion', 'itemMutationId', 'listAuthorizationReconciliationCandidates',
-        'resolveAuthorizationRevocation')
+        'resolveAuthorizationRevocation', 'listRetentionReconciliationCandidates', 'resolveRetentionExpiry',
+        'resolveMaintenanceJobBinding')
       && has('platformTransactionContract', 'PlatformPolicyArchiveSecureDestroyRecoveryRecord',
         'listRecoverableArchiveSecureDestroyOperations')
       && has('platformTransactionRepository', 'local_governed_ocr_source_deletion_recovery_intents',
@@ -130,7 +133,7 @@ const definitions = [
     has('policy', "intent.purpose === 'ocr_process'", "'sensitive_processing'", "capability: 'archive.ocr'")
       && has('appAdapter', 'RepositoryBackedLocalGovernedOcrUnitOfWork',
         'Local OCR run authority is not bound to every exact central receipt',
-        'Local OCR orphan sweep requires a distinct maintenance authorization', 'finally')
+        'Local OCR maintenance requires one distinct exact settings receipt', 'local-ocr-maintenance-', 'finally')
       && has('transaction', 'class SqliteTransactionExecutor implements TransactionExecutor, AsyncTransactionExecutor', 'finally')
       && testHas(testFiles[8], 'leases the exact run source only after every receipt and revokes it on every exit path',
         'revokes the runtime lease on rollback',
@@ -144,24 +147,27 @@ const definitions = [
       && has('windowsEngine', "throw new LocalOcrSecurityError('UNSUPPORTED_MEDIA')", 'processSeparated=$true', 'lowPrivilegeSandboxVerified=$false')
       && testHas(testFiles[5], 'malware scanner is not configured', 'caps concurrent jobs at one')
       && testHas(testFiles[6], 'without claiming a low-privilege sandbox', 'fails closed for PDF')],
-  ['sealed result vault is owner-bound encrypted quota-limited and does not claim scheduled maintenance wiring',
+  ['sealed result vault is owner-bound encrypted quota-limited and scheduled maintenance is separately authorized',
     has('resultVault', 'class LocalGovernedOcrResultVault', 'LOCAL_GOVERNED_OCR_RESULT_VAULT_MAX_FILES = 1_024',
       'LOCAL_GOVERNED_OCR_RESULT_VAULT_MAX_BYTES = 256 * 1024 * 1024', 'NO_OVERWRITE_CONFLICT')
       && has('runtimeAdapter', 'class MainLocalGovernedOcrRuntimeAdapter', 'createWindowsLocalGovernedOcrRuntimeAdapter',
         "operation: 'orphan_sweep'", "executionScope: 'bounded_child_process'", 'lowPrivilegeSandboxVerified: false')
       && testHas(testFiles[7], 'hard-link', 'orphan', 'cursor')
-      && scope.truth?.scheduledOrphanSweepProductionWiringValidated === false
-      && scope.truth?.retentionExpiryPurgeValidated === false],
+      && scope.truth?.scheduledOrphanSweepProductionWiringValidated === true
+      && scope.truth?.retentionExpiryPurgeValidated === true],
   ['DataStore production facade composes PEP UoW vault runtime and hashes corrected text metadata',
     has('compositionRoot', 'SqliteLocalGovernedOcrRepository', 'localGovernedOcrRepository')
       && has('dataStore', 'createLocalGovernedOcrProductionPolicyEnforcementPointResolver',
         'createWindowsLocalGovernedOcrRuntimeAdapter', 'new LocalGovernedOcrResultVault',
         'failClosedLocalGovernedOcrRuntime', 'correctedTextSha256', '#propagateLocalGovernedOcrArchiveDeletion',
         'resumePendingLocalGovernedOcrArchiveDeletions', 'ReconcileLocalGovernedOcrAuthorizationUseCase',
-        'reconcileLocalGovernedOcrAuthorizations')
+        'ReconcileLocalGovernedOcrRetentionUseCase', 'SweepLocalGovernedOcrOrphansUseCase',
+        'reconcileLocalGovernedOcrAuthorizations', 'reconcileLocalGovernedOcrRetention',
+        'sweepLocalGovernedOcrOrphans')
       && has('main', 'resumePendingLocalGovernedOcrArchiveDeletions', 'ocr.source_deletion_recovery_cycle_failed',
         'reconcileLocalGovernedOcrAuthorizations', 'ocr.authorization_reconciliation_cycle_failed')
       && testHas(testFiles[13], 'fails closed without central policy', 'no malware provider',
+        'purges expired sealed results under exact job-delete receipts and authorizes scheduled orphan maintenance separately',
         'recovers source deletion with the same operation id', 'restartedStore',
         'local_governed_ocr_source_deletion_recovery_intents')
       && scope.truth?.localDataStoreFacadeCompositionTested === true
@@ -233,7 +239,7 @@ const report = {
   countsAsRequirementPass: false,
   activePredecessor: '33-P',
   localTargetedTestFiles: testFiles,
-  targetedTestRatchet: { files: 14, tests: 103 },
+  targetedTestRatchet: { files: 14, tests: 113 },
   migration94Sha256,
   checksPassed: checks.length - failures.length,
   checksFailed: failures.length,

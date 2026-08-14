@@ -439,6 +439,7 @@ describe('33-Q local governed OCR repository policy boundary', () => {
     const completedBase = Object.freeze({ ...queuedView, revision: 2, status: 'completed' as const, runAttempt: 1,
       resultAvailable: true, resultContentSha256: resultSha, resultCharacterCount: 12, resultPageCount: 1,
       derivedBindingHash: bindingHash, sealedResultId: 'ocr-result:authorization-reconcile', completedAt: asIsoDateTime(NOW),
+      retentionUntil: asIsoDateTime('2026-08-14T09:30:00.000Z'),
       updatedAt: asIsoDateTime(NOW) });
     const completed: LocalGovernedOcrJobRow = Object.freeze({ ...completedBase,
       stateFingerprint: computeLocalGovernedOcrJobStateFingerprint(completedBase) });
@@ -452,6 +453,25 @@ describe('33-Q local governed OCR repository policy boundary', () => {
     }))).toEqual({ ok: true, value: true });
 
     const at = '2026-08-14T10:00:00.000Z';
+    const retention = await executePolicy(database, 'local_ocr_job', queued.id, 'delete', (repository, context) =>
+      repository.listRetentionReconciliationCandidates(context, queued.key, at, 8), at);
+    expect(retention).toEqual({ ok: true, value: [expect.objectContaining({
+      jobId: queued.id, revision: 2, retentionUntil: '2026-08-14T09:30:00.000Z'
+    })] });
+    const expiry = await executePolicy(database, 'local_ocr_job', queued.id, 'delete', (repository, context) =>
+      repository.resolveRetentionExpiry(context, queued.key, queued.id, at), at);
+    expect(expiry).toEqual({ ok: true, value: '2026-08-14T09:30:00.000Z' });
+    const maintenance = await executePolicy(database, 'local_ocr_settings', `local-ocr-settings:${PERSON_ID}`, 'update',
+      (repository, context) => repository.resolveMaintenanceJobBinding(context, queued.key, queued.id), at);
+    expect(maintenance).toEqual({ ok: true, value: expect.objectContaining({
+      jobId: queued.id,
+      currentSealedResultId: 'ocr-result:authorization-reconcile',
+      sourceResourceId: queued.source.resourceId,
+      inputSha256: SOURCE_SHA
+    }) });
+    await expect(executePolicy(database, 'local_ocr_job', queued.id, 'delete', (repository, context) =>
+      repository.resolveMaintenanceJobBinding(context, queued.key, queued.id), at)).rejects.toThrow(/primary policy scope/u);
+
     database.prepare(`UPDATE ai_consents SET ends_at='2026-08-14T09:30:00.000Z' WHERE id='consent-33-q'`).run();
     const expired = await executePolicy(database, 'local_ocr_job', queued.id, 'delete', (repository, context) =>
       repository.listAuthorizationReconciliationCandidates(context, queued.key, at, 8), at);

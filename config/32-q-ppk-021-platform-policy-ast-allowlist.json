@@ -59,7 +59,7 @@
     "SQL_CALL": 63,
     "SQL_CONSTRUCTOR": 2,
     "SQL_IMPORT": 2,
-    "USE_CASE_COMPOSITION": 323
+    "USE_CASE_COMPOSITION": 325
   },
   "allowedSurfaceKeys": [
     "CRYPTO_GLOBAL|apps/desktop/src/main/preload.ts|randomUUID",
@@ -635,6 +635,7 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ReauthenticateWithWindowsHelloUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ReauthorizeCurrentDeviceAfterRecoveryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ReconcileLocalGovernedOcrAuthorizationUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ReconcileLocalGovernedOcrRetentionUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|RecordArchiveOpenedUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|RecordBackupPropagationRunUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|RecordBackupRunUseCase",
@@ -693,6 +694,7 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|StartBackgroundTaskUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|StartQueuedTaskUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|StoreArchiveFileUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|SweepLocalGovernedOcrOrphansUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ToggleAutomationRuleUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|TrustCurrentDeviceUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|UndoDataRepairUseCase",

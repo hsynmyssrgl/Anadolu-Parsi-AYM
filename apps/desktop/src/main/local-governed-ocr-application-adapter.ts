@@ -32,6 +32,7 @@ import type {
   AuditRepositoryPort,
   DerivedDataPolicyRepositoryPort,
   LocalGovernedOcrJobRow,
+  LocalGovernedOcrMaintenanceJobBindingRow,
   LocalGovernedOcrRepositoryPort,
   OutboxRepositoryPort,
   PolicyAuthorizedRepositoryExecutionContext,
@@ -91,6 +92,13 @@ interface DetachedLocalGovernedOcrRunAuthorityLease {
     readonly expectedInputSha256: string;
   };
   readonly source: AuthorizedLocalGovernedOcrArchiveSource;
+}
+
+interface LocalGovernedOcrMaintenanceAuthorityLease {
+  readonly token: symbol;
+  readonly context: LocalGovernedOcrApplicationContext;
+  readonly key: LocalGovernedOcrAggregateKey;
+  readonly primary: EstablishedAuthorizationSlot;
 }
 
 const SHA256 = /^[0-9a-f]{64}$/u;
@@ -427,6 +435,27 @@ class RepositoryBackedLocalGovernedOcrWriteScope implements LocalGovernedOcrWrit
     );
   }
 
+  public resolveRetentionExpiry(
+    key: LocalGovernedOcrAggregateKey,
+    jobId: string,
+    at: LocalGovernedOcrWriteScope['occurredAt']
+  ): ReturnType<LocalGovernedOcrWriteScope['resolveRetentionExpiry']> {
+    const primary = this.slot('primary');
+    if (!exactKey(this.context, key) || at !== this.occurredAt
+      || primary?.intent.resourceType !== 'local_ocr_job'
+      || primary.intent.resourceId !== jobId
+      || primary.intent.action !== 'delete'
+      || primary.intent.capability !== 'archive.write') {
+      return this.missing('OCR retention reconciliation requires the exact job-delete receipt');
+    }
+    return this.dependencies.localGovernedOcrRepository.resolveRetentionExpiry(
+      primary.repository,
+      key,
+      jobId,
+      at
+    );
+  }
+
   public findMutationByClientOperationId(
     key: LocalGovernedOcrAggregateKey,
     clientOperationId: string
@@ -572,6 +601,7 @@ export class RepositoryBackedLocalGovernedOcrUnitOfWork
 implements LocalGovernedOcrUnitOfWork, LocalGovernedOcrMainAuthorityPort {
   #activeAuthorityLease: ActiveLocalGovernedOcrAuthorityLease | undefined;
   #detachedRunAuthorityLease: DetachedLocalGovernedOcrRunAuthorityLease | undefined;
+  #maintenanceAuthorityLease: LocalGovernedOcrMaintenanceAuthorityLease | undefined;
   #transactionTail: Promise<void> = Promise.resolve();
 
   public constructor(private readonly dependencies: RepositoryBackedLocalGovernedOcrApplicationDependencies) {}
@@ -713,12 +743,12 @@ implements LocalGovernedOcrUnitOfWork, LocalGovernedOcrMainAuthorityPort {
 
   public resolveAuthorizedJobBinding(
     input: Parameters<LocalGovernedOcrMainAuthorityPort['resolveAuthorizedJobBinding']>[0]
-  ): Result<AuthorizedLocalGovernedOcrJobBinding, AppError> {
+  ): ReturnType<LocalGovernedOcrMainAuthorityPort['resolveAuthorizedJobBinding']> {
+    if (input.operation === 'orphan_sweep') {
+      return this.#resolveMaintenanceJobBinding(input);
+    }
     const lease = this.#lease(input.correlationId);
     if (!lease) return authorityDenied(input.correlationId, 'Local OCR job authority lease is absent or expired');
-    if (input.operation === 'orphan_sweep') {
-      return authorityDenied(input.correlationId, 'Local OCR orphan sweep requires a distinct maintenance authorization');
-    }
     try {
       const current = this.#findCurrentJob(lease, input.jobId);
       if (!current.ok) return current;
@@ -739,6 +769,86 @@ implements LocalGovernedOcrUnitOfWork, LocalGovernedOcrMainAuthorityPort {
       }));
     } catch {
       return authorityDenied(input.correlationId, 'Local OCR job authority resolution failed closed');
+    }
+  }
+
+  async #resolveMaintenanceJobBinding(
+    input: Parameters<LocalGovernedOcrMainAuthorityPort['resolveAuthorizedJobBinding']>[0]
+  ): Promise<Result<AuthorizedLocalGovernedOcrJobBinding, AppError>> {
+    const lease = this.#maintenanceAuthorityLease;
+    if (!lease || lease.context.correlationId !== input.correlationId
+      || input.operation !== 'orphan_sweep'
+      || input.sealedResultId === null || !SHA256.test(input.sealedResultId)) {
+      return authorityDenied(input.correlationId, 'Local OCR orphan sweep maintenance lease is absent or malformed');
+    }
+    const primary = lease.primary;
+    if (!exactIntent(primary, {
+      resourceType: 'local_ocr_settings',
+      resourceId: `local-ocr-settings:${lease.key.ownerPersonId}`,
+      action: 'update',
+      capability: 'family.write',
+      purpose: 'administration'
+    })) {
+      return authorityDenied(input.correlationId, 'Local OCR orphan sweep maintenance receipt is not exact');
+    }
+    try {
+      const digest = createHash('sha256').update(JSON.stringify([
+        'local-governed-ocr-maintenance-candidate-v1',
+        lease.context.correlationId,
+        input.jobId,
+        input.sealedResultId
+      ]), 'utf8').digest('hex');
+      const candidateContext = Object.freeze({
+        ...lease.context,
+        correlationId: asCorrelationId(`local-ocr-maintenance-${digest}`)
+      });
+      const resolved = await this.execute<LocalGovernedOcrMaintenanceJobBindingRow | null>(
+        candidateContext,
+        { primary: primary.intent },
+        () => {
+          const candidateLease = this.#activeAuthorityLease;
+          const candidatePrimary = candidateLease?.bySlot.get('primary');
+          if (!candidateLease || !candidatePrimary || !exactIntent(candidatePrimary, {
+            resourceType: 'local_ocr_settings',
+            resourceId: `local-ocr-settings:${lease.key.ownerPersonId}`,
+            action: 'update',
+            capability: 'family.write',
+            purpose: 'administration'
+          })) {
+            return authorityDenied(candidateContext.correlationId, 'Local OCR orphan candidate receipt is not exact');
+          }
+          return this.dependencies.localGovernedOcrRepository.resolveMaintenanceJobBinding(
+            candidatePrimary.repository,
+            lease.key,
+            input.jobId
+          );
+        }
+      );
+      if (!resolved.ok) {
+        return authorityDenied(input.correlationId, 'Local OCR orphan sweep candidate reauthorization failed closed');
+      }
+      const row = resolved.value;
+      if (!row || !exactKey(lease.context, row.key)
+        || row.jobId !== input.jobId
+        || row.derivedResourceId.length < 1
+        || row.sourceResourceId.length < 1
+        || !SHA256.test(row.inputSha256)
+        || (row.currentSealedResultId !== null && !SHA256.test(row.currentSealedResultId))) {
+        return authorityDenied(input.correlationId, 'Local OCR orphan sweep current job binding is absent or invalid');
+      }
+      return ok(Object.freeze({
+        authority: 'central_pep_authorized_local_ocr_job' as const,
+        familyId: lease.key.familyId,
+        accountId: lease.key.accountId,
+        ownerPersonId: lease.key.ownerPersonId,
+        jobId: row.jobId,
+        derivedResourceId: row.derivedResourceId,
+        sourceResourceId: row.sourceResourceId,
+        inputSha256: row.inputSha256,
+        currentSealedResultId: row.currentSealedResultId
+      }));
+    } catch {
+      return authorityDenied(input.correlationId, 'Local OCR orphan sweep live binding resolution failed closed');
     }
   }
 
@@ -902,6 +1012,23 @@ implements LocalGovernedOcrUnitOfWork, LocalGovernedOcrMainAuthorityPort {
       ));
   }
 
+  public listRetentionReconciliationCandidates(
+    context: LocalGovernedOcrApplicationContext,
+    key: LocalGovernedOcrAggregateKey,
+    limit: number
+  ): ReturnType<LocalGovernedOcrUnitOfWork['listRetentionReconciliationCandidates']> {
+    if (!exactKey(context, key)) {
+      return err(applicationError(context, 'OCR retention reconciliation key exceeds the authenticated owner'));
+    }
+    return this.dependencies.transactionExecutor.execute(context.correlationId, (transaction) =>
+      this.dependencies.localGovernedOcrRepository.listRetentionReconciliationCandidates(
+        repositoryContext(context, transaction),
+        key,
+        transaction.occurredAt,
+        limit
+      ));
+  }
+
   public async executeDetached<TPrepared, TResult>(
     context: LocalGovernedOcrApplicationContext,
     plan: LocalGovernedOcrAuthorizationPlan,
@@ -965,6 +1092,73 @@ implements LocalGovernedOcrUnitOfWork, LocalGovernedOcrMainAuthorityPort {
       return await operation(committed.value.prepared);
     } finally {
       if (this.#detachedRunAuthorityLease?.token === token) this.#detachedRunAuthorityLease = undefined;
+    }
+  }
+
+  public async executeMaintenance<TResult>(
+    context: LocalGovernedOcrApplicationContext,
+    plan: LocalGovernedOcrAuthorizationPlan,
+    prepare: (scope: LocalGovernedOcrWriteScope) => Result<void, AppError> | Promise<Result<void, AppError>>,
+    operation: () => Promise<Result<TResult, AppError>>
+  ): Promise<Result<TResult, AppError>> {
+    const personId = context.actor.personId;
+    const expectedResourceId = personId ? `local-ocr-settings:${personId}` : '';
+    if (!personId || typeof prepare !== 'function' || typeof operation !== 'function'
+      || this.#maintenanceAuthorityLease
+      || plan.source !== undefined || plan.settings !== undefined || plan.target !== undefined
+      || plan.primary.resourceType !== 'local_ocr_settings'
+      || plan.primary.resourceId !== expectedResourceId
+      || plan.primary.action !== 'update'
+      || plan.primary.capability !== 'family.write'
+      || plan.primary.purpose !== 'administration') {
+      return err(applicationError(
+        context,
+        'Local OCR maintenance requires one distinct exact settings receipt',
+        { code: ERROR_CODES.RESOURCE_CONFLICT }
+      ));
+    }
+    let established: EstablishedAuthorizationSlot | undefined;
+    const authorized = await this.execute(context, plan, async (scope) => {
+      const prepared = await prepare(scope);
+      if (!prepared.ok) return prepared;
+      const lease = this.#activeAuthorityLease;
+      const primary = lease?.bySlot.get('primary');
+      if (!lease || !primary || !exactKey(context, lease.key)
+        || !exactIntent(primary, {
+          resourceType: 'local_ocr_settings',
+          resourceId: expectedResourceId,
+          action: 'update',
+          capability: 'family.write',
+          purpose: 'administration'
+        })) {
+        return err(applicationError(context, 'Local OCR maintenance receipt was not established exactly'));
+      }
+      established = primary;
+      return ok(undefined);
+    });
+    if (!authorized.ok) return authorized;
+    if (!established || this.#maintenanceAuthorityLease) {
+      return err(applicationError(
+        context,
+        'Local OCR maintenance authority overlapped after commit',
+        { code: ERROR_CODES.RESOURCE_CONFLICT }
+      ));
+    }
+    const token = Symbol('local-governed-ocr-maintenance-authority');
+    this.#maintenanceAuthorityLease = Object.freeze({
+      token,
+      context,
+      key: Object.freeze({
+        familyId: context.familyId,
+        accountId: context.actor.userId,
+        ownerPersonId: asPersonId(personId)
+      }),
+      primary: established
+    });
+    try {
+      return await operation();
+    } finally {
+      if (this.#maintenanceAuthorityLease?.token === token) this.#maintenanceAuthorityLease = undefined;
     }
   }
 

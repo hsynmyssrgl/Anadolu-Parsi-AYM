@@ -257,6 +257,11 @@ class DeterministicBoundedOcrRuntime implements LocalGovernedOcrRuntimePort {
     return ok({ deleted: true, verified: true });
   }
 
+  public async sweepOrphans(): ReturnType<LocalGovernedOcrRuntimePort['sweepOrphans']> {
+    return ok({ scanned: 0, deleted: 0, referenced: 0, rejected: 0,
+      networkUsed: false, cloudUsed: false });
+  }
+
   #notFound(correlationId: CorrelationId) {
     return createAppError({
       code: ERROR_CODES.RESOURCE_NOT_FOUND,
@@ -647,6 +652,88 @@ describe('33-Q Local OCR DataStore production composition', () => {
         consent: { status: 'granted' },
         archive: { destroyed_at: null }
       });
+    } finally {
+      fixture.store.close();
+    }
+  });
+
+  it('purges expired sealed results under exact job-delete receipts and authorizes scheduled orphan maintenance separately', async () => {
+    const runtime = new DeterministicBoundedOcrRuntime();
+    const fixture = await prepareOcrFixture({ runtime });
+    try {
+      const created = await fixture.store.createLocalGovernedOcrJob({
+        sourceResourceType: 'archive_item',
+        sourceResourceId: fixture.sourceId,
+        languageHints: ['tr-TR'],
+        expectedRevision: 0,
+        clientOperationId: '33-q-retention-create'
+      });
+      await fixture.store.runLocalGovernedOcrJob({
+        jobId: created.resourceId,
+        expectedRevision: 1,
+        clientOperationId: '33-q-retention-run'
+      });
+      expect(runtime.hasResult(created.resourceId)).toBe(true);
+      const before = inspectDatabase(fixture.databasePath, (database) => database.prepare(`
+        SELECT revision,status,result_available,sealed_result_id,retention_until FROM local_governed_ocr_jobs WHERE id=?
+      `).get(created.resourceId)) as Record<string, unknown>;
+      expect(before).toMatchObject({ revision: 3, status: 'completed', result_available: 1,
+        sealed_result_id: expect.any(String), retention_until: expect.any(String) });
+
+      fixture.clock.advanceDays(2);
+      expect(fixture.store.login({
+        accountId: fixture.accountId,
+        password: 'Guclu33QOcrTestParolasi!2026'
+      })).toMatchObject({ authenticated: true });
+      await expect(fixture.store.reconcileLocalGovernedOcrRetention(8)).resolves.toEqual({
+        attempted: 1, completed: 1, failed: 0
+      });
+      await expect(fixture.store.reconcileLocalGovernedOcrRetention(8)).resolves.toEqual({
+        attempted: 0, completed: 0, failed: 0
+      });
+      expect(runtime.hasResult(created.resourceId)).toBe(false);
+      const persisted = inspectDatabase(fixture.databasePath, (database) => ({
+        job: database.prepare(`SELECT revision,status,result_available,sealed_result_id,source_deleted_at,
+          deletion_propagation,retention_until,last_mutation_id FROM local_governed_ocr_jobs WHERE id=?`).get(created.resourceId),
+        mutation: database.prepare(`SELECT mutation_kind,resource_type,resource_id FROM local_governed_ocr_mutations
+          WHERE mutation_kind='retention_expire_propagate' AND resource_id=?`).get(created.resourceId),
+        audit: database.prepare(`SELECT action,resource_type,resource_id FROM audit_log
+          WHERE action='ocr.retention_expire_propagate' AND resource_id=?`).get(created.resourceId),
+        archive: database.prepare(`SELECT destroyed_at FROM archive_items WHERE id=?`).get(fixture.sourceId)
+      }));
+      expect(persisted).toEqual({
+        job: { revision: 4, status: 'deleted', result_available: 0, sealed_result_id: null,
+          source_deleted_at: null, deletion_propagation: 'active', retention_until: before.retention_until,
+          last_mutation_id: expect.any(String) },
+        mutation: { mutation_kind: 'retention_expire_propagate', resource_type: 'local_ocr_job',
+          resource_id: created.resourceId },
+        audit: { action: 'ocr.retention_expire_propagate', resource_type: 'local_ocr_job',
+          resource_id: created.resourceId },
+        archive: { destroyed_at: null }
+      });
+
+      await expect(fixture.store.sweepLocalGovernedOcrOrphans(16)).resolves.toEqual({
+        scanned: 0, deleted: 0, referenced: 0, rejected: 0, networkUsed: false, cloudUsed: false
+      });
+      expect(inspectDatabase(fixture.databasePath, (database) => ({
+        audit: database.prepare(`SELECT action,resource_type FROM audit_log
+          WHERE action='ocr.orphan_sweep_authorized' ORDER BY occurred_at DESC LIMIT 1`).get(),
+        outbox: database.prepare(`SELECT event_type,aggregate_type FROM event_outbox
+          WHERE event_type='ocr.maintenance.authorized' ORDER BY occurred_at DESC LIMIT 1`).get()
+      }))).toEqual({
+        audit: { action: 'ocr.orphan_sweep_authorized', resource_type: 'local_ocr_settings' },
+        outbox: { event_type: 'ocr.maintenance.authorized', aggregate_type: 'local_ocr_settings' }
+      });
+      expect(fixture.requests).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          resource: expect.objectContaining({ type: 'local_ocr_job', id: created.resourceId }),
+          action: 'delete', capability: 'archive.write', purpose: 'ocr_process'
+        }),
+        expect.objectContaining({
+          resource: expect.objectContaining({ type: 'local_ocr_settings' }),
+          action: 'update', capability: 'family.write', purpose: 'administration'
+        })
+      ]));
     } finally {
       fixture.store.close();
     }

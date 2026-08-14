@@ -55,6 +55,7 @@ import type {
   LocalGovernedOcrJobRow,
   LocalGovernedOcrMutationRow,
   LocalGovernedOcrPolicyResourceMetadata,
+  LocalGovernedOcrRetentionReconciliationCandidate,
   LocalGovernedOcrSettingsRow,
   LocalGovernedOcrSourceRow,
   LocalGovernedOcrSourceDeletionBatch
@@ -130,6 +131,11 @@ export interface LocalGovernedOcrWriteScope {
     jobId: string,
     at: IsoDateTime
   ): Result<LocalGovernedOcrAuthorizationRevocationReason | null, AppError>;
+  resolveRetentionExpiry(
+    key: LocalGovernedOcrAggregateKey,
+    jobId: string,
+    at: IsoDateTime
+  ): Result<IsoDateTime | null, AppError>;
   findMutationByClientOperationId(
     key: LocalGovernedOcrAggregateKey,
     clientOperationId: string
@@ -179,6 +185,12 @@ export interface LocalGovernedOcrUnitOfWork {
     key: LocalGovernedOcrAggregateKey,
     limit: number
   ): Result<readonly LocalGovernedOcrAuthorizationReconciliationCandidate[], AppError>;
+  /** Actor-bound, payload-free retention discovery; current rows are the durable retry queue. */
+  listRetentionReconciliationCandidates(
+    context: LocalGovernedOcrApplicationContext,
+    key: LocalGovernedOcrAggregateKey,
+    limit: number
+  ): Result<readonly LocalGovernedOcrRetentionReconciliationCandidate[], AppError>;
   /** Every supplied intent is authorized by the central PEP before the shared transaction callback runs. */
   execute<T>(
     context: LocalGovernedOcrApplicationContext,
@@ -202,6 +214,16 @@ export interface LocalGovernedOcrUnitOfWork {
     },
     prepare: (scope: LocalGovernedOcrWriteScope) => Result<TPrepared, AppError> | Promise<Result<TPrepared, AppError>>,
     operation: (prepared: TPrepared) => Promise<Result<TResult, AppError>>
+  ): Promise<Result<TResult, AppError>>;
+  /**
+   * Commits a short, owner-scoped settings maintenance receipt before exposing a bounded main-only
+   * authority lease. The lease is revoked in every completion and failure path.
+   */
+  executeMaintenance<TResult>(
+    context: LocalGovernedOcrApplicationContext,
+    authorization: LocalGovernedOcrAuthorizationPlan,
+    prepare: (scope: LocalGovernedOcrWriteScope) => Result<void, AppError> | Promise<Result<void, AppError>>,
+    operation: () => Promise<Result<TResult, AppError>>
   ): Promise<Result<TResult, AppError>>;
 }
 
@@ -260,6 +282,19 @@ export interface LocalGovernedOcrRuntimePort {
     readonly sealedResultId: string;
     readonly correlationId: CorrelationId;
   }): Promise<Result<{ readonly deleted: true; readonly verified: true }, AppError>>;
+  sweepOrphans(input: {
+    readonly correlationId: CorrelationId;
+    readonly maximumCandidates?: number;
+  }): Promise<Result<LocalGovernedOcrOrphanSweepResult, AppError>>;
+}
+
+export interface LocalGovernedOcrOrphanSweepResult {
+  readonly scanned: number;
+  readonly deleted: number;
+  readonly referenced: number;
+  readonly rejected: number;
+  readonly networkUsed: false;
+  readonly cloudUsed: false;
 }
 
 export interface LocalGovernedOcrOperationIdentifiers {
@@ -737,6 +772,8 @@ export class GetLocalGovernedOcrCenterUseCase {
           sourceDeletionPropagatesToDerivedResult: true,
           sourceDeletionAutoResumeGuaranteed: true,
           authorizationRevocationPropagatesToSealedResult: true,
+          retentionExpiryPropagatesToSealedResult: true,
+          scheduledOrphanSweepUsesDistinctMaintenanceAuthority: true,
           derivedDeletionDeletesSource: false
         },
         generatedAt: scope.occurredAt
@@ -1465,6 +1502,209 @@ export class ReconcileLocalGovernedOcrAuthorizationUseCase {
         });
       }
     });
+  }
+}
+
+export interface ReconcileLocalGovernedOcrRetentionInput {
+  readonly jobId: string;
+  readonly expectedRevision: number;
+  readonly retentionUntil: IsoDateTime;
+  readonly clientOperationId: string;
+}
+
+/**
+ * Main-only retention reconciliation. Discovery contains no OCR payload; expiry is revalidated beneath
+ * a fresh job-delete receipt before file-first purge and the atomic current-row tombstone.
+ */
+export class ReconcileLocalGovernedOcrRetentionUseCase {
+  public constructor(
+    private readonly unitOfWork: LocalGovernedOcrUnitOfWork,
+    private readonly runtime: LocalGovernedOcrRuntimePort
+  ) {}
+
+  public list(
+    context: LocalGovernedOcrApplicationContext,
+    limit = 8
+  ): Result<readonly LocalGovernedOcrRetentionReconciliationCandidate[], AppError> {
+    const key = keyFor(context);
+    if (!key.ok) return key;
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 32) {
+      return err(invalid(context, 'OCR retention uzlaştırma sınırı geçersizdir.'));
+    }
+    return this.unitOfWork.listRetentionReconciliationCandidates(context, key.value, limit);
+  }
+
+  public async execute(input: {
+    readonly context: LocalGovernedOcrApplicationContext;
+    readonly command: ReconcileLocalGovernedOcrRetentionInput;
+    readonly identifiers: LocalGovernedOcrOperationIdentifiers;
+  }): Promise<Result<LocalGovernedOcrMutationReceiptView, AppError>> {
+    const key = keyFor(input.context);
+    if (!key.ok) return key;
+    if (input.command.jobId !== input.identifiers.resourceId || !validTime(input.command.retentionUntil)) {
+      return err(invalid(input.context, 'OCR retention uzlaştırma kapsamı geçersizdir.'));
+    }
+    const metadata = resolveJobSourceMetadata(
+      this.unitOfWork,
+      input.context,
+      key.value,
+      input.command.jobId
+    );
+    if (!metadata.ok) return metadata;
+    return executeMutation(this.unitOfWork, {
+      context: input.context,
+      key: key.value,
+      expectedRevision: input.command.expectedRevision,
+      clientOperationId: input.command.clientOperationId,
+      identifiers: input.identifiers
+    }, {
+      mutationKind: 'retention_expire_propagate',
+      resourceType: 'local_ocr_job',
+      authorization: {
+        primary: jobIntent(key.value, 'delete', input.command.jobId, metadata.value.sensitivity)
+      },
+      loadCurrent: (scope) => {
+        const row = scope.findJob(key.value, input.command.jobId);
+        return row.ok
+          ? ok(row.value ? { revision: row.value.revision, stateFingerprint: row.value.stateFingerprint } : null)
+          : row;
+      },
+      prepare: async (scope) => {
+        const current = loadExactJob(scope, input.context, key.value, input.command.jobId);
+        if (!current.ok) return current;
+        if (current.value.revision !== input.command.expectedRevision
+          || current.value.status !== 'completed'
+          || !current.value.resultAvailable
+          || !current.value.sealedResultId
+          || current.value.retentionUntil !== input.command.retentionUntil) {
+          return err(conflict(input.context, 'OCR sonucu retention uzlaştırması için exact current durumda değildir.'));
+        }
+        const expiry = scope.resolveRetentionExpiry(key.value, current.value.id, scope.occurredAt);
+        if (!expiry.ok) return expiry;
+        if (expiry.value !== input.command.retentionUntil) {
+          return err(conflict(input.context, 'OCR retention süresi artık exact current durumla uyuşmuyor.'));
+        }
+        const purged = await this.runtime.purgeSealedResult({
+          jobId: current.value.id,
+          sealedResultId: current.value.sealedResultId,
+          correlationId: input.context.correlationId
+        });
+        if (!purged.ok || !purged.value.deleted || !purged.value.verified) {
+          return purged.ok
+            ? err(unexpected(input.context, 'OCR retention süresi dolan sealed sonuç doğrulanmış biçimde silinemedi.'))
+            : purged;
+        }
+        const {
+          stateFingerprint: _fingerprint,
+          sealedResultId: _sealed,
+          resultContentSha256: _content,
+          resultCharacterCount: _characters,
+          resultPageCount: _pages,
+          confidenceBasisPoints: _confidence,
+          derivedBindingHash: _binding,
+          failureCode: _failure,
+          cancellationRequestedAt: _cancellationRequestedAt,
+          completedAt: _completedAt,
+          failedAt: _failedAt,
+          cancelledAt: _cancelledAt,
+          ...base
+        } = current.value;
+        const row = jobRow({
+          ...base,
+          revision: current.value.revision + 1,
+          status: 'deleted',
+          resultAvailable: false,
+          deletedAt: scope.occurredAt,
+          deletionPropagation: 'active',
+          updatedAt: scope.occurredAt
+        });
+        return ok({
+          previousRevision: current.value.revision,
+          revision: row.revision,
+          stateFingerprint: row.stateFingerprint,
+          persist: () => {
+            const saved = scope.saveJob(row, current.value.revision);
+            return saved.ok && saved.value
+              ? ok(undefined)
+              : saved.ok
+                ? err(conflict(input.context, 'OCR retention uzlaştırma revizyonu yarıştı.'))
+                : saved;
+          }
+        });
+      }
+    });
+  }
+}
+
+/** Distinct owner-scoped PEP receipt for bounded main-only orphan cleanup. */
+export class SweepLocalGovernedOcrOrphansUseCase {
+  public constructor(
+    private readonly unitOfWork: LocalGovernedOcrUnitOfWork,
+    private readonly runtime: LocalGovernedOcrRuntimePort
+  ) {}
+
+  public async execute(input: {
+    readonly context: LocalGovernedOcrApplicationContext;
+    readonly maximumCandidates?: number;
+    readonly auditId: string;
+    readonly outboxEventId: EventId;
+  }): Promise<Result<LocalGovernedOcrOrphanSweepResult, AppError>> {
+    const key = keyFor(input.context);
+    if (!key.ok) return key;
+    const maximumCandidates = input.maximumCandidates ?? 64;
+    if (!Number.isSafeInteger(maximumCandidates) || maximumCandidates < 1 || maximumCandidates > 128
+      || !IDENTIFIER.test(input.auditId) || !IDENTIFIER.test(input.outboxEventId)) {
+      return err(invalid(input.context, 'OCR orphan bakım sınırı veya kimliği geçersizdir.'));
+    }
+    const resourceId = localGovernedOcrSettingsResourceId(key.value.ownerPersonId);
+    return this.unitOfWork.executeMaintenance(
+      input.context,
+      { primary: settingsIntent(key.value, 'update') },
+      (scope) => {
+        const center = scope.loadCenter(key.value);
+        if (!center.ok) return center;
+        if (!exactKey(center.value.settings.key, key.value)) {
+          return err(denied(input.context, 'OCR orphan bakımı exact owner settings kaydına bağlı değildir.'));
+        }
+        const audited = scope.appendAudit({
+          id: input.auditId,
+          action: 'ocr.orphan_sweep_authorized',
+          resourceType: 'local_ocr_settings',
+          resourceId,
+          occurredAt: scope.occurredAt,
+          actorId: input.context.actor.userId
+        });
+        if (!audited.ok) return audited;
+        return scope.enqueueEvent({
+          eventId: input.outboxEventId,
+          eventType: 'ocr.maintenance.authorized',
+          eventVersion: 1,
+          aggregateType: 'local_ocr_settings',
+          aggregateId: resourceId,
+          occurredAt: scope.occurredAt,
+          actorId: input.context.actor.userId,
+          correlationId: input.context.correlationId,
+          payload: { operation: 'orphan_sweep', maximumCandidates }
+        });
+      },
+      async () => {
+        const swept = await this.runtime.sweepOrphans({
+          correlationId: input.context.correlationId,
+          maximumCandidates
+        });
+        if (!swept.ok) return swept;
+        const total = swept.value.deleted + swept.value.referenced + swept.value.rejected;
+        if (swept.value.networkUsed || swept.value.cloudUsed
+          || !Number.isSafeInteger(swept.value.scanned) || swept.value.scanned < 0
+          || !Number.isSafeInteger(swept.value.deleted) || swept.value.deleted < 0
+          || !Number.isSafeInteger(swept.value.referenced) || swept.value.referenced < 0
+          || !Number.isSafeInteger(swept.value.rejected) || swept.value.rejected < 0
+          || swept.value.scanned > maximumCandidates || total < swept.value.scanned) {
+          return err(unexpected(input.context, 'OCR orphan bakım sonucu güvenli sınırları aşmıştır.'));
+        }
+        return swept;
+      }
+    );
   }
 }
 

@@ -30,6 +30,7 @@ import type {
   LocalGovernedOcrAuthorizationRevocationReason,
   LocalGovernedOcrJobRow,
   LocalGovernedOcrMutationRow,
+  LocalGovernedOcrRetentionReconciliationCandidate,
   LocalGovernedOcrSourceDeletionBatch,
   LocalGovernedOcrSourceRow
 } from '@ppt/repository-contracts';
@@ -42,6 +43,8 @@ import {
   GetLocalGovernedOcrResultUseCase,
   PropagateLocalGovernedOcrSourceDeletionUseCase,
   ReconcileLocalGovernedOcrAuthorizationUseCase,
+  ReconcileLocalGovernedOcrRetentionUseCase,
+  SweepLocalGovernedOcrOrphansUseCase,
   RerunLocalGovernedOcrJobUseCase,
   RunLocalGovernedOcrJobUseCase,
   SetLocalGovernedOcrEnabledUseCase,
@@ -218,6 +221,25 @@ class Unit implements LocalGovernedOcrUnitOfWork {
       }))));
   }
 
+  public listRetentionReconciliationCandidates(
+    _context: LocalGovernedOcrApplicationContext,
+    requestedKey: typeof key,
+    limit: number
+  ) {
+    if (requestedKey.familyId !== FAMILY || requestedKey.accountId !== ACCOUNT
+      || requestedKey.ownerPersonId !== PERSON) return ok([]);
+    return ok(Object.freeze([...this.jobs.values()]
+      .filter((row) => row.status === 'completed' && row.resultAvailable && row.sealedResultId
+        && row.retentionUntil !== undefined && Date.parse(row.retentionUntil) <= Date.parse(NOW))
+      .slice(0, limit)
+      .map((row): LocalGovernedOcrRetentionReconciliationCandidate => Object.freeze({
+        jobId: row.id,
+        revision: row.revision,
+        stateFingerprint: row.stateFingerprint,
+        retentionUntil: row.retentionUntil!
+      }))));
+  }
+
   public resolvePolicyResource(
     _context: LocalGovernedOcrApplicationContext,
     requestedKey: typeof key,
@@ -285,6 +307,12 @@ class Unit implements LocalGovernedOcrUnitOfWork {
         ok(this.consent?.resourceId === resourceId ? this.consent : null),
       resolveAuthorizationRevocation: (_key, jobId) =>
         ok(this.jobs.has(jobId) ? this.authorizationRevocation : null),
+      resolveRetentionExpiry: (_key, jobId) => {
+        const row = this.jobs.get(jobId);
+        return ok(row?.retentionUntil !== undefined && Date.parse(row.retentionUntil) <= Date.parse(NOW)
+          ? row.retentionUntil
+          : null);
+      },
       findMutationByClientOperationId: (_key, operationId) => ok(this.mutations.get(operationId) ?? null),
       findSourceDeletionMutationByClientOperationId: (_key, sourceResourceId, operationId) => {
         const row = this.mutations.get(operationId);
@@ -350,6 +378,16 @@ class Unit implements LocalGovernedOcrUnitOfWork {
     runtimeAuthority(committed.value);
     return operation(committed.value);
   }
+
+  public async executeMaintenance<TResult>(
+    operationContext: LocalGovernedOcrApplicationContext,
+    authorization: LocalGovernedOcrAuthorizationPlan,
+    prepare: (scope: LocalGovernedOcrWriteScope) => Result<void, AppError> | Promise<Result<void, AppError>>,
+    operation: () => Promise<Result<TResult, AppError>>
+  ): Promise<Result<TResult, AppError>> {
+    const committed = await this.execute(operationContext, authorization, prepare);
+    return committed.ok ? operation() : committed;
+  }
 }
 
 class Runtime implements LocalGovernedOcrRuntimePort {
@@ -391,6 +429,11 @@ class Runtime implements LocalGovernedOcrRuntimePort {
     this.texts.delete(input.sealedResultId);
     return ok({ deleted: true as const, verified: true as const });
   }
+  public async sweepOrphans() {
+    this.order.push('runtime.sweep');
+    return ok({ scanned: 0, deleted: 0, referenced: 0, rejected: 0,
+      networkUsed: false as const, cloudUsed: false as const });
+  }
 }
 
 const completedJob = (id = 'ocr-job-1', revision = 2): LocalGovernedOcrJobRow => jobRow({
@@ -419,6 +462,8 @@ describe('33-Q local governed OCR application core', () => {
       explicitSensitiveProcessingConsentRequired: true, derivedPolicyBindingRequired: true,
       sourceDeletionPropagatesToDerivedResult: true, sourceDeletionAutoResumeGuaranteed: true,
       authorizationRevocationPropagatesToSealedResult: true,
+      retentionExpiryPropagatesToSealedResult: true,
+      scheduledOrphanSweepUsesDistinctMaintenanceAuthority: true,
       derivedDeletionDeletesSource: false
     });
     expect(result.ok && result.value.jobs[0]).not.toHaveProperty('activeRunId');
@@ -426,6 +471,85 @@ describe('33-Q local governed OCR application core', () => {
       LOCAL_GOVERNED_OCR_MAX_PAGES]).toEqual([16 * 1024 * 1024, 250_000, 50]);
     expect(unit.plans[0]?.primary).toMatchObject({ action: 'read', capability: 'family.read',
       resourceType: 'local_ocr_settings', purpose: 'administration', sensitivity: 'personal' });
+  });
+
+  it('purges expired sealed results through the durable retry queue and sweeps orphans only under maintenance authority', async () => {
+    const retentionUntil = asIsoDateTime('2026-08-14T09:00:00.000Z');
+    const expired = jobRow({
+      revision: 2,
+      status: 'completed',
+      runAttempt: 1,
+      resultAvailable: true,
+      resultContentSha256: RESULT_SHA,
+      resultCharacterCount: 42,
+      resultPageCount: 1,
+      derivedBindingHash: hash('expired-binding'),
+      completedAt: asIsoDateTime('2026-08-14T08:00:00.000Z'),
+      retentionUntil
+    }, 'sealed-result-1');
+    const unit = new Unit();
+    unit.jobs.set(expired.id, expired);
+    const runtime = new Runtime(unit.order);
+    const useCase = new ReconcileLocalGovernedOcrRetentionUseCase(unit, runtime);
+    expect(useCase.list(context, 8)).toEqual({ ok: true, value: [expect.objectContaining({
+      jobId: expired.id,
+      revision: expired.revision,
+      retentionUntil
+    })] });
+    const command = Object.freeze({
+      jobId: expired.id,
+      expectedRevision: expired.revision,
+      retentionUntil,
+      clientOperationId: 'retention-operation-1'
+    });
+    const reconciled = await useCase.execute({
+      context,
+      command,
+      identifiers: ids(expired.id, 'retention')
+    });
+    expect(reconciled).toEqual(expect.objectContaining({ ok: true, value: expect.objectContaining({
+      mutationKind: 'retention_expire_propagate', previousRevision: 2, revision: 3, replayed: false
+    }) }));
+    expect(unit.jobs.get(expired.id)).toMatchObject({
+      status: 'deleted', resultAvailable: false, retentionUntil, deletionPropagation: 'active'
+    });
+    expect(unit.jobs.get(expired.id)).not.toHaveProperty('sealedResultId');
+    expect(unit.jobs.get(expired.id)?.source.resourceId).toBe(SOURCE_ID);
+    expect(unit.order).toEqual([
+      `runtime.purge:${expired.id}`, 'mutation.insert', 'job.save', 'audit.append', 'outbox.enqueue'
+    ]);
+
+    const sweepUnit = new Unit();
+    const sweepRuntime = new Runtime(sweepUnit.order);
+    const swept = await new SweepLocalGovernedOcrOrphansUseCase(sweepUnit, sweepRuntime).execute({
+      context,
+      maximumCandidates: 16,
+      auditId: 'orphan-sweep-audit',
+      outboxEventId: asEventId('orphan-sweep-outbox')
+    });
+    expect(swept).toEqual({ ok: true, value: {
+      scanned: 0, deleted: 0, referenced: 0, rejected: 0, networkUsed: false, cloudUsed: false
+    } });
+    expect(sweepUnit.plans).toEqual([expect.objectContaining({ primary: expect.objectContaining({
+      resourceType: 'local_ocr_settings', resourceId: localGovernedOcrSettingsResourceId(PERSON),
+      action: 'update', capability: 'family.write', purpose: 'administration'
+    }) })]);
+    expect(sweepUnit.order).toEqual(['audit.append', 'outbox.enqueue', 'runtime.sweep']);
+
+    const failedUnit = new Unit();
+    failedUnit.jobs.set(expired.id, expired);
+    const failedRuntime = new Runtime(failedUnit.order);
+    failedRuntime.failPurge = true;
+    const failed = await new ReconcileLocalGovernedOcrRetentionUseCase(failedUnit, failedRuntime).execute({
+      context,
+      command,
+      identifiers: ids(expired.id, 'retention-failed')
+    });
+    expect(failed.ok).toBe(false);
+    expect(failedUnit.jobs.get(expired.id)).toEqual(expired);
+    expect(failedUnit.mutations.size).toBe(0);
+    expect(failedUnit.audits).toEqual([]);
+    expect(failedUnit.events).toEqual([]);
   });
 
   it('creates one metadata-only job with a fresh OCR source receipt, separate consent and exact replay', async () => {

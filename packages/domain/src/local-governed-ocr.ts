@@ -91,6 +91,8 @@ export interface LocalGovernedOcrTruthView {
   readonly sourceDeletionPropagatesToDerivedResult: true;
   readonly sourceDeletionAutoResumeGuaranteed: true;
   readonly authorizationRevocationPropagatesToSealedResult: true;
+  readonly retentionExpiryPropagatesToSealedResult: true;
+  readonly scheduledOrphanSweepUsesDistinctMaintenanceAuthority: true;
   readonly derivedDeletionDeletesSource: false;
 }
 
@@ -123,6 +125,7 @@ export type LocalGovernedOcrMutationKind =
   | 'job_rerun'
   | 'job_delete'
   | 'authorization_revoke_propagate'
+  | 'retention_expire_propagate'
   | 'processing_disable'
   | 'processing_enable'
   | 'source_delete_propagate';

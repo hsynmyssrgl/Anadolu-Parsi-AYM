@@ -14,9 +14,11 @@ import type {
   LocalGovernedOcrAuthorizationRevocationReason,
   LocalGovernedOcrConsentRow,
   LocalGovernedOcrJobRow,
+  LocalGovernedOcrMaintenanceJobBindingRow,
   LocalGovernedOcrMutationRow,
   LocalGovernedOcrPolicyResourceMetadata,
   LocalGovernedOcrRepositoryPort,
+  LocalGovernedOcrRetentionReconciliationCandidate,
   LocalGovernedOcrSettingsRow,
   LocalGovernedOcrSourceRow,
   LocalGovernedOcrSourceDeletionBatch,
@@ -36,6 +38,7 @@ const SETTINGS_RESOURCE_PREFIX = 'local-ocr-settings:';
 const MAX_JOBS = 500;
 const MAX_LANGUAGE_HINTS = 8;
 const MAX_AUTHORIZATION_RECONCILIATION_CANDIDATES = 32;
+const MAX_RETENTION_RECONCILIATION_CANDIDATES = 32;
 
 const authorizationRevocationProjectionSql = `WITH authorization_state AS (
   SELECT job.id job_id,job.revision,job.state_fingerprint,
@@ -489,6 +492,39 @@ export class SqliteLocalGovernedOcrRepository extends SqliteRepository implement
       })));
   }
 
+  public listRetentionReconciliationCandidates(
+    context: RepositoryExecutionContext,
+    key: LocalGovernedOcrAggregateKey,
+    at: string,
+    limit: number
+  ): RepositoryResult<readonly LocalGovernedOcrRetentionReconciliationCandidate[]> {
+    assertKey(context, key);
+    assertIso(at);
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > MAX_RETENTION_RECONCILIATION_CANDIDATES) {
+      throw new Error('OCR retention reconciliation limit is invalid');
+    }
+    return this.execute(context, () => Object.freeze((this.database(context).prepare(`SELECT id job_id,revision,state_fingerprint,retention_until
+      FROM local_governed_ocr_jobs
+      WHERE family_id=? AND account_id=? AND owner_person_id=?
+        AND status='completed' AND result_available=1 AND sealed_result_id IS NOT NULL
+        AND retention_until IS NOT NULL AND julianday(retention_until)<=julianday(?)
+      ORDER BY retention_until,id LIMIT ?`).all(
+        key.familyId, key.accountId, key.ownerPersonId, at, limit
+      ) as Record<string, unknown>[]).map((row): LocalGovernedOcrRetentionReconciliationCandidate => {
+        const retentionUntil = asIsoDateTime(String(row.retention_until));
+        if (!Number.isSafeInteger(Number(row.revision)) || Number(row.revision) < 1
+          || !SHA256.test(String(row.state_fingerprint))) {
+          throw new Error('OCR retention reconciliation candidate is invalid');
+        }
+        return Object.freeze({
+          jobId: String(row.job_id),
+          revision: Number(row.revision),
+          stateFingerprint: String(row.state_fingerprint),
+          retentionUntil
+        });
+      })));
+  }
+
   public resolveAuthorizationRevocation(
     context: RepositoryExecutionContext,
     key: LocalGovernedOcrAggregateKey,
@@ -507,6 +543,49 @@ export class SqliteLocalGovernedOcrRepository extends SqliteRepository implement
         throw new Error('OCR authorization revocation reason is invalid');
       }
       return reason as LocalGovernedOcrAuthorizationRevocationReason;
+    });
+  }
+
+  public resolveRetentionExpiry(
+    context: RepositoryExecutionContext,
+    key: LocalGovernedOcrAggregateKey,
+    jobId: string,
+    at: string
+  ): RepositoryResult<ReturnType<typeof asIsoDateTime> | null> {
+    primaryScope(context, key, 'local_ocr_job', jobId, ['delete']);
+    assertIso(at);
+    return this.execute(context, () => {
+      const row = this.database(context).prepare(`SELECT retention_until FROM local_governed_ocr_jobs
+        WHERE id=? AND family_id=? AND account_id=? AND owner_person_id=?
+          AND status='completed' AND result_available=1 AND sealed_result_id IS NOT NULL
+          AND retention_until IS NOT NULL AND julianday(retention_until)<=julianday(?)`).get(
+        jobId, key.familyId, key.accountId, key.ownerPersonId, at
+      ) as { readonly retention_until?: unknown } | undefined;
+      return row ? asIsoDateTime(String(row.retention_until)) : null;
+    });
+  }
+
+  public resolveMaintenanceJobBinding(
+    context: RepositoryExecutionContext,
+    key: LocalGovernedOcrAggregateKey,
+    jobId: string
+  ): RepositoryResult<LocalGovernedOcrMaintenanceJobBindingRow | null> {
+    primaryScope(context, key, 'local_ocr_settings', settingsResourceId(key), ['update']);
+    return this.execute(context, () => {
+      const raw = this.database(context).prepare(`SELECT * FROM local_governed_ocr_jobs
+        WHERE id=? AND family_id=? AND account_id=? AND owner_person_id=?`).get(
+        jobId, key.familyId, key.accountId, key.ownerPersonId
+      ) as Record<string, unknown> | undefined;
+      if (!raw) return null;
+      const row = mapJob(raw);
+      return Object.freeze({
+        key: row.key,
+        jobId: row.id,
+        derivedResourceId: row.derivedResourceId,
+        sourceResourceId: row.source.resourceId,
+        inputSha256: row.source.inputSha256,
+        currentSealedResultId: row.sealedResultId ?? null
+      });
     });
   }
 
@@ -611,6 +690,7 @@ export class SqliteLocalGovernedOcrRepository extends SqliteRepository implement
     const action: PolicyAction = row.resourceType === 'local_ocr_settings' ? 'update'
       : row.mutationKind === 'job_delete'
         || row.mutationKind === 'authorization_revoke_propagate'
+        || row.mutationKind === 'retention_expire_propagate'
         || row.mutationKind === 'source_delete_propagate' ? 'delete' : 'process';
     const policy = primaryScope(context, row.key, row.resourceType, row.resourceId, [action]);
     return this.execute(context, () => {

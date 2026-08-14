@@ -77,6 +77,24 @@ export interface LocalGovernedOcrAuthorizationReconciliationCandidate {
   readonly reason: LocalGovernedOcrAuthorizationRevocationReason;
 }
 
+/** Payload-free durable retention work; the current job row remains the retry authority. */
+export interface LocalGovernedOcrRetentionReconciliationCandidate {
+  readonly jobId: string;
+  readonly revision: number;
+  readonly stateFingerprint: string;
+  readonly retentionUntil: IsoDateTime;
+}
+
+/** Exact live binding readable only beneath the owner-scoped settings maintenance receipt. */
+export interface LocalGovernedOcrMaintenanceJobBindingRow {
+  readonly key: LocalGovernedOcrAggregateKey;
+  readonly jobId: string;
+  readonly derivedResourceId: string;
+  readonly sourceResourceId: string;
+  readonly inputSha256: string;
+  readonly currentSealedResultId: string | null;
+}
+
 export interface LocalGovernedOcrCenterSnapshotRow {
   readonly settings: LocalGovernedOcrSettingsRow;
   readonly jobs: readonly LocalGovernedOcrJobRow[];
@@ -178,6 +196,14 @@ export interface LocalGovernedOcrRepositoryPort {
     limit: number
   ): RepositoryResult<readonly LocalGovernedOcrAuthorizationReconciliationCandidate[]>;
 
+  /** Receiptless, actor-bound and payload-free discovery for expired sealed results. */
+  listRetentionReconciliationCandidates(
+    context: RepositoryExecutionContext,
+    key: LocalGovernedOcrAggregateKey,
+    at: string,
+    limit: number
+  ): RepositoryResult<readonly LocalGovernedOcrRetentionReconciliationCandidate[]>;
+
   /** Revalidates the exact current denial beneath the job-delete receipt before tombstoning. */
   resolveAuthorizationRevocation(
     context: RepositoryExecutionContext,
@@ -185,6 +211,24 @@ export interface LocalGovernedOcrRepositoryPort {
     jobId: string,
     at: string
   ): RepositoryResult<LocalGovernedOcrAuthorizationRevocationReason | null>;
+
+  /** Revalidates exact expiry beneath the job-delete receipt before file-first purge. */
+  resolveRetentionExpiry(
+    context: RepositoryExecutionContext,
+    key: LocalGovernedOcrAggregateKey,
+    jobId: string,
+    at: string
+  ): RepositoryResult<IsoDateTime | null>;
+
+  /**
+   * Live, payload-minimized job binding beneath the distinct settings maintenance receipt.
+   * Generic job reads are deliberately not widened to maintenance authority.
+   */
+  resolveMaintenanceJobBinding(
+    context: RepositoryExecutionContext,
+    key: LocalGovernedOcrAggregateKey,
+    jobId: string
+  ): RepositoryResult<LocalGovernedOcrMaintenanceJobBindingRow | null>;
 
   findMutationByClientOperationId(
     context: RepositoryExecutionContext,

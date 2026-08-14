@@ -206,6 +206,8 @@ import {
   RerunLocalGovernedOcrJobUseCase,
   DeleteLocalGovernedOcrJobUseCase,
   ReconcileLocalGovernedOcrAuthorizationUseCase,
+  ReconcileLocalGovernedOcrRetentionUseCase,
+  SweepLocalGovernedOcrOrphansUseCase,
   SetLocalGovernedOcrEnabledUseCase,
   PropagateLocalGovernedOcrSourceDeletionUseCase,
   localGovernedOcrSettingsResourceId,
@@ -853,6 +855,9 @@ const failClosedLocalGovernedOcrRuntime: LocalGovernedOcrRuntimePort = Object.fr
   },
   async purgeSealedResult(input: Parameters<LocalGovernedOcrRuntimePort['purgeSealedResult']>[0]) {
     return localGovernedOcrRuntimeFailure(input.correlationId);
+  },
+  async sweepOrphans(input: Parameters<LocalGovernedOcrRuntimePort['sweepOrphans']>[0]) {
+    return localGovernedOcrRuntimeFailure(input.correlationId);
   }
 });
 
@@ -862,7 +867,8 @@ const assertLocalGovernedOcrRuntimePort = (runtime: LocalGovernedOcrRuntimePort)
     || typeof runtime.correctAndSeal !== 'function'
     || typeof runtime.readSealedResult !== 'function'
     || typeof runtime.requestCancellation !== 'function'
-    || typeof runtime.purgeSealedResult !== 'function') {
+    || typeof runtime.purgeSealedResult !== 'function'
+    || typeof runtime.sweepOrphans !== 'function') {
     throw new PlatformPolicyEnforcementError(
       'ENFORCEMENT_UNAVAILABLE',
       'Explicit Local OCR bounded runtime injection is incomplete'
@@ -1251,6 +1257,8 @@ export class FamilyDataStore {
   readonly #rerunLocalGovernedOcrJobUseCase: RerunLocalGovernedOcrJobUseCase;
   readonly #deleteLocalGovernedOcrJobUseCase: DeleteLocalGovernedOcrJobUseCase;
   readonly #reconcileLocalGovernedOcrAuthorizationUseCase: ReconcileLocalGovernedOcrAuthorizationUseCase;
+  readonly #reconcileLocalGovernedOcrRetentionUseCase: ReconcileLocalGovernedOcrRetentionUseCase;
+  readonly #sweepLocalGovernedOcrOrphansUseCase: SweepLocalGovernedOcrOrphansUseCase;
   readonly #setLocalGovernedOcrEnabledUseCase: SetLocalGovernedOcrEnabledUseCase;
   readonly #propagateLocalGovernedOcrSourceDeletionUseCase: PropagateLocalGovernedOcrSourceDeletionUseCase;
   readonly #listDataRetentionPoliciesUseCase: ListDataRetentionPoliciesUseCase;
@@ -2445,6 +2453,14 @@ export class FamilyDataStore {
       localGovernedOcrUnitOfWork,
       localGovernedOcrRuntime
     );
+    this.#reconcileLocalGovernedOcrRetentionUseCase = new ReconcileLocalGovernedOcrRetentionUseCase(
+      localGovernedOcrUnitOfWork,
+      localGovernedOcrRuntime
+    );
+    this.#sweepLocalGovernedOcrOrphansUseCase = new SweepLocalGovernedOcrOrphansUseCase(
+      localGovernedOcrUnitOfWork,
+      localGovernedOcrRuntime
+    );
     this.#setLocalGovernedOcrEnabledUseCase = new SetLocalGovernedOcrEnabledUseCase(
       localGovernedOcrUnitOfWork,
       localGovernedOcrRuntime
@@ -3519,6 +3535,85 @@ export class FamilyDataStore {
       }
     }
     return { attempted: listed.value.length, completed, failed };
+  }
+
+  public async reconcileLocalGovernedOcrRetention(limit = 8): Promise<{
+    readonly attempted: number;
+    readonly completed: number;
+    readonly failed: number;
+  }> {
+    const listContext = this.#localGovernedOcrApplicationContext('local-ocr-retention-reconcile-list');
+    const listed = this.#reconcileLocalGovernedOcrRetentionUseCase.list(listContext, limit);
+    if (!listed.ok) throw new Error(`[${listed.error.code}] ${listed.error.message}`);
+    let completed = 0;
+    let failed = 0;
+    for (const candidate of listed.value) {
+      const context = this.#localGovernedOcrApplicationContext('local-ocr-retention-reconcile');
+      const clientOperationId = deterministicArchiveIdentifier(
+        canonicalArchiveOperationValue({
+          familyId: context.familyId,
+          accountId: context.actor.userId,
+          ownerPersonId: context.actor.personId,
+          jobId: candidate.jobId,
+          revision: candidate.revision,
+          retentionUntil: candidate.retentionUntil
+        }),
+        'local-ocr-retention-reconcile'
+      );
+      const command = Object.freeze({
+        jobId: candidate.jobId,
+        expectedRevision: candidate.revision,
+        retentionUntil: candidate.retentionUntil,
+        clientOperationId
+      });
+      try {
+        const result = await this.#reconcileLocalGovernedOcrRetentionUseCase.execute({
+          context,
+          command,
+          identifiers: localGovernedOcrMutationIdentifiers(
+            context,
+            clientOperationId,
+            candidate.jobId,
+            'retention_expire_propagate',
+            command
+          )
+        });
+        if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+        completed += 1;
+      } catch {
+        failed += 1;
+      }
+    }
+    return { attempted: listed.value.length, completed, failed };
+  }
+
+  public async sweepLocalGovernedOcrOrphans(maximumCandidates = 64): Promise<{
+    readonly scanned: number;
+    readonly deleted: number;
+    readonly referenced: number;
+    readonly rejected: number;
+    readonly networkUsed: false;
+    readonly cloudUsed: false;
+  }> {
+    const context = this.#localGovernedOcrApplicationContext('local-ocr-orphan-sweep');
+    const operationId = deterministicArchiveIdentifier(
+      canonicalArchiveOperationValue({
+        familyId: context.familyId,
+        accountId: context.actor.userId,
+        ownerPersonId: context.actor.personId,
+        correlationId: context.correlationId,
+        maximumCandidates
+      }),
+      'local-ocr-orphan-sweep'
+    );
+    const result = await this.#sweepLocalGovernedOcrOrphansUseCase.execute({
+      context,
+      maximumCandidates,
+      auditId: deterministicArchiveIdentifier(operationId, 'audit'),
+      outboxEventId: asEventId(deterministicArchiveIdentifier(operationId, 'outbox'))
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
   }
 
   #legacyApplicationContext(prefix:string):LegacyApplicationContext {

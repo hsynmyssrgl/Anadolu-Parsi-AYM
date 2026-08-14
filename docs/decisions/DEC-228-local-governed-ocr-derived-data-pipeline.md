@@ -4,7 +4,7 @@
 - Durum: `PLANNED / LOCAL_IMPLEMENTATION_STARTED`
 - Requirement PASS: `false`
 - Yerel uygulama: `PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED / ACCEPTANCE_INCOMPLETE`
-- Yerel otomatik bileşen kanıtı: `14 dosya / 110 test PASS`
+- Yerel otomatik bileşen kanıtı: `14 dosya / 113 test PASS`
 - Dış/manuel kanıt: `NOT_RUN`
 - Persistent receipt: `NOT_RUN`
 
@@ -47,7 +47,7 @@ Yerel domain/repository-contract, migration 94 metadata şeması, merkezi PEP/Uo
 - Yeni archive import create receipt’i actor person `ownerPersonId` ile mühürlenir; 3/3 archive policy testi ve desktop typecheck bunu yerel kaynakta doğrular. Immutable eski create receipt’lerinde `ownerPersonId=null` ise OCR fail-closed kalır. Sahipliği tahmin eden veya receipt’i sessizce yeniden yazan bir yol yasaktır; legacy ownership re-attestation/backfill otoritesi tasarlanıp kanıtlanmadan eski arşiv OCR erişilebilirliği/acceptance kapanmaz.
 - PPK-016; `OCR_TEXT`, `SEARCH_INDEX`, `SUMMARY`, `EMBEDDING`, `TRANSLATION`, `TRANSCRIPT`, `CACHE` ve `REPLICA` türleri için exact recursive lineage, retention ve erişim politikası mirası sağlar. OCR local binding entegrasyonu gate/testte vardır; gerçek arama/AI türev üretimi ve 33-Q acceptance açık kalır.
 - PPK-019; OCR job/current metadata, mutation ve immutable source-deletion item ledger sınıfları ile owner-bound sealed-result purge zincirini tanır. Batch/rollback/replay ve source destroy failureında false ledger yazmama testlidir. Bound secure-destroy intenti içeriksiz recovery ledgerında kalır; gerçek temp SQLite restart testi source-file success sonrası process-death penceresini sonraki authenticated scheduler çevriminde aynı operation kimliğiyle otomatik tamamlar. Bu yerel kurtarma gelecekteki index/embedding/cache, managed-backup veya fiziksel silme garantisi değildir.
-- PPK-021 current gate 441 üretim dosyasında 680 privileged yüzeyi exact SHA-256 `e27c91d81b7196f68e6d26714b793a7ca1a278382007559f704e9d44f362218d` ile PASS ölçer (`17/17` targeted, `84/84` contract, `20/20` runtime). Bu build-time AST kanıtı runtime PEP veya OCR acceptance yerine geçmez.
+- PPK-021 current gate 441 üretim dosyasında 682 privileged yüzeyi exact SHA-256 `79c2780d7ef80da7b0646389a9fb618cb81ea26925a8cf5286bcc7d37336c9ff` ile PASS ölçer (`17/17` targeted, `84/84` contract, `20/20` runtime). Bu build-time AST kanıtı runtime PEP veya OCR acceptance yerine geçmez.
 - PPK-022 current gate 441 üretim dosyasında 339 capability yüzeyini exact SHA-256 `bba1167e470099c3af1d4363bdba117028b7ce0b61fb78c381e07f3d439ec399` ile PASS ölçer (`19/19` targeted, `110/110` contract, `24/24` runtime, `19/19` canonical availability). `windows-desktop` aggregate `ocr.process` capability’si ayrı `ocr-worker` uygulama kimliği veya düşük yetki sandbox kanıtı değildir; `ocr-worker=[]` korunur.
 - B2-05/B6-03, 33-K/33-O ve PPK-017 süreli hassas veri rızası ile içeriksiz log temelleri sağlar. Production adapter `archive.ocr/process/ocr_process` PEP planını ayrı `sensitive_processing` rızasından ayırır; exact receipt ve runtime-authority lease yerel entegrasyon testlerinde doğrulanır. OCR rızası `ai_process` izni sayılmaz ve local test gerçek cihaz/UAT kanıtı değildir.
 
@@ -55,7 +55,7 @@ Kapanmış temel paketlerin yeniden kullanımı `REUSE_FOUNDATION_ONLY`, bunlar�
 
 ## Yerel otomatik kanıt sınırı
 
-Stabil yerel snapshot; core use-case/repository/transaction `3 dosya / 21 test`, security/input/worker/Windows `4/24`, sealed runtime `1/16`, PEP/UoW policy `2/12`, IPC `2/27`, UI `1/5` ve DataStore production facade `1/5` olmak üzere toplam `14 dosya / 110 test PASS` üretmiştir. Migration 94 kanonik SHA-256 değeri `2ac0ddd2bb9db3b2be117e9b623d875ed9baa41f57f48f16cd0f28719801633b` ve migration verifier sonucu `9/9 PASS` durumundadır. Archive+PPK-016+PPK-019 regresyonu ayrıca `3 dosya / 108 test PASS` durumundadır. Bu sonuçlar yalnız kısmi yerel uygulama kanıtıdır; gerçek cihaz, dış/manual kabul, tam adversarial matris veya requirement kapanışı değildir.
+Stabil yerel snapshot; core use-case/repository/transaction `3 dosya / 22 test`, security/input/worker/Windows `4/24`, sealed runtime `1/16`, PEP/UoW policy `2/13`, IPC `2/27`, UI `1/5` ve DataStore production facade `1/6` olmak üzere toplam `14 dosya / 113 test PASS` üretmiştir. Migration 94 kanonik SHA-256 değeri `08fef61dc21062134716dfae8e78c2256eb5da275eedaf1fe3502a3c2450cb65` ve migration verifier sonucu `9/9 PASS` durumundadır. Archive+PPK-016+PPK-019 regresyonu ayrıca `3 dosya / 108 test PASS` durumundadır. Bu sonuçlar yalnız kısmi yerel uygulama kanıtıdır; gerçek cihaz, dış/manual kabul, tam adversarial matris veya requirement kapanışı değildir.
 
 ## Yerel sağlayıcı ve fallback kararı
 
@@ -93,19 +93,19 @@ Apple cihazlara yalnız exact policy-authorized türetilmiş indeks/özet gönde
 
 Audit/outbox ve mutation receipt’leri içeriksiz metadata ile sınırlıdır; corrected text request fingerprintine yalnız SHA-256 olarak girer. Belge adı, OCR metni, snippet, path veya kullanıcı içeriği loglanmaz. Bu local source/test gerçeği retention/human review acceptance değildir.
 
-Retention metadata job/lineage üzerinde taşınır; ancak expiry sonrası sealed result ve gelecekteki index/cache türevlerini owner-bound otomatik purge eden scheduled maintenance PEP/wiring yoktur. Startup repair ve bounded orphan candidate traversal bu eksikliği kapatmaz; OCR-009 retention acceptance açık kalır.
+Retention metadata job/lineage üzerinde taşınır. Expiry sonrası current sealed result exact job-delete receipt'i altında file-first doğrulanmış purge ve atomik mutation/audit/outbox ile temizlenir; scheduled orphan traversal ayrı owner-settings maintenance PEP receipt'i ve her aday için taze live-binding receipt'i kullanır. Gelecekteki index/cache/embedding, managed backup ve fiziksel secure erase ownerları henüz bu zincire bağlı olmadığından OCR-009/OCR-020 acceptance açık kalır.
 
 ## Açık engeller
 
 - 33-P atomik kapanışı ve dış/manuel kanıtları tamamlanmamıştır.
-- Yerel domain/application/repository, transaction, PEP/UoW, sealed vault/runtime, DataStore facade, IPC ve UI `14 dosya / 110 test PASS` ile `PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED / ACCEPTANCE_INCOMPLETE` durumundadır. Registry atomik kapanış kaydı bu kısmi snapshot için değiştirilmemiştir.
+- Yerel domain/application/repository, transaction, PEP/UoW, sealed vault/runtime, DataStore facade, IPC ve UI `14 dosya / 113 test PASS` ile `PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED / ACCEPTANCE_INCOMPLETE` durumundadır. Registry atomik kapanış kaydı bu kısmi snapshot için değiştirilmemiştir.
 - Zararlı dosya providerı ve PDF rasterizer yoktur; child-process separation düşük yetki sandbox kanıtı değildir.
 - Exact `ocr_process` receipt + ayrı `sensitive_processing` rızası, owner-bound sealed-result vault ve local metadata owner zinciri yerel testtedir; policy-filtered tam metin index/snippet ve gerçek cihaz acceptance yoktur.
 - Owner-bound sealed-result purge, source-delete çoklu iş batch/current-row/repository-derived immutable item-ledger, rollback ve authenticated restart auto-resume zinciri yerel testlerde doğrulanmıştır. Gelecekteki index/embedding/cache ile managed-backup owner propagationı tamamlanmadan OCR-020 kabulü yoktur.
 - Permission veya `sensitive_processing` rıza iptal/expiry sonrasında current owner-bound sealed OCR sonucu otomatik ve tekrar denenebilir biçimde purge edilir; gelecekteki index/embedding/cache/managed-backup owner propagationı olmadığı için OCR-020 acceptance `false` kalır.
 - İki fazlı Run/Cancel local production-executor probe’u PASS’tir; running Cancel runtime’a ulaşır ve finalizasyon Cancel commit’inden sonra tamamlanır. Gerçek cihaz, accessibility ve human cancellation UAT yine `NOT_RUN` kalır.
-- Sealed-result startup repair ve bounded orphan taraması bileşen olarak testlidir; distinct maintenance PEP/authority ile scheduled production sweep bağlanmamıştır.
-- Retention expiry sonrası sealed result/türev otomatik purge zinciri kanıtlı değildir; OCR-009 retention acceptance `false` kalır.
+- Sealed-result startup repair ve bounded orphan taraması distinct owner-settings maintenance PEP/authority ile authenticated scheduler çevrimine bağlanmış ve aday başına taze receipt/live binding test edilmiştir; bu ayrı düşük-yetkili worker veya OS-enforced sandbox kanıtı değildir.
+- Retention expiry sonrası current sealed result owner-bound, file-first ve exact job-delete receipt'i altında otomatik purge edilir; gelecekteki türev/yedek ownerları ve fiziksel secure erase kanıtı olmadığından OCR-009 retention acceptance `false` kalır.
 - Yeni archive import receipt’leri ownerPersonId bağlıdır; fakat eski immutable receipt’lerde ownerPersonId null olduğunda OCR fail-closed kalır ve legacy ownership re-attestation/backfill otoritesi yoktur.
 - Windows yerel OCR, Apple Vision, offline fallback, malicious PDF/zip bomb/dev görüntü/bozuk font, çok dil, el yazısı, düşük kalite, erişilebilirlik ve cross-device kanıtları `NOT_RUN` durumundadır.
 - Harici sağlayıcı yapılandırılmamıştır; privacy/legal/security/human review ve persistent receipt `NOT_RUN` durumundadır.

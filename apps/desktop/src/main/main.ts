@@ -2619,6 +2619,40 @@ function startBackgroundSchedulers(): void {
           `attempted=${ocrAuthorization.attempted};completed=${ocrAuthorization.completed};failed=${ocrAuthorization.failed}`
         );
       }
+      const ocrRetention = await current.reconcileLocalGovernedOcrRetention().catch((error: unknown) => {
+        current.recordDiagnostic(
+          'error',
+          'ocr.retention_reconciliation_cycle_failed',
+          'Yerel OCR retention uzlaştırma çevrimi tamamlanamadı.',
+          error instanceof Error ? error.name : typeof error
+        );
+        return undefined;
+      });
+      if (ocrRetention && ocrRetention.failed > 0) {
+        current.recordDiagnostic(
+          'warning',
+          'ocr.retention_reconciliation_item_pending',
+          'Bazı süresi dolan yerel OCR sonuçları sonraki çevrimde yeniden denenecek.',
+          `attempted=${ocrRetention.attempted};completed=${ocrRetention.completed};failed=${ocrRetention.failed}`
+        );
+      }
+      const ocrOrphans = await current.sweepLocalGovernedOcrOrphans().catch((error: unknown) => {
+        current.recordDiagnostic(
+          'error',
+          'ocr.orphan_sweep_cycle_failed',
+          'Yerel OCR orphan bakım çevrimi tamamlanamadı.',
+          error instanceof Error ? error.name : typeof error
+        );
+        return undefined;
+      });
+      if (ocrOrphans && ocrOrphans.rejected > 0) {
+        current.recordDiagnostic(
+          'warning',
+          'ocr.orphan_sweep_item_rejected',
+          'Bazı yerel OCR sealed sonuçları canlı owner bağı doğrulanamadığı için korunarak sonraki çevrime bırakıldı.',
+          `scanned=${ocrOrphans.scanned};deleted=${ocrOrphans.deleted};referenced=${ocrOrphans.referenced};rejected=${ocrOrphans.rejected}`
+        );
+      }
       const ocrRecovery = await current.resumePendingLocalGovernedOcrArchiveDeletions().catch((error: unknown) => {
         current.recordDiagnostic(
           'error',
