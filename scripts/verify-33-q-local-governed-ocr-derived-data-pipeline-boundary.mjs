@@ -130,7 +130,7 @@ const definitions = [
   ['all governance and partial production source surfaces exist', governancePathsExist && localSourcePathsExist],
   ['migration 94 canonical definition and manifest are exact',
     migration94?.name === 'local_governed_ocr' && migration94?.checksum === migration94Sha256
-      && migration94Sha256 === 'fe45fabe96747ba37b2ce4a9bffce7142b6d47565ad94d1d842ed2fb4ee7e710'
+      && migration94Sha256 === '2ac0ddd2bb9db3b2be117e9b623d875ed9baa41f57f48f16cd0f28719801633b'
       && scope.plannedModel?.resultAndStorage?.migration94Sha256 === migration94Sha256],
   ['PPK-021 and PPK-022 ratchets match the final declared local snapshot',
     ppk.ppk021?.status === 'PASS' && ppk.ppk022?.status === 'PASS'
@@ -162,14 +162,14 @@ const definitions = [
       && scope.truth?.productionProviderWiredAndValidated === false
       && scope.truth?.productionIpcEndToEndValidated === false
       && scope.truth?.productionUiEndToEndValidated === false],
-  ['high residuals and fail-closed provider truth remain open',
+  ['current sealed-result authorization reconciliation is validated while broader residuals remain open',
     scope.truth?.maliciousFileScannerProviderAvailable === false
       && scope.truth?.productionConcurrentRunCancelProbeExecuted === true
       && scope.truth?.productionConcurrentRunCancelValidated === true
       && scope.truth?.archiveSourceDestroyAndOcrPropagationAtomicityValidated === false
       && scope.truth?.archiveSourceDestroyCrashWindowAutoResumeValidated === true
       && scope.truth?.sourceDeletionAutoResumeGuaranteed === true
-      && scope.truth?.permissionOrConsentRevocationOcrPurgeValidated === false
+      && scope.truth?.permissionOrConsentRevocationOcrPurgeValidated === true
       && scope.truth?.scheduledOrphanSweepProductionWiringValidated === false
       && scope.truth?.retentionExpiryPurgeValidated === false
       && scope.truth?.legacyArchiveOwnershipReattestationAvailable === false],
@@ -181,12 +181,12 @@ const definitions = [
       && scope.truth?.physicalSecureEraseGuaranteed === false
       && scope.truth?.externalCopyDestructionGuaranteed === false],
   ['decision and threat model preserve partial and no-claim markers',
-    decision.includes('14 dosya / 103 test PASS')
+    decision.includes('14 dosya / 110 test PASS')
       && decision.includes('PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED / ACCEPTANCE_INCOMPLETE')
       && decision.includes('- Requirement PASS: `false`')
       && decision.includes('- Persistent receipt: `NOT_RUN`')
       && decision.includes('requirement `PASS`')
-      && threat.includes('14 dosya / 103 test PASS')
+      && threat.includes('14 dosya / 110 test PASS')
       && threat.includes('iki fazlı run/cancel local kanıtı `PASS`')
       && threat.includes('authenticated restart auto-resume')]
 ];
@@ -205,7 +205,7 @@ const report = {
   countsAsRequirementPass: false,
   requirementGateStatus: 'BLOCKED_BY_33_P_AND_OPEN_TECHNICAL_EXTERNAL_MANUAL_EVIDENCE',
   activePredecessor: '33-P',
-  targetedTestRatchet: { files: 14, tests: 103 },
+  targetedTestRatchet: { files: 14, tests: 110 },
   migration94Sha256,
   ppkGateEvidence: ppk,
   checksPassed: checks.length - failures.length,

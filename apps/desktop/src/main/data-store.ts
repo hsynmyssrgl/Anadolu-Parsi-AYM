@@ -205,6 +205,7 @@ import {
   CorrectLocalGovernedOcrResultUseCase,
   RerunLocalGovernedOcrJobUseCase,
   DeleteLocalGovernedOcrJobUseCase,
+  ReconcileLocalGovernedOcrAuthorizationUseCase,
   SetLocalGovernedOcrEnabledUseCase,
   PropagateLocalGovernedOcrSourceDeletionUseCase,
   localGovernedOcrSettingsResourceId,
@@ -1249,6 +1250,7 @@ export class FamilyDataStore {
   readonly #correctLocalGovernedOcrResultUseCase: CorrectLocalGovernedOcrResultUseCase;
   readonly #rerunLocalGovernedOcrJobUseCase: RerunLocalGovernedOcrJobUseCase;
   readonly #deleteLocalGovernedOcrJobUseCase: DeleteLocalGovernedOcrJobUseCase;
+  readonly #reconcileLocalGovernedOcrAuthorizationUseCase: ReconcileLocalGovernedOcrAuthorizationUseCase;
   readonly #setLocalGovernedOcrEnabledUseCase: SetLocalGovernedOcrEnabledUseCase;
   readonly #propagateLocalGovernedOcrSourceDeletionUseCase: PropagateLocalGovernedOcrSourceDeletionUseCase;
   readonly #listDataRetentionPoliciesUseCase: ListDataRetentionPoliciesUseCase;
@@ -2439,6 +2441,10 @@ export class FamilyDataStore {
       localGovernedOcrUnitOfWork,
       localGovernedOcrRuntime
     );
+    this.#reconcileLocalGovernedOcrAuthorizationUseCase = new ReconcileLocalGovernedOcrAuthorizationUseCase(
+      localGovernedOcrUnitOfWork,
+      localGovernedOcrRuntime
+    );
     this.#setLocalGovernedOcrEnabledUseCase = new SetLocalGovernedOcrEnabledUseCase(
       localGovernedOcrUnitOfWork,
       localGovernedOcrRuntime
@@ -3464,6 +3470,57 @@ export class FamilyDataStore {
     }
     return { attempted: listed.value.length, completed, failed };
   }
+
+  public async reconcileLocalGovernedOcrAuthorizations(limit = 8): Promise<{
+    readonly attempted: number;
+    readonly completed: number;
+    readonly failed: number;
+  }> {
+    const listContext = this.#localGovernedOcrApplicationContext('local-ocr-authorization-reconcile-list');
+    const listed = this.#reconcileLocalGovernedOcrAuthorizationUseCase.list(listContext, limit);
+    if (!listed.ok) throw new Error(`[${listed.error.code}] ${listed.error.message}`);
+    let completed = 0;
+    let failed = 0;
+    for (const candidate of listed.value) {
+      const context = this.#localGovernedOcrApplicationContext('local-ocr-authorization-reconcile');
+      const clientOperationId = deterministicArchiveIdentifier(
+        canonicalArchiveOperationValue({
+          familyId: context.familyId,
+          accountId: context.actor.userId,
+          ownerPersonId: context.actor.personId,
+          jobId: candidate.jobId,
+          revision: candidate.revision,
+          reason: candidate.reason
+        }),
+        'local-ocr-authorization-reconcile'
+      );
+      const command = Object.freeze({
+        jobId: candidate.jobId,
+        expectedRevision: candidate.revision,
+        reason: candidate.reason,
+        clientOperationId
+      });
+      try {
+        const result = await this.#reconcileLocalGovernedOcrAuthorizationUseCase.execute({
+          context,
+          command,
+          identifiers: localGovernedOcrMutationIdentifiers(
+            context,
+            clientOperationId,
+            candidate.jobId,
+            'authorization_revoke_propagate',
+            command
+          )
+        });
+        if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+        completed += 1;
+      } catch {
+        failed += 1;
+      }
+    }
+    return { attempted: listed.value.length, completed, failed };
+  }
+
   #legacyApplicationContext(prefix:string):LegacyApplicationContext {
     const authenticatedUserId=this.#requireAuth(); const account=this.#currentAccount();
     return {familyId:asFamilyId('family-main'),actor:{userId:asUserId(authenticatedUserId),role:account.role,...(account.personId?{personId:account.personId}:{})},correlationId:this.#correlation?.current()?.correlationId??asCorrelationId(`${prefix}-${randomUUID()}`)};

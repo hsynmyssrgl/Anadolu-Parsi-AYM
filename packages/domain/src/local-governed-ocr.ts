@@ -90,6 +90,7 @@ export interface LocalGovernedOcrTruthView {
   readonly derivedPolicyBindingRequired: true;
   readonly sourceDeletionPropagatesToDerivedResult: true;
   readonly sourceDeletionAutoResumeGuaranteed: true;
+  readonly authorizationRevocationPropagatesToSealedResult: true;
   readonly derivedDeletionDeletesSource: false;
 }
 
@@ -121,6 +122,7 @@ export type LocalGovernedOcrMutationKind =
   | 'result_correct'
   | 'job_rerun'
   | 'job_delete'
+  | 'authorization_revoke_propagate'
   | 'processing_disable'
   | 'processing_enable'
   | 'source_delete_propagate';

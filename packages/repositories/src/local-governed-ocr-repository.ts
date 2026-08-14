@@ -10,6 +10,8 @@ import type { DataSensitivity, PlatformPolicyTransactionContext, PolicyAction } 
 import type {
   LocalGovernedOcrCenterSnapshotRow,
   LocalGovernedOcrArchiveVaultLocatorRow,
+  LocalGovernedOcrAuthorizationReconciliationCandidate,
+  LocalGovernedOcrAuthorizationRevocationReason,
   LocalGovernedOcrConsentRow,
   LocalGovernedOcrJobRow,
   LocalGovernedOcrMutationRow,
@@ -33,6 +35,47 @@ const STRICT_ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u;
 const SETTINGS_RESOURCE_PREFIX = 'local-ocr-settings:';
 const MAX_JOBS = 500;
 const MAX_LANGUAGE_HINTS = 8;
+const MAX_AUTHORIZATION_RECONCILIATION_CANDIDATES = 32;
+
+const authorizationRevocationProjectionSql = `WITH authorization_state AS (
+  SELECT job.id job_id,job.revision,job.state_fingerprint,
+    CASE
+      WHEN consent.id IS NULL
+        OR consent.status<>'granted'
+        OR consent.account_id<>job.account_id
+        OR consent.purpose<>'sensitive_processing'
+        OR consent.resource_type<>'archive_item'
+        OR consent.resource_id<>job.source_resource_id
+        OR julianday(consent.starts_at)>julianday(?)
+        THEN 'consent_revoked'
+      WHEN consent.ends_at IS NOT NULL AND julianday(consent.ends_at)<julianday(?)
+        THEN 'consent_expired'
+      WHEN EXISTS(
+        SELECT 1 FROM object_permissions permission
+        JOIN json_each(permission.actions) action
+        WHERE permission.subject_account_id=job.account_id
+          AND permission.effect='deny'
+          AND permission.purpose IN ('general','ai_processing')
+          AND julianday(permission.starts_at)<=julianday(?)
+          AND (permission.ends_at IS NULL OR julianday(permission.ends_at)>=julianday(?))
+          AND action.type='text' AND action.value IN ('read','ai_process')
+          AND (
+            (permission.resource_type='archive_item'
+              AND permission.resource_id IN (job.source_resource_id,'*'))
+            OR (permission.resource_type='local_ocr_job'
+              AND permission.resource_id IN (job.id,'*'))
+            OR (permission.resource_type='local_ocr_result'
+              AND permission.resource_id IN (job.derived_resource_id,'*'))
+          )
+      ) THEN 'permission_revoked'
+      ELSE NULL
+    END reason
+  FROM local_governed_ocr_jobs job
+  LEFT JOIN ai_consents consent ON consent.id=job.consent_id
+  WHERE job.family_id=? AND job.account_id=? AND job.owner_person_id=?
+    AND job.status='completed' AND job.result_available=1 AND job.sealed_result_id IS NOT NULL
+)
+SELECT job_id,revision,state_fingerprint,reason FROM authorization_state WHERE reason IS NOT NULL`;
 
 const digest = (value: string): string => createHash('sha256').update(value, 'utf8').digest('hex');
 const settingsResourceId = (key: LocalGovernedOcrAggregateKey): string => `${SETTINGS_RESOURCE_PREFIX}${key.ownerPersonId}`;
@@ -416,6 +459,57 @@ export class SqliteLocalGovernedOcrRepository extends SqliteRepository implement
     });
   }
 
+  public listAuthorizationReconciliationCandidates(
+    context: RepositoryExecutionContext,
+    key: LocalGovernedOcrAggregateKey,
+    at: string,
+    limit: number
+  ): RepositoryResult<readonly LocalGovernedOcrAuthorizationReconciliationCandidate[]> {
+    assertKey(context, key);
+    assertIso(at);
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > MAX_AUTHORIZATION_RECONCILIATION_CANDIDATES) {
+      throw new Error('OCR authorization reconciliation limit is invalid');
+    }
+    return this.execute(context, () => Object.freeze((this.database(context).prepare(
+      `${authorizationRevocationProjectionSql} ORDER BY job_id LIMIT ?`
+    ).all(at, at, at, at, key.familyId, key.accountId, key.ownerPersonId, limit) as Record<string, unknown>[])
+      .map((row): LocalGovernedOcrAuthorizationReconciliationCandidate => {
+        const reason = String(row.reason);
+        if (!['consent_revoked', 'consent_expired', 'permission_revoked'].includes(reason)
+          || !Number.isSafeInteger(Number(row.revision)) || Number(row.revision) < 1
+          || !SHA256.test(String(row.state_fingerprint))) {
+          throw new Error('OCR authorization reconciliation candidate is invalid');
+        }
+        return Object.freeze({
+          jobId: String(row.job_id),
+          revision: Number(row.revision),
+          stateFingerprint: String(row.state_fingerprint),
+          reason: reason as LocalGovernedOcrAuthorizationRevocationReason
+        });
+      })));
+  }
+
+  public resolveAuthorizationRevocation(
+    context: RepositoryExecutionContext,
+    key: LocalGovernedOcrAggregateKey,
+    jobId: string,
+    at: string
+  ): RepositoryResult<LocalGovernedOcrAuthorizationRevocationReason | null> {
+    primaryScope(context, key, 'local_ocr_job', jobId, ['delete']);
+    assertIso(at);
+    return this.execute(context, () => {
+      const row = this.database(context).prepare(
+        `${authorizationRevocationProjectionSql} AND job_id=? LIMIT 1`
+      ).get(at, at, at, at, key.familyId, key.accountId, key.ownerPersonId, jobId) as Record<string, unknown> | undefined;
+      if (!row) return null;
+      const reason = String(row.reason);
+      if (!['consent_revoked', 'consent_expired', 'permission_revoked'].includes(reason)) {
+        throw new Error('OCR authorization revocation reason is invalid');
+      }
+      return reason as LocalGovernedOcrAuthorizationRevocationReason;
+    });
+  }
+
   public findMutationByClientOperationId(context: RepositoryExecutionContext, key: LocalGovernedOcrAggregateKey,
     clientOperationId: string): RepositoryResult<LocalGovernedOcrMutationRow | null> {
     assertKey(context, key);
@@ -515,7 +609,9 @@ export class SqliteLocalGovernedOcrRepository extends SqliteRepository implement
     if (!SHA256.test(row.requestFingerprint) || !SHA256.test(row.stateFingerprint)
       || row.revision !== row.previousRevision + 1 || row.clientOperationId.length > 160) throw new Error('OCR mutation is invalid');
     const action: PolicyAction = row.resourceType === 'local_ocr_settings' ? 'update'
-      : row.mutationKind === 'job_delete' || row.mutationKind === 'source_delete_propagate' ? 'delete' : 'process';
+      : row.mutationKind === 'job_delete'
+        || row.mutationKind === 'authorization_revoke_propagate'
+        || row.mutationKind === 'source_delete_propagate' ? 'delete' : 'process';
     const policy = primaryScope(context, row.key, row.resourceType, row.resourceId, [action]);
     return this.execute(context, () => {
       const database = this.database(context);

@@ -66,6 +66,10 @@ CREATE TABLE archive_items(
 );
 CREATE TABLE ai_consents(id TEXT PRIMARY KEY,account_id TEXT NOT NULL,purpose TEXT NOT NULL,resource_type TEXT NOT NULL,
   resource_id TEXT NOT NULL,status TEXT NOT NULL,starts_at TEXT NOT NULL,ends_at TEXT,created_at TEXT NOT NULL);
+CREATE TABLE object_permissions(
+  id TEXT PRIMARY KEY,subject_account_id TEXT NOT NULL,resource_type TEXT NOT NULL,resource_id TEXT NOT NULL,
+  actions TEXT NOT NULL,effect TEXT NOT NULL,purpose TEXT NOT NULL,starts_at TEXT NOT NULL,ends_at TEXT
+);
 CREATE TABLE derived_data_policy_bindings(
   binding_hash TEXT PRIMARY KEY,status TEXT NOT NULL,derived_kind TEXT NOT NULL,derived_resource_id TEXT NOT NULL,
   content_sha256 TEXT NOT NULL,family_id TEXT NOT NULL
@@ -415,6 +419,97 @@ describe('33-Q local governed OCR repository policy boundary', () => {
     expect(database.prepare(`SELECT revision,status,run_attempt,active_run_id,cancellation_requested_at,cancelled_at
       FROM local_governed_ocr_jobs WHERE id=?`).get(queued.id)).toEqual({ revision: 4, status: 'cancelled',
       run_attempt: 1, active_run_id: null, cancellation_requested_at: null, cancelled_at: NOW });
+  });
+
+  it('discovers revoked, expired and denied authorization and tombstones only under the exact live denial', async () => {
+    const database = openFixture(); await seedSource(database);
+    const queued = queuedJob();
+    expect((await executePolicy(database, 'local_ocr_job', queued.id, 'process', (repository, context) => {
+      const inserted = repository.insertMutation(context, mutationFor(queued));
+      return inserted.ok ? repository.insertJob(context, queued) : inserted;
+    })).ok).toBe(true);
+
+    const resultSha = 'd'.repeat(64);
+    const bindingHash = 'e'.repeat(64);
+    database.prepare('INSERT INTO derived_data_policy_bindings VALUES(?,?,?,?,?,?)')
+      .run(bindingHash, 'sealed', 'OCR_TEXT', queued.derivedResourceId, resultSha, FAMILY_ID);
+    database.prepare('INSERT INTO derived_data_policy_sources VALUES(?,?,?,?)')
+      .run(bindingHash, 'archive_item', queued.source.resourceId, SOURCE_SHA);
+    const { stateFingerprint: _queuedFingerprint, ...queuedView } = queued;
+    const completedBase = Object.freeze({ ...queuedView, revision: 2, status: 'completed' as const, runAttempt: 1,
+      resultAvailable: true, resultContentSha256: resultSha, resultCharacterCount: 12, resultPageCount: 1,
+      derivedBindingHash: bindingHash, sealedResultId: 'ocr-result:authorization-reconcile', completedAt: asIsoDateTime(NOW),
+      updatedAt: asIsoDateTime(NOW) });
+    const completed: LocalGovernedOcrJobRow = Object.freeze({ ...completedBase,
+      stateFingerprint: computeLocalGovernedOcrJobStateFingerprint(completedBase) });
+    const completionMutation: LocalGovernedOcrMutationRow = Object.freeze({ id: 'ocr-authorization-complete-mutation',
+      key: queued.key, clientOperationId: 'ocr-authorization-complete-operation', requestFingerprint: '4'.repeat(64),
+      mutationKind: 'job_run', resourceType: 'local_ocr_job', resourceId: queued.id, previousRevision: 1, revision: 2,
+      stateFingerprint: completed.stateFingerprint, occurredAt: asIsoDateTime(NOW) });
+    expect((await executePolicy(database, 'local_ocr_job', queued.id, 'process', (repository, context) => {
+      const inserted = repository.insertMutation(context, completionMutation);
+      return inserted.ok ? repository.saveJob(context, completed, 1) : inserted;
+    }))).toEqual({ ok: true, value: true });
+
+    const at = '2026-08-14T10:00:00.000Z';
+    database.prepare(`UPDATE ai_consents SET ends_at='2026-08-14T09:30:00.000Z' WHERE id='consent-33-q'`).run();
+    const expired = await executePolicy(database, 'local_ocr_job', queued.id, 'delete', (repository, context) =>
+      repository.listAuthorizationReconciliationCandidates(context, queued.key, at, 8), at);
+    expect(expired).toEqual({ ok: true, value: [expect.objectContaining({ jobId: queued.id,
+      revision: 2, reason: 'consent_expired' })] });
+
+    database.prepare(`UPDATE ai_consents SET status='revoked',ends_at=NULL WHERE id='consent-33-q'`).run();
+    const revoked = await executePolicy(database, 'local_ocr_job', queued.id, 'delete', (repository, context) =>
+      repository.resolveAuthorizationRevocation(context, queued.key, queued.id, at), at);
+    expect(revoked).toEqual({ ok: true, value: 'consent_revoked' });
+
+    database.prepare(`UPDATE ai_consents SET status='granted',ends_at=NULL WHERE id='consent-33-q'`).run();
+    database.prepare(`INSERT INTO object_permissions VALUES(
+      'ocr-permission-deny',?,'archive_item',?,'["read"]','deny','general',?,NULL
+    )`).run(ACCOUNT_ID, queued.source.resourceId, NOW);
+    const denied = await executePolicy(database, 'local_ocr_job', queued.id, 'delete', (repository, context) =>
+      repository.resolveAuthorizationRevocation(context, queued.key, queued.id, at), at);
+    expect(denied).toEqual({ ok: true, value: 'permission_revoked' });
+
+    const { stateFingerprint: _completedFingerprint, sealedResultId: _sealed, resultContentSha256: _result,
+      resultCharacterCount: _characters, resultPageCount: _pages, derivedBindingHash: _binding,
+      completedAt: _completedAt, ...completedView } = completed;
+    const deletedBase = Object.freeze({ ...completedView, revision: 3, status: 'deleted' as const,
+      resultAvailable: false, deletedAt: asIsoDateTime(at), deletionPropagation: 'active' as const,
+      updatedAt: asIsoDateTime(at) });
+    const deleted: LocalGovernedOcrJobRow = Object.freeze({ ...deletedBase,
+      stateFingerprint: computeLocalGovernedOcrJobStateFingerprint(deletedBase) });
+    const mutation: LocalGovernedOcrMutationRow = Object.freeze({ id: 'ocr-authorization-revoke-mutation',
+      key: queued.key, clientOperationId: 'ocr-authorization-revoke-operation', requestFingerprint: '5'.repeat(64),
+      mutationKind: 'authorization_revoke_propagate', resourceType: 'local_ocr_job', resourceId: queued.id,
+      previousRevision: 2, revision: 3, stateFingerprint: deleted.stateFingerprint, occurredAt: asIsoDateTime(at) });
+
+    database.prepare(`DELETE FROM object_permissions WHERE id='ocr-permission-deny'`).run();
+    const forged = await executePolicy(database, 'local_ocr_job', queued.id, 'delete', (repository, context) => {
+      database.exec('BEGIN IMMEDIATE');
+      const inserted = repository.insertMutation(context, mutation);
+      const saved = inserted.ok ? repository.saveJob(context, deleted, 2) : inserted;
+      database.exec(saved.ok ? 'COMMIT' : 'ROLLBACK');
+      return saved;
+    }, at);
+    expect(forged.ok).toBe(false);
+    expect(database.prepare('SELECT revision,status,result_available FROM local_governed_ocr_jobs WHERE id=?')
+      .get(queued.id)).toEqual({ revision: 2, status: 'completed', result_available: 1 });
+
+    database.prepare(`INSERT INTO object_permissions VALUES(
+      'ocr-permission-deny',?,'local_ocr_result',?,'["ai_process"]','deny','ai_processing',?,NULL
+    )`).run(ACCOUNT_ID, queued.derivedResourceId, NOW);
+    const reconciled = await executePolicy(database, 'local_ocr_job', queued.id, 'delete', (repository, context) => {
+      const inserted = repository.insertMutation(context, mutation);
+      return inserted.ok ? repository.saveJob(context, deleted, 2) : inserted;
+    }, at);
+    expect(reconciled).toEqual({ ok: true, value: true });
+    expect(database.prepare(`SELECT revision,status,result_available,sealed_result_id,source_deleted_at,deletion_propagation,
+      last_mutation_id FROM local_governed_ocr_jobs WHERE id=?`).get(queued.id)).toEqual({ revision: 3,
+      status: 'deleted', result_available: 0, sealed_result_id: null, source_deleted_at: null,
+      deletion_propagation: 'active', last_mutation_id: mutation.id });
+    expect(() => database.prepare(`UPDATE local_governed_ocr_mutations SET request_fingerprint=? WHERE id=?`)
+      .run('6'.repeat(64), mutation.id)).toThrow(/immutable/u);
   });
 
   it('persists default-off/on settings under administration and denies unsealed completed results', async () => {

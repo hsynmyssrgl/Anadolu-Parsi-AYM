@@ -142,6 +142,7 @@ class DeterministicBoundedOcrRuntime implements LocalGovernedOcrRuntimePort {
   public purgeCalls = 0;
   public mismatchNextRun = false;
   public failNextPurge = false;
+  public failAfterNextPurge = false;
 
   public hasResult(jobId: string): boolean {
     return this.#results.has(jobId);
@@ -244,6 +245,15 @@ class DeterministicBoundedOcrRuntime implements LocalGovernedOcrRuntimePort {
       return err(this.#notFound(input.correlationId));
     }
     this.#results.delete(input.jobId);
+    if (this.failAfterNextPurge) {
+      this.failAfterNextPurge = false;
+      return err(createAppError({
+        code: ERROR_CODES.CORE_UNEXPECTED,
+        category: 'infrastructure',
+        message: 'injected post-delete acknowledgement failure',
+        correlationId: input.correlationId
+      }));
+    }
     return ok({ deleted: true, verified: true });
   }
 
@@ -503,6 +513,140 @@ describe('33-Q Local OCR DataStore production composition', () => {
       expect(existsSync(`${fixture.databasePath}.local-ocr-results`)).toBe(true);
       expect(fixture.requests.some((request) => request.capability === 'archive.ocr'
         && request.action === 'process')).toBe(true);
+    } finally {
+      fixture.store.close();
+    }
+  });
+
+  it('retries consent-revocation cleanup after file-first acknowledgement loss and leaves the archive source intact', async () => {
+    const runtime = new DeterministicBoundedOcrRuntime();
+    const fixture = await prepareOcrFixture({ runtime });
+    try {
+      const created = await fixture.store.createLocalGovernedOcrJob({
+        sourceResourceType: 'archive_item',
+        sourceResourceId: fixture.sourceId,
+        languageHints: ['tr-TR'],
+        expectedRevision: 0,
+        clientOperationId: '33-q-authorization-create'
+      });
+      const run = await fixture.store.runLocalGovernedOcrJob({
+        jobId: created.resourceId,
+        expectedRevision: 1,
+        clientOperationId: '33-q-authorization-run'
+      });
+      expect(run).toMatchObject({ revision: 3, mutationKind: 'job_run' });
+      expect(runtime.hasResult(created.resourceId)).toBe(true);
+
+      inspectDatabase(fixture.databasePath, (database) => database.prepare(
+        `UPDATE ai_consents SET status='revoked' WHERE id=?`
+      ).run(fixture.consentId));
+      runtime.failAfterNextPurge = true;
+      await expect(fixture.store.reconcileLocalGovernedOcrAuthorizations(8)).resolves.toEqual({
+        attempted: 1, completed: 0, failed: 1
+      });
+      expect(runtime.hasResult(created.resourceId)).toBe(false);
+      expect(inspectDatabase(fixture.databasePath, (database) => ({
+        job: database.prepare(`SELECT revision,status,result_available,sealed_result_id FROM local_governed_ocr_jobs WHERE id=?`)
+          .get(created.resourceId),
+        mutations: database.prepare(`SELECT COUNT(*) AS value FROM local_governed_ocr_mutations
+          WHERE mutation_kind='authorization_revoke_propagate' AND resource_id=?`).get(created.resourceId)
+      }))).toEqual({
+        job: { revision: 3, status: 'completed', result_available: 1,
+          sealed_result_id: expect.any(String) },
+        mutations: { value: 0 }
+      });
+
+      await expect(fixture.store.reconcileLocalGovernedOcrAuthorizations(8)).resolves.toEqual({
+        attempted: 1, completed: 1, failed: 0
+      });
+      await expect(fixture.store.reconcileLocalGovernedOcrAuthorizations(8)).resolves.toEqual({
+        attempted: 0, completed: 0, failed: 0
+      });
+      expect(runtime.purgeCalls).toBe(2);
+      await expect(fixture.store.getLocalGovernedOcrResult({ jobId: created.resourceId }))
+        .rejects.toThrow(/RESOURCE-CONFLICT|PERMISSION-DENIED/u);
+      const persisted = inspectDatabase(fixture.databasePath, (database) => ({
+        job: database.prepare(`SELECT revision,status,result_available,sealed_result_id,source_deleted_at,
+          deletion_propagation,last_mutation_id FROM local_governed_ocr_jobs WHERE id=?`).get(created.resourceId),
+        mutation: database.prepare(`SELECT mutation_kind,resource_type,resource_id FROM local_governed_ocr_mutations
+          WHERE mutation_kind='authorization_revoke_propagate' AND resource_id=?`).get(created.resourceId),
+        audit: database.prepare(`SELECT action,resource_type,resource_id FROM audit_log
+          WHERE action='ocr.authorization_revoke_propagate' AND resource_id=?`).get(created.resourceId),
+        outbox: database.prepare(`SELECT event_type,aggregate_type,aggregate_id FROM event_outbox
+          WHERE event_type='ocr.state.changed' AND aggregate_id=? ORDER BY occurred_at DESC LIMIT 1`).get(created.resourceId),
+        archive: database.prepare(`SELECT destroyed_at FROM archive_items WHERE id=?`).get(fixture.sourceId)
+      }));
+      expect(persisted).toEqual({
+        job: { revision: 4, status: 'deleted', result_available: 0, sealed_result_id: null,
+          source_deleted_at: null, deletion_propagation: 'active', last_mutation_id: expect.any(String) },
+        mutation: { mutation_kind: 'authorization_revoke_propagate', resource_type: 'local_ocr_job',
+          resource_id: created.resourceId },
+        audit: { action: 'ocr.authorization_revoke_propagate', resource_type: 'local_ocr_job',
+          resource_id: created.resourceId },
+        outbox: { event_type: 'ocr.state.changed', aggregate_type: 'local_ocr_job', aggregate_id: created.resourceId },
+        archive: { destroyed_at: null }
+      });
+      expect(fixture.requests).toEqual(expect.arrayContaining([expect.objectContaining({
+        resource: expect.objectContaining({ type: 'local_ocr_job', id: created.resourceId }),
+        action: 'delete',
+        capability: 'archive.write',
+        purpose: 'ocr_process'
+      })]));
+    } finally {
+      fixture.store.close();
+    }
+  });
+
+  it('denies a newly forbidden OCR source immediately and reconciles its sealed result without deleting the source', async () => {
+    const runtime = new DeterministicBoundedOcrRuntime();
+    const fixture = await prepareOcrFixture({ runtime });
+    try {
+      const created = await fixture.store.createLocalGovernedOcrJob({
+        sourceResourceType: 'archive_item', sourceResourceId: fixture.sourceId, languageHints: ['tr-TR'],
+        expectedRevision: 0, clientOperationId: '33-q-permission-create'
+      });
+      await fixture.store.runLocalGovernedOcrJob({
+        jobId: created.resourceId, expectedRevision: 1, clientOperationId: '33-q-permission-run'
+      });
+      expect(runtime.hasResult(created.resourceId)).toBe(true);
+      fixture.store.upsertPermission({
+        subjectAccountId: fixture.accountId,
+        resourceType: 'archive_item',
+        resourceId: fixture.sourceId,
+        actions: ['read'],
+        effect: 'deny',
+        purpose: 'general',
+        denialReason: '33-Q OCR kaynağı için yerel okuma izni geri alındı'
+      });
+      expect(inspectDatabase(fixture.databasePath, (database) => database.prepare(`
+        SELECT subject_account_id,resource_type,resource_id,actions,effect,purpose,starts_at,ends_at
+        FROM object_permissions WHERE resource_type='archive_item' AND resource_id=? AND effect='deny'
+      `).all(fixture.sourceId))).toEqual([expect.objectContaining({
+        subject_account_id: fixture.accountId,
+        resource_type: 'archive_item',
+        resource_id: fixture.sourceId,
+        actions: '["read"]',
+        effect: 'deny',
+        purpose: 'general'
+      })]);
+
+      await expect(fixture.store.getLocalGovernedOcrResult({ jobId: created.resourceId }))
+        .rejects.toThrow(/EXPLICIT_DENY|PERMISSION-DENIED/u);
+      await expect(fixture.store.reconcileLocalGovernedOcrAuthorizations(8)).resolves.toEqual({
+        attempted: 1, completed: 1, failed: 0
+      });
+      expect(runtime.hasResult(created.resourceId)).toBe(false);
+      expect(inspectDatabase(fixture.databasePath, (database) => ({
+        job: database.prepare(`SELECT status,result_available,sealed_result_id,source_deleted_at,deletion_propagation
+          FROM local_governed_ocr_jobs WHERE id=?`).get(created.resourceId),
+        consent: database.prepare(`SELECT status FROM ai_consents WHERE id=?`).get(fixture.consentId),
+        archive: database.prepare(`SELECT destroyed_at FROM archive_items WHERE id=?`).get(fixture.sourceId)
+      }))).toEqual({
+        job: { status: 'deleted', result_available: 0, sealed_result_id: null, source_deleted_at: null,
+          deletion_propagation: 'active' },
+        consent: { status: 'granted' },
+        archive: { destroyed_at: null }
+      });
     } finally {
       fixture.store.close();
     }

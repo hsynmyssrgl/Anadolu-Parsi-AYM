@@ -26,6 +26,8 @@ import {
 import type { DerivedDataPolicyBinding, DerivedDataSourcePolicySnapshot } from '@ppt/platform-policy';
 import type {
   LocalGovernedOcrConsentRow,
+  LocalGovernedOcrAuthorizationReconciliationCandidate,
+  LocalGovernedOcrAuthorizationRevocationReason,
   LocalGovernedOcrJobRow,
   LocalGovernedOcrMutationRow,
   LocalGovernedOcrSourceDeletionBatch,
@@ -39,6 +41,7 @@ import {
   GetLocalGovernedOcrCenterUseCase,
   GetLocalGovernedOcrResultUseCase,
   PropagateLocalGovernedOcrSourceDeletionUseCase,
+  ReconcileLocalGovernedOcrAuthorizationUseCase,
   RerunLocalGovernedOcrJobUseCase,
   RunLocalGovernedOcrJobUseCase,
   SetLocalGovernedOcrEnabledUseCase,
@@ -195,6 +198,25 @@ class Unit implements LocalGovernedOcrUnitOfWork {
   public lastBatch?: LocalGovernedOcrSourceDeletionBatch;
   public failAudit = false;
   public failBatch = false;
+  public authorizationRevocation: LocalGovernedOcrAuthorizationRevocationReason | null = null;
+
+  public listAuthorizationReconciliationCandidates(
+    _context: LocalGovernedOcrApplicationContext,
+    requestedKey: typeof key,
+    limit: number
+  ) {
+    if (requestedKey.familyId !== FAMILY || requestedKey.accountId !== ACCOUNT
+      || requestedKey.ownerPersonId !== PERSON || this.authorizationRevocation === null) return ok([]);
+    return ok(Object.freeze([...this.jobs.values()]
+      .filter((row) => row.status === 'completed' && row.resultAvailable && row.sealedResultId)
+      .slice(0, limit)
+      .map((row): LocalGovernedOcrAuthorizationReconciliationCandidate => Object.freeze({
+        jobId: row.id,
+        revision: row.revision,
+        stateFingerprint: row.stateFingerprint,
+        reason: this.authorizationRevocation!
+      }))));
+  }
 
   public resolvePolicyResource(
     _context: LocalGovernedOcrApplicationContext,
@@ -261,6 +283,8 @@ class Unit implements LocalGovernedOcrUnitOfWork {
       resolveArchiveSource: (_key, resourceId) => ok(this.source?.resourceId === resourceId ? this.source : null),
       resolveActiveSensitiveProcessingConsent: (_key, _type, resourceId) =>
         ok(this.consent?.resourceId === resourceId ? this.consent : null),
+      resolveAuthorizationRevocation: (_key, jobId) =>
+        ok(this.jobs.has(jobId) ? this.authorizationRevocation : null),
       findMutationByClientOperationId: (_key, operationId) => ok(this.mutations.get(operationId) ?? null),
       findSourceDeletionMutationByClientOperationId: (_key, sourceResourceId, operationId) => {
         const row = this.mutations.get(operationId);
@@ -394,6 +418,7 @@ describe('33-Q local governed OCR application core', () => {
       networkUsed: false, cloudUsed: false, providerDeliveryGuaranteed: false,
       explicitSensitiveProcessingConsentRequired: true, derivedPolicyBindingRequired: true,
       sourceDeletionPropagatesToDerivedResult: true, sourceDeletionAutoResumeGuaranteed: true,
+      authorizationRevocationPropagatesToSealedResult: true,
       derivedDeletionDeletesSource: false
     });
     expect(result.ok && result.value.jobs[0]).not.toHaveProperty('activeRunId');
@@ -544,6 +569,76 @@ describe('33-Q local governed OCR application core', () => {
     expect(unit.source).toBe(originalSource);
     expect(JSON.stringify({ mutations: [...unit.mutations.values()], audits: unit.audits, events: unit.events }))
       .not.toMatch(/(?:Düzeltilmiş yerel sonuç|Yalnız türetilmiş)/u);
+  });
+
+  it('purges a sealed result file-first after exact consent revocation and retries an atomic ledger rollback', async () => {
+    const unit = new Unit();
+    unit.jobs.set('ocr-job-1', completedJob('ocr-job-1'));
+    unit.authorizationRevocation = 'consent_revoked';
+    const runtime = new Runtime(unit.order);
+    const useCase = new ReconcileLocalGovernedOcrAuthorizationUseCase(unit, runtime);
+
+    expect(useCase.list(context, 8)).toEqual({ ok: true, value: [expect.objectContaining({
+      jobId: 'ocr-job-1', revision: 2, reason: 'consent_revoked'
+    })] });
+
+    unit.failAudit = true;
+    const command = Object.freeze({ jobId: 'ocr-job-1', expectedRevision: 2,
+      reason: 'consent_revoked' as const, clientOperationId: 'ocr-authorization-revoke-operation' });
+    const identifiers = ids('ocr-job-1', 'authorization-revoke');
+    const rolledBack = await useCase.execute({ context, command, identifiers });
+    expect(rolledBack.ok).toBe(false);
+    expect(unit.jobs.get('ocr-job-1')).toMatchObject({ status: 'completed', revision: 2, resultAvailable: true });
+    expect(unit.mutations.size).toBe(0);
+    expect(unit.audits).toHaveLength(0);
+    expect(unit.events).toHaveLength(0);
+    expect(runtime.purges).toEqual(['ocr-job-1']);
+
+    unit.failAudit = false;
+    const completed = await useCase.execute({ context, command, identifiers });
+    expect(completed).toEqual(expect.objectContaining({ ok: true, value: expect.objectContaining({
+      mutationKind: 'authorization_revoke_propagate', previousRevision: 2, revision: 3, replayed: false
+    }) }));
+    expect(unit.plans.at(-1)).toMatchObject({ primary: { resourceType: 'local_ocr_job', resourceId: 'ocr-job-1',
+      action: 'delete', capability: 'archive.write' } });
+    expect(unit.plans.at(-1)?.source).toBeUndefined();
+    expect(unit.jobs.get('ocr-job-1')).toMatchObject({ status: 'deleted', revision: 3, resultAvailable: false,
+      source: { resourceId: SOURCE_ID }, deletionPropagation: 'active' });
+    expect(unit.jobs.get('ocr-job-1')?.sourceDeletedAt).toBeUndefined();
+    expect(unit.jobs.get('ocr-job-1')?.sealedResultId).toBeUndefined();
+    expect(unit.order.slice(-5)).toEqual([
+      'runtime.purge:ocr-job-1', 'mutation.insert', 'job.save', 'audit.append', 'outbox.enqueue'
+    ]);
+
+    const replay = await useCase.execute({ context, command, identifiers });
+    expect(replay).toEqual(expect.objectContaining({ ok: true, value: expect.objectContaining({ replayed: true }) }));
+    expect(runtime.purges).toEqual(['ocr-job-1', 'ocr-job-1']);
+  });
+
+  it('does not touch sealed output when the discovered authorization reason is stale or purge verification fails', async () => {
+    const stale = new Unit(); stale.jobs.set('ocr-job-1', completedJob('ocr-job-1'));
+    stale.authorizationRevocation = 'permission_revoked';
+    const staleRuntime = new Runtime(stale.order);
+    const staleUseCase = new ReconcileLocalGovernedOcrAuthorizationUseCase(stale, staleRuntime);
+    const staleResult = await staleUseCase.execute({ context, command: { jobId: 'ocr-job-1', expectedRevision: 2,
+      reason: 'consent_expired', clientOperationId: 'ocr-stale-authorization-operation' },
+      identifiers: ids('ocr-job-1', 'stale-authorization') });
+    expect(staleResult.ok).toBe(false);
+    expect(staleRuntime.purges).toHaveLength(0);
+    expect(stale.mutations.size).toBe(0);
+
+    const failed = new Unit(); failed.jobs.set('ocr-job-1', completedJob('ocr-job-1'));
+    failed.authorizationRevocation = 'consent_expired';
+    const failedRuntime = new Runtime(failed.order); failedRuntime.failPurge = true;
+    const failedUseCase = new ReconcileLocalGovernedOcrAuthorizationUseCase(failed, failedRuntime);
+    const failedResult = await failedUseCase.execute({ context, command: { jobId: 'ocr-job-1', expectedRevision: 2,
+      reason: 'consent_expired', clientOperationId: 'ocr-failed-authorization-operation' },
+      identifiers: ids('ocr-job-1', 'failed-authorization') });
+    expect(failedResult.ok).toBe(false);
+    expect(failed.jobs.get('ocr-job-1')).toMatchObject({ status: 'completed', resultAvailable: true });
+    expect(failed.mutations.size).toBe(0);
+    expect(failed.audits).toHaveLength(0);
+    expect(failed.events).toHaveLength(0);
   });
 
   it('returns plaintext only through the authorized result read and keeps audit content-free', async () => {

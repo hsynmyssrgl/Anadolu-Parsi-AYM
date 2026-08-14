@@ -12412,7 +12412,7 @@ CREATE TABLE local_governed_ocr_mutations (
   client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 1 AND 160),
   request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
   mutation_kind TEXT NOT NULL CHECK(mutation_kind IN (
-    'job_create','job_run_begin','job_run','job_cancel','result_correct','job_rerun','job_delete',
+    'job_create','job_run_begin','job_run','job_cancel','result_correct','job_rerun','job_delete','authorization_revoke_propagate',
     'processing_disable','processing_enable','source_delete_propagate'
   )),
   resource_type TEXT NOT NULL CHECK(resource_type IN ('local_ocr_job','local_ocr_settings')),
@@ -12536,11 +12536,11 @@ WHEN NOT EXISTS(
     AND receipt.resource_id=NEW.resource_id
     AND receipt.action=CASE
       WHEN NEW.resource_type='local_ocr_settings' THEN 'update'
-      WHEN NEW.mutation_kind IN ('job_delete','source_delete_propagate') THEN 'delete'
+      WHEN NEW.mutation_kind IN ('job_delete','authorization_revoke_propagate','source_delete_propagate') THEN 'delete'
       ELSE 'process' END
     AND receipt.capability=CASE
       WHEN NEW.resource_type='local_ocr_settings' THEN 'family.write'
-      WHEN NEW.mutation_kind IN ('job_delete','source_delete_propagate') THEN 'archive.write'
+      WHEN NEW.mutation_kind IN ('job_delete','authorization_revoke_propagate','source_delete_propagate') THEN 'archive.write'
       ELSE 'archive.ocr' END
     AND receipt.issued_at=NEW.occurred_at AND receipt.recorded_at=NEW.occurred_at
     AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.account_id
@@ -12652,6 +12652,44 @@ WHEN (
   )
 )
 BEGIN SELECT RAISE(ABORT,'33-Q OCR run phase transition is not exact'); END;
+
+CREATE TRIGGER trg_33q_authorization_revoke_transition BEFORE UPDATE ON local_governed_ocr_jobs
+WHEN (SELECT mutation_kind FROM local_governed_ocr_mutations WHERE id=NEW.last_mutation_id)='authorization_revoke_propagate'
+ AND NOT (
+   OLD.status='completed' AND OLD.result_available=1 AND OLD.sealed_result_id IS NOT NULL
+   AND NEW.status='deleted' AND NEW.result_available=0 AND NEW.sealed_result_id IS NULL
+   AND NEW.deleted_at=NEW.updated_at AND NEW.deletion_propagation='active'
+   AND NEW.source_deleted_at IS OLD.source_deleted_at
+   AND (
+     NOT EXISTS(
+       SELECT 1 FROM ai_consents consent
+       WHERE consent.id=OLD.consent_id
+         AND consent.status='granted'
+         AND consent.account_id=OLD.account_id
+         AND consent.purpose='sensitive_processing'
+         AND consent.resource_type='archive_item'
+         AND consent.resource_id=OLD.source_resource_id
+         AND julianday(consent.starts_at)<=julianday(NEW.updated_at)
+         AND (consent.ends_at IS NULL OR julianday(consent.ends_at)>=julianday(NEW.updated_at))
+     )
+     OR EXISTS(
+       SELECT 1 FROM object_permissions permission
+       JOIN json_each(permission.actions) action
+       WHERE permission.subject_account_id=OLD.account_id
+         AND permission.effect='deny'
+         AND permission.purpose IN ('general','ai_processing')
+         AND julianday(permission.starts_at)<=julianday(NEW.updated_at)
+         AND (permission.ends_at IS NULL OR julianday(permission.ends_at)>=julianday(NEW.updated_at))
+         AND action.type='text' AND action.value IN ('read','ai_process')
+         AND (
+           (permission.resource_type='archive_item' AND permission.resource_id IN (OLD.source_resource_id,'*'))
+           OR (permission.resource_type='local_ocr_job' AND permission.resource_id IN (OLD.id,'*'))
+           OR (permission.resource_type='local_ocr_result' AND permission.resource_id IN (OLD.derived_resource_id,'*'))
+         )
+     )
+   )
+ )
+BEGIN SELECT RAISE(ABORT,'33-Q OCR authorization revocation purge requires an exact current denial'); END;
 
 CREATE TRIGGER trg_33q_settings_insert BEFORE INSERT ON local_governed_ocr_settings
 WHEN NEW.revision<>1

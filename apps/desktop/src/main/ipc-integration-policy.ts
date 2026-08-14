@@ -82,6 +82,7 @@ export interface LocalGovernedOcrCenterIpcView {
     readonly derivedPolicyBindingRequired: true;
     readonly sourceDeletionPropagatesToDerivedResult: true;
     readonly sourceDeletionAutoResumeGuaranteed: true;
+    readonly authorizationRevocationPropagatesToSealedResult: true;
     readonly derivedDeletionDeletesSource: false;
   };
   readonly generatedAt: string;
@@ -210,6 +211,8 @@ export const projectLocalGovernedOcrCenterIpcView = (
       derivedPolicyBindingRequired: center.truth.derivedPolicyBindingRequired,
       sourceDeletionPropagatesToDerivedResult: center.truth.sourceDeletionPropagatesToDerivedResult,
       sourceDeletionAutoResumeGuaranteed: center.truth.sourceDeletionAutoResumeGuaranteed,
+      authorizationRevocationPropagatesToSealedResult:
+        center.truth.authorizationRevocationPropagatesToSealedResult,
       derivedDeletionDeletesSource: center.truth.derivedDeletionDeletesSource
     },
     generatedAt: center.generatedAt
@@ -2483,6 +2486,7 @@ const localOcrCenterResult = (value: unknown): boolean => {
       'plaintextResultPersistedInRepository', 'networkUsed', 'cloudUsed', 'providerDeliveryGuaranteed',
       'explicitSensitiveProcessingConsentRequired', 'derivedPolicyBindingRequired',
       'sourceDeletionPropagatesToDerivedResult', 'sourceDeletionAutoResumeGuaranteed',
+      'authorizationRevocationPropagatesToSealedResult',
       'derivedDeletionDeletesSource'
     ]) || value.truth.executionScope !== 'bounded_child_process'
     || value.truth.lowPrivilegeSandboxVerified !== false || value.truth.sourceContentExposedToRenderer !== false
@@ -2492,6 +2496,7 @@ const localOcrCenterResult = (value: unknown): boolean => {
     || value.truth.derivedPolicyBindingRequired !== true
     || value.truth.sourceDeletionPropagatesToDerivedResult !== true
     || value.truth.sourceDeletionAutoResumeGuaranteed !== true
+    || value.truth.authorizationRevocationPropagatesToSealedResult !== true
     || value.truth.derivedDeletionDeletesSource !== false || !localOcrIso(value.generatedAt)) return false;
   return value.settings.enabled
     ? value.settings.disabledReason === null && value.settings.disabledAt === null

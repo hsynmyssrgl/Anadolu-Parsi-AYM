@@ -582,6 +582,67 @@ const toPolicyGrant = (row: ObjectPermissionRow): PolicyGrant => Object.freeze({
   ...(row.endsAt ? { endsAt: row.endsAt } : {})
 });
 
+const localGovernedOcrPermissionResourceTypes = new Set([
+  'archive_item',
+  'local_ocr_job',
+  'local_ocr_result',
+  'local_ocr_settings'
+]);
+
+const localGovernedOcrPermissionIsRelevant = (row: ObjectPermissionRow): boolean =>
+  row.resourceType !== 'archive_item'
+  || row.purpose === 'ai_processing'
+  || row.actions.includes('ai_process')
+  || (row.purpose === 'general' && row.actions.includes('read'));
+
+const localGovernedOcrPermissionIsValid = (
+  row: ObjectPermissionRow,
+  accountId: string,
+  occurredAt: string
+): boolean => {
+  const now = parsedTimestamp(occurredAt);
+  const startsAt = parsedTimestamp(row.startsAt);
+  const endsAt = row.endsAt === undefined ? undefined : parsedTimestamp(row.endsAt);
+  const settings = row.resourceType === 'local_ocr_settings';
+  return nonEmpty(row.id, 256)
+    && row.subjectAccountId === accountId
+    && localGovernedOcrPermissionResourceTypes.has(row.resourceType)
+    && nonEmpty(row.resourceId, 256)
+    && Array.isArray(row.actions)
+    && row.actions.length >= 1
+    && row.actions.length <= 3
+    && row.actions.every((action) => settings
+      ? action === 'read' || action === 'update' || action === 'delete'
+      : action === 'read' || action === 'ai_process' || action === 'delete')
+    && (row.effect === 'allow' || row.effect === 'deny')
+    && (row.ownershipBasisPoints === undefined
+      || (row.effect === 'allow' && Number.isInteger(row.ownershipBasisPoints)
+        && row.ownershipBasisPoints >= 1 && row.ownershipBasisPoints <= 10_000))
+    && (row.purpose === 'general'
+      || (settings ? row.purpose === 'administration' : row.purpose === 'ai_processing'))
+    && row.familyBranchId === undefined
+    && Number.isFinite(now)
+    && Number.isFinite(startsAt)
+    && startsAt <= now
+    && (endsAt === undefined || (Number.isFinite(endsAt) && endsAt >= now))
+    && (row.effect !== 'allow' || endsAt !== undefined);
+};
+
+const toLocalGovernedOcrPolicyGrant = (row: ObjectPermissionRow): PolicyGrant => Object.freeze({
+  id: row.id,
+  subjectAccountId: row.subjectAccountId,
+  resourceType: row.resourceType,
+  resourceId: row.resourceId,
+  actions: Object.freeze(row.actions.map((action): PolicyAction => action === 'ai_process' ? 'process' : action)),
+  effect: row.effect,
+  ...(row.ownershipBasisPoints === undefined ? {} : { ownershipBasisPoints: row.ownershipBasisPoints }),
+  ...(row.purpose === 'general'
+    ? {}
+    : { purposes: Object.freeze([row.purpose === 'ai_processing' ? 'ocr_process' : 'administration']) }),
+  startsAt: row.startsAt,
+  ...(row.endsAt ? { endsAt: row.endsAt } : {})
+});
+
 const authorityExpiry = (account: AccountRow, occurredAt: string): string | undefined => {
   const now = parsedTimestamp(occurredAt);
   const accountEndsAt = account.endsAt === undefined
@@ -1611,8 +1672,56 @@ const loadLocalGovernedOcrCapturedSnapshotInTransaction = (
   transaction: TransactionContext
 ): Result<LocalGovernedOcrCapturedSnapshot, AppError> => {
   const timelineContext = timelineContextFromLocalGovernedOcr(context);
-  const authority = loadAuthoritySnapshotInTransaction(dependencies, timelineContext, identity, transaction);
-  if (!authority.ok) return authority;
+  const baseAuthority = loadAuthoritySnapshotInTransaction(dependencies, timelineContext, identity, transaction);
+  if (!baseAuthority.ok) return baseAuthority;
+  const execution = repositoryContext(timelineContext, transaction);
+  const permissionRows = dependencies.permissionRepository.listActiveForSubject(
+    execution,
+    context.actor.userId,
+    execution.occurredAt
+  );
+  if (!permissionRows.ok) return permissionRows;
+  const localPermissions = permissionRows.value.filter((row) =>
+    localGovernedOcrPermissionResourceTypes.has(row.resourceType)
+    && localGovernedOcrPermissionIsRelevant(row)
+  );
+  if (localPermissions.length > 10_000
+    || localPermissions.some((row) => !localGovernedOcrPermissionIsValid(
+      row,
+      context.actor.userId,
+      execution.occurredAt
+    ))) {
+    return invalidLocalGovernedOcrAuthority(context, 'Local OCR permission snapshot contains invalid grants');
+  }
+  const localGrants = Object.freeze(localPermissions
+    .map(toLocalGovernedOcrPolicyGrant)
+    .sort((left, right) => left.id.localeCompare(right.id)));
+  const authority: AuthoritySnapshot = Object.freeze({
+    authority: Object.freeze({
+      ...baseAuthority.value.authority,
+      grants: Object.freeze([
+        ...(baseAuthority.value.authority.grants ?? []),
+        ...localGrants
+      ])
+    }),
+    securityFingerprint: stable({
+      base: baseAuthority.value.securityFingerprint,
+      localOcrPermissions: localPermissions
+        .map((row) => ({
+          id: row.id,
+          subjectAccountId: row.subjectAccountId,
+          resourceType: row.resourceType,
+          resourceId: row.resourceId,
+          actions: [...row.actions],
+          effect: row.effect,
+          purpose: row.purpose,
+          ownershipBasisPoints: row.ownershipBasisPoints,
+          startsAt: row.startsAt,
+          endsAt: row.endsAt
+        }))
+        .sort((left, right) => left.id.localeCompare(right.id))
+    })
+  });
   const resource = loadLocalGovernedOcrResourceSnapshotInTransaction(
     dependencies,
     context,
@@ -1623,13 +1732,12 @@ const loadLocalGovernedOcrCapturedSnapshotInTransaction = (
   if (!resource.ok) return resource;
 
   if (requestedIntent.capability !== 'archive.ocr') {
-    return ok(Object.freeze({ authority: authority.value, resource: resource.value }));
+    return ok(Object.freeze({ authority, resource: resource.value }));
   }
   const sourceResourceId = resource.value.sourceResourceId;
   if (!sourceResourceId || !context.actor.personId) {
     return invalidLocalGovernedOcrAuthority(context, 'Local OCR processing consent source is unavailable');
   }
-  const execution = repositoryContext(timelineContext, transaction);
   const consents = dependencies.aiConsentRepository.listActive(
     execution,
     context.actor.userId,
@@ -1667,11 +1775,11 @@ const loadLocalGovernedOcrCapturedSnapshotInTransaction = (
   });
   const enhancedAuthority: AuthoritySnapshot = Object.freeze({
     authority: Object.freeze({
-      ...authority.value.authority,
+      ...authority.authority,
       consents: Object.freeze([policyConsent])
     }),
     securityFingerprint: stable({
-      authority: authority.value.securityFingerprint,
+      authority: authority.securityFingerprint,
       consent: {
         id: consent.id,
         sourceResourceId,

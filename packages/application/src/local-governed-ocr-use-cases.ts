@@ -48,6 +48,8 @@ import {
   type DerivedDataTargetPolicy
 } from '@ppt/platform-policy';
 import type {
+  LocalGovernedOcrAuthorizationReconciliationCandidate,
+  LocalGovernedOcrAuthorizationRevocationReason,
   LocalGovernedOcrCenterSnapshotRow,
   LocalGovernedOcrConsentRow,
   LocalGovernedOcrJobRow,
@@ -123,6 +125,11 @@ export interface LocalGovernedOcrWriteScope {
     resourceId: string,
     at: IsoDateTime
   ): Result<LocalGovernedOcrConsentRow | null, AppError>;
+  resolveAuthorizationRevocation(
+    key: LocalGovernedOcrAggregateKey,
+    jobId: string,
+    at: IsoDateTime
+  ): Result<LocalGovernedOcrAuthorizationRevocationReason | null, AppError>;
   findMutationByClientOperationId(
     key: LocalGovernedOcrAggregateKey,
     clientOperationId: string
@@ -166,6 +173,12 @@ export interface LocalGovernedOcrUnitOfWork {
     key: LocalGovernedOcrAggregateKey,
     resourceId: string
   ): Result<LocalGovernedOcrPolicyResourceMetadata | null, AppError>;
+  /** Actor-bound, payload-free work discovery; the current job row is the durable retry queue. */
+  listAuthorizationReconciliationCandidates(
+    context: LocalGovernedOcrApplicationContext,
+    key: LocalGovernedOcrAggregateKey,
+    limit: number
+  ): Result<readonly LocalGovernedOcrAuthorizationReconciliationCandidate[], AppError>;
   /** Every supplied intent is authorized by the central PEP before the shared transaction callback runs. */
   execute<T>(
     context: LocalGovernedOcrApplicationContext,
@@ -723,6 +736,7 @@ export class GetLocalGovernedOcrCenterUseCase {
           derivedPolicyBindingRequired: true,
           sourceDeletionPropagatesToDerivedResult: true,
           sourceDeletionAutoResumeGuaranteed: true,
+          authorizationRevocationPropagatesToSealedResult: true,
           derivedDeletionDeletesSource: false
         },
         generatedAt: scope.occurredAt
@@ -1314,6 +1328,141 @@ export class DeleteLocalGovernedOcrJobUseCase {
         return ok({ previousRevision: current.value.revision, revision: row.revision, stateFingerprint: row.stateFingerprint,
           persist: () => { const saved = scope.saveJob(row, current.value.revision);
             return saved.ok && saved.value ? ok(undefined) : saved.ok ? err(conflict(input.context, 'OCR iş revizyonu yarıştı.')) : saved; } });
+      }
+    });
+  }
+}
+
+export interface ReconcileLocalGovernedOcrAuthorizationInput {
+  readonly jobId: string;
+  readonly expectedRevision: number;
+  readonly reason: LocalGovernedOcrAuthorizationRevocationReason;
+  readonly clientOperationId: string;
+}
+
+/**
+ * Main-only reconciliation. Discovery is payload-free; the exact denial is revalidated beneath a
+ * fresh job-delete receipt before file-first purge and the atomic current-row tombstone.
+ */
+export class ReconcileLocalGovernedOcrAuthorizationUseCase {
+  public constructor(
+    private readonly unitOfWork: LocalGovernedOcrUnitOfWork,
+    private readonly runtime: LocalGovernedOcrRuntimePort
+  ) {}
+
+  public list(
+    context: LocalGovernedOcrApplicationContext,
+    limit = 8
+  ): Result<readonly LocalGovernedOcrAuthorizationReconciliationCandidate[], AppError> {
+    const key = keyFor(context);
+    if (!key.ok) return key;
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 32) {
+      return err(invalid(context, 'OCR yetki uzlaştırma sınırı geçersizdir.'));
+    }
+    return this.unitOfWork.listAuthorizationReconciliationCandidates(context, key.value, limit);
+  }
+
+  public async execute(input: {
+    readonly context: LocalGovernedOcrApplicationContext;
+    readonly command: ReconcileLocalGovernedOcrAuthorizationInput;
+    readonly identifiers: LocalGovernedOcrOperationIdentifiers;
+  }): Promise<Result<LocalGovernedOcrMutationReceiptView, AppError>> {
+    const key = keyFor(input.context);
+    if (!key.ok) return key;
+    if (input.command.jobId !== input.identifiers.resourceId
+      || !['consent_revoked', 'consent_expired', 'permission_revoked'].includes(input.command.reason)) {
+      return err(invalid(input.context, 'OCR yetki uzlaştırma kapsamı geçersizdir.'));
+    }
+    const metadata = resolveJobSourceMetadata(
+      this.unitOfWork,
+      input.context,
+      key.value,
+      input.command.jobId
+    );
+    if (!metadata.ok) return metadata;
+    return executeMutation(this.unitOfWork, {
+      context: input.context,
+      key: key.value,
+      expectedRevision: input.command.expectedRevision,
+      clientOperationId: input.command.clientOperationId,
+      identifiers: input.identifiers
+    }, {
+      mutationKind: 'authorization_revoke_propagate',
+      resourceType: 'local_ocr_job',
+      authorization: {
+        primary: jobIntent(key.value, 'delete', input.command.jobId, metadata.value.sensitivity)
+      },
+      loadCurrent: (scope) => {
+        const row = scope.findJob(key.value, input.command.jobId);
+        return row.ok
+          ? ok(row.value ? { revision: row.value.revision, stateFingerprint: row.value.stateFingerprint } : null)
+          : row;
+      },
+      prepare: async (scope) => {
+        const current = loadExactJob(scope, input.context, key.value, input.command.jobId);
+        if (!current.ok) return current;
+        if (current.value.revision !== input.command.expectedRevision
+          || current.value.status !== 'completed'
+          || !current.value.resultAvailable
+          || !current.value.sealedResultId) {
+          return err(conflict(input.context, 'OCR sonucu uzlaştırma için exact current durumda değildir.'));
+        }
+        const reason = scope.resolveAuthorizationRevocation(
+          key.value,
+          current.value.id,
+          scope.occurredAt
+        );
+        if (!reason.ok) return reason;
+        if (reason.value !== input.command.reason) {
+          return err(conflict(input.context, 'OCR yetki iptali artık exact current durumla uyuşmuyor.'));
+        }
+        const purged = await this.runtime.purgeSealedResult({
+          jobId: current.value.id,
+          sealedResultId: current.value.sealedResultId,
+          correlationId: input.context.correlationId
+        });
+        if (!purged.ok || !purged.value.deleted || !purged.value.verified) {
+          return purged.ok
+            ? err(unexpected(input.context, 'OCR yetki iptalinde sealed sonuç doğrulanmış biçimde silinemedi.'))
+            : purged;
+        }
+        const {
+          stateFingerprint: _fingerprint,
+          sealedResultId: _sealed,
+          resultContentSha256: _content,
+          resultCharacterCount: _characters,
+          resultPageCount: _pages,
+          confidenceBasisPoints: _confidence,
+          derivedBindingHash: _binding,
+          failureCode: _failure,
+          cancellationRequestedAt: _cancellationRequestedAt,
+          completedAt: _completedAt,
+          failedAt: _failedAt,
+          cancelledAt: _cancelledAt,
+          ...base
+        } = current.value;
+        const row = jobRow({
+          ...base,
+          revision: current.value.revision + 1,
+          status: 'deleted',
+          resultAvailable: false,
+          deletedAt: scope.occurredAt,
+          deletionPropagation: 'active',
+          updatedAt: scope.occurredAt
+        });
+        return ok({
+          previousRevision: current.value.revision,
+          revision: row.revision,
+          stateFingerprint: row.stateFingerprint,
+          persist: () => {
+            const saved = scope.saveJob(row, current.value.revision);
+            return saved.ok && saved.value
+              ? ok(undefined)
+              : saved.ok
+                ? err(conflict(input.context, 'OCR yetki uzlaştırma revizyonu yarıştı.'))
+                : saved;
+          }
+        });
       }
     });
   }

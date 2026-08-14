@@ -2602,6 +2602,23 @@ function startBackgroundSchedulers(): void {
         );
       });
       if(!current.isAuthenticated()) return;
+      const ocrAuthorization = await current.reconcileLocalGovernedOcrAuthorizations().catch((error: unknown) => {
+        current.recordDiagnostic(
+          'error',
+          'ocr.authorization_reconciliation_cycle_failed',
+          'Yerel OCR izin ve rıza uzlaştırma çevrimi tamamlanamadı.',
+          error instanceof Error ? error.name : typeof error
+        );
+        return undefined;
+      });
+      if (ocrAuthorization && ocrAuthorization.failed > 0) {
+        current.recordDiagnostic(
+          'warning',
+          'ocr.authorization_reconciliation_item_pending',
+          'Bazı yerel OCR izin veya rıza iptalleri sonraki çevrimde yeniden denenecek.',
+          `attempted=${ocrAuthorization.attempted};completed=${ocrAuthorization.completed};failed=${ocrAuthorization.failed}`
+        );
+      }
       const ocrRecovery = await current.resumePendingLocalGovernedOcrArchiveDeletions().catch((error: unknown) => {
         current.recordDiagnostic(
           'error',

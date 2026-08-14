@@ -12,6 +12,7 @@ import {
   PlatformPolicyKernel,
   type PlatformPolicyAuthorizationProvider
 } from '@ppt/platform-policy';
+import type { ObjectPermissionRow } from '@ppt/repository-contracts';
 import type { LocalGovernedOcrProductionPolicyRuntimeDependencies } from '../src/main/timeline-production-policy-runtime.js';
 import { createLocalGovernedOcrProductionPolicyEnforcementPointResolver } from '../src/main/timeline-production-policy-runtime.js';
 
@@ -70,6 +71,7 @@ interface FixtureOptions {
   readonly archiveAccountId?: string;
   readonly archiveOwnerPersonId?: string;
   readonly jobSourceResourceId?: string;
+  readonly permissions?: readonly ObjectPermissionRow[];
 }
 
 const fixture = (options: FixtureOptions = {}) => {
@@ -131,7 +133,7 @@ const fixture = (options: FixtureOptions = {}) => {
         createdAt: NOW
       })
     },
-    permissionRepository: { listActiveForSubject: () => ok([]) },
+    permissionRepository: { listActiveForSubject: () => ok(options.permissions ?? []) },
     trustedDeviceRepository: {
       findActive: () => ok({
         id: 'trusted-33-q',
@@ -289,6 +291,36 @@ describe('33-Q local governed OCR production central PEP', () => {
       resourceType: 'local_ocr_job',
       resourceId: JOB_ID
     }), { sourceResourceId: 'archive-source-replacement' })).rejects.toThrow(/preserve|source|snapshot/u);
+  });
+
+  it('honors an exact active OCR deny while ignoring unrelated archive administration grants', async () => {
+    const unrelatedArchiveGrant: ObjectPermissionRow = Object.freeze({
+      id: 'archive-administration-grant',
+      subjectAccountId: ACCOUNT,
+      resourceType: 'archive_item',
+      resourceId: '*',
+      actions: Object.freeze(['read', 'create', 'update', 'delete', 'record']),
+      effect: 'allow',
+      purpose: 'archive',
+      startsAt: asIsoDateTime('2026-08-14T08:00:00.000Z'),
+      createdAt: asIsoDateTime('2026-08-14T08:00:00.000Z')
+    });
+    const allowed = await authorize(fixture({ permissions: [unrelatedArchiveGrant] }).dependencies, intent());
+    expect(allowed.resourceId).toBe(SOURCE_ID);
+
+    const exactDeny: ObjectPermissionRow = Object.freeze({
+      id: 'local-ocr-source-read-deny',
+      subjectAccountId: ACCOUNT,
+      resourceType: 'archive_item',
+      resourceId: SOURCE_ID,
+      actions: Object.freeze(['read']),
+      effect: 'deny',
+      purpose: 'general',
+      startsAt: asIsoDateTime('2026-08-14T09:00:00.000Z'),
+      createdAt: asIsoDateTime('2026-08-14T09:00:00.000Z')
+    });
+    await expect(authorize(fixture({ permissions: [unrelatedArchiveGrant, exactDeny] }).dependencies, intent()))
+      .rejects.toThrow(/explicit_deny|permission|policy|authorization/iu);
   });
 
   it('fails closed for missing exact consent and foreign archive account or owner metadata', async () => {

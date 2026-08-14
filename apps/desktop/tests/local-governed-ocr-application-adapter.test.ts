@@ -129,6 +129,10 @@ const purgePlan = (): LocalGovernedOcrAuthorizationPlan => Object.freeze({
   source: policyIntent({ action: 'read', resourceType: 'archive_item', resourceId: SOURCE_ID })
 });
 
+const authorizationReconciliationPlan = (): LocalGovernedOcrAuthorizationPlan => Object.freeze({
+  primary: policyIntent({ action: 'delete', capability: 'archive.write' })
+});
+
 const sourceDeletionPlan = (): LocalGovernedOcrAuthorizationPlan => Object.freeze({
   primary: policyIntent({
     action: 'delete', capability: 'archive.write', resourceType: 'archive_item', resourceId: SOURCE_ID
@@ -372,6 +376,14 @@ const dependencies = (
         status: 'granted',
         startsAt: asIsoDateTime('2026-08-14T09:00:00.000Z')
       } as never);
+    },
+    listAuthorizationReconciliationCandidates: (_repository: unknown, _key: unknown, _at: string, limit: number) => {
+      return ok(Object.freeze(limit < 1 ? [] : [{ jobId: JOB_ID, revision: currentJobState.revision,
+        stateFingerprint: currentJobState.stateFingerprint, reason: 'permission_revoked' as const }]));
+    },
+    resolveAuthorizationRevocation: (repository: PolicyAuthorizedRepositoryExecutionContext) => {
+      assertRoute('authorization-revocation', repository);
+      return ok('permission_revoked' as const);
     },
     findMutationByClientOperationId: (repository: PolicyAuthorizedRepositoryExecutionContext, _key: unknown,
       clientOperationId: string) => {
@@ -650,6 +662,30 @@ describe('33-Q repository-backed local governed OCR UoW', () => {
     });
     expect(propagated).toEqual(ok('source-delete-purge'));
     expect(fixture.routed).toContain(`source-jobs:archive_item:${SOURCE_ID}`);
+  });
+
+  it('discovers owner-bound revocations and authorizes purge only under the exact primary job-delete receipt', async () => {
+    const fixture = dependencies();
+    const unitOfWork = new RepositoryBackedLocalGovernedOcrUnitOfWork(fixture.value);
+    const candidates = unitOfWork.listAuthorizationReconciliationCandidates(context, jobRow.key, 8);
+    expect(candidates).toEqual({ ok: true, value: [expect.objectContaining({
+      jobId: JOB_ID, revision: jobRow.revision, reason: 'permission_revoked'
+    })] });
+
+    const bindingInput = Object.freeze({ operation: 'purge' as const, jobId: JOB_ID,
+      sealedResultId: SEALED_RESULT_ID, correlationId: CORRELATION });
+    const reconciled = await unitOfWork.execute(context, authorizationReconciliationPlan(), (scope) => {
+      expect(scope.resolveAuthorizationRevocation(jobRow.key, JOB_ID, NOW))
+        .toEqual({ ok: true, value: 'permission_revoked' });
+      expect(unitOfWork.resolveAuthorizedJobBinding(bindingInput)).toEqual(expect.objectContaining({ ok: true,
+        value: expect.objectContaining({ jobId: JOB_ID, currentSealedResultId: SEALED_RESULT_ID }) }));
+      expect(unitOfWork.resolveAuthorizedJobBinding({ ...bindingInput, jobId: 'foreign-job' }).ok).toBe(false);
+      return ok('authorization-reconciled');
+    });
+    expect(reconciled).toEqual(ok('authorization-reconciled'));
+    expect(unitOfWork.resolveAuthorizedJobBinding(bindingInput).ok).toBe(false);
+    expect(fixture.routed).toContain(`authorization-revocation:local_ocr_job:${JOB_ID}`);
+    expect(fixture.recorded).toEqual([`local_ocr_job:${JOB_ID}`]);
   });
 
   it('revokes the runtime lease on rollback and never projects a rolled-back receipt', async () => {

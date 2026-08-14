@@ -112,7 +112,7 @@
         "packages/database/src/family-database-migrations.ts",
         "artifacts/manifests/DATABASE_MIGRATION_VERIFICATION_MVP56.json"
       ],
-      "sha256": "fe45fabe96747ba37b2ce4a9bffce7142b6d47565ad94d1d842ed2fb4ee7e710",
+      "sha256": "2ac0ddd2bb9db3b2be117e9b623d875ed9baa41f57f48f16cd0f28719801633b",
       "truth": "Migration 94 ve metadata repository; rolling retention, source-delete batch/item ledger ve rollback dahil yerel testlerde doğrulanmıştır. Owner-bound şifreli sealed-result vault/runtime production facade içinde yerel testtedir; tam metin indeks, gerçek cihaz ve uçtan uca kabul değildir."
     },
     {
@@ -259,8 +259,8 @@
     "ppk021": {
       "status": "PASS",
       "scannedProductionFiles": 441,
-      "exactPrivilegedSurfaceCount": 679,
-      "exactAllowlistSha256": "c9e05bd1c77dd0f91d09f60f5a95a76faca0a2010882ea1c00b64d0d6be726eb",
+      "exactPrivilegedSurfaceCount": 680,
+      "exactAllowlistSha256": "e27c91d81b7196f68e6d26714b793a7ca1a278382007559f704e9d44f362218d",
       "targetedTestsPassed": 17,
       "contractChecksPassed": 84,
       "runtimeChecksPassed": 20,
@@ -301,7 +301,7 @@
     "archiveSourceDestroyAndOcrPropagationAtomicityValidated": false,
     "archiveSourceDestroyCrashWindowAutoResumeValidated": true,
     "sourceDeletionAutoResumeGuaranteed": true,
-    "permissionOrConsentRevocationOcrPurgeValidated": false,
+    "permissionOrConsentRevocationOcrPurgeValidated": true,
     "localSchemaRepositorySealedResultCompositionTested": true,
     "ocrSchemaRepositorySealedResultAcceptanceValidated": false,
     "repositoryCompositionRootBindingPresent": true,
@@ -327,7 +327,7 @@
     "localComponentOcrTestsImplemented": true,
     "fullAcceptanceOcrTestMatrixImplemented": false,
     "localComponentTestFilesPassed": 14,
-    "localComponentTestsPassed": 103,
+    "localComponentTestsPassed": 110,
     "isolatedWindowsMediaOcrSmokeExecuted": true,
     "externalOcrProviderConfigured": false,
     "physicalSecureEraseGuaranteed": false,
@@ -341,7 +341,7 @@
     "Real-device accepted ocr_process authorization/consent execution; local production composition tests are not manual acceptance",
     "Policy-filtered full-text index and masked snippet query; sealed result vault alone is not search acceptance",
     "Guaranteed source-deletion propagation across future index, embedding, cache and managed-backup owners; local OCR job recovery alone is insufficient",
-    "Automatic quarantine/purge of existing OCR results after object-permission or sensitive_processing consent revocation/expiry",
+    "Automatic quarantine/purge across future OCR index, embedding, cache and managed-backup owners after object-permission or sensitive_processing consent revocation/expiry; current sealed result cleanup alone is insufficient",
     "Desktop IPC/UI real accessibility, privacy, security and human UAT",
     "Real-device concurrent cancellation and accessibility/human UAT; local two-phase production-executor probe passes but external/manual acceptance remains NOT_RUN",
     "Distinct maintenance PEP/authority and scheduled production orphan sweep",
@@ -354,11 +354,11 @@
     "boundary": "STARTER_NOT_RUN",
     "contract": "STARTER_NOT_RUN",
     "runtime": "LOCAL_COMPOSED_COMPONENT_MATRIX_PASS",
-    "targetedTests": "14_FILES_103_TESTS_PASS",
+    "targetedTests": "14_FILES_110_TESTS_PASS",
     "sourceStabilizationStatus": "STABLE_LOCAL_SNAPSHOT",
     "ratchetSemantics": "EXACT_LOCAL_SNAPSHOT_NOT_REQUIREMENT_CLOSURE",
     "targetedTestFileRatchet": 14,
-    "targetedTestRatchet": 103,
+    "targetedTestRatchet": 110,
     "countsAsRequirementPass": false
   },
   "persistentReceiptStatus": "NOT_RUN"

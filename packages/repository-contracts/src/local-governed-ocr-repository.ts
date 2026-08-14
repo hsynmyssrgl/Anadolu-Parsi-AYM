@@ -64,6 +64,19 @@ export interface LocalGovernedOcrConsentRow {
   readonly endsAt?: IsoDateTime;
 }
 
+export type LocalGovernedOcrAuthorizationRevocationReason =
+  | 'consent_revoked'
+  | 'consent_expired'
+  | 'permission_revoked';
+
+/** Payload-free durable-work projection; the current job row remains the retry authority. */
+export interface LocalGovernedOcrAuthorizationReconciliationCandidate {
+  readonly jobId: string;
+  readonly revision: number;
+  readonly stateFingerprint: string;
+  readonly reason: LocalGovernedOcrAuthorizationRevocationReason;
+}
+
 export interface LocalGovernedOcrCenterSnapshotRow {
   readonly settings: LocalGovernedOcrSettingsRow;
   readonly jobs: readonly LocalGovernedOcrJobRow[];
@@ -156,6 +169,22 @@ export interface LocalGovernedOcrRepositoryPort {
     resourceId: string,
     at: string
   ): RepositoryResult<LocalGovernedOcrConsentRow | null>;
+
+  /** Receiptless, actor-bound and payload-free pre-authorization maintenance lookup. */
+  listAuthorizationReconciliationCandidates(
+    context: RepositoryExecutionContext,
+    key: LocalGovernedOcrAggregateKey,
+    at: string,
+    limit: number
+  ): RepositoryResult<readonly LocalGovernedOcrAuthorizationReconciliationCandidate[]>;
+
+  /** Revalidates the exact current denial beneath the job-delete receipt before tombstoning. */
+  resolveAuthorizationRevocation(
+    context: RepositoryExecutionContext,
+    key: LocalGovernedOcrAggregateKey,
+    jobId: string,
+    at: string
+  ): RepositoryResult<LocalGovernedOcrAuthorizationRevocationReason | null>;
 
   findMutationByClientOperationId(
     context: RepositoryExecutionContext,

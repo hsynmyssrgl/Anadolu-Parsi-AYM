@@ -101,24 +101,26 @@ const definitions = [
       && registryItems.every((item) => item?.status === 'NOT_IMPLEMENTED' && item.chain?.evidence === false)],
   ['implemented targeted inventory is the exact 14-file local snapshot',
     allTestsExist && exact(inventory.implementedTargetedTests, testFiles)
-      && scope.validation?.targetedTestFileRatchet === 14 && scope.validation?.targetedTestRatchet === 103
-      && inventory.validation?.targetedTestFileRatchet === 14 && inventory.validation?.targetedTestRatchet === 103],
+      && scope.validation?.targetedTestFileRatchet === 14 && scope.validation?.targetedTestRatchet === 110
+      && inventory.validation?.targetedTestFileRatchet === 14 && inventory.validation?.targetedTestRatchet === 110],
   ['domain and application contracts bind limits local execution and no low-privilege overclaim',
     has('domain', 'LOCAL_GOVERNED_OCR_MAX_SOURCE_BYTES = 16 * 1_024 * 1_024',
       'LOCAL_GOVERNED_OCR_MAX_RESULT_CHARACTERS = 250_000', 'LOCAL_GOVERNED_OCR_MAX_PAGES = 50',
       "executionScope: 'bounded_child_process'", 'lowPrivilegeSandboxVerified: false',
-      'sourceDeletionAutoResumeGuaranteed: true')
+      'sourceDeletionAutoResumeGuaranteed: true', 'authorizationRevocationPropagatesToSealedResult: true')
       && has('application', 'LocalGovernedOcrRuntimePort', 'runAndSeal', 'purgeSealedResult',
         "executionScope: 'bounded_child_process'", 'lowPrivilegeSandboxVerified: false')
       && has('repositoryContract', 'LocalGovernedOcrRepositoryPort', 'LocalGovernedOcrSourceDeletionBatch')],
   ['repository and migration bind metadata lineage retention and immutable source-delete child ledger',
     migration94?.name === 'local_governed_ocr' && migration94?.checksum === migration94Sha256
-      && migration94Sha256 === 'fe45fabe96747ba37b2ce4a9bffce7142b6d47565ad94d1d842ed2fb4ee7e710'
+      && migration94Sha256 === '2ac0ddd2bb9db3b2be117e9b623d875ed9baa41f57f48f16cd0f28719801633b'
       && has('migration', 'local_governed_ocr_jobs', 'local_governed_ocr_mutations',
         'local_governed_ocr_source_deletion_items', 'trg_33q_source_deletion_item_insert', 'trg_33q_mutation_delete',
-        'local_governed_ocr_source_deletion_recovery_intents', 'trg_33q_source_deletion_recovery_insert')
+        'local_governed_ocr_source_deletion_recovery_intents', 'trg_33q_source_deletion_recovery_insert',
+        'authorization_revoke_propagate')
       && has('repository', 'SqliteLocalGovernedOcrRepository', 'assertPolicyAuthorizedRepositoryContext',
-        'public propagateSourceDeletion', 'itemMutationId')
+        'public propagateSourceDeletion', 'itemMutationId', 'listAuthorizationReconciliationCandidates',
+        'resolveAuthorizationRevocation')
       && has('platformTransactionContract', 'PlatformPolicyArchiveSecureDestroyRecoveryRecord',
         'listRecoverableArchiveSecureDestroyOperations')
       && has('platformTransactionRepository', 'local_governed_ocr_source_deletion_recovery_intents',
@@ -155,8 +157,10 @@ const definitions = [
       && has('dataStore', 'createLocalGovernedOcrProductionPolicyEnforcementPointResolver',
         'createWindowsLocalGovernedOcrRuntimeAdapter', 'new LocalGovernedOcrResultVault',
         'failClosedLocalGovernedOcrRuntime', 'correctedTextSha256', '#propagateLocalGovernedOcrArchiveDeletion',
-        'resumePendingLocalGovernedOcrArchiveDeletions')
-      && has('main', 'resumePendingLocalGovernedOcrArchiveDeletions', 'ocr.source_deletion_recovery_cycle_failed')
+        'resumePendingLocalGovernedOcrArchiveDeletions', 'ReconcileLocalGovernedOcrAuthorizationUseCase',
+        'reconcileLocalGovernedOcrAuthorizations')
+      && has('main', 'resumePendingLocalGovernedOcrArchiveDeletions', 'ocr.source_deletion_recovery_cycle_failed',
+        'reconcileLocalGovernedOcrAuthorizations', 'ocr.authorization_reconciliation_cycle_failed')
       && testHas(testFiles[13], 'fails closed without central policy', 'no malware provider',
         'recovers source deletion with the same operation id', 'restartedStore',
         'local_governed_ocr_source_deletion_recovery_intents')
@@ -169,7 +173,8 @@ const definitions = [
     ])
       && has('rendererTypes', 'getLocalGovernedOcrCenter', 'setLocalGovernedOcrEnabled')
       && !sources.preload.includes('propagateLocalGovernedOcrSourceDeletion')
-      && has('ipcPolicy', "executionScope: 'bounded_child_process'", 'sourceContentExposedToRenderer !== false')
+      && has('ipcPolicy', "executionScope: 'bounded_child_process'", 'sourceContentExposedToRenderer !== false',
+        'authorizationRevocationPropagatesToSealedResult')
       && sources.ipcPolicy.includes('sourceDeletionAutoResumeGuaranteed !== true')
       && testHas(testFiles[10], 'main-only', 'source')
       && testHas(testFiles[11], 'nine', 'bridge')],
@@ -183,13 +188,17 @@ const definitions = [
       && scope.plannedModel?.searchAndUserControl?.twoPhaseRunTransactionImplemented === true
       && scope.plannedModel?.searchAndUserControl?.runningConcurrentCancelSupported === true
       && scope.truth?.productionUiEndToEndValidated === false],
-  ['source-deletion ordering and authenticated restart auto-resume are validated while broader atomic propagation remains false',
+  ['source deletion and current sealed-result authorization reconciliation are validated while future owners remain open',
     scope.truth?.sourceDeletionBatchPersistenceValidated === true
       && scope.truth?.archiveSourceDestroyBeforeOcrPropagationOrderingValidated === true
       && scope.truth?.archiveSourceDestroyAndOcrPropagationAtomicityValidated === false
       && scope.truth?.archiveSourceDestroyCrashWindowAutoResumeValidated === true
       && scope.truth?.sourceDeletionAutoResumeGuaranteed === true
-      && scope.truth?.permissionOrConsentRevocationOcrPurgeValidated === false
+      && scope.truth?.permissionOrConsentRevocationOcrPurgeValidated === true
+      && has('application', 'ReconcileLocalGovernedOcrAuthorizationUseCase', 'authorization_revoke_propagate')
+      && has('repositoryContract', 'listAuthorizationReconciliationCandidates', 'resolveAuthorizationRevocation')
+      && testHas(testFiles[0], 'purges a sealed result file-first after exact consent revocation')
+      && testHas(testFiles[13], 'denies a newly forbidden OCR source immediately and reconciles its sealed result')
       && scope.plannedModel?.deletion?.ocrOwnerRegistration === 'LOCAL_OCR_JOB_OWNER_AUTO_RESUME_TRUE_FUTURE_DERIVED_PROPAGATION_FALSE'],
   ['capability manifest grants aggregate desktop OCR only and no separate worker or sandbox claim',
     capabilityManifest.defaultDecision === 'DENY'

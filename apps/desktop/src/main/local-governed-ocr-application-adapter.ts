@@ -292,7 +292,14 @@ const authorizationPlanIsCoherent = (
     .filter((intent): intent is LocalGovernedOcrPolicyIntent => intent !== undefined);
   if (intents.some((intent) => !intentMatchesContext(context, intent))) return false;
   if (plan.primary.resourceType === 'local_ocr_job') {
-    if (!plan.source || plan.source.resourceType !== 'archive_item') return false;
+    const sourceFreeAuthorizationReconciliation = plan.primary.action === 'delete'
+      && plan.primary.capability === 'archive.write'
+      && plan.primary.purpose === 'ocr_process'
+      && !plan.source
+      && !plan.settings
+      && !plan.target;
+    if (!sourceFreeAuthorizationReconciliation
+      && (!plan.source || plan.source.resourceType !== 'archive_item')) return false;
     if (plan.target && plan.target.sourceJobId !== plan.primary.resourceId) return false;
   }
   if (plan.settings && plan.settings.resourceType !== 'local_ocr_settings') return false;
@@ -395,6 +402,27 @@ class RepositoryBackedLocalGovernedOcrWriteScope implements LocalGovernedOcrWrit
       key,
       resourceType,
       resourceId,
+      at
+    );
+  }
+
+  public resolveAuthorizationRevocation(
+    key: LocalGovernedOcrAggregateKey,
+    jobId: string,
+    at: LocalGovernedOcrWriteScope['occurredAt']
+  ): ReturnType<LocalGovernedOcrWriteScope['resolveAuthorizationRevocation']> {
+    const primary = this.slot('primary');
+    if (!exactKey(this.context, key) || at !== this.occurredAt
+      || primary?.intent.resourceType !== 'local_ocr_job'
+      || primary.intent.resourceId !== jobId
+      || primary.intent.action !== 'delete'
+      || primary.intent.capability !== 'archive.write') {
+      return this.missing('OCR authorization reconciliation requires the exact job-delete receipt');
+    }
+    return this.dependencies.localGovernedOcrRepository.resolveAuthorizationRevocation(
+      primary.repository,
+      key,
+      jobId,
       at
     );
   }
@@ -805,12 +833,15 @@ implements LocalGovernedOcrUnitOfWork, LocalGovernedOcrMainAuthorityPort {
 
     const primaryAction = primary?.intent.action;
     const capability = primaryAction === 'delete' ? 'archive.write' : 'archive.ocr';
-    return (primaryAction === 'process' || primaryAction === 'delete')
+    const exactPrimary = (primaryAction === 'process' || primaryAction === 'delete')
       && exactIntent(primary, {
         resourceType: 'local_ocr_job', resourceId: row.id, action: primaryAction,
         capability, purpose: 'ocr_process'
-      })
-      && exactSourceRead && !settings && !target;
+      });
+    if (primaryAction === 'delete') {
+      return exactPrimary && (!source || exactSourceRead) && !settings && !target;
+    }
+    return exactPrimary && exactSourceRead && !settings && !target;
   }
 
   #sealedResultMatches(
@@ -851,6 +882,23 @@ implements LocalGovernedOcrUnitOfWork, LocalGovernedOcrMainAuthorityPort {
         repositoryContext(context, transaction),
         key,
         resourceId
+      ));
+  }
+
+  public listAuthorizationReconciliationCandidates(
+    context: LocalGovernedOcrApplicationContext,
+    key: LocalGovernedOcrAggregateKey,
+    limit: number
+  ): ReturnType<LocalGovernedOcrUnitOfWork['listAuthorizationReconciliationCandidates']> {
+    if (!exactKey(context, key)) {
+      return err(applicationError(context, 'OCR authorization reconciliation key exceeds the authenticated owner'));
+    }
+    return this.dependencies.transactionExecutor.execute(context.correlationId, (transaction) =>
+      this.dependencies.localGovernedOcrRepository.listAuthorizationReconciliationCandidates(
+        repositoryContext(context, transaction),
+        key,
+        transaction.occurredAt,
+        limit
       ));
   }
 
@@ -1033,27 +1081,31 @@ implements LocalGovernedOcrUnitOfWork, LocalGovernedOcrMainAuthorityPort {
                 if (this.#activeAuthorityLease?.token === token) this.#activeAuthorityLease = undefined;
               }
             }
-            return current.enforcementPoint.execute(
-              {
-                correlationId: current.policyContext.correlationId,
-                action: current.intent.action,
-                capability: current.intent.capability,
-                resourceType: current.intent.resourceType,
-                resourceId: current.intent.resourceId,
-                purpose: current.intent.purpose
-              },
-              this.dependencies.clusterFence,
-              async (authorization) => {
-                const repository = governedRepositoryContext(
-                  current.policyContext,
-                  transaction,
-                  current.intent,
-                  authorization
-                );
-                established.push({ ...current, authorization, repository });
-                return authorize(index + 1);
-              }
-            );
+            try {
+              return await current.enforcementPoint.execute(
+                {
+                  correlationId: current.policyContext.correlationId,
+                  action: current.intent.action,
+                  capability: current.intent.capability,
+                  resourceType: current.intent.resourceType,
+                  resourceId: current.intent.resourceId,
+                  purpose: current.intent.purpose
+                },
+                this.dependencies.clusterFence,
+                async (authorization) => {
+                  const repository = governedRepositoryContext(
+                    current.policyContext,
+                    transaction,
+                    current.intent,
+                    authorization
+                  );
+                  established.push({ ...current, authorization, repository });
+                  return authorize(index + 1);
+                }
+              );
+            } catch (error) {
+              return policyFailure(context, error);
+            }
           };
           return authorize(0);
         }

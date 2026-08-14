@@ -78,14 +78,14 @@ const ppk022Tail = ppk022Gate?.outputTail ?? '';
 
 const definitions = [
   ['exact 14-file local Vitest process exits successfully', run.status === 0],
-  ['local test result meets the exact 14/103 ratchet',
-    run.status === 0 && filesPassed === 14 && testsPassed === 103
-      && scope.validation?.targetedTestFileRatchet === 14 && scope.validation?.targetedTestRatchet === 103
-      && inventory.validation?.targetedTestFileRatchet === 14 && inventory.validation?.targetedTestRatchet === 103
+  ['local test result meets the exact 14/110 ratchet',
+    run.status === 0 && filesPassed === 14 && testsPassed === 110
+      && scope.validation?.targetedTestFileRatchet === 14 && scope.validation?.targetedTestRatchet === 110
+      && inventory.validation?.targetedTestFileRatchet === 14 && inventory.validation?.targetedTestRatchet === 110
       && exact(inventory.implementedTargetedTests, testFiles)],
   ['migration 94 manifest and canonical source hash remain exact',
     migration94?.name === 'local_governed_ocr' && migration94?.checksum === migration94Sha256
-      && migration94Sha256 === 'fe45fabe96747ba37b2ce4a9bffce7142b6d47565ad94d1d842ed2fb4ee7e710'],
+      && migration94Sha256 === '2ac0ddd2bb9db3b2be117e9b623d875ed9baa41f57f48f16cd0f28719801633b'],
   ['PPK-021 runtime artifact is PASS at the exact current ratchet',
     ppk.ppk021?.status === 'PASS' && ppk021Runtime.status === 'PASS' && ppk021Gate?.status === 'PASS'
       && ppk021Tail.includes(`"scannedFiles": ${ppk.ppk021.scannedProductionFiles}`)
@@ -119,7 +119,7 @@ const definitions = [
       && scope.truth?.productionProviderWiredAndValidated === false
       && scope.truth?.productionOcrRuntimeExecuted === false
       && scope.truth?.maliciousFileScannerProviderAvailable === false],
-  ['two-phase cancellation is locally validated while source-delete and maintenance residuals remain open',
+  ['two-phase cancellation source-delete recovery and current sealed-result reconciliation are locally validated',
     scope.truth?.productionConcurrentRunCancelProbeExecuted === true
       && scope.truth?.productionConcurrentRunCancelValidated === true
       && scope.truth?.rendererRunningCancelAvailableAndTested === true
@@ -129,7 +129,7 @@ const definitions = [
       && scope.truth?.archiveSourceDestroyAndOcrPropagationAtomicityValidated === false
       && scope.truth?.archiveSourceDestroyCrashWindowAutoResumeValidated === true
       && scope.truth?.sourceDeletionAutoResumeGuaranteed === true
-      && scope.truth?.permissionOrConsentRevocationOcrPurgeValidated === false
+      && scope.truth?.permissionOrConsentRevocationOcrPurgeValidated === true
       && scope.truth?.scheduledOrphanSweepProductionWiringValidated === false
       && scope.truth?.retentionExpiryPurgeValidated === false],
   ['external manual UAT legal privacy security and certification evidence remains NOT_RUN',
@@ -160,7 +160,7 @@ const report = {
   targetedTestFilesPassed: filesPassed,
   targetedTestsPassed: testsPassed,
   targetedTestFileRatchet: 14,
-  targetedTestRatchet: 103,
+  targetedTestRatchet: 110,
   testFiles,
   migration94Sha256,
   ppkGateEvidence: ppk,
@@ -171,7 +171,7 @@ const report = {
     lowPrivilegeSandbox: 'NOT_VERIFIED',
     concurrentRunCancel: 'LOCAL_TWO_PHASE_PRODUCTION_EXECUTOR_PROBE_PASS_EXTERNAL_UAT_NOT_RUN',
     sourceDeleteCrashAutoResume: 'HIGH_OPEN',
-    permissionOrConsentRevocationPurge: 'OPEN',
+    permissionOrConsentRevocationPurge: 'CURRENT_SEALED_RESULT_AUTO_RECONCILE_PASS_FUTURE_DERIVED_OWNERS_OPEN',
     scheduledOrphanSweepAuthority: 'UNWIRED',
     retentionExpiryPurge: 'OPEN',
     fullTextIndexAndMaskedSnippet: 'NOT_IMPLEMENTED',
@@ -194,7 +194,7 @@ if (!noWrite) {
   await mkdir(dirname(resolve(root, output)), { recursive: true });
   await writeFile(resolve(root, output), `${JSON.stringify(report, null, 2)}\n`, 'utf8');
 }
-console.log(`33-Q runtime starter: ${report.status} (${report.checksPassed}/${checks.length}; ${filesPassed}/14 files; ${testsPassed}/103 tests; requirement PASS=false; write=${!noWrite}).`);
+console.log(`33-Q runtime starter: ${report.status} (${report.checksPassed}/${checks.length}; ${filesPassed}/14 files; ${testsPassed}/110 tests; requirement PASS=false; write=${!noWrite}).`);
 if (failures.length) {
   console.error(combined.slice(-4000));
   process.exitCode = 1;
