@@ -155,6 +155,70 @@
             "status": "PASS"
           }
         ],
+        "evidenceBinding": {
+          "sourceCommit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "sourceTree": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "hostRefSha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "signerKeyIdSha256": "be14b4f578564c9a3420b950a40d6dcc90f6c89b021776e9650d6c3fc3789dd1",
+          "manifest": {
+            "relativePath": "manifest.json",
+            "sizeBytes": 2317,
+            "sha256": "88b488095ad078731ef86823a91327ed0ed5f6b0c32262b0bd3aa5b95d335936"
+          },
+          "files": [
+            {
+              "id": "live-provider-account-test",
+              "relativePath": "live-provider-account-test.json",
+              "sizeBytes": 2038,
+              "sha256": "2f0a46c12222cf0b30209e5170fac6f322e6d4874b50ab2a63807933e1f817c7"
+            },
+            {
+              "id": "real-authenticator-device-test",
+              "relativePath": "real-authenticator-device-test.json",
+              "sizeBytes": 847,
+              "sha256": "0b982464c16968d06f4f268b96640a0823173fa21e72a45f054ed84fc801c72c"
+            },
+            {
+              "id": "cross-device-companion-test",
+              "relativePath": "cross-device-companion-test.json",
+              "sizeBytes": 730,
+              "sha256": "89c132b8205a51d519a8d378afa0beeafa39c8ef3cd63895fa41d3179c6cd04a"
+            },
+            {
+              "id": "credential-verifier-uat",
+              "relativePath": "credential-verifier-uat.json",
+              "sizeBytes": 716,
+              "sha256": "f495b8c65c2cdcf9ce30dac5614affc3c0fdc50d5000150a05ba706a9bbe605f"
+            },
+            {
+              "id": "human-uat",
+              "relativePath": "human-uat.json",
+              "sizeBytes": 606,
+              "sha256": "e85ed46ef9e2a8425ba1d0e2177f91b92cd2789a3096fa064ff09e8aeb930d38"
+            },
+            {
+              "id": "privacy-review",
+              "relativePath": "privacy-review.json",
+              "sizeBytes": 615,
+              "sha256": "e398b3a4fc1c6b4c178313a9beb2f26d1fcdec168869bdd45eb2f92b1e9d161c"
+            },
+            {
+              "id": "legal-review",
+              "relativePath": "legal-review.json",
+              "sizeBytes": 611,
+              "sha256": "710bc8fcf8810c017ab4c5baa00c2f2db633b7d1049832fb1c4f4c2106820e12"
+            },
+            {
+              "id": "identity-review",
+              "relativePath": "identity-review.json",
+              "sizeBytes": 617,
+              "sha256": "844ca2a9d117b0353eac93b5e930b5cdb6cf8bcfc916416b360ff2aaa7f06da4"
+            }
+          ],
+          "evidenceTreeSha256": "1f9aeefa1f00d543fd2ee3fb46585ddf0501eed424556be3ae4830003e601a3a",
+          "generatedAt": "2026-08-14T12:00:00.000Z",
+          "expiresAt": "2026-08-21T12:00:00.000Z"
+        },
         "closureReadiness": {
           "status": "READY_FOR_GOVERNED_REVIEW",
           "requirementPassGranted": false,
@@ -202,5 +266,5 @@
   "requirementPassGranted": false,
   "registryMutationPerformed": false,
   "persistentReceiptWritten": false,
-  "generatedAt": "2026-08-14T11:28:23.394Z"
+  "generatedAt": "2026-08-14T11:48:36.199Z"
 }

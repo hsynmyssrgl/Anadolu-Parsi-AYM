@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "step": "33-P",
+  "decision": "DEC-227",
+  "status": "PASS",
+  "checks": 7,
+  "passed": 7,
+  "failed": 0,
+  "results": [
+    {
+      "id": "exact-synthetic-preparation-passes",
+      "status": "PASS"
+    },
+    {
+      "id": "prepared-state-is-receipt-pending-without-registry-mutation",
+      "status": "PASS"
+    },
+    {
+      "id": "preparation-record-binds-content-free-evidence-and-successor",
+      "status": "PASS"
+    },
+    {
+      "id": "foreign-evidence-source-rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "untrusted-signer-rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "failed-build-rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "non-active-step-rejected",
+      "status": "PASS"
+    }
+  ],
+  "actualExternalEvidenceStatus": "NOT_RUN",
+  "registryMutationPerformed": false,
+  "persistentReceiptWritten": false,
+  "generatedAt": "2026-08-14T11:48:36.326Z"
+}

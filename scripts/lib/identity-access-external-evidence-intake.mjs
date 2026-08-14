@@ -244,6 +244,7 @@ export const verifyIdentityAccessExternalEvidenceIntake = async ({
   pass(checks, 'manifest-ed25519-signature', signatureValid);
 
   const files = Array.isArray(manifest?.files) ? manifest.files : [];
+  const verifiedEvidenceFiles = [];
   pass(checks, 'manifest-exact-evidence-set', files.length === IDENTITY_ACCESS_EXTERNAL_EVIDENCE_IDS.length
     && files.every((entry, index) => exactKeys(entry, ['id', 'relativePath', 'sizeBytes', 'sha256'])
       && entry.id === IDENTITY_ACCESS_EXTERNAL_EVIDENCE_IDS[index])
@@ -258,8 +259,17 @@ export const verifyIdentityAccessExternalEvidenceIntake = async ({
       const evidenceRead = await readBoundedJson(filePath, MAX_EVIDENCE_BYTES);
       const digestMatches = Number.isSafeInteger(entry.sizeBytes) && entry.sizeBytes === evidenceRead.sizeBytes
         && validSha256(entry.sha256) && entry.sha256 === evidenceRead.sha256;
+      const semanticMatches = validateEvidenceDocument(evidenceRead.value, id, manifest, observedAt);
       pass(checks, `${id}-byte-hash-binding`, digestMatches);
-      pass(checks, `${id}-semantic-contract`, validateEvidenceDocument(evidenceRead.value, id, manifest, observedAt));
+      pass(checks, `${id}-semantic-contract`, semanticMatches);
+      if (digestMatches && semanticMatches) {
+        verifiedEvidenceFiles.push(Object.freeze({
+          id,
+          relativePath: entry.relativePath,
+          sizeBytes: entry.sizeBytes,
+          sha256: entry.sha256
+        }));
+      }
       evidenceRead.bytes.fill(0);
     } catch (error) {
       pass(checks, `${id}-byte-hash-binding`, false, error instanceof Error ? error.message : String(error));
@@ -268,6 +278,22 @@ export const verifyIdentityAccessExternalEvidenceIntake = async ({
   }
 
   const failures = checks.filter((item) => item.status !== 'PASS');
+  const evidenceBinding = failures.length === 0 ? Object.freeze({
+    sourceCommit: manifest.source.commit,
+    sourceTree: manifest.source.tree,
+    hostRefSha256: manifest.hostRefSha256,
+    signerKeyIdSha256,
+    manifest: Object.freeze({
+      relativePath: manifestRelativePath,
+      sizeBytes: manifestRead.sizeBytes,
+      sha256: manifestRead.sha256
+    }),
+    files: Object.freeze(verifiedEvidenceFiles),
+    evidenceTreeSha256: sha256(Buffer.from(verifiedEvidenceFiles
+      .map((entry) => `${entry.id}\t${entry.sha256}\t${entry.sizeBytes}\t${entry.relativePath}\n`).join(''), 'utf8')),
+    generatedAt: manifest.generatedAt,
+    expiresAt: manifest.expiresAt
+  }) : null;
   return Object.freeze({
     schemaVersion: 1,
     step: '33-P',
@@ -277,6 +303,7 @@ export const verifyIdentityAccessExternalEvidenceIntake = async ({
     passed: checks.length - failures.length,
     failed: failures.length,
     results: Object.freeze(checks),
+    evidenceBinding,
     closureReadiness: Object.freeze({
       status: failures.length === 0 ? 'READY_FOR_GOVERNED_REVIEW' : 'NOT_READY',
       requirementPassGranted: false,

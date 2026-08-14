@@ -807,6 +807,7 @@
     "verify:33-p:runtime": "node scripts/verify-33-p-passkeys-federated-identity-verifiable-temporary-credentials-runtime.mjs",
     "verify:33-p:external-evidence-intake": "node scripts/verify-33-p-identity-access-external-evidence-intake.mjs",
     "verify:33-p:external-evidence-intake:runtime": "node scripts/verify-33-p-identity-access-external-evidence-intake-runtime.mjs",
+    "verify:33-p:preparation-state-machine:runtime": "node scripts/verify-33-p-identity-access-preparation-state-machine-runtime.mjs",
     "finalize:33-d:external-receipt": "node scripts/finalize-33-d-controlled-import-open-banking-external-receipt.mjs",
     "verify:33-d:completion": "node scripts/verify-33-d-controlled-import-open-banking-completion.mjs",
     "verify:33-d:completion:external": "node scripts/verify-33-d-controlled-import-open-banking-completion.mjs --external",

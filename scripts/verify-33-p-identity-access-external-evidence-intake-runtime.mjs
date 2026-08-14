@@ -159,7 +159,12 @@ try {
     && accepted.closureReadiness.status === 'READY_FOR_GOVERNED_REVIEW'
     && accepted.closureReadiness.requirementPassGranted === false
     && accepted.closureReadiness.registryMutationPerformed === false
-    && accepted.closureReadiness.persistentReceiptWritten === false, accepted);
+    && accepted.closureReadiness.persistentReceiptWritten === false
+    && accepted.evidenceBinding?.sourceCommit === COMMIT
+    && accepted.evidenceBinding?.sourceTree === TREE
+    && accepted.evidenceBinding?.signerKeyIdSha256 === signerKeyIdSha256
+    && accepted.evidenceBinding?.files?.length === IDENTITY_ACCESS_EXTERNAL_EVIDENCE_IDS.length
+    && /^[0-9a-f]{64}$/u.test(accepted.evidenceBinding?.evidenceTreeSha256 ?? ''), accepted);
 
   const traversalManifest = signedManifest({
     ...unsignedManifest,
@@ -219,6 +224,7 @@ try {
     expectedSourceCommit: COMMIT, expectedSourceTree: TREE, observedAt: NOW
   });
   check('self-signed-untrusted-bundle-rejected', rejectedSelfSignedForeign.status === 'FAIL'
+    && rejectedSelfSignedForeign.evidenceBinding === null
     && rejectedSelfSignedForeign.results.some((item) => item.id === 'trusted-signer-authority' && item.status === 'FAIL')
     && rejectedSelfSignedForeign.results.some((item) => item.id === 'manifest-ed25519-signature' && item.status === 'PASS'));
   await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
