@@ -1,6 +1,6 @@
 # 33-O / DEC-226 gizlilik, veri hakları ve olay kontrolü tehdit modeli
 
-- Durum: VALIDATED_RECEIPT_PENDING
+- Durum: COMPLETED
 - Doğrulama: PASS_AUTOMATED_MANUAL_NOT_RUN_NO_CERTIFICATION
 
 | Tehdit | Planlanan fail-closed kontrol |

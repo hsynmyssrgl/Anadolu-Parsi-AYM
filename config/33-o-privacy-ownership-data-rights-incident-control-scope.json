@@ -137,8 +137,8 @@
     "realDevice": "NOT_RUN",
     "certificationClaimed": false
   },
-  "completionBlockers": [
-    "Persistent local and D: receipt, source protection and Git remote equality are pending."
-  ],
-  "persistentReceiptStatus": "NOT_RUN"
+  "completionBlockers": [],
+  "persistentReceiptStatus": "PASS",
+  "persistentReceiptPath": "artifacts/checkpoints/33-O_LIBRARY_RECEIPT.json",
+  "completedAt": "2026-08-14T03:03:17.124Z"
 }
