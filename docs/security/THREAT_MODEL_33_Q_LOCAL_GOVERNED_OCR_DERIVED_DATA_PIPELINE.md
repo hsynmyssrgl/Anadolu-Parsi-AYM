@@ -3,7 +3,7 @@
 - Durum: `PLANNED / LOCAL_IMPLEMENTATION_STARTED`
 - Yerel uygulama: `PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED / ACCEPTANCE_INCOMPLETE`
 - Requirement PASS: `false`
-- Yerel otomatik bileşen kanıtı: `14 dosya / 113 test PASS`
+- Yerel otomatik bileşen kanıtı: `15 dosya / 128 test PASS`
 - Production runtime ve dış/manuel kanıt: `NOT_RUN`
 
 | Tehdit | Zorunlu fail-closed kontrol | Mevcut gerçek / açık risk |
@@ -49,7 +49,7 @@
 
 ## Kalan kanıt ve iddia sınırı
 
-Yerel domain/contract, migration 94, PEP/UoW, sealed vault/runtime, Windows child-process adapter, DataStore facade, IPC ve UI `14 dosya / 113 test PASS` ile composition’a bağlıdır; bu yalnız `PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED / ACCEPTANCE_INCOMPLETE` kanıtıdır. Aynı cihazdaki durable source-delete auto-resume, permission/rıza iptalindeki current sealed-result auto-reconcile, retention expiry purge ve distinct-maintenance-PEP orphan sweep gerçek temp SQLite/production adapter testlerinde vardır. Gerçek cihazda kabul edilmiş Windows OCR, Apple Vision, denetlenmiş offline fallback, doğrulanmış düşük yetkili sandbox, tam zararlı belge matrisi, policy-filtered full-text index/snippet, cross-device ve dış provider kanıtı yoktur. Privacy, legal, security, accessibility ve human UAT `NOT_RUN` durumundadır.
+Yerel domain/contract, migration 94, PEP/UoW, sealed vault/runtime, Windows child-process adapter, DataStore facade, IPC, UI ve sentetik zararlı-belge fail-closed matrisi `15 dosya / 128 test PASS` ile composition’a bağlıdır; bu yalnız `PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED / ACCEPTANCE_INCOMPLETE` kanıtıdır. Aynı cihazdaki durable source-delete auto-resume, permission/rıza iptalindeki current sealed-result auto-reconcile, retention expiry purge ve distinct-maintenance-PEP orphan sweep gerçek temp SQLite/production adapter testlerinde vardır. Sentetik matris bozuk/poliglot görüntüleri, aktif/kaçışlı PDF işaretlerini, kotaları ve temiz olmayan tarayıcı kararlarını worker öncesinde reddeder; gerçek malware providerı veya PDF rasterizerı sayılmaz. Gerçek cihazda kabul edilmiş Windows OCR, Apple Vision, denetlenmiş offline fallback, doğrulanmış düşük yetkili sandbox, tam gerçek-belge matrisi, policy-filtered full-text index/snippet, cross-device ve dış provider kanıtı yoktur. Privacy, legal, security, accessibility ve human UAT `NOT_RUN` durumundadır.
 
 Ham belge dışarı gönderilmez; sessiz cloud fallback yasaktır. Bununla birlikte üretim OCR hattı henüz çalışmadığı için bu ifade bir canlı sistem teslim kanıtı değildir. Remote delivery, provider availability, fiziksel secure erase, harici kopya imhası, resmî belge doğruluğu, sağlık/finans doğruluğu veya hukuki sertifikasyon garanti edilmez.
 

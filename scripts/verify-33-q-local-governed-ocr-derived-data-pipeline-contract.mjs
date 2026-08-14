@@ -26,7 +26,8 @@ const testFiles = Object.freeze([
   'apps/desktop/tests/local-governed-ocr-ipc-integration.test.ts',
   'apps/desktop/tests/local-governed-ocr-ipc-bridge.test.ts',
   'apps/desktop/tests/local-governed-ocr-ui.test.ts',
-  'apps/desktop/tests/local-governed-ocr-data-store-production.test.ts'
+  'apps/desktop/tests/local-governed-ocr-data-store-production.test.ts',
+  'apps/desktop/tests/local-governed-ocr-malicious-document-matrix.test.ts'
 ]);
 const sourcePaths = Object.freeze({
   domain: 'packages/domain/src/local-governed-ocr.ts',
@@ -99,10 +100,10 @@ const definitions = [
   ['accepted registry remains exact open atomic closure authority',
     exact(scope.requirements, requirements) && exact(inventory.requirements, requirements)
       && registryItems.every((item) => item?.status === 'NOT_IMPLEMENTED' && item.chain?.evidence === false)],
-  ['implemented targeted inventory is the exact 14-file local snapshot',
+  ['implemented targeted inventory is the exact 15-file local snapshot',
     allTestsExist && exact(inventory.implementedTargetedTests, testFiles)
-      && scope.validation?.targetedTestFileRatchet === 14 && scope.validation?.targetedTestRatchet === 113
-      && inventory.validation?.targetedTestFileRatchet === 14 && inventory.validation?.targetedTestRatchet === 113],
+      && scope.validation?.targetedTestFileRatchet === 15 && scope.validation?.targetedTestRatchet === 128
+      && inventory.validation?.targetedTestFileRatchet === 15 && inventory.validation?.targetedTestRatchet === 128],
   ['domain and application contracts bind limits local execution and no low-privilege overclaim',
     has('domain', 'LOCAL_GOVERNED_OCR_MAX_SOURCE_BYTES = 16 * 1_024 * 1_024',
       'LOCAL_GOVERNED_OCR_MAX_RESULT_CHARACTERS = 250_000', 'LOCAL_GOVERNED_OCR_MAX_PAGES = 50',
@@ -142,11 +143,14 @@ const definitions = [
   ['security and worker are local bounded child-process components with PDF malware and low privilege fail-closed',
     has('security', 'LOCAL_OCR_MAX_INPUT_BYTES = 16 * 1024 * 1024', 'LOCAL_OCR_MAX_PAGES = 50',
       'LOCAL_OCR_MAX_IMAGE_PIXELS = 40_000_000', 'LOCAL_OCR_MAX_TEXT_CHARACTERS = 250_000',
-      'processSeparated: true', 'lowPrivilegeSandboxVerified: false')
+      'processSeparated: true', 'lowPrivilegeSandboxVerified: false', 'PNG_CRC_TABLE',
+      "replace(/#([0-9A-Fa-f]{2})/gu")
       && has('worker', "executionBoundary !== 'bounded-child-process'", 'lowPrivilegeSandboxVerified !== false')
       && has('windowsEngine', "throw new LocalOcrSecurityError('UNSUPPORTED_MEDIA')", 'processSeparated=$true', 'lowPrivilegeSandboxVerified=$false')
       && testHas(testFiles[5], 'malware scanner is not configured', 'caps concurrent jobs at one')
-      && testHas(testFiles[6], 'without claiming a low-privilege sandbox', 'fails closed for PDF')],
+      && testHas(testFiles[6], 'without claiming a low-privilege sandbox', 'fails closed for PDF')
+      && testHas(testFiles[14], 'CRC-corrupted', '/Java#53cript', 'NotConfiguredLocalOcrMalwareVerdictAdapter')
+      && scope.truth?.localMaliciousDocumentFailClosedMatrixImplemented === true],
   ['sealed result vault is owner-bound encrypted quota-limited and scheduled maintenance is separately authorized',
     has('resultVault', 'class LocalGovernedOcrResultVault', 'LOCAL_GOVERNED_OCR_RESULT_VAULT_MAX_FILES = 1_024',
       'LOCAL_GOVERNED_OCR_RESULT_VAULT_MAX_BYTES = 256 * 1024 * 1024', 'NO_OVERWRITE_CONFLICT')
@@ -239,7 +243,7 @@ const report = {
   countsAsRequirementPass: false,
   activePredecessor: '33-P',
   localTargetedTestFiles: testFiles,
-  targetedTestRatchet: { files: 14, tests: 113 },
+  targetedTestRatchet: { files: 15, tests: 128 },
   migration94Sha256,
   checksPassed: checks.length - failures.length,
   checksFailed: failures.length,

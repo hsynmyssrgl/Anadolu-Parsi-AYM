@@ -27,7 +27,8 @@ const testFiles = Object.freeze([
   'apps/desktop/tests/local-governed-ocr-ipc-integration.test.ts',
   'apps/desktop/tests/local-governed-ocr-ipc-bridge.test.ts',
   'apps/desktop/tests/local-governed-ocr-ui.test.ts',
-  'apps/desktop/tests/local-governed-ocr-data-store-production.test.ts'
+  'apps/desktop/tests/local-governed-ocr-data-store-production.test.ts',
+  'apps/desktop/tests/local-governed-ocr-malicious-document-matrix.test.ts'
 ]);
 
 const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
@@ -77,11 +78,11 @@ const ppk021Tail = ppk021Gate?.outputTail ?? '';
 const ppk022Tail = ppk022Gate?.outputTail ?? '';
 
 const definitions = [
-  ['exact 14-file local Vitest process exits successfully', run.status === 0],
-  ['local test result meets the exact 14/113 ratchet',
-    run.status === 0 && filesPassed === 14 && testsPassed === 113
-      && scope.validation?.targetedTestFileRatchet === 14 && scope.validation?.targetedTestRatchet === 113
-      && inventory.validation?.targetedTestFileRatchet === 14 && inventory.validation?.targetedTestRatchet === 113
+  ['exact 15-file local Vitest process exits successfully', run.status === 0],
+  ['local test result meets the exact 15/128 ratchet',
+    run.status === 0 && filesPassed === 15 && testsPassed === 128
+      && scope.validation?.targetedTestFileRatchet === 15 && scope.validation?.targetedTestRatchet === 128
+      && inventory.validation?.targetedTestFileRatchet === 15 && inventory.validation?.targetedTestRatchet === 128
       && exact(inventory.implementedTargetedTests, testFiles)],
   ['migration 94 manifest and canonical source hash remain exact',
     migration94?.name === 'local_governed_ocr' && migration94?.checksum === migration94Sha256
@@ -118,6 +119,7 @@ const definitions = [
       && scope.truth?.rendererUiComponentTested === true
       && scope.truth?.productionProviderWiredAndValidated === false
       && scope.truth?.productionOcrRuntimeExecuted === false
+      && scope.truth?.localMaliciousDocumentFailClosedMatrixImplemented === true
       && scope.truth?.maliciousFileScannerProviderAvailable === false],
   ['two-phase cancellation source-delete recovery and current sealed-result retention/orphan reconciliation are locally validated',
     scope.truth?.productionConcurrentRunCancelProbeExecuted === true
@@ -159,8 +161,8 @@ const report = {
   ratchetSemantics: 'EXACT_LOCAL_SNAPSHOT_NOT_REQUIREMENT_CLOSURE',
   targetedTestFilesPassed: filesPassed,
   targetedTestsPassed: testsPassed,
-  targetedTestFileRatchet: 14,
-  targetedTestRatchet: 113,
+  targetedTestFileRatchet: 15,
+  targetedTestRatchet: 128,
   testFiles,
   migration94Sha256,
   ppkGateEvidence: ppk,
@@ -170,7 +172,7 @@ const report = {
     pdfLanes: 'UNSUPPORTED_FAIL_CLOSED',
     lowPrivilegeSandbox: 'NOT_VERIFIED',
     concurrentRunCancel: 'LOCAL_TWO_PHASE_PRODUCTION_EXECUTOR_PROBE_PASS_EXTERNAL_UAT_NOT_RUN',
-    sourceDeleteCrashAutoResume: 'HIGH_OPEN',
+    sourceDeleteCrashAutoResume: 'LOCAL_AUTHENTICATED_RESTART_AUTO_RESUME_PASS_FUTURE_DERIVED_OWNERS_OPEN',
     permissionOrConsentRevocationPurge: 'CURRENT_SEALED_RESULT_AUTO_RECONCILE_PASS_FUTURE_DERIVED_OWNERS_OPEN',
     scheduledOrphanSweepAuthority: 'LOCAL_DISTINCT_MAINTENANCE_PEP_PASS_EXTERNAL_UAT_NOT_RUN',
     retentionExpiryPurge: 'CURRENT_SEALED_RESULT_PASS_FUTURE_DERIVED_OWNERS_OPEN',
@@ -194,7 +196,7 @@ if (!noWrite) {
   await mkdir(dirname(resolve(root, output)), { recursive: true });
   await writeFile(resolve(root, output), `${JSON.stringify(report, null, 2)}\n`, 'utf8');
 }
-console.log(`33-Q runtime starter: ${report.status} (${report.checksPassed}/${checks.length}; ${filesPassed}/14 files; ${testsPassed}/113 tests; requirement PASS=false; write=${!noWrite}).`);
+console.log(`33-Q runtime starter: ${report.status} (${report.checksPassed}/${checks.length}; ${filesPassed}/15 files; ${testsPassed}/128 tests; requirement PASS=false; write=${!noWrite}).`);
 if (failures.length) {
   console.error(combined.slice(-4000));
   process.exitCode = 1;

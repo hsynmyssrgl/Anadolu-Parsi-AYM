@@ -193,7 +193,8 @@
     "apps/desktop/tests/local-governed-ocr-ipc-integration.test.ts",
     "apps/desktop/tests/local-governed-ocr-ipc-bridge.test.ts",
     "apps/desktop/tests/local-governed-ocr-ui.test.ts",
-    "apps/desktop/tests/local-governed-ocr-data-store-production.test.ts"
+    "apps/desktop/tests/local-governed-ocr-data-store-production.test.ts",
+    "apps/desktop/tests/local-governed-ocr-malicious-document-matrix.test.ts"
   ],
   "reusedEvidence": {
     "ppk002EncryptedArchiveAndPepUow": [
@@ -326,8 +327,9 @@
     "productionConcurrentRunCancelValidated": true,
     "localComponentOcrTestsImplemented": true,
     "fullAcceptanceOcrTestMatrixImplemented": false,
-    "localComponentTestFilesPassed": 14,
-    "localComponentTestsPassed": 113,
+    "localMaliciousDocumentFailClosedMatrixImplemented": true,
+    "localComponentTestFilesPassed": 15,
+    "localComponentTestsPassed": 128,
     "isolatedWindowsMediaOcrSmokeExecuted": true,
     "externalOcrProviderConfigured": false,
     "physicalSecureEraseGuaranteed": false,
@@ -335,7 +337,7 @@
   },
   "unavailableBindings": [
     "Production-wired and real-device-validated local OCR provider/version resolver",
-    "Archive intake malware scanner and bounded document probe",
+    "Production malware scanner and PDF rasterizer remain unavailable; the local structural and scanner-negative fail-closed matrix is implemented",
     "Verified low-privilege OCR sandbox; child-process separation alone is insufficient",
     "Verified worker network isolation; windows-desktop aggregate network.access and self-reported networkUsed=false are not an OS-enforced deny",
     "Real-device accepted ocr_process authorization/consent execution; local production composition tests are not manual acceptance",
@@ -352,11 +354,11 @@
     "boundary": "STARTER_NOT_RUN",
     "contract": "STARTER_NOT_RUN",
     "runtime": "LOCAL_COMPOSED_COMPONENT_MATRIX_PASS",
-    "targetedTests": "14_FILES_113_TESTS_PASS",
+    "targetedTests": "15_FILES_128_TESTS_PASS",
     "sourceStabilizationStatus": "STABLE_LOCAL_SNAPSHOT",
     "ratchetSemantics": "EXACT_LOCAL_SNAPSHOT_NOT_REQUIREMENT_CLOSURE",
-    "targetedTestFileRatchet": 14,
-    "targetedTestRatchet": 113,
+    "targetedTestFileRatchet": 15,
+    "targetedTestRatchet": 128,
     "countsAsRequirementPass": false
   },
   "persistentReceiptStatus": "NOT_RUN"

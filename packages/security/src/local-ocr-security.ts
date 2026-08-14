@@ -176,13 +176,91 @@ const boundedImageDimensions = (width: number, height: number): boolean => Numbe
   && width > 0 && height > 0 && width <= LOCAL_OCR_MAX_IMAGE_DIMENSION && height <= LOCAL_OCR_MAX_IMAGE_DIMENSION
   && width * height <= LOCAL_OCR_MAX_IMAGE_PIXELS;
 
+const PNG_CRC_TABLE = Object.freeze(Array.from({ length: 256 }, (_, index) => {
+  let value = index;
+  for (let bit = 0; bit < 8; bit += 1) value = (value & 1) === 1
+    ? (0xedb88320 ^ (value >>> 1)) >>> 0
+    : value >>> 1;
+  return value >>> 0;
+}));
+const pngCrc32 = (bytes: Buffer, start: number, end: number): number => {
+  let crc = 0xffffffff;
+  for (let index = start; index < end; index += 1) {
+    crc = (PNG_CRC_TABLE[(crc ^ bytes[index]!) & 0xff]! ^ (crc >>> 8)) >>> 0;
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+};
+const validPngBitDepth = (colorType: number, bitDepth: number): boolean => (
+  (colorType === 0 && [1, 2, 4, 8, 16].includes(bitDepth))
+  || (colorType === 2 && [8, 16].includes(bitDepth))
+  || (colorType === 3 && [1, 2, 4, 8].includes(bitDepth))
+  || (colorType === 4 && [8, 16].includes(bitDepth))
+  || (colorType === 6 && [8, 16].includes(bitDepth))
+);
+
 const inspectPng = (bytes: Buffer): readonly [number, number] => {
   const magic = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
-  if (bytes.length < 33 || !bytes.subarray(0, 8).equals(magic)
-    || bytes.readUInt32BE(8) !== 13 || bytes.subarray(12, 16).toString('ascii') !== 'IHDR') fail('TYPE_MISMATCH');
-  const width = bytes.readUInt32BE(16);
-  const height = bytes.readUInt32BE(20);
-  if (!boundedImageDimensions(width, height)) fail('INPUT_INVALID');
+  if (bytes.length < 45 || !bytes.subarray(0, 8).equals(magic)) fail('TYPE_MISMATCH');
+  let offset = 8;
+  let width = 0;
+  let height = 0;
+  let colorType = -1;
+  let sawHeader = false;
+  let sawPalette = false;
+  let sawTransparency = false;
+  let sawImageData = false;
+  let imageDataClosed = false;
+  let sawEnd = false;
+  while (offset + 12 <= bytes.length && !sawEnd) {
+    const length = bytes.readUInt32BE(offset);
+    const typeStart = offset + 4;
+    const dataStart = offset + 8;
+    const dataEnd = dataStart + length;
+    const chunkEnd = dataEnd + 4;
+    if (length > LOCAL_OCR_MAX_INPUT_BYTES || chunkEnd > bytes.length) fail('TYPE_MISMATCH');
+    const type = bytes.subarray(typeStart, dataStart).toString('ascii');
+    if (!/^[A-Za-z]{4}$/u.test(type)) fail('TYPE_MISMATCH');
+    if (type === 'IHDR') {
+      if (sawHeader || offset !== 8 || length !== 13) fail('TYPE_MISMATCH');
+      width = bytes.readUInt32BE(dataStart);
+      height = bytes.readUInt32BE(dataStart + 4);
+      const bitDepth = bytes[dataStart + 8]!;
+      colorType = bytes[dataStart + 9]!;
+      if (!boundedImageDimensions(width, height)) fail('INPUT_INVALID');
+      if (!validPngBitDepth(colorType, bitDepth)
+        || bytes[dataStart + 10] !== 0 || bytes[dataStart + 11] !== 0
+        || ![0, 1].includes(bytes[dataStart + 12]!)) fail('TYPE_MISMATCH');
+      sawHeader = true;
+    } else if (type === 'PLTE') {
+      if (!sawHeader || sawPalette || sawImageData || length < 3 || length > 768 || length % 3 !== 0
+        || [0, 4].includes(colorType)) fail('TYPE_MISMATCH');
+      sawPalette = true;
+    } else if (type === 'tRNS') {
+      const validLength = (colorType === 0 && length === 2)
+        || (colorType === 2 && length === 6)
+        || (colorType === 3 && sawPalette && length >= 1 && length <= 256);
+      if (!sawHeader || sawTransparency || sawImageData || !validLength) fail('TYPE_MISMATCH');
+      sawTransparency = true;
+    } else if (type === 'IDAT') {
+      if (!sawHeader || sawEnd || imageDataClosed || length === 0 || (colorType === 3 && !sawPalette)) {
+        fail('TYPE_MISMATCH');
+      }
+      sawImageData = true;
+    } else if (type === 'IEND') {
+      if (!sawHeader || !sawImageData || length !== 0) fail('TYPE_MISMATCH');
+      sawEnd = true;
+    } else if (['cHRM', 'gAMA', 'sRGB', 'pHYs'].includes(type)) {
+      const expectedLength = type === 'cHRM' ? 32 : type === 'gAMA' ? 4 : type === 'sRGB' ? 1 : 9;
+      if (!sawHeader || sawImageData || length !== expectedLength) fail('TYPE_MISMATCH');
+    } else {
+      // Text, ICC/Exif metadata, animation and unknown chunks are outside the OCR admission profile.
+      fail('TYPE_MISMATCH');
+    }
+    if (pngCrc32(bytes, typeStart, dataEnd) !== bytes.readUInt32BE(dataEnd)) fail('TYPE_MISMATCH');
+    if (sawImageData && type !== 'IDAT' && type !== 'IEND') imageDataClosed = true;
+    offset = chunkEnd;
+  }
+  if (!sawHeader || !sawImageData || !sawEnd || offset !== bytes.length) fail('TYPE_MISMATCH');
   return Object.freeze([width, height]);
 };
 
@@ -216,7 +294,8 @@ const inspectPdf = (bytes: Buffer): void => {
   const tail = bytes.subarray(Math.max(0, bytes.length - 1_024)).toString('latin1');
   const eof = tail.lastIndexOf('%%EOF');
   if (eof < 0 || !/^[\u0000\t\n\f\r ]*$/u.test(tail.slice(eof + 5))) fail('TYPE_MISMATCH');
-  const text = bytes.toString('latin1');
+  const text = bytes.toString('latin1').replace(/#([0-9A-Fa-f]{2})/gu,
+    (_match, value: string) => String.fromCharCode(Number.parseInt(value, 16)));
   if (PDF_ACTIVE_CONTENT.test(text) || /\/Encrypt\b/u.test(text)) fail('INPUT_INVALID');
 };
 

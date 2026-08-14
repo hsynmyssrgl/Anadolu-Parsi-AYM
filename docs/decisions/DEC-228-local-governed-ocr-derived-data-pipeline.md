@@ -4,7 +4,7 @@
 - Durum: `PLANNED / LOCAL_IMPLEMENTATION_STARTED`
 - Requirement PASS: `false`
 - Yerel uygulama: `PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED / ACCEPTANCE_INCOMPLETE`
-- Yerel otomatik bileşen kanıtı: `14 dosya / 113 test PASS`
+- Yerel otomatik bileşen kanıtı: `15 dosya / 128 test PASS`
 - Dış/manuel kanıt: `NOT_RUN`
 - Persistent receipt: `NOT_RUN`
 
@@ -55,7 +55,7 @@ Kapanmış temel paketlerin yeniden kullanımı `REUSE_FOUNDATION_ONLY`, bunlar�
 
 ## Yerel otomatik kanıt sınırı
 
-Stabil yerel snapshot; core use-case/repository/transaction `3 dosya / 22 test`, security/input/worker/Windows `4/24`, sealed runtime `1/16`, PEP/UoW policy `2/13`, IPC `2/27`, UI `1/5` ve DataStore production facade `1/6` olmak üzere toplam `14 dosya / 113 test PASS` üretmiştir. Migration 94 kanonik SHA-256 değeri `08fef61dc21062134716dfae8e78c2256eb5da275eedaf1fe3502a3c2450cb65` ve migration verifier sonucu `9/9 PASS` durumundadır. Archive+PPK-016+PPK-019 regresyonu ayrıca `3 dosya / 108 test PASS` durumundadır. Bu sonuçlar yalnız kısmi yerel uygulama kanıtıdır; gerçek cihaz, dış/manual kabul, tam adversarial matris veya requirement kapanışı değildir.
+Stabil yerel snapshot; core use-case/repository/transaction `3 dosya / 22 test`, security/input/worker/Windows `4/24`, sealed runtime `1/16`, PEP/UoW policy `2/13`, IPC `2/27`, UI `1/5`, DataStore production facade `1/6` ve sentetik zararlı-belge fail-closed matrisi `1/15` olmak üzere toplam `15 dosya / 128 test PASS` üretmiştir. Matris eksik/IEND’siz, CRC bozuk ve ZIP-poliglot PNG; boyut/kota bombası; MIME/magic drift; aktif, gömülü, şifreli ve `#xx` kaçışlı PDF sözlükleri; zararlı/bilinmeyen/tarayıcı-hatası kararları ile provider yokluğunu worker öncesinde reddeder. Bu matris gerçek malware providerı, PDF rasterizerı veya gerçek cihaz kabulü değildir. Migration 94 kanonik SHA-256 değeri `08fef61dc21062134716dfae8e78c2256eb5da275eedaf1fe3502a3c2450cb65` ve migration verifier sonucu `9/9 PASS` durumundadır. Archive+PPK-016+PPK-019 regresyonu ayrıca `3 dosya / 108 test PASS` durumundadır. Bu sonuçlar yalnız kısmi yerel uygulama kanıtıdır; gerçek cihaz, dış/manual kabul veya requirement kapanışı değildir.
 
 ## Yerel sağlayıcı ve fallback kararı
 
@@ -98,7 +98,7 @@ Retention metadata job/lineage üzerinde taşınır. Expiry sonrası current sea
 ## Açık engeller
 
 - 33-P atomik kapanışı ve dış/manuel kanıtları tamamlanmamıştır.
-- Yerel domain/application/repository, transaction, PEP/UoW, sealed vault/runtime, DataStore facade, IPC ve UI `14 dosya / 113 test PASS` ile `PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED / ACCEPTANCE_INCOMPLETE` durumundadır. Registry atomik kapanış kaydı bu kısmi snapshot için değiştirilmemiştir.
+- Yerel domain/application/repository, transaction, PEP/UoW, sealed vault/runtime, DataStore facade, IPC, UI ve sentetik zararlı-belge fail-closed matrisi `15 dosya / 128 test PASS` ile `PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED / ACCEPTANCE_INCOMPLETE` durumundadır. Registry atomik kapanış kaydı bu kısmi snapshot için değiştirilmemiştir.
 - Zararlı dosya providerı ve PDF rasterizer yoktur; child-process separation düşük yetki sandbox kanıtı değildir.
 - Exact `ocr_process` receipt + ayrı `sensitive_processing` rızası, owner-bound sealed-result vault ve local metadata owner zinciri yerel testtedir; policy-filtered tam metin index/snippet ve gerçek cihaz acceptance yoktur.
 - Owner-bound sealed-result purge, source-delete çoklu iş batch/current-row/repository-derived immutable item-ledger, rollback ve authenticated restart auto-resume zinciri yerel testlerde doğrulanmıştır. Gelecekteki index/embedding/cache ile managed-backup owner propagationı tamamlanmadan OCR-020 kabulü yoktur.
