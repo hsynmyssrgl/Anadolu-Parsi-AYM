@@ -130,7 +130,7 @@ const definitions = [
   ['all governance and partial production source surfaces exist', governancePathsExist && localSourcePathsExist],
   ['migration 94 canonical definition and manifest are exact',
     migration94?.name === 'local_governed_ocr' && migration94?.checksum === migration94Sha256
-      && migration94Sha256 === 'd97738a84ace5de1e56f76f0ea263e6e39a1ec21a52952ed32df6767d04a87e0'
+      && migration94Sha256 === '6f2e62cb05808731f0a1ef014acb8cfb1f455974f734fd9a117f46e7dbe95cb1'
       && scope.plannedModel?.resultAndStorage?.migration94Sha256 === migration94Sha256],
   ['PPK-021 and PPK-022 ratchets match the final declared local snapshot',
     ppk.ppk021?.status === 'PASS' && ppk.ppk022?.status === 'PASS'
@@ -165,7 +165,7 @@ const definitions = [
   ['high residuals and fail-closed provider truth remain open',
     scope.truth?.maliciousFileScannerProviderAvailable === false
       && scope.truth?.productionConcurrentRunCancelProbeExecuted === true
-      && scope.truth?.productionConcurrentRunCancelValidated === false
+      && scope.truth?.productionConcurrentRunCancelValidated === true
       && scope.truth?.archiveSourceDestroyAndOcrPropagationAtomicityValidated === false
       && scope.truth?.archiveSourceDestroyCrashWindowAutoResumeValidated === false
       && scope.truth?.sourceDeletionAutoResumeGuaranteed === false
@@ -181,13 +181,13 @@ const definitions = [
       && scope.truth?.physicalSecureEraseGuaranteed === false
       && scope.truth?.externalCopyDestructionGuaranteed === false],
   ['decision and threat model preserve partial and no-claim markers',
-    decision.includes('14 dosya / 102 test PASS')
+    decision.includes('14 dosya / 103 test PASS')
       && decision.includes('PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED / ACCEPTANCE_INCOMPLETE')
       && decision.includes('- Requirement PASS: `false`')
       && decision.includes('- Persistent receipt: `NOT_RUN`')
       && decision.includes('requirement `PASS`')
-      && threat.includes('14 dosya / 102 test PASS')
-      && threat.includes('cancellation acceptance `false`')
+      && threat.includes('14 dosya / 103 test PASS')
+      && threat.includes('iki fazlı run/cancel local kanıtı `PASS`')
       && threat.includes('durable auto-resume yoktur')]
 ];
 
@@ -205,7 +205,7 @@ const report = {
   countsAsRequirementPass: false,
   requirementGateStatus: 'BLOCKED_BY_33_P_AND_OPEN_TECHNICAL_EXTERNAL_MANUAL_EVIDENCE',
   activePredecessor: '33-P',
-  targetedTestRatchet: { files: 14, tests: 102 },
+  targetedTestRatchet: { files: 14, tests: 103 },
   migration94Sha256,
   ppkGateEvidence: ppk,
   checksPassed: checks.length - failures.length,

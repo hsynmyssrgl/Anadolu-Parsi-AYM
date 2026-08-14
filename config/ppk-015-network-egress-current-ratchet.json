@@ -17,7 +17,7 @@
   "currentBoundary": {
     "productionSourceZones": 18,
     "scannedFiles": 441,
-    "sourceInventorySha256": "a7d17f433302970bd60a004832402a0a67ff8021f5a797ab0b6b3ffab894e60e",
+    "sourceInventorySha256": "9c8f74062e83624e4fe449120878efca630d12e9acee3703d04c0e87f0e4a493",
     "maliciousSelfTests": 7,
     "findings": 0,
     "authorizedAdapterCount": 2,

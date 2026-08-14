@@ -342,6 +342,81 @@ describe('33-Q local governed OCR repository policy boundary', () => {
     }) }));
   });
 
+  it('binds run begin, cancellation and terminal finalization to one exact active run id', async () => {
+    const database = openFixture(); await seedSource(database);
+    const queued = queuedJob();
+    const created = await executePolicy(database, 'local_ocr_job', queued.id, 'process', (repository, context) => {
+      const inserted = repository.insertMutation(context, mutationFor(queued));
+      return inserted.ok ? repository.insertJob(context, queued) : inserted;
+    });
+    expect(created.ok).toBe(true);
+
+    const runId = '6'.repeat(64);
+    const { stateFingerprint: _queuedFingerprint, ...queuedView } = queued;
+    const runningBase = Object.freeze({ ...queuedView, revision: 2, status: 'running' as const,
+      runAttempt: 1, activeRunId: runId, updatedAt: asIsoDateTime(NOW) });
+    const running: LocalGovernedOcrJobRow = Object.freeze({ ...runningBase,
+      stateFingerprint: computeLocalGovernedOcrJobStateFingerprint(runningBase) });
+    const beginMutation: LocalGovernedOcrMutationRow = Object.freeze({ id: 'ocr-run-begin-mutation', key: queued.key,
+      clientOperationId: 'ocr-run-begin-operation', requestFingerprint: runId, mutationKind: 'job_run_begin',
+      resourceType: 'local_ocr_job', resourceId: queued.id, previousRevision: 1, revision: 2,
+      stateFingerprint: running.stateFingerprint, occurredAt: asIsoDateTime(NOW) });
+
+    const forgedBase = Object.freeze({ ...runningBase, activeRunId: '7'.repeat(64) });
+    const forged: LocalGovernedOcrJobRow = Object.freeze({ ...forgedBase,
+      stateFingerprint: computeLocalGovernedOcrJobStateFingerprint(forgedBase) });
+    const forgedBegin = await executePolicy(database, 'local_ocr_job', queued.id, 'process', (repository, context) => {
+      database.exec('BEGIN IMMEDIATE');
+      const inserted = repository.insertMutation(context, beginMutation);
+      const saved = inserted.ok ? repository.saveJob(context, forged, 1) : inserted;
+      database.exec(saved.ok ? 'COMMIT' : 'ROLLBACK');
+      return saved;
+    });
+    expect(forgedBegin.ok).toBe(false);
+    expect(database.prepare('SELECT revision,status,active_run_id FROM local_governed_ocr_jobs WHERE id=?').get(queued.id))
+      .toEqual({ revision: 1, status: 'queued', active_run_id: null });
+
+    const begun = await executePolicy(database, 'local_ocr_job', queued.id, 'process', (repository, context) => {
+      const inserted = repository.insertMutation(context, beginMutation);
+      return inserted.ok ? repository.saveJob(context, running, 1) : inserted;
+    });
+    expect(begun).toEqual({ ok: true, value: true });
+
+    const { stateFingerprint: _runningFingerprint, ...runningView } = running;
+    const cancellingBase = Object.freeze({ ...runningView, revision: 3, status: 'cancel_requested' as const,
+      cancellationRequestedAt: asIsoDateTime(NOW), updatedAt: asIsoDateTime(NOW) });
+    const cancelling: LocalGovernedOcrJobRow = Object.freeze({ ...cancellingBase,
+      stateFingerprint: computeLocalGovernedOcrJobStateFingerprint(cancellingBase) });
+    const cancelMutation: LocalGovernedOcrMutationRow = Object.freeze({ id: 'ocr-run-cancel-mutation', key: queued.key,
+      clientOperationId: 'ocr-run-cancel-operation', requestFingerprint: '8'.repeat(64), mutationKind: 'job_cancel',
+      resourceType: 'local_ocr_job', resourceId: queued.id, previousRevision: 2, revision: 3,
+      stateFingerprint: cancelling.stateFingerprint, occurredAt: asIsoDateTime(NOW) });
+    const cancellation = await executePolicy(database, 'local_ocr_job', queued.id, 'process', (repository, context) => {
+      const inserted = repository.insertMutation(context, cancelMutation);
+      return inserted.ok ? repository.saveJob(context, cancelling, 2) : inserted;
+    });
+    expect(cancellation).toEqual({ ok: true, value: true });
+
+    const { stateFingerprint: _cancellingFingerprint, activeRunId: _activeRunId,
+      cancellationRequestedAt: _requestedAt, ...cancellingView } = cancelling;
+    const cancelledBase = Object.freeze({ ...cancellingView, revision: 4, status: 'cancelled' as const,
+      cancelledAt: asIsoDateTime(NOW), updatedAt: asIsoDateTime(NOW) });
+    const cancelled: LocalGovernedOcrJobRow = Object.freeze({ ...cancelledBase,
+      stateFingerprint: computeLocalGovernedOcrJobStateFingerprint(cancelledBase) });
+    const finalMutation: LocalGovernedOcrMutationRow = Object.freeze({ id: 'ocr-run-final-mutation', key: queued.key,
+      clientOperationId: 'ocr-run-final-operation', requestFingerprint: '9'.repeat(64), mutationKind: 'job_run',
+      resourceType: 'local_ocr_job', resourceId: queued.id, previousRevision: 3, revision: 4,
+      stateFingerprint: cancelled.stateFingerprint, occurredAt: asIsoDateTime(NOW) });
+    const finalized = await executePolicy(database, 'local_ocr_job', queued.id, 'process', (repository, context) => {
+      const inserted = repository.insertMutation(context, finalMutation);
+      return inserted.ok ? repository.saveJob(context, cancelled, 3) : inserted;
+    });
+    expect(finalized).toEqual({ ok: true, value: true });
+    expect(database.prepare(`SELECT revision,status,run_attempt,active_run_id,cancellation_requested_at,cancelled_at
+      FROM local_governed_ocr_jobs WHERE id=?`).get(queued.id)).toEqual({ revision: 4, status: 'cancelled',
+      run_attempt: 1, active_run_id: null, cancellation_requested_at: null, cancelled_at: NOW });
+  });
+
   it('persists default-off/on settings under administration and denies unsealed completed results', async () => {
     const database = openFixture(); await seedSource(database);
     const key = { familyId: FAMILY_ID, accountId: ACCOUNT_ID, ownerPersonId: PERSON_ID };

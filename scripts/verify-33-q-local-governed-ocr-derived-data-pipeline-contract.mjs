@@ -99,8 +99,8 @@ const definitions = [
       && registryItems.every((item) => item?.status === 'NOT_IMPLEMENTED' && item.chain?.evidence === false)],
   ['implemented targeted inventory is the exact 14-file local snapshot',
     allTestsExist && exact(inventory.implementedTargetedTests, testFiles)
-      && scope.validation?.targetedTestFileRatchet === 14 && scope.validation?.targetedTestRatchet === 102
-      && inventory.validation?.targetedTestFileRatchet === 14 && inventory.validation?.targetedTestRatchet === 102],
+      && scope.validation?.targetedTestFileRatchet === 14 && scope.validation?.targetedTestRatchet === 103
+      && inventory.validation?.targetedTestFileRatchet === 14 && inventory.validation?.targetedTestRatchet === 103],
   ['domain and application contracts bind limits local execution and no low-privilege overclaim',
     has('domain', 'LOCAL_GOVERNED_OCR_MAX_SOURCE_BYTES = 16 * 1_024 * 1_024',
       'LOCAL_GOVERNED_OCR_MAX_RESULT_CHARACTERS = 250_000', 'LOCAL_GOVERNED_OCR_MAX_PAGES = 50',
@@ -111,7 +111,7 @@ const definitions = [
       && has('repositoryContract', 'LocalGovernedOcrRepositoryPort', 'LocalGovernedOcrSourceDeletionBatch')],
   ['repository and migration bind metadata lineage retention and immutable source-delete child ledger',
     migration94?.name === 'local_governed_ocr' && migration94?.checksum === migration94Sha256
-      && migration94Sha256 === 'd97738a84ace5de1e56f76f0ea263e6e39a1ec21a52952ed32df6767d04a87e0'
+      && migration94Sha256 === '6f2e62cb05808731f0a1ef014acb8cfb1f455974f734fd9a117f46e7dbe95cb1'
       && has('migration', 'local_governed_ocr_jobs', 'local_governed_ocr_mutations',
         'local_governed_ocr_source_deletion_items', 'trg_33q_source_deletion_item_insert', 'trg_33q_mutation_delete')
       && has('repository', 'SqliteLocalGovernedOcrRepository', 'assertPolicyAuthorizedRepositoryContext',
@@ -124,7 +124,8 @@ const definitions = [
         'Local OCR orphan sweep requires a distinct maintenance authorization', 'finally')
       && has('transaction', 'class SqliteTransactionExecutor implements TransactionExecutor, AsyncTransactionExecutor', 'finally')
       && testHas(testFiles[8], 'leases the exact run source only after every receipt and revokes it on every exit path',
-        'revokes the runtime lease on rollback', 'cancellationRuntimeCalls')
+        'revokes the runtime lease on rollback',
+        'lets a concurrent cancel reach the runtime after the short run-begin transaction commits', 'cancellationRuntimeCalls')
       && testHas(testFiles[2], 'rejects overlapping sync or async use', 'rolls back an application error')],
   ['security and worker are local bounded child-process components with PDF malware and low privilege fail-closed',
     has('security', 'LOCAL_OCR_MAX_INPUT_BYTES = 16 * 1024 * 1024', 'LOCAL_OCR_MAX_PAGES = 50',
@@ -167,8 +168,9 @@ const definitions = [
       && has('app', "import { LocalGovernedOcrPanel }", '<LocalGovernedOcrPanel')
       && testHas(testFiles[12], 'mutation identity and original CAS revision stable across a failed retry', 'offline', 'PDF')
       && scope.truth?.rendererUiComponentTested === true
-      && scope.truth?.rendererQueuedCancelOnlyTruthDisclosed === true
-      && scope.plannedModel?.searchAndUserControl?.runningConcurrentCancelSupported === false
+      && scope.truth?.rendererRunningCancelAvailableAndTested === true
+      && scope.plannedModel?.searchAndUserControl?.twoPhaseRunTransactionImplemented === true
+      && scope.plannedModel?.searchAndUserControl?.runningConcurrentCancelSupported === true
       && scope.truth?.productionUiEndToEndValidated === false],
   ['source-deletion ordering is fail-honest while crash auto-resume and atomic propagation remain false',
     scope.truth?.sourceDeletionBatchPersistenceValidated === true
@@ -185,9 +187,9 @@ const definitions = [
       && exact(capabilityManifest.applicationRuntimeCapabilities?.['ocr-worker'], [])
       && scope.truth?.lowPrivilegeOcrSandboxVerified === false
       && scope.truth?.workerNetworkIsolationVerified === false],
-  ['all open acceptance and no-claim truth stays false',
+  ['local two-phase cancellation is true while external acceptance and no-claim truth stays fail-closed',
     scope.truth?.productionConcurrentRunCancelProbeExecuted === true
-      && scope.truth?.productionConcurrentRunCancelValidated === false
+      && scope.truth?.productionConcurrentRunCancelValidated === true
       && scope.truth?.maliciousFileScannerProviderAvailable === false
       && scope.truth?.externalOcrProviderConfigured === false
       && scope.truth?.rawDocumentEgressPerformed === false
@@ -211,7 +213,7 @@ const report = {
   countsAsRequirementPass: false,
   activePredecessor: '33-P',
   localTargetedTestFiles: testFiles,
-  targetedTestRatchet: { files: 14, tests: 102 },
+  targetedTestRatchet: { files: 14, tests: 103 },
   migration94Sha256,
   checksPassed: checks.length - failures.length,
   checksFailed: failures.length,

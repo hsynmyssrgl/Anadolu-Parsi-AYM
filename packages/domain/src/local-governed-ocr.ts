@@ -115,6 +115,7 @@ export interface LocalGovernedOcrResultView {
 
 export type LocalGovernedOcrMutationKind =
   | 'job_create'
+  | 'job_run_begin'
   | 'job_run'
   | 'job_cancel'
   | 'result_correct'

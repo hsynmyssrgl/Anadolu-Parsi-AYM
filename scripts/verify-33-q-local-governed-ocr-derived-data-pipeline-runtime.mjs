@@ -78,14 +78,14 @@ const ppk022Tail = ppk022Gate?.outputTail ?? '';
 
 const definitions = [
   ['exact 14-file local Vitest process exits successfully', run.status === 0],
-  ['local test result meets the exact 14/102 ratchet',
-    run.status === 0 && filesPassed === 14 && testsPassed === 102
-      && scope.validation?.targetedTestFileRatchet === 14 && scope.validation?.targetedTestRatchet === 102
-      && inventory.validation?.targetedTestFileRatchet === 14 && inventory.validation?.targetedTestRatchet === 102
+  ['local test result meets the exact 14/103 ratchet',
+    run.status === 0 && filesPassed === 14 && testsPassed === 103
+      && scope.validation?.targetedTestFileRatchet === 14 && scope.validation?.targetedTestRatchet === 103
+      && inventory.validation?.targetedTestFileRatchet === 14 && inventory.validation?.targetedTestRatchet === 103
       && exact(inventory.implementedTargetedTests, testFiles)],
   ['migration 94 manifest and canonical source hash remain exact',
     migration94?.name === 'local_governed_ocr' && migration94?.checksum === migration94Sha256
-      && migration94Sha256 === 'd97738a84ace5de1e56f76f0ea263e6e39a1ec21a52952ed32df6767d04a87e0'],
+      && migration94Sha256 === '6f2e62cb05808731f0a1ef014acb8cfb1f455974f734fd9a117f46e7dbe95cb1'],
   ['PPK-021 runtime artifact is PASS at the exact current ratchet',
     ppk.ppk021?.status === 'PASS' && ppk021Runtime.status === 'PASS' && ppk021Gate?.status === 'PASS'
       && ppk021Tail.includes(`"scannedFiles": ${ppk.ppk021.scannedProductionFiles}`)
@@ -119,9 +119,12 @@ const definitions = [
       && scope.truth?.productionProviderWiredAndValidated === false
       && scope.truth?.productionOcrRuntimeExecuted === false
       && scope.truth?.maliciousFileScannerProviderAvailable === false],
-  ['known high cancellation source-delete and maintenance residuals remain open',
+  ['two-phase cancellation is locally validated while source-delete and maintenance residuals remain open',
     scope.truth?.productionConcurrentRunCancelProbeExecuted === true
-      && scope.truth?.productionConcurrentRunCancelValidated === false
+      && scope.truth?.productionConcurrentRunCancelValidated === true
+      && scope.truth?.rendererRunningCancelAvailableAndTested === true
+      && scope.plannedModel?.searchAndUserControl?.twoPhaseRunTransactionImplemented === true
+      && scope.plannedModel?.searchAndUserControl?.runningConcurrentCancelSupported === true
       && scope.truth?.archiveSourceDestroyBeforeOcrPropagationOrderingValidated === true
       && scope.truth?.archiveSourceDestroyAndOcrPropagationAtomicityValidated === false
       && scope.truth?.archiveSourceDestroyCrashWindowAutoResumeValidated === false
@@ -157,7 +160,7 @@ const report = {
   targetedTestFilesPassed: filesPassed,
   targetedTestsPassed: testsPassed,
   targetedTestFileRatchet: 14,
-  targetedTestRatchet: 102,
+  targetedTestRatchet: 103,
   testFiles,
   migration94Sha256,
   ppkGateEvidence: ppk,
@@ -166,7 +169,7 @@ const report = {
     malwareProvider: 'UNAVAILABLE_FAIL_CLOSED',
     pdfLanes: 'UNSUPPORTED_FAIL_CLOSED',
     lowPrivilegeSandbox: 'NOT_VERIFIED',
-    concurrentRunCancel: 'HIGH_OPEN',
+    concurrentRunCancel: 'LOCAL_TWO_PHASE_PRODUCTION_EXECUTOR_PROBE_PASS_EXTERNAL_UAT_NOT_RUN',
     sourceDeleteCrashAutoResume: 'HIGH_OPEN',
     permissionOrConsentRevocationPurge: 'OPEN',
     scheduledOrphanSweepAuthority: 'UNWIRED',
@@ -191,7 +194,7 @@ if (!noWrite) {
   await mkdir(dirname(resolve(root, output)), { recursive: true });
   await writeFile(resolve(root, output), `${JSON.stringify(report, null, 2)}\n`, 'utf8');
 }
-console.log(`33-Q runtime starter: ${report.status} (${report.checksPassed}/${checks.length}; ${filesPassed}/14 files; ${testsPassed}/102 tests; requirement PASS=false; write=${!noWrite}).`);
+console.log(`33-Q runtime starter: ${report.status} (${report.checksPassed}/${checks.length}; ${filesPassed}/14 files; ${testsPassed}/103 tests; requirement PASS=false; write=${!noWrite}).`);
 if (failures.length) {
   console.error(combined.slice(-4000));
   process.exitCode = 1;

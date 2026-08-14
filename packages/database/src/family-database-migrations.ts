@@ -12412,7 +12412,7 @@ CREATE TABLE local_governed_ocr_mutations (
   client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 1 AND 160),
   request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
   mutation_kind TEXT NOT NULL CHECK(mutation_kind IN (
-    'job_create','job_run','job_cancel','result_correct','job_rerun','job_delete',
+    'job_create','job_run_begin','job_run','job_cancel','result_correct','job_rerun','job_delete',
     'processing_disable','processing_enable','source_delete_propagate'
   )),
   resource_type TEXT NOT NULL CHECK(resource_type IN ('local_ocr_job','local_ocr_settings')),
@@ -12441,6 +12441,7 @@ CREATE TABLE local_governed_ocr_jobs (
   derived_resource_id TEXT NOT NULL UNIQUE CHECK(length(trim(derived_resource_id)) BETWEEN 1 AND 256),
   language_hints_json TEXT NOT NULL CHECK(json_valid(language_hints_json) AND json_type(language_hints_json)='array' AND length(language_hints_json)<=512),
   status TEXT NOT NULL CHECK(status IN ('queued','running','cancel_requested','completed','failed','cancelled','deleted')),
+  active_run_id TEXT CHECK(active_run_id IS NULL OR (length(active_run_id)=64 AND active_run_id NOT GLOB '*[^0-9a-f]*')),
   run_attempt INTEGER NOT NULL CHECK(run_attempt BETWEEN 0 AND 100),
   correction_revision INTEGER NOT NULL CHECK(correction_revision BETWEEN 0 AND 1000),
   result_available INTEGER NOT NULL CHECK(result_available IN (0,1)),
@@ -12474,6 +12475,8 @@ CREATE TABLE local_governed_ocr_jobs (
     OR (result_available=0 AND result_content_sha256 IS NULL AND result_character_count IS NULL AND result_page_count IS NULL
       AND confidence_basis_points IS NULL AND derived_binding_hash IS NULL AND sealed_result_id IS NULL)),
   CHECK((status='failed' AND failure_code IS NOT NULL AND failed_at IS NOT NULL) OR (status<>'failed' AND failure_code IS NULL AND failed_at IS NULL)),
+  CHECK((status IN ('running','cancel_requested') AND active_run_id IS NOT NULL)
+    OR (status NOT IN ('running','cancel_requested') AND active_run_id IS NULL)),
   CHECK((status='cancel_requested' AND cancellation_requested_at IS NOT NULL) OR status<>'cancel_requested'),
   CHECK((status='cancelled' AND cancelled_at IS NOT NULL) OR (status<>'cancelled' AND cancelled_at IS NULL)),
   CHECK((status='deleted' AND deleted_at IS NOT NULL) OR (status<>'deleted' AND deleted_at IS NULL)),
@@ -12616,6 +12619,39 @@ WHEN NEW.revision<>OLD.revision+1 OR NEW.id<>OLD.id OR NEW.family_id<>OLD.family
      AND binding.family_id=NEW.family_id AND source.source_resource_type='archive_item'
      AND source.source_resource_id=NEW.source_resource_id AND source.content_sha256=NEW.input_sha256))
 BEGIN SELECT RAISE(ABORT,'33-Q OCR job update requires exact immutable source, mutation and sealed lineage'); END;
+
+CREATE TRIGGER trg_33q_run_phase_transition BEFORE UPDATE ON local_governed_ocr_jobs
+WHEN (
+  OLD.status IN ('running','cancel_requested')
+  OR NEW.status IN ('running','cancel_requested')
+  OR OLD.active_run_id IS NOT NEW.active_run_id
+) AND NOT (
+  (
+    OLD.status='queued' AND NEW.status='running'
+    AND OLD.active_run_id IS NULL
+    AND NEW.active_run_id=(SELECT request_fingerprint FROM local_governed_ocr_mutations WHERE id=NEW.last_mutation_id)
+    AND (SELECT mutation_kind FROM local_governed_ocr_mutations WHERE id=NEW.last_mutation_id)='job_run_begin'
+    AND NEW.run_attempt=OLD.run_attempt+1
+  )
+  OR (
+    OLD.status='running' AND NEW.status='cancel_requested'
+    AND NEW.active_run_id=OLD.active_run_id
+    AND NEW.run_attempt=OLD.run_attempt
+    AND (SELECT mutation_kind FROM local_governed_ocr_mutations WHERE id=NEW.last_mutation_id)='job_cancel'
+  )
+  OR (
+    OLD.status IN ('running','cancel_requested') AND NEW.status IN ('completed','failed','cancelled')
+    AND OLD.active_run_id IS NOT NULL AND NEW.active_run_id IS NULL
+    AND NEW.run_attempt=OLD.run_attempt
+    AND (SELECT mutation_kind FROM local_governed_ocr_mutations WHERE id=NEW.last_mutation_id)='job_run'
+  )
+  OR (
+    OLD.status IN ('running','cancel_requested') AND NEW.status='deleted'
+    AND OLD.active_run_id IS NOT NULL AND NEW.active_run_id IS NULL
+    AND (SELECT mutation_kind FROM local_governed_ocr_mutations WHERE id=NEW.last_mutation_id)='source_delete_propagate'
+  )
+)
+BEGIN SELECT RAISE(ABORT,'33-Q OCR run phase transition is not exact'); END;
 
 CREATE TRIGGER trg_33q_settings_insert BEFORE INSERT ON local_governed_ocr_settings
 WHEN NEW.revision<>1

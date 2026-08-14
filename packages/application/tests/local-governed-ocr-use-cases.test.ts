@@ -139,7 +139,8 @@ const settingsRow = (enabled = true, revision = 0): LocalGovernedOcrSettingsView
 
 const jobRow = (
   overrides: Partial<LocalGovernedOcrJobView> = {},
-  sealedResultId?: string
+  sealedResultId?: string,
+  activeRunId?: string
 ): LocalGovernedOcrJobRow => {
   const view: LocalGovernedOcrJobView = {
     id: 'ocr-job-1',
@@ -164,8 +165,12 @@ const jobRow = (
     updatedAt: NOW,
     ...overrides
   };
-  return Object.freeze({ ...view, ...(sealedResultId === undefined ? {} : { sealedResultId }),
-    stateFingerprint: hash(canonicalLocalGovernedOcrJobStateJson(view)) });
+  return Object.freeze({ ...view,
+    ...(activeRunId === undefined ? {} : { activeRunId }),
+    ...(sealedResultId === undefined ? {} : { sealedResultId }),
+    stateFingerprint: hash(activeRunId === undefined
+      ? canonicalLocalGovernedOcrJobStateJson(view)
+      : JSON.stringify({ state: JSON.parse(canonicalLocalGovernedOcrJobStateJson(view)), activeRunId })) });
 };
 
 const failure = (message: string): AppError => createAppError({
@@ -305,6 +310,22 @@ class Unit implements LocalGovernedOcrUnitOfWork {
       return err(failure(error instanceof Error ? error.message : 'unexpected operation error'));
     }
   }
+
+  public async executeDetached<TPrepared, TResult>(
+    operationContext: LocalGovernedOcrApplicationContext,
+    authorization: LocalGovernedOcrAuthorizationPlan,
+    runtimeAuthority: (prepared: TPrepared) => {
+      readonly operation: 'run'; readonly runId: string; readonly jobId: string;
+      readonly derivedResourceId: string; readonly sourceResourceId: string; readonly expectedInputSha256: string;
+    },
+    prepare: (scope: LocalGovernedOcrWriteScope) => Result<TPrepared, AppError> | Promise<Result<TPrepared, AppError>>,
+    operation: (prepared: TPrepared) => Promise<Result<TResult, AppError>>
+  ): Promise<Result<TResult, AppError>> {
+    const committed = await this.execute(operationContext, authorization, prepare);
+    if (!committed.ok) return committed;
+    runtimeAuthority(committed.value);
+    return operation(committed.value);
+  }
 }
 
 class Runtime implements LocalGovernedOcrRuntimePort {
@@ -365,6 +386,7 @@ const completedJob = (id = 'ocr-job-1', revision = 2): LocalGovernedOcrJobRow =>
 describe('33-Q local governed OCR application core', () => {
   it('exposes the bounded local truth and canonical limits without a cloud, renderer-byte or secure-erase claim', async () => {
     const unit = new Unit();
+    unit.jobs.set('ocr-job-1', jobRow({ status: 'running', runAttempt: 1 }, undefined, hash('main-only-active-run')));
     const result = await new GetLocalGovernedOcrCenterUseCase(unit).execute(context);
     expect(result.ok && result.value.truth).toEqual({
       executionScope: 'bounded_child_process', lowPrivilegeSandboxVerified: false,
@@ -374,6 +396,7 @@ describe('33-Q local governed OCR application core', () => {
       sourceDeletionPropagatesToDerivedResult: true, sourceDeletionAutoResumeGuaranteed: false,
       derivedDeletionDeletesSource: false
     });
+    expect(result.ok && result.value.jobs[0]).not.toHaveProperty('activeRunId');
     expect([LOCAL_GOVERNED_OCR_MAX_SOURCE_BYTES, LOCAL_GOVERNED_OCR_MAX_RESULT_CHARACTERS,
       LOCAL_GOVERNED_OCR_MAX_PAGES]).toEqual([16 * 1024 * 1024, 250_000, 50]);
     expect(unit.plans[0]?.primary).toMatchObject({ action: 'read', capability: 'family.read',
@@ -435,7 +458,7 @@ describe('33-Q local governed OCR application core', () => {
       command: { jobId: 'ocr-job-1', expectedRevision: 1, clientOperationId: 'ocr-run-operation-1' },
       identifiers: ids('ocr-job-1', 'run-1') });
     expect(result.ok).toBe(true);
-    expect(unit.jobs.get('ocr-job-1')).toMatchObject({ status: 'completed', revision: 2,
+    expect(unit.jobs.get('ocr-job-1')).toMatchObject({ status: 'completed', revision: 3,
       resultAvailable: true, resultContentSha256: RESULT_SHA, runAttempt: 1 });
     expect(unit.jobs.get('ocr-job-1')).not.toHaveProperty('confidenceBasisPoints');
     expect(unit.bindings).toHaveLength(1);
@@ -456,13 +479,14 @@ describe('33-Q local governed OCR application core', () => {
       command: { jobId: 'ocr-job-1', expectedRevision: 1, clientOperationId: 'ocr-run-hostile-1' },
       identifiers: ids('ocr-job-1', 'run-hostile') });
     expect(denied.ok).toBe(false);
-    expect(hostile.jobs.get('ocr-job-1')?.status).toBe('queued');
-    expect(hostile.mutations.size).toBe(0);
+    expect(hostile.jobs.get('ocr-job-1')).toMatchObject({ status: 'running', revision: 2 });
+    expect(hostile.mutations.size).toBe(1);
+    expect([...hostile.mutations.values()][0]?.mutationKind).toBe('job_run_begin');
   });
 
   it('keeps disable settings-only while explicit cancel owns the running-job mutation', async () => {
     const unit = new Unit();
-    unit.jobs.set('ocr-job-1', jobRow({ status: 'running' }));
+    unit.jobs.set('ocr-job-1', jobRow({ status: 'running', runAttempt: 1 }, undefined, hash('active-run-fixture')));
     const runtime = new Runtime(unit.order);
     const settingsId = localGovernedOcrSettingsResourceId(PERSON);
     const disabled = await new SetLocalGovernedOcrEnabledUseCase(unit, runtime).execute({ context,

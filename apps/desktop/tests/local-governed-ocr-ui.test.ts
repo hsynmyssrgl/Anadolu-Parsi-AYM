@@ -40,8 +40,9 @@ describe('33-Q local governed OCR renderer surface', () => {
       "düşük ayrıcalıklı sandbox doğrulanmış değildir",
       "PDF rasterizer ve kötü amaçlı yazılım sağlayıcısı yoksa işlem fail-closed reddedilir",
       "crash sonrası otomatik devam kanıtlanmış değildir",
-      "başlamış işi eşzamanlı iptal etme henüz desteklenmez",
-      "selectedJob.status !== 'queued'",
+      "Sıradaki veya çalışan iş iptal edilebilir",
+      "!['queued', 'running'].includes(selectedJob.status)",
+      "selectedJob.status === 'running' ? 'Çalışan işi iptal et'",
       "Sıradaki işi iptal et",
       "Türetilmiş sonucu silmek kaynak belgeyi silmez"
     ]) expect(panel).toContain(truth);

@@ -18,6 +18,8 @@ import type {
  * are deliberately absent; `sealedResultId` is an opaque main-process vault identifier.
  */
 export interface LocalGovernedOcrJobRow extends LocalGovernedOcrJobView {
+  /** Main-only two-phase run binding. It is never projected into renderer-safe job views. */
+  readonly activeRunId?: string;
   readonly sealedResultId?: string;
   readonly stateFingerprint: string;
 }

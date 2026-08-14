@@ -72,6 +72,7 @@ export type LocalGovernedOcrRuntimeJobOperation = 'read' | 'correct' | 'purge' |
 export interface LocalGovernedOcrMainAuthorityPort {
   resolveAuthorizedArchiveSource(input: {
     readonly operation: 'run';
+    readonly runId: string;
     readonly jobId: string;
     readonly derivedResourceId: string;
     readonly sourceResourceId: string;
@@ -238,7 +239,7 @@ export class MainLocalGovernedOcrRuntimeAdapter implements LocalGovernedOcrRunti
 
   public async runAndSeal(input: Parameters<LocalGovernedOcrRuntimePort['runAndSeal']>[0]):
   Promise<Result<LocalGovernedOcrRunOutcome, AppError>> {
-    if (!validIdentifier(input.jobId) || !validIdentifier(input.derivedResourceId)
+    if (!SHA256.test(input.runId) || !validIdentifier(input.jobId) || !validIdentifier(input.derivedResourceId)
       || input.sourceResourceType !== 'archive_item' || !validIdentifier(input.sourceResourceId)
       || !SHA256.test(input.expectedInputSha256) || !validLanguageHints(input.languageHints)) {
       return err(invalid(input.correlationId));
@@ -248,7 +249,7 @@ export class MainLocalGovernedOcrRuntimeAdapter implements LocalGovernedOcrRunti
     let controller: AbortController | undefined;
     try {
       const authority = await this.#authority.resolveAuthorizedArchiveSource({
-        operation: 'run', jobId: input.jobId, derivedResourceId: input.derivedResourceId,
+        operation: 'run', runId: input.runId, jobId: input.jobId, derivedResourceId: input.derivedResourceId,
         sourceResourceId: input.sourceResourceId, expectedInputSha256: input.expectedInputSha256,
         correlationId: input.correlationId
       });

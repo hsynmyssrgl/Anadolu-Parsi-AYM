@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import {
   ERROR_CODES,
+  asCorrelationId,
   createAppError,
   err,
   ok,
@@ -171,6 +172,24 @@ export interface LocalGovernedOcrUnitOfWork {
     authorization: LocalGovernedOcrAuthorizationPlan,
     operation: (scope: LocalGovernedOcrWriteScope) => Result<T, AppError> | Promise<Result<T, AppError>>
   ): Promise<Result<T, AppError>>;
+  /**
+   * Commits a short authorization/write phase, then runs the supplied callback with a bounded,
+   * main-only source authority lease after the database transaction has closed.
+   */
+  executeDetached<TPrepared, TResult>(
+    context: LocalGovernedOcrApplicationContext,
+    authorization: LocalGovernedOcrAuthorizationPlan,
+    runtimeAuthority: (prepared: TPrepared) => {
+      readonly operation: 'run';
+      readonly runId: string;
+      readonly jobId: string;
+      readonly derivedResourceId: string;
+      readonly sourceResourceId: string;
+      readonly expectedInputSha256: string;
+    },
+    prepare: (scope: LocalGovernedOcrWriteScope) => Result<TPrepared, AppError> | Promise<Result<TPrepared, AppError>>,
+    operation: (prepared: TPrepared) => Promise<Result<TResult, AppError>>
+  ): Promise<Result<TResult, AppError>>;
 }
 
 export interface LocalGovernedOcrSealedResult {
@@ -197,6 +216,7 @@ export type LocalGovernedOcrRunOutcome =
  */
 export interface LocalGovernedOcrRuntimePort {
   runAndSeal(input: {
+    readonly runId: string;
     readonly jobId: string;
     readonly derivedResourceId: string;
     readonly sourceResourceType: 'archive_item';
@@ -364,17 +384,24 @@ const identifiersValid = (value: LocalGovernedOcrOperationIdentifiers): boolean 
   && SHA256.test(value.requestFingerprint);
 
 const jobView = (row: LocalGovernedOcrJobRow): LocalGovernedOcrJobView => {
-  const { sealedResultId: _sealed, stateFingerprint: _fingerprint, ...view } = row;
+  const { sealedResultId: _sealed, stateFingerprint: _fingerprint, activeRunId: _activeRunId, ...view } = row;
   return view;
 };
 const settingsView = (row: LocalGovernedOcrSettingsRow): LocalGovernedOcrSettingsView => {
   const { stateFingerprint: _fingerprint, ...view } = row;
   return view;
 };
-const jobRow = (view: LocalGovernedOcrJobView, sealedResultId?: string): LocalGovernedOcrJobRow => ({
+const jobRow = (
+  view: LocalGovernedOcrJobView,
+  sealedResultId?: string,
+  activeRunId?: string
+): LocalGovernedOcrJobRow => ({
   ...view,
+  ...(activeRunId === undefined ? {} : { activeRunId }),
   ...(sealedResultId === undefined ? {} : { sealedResultId }),
-  stateFingerprint: hash(canonicalLocalGovernedOcrJobStateJson(view))
+  stateFingerprint: hash(activeRunId === undefined
+    ? canonicalLocalGovernedOcrJobStateJson(view)
+    : JSON.stringify({ state: JSON.parse(canonicalLocalGovernedOcrJobStateJson(view)), activeRunId }))
 });
 const settingsRow = (view: LocalGovernedOcrSettingsView): LocalGovernedOcrSettingsRow => ({
   ...view,
@@ -507,102 +534,113 @@ interface PreparedMutation {
   persist(): Result<void, AppError> | Promise<Result<void, AppError>>;
 }
 
+interface MutationExecutionInput {
+  readonly context: LocalGovernedOcrApplicationContext;
+  readonly key: LocalGovernedOcrAggregateKey;
+  readonly expectedRevision: number;
+  readonly clientOperationId: string;
+  readonly identifiers: LocalGovernedOcrOperationIdentifiers;
+}
+
+interface MutationSpecification {
+  readonly mutationKind: LocalGovernedOcrMutationKind;
+  readonly resourceType: LocalGovernedOcrResourceType;
+  readonly authorization: LocalGovernedOcrAuthorizationPlan;
+  loadCurrent(scope: LocalGovernedOcrWriteScope): Result<CurrentMutationState | null, AppError>;
+  prepare(scope: LocalGovernedOcrWriteScope): Result<PreparedMutation, AppError> | Promise<Result<PreparedMutation, AppError>>;
+}
+
+const executeMutationInScope = async (
+  scope: LocalGovernedOcrWriteScope,
+  input: MutationExecutionInput,
+  specification: MutationSpecification
+): Promise<Result<LocalGovernedOcrMutationReceiptView, AppError>> => {
+  const replay = scope.findMutationByClientOperationId(input.key, input.clientOperationId);
+  if (!replay.ok) return replay;
+  if (replay.value) {
+    if (!exactKey(replay.value.key, input.key)
+      || replay.value.requestFingerprint !== input.identifiers.requestFingerprint
+      || replay.value.mutationKind !== specification.mutationKind
+      || replay.value.resourceType !== specification.resourceType
+      || replay.value.resourceId !== input.identifiers.resourceId
+      || replay.value.previousRevision !== input.expectedRevision) {
+      return err(conflict(input.context, 'OCR istemci işlem kimliği farklı istek veya kapsamla yeniden kullanılmış.'));
+    }
+    const current = specification.loadCurrent(scope);
+    if (!current.ok) return current;
+    if (!current.value || current.value.revision !== replay.value.revision
+      || current.value.stateFingerprint !== replay.value.stateFingerprint) {
+      return err(conflict(input.context, 'OCR replay sonucu artık exact current state değildir.'));
+    }
+    return ok(mutationReceipt(replay.value, true));
+  }
+  const prepared = await specification.prepare(scope);
+  if (!prepared.ok) return prepared;
+  if (prepared.value.previousRevision !== input.expectedRevision) {
+    return err(conflict(input.context, 'OCR kaynağı revizyonu güncel değildir.'));
+  }
+  const mutation: LocalGovernedOcrMutationRow = {
+    id: input.identifiers.mutationId,
+    key: input.key,
+    clientOperationId: input.clientOperationId,
+    requestFingerprint: input.identifiers.requestFingerprint,
+    mutationKind: specification.mutationKind,
+    resourceType: specification.resourceType,
+    resourceId: input.identifiers.resourceId,
+    previousRevision: prepared.value.previousRevision,
+    revision: prepared.value.revision,
+    stateFingerprint: prepared.value.stateFingerprint,
+    occurredAt: scope.occurredAt
+  };
+  const inserted = scope.insertMutation(mutation);
+  if (!inserted.ok) return inserted;
+  const persisted = await prepared.value.persist();
+  if (!persisted.ok) return persisted;
+  const audited = scope.appendAudit({
+    id: input.identifiers.auditId,
+    action: `ocr.${specification.mutationKind}`,
+    resourceType: specification.resourceType,
+    resourceId: input.identifiers.resourceId,
+    occurredAt: scope.occurredAt,
+    actorId: input.context.actor.userId
+  });
+  if (!audited.ok) return audited;
+  const event: DomainEvent<{
+    readonly clientOperationId: string;
+    readonly mutationKind: LocalGovernedOcrMutationKind;
+    readonly revision: number;
+    readonly stateFingerprint: string;
+  }> = {
+    eventId: input.identifiers.outboxEventId,
+    eventType: 'ocr.state.changed',
+    eventVersion: 1,
+    aggregateType: specification.resourceType,
+    aggregateId: input.identifiers.resourceId,
+    occurredAt: scope.occurredAt,
+    actorId: input.context.actor.userId,
+    correlationId: input.context.correlationId,
+    payload: {
+      clientOperationId: input.clientOperationId,
+      mutationKind: specification.mutationKind,
+      revision: mutation.revision,
+      stateFingerprint: mutation.stateFingerprint
+    }
+  };
+  const queued = scope.enqueueEvent(event);
+  return queued.ok ? ok(mutationReceipt(mutation, false)) : queued;
+};
+
 const executeMutation = async (
   unitOfWork: LocalGovernedOcrUnitOfWork,
-  input: {
-    readonly context: LocalGovernedOcrApplicationContext;
-    readonly key: LocalGovernedOcrAggregateKey;
-    readonly expectedRevision: number;
-    readonly clientOperationId: string;
-    readonly identifiers: LocalGovernedOcrOperationIdentifiers;
-  },
-  specification: {
-    readonly mutationKind: LocalGovernedOcrMutationKind;
-    readonly resourceType: LocalGovernedOcrResourceType;
-    readonly authorization: LocalGovernedOcrAuthorizationPlan;
-    loadCurrent(scope: LocalGovernedOcrWriteScope): Result<CurrentMutationState | null, AppError>;
-    prepare(scope: LocalGovernedOcrWriteScope): Result<PreparedMutation, AppError> | Promise<Result<PreparedMutation, AppError>>;
-  }
+  input: MutationExecutionInput,
+  specification: MutationSpecification
 ): Promise<Result<LocalGovernedOcrMutationReceiptView, AppError>> => {
   if (!validRevision(input.expectedRevision) || !IDENTIFIER.test(input.clientOperationId)
     || !identifiersValid(input.identifiers)) {
     return err(invalid(input.context, 'OCR işlem kimliği, revizyonu veya fingerprint geçersiz.'));
   }
-  return unitOfWork.execute(input.context, specification.authorization, async (scope) => {
-    const replay = scope.findMutationByClientOperationId(input.key, input.clientOperationId);
-    if (!replay.ok) return replay;
-    if (replay.value) {
-      if (!exactKey(replay.value.key, input.key)
-        || replay.value.requestFingerprint !== input.identifiers.requestFingerprint
-        || replay.value.mutationKind !== specification.mutationKind
-        || replay.value.resourceType !== specification.resourceType
-        || replay.value.resourceId !== input.identifiers.resourceId
-        || replay.value.previousRevision !== input.expectedRevision) {
-        return err(conflict(input.context, 'OCR istemci işlem kimliği farklı istek veya kapsamla yeniden kullanılmış.'));
-      }
-      const current = specification.loadCurrent(scope);
-      if (!current.ok) return current;
-      if (!current.value || current.value.revision !== replay.value.revision
-        || current.value.stateFingerprint !== replay.value.stateFingerprint) {
-        return err(conflict(input.context, 'OCR replay sonucu artık exact current state değildir.'));
-      }
-      return ok(mutationReceipt(replay.value, true));
-    }
-    const prepared = await specification.prepare(scope);
-    if (!prepared.ok) return prepared;
-    if (prepared.value.previousRevision !== input.expectedRevision) {
-      return err(conflict(input.context, 'OCR kaynağı revizyonu güncel değildir.'));
-    }
-    const mutation: LocalGovernedOcrMutationRow = {
-      id: input.identifiers.mutationId,
-      key: input.key,
-      clientOperationId: input.clientOperationId,
-      requestFingerprint: input.identifiers.requestFingerprint,
-      mutationKind: specification.mutationKind,
-      resourceType: specification.resourceType,
-      resourceId: input.identifiers.resourceId,
-      previousRevision: prepared.value.previousRevision,
-      revision: prepared.value.revision,
-      stateFingerprint: prepared.value.stateFingerprint,
-      occurredAt: scope.occurredAt
-    };
-    const inserted = scope.insertMutation(mutation);
-    if (!inserted.ok) return inserted;
-    const persisted = await prepared.value.persist();
-    if (!persisted.ok) return persisted;
-    const audited = scope.appendAudit({
-      id: input.identifiers.auditId,
-      action: `ocr.${specification.mutationKind}`,
-      resourceType: specification.resourceType,
-      resourceId: input.identifiers.resourceId,
-      occurredAt: scope.occurredAt,
-      actorId: input.context.actor.userId
-    });
-    if (!audited.ok) return audited;
-    const event: DomainEvent<{
-      readonly clientOperationId: string;
-      readonly mutationKind: LocalGovernedOcrMutationKind;
-      readonly revision: number;
-      readonly stateFingerprint: string;
-    }> = {
-      eventId: input.identifiers.outboxEventId,
-      eventType: 'ocr.state.changed',
-      eventVersion: 1,
-      aggregateType: specification.resourceType,
-      aggregateId: input.identifiers.resourceId,
-      occurredAt: scope.occurredAt,
-      actorId: input.context.actor.userId,
-      correlationId: input.context.correlationId,
-      payload: {
-        clientOperationId: input.clientOperationId,
-        mutationKind: specification.mutationKind,
-        revision: mutation.revision,
-        stateFingerprint: mutation.stateFingerprint
-      }
-    };
-    const queued = scope.enqueueEvent(event);
-    return queued.ok ? ok(mutationReceipt(mutation, false)) : queued;
-  });
+  return unitOfWork.execute(input.context, specification.authorization,
+    (scope) => executeMutationInScope(scope, input, specification));
 };
 
 const loadExactJob = (
@@ -782,7 +820,10 @@ export class RunLocalGovernedOcrJobUseCase {
   }): Promise<Result<LocalGovernedOcrMutationReceiptView, AppError>> {
     const key = keyFor(input.context);
     if (!key.ok) return key;
-    if (input.command.jobId !== input.identifiers.resourceId) return err(invalid(input.context, 'OCR iş kimliği uyuşmuyor.'));
+    if (input.command.jobId !== input.identifiers.resourceId || !validRevision(input.command.expectedRevision)
+      || !IDENTIFIER.test(input.command.clientOperationId) || !identifiersValid(input.identifiers)) {
+      return err(invalid(input.context, 'OCR iş kimliği, revizyonu veya fingerprint geçersiz.'));
+    }
     const sourceMetadata = resolveJobSourceMetadata(this.unitOfWork, input.context, key.value, input.command.jobId);
     if (!sourceMetadata.ok) return sourceMetadata;
     const authorization: LocalGovernedOcrAuthorizationPlan = {
@@ -792,90 +833,296 @@ export class RunLocalGovernedOcrJobUseCase {
       target: targetIntent(key.value, input.command.jobId, sourceMetadata.value.derivedResourceId,
         sourceMetadata.value.sensitivity)
     };
-    return executeMutation(this.unitOfWork, {
-      context: input.context, key: key.value, expectedRevision: input.command.expectedRevision,
-      clientOperationId: input.command.clientOperationId, identifiers: input.identifiers
-    }, {
-      mutationKind: 'job_run', resourceType: 'local_ocr_job', authorization,
-      loadCurrent: (scope) => {
-        const loaded = scope.findJob(key.value, input.command.jobId);
-        return loaded.ok ? ok(loaded.value ? { revision: loaded.value.revision, stateFingerprint: loaded.value.stateFingerprint } : null) : loaded;
-      },
-      prepare: async (scope) => {
-        const current = loadExactJob(scope, input.context, key.value, input.command.jobId);
-        if (!current.ok) return current;
-        if (current.value.revision !== input.command.expectedRevision) return err(conflict(input.context, 'OCR iş revizyonu güncel değildir.'));
-        if (current.value.status !== 'queued') return err(conflict(input.context, 'Yalnız sıradaki OCR işi çalıştırılabilir.'));
-        const center = scope.loadCenter(key.value);
-        if (!center.ok) return center;
-        if (!center.value.settings.enabled) return err(conflict(input.context, 'Yerel OCR işlemesi devre dışıdır.'));
-        const authority = resolveSourceAndConsent(scope, input.context, key.value, current.value.source.resourceId, 'process');
-        if (!authority.ok) return authority;
-        if (authority.value.source.inputSha256 !== current.value.source.inputSha256) {
-          return err(conflict(input.context, 'Arşiv kaynağı değişmiştir; açık rerun işlemi gerekir.'));
-        }
-        const executed = await this.runtime.runAndSeal({
-          jobId: current.value.id, derivedResourceId: current.value.derivedResourceId,
-          sourceResourceType: 'archive_item', sourceResourceId: current.value.source.resourceId,
-          expectedInputSha256: current.value.source.inputSha256,
-          languageHints: current.value.languageHints, correlationId: input.context.correlationId
-        });
-        if (!executed.ok) return executed;
-        if (executed.value.networkUsed || executed.value.cloudUsed) {
-          return err(denied(input.context, 'Yerel OCR runtime ağ veya bulut kullanımı bildirdi.'));
-        }
-        const nextRevision = current.value.revision + 1;
-        if (executed.value.status === 'failed') {
-          const { stateFingerprint: _fingerprint, sealedResultId: _sealed, ...base } = current.value;
-          const row = jobRow({ ...base, revision: nextRevision, status: 'failed', runAttempt: current.value.runAttempt + 1,
-            resultAvailable: false, failureCode: executed.value.failureCode, failedAt: executed.value.failedAt,
-            consentId: authority.value.consent.id,
-            ...(authority.value.consent.endsAt === undefined ? {} : { consentExpiresAt: authority.value.consent.endsAt }),
-            updatedAt: scope.occurredAt });
-          return ok({ previousRevision: current.value.revision, revision: nextRevision, stateFingerprint: row.stateFingerprint,
-            persist: async () => {
-              const saved = scope.saveJob(row, current.value.revision);
-              return saved.ok && saved.value ? ok(undefined) : saved.ok ? err(conflict(input.context, 'OCR iş revizyonu yarıştı.')) : saved;
-            } });
-        }
-        if (executed.value.status === 'cancelled') {
-          const { stateFingerprint: _fingerprint, sealedResultId: _sealed, ...base } = current.value;
-          const row = jobRow({ ...base, revision: nextRevision, status: 'cancelled', runAttempt: current.value.runAttempt + 1,
-            resultAvailable: false, cancelledAt: executed.value.cancelledAt, consentId: authority.value.consent.id,
-            ...(authority.value.consent.endsAt === undefined ? {} : { consentExpiresAt: authority.value.consent.endsAt }),
-            updatedAt: scope.occurredAt });
-          return ok({ previousRevision: current.value.revision, revision: nextRevision, stateFingerprint: row.stateFingerprint,
-            persist: () => {
-              const saved = scope.saveJob(row, current.value.revision);
-              return saved.ok && saved.value ? ok(undefined) : saved.ok ? err(conflict(input.context, 'OCR iş revizyonu yarıştı.')) : saved;
-            } });
-        }
-        if (!validSealedResult(executed.value, current.value.source.inputSha256)) {
-          return err(denied(input.context, 'OCR runtime sonucu bütünlük veya limit kontrolünden geçmedi.'));
-        }
-        const binding = sealDerivedBinding(scope, input.context, key.value, authority.value.source,
-          current.value, executed.value,
-          `run-${current.value.runAttempt + 1}-correction-${current.value.correctionRevision}`,
-          this.inheritance);
-        if (!binding.ok) return binding;
-        const { stateFingerprint: _fingerprint, sealedResultId: _sealed, failureCode: _failure,
-          failedAt: _failed, cancelledAt: _cancelled, cancellationRequestedAt: _cancelRequested, ...base } = current.value;
-        const row = jobRow({
-          ...base, revision: nextRevision, status: 'completed', runAttempt: current.value.runAttempt + 1,
-          resultAvailable: true, resultContentSha256: executed.value.contentSha256,
-          resultCharacterCount: executed.value.characterCount, resultPageCount: executed.value.pageCount,
-          ...(executed.value.confidenceBasisPoints === undefined ? {} : { confidenceBasisPoints: executed.value.confidenceBasisPoints }),
-          derivedBindingHash: binding.value.bindingHash,
-          consentId: authority.value.consent.id,
-          ...(authority.value.consent.endsAt === undefined ? {} : { consentExpiresAt: authority.value.consent.endsAt }),
-          completedAt: executed.value.completedAt, updatedAt: scope.occurredAt
-        }, executed.value.sealedResultId);
-        return ok({ previousRevision: current.value.revision, revision: nextRevision, stateFingerprint: row.stateFingerprint,
-          persist: () => {
-            const saved = scope.saveJob(row, current.value.revision);
-            return saved.ok && saved.value ? ok(undefined) : saved.ok ? err(conflict(input.context, 'OCR iş revizyonu yarıştı.')) : saved;
-          } });
+    const activeRunId = hash(JSON.stringify([
+      'local-governed-ocr-run-v2', key.value.familyId, key.value.accountId, key.value.ownerPersonId,
+      input.command.jobId, input.command.clientOperationId, input.identifiers.requestFingerprint,
+      input.command.expectedRevision
+    ]));
+    const beginClientOperationId = `ocr-run-begin:${activeRunId}`;
+    const phaseContext = (phase: 'preflight' | 'begin' | 'postflight' | 'final'): LocalGovernedOcrApplicationContext => ({
+      ...input.context,
+      correlationId: asCorrelationId(`local-ocr-run-${phase}-${hash(JSON.stringify([
+        input.context.correlationId, activeRunId, phase
+      ]))}`)
+    });
+    const preflightContext = phaseContext('preflight');
+    const beginContext = phaseContext('begin');
+    const finalContext = phaseContext('final');
+    const beginIdentifiers: LocalGovernedOcrOperationIdentifiers = {
+      mutationId: `ocr-run-begin-mutation:${activeRunId}`,
+      resourceId: input.command.jobId,
+      requestFingerprint: activeRunId,
+      auditId: `ocr-run-begin-audit:${activeRunId}`,
+      outboxEventId: `ocr-run-begin-event:${activeRunId}` as EventId
+    };
+    const beginInput: MutationExecutionInput = {
+      context: beginContext,
+      key: key.value,
+      expectedRevision: input.command.expectedRevision,
+      clientOperationId: beginClientOperationId,
+      identifiers: beginIdentifiers
+    };
+    const loadFinalReplay = (scope: LocalGovernedOcrWriteScope): Result<LocalGovernedOcrMutationReceiptView | null, AppError> => {
+      const replay = scope.findMutationByClientOperationId(key.value, input.command.clientOperationId);
+      if (!replay.ok) return replay;
+      if (!replay.value) return ok(null);
+      const begin = scope.findMutationByClientOperationId(key.value, beginClientOperationId);
+      if (!begin.ok) return begin;
+      if (!begin.value || !exactKey(begin.value.key, key.value)
+        || begin.value.mutationKind !== 'job_run_begin' || begin.value.resourceType !== 'local_ocr_job'
+        || begin.value.resourceId !== input.command.jobId || begin.value.requestFingerprint !== activeRunId
+        || begin.value.previousRevision !== input.command.expectedRevision
+        || begin.value.revision !== input.command.expectedRevision + 1
+        || !exactKey(replay.value.key, key.value)
+        || replay.value.requestFingerprint !== input.identifiers.requestFingerprint
+        || replay.value.mutationKind !== 'job_run' || replay.value.resourceType !== 'local_ocr_job'
+        || replay.value.resourceId !== input.command.jobId
+        || replay.value.previousRevision < begin.value.revision
+        || replay.value.previousRevision > begin.value.revision + 1
+        || replay.value.revision !== replay.value.previousRevision + 1) {
+        return err(conflict(input.context, 'OCR run replay zinciri exact begin/final kimliğiyle eşleşmiyor.'));
       }
+      const current = scope.findJob(key.value, input.command.jobId);
+      if (!current.ok) return current;
+      if (!current.value || current.value.revision !== replay.value.revision
+        || current.value.stateFingerprint !== replay.value.stateFingerprint) {
+        return err(conflict(input.context, 'OCR run replay sonucu artık exact current state değildir.'));
+      }
+      return ok(mutationReceipt(replay.value, true));
+    };
+
+    const preflight = await this.unitOfWork.execute(preflightContext, authorization, loadFinalReplay);
+    if (!preflight.ok) return preflight;
+    if (preflight.value) return ok(preflight.value);
+
+    const detached = await this.unitOfWork.executeDetached<
+      { readonly beginReceipt: LocalGovernedOcrMutationReceiptView; readonly job: LocalGovernedOcrJobRow },
+      { readonly outcome: LocalGovernedOcrRunOutcome }
+    >(beginContext, authorization, (prepared) => ({
+      operation: 'run',
+      runId: activeRunId,
+      jobId: input.command.jobId,
+      derivedResourceId: sourceMetadata.value.derivedResourceId,
+      sourceResourceId: sourceMetadata.value.resourceId,
+      expectedInputSha256: prepared.job.source.inputSha256
+    }), async (scope) => {
+      const begun = await executeMutationInScope(scope, beginInput, {
+        mutationKind: 'job_run_begin',
+        resourceType: 'local_ocr_job',
+        authorization,
+        loadCurrent: (currentScope) => {
+          const loaded = currentScope.findJob(key.value, input.command.jobId);
+          return loaded.ok
+            ? ok(loaded.value ? { revision: loaded.value.revision, stateFingerprint: loaded.value.stateFingerprint } : null)
+            : loaded;
+        },
+        prepare: (currentScope) => {
+          const current = loadExactJob(currentScope, input.context, key.value, input.command.jobId);
+          if (!current.ok) return current;
+          if (current.value.revision !== input.command.expectedRevision || current.value.status !== 'queued'
+            || current.value.activeRunId !== undefined) {
+            return err(conflict(input.context, 'Yalnız exact sıradaki OCR işi başlatılabilir.'));
+          }
+          const center = currentScope.loadCenter(key.value);
+          if (!center.ok) return center;
+          if (!center.value.settings.enabled) return err(conflict(input.context, 'Yerel OCR işlemesi devre dışıdır.'));
+          const authority = resolveSourceAndConsent(currentScope, input.context, key.value,
+            current.value.source.resourceId, 'process');
+          if (!authority.ok) return authority;
+          if (authority.value.source.inputSha256 !== current.value.source.inputSha256) {
+            return err(conflict(input.context, 'Arşiv kaynağı değişmiştir; açık rerun işlemi gerekir.'));
+          }
+          const { stateFingerprint: _fingerprint, sealedResultId: _sealed, activeRunId: _active,
+            resultContentSha256: _content, resultCharacterCount: _characters, resultPageCount: _pages,
+            confidenceBasisPoints: _confidence, derivedBindingHash: _binding, failureCode: _failure,
+            completedAt: _completed, failedAt: _failed, cancelledAt: _cancelled,
+            cancellationRequestedAt: _cancelRequested, consentExpiresAt: _consentExpiresAt,
+            ...base } = current.value;
+          const view: LocalGovernedOcrJobView = {
+            ...base,
+            revision: current.value.revision + 1,
+            status: 'running',
+            runAttempt: current.value.runAttempt + 1,
+            resultAvailable: false,
+            consentId: authority.value.consent.id,
+            ...(authority.value.consent.endsAt === undefined
+              ? {}
+              : { consentExpiresAt: authority.value.consent.endsAt }),
+            updatedAt: currentScope.occurredAt
+          };
+          const row = jobRow(view, undefined, activeRunId);
+          return ok({
+            previousRevision: current.value.revision,
+            revision: row.revision,
+            stateFingerprint: row.stateFingerprint,
+            persist: () => {
+              const saved = currentScope.saveJob(row, current.value.revision);
+              return saved.ok && saved.value ? ok(undefined)
+                : saved.ok ? err(conflict(input.context, 'OCR begin revizyonu yarıştı.')) : saved;
+            }
+          });
+        }
+      });
+      if (!begun.ok) return begun;
+      const running = loadExactJob(scope, input.context, key.value, input.command.jobId);
+      if (!running.ok) return running;
+      if (running.value.status !== 'running' || running.value.activeRunId !== activeRunId
+        || running.value.source.resourceId !== sourceMetadata.value.resourceId
+        || running.value.derivedResourceId !== sourceMetadata.value.derivedResourceId) {
+        return err(conflict(input.context, 'OCR detached run authority exact running state ile eşleşmiyor.'));
+      }
+      return ok({ beginReceipt: begun.value, job: running.value });
+    }, async (prepared) => {
+      const executed = await this.runtime.runAndSeal({
+        runId: activeRunId,
+        jobId: prepared.job.id,
+        derivedResourceId: prepared.job.derivedResourceId,
+        sourceResourceType: 'archive_item',
+        sourceResourceId: prepared.job.source.resourceId,
+        expectedInputSha256: prepared.job.source.inputSha256,
+        languageHints: prepared.job.languageHints,
+        correlationId: beginContext.correlationId
+      });
+      return executed.ok ? ok({ outcome: executed.value }) : executed;
+    });
+    if (!detached.ok) {
+      const postflight = await this.unitOfWork.execute(phaseContext('postflight'), authorization, loadFinalReplay);
+      if (postflight.ok && postflight.value) return ok(postflight.value);
+      return detached;
+    }
+    if (detached.value.outcome.networkUsed || detached.value.outcome.cloudUsed) {
+      return err(denied(input.context, 'Yerel OCR runtime ağ veya bulut kullanımı bildirdi.'));
+    }
+    if (detached.value.outcome.status === 'failed'
+      && (!validTime(detached.value.outcome.failedAt)
+        || !['source_unavailable', 'consent_unavailable', 'engine_failed', 'integrity_mismatch']
+          .includes(detached.value.outcome.failureCode))) {
+      return err(denied(input.context, 'OCR runtime failure sonucu doğrulanamadı.'));
+    }
+    if (detached.value.outcome.status === 'cancelled' && !validTime(detached.value.outcome.cancelledAt)) {
+      return err(denied(input.context, 'OCR runtime iptal sonucu doğrulanamadı.'));
+    }
+
+    return this.unitOfWork.execute(finalContext, authorization, async (scope) => {
+      const replay = loadFinalReplay(scope);
+      if (!replay.ok) return replay;
+      if (replay.value) return ok(replay.value);
+      const begin = scope.findMutationByClientOperationId(key.value, beginClientOperationId);
+      if (!begin.ok) return begin;
+      if (!begin.value || begin.value.mutationKind !== 'job_run_begin'
+        || begin.value.requestFingerprint !== activeRunId
+        || begin.value.previousRevision !== input.command.expectedRevision
+        || begin.value.revision !== input.command.expectedRevision + 1) {
+        return err(conflict(input.context, 'OCR finalizasyonu exact begin ledger olmadan yapılamaz.'));
+      }
+      const current = loadExactJob(scope, input.context, key.value, input.command.jobId);
+      if (!current.ok) return current;
+      if (!['running', 'cancel_requested'].includes(current.value.status)
+        || current.value.activeRunId !== activeRunId
+        || current.value.revision < begin.value.revision || current.value.revision > begin.value.revision + 1
+        || current.value.source.resourceId !== sourceMetadata.value.resourceId
+        || current.value.derivedResourceId !== sourceMetadata.value.derivedResourceId) {
+        return err(conflict(input.context, 'OCR finalizasyonu exact aktif run state ile eşleşmiyor.'));
+      }
+      const authority = resolveSourceAndConsent(scope, input.context, key.value,
+        current.value.source.resourceId, 'process');
+      if (!authority.ok) return authority;
+      if (authority.value.source.inputSha256 !== current.value.source.inputSha256) {
+        return err(conflict(input.context, 'Arşiv kaynağı run sırasında değişmiştir.'));
+      }
+      return executeMutationInScope(scope, {
+        context: finalContext,
+        key: key.value,
+        expectedRevision: current.value.revision,
+        clientOperationId: input.command.clientOperationId,
+        identifiers: input.identifiers
+      }, {
+        mutationKind: 'job_run',
+        resourceType: 'local_ocr_job',
+        authorization,
+        loadCurrent: (currentScope) => {
+          const loaded = currentScope.findJob(key.value, input.command.jobId);
+          return loaded.ok
+            ? ok(loaded.value ? { revision: loaded.value.revision, stateFingerprint: loaded.value.stateFingerprint } : null)
+            : loaded;
+        },
+        prepare: (currentScope) => {
+          const nextRevision = current.value.revision + 1;
+          const { stateFingerprint: _fingerprint, sealedResultId: _sealed, activeRunId: _active,
+            resultContentSha256: _content, resultCharacterCount: _characters, resultPageCount: _pages,
+            confidenceBasisPoints: _confidence, derivedBindingHash: _binding, failureCode: _failure,
+            completedAt: _completed, failedAt: _failed, cancelledAt: _cancelled,
+            cancellationRequestedAt: _cancelRequested, consentExpiresAt: _consentExpiresAt,
+            ...base } = current.value;
+          let row: LocalGovernedOcrJobRow;
+          if (detached.value.outcome.status === 'failed') {
+            row = jobRow({
+              ...base,
+              revision: nextRevision,
+              status: 'failed',
+              resultAvailable: false,
+              failureCode: detached.value.outcome.failureCode,
+              failedAt: detached.value.outcome.failedAt,
+              consentId: authority.value.consent.id,
+              ...(authority.value.consent.endsAt === undefined
+                ? {}
+                : { consentExpiresAt: authority.value.consent.endsAt }),
+              updatedAt: currentScope.occurredAt
+            });
+          } else if (detached.value.outcome.status === 'cancelled') {
+            row = jobRow({
+              ...base,
+              revision: nextRevision,
+              status: 'cancelled',
+              resultAvailable: false,
+              cancelledAt: detached.value.outcome.cancelledAt,
+              consentId: authority.value.consent.id,
+              ...(authority.value.consent.endsAt === undefined
+                ? {}
+                : { consentExpiresAt: authority.value.consent.endsAt }),
+              updatedAt: currentScope.occurredAt
+            });
+          } else {
+            if (!validSealedResult(detached.value.outcome, current.value.source.inputSha256)) {
+              return err(denied(input.context, 'OCR runtime sonucu bütünlük veya limit kontrolünden geçmedi.'));
+            }
+            const binding = sealDerivedBinding(currentScope, input.context, key.value, authority.value.source,
+              current.value, detached.value.outcome,
+              `run-${current.value.runAttempt}-correction-${current.value.correctionRevision}`,
+              this.inheritance);
+            if (!binding.ok) return binding;
+            row = jobRow({
+              ...base,
+              revision: nextRevision,
+              status: 'completed',
+              resultAvailable: true,
+              resultContentSha256: detached.value.outcome.contentSha256,
+              resultCharacterCount: detached.value.outcome.characterCount,
+              resultPageCount: detached.value.outcome.pageCount,
+              ...(detached.value.outcome.confidenceBasisPoints === undefined
+                ? {}
+                : { confidenceBasisPoints: detached.value.outcome.confidenceBasisPoints }),
+              derivedBindingHash: binding.value.bindingHash,
+              consentId: authority.value.consent.id,
+              ...(authority.value.consent.endsAt === undefined
+                ? {}
+                : { consentExpiresAt: authority.value.consent.endsAt }),
+              completedAt: detached.value.outcome.completedAt,
+              updatedAt: currentScope.occurredAt
+            }, detached.value.outcome.sealedResultId);
+          }
+          return ok({
+            previousRevision: current.value.revision,
+            revision: row.revision,
+            stateFingerprint: row.stateFingerprint,
+            persist: () => {
+              const saved = currentScope.saveJob(row, current.value.revision);
+              return saved.ok && saved.value ? ok(undefined)
+                : saved.ok ? err(conflict(input.context, 'OCR final revizyonu yarıştı.')) : saved;
+            }
+          });
+        }
+      });
     });
   }
 }
@@ -910,7 +1157,7 @@ export class CancelLocalGovernedOcrJobUseCase {
         const view: LocalGovernedOcrJobView = { ...base, revision: current.value.revision + 1, status: nextStatus,
           ...(nextStatus === 'cancel_requested' ? { cancellationRequestedAt: scope.occurredAt } : { cancelledAt: scope.occurredAt }),
           updatedAt: scope.occurredAt };
-        const row = jobRow(view, current.value.sealedResultId);
+        const row = jobRow(view, current.value.sealedResultId, current.value.activeRunId);
         return ok({ previousRevision: current.value.revision, revision: row.revision, stateFingerprint: row.stateFingerprint,
           persist: () => { const saved = scope.saveJob(row, current.value.revision);
             return saved.ok && saved.value ? ok(undefined) : saved.ok ? err(conflict(input.context, 'OCR iş revizyonu yarıştı.')) : saved; } });

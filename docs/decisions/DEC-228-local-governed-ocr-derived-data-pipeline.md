@@ -4,7 +4,7 @@
 - Durum: `PLANNED / LOCAL_IMPLEMENTATION_STARTED`
 - Requirement PASS: `false`
 - Yerel uygulama: `PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED / ACCEPTANCE_INCOMPLETE`
-- Yerel otomatik bileşen kanıtı: `14 dosya / 102 test PASS`
+- Yerel otomatik bileşen kanıtı: `14 dosya / 103 test PASS`
 - Dış/manuel kanıt: `NOT_RUN`
 - Persistent receipt: `NOT_RUN`
 
@@ -55,7 +55,7 @@ Kapanmış temel paketlerin yeniden kullanımı `REUSE_FOUNDATION_ONLY`, bunlar�
 
 ## Yerel otomatik kanıt sınırı
 
-Stabil yerel snapshot; core use-case/repository/transaction `3 dosya / 17 test`, security/input/worker/Windows `4/24`, sealed runtime `1/16`, PEP/UoW policy `2/10`, IPC `2/27`, UI `1/5` ve DataStore production facade `1/3` olmak üzere toplam `14 dosya / 102 test PASS` üretmiştir. Migration 94 kanonik SHA-256 değeri `d97738a84ace5de1e56f76f0ea263e6e39a1ec21a52952ed32df6767d04a87e0` ve migration verifier sonucu `9/9 PASS` durumundadır. Archive+PPK-016+PPK-019 regresyonu ayrıca `3 dosya / 108 test PASS` durumundadır. Bu sonuçlar yalnız kısmi yerel uygulama kanıtıdır; gerçek cihaz, dış/manual kabul, tam adversarial matris veya requirement kapanışı değildir.
+Stabil yerel snapshot; core use-case/repository/transaction `3 dosya / 18 test`, security/input/worker/Windows `4/24`, sealed runtime `1/16`, PEP/UoW policy `2/10`, IPC `2/27`, UI `1/5` ve DataStore production facade `1/3` olmak üzere toplam `14 dosya / 103 test PASS` üretmiştir. Migration 94 kanonik SHA-256 değeri `6f2e62cb05808731f0a1ef014acb8cfb1f455974f734fd9a117f46e7dbe95cb1` ve migration verifier sonucu `9/9 PASS` durumundadır. Archive+PPK-016+PPK-019 regresyonu ayrıca `3 dosya / 108 test PASS` durumundadır. Bu sonuçlar yalnız kısmi yerel uygulama kanıtıdır; gerçek cihaz, dış/manual kabul, tam adversarial matris veya requirement kapanışı değildir.
 
 ## Yerel sağlayıcı ve fallback kararı
 
@@ -67,7 +67,7 @@ Harici OCR; ayrı açık rıza, gönderilecek veri önizlemesi ve redaksiyon, ex
 
 Belge parser/OCR, renderer veya ana Electron sürecinde sınırsız çalışamaz. Ayrı düşük yetkili süreç; exact kaynak kimliği/SHA, tek kullanımlık iş kimliği, izin verilen format lane’i, maksimum dosya/envelope boyutu, sayfa, piksel, CPU/RAM ve süre sınırlarıyla başlamalıdır. Ağ capability’si varsayılan kapalı kalır. Process crash/timeout/cancel durumunda düz metin dosya, log veya cache kalıntısı bırakılamaz.
 
-Cancellation kabulü child-process düzeyindeki active-cancel testiyle kapanmaz. Production use-case + gerçek SQLite executor probe’u, `Run` bounded workerı `BEGIN IMMEDIATE` / `AsyncTransactionExecutor` callback’i içinde beklerken aynı executor active guardının eşzamanlı `Cancel` işlemini runtime’a ulaşmadan reddettiğini doğrular (`cancellationRuntimeCalls=0`). Worker çalışması uzun ömürlü yazma transaction’ından ayrılmadan ve ayrı preauthorized control yolu kurulmadan residual risk `HIGH`, cancellation evidence ve acceptance `false` kalır.
+Önceki cancellation transaction-topology açığı iki fazlı `job_run_begin` → detached main-only worker lease → `job_run` finalizasyonuyla kapatılmıştır. Begin kısa transactionı commit olduktan sonra worker çalışır; eşzamanlı `Cancel` ayrı yetkili kısa transactionda runtime’a ulaşır (`cancellationRuntimeCalls=1`), kalıcı `cancel_requested` state’i commit olur ve FIFO final transactionı bundan sonra terminal `cancelled` state’ini yazar. Production UoW + active-guard executor probe’u ve repository state-machine negatif testi PASS’tir. Bu local otomatik kanıt gerçek cihaz, accessibility veya human cancellation UAT değildir.
 
 Görüntü OCR, PDF gömülü metin çıkarma ve taranmış PDF OCR ayrı format lane’leridir. PDF JavaScript, ek dosya, harici referans, font/parser saldırısı, zip bomb, aşırı sıkıştırma ve dev görüntü senaryoları açık negatif test olmadan desteklenmiş sayılamaz.
 
@@ -75,7 +75,7 @@ Görüntü OCR, PDF gömülü metin çıkarma ve taranmış PDF OCR ayrı format
 
 OCR sonucu kaynak SHA/sürüm, sayfa, dil, koordinat, confidence, provider/model sürümü ve türev hash ile bağlanmalıdır. OCR metni ve indeksler şifreli kalır; düz metin temp/log/cache yasaktır. Tam metin indeks ve snippet sorgusu aynı merkezi yetki, sahiplik, policy, retention ve maskeleme kararından geçer.
 
-Arşiv ekranındaki tek panel; oluşturma, çalıştırma, yalnız queued iş için iptal, explicit sonuç gösterme, düzeltme, yeniden çalıştırma, silme ve global enable/disable için dokuz dar bridge yöntemini kullanır. Başlamış işi eşzamanlı iptal desteklenmediği açıkça gösterilir. Retry aynı `clientOperationId` ve original `expectedRevision` ile idempotent kalır; source-delete renderer’a açılmaz. Bu UI kaynak/test kanıtıdır, erişilebilirlik/human UAT veya cancellation acceptance değildir. Tam metin indeks ve policy-filtered/masked snippet henüz yoktur. OCR çıktısı resmî belge doğrulaması, sağlık teşhisi, finansal gerçek veya hukuki sertifikasyon değildir.
+Arşiv ekranındaki tek panel; oluşturma, çalıştırma, queued veya running iş için iptal, explicit sonuç gösterme, düzeltme, yeniden çalıştırma, silme ve global enable/disable için dokuz dar bridge yöntemini kullanır. `cancel_requested` yeniden tetiklenemez. Retry aynı `clientOperationId` ve original `expectedRevision` ile idempotent kalır; source-delete renderer’a açılmaz. Bu UI kaynak/test kanıtıdır, erişilebilirlik/human UAT veya requirement kapanışı değildir. Tam metin indeks ve policy-filtered/masked snippet henüz yoktur. OCR çıktısı resmî belge doğrulaması, sağlık teşhisi, finansal gerçek veya hukuki sertifikasyon değildir.
 
 OCR metni AI’ya otomatik verilmez. Özet, çeviri, transkript ve embedding üretimi için ayrı `ai_process` kararı ve PPK-016 politika mirası gerekir.
 
@@ -98,13 +98,13 @@ Retention metadata job/lineage üzerinde taşınır; ancak expiry sonrası seale
 ## Açık engeller
 
 - 33-P atomik kapanışı ve dış/manuel kanıtları tamamlanmamıştır.
-- Yerel domain/application/repository, transaction, PEP/UoW, sealed vault/runtime, DataStore facade, IPC ve UI `14 dosya / 102 test PASS` ile `PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED / ACCEPTANCE_INCOMPLETE` durumundadır. Registry atomik kapanış kaydı bu kısmi snapshot için değiştirilmemiştir.
+- Yerel domain/application/repository, transaction, PEP/UoW, sealed vault/runtime, DataStore facade, IPC ve UI `14 dosya / 103 test PASS` ile `PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED / ACCEPTANCE_INCOMPLETE` durumundadır. Registry atomik kapanış kaydı bu kısmi snapshot için değiştirilmemiştir.
 - Zararlı dosya providerı ve PDF rasterizer yoktur; child-process separation düşük yetki sandbox kanıtı değildir.
 - Exact `ocr_process` receipt + ayrı `sensitive_processing` rızası, owner-bound sealed-result vault ve local metadata owner zinciri yerel testtedir; policy-filtered tam metin index/snippet ve gerçek cihaz acceptance yoktur.
 - Owner-bound sealed-result purge ile source-delete çoklu iş batch/current-row/repository-derived immutable item-ledger ve rollback zinciri yerel testlerde doğrulanmıştır. Durable crash auto-resume olmadan OCR-020 kabulü yoktur.
 - HIGH: DataStore fail-honest source-destroy-first sırasına alınmıştır; fakat source file success ile OCR propagation arasında crash olursa türev sonuç kalabilir. Durable auto-resume/recovery state machine yoktur; PPK-019 atomic/guaranteed propagation ve OCR-020/source-deletion acceptance `false` kalır.
 - Permission veya `sensitive_processing` rıza iptal/expiry sonrasında mevcut OCR türevlerini otomatik purge eden propagation wiring/testi yoktur; OCR-020 acceptance `false` kalır.
-- Production Run/Cancel probe, worker bekleyişi yazma transaction’ı içindeyken aynı executor active guardının Cancel’i runtime’a ulaşmadan reddettiğini gösterir. Cancellation residual riski `HIGH`, evidence ve acceptance `false` kalır.
+- İki fazlı Run/Cancel local production-executor probe’u PASS’tir; running Cancel runtime’a ulaşır ve finalizasyon Cancel commit’inden sonra tamamlanır. Gerçek cihaz, accessibility ve human cancellation UAT yine `NOT_RUN` kalır.
 - Sealed-result startup repair ve bounded orphan taraması bileşen olarak testlidir; distinct maintenance PEP/authority ile scheduled production sweep bağlanmamıştır.
 - Retention expiry sonrası sealed result/türev otomatik purge zinciri kanıtlı değildir; OCR-009 retention acceptance `false` kalır.
 - Yeni archive import receipt’leri ownerPersonId bağlıdır; fakat eski immutable receipt’lerde ownerPersonId null olduğunda OCR fail-closed kalır ve legacy ownership re-attestation/backfill otoritesi yoktur.

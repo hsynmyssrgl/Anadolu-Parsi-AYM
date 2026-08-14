@@ -284,6 +284,7 @@ const addPngJob = (context: ReturnType<typeof setup>, jobId: string) => {
 };
 
 const runInput = (source: AuthorizedLocalGovernedOcrArchiveSource) => ({
+  runId: sha256(`run:${source.jobId}`),
   jobId: source.jobId,
   derivedResourceId: source.derivedResourceId,
   sourceResourceType: 'archive_item' as const,

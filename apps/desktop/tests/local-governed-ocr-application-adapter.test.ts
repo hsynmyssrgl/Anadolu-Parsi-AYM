@@ -176,6 +176,15 @@ const queuedJobRow = Object.freeze({
   status: 'queued' as const,
   resultAvailable: false
 });
+const RUN_ID = '9'.repeat(64);
+const runningJobRow = Object.freeze({
+  ...queuedJobRow,
+  revision: queuedJobRow.revision + 1,
+  status: 'running' as const,
+  runAttempt: queuedJobRow.runAttempt + 1,
+  activeRunId: RUN_ID,
+  stateFingerprint: '8'.repeat(64)
+});
 
 class TestAsyncTransactionExecutor implements AsyncTransactionExecutor {
   public active = false;
@@ -294,6 +303,8 @@ const dependencies = (
   currentJob = jobRow,
   transactionExecutor: TestAsyncTransactionExecutor = new TestAsyncTransactionExecutor()
 ) => {
+  let currentJobState = currentJob;
+  const mutations = new Map<string, unknown>();
   const recorded: string[] = [];
   const projected: string[] = [];
   const routed: string[] = [];
@@ -309,11 +320,11 @@ const dependencies = (
     },
     findJob: (repository: PolicyAuthorizedRepositoryExecutionContext, _key: unknown, jobId: string) => {
       assertRoute('job', repository);
-      return ok(jobId === JOB_ID ? currentJob : null);
+      return ok(jobId === JOB_ID ? currentJobState : null);
     },
     listJobsBySource: (repository: PolicyAuthorizedRepositoryExecutionContext) => {
       assertRoute('source-jobs', repository);
-      return ok([currentJob]);
+      return ok([currentJobState]);
     },
     resolveArchiveSource: (repository: PolicyAuthorizedRepositoryExecutionContext) => {
       assertRoute('source', repository);
@@ -362,24 +373,28 @@ const dependencies = (
         startsAt: asIsoDateTime('2026-08-14T09:00:00.000Z')
       } as never);
     },
-    findMutationByClientOperationId: (repository: PolicyAuthorizedRepositoryExecutionContext) => {
+    findMutationByClientOperationId: (repository: PolicyAuthorizedRepositoryExecutionContext, _key: unknown,
+      clientOperationId: string) => {
       assertRoute('replay', repository);
-      return ok(null);
+      return ok(mutations.get(clientOperationId) ?? null);
     },
-    insertMutation: (repository: PolicyAuthorizedRepositoryExecutionContext) => {
+    insertMutation: (repository: PolicyAuthorizedRepositoryExecutionContext, row: { readonly clientOperationId: string }) => {
       assertRoute('mutation', repository);
+      mutations.set(row.clientOperationId, row);
       return ok(undefined);
     },
-    saveJob: (repository: PolicyAuthorizedRepositoryExecutionContext) => {
+    saveJob: (repository: PolicyAuthorizedRepositoryExecutionContext, row: typeof currentJobState, expectedRevision: number) => {
       assertRoute('save', repository);
+      if (currentJobState.revision !== expectedRevision) return ok(false);
+      currentJobState = row;
       return ok(true);
     },
     resolvePolicyResource: () => ok({
       familyId: FAMILY,
       accountId: ACCOUNT,
       ownerPersonId: PERSON,
-      revision: currentJob.revision,
-      stateFingerprint: currentJob.stateFingerprint,
+      revision: currentJobState.revision,
+      stateFingerprint: currentJobState.stateFingerprint,
       sensitivity: 'personal',
       sourceResourceType: 'archive_item',
       sourceResourceId: SOURCE_ID,
@@ -426,7 +441,8 @@ const dependencies = (
     ),
     clusterFence: () => ({ writable: true, epoch: 94 })
   };
-  return { value, transactionExecutor, recorded, projected, routed, resolvedCorrelations };
+  return { value, transactionExecutor, recorded, projected, routed, resolvedCorrelations,
+    currentJob: () => currentJobState, mutations };
 };
 
 describe('33-Q repository-backed local governed OCR UoW', () => {
@@ -530,10 +546,11 @@ describe('33-Q repository-backed local governed OCR UoW', () => {
   });
 
   it('leases the exact run source only after every receipt and revokes it on every exit path', async () => {
-    const fixture = dependencies(queuedJobRow);
+    const fixture = dependencies(runningJobRow);
     const unitOfWork = new RepositoryBackedLocalGovernedOcrUnitOfWork(fixture.value);
     const exactInput = {
       operation: 'run' as const,
+      runId: RUN_ID,
       jobId: JOB_ID,
       derivedResourceId: RESULT_ID,
       sourceResourceId: SOURCE_ID,
@@ -542,7 +559,14 @@ describe('33-Q repository-backed local governed OCR UoW', () => {
     };
     expect(unitOfWork.resolveAuthorizedArchiveSource(exactInput).ok).toBe(false);
 
-    const result = await unitOfWork.execute(context, plan(), async () => {
+    const result = await unitOfWork.executeDetached(context, plan(), () => ({
+      operation: 'run' as const,
+      runId: RUN_ID,
+      jobId: JOB_ID,
+      derivedResourceId: RESULT_ID,
+      sourceResourceId: SOURCE_ID,
+      expectedInputSha256: INPUT_SHA256
+    }), () => ok('prepared'), async () => {
       await Promise.resolve();
       const authorized = unitOfWork.resolveAuthorizedArchiveSource(exactInput);
       expect(authorized.ok, authorized.ok ? '' : authorized.error.message).toBe(true);
@@ -668,17 +692,9 @@ describe('33-Q repository-backed local governed OCR UoW', () => {
     expect(unitOfWork.resolveAuthorizedJobBinding(bindingInput).ok).toBe(false);
   });
 
-  it('proves the production async transaction topology rejects a concurrent run cancellation before runtime', async () => {
-    const commands: string[] = [];
-    const database: DatabaseExecutor = {
-      exec: (sql) => { commands.push(sql); },
-      prepare: () => { throw new Error('repository mocks do not prepare SQL in this topology test'); }
-    };
-    const productionExecutor = new SqliteTransactionExecutor(database, { now: () => NOW });
-    const fixture = dependencies(
-      queuedJobRow,
-      productionExecutor as unknown as TestAsyncTransactionExecutor
-    );
+  it('lets a concurrent cancel reach the runtime after the short run-begin transaction commits', async () => {
+    const transactionExecutor = new TestAsyncTransactionExecutor();
+    const fixture = dependencies(queuedJobRow, transactionExecutor);
     const unitOfWork = new RepositoryBackedLocalGovernedOcrUnitOfWork(fixture.value);
     let releaseWorker!: () => void;
     let workerEntered!: () => void;
@@ -690,15 +706,15 @@ describe('33-Q repository-backed local governed OCR UoW', () => {
         workerEntered();
         await workerGate;
         return ok({
-          status: 'failed' as const,
-          failedAt: NOW,
-          failureCode: 'engine_failed' as const,
+          status: 'cancelled' as const,
+          cancelledAt: NOW,
           networkUsed: false as const,
           cloudUsed: false as const
         });
       },
       requestCancellation: async () => {
         cancellationRuntimeCalls += 1;
+        releaseWorker();
         return ok({ accepted: true as const });
       }
     } as unknown as LocalGovernedOcrRuntimePort;
@@ -719,13 +735,20 @@ describe('33-Q repository-backed local governed OCR UoW', () => {
         requestFingerprint: '1'.repeat(64)
       }
     });
-    await entered;
+    const runStart = await Promise.race([
+      entered.then(() => ({ kind: 'entered' as const })),
+      runPromise.then((result) => ({ kind: 'ended' as const, result }))
+    ]);
+    if (runStart.kind === 'ended') {
+      throw new Error(`run ended before worker: ${JSON.stringify({ result: runStart.result,
+        current: fixture.currentJob(), mutations: [...fixture.mutations.values()] })}`);
+    }
 
     const cancelResult = await cancel.execute({
       context: { ...context, correlationId: asCorrelationId('ocr-uow-concurrent-cancel') },
       command: {
         jobId: JOB_ID,
-        expectedRevision: queuedJobRow.revision,
+        expectedRevision: queuedJobRow.revision + 1,
         clientOperationId: 'ocr-cancel-overlap-operation'
       },
       identifiers: {
@@ -736,13 +759,14 @@ describe('33-Q repository-backed local governed OCR UoW', () => {
         requestFingerprint: '2'.repeat(64)
       }
     });
-    expect(cancelResult.ok).toBe(false);
-    expect(cancellationRuntimeCalls).toBe(0);
-    expect(commands).toEqual(['BEGIN IMMEDIATE', 'COMMIT', 'BEGIN IMMEDIATE']);
-
-    releaseWorker();
+    expect(cancelResult.ok).toBe(true);
+    expect(cancellationRuntimeCalls).toBe(1);
     const runResult = await runPromise;
-    expect(runResult.ok).toBe(true);
-    expect(commands).toEqual(['BEGIN IMMEDIATE', 'COMMIT', 'BEGIN IMMEDIATE', 'COMMIT']);
+    expect(runResult.ok, runResult.ok ? '' : runResult.error.message).toBe(true);
+    expect(transactionExecutor.active).toBe(false);
+    expect(transactionExecutor.rolledBackCount).toBe(0);
+    expect(transactionExecutor.committedCount).toBeGreaterThanOrEqual(4);
+    expect(fixture.currentJob()).toMatchObject({ status: 'cancelled' });
+    expect(fixture.currentJob()).not.toHaveProperty('activeRunId');
   });
 });

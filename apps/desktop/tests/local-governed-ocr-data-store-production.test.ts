@@ -488,7 +488,7 @@ describe('33-Q Local OCR DataStore production composition', () => {
         expectedRevision: 1,
         clientOperationId: '33-q-default-runtime-run'
       });
-      expect(run).toMatchObject({ mutationKind: 'job_run', revision: 2, replayed: false });
+      expect(run).toMatchObject({ mutationKind: 'job_run', revision: 3, replayed: false });
       const failed = (await fixture.store.getLocalGovernedOcrCenter()).jobs
         .find((job) => job.id === created.resourceId)!;
       expect(failed).toMatchObject({
@@ -534,18 +534,18 @@ describe('33-Q Local OCR DataStore production composition', () => {
       };
       const run = await fixture.store.runLocalGovernedOcrJob(runCommand);
       const runReplay = await fixture.store.runLocalGovernedOcrJob(runCommand);
-      expect(run).toMatchObject({ mutationKind: 'job_run', revision: 2, replayed: false });
-      expect(runReplay).toMatchObject({ revision: 2, replayed: true });
+      expect(run).toMatchObject({ mutationKind: 'job_run', revision: 3, replayed: false });
+      expect(runReplay).toMatchObject({ revision: 3, replayed: true });
       expect(runtime.runCalls).toBe(1);
       await expect(fixture.store.runLocalGovernedOcrJob({
         ...runCommand,
-        expectedRevision: 2
+        expectedRevision: 3
       })).rejects.toThrow(/RESOURCE-CONFLICT/u);
 
       const firstResult = await fixture.store.getLocalGovernedOcrResult({ jobId: created.resourceId });
       expect(firstResult).toMatchObject({
         jobId: created.resourceId,
-        revision: 2,
+        revision: 3,
         corrected: false,
         payloadSource: 'sealed_local_result',
         networkUsed: false,
@@ -556,33 +556,33 @@ describe('33-Q Local OCR DataStore production composition', () => {
       const corrected = await fixture.store.correctLocalGovernedOcrResult({
         jobId: created.resourceId,
         correctedText: CORRECTED_OCR_TEXT,
-        expectedRevision: 2,
+        expectedRevision: 3,
         clientOperationId: '33-q-full-correct-primary'
       });
-      expect(corrected).toMatchObject({ mutationKind: 'result_correct', revision: 3 });
+      expect(corrected).toMatchObject({ mutationKind: 'result_correct', revision: 4 });
       expect(await fixture.store.getLocalGovernedOcrResult({ jobId: created.resourceId }))
-        .toMatchObject({ text: CORRECTED_OCR_TEXT, corrected: true, revision: 3 });
+        .toMatchObject({ text: CORRECTED_OCR_TEXT, corrected: true, revision: 4 });
 
       const rerun = await fixture.store.rerunLocalGovernedOcrJob({
         jobId: created.resourceId,
         languageHints: ['tr-TR', 'en-US'],
-        expectedRevision: 3,
+        expectedRevision: 4,
         clientOperationId: '33-q-full-rerun-primary'
       });
-      expect(rerun).toMatchObject({ mutationKind: 'job_rerun', revision: 4 });
+      expect(rerun).toMatchObject({ mutationKind: 'job_rerun', revision: 5 });
       const secondRun = await fixture.store.runLocalGovernedOcrJob({
         jobId: created.resourceId,
-        expectedRevision: 4,
+        expectedRevision: 5,
         clientOperationId: '33-q-full-run-primary-second'
       });
-      expect(secondRun).toMatchObject({ mutationKind: 'job_run', revision: 5 });
+      expect(secondRun).toMatchObject({ mutationKind: 'job_run', revision: 7 });
       const deleted = await fixture.store.deleteLocalGovernedOcrJob({
         jobId: created.resourceId,
         reason: 'Kullanıcı tarafından yerel OCR sonucu silindi.',
-        expectedRevision: 5,
+        expectedRevision: 7,
         clientOperationId: '33-q-full-delete-primary'
       });
-      expect(deleted).toMatchObject({ mutationKind: 'job_delete', revision: 6 });
+      expect(deleted).toMatchObject({ mutationKind: 'job_delete', revision: 8 });
       expect(runtime.hasResult(created.resourceId)).toBe(false);
 
       const disabled = await fixture.store.setLocalGovernedOcrEnabled({
@@ -643,12 +643,12 @@ describe('33-Q Local OCR DataStore production composition', () => {
         .rejects.toThrow(/PERMISSION-DENIED-001/u);
       const afterRollback = (await fixture.store.getLocalGovernedOcrCenter()).jobs
         .find((job) => job.id === rollbackJob.resourceId)!;
-      expect(afterRollback).toMatchObject({ status: 'queued', revision: 1, resultAvailable: false });
+      expect(afterRollback).toMatchObject({ status: 'running', revision: 2, resultAvailable: false });
       expect(inspectDatabase(fixture.databasePath, (database) => Number((database.prepare(
         'SELECT COUNT(*) AS value FROM local_governed_ocr_mutations WHERE client_operation_id=?'
       ).get(rollbackRun.clientOperationId) as { readonly value: number }).value))).toBe(0);
       const retriedRollback = await fixture.store.runLocalGovernedOcrJob(rollbackRun);
-      expect(retriedRollback).toMatchObject({ mutationKind: 'job_run', revision: 2, replayed: false });
+      expect(retriedRollback).toMatchObject({ mutationKind: 'job_run', revision: 3, replayed: false });
 
       fixture.clock.advanceDays(2);
       expect(fixture.store.login({

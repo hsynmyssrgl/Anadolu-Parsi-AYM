@@ -247,7 +247,7 @@ export function LocalGovernedOcrPanel({ selectedSource }: LocalGovernedOcrPanelP
         <span>İşleme ağ ve bulut kullanmaz; kaynak baytları renderer'a verilmez, açık metin repository tablosunda tutulmaz.</span>
         <span>Çalışma ayrı ve kotalı bir child process içindedir; düşük ayrıcalıklı sandbox doğrulanmış değildir.</span>
         <span>PDF rasterizer ve kötü amaçlı yazılım sağlayıcısı yoksa işlem fail-closed reddedilir. Kaynak dosya imhasından sonra türetilmiş sonuç temizliği aynı işlem kimliğiyle yeniden denenebilir; crash sonrası otomatik devam kanıtlanmış değildir.</span>
-        <span>Yalnız sıradaki iş iptal edilebilir; başlamış işi eşzamanlı iptal etme henüz desteklenmez. Türetilmiş sonucu silmek kaynak belgeyi silmez.</span>
+        <span>Sıradaki veya çalışan iş iptal edilebilir; çalışan işte istek yerel worker'a iletilir ve kalıcı sonuç transactionı Cancel commit'inden sonra tamamlanır. Türetilmiş sonucu silmek kaynak belgeyi silmez.</span>
       </div>
 
       <div className="local-ocr-create-grid">
@@ -286,7 +286,9 @@ export function LocalGovernedOcrPanel({ selectedSource }: LocalGovernedOcrPanelP
             {selectedJob.failureCode && <StatusMessage tone="warning">{FAILURE_LABELS[selectedJob.failureCode]}</StatusMessage>}
             <div className="button-row">
               <Button tone="primary" disabled={Boolean(busyKey) || selectedJob.status !== 'queued'} onClick={() => void run()}>Yerel OCR'ı çalıştır</Button>
-              <Button disabled={Boolean(busyKey) || selectedJob.status !== 'queued'} onClick={() => void cancel()}>Sıradaki işi iptal et</Button>
+              <Button disabled={Boolean(busyKey) || !['queued', 'running'].includes(selectedJob.status)} onClick={() => void cancel()}>
+                {selectedJob.status === 'running' ? 'Çalışan işi iptal et' : 'Sıradaki işi iptal et'}
+              </Button>
               <Button disabled={Boolean(busyKey) || !selectedJob.resultAvailable} onClick={() => void readResult()}>Sonucu açıkça görüntüle</Button>
               <Button disabled={Boolean(busyKey) || !['completed', 'failed', 'cancelled'].includes(selectedJob.status)} onClick={() => void rerun()}>Yeniden sıraya al</Button>
               <Button tone="danger" disabled={Boolean(busyKey) || selectedJob.status === 'deleted'} onClick={() => void remove()}>Yerel sonucu sil</Button>

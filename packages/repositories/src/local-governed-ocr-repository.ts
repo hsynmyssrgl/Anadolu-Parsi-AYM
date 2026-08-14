@@ -76,6 +76,7 @@ const mapJob = (row: Record<string, unknown>): LocalGovernedOcrJobRow => {
     derivedResourceId: String(row.derived_resource_id),
     languageHints: parseLanguageHints(row.language_hints_json),
     status: String(row.status) as LocalGovernedOcrJobRow['status'],
+    ...(row.active_run_id ? { activeRunId: String(row.active_run_id) } : {}),
     runAttempt: Number(row.run_attempt),
     correctionRevision: Number(row.correction_revision),
     resultAvailable: Number(row.result_available) === 1,
@@ -139,7 +140,9 @@ const mapMutation = (row: Record<string, unknown>): LocalGovernedOcrMutationRow 
 });
 
 export const computeLocalGovernedOcrJobStateFingerprint = (row: LocalGovernedOcrJobRow): string =>
-  digest(canonicalLocalGovernedOcrJobStateJson(row));
+  digest(row.activeRunId === undefined
+    ? canonicalLocalGovernedOcrJobStateJson(row)
+    : JSON.stringify({ state: JSON.parse(canonicalLocalGovernedOcrJobStateJson(row)), activeRunId: row.activeRunId }));
 export const computeLocalGovernedOcrSettingsStateFingerprint = (row: LocalGovernedOcrSettingsRow): string =>
   digest(canonicalLocalGovernedOcrSettingsStateJson(row));
 const computeSourceDeletionStateFingerprint = (rows: readonly LocalGovernedOcrJobRow[]): string => digest(JSON.stringify(
@@ -154,6 +157,11 @@ const assertJobFingerprint = (row: LocalGovernedOcrJobRow): void => {
   if (row.sealedResultId !== undefined && (!OPAQUE_SEALED_RESULT_ID.test(row.sealedResultId)
     || /(?:token|bearer|password|secret)/iu.test(row.sealedResultId))) {
     throw new Error('OCR sealed result reference is not opaque');
+  }
+  if ((row.status === 'running' || row.status === 'cancel_requested')
+    ? row.activeRunId === undefined || !SHA256.test(row.activeRunId)
+    : row.activeRunId !== undefined) {
+    throw new Error('OCR active run binding does not match the persisted job state');
   }
 };
 
@@ -447,11 +455,11 @@ export class SqliteLocalGovernedOcrRepository extends SqliteRepository implement
       const lastMutationId = this.findExactMutationId(context, row.key, 'local_ocr_job', row.id, 0, row.revision, row.stateFingerprint);
       this.database(context).prepare(`INSERT INTO local_governed_ocr_jobs(
         id,family_id,account_id,owner_person_id,revision,source_resource_type,source_resource_id,input_sha256,mime_type,size_bytes,
-        derived_resource_id,language_hints_json,status,run_attempt,correction_revision,result_available,result_content_sha256,
+        derived_resource_id,language_hints_json,status,active_run_id,run_attempt,correction_revision,result_available,result_content_sha256,
         result_character_count,result_page_count,confidence_basis_points,derived_binding_hash,sealed_result_id,consent_id,consent_expires_at,
         retention_until,failure_code,cancellation_requested_at,completed_at,failed_at,cancelled_at,deleted_at,source_deleted_at,
         deletion_propagation,processor,network_used,cloud_used,created_at,updated_at,last_mutation_id,state_fingerprint,policy_receipt_hash
-      ) VALUES(${Array.from({ length: 41 }, () => '?').join(',')})`).run(...this.jobParameters(row), lastMutationId, row.stateFingerprint, policy.receiptHash);
+      ) VALUES(${Array.from({ length: 42 }, () => '?').join(',')})`).run(...this.jobParameters(row), lastMutationId, row.stateFingerprint, policy.receiptHash);
     });
   }
 
@@ -468,7 +476,7 @@ export class SqliteLocalGovernedOcrRepository extends SqliteRepository implement
       const parameters = this.jobParameters(row);
       const changed = this.database(context).prepare(`UPDATE local_governed_ocr_jobs SET
         revision=?,source_resource_type=?,source_resource_id=?,input_sha256=?,mime_type=?,size_bytes=?,derived_resource_id=?,language_hints_json=?,
-        status=?,run_attempt=?,correction_revision=?,result_available=?,result_content_sha256=?,result_character_count=?,result_page_count=?,
+        status=?,active_run_id=?,run_attempt=?,correction_revision=?,result_available=?,result_content_sha256=?,result_character_count=?,result_page_count=?,
         confidence_basis_points=?,derived_binding_hash=?,sealed_result_id=?,consent_id=?,consent_expires_at=?,retention_until=?,failure_code=?,
         cancellation_requested_at=?,completed_at=?,failed_at=?,cancelled_at=?,deleted_at=?,source_deleted_at=?,deletion_propagation=?,processor=?,
         network_used=?,cloud_used=?,created_at=?,updated_at=?,last_mutation_id=?,state_fingerprint=?,policy_receipt_hash=?
@@ -599,7 +607,7 @@ export class SqliteLocalGovernedOcrRepository extends SqliteRepository implement
           const parameters = this.jobParameters(item.next);
           const changed = database.prepare(`UPDATE local_governed_ocr_jobs SET
             revision=?,source_resource_type=?,source_resource_id=?,input_sha256=?,mime_type=?,size_bytes=?,derived_resource_id=?,language_hints_json=?,
-            status=?,run_attempt=?,correction_revision=?,result_available=?,result_content_sha256=?,result_character_count=?,result_page_count=?,
+            status=?,active_run_id=?,run_attempt=?,correction_revision=?,result_available=?,result_content_sha256=?,result_character_count=?,result_page_count=?,
             confidence_basis_points=?,derived_binding_hash=?,sealed_result_id=?,consent_id=?,consent_expires_at=?,retention_until=?,failure_code=?,
             cancellation_requested_at=?,completed_at=?,failed_at=?,cancelled_at=?,deleted_at=?,source_deleted_at=?,deletion_propagation=?,processor=?,
             network_used=?,cloud_used=?,created_at=?,updated_at=?,last_mutation_id=?,state_fingerprint=?,policy_receipt_hash=?
@@ -709,7 +717,8 @@ export class SqliteLocalGovernedOcrRepository extends SqliteRepository implement
   private jobParameters(row: LocalGovernedOcrJobRow): readonly unknown[] {
     return [row.id, row.key.familyId, row.key.accountId, row.key.ownerPersonId, row.revision,
       row.source.resourceType, row.source.resourceId, row.source.inputSha256, row.source.mimeType, row.source.sizeBytes,
-      row.derivedResourceId, JSON.stringify(row.languageHints), row.status, row.runAttempt, row.correctionRevision,
+      row.derivedResourceId, JSON.stringify(row.languageHints), row.status, row.activeRunId ?? null,
+      row.runAttempt, row.correctionRevision,
       row.resultAvailable ? 1 : 0, row.resultContentSha256 ?? null, row.resultCharacterCount ?? null,
       row.resultPageCount ?? null, row.confidenceBasisPoints ?? null, row.derivedBindingHash ?? null,
       row.sealedResultId ?? null, row.consentId, row.consentExpiresAt ?? null, row.retentionUntil ?? null,

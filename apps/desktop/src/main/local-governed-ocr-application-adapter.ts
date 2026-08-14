@@ -79,6 +79,20 @@ interface ActiveLocalGovernedOcrAuthorityLease {
   readonly bySlot: ReadonlyMap<AuthorizationSlot, EstablishedAuthorizationSlot>;
 }
 
+interface DetachedLocalGovernedOcrRunAuthorityLease {
+  readonly token: symbol;
+  readonly context: LocalGovernedOcrApplicationContext;
+  readonly authority: {
+    readonly operation: 'run';
+    readonly runId: string;
+    readonly jobId: string;
+    readonly derivedResourceId: string;
+    readonly sourceResourceId: string;
+    readonly expectedInputSha256: string;
+  };
+  readonly source: AuthorizedLocalGovernedOcrArchiveSource;
+}
+
 const SHA256 = /^[0-9a-f]{64}$/u;
 const LOCAL_OCR_MEDIA_TYPES = new Set(['image/png', 'image/jpeg', 'application/pdf']);
 const validLocalOcrMediaType = (
@@ -529,12 +543,39 @@ const validateEnforcementPoint = (
 export class RepositoryBackedLocalGovernedOcrUnitOfWork
 implements LocalGovernedOcrUnitOfWork, LocalGovernedOcrMainAuthorityPort {
   #activeAuthorityLease: ActiveLocalGovernedOcrAuthorityLease | undefined;
+  #detachedRunAuthorityLease: DetachedLocalGovernedOcrRunAuthorityLease | undefined;
+  #transactionTail: Promise<void> = Promise.resolve();
 
   public constructor(private readonly dependencies: RepositoryBackedLocalGovernedOcrApplicationDependencies) {}
+
+  async #withTransactionTurn<T>(operation: () => Promise<Result<T, AppError>>): Promise<Result<T, AppError>> {
+    const predecessor = this.#transactionTail;
+    let release!: () => void;
+    this.#transactionTail = new Promise<void>((resolve) => { release = resolve; });
+    await predecessor;
+    try {
+      return await operation();
+    } finally {
+      release();
+    }
+  }
 
   public resolveAuthorizedArchiveSource(
     input: Parameters<LocalGovernedOcrMainAuthorityPort['resolveAuthorizedArchiveSource']>[0]
   ): Result<AuthorizedLocalGovernedOcrArchiveSource, AppError> {
+    const detached = this.#detachedRunAuthorityLease;
+    if (detached?.context.correlationId === input.correlationId) {
+      const exact = input.operation === 'run'
+        && SHA256.test(input.runId)
+        && input.runId === detached.authority.runId
+        && input.jobId === detached.authority.jobId
+        && input.derivedResourceId === detached.authority.derivedResourceId
+        && input.sourceResourceId === detached.authority.sourceResourceId
+        && input.expectedInputSha256 === detached.authority.expectedInputSha256;
+      return exact
+        ? ok(detached.source)
+        : authorityDenied(input.correlationId, 'Detached Local OCR run authority binding changed');
+    }
     const lease = this.#lease(input.correlationId);
     if (!lease) return authorityDenied(input.correlationId, 'Local OCR archive authority lease is absent or expired');
     try {
@@ -562,13 +603,15 @@ implements LocalGovernedOcrUnitOfWork, LocalGovernedOcrMainAuthorityPort {
           capability: 'archive.ocr', purpose: 'ocr_process'
         })
         || targetIntent?.sourceJobId !== input.jobId
+        || !SHA256.test(input.runId)
         || !SHA256.test(input.expectedInputSha256)
       ) return authorityDenied(input.correlationId, 'Local OCR run authority is not bound to every exact central receipt');
 
       const current = this.dependencies.localGovernedOcrRepository.findJob(primary.repository, lease.key, input.jobId);
       if (!current.ok) return current;
       if (!current.value || !exactJobRow(lease, current.value, input.jobId)
-        || current.value.status !== 'queued' || current.value.deletionPropagation !== 'active'
+        || current.value.status !== 'running' || current.value.activeRunId !== input.runId
+        || current.value.deletionPropagation !== 'active'
         || current.value.sourceDeletedAt !== undefined
         || current.value.resultAvailable
         || current.value.sealedResultId !== undefined
@@ -811,6 +854,72 @@ implements LocalGovernedOcrUnitOfWork, LocalGovernedOcrMainAuthorityPort {
       ));
   }
 
+  public async executeDetached<TPrepared, TResult>(
+    context: LocalGovernedOcrApplicationContext,
+    plan: LocalGovernedOcrAuthorizationPlan,
+    runtimeAuthority: (prepared: TPrepared) => {
+      readonly operation: 'run';
+      readonly runId: string;
+      readonly jobId: string;
+      readonly derivedResourceId: string;
+      readonly sourceResourceId: string;
+      readonly expectedInputSha256: string;
+    },
+    prepare: (scope: LocalGovernedOcrWriteScope) => Result<TPrepared, AppError> | Promise<Result<TPrepared, AppError>>,
+    operation: (prepared: TPrepared) => Promise<Result<TResult, AppError>>
+  ): Promise<Result<TResult, AppError>> {
+    if (typeof runtimeAuthority !== 'function' || typeof prepare !== 'function' || typeof operation !== 'function'
+      || this.#detachedRunAuthorityLease) {
+      return err(applicationError(
+        context,
+        'Local OCR detached run authority cannot overlap or omit its callbacks',
+        { code: ERROR_CODES.RESOURCE_CONFLICT }
+      ));
+    }
+    const committed = await this.execute(context, plan, async (scope) => {
+      const prepared = await prepare(scope);
+      if (!prepared.ok) return prepared;
+      let authority: ReturnType<typeof runtimeAuthority>;
+      try {
+        authority = runtimeAuthority(prepared.value);
+      } catch {
+        return err(applicationError(context, 'Local OCR detached run authority could not be derived'));
+      }
+      if (authority.operation !== 'run' || !SHA256.test(authority.runId)
+        || !SHA256.test(authority.expectedInputSha256)
+        || authority.jobId.length < 8 || authority.derivedResourceId.length < 8
+        || authority.sourceResourceId.length < 8) {
+        return err(applicationError(context, 'Local OCR detached run authority is malformed'));
+      }
+      const source = await this.resolveAuthorizedArchiveSource({
+        ...authority,
+        correlationId: context.correlationId
+      });
+      if (!source.ok) return source;
+      return ok(Object.freeze({ prepared: prepared.value, authority: Object.freeze(authority), source: source.value }));
+    });
+    if (!committed.ok) return committed;
+    if (this.#detachedRunAuthorityLease) {
+      return err(applicationError(
+        context,
+        'Local OCR detached run authority overlapped after commit',
+        { code: ERROR_CODES.RESOURCE_CONFLICT }
+      ));
+    }
+    const token = Symbol('local-governed-ocr-detached-run-authority');
+    this.#detachedRunAuthorityLease = Object.freeze({
+      token,
+      context,
+      authority: committed.value.authority,
+      source: committed.value.source
+    });
+    try {
+      return await operation(committed.value.prepared);
+    } finally {
+      if (this.#detachedRunAuthorityLease?.token === token) this.#detachedRunAuthorityLease = undefined;
+    }
+  }
+
   public async execute<T>(
     context: LocalGovernedOcrApplicationContext,
     plan: LocalGovernedOcrAuthorizationPlan,
@@ -819,9 +928,10 @@ implements LocalGovernedOcrUnitOfWork, LocalGovernedOcrMainAuthorityPort {
     if (!authorizationPlanIsCoherent(context, plan) || typeof operation !== 'function') {
       return err(applicationError(context, 'OCR authorization plan is incomplete or cross-scope'));
     }
-    let transactionOccurredAt: TransactionContext['occurredAt'] | undefined;
-    let authorizationTransaction: TransactionContext | undefined;
-    const authorizationOccurredAt = (): TransactionContext['occurredAt'] => {
+    return this.#withTransactionTurn(async () => {
+      let transactionOccurredAt: TransactionContext['occurredAt'] | undefined;
+      let authorizationTransaction: TransactionContext | undefined;
+      const authorizationOccurredAt = (): TransactionContext['occurredAt'] => {
       if (!transactionOccurredAt) {
         throw new PlatformPolicyEnforcementError(
           'ENFORCEMENT_UNAVAILABLE',
@@ -830,7 +940,7 @@ implements LocalGovernedOcrUnitOfWork, LocalGovernedOcrMainAuthorityPort {
       }
       return transactionOccurredAt;
     };
-    const activeAuthorizationTransaction = (): TransactionContext => {
+      const activeAuthorizationTransaction = (): TransactionContext => {
       if (!authorizationTransaction) {
         throw new PlatformPolicyEnforcementError(
           'ENFORCEMENT_UNAVAILABLE',
@@ -840,7 +950,7 @@ implements LocalGovernedOcrUnitOfWork, LocalGovernedOcrMainAuthorityPort {
       return authorizationTransaction;
     };
 
-    try {
+      try {
       const requested: Array<readonly [AuthorizationSlot, LocalGovernedOcrPolicyIntent]> = [
         ['primary', plan.primary]
       ];
@@ -963,11 +1073,12 @@ implements LocalGovernedOcrUnitOfWork, LocalGovernedOcrMainAuthorityPort {
         }
       }
       return result;
-    } catch (error) {
-      return policyFailure(context, error);
-    } finally {
-      transactionOccurredAt = undefined;
-      authorizationTransaction = undefined;
-    }
+      } catch (error) {
+        return policyFailure(context, error);
+      } finally {
+        transactionOccurredAt = undefined;
+        authorizationTransaction = undefined;
+      }
+    });
   }
 }
