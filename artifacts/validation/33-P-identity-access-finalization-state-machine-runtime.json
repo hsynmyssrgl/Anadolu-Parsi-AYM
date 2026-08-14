@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "step": "33-P",
+  "decision": "DEC-227",
+  "status": "PASS",
+  "checks": 10,
+  "passed": 10,
+  "failed": 0,
+  "results": [
+    {
+      "id": "finalizer-rejects-missing-evidence-before-state-write",
+      "status": "PASS"
+    },
+    {
+      "id": "completion-verifier-rejects-missing-receipt-without-state-write",
+      "status": "PASS"
+    },
+    {
+      "id": "exact-prepared-finalization-passes",
+      "status": "PASS"
+    },
+    {
+      "id": "final-state-completes-exact-chains-without-successor-activation",
+      "status": "PASS"
+    },
+    {
+      "id": "expired-signed-evidence-rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "foreign-signer-rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "post-evidence-source-drift-rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "pre-finalized-registry-overclaim-rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "premature-successor-activation-rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "non-active-receipt-step-rejected",
+      "status": "PASS"
+    }
+  ],
+  "actualExternalEvidenceStatus": "NOT_RUN",
+  "actualPreparationStatus": "NOT_RUN",
+  "actualFinalizationStatus": "NOT_RUN",
+  "registryMutationPerformed": false,
+  "persistentReceiptWritten": false,
+  "generatedAt": "2026-08-14T12:40:40.905Z"
+}

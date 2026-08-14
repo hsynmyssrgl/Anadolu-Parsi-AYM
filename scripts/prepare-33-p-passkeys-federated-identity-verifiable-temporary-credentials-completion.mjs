@@ -204,14 +204,30 @@ try {
     const preparationBytes = jsonBytes(prepared.preparationRecord);
     await writeNewPair(paths.evidenceReport, evidenceBytes);
     await writeNewPair(paths.preparationRecord, preparationBytes);
+    const preparedTruthSection = `\n\n## Governed signed-evidence preparation\n\n`
+      + `- Actual external evidence: PASS_SIGNED_EXTERNAL_EVIDENCE.\n`
+      + `- Evidence source commit: ${evidenceSourceCommit}; evidence tree: ${evidenceReport.evidenceBinding.evidenceTreeSha256}.\n`
+      + `- Sekiz evidence sınıfı governed signer ve süre bağıyla doğrulandı; certificationClaimed=false.\n`
+      + `- Persistent receipt, source protection ve Git remote eşitliği: PENDING.\n`
+      + `- Requirement PASS: false; accepted-scope registry değişmedi; 33-Q aktive edilmedi.\n`
+      + `- Fiziksel secure erase, backup propagation ve tam tarihsel retention iddiası kurulmadı.\n`;
     const finalDecision = decision
       .replace('- Durum: IN_PROGRESS', '- Durum: VALIDATED_RECEIPT_PENDING')
-      .replace('- Uygulama gerçeği: PARTIAL_LOCAL_IMPLEMENTATION', '- Uygulama gerçeği: VALIDATED_EXTERNAL_EVIDENCE_RECEIPT_PENDING');
+      .replace('- Uygulama gerçeği: PARTIAL_LOCAL_IMPLEMENTATION', '- Uygulama gerçeği: VALIDATED_EXTERNAL_EVIDENCE_RECEIPT_PENDING')
+      + preparedTruthSection;
     const finalThreat = threat
       .replace('- Durum: IN_PROGRESS', '- Durum: VALIDATED_RECEIPT_PENDING')
       .replace('- Uygulama gerçeği: PARTIAL_LOCAL_IMPLEMENTATION', '- Uygulama gerçeği: VALIDATED_EXTERNAL_EVIDENCE_RECEIPT_PENDING')
-      .replace('- Dış/manuel kanıt: NOT_RUN', '- Dış/manuel kanıt: PASS_SIGNED_EXTERNAL_EVIDENCE');
-    assert(finalDecision !== decision && finalThreat !== threat, '33-P preparation document state drift');
+      .replace('- Dış/manuel kanıt: NOT_RUN', '- Dış/manuel kanıt: PASS_SIGNED_EXTERNAL_EVIDENCE')
+      + preparedTruthSection;
+    assert(finalDecision.includes('- Durum: VALIDATED_RECEIPT_PENDING')
+      && finalDecision.includes('- Uygulama gerçeği: VALIDATED_EXTERNAL_EVIDENCE_RECEIPT_PENDING')
+      && finalDecision.includes('Actual external evidence: PASS_SIGNED_EXTERNAL_EVIDENCE')
+      && finalThreat.includes('- Durum: VALIDATED_RECEIPT_PENDING')
+      && finalThreat.includes('- Uygulama gerçeği: VALIDATED_EXTERNAL_EVIDENCE_RECEIPT_PENDING')
+      && finalThreat.includes('- Dış/manuel kanıt: PASS_SIGNED_EXTERNAL_EVIDENCE')
+      && finalThreat.includes('Actual external evidence: PASS_SIGNED_EXTERNAL_EVIDENCE'),
+    '33-P preparation document state drift');
     const audit = `# 33-P Kimlik Erişimi ve Yetki Belgeleri - Üst Kapanış\n\n`
       + `## Durum\n\nVALIDATED / RECEIPT_PENDING. Governed signer ve sekiz dış kanıt exact source commitine bağlıdır; persistent receipt tamamlanmadan requirement PASS=false kalır.\n\n`
       + `## Kanıt\n\n- Evidence source commit: ${evidenceSourceCommit}.\n- Evidence tree SHA-256: ${evidenceReport.evidenceBinding.evidenceTreeSha256}.\n- Boundary: 21/21 PASS; contract: 17/17 PASS; runtime: 24/24 PASS.\n`

@@ -6,8 +6,8 @@ export const IDENTITY_ACCESS_COMPLETION_REQUIREMENTS = Object.freeze([
 
 const SHA256 = /^[0-9a-f]{64}$/u;
 const GIT_OBJECT_ID = /^[0-9a-f]{40,64}$/u;
-const PASS_EVIDENCE = 'PASS_SIGNED_EXTERNAL_EVIDENCE';
-const ACCEPTANCE = Object.freeze({
+export const IDENTITY_ACCESS_PASS_EVIDENCE = 'PASS_SIGNED_EXTERNAL_EVIDENCE';
+export const IDENTITY_ACCESS_REQUIREMENT_ACCEPTANCE = Object.freeze({
   'B2-02': 'Kayıt, assertion, silme, birden çok anahtar, kayıp anahtar kurtarma ve audit var.',
   'B6-06': 'Yapılandırılmamış sağlayıcı görünmez; canlı hesapla test edilmeden PASS yok.',
   'B6-07': 'Windows tek ana veri kaynağı; çatışma ve cihaz iptali sözleşmesi.',
@@ -110,7 +110,7 @@ export const evaluateIdentityAccessCompletionPreparation = ({
     && workPlan?.steps?.filter((item) => item.status === 'IN_PROGRESS').length === 1);
   add(checks, 'accepted-registry-remains-open', registryItems.length === IDENTITY_ACCESS_COMPLETION_REQUIREMENTS.length
     && registryItems.every((item, index) => item && item.status !== 'COMPLETE' && item.chain?.evidence === false
-      && item.acceptance === ACCEPTANCE[IDENTITY_ACCESS_COMPLETION_REQUIREMENTS[index]]));
+      && item.acceptance === IDENTITY_ACCESS_REQUIREMENT_ACCEPTANCE[IDENTITY_ACCESS_COMPLETION_REQUIREMENTS[index]]));
   add(checks, 'predecessor-receipt-exact', predecessorReceipt?.step === '33-O'
     && predecessorReceipt?.decision === 'DEC-226' && predecessorReceipt?.status === 'PASS'
     && predecessorReceipt?.persistentReceiptStatus === 'PASS' && predecessorReceipt?.nextOfficialStep === '33-P'
@@ -153,7 +153,7 @@ export const buildIdentityAccessPreparedState = (input) => {
   const manualEvidence = Object.fromEntries([
     'liveProviderAccountTest', 'realAuthenticatorDevice', 'crossDeviceSync', 'credentialVerifierUat',
     'humanUat', 'privacyReview', 'legalReview', 'identityReview'
-  ].map((key) => [key, PASS_EVIDENCE]));
+  ].map((key) => [key, IDENTITY_ACCESS_PASS_EVIDENCE]));
   manualEvidence.certificationClaimed = false;
   scope.status = 'VALIDATED_RECEIPT_PENDING';
   scope.governancePhase = 'VALIDATED_EXTERNAL_EVIDENCE_RECEIPT_PENDING';
@@ -166,7 +166,7 @@ export const buildIdentityAccessPreparedState = (input) => {
   scope.manualEvidence = manualEvidence;
   Object.assign(scope.truth, {
     governedExternalEvidenceSignerConfigured: true,
-    actualExternalEvidenceIntakeStatus: PASS_EVIDENCE,
+    actualExternalEvidenceIntakeStatus: IDENTITY_ACCESS_PASS_EVIDENCE,
     networkReadyProviderConfigurationObserved: true,
     appleProtectedClientAuthenticationConfigured: true,
     providerExchangePerformed: true,
@@ -180,7 +180,7 @@ export const buildIdentityAccessPreparedState = (input) => {
   scope.validation = {
     ...scope.validation,
     status: 'VALIDATED_RECEIPT_PENDING',
-    actualExternalEvidenceIntake: PASS_EVIDENCE,
+    actualExternalEvidenceIntake: IDENTITY_ACCESS_PASS_EVIDENCE,
     evidenceBinding: structuredClone(input.evidenceReport.evidenceBinding),
     finalTechnicalEvidence: structuredClone(input.technicalEvidence),
     countsAsRequirementPass: false,

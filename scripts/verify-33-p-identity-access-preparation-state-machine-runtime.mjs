@@ -10,6 +10,10 @@ import { IDENTITY_ACCESS_EXTERNAL_EVIDENCE_IDS } from './lib/identity-access-ext
 
 const root = resolve(process.cwd());
 if (root !== resolve('C:\\PPT\\AYM', '06_KOD', 'app')) throw new Error(`Unsafe source root: ${root}`);
+if (process.argv.slice(2).some((argument) => argument !== '--no-write')) {
+  throw new Error('Unsupported 33-P preparation runtime argument');
+}
+const noWrite = process.argv.includes('--no-write');
 const output = resolve(root, 'artifacts/validation/33-P-identity-access-preparation-state-machine-runtime.json');
 const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
 const [scope, inventory, acceptedScopeRegistry, roadmap, workPlan, ledger, predecessorReceipt] = await Promise.all([
@@ -156,7 +160,9 @@ const report = {
   persistentReceiptWritten: false,
   generatedAt: new Date().toISOString()
 };
-await mkdir(dirname(output), { recursive: true });
-await writeFile(output, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
+if (!noWrite) {
+  await mkdir(dirname(output), { recursive: true });
+  await writeFile(output, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
+}
 console.log(`33-P preparation state machine runtime: ${report.status} (${report.passed}/${report.checks}; actual evidence NOT_RUN).`);
 if (failures.length > 0) process.exitCode = 1;
