@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "release": "Bronze 04.08.2026.29",
   "requirements": 358,
-  "incompleteRequired": 253,
+  "incompleteRequired": 244,
   "silverReady": false,
   "enforcement": "fail-closed",
   "productSurface": {
@@ -19,9 +19,9 @@
       "missingRouteRejected": true
     }
   },
-  "checksPassed": 1896,
+  "checksPassed": 1905,
   "checksFailed": 0,
   "status": "PASS",
   "failures": [],
-  "generatedAt": "2026-08-14T00:09:52.928Z"
+  "generatedAt": "2026-08-14T03:00:29.084Z"
 }

@@ -100,3 +100,4 @@ export * from './desktop-security-use-cases.js';
 export * from './privacy-control-use-cases.js';
 export * from './accessibility-preferences-use-cases.js';
 export * from './form-draft-use-cases.js';
+export * from './privacy-ownership-data-rights-use-cases.js';

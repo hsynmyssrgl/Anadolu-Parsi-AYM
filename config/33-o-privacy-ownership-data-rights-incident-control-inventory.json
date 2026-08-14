@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "step": "33-O",
+  "decision": "DEC-226",
+  "requirements": [
+    "B6-02",
+    "PPK-028",
+    "AUD-COM-006",
+    "EXT-036",
+    "EXT-037",
+    "EXT-038",
+    "EXT-040",
+    "EXT-041",
+    "EXT-042"
+  ],
+  "status": "COMPLETE",
+  "plannedSurfaces": [
+    {
+      "id": "domain",
+      "paths": [
+        "packages/domain/src/privacy-ownership-data-rights.ts"
+      ]
+    },
+    {
+      "id": "application",
+      "paths": [
+        "packages/application/src/privacy-ownership-data-rights-use-cases.ts"
+      ]
+    },
+    {
+      "id": "repository-contract",
+      "paths": [
+        "packages/repository-contracts/src/privacy-ownership-data-rights-repository.ts"
+      ]
+    },
+    {
+      "id": "migration-92",
+      "paths": [
+        "packages/database/src/family-database-migrations.ts"
+      ]
+    },
+    {
+      "id": "repository",
+      "paths": [
+        "packages/repositories/src/privacy-ownership-data-rights-repository.ts"
+      ]
+    },
+    {
+      "id": "central-pep-uow",
+      "paths": [
+        "apps/desktop/src/main/timeline-production-policy-runtime.ts",
+        "apps/desktop/src/main/data-store.ts"
+      ]
+    },
+    {
+      "id": "local-encrypted-export",
+      "paths": [
+        "apps/desktop/src/main/privacy-data-export-service.ts"
+      ]
+    },
+    {
+      "id": "composition-ipc-ui",
+      "paths": [
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/main/ipc-request-lifecycle.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/renderer/global.d.ts",
+        "apps/desktop/src/renderer/App.tsx"
+      ]
+    },
+    {
+      "id": "tests",
+      "paths": [
+        "packages/application/tests/privacy-ownership-data-rights-use-cases.test.ts",
+        "packages/repositories/privacy-ownership-data-rights-repository-policy.test.ts",
+        "packages/security/tests/privacy-data-export.test.ts",
+        "apps/desktop/tests/privacy-data-export-service.test.ts",
+        "apps/desktop/tests/privacy-ownership-data-rights-ipc-integration.test.ts",
+        "apps/desktop/tests/privacy-ownership-data-rights-ipc-bridge.test.ts",
+        "apps/desktop/tests/privacy-ownership-data-rights-application-adapter.test.ts",
+        "apps/desktop/tests/privacy-ownership-data-store.test.ts",
+        "apps/desktop/tests/privacy-ownership-data-rights-ui.test.ts",
+        "apps/desktop/tests/ppk016-derived-data-policy-inheritance.test.ts",
+        "apps/desktop/tests/ppk019-source-deletion-propagation.test.ts"
+      ]
+    },
+    {
+      "id": "governance",
+      "paths": [
+        "docs/decisions/DEC-226-privacy-ownership-data-rights-incident-control.md",
+        "docs/security/THREAT_MODEL_33_O_PRIVACY_OWNERSHIP_DATA_RIGHTS_INCIDENT_CONTROL.md"
+      ]
+    }
+  ],
+  "reusedEvidence": {
+    "PPK-016": [
+      "config/32-l-ppk-016-derived-data-policy-inheritance-scope.json",
+      "docs/decisions/DEC-197-ppk-016-derived-data-policy-inheritance.md",
+      "artifacts/validation/32-L-ppk-016-derived-data-policy-inheritance-runtime.json"
+    ],
+    "PPK-019": [
+      "config/32-o-ppk-019-source-deletion-propagation-scope.json",
+      "docs/decisions/DEC-200-ppk-019-source-deletion-propagation.md",
+      "artifacts/validation/32-O-ppk-019-source-deletion-propagation-runtime.json"
+    ],
+    "33-K": [
+      "config/33-k-privacy-consent-lost-device-control-scope.json",
+      "docs/decisions/DEC-222-privacy-consent-lost-device-control-center.md",
+      "artifacts/validation/33-K-privacy-consent-lost-device-control-runtime.json"
+    ],
+    "33-N": [
+      "config/33-n-draft-async-state-ux-scope.json",
+      "docs/decisions/DEC-225-draft-async-state-ux.md",
+      "artifacts/validation/33-N-draft-async-state-ux-runtime.json"
+    ]
+  },
+  "evidenceOutputs": [
+    "artifacts/validation/33-O-privacy-ownership-data-rights-incident-control-boundary.json",
+    "artifacts/validation/33-O-privacy-ownership-data-rights-incident-control-contract.json",
+    "artifacts/validation/33-O-privacy-ownership-data-rights-incident-control-runtime.json"
+  ],
+  "networkChannels": [],
+  "validation": {
+    "status": "PASS",
+    "boundaryChecks": 45,
+    "contractChecks": 18,
+    "runtimeChecks": 18,
+    "targetedTestFiles": 11,
+    "targetedTests": 167,
+    "preparedAt": "2026-08-14T02:59:20.901Z"
+  },
+  "openRequirements": [],
+  "openBlockers": [
+    "Persistent local and D: receipt, source protection and Git remote equality are pending."
+  ],
+  "persistentReceiptStatus": "NOT_RUN"
+}

@@ -4,8 +4,8 @@
   "release": "Bronze 04.08.2026.29",
   "rule": "PR-171",
   "policy": "ONE_IN_PROGRESS_PREVIOUS_MUST_HAVE_PASS_AND_PERSISTENT_RECEIPT",
-  "workflowStatus": "COMPLETED",
-  "currentStep": null,
+  "workflowStatus": "IN_PROGRESS",
+  "currentStep": "33-O",
   "steps": [
     {
       "id": "29-A",
@@ -2471,10 +2471,49 @@
       "persistentReceiptStatus": "PASS",
       "completionTransitionStatus": "PASS",
       "persistentReceiptPath": "artifacts/checkpoints/33-N_LIBRARY_RECEIPT.json"
+    },
+    {
+      "id": "33-O",
+      "title": "Gizlilik, sahiplik, veri hakları ve olay kontrol merkezi",
+      "scopeRequirement": "B6-02,PPK-028,AUD-COM-006,EXT-036,EXT-037,EXT-038,EXT-040,EXT-041,EXT-042",
+      "status": "IN_PROGRESS",
+      "validationStatus": "PASS",
+      "localEvidence": [
+        "config/33-o-privacy-ownership-data-rights-incident-control-scope.json",
+        "config/33-o-privacy-ownership-data-rights-incident-control-inventory.json",
+        "docs/decisions/DEC-226-privacy-ownership-data-rights-incident-control.md",
+        "docs/security/THREAT_MODEL_33_O_PRIVACY_OWNERSHIP_DATA_RIGHTS_INCIDENT_CONTROL.md",
+        "artifacts/validation/33-O-privacy-ownership-data-rights-incident-control-boundary.json",
+        "artifacts/validation/33-O-privacy-ownership-data-rights-incident-control-contract.json",
+        "artifacts/validation/33-O-privacy-ownership-data-rights-incident-control-runtime.json",
+        "docs/audit/33-O_PRIVACY_OWNERSHIP_DATA_RIGHTS_INCIDENT_CONTROL_UST_KAPANIS.md",
+        "packages/domain/src/privacy-ownership-data-rights.ts",
+        "packages/application/src/privacy-ownership-data-rights-use-cases.ts",
+        "packages/database/src/family-database-migrations.ts",
+        "packages/repository-contracts/src/privacy-ownership-data-rights-repository.ts",
+        "packages/repositories/src/privacy-ownership-data-rights-repository.ts",
+        "packages/security/src/privacy-data-export.ts",
+        "apps/desktop/src/main/privacy-data-export-service.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/renderer/App.tsx",
+        "packages/application/tests/privacy-ownership-data-rights-use-cases.test.ts",
+        "packages/repositories/privacy-ownership-data-rights-repository-policy.test.ts",
+        "packages/security/tests/privacy-data-export.test.ts",
+        "apps/desktop/tests/privacy-data-export-service.test.ts",
+        "apps/desktop/tests/privacy-ownership-data-rights-ipc-integration.test.ts",
+        "apps/desktop/tests/privacy-ownership-data-rights-ipc-bridge.test.ts",
+        "apps/desktop/tests/privacy-ownership-data-rights-application-adapter.test.ts",
+        "apps/desktop/tests/privacy-ownership-data-store.test.ts",
+        "apps/desktop/tests/privacy-ownership-data-rights-ui.test.ts",
+        "apps/desktop/tests/ppk016-derived-data-policy-inheritance.test.ts",
+        "apps/desktop/tests/ppk019-source-deletion-propagation.test.ts"
+      ],
+      "persistentReceiptStatus": "PENDING",
+      "completionTransitionStatus": "PENDING"
     }
   ],
   "recoveryAuthority": "USER_FULL_AUTO_2026-08-14",
-  "recoveryReason": "33-M persistent receipt and source protection PASS; user authorized automatic sequential execution of all remaining packages.",
-  "updatedAt": "2026-08-14T00:11:34.729Z",
-  "segmentationNote": "33-N is immutable COMPLETED/PASS with exact local and D: receipt. 33-O / DEC-226 is the declared next package and requires its own activation."
+  "recoveryReason": "33-N persistent receipt, source protection and Git remote equality PASS; user authorized automatic sequential execution of all remaining packages.",
+  "updatedAt": "2026-08-14T02:59:20.901Z",
+  "segmentationNote": "33-O is validated PASS and remains fail-closed IN_PROGRESS until exact local and D: persistent receipt finalization."
 }

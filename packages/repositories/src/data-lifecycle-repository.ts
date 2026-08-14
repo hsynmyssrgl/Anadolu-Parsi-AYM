@@ -61,10 +61,15 @@ const RESOURCE_TABLES:Record<DataLifecycleResourceType,string>={
 };
 
 const DERIVED_POLICY_METADATA_TABLES=new Set(['derived_data_policy_bindings','derived_data_policy_sources']);
+const REGISTERED_DERIVED_PAYLOAD_OWNER_TABLES=new Set(['governed_ai_memory_records']);
+const REGISTERED_DERIVED_PAYLOAD_METADATA_TABLES=new Set(['governed_ai_memory_mutations']);
 const DERIVED_PAYLOAD_TABLE_PATTERN=/(?:^|_)(?:ocr(?:_text)?|search_index|thumbnail|ai_memory|derived_cache|plaintext_replica|replica)(?:_|$)/u;
 const inspectPersistentOwners=(database:DatabaseExecutor,inspectedAt:string):SourceDeletionPersistentOwnerInspection=>{
   const tableNames=(database.prepare("SELECT name FROM sqlite_schema WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all() as Array<{name:unknown}>).map(row=>String(row.name));
-  const unregisteredPersistentOwners=tableNames.filter(name=>DERIVED_PAYLOAD_TABLE_PATTERN.test(name)&&!DERIVED_POLICY_METADATA_TABLES.has(name));
+  const unregisteredPersistentOwners=tableNames.filter(name=>DERIVED_PAYLOAD_TABLE_PATTERN.test(name)
+    && !DERIVED_POLICY_METADATA_TABLES.has(name)
+    && !REGISTERED_DERIVED_PAYLOAD_OWNER_TABLES.has(name)
+    && !REGISTERED_DERIVED_PAYLOAD_METADATA_TABLES.has(name));
   const derivedMetadata=tableNames.filter(name=>name.startsWith('derived_data_'));
   return Object.freeze({
     schemaVersion:1,
@@ -73,6 +78,23 @@ const inspectPersistentOwners=(database:DatabaseExecutor,inspectedAt:string):Sou
     plaintextReplicaEnabled:unregisteredPersistentOwners.some(name=>/(?:^|_)plaintext_replica(?:_|$)/u.test(name)),
     derivedPolicyMetadataOnly:derivedMetadata.every(name=>DERIVED_POLICY_METADATA_TABLES.has(name))
   });
+};
+
+const assertLinkedAiMemoryTombstones=(database:DatabaseExecutor,resourceType:string,resourceId:string):void=>{
+  const requiredTables=['derived_data_policy_bindings','derived_data_policy_sources','governed_ai_memory_records'];
+  const available=new Set((database.prepare("SELECT name FROM sqlite_schema WHERE type='table' AND name IN ('derived_data_policy_bindings','derived_data_policy_sources','governed_ai_memory_records')").all() as Array<{name:unknown}>).map(row=>String(row.name)));
+  if(!requiredTables.every(table=>available.has(table)))return;
+  const blocking=database.prepare(`
+    SELECT records.resource_id
+    FROM derived_data_policy_sources AS sources
+    JOIN derived_data_policy_bindings AS bindings ON bindings.binding_hash=sources.binding_hash
+    JOIN governed_ai_memory_records AS records ON records.derived_binding_hash=bindings.binding_hash
+    WHERE sources.source_resource_type=? AND sources.source_resource_id=?
+      AND bindings.derived_kind='AI_MEMORY'
+      AND (records.state<>'deleted' OR records.title<>'' OR records.statement<>'')
+    LIMIT 1
+  `).get(resourceType,resourceId) as Record<string,unknown>|undefined;
+  if(blocking)throw new Error('SOURCE_DELETION_PROPAGATION_AI_MEMORY_NOT_TOMBSTONED');
 };
 
 export class SqliteDataLifecycleRepository extends SqliteRepository implements DataLifecycleRepositoryPort {
@@ -120,6 +142,7 @@ export class SqliteDataLifecycleRepository extends SqliteRepository implements D
       if(JSON.stringify(currentInspection)!==JSON.stringify(plan.persistentInspection))throw new Error('SOURCE_DELETION_PROPAGATION_SCHEMA_CHANGED');
       const lifecycle=database.prepare("SELECT state,legal_hold FROM data_lifecycle WHERE resource_type=? AND resource_id=?").get(plan.source.resourceType,plan.source.resourceId) as Record<string,unknown>|undefined;
       if(String(lifecycle?.state??'')!=='purge_scheduled'||Number(lifecycle?.legal_hold??1)!==0)throw new Error('SOURCE_DELETION_PROPAGATION_LIFECYCLE_MISMATCH');
+      assertLinkedAiMemoryTombstones(database,plan.source.resourceType,plan.source.resourceId);
       database.exec('PRAGMA secure_delete=ON;');
       const permissions=database.prepare('DELETE FROM object_permissions WHERE resource_type=? AND resource_id=?').run(plan.source.resourceType,plan.source.resourceId) as {changes?:number};
       const consents=database.prepare('DELETE FROM ai_consents WHERE resource_type=? AND resource_id=?').run(plan.source.resourceType,plan.source.resourceId) as {changes?:number};

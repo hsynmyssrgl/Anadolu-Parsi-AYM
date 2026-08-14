@@ -1,7 +1,7 @@
 export type AuthorizationAction = 'read' | 'create' | 'update' | 'delete' | 'share' | 'record' | 'ai_process' | 'administer';
 export type AuthorizationRole = 'family_admin' | 'adult_member' | 'limited_member' | 'caregiver' | 'advisor';
 export type SensitiveRecordPrivacy = 'private' | 'selected_members' | 'family';
-export type SensitiveRecordDomain = 'finance' | 'health' | 'life';
+export type SensitiveRecordDomain = 'finance' | 'health' | 'life' | 'privacy';
 export type AuthorizationPurpose = 'general'|'care'|'finance'|'health'|'archive'|'legacy'|'ai_processing'|'administration';
 
 /** PPK-010: no production path may bypass central policy with a direct role allow/deny exception. */

@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "step": "33-O",
+  "decision": "DEC-226",
+  "requirements": [
+    "B6-02",
+    "PPK-028",
+    "AUD-COM-006",
+    "EXT-036",
+    "EXT-037",
+    "EXT-038",
+    "EXT-040",
+    "EXT-041",
+    "EXT-042"
+  ],
+  "status": "PASS",
+  "checksPassed": 18,
+  "checksFailed": 0,
+  "targetedTestFilesPassed": 11,
+  "targetedTestsPassed": 167,
+  "testFiles": [
+    "packages/application/tests/privacy-ownership-data-rights-use-cases.test.ts",
+    "packages/repositories/privacy-ownership-data-rights-repository-policy.test.ts",
+    "packages/security/tests/privacy-data-export.test.ts",
+    "apps/desktop/tests/privacy-data-export-service.test.ts",
+    "apps/desktop/tests/privacy-ownership-data-rights-ipc-integration.test.ts",
+    "apps/desktop/tests/privacy-ownership-data-rights-ipc-bridge.test.ts",
+    "apps/desktop/tests/privacy-ownership-data-rights-application-adapter.test.ts",
+    "apps/desktop/tests/privacy-ownership-data-store.test.ts",
+    "apps/desktop/tests/privacy-ownership-data-rights-ui.test.ts",
+    "apps/desktop/tests/ppk016-derived-data-policy-inheritance.test.ts",
+    "apps/desktop/tests/ppk019-source-deletion-propagation.test.ts"
+  ],
+  "checks": [
+    {
+      "name": "targeted vitest exits successfully",
+      "status": "PASS"
+    },
+    {
+      "name": "exact eleven targeted files pass",
+      "status": "PASS"
+    },
+    {
+      "name": "exact measured 167-test ratchet passes",
+      "status": "PASS"
+    },
+    {
+      "name": "AI memory mutation replay is operation and fingerprint bound",
+      "status": "PASS"
+    },
+    {
+      "name": "repository owner isolation and bounded complete-category inventory are policy and key bound",
+      "status": "PASS"
+    },
+    {
+      "name": "access and processing facts are explicitly local only",
+      "status": "PASS"
+    },
+    {
+      "name": "rights incident export scope and permission simulation use exact governed production APIs",
+      "status": "PASS"
+    },
+    {
+      "name": "migration enforces immutable ledgers and incident containment",
+      "status": "PASS"
+    },
+    {
+      "name": "encrypted export KDF wrapped DEK and payload AEAD are exact",
+      "status": "PASS"
+    },
+    {
+      "name": "encrypted export authenticates AAD and fails closed",
+      "status": "PASS"
+    },
+    {
+      "name": "file publish is same-directory no-clobber with decrypt readback",
+      "status": "PASS"
+    },
+    {
+      "name": "IPC production policy owns exact channels scopes and unknown rejection",
+      "status": "PASS"
+    },
+    {
+      "name": "IPC recursively rejects banking secret path prototype and oversize input",
+      "status": "PASS"
+    },
+    {
+      "name": "IPC production lifecycle ratchets reads writes concurrency queue and timeout",
+      "status": "PASS"
+    },
+    {
+      "name": "main owns export destination and cancellation",
+      "status": "PASS"
+    },
+    {
+      "name": "UI preserves retry stable CAS lock exact owner export lifecycle inventory totals and passphrase clearing",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-016 lineage authority remains production-bound",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-019 AI tombstone trigger and migration checksum are exact",
+      "status": "PASS"
+    }
+  ],
+  "process": {
+    "exitCode": 0,
+    "signal": null
+  },
+  "generatedAt": "2026-08-14T03:00:04.887Z"
+}

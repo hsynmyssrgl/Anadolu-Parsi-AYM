@@ -36,6 +36,7 @@ import {
   SqlitePersonRepository,
   SqlitePersonLifecycleRepository,
   SqlitePlatformPolicyTransactionRepository,
+  SqlitePrivacyOwnershipDataRightsRepository,
   SqliteRelationRepository,
   SqliteReportRepository,
   SqliteTaskRepository,
@@ -89,6 +90,7 @@ import type {
   PersonRepositoryPort,
   PersonLifecycleRepositoryPort,
   PlatformPolicyTransactionRepositoryPort,
+  PrivacyOwnershipDataRightsRepositoryPort,
   ProductSurfaceGovernanceRepositoryPort,
   RelationRepositoryPort,
   ReportRepositoryPort,
@@ -137,6 +139,7 @@ export interface RepositoryCompositionRoot {
   readonly personRepository: PersonRepositoryPort;
   readonly personLifecycleRepository: PersonLifecycleRepositoryPort;
   readonly platformPolicyTransactionRepository: PlatformPolicyTransactionRepositoryPort;
+  readonly privacyOwnershipDataRightsRepository: PrivacyOwnershipDataRightsRepositoryPort;
   readonly relationRepository: RelationRepositoryPort;
   readonly reportRepository: ReportRepositoryPort;
   readonly taskRepository: TaskRepositoryPort;
@@ -196,6 +199,7 @@ export const createSqliteRepositoryCompositionRoot = (
     personRepository: new SqlitePersonRepository(repositoryOptions),
     personLifecycleRepository: new SqlitePersonLifecycleRepository(repositoryOptions),
     platformPolicyTransactionRepository: new SqlitePlatformPolicyTransactionRepository(repositoryOptions),
+    privacyOwnershipDataRightsRepository: new SqlitePrivacyOwnershipDataRightsRepository(repositoryOptions),
     relationRepository: new SqliteRelationRepository(repositoryOptions),
     reportRepository: new SqliteReportRepository(repositoryOptions),
     taskRepository: new SqliteTaskRepository(repositoryOptions),

@@ -11529,6 +11529,507 @@ BEGIN SELECT RAISE(ABORT,'form draft deletion is forbidden'); END;
 UPDATE database_metadata SET value='REVISION-33-N-DRAFT-ASYNC-STATE-UX',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 
+const privacyOwnershipDataRightsIncidentControlSql = `
+CREATE TABLE governed_ai_memory_mutations(
+ id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 128),
+ client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 1 AND 128),
+ request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+ state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+ mutation_kind TEXT NOT NULL CHECK(mutation_kind IN ('ai_memory_correct','ai_memory_restrict','ai_memory_delete','ai_memory_expire','rights_request_create','rights_request_update','rights_export_finalize','incident_create','incident_update')),
+ resource_type TEXT NOT NULL CHECK(resource_type IN ('ai_memory_record','data_rights_request','privacy_incident')),
+ resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 1 AND 256),
+ family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+ account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+ owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+ previous_revision INTEGER NOT NULL CHECK(previous_revision BETWEEN 0 AND 2147483646),
+ revision INTEGER NOT NULL CHECK(revision=previous_revision+1),
+ policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+ policy_resource_type TEXT NOT NULL CHECK(length(trim(policy_resource_type)) BETWEEN 1 AND 128),
+ policy_resource_id TEXT NOT NULL CHECK(policy_resource_id=resource_id),
+ policy_action TEXT NOT NULL CHECK(policy_action IN ('create','update','delete')),
+ policy_capability TEXT NOT NULL CHECK(policy_capability IN ('family.read','family.write','ai.process')),
+ policy_purpose TEXT NOT NULL CHECK(policy_purpose IN ('general','ai_processing','administration')),
+ policy_sensitivity TEXT NOT NULL CHECK(policy_sensitivity IN ('personal','sensitive','highly_sensitive')),
+ occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+ UNIQUE(account_id,client_operation_id), UNIQUE(resource_id,revision),
+ CHECK((mutation_kind IN ('ai_memory_correct','rights_request_create','incident_create') AND previous_revision>=0)
+   OR (mutation_kind NOT IN ('ai_memory_correct','rights_request_create','incident_create') AND previous_revision>0))
+) STRICT;
+
+CREATE TABLE governed_ai_memory_records(
+ resource_id TEXT PRIMARY KEY CHECK(length(trim(resource_id)) BETWEEN 1 AND 256),
+ family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+ account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+ owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+ derived_binding_hash TEXT NOT NULL REFERENCES derived_data_policy_bindings(binding_hash) ON DELETE RESTRICT,
+ title TEXT NOT NULL CHECK(length(title)<=256),
+ statement TEXT NOT NULL CHECK(length(statement)<=4096),
+ source_resource_type TEXT NOT NULL CHECK(length(trim(source_resource_type)) BETWEEN 1 AND 128),
+ source_resource_id TEXT NOT NULL CHECK(length(trim(source_resource_id)) BETWEEN 1 AND 256),
+ source_occurred_at TEXT CHECK(source_occurred_at IS NULL OR (length(source_occurred_at)=24 AND source_occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(source_occurred_at) IS NOT NULL)),
+ restriction_visibility TEXT NOT NULL CHECK(restriction_visibility IN ('owner_only','selected_accounts','family')),
+ selected_account_ids_json TEXT NOT NULL CHECK(json_valid(selected_account_ids_json) AND json_type(selected_account_ids_json)='array' AND json_array_length(selected_account_ids_json)<=32 AND json(selected_account_ids_json)=selected_account_ids_json),
+ allowed_purposes_json TEXT NOT NULL CHECK(json_valid(allowed_purposes_json) AND json_type(allowed_purposes_json)='array' AND json_array_length(allowed_purposes_json) BETWEEN 1 AND 7 AND json(allowed_purposes_json)=allowed_purposes_json),
+ processing_allowed INTEGER NOT NULL CHECK(processing_allowed IN (0,1)),
+ state TEXT NOT NULL CHECK(state IN ('active','restricted','expired','pending_deletion','deleted')),
+ retention_until TEXT CHECK(retention_until IS NULL OR (length(retention_until)=24 AND retention_until GLOB '????-??-??T??:??:??.???Z' AND julianday(retention_until) IS NOT NULL)),
+ expired_at TEXT CHECK(expired_at IS NULL OR (length(expired_at)=24 AND expired_at GLOB '????-??-??T??:??:??.???Z' AND julianday(expired_at) IS NOT NULL)),
+ deletion_requested_at TEXT CHECK(deletion_requested_at IS NULL OR (length(deletion_requested_at)=24 AND deletion_requested_at GLOB '????-??-??T??:??:??.???Z' AND julianday(deletion_requested_at) IS NOT NULL)),
+ deleted_at TEXT CHECK(deleted_at IS NULL OR (length(deleted_at)=24 AND deleted_at GLOB '????-??-??T??:??:??.???Z' AND julianday(deleted_at) IS NOT NULL)),
+ revision INTEGER NOT NULL CHECK(revision BETWEEN 1 AND 2147483647),
+ state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+ last_mutation_id TEXT NOT NULL UNIQUE REFERENCES governed_ai_memory_mutations(id) ON DELETE RESTRICT,
+ created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z' AND julianday(created_at) IS NOT NULL),
+ updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND updated_at GLOB '????-??-??T??:??:??.???Z' AND julianday(updated_at) IS NOT NULL),
+ policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+ UNIQUE(account_id,derived_binding_hash), CHECK(julianday(updated_at)>=julianday(created_at)),
+ CHECK((state='deleted' AND deleted_at IS NOT NULL) OR state<>'deleted'),
+ CHECK((state='deleted' AND title='' AND statement='' AND processing_allowed=0 AND restriction_visibility='owner_only')
+   OR (state<>'deleted' AND length(trim(title))>=1 AND length(trim(statement))>=1)),
+ CHECK((restriction_visibility='selected_accounts' AND json_array_length(selected_account_ids_json)>0) OR (restriction_visibility<>'selected_accounts' AND json_array_length(selected_account_ids_json)=0))
+) STRICT;
+CREATE INDEX idx_33o_ai_memory_owner ON governed_ai_memory_records(family_id,owner_person_id,account_id,state,updated_at DESC);
+CREATE INDEX idx_33o_ai_memory_history ON governed_ai_memory_mutations(resource_id,revision DESC);
+
+CREATE TABLE privacy_access_observations(
+ id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 128),
+ family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+ account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+ owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+ observer_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+ observer_person_id TEXT REFERENCES people(id) ON DELETE RESTRICT,
+ observer_display_name TEXT NOT NULL CHECK(length(trim(observer_display_name)) BETWEEN 1 AND 256),
+ resource_type TEXT NOT NULL CHECK(length(trim(resource_type)) BETWEEN 1 AND 128),
+ resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 1 AND 256),
+ action TEXT NOT NULL CHECK(action IN ('read','share','process','record','administer')),
+ decision TEXT NOT NULL CHECK(decision IN ('allowed','denied')),
+ decision_reason TEXT NOT NULL CHECK(length(trim(decision_reason)) BETWEEN 1 AND 512),
+ purpose TEXT NOT NULL CHECK(length(trim(purpose)) BETWEEN 1 AND 128),
+ policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+ observation_fingerprint TEXT NOT NULL UNIQUE CHECK(length(observation_fingerprint)=64 AND observation_fingerprint NOT GLOB '*[^0-9a-f]*'),
+ device_id TEXT CHECK(device_id IS NULL OR length(trim(device_id)) BETWEEN 1 AND 128),
+ correlation_id TEXT NOT NULL CHECK(length(trim(correlation_id)) BETWEEN 1 AND 128),
+ source TEXT NOT NULL CHECK(source IN ('immutable_policy_receipt','audit_chain')),
+ observed_at TEXT NOT NULL CHECK(length(observed_at)=24 AND observed_at GLOB '????-??-??T??:??:??.???Z' AND julianday(observed_at) IS NOT NULL)
+) STRICT;
+CREATE INDEX idx_33o_access_subject ON privacy_access_observations(account_id,observed_at DESC,id);
+
+CREATE TABLE privacy_processing_observations(
+ id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 128),
+ family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+ account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+ owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+ resource_type TEXT NOT NULL CHECK(length(trim(resource_type)) BETWEEN 1 AND 128),
+ resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 1 AND 256),
+ processor_kind TEXT NOT NULL CHECK(processor_kind IN ('ai','ocr','translation')),
+ observation_status TEXT NOT NULL CHECK(observation_status IN ('started','completed','failed','cancelled')),
+ purpose TEXT NOT NULL CHECK(length(trim(purpose)) BETWEEN 1 AND 128),
+ processor TEXT NOT NULL CHECK(processor IN ('local_ai','local_ocr','local_translation')),
+ locally_observed INTEGER NOT NULL CHECK(locally_observed=1),
+ network_delivery_observed INTEGER NOT NULL CHECK(network_delivery_observed=0),
+ policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+ observation_fingerprint TEXT NOT NULL UNIQUE CHECK(length(observation_fingerprint)=64 AND observation_fingerprint NOT GLOB '*[^0-9a-f]*'),
+ observed_at TEXT NOT NULL CHECK(length(observed_at)=24 AND observed_at GLOB '????-??-??T??:??:??.???Z' AND julianday(observed_at) IS NOT NULL)
+ ,completed_at TEXT CHECK(completed_at IS NULL OR (length(completed_at)=24 AND completed_at GLOB '????-??-??T??:??:??.???Z' AND julianday(completed_at)>=julianday(observed_at)))
+) STRICT;
+CREATE INDEX idx_33o_processing_subject ON privacy_processing_observations(account_id,observed_at DESC,id);
+
+CREATE TABLE privacy_rights_requests(
+ id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 128),
+ family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+ account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+ owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+ request_kind TEXT NOT NULL CHECK(request_kind IN ('encrypted_export','retention_change','erasure','legacy_export')),
+ scope_resource_type TEXT NOT NULL CHECK(length(trim(scope_resource_type)) BETWEEN 1 AND 128),
+ scope_resource_id TEXT NOT NULL CHECK(length(trim(scope_resource_id)) BETWEEN 1 AND 256),
+ requested_retention_until TEXT CHECK(requested_retention_until IS NULL OR (length(requested_retention_until)=24 AND requested_retention_until GLOB '????-??-??T??:??:??.???Z' AND julianday(requested_retention_until) IS NOT NULL)),
+ status TEXT NOT NULL CHECK(status IN ('requested','in_review','locally_completed','rejected','cancelled')),
+ reason TEXT NOT NULL CHECK(length(trim(reason)) BETWEEN 1 AND 4096),
+ resolution_note TEXT CHECK(resolution_note IS NULL OR length(trim(resolution_note)) BETWEEN 1 AND 4096),
+ encrypted_export_required INTEGER NOT NULL CHECK(encrypted_export_required IN (0,1)),
+ external_copies_erasure_guaranteed INTEGER NOT NULL CHECK(external_copies_erasure_guaranteed=0),
+ revision INTEGER NOT NULL CHECK(revision BETWEEN 1 AND 2147483647),
+ state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+ last_mutation_id TEXT NOT NULL UNIQUE REFERENCES governed_ai_memory_mutations(id) ON DELETE RESTRICT,
+ policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+ created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z' AND julianday(created_at) IS NOT NULL),
+ updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND updated_at GLOB '????-??-??T??:??:??.???Z' AND julianday(updated_at) IS NOT NULL),
+ CHECK(julianday(updated_at)>=julianday(created_at)),
+ CHECK((request_kind IN ('encrypted_export','legacy_export') AND encrypted_export_required=1) OR (request_kind NOT IN ('encrypted_export','legacy_export')))
+) STRICT;
+CREATE INDEX idx_33o_rights_subject ON privacy_rights_requests(account_id,status,updated_at DESC,id);
+
+CREATE TABLE privacy_rights_request_events(
+ id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 128),
+ request_id TEXT NOT NULL REFERENCES privacy_rights_requests(id) ON DELETE RESTRICT,
+ family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+ account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+ revision INTEGER NOT NULL CHECK(revision BETWEEN 1 AND 2147483647),
+ state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+ event_type TEXT NOT NULL CHECK(event_type IN ('requested','in_review','locally_completed','rejected','cancelled')),
+ event_fingerprint TEXT NOT NULL UNIQUE CHECK(length(event_fingerprint)=64 AND event_fingerprint NOT GLOB '*[^0-9a-f]*'),
+ policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+ occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+ UNIQUE(request_id,revision)
+) STRICT;
+
+CREATE TABLE privacy_export_records(
+ id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 128),
+ rights_request_id TEXT NOT NULL UNIQUE REFERENCES privacy_rights_requests(id) ON DELETE RESTRICT,
+ family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+ account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+ owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+ request_revision INTEGER NOT NULL CHECK(request_revision BETWEEN 1 AND 2147483647),
+ artifact_sha256 TEXT NOT NULL UNIQUE CHECK(length(artifact_sha256)=64 AND artifact_sha256 NOT GLOB '*[^0-9a-f]*'),
+ envelope_sha256 TEXT NOT NULL UNIQUE CHECK(length(envelope_sha256)=64 AND envelope_sha256 NOT GLOB '*[^0-9a-f]*'),
+ lineage_snapshot_sha256 TEXT NOT NULL CHECK(length(lineage_snapshot_sha256)=64 AND lineage_snapshot_sha256 NOT GLOB '*[^0-9a-f]*'),
+ encryption_algorithm TEXT NOT NULL CHECK(encryption_algorithm='AES-256-GCM'),
+ item_count INTEGER NOT NULL CHECK(item_count BETWEEN 0 AND 10000),
+ plaintext_size_bytes INTEGER NOT NULL CHECK(plaintext_size_bytes BETWEEN 1 AND 33554432),
+ size_bytes INTEGER NOT NULL CHECK(size_bytes BETWEEN 1 AND 52428800),
+ local_user_selected INTEGER NOT NULL CHECK(local_user_selected=1),
+ delivery_guaranteed INTEGER NOT NULL CHECK(delivery_guaranteed=0),
+ recipient_read_guaranteed INTEGER NOT NULL CHECK(recipient_read_guaranteed=0),
+ state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+ policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+ created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z' AND julianday(created_at) IS NOT NULL)
+) STRICT;
+CREATE INDEX idx_33o_export_subject ON privacy_export_records(account_id,created_at DESC,id);
+
+CREATE TABLE policy_incident_cases(
+ id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 128),
+ family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+ account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+ owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+ title TEXT NOT NULL CHECK(length(trim(title)) BETWEEN 1 AND 256),
+ status TEXT NOT NULL CHECK(status IN ('open','contained_locally','resolved','cancelled')),
+ severity TEXT NOT NULL CHECK(severity IN ('low','medium','high','critical')),
+ suspected_at TEXT NOT NULL CHECK(length(suspected_at)=24 AND suspected_at GLOB '????-??-??T??:??:??.???Z' AND julianday(suspected_at) IS NOT NULL),
+ actions_json TEXT NOT NULL CHECK(json_valid(actions_json) AND json_type(actions_json)='array' AND json_array_length(actions_json) BETWEEN 1 AND 5 AND json(actions_json)=actions_json),
+ evidence_reference_ids_json TEXT NOT NULL CHECK(json_valid(evidence_reference_ids_json) AND json_type(evidence_reference_ids_json)='array' AND json_array_length(evidence_reference_ids_json)<=64 AND json(evidence_reference_ids_json)=evidence_reference_ids_json),
+ resolution_note TEXT CHECK(resolution_note IS NULL OR length(trim(resolution_note)) BETWEEN 1 AND 4096),
+ revision INTEGER NOT NULL CHECK(revision BETWEEN 1 AND 2147483647),
+ state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+ last_mutation_id TEXT NOT NULL UNIQUE REFERENCES governed_ai_memory_mutations(id) ON DELETE RESTRICT,
+ remote_wipe_performed INTEGER NOT NULL CHECK(remote_wipe_performed=0),
+ mdm_operation_performed INTEGER NOT NULL CHECK(mdm_operation_performed=0),
+ network_delivery_guaranteed INTEGER NOT NULL CHECK(network_delivery_guaranteed=0),
+ policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+ created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z' AND julianday(created_at) IS NOT NULL),
+ updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND updated_at GLOB '????-??-??T??:??:??.???Z' AND julianday(updated_at) IS NOT NULL),
+ CHECK(julianday(updated_at)>=julianday(created_at))
+) STRICT;
+CREATE INDEX idx_33o_incident_subject ON policy_incident_cases(account_id,status,updated_at DESC,id);
+
+CREATE TABLE policy_incident_events(
+ id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 128),
+ incident_id TEXT NOT NULL REFERENCES policy_incident_cases(id) ON DELETE RESTRICT,
+ family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+ account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+ revision INTEGER NOT NULL CHECK(revision BETWEEN 1 AND 2147483647),
+ state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+ event_type TEXT NOT NULL CHECK(event_type IN ('opened','contained_locally','authority_revoked','resolved','cancelled')),
+ event_fingerprint TEXT NOT NULL UNIQUE CHECK(length(event_fingerprint)=64 AND event_fingerprint NOT GLOB '*[^0-9a-f]*'),
+ evidence_sha256 TEXT NOT NULL CHECK(length(evidence_sha256)=64 AND evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
+ policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+ occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+ UNIQUE(incident_id,revision)
+) STRICT;
+
+CREATE TABLE policy_incident_revocations(
+ id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 128),
+ incident_id TEXT NOT NULL REFERENCES policy_incident_cases(id) ON DELETE RESTRICT,
+ family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+ account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+ target_kind TEXT NOT NULL CHECK(target_kind IN ('session','trusted_device','capability','offline_lease','consent')),
+ target_fingerprint TEXT NOT NULL CHECK(length(target_fingerprint)=64 AND target_fingerprint NOT GLOB '*[^0-9a-f]*'),
+ outcome TEXT NOT NULL CHECK(outcome IN ('revoked','already_revoked')),
+ policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+ revoked_at TEXT NOT NULL CHECK(length(revoked_at)=24 AND revoked_at GLOB '????-??-??T??:??:??.???Z' AND julianday(revoked_at) IS NOT NULL),
+ UNIQUE(incident_id,target_kind,target_fingerprint)
+) STRICT;
+
+CREATE TABLE policy_incident_quarantine_items(
+ id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 128),
+ incident_id TEXT NOT NULL REFERENCES policy_incident_cases(id) ON DELETE RESTRICT,
+ family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+ account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+ target_kind TEXT NOT NULL CHECK(target_kind IN ('device_state','capability_state','event_package','derived_artifact')),
+ target_fingerprint TEXT NOT NULL CHECK(length(target_fingerprint)=64 AND target_fingerprint NOT GLOB '*[^0-9a-f]*'),
+ integrity_sha256 TEXT NOT NULL CHECK(length(integrity_sha256)=64 AND integrity_sha256 NOT GLOB '*[^0-9a-f]*'),
+ status TEXT NOT NULL CHECK(status IN ('quarantined','released','destroyed')),
+ revision INTEGER NOT NULL CHECK(revision BETWEEN 1 AND 2147483647),
+ policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+ quarantined_at TEXT NOT NULL CHECK(length(quarantined_at)=24 AND quarantined_at GLOB '????-??-??T??:??:??.???Z' AND julianday(quarantined_at) IS NOT NULL),
+ resolved_at TEXT CHECK(resolved_at IS NULL OR (length(resolved_at)=24 AND resolved_at GLOB '????-??-??T??:??:??.???Z' AND julianday(resolved_at) IS NOT NULL)),
+ UNIQUE(incident_id,target_kind,target_fingerprint),
+ CHECK((status='quarantined' AND resolved_at IS NULL) OR (status IN ('released','destroyed') AND resolved_at IS NOT NULL))
+) STRICT;
+
+CREATE TRIGGER trg_33o_incident_payload_insert BEFORE INSERT ON policy_incident_cases
+WHEN EXISTS(SELECT 1 FROM json_each(NEW.actions_json) item
+ WHERE json_type(item.value)<>'object'
+    OR (SELECT COUNT(*) FROM json_each(item.value))<>2
+    OR EXISTS(SELECT 1 FROM json_each(item.value) property WHERE property.key NOT IN ('action','targetId'))
+    OR json_type(item.value,'$.action')<>'text'
+    OR json_extract(item.value,'$.action') NOT IN ('revoke_local_session_authority','revoke_trusted_device','revoke_offline_capability','revoke_consent','revoke_capability','quarantine_local_derived_data')
+    OR json_type(item.value,'$.targetId')<>'text'
+    OR length(trim(json_extract(item.value,'$.targetId'))) NOT BETWEEN 1 AND 256)
+ OR EXISTS(SELECT 1 FROM json_each(NEW.evidence_reference_ids_json) evidence
+    WHERE evidence.type<>'text' OR length(trim(evidence.value)) NOT BETWEEN 1 AND 256)
+BEGIN SELECT RAISE(ABORT,'33-O incident actions or evidence are invalid'); END;
+CREATE TRIGGER trg_33o_incident_payload_update BEFORE UPDATE OF actions_json,evidence_reference_ids_json ON policy_incident_cases
+WHEN EXISTS(SELECT 1 FROM json_each(NEW.actions_json) item
+ WHERE json_type(item.value)<>'object'
+    OR (SELECT COUNT(*) FROM json_each(item.value))<>2
+    OR EXISTS(SELECT 1 FROM json_each(item.value) property WHERE property.key NOT IN ('action','targetId'))
+    OR json_type(item.value,'$.action')<>'text'
+    OR json_extract(item.value,'$.action') NOT IN ('revoke_local_session_authority','revoke_trusted_device','revoke_offline_capability','revoke_consent','revoke_capability','quarantine_local_derived_data')
+    OR json_type(item.value,'$.targetId')<>'text'
+    OR length(trim(json_extract(item.value,'$.targetId'))) NOT BETWEEN 1 AND 256)
+ OR EXISTS(SELECT 1 FROM json_each(NEW.evidence_reference_ids_json) evidence
+    WHERE evidence.type<>'text' OR length(trim(evidence.value)) NOT BETWEEN 1 AND 256)
+BEGIN SELECT RAISE(ABORT,'33-O incident actions or evidence are invalid'); END;
+
+CREATE TRIGGER trg_33o_ai_mutation_receipt BEFORE INSERT ON governed_ai_memory_mutations
+WHEN NOT EXISTS(SELECT 1 FROM platform_policy_transaction_receipts receipt
+ JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+ JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash AND projection.record_json=receipt.record_json
+ JOIN accounts account ON account.id=NEW.account_id AND account.status='active' AND account.person_id=NEW.owner_person_id
+ JOIN people person ON person.id=NEW.owner_person_id AND person.status='active' AND person.family_id=NEW.family_id
+ WHERE receipt.receipt_hash=NEW.policy_receipt_hash AND receipt.resource_type=NEW.policy_resource_type AND receipt.resource_id=NEW.resource_id
+  AND receipt.action=NEW.policy_action AND receipt.capability=NEW.policy_capability
+  AND NEW.policy_resource_type=NEW.resource_type
+  AND NEW.policy_action=CASE WHEN NEW.previous_revision=0 THEN 'create' WHEN NEW.mutation_kind='ai_memory_delete' THEN 'delete' ELSE 'update' END
+  AND NEW.policy_capability='family.write'
+  AND NEW.policy_purpose=CASE WHEN NEW.resource_type='ai_memory_record' THEN 'ai_processing' ELSE 'administration' END
+  AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.account_id
+  AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.owner_person_id
+  AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+  AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+  AND json_extract(receipt.record_json,'$.request.resource.sensitivity')=NEW.policy_sensitivity
+  AND json_extract(receipt.record_json,'$.request.purpose')=NEW.policy_purpose)
+BEGIN SELECT RAISE(ABORT,'33-O mutation requires exact active subject and durable policy receipt'); END;
+CREATE TRIGGER trg_33o_ai_current_insert BEFORE INSERT ON governed_ai_memory_records
+WHEN NOT EXISTS(SELECT 1 FROM governed_ai_memory_mutations m WHERE m.id=NEW.last_mutation_id AND m.resource_id=NEW.resource_id
+ AND m.family_id=NEW.family_id AND m.account_id=NEW.account_id AND m.owner_person_id=NEW.owner_person_id
+ AND m.resource_type='ai_memory_record' AND m.previous_revision=0 AND m.revision=NEW.revision
+ AND m.mutation_kind='ai_memory_correct' AND m.state_fingerprint=NEW.state_fingerprint
+ AND m.policy_receipt_hash=NEW.policy_receipt_hash AND m.occurred_at=NEW.created_at AND NEW.created_at=NEW.updated_at)
+ OR NOT EXISTS(SELECT 1 FROM derived_data_policy_bindings binding
+   JOIN platform_policy_transaction_receipts producer ON producer.receipt_hash=binding.producer_receipt_hash
+   JOIN platform_policy_database_fences producer_fence ON producer_fence.fence_name=producer.fence_name AND producer_fence.epoch=producer.fence_epoch AND producer_fence.writable=1
+   JOIN platform_policy_journal_projection_outbox producer_projection ON producer_projection.receipt_hash=producer.receipt_hash AND producer_projection.record_json=producer.record_json
+   WHERE binding.binding_hash=NEW.derived_binding_hash
+   AND binding.status='sealed' AND binding.derived_kind='AI_MEMORY' AND binding.derived_resource_type='ai_memory'
+   AND binding.derived_resource_id=NEW.resource_id AND binding.family_id=NEW.family_id
+   AND json_extract(producer.record_json,'$.request.subject.accountId')=NEW.account_id
+   AND json_extract(producer.record_json,'$.request.subject.personId')=NEW.owner_person_id
+   AND json_extract(producer.record_json,'$.request.resource.familyId')=NEW.family_id
+   AND json_extract(producer.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id)
+BEGIN SELECT RAISE(ABORT,'33-O AI memory current row requires exact initial mutation'); END;
+CREATE TRIGGER trg_33o_ai_current_update BEFORE UPDATE ON governed_ai_memory_records
+WHEN NEW.resource_id<>OLD.resource_id OR NEW.family_id<>OLD.family_id OR NEW.account_id<>OLD.account_id
+ OR NEW.owner_person_id<>OLD.owner_person_id OR NEW.derived_binding_hash<>OLD.derived_binding_hash OR NEW.created_at<>OLD.created_at
+ OR OLD.state='deleted' OR NEW.revision<>OLD.revision+1 OR julianday(NEW.updated_at)<julianday(OLD.updated_at)
+ OR NOT EXISTS(SELECT 1 FROM governed_ai_memory_mutations m WHERE m.id=NEW.last_mutation_id AND m.resource_id=OLD.resource_id
+  AND m.resource_type='ai_memory_record' AND m.family_id=OLD.family_id AND m.account_id=OLD.account_id AND m.owner_person_id=OLD.owner_person_id
+  AND m.previous_revision=OLD.revision AND m.revision=NEW.revision
+  AND m.state_fingerprint=NEW.state_fingerprint AND m.policy_receipt_hash=NEW.policy_receipt_hash AND m.occurred_at=NEW.updated_at
+  AND ((m.mutation_kind='ai_memory_delete' AND NEW.state IN ('pending_deletion','deleted'))
+    OR (m.mutation_kind='ai_memory_expire' AND NEW.state='expired')
+    OR (m.mutation_kind='ai_memory_restrict' AND NEW.state IN ('active','restricted'))
+    OR (m.mutation_kind='ai_memory_correct' AND NEW.state IN ('active','restricted'))))
+BEGIN SELECT RAISE(ABORT,'33-O AI memory update requires exact next immutable mutation'); END;
+
+CREATE TRIGGER trg_33o_rights_insert BEFORE INSERT ON privacy_rights_requests
+WHEN NOT EXISTS(SELECT 1 FROM governed_ai_memory_mutations m WHERE m.id=NEW.last_mutation_id
+ AND m.mutation_kind='rights_request_create' AND m.resource_type='data_rights_request' AND m.resource_id=NEW.id
+ AND m.family_id=NEW.family_id AND m.account_id=NEW.account_id AND m.owner_person_id=NEW.owner_person_id
+ AND m.previous_revision=0 AND m.revision=NEW.revision AND m.policy_receipt_hash=NEW.policy_receipt_hash
+ AND m.state_fingerprint=NEW.state_fingerprint AND m.occurred_at=NEW.created_at AND NEW.created_at=NEW.updated_at)
+BEGIN SELECT RAISE(ABORT,'33-O rights request requires exact initial mutation'); END;
+
+CREATE TRIGGER trg_33o_rights_update BEFORE UPDATE ON privacy_rights_requests
+WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.account_id<>OLD.account_id OR NEW.owner_person_id<>OLD.owner_person_id
+ OR NEW.request_kind<>OLD.request_kind OR NEW.scope_resource_type<>OLD.scope_resource_type OR NEW.scope_resource_id<>OLD.scope_resource_id
+ OR NEW.reason<>OLD.reason OR NEW.created_at<>OLD.created_at OR NEW.revision<>OLD.revision+1
+ OR julianday(NEW.updated_at)<julianday(OLD.updated_at) OR OLD.status IN ('locally_completed','rejected','cancelled')
+ OR (OLD.status='requested' AND NEW.status NOT IN ('in_review','locally_completed','rejected','cancelled'))
+ OR (OLD.status='in_review' AND NEW.status NOT IN ('locally_completed','rejected','cancelled'))
+ OR (NEW.status='locally_completed' AND OLD.request_kind NOT IN ('encrypted_export','legacy_export'))
+ OR NOT EXISTS(SELECT 1 FROM governed_ai_memory_mutations m WHERE m.id=NEW.last_mutation_id
+   AND m.mutation_kind=CASE WHEN NEW.status='locally_completed' THEN 'rights_export_finalize' ELSE 'rights_request_update' END
+   AND m.resource_type='data_rights_request' AND m.resource_id=OLD.id
+   AND m.family_id=OLD.family_id AND m.account_id=OLD.account_id AND m.owner_person_id=OLD.owner_person_id
+   AND m.previous_revision=OLD.revision AND m.revision=NEW.revision AND m.state_fingerprint=NEW.state_fingerprint
+   AND m.policy_receipt_hash=NEW.policy_receipt_hash AND m.occurred_at=NEW.updated_at)
+BEGIN SELECT RAISE(ABORT,'33-O rights request transition is stale or invalid'); END;
+
+CREATE TRIGGER trg_33o_incident_insert BEFORE INSERT ON policy_incident_cases
+WHEN NOT EXISTS(SELECT 1 FROM governed_ai_memory_mutations m WHERE m.id=NEW.last_mutation_id
+ AND m.mutation_kind='incident_create' AND m.resource_type='privacy_incident' AND m.resource_id=NEW.id
+ AND m.family_id=NEW.family_id AND m.account_id=NEW.account_id AND m.owner_person_id=NEW.owner_person_id
+ AND m.previous_revision=0 AND m.revision=NEW.revision AND m.policy_receipt_hash=NEW.policy_receipt_hash
+ AND m.state_fingerprint=NEW.state_fingerprint AND m.occurred_at=NEW.created_at AND NEW.created_at=NEW.updated_at)
+BEGIN SELECT RAISE(ABORT,'33-O incident requires exact initial mutation'); END;
+CREATE TRIGGER trg_33o_incident_update BEFORE UPDATE ON policy_incident_cases
+WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.account_id<>OLD.account_id OR NEW.owner_person_id<>OLD.owner_person_id
+ OR NEW.title<>OLD.title OR NEW.severity<>OLD.severity OR NEW.suspected_at<>OLD.suspected_at OR NEW.actions_json<>OLD.actions_json
+ OR NEW.evidence_reference_ids_json<>OLD.evidence_reference_ids_json OR NEW.created_at<>OLD.created_at
+ OR NEW.revision<>OLD.revision+1 OR julianday(NEW.updated_at)<julianday(OLD.updated_at) OR OLD.status IN ('resolved','cancelled')
+ OR (OLD.status='open' AND NEW.status NOT IN ('contained_locally','resolved','cancelled'))
+ OR (OLD.status='contained_locally' AND NEW.status NOT IN ('resolved','cancelled'))
+ OR NOT EXISTS(SELECT 1 FROM governed_ai_memory_mutations m WHERE m.id=NEW.last_mutation_id
+   AND m.mutation_kind='incident_update' AND m.resource_type='privacy_incident' AND m.resource_id=OLD.id
+   AND m.family_id=OLD.family_id AND m.account_id=OLD.account_id AND m.owner_person_id=OLD.owner_person_id
+   AND m.previous_revision=OLD.revision AND m.revision=NEW.revision AND m.state_fingerprint=NEW.state_fingerprint
+   AND m.policy_receipt_hash=NEW.policy_receipt_hash AND m.occurred_at=NEW.updated_at)
+BEGIN SELECT RAISE(ABORT,'33-O incident transition is stale or invalid'); END;
+CREATE TRIGGER trg_33o_quarantine_update BEFORE UPDATE ON policy_incident_quarantine_items
+BEGIN SELECT RAISE(ABORT,'33-O quarantine ledger is immutable'); END;
+
+CREATE TRIGGER trg_33o_access_receipt BEFORE INSERT ON privacy_access_observations
+WHEN NOT EXISTS(SELECT 1 FROM platform_policy_transaction_receipts receipt
+ JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+ JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash AND projection.record_json=receipt.record_json
+ JOIN accounts owner_account ON owner_account.id=NEW.account_id AND owner_account.status='active' AND owner_account.person_id=NEW.owner_person_id
+ JOIN people owner ON owner.id=NEW.owner_person_id AND owner.status='active' AND owner.family_id=NEW.family_id
+ JOIN accounts observer ON observer.id=NEW.observer_account_id AND observer.status='active'
+ WHERE receipt.receipt_hash=NEW.policy_receipt_hash AND receipt.resource_type=NEW.resource_type AND receipt.resource_id=NEW.resource_id
+  AND receipt.action=NEW.action AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.observer_account_id
+  AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+  AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+  AND json_extract(receipt.record_json,'$.request.purpose')=NEW.purpose
+  AND json_extract(receipt.record_json,'$.request.resource.sensitivity') IN ('personal','sensitive','highly_sensitive'))
+BEGIN SELECT RAISE(ABORT,'33-O access observation requires exact durable receipt'); END;
+
+CREATE TRIGGER trg_33o_processing_receipt BEFORE INSERT ON privacy_processing_observations
+WHEN NOT EXISTS(SELECT 1 FROM platform_policy_transaction_receipts receipt
+ JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+ JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash AND projection.record_json=receipt.record_json
+ JOIN accounts account ON account.id=NEW.account_id AND account.status='active' AND account.person_id=NEW.owner_person_id
+ JOIN people person ON person.id=NEW.owner_person_id AND person.status='active' AND person.family_id=NEW.family_id
+ WHERE receipt.receipt_hash=NEW.policy_receipt_hash AND receipt.resource_type=NEW.resource_type AND receipt.resource_id=NEW.resource_id
+  AND receipt.action='process' AND receipt.capability=CASE NEW.processor_kind WHEN 'ai' THEN 'ai.process' WHEN 'ocr' THEN 'archive.ocr' ELSE 'translation.process' END
+  AND NEW.processor=CASE NEW.processor_kind WHEN 'ai' THEN 'local_ai' WHEN 'ocr' THEN 'local_ocr' ELSE 'local_translation' END
+  AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.account_id
+  AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.owner_person_id
+  AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+  AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+  AND json_extract(receipt.record_json,'$.request.purpose')=NEW.purpose
+  AND json_extract(receipt.record_json,'$.request.resource.sensitivity') IN ('personal','sensitive','highly_sensitive'))
+BEGIN SELECT RAISE(ABORT,'33-O processing observation requires exact local durable receipt'); END;
+
+CREATE TRIGGER trg_33o_rights_event_parent BEFORE INSERT ON privacy_rights_request_events
+WHEN NOT EXISTS(SELECT 1 FROM privacy_rights_requests parent
+ JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+ JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+ JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash AND projection.record_json=receipt.record_json
+ WHERE parent.id=NEW.request_id AND parent.family_id=NEW.family_id AND parent.account_id=NEW.account_id
+  AND parent.revision=NEW.revision AND parent.status=NEW.event_type AND parent.state_fingerprint=NEW.state_fingerprint
+  AND parent.policy_receipt_hash=NEW.policy_receipt_hash
+  AND receipt.resource_type='data_rights_request' AND receipt.resource_id=NEW.request_id
+  AND receipt.action=CASE NEW.revision WHEN 1 THEN 'create' ELSE 'update' END AND receipt.capability='family.write'
+  AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.account_id
+  AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+  AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=parent.owner_person_id)
+BEGIN SELECT RAISE(ABORT,'33-O rights event requires exact current parent and receipt'); END;
+
+CREATE TRIGGER trg_33o_export_receipt BEFORE INSERT ON privacy_export_records
+WHEN NOT EXISTS(SELECT 1 FROM privacy_rights_requests parent
+ JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+ JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+ JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash AND projection.record_json=receipt.record_json
+ WHERE parent.id=NEW.rights_request_id AND parent.family_id=NEW.family_id AND parent.account_id=NEW.account_id
+  AND parent.owner_person_id=NEW.owner_person_id AND parent.request_kind IN ('encrypted_export','legacy_export')
+  AND parent.policy_receipt_hash=NEW.policy_receipt_hash
+  AND parent.revision=NEW.request_revision
+  AND parent.status='locally_completed' AND receipt.resource_type='data_rights_request' AND receipt.resource_id=parent.id
+  AND receipt.action='update' AND receipt.capability='family.write'
+  AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.account_id
+  AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+  AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+  AND json_extract(receipt.record_json,'$.request.resource.sensitivity') IN ('personal','sensitive','highly_sensitive'))
+BEGIN SELECT RAISE(ABORT,'33-O encrypted export requires exact completed local rights request'); END;
+
+CREATE TRIGGER trg_33o_incident_event_parent BEFORE INSERT ON policy_incident_events
+WHEN NOT EXISTS(SELECT 1 FROM policy_incident_cases parent
+ JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+ JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+ JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash AND projection.record_json=receipt.record_json
+ WHERE parent.id=NEW.incident_id AND parent.family_id=NEW.family_id AND parent.account_id=NEW.account_id
+  AND parent.revision=NEW.revision AND parent.state_fingerprint=NEW.state_fingerprint AND parent.policy_receipt_hash=NEW.policy_receipt_hash
+  AND NEW.event_type=CASE parent.status WHEN 'open' THEN 'opened' ELSE parent.status END
+  AND receipt.resource_type='privacy_incident' AND receipt.resource_id=NEW.incident_id
+  AND receipt.action=CASE NEW.revision WHEN 1 THEN 'create' ELSE 'update' END AND receipt.capability='family.write'
+  AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.account_id
+  AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+  AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=parent.owner_person_id)
+BEGIN SELECT RAISE(ABORT,'33-O incident event requires exact current parent and receipt'); END;
+
+CREATE TRIGGER trg_33o_revocation_receipt BEFORE INSERT ON policy_incident_revocations
+WHEN NOT EXISTS(SELECT 1 FROM policy_incident_cases parent
+ JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+ JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+ JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash AND projection.record_json=receipt.record_json
+ WHERE parent.id=NEW.incident_id AND parent.family_id=NEW.family_id AND parent.account_id=NEW.account_id
+  AND parent.policy_receipt_hash=NEW.policy_receipt_hash
+  AND receipt.resource_type='privacy_incident' AND receipt.resource_id=NEW.incident_id
+  AND receipt.action IN ('create','update') AND receipt.capability='family.write'
+  AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.account_id
+  AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+  AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=parent.owner_person_id)
+BEGIN SELECT RAISE(ABORT,'33-O incident revocation requires exact parent and receipt'); END;
+
+CREATE TRIGGER trg_33o_quarantine_receipt BEFORE INSERT ON policy_incident_quarantine_items
+WHEN NEW.status<>'quarantined' OR NEW.revision<>1 OR NOT EXISTS(SELECT 1 FROM policy_incident_cases parent
+ JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+ JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+ JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash AND projection.record_json=receipt.record_json
+ WHERE parent.id=NEW.incident_id AND parent.family_id=NEW.family_id AND parent.account_id=NEW.account_id
+  AND parent.policy_receipt_hash=NEW.policy_receipt_hash
+  AND receipt.resource_type='privacy_incident' AND receipt.resource_id=NEW.incident_id
+  AND receipt.action IN ('create','update') AND receipt.capability='family.write'
+  AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.account_id
+  AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+  AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=parent.owner_person_id)
+BEGIN SELECT RAISE(ABORT,'33-O quarantine requires exact parent and receipt'); END;
+
+CREATE TRIGGER trg_33o_ai_current_delete BEFORE DELETE ON governed_ai_memory_records BEGIN SELECT RAISE(ABORT,'33-O AI memory current deletion is forbidden'); END;
+CREATE TRIGGER trg_33o_ai_mutation_update BEFORE UPDATE ON governed_ai_memory_mutations BEGIN SELECT RAISE(ABORT,'33-O AI memory mutation ledger is immutable'); END;
+CREATE TRIGGER trg_33o_ai_mutation_delete BEFORE DELETE ON governed_ai_memory_mutations BEGIN SELECT RAISE(ABORT,'33-O AI memory mutation ledger is immutable'); END;
+CREATE TRIGGER trg_33o_access_update BEFORE UPDATE ON privacy_access_observations BEGIN SELECT RAISE(ABORT,'33-O access observations are immutable'); END;
+CREATE TRIGGER trg_33o_access_delete BEFORE DELETE ON privacy_access_observations BEGIN SELECT RAISE(ABORT,'33-O access observations are immutable'); END;
+CREATE TRIGGER trg_33o_processing_update BEFORE UPDATE ON privacy_processing_observations BEGIN SELECT RAISE(ABORT,'33-O processing observations are immutable'); END;
+CREATE TRIGGER trg_33o_processing_delete BEFORE DELETE ON privacy_processing_observations BEGIN SELECT RAISE(ABORT,'33-O processing observations are immutable'); END;
+CREATE TRIGGER trg_33o_rights_delete BEFORE DELETE ON privacy_rights_requests BEGIN SELECT RAISE(ABORT,'33-O rights requests cannot be deleted'); END;
+CREATE TRIGGER trg_33o_rights_event_update BEFORE UPDATE ON privacy_rights_request_events BEGIN SELECT RAISE(ABORT,'33-O rights events are immutable'); END;
+CREATE TRIGGER trg_33o_rights_event_delete BEFORE DELETE ON privacy_rights_request_events BEGIN SELECT RAISE(ABORT,'33-O rights events are immutable'); END;
+CREATE TRIGGER trg_33o_export_update BEFORE UPDATE ON privacy_export_records BEGIN SELECT RAISE(ABORT,'33-O export receipts are immutable'); END;
+CREATE TRIGGER trg_33o_export_delete BEFORE DELETE ON privacy_export_records BEGIN SELECT RAISE(ABORT,'33-O export receipts are immutable'); END;
+CREATE TRIGGER trg_33o_incident_delete BEFORE DELETE ON policy_incident_cases BEGIN SELECT RAISE(ABORT,'33-O incidents cannot be deleted'); END;
+CREATE TRIGGER trg_33o_incident_event_update BEFORE UPDATE ON policy_incident_events BEGIN SELECT RAISE(ABORT,'33-O incident events are immutable'); END;
+CREATE TRIGGER trg_33o_incident_event_delete BEFORE DELETE ON policy_incident_events BEGIN SELECT RAISE(ABORT,'33-O incident events are immutable'); END;
+CREATE TRIGGER trg_33o_revocation_update BEFORE UPDATE ON policy_incident_revocations BEGIN SELECT RAISE(ABORT,'33-O revocations are immutable'); END;
+CREATE TRIGGER trg_33o_revocation_delete BEFORE DELETE ON policy_incident_revocations BEGIN SELECT RAISE(ABORT,'33-O revocations are immutable'); END;
+CREATE TRIGGER trg_33o_quarantine_delete BEFORE DELETE ON policy_incident_quarantine_items BEGIN SELECT RAISE(ABORT,'33-O quarantine items cannot be deleted'); END;
+
+CREATE TRIGGER trg_33o_ai_current_quota BEFORE INSERT ON governed_ai_memory_records WHEN (SELECT COUNT(*) FROM governed_ai_memory_records WHERE account_id=NEW.account_id)>=500 BEGIN SELECT RAISE(ABORT,'33-O AI memory quota exceeded'); END;
+CREATE TRIGGER trg_33o_ai_mutation_quota BEFORE INSERT ON governed_ai_memory_mutations WHEN (SELECT COUNT(*) FROM governed_ai_memory_mutations WHERE account_id=NEW.account_id)>=4096 BEGIN SELECT RAISE(ABORT,'33-O AI memory history quota exceeded'); END;
+CREATE TRIGGER trg_33o_access_quota BEFORE INSERT ON privacy_access_observations WHEN (SELECT COUNT(*) FROM privacy_access_observations WHERE account_id=NEW.account_id)>=500 BEGIN SELECT RAISE(ABORT,'33-O access observation quota exceeded'); END;
+CREATE TRIGGER trg_33o_processing_quota BEFORE INSERT ON privacy_processing_observations WHEN (SELECT COUNT(*) FROM privacy_processing_observations WHERE account_id=NEW.account_id)>=500 BEGIN SELECT RAISE(ABORT,'33-O processing observation quota exceeded'); END;
+CREATE TRIGGER trg_33o_rights_quota BEFORE INSERT ON privacy_rights_requests WHEN (SELECT COUNT(*) FROM privacy_rights_requests WHERE account_id=NEW.account_id)>=100 BEGIN SELECT RAISE(ABORT,'33-O rights request quota exceeded'); END;
+CREATE TRIGGER trg_33o_rights_event_quota BEFORE INSERT ON privacy_rights_request_events WHEN (SELECT COUNT(*) FROM privacy_rights_request_events WHERE account_id=NEW.account_id)>=1024 BEGIN SELECT RAISE(ABORT,'33-O rights event quota exceeded'); END;
+CREATE TRIGGER trg_33o_export_quota BEFORE INSERT ON privacy_export_records WHEN (SELECT COUNT(*) FROM privacy_export_records WHERE account_id=NEW.account_id)>=256 BEGIN SELECT RAISE(ABORT,'33-O export receipt quota exceeded'); END;
+CREATE TRIGGER trg_33o_incident_quota BEFORE INSERT ON policy_incident_cases WHEN (SELECT COUNT(*) FROM policy_incident_cases WHERE account_id=NEW.account_id)>=100 BEGIN SELECT RAISE(ABORT,'33-O incident quota exceeded'); END;
+CREATE TRIGGER trg_33o_incident_event_quota BEFORE INSERT ON policy_incident_events WHEN (SELECT COUNT(*) FROM policy_incident_events WHERE account_id=NEW.account_id)>=2048 BEGIN SELECT RAISE(ABORT,'33-O incident event quota exceeded'); END;
+CREATE TRIGGER trg_33o_revocation_quota BEFORE INSERT ON policy_incident_revocations WHEN (SELECT COUNT(*) FROM policy_incident_revocations WHERE account_id=NEW.account_id)>=512 BEGIN SELECT RAISE(ABORT,'33-O incident revocation quota exceeded'); END;
+CREATE TRIGGER trg_33o_quarantine_quota BEFORE INSERT ON policy_incident_quarantine_items WHEN (SELECT COUNT(*) FROM policy_incident_quarantine_items WHERE account_id=NEW.account_id)>=512 BEGIN SELECT RAISE(ABORT,'33-O quarantine quota exceeded'); END;
+
+UPDATE database_metadata SET value='REVISION-33-O-PRIVACY-OWNERSHIP-DATA-RIGHTS-INCIDENT-CONTROL',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -11620,7 +12121,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(88, 'b5_family_emergency_card_portability_ledger', familyEmergencyCardPortabilityLedgerSql),
   createMigrationDefinition(89, 'b4_long_term_portfolio_ledger', longTermPortfolioLedgerSql),
   createMigrationDefinition(90, 'b7_accessibility_preferences', accessibilityPreferencesSql),
-  createMigrationDefinition(91, 'b3_governed_form_drafts', governedFormDraftsSql)
+  createMigrationDefinition(91, 'b3_governed_form_drafts', governedFormDraftsSql),
+  createMigrationDefinition(92, 'privacy_ownership_data_rights_incident_control', privacyOwnershipDataRightsIncidentControlSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

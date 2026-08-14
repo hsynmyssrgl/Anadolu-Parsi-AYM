@@ -1,0 +1,202 @@
+{
+  "schemaVersion": 1,
+  "step": "33-O",
+  "decision": "DEC-226",
+  "requirements": [
+    "B6-02",
+    "PPK-028",
+    "AUD-COM-006",
+    "EXT-036",
+    "EXT-037",
+    "EXT-038",
+    "EXT-040",
+    "EXT-041",
+    "EXT-042"
+  ],
+  "status": "PASS",
+  "checksPassed": 45,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "domain owner-scoped aggregate",
+      "status": "PASS"
+    },
+    {
+      "name": "AI memory lifecycle and bounds",
+      "status": "PASS"
+    },
+    {
+      "name": "AI correction restriction deletion expiry commands",
+      "status": "PASS"
+    },
+    {
+      "name": "access history purpose and decision",
+      "status": "PASS"
+    },
+    {
+      "name": "local processing observation truth",
+      "status": "PASS"
+    },
+    {
+      "name": "data rights and retention model",
+      "status": "PASS"
+    },
+    {
+      "name": "incident no-claim model",
+      "status": "PASS"
+    },
+    {
+      "name": "permission simulation creates no authority",
+      "status": "PASS"
+    },
+    {
+      "name": "application exact command validation",
+      "status": "PASS"
+    },
+    {
+      "name": "application replay fingerprint fence",
+      "status": "PASS"
+    },
+    {
+      "name": "application central policy transaction",
+      "status": "PASS"
+    },
+    {
+      "name": "application local observation truth",
+      "status": "PASS"
+    },
+    {
+      "name": "application permission preview only",
+      "status": "PASS"
+    },
+    {
+      "name": "repository contract policy scope",
+      "status": "PASS"
+    },
+    {
+      "name": "repository contract mutation ledger",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 92 identity",
+      "status": "PASS"
+    },
+    {
+      "name": "migration strict AI memory tables",
+      "status": "PASS"
+    },
+    {
+      "name": "migration access and processing observations",
+      "status": "PASS"
+    },
+    {
+      "name": "migration rights and incident tables",
+      "status": "PASS"
+    },
+    {
+      "name": "migration immutable and quota triggers",
+      "status": "PASS"
+    },
+    {
+      "name": "repository owner scoping",
+      "status": "PASS"
+    },
+    {
+      "name": "repository policy persistence binding",
+      "status": "PASS"
+    },
+    {
+      "name": "repository immutable mutation access",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-019 managed AI owner registration",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-019 AI tombstone purge fence",
+      "status": "PASS"
+    },
+    {
+      "name": "production policy resolves privacy resources",
+      "status": "PASS"
+    },
+    {
+      "name": "repository composition exposes privacy repository",
+      "status": "PASS"
+    },
+    {
+      "name": "data store composes privacy use cases",
+      "status": "PASS"
+    },
+    {
+      "name": "encrypted export scrypt and AES GCM",
+      "status": "PASS"
+    },
+    {
+      "name": "encrypted export exact canonical envelope",
+      "status": "PASS"
+    },
+    {
+      "name": "file service no-clobber and readback",
+      "status": "PASS"
+    },
+    {
+      "name": "IPC exact governed channels",
+      "status": "PASS"
+    },
+    {
+      "name": "IPC recursive secret path prototype bounds",
+      "status": "PASS"
+    },
+    {
+      "name": "IPC export result content-free",
+      "status": "PASS"
+    },
+    {
+      "name": "IPC rate admission and noncancellable writes",
+      "status": "PASS"
+    },
+    {
+      "name": "runtime enforces result policy",
+      "status": "PASS"
+    },
+    {
+      "name": "main dialog owns destination and cancellation",
+      "status": "PASS"
+    },
+    {
+      "name": "preload renderer cannot supply destination",
+      "status": "PASS"
+    },
+    {
+      "name": "renderer global exact safe result",
+      "status": "PASS"
+    },
+    {
+      "name": "UI extends existing security route",
+      "status": "PASS"
+    },
+    {
+      "name": "UI no-claim truth and content-free lineage",
+      "status": "PASS"
+    },
+    {
+      "name": "application and repository negative suites",
+      "status": "PASS"
+    },
+    {
+      "name": "crypto and file service suites",
+      "status": "PASS"
+    },
+    {
+      "name": "IPC bridge and UI suites",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-019 migration 92 cross regression",
+      "status": "PASS"
+    }
+  ],
+  "generatedAt": "2026-08-14T02:59:41.850Z"
+}

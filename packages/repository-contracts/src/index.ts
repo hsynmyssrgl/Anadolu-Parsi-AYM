@@ -38,6 +38,7 @@ export * from './windows-hello-registration-repository.js';
 export * from './platform-policy-transaction-repository.js';
 export * from './offline-capability-lease-repository.js';
 export * from './derived-data-policy-repository.js';
+export * from './privacy-ownership-data-rights-repository.js';
 
 export * from './data-lifecycle-repository.js';
 

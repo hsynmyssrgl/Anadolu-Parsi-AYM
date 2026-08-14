@@ -29,6 +29,11 @@ export const DERIVED_DATA_DIRECT_ACCESS_EXCEPTIONS = Object.freeze([] as const);
 export const DERIVED_DATA_AUTHORIZED_REPOSITORY_ADAPTERS = Object.freeze([
   'packages/repositories/src/derived-data-policy-repository.ts'
 ] as const);
+/** Exact read-only metadata inventory consumers; this grants no schema or mutation authority. */
+export const DERIVED_DATA_AUTHORIZED_METADATA_INVENTORY_READERS = Object.freeze([
+  'packages/repositories/src/data-lifecycle-repository.ts',
+  'packages/repositories/src/privacy-ownership-data-rights-repository.ts'
+] as const);
 
 export const DERIVED_DATA_MAX_SOURCE_COUNT = 32 as const;
 export const DERIVED_DATA_MAX_LINEAGE_DEPTH = 16 as const;

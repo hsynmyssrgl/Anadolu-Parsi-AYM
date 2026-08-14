@@ -23,6 +23,10 @@ export const SOURCE_DELETION_AUTHORIZED_REPOSITORY_ADAPTERS = Object.freeze([
   'packages/repositories/src/data-lifecycle-repository.ts',
   'packages/repositories/src/backup-propagation-repository.ts'
 ] as const);
+/** Content-free append-only mutation metadata; never a semantic derived-payload owner. */
+export const SOURCE_DELETION_METADATA_ONLY_MUTATION_LEDGERS = Object.freeze([
+  'governed_ai_memory_mutations'
+] as const);
 
 export type SourceDeletionPropagationOwnerKind = (typeof SOURCE_DELETION_PROPAGATION_OWNER_KINDS)[number];
 export type SourceDeletionCacheRegistryId = (typeof SOURCE_DELETION_REQUIRED_CACHE_REGISTRIES)[number];

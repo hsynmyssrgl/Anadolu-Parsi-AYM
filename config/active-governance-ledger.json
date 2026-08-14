@@ -15,9 +15,9 @@
   "artifactInventory": "artifacts/manifests/PROJECT_ARTIFACT_INDEX.json",
   "persistentLibraryRoot": "/Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi",
   "persistentLibraryReleasePath": "/Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi/Bronze 04.08.2026.29",
-  "preflightStatus": "PENDING_33_N",
-  "postflightStatus": "PASS",
-  "libraryUploadStatus": "33-N_COMPLETED_RECEIPT_PASS",
+  "preflightStatus": "PENDING_33_O",
+  "postflightStatus": "PENDING_33_O_PERSISTENT_RECEIPT",
+  "libraryUploadStatus": "33-O_VALIDATED_RECEIPT_PENDING",
   "conversationCapacity": {
     "method": "platform_actual_or_unavailable",
     "actualUsedPercent": null,
@@ -32,8 +32,8 @@
     "canonicalPR172Unchanged": true,
     "recordedAt": "2026-08-06T07:45:38.3898625+03:00"
   },
-  "nextOfficialTask": "33-O_DEC-226_ACTIVATION",
-  "activeMicroStep": null,
+  "nextOfficialTask": "33-O_PERSISTENT_RECEIPT_AND_SOURCE_PROTECTION",
+  "activeMicroStep": "33-O",
   "supersessions": [
     {
       "id": "GOV-SUP-29-D3-001",
@@ -713,7 +713,7 @@
       "status": "RESOLVED_AFTER_PERSISTENT_RECEIPT_FULL_AUTO_SELECTION_AUTHORIZED"
     }
   ],
-  "updatedAt": "2026-08-14T00:11:34.729Z",
+  "updatedAt": "2026-08-14T02:59:20.901Z",
   "externalLibraryAuthority": {
     "step": "30-Z",
     "status": "PASS",

@@ -19,6 +19,7 @@ import {
 } from '@ppt/application';
 import {
   SOURCE_DELETION_PROPAGATION_OWNER_KINDS,
+  SOURCE_DELETION_METADATA_ONLY_MUTATION_LEDGERS,
   SOURCE_DELETION_REQUIRED_CACHE_REGISTRIES,
   SourceDeletionPropagationPolicy,
   type SourceDeletionCacheInvalidation,
@@ -98,6 +99,43 @@ const makeDatabase = (): DatabaseSync => {
   return database;
 };
 
+const makeMigration92Database = (memoryState?:'active'|'restricted'|'deleted'):DatabaseSync => {
+  const database=makeDatabase();
+  const derivedMigration=FAMILY_DATABASE_MIGRATIONS.find(candidate=>candidate.version===77);
+  const migration=FAMILY_DATABASE_MIGRATIONS.find(candidate=>candidate.version===92);
+  if(!derivedMigration)throw new Error('MIGRATION_77_MISSING');
+  if(!migration)throw new Error('MIGRATION_92_MISSING');
+  database.exec(derivedMigration.sql);
+  database.exec(migration.sql);
+  database.exec('PRAGMA foreign_keys=OFF');
+  for(const row of database.prepare("SELECT name FROM sqlite_schema WHERE type='trigger'").all() as Array<{name:unknown}>){
+    database.exec(`DROP TRIGGER "${String(row.name).replaceAll('"','""')}"`);
+  }
+  if(memoryState){
+    const hash=(digit:string)=>digit.repeat(64);
+    database.prepare(`INSERT INTO derived_data_policy_bindings(
+      binding_hash,schema_version,derived_kind,derived_resource_type,derived_resource_id,derived_resource_version,content_sha256,family_id,
+      policy_version,policy_package_sha256,sensitivity,data_classes_json,access_policy_json,access_policy_sha256,obligations_json,
+      obligations_sha256,source_set_sha256,producer_receipt_hash,binding_json,source_count,lineage_depth,retention_until,status,created_at,sealed_at
+    ) VALUES(?,1,'AI_MEMORY','governed_ai_memory_record','memory-1','1',?,'family-ppk-019','1',?,'personal','["personal"]','{}',?,'[]',?,?,?,'{}',1,1,NULL,'pending',?,NULL)`)
+      .run(hash('1'),hash('2'),hash('3'),hash('4'),hash('5'),hash('6'),hash('7'),NOW);
+    database.prepare(`INSERT INTO derived_data_policy_sources(
+      binding_hash,source_ordinal,source_key,source_resource_type,source_resource_id,source_resource_version,content_sha256,family_id,
+      policy_version,policy_package_sha256,sensitivity,data_classes_json,policy_receipt_hash,context_hash,request_hash,source_snapshot_json,
+      source_snapshot_sha256,lineage_depth,retention_until,authorized_at
+    ) VALUES(?,0,?,'finance_record','finance-ppk-019','1',?,'family-ppk-019','1',?,'personal','["personal"]',?,?,?,'{}',?,0,NULL,?)`)
+      .run(hash('1'),hash('8'),hash('9'),hash('3'),hash('7'),hash('a'),hash('b'),hash('c'),NOW);
+    const deleted=memoryState==='deleted';
+    database.prepare(`INSERT INTO governed_ai_memory_records(
+      resource_id,family_id,account_id,owner_person_id,derived_binding_hash,title,statement,source_resource_type,source_resource_id,
+      source_occurred_at,restriction_visibility,selected_account_ids_json,allowed_purposes_json,processing_allowed,state,retention_until,
+      expired_at,deletion_requested_at,deleted_at,revision,state_fingerprint,last_mutation_id,created_at,updated_at,policy_receipt_hash
+    ) VALUES('memory-1','family-ppk-019','account-1','person-1',?,?,?,?,?,NULL,'owner_only','[]','["general"]',?,?,NULL,NULL,NULL,?,1,?,'mutation-1',?,?,?)`)
+      .run(hash('1'),deleted?'':'Yerel hafıza',deleted?'':'Kaynak veriden türetildi','finance_record','finance-ppk-019',deleted?0:1,memoryState,deleted?NOW:null,hash('d'),NOW,NOW,hash('7'));
+  }
+  return database;
+};
+
 const repositoryContext = (database: DatabaseSync): RepositoryExecutionContext => ({
   transaction: database as never,
   actor: { userId: asUserId('account-ppk-019'), roles: ['family_admin'] },
@@ -117,6 +155,8 @@ describe('PPK-019 merkezi kaynak silme ve retention yayılımı', () => {
     expect(SOURCE_DELETION_REQUIRED_CACHE_REGISTRIES).toEqual([
       'family-import-preview', 'ipc-main-read', 'offline-sensitive'
     ]);
+    expect(SOURCE_DELETION_METADATA_ONLY_MUTATION_LEDGERS).toEqual(['governed_ai_memory_mutations']);
+    expect(Object.isFrozen(SOURCE_DELETION_METADATA_ONLY_MUTATION_LEDGERS)).toBe(true);
   });
 
   it('yerel sahipleri tamamlayıp yedek yeniden yazımını pending bırakır', () => {
@@ -227,6 +267,47 @@ describe('PPK-019 merkezi kaynak silme ve retention yayılımı', () => {
     expect(database.prepare("SELECT COUNT(*) AS total FROM finance_records WHERE id='finance-ppk-019'").get()).toEqual({ total: 0 });
     expect(database.prepare("SELECT COUNT(*) AS total FROM object_permissions").get()).toEqual({ total: 0 });
     expect(database.prepare("SELECT COUNT(*) AS total FROM ai_consents").get()).toEqual({ total: 0 });
+  });
+
+  it('migration 92 yönetilen AI-memory owner kaydını sahte unregistered payload saymaz', () => {
+    const database=makeMigration92Database();
+    const inspected=new SqliteDataLifecycleRepository().inspectSourceDeletionPropagation(repositoryContext(database),NOW);
+    expect(inspected).toEqual({ok:true,value:inspection()});
+  });
+
+  it.each(['active','restricted'] as const)('kaynağa bağlı %s AI-memory current row purge işlemini fail-closed engeller', (state) => {
+    const database=makeMigration92Database(state);
+    const repository=new SqliteDataLifecycleRepository();
+    const context=repositoryContext(database);
+    const inspected=repository.inspectSourceDeletionPropagation(context,NOW);
+    if(!inspected.ok)throw new Error('inspection failed');
+    const plan=allowedPlan(new SourceDeletionPropagationPolicy(),inspected.value);
+    database.exec('BEGIN IMMEDIATE');
+    const result=repository.purgeResourceWithPropagation(context,plan);
+    database.exec('ROLLBACK');
+    expect(result.ok).toBe(false);
+    expect(database.prepare("SELECT COUNT(*) AS total FROM finance_records WHERE id='finance-ppk-019'").get()).toEqual({total:1});
+  });
+
+  it('silinmiş ve title/statement scrubbed AI-memory tombstone kaynak purge yayılımına izin verir', () => {
+    const database=makeMigration92Database('deleted');
+    const repository=new SqliteDataLifecycleRepository();
+    const context=repositoryContext(database);
+    const inspected=repository.inspectSourceDeletionPropagation(context,NOW);
+    if(!inspected.ok)throw new Error('inspection failed');
+    const plan=allowedPlan(new SourceDeletionPropagationPolicy(),inspected.value);
+    database.exec('BEGIN IMMEDIATE');
+    const result=repository.purgeResourceWithPropagation(context,plan);
+    database.exec(result.ok?'COMMIT':'ROLLBACK');
+    expect(result.ok).toBe(true);
+    expect(database.prepare("SELECT COUNT(*) AS total FROM finance_records WHERE id='finance-ppk-019'").get()).toEqual({total:0});
+  });
+
+  it('migration 92 yanında kayıtsız başka payload tablosu yine inspection reddi üretir', () => {
+    const database=makeMigration92Database();
+    database.exec('CREATE TABLE thumbnail_payloads(id TEXT PRIMARY KEY,payload TEXT NOT NULL)');
+    const inspected=new SqliteDataLifecycleRepository().inspectSourceDeletionPropagation(repositoryContext(database),NOW);
+    expect(inspected.ok&&inspected.value.unregisteredPersistentOwners).toEqual(['thumbnail_payloads']);
   });
 
   it('repository plan tamperında kaynağı ve metadata satırlarını korur', () => {

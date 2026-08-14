@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "id": "33-O-PRIVACY-OWNERSHIP-DATA-RIGHTS-INCIDENT-CONTROL",
+  "decision": "DEC-226",
+  "requirements": [
+    "B6-02",
+    "PPK-028",
+    "AUD-COM-006",
+    "EXT-036",
+    "EXT-037",
+    "EXT-038",
+    "EXT-040",
+    "EXT-041",
+    "EXT-042"
+  ],
+  "status": "COMPLETE",
+  "requirementChainLinks": [
+    "decision",
+    "threatModel",
+    "scope",
+    "inventory",
+    "domain",
+    "migration",
+    "application",
+    "repositoryContract",
+    "repository",
+    "policy",
+    "ipc",
+    "ui",
+    "tests"
+  ],
+  "canonicalAcceptance": {
+    "B6-02": "Kullanıcı tüm AI hafıza kayıtlarını yönetir; silme audit edilir.",
+    "PPK-028": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
+    "AUD-COM-006": "Karar→domain→schema→use-case→repository→API→UI→test zinciri tam ve kanıtlıdır.",
+    "EXT-036": "Tam karar-kod-ekran-test-belge-kanıt zinciri.",
+    "EXT-037": "Tam karar-kod-ekran-test-belge-kanıt zinciri.",
+    "EXT-038": "Tam karar-kod-ekran-test-belge-kanıt zinciri.",
+    "EXT-040": "Tam karar-kod-ekran-test-belge-kanıt zinciri.",
+    "EXT-041": "Tam karar-kod-ekran-test-belge-kanıt zinciri.",
+    "EXT-042": "Tam karar-kod-ekran-test-belge-kanıt zinciri."
+  },
+  "plannedModel": {
+    "migration": 92,
+    "migrationName": "privacy_ownership_data_rights_incident_control",
+    "resourceTypes": [
+      "ai_memory",
+      "privacy_rights_request",
+      "policy_incident",
+      "policy_simulation"
+    ],
+    "persistenceAuthority": "central_pep_uow",
+    "tables": [
+      "governed_ai_memory_records",
+      "governed_ai_memory_mutations",
+      "privacy_access_observations",
+      "privacy_processing_observations",
+      "privacy_rights_requests",
+      "policy_incident_cases",
+      "policy_incident_quarantine_items",
+      "privacy_export_records"
+    ],
+    "reusedAuthorities": {
+      "derivedDataLineage": "PPK-016",
+      "sourceDeletionPropagation": "PPK-019",
+      "localDeviceAuthorityRevocation": "33-K",
+      "asyncRouteStateUx": "33-N"
+    },
+    "permissionSimulation": "preview_only_no_grant_no_mutation",
+    "encryptedExport": "local_user_selected_authenticated_encryption"
+  },
+  "truth": {
+    "networkChannels": [],
+    "networkDelivery": "not_performed",
+    "networkDeliveryGuaranteed": false,
+    "remoteWipePerformed": false,
+    "mdmOperationPerformed": false,
+    "remoteDeviceStateVerified": false,
+    "appleSyncFacts": "locally_observed_only",
+    "aiProcessingFacts": "locally_observed_only",
+    "ocrProcessingFacts": "locally_observed_only",
+    "translationProcessingFacts": "locally_observed_only",
+    "aiInferenceOrTrainingClaimed": false,
+    "exportDeliveryGuaranteed": false,
+    "recipientReadGuaranteed": false,
+    "legacyDeliveryGuaranteed": false,
+    "externalCopyPhysicalDeletionGuaranteed": false,
+    "permissionSimulationGrantsAuthority": false,
+    "legalCertificationClaimed": false,
+    "privacyCertificationClaimed": false
+  },
+  "validation": {
+    "status": "PASS",
+    "boundary": "artifacts/validation/33-O-privacy-ownership-data-rights-incident-control-boundary.json",
+    "contract": "artifacts/validation/33-O-privacy-ownership-data-rights-incident-control-contract.json",
+    "runtime": "artifacts/validation/33-O-privacy-ownership-data-rights-incident-control-runtime.json",
+    "designTargetsUnverified": {
+      "boundaryChecks": 45,
+      "contractChecks": 18,
+      "runtimeChecks": 18,
+      "targetedTestFiles": 11,
+      "targetedTests": 167,
+      "migration92Checksum": "a81c13518563172d29aa2b351218faf553a2189616657fc0fbda9b1922eee137"
+    },
+    "persistentReceipt": "NOT_RUN",
+    "finalEvidence": {
+      "boundaryChecksPassed": 45,
+      "contractChecksPassed": 18,
+      "runtimeChecksPassed": 18,
+      "targetedTestFilesPassed": 11,
+      "targetedTestsPassed": 167,
+      "fullVitestTestFilesPassed": 149,
+      "fullVitestTestsPassed": 1214,
+      "productionWorkspaceBuildsPassed": 18,
+      "ppk021ExactAllowlistEntries": 590,
+      "ppk021UseCaseCompositionSurfaces": 297,
+      "ppk022CapabilitySurfaces": 254,
+      "networkChannels": 0,
+      "operatingSystemSettingsModified": false,
+      "localUserSelectedEncryptedFileWriteSupported": true,
+      "latestDatabaseMigration": 92,
+      "migration92Checksum": "a81c13518563172d29aa2b351218faf553a2189616657fc0fbda9b1922eee137",
+      "requirementChainsComplete": 9,
+      "automatedClosureEvidenceComplete": true,
+      "legalReview": "NOT_RUN",
+      "privacyReview": "NOT_RUN",
+      "realDevice": "NOT_RUN",
+      "humanUat": "NOT_RUN",
+      "certificationClaimed": false
+    },
+    "preparedAt": "2026-08-14T02:59:20.901Z"
+  },
+  "manualEvidence": {
+    "humanPrivacyUat": "NOT_RUN",
+    "humanUat": "NOT_RUN",
+    "legalReview": "NOT_RUN",
+    "realDevice": "NOT_RUN",
+    "certificationClaimed": false
+  },
+  "completionBlockers": [
+    "Persistent local and D: receipt, source protection and Git remote equality are pending."
+  ],
+  "persistentReceiptStatus": "NOT_RUN"
+}

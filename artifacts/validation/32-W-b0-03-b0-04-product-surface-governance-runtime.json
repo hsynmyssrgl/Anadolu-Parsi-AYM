@@ -28,7 +28,7 @@
       "status": "PASS",
       "exitCode": 0,
       "signal": null,
-      "outputTail": "Feature Reality Gate: PASS honesty / 350 requirements / surface 17+5=22 / unused API 14+0 / Silver BLOCKED."
+      "outputTail": "Feature Reality Gate: PASS honesty / 358 requirements / surface 17+5=22 / unused API 14+0 / Silver BLOCKED."
     },
     {
       "id": "b0-surface-targeted-runtime",
@@ -37,7 +37,7 @@
       "signal": null,
       "tests": 6,
       "testFiles": 2,
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n······\n\n Test Files  2 passed (2)\n      Tests  6 passed (6)\n   Start at  12:47:05\n   Duration  1.15s (transform 301ms, setup 0ms, import 668ms, tests 13ms, environment 0ms)"
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n······\n\n Test Files  2 passed (2)\n      Tests  6 passed (6)\n   Start at  05:26:13\n   Duration  3.79s (transform 1.58s, setup 0ms, import 3.14s, tests 14ms, environment 0ms)"
     },
     {
       "id": "root-typescript",
@@ -51,11 +51,11 @@
       "status": "PASS",
       "exitCode": 0,
       "signal": null,
-      "outputTail": "User Decision Ledger: PASS (333 checks / 62 decisions)."
+      "outputTail": "User Decision Ledger: PASS (413 checks / 78 decisions)."
     }
   ],
   "failures": [],
   "requirementCompletionClaimed": true,
   "b901CompletedByThisPackage": false,
-  "generatedAt": "2026-08-12T09:47:08.133Z"
+  "generatedAt": "2026-08-14T02:26:19.496Z"
 }

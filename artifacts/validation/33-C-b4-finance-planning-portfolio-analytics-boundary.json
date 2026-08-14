@@ -172,15 +172,15 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 91,
+  "latestDatabaseMigration": 92,
   "financePlanningLedgerColumns": 39,
-  "ppk021ExactAllowlistEntries": 571,
-  "ppk021UseCaseCompositionSurfaces": 291,
-  "ppk022CapabilitySurfaces": 246,
+  "ppk021ExactAllowlistEntries": 590,
+  "ppk021UseCaseCompositionSurfaces": 297,
+  "ppk022CapabilitySurfaces": 254,
   "prohibitedSecretColumns": 0,
   "crossCurrencyAggregationPerformed": false,
   "externalPricingPerformed": false,
   "bankSynchronizationPerformed": false,
   "paymentExecutionPerformed": false,
-  "generatedAt": "2026-08-14T00:06:42.409Z"
+  "generatedAt": "2026-08-14T02:58:30.100Z"
 }

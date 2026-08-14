@@ -1,4 +1,9 @@
 
+## DEC-226 - Gizlilik sahiplik veri haklari ve olay kontrolu
+
+33-O dokuz requirement icin merkezi PEP/UoW, migration 92, yerel gozlem, sifreli export ve no-claim sinirlarini baglar. Ayrinti: docs/decisions/DEC-226-privacy-ownership-data-rights-incident-control.md.
+
+
 ## DEC-225 - Taslak ve asenkron durum UX
 
 33-N; B3-02, B7-14 ve B7-15 icin merkezi form_draft PEP/UoW, immutable revision history, immediate undo, accessible validation ve fail-closed async state sozlesmesini baglar. Ayrinti: docs/decisions/DEC-225-draft-async-state-ux.md.
@@ -117,8 +122,8 @@ gider akışları manual-only çalışır. Dış sicil sorgusu, sağlayıcı ile
 içeriği ifşası veya ödeme icrası yapılmaz. Ayrıntılı karar:
 `docs/decisions/DEC-216-b5-category-life-home-vehicle.md`
 
-PPK-021 güncel ratchet 557 exact yüzey ve 284 use-case composition yüzeyidir;
-PPK-022 güncel exact capability ratchet 246'dır.
+PPK-021 güncel ratchet 590 exact yüzey ve 297 use-case composition yüzeyidir;
+PPK-022 güncel exact capability ratchet 254'tür.
 
 ## DEC-215 — Kontrollü finans içe aktarma ve ağsız ÖHVPS sınırı
 

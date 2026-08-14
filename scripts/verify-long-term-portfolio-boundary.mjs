@@ -165,11 +165,11 @@ check('truth excludes execution advice guarantees live delivery and network chan
   && scope.truth?.returnGuaranteed===false && scope.truth?.taxOrLegalAccuracyGuaranteed===false
   && scope.truth?.projectionOutcomeGuaranteed===false && inventory.networkChannels?.length===0);
 check('PPK-021 exact successor ratchet is green', astGate.status==='PASS'
-  && astGate.privilegedSurfaces===571 && astGate.exactAllowlistEntries===571
-  && astGate.surfaceCounts?.USE_CASE_COMPOSITION===291
+  && astGate.privilegedSurfaces===590 && astGate.exactAllowlistEntries===590
+  && astGate.surfaceCounts?.USE_CASE_COMPOSITION===297
   && astGate.directRoleAuthorizationBypasses===0 && astGate.findings.length===0);
 check('PPK-022 exact capability ratchet remains green', capabilityGate.status==='PASS'
-  && capabilityGate.capabilitySurfaces===246 && capabilityGate.exactManifestSurfaces===246
+  && capabilityGate.capabilitySurfaces===254 && capabilityGate.exactManifestSurfaces===254
   && capabilityGate.findings.length===0);
 check('root lifecycle executes 33-L boundary before typecheck and build', ['pretypecheck','prebuild'].every((name)=>
   rootPackage.scripts?.[name]?.includes('verify-long-term-portfolio-boundary.mjs')));

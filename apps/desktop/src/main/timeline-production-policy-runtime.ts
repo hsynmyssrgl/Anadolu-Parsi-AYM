@@ -39,6 +39,7 @@ import type {
   PersonRecord,
   PersonRepositoryPort,
   PlatformPolicyTransactionRepositoryPort,
+  PrivacyOwnershipDataRightsRepositoryPort,
   PolicyAuthorizedRepositoryExecutionContext,
   RepositoryExecutionContext,
   TransactionContext,
@@ -65,6 +66,7 @@ export interface TimelineProductionPolicyRuntimeDependencies {
   readonly timelinePolicyResourceRepository: TimelineEventPolicyResourceRepositoryPort;
   readonly accessibilityPreferencesRepository: AccessibilityPreferencesRepositoryPort;
   readonly formDraftRepository: FormDraftRepositoryPort;
+  readonly privacyOwnershipDataRightsRepository: PrivacyOwnershipDataRightsRepositoryPort;
   readonly personRepository: PersonRepositoryPort;
   readonly deviceIdentityProvider: Pick<FileDeviceIdentityProvider, 'snapshot'>;
   readonly authorizationProvider: PlatformPolicyAuthorizationProvider;
@@ -92,7 +94,16 @@ const REPLAY_PRUNING_BATCH_SIZE = 128;
 const timelineResourceTypes = new Set<TimelinePolicyIntent['resourceType']>([
   'event',
   'accessibility_preferences',
-  'form_draft'
+  'form_draft',
+  'privacy_ownership_center',
+  'ai_memory_record',
+  'data_rights_request',
+  'privacy_incident'
+]);
+const timelinePurposes = new Set<TimelinePolicyIntent['purpose']>([
+  'general',
+  'ai_processing',
+  'administration'
 ]);
 
 const nonEmpty = (value: unknown, max = 512): value is string =>
@@ -522,7 +533,7 @@ const permissionIsValid = (
     && row.actions.every((action) => action === 'read' || action === 'update' || action === 'delete')
     && (row.effect === 'allow' || row.effect === 'deny')
     && (row.ownershipBasisPoints === undefined || (row.effect === 'allow' && Number.isInteger(row.ownershipBasisPoints) && row.ownershipBasisPoints >= 1 && row.ownershipBasisPoints <= 10_000))
-    && row.purpose === 'general'
+    && timelinePurposes.has(row.purpose as TimelinePolicyIntent['purpose'])
     && row.familyBranchId === undefined
     && Number.isFinite(now)
     && Number.isFinite(startsAt)
@@ -643,7 +654,7 @@ const loadAuthoritySnapshotInTransaction = (
   if (!permissionsResult.ok) return permissionsResult;
   const timelinePermissions = permissionsResult.value.filter((row) =>
     timelineResourceTypes.has(row.resourceType as TimelinePolicyIntent['resourceType'])
-    && row.purpose === 'general'
+    && timelinePurposes.has(row.purpose as TimelinePolicyIntent['purpose'])
   );
   if (
     timelinePermissions.length > 10_000
@@ -692,10 +703,50 @@ interface TimelinePolicyResourceState {
 
 const findTimelineResourceForPolicyResolution = (
   dependencies: TimelineProductionPolicyRuntimeDependencies,
+  context: TimelineApplicationContext,
   execution: RepositoryExecutionContext,
   resourceType: TimelinePolicyIntent['resourceType'],
   resourceId: string
 ): Result<TimelinePolicyResourceState | null, AppError> => {
+  if (
+    resourceType === 'privacy_ownership_center'
+    || resourceType === 'ai_memory_record'
+    || resourceType === 'data_rights_request'
+    || resourceType === 'privacy_incident'
+  ) {
+    if (!context.actor.personId) {
+      throw new PlatformPolicyEnforcementError(
+        'RESOURCE_RESOLUTION_FAILED',
+        'Privacy ownership policy resolution requires an exact person identity'
+      );
+    }
+    if (resourceType === 'privacy_ownership_center' && resourceId !== context.actor.userId) {
+      throw new PlatformPolicyEnforcementError(
+        'RESOURCE_RESOLUTION_FAILED',
+        'Privacy ownership center identity must match the authenticated account'
+      );
+    }
+    const repositoryResourceType = resourceType;
+    const found = dependencies.privacyOwnershipDataRightsRepository.resolvePolicyResource(
+      execution,
+      Object.freeze({
+        familyId: context.familyId,
+        accountId: context.actor.userId,
+        ownerPersonId: context.actor.personId
+      }),
+      repositoryResourceType,
+      resourceId
+    );
+    if (!found.ok) return found;
+    return ok(found.value
+      ? Object.freeze({
+          familyId: found.value.familyId,
+          ownerPersonId: found.value.ownerPersonId,
+          sensitivity: found.value.sensitivity,
+          stateFingerprint: found.value.stateFingerprint
+        })
+      : null);
+  }
   if (resourceType === 'form_draft') {
     const match = /^form_draft\/([^/]+)\/([A-Za-z0-9._:-]{3,128})$/u.exec(resourceId);
     if (!match?.[1] || !match[2]) {
@@ -775,8 +826,16 @@ const loadTimelineResourceSnapshotInTransaction = (
   const execution = repositoryContext(context, transaction);
   if (
     !timelineResourceTypes.has(requestedIntent.resourceType)
-    || requestedIntent.purpose !== 'general'
+    || !timelinePurposes.has(requestedIntent.purpose)
+    || (requestedIntent.resourceType === 'ai_memory_record' && requestedIntent.purpose !== 'ai_processing')
+    || ((requestedIntent.resourceType === 'privacy_ownership_center'
+      || requestedIntent.resourceType === 'privacy_incident'
+      || requestedIntent.resourceType === 'data_rights_request') && requestedIntent.purpose !== 'administration')
+    || ((requestedIntent.resourceType === 'event'
+      || requestedIntent.resourceType === 'accessibility_preferences'
+      || requestedIntent.resourceType === 'form_draft') && requestedIntent.purpose !== 'general')
     || !nonEmpty(requestedIntent.resourceId, 256)
+    || (requestedIntent.resourceId === '*' && requestedIntent.resourceType !== 'event')
     || (requestedIntent.sourceResourceId !== undefined && !nonEmpty(requestedIntent.sourceResourceId, 256))
     || (requestedIntent.action === 'read'
       ? requestedIntent.capability !== 'family.read'
@@ -811,13 +870,17 @@ const loadTimelineResourceSnapshotInTransaction = (
     ) return invalidAuthority(context, 'Timeline create policy metadata is incomplete');
     const existing = findTimelineResourceForPolicyResolution(
       dependencies,
+      context,
       execution,
       requestedIntent.resourceType,
       requestedIntent.resourceId
     );
     if (!existing.ok) return existing;
     if (existing.value && requestedIntent.resourceType !== 'accessibility_preferences'
-      && requestedIntent.resourceType !== 'form_draft') {
+      && requestedIntent.resourceType !== 'form_draft'
+      && requestedIntent.resourceType !== 'ai_memory_record'
+      && requestedIntent.resourceType !== 'data_rights_request'
+      && requestedIntent.resourceType !== 'privacy_incident') {
       return invalidAuthority(context, 'Timeline policy create resource already exists');
     }
     if (existing.value) {
@@ -860,6 +923,7 @@ const loadTimelineResourceSnapshotInTransaction = (
 
   const existing = findTimelineResourceForPolicyResolution(
     dependencies,
+    context,
     execution,
     requestedIntent.resourceType,
     requestedIntent.resourceId

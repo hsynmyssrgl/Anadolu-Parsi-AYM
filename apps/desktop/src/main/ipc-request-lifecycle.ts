@@ -75,6 +75,25 @@ const formDraftChannels = new Set<string>([
   ...formDraftReadChannels,
   ...formDraftWriteChannels
 ]);
+const privacyOwnershipReadChannels = new Set<string>([
+  'privacyOwnership:getCenter',
+  'privacyOwnership:simulatePermission'
+]);
+const privacyOwnershipWriteChannels = new Set<string>([
+  'privacyOwnership:correctAiMemory',
+  'privacyOwnership:restrictAiMemory',
+  'privacyOwnership:deleteAiMemory',
+  'privacyOwnership:expireAiMemory',
+  'privacyOwnership:createRightsRequest',
+  'privacyOwnership:updateRightsRequest',
+  'privacyOwnership:createIncident',
+  'privacyOwnership:updateIncident',
+  'privacyOwnership:exportEncrypted'
+]);
+const privacyOwnershipChannels = new Set<string>([
+  ...privacyOwnershipReadChannels,
+  ...privacyOwnershipWriteChannels
+]);
 
 const cancellableNetworkChannels = new Set<string>([
   'dataLifecycle:runRevocationSync'
@@ -86,6 +105,12 @@ const cancellableInteractiveAuthenticationChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLifecyclePolicy => {
+  if (privacyOwnershipReadChannels.has(channel)) {
+    return Object.freeze({ cancellable: true, latestWins: true, timeoutMs: 10_000 });
+  }
+  if (privacyOwnershipWriteChannels.has(channel)) {
+    return Object.freeze({ cancellable: false, latestWins: false, timeoutMs: 0 });
+  }
   if (formDraftReadChannels.has(channel)) {
     return Object.freeze({ cancellable: true, latestWins: true, timeoutMs: 10_000 });
   }
@@ -138,6 +163,17 @@ const standardAdmissionChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestAdmissionPolicy = (channel: string): IpcRequestAdmissionPolicy => {
+  if (privacyOwnershipChannels.has(channel)) {
+    return Object.freeze({
+      enabled: true,
+      priority: 'interactive',
+      priorityWeight: 100,
+      maxConcurrentPerSender: 2,
+      maxConcurrentPerChannel: 1,
+      maxQueuedPerSender: 4,
+      queueTimeoutMs: 2_500
+    });
+  }
   if (formDraftChannels.has(channel)) {
     return Object.freeze({
       enabled: true,
@@ -200,6 +236,12 @@ export interface IpcRequestRatePolicy {
 }
 
 export const resolveIpcRequestRatePolicy = (channel: string): IpcRequestRatePolicy => {
+  if (privacyOwnershipReadChannels.has(channel)) {
+    return Object.freeze({ enabled: true, maxRequestsPerWindow: 120, windowMs: 60_000 });
+  }
+  if (privacyOwnershipWriteChannels.has(channel)) {
+    return Object.freeze({ enabled: true, maxRequestsPerWindow: 24, windowMs: 60_000 });
+  }
   if (formDraftReadChannels.has(channel)) {
     return Object.freeze({ enabled: true, maxRequestsPerWindow: 120, windowMs: 60_000 });
   }

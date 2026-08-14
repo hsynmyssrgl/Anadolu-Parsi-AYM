@@ -18,7 +18,7 @@
   "signedManifestRuntimeCheckRequired": true,
   "buildManifestAloneGrantsRuntimeAuthority": false,
   "productionSourceZoneCount": 18,
-  "scannedProductionFiles": 381,
+  "scannedProductionFiles": 408,
   "protectedCapabilityFamilies": [
     "camera",
     "microphone",
@@ -30,11 +30,11 @@
   ],
   "surfaceCounts": {
     "FILE_DIALOG": 2,
-    "FILE_IMPORT": 233,
+    "FILE_IMPORT": 241,
     "NETWORK_API": 3,
     "NETWORK_IMPORT": 8
   },
-  "exactCapabilitySurfaceCount": 246,
+  "exactCapabilitySurfaceCount": 254,
   "applicationRuntimeCapabilities": {
     "windows-desktop": [
       "file.access",
@@ -1172,6 +1172,70 @@
     },
     {
       "key": "FILE_IMPORT|apps/desktop/src/main/platform-policy-receipt-file-sink.ts|node:fs:writeFileSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/privacy-data-export-service.ts|node:fs:constants",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/privacy-data-export-service.ts|node:fs/promises:access",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/privacy-data-export-service.ts|node:fs/promises:link",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/privacy-data-export-service.ts|node:fs/promises:lstat",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/privacy-data-export-service.ts|node:fs/promises:open",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/privacy-data-export-service.ts|node:fs/promises:readFile",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/privacy-data-export-service.ts|node:fs/promises:realpath",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/privacy-data-export-service.ts|node:fs/promises:unlink",
       "applicationIds": [
         "windows-desktop"
       ],

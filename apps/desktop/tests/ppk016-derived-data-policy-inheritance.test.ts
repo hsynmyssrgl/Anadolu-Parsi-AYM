@@ -16,6 +16,7 @@ import {
 } from '@ppt/application';
 import {
   DERIVED_DATA_AUTHORIZED_REPOSITORY_ADAPTERS,
+  DERIVED_DATA_AUTHORIZED_METADATA_INVENTORY_READERS,
   DERIVED_DATA_DIRECT_ACCESS_EXCEPTIONS,
   DERIVED_DATA_KINDS,
   DERIVED_DATA_MAX_ANCESTOR_COUNT,
@@ -639,6 +640,11 @@ describe('32-L PPK-016 türetilmiş veri politika mirası', () => {
       'packages/repositories/src/derived-data-policy-repository.ts'
     ]);
     expect(Object.isFrozen(DERIVED_DATA_AUTHORIZED_REPOSITORY_ADAPTERS)).toBe(true);
+    expect(DERIVED_DATA_AUTHORIZED_METADATA_INVENTORY_READERS).toEqual([
+      'packages/repositories/src/data-lifecycle-repository.ts',
+      'packages/repositories/src/privacy-ownership-data-rights-repository.ts'
+    ]);
+    expect(Object.isFrozen(DERIVED_DATA_AUTHORIZED_METADATA_INVENTORY_READERS)).toBe(true);
     expect(snapshot).toEqual({
       schemaVersion: 1,
       enforcement: 'fail-closed',

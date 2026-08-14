@@ -32,6 +32,7 @@ export * from './finance-repository.js';
 export * from './long-term-portfolio-repository.js';
 export * from './accessibility-preferences-repository.js';
 export * from './form-draft-repository.js';
+export * from './privacy-ownership-data-rights-repository.js';
 
 export * from './archive-repository.js';
 

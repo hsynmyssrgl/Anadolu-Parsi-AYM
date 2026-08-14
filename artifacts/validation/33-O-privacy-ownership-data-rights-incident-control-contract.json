@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "step": "33-O",
+  "decision": "DEC-226",
+  "requirements": [
+    "B6-02",
+    "PPK-028",
+    "AUD-COM-006",
+    "EXT-036",
+    "EXT-037",
+    "EXT-038",
+    "EXT-040",
+    "EXT-041",
+    "EXT-042"
+  ],
+  "status": "PASS",
+  "governanceState": "VALIDATED_RECEIPT_PENDING",
+  "persistentReceiptStatus": "NOT_RUN",
+  "checksPassed": 18,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "scope exact DEC and nine requirements",
+      "status": "PASS"
+    },
+    {
+      "name": "inventory exact step decision requirements",
+      "status": "PASS"
+    },
+    {
+      "name": "governance lifecycle initial prepared completed only",
+      "status": "PASS"
+    },
+    {
+      "name": "registry stays open initially and exact complete later",
+      "status": "PASS"
+    },
+    {
+      "name": "requirement chain contract is exact 13 links",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 92 exact identity",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK016 PPK019 33K 33N dependencies",
+      "status": "PASS"
+    },
+    {
+      "name": "all no-claim truth is fail closed",
+      "status": "PASS"
+    },
+    {
+      "name": "Apple AI OCR translation facts local only",
+      "status": "PASS"
+    },
+    {
+      "name": "manual human UAT legal review and real device remain NOT_RUN",
+      "status": "PASS"
+    },
+    {
+      "name": "certification remains false",
+      "status": "PASS"
+    },
+    {
+      "name": "package has boundary contract runtime scripts",
+      "status": "PASS"
+    },
+    {
+      "name": "package has prepare finalize and completion scripts",
+      "status": "PASS"
+    },
+    {
+      "name": "decision binds nine requirements and no claims",
+      "status": "PASS"
+    },
+    {
+      "name": "threat model binds local observation export and simulation",
+      "status": "PASS"
+    },
+    {
+      "name": "33-P successor exists and depends on 33-O",
+      "status": "PASS"
+    },
+    {
+      "name": "active ledger remains 33-O before preparation",
+      "status": "PASS"
+    },
+    {
+      "name": "receipt phase matches blockers",
+      "status": "PASS"
+    }
+  ],
+  "generatedAt": "2026-08-14T02:59:42.258Z"
+}

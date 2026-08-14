@@ -10,7 +10,7 @@ import {
 import type { DesktopRuntime } from './runtime-bootstrap.js';
 import { evaluateIpcSenderTrust, type IpcSenderEventLike, type TrustedRendererDescriptor } from './ipc-sender-trust.js';
 import { evaluateIpcPayloadSecurity } from './ipc-payload-security.js';
-import { evaluateIpcIntegrationPolicy } from './ipc-integration-policy.js';
+import { evaluateIpcIntegrationPolicy, evaluateIpcIntegrationResultPolicy } from './ipc-integration-policy.js';
 import {
   IpcTransportProtocolError,
   IpcTransportSessionRegistry,
@@ -341,6 +341,16 @@ export const registerCorrelatedIpcHandler = <TArguments extends unknown[], TResu
             })
           : Promise.resolve(input.handler(event, ...(handlerArguments as TArguments)));
         const result = await requestLease.run(operation);
+        const resultDecision = evaluateIpcIntegrationResultPolicy(input.channel, result);
+        if (!resultDecision.accepted) {
+          throw createAppError({
+            code: ERROR_CODES.CORE_UNEXPECTED,
+            message: 'IPC yanıtı kanalın güvenli sonuç sözleşmesiyle uyuşmuyor.',
+            category: 'security',
+            correlationId,
+            details: { channel: input.channel, reason: resultDecision.reason }
+          });
+        }
         const readCacheStored = readSharingKey
           ? input.readResults.store(event.sender?.id ?? -1, readSharingKey, result, readSharingPolicy, Date.now(), readCacheGeneration)
           : false;

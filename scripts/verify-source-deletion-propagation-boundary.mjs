@@ -10,6 +10,8 @@ const ADAPTER = 'apps/desktop/src/main/data-lifecycle-application-adapter.ts';
 const DATA_STORE = 'apps/desktop/src/main/data-store.ts';
 const MAIN = 'apps/desktop/src/main/main.ts';
 const CACHE_ADAPTER = 'apps/desktop/src/main/source-deletion-propagation-application-adapter.ts';
+const SCHEMA_OWNER = 'packages/database/src/family-database-migrations.ts';
+const AI_MEMORY_MUTATION_METADATA_LEDGER = 'governed_ai_memory_mutations';
 
 const AUTHORIZED_PROPAGATION_CALLERS = new Set([REPOSITORY, CONTRACT, ADAPTER, USE_CASE]);
 const AUTHORIZED_ENFORCEMENT_COMPOSITION = new Set([DATA_STORE]);
@@ -19,8 +21,14 @@ const relevant = /SourceDeletion|sourceDeletion|source-deletion|purgeResourceWit
 const normalize = (value) => value.replaceAll('\\', '/');
 
 const PRIMARY_DELETE = /DELETE\s+FROM\s+(?:finance_records|health_records|medication_plans|family_health_history|life_records)\b/iu;
-const DERIVED_PAYLOAD_TABLE = /CREATE\s+TABLE(?:\s+IF\s+NOT\s+EXISTS)?\s+[`"']?(?:[a-z0-9_]*(?:ocr(?:_text)?|search_index|thumbnail|ai_memory|derived_cache|plaintext_replica|replica)[a-z0-9_]*)/iu;
+const DERIVED_PAYLOAD_TABLE = /CREATE\s+TABLE(?:\s+IF\s+NOT\s+EXISTS)?\s+[`"']?([a-z0-9_]*(?:ocr(?:_text)?|search_index|thumbnail|ai_memory|derived_cache|plaintext_replica|replica)[a-z0-9_]*)/iu;
 const DERIVED_PERSISTENCE_SYMBOL = /\b(?:insert|save|store|persist|write)(?:OcrText|SearchIndex|Thumbnail|AiMemory|DerivedCache|PlaintextReplica)\b/u;
+const SEMANTIC_PAYLOAD_COLUMN = /\b(?:payload(?:_json)?|title|statement|content(?:_bytes)?|plaintext|ciphertext|file_path|secret)\s+(?:TEXT|BLOB)\b/iu;
+const METADATA_LEDGER_COLUMNS = Object.freeze([
+  'client_operation_id', 'request_fingerprint', 'state_fingerprint', 'mutation_kind',
+  'resource_type', 'resource_id', 'family_id', 'account_id', 'owner_person_id',
+  'previous_revision', 'revision', 'policy_receipt_hash', 'occurred_at'
+]);
 
 const lineOf = (source, offset) => (source.slice(0, offset).match(/\n/gu) ?? []).length + 1;
 const finding = (path, source, kind, match) => ({ path, line: lineOf(source, match.index ?? 0), kind, detail: match[0] });
@@ -34,7 +42,18 @@ export const scanSourceDeletionPropagationSourceText = (path, source) => {
   if (primaryDelete && !AUTHORIZED_PRIMARY_DELETE_OWNER.has(normalizedPath)) add('PRIMARY_DELETE_OUTSIDE_PROPAGATION_REPOSITORY', primaryDelete);
 
   const payloadTable = DERIVED_PAYLOAD_TABLE.exec(source);
-  if (payloadTable) add('UNREGISTERED_DERIVED_PAYLOAD_TABLE', payloadTable);
+  if (payloadTable) {
+    const tableName = payloadTable[1];
+    const declarationEnd = source.indexOf(') STRICT;', payloadTable.index);
+    const declaration = declarationEnd < 0 ? '' : source.slice(payloadTable.index, declarationEnd + ') STRICT;'.length);
+    const authorizedMetadataLedger = normalizedPath === SCHEMA_OWNER
+      && tableName === AI_MEMORY_MUTATION_METADATA_LEDGER
+      && METADATA_LEDGER_COLUMNS.every((column) => new RegExp(`\\b${column}\\b`, 'u').test(declaration))
+      && !SEMANTIC_PAYLOAD_COLUMN.test(declaration)
+      && source.includes('CREATE TRIGGER trg_33o_ai_mutation_update BEFORE UPDATE ON governed_ai_memory_mutations')
+      && source.includes('CREATE TRIGGER trg_33o_ai_mutation_delete BEFORE DELETE ON governed_ai_memory_mutations');
+    if (!authorizedMetadataLedger) add('UNREGISTERED_DERIVED_PAYLOAD_TABLE', payloadTable);
+  }
 
   const persistenceSymbol = DERIVED_PERSISTENCE_SYMBOL.exec(source);
   if (persistenceSymbol) add('UNREGISTERED_DERIVED_PAYLOAD_WRITER', persistenceSymbol);
@@ -86,17 +105,32 @@ const selfTest = () => {
     ['repository.purgeResourceWithPropagation(plan)', 'PROPAGATION_REPOSITORY_CALL_OUTSIDE_AUTHORIZED_CHAIN'],
     ['new EnforceSourceDeletionPropagationUseCase(policy, cache)', 'PROPAGATION_ENFORCEMENT_OUTSIDE_DATASTORE_COMPOSITION'],
     ["copyFileSync(databasePath, 'backup.db')", 'PLAINTEXT_REPLICA_COPY_ACTIVE'],
-    ['sourceDeletionExternalCacheInvalidator:{invalidate:()=>[]}', 'EMPTY_RUNTIME_CACHE_INVALIDATOR']
+    ['sourceDeletionExternalCacheInvalidator:{invalidate:()=>[]}', 'EMPTY_RUNTIME_CACHE_INVALIDATOR'],
+    [`CREATE TABLE ${AI_MEMORY_MUTATION_METADATA_LEDGER}(
+      client_operation_id TEXT,request_fingerprint TEXT,state_fingerprint TEXT,mutation_kind TEXT,
+      resource_type TEXT,resource_id TEXT,family_id TEXT,account_id TEXT,owner_person_id TEXT,
+      previous_revision INTEGER,revision INTEGER,policy_receipt_hash TEXT,occurred_at TEXT,payload_json TEXT
+    ) STRICT;
+    CREATE TRIGGER trg_33o_ai_mutation_update BEFORE UPDATE ON governed_ai_memory_mutations BEGIN SELECT RAISE(ABORT,'immutable'); END;
+    CREATE TRIGGER trg_33o_ai_mutation_delete BEFORE DELETE ON governed_ai_memory_mutations BEGIN SELECT RAISE(ABORT,'immutable'); END;`, 'UNREGISTERED_DERIVED_PAYLOAD_TABLE', SCHEMA_OWNER]
   ];
-  const failed = malicious.filter(([source, kind]) => !scanSourceDeletionPropagationSourceText('apps/example/src/bypass.ts', source).some((item) => item.kind === kind));
+  const failed = malicious.filter(([source, kind, path = 'apps/example/src/bypass.ts']) => !scanSourceDeletionPropagationSourceText(path, source).some((item) => item.kind === kind));
   if (failed.length) throw new Error(`Source deletion malicious self-test failed: ${failed.length}/${malicious.length}`);
   const benign = [
     'const thumbnailWidth = 96;',
     'const index = values.findIndex(Boolean);',
     "const replicaLabel = 'yedek';",
-    'const cache = new Map();'
+    'const cache = new Map();',
+    `CREATE TABLE ${AI_MEMORY_MUTATION_METADATA_LEDGER}(
+      client_operation_id TEXT,request_fingerprint TEXT,state_fingerprint TEXT,mutation_kind TEXT,
+      resource_type TEXT,resource_id TEXT,family_id TEXT,account_id TEXT,owner_person_id TEXT,
+      previous_revision INTEGER,revision INTEGER,policy_receipt_hash TEXT,occurred_at TEXT
+    ) STRICT;
+    CREATE TRIGGER trg_33o_ai_mutation_update BEFORE UPDATE ON governed_ai_memory_mutations BEGIN SELECT RAISE(ABORT,'immutable'); END;
+    CREATE TRIGGER trg_33o_ai_mutation_delete BEFORE DELETE ON governed_ai_memory_mutations BEGIN SELECT RAISE(ABORT,'immutable'); END;`
   ];
-  const falsePositives = benign.flatMap((source) => scanSourceDeletionPropagationSourceText('apps/example/src/ordinary.ts', source));
+  const falsePositives = benign.flatMap((source, index) => scanSourceDeletionPropagationSourceText(
+    index === benign.length - 1 ? SCHEMA_OWNER : 'apps/example/src/ordinary.ts', source));
   if (falsePositives.length) throw new Error(`Source deletion benign self-test produced ${falsePositives.length} finding(s)`);
   return { malicious: malicious.length, benign: benign.length };
 };
@@ -152,6 +186,7 @@ const main = async () => {
     plaintextReplicaProductionOwners: 0,
     directBypassExceptions: 0,
     authorizedRepositoryAdapters: 2,
+    metadataOnlyAppendOnlyMutationLedgers: 1,
     findings: result.findings
   };
   console.log(JSON.stringify(report, null, 2));

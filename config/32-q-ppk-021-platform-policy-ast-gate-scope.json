@@ -20,10 +20,10 @@
     "aliasesAndComputedPropertiesInspected": true,
     "protectedRuleCount": 6,
     "productionSourceZoneCount": 18,
-    "scannedProductionFiles": 389,
-    "exactPrivilegedSurfaceCount": 571,
-    "exactAllowlistEntryCount": 571,
-    "exactAllowlistSha256": "f32368aa68f979a5888da0d02b5b6862678cb9c60580827062199a6759fee9f9",
+    "scannedProductionFiles": 408,
+    "exactPrivilegedSurfaceCount": 590,
+    "exactAllowlistEntryCount": 590,
+    "exactAllowlistSha256": "18a278877e0883d7ba0290c37b227c9fe145a0a41833d5be07ccd2bcb33d499b",
     "directRoleAuthorizationBypasses": 0,
     "rendererRoleConditionGrantsAuthority": false,
     "allowlistMutationGrantsRuntimeAuthority": false,
@@ -59,7 +59,7 @@
     "SQL_CALL": 57,
     "SQL_CONSTRUCTOR": 2,
     "SQL_IMPORT": 2,
-    "USE_CASE_COMPOSITION": 291
+    "USE_CASE_COMPOSITION": 297
   },
   "productionSourceZones": ["apps/*/src", "packages/*/src"],
   "allowlist": "config/32-q-ppk-021-platform-policy-ast-allowlist.json",

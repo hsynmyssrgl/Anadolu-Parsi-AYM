@@ -1257,7 +1257,196 @@ const optionalWindowsHelloFallback = (value: unknown): boolean => {
     && optionalBoundedString(value.secondFactorCode, 256);
 };
 
+const privacyOwnershipChannels = new Set([
+  'privacyOwnership:getCenter',
+  'privacyOwnership:correctAiMemory',
+  'privacyOwnership:restrictAiMemory',
+  'privacyOwnership:deleteAiMemory',
+  'privacyOwnership:expireAiMemory',
+  'privacyOwnership:createRightsRequest',
+  'privacyOwnership:updateRightsRequest',
+  'privacyOwnership:createIncident',
+  'privacyOwnership:updateIncident',
+  'privacyOwnership:simulatePermission',
+  'privacyOwnership:exportEncrypted'
+]);
+const privacyAiMemoryVisibilities = new Set(['owner_only', 'selected_accounts', 'family']);
+const privacyAiMemoryPurposes = new Set(['general', 'care', 'finance', 'health', 'archive', 'legacy', 'ai_processing']);
+const privacyRightsKinds = new Set(['encrypted_export', 'retention_change', 'erasure', 'legacy_export']);
+const privacyRightsStatuses = new Set(['requested', 'in_review', 'locally_completed', 'rejected', 'cancelled']);
+const privacyIncidentSeverities = new Set(['low', 'medium', 'high', 'critical']);
+const privacyIncidentStatuses = new Set(['open', 'contained_locally', 'resolved', 'cancelled']);
+const privacyIncidentActions = new Set([
+  'revoke_local_session_authority', 'revoke_trusted_device', 'revoke_offline_capability',
+  'revoke_consent', 'revoke_capability', 'quarantine_local_derived_data'
+]);
+const privacyPermissionPurposes = new Set(['general', 'care', 'finance', 'health', 'archive', 'legacy', 'ai_processing', 'administration']);
+const privacyPathKeys = /^(?:path|filePath|directory|destination|destinationPath|sourcePath|targetPath)$/iu;
+const privacyCredentialKeys = /^(?:password|passphrase|pin|cvv|cvc|secret|token)$/iu;
+const privacyId = (value: unknown): boolean => typeof value === 'string'
+  && value === value.trim()
+  && value.length >= 2
+  && value.length <= 160
+  && /^[a-zA-Z0-9][a-zA-Z0-9._:-]*$/u.test(value);
+const privacyIso = (value: unknown): boolean => typeof value === 'string'
+  && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/u.test(value)
+  && Number.isFinite(Date.parse(value));
+const privacyRevision = (value: unknown): boolean => typeof value === 'number'
+  && Number.isSafeInteger(value) && value >= 0 && value <= 9_000_000_000_000_000;
+const privacyMutationIdentity = (value: Record<string, unknown>): boolean =>
+  privacyRevision(value.expectedRevision) && privacyId(value.clientOperationId);
+const exactNested = (value: unknown, keys: readonly string[]): value is Record<string, unknown> =>
+  isObject(value) && Object.keys(value).length === keys.length && hasOnlyKeys(value, keys);
+const optionalPrivacyText = (value: unknown, maximum = 4_096): boolean =>
+  value === undefined || boundedString(value, maximum, true);
+
+const inspectPrivacyOwnershipPayload = (
+  value: unknown,
+  allowRootPassphrase: boolean,
+  path = '$[0]',
+  depth = 0
+): IpcIntegrationPolicyDecision | undefined => {
+  if (depth > 10) return rejected('PRIVACY_ARGUMENT_NESTING_TOO_DEEP', path);
+  if (Array.isArray(value)) {
+    if (Object.getPrototypeOf(value) !== Array.prototype || value.length > 512) return rejected('PRIVACY_ARRAY_INVALID', path);
+    for (let index = 0; index < value.length; index += 1) {
+      const decision = inspectPrivacyOwnershipPayload(value[index], false, `${path}[${index}]`, depth + 1);
+      if (decision) return decision;
+    }
+    return undefined;
+  }
+  if (typeof value === 'string') {
+    if (value.length > 4_096) return rejected('PRIVACY_STRING_TOO_LARGE', path);
+    return containsLikelyFullPan(value) ? rejected('BANKING_SECRET_VALUE_PROHIBITED', path) : undefined;
+  }
+  if (typeof value === 'number' && !Number.isFinite(value)) return rejected('NON_FINITE_NUMBER_REJECTED', path);
+  if (value === null || typeof value !== 'object') return undefined;
+  if (!isObject(value)) return rejected('NON_PLAIN_OBJECT_REJECTED', path);
+  const ownKeys = Reflect.ownKeys(value);
+  if (ownKeys.some((key) => typeof key === 'symbol')) return rejected('SYMBOL_FIELD_PROHIBITED', path);
+  const keys = ownKeys as string[];
+  if (keys.length > 64) return rejected('PRIVACY_OBJECT_TOO_LARGE', path);
+  for (const key of keys) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (!descriptor || descriptor.get || descriptor.set || !('value' in descriptor)) return rejected('ACCESSOR_FIELD_PROHIBITED', `${path}.${key}`);
+    const nested = descriptor.value;
+    if (key === '__proto__' || key === 'prototype' || key === 'constructor') return rejected('PROTOTYPE_FIELD_PROHIBITED', `${path}.${key}`);
+    if (privacyPathKeys.test(key)) return rejected('PATH_FIELD_PROHIBITED', `${path}.${key}`);
+    if (privacyCredentialKeys.test(key) && !(allowRootPassphrase && depth === 0 && key === 'passphrase')) {
+      return rejected('CREDENTIAL_FIELD_PROHIBITED', `${path}.${key}`);
+    }
+    if (isProhibitedBankingSecretField(key)) return rejected('BANKING_SECRET_FIELD_PROHIBITED', `${path}.${key}`);
+    const decision = inspectPrivacyOwnershipPayload(nested, false, `${path}.${key}`, depth + 1);
+    if (decision) return decision;
+  }
+  return undefined;
+};
+
+const privacyOwnershipInput = (channel: string, args: readonly unknown[]): IpcIntegrationPolicyDecision => {
+  if (channel === 'privacyOwnership:getCenter') return zeroArguments(args);
+  if (args.length !== 1 || !isObject(args[0])) return rejected('OBJECT_ARGUMENT_REQUIRED', '$[0]');
+  const input = args[0];
+  const inspection = inspectPrivacyOwnershipPayload(input, channel === 'privacyOwnership:exportEncrypted');
+  if (inspection) return inspection;
+  const identity = (): boolean => privacyMutationIdentity(input);
+  switch (channel) {
+    case 'privacyOwnership:correctAiMemory':
+      return exactNested(input, ['expectedRevision', 'clientOperationId', 'recordId', 'title', 'statement'])
+        && identity() && privacyId(input.recordId) && boundedString(input.title, 240) && boundedString(input.statement, 4_096)
+        ? accepted() : rejected('PRIVACY_AI_MEMORY_CORRECTION_INVALID', '$[0]');
+    case 'privacyOwnership:restrictAiMemory': {
+      if (!exactNested(input, ['expectedRevision', 'clientOperationId', 'recordId', 'restriction'])
+        || !identity() || !privacyId(input.recordId)
+        || !exactNested(input.restriction, ['visibility', 'selectedAccountIds', 'allowedPurposes', 'processingAllowed'])) {
+        return rejected('PRIVACY_AI_MEMORY_RESTRICTION_INVALID', '$[0]');
+      }
+      const restriction = input.restriction;
+      const accounts = restriction.selectedAccountIds;
+      const purposes = restriction.allowedPurposes;
+      const valid = privacyAiMemoryVisibilities.has(String(restriction.visibility))
+        && Array.isArray(accounts) && accounts.length <= 32 && accounts.every(privacyId) && new Set(accounts).size === accounts.length
+        && Array.isArray(purposes) && purposes.length <= 7 && purposes.every((purpose) => privacyAiMemoryPurposes.has(String(purpose))) && new Set(purposes).size === purposes.length
+        && typeof restriction.processingAllowed === 'boolean'
+        && (restriction.visibility === 'selected_accounts' ? accounts.length > 0 : accounts.length === 0);
+      return valid ? accepted() : rejected('PRIVACY_AI_MEMORY_RESTRICTION_INVALID', '$[0].restriction');
+    }
+    case 'privacyOwnership:deleteAiMemory':
+      return exactNested(input, ['expectedRevision', 'clientOperationId', 'recordId', 'reason'])
+        && identity() && privacyId(input.recordId) && boundedString(input.reason, 4_096)
+        ? accepted() : rejected('PRIVACY_AI_MEMORY_DELETION_INVALID', '$[0]');
+    case 'privacyOwnership:expireAiMemory':
+      return exactNested(input, ['expectedRevision', 'clientOperationId', 'recordId', 'retentionUntil'])
+        && identity() && privacyId(input.recordId) && privacyIso(input.retentionUntil)
+        ? accepted() : rejected('PRIVACY_AI_MEMORY_EXPIRY_INVALID', '$[0]');
+    case 'privacyOwnership:createRightsRequest':
+      return hasOnlyKeys(input, ['expectedRevision', 'clientOperationId', 'kind', 'scopeResourceType', 'scopeResourceId', 'reason', 'requestedRetentionUntil'])
+        && Object.keys(input).length >= 6
+        && identity() && privacyRightsKinds.has(String(input.kind)) && privacyId(input.scopeResourceType) && privacyId(input.scopeResourceId)
+        && boundedString(input.reason, 4_096) && optionalPrivacyText(input.requestedRetentionUntil, 64)
+        && (input.requestedRetentionUntil === undefined || privacyIso(input.requestedRetentionUntil))
+        && (input.kind !== 'encrypted_export' || input.scopeResourceType === 'privacy_inventory')
+        && (input.kind !== 'legacy_export' || input.scopeResourceType === 'digital_legacy')
+        ? accepted() : rejected('PRIVACY_RIGHTS_REQUEST_CREATE_INVALID', '$[0]');
+    case 'privacyOwnership:updateRightsRequest':
+      return hasOnlyKeys(input, ['expectedRevision', 'clientOperationId', 'requestId', 'status', 'resolutionNote'])
+        && Object.keys(input).length >= 4
+        && identity() && privacyId(input.requestId) && privacyRightsStatuses.has(String(input.status)) && optionalPrivacyText(input.resolutionNote)
+        ? accepted() : rejected('PRIVACY_RIGHTS_REQUEST_UPDATE_INVALID', '$[0]');
+    case 'privacyOwnership:createIncident': {
+      if (!exactNested(input, ['expectedRevision', 'clientOperationId', 'title', 'severity', 'suspectedAt', 'actions', 'evidenceReferenceIds'])
+        || !identity() || !boundedString(input.title, 240) || !privacyIncidentSeverities.has(String(input.severity)) || !privacyIso(input.suspectedAt)
+        || !Array.isArray(input.actions) || input.actions.length < 1 || input.actions.length > 5 || !Array.isArray(input.evidenceReferenceIds)
+        || input.evidenceReferenceIds.length > 64 || !input.evidenceReferenceIds.every(privacyId)) {
+        return rejected('PRIVACY_INCIDENT_CREATE_INVALID', '$[0]');
+      }
+      return input.actions.every((action) => exactNested(action, ['action', 'targetId'])
+        && privacyIncidentActions.has(String(action.action)) && privacyId(action.targetId))
+        ? accepted() : rejected('PRIVACY_INCIDENT_ACTION_INVALID', '$[0].actions');
+    }
+    case 'privacyOwnership:updateIncident':
+      return hasOnlyKeys(input, ['expectedRevision', 'clientOperationId', 'incidentId', 'status', 'resolutionNote'])
+        && Object.keys(input).length >= 4
+        && identity() && privacyId(input.incidentId) && privacyIncidentStatuses.has(String(input.status)) && optionalPrivacyText(input.resolutionNote)
+        ? accepted() : rejected('PRIVACY_INCIDENT_UPDATE_INVALID', '$[0]');
+    case 'privacyOwnership:simulatePermission': {
+      if (!exactNested(input, ['targets']) || !Array.isArray(input.targets) || input.targets.length < 1 || input.targets.length > 100) {
+        return rejected('PRIVACY_PERMISSION_SIMULATION_INVALID', '$[0]');
+      }
+      return input.targets.every((target) => exactNested(target, ['subjectAccountId', 'resourceType', 'resourceId', 'action', 'purpose', 'occurredAt'])
+        && privacyId(target.subjectAccountId) && target.resourceType === 'privacy_inventory' && privacyId(target.resourceId)
+        && target.action === 'read' && privacyPermissionPurposes.has(String(target.purpose)) && privacyIso(target.occurredAt))
+        ? accepted() : rejected('PRIVACY_PERMISSION_SIMULATION_TARGET_INVALID', '$[0].targets');
+    }
+    case 'privacyOwnership:exportEncrypted': {
+      if (!exactNested(input, ['requestId', 'passphrase']) || !privacyId(input.requestId) || typeof input.passphrase !== 'string') {
+        return rejected('PRIVACY_ENCRYPTED_EXPORT_INVALID', '$[0]');
+      }
+      const normalized = input.passphrase.normalize('NFKC');
+      return normalized === input.passphrase && normalized.length >= 12 && normalized.length <= 1_024
+        && normalized.trim() === normalized && !/[\p{Cc}\p{Cf}]/u.test(normalized) && !/^\d+$/u.test(normalized)
+        ? accepted() : rejected('PRIVACY_ENCRYPTED_EXPORT_PASSPHRASE_INVALID', '$[0].passphrase');
+    }
+    default:
+      return rejected('UNKNOWN_IPC_CHANNEL', '$');
+  }
+};
+
+export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unknown): IpcIntegrationPolicyDecision => {
+  if (channel !== 'privacyOwnership:exportEncrypted') return accepted();
+  if (!exactNested(result, ['fileName', 'artifactSha256', 'artifactSizeBytes', 'createdAt', 'delivery'])) {
+    return rejected('PRIVACY_EXPORT_RESULT_INVALID', '$result');
+  }
+  return typeof result.fileName === 'string' && result.fileName.length >= 12 && result.fileName.length <= 255
+    && !/[\\/\0]/u.test(result.fileName) && result.fileName.toLowerCase().endsWith('.pptprivacy')
+    && typeof result.artifactSha256 === 'string' && /^[0-9a-f]{64}$/u.test(result.artifactSha256)
+    && typeof result.artifactSizeBytes === 'number' && Number.isSafeInteger(result.artifactSizeBytes)
+    && result.artifactSizeBytes > 0 && result.artifactSizeBytes <= 50 * 1024 * 1024
+    && privacyIso(result.createdAt) && result.delivery === 'not_performed'
+    ? accepted() : rejected('PRIVACY_EXPORT_RESULT_INVALID', '$result');
+};
+
 export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unknown[]): IpcIntegrationPolicyDecision => {
+  if (privacyOwnershipChannels.has(channel)) return privacyOwnershipInput(channel, args);
   switch (channel) {
     case 'accessibility:getPreferences':
       return zeroArguments(args);

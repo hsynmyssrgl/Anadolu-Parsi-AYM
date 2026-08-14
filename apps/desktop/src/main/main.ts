@@ -80,6 +80,17 @@ import type { ApplicationSecurityProfileGateBoundaryView, DerivedDataPolicyBound
 import { GetProductSurfaceGovernanceUseCase } from '@ppt/application';
 import type { ProductSurfaceGovernanceView } from '@ppt/domain';
 import type { SaveFormDraftInput, UndoFormDraftInput } from '@ppt/domain';
+import type {
+  CorrectAiMemoryInput,
+  RestrictAiMemoryInput,
+  DeleteAiMemoryInput,
+  ExpireAiMemoryInput,
+  CreateDataRightsRequestInput,
+  UpdateDataRightsRequestInput,
+  CreatePrivacyIncidentInput,
+  UpdatePrivacyIncidentInput,
+  SimulatePermissionVisibilityInput
+} from '@ppt/domain';
 import { createProductSurfaceGovernanceRepository } from './repository-composition-root.js';
 import { FinanceImportFileSessionRegistry } from './finance-import-file-session.js';
 
@@ -87,6 +98,19 @@ type ArchiveMutationInput<TInput> = TInput & { readonly operationId: string };
 interface ArchiveItemMutationInput {
   readonly itemId: string;
   readonly operationId: string;
+}
+
+interface EncryptedPrivacyDataExportRendererInput {
+  readonly requestId: string;
+  readonly passphrase: string;
+}
+
+class PrivacyExportCancelledError extends Error {
+  public readonly code = 'PRIVACY_EXPORT_CANCELLED' as const;
+  public constructor() {
+    super('[PRIVACY_EXPORT_CANCELLED] Şifreli gizlilik dışa aktarımı kullanıcı tarafından iptal edildi.');
+    this.name = 'PrivacyExportCancelledError';
+  }
 }
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
@@ -1976,6 +2000,33 @@ function registerIpc(): void {
   registerIpcHandler('formDraft:getWorkspace', (_event, formKey:string) => store().getFormDraftWorkspace(formKey));
   registerIpcHandler('formDraft:save', (_event, input:SaveFormDraftInput) => store().saveFormDraft(input));
   registerIpcHandler('formDraft:undo', (_event, input:UndoFormDraftInput) => store().undoFormDraft(input));
+  registerIpcHandler('privacyOwnership:getCenter', () => store().getPrivacyOwnershipCenter());
+  registerIpcHandler('privacyOwnership:correctAiMemory', (_event, input:CorrectAiMemoryInput) => store().correctAiMemory(input));
+  registerIpcHandler('privacyOwnership:restrictAiMemory', (_event, input:RestrictAiMemoryInput) => store().restrictAiMemory(input));
+  registerIpcHandler('privacyOwnership:deleteAiMemory', (_event, input:DeleteAiMemoryInput) => store().deleteAiMemory(input));
+  registerIpcHandler('privacyOwnership:expireAiMemory', (_event, input:ExpireAiMemoryInput) => store().expireAiMemory(input));
+  registerIpcHandler('privacyOwnership:createRightsRequest', (_event, input:CreateDataRightsRequestInput) => store().createPrivacyRightsRequest(input));
+  registerIpcHandler('privacyOwnership:updateRightsRequest', (_event, input:UpdateDataRightsRequestInput) => store().updatePrivacyRightsRequest(input));
+  registerIpcHandler('privacyOwnership:createIncident', (_event, input:CreatePrivacyIncidentInput) => store().createPrivacyIncident(input));
+  registerIpcHandler('privacyOwnership:updateIncident', (_event, input:UpdatePrivacyIncidentInput) => store().updatePrivacyIncident(input));
+  registerIpcHandler('privacyOwnership:simulatePermission', (_event, input:SimulatePermissionVisibilityInput) => store().simulatePrivacyPermission(input));
+  registerIpcHandler('privacyOwnership:exportEncrypted', async (_event, input:EncryptedPrivacyDataExportRendererInput) => {
+    const selected = await dialog.showSaveDialog({
+      title: 'Şifreli gizlilik verisi dışa aktarımını kaydet',
+      defaultPath: `Anadolu_Parsi_Gizlilik_Verileri_${new Date().toISOString().slice(0, 10)}.pptprivacy`,
+      filters: [{ name: 'Anadolu Parsı Şifreli Gizlilik Verisi', extensions: ['pptprivacy'] }],
+      properties: ['createDirectory']
+    });
+    if (selected.canceled || !selected.filePath) throw new PrivacyExportCancelledError();
+    if (!isAbsolute(selected.filePath) || extname(selected.filePath).toLowerCase() !== '.pptprivacy') {
+      throw new Error('Şifreli gizlilik dışa aktarım hedefi absolute ve .pptprivacy uzantılı olmalıdır.');
+    }
+    return store().exportEncryptedPrivacyData({
+      requestId: input.requestId,
+      passphrase: input.passphrase,
+      destination: selected.filePath
+    });
+  });
   registerIpcHandler('finance:list', () => store().listFinanceRecords());
   registerIpcHandler('finance:create', (_event, input:CreateFinanceRecordInput) => store().createFinanceRecord(input));
   registerIpcHandler('finance:listBankInstitutions', () => store().listBankInstitutions());

@@ -61,6 +61,32 @@ import type { LongTermPortfolioWorkspaceView, RecordLongTermPortfolioItemInput }
 import type { AccessibilityPreferencesView, UpdateAccessibilityPreferencesInput } from '@ppt/domain';
 import type { FormDraftView, FormDraftWorkspaceView, SaveFormDraftInput, UndoFormDraftInput } from '@ppt/domain';
 import type { ManagedLifeWorkspaceView, RecordManagedLifeItemInput } from '@ppt/domain';
+import type {
+  CorrectAiMemoryInput,
+  RestrictAiMemoryInput,
+  DeleteAiMemoryInput,
+  ExpireAiMemoryInput,
+  CreateDataRightsRequestInput,
+  UpdateDataRightsRequestInput,
+  CreatePrivacyIncidentInput,
+  UpdatePrivacyIncidentInput,
+  SimulatePermissionVisibilityInput,
+  PrivacyOwnershipControlCenterView,
+  PrivacyOwnershipMutationReceiptView,
+  PermissionSimulationView
+} from '@ppt/domain';
+
+export interface EncryptedPrivacyDataExportIpcInput {
+  readonly requestId: string;
+  readonly passphrase: string;
+}
+export interface EncryptedPrivacyDataExportIpcResult {
+  readonly fileName: string;
+  readonly artifactSha256: string;
+  readonly artifactSizeBytes: number;
+  readonly createdAt: string;
+  readonly delivery: 'not_performed';
+}
 
 interface EmergencyCardExportIpcInput {
   readonly profileId:string;
@@ -412,6 +438,17 @@ contextBridge.exposeInMainWorld('pardus', {
   getFormDraftWorkspace:(formKey:string):Promise<FormDraftWorkspaceView>=>invoke('formDraft:getWorkspace',formKey),
   saveFormDraft:(input:SaveFormDraftInput):Promise<FormDraftView>=>invoke('formDraft:save',input),
   undoFormDraft:(input:UndoFormDraftInput):Promise<FormDraftView>=>invoke('formDraft:undo',input),
+  getPrivacyOwnershipCenter:():Promise<PrivacyOwnershipControlCenterView>=>invoke('privacyOwnership:getCenter'),
+  correctAiMemory:(input:CorrectAiMemoryInput):Promise<PrivacyOwnershipMutationReceiptView>=>invoke('privacyOwnership:correctAiMemory',input),
+  restrictAiMemory:(input:RestrictAiMemoryInput):Promise<PrivacyOwnershipMutationReceiptView>=>invoke('privacyOwnership:restrictAiMemory',input),
+  deleteAiMemory:(input:DeleteAiMemoryInput):Promise<PrivacyOwnershipMutationReceiptView>=>invoke('privacyOwnership:deleteAiMemory',input),
+  expireAiMemory:(input:ExpireAiMemoryInput):Promise<PrivacyOwnershipMutationReceiptView>=>invoke('privacyOwnership:expireAiMemory',input),
+  createPrivacyRightsRequest:(input:CreateDataRightsRequestInput):Promise<PrivacyOwnershipMutationReceiptView>=>invoke('privacyOwnership:createRightsRequest',input),
+  updatePrivacyRightsRequest:(input:UpdateDataRightsRequestInput):Promise<PrivacyOwnershipMutationReceiptView>=>invoke('privacyOwnership:updateRightsRequest',input),
+  createPrivacyIncident:(input:CreatePrivacyIncidentInput):Promise<PrivacyOwnershipMutationReceiptView>=>invoke('privacyOwnership:createIncident',input),
+  updatePrivacyIncident:(input:UpdatePrivacyIncidentInput):Promise<PrivacyOwnershipMutationReceiptView>=>invoke('privacyOwnership:updateIncident',input),
+  simulatePrivacyPermission:(input:SimulatePermissionVisibilityInput):Promise<PermissionSimulationView>=>invoke('privacyOwnership:simulatePermission',input),
+  exportEncryptedPrivacyData:(input:EncryptedPrivacyDataExportIpcInput):Promise<EncryptedPrivacyDataExportIpcResult>=>invoke('privacyOwnership:exportEncrypted',input),
   getSessionLockState:():Promise<SessionLockStateView>=>invoke('auth:getSessionLockState'),
   recordSessionActivity:():Promise<SessionLockStateView>=>invoke('auth:recordSessionActivity'),
   lockSession:():Promise<SessionLockStateView>=>invoke('auth:lockSession'),

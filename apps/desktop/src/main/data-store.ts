@@ -38,7 +38,7 @@ import {
 } from '@ppt/core';
 import { EventDispatcher, createExponentialRetryPolicy, type DomainEvent, type EventDispatchBatchSummary, type EventDispatchStore } from '@ppt/events';
 import type { Logger } from '@ppt/logging';
-import { authorizationRoleMatches } from '@ppt/security';
+import { authorizationRoleMatches, canonicalizePrivacyDataExport } from '@ppt/security';
 import type { RepositoryExecutionPolicyGuard } from '@ppt/repositories';
 import {
   AppendAuditEntryUseCase, type AuditWriteApplicationContext, GetLatestAuditOccurredAtUseCase, type AuditReadApplicationContext, InstallAuditStorageProtectionUseCase, ListAutomationRulesUseCase, CreateAutomationRuleUseCase, ToggleAutomationRuleUseCase, ListAutomationRunsUseCase, RunAutomationRulesUseCase, type AutomationApplicationContext, GetReportSummaryUseCase, type ReportApplicationContext,
@@ -178,6 +178,12 @@ import {
   GetFormDraftWorkspaceUseCase,
   SaveFormDraftUseCase,
   UndoFormDraftUseCase,
+  GetPrivacyOwnershipControlCenterUseCase,
+  ManageAiMemoryUseCase,
+  ManageDataRightsRequestUseCase,
+  FinalizeEncryptedPrivacyExportUseCase,
+  ManagePrivacyIncidentUseCase,
+  SimulatePermissionVisibilityUseCase,
   ListArchiveItemsUseCase,
   SearchArchiveItemsUseCase,
   PrepareArchiveOpenUseCase,
@@ -212,6 +218,7 @@ import {
   type LongTermPortfolioApplicationContext,
   type AccessibilityPreferencesApplicationContext,
   type FormDraftApplicationContext,
+  type PrivacyOwnershipApplicationContext,
   type ArchiveApplicationContext,
   type LegacyApplicationContext,
   type MembershipApplicationContext,
@@ -370,6 +377,7 @@ import { FileSystemBackupPurgeQuarantinePort } from './backup-purge-propagation-
 import { FileSystemBackupQuarantineDestructionPort } from './backup-quarantine-file-application-adapter.js';
 import { RepositoryBackedAiConsentQueryPort, RepositoryBackedAiConsentUnitOfWork, RepositoryBackedSensitiveDataAuthorizationPort } from './ai-consent-application-adapter.js';
 import { RepositoryBackedPrivacyControlQueryPort, RepositoryBackedPrivacyControlUnitOfWork } from './privacy-control-application-adapter.js';
+import { RepositoryBackedPrivacyOwnershipDataRightsUnitOfWork } from './privacy-ownership-data-rights-application-adapter.js';
 import { RepositoryBackedLegacyQueryPort, RepositoryBackedLegacyUnitOfWork } from './legacy-application-adapter.js';
 import { RepositoryBackedAutomationAdapter } from './automation-application-adapter.js';
 import { RepositoryBackedReportQueryPort } from './report-application-adapter.js';
@@ -382,6 +390,7 @@ import {
 } from './full-backup-file-application-adapter.js';
 import { FileSystemArchiveVaultFilePort } from './archive-vault-file-application-adapter.js';
 import { FileSystemOperationalArtifactFilePort } from './operational-artifact-file-application-adapter.js';
+import { writePrivacyDataExportFile, type PrivacyDataExportFileResult } from './privacy-data-export-service.js';
 import type { OperationalArtifactFilePort } from '@ppt/application';
 import { NodeSystemResourceSnapshotPort } from './system-resource-snapshot-application-adapter.js';
 import { NodeFamilyStorageLayoutPort } from './family-storage-layout-application-adapter.js';
@@ -428,6 +437,20 @@ import type {
 import { buildDefaultLongTermPortfolioBootstrap, type LongTermPortfolioWorkspaceView, type RecordLongTermPortfolioItemInput } from '@ppt/domain';
 import type { AccessibilityPreferencesView, UpdateAccessibilityPreferencesInput } from '@ppt/domain';
 import type { FormDraftView, FormDraftWorkspaceView, SaveFormDraftInput, UndoFormDraftInput } from '@ppt/domain';
+import type {
+  CorrectAiMemoryInput,
+  CreateDataRightsRequestInput,
+  CreatePrivacyIncidentInput,
+  DeleteAiMemoryInput,
+  ExpireAiMemoryInput,
+  PermissionSimulationView,
+  PrivacyOwnershipControlCenterView,
+  PrivacyOwnershipMutationReceiptView,
+  RestrictAiMemoryInput,
+  SimulatePermissionVisibilityInput,
+  UpdateDataRightsRequestInput,
+  UpdatePrivacyIncidentInput
+} from '@ppt/domain';
 import type { ManagedLifeWorkspaceView, RecordManagedLifeItemInput } from '@ppt/domain';
 import type {
   EnrollWindowsHelloInput,
@@ -595,6 +618,23 @@ const deterministicArchiveIdentifier = (operationId: string, label: string): str
   const hex = createHash('sha256').update(`${operationId}\u0000${label}`, 'utf8').digest('hex');
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-5${hex.slice(13, 16)}-a${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
 };
+
+const privacyOperationFingerprint = (operation: string, input: unknown): string => createHash('sha256')
+  .update(canonicalArchiveOperationValue({ operation, input }), 'utf8')
+  .digest('hex');
+
+const privacyMutationIdentifiers = (
+  clientOperationId: string,
+  resourceId: string,
+  operation: string,
+  input: unknown
+) => ({
+  mutationId: deterministicArchiveIdentifier(clientOperationId, 'privacy-mutation'),
+  resourceId,
+  requestFingerprint: privacyOperationFingerprint(operation, input),
+  auditId: deterministicArchiveIdentifier(clientOperationId, 'privacy-audit'),
+  outboxEventId: asEventId(deterministicArchiveIdentifier(clientOperationId, 'privacy-outbox'))
+});
 
 interface ArchiveOperationExpectation {
   readonly resourceType: 'archive_item' | 'archive_retention_policy' | 'archive_category';
@@ -849,6 +889,12 @@ export class FamilyDataStore {
   readonly #getFormDraftWorkspaceUseCase: GetFormDraftWorkspaceUseCase;
   readonly #saveFormDraftUseCase: SaveFormDraftUseCase;
   readonly #undoFormDraftUseCase: UndoFormDraftUseCase;
+  readonly #getPrivacyOwnershipControlCenterUseCase: GetPrivacyOwnershipControlCenterUseCase;
+  readonly #manageAiMemoryUseCase: ManageAiMemoryUseCase;
+  readonly #manageDataRightsRequestUseCase: ManageDataRightsRequestUseCase;
+  readonly #finalizeEncryptedPrivacyExportUseCase: FinalizeEncryptedPrivacyExportUseCase;
+  readonly #managePrivacyIncidentUseCase: ManagePrivacyIncidentUseCase;
+  readonly #simulatePermissionVisibilityUseCase: SimulatePermissionVisibilityUseCase;
   readonly #listArchiveItemsUseCase: ListArchiveItemsUseCase;
   readonly #searchArchiveItemsUseCase: SearchArchiveItemsUseCase;
   readonly #prepareArchiveOpenUseCase: PrepareArchiveOpenUseCase;
@@ -1456,6 +1502,7 @@ export class FamilyDataStore {
           timelinePolicyResourceRepository: this.#repositories.timelineRepository,
           accessibilityPreferencesRepository: this.#repositories.accessibilityPreferencesRepository,
           formDraftRepository: this.#repositories.formDraftRepository,
+          privacyOwnershipDataRightsRepository: this.#repositories.privacyOwnershipDataRightsRepository,
           personRepository: this.#repositories.personRepository,
           deviceIdentityProvider: this.#deviceIdentityProvider,
           authorizationProvider: productionArchivePolicy.authorizationProvider,
@@ -1506,6 +1553,70 @@ export class FamilyDataStore {
     this.#getFormDraftWorkspaceUseCase = new GetFormDraftWorkspaceUseCase(formDraftUnitOfWork);
     this.#saveFormDraftUseCase = new SaveFormDraftUseCase(formDraftUnitOfWork);
     this.#undoFormDraftUseCase = new UndoFormDraftUseCase(formDraftUnitOfWork);
+    const privacyOwnershipUnitOfWork = new RepositoryBackedPrivacyOwnershipDataRightsUnitOfWork({
+      policyTransactionRunner:timelinePolicyTransactionRunner,
+      privacyRepository:this.#repositories.privacyOwnershipDataRightsRepository,
+      accountRepository:this.#repositories.accountRepository,
+      personRepository:this.#repositories.personRepository,
+      trustedDeviceRepository:this.#repositories.trustedDeviceRepository,
+      offlineCapabilityLeaseRepository:this.#repositories.offlineCapabilityLeaseRepository,
+      aiConsentRepository:this.#repositories.aiConsentRepository,
+      objectPermissionRepository:this.#repositories.objectPermissionRepository,
+      auditRepository:this.#repositories.auditRepository,
+      outboxRepository:this.#repositories.outboxRepository,
+      aiMemoryDeletionPropagation:{
+        propagate:(repositoryContext,input)=>{
+          const subject = repositoryContext.policyAuthorization.subject;
+          if(!subject.personId)return err(createAppError({
+            code:ERROR_CODES.AUTHORIZATION_DENIED,category:'security',
+            message:'AI hafÄ±za temizliÄŸi exact kiÅŸi kapsamÄ± gerektirir.',
+            correlationId:repositoryContext.correlationId
+          }));
+          const key = {familyId:asFamilyId(repositoryContext.policyAuthorization.resourceFamilyId),
+            accountId:asUserId(subject.accountId),ownerPersonId:asPersonId(subject.personId)};
+          const current = this.#repositories.privacyOwnershipDataRightsRepository.findAiMemoryRecord(
+            repositoryContext,key,input.recordId
+          );
+          if(!current.ok)return current;
+          if(!current.value || current.value.derivedBindingHash!==input.derivedBindingHash)return err(createAppError({
+            code:ERROR_CODES.AUTHORIZATION_DENIED,category:'security',
+            message:'AI hafÄ±za temizliÄŸi exact sealed binding ile eÅŸleÅŸmiyor.',
+            correlationId:repositoryContext.correlationId
+          }));
+          const sourceIdentity = `${current.value.sourceResourceType}\u0000${current.value.sourceResourceId}`;
+          const permissions = this.#repositories.objectPermissionRepository.listAll(repositoryContext);
+          if(!permissions.ok)return permissions;
+          for(const permission of permissions.value.filter((item)=>
+            (item.resourceType==='ai_memory_record'||item.resourceType==='ai_memory')&&item.resourceId===input.recordId)){
+            const removed = this.#repositories.objectPermissionRepository.delete(repositoryContext,permission.id);
+            if(!removed.ok)return removed;
+          }
+          const remaining = this.#repositories.objectPermissionRepository.listAll(repositoryContext);
+          if(!remaining.ok)return remaining;
+          const grantRemains = remaining.value.some((item)=>
+            (item.resourceType==='ai_memory_record'||item.resourceType==='ai_memory')&&item.resourceId===input.recordId);
+          const preserved = this.#repositories.privacyOwnershipDataRightsRepository.findAiMemoryRecord(
+            repositoryContext,key,input.recordId
+          );
+          if(!preserved.ok)return preserved;
+          if(grantRemains || !preserved.value
+            || `${preserved.value.sourceResourceType}\u0000${preserved.value.sourceResourceId}`!==sourceIdentity
+            || preserved.value.derivedBindingHash!==input.derivedBindingHash)return err(createAppError({
+              code:ERROR_CODES.RESOURCE_CONFLICT,category:'conflict',
+              message:'AI hafÄ±za yerel grant temizliÄŸi veya kaynak korumasÄ± tamamlanmadÄ±.',
+              correlationId:repositoryContext.correlationId
+            }));
+          return ok({locallyCompleted:true,resourceGrantCleanupComplete:true,processingDisabled:true,
+            sourcePreserved:true,derivedBindingHash:input.derivedBindingHash});
+        }
+      }
+    });
+    this.#getPrivacyOwnershipControlCenterUseCase = new GetPrivacyOwnershipControlCenterUseCase(privacyOwnershipUnitOfWork);
+    this.#manageAiMemoryUseCase = new ManageAiMemoryUseCase(privacyOwnershipUnitOfWork);
+    this.#manageDataRightsRequestUseCase = new ManageDataRightsRequestUseCase(privacyOwnershipUnitOfWork);
+    this.#finalizeEncryptedPrivacyExportUseCase = new FinalizeEncryptedPrivacyExportUseCase(privacyOwnershipUnitOfWork);
+    this.#managePrivacyIncidentUseCase = new ManagePrivacyIncidentUseCase(privacyOwnershipUnitOfWork);
+    this.#simulatePermissionVisibilityUseCase = new SimulatePermissionVisibilityUseCase(privacyOwnershipUnitOfWork);
     const familyDataImportPolicyBatchRunner = new RepositoryBackedFamilyDataImportPolicyBatchRunner({
       transactionExecutor: this.#transactionExecutor,
       locationRunner: locationPolicyTransactionRunner,
@@ -2259,6 +2370,9 @@ export class FamilyDataStore {
     return this.#financeApplicationContext(prefix);
   }
   #formDraftApplicationContext(prefix:string):FormDraftApplicationContext {
+    return this.#financeApplicationContext(prefix);
+  }
+  #privacyOwnershipApplicationContext(prefix:string):PrivacyOwnershipApplicationContext {
     return this.#financeApplicationContext(prefix);
   }
   #dataLifecycleApplicationContext(prefix:string): DataLifecycleApplicationContext {
@@ -4501,6 +4615,291 @@ export class FamilyDataStore {
   public getPrivacyControlCenter():PrivacyControlCenterView { const result=this.#getPrivacyControlCenterUseCase.execute(this.#privacyControlApplicationContext('privacy-control-center')); if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value; }
   public upsertLiveLocationConsent(input:UpsertLiveLocationConsentInput):PrivacyControlCenterView { const result=this.#upsertLiveLocationConsentUseCase.execute({context:this.#privacyControlApplicationContext('privacy-live-location-consent'),command:input,identifiers:{consentId:randomUUID(),auditId:randomUUID()}});if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return this.getPrivacyControlCenter(); }
   public shutdownLostDeviceAuthority(input:LostDeviceShutdownInput):LostDeviceShutdownResultView { const result=this.#shutdownLostDeviceAuthorityUseCase.execute({context:this.#privacyControlApplicationContext('privacy-lost-device-shutdown'),command:input,auditId:randomUUID()});if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value; }
+
+  public async getPrivacyOwnershipCenter():Promise<PrivacyOwnershipControlCenterView> {
+    const result = await this.#getPrivacyOwnershipControlCenterUseCase.execute(
+      this.#privacyOwnershipApplicationContext('privacy-ownership-center')
+    );
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async correctAiMemory(input:CorrectAiMemoryInput):Promise<PrivacyOwnershipMutationReceiptView> {
+    const result = await this.#manageAiMemoryUseCase.execute({
+      context:this.#privacyOwnershipApplicationContext('privacy-ai-memory-correct'),
+      command:{operation:'correct',input},
+      identifiers:privacyMutationIdentifiers(input.clientOperationId,input.recordId,'ai_memory_correct',input)
+    });
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async restrictAiMemory(input:RestrictAiMemoryInput):Promise<PrivacyOwnershipMutationReceiptView> {
+    const result = await this.#manageAiMemoryUseCase.execute({
+      context:this.#privacyOwnershipApplicationContext('privacy-ai-memory-restrict'),
+      command:{operation:'restrict',input},
+      identifiers:privacyMutationIdentifiers(input.clientOperationId,input.recordId,'ai_memory_restrict',input)
+    });
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async deleteAiMemory(input:DeleteAiMemoryInput):Promise<PrivacyOwnershipMutationReceiptView> {
+    const result = await this.#manageAiMemoryUseCase.execute({
+      context:this.#privacyOwnershipApplicationContext('privacy-ai-memory-delete'),
+      command:{operation:'delete',input},
+      identifiers:privacyMutationIdentifiers(input.clientOperationId,input.recordId,'ai_memory_delete',input)
+    });
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async expireAiMemory(input:ExpireAiMemoryInput):Promise<PrivacyOwnershipMutationReceiptView> {
+    const result = await this.#manageAiMemoryUseCase.execute({
+      context:this.#privacyOwnershipApplicationContext('privacy-ai-memory-expire'),
+      command:{operation:'expire',input},
+      identifiers:privacyMutationIdentifiers(input.clientOperationId,input.recordId,'ai_memory_expire',input)
+    });
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async createPrivacyRightsRequest(input:CreateDataRightsRequestInput):Promise<PrivacyOwnershipMutationReceiptView> {
+    const resourceId = deterministicArchiveIdentifier(input.clientOperationId,'privacy-rights-request');
+    const result = await this.#manageDataRightsRequestUseCase.execute({
+      context:this.#privacyOwnershipApplicationContext('privacy-rights-request-create'),
+      command:{operation:'create',input},
+      identifiers:privacyMutationIdentifiers(input.clientOperationId,resourceId,'rights_request_create',input)
+    });
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async updatePrivacyRightsRequest(input:UpdateDataRightsRequestInput):Promise<PrivacyOwnershipMutationReceiptView> {
+    const result = await this.#manageDataRightsRequestUseCase.execute({
+      context:this.#privacyOwnershipApplicationContext('privacy-rights-request-update'),
+      command:{operation:'update',input},
+      identifiers:privacyMutationIdentifiers(input.clientOperationId,input.requestId,'rights_request_update',input)
+    });
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async createPrivacyIncident(input:CreatePrivacyIncidentInput):Promise<PrivacyOwnershipMutationReceiptView> {
+    const resourceId = deterministicArchiveIdentifier(input.clientOperationId,'privacy-incident');
+    const result = await this.#managePrivacyIncidentUseCase.execute({
+      context:this.#privacyOwnershipApplicationContext('privacy-incident-create'),
+      command:{operation:'create',input},
+      identifiers:privacyMutationIdentifiers(input.clientOperationId,resourceId,'incident_create',input)
+    });
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    if(input.actions.some((item)=>item.action==='revoke_local_session_authority'))this.#sessionManager.clear();
+    return result.value;
+  }
+
+  public async updatePrivacyIncident(input:UpdatePrivacyIncidentInput):Promise<PrivacyOwnershipMutationReceiptView> {
+    const result = await this.#managePrivacyIncidentUseCase.execute({
+      context:this.#privacyOwnershipApplicationContext('privacy-incident-update'),
+      command:{operation:'update',input},
+      identifiers:privacyMutationIdentifiers(input.clientOperationId,input.incidentId,'incident_update',input)
+    });
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async simulatePrivacyPermission(input:SimulatePermissionVisibilityInput):Promise<PermissionSimulationView> {
+    const result = await this.#simulatePermissionVisibilityUseCase.execute({
+      context:this.#privacyOwnershipApplicationContext('privacy-permission-simulation'),
+      targets:input.targets
+    });
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async exportEncryptedPrivacyData(input:{readonly requestId:string;readonly passphrase:string;readonly destination:string}):Promise<PrivacyDataExportFileResult> {
+    if(!input || typeof input!=='object' || Array.isArray(input)
+      || Object.getPrototypeOf(input)!==Object.prototype
+      || Object.keys(input).sort().join(',')!=='destination,passphrase,requestId') {
+      throw new Error('Åifreli gizlilik dÄ±ÅŸa aktarÄ±m isteÄŸi exact deÄŸildir.');
+    }
+    const center = await this.getPrivacyOwnershipCenter();
+    const request = center.rightsRequests.find((item)=>item.id===input.requestId);
+    if(!request || !['encrypted_export','legacy_export'].includes(request.kind)
+      || !['requested','in_review'].includes(request.status)) {
+      throw new Error('Åifreli dÄ±ÅŸa aktarÄ±m iÃ§in etkin ve exact owner talebi gerekir.');
+    }
+    const privacyInventoryScope = request.kind==='encrypted_export'
+      && request.scopeResourceType==='privacy_inventory'
+      && request.scopeResourceId===center.key.ownerPersonId;
+    const digitalLegacyScope = request.kind==='legacy_export'
+      && request.scopeResourceType==='digital_legacy'
+      && request.scopeResourceId===center.key.ownerPersonId;
+    if(!privacyInventoryScope && !digitalLegacyScope) {
+      throw new Error('Şifreli dışa aktarım talep türü ve exact kullanıcı kapsamı eşleşmiyor.');
+    }
+    const createdAt = this.#clock.now();
+    const requestMetadata = Object.freeze({id:request.id,kind:request.kind,
+      scopeResourceType:request.scopeResourceType,scopeResourceId:request.scopeResourceId});
+    const ownerLegacyPlans = digitalLegacyScope
+      ? this.listDigitalLegacyPlans().filter((plan)=>plan.ownerPersonId===center.key.ownerPersonId)
+      : [];
+    const ownerLegacyPlanIds = new Set(ownerLegacyPlans.map((plan)=>plan.id));
+    const ownerLegacyGrants = digitalLegacyScope
+      ? ownerLegacyPlans.flatMap((plan)=>this.listLegacyGrants(plan.id)).filter((grant)=>ownerLegacyPlanIds.has(grant.planId))
+      : [];
+    const ownerLegacyApprovals = digitalLegacyScope
+      ? ownerLegacyPlans.flatMap((plan)=>this.listLegacyApprovals(plan.id)).filter((approval)=>ownerLegacyPlanIds.has(approval.planId))
+      : [];
+    let structuredOwnerItemCount = 0;
+    let ownerStructuredData:Readonly<Record<string,unknown>>|undefined;
+    if(privacyInventoryScope) {
+      const ownerPersonId = center.key.ownerPersonId;
+      const financeRecords = (await this.listFinanceRecords()).filter((item)=>item.ownerPersonId===ownerPersonId);
+      const financeRecordIds = new Set(financeRecords.map((item)=>item.id));
+      const financeValuations = (await this.listFinanceValuations()).filter((item)=>financeRecordIds.has(item.financeRecordId));
+      const bankAccounts = (await this.listBankAccounts()).filter((item)=>item.ownerPersonId===ownerPersonId);
+      const paymentCards = (await this.listPaymentCards()).filter((item)=>item.ownerPersonId===ownerPersonId);
+      const loanAccounts = (await this.listLoanAccounts()).filter((item)=>item.ownerPersonId===ownerPersonId);
+      const healthRecords = (await this.listHealthRecords()).filter((item)=>item.ownerPersonId===ownerPersonId);
+      const medicationPlans = (await this.listMedicationPlans()).filter((item)=>item.ownerPersonId===ownerPersonId);
+      const familyHealthHistory = (await this.listFamilyHealthHistory()).filter((item)=>item.relatedPersonId===ownerPersonId);
+      const lifeRecords = (await this.listLifeRecords()).filter((item)=>item.ownerPersonId===ownerPersonId);
+      const lifecycleRecords = this.listDataLifecycleRecords().filter((item)=>item.ownerPersonId===ownerPersonId);
+      const accountProfiles = this.listAccounts().filter((item)=>item.id===center.key.accountId && item.personId===ownerPersonId);
+      const personProfiles = this.lookupEntityCatalog({personIds:[ownerPersonId]}).people.filter((item)=>item.id===ownerPersonId);
+      const planning = await this.getFinancePlanningWorkspace();
+      const ownerPlanning = Object.freeze({
+        categories:planning.categories.filter((item)=>item.ownerPersonId===ownerPersonId),
+        cashFlowEntries:planning.cashFlowEntries.filter((item)=>item.ownerPersonId===ownerPersonId),
+        importedCashFlowEntries:planning.importedCashFlowEntries.filter((item)=>item.ownerPersonId===ownerPersonId),
+        importBatches:planning.importBatches.filter((item)=>item.ownerPersonId===ownerPersonId),
+        budgetRevisions:planning.budgetRevisions.filter((item)=>item.ownerPersonId===ownerPersonId),
+        budgetVariances:planning.budgetVariances.filter((item)=>item.ownerPersonId===ownerPersonId),
+        recurringRules:planning.recurringRules.filter((item)=>item.ownerPersonId===ownerPersonId),
+        goals:planning.goals.filter((item)=>item.ownerPersonId===ownerPersonId),
+        portfolioAssets:planning.portfolioAssets.filter((item)=>item.ownerPersonId===ownerPersonId),
+        upcomingPayments:planning.upcomingPayments.filter((item)=>item.ownerPersonId===ownerPersonId),
+        personSummary:planning.personSummaries.find((item)=>item.ownerPersonId===ownerPersonId)??null,
+        generatedAt:planning.generatedAt,
+        dataSource:planning.dataSource,
+        externalPricing:planning.externalPricing,
+        bankSynchronization:planning.bankSynchronization,
+        paymentExecution:planning.paymentExecution
+      });
+      const managedLife = await this.getManagedLifeWorkspace();
+      const ownerManagedLife = Object.freeze({
+        profiles:managedLife.profiles.filter((item)=>item.ownerPersonId===ownerPersonId),
+        homeInventoryItems:managedLife.homeInventoryItems.filter((item)=>item.ownerPersonId===ownerPersonId),
+        emergencyPlans:managedLife.emergencyPlans.filter((item)=>item.ownerPersonId===ownerPersonId),
+        emergencyAssistanceProfiles:managedLife.emergencyAssistanceProfiles.filter((item)=>item.ownerPersonId===ownerPersonId),
+        upcomingReminders:managedLife.upcomingReminders.filter((item)=>item.ownerPersonId===ownerPersonId),
+        generatedAt:managedLife.generatedAt,
+        truth:{dataSource:managedLife.dataSource,externalRegistryLookup:managedLife.externalRegistryLookup,
+          providerContact:managedLife.providerContact,documentContentExposure:managedLife.documentContentExposure,
+          networkEgressAdded:managedLife.networkEgressAdded}
+      });
+      const longTermPortfolio = await this.getLongTermPortfolioWorkspace();
+      const ownerLongTermPortfolio = longTermPortfolio.portfolio?.ownerPersonId===ownerPersonId ? longTermPortfolio : null;
+      const accessibility = await this.getAccessibilityPreferences();
+      if(accessibility.accountId!==center.key.accountId || accessibility.familyId!==center.key.familyId
+        || accessibility.ownerPersonId!==ownerPersonId) {
+        throw new Error('Erişilebilirlik tercihi exact dışa aktarım sahibiyle eşleşmiyor.');
+      }
+      const ownerCollections = [accountProfiles,personProfiles,financeRecords,financeValuations,bankAccounts,paymentCards,
+        loanAccounts,healthRecords,medicationPlans,familyHealthHistory,lifeRecords,lifecycleRecords,
+        ownerPlanning.categories,ownerPlanning.cashFlowEntries,ownerPlanning.importedCashFlowEntries,ownerPlanning.importBatches,
+        ownerPlanning.budgetRevisions,ownerPlanning.budgetVariances,ownerPlanning.recurringRules,ownerPlanning.goals,
+        ownerPlanning.portfolioAssets,ownerPlanning.upcomingPayments,ownerManagedLife.profiles,ownerManagedLife.homeInventoryItems,
+        ownerManagedLife.emergencyPlans,ownerManagedLife.emergencyAssistanceProfiles,ownerManagedLife.upcomingReminders];
+      structuredOwnerItemCount = ownerCollections.reduce((sum,items)=>sum+items.length,0)
+        + 1 + (ownerPlanning.personSummary?1:0) + (ownerLongTermPortfolio?1:0);
+      ownerStructuredData = Object.freeze({
+        accountProfiles,personProfiles,financeRecords,financeValuations,bankAccounts,paymentCards,loanAccounts,
+        healthRecords,medicationPlans,familyHealthHistory,lifeRecords,lifecycleRecords,
+        financePlanning:ownerPlanning,managedLife:ownerManagedLife,longTermPortfolio:ownerLongTermPortfolio,accessibility,
+        coverage:Object.freeze({ownerScoped:true,archiveBinaryPayloadsIncluded:false,
+          unscopedFamilyEventContentIncluded:false,formDraftPayloadsIncluded:false,
+          formDraftExclusionReason:'selected_form_key_required'})
+      });
+    }
+    const exportLineage = privacyInventoryScope ? center.derivedDataLineage : [];
+    const exportValue = privacyInventoryScope ? Object.freeze({
+      schemaVersion:1,
+      exportType:'privacy_self_data',
+      key:center.key,
+      request:requestMetadata,
+      ownerStructuredData,
+      dataInventory:center.dataInventory,
+      aiMemoryRecords:center.aiMemoryRecords,
+      accessHistory:center.accessHistory,
+      localDeviceActivity:center.localDeviceActivity,
+      localProcessingObservations:center.localProcessingObservations,
+      derivedDataLineage:exportLineage,
+      rightsRequests:center.rightsRequests,
+      encryptedExports:center.encryptedExports,
+      incidents:center.incidents,
+      truth:{...center.truth,scopeApplied:true,scopeKind:'privacy_inventory',
+        archiveBinaryPayloadsIncluded:false,networkDelivery:'not_performed',externalPhysicalErasureGuaranteed:false},
+      generatedAt:createdAt
+    }) : Object.freeze({
+      schemaVersion:1,
+      exportType:'privacy_digital_legacy',
+      key:center.key,
+      request:requestMetadata,
+      digitalLegacy:Object.freeze({plans:ownerLegacyPlans,grants:ownerLegacyGrants,approvals:ownerLegacyApprovals}),
+      truth:Object.freeze({scopeApplied:true,scopeKind:'digital_legacy',ownerFiltered:true,
+        unrelatedPrivacyRecordsIncluded:false,networkDelivery:'not_performed',recipientReadGuaranteed:false,
+        externalPhysicalErasureGuaranteed:false}),
+      generatedAt:createdAt
+    });
+    const scopeSha256 = createHash('sha256').update(canonicalizePrivacyDataExport({
+      requestId:request.id,kind:request.kind,scopeResourceType:request.scopeResourceType,scopeResourceId:request.scopeResourceId,
+      familyId:center.key.familyId,accountId:center.key.accountId,ownerPersonId:center.key.ownerPersonId
+    }),'utf8').digest('hex');
+    const lineageSha256 = createHash('sha256')
+      .update(canonicalizePrivacyDataExport(exportLineage),'utf8').digest('hex');
+    const itemCount = privacyInventoryScope
+      ? 1 + structuredOwnerItemCount + center.dataInventory.length + center.aiMemoryRecords.length
+        + center.accessHistory.length + center.localDeviceActivity.length + center.localProcessingObservations.length
+        + exportLineage.length + center.rightsRequests.length + center.encryptedExports.length + center.incidents.length
+      : 1 + ownerLegacyPlans.length + ownerLegacyGrants.length + ownerLegacyApprovals.length;
+    if(!Number.isSafeInteger(itemCount) || itemCount<1 || itemCount>10_000) {
+      throw new Error('Şifreli dışa aktarım kapsamı güvenli öğe sınırını aşıyor.');
+    }
+    return writePrivacyDataExportFile({
+      value:exportValue,
+      metadata:{accountId:center.key.accountId,familyId:center.key.familyId,ownerPersonId:center.key.ownerPersonId,
+        requestId:request.id,scopeSha256,lineageSha256,createdAt},
+      passphrase:input.passphrase,
+      destination:input.destination,
+      onVerified:async (verified)=>{
+        const clientOperationId = deterministicArchiveIdentifier(`${request.id}:${verified.artifactSha256}`,'privacy-export-finalize');
+        const command = {
+          requestId:request.id,
+          expectedRevision:request.revision,
+          clientOperationId,
+          artifactSha256:verified.artifactSha256,
+          envelopeSha256:verified.artifactSha256,
+          lineageSha256,
+          itemCount,
+          plaintextSizeBytes:verified.plaintextSizeBytes,
+          sizeBytes:verified.artifactSizeBytes
+        } as const;
+        const result = await this.#finalizeEncryptedPrivacyExportUseCase.execute({
+          context:this.#privacyOwnershipApplicationContext('privacy-export-finalize'),
+          command,
+          identifiers:{
+            mutationId:deterministicArchiveIdentifier(clientOperationId,'privacy-mutation'),
+            exportId:deterministicArchiveIdentifier(clientOperationId,'privacy-export-record'),
+            requestFingerprint:privacyOperationFingerprint('rights_export_finalize',command),
+            auditId:deterministicArchiveIdentifier(clientOperationId,'privacy-audit'),
+            outboxEventId:asEventId(deterministicArchiveIdentifier(clientOperationId,'privacy-outbox'))
+          }
+        });
+        if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+      }
+    });
+  }
 
   public async getDashboardOverview(): Promise<DashboardOverviewView> {
     const result = await this.#getDashboardOverviewUseCase.execute({
