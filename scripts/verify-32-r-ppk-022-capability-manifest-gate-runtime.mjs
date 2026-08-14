@@ -99,7 +99,7 @@ const report = {
   targetedTestsMinimum: 19,
   securityRegressionTestsMinimum: 264,
   productionSourceZones: 18,
-  scannedProductionFiles: 442,
+  scannedProductionFiles: 447,
   exactCapabilitySurfaces: 345,
   exactManifestEntries: 345,
   pinnedBootstrapSurfaces: 26,

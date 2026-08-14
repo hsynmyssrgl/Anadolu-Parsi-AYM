@@ -12935,6 +12935,237 @@ END;
 UPDATE database_metadata SET value='REVISION-33-Q-LEGACY-ARCHIVE-OWNERSHIP-REATTESTATION',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 
+const archiveEvidenceRelationsMediaLifecycleSql = `
+CREATE TABLE archive_relation_evidence_mutations (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 128),
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 1 AND 160),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  evidence_id TEXT NOT NULL CHECK(length(trim(evidence_id)) BETWEEN 1 AND 128),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  relation_id TEXT NOT NULL REFERENCES relations(id) ON DELETE RESTRICT,
+  archive_item_id TEXT NOT NULL REFERENCES archive_items(id) ON DELETE RESTRICT,
+  mutation_kind TEXT NOT NULL CHECK(mutation_kind IN ('evidence_create','evidence_remove')),
+  previous_revision INTEGER NOT NULL CHECK(previous_revision>=0),
+  revision INTEGER NOT NULL CHECK(revision=previous_revision+1),
+  evidence_date TEXT NOT NULL CHECK(length(evidence_date)=10 AND evidence_date GLOB '????-??-??' AND date(evidence_date)=evidence_date),
+  confidence TEXT NOT NULL CHECK(confidence IN ('low','medium','high')),
+  status TEXT NOT NULL CHECK(status IN ('active','removed')),
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL UNIQUE REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  UNIQUE(family_id,actor_account_id,client_operation_id),
+  CHECK(date(evidence_date)<=date(occurred_at))
+) STRICT;
+
+CREATE INDEX idx_archive_relation_evidence_mutations_item
+ON archive_relation_evidence_mutations(archive_item_id,occurred_at DESC,id);
+
+CREATE TABLE archive_relation_evidence (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 128),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  relation_id TEXT NOT NULL REFERENCES relations(id) ON DELETE RESTRICT,
+  archive_item_id TEXT NOT NULL REFERENCES archive_items(id) ON DELETE RESTRICT,
+  evidence_date TEXT NOT NULL CHECK(length(evidence_date)=10 AND evidence_date GLOB '????-??-??' AND date(evidence_date)=evidence_date),
+  confidence TEXT NOT NULL CHECK(confidence IN ('low','medium','high')),
+  status TEXT NOT NULL CHECK(status IN ('active','removed')),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES archive_relation_evidence_mutations(id) ON DELETE RESTRICT,
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z' AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND updated_at GLOB '????-??-??T??:??:??.???Z' AND julianday(updated_at) IS NOT NULL),
+  removed_at TEXT CHECK(removed_at IS NULL OR (length(removed_at)=24 AND removed_at GLOB '????-??-??T??:??:??.???Z' AND julianday(removed_at) IS NOT NULL)),
+  CHECK((status='active' AND removed_at IS NULL) OR (status='removed' AND removed_at=updated_at)),
+  UNIQUE(relation_id,archive_item_id)
+) STRICT;
+
+CREATE INDEX idx_archive_relation_evidence_relation
+ON archive_relation_evidence(family_id,relation_id,status,evidence_date DESC);
+CREATE INDEX idx_archive_relation_evidence_archive
+ON archive_relation_evidence(archive_item_id,status,evidence_date DESC);
+
+CREATE TRIGGER trg_33r_relation_evidence_mutation_insert
+BEFORE INSERT ON archive_relation_evidence_mutations
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM archive_items item
+  JOIN platform_policy_transaction_receipts item_receipt ON item_receipt.receipt_hash=item.policy_receipt_hash
+  JOIN relations relation ON relation.id=NEW.relation_id AND relation.family_id=NEW.family_id
+  JOIN accounts account ON account.id=NEW.actor_account_id AND account.status='active'
+  JOIN people owner ON owner.id=NEW.owner_person_id AND owner.family_id=NEW.family_id AND owner.status='active'
+  JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+  JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+  WHERE item.id=NEW.archive_item_id AND item.family_id=NEW.family_id AND item.destroyed_at IS NULL
+    AND json_extract(item_receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND receipt.resource_type='archive_item' AND receipt.resource_id=NEW.archive_item_id
+    AND receipt.action='update' AND receipt.capability='archive.write' AND receipt.recorded_at=NEW.occurred_at
+    AND json_extract(receipt.record_json,'$.request.purpose')='archive'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.actor_account_id
+    AND (
+      (NEW.mutation_kind='evidence_create' AND NEW.previous_revision=0 AND NEW.revision=1 AND NEW.status='active'
+        AND NOT EXISTS(SELECT 1 FROM archive_relation_evidence existing WHERE existing.id=NEW.evidence_id OR (existing.relation_id=NEW.relation_id AND existing.archive_item_id=NEW.archive_item_id)))
+      OR
+      (NEW.mutation_kind='evidence_remove' AND NEW.status='removed' AND EXISTS(
+        SELECT 1 FROM archive_relation_evidence current
+        WHERE current.id=NEW.evidence_id AND current.family_id=NEW.family_id
+          AND current.owner_person_id=NEW.owner_person_id AND current.relation_id=NEW.relation_id
+          AND current.archive_item_id=NEW.archive_item_id AND current.evidence_date=NEW.evidence_date
+          AND current.confidence=NEW.confidence AND current.status='active' AND current.revision=NEW.previous_revision
+      ))
+    )
+)
+BEGIN
+  SELECT RAISE(ABORT,'33-R relation evidence mutation requires an exact active relation, owner-bound document and durable archive update receipt');
+END;
+
+CREATE TRIGGER trg_33r_relation_evidence_insert
+BEFORE INSERT ON archive_relation_evidence
+WHEN NOT EXISTS(
+  SELECT 1 FROM archive_relation_evidence_mutations mutation
+  WHERE mutation.id=NEW.last_mutation_id AND mutation.evidence_id=NEW.id
+    AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+    AND mutation.relation_id=NEW.relation_id AND mutation.archive_item_id=NEW.archive_item_id
+    AND mutation.mutation_kind='evidence_create' AND mutation.previous_revision=0 AND mutation.revision=NEW.revision
+    AND mutation.evidence_date=NEW.evidence_date AND mutation.confidence=NEW.confidence
+    AND mutation.status=NEW.status AND mutation.state_fingerprint=NEW.state_fingerprint
+    AND mutation.occurred_at=NEW.created_at AND NEW.updated_at=NEW.created_at
+)
+BEGIN
+  SELECT RAISE(ABORT,'33-R relation evidence current row requires its exact immutable create mutation');
+END;
+
+CREATE TRIGGER trg_33r_relation_evidence_update
+BEFORE UPDATE ON archive_relation_evidence
+WHEN NEW.id IS NOT OLD.id OR NEW.family_id IS NOT OLD.family_id OR NEW.owner_person_id IS NOT OLD.owner_person_id
+  OR NEW.relation_id IS NOT OLD.relation_id OR NEW.archive_item_id IS NOT OLD.archive_item_id
+  OR NEW.evidence_date IS NOT OLD.evidence_date OR NEW.confidence IS NOT OLD.confidence
+  OR NEW.created_at IS NOT OLD.created_at OR OLD.status IS NOT 'active' OR NEW.status IS NOT 'removed'
+  OR NEW.revision IS NOT OLD.revision+1 OR NEW.removed_at IS NOT NEW.updated_at
+  OR NOT EXISTS(
+    SELECT 1 FROM archive_relation_evidence_mutations mutation
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.evidence_id=NEW.id
+      AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+      AND mutation.relation_id=NEW.relation_id AND mutation.archive_item_id=NEW.archive_item_id
+      AND mutation.mutation_kind='evidence_remove' AND mutation.previous_revision=OLD.revision
+      AND mutation.revision=NEW.revision AND mutation.evidence_date=NEW.evidence_date
+      AND mutation.confidence=NEW.confidence AND mutation.status=NEW.status
+      AND mutation.state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.updated_at
+  )
+BEGIN
+  SELECT RAISE(ABORT,'33-R relation evidence may only transition once to an exact immutable removed state');
+END;
+
+CREATE TRIGGER trg_33r_relation_evidence_delete
+BEFORE DELETE ON archive_relation_evidence
+BEGIN SELECT RAISE(ABORT,'33-R relation evidence current history is durable'); END;
+CREATE TRIGGER trg_33r_relation_evidence_mutation_update
+BEFORE UPDATE ON archive_relation_evidence_mutations
+BEGIN SELECT RAISE(ABORT,'33-R relation evidence mutation ledger is immutable'); END;
+CREATE TRIGGER trg_33r_relation_evidence_mutation_delete
+BEFORE DELETE ON archive_relation_evidence_mutations
+BEGIN SELECT RAISE(ABORT,'33-R relation evidence mutation ledger is durable'); END;
+
+DROP TRIGGER trg_platform_policy_archive_mutation_insert;
+CREATE TRIGGER trg_platform_policy_archive_mutation_insert
+BEFORE INSERT ON platform_policy_archive_business_mutations
+WHEN NOT EXISTS(
+    SELECT 1
+    FROM platform_policy_transaction_receipts receipt
+    JOIN platform_policy_database_fences fence
+      ON fence.fence_name=receipt.fence_name
+     AND fence.epoch=receipt.fence_epoch
+     AND fence.writable=1
+    WHERE receipt.receipt_hash=NEW.receipt_hash
+      AND receipt.receipt_version=NEW.receipt_version
+      AND receipt.nonce=NEW.receipt_nonce
+      AND receipt.correlation_id=NEW.correlation_id
+      AND receipt.resource_type=NEW.resource_type
+      AND receipt.resource_id=NEW.resource_id
+      AND receipt.action=NEW.action
+      AND receipt.capability=NEW.capability
+      AND receipt.recorded_at=NEW.consumed_at
+  )
+  OR NOT (
+    (
+      NEW.table_name='archive_items'
+      AND NEW.operation IN ('insert','update','destroy')
+      AND NEW.row_id=NEW.resource_id
+      AND NEW.action=CASE NEW.operation
+        WHEN 'insert' THEN 'create'
+        WHEN 'update' THEN 'update'
+        ELSE 'delete'
+      END
+      AND EXISTS(
+        SELECT 1 FROM archive_items item
+        WHERE item.id=NEW.row_id
+          AND item.policy_receipt_hash=NEW.receipt_hash
+          AND item.policy_receipt_version=NEW.receipt_version
+          AND item.policy_receipt_nonce=NEW.receipt_nonce
+          AND item.policy_correlation_id=NEW.correlation_id
+          AND item.policy_resource_type=NEW.resource_type
+          AND item.policy_resource_id=NEW.resource_id
+          AND item.policy_action=NEW.action
+          AND item.policy_capability=NEW.capability
+      )
+    )
+    OR
+    (
+      NEW.table_name='archive_versions'
+      AND NEW.operation='insert'
+      AND EXISTS(
+        SELECT 1 FROM archive_versions version
+        WHERE version.id=NEW.row_id
+          AND version.archive_item_id=NEW.resource_id
+          AND version.policy_receipt_hash=NEW.receipt_hash
+          AND version.policy_receipt_version=NEW.receipt_version
+          AND version.policy_receipt_nonce=NEW.receipt_nonce
+          AND version.policy_correlation_id=NEW.correlation_id
+          AND version.policy_resource_type=NEW.resource_type
+          AND version.policy_resource_id=NEW.resource_id
+          AND version.policy_action=NEW.action
+          AND version.policy_capability=NEW.capability
+          AND ((version.version_no=1 AND NEW.action='create') OR (version.version_no>1 AND NEW.action='update'))
+      )
+    )
+  )
+BEGIN
+  SELECT RAISE(ABORT,'archive business mutation ledger binding is invalid');
+END;
+
+DROP TRIGGER trg_archive_versions_policy_insert;
+CREATE TRIGGER trg_archive_versions_policy_insert
+BEFORE INSERT ON archive_versions
+WHEN NEW.policy_resource_type IS NOT 'archive_item'
+  OR NEW.policy_resource_id IS NOT NEW.archive_item_id
+  OR NEW.policy_action NOT IN ('create','update')
+  OR NEW.policy_capability IS NOT 'archive.write'
+  OR NOT EXISTS(
+    SELECT 1 FROM platform_policy_transaction_receipts receipt
+    JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+    JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+    JOIN archive_items item ON item.id=NEW.archive_item_id AND item.family_id=json_extract(receipt.record_json,'$.request.resource.familyId') AND item.destroyed_at IS NULL
+    WHERE receipt.receipt_hash=NEW.policy_receipt_hash AND receipt.receipt_version=NEW.policy_receipt_version
+      AND receipt.nonce=NEW.policy_receipt_nonce AND receipt.correlation_id=NEW.policy_correlation_id
+      AND receipt.resource_type=NEW.policy_resource_type AND receipt.resource_id=NEW.policy_resource_id
+      AND receipt.action=NEW.policy_action AND receipt.capability=NEW.policy_capability
+      AND ((NEW.version_no=1 AND NEW.policy_action='create') OR (NEW.version_no>1 AND NEW.policy_action='update'))
+  )
+  OR EXISTS(
+    SELECT 1 FROM platform_policy_archive_business_mutations consumed
+    WHERE consumed.receipt_hash=NEW.policy_receipt_hash AND consumed.table_name='archive_versions' AND consumed.operation='insert'
+  )
+BEGIN
+  SELECT RAISE(ABORT,'archive version insert requires a fresh exact parent create or update policy receipt');
+END;
+
+UPDATE database_metadata SET value='REVISION-33-R-ARCHIVE-EVIDENCE-MEDIA-SEARCH',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -13030,7 +13261,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(92, 'privacy_ownership_data_rights_incident_control', privacyOwnershipDataRightsIncidentControlSql),
   createMigrationDefinition(93, 'identity_access_credentials', identityAccessCredentialLedgerSql),
   createMigrationDefinition(94, 'local_governed_ocr', localGovernedOcrLedgerSql),
-  createMigrationDefinition(95, 'legacy_archive_ownership_reattestation', legacyArchiveOwnershipReattestationSql)
+  createMigrationDefinition(95, 'legacy_archive_ownership_reattestation', legacyArchiveOwnershipReattestationSql),
+  createMigrationDefinition(96, 'archive_evidence_relations_media_search', archiveEvidenceRelationsMediaLifecycleSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

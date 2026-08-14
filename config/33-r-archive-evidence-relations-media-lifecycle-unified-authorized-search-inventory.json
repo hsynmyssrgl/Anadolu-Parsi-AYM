@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "step": "33-R",
+  "decision": "DEC-229",
+  "requirements": ["B3-01", "B3-03", "B3-05"],
+  "status": "PLANNED",
+  "implementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+  "countsAsRequirementPass": false,
+  "registryReconciliation": {
+    "registryMutationPerformed": false,
+    "roadmapMutationPerformed": false,
+    "planOrLedgerActivationPerformed": false,
+    "activePredecessor": "33-P",
+    "evidenceChainMustRemainOpen": true
+  },
+  "implementedProductionSurfaces": [
+    {
+      "id": "domain-and-application",
+      "status": "LOCAL_COMPONENT_TESTED",
+      "paths": [
+        "packages/domain/src/archive-evidence-media.ts",
+        "packages/domain/src/unified-authorized-search.ts",
+        "packages/application/src/archive-evidence-media-use-cases.ts",
+        "packages/application/src/unified-authorized-search-use-cases.ts"
+      ]
+    },
+    {
+      "id": "migration-and-repository",
+      "status": "LOCAL_COMPONENT_TESTED",
+      "paths": [
+        "packages/database/src/family-database-migrations.ts",
+        "packages/repository-contracts/src/archive-repository.ts",
+        "packages/repositories/src/archive-repository.ts"
+      ],
+      "migrationVersion": 96,
+      "migrationSha256": "c00b2a72bf49d2200c85b2045a8ab7a01ef7a41882b2b14eb5a1f4715bde1eb2"
+    },
+    {
+      "id": "desktop-composition-ipc-ui",
+      "status": "LOCAL_COMPONENT_TESTED",
+      "paths": [
+        "apps/desktop/src/main/archive-application-adapter.ts",
+        "apps/desktop/src/main/unified-authorized-search-application-adapter.ts",
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/main/ipc-read-sharing.ts",
+        "apps/desktop/src/main/ipc-request-lifecycle.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/renderer/global.d.ts",
+        "apps/desktop/src/renderer/App.tsx",
+        "apps/desktop/src/renderer/styles.css"
+      ]
+    }
+  ],
+  "implementedTargetedTests": [
+    "packages/application/tests/archive-evidence-media-use-cases.test.ts",
+    "packages/repositories/archive-evidence-media-repository-policy.test.ts",
+    "apps/desktop/tests/archive-core-table-receipt-fence.test.ts",
+    "apps/desktop/tests/archive-evidence-media-data-store.test.ts",
+    "apps/desktop/tests/archive-evidence-media-ipc-ui.test.ts",
+    "packages/application/tests/unified-authorized-search-use-cases.test.ts",
+    "apps/desktop/tests/unified-authorized-search-application-adapter.test.ts",
+    "apps/desktop/tests/unified-authorized-search-ipc-ui.test.ts"
+  ],
+  "validation": {
+    "targetedTestFileRatchet": 8,
+    "targetedTestRatchet": 30,
+    "migrationChecks": 9,
+    "dataStoreSmokeChecks": 14,
+    "ppk021": {
+      "status": "PASS",
+      "files": 447,
+      "surfaces": 692,
+      "sha256": "80bb7e2c6777792375260a348c4f0a4870e7f47eefcf940f22d8588682f6ed62",
+      "targeted": 17,
+      "contract": 84,
+      "runtime": 20
+    },
+    "ppk022": {
+      "status": "PASS",
+      "files": 447,
+      "surfaces": 345,
+      "sha256": "1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e",
+      "targeted": 19,
+      "contract": 110,
+      "runtime": 24
+    },
+    "countsAsRequirementPass": false
+  },
+  "openAcceptanceBindings": [
+    "ACTIVE_PREDECESSOR_33_P",
+    "RESTART_DURABLE_MUTATION_RECOVERY_NOT_VALIDATED",
+    "ARCHIVE_FILE_SQLITE_CRASH_ATOMICITY_NOT_GUARANTEED",
+    "LEGACY_OWNERLESS_ARCHIVE_REATTESTATION_UAT_NOT_RUN",
+    "REAL_USER_LARGE_FAMILY_ACCESSIBILITY_PRIVACY_LEGAL_SECURITY_UAT_NOT_RUN"
+  ],
+  "governanceSurfaces": [
+    "config/33-r-archive-evidence-relations-media-lifecycle-unified-authorized-search-scope.json",
+    "config/33-r-archive-evidence-relations-media-lifecycle-unified-authorized-search-inventory.json",
+    "docs/decisions/DEC-229-archive-evidence-relations-media-lifecycle-unified-authorized-search.md",
+    "docs/security/THREAT_MODEL_33_R_ARCHIVE_EVIDENCE_RELATIONS_MEDIA_LIFECYCLE_UNIFIED_AUTHORIZED_SEARCH.md",
+    "scripts/verify-33-r-archive-evidence-relations-media-lifecycle-unified-authorized-search-boundary.mjs",
+    "scripts/verify-33-r-archive-evidence-relations-media-lifecycle-unified-authorized-search-contract.mjs",
+    "scripts/verify-33-r-archive-evidence-relations-media-lifecycle-unified-authorized-search-runtime.mjs"
+  ]
+}

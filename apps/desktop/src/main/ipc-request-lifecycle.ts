@@ -62,6 +62,7 @@ const readLatestWinsChannels = new Set<string>([
   'genealogy:insights',
   'archive:versions',
   'archive:search',
+  'unifiedSearch:search',
   'timeline:listArchived'
 ]);
 const formDraftReadChannels = new Set<string>([
@@ -138,6 +139,19 @@ const localGovernedOcrChannels = new Set<string>([
 const archiveOwnershipReattestationChannels = new Set<string>([
   'archive:reattestLegacyOwnership'
 ]);
+const archiveEvidenceReadChannels = new Set<string>([
+  'archive:listRelationEvidence',
+  'archive:listRelationEvidenceHistory'
+]);
+const archiveEvidenceWriteChannels = new Set<string>([
+  'archive:addRelationEvidence',
+  'archive:removeRelationEvidence',
+  'archive:addVersion'
+]);
+const archiveEvidenceChannels = new Set<string>([
+  ...archiveEvidenceReadChannels,
+  ...archiveEvidenceWriteChannels
+]);
 
 const cancellableNetworkChannels = new Set<string>([
   'dataLifecycle:runRevocationSync'
@@ -149,6 +163,12 @@ const cancellableInteractiveAuthenticationChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLifecyclePolicy => {
+  if (archiveEvidenceReadChannels.has(channel)) {
+    return Object.freeze({ cancellable: true, latestWins: true, timeoutMs: 10_000 });
+  }
+  if (archiveEvidenceWriteChannels.has(channel)) {
+    return Object.freeze({ cancellable: false, latestWins: false, timeoutMs: 0 });
+  }
   if (archiveOwnershipReattestationChannels.has(channel)) {
     return Object.freeze({ cancellable: false, latestWins: false, timeoutMs: 0 });
   }
@@ -218,10 +238,14 @@ const standardAdmissionChannels = new Set<string>([
   'genealogy:insights',
   'archive:versions',
   'archive:search',
+  'unifiedSearch:search',
   'timeline:listArchived'
 ]);
 
 export const resolveIpcRequestAdmissionPolicy = (channel: string): IpcRequestAdmissionPolicy => {
+  if (archiveEvidenceChannels.has(channel)) {
+    return Object.freeze({ enabled:true, priority:'interactive', priorityWeight:100, maxConcurrentPerSender:2, maxConcurrentPerChannel:1, maxQueuedPerSender:4, queueTimeoutMs:2_500 });
+  }
   if (archiveOwnershipReattestationChannels.has(channel)) {
     return Object.freeze({ enabled:true, priority:'interactive', priorityWeight:100, maxConcurrentPerSender:2, maxConcurrentPerChannel:1, maxQueuedPerSender:4, queueTimeoutMs:2_500 });
   }
@@ -320,6 +344,15 @@ export interface IpcRequestRatePolicy {
 }
 
 export const resolveIpcRequestRatePolicy = (channel: string): IpcRequestRatePolicy => {
+  if (archiveEvidenceReadChannels.has(channel)) {
+    return Object.freeze({ enabled: true, maxRequestsPerWindow: 60, windowMs: 60_000 });
+  }
+  if (archiveEvidenceWriteChannels.has(channel)) {
+    return Object.freeze({ enabled: true, maxRequestsPerWindow: 16, windowMs: 60_000 });
+  }
+  if (channel === 'unifiedSearch:search') {
+    return Object.freeze({ enabled: true, maxRequestsPerWindow: 60, windowMs: 60_000 });
+  }
   if (archiveOwnershipReattestationChannels.has(channel)) {
     return Object.freeze({ enabled: true, maxRequestsPerWindow: 6, windowMs: 60_000 });
   }

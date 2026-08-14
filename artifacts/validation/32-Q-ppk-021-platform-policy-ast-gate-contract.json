@@ -54,7 +54,7 @@
       "passed": true
     },
     {
-      "name": "manifest contains exactly 685 surfaces",
+      "name": "manifest contains exactly 692 surfaces",
       "passed": true
     },
     {
@@ -282,7 +282,7 @@
       "passed": true
     },
     {
-      "name": "scope records six rules and 685 exact surfaces",
+      "name": "scope records six rules and 692 exact surfaces",
       "passed": true
     },
     {
@@ -310,7 +310,7 @@
       "passed": true
     },
     {
-      "name": "decision pins the current OCR-search-expanded source ratchet without rewriting historical closure",
+      "name": "decision pins the current archive-evidence-media-search-expanded source ratchet without rewriting historical closure",
       "passed": true
     },
     {
@@ -350,13 +350,13 @@
   "sourceGate": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 442,
-    "privilegedSurfaces": 685,
-    "exactAllowlistEntries": 685,
-    "exactAllowlistSha256": "7713c4b422c9822f6a5505b7245e27032f34872e98843d3126cf6de9a285759e",
+    "scannedFiles": 447,
+    "privilegedSurfaces": 692,
+    "exactAllowlistEntries": 692,
+    "exactAllowlistSha256": "80bb7e2c6777792375260a348c4f0a4870e7f47eefcf940f22d8588682f6ed62",
     "surfaceCounts": {
       "CRYPTO_GLOBAL": 5,
-      "CRYPTO_IMPORT": 198,
+      "CRYPTO_IMPORT": 199,
       "DATABASE_IMPORT": 21,
       "NETWORK_IMPORT": 11,
       "REPOSITORY_IMPORT": 55,
@@ -364,7 +364,7 @@
       "SQL_CALL": 63,
       "SQL_CONSTRUCTOR": 2,
       "SQL_IMPORT": 2,
-      "USE_CASE_COMPOSITION": 327
+      "USE_CASE_COMPOSITION": 333
     },
     "maliciousSelfTestAssertions": 17,
     "benignSelfTestAssertions": 4,
@@ -372,13 +372,13 @@
     "findings": []
   },
   "protectedRuleCount": 6,
-  "exactAllowlistEntries": 685,
-  "exactAllowlistSha256": "7713c4b422c9822f6a5505b7245e27032f34872e98843d3126cf6de9a285759e",
+  "exactAllowlistEntries": 692,
+  "exactAllowlistSha256": "80bb7e2c6777792375260a348c4f0a4870e7f47eefcf940f22d8588682f6ed62",
   "directRoleAuthorizationBypasses": 0,
   "syntaxModel": "TYPESCRIPT_AST",
   "regexOnlyGateAccepted": false,
   "buildGateReplacesRuntimePolicy": false,
-  "latestDatabaseMigration": 95,
+  "latestDatabaseMigration": 96,
   "schemaMigrationRequired": false,
   "historicalBackfillPerformed": false,
   "legacyDesktopVaultPreserved": true,
@@ -387,5 +387,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-14T20:22:28.003Z"
+  "generatedAt": "2026-08-14T21:59:52.239Z"
 }

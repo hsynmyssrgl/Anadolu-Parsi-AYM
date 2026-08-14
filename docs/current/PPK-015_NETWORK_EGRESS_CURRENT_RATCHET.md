@@ -18,11 +18,11 @@ Güncel politika 2 adapter ve 3 purpose içerir:
 
 OIDC adaptörü yalnız tam token ve JWKS primary/secondary SPKI pinleri, TLS 1.3, işletim sistemi sertifika güveni, public DNS, çözümlenen ve bağlanılan IP eşitliği, redirect yasağı, exact JSON içerik türü, boyut ve süre sınırlarıyla çalışır. Sağlayıcı görünürlüğü secure-network-ready profile ve main-only deep-link callback kaydına bağlıdır. Apple, korumalı `private_key_jwt` assertion sağlayıcısı olmadığı sürece görünmez. Provider availability veya delivery garantisi verilmez.
 
-Güncel kaynak ratchet'i 18 source zone, 442 dosya, 7 malicious self-test, 2 adapter, 3 purpose, sıfır doğrudan primitive istisnası ve sıfır bulgudur. Üretim kaynak özeti `a7c85a5c6da2257a4d28fca4b208c7a0742ea515341343fc1f522b51a17b8bed`; yetkili adapter/purpose özeti `8c3764ee962b55dda7fa85520b8fbb34088a65ab722febd30254416b7d6898bb` değeridir.
+Güncel kaynak ratchet'i 18 source zone, 447 dosya, 7 malicious self-test, 2 adapter, 3 purpose, sıfır doğrudan primitive istisnası ve sıfır bulgudur. Üretim kaynak özeti `4bd8f4e4576bfb2e10abc59a40da80361260a5910ee3045792c18fdf9e23c703`; yetkili adapter/purpose özeti `8c3764ee962b55dda7fa85520b8fbb34088a65ab722febd30254416b7d6898bb` değeridir.
 
 ## Migration ayrımı
 
-Migration 77 daha sonra PPK-016 tarafından türetilmiş-veri metadata zinciri için eklenmiştir; PPK-015 tarafından eklenmiş değildir. Güncel latest migration 95, 33-Q local governed OCR ve legacy arşiv sahipliği yeniden doğrulama zinciri tarafından sahiplenilir. Bu ardıl migrationlar, 32-K kapanış anındaki migration 76 gerçeğini veya PPK-015'in yeni persistence eklemediği gerçeğini değiştirmez.
+Migration 77 daha sonra PPK-016 tarafından türetilmiş-veri metadata zinciri için eklenmiştir; PPK-015 tarafından eklenmiş değildir. Güncel latest migration 96, 33-R arşiv delil ilişkileri ve medya sürüm yaşam döngüsü zinciri tarafından sahiplenilir. Bu ardıl migrationlar, 32-K kapanış anındaki migration 76 gerçeğini veya PPK-015'in yeni persistence eklemediği gerçeğini değiştirmez.
 
 ## Gerçeklik sınırı
 

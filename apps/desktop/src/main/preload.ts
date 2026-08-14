@@ -37,6 +37,8 @@ import type {
   LocalGovernedOcrSetEnabledIpcInput
 } from './ipc-integration-policy.js';
 import type { FamilyEventView, FamilyMutationResultView, SetFamilyEventArchivedInput, UpdateFamilyEventInput } from '@ppt/domain';
+import type { UnifiedAuthorizedSearchInput, UnifiedAuthorizedSearchView } from '@ppt/domain';
+import type { AddArchiveItemVersionInput, AddArchiveRelationEvidenceInput, ArchiveRelationEvidenceHistoryView, ArchiveRelationEvidenceView, RemoveArchiveRelationEvidenceInput } from '@ppt/domain';
 import type { LegacyArchiveOwnershipReattestationView, ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { AssignPersonMembershipInput, CreateFamilyBranchInput, CreateHouseholdInput, FamilyBranch, Household, HouseholdMembershipWorkspaceView, PersonLifecycleProfile, PersonLifecycleWorkspaceView, PersonMembership, UpdatePersonProfileInput } from '@ppt/domain';
 import type { AuthorizationContextWorkspaceView } from '@ppt/domain';
@@ -689,7 +691,14 @@ contextBridge.exposeInMainWorld('pardus', {
   createLocation: (input: CreateFamilyLocationInput): Promise<FamilyMutationResultView> => invoke('location:create', input),
   listArchive: ():Promise<ArchiveItemView[]> => invoke('archive:list'),
   searchArchive:(input:ArchiveSearchInput={}):Promise<ArchiveItemView[]>=>invoke('archive:search',input),
+  searchUnifiedAuthorizedRecords:(input:UnifiedAuthorizedSearchInput):Promise<UnifiedAuthorizedSearchView>=>
+    invoke('unifiedSearch:search',input),
   listArchiveVersions:(itemId:string):Promise<ArchiveVersionView[]>=>invoke('archive:listVersions',itemId),
+  listArchiveRelationEvidence:(itemId:string):Promise<ArchiveRelationEvidenceView[]>=>invoke('archive:listRelationEvidence',itemId),
+  listArchiveRelationEvidenceHistory:(itemId:string):Promise<ArchiveRelationEvidenceHistoryView[]>=>invoke('archive:listRelationEvidenceHistory',itemId),
+  addArchiveRelationEvidence:(input:AddArchiveRelationEvidenceInput&{readonly clientOperationId:string}):Promise<ArchiveRelationEvidenceView[]>=>invoke('archive:addRelationEvidence',input),
+  removeArchiveRelationEvidence:(input:RemoveArchiveRelationEvidenceInput&{readonly clientOperationId:string}):Promise<ArchiveRelationEvidenceView[]>=>invoke('archive:removeRelationEvidence',input),
+  addArchiveItemVersion:(input:AddArchiveItemVersionInput&{readonly clientOperationId:string}):Promise<ArchiveVersionView[]>=>invoke('archive:addVersion',input),
   listArchiveRetentionPolicies:():Promise<ArchiveRetentionPolicyView[]>=>invoke('archive:listRetentionPolicies'),
   createArchiveRetentionPolicy:(input:CreateArchiveRetentionPolicyInput):Promise<ArchiveRetentionPolicyView[]>=>
     invokeArchiveMutation('archive:createRetentionPolicy', input, (operationId) => ({ ...input, operationId })),

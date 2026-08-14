@@ -57,7 +57,10 @@ export const IPC_DERIVED_DATA_NO_CACHE_CHANNELS = Object.freeze([
   'largeData:archive',
   'genealogy:insights',
   'archive:versions',
-  'archive:search'
+  'archive:search',
+  'unifiedSearch:search',
+  'archive:listRelationEvidence',
+  'archive:listRelationEvidenceHistory'
 ] as const);
 
 const policySensitiveChannels = new Set<string>(IPC_POLICY_SENSITIVE_READ_CHANNELS);
@@ -75,7 +78,10 @@ const standardChannels = new Set<string>([
   'largeData:archive',
   'genealogy:insights',
   'archive:versions',
-  'archive:search'
+  'archive:search',
+  'unifiedSearch:search',
+  'archive:listRelationEvidence',
+  'archive:listRelationEvidenceHistory'
 ]);
 
 const disabledPolicy: IpcReadSharingPolicy = Object.freeze({

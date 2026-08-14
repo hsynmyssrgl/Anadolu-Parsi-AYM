@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "id": "33-R-ARCHIVE-EVIDENCE-RELATIONS-MEDIA-LIFECYCLE-UNIFIED-AUTHORIZED-SEARCH",
+  "step": "33-R",
+  "decision": "DEC-229",
+  "title": "Archive evidence relations media lifecycle and unified authorized search",
+  "status": "PLANNED",
+  "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+  "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+  "requirements": [
+    "B3-01",
+    "B3-03",
+    "B3-05"
+  ],
+  "dependsOn": [
+    "33-Q"
+  ],
+  "roadmapStatus": "PLANNED",
+  "registrySemantics": {
+    "acceptedScopeRegistryAuthority": "ATOMIC_CLOSURE_STATE",
+    "registryMutationPerformedByStarter": false,
+    "roadmapMutationPerformedByStarter": false,
+    "planOrLedgerActivationPerformedByStarter": false,
+    "currentOpenStatusesIntentional": true,
+    "registryEvidenceMustRemainFalseUntilClosure": true,
+    "activePredecessor": "33-P"
+  },
+  "canonicalAcceptance": {
+    "B3-01": "Her önemli ilişki kaynak, tarih, güven seviyesi ve belgeyle ilişkilendirilebilir.",
+    "B3-03": "Ekler güvenli kasada; önizleme, kaldırma, sürüm ve izinler çalışır.",
+    "B3-05": "Aile, olay, belge, finans, sağlık ve yaşam kayıtları tek aramada; yetkisiz sonuç sızmaz."
+  },
+  "implementedModel": {
+    "evidenceRelations": {
+      "status": "PARTIAL_LOCAL_COMPOSED_AND_TESTED_ACCEPTANCE_INCOMPLETE",
+      "ownerBoundArchiveDocumentRequired": true,
+      "relationDateConfidenceRequired": true,
+      "futureEvidenceDateDenied": true,
+      "activeToRemovedOnly": true,
+      "immutableMutationHistory": true,
+      "physicalHistoryDeletionAllowed": false,
+      "optimisticRevisionRequired": true,
+      "idempotentClientOperationRequired": true,
+      "centralPepReceiptFenceRequired": true
+    },
+    "mediaVersionLifecycle": {
+      "status": "PARTIAL_LOCAL_COMPOSED_AND_TESTED_ACCEPTANCE_INCOMPLETE",
+      "encryptedArchiveVaultRequired": true,
+      "versionOneCreateReceipt": true,
+      "laterVersionUpdateReceipt": true,
+      "immutableVersionRows": true,
+      "mainProcessFilePicker": true,
+      "rendererPathAuthority": false,
+      "unknownCommitPreservesEncryptedFileForRetry": true,
+      "restartDurablePendingRecoveryGuaranteed": false
+    },
+    "unifiedAuthorizedSearch": {
+      "status": "PARTIAL_LOCAL_COMPOSED_AND_TESTED_ACCEPTANCE_INCOMPLETE",
+      "modules": [
+        "family",
+        "event",
+        "archive",
+        "finance",
+        "health",
+        "life"
+      ],
+      "centralAuthorizedSourceUseCasesOnly": true,
+      "rawSqlSearchAllowed": false,
+      "partialSourceFailureReturnsResults": false,
+      "queryEchoedToRenderer": false,
+      "maxQueryCharacters": 80,
+      "maxQueryTokens": 8,
+      "maxResults": 25,
+      "maxCandidates": 5000
+    }
+  },
+  "truth": {
+    "requirementsClosed": false,
+    "countsAsRequirementPass": false,
+    "localDomainContractImplemented": true,
+    "localMigrationRepositoryImplemented": true,
+    "localApplicationUseCasesImplemented": true,
+    "localDesktopDataStoreCompositionImplemented": true,
+    "localIpcBridgeImplemented": true,
+    "localRendererSurfaceImplemented": true,
+    "localTargetedMatrixPassed": true,
+    "ownerFamilyAccountIsolationTested": true,
+    "forgedReceiptRollbackTested": true,
+    "immutableEvidenceHistoryTested": true,
+    "versionUpdateReceiptTested": true,
+    "unifiedSearchUnauthorizedLeakTested": true,
+    "rendererReceivesRawFilePath": false,
+    "rendererReceivesPolicyReceipt": false,
+    "rendererReceivesAccountFamilyOwnerAuthority": false,
+    "restartDurableMutationRecoveryValidated": false,
+    "archiveFileAndSqliteAtomicityGuaranteed": false,
+    "legacyOwnerlessArchiveAutomaticallyTrusted": false,
+    "externalManualAcceptanceCompleted": false,
+    "privacyLegalSecurityReviewCompleted": false,
+    "certificationClaimed": false
+  },
+  "validation": {
+    "targetedTestFiles": [
+      "packages/application/tests/archive-evidence-media-use-cases.test.ts",
+      "packages/repositories/archive-evidence-media-repository-policy.test.ts",
+      "apps/desktop/tests/archive-core-table-receipt-fence.test.ts",
+      "apps/desktop/tests/archive-evidence-media-data-store.test.ts",
+      "apps/desktop/tests/archive-evidence-media-ipc-ui.test.ts",
+      "packages/application/tests/unified-authorized-search-use-cases.test.ts",
+      "apps/desktop/tests/unified-authorized-search-application-adapter.test.ts",
+      "apps/desktop/tests/unified-authorized-search-ipc-ui.test.ts"
+    ],
+    "targetedTestFileRatchet": 8,
+    "targetedTestRatchet": 30,
+    "migrationVersion": 96,
+    "migrationName": "archive_evidence_relations_media_search",
+    "migrationSha256": "c00b2a72bf49d2200c85b2045a8ab7a01ef7a41882b2b14eb5a1f4715bde1eb2",
+    "dataStoreSmokeChecks": 14,
+    "ppk021": {
+      "status": "PASS",
+      "scannedProductionFiles": 447,
+      "exactPrivilegedSurfaceCount": 692,
+      "exactAllowlistSha256": "80bb7e2c6777792375260a348c4f0a4870e7f47eefcf940f22d8588682f6ed62",
+      "targetedTests": 17,
+      "contractChecks": 84,
+      "runtimeChecks": 20
+    },
+    "ppk022": {
+      "status": "PASS",
+      "scannedProductionFiles": 447,
+      "exactCapabilitySurfaceCount": 345,
+      "exactCapabilityManifestSha256": "1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e",
+      "targetedTests": 19,
+      "contractChecks": 110,
+      "runtimeChecks": 24
+    },
+    "boundaryArtifact": "artifacts/validation/33-R-archive-evidence-relations-media-lifecycle-unified-authorized-search-boundary.json",
+    "contractArtifact": "artifacts/validation/33-R-archive-evidence-relations-media-lifecycle-unified-authorized-search-contract.json",
+    "runtimeArtifact": "artifacts/validation/33-R-archive-evidence-relations-media-lifecycle-unified-authorized-search-runtime.json",
+    "countsAsRequirementPass": false
+  },
+  "manualEvidence": {
+    "realUserArchiveEvidenceUat": "NOT_RUN",
+    "realMediaVersionRecoveryUat": "NOT_RUN",
+    "largeFamilyUnifiedSearchUat": "NOT_RUN",
+    "accessibilityReview": "NOT_RUN",
+    "privacyReview": "NOT_RUN",
+    "legalReview": "NOT_RUN",
+    "securityReview": "NOT_RUN",
+    "certificationClaimed": false
+  },
+  "persistentReceiptStatus": "NOT_RUN",
+  "remainingAcceptanceWork": [
+    "33-P ve 33-Q atomik yönetişim kapanışlarının tamamlanması",
+    "belirsiz commit sonrası restart-durable mutation recovery sözleşmesi",
+    "archive dosyası ile SQLite metadata arasındaki crash recovery kabulü",
+    "legacy ownerless archive yeniden doğrulama UAT kanıtı",
+    "gerçek kullanıcı, büyük aile, erişilebilirlik, gizlilik, hukuk ve güvenlik kabul kanıtları"
+  ]
+}

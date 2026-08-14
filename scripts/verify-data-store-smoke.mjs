@@ -35,8 +35,8 @@ try {
     ...policyOptions
   });
   assert.ok(migrationSummary, 'Migration özeti üretilmedi.');
-  assert.deepEqual(migrationSummary.appliedVersions, Array.from({ length: 95 }, (_unused, index) => index + 1));
-  assert.equal(migrationSummary.schemaAfter.tableCount, 138);
+  assert.deepEqual(migrationSummary.appliedVersions, Array.from({ length: 96 }, (_unused, index) => index + 1));
+  assert.equal(migrationSummary.schemaAfter.tableCount, 140);
 
   const initialState = store.getAuthState();
   if (!initialState.initialized) {
@@ -74,11 +74,13 @@ try {
   const probe = new DatabaseSync(databasePath, { readOnly: true });
   try {
     const migrations = probe.prepare('SELECT version,success FROM schema_migrations ORDER BY version').all();
-    assert.equal(migrations.length, 95, 'Migration kayıtları eksik.');
+    assert.equal(migrations.length, 96, 'Migration kayıtları eksik.');
     assert.equal(migrations.every((row) => Number(row.success) === 1), true, 'Başarısız migration kaydı bulundu.');
     assert.equal(Boolean(probe.prepare("SELECT 1 AS present FROM sqlite_master WHERE type='table' AND name='database_metadata'").get()), true);
     assert.equal(Boolean(probe.prepare("SELECT 1 AS present FROM sqlite_master WHERE type='table' AND name='local_governed_ocr_source_deletion_recovery_intents'").get()), true);
     assert.equal(Boolean(probe.prepare("SELECT 1 AS present FROM sqlite_master WHERE type='table' AND name='archive_legacy_ownership_reattestations'").get()), true);
+    assert.equal(Boolean(probe.prepare("SELECT 1 AS present FROM sqlite_master WHERE type='table' AND name='archive_relation_evidence'").get()), true);
+    assert.equal(Boolean(probe.prepare("SELECT 1 AS present FROM sqlite_master WHERE type='table' AND name='archive_relation_evidence_mutations'").get()), true);
     const outbox = probe.prepare("SELECT event_type,aggregate_type,aggregate_id,status,attempt_count FROM event_outbox WHERE event_type='family.member.created' ORDER BY occurred_at DESC LIMIT 1").get();
     assert.ok(outbox, 'Aile üyesi olayı transactional outbox içine yazılmadı.');
     assert.equal(outbox.aggregate_type, 'person');

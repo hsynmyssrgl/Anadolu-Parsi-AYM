@@ -186,10 +186,16 @@ import {
   SimulatePermissionVisibilityUseCase,
   ListArchiveItemsUseCase,
   SearchArchiveItemsUseCase,
+  SearchUnifiedAuthorizedRecordsUseCase,
   PrepareArchiveOpenUseCase,
   RecordArchiveOpenedUseCase,
   AuthorizeEmergencyArchiveReadUseCase,
   ListArchiveVersionsUseCase,
+  ListArchiveRelationEvidenceUseCase,
+  ListArchiveRelationEvidenceHistoryUseCase,
+  AddArchiveRelationEvidenceUseCase,
+  RemoveArchiveRelationEvidenceUseCase,
+  AddArchiveItemVersionUseCase,
   ImportArchiveItemUseCase,
   ListArchiveRetentionPoliciesUseCase,
   ListArchiveRetentionStatusUseCase,
@@ -241,6 +247,7 @@ import {
   type LocationApplicationContext,
   type TimelineApplicationContext,
   type LocalGovernedOcrApplicationContext,
+  type UnifiedAuthorizedSearchApplicationContext,
   type LocalGovernedOcrOperationIdentifiers,
   type LocalGovernedOcrRuntimePort,
   ListDataRetentionPoliciesUseCase,
@@ -302,6 +309,7 @@ import {
   type WindowsHelloPlatformPort,
   type WindowsHelloDeviceBindingPort
 } from '@ppt/application';
+import type { AddArchiveItemVersionInput, AddArchiveRelationEvidenceInput, ArchiveRelationEvidenceHistoryView, ArchiveRelationEvidenceView, RemoveArchiveRelationEvidenceInput, UnifiedAuthorizedSearchInput, UnifiedAuthorizedSearchView } from '@ppt/domain';
 import { RepositoryBackedFamilyApplicationUnitOfWork, RepositoryBackedFamilyGraphQueryPort } from './family-application-adapter.js';
 import { RepositoryBackedHouseholdMembershipUnitOfWork } from './household-membership-application-adapter.js';
 import { RepositoryBackedPersonLifecycleUnitOfWork } from './person-lifecycle-application-adapter.js';
@@ -368,6 +376,7 @@ import {
   nonWritableArchiveClusterFence,
   type ArchivePolicyEnforcementPointResolver
 } from './archive-application-adapter.js';
+import { RepositoryBackedUnifiedAuthorizedSearchSourcePort } from './unified-authorized-search-application-adapter.js';
 import {
   PlatformPolicyEnforcementError,
   SensitiveLogPolicy,
@@ -1246,10 +1255,16 @@ export class FamilyDataStore {
   readonly #createReadOnlyCompanionSnapshotUseCase: CreateReadOnlyCompanionSnapshotUseCase;
   readonly #listArchiveItemsUseCase: ListArchiveItemsUseCase;
   readonly #searchArchiveItemsUseCase: SearchArchiveItemsUseCase;
+  readonly #searchUnifiedAuthorizedRecordsUseCase: SearchUnifiedAuthorizedRecordsUseCase;
   readonly #prepareArchiveOpenUseCase: PrepareArchiveOpenUseCase;
   readonly #recordArchiveOpenedUseCase: RecordArchiveOpenedUseCase;
   readonly #authorizeEmergencyArchiveReadUseCase: AuthorizeEmergencyArchiveReadUseCase;
   readonly #listArchiveVersionsUseCase: ListArchiveVersionsUseCase;
+  readonly #listArchiveRelationEvidenceUseCase: ListArchiveRelationEvidenceUseCase;
+  readonly #listArchiveRelationEvidenceHistoryUseCase: ListArchiveRelationEvidenceHistoryUseCase;
+  readonly #addArchiveRelationEvidenceUseCase: AddArchiveRelationEvidenceUseCase;
+  readonly #removeArchiveRelationEvidenceUseCase: RemoveArchiveRelationEvidenceUseCase;
+  readonly #addArchiveItemVersionUseCase: AddArchiveItemVersionUseCase;
   readonly #importArchiveItemUseCase: ImportArchiveItemUseCase;
   readonly #listArchiveRetentionPoliciesUseCase: ListArchiveRetentionPoliciesUseCase;
   readonly #listArchiveRetentionStatusUseCase: ListArchiveRetentionStatusUseCase;
@@ -2356,10 +2371,25 @@ export class FamilyDataStore {
     const archiveUnitOfWork = new RepositoryBackedArchiveUnitOfWork(archiveApplicationDependencies);
     this.#listArchiveItemsUseCase = new ListArchiveItemsUseCase(archiveQuery);
     this.#searchArchiveItemsUseCase = new SearchArchiveItemsUseCase(archiveQuery);
+    this.#searchUnifiedAuthorizedRecordsUseCase = new SearchUnifiedAuthorizedRecordsUseCase(
+      new RepositoryBackedUnifiedAuthorizedSearchSourcePort({
+        loadFamilyAndEvents: () => this.getSnapshotSections({ sections: ['graph', 'timeline'] }),
+        listArchive: () => this.listArchive(),
+        listFinance: () => this.listFinanceRecords(),
+        listHealth: () => this.listHealthRecords(),
+        listLife: () => this.listLifeRecords(),
+        now: () => this.#clock.now()
+      })
+    );
     this.#prepareArchiveOpenUseCase = new PrepareArchiveOpenUseCase(archiveQuery);
     this.#recordArchiveOpenedUseCase = new RecordArchiveOpenedUseCase(archiveUnitOfWork);
     this.#authorizeEmergencyArchiveReadUseCase = new AuthorizeEmergencyArchiveReadUseCase(archiveUnitOfWork);
     this.#listArchiveVersionsUseCase = new ListArchiveVersionsUseCase(archiveQuery);
+    this.#listArchiveRelationEvidenceUseCase = new ListArchiveRelationEvidenceUseCase(archiveQuery);
+    this.#listArchiveRelationEvidenceHistoryUseCase = new ListArchiveRelationEvidenceHistoryUseCase(archiveQuery);
+    this.#addArchiveRelationEvidenceUseCase = new AddArchiveRelationEvidenceUseCase(archiveUnitOfWork);
+    this.#removeArchiveRelationEvidenceUseCase = new RemoveArchiveRelationEvidenceUseCase(archiveUnitOfWork);
+    this.#addArchiveItemVersionUseCase = new AddArchiveItemVersionUseCase(archiveUnitOfWork);
     this.#importArchiveItemUseCase = new ImportArchiveItemUseCase(archiveUnitOfWork);
     this.#listArchiveRetentionPoliciesUseCase = new ListArchiveRetentionPoliciesUseCase(archiveQuery);
     this.#listArchiveRetentionStatusUseCase = new ListArchiveRetentionStatusUseCase(archiveQuery);
@@ -3115,6 +3145,10 @@ export class FamilyDataStore {
     };
   }
 
+  #unifiedAuthorizedSearchApplicationContext(prefix: string): UnifiedAuthorizedSearchApplicationContext {
+    return this.#localGovernedOcrApplicationContext(prefix);
+  }
+
   async #propagateLocalGovernedOcrArchiveDeletion(
     archiveContext: ArchiveApplicationContext,
     sourceResourceId: string,
@@ -3212,6 +3246,37 @@ export class FamilyDataStore {
     }
     this.#bindArchivePendingOperation(context, pendingMutation);
     return context;
+  }
+
+  #archiveDirectMutationContext(
+    prefix: string,
+    clientOperationId: string,
+    semanticInput: unknown,
+    correlationId?: ArchiveApplicationContext['correlationId']
+  ): ArchiveApplicationContext {
+    const operationId = this.#archiveOperationId(clientOperationId);
+    const authenticatedUserId = this.#requireAuth();
+    const account = this.#currentAccount();
+    const familyId = asFamilyId('family-main');
+    const actor = {
+      userId: asUserId(authenticatedUserId),
+      role: account.role,
+      ...(account.personId ? { personId: asPersonId(account.personId) } : {})
+    } as const;
+    return {
+      familyId,
+      actor,
+      correlationId: correlationId
+        ?? this.#correlation?.current()?.correlationId
+        ?? asCorrelationId(`${prefix}-${randomUUID()}`),
+      operationId,
+      operationFingerprint: createHash('sha256').update(canonicalArchiveOperationValue({
+        actorAccountId: actor.userId,
+        familyId,
+        mutation: prefix,
+        semanticInput
+      }), 'utf8').digest('hex')
+    };
   }
 
   #archiveRepositoryContext(
@@ -5586,7 +5651,62 @@ export class FamilyDataStore {
 
   public async searchArchive(input: ArchiveSearchInput = {}): Promise<ArchiveItemView[]> { const result=await this.#searchArchiveItemsUseCase.execute(this.#archiveApplicationContext('archive-search'),input); if(!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`); return [...result.value]; }
 
+  public async searchUnifiedAuthorizedRecords(
+    input: UnifiedAuthorizedSearchInput
+  ): Promise<UnifiedAuthorizedSearchView> {
+    const result = await this.#searchUnifiedAuthorizedRecordsUseCase.execute(
+      this.#unifiedAuthorizedSearchApplicationContext('unified-authorized-search'),
+      input
+    );
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
   public async listArchiveVersions(itemId:string): Promise<ArchiveVersionView[]> { const result=await this.#listArchiveVersionsUseCase.execute(this.#archiveApplicationContext('archive-versions'),itemId); if(!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`); return [...result.value]; }
+  public async listArchiveRelationEvidence(itemId:string):Promise<ArchiveRelationEvidenceView[]>{const result=await this.#listArchiveRelationEvidenceUseCase.execute(this.#archiveApplicationContext('archive-relation-evidence-list'),itemId);if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return [...result.value];}
+  public async listArchiveRelationEvidenceHistory(itemId:string):Promise<ArchiveRelationEvidenceHistoryView[]>{const result=await this.#listArchiveRelationEvidenceHistoryUseCase.execute(this.#archiveApplicationContext('archive-relation-evidence-history'),itemId);if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return [...result.value];}
+  public async addArchiveRelationEvidence(input:AddArchiveRelationEvidenceInput&{readonly clientOperationId:string}):Promise<ArchiveRelationEvidenceView[]>{
+    const command={relationId:input.relationId.trim(),archiveItemId:input.archiveItemId.trim(),evidenceDate:input.evidenceDate,confidence:input.confidence};
+    const context=this.#archiveDirectMutationContext('archive.relation-evidence.add',input.clientOperationId,command);
+    const evidenceId=deterministicArchiveIdentifier(input.clientOperationId,'relation-evidence');
+    const result=await this.#addArchiveRelationEvidenceUseCase.execute({context,command,identifiers:{evidenceId,mutationId:deterministicArchiveIdentifier(input.clientOperationId,'mutation'),auditId:deterministicArchiveIdentifier(input.clientOperationId,'audit'),outboxEventId:asEventId(deterministicArchiveIdentifier(input.clientOperationId,'outbox'))}});
+    if(!result.ok){const current=await this.listArchiveRelationEvidence(command.archiveItemId);if(result.error.code===ERROR_CODES.RESOURCE_CONFLICT&&current.some(item=>item.id===evidenceId))return current;throw new Error(`[${result.error.code}] ${result.error.message}`);}
+    return this.listArchiveRelationEvidence(command.archiveItemId);
+  }
+  public async removeArchiveRelationEvidence(input:RemoveArchiveRelationEvidenceInput&{readonly clientOperationId:string}):Promise<ArchiveRelationEvidenceView[]>{
+    const command={evidenceId:input.evidenceId.trim(),archiveItemId:input.archiveItemId.trim(),expectedRevision:input.expectedRevision};
+    const context=this.#archiveDirectMutationContext('archive.relation-evidence.remove',input.clientOperationId,command);
+    const mutationId=deterministicArchiveIdentifier(input.clientOperationId,'mutation');
+    const result=await this.#removeArchiveRelationEvidenceUseCase.execute({context,command,identifiers:{mutationId,auditId:deterministicArchiveIdentifier(input.clientOperationId,'audit'),outboxEventId:asEventId(deterministicArchiveIdentifier(input.clientOperationId,'outbox'))}});
+    if(!result.ok){
+      const current=await this.listArchiveRelationEvidence(command.archiveItemId);
+      if(result.error.code===ERROR_CODES.RESOURCE_CONFLICT){
+        const history=await this.listArchiveRelationEvidenceHistory(command.archiveItemId);
+        if(history.some(item=>item.mutationId===mutationId&&item.evidenceId===command.evidenceId&&item.mutationKind==='evidence_remove'&&item.revision===command.expectedRevision+1))return current;
+      }
+      throw new Error(`[${result.error.code}] ${result.error.message}`);
+    }
+    return this.listArchiveRelationEvidence(command.archiveItemId);
+  }
+  public async addArchiveItemVersionFile(sourcePath:string,input:AddArchiveItemVersionInput&{readonly clientOperationId:string}):Promise<ArchiveVersionView[]>{
+    const itemId=input.itemId.trim();
+    const operationId=this.#archiveOperationId(input.clientOperationId);
+    const versionId=deterministicArchiveIdentifier(operationId,'version');
+    const fileContext=this.#archiveApplicationContext('archive-version-file');
+    const stored=this.#storeArchiveFileUseCase.execute(fileContext.correlationId,{sourcePath,itemId:versionId});
+    if(!stored.ok)throw new Error(`[${stored.error.code}] ${stored.error.message}`);
+    const command={itemId,originalName:stored.value.originalName,storedName:stored.value.storedName,mimeType:stored.value.mimeType,sizeBytes:stored.value.sizeBytes,sha256:stored.value.sha256,...(input.note?.trim()?{note:input.note.trim()}:{})};
+    const context=this.#archiveDirectMutationContext('archive.version.add',operationId,command,fileContext.correlationId);
+    const result=await this.#addArchiveItemVersionUseCase.execute({context,command,identifiers:{versionId,auditId:deterministicArchiveIdentifier(operationId,'audit'),outboxEventId:asEventId(deterministicArchiveIdentifier(operationId,'outbox'))}});
+    if(!result.ok){
+      let existing:ArchiveVersionView[]|undefined;
+      try{existing=await this.listArchiveVersions(itemId);}catch{/* Unknown commit state preserves the encrypted file. */}
+      if(result.error.code===ERROR_CODES.RESOURCE_CONFLICT&&existing?.some(version=>version.id===versionId))return existing;
+      if(stored.value.createdNewFile&&existing&&!existing.some(version=>version.id===versionId))this.#destroyArchiveFileUseCase.execute(context.correlationId,{storedName:stored.value.storedName,secureDestroy:false});
+      throw new Error(`[${result.error.code}] ${result.error.message}`);
+    }
+    return this.listArchiveVersions(itemId);
+  }
   public async listArchiveRetentionPolicies(): Promise<ArchiveRetentionPolicyView[]> { const result=await this.#listArchiveRetentionPoliciesUseCase.execute(this.#archiveApplicationContext('archive-retention-policies')); if(!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`); return [...result.value]; }
   public async createArchiveRetentionPolicy(
     input:CreateArchiveRetentionPolicyInput & { readonly operationId?: string }

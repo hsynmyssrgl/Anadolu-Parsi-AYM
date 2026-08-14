@@ -323,7 +323,7 @@ describe('30-R archive core-table receipt fence', () => {
         'archive-version-30r-replay',itemId,2,'replay.txt','replay.vault','text/plain',9,'b'.repeat(64),NOW,null,
         binding.receiptHash,binding.receiptVersion,binding.nonce,binding.correlationId,
         binding.resourceType,binding.resourceId,binding.action,binding.capability
-      )).toThrow(/fresh exact parent policy receipt/u);
+      )).toThrow(/fresh exact parent create or update policy receipt/u);
     });
 
     expect(() => harness.runtime.database.prepare('UPDATE archive_items SET title=? WHERE id=?')

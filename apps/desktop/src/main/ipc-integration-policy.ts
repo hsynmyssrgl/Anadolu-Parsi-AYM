@@ -21,6 +21,13 @@ import {
   type LocalGovernedOcrSearchView,
   type PolicyServiceAvailabilityBoundaryView
 } from '@ppt/domain';
+import {
+  UNIFIED_AUTHORIZED_SEARCH_MAX_RESULTS,
+  UNIFIED_AUTHORIZED_SEARCH_MODULES,
+  canonicalUnifiedAuthorizedSearchTokens,
+  unifiedAuthorizedSearchResourceTypeForModule,
+  type UnifiedAuthorizedSearchModule
+} from '@ppt/domain';
 
 export interface IpcIntegrationPolicyDecision {
   readonly accepted: boolean;
@@ -2168,6 +2175,160 @@ const privacyId = (value: unknown): boolean => typeof value === 'string'
   && value.length >= 2
   && value.length <= 160
   && /^[a-zA-Z0-9][a-zA-Z0-9._:-]*$/u.test(value);
+
+export const UNIFIED_AUTHORIZED_SEARCH_IPC_CHANNEL = 'unifiedSearch:search' as const;
+const unifiedAuthorizedSearchModules = new Set<unknown>(UNIFIED_AUTHORIZED_SEARCH_MODULES);
+
+const unifiedAuthorizedSearchInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => {
+  if (args.length !== 1 || !isObject(args[0])) return rejected('UNIFIED_SEARCH_OBJECT_REQUIRED', '$[0]');
+  const input = args[0];
+  if (!hasOnlyKeys(input, ['query', 'limit', 'modules']) || Object.keys(input).length < 1) {
+    return rejected('UNIFIED_SEARCH_UNKNOWN_FIELD', '$[0]');
+  }
+  if (canonicalUnifiedAuthorizedSearchTokens(input.query) === null
+    || !optionalInteger(input.limit, 1, UNIFIED_AUTHORIZED_SEARCH_MAX_RESULTS)) {
+    return rejected('UNIFIED_SEARCH_ARGUMENT_INVALID', '$[0]');
+  }
+  if (input.modules === undefined) return accepted();
+  if (!Array.isArray(input.modules) || Object.getPrototypeOf(input.modules) !== Array.prototype
+    || input.modules.length < 1 || input.modules.length > UNIFIED_AUTHORIZED_SEARCH_MODULES.length
+    || input.modules.some((module) => !unifiedAuthorizedSearchModules.has(module))
+    || new Set(input.modules).size !== input.modules.length) {
+    return rejected('UNIFIED_SEARCH_MODULES_INVALID', '$[0].modules');
+  }
+  return accepted();
+};
+
+const unifiedAuthorizedSearchResult = (result: unknown): IpcIntegrationPolicyDecision => {
+  if (!exactNested(result, [
+    'schemaVersion', 'items', 'searchedModules', 'truncated', 'policyFiltered', 'complete',
+    'queryEchoed', 'generatedAt'
+  ]) || result.schemaVersion !== 1 || result.policyFiltered !== true || result.complete !== true
+    || result.queryEchoed !== false || typeof result.truncated !== 'boolean' || !privacyIso(result.generatedAt)) {
+    return rejected('UNIFIED_SEARCH_RESULT_INVALID', '$result');
+  }
+  if (!Array.isArray(result.searchedModules) || Object.getPrototypeOf(result.searchedModules) !== Array.prototype
+    || result.searchedModules.length < 1 || result.searchedModules.length > UNIFIED_AUTHORIZED_SEARCH_MODULES.length
+    || result.searchedModules.some((module) => !unifiedAuthorizedSearchModules.has(module))
+    || new Set(result.searchedModules).size !== result.searchedModules.length) {
+    return rejected('UNIFIED_SEARCH_RESULT_MODULES_INVALID', '$result.searchedModules');
+  }
+  if (!Array.isArray(result.items) || Object.getPrototypeOf(result.items) !== Array.prototype
+    || result.items.length > UNIFIED_AUTHORIZED_SEARCH_MAX_RESULTS) {
+    return rejected('UNIFIED_SEARCH_RESULT_ITEMS_INVALID', '$result.items');
+  }
+  const selected = new Set(result.searchedModules);
+  for (let index = 0; index < result.items.length; index += 1) {
+    const item = result.items[index];
+    const keys = isObject(item) && item.occurredAt === undefined
+      ? ['module', 'resourceType', 'resourceId', 'title']
+      : ['module', 'resourceType', 'resourceId', 'title', 'occurredAt'];
+    if (!exactNested(item, keys) || !unifiedAuthorizedSearchModules.has(item.module)
+      || !selected.has(item.module) || !privacyId(item.resourceId)
+      || typeof item.title !== 'string' || item.title !== item.title.trim()
+      || item.title.length < 1 || item.title.length > 240 || /[\p{Cc}\p{Cs}]/u.test(item.title)
+      || (item.occurredAt !== undefined && !privacyIso(item.occurredAt))
+      || item.resourceType !== unifiedAuthorizedSearchResourceTypeForModule(item.module as UnifiedAuthorizedSearchModule)) {
+      return rejected('UNIFIED_SEARCH_RESULT_ITEM_INVALID', `$result.items[${index}]`);
+    }
+  }
+  return accepted();
+};
+
+export const ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS = Object.freeze({
+  listEvidence: 'archive:listRelationEvidence',
+  listEvidenceHistory: 'archive:listRelationEvidenceHistory',
+  addEvidence: 'archive:addRelationEvidence',
+  removeEvidence: 'archive:removeRelationEvidence',
+  addVersion: 'archive:addVersion'
+} as const);
+const archiveEvidenceMediaChannels = new Set<string>(Object.values(ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS));
+const archiveEvidenceConfidence = new Set<unknown>(['low', 'medium', 'high']);
+const archiveEvidenceId = (value: unknown): boolean => typeof value === 'string'
+  && value === value.trim() && value.length >= 1 && value.length <= 128
+  && /^[A-Za-z0-9][A-Za-z0-9._:-]*$/u.test(value);
+const archiveEvidenceDate = (value: unknown): boolean => {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/u.test(value)) return false;
+  const parsed = Date.parse(`${value}T00:00:00.000Z`);
+  return Number.isFinite(parsed) && new Date(parsed).toISOString().slice(0, 10) === value;
+};
+const archiveEvidenceMediaInput = (channel: string, args: readonly unknown[]): IpcIntegrationPolicyDecision => {
+  if (channel === ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS.listEvidence
+    || channel === ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS.listEvidenceHistory) {
+    return args.length === 1 && archiveEvidenceId(args[0])
+      ? accepted() : rejected('ARCHIVE_EVIDENCE_ITEM_ID_INVALID', '$[0]');
+  }
+  if (args.length !== 1 || !isObject(args[0])) return rejected('ARCHIVE_EVIDENCE_OBJECT_REQUIRED', '$[0]');
+  const input = args[0];
+  if (channel === ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS.addEvidence) {
+    return hasOnlyKeys(input, ['relationId', 'archiveItemId', 'evidenceDate', 'confidence', 'clientOperationId'])
+      && archiveEvidenceId(input.relationId) && archiveEvidenceId(input.archiveItemId)
+      && archiveEvidenceDate(input.evidenceDate) && archiveEvidenceConfidence.has(input.confidence)
+      && privacyId(input.clientOperationId)
+      ? accepted() : rejected('ARCHIVE_EVIDENCE_ADD_INPUT_INVALID', '$[0]');
+  }
+  if (channel === ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS.removeEvidence) {
+    return hasOnlyKeys(input, ['evidenceId', 'archiveItemId', 'expectedRevision', 'clientOperationId'])
+      && archiveEvidenceId(input.evidenceId) && archiveEvidenceId(input.archiveItemId)
+      && privacyRevision(input.expectedRevision) && Number(input.expectedRevision) >= 1
+      && privacyId(input.clientOperationId)
+      ? accepted() : rejected('ARCHIVE_EVIDENCE_REMOVE_INPUT_INVALID', '$[0]');
+  }
+  if (channel === ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS.addVersion) {
+    const keys = input.note === undefined
+      ? ['itemId', 'clientOperationId'] : ['itemId', 'note', 'clientOperationId'];
+    return hasOnlyKeys(input, keys) && archiveEvidenceId(input.itemId)
+      && privacyId(input.clientOperationId)
+      && (input.note === undefined || (boundedString(input.note, 500, true) && !/[\p{Cc}\p{Cs}]/u.test(String(input.note))))
+      ? accepted() : rejected('ARCHIVE_VERSION_ADD_INPUT_INVALID', '$[0]');
+  }
+  return rejected('UNKNOWN_IPC_CHANNEL', '$');
+};
+const archiveRelationEvidenceItemResult = (value: unknown): boolean => {
+  if (!isObject(value)) return false;
+  const keys = value.removedAt === undefined
+    ? ['id', 'relationId', 'archiveItemId', 'documentTitle', 'documentOriginalName', 'documentMimeType', 'evidenceDate', 'confidence', 'status', 'revision', 'createdAt', 'updatedAt']
+    : ['id', 'relationId', 'archiveItemId', 'documentTitle', 'documentOriginalName', 'documentMimeType', 'evidenceDate', 'confidence', 'status', 'revision', 'createdAt', 'updatedAt', 'removedAt'];
+  return hasOnlyKeys(value, keys) && archiveEvidenceId(value.id) && archiveEvidenceId(value.relationId)
+    && archiveEvidenceId(value.archiveItemId) && boundedString(value.documentTitle, 240)
+    && boundedString(value.documentOriginalName, 255) && boundedString(value.documentMimeType, 160)
+    && archiveEvidenceDate(value.evidenceDate) && archiveEvidenceConfidence.has(value.confidence)
+    && (value.status === 'active' || value.status === 'removed')
+    && privacyRevision(value.revision) && Number(value.revision) >= 1
+    && privacyIso(value.createdAt) && privacyIso(value.updatedAt)
+    && ((value.status === 'active' && value.removedAt === undefined)
+      || (value.status === 'removed' && privacyIso(value.removedAt)));
+};
+const archiveRelationEvidenceHistoryItemResult = (value: unknown): boolean => isObject(value)
+  && hasOnlyKeys(value, ['mutationId', 'evidenceId', 'mutationKind', 'revision', 'evidenceDate', 'confidence', 'status', 'occurredAt'])
+  && archiveEvidenceId(value.mutationId) && archiveEvidenceId(value.evidenceId)
+  && (value.mutationKind === 'evidence_create' || value.mutationKind === 'evidence_remove')
+  && privacyRevision(value.revision) && Number(value.revision) >= 1
+  && archiveEvidenceDate(value.evidenceDate) && archiveEvidenceConfidence.has(value.confidence)
+  && (value.status === 'active' || value.status === 'removed') && privacyIso(value.occurredAt);
+const archiveVersionItemResult = (value: unknown): boolean => {
+  if (!isObject(value)) return false;
+  const keys = value.note === undefined
+    ? ['id', 'archiveItemId', 'versionNo', 'originalName', 'mimeType', 'sizeBytes', 'sha256', 'createdAt']
+    : ['id', 'archiveItemId', 'versionNo', 'originalName', 'mimeType', 'sizeBytes', 'sha256', 'createdAt', 'note'];
+  return hasOnlyKeys(value, keys) && archiveEvidenceId(value.id) && archiveEvidenceId(value.archiveItemId)
+    && Number.isSafeInteger(value.versionNo) && Number(value.versionNo) >= 1 && Number(value.versionNo) <= 1_000
+    && boundedString(value.originalName, 255) && boundedString(value.mimeType, 160)
+    && Number.isSafeInteger(value.sizeBytes) && Number(value.sizeBytes) >= 1 && Number(value.sizeBytes) <= 250 * 1024 * 1024
+    && typeof value.sha256 === 'string' && /^[a-f0-9]{64}$/u.test(value.sha256)
+    && privacyIso(value.createdAt) && (value.note === undefined || boundedString(value.note, 500, true));
+};
+const archiveEvidenceMediaResult = (channel: string, result: unknown): IpcIntegrationPolicyDecision => {
+  if (!Array.isArray(result) || Object.getPrototypeOf(result) !== Array.prototype || result.length > 1_000) {
+    return rejected('ARCHIVE_EVIDENCE_RESULT_ARRAY_INVALID', '$result');
+  }
+  const valid = channel === ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS.listEvidenceHistory
+    ? result.every(archiveRelationEvidenceHistoryItemResult)
+    : channel === ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS.addVersion
+      ? result.every(archiveVersionItemResult)
+      : result.every(archiveRelationEvidenceItemResult);
+  return valid ? accepted() : rejected('ARCHIVE_EVIDENCE_RESULT_ITEM_INVALID', '$result');
+};
 const privacyIso = (value: unknown): boolean => typeof value === 'string'
   && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/u.test(value)
   && Number.isFinite(Date.parse(value));
@@ -2694,6 +2855,9 @@ const policyServiceAvailabilityResult = (
 };
 
 export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unknown): IpcIntegrationPolicyDecision => {
+  if (channel === UNIFIED_AUTHORIZED_SEARCH_IPC_CHANNEL) return unifiedAuthorizedSearchResult(result);
+  if (archiveEvidenceMediaChannels.has(channel)) return archiveEvidenceMediaResult(channel, result);
+  if (channel.startsWith('archive:') && (channel.includes('RelationEvidence') || channel === 'archive:addVersion')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
   if (channel === 'archive:reattestLegacyOwnership') {
     return exactNested(result, ['itemId', 'ownershipBinding', 'reattestedAt'])
       && boundedString(result.itemId, 256)
@@ -2725,6 +2889,9 @@ export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unkn
 };
 
 export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unknown[]): IpcIntegrationPolicyDecision => {
+  if (channel === UNIFIED_AUTHORIZED_SEARCH_IPC_CHANNEL) return unifiedAuthorizedSearchInput(args);
+  if (archiveEvidenceMediaChannels.has(channel)) return archiveEvidenceMediaInput(channel, args);
+  if (channel.startsWith('archive:') && (channel.includes('RelationEvidence') || channel === 'archive:addVersion')) return rejected('UNKNOWN_IPC_CHANNEL', '$');
   if (localOcrChannels.has(channel)) return localOcrInput(channel, args);
   if (channel.startsWith('localOcr:')) return rejected('UNKNOWN_IPC_CHANNEL', '$');
   if (identityAccessChannels.has(channel)) return identityAccessInput(channel, args);

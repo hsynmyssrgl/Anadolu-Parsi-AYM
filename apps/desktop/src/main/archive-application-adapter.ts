@@ -482,6 +482,24 @@ class RepositoryBackedArchiveQueryPort implements ArchiveQueryPort {
     });
   }
 
+  public listRelationEvidence(context: ArchiveApplicationContext, itemId: string): ReturnType<ArchiveQueryPort['listRelationEvidence']> {
+    return executeGovernedRead(this.dependencies, context, archiveReadIntent(context, 'archive_item', itemId), (execution, snapshot) => {
+      if (!legacyReadAllowed(this.#authorization, snapshot, { action: 'read', resourceId: itemId, occurredAt: execution.occurredAt })) {
+        return err(createAppError({ code: ERROR_CODES.AUTHORIZATION_DENIED, message: 'Bu arşiv kanıtını görüntüleme yetkiniz yok.', category: 'authorization', correlationId: context.correlationId }));
+      }
+      return this.dependencies.archiveRepository.listRelationEvidence(execution, itemId);
+    });
+  }
+
+  public listRelationEvidenceHistory(context: ArchiveApplicationContext, itemId: string): ReturnType<ArchiveQueryPort['listRelationEvidenceHistory']> {
+    return executeGovernedRead(this.dependencies, context, archiveReadIntent(context, 'archive_item', itemId), (execution, snapshot) => {
+      if (!legacyReadAllowed(this.#authorization, snapshot, { action: 'read', resourceId: itemId, occurredAt: execution.occurredAt })) {
+        return err(createAppError({ code: ERROR_CODES.AUTHORIZATION_DENIED, message: 'Bu arşiv kanıt geçmişini görüntüleme yetkiniz yok.', category: 'authorization', correlationId: context.correlationId }));
+      }
+      return this.dependencies.archiveRepository.listRelationEvidenceHistory(execution, itemId);
+    });
+  }
+
   public listRetentionPolicies(context: ArchiveApplicationContext): ReturnType<ArchiveQueryPort['listRetentionPolicies']> {
     return this.dependencies.transactionExecutor.execute(context.correlationId, (transaction) => {
       const execution = repositoryContext(context, transaction);
@@ -589,6 +607,24 @@ export class RepositoryBackedArchiveQueryPort implements ArchiveQueryPort {
     });
   }
 
+  public listRelationEvidence(context: ArchiveApplicationContext, itemId: string): ReturnType<ArchiveQueryPort['listRelationEvidence']> {
+    return executeGovernedRead(this.dependencies, context, archiveReadIntent(context, 'archive_item', itemId), (execution, snapshot) => {
+      if (!legacyReadAllowed(this.#authorization, snapshot, { action: 'read', resourceId: itemId, occurredAt: execution.occurredAt })) {
+        return err(createAppError({ code: ERROR_CODES.AUTHORIZATION_DENIED, message: 'Bu arşiv kanıtını görüntüleme yetkiniz yok.', category: 'authorization', correlationId: context.correlationId }));
+      }
+      return this.dependencies.archiveRepository.listRelationEvidence(execution, itemId);
+    });
+  }
+
+  public listRelationEvidenceHistory(context: ArchiveApplicationContext, itemId: string): ReturnType<ArchiveQueryPort['listRelationEvidenceHistory']> {
+    return executeGovernedRead(this.dependencies, context, archiveReadIntent(context, 'archive_item', itemId), (execution, snapshot) => {
+      if (!legacyReadAllowed(this.#authorization, snapshot, { action: 'read', resourceId: itemId, occurredAt: execution.occurredAt })) {
+        return err(createAppError({ code: ERROR_CODES.AUTHORIZATION_DENIED, message: 'Bu arşiv kanıt geçmişini görüntüleme yetkiniz yok.', category: 'authorization', correlationId: context.correlationId }));
+      }
+      return this.dependencies.archiveRepository.listRelationEvidenceHistory(execution, itemId);
+    });
+  }
+
   public listRetentionPolicies(context: ArchiveApplicationContext): ReturnType<ArchiveQueryPort['listRetentionPolicies']> {
     return executeGovernedRead(this.dependencies, context, archiveReadIntent(context, 'archive_collection', String(context.familyId)), (execution) =>
       this.dependencies.archiveRepository.listRetentionPolicies(execution)
@@ -657,11 +693,18 @@ class GovernedArchiveWriteScope implements ArchiveWriteScope {
     });
   }
 
+  public listVersions(itemId: string): ReturnType<ArchiveWriteScope['listVersions']> {
+    return this.dependencies.archiveRepository.listVersionsForPolicyResolution(this.execution, itemId);
+  }
+
   public insertRetentionPolicy(input: Parameters<ArchiveWriteScope['insertRetentionPolicy']>[0]) { return this.dependencies.archiveRepository.insertRetentionPolicy(this.execution, input); }
   public assignRetentionPolicy(itemId: string, policyId: string | null) { return this.dependencies.archiveRepository.assignRetentionPolicy(this.execution, itemId, policyId); }
   public markDestroyed(itemId: string, destroyedAt: ArchiveWriteScope['occurredAt']) { return this.dependencies.archiveRepository.markDestroyed(this.execution, itemId, destroyedAt); }
   public insertItem(input: Parameters<ArchiveWriteScope['insertItem']>[0]) { return this.dependencies.archiveRepository.insert(this.execution, input); }
   public insertVersion(input: Parameters<ArchiveWriteScope['insertVersion']>[0]) { return this.dependencies.archiveRepository.insertVersion(this.execution, input); }
+  public replaceItemFile(input: Parameters<ArchiveWriteScope['replaceItemFile']>[0]) { return this.dependencies.archiveRepository.replaceItemFile(this.execution, input); }
+  public insertRelationEvidence(input: Parameters<ArchiveWriteScope['insertRelationEvidence']>[0]) { return this.dependencies.archiveRepository.insertRelationEvidence(this.execution, input); }
+  public removeRelationEvidence(input: Parameters<ArchiveWriteScope['removeRelationEvidence']>[0]) { return this.dependencies.archiveRepository.removeRelationEvidence(this.execution, input); }
   public incrementEventAttachment(eventId: string) { return this.dependencies.archiveRepository.incrementEventAttachment(this.execution, eventId); }
   public appendAudit(input: Parameters<ArchiveWriteScope['appendAudit']>[0]) { return this.dependencies.auditRepository.append(this.execution, input); }
   public enqueueEvent<T>(event: DomainEvent<T>) { return this.dependencies.outboxRepository.enqueue(this.execution, event); }
