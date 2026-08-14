@@ -27,13 +27,23 @@ const testFiles = Object.freeze([
   'apps/desktop/tests/local-governed-ocr-ipc-bridge.test.ts',
   'apps/desktop/tests/local-governed-ocr-ui.test.ts',
   'apps/desktop/tests/local-governed-ocr-data-store-production.test.ts',
-  'apps/desktop/tests/local-governed-ocr-malicious-document-matrix.test.ts'
+  'apps/desktop/tests/local-governed-ocr-malicious-document-matrix.test.ts',
+  'packages/application/tests/archive-legacy-ownership-reattestation.test.ts',
+  'apps/desktop/tests/archive-core-table-receipt-fence.test.ts',
+  'apps/desktop/tests/archive-legacy-ownership-reattestation-data-store.test.ts',
+  'apps/desktop/tests/archive-legacy-ownership-reattestation-ipc-ui.test.ts'
 ]);
 const sourcePaths = Object.freeze({
   domain: 'packages/domain/src/local-governed-ocr.ts',
+  archiveDomain: 'packages/domain/src/app-data.ts',
   application: 'packages/application/src/local-governed-ocr-use-cases.ts',
+  archiveApplication: 'packages/application/src/archive-use-cases.ts',
   repositoryContract: 'packages/repository-contracts/src/local-governed-ocr-repository.ts',
+  archiveRepositoryContract: 'packages/repository-contracts/src/archive-repository.ts',
+  largeReadModelContract: 'packages/repository-contracts/src/large-family-read-model-repository.ts',
   repository: 'packages/repositories/src/local-governed-ocr-repository.ts',
+  archiveRepository: 'packages/repositories/src/archive-repository.ts',
+  largeReadModelRepository: 'packages/repositories/src/large-family-read-model-repository.ts',
   platformTransactionContract: 'packages/repository-contracts/src/platform-policy-transaction-repository.ts',
   platformTransactionRepository: 'packages/repositories/src/platform-policy-transaction-repository.ts',
   transaction: 'packages/database/src/transaction.ts',
@@ -44,6 +54,9 @@ const sourcePaths = Object.freeze({
   windowsEngine: 'apps/desktop/src/main/windows-media-ocr-engine-adapter.ts',
   worker: 'apps/desktop/src/main/local-ocr-worker.ts',
   appAdapter: 'apps/desktop/src/main/local-governed-ocr-application-adapter.ts',
+  archiveAppAdapter: 'apps/desktop/src/main/archive-application-adapter.ts',
+  archivePolicy: 'apps/desktop/src/main/archive-production-policy-runtime.ts',
+  largeReadModelService: 'apps/desktop/src/main/large-family-read-model-service.ts',
   policy: 'apps/desktop/src/main/timeline-production-policy-runtime.ts',
   resultVault: 'apps/desktop/src/main/local-governed-ocr-result-vault.ts',
   runtimeAdapter: 'apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts',
@@ -85,9 +98,14 @@ const allTestsExist = (await Promise.all(testFiles.map(exists))).every(Boolean);
 const registryItems = requirements.map((id) => registry.requirements?.find((item) => item.id === id));
 const roadmap33Q = roadmap.packages?.find((item) => item.step === '33-Q');
 const migration94 = migrationManifest.migrationVersions?.find((item) => item.version === 94);
+const migration95 = migrationManifest.migrationVersions?.find((item) => item.version === 95);
 const migrationMatch = sources.migration.match(/const localGovernedOcrLedgerSql = `([\s\S]*?)`;\r?\n\r?\n(?=const [A-Za-z_$][A-Za-z0-9_$]*Sql =|export const FAMILY_DATABASE_MIGRATIONS)/u);
 const migration94Sha256 = migrationMatch
   ? createHash('sha256').update(`${migrationMatch[1].replace(/\r\n/g, '\n').trim()}\n`).digest('hex')
+  : '';
+const migration95Match = sources.migration.match(/const legacyArchiveOwnershipReattestationSql = `([\s\S]*?)`;\r?\n\r?\n(?=const [A-Za-z_$][A-Za-z0-9_$]*Sql =|export const FAMILY_DATABASE_MIGRATIONS)/u);
+const migration95Sha256 = migration95Match
+  ? createHash('sha256').update(`${migration95Match[1].replace(/\r\n/g, '\n').trim()}\n`).digest('hex')
   : '';
 const localOcrPreloadChannels = [...sources.preload.matchAll(/invoke\('(localOcr:[^']+)'/gu)].map((match) => match[1]);
 
@@ -100,10 +118,10 @@ const definitions = [
   ['accepted registry remains exact open atomic closure authority',
     exact(scope.requirements, requirements) && exact(inventory.requirements, requirements)
       && registryItems.every((item) => item?.status === 'NOT_IMPLEMENTED' && item.chain?.evidence === false)],
-  ['implemented targeted inventory is the exact 15-file local snapshot',
+  ['implemented targeted inventory is the exact 19-file local snapshot',
     allTestsExist && exact(inventory.implementedTargetedTests, testFiles)
-      && scope.validation?.targetedTestFileRatchet === 15 && scope.validation?.targetedTestRatchet === 128
-      && inventory.validation?.targetedTestFileRatchet === 15 && inventory.validation?.targetedTestRatchet === 128],
+      && scope.validation?.targetedTestFileRatchet === 19 && scope.validation?.targetedTestRatchet === 139
+      && inventory.validation?.targetedTestFileRatchet === 19 && inventory.validation?.targetedTestRatchet === 139],
   ['domain and application contracts bind limits local execution and no low-privilege overclaim',
     has('domain', 'LOCAL_GOVERNED_OCR_MAX_SOURCE_BYTES = 16 * 1_024 * 1_024',
       'LOCAL_GOVERNED_OCR_MAX_RESULT_CHARACTERS = 250_000', 'LOCAL_GOVERNED_OCR_MAX_PAGES = 50',
@@ -130,6 +148,27 @@ const definitions = [
       && has('platformTransactionRepository', 'local_governed_ocr_source_deletion_recovery_intents',
         'listRecoverableArchiveSecureDestroyOperations')
       && testHas(testFiles[1], 'repository-derived immutable item ledgers', 'expired unreferenced mutation metadata')],
+  ['legacy ownerless archive reattestation is exact actor-bound strong-authenticated and immutable',
+    migration95?.name === 'legacy_archive_ownership_reattestation' && migration95?.checksum === migration95Sha256
+      && migration95Sha256 === '2a7206f2335ee24e5e6135867dbed5096530477a1e3d514ef2f0ce9683029c90'
+      && has('archiveDomain', 'ArchiveOwnershipBinding', 'archiveLegacyOwnershipReattestationConfirmation', 'ReattestLegacyArchiveOwnershipInput')
+      && has('archiveApplication', 'ReattestLegacyArchiveOwnershipUseCase', 'this.strongAuthentication.verify', "kind:'legacy_ownerless_to_actor'")
+      && has('archiveRepositoryContract', 'reattestLegacyOwnership')
+      && has('largeReadModelContract', 'ownershipBinding')
+      && has('archiveRepository', 'archive_legacy_ownership_reattestations', 'strong_authentication_verified')
+      && has('largeReadModelRepository', 'ownership_binding', 'legacy_unverified')
+      && has('largeReadModelService', 'ownershipBinding')
+      && has('archiveAppAdapter', 'policyEnforcementPointResolver.resolve(context, intent)', 'reattestLegacyOwnership')
+      && has('archivePolicy', 'legacy_ownerless_to_actor', 'Archive ownership is already verified and cannot be reassigned')
+      && has('dataStore', 'ReattestLegacyArchiveOwnershipUseCase', '#legacyArchiveOwnershipReattestationContext', 'reattestLegacyArchiveOwnership')
+      && has('ipcPolicy', "case 'archive:reattestLegacyOwnership'", 'archiveLegacyOwnershipReattestationConfirmation')
+      && has('app', "selected?.ownershipBinding==='legacy_unverified'", "finally{setReattestPassword('');setReattestCode('');setReattestConfirmation('')")
+      && testHas(testFiles[15], 'family administrator person binding', 'actor-only reattestation intent')
+      && testHas(testFiles[16], 'strong-authenticated legacy ownerless-to-actor transition')
+      && testHas(testFiles[17], 'strongly authenticates', 'archive_legacy_ownership_reattestations')
+      && testHas(testFiles[18], 'only the exact actor-bound strong-authentication input', 'six attempts per minute')
+      && scope.truth?.legacyArchiveOwnershipReattestationAvailable === true
+      && scope.truth?.legacyArchiveOwnershipIndependentAttestationPersisted === false],
   ['central PEP UoW keeps ocr_process and sensitive_processing separate and leases exact runtime authority',
     has('policy', "intent.purpose === 'ocr_process'", "'sensitive_processing'", "capability: 'archive.ocr'")
       && has('appAdapter', 'RepositoryBackedLocalGovernedOcrUnitOfWork',
@@ -243,8 +282,9 @@ const report = {
   countsAsRequirementPass: false,
   activePredecessor: '33-P',
   localTargetedTestFiles: testFiles,
-  targetedTestRatchet: { files: 15, tests: 128 },
+  targetedTestRatchet: { files: 19, tests: 139 },
   migration94Sha256,
+  migration95Sha256,
   checksPassed: checks.length - failures.length,
   checksFailed: failures.length,
   checks,

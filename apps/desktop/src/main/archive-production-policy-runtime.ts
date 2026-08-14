@@ -1,4 +1,4 @@
-import type { ArchiveApplicationContext } from '@ppt/application';
+import type { ArchiveApplicationContext, ArchivePolicyIntent } from '@ppt/application';
 import {
   ERROR_CODES,
   asIsoDateTime,
@@ -55,7 +55,7 @@ import type {
   ArchivePolicyTransactionRevalidationInput
 } from './archive-application-adapter.js';
 import type { FileDeviceIdentityProvider } from './device-identity.js';
-import { authorizationRoleMatches } from '@ppt/security';
+import { authorizationRoleMatches, isAdministrativeRole } from '@ppt/security';
 
 type DeviceIdentitySnapshot = ReturnType<FileDeviceIdentityProvider['snapshot']>;
 
@@ -85,7 +85,9 @@ interface ArchiveResourceSnapshot {
   readonly stateFingerprint: string;
 }
 
-type ArchiveResourceIntent = Pick<PlatformPolicyIntent, 'action' | 'resourceType' | 'resourceId'>;
+type ArchiveResourceIntent = Pick<PlatformPolicyIntent, 'action' | 'resourceType' | 'resourceId'> & {
+  readonly ownershipReattestation?: ArchivePolicyIntent['ownershipReattestation'];
+};
 
 const ARCHIVE_POLICY_FENCE_NAME = 'archive-write';
 const MAX_PROJECTION_DRAIN_ROUNDS = 20;
@@ -961,6 +963,26 @@ const loadArchiveResourceSnapshotInTransaction = (
   if (!item.value || item.value.familyId !== context.familyId) {
     return invalidAuthority(context, 'Archive policy resource does not exist in the active family');
   }
+  const reattestation = intent.ownershipReattestation;
+  let committedReattestation: PlatformPolicyArchiveOperationMetadata | undefined;
+  if (reattestation) {
+    if (
+      intent.action !== 'update'
+      || reattestation.kind !== 'legacy_ownerless_to_actor'
+      || !context.actor.personId
+      || reattestation.ownerPersonId !== context.actor.personId
+      || !isAdministrativeRole(context.actor.role)
+    ) return invalidAuthority(context, 'Legacy archive ownership reattestation authority is invalid');
+    if (item.value.ownerPersonId) {
+      if (item.value.ownerPersonId !== reattestation.ownerPersonId) {
+        return invalidAuthority(context, 'Archive ownership is already bound to another person');
+      }
+      const committed = findMatchingCommittedCreateOperation(dependencies, context, intent, execution);
+      if (!committed.ok) return committed;
+      if (!committed.value) return invalidAuthority(context, 'Archive ownership is already verified and cannot be reassigned');
+      committedReattestation = committed.value;
+    }
+  }
   const versions = dependencies.archiveRepository.listVersionsForPolicyResolution(execution, intent.resourceId);
   if (!versions.ok) return versions;
   const retentionStatuses = dependencies.archiveRepository.listRetentionStatusForPolicyResolution(execution);
@@ -981,19 +1003,30 @@ const loadArchiveResourceSnapshotInTransaction = (
     type: 'archive_item',
     id: item.value.id,
     familyId: item.value.familyId,
-    ...(item.value.ownerPersonId ? { ownerPersonId: item.value.ownerPersonId } : {}),
+    ...(reattestation ? { ownerPersonId: reattestation.ownerPersonId } : item.value.ownerPersonId ? { ownerPersonId: item.value.ownerPersonId } : {}),
     sensitivity: sensitivityFor(item.value)
   });
   return ok(Object.freeze({
     resource,
-    stateFingerprint: stable({
+    stateFingerprint: stable(committedReattestation ? {
+      state: 'completed-ownership-reattestation',
+      operationId: committedReattestation.operationId,
+      operationFingerprint: committedReattestation.operationFingerprint,
+      resultHash: committedReattestation.resultHash,
+      completedAt: committedReattestation.completedAt,
+      resourceType: intent.resourceType,
+      resourceId: intent.resourceId,
+      familyId: context.familyId,
+      ownerPersonId: reattestation!.ownerPersonId
+    } : {
       item: item.value,
       versions: versions.value,
       retention: {
         status: retentionStatus,
         policy: retentionPolicy
       },
-      classification: classifications.value.find((row) => row.itemId === intent.resourceId) ?? null
+      classification: classifications.value.find((row) => row.itemId === intent.resourceId) ?? null,
+      ...(reattestation ? { ownershipReattestation: { kind: reattestation.kind, ownerPersonId: reattestation.ownerPersonId } } : {})
     })
   }));
 };
@@ -1020,7 +1053,7 @@ const loadArchiveResourceSnapshot = (
 const resolveResource = (
   dependencies: ArchiveProductionPolicyRuntimeDependencies,
   context: ArchiveApplicationContext,
-  intent: PlatformPolicyIntent,
+  intent: ArchiveResourceIntent,
   authority: PlatformPolicyConnectionAuthority
 ): ArchiveResourceSnapshot => {
   if (
@@ -1062,6 +1095,7 @@ const revalidateProductionTransaction = (
   identity: DeviceIdentitySnapshot,
   capturedAuthority: AuthoritySnapshot,
   capturedResource: ArchiveResourceSnapshot | undefined,
+  governedIntent: ArchivePolicyIntent | undefined,
   input: ArchivePolicyTransactionRevalidationInput
 ): Result<void, AppError> => {
   if (
@@ -1099,10 +1133,22 @@ const revalidateProductionTransaction = (
     return invalidAuthority(context, 'Archive policy receipt subject no longer matches the live authority');
   }
 
+  if (
+    governedIntent
+    && (
+      input.intent.action !== governedIntent.action
+      || input.intent.capability !== governedIntent.capability
+      || input.intent.resourceType !== governedIntent.resourceType
+      || input.intent.resourceId !== governedIntent.resourceId
+      || input.intent.purpose !== governedIntent.purpose
+    )
+  ) {
+    return invalidAuthority(context, 'Archive governed intent changed after receipt issuance');
+  }
   const currentResource = loadArchiveResourceSnapshotInTransaction(
     dependencies,
     input.context,
-    input.intent,
+    governedIntent ?? input.intent,
     input.transaction
   );
   if (!currentResource.ok) return currentResource;
@@ -1123,7 +1169,7 @@ export const createArchiveProductionPolicyEnforcementPointResolver = (
 ): ArchivePolicyEnforcementPointResolver => {
   ensureRuntimeConfiguration(dependencies);
   return Object.freeze({
-    async resolve(context: ArchiveApplicationContext): Promise<ArchivePolicyEnforcementPoint> {
+    async resolve(context: ArchiveApplicationContext, governedIntent?: ArchivePolicyIntent): Promise<ArchivePolicyEnforcementPoint> {
       const recovered = await drainPendingJournalProjections(dependencies, context, {
         businessTransactionCommitted: false
       });
@@ -1169,7 +1215,22 @@ export const createArchiveProductionPolicyEnforcementPointResolver = (
         authorityResolver: { resolve: () => snapshot.value.authority },
         resourceResolver: {
           resolve: (intent, authority) => {
-            capturedResource = resolveResource(dependencies, context, intent, authority);
+            if (
+              governedIntent
+              && (
+                intent.action !== governedIntent.action
+                || intent.capability !== governedIntent.capability
+                || intent.resourceType !== governedIntent.resourceType
+                || intent.resourceId !== governedIntent.resourceId
+                || intent.purpose !== governedIntent.purpose
+              )
+            ) {
+              throw new PlatformPolicyEnforcementError(
+                'INTENT_INVALID',
+                'Archive governed intent does not match the canonical policy intent'
+              );
+            }
+            capturedResource = resolveResource(dependencies, context, governedIntent ?? intent, authority);
             return capturedResource.resource;
           }
         },
@@ -1189,6 +1250,7 @@ export const createArchiveProductionPolicyEnforcementPointResolver = (
             identity,
             snapshot.value,
             capturedResource,
+            governedIntent,
             input
           ),
         recordAuthorizedTransaction: (

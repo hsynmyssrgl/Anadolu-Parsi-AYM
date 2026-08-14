@@ -59,7 +59,7 @@
     "SQL_CALL": 63,
     "SQL_CONSTRUCTOR": 2,
     "SQL_IMPORT": 2,
-    "USE_CASE_COMPOSITION": 325
+    "USE_CASE_COMPOSITION": 326
   },
   "allowedSurfaceKeys": [
     "CRYPTO_GLOBAL|apps/desktop/src/main/preload.ts|randomUUID",
@@ -632,6 +632,7 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ReadArchiveFileBytesUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ReadOperationalGzipArtifactUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ReadOperationalTextArtifactUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ReattestLegacyArchiveOwnershipUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ReauthenticateWithWindowsHelloUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ReauthorizeCurrentDeviceAfterRecoveryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ReconcileLocalGovernedOcrAuthorizationUseCase",

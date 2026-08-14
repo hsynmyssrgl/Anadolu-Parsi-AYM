@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import {
   ERROR_CODES,
+  asIsoDateTime,
   asPersonId,
   asUserId,
   createAppError,
@@ -91,7 +92,7 @@ export type ArchivePolicyEnforcementPoint = Pick<PlatformPolicyEnforcementPoint,
 };
 
 export interface ArchivePolicyEnforcementPointResolver {
-  resolve(context: ArchiveApplicationContext):
+  resolve(context: ArchiveApplicationContext, intent?: ArchivePolicyIntent):
     | ArchivePolicyEnforcementPoint
     | Promise<ArchivePolicyEnforcementPoint>;
 }
@@ -166,7 +167,7 @@ const governedRepositoryContext = (
       ...(authorization.subject.personId ? { personId: asPersonId(authorization.subject.personId) } : {})
     },
     correlationId: context.correlationId,
-    occurredAt: transaction.occurredAt,
+    occurredAt: asIsoDateTime(authorization.occurredAt),
     policyAuthorization: authorization
   };
 };
@@ -295,7 +296,7 @@ const executeGoverned = async <T>(
   ) => Result<T, AppError> | Promise<Result<T, AppError>>
 ): Promise<Result<T, AppError>> => {
   try {
-    const enforcementPoint = await dependencies.policyEnforcementPointResolver.resolve(context);
+    const enforcementPoint = await dependencies.policyEnforcementPointResolver.resolve(context, intent);
     if (!enforcementPoint || typeof enforcementPoint.execute !== 'function') {
       throw new PlatformPolicyEnforcementError('ENFORCEMENT_UNAVAILABLE', 'Archive Policy Enforcement Point is missing');
     }
@@ -339,15 +340,16 @@ const executeGoverned = async <T>(
       );
     }
     let committedAuthorization: PlatformPolicyTransactionContext | undefined;
-    const result = await enforcementPoint.execute(
-      {
+    const policyIntent = Object.freeze({
         correlationId: context.correlationId,
         action: intent.action,
         capability: intent.capability,
         resourceType: intent.resourceType,
         resourceId: intent.resourceId,
         purpose: intent.purpose
-      },
+      });
+    const result = await enforcementPoint.execute(
+      policyIntent,
       dependencies.clusterFence,
       async (authorization) => {
         assertActivePlatformPolicyTransactionContext(authorization, {
@@ -665,6 +667,7 @@ class GovernedArchiveWriteScope implements ArchiveWriteScope {
   public enqueueEvent<T>(event: DomainEvent<T>) { return this.dependencies.outboxRepository.enqueue(this.execution, event); }
   public insertCategory(input: Parameters<ArchiveWriteScope['insertCategory']>[0]) { return this.dependencies.archiveRepository.insertCategory(this.execution, input); }
   public updateClassification(input: Parameters<ArchiveWriteScope['updateClassification']>[0]) { return this.dependencies.archiveRepository.updateClassification(this.execution, input); }
+  public reattestLegacyOwnership(itemId: string, ownerPersonId: Parameters<ArchiveWriteScope['reattestLegacyOwnership']>[1]) { return this.dependencies.archiveRepository.reattestLegacyOwnership(this.execution, itemId, ownerPersonId); }
 }
 
 export class RepositoryBackedArchiveUnitOfWork implements ArchiveUnitOfWork {
@@ -694,7 +697,7 @@ export class RepositoryBackedArchiveUnitOfWork implements ArchiveUnitOfWork {
           }));
         }
         const execution = governedRepositoryContext(context, transaction, authorization, intent);
-        const result = operation(new GovernedArchiveWriteScope(this.dependencies, execution, transaction.occurredAt));
+        const result = operation(new GovernedArchiveWriteScope(this.dependencies, execution, asIsoDateTime(authorization.occurredAt)));
         if (!result.ok) return result;
         const idempotency = enforcementPoint.recordAuthorizedOperationResult?.({
           ...governedInput,

@@ -12,11 +12,12 @@ import {
   isExactManagedLifeIsoDateTime,
   isProhibitedBankingSecretField
 } from '@ppt/application';
-import type {
-  LocalGovernedOcrCenterView,
-  LocalGovernedOcrMutationReceiptView,
-  LocalGovernedOcrResultView,
-  PolicyServiceAvailabilityBoundaryView
+import {
+  archiveLegacyOwnershipReattestationConfirmation,
+  type LocalGovernedOcrCenterView,
+  type LocalGovernedOcrMutationReceiptView,
+  type LocalGovernedOcrResultView,
+  type PolicyServiceAvailabilityBoundaryView
 } from '@ppt/domain';
 
 export interface IpcIntegrationPolicyDecision {
@@ -280,6 +281,17 @@ const exactObject = (
   if (args.length !== 1) return rejected('ARGUMENT_COUNT_MISMATCH');
   const value = args[0];
   if (!isObject(value)) return rejected('OBJECT_ARGUMENT_REQUIRED', '$[0]');
+  const ownKeys = Reflect.ownKeys(value);
+  if (ownKeys.some((key) => typeof key === 'symbol')) return rejected('SYMBOL_FIELD_PROHIBITED', '$[0]');
+  for (const key of ownKeys as string[]) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (!descriptor || descriptor.get || descriptor.set || !('value' in descriptor)) {
+      return rejected('ACCESSOR_FIELD_PROHIBITED', `$[0].${key}`);
+    }
+    if (key === '__proto__' || key === 'prototype' || key === 'constructor') {
+      return rejected('PROTOTYPE_FIELD_PROHIBITED', `$[0].${key}`);
+    }
+  }
   if (!hasOnlyKeys(value, keys)) return rejected('UNKNOWN_OBJECT_FIELD', '$[0]');
   return validate(value) ? accepted() : rejected('OBJECT_ARGUMENT_INVALID', '$[0]');
 };
@@ -2592,6 +2604,14 @@ const policyServiceAvailabilityResult = (
 };
 
 export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unknown): IpcIntegrationPolicyDecision => {
+  if (channel === 'archive:reattestLegacyOwnership') {
+    return exactNested(result, ['itemId', 'ownershipBinding', 'reattestedAt'])
+      && boundedString(result.itemId, 256)
+      && result.ownershipBinding === 'verified_actor'
+      && privacyIso(result.reattestedAt)
+      ? accepted()
+      : rejected('ARCHIVE_OWNERSHIP_REATTESTATION_RESULT_INVALID', '$result');
+  }
   if (localOcrChannels.has(channel)) return localOcrResult(channel, result);
   if (channel.startsWith('localOcr:')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
   if (identityAccessChannels.has(channel)) return identityAccessResult(channel, result);
@@ -2770,6 +2790,13 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
       return pageInput(args, 'timeline');
     case 'largeData:archive':
       return pageInput(args, 'archive');
+    case 'archive:reattestLegacyOwnership':
+      return exactObject(args, ['itemId', 'password', 'code', 'confirmation'], (value) =>
+        boundedString(value.itemId, 256)
+        && boundedString(value.password, 1024)
+        && (value.code === undefined || (typeof value.code === 'string' && /^\d{6,10}$/u.test(value.code)))
+        && typeof value.confirmation === 'string'
+        && value.confirmation === archiveLegacyOwnershipReattestationConfirmation(value.itemId as string));
     case 'catalog:listPeople':
       return catalogPageInput(args, 'person');
     case 'catalog:listEvents':

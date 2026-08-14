@@ -12815,6 +12815,126 @@ END;
 UPDATE database_metadata SET value='REVISION-33-Q-LOCAL-GOVERNED-OCR',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 
+const legacyArchiveOwnershipReattestationSql = `
+CREATE TABLE archive_legacy_ownership_reattestations (
+  archive_item_id TEXT PRIMARY KEY REFERENCES archive_items(id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  previous_policy_receipt_hash TEXT REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  policy_receipt_hash TEXT NOT NULL UNIQUE REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT CHECK(
+    length(policy_receipt_hash)=64 AND policy_receipt_hash NOT GLOB '*[^0-9a-f]*'
+  ),
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version=1),
+  policy_receipt_nonce TEXT NOT NULL UNIQUE CHECK(length(trim(policy_receipt_nonce)) BETWEEN 1 AND 256),
+  correlation_id TEXT NOT NULL UNIQUE CHECK(length(trim(correlation_id)) BETWEEN 1 AND 128),
+  confirmation_version INTEGER NOT NULL CHECK(confirmation_version=1),
+  strong_authentication_verified INTEGER NOT NULL CHECK(strong_authentication_verified=1),
+  reattested_at TEXT NOT NULL CHECK(
+    length(reattested_at)=24
+    AND reattested_at GLOB '????-??-??T??:??:??.???Z'
+    AND julianday(reattested_at) IS NOT NULL
+  )
+) STRICT;
+
+CREATE INDEX idx_archive_legacy_ownership_actor
+ON archive_legacy_ownership_reattestations(actor_account_id,reattested_at DESC);
+
+CREATE TRIGGER trg_archive_legacy_ownership_reattestation_insert
+BEFORE INSERT ON archive_legacy_ownership_reattestations
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM archive_items item
+  LEFT JOIN platform_policy_transaction_receipts previous
+    ON previous.receipt_hash=item.policy_receipt_hash
+  JOIN accounts account
+    ON account.id=NEW.actor_account_id
+   AND account.person_id=NEW.owner_person_id
+   AND account.role='family_admin'
+   AND account.status='active'
+  JOIN people person
+    ON person.id=NEW.owner_person_id
+   AND person.family_id=NEW.family_id
+   AND person.status='active'
+  JOIN platform_policy_transaction_receipts receipt
+    ON receipt.receipt_hash=NEW.policy_receipt_hash
+  JOIN platform_policy_database_fences fence
+    ON fence.fence_name=receipt.fence_name
+   AND fence.epoch=receipt.fence_epoch
+   AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection
+    ON projection.receipt_hash=receipt.receipt_hash
+  WHERE item.id=NEW.archive_item_id
+    AND item.family_id=NEW.family_id
+    AND item.destroyed_at IS NULL
+    AND item.policy_receipt_hash IS NEW.previous_policy_receipt_hash
+    AND json_extract(previous.record_json,'$.request.resource.ownerPersonId') IS NULL
+    AND receipt.receipt_version=NEW.policy_receipt_version
+    AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.correlation_id
+    AND receipt.resource_type='archive_item'
+    AND receipt.resource_id=NEW.archive_item_id
+    AND receipt.action='update'
+    AND receipt.capability='archive.write'
+    AND receipt.recorded_at=NEW.reattested_at
+    AND json_extract(receipt.record_json,'$.request.purpose')='archive'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.actor_account_id
+    AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.owner_person_id
+    AND EXISTS(
+      SELECT 1 FROM json_each(receipt.record_json,'$.request.subject.roles') role
+      WHERE role.value='family_admin'
+    )
+)
+BEGIN
+  SELECT RAISE(ABORT,'legacy archive ownership reattestation requires exact ownerless source, active administrator and durable receipt');
+END;
+
+CREATE TRIGGER trg_archive_legacy_ownership_transition
+BEFORE UPDATE OF policy_receipt_hash ON archive_items
+WHEN (
+  (
+    (SELECT json_extract(record_json,'$.request.resource.ownerPersonId') FROM platform_policy_transaction_receipts WHERE receipt_hash=OLD.policy_receipt_hash) IS NULL
+    AND (SELECT json_extract(record_json,'$.request.resource.ownerPersonId') FROM platform_policy_transaction_receipts WHERE receipt_hash=NEW.policy_receipt_hash) IS NOT NULL
+    AND NOT EXISTS(
+      SELECT 1 FROM archive_legacy_ownership_reattestations attestation
+      WHERE attestation.archive_item_id=NEW.id
+        AND attestation.family_id=NEW.family_id
+        AND attestation.previous_policy_receipt_hash IS OLD.policy_receipt_hash
+        AND attestation.policy_receipt_hash=NEW.policy_receipt_hash
+        AND attestation.policy_receipt_nonce=NEW.policy_receipt_nonce
+        AND attestation.correlation_id=NEW.policy_correlation_id
+        AND attestation.owner_person_id=(SELECT json_extract(record_json,'$.request.resource.ownerPersonId') FROM platform_policy_transaction_receipts WHERE receipt_hash=NEW.policy_receipt_hash)
+    )
+  )
+  OR
+  (
+    (SELECT json_extract(record_json,'$.request.resource.ownerPersonId') FROM platform_policy_transaction_receipts WHERE receipt_hash=OLD.policy_receipt_hash) IS NOT NULL
+    AND (SELECT json_extract(record_json,'$.request.resource.ownerPersonId') FROM platform_policy_transaction_receipts WHERE receipt_hash=NEW.policy_receipt_hash)
+      IS NOT
+      (SELECT json_extract(record_json,'$.request.resource.ownerPersonId') FROM platform_policy_transaction_receipts WHERE receipt_hash=OLD.policy_receipt_hash)
+  )
+)
+BEGIN
+  SELECT RAISE(ABORT,'archive ownership may only transition once from legacy ownerless state through reattestation');
+END;
+
+CREATE TRIGGER trg_archive_legacy_ownership_reattestation_update
+BEFORE UPDATE ON archive_legacy_ownership_reattestations
+BEGIN
+  SELECT RAISE(ABORT,'legacy archive ownership reattestation is immutable');
+END;
+
+CREATE TRIGGER trg_archive_legacy_ownership_reattestation_delete
+BEFORE DELETE ON archive_legacy_ownership_reattestations
+BEGIN
+  SELECT RAISE(ABORT,'legacy archive ownership reattestation is durable');
+END;
+
+UPDATE database_metadata SET value='REVISION-33-Q-LEGACY-ARCHIVE-OWNERSHIP-REATTESTATION',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -12909,7 +13029,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(91, 'b3_governed_form_drafts', governedFormDraftsSql),
   createMigrationDefinition(92, 'privacy_ownership_data_rights_incident_control', privacyOwnershipDataRightsIncidentControlSql),
   createMigrationDefinition(93, 'identity_access_credentials', identityAccessCredentialLedgerSql),
-  createMigrationDefinition(94, 'local_governed_ocr', localGovernedOcrLedgerSql)
+  createMigrationDefinition(94, 'local_governed_ocr', localGovernedOcrLedgerSql),
+  createMigrationDefinition(95, 'legacy_archive_ownership_reattestation', legacyArchiveOwnershipReattestationSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

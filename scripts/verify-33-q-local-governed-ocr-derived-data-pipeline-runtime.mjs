@@ -28,7 +28,11 @@ const testFiles = Object.freeze([
   'apps/desktop/tests/local-governed-ocr-ipc-bridge.test.ts',
   'apps/desktop/tests/local-governed-ocr-ui.test.ts',
   'apps/desktop/tests/local-governed-ocr-data-store-production.test.ts',
-  'apps/desktop/tests/local-governed-ocr-malicious-document-matrix.test.ts'
+  'apps/desktop/tests/local-governed-ocr-malicious-document-matrix.test.ts',
+  'packages/application/tests/archive-legacy-ownership-reattestation.test.ts',
+  'apps/desktop/tests/archive-core-table-receipt-fence.test.ts',
+  'apps/desktop/tests/archive-legacy-ownership-reattestation-data-store.test.ts',
+  'apps/desktop/tests/archive-legacy-ownership-reattestation-ipc-ui.test.ts'
 ]);
 
 const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
@@ -62,9 +66,14 @@ const testMatch = combined.match(/Tests\s+(?:\d+ failed\s+\|\s+)?(\d+) passed/u)
 const filesPassed = fileMatch ? Number(fileMatch[1]) : 0;
 const testsPassed = testMatch ? Number(testMatch[1]) : 0;
 const migration94 = migrationManifest.migrationVersions?.find((item) => item.version === 94);
+const migration95 = migrationManifest.migrationVersions?.find((item) => item.version === 95);
 const migrationMatch = migrationSource.match(/const localGovernedOcrLedgerSql = `([\s\S]*?)`;\r?\n\r?\n(?=const [A-Za-z_$][A-Za-z0-9_$]*Sql =|export const FAMILY_DATABASE_MIGRATIONS)/u);
 const migration94Sha256 = migrationMatch
   ? createHash('sha256').update(`${migrationMatch[1].replace(/\r\n/g, '\n').trim()}\n`).digest('hex')
+  : '';
+const migration95Match = migrationSource.match(/const legacyArchiveOwnershipReattestationSql = `([\s\S]*?)`;\r?\n\r?\n(?=const [A-Za-z_$][A-Za-z0-9_$]*Sql =|export const FAMILY_DATABASE_MIGRATIONS)/u);
+const migration95Sha256 = migration95Match
+  ? createHash('sha256').update(`${migration95Match[1].replace(/\r\n/g, '\n').trim()}\n`).digest('hex')
   : '';
 const roadmap33Q = roadmap.packages?.find((item) => item.step === '33-Q');
 const registryItems = requirements.map((id) => registry.requirements?.find((item) => item.id === id));
@@ -78,15 +87,17 @@ const ppk021Tail = ppk021Gate?.outputTail ?? '';
 const ppk022Tail = ppk022Gate?.outputTail ?? '';
 
 const definitions = [
-  ['exact 15-file local Vitest process exits successfully', run.status === 0],
-  ['local test result meets the exact 15/128 ratchet',
-    run.status === 0 && filesPassed === 15 && testsPassed === 128
-      && scope.validation?.targetedTestFileRatchet === 15 && scope.validation?.targetedTestRatchet === 128
-      && inventory.validation?.targetedTestFileRatchet === 15 && inventory.validation?.targetedTestRatchet === 128
+  ['exact 19-file local Vitest process exits successfully', run.status === 0],
+  ['local test result meets the exact 19/139 ratchet',
+    run.status === 0 && filesPassed === 19 && testsPassed === 139
+      && scope.validation?.targetedTestFileRatchet === 19 && scope.validation?.targetedTestRatchet === 139
+      && inventory.validation?.targetedTestFileRatchet === 19 && inventory.validation?.targetedTestRatchet === 139
       && exact(inventory.implementedTargetedTests, testFiles)],
-  ['migration 94 manifest and canonical source hash remain exact',
+  ['migration 94 and 95 manifests and canonical source hashes remain exact',
     migration94?.name === 'local_governed_ocr' && migration94?.checksum === migration94Sha256
-      && migration94Sha256 === '08fef61dc21062134716dfae8e78c2256eb5da275eedaf1fe3502a3c2450cb65'],
+      && migration94Sha256 === '08fef61dc21062134716dfae8e78c2256eb5da275eedaf1fe3502a3c2450cb65'
+      && migration95?.name === 'legacy_archive_ownership_reattestation' && migration95?.checksum === migration95Sha256
+      && migration95Sha256 === '2a7206f2335ee24e5e6135867dbed5096530477a1e3d514ef2f0ce9683029c90'],
   ['PPK-021 runtime artifact is PASS at the exact current ratchet',
     ppk.ppk021?.status === 'PASS' && ppk021Runtime.status === 'PASS' && ppk021Gate?.status === 'PASS'
       && ppk021Tail.includes(`"scannedFiles": ${ppk.ppk021.scannedProductionFiles}`)
@@ -140,7 +151,16 @@ const definitions = [
       && scope.truth?.externalProviderAvailabilityVerified === false
       && scope.truth?.crossDeviceOcrSyncPerformed === false
       && scope.truth?.physicalSecureEraseGuaranteed === false
-      && scope.persistentReceiptStatus === 'NOT_RUN']
+      && scope.persistentReceiptStatus === 'NOT_RUN'],
+  ['legacy ownerless archive reattestation is local actor-bound and not an acceptance overclaim',
+    scope.truth?.legacyArchiveNullOwnerReceiptFailsClosed === true
+      && scope.truth?.legacyArchiveOwnershipReattestationAvailable === true
+      && scope.truth?.legacyArchiveOwnershipReattestationStrongAuthTested === true
+      && scope.truth?.legacyArchiveOwnershipReattestationActorBound === true
+      && scope.truth?.legacyArchiveOwnershipReassignmentAllowed === false
+      && scope.truth?.legacyArchiveOwnershipIndependentAttestationPersisted === false
+      && scope.plannedModel?.legacyArchiveOwnership?.migration95Sha256 === migration95Sha256
+      && scope.plannedModel?.legacyArchiveOwnership?.manualUat === 'NOT_RUN']
 ];
 
 const checks = definitions.map(([name, passed]) => ({ name, status: passed ? 'PASS' : 'FAIL' }));
@@ -161,10 +181,11 @@ const report = {
   ratchetSemantics: 'EXACT_LOCAL_SNAPSHOT_NOT_REQUIREMENT_CLOSURE',
   targetedTestFilesPassed: filesPassed,
   targetedTestsPassed: testsPassed,
-  targetedTestFileRatchet: 15,
-  targetedTestRatchet: 128,
+  targetedTestFileRatchet: 19,
+  targetedTestRatchet: 139,
   testFiles,
   migration94Sha256,
+  migration95Sha256,
   ppkGateEvidence: ppk,
   openAcceptanceBindings: {
     activePredecessor: '33-P',
@@ -176,6 +197,7 @@ const report = {
     permissionOrConsentRevocationPurge: 'CURRENT_SEALED_RESULT_AUTO_RECONCILE_PASS_FUTURE_DERIVED_OWNERS_OPEN',
     scheduledOrphanSweepAuthority: 'LOCAL_DISTINCT_MAINTENANCE_PEP_PASS_EXTERNAL_UAT_NOT_RUN',
     retentionExpiryPurge: 'CURRENT_SEALED_RESULT_PASS_FUTURE_DERIVED_OWNERS_OPEN',
+    legacyArchiveOwnershipReattestation: 'LOCAL_OWNERLESS_TO_ACTOR_PASS_INDEPENDENT_ATTESTATION_AND_MANUAL_UAT_NOT_RUN',
     fullTextIndexAndMaskedSnippet: 'NOT_IMPLEMENTED',
     realDeviceExternalAndManualEvidence: 'NOT_RUN'
   },
@@ -196,7 +218,7 @@ if (!noWrite) {
   await mkdir(dirname(resolve(root, output)), { recursive: true });
   await writeFile(resolve(root, output), `${JSON.stringify(report, null, 2)}\n`, 'utf8');
 }
-console.log(`33-Q runtime starter: ${report.status} (${report.checksPassed}/${checks.length}; ${filesPassed}/15 files; ${testsPassed}/128 tests; requirement PASS=false; write=${!noWrite}).`);
+console.log(`33-Q runtime starter: ${report.status} (${report.checksPassed}/${checks.length}; ${filesPassed}/19 files; ${testsPassed}/139 tests; requirement PASS=false; write=${!noWrite}).`);
 if (failures.length) {
   console.error(combined.slice(-4000));
   process.exitCode = 1;

@@ -1,3 +1,4 @@
+import type { PersonId } from '@ppt/core';
 import type { ArchiveItemView, ArchiveVersionView, ArchiveRetentionPolicyView, ArchiveRetentionStatusView, ArchiveCategoryView, ArchiveClassificationView, ArchiveSensitivity } from '@ppt/domain';
 import type { PolicyAuthorizedRepositoryExecutionContext, RepositoryExecutionContext, RepositoryResult } from './repository-context.js';
 
@@ -41,6 +42,7 @@ export interface ArchiveRepositoryPort {
             name: string;
         }[];
     }): RepositoryResult<void>;
+    reattestLegacyOwnership(context: PolicyAuthorizedRepositoryExecutionContext, itemId: string, ownerPersonId: PersonId): RepositoryResult<void>;
     incrementEventAttachment(context: PolicyAuthorizedRepositoryExecutionContext, eventId: string): RepositoryResult<void>;
 }
 

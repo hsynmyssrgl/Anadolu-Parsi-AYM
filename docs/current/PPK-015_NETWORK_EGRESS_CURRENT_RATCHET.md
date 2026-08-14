@@ -18,11 +18,11 @@ Güncel politika 2 adapter ve 3 purpose içerir:
 
 OIDC adaptörü yalnız tam token ve JWKS primary/secondary SPKI pinleri, TLS 1.3, işletim sistemi sertifika güveni, public DNS, çözümlenen ve bağlanılan IP eşitliği, redirect yasağı, exact JSON içerik türü, boyut ve süre sınırlarıyla çalışır. Sağlayıcı görünürlüğü secure-network-ready profile ve main-only deep-link callback kaydına bağlıdır. Apple, korumalı `private_key_jwt` assertion sağlayıcısı olmadığı sürece görünmez. Provider availability veya delivery garantisi verilmez.
 
-Güncel kaynak ratchet'i 18 source zone, 441 dosya, 7 malicious self-test, 2 adapter, 3 purpose, sıfır doğrudan primitive istisnası ve sıfır bulgudur. Üretim kaynak özeti `11e0e1255c07ce339b90bf4543bb55e2c6b4c6aa7348a08fcc65343458d522e3`; yetkili adapter/purpose özeti `8c3764ee962b55dda7fa85520b8fbb34088a65ab722febd30254416b7d6898bb` değeridir.
+Güncel kaynak ratchet'i 18 source zone, 441 dosya, 7 malicious self-test, 2 adapter, 3 purpose, sıfır doğrudan primitive istisnası ve sıfır bulgudur. Üretim kaynak özeti `8f3970cdbc8680281b646b0951439c8334c90168e2574e0c6956e87570d09be6`; yetkili adapter/purpose özeti `8c3764ee962b55dda7fa85520b8fbb34088a65ab722febd30254416b7d6898bb` değeridir.
 
 ## Migration ayrımı
 
-Migration 77 daha sonra PPK-016 tarafından türetilmiş-veri metadata zinciri için eklenmiştir; PPK-015 tarafından eklenmiş değildir. Güncel latest migration 94, 33-Q local governed OCR paketi tarafından sahiplenilir. Bu ardıl migrationlar, 32-K kapanış anındaki migration 76 gerçeğini veya PPK-015'in yeni persistence eklemediği gerçeğini değiştirmez.
+Migration 77 daha sonra PPK-016 tarafından türetilmiş-veri metadata zinciri için eklenmiştir; PPK-015 tarafından eklenmiş değildir. Güncel latest migration 95, 33-Q local governed OCR ve legacy arşiv sahipliği yeniden doğrulama zinciri tarafından sahiplenilir. Bu ardıl migrationlar, 32-K kapanış anındaki migration 76 gerçeğini veya PPK-015'in yeni persistence eklemediği gerçeğini değiştirmez.
 
 ## Gerçeklik sınırı
 

@@ -389,8 +389,12 @@ export interface ArchiveItemView { id: string; title: string; originalName: stri
 export interface CreateArchiveItemInput { title: string; linkedEventId?: string; }
 export interface ArchiveSearchInput { query?:string; categoryId?:string; sensitivity?:'standard'|'personal'|'high'; tag?:string; mimeType?:string; linkedEventId?:string; }
 export interface ArchivePageInput extends ArchiveSearchInput { readonly cursor?:string; readonly limit?:number; }
-export interface ArchivePageItemView extends ArchiveItemView { readonly categoryId?:string; readonly categoryName?:string; readonly sensitivity:'standard'|'personal'|'high'; readonly tagNames:string[]; readonly retentionPolicyId?:string; readonly retentionPolicyName?:string; readonly retainUntil?:string; readonly eligibleForDestruction:boolean; }
+export type ArchiveOwnershipBinding = 'verified_actor'|'legacy_unverified';
+export interface ArchivePageItemView extends ArchiveItemView { readonly categoryId?:string; readonly categoryName?:string; readonly sensitivity:'standard'|'personal'|'high'; readonly tagNames:string[]; readonly retentionPolicyId?:string; readonly retentionPolicyName?:string; readonly retainUntil?:string; readonly eligibleForDestruction:boolean; readonly ownershipBinding:ArchiveOwnershipBinding; }
 export interface ArchivePageView { readonly items:ArchivePageItemView[]; readonly hasMore:boolean; readonly nextCursor?:string; readonly metrics:LargeDataPageMetricsView; }
+export const archiveLegacyOwnershipReattestationConfirmation=(itemId:string):string=>`BU ESKİ ARŞİV KAYDINI KENDİ ADIMA ÜSTLENİYORUM ${itemId}`;
+export interface ReattestLegacyArchiveOwnershipInput { readonly itemId:string; readonly password:string; readonly code?:string; readonly confirmation:string; }
+export interface LegacyArchiveOwnershipReattestationView { readonly itemId:string; readonly ownershipBinding:'verified_actor'; readonly reattestedAt:string; }
 export interface ArchiveVersionView { id:string; archiveItemId:string; versionNo:number; originalName:string; mimeType:string; sizeBytes:number; sha256:string; createdAt:string; note?:string; }
 export interface ArchiveRetentionPolicyView { id:string; name:string; retentionDays:number; secureDestroy:boolean; createdAt:string; }
 export interface CreateArchiveRetentionPolicyInput { name:string; retentionDays:number; secureDestroy:boolean; }

@@ -116,6 +116,28 @@
       "truth": "Migration 94 ve metadata repository; rolling retention, source-delete batch/item ledger ve rollback dahil yerel testlerde doğrulanmıştır. Owner-bound şifreli sealed-result vault/runtime production facade içinde yerel testtedir; tam metin indeks, gerçek cihaz ve uçtan uca kabul değildir."
     },
     {
+      "id": "migration-95-legacy-archive-ownership-reattestation",
+      "implementationStatus": "PARTIAL_LOCAL_FAIL_CLOSED_REATTESTATION_TESTED_ACCEPTANCE_INCOMPLETE",
+      "plannedPaths": [
+        "packages/domain/src/app-data.ts",
+        "packages/application/src/archive-use-cases.ts",
+        "packages/repository-contracts/src/archive-repository.ts",
+        "packages/repository-contracts/src/large-family-read-model-repository.ts",
+        "packages/repositories/src/archive-repository.ts",
+        "packages/repositories/src/large-family-read-model-repository.ts",
+        "packages/database/src/family-database-migrations.ts",
+        "apps/desktop/src/main/archive-application-adapter.ts",
+        "apps/desktop/src/main/archive-production-policy-runtime.ts",
+        "apps/desktop/src/main/large-family-read-model-service.ts",
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/renderer/App.tsx",
+        "artifacts/manifests/DATABASE_MIGRATION_VERIFICATION_MVP56.json"
+      ],
+      "sha256": "2a7206f2335ee24e5e6135867dbed5096530477a1e3d514ef2f0ce9683029c90",
+      "truth": "Ownerless legacy archive receipt remains fail-closed until an explicit item-bound confirmation and existing strong authentication succeed for the current family administrator actor-person. Migration 95 permits only ownerless-to-actor transition, makes the ledger immutable and prohibits reassignment; independent authentication attestation and manual acceptance remain NOT_RUN."
+    },
+    {
       "id": "repository",
     "implementationStatus": "PARTIAL_LOCAL_COMPONENT_BOUND_TO_REPOSITORY_ROOT_AND_UOW",
       "plannedPaths": [
@@ -177,7 +199,11 @@
     "apps/desktop/tests/local-governed-ocr-ipc-bridge.test.ts",
     "apps/desktop/tests/local-governed-ocr-ui.test.ts",
     "apps/desktop/tests/local-governed-ocr-data-store-production.test.ts",
-    "apps/desktop/tests/local-governed-ocr-malicious-document-matrix.test.ts"
+    "apps/desktop/tests/local-governed-ocr-malicious-document-matrix.test.ts",
+    "packages/application/tests/archive-legacy-ownership-reattestation.test.ts",
+    "apps/desktop/tests/archive-core-table-receipt-fence.test.ts",
+    "apps/desktop/tests/archive-legacy-ownership-reattestation-data-store.test.ts",
+    "apps/desktop/tests/archive-legacy-ownership-reattestation-ipc-ui.test.ts"
   ],
   "implementedTargetedTests": [
     "packages/application/tests/local-governed-ocr-use-cases.test.ts",
@@ -194,7 +220,11 @@
     "apps/desktop/tests/local-governed-ocr-ipc-bridge.test.ts",
     "apps/desktop/tests/local-governed-ocr-ui.test.ts",
     "apps/desktop/tests/local-governed-ocr-data-store-production.test.ts",
-    "apps/desktop/tests/local-governed-ocr-malicious-document-matrix.test.ts"
+    "apps/desktop/tests/local-governed-ocr-malicious-document-matrix.test.ts",
+    "packages/application/tests/archive-legacy-ownership-reattestation.test.ts",
+    "apps/desktop/tests/archive-core-table-receipt-fence.test.ts",
+    "apps/desktop/tests/archive-legacy-ownership-reattestation-data-store.test.ts",
+    "apps/desktop/tests/archive-legacy-ownership-reattestation-ipc-ui.test.ts"
   ],
   "reusedEvidence": {
     "ppk002EncryptedArchiveAndPepUow": [
@@ -260,8 +290,8 @@
     "ppk021": {
       "status": "PASS",
       "scannedProductionFiles": 441,
-      "exactPrivilegedSurfaceCount": 682,
-      "exactAllowlistSha256": "79c2780d7ef80da7b0646389a9fb618cb81ea26925a8cf5286bcc7d37336c9ff",
+      "exactPrivilegedSurfaceCount": 683,
+      "exactAllowlistSha256": "efc8cdee046227dad31f5e82ccd79a9de90422e930be2a4ec9fa7d1184158571",
       "targetedTestsPassed": 17,
       "contractChecksPassed": 84,
       "runtimeChecksPassed": 20,
@@ -308,7 +338,11 @@
     "repositoryCompositionRootBindingPresent": true,
     "newArchiveImportOwnerPersonReceiptBindingValidated": true,
     "legacyArchiveNullOwnerReceiptFailsClosed": true,
-    "legacyArchiveOwnershipReattestationAvailable": false,
+    "legacyArchiveOwnershipReattestationAvailable": true,
+    "legacyArchiveOwnershipReattestationStrongAuthTested": true,
+    "legacyArchiveOwnershipReattestationActorBound": true,
+    "legacyArchiveOwnershipReassignmentAllowed": false,
+    "legacyArchiveOwnershipIndependentAttestationPersisted": false,
     "localProductionUseCaseAndDataStoreCompositionTested": true,
     "endToEndProductionRepositoryUseCaseAcceptanceValidated": false,
     "localRuntimeAuthorityLeaseTested": true,
@@ -328,8 +362,8 @@
     "localComponentOcrTestsImplemented": true,
     "fullAcceptanceOcrTestMatrixImplemented": false,
     "localMaliciousDocumentFailClosedMatrixImplemented": true,
-    "localComponentTestFilesPassed": 15,
-    "localComponentTestsPassed": 128,
+    "localComponentTestFilesPassed": 19,
+    "localComponentTestsPassed": 139,
     "isolatedWindowsMediaOcrSmokeExecuted": true,
     "externalOcrProviderConfigured": false,
     "physicalSecureEraseGuaranteed": false,
@@ -346,7 +380,7 @@
     "Automatic quarantine/purge across future OCR index, embedding, cache and managed-backup owners after object-permission or sensitive_processing consent revocation/expiry; current sealed result cleanup alone is insufficient",
     "Desktop IPC/UI real accessibility, privacy, security and human UAT",
     "Real-device concurrent cancellation and accessibility/human UAT; local two-phase production-executor probe passes but external/manual acceptance remains NOT_RUN",
-    "Legacy archive receipts with ownerPersonId=null fail closed; no ownership re-attestation or backfill authority is available",
+    "Legacy archive receipts with ownerPersonId=null fail closed until explicit item-bound strong-authentication re-attestation; local ownerless-to-current-actor flow exists, but bulk backfill, reassignment, independent authentication attestation and manual UAT remain unavailable",
     "Real-device Windows UAT, Apple Vision, offline fallback and full malicious-document runtime matrix",
     "External provider privacy contract, region, retention and deletion evidence"
   ],
@@ -354,11 +388,11 @@
     "boundary": "STARTER_NOT_RUN",
     "contract": "STARTER_NOT_RUN",
     "runtime": "LOCAL_COMPOSED_COMPONENT_MATRIX_PASS",
-    "targetedTests": "15_FILES_128_TESTS_PASS",
+    "targetedTests": "19_FILES_139_TESTS_PASS",
     "sourceStabilizationStatus": "STABLE_LOCAL_SNAPSHOT",
     "ratchetSemantics": "EXACT_LOCAL_SNAPSHOT_NOT_REQUIREMENT_CLOSURE",
-    "targetedTestFileRatchet": 15,
-    "targetedTestRatchet": 128,
+    "targetedTestFileRatchet": 19,
+    "targetedTestRatchet": 139,
     "countsAsRequirementPass": false
   },
   "persistentReceiptStatus": "NOT_RUN"

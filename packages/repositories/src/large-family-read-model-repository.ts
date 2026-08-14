@@ -102,12 +102,13 @@ export class SqliteLargeFamilyReadModelRepository extends SqliteRepository imple
       params.push(input.limit);
       const rows=this.database(context).prepare(`
         SELECT a.id,a.title,a.original_name,a.mime_type,a.size_bytes,a.sha256,a.created_at,a.linked_event_id,a.category_id,c.name category_name,a.sensitivity,
+          CASE WHEN json_extract(receipt.record_json,'$.request.resource.ownerPersonId') IS NULL THEN 'legacy_unverified' ELSE 'verified_actor' END ownership_binding,
           p.id retention_policy_id,p.name retention_policy_name,p.retention_days,
           (SELECT group_concat(t.name,'|') FROM archive_item_tags it JOIN archive_tags t ON t.id=it.tag_id WHERE it.archive_item_id=a.id ORDER BY t.name COLLATE NOCASE) tag_names
-        FROM archive_items a LEFT JOIN archive_categories c ON c.id=a.category_id LEFT JOIN archive_retention_policies p ON p.id=a.retention_policy_id
+        FROM archive_items a LEFT JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=a.policy_receipt_hash LEFT JOIN archive_categories c ON c.id=a.category_id LEFT JOIN archive_retention_policies p ON p.id=a.retention_policy_id
         WHERE ${where.join(' AND ')} ORDER BY a.created_at DESC,a.id DESC LIMIT ?
       `).all(...params) as Array<Record<string,unknown>>;
-      return rows.map(row=>({id:String(row.id),title:String(row.title),originalName:String(row.original_name),mimeType:String(row.mime_type),sizeBytes:Number(row.size_bytes),sha256:String(row.sha256),createdAt:String(row.created_at),...(row.linked_event_id?{linkedEventId:String(row.linked_event_id)}:{}),...(row.category_id?{categoryId:String(row.category_id)}:{}),...(row.category_name?{categoryName:String(row.category_name)}:{}),sensitivity:String(row.sensitivity??'standard') as LargeArchiveRow['sensitivity'],tagNames:String(row.tag_names??'').split('|').filter(Boolean),...(row.retention_policy_id?{retentionPolicyId:String(row.retention_policy_id)}:{}),...(row.retention_policy_name?{retentionPolicyName:String(row.retention_policy_name)}:{}),...(row.retention_days!==null&&row.retention_days!==undefined?{retentionDays:Number(row.retention_days)}:{})}));
+      return rows.map(row=>({id:String(row.id),title:String(row.title),originalName:String(row.original_name),mimeType:String(row.mime_type),sizeBytes:Number(row.size_bytes),sha256:String(row.sha256),createdAt:String(row.created_at),...(row.linked_event_id?{linkedEventId:String(row.linked_event_id)}:{}),...(row.category_id?{categoryId:String(row.category_id)}:{}),...(row.category_name?{categoryName:String(row.category_name)}:{}),sensitivity:String(row.sensitivity??'standard') as LargeArchiveRow['sensitivity'],tagNames:String(row.tag_names??'').split('|').filter(Boolean),...(row.retention_policy_id?{retentionPolicyId:String(row.retention_policy_id)}:{}),...(row.retention_policy_name?{retentionPolicyName:String(row.retention_policy_name)}:{}),...(row.retention_days!==null&&row.retention_days!==undefined?{retentionDays:Number(row.retention_days)}:{}),ownershipBinding:String(row.ownership_binding) as LargeArchiveRow['ownershipBinding']}));
     });
   }
 }

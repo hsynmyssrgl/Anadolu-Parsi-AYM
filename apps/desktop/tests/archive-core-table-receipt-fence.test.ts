@@ -109,6 +109,10 @@ const makeHarness = (): Harness => {
   expect(synchronized.ok).toBe(true);
   runtime.database.prepare('INSERT INTO families(id,name,created_at) VALUES(?,?,?)')
     .run(FAMILY_ID, '30-R Receipt Fence Family', NOW);
+  runtime.database.prepare('INSERT INTO people(id,family_id,display_name,birth_date,relationship_type,generation,branch,status,created_at) VALUES(?,?,?,?,?,?,?,?,?)')
+    .run(PERSON_ID,FAMILY_ID,'30-R Administrator',null,'self',0,'main','active',NOW);
+  runtime.database.prepare('INSERT INTO accounts(id,display_name,email,password_record,created_at,role,status,person_id,starts_at) VALUES(?,?,?,?,?,?,?,?,?)')
+    .run(ACCOUNT_ID,'30-R Administrator','30r@example.test','test-password-record',NOW,'family_admin','active',PERSON_ID,'2026-01-01T00:00:00.000Z');
   return {
     runtime,
     policyRepository,
@@ -133,6 +137,7 @@ const withReceipt = async (
     readonly resourceType?: 'archive_item' | 'archive_retention_policy' | 'archive_category';
     readonly resourceId: string;
     readonly action: 'create' | 'update' | 'delete';
+    readonly ownerPersonId?: typeof PERSON_ID | null;
   },
   operation: (context: PolicyAuthorizedRepositoryExecutionContext, binding: ReceiptBinding) => void
 ): Promise<ReceiptBinding> => {
@@ -169,7 +174,7 @@ const withReceipt = async (
         type: resourceType,
         id: input.resourceId,
         familyId: FAMILY_ID,
-        ownerPersonId: PERSON_ID,
+        ...(input.ownerPersonId===null?{}:{ownerPersonId:input.ownerPersonId??PERSON_ID}),
         sensitivity: 'personal'
       })
     },
@@ -245,6 +250,32 @@ afterEach(() => {
 });
 
 describe('30-R archive core-table receipt fence', () => {
+  it('allows exactly one strong-authenticated legacy ownerless-to-actor transition and seals its ledger', async () => {
+    const harness=makeHarness();
+    const itemId='archive-legacy-ownerless';
+    await withReceipt(harness,{correlationId:'corr-legacy-create',nonce:'nonce-legacy-create',resourceId:itemId,action:'create',ownerPersonId:null},(context)=>{
+      const inserted=harness.archiveRepository.insert(context,{id:itemId,familyId:FAMILY_ID,title:'Legacy ownerless item',originalName:'legacy.txt',storedName:'legacy.vault',mimeType:'text/plain',sizeBytes:12,sha256:'9'.repeat(64),sensitivity:'personal',aiProcessingAllowed:false,createdAt:NOW});
+      expect(inserted.ok).toBe(true);
+    });
+    const before=harness.runtime.transactionExecutor.execute(asCorrelationId('corr-legacy-before'),transaction=>harness.archiveRepository.findForPolicyResolution(repositoryContext(transaction),itemId));
+    expect(before.ok&&before.value?.ownerPersonId).toBeUndefined();
+
+    await withReceipt(harness,{correlationId:'corr-legacy-generic-update',nonce:'nonce-legacy-generic-update',resourceId:itemId,action:'update'},(_context,binding)=>{
+      expect(()=>harness.runtime.database.prepare('UPDATE archive_items SET policy_receipt_hash=?,policy_receipt_version=?,policy_receipt_nonce=?,policy_correlation_id=?,policy_resource_type=?,policy_resource_id=?,policy_action=?,policy_capability=? WHERE id=?').run(binding.receiptHash,binding.receiptVersion,binding.nonce,binding.correlationId,binding.resourceType,binding.resourceId,binding.action,binding.capability,itemId)).toThrow(/ownership may only transition once/u);
+    });
+
+    await withReceipt(harness,{correlationId:'corr-legacy-reattest',nonce:'nonce-legacy-reattest',resourceId:itemId,action:'update'},(context)=>{
+      const reattested=harness.archiveRepository.reattestLegacyOwnership(context,itemId,PERSON_ID);
+      expect(reattested.ok).toBe(true);
+    });
+    const after=harness.runtime.transactionExecutor.execute(asCorrelationId('corr-legacy-after'),transaction=>harness.archiveRepository.findForPolicyResolution(repositoryContext(transaction),itemId));
+    expect(after.ok&&after.value?.ownerPersonId).toBe(PERSON_ID);
+    const ledger=harness.runtime.database.prepare('SELECT archive_item_id,family_id,actor_account_id,owner_person_id,confirmation_version,strong_authentication_verified FROM archive_legacy_ownership_reattestations WHERE archive_item_id=?').get(itemId) as Record<string,unknown>;
+    expect(ledger).toMatchObject({archive_item_id:itemId,family_id:FAMILY_ID,actor_account_id:ACCOUNT_ID,owner_person_id:PERSON_ID,confirmation_version:1,strong_authentication_verified:1});
+    expect(()=>harness.runtime.database.prepare('UPDATE archive_legacy_ownership_reattestations SET confirmation_version=confirmation_version WHERE archive_item_id=?').run(itemId)).toThrow(/reattestation is immutable/u);
+    expect(()=>harness.runtime.database.prepare('DELETE FROM archive_legacy_ownership_reattestations WHERE archive_item_id=?').run(itemId)).toThrow(/reattestation is durable/u);
+  });
+
   it('binds governed writes and rejects direct missing, mismatched, replayed and cross-resource SQL', async () => {
     const harness = makeHarness();
     const itemId = 'archive-30r-governed';

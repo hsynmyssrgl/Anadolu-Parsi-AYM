@@ -35,6 +35,7 @@ import type {
   LocalGovernedOcrSetEnabledIpcInput
 } from './ipc-integration-policy.js';
 import type { FamilyEventView, FamilyMutationResultView, SetFamilyEventArchivedInput, UpdateFamilyEventInput } from '@ppt/domain';
+import type { LegacyArchiveOwnershipReattestationView, ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { AssignPersonMembershipInput, CreateFamilyBranchInput, CreateHouseholdInput, FamilyBranch, Household, HouseholdMembershipWorkspaceView, PersonLifecycleProfile, PersonLifecycleWorkspaceView, PersonMembership, UpdatePersonProfileInput } from '@ppt/domain';
 import type { AuthorizationContextWorkspaceView } from '@ppt/domain';
 import type { IssueOfflineCapabilityLeaseInput, OfflineCapabilityLeaseWorkspaceView } from '@ppt/domain';
@@ -460,6 +461,7 @@ contextBridge.exposeInMainWorld('pardus', {
   listLargeGenealogyTree:(input:GenealogyTreePageInput={}):Promise<GenealogyTreePageView>=>invoke('largeData:tree',input),
   listLargeTimeline:(input:TimelinePageInput={}):Promise<TimelinePageView>=>invoke('largeData:timeline',input),
   listLargeArchive:(input:ArchivePageInput={}):Promise<ArchivePageView>=>invoke('largeData:archive',input),
+  reattestLegacyArchiveOwnership:(input:ReattestLegacyArchiveOwnershipInput):Promise<LegacyArchiveOwnershipReattestationView>=>invoke('archive:reattestLegacyOwnership',input),
   listArchiveCategories: ():Promise<ArchiveCategoryView[]> => invoke('archive:listCategories'),
   createArchiveCategory: (input:CreateArchiveCategoryInput):Promise<ArchiveCategoryView[]> =>
     invokeArchiveMutation('archive:createCategory', input, (operationId) => ({ ...input, operationId })),

@@ -197,6 +197,7 @@ import {
   AssignArchiveRetentionPolicyUseCase,
   PrepareArchiveDestructionUseCase,
   MarkArchiveDestroyedUseCase,
+  ReattestLegacyArchiveOwnershipUseCase,
   GetLocalGovernedOcrCenterUseCase,
   GetLocalGovernedOcrResultUseCase,
   CreateLocalGovernedOcrJobUseCase,
@@ -456,6 +457,7 @@ import type {
   FamilyRelationView,
   ArchiveItemView, AuthStateView, CreateArchiveItemInput, CreateFamilyRelationInput, LoginInput, SetupAdminInput, ChangePasswordInput, AuditEntryView, TwoFactorSetupView, EnableTwoFactorInput, DisableTwoFactorInput, TrustCurrentDeviceInput, ReauthorizeCurrentDeviceInput, ReauthorizeCurrentDeviceResultView, SecurityEventReceiptArchiveItemView, SecurityEventReceiptVerificationView, TrustedDeviceView, FamilyAccountView, FamilyInvitationView, FamilyInvitationInspectionView, CreateFamilyInvitationInput, InspectFamilyInvitationInput, ResendFamilyInvitationInput, AcceptFamilyInvitationInput, UpdateEventParticipantsInput, UpdateEventInvitationInput, UpdateEventNotesInput, UpdateFamilyEventInput, SetFamilyEventArchivedInput, AcknowledgeFamilyNotificationInput, ObjectPermissionView, UpsertObjectPermissionInput, AuthorizationPurpose, AuthorizationContextWorkspaceView, UpdateFamilyAccountInput, FamilyRole, FinanceRecordView, CreateFinanceRecordInput, BankInstitutionView, BankAccountView, CreateBankAccountInput, IbanStructuralValidationView, ValidateIbanInput, PaymentCardView, CreatePaymentCardInput, HealthRecordView, CreateHealthRecordInput, MedicationPlanView, CreateMedicationPlanInput, FamilyHealthHistoryView, CreateFamilyHealthHistoryInput, FinanceValuationView, CreateFinanceValuationInput, LifeRecordView, CreateLifeRecordInput, AutomationRuleView, CreateAutomationRuleInput, ReportSummaryView, GenealogyInsightView, ArchiveCategoryView, ArchiveClassificationView, CreateArchiveCategoryInput, UpdateArchiveClassificationInput, AiConsentView, UpsertAiConsentInput, AiAccessPreviewView, SensitiveDataProfileView, UpsertSensitiveDataConsentInput, SensitiveExportPreviewInput, SensitiveExportPreviewView, AutomationRunView, RunAutomationInput, DigitalLegacyPlanView, UpsertDigitalLegacyPlanInput, LegacyGrantView, UpsertLegacyGrantInput, ExecuteLegacyPlanInput, LegacyApprovalView, ApproveLegacyExecutionInput, CancelLegacyExecutionInput, ArchiveSearchInput, ArchiveVersionView, ArchiveRetentionPolicyView, CreateArchiveRetentionPolicyInput, AssignArchiveRetentionPolicyInput, ArchiveRetentionStatusView, SystemHealthView, BackupTargetView, UpsertBackupTargetInput, BackupRunView, BackupRunResultView, PerformanceSampleView, DiagnosticEntryView, MaintenanceResultView, BackupSchedulerResultView, AdaptiveResourceStateView, PerformanceTrendView, BackgroundTaskView, QueuedTaskView, EnqueueTaskInput, TaskQueueCycleResultView, MaintenancePolicyView, UpsertMaintenancePolicyInput, MaintenanceCycleResultView, HealthNotificationView, DiagnosticReportView, DiagnosticFilterInput, DiagnosticReportHistoryView, SystemHealthScoreView, SystemHealthHistoryView, SystemHealthTrendView, DiagnosticArchiveView, DiagnosticReportVerificationView, DiagnosticArchiveVerificationView, DiagnosticReportContentView, PerformanceAnomalyView, MaintenanceRecommendationView, DiagnosticReportComparisonView, DiagnosticArchiveContentView, DiagnosticArchiveSearchInput, DiagnosticArchiveExportView, MaintenanceHistoryView, MaintenanceHistoryFilterInput, MaintenanceHistoryExportView, UnifiedDiagnosticArchiveSearchView, SystemHealthStatus, ExportArtifactView, ExportArtifactVerificationView, BackupInspectionView, AuditIntegrityView, BackupPropagationRunView, BackupCleanRewritePolicyView, BackupCleanRewriteStatusView, BackupCleanRewriteRunStatus, BackupCleanRewriteRunView, BackupCleanRewriteTrigger, BackupCleanRewriteState, BackupCleanRewriteOutcome, UpdateBackupCleanRewritePolicyInput, BackupQuarantinePolicyView, BackupQuarantineBatchView, BackupQuarantineDestructionResultView, UpdateBackupQuarantinePolicyInput, SetBackupQuarantineLegalHoldInput, DestroyBackupQuarantineBatchInput, ExternalBackupCopyView, ExternalBackupInventorySummaryView, RegisterExternalBackupCopyInput, ReviewExternalBackupCopyInput, SetExternalBackupCopyLegalHoldInput, AttestExternalBackupCopyDestroyedInput, ExternalBackupEvidenceIssuerView, ExternalBackupEvidenceIssuerRotationView, ExternalBackupEvidenceRevocationListView, ExternalBackupRevocationEndpointView, ExternalBackupDestructionEvidenceView, RegisterExternalBackupEvidenceIssuerInput, RotateExternalBackupEvidenceIssuerInput, RevokeExternalBackupEvidenceIssuerInput, ApplyExternalBackupEvidenceRevocationListInput, UpsertExternalBackupRevocationEndpointInput, VerifyExternalBackupDestructionEvidenceInput, FamilyDataImportPreviewView, FamilyDataImportBatchView, ApplyFamilyDataImportInput, RollbackFamilyDataImportInput, GenealogyTreePageInput, GenealogyTreePageView, TimelinePageInput, TimelinePageView, ArchivePageInput, ArchivePageView, PersonCatalogPageInput, PersonCatalogPageView, EventCatalogPageInput, EventCatalogPageView, EntityCatalogLookupInput, EntityCatalogLookupView, DataRetentionPolicyView, DataLifecycleRecordView, CreateDataRetentionPolicyInput, ArchiveDataResourceInput, RestoreDataResourceInput, RequestDataPurgeInput, CancelDataPurgeInput, ExecuteDataPurgeInput, SetDataLegalHoldInput
 } from '@ppt/domain';
+import { archiveLegacyOwnershipReattestationConfirmation, type LegacyArchiveOwnershipReattestationView, type ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type {
   LoanAccountView,
   CreateLoanAccountInput,
@@ -1248,6 +1250,7 @@ export class FamilyDataStore {
   readonly #assignArchiveRetentionPolicyUseCase: AssignArchiveRetentionPolicyUseCase;
   readonly #prepareArchiveDestructionUseCase: PrepareArchiveDestructionUseCase;
   readonly #markArchiveDestroyedUseCase: MarkArchiveDestroyedUseCase;
+  readonly #reattestLegacyArchiveOwnershipUseCase: ReattestLegacyArchiveOwnershipUseCase;
   readonly #getLocalGovernedOcrCenterUseCase: GetLocalGovernedOcrCenterUseCase;
   readonly #getLocalGovernedOcrResultUseCase: GetLocalGovernedOcrResultUseCase;
   readonly #createLocalGovernedOcrJobUseCase: CreateLocalGovernedOcrJobUseCase;
@@ -2356,6 +2359,7 @@ export class FamilyDataStore {
     this.#assignArchiveRetentionPolicyUseCase = new AssignArchiveRetentionPolicyUseCase(archiveUnitOfWork);
     this.#prepareArchiveDestructionUseCase = new PrepareArchiveDestructionUseCase(archiveQuery);
     this.#markArchiveDestroyedUseCase = new MarkArchiveDestroyedUseCase(archiveUnitOfWork);
+    this.#reattestLegacyArchiveOwnershipUseCase = new ReattestLegacyArchiveOwnershipUseCase(archiveUnitOfWork, strongAuthentication);
     this.#listArchiveCategoriesUseCase = new ListArchiveCategoriesUseCase(archiveQuery);
     this.#listArchiveClassificationsUseCase = new ListArchiveClassificationsUseCase(archiveQuery);
     this.#createArchiveCategoryUseCase = new CreateArchiveCategoryUseCase(archiveUnitOfWork);
@@ -3081,7 +3085,7 @@ export class FamilyDataStore {
 
   #archiveApplicationContext(prefix: string): ArchiveApplicationContext {
     const authenticatedUserId=this.#requireAuth(); const account=this.#currentAccount();
-    return {familyId:asFamilyId('family-main'),actor:{userId:asUserId(authenticatedUserId),role:account.role,...(account.personId?{personId:account.personId}:{})},correlationId:this.#correlation?.current()?.correlationId??asCorrelationId(`${prefix}-${randomUUID()}`)};
+    return {familyId:asFamilyId('family-main'),actor:{userId:asUserId(authenticatedUserId),role:account.role,...(account.personId?{personId:asPersonId(account.personId)}:{})},correlationId:this.#correlation?.current()?.correlationId??asCorrelationId(`${prefix}-${randomUUID()}`)};
   }
 
   #localGovernedOcrApplicationContext(prefix: string): LocalGovernedOcrApplicationContext {
@@ -3150,6 +3154,14 @@ export class FamilyDataStore {
     return resolved;
   }
 
+  #legacyArchiveOwnershipReattestationContext(itemId:string):ArchiveApplicationContext {
+    const context=this.#archiveApplicationContext('archive-legacy-ownership-reattestation');
+    if(!context.actor.personId)throw new PlatformPolicyEnforcementError('TRANSACTION_CONTEXT_MISMATCH','Eski arşiv sahipliği için kişi profili zorunludur.');
+    const operationSeed=canonicalArchiveOperationValue({familyId:context.familyId,actorAccountId:context.actor.userId,ownerPersonId:context.actor.personId,itemId,confirmationVersion:1});
+    const operationDigest=createHash('sha256').update(operationSeed,'utf8').digest('hex');
+    return {...context,operationId:`archive-reattest-${operationDigest}`,operationFingerprint:createHash('sha256').update(canonicalArchiveOperationValue({mutation:'archive.legacy-ownership-reattestation',familyId:context.familyId,actorAccountId:context.actor.userId,ownerPersonId:context.actor.personId,itemId,confirmationVersion:1}),'utf8').digest('hex')};
+  }
+
   #archiveMutationContext(
     prefix: string,
     operationId: string,
@@ -3162,7 +3174,7 @@ export class FamilyDataStore {
     const actor = {
       userId: asUserId(authenticatedUserId),
       role: account.role,
-      ...(account.personId ? { personId: account.personId } : {})
+      ...(account.personId ? { personId: asPersonId(account.personId) } : {})
     } as const;
     const operationFingerprint = createHash('sha256').update(canonicalArchiveOperationValue({
       actorAccountId: actor.userId,
@@ -5382,6 +5394,20 @@ export class FamilyDataStore {
   public listLargeArchive(input: ArchivePageInput = {}): ArchivePageView {
     this.#requireAuth();
     return this.#largeFamilyReadModelService.listArchivePage(input);
+  }
+
+  public async reattestLegacyArchiveOwnership(input:ReattestLegacyArchiveOwnershipInput):Promise<LegacyArchiveOwnershipReattestationView> {
+    const itemId=input.itemId.trim();
+    const context=this.#legacyArchiveOwnershipReattestationContext(itemId);
+    if(input.confirmation!==archiveLegacyOwnershipReattestationConfirmation(itemId))throw new Error('Eski arşiv sahipliği onay metni birebir eşleşmelidir.');
+    const operationId=context.operationId!;
+    const result=await this.#reattestLegacyArchiveOwnershipUseCase.execute({
+      context,
+      command:{itemId,password:input.password,...(input.code?{code:input.code}:{}),confirmation:input.confirmation},
+      identifiers:{auditId:deterministicArchiveIdentifier(operationId,'audit'),outboxEventId:asEventId(deterministicArchiveIdentifier(operationId,'outbox'))}
+    });
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
   }
 
   public listPersonCatalog(input: PersonCatalogPageInput = {}): PersonCatalogPageView {

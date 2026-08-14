@@ -1,5 +1,5 @@
 import type { FamilyId, PersonId } from '@ppt/core';
-import type { ArchiveSensitivity, FamilyEventView } from '@ppt/domain';
+import type { ArchiveOwnershipBinding, ArchiveSensitivity, FamilyEventView } from '@ppt/domain';
 import type {
   PolicyAuthorizedRepositoryExecutionContext,
   RepositoryExecutionContext,
@@ -21,6 +21,7 @@ export interface LargeArchiveRow {
   readonly sha256:string; readonly createdAt:string; readonly linkedEventId?:string; readonly categoryId?:string;
   readonly categoryName?:string; readonly sensitivity:ArchiveSensitivity; readonly tagNames:readonly string[];
   readonly retentionPolicyId?:string; readonly retentionPolicyName?:string; readonly retentionDays?:number;
+  readonly ownershipBinding:ArchiveOwnershipBinding;
 }
 
 /**

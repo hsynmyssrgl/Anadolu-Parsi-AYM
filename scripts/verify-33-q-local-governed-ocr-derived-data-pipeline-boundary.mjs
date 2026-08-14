@@ -30,9 +30,15 @@ const governancePaths = Object.freeze([
 ]);
 const localSourcePaths = Object.freeze([
   'packages/domain/src/local-governed-ocr.ts',
+  'packages/domain/src/app-data.ts',
   'packages/application/src/local-governed-ocr-use-cases.ts',
+  'packages/application/src/archive-use-cases.ts',
   'packages/repository-contracts/src/local-governed-ocr-repository.ts',
+  'packages/repository-contracts/src/archive-repository.ts',
+  'packages/repository-contracts/src/large-family-read-model-repository.ts',
   'packages/repositories/src/local-governed-ocr-repository.ts',
+  'packages/repositories/src/archive-repository.ts',
+  'packages/repositories/src/large-family-read-model-repository.ts',
   'packages/database/src/transaction.ts',
   'packages/database/src/family-database-migrations.ts',
   'packages/security/src/local-ocr-security.ts',
@@ -41,6 +47,9 @@ const localSourcePaths = Object.freeze([
   'apps/desktop/src/main/windows-media-ocr-engine-adapter.ts',
   'apps/desktop/src/main/local-ocr-worker.ts',
   'apps/desktop/src/main/local-governed-ocr-application-adapter.ts',
+  'apps/desktop/src/main/archive-application-adapter.ts',
+  'apps/desktop/src/main/archive-production-policy-runtime.ts',
+  'apps/desktop/src/main/large-family-read-model-service.ts',
   'apps/desktop/src/main/timeline-production-policy-runtime.ts',
   'apps/desktop/src/main/local-governed-ocr-result-vault.ts',
   'apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts',
@@ -87,9 +96,14 @@ const [scope, inventory, registry, roadmap, plan, ledger, pkg, capabilityManifes
 const roadmap33Q = roadmap.packages?.find((item) => item.step === '33-Q');
 const registryItems = requirements.map((id) => registry.requirements?.find((item) => item.id === id));
 const migration94 = migrationManifest.migrationVersions?.find((item) => item.version === 94);
+const migration95 = migrationManifest.migrationVersions?.find((item) => item.version === 95);
 const migrationMatch = migrationSource.match(/const localGovernedOcrLedgerSql = `([\s\S]*?)`;\r?\n\r?\n(?=const [A-Za-z_$][A-Za-z0-9_$]*Sql =|export const FAMILY_DATABASE_MIGRATIONS)/u);
 const migration94Sha256 = migrationMatch
   ? createHash('sha256').update(`${migrationMatch[1].replace(/\r\n/g, '\n').trim()}\n`).digest('hex')
+  : '';
+const migration95Match = migrationSource.match(/const legacyArchiveOwnershipReattestationSql = `([\s\S]*?)`;\r?\n\r?\n(?=const [A-Za-z_$][A-Za-z0-9_$]*Sql =|export const FAMILY_DATABASE_MIGRATIONS)/u);
+const migration95Sha256 = migration95Match
+  ? createHash('sha256').update(`${migration95Match[1].replace(/\r\n/g, '\n').trim()}\n`).digest('hex')
   : '';
 const ppk = inventory.ppkGateEvidence ?? {};
 const governancePathsExist = (await Promise.all(governancePaths.map(exists))).every(Boolean);
@@ -128,10 +142,13 @@ const definitions = [
       && inventory.countsAsRequirementPass === false && inventory.validation?.countsAsRequirementPass === false
       && scope.persistentReceiptStatus === 'NOT_RUN' && inventory.persistentReceiptStatus === 'NOT_RUN'],
   ['all governance and partial production source surfaces exist', governancePathsExist && localSourcePathsExist],
-  ['migration 94 canonical definition and manifest are exact',
+  ['migration 94 and 95 canonical definitions and manifests are exact',
     migration94?.name === 'local_governed_ocr' && migration94?.checksum === migration94Sha256
       && migration94Sha256 === '08fef61dc21062134716dfae8e78c2256eb5da275eedaf1fe3502a3c2450cb65'
-      && scope.plannedModel?.resultAndStorage?.migration94Sha256 === migration94Sha256],
+      && scope.plannedModel?.resultAndStorage?.migration94Sha256 === migration94Sha256
+      && migration95?.name === 'legacy_archive_ownership_reattestation' && migration95?.checksum === migration95Sha256
+      && migration95Sha256 === '2a7206f2335ee24e5e6135867dbed5096530477a1e3d514ef2f0ce9683029c90'
+      && scope.plannedModel?.legacyArchiveOwnership?.migration95Sha256 === migration95Sha256],
   ['PPK-021 and PPK-022 ratchets match the final declared local snapshot',
     ppk.ppk021?.status === 'PASS' && ppk.ppk022?.status === 'PASS'
       && ppk021Scope.boundaries?.scannedProductionFiles === ppk.ppk021.scannedProductionFiles
@@ -173,7 +190,11 @@ const definitions = [
       && scope.truth?.permissionOrConsentRevocationOcrPurgeValidated === true
       && scope.truth?.scheduledOrphanSweepProductionWiringValidated === true
       && scope.truth?.retentionExpiryPurgeValidated === true
-      && scope.truth?.legacyArchiveOwnershipReattestationAvailable === false],
+      && scope.truth?.legacyArchiveOwnershipReattestationAvailable === true
+      && scope.truth?.legacyArchiveOwnershipReattestationStrongAuthTested === true
+      && scope.truth?.legacyArchiveOwnershipReattestationActorBound === true
+      && scope.truth?.legacyArchiveOwnershipReassignmentAllowed === false
+      && scope.truth?.legacyArchiveOwnershipIndependentAttestationPersisted === false],
   ['manual external and certification evidence remains fail-closed',
     manualEvidenceNotRun && scope.manualEvidence?.certificationClaimed === false
       && scope.truth?.rawDocumentEgressPerformed === false
@@ -182,12 +203,12 @@ const definitions = [
       && scope.truth?.physicalSecureEraseGuaranteed === false
       && scope.truth?.externalCopyDestructionGuaranteed === false],
   ['decision and threat model preserve partial and no-claim markers',
-    decision.includes('15 dosya / 128 test PASS')
+    decision.includes('19 dosya / 139 test PASS')
       && decision.includes('PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED / ACCEPTANCE_INCOMPLETE')
       && decision.includes('- Requirement PASS: `false`')
       && decision.includes('- Persistent receipt: `NOT_RUN`')
       && decision.includes('requirement `PASS`')
-      && threat.includes('15 dosya / 128 test PASS')
+      && threat.includes('19 dosya / 139 test PASS')
       && threat.includes('iki fazlı run/cancel local kanıtı `PASS`')
       && threat.includes('authenticated restart auto-resume')]
 ];
@@ -206,8 +227,9 @@ const report = {
   countsAsRequirementPass: false,
   requirementGateStatus: 'BLOCKED_BY_33_P_AND_OPEN_TECHNICAL_EXTERNAL_MANUAL_EVIDENCE',
   activePredecessor: '33-P',
-  targetedTestRatchet: { files: 15, tests: 128 },
+  targetedTestRatchet: { files: 19, tests: 139 },
   migration94Sha256,
+  migration95Sha256,
   ppkGateEvidence: ppk,
   checksPassed: checks.length - failures.length,
   checksFailed: failures.length,
