@@ -35,11 +35,16 @@ import { WindowsMediaOcrEngineAdapter } from './windows-media-ocr-engine-adapter
 import {
   LocalGovernedOcrResultVault,
   LocalGovernedOcrResultVaultError,
+  LOCAL_GOVERNED_OCR_SEARCH_INDEX_PERSISTED,
   deriveLocalGovernedOcrCorrectionSealedResultId,
   deriveLocalGovernedOcrRunSealedResultId,
   type LocalGovernedOcrRuntimeBinding,
   type LocalGovernedOcrSealedPayload
 } from './local-governed-ocr-result-vault.js';
+import {
+  buildLocalGovernedOcrSearchIndex,
+  searchLocalGovernedOcrText
+} from './local-governed-ocr-search-index.js';
 
 const SHA256 = /^[0-9a-f]{64}$/u;
 const IDENTIFIER = /^[A-Za-z0-9._:-]{1,160}$/u;
@@ -63,7 +68,7 @@ export interface AuthorizedLocalGovernedOcrJobBinding extends LocalGovernedOcrRu
   readonly currentSealedResultId: string | null;
 }
 
-export type LocalGovernedOcrRuntimeJobOperation = 'read' | 'correct' | 'purge' | 'cancel' | 'orphan_sweep';
+export type LocalGovernedOcrRuntimeJobOperation = 'read' | 'search' | 'correct' | 'purge' | 'cancel' | 'orphan_sweep';
 
 /**
  * Main-only adapter supplied by the central PEP transaction composition. Merely knowing a file name or
@@ -300,19 +305,21 @@ export class MainLocalGovernedOcrRuntimeAdapter implements LocalGovernedOcrRunti
       if (!validCorrectedText(result.text)) throw new LocalOcrSecurityError('OUTPUT_LIMIT_EXCEEDED');
       const completed = nowIso(this.#now, input.correlationId);
       if (!completed.ok) return completed;
+      const contentSha256 = hashText(result.text);
       const payload: LocalGovernedOcrSealedPayload = Object.freeze({
-        schemaVersion: 1,
+        schemaVersion: 2,
         kind: 'local-governed-ocr-sealed-result-v1',
         sealedResultId,
         binding: Object.freeze(binding),
         text: result.text,
-        contentSha256: hashText(result.text),
+        contentSha256,
         characterCount: result.text.length,
         pageCount: result.pageCount,
         confidenceBasisPoints: confidenceBasisPoints(result),
         completedAt: completed.value,
         corrected: false,
         previousSealedResultId: null,
+        searchIndex: buildLocalGovernedOcrSearchIndex(result.text, contentSha256),
         providerResult: result,
         networkUsed: false,
         cloudUsed: false
@@ -372,6 +379,7 @@ export class MainLocalGovernedOcrRuntimeAdapter implements LocalGovernedOcrRunti
       if (!completed.ok) return completed;
       const payload: LocalGovernedOcrSealedPayload = Object.freeze({
         ...previous,
+        schemaVersion: 2,
         sealedResultId,
         text: input.correctedText,
         contentSha256: correctedContentSha256,
@@ -379,6 +387,7 @@ export class MainLocalGovernedOcrRuntimeAdapter implements LocalGovernedOcrRunti
         completedAt: completed.value,
         corrected: true,
         previousSealedResultId: input.previousSealedResultId,
+        searchIndex: buildLocalGovernedOcrSearchIndex(input.correctedText, correctedContentSha256),
         networkUsed: false,
         cloudUsed: false
       });
@@ -406,6 +415,36 @@ export class MainLocalGovernedOcrRuntimeAdapter implements LocalGovernedOcrRunti
     } catch (error) {
       if (error instanceof LocalGovernedOcrResultVaultError && error.code === 'NOT_FOUND') {
         return err(appError(input.correlationId, ERROR_CODES.RESOURCE_NOT_FOUND, 'not_found', 'Yerel OCR sealed sonucu bulunamadı.'));
+      }
+      return err(unexpected(input.correlationId));
+    }
+  }
+
+  public async searchSealedResult(input: Parameters<LocalGovernedOcrRuntimePort['searchSealedResult']>[0]):
+  ReturnType<LocalGovernedOcrRuntimePort['searchSealedResult']> {
+    if (!validIdentifier(input.jobId) || !SHA256.test(input.sealedResultId)) return err(invalid(input.correlationId));
+    try {
+      const authority = await this.#resolveJobAuthority('search', input.jobId, input.sealedResultId, input.correlationId);
+      if (!authority.ok) return authority;
+      if (authority.value.currentSealedResultId !== input.sealedResultId) return err(denied(input.correlationId));
+      const payload = this.#resultVault.read(exactRuntimeBinding(authority.value), input.sealedResultId);
+      if (payload[LOCAL_GOVERNED_OCR_SEARCH_INDEX_PERSISTED] !== true) {
+        return err(appError(input.correlationId, ERROR_CODES.RESOURCE_CONFLICT, 'conflict',
+          'Legacy OCR result has no encrypted search index; rerun or correct the result before searching.'));
+      }
+      const hit = searchLocalGovernedOcrText({ index: payload.searchIndex, text: payload.text,
+        contentSha256: payload.contentSha256, query: input.query, corrected: payload.corrected,
+        layout: payload.providerResult.layout });
+      return hit === null
+        ? ok({ matched: false, matchedTokenCount: 0, contentSha256: payload.contentSha256,
+          snippet: null, snippetMasked: true,
+          pageNumber: null, networkUsed: false, cloudUsed: false })
+        : ok({ matched: true, matchedTokenCount: hit.matchedTokenCount, contentSha256: payload.contentSha256,
+          snippet: hit.snippet,
+          snippetMasked: true, pageNumber: hit.pageNumber, networkUsed: false, cloudUsed: false });
+    } catch (error) {
+      if (error instanceof LocalGovernedOcrResultVaultError && error.code === 'NOT_FOUND') {
+        return err(appError(input.correlationId, ERROR_CODES.RESOURCE_NOT_FOUND, 'not_found', 'Yerel OCR sealed indeksi bulunamadı.'));
       }
       return err(unexpected(input.correlationId));
     }

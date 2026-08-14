@@ -200,6 +200,7 @@ import {
   ReattestLegacyArchiveOwnershipUseCase,
   GetLocalGovernedOcrCenterUseCase,
   GetLocalGovernedOcrResultUseCase,
+  SearchLocalGovernedOcrUseCase,
   CreateLocalGovernedOcrJobUseCase,
   RunLocalGovernedOcrJobUseCase,
   CancelLocalGovernedOcrJobUseCase,
@@ -502,9 +503,11 @@ import type {
   LocalGovernedOcrCenterView,
   LocalGovernedOcrMutationReceiptView,
   LocalGovernedOcrResultView,
+  LocalGovernedOcrSearchView,
   PropagateLocalGovernedOcrSourceDeletionInput,
   RerunLocalGovernedOcrJobInput,
   RunLocalGovernedOcrJobInput,
+  SearchLocalGovernedOcrInput,
   SetLocalGovernedOcrEnabledInput
 } from '@ppt/domain';
 import { SqliteFamilyDatabaseRuntime } from './family-database-runtime.js';
@@ -852,6 +855,9 @@ const failClosedLocalGovernedOcrRuntime: LocalGovernedOcrRuntimePort = Object.fr
   async readSealedResult(input: Parameters<LocalGovernedOcrRuntimePort['readSealedResult']>[0]) {
     return localGovernedOcrRuntimeFailure(input.correlationId);
   },
+  async searchSealedResult(input: Parameters<LocalGovernedOcrRuntimePort['searchSealedResult']>[0]) {
+    return localGovernedOcrRuntimeFailure(input.correlationId);
+  },
   async requestCancellation(input: Parameters<LocalGovernedOcrRuntimePort['requestCancellation']>[0]) {
     return localGovernedOcrRuntimeFailure(input.correlationId);
   },
@@ -868,6 +874,7 @@ const assertLocalGovernedOcrRuntimePort = (runtime: LocalGovernedOcrRuntimePort)
     || typeof runtime.runAndSeal !== 'function'
     || typeof runtime.correctAndSeal !== 'function'
     || typeof runtime.readSealedResult !== 'function'
+    || typeof runtime.searchSealedResult !== 'function'
     || typeof runtime.requestCancellation !== 'function'
     || typeof runtime.purgeSealedResult !== 'function'
     || typeof runtime.sweepOrphans !== 'function') {
@@ -1253,6 +1260,7 @@ export class FamilyDataStore {
   readonly #reattestLegacyArchiveOwnershipUseCase: ReattestLegacyArchiveOwnershipUseCase;
   readonly #getLocalGovernedOcrCenterUseCase: GetLocalGovernedOcrCenterUseCase;
   readonly #getLocalGovernedOcrResultUseCase: GetLocalGovernedOcrResultUseCase;
+  readonly #searchLocalGovernedOcrUseCase: SearchLocalGovernedOcrUseCase;
   readonly #createLocalGovernedOcrJobUseCase: CreateLocalGovernedOcrJobUseCase;
   readonly #runLocalGovernedOcrJobUseCase: RunLocalGovernedOcrJobUseCase;
   readonly #cancelLocalGovernedOcrJobUseCase: CancelLocalGovernedOcrJobUseCase;
@@ -2429,6 +2437,10 @@ export class FamilyDataStore {
           });
     this.#getLocalGovernedOcrCenterUseCase = new GetLocalGovernedOcrCenterUseCase(localGovernedOcrUnitOfWork);
     this.#getLocalGovernedOcrResultUseCase = new GetLocalGovernedOcrResultUseCase(
+      localGovernedOcrUnitOfWork,
+      localGovernedOcrRuntime
+    );
+    this.#searchLocalGovernedOcrUseCase = new SearchLocalGovernedOcrUseCase(
       localGovernedOcrUnitOfWork,
       localGovernedOcrRuntime
     );
@@ -5440,6 +5452,16 @@ export class FamilyDataStore {
     const result = await this.#getLocalGovernedOcrResultUseCase.execute({
       context,
       jobId: input.jobId,
+      auditId: randomUUID()
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async searchLocalGovernedOcr(input: SearchLocalGovernedOcrInput): Promise<LocalGovernedOcrSearchView> {
+    const result = await this.#searchLocalGovernedOcrUseCase.execute({
+      context: this.#localGovernedOcrApplicationContext('local-ocr-search'),
+      command: input,
       auditId: randomUUID()
     });
     if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);

@@ -119,7 +119,8 @@ const identityAccessChannels = new Set<string>([
 ]);
 const localGovernedOcrReadChannels = new Set<string>([
   'localOcr:getCenter',
-  'localOcr:getResult'
+  'localOcr:getResult',
+  'localOcr:search'
 ]);
 const localGovernedOcrWriteChannels = new Set<string>([
   'localOcr:create',

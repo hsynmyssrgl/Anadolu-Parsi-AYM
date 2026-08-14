@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import type {
   LocalGovernedOcrCenterView,
   LocalGovernedOcrMutationReceiptView,
-  LocalGovernedOcrResultView
+  LocalGovernedOcrResultView,
+  LocalGovernedOcrSearchView
 } from '@ppt/domain';
 import {
   LOCAL_GOVERNED_OCR_IPC_CHANNELS,
@@ -10,7 +11,8 @@ import {
   evaluateIpcIntegrationResultPolicy,
   projectLocalGovernedOcrCenterIpcView,
   projectLocalGovernedOcrMutationIpcView,
-  projectLocalGovernedOcrResultIpcView
+  projectLocalGovernedOcrResultIpcView,
+  projectLocalGovernedOcrSearchIpcView
 } from '../src/main/ipc-integration-policy.js';
 import {
   IpcRequestLifecycleRegistry,
@@ -27,6 +29,7 @@ const jobMutation = { ...mutationIdentity, jobId: 'local-ocr-job-0001' } as cons
 const validInputs = {
   [LOCAL_GOVERNED_OCR_IPC_CHANNELS.getCenter]: [],
   [LOCAL_GOVERNED_OCR_IPC_CHANNELS.getResult]: [{ jobId: 'local-ocr-job-0001' }],
+  [LOCAL_GOVERNED_OCR_IPC_CHANNELS.search]: [{ query: 'güvenli sonuç', limit: 10 }],
   [LOCAL_GOVERNED_OCR_IPC_CHANNELS.create]: [{
     expectedRevision: 0,
     clientOperationId: 'operation-local-ocr-create-0001',
@@ -94,6 +97,11 @@ const domainCenter = {
     sourceDeletionPropagatesToDerivedResult: true,
     sourceDeletionAutoResumeGuaranteed: true,
     authorizationRevocationPropagatesToSealedResult: true,
+    retentionExpiryPropagatesToSealedResult: true,
+    scheduledOrphanSweepUsesDistinctMaintenanceAuthority: true,
+    encryptedFullTextIndexAvailable: true,
+    policyFilteredSearchRequired: true,
+    snippetMaskingEnforced: true,
     derivedDeletionDeletesSource: false
   },
   generatedAt: occurredAt
@@ -103,6 +111,21 @@ const domainResult = {
   jobId: 'local-ocr-job-0001', revision: 3, text: 'Guvenli yerel OCR sonucu.', contentSha256: hash,
   corrected: false, payloadSource: 'sealed_local_result', networkUsed: false, cloudUsed: false
 } as const satisfies LocalGovernedOcrResultView;
+
+const domainSearch = {
+  schemaVersion: 1,
+  matches: [{ jobId: 'local-ocr-job-0001', revision: 3, snippet: 'Güvenli [numara maskeli ••••1111] sonuç.',
+    snippetMasked: true, matchedTokenCount: 2, pageNumber: 1, corrected: false,
+    networkUsed: false, cloudUsed: false }],
+  truncated: false,
+  policyFiltered: true,
+  encryptedIndexAtRest: true,
+  snippetsMasked: true,
+  queryEchoed: false,
+  networkUsed: false,
+  cloudUsed: false,
+  generatedAt: occurredAt
+} as const satisfies LocalGovernedOcrSearchView;
 
 const domainMutation = {
   clientOperationId: 'operation-local-ocr-run-0001',
@@ -120,7 +143,7 @@ const domainMutation = {
 } as const satisfies LocalGovernedOcrMutationReceiptView;
 
 describe('33-Q local governed OCR IPC boundary', () => {
-  it('accepts the nine exact renderer contracts and rejects unknown or main-only channels', () => {
+  it('accepts the ten exact renderer contracts and rejects unknown or main-only channels', () => {
     for (const channel of Object.values(LOCAL_GOVERNED_OCR_IPC_CHANNELS)) {
       expect(evaluateIpcIntegrationPolicy(channel, validInputs[channel]), channel).toEqual({ accepted: true });
     }
@@ -206,13 +229,20 @@ describe('33-Q local governed OCR IPC boundary', () => {
     expect(evaluateIpcIntegrationPolicy(LOCAL_GOVERNED_OCR_IPC_CHANNELS.delete, [{
       ...jobMutation, reason: 'x'.repeat(513)
     }])).toMatchObject({ accepted: false });
+    expect(evaluateIpcIntegrationPolicy(LOCAL_GOVERNED_OCR_IPC_CHANNELS.search, [{ query: 'güvenli sonuç', limit: 25 }]))
+      .toEqual({ accepted: true });
+    for (const query of [' kullanıcı@example.com', 'kullanıcı@example.com', 'TR330006100519786457841326', '4111111111111111']) {
+      expect(evaluateIpcIntegrationPolicy(LOCAL_GOVERNED_OCR_IPC_CHANNELS.search, [{ query }]))
+        .toMatchObject({ accepted: false });
+    }
   });
 
   it('projects center, plaintext and mutation results without owner, receipt or hash authority', () => {
     const center = projectLocalGovernedOcrCenterIpcView(domainCenter);
     const result = projectLocalGovernedOcrResultIpcView(domainResult);
+    const search = projectLocalGovernedOcrSearchIpcView(domainSearch);
     const mutation = projectLocalGovernedOcrMutationIpcView(domainMutation, 'job_run');
-    const rendererJson = JSON.stringify({ center, result, mutation });
+    const rendererJson = JSON.stringify({ center, result, search, mutation });
     for (const forbidden of [
       'familyId', 'accountId', 'ownerPersonId', 'inputSha256', 'contentSha256', 'derivedBindingHash',
       'stateFingerprint', 'sealedResultId', 'receipt', 'clientOperationId', 'consentId', 'derivedResourceId'
@@ -225,6 +255,8 @@ describe('33-Q local governed OCR IPC boundary', () => {
       jobId: 'local-ocr-job-0001', revision: 3, text: 'Guvenli yerel OCR sonucu.', corrected: false,
       payloadSource: 'sealed_local_result', networkUsed: false, cloudUsed: false
     });
+    expect(search).toEqual(domainSearch);
+    expect(rendererJson).not.toContain('güvenli sonuç');
     expect(mutation).toEqual({
       previousRevision: 2, revision: 3, occurredAt, replayed: false, networkUsed: false, cloudUsed: false
     });
@@ -246,6 +278,13 @@ describe('33-Q local governed OCR IPC boundary', () => {
       LOCAL_GOVERNED_OCR_IPC_CHANNELS.getResult,
       projectLocalGovernedOcrResultIpcView(domainResult)
     )).toEqual({ accepted: true });
+    expect(evaluateIpcIntegrationResultPolicy(
+      LOCAL_GOVERNED_OCR_IPC_CHANNELS.search,
+      projectLocalGovernedOcrSearchIpcView(domainSearch)
+    )).toEqual({ accepted: true });
+    expect(evaluateIpcIntegrationResultPolicy(LOCAL_GOVERNED_OCR_IPC_CHANNELS.search, {
+      ...projectLocalGovernedOcrSearchIpcView(domainSearch), query: 'güvenli sonuç'
+    })).toMatchObject({ accepted: false });
     for (const [channel, expectedKind] of [
       [LOCAL_GOVERNED_OCR_IPC_CHANNELS.create, 'job_create'],
       [LOCAL_GOVERNED_OCR_IPC_CHANNELS.run, 'job_run'],
@@ -325,12 +364,15 @@ describe('33-Q local governed OCR IPC boundary', () => {
         maxConcurrentPerChannel: 1, maxQueuedPerSender: 4, queueTimeoutMs: 2_500
       });
     }
-    for (const channel of [LOCAL_GOVERNED_OCR_IPC_CHANNELS.getCenter, LOCAL_GOVERNED_OCR_IPC_CHANNELS.getResult]) {
+    for (const channel of [LOCAL_GOVERNED_OCR_IPC_CHANNELS.getCenter, LOCAL_GOVERNED_OCR_IPC_CHANNELS.getResult,
+      LOCAL_GOVERNED_OCR_IPC_CHANNELS.search]) {
       expect(resolveIpcRequestLifecyclePolicy(channel)).toEqual({ cancellable: true, latestWins: true, timeoutMs: 10_000 });
       expect(resolveIpcRequestRatePolicy(channel)).toEqual({ enabled: true, maxRequestsPerWindow: 60, windowMs: 60_000 });
     }
     for (const channel of Object.values(LOCAL_GOVERNED_OCR_IPC_CHANNELS).filter((channel) =>
-      channel !== LOCAL_GOVERNED_OCR_IPC_CHANNELS.getCenter && channel !== LOCAL_GOVERNED_OCR_IPC_CHANNELS.getResult)) {
+      channel !== LOCAL_GOVERNED_OCR_IPC_CHANNELS.getCenter
+      && channel !== LOCAL_GOVERNED_OCR_IPC_CHANNELS.getResult
+      && channel !== LOCAL_GOVERNED_OCR_IPC_CHANNELS.search)) {
       expect(resolveIpcRequestLifecyclePolicy(channel)).toEqual({ cancellable: false, latestWins: false, timeoutMs: 0 });
       expect(resolveIpcRequestRatePolicy(channel)).toEqual({ enabled: true, maxRequestsPerWindow: 12, windowMs: 60_000 });
     }

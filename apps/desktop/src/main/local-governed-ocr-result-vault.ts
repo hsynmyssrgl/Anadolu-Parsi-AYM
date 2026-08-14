@@ -26,15 +26,22 @@ import {
   type LocalOcrResult
 } from '@ppt/security';
 import { ProtectedSideArtifactStore, type ProtectedSideArtifactEnvelope } from './protected-side-artifact-store.js';
+import {
+  buildLocalGovernedOcrSearchIndex,
+  validateLocalGovernedOcrSearchIndex,
+  type LocalGovernedOcrEncryptedSearchIndex
+} from './local-governed-ocr-search-index.js';
 
-const RESULT_SCHEMA_VERSION = 1;
+const RESULT_SCHEMA_VERSION = 2;
 const RESULT_KIND = 'local-governed-ocr-sealed-result-v1';
 const MAX_PROTECTED_ENVELOPE_BYTES = 2 * 1024 * 1024;
+const MAX_SEALED_PAYLOAD_BYTES = LOCAL_OCR_MAX_OUTPUT_BYTES + 128 * 1024;
 const MAX_CORRECTION_CHAIN = 512;
 export const LOCAL_GOVERNED_OCR_RESULT_VAULT_MAX_FILES = 1_024;
 export const LOCAL_GOVERNED_OCR_RESULT_VAULT_MAX_BYTES = 256 * 1024 * 1024;
 const SHA256 = /^[0-9a-f]{64}$/u;
 const IDENTIFIER = /^[A-Za-z0-9._:-]{1,160}$/u;
+export const LOCAL_GOVERNED_OCR_SEARCH_INDEX_PERSISTED = Symbol('local-governed-ocr-search-index-persisted');
 
 export interface LocalGovernedOcrRuntimeBinding {
   readonly familyId: string;
@@ -47,7 +54,7 @@ export interface LocalGovernedOcrRuntimeBinding {
 }
 
 export interface LocalGovernedOcrSealedPayload {
-  readonly schemaVersion: 1;
+  readonly schemaVersion: 2;
   readonly kind: typeof RESULT_KIND;
   readonly sealedResultId: string;
   readonly binding: LocalGovernedOcrRuntimeBinding;
@@ -59,6 +66,10 @@ export interface LocalGovernedOcrSealedPayload {
   readonly completedAt: string;
   readonly corrected: boolean;
   readonly previousSealedResultId: string | null;
+  /** Canonical Bloom index. It is serialized only inside the encrypted result envelope. */
+  readonly searchIndex: LocalGovernedOcrEncryptedSearchIndex;
+  /** Non-enumerable runtime truth; legacy v1 payloads derive an index in memory but do not claim it existed at rest. */
+  readonly [LOCAL_GOVERNED_OCR_SEARCH_INDEX_PERSISTED]?: boolean;
   /** Validated provider output is retained only inside the encrypted main-process envelope. */
   readonly providerResult: LocalOcrResult;
   readonly networkUsed: false;
@@ -146,17 +157,22 @@ const validProviderResult = (value: unknown, binding: LocalGovernedOcrRuntimeBin
 };
 
 const parsePayload = (bytes: Buffer): LocalGovernedOcrSealedPayload => {
-  if (bytes.byteLength < 2 || bytes.byteLength > LOCAL_OCR_MAX_OUTPUT_BYTES) {
+  if (bytes.byteLength < 2 || bytes.byteLength > MAX_SEALED_PAYLOAD_BYTES) {
     throw new LocalGovernedOcrResultVaultError('ENVELOPE_REJECTED');
   }
   let value: unknown;
   try { value = JSON.parse(bytes.toString('utf8')) as unknown; }
   catch { throw new LocalGovernedOcrResultVaultError('ENVELOPE_REJECTED'); }
-  if (!plainRecord(value) || !exactKeys(value, [
+  const legacyKeys = [
     'schemaVersion', 'kind', 'sealedResultId', 'binding', 'text', 'contentSha256', 'characterCount',
     'pageCount', 'confidenceBasisPoints', 'completedAt', 'corrected', 'previousSealedResultId',
     'providerResult', 'networkUsed', 'cloudUsed'
-  ]) || value.schemaVersion !== RESULT_SCHEMA_VERSION || value.kind !== RESULT_KIND
+  ] as const;
+  const indexedKeys = [...legacyKeys, 'searchIndex'] as const;
+  if (!plainRecord(value)
+    || !((value.schemaVersion === 1 && exactKeys(value, legacyKeys))
+      || (value.schemaVersion === RESULT_SCHEMA_VERSION && exactKeys(value, indexedKeys)))
+    || value.kind !== RESULT_KIND
     || typeof value.sealedResultId !== 'string' || !SHA256.test(value.sealedResultId)
     || !validBinding(value.binding) || !validText(value.text)
     || typeof value.contentSha256 !== 'string' || !SHA256.test(value.contentSha256)
@@ -170,10 +186,20 @@ const parsePayload = (bytes: Buffer): LocalGovernedOcrSealedPayload => {
       || (typeof value.previousSealedResultId === 'string' && SHA256.test(value.previousSealedResultId)))
     || (value.corrected !== (value.previousSealedResultId !== null))
     || !validProviderResult(value.providerResult, value.binding, Number(value.pageCount))
+    || (value.schemaVersion === RESULT_SCHEMA_VERSION
+      && !validateLocalGovernedOcrSearchIndex(value.searchIndex, value.text, value.contentSha256))
     || value.networkUsed !== false || value.cloudUsed !== false) {
     throw new LocalGovernedOcrResultVaultError('ENVELOPE_REJECTED');
   }
-  return Object.freeze(value as unknown as LocalGovernedOcrSealedPayload);
+  const searchIndex = buildLocalGovernedOcrSearchIndex(value.text, value.contentSha256);
+  const parsed = { ...value, schemaVersion: RESULT_SCHEMA_VERSION, searchIndex } as unknown as LocalGovernedOcrSealedPayload;
+  Object.defineProperty(parsed, LOCAL_GOVERNED_OCR_SEARCH_INDEX_PERSISTED, {
+    value: value.schemaVersion === RESULT_SCHEMA_VERSION,
+    enumerable: false,
+    configurable: false,
+    writable: false
+  });
+  return Object.freeze(parsed);
 };
 
 const parseProtectedEnvelope = (bytes: Buffer): ProtectedSideArtifactEnvelope => {

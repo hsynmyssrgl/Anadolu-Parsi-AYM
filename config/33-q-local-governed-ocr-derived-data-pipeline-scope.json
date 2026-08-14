@@ -110,7 +110,7 @@
     "sourceDeletionPropagation": {
       "status": "REUSE_FOUNDATION_ONLY",
       "authority": "PPK-019",
-      "truth": "OCR metadata owner sınıfları ile local purge/source-delete batch, immutable child item-ledger ve authenticated restart auto-resume zinciri yerel kaynakta/testte vardır. Gelecekteki index/embedding/cache, managed-backup ve fiziksel harici silme kapsamları için atomik/garantili propagation iddiası yoktur."
+      "truth": "OCR metadata owner sınıfları ile local sealed-result ve aynı zarf içindeki current indeks purge, source-delete batch, immutable child item-ledger ve authenticated restart auto-resume zinciri yerel kaynakta/testte vardır. Gelecekteki bağımsız index/embedding/cache, managed-backup ve fiziksel harici silme kapsamları için atomik/garantili propagation iddiası yoktur."
     },
     "capabilityManifest": {
       "status": "REUSE_FOUNDATION_ONLY_DEFAULT_DENY_CURRENT_GATE_PASS",
@@ -204,6 +204,10 @@
     "searchAndUserControl": {
       "policyFilteredIndexRequired": true,
       "snippetMaskingRequired": true,
+      "encryptedFullTextIndexImplemented": true,
+      "policyFilteredSearchImplemented": true,
+      "maskedSnippetImplemented": true,
+      "legacyV1SearchRequiresRerunOrCorrection": true,
       "previewCorrectRerunLanguageDeleteDisableRequired": true,
       "queuedCancelImplemented": true,
       "twoPhaseRunTransactionImplemented": true,
@@ -211,7 +215,7 @@
       "runningConcurrentCancelProductionExecutorProbePassed": true,
       "lowConfidenceVisible": true,
       "officialMedicalFinancialTruthClaimed": false,
-      "status": "PARTIAL_LOCAL_USER_CONTROL_UI_IMPLEMENTED_FULL_TEXT_INDEX_AND_SNIPPET_NOT_IMPLEMENTED_UAT_NOT_RUN"
+      "status": "PARTIAL_LOCAL_POLICY_FILTERED_ENCRYPTED_INDEX_AND_MASKED_SNIPPET_PASS_LEGACY_V1_RERUN_REQUIRED_EXTERNAL_UAT_NOT_RUN"
     },
     "externalProvider": {
       "requiresSeparateExplicitConsent": true,
@@ -285,6 +289,10 @@
     "desktopIpcSurfaceComponentTested": true,
     "rendererUiComponentTested": true,
     "rendererRunningCancelAvailableAndTested": true,
+    "localEncryptedFullTextIndexComponentTested": true,
+    "policyFilteredSearchCompositionTested": true,
+    "maskedSnippetComponentTested": true,
+    "legacyV1SearchFailsClosedUntilRerun": true,
     "ppk016LocalIntegrationGateValidated": true,
     "ppk019LocalIntegrationGateValidated": true,
     "ppk021AstGateValidated": true,
@@ -345,11 +353,11 @@
     "automatedBoundaryStatus": "NOT_RUN",
     "automatedContractStatus": "NOT_RUN",
     "implementationRuntime": "LOCAL_COMPOSED_COMPONENT_MATRIX_PASS",
-    "targetedTests": "19_FILES_139_TESTS_PASS",
+    "targetedTests": "20_FILES_147_TESTS_PASS",
     "sourceStabilizationStatus": "STABLE_LOCAL_SNAPSHOT",
     "ratchetSemantics": "EXACT_LOCAL_SNAPSHOT_NOT_REQUIREMENT_CLOSURE",
-    "targetedTestFileRatchet": 19,
-    "targetedTestRatchet": 139,
+    "targetedTestFileRatchet": 20,
+    "targetedTestRatchet": 147,
     "countsAsRequirementPass": false,
     "persistentReceipt": "NOT_RUN"
   },
@@ -371,19 +379,19 @@
   },
   "completionBlockers": [
     "33-P external/manual evidence and atomic closure remain IN_PROGRESS; 33-Q cannot become active.",
-    "Yerel domain/application/repository-contract/repository, migration 94-95, merkezi PEP/UoW adapterı, sealed-result vault/runtime, DataStore facade, dar IPC, Arşiv içi UI, legacy sahiplik yeniden doğrulaması ve sentetik zararlı-belge fail-closed matrisi 19/139 sonuçla PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED durumundadır; gerçek cihaz, dış/manual kanıt ve requirement kabulü incomplete kalır.",
+    "Yerel domain/application/repository-contract/repository, migration 94-95, merkezi PEP/UoW adapterı, sealed-result vault/runtime, policy-filtered şifreli tam metin indeks ve maskeli snippet, DataStore facade, dar IPC, Arşiv içi UI, legacy sahiplik yeniden doğrulaması ve sentetik zararlı-belge fail-closed matrisi 20/147 sonuçla PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED durumundadır; gerçek cihaz, dış/manual kanıt ve requirement kabulü incomplete kalır.",
     "Sentetik matris bozuk/CRC-driftli/poliglot görüntüleri, aktif veya kaçışlı PDF işaretlerini, kotaları ve temiz olmayan tarayıcı kararlarını worker öncesinde reddeder. OCR-specific gerçek malware providerı ile PDF rasterizer/provider yoktur; bu nedenle tam gerçek-belge admission zinciri fail-closed unavailable kalır.",
     "ocr_process receipt amacı ile sensitive_processing rızasının exact source-read/derived-policy compositionı yerel production adapter testlerinde doğrulanmıştır; gerçek kullanıcı/cihaz kabulü ve 33-Q requirement evidence kapanışı yoktur.",
     "Child-process quota ve production adapter wiringi yerel testtedir; bunlar düşük yetkili sandbox veya OS-enforced ağ izolasyonu kanıtı değildir. Default malware provider yokken gerçek run fail-closed kalır.",
     "PPK-022 windows-desktop aggregate runtime kimliğinde network.access de vardır; networkUsed=false sonuç alanı OS-enforced ağ izolasyonu değildir. Ayrı ocr-worker process identity/network sandbox doğrulanmadan OCR-005/OCR-006 kabulü yoktur.",
-    "Migration 94 metadata şeması, owner-bound şifreli sealed-result vault/composition, retention expiry purge ve distinct maintenance PEP ile scheduled orphan sweep yerel testte vardır; policy-filtered tam metin search/snippet ve uçtan uca kabul incomplete kalır.",
-    "Owner-bound sealed-result purge, source-delete çoklu iş batch/current-row/repository-derived immutable item-ledger ve authenticated restart sonrası bounded auto-resume yerel matriste doğrulanmıştır; gelecekteki index/embedding/cache ve managed-backup owner propagationı olmadan OCR-020 kapanmaz.",
-    "Object-permission reddi veya sensitive_processing rıza iptal/expiry olayı yeni OCR erişimini fail-closed durdurur; mevcut owner-bound sealed OCR sonucu içeriksiz aday keşfi, exact job-delete PEP, file-first idempotent purge ve atomik mutation/audit/outbox ile bounded authenticated scheduler çevriminde otomatik temizlenir. Bu kanıt yalnız current sealed result ownerını kapsar; gelecekteki index/embedding/cache ve managed-backup ownerları açık olduğundan OCR-020 kapanmaz.",
-    "DataStore prepare -> verified source-file destroy -> OCR purge/ledger -> archive mark sırasını korur. Bound secure-destroy intenti içeriksiz, immutable ve aktör/aile bağlı recovery ledgerına kaydedilir; source-file success sonrası process crash gerçek temp SQLite restart testinde sonraki authenticated scheduler çevriminde aynı operationId ile otomatik tamamlanır. Bu yerel kurtarma gelecekteki index/embedding/cache, managed-backup veya fiziksel imha garantisi değildir; OCR-020 acceptance false kalır.",
+    "Migration 94 metadata şeması, owner-bound şifreli sealed-result vault/composition, policy-filtered şifreli tam metin indeks ve maskeli snippet, retention expiry purge ve distinct maintenance PEP ile scheduled orphan sweep yerel testte vardır; legacy v1 sonuçlar rerun/correction olmadan search için fail-closed kalır ve uçtan uca kabul incomplete durumdadır.",
+    "Owner-bound sealed-result ve aynı zarf içindeki current indeks purge, source-delete çoklu iş batch/current-row/repository-derived immutable item-ledger ve authenticated restart sonrası bounded auto-resume yerel matriste doğrulanmıştır; gelecekteki bağımsız index/embedding/cache ve managed-backup owner propagationı olmadan OCR-020 kapanmaz.",
+    "Object-permission reddi veya sensitive_processing rıza iptal/expiry olayı yeni OCR erişimini fail-closed durdurur; mevcut owner-bound sealed OCR sonucu ve aynı şifreli zarf içindeki current indeks içeriksiz aday keşfi, exact job-delete PEP, file-first idempotent purge ve atomik mutation/audit/outbox ile bounded authenticated scheduler çevriminde otomatik temizlenir. Bu kanıt gelecekteki bağımsız index/embedding/cache ve managed-backup ownerlarını kapsamadığından OCR-020 kapanmaz.",
+    "DataStore prepare -> verified source-file destroy -> OCR result/index purge/ledger -> archive mark sırasını korur. Bound secure-destroy intenti içeriksiz, immutable ve aktör/aile bağlı recovery ledgerına kaydedilir; source-file success sonrası process crash gerçek temp SQLite restart testinde sonraki authenticated scheduler çevriminde aynı operationId ile otomatik tamamlanır. Bu yerel kurtarma gelecekteki bağımsız index/embedding/cache, managed-backup veya fiziksel imha garantisi değildir; OCR-020 acceptance false kalır.",
     "Önceki HIGH Run/Cancel transaction-topology açığı iki fazlı begin -> detached worker -> final akışı ve FIFO kısa-transaction kuyruğuyla kapatılmıştır; production executor probe'unda running Cancel runtime'a ulaşır, commit olur ve final transaction Cancel commit'inden sonra tamamlanır. Bu local otomatik kanıt gerçek cihaz/human UAT değildir.",
     "UI queued ve running işleri iptal edebilir; cancel_requested yeniden tetiklenemez. Bu kaynak/test kanıtı erişilebilirlik ve human UAT requirementını tek başına kapatmaz.",
     "Scheduled sealed-result orphan sweep, owner-scoped settings maintenance PEP receipt'i ve her aday için taze deterministic child receipt altında live current-job binding ile bounded authenticated scheduler çevrimine bağlanmıştır. Bu, düşük yetkili ayrı worker, fiziksel secure erase, backup propagation veya requirement kabulü değildir.",
-    "Retention expiry sonrası current sealed result exact job-delete receipt'i altında file-first doğrulanmış purge, atomik mutation/audit/outbox ve kaynak korunumu ile uzlaştırılır. Gelecekteki index/embedding/cache, managed backup ve fiziksel imha ownerları açık olduğundan OCR-009/OCR-020 acceptance kapanmaz.",
+    "Retention expiry sonrası current sealed result ve aynı şifreli zarf içindeki indeks exact job-delete receipt'i altında file-first doğrulanmış purge, atomik mutation/audit/outbox ve kaynak korunumu ile uzlaştırılır. Gelecekteki bağımsız index/embedding/cache, managed backup ve fiziksel imha ownerları açık olduğundan OCR-009/OCR-020 acceptance kapanmaz.",
     "Yeni archive import create receipt actor person ownerPersonId ile bağlıdır; immutable eski receipt ownerPersonId=null ise OCR fail-closed kalır. Yerel legacy re-attestation yalnız exact item-bound onay, mevcut güçlü kimlik doğrulama, family_admin rolü ve oturumdaki actor-person hedefiyle ownerless->actor geçişine izin verir; bulk backfill ve sahip değişimi yoktur. Bağımsız authentication attestation, gerçek cihaz/accessibility/privacy/security UAT ve requirement acceptance NOT_RUN kalır.",
     "Real Windows OCR, Apple Vision, offline fallback, malicious-document, multilingual, handwriting, low-quality, accessibility and cross-device evidence are NOT_RUN.",
     "External OCR remains disabled; region, retention, deletion, contract, provider availability and delivery evidence are NOT_RUN.",

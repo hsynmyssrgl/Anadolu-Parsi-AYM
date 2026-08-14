@@ -905,7 +905,7 @@ implements LocalGovernedOcrUnitOfWork, LocalGovernedOcrMainAuthorityPort {
       capability: 'archive.ocr', purpose: 'ocr_process'
     });
 
-    if (operation === 'read') return row.status === 'completed'
+    if (operation === 'read' || operation === 'search') return row.status === 'completed'
       && row.resultAvailable
       && row.deletionPropagation === 'active'
       && row.sourceDeletedAt === undefined

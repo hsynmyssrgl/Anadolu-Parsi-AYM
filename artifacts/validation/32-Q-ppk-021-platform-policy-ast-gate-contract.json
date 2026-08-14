@@ -54,7 +54,7 @@
       "passed": true
     },
     {
-      "name": "manifest contains exactly 683 surfaces",
+      "name": "manifest contains exactly 685 surfaces",
       "passed": true
     },
     {
@@ -282,7 +282,7 @@
       "passed": true
     },
     {
-      "name": "scope records six rules and 683 exact surfaces",
+      "name": "scope records six rules and 685 exact surfaces",
       "passed": true
     },
     {
@@ -310,7 +310,7 @@
       "passed": true
     },
     {
-      "name": "decision pins the current OCR-expanded source ratchet without rewriting historical closure",
+      "name": "decision pins the current OCR-search-expanded source ratchet without rewriting historical closure",
       "passed": true
     },
     {
@@ -350,13 +350,13 @@
   "sourceGate": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 441,
-    "privilegedSurfaces": 683,
-    "exactAllowlistEntries": 683,
-    "exactAllowlistSha256": "efc8cdee046227dad31f5e82ccd79a9de90422e930be2a4ec9fa7d1184158571",
+    "scannedFiles": 442,
+    "privilegedSurfaces": 685,
+    "exactAllowlistEntries": 685,
+    "exactAllowlistSha256": "7713c4b422c9822f6a5505b7245e27032f34872e98843d3126cf6de9a285759e",
     "surfaceCounts": {
       "CRYPTO_GLOBAL": 5,
-      "CRYPTO_IMPORT": 197,
+      "CRYPTO_IMPORT": 198,
       "DATABASE_IMPORT": 21,
       "NETWORK_IMPORT": 11,
       "REPOSITORY_IMPORT": 55,
@@ -364,7 +364,7 @@
       "SQL_CALL": 63,
       "SQL_CONSTRUCTOR": 2,
       "SQL_IMPORT": 2,
-      "USE_CASE_COMPOSITION": 326
+      "USE_CASE_COMPOSITION": 327
     },
     "maliciousSelfTestAssertions": 17,
     "benignSelfTestAssertions": 4,
@@ -372,8 +372,8 @@
     "findings": []
   },
   "protectedRuleCount": 6,
-  "exactAllowlistEntries": 683,
-  "exactAllowlistSha256": "efc8cdee046227dad31f5e82ccd79a9de90422e930be2a4ec9fa7d1184158571",
+  "exactAllowlistEntries": 685,
+  "exactAllowlistSha256": "7713c4b422c9822f6a5505b7245e27032f34872e98843d3126cf6de9a285759e",
   "directRoleAuthorizationBypasses": 0,
   "syntaxModel": "TYPESCRIPT_AST",
   "regexOnlyGateAccepted": false,
@@ -387,5 +387,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-14T18:32:45.709Z"
+  "generatedAt": "2026-08-14T20:22:28.003Z"
 }

@@ -5,6 +5,11 @@ export const LOCAL_GOVERNED_OCR_MAX_LANGUAGE_HINTS = 8 as const;
 export const LOCAL_GOVERNED_OCR_MAX_SOURCE_BYTES = 16 * 1_024 * 1_024;
 export const LOCAL_GOVERNED_OCR_MAX_RESULT_CHARACTERS = 250_000 as const;
 export const LOCAL_GOVERNED_OCR_MAX_PAGES = 50 as const;
+export const LOCAL_GOVERNED_OCR_MAX_SEARCH_MATCHES = 25 as const;
+export const LOCAL_GOVERNED_OCR_MAX_SEARCH_CANDIDATES = 100 as const;
+export const LOCAL_GOVERNED_OCR_MAX_SEARCH_QUERY_CHARACTERS = 80 as const;
+export const LOCAL_GOVERNED_OCR_MAX_SEARCH_QUERY_TOKENS = 8 as const;
+export const LOCAL_GOVERNED_OCR_MAX_SEARCH_SNIPPET_CHARACTERS = 240 as const;
 
 export interface LocalGovernedOcrAggregateKey {
   readonly familyId: FamilyId;
@@ -93,6 +98,9 @@ export interface LocalGovernedOcrTruthView {
   readonly authorizationRevocationPropagatesToSealedResult: true;
   readonly retentionExpiryPropagatesToSealedResult: true;
   readonly scheduledOrphanSweepUsesDistinctMaintenanceAuthority: true;
+  readonly encryptedFullTextIndexAvailable: true;
+  readonly policyFilteredSearchRequired: true;
+  readonly snippetMaskingEnforced: true;
   readonly derivedDeletionDeletesSource: false;
 }
 
@@ -114,6 +122,36 @@ export interface LocalGovernedOcrResultView {
   readonly payloadSource: 'sealed_local_result';
   readonly networkUsed: false;
   readonly cloudUsed: false;
+}
+
+export interface LocalGovernedOcrSearchMatchView {
+  readonly jobId: string;
+  readonly revision: number;
+  readonly snippet: string;
+  readonly snippetMasked: true;
+  readonly matchedTokenCount: number;
+  readonly pageNumber: number | null;
+  readonly corrected: boolean;
+  readonly networkUsed: false;
+  readonly cloudUsed: false;
+}
+
+export interface LocalGovernedOcrSearchView {
+  readonly schemaVersion: 1;
+  readonly matches: readonly LocalGovernedOcrSearchMatchView[];
+  readonly truncated: boolean;
+  readonly policyFiltered: true;
+  readonly encryptedIndexAtRest: true;
+  readonly snippetsMasked: true;
+  readonly queryEchoed: false;
+  readonly networkUsed: false;
+  readonly cloudUsed: false;
+  readonly generatedAt: IsoDateTime;
+}
+
+export interface SearchLocalGovernedOcrInput {
+  readonly query: string;
+  readonly limit?: number;
 }
 
 export type LocalGovernedOcrMutationKind =
@@ -193,6 +231,28 @@ export interface PropagateLocalGovernedOcrSourceDeletionInput {
   readonly purgedAt: IsoDateTime;
   readonly clientOperationId: string;
 }
+
+export const canonicalLocalGovernedOcrSearchTokens = (value: unknown): readonly string[] | null => {
+  if (typeof value !== 'string' || value !== value.trim() || value.length < 2
+    || value.length > LOCAL_GOVERNED_OCR_MAX_SEARCH_QUERY_CHARACTERS
+    || /[\u0000-\u001f\u007f]/u.test(value)) return null;
+  const normalized = value.normalize('NFKC');
+  if (normalized !== normalized.trim() || normalized.length < 2
+    || normalized.length > LOCAL_GOVERNED_OCR_MAX_SEARCH_QUERY_CHARACTERS
+    || /[\u0000-\u001f\u007f]/u.test(normalized)
+    || /\b[A-Z]{2}\d{2}[A-Z0-9]{10,30}\b/iu.test(normalized.replace(/[\s-]/gu, ''))
+    || /[^\s@]+@[^\s@]+\.[^\s@]+/u.test(normalized)
+    || /\p{Nd}(?:[\s./-]?\p{Nd}){5,}/u.test(normalized)
+    || /(?:^|[^\p{L}\p{N}_])(?:parola|şifre|password|secret|token)(?:$|[^\p{L}\p{N}_])/iu.test(normalized)) return null;
+  const tokens = new Set<string>();
+  for (const match of normalized.matchAll(/[\p{L}\p{N}]+/gu)) {
+    const token = match[0].normalize('NFKC').toLowerCase();
+    if (token.length >= 2 && token.length <= 64) tokens.add(token);
+  }
+  const canonical = [...tokens].sort();
+  return canonical.length >= 1 && canonical.length <= LOCAL_GOVERNED_OCR_MAX_SEARCH_QUERY_TOKENS
+    ? Object.freeze(canonical) : null;
+};
 
 const canonicalKey = (key: LocalGovernedOcrAggregateKey) => ({
   familyId: key.familyId,

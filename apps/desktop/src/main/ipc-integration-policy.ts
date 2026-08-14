@@ -14,9 +14,11 @@ import {
 } from '@ppt/application';
 import {
   archiveLegacyOwnershipReattestationConfirmation,
+  canonicalLocalGovernedOcrSearchTokens,
   type LocalGovernedOcrCenterView,
   type LocalGovernedOcrMutationReceiptView,
   type LocalGovernedOcrResultView,
+  type LocalGovernedOcrSearchView,
   type PolicyServiceAvailabilityBoundaryView
 } from '@ppt/domain';
 
@@ -84,6 +86,9 @@ export interface LocalGovernedOcrCenterIpcView {
     readonly sourceDeletionPropagatesToDerivedResult: true;
     readonly sourceDeletionAutoResumeGuaranteed: true;
     readonly authorizationRevocationPropagatesToSealedResult: true;
+    readonly encryptedFullTextIndexAvailable: true;
+    readonly policyFilteredSearchRequired: true;
+    readonly snippetMaskingEnforced: true;
     readonly derivedDeletionDeletesSource: false;
   };
   readonly generatedAt: string;
@@ -97,6 +102,29 @@ export interface LocalGovernedOcrResultIpcView {
   readonly payloadSource: 'sealed_local_result';
   readonly networkUsed: false;
   readonly cloudUsed: false;
+}
+
+export interface LocalGovernedOcrSearchIpcView {
+  readonly schemaVersion: 1;
+  readonly matches: readonly {
+    readonly jobId: string;
+    readonly revision: number;
+    readonly snippet: string;
+    readonly snippetMasked: true;
+    readonly matchedTokenCount: number;
+    readonly pageNumber: number | null;
+    readonly corrected: boolean;
+    readonly networkUsed: false;
+    readonly cloudUsed: false;
+  }[];
+  readonly truncated: boolean;
+  readonly policyFiltered: true;
+  readonly encryptedIndexAtRest: true;
+  readonly snippetsMasked: true;
+  readonly queryEchoed: false;
+  readonly networkUsed: false;
+  readonly cloudUsed: false;
+  readonly generatedAt: string;
 }
 
 export interface LocalGovernedOcrMutationIpcView {
@@ -115,6 +143,11 @@ export type LocalGovernedOcrRendererMutationKind = Exclude<
 
 export interface LocalGovernedOcrResultReadIpcInput {
   readonly jobId: string;
+}
+
+export interface LocalGovernedOcrSearchIpcInput {
+  readonly query: string;
+  readonly limit?: number;
 }
 
 export interface LocalGovernedOcrCreateIpcInput {
@@ -214,6 +247,9 @@ export const projectLocalGovernedOcrCenterIpcView = (
       sourceDeletionAutoResumeGuaranteed: center.truth.sourceDeletionAutoResumeGuaranteed,
       authorizationRevocationPropagatesToSealedResult:
         center.truth.authorizationRevocationPropagatesToSealedResult,
+      encryptedFullTextIndexAvailable: center.truth.encryptedFullTextIndexAvailable,
+      policyFilteredSearchRequired: center.truth.policyFilteredSearchRequired,
+      snippetMaskingEnforced: center.truth.snippetMaskingEnforced,
       derivedDeletionDeletesSource: center.truth.derivedDeletionDeletesSource
     },
     generatedAt: center.generatedAt
@@ -230,6 +266,31 @@ export const projectLocalGovernedOcrResultIpcView = (
   payloadSource: result.payloadSource,
   networkUsed: result.networkUsed,
   cloudUsed: result.cloudUsed
+});
+
+export const projectLocalGovernedOcrSearchIpcView = (
+  result: LocalGovernedOcrSearchView
+): LocalGovernedOcrSearchIpcView => ({
+  schemaVersion: 1,
+  matches: result.matches.map((match) => ({
+    jobId: match.jobId,
+    revision: match.revision,
+    snippet: match.snippet,
+    snippetMasked: true,
+    matchedTokenCount: match.matchedTokenCount,
+    pageNumber: match.pageNumber,
+    corrected: match.corrected,
+    networkUsed: false,
+    cloudUsed: false
+  })),
+  truncated: result.truncated,
+  policyFiltered: true,
+  encryptedIndexAtRest: true,
+  snippetsMasked: true,
+  queryEchoed: false,
+  networkUsed: false,
+  cloudUsed: false,
+  generatedAt: result.generatedAt
 });
 
 export const projectLocalGovernedOcrMutationIpcView = (
@@ -2253,6 +2314,7 @@ const privacyOwnershipInput = (channel: string, args: readonly unknown[]): IpcIn
 export const LOCAL_GOVERNED_OCR_IPC_CHANNELS = Object.freeze({
   getCenter: 'localOcr:getCenter',
   getResult: 'localOcr:getResult',
+  search: 'localOcr:search',
   create: 'localOcr:create',
   run: 'localOcr:run',
   cancel: 'localOcr:cancel',
@@ -2411,6 +2473,12 @@ const localOcrInput = (channel: string, args: readonly unknown[]): IpcIntegratio
     case LOCAL_GOVERNED_OCR_IPC_CHANNELS.getResult:
       return localOcrExact(input, ['jobId']) && localOcrId(input.jobId)
         ? accepted() : rejected('LOCAL_OCR_RESULT_READ_ARGUMENT_INVALID', '$[0]');
+    case LOCAL_GOVERNED_OCR_IPC_CHANNELS.search: {
+      const keys = input.limit === undefined ? ['query'] : ['query', 'limit'];
+      return localOcrExact(input, keys) && canonicalLocalGovernedOcrSearchTokens(input.query) !== null
+        && (input.limit === undefined || localOcrBoundedInteger(input.limit, 1, 25))
+        ? accepted() : rejected('LOCAL_OCR_SEARCH_ARGUMENT_INVALID', '$[0]');
+    }
     case LOCAL_GOVERNED_OCR_IPC_CHANNELS.create:
       return localOcrExact(input, ['expectedRevision', 'clientOperationId', 'sourceResourceId', 'languageHints'])
         && localOcrMutationIdentity(input) && input.expectedRevision === 0
@@ -2499,6 +2567,7 @@ const localOcrCenterResult = (value: unknown): boolean => {
       'explicitSensitiveProcessingConsentRequired', 'derivedPolicyBindingRequired',
       'sourceDeletionPropagatesToDerivedResult', 'sourceDeletionAutoResumeGuaranteed',
       'authorizationRevocationPropagatesToSealedResult',
+      'encryptedFullTextIndexAvailable', 'policyFilteredSearchRequired', 'snippetMaskingEnforced',
       'derivedDeletionDeletesSource'
     ]) || value.truth.executionScope !== 'bounded_child_process'
     || value.truth.lowPrivilegeSandboxVerified !== false || value.truth.sourceContentExposedToRenderer !== false
@@ -2509,6 +2578,9 @@ const localOcrCenterResult = (value: unknown): boolean => {
     || value.truth.sourceDeletionPropagatesToDerivedResult !== true
     || value.truth.sourceDeletionAutoResumeGuaranteed !== true
     || value.truth.authorizationRevocationPropagatesToSealedResult !== true
+    || value.truth.encryptedFullTextIndexAvailable !== true
+    || value.truth.policyFilteredSearchRequired !== true
+    || value.truth.snippetMaskingEnforced !== true
     || value.truth.derivedDeletionDeletesSource !== false || !localOcrIso(value.generatedAt)) return false;
   return value.settings.enabled
     ? value.settings.disabledReason === null && value.settings.disabledAt === null
@@ -2521,6 +2593,22 @@ const localOcrTextResult = (value: unknown): boolean => localOcrExact(value, [
   && typeof value.text === 'string' && value.text.length >= 1 && value.text.length <= 250_000 && !value.text.includes('\0')
   && typeof value.corrected === 'boolean' && value.payloadSource === 'sealed_local_result'
   && value.networkUsed === false && value.cloudUsed === false;
+
+const localOcrSearchResult = (value: unknown): boolean => localOcrExact(value, [
+  'schemaVersion', 'matches', 'truncated', 'policyFiltered', 'encryptedIndexAtRest', 'snippetsMasked',
+  'queryEchoed', 'networkUsed', 'cloudUsed', 'generatedAt'
+]) && value.schemaVersion === 1 && Array.isArray(value.matches) && value.matches.length <= 25
+  && value.matches.every((match) => localOcrExact(match, [
+    'jobId', 'revision', 'snippet', 'snippetMasked', 'matchedTokenCount', 'pageNumber', 'corrected', 'networkUsed', 'cloudUsed'
+  ]) && localOcrId(match.jobId) && localOcrRevision(match.revision)
+    && typeof match.snippet === 'string' && match.snippet.length >= 1 && match.snippet.length <= 240
+    && match.snippetMasked === true && localOcrBoundedInteger(match.matchedTokenCount, 1, 8)
+    && (match.pageNumber === null || localOcrBoundedInteger(match.pageNumber, 1, 50))
+    && typeof match.corrected === 'boolean' && match.networkUsed === false && match.cloudUsed === false)
+  && new Set(value.matches.map((match) => isObject(match) ? match.jobId : undefined)).size === value.matches.length
+  && typeof value.truncated === 'boolean' && value.policyFiltered === true && value.encryptedIndexAtRest === true
+  && value.snippetsMasked === true && value.queryEchoed === false && value.networkUsed === false
+  && value.cloudUsed === false && localOcrIso(value.generatedAt);
 
 const localOcrMutationResult = (value: unknown): boolean => localOcrExact(value, [
   'previousRevision', 'revision', 'occurredAt', 'replayed', 'networkUsed', 'cloudUsed'
@@ -2536,6 +2624,8 @@ const localOcrResult = (channel: string, result: unknown): IpcIntegrationPolicyD
     ? localOcrCenterResult(result)
     : channel === LOCAL_GOVERNED_OCR_IPC_CHANNELS.getResult
       ? localOcrTextResult(result)
+      : channel === LOCAL_GOVERNED_OCR_IPC_CHANNELS.search
+        ? localOcrSearchResult(result)
       : localOcrWriteChannels.has(channel) && localOcrMutationResult(result);
   return valid ? accepted() : rejected('LOCAL_OCR_RESULT_INVALID', '$result');
 };

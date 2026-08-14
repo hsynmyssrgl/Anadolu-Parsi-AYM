@@ -32,7 +32,8 @@ const testFiles = Object.freeze([
   'packages/application/tests/archive-legacy-ownership-reattestation.test.ts',
   'apps/desktop/tests/archive-core-table-receipt-fence.test.ts',
   'apps/desktop/tests/archive-legacy-ownership-reattestation-data-store.test.ts',
-  'apps/desktop/tests/archive-legacy-ownership-reattestation-ipc-ui.test.ts'
+  'apps/desktop/tests/archive-legacy-ownership-reattestation-ipc-ui.test.ts',
+  'apps/desktop/tests/local-governed-ocr-search-index.test.ts'
 ]);
 
 const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
@@ -87,11 +88,11 @@ const ppk021Tail = ppk021Gate?.outputTail ?? '';
 const ppk022Tail = ppk022Gate?.outputTail ?? '';
 
 const definitions = [
-  ['exact 19-file local Vitest process exits successfully', run.status === 0],
-  ['local test result meets the exact 19/139 ratchet',
-    run.status === 0 && filesPassed === 19 && testsPassed === 139
-      && scope.validation?.targetedTestFileRatchet === 19 && scope.validation?.targetedTestRatchet === 139
-      && inventory.validation?.targetedTestFileRatchet === 19 && inventory.validation?.targetedTestRatchet === 139
+  ['exact 20-file local Vitest process exits successfully', run.status === 0],
+  ['local test result meets the exact 20/147 ratchet',
+    run.status === 0 && filesPassed === 20 && testsPassed === 147
+      && scope.validation?.targetedTestFileRatchet === 20 && scope.validation?.targetedTestRatchet === 147
+      && inventory.validation?.targetedTestFileRatchet === 20 && inventory.validation?.targetedTestRatchet === 147
       && exact(inventory.implementedTargetedTests, testFiles)],
   ['migration 94 and 95 manifests and canonical source hashes remain exact',
     migration94?.name === 'local_governed_ocr' && migration94?.checksum === migration94Sha256
@@ -132,6 +133,14 @@ const definitions = [
       && scope.truth?.productionOcrRuntimeExecuted === false
       && scope.truth?.localMaliciousDocumentFailClosedMatrixImplemented === true
       && scope.truth?.maliciousFileScannerProviderAvailable === false],
+  ['encrypted policy-filtered search and masked snippets are local while legacy and external acceptance stay fail-closed',
+    scope.truth?.localEncryptedFullTextIndexComponentTested === true
+      && scope.truth?.policyFilteredSearchCompositionTested === true
+      && scope.truth?.maskedSnippetComponentTested === true
+      && scope.truth?.legacyV1SearchFailsClosedUntilRerun === true
+      && scope.plannedModel?.searchAndUserControl?.encryptedFullTextIndexImplemented === true
+      && scope.plannedModel?.searchAndUserControl?.policyFilteredSearchImplemented === true
+      && scope.plannedModel?.searchAndUserControl?.maskedSnippetImplemented === true],
   ['two-phase cancellation source-delete recovery and current sealed-result retention/orphan reconciliation are locally validated',
     scope.truth?.productionConcurrentRunCancelProbeExecuted === true
       && scope.truth?.productionConcurrentRunCancelValidated === true
@@ -181,8 +190,8 @@ const report = {
   ratchetSemantics: 'EXACT_LOCAL_SNAPSHOT_NOT_REQUIREMENT_CLOSURE',
   targetedTestFilesPassed: filesPassed,
   targetedTestsPassed: testsPassed,
-  targetedTestFileRatchet: 19,
-  targetedTestRatchet: 139,
+  targetedTestFileRatchet: 20,
+  targetedTestRatchet: 147,
   testFiles,
   migration94Sha256,
   migration95Sha256,
@@ -198,7 +207,7 @@ const report = {
     scheduledOrphanSweepAuthority: 'LOCAL_DISTINCT_MAINTENANCE_PEP_PASS_EXTERNAL_UAT_NOT_RUN',
     retentionExpiryPurge: 'CURRENT_SEALED_RESULT_PASS_FUTURE_DERIVED_OWNERS_OPEN',
     legacyArchiveOwnershipReattestation: 'LOCAL_OWNERLESS_TO_ACTOR_PASS_INDEPENDENT_ATTESTATION_AND_MANUAL_UAT_NOT_RUN',
-    fullTextIndexAndMaskedSnippet: 'NOT_IMPLEMENTED',
+    fullTextIndexAndMaskedSnippet: 'LOCAL_POLICY_FILTERED_ENCRYPTED_INDEX_AND_MASKED_SNIPPET_PASS_LEGACY_V1_RERUN_REQUIRED_EXTERNAL_UAT_NOT_RUN',
     realDeviceExternalAndManualEvidence: 'NOT_RUN'
   },
   checksPassed: checks.length - failures.length,
@@ -218,7 +227,7 @@ if (!noWrite) {
   await mkdir(dirname(resolve(root, output)), { recursive: true });
   await writeFile(resolve(root, output), `${JSON.stringify(report, null, 2)}\n`, 'utf8');
 }
-console.log(`33-Q runtime starter: ${report.status} (${report.checksPassed}/${checks.length}; ${filesPassed}/19 files; ${testsPassed}/139 tests; requirement PASS=false; write=${!noWrite}).`);
+console.log(`33-Q runtime starter: ${report.status} (${report.checksPassed}/${checks.length}; ${filesPassed}/20 files; ${testsPassed}/147 tests; requirement PASS=false; write=${!noWrite}).`);
 if (failures.length) {
   console.error(combined.slice(-4000));
   process.exitCode = 1;

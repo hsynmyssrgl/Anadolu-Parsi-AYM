@@ -223,6 +223,27 @@ class DeterministicBoundedOcrRuntime implements LocalGovernedOcrRuntimePort {
     });
   }
 
+  public async searchSealedResult(
+    input: Parameters<LocalGovernedOcrRuntimePort['searchSealedResult']>[0]
+  ): ReturnType<LocalGovernedOcrRuntimePort['searchSealedResult']> {
+    const result = this.#results.get(input.jobId);
+    if (!result || result.sealedResultId !== input.sealedResultId) {
+      return err(this.#notFound(input.correlationId));
+    }
+    const tokens = [...new Set(input.query.normalize('NFKC').toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [])];
+    const normalized = result.text.normalize('NFKC').toLowerCase();
+    const matched = tokens.length > 0 && tokens.every((token) => normalized.includes(token));
+    return ok(matched ? {
+      matched: true, matchedTokenCount: tokens.length, contentSha256: result.contentSha256,
+      snippet: result.text.slice(0, 240), snippetMasked: true,
+      pageNumber: 1, networkUsed: false, cloudUsed: false
+    } : {
+      matched: false, matchedTokenCount: 0, contentSha256: result.contentSha256,
+      snippet: null, snippetMasked: true,
+      pageNumber: null, networkUsed: false, cloudUsed: false
+    });
+  }
+
   public async requestCancellation(): ReturnType<LocalGovernedOcrRuntimePort['requestCancellation']> {
     return ok({ accepted: true });
   }
@@ -748,6 +769,8 @@ describe('33-Q Local OCR DataStore production composition', () => {
       const center = await fixture.store.getLocalGovernedOcrCenter();
       expect(center.settings).toMatchObject({ revision: 0, enabled: true });
       expect(center.truth.sourceDeletionAutoResumeGuaranteed).toBe(true);
+      expect(center.truth).toMatchObject({ encryptedFullTextIndexAvailable: true,
+        policyFilteredSearchRequired: true, snippetMaskingEnforced: true });
 
       const createCommand = {
         sourceResourceType: 'archive_item' as const,
@@ -786,6 +809,18 @@ describe('33-Q Local OCR DataStore production composition', () => {
         cloudUsed: false
       });
       expect(firstResult.text).toContain(RAW_OCR_TEXT);
+
+      const search = await fixture.store.searchLocalGovernedOcr({ query: 'OCR PLAINTEXT', limit: 10 });
+      expect(search).toMatchObject({ policyFiltered: true, encryptedIndexAtRest: true, snippetsMasked: true,
+        queryEchoed: false, networkUsed: false, cloudUsed: false,
+        matches: [{ jobId: created.resourceId, snippetMasked: true, matchedTokenCount: 2 }] });
+      expect(Object.prototype.hasOwnProperty.call(search, 'query')).toBe(false);
+      expect(inspectDatabase(fixture.databasePath, (database) => ({
+        requested: database.prepare("SELECT COUNT(*) AS count FROM audit_log WHERE action='ocr.search_requested'").get(),
+        checked: database.prepare("SELECT COUNT(*) AS count FROM audit_log WHERE action='ocr.search_result_checked'").get(),
+        leaked: database.prepare(`SELECT COUNT(*) AS count FROM audit_log
+          WHERE action LIKE '%OCR PLAINTEXT%' OR resource_id LIKE '%OCR PLAINTEXT%'`).get()
+      }))).toEqual({ requested: { count: 1 }, checked: { count: 1 }, leaked: { count: 0 } });
 
       const corrected = await fixture.store.correctLocalGovernedOcrResult({
         jobId: created.resourceId,

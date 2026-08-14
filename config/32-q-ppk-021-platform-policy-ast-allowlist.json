@@ -51,7 +51,7 @@
   },
   "expectedSurfaceCounts": {
     "CRYPTO_GLOBAL": 5,
-    "CRYPTO_IMPORT": 197,
+    "CRYPTO_IMPORT": 198,
     "DATABASE_IMPORT": 21,
     "NETWORK_IMPORT": 11,
     "REPOSITORY_IMPORT": 55,
@@ -59,7 +59,7 @@
     "SQL_CALL": 63,
     "SQL_CONSTRUCTOR": 2,
     "SQL_IMPORT": 2,
-    "USE_CASE_COMPOSITION": 326
+    "USE_CASE_COMPOSITION": 327
   },
   "allowedSurfaceKeys": [
     "CRYPTO_GLOBAL|apps/desktop/src/main/preload.ts|randomUUID",
@@ -136,6 +136,7 @@
     "CRYPTO_IMPORT|apps/desktop/src/main/local-governed-ocr-result-vault.ts|node:crypto:createHash",
     "CRYPTO_IMPORT|apps/desktop/src/main/local-governed-ocr-result-vault.ts|node:crypto:randomBytes",
     "CRYPTO_IMPORT|apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts|node:crypto:createHash",
+    "CRYPTO_IMPORT|apps/desktop/src/main/local-governed-ocr-search-index.ts|node:crypto:createHash",
     "CRYPTO_IMPORT|apps/desktop/src/main/main.ts|node:crypto:createHash",
     "CRYPTO_IMPORT|apps/desktop/src/main/main.ts|node:crypto:randomUUID",
     "CRYPTO_IMPORT|apps/desktop/src/main/managed-backup-password.ts|node:crypto:randomBytes",
@@ -682,6 +683,7 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|SaveFormDraftUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ScanDataRepairIssuesUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|SearchArchiveItemsUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|SearchLocalGovernedOcrUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|SearchMaintenanceHistoryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|SetBackupQuarantineLegalHoldUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|SetDataLegalHoldUseCase",

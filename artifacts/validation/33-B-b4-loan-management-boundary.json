@@ -164,11 +164,11 @@
   ],
   "failures": [],
   "latestDatabaseMigration": 95,
-  "ppk021ExactAllowlistEntries": 683,
-  "ppk021UseCaseCompositionSurfaces": 326,
-  "ppk022CapabilitySurfaces": 339,
+  "ppk021ExactAllowlistEntries": 685,
+  "ppk021UseCaseCompositionSurfaces": 327,
+  "ppk022CapabilitySurfaces": 345,
   "prohibitedSecretColumns": 0,
   "bankVerificationPerformed": false,
   "bankExecutionPerformed": false,
-  "generatedAt": "2026-08-14T18:55:17.582Z"
+  "generatedAt": "2026-08-14T20:42:00.540Z"
 }

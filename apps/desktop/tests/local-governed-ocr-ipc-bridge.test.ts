@@ -13,6 +13,7 @@ const globalTypes = source('apps/desktop/src/renderer/global.d.ts');
 const channels = {
   getCenter: 'localOcr:getCenter',
   getResult: 'localOcr:getResult',
+  search: 'localOcr:search',
   create: 'localOcr:create',
   run: 'localOcr:run',
   cancel: 'localOcr:cancel',
@@ -25,6 +26,7 @@ const channels = {
 const methods = [
   'getLocalGovernedOcrCenter',
   'getLocalGovernedOcrResult',
+  'searchLocalGovernedOcr',
   'createLocalGovernedOcrJob',
   'runLocalGovernedOcrJob',
   'cancelLocalGovernedOcrJob',
@@ -35,7 +37,7 @@ const methods = [
 ] as const;
 
 describe('33-Q local governed OCR desktop IPC bridge', () => {
-  it('exposes and registers each of the nine governed channels exactly once', () => {
+  it('exposes and registers each of the ten governed channels exactly once', () => {
     for (const [key, channel] of Object.entries(channels)) {
       expect(preload.match(new RegExp(`invoke\\('${channel}'`, 'gu')), channel).toHaveLength(1);
       expect(main.match(new RegExp(`LOCAL_GOVERNED_OCR_IPC_CHANNELS\\.${key}`, 'gu')), channel).toHaveLength(1);
@@ -67,7 +69,8 @@ describe('33-Q local governed OCR desktop IPC bridge', () => {
   it('redacts renderer results before the runtime validates their exact safe schemas', () => {
     expect(main).toContain("projectLocalGovernedOcrCenterIpcView(await localGovernedOcrBridgeMethod('getLocalGovernedOcrCenter')())");
     expect(main).toContain("projectLocalGovernedOcrResultIpcView(await localGovernedOcrBridgeMethod('getLocalGovernedOcrResult')(input))");
-    for (const method of methods.slice(2)) {
+    expect(main).toContain("projectLocalGovernedOcrSearchIpcView(await localGovernedOcrBridgeMethod('searchLocalGovernedOcr')(input))");
+    for (const method of methods.slice(3)) {
       const methodIndex = main.indexOf(`localGovernedOcrBridgeMethod('${method}')`);
       const projectorIndex = main.lastIndexOf('projectLocalGovernedOcrMutationIpcView(', methodIndex);
       expect(methodIndex, method).toBeGreaterThan(projectorIndex);

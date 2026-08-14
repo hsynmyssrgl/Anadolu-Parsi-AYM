@@ -68,8 +68,8 @@ const technicalEvidence = {
   contract: { status: 'PASS', checksPassed: 17 },
   runtime: { status: 'PASS', checksPassed: 24, targetedTestFilesPassed: 19, targetedTestsPassed: 116 },
   migration93Checksum: '51191e62bcf4baec07e3eab5985ef4210402cdb8b7416064519ceb082322916a',
-  ppk021: { status: 'PASS', findings: 0, exactAllowlistEntries: 683 },
-  ppk022: { status: 'PASS', findings: 0, exactManifestSurfaces: 339 },
+  ppk021: { status: 'PASS', findings: 0, exactAllowlistEntries: 685 },
+  ppk022: { status: 'PASS', findings: 0, exactManifestSurfaces: 345 },
   fullVitest: { testFilesPassed: 170, testsPassed: 1338 },
   builds: { packages: true, coreService: true, desktop: true }
 };

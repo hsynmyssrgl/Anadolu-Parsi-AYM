@@ -32,6 +32,8 @@ import type {
   LocalGovernedOcrRerunIpcInput,
   LocalGovernedOcrResultIpcView,
   LocalGovernedOcrResultReadIpcInput,
+  LocalGovernedOcrSearchIpcInput,
+  LocalGovernedOcrSearchIpcView,
   LocalGovernedOcrSetEnabledIpcInput
 } from './ipc-integration-policy.js';
 import type { FamilyEventView, FamilyMutationResultView, SetFamilyEventArchivedInput, UpdateFamilyEventInput } from '@ppt/domain';
@@ -110,6 +112,8 @@ export type {
   LocalGovernedOcrRerunIpcInput,
   LocalGovernedOcrResultIpcView,
   LocalGovernedOcrResultReadIpcInput,
+  LocalGovernedOcrSearchIpcInput,
+  LocalGovernedOcrSearchIpcView,
   LocalGovernedOcrSetEnabledIpcInput
 };
 export interface CompletePasskeyRegistrationIpcInput {
@@ -482,6 +486,7 @@ contextBridge.exposeInMainWorld('pardus', {
   undoFormDraft:(input:UndoFormDraftInput):Promise<FormDraftView>=>invoke('formDraft:undo',input),
   getLocalGovernedOcrCenter:():Promise<LocalGovernedOcrCenterIpcView>=>invoke('localOcr:getCenter'),
   getLocalGovernedOcrResult:(input:LocalGovernedOcrResultReadIpcInput):Promise<LocalGovernedOcrResultIpcView>=>invoke('localOcr:getResult',input),
+  searchLocalGovernedOcr:(input:LocalGovernedOcrSearchIpcInput):Promise<LocalGovernedOcrSearchIpcView>=>invoke('localOcr:search',input),
   createLocalGovernedOcrJob:(input:LocalGovernedOcrCreateIpcInput):Promise<LocalGovernedOcrMutationIpcView>=>invoke('localOcr:create',input),
   runLocalGovernedOcrJob:(input:LocalGovernedOcrJobMutationIpcInput):Promise<LocalGovernedOcrMutationIpcView>=>invoke('localOcr:run',input),
   cancelLocalGovernedOcrJob:(input:LocalGovernedOcrJobMutationIpcInput):Promise<LocalGovernedOcrMutationIpcView>=>invoke('localOcr:cancel',input),

@@ -47,6 +47,7 @@ import {
   SweepLocalGovernedOcrOrphansUseCase,
   RerunLocalGovernedOcrJobUseCase,
   RunLocalGovernedOcrJobUseCase,
+  SearchLocalGovernedOcrUseCase,
   SetLocalGovernedOcrEnabledUseCase,
   localGovernedOcrSettingsResourceId,
   type LocalGovernedOcrApplicationContext,
@@ -407,6 +408,11 @@ class Runtime implements LocalGovernedOcrRuntimePort {
   public readonly purges: string[] = [];
   public readonly cancellations: string[] = [];
   public readonly runs: unknown[] = [];
+  public readonly searches: unknown[] = [];
+  public readonly searchResults = new Map<string, {
+    readonly matched: boolean; readonly matchedTokenCount: number; readonly contentSha256: string; readonly snippet: string | null;
+    readonly snippetMasked: true; readonly pageNumber: number | null; readonly networkUsed: false; readonly cloudUsed: false;
+  }>();
   public failPurge = false;
 
   public constructor(private readonly order: string[]) {}
@@ -418,6 +424,15 @@ class Runtime implements LocalGovernedOcrRuntimePort {
     const value = this.texts.get(input.sealedResultId);
     return value ? ok({ text: value.text, contentSha256: value.hash, networkUsed: false as const, cloudUsed: false as const })
       : err(failure('sealed result missing'));
+  }
+  public async searchSealedResult(input: Parameters<LocalGovernedOcrRuntimePort['searchSealedResult']>[0]) {
+    this.searches.push(input);
+    return ok(this.searchResults.get(input.sealedResultId) ?? {
+      matched: false, matchedTokenCount: 0,
+      contentSha256: this.texts.get(input.sealedResultId)?.hash ?? RESULT_SHA,
+      snippet: null, snippetMasked: true as const,
+      pageNumber: null, networkUsed: false as const, cloudUsed: false as const
+    });
   }
   public async requestCancellation(input: Parameters<LocalGovernedOcrRuntimePort['requestCancellation']>[0]) {
     this.order.push(`runtime.cancel:${input.jobId}`); this.cancellations.push(input.jobId);
@@ -464,6 +479,9 @@ describe('33-Q local governed OCR application core', () => {
       authorizationRevocationPropagatesToSealedResult: true,
       retentionExpiryPropagatesToSealedResult: true,
       scheduledOrphanSweepUsesDistinctMaintenanceAuthority: true,
+      encryptedFullTextIndexAvailable: true,
+      policyFilteredSearchRequired: true,
+      snippetMaskingEnforced: true,
       derivedDeletionDeletesSource: false
     });
     expect(result.ok && result.value.jobs[0]).not.toHaveProperty('activeRunId');
@@ -780,6 +798,44 @@ describe('33-Q local governed OCR application core', () => {
       jobId: 'ocr-job-1', auditId: 'audit-result-read-2' });
     expect(denied.ok).toBe(false);
     expect(deniedUnit.audits).toHaveLength(0);
+  });
+
+  it('searches each candidate under fresh job, source and consent authority without auditing query content', async () => {
+    const unit = new Unit(); unit.jobs.set('ocr-job-1', completedJob('ocr-job-1'));
+    const runtime = new Runtime(unit.order);
+    runtime.searchResults.set('sealed-result-ocr-job-1', {
+      matched: true, matchedTokenCount: 2, contentSha256: RESULT_SHA,
+      snippet: 'Yetkili [numara maskeli ••••1111] sonuç',
+      snippetMasked: true, pageNumber: 1, networkUsed: false, cloudUsed: false
+    });
+    const result = await new SearchLocalGovernedOcrUseCase(unit, runtime).execute({ context,
+      command: { query: 'yetkili sonuç', limit: 10 }, auditId: 'audit-search-request-1' });
+    expect(result.ok && result.value).toMatchObject({ policyFiltered: true, encryptedIndexAtRest: true,
+      snippetsMasked: true, queryEchoed: false, networkUsed: false, cloudUsed: false,
+      matches: [{ jobId: 'ocr-job-1', matchedTokenCount: 2, snippetMasked: true }] });
+    expect(runtime.searches).toHaveLength(1);
+    expect(JSON.stringify(unit.audits)).not.toContain('yetkili sonuç');
+    expect(JSON.stringify(unit.audits)).not.toContain('numara maskeli');
+    expect(unit.events).toHaveLength(0);
+
+    const mismatchedUnit = new Unit(); mismatchedUnit.jobs.set('ocr-job-1', completedJob('ocr-job-1'));
+    const mismatchedRuntime = new Runtime(mismatchedUnit.order);
+    mismatchedRuntime.searchResults.set('sealed-result-ocr-job-1', {
+      matched: true, matchedTokenCount: 2, contentSha256: 'd'.repeat(64),
+      snippet: 'Maskeli sonuç', snippetMasked: true, pageNumber: 1, networkUsed: false, cloudUsed: false
+    });
+    const mismatched = await new SearchLocalGovernedOcrUseCase(mismatchedUnit, mismatchedRuntime).execute({ context,
+      command: { query: 'yetkili sonuç', limit: 10 }, auditId: 'audit-search-request-hash-mismatch' });
+    expect(mismatched).toMatchObject({ ok: true, value: { matches: [], truncated: true } });
+    expect(mismatchedUnit.audits.filter((row) => row.action === 'ocr.search_result_checked')).toHaveLength(0);
+
+    const deniedUnit = new Unit(); deniedUnit.consent = null;
+    deniedUnit.jobs.set('ocr-job-1', completedJob('ocr-job-1'));
+    const deniedRuntime = new Runtime(deniedUnit.order);
+    const filtered = await new SearchLocalGovernedOcrUseCase(deniedUnit, deniedRuntime).execute({ context,
+      command: { query: 'yetkili sonuç', limit: 10 }, auditId: 'audit-search-request-2' });
+    expect(filtered.ok && filtered.value.matches).toEqual([]);
+    expect(deniedRuntime.searches).toHaveLength(0);
   });
 
   it('propagates source deletion file-first through one atomic batch, replays exactly and rolls DB back on failure', async () => {

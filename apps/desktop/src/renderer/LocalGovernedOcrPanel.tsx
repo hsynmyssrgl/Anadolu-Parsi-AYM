@@ -6,6 +6,7 @@ type LocalOcrBridge = NonNullable<Window['pardus']>;
 type LocalOcrCenter = Awaited<ReturnType<LocalOcrBridge['getLocalGovernedOcrCenter']>>;
 type LocalOcrJob = LocalOcrCenter['jobs'][number];
 type LocalOcrResult = Awaited<ReturnType<LocalOcrBridge['getLocalGovernedOcrResult']>>;
+type LocalOcrSearch = Awaited<ReturnType<LocalOcrBridge['searchLocalGovernedOcr']>>;
 
 export interface LocalGovernedOcrArchiveSource {
   readonly id: string;
@@ -56,6 +57,8 @@ export function LocalGovernedOcrPanel({ selectedSource }: LocalGovernedOcrPanelP
   const [notice, setNotice] = useState('');
   const [selectedJobId, setSelectedJobId] = useState('');
   const [result, setResult] = useState<LocalOcrResult>();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResult, setSearchResult] = useState<LocalOcrSearch>();
   const [correctedText, setCorrectedText] = useState('');
   const [languageInput, setLanguageInput] = useState('tr-TR');
   const [busyKey, setBusyKey] = useState('');
@@ -190,6 +193,21 @@ export function LocalGovernedOcrPanel({ selectedSource }: LocalGovernedOcrPanelP
     }
   };
 
+  const search = async (): Promise<void> => {
+    if (!window.pardus || busyKey || searchQuery !== searchQuery.trim()
+      || searchQuery.length < 2 || searchQuery.length > 80) return;
+    setBusyKey('search');
+    setOperationError('');
+    try {
+      setSearchResult(await window.pardus.searchLocalGovernedOcr({ query: searchQuery, limit: 10 }));
+    } catch (caught) {
+      setSearchResult(undefined);
+      setOperationError(errorMessage(caught, 'Şifreli OCR dizininde arama tamamlanamadı.'));
+    } finally {
+      setBusyKey('');
+    }
+  };
+
   const correct = async (): Promise<void> => {
     if (!window.pardus || !selectedJob || correctedText.length < 1 || correctedText.length > 250_000) return;
     await mutate(`correct:${selectedJob.id}`, selectedJob.revision, (operation) => window.pardus!.correctLocalGovernedOcrResult({
@@ -246,9 +264,31 @@ export function LocalGovernedOcrPanel({ selectedSource }: LocalGovernedOcrPanelP
         <strong>Açık iddia sınırı</strong>
         <span>İşleme ağ ve bulut kullanmaz; kaynak baytları renderer'a verilmez, açık metin repository tablosunda tutulmaz.</span>
         <span>Çalışma ayrı ve kotalı bir child process içindedir; düşük ayrıcalıklı sandbox doğrulanmış değildir.</span>
-        <span>PDF rasterizer ve kötü amaçlı yazılım sağlayıcısı yoksa işlem fail-closed reddedilir. Kaynak dosya imhasından sonra türetilmiş sonuç temizliği aynı işlem kimliğiyle yeniden denenebilir; crash sonrası otomatik devam kanıtlanmış değildir.</span>
+        <span>PDF rasterizer ve kötü amaçlı yazılım sağlayıcısı yoksa işlem fail-closed reddedilir. Kaynak dosya imhasından sonra türetilmiş sonuç temizliği kalıcı iş günlüğünden otomatik ve aynı işlem kimliğiyle sürdürülür.</span>
         <span>Sıradaki veya çalışan iş iptal edilebilir; çalışan işte istek yerel worker'a iletilir ve kalıcı sonuç transactionı Cancel commit'inden sonra tamamlanır. Türetilmiş sonucu silmek kaynak belgeyi silmez.</span>
+        <span>Tam metin dizini sonuçla birlikte şifreli kasada tutulur; her aday için taze yetki ve izin denetimi yapılır, renderer yalnız maskelenmiş kısa parçaları görür.</span>
       </div>
+
+      <form className="local-ocr-search" onSubmit={(event) => { event.preventDefault(); void search(); }}>
+        <label htmlFor="local-ocr-search-query">OCR sonuçlarında güvenli ara
+          <input id="local-ocr-search-query" value={searchQuery} maxLength={80}
+            onChange={(event) => { setSearchQuery(event.target.value); setSearchResult(undefined); }}
+            placeholder="En az iki karakter" autoComplete="off" />
+        </label>
+        <Button type="submit" disabled={Boolean(busyKey) || searchQuery !== searchQuery.trim() || searchQuery.length < 2}>
+          {busyKey === 'search' ? 'Yetkiler denetleniyor…' : 'Şifreli dizinde ara'}
+        </Button>
+        <small>Sorgu veya dizin renderer sonucunda yankılanmaz; e-posta, IBAN ve uzun sayı dizileri sorgu olarak reddedilir.</small>
+        {searchResult && <div className="local-ocr-search-results" aria-live="polite">
+          <strong>{searchResult.matches.length ? `${searchResult.matches.length} yetkili eşleşme` : 'Yetkili eşleşme bulunamadı'}</strong>
+          {searchResult.matches.map((match) => <button type="button" key={`${match.jobId}:${match.revision}`}
+            onClick={() => setSelectedJobId(match.jobId)}>
+            <span>{match.snippet}</span>
+            <small>{match.pageNumber ? `Sayfa ${match.pageNumber} · ` : ''}{match.corrected ? 'Düzeltilmiş sonuç' : 'Yerel sağlayıcı sonucu'}</small>
+          </button>)}
+          {searchResult.truncated && <small>Sonuçlar güvenli üst sınırda kesildi.</small>}
+        </div>}
+      </form>
 
       <div className="local-ocr-create-grid">
         <div>

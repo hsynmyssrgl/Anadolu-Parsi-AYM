@@ -330,6 +330,85 @@ describe('MainLocalGovernedOcrRuntimeAdapter / encrypted sealed result vault', (
     }));
   });
 
+  it('searches only the current encrypted index, verifies plaintext and returns a bounded safe hit', async () => {
+    const context = setup();
+    const source = addPngJob(context, 'job-search-0001');
+    const executed = await context.runtime.runAndSeal(runInput(source));
+    if (!executed.ok || executed.value.status !== 'completed') throw new Error('setup failed');
+    context.authority.current.set(source.jobId, executed.value.sealedResultId);
+
+    const hit = await context.runtime.searchSealedResult({
+      jobId: source.jobId, sealedResultId: executed.value.sealedResultId, query: 'aylık', correlationId: CORRELATION
+    });
+    expect(hit).toEqual(ok({ matched: true, matchedTokenCount: 1, contentSha256: executed.value.contentSha256,
+      snippet: expect.stringContaining('Aylık'),
+      snippetMasked: true, pageNumber: 1, networkUsed: false, cloudUsed: false }));
+
+    const miss = await context.runtime.searchSealedResult({
+      jobId: source.jobId, sealedResultId: executed.value.sealedResultId, query: 'olmayan', correlationId: CORRELATION
+    });
+    expect(miss).toEqual(ok({ matched: false, matchedTokenCount: 0, contentSha256: executed.value.contentSha256,
+      snippet: null,
+      snippetMasked: true, pageNumber: null, networkUsed: false, cloudUsed: false }));
+  });
+
+  it('keeps legacy v1 result reads compatible but refuses to claim an encrypted at-rest search index', async () => {
+    const context = setup();
+    const source = addPngJob(context, 'job-search-legacy');
+    const executed = await context.runtime.runAndSeal(runInput(source));
+    if (!executed.ok || executed.value.status !== 'completed') throw new Error('setup failed');
+    const payload = context.vault.read(runtimeBinding(source), executed.value.sealedResultId);
+    const { searchIndex: _searchIndex, ...indexedPayload } = payload;
+    const legacyPayload = { ...indexedPayload, schemaVersion: 1 };
+    const encoded = Buffer.from(JSON.stringify(legacyPayload), 'utf8');
+    const path = join(context.resultRoot, `${executed.value.sealedResultId}.ocrsealed`);
+    try {
+      const envelope = context.protectedStore.sealBuffer('local-governed-ocr-sealed-result-v1', encoded);
+      rmSync(path);
+      writeFileSync(path, `${JSON.stringify(envelope)}\n`, { mode: 0o600 });
+    } finally {
+      encoded.fill(0);
+    }
+    context.authority.current.set(source.jobId, executed.value.sealedResultId);
+
+    const read = context.vault.read(runtimeBinding(source), executed.value.sealedResultId);
+    expect(read.schemaVersion).toBe(2);
+    expect(read.searchIndex.contentSha256).toBe(read.contentSha256);
+    expect(await context.runtime.readSealedResult({ jobId: source.jobId,
+      sealedResultId: executed.value.sealedResultId, correlationId: CORRELATION })).toMatchObject({ ok: true });
+    const hit = await context.runtime.searchSealedResult({ jobId: source.jobId,
+      sealedResultId: executed.value.sealedResultId, query: 'aylık', correlationId: CORRELATION });
+    expect(hit).toMatchObject({ ok: false, error: { code: ERROR_CODES.RESOURCE_CONFLICT } });
+  });
+
+  it('reindexes corrections and masks structured secrets before a snippet crosses the runtime boundary', async () => {
+    const context = setup();
+    const source = addPngJob(context, 'job-search-0002');
+    const executed = await context.runtime.runAndSeal(runInput(source));
+    if (!executed.ok || executed.value.status !== 'completed') throw new Error('setup failed');
+    context.authority.current.set(source.jobId, executed.value.sealedResultId);
+    const correctedText = 'Bütçe özeti TR330006100519786457841326, kullanıcı@example.com ve parola: cok-gizli içerir.';
+    const corrected = await context.runtime.correctAndSeal({ jobId: source.jobId,
+      previousSealedResultId: executed.value.sealedResultId, expectedInputSha256: source.inputSha256,
+      correctedText, correlationId: CORRELATION });
+    if (!corrected.ok) throw new Error('correction failed');
+    context.authority.current.set(source.jobId, corrected.value.sealedResultId);
+
+    const hit = await context.runtime.searchSealedResult({
+      jobId: source.jobId, sealedResultId: corrected.value.sealedResultId, query: 'bütçe özeti', correlationId: CORRELATION
+    });
+    expect(hit.ok && hit.value).toMatchObject({ matched: true, matchedTokenCount: 2, snippetMasked: true,
+      pageNumber: null, networkUsed: false, cloudUsed: false });
+    if (!hit.ok || !hit.value.matched || hit.value.snippet === null) return;
+    expect(hit.value.snippet).toContain('maskeli');
+    expect(hit.value.snippet).not.toContain('TR330006100519786457841326');
+    expect(hit.value.snippet).not.toContain('kullanıcı@example.com');
+    expect(hit.value.snippet).not.toContain('cok-gizli');
+    const raw = readFileSync(join(context.resultRoot, `${corrected.value.sealedResultId}.ocrsealed`));
+    expect(raw.includes(Buffer.from(correctedText, 'utf8'))).toBe(false);
+    expect(raw.includes(Buffer.from('bütçe', 'utf8'))).toBe(false);
+  });
+
   it('fails closed when the explicit local malware provider is not configured', async () => {
     const context = setup({ scanner: new NotConfiguredLocalOcrMalwareVerdictAdapter() });
     const source = addPngJob(context, 'job-0002');

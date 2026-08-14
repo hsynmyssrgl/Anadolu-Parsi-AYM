@@ -526,8 +526,8 @@
   "sourceGate": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 441,
-    "securityRelevantFiles": 63,
+    "scannedFiles": 442,
+    "securityRelevantFiles": 64,
     "maliciousSelfTestAssertions": 15,
     "benignFalsePositiveAssertions": 5,
     "findings": []
@@ -543,7 +543,7 @@
   "managedBackupVerifiedRewriteRequired": true,
   "unmanagedAndExternalBackupAttentionRequired": true,
   "historicalBackupQuarantineIsNotPhysicalDestruction": true,
-  "latestDatabaseMigration": 94,
+  "latestDatabaseMigration": 95,
   "schemaMigrationRequired": false,
   "historicalBackfillPerformed": false,
   "legacyDesktopVaultPreserved": true,
@@ -552,5 +552,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-14T16:33:41.521Z"
+  "generatedAt": "2026-08-14T20:26:15.203Z"
 }

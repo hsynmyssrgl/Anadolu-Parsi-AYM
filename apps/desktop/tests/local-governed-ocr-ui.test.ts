@@ -15,7 +15,7 @@ describe('33-Q local governed OCR renderer surface', () => {
 
   it('uses all renderer-safe bridge methods and never exposes source deletion', () => {
     for (const method of [
-      'getLocalGovernedOcrCenter', 'getLocalGovernedOcrResult', 'createLocalGovernedOcrJob',
+      'getLocalGovernedOcrCenter', 'getLocalGovernedOcrResult', 'searchLocalGovernedOcr', 'createLocalGovernedOcrJob',
       'runLocalGovernedOcrJob', 'cancelLocalGovernedOcrJob', 'correctLocalGovernedOcrResult',
       'rerunLocalGovernedOcrJob', 'deleteLocalGovernedOcrJob', 'setLocalGovernedOcrEnabled'
     ]) expect(panel).toContain(`.${method}(`);
@@ -39,13 +39,14 @@ describe('33-Q local governed OCR renderer surface', () => {
       "İşleme ağ ve bulut kullanmaz",
       "düşük ayrıcalıklı sandbox doğrulanmış değildir",
       "PDF rasterizer ve kötü amaçlı yazılım sağlayıcısı yoksa işlem fail-closed reddedilir",
-      "crash sonrası otomatik devam kanıtlanmış değildir",
+      "kalıcı iş günlüğünden otomatik ve aynı işlem kimliğiyle sürdürülür",
       "Sıradaki veya çalışan iş iptal edilebilir",
       "!['queued', 'running'].includes(selectedJob.status)",
       "selectedJob.status === 'running' ? 'Çalışan işi iptal et'",
       "Sıradaki işi iptal et",
       "Türetilmiş sonucu silmek kaynak belgeyi silmez"
     ]) expect(panel).toContain(truth);
+    expect(panel).toContain('Tam metin dizini sonuçla birlikte şifreli kasada tutulur');
     expect(panel).not.toContain('if (!networkOnline) return');
   });
 
@@ -56,7 +57,11 @@ describe('33-Q local governed OCR renderer surface', () => {
     expect(panel).toContain('AsyncStatePanel state="error" title="Yerel OCR merkezi yüklenemedi"');
     expect(panel).toContain('Sonucu açıkça görüntüle');
     expect(panel).toContain('aria-label="OCR sonucu düzeltme metni"');
+    expect(panel).toContain('id="local-ocr-search-query"');
+    expect(panel).toContain('searchLocalGovernedOcr({ query: searchQuery, limit: 10 })');
+    expect(panel).toContain('renderer sonucunda yankılanmaz');
     expect(styles).toContain('.local-ocr-center');
+    expect(styles).toContain('.local-ocr-search-results');
     expect(styles).toContain('.local-ocr-result textarea');
   });
 });

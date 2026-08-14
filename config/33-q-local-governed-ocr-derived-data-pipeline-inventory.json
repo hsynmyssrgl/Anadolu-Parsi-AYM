@@ -113,7 +113,7 @@
         "artifacts/manifests/DATABASE_MIGRATION_VERIFICATION_MVP56.json"
       ],
       "sha256": "08fef61dc21062134716dfae8e78c2256eb5da275eedaf1fe3502a3c2450cb65",
-      "truth": "Migration 94 ve metadata repository; rolling retention, source-delete batch/item ledger ve rollback dahil yerel testlerde doğrulanmıştır. Owner-bound şifreli sealed-result vault/runtime production facade içinde yerel testtedir; tam metin indeks, gerçek cihaz ve uçtan uca kabul değildir."
+      "truth": "Migration 94 ve metadata repository; rolling retention, source-delete batch/item ledger ve rollback dahil yerel testlerde doğrulanmıştır. Owner-bound şifreli sealed-result vault/runtime ile policy-filtered şifreli tam metin indeks ve maskeli snippet production facade içinde yerel testtedir; legacy v1 arama, gerçek cihaz ve uçtan uca kabul tamamlanmamıştır."
     },
     {
       "id": "migration-95-legacy-archive-ownership-reattestation",
@@ -163,8 +163,9 @@
       "plannedPaths": [
       "apps/desktop/src/main/local-governed-ocr-application-adapter.ts",
       "apps/desktop/src/main/timeline-production-policy-runtime.ts",
-      "apps/desktop/src/main/local-governed-ocr-result-vault.ts",
-      "apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts",
+        "apps/desktop/src/main/local-governed-ocr-result-vault.ts",
+        "apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts",
+        "apps/desktop/src/main/local-governed-ocr-search-index.ts",
         "apps/desktop/src/main/data-store.ts",
         "apps/desktop/src/main/repository-composition-root.ts",
         "apps/desktop/src/main/main.ts"
@@ -203,7 +204,8 @@
     "packages/application/tests/archive-legacy-ownership-reattestation.test.ts",
     "apps/desktop/tests/archive-core-table-receipt-fence.test.ts",
     "apps/desktop/tests/archive-legacy-ownership-reattestation-data-store.test.ts",
-    "apps/desktop/tests/archive-legacy-ownership-reattestation-ipc-ui.test.ts"
+    "apps/desktop/tests/archive-legacy-ownership-reattestation-ipc-ui.test.ts",
+    "apps/desktop/tests/local-governed-ocr-search-index.test.ts"
   ],
   "implementedTargetedTests": [
     "packages/application/tests/local-governed-ocr-use-cases.test.ts",
@@ -224,7 +226,8 @@
     "packages/application/tests/archive-legacy-ownership-reattestation.test.ts",
     "apps/desktop/tests/archive-core-table-receipt-fence.test.ts",
     "apps/desktop/tests/archive-legacy-ownership-reattestation-data-store.test.ts",
-    "apps/desktop/tests/archive-legacy-ownership-reattestation-ipc-ui.test.ts"
+    "apps/desktop/tests/archive-legacy-ownership-reattestation-ipc-ui.test.ts",
+    "apps/desktop/tests/local-governed-ocr-search-index.test.ts"
   ],
   "reusedEvidence": {
     "ppk002EncryptedArchiveAndPepUow": [
@@ -289,9 +292,9 @@
   "ppkGateEvidence": {
     "ppk021": {
       "status": "PASS",
-      "scannedProductionFiles": 441,
-      "exactPrivilegedSurfaceCount": 683,
-      "exactAllowlistSha256": "efc8cdee046227dad31f5e82ccd79a9de90422e930be2a4ec9fa7d1184158571",
+      "scannedProductionFiles": 442,
+      "exactPrivilegedSurfaceCount": 685,
+      "exactAllowlistSha256": "7713c4b422c9822f6a5505b7245e27032f34872e98843d3126cf6de9a285759e",
       "targetedTestsPassed": 17,
       "contractChecksPassed": 84,
       "runtimeChecksPassed": 20,
@@ -299,9 +302,9 @@
     },
     "ppk022": {
       "status": "PASS",
-      "scannedProductionFiles": 441,
-      "exactCapabilitySurfaceCount": 339,
-      "exactCapabilityManifestSha256": "bba1167e470099c3af1d4363bdba117028b7ce0b61fb78c381e07f3d439ec399",
+      "scannedProductionFiles": 442,
+      "exactCapabilitySurfaceCount": 345,
+      "exactCapabilityManifestSha256": "1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e",
       "targetedTestsPassed": 19,
       "contractChecksPassed": 110,
       "runtimeChecksPassed": 24,
@@ -353,6 +356,10 @@
     "rendererUiComponentImplementedAndTested": true,
     "rendererRunningCancelAvailableAndTested": true,
     "rendererUiEndToEndValidated": false,
+    "localEncryptedFullTextIndexComponentTested": true,
+    "policyFilteredSearchCompositionTested": true,
+    "maskedSnippetComponentTested": true,
+    "legacyV1SearchFailsClosedUntilRerun": true,
     "ppk016LocalIntegrationGateValidated": true,
     "ppk019LocalIntegrationGateValidated": true,
     "ppk021AstGateValidated": true,
@@ -362,8 +369,8 @@
     "localComponentOcrTestsImplemented": true,
     "fullAcceptanceOcrTestMatrixImplemented": false,
     "localMaliciousDocumentFailClosedMatrixImplemented": true,
-    "localComponentTestFilesPassed": 19,
-    "localComponentTestsPassed": 139,
+    "localComponentTestFilesPassed": 20,
+    "localComponentTestsPassed": 147,
     "isolatedWindowsMediaOcrSmokeExecuted": true,
     "externalOcrProviderConfigured": false,
     "physicalSecureEraseGuaranteed": false,
@@ -375,7 +382,7 @@
     "Verified low-privilege OCR sandbox; child-process separation alone is insufficient",
     "Verified worker network isolation; windows-desktop aggregate network.access and self-reported networkUsed=false are not an OS-enforced deny",
     "Real-device accepted ocr_process authorization/consent execution; local production composition tests are not manual acceptance",
-    "Policy-filtered full-text index and masked snippet query; sealed result vault alone is not search acceptance",
+    "Policy-filtered encrypted full-text index and masked snippet are locally tested; legacy v1 results require rerun/correction and external accessibility/privacy/security/human UAT remains unavailable",
     "Guaranteed source-deletion propagation across future index, embedding, cache and managed-backup owners; local OCR job recovery alone is insufficient",
     "Automatic quarantine/purge across future OCR index, embedding, cache and managed-backup owners after object-permission or sensitive_processing consent revocation/expiry; current sealed result cleanup alone is insufficient",
     "Desktop IPC/UI real accessibility, privacy, security and human UAT",
@@ -388,11 +395,11 @@
     "boundary": "STARTER_NOT_RUN",
     "contract": "STARTER_NOT_RUN",
     "runtime": "LOCAL_COMPOSED_COMPONENT_MATRIX_PASS",
-    "targetedTests": "19_FILES_139_TESTS_PASS",
+    "targetedTests": "20_FILES_147_TESTS_PASS",
     "sourceStabilizationStatus": "STABLE_LOCAL_SNAPSHOT",
     "ratchetSemantics": "EXACT_LOCAL_SNAPSHOT_NOT_REQUIREMENT_CLOSURE",
-    "targetedTestFileRatchet": 19,
-    "targetedTestRatchet": 139,
+    "targetedTestFileRatchet": 20,
+    "targetedTestRatchet": 147,
     "countsAsRequirementPass": false
   },
   "persistentReceiptStatus": "NOT_RUN"

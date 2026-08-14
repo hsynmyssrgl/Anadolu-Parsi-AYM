@@ -19,8 +19,10 @@ import type {
   LocalGovernedOcrCenterView,
   LocalGovernedOcrMutationReceiptView,
   LocalGovernedOcrResultView,
+  LocalGovernedOcrSearchView,
   RerunLocalGovernedOcrJobInput,
   RunLocalGovernedOcrJobInput,
+  SearchLocalGovernedOcrInput,
   SetLocalGovernedOcrEnabledInput
 } from '@ppt/domain';
 import type { CreateLoanAccountInput, RecordLoanPaymentInput, RecordFinancePlanningItemInput, CommitFinanceImportPreviewInput, RecordLongTermPortfolioItemInput, UpdateAccessibilityPreferencesInput } from '@ppt/domain';
@@ -52,12 +54,14 @@ import {
   projectLocalGovernedOcrCenterIpcView,
   projectLocalGovernedOcrMutationIpcView,
   projectLocalGovernedOcrResultIpcView,
+  projectLocalGovernedOcrSearchIpcView,
   type LocalGovernedOcrCorrectIpcInput,
   type LocalGovernedOcrCreateIpcInput,
   type LocalGovernedOcrDeleteIpcInput,
   type LocalGovernedOcrJobMutationIpcInput,
   type LocalGovernedOcrRerunIpcInput,
   type LocalGovernedOcrResultReadIpcInput,
+  type LocalGovernedOcrSearchIpcInput,
   type LocalGovernedOcrSetEnabledIpcInput
 } from './ipc-integration-policy.js';
 import { IpcTransportSessionRegistry } from './ipc-transport-context.js';
@@ -276,6 +280,7 @@ type LocalGovernedOcrBridgeValue<T> = T | Promise<T>;
 interface LocalGovernedOcrIpcDataStoreBridge {
   getLocalGovernedOcrCenter(): LocalGovernedOcrBridgeValue<LocalGovernedOcrCenterView>;
   getLocalGovernedOcrResult(input: LocalGovernedOcrResultReadIpcInput): LocalGovernedOcrBridgeValue<LocalGovernedOcrResultView>;
+  searchLocalGovernedOcr(input: SearchLocalGovernedOcrInput): LocalGovernedOcrBridgeValue<LocalGovernedOcrSearchView>;
   createLocalGovernedOcrJob(input: CreateLocalGovernedOcrJobInput): LocalGovernedOcrBridgeValue<LocalGovernedOcrMutationReceiptView>;
   runLocalGovernedOcrJob(input: RunLocalGovernedOcrJobInput): LocalGovernedOcrBridgeValue<LocalGovernedOcrMutationReceiptView>;
   cancelLocalGovernedOcrJob(input: CancelLocalGovernedOcrJobInput): LocalGovernedOcrBridgeValue<LocalGovernedOcrMutationReceiptView>;
@@ -2194,6 +2199,8 @@ function registerIpc(): void {
     projectLocalGovernedOcrCenterIpcView(await localGovernedOcrBridgeMethod('getLocalGovernedOcrCenter')()));
   registerIpcHandler(LOCAL_GOVERNED_OCR_IPC_CHANNELS.getResult, async (_event, input:LocalGovernedOcrResultReadIpcInput) =>
     projectLocalGovernedOcrResultIpcView(await localGovernedOcrBridgeMethod('getLocalGovernedOcrResult')(input)));
+  registerIpcHandler(LOCAL_GOVERNED_OCR_IPC_CHANNELS.search, async (_event, input:LocalGovernedOcrSearchIpcInput) =>
+    projectLocalGovernedOcrSearchIpcView(await localGovernedOcrBridgeMethod('searchLocalGovernedOcr')(input)));
   registerIpcHandler(LOCAL_GOVERNED_OCR_IPC_CHANNELS.create, async (_event, input:LocalGovernedOcrCreateIpcInput) =>
     projectLocalGovernedOcrMutationIpcView(await localGovernedOcrBridgeMethod('createLocalGovernedOcrJob')({
       ...input,

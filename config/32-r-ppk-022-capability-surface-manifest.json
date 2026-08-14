@@ -18,7 +18,7 @@
   "signedManifestRuntimeCheckRequired": true,
   "buildManifestAloneGrantsRuntimeAuthority": false,
   "productionSourceZoneCount": 18,
-  "scannedProductionFiles": 441,
+  "scannedProductionFiles": 442,
   "protectedCapabilityFamilies": [
     "camera",
     "microphone",
@@ -34,9 +34,9 @@
     "NETWORK_API": 2,
     "NETWORK_IMPORT": 13,
     "OCR_API": 5,
-    "OCR_IMPORT": 29
+    "OCR_IMPORT": 35
   },
-  "exactCapabilitySurfaceCount": 339,
+  "exactCapabilitySurfaceCount": 345,
   "applicationRuntimeCapabilities": {
     "windows-desktop": [
       "file.access",
@@ -2605,6 +2605,30 @@
       "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
     },
     {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-result-vault.ts|./local-governed-ocr-search-index.js:buildLocalGovernedOcrSearchIndex",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-result-vault.ts|./local-governed-ocr-search-index.js:LocalGovernedOcrEncryptedSearchIndex",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-result-vault.ts|./local-governed-ocr-search-index.js:validateLocalGovernedOcrSearchIndex",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
       "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts|./local-governed-ocr-result-vault.js:deriveLocalGovernedOcrCorrectionSealedResultId",
       "applicationIds": [
         "windows-desktop"
@@ -2614,6 +2638,14 @@
     },
     {
       "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts|./local-governed-ocr-result-vault.js:deriveLocalGovernedOcrRunSealedResultId",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts|./local-governed-ocr-result-vault.js:LOCAL_GOVERNED_OCR_SEARCH_INDEX_PERSISTED",
       "applicationIds": [
         "windows-desktop"
       ],
@@ -2646,6 +2678,22 @@
     },
     {
       "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts|./local-governed-ocr-result-vault.js:LocalGovernedOcrSealedPayload",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts|./local-governed-ocr-search-index.js:buildLocalGovernedOcrSearchIndex",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts|./local-governed-ocr-search-index.js:searchLocalGovernedOcrText",
       "applicationIds": [
         "windows-desktop"
       ],

@@ -31,7 +31,8 @@ const testFiles = Object.freeze([
   'packages/application/tests/archive-legacy-ownership-reattestation.test.ts',
   'apps/desktop/tests/archive-core-table-receipt-fence.test.ts',
   'apps/desktop/tests/archive-legacy-ownership-reattestation-data-store.test.ts',
-  'apps/desktop/tests/archive-legacy-ownership-reattestation-ipc-ui.test.ts'
+  'apps/desktop/tests/archive-legacy-ownership-reattestation-ipc-ui.test.ts',
+  'apps/desktop/tests/local-governed-ocr-search-index.test.ts'
 ]);
 const sourcePaths = Object.freeze({
   domain: 'packages/domain/src/local-governed-ocr.ts',
@@ -60,6 +61,7 @@ const sourcePaths = Object.freeze({
   policy: 'apps/desktop/src/main/timeline-production-policy-runtime.ts',
   resultVault: 'apps/desktop/src/main/local-governed-ocr-result-vault.ts',
   runtimeAdapter: 'apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts',
+  searchIndex: 'apps/desktop/src/main/local-governed-ocr-search-index.ts',
   compositionRoot: 'apps/desktop/src/main/repository-composition-root.ts',
   dataStore: 'apps/desktop/src/main/data-store.ts',
   ipcPolicy: 'apps/desktop/src/main/ipc-integration-policy.ts',
@@ -118,10 +120,10 @@ const definitions = [
   ['accepted registry remains exact open atomic closure authority',
     exact(scope.requirements, requirements) && exact(inventory.requirements, requirements)
       && registryItems.every((item) => item?.status === 'NOT_IMPLEMENTED' && item.chain?.evidence === false)],
-  ['implemented targeted inventory is the exact 19-file local snapshot',
+  ['implemented targeted inventory is the exact 20-file local snapshot',
     allTestsExist && exact(inventory.implementedTargetedTests, testFiles)
-      && scope.validation?.targetedTestFileRatchet === 19 && scope.validation?.targetedTestRatchet === 139
-      && inventory.validation?.targetedTestFileRatchet === 19 && inventory.validation?.targetedTestRatchet === 139],
+      && scope.validation?.targetedTestFileRatchet === 20 && scope.validation?.targetedTestRatchet === 147
+      && inventory.validation?.targetedTestFileRatchet === 20 && inventory.validation?.targetedTestRatchet === 147],
   ['domain and application contracts bind limits local execution and no low-privilege overclaim',
     has('domain', 'LOCAL_GOVERNED_OCR_MAX_SOURCE_BYTES = 16 * 1_024 * 1_024',
       'LOCAL_GOVERNED_OCR_MAX_RESULT_CHARACTERS = 250_000', 'LOCAL_GOVERNED_OCR_MAX_PAGES = 50',
@@ -198,6 +200,19 @@ const definitions = [
       && testHas(testFiles[7], 'hard-link', 'orphan', 'cursor')
       && scope.truth?.scheduledOrphanSweepProductionWiringValidated === true
       && scope.truth?.retentionExpiryPurgeValidated === true],
+  ['encrypted full-text index is content-bound policy-filtered and emits only masked bounded snippets',
+    has('searchIndex', 'SEARCH_INDEX_BYTES = 64 * 1024',
+      'validateLocalGovernedOcrSearchIndex', 'searchLocalGovernedOcrText', 'maskStructuredSecrets')
+      && has('resultVault', 'LOCAL_GOVERNED_OCR_SEARCH_INDEX_PERSISTED', "schemaVersion: 2", 'searchIndex')
+      && has('runtimeAdapter', 'LOCAL_GOVERNED_OCR_SEARCH_INDEX_PERSISTED', 'searchLocalGovernedOcrText',
+        'Legacy OCR result has no encrypted search index; rerun or correct the result before searching')
+      && has('application', 'SearchLocalGovernedOcrUseCase', 'ocr.search_requested', 'ocr.search_result_checked')
+      && testHas(testFiles[19], 'fixed-size index', 'exact plaintext verification', 'masks structured secrets',
+        'rejects sensitive or unbounded search probes')
+      && scope.truth?.localEncryptedFullTextIndexComponentTested === true
+      && scope.truth?.policyFilteredSearchCompositionTested === true
+      && scope.truth?.maskedSnippetComponentTested === true
+      && scope.truth?.legacyV1SearchFailsClosedUntilRerun === true],
   ['DataStore production facade composes PEP UoW vault runtime and hashes corrected text metadata',
     has('compositionRoot', 'SqliteLocalGovernedOcrRepository', 'localGovernedOcrRepository')
       && has('dataStore', 'createLocalGovernedOcrProductionPolicyEnforcementPointResolver',
@@ -206,7 +221,7 @@ const definitions = [
         'resumePendingLocalGovernedOcrArchiveDeletions', 'ReconcileLocalGovernedOcrAuthorizationUseCase',
         'ReconcileLocalGovernedOcrRetentionUseCase', 'SweepLocalGovernedOcrOrphansUseCase',
         'reconcileLocalGovernedOcrAuthorizations', 'reconcileLocalGovernedOcrRetention',
-        'sweepLocalGovernedOcrOrphans')
+        'sweepLocalGovernedOcrOrphans', 'searchLocalGovernedOcr')
       && has('main', 'resumePendingLocalGovernedOcrArchiveDeletions', 'ocr.source_deletion_recovery_cycle_failed',
         'reconcileLocalGovernedOcrAuthorizations', 'ocr.authorization_reconciliation_cycle_failed')
       && testHas(testFiles[13], 'fails closed without central policy', 'no malware provider',
@@ -215,20 +230,20 @@ const definitions = [
         'local_governed_ocr_source_deletion_recovery_intents')
       && scope.truth?.localDataStoreFacadeCompositionTested === true
       && scope.truth?.productionProviderWiredAndValidated === false],
-  ['desktop exposes exactly nine safe renderer OCR methods and keeps source deletion main-only',
+  ['desktop exposes exactly ten safe renderer OCR methods and keeps source deletion main-only',
     exact(localOcrPreloadChannels, [
-      'localOcr:getCenter', 'localOcr:getResult', 'localOcr:create', 'localOcr:run', 'localOcr:cancel',
+      'localOcr:getCenter', 'localOcr:getResult', 'localOcr:search', 'localOcr:create', 'localOcr:run', 'localOcr:cancel',
       'localOcr:correct', 'localOcr:rerun', 'localOcr:delete', 'localOcr:setEnabled'
     ])
-      && has('rendererTypes', 'getLocalGovernedOcrCenter', 'setLocalGovernedOcrEnabled')
+      && has('rendererTypes', 'getLocalGovernedOcrCenter', 'searchLocalGovernedOcr', 'setLocalGovernedOcrEnabled')
       && !sources.preload.includes('propagateLocalGovernedOcrSourceDeletion')
       && has('ipcPolicy', "executionScope: 'bounded_child_process'", 'sourceContentExposedToRenderer !== false',
         'authorizationRevocationPropagatesToSealedResult')
       && sources.ipcPolicy.includes('sourceDeletionAutoResumeGuaranteed !== true')
       && testHas(testFiles[10], 'main-only', 'source')
-      && testHas(testFiles[11], 'nine', 'bridge')],
+      && testHas(testFiles[11], 'ten', 'bridge')],
   ['Archive UI uses the safe bridge with explicit reveal idempotent retry and no remote truth claim',
-    has('panel', 'function LocalGovernedOcrPanel', 'getLocalGovernedOcrCenter',
+    has('panel', 'function LocalGovernedOcrPanel', 'getLocalGovernedOcrCenter', 'searchLocalGovernedOcr',
       'onClick={() => void readResult()}', 'clientOperationId', 'expectedRevision')
       && has('app', "import { LocalGovernedOcrPanel }", '<LocalGovernedOcrPanel')
       && testHas(testFiles[12], 'mutation identity and original CAS revision stable across a failed retry', 'offline', 'PDF')
@@ -282,7 +297,7 @@ const report = {
   countsAsRequirementPass: false,
   activePredecessor: '33-P',
   localTargetedTestFiles: testFiles,
-  targetedTestRatchet: { files: 19, tests: 139 },
+  targetedTestRatchet: { files: 20, tests: 147 },
   migration94Sha256,
   migration95Sha256,
   checksPassed: checks.length - failures.length,

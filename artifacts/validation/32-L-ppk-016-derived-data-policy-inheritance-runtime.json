@@ -24,8 +24,8 @@
       "exitCode": 0,
       "signal": null,
       "expectedOutput": "\"status\": \"PASS\"",
-      "outputSha256": "49bbd89c47da9c45d38d3364720a36059ef87e47594cda688d404785fb219965",
-      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 441,\n  \"securityRelevantFiles\": 39,\n  \"maliciousSelfTestAssertions\": 30,\n  \"benignFalsePositiveAssertions\": 6,\n  \"governedPolicy\": \"packages/platform-policy/src/derived-data-inheritance-policy.ts\",\n  \"governedUseCase\": \"packages/application/src/derived-data-inheritance-use-cases.ts\",\n  \"authorizedRepositoryAdapters\": 1,\n  \"authorizedProducerAdapters\": 1,\n  \"authorizedSealedMetadataReaders\": 1,\n  \"authorizedSealedPayloadReadPaths\": 2,\n  \"latentAiMemoryProducerPubliclyReachable\": false,\n  \"plaintextReplicaProductionAdapters\": 0,\n  \"retainedFamilyImportPayloadFields\": 0,\n  \"semanticAutomationPersistenceFields\": 0,\n  \"semanticArchiveReplayPayloadFields\": 0,\n  \"authorizedRepository\": \"packages/repositories/src/derived-data-policy-repository.ts\",\n  \"authorizedSchemaOwner\": \"packages/database/src/family-database-migrations.ts\",\n  \"authorizedSourceDeletionMetadataInventoryReaders\": 1,\n  \"authorizedMetadataInventoryReaders\": 2,\n  \"directPersistenceExceptions\": 0,\n  \"findings\": []\n}"
+      "outputSha256": "6f823fabd3225c70ce369c646f4ce72d6c5d5fe95511967f9cb0c19d3f1caaa9",
+      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 442,\n  \"securityRelevantFiles\": 39,\n  \"maliciousSelfTestAssertions\": 30,\n  \"benignFalsePositiveAssertions\": 6,\n  \"governedPolicy\": \"packages/platform-policy/src/derived-data-inheritance-policy.ts\",\n  \"governedUseCase\": \"packages/application/src/derived-data-inheritance-use-cases.ts\",\n  \"authorizedRepositoryAdapters\": 1,\n  \"authorizedProducerAdapters\": 1,\n  \"authorizedSealedMetadataReaders\": 1,\n  \"authorizedSealedPayloadReadPaths\": 2,\n  \"latentAiMemoryProducerPubliclyReachable\": false,\n  \"plaintextReplicaProductionAdapters\": 0,\n  \"retainedFamilyImportPayloadFields\": 0,\n  \"semanticAutomationPersistenceFields\": 0,\n  \"semanticArchiveReplayPayloadFields\": 0,\n  \"authorizedRepository\": \"packages/repositories/src/derived-data-policy-repository.ts\",\n  \"authorizedSchemaOwner\": \"packages/database/src/family-database-migrations.ts\",\n  \"authorizedSourceDeletionMetadataInventoryReaders\": 1,\n  \"authorizedMetadataInventoryReaders\": 2,\n  \"directPersistenceExceptions\": 0,\n  \"findings\": []\n}"
     },
     {
       "id": "ppk-016-targeted-policy-use-case-schema",
@@ -34,18 +34,18 @@
       "signal": null,
       "tests": 77,
       "minimumTests": 77,
-      "outputSha256": "424718eb1029b50189fafed5bc0bab33f5689740759123a5ee4ad0aeef2082ed",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·············································································\n\n Test Files  1 passed (1)\n      Tests  77 passed (77)\n   Start at  19:32:07\n   Duration  5.76s (transform 2.65s, setup 0ms, import 5.01s, tests 487ms, environment 0ms)"
+      "outputSha256": "94361679348f4999bf67a763939f3bd0ec003de14e701a56133feb402e73026d",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·············································································\n\n Test Files  1 passed (1)\n      Tests  77 passed (77)\n   Start at  23:24:56\n   Duration  6.12s (transform 2.74s, setup 0ms, import 5.33s, tests 513ms, environment 0ms)"
     },
     {
       "id": "ppk-016-local-ocr-sealed-owner-integration",
       "status": "PASS",
       "exitCode": 0,
       "signal": null,
-      "tests": 48,
+      "tests": 52,
       "minimumTests": 40,
-      "outputSha256": "034de2d8b5c55f0e904d8357a74b9e649fbdb5ec129a02e6b88d0c125964286a",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n················································\n\n Test Files  5 passed (5)\n      Tests  48 passed (48)\n   Start at  19:32:15\n   Duration  7.27s (transform 2.32s, setup 0ms, import 5.01s, tests 860ms, environment 0ms)"
+      "outputSha256": "46cd499711b6b574b0401f518cd130ffe046658af037bbf0d5ee3268a2097b6a",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n····················································\n\n Test Files  5 passed (5)\n      Tests  52 passed (52)\n   Start at  23:25:05\n   Duration  8.46s (transform 2.43s, setup 0ms, import 5.38s, tests 1.66s, environment 0ms)"
     },
     {
       "id": "family-import-content-free-lease-regression",
@@ -54,8 +54,8 @@
       "signal": null,
       "tests": 10,
       "minimumTests": 10,
-      "outputSha256": "6deaf28064fbca595a096803d286c8b9ad59633e66fa39f7d5f5c8c2e448ab9d",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n··········\n\n Test Files  3 passed (3)\n      Tests  10 passed (10)\n   Start at  19:32:23\n   Duration  9.50s (transform 3.59s, setup 0ms, import 7.38s, tests 1.30s, environment 0ms)"
+      "outputSha256": "17b9c97aa5941ed1f576812dd8ce35f1da98508e173d67154659d0c9d48fe673",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n··········\n\n Test Files  3 passed (3)\n      Tests  10 passed (10)\n   Start at  23:25:14\n   Duration  10.16s (transform 3.86s, setup 0ms, import 7.93s, tests 1.37s, environment 0ms)"
     },
     {
       "id": "plaintext-replica-retirement-contract",
@@ -73,8 +73,8 @@
       "signal": null,
       "tests": 1,
       "minimumTests": 1,
-      "outputSha256": "a9aa727c15b9eaa3456f1e9ee16775ae59dafab7ebb5a0c76e34975f6ded8031",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n--------·-------------------------------------------\n\n Test Files  1 passed (1)\n      Tests  1 passed | 51 skipped (52)\n   Start at  19:32:33\n   Duration  8.42s (transform 3.63s, setup 0ms, import 6.83s, tests 1.31s, environment 0ms)"
+      "outputSha256": "3ee39c7936fc21f87f014a2f20412faa16ec4da0e4c0426378bccacf466893c1",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n--------·-------------------------------------------\n\n Test Files  1 passed (1)\n      Tests  1 passed | 51 skipped (52)\n   Start at  23:25:25\n   Duration  9.05s (transform 3.91s, setup 0ms, import 7.34s, tests 1.43s, environment 0ms)"
     },
     {
       "id": "automation-content-free-derived-owner-regression",
@@ -83,8 +83,8 @@
       "signal": null,
       "tests": 5,
       "minimumTests": 5,
-      "outputSha256": "40d186d427eab974df65d55ff1161a6c55cc1cc4e69b2353e2617d842c9ce31e",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·····\n\n Test Files  2 passed (2)\n      Tests  5 passed (5)\n   Start at  19:32:43\n   Duration  8.72s (transform 3.59s, setup 0ms, import 7.08s, tests 1.07s, environment 0ms)"
+      "outputSha256": "45773675acf1a3d9c89b04a1a2ad41329898d27a47db72ccad3470f645a6237e",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·····\n\n Test Files  2 passed (2)\n      Tests  5 passed (5)\n   Start at  23:25:35\n   Duration  9.39s (transform 3.82s, setup 0ms, import 7.65s, tests 1.14s, environment 0ms)"
     },
     {
       "id": "archive-content-free-result-journal-regression",
@@ -93,8 +93,8 @@
       "signal": null,
       "tests": 5,
       "minimumTests": 5,
-      "outputSha256": "f4004692461cc77c2b5c1ba7609ccfb4133787d43a79c3763138fec55992d3fd",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·····\n\n Test Files  1 passed (1)\n      Tests  5 passed (5)\n   Start at  19:32:52\n   Duration  7.91s (transform 1.85s, setup 0ms, import 3.54s, tests 4.11s, environment 0ms)"
+      "outputSha256": "772dcfbe9f49505e5ac22223ef5adc3d3a28e61106f231f5c00c80d82b77fddb",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·····\n\n Test Files  1 passed (1)\n      Tests  5 passed (5)\n   Start at  23:25:45\n   Duration  8.92s (transform 1.92s, setup 0ms, import 3.76s, tests 4.86s, environment 0ms)"
     },
     {
       "id": "protected-operational-artifact-production-composition",
@@ -103,8 +103,8 @@
       "signal": null,
       "tests": 3,
       "minimumTests": 3,
-      "outputSha256": "9b76fd281043318f0f022acde81b315445152e9cb3dae0321373bceb3eb401f7",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n···\n\n Test Files  1 passed (1)\n      Tests  3 passed (3)\n   Start at  19:33:01\n   Duration  376ms (transform 32ms, setup 0ms, import 66ms, tests 46ms, environment 0ms)"
+      "outputSha256": "7c6ffe6accf68f839b4b1fb37a665dd7cb322ba7ef51360625a1922494656047",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n···\n\n Test Files  1 passed (1)\n      Tests  3 passed (3)\n   Start at  23:25:55\n   Duration  420ms (transform 32ms, setup 0ms, import 69ms, tests 54ms, environment 0ms)"
     },
     {
       "id": "ppk-015-egress-regression",
@@ -113,8 +113,8 @@
       "signal": null,
       "tests": 19,
       "minimumTests": 17,
-      "outputSha256": "4f873b2bdecb1bc61756278c527811e8e364d052dfd0c1b53c4d6ee366ff4e51",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n···················\n\n Test Files  1 passed (1)\n      Tests  19 passed (19)\n   Start at  19:33:02\n   Duration  835ms (transform 291ms, setup 0ms, import 558ms, tests 14ms, environment 0ms)"
+      "outputSha256": "363f8f58e178004a3c6bdadb136319b68339f2e48ea8f0e4722a4dff2a9edfc7",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n···················\n\n Test Files  1 passed (1)\n      Tests  19 passed (19)\n   Start at  23:25:56\n   Duration  901ms (transform 293ms, setup 0ms, import 582ms, tests 15ms, environment 0ms)"
     },
     {
       "id": "ppk-014-versioned-api-regression",
@@ -123,8 +123,8 @@
       "signal": null,
       "tests": 18,
       "minimumTests": 17,
-      "outputSha256": "a8744e21e922a0b36fdef43d57d288bf1e7e99e56039b7b4205248aab86075c5",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n··················\n\n Test Files  1 passed (1)\n      Tests  18 passed (18)\n   Start at  19:33:03\n   Duration  1.21s (transform 438ms, setup 0ms, import 882ms, tests 56ms, environment 0ms)"
+      "outputSha256": "a98bb30c21e7022208c65c7263fc039f9d1168dd789518cf155663a0a0ad0f21",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n··················\n\n Test Files  1 passed (1)\n      Tests  18 passed (18)\n   Start at  23:25:57\n   Duration  1.30s (transform 467ms, setup 0ms, import 950ms, tests 61ms, environment 0ms)"
     },
     {
       "id": "ppk-013-direct-data-access-regression",
@@ -133,8 +133,8 @@
       "signal": null,
       "tests": 20,
       "minimumTests": 20,
-      "outputSha256": "f07b1a7cf2f88cf8e58fea5ae49b803d39993a74efe5543c5e306eb1a0ad3bf3",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n····················\n\n Test Files  1 passed (1)\n      Tests  20 passed (20)\n   Start at  19:33:05\n   Duration  3.23s (transform 1.54s, setup 0ms, import 2.95s, tests 11ms, environment 0ms)"
+      "outputSha256": "193ff1b734f7495f6aaeb06f6ea4e843067c492d0f42d79b477e670eb9ed18e4",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n····················\n\n Test Files  1 passed (1)\n      Tests  20 passed (20)\n   Start at  23:25:59\n   Duration  3.54s (transform 1.66s, setup 0ms, import 3.23s, tests 13ms, environment 0ms)"
     },
     {
       "id": "ppk-012-sensitive-cache-no-cache-regression",
@@ -143,8 +143,8 @@
       "signal": null,
       "tests": 15,
       "minimumTests": 15,
-      "outputSha256": "3596468ffb9ac07aeac383484244deea5bd373e69d1696ad551ae4050e910df2",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n···············\n\n Test Files  2 passed (2)\n      Tests  15 passed (15)\n   Start at  19:33:09\n   Duration  1.14s (transform 292ms, setup 0ms, import 600ms, tests 23ms, environment 0ms)"
+      "outputSha256": "3869fcaabe0492dba7cef89547efa9644fc9abb3905b6a0a1a42f970b74303aa",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n···············\n\n Test Files  2 passed (2)\n      Tests  15 passed (15)\n   Start at  23:26:03\n   Duration  1.24s (transform 316ms, setup 0ms, import 672ms, tests 23ms, environment 0ms)"
     },
     {
       "id": "migration-77-policy-plus-94-ocr-metadata-runtime",
@@ -152,8 +152,8 @@
       "exitCode": 0,
       "signal": null,
       "expectedOutput": "\"version\": 94",
-      "outputSha256": "c3aec1d8325b97de56ce14d8e28f4bcc7c53739923e32d89d3a5e2b161bce366",
-      "outputTail": "mport_open_banking\",\n      \"checksum\": \"be32fbe6a79688ee879fda02a16faa78f6e0d4151e1462b2c9f28a1da44518c8\"\n    },\n    {\n      \"version\": 83,\n      \"name\": \"b5_life_home_vehicle_managed_ledger\",\n      \"checksum\": \"f648e5f8b6f685222bc26c3ce6fc9edcc37eeebc8ea69a44fc2c0951ff8057dc\"\n    },\n    {\n      \"version\": 84,\n      \"name\": \"b5_life_home_inventory_ledger\",\n      \"checksum\": \"0d6bcb5884a7ea2c11c1b1d4e633344e990c18a203e7b6ce6592dcc80f630362\"\n    },\n    {\n      \"version\": 85,\n      \"name\": \"b5_family_emergency_planning_ledger\",\n      \"checksum\": \"73ba7ebb56a98467bccf527a7f7906699e5fb6bb4dad394cd96ec12e77aa3bd2\"\n    },\n    {\n      \"version\": 86,\n      \"name\": \"b5_family_emergency_preparedness_ledger\",\n      \"checksum\": \"ba95e841da7a08977d50e0c9cb441e0743af6fdcb1c6dee9c42bb136e20183dc\"\n    },\n    {\n      \"version\": 87,\n      \"name\": \"b5_family_emergency_assistance_card_ledger\",\n      \"checksum\": \"b424f1fa2d89d6e0b645912444d9d8639de3d6a3ff0a61fa829b1e14c5206097\"\n    },\n    {\n      \"version\": 88,\n      \"name\": \"b5_family_emergency_card_portability_ledger\",\n      \"checksum\": \"8785551a6ce0facd609e374e7ba65c70d35b552e6f63a7f0b3d790bfbffa2b04\"\n    },\n    {\n      \"version\": 89,\n      \"name\": \"b4_long_term_portfolio_ledger\",\n      \"checksum\": \"1e52fa04e4720830ff3300ceb5a71f78aee216c073b4f4786e393fa45063bbe0\"\n    },\n    {\n      \"version\": 90,\n      \"name\": \"b7_accessibility_preferences\",\n      \"checksum\": \"15f69b6269d0cf2002543ff26df0ddea1844497dff8228141dfb451c0341320c\"\n    },\n    {\n      \"version\": 91,\n      \"name\": \"b3_governed_form_drafts\",\n      \"checksum\": \"7107cbdbe66f05ac6e208bfac39bc4bcc884c679e63af4e49c4a15bacda1b611\"\n    },\n    {\n      \"version\": 92,\n      \"name\": \"privacy_ownership_data_rights_incident_control\",\n      \"checksum\": \"a81c13518563172d29aa2b351218faf553a2189616657fc0fbda9b1922eee137\"\n    },\n    {\n      \"version\": 93,\n      \"name\": \"identity_access_credentials\",\n      \"checksum\": \"51191e62bcf4baec07e3eab5985ef4210402cdb8b7416064519ceb082322916a\"\n    },\n    {\n      \"version\": 94,\n      \"name\": \"local_governed_ocr\",\n      \"checksum\": \"08fef61dc21062134716dfae8e78c2256eb5da275eedaf1fe3502a3c2450cb65\"\n    }\n  ],\n  \"generatedAt\": \"2026-08-14T16:33:12.993Z\"\n}"
+      "outputSha256": "58083a2bac2011908e8603554cbda88160b5f2275a48ed088d6e2739ebe304cd",
+      "outputTail": "_managed_ledger\",\n      \"checksum\": \"f648e5f8b6f685222bc26c3ce6fc9edcc37eeebc8ea69a44fc2c0951ff8057dc\"\n    },\n    {\n      \"version\": 84,\n      \"name\": \"b5_life_home_inventory_ledger\",\n      \"checksum\": \"0d6bcb5884a7ea2c11c1b1d4e633344e990c18a203e7b6ce6592dcc80f630362\"\n    },\n    {\n      \"version\": 85,\n      \"name\": \"b5_family_emergency_planning_ledger\",\n      \"checksum\": \"73ba7ebb56a98467bccf527a7f7906699e5fb6bb4dad394cd96ec12e77aa3bd2\"\n    },\n    {\n      \"version\": 86,\n      \"name\": \"b5_family_emergency_preparedness_ledger\",\n      \"checksum\": \"ba95e841da7a08977d50e0c9cb441e0743af6fdcb1c6dee9c42bb136e20183dc\"\n    },\n    {\n      \"version\": 87,\n      \"name\": \"b5_family_emergency_assistance_card_ledger\",\n      \"checksum\": \"b424f1fa2d89d6e0b645912444d9d8639de3d6a3ff0a61fa829b1e14c5206097\"\n    },\n    {\n      \"version\": 88,\n      \"name\": \"b5_family_emergency_card_portability_ledger\",\n      \"checksum\": \"8785551a6ce0facd609e374e7ba65c70d35b552e6f63a7f0b3d790bfbffa2b04\"\n    },\n    {\n      \"version\": 89,\n      \"name\": \"b4_long_term_portfolio_ledger\",\n      \"checksum\": \"1e52fa04e4720830ff3300ceb5a71f78aee216c073b4f4786e393fa45063bbe0\"\n    },\n    {\n      \"version\": 90,\n      \"name\": \"b7_accessibility_preferences\",\n      \"checksum\": \"15f69b6269d0cf2002543ff26df0ddea1844497dff8228141dfb451c0341320c\"\n    },\n    {\n      \"version\": 91,\n      \"name\": \"b3_governed_form_drafts\",\n      \"checksum\": \"7107cbdbe66f05ac6e208bfac39bc4bcc884c679e63af4e49c4a15bacda1b611\"\n    },\n    {\n      \"version\": 92,\n      \"name\": \"privacy_ownership_data_rights_incident_control\",\n      \"checksum\": \"a81c13518563172d29aa2b351218faf553a2189616657fc0fbda9b1922eee137\"\n    },\n    {\n      \"version\": 93,\n      \"name\": \"identity_access_credentials\",\n      \"checksum\": \"51191e62bcf4baec07e3eab5985ef4210402cdb8b7416064519ceb082322916a\"\n    },\n    {\n      \"version\": 94,\n      \"name\": \"local_governed_ocr\",\n      \"checksum\": \"08fef61dc21062134716dfae8e78c2256eb5da275eedaf1fe3502a3c2450cb65\"\n    },\n    {\n      \"version\": 95,\n      \"name\": \"legacy_archive_ownership_reattestation\",\n      \"checksum\": \"2a7206f2335ee24e5e6135867dbed5096530477a1e3d514ef2f0ce9683029c90\"\n    }\n  ],\n  \"generatedAt\": \"2026-08-14T20:26:08.225Z\"\n}"
     },
     {
       "id": "root-typescript",
@@ -225,5 +225,5 @@
   "historicalReceiptAloneCountsAsRevocationPropagationEvidence": false,
   "policySensitiveIpcNoCacheWeakened": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-14T16:33:17.042Z"
+  "generatedAt": "2026-08-14T20:26:13.041Z"
 }

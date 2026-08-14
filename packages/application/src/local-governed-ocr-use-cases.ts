@@ -19,7 +19,11 @@ import {
   LOCAL_GOVERNED_OCR_MAX_LANGUAGE_HINTS,
   LOCAL_GOVERNED_OCR_MAX_PAGES,
   LOCAL_GOVERNED_OCR_MAX_RESULT_CHARACTERS,
+  LOCAL_GOVERNED_OCR_MAX_SEARCH_CANDIDATES,
+  LOCAL_GOVERNED_OCR_MAX_SEARCH_MATCHES,
+  LOCAL_GOVERNED_OCR_MAX_SEARCH_SNIPPET_CHARACTERS,
   LOCAL_GOVERNED_OCR_MAX_SOURCE_BYTES,
+  canonicalLocalGovernedOcrSearchTokens,
   canonicalLocalGovernedOcrJobStateJson,
   canonicalLocalGovernedOcrSettingsStateJson,
   type CancelLocalGovernedOcrJobInput,
@@ -35,10 +39,13 @@ import {
   type LocalGovernedOcrMutationReceiptView,
   type LocalGovernedOcrResourceType,
   type LocalGovernedOcrResultView,
+  type LocalGovernedOcrSearchMatchView,
+  type LocalGovernedOcrSearchView,
   type LocalGovernedOcrSettingsView,
   type PropagateLocalGovernedOcrSourceDeletionInput,
   type RerunLocalGovernedOcrJobInput,
   type RunLocalGovernedOcrJobInput,
+  type SearchLocalGovernedOcrInput,
   type SetLocalGovernedOcrEnabledInput
 } from '@ppt/domain';
 import type { DomainEvent } from '@ppt/events';
@@ -272,6 +279,21 @@ export interface LocalGovernedOcrRuntimePort {
     readonly sealedResultId: string;
     readonly correlationId: CorrelationId;
   }): Promise<Result<{ readonly text: string; readonly contentSha256: string; readonly networkUsed: false; readonly cloudUsed: false }, AppError>>;
+  searchSealedResult(input: {
+    readonly jobId: string;
+    readonly sealedResultId: string;
+    readonly query: string;
+    readonly correlationId: CorrelationId;
+  }): Promise<Result<{
+    readonly matched: boolean;
+    readonly matchedTokenCount: number;
+    readonly contentSha256: string;
+    readonly snippet: string | null;
+    readonly snippetMasked: true;
+    readonly pageNumber: number | null;
+    readonly networkUsed: false;
+    readonly cloudUsed: false;
+  }, AppError>>;
   requestCancellation(input: { readonly jobId: string; readonly correlationId: CorrelationId }): Promise<Result<{ readonly accepted: true }, AppError>>;
   /**
    * Idempotent owner-bound local logical/file removal. `verified` proves the exact sealed result is absent;
@@ -774,6 +796,9 @@ export class GetLocalGovernedOcrCenterUseCase {
           authorizationRevocationPropagatesToSealedResult: true,
           retentionExpiryPropagatesToSealedResult: true,
           scheduledOrphanSweepUsesDistinctMaintenanceAuthority: true,
+          encryptedFullTextIndexAvailable: true,
+          policyFilteredSearchRequired: true,
+          snippetMaskingEnforced: true,
           derivedDeletionDeletesSource: false
         },
         generatedAt: scope.occurredAt
@@ -1778,6 +1803,106 @@ export class GetLocalGovernedOcrResultUseCase {
         text: read.value.text, contentSha256: read.value.contentSha256,
         corrected: current.value.correctionRevision > 0, payloadSource: 'sealed_local_result', networkUsed: false, cloudUsed: false }) : audited;
     });
+  }
+}
+
+export class SearchLocalGovernedOcrUseCase {
+  public constructor(private readonly unitOfWork: LocalGovernedOcrUnitOfWork, private readonly runtime: LocalGovernedOcrRuntimePort) {}
+
+  public async execute(input: {
+    readonly context: LocalGovernedOcrApplicationContext;
+    readonly command: SearchLocalGovernedOcrInput;
+    readonly auditId: string;
+  }): Promise<Result<LocalGovernedOcrSearchView, AppError>> {
+    const key = keyFor(input.context); if (!key.ok) return key;
+    const queryTokens = canonicalLocalGovernedOcrSearchTokens(input.command.query);
+    const limit = input.command.limit ?? 10;
+    if (!queryTokens || !Number.isSafeInteger(limit) || limit < 1 || limit > LOCAL_GOVERNED_OCR_MAX_SEARCH_MATCHES
+      || !IDENTIFIER.test(input.auditId)) return err(invalid(input.context, 'OCR arama sorgusu veya limiti geçersizdir.'));
+
+    const enumeration = await this.unitOfWork.execute(input.context, { primary: settingsIntent(key.value, 'read') }, (scope) => {
+      const loaded = scope.loadCenter(key.value);
+      if (!loaded.ok) return loaded;
+      if (!exactKey(loaded.value.settings.key, key.value) || loaded.value.jobs.length > LOCAL_GOVERNED_OCR_MAX_JOBS
+        || loaded.value.jobs.some((job) => !exactKey(job.key, key.value))) {
+        return err(unexpected(input.context, 'OCR arama aday kapsamı veya limiti geçersizdir.'));
+      }
+      const audited = scope.appendAudit({ id: input.auditId, action: 'ocr.search_requested', resourceType: 'local_ocr_settings',
+        resourceId: localGovernedOcrSettingsResourceId(key.value.ownerPersonId), occurredAt: scope.occurredAt,
+        actorId: input.context.actor.userId });
+      if (!audited.ok) return audited;
+      const jobs = loaded.value.jobs
+        .filter((job) => job.status === 'completed' && job.resultAvailable && Boolean(job.sealedResultId) && Boolean(job.resultContentSha256))
+        .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt) || left.id.localeCompare(right.id));
+      return ok({ jobs, generatedAt: scope.occurredAt });
+    });
+    if (!enumeration.ok) return enumeration;
+
+    const candidates = enumeration.value.jobs.slice(0, LOCAL_GOVERNED_OCR_MAX_SEARCH_CANDIDATES);
+    const matches: LocalGovernedOcrSearchMatchView[] = [];
+    let truncated = enumeration.value.jobs.length > candidates.length;
+    for (const candidate of candidates) {
+      const source = resolveJobSourceMetadata(this.unitOfWork, input.context, key.value, candidate.id);
+      if (!source.ok) {
+        if (source.error.code === ERROR_CODES.RESOURCE_CONFLICT) { truncated = true; continue; }
+        if (source.error.code === ERROR_CODES.AUTHORIZATION_DENIED
+          || source.error.code === ERROR_CODES.RESOURCE_NOT_FOUND
+        ) continue;
+        return source;
+      }
+      const correlationId = asCorrelationId(`ocr-search-${hash(`${input.context.correlationId}|${candidate.id}`).slice(0, 48)}`);
+      const context: LocalGovernedOcrApplicationContext = { ...input.context, correlationId };
+      const searched = await this.unitOfWork.execute(context, {
+        primary: jobIntent(key.value, 'read', candidate.id, source.value.sensitivity),
+        source: sourceIntent(key.value, 'read', source.value.resourceId, source.value.sensitivity)
+      }, async (scope): Promise<Result<LocalGovernedOcrSearchMatchView | null, AppError>> => {
+        const current = loadExactJob(scope, context, key.value, candidate.id); if (!current.ok) return current;
+        if (current.value.revision !== candidate.revision || current.value.status !== 'completed'
+          || !current.value.resultAvailable || !current.value.sealedResultId || !current.value.resultContentSha256) return ok(null);
+        const authority = resolveSourceAndConsent(scope, context, key.value, current.value.source.resourceId, 'read');
+        if (!authority.ok) return authority;
+        const found = await this.runtime.searchSealedResult({ jobId: current.value.id,
+          sealedResultId: current.value.sealedResultId, query: input.command.query, correlationId });
+        if (!found.ok) return found;
+        if (found.value.contentSha256 !== current.value.resultContentSha256) {
+          return err(conflict(context, 'OCR arama sealed-index içerik bağı güncel değildir.'));
+        }
+        if (found.value.networkUsed || found.value.cloudUsed || found.value.snippetMasked !== true
+          || typeof found.value.matched !== 'boolean'
+          || !Number.isSafeInteger(found.value.matchedTokenCount) || found.value.matchedTokenCount < 0
+          || !(found.value.pageNumber === null || (Number.isSafeInteger(found.value.pageNumber)
+            && found.value.pageNumber >= 1 && found.value.pageNumber <= (current.value.resultPageCount ?? LOCAL_GOVERNED_OCR_MAX_PAGES)))) {
+          return err(denied(context, 'OCR arama sealed-index sonucu doğrulanamadı.'));
+        }
+        const auditId = hash(`${input.auditId}|${current.value.id}`);
+        const audited = scope.appendAudit({ id: auditId, action: 'ocr.search_result_checked', resourceType: 'local_ocr_job',
+          resourceId: current.value.id, occurredAt: scope.occurredAt, actorId: context.actor.userId });
+        if (!audited.ok) return audited;
+        if (!found.value.matched) {
+          return found.value.snippet === null && found.value.matchedTokenCount === 0 && found.value.pageNumber === null
+            ? ok(null) : err(denied(context, 'OCR arama negatif sonucu geçersizdir.'));
+        }
+        if (found.value.matchedTokenCount !== queryTokens.length || typeof found.value.snippet !== 'string'
+          || found.value.snippet.length < 1 || found.value.snippet.length > LOCAL_GOVERNED_OCR_MAX_SEARCH_SNIPPET_CHARACTERS) {
+          return err(denied(context, 'OCR arama snippet sonucu geçersizdir.'));
+        }
+        return ok({ jobId: current.value.id, revision: current.value.revision, snippet: found.value.snippet,
+          snippetMasked: true, matchedTokenCount: found.value.matchedTokenCount, pageNumber: found.value.pageNumber,
+          corrected: current.value.correctionRevision > 0, networkUsed: false, cloudUsed: false });
+      });
+      if (!searched.ok) {
+        if (searched.error.code === ERROR_CODES.RESOURCE_CONFLICT) { truncated = true; continue; }
+        if (searched.error.code === ERROR_CODES.AUTHORIZATION_DENIED
+          || searched.error.code === ERROR_CODES.RESOURCE_NOT_FOUND
+        ) continue;
+        return searched;
+      }
+      if (searched.value) matches.push(searched.value);
+      if (matches.length > limit) { truncated = true; break; }
+    }
+    return ok({ schemaVersion: 1, matches: Object.freeze(matches.slice(0, limit)), truncated,
+      policyFiltered: true, encryptedIndexAtRest: true, snippetsMasked: true, queryEchoed: false,
+      networkUsed: false, cloudUsed: false, generatedAt: enumeration.value.generatedAt });
   }
 }
 
