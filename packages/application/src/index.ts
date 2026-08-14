@@ -102,3 +102,4 @@ export * from './accessibility-preferences-use-cases.js';
 export * from './form-draft-use-cases.js';
 export * from './privacy-ownership-data-rights-use-cases.js';
 export * from './identity-access-credential-use-cases.js';
+export * from './local-governed-ocr-use-cases.js';

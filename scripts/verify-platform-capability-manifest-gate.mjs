@@ -20,7 +20,7 @@ const RUNTIME_CAPABILITIES = Object.freeze([
   'ai.process', 'location.access', 'network.access'
 ]);
 const EXPECTED_APPLICATION_CAPABILITIES = Object.freeze({
-  'windows-desktop': Object.freeze(['file.access', 'network.access']),
+  'windows-desktop': Object.freeze(['file.access', 'network.access', 'ocr.process']),
   'windows-core-service': Object.freeze(['file.access', 'network.access']),
   'windows-cluster-agent': Object.freeze([]),
   'macos-companion': Object.freeze([]),
@@ -41,6 +41,13 @@ const APPLICATION_OWNERS_BY_SOURCE_PREFIX = Object.freeze([
   Object.freeze(['packages/core-service-client/src/', Object.freeze(['windows-desktop'])]),
   Object.freeze(['packages/database/src/', Object.freeze(['windows-desktop'])]),
   Object.freeze(['packages/logging/src/', Object.freeze(['windows-core-service', 'windows-desktop'])])
+]);
+const WINDOWS_DESKTOP_OCR_PACKAGE_SURFACE_PATHS = new Set([
+  'packages/application/src/index.ts',
+  'packages/domain/src/index.ts',
+  'packages/repositories/src/index.ts',
+  'packages/repository-contracts/src/index.ts',
+  'packages/security/src/index.ts'
 ]);
 const PINNED_BOOTSTRAP_SURFACE_KEYS = new Set([
   'FILE_IMPORT|apps/desktop/src/main/main.ts|node:fs:existsSync',
@@ -74,6 +81,7 @@ const WILDCARD = /[*?\[\]{}]/u;
 const same = (left, right) => left.length === right.length && left.every((value, index) => value === right[index]);
 const expectedApplicationsForSurfaceKey = (key) => {
   const path = typeof key === 'string' ? key.split('|')[1] : undefined;
+  if (path && WINDOWS_DESKTOP_OCR_PACKAGE_SURFACE_PATHS.has(path)) return Object.freeze(['windows-desktop']);
   return APPLICATION_OWNERS_BY_SOURCE_PREFIX.find(([prefix]) => path?.startsWith(prefix))?.[1];
 };
 

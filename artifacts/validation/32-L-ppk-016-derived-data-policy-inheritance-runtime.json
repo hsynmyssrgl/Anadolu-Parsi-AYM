@@ -5,8 +5,8 @@
   "requirement": "PPK-016",
   "phase": "DERIVED_DATA_POLICY_INHERITANCE_RUNTIME",
   "status": "PASS",
-  "checkCount": 15,
-  "passed": 15,
+  "checkCount": 16,
+  "passed": 16,
   "failed": 0,
   "results": [
     {
@@ -15,8 +15,8 @@
       "exitCode": 0,
       "signal": null,
       "expectedOutput": "PPK-016 contract: PASS",
-      "outputSha256": "f274c50438b2fdeac613ebf822b1455d8b7964102c9ab27f4165ebfd676ff3ae",
-      "outputTail": "32-L PPK-016 contract: PASS (109/109)."
+      "outputSha256": "d6acba56f5d638e775e9f9ddb09450e06a09d181e4701f74e25a2eb32aa73761",
+      "outputTail": "32-L PPK-016 contract: PASS (115/115)."
     },
     {
       "id": "derived-data-production-source-fail-gate",
@@ -24,18 +24,28 @@
       "exitCode": 0,
       "signal": null,
       "expectedOutput": "\"status\": \"PASS\"",
-      "outputSha256": "fd714e2dc7d81c54dc9138be101b6f0398e463f89578b3b7119ebd0ec7528dc3",
-      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 335,\n  \"securityRelevantFiles\": 23,\n  \"maliciousSelfTestAssertions\": 23,\n  \"benignFalsePositiveAssertions\": 4,\n  \"governedPolicy\": \"packages/platform-policy/src/derived-data-inheritance-policy.ts\",\n  \"governedUseCase\": \"packages/application/src/derived-data-inheritance-use-cases.ts\",\n  \"authorizedRepositoryAdapters\": 1,\n  \"authorizedProducerAdapters\": 0,\n  \"latentAiMemoryProducerPubliclyReachable\": false,\n  \"plaintextReplicaProductionAdapters\": 0,\n  \"retainedFamilyImportPayloadFields\": 0,\n  \"semanticAutomationPersistenceFields\": 0,\n  \"semanticArchiveReplayPayloadFields\": 0,\n  \"authorizedRepository\": \"packages/repositories/src/derived-data-policy-repository.ts\",\n  \"authorizedSchemaOwner\": \"packages/database/src/family-database-migrations.ts\",\n  \"directPersistenceExceptions\": 0,\n  \"findings\": []\n}"
+      "outputSha256": "49bbd89c47da9c45d38d3364720a36059ef87e47594cda688d404785fb219965",
+      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 441,\n  \"securityRelevantFiles\": 39,\n  \"maliciousSelfTestAssertions\": 30,\n  \"benignFalsePositiveAssertions\": 6,\n  \"governedPolicy\": \"packages/platform-policy/src/derived-data-inheritance-policy.ts\",\n  \"governedUseCase\": \"packages/application/src/derived-data-inheritance-use-cases.ts\",\n  \"authorizedRepositoryAdapters\": 1,\n  \"authorizedProducerAdapters\": 1,\n  \"authorizedSealedMetadataReaders\": 1,\n  \"authorizedSealedPayloadReadPaths\": 2,\n  \"latentAiMemoryProducerPubliclyReachable\": false,\n  \"plaintextReplicaProductionAdapters\": 0,\n  \"retainedFamilyImportPayloadFields\": 0,\n  \"semanticAutomationPersistenceFields\": 0,\n  \"semanticArchiveReplayPayloadFields\": 0,\n  \"authorizedRepository\": \"packages/repositories/src/derived-data-policy-repository.ts\",\n  \"authorizedSchemaOwner\": \"packages/database/src/family-database-migrations.ts\",\n  \"authorizedSourceDeletionMetadataInventoryReaders\": 1,\n  \"authorizedMetadataInventoryReaders\": 2,\n  \"directPersistenceExceptions\": 0,\n  \"findings\": []\n}"
     },
     {
       "id": "ppk-016-targeted-policy-use-case-schema",
       "status": "PASS",
       "exitCode": 0,
       "signal": null,
-      "tests": 75,
-      "minimumTests": 75,
-      "outputSha256": "cfc8f3bc0a581efe38b4fb07dd7c1cd273689385a39efddf82822a8b390d70b1",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n···········································································\n\n Test Files  1 passed (1)\n      Tests  75 passed (75)\n   Start at  23:12:14\n   Duration  6.62s (transform 2.55s, setup 0ms, import 5.07s, tests 1.05s, environment 0ms)\n\n\n(node:18656) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "tests": 77,
+      "minimumTests": 77,
+      "outputSha256": "0fa9c3837fe558410c0e8073ed418c9ef71e709bd80b1a6cd99e55ced29e7d93",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·············································································\n\n Test Files  1 passed (1)\n      Tests  77 passed (77)\n   Start at  13:17:49\n   Duration  6.03s (transform 2.70s, setup 0ms, import 5.22s, tests 523ms, environment 0ms)"
+    },
+    {
+      "id": "ppk-016-local-ocr-sealed-owner-integration",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "tests": 40,
+      "minimumTests": 40,
+      "outputSha256": "131f60650add0533c951ababa073e9e960d500c1558e83bdeb9de7ecc58dcafc",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n········································\n\n Test Files  5 passed (5)\n      Tests  40 passed (40)\n   Start at  13:17:59\n   Duration  8.10s (transform 2.40s, setup 0ms, import 5.46s, tests 878ms, environment 1ms)"
     },
     {
       "id": "family-import-content-free-lease-regression",
@@ -44,8 +54,8 @@
       "signal": null,
       "tests": 10,
       "minimumTests": 10,
-      "outputSha256": "cf6bc7f0880efdbc4fc259e042ab8b3c69a9a49b822aefc453898b53663b8332",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n··········\n\n Test Files  3 passed (3)\n      Tests  10 passed (10)\n   Start at  23:12:22\n   Duration  11.36s (transform 3.69s, setup 0ms, import 7.83s, tests 2.31s, environment 1ms)\n\n\n(node:15016) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:23128) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:10132) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "outputSha256": "e4b33aa2fd3afdc22a299a9c3ef47550e41132311d8efaa71f55ec8e68f9d58e",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n··········\n\n Test Files  3 passed (3)\n      Tests  10 passed (10)\n   Start at  13:18:08\n   Duration  11.87s (transform 4.23s, setup 0ms, import 9.02s, tests 1.76s, environment 0ms)"
     },
     {
       "id": "plaintext-replica-retirement-contract",
@@ -63,8 +73,8 @@
       "signal": null,
       "tests": 1,
       "minimumTests": 1,
-      "outputSha256": "ffa6060a9385a2c8ec7d4029a2bd0f2d9c0b0527b66ddefeee0680467779df93",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n--------·----------------------------------\n\n Test Files  1 passed (1)\n      Tests  1 passed | 42 skipped (43)\n   Start at  23:12:34\n   Duration  9.87s (transform 3.60s, setup 0ms, import 6.95s, tests 2.49s, environment 0ms)\n\n\n(node:15320) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "outputSha256": "4afe62d4653e7a50faa94d38081c54746c2f94efde434f705429fd80367fcd16",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n--------·-------------------------------------------\n\n Test Files  1 passed (1)\n      Tests  1 passed | 51 skipped (52)\n   Start at  13:18:21\n   Duration  9.89s (transform 4.23s, setup 0ms, import 8.04s, tests 1.51s, environment 0ms)"
     },
     {
       "id": "automation-content-free-derived-owner-regression",
@@ -73,8 +83,8 @@
       "signal": null,
       "tests": 5,
       "minimumTests": 5,
-      "outputSha256": "843b608e75835715762789f9019c320baa24723472a2198a52c6ed75cf65ce8f",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·····\n\n Test Files  2 passed (2)\n      Tests  5 passed (5)\n   Start at  23:12:45\n   Duration  10.52s (transform 3.74s, setup 0ms, import 7.66s, tests 1.90s, environment 0ms)\n\n\n(node:31836) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:34100) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "outputSha256": "0fa34cd61af931dfaa8d65916eeb539a169ac09222b3d87cfc711bfd438035ed",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·····\n\n Test Files  2 passed (2)\n      Tests  5 passed (5)\n   Start at  13:18:31\n   Duration  9.24s (transform 3.77s, setup 0ms, import 7.55s, tests 1.09s, environment 0ms)"
     },
     {
       "id": "archive-content-free-result-journal-regression",
@@ -83,8 +93,8 @@
       "signal": null,
       "tests": 5,
       "minimumTests": 5,
-      "outputSha256": "e4313b24c6d978e59e0b9f9d1fa0ccb0df2ab13a44863a8d64ba9fe066527de6",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·····\n\n Test Files  1 passed (1)\n      Tests  5 passed (5)\n   Start at  23:12:57\n   Duration  10.96s (transform 1.85s, setup 0ms, import 3.70s, tests 6.80s, environment 0ms)\n\n\n(node:32060) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "outputSha256": "d063d8c917a13ea3695ebe42333c8cc50f47d7090e69f188ac4dd7461f249a90",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·····\n\n Test Files  1 passed (1)\n      Tests  5 passed (5)\n   Start at  13:18:41\n   Duration  8.20s (transform 1.86s, setup 0ms, import 3.60s, tests 4.33s, environment 0ms)"
     },
     {
       "id": "protected-operational-artifact-production-composition",
@@ -93,28 +103,28 @@
       "signal": null,
       "tests": 3,
       "minimumTests": 3,
-      "outputSha256": "70d749da287d6523417ccff776502427e4a80f6554c7989d99f4b8713bb90a46",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n···\n\n Test Files  1 passed (1)\n      Tests  3 passed (3)\n   Start at  23:13:09\n   Duration  636ms (transform 49ms, setup 0ms, import 105ms, tests 72ms, environment 0ms)"
+      "outputSha256": "1b1aa25d15f22d899e66cbf1287051225c58ae39c5dbeeebf87c8fe8c21ecafb",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n···\n\n Test Files  1 passed (1)\n      Tests  3 passed (3)\n   Start at  13:18:50\n   Duration  394ms (transform 31ms, setup 0ms, import 64ms, tests 48ms, environment 0ms)"
     },
     {
       "id": "ppk-015-egress-regression",
       "status": "PASS",
       "exitCode": 0,
       "signal": null,
-      "tests": 17,
+      "tests": 19,
       "minimumTests": 17,
-      "outputSha256": "d47092bcdf5efa6d8f340c2c7dcc91eb4a7e11fdd634e282cedf5fea5da7c052",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·················\n\n Test Files  1 passed (1)\n      Tests  17 passed (17)\n   Start at  23:13:10\n   Duration  1.06s (transform 309ms, setup 0ms, import 565ms, tests 27ms, environment 0ms)"
+      "outputSha256": "be7a3a178c29e6781830c3b5c789a1ee6d5f39076cba22c36175a2fd6ec2e9fa",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n···················\n\n Test Files  1 passed (1)\n      Tests  19 passed (19)\n   Start at  13:18:51\n   Duration  849ms (transform 281ms, setup 0ms, import 558ms, tests 14ms, environment 0ms)"
     },
     {
       "id": "ppk-014-versioned-api-regression",
       "status": "PASS",
       "exitCode": 0,
       "signal": null,
-      "tests": 17,
+      "tests": 18,
       "minimumTests": 17,
-      "outputSha256": "e2e543919129d227bdd1d00f0600d9ab3ea244f84d4eeb60704fcff923414994",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·················\n\n Test Files  1 passed (1)\n      Tests  17 passed (17)\n   Start at  23:13:12\n   Duration  1.22s (transform 379ms, setup 0ms, import 738ms, tests 57ms, environment 0ms)"
+      "outputSha256": "8722024ed5c03c0a0bea85cc8e5f1add4ebc52688095ad9bb517130344980027",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n··················\n\n Test Files  1 passed (1)\n      Tests  18 passed (18)\n   Start at  13:18:53\n   Duration  1.23s (transform 451ms, setup 0ms, import 904ms, tests 57ms, environment 0ms)"
     },
     {
       "id": "ppk-013-direct-data-access-regression",
@@ -123,8 +133,8 @@
       "signal": null,
       "tests": 20,
       "minimumTests": 20,
-      "outputSha256": "80b1129e98f64b8b14fa0dddb3b7f73a6c3945b05c4c68f003291513300207f4",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n····················\n\n Test Files  1 passed (1)\n      Tests  20 passed (20)\n   Start at  23:13:15\n   Duration  3.13s (transform 1.38s, setup 0ms, import 2.68s, tests 25ms, environment 0ms)"
+      "outputSha256": "27842786829ed1839c61d12b7808a14df7c20f166585fd7892989c7ab3dd529b",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n····················\n\n Test Files  1 passed (1)\n      Tests  20 passed (20)\n   Start at  13:18:54\n   Duration  3.31s (transform 1.59s, setup 0ms, import 3.03s, tests 11ms, environment 0ms)"
     },
     {
       "id": "ppk-012-sensitive-cache-no-cache-regression",
@@ -133,17 +143,17 @@
       "signal": null,
       "tests": 15,
       "minimumTests": 15,
-      "outputSha256": "6e5789115dbed77d0295466752889002924094e1f4c387c8fcda98dcd7ad940a",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n···············\n\n Test Files  2 passed (2)\n      Tests  15 passed (15)\n   Start at  23:13:19\n   Duration  1.59s (transform 332ms, setup 0ms, import 635ms, tests 39ms, environment 0ms)"
+      "outputSha256": "479c38f717f79e48182c15f24ea312e008c813da252da7e921246a87443d444c",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n···············\n\n Test Files  2 passed (2)\n      Tests  15 passed (15)\n   Start at  13:18:58\n   Duration  1.27s (transform 332ms, setup 0ms, import 686ms, tests 22ms, environment 0ms)"
     },
     {
-      "id": "migration-77-metadata-runtime",
+      "id": "migration-77-policy-plus-94-ocr-metadata-runtime",
       "status": "PASS",
       "exitCode": 0,
       "signal": null,
-      "expectedOutput": "\"version\": 77",
-      "outputSha256": "28b705a7de71a1a7678bffa6848fa710d3a10a7297408b8fefb825512ddf88d9",
-      "outputTail": "c9609\"\n    },\n    {\n      \"version\": 67,\n      \"name\": \"local_ppk002_timeline_event_policy_receipt_fence\",\n      \"checksum\": \"a67f9807f2a2bb00ada3768d06882a0ca2648d91b19eacb2becf46cf9ef2b528\"\n    },\n    {\n      \"version\": 68,\n      \"name\": \"ppk002_family_import_governed_rollback_receipt_fence\",\n      \"checksum\": \"298ffa1c65a65e762904cb913ecb9b45d1dfa5fcd94659c1a3181a5984f71bd6\"\n    },\n    {\n      \"version\": 69,\n      \"name\": \"ppk004_complete_policy_context_binding\",\n      \"checksum\": \"b0eaf8abbf4b45e00404717a1ba767ce64687e9f575a0e11798326cbdbfeeb91\"\n    },\n    {\n      \"version\": 70,\n      \"name\": \"ppk005_complete_data_classification\",\n      \"checksum\": \"bfd3643232c6daa25d85804f08c4580f896fe4d6e81c2ad3d7dcf602649085e9\"\n    },\n    {\n      \"version\": 71,\n      \"name\": \"ppk006_complete_policy_obligation_suite\",\n      \"checksum\": \"ba678463aa0138780d74d2342bcc453ab622e87c7213a4d10078319762c96a90\"\n    },\n    {\n      \"version\": 72,\n      \"name\": \"ppk007_signed_versioned_policy_package\",\n      \"checksum\": \"6660072205bd61c06dd1d4f4b744884f7edb29bf370d44a228c150ebca679a83\"\n    },\n    {\n      \"version\": 73,\n      \"name\": \"ppk008_application_identity_device_certificate_manifest\",\n      \"checksum\": \"0099d0238be94ea6bb95579d2ac9f33c015e99d5c14463442313953c014b87fd\"\n    },\n    {\n      \"version\": 74,\n      \"name\": \"ppk009_core_service_decision_reevaluation\",\n      \"checksum\": \"99c89269ac120adbb387dc796ecf1b837f978e04e375d3d41c4fb605020ea813\"\n    },\n    {\n      \"version\": 75,\n      \"name\": \"ppk011_contextual_ownership_share\",\n      \"checksum\": \"3c59ecd6df8d4bf777a8eee8c4864f19848fb712c85691105320afa17b476337\"\n    },\n    {\n      \"version\": 76,\n      \"name\": \"ppk012_offline_capability_lease_cache_fence\",\n      \"checksum\": \"98546bdde3fe97f9f37f2421dd74ad305ce5301dd23a9954ed54bd53610e9388\"\n    },\n    {\n      \"version\": 77,\n      \"name\": \"ppk016_derived_data_policy_inheritance\",\n      \"checksum\": \"de7fbb16719ad427c33d20be3cf564577185d6a1c2eb916cbe0dbdf40724a1da\"\n    }\n  ],\n  \"generatedAt\": \"2026-08-11T20:13:25.092Z\"\n}\n\n(node:33872) ExperimentalWarning: SQLite is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "expectedOutput": "\"version\": 94",
+      "outputSha256": "4409faf4cd1ae99987003809600f8cab888feeb45ba300fcca071a9822f99cd9",
+      "outputTail": "mport_open_banking\",\n      \"checksum\": \"be32fbe6a79688ee879fda02a16faa78f6e0d4151e1462b2c9f28a1da44518c8\"\n    },\n    {\n      \"version\": 83,\n      \"name\": \"b5_life_home_vehicle_managed_ledger\",\n      \"checksum\": \"f648e5f8b6f685222bc26c3ce6fc9edcc37eeebc8ea69a44fc2c0951ff8057dc\"\n    },\n    {\n      \"version\": 84,\n      \"name\": \"b5_life_home_inventory_ledger\",\n      \"checksum\": \"0d6bcb5884a7ea2c11c1b1d4e633344e990c18a203e7b6ce6592dcc80f630362\"\n    },\n    {\n      \"version\": 85,\n      \"name\": \"b5_family_emergency_planning_ledger\",\n      \"checksum\": \"73ba7ebb56a98467bccf527a7f7906699e5fb6bb4dad394cd96ec12e77aa3bd2\"\n    },\n    {\n      \"version\": 86,\n      \"name\": \"b5_family_emergency_preparedness_ledger\",\n      \"checksum\": \"ba95e841da7a08977d50e0c9cb441e0743af6fdcb1c6dee9c42bb136e20183dc\"\n    },\n    {\n      \"version\": 87,\n      \"name\": \"b5_family_emergency_assistance_card_ledger\",\n      \"checksum\": \"b424f1fa2d89d6e0b645912444d9d8639de3d6a3ff0a61fa829b1e14c5206097\"\n    },\n    {\n      \"version\": 88,\n      \"name\": \"b5_family_emergency_card_portability_ledger\",\n      \"checksum\": \"8785551a6ce0facd609e374e7ba65c70d35b552e6f63a7f0b3d790bfbffa2b04\"\n    },\n    {\n      \"version\": 89,\n      \"name\": \"b4_long_term_portfolio_ledger\",\n      \"checksum\": \"1e52fa04e4720830ff3300ceb5a71f78aee216c073b4f4786e393fa45063bbe0\"\n    },\n    {\n      \"version\": 90,\n      \"name\": \"b7_accessibility_preferences\",\n      \"checksum\": \"15f69b6269d0cf2002543ff26df0ddea1844497dff8228141dfb451c0341320c\"\n    },\n    {\n      \"version\": 91,\n      \"name\": \"b3_governed_form_drafts\",\n      \"checksum\": \"7107cbdbe66f05ac6e208bfac39bc4bcc884c679e63af4e49c4a15bacda1b611\"\n    },\n    {\n      \"version\": 92,\n      \"name\": \"privacy_ownership_data_rights_incident_control\",\n      \"checksum\": \"a81c13518563172d29aa2b351218faf553a2189616657fc0fbda9b1922eee137\"\n    },\n    {\n      \"version\": 93,\n      \"name\": \"identity_access_credentials\",\n      \"checksum\": \"51191e62bcf4baec07e3eab5985ef4210402cdb8b7416064519ceb082322916a\"\n    },\n    {\n      \"version\": 94,\n      \"name\": \"local_governed_ocr\",\n      \"checksum\": \"d97738a84ace5de1e56f76f0ea263e6e39a1ec21a52952ed32df6767d04a87e0\"\n    }\n  ],\n  \"generatedAt\": \"2026-08-14T10:19:02.927Z\"\n}"
     },
     {
       "id": "root-typescript",
@@ -171,8 +181,10 @@
     "HASH_ONLY_SOURCE_LOOKUP_CURRENT_CONTEXT_BINDING",
     "DUPLICATE_SELF_CYCLE_DEPTH_REJECTION",
     "LOCALE_INDEPENDENT_CANONICAL_HASH",
-    "MIGRATION_77_METADATA_ONLY_SEALED_IMMUTABILITY",
-    "ZERO_CURRENT_DERIVED_PAYLOAD_PRODUCER_ADAPTERS",
+    "MIGRATION_77_POLICY_LINEAGE_PLUS_MIGRATION_94_SEALED_OCR_METADATA",
+    "EXACT_SINGLE_LOCAL_OCR_DERIVED_PAYLOAD_PRODUCER_ADAPTER",
+    "CONTENT_FREE_OCR_METADATA_REPOSITORY",
+    "MAIN_ONLY_HASH_VERIFIED_OCR_PAYLOAD_READ_CHAIN",
     "FAMILY_IMPORT_CONTENT_FREE_PREVIEW_LEASE",
     "PLAINTEXT_DATABASE_REPLICA_RETIRED",
     "PROTECTED_FULL_BACKUP_ONLY",
@@ -183,13 +195,15 @@
     "PPK_012_TO_PPK_015_SECURITY_REGRESSION",
     "ROOT_TYPESCRIPT"
   ],
-  "migrationDecision": "MIGRATION_77_METADATA_ONLY_IMMUTABLE_RECEIPT_BOUND_LINEAGE",
+  "migrationDecision": "MIGRATION_77_POLICY_LINEAGE_PLUS_MIGRATION_94_SEALED_OCR_METADATA",
   "directDerivedDataPersistenceExceptions": 0,
   "authorizedRepositoryAdapters": 1,
-  "authorizedDerivedProducerAdapters": 0,
+  "authorizedDerivedProducerAdapters": 1,
+  "authorizedSealedMetadataReaders": 1,
+  "authorizedSealedPayloadReadChainComponents": 2,
   "sourceReceiptMaximumAgeMsAtCreation": 30000,
   "futureSourceReceiptAllowedAtCreation": false,
-  "targetedTestMinimumTests": 75,
+  "targetedTestMinimumTests": 77,
   "readTimeProducerReceiptProvenanceRequired": true,
   "readTimeSourceReceiptProvenanceRequired": true,
   "creationChronologyRevalidatedAtRead": true,
@@ -205,11 +219,11 @@
   "cutoverAuthorityAttached": false,
   "realDataTransferPerformed": false,
   "realDataBackfillPerformed": false,
-  "derivedPayloadPersistedByValidation": false,
-  "currentDerivedPayloadRepositoryOrReadPathExists": false,
+  "derivedPayloadPersistedByValidation": true,
+  "currentDerivedPayloadRepositoryOrReadPathExists": true,
   "futureCurrentPepReevaluationRequired": true,
   "historicalReceiptAloneCountsAsRevocationPropagationEvidence": false,
   "policySensitiveIpcNoCacheWeakened": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-11T20:13:31.535Z"
+  "generatedAt": "2026-08-14T10:19:07.454Z"
 }

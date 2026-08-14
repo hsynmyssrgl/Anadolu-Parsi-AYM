@@ -117,6 +117,23 @@ const identityAccessChannels = new Set<string>([
   ...identityAccessReadChannels,
   ...identityAccessWriteChannels
 ]);
+const localGovernedOcrReadChannels = new Set<string>([
+  'localOcr:getCenter',
+  'localOcr:getResult'
+]);
+const localGovernedOcrWriteChannels = new Set<string>([
+  'localOcr:create',
+  'localOcr:run',
+  'localOcr:cancel',
+  'localOcr:correct',
+  'localOcr:rerun',
+  'localOcr:delete',
+  'localOcr:setEnabled'
+]);
+const localGovernedOcrChannels = new Set<string>([
+  ...localGovernedOcrReadChannels,
+  ...localGovernedOcrWriteChannels
+]);
 
 const cancellableNetworkChannels = new Set<string>([
   'dataLifecycle:runRevocationSync'
@@ -128,6 +145,12 @@ const cancellableInteractiveAuthenticationChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLifecyclePolicy => {
+  if (localGovernedOcrReadChannels.has(channel)) {
+    return Object.freeze({ cancellable: true, latestWins: true, timeoutMs: 10_000 });
+  }
+  if (localGovernedOcrWriteChannels.has(channel)) {
+    return Object.freeze({ cancellable: false, latestWins: false, timeoutMs: 0 });
+  }
   if (identityAccessReadChannels.has(channel)) {
     return Object.freeze({ cancellable: true, latestWins: true, timeoutMs: 10_000 });
   }
@@ -192,6 +215,17 @@ const standardAdmissionChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestAdmissionPolicy = (channel: string): IpcRequestAdmissionPolicy => {
+  if (localGovernedOcrChannels.has(channel)) {
+    return Object.freeze({
+      enabled: true,
+      priority: 'interactive',
+      priorityWeight: 100,
+      maxConcurrentPerSender: 2,
+      maxConcurrentPerChannel: 1,
+      maxQueuedPerSender: 4,
+      queueTimeoutMs: 2_500
+    });
+  }
   if (identityAccessChannels.has(channel)) {
     return Object.freeze({
       enabled: true,
@@ -276,6 +310,12 @@ export interface IpcRequestRatePolicy {
 }
 
 export const resolveIpcRequestRatePolicy = (channel: string): IpcRequestRatePolicy => {
+  if (localGovernedOcrReadChannels.has(channel)) {
+    return Object.freeze({ enabled: true, maxRequestsPerWindow: 60, windowMs: 60_000 });
+  }
+  if (localGovernedOcrWriteChannels.has(channel)) {
+    return Object.freeze({ enabled: true, maxRequestsPerWindow: 12, windowMs: 60_000 });
+  }
   if (identityAccessReadChannels.has(channel)) {
     return Object.freeze({ enabled: true, maxRequestsPerWindow: 120, windowMs: 60_000 });
   }

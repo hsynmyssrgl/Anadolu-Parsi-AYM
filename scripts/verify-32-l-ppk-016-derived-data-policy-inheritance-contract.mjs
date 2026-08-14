@@ -40,6 +40,11 @@ const sources = Object.fromEntries(await Promise.all(Object.entries({
   archiveAdapter: 'apps/desktop/src/main/archive-application-adapter.ts',
   archiveRepository: 'packages/repositories/src/platform-policy-transaction-repository.ts',
   archiveContract: 'packages/repository-contracts/src/platform-policy-transaction-repository.ts',
+  ocrApplicationAdapter: 'apps/desktop/src/main/local-governed-ocr-application-adapter.ts',
+  ocrUseCase: 'packages/application/src/local-governed-ocr-use-cases.ts',
+  ocrRepository: 'packages/repositories/src/local-governed-ocr-repository.ts',
+  ocrRuntimeAdapter: 'apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts',
+  ocrResultVault: 'apps/desktop/src/main/local-governed-ocr-result-vault.ts',
   package: 'package.json',
   runtime: 'scripts/verify-32-l-ppk-016-derived-data-policy-inheritance-runtime.mjs',
   targetedTest: 'apps/desktop/tests/ppk016-derived-data-policy-inheritance.test.ts',
@@ -92,7 +97,9 @@ check('production inventory defines the governed materialization and five adjace
   'governedDerivedMaterialization', 'liveProjection', 'transactionJournal',
   'primaryRecord', 'operationalArtifact', 'wholeVaultBackup'
 ].every((key) => typeof inventory.definition?.[key] === 'string' && inventory.definition[key].length > 40));
-check('production inventory has thirteen unique reviewed owners and no remaining implementation blocker', inventory.productionInventory?.length === 13 && inventoryById.size === 13 && inventory.closureSummary?.activeUngovernedDerivedPayloadOwners === 0 && inventory.closureSummary?.retiredOrPayloadEliminatedCandidates === 3 && inventory.closureSummary?.classifiedAdjacentOwners === 10 && inventory.closureSummary?.closedContentFreeOrCurrentPepOwners === 3 && inventory.closureSummary?.openBlockerCount === 0 && inventory.closureSummary?.openBlockers?.length === 0 && inventory.closureSummary?.directPersistenceExceptions === 0);
+check('production inventory has fourteen unique reviewed owners and one governed OCR owner', inventory.productionInventory?.length === 14 && inventoryById.size === 14 && inventory.closureSummary?.activeUngovernedDerivedPayloadOwners === 0 && inventory.closureSummary?.activeGovernedDerivedPayloadOwners === 1 && inventory.closureSummary?.retiredOrPayloadEliminatedCandidates === 3 && inventory.closureSummary?.classifiedAdjacentOwners === 10 && inventory.closureSummary?.closedContentFreeOrCurrentPepOwners === 3 && inventory.closureSummary?.openBlockerCount === 0 && inventory.closureSummary?.openBlockers?.length === 0 && inventory.closureSummary?.directPersistenceExceptions === 0);
+const ocrOwner = inventoryById.get('local-ocr-sealed-result');
+check('local OCR owner inventory binds the only writer metadata owner and main-only read chain', ocrOwner?.classification === 'GOVERNED_DERIVED_MATERIALIZATION' && ocrOwner?.disposition === 'SEALED_LOCAL_RESULT_EXACT_PPK016_BINDING' && ocrOwner?.derivedKind === 'OCR_TEXT' && ocrOwner?.derivedResourceType === 'local_ocr_result' && ocrOwner?.authorizedBindingWriterPath === 'apps/desktop/src/main/local-governed-ocr-application-adapter.ts' && ocrOwner?.authorizedSealedMetadataReaderPath === 'packages/repositories/src/local-governed-ocr-repository.ts' && ocrOwner?.authorizedSealedPayloadReadChain?.length === 2 && ocrOwner?.repositorySemanticPayloadFieldsAllowed === false);
 check('three unsafe materialization candidates are retired or payload-eliminated', [
   ['latent-ai-timeline-memory', 'RETIRED_FROM_PUBLIC_PRODUCTION_SURFACE'],
   ['family-import-preview-cache', 'PAYLOAD_RETENTION_ELIMINATED'],
@@ -157,6 +164,13 @@ const archiveResolveSegment = archiveResolveStart >= 0
 check('archive retry requires a current persisted receipt and returns content-free conflict', archiveResolveSegment.includes('assertArchiveOperationResultAccessReceipt(context, currentReceiptRow)') && archiveResolveSegment.indexOf('assertArchiveOperationResultAccessReceipt(context, currentReceiptRow)') < archiveResolveSegment.indexOf("state: 'conflict'") && sources.archiveAdapter.includes("semanticReplay: 'forbidden'") && sources.archiveAdapter.includes("status: 'completed'") && !/\b(?:serializeArchiveOperationResult|deserializeArchiveOperationResult)\b/u.test(sources.archiveAdapter));
 check('direct derived-data persistence exception registry is frozen and empty', sources.policy.includes('DERIVED_DATA_DIRECT_ACCESS_EXCEPTIONS = Object.freeze([] as const)'));
 check('exactly one authorized repository adapter is declared', sources.policy.includes('DERIVED_DATA_AUTHORIZED_REPOSITORY_ADAPTERS') && sources.policy.includes("'packages/repositories/src/derived-data-policy-repository.ts'"));
+check('exactly one OCR producer metadata owner and two-component main-only read chain are declared', sources.policy.includes('DERIVED_DATA_AUTHORIZED_PRODUCER_ADAPTERS') && sources.policy.includes("'apps/desktop/src/main/local-governed-ocr-application-adapter.ts'") && sources.policy.includes('DERIVED_DATA_AUTHORIZED_SEALED_METADATA_READERS') && sources.policy.includes("'packages/repositories/src/local-governed-ocr-repository.ts'") && sources.policy.includes('DERIVED_DATA_AUTHORIZED_SEALED_PAYLOAD_READ_PATHS') && ['packages/application/src/local-governed-ocr-use-cases.ts', 'apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts'].every((path) => sources.policy.includes(`'${path}'`)));
+check('OCR writer uses exact target receipt and central insertSealed path', ["targetIntent?.resourceType !== 'local_ocr_result'", 'targetIntent.sourceJobId !== primary.intent.resourceId', "binding.target.resourceType !== 'local_ocr_result'", 'binding.target.resourceId !== target.intent.resourceId', 'derivedDataPolicyRepository.insertSealed(target.repository, binding)'].every((marker) => sources.ocrApplicationAdapter.includes(marker)));
+check('OCR metadata repository owns no plaintext bytes or path semantic fields', ['derived_binding_hash', 'sealed_result_id', 'result_content_sha256', 'assertPolicyAuthorizedRepositoryContext'].every((marker) => sources.ocrRepository.includes(marker)) && !/\b(?:result_text|ocr_text|raw_bytes|source_bytes|document_bytes|content_bytes|payload_json|file_path|source_path|vault_path)\b/iu.test(sources.ocrRepository));
+const ocrReadStart = sources.ocrUseCase.indexOf('export class GetLocalGovernedOcrResultUseCase');
+const ocrReadEnd = sources.ocrUseCase.indexOf('export class PropagateLocalGovernedOcrSourceDeletionUseCase', ocrReadStart);
+const ocrReadSegment = ocrReadStart >= 0 && ocrReadEnd > ocrReadStart ? sources.ocrUseCase.slice(ocrReadStart, ocrReadEnd) : '';
+check('OCR plaintext read stays in current-source authorized hash-verified main chain', ['resolveSourceAndConsent(', 'this.runtime.readSealedResult(', 'read.value.contentSha256 !== current.value.resultContentSha256', "action: 'ocr.result_read'"].every((marker) => ocrReadSegment.includes(marker)) && sources.ocrRuntimeAdapter.includes('public async readSealedResult(') && sources.ocrResultVault.includes('public read('));
 check('source count and lineage depth are fail-closed bounded', sources.policy.includes('DERIVED_DATA_MAX_SOURCE_COUNT = 32') && sources.policy.includes('DERIVED_DATA_MAX_LINEAGE_DEPTH = 16'));
 check('canonical ancestor closure is bounded to 512 and exposed by the content-free boundary', sources.policy.includes('DERIVED_DATA_MAX_ANCESTOR_COUNT = 512') && sources.policy.includes('ancestorByKey.size > DERIVED_DATA_MAX_ANCESTOR_COUNT') && sources.policy.includes("return deny('ANCESTOR_COUNT_EXCEEDED')") && sources.policy.includes('maximumAncestorCount: DERIVED_DATA_MAX_ANCESTOR_COUNT') && sources.domain.includes('readonly maximumAncestorCount: 512'));
 check('target source and binding use exact canonical field sets', sources.policy.includes("exactKeys(input, ['target', 'sources'])") && sources.policy.includes('exactKeys(value, TARGET_KEYS)') && sources.policy.includes('exactKeys(value, SOURCE_KEYS)') && sources.policy.includes('exactKeys(value, BINDING_KEYS)'));
@@ -258,13 +272,13 @@ check('profile menu exposes the derived-data security entry', sources.renderer.i
 
 check('source gate scans every production app and package source zone', sources.scanner.includes("for (const parent of ['apps', 'packages'])") && sources.scanner.includes('scanDerivedDataPolicyBoundary'));
 check('source gate blocks SQL adapter primitive and direct-write bypasses', ['DERIVED_BINDING_SQL_OUTSIDE_AUTHORIZED_OWNER', 'DERIVED_REPOSITORY_IMPORT_OUTSIDE_COMPOSITION', 'DERIVED_REPOSITORY_CONCRETE_SYMBOL_OUTSIDE_COMPOSITION', 'DERIVED_PERSISTENCE_PRIMITIVE_OUTSIDE_REPOSITORY', 'DERIVED_BINDING_DIRECT_WRITE_OUTSIDE_REPOSITORY'].every((marker) => sources.scanner.includes(marker)));
-check('source gate exposes zero producer adapters and blocks no-op enforcement composition', sources.scanner.includes('AUTHORIZED_ENFORCEMENT_USE_CASE_USERS') && sources.scanner.includes('DERIVED_ENFORCEMENT_USE_CASE_OUTSIDE_AUTHORIZED_COMPOSITION') && sources.scanner.includes('authorizedProducerAdapters: 0'));
+check('source gate exposes one exact OCR producer and blocks no-op enforcement composition', sources.scanner.includes('AUTHORIZED_ENFORCEMENT_USE_CASE_USERS') && sources.scanner.includes('DERIVED_ENFORCEMENT_USE_CASE_OUTSIDE_AUTHORIZED_COMPOSITION') && sources.scanner.includes('authorizedProducerAdapters: 1') && sources.scanner.includes('OCR_PPK016_EXACT_WRITER_FENCE_MISSING'));
 check('source gate permits only the exact policy adapter registry literal and still rejects policy imports', sources.scanner.includes('authorizedPolicyRegistryLiteral') && sources.scanner.includes('normalizedPath === GOVERNED_POLICY') && sources.scanner.includes('value === AUTHORIZED_REPOSITORY') && sources.scanner.includes("'DERIVED_REPOSITORY_IMPORT_OUTSIDE_COMPOSITION', GOVERNED_POLICY"));
 const maliciousSelfTestSegment = sources.scanner.slice(
   sources.scanner.indexOf('const maliciousCases = ['),
   sources.scanner.indexOf('const failures = maliciousCases', sources.scanner.indexOf('const maliciousCases = ['))
 );
-check('source gate carries twenty-three malicious and four benign self-tests', [
+check('source gate carries twenty-seven malicious core cases plus metadata-reader cases and six benign cases', [
   'INSERT INTO derived_data_policy_bindings',
   'SELECT * FROM derived_data_policy_sources',
   "from './derived-data-policy-repository.js'",
@@ -287,19 +301,23 @@ check('source gate carries twenty-three malicious and four benign self-tests', [
   'deserializeArchiveOperationResult(context, resultJson)',
   'SELECT result_json FROM platform_policy_archive_operations',
   'INSERT INTO automation_runs(title,due_at) VALUES(?,?)',
-  "const sql = 'SELECT result_json FROM platform_policy_archive_operations'"
+  "const sql = 'SELECT result_json FROM platform_policy_archive_operations'",
+  'UPDATE local_governed_ocr_jobs SET sealed_result_id',
+  'INSERT INTO local_governed_ocr_jobs(id,result_text)',
+  'public insertDerivedBinding()',
+  'runtime.readSealedResult'
 ].every((marker) => sources.scanner.includes(marker)) && [
   'const cache = new Map',
   'values.findIndex',
   'Önizleme hazır',
   'family-search-index'
-].every((marker) => sources.scanner.includes(marker)) && (maliciousSelfTestSegment.match(/^\s*\[/gmu)?.length ?? 0) === 23);
-check('current production source has twenty-three relevant files and zero boundary finding', sourceScan.relevantFiles === 23 && sourceScan.findings.length === 0);
+].every((marker) => sources.scanner.includes(marker)) && (maliciousSelfTestSegment.match(/^\s*\[/gmu)?.length ?? 0) === 27);
+check('current production source includes OCR integration files and has zero boundary finding', sourceScan.relevantFiles >= 39 && sourceScan.findings.length === 0);
 check('typecheck and build both execute the PPK-016 source gate', rootPackage.scripts?.pretypecheck?.includes('verify-derived-data-policy-boundary.mjs') && rootPackage.scripts?.prebuild?.includes('verify-derived-data-policy-boundary.mjs'));
 check('targeted tests cover inheritance downgrade lineage tamper ancestor overflow and operation ordering', ['SENSITIVITY_DOWNGRADE', 'DATA_CLASS_DOWNGRADE', 'SOURCE_ACCESS_INTERSECTION_EMPTY', 'OBLIGATION_DOWNGRADE', 'RETENTION_BROADENED', 'FAMILY_MISMATCH', 'POLICY_PACKAGE_HASH_MISMATCH', 'SOURCE_RECEIPT_INACTIVE', 'DUPLICATE_SOURCE', 'SELF_REFERENCE', 'CYCLIC_LINEAGE', 'LINEAGE_DEPTH_EXCEEDED', 'ANCESTOR_COUNT_EXCEEDED', 'SOURCE_SET_HASH_MISMATCH', 'BINDING_HASH_MISMATCH', 'not.toHaveBeenCalled', "expect(order).toEqual(['persist', 'operation'])"].every((marker) => sources.targetedTest.includes(marker)));
 check('targeted tests exercise real migration 77 repository sealing hash-only lookup and immutable reads', ['DatabaseSync', 'SqliteDerivedDataPolicyRepository', 'pending-source-sealed', 'listBindingHashesBySource', 'source hash lookup current policy context', 'sealed derived data policy binding is immutable', 'source JSON does not match structural metadata'].every((marker) => sources.targetedTest.includes(marker)));
 check('targeted tests cover future stale exact-30000ms receipt boundaries and producer time mismatch', ['future issued-at', 'stale issued-at', 'tam 30.000 ms tazelik sınırını kabul eder', 'producer issued-at', "authorized_at: '2026-08-11T12:00:01.000Z'"].every((marker) => sources.targetedTest.includes(marker)));
-check('runtime requires all seventy-five current PPK-016 targeted tests', sources.runtime.includes("id: 'ppk-016-targeted-policy-use-case-schema'") && sources.runtime.includes('minimumTests: 75'));
+check('runtime requires the expanded PPK-016 targeted tests', sources.runtime.includes("id: 'ppk-016-targeted-policy-use-case-schema'") && sources.runtime.includes('minimumTests: 77'));
 check('targeted tests prove the exact 512 allow and 513 ancestor rejection boundary', sources.targetedTest.includes('birleşik ata kümesinde 512 kaydı kabul, 513 kaydı fail-closed reddeder') && sources.targetedTest.includes('ancestors(DERIVED_DATA_MAX_ANCESTOR_COUNT - 1)') && sources.targetedTest.includes('ancestors(DERIVED_DATA_MAX_ANCESTOR_COUNT)'));
 check('targeted tests reject producer and source provenance tamper through both read APIs', ['producer hash işaretçisi', 'signed producer receipt hashı', 'producer allowed subject', 'producer created-at', 'diskte kaynak authorized-at/receipt zamanı pencere dışına taşınırsa read-back reddeder', 'expectRuntimeBindingReadRejected', 'expectRuntimeSourceLookupRejected'].every((marker) => sources.targetedTest.includes(marker)));
 check('targeted tests prove exact upstream reset rejection and safe monotonic policy-package rotation', ['mühürlü upstream soyunu exact bağlar ve daha gevşek olmayan güncel politika paketi rotasyonuna izin verir', 'tarihsel upstream target effective politikadan daha sıkıysa current source gevşetmesini reddeder', 'geçerli PEP makbuzuyla historical offline no_export yükümlülüğünü current online kaynakta düşürmeyi reddeder', 'diskte downstream soy metadata reseti yapıldığında read-back upstream bağıyla yeniden doğrular'].every((marker) => sources.targetedTest.includes(marker)));
@@ -322,8 +340,9 @@ check('audit records the complete executed validation matrix without expanding t
 check('runtime evidence plan names the new provenance lineage rotation and ancestor boundaries', ['READ_TIME_PRODUCER_SOURCE_RECEIPT_PROVENANCE', 'READ_TIME_CREATION_CHRONOLOGY_REVALIDATION', 'CURRENT_PEP_HISTORICAL_RECEIPT_NOT_GRANT', 'EXACT_RECURSIVE_UPSTREAM_LINEAGE', 'MONOTONIC_UPSTREAM_POLICY_ROTATION', 'MAXIMUM_512_ANCESTOR_AND_STORED_TRAVERSAL'].every((marker) => sources.runtime.includes(`'${marker}'`)));
 
 check('accepted registry closes the complete PPK-016 evidence chain', requirement?.status === 'COMPLETE' && Object.values(requirement.chain ?? {}).every((value) => value === true));
-check('scope closes PPK-016 with migration 77 and no transfer backfill or cutover', scope.status === 'COMPLETED' && scope.boundaries?.migrationVersion === 77 && scope.requirementCompletionClaimed === true && scope.realDataTransferPerformed === false && scope.realDataBackfillPerformed === false && scope.sqliteOwnershipTransferred === false && scope.cutoverAuthorityAttached === false);
-check('DEC-197 is latest and binds PPK-016 evidence', ledger.decisions.at(-1)?.id === 'DEC-197' && ledger.decisions.at(-1)?.requirements?.includes('PPK-016') && ledger.decisionCount === ledger.decisions.length);
+check('scope preserves migration 77 foundation and integrates migration 94 OCR owner without transfer backfill or cutover', scope.status === 'COMPLETED' && scope.boundaries?.migrationVersion === 77 && scope.boundaries?.latestIntegratedMigrationVersion === 94 && scope.boundaries?.payloadPersistenceAllowed === true && scope.boundaries?.currentDerivedPayloadOwnerExists === true && scope.boundaries?.authorizedDerivedProducerAdapterCount === 1 && scope.boundaries?.authorizedSealedMetadataReaderCount === 1 && scope.boundaries?.authorizedSealedPayloadReadChainComponentCount === 2 && scope.boundaries?.localOcrDerivedResultBindingIntegrated === true && scope.requirementCompletionClaimed === true && scope.realDataTransferPerformed === false && scope.realDataBackfillPerformed === false && scope.sqliteOwnershipTransferred === false && scope.cutoverAuthorityAttached === false);
+check('scope records the current OCR integration validation without rewriting historical closure evidence', scope.validation?.currentLocalOcrIntegrationEvidence?.sourceGateRelevantFiles >= 39 && scope.validation?.currentLocalOcrIntegrationEvidence?.sourceGateMaliciousSelfTests === 30 && scope.validation?.currentLocalOcrIntegrationEvidence?.sourceGateBenignSelfTests === 6 && scope.validation?.currentLocalOcrIntegrationEvidence?.sourceGateFindings === 0 && scope.validation?.currentLocalOcrIntegrationEvidence?.targetedTestsPassed === 77 && scope.validation?.currentLocalOcrIntegrationEvidence?.ocrIntegrationTestsPassed === 40 && scope.validation?.currentLocalOcrIntegrationEvidence?.runtimeBundleChecksPassed === 16 && scope.validation?.currentLocalOcrIntegrationEvidence?.runtimeBundleChecksFailed === 0);
+check('DEC-197 remains active and binds PPK-016 evidence', ledger.decisions.some((item) => item.id === 'DEC-197' && item.status === 'ACTIVE' && item.requirements?.includes('PPK-016')) && ledger.decisionCount === ledger.decisions.length);
 check('decision and audit preserve Desktop vault no-cache DEC-171 and zero real data', sources.decision.includes('SQLite sahipliği') && sources.decision.includes('DEC-171') && sources.audit.includes('no-cache') && sources.audit.includes('DEC-171') && /gerçek veri/iu.test(sources.audit));
 check('decision and audit limit completion to metadata foundation and require future current-PEP payload binding', [sources.decision, sources.audit].every((document) => ['generic IPC', 'no-cache', 'güncel PEP yeniden değerlendirmesi', 'aynı policy-authorized transaction', 'Tarihsel receipt tek başına', 'metadata/enforcement foundation'].every((marker) => document.includes(marker))));
 check('decision and audit record the fail-closed 30000 ms creation-time receipt window', [sources.decision, sources.audit].every((document) => document.includes('30.000 ms') && document.includes('producer transaction') && document.includes('fail-closed')));
@@ -348,10 +367,12 @@ const report = {
   openProductionBlockers: inventory.closureSummary?.openBlockers ?? [],
   directDerivedDataPersistenceExceptions: 0,
   authorizedRepositoryAdapters: 1,
-  authorizedDerivedProducerAdapters: 0,
+  authorizedDerivedProducerAdapters: 1,
+  authorizedSealedMetadataReaders: 1,
+  authorizedSealedPayloadReadChainComponents: 2,
   sourceReceiptMaximumAgeMsAtCreation: 30_000,
   futureSourceReceiptAllowedAtCreation: false,
-  targetedTestMinimumTests: 75,
+  targetedTestMinimumTests: 77,
   readTimeProducerReceiptProvenanceRequired: true,
   readTimeSourceReceiptProvenanceRequired: true,
   creationChronologyRevalidatedAtRead: true,
@@ -362,14 +383,14 @@ const report = {
   ambiguousUpstreamRejected: true,
   maximumAncestorCount: 512,
   maximumStoredLineageTraversalCount: 512,
-  migrationDecision: 'MIGRATION_77_METADATA_ONLY_IMMUTABLE_RECEIPT_BOUND_LINEAGE',
+  migrationDecision: 'MIGRATION_77_POLICY_LINEAGE_PLUS_MIGRATION_94_SEALED_OCR_METADATA',
   legacyDesktopVaultPreserved: true,
   sqliteOwnershipTransferred: false,
   cutoverAuthorityAttached: false,
   realDataTransferPerformed: false,
   realDataBackfillPerformed: false,
-  derivedPayloadPersistedByValidation: false,
-  currentDerivedPayloadRepositoryOrReadPathExists: false,
+  derivedPayloadPersistedByValidation: true,
+  currentDerivedPayloadRepositoryOrReadPathExists: true,
   futureCurrentPepReevaluationRequired: true,
   historicalReceiptAloneCountsAsRevocationPropagationEvidence: false,
   policySensitiveIpcNoCacheWeakened: false,

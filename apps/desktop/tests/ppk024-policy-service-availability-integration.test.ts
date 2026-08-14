@@ -13,7 +13,10 @@ import {
   type PolicyServiceAvailabilityObservation,
   type PolicyServiceAvailabilityReason
 } from '@ppt/platform-policy';
-import { evaluateIpcIntegrationPolicy } from '../src/main/ipc-integration-policy.js';
+import {
+  evaluateIpcIntegrationPolicy,
+  evaluateIpcIntegrationResultPolicy
+} from '../src/main/ipc-integration-policy.js';
 import { resolveIpcReadSharingPolicy } from '../src/main/ipc-read-sharing.js';
 
 const NOW = '2026-08-12T03:00:00.000Z';
@@ -242,6 +245,20 @@ describe('32-T PPK-024 Policy Service availability integration', () => {
     expect(resolveIpcReadSharingPolicy(channel)).toEqual({
       enabled: false, priority: 'standard', ttlMs: 0, maxEntries: 0, maxResultBytes: 0
     });
+  });
+
+  it('accepts only the exact content-free availability result contract', async () => {
+    const channel = 'system:getPolicyServiceAvailabilityBoundary';
+    const view = await new GetPolicyServiceAvailabilityBoundaryUseCase(
+      new PolicyServiceAvailabilityPolicy(),
+      { observe: () => observation() }
+    ).execute();
+    expect(evaluateIpcIntegrationResultPolicy(channel, view)).toEqual({ accepted: true });
+    expect(evaluateIpcIntegrationResultPolicy(channel, { ...view, policyPackageSha256: 'a'.repeat(64) }))
+      .toEqual({ accepted: false, reason: 'POLICY_SERVICE_AVAILABILITY_RESULT_INVALID', path: '$result' });
+    const accessor = { ...view } as Record<string, unknown>;
+    Object.defineProperty(accessor, 'reason', { enumerable: true, get: () => 'FRESH_VERIFIED_READ_WRITE' });
+    expect(evaluateIpcIntegrationResultPolicy(channel, accessor)).toMatchObject({ accepted: false });
   });
 
   it.each([

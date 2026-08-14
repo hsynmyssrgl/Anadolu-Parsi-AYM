@@ -18,6 +18,10 @@ const AUTOMATION_APPLICATION_ADAPTER = 'apps/desktop/src/main/automation-applica
 const AUTOMATION_REPOSITORY = 'packages/repositories/src/automation-repository.ts';
 const ARCHIVE_APPLICATION_ADAPTER = 'apps/desktop/src/main/archive-application-adapter.ts';
 const ARCHIVE_OPERATION_REPOSITORY = 'packages/repositories/src/platform-policy-transaction-repository.ts';
+const OCR_APPLICATION_ADAPTER = 'apps/desktop/src/main/local-governed-ocr-application-adapter.ts';
+const OCR_APPLICATION_USE_CASE = 'packages/application/src/local-governed-ocr-use-cases.ts';
+const OCR_METADATA_REPOSITORY = 'packages/repositories/src/local-governed-ocr-repository.ts';
+const OCR_RUNTIME_ADAPTER = 'apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts';
 const SOURCE_DELETION_METADATA_INVENTORY = 'packages/repositories/src/data-lifecycle-repository.ts';
 const PRIVACY_OWNERSHIP_METADATA_INVENTORY = 'packages/repositories/src/privacy-ownership-data-rights-repository.ts';
 const ALWAYS_SCANNED_PRODUCTION_SOURCES = new Set([
@@ -26,7 +30,11 @@ const ALWAYS_SCANNED_PRODUCTION_SOURCES = new Set([
   AUTOMATION_APPLICATION_ADAPTER,
   AUTOMATION_REPOSITORY,
   ARCHIVE_APPLICATION_ADAPTER,
-  ARCHIVE_OPERATION_REPOSITORY
+  ARCHIVE_OPERATION_REPOSITORY,
+  OCR_APPLICATION_ADAPTER,
+  OCR_APPLICATION_USE_CASE,
+  OCR_METADATA_REPOSITORY,
+  OCR_RUNTIME_ADAPTER
 ]);
 
 const AUTHORIZED_SQL_OWNERS = new Set([AUTHORIZED_REPOSITORY, AUTHORIZED_SCHEMA_OWNER]);
@@ -43,7 +51,12 @@ const AUTHORIZED_CONCRETE_REPOSITORY_USERS = new Set([
 ]);
 const AUTHORIZED_BINDING_WRITE_DECLARATIONS = new Set([
   AUTHORIZED_REPOSITORY,
-  AUTHORIZED_REPOSITORY_CONTRACT
+  AUTHORIZED_REPOSITORY_CONTRACT,
+  OCR_APPLICATION_ADAPTER
+]);
+const AUTHORIZED_SEALED_RESULT_READ_PATHS = new Set([
+  OCR_APPLICATION_USE_CASE,
+  OCR_RUNTIME_ADAPTER
 ]);
 const AUTHORIZED_ENFORCEMENT_USE_CASE_USERS = new Set([
   GOVERNED_USE_CASE,
@@ -52,14 +65,16 @@ const AUTHORIZED_ENFORCEMENT_USE_CASE_USERS = new Set([
 const DERIVED_BINDING_TABLE = /\bderived_data_policy_(?:bindings|sources)\b/iu;
 const AUTOMATION_RUN_TABLE = /\bautomation_runs\b/iu;
 const ARCHIVE_OPERATION_TABLE = /\bplatform_policy_archive_operations\b/iu;
+const OCR_CURRENT_METADATA_TABLE = /\blocal_governed_ocr_jobs\b/iu;
 const SQL_MUTATION = /\b(?:INSERT\s+INTO|UPDATE|DELETE\s+FROM|REPLACE\s+INTO)\b/iu;
 const SQL_READ_ONLY_QUERY = /^\s*(?:SELECT\b|WITH\b[\s\S]*?\bSELECT\b)/iu;
 const ARCHIVE_SEMANTIC_PAYLOAD_COLUMN = /\bresult_json\b/iu;
+const OCR_REPOSITORY_SEMANTIC_PAYLOAD = /\b(?:result_text|ocr_text|raw_bytes|source_bytes|document_bytes|content_bytes|payload_json|file_path|source_path|vault_path)\b/iu;
 const DERIVED_REPOSITORY_MODULE = /(?:^|\/)derived-data-policy-repository(?:\.[cm]?[jt]s)?$/u;
 const AI_MEMORY_PRODUCER_MODULE = /(?:^|\/)ai-memory(?:\.[cm]?[jt]s)?$/u;
 const RAW_REPLICA_MODULE = /(?:^|\/)(?:database-export-file-use-cases|database-export-file-application-adapter)(?:\.[cm]?[jt]s)?$/u;
 const PERSISTENCE_IMPORT = /^(?:node:)?sqlite$|^better-sqlite3$|^@ppt\/(?:database|repositories)(?:\/|$)/u;
-const RELEVANT_SOURCE = /DerivedData|derived_data_policy_|derived-data-policy-repository|ai-memory|buildAiTimelineContext|database-export-file|ExportDatabaseFileUseCase|FileSystemDatabaseExportFilePort|automation_runs|platform_policy_archive_operations/u;
+const RELEVANT_SOURCE = /DerivedData|derived_data_policy_|derived-data-policy-repository|ai-memory|buildAiTimelineContext|database-export-file|ExportDatabaseFileUseCase|FileSystemDatabaseExportFilePort|automation_runs|platform_policy_archive_operations|local_governed_ocr_jobs|local-governed-ocr|readSealedResult/u;
 const sourceExtensions = new Set(['.ts', '.tsx', '.mts', '.cts', '.js', '.jsx', '.mjs', '.cjs']);
 
 const normalize = (value) => value.replaceAll('\\', '/');
@@ -240,6 +255,71 @@ export const scanDerivedDataPolicySourceText = (path, source) => {
     }
   }
 
+  if (normalizedPath === OCR_APPLICATION_ADAPTER) {
+    const writerStart = source.indexOf('public insertDerivedBinding(');
+    const writerEnd = source.indexOf('public appendAudit(', writerStart);
+    const writerSegment = writerStart >= 0 && writerEnd > writerStart
+      ? source.slice(writerStart, writerEnd)
+      : '';
+    const insertCalls = [...source.matchAll(/\binsertSealed\s*\(/gu)];
+    if (
+      writerStart < 0
+      || writerEnd <= writerStart
+      || insertCalls.length !== 1
+      || insertCalls[0].index < writerStart
+      || insertCalls[0].index >= writerEnd
+      || ![
+        "const target = this.slot('target')",
+        "const primary = this.slot('primary')",
+        "targetIntent?.resourceType !== 'local_ocr_result'",
+        'targetIntent.sourceJobId !== primary.intent.resourceId',
+        "binding.target.resourceType !== 'local_ocr_result'",
+        'binding.target.resourceId !== target.intent.resourceId',
+        'binding.target.familyId !== this.context.familyId',
+        'this.dependencies.derivedDataPolicyRepository.insertSealed(target.repository, binding)'
+      ].every((marker) => writerSegment.includes(marker))
+    ) {
+      report('OCR_PPK016_EXACT_WRITER_FENCE_MISSING', 'local_ocr_result exact binding writer', Math.max(writerStart, 0));
+    }
+  }
+
+  if (normalizedPath === OCR_APPLICATION_USE_CASE) {
+    const readStart = source.indexOf('export class GetLocalGovernedOcrResultUseCase');
+    const readEnd = source.indexOf('export class PropagateLocalGovernedOcrSourceDeletionUseCase', readStart);
+    const readSegment = readStart >= 0 && readEnd > readStart ? source.slice(readStart, readEnd) : '';
+    const readCalls = [...source.matchAll(/\breadSealedResult\s*\(/gu)];
+    if (
+      readStart < 0
+      || readEnd <= readStart
+      || readCalls.length !== 2
+      || !readSegment.includes('resolveSourceAndConsent(')
+      || !readSegment.includes('current.value.resultContentSha256')
+      || !readSegment.includes('current.value.sealedResultId')
+      || !readSegment.includes('this.runtime.readSealedResult(')
+      || !readSegment.includes('read.value.contentSha256 !== current.value.resultContentSha256')
+      || !readSegment.includes("action: 'ocr.result_read'")
+    ) {
+      report('OCR_PPK016_EXACT_READ_FENCE_MISSING', 'local_ocr_result exact authorized read', Math.max(readStart, 0));
+    }
+  }
+
+  if (normalizedPath === OCR_METADATA_REPOSITORY) {
+    const semanticPayload = OCR_REPOSITORY_SEMANTIC_PAYLOAD.exec(source);
+    if (semanticPayload) {
+      report('OCR_REPOSITORY_SEMANTIC_PAYLOAD', semanticPayload[0], semanticPayload.index);
+    }
+    if (![
+      'assertPolicyAuthorizedRepositoryContext',
+      'primaryScope(context',
+      'archiveDeletionScope(context',
+      'derived_binding_hash',
+      'sealed_result_id',
+      'result_content_sha256'
+    ].every((marker) => source.includes(marker))) {
+      report('OCR_REPOSITORY_CONTENT_FREE_METADATA_FENCE_MISSING', 'local OCR metadata repository fence', 0);
+    }
+  }
+
   for (const token of lexicalTokens(source)) {
     const { offset, value } = token;
     if (token.kind === 'string') {
@@ -295,6 +375,14 @@ export const scanDerivedDataPolicySourceText = (path, source) => {
         report('ARCHIVE_OPERATION_SQL_OUTSIDE_AUTHORIZED_OWNER', value.slice(0, 160), offset);
       }
       if (
+        OCR_CURRENT_METADATA_TABLE.test(value)
+        && SQL_MUTATION.test(value)
+        && normalizedPath !== OCR_METADATA_REPOSITORY
+        && normalizedPath !== AUTHORIZED_SCHEMA_OWNER
+      ) {
+        report('OCR_METADATA_SQL_OUTSIDE_AUTHORIZED_OWNER', value.slice(0, 160), offset);
+      }
+      if (
         derivedPolicySource
         && PERSISTENCE_IMPORT.test(value)
         && !AUTHORIZED_CONCRETE_REPOSITORY_USERS.has(normalizedPath)
@@ -316,6 +404,15 @@ export const scanDerivedDataPolicySourceText = (path, source) => {
       && !AUTHORIZED_BINDING_WRITE_DECLARATIONS.has(normalizedPath)
     ) {
       report('DERIVED_BINDING_DIRECT_WRITE_OUTSIDE_REPOSITORY', value, offset);
+    }
+    if (
+      token.kind === 'identifier'
+      && value === 'readSealedResult'
+      && source[offset - 1] === '.'
+      && /^\s*\(/u.test(source.slice(offset + value.length))
+      && !AUTHORIZED_SEALED_RESULT_READ_PATHS.has(normalizedPath)
+    ) {
+      report('OCR_SEALED_RESULT_READ_OUTSIDE_AUTHORIZED_PATH', value, offset);
     }
     if (
       token.kind === 'identifier'
@@ -412,7 +509,11 @@ const selfTest = () => {
     ["const value = deserializeArchiveOperationResult(context, resultJson);", 'ARCHIVE_SEMANTIC_REPLAY_PAYLOAD', ARCHIVE_APPLICATION_ADAPTER],
     ["const ARCHIVE_OPERATION_METADATA_SELECT = `SELECT result_json FROM platform_policy_archive_operations`;", 'ARCHIVE_METADATA_LOOKUP_SELECTS_SEMANTIC_PAYLOAD', ARCHIVE_OPERATION_REPOSITORY],
     ["const sql = 'INSERT INTO automation_runs(title,due_at) VALUES(?,?)';", 'AUTOMATION_LEDGER_SQL_OUTSIDE_AUTHORIZED_OWNER'],
-    ["const sql = 'SELECT result_json FROM platform_policy_archive_operations';", 'ARCHIVE_OPERATION_SQL_OUTSIDE_AUTHORIZED_OWNER']
+    ["const sql = 'SELECT result_json FROM platform_policy_archive_operations';", 'ARCHIVE_OPERATION_SQL_OUTSIDE_AUTHORIZED_OWNER'],
+    ["const sql = 'UPDATE local_governed_ocr_jobs SET sealed_result_id=? WHERE id=?';", 'OCR_METADATA_SQL_OUTSIDE_AUTHORIZED_OWNER'],
+    ["const sql = 'INSERT INTO local_governed_ocr_jobs(id,result_text) VALUES(?,?)';", 'OCR_REPOSITORY_SEMANTIC_PAYLOAD', OCR_METADATA_REPOSITORY],
+    ["public insertDerivedBinding() { return repository.insertSealed(context, binding); }", 'OCR_PPK016_EXACT_WRITER_FENCE_MISSING', OCR_APPLICATION_ADAPTER],
+    ["runtime.readSealedResult({ jobId, sealedResultId });", 'OCR_SEALED_RESULT_READ_OUTSIDE_AUTHORIZED_PATH']
   ];
   const failures = maliciousCases.filter(([source, kind, path = 'apps/example/src/derived-bypass.ts']) =>
     !scanDerivedDataPolicySourceText(path, source)
@@ -493,7 +594,9 @@ const main = async () => {
     governedPolicy: GOVERNED_POLICY,
     governedUseCase: GOVERNED_USE_CASE,
     authorizedRepositoryAdapters: 1,
-    authorizedProducerAdapters: 0,
+    authorizedProducerAdapters: 1,
+    authorizedSealedMetadataReaders: 1,
+    authorizedSealedPayloadReadPaths: AUTHORIZED_SEALED_RESULT_READ_PATHS.size,
     latentAiMemoryProducerPubliclyReachable: false,
     plaintextReplicaProductionAdapters: 0,
     retainedFamilyImportPayloadFields: 0,

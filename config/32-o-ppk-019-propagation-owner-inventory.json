@@ -12,6 +12,49 @@
   },
   "productionInventory": [
     {
+      "id": "governed-ai-memory-records",
+      "classification": "REGISTERED_SEMANTIC_DERIVED_OWNER",
+      "paths": [
+        "packages/repositories/src/data-lifecycle-repository.ts",
+        "packages/database/src/family-database-migrations.ts"
+      ],
+      "control": "governed_ai_memory_records aktif semantik owner olarak kayıtlıdır; kaynak purge öncesinde exact PPK-016 source bağı üzerinden deleted tombstone, boş title/statement ve processing_allowed=0 durumu zorunludur.",
+      "disposition": "CLOSED_REGISTERED_TOMBSTONE_BEFORE_SOURCE_DELETE"
+    },
+    {
+      "id": "local-ocr-sealed-derived-result",
+      "classification": "REGISTERED_SEALED_SEMANTIC_DERIVED_OWNER",
+      "paths": [
+        "packages/application/src/local-governed-ocr-use-cases.ts",
+        "apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts",
+        "apps/desktop/src/main/local-governed-ocr-result-vault.ts"
+      ],
+      "control": "archive_item source deletion main-only receipt altında önce exact sealed_result_id için deleted+verified file purge yapar; yalnız bundan sonra aynı repository transactionında job tombstone ve per-item ledger yazılır. Derived job delete archive source'u silmez.",
+      "disposition": "CLOSED_FILE_FIRST_VERIFIED_PURGE_THEN_ATOMIC_TOMBSTONE"
+    },
+    {
+      "id": "local-governed-ocr-metadata-and-deletion-ledgers",
+      "classification": "CONTENT_FREE_CURRENT_AND_APPEND_ONLY_METADATA",
+      "paths": [
+        "packages/platform-policy/src/source-deletion-propagation-policy.ts",
+        "packages/repositories/src/data-lifecycle-repository.ts",
+        "packages/repositories/src/local-governed-ocr-repository.ts",
+        "packages/database/src/family-database-migrations.ts"
+      ],
+      "currentMetadataOwners": [
+        "local_governed_ocr_jobs"
+      ],
+      "appendOnlyMetadataLedgers": [
+        "local_governed_ocr_mutations",
+        "local_governed_ocr_source_deletion_items"
+      ],
+      "contentFreeSettingsMetadata": [
+        "local_governed_ocr_settings"
+      ],
+      "control": "Current job satırı yalnız owner/source/binding/sealed-id/hash/count/tombstone metadata'sıdır. Mutation ve source-deletion item sınıfları immutable ledger'dır; bounded mutation prune yalnız 30 gün grace ve sıfır current/item referansı ile mümkündür. Hiçbiri OCR plaintext, raw bytes veya path taşımaz.",
+      "disposition": "CLASSIFIED_CONTENT_FREE_METADATA_ONLY"
+    },
+    {
       "id": "central-source-deletion-propagation-policy",
       "classification": "CANONICAL_FAIL_CLOSED_POLICY_AND_USE_CASE",
       "paths": [
@@ -32,13 +75,13 @@
       "disposition": "CLOSED_ATOMIC_LOCAL_PROPAGATION"
     },
     {
-      "id": "ocr-index-thumbnail-ai-memory-persistent-payloads",
+      "id": "search-index-thumbnail-cache-and-replica-persistent-payloads",
       "classification": "ABSENT_TODAY_FUTURE_DEFAULT_DENY",
       "paths": [
         "scripts/verify-source-deletion-propagation-boundary.mjs",
         "packages/repositories/src/data-lifecycle-repository.ts"
       ],
-      "control": "Aktif üretim persistent semantic owner sayısı sıfırdır. Yeni tablo/writer statik gate ve runtime sqlite_schema taraması tarafından kayıtlı merkezi owner zinciri olmadan reddedilir.",
+      "control": "OCR ve AI memory dışında aktif search-index, thumbnail, derived-cache veya plaintext-replica semantic owner yoktur. Yeni tablo/writer statik gate ve runtime sqlite_schema taraması tarafından kayıtlı merkezi owner zinciri olmadan reddedilir.",
       "disposition": "CLOSED_VERIFIED_ABSENT"
     },
     {
@@ -107,10 +150,12 @@
     }
   ],
   "closureSummary": {
-    "reviewedOwners": 9,
+    "reviewedOwners": 12,
     "requiredOwnerKinds": 7,
     "requiredRuntimeCacheRegistries": 3,
-    "activeSemanticPersistentOwners": 0,
+    "activeSemanticPersistentOwners": 2,
+    "currentMetadataOwners": 1,
+    "metadataOnlyAppendOnlyLedgers": 3,
     "activePlaintextReplicaOwners": 0,
     "directBypassExceptions": 0,
     "unregisteredPersistentOwners": 0,

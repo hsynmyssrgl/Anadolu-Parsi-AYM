@@ -5,8 +5,8 @@
   "requirement": "PPK-016",
   "phase": "DERIVED_DATA_POLICY_INHERITANCE_CONTRACT",
   "status": "PASS",
-  "checkCount": 109,
-  "passed": 109,
+  "checkCount": 115,
+  "passed": 115,
   "failed": 0,
   "checks": [
     {
@@ -22,7 +22,11 @@
       "status": "PASS"
     },
     {
-      "name": "production inventory has thirteen unique reviewed owners and no remaining implementation blocker",
+      "name": "production inventory has fourteen unique reviewed owners and one governed OCR owner",
+      "status": "PASS"
+    },
+    {
+      "name": "local OCR owner inventory binds the only writer metadata owner and main-only read chain",
       "status": "PASS"
     },
     {
@@ -87,6 +91,22 @@
     },
     {
       "name": "exactly one authorized repository adapter is declared",
+      "status": "PASS"
+    },
+    {
+      "name": "exactly one OCR producer metadata owner and two-component main-only read chain are declared",
+      "status": "PASS"
+    },
+    {
+      "name": "OCR writer uses exact target receipt and central insertSealed path",
+      "status": "PASS"
+    },
+    {
+      "name": "OCR metadata repository owns no plaintext bytes or path semantic fields",
+      "status": "PASS"
+    },
+    {
+      "name": "OCR plaintext read stays in current-source authorized hash-verified main chain",
       "status": "PASS"
     },
     {
@@ -334,7 +354,7 @@
       "status": "PASS"
     },
     {
-      "name": "source gate exposes zero producer adapters and blocks no-op enforcement composition",
+      "name": "source gate exposes one exact OCR producer and blocks no-op enforcement composition",
       "status": "PASS"
     },
     {
@@ -342,11 +362,11 @@
       "status": "PASS"
     },
     {
-      "name": "source gate carries twenty-three malicious and four benign self-tests",
+      "name": "source gate carries twenty-seven malicious core cases plus metadata-reader cases and six benign cases",
       "status": "PASS"
     },
     {
-      "name": "current production source has twenty-three relevant files and zero boundary finding",
+      "name": "current production source includes OCR integration files and has zero boundary finding",
       "status": "PASS"
     },
     {
@@ -366,7 +386,7 @@
       "status": "PASS"
     },
     {
-      "name": "runtime requires all seventy-five current PPK-016 targeted tests",
+      "name": "runtime requires the expanded PPK-016 targeted tests",
       "status": "PASS"
     },
     {
@@ -426,11 +446,15 @@
       "status": "PASS"
     },
     {
-      "name": "scope closes PPK-016 with migration 77 and no transfer backfill or cutover",
+      "name": "scope preserves migration 77 foundation and integrates migration 94 OCR owner without transfer backfill or cutover",
       "status": "PASS"
     },
     {
-      "name": "DEC-197 is latest and binds PPK-016 evidence",
+      "name": "scope records the current OCR integration validation without rewriting historical closure evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "DEC-197 remains active and binds PPK-016 evidence",
       "status": "PASS"
     },
     {
@@ -449,21 +473,23 @@
   "failures": [],
   "sourceScan": {
     "zones": 18,
-    "files": 335,
-    "relevantFiles": 23,
+    "files": 441,
+    "relevantFiles": 39,
     "findings": []
   },
   "productionInventoryStatus": "COMPLETE",
-  "productionInventoryOwnerCount": 13,
+  "productionInventoryOwnerCount": 14,
   "productionInventoryCompletionClaimed": true,
   "activeUngovernedDerivedPayloadOwners": 0,
   "openProductionBlockers": [],
   "directDerivedDataPersistenceExceptions": 0,
   "authorizedRepositoryAdapters": 1,
-  "authorizedDerivedProducerAdapters": 0,
+  "authorizedDerivedProducerAdapters": 1,
+  "authorizedSealedMetadataReaders": 1,
+  "authorizedSealedPayloadReadChainComponents": 2,
   "sourceReceiptMaximumAgeMsAtCreation": 30000,
   "futureSourceReceiptAllowedAtCreation": false,
-  "targetedTestMinimumTests": 75,
+  "targetedTestMinimumTests": 77,
   "readTimeProducerReceiptProvenanceRequired": true,
   "readTimeSourceReceiptProvenanceRequired": true,
   "creationChronologyRevalidatedAtRead": true,
@@ -474,17 +500,17 @@
   "ambiguousUpstreamRejected": true,
   "maximumAncestorCount": 512,
   "maximumStoredLineageTraversalCount": 512,
-  "migrationDecision": "MIGRATION_77_METADATA_ONLY_IMMUTABLE_RECEIPT_BOUND_LINEAGE",
+  "migrationDecision": "MIGRATION_77_POLICY_LINEAGE_PLUS_MIGRATION_94_SEALED_OCR_METADATA",
   "legacyDesktopVaultPreserved": true,
   "sqliteOwnershipTransferred": false,
   "cutoverAuthorityAttached": false,
   "realDataTransferPerformed": false,
   "realDataBackfillPerformed": false,
-  "derivedPayloadPersistedByValidation": false,
-  "currentDerivedPayloadRepositoryOrReadPathExists": false,
+  "derivedPayloadPersistedByValidation": true,
+  "currentDerivedPayloadRepositoryOrReadPathExists": true,
   "futureCurrentPepReevaluationRequired": true,
   "historicalReceiptAloneCountsAsRevocationPropagationEvidence": false,
   "policySensitiveIpcNoCacheWeakened": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-11T20:12:12.708Z"
+  "generatedAt": "2026-08-14T10:17:48.206Z"
 }

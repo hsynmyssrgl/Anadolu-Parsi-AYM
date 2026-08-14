@@ -22,6 +22,18 @@ import {
   resolveIpcReadSharingPolicy,
   shouldInvalidateIpcReadSharing
 } from './ipc-read-sharing.js';
+import type {
+  LocalGovernedOcrCenterIpcView,
+  LocalGovernedOcrCorrectIpcInput,
+  LocalGovernedOcrCreateIpcInput,
+  LocalGovernedOcrDeleteIpcInput,
+  LocalGovernedOcrJobMutationIpcInput,
+  LocalGovernedOcrMutationIpcView,
+  LocalGovernedOcrRerunIpcInput,
+  LocalGovernedOcrResultIpcView,
+  LocalGovernedOcrResultReadIpcInput,
+  LocalGovernedOcrSetEnabledIpcInput
+} from './ipc-integration-policy.js';
 import type { FamilyEventView, FamilyMutationResultView, SetFamilyEventArchivedInput, UpdateFamilyEventInput } from '@ppt/domain';
 import type { AssignPersonMembershipInput, CreateFamilyBranchInput, CreateHouseholdInput, FamilyBranch, Household, HouseholdMembershipWorkspaceView, PersonLifecycleProfile, PersonLifecycleWorkspaceView, PersonMembership, UpdatePersonProfileInput } from '@ppt/domain';
 import type { AuthorizationContextWorkspaceView } from '@ppt/domain';
@@ -87,6 +99,18 @@ export interface EncryptedPrivacyDataExportIpcInput {
   readonly requestId: string;
   readonly passphrase: string;
 }
+export type {
+  LocalGovernedOcrCenterIpcView,
+  LocalGovernedOcrCorrectIpcInput,
+  LocalGovernedOcrCreateIpcInput,
+  LocalGovernedOcrDeleteIpcInput,
+  LocalGovernedOcrJobMutationIpcInput,
+  LocalGovernedOcrMutationIpcView,
+  LocalGovernedOcrRerunIpcInput,
+  LocalGovernedOcrResultIpcView,
+  LocalGovernedOcrResultReadIpcInput,
+  LocalGovernedOcrSetEnabledIpcInput
+};
 export interface CompletePasskeyRegistrationIpcInput {
   readonly expectedRevision:number;readonly clientOperationId:string;readonly challengeId:string;readonly displayName:string;
   readonly response:WebAuthnRegistrationInput;readonly confirmation:'PASSKEY KAYDINI TAMAMLA';
@@ -454,6 +478,15 @@ contextBridge.exposeInMainWorld('pardus', {
   getFormDraftWorkspace:(formKey:string):Promise<FormDraftWorkspaceView>=>invoke('formDraft:getWorkspace',formKey),
   saveFormDraft:(input:SaveFormDraftInput):Promise<FormDraftView>=>invoke('formDraft:save',input),
   undoFormDraft:(input:UndoFormDraftInput):Promise<FormDraftView>=>invoke('formDraft:undo',input),
+  getLocalGovernedOcrCenter:():Promise<LocalGovernedOcrCenterIpcView>=>invoke('localOcr:getCenter'),
+  getLocalGovernedOcrResult:(input:LocalGovernedOcrResultReadIpcInput):Promise<LocalGovernedOcrResultIpcView>=>invoke('localOcr:getResult',input),
+  createLocalGovernedOcrJob:(input:LocalGovernedOcrCreateIpcInput):Promise<LocalGovernedOcrMutationIpcView>=>invoke('localOcr:create',input),
+  runLocalGovernedOcrJob:(input:LocalGovernedOcrJobMutationIpcInput):Promise<LocalGovernedOcrMutationIpcView>=>invoke('localOcr:run',input),
+  cancelLocalGovernedOcrJob:(input:LocalGovernedOcrJobMutationIpcInput):Promise<LocalGovernedOcrMutationIpcView>=>invoke('localOcr:cancel',input),
+  correctLocalGovernedOcrResult:(input:LocalGovernedOcrCorrectIpcInput):Promise<LocalGovernedOcrMutationIpcView>=>invoke('localOcr:correct',input),
+  rerunLocalGovernedOcrJob:(input:LocalGovernedOcrRerunIpcInput):Promise<LocalGovernedOcrMutationIpcView>=>invoke('localOcr:rerun',input),
+  deleteLocalGovernedOcrJob:(input:LocalGovernedOcrDeleteIpcInput):Promise<LocalGovernedOcrMutationIpcView>=>invoke('localOcr:delete',input),
+  setLocalGovernedOcrEnabled:(input:LocalGovernedOcrSetEnabledIpcInput):Promise<LocalGovernedOcrMutationIpcView>=>invoke('localOcr:setEnabled',input),
   getIdentityAccessCredentialCenter:():Promise<IdentityAccessCredentialCenterView>=>invoke('identityAccess:getCenter'),
   issueIdentityAccessOperationToken:(operationKind:IdentityAccessOperationKind):Promise<IdentityAccessOperationTokenView>=>invoke('identityAccess:issueOperationToken',{operationKind}),
   beginPasskeyRegistration:(input:{readonly clientOperationId:string}):Promise<PasskeyChallengeView>=>invoke('identityAccess:beginPasskeyRegistration',input),

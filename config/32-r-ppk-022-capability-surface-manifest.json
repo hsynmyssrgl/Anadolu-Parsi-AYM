@@ -18,7 +18,7 @@
   "signedManifestRuntimeCheckRequired": true,
   "buildManifestAloneGrantsRuntimeAuthority": false,
   "productionSourceZoneCount": 18,
-  "scannedProductionFiles": 428,
+  "scannedProductionFiles": 441,
   "protectedCapabilityFamilies": [
     "camera",
     "microphone",
@@ -30,15 +30,18 @@
   ],
   "surfaceCounts": {
     "FILE_DIALOG": 2,
-    "FILE_IMPORT": 265,
+    "FILE_IMPORT": 288,
     "NETWORK_API": 2,
-    "NETWORK_IMPORT": 13
+    "NETWORK_IMPORT": 13,
+    "OCR_API": 5,
+    "OCR_IMPORT": 29
   },
-  "exactCapabilitySurfaceCount": 282,
+  "exactCapabilitySurfaceCount": 339,
   "applicationRuntimeCapabilities": {
     "windows-desktop": [
       "file.access",
-      "network.access"
+      "network.access",
+      "ocr.process"
     ],
     "windows-core-service": [
       "file.access",
@@ -892,6 +895,182 @@
     },
     {
       "key": "FILE_IMPORT|apps/desktop/src/main/ipc-adaptive-resource-budget-state.ts|node:fs:writeFileSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/local-governed-ocr-result-vault.ts|node:fs:chmodSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/local-governed-ocr-result-vault.ts|node:fs:closeSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/local-governed-ocr-result-vault.ts|node:fs:constants",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/local-governed-ocr-result-vault.ts|node:fs:existsSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/local-governed-ocr-result-vault.ts|node:fs:fstatSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/local-governed-ocr-result-vault.ts|node:fs:fsyncSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/local-governed-ocr-result-vault.ts|node:fs:linkSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/local-governed-ocr-result-vault.ts|node:fs:lstatSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/local-governed-ocr-result-vault.ts|node:fs:mkdirSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/local-governed-ocr-result-vault.ts|node:fs:openSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/local-governed-ocr-result-vault.ts|node:fs:readdirSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/local-governed-ocr-result-vault.ts|node:fs:readFileSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/local-governed-ocr-result-vault.ts|node:fs:realpathSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/local-governed-ocr-result-vault.ts|node:fs:rmSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/local-governed-ocr-result-vault.ts|node:fs:writeFileSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/local-ocr-input-adapter.ts|node:fs:closeSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/local-ocr-input-adapter.ts|node:fs:constants",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/local-ocr-input-adapter.ts|node:fs:fstatSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/local-ocr-input-adapter.ts|node:fs:lstatSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/local-ocr-input-adapter.ts|node:fs:openSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/local-ocr-input-adapter.ts|node:fs:readSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/local-ocr-input-adapter.ts|node:fs:realpathSync",
       "applicationIds": [
         "windows-desktop"
       ],
@@ -2003,6 +2182,14 @@
       "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
     },
     {
+      "key": "FILE_IMPORT|apps/desktop/src/main/windows-media-ocr-engine-adapter.ts|node:fs:existsSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
       "key": "FILE_IMPORT|apps/desktop/src/main/windows-open021-efs-evidence-probe.ts|node:fs:existsSync",
       "applicationIds": [
         "windows-desktop"
@@ -2320,6 +2507,278 @@
       ],
       "capability": "network.access",
       "runtimeEnforcement": "PINNED_BOOTSTRAP_THEN_SIGNED"
+    },
+    {
+      "key": "OCR_API|apps/desktop/src/main/data-store.ts|LocalGovernedOcrResultVault.constructor",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_API|apps/desktop/src/main/data-store.ts|RepositoryBackedLocalGovernedOcrUnitOfWork.constructor",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_API|apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts|BoundedLocalOcrWorker.constructor",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_API|apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts|NotConfiguredLocalOcrMalwareVerdictAdapter.constructor",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_API|apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts|WindowsMediaOcrEngineAdapter.constructor",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/data-store.ts|./local-governed-ocr-application-adapter.js:RepositoryBackedLocalGovernedOcrUnitOfWork",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/data-store.ts|./local-governed-ocr-result-vault.js:LocalGovernedOcrResultVault",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/data-store.ts|./local-governed-ocr-runtime-adapter.js:createWindowsLocalGovernedOcrRuntimeAdapter",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-application-adapter.ts|./local-governed-ocr-runtime-adapter.js:AuthorizedLocalGovernedOcrArchiveSource",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-application-adapter.ts|./local-governed-ocr-runtime-adapter.js:AuthorizedLocalGovernedOcrJobBinding",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-application-adapter.ts|./local-governed-ocr-runtime-adapter.js:LocalGovernedOcrMainAuthorityPort",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-application-adapter.ts|./local-governed-ocr-runtime-adapter.js:LocalGovernedOcrRuntimeJobOperation",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts|./local-governed-ocr-result-vault.js:deriveLocalGovernedOcrCorrectionSealedResultId",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts|./local-governed-ocr-result-vault.js:deriveLocalGovernedOcrRunSealedResultId",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts|./local-governed-ocr-result-vault.js:LocalGovernedOcrResultVault",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts|./local-governed-ocr-result-vault.js:LocalGovernedOcrResultVaultError",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts|./local-governed-ocr-result-vault.js:LocalGovernedOcrRuntimeBinding",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts|./local-governed-ocr-result-vault.js:LocalGovernedOcrSealedPayload",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts|./local-ocr-worker.js:BoundedLocalOcrWorker",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts|./local-ocr-worker.js:BoundedLocalOcrWorkerOptions",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts|./local-ocr-worker.js:LocalOcrMalwareVerdictPort",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts|./local-ocr-worker.js:NotConfiguredLocalOcrMalwareVerdictAdapter",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts|./windows-media-ocr-engine-adapter.js:WindowsMediaOcrEngineAdapter",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-ocr-worker.ts|./local-ocr-engine-adapter.js:LocalOcrEngineDescriptor",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-ocr-worker.ts|./local-ocr-engine-adapter.js:LocalOcrEnginePort",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/local-ocr-worker.ts|./local-ocr-engine-adapter.js:LocalOcrWorkerQuotas",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/windows-media-ocr-engine-adapter.ts|./local-ocr-engine-adapter.js:LocalOcrEngineDescriptor",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/windows-media-ocr-engine-adapter.ts|./local-ocr-engine-adapter.js:LocalOcrEnginePort",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|apps/desktop/src/main/windows-media-ocr-engine-adapter.ts|./local-ocr-engine-adapter.js:LocalOcrWorkerQuotas",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|packages/application/src/index.ts|./local-governed-ocr-use-cases.js:export-all",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|packages/domain/src/index.ts|./local-governed-ocr.js:export-all",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|packages/repositories/src/index.ts|./local-governed-ocr-repository.js:export-all",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|packages/repository-contracts/src/index.ts|./local-governed-ocr-repository.js:export-all",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "OCR_IMPORT|packages/security/src/index.ts|./local-ocr-security.js:export-all",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "ocr.process",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
     }
   ],
   "invariants": {

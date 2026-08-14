@@ -74,7 +74,7 @@ describe('32-R PPK-022 signed runtime capability manifest policy', () => {
   it('binds the seven-family runtime capability list into the signed application manifest hash', () => {
     const { policyKernel, manifest } = setup();
     expect(PLATFORM_RUNTIME_CAPABILITIES).toHaveLength(7);
-    expect(manifest.runtimeCapabilities).toEqual(['file.access', 'network.access']);
+    expect(manifest.runtimeCapabilities).toEqual(['file.access', 'network.access', 'ocr.process']);
     expect(manifest.capabilityManifestSha256).toBe(platformCapabilityManifestHash(manifest));
     expect(policyKernel.verifyPolicyPackage(policyKernel.policyPackage)).toBe(true);
   });
@@ -111,7 +111,7 @@ describe('32-R PPK-022 signed runtime capability manifest policy', () => {
     const missing = rebuiltManifest(manifest, ['file.access']);
     expect(policy.evaluateCoverage('windows-desktop', { ...authority, manifest: missing }))
       .toMatchObject({ allowed: false, reason: 'CAPABILITY_REQUIREMENT_MISSING' });
-    const unexpected = rebuiltManifest(manifest, ['camera.access', 'file.access', 'network.access']);
+    const unexpected = rebuiltManifest(manifest, ['camera.access', 'file.access', 'network.access', 'ocr.process']);
     expect(policy.evaluateCoverage('windows-desktop', { ...authority, manifest: unexpected }))
       .toMatchObject({ allowed: false, reason: 'CAPABILITY_REQUIREMENT_UNEXPECTED' });
   });
@@ -136,6 +136,8 @@ describe('32-R PPK-022 signed runtime capability manifest policy', () => {
   it('pins the pre-handshake Desktop file bootstrap and exposes only a content-free snapshot', () => {
     expect(() => assertPinnedBootstrapRuntimeCapability('windows-desktop', 'file.access')).not.toThrow();
     expect(() => assertPinnedBootstrapRuntimeCapability('windows-desktop', 'network.access')).not.toThrow();
+    expect(() => assertPinnedBootstrapRuntimeCapability('windows-desktop', 'ocr.process'))
+      .toThrow('BOOTSTRAP_RUNTIME_CAPABILITY_NOT_DECLARED');
     expect(() => assertPinnedBootstrapRuntimeCapability('windows-desktop', 'camera.access'))
       .toThrow('BOOTSTRAP_RUNTIME_CAPABILITY_NOT_DECLARED');
     const policy = new PlatformCapabilityManifestPolicy();
@@ -146,7 +148,7 @@ describe('32-R PPK-022 signed runtime capability manifest policy', () => {
       gateVersion: 'PPK-022-V1',
       protectedCapabilityCount: 7,
       canonicalApplicationCount: 14,
-      exactAstSurfaceCount: 282,
+      exactAstSurfaceCount: 339,
       bootstrapNetworkCapabilityPinned: true,
       buildManifestAloneGrantsRuntimeAuthority: false,
       latestDatabaseMigration: 77
@@ -155,7 +157,7 @@ describe('32-R PPK-022 signed runtime capability manifest policy', () => {
 
   it('never allows a capability from a signed but production-baseline-broadened manifest', () => {
     const { policy, authority, manifest, request } = setup();
-    const broadened = rebuiltManifest(manifest, ['camera.access', 'file.access', 'network.access']);
+    const broadened = rebuiltManifest(manifest, ['camera.access', 'file.access', 'network.access', 'ocr.process']);
     expect(policy.authorize({
       ...request('file.access'),
       capabilityManifestSha256: broadened.capabilityManifestSha256

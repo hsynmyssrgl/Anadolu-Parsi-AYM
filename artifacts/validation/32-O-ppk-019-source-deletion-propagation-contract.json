@@ -5,8 +5,8 @@
   "requirement": "PPK-019",
   "phase": "SOURCE_DELETION_RETENTION_PROPAGATION_CONTRACT",
   "status": "PASS",
-  "checkCount": 108,
-  "passed": 108,
+  "checkCount": 128,
+  "passed": 128,
   "failed": 0,
   "checks": [
     {
@@ -70,11 +70,31 @@
       "status": "PASS"
     },
     {
+      "name": "central propagation policy: SOURCE_DELETION_REGISTERED_SEMANTIC_OWNERS",
+      "status": "PASS"
+    },
+    {
+      "name": "central propagation policy: SOURCE_DELETION_CURRENT_METADATA_OWNERS",
+      "status": "PASS"
+    },
+    {
+      "name": "central propagation policy: SOURCE_DELETION_METADATA_ONLY_MUTATION_LEDGERS",
+      "status": "PASS"
+    },
+    {
+      "name": "central propagation policy: SOURCE_DELETION_CONTENT_FREE_METADATA_TABLES",
+      "status": "PASS"
+    },
+    {
       "name": "direct bypass exception registry is exactly empty",
       "status": "PASS"
     },
     {
-      "name": "authorized repository adapter registry names lifecycle and backup owners",
+      "name": "authorized repository adapter registry names lifecycle backup and local OCR owners",
+      "status": "PASS"
+    },
+    {
+      "name": "policy classifies two semantic owners one current OCR metadata owner three ledgers and content-free settings",
       "status": "PASS"
     },
     {
@@ -202,6 +222,22 @@
       "status": "PASS"
     },
     {
+      "name": "data lifecycle schema inspection registers exact OCR metadata classes without registering semantic payload fields",
+      "status": "PASS"
+    },
+    {
+      "name": "archive source deletion purges every sealed file with exact verification before atomic job and item ledger persistence",
+      "status": "PASS"
+    },
+    {
+      "name": "derived OCR delete purges only the sealed result and never deletes the archive source",
+      "status": "PASS"
+    },
+    {
+      "name": "OCR repository remains receipt-bound metadata-only",
+      "status": "PASS"
+    },
+    {
       "name": "ExecuteDataPurge requires central propagation use case",
       "status": "PASS"
     },
@@ -310,6 +346,30 @@
       "status": "PASS"
     },
     {
+      "name": "source gate: OCR_METADATA_SQL_OUTSIDE_AUTHORIZED_OWNER",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate: OCR_REPOSITORY_SEMANTIC_PAYLOAD",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate: OCR_REPOSITORY_RECEIPT_FENCE_MISSING",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate: OCR_SOURCE_DELETION_FILE_FIRST_FENCE_MISSING",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate: OCR_DERIVED_DELETE_SOURCE_DELETE_FORBIDDEN",
+      "status": "PASS"
+    },
+    {
+      "name": "source gate: OCR_PROPAGATION_CALL_OUTSIDE_AUTHORIZED_CHAIN",
+      "status": "PASS"
+    },
+    {
       "name": "source gate self-test matrix remains exact",
       "status": "PASS"
     },
@@ -322,7 +382,7 @@
       "status": "PASS"
     },
     {
-      "name": "targeted suite contains at least twenty executed cases",
+      "name": "targeted suite contains at least twenty-three executed cases",
       "status": "PASS"
     },
     {
@@ -362,11 +422,23 @@
       "status": "PASS"
     },
     {
+      "name": "targeted test: migration 94 OCR tablolarını full-schema owner taramasında exact metadata sınıflarına alır",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test: archive source silimini verified file-first purge sonra atomik tombstone/item ledger sırasına bağlar",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted test: zararlı OCR direct SQL, semantic payload, receiptless writer ve receiptless propagation yollarını fail-closed reddeder",
+      "status": "PASS"
+    },
+    {
       "name": "legacy lifecycle and backup runtimes use in-process TypeScript stripping rather than ambient npm",
       "status": "PASS"
     },
     {
-      "name": "latest database migration remains 77 and no PPK-019 migration exists",
+      "name": "migration 77 baseline and migration 94 OCR owner integration remain present with no PPK-019-specific migration",
       "status": "PASS"
     },
     {
@@ -386,7 +458,15 @@
       "status": "PASS"
     },
     {
-      "name": "inventory reviews nine owners with zero open semantic owner or bypass",
+      "name": "scope records current OCR integration evidence and exact outside-scope runtime blockers",
+      "status": "PASS"
+    },
+    {
+      "name": "inventory reviews twelve owners with two registered semantic owners and exact OCR metadata classes",
+      "status": "PASS"
+    },
+    {
+      "name": "inventory binds AI memory and local OCR semantic owners plus OCR metadata ledgers",
       "status": "PASS"
     },
     {
@@ -422,7 +502,7 @@
       "status": "PASS"
     },
     {
-      "name": "PPK-020 remains outside PPK-019 closure",
+      "name": "PPK-020 remains a distinct requirement not manufactured by PPK-019 closure",
       "status": "PASS"
     },
     {
@@ -446,22 +526,24 @@
   "sourceGate": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 346,
-    "securityRelevantFiles": 32,
-    "maliciousSelfTestAssertions": 8,
-    "benignFalsePositiveAssertions": 4,
+    "scannedFiles": 441,
+    "securityRelevantFiles": 62,
+    "maliciousSelfTestAssertions": 15,
+    "benignFalsePositiveAssertions": 5,
     "findings": []
   },
   "ownerKinds": 7,
   "requiredRuntimeCacheRegistries": 3,
-  "activeSemanticPersistentOwners": 0,
+  "activeSemanticPersistentOwners": 2,
+  "currentMetadataOwners": 1,
+  "metadataOnlyAppendOnlyLedgers": 3,
   "plaintextReplicaProductionOwners": 0,
   "directBypassExceptions": 0,
   "localPropagationMustPrecedeSourceDelete": true,
   "managedBackupVerifiedRewriteRequired": true,
   "unmanagedAndExternalBackupAttentionRequired": true,
   "historicalBackupQuarantineIsNotPhysicalDestruction": true,
-  "latestDatabaseMigration": 77,
+  "latestDatabaseMigration": 94,
   "schemaMigrationRequired": false,
   "historicalBackfillPerformed": false,
   "legacyDesktopVaultPreserved": true,
@@ -470,5 +552,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-11T23:36:40.123Z"
+  "generatedAt": "2026-08-14T10:19:19.579Z"
 }

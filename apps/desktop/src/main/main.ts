@@ -10,6 +10,18 @@ import { createWebAuthnChallenge, encryptPortableEmergencyPack, sha256Hex, valid
 import { writeContentFreeConsoleEvent } from '@ppt/logging';
 import { APP_META, USER_VISIBLE_APP_INFO, type CreateArchiveItemInput, CreateFamilyEventInput, UpdateFamilyEventInput, SetFamilyEventArchivedInput, UpdateEventParticipantsInput, UpdateEventInvitationInput, UpdateEventNotesInput, AcknowledgeFamilyNotificationInput, CreateFamilyLocationInput, CreateFamilyMemberInput, CreateFamilyRelationInput, LoginInput, SetupAdminInput, ChangePasswordInput, EnableTwoFactorInput, DisableTwoFactorInput, TrustCurrentDeviceInput, ReauthorizeCurrentDeviceInput, CreateFamilyInvitationInput, InspectFamilyInvitationInput, ResendFamilyInvitationInput, AcceptFamilyInvitationInput, UpsertObjectPermissionInput, UpdateFamilyAccountInput, CreateFinanceRecordInput, CreateBankAccountInput, ValidateIbanInput, CreatePaymentCardInput, CreateHealthRecordInput, CreateMedicationPlanInput, CreateFamilyHealthHistoryInput, CreateFinanceValuationInput, CreateLifeRecordInput, CreateAutomationRuleInput, CreateArchiveCategoryInput, UpdateArchiveClassificationInput, UpsertAiConsentInput, AiConsentPurpose, UpsertSensitiveDataConsentInput, SensitiveExportPreviewInput, RunAutomationInput, UpsertDigitalLegacyPlanInput, UpsertLegacyGrantInput, ExecuteLegacyPlanInput, ApproveLegacyExecutionInput, CancelLegacyExecutionInput, ArchiveSearchInput, CreateArchiveRetentionPolicyInput, AssignArchiveRetentionPolicyInput, UpsertBackupTargetInput, MaintenanceResultView, BackupSchedulerResultView, AdaptiveResourceStateView, EnqueueTaskInput, UpsertMaintenancePolicyInput, DiagnosticFilterInput, DiagnosticArchiveSearchInput, MaintenanceHistoryFilterInput, CreateDataRetentionPolicyInput, ArchiveDataResourceInput, RestoreDataResourceInput, RequestDataPurgeInput, CancelDataPurgeInput, ExecuteDataPurgeInput, SetDataLegalHoldInput, UpdateBackupQuarantinePolicyInput, SetBackupQuarantineLegalHoldInput, DestroyBackupQuarantineBatchInput, RegisterExternalBackupCopyInput, ReviewExternalBackupCopyInput, SetExternalBackupCopyLegalHoldInput, AttestExternalBackupCopyDestroyedInput, RegisterExternalBackupEvidenceIssuerInput, RotateExternalBackupEvidenceIssuerInput, RevokeExternalBackupEvidenceIssuerInput, ApplyExternalBackupEvidenceRevocationListInput, UpsertExternalBackupRevocationEndpointInput, PendingRevocationSyncListView, ApplyPendingRevocationSyncInput, RevocationSyncEndpointStateView, RevocationSyncRunResultView, VerifyExternalBackupDestructionEvidenceInput, ApplyFamilyDataImportInput, RollbackFamilyDataImportInput, GenealogyTreePageInput, TimelinePageInput, ArchivePageInput, PersonCatalogPageInput, EventCatalogPageInput, EntityCatalogLookupInput, FamilySnapshotSectionsInput, IpcAdaptiveBudgetMaintenanceOperation, IpcAdaptiveBudgetMaintenanceAuthorizationInput, IpcAdaptiveBudgetMaintenanceReauthenticationInput, IpcAdaptiveBudgetMaintenanceRecoveryInput, UpdateBackupCleanRewritePolicyInput } from '@ppt/domain';
 import type { RecordManagedLifeItemInput } from '@ppt/domain';
+import type {
+  CancelLocalGovernedOcrJobInput,
+  CorrectLocalGovernedOcrResultInput,
+  CreateLocalGovernedOcrJobInput,
+  DeleteLocalGovernedOcrJobInput,
+  LocalGovernedOcrCenterView,
+  LocalGovernedOcrMutationReceiptView,
+  LocalGovernedOcrResultView,
+  RerunLocalGovernedOcrJobInput,
+  RunLocalGovernedOcrJobInput,
+  SetLocalGovernedOcrEnabledInput
+} from '@ppt/domain';
 import type { CreateLoanAccountInput, RecordLoanPaymentInput, RecordFinancePlanningItemInput, CommitFinanceImportPreviewInput, RecordLongTermPortfolioItemInput, UpdateAccessibilityPreferencesInput } from '@ppt/domain';
 import type {
   AssignPersonMembershipInput,
@@ -34,6 +46,19 @@ import {
 } from './data-store.js';
 import { bootstrapDesktopRuntime, type DesktopRuntime } from './runtime-bootstrap.js';
 import { registerCorrelatedIpcHandler, registerIpcCancellationHandlers, createRuntimeCorrelationId, type IpcHandler } from './ipc-runtime.js';
+import {
+  LOCAL_GOVERNED_OCR_IPC_CHANNELS,
+  projectLocalGovernedOcrCenterIpcView,
+  projectLocalGovernedOcrMutationIpcView,
+  projectLocalGovernedOcrResultIpcView,
+  type LocalGovernedOcrCorrectIpcInput,
+  type LocalGovernedOcrCreateIpcInput,
+  type LocalGovernedOcrDeleteIpcInput,
+  type LocalGovernedOcrJobMutationIpcInput,
+  type LocalGovernedOcrRerunIpcInput,
+  type LocalGovernedOcrResultReadIpcInput,
+  type LocalGovernedOcrSetEnabledIpcInput
+} from './ipc-integration-policy.js';
 import { IpcTransportSessionRegistry } from './ipc-transport-context.js';
 import { countedStrongAuthenticationFailureCode, getIpcRequestAbortSignal, getIpcRequestContext, IpcRequestLifecycleRegistry } from './ipc-request-lifecycle.js';
 import { IpcReadResultCacheRegistry, OfflineSensitiveCacheRegistry } from './ipc-read-sharing.js';
@@ -238,6 +263,27 @@ if (process.env.PPT_WINDOWS_LAUNCH_USER_DATA_PATH) {
 const singleInstanceLock = app.requestSingleInstanceLock();
 if (!singleInstanceLock) app.quit();
 app.setAppUserModelId('tr.anadoluparsi.aileyasammerkezi');
+
+type LocalGovernedOcrBridgeValue<T> = T | Promise<T>;
+
+/**
+ * Temporary structural boundary until FamilyDataStore exposes the 33-Q application facade.
+ * Authenticated family/account/owner context, operation identifiers, audit identifiers and
+ * sealed-result authority are resolved behind these main-only methods, never by renderer input.
+ * Archive source-deletion propagation intentionally has no method on this renderer bridge.
+ */
+interface LocalGovernedOcrIpcDataStoreBridge {
+  getLocalGovernedOcrCenter(): LocalGovernedOcrBridgeValue<LocalGovernedOcrCenterView>;
+  getLocalGovernedOcrResult(input: LocalGovernedOcrResultReadIpcInput): LocalGovernedOcrBridgeValue<LocalGovernedOcrResultView>;
+  createLocalGovernedOcrJob(input: CreateLocalGovernedOcrJobInput): LocalGovernedOcrBridgeValue<LocalGovernedOcrMutationReceiptView>;
+  runLocalGovernedOcrJob(input: RunLocalGovernedOcrJobInput): LocalGovernedOcrBridgeValue<LocalGovernedOcrMutationReceiptView>;
+  cancelLocalGovernedOcrJob(input: CancelLocalGovernedOcrJobInput): LocalGovernedOcrBridgeValue<LocalGovernedOcrMutationReceiptView>;
+  correctLocalGovernedOcrResult(input: CorrectLocalGovernedOcrResultInput): LocalGovernedOcrBridgeValue<LocalGovernedOcrMutationReceiptView>;
+  rerunLocalGovernedOcrJob(input: RerunLocalGovernedOcrJobInput): LocalGovernedOcrBridgeValue<LocalGovernedOcrMutationReceiptView>;
+  deleteLocalGovernedOcrJob(input: DeleteLocalGovernedOcrJobInput): LocalGovernedOcrBridgeValue<LocalGovernedOcrMutationReceiptView>;
+  setLocalGovernedOcrEnabled(input: SetLocalGovernedOcrEnabledInput): LocalGovernedOcrBridgeValue<LocalGovernedOcrMutationReceiptView>;
+}
+
 let dataStore: FamilyDataStore | undefined;
 let desktopRuntime: DesktopRuntime | undefined;
 let coreServiceStartupConnection: CoreServiceStartupConnectionResult | undefined;
@@ -1155,6 +1201,17 @@ function consumeAdaptiveMaintenanceSession(
     metadata: { operation: expectedOperation, sessionFingerprint: decision.sessionFingerprint.slice(0, 16), senderId }
   });
   return decision.sessionFingerprint;
+}
+
+function localGovernedOcrBridgeMethod<K extends keyof LocalGovernedOcrIpcDataStoreBridge>(
+  methodName: K
+): LocalGovernedOcrIpcDataStoreBridge[K] {
+  const bridge = store() as unknown as Partial<LocalGovernedOcrIpcDataStoreBridge>;
+  const method = bridge[methodName];
+  if (typeof method !== 'function') {
+    throw new Error('Local governed OCR main application bridge is not configured.');
+  }
+  return method.bind(bridge) as LocalGovernedOcrIpcDataStoreBridge[K];
 }
 
 function registerIpc(): void {
@@ -2131,6 +2188,30 @@ function registerIpc(): void {
   registerIpcHandler('formDraft:getWorkspace', (_event, formKey:string) => store().getFormDraftWorkspace(formKey));
   registerIpcHandler('formDraft:save', (_event, input:SaveFormDraftInput) => store().saveFormDraft(input));
   registerIpcHandler('formDraft:undo', (_event, input:UndoFormDraftInput) => store().undoFormDraft(input));
+  registerIpcHandler(LOCAL_GOVERNED_OCR_IPC_CHANNELS.getCenter, async () =>
+    projectLocalGovernedOcrCenterIpcView(await localGovernedOcrBridgeMethod('getLocalGovernedOcrCenter')()));
+  registerIpcHandler(LOCAL_GOVERNED_OCR_IPC_CHANNELS.getResult, async (_event, input:LocalGovernedOcrResultReadIpcInput) =>
+    projectLocalGovernedOcrResultIpcView(await localGovernedOcrBridgeMethod('getLocalGovernedOcrResult')(input)));
+  registerIpcHandler(LOCAL_GOVERNED_OCR_IPC_CHANNELS.create, async (_event, input:LocalGovernedOcrCreateIpcInput) =>
+    projectLocalGovernedOcrMutationIpcView(await localGovernedOcrBridgeMethod('createLocalGovernedOcrJob')({
+      ...input,
+      sourceResourceType: 'archive_item'
+    }), 'job_create'));
+  registerIpcHandler(LOCAL_GOVERNED_OCR_IPC_CHANNELS.run, async (_event, input:LocalGovernedOcrJobMutationIpcInput) =>
+    projectLocalGovernedOcrMutationIpcView(await localGovernedOcrBridgeMethod('runLocalGovernedOcrJob')(input), 'job_run'));
+  registerIpcHandler(LOCAL_GOVERNED_OCR_IPC_CHANNELS.cancel, async (_event, input:LocalGovernedOcrJobMutationIpcInput) =>
+    projectLocalGovernedOcrMutationIpcView(await localGovernedOcrBridgeMethod('cancelLocalGovernedOcrJob')(input), 'job_cancel'));
+  registerIpcHandler(LOCAL_GOVERNED_OCR_IPC_CHANNELS.correct, async (_event, input:LocalGovernedOcrCorrectIpcInput) =>
+    projectLocalGovernedOcrMutationIpcView(await localGovernedOcrBridgeMethod('correctLocalGovernedOcrResult')(input), 'result_correct'));
+  registerIpcHandler(LOCAL_GOVERNED_OCR_IPC_CHANNELS.rerun, async (_event, input:LocalGovernedOcrRerunIpcInput) =>
+    projectLocalGovernedOcrMutationIpcView(await localGovernedOcrBridgeMethod('rerunLocalGovernedOcrJob')(input), 'job_rerun'));
+  registerIpcHandler(LOCAL_GOVERNED_OCR_IPC_CHANNELS.delete, async (_event, input:LocalGovernedOcrDeleteIpcInput) =>
+    projectLocalGovernedOcrMutationIpcView(await localGovernedOcrBridgeMethod('deleteLocalGovernedOcrJob')(input), 'job_delete'));
+  registerIpcHandler(LOCAL_GOVERNED_OCR_IPC_CHANNELS.setEnabled, async (_event, input:LocalGovernedOcrSetEnabledIpcInput) =>
+    projectLocalGovernedOcrMutationIpcView(
+      await localGovernedOcrBridgeMethod('setLocalGovernedOcrEnabled')(input),
+      input.enabled ? 'processing_enable' : 'processing_disable'
+    ));
   registerIpcHandler('identityAccess:getCenter',()=>store().getIdentityAccessCredentialCenter());
   registerIpcHandler('identityAccess:issueOperationToken',(_event,input:{readonly operationKind:IdentityAccessOperationKind})=>store().issueIdentityAccessOperationToken(input.operationKind));
   registerIpcHandler('identityAccess:beginPasskeyRegistration',(_event,input:{readonly clientOperationId:string})=>store().beginPasskeyRegistration({...input,relyingPartyId:IDENTITY_WEBAUTHN_RP_ID}));

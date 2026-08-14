@@ -12403,6 +12403,278 @@ END;
 UPDATE database_metadata SET value='REVISION-33-P-IDENTITY-ACCESS-CREDENTIALS',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 
+const localGovernedOcrLedgerSql = `
+CREATE TABLE local_governed_ocr_mutations (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 128),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 1 AND 160),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  mutation_kind TEXT NOT NULL CHECK(mutation_kind IN (
+    'job_create','job_run','job_cancel','result_correct','job_rerun','job_delete',
+    'processing_disable','processing_enable','source_delete_propagate'
+  )),
+  resource_type TEXT NOT NULL CHECK(resource_type IN ('local_ocr_job','local_ocr_settings')),
+  resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 1 AND 256),
+  previous_revision INTEGER NOT NULL CHECK(previous_revision>=0),
+  revision INTEGER NOT NULL CHECK(revision=previous_revision+1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  UNIQUE(account_id,client_operation_id),
+  UNIQUE(resource_type,resource_id,revision)
+) STRICT;
+CREATE INDEX idx_local_ocr_mutations_resource ON local_governed_ocr_mutations(account_id,resource_type,resource_id,revision DESC);
+
+CREATE TABLE local_governed_ocr_jobs (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 128),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  source_resource_type TEXT NOT NULL CHECK(source_resource_type='archive_item'),
+  source_resource_id TEXT NOT NULL REFERENCES archive_items(id) ON DELETE RESTRICT,
+  input_sha256 TEXT NOT NULL CHECK(length(input_sha256)=64 AND input_sha256 NOT GLOB '*[^0-9a-f]*'),
+  mime_type TEXT NOT NULL CHECK(mime_type IN ('image/png','image/jpeg','application/pdf')),
+  size_bytes INTEGER NOT NULL CHECK(size_bytes BETWEEN 12 AND 16777216),
+  derived_resource_id TEXT NOT NULL UNIQUE CHECK(length(trim(derived_resource_id)) BETWEEN 1 AND 256),
+  language_hints_json TEXT NOT NULL CHECK(json_valid(language_hints_json) AND json_type(language_hints_json)='array' AND length(language_hints_json)<=512),
+  status TEXT NOT NULL CHECK(status IN ('queued','running','cancel_requested','completed','failed','cancelled','deleted')),
+  run_attempt INTEGER NOT NULL CHECK(run_attempt BETWEEN 0 AND 100),
+  correction_revision INTEGER NOT NULL CHECK(correction_revision BETWEEN 0 AND 1000),
+  result_available INTEGER NOT NULL CHECK(result_available IN (0,1)),
+  result_content_sha256 TEXT CHECK(result_content_sha256 IS NULL OR (length(result_content_sha256)=64 AND result_content_sha256 NOT GLOB '*[^0-9a-f]*')),
+  result_character_count INTEGER CHECK(result_character_count IS NULL OR result_character_count BETWEEN 0 AND 250000),
+  result_page_count INTEGER CHECK(result_page_count IS NULL OR result_page_count BETWEEN 1 AND 50),
+  confidence_basis_points INTEGER CHECK(confidence_basis_points IS NULL OR confidence_basis_points BETWEEN 0 AND 10000),
+  derived_binding_hash TEXT CHECK(derived_binding_hash IS NULL OR (length(derived_binding_hash)=64 AND derived_binding_hash NOT GLOB '*[^0-9a-f]*')),
+  sealed_result_id TEXT CHECK(sealed_result_id IS NULL OR length(trim(sealed_result_id)) BETWEEN 1 AND 256),
+  consent_id TEXT NOT NULL REFERENCES ai_consents(id) ON DELETE RESTRICT,
+  consent_expires_at TEXT CHECK(consent_expires_at IS NULL OR (length(consent_expires_at)=24 AND julianday(consent_expires_at) IS NOT NULL)),
+  retention_until TEXT CHECK(retention_until IS NULL OR (length(retention_until)=24 AND julianday(retention_until) IS NOT NULL)),
+  failure_code TEXT CHECK(failure_code IS NULL OR failure_code IN ('source_unavailable','consent_unavailable','engine_failed','integrity_mismatch')),
+  cancellation_requested_at TEXT CHECK(cancellation_requested_at IS NULL OR (length(cancellation_requested_at)=24 AND julianday(cancellation_requested_at) IS NOT NULL)),
+  completed_at TEXT CHECK(completed_at IS NULL OR (length(completed_at)=24 AND julianday(completed_at) IS NOT NULL)),
+  failed_at TEXT CHECK(failed_at IS NULL OR (length(failed_at)=24 AND julianday(failed_at) IS NOT NULL)),
+  cancelled_at TEXT CHECK(cancelled_at IS NULL OR (length(cancelled_at)=24 AND julianday(cancelled_at) IS NOT NULL)),
+  deleted_at TEXT CHECK(deleted_at IS NULL OR (length(deleted_at)=24 AND julianday(deleted_at) IS NOT NULL)),
+  source_deleted_at TEXT CHECK(source_deleted_at IS NULL OR (length(source_deleted_at)=24 AND julianday(source_deleted_at) IS NOT NULL)),
+  deletion_propagation TEXT NOT NULL CHECK(deletion_propagation IN ('active','locally_deleted')),
+  processor TEXT NOT NULL CHECK(processor='local_ocr'),
+  network_used INTEGER NOT NULL CHECK(network_used=0),
+  cloud_used INTEGER NOT NULL CHECK(cloud_used=0),
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  last_mutation_id TEXT NOT NULL REFERENCES local_governed_ocr_mutations(id) ON DELETE RESTRICT,
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  CHECK((result_available=1 AND status='completed' AND result_content_sha256 IS NOT NULL AND result_character_count IS NOT NULL
+    AND result_page_count IS NOT NULL AND derived_binding_hash IS NOT NULL AND sealed_result_id IS NOT NULL AND completed_at IS NOT NULL)
+    OR (result_available=0 AND result_content_sha256 IS NULL AND result_character_count IS NULL AND result_page_count IS NULL
+      AND confidence_basis_points IS NULL AND derived_binding_hash IS NULL AND sealed_result_id IS NULL)),
+  CHECK((status='failed' AND failure_code IS NOT NULL AND failed_at IS NOT NULL) OR (status<>'failed' AND failure_code IS NULL AND failed_at IS NULL)),
+  CHECK((status='cancel_requested' AND cancellation_requested_at IS NOT NULL) OR status<>'cancel_requested'),
+  CHECK((status='cancelled' AND cancelled_at IS NOT NULL) OR (status<>'cancelled' AND cancelled_at IS NULL)),
+  CHECK((status='deleted' AND deleted_at IS NOT NULL) OR (status<>'deleted' AND deleted_at IS NULL)),
+  CHECK((deletion_propagation='locally_deleted' AND source_deleted_at IS NOT NULL AND status='deleted') OR deletion_propagation='active'),
+  CHECK(julianday(updated_at)>=julianday(created_at))
+) STRICT;
+CREATE INDEX idx_local_ocr_jobs_owner ON local_governed_ocr_jobs(account_id,owner_person_id,updated_at DESC,id);
+CREATE INDEX idx_local_ocr_jobs_source ON local_governed_ocr_jobs(family_id,source_resource_type,source_resource_id,updated_at DESC,id);
+
+CREATE TABLE local_governed_ocr_settings (
+  account_id TEXT PRIMARY KEY REFERENCES accounts(id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  resource_id TEXT NOT NULL UNIQUE CHECK(length(trim(resource_id)) BETWEEN 1 AND 256),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  enabled INTEGER NOT NULL CHECK(enabled IN (0,1)),
+  disabled_reason TEXT CHECK(disabled_reason IS NULL OR length(trim(disabled_reason)) BETWEEN 1 AND 500),
+  disabled_at TEXT CHECK(disabled_at IS NULL OR (length(disabled_at)=24 AND julianday(disabled_at) IS NOT NULL)),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  last_mutation_id TEXT NOT NULL REFERENCES local_governed_ocr_mutations(id) ON DELETE RESTRICT,
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  CHECK((enabled=1 AND disabled_reason IS NULL AND disabled_at IS NULL) OR (enabled=0 AND disabled_reason IS NOT NULL AND disabled_at IS NOT NULL))
+) STRICT;
+
+CREATE TABLE local_governed_ocr_source_deletion_items (
+  batch_mutation_id TEXT NOT NULL REFERENCES local_governed_ocr_mutations(id) ON DELETE RESTRICT,
+  item_mutation_id TEXT NOT NULL UNIQUE CHECK(length(trim(item_mutation_id)) BETWEEN 1 AND 128),
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 1 AND 160),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  job_id TEXT NOT NULL REFERENCES local_governed_ocr_jobs(id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  source_resource_id TEXT NOT NULL REFERENCES archive_items(id) ON DELETE RESTRICT,
+  previous_revision INTEGER NOT NULL CHECK(previous_revision>=1),
+  previous_state_fingerprint TEXT NOT NULL CHECK(length(previous_state_fingerprint)=64 AND previous_state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  revision INTEGER NOT NULL CHECK(revision=previous_revision+1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  PRIMARY KEY(batch_mutation_id,job_id),
+  UNIQUE(account_id,client_operation_id),
+  UNIQUE(job_id,revision)
+) STRICT;
+
+CREATE TRIGGER trg_33q_mutation_receipt BEFORE INSERT ON local_governed_ocr_mutations
+WHEN NOT EXISTS(
+  SELECT 1 FROM accounts account
+  JOIN people owner ON owner.id=account.person_id
+  JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+  JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash AND projection.record_json=receipt.record_json
+  WHERE account.id=NEW.account_id AND account.status='active' AND account.person_id=NEW.owner_person_id
+    AND owner.id=NEW.owner_person_id AND owner.family_id=NEW.family_id AND owner.status='active'
+    AND receipt.resource_type=CASE WHEN NEW.mutation_kind='source_delete_propagate' THEN 'archive_item' ELSE NEW.resource_type END
+    AND receipt.resource_id=NEW.resource_id
+    AND receipt.action=CASE
+      WHEN NEW.resource_type='local_ocr_settings' THEN 'update'
+      WHEN NEW.mutation_kind IN ('job_delete','source_delete_propagate') THEN 'delete'
+      ELSE 'process' END
+    AND receipt.capability=CASE
+      WHEN NEW.resource_type='local_ocr_settings' THEN 'family.write'
+      WHEN NEW.mutation_kind IN ('job_delete','source_delete_propagate') THEN 'archive.write'
+      ELSE 'archive.ocr' END
+    AND receipt.issued_at=NEW.occurred_at AND receipt.recorded_at=NEW.occurred_at
+    AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.account_id
+    AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND ((NEW.resource_type='local_ocr_settings' AND json_extract(receipt.record_json,'$.request.resource.sensitivity')='personal')
+      OR (NEW.mutation_kind='source_delete_propagate'
+        AND json_extract(receipt.record_json,'$.request.resource.sensitivity') IN ('personal','sensitive','highly_sensitive'))
+      OR (NEW.resource_type='local_ocr_job' AND NEW.mutation_kind<>'source_delete_propagate'
+        AND json_extract(receipt.record_json,'$.request.resource.sensitivity') IN ('personal','sensitive','highly_sensitive')))
+    AND json_extract(receipt.record_json,'$.request.purpose')=CASE
+      WHEN NEW.resource_type='local_ocr_settings' THEN 'administration' ELSE 'ocr_process' END
+)
+BEGIN SELECT RAISE(ABORT,'33-Q OCR mutation requires an exact active policy receipt'); END;
+
+CREATE TRIGGER trg_33q_job_insert BEFORE INSERT ON local_governed_ocr_jobs
+WHEN NEW.revision<>1 OR NEW.status<>'queued' OR NEW.run_attempt<>0 OR NEW.correction_revision<>0 OR NEW.result_available<>0
+ OR NEW.deletion_propagation<>'active' OR NEW.created_at<>NEW.updated_at
+ OR (SELECT COUNT(*) FROM local_governed_ocr_jobs WHERE account_id=NEW.account_id)>=500
+ OR (SELECT COUNT(*) FROM json_each(NEW.language_hints_json))>8
+ OR EXISTS(SELECT 1 FROM json_each(NEW.language_hints_json) item WHERE item.type<>'text' OR length(trim(item.value))<2 OR length(item.value)>35)
+ OR (SELECT COUNT(*) FROM json_each(NEW.language_hints_json))<>(SELECT COUNT(DISTINCT value) FROM json_each(NEW.language_hints_json))
+ OR NOT EXISTS(
+   SELECT 1 FROM archive_items source
+   JOIN platform_policy_transaction_receipts source_receipt ON source_receipt.receipt_hash=source.policy_receipt_hash
+   WHERE source.id=NEW.source_resource_id AND source.family_id=NEW.family_id AND source.destroyed_at IS NULL
+     AND source.sha256=NEW.input_sha256 AND source.mime_type=NEW.mime_type AND source.size_bytes=NEW.size_bytes
+     AND json_extract(source_receipt.record_json,'$.request.subject.accountId')=NEW.account_id
+     AND json_extract(source_receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+     AND json_extract(source_receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id)
+ OR NOT EXISTS(
+   SELECT 1 FROM ai_consents consent WHERE consent.id=NEW.consent_id AND consent.account_id=NEW.account_id
+     AND consent.purpose='sensitive_processing' AND consent.resource_type='archive_item' AND consent.resource_id=NEW.source_resource_id
+     AND consent.status='granted' AND julianday(consent.starts_at)<=julianday(NEW.created_at)
+     AND (consent.ends_at IS NULL OR (consent.ends_at=NEW.consent_expires_at AND julianday(consent.ends_at)>=julianday(NEW.created_at))))
+ OR NOT EXISTS(
+   SELECT 1 FROM local_governed_ocr_mutations mutation WHERE mutation.id=NEW.last_mutation_id
+     AND mutation.family_id=NEW.family_id AND mutation.account_id=NEW.account_id AND mutation.owner_person_id=NEW.owner_person_id
+     AND mutation.mutation_kind='job_create' AND mutation.resource_type='local_ocr_job' AND mutation.resource_id=NEW.id
+     AND mutation.previous_revision=0 AND mutation.revision=NEW.revision AND mutation.state_fingerprint=NEW.state_fingerprint
+     AND mutation.policy_receipt_hash=NEW.policy_receipt_hash AND mutation.occurred_at=NEW.updated_at)
+BEGIN SELECT RAISE(ABORT,'33-Q OCR job creation requires exact source, consent, mutation and quota'); END;
+
+CREATE TRIGGER trg_33q_job_update BEFORE UPDATE ON local_governed_ocr_jobs
+WHEN NEW.revision<>OLD.revision+1 OR NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.account_id<>OLD.account_id OR NEW.owner_person_id<>OLD.owner_person_id
+ OR NEW.source_resource_type<>OLD.source_resource_type OR NEW.source_resource_id<>OLD.source_resource_id OR NEW.input_sha256<>OLD.input_sha256
+ OR NEW.mime_type<>OLD.mime_type OR NEW.size_bytes<>OLD.size_bytes OR NEW.derived_resource_id<>OLD.derived_resource_id OR NEW.created_at<>OLD.created_at
+ OR NEW.processor<>'local_ocr' OR NEW.network_used<>0 OR NEW.cloud_used<>0
+ OR (SELECT COUNT(*) FROM json_each(NEW.language_hints_json))>8
+ OR EXISTS(SELECT 1 FROM json_each(NEW.language_hints_json) item WHERE item.type<>'text' OR length(trim(item.value))<2 OR length(item.value)>35)
+ OR (SELECT COUNT(*) FROM json_each(NEW.language_hints_json))<>(SELECT COUNT(DISTINCT value) FROM json_each(NEW.language_hints_json))
+ OR (NOT EXISTS(
+   SELECT 1 FROM local_governed_ocr_mutations mutation WHERE mutation.id=NEW.last_mutation_id
+     AND mutation.family_id=NEW.family_id AND mutation.account_id=NEW.account_id AND mutation.owner_person_id=NEW.owner_person_id
+     AND mutation.resource_type='local_ocr_job' AND mutation.resource_id=NEW.id
+     AND mutation.previous_revision=OLD.revision AND mutation.revision=NEW.revision AND mutation.state_fingerprint=NEW.state_fingerprint
+     AND mutation.policy_receipt_hash=NEW.policy_receipt_hash AND mutation.occurred_at=NEW.updated_at)
+   AND NOT EXISTS(
+   SELECT 1 FROM local_governed_ocr_source_deletion_items item
+   JOIN local_governed_ocr_mutations batch ON batch.id=item.batch_mutation_id
+   WHERE item.batch_mutation_id=NEW.last_mutation_id AND item.job_id=NEW.id
+     AND item.family_id=NEW.family_id AND item.account_id=NEW.account_id AND item.owner_person_id=NEW.owner_person_id
+     AND item.source_resource_id=NEW.source_resource_id
+     AND item.previous_revision=OLD.revision AND item.previous_state_fingerprint=OLD.state_fingerprint
+     AND item.revision=NEW.revision AND item.state_fingerprint=NEW.state_fingerprint
+     AND item.policy_receipt_hash=NEW.policy_receipt_hash AND item.occurred_at=NEW.updated_at
+     AND batch.mutation_kind='source_delete_propagate' AND batch.resource_type='local_ocr_job'
+     AND batch.resource_id=NEW.source_resource_id AND batch.policy_receipt_hash=NEW.policy_receipt_hash
+     AND batch.occurred_at=NEW.updated_at))
+ OR (NEW.result_available=1 AND NOT EXISTS(
+   SELECT 1 FROM derived_data_policy_bindings binding
+   JOIN derived_data_policy_sources source ON source.binding_hash=binding.binding_hash
+   WHERE binding.binding_hash=NEW.derived_binding_hash AND binding.status='sealed' AND binding.derived_kind='OCR_TEXT'
+     AND binding.derived_resource_id=NEW.derived_resource_id AND binding.content_sha256=NEW.result_content_sha256
+     AND binding.family_id=NEW.family_id AND source.source_resource_type='archive_item'
+     AND source.source_resource_id=NEW.source_resource_id AND source.content_sha256=NEW.input_sha256))
+BEGIN SELECT RAISE(ABORT,'33-Q OCR job update requires exact immutable source, mutation and sealed lineage'); END;
+
+CREATE TRIGGER trg_33q_settings_insert BEFORE INSERT ON local_governed_ocr_settings
+WHEN NEW.revision<>1
+ OR NOT EXISTS(SELECT 1 FROM accounts account JOIN people owner ON owner.id=account.person_id
+   WHERE account.id=NEW.account_id AND account.status='active' AND account.person_id=NEW.owner_person_id
+     AND owner.family_id=NEW.family_id AND owner.status='active')
+ OR NOT EXISTS(SELECT 1 FROM local_governed_ocr_mutations mutation WHERE mutation.id=NEW.last_mutation_id
+   AND mutation.family_id=NEW.family_id AND mutation.account_id=NEW.account_id AND mutation.owner_person_id=NEW.owner_person_id
+   AND mutation.resource_type='local_ocr_settings' AND mutation.resource_id=NEW.resource_id
+   AND mutation.previous_revision=0 AND mutation.revision=NEW.revision AND mutation.state_fingerprint=NEW.state_fingerprint
+   AND mutation.policy_receipt_hash=NEW.policy_receipt_hash AND mutation.occurred_at=NEW.updated_at)
+BEGIN SELECT RAISE(ABORT,'33-Q OCR settings creation requires exact active subject and mutation'); END;
+
+CREATE TRIGGER trg_33q_settings_update BEFORE UPDATE ON local_governed_ocr_settings
+WHEN NEW.revision<>OLD.revision+1 OR NEW.account_id<>OLD.account_id OR NEW.family_id<>OLD.family_id
+ OR NEW.owner_person_id<>OLD.owner_person_id OR NEW.resource_id<>OLD.resource_id
+ OR NOT EXISTS(SELECT 1 FROM local_governed_ocr_mutations mutation WHERE mutation.id=NEW.last_mutation_id
+   AND mutation.family_id=NEW.family_id AND mutation.account_id=NEW.account_id AND mutation.owner_person_id=NEW.owner_person_id
+   AND mutation.resource_type='local_ocr_settings' AND mutation.resource_id=NEW.resource_id
+   AND mutation.previous_revision=OLD.revision AND mutation.revision=NEW.revision AND mutation.state_fingerprint=NEW.state_fingerprint
+   AND mutation.policy_receipt_hash=NEW.policy_receipt_hash AND mutation.occurred_at=NEW.updated_at)
+BEGIN SELECT RAISE(ABORT,'33-Q OCR settings update requires exact optimistic mutation'); END;
+
+CREATE TRIGGER trg_33q_source_deletion_item_insert BEFORE INSERT ON local_governed_ocr_source_deletion_items
+WHEN NOT EXISTS(
+  SELECT 1 FROM local_governed_ocr_mutations batch
+  JOIN local_governed_ocr_jobs current ON current.id=NEW.job_id
+  WHERE batch.id=NEW.batch_mutation_id AND batch.mutation_kind='source_delete_propagate'
+    AND batch.resource_type='local_ocr_job' AND batch.resource_id=NEW.source_resource_id
+    AND batch.previous_revision=0 AND batch.revision=1
+    AND batch.family_id=NEW.family_id AND batch.account_id=NEW.account_id AND batch.owner_person_id=NEW.owner_person_id
+    AND batch.policy_receipt_hash=NEW.policy_receipt_hash AND batch.occurred_at=NEW.occurred_at
+    AND current.family_id=NEW.family_id AND current.account_id=NEW.account_id AND current.owner_person_id=NEW.owner_person_id
+    AND current.source_resource_type='archive_item' AND current.source_resource_id=NEW.source_resource_id
+    AND current.revision=NEW.previous_revision AND current.state_fingerprint=NEW.previous_state_fingerprint
+    AND NEW.revision=NEW.previous_revision+1)
+BEGIN SELECT RAISE(ABORT,'33-Q OCR source deletion item requires exact batch and current row'); END;
+
+CREATE TRIGGER trg_33q_source_deletion_item_update BEFORE UPDATE ON local_governed_ocr_source_deletion_items
+BEGIN SELECT RAISE(ABORT,'33-Q OCR source deletion item ledger is immutable'); END;
+CREATE TRIGGER trg_33q_source_deletion_item_delete BEFORE DELETE ON local_governed_ocr_source_deletion_items
+BEGIN SELECT RAISE(ABORT,'33-Q OCR source deletion item ledger is immutable'); END;
+
+CREATE TRIGGER trg_33q_mutation_update BEFORE UPDATE ON local_governed_ocr_mutations BEGIN SELECT RAISE(ABORT,'33-Q OCR mutation ledger is immutable'); END;
+CREATE TRIGGER trg_33q_mutation_delete BEFORE DELETE ON local_governed_ocr_mutations
+WHEN julianday(OLD.occurred_at)>julianday('now','-30 days')
+ OR EXISTS(SELECT 1 FROM local_governed_ocr_jobs current WHERE current.last_mutation_id=OLD.id)
+ OR EXISTS(SELECT 1 FROM local_governed_ocr_settings current WHERE current.last_mutation_id=OLD.id)
+ OR EXISTS(SELECT 1 FROM local_governed_ocr_source_deletion_items item WHERE item.batch_mutation_id=OLD.id)
+BEGIN SELECT RAISE(ABORT,'33-Q OCR mutation prune requires thirty-day grace and zero current references'); END;
+CREATE TRIGGER trg_33q_job_delete BEFORE DELETE ON local_governed_ocr_jobs BEGIN SELECT RAISE(ABORT,'33-Q OCR jobs cannot be physically deleted'); END;
+CREATE TRIGGER trg_33q_settings_delete BEFORE DELETE ON local_governed_ocr_settings BEGIN SELECT RAISE(ABORT,'33-Q OCR settings cannot be deleted'); END;
+CREATE TRIGGER trg_33q_mutation_quota BEFORE INSERT ON local_governed_ocr_mutations
+WHEN (SELECT COUNT(*) FROM local_governed_ocr_mutations WHERE account_id=NEW.account_id AND julianday(occurred_at)>julianday(NEW.occurred_at,'-30 days'))>=4096
+BEGIN SELECT RAISE(ABORT,'33-Q bounded OCR mutation quota exceeded'); END;
+
+UPDATE database_metadata SET value='REVISION-33-Q-LOCAL-GOVERNED-OCR',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -12496,7 +12768,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(90, 'b7_accessibility_preferences', accessibilityPreferencesSql),
   createMigrationDefinition(91, 'b3_governed_form_drafts', governedFormDraftsSql),
   createMigrationDefinition(92, 'privacy_ownership_data_rights_incident_control', privacyOwnershipDataRightsIncidentControlSql),
-  createMigrationDefinition(93, 'identity_access_credentials', identityAccessCredentialLedgerSql)
+  createMigrationDefinition(93, 'identity_access_credentials', identityAccessCredentialLedgerSql),
+  createMigrationDefinition(94, 'local_governed_ocr', localGovernedOcrLedgerSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

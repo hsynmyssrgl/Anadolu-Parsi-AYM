@@ -11,7 +11,7 @@ export const PLATFORM_APPLICATION_RUNTIME_CAPABILITY_REQUIREMENTS: Readonly<Reco
   PlatformApplicationId,
   readonly PlatformRuntimeCapability[]
 >> = Object.freeze({
-  'windows-desktop': Object.freeze(['file.access', 'network.access'] as const),
+  'windows-desktop': Object.freeze(['file.access', 'network.access', 'ocr.process'] as const),
   'windows-core-service': Object.freeze(['file.access', 'network.access'] as const),
   'windows-cluster-agent': Object.freeze([] as const),
   'macos-companion': Object.freeze([] as const),
@@ -27,7 +27,7 @@ export const PLATFORM_APPLICATION_RUNTIME_CAPABILITY_REQUIREMENTS: Readonly<Reco
   'signed-plugin': Object.freeze([] as const)
 });
 
-export const PPK022_EXPECTED_AST_CAPABILITY_SURFACE_COUNT = 282 as const;
+export const PPK022_EXPECTED_AST_CAPABILITY_SURFACE_COUNT = 339 as const;
 
 export type PlatformCapabilityManifestAuthoritySource =
   | 'core-service-kernel'
@@ -345,7 +345,9 @@ export const assertPinnedBootstrapRuntimeCapability = (
   applicationId: PlatformApplicationId,
   capability: PlatformRuntimeCapability
 ): void => {
-  if (!PLATFORM_APPLICATION_RUNTIME_CAPABILITY_REQUIREMENTS[applicationId].includes(capability)) {
+  const bootstrapPinned = applicationId === 'windows-desktop'
+    && (capability === 'file.access' || capability === 'network.access');
+  if (!bootstrapPinned) {
     throw new Error(`BOOTSTRAP_RUNTIME_CAPABILITY_NOT_DECLARED:${applicationId}:${capability}`);
   }
 };

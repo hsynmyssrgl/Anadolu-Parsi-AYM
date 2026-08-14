@@ -5,8 +5,8 @@
   "requirement": "PPK-022",
   "phase": "CAPABILITY_MANIFEST_BUILD_RUNTIME_GATE_CONTRACT",
   "status": "PASS",
-  "checkCount": 108,
-  "passed": 108,
+  "checkCount": 110,
+  "passed": 110,
   "failed": 0,
   "failures": [],
   "checks": [
@@ -59,7 +59,7 @@
       "passed": true
     },
     {
-      "name": "manifest contains exactly 282 unique surfaces",
+      "name": "manifest contains exactly 339 unique surfaces",
       "passed": true
     },
     {
@@ -99,7 +99,11 @@
       "passed": true
     },
     {
-      "name": "only file and network are deployed",
+      "name": "only Desktop OCR plus file and network are deployed",
+      "passed": true
+    },
+    {
+      "name": "local OCR stays in windows-desktop while ocr-worker remains undeployed and low privilege is not claimed",
       "passed": true
     },
     {
@@ -411,11 +415,15 @@
       "passed": true
     },
     {
+      "name": "decision pins current Desktop OCR capability truth and source ratchet",
+      "passed": true
+    },
+    {
       "name": "threat model covers all primary resource and manifest evasions",
       "passed": true
     },
     {
-      "name": "master register contains DEC-203",
+      "name": "master register contains DEC-203 and current exact capability ratchet",
       "passed": true
     },
     {
@@ -446,10 +454,10 @@
   "protectedCapabilityFamilies": 7,
   "canonicalApplications": 14,
   "productionSourceZones": 18,
-  "scannedProductionFiles": 428,
-  "exactCapabilitySurfaces": 282,
-  "exactManifestEntries": 282,
-  "exactManifestSha256": "281f4bb54c1492d41d3ee5add80487c1353be0a34988dd0511620e092de2e6a8",
+  "scannedProductionFiles": 441,
+  "exactCapabilitySurfaces": 339,
+  "exactManifestEntries": 339,
+  "exactManifestSha256": "bba1167e470099c3af1d4363bdba117028b7ce0b61fb78c381e07f3d439ec399",
   "pinnedBootstrapSurfaces": 26,
   "maliciousAstSelfTests": 33,
   "benignAstSelfTests": 5,
@@ -467,5 +475,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-14T06:33:20.971Z"
+  "generatedAt": "2026-08-14T10:15:26.098Z"
 }

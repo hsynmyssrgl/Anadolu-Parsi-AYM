@@ -4,17 +4,17 @@ import {
   SqliteDatabaseMaintenanceCommandPort,
   SqliteDatabaseRuntimeHealthQueryPort
 } from '@ppt/infrastructure';
-import type { DatabaseConnection } from '@ppt/contracts';
+import type { AsyncTransactionExecutor, DatabaseConnection } from '@ppt/contracts';
 import type { MigrationRunSummary } from '@ppt/database';
 import type {
   PlatformPolicyArchiveOperationMetadata,
   PlatformPolicyArchivePendingOperationMutation,
   PlatformPolicyArchivePendingOperationRecord,
-  RepositoryExecutionContext,
-  TransactionExecutor
+  RepositoryExecutionContext
 } from '@ppt/repository-contracts';
 import { createHash, randomUUID } from 'node:crypto';
 import { rmSync } from 'node:fs';
+import { resolve, sep } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { arch, platform } from 'node:os';
 import {
@@ -197,6 +197,17 @@ import {
   AssignArchiveRetentionPolicyUseCase,
   PrepareArchiveDestructionUseCase,
   MarkArchiveDestroyedUseCase,
+  GetLocalGovernedOcrCenterUseCase,
+  GetLocalGovernedOcrResultUseCase,
+  CreateLocalGovernedOcrJobUseCase,
+  RunLocalGovernedOcrJobUseCase,
+  CancelLocalGovernedOcrJobUseCase,
+  CorrectLocalGovernedOcrResultUseCase,
+  RerunLocalGovernedOcrJobUseCase,
+  DeleteLocalGovernedOcrJobUseCase,
+  SetLocalGovernedOcrEnabledUseCase,
+  PropagateLocalGovernedOcrSourceDeletionUseCase,
+  localGovernedOcrSettingsResourceId,
   ListArchiveCategoriesUseCase, ListAiConsentsUseCase, UpsertAiConsentUseCase, PreviewAiAccessUseCase,
   ListSensitiveDataProfilesUseCase, UpsertSensitiveDataConsentUseCase, PreviewSensitiveExportUseCase,
   ListArchiveClassificationsUseCase,
@@ -224,6 +235,9 @@ import {
   type MembershipApplicationContext,
   type LocationApplicationContext,
   type TimelineApplicationContext,
+  type LocalGovernedOcrApplicationContext,
+  type LocalGovernedOcrOperationIdentifiers,
+  type LocalGovernedOcrRuntimePort,
   ListDataRetentionPoliciesUseCase,
   ListDataLifecycleRecordsUseCase,
   CreateDataRetentionPolicyUseCase,
@@ -363,7 +377,11 @@ import { createFinanceProductionPolicyEnforcementPointResolver } from './finance
 import { createHealthProductionPolicyEnforcementPointResolver } from './health-production-policy-runtime.js';
 import { createLifeProductionPolicyEnforcementPointResolver } from './life-production-policy-runtime.js';
 import { createLocationProductionPolicyEnforcementPointResolver } from './location-production-policy-runtime.js';
-import { createTimelineProductionPolicyEnforcementPointResolver } from './timeline-production-policy-runtime.js';
+import {
+  createLocalGovernedOcrProductionPolicyEnforcementPointResolver,
+  createTimelineProductionPolicyEnforcementPointResolver,
+  type LocalGovernedOcrProductionPolicyEnforcementPointResolver
+} from './timeline-production-policy-runtime.js';
 import { RepositoryBackedDataLifecycleQueryPort, RepositoryBackedDataLifecycleUnitOfWork, RepositoryBackedStrongAuthenticationPort } from './data-lifecycle-application-adapter.js';
 import {
   DesktopSourceDeletionRuntimeCacheInvalidationPort,
@@ -396,6 +414,9 @@ import {
   recoverInterruptedFullBackupRestore
 } from './full-backup-file-application-adapter.js';
 import { FileSystemArchiveVaultFilePort } from './archive-vault-file-application-adapter.js';
+import { RepositoryBackedLocalGovernedOcrUnitOfWork } from './local-governed-ocr-application-adapter.js';
+import { createWindowsLocalGovernedOcrRuntimeAdapter } from './local-governed-ocr-runtime-adapter.js';
+import { LocalGovernedOcrResultVault } from './local-governed-ocr-result-vault.js';
 import { FileSystemOperationalArtifactFilePort } from './operational-artifact-file-application-adapter.js';
 import { writePrivacyDataExportFile, type PrivacyDataExportFileResult } from './privacy-data-export-service.js';
 import type { OperationalArtifactFilePort } from '@ppt/application';
@@ -468,6 +489,19 @@ import type {
   WindowsHelloStateView
 } from '@ppt/domain';
 import type { DesktopSecurityPostureView, SessionLockStateView, UnlockSessionInput } from '@ppt/domain';
+import type {
+  CancelLocalGovernedOcrJobInput,
+  CorrectLocalGovernedOcrResultInput,
+  CreateLocalGovernedOcrJobInput,
+  DeleteLocalGovernedOcrJobInput,
+  LocalGovernedOcrCenterView,
+  LocalGovernedOcrMutationReceiptView,
+  LocalGovernedOcrResultView,
+  PropagateLocalGovernedOcrSourceDeletionInput,
+  RerunLocalGovernedOcrJobInput,
+  RunLocalGovernedOcrJobInput,
+  SetLocalGovernedOcrEnabledInput
+} from '@ppt/domain';
 import { SqliteFamilyDatabaseRuntime } from './family-database-runtime.js';
 import { createSqliteRepositoryCompositionRoot, type RepositoryCompositionRoot } from './repository-composition-root.js';
 import type { IssueOfflineCapabilityLeaseInput, OfflineCapabilityLeaseView, LostDeviceShutdownInput, LostDeviceShutdownResultView, PrivacyControlCenterView, UpsertLiveLocationConsentInput } from '@ppt/domain';
@@ -568,6 +602,10 @@ interface DataStoreOptions {
   operationalArtifactFiles?: OperationalArtifactFilePort;
   vaultKeySecretProtector?: DeviceSecretProtector;
   archivePath?: string;
+  /** Explicit bounded runtime seam for deterministic production-composition integration tests. */
+  localGovernedOcrRuntime?: LocalGovernedOcrRuntimePort;
+  /** Must resolve to a dedicated directory disjoint from the archive, database and key paths. */
+  localGovernedOcrResultPath?: string;
   archivePolicyEnforcementPointResolver?: ArchivePolicyEnforcementPointResolver;
   financePolicyEnforcementPointResolver?: FinancePolicyEnforcementPointResolver;
   healthPolicyEnforcementPointResolver?: HealthPolicyEnforcementPointResolver;
@@ -678,6 +716,158 @@ const canonicalArchiveOperationValue = (value: unknown): string => {
 const deterministicArchiveIdentifier = (operationId: string, label: string): string => {
   const hex = createHash('sha256').update(`${operationId}\u0000${label}`, 'utf8').digest('hex');
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-5${hex.slice(13, 16)}-a${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
+};
+
+const LOCAL_GOVERNED_OCR_CLIENT_OPERATION_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{7,159}$/u;
+
+const localGovernedOcrFingerprintCommand = (command: unknown): unknown => {
+  if (typeof command !== 'object' || command === null || Array.isArray(command)) return command;
+  const record = command as Readonly<Record<string, unknown>>;
+  if (typeof record.correctedText !== 'string') return command;
+  const { correctedText, ...metadata } = record;
+  return Object.freeze({
+    ...metadata,
+    correctedTextSha256: createHash('sha256').update(correctedText, 'utf8').digest('hex')
+  });
+};
+
+const localGovernedOcrOperationSeed = (
+  context: LocalGovernedOcrApplicationContext,
+  clientOperationId: string
+): string => {
+  if (!LOCAL_GOVERNED_OCR_CLIENT_OPERATION_ID.test(clientOperationId)) {
+    throw new Error('Local OCR clientOperationId must be a stable 8-160 character identifier.');
+  }
+  return canonicalArchiveOperationValue({
+    familyId: context.familyId,
+    accountId: context.actor.userId,
+    ownerPersonId: context.actor.personId,
+    clientOperationId
+  });
+};
+
+const localGovernedOcrMutationIdentifiers = (
+  context: LocalGovernedOcrApplicationContext,
+  clientOperationId: string,
+  resourceId: string,
+  operation: string,
+  command: unknown
+): LocalGovernedOcrOperationIdentifiers => {
+  const seed = localGovernedOcrOperationSeed(context, clientOperationId);
+  return Object.freeze({
+    mutationId: deterministicArchiveIdentifier(seed, 'local-ocr-mutation'),
+    resourceId,
+    requestFingerprint: createHash('sha256').update(canonicalArchiveOperationValue({
+      operation,
+      familyId: context.familyId,
+      accountId: context.actor.userId,
+      ownerPersonId: context.actor.personId,
+      command: localGovernedOcrFingerprintCommand(command)
+    }), 'utf8').digest('hex'),
+    auditId: deterministicArchiveIdentifier(seed, 'local-ocr-audit'),
+    outboxEventId: asEventId(deterministicArchiveIdentifier(seed, 'local-ocr-outbox'))
+  });
+};
+
+const localGovernedOcrJobId = (
+  context: LocalGovernedOcrApplicationContext,
+  clientOperationId: string
+): string => deterministicArchiveIdentifier(
+  localGovernedOcrOperationSeed(context, clientOperationId),
+  'local-ocr-job'
+);
+
+const localGovernedOcrStageCorrelationId = (
+  correlationId: LocalGovernedOcrApplicationContext['correlationId'],
+  stage: 'archive-destruction-plan' | 'archive-deletion-propagation'
+): LocalGovernedOcrApplicationContext['correlationId'] => asCorrelationId(
+  `local-ocr-${stage}-${deterministicArchiveIdentifier(correlationId, stage)}`
+);
+
+const normalizedCompositionPath = (value: string): string => {
+  const normalized = resolve(value);
+  return process.platform === 'win32' ? normalized.toLocaleLowerCase('en-US') : normalized;
+};
+
+const compositionPathsOverlap = (left: string, right: string): boolean => {
+  const normalizedLeft = normalizedCompositionPath(left);
+  const normalizedRight = normalizedCompositionPath(right);
+  return normalizedLeft === normalizedRight
+    || normalizedLeft.startsWith(`${normalizedRight}${sep}`)
+    || normalizedRight.startsWith(`${normalizedLeft}${sep}`);
+};
+
+const localGovernedOcrResultRoot = (input: {
+  readonly requestedPath?: string;
+  readonly databasePath: string;
+  readonly archivePath: string;
+  readonly keyPath: string;
+  readonly temporaryOpenPath: string;
+}): string => {
+  const root = resolve(input.requestedPath ?? `${input.databasePath}.local-ocr-results`);
+  if (
+    !root.trim()
+    || compositionPathsOverlap(root, input.databasePath)
+    || compositionPathsOverlap(root, input.archivePath)
+    || compositionPathsOverlap(root, input.keyPath)
+    || compositionPathsOverlap(root, input.temporaryOpenPath)
+  ) throw new PlatformPolicyEnforcementError(
+    'ENFORCEMENT_UNAVAILABLE',
+    'Local OCR protected result root must be separate from archive, database, key and temporary-open storage'
+  );
+  return root;
+};
+
+const failClosedLocalGovernedOcrPolicyEnforcementPointResolver:
+LocalGovernedOcrProductionPolicyEnforcementPointResolver = Object.freeze({
+  resolve(): never {
+    throw new PlatformPolicyEnforcementError(
+      'ENFORCEMENT_UNAVAILABLE',
+      'Local OCR production policy enforcement is not composed for this process'
+    );
+  }
+});
+
+const localGovernedOcrRuntimeFailure = (
+  correlationId: Parameters<LocalGovernedOcrRuntimePort['runAndSeal']>[0]['correlationId']
+) => err(createAppError({
+  code: ERROR_CODES.AUTHORIZATION_DENIED,
+  category: 'security',
+  message: 'Local OCR protected runtime prerequisites are unavailable.',
+  correlationId
+}));
+
+const failClosedLocalGovernedOcrRuntime: LocalGovernedOcrRuntimePort = Object.freeze({
+  async runAndSeal(input: Parameters<LocalGovernedOcrRuntimePort['runAndSeal']>[0]) {
+    return localGovernedOcrRuntimeFailure(input.correlationId);
+  },
+  async correctAndSeal(input: Parameters<LocalGovernedOcrRuntimePort['correctAndSeal']>[0]) {
+    return localGovernedOcrRuntimeFailure(input.correlationId);
+  },
+  async readSealedResult(input: Parameters<LocalGovernedOcrRuntimePort['readSealedResult']>[0]) {
+    return localGovernedOcrRuntimeFailure(input.correlationId);
+  },
+  async requestCancellation(input: Parameters<LocalGovernedOcrRuntimePort['requestCancellation']>[0]) {
+    return localGovernedOcrRuntimeFailure(input.correlationId);
+  },
+  async purgeSealedResult(input: Parameters<LocalGovernedOcrRuntimePort['purgeSealedResult']>[0]) {
+    return localGovernedOcrRuntimeFailure(input.correlationId);
+  }
+});
+
+const assertLocalGovernedOcrRuntimePort = (runtime: LocalGovernedOcrRuntimePort): LocalGovernedOcrRuntimePort => {
+  if (!runtime
+    || typeof runtime.runAndSeal !== 'function'
+    || typeof runtime.correctAndSeal !== 'function'
+    || typeof runtime.readSealedResult !== 'function'
+    || typeof runtime.requestCancellation !== 'function'
+    || typeof runtime.purgeSealedResult !== 'function') {
+    throw new PlatformPolicyEnforcementError(
+      'ENFORCEMENT_UNAVAILABLE',
+      'Explicit Local OCR bounded runtime injection is incomplete'
+    );
+  }
+  return runtime;
 };
 
 const privacyOperationFingerprint = (operation: string, input: unknown): string => createHash('sha256')
@@ -816,7 +1006,7 @@ export class FamilyDataStore {
   readonly #strongAuthentication: StrongAuthenticationPort;
   readonly #clock: Clock;
   readonly #correlation: CorrelationContextProvider | undefined;
-  readonly #transactionExecutor: TransactionExecutor;
+  readonly #transactionExecutor: AsyncTransactionExecutor;
   readonly #repositories: RepositoryCompositionRoot;
   readonly #listBackupTargetsUseCase: ListBackupTargetsUseCase;
   readonly #findBackupTargetUseCase: FindBackupTargetUseCase;
@@ -1051,6 +1241,16 @@ export class FamilyDataStore {
   readonly #assignArchiveRetentionPolicyUseCase: AssignArchiveRetentionPolicyUseCase;
   readonly #prepareArchiveDestructionUseCase: PrepareArchiveDestructionUseCase;
   readonly #markArchiveDestroyedUseCase: MarkArchiveDestroyedUseCase;
+  readonly #getLocalGovernedOcrCenterUseCase: GetLocalGovernedOcrCenterUseCase;
+  readonly #getLocalGovernedOcrResultUseCase: GetLocalGovernedOcrResultUseCase;
+  readonly #createLocalGovernedOcrJobUseCase: CreateLocalGovernedOcrJobUseCase;
+  readonly #runLocalGovernedOcrJobUseCase: RunLocalGovernedOcrJobUseCase;
+  readonly #cancelLocalGovernedOcrJobUseCase: CancelLocalGovernedOcrJobUseCase;
+  readonly #correctLocalGovernedOcrResultUseCase: CorrectLocalGovernedOcrResultUseCase;
+  readonly #rerunLocalGovernedOcrJobUseCase: RerunLocalGovernedOcrJobUseCase;
+  readonly #deleteLocalGovernedOcrJobUseCase: DeleteLocalGovernedOcrJobUseCase;
+  readonly #setLocalGovernedOcrEnabledUseCase: SetLocalGovernedOcrEnabledUseCase;
+  readonly #propagateLocalGovernedOcrSourceDeletionUseCase: PropagateLocalGovernedOcrSourceDeletionUseCase;
   readonly #listDataRetentionPoliciesUseCase: ListDataRetentionPoliciesUseCase;
   readonly #listDataLifecycleRecordsUseCase: ListDataLifecycleRecordsUseCase;
   readonly #createDataRetentionPolicyUseCase: CreateDataRetentionPolicyUseCase;
@@ -2160,6 +2360,93 @@ export class FamilyDataStore {
     this.#listSensitiveDataProfilesUseCase = new ListSensitiveDataProfilesUseCase(aiConsentQuery, sensitiveDataAuthorization);
     this.#upsertSensitiveDataConsentUseCase = new UpsertSensitiveDataConsentUseCase(aiConsentUnitOfWork, sensitiveDataAuthorization);
     this.#previewSensitiveExportUseCase = new PreviewSensitiveExportUseCase(aiConsentQuery, aiConsentUnitOfWork, sensitiveDataAuthorization);
+    const localGovernedOcrPolicyEnforcementPointResolver = productionArchivePolicy === undefined
+      ? failClosedLocalGovernedOcrPolicyEnforcementPointResolver
+      : createLocalGovernedOcrProductionPolicyEnforcementPointResolver({
+          transactionExecutor: this.#transactionExecutor,
+          accountRepository: this.#repositories.accountRepository,
+          permissionRepository: this.#repositories.objectPermissionRepository,
+          trustedDeviceRepository: this.#repositories.trustedDeviceRepository,
+          timelinePolicyResourceRepository: this.#repositories.timelineRepository,
+          accessibilityPreferencesRepository: this.#repositories.accessibilityPreferencesRepository,
+          formDraftRepository: this.#repositories.formDraftRepository,
+          identityAccessCredentialRepository: this.#repositories.identityAccessCredentialRepository,
+          privacyOwnershipDataRightsRepository: this.#repositories.privacyOwnershipDataRightsRepository,
+          personRepository: this.#repositories.personRepository,
+          deviceIdentityProvider: this.#deviceIdentityProvider,
+          authorizationProvider: productionArchivePolicy.authorizationProvider,
+          receiptSink: productionArchivePolicy.receiptSink,
+          policyTransactionRepository: this.#repositories.platformPolicyTransactionRepository,
+          clusterFence: productionArchivePolicy.clusterFence,
+          policyVersion: productionArchivePolicy.policyVersion,
+          clock: this.#clock,
+          localGovernedOcrRepository: this.#repositories.localGovernedOcrRepository,
+          aiConsentRepository: this.#repositories.aiConsentRepository
+        });
+    const localGovernedOcrUnitOfWork = new RepositoryBackedLocalGovernedOcrUnitOfWork({
+      transactionExecutor: this.#transactionExecutor,
+      localGovernedOcrRepository: this.#repositories.localGovernedOcrRepository,
+      derivedDataPolicyRepository: this.#repositories.derivedDataPolicyRepository,
+      auditRepository: this.#repositories.auditRepository,
+      outboxRepository: this.#repositories.outboxRepository,
+      policyEnforcementPointResolver: localGovernedOcrPolicyEnforcementPointResolver,
+      clusterFence: productionArchivePolicy?.clusterFence ?? nonWritableArchiveClusterFence
+    });
+    const localGovernedOcrRuntime = options.localGovernedOcrRuntime !== undefined
+      ? assertLocalGovernedOcrRuntimePort(options.localGovernedOcrRuntime)
+      : options.protectedSideArtifacts === undefined
+        ? failClosedLocalGovernedOcrRuntime
+        : createWindowsLocalGovernedOcrRuntimeAdapter({
+            authority: localGovernedOcrUnitOfWork,
+            archiveVaultFiles,
+            resultVault: new LocalGovernedOcrResultVault({
+              rootDirectory: localGovernedOcrResultRoot({
+                ...(options.localGovernedOcrResultPath === undefined
+                  ? {}
+                  : { requestedPath: options.localGovernedOcrResultPath }),
+                databasePath: storageLayout.databasePath,
+                archivePath: storageLayout.archivePath,
+                keyPath: storageLayout.vaultKeyPath,
+                temporaryOpenPath: storageLayout.temporaryOpenPath
+              }),
+              protectedStore: options.protectedSideArtifacts
+            }),
+            now: () => this.#clock.now()
+          });
+    this.#getLocalGovernedOcrCenterUseCase = new GetLocalGovernedOcrCenterUseCase(localGovernedOcrUnitOfWork);
+    this.#getLocalGovernedOcrResultUseCase = new GetLocalGovernedOcrResultUseCase(
+      localGovernedOcrUnitOfWork,
+      localGovernedOcrRuntime
+    );
+    this.#createLocalGovernedOcrJobUseCase = new CreateLocalGovernedOcrJobUseCase(localGovernedOcrUnitOfWork);
+    this.#runLocalGovernedOcrJobUseCase = new RunLocalGovernedOcrJobUseCase(
+      localGovernedOcrUnitOfWork,
+      localGovernedOcrRuntime
+    );
+    this.#cancelLocalGovernedOcrJobUseCase = new CancelLocalGovernedOcrJobUseCase(
+      localGovernedOcrUnitOfWork,
+      localGovernedOcrRuntime
+    );
+    this.#correctLocalGovernedOcrResultUseCase = new CorrectLocalGovernedOcrResultUseCase(
+      localGovernedOcrUnitOfWork,
+      localGovernedOcrRuntime
+    );
+    this.#rerunLocalGovernedOcrJobUseCase = new RerunLocalGovernedOcrJobUseCase(
+      localGovernedOcrUnitOfWork,
+      localGovernedOcrRuntime
+    );
+    this.#deleteLocalGovernedOcrJobUseCase = new DeleteLocalGovernedOcrJobUseCase(
+      localGovernedOcrUnitOfWork,
+      localGovernedOcrRuntime
+    );
+    this.#setLocalGovernedOcrEnabledUseCase = new SetLocalGovernedOcrEnabledUseCase(
+      localGovernedOcrUnitOfWork,
+      localGovernedOcrRuntime
+    );
+    this.#propagateLocalGovernedOcrSourceDeletionUseCase = new PropagateLocalGovernedOcrSourceDeletionUseCase(
+      localGovernedOcrUnitOfWork,
+      localGovernedOcrRuntime
+    );
     const legacyDependencies={transactionExecutor:this.#transactionExecutor,legacyRepository:this.#repositories.legacyRepository,accountRepository:this.#repositories.accountRepository,permissionRepository:this.#repositories.objectPermissionRepository,personRepository:this.#repositories.personRepository,auditRepository:this.#repositories.auditRepository,outboxRepository:this.#repositories.outboxRepository} as const;
     const legacyQuery=new RepositoryBackedLegacyQueryPort(legacyDependencies); const legacyUnitOfWork=new RepositoryBackedLegacyUnitOfWork(legacyDependencies);
     this.#listDigitalLegacyPlansUseCase=new ListDigitalLegacyPlansUseCase(legacyQuery); this.#listLegacyGrantsUseCase=new ListLegacyGrantsUseCase(legacyQuery); this.#listLegacyApprovalsUseCase=new ListLegacyApprovalsUseCase(legacyQuery);
@@ -2775,6 +3062,61 @@ export class FamilyDataStore {
     return {familyId:asFamilyId('family-main'),actor:{userId:asUserId(authenticatedUserId),role:account.role,...(account.personId?{personId:account.personId}:{})},correlationId:this.#correlation?.current()?.correlationId??asCorrelationId(`${prefix}-${randomUUID()}`)};
   }
 
+  #localGovernedOcrApplicationContext(prefix: string): LocalGovernedOcrApplicationContext {
+    const authenticatedUserId = this.#requireAuth();
+    const account = this.#currentAccount();
+    return {
+      familyId: asFamilyId('family-main'),
+      actor: {
+        userId: asUserId(authenticatedUserId),
+        role: account.role,
+        ...(account.personId ? { personId: asPersonId(account.personId) } : {})
+      },
+      correlationId: this.#correlation?.current()?.correlationId
+        ?? asCorrelationId(`${prefix}-${randomUUID()}`)
+    };
+  }
+
+  async #propagateLocalGovernedOcrArchiveDeletion(
+    archiveContext: ArchiveApplicationContext,
+    sourceResourceId: string,
+    archiveOperationId: string
+  ): Promise<void> {
+    const context: LocalGovernedOcrApplicationContext = {
+      familyId: archiveContext.familyId,
+      actor: {
+        userId: archiveContext.actor.userId,
+        role: archiveContext.actor.role,
+        ...(archiveContext.actor.personId
+          ? { personId: asPersonId(archiveContext.actor.personId) }
+          : {})
+      },
+      correlationId: archiveContext.correlationId
+    };
+    const clientOperationId = deterministicArchiveIdentifier(
+      archiveOperationId,
+      'local-ocr-source-delete'
+    );
+    const command: PropagateLocalGovernedOcrSourceDeletionInput = {
+      sourceResourceType: 'archive_item',
+      sourceResourceId,
+      purgedAt: asIsoDateTime(this.#clock.now()),
+      clientOperationId
+    };
+    const result = await this.#propagateLocalGovernedOcrSourceDeletionUseCase.execute({
+      context,
+      command,
+      identifiers: localGovernedOcrMutationIdentifiers(
+        context,
+        clientOperationId,
+        sourceResourceId,
+        'source_delete_propagate',
+        { sourceResourceType: 'archive_item', sourceResourceId }
+      )
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+  }
+
   #archiveOperationId(operationId?: string): string {
     const resolved = operationId === undefined ? `archive-op-${randomUUID()}` : operationId;
     if (!ARCHIVE_OPERATION_ID.test(resolved)) {
@@ -2828,7 +3170,7 @@ export class FamilyDataStore {
 
   #archiveRepositoryContext(
     context: ArchiveApplicationContext,
-    transaction: Parameters<Parameters<TransactionExecutor['execute']>[1]>[0]
+    transaction: Parameters<Parameters<AsyncTransactionExecutor['execute']>[1]>[0]
   ): RepositoryExecutionContext {
     return {
       transaction: transaction.transaction,
@@ -4827,6 +5169,142 @@ export class FamilyDataStore {
     return this.#entityCatalogService.lookup(input);
   }
 
+  public async getLocalGovernedOcrCenter(): Promise<LocalGovernedOcrCenterView> {
+    const result = await this.#getLocalGovernedOcrCenterUseCase.execute(
+      this.#localGovernedOcrApplicationContext('local-ocr-center')
+    );
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async getLocalGovernedOcrResult(
+    input: { readonly jobId: string }
+  ): Promise<LocalGovernedOcrResultView> {
+    const context = this.#localGovernedOcrApplicationContext('local-ocr-result-read');
+    const result = await this.#getLocalGovernedOcrResultUseCase.execute({
+      context,
+      jobId: input.jobId,
+      auditId: randomUUID()
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async createLocalGovernedOcrJob(
+    input: CreateLocalGovernedOcrJobInput
+  ): Promise<LocalGovernedOcrMutationReceiptView> {
+    const context = this.#localGovernedOcrApplicationContext('local-ocr-job-create');
+    const resourceId = localGovernedOcrJobId(context, input.clientOperationId);
+    const result = await this.#createLocalGovernedOcrJobUseCase.execute({
+      context,
+      command: input,
+      identifiers: localGovernedOcrMutationIdentifiers(
+        context,
+        input.clientOperationId,
+        resourceId,
+        'job_create',
+        input
+      )
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async runLocalGovernedOcrJob(
+    input: RunLocalGovernedOcrJobInput
+  ): Promise<LocalGovernedOcrMutationReceiptView> {
+    const context = this.#localGovernedOcrApplicationContext('local-ocr-job-run');
+    const result = await this.#runLocalGovernedOcrJobUseCase.execute({
+      context,
+      command: input,
+      identifiers: localGovernedOcrMutationIdentifiers(
+        context, input.clientOperationId, input.jobId, 'job_run', input
+      )
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async cancelLocalGovernedOcrJob(
+    input: CancelLocalGovernedOcrJobInput
+  ): Promise<LocalGovernedOcrMutationReceiptView> {
+    const context = this.#localGovernedOcrApplicationContext('local-ocr-job-cancel');
+    const result = await this.#cancelLocalGovernedOcrJobUseCase.execute({
+      context,
+      command: input,
+      identifiers: localGovernedOcrMutationIdentifiers(
+        context, input.clientOperationId, input.jobId, 'job_cancel', input
+      )
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async correctLocalGovernedOcrResult(
+    input: CorrectLocalGovernedOcrResultInput
+  ): Promise<LocalGovernedOcrMutationReceiptView> {
+    const context = this.#localGovernedOcrApplicationContext('local-ocr-result-correct');
+    const result = await this.#correctLocalGovernedOcrResultUseCase.execute({
+      context,
+      command: input,
+      identifiers: localGovernedOcrMutationIdentifiers(
+        context, input.clientOperationId, input.jobId, 'result_correct', input
+      )
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async rerunLocalGovernedOcrJob(
+    input: RerunLocalGovernedOcrJobInput
+  ): Promise<LocalGovernedOcrMutationReceiptView> {
+    const context = this.#localGovernedOcrApplicationContext('local-ocr-job-rerun');
+    const result = await this.#rerunLocalGovernedOcrJobUseCase.execute({
+      context,
+      command: input,
+      identifiers: localGovernedOcrMutationIdentifiers(
+        context, input.clientOperationId, input.jobId, 'job_rerun', input
+      )
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async deleteLocalGovernedOcrJob(
+    input: DeleteLocalGovernedOcrJobInput
+  ): Promise<LocalGovernedOcrMutationReceiptView> {
+    const context = this.#localGovernedOcrApplicationContext('local-ocr-job-delete');
+    const result = await this.#deleteLocalGovernedOcrJobUseCase.execute({
+      context,
+      command: input,
+      identifiers: localGovernedOcrMutationIdentifiers(
+        context, input.clientOperationId, input.jobId, 'job_delete', input
+      )
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async setLocalGovernedOcrEnabled(
+    input: SetLocalGovernedOcrEnabledInput
+  ): Promise<LocalGovernedOcrMutationReceiptView> {
+    const context = this.#localGovernedOcrApplicationContext('local-ocr-settings-update');
+    if (!context.actor.personId) {
+      throw new Error('[AUTHORIZATION_DENIED] Local OCR settings require an exact owner person.');
+    }
+    const resourceId = localGovernedOcrSettingsResourceId(context.actor.personId);
+    const result = await this.#setLocalGovernedOcrEnabledUseCase.execute({
+      context,
+      command: input,
+      identifiers: localGovernedOcrMutationIdentifiers(
+        context, input.clientOperationId, resourceId,
+        input.enabled ? 'processing_enable' : 'processing_disable', input
+      )
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
 
   public async searchArchive(input: ArchiveSearchInput = {}): Promise<ArchiveItemView[]> { const result=await this.#searchArchiveItemsUseCase.execute(this.#archiveApplicationContext('archive-search'),input); if(!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`); return [...result.value]; }
 
@@ -4900,10 +5378,31 @@ export class FamilyDataStore {
       action: 'delete'
     });
     if (!replay) {
-      const prepared=await this.#prepareArchiveDestructionUseCase.execute(context,normalizedItemId);
+      const destructionPlanContext: ArchiveApplicationContext = {
+        ...context,
+        correlationId: localGovernedOcrStageCorrelationId(
+          context.correlationId,
+          'archive-destruction-plan'
+        )
+      };
+      const prepared=await this.#prepareArchiveDestructionUseCase.execute(
+        destructionPlanContext,
+        normalizedItemId
+      );
       if(!prepared.ok) throw new Error(`[${prepared.error.code}] ${prepared.error.message}`);
       const destroyed=this.#destroyArchiveFileUseCase.execute(context.correlationId,prepared.value);
       if(!destroyed.ok) throw new Error(`[${destroyed.error.code}] ${destroyed.error.message}`);
+      await this.#propagateLocalGovernedOcrArchiveDeletion(
+        {
+          ...context,
+          correlationId: localGovernedOcrStageCorrelationId(
+            context.correlationId,
+            'archive-deletion-propagation'
+          )
+        },
+        normalizedItemId,
+        operationId
+      );
     }
     const marked=await this.#markArchiveDestroyedUseCase.execute({
       context,

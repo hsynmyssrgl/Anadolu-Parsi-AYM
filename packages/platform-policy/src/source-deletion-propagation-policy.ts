@@ -21,11 +21,27 @@ export const SOURCE_DELETION_REQUIRED_CACHE_REGISTRIES = Object.freeze([
 export const SOURCE_DELETION_DIRECT_BYPASS_EXCEPTIONS = Object.freeze([] as const);
 export const SOURCE_DELETION_AUTHORIZED_REPOSITORY_ADAPTERS = Object.freeze([
   'packages/repositories/src/data-lifecycle-repository.ts',
-  'packages/repositories/src/backup-propagation-repository.ts'
+  'packages/repositories/src/backup-propagation-repository.ts',
+  'packages/repositories/src/local-governed-ocr-repository.ts'
+] as const);
+/** Active governed semantic owners with an exact PPK-019 tombstone/purge path. */
+export const SOURCE_DELETION_REGISTERED_SEMANTIC_OWNERS = Object.freeze([
+  'governed_ai_memory_records',
+  'local_ocr_result'
+] as const);
+/** Content-free current metadata that binds a sealed local result to its archive source and current tombstone state. */
+export const SOURCE_DELETION_CURRENT_METADATA_OWNERS = Object.freeze([
+  'local_governed_ocr_jobs'
 ] as const);
 /** Content-free append-only mutation metadata; never a semantic derived-payload owner. */
 export const SOURCE_DELETION_METADATA_ONLY_MUTATION_LEDGERS = Object.freeze([
-  'governed_ai_memory_mutations'
+  'governed_ai_memory_mutations',
+  'local_governed_ocr_mutations',
+  'local_governed_ocr_source_deletion_items'
+] as const);
+/** Content-free current settings metadata; it neither owns a source nor a derived semantic payload. */
+export const SOURCE_DELETION_CONTENT_FREE_METADATA_TABLES = Object.freeze([
+  'local_governed_ocr_settings'
 ] as const);
 
 export type SourceDeletionPropagationOwnerKind = (typeof SOURCE_DELETION_PROPAGATION_OWNER_KINDS)[number];

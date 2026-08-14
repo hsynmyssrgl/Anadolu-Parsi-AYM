@@ -12,6 +12,10 @@ import type {
 } from '@ppt/repository-contracts';
 import type { DataLifecycleResourceType, DataLifecycleState, RecordPrivacy } from '@ppt/domain';
 import {
+  SOURCE_DELETION_CONTENT_FREE_METADATA_TABLES,
+  SOURCE_DELETION_CURRENT_METADATA_OWNERS,
+  SOURCE_DELETION_METADATA_ONLY_MUTATION_LEDGERS,
+  SOURCE_DELETION_REGISTERED_SEMANTIC_OWNERS,
   SourceDeletionPropagationPolicy,
   type SourceDeletionPersistentOwnerInspection,
   type SourceDeletionPropagationPlan
@@ -61,8 +65,12 @@ const RESOURCE_TABLES:Record<DataLifecycleResourceType,string>={
 };
 
 const DERIVED_POLICY_METADATA_TABLES=new Set(['derived_data_policy_bindings','derived_data_policy_sources']);
-const REGISTERED_DERIVED_PAYLOAD_OWNER_TABLES=new Set(['governed_ai_memory_records']);
-const REGISTERED_DERIVED_PAYLOAD_METADATA_TABLES=new Set(['governed_ai_memory_mutations']);
+const REGISTERED_DERIVED_PAYLOAD_OWNER_TABLES=new Set<string>(SOURCE_DELETION_REGISTERED_SEMANTIC_OWNERS);
+const REGISTERED_DERIVED_PAYLOAD_METADATA_TABLES=new Set<string>([
+  ...SOURCE_DELETION_CURRENT_METADATA_OWNERS,
+  ...SOURCE_DELETION_METADATA_ONLY_MUTATION_LEDGERS,
+  ...SOURCE_DELETION_CONTENT_FREE_METADATA_TABLES
+]);
 const DERIVED_PAYLOAD_TABLE_PATTERN=/(?:^|_)(?:ocr(?:_text)?|search_index|thumbnail|ai_memory|derived_cache|plaintext_replica|replica)(?:_|$)/u;
 const inspectPersistentOwners=(database:DatabaseExecutor,inspectedAt:string):SourceDeletionPersistentOwnerInspection=>{
   const tableNames=(database.prepare("SELECT name FROM sqlite_schema WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all() as Array<{name:unknown}>).map(row=>String(row.name));

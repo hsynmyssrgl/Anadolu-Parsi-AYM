@@ -482,7 +482,12 @@
       "version": 93,
       "name": "identity_access_credentials",
       "checksum": "51191e62bcf4baec07e3eab5985ef4210402cdb8b7416064519ceb082322916a"
+    },
+    {
+      "version": 94,
+      "name": "local_governed_ocr",
+      "checksum": "d97738a84ace5de1e56f76f0ea263e6e39a1ec21a52952ed32df6767d04a87e0"
     }
   ],
-  "generatedAt": "2026-08-14T06:38:40.160Z"
+  "generatedAt": "2026-08-14T10:19:57.339Z"
 }

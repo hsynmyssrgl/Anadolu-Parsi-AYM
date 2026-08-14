@@ -33,3 +33,4 @@ export * from './accessibility-preferences.js';
 export * from './form-drafts.js';
 export * from './privacy-ownership-data-rights.js';
 export * from './identity-access-credentials.js';
+export * from './local-governed-ocr.js';

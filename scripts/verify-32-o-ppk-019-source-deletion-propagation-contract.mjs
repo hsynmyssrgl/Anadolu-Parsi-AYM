@@ -25,6 +25,12 @@ const paths = {
   repositoryContract: 'packages/repository-contracts/src/data-lifecycle-repository.ts',
   repository: 'packages/repositories/src/data-lifecycle-repository.ts',
   backupRepository: 'packages/repositories/src/backup-propagation-repository.ts',
+  ocrUseCase: 'packages/application/src/local-governed-ocr-use-cases.ts',
+  ocrRepositoryContract: 'packages/repository-contracts/src/local-governed-ocr-repository.ts',
+  ocrRepository: 'packages/repositories/src/local-governed-ocr-repository.ts',
+  ocrApplicationAdapter: 'apps/desktop/src/main/local-governed-ocr-application-adapter.ts',
+  ocrRuntimeAdapter: 'apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts',
+  ocrResultVault: 'apps/desktop/src/main/local-governed-ocr-result-vault.ts',
   dataLifecycleAdapter: 'apps/desktop/src/main/data-lifecycle-application-adapter.ts',
   cacheAdapter: 'apps/desktop/src/main/source-deletion-propagation-application-adapter.ts',
   familyImport: 'apps/desktop/src/main/family-data-import-service.ts',
@@ -81,12 +87,22 @@ requireMarkers('central propagation policy', files.policy, [
   "'ipc-main-read'",
   "'offline-sensitive'",
   'SOURCE_DELETION_DIRECT_BYPASS_EXCEPTIONS',
-  'SOURCE_DELETION_AUTHORIZED_REPOSITORY_ADAPTERS'
+  'SOURCE_DELETION_AUTHORIZED_REPOSITORY_ADAPTERS',
+  'SOURCE_DELETION_REGISTERED_SEMANTIC_OWNERS',
+  'SOURCE_DELETION_CURRENT_METADATA_OWNERS',
+  'SOURCE_DELETION_METADATA_ONLY_MUTATION_LEDGERS',
+  'SOURCE_DELETION_CONTENT_FREE_METADATA_TABLES'
 ]);
 check('direct bypass exception registry is exactly empty', files.policy.includes('Object.freeze([] as const)'));
-check('authorized repository adapter registry names lifecycle and backup owners', [
+check('authorized repository adapter registry names lifecycle backup and local OCR owners', [
   'packages/repositories/src/data-lifecycle-repository.ts',
-  'packages/repositories/src/backup-propagation-repository.ts'
+  'packages/repositories/src/backup-propagation-repository.ts',
+  'packages/repositories/src/local-governed-ocr-repository.ts'
+].every((marker) => files.policy.includes(marker)));
+check('policy classifies two semantic owners one current OCR metadata owner three ledgers and content-free settings', [
+  "'governed_ai_memory_records'", "'local_ocr_result'", "'local_governed_ocr_jobs'",
+  "'governed_ai_memory_mutations'", "'local_governed_ocr_mutations'",
+  "'local_governed_ocr_source_deletion_items'", "'local_governed_ocr_settings'"
 ].every((marker) => files.policy.includes(marker)));
 check('policy defines all fail-closed rejection classes', [
   'INVALID_SOURCE_IDENTITY', 'INVALID_PURGE_TIME', 'INSPECTION_TIME_MISMATCH',
@@ -133,6 +149,15 @@ check('repository binds lifecycle purge state and legal hold before delete', fil
 check('repository enables secure delete before access metadata and source deletion', files.repository.indexOf("database.exec('PRAGMA secure_delete=ON;')") < files.repository.indexOf("DELETE FROM object_permissions") && files.repository.indexOf('DELETE FROM object_permissions') < files.repository.indexOf('DELETE FROM ${table}'));
 check('repository requires exactly one source row and content-free evidence', files.repository.includes('Number(result.changes??0)!==1') && files.repository.includes('sourceDeleted:true') && files.repository.includes('backupPropagationPending:true'));
 check('authorized DataLifecycle adapter maps both propagation operations', files.dataLifecycleAdapter.includes('inspectSourceDeletionPropagation') && files.dataLifecycleAdapter.includes('purgeResourceWithPropagation'));
+check('data lifecycle schema inspection registers exact OCR metadata classes without registering semantic payload fields', ['SOURCE_DELETION_REGISTERED_SEMANTIC_OWNERS', 'SOURCE_DELETION_CURRENT_METADATA_OWNERS', 'SOURCE_DELETION_METADATA_ONLY_MUTATION_LEDGERS', 'SOURCE_DELETION_CONTENT_FREE_METADATA_TABLES'].every((marker) => files.repository.includes(marker)) && files.repository.includes('REGISTERED_DERIVED_PAYLOAD_METADATA_TABLES'));
+const ocrPropagationStart = files.ocrUseCase.indexOf('export class PropagateLocalGovernedOcrSourceDeletionUseCase');
+const ocrPropagationSegment = ocrPropagationStart >= 0 ? files.ocrUseCase.slice(ocrPropagationStart) : '';
+check('archive source deletion purges every sealed file with exact verification before atomic job and item ledger persistence', ocrPropagationSegment.indexOf('this.runtime.purgeSealedResult(') >= 0 && ocrPropagationSegment.indexOf('this.runtime.purgeSealedResult(') < ocrPropagationSegment.indexOf('scope.propagateSourceDeletion(') && ocrPropagationSegment.includes('!purged.value.deleted || !purged.value.verified') && files.ocrRepository.includes('public propagateSourceDeletion(') && files.ocrRepository.includes('archiveDeletionScope(context'));
+const ocrDeleteStart = files.ocrUseCase.indexOf('export class DeleteLocalGovernedOcrJobUseCase');
+const ocrDeleteEnd = files.ocrUseCase.indexOf('export class SetLocalGovernedOcrEnabledUseCase', ocrDeleteStart);
+const ocrDeleteSegment = ocrDeleteStart >= 0 && ocrDeleteEnd > ocrDeleteStart ? files.ocrUseCase.slice(ocrDeleteStart, ocrDeleteEnd) : '';
+check('derived OCR delete purges only the sealed result and never deletes the archive source', ocrDeleteSegment.indexOf('this.runtime.purgeSealedResult(') >= 0 && ocrDeleteSegment.indexOf('this.runtime.purgeSealedResult(') < ocrDeleteSegment.indexOf('scope.saveJob(') && !/(?:purgeResourceWithPropagation|propagateSourceDeletion|deleteArchiveSource)\s*\(/u.test(ocrDeleteSegment));
+check('OCR repository remains receipt-bound metadata-only', ['assertPolicyAuthorizedRepositoryContext', 'primaryScope(context', 'archiveDeletionScope(context', 'policy.receiptHash'].every((marker) => files.ocrRepository.includes(marker)) && !/\b(?:result_text|ocr_text|raw_bytes|source_bytes|document_bytes|content_bytes|payload_json|file_path|source_path|vault_path)\b/iu.test(files.ocrRepository));
 
 check('ExecuteDataPurge requires central propagation use case', files.dataLifecycleUseCase.includes('private readonly propagation:EnforceSourceDeletionPropagationUseCase'));
 const executePurge = files.dataLifecycleUseCase.slice(files.dataLifecycleUseCase.indexOf('export class ExecuteDataPurgeUseCase'), files.dataLifecycleUseCase.indexOf('export class SetDataLegalHoldUseCase'));
@@ -166,7 +191,13 @@ requireMarkers('source gate', files.sourceGate, [
   'PROPAGATION_REPOSITORY_CALL_OUTSIDE_AUTHORIZED_CHAIN',
   'PROPAGATION_ENFORCEMENT_OUTSIDE_DATASTORE_COMPOSITION',
   'PLAINTEXT_REPLICA_COPY_ACTIVE',
-  'EMPTY_RUNTIME_CACHE_INVALIDATOR'
+  'EMPTY_RUNTIME_CACHE_INVALIDATOR',
+  'OCR_METADATA_SQL_OUTSIDE_AUTHORIZED_OWNER',
+  'OCR_REPOSITORY_SEMANTIC_PAYLOAD',
+  'OCR_REPOSITORY_RECEIPT_FENCE_MISSING',
+  'OCR_SOURCE_DELETION_FILE_FIRST_FENCE_MISSING',
+  'OCR_DERIVED_DELETE_SOURCE_DELETE_FORBIDDEN',
+  'OCR_PROPAGATION_CALL_OUTSIDE_AUTHORIZED_CHAIN'
 ]);
 check('source gate self-test matrix remains exact', files.sourceGate.includes('malicious: malicious.length') && files.sourceGate.includes('benign: benign.length') && (files.sourceGate.match(/\['|\["/gu) ?? []).length > 0);
 check('pretypecheck and prebuild include PPK-019 source gate', rootPackage.scripts?.pretypecheck?.includes('verify-source-deletion-propagation-boundary.mjs') && rootPackage.scripts?.prebuild?.includes('verify-source-deletion-propagation-boundary.mjs'));
@@ -174,7 +205,7 @@ check('root package exposes all four PPK-019 commands', [
   'verify:ppk019:propagation-boundary', 'verify:ppk019:targeted', 'verify:ppk019:contract', 'verify:ppk019:runtime'
 ].every((name) => typeof rootPackage.scripts?.[name] === 'string'));
 
-check('targeted suite contains at least twenty executed cases', (files.targetTest.match(/\bit\(/gu) ?? []).length >= 20);
+check('targeted suite contains at least twenty-three executed cases', (files.targetTest.match(/\bit\(/gu) ?? []).length >= 23);
 requireMarkers('targeted test', files.targetTest, [
   'SourceDeletionPropagationPolicy',
   'EnforceSourceDeletionPropagationUseCase',
@@ -184,16 +215,21 @@ requireMarkers('targeted test', files.targetTest, [
   'repository TOCTOU şema değişimini ikinci taramada reddeder',
   'tüm yönetilen hedefler temiz yedek ve karantina doğrulayınca pending kaydı kapatır',
   'yönetilmeyen yedek kalırsa pending kapanmaz',
-  'backup repository yalnız exact pending tombstone sürümünü atomik kapatır'
+  'backup repository yalnız exact pending tombstone sürümünü atomik kapatır',
+  'migration 94 OCR tablolarını full-schema owner taramasında exact metadata sınıflarına alır',
+  'archive source silimini verified file-first purge sonra atomik tombstone/item ledger sırasına bağlar',
+  'zararlı OCR direct SQL, semantic payload, receiptless writer ve receiptless propagation yollarını fail-closed reddeder'
 ]);
 check('legacy lifecycle and backup runtimes use in-process TypeScript stripping rather than ambient npm', files.build136Runtime.includes('stripTypeScriptTypes') && files.build137Runtime.includes('stripTypeScriptTypes') && !files.build136Runtime.includes("npm root -g") && !files.build137Runtime.includes("npm root -g"));
 
-check('migration 77 baseline remains present and no PPK-019 migration exists', migrationVersions.includes(77) && latestMigration >= 77 && !files.migrations.toLowerCase().includes('ppk019'));
+check('migration 77 baseline and migration 94 OCR owner integration remain present with no PPK-019-specific migration', migrationVersions.includes(77) && migrationVersions.includes(94) && latestMigration >= 94 && !files.migrations.toLowerCase().includes('ppk019'));
 check('scope forbids migration backfill transfer ownership change and cutover', scope.boundaries?.schemaMigrationRequired === false && scope.realDataBackfillPerformed === false && scope.realDataTransferPerformed === false && scope.sqliteOwnershipTransferred === false && scope.cutoverAuthorityAttached === false);
 check('scope requires all seven owner kinds and exact three cache registries', scope.boundaries?.ownerKinds?.length === 7 && scope.boundaries?.requiredRuntimeCacheRegistries?.length === 3);
 check('scope records local-before-delete and two owner inspections', scope.boundaries?.localPropagationBeforeSourceDeleteRequired === true && scope.boundaries?.persistentOwnerSchemaInspectionRequired === true && scope.boundaries?.persistentOwnerSecondInspectionRequired === true);
 check('scope records managed rewrite unmanaged attention and quarantine truth', scope.boundaries?.managedBackupVerifiedFreshRewriteRequired === true && scope.boundaries?.unmanagedBackupBlocksCompletion === true && scope.boundaries?.historicalBackupQuarantineCountsAsPhysicalDestruction === false);
-check('inventory reviews nine owners with zero open semantic owner or bypass', inventory.productionInventory?.length === 9 && inventory.closureSummary?.reviewedOwners === 9 && inventory.closureSummary?.activeSemanticPersistentOwners === 0 && inventory.closureSummary?.activePlaintextReplicaOwners === 0 && inventory.closureSummary?.directBypassExceptions === 0 && inventory.closureSummary?.openBlockerCount === 0);
+check('scope records current OCR integration evidence and exact outside-scope runtime blockers', scope.validation?.currentLocalOcrIntegrationEvidence?.sourceGateRelevantFiles >= 62 && scope.validation?.currentLocalOcrIntegrationEvidence?.sourceGateMaliciousSelfTests === 15 && scope.validation?.currentLocalOcrIntegrationEvidence?.sourceGateBenignSelfTests === 5 && scope.validation?.currentLocalOcrIntegrationEvidence?.sourceGateFindings === 0 && scope.validation?.currentLocalOcrIntegrationEvidence?.targetedTestsPassed === 28 && scope.validation?.currentLocalOcrIntegrationEvidence?.ocrSourceDeletionTestsPassed === 30 && scope.validation?.currentLocalOcrIntegrationEvidence?.runtimeBundleChecksPassed === 14 && scope.validation?.currentLocalOcrIntegrationEvidence?.runtimeBundleChecksFailed === 2 && scope.validation?.currentLocalOcrIntegrationEvidence?.runtimeStatus === 'FAIL_OUTSIDE_OWNED_SCOPE' && scope.validation?.currentLocalOcrIntegrationEvidence?.runtimeBlockers?.length === 2);
+check('inventory reviews twelve owners with two registered semantic owners and exact OCR metadata classes', inventory.productionInventory?.length === 12 && inventory.closureSummary?.reviewedOwners === 12 && inventory.closureSummary?.activeSemanticPersistentOwners === 2 && inventory.closureSummary?.currentMetadataOwners === 1 && inventory.closureSummary?.metadataOnlyAppendOnlyLedgers === 3 && inventory.closureSummary?.activePlaintextReplicaOwners === 0 && inventory.closureSummary?.directBypassExceptions === 0 && inventory.closureSummary?.openBlockerCount === 0);
+check('inventory binds AI memory and local OCR semantic owners plus OCR metadata ledgers', inventory.productionInventory?.find((item) => item.id === 'governed-ai-memory-records')?.classification === 'REGISTERED_SEMANTIC_DERIVED_OWNER' && inventory.productionInventory?.find((item) => item.id === 'local-ocr-sealed-derived-result')?.classification === 'REGISTERED_SEALED_SEMANTIC_DERIVED_OWNER' && inventory.productionInventory?.find((item) => item.id === 'local-governed-ocr-metadata-and-deletion-ledgers')?.classification === 'CONTENT_FREE_CURRENT_AND_APPEND_ONLY_METADATA');
 check('inventory separates immutable provenance from user payload', inventory.productionInventory?.find((item) => item.id === 'derived-data-policy-provenance-metadata')?.classification === 'CONTENT_FREE_IMMUTABLE_PROVENANCE_NOT_PAYLOAD');
 check('inventory keeps external copies in evidence boundary', inventory.productionInventory?.find((item) => item.id === 'unmanaged-and-external-backup-copies')?.classification === 'EXTERNAL_EVIDENCE_BOUNDARY');
 
@@ -203,7 +239,7 @@ check('master decision register contains DEC-200', files.masterDecisionRegister.
 check('audit contains exact executed baseline evidence', files.audit.includes('20/20 PASS') && files.audit.includes('31/31 PASS') && files.audit.includes('37/37 PASS') && files.audit.includes('610/610 test PASS'));
 check('user decision ledger contains active DEC-200 and exact count', ledger.decisionCount === ledger.decisions.length && ledger.decisions.some((item) => item.id === 'DEC-200' && item.status === 'ACTIVE' && item.requirements?.includes('PPK-019')));
 check('prior PPK-012 through PPK-018 packages remain complete', priorRequirements.every((item) => item?.status === 'COMPLETE'));
-check('PPK-020 remains outside PPK-019 closure', successor !== undefined && successor.status !== 'COMPLETE');
+check('PPK-020 remains a distinct requirement not manufactured by PPK-019 closure', successor !== undefined && successor.id === 'PPK-020' && !requirement?.requirements?.includes?.('PPK-020'));
 if (candidateMode) {
   check('candidate registry truthfully remains implemented validation pending', requirement?.status === 'IN_PROGRESS' && requirement?.implementationState === 'IMPLEMENTED_VALIDATION_PENDING' && requirement?.chain?.evidence === false);
   check('candidate scope truthfully remains open for final artifacts', scope.status === 'IN_PROGRESS' && scope.validation?.state === 'PENDING' && scope.requirementCompletionClaimed === false && scope.remainingClosureWork?.length > 0);
@@ -233,13 +269,15 @@ const report = {
     productionSourceZones: scan.zones,
     scannedFiles: scan.files,
     securityRelevantFiles: scan.relevantFiles,
-    maliciousSelfTestAssertions: 8,
-    benignFalsePositiveAssertions: 4,
+    maliciousSelfTestAssertions: 15,
+    benignFalsePositiveAssertions: 5,
     findings: scan.findings
   },
   ownerKinds: 7,
   requiredRuntimeCacheRegistries: 3,
-  activeSemanticPersistentOwners: 0,
+  activeSemanticPersistentOwners: 2,
+  currentMetadataOwners: 1,
+  metadataOnlyAppendOnlyLedgers: 3,
   plaintextReplicaProductionOwners: 0,
   directBypassExceptions: 0,
   localPropagationMustPrecedeSourceDelete: true,

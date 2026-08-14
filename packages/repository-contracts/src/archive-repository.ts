@@ -1,7 +1,7 @@
 import type { ArchiveItemView, ArchiveVersionView, ArchiveRetentionPolicyView, ArchiveRetentionStatusView, ArchiveCategoryView, ArchiveClassificationView, ArchiveSensitivity } from '@ppt/domain';
 import type { PolicyAuthorizedRepositoryExecutionContext, RepositoryExecutionContext, RepositoryResult } from './repository-context.js';
 
-export interface ArchiveItemRow extends ArchiveItemView { readonly storedName:string; readonly familyId:string; readonly categoryId?:string; readonly sensitivity:'standard'|'personal'|'high'; readonly aiProcessingAllowed:boolean; }
+export interface ArchiveItemRow extends ArchiveItemView { readonly storedName:string; readonly familyId:string; readonly ownerPersonId?:string; readonly categoryId?:string; readonly sensitivity:'standard'|'personal'|'high'; readonly aiProcessingAllowed:boolean; }
 
 export interface ArchiveVersionRow extends ArchiveVersionView { readonly storedName:string; }
 

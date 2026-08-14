@@ -203,7 +203,7 @@ export const scanPlatformCapabilityManifestSource = (pathInput, source) => {
       const kind = moduleName ? moduleKind(moduleName) : undefined;
       if (!kind) return;
       const symbols = node.type === 'ExportAllDeclaration'
-        ? ['*export*']
+        ? ['export-all']
         : (node.specifiers?.length ? node.specifiers.map((specifier) => {
             const exported = specifier.exported?.type === 'Identifier' ? specifier.exported.name : literalString(specifier.exported);
             const local = specifier.local?.type === 'Identifier' ? specifier.local.name : literalString(specifier.local);

@@ -10,7 +10,7 @@ const [
   scanner, gateScript, combinedGate, kernel, policy, policyIndex, domain,
   domainIndex, useCase, applicationIndex, policyTest, astTest, integrationTest,
   coreMain, startup, startupRuntime, desktopMain, preload, globalTypes, renderer, ipcPolicy,
-  ipcCache, decision, threat, audit, masterRegister, migrations
+  ipcCache, decision, threat, audit, masterRegister, migrations, ocrSecurity
 ] = await Promise.all([
   readJson('config/32-r-ppk-022-capability-manifest-gate-scope.json'),
   readJson('config/32-r-ppk-022-capability-manifest-gate-inventory.json'),
@@ -45,7 +45,8 @@ const [
   readText('docs/security/PPK-022_CAPABILITY_MANIFEST_BUILD_RUNTIME_GATE_THREAT_MODEL.md'),
   readText('docs/audit/32-R_PPK-022_CAPABILITY_MANIFEST_BUILD_RUNTIME_GATE_UST_KAPANIS.md'),
   readText('docs/10_MASTER_DECISION_REGISTER.md'),
-  readText('packages/database/src/family-database-migrations.ts')
+  readText('packages/database/src/family-database-migrations.ts'),
+  readText('packages/security/src/local-ocr-security.ts')
 ]);
 
 const gate = await runPlatformCapabilityManifestGate();
@@ -74,7 +75,9 @@ const applicationIds = [
   'ocr-worker', 'ai-worker', 'translation-worker', 'communication-service', 'backup-worker', 'signed-plugin'
 ];
 const expectedApplications = Object.fromEntries(applicationIds.map((id) => [id,
-  id === 'windows-desktop' || id === 'windows-core-service' ? ['file.access', 'network.access'] : []
+  id === 'windows-desktop'
+    ? ['file.access', 'network.access', 'ocr.process']
+    : id === 'windows-core-service' ? ['file.access', 'network.access'] : []
 ]));
 const observedCounts = Object.fromEntries([...new Set(entries.map((entry) => entry.key.split('|', 1)[0]))]
   .sort((left, right) => left.localeCompare(right, 'en'))
@@ -94,7 +97,7 @@ check('installed AST parser is locked', lockfile.packages?.['node_modules/@babel
 check('manifest is exact default deny', manifest.defaultDecision === 'DENY' && manifest.exactMatchRequired === true && manifest.wildcardsAllowed === false);
 check('manifest requires signed runtime check without static authority', manifest.signedManifestRuntimeCheckRequired === true && manifest.buildManifestAloneGrantsRuntimeAuthority === false);
 check('manifest binds eighteen production zones', manifest.productionSourceZoneCount === 18 && scope.boundaries?.productionSourceZoneCount === 18);
-check('manifest contains exactly 282 unique surfaces', entries.length === 282 && new Set(keys).size === 282);
+check('manifest contains exactly 339 unique surfaces', entries.length === 339 && new Set(keys).size === 339);
 check('manifest surface keys are stable sorted', keys.every((key, index) => key === sortedKeys[index]));
 check('manifest contains no wildcard keys', keys.every((key) => !/[*?\[\]{}]/u.test(key)));
 check('manifest entries have exact schema', entries.every((entry) => Object.keys(entry).sort().join('|') === 'applicationIds|capability|key|runtimeEnforcement'));
@@ -104,13 +107,14 @@ check('manifest surface counts are exact', JSON.stringify(observedCounts) === JS
 check('manifest hash binds scope and inventory', manifestSha256 === scope.boundaries?.exactCapabilityManifestSha256 && manifestSha256 === inventory.engine?.exactManifestSha256);
 check('application registry lists all fourteen exact profiles', JSON.stringify(manifest.applicationRuntimeCapabilities) === JSON.stringify(expectedApplications));
 check('only two deployed applications hold capabilities', Object.values(manifest.applicationRuntimeCapabilities).filter((values) => values.length > 0).length === 2);
-check('only file and network are deployed', [...new Set(Object.values(manifest.applicationRuntimeCapabilities).flat())].sort().join('|') === 'file.access|network.access');
+check('only Desktop OCR plus file and network are deployed', [...new Set(Object.values(manifest.applicationRuntimeCapabilities).flat())].sort().join('|') === 'file.access|network.access|ocr.process');
+check('local OCR stays in windows-desktop while ocr-worker remains undeployed and low privilege is not claimed', manifest.applicationRuntimeCapabilities['windows-desktop']?.join('|') === 'file.access|network.access|ocr.process' && manifest.applicationRuntimeCapabilities['ocr-worker']?.length === 0 && ocrSecurity.includes('readonly lowPrivilegeSandboxVerified: false;'));
 check('bootstrap entries are bounded and Desktop-owned', pinnedEntries.length === 26 && pinnedEntries.every((entry) => entry.applicationIds.includes('windows-desktop')) && pinnedEntries.filter((entry) => entry.capability === 'file.access').length === 24 && pinnedEntries.filter((entry) => entry.capability === 'network.access').length === 2);
 check('manifest preserves no-transfer ownership invariants', manifest.invariants?.realDataTransferPerformed === false && manifest.invariants?.sqliteOwnershipTransferred === false && manifest.invariants?.desktopVaultOwnershipPreserved === true);
 
 check('production capability gate passes', gate.status === 'PASS' && gate.findings.length === 0);
-check('gate scans all current production sources', gate.productionSourceZones === 18 && gate.scannedFiles === 428);
-check('gate and manifest cardinality are exact', gate.capabilitySurfaces === 282 && gate.exactManifestSurfaces === 282);
+check('gate scans all current production sources', gate.productionSourceZones === 18 && gate.scannedFiles === 441);
+check('gate and manifest cardinality are exact', gate.capabilitySurfaces === 339 && gate.exactManifestSurfaces === 339);
 check('gate manifest hash matches canonical file', gate.exactManifestSha256 === manifestSha256);
 check('gate reports seven families and fourteen applications', gate.protectedCapabilityFamilies === 7 && gate.canonicalApplications === 14);
 check('gate executes malicious and benign self tests', gate.maliciousSelfTestAssertions === 33 && gate.benignSelfTestAssertions === 5);
@@ -159,10 +163,10 @@ check('Core Service verifies signed package coverage before server construction'
 check('Core Service fails closed on missing or denied manifest', includesAll(coreMain, ['Core Service signed capability manifest is missing', 'Core Service runtime capability coverage denied']));
 check('Desktop startup reads only authenticated Core Service authority', includesAll(startup, ["source: 'authenticated-core-service-health'", "evaluateCoverage(\n    'windows-desktop'", 'Desktop runtime capability manifest coverage was denied']));
 check('Desktop startup verifies package and application versions first', startup.indexOf('POLICY_PACKAGE_MISMATCH') < startup.indexOf('desktopCapabilityCoverage') && startup.indexOf('APPLICATION_VERSION_MISMATCH') < startup.indexOf('desktopCapabilityCoverage'));
-check('real Desktop startup runtime fixture carries exact signed capabilities', includesAll(startupRuntime, ["applicationRuntimeCapabilities:{'windows-desktop':['file.access','network.access'],'windows-core-service':['file.access','network.access']}", "runtimeCapabilities.join('|')==='file.access|network.access'"]));
+check('real Desktop startup runtime fixture carries exact signed capabilities', includesAll(startupRuntime, ["applicationRuntimeCapabilities:{'windows-desktop':['file.access','network.access','ocr.process'],'windows-core-service':['file.access','network.access']}", "runtimeCapabilities.join('|')==='file.access|network.access|ocr.process'"]));
 check('Desktop bootstrap pins file and network capabilities before operational startup', includesAll(desktopMain, ["assertPinnedBootstrapRuntimeCapability('windows-desktop', 'file.access')", "assertPinnedBootstrapRuntimeCapability('windows-desktop', 'network.access')"]));
 
-check('domain boundary is fixed and content free', includesAll(domain, ['PlatformCapabilityManifestGateBoundaryView', 'protectedCapabilityCount: 7', 'canonicalApplicationCount: 14', 'exactAstSurfaceCount: 282', 'sourcePathsExposedToClient: false', 'manifestHashesExposedToClient: false']));
+check('domain boundary is fixed and content free', includesAll(domain, ['PlatformCapabilityManifestGateBoundaryView', 'protectedCapabilityCount: 7', 'canonicalApplicationCount: 14', 'exactAstSurfaceCount: 339', 'sourcePathsExposedToClient: false', 'manifestHashesExposedToClient: false']));
 check('domain exports capability gate boundary', domainIndex.includes("export * from './platform-capability-manifest-gate.js'"));
 check('application use case verifies policy snapshot', includesAll(useCase, ['GetPlatformCapabilityManifestGateBoundaryUseCase', 'this.policy.verifySnapshot(snapshot)', 'PLATFORM_CAPABILITY_MANIFEST_GATE_SNAPSHOT_INVALID']));
 check('application boundary preserves no migration truth', includesAll(useCase, ['schemaMigrationRequired: false', 'latestDatabaseMigration: 77']));
@@ -172,7 +176,7 @@ check('policy tests cover signed hash and seven families', includesAll(policyTes
 check('policy tests cover malformed unverified and identity mismatch', includesAll(policyTest, ['MALFORMED_REQUEST', 'POLICY_PACKAGE_UNVERIFIED', 'POLICY_PACKAGE_HASH_MISMATCH', 'APPLICATION_ID_MISMATCH', 'APPLICATION_VERSION_MISMATCH', 'CAPABILITY_MANIFEST_HASH_MISMATCH']));
 check('policy tests cover missing unexpected and tampered capability', includesAll(policyTest, ['CAPABILITY_REQUIREMENT_MISSING', 'CAPABILITY_REQUIREMENT_UNEXPECTED', 'MALFORMED_AUTHORITY']));
 check('AST tests cover all seven resource families', includesAll(astTest, ['CAMERA_IMPORT', 'MICROPHONE_IMPORT', 'FILE_IMPORT', 'OCR_IMPORT', 'AI_IMPORT', 'LOCATION_API', 'NETWORK_API']));
-check('AST tests cover exact production and drift denial', includesAll(astTest, ['inventoryPlatformCapabilityManifestSurfaces()', 'toHaveLength(282)', 'UNDECLARED_CAPABILITY_SURFACE', 'CAPABILITY_SURFACE_ENTRY_INVALID', 'APPLICATION_CAPABILITY_BASELINE_MISMATCH']));
+check('AST tests cover exact production and drift denial', includesAll(astTest, ['inventoryPlatformCapabilityManifestSurfaces()', 'inventory.files).toBe(441)', 'toHaveLength(339)', 'UNDECLARED_CAPABILITY_SURFACE', 'CAPABILITY_SURFACE_ENTRY_INVALID', 'APPLICATION_CAPABILITY_BASELINE_MISMATCH']));
 check('integration tests bind runtime startup and bootstrap', includesAll(integrationTest, ['applicationRuntimeCapabilities: PLATFORM_APPLICATION_RUNTIME_CAPABILITY_REQUIREMENTS', "source: 'authenticated-core-service-health'", 'assertPinnedBootstrapRuntimeCapability']));
 
 check('main composes exact capability policy and status use case', includesAll(desktopMain, ['new PlatformCapabilityManifestPolicy()', 'new GetPlatformCapabilityManifestGateBoundaryUseCase(platformCapabilityManifestPolicy)']));
@@ -192,8 +196,9 @@ check('scope records no persistence transfer or cutover', scope.boundaries?.sche
 check('inventory has eight implemented controls', inventory.controls?.length === 8 && inventory.controls.every((item) => item.disposition === 'IMPLEMENTED'));
 check('inventory has zero findings and blockers', inventory.engine?.findings === 0 && inventory.closureSummary?.openBlockerCount === 0 && inventory.closureSummary?.openBlockers?.length === 0);
 check('decision records AST signed runtime and authority separation', includesAll(decision, ['DEC-203', 'exact `kind|path|symbol`', 'imzalı Platform Policy', 'Build manifesti tek başına runtime yetkisi değildir']));
+check('decision pins current Desktop OCR capability truth and source ratchet', includesAll(decision, ['441 dosya / 339 exact capability yüzeyi', manifestSha256, '`ocr-worker` capability kümesi boştur', '`lowPrivilegeSandboxVerified=false`']));
 check('threat model covers all primary resource and manifest evasions', ['Beyansız statik import', 'Dinamik import/require kaçışı', 'Kamera ve mikrofon kaçışı', 'OCR/AI kaçışı', 'Konum kaçışı', 'Manifest içeriği tamperi', 'İmzalı paket ikamesi', 'Pre-handshake boşluğu'].every((marker) => threat.includes(marker)));
-check('master register contains DEC-203', masterRegister.includes('## DEC-203') && masterRegister.includes('DEC-203-ppk-022-capability-manifest-build-runtime-gate.md'));
+check('master register contains DEC-203 and current exact capability ratchet', masterRegister.includes('## DEC-203') && masterRegister.includes('DEC-203-ppk-022-capability-manifest-build-runtime-gate.md') && masterRegister.includes('441 dosya / 339 exact yüzey') && masterRegister.includes(manifestSha256));
 check('decision ledger contains active DEC-203', ledger.decisionCount === ledger.decisions.length && ledger.decisions.some((item) => item.id === 'DEC-203' && item.status === 'ACTIVE' && item.requirements?.includes('PPK-022')));
 check('database migration 77 baseline remains present', versions.includes(77) && latestMigration >= 77 && scope.boundaries?.latestDatabaseMigration === 77);
 

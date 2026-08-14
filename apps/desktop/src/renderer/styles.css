@@ -1453,3 +1453,37 @@ linear-gradient(145deg,#071a2d 0%,#0b2744 52%,#0b1c31 100%)}
   .validation-summary,
   .governed-draft-center [aria-invalid="true"] { border-color: CanvasText; forced-color-adjust: auto; }
 }
+
+.local-ocr-center { display: grid; gap: 16px; margin-top: 18px; }
+.local-ocr-center .panel-heading p { max-width: 76ch; margin: 6px 0 0; color: var(--muted); }
+.local-ocr-truth {
+  display: grid;
+  gap: 7px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--panel) 88%, var(--blue) 12%);
+}
+.local-ocr-truth span { color: var(--muted); line-height: 1.45; }
+.local-ocr-create-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+}
+.local-ocr-create-grid > div,
+.local-ocr-create-grid > label { display: grid; gap: 6px; }
+.local-ocr-create-grid > div span { color: var(--muted); overflow-wrap: anywhere; }
+.local-ocr-workspace { display: grid; gap: 12px; }
+.local-ocr-workspace > label { display: grid; gap: 7px; max-width: 620px; }
+.local-ocr-job-card { display: grid; gap: 14px; padding: 16px; border: 1px solid var(--border); border-radius: 12px; }
+.local-ocr-result { display: grid; gap: 10px; }
+.local-ocr-result > div { display: flex; justify-content: space-between; gap: 12px; }
+.local-ocr-result > div span { color: var(--muted); }
+.local-ocr-result textarea { min-height: 220px; width: 100%; resize: vertical; font-family: inherit; line-height: 1.55; }
+.local-ocr-result .button { justify-self: start; }
+
+@media (max-width: 900px) {
+  .local-ocr-create-grid { grid-template-columns: minmax(0, 1fr); }
+  .local-ocr-create-grid > .button { justify-self: start; }
+}

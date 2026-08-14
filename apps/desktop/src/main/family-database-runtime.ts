@@ -8,8 +8,7 @@ import {
   runFamilyDatabaseMigrations,
   type MigrationRunSummary
 } from '@ppt/database';
-import type { DatabaseConnection } from '@ppt/contracts';
-import type { TransactionExecutor } from '@ppt/repository-contracts';
+import type { AsyncTransactionExecutor, DatabaseConnection } from '@ppt/contracts';
 
 export interface SqliteFamilyDatabaseRuntimeOptions {
   readonly databasePath: string;
@@ -29,7 +28,7 @@ export interface SqliteFamilyDatabaseRuntimeOptions {
 
 export class SqliteFamilyDatabaseRuntime {
   public readonly database: DatabaseConnection;
-  public readonly transactionExecutor: TransactionExecutor;
+  public readonly transactionExecutor: AsyncTransactionExecutor;
   private readonly closeDatabaseOnClose: boolean;
 
   public constructor(options: SqliteFamilyDatabaseRuntimeOptions) {

@@ -1,4 +1,5 @@
 import { DatabaseSync } from 'node:sqlite';
+import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   asCorrelationId,
@@ -19,7 +20,11 @@ import {
 } from '@ppt/application';
 import {
   SOURCE_DELETION_PROPAGATION_OWNER_KINDS,
+  SOURCE_DELETION_AUTHORIZED_REPOSITORY_ADAPTERS,
+  SOURCE_DELETION_CONTENT_FREE_METADATA_TABLES,
+  SOURCE_DELETION_CURRENT_METADATA_OWNERS,
   SOURCE_DELETION_METADATA_ONLY_MUTATION_LEDGERS,
+  SOURCE_DELETION_REGISTERED_SEMANTIC_OWNERS,
   SOURCE_DELETION_REQUIRED_CACHE_REGISTRIES,
   SourceDeletionPropagationPolicy,
   type SourceDeletionCacheInvalidation,
@@ -155,7 +160,19 @@ describe('PPK-019 merkezi kaynak silme ve retention yayılımı', () => {
     expect(SOURCE_DELETION_REQUIRED_CACHE_REGISTRIES).toEqual([
       'family-import-preview', 'ipc-main-read', 'offline-sensitive'
     ]);
-    expect(SOURCE_DELETION_METADATA_ONLY_MUTATION_LEDGERS).toEqual(['governed_ai_memory_mutations']);
+    expect(SOURCE_DELETION_AUTHORIZED_REPOSITORY_ADAPTERS).toEqual([
+      'packages/repositories/src/data-lifecycle-repository.ts',
+      'packages/repositories/src/backup-propagation-repository.ts',
+      'packages/repositories/src/local-governed-ocr-repository.ts'
+    ]);
+    expect(SOURCE_DELETION_REGISTERED_SEMANTIC_OWNERS).toEqual([
+      'governed_ai_memory_records', 'local_ocr_result'
+    ]);
+    expect(SOURCE_DELETION_CURRENT_METADATA_OWNERS).toEqual(['local_governed_ocr_jobs']);
+    expect(SOURCE_DELETION_METADATA_ONLY_MUTATION_LEDGERS).toEqual([
+      'governed_ai_memory_mutations', 'local_governed_ocr_mutations', 'local_governed_ocr_source_deletion_items'
+    ]);
+    expect(SOURCE_DELETION_CONTENT_FREE_METADATA_TABLES).toEqual(['local_governed_ocr_settings']);
     expect(Object.isFrozen(SOURCE_DELETION_METADATA_ONLY_MUTATION_LEDGERS)).toBe(true);
   });
 
@@ -443,5 +460,50 @@ describe('PPK-019 merkezi kaynak silme ve retention yayılımı', () => {
     database.exec(completed.ok ? 'COMMIT' : 'ROLLBACK');
     expect(completed).toEqual({ ok: true, value: 1 });
     expect(repository.listPending(context)).toEqual({ ok: true, value: [] });
+  });
+
+  it('migration 94 OCR tablolarını full-schema owner taramasında exact metadata sınıflarına alır', () => {
+    const database = new DatabaseSync(':memory:');
+    databases.push(database);
+    for (const migration of FAMILY_DATABASE_MIGRATIONS) database.exec(migration.sql);
+    const inspected = new SqliteDataLifecycleRepository().inspectSourceDeletionPropagation(repositoryContext(database), NOW);
+    expect(inspected).toEqual({ ok: true, value: {
+      schemaVersion: 1,
+      inspectedAt: NOW,
+      unregisteredPersistentOwners: [],
+      plaintextReplicaEnabled: false,
+      derivedPolicyMetadataOnly: true
+    } });
+  });
+
+  it('archive source silimini verified file-first purge sonra atomik tombstone/item ledger sırasına bağlar ve derived delete sourceu korur', () => {
+    const useCases = readFileSync(new URL('../../../packages/application/src/local-governed-ocr-use-cases.ts', import.meta.url), 'utf8');
+    const propagationStart = useCases.indexOf('export class PropagateLocalGovernedOcrSourceDeletionUseCase');
+    const propagation = useCases.slice(propagationStart);
+    expect(propagation.indexOf('this.runtime.purgeSealedResult(')).toBeGreaterThanOrEqual(0);
+    expect(propagation.indexOf('this.runtime.purgeSealedResult(')).toBeLessThan(propagation.indexOf('scope.propagateSourceDeletion('));
+    expect(propagation).toContain('!purged.value.deleted || !purged.value.verified');
+    const deleteStart = useCases.indexOf('export class DeleteLocalGovernedOcrJobUseCase');
+    const deleteEnd = useCases.indexOf('export class SetLocalGovernedOcrEnabledUseCase', deleteStart);
+    const derivedDelete = useCases.slice(deleteStart, deleteEnd);
+    expect(derivedDelete.indexOf('this.runtime.purgeSealedResult(')).toBeLessThan(derivedDelete.indexOf('scope.saveJob('));
+    expect(derivedDelete).not.toMatch(/(?:purgeResourceWithPropagation|propagateSourceDeletion|deleteArchiveSource)\s*\(/u);
+  });
+
+  it('zararlı OCR direct SQL, semantic payload, receiptless writer ve receiptless propagation yollarını fail-closed reddeder', async () => {
+    // @ts-expect-error Production source verifier is an ESM JavaScript module by design.
+    const { scanSourceDeletionPropagationSourceText } = await import('../../../scripts/verify-source-deletion-propagation-boundary.mjs') as {
+      scanSourceDeletionPropagationSourceText(path: string, sourceText: string): Array<{ readonly kind: string }>;
+    };
+    const scan = (path: string, sourceText: string) => scanSourceDeletionPropagationSourceText(path, sourceText)
+      .map((finding) => finding.kind);
+    expect(scan('apps/example/src/bypass.ts',
+      "const sql='UPDATE local_governed_ocr_jobs SET source_deleted_at=? WHERE id=?'")).toContain('OCR_METADATA_SQL_OUTSIDE_AUTHORIZED_OWNER');
+    expect(scan('packages/repositories/src/local-governed-ocr-repository.ts',
+      "const sql='INSERT INTO local_governed_ocr_jobs(id,result_text) VALUES(?,?)'")).toContain('OCR_REPOSITORY_SEMANTIC_PAYLOAD');
+    expect(scan('packages/repositories/src/local-governed-ocr-repository.ts',
+      "public saveJob(){database.prepare('UPDATE local_governed_ocr_jobs SET revision=?')}")).toContain('OCR_REPOSITORY_RECEIPT_FENCE_MISSING');
+    expect(scan('apps/example/src/bypass.ts', 'repository.propagateSourceDeletion(batch)'))
+      .toContain('OCR_PROPAGATION_CALL_OUTSIDE_AUTHORIZED_CHAIN');
   });
 });

@@ -55,6 +55,7 @@ try {
 
   const preloadCommonJsSources = [
     'preload.ts',
+    'ipc-integration-policy.ts',
     'ipc-transport-context.ts',
     'ipc-request-lifecycle.ts',
     'ipc-read-sharing.ts'

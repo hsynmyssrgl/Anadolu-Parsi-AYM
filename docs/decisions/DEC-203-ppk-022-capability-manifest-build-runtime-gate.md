@@ -11,7 +11,7 @@ Kamera, mikrofon, dosya, OCR, AI, konum ve ağ kullanımı iki bağımsız ve bi
 1. Üretim TypeScript/JSX ağacı `@babel/parser` AST ile taranır. Her kaynak yüzeyi exact `kind|path|symbol` anahtarı, source-prefix ile sabit kanonik uygulama sahipliği, runtime capability ve exact bootstrap/signed-startup enforcement aşamasıyla manifestte bulunmalıdır. Parse edilemeyen kaynak, çözülemeyen dinamik import, yeni/stale/duplicate yüzey, owner/stage drift ve wildcard build'i durdurur.
 2. Çalışma zamanında uygulamanın capability kümesi `PlatformApplicationIdentityManifest.runtimeCapabilities` içinde yer alır; bu alan manifest SHA-256'sına ve imzalı Platform Policy paketine dahildir. Uygulama kimliği, sürüm, manifest hash'i, paket hash'i veya capability exact coverage uyuşmazlığı fail-closed reddedilir.
 
-Yedi kanonik runtime capability şunlardır: `camera.access`, `microphone.access`, `file.access`, `ocr.process`, `ai.process`, `location.access`, `network.access`. On dört kanonik uygulama exact registry'de bulunur. Yalnız deployed `windows-desktop` ve `windows-core-service` profilleri `file.access` ile `network.access` taşır. Diğer on iki profil boş capability kümesiyle not-deployed/profile-only kalır; build kaydı veya profil tanımı yetki vermez.
+Yedi kanonik runtime capability şunlardır: `camera.access`, `microphone.access`, `file.access`, `ocr.process`, `ai.process`, `location.access`, `network.access`. On dört kanonik uygulama exact registry'de bulunur. Deployed `windows-desktop` profili `file.access`, `network.access` ve yerel OCR için `ocr.process`; `windows-core-service` profili yalnız `file.access` ile `network.access` taşır. Diğer on iki profil boş capability kümesiyle not-deployed/profile-only kalır; özellikle `ocr-worker` capability kümesi boştur. Build kaydı veya profil tanımı yetki vermez. Mevcut Windows OCR child-process yürütümü için `lowPrivilegeSandboxVerified=false` gerçeği korunur; capability kaydı düşük ayrıcalık doğrulaması iddiası değildir.
 
 ## Başlangıç ve runtime otoritesi
 
@@ -34,3 +34,5 @@ PPK-023 her yeni uygulama için ASVS/MASVS/SSDF eşlemesi ve tehdit modelidir. D
 ## Doğrulama durumu
 
 Final doğrulamada 18 source zone, 355 dosya ve 237 exact capability yüzeyi 33 kötü niyetli ve 5 benign self-testle sıfır bulgu vermiştir. Üç hedefli dosyada 19/19 test, PPK-012–PPK-022 regresyonunda 264/264 test ve tam Vitest'te 77/77 dosya ile 672/672 test geçmiştir. On sekiz workspace production build, migration 77, bağımlılık/workspace/karar defteri ve 108/108 contract ile 24/24 runtime kanıt demeti gerçek çalıştırmayla doğrulanmıştır.
+
+33-Q yerel OCR entegrasyonu sonrasındaki güncel source ratchet, tarihsel kapanış sayılarını değiştirmeden, 18 zone / 441 dosya / 339 exact capability yüzeyini sıfır bulguyla bağlar. Güncel manifest SHA-256 değeri `bba1167e470099c3af1d4363bdba117028b7ce0b61fb78c381e07f3d439ec399` olarak sabitlenmiştir; 26 bootstrap yüzeyi değişmemiştir.

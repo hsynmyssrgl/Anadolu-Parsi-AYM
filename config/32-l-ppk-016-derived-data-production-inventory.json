@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "requirement": "PPK-016",
-  "assessedAt": "2026-08-11",
+  "assessedAt": "2026-08-14",
   "status": "COMPLETE",
   "completionClaimed": true,
   "definition": {
@@ -25,6 +25,30 @@
     "REPLICA"
   ],
   "productionInventory": [
+    {
+      "id": "local-ocr-sealed-result",
+      "path": "apps/desktop/src/main/local-governed-ocr-application-adapter.ts",
+      "evidencePaths": [
+        "packages/application/src/local-governed-ocr-use-cases.ts",
+        "packages/repositories/src/local-governed-ocr-repository.ts",
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts",
+        "apps/desktop/src/main/local-governed-ocr-result-vault.ts",
+        "packages/database/src/family-database-migrations.ts"
+      ],
+      "classification": "GOVERNED_DERIVED_MATERIALIZATION",
+      "disposition": "SEALED_LOCAL_RESULT_EXACT_PPK016_BINDING",
+      "derivedKind": "OCR_TEXT",
+      "derivedResourceType": "local_ocr_result",
+      "authorizedBindingWriterPath": "apps/desktop/src/main/local-governed-ocr-application-adapter.ts",
+      "authorizedSealedMetadataReaderPath": "packages/repositories/src/local-governed-ocr-repository.ts",
+      "authorizedSealedPayloadReadChain": [
+        "packages/application/src/local-governed-ocr-use-cases.ts",
+        "apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts"
+      ],
+      "repositorySemanticPayloadFieldsAllowed": false,
+      "control": "local_ocr_result yalnız exact target receipt altında merkezi PPK-016 repository insertSealed çağrısıyla bağlanır. OCR repository yalnız binding hash, sealed result kimliği, içerik hashı ve bounded sayaç metadata'sı tutar; OCR metni, ham byte veya dosya yolu tutmaz. Plaintext okuma yalnız current source/consent yetkisini ve sonuç hashını yeniden doğrulayan application use-case ile main runtime adapter zincirindedir; DataStore facade veya renderer ayrı okuma yetkisi değildir."
+    },
     {
       "id": "latent-ai-timeline-memory",
       "path": "packages/domain/src/ai-memory.ts",
@@ -119,6 +143,7 @@
   ],
   "closureSummary": {
     "activeUngovernedDerivedPayloadOwners": 0,
+    "activeGovernedDerivedPayloadOwners": 1,
     "retiredOrPayloadEliminatedCandidates": 3,
     "classifiedAdjacentOwners": 10,
     "closedContentFreeOrCurrentPepOwners": 3,

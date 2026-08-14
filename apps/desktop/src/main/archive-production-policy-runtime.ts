@@ -908,6 +908,9 @@ const loadArchiveResourceSnapshotInTransaction = (
         type: intent.resourceType,
         id: intent.resourceId,
         familyId: context.familyId,
+        ...(intent.resourceType === 'archive_item' && context.actor.personId
+          ? { ownerPersonId: context.actor.personId }
+          : {}),
         sensitivity: 'internal' as const
       });
       return ok(Object.freeze({
@@ -931,6 +934,9 @@ const loadArchiveResourceSnapshotInTransaction = (
       type: intent.resourceType,
       id: intent.resourceId,
       familyId: context.familyId,
+      ...(intent.resourceType === 'archive_item' && context.actor.personId
+        ? { ownerPersonId: context.actor.personId }
+        : {}),
       sensitivity: 'internal' as const
     });
     return ok(Object.freeze({
@@ -975,7 +981,7 @@ const loadArchiveResourceSnapshotInTransaction = (
     type: 'archive_item',
     id: item.value.id,
     familyId: item.value.familyId,
-    ...(intent.action === 'read' && context.actor.personId ? { ownerPersonId: context.actor.personId } : {}),
+    ...(item.value.ownerPersonId ? { ownerPersonId: item.value.ownerPersonId } : {}),
     sensitivity: sensitivityFor(item.value)
   });
   return ok(Object.freeze({

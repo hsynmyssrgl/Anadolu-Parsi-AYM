@@ -111,11 +111,11 @@ export const verifySensitiveDataConsentBoundary = async () => {
   check('existing AI route remains reachable from canonical navigation', navigation.includes("id: 'ai'"));
   check('no sensitive send upload or transfer IPC action exists', !/ai:(?:send|upload|transfer)Sensitive/iu.test(`${main}\n${preload}`));
   check('PPK-021 exact ratchet accepts the reviewed compositions and zero direct role bypass',
-    astGate.status === 'PASS' && astGate.privilegedSurfaces === 657 && astGate.exactAllowlistEntries === 657
+    astGate.status === 'PASS' && astGate.privilegedSurfaces === 679 && astGate.exactAllowlistEntries === 679
     && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
   check('PPK-022 successor capability ratchet stays exact and green',
-    capabilityGate.status === 'PASS' && capabilityGate.capabilitySurfaces === 282
-    && capabilityGate.exactManifestSurfaces === 282 && capabilityGate.findings.length === 0);
+    capabilityGate.status === 'PASS' && capabilityGate.capabilitySurfaces === 339
+    && capabilityGate.exactManifestSurfaces === 339 && capabilityGate.findings.length === 0);
   check('scope and inventory bind both requirements and no outbound channel',
     scope.status === 'COMPLETE' && scope.requirements.join(',') === 'B2-05,B6-03'
     && inventory.status === 'COMPLETE' && inventory.outboundTransferChannels.length === 0);

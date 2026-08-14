@@ -616,6 +616,9 @@ describe('archive production policy runtime', () => {
       'personal',
       'personal'
     ]);
+    expect(requests[0]!.resource.ownerPersonId).toBe(PERSON_ID);
+    expect(requests.filter((request) => request.resource.type === 'archive_item')
+      .every((request) => request.resource.ownerPersonId === PERSON_ID)).toBe(true);
     expect(requests[0]!.grants).toHaveLength(3);
     expect(requests[0]!.grants?.every((grant) => grant.purposes?.[0] === 'archive')).toBe(true);
     expect(requests[0]!.grants?.some((grant) => grant.id === 'permission-unrelated-ai')).toBe(false);

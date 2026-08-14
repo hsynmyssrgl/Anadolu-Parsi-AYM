@@ -16,6 +16,9 @@ import {
 } from '@ppt/application';
 import {
   DERIVED_DATA_AUTHORIZED_REPOSITORY_ADAPTERS,
+  DERIVED_DATA_AUTHORIZED_PRODUCER_ADAPTERS,
+  DERIVED_DATA_AUTHORIZED_SEALED_METADATA_READERS,
+  DERIVED_DATA_AUTHORIZED_SEALED_PAYLOAD_READ_PATHS,
   DERIVED_DATA_AUTHORIZED_METADATA_INVENTORY_READERS,
   DERIVED_DATA_DIRECT_ACCESS_EXCEPTIONS,
   DERIVED_DATA_KINDS,
@@ -640,6 +643,21 @@ describe('32-L PPK-016 türetilmiş veri politika mirası', () => {
       'packages/repositories/src/derived-data-policy-repository.ts'
     ]);
     expect(Object.isFrozen(DERIVED_DATA_AUTHORIZED_REPOSITORY_ADAPTERS)).toBe(true);
+    expect(DERIVED_DATA_AUTHORIZED_PRODUCER_ADAPTERS).toEqual([
+      'apps/desktop/src/main/local-governed-ocr-application-adapter.ts'
+    ]);
+    expect(DERIVED_DATA_AUTHORIZED_SEALED_METADATA_READERS).toEqual([
+      'packages/repositories/src/local-governed-ocr-repository.ts'
+    ]);
+    expect(DERIVED_DATA_AUTHORIZED_SEALED_PAYLOAD_READ_PATHS).toEqual([
+      'packages/application/src/local-governed-ocr-use-cases.ts',
+      'apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts'
+    ]);
+    expect([
+      DERIVED_DATA_AUTHORIZED_PRODUCER_ADAPTERS,
+      DERIVED_DATA_AUTHORIZED_SEALED_METADATA_READERS,
+      DERIVED_DATA_AUTHORIZED_SEALED_PAYLOAD_READ_PATHS
+    ].every(Object.isFrozen)).toBe(true);
     expect(DERIVED_DATA_AUTHORIZED_METADATA_INVENTORY_READERS).toEqual([
       'packages/repositories/src/data-lifecycle-repository.ts',
       'packages/repositories/src/privacy-ownership-data-rights-repository.ts'
@@ -950,6 +968,43 @@ describe('32-L PPK-016 türetilmiş veri politika mirası', () => {
       'semanticAutomationPersistenceFields: 0',
       'semanticArchiveReplayPayloadFields: 0'
     ]) expect(sourceGate).toContain(marker);
+  });
+
+  it('local_ocr_result için tek writer, content-free metadata owner ve main-only read zincirini exact kilitler', () => {
+    const producer = readFileSync(new URL('../src/main/local-governed-ocr-application-adapter.ts', import.meta.url), 'utf8');
+    const useCases = readFileSync(new URL('../../../packages/application/src/local-governed-ocr-use-cases.ts', import.meta.url), 'utf8');
+    const repository = readFileSync(new URL('../../../packages/repositories/src/local-governed-ocr-repository.ts', import.meta.url), 'utf8');
+    const writerStart = producer.indexOf('public insertDerivedBinding(');
+    const writerEnd = producer.indexOf('public appendAudit(', writerStart);
+    const writer = producer.slice(writerStart, writerEnd);
+    expect(writer.match(/\binsertSealed\s*\(/gu)).toHaveLength(1);
+    expect(writer).toContain("targetIntent?.resourceType !== 'local_ocr_result'");
+    expect(writer).toContain('targetIntent.sourceJobId !== primary.intent.resourceId');
+    const readStart = useCases.indexOf('export class GetLocalGovernedOcrResultUseCase');
+    const readEnd = useCases.indexOf('export class PropagateLocalGovernedOcrSourceDeletionUseCase', readStart);
+    const read = useCases.slice(readStart, readEnd);
+    expect(read).toContain('resolveSourceAndConsent(');
+    expect(read).toContain('this.runtime.readSealedResult(');
+    expect(read).toContain('read.value.contentSha256 !== current.value.resultContentSha256');
+    expect(repository).toContain('derived_binding_hash');
+    expect(repository).toContain('sealed_result_id');
+    expect(repository).not.toMatch(/\b(?:result_text|ocr_text|raw_bytes|source_bytes|document_bytes|content_bytes|payload_json|file_path|source_path|vault_path)\b/iu);
+  });
+
+  it('zararlı OCR direct SQL, semantic repository payloadı ve yetkisiz plaintext read yolunu fail-closed reddeder', async () => {
+    // @ts-expect-error Production source verifier is an ESM JavaScript module by design.
+    const { scanDerivedDataPolicySourceText } = await import('../../../scripts/verify-derived-data-policy-boundary.mjs') as {
+      scanDerivedDataPolicySourceText(path: string, sourceText: string): Array<{ readonly kind: string }>;
+    };
+    expect(scanDerivedDataPolicySourceText('apps/example/src/bypass.ts',
+      "const sql='UPDATE local_governed_ocr_jobs SET sealed_result_id=? WHERE id=?'")
+      .map((finding) => finding.kind)).toContain('OCR_METADATA_SQL_OUTSIDE_AUTHORIZED_OWNER');
+    expect(scanDerivedDataPolicySourceText('packages/repositories/src/local-governed-ocr-repository.ts',
+      "const sql='INSERT INTO local_governed_ocr_jobs(id,result_text) VALUES(?,?)'")
+      .map((finding) => finding.kind)).toContain('OCR_REPOSITORY_SEMANTIC_PAYLOAD');
+    expect(scanDerivedDataPolicySourceText('apps/example/src/bypass.ts',
+      'runtime.readSealedResult({ jobId, sealedResultId })')
+      .map((finding) => finding.kind)).toContain('OCR_SEALED_RESULT_READ_OUTSIDE_AUTHORIZED_PATH');
   });
 });
 

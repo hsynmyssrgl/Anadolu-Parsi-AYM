@@ -5,8 +5,8 @@
   "requirement": "PPK-021",
   "phase": "PLATFORM_POLICY_AST_FAIL_GATE_CONTRACT",
   "status": "PASS",
-  "checkCount": 83,
-  "passed": 83,
+  "checkCount": 84,
+  "passed": 84,
   "failed": 0,
   "checks": [
     {
@@ -54,7 +54,7 @@
       "passed": true
     },
     {
-      "name": "manifest contains exactly 657 surfaces",
+      "name": "manifest contains exactly 679 surfaces",
       "passed": true
     },
     {
@@ -86,7 +86,7 @@
       "passed": true
     },
     {
-      "name": "gate scans all production zones",
+      "name": "gate scans the exact current production snapshot",
       "passed": true
     },
     {
@@ -282,7 +282,7 @@
       "passed": true
     },
     {
-      "name": "scope records six rules and 657 exact surfaces",
+      "name": "scope records six rules and 679 exact surfaces",
       "passed": true
     },
     {
@@ -310,11 +310,15 @@
       "passed": true
     },
     {
+      "name": "decision pins the current OCR-expanded source ratchet without rewriting historical closure",
+      "passed": true
+    },
+    {
       "name": "threat model covers all primary evasions",
       "passed": true
     },
     {
-      "name": "master register contains DEC-202",
+      "name": "master register contains DEC-202 and current exact source ratchet",
       "passed": true
     },
     {
@@ -346,21 +350,21 @@
   "sourceGate": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 428,
-    "privilegedSurfaces": 657,
-    "exactAllowlistEntries": 657,
-    "exactAllowlistSha256": "324b27032181112a448d386365bdf6cf5add688335a79145f8708a285f7f5a45",
+    "scannedFiles": 441,
+    "privilegedSurfaces": 679,
+    "exactAllowlistEntries": 679,
+    "exactAllowlistSha256": "c9e05bd1c77dd0f91d09f60f5a95a76faca0a2010882ea1c00b64d0d6be726eb",
     "surfaceCounts": {
-      "CRYPTO_GLOBAL": 4,
-      "CRYPTO_IMPORT": 190,
+      "CRYPTO_GLOBAL": 5,
+      "CRYPTO_IMPORT": 197,
       "DATABASE_IMPORT": 21,
       "NETWORK_IMPORT": 11,
-      "REPOSITORY_IMPORT": 54,
+      "REPOSITORY_IMPORT": 55,
       "ROLE_PRESENTATION": 1,
-      "SQL_CALL": 61,
+      "SQL_CALL": 63,
       "SQL_CONSTRUCTOR": 2,
       "SQL_IMPORT": 2,
-      "USE_CASE_COMPOSITION": 311
+      "USE_CASE_COMPOSITION": 322
     },
     "maliciousSelfTestAssertions": 17,
     "benignSelfTestAssertions": 4,
@@ -368,13 +372,13 @@
     "findings": []
   },
   "protectedRuleCount": 6,
-  "exactAllowlistEntries": 657,
-  "exactAllowlistSha256": "324b27032181112a448d386365bdf6cf5add688335a79145f8708a285f7f5a45",
+  "exactAllowlistEntries": 679,
+  "exactAllowlistSha256": "c9e05bd1c77dd0f91d09f60f5a95a76faca0a2010882ea1c00b64d0d6be726eb",
   "directRoleAuthorizationBypasses": 0,
   "syntaxModel": "TYPESCRIPT_AST",
   "regexOnlyGateAccepted": false,
   "buildGateReplacesRuntimePolicy": false,
-  "latestDatabaseMigration": 93,
+  "latestDatabaseMigration": 94,
   "schemaMigrationRequired": false,
   "historicalBackfillPerformed": false,
   "legacyDesktopVaultPreserved": true,
@@ -383,5 +387,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-14T06:32:07.326Z"
+  "generatedAt": "2026-08-14T10:14:21.721Z"
 }

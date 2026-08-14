@@ -34,6 +34,7 @@ export * from './accessibility-preferences-repository.js';
 export * from './form-draft-repository.js';
 export * from './privacy-ownership-data-rights-repository.js';
 export * from './identity-access-credential-repository.js';
+export * from './local-governed-ocr-repository.js';
 
 export * from './archive-repository.js';
 

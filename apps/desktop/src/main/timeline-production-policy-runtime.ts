@@ -1,4 +1,9 @@
-import type { TimelineApplicationContext, TimelinePolicyIntent } from '@ppt/application';
+import type {
+  LocalGovernedOcrApplicationContext,
+  LocalGovernedOcrPolicyIntent,
+  TimelineApplicationContext,
+  TimelinePolicyIntent
+} from '@ppt/application';
 import {
   ERROR_CODES,
   asEventId,
@@ -32,8 +37,11 @@ import type {
   AccountRepositoryPort,
   AccountRow,
   AccessibilityPreferencesRepositoryPort,
+  AiConsentRepositoryPort,
   FormDraftRepositoryPort,
   IdentityAccessCredentialRepositoryPort,
+  LocalGovernedOcrPolicyResourceMetadata,
+  LocalGovernedOcrRepositoryPort,
   TimelineEventPolicyResourceRepositoryPort,
   ObjectPermissionRepositoryPort,
   ObjectPermissionRow,
@@ -77,6 +85,13 @@ export interface TimelineProductionPolicyRuntimeDependencies {
   readonly clusterFence: PlatformPolicyClusterFence;
   readonly policyVersion: string;
   readonly clock: Clock;
+}
+
+/** OCR adds only the two receiptless, metadata-only resolvers required before central authorization. */
+export interface LocalGovernedOcrProductionPolicyRuntimeDependencies
+  extends TimelineProductionPolicyRuntimeDependencies {
+  readonly localGovernedOcrRepository: LocalGovernedOcrRepositoryPort;
+  readonly aiConsentRepository: AiConsentRepositoryPort;
 }
 
 interface AuthoritySnapshot {
@@ -1265,6 +1280,673 @@ export const createTimelineProductionPolicyEnforcementPointResolver = (
           }
         )
       }));
+    }
+  });
+};
+
+export interface LocalGovernedOcrProductionPolicyResolutionOptions {
+  /**
+   * Required only while a new local job does not exist. Existing jobs derive and
+   * preserve their source identity from the repository, never from the caller.
+   */
+  readonly sourceResourceId?: string;
+  /**
+   * The async SQLite runner supplies its immutable transaction timestamp here,
+   * so every nested OCR receipt and every governed row share the exact instant.
+   */
+  readonly authorizationOccurredAt?: () => ReturnType<Clock['now']>;
+  /** Active async business transaction used to persist replay reservations without nesting SQLite transactions. */
+  readonly authorizationTransaction?: () => TransactionContext;
+}
+
+export interface LocalGovernedOcrPolicyTransactionRevalidationInput {
+  readonly context: LocalGovernedOcrApplicationContext;
+  readonly intent: LocalGovernedOcrPolicyIntent;
+  readonly authorization: PlatformPolicyTransactionContext;
+  readonly transaction: TransactionContext;
+}
+
+export interface LocalGovernedOcrPolicyCommittedTransactionInput {
+  readonly context: LocalGovernedOcrApplicationContext;
+  readonly intent: LocalGovernedOcrPolicyIntent;
+  readonly authorization: PlatformPolicyTransactionContext;
+}
+
+export type LocalGovernedOcrProductionPolicyEnforcementPoint =
+  Pick<TimelinePolicyEnforcementPoint, 'execute'> & {
+    readonly requiresTransactionRevalidation: true;
+    readonly revalidateTransaction: (
+      input: LocalGovernedOcrPolicyTransactionRevalidationInput
+    ) => Result<void, AppError>;
+    readonly requiresDurableTransactionReceipt: true;
+    readonly recordAuthorizedTransaction: (
+      input: LocalGovernedOcrPolicyTransactionRevalidationInput
+    ) => Result<void, AppError>;
+    readonly projectCommittedTransaction: (
+      input: LocalGovernedOcrPolicyCommittedTransactionInput
+    ) => Promise<Result<void, AppError>>;
+  };
+
+export interface LocalGovernedOcrProductionPolicyEnforcementPointResolver {
+  resolve(
+    context: LocalGovernedOcrApplicationContext,
+    intent: LocalGovernedOcrPolicyIntent,
+    options?: LocalGovernedOcrProductionPolicyResolutionOptions
+  ): Promise<LocalGovernedOcrProductionPolicyEnforcementPoint>;
+}
+
+interface LocalGovernedOcrResourceSnapshot extends TimelineResourceSnapshot {
+  readonly sourceResourceId?: string;
+}
+
+interface LocalGovernedOcrCapturedSnapshot {
+  readonly authority: AuthoritySnapshot;
+  readonly resource: LocalGovernedOcrResourceSnapshot;
+}
+
+const timelineContextFromLocalGovernedOcr = (
+  context: LocalGovernedOcrApplicationContext
+): TimelineApplicationContext => Object.freeze({
+  familyId: context.familyId,
+  actor: Object.freeze({
+    userId: context.actor.userId,
+    roles: Object.freeze([context.actor.role]),
+    ...(context.actor.personId ? { personId: context.actor.personId } : {})
+  }),
+  correlationId: context.correlationId
+});
+
+const invalidLocalGovernedOcrAuthority = (
+  context: LocalGovernedOcrApplicationContext,
+  message: string
+): Result<never, AppError> => invalidAuthority(timelineContextFromLocalGovernedOcr(context), message);
+
+const localGovernedOcrMetadataMatches = (
+  context: LocalGovernedOcrApplicationContext,
+  metadata: LocalGovernedOcrPolicyResourceMetadata
+): boolean => Boolean(context.actor.personId)
+  && metadata.familyId === context.familyId
+  && metadata.accountId === context.actor.userId
+  && metadata.ownerPersonId === context.actor.personId
+  && Number.isSafeInteger(metadata.revision)
+  && metadata.revision >= 0
+  && /^[0-9a-f]{64}$/u.test(metadata.stateFingerprint)
+  && (metadata.sensitivity === 'personal'
+    || metadata.sensitivity === 'sensitive'
+    || metadata.sensitivity === 'highly_sensitive');
+
+const localGovernedOcrIntentIsSupported = (
+  context: LocalGovernedOcrApplicationContext,
+  intent: LocalGovernedOcrPolicyIntent
+): boolean => Boolean(context.actor.personId)
+  && intent.familyId === context.familyId
+  && intent.ownerPersonId === context.actor.personId
+  && intent.privacy === 'private'
+  && nonEmpty(intent.resourceId, 256)
+  && intent.resourceId !== '*'
+  && (
+    (intent.resourceType === 'local_ocr_settings'
+      && intent.purpose === 'administration'
+      && ((intent.action === 'read' && intent.capability === 'family.read')
+        || (intent.action === 'update' && intent.capability === 'family.write')))
+    || (intent.resourceType === 'local_ocr_job'
+      && intent.purpose === 'ocr_process'
+      && ((intent.action === 'read' && intent.capability === 'archive.ocr')
+        || (intent.action === 'process' && intent.capability === 'archive.ocr')
+        || (intent.action === 'delete' && intent.capability === 'archive.write')))
+    || (intent.resourceType === 'local_ocr_result'
+      && intent.purpose === 'ocr_process'
+      && intent.action === 'process'
+      && intent.capability === 'archive.ocr'
+      && nonEmpty((intent as LocalGovernedOcrPolicyIntent & { readonly sourceJobId?: string }).sourceJobId, 256))
+    || (intent.resourceType === 'archive_item'
+      && intent.purpose === 'ocr_process'
+      && ((intent.action === 'read' && intent.capability === 'archive.ocr')
+        || (intent.action === 'process' && intent.capability === 'archive.ocr')
+        || (intent.action === 'delete' && intent.capability === 'archive.write')))
+  );
+
+const loadLocalGovernedOcrResourceSnapshotInTransaction = (
+  dependencies: LocalGovernedOcrProductionPolicyRuntimeDependencies,
+  context: LocalGovernedOcrApplicationContext,
+  requestedIntent: LocalGovernedOcrPolicyIntent,
+  options: LocalGovernedOcrProductionPolicyResolutionOptions,
+  transaction: TransactionContext
+): Result<LocalGovernedOcrResourceSnapshot, AppError> => {
+  if (!localGovernedOcrIntentIsSupported(context, requestedIntent) || !context.actor.personId) {
+    return invalidLocalGovernedOcrAuthority(context, 'Local OCR policy intent is not an exact supported operation');
+  }
+  if (options.sourceResourceId !== undefined && !nonEmpty(options.sourceResourceId, 256)) {
+    return invalidLocalGovernedOcrAuthority(context, 'Local OCR source identity is invalid');
+  }
+  const timelineContext = timelineContextFromLocalGovernedOcr(context);
+  const execution = repositoryContext(timelineContext, transaction);
+  const key = Object.freeze({
+    familyId: context.familyId,
+    accountId: context.actor.userId,
+    ownerPersonId: context.actor.personId
+  });
+
+  if (requestedIntent.resourceType === 'local_ocr_settings') {
+    if (options.sourceResourceId !== undefined) {
+      return invalidLocalGovernedOcrAuthority(context, 'Local OCR settings cannot acquire a source receipt');
+    }
+    const found = dependencies.localGovernedOcrRepository.resolvePolicyResource(
+      execution,
+      key,
+      'local_ocr_settings',
+      requestedIntent.resourceId
+    );
+    if (!found.ok) return found;
+    if (
+      !found.value
+      || !localGovernedOcrMetadataMatches(context, found.value)
+      || found.value.sensitivity !== 'personal'
+      || found.value.sourceResourceType !== null
+      || found.value.sourceResourceId !== null
+      || found.value.derivedResourceId !== null
+    ) return invalidLocalGovernedOcrAuthority(context, 'Local OCR settings ownership or state changed');
+    return ok(Object.freeze({
+      resource: Object.freeze({
+        type: 'local_ocr_settings',
+        id: requestedIntent.resourceId,
+        familyId: context.familyId,
+        ownerPersonId: context.actor.personId,
+        sensitivity: 'personal' as const
+      }),
+      stateFingerprint: found.value.stateFingerprint
+    }));
+  }
+
+  if (requestedIntent.resourceType === 'archive_item') {
+    if (options.sourceResourceId !== undefined && options.sourceResourceId !== requestedIntent.resourceId) {
+      return invalidLocalGovernedOcrAuthority(context, 'Local OCR archive source identity changed');
+    }
+    const found = dependencies.localGovernedOcrRepository.resolveArchivePolicyResource(
+      execution,
+      key,
+      requestedIntent.resourceId
+    );
+    if (!found.ok) return found;
+    if (!found.value || !localGovernedOcrMetadataMatches(context, found.value)
+      || found.value.sourceResourceType !== null
+      || found.value.sourceResourceId !== null
+      || found.value.derivedResourceId !== null) {
+      return invalidLocalGovernedOcrAuthority(context, 'Local OCR archive source ownership or state changed');
+    }
+    return ok(Object.freeze({
+      resource: Object.freeze({
+        type: 'archive_item',
+        id: requestedIntent.resourceId,
+        familyId: context.familyId,
+        ownerPersonId: context.actor.personId,
+        sensitivity: found.value.sensitivity
+      }),
+      sourceResourceId: requestedIntent.resourceId,
+      stateFingerprint: found.value.stateFingerprint
+    }));
+  }
+
+  if (requestedIntent.resourceType === 'local_ocr_result') {
+    if (options.sourceResourceId !== undefined) {
+      return invalidLocalGovernedOcrAuthority(context, 'Local OCR result source is repository-derived');
+    }
+    const sourceJobId = (requestedIntent as LocalGovernedOcrPolicyIntent & {
+      readonly sourceJobId?: string;
+    }).sourceJobId;
+    if (!nonEmpty(sourceJobId, 256)) {
+      return invalidLocalGovernedOcrAuthority(context, 'Local OCR result producer job identity is invalid');
+    }
+    const job = dependencies.localGovernedOcrRepository.resolvePolicyResource(
+      execution,
+      key,
+      'local_ocr_job',
+      sourceJobId
+    );
+    if (!job.ok) return job;
+    if (
+      !job.value
+      || !localGovernedOcrMetadataMatches(context, job.value)
+      || job.value.sourceResourceType !== 'archive_item'
+      || !job.value.sourceResourceId
+      || job.value.derivedResourceId !== requestedIntent.resourceId
+    ) return invalidLocalGovernedOcrAuthority(context, 'Local OCR result is not bound to the exact producer job');
+    const source = dependencies.localGovernedOcrRepository.resolveArchivePolicyResource(
+      execution,
+      key,
+      job.value.sourceResourceId
+    );
+    if (!source.ok) return source;
+    if (!source.value || !localGovernedOcrMetadataMatches(context, source.value)
+      || source.value.sourceResourceType !== null
+      || source.value.sourceResourceId !== null
+      || source.value.derivedResourceId !== null) {
+      return invalidLocalGovernedOcrAuthority(context, 'Local OCR result source ownership or state changed');
+    }
+    return ok(Object.freeze({
+      resource: Object.freeze({
+        type: 'local_ocr_result',
+        id: requestedIntent.resourceId,
+        familyId: context.familyId,
+        ownerPersonId: context.actor.personId,
+        sensitivity: source.value.sensitivity,
+        sourceResourceId: job.value.sourceResourceId
+      }),
+      sourceResourceId: job.value.sourceResourceId,
+      stateFingerprint: stable({
+        targetResourceId: requestedIntent.resourceId,
+        producerJobId: sourceJobId,
+        jobStateFingerprint: job.value.stateFingerprint,
+        sourceStateFingerprint: source.value.stateFingerprint
+      })
+    }));
+  }
+
+  const job = dependencies.localGovernedOcrRepository.resolvePolicyResource(
+    execution,
+    key,
+    'local_ocr_job',
+    requestedIntent.resourceId
+  );
+  if (!job.ok) return job;
+  if (job.value && !localGovernedOcrMetadataMatches(context, job.value)) {
+    return invalidLocalGovernedOcrAuthority(context, 'Local OCR job ownership or state changed');
+  }
+  if (!job.value && requestedIntent.action !== 'process') {
+    return invalidLocalGovernedOcrAuthority(context, 'Local OCR job does not exist for this operation');
+  }
+  const repositorySourceId = job.value?.sourceResourceType === 'archive_item'
+    ? job.value.sourceResourceId ?? undefined
+    : undefined;
+  if (job.value && (!repositorySourceId || job.value.sourceResourceType !== 'archive_item')) {
+    return invalidLocalGovernedOcrAuthority(context, 'Local OCR job source scope is incomplete');
+  }
+  if (job.value && !nonEmpty(job.value.derivedResourceId, 256)) {
+    return invalidLocalGovernedOcrAuthority(context, 'Local OCR job derived target identity is incomplete');
+  }
+  if (repositorySourceId && options.sourceResourceId && repositorySourceId !== options.sourceResourceId) {
+    return invalidLocalGovernedOcrAuthority(context, 'Local OCR update must preserve its repository-derived source');
+  }
+  const sourceResourceId = repositorySourceId ?? options.sourceResourceId;
+  if (!sourceResourceId) {
+    return invalidLocalGovernedOcrAuthority(context, 'Local OCR create requires an exact replacement source');
+  }
+  const source = dependencies.localGovernedOcrRepository.resolveArchivePolicyResource(
+    execution,
+    key,
+    sourceResourceId
+  );
+  if (!source.ok) return source;
+  if (!source.value || !localGovernedOcrMetadataMatches(context, source.value)
+    || source.value.sourceResourceType !== null
+    || source.value.sourceResourceId !== null
+    || source.value.derivedResourceId !== null) {
+    return invalidLocalGovernedOcrAuthority(context, 'Local OCR repository-derived source ownership or state changed');
+  }
+  return ok(Object.freeze({
+    resource: Object.freeze({
+      type: 'local_ocr_job',
+      id: requestedIntent.resourceId,
+      familyId: context.familyId,
+      ownerPersonId: context.actor.personId,
+      sensitivity: source.value.sensitivity,
+      sourceResourceId
+    }),
+    sourceResourceId,
+    stateFingerprint: stable({
+      job: job.value
+        ? { revision: job.value.revision, stateFingerprint: job.value.stateFingerprint }
+        : { state: 'absent', resourceId: requestedIntent.resourceId },
+      source: { resourceId: sourceResourceId, stateFingerprint: source.value.stateFingerprint }
+    })
+  }));
+};
+
+const loadLocalGovernedOcrCapturedSnapshotInTransaction = (
+  dependencies: LocalGovernedOcrProductionPolicyRuntimeDependencies,
+  context: LocalGovernedOcrApplicationContext,
+  requestedIntent: LocalGovernedOcrPolicyIntent,
+  options: LocalGovernedOcrProductionPolicyResolutionOptions,
+  identity: DeviceIdentitySnapshot,
+  transaction: TransactionContext
+): Result<LocalGovernedOcrCapturedSnapshot, AppError> => {
+  const timelineContext = timelineContextFromLocalGovernedOcr(context);
+  const authority = loadAuthoritySnapshotInTransaction(dependencies, timelineContext, identity, transaction);
+  if (!authority.ok) return authority;
+  const resource = loadLocalGovernedOcrResourceSnapshotInTransaction(
+    dependencies,
+    context,
+    requestedIntent,
+    options,
+    transaction
+  );
+  if (!resource.ok) return resource;
+
+  if (requestedIntent.capability !== 'archive.ocr') {
+    return ok(Object.freeze({ authority: authority.value, resource: resource.value }));
+  }
+  const sourceResourceId = resource.value.sourceResourceId;
+  if (!sourceResourceId || !context.actor.personId) {
+    return invalidLocalGovernedOcrAuthority(context, 'Local OCR processing consent source is unavailable');
+  }
+  const execution = repositoryContext(timelineContext, transaction);
+  const consents = dependencies.aiConsentRepository.listActive(
+    execution,
+    context.actor.userId,
+    'sensitive_processing',
+    execution.occurredAt
+  );
+  if (!consents.ok) return consents;
+  if (consents.value.length > 10_000) {
+    return invalidLocalGovernedOcrAuthority(context, 'Local OCR consent snapshot exceeds the bounded policy scope');
+  }
+  const exactConsents = consents.value
+    .filter((consent) => consent.accountId === context.actor.userId
+      && consent.purpose === 'sensitive_processing'
+      && consent.resourceType === 'archive_item'
+      && consent.resourceId === sourceResourceId
+      && consent.status === 'granted'
+      && nonEmpty(consent.id, 256)
+      && Number.isFinite(parsedTimestamp(consent.startsAt))
+      && parsedTimestamp(consent.startsAt) <= parsedTimestamp(execution.occurredAt)
+      && (consent.endsAt === undefined
+        || (Number.isFinite(parsedTimestamp(consent.endsAt))
+          && parsedTimestamp(consent.endsAt) >= parsedTimestamp(execution.occurredAt))))
+    .sort((left, right) => right.startsAt.localeCompare(left.startsAt) || left.id.localeCompare(right.id));
+  const consent = exactConsents[0];
+  if (!consent) {
+    return invalidLocalGovernedOcrAuthority(context, 'Local OCR requires active exact sensitive-processing consent');
+  }
+  const policyConsent = Object.freeze({
+    id: consent.id,
+    subjectPersonId: context.actor.personId,
+    capability: 'archive.ocr' as const,
+    purpose: 'ocr_process',
+    startsAt: consent.startsAt,
+    ...(consent.endsAt ? { endsAt: consent.endsAt } : {})
+  });
+  const enhancedAuthority: AuthoritySnapshot = Object.freeze({
+    authority: Object.freeze({
+      ...authority.value.authority,
+      consents: Object.freeze([policyConsent])
+    }),
+    securityFingerprint: stable({
+      authority: authority.value.securityFingerprint,
+      consent: {
+        id: consent.id,
+        sourceResourceId,
+        startsAt: consent.startsAt,
+        endsAt: consent.endsAt ?? null
+      }
+    })
+  });
+  return ok(Object.freeze({ authority: enhancedAuthority, resource: resource.value }));
+};
+
+const loadLocalGovernedOcrCapturedSnapshot = (
+  dependencies: LocalGovernedOcrProductionPolicyRuntimeDependencies,
+  context: LocalGovernedOcrApplicationContext,
+  requestedIntent: LocalGovernedOcrPolicyIntent,
+  options: LocalGovernedOcrProductionPolicyResolutionOptions,
+  identity: DeviceIdentitySnapshot
+): Result<LocalGovernedOcrCapturedSnapshot, AppError> => dependencies.transactionExecutor.execute(
+  context.correlationId,
+  (transaction) => loadLocalGovernedOcrCapturedSnapshotInTransaction(
+    dependencies,
+    context,
+    requestedIntent,
+    options,
+    identity,
+    transaction
+  )
+);
+
+const revalidateLocalGovernedOcrProductionTransaction = (
+  dependencies: LocalGovernedOcrProductionPolicyRuntimeDependencies,
+  requestedContext: LocalGovernedOcrApplicationContext,
+  requestedIntent: LocalGovernedOcrPolicyIntent,
+  options: LocalGovernedOcrProductionPolicyResolutionOptions,
+  identity: DeviceIdentitySnapshot,
+  captured: LocalGovernedOcrCapturedSnapshot,
+  input: LocalGovernedOcrPolicyTransactionRevalidationInput
+): Result<void, AppError> => {
+  if (
+    stable(input.context) !== stable(requestedContext)
+    || stable(input.intent) !== stable(requestedIntent)
+  ) return invalidLocalGovernedOcrAuthority(requestedContext, 'Local OCR context changed before the business transaction');
+  const current = loadLocalGovernedOcrCapturedSnapshotInTransaction(
+    dependencies,
+    requestedContext,
+    requestedIntent,
+    options,
+    identity,
+    input.transaction
+  );
+  if (!current.ok) return current;
+  if (
+    current.value.authority.securityFingerprint !== captured.authority.securityFingerprint
+    || current.value.resource.stateFingerprint !== captured.resource.stateFingerprint
+    || stable(current.value.resource.resource) !== stable(captured.resource.resource)
+  ) return invalidLocalGovernedOcrAuthority(requestedContext, 'Local OCR authority or resource changed after receipt issuance');
+  const authorization = input.authorization;
+  if (
+    authorization.subject.accountId !== requestedContext.actor.userId
+    || authorization.subject.personId !== requestedContext.actor.personId
+    || authorization.resourceType !== captured.resource.resource.type
+    || authorization.resourceId !== captured.resource.resource.id
+    || authorization.resourceFamilyId !== requestedContext.familyId
+    || authorization.resourceOwnerPersonId !== requestedContext.actor.personId
+    || authorization.capability !== requestedIntent.capability
+    || authorization.action !== requestedIntent.action
+    || authorization.purpose !== requestedIntent.purpose
+  ) return invalidLocalGovernedOcrAuthority(requestedContext, 'Local OCR receipt no longer matches the exact live scope');
+  return ok(undefined);
+};
+
+const recordAuthorizedLocalGovernedOcrTransaction = (
+  dependencies: LocalGovernedOcrProductionPolicyRuntimeDependencies,
+  input: LocalGovernedOcrPolicyTransactionRevalidationInput
+): Result<void, AppError> => {
+  if (!input.authorization.fenceWritable) {
+    return invalidLocalGovernedOcrAuthority(input.context, 'Local OCR policy operation requires a writable database fence');
+  }
+  const timelineContext = timelineContextFromLocalGovernedOcr(input.context);
+  const authorizedRepositoryContext = policyRepositoryContext(
+    timelineContext,
+    input.transaction,
+    input.authorization
+  );
+  const recorded = dependencies.policyTransactionRepository.recordAuthorizedTransaction(
+    { ...authorizedRepositoryContext, occurredAt: asIsoDateTime(input.authorization.occurredAt) },
+    {
+      record: input.authorization.receiptRecord,
+      fenceName: TIMELINE_POLICY_FENCE_NAME,
+      fenceEpoch: input.authorization.fenceEpoch,
+      fenceWritable: true
+    }
+  );
+  return recorded.ok ? ok(undefined) : recorded;
+};
+
+const ensureLocalGovernedOcrRuntimeConfiguration = (
+  dependencies: LocalGovernedOcrProductionPolicyRuntimeDependencies
+): void => {
+  ensureRuntimeConfiguration(dependencies);
+  if (
+    typeof dependencies.localGovernedOcrRepository?.resolvePolicyResource !== 'function'
+    || typeof dependencies.localGovernedOcrRepository?.resolveArchivePolicyResource !== 'function'
+    || typeof dependencies.aiConsentRepository?.listActive !== 'function'
+  ) throw new PlatformPolicyEnforcementError(
+    'ENFORCEMENT_UNAVAILABLE',
+    'Local OCR production policy metadata or consent resolver is unavailable'
+  );
+};
+
+const createLocalGovernedOcrReplayStore = (
+  dependencies: LocalGovernedOcrProductionPolicyRuntimeDependencies,
+  context: LocalGovernedOcrApplicationContext,
+  options: LocalGovernedOcrProductionPolicyResolutionOptions
+): PlatformPolicyReplayStore => {
+  if (!options.authorizationTransaction) {
+    return createDurableReplayStore(dependencies, timelineContextFromLocalGovernedOcr(context));
+  }
+  return Object.freeze({
+    reserve(reservation: PlatformPolicyReplayReservation) {
+      let transaction: TransactionContext;
+      try {
+        transaction = options.authorizationTransaction!();
+      } catch (error) {
+        throw new PlatformPolicyEnforcementError(
+          'ENFORCEMENT_UNAVAILABLE',
+          'Local OCR replay transaction is unavailable',
+          { cause: error }
+        );
+      }
+      const execution = repositoryContext(timelineContextFromLocalGovernedOcr(context), transaction);
+      const pruned = dependencies.policyTransactionRepository.pruneExpiredUnusedReplayReservations(
+        execution,
+        { cutoffMs: reservation.reservedAtMs, limit: REPLAY_PRUNING_BATCH_SIZE }
+      );
+      if (!pruned.ok) {
+        throw new PlatformPolicyEnforcementError(
+          'ENFORCEMENT_UNAVAILABLE',
+          'Local OCR replay reservation pruning failed',
+          { cause: pruned.error }
+        );
+      }
+      const reserved = dependencies.policyTransactionRepository.reserveReplayNonce(execution, reservation);
+      if (!reserved.ok) {
+        throw new PlatformPolicyEnforcementError(
+          'ENFORCEMENT_UNAVAILABLE',
+          'Local OCR replay reservation could not be persisted',
+          { cause: reserved.error }
+        );
+      }
+      return reserved.value;
+    }
+  });
+};
+
+/**
+ * OCR-specific facade over the same typed central PEP, durable replay store,
+ * SQLite receipt transaction and journal projection used by timeline writes.
+ */
+export const createLocalGovernedOcrProductionPolicyEnforcementPointResolver = (
+  dependencies: LocalGovernedOcrProductionPolicyRuntimeDependencies
+): LocalGovernedOcrProductionPolicyEnforcementPointResolver => {
+  ensureLocalGovernedOcrRuntimeConfiguration(dependencies);
+  return Object.freeze({
+    async resolve(
+      context: LocalGovernedOcrApplicationContext,
+      requestedIntent: LocalGovernedOcrPolicyIntent,
+      options: LocalGovernedOcrProductionPolicyResolutionOptions = {}
+    ) {
+      const timelineContext = timelineContextFromLocalGovernedOcr(context);
+      const recovered = await drainPendingJournalProjections(dependencies, timelineContext, {
+        businessTransactionCommitted: false
+      });
+      if (!recovered.ok) {
+        throw new PlatformPolicyEnforcementError(
+          'RECEIPT_PERSISTENCE_FAILED',
+          'Local OCR policy receipt recovery must succeed before authorization',
+          { cause: recovered.error }
+        );
+      }
+      synchronizeDatabaseFence(dependencies, timelineContext);
+      let identity: DeviceIdentitySnapshot;
+      try {
+        identity = dependencies.deviceIdentityProvider.snapshot();
+      } catch (error) {
+        throw new PlatformPolicyEnforcementError(
+          'AUTHORITY_RESOLUTION_FAILED',
+          'Local OCR device identity snapshot could not be loaded',
+          { cause: error }
+        );
+      }
+      if (
+        !nonEmpty(identity.deviceId, 256)
+        || !nonEmpty(identity.fingerprint, 512)
+        || !nonBlank(identity.publicKeyPem, 16_384)
+      ) throw new PlatformPolicyEnforcementError('AUTHORITY_INVALID', 'Local OCR device identity snapshot is invalid');
+
+      const captured = loadLocalGovernedOcrCapturedSnapshot(
+        dependencies,
+        context,
+        requestedIntent,
+        options,
+        identity
+      );
+      if (!captured.ok) {
+        throw new PlatformPolicyEnforcementError(
+          'RESOURCE_RESOLUTION_FAILED',
+          `Local OCR production policy snapshot could not be loaded: ${captured.error.code}`,
+          { cause: captured.error }
+        );
+      }
+      const enforcementPoint = createTypedPolicyEnforcementPoint({
+        provider: dependencies.authorizationProvider,
+        authorityResolver: { resolve: () => captured.value.authority.authority },
+        resourceResolver: {
+          resolve(intent, authority) {
+            if (
+              authority.accountId !== context.actor.userId
+              || authority.personId !== context.actor.personId
+              || authority.roles.length !== 1
+              || authority.roles[0] !== context.actor.role
+              || authority.familyIds.length !== 1
+              || authority.familyIds[0] !== context.familyId
+              || intent.action !== requestedIntent.action
+              || intent.capability !== requestedIntent.capability
+              || intent.resourceType !== requestedIntent.resourceType
+              || intent.resourceId !== requestedIntent.resourceId
+              || intent.purpose !== requestedIntent.purpose
+            ) throw new PlatformPolicyEnforcementError(
+              'RESOURCE_RESOLUTION_FAILED',
+              'Local OCR intent or authority changed before resource resolution'
+            );
+            return captured.value.resource.resource;
+          }
+        },
+        receiptSink: dependencies.receiptSink,
+        replayStore: createLocalGovernedOcrReplayStore(dependencies, context, options),
+        deferAllowedReceiptPersistence: true,
+        clock: () => {
+          const occurredAt = options.authorizationOccurredAt?.() ?? dependencies.clock.now();
+          if (!Number.isFinite(parsedTimestamp(occurredAt))) {
+            throw new PlatformPolicyEnforcementError(
+              'ENFORCEMENT_UNAVAILABLE',
+              'Local OCR transaction timestamp is unavailable for receipt issuance'
+            );
+          }
+          return occurredAt;
+        }
+      });
+
+      return Object.freeze(Object.assign(enforcementPoint, {
+        requiresTransactionRevalidation: true as const,
+        requiresDurableTransactionReceipt: true as const,
+        revalidateTransaction: (
+          input: LocalGovernedOcrPolicyTransactionRevalidationInput
+        ): Result<void, AppError> => revalidateLocalGovernedOcrProductionTransaction(
+          dependencies,
+          context,
+          requestedIntent,
+          options,
+          identity,
+          captured.value,
+          input
+        ),
+        recordAuthorizedTransaction: (
+          input: LocalGovernedOcrPolicyTransactionRevalidationInput
+        ): Result<void, AppError> => recordAuthorizedLocalGovernedOcrTransaction(dependencies, input),
+        projectCommittedTransaction: (
+          input: LocalGovernedOcrPolicyCommittedTransactionInput
+        ): Promise<Result<void, AppError>> => drainPendingJournalProjections(
+          dependencies,
+          timelineContextFromLocalGovernedOcr(input.context),
+          { businessTransactionCommitted: true, expectedAuthorization: input.authorization }
+        )
+      })) as LocalGovernedOcrProductionPolicyEnforcementPoint;
     }
   });
 };

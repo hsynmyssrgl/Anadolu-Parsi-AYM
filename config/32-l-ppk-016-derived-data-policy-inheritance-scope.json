@@ -30,9 +30,12 @@
     "duplicateSelfCycleRejected": true,
     "sealedMetadataImmutable": true,
     "typedIpcStatusNoCache": true,
-    "payloadPersistenceAllowed": false,
-    "currentDerivedPayloadOwnerExists": false,
-    "authorizedDerivedProducerAdapterCount": 0,
+    "payloadPersistenceAllowed": true,
+    "currentDerivedPayloadOwnerExists": true,
+    "authorizedDerivedProducerAdapterCount": 1,
+    "authorizedSealedMetadataReaderCount": 1,
+    "authorizedSealedPayloadReadChainComponentCount": 2,
+    "localOcrDerivedResultBindingIntegrated": true,
     "futureCurrentPepReevaluationRequired": true,
     "futurePayloadReadWriteSameAuthorizedTransactionRequired": true,
     "historicalReceiptAloneCountsAsRevocationPropagationEvidence": false,
@@ -43,7 +46,8 @@
     "nonSemanticOperationalTelemetryClassifiedSeparately": true,
     "protectedWholeVaultBackupClassifiedSeparately": true,
     "newSchemaMigrationRequired": true,
-    "migrationVersion": 77
+    "migrationVersion": 77,
+    "latestIntegratedMigrationVersion": 94
   },
   "derivedKinds": [
     "OCR_TEXT",
@@ -172,6 +176,21 @@
       "productionSourceFindings": 0,
       "maliciousSourceGateAssertions": 11,
       "benignSourceGateAssertions": 4
+    },
+    "currentLocalOcrIntegrationEvidence": {
+      "recordedAt": "2026-08-14",
+      "sourceGateRelevantFiles": 39,
+      "sourceGateMaliciousSelfTests": 30,
+      "sourceGateBenignSelfTests": 6,
+      "sourceGateFindings": 0,
+      "targetedTestsPassed": 77,
+      "ocrIntegrationFilesPassed": 5,
+      "ocrIntegrationTestsPassed": 40,
+      "contractChecksPassed": 115,
+      "runtimeBundleChecksPassed": 16,
+      "runtimeBundleChecksFailed": 0,
+      "electronTypeScriptDiagnostics": 0,
+      "rendererTypeScriptDiagnostics": 0
     }
   },
   "threatModel": "docs/security/PPK-016_DERIVED_DATA_POLICY_INHERITANCE_THREAT_MODEL.md",
@@ -183,5 +202,5 @@
   "realDataTransferPerformed": false,
   "realDataBackfillPerformed": false,
   "requirementCompletionClaimed": true,
-  "mandatoryTruthSentence": "PPK-016 retained/reusable semantik materialization için politika mirası ve receipt-bağlı exact recursive lineage metadata omurgasını doğrulanmış olarak kapatır; üretim envanterindeki semantik automation/archive yolları content-free veya current-PEP kontrollü sınırlara çekilmiştir, korumalı yedek ve operasyonel tanı sınırları inheritance kanıtı değildir; gerçek OCR/AI üretimi, payload backfill'i, silme yayılımı, Desktop kasa/SQLite sahiplik aktarımı veya cutover yapılmamıştır."
+  "mandatoryTruthSentence": "PPK-016 retained/reusable semantik materialization için politika mirası ve receipt-bağlı exact recursive lineage metadata omurgasını doğrulanmış olarak kapatır. local_ocr_result sealed owner tek exact PPK-016 writer ve main-only read zinciriyle envantere alınmıştır; OCR repository ham metin, byte veya path sahibi değildir. Bu entegrasyon 33-Q acceptance, gerçek veri backfill'i, Desktop kasa/SQLite sahiplik aktarımı veya cutover iddiası değildir."
 }

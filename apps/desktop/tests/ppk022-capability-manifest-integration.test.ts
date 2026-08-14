@@ -1,7 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { GetPlatformCapabilityManifestGateBoundaryUseCase } from '@ppt/application';
-import { PlatformCapabilityManifestPolicy } from '@ppt/platform-policy';
+import {
+  PLATFORM_APPLICATION_RUNTIME_CAPABILITY_REQUIREMENTS,
+  PlatformCapabilityManifestPolicy
+} from '@ppt/platform-policy';
 import { evaluateIpcIntegrationPolicy } from '../src/main/ipc-integration-policy.js';
 import { resolveIpcReadSharingPolicy } from '../src/main/ipc-read-sharing.js';
 
@@ -14,7 +17,7 @@ describe('32-R PPK-022 Desktop/Core Service capability manifest integration', ()
       enforcement: 'build-and-runtime-fail-closed',
       protectedCapabilityCount: 7,
       canonicalApplicationCount: 14,
-      exactAstSurfaceCount: 282,
+      exactAstSurfaceCount: 339,
       signedManifestHashBindingRequired: true,
       authenticatedRuntimeAuthorityRequired: true,
       bootstrapNetworkCapabilityPinned: true,
@@ -44,6 +47,12 @@ describe('32-R PPK-022 Desktop/Core Service capability manifest integration', ()
     expect(startup).toContain("evaluateCoverage(\n    'windows-desktop'");
     expect(desktopMain).toContain("assertPinnedBootstrapRuntimeCapability('windows-desktop', 'file.access')");
     expect(desktopMain).toContain("assertPinnedBootstrapRuntimeCapability('windows-desktop', 'network.access')");
+    expect(PLATFORM_APPLICATION_RUNTIME_CAPABILITY_REQUIREMENTS['windows-desktop']).toEqual([
+      'file.access', 'network.access', 'ocr.process'
+    ]);
+    expect(PLATFORM_APPLICATION_RUNTIME_CAPABILITY_REQUIREMENTS['ocr-worker']).toEqual([]);
+    expect(readFileSync('packages/security/src/local-ocr-security.ts', 'utf8'))
+      .toContain('readonly lowPrivilegeSandboxVerified: false;');
   });
 
   it('wires preload, typing and UI truth to one no-cache status channel', () => {

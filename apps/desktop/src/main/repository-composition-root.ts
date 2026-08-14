@@ -27,6 +27,7 @@ import {
   SqliteIdentityAccessCredentialRepository,
   SqliteLegacyRepository,
   SqliteLifeRepository,
+  SqliteLocalGovernedOcrRepository,
   SqliteLongTermPortfolioRepository,
   SqliteLargeFamilyReadModelRepository,
   SqliteLocationRepository,
@@ -82,6 +83,7 @@ import type {
   LifePolicyResourceRepositoryPort,
   LifeProjectionRepositoryPort,
   LifeRepositoryPort,
+  LocalGovernedOcrRepositoryPort,
   LongTermPortfolioRepository,
   LocationPolicyResourceRepositoryPort,
   LocationRepositoryPort,
@@ -133,6 +135,7 @@ export interface RepositoryCompositionRoot {
   readonly identityAccessCredentialRepository: IdentityAccessCredentialRepositoryPort;
   readonly legacyRepository: LegacyRepositoryPort;
   readonly lifeRepository: LifeRepositoryPort & LifePolicyResourceRepositoryPort & LifeProjectionRepositoryPort;
+  readonly localGovernedOcrRepository: LocalGovernedOcrRepositoryPort;
   readonly largeFamilyReadModelRepository: LargeFamilyReadModelRepositoryPort;
   readonly locationRepository: LocationRepositoryPort & LocationPolicyResourceRepositoryPort;
   readonly notificationStateRepository: NotificationStateRepositoryPort;
@@ -194,6 +197,7 @@ export const createSqliteRepositoryCompositionRoot = (
     identityAccessCredentialRepository: new SqliteIdentityAccessCredentialRepository(repositoryOptions),
     legacyRepository: new SqliteLegacyRepository(repositoryOptions),
     lifeRepository: new SqliteLifeRepository(repositoryOptions),
+    localGovernedOcrRepository: new SqliteLocalGovernedOcrRepository(repositoryOptions),
     largeFamilyReadModelRepository: new SqliteLargeFamilyReadModelRepository(repositoryOptions),
     locationRepository: new SqliteLocationRepository(repositoryOptions),
     notificationStateRepository: new SqliteNotificationStateRepository(repositoryOptions),

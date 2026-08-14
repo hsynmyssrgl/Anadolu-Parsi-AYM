@@ -215,7 +215,7 @@ export const verifyFamilyEmergencyPlanningBoundary = async () => {
     && Object.keys(item.chain ?? {}).length === 13 && Object.values(item.chain).every((value) => value === true)));
   check('platform policy and capability gates remain exact PASS', astGate.status === 'PASS'
     && capabilityGate.status === 'PASS' && astGate.directRoleAuthorizationBypasses === 0);
-  check('PPK-022 current successor ratchet remains exact', capabilityGate.exactManifestSurfaces === 282);
+  check('PPK-022 current successor ratchet remains exact', capabilityGate.exactManifestSurfaces === 339);
   check('root package exposes boundary targeted contract runtime and completion commands', includesAll(JSON.stringify(rootPackage.scripts), [
     'verify:b5-family-emergency:boundary', 'verify:b5-family-emergency:targeted',
     'verify:b5-family-emergency:contract', 'verify:b5-family-emergency:runtime',

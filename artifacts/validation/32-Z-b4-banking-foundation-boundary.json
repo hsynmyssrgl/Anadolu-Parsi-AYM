@@ -146,10 +146,10 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 93,
+  "latestDatabaseMigration": 94,
   "catalogRows": 71,
-  "ppk021ExactAllowlistEntries": 657,
-  "ppk022CapabilitySurfaces": 282,
+  "ppk021ExactAllowlistEntries": 679,
+  "ppk022CapabilitySurfaces": 339,
   "networkVerificationPerformed": false,
-  "generatedAt": "2026-08-14T06:50:00.303Z"
+  "generatedAt": "2026-08-14T10:35:06.581Z"
 }

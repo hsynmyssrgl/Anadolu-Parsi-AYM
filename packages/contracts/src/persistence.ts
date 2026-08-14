@@ -57,3 +57,15 @@ export interface TransactionExecutor {
     operation: (context: TransactionContext) => Result<TValue, AppError>
   ): Result<TValue, AppError>;
 }
+
+/**
+ * Explicit asynchronous transaction boundary for bounded main-process work that must complete
+ * before a single database commit. Implementations must retain the same transaction context and
+ * `occurredAt` value across awaits and reject overlapping use of the same database connection.
+ */
+export interface AsyncTransactionExecutor extends TransactionExecutor {
+  executeAsync<TValue>(
+    correlationId: CorrelationId,
+    operation: (context: TransactionContext) => Promise<Result<TValue, AppError>>
+  ): Promise<Result<TValue, AppError>>;
+}

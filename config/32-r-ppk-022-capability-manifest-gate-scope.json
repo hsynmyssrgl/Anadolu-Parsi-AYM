@@ -23,10 +23,10 @@
     "deployedApplicationCount": 2,
     "applicationsWithDeclaredRuntimeCapabilities": 2,
     "productionSourceZoneCount": 18,
-    "scannedProductionFiles": 428,
-    "exactCapabilitySurfaceCount": 282,
-    "exactCapabilityManifestEntryCount": 282,
-    "exactCapabilityManifestSha256": "281f4bb54c1492d41d3ee5add80487c1353be0a34988dd0511620e092de2e6a8",
+    "scannedProductionFiles": 441,
+    "exactCapabilitySurfaceCount": 339,
+    "exactCapabilityManifestEntryCount": 339,
+    "exactCapabilityManifestSha256": "bba1167e470099c3af1d4363bdba117028b7ce0b61fb78c381e07f3d439ec399",
     "pinnedBootstrapSurfaceCount": 26,
     "pinnedBootstrapFileSurfaceCount": 24,
     "pinnedBootstrapNetworkSurfaceCount": 2,
@@ -63,7 +63,7 @@
     "sqliteOwnershipTransferred": false
   },
   "applicationRuntimeCapabilities": {
-    "windows-desktop": ["file.access", "network.access"],
+    "windows-desktop": ["file.access", "network.access", "ocr.process"],
     "windows-core-service": ["file.access", "network.access"],
     "windows-cluster-agent": [],
     "macos-companion": [],
@@ -80,9 +80,11 @@
   },
   "surfaceCounts": {
     "FILE_DIALOG": 2,
-    "FILE_IMPORT": 265,
+    "FILE_IMPORT": 288,
     "NETWORK_API": 2,
-    "NETWORK_IMPORT": 13
+    "NETWORK_IMPORT": 13,
+    "OCR_API": 5,
+    "OCR_IMPORT": 29
   },
   "knownOpenProductionPaths": [],
   "remainingClosureWork": [],

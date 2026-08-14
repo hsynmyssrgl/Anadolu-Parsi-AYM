@@ -1,0 +1,372 @@
+{
+  "schemaVersion": 1,
+  "id": "33-Q-LOCAL-GOVERNED-OCR-DERIVED-DATA-PIPELINE",
+  "step": "33-Q",
+  "decision": "DEC-228",
+  "title": "Local governed OCR and derived-data pipeline",
+  "status": "PLANNED",
+  "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+  "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+  "requirements": [
+    "B3-04",
+    "OCR-001",
+    "OCR-002",
+    "OCR-003",
+    "OCR-004",
+    "OCR-005",
+    "OCR-006",
+    "OCR-007",
+    "OCR-008",
+    "OCR-009",
+    "OCR-010",
+    "OCR-011",
+    "OCR-012",
+    "OCR-013",
+    "OCR-014",
+    "OCR-015",
+    "OCR-016",
+    "OCR-017",
+    "OCR-018",
+    "OCR-019",
+    "OCR-020",
+    "XPF-001"
+  ],
+  "dependsOn": [
+    "33-O",
+    "33-P",
+    "PPK-016",
+    "PPK-019",
+    "PPK-022"
+  ],
+  "roadmapStatus": "PLANNED",
+  "registrySemantics": {
+    "acceptedScopeRegistryAuthority": "ATOMIC_CLOSURE_STATE",
+    "registryMutationPerformedByStarter": false,
+    "roadmapMutationPerformedByStarter": false,
+    "planOrLedgerActivationPerformedByStarter": false,
+    "currentOpenStatusesIntentional": true,
+    "registryEvidenceMustRemainFalseUntilClosure": true,
+    "blockedByActivePredecessor": "33-P"
+  },
+  "canonicalRequirementTitles": {
+    "B3-04": "Belge OCR/metin indeksi için yerel, izinli ve kapatılabilir sınır",
+    "OCR-001": "Build228’de gerçek OCR motoru ve kullanıcı akışı bulunmaması",
+    "OCR-002": "Dosya önce şifreli kasaya alınır, hash ve zararlı dosya kontrolü tamamlanır",
+    "OCR-003": "OCR öncesi kaynak okuma + ocr_process amacı + AI/derived-data rızası değerlendirilir",
+    "OCR-004": "Windows yerel OCR ve Apple Vision yerel OCR; dış servis varsayılan kapalı",
+    "OCR-005": "NPU/yerel API yoksa denetlenmiş offline fallback; hiçbir zaman sessiz bulut gönderimi yok",
+    "OCR-006": "Belge ayrıştırıcı/OCR worker sandbox, düşük yetki, CPU/RAM/süre/sayfa/piksel limiti",
+    "OCR-007": "Görüntü OCR, PDF gömülü metin çıkarma ve taranmış PDF OCR yollarının ayrı tutulması",
+    "OCR-008": "Metin, dil, sayfa, koordinat, confidence, model/provider sürümü ve kaynak SHA ilişkisi",
+    "OCR-009": "OCR metni kaynak belgenin hassasiyet, sahiplik, izin, retention ve export politikasını devralır",
+    "OCR-010": "OCR metni ve indeksler şifreli; düz metin temp/log/cache yasak",
+    "OCR-011": "Yetki filtreli tam metin indeks; sonuç snippet’i dahi policy ve maskeleme yükümlülüğünden geçer",
+    "OCR-012": "Önizle, düzelt, yeniden çalıştır, dili seç, sil ve OCR’ı tamamen kapat",
+    "OCR-013": "Düşük confidence görünür; OCR sonucu resmî/sağlık/finans gerçeği gibi otomatik kabul edilmez",
+    "OCR-014": "Ayrı açık onay, veri önizleme/redaksiyon, bölge, saklama, silme ve sözleşme olmadan kapalı",
+    "OCR-015": "OCR metni AI’ya otomatik verilmez; ayrı ai_process kararı gerekir",
+    "OCR-016": "Talep, başlama, tamamlanma, hata, provider/model, kaynak/türev hash; içerik loglanmaz",
+    "OCR-017": "Yalnız yetkili türetilmiş indeks/özet Apple cihazlara; ham belge ve tam metin ayrı izinli",
+    "OCR-018": "Ekran okuyucu için belge metni, sayfa konumu ve kullanıcı düzeltmesi; görsel orijinal korunur",
+    "OCR-019": "Kötü amaçlı PDF, zip bomb, dev görüntü, bozuk font, çok dil, el yazısı, düşük kalite ve yetki sızıntısı testleri",
+    "OCR-020": "Kaynak imha/izin iptalinde OCR metni, indeks, embedding, cache ve türevler karantinaya/silmeye girer",
+    "XPF-001": "Çeviri, özet, transkript ve embedding türevleri kaynak politika mirasını zorunlu devralır"
+  },
+  "canonicalAcceptance": {
+    "B3-04": "Desteklenen belgelerde yerel indeks; ham belge dışarı gönderilmez.",
+    "OCR-001": "Kaynakta provider, use-case, schema, UI ve test zinciri bulunmalıdır.",
+    "OCR-002": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
+    "OCR-003": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
+    "OCR-004": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
+    "OCR-005": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
+    "OCR-006": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
+    "OCR-007": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
+    "OCR-008": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
+    "OCR-009": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
+    "OCR-010": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
+    "OCR-011": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
+    "OCR-012": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
+    "OCR-013": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
+    "OCR-014": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
+    "OCR-015": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
+    "OCR-016": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
+    "OCR-017": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
+    "OCR-018": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
+    "OCR-019": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
+    "OCR-020": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez.",
+    "XPF-001": "Kod, politika, test ve kanıt zinciri tamamlanmadan PASS verilemez."
+  },
+  "foundationReuse": {
+    "encryptedArchiveAndCentralPepUow": {
+      "status": "REUSE_FOUNDATION_ONLY",
+      "authority": "PPK-002",
+      "truth": "Şifreli arşiv dosyası, korumalı anahtar, hash doğrulaması ve policy-authorized SQLite transaction temeli vardır; OCR giriş taraması, OCR worker aktarımı veya OCR kabulü değildir."
+    },
+    "derivedPolicyInheritance": {
+      "status": "REUSE_FOUNDATION_ONLY",
+      "authority": "PPK-016",
+      "truth": "OCR_TEXT, SEARCH_INDEX, SUMMARY, EMBEDDING, TRANSLATION ve TRANSCRIPT türleri için receipt-bağlı politika mirası temeli vardır. OCR local policy binding testleri PASS olsa da 33-Q kabul zinciri, gerçek kullanıcı/cihaz kanıtı ve tam arama/AI türev hattı açık kalır."
+    },
+    "sourceDeletionPropagation": {
+      "status": "REUSE_FOUNDATION_ONLY",
+      "authority": "PPK-019",
+      "truth": "OCR metadata owner sınıfları ile local purge/source-delete batch ve immutable child item-ledger zinciri yerel kaynakta/testte vardır. Source-file success sonrası OCR propagationından önceki crash penceresi durable auto-resume ile kapanmadığı için atomik/garantili propagation ve fiziksel harici silme iddiası yoktur."
+    },
+    "capabilityManifest": {
+      "status": "REUSE_FOUNDATION_ONLY_DEFAULT_DENY_CURRENT_GATE_PASS",
+      "authority": "PPK-022",
+      "truth": "OCR yüzeyleri AST/build/runtime gate tarafından fail-closed izlenir. Aggregate windows-desktop archive.ocr yetkisi ayrı ocr-worker uygulama kimliği veya düşük yetkili sandbox kanıtı değildir; ocr-worker runtime capability kümesi boş kalır."
+    },
+    "consent": {
+      "status": "PARTIAL_LOCAL_PRODUCTION_COMPOSITION_TESTED_ACCEPTANCE_INCOMPLETE",
+      "authority": "B2-05,B6-03,33-K,33-O",
+      "truth": "Süreli hassas veri rıza temeli vardır. Production adapter archive.ocr/process/ocr_process PEP planını ayrı ve güncel sensitive_processing rızasından ayırır; exact receipt ve runtime-authority lease bağları yerel entegrasyon testlerinde doğrulanır. Bu kanıt gerçek cihaz/UAT veya ai_process izni değildir."
+    },
+    "contentFreeAudit": {
+      "status": "PARTIAL_LOCAL_COMPOSITION_TESTED_ACCEPTANCE_INCOMPLETE",
+      "authority": "PPK-017",
+      "truth": "Hassas içerik loglama yasağı, payload-free audit/outbox portu ve content-free receipt metadata yerel production adapter testlerinde vardır; tam olay/UAT/retention kabulü tamamlanmamıştır."
+    },
+    "workerIsolation": {
+      "status": "PARTIAL_LOCAL_COMPONENT_COMPOSED_LOW_PRIVILEGE_NOT_VERIFIED",
+      "truth": "Bounded child-process, Windows.Media.Ocr adapterı, Job Object limitleri ve main-authority lease zinciri yerel production composition testlerinde doğrulanmıştır. Ayrı process düşük yetki sandbox değildir; aggregate windows-desktop capability ayrı ocr-worker kimliği değildir; gerçek cihaz kabulü yoktur."
+    }
+  },
+  "plannedModel": {
+    "intake": {
+      "requiredOrder": [
+        "central_authorization",
+        "encrypted_archive_store",
+        "source_sha256_verification",
+        "malicious_file_scan",
+        "bounded_format_probe",
+        "ocr_job_admission"
+      ],
+      "maliciousFileScanner": "PROVIDER_UNAVAILABLE_FAIL_CLOSED",
+      "rawDocumentNetworkEgress": "FORBIDDEN"
+    },
+    "authorization": {
+      "purpose": "ocr_process",
+      "sourceReadPermissionRequired": true,
+      "derivedDataPolicyRequired": true,
+      "explicitConsentEvaluationRequired": true,
+      "aiProcessDecisionSeparate": true,
+      "status": "PARTIAL_LOCAL_PRODUCTION_UOW_TESTED_ACCEPTANCE_INCOMPLETE"
+    },
+    "providers": {
+      "windowsLocalOcr": "PARTIAL_LOCAL_PRODUCTION_ADAPTER_BOUND_DEFAULT_MALWARE_FAIL_CLOSED_REAL_DEVICE_NOT_RUN",
+      "appleVisionLocalOcr": "DESIGN_TARGET_NOT_IMPLEMENTED",
+      "auditedOfflineFallback": "DESIGN_TARGET_NOT_IMPLEMENTED",
+      "externalProvider": "DEFAULT_DISABLED_NOT_CONFIGURED",
+      "silentCloudFallbackAllowed": false
+    },
+    "workerIsolation": {
+      "separateLowPrivilegeProcessRequired": true,
+      "networkCapabilityDefault": "DENIED",
+      "boundedCpuRamDurationPagesPixelsRequired": true,
+      "status": "PARTIAL_LOCAL_CHILD_PROCESS_COMPOSED_LOW_PRIVILEGE_NOT_VERIFIED"
+    },
+    "formatLanes": {
+      "imageOcr": "PARTIAL_LOCAL_PNG_JPEG_ADAPTER_COMPOSED_DEFAULT_MALWARE_FAIL_CLOSED",
+      "pdfEmbeddedText": "NOT_IMPLEMENTED",
+      "scannedPdfOcr": "NOT_IMPLEMENTED"
+    },
+    "resultAndStorage": {
+      "requiredFields": [
+        "sourceSha256",
+        "sourceVersion",
+        "page",
+        "language",
+        "coordinates",
+        "confidence",
+        "provider",
+        "providerVersion",
+        "derivedSha256"
+      ],
+      "encryptedAtRestRequired": true,
+      "plaintextTempLogCacheAllowed": false,
+      "migration94Sha256": "d97738a84ace5de1e56f76f0ea263e6e39a1ec21a52952ed32df6767d04a87e0",
+      "schemaAndRepository": "PARTIAL_LOCAL_SCHEMA_REPOSITORY_SEALED_RESULT_COMPOSITION_TESTED_ACCEPTANCE_INCOMPLETE"
+    },
+    "searchAndUserControl": {
+      "policyFilteredIndexRequired": true,
+      "snippetMaskingRequired": true,
+      "previewCorrectRerunLanguageDeleteDisableRequired": true,
+      "queuedCancelImplemented": true,
+      "runningConcurrentCancelSupported": false,
+      "lowConfidenceVisible": true,
+      "officialMedicalFinancialTruthClaimed": false,
+      "status": "PARTIAL_LOCAL_USER_CONTROL_UI_IMPLEMENTED_FULL_TEXT_INDEX_AND_SNIPPET_NOT_IMPLEMENTED_UAT_NOT_RUN"
+    },
+    "externalProvider": {
+      "requiresSeparateExplicitConsent": true,
+      "requiresPreviewAndRedaction": true,
+      "requiresRegionRetentionDeletionContract": true,
+      "configured": false,
+      "availabilityOrDeliveryGuaranteed": false
+    },
+    "aiAndDerivedData": {
+      "automaticAiFeedAllowed": false,
+      "separateAiProcessDecisionRequired": true,
+      "sourcePolicyInheritanceRequired": true,
+      "status": "NOT_IMPLEMENTED"
+    },
+    "audit": {
+      "contentAllowed": false,
+      "requiredMetadata": [
+        "request",
+        "start",
+        "complete",
+        "error",
+        "provider",
+        "providerVersion",
+        "sourceSha256",
+        "derivedSha256"
+      ],
+      "status": "PARTIAL_LOCAL_COMPOSITION_TESTED_ACCEPTANCE_INCOMPLETE"
+    },
+    "sync": {
+      "derivedIndexOrSummaryRequiresPolicyAuthorization": true,
+      "rawDocumentAndFullTextRequireSeparateAuthorization": true,
+      "crossDeviceDeliveryGuaranteed": false,
+      "status": "PARTIAL_LOCAL_UI_COMPONENT_IMPLEMENTED_ACCESSIBILITY_UAT_NOT_RUN"
+    },
+    "accessibility": {
+      "screenReaderTextAndPagePositionRequired": true,
+      "userCorrectionRequired": true,
+      "visualOriginalPreserved": true,
+      "status": "NOT_IMPLEMENTED"
+    },
+    "deletion": {
+      "sourceDestructionOrPermissionRevocationPropagatesTo": [
+        "ocr_text",
+        "search_index",
+        "embedding",
+        "cache",
+        "summary",
+        "translation",
+        "transcript",
+        "replica",
+        "managed_backup_pending"
+      ],
+      "ocrOwnerRegistration": "PARTIAL_LOCAL_METADATA_OWNER_REGISTERED_GUARANTEED_PROPAGATION_FALSE",
+      "permissionOrConsentRevocationPropagation": "NOT_IMPLEMENTED_FOR_EXISTING_DERIVED_RESULTS",
+      "physicalEraseGuaranteed": false,
+      "externalCopyDestructionGuaranteed": false
+    }
+  },
+  "truth": {
+    "governanceStarterCreated": true,
+    "localDomainAndRepositoryContractComponentsPresent": true,
+    "localApplicationUseCaseComponentPresent": true,
+    "localRepositoryComponentPresent": true,
+    "localMigration94ComponentPresent": true,
+    "localSecurityValidationComponentPresent": true,
+    "localWindowsOcrAdapterComponentPresent": true,
+    "localCentralPepUowCompositionTested": true,
+    "localRuntimeAuthorityLeaseTested": true,
+    "localEncryptedSealedResultVaultComponentTested": true,
+    "localDataStoreFacadeCompositionTested": true,
+    "desktopIpcSurfaceComponentTested": true,
+    "rendererUiComponentTested": true,
+    "rendererQueuedCancelOnlyTruthDisclosed": true,
+    "ppk016LocalIntegrationGateValidated": true,
+    "ppk019LocalIntegrationGateValidated": true,
+    "ppk021AstGateValidated": true,
+    "ppk022CapabilitySurfaceGateValidated": true,
+    "productionProviderWiredAndValidated": false,
+    "productionUseCaseWiredAndValidated": false,
+    "productionSchemaRepositoryAndSealedResultChainValidated": false,
+    "repositoryCompositionRootBindingPresent": true,
+    "newArchiveImportOwnerPersonReceiptBindingValidated": true,
+    "legacyArchiveNullOwnerReceiptFailsClosed": true,
+    "legacyArchiveOwnershipReattestationAvailable": false,
+    "endToEndProductionRepositoryUseCaseWiringValidated": false,
+    "productionIpcImplemented": true,
+    "productionIpcEndToEndValidated": false,
+    "productionUiImplemented": true,
+    "productionUiEndToEndValidated": false,
+    "localComponentTargetedTestsImplemented": true,
+    "fullAcceptanceTargetedTestMatrixImplemented": false,
+    "maliciousFileScannerProviderAvailable": false,
+    "boundedChildProcessComponentPresent": true,
+    "ownerBoundLocalSealedResultPurgeContractPresent": true,
+    "sourceDeletionBatchPersistenceValidated": true,
+    "scheduledOrphanSweepProductionWiringValidated": false,
+    "retentionExpiryPurgeValidated": false,
+    "archiveSourceDestroyBeforeOcrPropagationOrderingValidated": true,
+    "archiveSourceDestroyAndOcrPropagationAtomicityValidated": false,
+    "archiveSourceDestroyCrashWindowAutoResumeValidated": false,
+    "sourceDeletionAutoResumeGuaranteed": false,
+    "permissionOrConsentRevocationOcrPurgeValidated": false,
+    "lowPrivilegeOcrSandboxVerified": false,
+    "workerNetworkIsolationVerified": false,
+    "productionOcrRuntimeExecuted": false,
+    "productionConcurrentRunCancelProbeExecuted": true,
+    "productionConcurrentRunCancelValidated": false,
+    "isolatedWindowsMediaOcrSmokeExecuted": true,
+    "rawDocumentEgressPerformed": false,
+    "silentCloudFallbackAllowed": false,
+    "externalOcrProviderConfigured": false,
+    "externalProviderAvailabilityVerified": false,
+    "plaintextOcrArtifactWritten": false,
+    "ocrResultClaimedAsOfficialTruth": false,
+    "ocrTextAutomaticallySentToAi": false,
+    "crossDeviceOcrSyncPerformed": false,
+    "physicalSecureEraseGuaranteed": false,
+    "externalCopyDestructionGuaranteed": false,
+    "requirementsClosed": false
+  },
+    "validation": {
+    "status": "PLANNED",
+    "boundary": "artifacts/validation/33-Q-local-governed-ocr-derived-data-pipeline-boundary.json",
+    "contract": "artifacts/validation/33-Q-local-governed-ocr-derived-data-pipeline-contract.json",
+    "runtime": "artifacts/validation/33-Q-local-governed-ocr-derived-data-pipeline-runtime.json",
+    "automatedBoundaryStatus": "NOT_RUN",
+    "automatedContractStatus": "NOT_RUN",
+    "implementationRuntime": "LOCAL_COMPOSED_COMPONENT_MATRIX_PASS",
+    "targetedTests": "14_FILES_102_TESTS_PASS",
+    "sourceStabilizationStatus": "STABLE_LOCAL_SNAPSHOT",
+    "ratchetSemantics": "EXACT_LOCAL_SNAPSHOT_NOT_REQUIREMENT_CLOSURE",
+    "targetedTestFileRatchet": 14,
+    "targetedTestRatchet": 102,
+    "countsAsRequirementPass": false,
+    "persistentReceipt": "NOT_RUN"
+  },
+  "manualEvidence": {
+    "realWindowsLocalOcr": "NOT_RUN",
+    "realAppleVisionOcr": "NOT_RUN",
+    "offlineFallback": "NOT_RUN",
+    "maliciousDocumentMatrix": "NOT_RUN",
+    "multilingualAndHandwriting": "NOT_RUN",
+    "lowQualityAndAccessibility": "NOT_RUN",
+    "crossDevice": "NOT_RUN",
+    "externalProviderPrivacyContract": "NOT_RUN",
+    "humanUat": "NOT_RUN",
+    "privacyReview": "NOT_RUN",
+    "legalReview": "NOT_RUN",
+    "securityReview": "NOT_RUN",
+    "certificationClaimed": false
+  },
+  "completionBlockers": [
+    "33-P external/manual evidence and atomic closure remain IN_PROGRESS; 33-Q cannot become active.",
+    "Yerel domain/application/repository-contract/repository, migration 94, merkezi PEP/UoW adapterı, sealed-result vault/runtime, DataStore facade, dar IPC ve Arşiv içi UI 14/102 matriste PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED durumundadır; gerçek cihaz, dış/manual kanıt ve requirement kabulü incomplete kalır.",
+    "Archive intake için OCR-specific malicious-file provider yoktur; PDF rasterizer/provider ve tam bounded format admission zinciri fail-closed unavailable kalır.",
+    "ocr_process receipt amacı ile sensitive_processing rızasının exact source-read/derived-policy compositionı yerel production adapter testlerinde doğrulanmıştır; gerçek kullanıcı/cihaz kabulü ve 33-Q requirement evidence kapanışı yoktur.",
+    "Child-process quota ve production adapter wiringi yerel testtedir; bunlar düşük yetkili sandbox veya OS-enforced ağ izolasyonu kanıtı değildir. Default malware provider yokken gerçek run fail-closed kalır.",
+    "PPK-022 windows-desktop aggregate runtime kimliğinde network.access de vardır; networkUsed=false sonuç alanı OS-enforced ağ izolasyonu değildir. Ayrı ocr-worker process identity/network sandbox doğrulanmadan OCR-005/OCR-006 kabulü yoktur.",
+    "Migration 94 metadata şeması ve owner-bound şifreli sealed-result vault/composition yerel testte vardır; policy-filtered tam metin search/snippet, scheduled orphan sweep ve uçtan uca kabul incomplete kalır.",
+    "Owner-bound sealed-result purge, source-delete çoklu iş batch/current-row/repository-derived immutable item-ledger ve production facade retry zinciri yerel matriste doğrulanmıştır; crash-window auto-resume ve garantili PPK-019 propagation olmadan OCR-020 kapanmaz.",
+    "Existing OCR sonuçlarının object-permission veya sensitive_processing rıza iptal/expiry olayında otomatik karantina/purge zinciri yoktur; yeni işin fail-closed reddi mevcut türevin silindiği anlamına gelmez ve OCR-020 açık kalır.",
+    "HIGH residual: DataStore prepare -> verified source-file destroy -> OCR purge/ledger -> archive mark sırasıyla source destroy failure false-claim riskini kapatır. Ancak source-file success ile OCR propagation arasında crash olursa derived sonuç kalabilir; durable auto-resume yoktur. PPK-019 atomic/guaranteed propagation ve OCR-020/source-deletion acceptance false kalır.",
+    "HIGH residual: production Run/Cancel probe, Run use-case bounded workerı BEGIN IMMEDIATE / AsyncTransactionExecutor callback'i içinde beklerken aynı executor active guardının Cancel transactionını runtime'a ulaşmadan reddettiğini doğrular. İki fazlı run/control tasarımı yoktur; cancellation evidence ve acceptance false kalır.",
+    "UI yalnız queued iş için iptal sunar; başlamış işi eşzamanlı iptal desteklenmiyor mesajı açıkça gösterilir. Bu fail-honest sunum cancellation requirementını kapatmaz.",
+    "Scheduled sealed-result orphan sweep için distinct maintenance PEP/authority production wiringi yoktur; startup repair bileşeni bunu requirement kabulüne dönüştürmez.",
+    "Retention metadata taşınsa da retention expiry sonrası sealed result ve türevleri otomatik purge eden scheduled authority/wiring doğrulanmamıştır; OCR-009 retention acceptance açık kalır.",
+    "Yeni archive import create receipt actor person ownerPersonId ile bağlıdır; immutable eski receipt ownerPersonId=null ise OCR fail-closed kalır. Legacy ownership re-attestation/backfill otoritesi olmadığından eski arşiv OCR erişilebilirliği ve acceptance açık kalır.",
+    "Real Windows OCR, Apple Vision, offline fallback, malicious-document, multilingual, handwriting, low-quality, accessibility and cross-device evidence are NOT_RUN.",
+    "External OCR remains disabled; region, retention, deletion, contract, provider availability and delivery evidence are NOT_RUN.",
+    "Persistent receipt, prepare/finalize/completion, source protection and Git/GitHub equality are NOT_RUN."
+  ],
+  "persistentReceiptStatus": "NOT_RUN"
+}

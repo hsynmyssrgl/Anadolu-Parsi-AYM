@@ -29,6 +29,19 @@ export const DERIVED_DATA_DIRECT_ACCESS_EXCEPTIONS = Object.freeze([] as const);
 export const DERIVED_DATA_AUTHORIZED_REPOSITORY_ADAPTERS = Object.freeze([
   'packages/repositories/src/derived-data-policy-repository.ts'
 ] as const);
+/** Exact production composition path allowed to seal a governed payload binding through the repository above. */
+export const DERIVED_DATA_AUTHORIZED_PRODUCER_ADAPTERS = Object.freeze([
+  'apps/desktop/src/main/local-governed-ocr-application-adapter.ts'
+] as const);
+/** Content-free current-row metadata owner for the sealed payload; it never owns OCR plaintext or source bytes/path. */
+export const DERIVED_DATA_AUTHORIZED_SEALED_METADATA_READERS = Object.freeze([
+  'packages/repositories/src/local-governed-ocr-repository.ts'
+] as const);
+/** The only application path allowed to request plaintext from the main-only sealed-result runtime. */
+export const DERIVED_DATA_AUTHORIZED_SEALED_PAYLOAD_READ_PATHS = Object.freeze([
+  'packages/application/src/local-governed-ocr-use-cases.ts',
+  'apps/desktop/src/main/local-governed-ocr-runtime-adapter.ts'
+] as const);
 /** Exact read-only metadata inventory consumers; this grants no schema or mutation authority. */
 export const DERIVED_DATA_AUTHORIZED_METADATA_INVENTORY_READERS = Object.freeze([
   'packages/repositories/src/data-lifecycle-repository.ts',
