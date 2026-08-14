@@ -1,3 +1,4 @@
+import { spawnSync } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import {
@@ -80,6 +81,24 @@ const base = {
 const checks = [];
 const check = (id, condition) => checks.push({ id, status: condition ? 'PASS' : 'FAIL' });
 
+const governedPaths = [
+  'config/33-p-passkeys-federated-identity-verifiable-temporary-credentials-scope.json',
+  'config/33-p-passkeys-federated-identity-verifiable-temporary-credentials-inventory.json',
+  'config/accepted-scope-registry.json',
+  'config/remaining-scope-package-roadmap.json',
+  'config/work-segmentation-plan.json',
+  'config/active-governance-ledger.json'
+];
+const beforeCliFailure = await Promise.all(governedPaths.map((path) => readFile(resolve(root, path))));
+const missingEvidenceRun = spawnSync(process.execPath, [
+  'scripts/prepare-33-p-passkeys-federated-identity-verifiable-temporary-credentials-completion.mjs'
+], { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 30_000, maxBuffer: 4 * 1024 * 1024 });
+const afterCliFailure = await Promise.all(governedPaths.map((path) => readFile(resolve(root, path))));
+check('mutating-cli-rejects-missing-evidence-before-state-write', missingEvidenceRun.status !== 0
+  && `${missingEvidenceRun.stdout ?? ''}\n${missingEvidenceRun.stderr ?? ''}`.includes(
+    '33-P preparation requires exactly one value for --evidence-root')
+  && beforeCliFailure.every((bytes, index) => bytes.equals(afterCliFailure[index])));
+
 const accepted = evaluateIdentityAccessCompletionPreparation(base);
 check('exact-synthetic-preparation-passes', accepted.status === 'PASS' && accepted.failed === 0);
 const prepared = buildIdentityAccessPreparedState(base);
@@ -132,6 +151,7 @@ const report = {
   failed: failures.length,
   results: checks,
   actualExternalEvidenceStatus: 'NOT_RUN',
+  actualPreparationStatus: 'NOT_RUN',
   registryMutationPerformed: false,
   persistentReceiptWritten: false,
   generatedAt: new Date().toISOString()

@@ -3,10 +3,14 @@
   "step": "33-P",
   "decision": "DEC-227",
   "status": "PASS",
-  "checks": 7,
-  "passed": 7,
+  "checks": 8,
+  "passed": 8,
   "failed": 0,
   "results": [
+    {
+      "id": "mutating-cli-rejects-missing-evidence-before-state-write",
+      "status": "PASS"
+    },
     {
       "id": "exact-synthetic-preparation-passes",
       "status": "PASS"
@@ -37,7 +41,8 @@
     }
   ],
   "actualExternalEvidenceStatus": "NOT_RUN",
+  "actualPreparationStatus": "NOT_RUN",
   "registryMutationPerformed": false,
   "persistentReceiptWritten": false,
-  "generatedAt": "2026-08-14T11:48:36.326Z"
+  "generatedAt": "2026-08-14T12:03:06.083Z"
 }
