@@ -33,6 +33,8 @@ const sourcePaths = Object.freeze({
   application: 'packages/application/src/local-governed-ocr-use-cases.ts',
   repositoryContract: 'packages/repository-contracts/src/local-governed-ocr-repository.ts',
   repository: 'packages/repositories/src/local-governed-ocr-repository.ts',
+  platformTransactionContract: 'packages/repository-contracts/src/platform-policy-transaction-repository.ts',
+  platformTransactionRepository: 'packages/repositories/src/platform-policy-transaction-repository.ts',
   transaction: 'packages/database/src/transaction.ts',
   migration: 'packages/database/src/family-database-migrations.ts',
   security: 'packages/security/src/local-ocr-security.ts',
@@ -105,17 +107,22 @@ const definitions = [
     has('domain', 'LOCAL_GOVERNED_OCR_MAX_SOURCE_BYTES = 16 * 1_024 * 1_024',
       'LOCAL_GOVERNED_OCR_MAX_RESULT_CHARACTERS = 250_000', 'LOCAL_GOVERNED_OCR_MAX_PAGES = 50',
       "executionScope: 'bounded_child_process'", 'lowPrivilegeSandboxVerified: false',
-      'sourceDeletionAutoResumeGuaranteed: false')
+      'sourceDeletionAutoResumeGuaranteed: true')
       && has('application', 'LocalGovernedOcrRuntimePort', 'runAndSeal', 'purgeSealedResult',
         "executionScope: 'bounded_child_process'", 'lowPrivilegeSandboxVerified: false')
       && has('repositoryContract', 'LocalGovernedOcrRepositoryPort', 'LocalGovernedOcrSourceDeletionBatch')],
   ['repository and migration bind metadata lineage retention and immutable source-delete child ledger',
     migration94?.name === 'local_governed_ocr' && migration94?.checksum === migration94Sha256
-      && migration94Sha256 === '6f2e62cb05808731f0a1ef014acb8cfb1f455974f734fd9a117f46e7dbe95cb1'
+      && migration94Sha256 === 'fe45fabe96747ba37b2ce4a9bffce7142b6d47565ad94d1d842ed2fb4ee7e710'
       && has('migration', 'local_governed_ocr_jobs', 'local_governed_ocr_mutations',
-        'local_governed_ocr_source_deletion_items', 'trg_33q_source_deletion_item_insert', 'trg_33q_mutation_delete')
+        'local_governed_ocr_source_deletion_items', 'trg_33q_source_deletion_item_insert', 'trg_33q_mutation_delete',
+        'local_governed_ocr_source_deletion_recovery_intents', 'trg_33q_source_deletion_recovery_insert')
       && has('repository', 'SqliteLocalGovernedOcrRepository', 'assertPolicyAuthorizedRepositoryContext',
         'public propagateSourceDeletion', 'itemMutationId')
+      && has('platformTransactionContract', 'PlatformPolicyArchiveSecureDestroyRecoveryRecord',
+        'listRecoverableArchiveSecureDestroyOperations')
+      && has('platformTransactionRepository', 'local_governed_ocr_source_deletion_recovery_intents',
+        'listRecoverableArchiveSecureDestroyOperations')
       && testHas(testFiles[1], 'repository-derived immutable item ledgers', 'expired unreferenced mutation metadata')],
   ['central PEP UoW keeps ocr_process and sensitive_processing separate and leases exact runtime authority',
     has('policy', "intent.purpose === 'ocr_process'", "'sensitive_processing'", "capability: 'archive.ocr'")
@@ -147,8 +154,12 @@ const definitions = [
     has('compositionRoot', 'SqliteLocalGovernedOcrRepository', 'localGovernedOcrRepository')
       && has('dataStore', 'createLocalGovernedOcrProductionPolicyEnforcementPointResolver',
         'createWindowsLocalGovernedOcrRuntimeAdapter', 'new LocalGovernedOcrResultVault',
-        'failClosedLocalGovernedOcrRuntime', 'correctedTextSha256', '#propagateLocalGovernedOcrArchiveDeletion')
-      && testHas(testFiles[13], 'fails closed without central policy', 'no malware provider', 'source deletion with the same operation id')
+        'failClosedLocalGovernedOcrRuntime', 'correctedTextSha256', '#propagateLocalGovernedOcrArchiveDeletion',
+        'resumePendingLocalGovernedOcrArchiveDeletions')
+      && has('main', 'resumePendingLocalGovernedOcrArchiveDeletions', 'ocr.source_deletion_recovery_cycle_failed')
+      && testHas(testFiles[13], 'fails closed without central policy', 'no malware provider',
+        'recovers source deletion with the same operation id', 'restartedStore',
+        'local_governed_ocr_source_deletion_recovery_intents')
       && scope.truth?.localDataStoreFacadeCompositionTested === true
       && scope.truth?.productionProviderWiredAndValidated === false],
   ['desktop exposes exactly nine safe renderer OCR methods and keeps source deletion main-only',
@@ -159,7 +170,7 @@ const definitions = [
       && has('rendererTypes', 'getLocalGovernedOcrCenter', 'setLocalGovernedOcrEnabled')
       && !sources.preload.includes('propagateLocalGovernedOcrSourceDeletion')
       && has('ipcPolicy', "executionScope: 'bounded_child_process'", 'sourceContentExposedToRenderer !== false')
-      && sources.ipcPolicy.includes('sourceDeletionAutoResumeGuaranteed !== false')
+      && sources.ipcPolicy.includes('sourceDeletionAutoResumeGuaranteed !== true')
       && testHas(testFiles[10], 'main-only', 'source')
       && testHas(testFiles[11], 'nine', 'bridge')],
   ['Archive UI uses the safe bridge with explicit reveal idempotent retry and no remote truth claim',
@@ -172,14 +183,14 @@ const definitions = [
       && scope.plannedModel?.searchAndUserControl?.twoPhaseRunTransactionImplemented === true
       && scope.plannedModel?.searchAndUserControl?.runningConcurrentCancelSupported === true
       && scope.truth?.productionUiEndToEndValidated === false],
-  ['source-deletion ordering is fail-honest while crash auto-resume and atomic propagation remain false',
+  ['source-deletion ordering and authenticated restart auto-resume are validated while broader atomic propagation remains false',
     scope.truth?.sourceDeletionBatchPersistenceValidated === true
       && scope.truth?.archiveSourceDestroyBeforeOcrPropagationOrderingValidated === true
       && scope.truth?.archiveSourceDestroyAndOcrPropagationAtomicityValidated === false
-      && scope.truth?.archiveSourceDestroyCrashWindowAutoResumeValidated === false
-      && scope.truth?.sourceDeletionAutoResumeGuaranteed === false
+      && scope.truth?.archiveSourceDestroyCrashWindowAutoResumeValidated === true
+      && scope.truth?.sourceDeletionAutoResumeGuaranteed === true
       && scope.truth?.permissionOrConsentRevocationOcrPurgeValidated === false
-      && scope.plannedModel?.deletion?.ocrOwnerRegistration === 'PARTIAL_LOCAL_METADATA_OWNER_REGISTERED_GUARANTEED_PROPAGATION_FALSE'],
+      && scope.plannedModel?.deletion?.ocrOwnerRegistration === 'LOCAL_OCR_JOB_OWNER_AUTO_RESUME_TRUE_FUTURE_DERIVED_PROPAGATION_FALSE'],
   ['capability manifest grants aggregate desktop OCR only and no separate worker or sandbox claim',
     capabilityManifest.defaultDecision === 'DENY'
       && capabilityManifest.applicationRuntimeCapabilities?.['windows-desktop']?.includes('ocr.process')

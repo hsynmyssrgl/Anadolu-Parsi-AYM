@@ -110,7 +110,7 @@
     "sourceDeletionPropagation": {
       "status": "REUSE_FOUNDATION_ONLY",
       "authority": "PPK-019",
-      "truth": "OCR metadata owner sınıfları ile local purge/source-delete batch ve immutable child item-ledger zinciri yerel kaynakta/testte vardır. Source-file success sonrası OCR propagationından önceki crash penceresi durable auto-resume ile kapanmadığı için atomik/garantili propagation ve fiziksel harici silme iddiası yoktur."
+      "truth": "OCR metadata owner sınıfları ile local purge/source-delete batch, immutable child item-ledger ve authenticated restart auto-resume zinciri yerel kaynakta/testte vardır. Gelecekteki index/embedding/cache, managed-backup ve fiziksel harici silme kapsamları için atomik/garantili propagation iddiası yoktur."
     },
     "capabilityManifest": {
       "status": "REUSE_FOUNDATION_ONLY_DEFAULT_DENY_CURRENT_GATE_PASS",
@@ -185,7 +185,7 @@
       ],
       "encryptedAtRestRequired": true,
       "plaintextTempLogCacheAllowed": false,
-      "migration94Sha256": "6f2e62cb05808731f0a1ef014acb8cfb1f455974f734fd9a117f46e7dbe95cb1",
+      "migration94Sha256": "fe45fabe96747ba37b2ce4a9bffce7142b6d47565ad94d1d842ed2fb4ee7e710",
       "schemaAndRepository": "PARTIAL_LOCAL_SCHEMA_REPOSITORY_SEALED_RESULT_COMPOSITION_TESTED_ACCEPTANCE_INCOMPLETE"
     },
     "searchAndUserControl": {
@@ -251,7 +251,7 @@
         "replica",
         "managed_backup_pending"
       ],
-      "ocrOwnerRegistration": "PARTIAL_LOCAL_METADATA_OWNER_REGISTERED_GUARANTEED_PROPAGATION_FALSE",
+      "ocrOwnerRegistration": "LOCAL_OCR_JOB_OWNER_AUTO_RESUME_TRUE_FUTURE_DERIVED_PROPAGATION_FALSE",
       "permissionOrConsentRevocationPropagation": "NOT_IMPLEMENTED_FOR_EXISTING_DERIVED_RESULTS",
       "physicalEraseGuaranteed": false,
       "externalCopyDestructionGuaranteed": false
@@ -298,8 +298,8 @@
     "retentionExpiryPurgeValidated": false,
     "archiveSourceDestroyBeforeOcrPropagationOrderingValidated": true,
     "archiveSourceDestroyAndOcrPropagationAtomicityValidated": false,
-    "archiveSourceDestroyCrashWindowAutoResumeValidated": false,
-    "sourceDeletionAutoResumeGuaranteed": false,
+    "archiveSourceDestroyCrashWindowAutoResumeValidated": true,
+    "sourceDeletionAutoResumeGuaranteed": true,
     "permissionOrConsentRevocationOcrPurgeValidated": false,
     "lowPrivilegeOcrSandboxVerified": false,
     "workerNetworkIsolationVerified": false,
@@ -358,9 +358,9 @@
     "Child-process quota ve production adapter wiringi yerel testtedir; bunlar düşük yetkili sandbox veya OS-enforced ağ izolasyonu kanıtı değildir. Default malware provider yokken gerçek run fail-closed kalır.",
     "PPK-022 windows-desktop aggregate runtime kimliğinde network.access de vardır; networkUsed=false sonuç alanı OS-enforced ağ izolasyonu değildir. Ayrı ocr-worker process identity/network sandbox doğrulanmadan OCR-005/OCR-006 kabulü yoktur.",
     "Migration 94 metadata şeması ve owner-bound şifreli sealed-result vault/composition yerel testte vardır; policy-filtered tam metin search/snippet, scheduled orphan sweep ve uçtan uca kabul incomplete kalır.",
-    "Owner-bound sealed-result purge, source-delete çoklu iş batch/current-row/repository-derived immutable item-ledger ve production facade retry zinciri yerel matriste doğrulanmıştır; crash-window auto-resume ve garantili PPK-019 propagation olmadan OCR-020 kapanmaz.",
+    "Owner-bound sealed-result purge, source-delete çoklu iş batch/current-row/repository-derived immutable item-ledger ve authenticated restart sonrası bounded auto-resume yerel matriste doğrulanmıştır; gelecekteki index/embedding/cache ve managed-backup owner propagationı olmadan OCR-020 kapanmaz.",
     "Existing OCR sonuçlarının object-permission veya sensitive_processing rıza iptal/expiry olayında otomatik karantina/purge zinciri yoktur; yeni işin fail-closed reddi mevcut türevin silindiği anlamına gelmez ve OCR-020 açık kalır.",
-    "HIGH residual: DataStore prepare -> verified source-file destroy -> OCR purge/ledger -> archive mark sırasıyla source destroy failure false-claim riskini kapatır. Ancak source-file success ile OCR propagation arasında crash olursa derived sonuç kalabilir; durable auto-resume yoktur. PPK-019 atomic/guaranteed propagation ve OCR-020/source-deletion acceptance false kalır.",
+    "DataStore prepare -> verified source-file destroy -> OCR purge/ledger -> archive mark sırasını korur. Bound secure-destroy intenti içeriksiz, immutable ve aktör/aile bağlı recovery ledgerına kaydedilir; source-file success sonrası process crash gerçek temp SQLite restart testinde sonraki authenticated scheduler çevriminde aynı operationId ile otomatik tamamlanır. Bu yerel kurtarma gelecekteki index/embedding/cache, managed-backup veya fiziksel imha garantisi değildir; OCR-020 acceptance false kalır.",
     "Önceki HIGH Run/Cancel transaction-topology açığı iki fazlı begin -> detached worker -> final akışı ve FIFO kısa-transaction kuyruğuyla kapatılmıştır; production executor probe'unda running Cancel runtime'a ulaşır, commit olur ve final transaction Cancel commit'inden sonra tamamlanır. Bu local otomatik kanıt gerçek cihaz/human UAT değildir.",
     "UI queued ve running işleri iptal edebilir; cancel_requested yeniden tetiklenemez. Bu kaynak/test kanıtı erişilebilirlik ve human UAT requirementını tek başına kapatmaz.",
     "Scheduled sealed-result orphan sweep için distinct maintenance PEP/authority production wiringi yoktur; startup repair bileşeni bunu requirement kabulüne dönüştürmez.",

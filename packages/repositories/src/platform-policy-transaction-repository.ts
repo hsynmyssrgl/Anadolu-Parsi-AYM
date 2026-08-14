@@ -11,6 +11,7 @@ import {
   type PlatformPolicyArchivePendingOperationIdentityInput,
   type PlatformPolicyArchivePendingOperationMutation,
   type PlatformPolicyArchivePendingOperationRecord,
+  type PlatformPolicyArchiveSecureDestroyRecoveryRecord,
   type PlatformPolicyJournalAnchor,
   type PlatformPolicyJournalProjection,
   type PlatformPolicyJournalProjectionProof,
@@ -713,6 +714,15 @@ const assertArchivePendingOperationIdentity = (
   if (input.purpose !== 'archive' || context.actor.userId !== input.actorAccountId) {
     throw new Error('Archive pending operation identity does not match its repository actor');
   }
+  if (input.secureDestroyResourceId !== undefined) {
+    if (input.mutation !== 'archive:secureDestroy') {
+      throw new Error('Archive secure-destroy recovery locator belongs to a different mutation');
+    }
+    assertNonEmpty(input.secureDestroyResourceId, 'Archive secure-destroy recovery resource identifier', 256);
+    if (input.secureDestroyResourceId !== input.secureDestroyResourceId.trim()) {
+      throw new Error('Archive secure-destroy recovery resource identifier is not canonical');
+    }
+  }
 };
 
 const assertArchivePendingOperationMatches = (
@@ -1103,6 +1113,32 @@ export class SqlitePlatformPolicyTransactionRepository
       ) {
         throw new Error('Archive pending operation acquisition resolved a conflicting durable identity');
       }
+      if (input.secureDestroyResourceId !== undefined) {
+        database.prepare(`
+          INSERT INTO local_governed_ocr_source_deletion_recovery_intents(
+            operation_id,family_id,actor_account_id,intent_fingerprint,source_resource_id,registered_at
+          ) VALUES(?,?,?,?,?,?)
+          ON CONFLICT(operation_id) DO NOTHING
+        `).run(
+          operation.operationId,
+          input.resourceFamilyId,
+          input.actorAccountId,
+          input.intentFingerprint,
+          input.secureDestroyResourceId,
+          context.occurredAt
+        );
+        const recovery = database.prepare(`
+          SELECT family_id,actor_account_id,intent_fingerprint,source_resource_id
+          FROM local_governed_ocr_source_deletion_recovery_intents WHERE operation_id=?
+        `).get(operation.operationId) as Record<string, unknown> | undefined;
+        if (!recovery
+          || String(recovery.family_id) !== input.resourceFamilyId
+          || String(recovery.actor_account_id) !== input.actorAccountId
+          || String(recovery.intent_fingerprint) !== input.intentFingerprint
+          || String(recovery.source_resource_id) !== input.secureDestroyResourceId) {
+          throw new Error('Archive secure-destroy recovery intent resolved a conflicting resource');
+        }
+      }
       return operation;
     });
   }
@@ -1203,6 +1239,49 @@ export class SqlitePlatformPolicyTransactionRepository
         throw new Error('Archive pending operation does not belong to the repository actor');
       }
       return operation;
+    });
+  }
+
+  public listRecoverableArchiveSecureDestroyOperations(
+    context: RepositoryExecutionContext,
+    input: {
+      readonly resourceFamilyId: string;
+      readonly actorAccountId: string;
+      readonly limit?: number;
+    }
+  ): RepositoryResult<readonly PlatformPolicyArchiveSecureDestroyRecoveryRecord[]> {
+    return this.execute(context, () => {
+      assertNonEmpty(input.resourceFamilyId, 'Archive recovery family identifier', 128);
+      assertNonEmpty(input.actorAccountId, 'Archive recovery actor identifier', 128);
+      if (context.actor.userId !== input.actorAccountId) {
+        throw new Error('Archive recovery list does not belong to the repository actor');
+      }
+      const limit = input.limit ?? 8;
+      if (!Number.isSafeInteger(limit) || limit < 1 || limit > 32) {
+        throw new Error('Archive recovery list limit is invalid');
+      }
+      return (this.database(context).prepare(`
+        SELECT recovery.operation_id,recovery.intent_fingerprint,recovery.family_id,
+          recovery.actor_account_id,recovery.source_resource_id,pending.acquired_at
+        FROM local_governed_ocr_source_deletion_recovery_intents recovery
+        JOIN platform_policy_archive_pending_operations pending
+          ON pending.operation_id=recovery.operation_id
+        WHERE recovery.family_id=? AND recovery.actor_account_id=?
+          AND pending.mutation='archive:secureDestroy'
+          AND pending.purpose='archive'
+          AND pending.bound_operation_fingerprint IS NOT NULL
+          AND pending.acknowledged_at IS NULL
+        ORDER BY pending.acquired_at,pending.operation_id
+        LIMIT ?
+      `).all(input.resourceFamilyId, input.actorAccountId, limit) as Array<Record<string, unknown>>)
+        .map((row) => ({
+          operationId: String(row.operation_id),
+          intentFingerprint: String(row.intent_fingerprint),
+          resourceFamilyId: String(row.family_id),
+          actorAccountId: String(row.actor_account_id),
+          sourceResourceId: String(row.source_resource_id),
+          acquiredAt: String(row.acquired_at) as IsoDateTime
+        }));
     });
   }
 

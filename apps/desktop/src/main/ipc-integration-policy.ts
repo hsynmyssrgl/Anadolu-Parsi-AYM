@@ -81,7 +81,7 @@ export interface LocalGovernedOcrCenterIpcView {
     readonly explicitSensitiveProcessingConsentRequired: true;
     readonly derivedPolicyBindingRequired: true;
     readonly sourceDeletionPropagatesToDerivedResult: true;
-    readonly sourceDeletionAutoResumeGuaranteed: false;
+    readonly sourceDeletionAutoResumeGuaranteed: true;
     readonly derivedDeletionDeletesSource: false;
   };
   readonly generatedAt: string;
@@ -2491,7 +2491,7 @@ const localOcrCenterResult = (value: unknown): boolean => {
     || value.truth.explicitSensitiveProcessingConsentRequired !== true
     || value.truth.derivedPolicyBindingRequired !== true
     || value.truth.sourceDeletionPropagatesToDerivedResult !== true
-    || value.truth.sourceDeletionAutoResumeGuaranteed !== false
+    || value.truth.sourceDeletionAutoResumeGuaranteed !== true
     || value.truth.derivedDeletionDeletesSource !== false || !localOcrIso(value.generatedAt)) return false;
   return value.settings.enabled
     ? value.settings.disabledReason === null && value.settings.disabledAt === null

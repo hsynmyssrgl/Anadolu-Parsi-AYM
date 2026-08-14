@@ -92,7 +92,7 @@ const domainCenter = {
     explicitSensitiveProcessingConsentRequired: true,
     derivedPolicyBindingRequired: true,
     sourceDeletionPropagatesToDerivedResult: true,
-    sourceDeletionAutoResumeGuaranteed: false,
+    sourceDeletionAutoResumeGuaranteed: true,
     derivedDeletionDeletesSource: false
   },
   generatedAt: occurredAt
@@ -231,14 +231,14 @@ describe('33-Q local governed OCR IPC boundary', () => {
 
   it('accepts only projected safe result schemas and rejects raw domain results', () => {
     const projectedCenter = projectLocalGovernedOcrCenterIpcView(domainCenter);
-    expect(projectedCenter.truth.sourceDeletionAutoResumeGuaranteed).toBe(false);
+    expect(projectedCenter.truth.sourceDeletionAutoResumeGuaranteed).toBe(true);
     expect(evaluateIpcIntegrationResultPolicy(
       LOCAL_GOVERNED_OCR_IPC_CHANNELS.getCenter,
       projectedCenter
     )).toEqual({ accepted: true });
     expect(evaluateIpcIntegrationResultPolicy(LOCAL_GOVERNED_OCR_IPC_CHANNELS.getCenter, {
       ...projectedCenter,
-      truth: { ...projectedCenter.truth, sourceDeletionAutoResumeGuaranteed: true }
+      truth: { ...projectedCenter.truth, sourceDeletionAutoResumeGuaranteed: false }
     })).toMatchObject({ accepted: false, reason: 'LOCAL_OCR_RESULT_INVALID' });
     expect(evaluateIpcIntegrationResultPolicy(
       LOCAL_GOVERNED_OCR_IPC_CHANNELS.getResult,

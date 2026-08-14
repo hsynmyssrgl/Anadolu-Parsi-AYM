@@ -89,7 +89,7 @@ export interface LocalGovernedOcrTruthView {
   readonly explicitSensitiveProcessingConsentRequired: true;
   readonly derivedPolicyBindingRequired: true;
   readonly sourceDeletionPropagatesToDerivedResult: true;
-  readonly sourceDeletionAutoResumeGuaranteed: false;
+  readonly sourceDeletionAutoResumeGuaranteed: true;
   readonly derivedDeletionDeletesSource: false;
 }
 

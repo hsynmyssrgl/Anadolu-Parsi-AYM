@@ -85,7 +85,7 @@ const definitions = [
       && exact(inventory.implementedTargetedTests, testFiles)],
   ['migration 94 manifest and canonical source hash remain exact',
     migration94?.name === 'local_governed_ocr' && migration94?.checksum === migration94Sha256
-      && migration94Sha256 === '6f2e62cb05808731f0a1ef014acb8cfb1f455974f734fd9a117f46e7dbe95cb1'],
+      && migration94Sha256 === 'fe45fabe96747ba37b2ce4a9bffce7142b6d47565ad94d1d842ed2fb4ee7e710'],
   ['PPK-021 runtime artifact is PASS at the exact current ratchet',
     ppk.ppk021?.status === 'PASS' && ppk021Runtime.status === 'PASS' && ppk021Gate?.status === 'PASS'
       && ppk021Tail.includes(`"scannedFiles": ${ppk.ppk021.scannedProductionFiles}`)
@@ -127,8 +127,8 @@ const definitions = [
       && scope.plannedModel?.searchAndUserControl?.runningConcurrentCancelSupported === true
       && scope.truth?.archiveSourceDestroyBeforeOcrPropagationOrderingValidated === true
       && scope.truth?.archiveSourceDestroyAndOcrPropagationAtomicityValidated === false
-      && scope.truth?.archiveSourceDestroyCrashWindowAutoResumeValidated === false
-      && scope.truth?.sourceDeletionAutoResumeGuaranteed === false
+      && scope.truth?.archiveSourceDestroyCrashWindowAutoResumeValidated === true
+      && scope.truth?.sourceDeletionAutoResumeGuaranteed === true
       && scope.truth?.permissionOrConsentRevocationOcrPurgeValidated === false
       && scope.truth?.scheduledOrphanSweepProductionWiringValidated === false
       && scope.truth?.retentionExpiryPurgeValidated === false],

@@ -12708,6 +12708,57 @@ CREATE TRIGGER trg_33q_mutation_quota BEFORE INSERT ON local_governed_ocr_mutati
 WHEN (SELECT COUNT(*) FROM local_governed_ocr_mutations WHERE account_id=NEW.account_id AND julianday(occurred_at)>julianday(NEW.occurred_at,'-30 days'))>=4096
 BEGIN SELECT RAISE(ABORT,'33-Q bounded OCR mutation quota exceeded'); END;
 
+CREATE TABLE local_governed_ocr_source_deletion_recovery_intents (
+  operation_id TEXT PRIMARY KEY
+    REFERENCES platform_policy_archive_pending_operations(operation_id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  intent_fingerprint TEXT NOT NULL CHECK(
+    length(intent_fingerprint)=64 AND intent_fingerprint NOT GLOB '*[^0-9a-f]*'
+  ),
+  source_resource_id TEXT NOT NULL CHECK(
+    length(source_resource_id) BETWEEN 1 AND 256 AND source_resource_id=trim(source_resource_id)
+  ),
+  registered_at TEXT NOT NULL CHECK(
+    length(registered_at)=24 AND registered_at GLOB '????-??-??T??:??:??.???Z'
+      AND julianday(registered_at) IS NOT NULL
+  )
+) STRICT;
+
+CREATE INDEX idx_33q_source_deletion_recovery_actor
+ON local_governed_ocr_source_deletion_recovery_intents(
+  family_id,actor_account_id,registered_at,operation_id
+);
+
+CREATE TRIGGER trg_33q_source_deletion_recovery_insert
+BEFORE INSERT ON local_governed_ocr_source_deletion_recovery_intents
+WHEN NOT EXISTS(
+  SELECT 1 FROM platform_policy_archive_pending_operations pending
+  WHERE pending.operation_id=NEW.operation_id
+    AND pending.family_id=NEW.family_id
+    AND pending.actor_account_id=NEW.actor_account_id
+    AND pending.intent_fingerprint=NEW.intent_fingerprint
+    AND pending.mutation='archive:secureDestroy'
+    AND pending.purpose='archive'
+    AND pending.acknowledged_at IS NULL
+    AND julianday(NEW.registered_at)>=julianday(pending.acquired_at)
+)
+BEGIN
+  SELECT RAISE(ABORT,'33-Q source deletion recovery requires exact durable pending intent');
+END;
+
+CREATE TRIGGER trg_33q_source_deletion_recovery_update
+BEFORE UPDATE ON local_governed_ocr_source_deletion_recovery_intents
+BEGIN
+  SELECT RAISE(ABORT,'33-Q source deletion recovery intent is immutable');
+END;
+
+CREATE TRIGGER trg_33q_source_deletion_recovery_delete
+BEFORE DELETE ON local_governed_ocr_source_deletion_recovery_intents
+BEGIN
+  SELECT RAISE(ABORT,'33-Q source deletion recovery intent is durable');
+END;
+
 UPDATE database_metadata SET value='REVISION-33-Q-LOCAL-GOVERNED-OCR',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 

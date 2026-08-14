@@ -36,7 +36,7 @@ try {
   });
   assert.ok(migrationSummary, 'Migration özeti üretilmedi.');
   assert.deepEqual(migrationSummary.appliedVersions, Array.from({ length: 94 }, (_unused, index) => index + 1));
-  assert.equal(migrationSummary.schemaAfter.tableCount, 136);
+  assert.equal(migrationSummary.schemaAfter.tableCount, 137);
 
   const initialState = store.getAuthState();
   if (!initialState.initialized) {
@@ -77,6 +77,7 @@ try {
     assert.equal(migrations.length, 94, 'Migration kayıtları eksik.');
     assert.equal(migrations.every((row) => Number(row.success) === 1), true, 'Başarısız migration kaydı bulundu.');
     assert.equal(Boolean(probe.prepare("SELECT 1 AS present FROM sqlite_master WHERE type='table' AND name='database_metadata'").get()), true);
+    assert.equal(Boolean(probe.prepare("SELECT 1 AS present FROM sqlite_master WHERE type='table' AND name='local_governed_ocr_source_deletion_recovery_intents'").get()), true);
     const outbox = probe.prepare("SELECT event_type,aggregate_type,aggregate_id,status,attempt_count FROM event_outbox WHERE event_type='family.member.created' ORDER BY occurred_at DESC LIMIT 1").get();
     assert.ok(outbox, 'Aile üyesi olayı transactional outbox içine yazılmadı.');
     assert.equal(outbox.aggregate_type, 'person');

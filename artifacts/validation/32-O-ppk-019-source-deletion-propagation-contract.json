@@ -94,7 +94,7 @@
       "status": "PASS"
     },
     {
-      "name": "policy classifies two semantic owners one current OCR metadata owner three ledgers and content-free settings",
+      "name": "policy classifies two semantic owners one current OCR metadata owner three ledgers and two content-free control tables",
       "status": "PASS"
     },
     {
@@ -458,7 +458,7 @@
       "status": "PASS"
     },
     {
-      "name": "scope records current OCR integration evidence and exact outside-scope runtime blockers",
+      "name": "scope records current OCR integration evidence with durable recovery metadata and green runtime",
       "status": "PASS"
     },
     {
@@ -527,7 +527,7 @@
     "status": "PASS",
     "productionSourceZones": 18,
     "scannedFiles": 441,
-    "securityRelevantFiles": 62,
+    "securityRelevantFiles": 63,
     "maliciousSelfTestAssertions": 15,
     "benignFalsePositiveAssertions": 5,
     "findings": []
@@ -552,5 +552,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-14T13:43:32.567Z"
+  "generatedAt": "2026-08-14T14:25:07.125Z"
 }

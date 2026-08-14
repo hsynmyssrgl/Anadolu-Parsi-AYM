@@ -2602,6 +2602,23 @@ function startBackgroundSchedulers(): void {
         );
       });
       if(!current.isAuthenticated()) return;
+      const ocrRecovery = await current.resumePendingLocalGovernedOcrArchiveDeletions().catch((error: unknown) => {
+        current.recordDiagnostic(
+          'error',
+          'ocr.source_deletion_recovery_cycle_failed',
+          'Yerel OCR kaynak silme kurtarma çevrimi tamamlanamadı.',
+          error instanceof Error ? error.name : typeof error
+        );
+        return undefined;
+      });
+      if (ocrRecovery && ocrRecovery.failed > 0) {
+        current.recordDiagnostic(
+          'warning',
+          'ocr.source_deletion_recovery_item_pending',
+          'Bazı yerel OCR kaynak silme işlemleri sonraki çevrimde yeniden denenecek.',
+          `attempted=${ocrRecovery.attempted};completed=${ocrRecovery.completed};failed=${ocrRecovery.failed}`
+        );
+      }
       try { lastSchedulerResult=current.runDueBackupTargets(lastSchedulerCycleAt); }
       catch(error){ current.recordDiagnostic('error','scheduler.cycle_failed','Arka plan zamanlayıcısı çalışamadı.',error instanceof Error?error.message:String(error)); }
       await revocationSync().runDue().catch((error:unknown)=>current.recordDiagnostic('error','revocation.sync_cycle_failed','Periyodik güvenli iptal listesi senkronizasyonu çalışamadı.',error instanceof Error?error.message:String(error)));

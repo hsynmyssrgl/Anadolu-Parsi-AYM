@@ -511,9 +511,12 @@ describe('33-Q Local OCR DataStore production composition', () => {
   it('executes the full facade, rolls back mismatches and recovers source deletion with the same operation id', async () => {
     const runtime = new DeterministicBoundedOcrRuntime();
     const fixture = await prepareOcrFixture({ runtime });
+    let originalStoreClosed = false;
+    let restartedStore: FamilyDataStore | undefined;
     try {
       const center = await fixture.store.getLocalGovernedOcrCenter();
       expect(center.settings).toMatchObject({ revision: 0, enabled: true });
+      expect(center.truth.sourceDeletionAutoResumeGuaranteed).toBe(true);
 
       const createCommand = {
         sourceResourceType: 'archive_item' as const,
@@ -662,7 +665,17 @@ describe('33-Q Local OCR DataStore production composition', () => {
       const preservedPath = `${storedPath}.preserved`;
       renameSync(storedPath, preservedPath);
       mkdirSync(storedPath);
-      const archiveDeleteOperationId = '33-q-ocr-archive-delete-operation';
+      const archiveDeleteIntent = {
+        mutation: 'archive:secureDestroy' as const,
+        semanticInput: { itemId: fixture.sourceId }
+      };
+      const archiveDeleteOperationId = fixture.store.acquireArchivePendingOperationIdentity(
+        archiveDeleteIntent
+      ).operationId;
+      fixture.store.requireArchivePendingOperationIdentity({
+        ...archiveDeleteIntent,
+        operationId: archiveDeleteOperationId
+      });
       const purgeCallsBeforeDestroyFailure = runtime.purgeCalls;
       await expect(fixture.store.securelyDestroyArchiveItem(
         fixture.sourceId,
@@ -694,7 +707,25 @@ describe('33-Q Local OCR DataStore production composition', () => {
         WHERE mutation_kind='source_delete_propagate' AND resource_id=?
       `).get(fixture.sourceId))).toMatchObject({ value: 0 });
 
-      await fixture.store.securelyDestroyArchiveItem(fixture.sourceId, archiveDeleteOperationId);
+      fixture.store.close();
+      originalStoreClosed = true;
+      restartedStore = new FamilyDataStore({
+        databasePath: fixture.databasePath,
+        archivePath: fixture.archivePath,
+        seed: false,
+        clock: fixture.clock,
+        ...productionPolicyOptions(fixture.requests),
+        localGovernedOcrRuntime: runtime
+      });
+      expect(restartedStore.login({
+        accountId: fixture.accountId,
+        password: 'Guclu33QOcrTestParolasi!2026'
+      })).toMatchObject({ authenticated: true });
+      await expect(restartedStore.resumePendingLocalGovernedOcrArchiveDeletions()).resolves.toEqual({
+        attempted: 1,
+        completed: 1,
+        failed: 0
+      });
       const deletionState = inspectDatabase(fixture.databasePath, (database) => ({
         archive: database.prepare('SELECT destroyed_at FROM archive_items WHERE id=?').get(fixture.sourceId),
         jobs: database.prepare(`
@@ -704,7 +735,14 @@ describe('33-Q Local OCR DataStore production composition', () => {
         mutations: database.prepare(`
           SELECT mutation_kind,resource_id FROM local_governed_ocr_mutations
           WHERE mutation_kind='source_delete_propagate' AND resource_id=?
-        `).all(fixture.sourceId)
+        `).all(fixture.sourceId),
+        pending: database.prepare(`
+          SELECT pending.acknowledgement_kind,pending.acknowledged_at,recovery.source_resource_id
+          FROM platform_policy_archive_pending_operations pending
+          JOIN local_governed_ocr_source_deletion_recovery_intents recovery
+            ON recovery.operation_id=pending.operation_id
+          WHERE pending.operation_id=?
+        `).get(archiveDeleteOperationId)
       }));
       expect(deletionState.archive).toMatchObject({ destroyed_at: expect.any(String) });
       expect(deletionState.jobs).toHaveLength(3);
@@ -720,6 +758,11 @@ describe('33-Q Local OCR DataStore production composition', () => {
       expect(deletionState.mutations).toEqual([
         expect.objectContaining({ mutation_kind: 'source_delete_propagate', resource_id: fixture.sourceId })
       ]);
+      expect(deletionState.pending).toMatchObject({
+        acknowledgement_kind: 'completed',
+        acknowledged_at: expect.any(String),
+        source_resource_id: fixture.sourceId
+      });
       expect(runtime.hasResult(cancelledJob.resourceId)).toBe(false);
       expect(runtime.hasResult(rollbackJob.resourceId)).toBe(false);
 
@@ -755,7 +798,8 @@ describe('33-Q Local OCR DataStore production composition', () => {
         })
       ]));
     } finally {
-      fixture.store.close();
+      restartedStore?.close();
+      if (!originalStoreClosed) fixture.store.close();
     }
   });
 });

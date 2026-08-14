@@ -3243,6 +3243,7 @@ export class FamilyDataStore {
   #archivePendingIntentIdentity(input: ArchivePendingOperationIntentInput): {
     readonly context: ArchiveApplicationContext;
     readonly intentFingerprint: string;
+    readonly secureDestroyResourceId?: string;
   } {
     if (!ARCHIVE_PENDING_OPERATION_MUTATIONS.has(input.mutation)) {
       throw new PlatformPolicyEnforcementError(
@@ -3263,9 +3264,31 @@ export class FamilyDataStore {
         'Arşiv için bekleyen işlem girdisi güvenli boyut sınırını aşıyor.'
       );
     }
+    let secureDestroyResourceId: string | undefined;
+    if (input.mutation === 'archive:secureDestroy') {
+      if (!input.semanticInput || typeof input.semanticInput !== 'object' || Array.isArray(input.semanticInput)) {
+        throw new PlatformPolicyEnforcementError(
+          'TRANSACTION_CONTEXT_MISMATCH',
+          'Arşiv güvenli imha kurtarma girdisi exact kaynak kimliği gerektirir.'
+        );
+      }
+      const record = input.semanticInput as Record<string, unknown>;
+      const itemIdDescriptor = Object.getOwnPropertyDescriptor(record, 'itemId');
+      if (Reflect.ownKeys(record).length !== 1 || !itemIdDescriptor || !('value' in itemIdDescriptor)
+        || typeof itemIdDescriptor.value !== 'string'
+        || itemIdDescriptor.value !== itemIdDescriptor.value.trim()
+        || itemIdDescriptor.value.length < 1 || itemIdDescriptor.value.length > 256) {
+        throw new PlatformPolicyEnforcementError(
+          'TRANSACTION_CONTEXT_MISMATCH',
+          'Arşiv güvenli imha kurtarma kaynak kimliği kanonik değildir.'
+        );
+      }
+      secureDestroyResourceId = itemIdDescriptor.value;
+    }
     return {
       context,
-      intentFingerprint: createHash('sha256').update(canonicalIntent, 'utf8').digest('hex')
+      intentFingerprint: createHash('sha256').update(canonicalIntent, 'utf8').digest('hex'),
+      ...(secureDestroyResourceId === undefined ? {} : { secureDestroyResourceId })
     };
   }
 
@@ -3299,7 +3322,7 @@ export class FamilyDataStore {
   public acquireArchivePendingOperationIdentity(
     input: ArchivePendingOperationIntentInput
   ): ArchivePendingOperationIdentityView {
-    const { context, intentFingerprint } = this.#archivePendingIntentIdentity(input);
+    const { context, intentFingerprint, secureDestroyResourceId } = this.#archivePendingIntentIdentity(input);
     const candidateOperationId = `archive-op-${randomUUID()}`;
     const acquired = this.#transactionExecutor.execute(context.correlationId, (transaction) =>
       this.#repositories.platformPolicyTransactionRepository.acquireArchivePendingOperation(
@@ -3310,7 +3333,8 @@ export class FamilyDataStore {
           mutation: input.mutation,
           resourceFamilyId: context.familyId,
           actorAccountId: context.actor.userId,
-          purpose: 'archive'
+          purpose: 'archive',
+          ...(secureDestroyResourceId === undefined ? {} : { secureDestroyResourceId })
         }
       )
     );
@@ -3385,6 +3409,60 @@ export class FamilyDataStore {
       recovered: false,
       state: acknowledged.value.acknowledgedAt ? 'acknowledged' : 'pending'
     });
+  }
+
+  public async resumePendingLocalGovernedOcrArchiveDeletions(limit = 8): Promise<{
+    readonly attempted: number;
+    readonly completed: number;
+    readonly failed: number;
+  }> {
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 32) {
+      throw new PlatformPolicyEnforcementError(
+        'TRANSACTION_CONTEXT_MISMATCH',
+        'Yerel OCR kaynak silme kurtarma sınırı geçersizdir.'
+      );
+    }
+    const context = this.#archiveApplicationContext('local-ocr-source-deletion-recovery');
+    const listed = this.#transactionExecutor.execute(context.correlationId, (transaction) =>
+      this.#repositories.platformPolicyTransactionRepository.listRecoverableArchiveSecureDestroyOperations(
+        this.#archiveRepositoryContext(context, transaction),
+        {
+          resourceFamilyId: context.familyId,
+          actorAccountId: context.actor.userId,
+          limit
+        }
+      )
+    );
+    if (!listed.ok) throw new Error(`[${listed.error.code}] ${listed.error.message}`);
+    let completed = 0;
+    let failed = 0;
+    for (const recovery of listed.value) {
+      const pendingInput = {
+        mutation: 'archive:secureDestroy' as const,
+        semanticInput: { itemId: recovery.sourceResourceId }
+      };
+      try {
+        const identity = this.requireArchivePendingOperationIdentity({
+          ...pendingInput,
+          operationId: recovery.operationId
+        });
+        if (identity.intentFingerprint !== recovery.intentFingerprint) {
+          throw new PlatformPolicyEnforcementError(
+            'TRANSACTION_CONTEXT_MISMATCH',
+            'Yerel OCR kaynak silme kurtarma fingerprinti değişmiştir.'
+          );
+        }
+        await this.securelyDestroyArchiveItem(recovery.sourceResourceId, recovery.operationId);
+        this.acknowledgeArchivePendingOperationIdentity({
+          ...pendingInput,
+          operationId: recovery.operationId
+        });
+        completed += 1;
+      } catch {
+        failed += 1;
+      }
+    }
+    return { attempted: listed.value.length, completed, failed };
   }
   #legacyApplicationContext(prefix:string):LegacyApplicationContext {
     const authenticatedUserId=this.#requireAuth(); const account=this.#currentAccount();

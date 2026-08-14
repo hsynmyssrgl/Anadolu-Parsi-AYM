@@ -48,10 +48,11 @@
         "local_governed_ocr_mutations",
         "local_governed_ocr_source_deletion_items"
       ],
-      "contentFreeSettingsMetadata": [
-        "local_governed_ocr_settings"
+      "contentFreeMetadataTables": [
+        "local_governed_ocr_settings",
+        "local_governed_ocr_source_deletion_recovery_intents"
       ],
-      "control": "Current job satırı yalnız owner/source/binding/sealed-id/hash/count/tombstone metadata'sıdır. Mutation ve source-deletion item sınıfları immutable ledger'dır; bounded mutation prune yalnız 30 gün grace ve sıfır current/item referansı ile mümkündür. Hiçbiri OCR plaintext, raw bytes veya path taşımaz.",
+      "control": "Current job satırı yalnız owner/source/binding/sealed-id/hash/count/tombstone metadata'sıdır. Mutation ve source-deletion item sınıfları immutable ledger'dır; bounded mutation prune yalnız 30 gün grace ve sıfır current/item referansı ile mümkündür. Recovery intent tablosu yalnız exact pending operation, actor/family, source kimliği, fingerprint ve zamanı taşır; pending secureDestroy bağı trigger ile zorunlu, UPDATE/DELETE yasaktır. Hiçbiri OCR plaintext, raw bytes veya path taşımaz.",
       "disposition": "CLASSIFIED_CONTENT_FREE_METADATA_ONLY"
     },
     {
@@ -156,6 +157,7 @@
     "activeSemanticPersistentOwners": 2,
     "currentMetadataOwners": 1,
     "metadataOnlyAppendOnlyLedgers": 3,
+    "contentFreeMetadataTables": 2,
     "activePlaintextReplicaOwners": 0,
     "directBypassExceptions": 0,
     "unregisteredPersistentOwners": 0,

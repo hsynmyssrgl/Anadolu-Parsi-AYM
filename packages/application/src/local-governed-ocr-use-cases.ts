@@ -722,7 +722,7 @@ export class GetLocalGovernedOcrCenterUseCase {
           explicitSensitiveProcessingConsentRequired: true,
           derivedPolicyBindingRequired: true,
           sourceDeletionPropagatesToDerivedResult: true,
-          sourceDeletionAutoResumeGuaranteed: false,
+          sourceDeletionAutoResumeGuaranteed: true,
           derivedDeletionDeletesSource: false
         },
         generatedAt: scope.occurredAt

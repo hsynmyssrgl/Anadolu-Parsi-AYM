@@ -45,6 +45,7 @@
     "registeredSemanticPersistentOwners": 2,
     "localOcrCurrentMetadataOwners": 1,
     "metadataOnlyAppendOnlyLedgers": 3,
+    "localOcrContentFreeMetadataTables": 2,
     "localOcrFileFirstVerifiedPurgeRequired": true,
     "derivedDeletePreservesArchiveSource": true,
     "schemaMigrationRequired": false,
@@ -89,7 +90,7 @@
   "productionInventory": "config/32-o-ppk-019-propagation-owner-inventory.json",
   "knownOpenProductionPaths": [],
   "remainingClosureWork": [],
-  "schemaDecision": "PPK-019 için ayrı migration eklenmez. Mevcut migration 94 local OCR current metadata, immutable mutation/source-deletion item ledger ve exact sealed-lineage bağını sağlar; migration 16/17 data lifecycle ve backup propagation temeli korunur. Historical backfill/cutover yapılmaz, Desktop vault veya SQLite sahipliği değiştirilmez.",
+  "schemaDecision": "PPK-019 için ayrı migration eklenmez. Mevcut migration 94 local OCR current metadata, immutable mutation/source-deletion item ledger, durable content-free source-deletion recovery intent ve exact sealed-lineage bağını sağlar; migration 16/17 data lifecycle ve backup propagation temeli korunur. Historical backfill/cutover yapılmaz, Desktop vault veya SQLite sahipliği değiştirilmez.",
   "validation": {
     "contract": "artifacts/validation/32-O-ppk-019-source-deletion-propagation-contract.json",
     "runtime": "artifacts/validation/32-O-ppk-019-source-deletion-propagation-runtime.json",
@@ -160,21 +161,18 @@
     },
     "currentLocalOcrIntegrationEvidence": {
       "recordedAt": "2026-08-14",
-      "sourceGateRelevantFiles": 62,
-      "sourceGateMaliciousSelfTests": 15,
-      "sourceGateBenignSelfTests": 5,
+      "sourceGateRelevantFiles": 63,
+      "sourceGateMaliciousSelfTests": 17,
+      "sourceGateBenignSelfTests": 6,
       "sourceGateFindings": 0,
       "targetedTestsPassed": 28,
       "ocrSourceDeletionFilesPassed": 3,
       "ocrSourceDeletionTestsPassed": 30,
       "contractChecksPassed": 128,
-      "runtimeBundleChecksPassed": 14,
-      "runtimeBundleChecksFailed": 2,
-      "runtimeStatus": "FAIL_OUTSIDE_OWNED_SCOPE",
-      "runtimeBlockers": [
-        "verify-data-store-smoke.mjs still expects migrations 1..93 while migration 94 exists",
-        "PPK-021/PPK-022 capability and privileged-surface manifests do not yet inventory OCR surfaces"
-      ],
+      "runtimeBundleChecksPassed": 16,
+      "runtimeBundleChecksFailed": 0,
+      "runtimeStatus": "PASS",
+      "runtimeBlockers": [],
       "electronTypeScriptDiagnostics": 0,
       "rendererTypeScriptDiagnostics": 0
     }
@@ -189,5 +187,5 @@
   "realDataTransferPerformed": false,
   "realDataBackfillPerformed": false,
   "requirementCompletionClaimed": true,
-  "mandatoryTruthSentence": "PPK-019 genel owner taraması iki kayıtlı semantik owner'ı tanır: governed AI memory tombstone zinciri ve local_ocr_result sealed owner. Archive source deletion OCR sealed dosyasını önce exact deleted+verified purge eder, ardından job tombstone ve item ledger'ı atomik yazar; derived job delete archive source'u silmez. Yönetilmeyen veya harici kopya otomatik fiziksel imha edilmiş sayılmaz ve kanıt/attestation tamamlanana kadar attention/pending sınırı korunur."
+  "mandatoryTruthSentence": "PPK-019 genel owner taraması iki kayıtlı semantik owner'ı tanır: governed AI memory tombstone zinciri ve local_ocr_result sealed owner. Archive source deletion OCR sealed dosyasını önce exact deleted+verified purge eder, ardından job tombstone ve item ledger'ı atomik yazar; aynı cihazdaki authenticated restart recovery yalnız içeriksiz, immutable ve exact pending secureDestroy intent metadata'sından normal PEP yolunu yeniden çalıştırır. Derived job delete archive source'u silmez. Yönetilmeyen veya harici kopya otomatik fiziksel imha edilmiş sayılmaz ve kanıt/attestation tamamlanana kadar attention/pending sınırı korunur."
 }

@@ -93,6 +93,7 @@ const report = {
     'PPK_012_TO_PPK_019_SECURITY_REGRESSION',
     'MIGRATION_94_REGISTERED_OCR_OWNER_NO_PPK019_SPECIFIC_TRANSFER_OR_CUTOVER',
     'LOCAL_OCR_FILE_FIRST_VERIFIED_PURGE_THEN_ATOMIC_TOMBSTONE_LEDGER',
+    'LOCAL_OCR_DURABLE_CONTENT_FREE_SOURCE_DELETION_RECOVERY_METADATA',
     'DERIVED_OCR_DELETE_PRESERVES_ARCHIVE_SOURCE',
     'ROOT_TYPESCRIPT'
   ],
@@ -104,6 +105,7 @@ const report = {
   activeSemanticPersistentOwners: 2,
   currentMetadataOwners: 1,
   metadataOnlyAppendOnlyLedgers: 3,
+  contentFreeMetadataTables: 2,
   plaintextReplicaProductionOwners: 0,
   directBypassExceptions: 0,
   localPropagationMustPrecedeSourceDelete: true,

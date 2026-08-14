@@ -393,7 +393,7 @@ describe('33-Q local governed OCR application core', () => {
       sourceBytesExposedToRenderer: false, plaintextResultPersistedInRepository: false,
       networkUsed: false, cloudUsed: false, providerDeliveryGuaranteed: false,
       explicitSensitiveProcessingConsentRequired: true, derivedPolicyBindingRequired: true,
-      sourceDeletionPropagatesToDerivedResult: true, sourceDeletionAutoResumeGuaranteed: false,
+      sourceDeletionPropagatesToDerivedResult: true, sourceDeletionAutoResumeGuaranteed: true,
       derivedDeletionDeletesSource: false
     });
     expect(result.ok && result.value.jobs[0]).not.toHaveProperty('activeRunId');

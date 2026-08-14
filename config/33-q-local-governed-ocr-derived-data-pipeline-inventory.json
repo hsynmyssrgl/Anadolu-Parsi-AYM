@@ -112,7 +112,7 @@
         "packages/database/src/family-database-migrations.ts",
         "artifacts/manifests/DATABASE_MIGRATION_VERIFICATION_MVP56.json"
       ],
-      "sha256": "6f2e62cb05808731f0a1ef014acb8cfb1f455974f734fd9a117f46e7dbe95cb1",
+      "sha256": "fe45fabe96747ba37b2ce4a9bffce7142b6d47565ad94d1d842ed2fb4ee7e710",
       "truth": "Migration 94 ve metadata repository; rolling retention, source-delete batch/item ledger ve rollback dahil yerel testlerde doğrulanmıştır. Owner-bound şifreli sealed-result vault/runtime production facade içinde yerel testtedir; tam metin indeks, gerçek cihaz ve uçtan uca kabul değildir."
     },
     {
@@ -299,8 +299,8 @@
     "sourceDeletionBatchPersistenceValidated": true,
     "archiveSourceDestroyBeforeOcrPropagationOrderingValidated": true,
     "archiveSourceDestroyAndOcrPropagationAtomicityValidated": false,
-    "archiveSourceDestroyCrashWindowAutoResumeValidated": false,
-    "sourceDeletionAutoResumeGuaranteed": false,
+    "archiveSourceDestroyCrashWindowAutoResumeValidated": true,
+    "sourceDeletionAutoResumeGuaranteed": true,
     "permissionOrConsentRevocationOcrPurgeValidated": false,
     "localSchemaRepositorySealedResultCompositionTested": true,
     "ocrSchemaRepositorySealedResultAcceptanceValidated": false,
@@ -340,14 +340,13 @@
     "Verified worker network isolation; windows-desktop aggregate network.access and self-reported networkUsed=false are not an OS-enforced deny",
     "Real-device accepted ocr_process authorization/consent execution; local production composition tests are not manual acceptance",
     "Policy-filtered full-text index and masked snippet query; sealed result vault alone is not search acceptance",
-    "Guaranteed source-deletion propagation and durable crash-window auto-resume; local metadata owner registration is insufficient",
+    "Guaranteed source-deletion propagation across future index, embedding, cache and managed-backup owners; local OCR job recovery alone is insufficient",
     "Automatic quarantine/purge of existing OCR results after object-permission or sensitive_processing consent revocation/expiry",
     "Desktop IPC/UI real accessibility, privacy, security and human UAT",
     "Real-device concurrent cancellation and accessibility/human UAT; local two-phase production-executor probe passes but external/manual acceptance remains NOT_RUN",
     "Distinct maintenance PEP/authority and scheduled production orphan sweep",
     "Scheduled owner-bound purge after OCR result retention expiry",
     "Legacy archive receipts with ownerPersonId=null fail closed; no ownership re-attestation or backfill authority is available",
-    "HIGH residual: fail-honest source-destroy-first ordering is present, but a crash after source-file success and before OCR propagation can leave derived data; durable owner-bound automatic resume is unavailable",
     "Real-device Windows UAT, Apple Vision, offline fallback and full malicious-document runtime matrix",
     "External provider privacy contract, region, retention and deletion evidence"
   ],

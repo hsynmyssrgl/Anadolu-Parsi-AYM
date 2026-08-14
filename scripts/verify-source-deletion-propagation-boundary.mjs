@@ -21,11 +21,14 @@ const OCR_CURRENT_METADATA_OWNER = 'local_governed_ocr_jobs';
 const OCR_MUTATION_METADATA_LEDGER = 'local_governed_ocr_mutations';
 const OCR_SOURCE_DELETION_METADATA_LEDGER = 'local_governed_ocr_source_deletion_items';
 const OCR_SETTINGS_METADATA = 'local_governed_ocr_settings';
+const OCR_SOURCE_DELETION_RECOVERY_METADATA = 'local_governed_ocr_source_deletion_recovery_intents';
+const PLATFORM_POLICY_TRANSACTION_REPOSITORY = 'packages/repositories/src/platform-policy-transaction-repository.ts';
 
 const AUTHORIZED_PROPAGATION_CALLERS = new Set([REPOSITORY, CONTRACT, ADAPTER, USE_CASE]);
 const AUTHORIZED_ENFORCEMENT_COMPOSITION = new Set([DATA_STORE]);
 const AUTHORIZED_PRIMARY_DELETE_OWNER = new Set([REPOSITORY]);
 const AUTHORIZED_OCR_SQL_OWNERS = new Set([OCR_REPOSITORY, SCHEMA_OWNER]);
+const AUTHORIZED_OCR_RECOVERY_SQL_OWNERS = new Set([PLATFORM_POLICY_TRANSACTION_REPOSITORY, SCHEMA_OWNER]);
 const AUTHORIZED_OCR_PROPAGATION_CALLERS = new Set([OCR_USE_CASE, OCR_APPLICATION_ADAPTER, OCR_REPOSITORY, OCR_CONTRACT]);
 const sourceExtensions = new Set(['.ts', '.tsx', '.mts', '.cts', '.js', '.jsx', '.mjs', '.cjs']);
 const relevant = /SourceDeletion|sourceDeletion|source-deletion|purgeResourceWithPropagation|RETENTION_PURGE|ocr|thumbnail|ai_memory|plaintext_replica|search_index/iu;
@@ -35,7 +38,7 @@ const PRIMARY_DELETE = /DELETE\s+FROM\s+(?:finance_records|health_records|medica
 const DERIVED_PAYLOAD_TABLE = /CREATE\s+TABLE(?:\s+IF\s+NOT\s+EXISTS)?\s+[`"']?([a-z0-9_]*(?:ocr(?:_text)?|search_index|thumbnail|ai_memory|derived_cache|plaintext_replica|replica)[a-z0-9_]*)/giu;
 const DERIVED_PERSISTENCE_SYMBOL = /\b(?:insert|save|store|persist|write)(?:OcrText|SearchIndex|Thumbnail|AiMemory|DerivedCache|PlaintextReplica)\b/u;
 const SEMANTIC_PAYLOAD_COLUMN = /\b(?:payload(?:_json)?|result_text|ocr_text|title|statement|content(?:_bytes)?|raw_bytes|source_bytes|document_bytes|plaintext|ciphertext|file_path|source_path|vault_path|secret)\s+(?:TEXT|BLOB)\b/iu;
-const OCR_SQL_MUTATION = /\b(?:INSERT\s+INTO|UPDATE|DELETE\s+FROM|REPLACE\s+INTO)\s+(local_governed_ocr_(?:jobs|mutations|source_deletion_items|settings))\b/giu;
+const OCR_SQL_MUTATION = /\b(?:INSERT\s+INTO|UPDATE|DELETE\s+FROM|REPLACE\s+INTO)\s+(local_governed_ocr_(?:jobs|mutations|source_deletion_items|settings|source_deletion_recovery_intents))\b/giu;
 const OCR_REPOSITORY_SEMANTIC_PAYLOAD = /\b(?:result_text|ocr_text|raw_bytes|source_bytes|document_bytes|content_bytes|payload_json|file_path|source_path|vault_path)\b/iu;
 const METADATA_LEDGER_COLUMNS = Object.freeze([
   'client_operation_id', 'request_fingerprint', 'state_fingerprint', 'mutation_kind',
@@ -102,12 +105,23 @@ export const scanSourceDeletionPropagationSourceText = (path, source) => {
             .every((column) => new RegExp(`\\b${column}\\b`, 'u').test(declaration))
           && source.includes('CREATE TRIGGER trg_33q_settings_update BEFORE UPDATE ON local_governed_ocr_settings')
           && source.includes('CREATE TRIGGER trg_33q_settings_delete BEFORE DELETE ON local_governed_ocr_settings'))
+        || (tableName === OCR_SOURCE_DELETION_RECOVERY_METADATA
+          && ['operation_id', 'family_id', 'actor_account_id', 'intent_fingerprint', 'source_resource_id', 'registered_at']
+            .every((column) => new RegExp(`\\b${column}\\b`, 'u').test(declaration))
+          && source.includes('CREATE TRIGGER trg_33q_source_deletion_recovery_insert')
+          && source.includes("pending.mutation='archive:secureDestroy'")
+          && source.includes('pending.acknowledged_at IS NULL')
+          && source.includes('CREATE TRIGGER trg_33q_source_deletion_recovery_update')
+          && source.includes('CREATE TRIGGER trg_33q_source_deletion_recovery_delete'))
       );
     if (!authorizedAiMetadataLedger && !authorizedAiCurrentOwner && !authorizedOcrMetadata) add('UNREGISTERED_DERIVED_PAYLOAD_TABLE', payloadTable);
   }
 
   for (const mutation of source.matchAll(OCR_SQL_MUTATION)) {
-    if (!AUTHORIZED_OCR_SQL_OWNERS.has(normalizedPath)) add('OCR_METADATA_SQL_OUTSIDE_AUTHORIZED_OWNER', mutation);
+    const authorizedOwners = mutation[1] === OCR_SOURCE_DELETION_RECOVERY_METADATA
+      ? AUTHORIZED_OCR_RECOVERY_SQL_OWNERS
+      : AUTHORIZED_OCR_SQL_OWNERS;
+    if (!authorizedOwners.has(normalizedPath)) add('OCR_METADATA_SQL_OUTSIDE_AUTHORIZED_OWNER', mutation);
   }
 
   if (normalizedPath === OCR_REPOSITORY) {
@@ -212,7 +226,15 @@ const selfTest = () => {
     ["public saveJob(){database.prepare('UPDATE local_governed_ocr_jobs SET revision=?')} ", 'OCR_REPOSITORY_RECEIPT_FENCE_MISSING', OCR_REPOSITORY],
     ["export class PropagateLocalGovernedOcrSourceDeletionUseCase { execute(){ return scope.propagateSourceDeletion(batch); } }", 'OCR_SOURCE_DELETION_FILE_FIRST_FENCE_MISSING', OCR_USE_CASE],
     ["export class DeleteLocalGovernedOcrJobUseCase { execute(){ deleteArchiveSource(); } } export class SetLocalGovernedOcrEnabledUseCase {}", 'OCR_DERIVED_DELETE_SOURCE_DELETE_FORBIDDEN', OCR_USE_CASE],
-    ["repository.propagateSourceDeletion(batch)", 'OCR_PROPAGATION_CALL_OUTSIDE_AUTHORIZED_CHAIN']
+    ["repository.propagateSourceDeletion(batch)", 'OCR_PROPAGATION_CALL_OUTSIDE_AUTHORIZED_CHAIN'],
+    [`CREATE TABLE ${OCR_SOURCE_DELETION_RECOVERY_METADATA}(
+      operation_id TEXT,family_id TEXT,actor_account_id TEXT,intent_fingerprint TEXT,
+      source_resource_id TEXT,registered_at TEXT,payload_json TEXT
+    ) STRICT;
+    CREATE TRIGGER trg_33q_source_deletion_recovery_insert BEFORE INSERT ON ${OCR_SOURCE_DELETION_RECOVERY_METADATA} BEGIN SELECT 1; END;
+    CREATE TRIGGER trg_33q_source_deletion_recovery_update BEFORE UPDATE ON ${OCR_SOURCE_DELETION_RECOVERY_METADATA} BEGIN SELECT RAISE(ABORT,'immutable'); END;
+    CREATE TRIGGER trg_33q_source_deletion_recovery_delete BEFORE DELETE ON ${OCR_SOURCE_DELETION_RECOVERY_METADATA} BEGIN SELECT RAISE(ABORT,'immutable'); END;`, 'UNREGISTERED_DERIVED_PAYLOAD_TABLE', SCHEMA_OWNER],
+    ["database.prepare('DELETE FROM local_governed_ocr_source_deletion_recovery_intents')", 'OCR_METADATA_SQL_OUTSIDE_AUTHORIZED_OWNER']
   ];
   const failed = malicious.filter(([source, kind, path = 'apps/example/src/bypass.ts']) => !scanSourceDeletionPropagationSourceText(path, source).some((item) => item.kind === kind));
   if (failed.length) throw new Error(`Source deletion malicious self-test failed: ${failed.length}/${malicious.length}`);
@@ -227,10 +249,20 @@ const selfTest = () => {
       previous_revision INTEGER,revision INTEGER,policy_receipt_hash TEXT,occurred_at TEXT
     ) STRICT;
     CREATE TRIGGER trg_33o_ai_mutation_update BEFORE UPDATE ON governed_ai_memory_mutations BEGIN SELECT RAISE(ABORT,'immutable'); END;
-    CREATE TRIGGER trg_33o_ai_mutation_delete BEFORE DELETE ON governed_ai_memory_mutations BEGIN SELECT RAISE(ABORT,'immutable'); END;`
+    CREATE TRIGGER trg_33o_ai_mutation_delete BEFORE DELETE ON governed_ai_memory_mutations BEGIN SELECT RAISE(ABORT,'immutable'); END;`,
+    `CREATE TABLE ${OCR_SOURCE_DELETION_RECOVERY_METADATA}(
+      operation_id TEXT,family_id TEXT,actor_account_id TEXT,intent_fingerprint TEXT,
+      source_resource_id TEXT,registered_at TEXT
+    ) STRICT;
+    CREATE TRIGGER trg_33q_source_deletion_recovery_insert BEFORE INSERT ON ${OCR_SOURCE_DELETION_RECOVERY_METADATA}
+    WHEN NOT EXISTS(SELECT 1 FROM platform_policy_archive_pending_operations pending
+      WHERE pending.mutation='archive:secureDestroy' AND pending.acknowledged_at IS NULL)
+    BEGIN SELECT RAISE(ABORT,'bound'); END;
+    CREATE TRIGGER trg_33q_source_deletion_recovery_update BEFORE UPDATE ON ${OCR_SOURCE_DELETION_RECOVERY_METADATA} BEGIN SELECT RAISE(ABORT,'immutable'); END;
+    CREATE TRIGGER trg_33q_source_deletion_recovery_delete BEFORE DELETE ON ${OCR_SOURCE_DELETION_RECOVERY_METADATA} BEGIN SELECT RAISE(ABORT,'immutable'); END;`
   ];
   const falsePositives = benign.flatMap((source, index) => scanSourceDeletionPropagationSourceText(
-    index === benign.length - 1 ? SCHEMA_OWNER : 'apps/example/src/ordinary.ts', source));
+    index >= benign.length - 2 ? SCHEMA_OWNER : 'apps/example/src/ordinary.ts', source));
   if (falsePositives.length) throw new Error(`Source deletion benign self-test produced ${falsePositives.length} finding(s)`);
   return { malicious: malicious.length, benign: benign.length };
 };
@@ -295,7 +327,7 @@ const main = async () => {
     authorizedRepositoryAdapters: 3,
     currentMetadataOwners: 1,
     metadataOnlyAppendOnlyMutationLedgers: 3,
-    contentFreeSettingsMetadataTables: 1,
+    contentFreeMetadataTables: 2,
     findings: result.findings
   };
   console.log(JSON.stringify(report, null, 2));

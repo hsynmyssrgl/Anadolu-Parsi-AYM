@@ -130,7 +130,7 @@ const definitions = [
   ['all governance and partial production source surfaces exist', governancePathsExist && localSourcePathsExist],
   ['migration 94 canonical definition and manifest are exact',
     migration94?.name === 'local_governed_ocr' && migration94?.checksum === migration94Sha256
-      && migration94Sha256 === '6f2e62cb05808731f0a1ef014acb8cfb1f455974f734fd9a117f46e7dbe95cb1'
+      && migration94Sha256 === 'fe45fabe96747ba37b2ce4a9bffce7142b6d47565ad94d1d842ed2fb4ee7e710'
       && scope.plannedModel?.resultAndStorage?.migration94Sha256 === migration94Sha256],
   ['PPK-021 and PPK-022 ratchets match the final declared local snapshot',
     ppk.ppk021?.status === 'PASS' && ppk.ppk022?.status === 'PASS'
@@ -167,8 +167,8 @@ const definitions = [
       && scope.truth?.productionConcurrentRunCancelProbeExecuted === true
       && scope.truth?.productionConcurrentRunCancelValidated === true
       && scope.truth?.archiveSourceDestroyAndOcrPropagationAtomicityValidated === false
-      && scope.truth?.archiveSourceDestroyCrashWindowAutoResumeValidated === false
-      && scope.truth?.sourceDeletionAutoResumeGuaranteed === false
+      && scope.truth?.archiveSourceDestroyCrashWindowAutoResumeValidated === true
+      && scope.truth?.sourceDeletionAutoResumeGuaranteed === true
       && scope.truth?.permissionOrConsentRevocationOcrPurgeValidated === false
       && scope.truth?.scheduledOrphanSweepProductionWiringValidated === false
       && scope.truth?.retentionExpiryPurgeValidated === false
@@ -188,7 +188,7 @@ const definitions = [
       && decision.includes('requirement `PASS`')
       && threat.includes('14 dosya / 103 test PASS')
       && threat.includes('iki fazlı run/cancel local kanıtı `PASS`')
-      && threat.includes('durable auto-resume yoktur')]
+      && threat.includes('authenticated restart auto-resume')]
 ];
 
 const checks = definitions.map(([name, passed]) => ({ name, status: passed ? 'PASS' : 'FAIL' }));

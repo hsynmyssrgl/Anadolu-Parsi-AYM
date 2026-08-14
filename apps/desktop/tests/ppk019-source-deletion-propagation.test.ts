@@ -172,7 +172,10 @@ describe('PPK-019 merkezi kaynak silme ve retention yayılımı', () => {
     expect(SOURCE_DELETION_METADATA_ONLY_MUTATION_LEDGERS).toEqual([
       'governed_ai_memory_mutations', 'local_governed_ocr_mutations', 'local_governed_ocr_source_deletion_items'
     ]);
-    expect(SOURCE_DELETION_CONTENT_FREE_METADATA_TABLES).toEqual(['local_governed_ocr_settings']);
+    expect(SOURCE_DELETION_CONTENT_FREE_METADATA_TABLES).toEqual([
+      'local_governed_ocr_settings',
+      'local_governed_ocr_source_deletion_recovery_intents'
+    ]);
     expect(Object.isFrozen(SOURCE_DELETION_METADATA_ONLY_MUTATION_LEDGERS)).toBe(true);
   });
 

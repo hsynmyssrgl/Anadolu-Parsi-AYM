@@ -39,9 +39,10 @@ export const SOURCE_DELETION_METADATA_ONLY_MUTATION_LEDGERS = Object.freeze([
   'local_governed_ocr_mutations',
   'local_governed_ocr_source_deletion_items'
 ] as const);
-/** Content-free current settings metadata; it neither owns a source nor a derived semantic payload. */
+/** Content-free control metadata; these tables never own source or derived semantic payload bytes. */
 export const SOURCE_DELETION_CONTENT_FREE_METADATA_TABLES = Object.freeze([
-  'local_governed_ocr_settings'
+  'local_governed_ocr_settings',
+  'local_governed_ocr_source_deletion_recovery_intents'
 ] as const);
 
 export type SourceDeletionPropagationOwnerKind = (typeof SOURCE_DELETION_PROPAGATION_OWNER_KINDS)[number];

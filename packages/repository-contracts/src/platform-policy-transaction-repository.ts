@@ -123,6 +123,12 @@ export interface PlatformPolicyArchivePendingOperationIdentityInput {
   readonly resourceFamilyId: string;
   readonly actorAccountId: string;
   readonly purpose: 'archive';
+  /**
+   * Main-only recovery locator. It is accepted only for archive:secureDestroy
+   * and never becomes renderer authority; the canonical intent fingerprint is
+   * revalidated before any resumed side effect.
+   */
+  readonly secureDestroyResourceId?: string;
 }
 
 export interface BindPlatformPolicyArchivePendingOperationInput {
@@ -140,6 +146,15 @@ export interface PlatformPolicyArchivePendingOperationRecord
   readonly boundOperationFingerprint?: string;
   readonly acknowledgedAt?: IsoDateTime;
   readonly acknowledgementKind?: 'completed' | 'cancelled';
+}
+
+export interface PlatformPolicyArchiveSecureDestroyRecoveryRecord {
+  readonly operationId: string;
+  readonly intentFingerprint: string;
+  readonly resourceFamilyId: string;
+  readonly actorAccountId: string;
+  readonly sourceResourceId: string;
+  readonly acquiredAt: IsoDateTime;
 }
 
 export interface PlatformPolicyTransactionReceiptRecord {
@@ -282,6 +297,20 @@ export interface PlatformPolicyTransactionRepositoryPort {
     context: RepositoryExecutionContext,
     operationId: string
   ): RepositoryResult<PlatformPolicyArchivePendingOperationRecord | undefined>;
+
+  /**
+   * Lists only bound, unacknowledged secure-destroy intents for the exact
+   * authenticated actor. Callers must still revalidate the canonical pending
+   * intent and execute normal PEP-protected deletion before acknowledgement.
+   */
+  listRecoverableArchiveSecureDestroyOperations(
+    context: RepositoryExecutionContext,
+    input: {
+      readonly resourceFamilyId: string;
+      readonly actorAccountId: string;
+      readonly limit?: number;
+    }
+  ): RepositoryResult<readonly PlatformPolicyArchiveSecureDestroyRecoveryRecord[]>;
 
   listPendingJournalProjections(
     context: RepositoryExecutionContext,
