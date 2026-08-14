@@ -2,10 +2,16 @@ import type { PlatformApplicationId } from './policy-kernel.js';
 
 export const NETWORK_EGRESS_DIRECT_PRIMITIVE_EXCEPTIONS = Object.freeze([] as const);
 export const NETWORK_EGRESS_AUTHORIZED_ADAPTERS = Object.freeze([
-  'apps/desktop/src/main/secure-revocation-list-fetcher.ts'
+  'apps/desktop/src/main/secure-revocation-list-fetcher.ts',
+  'apps/desktop/src/main/secure-oidc-network-adapter.ts'
+] as const);
+export const NETWORK_EGRESS_AUTHORIZED_PURPOSES = Object.freeze([
+  'external-backup-revocation-list.fetch',
+  'oidc.token.exchange',
+  'oidc.jwks.fetch'
 ] as const);
 
-export type NetworkEgressPurpose = 'external-backup-revocation-list.fetch';
+export type NetworkEgressPurpose = typeof NETWORK_EGRESS_AUTHORIZED_PURPOSES[number];
 export type NetworkEgressTlsMode = 'tls' | 'mtls';
 export type NetworkEgressDenialReason =
   | 'ALLOW_EGRESS'
@@ -42,7 +48,7 @@ export interface NetworkEgressAuthoritativeContext {
   readonly endpointId: string;
   readonly sourceUrl: string;
   readonly endpointStatus: 'active' | 'disabled';
-  readonly allowedMethod: 'GET';
+  readonly allowedMethod: 'GET' | 'POST';
   readonly allowedPurpose: NetworkEgressPurpose;
   readonly allowedApplicationId: PlatformApplicationId;
   readonly minimumTlsVersion: 'TLSv1.3';
@@ -63,8 +69,10 @@ export interface NetworkEgressBoundarySnapshot {
   readonly schemaVersion: 1;
   readonly enforcement: 'fail-closed';
   readonly authorizedApplicationId: 'windows-desktop';
-  readonly authorizedPurpose: NetworkEgressPurpose;
-  readonly authorizedAdapterCount: 1;
+  readonly authorizedPurpose: 'external-backup-revocation-list.fetch';
+  readonly authorizedPurposes: typeof NETWORK_EGRESS_AUTHORIZED_PURPOSES;
+  readonly authorizedAdapters: typeof NETWORK_EGRESS_AUTHORIZED_ADAPTERS;
+  readonly authorizedAdapterCount: 2;
   readonly directPrimitiveExceptionCount: 0;
   readonly allowlistRequired: true;
   readonly minimumTlsVersion: 'TLSv1.3';
@@ -110,6 +118,11 @@ const APPLICATION_IDS = new Set<PlatformApplicationId>([
   'ocr-worker', 'ai-worker', 'translation-worker', 'communication-service',
   'backup-worker', 'signed-plugin'
 ]);
+const PURPOSE_METHOD = Object.freeze({
+  'external-backup-revocation-list.fetch': 'GET',
+  'oidc.token.exchange': 'POST',
+  'oidc.jwks.fetch': 'GET'
+} satisfies Readonly<Record<NetworkEgressPurpose, 'GET' | 'POST'>>);
 const normalizedHttpsUrl = (value: unknown): string | null => {
   if (typeof value !== 'string' || value.length > 2_048 || value.trim() !== value) return null;
   try {
@@ -152,8 +165,9 @@ const validContext = (value: unknown): value is NetworkEgressAuthoritativeContex
     && nonEmpty(value.endpointId, 128)
     && normalizedHttpsUrl(value.sourceUrl) === value.sourceUrl
     && (value.endpointStatus === 'active' || value.endpointStatus === 'disabled')
-    && value.allowedMethod === 'GET'
-    && value.allowedPurpose === 'external-backup-revocation-list.fetch'
+    && (value.allowedMethod === 'GET' || value.allowedMethod === 'POST')
+    && NETWORK_EGRESS_AUTHORIZED_PURPOSES.includes(value.allowedPurpose as NetworkEgressPurpose)
+    && PURPOSE_METHOD[value.allowedPurpose as NetworkEgressPurpose] === value.allowedMethod
     && value.allowedApplicationId === 'windows-desktop'
     && value.minimumTlsVersion === 'TLSv1.3'
     && validTlsBinding(value.tlsMode, value.clientIdentityId)
@@ -192,6 +206,8 @@ export class NetworkEgressPolicy {
       enforcement: 'fail-closed',
       authorizedApplicationId: 'windows-desktop',
       authorizedPurpose: 'external-backup-revocation-list.fetch',
+      authorizedPurposes: NETWORK_EGRESS_AUTHORIZED_PURPOSES,
+      authorizedAdapters: NETWORK_EGRESS_AUTHORIZED_ADAPTERS,
       authorizedAdapterCount: NETWORK_EGRESS_AUTHORIZED_ADAPTERS.length,
       directPrimitiveExceptionCount: NETWORK_EGRESS_DIRECT_PRIMITIVE_EXCEPTIONS.length,
       allowlistRequired: true,

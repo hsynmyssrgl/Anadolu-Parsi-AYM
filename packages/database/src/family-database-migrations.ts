@@ -12030,6 +12030,379 @@ CREATE TRIGGER trg_33o_quarantine_quota BEFORE INSERT ON policy_incident_quarant
 UPDATE database_metadata SET value='REVISION-33-O-PRIVACY-OWNERSHIP-DATA-RIGHTS-INCIDENT-CONTROL',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 
+const identityAccessCredentialLedgerSql = `
+CREATE TABLE identity_access_mutations (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 128),
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 1 AND 160),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  mutation_kind TEXT NOT NULL CHECK(mutation_kind IN ('passkey_register','passkey_authenticate','passkey_revoke','passkey_recover_lost','federated_link','federated_unlink','temporary_credential_issue','temporary_credential_revoke')),
+  resource_type TEXT NOT NULL CHECK(resource_type IN ('passkey_credential','federated_identity_link','temporary_verifiable_credential')),
+  resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 1 AND 256),
+  previous_revision INTEGER NOT NULL CHECK(previous_revision>=0),
+  revision INTEGER NOT NULL CHECK(revision=previous_revision+1),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+  UNIQUE(account_id,client_operation_id), UNIQUE(resource_type,resource_id,revision)
+) STRICT;
+CREATE INDEX idx_identity_mutations_resource ON identity_access_mutations(account_id,resource_type,resource_id,revision DESC);
+
+CREATE TABLE identity_passkey_challenges (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 128),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  purpose TEXT NOT NULL CHECK(purpose IN ('passkey_registration','passkey_authentication')),
+  challenge_sha256 TEXT NOT NULL UNIQUE CHECK(length(challenge_sha256)=64 AND challenge_sha256 NOT GLOB '*[^0-9a-f]*'),
+  relying_party_id TEXT NOT NULL CHECK(length(trim(relying_party_id)) BETWEEN 1 AND 253),
+  trusted_device_id TEXT NOT NULL REFERENCES trusted_devices(id) ON DELETE RESTRICT,
+  device_id TEXT NOT NULL CHECK(length(trim(device_id)) BETWEEN 1 AND 256),
+  security_epoch INTEGER NOT NULL CHECK(security_epoch BETWEEN 0 AND 2147483647),
+  created_at TEXT NOT NULL, expires_at TEXT NOT NULL, consumed_at TEXT,
+  consumption_mutation_id TEXT REFERENCES identity_access_mutations(id) ON DELETE RESTRICT,
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  CHECK(length(expires_at)=24 AND julianday(expires_at) IS NOT NULL),
+  CHECK(julianday(expires_at)>julianday(created_at) AND (julianday(expires_at)-julianday(created_at))*86400.0<=300.001),
+  CHECK((consumed_at IS NULL)=(consumption_mutation_id IS NULL))
+) STRICT;
+
+CREATE TABLE identity_passkey_credentials (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 128),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  revision INTEGER NOT NULL CHECK(revision>=1), display_name TEXT NOT NULL CHECK(length(trim(display_name)) BETWEEN 1 AND 120),
+  credential_id TEXT NOT NULL UNIQUE CHECK(length(trim(credential_id)) BETWEEN 1 AND 2048),
+  credential_id_sha256 TEXT NOT NULL UNIQUE CHECK(length(credential_id_sha256)=64 AND credential_id_sha256 NOT GLOB '*[^0-9a-f]*'),
+  public_key_cose_base64url TEXT NOT NULL CHECK(length(trim(public_key_cose_base64url)) BETWEEN 1 AND 8192),
+  public_key_sha256 TEXT NOT NULL CHECK(length(public_key_sha256)=64 AND public_key_sha256 NOT GLOB '*[^0-9a-f]*'),
+  user_handle_sha256 TEXT NOT NULL CHECK(length(user_handle_sha256)=64 AND user_handle_sha256 NOT GLOB '*[^0-9a-f]*'),
+  relying_party_id TEXT NOT NULL CHECK(length(trim(relying_party_id)) BETWEEN 1 AND 253), aaguid TEXT CHECK(length(trim(aaguid)) BETWEEN 1 AND 64),
+  transports_json TEXT NOT NULL CHECK(json_valid(transports_json) AND json_type(transports_json)='array' AND length(transports_json)<=128),
+  sign_count INTEGER NOT NULL CHECK(sign_count BETWEEN 0 AND 4294967295), backup_eligible INTEGER NOT NULL CHECK(backup_eligible IN (0,1)), backup_state INTEGER NOT NULL CHECK(backup_state IN (0,1)),
+  trusted_device_id TEXT NOT NULL REFERENCES trusted_devices(id) ON DELETE RESTRICT, security_epoch INTEGER NOT NULL CHECK(security_epoch BETWEEN 0 AND 2147483647),
+  status TEXT NOT NULL CHECK(status IN ('active','revoked')), created_at TEXT NOT NULL, last_used_at TEXT, revoked_at TEXT,
+  revocation_reason TEXT CHECK(revocation_reason IN ('manual','lost','recovery','device_revoked','security_epoch_changed')),
+  last_mutation_id TEXT NOT NULL REFERENCES identity_access_mutations(id) ON DELETE RESTRICT,
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  CHECK((status='active' AND revoked_at IS NULL AND revocation_reason IS NULL) OR (status='revoked' AND revoked_at IS NOT NULL AND revocation_reason IS NOT NULL))
+) STRICT;
+CREATE INDEX idx_identity_passkeys_owner ON identity_passkey_credentials(account_id,status,created_at DESC);
+
+CREATE TABLE identity_passkey_credential_tombstones (
+  credential_id_sha256 TEXT PRIMARY KEY CHECK(length(credential_id_sha256)=64 AND credential_id_sha256 NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  terminal_status TEXT NOT NULL CHECK(terminal_status='revoked'),
+  revocation_reason TEXT NOT NULL CHECK(revocation_reason IN ('manual','lost','recovery','device_revoked','security_epoch_changed')),
+  revoked_at TEXT NOT NULL CHECK(length(revoked_at)=24 AND julianday(revoked_at) IS NOT NULL),
+  retain_until TEXT NOT NULL CHECK(length(retain_until)=24 AND julianday(retain_until)>julianday(revoked_at)),
+  final_revision INTEGER NOT NULL CHECK(final_revision>=2),
+  final_state_fingerprint TEXT NOT NULL CHECK(length(final_state_fingerprint)=64 AND final_state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  final_mutation_id TEXT NOT NULL REFERENCES identity_access_mutations(id) ON DELETE RESTRICT,
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  recorded_at TEXT NOT NULL CHECK(length(recorded_at)=24 AND julianday(recorded_at) IS NOT NULL)
+) STRICT;
+
+CREATE TABLE identity_federated_provider_configurations (
+  provider TEXT PRIMARY KEY CHECK(provider IN ('apple','google','microsoft')), configured INTEGER NOT NULL CHECK(configured IN (0,1)),
+  configuration_id TEXT NOT NULL CHECK(length(trim(configuration_id)) BETWEEN 1 AND 128),
+  authorization_endpoint_sha256 TEXT NOT NULL CHECK(length(authorization_endpoint_sha256)=64 AND authorization_endpoint_sha256 NOT GLOB '*[^0-9a-f]*'),
+  client_configuration_sha256 TEXT NOT NULL CHECK(length(client_configuration_sha256)=64 AND client_configuration_sha256 NOT GLOB '*[^0-9a-f]*')
+) STRICT;
+
+CREATE TABLE identity_access_source_clocks (
+  account_id TEXT PRIMARY KEY REFERENCES accounts(id) ON DELETE RESTRICT,
+  source_version INTEGER NOT NULL CHECK(source_version BETWEEN 1 AND 9007199254740991),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL)
+) STRICT;
+
+CREATE TABLE identity_federated_links (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 128), family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT, owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  revision INTEGER NOT NULL CHECK(revision>=1), provider TEXT NOT NULL REFERENCES identity_federated_provider_configurations(provider) ON DELETE RESTRICT,
+  configuration_id TEXT NOT NULL CHECK(length(trim(configuration_id)) BETWEEN 1 AND 128),
+  authorization_endpoint_sha256 TEXT NOT NULL CHECK(length(authorization_endpoint_sha256)=64 AND authorization_endpoint_sha256 NOT GLOB '*[^0-9a-f]*'),
+  client_configuration_sha256 TEXT NOT NULL CHECK(length(client_configuration_sha256)=64 AND client_configuration_sha256 NOT GLOB '*[^0-9a-f]*'),
+  provider_subject_sha256 TEXT NOT NULL CHECK(length(provider_subject_sha256)=64 AND provider_subject_sha256 NOT GLOB '*[^0-9a-f]*'),
+  granted_scopes_json TEXT NOT NULL CHECK(json_valid(granted_scopes_json) AND json_type(granted_scopes_json)='array' AND length(granted_scopes_json)<=1024),
+  status TEXT NOT NULL CHECK(status IN ('linked','revoked')), encrypted_vault_entry_id TEXT NOT NULL CHECK(length(trim(encrypted_vault_entry_id)) BETWEEN 1 AND 256),
+  live_account_tested INTEGER NOT NULL CHECK(live_account_tested=1), authorization_code_pkce_verified INTEGER NOT NULL CHECK(authorization_code_pkce_verified=1),
+  state_verified INTEGER NOT NULL CHECK(state_verified=1), nonce_verified INTEGER NOT NULL CHECK(nonce_verified=1),
+  token_bytes_exposed INTEGER NOT NULL CHECK(token_bytes_exposed=0), token_stored_in_encrypted_vault INTEGER NOT NULL CHECK(token_stored_in_encrypted_vault=1),
+  provider_availability_guaranteed INTEGER NOT NULL CHECK(provider_availability_guaranteed=0), provider_delivery_guaranteed INTEGER NOT NULL CHECK(provider_delivery_guaranteed=0),
+  linked_at TEXT NOT NULL, last_locally_verified_at TEXT NOT NULL, revoked_at TEXT,
+  last_mutation_id TEXT NOT NULL REFERENCES identity_access_mutations(id) ON DELETE RESTRICT,
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  UNIQUE(account_id,provider), UNIQUE(provider,provider_subject_sha256), CHECK((status='linked' AND revoked_at IS NULL) OR (status='revoked' AND revoked_at IS NOT NULL))
+) STRICT;
+
+CREATE TABLE identity_temporary_credentials (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 128), family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT, owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  revision INTEGER NOT NULL CHECK(revision>=1), kind TEXT NOT NULL CHECK(kind IN ('school_pickup','temporary_caregiver','pet_caregiver','emergency_contact_health','event_invitation','temporary_home_access')),
+  purpose TEXT NOT NULL CHECK(purpose IN ('school_pickup_authorization','temporary_care_authorization','pet_care_authorization','emergency_contact_health_access','event_invitation_access','temporary_home_access')),
+  audience_ref_sha256 TEXT NOT NULL CHECK(length(audience_ref_sha256)=64 AND audience_ref_sha256 NOT GLOB '*[^0-9a-f]*'),
+  disclosed_claim_keys_json TEXT NOT NULL CHECK(json_valid(disclosed_claim_keys_json) AND json_type(disclosed_claim_keys_json)='array' AND json_array_length(disclosed_claim_keys_json) BETWEEN 1 AND 8 AND length(disclosed_claim_keys_json)<=512),
+  disclosure_sha256 TEXT NOT NULL CHECK(length(disclosure_sha256)=64 AND disclosure_sha256 NOT GLOB '*[^0-9a-f]*'), payload_sha256 TEXT NOT NULL UNIQUE CHECK(length(payload_sha256)=64 AND payload_sha256 NOT GLOB '*[^0-9a-f]*'),
+  signature_sha256 TEXT NOT NULL CHECK(length(signature_sha256)=64 AND signature_sha256 NOT GLOB '*[^0-9a-f]*'), issuer_key_id TEXT NOT NULL CHECK(length(trim(issuer_key_id)) BETWEEN 1 AND 128),
+  issuer_public_key_sha256 TEXT NOT NULL CHECK(length(issuer_public_key_sha256)=64 AND issuer_public_key_sha256 NOT GLOB '*[^0-9a-f]*'), signature_algorithm TEXT NOT NULL CHECK(signature_algorithm='Ed25519'),
+  qr_payload_bytes INTEGER NOT NULL CHECK(qr_payload_bytes BETWEEN 1 AND 4096), status TEXT NOT NULL CHECK(status IN ('active','revoked')),
+  not_before TEXT NOT NULL, expires_at TEXT NOT NULL, issued_at TEXT NOT NULL, revoked_at TEXT, revocation_reason TEXT CHECK(length(trim(revocation_reason)) BETWEEN 1 AND 256),
+  encrypted_envelope_reference TEXT NOT NULL CHECK(length(trim(encrypted_envelope_reference)) BETWEEN 1 AND 256),
+  last_mutation_id TEXT NOT NULL REFERENCES identity_access_mutations(id) ON DELETE RESTRICT,
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  CHECK(julianday(expires_at)>julianday(not_before) AND (julianday(expires_at)-julianday(not_before))*86400.0<=2678400.001),
+  CHECK((status='active' AND revoked_at IS NULL AND revocation_reason IS NULL) OR (status='revoked' AND revoked_at IS NOT NULL AND revocation_reason IS NOT NULL))
+) STRICT;
+CREATE INDEX idx_identity_temp_owner ON identity_temporary_credentials(account_id,status,expires_at DESC);
+
+CREATE TABLE identity_temporary_credential_tombstones (
+  credential_id TEXT PRIMARY KEY CHECK(length(trim(credential_id)) BETWEEN 1 AND 128),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  payload_sha256 TEXT NOT NULL UNIQUE CHECK(length(payload_sha256)=64 AND payload_sha256 NOT GLOB '*[^0-9a-f]*'),
+  terminal_status TEXT NOT NULL CHECK(terminal_status IN ('expired','revoked')),
+  expires_at TEXT NOT NULL CHECK(length(expires_at)=24 AND julianday(expires_at) IS NOT NULL),
+  revoked_at TEXT CHECK(revoked_at IS NULL OR (length(revoked_at)=24 AND julianday(revoked_at) IS NOT NULL)),
+  retain_until TEXT NOT NULL CHECK(length(retain_until)=24 AND julianday(retain_until)>julianday(expires_at)),
+  final_revision INTEGER NOT NULL CHECK(final_revision>=1),
+  final_state_fingerprint TEXT NOT NULL CHECK(length(final_state_fingerprint)=64 AND final_state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  final_mutation_id TEXT NOT NULL REFERENCES identity_access_mutations(id) ON DELETE RESTRICT,
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  pruned_at TEXT NOT NULL CHECK(length(pruned_at)=24 AND julianday(pruned_at) IS NOT NULL)
+) STRICT;
+
+CREATE TABLE identity_companion_snapshots (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 128), family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT, owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  trusted_device_id TEXT NOT NULL REFERENCES trusted_devices(id) ON DELETE RESTRICT, protocol_version INTEGER NOT NULL CHECK(protocol_version=1),
+  source_version INTEGER NOT NULL CHECK(source_version>=0), schema_version INTEGER NOT NULL CHECK(schema_version>=1),
+  ciphertext_sha256 TEXT NOT NULL CHECK(length(ciphertext_sha256)=64 AND ciphertext_sha256 NOT GLOB '*[^0-9a-f]*'), envelope_sha256 TEXT NOT NULL CHECK(length(envelope_sha256)=64 AND envelope_sha256 NOT GLOB '*[^0-9a-f]*'),
+  envelope_bytes INTEGER NOT NULL CHECK(envelope_bytes BETWEEN 1 AND 8388608), security_epoch INTEGER NOT NULL CHECK(security_epoch>=0), generated_at TEXT NOT NULL, expires_at TEXT NOT NULL,
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  UNIQUE(account_id,trusted_device_id,source_version,schema_version,security_epoch),
+  CHECK(julianday(expires_at)>julianday(generated_at) AND (julianday(expires_at)-julianday(generated_at))*86400.0<=86400.001)
+) STRICT;
+
+CREATE TRIGGER trg_33p_mutation_receipt BEFORE INSERT ON identity_access_mutations
+WHEN NOT EXISTS(SELECT 1 FROM accounts a JOIN people p ON p.id=a.person_id
+ JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+ JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+ JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash AND projection.record_json=receipt.record_json
+ WHERE a.id=NEW.account_id AND a.person_id=NEW.owner_person_id AND a.status='active' AND p.id=NEW.owner_person_id AND p.family_id=NEW.family_id AND p.status='active'
+ AND receipt.resource_type=NEW.resource_type AND receipt.resource_id=NEW.resource_id AND receipt.capability='family.write'
+ AND receipt.issued_at=NEW.occurred_at AND receipt.recorded_at=NEW.occurred_at
+ AND receipt.action=CASE WHEN NEW.mutation_kind IN ('passkey_register','federated_link','temporary_credential_issue') THEN 'create'
+                         WHEN NEW.mutation_kind IN ('passkey_revoke','passkey_recover_lost','federated_unlink','temporary_credential_revoke') THEN 'delete' ELSE 'update' END
+ AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.account_id
+ AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.owner_person_id
+ AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+ AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+ AND json_extract(receipt.record_json,'$.request.purpose')='administration'
+ AND json_extract(receipt.record_json,'$.request.resource.sensitivity')='highly_sensitive')
+BEGIN SELECT RAISE(ABORT,'33-P mutation requires exact durable identity receipt'); END;
+
+CREATE TRIGGER trg_33p_challenge_insert BEFORE INSERT ON identity_passkey_challenges
+WHEN NOT EXISTS(SELECT 1 FROM accounts a JOIN people p ON p.id=a.person_id JOIN trusted_devices d ON d.id=NEW.trusted_device_id
+ JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+ JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+ JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash AND projection.record_json=receipt.record_json
+ WHERE a.id=NEW.account_id AND a.person_id=NEW.owner_person_id AND a.security_epoch=NEW.security_epoch AND a.status='active'
+ AND p.id=NEW.owner_person_id AND p.family_id=NEW.family_id AND p.status='active' AND d.account_id=NEW.account_id AND d.device_id=NEW.device_id AND d.security_epoch=NEW.security_epoch AND d.revoked_at IS NULL
+ AND receipt.resource_type='identity_challenge' AND receipt.resource_id=NEW.id AND receipt.action='create' AND receipt.capability='family.write'
+ AND receipt.issued_at=NEW.created_at AND receipt.recorded_at=NEW.created_at
+ AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.account_id AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.owner_person_id
+ AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+ AND json_extract(receipt.record_json,'$.request.purpose')='administration' AND json_extract(receipt.record_json,'$.request.resource.sensitivity')='highly_sensitive')
+BEGIN SELECT RAISE(ABORT,'33-P challenge requires active device epoch and exact receipt'); END;
+
+CREATE TRIGGER trg_33p_challenge_consume BEFORE UPDATE ON identity_passkey_challenges
+WHEN OLD.consumed_at IS NOT NULL OR NEW.consumed_at IS NULL OR NEW.consumption_mutation_id IS NULL OR julianday(NEW.consumed_at)>=julianday(OLD.expires_at)
+ OR NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.account_id<>OLD.account_id OR NEW.owner_person_id<>OLD.owner_person_id
+ OR NEW.purpose<>OLD.purpose OR NEW.challenge_sha256<>OLD.challenge_sha256 OR NEW.relying_party_id<>OLD.relying_party_id OR NEW.trusted_device_id<>OLD.trusted_device_id
+ OR NEW.device_id<>OLD.device_id OR NEW.security_epoch<>OLD.security_epoch OR NEW.created_at<>OLD.created_at OR NEW.expires_at<>OLD.expires_at OR NEW.policy_receipt_hash<>OLD.policy_receipt_hash
+ OR NOT EXISTS(SELECT 1 FROM identity_access_mutations m WHERE m.id=NEW.consumption_mutation_id AND m.family_id=NEW.family_id AND m.account_id=NEW.account_id AND m.owner_person_id=NEW.owner_person_id
+   AND m.mutation_kind=CASE NEW.purpose WHEN 'passkey_registration' THEN 'passkey_register' ELSE 'passkey_authenticate' END)
+BEGIN SELECT RAISE(ABORT,'33-P challenge replay, expiry or mutation mismatch'); END;
+
+CREATE TRIGGER trg_33p_passkey_current_insert BEFORE INSERT ON identity_passkey_credentials
+WHEN NEW.status<>'active' OR NEW.revoked_at IS NOT NULL OR (SELECT COUNT(*) FROM identity_passkey_credentials WHERE account_id=NEW.account_id AND status='active')>=16
+ OR (SELECT COUNT(*) FROM (SELECT credential_id_sha256 FROM identity_passkey_credentials WHERE account_id=NEW.account_id UNION SELECT credential_id_sha256 FROM identity_passkey_credential_tombstones WHERE account_id=NEW.account_id))>=256
+ OR EXISTS(SELECT 1 FROM identity_passkey_credential_tombstones tombstone WHERE tombstone.credential_id_sha256=NEW.credential_id_sha256 AND julianday(tombstone.retain_until)>julianday(NEW.created_at)) OR NOT EXISTS(
+ SELECT 1 FROM identity_access_mutations m JOIN trusted_devices d ON d.id=NEW.trusted_device_id
+ WHERE m.id=NEW.last_mutation_id AND m.family_id=NEW.family_id AND m.account_id=NEW.account_id AND m.owner_person_id=NEW.owner_person_id
+ AND m.mutation_kind='passkey_register' AND m.resource_type='passkey_credential' AND m.resource_id=NEW.id AND m.previous_revision=0 AND m.revision=NEW.revision AND m.state_fingerprint=NEW.state_fingerprint AND m.occurred_at=NEW.created_at
+ AND m.policy_receipt_hash=NEW.policy_receipt_hash AND d.account_id=NEW.account_id AND d.security_epoch=NEW.security_epoch AND d.revoked_at IS NULL)
+BEGIN SELECT RAISE(ABORT,'33-P passkey insert requires exact mutation/device or quota'); END;
+CREATE TRIGGER trg_33p_passkey_current_update BEFORE UPDATE ON identity_passkey_credentials
+WHEN NEW.revision<>OLD.revision+1 OR NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.account_id<>OLD.account_id OR NEW.owner_person_id<>OLD.owner_person_id
+ OR NEW.credential_id<>OLD.credential_id OR NEW.credential_id_sha256<>OLD.credential_id_sha256 OR NEW.public_key_cose_base64url<>OLD.public_key_cose_base64url OR NEW.public_key_sha256<>OLD.public_key_sha256 OR NEW.user_handle_sha256<>OLD.user_handle_sha256
+ OR NEW.display_name<>OLD.display_name OR NEW.relying_party_id<>OLD.relying_party_id OR NEW.aaguid IS NOT OLD.aaguid OR NEW.transports_json<>OLD.transports_json
+ OR NEW.trusted_device_id<>OLD.trusted_device_id OR NEW.security_epoch<>OLD.security_epoch OR NEW.created_at<>OLD.created_at
+ OR OLD.status='revoked' OR (NEW.status='active' AND NOT ((OLD.sign_count=0 AND NEW.sign_count=0) OR NEW.sign_count>OLD.sign_count)) OR (NEW.status='revoked' AND NEW.sign_count<>OLD.sign_count)
+ OR (NEW.status='revoked' AND (NEW.backup_eligible<>OLD.backup_eligible OR NEW.backup_state<>OLD.backup_state OR NEW.last_used_at IS NOT OLD.last_used_at))
+ OR NOT EXISTS(SELECT 1 FROM identity_access_mutations m WHERE m.id=NEW.last_mutation_id AND m.family_id=NEW.family_id AND m.account_id=NEW.account_id AND m.owner_person_id=NEW.owner_person_id
+  AND m.resource_type='passkey_credential' AND m.resource_id=NEW.id AND m.previous_revision=OLD.revision AND m.revision=NEW.revision AND m.state_fingerprint=NEW.state_fingerprint AND m.policy_receipt_hash=NEW.policy_receipt_hash
+  AND ((m.mutation_kind='passkey_authenticate' AND NEW.status='active') OR (m.mutation_kind IN ('passkey_revoke','passkey_recover_lost') AND NEW.status='revoked')))
+BEGIN SELECT RAISE(ABORT,'33-P passkey optimistic revision, clone counter or transition mismatch'); END;
+CREATE TRIGGER trg_33p_passkey_tombstone_insert BEFORE INSERT ON identity_passkey_credential_tombstones
+WHEN (SELECT COUNT(*) FROM identity_passkey_credential_tombstones WHERE account_id=NEW.account_id)>=256
+ OR abs((julianday(NEW.retain_until)-julianday(NEW.revoked_at))*86400.0-31536000.0)>0.001 OR julianday(NEW.recorded_at)<julianday(NEW.revoked_at) OR NOT EXISTS(
+ SELECT 1 FROM identity_passkey_credentials current WHERE current.credential_id_sha256=NEW.credential_id_sha256
+ AND current.family_id=NEW.family_id AND current.account_id=NEW.account_id AND current.owner_person_id=NEW.owner_person_id
+ AND current.status='revoked' AND current.revocation_reason=NEW.revocation_reason AND current.revoked_at=NEW.revoked_at
+ AND current.revision=NEW.final_revision AND current.state_fingerprint=NEW.final_state_fingerprint
+ AND current.last_mutation_id=NEW.final_mutation_id AND current.policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'33-P passkey tombstone requires exact revoked credential and bounded retention'); END;
+
+CREATE TRIGGER trg_33p_federated_insert BEFORE INSERT ON identity_federated_links
+WHEN NEW.status<>'linked' OR NEW.revoked_at IS NOT NULL OR (SELECT COUNT(*) FROM identity_federated_links WHERE account_id=NEW.account_id AND status='linked')>=3 OR NOT EXISTS(SELECT 1 FROM identity_access_mutations m
+ JOIN identity_federated_provider_configurations config ON config.provider=NEW.provider AND config.configured=1 AND config.configuration_id=NEW.configuration_id AND config.authorization_endpoint_sha256=NEW.authorization_endpoint_sha256 AND config.client_configuration_sha256=NEW.client_configuration_sha256
+ WHERE m.id=NEW.last_mutation_id AND m.family_id=NEW.family_id AND m.account_id=NEW.account_id AND m.owner_person_id=NEW.owner_person_id AND m.mutation_kind='federated_link'
+ AND m.resource_type='federated_identity_link' AND m.resource_id=NEW.id AND m.previous_revision=0 AND m.revision=NEW.revision AND m.state_fingerprint=NEW.state_fingerprint AND m.policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'33-P federated link requires exact mutation or quota'); END;
+CREATE TRIGGER trg_33p_federated_update BEFORE UPDATE ON identity_federated_links
+WHEN NEW.revision<>OLD.revision+1 OR NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.account_id<>OLD.account_id OR NEW.owner_person_id<>OLD.owner_person_id OR NEW.provider<>OLD.provider
+ OR NOT EXISTS(SELECT 1 FROM identity_access_mutations m
+   JOIN identity_federated_provider_configurations config ON config.provider=NEW.provider AND config.configured=1
+     AND config.configuration_id=NEW.configuration_id AND config.authorization_endpoint_sha256=NEW.authorization_endpoint_sha256 AND config.client_configuration_sha256=NEW.client_configuration_sha256
+   WHERE m.id=NEW.last_mutation_id AND m.family_id=NEW.family_id AND m.account_id=NEW.account_id AND m.owner_person_id=NEW.owner_person_id
+   AND m.resource_type='federated_identity_link' AND m.resource_id=NEW.id AND m.previous_revision=OLD.revision AND m.revision=NEW.revision AND m.state_fingerprint=NEW.state_fingerprint AND m.policy_receipt_hash=NEW.policy_receipt_hash
+   AND ((OLD.status='linked' AND NEW.status='revoked' AND m.mutation_kind='federated_unlink'
+         AND NEW.configuration_id=OLD.configuration_id AND NEW.authorization_endpoint_sha256=OLD.authorization_endpoint_sha256 AND NEW.client_configuration_sha256=OLD.client_configuration_sha256
+         AND NEW.provider_subject_sha256=OLD.provider_subject_sha256 AND NEW.encrypted_vault_entry_id=OLD.encrypted_vault_entry_id AND NEW.granted_scopes_json=OLD.granted_scopes_json AND NEW.linked_at=OLD.linked_at)
+     OR (OLD.status='revoked' AND NEW.status='linked' AND NEW.revoked_at IS NULL AND m.mutation_kind='federated_link')))
+BEGIN SELECT RAISE(ABORT,'33-P federation unlink/relink transition or configuration mismatch'); END;
+
+CREATE TRIGGER trg_33p_temp_insert BEFORE INSERT ON identity_temporary_credentials
+WHEN NEW.status<>'active' OR NEW.revoked_at IS NOT NULL OR NEW.revocation_reason IS NOT NULL
+ OR NEW.purpose<>CASE NEW.kind WHEN 'school_pickup' THEN 'school_pickup_authorization' WHEN 'temporary_caregiver' THEN 'temporary_care_authorization'
+   WHEN 'pet_caregiver' THEN 'pet_care_authorization' WHEN 'emergency_contact_health' THEN 'emergency_contact_health_access'
+   WHEN 'event_invitation' THEN 'event_invitation_access' WHEN 'temporary_home_access' THEN 'temporary_home_access' END
+ OR (SELECT COUNT(*) FROM json_each(NEW.disclosed_claim_keys_json))<>(SELECT COUNT(DISTINCT value) FROM json_each(NEW.disclosed_claim_keys_json))
+ OR EXISTS(SELECT 1 FROM json_each(NEW.disclosed_claim_keys_json) claim WHERE claim.type<>'text' OR claim.value NOT IN (
+   'subject_display_name','authorized_person_display_name','caregiver_display_name','pet_display_name','school_name','emergency_contact_name','emergency_contact_phone','allergy_summary','critical_medication_summary','event_title','valid_location_label','contact_phone'))
+ OR EXISTS(SELECT 1 FROM json_each(NEW.disclosed_claim_keys_json) claim WHERE
+   (NEW.kind='school_pickup' AND claim.value NOT IN ('subject_display_name','authorized_person_display_name','school_name','contact_phone')) OR
+   (NEW.kind='temporary_caregiver' AND claim.value NOT IN ('subject_display_name','caregiver_display_name','contact_phone')) OR
+   (NEW.kind='pet_caregiver' AND claim.value NOT IN ('pet_display_name','caregiver_display_name','contact_phone')) OR
+   (NEW.kind='emergency_contact_health' AND claim.value NOT IN ('subject_display_name','emergency_contact_name','emergency_contact_phone','allergy_summary','critical_medication_summary')) OR
+   (NEW.kind='event_invitation' AND claim.value NOT IN ('subject_display_name','event_title','valid_location_label','contact_phone')) OR
+   (NEW.kind='temporary_home_access' AND claim.value NOT IN ('subject_display_name','valid_location_label','contact_phone')))
+ OR (NEW.kind='school_pickup' AND (NOT EXISTS(SELECT 1 FROM json_each(NEW.disclosed_claim_keys_json) WHERE value='subject_display_name') OR NOT EXISTS(SELECT 1 FROM json_each(NEW.disclosed_claim_keys_json) WHERE value='authorized_person_display_name')))
+ OR (NEW.kind='temporary_caregiver' AND (NOT EXISTS(SELECT 1 FROM json_each(NEW.disclosed_claim_keys_json) WHERE value='subject_display_name') OR NOT EXISTS(SELECT 1 FROM json_each(NEW.disclosed_claim_keys_json) WHERE value='caregiver_display_name')))
+ OR (NEW.kind='pet_caregiver' AND (NOT EXISTS(SELECT 1 FROM json_each(NEW.disclosed_claim_keys_json) WHERE value='pet_display_name') OR NOT EXISTS(SELECT 1 FROM json_each(NEW.disclosed_claim_keys_json) WHERE value='caregiver_display_name')))
+ OR (NEW.kind='emergency_contact_health' AND (NOT EXISTS(SELECT 1 FROM json_each(NEW.disclosed_claim_keys_json) WHERE value='subject_display_name') OR NOT EXISTS(SELECT 1 FROM json_each(NEW.disclosed_claim_keys_json) WHERE value='emergency_contact_name') OR NOT EXISTS(SELECT 1 FROM json_each(NEW.disclosed_claim_keys_json) WHERE value='emergency_contact_phone')))
+ OR (NEW.kind='event_invitation' AND (NOT EXISTS(SELECT 1 FROM json_each(NEW.disclosed_claim_keys_json) WHERE value='subject_display_name') OR NOT EXISTS(SELECT 1 FROM json_each(NEW.disclosed_claim_keys_json) WHERE value='event_title')))
+ OR (NEW.kind='temporary_home_access' AND (NOT EXISTS(SELECT 1 FROM json_each(NEW.disclosed_claim_keys_json) WHERE value='subject_display_name') OR NOT EXISTS(SELECT 1 FROM json_each(NEW.disclosed_claim_keys_json) WHERE value='valid_location_label')))
+ OR (SELECT COUNT(*) FROM identity_temporary_credentials WHERE account_id=NEW.account_id AND status='active' AND julianday(expires_at)>julianday(NEW.issued_at))>=256
+ OR (SELECT COUNT(*) FROM (SELECT id FROM identity_temporary_credentials WHERE account_id=NEW.account_id UNION SELECT credential_id AS id FROM identity_temporary_credential_tombstones WHERE account_id=NEW.account_id))>=2048
+ OR NOT EXISTS(SELECT 1 FROM identity_access_mutations m
+ WHERE m.id=NEW.last_mutation_id AND m.family_id=NEW.family_id AND m.account_id=NEW.account_id AND m.owner_person_id=NEW.owner_person_id AND m.mutation_kind='temporary_credential_issue'
+ AND m.resource_type='temporary_verifiable_credential' AND m.resource_id=NEW.id AND m.previous_revision=0 AND m.revision=NEW.revision AND m.state_fingerprint=NEW.state_fingerprint AND m.policy_receipt_hash=NEW.policy_receipt_hash AND m.occurred_at=NEW.issued_at)
+BEGIN SELECT RAISE(ABORT,'33-P temporary credential requires exact mutation or quota'); END;
+CREATE TRIGGER trg_33p_temp_update BEFORE UPDATE ON identity_temporary_credentials
+WHEN NEW.revision<>OLD.revision+1 OR OLD.status<>'active' OR NEW.status<>'revoked' OR NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.account_id<>OLD.account_id OR NEW.owner_person_id<>OLD.owner_person_id
+ OR NEW.kind<>OLD.kind OR NEW.purpose<>OLD.purpose OR NEW.audience_ref_sha256<>OLD.audience_ref_sha256 OR NEW.disclosed_claim_keys_json<>OLD.disclosed_claim_keys_json OR NEW.disclosure_sha256<>OLD.disclosure_sha256 OR NEW.payload_sha256<>OLD.payload_sha256 OR NEW.signature_sha256<>OLD.signature_sha256 OR NEW.encrypted_envelope_reference<>OLD.encrypted_envelope_reference
+ OR NEW.issuer_key_id<>OLD.issuer_key_id OR NEW.issuer_public_key_sha256<>OLD.issuer_public_key_sha256 OR NEW.signature_algorithm<>OLD.signature_algorithm OR NEW.qr_payload_bytes<>OLD.qr_payload_bytes
+ OR NEW.not_before<>OLD.not_before OR NEW.expires_at<>OLD.expires_at OR NEW.issued_at<>OLD.issued_at
+ OR NOT EXISTS(SELECT 1 FROM identity_access_mutations m WHERE m.id=NEW.last_mutation_id AND m.family_id=NEW.family_id AND m.account_id=NEW.account_id AND m.owner_person_id=NEW.owner_person_id AND m.mutation_kind='temporary_credential_revoke' AND m.resource_type='temporary_verifiable_credential' AND m.resource_id=NEW.id AND m.previous_revision=OLD.revision AND m.revision=NEW.revision AND m.state_fingerprint=NEW.state_fingerprint AND m.policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'33-P temporary credential revocation mismatch'); END;
+CREATE TRIGGER trg_33p_temp_tombstone_insert BEFORE INSERT ON identity_temporary_credential_tombstones
+WHEN (SELECT COUNT(*) FROM identity_temporary_credential_tombstones WHERE account_id=NEW.account_id)>=2048
+ OR julianday(NEW.pruned_at)<julianday(NEW.expires_at)+7 OR abs((julianday(NEW.retain_until)-julianday(NEW.expires_at))*86400.0-31536000.0)>0.001 OR NOT EXISTS(
+ SELECT 1 FROM identity_temporary_credentials current WHERE current.id=NEW.credential_id
+ AND current.family_id=NEW.family_id AND current.account_id=NEW.account_id AND current.owner_person_id=NEW.owner_person_id
+ AND current.payload_sha256=NEW.payload_sha256 AND current.expires_at=NEW.expires_at AND current.revision=NEW.final_revision
+ AND current.state_fingerprint=NEW.final_state_fingerprint AND current.last_mutation_id=NEW.final_mutation_id
+ AND current.policy_receipt_hash=NEW.policy_receipt_hash
+ AND NEW.terminal_status=CASE current.status WHEN 'revoked' THEN 'revoked' ELSE 'expired' END
+ AND NEW.revoked_at IS current.revoked_at)
+BEGIN SELECT RAISE(ABORT,'33-P temporary tombstone requires expiry grace and exact content-free terminal metadata'); END;
+
+CREATE TRIGGER trg_33p_companion_insert BEFORE INSERT ON identity_companion_snapshots
+WHEN (SELECT COUNT(*) FROM identity_companion_snapshots WHERE account_id=NEW.account_id AND julianday(expires_at)>julianday(NEW.generated_at))>=256 OR NOT EXISTS(SELECT 1 FROM accounts a JOIN people p ON p.id=a.person_id JOIN trusted_devices d ON d.id=NEW.trusted_device_id
+ JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+ JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+ JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash AND projection.record_json=receipt.record_json
+ WHERE a.id=NEW.account_id AND a.person_id=NEW.owner_person_id AND a.security_epoch=NEW.security_epoch AND a.status='active' AND p.family_id=NEW.family_id AND p.status='active'
+ AND d.account_id=NEW.account_id AND d.security_epoch=NEW.security_epoch AND d.revoked_at IS NULL AND receipt.resource_type='companion_sync_snapshot' AND receipt.resource_id=NEW.id
+ AND receipt.action='create' AND receipt.capability='family.write' AND receipt.issued_at=NEW.generated_at AND receipt.recorded_at=NEW.generated_at AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.account_id
+ AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.owner_person_id AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+ AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id AND json_extract(receipt.record_json,'$.request.purpose')='administration'
+ AND json_extract(receipt.record_json,'$.request.resource.sensitivity')='highly_sensitive')
+BEGIN SELECT RAISE(ABORT,'33-P companion snapshot requires exact current device receipt'); END;
+
+CREATE TRIGGER trg_33p_mutation_update BEFORE UPDATE ON identity_access_mutations BEGIN SELECT RAISE(ABORT,'33-P mutation ledger is immutable'); END;
+CREATE TRIGGER trg_33p_mutation_delete BEFORE DELETE ON identity_access_mutations
+WHEN julianday(OLD.occurred_at)>julianday('now','-7 days')
+ OR EXISTS(SELECT 1 FROM identity_passkey_challenges challenge WHERE challenge.consumption_mutation_id=OLD.id)
+ OR EXISTS(SELECT 1 FROM identity_passkey_credentials current WHERE current.last_mutation_id=OLD.id)
+ OR EXISTS(SELECT 1 FROM identity_federated_links current WHERE current.last_mutation_id=OLD.id)
+ OR EXISTS(SELECT 1 FROM identity_temporary_credentials current WHERE current.last_mutation_id=OLD.id)
+ OR EXISTS(SELECT 1 FROM identity_passkey_credential_tombstones tombstone WHERE tombstone.final_mutation_id=OLD.id)
+ OR EXISTS(SELECT 1 FROM identity_temporary_credential_tombstones tombstone WHERE tombstone.final_mutation_id=OLD.id)
+BEGIN SELECT RAISE(ABORT,'33-P mutation prune requires seven-day grace and zero current/challenge/tombstone references'); END;
+CREATE TRIGGER trg_33p_challenge_delete BEFORE DELETE ON identity_passkey_challenges
+WHEN OLD.consumed_at IS NULL AND julianday(OLD.expires_at)>julianday('now')
+BEGIN SELECT RAISE(ABORT,'33-P active challenge cannot be deleted'); END;
+CREATE TRIGGER trg_33p_passkey_delete BEFORE DELETE ON identity_passkey_credentials
+WHEN OLD.status<>'revoked' OR julianday(OLD.revoked_at)>julianday('now','-2 days') OR NOT EXISTS(
+ SELECT 1 FROM identity_passkey_credential_tombstones tombstone WHERE tombstone.credential_id_sha256=OLD.credential_id_sha256
+ AND tombstone.family_id=OLD.family_id AND tombstone.account_id=OLD.account_id AND tombstone.owner_person_id=OLD.owner_person_id
+ AND tombstone.revoked_at=OLD.revoked_at AND tombstone.final_revision=OLD.revision AND tombstone.final_state_fingerprint=OLD.state_fingerprint
+ AND tombstone.final_mutation_id=OLD.last_mutation_id AND tombstone.policy_receipt_hash=OLD.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'33-P passkey delete requires retained exact digest tombstone and replay grace'); END;
+CREATE TRIGGER trg_33p_federated_delete BEFORE DELETE ON identity_federated_links BEGIN SELECT RAISE(ABORT,'33-P federated links cannot be deleted'); END;
+CREATE TRIGGER trg_33p_temp_delete BEFORE DELETE ON identity_temporary_credentials
+WHEN julianday(OLD.expires_at)>julianday('now','-7 days') OR NOT EXISTS(
+ SELECT 1 FROM identity_temporary_credential_tombstones tombstone WHERE tombstone.credential_id=OLD.id
+ AND tombstone.family_id=OLD.family_id AND tombstone.account_id=OLD.account_id AND tombstone.owner_person_id=OLD.owner_person_id
+ AND tombstone.payload_sha256=OLD.payload_sha256 AND tombstone.expires_at=OLD.expires_at AND tombstone.final_revision=OLD.revision
+ AND tombstone.final_state_fingerprint=OLD.state_fingerprint AND tombstone.final_mutation_id=OLD.last_mutation_id
+ AND tombstone.policy_receipt_hash=OLD.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'33-P temporary credential delete requires expiry grace and exact content-free tombstone'); END;
+CREATE TRIGGER trg_33p_passkey_tombstone_update BEFORE UPDATE ON identity_passkey_credential_tombstones BEGIN SELECT RAISE(ABORT,'33-P passkey tombstones are immutable'); END;
+CREATE TRIGGER trg_33p_passkey_tombstone_delete BEFORE DELETE ON identity_passkey_credential_tombstones
+WHEN julianday(OLD.retain_until)>julianday('now') OR EXISTS(SELECT 1 FROM identity_passkey_credentials current WHERE current.credential_id_sha256=OLD.credential_id_sha256)
+BEGIN SELECT RAISE(ABORT,'33-P passkey digest tombstone retention is active'); END;
+CREATE TRIGGER trg_33p_temp_tombstone_update BEFORE UPDATE ON identity_temporary_credential_tombstones BEGIN SELECT RAISE(ABORT,'33-P temporary credential tombstones are immutable'); END;
+CREATE TRIGGER trg_33p_temp_tombstone_delete BEFORE DELETE ON identity_temporary_credential_tombstones
+WHEN julianday(OLD.retain_until)>julianday('now') OR EXISTS(SELECT 1 FROM identity_temporary_credentials current WHERE current.id=OLD.credential_id)
+BEGIN SELECT RAISE(ABORT,'33-P temporary credential tombstone retention is active'); END;
+CREATE TRIGGER trg_33p_companion_update BEFORE UPDATE ON identity_companion_snapshots BEGIN SELECT RAISE(ABORT,'33-P companion snapshots are immutable'); END;
+CREATE TRIGGER trg_33p_companion_delete BEFORE DELETE ON identity_companion_snapshots
+WHEN julianday(OLD.expires_at)>julianday('now')
+BEGIN SELECT RAISE(ABORT,'33-P active companion snapshots are immutable'); END;
+CREATE TRIGGER trg_33p_mutation_quota BEFORE INSERT ON identity_access_mutations WHEN (SELECT COUNT(*) FROM identity_access_mutations WHERE account_id=NEW.account_id)>=4096 BEGIN SELECT RAISE(ABORT,'33-P bounded mutation metadata quota exceeded'); END;
+CREATE TRIGGER trg_33p_challenge_quota BEFORE INSERT ON identity_passkey_challenges WHEN (SELECT COUNT(*) FROM identity_passkey_challenges WHERE account_id=NEW.account_id)>=512 OR (SELECT COUNT(*) FROM identity_passkey_challenges WHERE account_id=NEW.account_id AND consumed_at IS NULL AND julianday(expires_at)>julianday(NEW.created_at))>=32 BEGIN SELECT RAISE(ABORT,'33-P bounded challenge quota exceeded'); END;
+
+CREATE TRIGGER trg_33p_identity_source_clock AFTER INSERT ON identity_access_mutations
+BEGIN
+  INSERT INTO identity_access_source_clocks(account_id,source_version,updated_at) VALUES(NEW.account_id,1,NEW.occurred_at)
+  ON CONFLICT(account_id) DO UPDATE SET source_version=source_version+1,updated_at=excluded.updated_at;
+END;
+CREATE TRIGGER trg_33p_identity_provider_source_clock AFTER UPDATE OF configured,configuration_id,authorization_endpoint_sha256,client_configuration_sha256 ON identity_federated_provider_configurations
+WHEN NEW.configured<>OLD.configured OR NEW.configuration_id<>OLD.configuration_id OR NEW.authorization_endpoint_sha256<>OLD.authorization_endpoint_sha256 OR NEW.client_configuration_sha256<>OLD.client_configuration_sha256
+BEGIN
+  INSERT INTO identity_access_source_clocks(account_id,source_version,updated_at)
+    SELECT DISTINCT account_id,1,strftime('%Y-%m-%dT%H:%M:%fZ','now') FROM identity_federated_links WHERE provider=NEW.provider
+  ON CONFLICT(account_id) DO UPDATE SET source_version=source_version+1,updated_at=excluded.updated_at;
+END;
+
+UPDATE database_metadata SET value='REVISION-33-P-IDENTITY-ACCESS-CREDENTIALS',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -12122,7 +12495,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(89, 'b4_long_term_portfolio_ledger', longTermPortfolioLedgerSql),
   createMigrationDefinition(90, 'b7_accessibility_preferences', accessibilityPreferencesSql),
   createMigrationDefinition(91, 'b3_governed_form_drafts', governedFormDraftsSql),
-  createMigrationDefinition(92, 'privacy_ownership_data_rights_incident_control', privacyOwnershipDataRightsIncidentControlSql)
+  createMigrationDefinition(92, 'privacy_ownership_data_rights_incident_control', privacyOwnershipDataRightsIncidentControlSql),
+  createMigrationDefinition(93, 'identity_access_credentials', identityAccessCredentialLedgerSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

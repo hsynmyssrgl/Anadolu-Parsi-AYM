@@ -104,7 +104,7 @@
         "EXT-074"
       ],
       "leverage": "Shares device trust, challenge, strong authentication, encrypted token vault and minimum-disclosure QR credential boundaries.",
-      "status": "READY_NEXT"
+      "status": "IN_PROGRESS"
     },
     {
       "order": 5,
@@ -723,7 +723,7 @@
     "secondStep": "33-N",
     "finalStep": "34-L"
   },
-  "updatedAt": "2026-08-14T03:03:17.124Z",
+  "updatedAt": "2026-08-14T03:37:34.276Z",
   "completedRequirementCount": 25,
   "remainingRequirementCount": 249
 }

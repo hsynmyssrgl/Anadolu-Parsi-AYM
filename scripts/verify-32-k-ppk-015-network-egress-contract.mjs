@@ -1,132 +1,221 @@
+import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { scanNetworkEgressBoundary } from './verify-network-egress-boundary.mjs';
+import { inspectNetworkEgressStaticRatchet, scanNetworkEgressBoundary } from './verify-network-egress-boundary.mjs';
 
 const checks = [];
 const failures = [];
-const check = (name, condition) => {
+const check = (name, condition, detail = undefined) => {
   const status = condition ? 'PASS' : 'FAIL';
-  checks.push({ name, status });
+  checks.push({ name, status, ...(detail === undefined ? {} : { detail }) });
   if (!condition) failures.push(name);
 };
+const sha256 = (value) => createHash('sha256').update(value).digest('hex');
+const includesAll = (source, markers) => markers.every((marker) => source.includes(marker));
 
-const sources = Object.fromEntries(await Promise.all(Object.entries({
+const paths = Object.freeze({
   policy: 'packages/platform-policy/src/network-egress-policy.ts',
   policyIndex: 'packages/platform-policy/src/index.ts',
   domain: 'packages/domain/src/app-data.ts',
-  useCase: 'apps/desktop/src/main/governed-network-egress-use-case.ts',
-  fetcher: 'apps/desktop/src/main/secure-revocation-list-fetcher.ts',
-  sync: 'apps/desktop/src/main/secure-revocation-sync-service.ts',
-  endpointUseCase: 'packages/application/src/external-backup-revocation-endpoint-use-cases.ts',
-  repositoryContract: 'packages/repository-contracts/src/external-backup-inventory-repository.ts',
-  repository: 'packages/repositories/src/external-backup-inventory-repository.ts',
-  migration: 'packages/database/src/family-database-migrations.ts',
+  revocationUseCase: 'apps/desktop/src/main/governed-network-egress-use-case.ts',
+  revocationFetcher: 'apps/desktop/src/main/secure-revocation-list-fetcher.ts',
+  revocationSync: 'apps/desktop/src/main/secure-revocation-sync-service.ts',
+  oidcAdapter: 'apps/desktop/src/main/secure-oidc-network-adapter.ts',
+  oidcFingerprint: 'apps/desktop/src/main/oidc-provider-configuration-fingerprint.ts',
   main: 'apps/desktop/src/main/main.ts',
-  preload: 'apps/desktop/src/main/preload.ts',
-  global: 'apps/desktop/src/renderer/global.d.ts',
   renderer: 'apps/desktop/src/renderer/App.tsx',
   ipcPolicy: 'apps/desktop/src/main/ipc-integration-policy.ts',
   sensitiveCache: 'apps/desktop/src/main/ipc-read-sharing.ts',
+  migration: 'packages/database/src/family-database-migrations.ts',
   scanner: 'scripts/verify-network-egress-boundary.mjs',
   package: 'package.json',
-  targetedTest: 'apps/desktop/tests/ppk015-network-egress-policy.test.ts',
-  threatModel: 'docs/security/PPK-015_NETWORK_EGRESS_POLICY_THREAT_MODEL.md',
-  decision: 'docs/decisions/DEC-196-ppk-015-network-egress-policy.md',
-  audit: 'docs/audit/32-K_PPK-015_NETWORK_EGRESS_POLICY_UST_KAPANIS.md'
-}).map(async ([key, path]) => [key, await readFile(path, 'utf8')])));
-
+  policyTest: 'apps/desktop/tests/ppk015-network-egress-policy.test.ts',
+  oidcTest: 'apps/desktop/tests/secure-oidc-network-adapter.test.ts',
+  historicalScope: 'config/32-k-ppk-015-network-egress-policy-scope.json',
+  historicalDecision: 'docs/decisions/DEC-196-ppk-015-network-egress-policy.md',
+  historicalAudit: 'docs/audit/32-K_PPK-015_NETWORK_EGRESS_POLICY_UST_KAPANIS.md',
+  historicalIndex: 'artifacts/manifests/ALL_DOCUMENTS_INDEX.json',
+  currentRatchet: 'config/ppk-015-network-egress-current-ratchet.json',
+  currentNote: 'docs/current/PPK-015_NETWORK_EGRESS_CURRENT_RATCHET.md'
+});
+const bytes = Object.fromEntries(await Promise.all(Object.entries(paths)
+  .map(async ([key, path]) => [key, await readFile(path)])));
+const sources = Object.fromEntries(Object.entries(bytes).map(([key, value]) => [key, value.toString('utf8')]));
+const historicalScope = JSON.parse(sources.historicalScope);
+const historicalIndex = JSON.parse(sources.historicalIndex);
+const ratchet = JSON.parse(sources.currentRatchet);
 const registry = JSON.parse(await readFile('config/accepted-scope-registry.json', 'utf8'));
 const requirement = registry.requirements.find((item) => item.id === 'PPK-015');
-const scope = JSON.parse(await readFile('config/32-k-ppk-015-network-egress-policy-scope.json', 'utf8'));
 const ledger = JSON.parse(await readFile('config/user-decision-ledger.json', 'utf8'));
+const decision = ledger.decisions.find((item) => item.id === 'DEC-196');
 const rootPackage = JSON.parse(sources.package);
 const sourceScan = await scanNetworkEgressBoundary();
+const staticRatchet = inspectNetworkEgressStaticRatchet();
+const migrationEntries = [...sources.migration.matchAll(/createMigrationDefinition\((\d+),\s*'([^']+)'/gu)]
+  .map((match) => ({ version: Number(match[1]), name: match[2] }));
+const latestMigration = Math.max(...migrationEntries.map(({ version }) => version));
 
-check('direct network primitive exception registry is empty and immutable', sources.policy.includes('NETWORK_EGRESS_DIRECT_PRIMITIVE_EXCEPTIONS = Object.freeze([] as const)'));
-check('exactly one external egress adapter is registered', sources.policy.includes("'apps/desktop/src/main/secure-revocation-list-fetcher.ts'") && sources.policy.includes('NETWORK_EGRESS_AUTHORIZED_ADAPTERS'));
-check('network request requires an exact canonical field set', sources.policy.includes("'schemaVersion', 'endpointId', 'sourceUrl', 'method', 'purpose'") && sources.policy.includes("'applicationId', 'tlsMode', 'clientIdentityId'"));
-check('authority requires endpoint status application TLS and pin bindings', ['endpointStatus', 'allowedApplicationId', 'minimumTlsVersion', 'expectedPins', 'observedAt'].every((marker) => sources.policy.includes(marker)));
-check('policy rejects malformed requests and authority contexts', sources.policy.includes("'MALFORMED_REQUEST'") && sources.policy.includes("'MALFORMED_AUTHORITY'"));
-check('application purpose and method mismatches fail closed', ['APPLICATION_NOT_ALLOWED', 'PURPOSE_NOT_ALLOWED', 'METHOD_NOT_ALLOWED'].every((marker) => sources.policy.includes(`'${marker}'`)));
-check('endpoint identity status and URL mismatches fail closed', ['ENDPOINT_DISABLED', 'ENDPOINT_ID_MISMATCH', 'ENDPOINT_NOT_ALLOWLISTED'].every((marker) => sources.policy.includes(`'${marker}'`)));
-check('TLS mode and mTLS identity mismatches fail closed', sources.policy.includes("'TLS_POLICY_MISMATCH'") && sources.policy.includes("'MTLS_IDENTITY_MISMATCH'"));
-check('pin set is bounded ordered unique and SHA-256 shaped', sources.policy.includes('value.length < 1 || value.length > 2') && sources.policy.includes("pins[0]?.kind === 'primary'") && sources.policy.includes('new Set(pins.map'));
-check('canonical endpoint URL requires HTTPS standard port without credentials fragment or local name', sources.policy.includes("url.protocol !== 'https:'") && sources.policy.includes("url.port !== '443'") && sources.policy.includes("endsWith('.local')"));
-check('boundary snapshot exposes fail-closed TLS/mTLS rotation truth only', ['minimumTlsVersion: \'TLSv1.3\'', 'mutualTlsSupported: true', 'certificatePinRotationSupported: true', 'secretMaterialExposed: false'].every((marker) => sources.policy.includes(marker)));
-check('platform policy exports the network egress policy', sources.policyIndex.includes("export * from './network-egress-policy.js'"));
+check('historical 32-K scope bytes remain immutable', sha256(bytes.historicalScope) === ratchet.historicalClosure.scopeSha256);
+check('historical DEC-196 bytes remain immutable', sha256(bytes.historicalDecision) === ratchet.historicalClosure.decisionSha256);
+check('historical 32-K audit bytes remain immutable', sha256(bytes.historicalAudit) === ratchet.historicalClosure.auditSha256);
+check('historical document index independently anchors all three closure hashes', [
+  ['historicalScope', paths.historicalScope, ratchet.historicalClosure.scopeSha256],
+  ['historicalDecision', paths.historicalDecision, ratchet.historicalClosure.decisionSha256],
+  ['historicalAudit', paths.historicalAudit, ratchet.historicalClosure.auditSha256]
+].every(([key, path, expected]) => {
+  const entry = historicalIndex.documents?.find((item) => item.path === path);
+  return entry?.classification === 'ACTIVE_REFERENCE' && entry.sha256 === expected && entry.bytes === bytes[key].byteLength;
+}));
+check('historical scope records the original single revocation adapter truth', historicalScope.boundaries?.singleAuthorizedExternalEgressAdapter === true
+  && historicalScope.authorizedAdapter === ratchet.historicalClosure.authorizedAdapter);
+check('historical scope records no migration 77 added by 32-K', historicalScope.schemaDecision?.includes('migration 77 eklenmez')
+  && ratchet.historicalClosure.latestMigrationAtClosure === 76 && ratchet.historicalClosure.packageOwnedMigrationAdded === false);
+check('historical scope preserves no transfer ownership or cutover truth', historicalScope.status === 'COMPLETED'
+  && historicalScope.realDataTransferPerformed === false && historicalScope.sqliteOwnershipTransferred === false
+  && historicalScope.cutoverAuthorityAttached === false && historicalScope.requirementCompletionClaimed === true);
+check('DEC-196 remains an active registered PPK-015 decision', decision?.status === 'ACTIVE'
+  && decision.requirements?.includes('PPK-015') && decision.document === paths.historicalDecision);
+check('DEC-196 is historical and is not required to remain the latest ledger entry', ledger.decisions.indexOf(decision) >= 0
+  && ledger.decisions.indexOf(decision) < ledger.decisions.length - 1 && ledger.decisions.at(-1)?.id !== 'DEC-196');
+check('later migration 77 is explicitly owned by PPK-016 rather than PPK-015', migrationEntries.some(({ version, name }) => version === 77 && name === 'ppk016_derived_data_policy_inheritance')
+  && !migrationEntries.some(({ name }) => /(?:ppk015|network_egress)/iu.test(name)));
+check('migration 23 remains the revocation allowlist schema owner', migrationEntries.some(({ version, name }) => version === 23 && name === 'external_backup_revocation_endpoint_pin_rotation'));
+check('current migration truth is recorded separately from historical 32-K', latestMigration === ratchet.currentBoundary.latestDatabaseMigration
+  && latestMigration >= ratchet.historicalClosure.latestMigrationAtClosure);
 
-check('central use case is the only caller of the external adapter', sources.useCase.includes("from './secure-revocation-list-fetcher.js'") && sources.sync.includes("from './governed-network-egress-use-case.js'"));
-check('central use case authorizes before invoking the network adapter', sources.useCase.indexOf('this.policy.authorize') < sources.useCase.indexOf('return this.fetcher') && sources.useCase.includes('if (!decision.allowed) throw new NetworkEgressDeniedError'));
-check('central use case binds windows desktop purpose GET endpoint and TLS mode', ['applicationId: \'windows-desktop\'', "purpose: 'external-backup-revocation-list.fetch'", "method: 'GET'", 'endpointStatus: input.endpoint.status'].every((marker) => sources.useCase.includes(marker)));
-check('mTLS identity ID is bound while secret material bypasses policy and IPC', sources.useCase.includes('identityId = input.mutualTlsIdentity?.identityId ?? null') && sources.useCase.includes('mutualTlsIdentity: input.mutualTlsIdentity'));
-check('sync service resolves current pins before governed fetch', sources.sync.indexOf('resolveExternalBackupRevocationEndpointPins') < sources.sync.indexOf('fetchList({ endpoint') && sources.sync.includes('fetchGovernedExternalBackupEvidenceRevocationList'));
-check('network payload remains pending and is not auto-applied', sources.sync.includes('state.pending = { fetched') && !sources.sync.includes('applyExternalBackupEvidenceRevocationList'));
+check('current ratchet declares a successor boundary without rewriting closure', ratchet.schemaVersion === 1
+  && ratchet.requirement === 'PPK-015' && ratchet.status === 'CURRENT_RATCHET'
+  && ratchet.historicalClosure.decisionId === 'DEC-196' && ratchet.historicalClosure.evidenceRewritten === false);
+check('current policy keeps the direct primitive exception registry empty', sources.policy.includes('NETWORK_EGRESS_DIRECT_PRIMITIVE_EXCEPTIONS = Object.freeze([] as const)')
+  && ratchet.currentBoundary.directPrimitiveExceptionCount === 0);
+check('current policy registers the exact two adapters', ratchet.currentBoundary.authorizedAdapters.length === 2
+  && ratchet.currentBoundary.authorizedAdapters.every((path) => sources.policy.includes(`'${path}'`))
+  && sources.policy.includes('authorizedAdapterCount: 2'));
+check('current policy registers the exact three purposes', ratchet.currentBoundary.authorizedPurposes.length === 3
+  && ratchet.currentBoundary.authorizedPurposes.every((purpose) => sources.policy.includes(`'${purpose}'`)));
+check('purpose and method bindings are exact', includesAll(sources.policy, [
+  "'external-backup-revocation-list.fetch': 'GET'", "'oidc.token.exchange': 'POST'", "'oidc.jwks.fetch': 'GET'"
+]));
+check('policy continues to bind exact request authority TLS and pins', includesAll(sources.policy, [
+  'MALFORMED_REQUEST', 'MALFORMED_AUTHORITY', 'APPLICATION_NOT_ALLOWED', 'PURPOSE_NOT_ALLOWED', 'METHOD_NOT_ALLOWED',
+  'ENDPOINT_DISABLED', 'ENDPOINT_ID_MISMATCH', 'ENDPOINT_NOT_ALLOWLISTED', 'TLS_POLICY_MISMATCH', 'CERTIFICATE_PIN_SET_INVALID'
+]));
+check('platform policy and typed domain publish the current inventory', sources.policyIndex.includes("export * from './network-egress-policy.js'")
+  && includesAll(sources.domain, ['NetworkEgressBoundaryView', 'oidc.token.exchange', 'oidc.jwks.fetch', 'authorizedAdapterCount:2']));
 
-check('adapter requires TLS 1.3 and operating-system server trust', sources.fetcher.includes("minVersion:'TLSv1.3'") && sources.fetcher.includes('rejectUnauthorized:true') && sources.fetcher.includes("socket.getProtocol()!=='TLSv1.3'"));
-check('adapter verifies peer SPKI against the authoritative rotation pins', sources.fetcher.includes("type:'spki'") && sources.fetcher.includes('expectedPins.find(item=>item.sha256===response.pin)'));
-check('adapter rejects private DNS results and connected remote address', sources.fetcher.includes('await assertPublicHost(current.hostname)') && sources.fetcher.includes('isPrivateIp(socket.remoteAddress)'));
-check('adapter rejects every HTTP redirect', sources.fetcher.includes('response.status>=300&&response.status<400') && sources.fetcher.includes('yönlendirmeleri allowlist'));
-check('adapter binds optional mTLS cert key and local certificate proof', sources.fetcher.includes('cert:identity.cert,key:identity.key') && sources.fetcher.includes('socket.getCertificate().raw'));
-check('adapter enforces response size JSON type and schema', sources.fetcher.includes('MAX_RESPONSE_BYTES=1_048_576') && sources.fetcher.includes("contentType.includes('application/json')") && sources.fetcher.includes("value.schemaVersion!==1"));
-check('adapter accepts only standard HTTPS with no credentials or fragment', sources.fetcher.includes("current.protocol!=='https:'") && sources.fetcher.includes('current.username||current.password||current.hash'));
+check('revocation egress remains use-case governed', sources.revocationUseCase.indexOf('this.policy.authorize') < sources.revocationUseCase.indexOf('return this.fetcher')
+  && sources.revocationSync.includes("from './governed-network-egress-use-case.js'"));
+check('revocation adapter retains TLS trust DNS connected-address and SPKI checks', includesAll(sources.revocationFetcher, [
+  "minVersion:'TLSv1.3'", 'rejectUnauthorized:true', 'await assertPublicHost(current.hostname)', 'isPrivateIp(socket.remoteAddress)', "type:'spki'"
+]));
+check('revocation payload remains pending rather than automatically applied', sources.revocationSync.includes('state.pending = { fetched')
+  && !sources.revocationSync.includes('applyExternalBackupEvidenceRevocationList'));
 
-check('existing domain endpoint schema remains the authoritative allowlist profile', ['ExternalBackupRevocationEndpointView', 'sourceUrl:string', 'primarySpkiSha256:string', 'secondarySpkiSha256?:string'].every((marker) => sources.domain.includes(marker)));
-check('endpoint use case normalizes HTTPS and requires strong authentication', sources.endpointUseCase.includes('normalizeHttpsSource') && sources.endpointUseCase.includes('this.strongAuth.verify'));
-check('endpoint use case bounds dual-pin overlap and future scheduling', sources.endpointUseCase.includes('14*86_400_000') && sources.endpointUseCase.includes('90*86_400_000'));
-check('repository contract persists allowlist and rotation metadata without secrets', sources.repositoryContract.includes('UpsertExternalBackupRevocationEndpointRow') && !sources.repositoryContract.includes('clientPrivateKey'));
-check('repository reads and writes the existing endpoint allowlist table', sources.repository.includes('external_backup_revocation_endpoints') && sources.repository.includes('mapRevocationEndpoint'));
-check('migration 23 owns endpoint allowlist and dual pin fields', sources.migration.includes("createMigrationDefinition(23, 'external_backup_revocation_endpoint_pin_rotation'") && sources.migration.includes('secondary_spki_sha256'));
-check('no migration 77 or persistent mTLS secret column is added', !sources.migration.includes('createMigrationDefinition(77,') && !sources.migration.includes('client_private_key'));
+check('OIDC transport uses only the dedicated HTTPS DNS adapter', includesAll(sources.oidcAdapter, [
+  "from 'node:dns/promises'", "from 'node:https'", "from 'node:net'", 'class NodeHttpsOidcTransport'
+]));
+check('OIDC transport requires TLS 1.3 OS trust and selected-connected exact public address', includesAll(sources.oidcAdapter, [
+  "minVersion: 'TLSv1.3'", "maxVersion: 'TLSv1.3'", 'rejectUnauthorized: true',
+  'isPrivateOrReservedOidcAddress', 'isSameOidcAddress(selected.address, socket.remoteAddress)'
+]));
+check('OIDC transport rejects redirects encoding type spoof and oversized bodies', includesAll(sources.oidcAdapter, [
+  'OIDC HTTPS redirect reddedildi.', "split(';', 1)[0]?.trim() !== 'application/json'", "!['', 'identity'].includes", 'maximumResponseBytes'
+]));
+check('OIDC transport zeroizes bounded token and response buffers', includesAll(sources.oidcAdapter, [
+  'zeroizeChunks', 'body.fill(0)', 'response?.body.fill(0)', 'OIDC network islemi zaman asimina ugradi.'
+]));
+check('OIDC policy authorization happens before transport execution', sources.oidcAdapter.indexOf('this.#policy.authorize')
+  < sources.oidcAdapter.indexOf('this.#transport.execute'));
+check('OIDC provider visibility requires complete network-ready profiles', includesAll(sources.oidcAdapter, [
+  'networkReadyOidcProviderRegistrations', "value.clientAuthenticationMode !== 'public_pkce'", "configuration.providerId === 'apple'"
+]));
+check('OIDC client fingerprint binds auth mode and both endpoint pin sets', includesAll(sources.oidcFingerprint, [
+  'oidc-client-configuration-v2', 'clientAuthenticationMode', 'tokenEndpointPins', 'jwksEndpointPins', 'primary', 'secondary'
+]));
+check('main visibility and provisioning use only the secure network-ready registrations', includesAll(sources.main, [
+  'new SecureOidcNetworkAdapter', 'secureOidcNetworkAdapter.networkReadyProviderRegistrations()',
+  'clientConfigurationSha256})', "provider==='apple'||clientAuthenticationMode!=='public_pkce'"
+]));
+check('main has no direct electron network fetch or raw client secret path', !sources.main.includes('net.fetch')
+  && !sources.main.includes('client_secret') && !sources.main.includes('PPT_OIDC_CLIENT_SECRET'));
 
-check('typed domain IPC status never exposes path or secret material', sources.domain.includes('NetworkEgressBoundaryView') && sources.domain.includes('persistentPathExposed:false') && sources.domain.includes('secretMaterialExposed:false'));
-check('main process exposes only boundary posture through typed IPC', sources.main.includes("registerIpcHandler('system:getNetworkEgressBoundary'") && sources.main.includes('networkEgressPolicy.snapshot()'));
-check('preload and renderer declarations expose the typed status method', sources.preload.includes('getNetworkEgressBoundary') && sources.global.includes('getNetworkEgressBoundary():Promise<NetworkEgressBoundaryView>'));
-check('IPC integration policy requires zero arguments for egress status', sources.ipcPolicy.includes("case 'system:getNetworkEgressBoundary':") && sources.ipcPolicy.includes('return zeroArguments(args)'));
-check('network egress status is explicitly security-posture no-cache', sources.sensitiveCache.includes('IPC_SECURITY_POSTURE_NO_CACHE_CHANNELS') && sources.sensitiveCache.includes("'system:getNetworkEgressBoundary'"));
-check('system UI renders PPK-015 fail-closed TLS mTLS and zero exception posture', sources.renderer.includes('PPK-015 · ağ çıkış güvenliği') && sources.renderer.includes('Fail-closed egress politikası etkin') && sources.renderer.includes('directPrimitiveExceptionCount'));
-check('profile menu exposes the network egress security entry', sources.renderer.includes('Ağ çıkış güvenliği'));
+check('typed IPC remains posture-only and no-cache', sources.main.includes("registerIpcHandler('system:getNetworkEgressBoundary'")
+  && sources.ipcPolicy.includes("case 'system:getNetworkEgressBoundary':")
+  && sources.sensitiveCache.includes("'system:getNetworkEgressBoundary'"));
+check('system UI states revocation OIDC token and JWKS allowlist truth', includesAll(sources.renderer, [
+  'PPK-015', 'OIDC token', 'JWKS', 'directPrimitiveExceptionCount'
+]));
 
-check('source gate scans all production app and package source zones', sources.scanner.includes("for (const parent of ['apps', 'packages'])") && sources.scanner.includes('scanNetworkEgressBoundary'));
-check('source gate blocks network modules packages globals and adapter bypass', ['DIRECT_NETWORK_MODULE', 'THIRD_PARTY_NETWORK_CLIENT', 'GLOBAL_NETWORK_PRIMITIVE', 'EGRESS_ADAPTER_IMPORT_OUTSIDE_USE_CASE', 'EGRESS_USE_CASE_IMPORT_OUTSIDE_SYNC_SERVICE'].every((marker) => sources.scanner.includes(marker)));
-check('source gate has six malicious self-tests and zero exception reporting', sources.scanner.includes('return cases.length') && sources.scanner.includes('directPrimitiveExceptions: 0'));
-check('current production source has zero egress bypass findings', sourceScan.findings.length === 0 && sourceScan.files >= 300 && sourceScan.zones >= 18);
-check('typecheck and production build both execute the egress source gate', rootPackage.scripts?.pretypecheck?.includes('verify-network-egress-boundary.mjs') && rootPackage.scripts?.prebuild?.includes('verify-network-egress-boundary.mjs'));
+check('source gate scans the exact current production inventory', sourceScan.zones === ratchet.currentBoundary.productionSourceZones
+  && sourceScan.files === ratchet.currentBoundary.scannedFiles
+  && sourceScan.sourceInventorySha256 === ratchet.currentBoundary.sourceInventorySha256,
+  `${sourceScan.zones}/${sourceScan.files}/${sourceScan.sourceInventorySha256}`);
+check('source gate keeps exact current malicious self-test and zero finding ratchets', staticRatchet.selfTestAssertions === ratchet.currentBoundary.maliciousSelfTests
+  && sourceScan.findings.length === ratchet.currentBoundary.findings && sourceScan.findings.length === 0);
+check('authorized adapter and purpose inventory hash is exact', ratchet.currentBoundary.authorizedInventorySha256
+  === staticRatchet.authorizedInventorySha256
+  && staticRatchet.authorizedExternalEgressAdapters === ratchet.currentBoundary.authorizedAdapterCount
+  && staticRatchet.authorizedExternalEgressAdapters === ratchet.currentBoundary.authorizedAdapters.length
+  && staticRatchet.authorizedEgressPurposeCount === ratchet.currentBoundary.authorizedPurposeCount
+  && staticRatchet.authorizedEgressPurposeCount === ratchet.currentBoundary.authorizedPurposes.length
+  && staticRatchet.localOnlyTransportFiles === ratchet.currentBoundary.localOnlyTransportFiles);
+check('scanner exposes the current hash and count evidence', includesAll(sources.scanner, [
+  'sourceInventorySha256', 'authorizedInventorySha256', 'authorizedEgressPurposeCount', 'selfTestAssertions'
+]));
+check('typecheck and build both execute the source gate', rootPackage.scripts?.pretypecheck?.includes('verify-network-egress-boundary.mjs')
+  && rootPackage.scripts?.prebuild?.includes('verify-network-egress-boundary.mjs'));
 
-check('targeted tests cover TLS mTLS allowlist mismatches pin corruption and no-call denial', ['ALLOW_EGRESS', 'APPLICATION_NOT_ALLOWED', 'PURPOSE_NOT_ALLOWED', 'METHOD_NOT_ALLOWED', 'ENDPOINT_DISABLED', 'ENDPOINT_ID_MISMATCH', 'ENDPOINT_NOT_ALLOWLISTED', 'TLS_POLICY_MISMATCH', 'MTLS_IDENTITY_MISMATCH', 'adapter).not.toHaveBeenCalled'].every((marker) => sources.targetedTest.includes(marker)));
-check('threat model records assets trust boundaries threats controls remaining risks and reality', ['Korunan varlıklar', 'Güven sınırları', 'Tehditler ve kontroller', 'Kalan riskler', 'Gerçeklik sınırı'].every((marker) => sources.threatModel.includes(marker)));
-check('PPK-012 policy-sensitive IPC no-cache fence remains active', sources.sensitiveCache.includes('IPC_POLICY_SENSITIVE_READ_CHANNELS') && /ttlMs\s*:\s*0/u.test(sources.sensitiveCache));
-check('accepted registry closes the complete PPK-015 evidence chain', requirement?.status === 'COMPLETE' && Object.values(requirement.chain ?? {}).every((value) => value === true));
-check('scope closes PPK-015 without transfer ownership or cutover', scope.status === 'COMPLETED' && scope.requirementCompletionClaimed === true && scope.realDataTransferPerformed === false && scope.sqliteOwnershipTransferred === false && scope.cutoverAuthorityAttached === false);
-check('DEC-196 is latest and binds PPK-015 evidence', ledger.decisions.at(-1)?.id === 'DEC-196' && ledger.decisions.at(-1)?.requirements?.includes('PPK-015'));
-check('decision and audit preserve Desktop vault no-cache and DEC-171', sources.decision.includes('SQLite sahipliği') && sources.decision.includes('DEC-171') && sources.audit.includes('no-cache') && /gerçek veri/iu.test(sources.audit));
+check('targeted policy tests cover current POST GET inventory and fail-closed mismatches', includesAll(sources.policyTest, [
+  'oidc.token.exchange', 'oidc.jwks.fetch', 'MALFORMED_AUTHORITY', 'adapter).not.toHaveBeenCalled'
+]));
+check('targeted OIDC tests cover pins scope DNS TLS redirect abort and zeroization', includesAll(sources.oidcTest, [
+  'pin rotation sets', 'unknown or escalated scope', 'mixed DNS', 'TLS downgrade', 'midstream abort', 'bounded deadline'
+]));
+check('current note explicitly separates historical closure from successor truth', includesAll(sources.currentNote, [
+  'DEC-196', 'migration 76', 'migration 77', 'migration 93', '2 adapter', '3 purpose', 'historical', 'current ratchet'
+]));
+check('accepted registry remains complete without claiming a new closure decision', requirement?.status === 'COMPLETE'
+  && Object.values(requirement.chain ?? {}).every((value) => value === true));
+check('current ratchet preserves no real request transfer ownership or cutover claims', ratchet.truth.realNetworkRequestPerformed === false
+  && ratchet.truth.realDataTransferPerformed === false && ratchet.truth.sqliteOwnershipTransferred === false
+  && ratchet.truth.cutoverAuthorityAttached === false && ratchet.truth.providerDeliveryGuaranteed === false);
 
 const report = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   release: 'Bronze 04.08.2026.29',
-  step: '32-K',
+  step: '32-K-current-ratchet',
   requirement: 'PPK-015',
-  phase: 'NETWORK_EGRESS_POLICY_CONTRACT',
+  phase: 'NETWORK_EGRESS_HISTORICAL_CLOSURE_AND_CURRENT_RATCHET',
   status: failures.length === 0 ? 'PASS' : 'FAIL',
   checkCount: checks.length,
   passed: checks.filter((item) => item.status === 'PASS').length,
   failed: failures.length,
   checks,
   failures,
-  sourceScan,
+  historicalClosure: {
+    decisionId: 'DEC-196',
+    latestMigrationAtClosure: ratchet.historicalClosure.latestMigrationAtClosure,
+    evidenceRewritten: false
+  },
+  currentRatchet: {
+    latestDatabaseMigration: latestMigration,
+    sourceScan,
+    authorizedAdapters: ratchet.currentBoundary.authorizedAdapters,
+    authorizedPurposes: ratchet.currentBoundary.authorizedPurposes,
+    authorizedInventorySha256: ratchet.currentBoundary.authorizedInventorySha256
+  },
   directNetworkPrimitiveExceptions: 0,
-  migrationDecision: 'NO_NEW_SCHEMA_MIGRATION_REUSE_MIGRATION_23_ENDPOINT_ALLOWLIST_AND_PIN_ROTATION',
-  legacyDesktopVaultPreserved: true,
+  realNetworkRequestPerformed: false,
+  realDataTransferPerformed: false,
   sqliteOwnershipTransferred: false,
   cutoverAuthorityAttached: false,
-  realDataTransferPerformed: false,
-  policySensitiveIpcNoCacheWeakened: false,
   requirementCompletionClaimed: failures.length === 0,
   generatedAt: new Date().toISOString()
 };
 await mkdir('artifacts/validation', { recursive: true });
 await writeFile('artifacts/validation/32-K-ppk-015-network-egress-contract.json', `${JSON.stringify(report, null, 2)}\n`);
 if (failures.length) {
-  console.error(`32-K PPK-015 contract: FAIL (${failures.length}/${checks.length}).`);
+  console.error(`32-K PPK-015 historical/current contract: FAIL (${failures.length}/${checks.length}).`);
   for (const failure of failures) console.error(`- ${failure}`);
   process.exit(1);
 }
-console.log(`32-K PPK-015 contract: PASS (${checks.length}/${checks.length}).`);
+console.log(`32-K PPK-015 historical/current contract: PASS (${checks.length}/${checks.length}).`);

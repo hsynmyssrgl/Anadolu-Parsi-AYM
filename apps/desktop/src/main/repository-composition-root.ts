@@ -24,6 +24,7 @@ import {
   SqliteHealthRepository,
   SqliteHouseholdMembershipRepository,
   SqliteInvitationRepository,
+  SqliteIdentityAccessCredentialRepository,
   SqliteLegacyRepository,
   SqliteLifeRepository,
   SqliteLongTermPortfolioRepository,
@@ -75,6 +76,7 @@ import type {
   HealthRepositoryPort,
   HouseholdMembershipRepositoryPort,
   InvitationRepositoryPort,
+  IdentityAccessCredentialRepositoryPort,
   LegacyRepositoryPort,
   LargeFamilyReadModelRepositoryPort,
   LifePolicyResourceRepositoryPort,
@@ -128,6 +130,7 @@ export interface RepositoryCompositionRoot {
   readonly healthRepository: HealthRepositoryPort & HealthPolicyResourceRepositoryPort;
   readonly householdMembershipRepository: HouseholdMembershipRepositoryPort;
   readonly invitationRepository: InvitationRepositoryPort;
+  readonly identityAccessCredentialRepository: IdentityAccessCredentialRepositoryPort;
   readonly legacyRepository: LegacyRepositoryPort;
   readonly lifeRepository: LifeRepositoryPort & LifePolicyResourceRepositoryPort & LifeProjectionRepositoryPort;
   readonly largeFamilyReadModelRepository: LargeFamilyReadModelRepositoryPort;
@@ -188,6 +191,7 @@ export const createSqliteRepositoryCompositionRoot = (
     healthRepository: new SqliteHealthRepository(repositoryOptions),
     householdMembershipRepository: new SqliteHouseholdMembershipRepository(repositoryOptions),
     invitationRepository: new SqliteInvitationRepository(repositoryOptions),
+    identityAccessCredentialRepository: new SqliteIdentityAccessCredentialRepository(repositoryOptions),
     legacyRepository: new SqliteLegacyRepository(repositoryOptions),
     lifeRepository: new SqliteLifeRepository(repositoryOptions),
     largeFamilyReadModelRepository: new SqliteLargeFamilyReadModelRepository(repositoryOptions),

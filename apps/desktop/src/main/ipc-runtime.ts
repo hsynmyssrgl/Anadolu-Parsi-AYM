@@ -256,6 +256,16 @@ export const registerCorrelatedIpcHandler = <TArguments extends unknown[], TResu
                   operation: () => cached.result as TResult
                 })
               : cached.result as TResult;
+            const cachedResultDecision = evaluateIpcIntegrationResultPolicy(input.channel, authorizedCachedResult);
+            if (!cachedResultDecision.accepted) {
+              throw createAppError({
+                code: ERROR_CODES.CORE_UNEXPECTED,
+                message: 'IPC Ã¶nbellek yanÄ±tÄ± kanalÄ±n gÃ¼venli sonuÃ§ sÃ¶zleÅŸmesiyle uyuÅŸmuyor.',
+                category: 'security',
+                correlationId,
+                details: { channel: input.channel, reason: cachedResultDecision.reason }
+              });
+            }
             return createIpcTransportResponseEnvelope(requestContext, correlationId, authorizedCachedResult);
           }
         }

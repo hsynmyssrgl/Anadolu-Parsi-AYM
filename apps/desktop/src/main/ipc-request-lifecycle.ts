@@ -94,6 +94,29 @@ const privacyOwnershipChannels = new Set<string>([
   ...privacyOwnershipReadChannels,
   ...privacyOwnershipWriteChannels
 ]);
+const identityAccessReadChannels = new Set<string>([
+  'identityAccess:getCenter',
+  'identityAccess:verifyTemporaryCredential'
+]);
+const identityAccessWriteChannels = new Set<string>([
+  'identityAccess:issueOperationToken',
+  'identityAccess:beginPasskeyRegistration',
+  'identityAccess:beginPasskeyAuthentication',
+  'identityAccess:completePasskeyRegistration',
+  'identityAccess:authenticateWithPasskey',
+  'identityAccess:revokePasskey',
+  'identityAccess:recoverLostPasskey',
+  'identityAccess:beginFederatedIdentityLink',
+  'identityAccess:completeFederatedIdentityLink',
+  'identityAccess:unlinkFederatedIdentity',
+  'identityAccess:issueTemporaryCredential',
+  'identityAccess:revokeTemporaryCredential',
+  'identityAccess:createCompanionSnapshot'
+]);
+const identityAccessChannels = new Set<string>([
+  ...identityAccessReadChannels,
+  ...identityAccessWriteChannels
+]);
 
 const cancellableNetworkChannels = new Set<string>([
   'dataLifecycle:runRevocationSync'
@@ -105,6 +128,12 @@ const cancellableInteractiveAuthenticationChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLifecyclePolicy => {
+  if (identityAccessReadChannels.has(channel)) {
+    return Object.freeze({ cancellable: true, latestWins: true, timeoutMs: 10_000 });
+  }
+  if (identityAccessWriteChannels.has(channel)) {
+    return Object.freeze({ cancellable: false, latestWins: false, timeoutMs: 0 });
+  }
   if (privacyOwnershipReadChannels.has(channel)) {
     return Object.freeze({ cancellable: true, latestWins: true, timeoutMs: 10_000 });
   }
@@ -163,6 +192,17 @@ const standardAdmissionChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestAdmissionPolicy = (channel: string): IpcRequestAdmissionPolicy => {
+  if (identityAccessChannels.has(channel)) {
+    return Object.freeze({
+      enabled: true,
+      priority: 'interactive',
+      priorityWeight: 100,
+      maxConcurrentPerSender: 2,
+      maxConcurrentPerChannel: 1,
+      maxQueuedPerSender: 4,
+      queueTimeoutMs: 2_500
+    });
+  }
   if (privacyOwnershipChannels.has(channel)) {
     return Object.freeze({
       enabled: true,
@@ -236,6 +276,12 @@ export interface IpcRequestRatePolicy {
 }
 
 export const resolveIpcRequestRatePolicy = (channel: string): IpcRequestRatePolicy => {
+  if (identityAccessReadChannels.has(channel)) {
+    return Object.freeze({ enabled: true, maxRequestsPerWindow: 120, windowMs: 60_000 });
+  }
+  if (identityAccessWriteChannels.has(channel)) {
+    return Object.freeze({ enabled: true, maxRequestsPerWindow: 16, windowMs: 60_000 });
+  }
   if (privacyOwnershipReadChannels.has(channel)) {
     return Object.freeze({ enabled: true, maxRequestsPerWindow: 120, windowMs: 60_000 });
   }

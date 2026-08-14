@@ -1,11 +1,12 @@
-import { app, BrowserWindow, dialog, ipcMain, net, powerMonitor, protocol, safeStorage, shell, type IpcMainInvokeEvent } from 'electron';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { app, BrowserWindow, dialog, ipcMain, powerMonitor, protocol, safeStorage, shell, type IpcMainInvokeEvent } from 'electron';
+import { fileURLToPath } from 'node:url';
 import { basename, dirname, extname, isAbsolute, join, resolve } from 'node:path';
 import { closeSync, existsSync, fstatSync, fsyncSync, linkSync, lstatSync, mkdirSync, openSync, readFileSync, readSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { createHash, randomUUID } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
-import { asCorrelationId, asIsoDateTime } from '@ppt/core';
-import { encryptPortableEmergencyPack, sha256Hex, verifyPortableEmergencyPackReadback } from '@ppt/security';
+import { asCorrelationId, asIsoDateTime, createAppError, err, ERROR_CODES, ok, type AppError, type Result } from '@ppt/core';
+import { createWebAuthnChallenge, encryptPortableEmergencyPack, sha256Hex, validateOidcProviderConfiguration, verifyPortableEmergencyPackReadback, type OidcProviderConfiguration, type WebAuthnAssertionInput, type WebAuthnRegistrationInput } from '@ppt/security';
 import { writeContentFreeConsoleEvent } from '@ppt/logging';
 import { APP_META, USER_VISIBLE_APP_INFO, type CreateArchiveItemInput, CreateFamilyEventInput, UpdateFamilyEventInput, SetFamilyEventArchivedInput, UpdateEventParticipantsInput, UpdateEventInvitationInput, UpdateEventNotesInput, AcknowledgeFamilyNotificationInput, CreateFamilyLocationInput, CreateFamilyMemberInput, CreateFamilyRelationInput, LoginInput, SetupAdminInput, ChangePasswordInput, EnableTwoFactorInput, DisableTwoFactorInput, TrustCurrentDeviceInput, ReauthorizeCurrentDeviceInput, CreateFamilyInvitationInput, InspectFamilyInvitationInput, ResendFamilyInvitationInput, AcceptFamilyInvitationInput, UpsertObjectPermissionInput, UpdateFamilyAccountInput, CreateFinanceRecordInput, CreateBankAccountInput, ValidateIbanInput, CreatePaymentCardInput, CreateHealthRecordInput, CreateMedicationPlanInput, CreateFamilyHealthHistoryInput, CreateFinanceValuationInput, CreateLifeRecordInput, CreateAutomationRuleInput, CreateArchiveCategoryInput, UpdateArchiveClassificationInput, UpsertAiConsentInput, AiConsentPurpose, UpsertSensitiveDataConsentInput, SensitiveExportPreviewInput, RunAutomationInput, UpsertDigitalLegacyPlanInput, UpsertLegacyGrantInput, ExecuteLegacyPlanInput, ApproveLegacyExecutionInput, CancelLegacyExecutionInput, ArchiveSearchInput, CreateArchiveRetentionPolicyInput, AssignArchiveRetentionPolicyInput, UpsertBackupTargetInput, MaintenanceResultView, BackupSchedulerResultView, AdaptiveResourceStateView, EnqueueTaskInput, UpsertMaintenancePolicyInput, DiagnosticFilterInput, DiagnosticArchiveSearchInput, MaintenanceHistoryFilterInput, CreateDataRetentionPolicyInput, ArchiveDataResourceInput, RestoreDataResourceInput, RequestDataPurgeInput, CancelDataPurgeInput, ExecuteDataPurgeInput, SetDataLegalHoldInput, UpdateBackupQuarantinePolicyInput, SetBackupQuarantineLegalHoldInput, DestroyBackupQuarantineBatchInput, RegisterExternalBackupCopyInput, ReviewExternalBackupCopyInput, SetExternalBackupCopyLegalHoldInput, AttestExternalBackupCopyDestroyedInput, RegisterExternalBackupEvidenceIssuerInput, RotateExternalBackupEvidenceIssuerInput, RevokeExternalBackupEvidenceIssuerInput, ApplyExternalBackupEvidenceRevocationListInput, UpsertExternalBackupRevocationEndpointInput, PendingRevocationSyncListView, ApplyPendingRevocationSyncInput, RevocationSyncEndpointStateView, RevocationSyncRunResultView, VerifyExternalBackupDestructionEvidenceInput, ApplyFamilyDataImportInput, RollbackFamilyDataImportInput, GenealogyTreePageInput, TimelinePageInput, ArchivePageInput, PersonCatalogPageInput, EventCatalogPageInput, EntityCatalogLookupInput, FamilySnapshotSectionsInput, IpcAdaptiveBudgetMaintenanceOperation, IpcAdaptiveBudgetMaintenanceAuthorizationInput, IpcAdaptiveBudgetMaintenanceReauthenticationInput, IpcAdaptiveBudgetMaintenanceRecoveryInput, UpdateBackupCleanRewritePolicyInput } from '@ppt/domain';
 import type { RecordManagedLifeItemInput } from '@ppt/domain';
@@ -28,7 +29,8 @@ import type { IssueOfflineCapabilityLeaseInput, OfflineCapabilityLeaseWorkspaceV
 import {
   FamilyDataStore,
   FullBackupRestoreRestartRequiredError,
-  type ArchivePendingOperationIntentInput
+  type ArchivePendingOperationIntentInput,
+  type IdentityAccessDataStorePorts
 } from './data-store.js';
 import { bootstrapDesktopRuntime, type DesktopRuntime } from './runtime-bootstrap.js';
 import { registerCorrelatedIpcHandler, registerIpcCancellationHandlers, createRuntimeCorrelationId, type IpcHandler } from './ipc-runtime.js';
@@ -45,7 +47,7 @@ import { IpcAdaptiveBudgetMaintenanceReauthenticationStateStore } from './ipc-ad
 import { deriveIpcAdaptiveBudgetMaintenanceRecoveryContextKey, deriveIpcAdaptiveBudgetMaintenanceRecoveryCooldownContextKey, evaluateIpcAdaptiveBudgetMaintenanceRecoveryAuthority, parseIpcAdaptiveBudgetMaintenanceRecoveryInput } from './ipc-adaptive-budget-maintenance-lock-recovery.js';
 import { isSafeExternalHttpsUrl, normalizeTrustedRendererDocumentUrl, type TrustedRendererDescriptor } from './ipc-sender-trust.js';
 import { installRendererSessionSecurity, type RendererSecurityWebContentsLike } from './renderer-session-security.js';
-import { PRIMARY_RENDERER_DOCUMENT_URL, PRIMARY_RENDERER_SCHEME, resolvePrimaryRendererAssetPath } from './renderer-protocol.js';
+import { PRIMARY_RENDERER_DOCUMENT_URL, PRIMARY_RENDERER_ORIGIN, PRIMARY_RENDERER_SCHEME, resolvePrimaryRendererAssetPath } from './renderer-protocol.js';
 import {
   ElectronSafeStorageDeviceSecretProtector,
   WindowsDpapiDeviceSecretProtector,
@@ -93,6 +95,29 @@ import type {
 } from '@ppt/domain';
 import { createProductSurfaceGovernanceRepository } from './repository-composition-root.js';
 import { FinanceImportFileSessionRegistry } from './finance-import-file-session.js';
+import { WebAuthnCeremonyAdapter } from './webauthn-ceremony-adapter.js';
+import { ProtectedTemporaryCredentialEnvelopeAdapter } from './temporary-credential-envelope-adapter.js';
+import { X25519EncryptedCompanionSnapshotAdapter } from './companion-sync-envelope-adapter.js';
+import {
+  OidcFederatedIdentityAdapter,
+  StaticTrustedOidcProviderConfigurationResolver
+} from './oidc-federated-identity-adapter.js';
+import { SecureOidcNetworkAdapter, type TrustedOidcNetworkRegistration } from './secure-oidc-network-adapter.js';
+import { FileSystemOidcVaultPersistence, OidcTokenVault } from './oidc-token-vault.js';
+import { MainOnlyOidcDeepLinkCallbackRegistry } from './oidc-deep-link-callback-registry.js';
+import type {
+  AuthenticateWithPasskeyInput,
+  CompletePasskeyRegistrationInput,
+  CreateReadOnlyCompanionSnapshotInput,
+  FederatedIdentityProvider,
+  IdentityAccessOperationKind,
+  IssueTemporaryVerifiableCredentialInput,
+  RecoverLostPasskeyInput,
+  RevokePasskeyInput,
+  RevokeTemporaryVerifiableCredentialInput,
+  UnlinkFederatedIdentityInput,
+  VerifyTemporaryVerifiableCredentialInput
+} from '@ppt/domain';
 
 type ArchiveMutationInput<TInput> = TInput & { readonly operationId: string };
 interface ArchiveItemMutationInput {
@@ -104,6 +129,54 @@ interface EncryptedPrivacyDataExportRendererInput {
   readonly requestId: string;
   readonly passphrase: string;
 }
+
+interface CompletePasskeyRegistrationRendererInput extends Omit<CompletePasskeyRegistrationInput,'ceremonyResponseId'> {
+  readonly response:WebAuthnRegistrationInput;
+  readonly confirmation:'PASSKEY KAYDINI TAMAMLA';
+}
+interface AuthenticateWithPasskeyRendererInput extends Omit<AuthenticateWithPasskeyInput,'ceremonyResponseId'> {
+  readonly credentialId:string;
+  readonly response:WebAuthnAssertionInput;
+  readonly confirmation:'PASSKEY ILE DOGRULA';
+}
+interface CompleteFederatedIdentityLinkRendererInput {
+  readonly expectedRevision:number;
+  readonly clientOperationId:string;
+  readonly provider:FederatedIdentityProvider;
+  readonly flowId:string;
+  readonly confirmation:'FEDERATED KIMLIGI BAGLA';
+}
+
+const IDENTITY_WEBAUTHN_RP_ID='renderer';
+const identityFailure=(message:string):AppError=>createAppError({code:ERROR_CODES.AUTHORIZATION_DENIED,category:'security',message,correlationId:asCorrelationId('identity-production-composition')});
+
+class MainOnlyPasskeyRecoveryRegistry {
+  readonly #proofs=new Map<string,{accountId:string;expiresAt:number}>();
+  public issue(accountId:string):string{const id=randomUUID();this.#prune();this.#proofs.set(id,{accountId,expiresAt:Date.now()+300_000});return id;}
+  public verify(input:{accountId:string;recoveryProofId:string}):Result<true,AppError>{const proof=this.#proofs.get(input.recoveryProofId);if(proof)this.#proofs.delete(input.recoveryProofId);this.#prune();return proof&&proof.accountId===input.accountId&&proof.expiresAt>Date.now()?ok(true):err(identityFailure('Passkey kurtarma proofu gecersiz veya kullanilmis.'));}
+  #prune():void{const now=Date.now();for(const [id,proof] of this.#proofs)if(proof.expiresAt<=now)this.#proofs.delete(id);}
+}
+
+const configuredOidcNetworkRegistrations=():readonly TrustedOidcNetworkRegistration[]=>{
+  const registrations:TrustedOidcNetworkRegistration[]=[];
+  for(const provider of ['apple','google','microsoft'] as const){
+    const prefix=`PPT_OIDC_${provider.toUpperCase()}`;
+    const values=[process.env[`${prefix}_CONFIGURATION_ID`],process.env[`${prefix}_ISSUER`],process.env[`${prefix}_AUTHORIZATION_ENDPOINT`],process.env[`${prefix}_TOKEN_ENDPOINT`],process.env[`${prefix}_JWKS_URI`],process.env[`${prefix}_CLIENT_ID`],process.env[`${prefix}_REDIRECT_URI`],process.env[`${prefix}_SCOPES`],process.env[`${prefix}_CLIENT_AUTHENTICATION_MODE`],process.env[`${prefix}_TOKEN_SPKI_PRIMARY_SHA256`],process.env[`${prefix}_TOKEN_SPKI_SECONDARY_SHA256`],process.env[`${prefix}_JWKS_SPKI_PRIMARY_SHA256`],process.env[`${prefix}_JWKS_SPKI_SECONDARY_SHA256`]];
+    if(values.some((value)=>!value))continue;
+    const [configurationId,issuer,authorizationEndpoint,tokenEndpoint,jwksUri,clientId,redirectUri,scopesText,clientAuthenticationMode,tokenPrimaryPin,tokenSecondaryPin,jwksPrimaryPin,jwksSecondaryPin]=values as [string,string,string,string,string,string,string,string,string,string,string,string,string];
+    if(provider==='apple'||clientAuthenticationMode!=='public_pkce'||!/^[A-Za-z0-9][A-Za-z0-9._:-]{1,127}$/u.test(configurationId))continue;
+    if(!['pardus-app://oidc','pardus-app://oidc/','pardus-app://oidc/callback'].includes(redirectUri))continue;
+    if(![tokenPrimaryPin,tokenSecondaryPin,jwksPrimaryPin,jwksSecondaryPin].every((pin)=>/^[0-9a-f]{64}$/u.test(pin))
+      ||tokenPrimaryPin===tokenSecondaryPin||jwksPrimaryPin===jwksSecondaryPin)continue;
+    const configuration:OidcProviderConfiguration=Object.freeze({providerId:provider,issuer,authorizationEndpoint,tokenEndpoint,jwksUri,clientId,redirectUri,scopes:Object.freeze(scopesText.split(' ').filter(Boolean))});
+    try{validateOidcProviderConfiguration(configuration);}catch{continue;}
+    registrations.push(Object.freeze({configurationId,configuration,clientAuthenticationMode,
+      tokenEndpointPins:Object.freeze([{sha256:tokenPrimaryPin,kind:'primary' as const},{sha256:tokenSecondaryPin,kind:'secondary' as const}]),
+      jwksEndpointPins:Object.freeze([{sha256:jwksPrimaryPin,kind:'primary' as const},{sha256:jwksSecondaryPin,kind:'secondary' as const}])}));
+  }
+  return Object.freeze(registrations);
+};
+
 
 class PrivacyExportCancelledError extends Error {
   public readonly code = 'PRIVACY_EXPORT_CANCELLED' as const;
@@ -182,6 +255,37 @@ let primaryWindow: BrowserWindow | undefined;
 let trustedRenderer: TrustedRendererDescriptor | undefined;
 let coordinatedWindowsHelloPlatform: WindowsHelloPlatformCoordinator | undefined;
 let windowsHelloOperationInProgress = false;
+let webAuthnCeremony:WebAuthnCeremonyAdapter|undefined;
+let oidcFederatedIdentity:OidcFederatedIdentityAdapter|undefined;
+let oidcTokenVault:OidcTokenVault|undefined;
+const passkeyRecoveryRegistry=new MainOnlyPasskeyRecoveryRegistry();
+const issuedOidcAuthorizationUrls=new Map<string,number>();
+const oidcDeepLinkCallbacks=new MainOnlyOidcDeepLinkCallbackRegistry(()=>new Date().toISOString());
+const queuedOidcArgumentDeliveries:string[][]=[];
+const oidcDeepLinkProtocolRegistered=(()=>{
+  if(process.platform!=='win32'||!app.isPackaged)return false;
+  try{return app.setAsDefaultProtocolClient('pardus-app');}catch{return false;}
+})();
+
+const restoreOidcDeepLinkBindings=():void=>{
+  if(!oidcTokenVault)return;
+  for(const binding of oidcTokenVault.listPendingAuthorizationFlowBindings(new Date().toISOString())){
+    oidcDeepLinkCallbacks.register({flowId:binding.flowId,provider:binding.providerId,accountId:binding.accountId,
+      stateSha256:binding.stateSha256,redirectUri:binding.redirectUri,expiresAt:binding.expiresAt});
+  }
+};
+const captureOidcDeepLinkArguments=(argumentsList:readonly string[]):void=>{
+  const candidates=argumentsList.filter((value)=>typeof value==='string'&&value.toLowerCase().startsWith('pardus-app://'));
+  if(candidates.length===0)return;
+  if(!oidcTokenVault){if(candidates.length===1&&Buffer.byteLength(candidates[0]!,'utf8')<=8_192&&queuedOidcArgumentDeliveries.length<4)queuedOidcArgumentDeliveries.push([candidates[0]!]);return;}
+  try{restoreOidcDeepLinkBindings();oidcDeepLinkCallbacks.captureFromArguments(argumentsList);}
+  catch{/* Fail closed without logging callback code, state or URL. */}
+};
+const drainQueuedOidcDeepLinks=():void=>{
+  if(!oidcTokenVault)return;
+  const deliveries=[process.argv,...queuedOidcArgumentDeliveries.splice(0)];
+  for(const delivery of deliveries)captureOidcDeepLinkArguments(delivery);
+};
 
 const observeEmergencyCardPowerSource = (): 'battery'|'ac'|'unknown' => {
   try {
@@ -791,6 +895,33 @@ function cleanBackupRewrite():AutomaticCleanBackupRewriteService {
   return automaticCleanBackupRewriteService;
 }
 
+function createIdentityAccessProductionPorts(current:DesktopRuntime,protector:DeviceSecretProtector):{
+  readonly ports:Partial<IdentityAccessDataStorePorts>;
+  readonly providerConfigurations:readonly import('@ppt/repository-contracts').FederatedProviderProvisioningRow[];
+}{
+  const deviceIdentity=new FileDeviceIdentityProvider(join(current.config.paths.secrets,'device-identity.json'),current.clock,protector);
+  webAuthnCeremony=new WebAuthnCeremonyAdapter({trustedRelyingParties:[{relyingPartyId:IDENTITY_WEBAUTHN_RP_ID,origin:PRIMARY_RENDERER_ORIGIN}],authenticatedDeviceId:(accountId)=>{
+    if(!dataStore)return null;const auth=dataStore.getAuthState();return auth.authenticated&&dataStore.currentAuthenticatedAccountId()===accountId&&auth.trustedDevice===true?auth.currentDeviceId??null:null;
+  },clock:()=>current.clock.now()});
+  const secureOidcNetworkAdapter=new SecureOidcNetworkAdapter({registrations:configuredOidcNetworkRegistrations(),policy:networkEgressPolicy,clock:()=>current.clock.now()});
+  const registrations=secureOidcNetworkAdapter.networkReadyProviderRegistrations();
+  const providerConfigurations=new StaticTrustedOidcProviderConfigurationResolver(registrations);
+  oidcTokenVault=new OidcTokenVault(protector,new FileSystemOidcVaultPersistence(join(current.config.paths.secrets,'identity-oidc-vault.json')));
+  drainQueuedOidcDeepLinks();
+  oidcFederatedIdentity=new OidcFederatedIdentityAdapter({providerConfigurations,codeExchangeClient:secureOidcNetworkAdapter,jwksResolver:secureOidcNetworkAdapter,tokenVault:oidcTokenVault,clock:()=>current.clock.now()});
+  const temporaryCredentialEnvelope=new ProtectedTemporaryCredentialEnvelopeAdapter({directory:join(current.config.paths.secrets,'temporary-credentials'),protector,deviceIdentity,clock:current.clock});
+  const encryptedCompanionSnapshot=new X25519EncryptedCompanionSnapshotAdapter({
+    encryptionKeys:{resolve:({trustedDeviceId,securityEpoch})=>{
+      const configuredDevice=process.env.PPT_COMPANION_TRUSTED_DEVICE_ID;const publicKeySpkiBase64Url=process.env.PPT_COMPANION_X25519_PUBLIC_KEY_SPKI_BASE64URL;
+      return configuredDevice&&publicKeySpkiBase64Url&&configuredDevice===trustedDeviceId?ok({publicKeySpkiBase64Url,algorithm:'X25519' as const,securityEpoch}):err(identityFailure('Companion X25519 recipient key is unavailable.'));
+    }}
+  });
+  const ports:Partial<IdentityAccessDataStorePorts>={challengeGenerator:{createChallenge:createWebAuthnChallenge},passkeyCeremonyVerifier:webAuthnCeremony,passkeyRecoveryVerifier:passkeyRecoveryRegistry,
+    federatedAuthorizationCeremony:oidcFederatedIdentity,federatedAuthorizationCodeVerifier:oidcFederatedIdentity,temporaryCredentialEnvelope,encryptedCompanionSnapshot,
+    federatedVaultControl:{revokeEntry:(_context,entryId)=>oidcTokenVault?.revokeToken(entryId,current.clock.now())?ok(undefined):err(identityFailure('Federated vault entry could not be revoked.'))}};
+  return Object.freeze({ports,providerConfigurations:Object.freeze(registrations.map(({configurationId,configuration,clientConfigurationSha256})=>Object.freeze({provider:configuration.providerId,configured:true,configurationId,authorizationEndpointSha256:createHash('sha256').update(configuration.authorizationEndpoint).digest('hex'),clientConfigurationSha256}))) });
+}
+
 function store(windowsHelloPlatformOverride?: WindowsHelloPlatformPort): FamilyDataStore {
   if (!dataStore) {
     const current = runtime();
@@ -800,7 +931,9 @@ function store(windowsHelloPlatformOverride?: WindowsHelloPlatformPort): FamilyD
     const databasePath = join(current.config.paths.data, current.config.database.fileName);
     const coreService = coreServiceConnection();
     const archivePolicyReceiptSink = policyReceiptSink();
-    dataStore = new FamilyDataStore({
+    const identityAccess=createIdentityAccessProductionPorts(current,osSecretProtector);
+    const provisioningCorrelationId=createRuntimeCorrelationId('startup');
+    dataStore=current.correlation.run({correlationId:provisioningCorrelationId},()=>desktopRepositoryPolicyScope.runBootstrap({correlationId:provisioningCorrelationId,boundary:'auth:getExternalIdentityProviders'},()=>new FamilyDataStore({
       databasePath,
       databaseConnection: session.database,
       databaseSnapshotProvider: session,
@@ -840,6 +973,8 @@ function store(windowsHelloPlatformOverride?: WindowsHelloPlatformPort): FamilyD
           ]);
         }
       },
+      identityAccessPorts:identityAccess.ports,
+      federatedProviderConfigurations:identityAccess.providerConfigurations,
       securityConfig: current.config.security,
       migrationBackupDirectory: join(dirname(databasePath), 'migration-backups'),
       onMigrationCompleted: (summary) => current.logger.info({
@@ -858,7 +993,7 @@ function store(windowsHelloPlatformOverride?: WindowsHelloPlatformPort): FamilyD
           safetyBackupCreated: summary.safetyBackup !== undefined
         }
       })
-    });
+    })));
   }
   return dataStore;
 }
@@ -1030,11 +1165,7 @@ function registerIpc(): void {
     requestLifecycles: ipcRequestLifecycles
   });
   registerIpcHandler('app:getInfo', () => USER_VISIBLE_APP_INFO);
-  registerIpcHandler('auth:getExternalIdentityProviders', () => ([
-    { id: 'apple', label: 'Apple ile devam et', configured: Boolean(process.env.PPT_OIDC_APPLE_CLIENT_ID), productionReady: process.env.PPT_OIDC_APPLE_READY === '1' },
-    { id: 'google', label: 'Google ile devam et', configured: Boolean(process.env.PPT_OIDC_GOOGLE_CLIENT_ID), productionReady: process.env.PPT_OIDC_GOOGLE_READY === '1' },
-    { id: 'microsoft', label: 'Microsoft ile devam et', configured: Boolean(process.env.PPT_OIDC_MICROSOFT_CLIENT_ID), productionReady: process.env.PPT_OIDC_MICROSOFT_READY === '1' }
-  ]));
+  registerIpcHandler('auth:getExternalIdentityProviders', () => (oidcDeepLinkProtocolRegistered?oidcFederatedIdentity?.listVisibleConfiguredProviders()??[]:[]).map(({provider})=>({id:provider,label:provider==='apple'?'Apple ile devam et':provider==='google'?'Google ile devam et':'Microsoft ile devam et',configured:true,productionReady:false})));
   registerIpcHandler('auth:getState', () => dataStore ? dataStore.getAuthState() : lockedAuthState());
   registerIpcHandler('auth:getSessionLockState', () => {
     const state = store().getSessionLockState();
@@ -2000,6 +2131,41 @@ function registerIpc(): void {
   registerIpcHandler('formDraft:getWorkspace', (_event, formKey:string) => store().getFormDraftWorkspace(formKey));
   registerIpcHandler('formDraft:save', (_event, input:SaveFormDraftInput) => store().saveFormDraft(input));
   registerIpcHandler('formDraft:undo', (_event, input:UndoFormDraftInput) => store().undoFormDraft(input));
+  registerIpcHandler('identityAccess:getCenter',()=>store().getIdentityAccessCredentialCenter());
+  registerIpcHandler('identityAccess:issueOperationToken',(_event,input:{readonly operationKind:IdentityAccessOperationKind})=>store().issueIdentityAccessOperationToken(input.operationKind));
+  registerIpcHandler('identityAccess:beginPasskeyRegistration',(_event,input:{readonly clientOperationId:string})=>store().beginPasskeyRegistration({...input,relyingPartyId:IDENTITY_WEBAUTHN_RP_ID}));
+  registerIpcHandler('identityAccess:beginPasskeyAuthentication',(_event,input:{readonly clientOperationId:string})=>store().beginPasskeyAuthentication({...input,relyingPartyId:IDENTITY_WEBAUTHN_RP_ID}));
+  registerIpcHandler('identityAccess:completePasskeyRegistration',(_event,input:CompletePasskeyRegistrationRendererInput&{readonly ceremonyResponseId?:string})=>{
+    const current=store();const auth=current.getAuthState();const accountId=current.currentAuthenticatedAccountId();const deviceId=auth.currentDeviceId;
+    if(!deviceId||auth.trustedDevice!==true||!webAuthnCeremony)throw new Error('WebAuthn exact authenticated device binding is unavailable.');
+    const ceremonyResponseId=randomUUID();webAuthnCeremony.storeRegistrationResponse({ceremonyResponseId,accountId:accountId as never,deviceId,expiresAt:new Date(Date.now()+300_000).toISOString()},input.response);
+    return current.completePasskeyRegistration({expectedRevision:input.expectedRevision,clientOperationId:input.clientOperationId,challengeId:input.challengeId,ceremonyResponseId,displayName:input.displayName});
+  });
+  registerIpcHandler('identityAccess:authenticateWithPasskey',(_event,input:AuthenticateWithPasskeyRendererInput&{readonly ceremonyResponseId?:string})=>{
+    const current=store();const auth=current.getAuthState();const accountId=current.currentAuthenticatedAccountId();const deviceId=auth.currentDeviceId;
+    if(!deviceId||auth.trustedDevice!==true||!webAuthnCeremony)throw new Error('WebAuthn exact authenticated device binding is unavailable.');
+    const ceremonyResponseId=randomUUID();webAuthnCeremony.storeAuthenticationResponse({ceremonyResponseId,accountId:accountId as never,deviceId,expiresAt:new Date(Date.now()+300_000).toISOString()},input.response);
+    return current.authenticateWithPasskey({expectedRevision:input.expectedRevision,clientOperationId:input.clientOperationId,credentialId:input.credentialId,challengeId:input.challengeId,ceremonyResponseId});
+  });
+  registerIpcHandler('identityAccess:revokePasskey',(_event,input:RevokePasskeyInput&{readonly confirmation:string})=>store().revokePasskey({expectedRevision:input.expectedRevision,clientOperationId:input.clientOperationId,credentialId:input.credentialId,reason:input.reason}));
+  registerIpcHandler('identityAccess:recoverLostPasskey',async(_event,input:Omit<RecoverLostPasskeyInput,'recoveryProofId'>&{readonly fallback?:{readonly password:string;readonly secondFactorCode?:string};readonly confirmation:string})=>{
+    const current=store();const authentication=await current.reauthenticateWithWindowsHello(input.fallback?{fallback:input.fallback}:{});if(!authentication.authenticated)throw new Error('Lost-passkey recovery requires strong local reauthentication.');
+    const accountId=current.currentAuthenticatedAccountId();const recoveryProofId=passkeyRecoveryRegistry.issue(accountId);
+    return current.recoverLostPasskey({expectedRevision:input.expectedRevision,clientOperationId:input.clientOperationId,credentialId:input.credentialId,recoveryProofId});
+  });
+  registerIpcHandler('identityAccess:beginFederatedIdentityLink',async(_event,input:{readonly clientOperationId:string;readonly provider:FederatedIdentityProvider})=>{if(!oidcDeepLinkProtocolRegistered)throw new Error('OIDC deep-link protocol registration is unavailable.');const ceremony=await store().beginFederatedIdentityLink(input);const expiry=Date.parse(ceremony.expiresAt);if(!isSafeExternalHttpsUrl(ceremony.authorizationUrl)||!Number.isFinite(expiry)||expiry<=Date.now()||expiry-Date.now()>600_000)throw new Error('OIDC authorization URL main-issued binding is invalid.');for(const [url,expiresAt] of issuedOidcAuthorizationUrls)if(expiresAt<=Date.now())issuedOidcAuthorizationUrls.delete(url);if(issuedOidcAuthorizationUrls.size>=16)throw new Error('OIDC authorization URL registry quota exceeded.');restoreOidcDeepLinkBindings();issuedOidcAuthorizationUrls.set(ceremony.authorizationUrl,expiry);return ceremony;});
+  registerIpcHandler('identityAccess:completeFederatedIdentityLink',async(_event,input:CompleteFederatedIdentityLinkRendererInput&{readonly verifiedFlowId?:string})=>{
+    const current=store();if(!oidcFederatedIdentity)throw new Error('OIDC production adapter is unavailable.');const accountId=current.currentAuthenticatedAccountId();
+    const captured=oidcDeepLinkCallbacks.take({flowId:input.flowId,provider:input.provider,accountId:String(accountId)});
+    const verified=await oidcFederatedIdentity.acceptAuthorizationCallback({flowId:input.flowId,linkId:input.flowId,provider:input.provider,accountId:accountId as never,callbackUrl:captured.callbackUrl,correlationId:createRuntimeCorrelationId('ipc')});
+    if(!verified.ok)throw new Error(`[${verified.error.code}] ${verified.error.message}`);
+    return current.linkFederatedIdentity({expectedRevision:input.expectedRevision,clientOperationId:input.clientOperationId,provider:input.provider,verifiedFlowId:input.flowId});
+  });
+  registerIpcHandler('identityAccess:unlinkFederatedIdentity',(_event,input:UnlinkFederatedIdentityInput&{readonly confirmation:string})=>store().unlinkFederatedIdentity({expectedRevision:input.expectedRevision,clientOperationId:input.clientOperationId,linkId:input.linkId}));
+  registerIpcHandler('identityAccess:issueTemporaryCredential',(_event,input:IssueTemporaryVerifiableCredentialInput&{readonly confirmation:string})=>store().issueTemporaryVerifiableCredential({expectedRevision:input.expectedRevision,clientOperationId:input.clientOperationId,kind:input.kind,purpose:input.purpose,audienceReference:input.audienceReference,disclosedClaims:input.disclosedClaims,notBefore:input.notBefore,expiresAt:input.expiresAt}));
+  registerIpcHandler('identityAccess:revokeTemporaryCredential',(_event,input:RevokeTemporaryVerifiableCredentialInput&{readonly confirmation:string})=>store().revokeTemporaryVerifiableCredential({expectedRevision:input.expectedRevision,clientOperationId:input.clientOperationId,credentialId:input.credentialId,reason:input.reason}));
+  registerIpcHandler('identityAccess:verifyTemporaryCredential',(_event,input:VerifyTemporaryVerifiableCredentialInput)=>store().verifyTemporaryVerifiableCredential(input));
+  registerIpcHandler('identityAccess:createCompanionSnapshot',(_event,input:CreateReadOnlyCompanionSnapshotInput&{readonly clientOperationId:string;readonly confirmation:string})=>store().createReadOnlyCompanionSnapshot({clientOperationId:input.clientOperationId,trustedDeviceId:input.trustedDeviceId,requestedMode:input.requestedMode,...(input.knownSourceVersion===undefined?{}:{knownSourceVersion:input.knownSourceVersion})}));
   registerIpcHandler('privacyOwnership:getCenter', () => store().getPrivacyOwnershipCenter());
   registerIpcHandler('privacyOwnership:correctAiMemory', (_event, input:CorrectAiMemoryInput) => store().correctAiMemory(input));
   registerIpcHandler('privacyOwnership:restrictAiMemory', (_event, input:RestrictAiMemoryInput) => store().restrictAiMemory(input));
@@ -2462,7 +2628,8 @@ function createWindow(): void {
   });
 
   window.webContents.setWindowOpenHandler(({ url }) => {
-    if (isSafeExternalHttpsUrl(url)) void shell.openExternal(url);
+    const expiresAt=issuedOidcAuthorizationUrls.get(url);if(expiresAt!==undefined)issuedOidcAuthorizationUrls.delete(url);
+    if (expiresAt!==undefined&&expiresAt>Date.now()&&isSafeExternalHttpsUrl(url)) void shell.openExternal(url);
     return { action: 'deny' };
   });
 
@@ -2510,7 +2677,8 @@ function createWindow(): void {
   void window.loadURL(rendererDocumentUrl);
 }
 
-app.on('second-instance', () => {
+app.on('second-instance', (_event,commandLine) => {
+  captureOidcDeepLinkArguments(commandLine);
   const window = BrowserWindow.getAllWindows()[0];
   if (!window) return;
   if (window.isMinimized()) window.restore();
@@ -2518,14 +2686,17 @@ app.on('second-instance', () => {
   window.focus();
 });
 
+app.on('open-url',(event,url)=>{event.preventDefault();captureOidcDeepLinkArguments([url]);});
+
 app.whenReady().then(async () => {
   const rendererRoot = resolve(currentDir, '../renderer');
-  const fetchRendererAsset = net.fetch.bind(net);
-  protocol.handle(PRIMARY_RENDERER_SCHEME, (request) => {
+  const rendererMediaTypes=Object.freeze(new Map<string,string>([['.html','text/html; charset=utf-8'],['.js','text/javascript; charset=utf-8'],['.css','text/css; charset=utf-8'],['.json','application/json; charset=utf-8'],['.svg','image/svg+xml'],['.png','image/png'],['.ico','image/x-icon'],['.woff2','font/woff2'],['.wasm','application/wasm']]));
+  protocol.handle(PRIMARY_RENDERER_SCHEME, async (request) => {
     if (request.method !== 'GET') return new Response('Not found', { status: 404 });
     const candidate = resolvePrimaryRendererAssetPath(request.url, rendererRoot);
     if (!candidate) return new Response('Not found', { status: 404 });
-    return fetchRendererAsset(pathToFileURL(candidate).toString());
+    try{return new Response(new Uint8Array(await readFile(candidate)),{status:200,headers:{'content-type':rendererMediaTypes.get(extname(candidate).toLowerCase())??'application/octet-stream','cache-control':'no-store','x-content-type-options':'nosniff'}});}
+    catch{return new Response('Not found',{status:404});}
   });
   startupStage = 'SAFE_STORAGE_INITIALIZATION';
   osSecretProtector = process.platform === 'win32'

@@ -102,7 +102,7 @@
       "passed": true
     },
     {
-      "name": "custom protocol transport is an exact PPK-022 network capability surface",
+      "name": "custom protocol transport uses the exact file-backed surface without stale fetch authority",
       "passed": true
     },
     {
@@ -115,6 +115,6 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 92,
-  "generatedAt": "2026-08-14T02:58:09.369Z"
+  "latestDatabaseMigration": 93,
+  "generatedAt": "2026-08-14T06:49:51.336Z"
 }

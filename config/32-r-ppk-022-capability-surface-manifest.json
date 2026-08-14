@@ -18,7 +18,7 @@
   "signedManifestRuntimeCheckRequired": true,
   "buildManifestAloneGrantsRuntimeAuthority": false,
   "productionSourceZoneCount": 18,
-  "scannedProductionFiles": 408,
+  "scannedProductionFiles": 428,
   "protectedCapabilityFamilies": [
     "camera",
     "microphone",
@@ -30,11 +30,11 @@
   ],
   "surfaceCounts": {
     "FILE_DIALOG": 2,
-    "FILE_IMPORT": 241,
-    "NETWORK_API": 3,
-    "NETWORK_IMPORT": 8
+    "FILE_IMPORT": 265,
+    "NETWORK_API": 2,
+    "NETWORK_IMPORT": 13
   },
-  "exactCapabilitySurfaceCount": 254,
+  "exactCapabilitySurfaceCount": 282,
   "applicationRuntimeCapabilities": {
     "windows-desktop": [
       "file.access",
@@ -1003,6 +1003,14 @@
       "runtimeEnforcement": "PINNED_BOOTSTRAP_THEN_SIGNED"
     },
     {
+      "key": "FILE_IMPORT|apps/desktop/src/main/main.ts|node:fs/promises:readFile",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
       "key": "FILE_IMPORT|apps/desktop/src/main/managed-backup-password.ts|node:fs:existsSync",
       "applicationIds": [
         "windows-desktop"
@@ -1044,6 +1052,94 @@
     },
     {
       "key": "FILE_IMPORT|apps/desktop/src/main/managed-backup-password.ts|node:fs:writeFileSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/oidc-token-vault.ts|node:fs:chmodSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/oidc-token-vault.ts|node:fs:closeSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/oidc-token-vault.ts|node:fs:existsSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/oidc-token-vault.ts|node:fs:fsyncSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/oidc-token-vault.ts|node:fs:mkdirSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/oidc-token-vault.ts|node:fs:openSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/oidc-token-vault.ts|node:fs:readFileSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/oidc-token-vault.ts|node:fs:renameSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/oidc-token-vault.ts|node:fs:rmSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/oidc-token-vault.ts|node:fs:statSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/oidc-token-vault.ts|node:fs:writeFileSync",
       "applicationIds": [
         "windows-desktop"
       ],
@@ -1651,6 +1747,102 @@
       "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
     },
     {
+      "key": "FILE_IMPORT|apps/desktop/src/main/temporary-credential-envelope-adapter.ts|node:fs:closeSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/temporary-credential-envelope-adapter.ts|node:fs:existsSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/temporary-credential-envelope-adapter.ts|node:fs:fstatSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/temporary-credential-envelope-adapter.ts|node:fs:fsyncSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/temporary-credential-envelope-adapter.ts|node:fs:lstatSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/temporary-credential-envelope-adapter.ts|node:fs:mkdirSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/temporary-credential-envelope-adapter.ts|node:fs:openSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/temporary-credential-envelope-adapter.ts|node:fs:readdirSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/temporary-credential-envelope-adapter.ts|node:fs:readFileSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/temporary-credential-envelope-adapter.ts|node:fs:realpathSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/temporary-credential-envelope-adapter.ts|node:fs:rmSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/temporary-credential-envelope-adapter.ts|node:fs:writeFileSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
       "key": "FILE_IMPORT|apps/desktop/src/main/user-data-vault.ts|node:fs:chmodSync",
       "applicationIds": [
         "windows-desktop"
@@ -2010,14 +2202,6 @@
       "runtimeEnforcement": "PINNED_BOOTSTRAP_THEN_SIGNED"
     },
     {
-      "key": "NETWORK_API|apps/desktop/src/main/main.ts|fetch",
-      "applicationIds": [
-        "windows-desktop"
-      ],
-      "capability": "network.access",
-      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
-    },
-    {
       "key": "NETWORK_API|apps/desktop/src/main/main.ts|loadURL",
       "applicationIds": [
         "windows-desktop"
@@ -2053,6 +2237,46 @@
       "key": "NETWORK_IMPORT|apps/core-service/src/local-admin-server.ts|node:net:Socket",
       "applicationIds": [
         "windows-core-service"
+      ],
+      "capability": "network.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "NETWORK_IMPORT|apps/desktop/src/main/secure-oidc-network-adapter.ts|node:dns/promises:lookup",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "network.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "NETWORK_IMPORT|apps/desktop/src/main/secure-oidc-network-adapter.ts|node:https:request",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "network.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "NETWORK_IMPORT|apps/desktop/src/main/secure-oidc-network-adapter.ts|node:https:RequestOptions",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "network.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "NETWORK_IMPORT|apps/desktop/src/main/secure-oidc-network-adapter.ts|node:net:BlockList",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "network.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "NETWORK_IMPORT|apps/desktop/src/main/secure-oidc-network-adapter.ts|node:net:isIP",
+      "applicationIds": [
+        "windows-desktop"
       ],
       "capability": "network.access",
       "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"

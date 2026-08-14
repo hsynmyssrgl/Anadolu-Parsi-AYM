@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "product": "Anadolu Parsı Aile Yaşam Merkezi",
+  "packageVersion": "4.8.2026-29",
+  "manifestSchemaVersion": 3,
+  "manifestFileCount": 4095,
+  "actualSourceFileCount": 4095,
+  "sha256EntryCount": 4096,
+  "symlinksAllowed": false,
+  "status": "PASS",
+  "failures": [],
+  "generatedAt": "2026-08-14T06:52:31.255Z"
+}

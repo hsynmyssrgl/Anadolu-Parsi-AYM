@@ -1,14 +1,18 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 
 const node = process.execPath;
+const ratchet = JSON.parse(await readFile('config/ppk-015-network-egress-current-ratchet.json', 'utf8'));
 const tasks = [
+  { id: 'historical-current-contract-ratchet', args: ['scripts/verify-32-k-ppk-015-network-egress-contract.mjs'], expect: 'historical/current contract: PASS' },
   { id: 'network-egress-source-gate', args: ['scripts/verify-network-egress-boundary.mjs'], expect: '"status": "PASS"' },
-  { id: 'ppk015-targeted-policy-use-case', args: ['node_modules/vitest/vitest.mjs', 'run', 'apps/desktop/tests/ppk015-network-egress-policy.test.ts', '--maxWorkers=1'], expect: '17 passed' },
-  { id: 'ppk014-versioned-api-regression', args: ['node_modules/vitest/vitest.mjs', 'run', 'apps/core-service/tests/ppk014-versioned-core-service-api-boundary.test.ts', '--maxWorkers=1'], expect: '17 passed' },
+  { id: 'ppk015-targeted-policy-use-case', args: ['node_modules/vitest/vitest.mjs', 'run', 'apps/desktop/tests/ppk015-network-egress-policy.test.ts', '--maxWorkers=1'], expect: '19 passed' },
+  { id: 'ppk015-secure-oidc-network-adapter', args: ['node_modules/vitest/vitest.mjs', 'run', 'apps/desktop/tests/secure-oidc-network-adapter.test.ts', '--maxWorkers=1'], expect: '12 passed' },
+  { id: 'ppk015-historical-current-governance-ratchet', args: ['node_modules/vitest/vitest.mjs', 'run', 'apps/desktop/tests/ppk015-network-egress-governance-ratchet.test.ts', '--maxWorkers=1'], expect: '4 passed' },
+  { id: 'ppk014-versioned-api-regression', args: ['node_modules/vitest/vitest.mjs', 'run', 'apps/core-service/tests/ppk014-versioned-core-service-api-boundary.test.ts', '--maxWorkers=1'], expect: '18 passed' },
   { id: 'ppk013-data-access-regression', args: ['node_modules/vitest/vitest.mjs', 'run', 'apps/desktop/tests/ppk013-client-data-access-boundary.test.ts', '--maxWorkers=1'], expect: '20 passed' },
   { id: 'ppk012-offline-cache-regression', args: ['node_modules/vitest/vitest.mjs', 'run', 'apps/desktop/tests/ppk012-offline-capability-lease-cache-fence.test.ts', '--maxWorkers=1'], expect: '12 passed' },
-  { id: 'migration-76-no-new-schema-runtime', before: [['node_modules/typescript/bin/tsc', '-p', 'packages/database/tsconfig.json']], args: ['scripts/verify-database-migrations.mjs'], expect: '"version": 76' },
+  { id: 'current-migration-ratchet', before: [['node_modules/typescript/bin/tsc', '-p', 'packages/database/tsconfig.json']], args: ['scripts/verify-database-migrations.mjs'], expect: `"version": ${ratchet.currentBoundary.latestDatabaseMigration}` },
   { id: 'root-typescript', args: ['node_modules/typescript/bin/tsc', '-p', 'tsconfig.json', '--noEmit'], expect: '' }
 ];
 
@@ -30,9 +34,9 @@ for (const task of tasks) {
 }
 const failures = checks.filter((item) => item.status === 'FAIL');
 const report = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   release: 'Bronze 04.08.2026.29',
-  step: '32-K',
+  step: '32-K-current-ratchet',
   requirement: 'PPK-015',
   phase: 'NETWORK_EGRESS_POLICY_RUNTIME',
   status: failures.length === 0 ? 'PASS' : 'FAIL',
@@ -40,6 +44,8 @@ const report = {
   passed: checks.length - failures.length,
   failed: failures.length,
   checks,
+  historicalClosure: { decisionId: 'DEC-196', latestMigrationAtClosure: 76, evidenceRewritten: false },
+  currentRatchet: ratchet.currentBoundary,
   realNetworkRequestPerformed: false,
   realDataTransferPerformed: false,
   generatedAt: new Date().toISOString()

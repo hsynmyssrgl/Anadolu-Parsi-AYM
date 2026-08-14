@@ -62,6 +62,13 @@ import type { AccessibilityPreferencesView, UpdateAccessibilityPreferencesInput 
 import type { FormDraftView, FormDraftWorkspaceView, SaveFormDraftInput, UndoFormDraftInput } from '@ppt/domain';
 import type { ManagedLifeWorkspaceView, RecordManagedLifeItemInput } from '@ppt/domain';
 import type {
+  AuthenticateWithPasskeyInput,CompanionSyncDenialView,CreateReadOnlyCompanionSnapshotInput,FederatedAuthorizationCeremonyView,FederatedIdentityProvider,
+  IdentityAccessCredentialCenterView,IdentityAccessMutationReceiptView,IdentityAccessOperationKind,IdentityAccessOperationTokenView,IssueTemporaryVerifiableCredentialInput,IssuedTemporaryVerifiableCredentialView,
+  PasskeyChallengeView,ReadOnlyCompanionSnapshotView,RecoverLostPasskeyInput,RevokePasskeyInput,RevokeTemporaryVerifiableCredentialInput,
+  TemporaryCredentialVerificationView,UnlinkFederatedIdentityInput,VerifyTemporaryVerifiableCredentialInput
+} from '@ppt/domain';
+import type { WebAuthnAssertionInput,WebAuthnRegistrationInput } from '@ppt/security';
+import type {
   CorrectAiMemoryInput,
   RestrictAiMemoryInput,
   DeleteAiMemoryInput,
@@ -80,6 +87,15 @@ export interface EncryptedPrivacyDataExportIpcInput {
   readonly requestId: string;
   readonly passphrase: string;
 }
+export interface CompletePasskeyRegistrationIpcInput {
+  readonly expectedRevision:number;readonly clientOperationId:string;readonly challengeId:string;readonly displayName:string;
+  readonly response:WebAuthnRegistrationInput;readonly confirmation:'PASSKEY KAYDINI TAMAMLA';
+}
+export interface AuthenticateWithPasskeyIpcInput extends Omit<AuthenticateWithPasskeyInput,'ceremonyResponseId'> {
+  readonly credentialId:string;readonly response:WebAuthnAssertionInput;readonly confirmation:'PASSKEY ILE DOGRULA';
+}
+export interface RecoverLostPasskeyIpcInput extends Omit<RecoverLostPasskeyInput,'recoveryProofId'> {readonly fallback?:{readonly password:string;readonly secondFactorCode?:string};readonly confirmation:'KAYIP PASSKEY KURTARMASINI BASLAT';}
+export interface CompleteFederatedIdentityLinkIpcInput {readonly expectedRevision:number;readonly clientOperationId:string;readonly provider:FederatedIdentityProvider;readonly flowId:string;readonly confirmation:'FEDERATED KIMLIGI BAGLA';}
 export interface EncryptedPrivacyDataExportIpcResult {
   readonly fileName: string;
   readonly artifactSha256: string;
@@ -438,6 +454,21 @@ contextBridge.exposeInMainWorld('pardus', {
   getFormDraftWorkspace:(formKey:string):Promise<FormDraftWorkspaceView>=>invoke('formDraft:getWorkspace',formKey),
   saveFormDraft:(input:SaveFormDraftInput):Promise<FormDraftView>=>invoke('formDraft:save',input),
   undoFormDraft:(input:UndoFormDraftInput):Promise<FormDraftView>=>invoke('formDraft:undo',input),
+  getIdentityAccessCredentialCenter:():Promise<IdentityAccessCredentialCenterView>=>invoke('identityAccess:getCenter'),
+  issueIdentityAccessOperationToken:(operationKind:IdentityAccessOperationKind):Promise<IdentityAccessOperationTokenView>=>invoke('identityAccess:issueOperationToken',{operationKind}),
+  beginPasskeyRegistration:(input:{readonly clientOperationId:string}):Promise<PasskeyChallengeView>=>invoke('identityAccess:beginPasskeyRegistration',input),
+  beginPasskeyAuthentication:(input:{readonly clientOperationId:string}):Promise<PasskeyChallengeView>=>invoke('identityAccess:beginPasskeyAuthentication',input),
+  completePasskeyRegistration:(input:CompletePasskeyRegistrationIpcInput):Promise<IdentityAccessMutationReceiptView>=>invoke('identityAccess:completePasskeyRegistration',input),
+  authenticateWithPasskey:(input:AuthenticateWithPasskeyIpcInput):Promise<IdentityAccessMutationReceiptView>=>invoke('identityAccess:authenticateWithPasskey',input),
+  revokePasskey:(input:RevokePasskeyInput&{readonly confirmation:'PASSKEY YETKISINI IPTAL ET'}):Promise<IdentityAccessMutationReceiptView>=>invoke('identityAccess:revokePasskey',input),
+  recoverLostPasskey:(input:RecoverLostPasskeyIpcInput):Promise<IdentityAccessMutationReceiptView>=>invoke('identityAccess:recoverLostPasskey',input),
+  beginFederatedIdentityLink:(input:{readonly clientOperationId:string;readonly provider:FederatedIdentityProvider}):Promise<FederatedAuthorizationCeremonyView>=>invoke('identityAccess:beginFederatedIdentityLink',input),
+  completeFederatedIdentityLink:(input:CompleteFederatedIdentityLinkIpcInput):Promise<IdentityAccessMutationReceiptView>=>invoke('identityAccess:completeFederatedIdentityLink',input),
+  unlinkFederatedIdentity:(input:UnlinkFederatedIdentityInput&{readonly confirmation:'FEDERATED KIMLIK BAGINI KALDIR'}):Promise<IdentityAccessMutationReceiptView>=>invoke('identityAccess:unlinkFederatedIdentity',input),
+  issueTemporaryVerifiableCredential:(input:IssueTemporaryVerifiableCredentialInput&{readonly confirmation:'GECICI YETKI BELGESI OLUSTUR'}):Promise<{readonly receipt:IdentityAccessMutationReceiptView;readonly issued?:IssuedTemporaryVerifiableCredentialView}>=>invoke('identityAccess:issueTemporaryCredential',input),
+  revokeTemporaryVerifiableCredential:(input:RevokeTemporaryVerifiableCredentialInput&{readonly confirmation:'GECICI YETKI BELGESINI IPTAL ET'}):Promise<IdentityAccessMutationReceiptView>=>invoke('identityAccess:revokeTemporaryCredential',input),
+  verifyTemporaryVerifiableCredential:(input:VerifyTemporaryVerifiableCredentialInput):Promise<TemporaryCredentialVerificationView>=>invoke('identityAccess:verifyTemporaryCredential',input),
+  createReadOnlyCompanionSnapshot:(input:CreateReadOnlyCompanionSnapshotInput&{readonly clientOperationId:string;readonly confirmation:'SALT OKUNUR ESLIKCI KOPYASI OLUSTUR'}):Promise<ReadOnlyCompanionSnapshotView|CompanionSyncDenialView>=>invoke('identityAccess:createCompanionSnapshot',input),
   getPrivacyOwnershipCenter:():Promise<PrivacyOwnershipControlCenterView>=>invoke('privacyOwnership:getCenter'),
   correctAiMemory:(input:CorrectAiMemoryInput):Promise<PrivacyOwnershipMutationReceiptView>=>invoke('privacyOwnership:correctAiMemory',input),
   restrictAiMemory:(input:RestrictAiMemoryInput):Promise<PrivacyOwnershipMutationReceiptView>=>invoke('privacyOwnership:restrictAiMemory',input),

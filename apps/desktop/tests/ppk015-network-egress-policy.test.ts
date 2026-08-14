@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { ExternalBackupRevocationEndpointView, FetchedExternalBackupEvidenceRevocationListView } from '@ppt/domain';
 import {
   NETWORK_EGRESS_AUTHORIZED_ADAPTERS,
+  NETWORK_EGRESS_AUTHORIZED_PURPOSES,
   NETWORK_EGRESS_DIRECT_PRIMITIVE_EXCEPTIONS,
   NetworkEgressPolicy,
   type NetworkEgressAuthoritativeContext,
@@ -82,13 +83,24 @@ describe('32-K PPK-015 network egress policy', () => {
   it('publishes a zero-exception fail-closed boundary snapshot', () => {
     expect(NETWORK_EGRESS_DIRECT_PRIMITIVE_EXCEPTIONS).toEqual([]);
     expect(Object.isFrozen(NETWORK_EGRESS_DIRECT_PRIMITIVE_EXCEPTIONS)).toBe(true);
-    expect(NETWORK_EGRESS_AUTHORIZED_ADAPTERS).toEqual(['apps/desktop/src/main/secure-revocation-list-fetcher.ts']);
+    expect(NETWORK_EGRESS_AUTHORIZED_ADAPTERS).toEqual([
+      'apps/desktop/src/main/secure-revocation-list-fetcher.ts',
+      'apps/desktop/src/main/secure-oidc-network-adapter.ts'
+    ]);
+    expect(NETWORK_EGRESS_AUTHORIZED_PURPOSES).toEqual([
+      'external-backup-revocation-list.fetch', 'oidc.token.exchange', 'oidc.jwks.fetch'
+    ]);
     expect(new NetworkEgressPolicy().snapshot()).toEqual({
       schemaVersion: 1,
       enforcement: 'fail-closed',
       authorizedApplicationId: 'windows-desktop',
       authorizedPurpose: 'external-backup-revocation-list.fetch',
-      authorizedAdapterCount: 1,
+      authorizedPurposes: ['external-backup-revocation-list.fetch', 'oidc.token.exchange', 'oidc.jwks.fetch'],
+      authorizedAdapters: [
+        'apps/desktop/src/main/secure-revocation-list-fetcher.ts',
+        'apps/desktop/src/main/secure-oidc-network-adapter.ts'
+      ],
+      authorizedAdapterCount: 2,
       directPrimitiveExceptionCount: 0,
       allowlistRequired: true,
       minimumTlsVersion: 'TLSv1.3',
@@ -104,6 +116,25 @@ describe('32-K PPK-015 network egress policy', () => {
 
   it('allows an exact TLS request bound to one primary pin', () => {
     expect(new NetworkEgressPolicy().authorize(request(), authority())).toMatchObject({ allowed: true, reason: 'ALLOW_EGRESS' });
+  });
+
+  it('allows only the exact OIDC token POST and JWKS GET purpose-method bindings', () => {
+    const policy = new NetworkEgressPolicy();
+    expect(policy.authorize(
+      request({ sourceUrl: 'https://accounts.example.com/oauth/token', method: 'POST', purpose: 'oidc.token.exchange' }),
+      authority({ sourceUrl: 'https://accounts.example.com/oauth/token', allowedMethod: 'POST', allowedPurpose: 'oidc.token.exchange' })
+    )).toMatchObject({ allowed: true, reason: 'ALLOW_EGRESS' });
+    expect(policy.authorize(
+      request({ sourceUrl: 'https://accounts.example.com/.well-known/jwks.json', purpose: 'oidc.jwks.fetch' }),
+      authority({ sourceUrl: 'https://accounts.example.com/.well-known/jwks.json', allowedPurpose: 'oidc.jwks.fetch' })
+    )).toMatchObject({ allowed: true, reason: 'ALLOW_EGRESS' });
+  });
+
+  it('rejects a purpose whose authoritative HTTP method violates the fixed inventory', () => {
+    expect(new NetworkEgressPolicy().authorize(
+      request({ sourceUrl: 'https://accounts.example.com/oauth/token', method: 'POST', purpose: 'oidc.token.exchange' }),
+      authority({ sourceUrl: 'https://accounts.example.com/oauth/token', allowedMethod: 'GET', allowedPurpose: 'oidc.token.exchange' })
+    ).reason).toBe('MALFORMED_AUTHORITY');
   });
 
   it('allows an exact mTLS request with a bound client identity and rotation pin', () => {

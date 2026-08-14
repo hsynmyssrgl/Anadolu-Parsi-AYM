@@ -53,7 +53,13 @@ export interface TimelinePolicyIntent {
     | 'privacy_ownership_center'
     | 'ai_memory_record'
     | 'data_rights_request'
-    | 'privacy_incident';
+    | 'privacy_incident'
+    | 'identity_access_center'
+    | 'identity_challenge'
+    | 'passkey_credential'
+    | 'federated_identity_link'
+    | 'temporary_verifiable_credential'
+    | 'companion_sync_snapshot';
   readonly resourceId: string;
   readonly purpose: 'general' | 'ai_processing' | 'administration';
   readonly ownerPersonId?: PersonId;

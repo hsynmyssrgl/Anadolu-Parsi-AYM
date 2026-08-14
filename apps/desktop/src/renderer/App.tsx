@@ -78,6 +78,24 @@ import type { FinancePlanningWorkspaceView, RecordFinancePlanningItemInput } fro
 import type { LongTermPortfolioWorkspaceView, RecordLongTermPortfolioItemInput } from '@ppt/domain';
 import type { ManagedLifeWorkspaceView, RecordManagedLifeItemInput } from '@ppt/domain';
 import type { PrivacyOwnershipControlCenterView } from '@ppt/domain';
+import {
+  TEMPORARY_CREDENTIAL_DISCLOSURE_RULES,
+  TEMPORARY_CREDENTIAL_PURPOSE_BY_KIND
+} from '@ppt/domain';
+import type {
+  CompanionSyncDenialView,
+  FederatedAuthorizationCeremonyView,
+  FederatedIdentityProvider,
+  IdentityAccessCredentialCenterView,
+  IdentityAccessOperationKind,
+  IssuedTemporaryVerifiableCredentialView,
+  PasskeyChallengeView,
+  PasskeyTransport,
+  ReadOnlyCompanionSnapshotView,
+  TemporaryCredentialClaimKey,
+  TemporaryCredentialKind,
+  TemporaryCredentialVerificationView
+} from '@ppt/domain';
 
 type ReleaseChannel = 'bronze' | 'silver' | 'gold';
 const releaseChannelFromStage = (stage: string): ReleaseChannel => {
@@ -1012,7 +1030,7 @@ function SystemManagementScreen(){
   <Surface className="workspace-summary"><SectionHeader eyebrow="B0-03 / B0-04 · ürün yüzeyi gerçeklik kapısı" title="Belge, rota, menü, ekran ve API envanteri tek sözleşmede"/><div className="notes-card"><strong>{productSurfaceGovernance?.enforcement==='fail-closed'&&productSurfaceGovernance.unresolvedUnusedRendererApiCount===0?'Ürün yüzeyi zinciri doğrulandı':'Ürün yüzeyi zinciri doğrulanamadı'}</strong><small>{productSurfaceGovernance?.productModuleCount??0} ürün modülü + {productSurfaceGovernance?.governanceSurfaceCount??0} yönetişim yüzeyi = {productSurfaceGovernance?.navigationRouteCount??0} kanonik rota</small><small>Menü {productSurfaceGovernance?.menuEntryCount??0} · ekran {productSurfaceGovernance?.renderedScreenCount??0} · sınıflandırılmış kullanılmayan renderer API {productSurfaceGovernance?.classifiedUnusedRendererApiCount??0}</small><small>Çözümlenmemiş API {productSurfaceGovernance?.unresolvedUnusedRendererApiCount??0} · eksik zincir build kapanışını fail-closed durdurur · veritabanı göçü gerekmez</small></div></Surface>
   {policyServiceAvailabilityBoundary&&<article className={`panel health-alert ${policyServiceAvailabilityBoundary.mode==='read-write'?'info':policyServiceAvailabilityBoundary.mode==='read-only'?'warning':'critical'}`}><h2>PPK-024 · Politika servisi çalışma modu</h2><strong>{policyServiceAvailabilityBoundary.mode==='read-write'?'Okuma ve yazma açık':policyServiceAvailabilityBoundary.mode==='read-only'?'Salt okunur — değişiklikler kapalı':'Erişim güvenli biçimde durduruldu'}</strong><p>{policyServiceAvailabilityBoundary.reason}</p><small>İmza {policyServiceAvailabilityBoundary.policyPackageVerified?'doğrulandı':'doğrulanamadı'} · canlılık {policyServiceAvailabilityBoundary.observationFresh?'güncel':'güncel değil'} · istemci bu göstergeden ek yetki türetemez.</small></article>}
   {health&&<div className="stats-grid"><article className="stat-card"><small>Sistem sağlık puanı</small><strong>{healthScore?.score??0}/100</strong><span>{healthScore?.grade==='excellent'?'Mükemmel':healthScore?.grade==='good'?'İyi':healthScore?.grade==='attention'?'Dikkat':'Kritik'}</span></article><article className="stat-card"><small>Genel durum</small><strong>{health.status==='healthy'?'Sağlıklı':health.status==='warning'?'Uyarı':'Kritik'}</strong><span>{health.integrityOk?'SQLite bütünlüğü doğrulandı':'Bütünlük sorunu'}</span></article><article className="stat-card"><small>Core Service</small><strong>{coreServiceHealth?`${coreServiceHealth.role} · ${coreServiceHealth.lifecycle}`:'Bağlantı yok'}</strong><span>{coreServiceHealth?`${coreServiceHealth.writable?'Yazılabilir':'Salt-okunur'} · ${coreServiceHealth.safeMode?'Güvenli mod':'Normal'} · ${coreServiceHealth.policyVersion}`:'Sağlık yanıtı alınamadı'}</span></article><article className="stat-card"><small>PPK-014 Core API</small><strong>{coreServiceApiBoundary?`${coreServiceApiBoundary.apiVersion} · ${coreServiceApiBoundary.enforcement}`:'Doğrulanamadı'}</strong><span>{coreServiceApiBoundary?'Sürümlü zarf · uygulama bağı · freshness · replay koruması':'API sınırı yanıtı alınamadı'}</span></article><article className="stat-card"><small>Zamanlayıcı</small><strong>{scheduler?.active?'Etkin':'Kapalı'}</strong><span>{scheduler?.lastCycleAt?`Son tur ${formatDate(scheduler.lastCycleAt,{hour:'2-digit',minute:'2-digit'})}`:'Oturum açılınca çalışır'}</span></article><article className="stat-card"><small>24 saatlik eğilim</small><strong>{trendLabel}</strong><span>CPU %{trend?.averageCpuPercent??0} · RAM %{trend?.averageMemoryPercent??0}</span></article><article className="stat-card"><small>Veri büyümesi</small><strong>{bytes((trend?.databaseGrowthBytes??0)+(trend?.archiveGrowthBytes??0))}</strong><span>{trend?.sampleCount??0} örnek değerlendirildi</span></article></div>}
-  <Surface className="workspace-summary"><SectionHeader eyebrow="PPK-015 · ağ çıkış güvenliği" title="Allowlist, TLS/mTLS ve sertifika rotasyonu"/><div className="notes-card"><strong>{networkEgressBoundary?.enforcement==='fail-closed'?'Fail-closed egress politikası etkin':'Ağ çıkış sınırı doğrulanamadı'}</strong><small>Yalnız kayıtlı iptal-listesi uç noktası · {networkEgressBoundary?.minimumTlsVersion??'TLS doğrulanamadı'} · SPKI çift-pin rotasyonu</small><small>mTLS {networkEgressBoundary?.mutualTlsSupported?'destekleniyor':'doğrulanamadı'} · yönlendirme {networkEgressBoundary?.redirectAllowed===false?'kapalı':'bilinmiyor'} · özel/yerel adresler {networkEgressBoundary?.privateAddressRejected?'reddediliyor':'bilinmiyor'}</small><small>{networkEgressBoundary?.authorizedAdapterCount??0} yetkili adaptör · {networkEgressBoundary?.directPrimitiveExceptionCount??0} doğrudan ağ istisnası</small></div></Surface>
+  <Surface className="workspace-summary"><SectionHeader eyebrow="PPK-015 · ağ çıkış güvenliği" title="Allowlist, TLS/mTLS ve sertifika rotasyonu"/><div className="notes-card"><strong>{networkEgressBoundary?.enforcement==='fail-closed'?'Fail-closed egress politikası etkin':'Ağ çıkış sınırı doğrulanamadı'}</strong><small>Yalnız kayıtlı iptal-listesi, OIDC token ve JWKS uç noktaları · {networkEgressBoundary?.minimumTlsVersion??'TLS doğrulanamadı'} · SPKI çift-pin rotasyonu</small><small>mTLS {networkEgressBoundary?.mutualTlsSupported?'destekleniyor':'doğrulanamadı'} · yönlendirme {networkEgressBoundary?.redirectAllowed===false?'kapalı':'bilinmiyor'} · özel/yerel adresler {networkEgressBoundary?.privateAddressRejected?'reddediliyor':'bilinmiyor'}</small><small>{networkEgressBoundary?.authorizedAdapterCount??0} yetkili adaptör · {networkEgressBoundary?.directPrimitiveExceptionCount??0} doğrudan ağ istisnası</small></div></Surface>
   <Surface className="workspace-summary"><SectionHeader eyebrow="PPK-016 · türetilmiş veri güvenliği" title="Kaynak politika mirası ve değişmez soy zinciri"/><div className="notes-card"><strong>{derivedDataPolicyBoundary?.enforcement==='fail-closed'?'Fail-closed politika mirası etkin':'Türetilmiş veri sınırı doğrulanamadı'}</strong><small>En çok {derivedDataPolicyBoundary?.maximumSourceCount??0} kaynak · {derivedDataPolicyBoundary?.maximumLineageDepth??0} soy derinliği · kaynak erişim politikalarının zorunlu kesişimi</small><small>Hassasiyet düşürme {derivedDataPolicyBoundary?.sensitivityDowngradeAllowed===false?'yasak':'doğrulanamadı'} · erişim genişletme {derivedDataPolicyBoundary?.accessBroadeningAllowed===false?'yasak':'doğrulanamadı'}</small><small>{derivedDataPolicyBoundary?.authorizedRepositoryAdapterCount??0} yetkili adaptör · {derivedDataPolicyBoundary?.directAccessExceptionCount??0} doğrudan erişim istisnası · içerik/yol {derivedDataPolicyBoundary?.payloadExposed===false&&derivedDataPolicyBoundary?.persistentPathExposed===false?'açığa çıkarılmıyor':'doğrulanamadı'}</small></div></Surface>
   <Surface className="workspace-summary"><SectionHeader eyebrow="PPK-017 · hassas log güvenliği" title="İçeriksiz log ve tanı sınırı"/><div className="notes-card"><strong>{sensitiveLoggingBoundary?.enforcement==='fail-closed'?'Fail-closed hassas log politikası etkin':'Hassas log sınırı doğrulanamadı'}</strong><small>OCR metni ve payload {sensitiveLoggingBoundary?.ocrTextAllowed===false&&sensitiveLoggingBoundary?.payloadAllowed===false?'yasak':'doğrulanamadı'} · keyfi mesaj/stack {sensitiveLoggingBoundary?.arbitraryMessageAllowed===false&&sensitiveLoggingBoundary?.errorStackAllowed===false?'yasak':'doğrulanamadı'}</small><small>Tanı kaynak metni {sensitiveLoggingBoundary?.diagnosticTextStored===false&&sensitiveLoggingBoundary?.diagnosticSourceTextHashed?'saklanmıyor; yalnız SHA-256':'doğrulanamadı'} · masaüstü sink {sensitiveLoggingBoundary?.protectedDesktopSinkRequired?'cihaz korumalı':'doğrulanamadı'}</small><small>İzinli metadata: kimlik · hash · sonuç · correlation · sayaç · zaman · sürüm</small></div></Surface>
   <Surface className="workspace-summary"><SectionHeader eyebrow="PPK-018 · değişmez karar denetimi" title="Policy karar audit zinciri"/><div className="notes-card"><strong>{policyDecisionAuditBoundary?.status==='verified'&&policyDecisionAuditBoundary.enforcement==='fail-closed'?'Korumalı karar zinciri doğrulandı':'Karar audit zinciri doğrulanamadı'}</strong><small>İzin ve ret kararları {policyDecisionAuditBoundary?.allowedDecisionsRecorded&&policyDecisionAuditBoundary?.deniedDecisionsRecorded?'birlikte kaydediliyor':'doğrulanamadı'} · ret nedeni {policyDecisionAuditBoundary?.denialReasonRequired?'zorunlu':'doğrulanamadı'}</small><small>Policy sürümü ve yükümlülükler {policyDecisionAuditBoundary?.obligationsRecordedExactly?'exact bağlı':'doğrulanamadı'} · zincir {policyDecisionAuditBoundary?.appendOnly&&policyDecisionAuditBoundary?.hmacSha256Chained?'append-only HMAC-SHA-256':'doğrulanamadı'}</small><small>{policyDecisionAuditBoundary?.auditedEntryCount??0} yeni audit kaydı · {policyDecisionAuditBoundary?.legacyReceiptEntryCount??0} tarihsel receipt · istemciye payload verilmez</small></div></Surface>
@@ -1278,6 +1296,357 @@ function PrivacyOwnershipCenter() {
   </section>;
 }
 
+interface IdentityAccessRegistrationResponseInput {
+  readonly credentialId: string;
+  readonly clientDataJsonBase64url: string;
+  readonly attestationObjectBase64url: string;
+  readonly transports: readonly PasskeyTransport[];
+}
+
+interface IdentityAccessAuthenticationResponseInput {
+  readonly credentialId: string;
+  readonly clientDataJsonBase64url: string;
+  readonly authenticatorDataBase64url: string;
+  readonly signatureBase64url: string;
+  readonly userHandleBase64url?: string;
+}
+
+interface PendingIdentityOperation<TPayload=unknown> {
+  readonly clientOperationId:string;
+  readonly tokenExpiresAt:string;
+  readonly expectedRevision:number;
+  readonly payload?:TPayload;
+}
+
+type ResolvedIdentityOperation<TPayload> = PendingIdentityOperation<TPayload>&{readonly payload:TPayload};
+
+interface PendingPasskeyRegistrationPayload {
+  readonly challenge:PasskeyChallengeView;
+  readonly displayName:string;
+  readonly response?:IdentityAccessRegistrationResponseInput;
+}
+
+interface PendingPasskeyAuthenticationPayload {
+  readonly challenge:PasskeyChallengeView;
+  readonly credentialId:string;
+  readonly response?:IdentityAccessAuthenticationResponseInput;
+}
+
+interface PendingFederatedIdentityPayload {
+  readonly ceremony:FederatedAuthorizationCeremonyView;
+}
+
+interface PendingTemporaryCredentialPayload {
+  readonly kind:TemporaryCredentialKind;
+  readonly purpose:(typeof TEMPORARY_CREDENTIAL_PURPOSE_BY_KIND)[TemporaryCredentialKind];
+  readonly audienceReference:string;
+  readonly disclosedClaims:readonly {readonly key:TemporaryCredentialClaimKey;readonly value:string}[];
+  readonly notBefore:ReturnType<typeof asIsoDateTime>;
+  readonly expiresAt:ReturnType<typeof asIsoDateTime>;
+}
+
+interface PendingLostPasskeyPayload {
+  readonly credentialId:string;
+}
+
+const identityAccessBridge=()=>window.pardus??null;
+
+const bufferToBase64url=(value:ArrayBuffer):string=>{
+  const bytes=new Uint8Array(value);let binary='';
+  for(let offset=0;offset<bytes.length;offset+=8_192)binary+=String.fromCharCode(...bytes.subarray(offset,offset+8_192));
+  return globalThis.btoa(binary).replace(/\+/gu,'-').replace(/\//gu,'_').replace(/=+$/gu,'');
+};
+
+const base64urlToBytes=(value:string):ArrayBuffer=>{
+  const canonical=value.replace(/-/gu,'+').replace(/_/gu,'/');
+  const binary=globalThis.atob(canonical.padEnd(Math.ceil(canonical.length/4)*4,'='));
+  return Uint8Array.from(binary,character=>character.charCodeAt(0)).buffer;
+};
+
+const passkeyTransport=(value:string):value is PasskeyTransport=>['internal','usb','nfc','ble','hybrid'].includes(value);
+
+const passkeyTimeout=(expiresAt:string):number=>Math.max(1_000,Math.min(300_000,Date.parse(expiresAt)-Date.now()));
+
+const challengeForPasskey=async(challenge:PasskeyChallengeView,credentialIdSha256:string):Promise<PasskeyChallengeView>=>{
+  for(const credentialId of challenge.allowedCredentialIds){
+    const digest=new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256',base64urlToBytes(credentialId)));
+    if(Array.from(digest,byte=>byte.toString(16).padStart(2,'0')).join('')===credentialIdSha256.toLowerCase()){
+      return Object.freeze({...challenge,allowedCredentialIds:Object.freeze([credentialId])});
+    }
+  }
+  throw new Error('Seçilen passkey bu WebAuthn challenge içinde bulunamadı; farklı bir credential ile doğrulama yapılmadı.');
+};
+
+const createPasskeyRegistrationResponse=async(challenge:PasskeyChallengeView,center:IdentityAccessCredentialCenterView):Promise<IdentityAccessRegistrationResponseInput>=>{
+  if(!globalThis.navigator?.credentials)throw new Error('Bu cihazda WebAuthn kullanılamıyor; hiçbir passkey kaydı oluşturulmadı.');
+  const credential=await globalThis.navigator.credentials.create({publicKey:{
+    challenge:base64urlToBytes(challenge.challenge),
+    rp:{id:challenge.relyingPartyId,name:'Anadolu Parsı Aile Yaşam Merkezi'},
+    user:{id:new TextEncoder().encode(String(center.key.accountId)),name:String(center.key.accountId),displayName:'Yerel aile hesabı'},
+    pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+    timeout:passkeyTimeout(challenge.expiresAt),attestation:'none',
+    authenticatorSelection:{residentKey:challenge.residentKey,userVerification:challenge.userVerification},
+    excludeCredentials:challenge.allowedCredentialIds.map(id=>({type:'public-key' as const,id:base64urlToBytes(id)}))
+  }});
+  if(!(credential instanceof PublicKeyCredential)||!(credential.response instanceof AuthenticatorAttestationResponse))throw new Error('Passkey kayıt töreni kullanıcı tarafından tamamlanmadı.');
+  const response=credential.response;
+  return Object.freeze({
+    credentialId:bufferToBase64url(credential.rawId),
+    clientDataJsonBase64url:bufferToBase64url(response.clientDataJSON),
+    attestationObjectBase64url:bufferToBase64url(response.attestationObject),
+    transports:Object.freeze((typeof response.getTransports==='function'?response.getTransports():[]).filter(passkeyTransport))
+  });
+};
+
+const createPasskeyAuthenticationResponse=async(challenge:PasskeyChallengeView):Promise<IdentityAccessAuthenticationResponseInput>=>{
+  if(!globalThis.navigator?.credentials)throw new Error('Bu cihazda WebAuthn kullanılamıyor; doğrulama yapılmadı.');
+  const credential=await globalThis.navigator.credentials.get({publicKey:{
+    challenge:base64urlToBytes(challenge.challenge),rpId:challenge.relyingPartyId,
+    timeout:passkeyTimeout(challenge.expiresAt),userVerification:challenge.userVerification,
+    allowCredentials:challenge.allowedCredentialIds.map(id=>({type:'public-key' as const,id:base64urlToBytes(id)}))
+  }});
+  if(!(credential instanceof PublicKeyCredential)||!(credential.response instanceof AuthenticatorAssertionResponse))throw new Error('Passkey doğrulama töreni tamamlanmadı.');
+  const response=credential.response;
+  return Object.freeze({
+    credentialId:bufferToBase64url(credential.rawId),
+    clientDataJsonBase64url:bufferToBase64url(response.clientDataJSON),
+    authenticatorDataBase64url:bufferToBase64url(response.authenticatorData),
+    signatureBase64url:bufferToBase64url(response.signature),
+    ...(response.userHandle?{userHandleBase64url:bufferToBase64url(response.userHandle)}:{})
+  });
+};
+
+const temporaryKindOptions:readonly {readonly kind:TemporaryCredentialKind;readonly label:string}[]=Object.freeze([
+  {kind:'school_pickup',label:'Okuldan teslim alma'},
+  {kind:'temporary_caregiver',label:'Geçici bakım veren'},
+  {kind:'pet_caregiver',label:'Evcil hayvan bakım veren'},
+  {kind:'emergency_contact_health',label:'Acil kişi sağlık özeti'},
+  {kind:'event_invitation',label:'Etkinlik daveti'},
+  {kind:'temporary_home_access',label:'Geçici ev erişimi'}
+]);
+
+const temporaryClaimLabels:Readonly<Record<TemporaryCredentialClaimKey,string>>=Object.freeze({
+  subject_display_name:'Konu kişi adı',authorized_person_display_name:'Yetkili kişi adı',caregiver_display_name:'Bakım veren adı',
+  pet_display_name:'Evcil hayvan adı',school_name:'Okul adı',emergency_contact_name:'Acil kişi adı',
+  emergency_contact_phone:'Acil kişi telefonu',allergy_summary:'Alerji özeti',critical_medication_summary:'Kritik ilaç özeti',
+  event_title:'Etkinlik başlığı',valid_location_label:'Geçerli konum',contact_phone:'İletişim telefonu'
+});
+
+const federatedProviderLabels:Readonly<Record<FederatedIdentityProvider,string>>=Object.freeze({apple:'Apple',google:'Google',microsoft:'Microsoft'});
+
+function IdentityAccessCredentialCenter({trustedDevices}:{trustedDevices:readonly TrustedDeviceView[]}) {
+  const [center,setCenter]=useState<IdentityAccessCredentialCenterView|null>(null);
+  const [providers,setProviders]=useState<ExternalIdentityProviderView[]>([]);
+  const [phase,setPhase]=useState<'loading'|'ready'|'error'>('loading');
+  const [busy,setBusy]=useState('');
+  const [message,setMessage]=useState('');
+  const [passkeyName,setPasskeyName]=useState('Bu cihazın passkey anahtarı');
+  const [lostPasskeyId,setLostPasskeyId]=useState('');
+  const [recoveryMethod,setRecoveryMethod]=useState<'windows_hello'|'password_fallback'>('windows_hello');
+  const [recoveryPassword,setRecoveryPassword]=useState('');
+  const [recoverySecondFactorCode,setRecoverySecondFactorCode]=useState('');
+  const [federatedFlow,setFederatedFlow]=useState<{readonly ceremony:FederatedAuthorizationCeremonyView;readonly clientOperationId:string}|null>(null);
+  const [temporaryKind,setTemporaryKind]=useState<TemporaryCredentialKind>('school_pickup');
+  const [temporaryAudience,setTemporaryAudience]=useState('');
+  const [temporaryExpiresAt,setTemporaryExpiresAt]=useState('');
+  const [temporaryClaims,setTemporaryClaims]=useState<Partial<Record<TemporaryCredentialClaimKey,string>>>({});
+  const [temporaryValidation,setTemporaryValidation]=useState<ValidationIssue[]>([]);
+  const [issuedTemporary,setIssuedTemporary]=useState<IssuedTemporaryVerifiableCredentialView|null>(null);
+  const [qrPayload,setQrPayload]=useState('');
+  const [verification,setVerification]=useState<TemporaryCredentialVerificationView|null>(null);
+  const [companionDeviceId,setCompanionDeviceId]=useState('');
+  const [knownSourceVersion,setKnownSourceVersion]=useState('');
+  const [companionResult,setCompanionResult]=useState<ReadOnlyCompanionSnapshotView|CompanionSyncDenialView|null>(null);
+  const pendingOperations=useRef(new Map<string,PendingIdentityOperation>());
+  const loadGuard=useRef(new AsyncWriteGuard());
+
+  const load=async()=>{
+    const bridge=identityAccessBridge();
+    if(!bridge||!window.pardus){setMessage('Kimlik ve yetki bridge’i kullanılamıyor.');setPhase('error');return;}
+    const ticket=loadGuard.current.start('identity-access-center');setPhase('loading');
+    try{
+      const [nextCenter,nextProviders]=await Promise.all([bridge.getIdentityAccessCredentialCenter(),window.pardus.getExternalIdentityProviders()]);
+      loadGuard.current.commit(ticket,()=>{setCenter(nextCenter);setProviders(nextProviders.filter(item=>item.configured));setLostPasskeyId(current=>nextCenter.passkeys.some(item=>item.id===current&&item.status==='active')?current:nextCenter.passkeys.find(item=>item.status==='active')?.id??'');setPhase('ready');});
+    }catch(error){loadGuard.current.commit(ticket,()=>{setMessage(error instanceof Error?error.message:'Kimlik ve yetki merkezi yüklenemedi.');setPhase('error');});}
+  };
+  useEffect(()=>{void load();return()=>loadGuard.current.invalidate('identity-access-center');},[]);
+  useEffect(()=>{if(!companionDeviceId){const first=trustedDevices.find(item=>!item.revokedAt);if(first)setCompanionDeviceId(first.id);}},[trustedDevices,companionDeviceId]);
+
+  const stableOperation=async(key:string,expectedRevision:number,operationKind:IdentityAccessOperationKind):Promise<PendingIdentityOperation>=>{
+    const current=pendingOperations.current.get(key);
+    if(current&&Date.parse(current.tokenExpiresAt)>Date.now())return current;
+    pendingOperations.current.delete(key);
+    const bridge=identityAccessBridge();if(!bridge)throw new Error('Main-issued operation token bridge kullanılamıyor.');
+    const issued=await bridge.issueIdentityAccessOperationToken(operationKind);
+    const operation=Object.freeze({clientOperationId:issued.clientOperationId,tokenExpiresAt:issued.expiresAt,expectedRevision});
+    pendingOperations.current.set(key,operation);return operation;
+  };
+  const rememberOperation=<TPayload,>(key:string,operation:PendingIdentityOperation,payload:TPayload):ResolvedIdentityOperation<TPayload>=>{
+    const next=Object.freeze({clientOperationId:operation.clientOperationId,tokenExpiresAt:operation.tokenExpiresAt,expectedRevision:operation.expectedRevision,payload});
+    pendingOperations.current.set(key,next);return next;
+  };
+  const runMutation=async(key:string,expectedRevision:number,run:(operation:PendingIdentityOperation)=>Promise<unknown>,success:string)=>{
+    if(busy)return;setBusy(key);setMessage('');
+    try{
+      const operationKind:IdentityAccessOperationKind=key.startsWith('passkey:revoke:')?'passkey_revoke'
+        :key.startsWith('federated:unlink:')?'federated_unlink':'temporary_credential_revoke';
+      const operation=await stableOperation(key,expectedRevision,operationKind);await run(operation);pendingOperations.current.delete(key);setMessage(success);await load();
+    }
+    catch(error){setMessage(error instanceof Error?`${error.message} Aynı işlem kimliği ve özgün revizyonla yeniden deneyebilirsiniz.`:'İşlem tamamlanamadı; yeniden deneme kimliği korundu.');}
+    finally{setBusy('');}
+  };
+
+  const registerPasskey=async()=>{
+    const bridge=identityAccessBridge();if(!bridge||!center||busy||passkeyName.trim().length<2)return;
+    const key='passkey:register';setBusy(key);setMessage('');
+    try{
+      let operation=await stableOperation(key,0,'passkey_register') as PendingIdentityOperation<PendingPasskeyRegistrationPayload>;
+      if(operation.payload&&Date.parse(operation.payload.challenge.expiresAt)<=Date.now()){
+        pendingOperations.current.delete(key);operation=await stableOperation(key,0,'passkey_register') as PendingIdentityOperation<PendingPasskeyRegistrationPayload>;
+      }
+      let payload=operation.payload;
+      if(!payload){
+        const challenge=await bridge.beginPasskeyRegistration({clientOperationId:operation.clientOperationId});
+        payload=Object.freeze({challenge,displayName:passkeyName.trim()});operation=rememberOperation(key,operation,payload);
+      }
+      if(!payload.response){
+        const response=await createPasskeyRegistrationResponse(payload.challenge,center);
+        payload=Object.freeze({...payload,response});operation=rememberOperation(key,operation,payload);
+      }
+      const response=payload.response;
+      if(!response)throw new Error('Passkey kayıt yanıtı güvenli yeniden deneme durumuna alınamadı.');
+      await bridge.completePasskeyRegistration({expectedRevision:operation.expectedRevision,clientOperationId:operation.clientOperationId,challengeId:payload.challenge.challengeId,displayName:payload.displayName,response,confirmation:'PASSKEY KAYDINI TAMAMLA'});
+      pendingOperations.current.delete(key);setMessage('Passkey töreni yerel olarak doğrulandı; özel anahtar ve biyometrik veri uygulamaya gelmedi.');await load();
+    }catch(error){setMessage(error instanceof Error?`${error.message} Süresi dolmamış challenge, tören yanıtı ve işlem kimliği yeniden deneme için korundu.`:'Passkey kaydı tamamlanamadı; challenge ve tekrar kimliği korundu.');}
+    finally{setBusy('');}
+  };
+
+  const authenticatePasskey=async(passkey:IdentityAccessCredentialCenterView['passkeys'][number])=>{
+    const bridge=identityAccessBridge();if(!bridge||busy)return;const key=`passkey:assert:${passkey.id}`;
+    setBusy(key);setMessage('');
+    try{
+      let operation=await stableOperation(key,passkey.revision,'passkey_authenticate') as PendingIdentityOperation<PendingPasskeyAuthenticationPayload>;
+      if(operation.payload&&Date.parse(operation.payload.challenge.expiresAt)<=Date.now()){
+        pendingOperations.current.delete(key);operation=await stableOperation(key,passkey.revision,'passkey_authenticate') as PendingIdentityOperation<PendingPasskeyAuthenticationPayload>;
+      }
+      let payload=operation.payload;
+      if(!payload){
+        const receivedChallenge=await bridge.beginPasskeyAuthentication({clientOperationId:operation.clientOperationId});
+        const challenge=await challengeForPasskey(receivedChallenge,passkey.credentialIdSha256);
+        payload=Object.freeze({challenge,credentialId:passkey.id});operation=rememberOperation(key,operation,payload);
+      }
+      if(!payload.response){
+        const response=await createPasskeyAuthenticationResponse(payload.challenge);
+        payload=Object.freeze({...payload,response});operation=rememberOperation(key,operation,payload);
+      }
+      const response=payload.response;
+      if(!response)throw new Error('Passkey doğrulama yanıtı güvenli yeniden deneme durumuna alınamadı.');
+      await bridge.authenticateWithPasskey({expectedRevision:operation.expectedRevision,clientOperationId:operation.clientOperationId,credentialId:payload.credentialId,challengeId:payload.challenge.challengeId,response,confirmation:'PASSKEY ILE DOGRULA'});
+      pendingOperations.current.delete(key);setMessage('Passkey imzası, kullanıcı varlığı ve kullanıcı doğrulaması yerel olarak doğrulandı.');await load();
+    }catch(error){setMessage(error instanceof Error?`${error.message} Süresi dolmamış challenge ve aynı doğrulama kimliği yeniden deneme için korundu.`:'Passkey doğrulaması tamamlanamadı; challenge korundu.');}
+    finally{setBusy('');}
+  };
+
+  const recoverLostPasskey=async(credentialId:string,revision:number)=>{
+    const bridge=identityAccessBridge();if(!bridge||busy||(recoveryMethod==='password_fallback'&&!recoveryPassword))return;
+    const key=`passkey:recover:${credentialId}`;
+    setBusy(key);setMessage('');
+    try{
+      let operation=await stableOperation(key,revision,'passkey_recover_lost') as PendingIdentityOperation<PendingLostPasskeyPayload>;
+      let payload=operation.payload;
+      if(!payload){
+        payload=Object.freeze({credentialId});operation=rememberOperation(key,operation,payload);
+      }
+      const fallback=recoveryMethod==='password_fallback'
+        ? {password:recoveryPassword,...(recoverySecondFactorCode.trim()?{secondFactorCode:recoverySecondFactorCode.trim()}: {})}
+        : undefined;
+      await bridge.recoverLostPasskey({expectedRevision:operation.expectedRevision,clientOperationId:operation.clientOperationId,credentialId:payload.credentialId,...(fallback?{fallback}: {}),confirmation:'KAYIP PASSKEY KURTARMASINI BASLAT'});
+      pendingOperations.current.delete(key);setMessage('Güçlü yerel yeniden doğrulama tamamlandı; kayıp passkey yetkisi, güvenlik dönemi ve yerel oturumlar kapatıldı.');await load();
+    }catch(error){setMessage(error instanceof Error?`${error.message} İşlem kimliği korundu; parola fallback kullanıyorsanız sırrı yeniden girin.`:'Kayıp passkey kurtarması tamamlanamadı; işlem kimliği korundu, sır saklanmadı.');}
+    finally{setRecoveryPassword('');setRecoverySecondFactorCode('');setBusy('');}
+  };
+
+  const startFederated=async(provider:FederatedIdentityProvider)=>{
+    const bridge=identityAccessBridge();if(!bridge||busy)return;const key=`federated:start:${provider}`;setBusy(key);setMessage('');
+    try{
+      let operation=await stableOperation(key,0,'federated_link') as PendingIdentityOperation<PendingFederatedIdentityPayload>;
+      if(operation.payload&&Date.parse(operation.payload.ceremony.expiresAt)<=Date.now()){
+        pendingOperations.current.delete(key);operation=await stableOperation(key,0,'federated_link') as PendingIdentityOperation<PendingFederatedIdentityPayload>;
+      }
+      let payload=operation.payload;
+      if(!payload){const ceremony=await bridge.beginFederatedIdentityLink({clientOperationId:operation.clientOperationId,provider});payload=Object.freeze({ceremony});operation=rememberOperation(key,operation,payload);}
+      setFederatedFlow({ceremony:payload.ceremony,clientOperationId:operation.clientOperationId});setMessage('Authorization Code + PKCE töreni hazır. Sağlayıcı dönüşü yalnız ana süreçte yakalanır; kullanılabilirlik veya ağ teslimi garanti edilmez.');
+    }
+    catch(error){setMessage(error instanceof Error?`${error.message} Yapılandırma veya canlı sağlayıcı kanıtı yoksa bağlantı kapalı kalır.`:'Federated kimlik töreni başlatılamadı.');}
+    finally{setBusy('');}
+  };
+
+  const completeFederated=async()=>{
+    const bridge=identityAccessBridge();if(!bridge||!federatedFlow||busy)return;const {ceremony}=federatedFlow;const key=`federated:start:${ceremony.provider}`;const operation=pendingOperations.current.get(key) as PendingIdentityOperation<PendingFederatedIdentityPayload>|undefined;if(!operation?.payload)return;setBusy(key);setMessage('');
+    try{
+      const payload=operation.payload;
+      await bridge.completeFederatedIdentityLink({expectedRevision:operation.expectedRevision,clientOperationId:operation.clientOperationId,provider:payload.ceremony.provider,flowId:payload.ceremony.flowId,confirmation:'FEDERATED KIMLIGI BAGLA'});pendingOperations.current.delete(key);setFederatedFlow(null);setMessage('Canlı hesap yalnız ana süreç callback yakalama, token exchange, imza, issuer, audience, state ve nonce doğrulamasından sonra bağlandı.');await load();
+    }
+    catch(error){const detail=error instanceof Error?error.message:'Ana süreç federated callback’i henüz yakalamadı veya doğrulayamadı.';if(!detail.includes('[OIDC_CALLBACK_NOT_CAPTURED]')){pendingOperations.current.delete(key);setFederatedFlow(null);}setMessage(detail.includes('[OIDC_CALLBACK_NOT_CAPTURED]')?`${detail} Sağlayıcıdan uygulamaya döndükten sonra aynı işlem kimliğiyle yeniden deneyebilirsiniz.`:`${detail} Authorization code tek kullanımlı olduğundan yeni bir PKCE akışı başlatın.`);}
+    finally{setBusy('');}
+  };
+
+  const issueTemporary=async()=>{
+    const bridge=identityAccessBridge();if(!bridge||busy)return;const rules=TEMPORARY_CREDENTIAL_DISCLOSURE_RULES[temporaryKind];const expires=new Date(temporaryExpiresAt);const issues:ValidationIssue[]=[];
+    if(!temporaryAudience.trim())issues.push({fieldId:'temporary-audience',message:'Hedef kişi veya bağlam zorunludur.'});
+    if(!temporaryExpiresAt||Number.isNaN(expires.getTime())||expires.getTime()<=Date.now())issues.push({fieldId:'temporary-expiry',message:'Gelecekte bir bitiş zamanı seçin.'});
+    for(const claim of rules.required)if(!temporaryClaims[claim]?.trim())issues.push({fieldId:`temporary-claim-${claim}`,message:`${temporaryClaimLabels[claim]} zorunludur.`});
+    setTemporaryValidation(issues);if(issues.length)return;
+    const key=`temporary:issue:${temporaryKind}`;setBusy('temporary:issue');setMessage('');
+    try{
+      let operation=await stableOperation(key,0,'temporary_credential_issue') as PendingIdentityOperation<PendingTemporaryCredentialPayload>;
+      let payload=operation.payload;
+      if(!payload){
+        const disclosedClaims=Object.freeze(rules.allowed.flatMap(claimKey=>{const value=temporaryClaims[claimKey]?.trim();return value?[Object.freeze({key:claimKey,value})]:[];}));
+        payload=Object.freeze({kind:temporaryKind,purpose:TEMPORARY_CREDENTIAL_PURPOSE_BY_KIND[temporaryKind],audienceReference:temporaryAudience.trim(),disclosedClaims,notBefore:asIsoDateTime(new Date().toISOString()),expiresAt:asIsoDateTime(expires.toISOString())});operation=rememberOperation(key,operation,payload);
+      }
+      const result=await bridge.issueTemporaryVerifiableCredential({expectedRevision:operation.expectedRevision,clientOperationId:operation.clientOperationId,kind:payload.kind,purpose:payload.purpose,audienceReference:payload.audienceReference,disclosedClaims:payload.disclosedClaims,notBefore:payload.notBefore,expiresAt:payload.expiresAt,confirmation:'GECICI YETKI BELGESI OLUSTUR'});pendingOperations.current.delete(key);setIssuedTemporary(result.issued??null);if(result.issued)setQrPayload(result.issued.qrPayload);setMessage(result.issued?'Minimum disclosure içeren, süreli ve çevrimdışı doğrulanabilir QR payload oluşturuldu.':'Aynı işlem daha önce kaydedildi; güvenlik nedeniyle QR payload yeniden gösterilmedi.');await load();
+    }
+    catch(error){setMessage(error instanceof Error?`${error.message} İlk hedef, disclosure, süre ve aynı işlem kimliği yeniden deneme için korundu.`:'Geçici yetki belgesi oluşturulamadı; ilk niyet korundu.');}
+    finally{setBusy('');}
+  };
+
+  const verifyTemporary=async()=>{
+    const bridge=identityAccessBridge();if(!bridge||!qrPayload.trim()||!temporaryAudience.trim()||busy)return;setBusy('temporary:verify');setMessage('');
+    try{const result=await bridge.verifyTemporaryVerifiableCredential({qrPayload:qrPayload.trim(),expectedAudienceReference:temporaryAudience.trim()});setVerification(result);setMessage('Self-signed imza, süre, hedef ve minimum disclosure çevrimdışı kontrol edildi; resmi kimlik ve uzak iptal güncelliği garanti edilmez.');}
+    catch(error){setVerification(null);setMessage(error instanceof Error?error.message:'QR payload çevrimdışı doğrulanamadı.');}
+    finally{setBusy('');}
+  };
+
+  const createCompanion=async(requestedMode:'read_only'|'write')=>{
+    const bridge=identityAccessBridge();if(!bridge||!companionDeviceId||busy)return;const version=knownSourceVersion.trim()?Number(knownSourceVersion):undefined;const key=`companion:${requestedMode}:${companionDeviceId}:${version??'current'}`;setBusy(key);setMessage('');
+    try{const operation=await stableOperation(key,0,'companion_snapshot_create');const result=await bridge.createReadOnlyCompanionSnapshot({clientOperationId:operation.clientOperationId,trustedDeviceId:companionDeviceId,requestedMode,...(version===undefined?{}:{knownSourceVersion:version}),confirmation:'SALT OKUNUR ESLIKCI KOPYASI OLUSTUR'});pendingOperations.current.delete(key);setCompanionResult(result);setMessage(result.status==='snapshot_ready'?'Şifreli salt okunur kopya yerel olarak hazırlandı; ağ teslimi yapılmadı.':'Yazma veya eski sürüm isteği reddedildi; Windows tek yazardır.');if(result.status==='snapshot_ready')await load();}
+    catch(error){setMessage(error instanceof Error?`${error.message} Aynı snapshot kimliğiyle yeniden deneyebilirsiniz.`:'Companion snapshot oluşturulamadı.');}
+    finally{setBusy('');}
+  };
+
+  if(phase==='loading')return <AsyncStatePanel state="loading" title="Kimlik ve geçici yetki merkezi yükleniyor" message="Passkey, bağlı hesap, süreli belge ve companion metadata görünümü hazırlanıyor."/>;
+  if(phase==='error')return <AsyncStatePanel state="error" title="Kimlik ve geçici yetki merkezi yüklenemedi" message={message||'Yetkili yerel görünüm kurulamadı.'} onRetry={load}/>;
+  if(!center)return <AsyncStatePanel state="empty" title="Kimlik ve geçici yetki merkezi boş" message="Bu hesap için yetkili yerel görünüm bulunamadı."/>;
+  const allEmpty=center.passkeys.length===0&&center.federatedLinks.length===0&&center.temporaryCredentials.length===0&&center.companionSnapshots.length===0;
+  const activePasskeys=center.passkeys.filter(item=>item.status==='active');
+  const configuredProviders=providers.filter(item=>item.configured);
+  const currentRules=TEMPORARY_CREDENTIAL_DISCLOSURE_RULES[temporaryKind];
+  const activeDevices=trustedDevices.filter(item=>!item.revokedAt);
+  return <section className="identity-access-center" aria-label="Kimlik, passkey ve geçici yetki merkezi" aria-describedby="identity-access-description">
+    <SectionHeader eyebrow="B2-02 · B6-06 · B6-07" title="Kimlik, passkey ve geçici yetki merkezi" action={<Button disabled={Boolean(busy)} onClick={()=>void load()}>Merkezi yenile</Button>}/>
+    <p id="identity-access-description">Bu tek merkez yalnız yerel olarak doğrulanmış tören metadata’sını yönetir. Biyometrik veri veya passkey özel anahtarı uygulamaya gelmez; uzak attestation, resmi kimlik veya hukuk sertifikasyonu yapılmaz. Sağlayıcı kullanılabilirliği, uzak iptal güncelliği ve ağ teslimi garanti edilmez.</p>
+    <div className="identity-truth-strip" role="list" aria-label="Kimlik ve yetki sınırları"><span role="listitem">Özel anahtar saklanmaz</span><span role="listitem">Biyometrik veri saklanmaz</span><span role="listitem">Token baytları gösterilmez</span><span role="listitem">Windows tek yazardır</span></div>
+    {allEmpty&&<AsyncStatePanel state="empty" title="Henüz kimlik veya geçici yetki kaydı yok" message="Aşağıdaki yerel, açık onaylı işlemlerden birini başlatabilirsiniz."/>}
+    <div className="identity-access-grid">
+      <section className="identity-access-card"><h3>Passkey ve cihaz doğrulaması</h3><p>WebAuthn kullanıcı varlığı ve doğrulaması ister. Uygulama biyometrik örnek istemez, yakalamaz veya saklamaz.</p><label>Passkey adı<input value={passkeyName} maxLength={120} onChange={event=>setPasskeyName(event.target.value)}/></label><Button tone="primary" disabled={Boolean(busy)||passkeyName.trim().length<2} onClick={()=>void registerPasskey()}>{busy==='passkey:register'?'WebAuthn bekleniyor…':'Bu cihazda passkey kaydet'}</Button>{center.passkeys.length===0?<EmptyState title="Passkey yok" body="Bu hesapta kayıtlı passkey metadata’sı bulunmuyor."/>:center.passkeys.map(item=><div className="identity-record" key={item.id}><div><strong>{item.displayName} · {item.status==='active'?'Etkin':'İptal'}</strong><small>{item.relyingPartyId} · sayaç {item.signCount} · güvenlik dönemi {item.securityEpoch}</small><small>Özel anahtar: saklanmaz · Biyometri: saklanmaz · Attestation payload: saklanmaz</small></div>{item.status==='active'&&<div className="button-row"><Button disabled={Boolean(busy)} onClick={()=>void authenticatePasskey(item)}>Passkey ile doğrula</Button><Button tone="danger" disabled={Boolean(busy)} onClick={()=>void runMutation(`passkey:revoke:${item.id}`,item.revision,operation=>identityAccessBridge()!.revokePasskey({expectedRevision:operation.expectedRevision,clientOperationId:operation.clientOperationId,credentialId:item.id,reason:'manual',confirmation:'PASSKEY YETKISINI IPTAL ET'}),'Passkey yerel yetkisi iptal edildi.')}>İptal et</Button></div>}</div>)}<fieldset><legend>Kayıp passkey kurtarma</legend><label>Etkin passkey<select value={lostPasskeyId} onChange={event=>setLostPasskeyId(event.target.value)}><option value="">Passkey seçin</option>{activePasskeys.map(item=><option value={item.id} key={item.id}>{item.displayName}</option>)}</select></label><label>Güçlü yerel yeniden doğrulama<select value={recoveryMethod} onChange={event=>setRecoveryMethod(event.target.value as 'windows_hello'|'password_fallback')}><option value="windows_hello">Windows Hello</option><option value="password_fallback">Hesap parolası fallback</option></select></label>{recoveryMethod==='password_fallback'&&<div className="identity-recovery-fallback"><label>Hesap parolası<input type="password" autoComplete="current-password" value={recoveryPassword} onChange={event=>setRecoveryPassword(event.target.value)}/></label><label>İkinci faktör kodu <small>(etkinse)</small><input inputMode="numeric" autoComplete="one-time-code" value={recoverySecondFactorCode} maxLength={256} onChange={event=>setRecoverySecondFactorCode(event.target.value)}/></label></div>}<Button tone="danger" disabled={Boolean(busy)||!lostPasskeyId||(recoveryMethod==='password_fallback'&&!recoveryPassword)} onClick={()=>{const item=activePasskeys.find(value=>value.id===lostPasskeyId);if(item)void recoverLostPasskey(item.id,item.revision);}}>{recoveryMethod==='windows_hello'?'Windows Hello ile doğrula ve yerel yetkiyi kapat':'Parola ile doğrula ve yerel yetkiyi kapat'}</Button><small>Güçlü kanıtı main process üretir; kullanıcıdan kanıt kimliği alınmaz. Bu işlem uzak cihazı silmez, MDM çalıştırmaz; yalnız yerel credential yetkisini, güvenlik dönemini ve yerel oturumları kapatır.</small></fieldset></section>
+      <section className="identity-access-card"><h3>Federated kimlik bağları</h3><p>Yalnız yapılandırılmış sağlayıcılar listelenir. Bağ ancak Authorization Code + PKCE, state, nonce, issuer, audience ve imza doğrulamasından sonra canlı kabul edilir.</p>{configuredProviders.length===0?<AsyncStatePanel state="empty" title="Yapılandırılmış sağlayıcı yok" message="Apple, Google veya Microsoft için güvenilir tam yapılandırma bulunmadığından bağlantı başlatılamaz; sağlayıcı kullanılabilirliği iddia edilmez."/>:<div className="identity-provider-list">{configuredProviders.map(provider=>{const linked=center.federatedLinks.some(item=>item.provider===provider.id&&item.status==='linked');const flowActive=federatedFlow?.ceremony.provider===provider.id;return <div className="identity-provider" key={provider.id}><div><strong>{federatedProviderLabels[provider.id]}</strong><small>{provider.productionReady?'Yapılandırma bulundu · canlı hesap kanıtı callback sonrası':'Yapılandırma bulundu · canlı hesap henüz doğrulanmadı'}</small></div><Button disabled={Boolean(busy)||linked||flowActive} onClick={()=>void startFederated(provider.id)}>{linked?'Bağlı':flowActive?'PKCE töreni açık':'PKCE bağlantısını başlat'}</Button></div>;})}</div>}{federatedFlow&&<div className="identity-ceremony"><strong>{federatedProviderLabels[federatedFlow.ceremony.provider]} töreni · S256</strong><small>Son: {formatDate(federatedFlow.ceremony.expiresAt,{dateStyle:'short',timeStyle:'short'})} · state ve nonce bağlı · code verifier şifreli kasada</small><a className="button default" href={federatedFlow.ceremony.authorizationUrl} target="_blank" rel="noreferrer">Sağlayıcı sayfasını aç</a><p>Sağlayıcı tamamlanınca <code>pardus-app://oidc</code> dönüşü yalnız ana süreçte yakalanır; code ve state renderer’a girilmez veya gösterilmez.</p><Button tone="primary" disabled={Boolean(busy)} onClick={()=>void completeFederated()}>Uygulamaya dönüşü doğrula ve bağla</Button></div>}{center.federatedLinks.length===0?<EmptyState title="Bağlı federated kimlik yok" body="Token baytları renderer’da veya yerel iş kayıtlarında gösterilmez."/>:center.federatedLinks.map(item=><div className="identity-record" key={item.id}><div><strong>{federatedProviderLabels[item.provider]} · {item.status==='linked'?'Canlı doğrulandı':'İptal'}</strong><small>{item.grantedScopes.join(', ')} · token şifreli kasada · teslim garantisi yok</small></div>{item.status==='linked'&&<Button tone="danger" disabled={Boolean(busy)} onClick={()=>void runMutation(`federated:unlink:${item.id}`,item.revision,operation=>identityAccessBridge()!.unlinkFederatedIdentity({expectedRevision:operation.expectedRevision,clientOperationId:operation.clientOperationId,linkId:item.id,confirmation:'FEDERATED KIMLIK BAGINI KALDIR'}),'Federated bağ ve yerel token yetkisi iptal edildi.')}>Bağı kaldır</Button>}</div>)}</section>
+      <section className="identity-access-card identity-temporary-card"><h3>Geçici doğrulanabilir yetkiler</h3><p>Tür, amaç ve izinli alan matrisi sabittir. Yalnız zorunlu ve sizin doldurduğunuz isteğe bağlı alanlar imzalı QR payload’a girer. Bu payload resmi kimlik veya hukuki yetki sertifikası değildir.</p><ValidationSummary issues={temporaryValidation}/><div className="identity-form-grid"><label>Yetki türü<select value={temporaryKind} onChange={event=>{setTemporaryKind(event.target.value as TemporaryCredentialKind);setTemporaryValidation([]);}}>{temporaryKindOptions.map(item=><option key={item.kind} value={item.kind}>{item.label}</option>)}</select></label><label>Amaç<input readOnly value={TEMPORARY_CREDENTIAL_PURPOSE_BY_KIND[temporaryKind]}/></label><label id="temporary-audience-label">Hedef kişi / bağlam<input id="temporary-audience" value={temporaryAudience} maxLength={160} onChange={event=>setTemporaryAudience(event.target.value)}/></label><label id="temporary-expiry-label">Bitiş zamanı<input id="temporary-expiry" type="datetime-local" value={temporaryExpiresAt} onChange={event=>setTemporaryExpiresAt(event.target.value)}/></label></div><fieldset><legend>Minimum disclosure alanları</legend><div className="temporary-claim-grid">{currentRules.allowed.map(key=><label key={key}>{temporaryClaimLabels[key]} {(currentRules.required as readonly TemporaryCredentialClaimKey[]).includes(key)?<strong aria-label="zorunlu">*</strong>:<small>isteğe bağlı</small>}<input id={`temporary-claim-${key}`} maxLength={256} value={temporaryClaims[key]??''} onChange={event=>setTemporaryClaims(current=>({...current,[key]:event.target.value}))}/></label>)}</div></fieldset><Button tone="primary" disabled={Boolean(busy)} onClick={()=>void issueTemporary()}>Süreli, imzalı QR payload oluştur</Button>{issuedTemporary&&<div className="issued-credential" role="status"><strong>QR payload hazır · {issuedTemporary.qrPayloadBytes} bayt</strong><small>Yalnız seçilen alanlar · özel imza anahtarı gösterilmez · ağ teslimi yapılmaz</small><code>{issuedTemporary.qrPayload}</code><Button onClick={()=>void navigator.clipboard.writeText(issuedTemporary.qrPayload)}>QR payload’ı kopyala</Button></div>}<h4>Çevrimdışı QR doğrulama</h4><label>QR payload<textarea rows={5} maxLength={5462} value={qrPayload} onChange={event=>setQrPayload(event.target.value.replace(/\s+/gu,''))}/></label><Button disabled={Boolean(busy)||!qrPayload.trim()} onClick={()=>void verifyTemporary()}>İmza ve süreyi çevrimdışı doğrula</Button>{verification&&<StatusMessage tone={verification.decision==='accepted_locally'?'success':verification.decision==='rejected'?'danger':'warning'}>{verification.decision} · imza {verification.signatureValid?'geçerli':'geçersiz'} · süre {verification.expired?'dolmuş':'uygun'} · yerel iptal {verification.revocationStatus} · uzak iptal güncelliği garanti edilmez</StatusMessage>}{center.temporaryCredentials.length===0?<EmptyState title="Geçici yetki yok" body="Oluşturulan belgeler süre, amaç ve minimum disclosure metadata’sıyla burada görünür."/>:center.temporaryCredentials.map(item=><div className="identity-record" key={item.id}><div><strong>{temporaryKindOptions.find(option=>option.kind===item.kind)?.label} · {item.status==='active'?'Etkin':'İptal'}</strong><small>{item.purpose} · {item.disclosedClaimKeys.length} alan · son {formatDate(item.expiresAt,{dateStyle:'short',timeStyle:'short'})}</small><small>Ed25519 · çevrimdışı imza/süre · uzak iptal güncelliği garanti edilmez</small></div>{item.status==='active'&&<Button tone="danger" disabled={Boolean(busy)} onClick={()=>void runMutation(`temporary:revoke:${item.id}`,item.revision,operation=>identityAccessBridge()!.revokeTemporaryVerifiableCredential({expectedRevision:operation.expectedRevision,clientOperationId:operation.clientOperationId,credentialId:item.id,reason:'Kullanıcının yerel geçici yetki iptali',confirmation:'GECICI YETKI BELGESINI IPTAL ET'}),'Geçici yetki yerel olarak iptal edildi; dağıtılmış kopyalarda anlık iptal garantisi yoktur.')}>Yerel yetkiyi iptal et</Button>}</div>)}</section>
+      <section className="identity-access-card"><h3>Salt okunur companion snapshot</h3><p>Windows tek yazardır. Companion yalnız şifreli, süreli ve salt okunur snapshot alabilir; uzak yazma, çatışma birleştirme veya ağ teslimi yoktur.</p>{activeDevices.length===0?<AsyncStatePanel state="empty" title="Uygun güvenilir cihaz yok" message="Snapshot için aynı hesap ve güvenlik döneminde etkin bir güvenilir cihaz gerekir."/>:<><label>Hedef güvenilir cihaz<select value={companionDeviceId} onChange={event=>setCompanionDeviceId(event.target.value)}>{activeDevices.map(item=><option value={item.id} key={item.id}>{item.displayName}{item.current?' · bu cihaz':''}</option>)}</select></label><label>Bilinen kaynak sürümü <small>(isteğe bağlı)</small><input type="number" min={0} step={1} value={knownSourceVersion} onChange={event=>setKnownSourceVersion(event.target.value)}/></label><div className="button-row"><Button tone="primary" disabled={Boolean(busy)||!companionDeviceId} onClick={()=>void createCompanion('read_only')}>Şifreli salt okunur kopya oluştur</Button><Button disabled={Boolean(busy)||!companionDeviceId} onClick={()=>void createCompanion('write')}>Yazma reddini doğrula</Button></div></>}{companionResult&&<StatusMessage tone={companionResult.status==='snapshot_ready'?'success':'warning'}>{companionResult.status==='snapshot_ready'?`Hazır · kaynak v${companionResult.sourceVersion} · ${companionResult.envelopeBytes} bayt · ağ teslimi yok`:`Reddedildi: ${companionResult.status} · güncel kaynak v${companionResult.currentSourceVersion} · uzak yazma kabul edilmez`}</StatusMessage>}{companionResult?.status==='snapshot_ready'&&<Button onClick={()=>void navigator.clipboard.writeText(companionResult.encryptedEnvelopeBase64Url)}>Şifreli envelope’u kopyala</Button>}{center.companionSnapshots.length===0?<EmptyState title="Companion snapshot yok" body="Üretilen metadata yalnız yerel merkezde listelenir; teslim sonucu iddia edilmez."/>:center.companionSnapshots.slice(0,6).map(item=><div className="identity-record" key={item.id}><div><strong>Kaynak v{item.sourceVersion} · Şema v{item.schemaVersion}</strong><small>{formatDate(item.generatedAt,{dateStyle:'short',timeStyle:'short'})} · {item.envelopeBytes} bayt · salt okunur</small></div></div>)}</section>
+    </div>{busy&&<StatusMessage tone="info">İşlem sürüyor; ikinci gönderim kilitli ve retry kimliği korunuyor.</StatusMessage>}{message&&<StatusMessage>{message}</StatusMessage>}
+  </section>;
+}
+
 function SettingsSecurity({auth,accessibility,onAccessibilityChange,onFamilyDataChanged}:{auth:AuthStateView;accessibility:AccessibilityPreferences;onAccessibilityChange:(next:AccessibilityPreferences)=>void;onFamilyDataChanged:()=>Promise<void>}) {
   const [message,setMessage]=useState('');
   const [backupInspection,setBackupInspection]=useState<BackupInspectionView|null>(null);
@@ -1414,6 +1783,7 @@ function SettingsSecurity({auth,accessibility,onAccessibilityChange,onFamilyData
 
   return <Surface className="security-center">
     <PrivacyOwnershipCenter/>
+    <IdentityAccessCredentialCenter trustedDevices={devices}/>
     <SectionHeader eyebrow="Yerel koruma" title="Güvenlik ve yedekleme"/>
     <div className="button-row"><Button onClick={()=>globalThis.dispatchEvent(new CustomEvent('ppt-replay-intro'))}>Tanıtımı yeniden oynat</Button><Button onClick={()=>{const disabled=globalThis.localStorage?.getItem(BRAND_AUDIO_DISABLED_KEY)==='1';globalThis.localStorage?.setItem(BRAND_AUDIO_DISABLED_KEY,disabled?'0':'1');setMessage(disabled?'Marka sesi açıldı.':'Marka sesi kapatıldı.');}}>Marka sesini aç/kapat</Button></div>
     <p>Oturum: {auth.displayName??'Yönetici'} · 2FA {auth.twoFactorEnabled?'açık':'kapalı'}</p>

@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "requirement": "PPK-015",
+  "status": "CURRENT_RATCHET",
+  "recordedAt": "2026-08-14",
+  "historicalClosure": {
+    "step": "32-K",
+    "decisionId": "DEC-196",
+    "latestMigrationAtClosure": 76,
+    "authorizedAdapter": "apps/desktop/src/main/secure-revocation-list-fetcher.ts",
+    "packageOwnedMigrationAdded": false,
+    "evidenceRewritten": false,
+    "scopeSha256": "343aa943907032bf1982e635a774e9aa363c72875d66fe09928d785f9a9aae50",
+    "decisionSha256": "af47dc2009e2f429c875e7c6acd723dfc511c79d7816491c5d5e92ca1f98fe13",
+    "auditSha256": "bd1590f8cb513bd5c59eda0f87f8c0a947f4716d079db58a23ff2ba9e518c326"
+  },
+  "currentBoundary": {
+    "productionSourceZones": 18,
+    "scannedFiles": 428,
+    "sourceInventorySha256": "0e84a7a6bed9930fb549083368775eea559ea1b51991b648a0903287117046e5",
+    "maliciousSelfTests": 7,
+    "findings": 0,
+    "authorizedAdapterCount": 2,
+    "authorizedAdapters": [
+      "apps/desktop/src/main/secure-revocation-list-fetcher.ts",
+      "apps/desktop/src/main/secure-oidc-network-adapter.ts"
+    ],
+    "authorizedPurposeCount": 3,
+    "authorizedPurposes": [
+      "external-backup-revocation-list.fetch",
+      "oidc.token.exchange",
+      "oidc.jwks.fetch"
+    ],
+    "authorizedInventorySha256": "8c3764ee962b55dda7fa85520b8fbb34088a65ab722febd30254416b7d6898bb",
+    "localOnlyTransportFiles": 2,
+    "directPrimitiveExceptionCount": 0,
+    "latestDatabaseMigration": 93
+  },
+  "truth": {
+    "historicalClosureReopened": false,
+    "newCompletionDecisionClaimed": false,
+    "ppk015PackageOwnedMigrationAdded": false,
+    "realNetworkRequestPerformed": false,
+    "realDataTransferPerformed": false,
+    "sqliteOwnershipTransferred": false,
+    "cutoverAuthorityAttached": false,
+    "providerDeliveryGuaranteed": false
+  }
+}

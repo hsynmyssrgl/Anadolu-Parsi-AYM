@@ -54,7 +54,7 @@
       "passed": true
     },
     {
-      "name": "manifest contains exactly 590 surfaces",
+      "name": "manifest contains exactly 657 surfaces",
       "passed": true
     },
     {
@@ -282,7 +282,7 @@
       "passed": true
     },
     {
-      "name": "scope records six rules and 590 exact surfaces",
+      "name": "scope records six rules and 657 exact surfaces",
       "passed": true
     },
     {
@@ -346,21 +346,21 @@
   "sourceGate": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 408,
-    "privilegedSurfaces": 590,
-    "exactAllowlistEntries": 590,
-    "exactAllowlistSha256": "18a278877e0883d7ba0290c37b227c9fe145a0a41833d5be07ccd2bcb33d499b",
+    "scannedFiles": 428,
+    "privilegedSurfaces": 657,
+    "exactAllowlistEntries": 657,
+    "exactAllowlistSha256": "324b27032181112a448d386365bdf6cf5add688335a79145f8708a285f7f5a45",
     "surfaceCounts": {
-      "CRYPTO_GLOBAL": 3,
-      "CRYPTO_IMPORT": 143,
+      "CRYPTO_GLOBAL": 4,
+      "CRYPTO_IMPORT": 190,
       "DATABASE_IMPORT": 21,
-      "NETWORK_IMPORT": 8,
-      "REPOSITORY_IMPORT": 53,
+      "NETWORK_IMPORT": 11,
+      "REPOSITORY_IMPORT": 54,
       "ROLE_PRESENTATION": 1,
-      "SQL_CALL": 60,
+      "SQL_CALL": 61,
       "SQL_CONSTRUCTOR": 2,
       "SQL_IMPORT": 2,
-      "USE_CASE_COMPOSITION": 297
+      "USE_CASE_COMPOSITION": 311
     },
     "maliciousSelfTestAssertions": 17,
     "benignSelfTestAssertions": 4,
@@ -368,13 +368,13 @@
     "findings": []
   },
   "protectedRuleCount": 6,
-  "exactAllowlistEntries": 590,
-  "exactAllowlistSha256": "18a278877e0883d7ba0290c37b227c9fe145a0a41833d5be07ccd2bcb33d499b",
+  "exactAllowlistEntries": 657,
+  "exactAllowlistSha256": "324b27032181112a448d386365bdf6cf5add688335a79145f8708a285f7f5a45",
   "directRoleAuthorizationBypasses": 0,
   "syntaxModel": "TYPESCRIPT_AST",
   "regexOnlyGateAccepted": false,
   "buildGateReplacesRuntimePolicy": false,
-  "latestDatabaseMigration": 92,
+  "latestDatabaseMigration": 93,
   "schemaMigrationRequired": false,
   "historicalBackfillPerformed": false,
   "legacyDesktopVaultPreserved": true,
@@ -383,5 +383,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-14T02:37:22.322Z"
+  "generatedAt": "2026-08-14T06:32:07.326Z"
 }

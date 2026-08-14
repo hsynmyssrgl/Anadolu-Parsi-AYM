@@ -378,6 +378,13 @@ import { FileSystemBackupQuarantineDestructionPort } from './backup-quarantine-f
 import { RepositoryBackedAiConsentQueryPort, RepositoryBackedAiConsentUnitOfWork, RepositoryBackedSensitiveDataAuthorizationPort } from './ai-consent-application-adapter.js';
 import { RepositoryBackedPrivacyControlQueryPort, RepositoryBackedPrivacyControlUnitOfWork } from './privacy-control-application-adapter.js';
 import { RepositoryBackedPrivacyOwnershipDataRightsUnitOfWork } from './privacy-ownership-data-rights-application-adapter.js';
+import {
+  RepositoryBackedIdentityAccessCredentialUnitOfWork,
+  type IdentityAccessCredentialQuotaPort,
+  type IdentityAccessExternalSecurityPorts,
+  type IdentityAccessFederatedVaultControlPort,
+  type IdentityAccessPolicyTransactionRunner
+} from './identity-access-credential-application-adapter.js';
 import { RepositoryBackedLegacyQueryPort, RepositoryBackedLegacyUnitOfWork } from './legacy-application-adapter.js';
 import { RepositoryBackedAutomationAdapter } from './automation-application-adapter.js';
 import { RepositoryBackedReportQueryPort } from './report-application-adapter.js';
@@ -465,6 +472,10 @@ import { SqliteFamilyDatabaseRuntime } from './family-database-runtime.js';
 import { createSqliteRepositoryCompositionRoot, type RepositoryCompositionRoot } from './repository-composition-root.js';
 import type { IssueOfflineCapabilityLeaseInput, OfflineCapabilityLeaseView, LostDeviceShutdownInput, LostDeviceShutdownResultView, PrivacyControlCenterView, UpsertLiveLocationConsentInput } from '@ppt/domain';
 import { FileDeviceIdentityProvider } from './device-identity.js';
+import {
+  issueIdentityAccessOperationToken,
+  verifyIdentityAccessOperationToken
+} from './identity-access-operation-token.js';
 import type { DeviceSecretProtector } from './device-secret-protector.js';
 import { ManagedBackupPasswordProvider } from './managed-backup-password.js';
 import { ProtectedArchiveVaultKeyProvider } from './archive-vault-key-provider.js';
@@ -477,6 +488,47 @@ import { createAccountSecurityReceiptFingerprint, createSecurityEventReceipt } f
 import { SecurityEventReceiptStore } from './security-event-receipt-store.js';
 import type { ProtectedSideArtifactStore } from './protected-side-artifact-store.js';
 import { FamilyMutationRevisionService, type FamilyMutationResultInput } from './family-mutation-revision-service.js';
+import {
+  AuthenticateWithPasskeyUseCase,
+  BeginFederatedIdentityLinkUseCase,
+  BeginPasskeyAuthenticationUseCase,
+  BeginPasskeyRegistrationUseCase,
+  CompletePasskeyRegistrationUseCase,
+  CreateReadOnlyCompanionSnapshotUseCase,
+  GetIdentityAccessCredentialCenterUseCase,
+  IssueTemporaryVerifiableCredentialUseCase,
+  LinkFederatedIdentityUseCase,
+  RecoverLostPasskeyUseCase,
+  RevokePasskeyUseCase,
+  RevokeTemporaryVerifiableCredentialUseCase,
+  UnlinkFederatedIdentityUseCase,
+  VerifyTemporaryVerifiableCredentialUseCase,
+  type IdentityAccessApplicationContext,
+  type IdentityChallengeGeneratorPort
+} from '@ppt/application';
+import type {
+  AuthenticateWithPasskeyInput,
+  CompanionSyncDenialView,
+  CompletePasskeyRegistrationInput,
+  CreateReadOnlyCompanionSnapshotInput,
+  FederatedAuthorizationCeremonyView,
+  FederatedIdentityProvider,
+  IdentityAccessCredentialCenterView,
+  IdentityAccessOperationKind,
+  IdentityAccessOperationTokenView,
+  IdentityAccessMutationReceiptView,
+  IssueTemporaryVerifiableCredentialInput,
+  IssuedTemporaryVerifiableCredentialView,
+  LinkFederatedIdentityInput,
+  PasskeyChallengeView,
+  ReadOnlyCompanionSnapshotView,
+  RecoverLostPasskeyInput,
+  RevokePasskeyInput,
+  RevokeTemporaryVerifiableCredentialInput,
+  TemporaryCredentialVerificationView,
+  UnlinkFederatedIdentityInput,
+  VerifyTemporaryVerifiableCredentialInput
+} from '@ppt/domain';
 
 export class FullBackupRestoreRestartRequiredError extends Error {
   public constructor(message: string) {
@@ -489,6 +541,12 @@ export class FullBackupRestoreRestartRequiredError extends Error {
 interface DatabaseSnapshotProvider {
   withSnapshot<T>(operation: (databasePath: string) => T): T;
   databaseBytes(): number;
+}
+
+export interface IdentityAccessDataStorePorts extends Omit<IdentityAccessExternalSecurityPorts, 'passkeySession'> {
+  readonly challengeGenerator: IdentityChallengeGeneratorPort;
+  readonly federatedVaultControl: IdentityAccessFederatedVaultControlPort;
+  readonly quota: IdentityAccessCredentialQuotaPort;
 }
 
 interface DataStoreOptions {
@@ -534,6 +592,9 @@ interface DataStoreOptions {
   logger?: Logger;
   repositoryExecutionPolicyGuard?: RepositoryExecutionPolicyGuard;
   sourceDeletionExternalCacheInvalidator?: DesktopSourceDeletionExternalCacheInvalidator;
+  /** Missing capabilities remain unavailable; no crypto/provider/vault fallback is synthesized. */
+  identityAccessPorts?: Partial<IdentityAccessDataStorePorts>;
+  federatedProviderConfigurations?: readonly import('@ppt/repository-contracts').FederatedProviderProvisioningRow[];
   securityConfig?: {
     sessionIdleTimeoutMinutes: number;
     maximumFailedLoginAttempts: number;
@@ -635,6 +696,73 @@ const privacyMutationIdentifiers = (
   auditId: deterministicArchiveIdentifier(clientOperationId, 'privacy-audit'),
   outboxEventId: asEventId(deterministicArchiveIdentifier(clientOperationId, 'privacy-outbox'))
 });
+
+const IDENTITY_ACCESS_CLIENT_OPERATION_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{7,159}$/u;
+
+const identityAccessOperationSeed = (
+  context: IdentityAccessApplicationContext,
+  clientOperationId: string
+): string => {
+  if (!IDENTITY_ACCESS_CLIENT_OPERATION_ID.test(clientOperationId)) {
+    throw new Error('Kimlik erişim clientOperationId değeri 8-160 karakter ve güvenli biçimde olmalıdır.');
+  }
+  return canonicalArchiveOperationValue({
+    familyId: context.familyId,
+    accountId: context.actor.userId,
+    ownerPersonId: context.actor.personId,
+    clientOperationId
+  });
+};
+
+const identityAccessResourceId = (
+  context: IdentityAccessApplicationContext,
+  clientOperationId: string,
+  label: string
+): string => deterministicArchiveIdentifier(identityAccessOperationSeed(context, clientOperationId), `identity-${label}`);
+
+const identityAccessMutationIdentifiers = (
+  context: IdentityAccessApplicationContext,
+  clientOperationId: string,
+  resourceId: string,
+  operation: string,
+  command: unknown
+) => {
+  const seed = identityAccessOperationSeed(context, clientOperationId);
+  return {
+    mutationId: deterministicArchiveIdentifier(seed, 'identity-mutation'),
+    resourceId,
+    requestFingerprint: createHash('sha256').update(canonicalArchiveOperationValue({
+      operation,
+      familyId: context.familyId,
+      accountId: context.actor.userId,
+      ownerPersonId: context.actor.personId,
+      command
+    }), 'utf8').digest('hex'),
+    auditId: deterministicArchiveIdentifier(seed, 'identity-audit'),
+    outboxEventId: asEventId(deterministicArchiveIdentifier(seed, 'identity-outbox'))
+  };
+};
+
+const identityAccessEvidenceIdentifiers = (
+  context: IdentityAccessApplicationContext,
+  clientOperationId: string,
+  resourceLabel: string
+) => {
+  const seed = identityAccessOperationSeed(context, clientOperationId);
+  return {
+    resourceId: deterministicArchiveIdentifier(seed, `identity-${resourceLabel}`),
+    auditId: deterministicArchiveIdentifier(seed, 'identity-audit'),
+    outboxEventId: asEventId(deterministicArchiveIdentifier(seed, 'identity-outbox'))
+  };
+};
+
+const identityAccessUnavailable = (message: string, correlationId = asCorrelationId('identity-access-port-unavailable')) =>
+  err(createAppError({
+    code: ERROR_CODES.AUTHORIZATION_DENIED,
+    category: 'security',
+    message,
+    correlationId
+  }));
 
 interface ArchiveOperationExpectation {
   readonly resourceType: 'archive_item' | 'archive_retention_policy' | 'archive_category';
@@ -805,6 +933,7 @@ export class FamilyDataStore {
   readonly #listAuditEntriesUseCase: ListAuditEntriesUseCase;
   readonly #verifyAuditIntegrityUseCase: VerifyAuditIntegrityUseCase;
   readonly #deviceIdentityProvider: FileDeviceIdentityProvider;
+  readonly #temporaryCredentialEnvelope: IdentityAccessExternalSecurityPorts['temporaryCredentialEnvelope'];
   readonly #securityEventReceiptStore: SecurityEventReceiptStore;
   readonly #listAutomationRulesUseCase: ListAutomationRulesUseCase;
   readonly #createAutomationRuleUseCase: CreateAutomationRuleUseCase;
@@ -895,6 +1024,20 @@ export class FamilyDataStore {
   readonly #finalizeEncryptedPrivacyExportUseCase: FinalizeEncryptedPrivacyExportUseCase;
   readonly #managePrivacyIncidentUseCase: ManagePrivacyIncidentUseCase;
   readonly #simulatePermissionVisibilityUseCase: SimulatePermissionVisibilityUseCase;
+  readonly #getIdentityAccessCredentialCenterUseCase: GetIdentityAccessCredentialCenterUseCase;
+  readonly #beginPasskeyRegistrationUseCase: BeginPasskeyRegistrationUseCase;
+  readonly #beginPasskeyAuthenticationUseCase: BeginPasskeyAuthenticationUseCase;
+  readonly #completePasskeyRegistrationUseCase: CompletePasskeyRegistrationUseCase;
+  readonly #authenticateWithPasskeyUseCase: AuthenticateWithPasskeyUseCase;
+  readonly #revokePasskeyUseCase: RevokePasskeyUseCase;
+  readonly #recoverLostPasskeyUseCase: RecoverLostPasskeyUseCase;
+  readonly #beginFederatedIdentityLinkUseCase: BeginFederatedIdentityLinkUseCase;
+  readonly #linkFederatedIdentityUseCase: LinkFederatedIdentityUseCase;
+  readonly #unlinkFederatedIdentityUseCase: UnlinkFederatedIdentityUseCase;
+  readonly #issueTemporaryVerifiableCredentialUseCase: IssueTemporaryVerifiableCredentialUseCase;
+  readonly #revokeTemporaryVerifiableCredentialUseCase: RevokeTemporaryVerifiableCredentialUseCase;
+  readonly #verifyTemporaryVerifiableCredentialUseCase: VerifyTemporaryVerifiableCredentialUseCase;
+  readonly #createReadOnlyCompanionSnapshotUseCase: CreateReadOnlyCompanionSnapshotUseCase;
   readonly #listArchiveItemsUseCase: ListArchiveItemsUseCase;
   readonly #searchArchiveItemsUseCase: SearchArchiveItemsUseCase;
   readonly #prepareArchiveOpenUseCase: PrepareArchiveOpenUseCase;
@@ -1114,6 +1257,28 @@ export class FamilyDataStore {
     });
     this.#database = this.#databaseRuntime.database;
     this.#transactionExecutor = this.#databaseRuntime.transactionExecutor;
+    const federatedProviderProvisioning=this.#transactionExecutor.execute(
+      this.#correlation?.current()?.correlationId ?? asCorrelationId(`identity-provider-provision-${randomUUID()}`),
+      (transaction) => {
+        const provisioned=this.#repositories.identityAccessCredentialRepository.provisionFederatedProviderConfigurations({
+          transaction:transaction.transaction,
+          actor:{userId:asUserId('deployment-configuration'),roles:['system']},
+          correlationId:this.#correlation?.current()?.correlationId ?? asCorrelationId(`identity-provider-provision-${randomUUID()}`),
+          occurredAt:transaction.occurredAt
+        },options.federatedProviderConfigurations??[]);
+        if(!provisioned.ok)throw new Error(`[${provisioned.error.code}] ${provisioned.error.message}`);
+        const cutoff=asIsoDateTime(new Date(Date.parse(transaction.occurredAt)-30*86_400_000).toISOString());
+        const pruned=this.#repositories.identityAccessCredentialRepository.pruneTerminalChallenges({
+          transaction:transaction.transaction,
+          actor:{userId:asUserId('deployment-configuration'),roles:['system']},
+          correlationId:this.#correlation?.current()?.correlationId ?? asCorrelationId(`identity-challenge-retention-${randomUUID()}`),
+          occurredAt:transaction.occurredAt
+        },cutoff);
+        if(!pruned.ok)throw new Error(`[${pruned.error.code}] ${pruned.error.message}`);
+        return ok(undefined);
+      }
+    );
+    if(!federatedProviderProvisioning.ok)throw new Error(`[${federatedProviderProvisioning.error.code}] Federated provider deployment configuration could not be provisioned.`);
     const authSessionPort = new InMemoryAuthSessionPort(
       this.#clock,
       options.securityConfig?.sessionIdleTimeoutMinutes ?? 15
@@ -1502,6 +1667,7 @@ export class FamilyDataStore {
           timelinePolicyResourceRepository: this.#repositories.timelineRepository,
           accessibilityPreferencesRepository: this.#repositories.accessibilityPreferencesRepository,
           formDraftRepository: this.#repositories.formDraftRepository,
+          identityAccessCredentialRepository: this.#repositories.identityAccessCredentialRepository,
           privacyOwnershipDataRightsRepository: this.#repositories.privacyOwnershipDataRightsRepository,
           personRepository: this.#repositories.personRepository,
           deviceIdentityProvider: this.#deviceIdentityProvider,
@@ -1617,6 +1783,88 @@ export class FamilyDataStore {
     this.#finalizeEncryptedPrivacyExportUseCase = new FinalizeEncryptedPrivacyExportUseCase(privacyOwnershipUnitOfWork);
     this.#managePrivacyIncidentUseCase = new ManagePrivacyIncidentUseCase(privacyOwnershipUnitOfWork);
     this.#simulatePermissionVisibilityUseCase = new SimulatePermissionVisibilityUseCase(privacyOwnershipUnitOfWork);
+    const identityAccessRepository = this.#repositories.identityAccessCredentialRepository;
+    const identityAccessPorts = options.identityAccessPorts;
+    const passkeyCeremonyVerifier = identityAccessPorts?.passkeyCeremonyVerifier ?? {
+      verifyRegistration: () => identityAccessUnavailable('WebAuthn kayıt doğrulayıcısı yapılandırılmadı.'),
+      verifyAuthentication: () => identityAccessUnavailable('WebAuthn assertion doğrulayıcısı yapılandırılmadı.')
+    };
+    const passkeyRecoveryVerifier = identityAccessPorts?.passkeyRecoveryVerifier ?? {
+      verify: (input) => identityAccessUnavailable('Güçlü passkey kurtarma doğrulayıcısı yapılandırılmadı.', input.correlationId)
+    };
+    const federatedAuthorizationCeremony = identityAccessPorts?.federatedAuthorizationCeremony ?? {
+      createAndStore: (input) => identityAccessUnavailable('Federated authorization ceremony portu yapılandırılmadı.', input.correlationId),
+      discardCeremony: () => undefined
+    };
+    const federatedAuthorizationCodeVerifier = identityAccessPorts?.federatedAuthorizationCodeVerifier ?? {
+      consumeVerifiedFlow: (input) => identityAccessUnavailable('Federated authorization code doğrulayıcısı yapılandırılmadı.', input.correlationId),
+      discardVaultEntry: () => undefined
+    };
+    const temporaryCredentialEnvelope = identityAccessPorts?.temporaryCredentialEnvelope ?? {
+      issueAndStore: () => identityAccessUnavailable('Geçici credential envelope portu yapılandırılmadı.'),
+      discardEncryptedEnvelope: () => { throw new Error('Geçici credential envelope fiziksel imha portu yapılandırılmadı.'); },
+      verifyOffline: () => identityAccessUnavailable('Geçici credential offline doğrulayıcısı yapılandırılmadı.')
+    };
+    this.#temporaryCredentialEnvelope = temporaryCredentialEnvelope;
+    const encryptedCompanionSnapshot = identityAccessPorts?.encryptedCompanionSnapshot ?? {
+      create: () => identityAccessUnavailable('Şifreli companion snapshot portu yapılandırılmadı.')
+    };
+    const externalSecurityPorts: IdentityAccessExternalSecurityPorts = {
+      passkeyCeremonyVerifier,
+      passkeySession: {
+        start: (accountId, securityEpoch) => this.#sessionManager.start(accountId, securityEpoch)
+      },
+      passkeyRecoveryVerifier,
+      federatedAuthorizationCeremony,
+      federatedAuthorizationCodeVerifier,
+      temporaryCredentialEnvelope,
+      encryptedCompanionSnapshot
+    };
+    const identityAccessUnitOfWork = new RepositoryBackedIdentityAccessCredentialUnitOfWork({
+      policyTransactionRunner: timelinePolicyTransactionRunner as unknown as IdentityAccessPolicyTransactionRunner,
+      identityRepository: identityAccessRepository,
+      accountRepository: this.#repositories.accountRepository,
+      trustedDeviceRepository: this.#repositories.trustedDeviceRepository,
+      auditRepository: this.#repositories.auditRepository,
+      outboxRepository: this.#repositories.outboxRepository,
+      federatedVaultControl: identityAccessPorts?.federatedVaultControl ?? {
+        revokeEntry: (repositoryContext) => identityAccessUnavailable(
+          'Federated token vault iptal portu yapılandırılmadı.',
+          repositoryContext.correlationId
+        )
+      },
+      quota: identityAccessPorts?.quota ?? {
+        countTemporaryCredentials: (repositoryContext,key) => identityAccessRepository.countTemporaryCredentials(repositoryContext,key)
+      },
+      localSessionRevocation: {
+        clearForAccount: (accountId) => {
+          const active = this.#sessionManager.snapshot().accountId;
+          if (active && active !== accountId) {
+            return identityAccessUnavailable('Yerel oturum iptali farklı bir hesap kapsamına yöneltildi.');
+          }
+          this.#sessionManager.clear();
+          return ok(undefined);
+        }
+      },
+      externalSecurityPorts
+    });
+    const challengeGenerator = identityAccessPorts?.challengeGenerator ?? {
+      createChallenge: () => { throw new Error('Passkey challenge üreticisi yapılandırılmadı.'); }
+    };
+    this.#getIdentityAccessCredentialCenterUseCase = new GetIdentityAccessCredentialCenterUseCase(identityAccessUnitOfWork);
+    this.#beginPasskeyRegistrationUseCase = new BeginPasskeyRegistrationUseCase(identityAccessUnitOfWork, challengeGenerator);
+    this.#beginPasskeyAuthenticationUseCase = new BeginPasskeyAuthenticationUseCase(identityAccessUnitOfWork, challengeGenerator);
+    this.#completePasskeyRegistrationUseCase = new CompletePasskeyRegistrationUseCase(identityAccessUnitOfWork, passkeyCeremonyVerifier);
+    this.#authenticateWithPasskeyUseCase = new AuthenticateWithPasskeyUseCase(identityAccessUnitOfWork, passkeyCeremonyVerifier, externalSecurityPorts.passkeySession);
+    this.#revokePasskeyUseCase = new RevokePasskeyUseCase(identityAccessUnitOfWork);
+    this.#recoverLostPasskeyUseCase = new RecoverLostPasskeyUseCase(identityAccessUnitOfWork, passkeyRecoveryVerifier);
+    this.#beginFederatedIdentityLinkUseCase = new BeginFederatedIdentityLinkUseCase(identityAccessUnitOfWork, federatedAuthorizationCeremony);
+    this.#linkFederatedIdentityUseCase = new LinkFederatedIdentityUseCase(identityAccessUnitOfWork, federatedAuthorizationCodeVerifier);
+    this.#unlinkFederatedIdentityUseCase = new UnlinkFederatedIdentityUseCase(identityAccessUnitOfWork);
+    this.#issueTemporaryVerifiableCredentialUseCase = new IssueTemporaryVerifiableCredentialUseCase(identityAccessUnitOfWork, temporaryCredentialEnvelope);
+    this.#revokeTemporaryVerifiableCredentialUseCase = new RevokeTemporaryVerifiableCredentialUseCase(identityAccessUnitOfWork);
+    this.#verifyTemporaryVerifiableCredentialUseCase = new VerifyTemporaryVerifiableCredentialUseCase(identityAccessUnitOfWork, temporaryCredentialEnvelope);
+    this.#createReadOnlyCompanionSnapshotUseCase = new CreateReadOnlyCompanionSnapshotUseCase(identityAccessUnitOfWork, encryptedCompanionSnapshot);
     const familyDataImportPolicyBatchRunner = new RepositoryBackedFamilyDataImportPolicyBatchRunner({
       transactionExecutor: this.#transactionExecutor,
       locationRunner: locationPolicyTransactionRunner,
@@ -2374,6 +2622,126 @@ export class FamilyDataStore {
   }
   #privacyOwnershipApplicationContext(prefix:string):PrivacyOwnershipApplicationContext {
     return this.#financeApplicationContext(prefix);
+  }
+  #identityAccessApplicationContext(prefix: string): IdentityAccessApplicationContext {
+    const location = this.#locationApplicationContext(prefix);
+    const session = this.#sessionManager.snapshot();
+    if (!session.active || !session.accountId || session.securityEpoch === undefined
+      || session.accountId !== location.actor.userId || !location.actor.personId) {
+      throw new Error('[AUTH_SESSION_STALE] Kimlik erişim merkezi exact etkin hesap ve kişi oturumu gerektirir.');
+    }
+    const personId = location.actor.personId;
+    const identity = this.#deviceIdentityProvider.snapshot();
+    const trusted = this.#transactionExecutor.execute(location.correlationId, (transaction) =>
+      this.#repositories.trustedDeviceRepository.findActive({
+        transaction: transaction.transaction,
+        actor: {
+          userId: location.actor.userId,
+          roles: [location.actor.role],
+          personId
+        },
+        correlationId: location.correlationId,
+        occurredAt: transaction.occurredAt
+      }, location.actor.userId, identity.deviceId)
+    );
+    if (!trusted.ok) throw new Error(`[${trusted.error.code}] ${trusted.error.message}`);
+    if (!trusted.value || trusted.value.revokedAt || trusted.value.accountId !== location.actor.userId
+      || trusted.value.deviceId !== identity.deviceId || trusted.value.securityEpoch !== session.securityEpoch
+      || trusted.value.fingerprint !== identity.fingerprint || trusted.value.publicKeyPem !== identity.publicKeyPem) {
+      throw new Error('[AUTH_DEVICE_TRUST_STALE] Kimlik erişim merkezi exact güncel güvenilir cihaz ve security_epoch gerektirir.');
+    }
+    return {
+      familyId: location.familyId,
+      actor: {
+        userId: location.actor.userId,
+        role: location.actor.role,
+        personId
+      },
+      currentDevice: {
+        trustedDeviceId: trusted.value.id,
+        deviceId: trusted.value.deviceId,
+        securityEpoch: trusted.value.securityEpoch
+      },
+      correlationId: location.correlationId
+    };
+  }
+
+  #requireIdentityAccessOperationToken(
+    context: IdentityAccessApplicationContext,
+    clientOperationId: string,
+    operationKind: IdentityAccessOperationKind
+  ): void {
+    const identity = this.#deviceIdentityProvider.snapshot();
+    verifyIdentityAccessOperationToken({
+      clientOperationId,
+      binding: {
+        accountId: context.actor.userId,
+        deviceId: context.currentDevice.deviceId,
+        securityEpoch: context.currentDevice.securityEpoch,
+        operationKind
+      },
+      now: this.#clock.now(),
+      devicePublicKeyPem: identity.publicKeyPem
+    });
+  }
+
+  #maintainIdentityAccessRetention(context: IdentityAccessApplicationContext): void {
+    if (!context.actor.personId) throw new Error('[AUTH_SESSION_STALE] Identity retention requires an exact owner.');
+    const personId = context.actor.personId;
+    const key = Object.freeze({
+      familyId: context.familyId,
+      accountId: context.actor.userId,
+      ownerPersonId: personId
+    });
+    const ownerRefSha256 = createHash('sha256').update(
+      JSON.stringify([key.familyId, key.accountId, key.ownerPersonId]), 'utf8'
+    ).digest('hex');
+    const owned = this.#temporaryCredentialEnvelope.listOwnedEnvelopeReferences?.(ownerRefSha256) ?? [];
+    const ownedReferenceValues = owned.map(({ encryptedEnvelopeReference }) => encryptedEnvelopeReference);
+    if (!Array.isArray(owned) || owned.length > 2_048 || new Set(ownedReferenceValues).size !== owned.length
+      || owned.some(({ encryptedEnvelopeReference, createdAt }) =>
+        !/^temporary-credential-envelope:[0-9a-f]{64}$/u.test(encryptedEnvelopeReference)
+        || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u.test(createdAt)
+        || new Date(createdAt).toISOString() !== createdAt)) {
+      throw new Error('Temporary credential owned-envelope inventory is invalid or exceeds its absolute bound.');
+    }
+    if (owned.length > 0) {
+      const referenced = this.#transactionExecutor.execute(context.correlationId, (transaction) =>
+        this.#repositories.identityAccessCredentialRepository.listReferencedTemporaryCredentialEnvelopeReferences({
+          transaction: transaction.transaction,
+          actor: { userId: context.actor.userId, roles: [context.actor.role], personId },
+          correlationId: context.correlationId,
+          occurredAt: transaction.occurredAt
+        }, key)
+      );
+      if (!referenced.ok) throw new Error(`[${referenced.error.code}] ${referenced.error.message}`);
+      const retained = new Set(referenced.value);
+      const orphanCutoff = Date.parse(this.#clock.now()) - 7 * 24 * 60 * 60 * 1_000;
+      for (const envelope of owned) {
+        if (Date.parse(envelope.createdAt) <= orphanCutoff && !retained.has(envelope.encryptedEnvelopeReference)) {
+          this.#temporaryCredentialEnvelope.discardEncryptedEnvelope(envelope.encryptedEnvelopeReference, ownerRefSha256);
+        }
+      }
+    }
+    const listed = this.#transactionExecutor.execute(context.correlationId, (transaction) =>
+      this.#repositories.identityAccessCredentialRepository.listTerminalTemporaryCredentialEnvelopeReferences({
+        transaction: transaction.transaction,
+        actor: { userId: context.actor.userId, roles: [context.actor.role], personId },
+        correlationId: context.correlationId,
+        occurredAt: transaction.occurredAt
+      }, key)
+    );
+    if (!listed.ok) throw new Error(`[${listed.error.code}] ${listed.error.message}`);
+    for (const reference of listed.value) this.#temporaryCredentialEnvelope.discardEncryptedEnvelope(reference, ownerRefSha256);
+    const pruned = this.#transactionExecutor.execute(context.correlationId, (transaction) =>
+      this.#repositories.identityAccessCredentialRepository.pruneTerminalCredentialMetadata({
+        transaction: transaction.transaction,
+        actor: { userId: context.actor.userId, roles: [context.actor.role], personId },
+        correlationId: context.correlationId,
+        occurredAt: transaction.occurredAt
+      }, key, listed.value)
+    );
+    if (!pruned.ok) throw new Error(`[${pruned.error.code}] ${pruned.error.message}`);
   }
   #dataLifecycleApplicationContext(prefix:string): DataLifecycleApplicationContext {
     const authenticatedUserId=this.#requireAuth();
@@ -4713,6 +5081,243 @@ export class FamilyDataStore {
       targets:input.targets
     });
     if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async getIdentityAccessCredentialCenter(): Promise<IdentityAccessCredentialCenterView> {
+    const result = await this.#getIdentityAccessCredentialCenterUseCase.execute(
+      this.#identityAccessApplicationContext('identity-access-center')
+    );
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public issueIdentityAccessOperationToken(operationKind: IdentityAccessOperationKind): IdentityAccessOperationTokenView {
+    const context = this.#identityAccessApplicationContext('identity-operation-token-issue');
+    this.#maintainIdentityAccessRetention(context);
+    return issueIdentityAccessOperationToken({
+      binding: {
+        accountId: context.actor.userId,
+        deviceId: context.currentDevice.deviceId,
+        securityEpoch: context.currentDevice.securityEpoch,
+        operationKind
+      },
+      now: this.#clock.now(),
+      deviceIdentityProvider: this.#deviceIdentityProvider
+    });
+  }
+
+  public async beginPasskeyRegistration(input: {
+    readonly clientOperationId: string;
+    readonly relyingPartyId: string;
+  }): Promise<PasskeyChallengeView> {
+    const context = this.#identityAccessApplicationContext('identity-passkey-registration-begin');
+    this.#requireIdentityAccessOperationToken(context, input.clientOperationId, 'passkey_register');
+    const identifiers = identityAccessEvidenceIdentifiers(context, input.clientOperationId, 'passkey-registration-challenge');
+    const result = await this.#beginPasskeyRegistrationUseCase.execute({
+      context,
+      relyingPartyId: input.relyingPartyId,
+      identifiers: {
+        challengeId: identifiers.resourceId,
+        auditId: identifiers.auditId,
+        outboxEventId: identifiers.outboxEventId
+      }
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async beginPasskeyAuthentication(input: {
+    readonly clientOperationId: string;
+    readonly relyingPartyId: string;
+  }): Promise<PasskeyChallengeView> {
+    const context = this.#identityAccessApplicationContext('identity-passkey-authentication-begin');
+    this.#requireIdentityAccessOperationToken(context, input.clientOperationId, 'passkey_authenticate');
+    const identifiers = identityAccessEvidenceIdentifiers(context, input.clientOperationId, 'passkey-authentication-challenge');
+    const result = await this.#beginPasskeyAuthenticationUseCase.execute({
+      context,
+      relyingPartyId: input.relyingPartyId,
+      identifiers: {
+        challengeId: identifiers.resourceId,
+        auditId: identifiers.auditId,
+        outboxEventId: identifiers.outboxEventId
+      }
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async completePasskeyRegistration(input: CompletePasskeyRegistrationInput): Promise<IdentityAccessMutationReceiptView> {
+    const context = this.#identityAccessApplicationContext('identity-passkey-registration-complete');
+    this.#requireIdentityAccessOperationToken(context, input.clientOperationId, 'passkey_register');
+    const resourceId = identityAccessResourceId(context, input.clientOperationId, 'passkey');
+    const result = await this.#completePasskeyRegistrationUseCase.execute({
+      context,
+      command: input,
+      identifiers: identityAccessMutationIdentifiers(
+        context, input.clientOperationId, resourceId, 'passkey_register', input
+      )
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async authenticateWithPasskey(
+    input: AuthenticateWithPasskeyInput & { readonly credentialId: string }
+  ): Promise<IdentityAccessMutationReceiptView> {
+    const context = this.#identityAccessApplicationContext('identity-passkey-authenticate');
+    this.#requireIdentityAccessOperationToken(context, input.clientOperationId, 'passkey_authenticate');
+    const { credentialId, ...command } = input;
+    const result = await this.#authenticateWithPasskeyUseCase.execute({
+      context,
+      command,
+      identifiers: identityAccessMutationIdentifiers(
+        context, command.clientOperationId, credentialId, 'passkey_authenticate', input
+      )
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async revokePasskey(input: RevokePasskeyInput): Promise<IdentityAccessMutationReceiptView> {
+    const context = this.#identityAccessApplicationContext('identity-passkey-revoke');
+    this.#requireIdentityAccessOperationToken(context, input.clientOperationId, 'passkey_revoke');
+    const result = await this.#revokePasskeyUseCase.execute({
+      context,
+      command: input,
+      identifiers: identityAccessMutationIdentifiers(
+        context, input.clientOperationId, input.credentialId, 'passkey_revoke', input
+      )
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async recoverLostPasskey(input: RecoverLostPasskeyInput): Promise<IdentityAccessMutationReceiptView> {
+    const context = this.#identityAccessApplicationContext('identity-passkey-recover-lost');
+    this.#requireIdentityAccessOperationToken(context, input.clientOperationId, 'passkey_recover_lost');
+    const result = await this.#recoverLostPasskeyUseCase.execute({
+      context,
+      command: input,
+      identifiers: identityAccessMutationIdentifiers(
+        context, input.clientOperationId, input.credentialId, 'passkey_recover_lost', input
+      )
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async beginFederatedIdentityLink(input: {
+    readonly clientOperationId: string;
+    readonly provider: FederatedIdentityProvider;
+  }): Promise<FederatedAuthorizationCeremonyView> {
+    const context = this.#identityAccessApplicationContext('identity-federated-link-begin');
+    this.#requireIdentityAccessOperationToken(context, input.clientOperationId, 'federated_link');
+    const identifiers = identityAccessEvidenceIdentifiers(context, input.clientOperationId, 'federated-flow');
+    const result = await this.#beginFederatedIdentityLinkUseCase.execute({
+      context,
+      provider: input.provider,
+      identifiers: {
+        flowId: identifiers.resourceId,
+        auditId: identifiers.auditId,
+        outboxEventId: identifiers.outboxEventId
+      }
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async linkFederatedIdentity(input: LinkFederatedIdentityInput): Promise<IdentityAccessMutationReceiptView> {
+    const context = this.#identityAccessApplicationContext('identity-federated-link-complete');
+    this.#requireIdentityAccessOperationToken(context, input.clientOperationId, 'federated_link');
+    const resourceId = input.verifiedFlowId;
+    const result = await this.#linkFederatedIdentityUseCase.execute({
+      context,
+      command: input,
+      identifiers: identityAccessMutationIdentifiers(
+        context, input.clientOperationId, resourceId, 'federated_link', input
+      )
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async unlinkFederatedIdentity(input: UnlinkFederatedIdentityInput): Promise<IdentityAccessMutationReceiptView> {
+    const context = this.#identityAccessApplicationContext('identity-federated-unlink');
+    this.#requireIdentityAccessOperationToken(context, input.clientOperationId, 'federated_unlink');
+    const result = await this.#unlinkFederatedIdentityUseCase.execute({
+      context,
+      command: input,
+      identifiers: identityAccessMutationIdentifiers(
+        context, input.clientOperationId, input.linkId, 'federated_unlink', input
+      )
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async issueTemporaryVerifiableCredential(input: IssueTemporaryVerifiableCredentialInput): Promise<{
+    readonly receipt: IdentityAccessMutationReceiptView;
+    readonly issued?: IssuedTemporaryVerifiableCredentialView;
+  }> {
+    const context = this.#identityAccessApplicationContext('identity-temporary-credential-issue');
+    this.#requireIdentityAccessOperationToken(context, input.clientOperationId, 'temporary_credential_issue');
+    const resourceId = identityAccessResourceId(context, input.clientOperationId, `temporary-${input.kind}`);
+    const result = await this.#issueTemporaryVerifiableCredentialUseCase.execute({
+      context,
+      command: input,
+      identifiers: identityAccessMutationIdentifiers(
+        context, input.clientOperationId, resourceId, 'temporary_credential_issue', input
+      )
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async revokeTemporaryVerifiableCredential(
+    input: RevokeTemporaryVerifiableCredentialInput
+  ): Promise<IdentityAccessMutationReceiptView> {
+    const context = this.#identityAccessApplicationContext('identity-temporary-credential-revoke');
+    this.#requireIdentityAccessOperationToken(context, input.clientOperationId, 'temporary_credential_revoke');
+    const result = await this.#revokeTemporaryVerifiableCredentialUseCase.execute({
+      context,
+      command: input,
+      identifiers: identityAccessMutationIdentifiers(
+        context, input.clientOperationId, input.credentialId, 'temporary_credential_revoke', input
+      )
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async verifyTemporaryVerifiableCredential(
+    input: VerifyTemporaryVerifiableCredentialInput
+  ): Promise<TemporaryCredentialVerificationView> {
+    const result = await this.#verifyTemporaryVerifiableCredentialUseCase.execute({
+      context: this.#identityAccessApplicationContext('identity-temporary-credential-verify'),
+      command: input
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async createReadOnlyCompanionSnapshot(
+    input: CreateReadOnlyCompanionSnapshotInput & { readonly clientOperationId: string }
+  ): Promise<ReadOnlyCompanionSnapshotView | CompanionSyncDenialView> {
+    const context = this.#identityAccessApplicationContext('identity-companion-snapshot-create');
+    this.#requireIdentityAccessOperationToken(context, input.clientOperationId, 'companion_snapshot_create');
+    const { clientOperationId, ...command } = input;
+    const identifiers = identityAccessEvidenceIdentifiers(context, clientOperationId, 'companion-snapshot');
+    const result = await this.#createReadOnlyCompanionSnapshotUseCase.execute({
+      context,
+      command,
+      identifiers: {
+        snapshotId: identifiers.resourceId,
+        auditId: identifiers.auditId,
+        outboxEventId: identifiers.outboxEventId
+      }
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
     return result.value;
   }
 

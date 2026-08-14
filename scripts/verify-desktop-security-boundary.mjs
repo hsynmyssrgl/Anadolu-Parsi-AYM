@@ -122,14 +122,15 @@ export const verifyDesktopSecurityBoundary = async () => {
   check('packaging requires ASAR and afterPack fuse mutation', desktopPackage.build?.asar === true
     && desktopPackage.build?.afterPack === 'scripts/apply-electron-fuses.mjs');
   check('new privileged surfaces are exact PPK-021 allowances', [
-    'NETWORK_IMPORT|apps/desktop/src/main/main.ts|electron:net',
     'USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetDesktopSecurityPostureUseCase',
     'USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetSessionLockStateUseCase',
     'USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|LockSessionUseCase',
     'USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|RecordSessionActivityUseCase'
-  ].every((key) => astKeys.has(key)));
-  check('custom protocol transport is an exact PPK-022 network capability surface',
-    capabilityKeys.has('NETWORK_API|apps/desktop/src/main/main.ts|fetch'));
+  ].every((key) => astKeys.has(key))
+    && !astKeys.has('NETWORK_IMPORT|apps/desktop/src/main/main.ts|electron:net'));
+  check('custom protocol transport uses the exact file-backed surface without stale fetch authority',
+    capabilityKeys.has('FILE_IMPORT|apps/desktop/src/main/main.ts|node:fs/promises:readFile')
+    && !capabilityKeys.has('NETWORK_API|apps/desktop/src/main/main.ts|fetch'));
   check('root pretypecheck and prebuild execute this boundary', ['pretypecheck', 'prebuild'].every((name) =>
     rootPackage.scripts?.[name]?.includes('verify-desktop-security-boundary.mjs')));
   check('migration 77 package baseline remains present', migrationVersions.includes(77) && latestMigration >= 77);

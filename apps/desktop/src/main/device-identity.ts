@@ -7,6 +7,7 @@ import {
   rmSync,
   writeFileSync
 } from 'node:fs';
+import { sign } from 'node:crypto';
 import { dirname } from 'node:path';
 import type { Clock } from '@ppt/core';
 import {
@@ -200,6 +201,14 @@ export class FileDeviceIdentityProvider {
 
   public createProof(challenge: string): DeviceProof {
     return createDeviceProof(this.#identity, challenge);
+  }
+
+  /** Signs bounded caller-owned bytes without exposing the device private key. */
+  public signDetached(payload: Uint8Array): Buffer {
+    if (!(payload instanceof Uint8Array) || payload.byteLength < 1 || payload.byteLength > 16_384) {
+      throw new Error('Cihaz kimligi detached signature payload boyutu gecersiz.');
+    }
+    return sign(null, Buffer.from(payload), this.#identity.privateKeyPem);
   }
 
   public destroyForTest(): void {

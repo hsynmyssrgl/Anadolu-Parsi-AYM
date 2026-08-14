@@ -1257,6 +1257,578 @@ const optionalWindowsHelloFallback = (value: unknown): boolean => {
     && optionalBoundedString(value.secondFactorCode, 256);
 };
 
+const identityAccessChannels = new Set([
+  'identityAccess:getCenter',
+  'identityAccess:issueOperationToken',
+  'identityAccess:beginPasskeyRegistration',
+  'identityAccess:beginPasskeyAuthentication',
+  'identityAccess:completePasskeyRegistration',
+  'identityAccess:authenticateWithPasskey',
+  'identityAccess:revokePasskey',
+  'identityAccess:recoverLostPasskey',
+  'identityAccess:beginFederatedIdentityLink',
+  'identityAccess:completeFederatedIdentityLink',
+  'identityAccess:unlinkFederatedIdentity',
+  'identityAccess:issueTemporaryCredential',
+  'identityAccess:revokeTemporaryCredential',
+  'identityAccess:verifyTemporaryCredential',
+  'identityAccess:createCompanionSnapshot'
+]);
+const identityAccessProviders = new Set(['apple', 'google', 'microsoft']);
+const identityAccessOperationKinds = new Set([
+  'passkey_register', 'passkey_authenticate', 'passkey_revoke', 'passkey_recover_lost',
+  'federated_link', 'federated_unlink', 'temporary_credential_issue', 'temporary_credential_revoke',
+  'companion_snapshot_create'
+]);
+const identityAccessTemporaryKinds = new Set([
+  'school_pickup', 'temporary_caregiver', 'pet_caregiver', 'emergency_contact_health',
+  'event_invitation', 'temporary_home_access'
+]);
+const identityAccessTemporaryPurposes = new Map<string, string>([
+  ['school_pickup', 'school_pickup_authorization'],
+  ['temporary_caregiver', 'temporary_care_authorization'],
+  ['pet_caregiver', 'pet_care_authorization'],
+  ['emergency_contact_health', 'emergency_contact_health_access'],
+  ['event_invitation', 'event_invitation_access'],
+  ['temporary_home_access', 'temporary_home_access']
+]);
+const identityAccessClaimKeys = new Set([
+  'subject_display_name', 'authorized_person_display_name', 'caregiver_display_name', 'pet_display_name',
+  'school_name', 'emergency_contact_name', 'emergency_contact_phone', 'allergy_summary',
+  'critical_medication_summary', 'event_title', 'valid_location_label', 'contact_phone'
+]);
+const identityAccessDisclosureRules = new Map<string, {
+  readonly required: ReadonlySet<string>;
+  readonly allowed: ReadonlySet<string>;
+}>([
+  ['school_pickup', { required: new Set(['subject_display_name', 'authorized_person_display_name']), allowed: new Set(['subject_display_name', 'authorized_person_display_name', 'school_name', 'contact_phone']) }],
+  ['temporary_caregiver', { required: new Set(['subject_display_name', 'caregiver_display_name']), allowed: new Set(['subject_display_name', 'caregiver_display_name', 'contact_phone']) }],
+  ['pet_caregiver', { required: new Set(['pet_display_name', 'caregiver_display_name']), allowed: new Set(['pet_display_name', 'caregiver_display_name', 'contact_phone']) }],
+  ['emergency_contact_health', { required: new Set(['subject_display_name', 'emergency_contact_name', 'emergency_contact_phone']), allowed: new Set(['subject_display_name', 'emergency_contact_name', 'emergency_contact_phone', 'allergy_summary', 'critical_medication_summary']) }],
+  ['event_invitation', { required: new Set(['subject_display_name', 'event_title']), allowed: new Set(['subject_display_name', 'event_title', 'valid_location_label', 'contact_phone']) }],
+  ['temporary_home_access', { required: new Set(['subject_display_name', 'valid_location_label']), allowed: new Set(['subject_display_name', 'valid_location_label', 'contact_phone']) }]
+]);
+const identityAccessId = (value: unknown): boolean => typeof value === 'string'
+  && value === value.trim() && /^[A-Za-z0-9][A-Za-z0-9._:-]{7,159}$/u.test(value);
+const identityAccessRevision = (value: unknown): boolean => typeof value === 'number'
+  && Number.isSafeInteger(value) && value >= 0 && value < 2_147_483_647;
+const identityAccessIso = (value: unknown): boolean => typeof value === 'string'
+  && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u.test(value)
+  && new Date(value).toISOString() === value;
+const identityAccessBase64Url = (value: unknown, maximum: number): boolean => typeof value === 'string'
+  && value.length >= 1 && value.length <= maximum && !value.includes('=') && /^[A-Za-z0-9_-]+$/u.test(value);
+const identityAccessQrPayload = (value: unknown): boolean => typeof value === 'string'
+  && value.length >= 32 && value.length <= 4_096
+  && /^pptvc1\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/u.test(value);
+const identityAccessText = (value: unknown, maximum: number): boolean => typeof value === 'string'
+  && value === value.trim() && value.length >= 1 && value.length <= maximum
+  && !/[\u0000-\u001f\u007f]/u.test(value);
+const identityAccessPathKeys = /^(?:path|filePath|directory|destination|destinationPath|sourcePath|targetPath|absolutePath)$/iu;
+const identityAccessCredentialKeys = /^(?:password|passphrase|pin|cvv|cvc|secret|token|accessToken|refreshToken|idToken|authorizationCode|codeVerifier|clientSecret|privateKey|privateKeyBytes|biometric|biometricData)$/iu;
+const identityAccessOpaqueKeys = new Set([
+  'credentialId', 'clientDataJsonBase64url', 'attestationObjectBase64url', 'authenticatorDataBase64url',
+  'signatureBase64url', 'userHandleBase64url', 'challenge', 'allowedCredentialIds', 'qrPayload',
+  'encryptedEnvelopeBase64Url', 'authorizationUrl', 'callbackUrl', 'credentialIdSha256', 'publicKeySha256',
+  'providerSubjectSha256', 'audienceRefSha256', 'disclosureSha256', 'payloadSha256', 'signatureSha256',
+  'issuerPublicKeySha256', 'ciphertextSha256', 'envelopeSha256', 'stateFingerprint'
+]);
+const identityAccessLocalPath = (value: string): boolean => /^(?:[A-Za-z]:[\\/]|\\\\|file:|\/(?:Users|home|private|var|tmp|etc)\/)/iu.test(value);
+const inspectIdentityAccessPayload = (
+  value: unknown,
+  channel: string,
+  path = '$[0]',
+  depth = 0,
+  fieldName?: string
+): IpcIntegrationPolicyDecision | undefined => {
+  if (depth > 10) return rejected('IDENTITY_ACCESS_ARGUMENT_NESTING_TOO_DEEP', path);
+  if (Array.isArray(value)) {
+    if (Object.getPrototypeOf(value) !== Array.prototype || value.length > 512) return rejected('IDENTITY_ACCESS_ARRAY_INVALID', path);
+    for (let index = 0; index < value.length; index += 1) {
+      const decision = inspectIdentityAccessPayload(value[index], channel, `${path}[${index}]`, depth + 1, fieldName);
+      if (decision) return decision;
+    }
+    return undefined;
+  }
+  if (typeof value === 'string') {
+    const maximum = fieldName === 'encryptedEnvelopeBase64Url' ? 11_184_811 : 32_768;
+    if (value.length > maximum) return rejected('IDENTITY_ACCESS_STRING_TOO_LARGE', path);
+    if (identityAccessLocalPath(value)) return rejected('PATH_VALUE_PROHIBITED', path);
+    if (!fieldName || !identityAccessOpaqueKeys.has(fieldName)) {
+      if (containsLikelyFullPan(value)) return rejected('BANKING_SECRET_VALUE_PROHIBITED', path);
+    }
+    return undefined;
+  }
+  if (typeof value === 'number' && !Number.isFinite(value)) return rejected('NON_FINITE_NUMBER_REJECTED', path);
+  if (value === null || typeof value !== 'object') return undefined;
+  if (!isObject(value)) return rejected('NON_PLAIN_OBJECT_REJECTED', path);
+  const ownKeys = Reflect.ownKeys(value);
+  if (ownKeys.some((key) => typeof key === 'symbol')) return rejected('SYMBOL_FIELD_PROHIBITED', path);
+  const keys = ownKeys as string[];
+  if (keys.length > 64) return rejected('IDENTITY_ACCESS_OBJECT_TOO_LARGE', path);
+  for (const key of keys) {
+    const childPath = `${path}.${key}`;
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (!descriptor || descriptor.get || descriptor.set || !('value' in descriptor)) return rejected('ACCESSOR_FIELD_PROHIBITED', childPath);
+    if (key === '__proto__' || key === 'prototype' || key === 'constructor') return rejected('PROTOTYPE_FIELD_PROHIBITED', childPath);
+    if (identityAccessPathKeys.test(key)) return rejected('PATH_FIELD_PROHIBITED', childPath);
+    const fallbackPassword = channel === 'identityAccess:recoverLostPasskey' && path === '$[0].fallback' && key === 'password';
+    if (identityAccessCredentialKeys.test(key) && !fallbackPassword) return rejected('CREDENTIAL_FIELD_PROHIBITED', childPath);
+    if (isProhibitedBankingSecretField(key) && !fallbackPassword) return rejected('BANKING_SECRET_FIELD_PROHIBITED', childPath);
+    const decision = inspectIdentityAccessPayload(descriptor.value, channel, childPath, depth + 1, key);
+    if (decision) return decision;
+  }
+  return undefined;
+};
+const identityAccessFallback = (value: unknown): boolean => value === undefined || (
+  isObject(value) && Object.keys(value).length >= 1 && Object.keys(value).length <= 2
+  && hasOnlyKeys(value, ['password', 'secondFactorCode']) && boundedString(value.password, 1_024)
+  && optionalBoundedString(value.secondFactorCode, 256)
+);
+const identityAccessOperation = (value: Record<string, unknown>): boolean =>
+  identityAccessId(value.clientOperationId) && identityAccessRevision(value.expectedRevision);
+const identityAccessRegistrationResponse = (value: unknown): boolean => {
+  if (!isObject(value) || !hasOnlyKeys(value, [
+    'credentialId', 'clientDataJsonBase64url', 'attestationObjectBase64url', 'transports'
+  ]) || Object.keys(value).length !== 4 || !identityAccessBase64Url(value.credentialId, 1_366)
+    || !identityAccessBase64Url(value.clientDataJsonBase64url, 5_462)
+    || !identityAccessBase64Url(value.attestationObjectBase64url, 21_846)
+    || !Array.isArray(value.transports) || value.transports.length > 5
+    || value.transports.some((item) => !['internal', 'usb', 'nfc', 'ble', 'hybrid'].includes(String(item)))) return false;
+  return new Set(value.transports).size === value.transports.length;
+};
+const identityAccessAuthenticationResponse = (value: unknown): boolean => {
+  if (!isObject(value) || !hasOnlyKeys(value, [
+    'credentialId', 'clientDataJsonBase64url', 'authenticatorDataBase64url', 'signatureBase64url', 'userHandleBase64url'
+  ])) return false;
+  const expected = value.userHandleBase64url === undefined ? 4 : 5;
+  return Object.keys(value).length === expected
+    && identityAccessBase64Url(value.credentialId, 1_366)
+    && identityAccessBase64Url(value.clientDataJsonBase64url, 5_462)
+    && identityAccessBase64Url(value.authenticatorDataBase64url, 5_462)
+    && identityAccessBase64Url(value.signatureBase64url, 2_731)
+    && (value.userHandleBase64url === undefined || identityAccessBase64Url(value.userHandleBase64url, 342));
+};
+const identityAccessInput = (channel: string, args: readonly unknown[]): IpcIntegrationPolicyDecision => {
+  if (channel === 'identityAccess:getCenter') return zeroArguments(args);
+  if (args.length !== 1 || !isObject(args[0])) return rejected('IDENTITY_ACCESS_OBJECT_REQUIRED', '$[0]');
+  const value = args[0];
+  const inspection = inspectIdentityAccessPayload(value, channel);
+  if (inspection) return inspection;
+  try {
+    if (new TextEncoder().encode(JSON.stringify(value)).byteLength > 65_536) {
+      return rejected('IDENTITY_ACCESS_PAYLOAD_TOO_LARGE', '$[0]');
+    }
+  } catch { return rejected('IDENTITY_ACCESS_OBJECT_INVALID', '$[0]'); }
+  switch (channel) {
+    case 'identityAccess:issueOperationToken':
+      return Object.keys(value).length === 1 && hasOnlyKeys(value, ['operationKind'])
+        && identityAccessOperationKinds.has(String(value.operationKind))
+        ? accepted() : rejected('IDENTITY_ACCESS_OPERATION_TOKEN_ISSUE_INVALID', '$[0]');
+    case 'identityAccess:beginPasskeyRegistration':
+    case 'identityAccess:beginPasskeyAuthentication':
+      return Object.keys(value).length === 1 && hasOnlyKeys(value, ['clientOperationId']) && identityAccessId(value.clientOperationId)
+        ? accepted() : rejected('IDENTITY_ACCESS_PASSKEY_BEGIN_INVALID', '$[0]');
+    case 'identityAccess:completePasskeyRegistration':
+      return Object.keys(value).length === 6 && hasOnlyKeys(value, [
+        'expectedRevision', 'clientOperationId', 'challengeId', 'displayName', 'response', 'confirmation'
+      ]) && identityAccessOperation(value) && value.expectedRevision === 0 && identityAccessId(value.challengeId)
+        && identityAccessText(value.displayName, 120)
+        && value.confirmation === 'PASSKEY KAYDINI TAMAMLA' && identityAccessRegistrationResponse(value.response)
+        ? accepted() : rejected('IDENTITY_ACCESS_PASSKEY_REGISTRATION_INVALID', '$[0]');
+    case 'identityAccess:authenticateWithPasskey':
+      return Object.keys(value).length === 6 && hasOnlyKeys(value, [
+        'expectedRevision', 'clientOperationId', 'credentialId', 'challengeId', 'response', 'confirmation'
+      ]) && identityAccessOperation(value) && identityAccessId(value.credentialId) && identityAccessId(value.challengeId)
+        && value.confirmation === 'PASSKEY ILE DOGRULA'
+        && identityAccessAuthenticationResponse(value.response)
+        ? accepted() : rejected('IDENTITY_ACCESS_PASSKEY_ASSERTION_INVALID', '$[0]');
+    case 'identityAccess:revokePasskey':
+      return Object.keys(value).length === 5 && hasOnlyKeys(value, [
+        'expectedRevision', 'clientOperationId', 'credentialId', 'reason', 'confirmation'
+      ]) && identityAccessOperation(value) && identityAccessId(value.credentialId)
+        && (value.reason === 'manual' || value.reason === 'lost') && value.confirmation === 'PASSKEY YETKISINI IPTAL ET'
+        ? accepted() : rejected('IDENTITY_ACCESS_PASSKEY_REVOKE_INVALID', '$[0]');
+    case 'identityAccess:recoverLostPasskey':
+      return Object.keys(value).length >= 4 && Object.keys(value).length <= 5 && hasOnlyKeys(value, [
+        'expectedRevision', 'clientOperationId', 'credentialId', 'fallback', 'confirmation'
+      ]) && identityAccessOperation(value) && identityAccessId(value.credentialId) && identityAccessFallback(value.fallback)
+        && value.confirmation === 'KAYIP PASSKEY KURTARMASINI BASLAT'
+        ? accepted() : rejected('IDENTITY_ACCESS_PASSKEY_RECOVERY_INVALID', '$[0]');
+    case 'identityAccess:beginFederatedIdentityLink':
+      return Object.keys(value).length === 2 && hasOnlyKeys(value, ['clientOperationId', 'provider'])
+        && identityAccessId(value.clientOperationId) && identityAccessProviders.has(String(value.provider))
+        ? accepted() : rejected('IDENTITY_ACCESS_FEDERATED_BEGIN_INVALID', '$[0]');
+    case 'identityAccess:completeFederatedIdentityLink':
+      return Object.keys(value).length === 5 && hasOnlyKeys(value, [
+        'expectedRevision', 'clientOperationId', 'provider', 'flowId', 'confirmation'
+      ]) && identityAccessOperation(value) && value.expectedRevision === 0 && identityAccessProviders.has(String(value.provider))
+        && identityAccessId(value.flowId)
+        && value.confirmation === 'FEDERATED KIMLIGI BAGLA'
+        ? accepted() : rejected('IDENTITY_ACCESS_FEDERATED_COMPLETE_INVALID', '$[0]');
+    case 'identityAccess:unlinkFederatedIdentity':
+      return Object.keys(value).length === 4 && hasOnlyKeys(value, [
+        'expectedRevision', 'clientOperationId', 'linkId', 'confirmation'
+      ]) && identityAccessOperation(value) && identityAccessId(value.linkId)
+        && value.confirmation === 'FEDERATED KIMLIK BAGINI KALDIR'
+        ? accepted() : rejected('IDENTITY_ACCESS_FEDERATED_UNLINK_INVALID', '$[0]');
+    case 'identityAccess:issueTemporaryCredential': {
+      if (Object.keys(value).length !== 9 || !hasOnlyKeys(value, [
+        'expectedRevision', 'clientOperationId', 'kind', 'purpose', 'audienceReference', 'disclosedClaims',
+        'notBefore', 'expiresAt', 'confirmation'
+      ]) || !identityAccessOperation(value) || value.expectedRevision !== 0
+        || !identityAccessTemporaryKinds.has(String(value.kind))
+        || identityAccessTemporaryPurposes.get(String(value.kind)) !== value.purpose
+        || !identityAccessText(value.audienceReference, 160) || !Array.isArray(value.disclosedClaims)
+        || value.disclosedClaims.length < 1 || value.disclosedClaims.length > 8
+        || !identityAccessIso(value.notBefore) || !identityAccessIso(value.expiresAt)
+        || Date.parse(String(value.expiresAt)) <= Date.parse(String(value.notBefore))
+        || Date.parse(String(value.expiresAt)) - Date.parse(String(value.notBefore)) > 2_678_400_000
+        || value.confirmation !== 'GECICI YETKI BELGESI OLUSTUR') {
+        return rejected('IDENTITY_ACCESS_TEMPORARY_ISSUE_INVALID', '$[0]');
+      }
+      const claims = value.disclosedClaims;
+      const valid = claims.every((item) => isObject(item) && Object.keys(item).length === 2
+        && hasOnlyKeys(item, ['key', 'value']) && identityAccessClaimKeys.has(String(item.key))
+        && identityAccessText(item.value, 256))
+        && new Set(claims.map((item) => isObject(item) ? item.key : undefined)).size === claims.length;
+      const rules = identityAccessDisclosureRules.get(String(value.kind));
+      const keys = claims.map((item) => isObject(item) ? String(item.key) : '');
+      const disclosureValid = rules !== undefined && [...rules.required].every((key) => keys.includes(key))
+        && keys.every((key) => rules.allowed.has(key));
+      return valid && disclosureValid ? accepted() : rejected('IDENTITY_ACCESS_TEMPORARY_CLAIMS_INVALID', '$[0].disclosedClaims');
+    }
+    case 'identityAccess:revokeTemporaryCredential':
+      return Object.keys(value).length === 5 && hasOnlyKeys(value, [
+        'expectedRevision', 'clientOperationId', 'credentialId', 'reason', 'confirmation'
+      ]) && identityAccessOperation(value) && identityAccessId(value.credentialId) && identityAccessText(value.reason, 256)
+        && value.confirmation === 'GECICI YETKI BELGESINI IPTAL ET'
+        ? accepted() : rejected('IDENTITY_ACCESS_TEMPORARY_REVOKE_INVALID', '$[0]');
+    case 'identityAccess:verifyTemporaryCredential':
+      return Object.keys(value).length === 2 && hasOnlyKeys(value, ['qrPayload', 'expectedAudienceReference'])
+        && identityAccessQrPayload(value.qrPayload) && identityAccessText(value.expectedAudienceReference, 160)
+        ? accepted() : rejected('IDENTITY_ACCESS_TEMPORARY_VERIFY_INVALID', '$[0]');
+    case 'identityAccess:createCompanionSnapshot':
+      return Object.keys(value).length >= 4 && Object.keys(value).length <= 5 && hasOnlyKeys(value, [
+        'clientOperationId', 'trustedDeviceId', 'requestedMode', 'knownSourceVersion', 'confirmation'
+      ]) && identityAccessId(value.clientOperationId) && identityAccessId(value.trustedDeviceId)
+        && (value.requestedMode === 'read_only' || value.requestedMode === 'write')
+        && (value.knownSourceVersion === undefined || identityAccessRevision(value.knownSourceVersion))
+        && value.confirmation === 'SALT OKUNUR ESLIKCI KOPYASI OLUSTUR'
+        ? accepted() : rejected('IDENTITY_ACCESS_COMPANION_INVALID', '$[0]');
+    default:
+      return rejected('UNKNOWN_IPC_CHANNEL', '$');
+  }
+};
+
+const identityAccessSha256 = (value: unknown): boolean => typeof value === 'string' && /^[0-9a-f]{64}$/u.test(value);
+const identityAccessInteger = (value: unknown, minimum = 0, maximum = 2_147_483_646): boolean =>
+  typeof value === 'number' && Number.isSafeInteger(value) && value >= minimum && value <= maximum;
+const identityAccessExact = (
+  value: unknown,
+  required: readonly string[],
+  optional: readonly string[] = []
+): value is Record<string, unknown> => isObject(value)
+  && required.every((key) => Object.prototype.hasOwnProperty.call(value, key))
+  && hasOnlyKeys(value, [...required, ...optional]);
+const identityAccessKey = (value: unknown): value is Record<string, unknown> => identityAccessExact(value, ['familyId', 'accountId', 'ownerPersonId'])
+  && identityAccessId(value.familyId) && identityAccessId(value.accountId) && identityAccessId(value.ownerPersonId);
+const identityAccessKeysEqual = (left: unknown, right: unknown): boolean => identityAccessKey(left) && identityAccessKey(right)
+  && left.familyId === right.familyId && left.accountId === right.accountId && left.ownerPersonId === right.ownerPersonId;
+const identityAccessUniqueStrings = (
+  value: unknown,
+  minimum: number,
+  maximum: number,
+  validate: (item: unknown) => boolean
+): value is readonly string[] => Array.isArray(value) && Object.getPrototypeOf(value) === Array.prototype
+  && value.length >= minimum && value.length <= maximum && value.every(validate) && new Set(value).size === value.length;
+const identityAccessRelyingPartyId = (value: unknown): boolean => typeof value === 'string'
+  && value.length >= 1 && value.length <= 253 && value === value.toLowerCase()
+  && /^[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?$/u.test(value);
+const identityAccessAuthorizationUrl = (value: unknown): boolean => {
+  if (typeof value !== 'string' || value.length < 8 || value.length > 8_192) return false;
+  let url: URL;
+  try { url = new URL(value); } catch { return false; }
+  return url.protocol === 'https:' && Boolean(url.host) && !url.username && !url.password && !url.hash
+    && url.searchParams.get('response_type') === 'code'
+    && identityAccessText(url.searchParams.get('state'), 512)
+    && identityAccessText(url.searchParams.get('nonce'), 512)
+    && identityAccessBase64Url(url.searchParams.get('code_challenge'), 512)
+    && url.searchParams.get('code_challenge_method') === 'S256';
+};
+
+const identityAccessMutationByChannel = Object.freeze({
+  'identityAccess:completePasskeyRegistration': ['passkey_register', 'passkey_credential'],
+  'identityAccess:authenticateWithPasskey': ['passkey_authenticate', 'passkey_credential'],
+  'identityAccess:revokePasskey': ['passkey_revoke', 'passkey_credential'],
+  'identityAccess:recoverLostPasskey': ['passkey_recover_lost', 'passkey_credential'],
+  'identityAccess:completeFederatedIdentityLink': ['federated_link', 'federated_identity_link'],
+  'identityAccess:unlinkFederatedIdentity': ['federated_unlink', 'federated_identity_link'],
+  'identityAccess:issueTemporaryCredential': ['temporary_credential_issue', 'temporary_verifiable_credential'],
+  'identityAccess:revokeTemporaryCredential': ['temporary_credential_revoke', 'temporary_verifiable_credential']
+} as const);
+const identityAccessMutationReceipt = (value: unknown, channel: keyof typeof identityAccessMutationByChannel): boolean => {
+  if (!identityAccessExact(value, [
+    'clientOperationId', 'mutationKind', 'resourceType', 'resourceId', 'previousRevision',
+    'revision', 'stateFingerprint', 'occurredAt', 'replayed'
+  ])) return false;
+  const expected = identityAccessMutationByChannel[channel];
+  return identityAccessId(value.clientOperationId) && value.mutationKind === expected[0]
+    && value.resourceType === expected[1] && identityAccessId(value.resourceId)
+    && identityAccessRevision(value.previousRevision) && identityAccessRevision(value.revision)
+    && Number(value.revision) === Number(value.previousRevision) + 1
+    && identityAccessSha256(value.stateFingerprint) && identityAccessIso(value.occurredAt)
+    && typeof value.replayed === 'boolean';
+};
+
+const identityAccessOperationTokenResult = (value: unknown): boolean => {
+  if (!identityAccessExact(value, ['clientOperationId', 'operationKind', 'issuedAt', 'expiresAt'])) return false;
+  if (typeof value.clientOperationId !== 'string'
+    || !/^iat1\.[0-9a-z]{1,10}\.[0-9a-z]{1,10}\.[A-Za-z0-9_-]{22}\.[A-Za-z0-9_-]{86}$/u.test(value.clientOperationId)
+    || value.clientOperationId.length > 160 || !identityAccessOperationKinds.has(String(value.operationKind))
+    || !identityAccessIso(value.issuedAt) || !identityAccessIso(value.expiresAt)) return false;
+  return Date.parse(String(value.expiresAt)) - Date.parse(String(value.issuedAt)) === 86_400_000;
+};
+
+const identityAccessPasskey = (value: unknown): boolean => {
+  const required = [
+    'id', 'key', 'revision', 'displayName', 'credentialIdSha256', 'publicKeySha256', 'relyingPartyId',
+    'transports', 'signCount', 'backupEligible', 'backupState', 'trustedDeviceId', 'securityEpoch',
+    'status', 'createdAt', 'privateKeyStored', 'biometricDataStored', 'attestationPayloadStored'
+  ];
+  if (!identityAccessExact(value, required, ['aaguid', 'lastUsedAt', 'revokedAt', 'revocationReason'])) return false;
+  const transports = identityAccessUniqueStrings(value.transports, 0, 5, (item) =>
+    ['internal', 'usb', 'nfc', 'ble', 'hybrid'].includes(String(item)));
+  const statusValid = value.status === 'active'
+    ? value.revokedAt === undefined && value.revocationReason === undefined
+    : value.status === 'revoked' && identityAccessIso(value.revokedAt)
+      && ['manual', 'lost', 'recovery', 'device_revoked', 'security_epoch_changed'].includes(String(value.revocationReason));
+  return identityAccessId(value.id) && identityAccessKey(value.key) && identityAccessRevision(value.revision)
+    && Number(value.revision) >= 1 && identityAccessText(value.displayName, 120)
+    && identityAccessSha256(value.credentialIdSha256) && identityAccessSha256(value.publicKeySha256)
+    && identityAccessRelyingPartyId(value.relyingPartyId)
+    && (value.aaguid === undefined || identityAccessText(value.aaguid, 64)) && transports
+    && identityAccessInteger(value.signCount, 0, 4_294_967_295)
+    && typeof value.backupEligible === 'boolean' && typeof value.backupState === 'boolean'
+    && identityAccessId(value.trustedDeviceId) && identityAccessRevision(value.securityEpoch)
+    && identityAccessIso(value.createdAt) && (value.lastUsedAt === undefined || identityAccessIso(value.lastUsedAt))
+    && statusValid && value.privateKeyStored === false && value.biometricDataStored === false
+    && value.attestationPayloadStored === false;
+};
+
+const identityAccessFederatedLink = (value: unknown): boolean => {
+  if (!identityAccessExact(value, [
+    'id', 'key', 'revision', 'provider', 'providerSubjectSha256', 'grantedScopes', 'status', 'liveAccountTested',
+    'authorizationCodePkceVerified', 'stateVerified', 'nonceVerified', 'tokenBytesExposed',
+    'tokenStoredInEncryptedVault', 'providerAvailabilityGuaranteed', 'providerDeliveryGuaranteed',
+    'linkedAt', 'lastLocallyVerifiedAt'
+  ], ['revokedAt'])) return false;
+  const scopes = identityAccessUniqueStrings(value.grantedScopes, 1, 16, (item) =>
+    typeof item === 'string' && /^[A-Za-z0-9._:-]{1,160}$/u.test(item));
+  const statusValid = value.status === 'linked'
+    ? value.revokedAt === undefined
+    : value.status === 'revoked' && identityAccessIso(value.revokedAt);
+  return identityAccessId(value.id) && identityAccessKey(value.key) && identityAccessRevision(value.revision)
+    && Number(value.revision) >= 1 && identityAccessProviders.has(String(value.provider))
+    && identityAccessSha256(value.providerSubjectSha256) && scopes && statusValid
+    && value.liveAccountTested === true && value.authorizationCodePkceVerified === true
+    && value.stateVerified === true && value.nonceVerified === true && value.tokenBytesExposed === false
+    && value.tokenStoredInEncryptedVault === true && value.providerAvailabilityGuaranteed === false
+    && value.providerDeliveryGuaranteed === false && identityAccessIso(value.linkedAt)
+    && identityAccessIso(value.lastLocallyVerifiedAt);
+};
+
+const identityAccessTemporaryCredential = (value: unknown): boolean => {
+  if (!identityAccessExact(value, [
+    'id', 'key', 'revision', 'kind', 'purpose', 'audienceRefSha256', 'disclosedClaimKeys',
+    'disclosureSha256', 'payloadSha256', 'signatureSha256', 'issuerKeyId', 'issuerPublicKeySha256',
+    'signatureAlgorithm', 'qrPayloadBytes', 'status', 'notBefore', 'expiresAt', 'issuedAt',
+    'encryptedEnvelopeStored', 'offlineSignatureVerifiable', 'expiryOfflineVerifiable',
+    'minimumDisclosureEnforced', 'networkDeliveryGuaranteed', 'remoteRevocationFreshnessGuaranteed'
+  ], ['revokedAt', 'revocationReason'])) return false;
+  const kind = String(value.kind);
+  const disclosedClaimKeys = value.disclosedClaimKeys;
+  const claims = identityAccessUniqueStrings(disclosedClaimKeys, 1, 8, (item) => identityAccessClaimKeys.has(String(item)));
+  const rules = identityAccessDisclosureRules.get(kind);
+  const disclosureValid = claims && rules !== undefined
+    && [...rules.required].every((key) => disclosedClaimKeys.includes(key))
+    && disclosedClaimKeys.every((key) => rules.allowed.has(key));
+  const statusValid = value.status === 'active'
+    ? value.revokedAt === undefined && value.revocationReason === undefined
+    : value.status === 'revoked' && identityAccessIso(value.revokedAt) && identityAccessText(value.revocationReason, 512);
+  return identityAccessId(value.id) && identityAccessKey(value.key) && identityAccessRevision(value.revision)
+    && Number(value.revision) >= 1 && identityAccessTemporaryKinds.has(kind)
+    && identityAccessTemporaryPurposes.get(kind) === value.purpose && identityAccessSha256(value.audienceRefSha256)
+    && disclosureValid && identityAccessSha256(value.disclosureSha256) && identityAccessSha256(value.payloadSha256)
+    && identityAccessSha256(value.signatureSha256) && identityAccessSha256(value.issuerKeyId)
+    && identityAccessSha256(value.issuerPublicKeySha256) && value.signatureAlgorithm === 'Ed25519'
+    && identityAccessInteger(value.qrPayloadBytes, 1, 4_096) && statusValid
+    && identityAccessIso(value.notBefore) && identityAccessIso(value.expiresAt) && identityAccessIso(value.issuedAt)
+    && Date.parse(String(value.notBefore)) >= Date.parse(String(value.issuedAt))
+    && Date.parse(String(value.expiresAt)) > Date.parse(String(value.notBefore))
+    && Date.parse(String(value.expiresAt)) - Date.parse(String(value.notBefore)) <= 2_678_400_000
+    && value.encryptedEnvelopeStored === true && value.offlineSignatureVerifiable === true
+    && value.expiryOfflineVerifiable === true && value.minimumDisclosureEnforced === true
+    && value.networkDeliveryGuaranteed === false && value.remoteRevocationFreshnessGuaranteed === false;
+};
+
+const identityAccessCompanionMetadata = (value: unknown, includeEnvelope: boolean): boolean => {
+  const required = [
+    'id', 'key', 'trustedDeviceId', 'protocolVersion', 'sourceVersion', 'schemaVersion', 'ciphertextSha256',
+    'envelopeSha256', 'envelopeBytes', 'securityEpoch', 'generatedAt', 'expiresAt', 'sourceAuthority',
+    'encrypted', 'readOnly', 'remoteWritesAccepted', 'conflictResolution', 'networkDeliveryGuaranteed'
+  ];
+  if (!identityAccessExact(value, includeEnvelope ? [...required, 'status', 'encryptedEnvelopeBase64Url'] : required)) return false;
+  return identityAccessId(value.id) && identityAccessKey(value.key) && identityAccessId(value.trustedDeviceId)
+    && value.protocolVersion === 1 && identityAccessRevision(value.sourceVersion)
+    && identityAccessInteger(value.schemaVersion, 1) && identityAccessSha256(value.ciphertextSha256)
+    && identityAccessSha256(value.envelopeSha256) && identityAccessInteger(value.envelopeBytes, 1, 8_388_608)
+    && identityAccessRevision(value.securityEpoch) && identityAccessIso(value.generatedAt) && identityAccessIso(value.expiresAt)
+    && Date.parse(String(value.expiresAt)) > Date.parse(String(value.generatedAt))
+    && value.sourceAuthority === 'windows_single_writer' && value.encrypted === true && value.readOnly === true
+    && value.remoteWritesAccepted === false && value.conflictResolution === 'reject_remote_and_refresh'
+    && value.networkDeliveryGuaranteed === false
+    && (!includeEnvelope || (value.status === 'snapshot_ready'
+      && identityAccessBase64Url(value.encryptedEnvelopeBase64Url, 11_184_811)));
+};
+
+const identityAccessTruth = (value: unknown): boolean => identityAccessExact(value, [
+  'passkeyPrivateKeyStored', 'biometricDataStored', 'passkeyVerificationScope', 'unconfiguredFederatedProvidersVisible',
+  'federatedProviderAvailabilityGuaranteed', 'federatedProviderDeliveryGuaranteed', 'tokenBytesExposed',
+  'companionSourceAuthority', 'companionRemoteWritesAccepted', 'companionNetworkDeliveryGuaranteed',
+  'credentialQrBounded', 'credentialMinimumDisclosureEnforced', 'offlineSignatureAndExpiryVerifiable',
+  'remoteRevocationFreshnessGuaranteed'
+]) && value.passkeyPrivateKeyStored === false && value.biometricDataStored === false
+  && value.passkeyVerificationScope === 'local_verified_ceremony_metadata_only'
+  && value.unconfiguredFederatedProvidersVisible === false
+  && value.federatedProviderAvailabilityGuaranteed === false && value.federatedProviderDeliveryGuaranteed === false
+  && value.tokenBytesExposed === false && value.companionSourceAuthority === 'windows_single_writer'
+  && value.companionRemoteWritesAccepted === false && value.companionNetworkDeliveryGuaranteed === false
+  && value.credentialQrBounded === true && value.credentialMinimumDisclosureEnforced === true
+  && value.offlineSignatureAndExpiryVerifiable === true && value.remoteRevocationFreshnessGuaranteed === false;
+
+const identityAccessCenter = (value: unknown): boolean => {
+  if (!identityAccessExact(value, [
+    'schemaVersion', 'key', 'passkeys', 'federatedLinks', 'temporaryCredentials', 'companionSnapshots', 'truth', 'generatedAt'
+  ]) || value.schemaVersion !== 1 || !identityAccessKey(value.key)
+    || !Array.isArray(value.passkeys) || value.passkeys.length > 16 || !value.passkeys.every(identityAccessPasskey)
+    || !Array.isArray(value.federatedLinks) || value.federatedLinks.length > 3 || !value.federatedLinks.every(identityAccessFederatedLink)
+    || !Array.isArray(value.temporaryCredentials) || value.temporaryCredentials.length > 256
+    || !value.temporaryCredentials.every(identityAccessTemporaryCredential)
+    || !Array.isArray(value.companionSnapshots) || value.companionSnapshots.length > 256
+    || !value.companionSnapshots.every((item) => identityAccessCompanionMetadata(item, false))
+    || !identityAccessTruth(value.truth) || !identityAccessIso(value.generatedAt)) return false;
+  const resources = [...value.passkeys, ...value.federatedLinks, ...value.temporaryCredentials, ...value.companionSnapshots];
+  return resources.every((item) => isObject(item) && identityAccessKeysEqual(item.key, value.key))
+    && new Set(value.passkeys.map((item) => isObject(item) ? item.id : undefined)).size === value.passkeys.length
+    && new Set(value.federatedLinks.map((item) => isObject(item) ? item.id : undefined)).size === value.federatedLinks.length
+    && new Set(value.temporaryCredentials.map((item) => isObject(item) ? item.id : undefined)).size === value.temporaryCredentials.length
+    && new Set(value.companionSnapshots.map((item) => isObject(item) ? item.id : undefined)).size === value.companionSnapshots.length;
+};
+
+const identityAccessChallengeResult = (value: unknown, purpose: 'passkey_registration' | 'passkey_authentication'): boolean => {
+  if (!identityAccessExact(value, [
+    'challengeId', 'challenge', 'purpose', 'relyingPartyId', 'expiresAt', 'userVerification', 'residentKey',
+    'privateKeyLeavesAuthenticator', 'biometricDataRequestedByApplication', 'allowedCredentialIds'
+  ])) return false;
+  const allowed = identityAccessUniqueStrings(value.allowedCredentialIds, purpose === 'passkey_authentication' ? 1 : 0, 16,
+    (item) => identityAccessBase64Url(item, 1_366));
+  return identityAccessId(value.challengeId) && identityAccessBase64Url(value.challenge, 512)
+    && String(value.challenge).length >= 43 && value.purpose === purpose && identityAccessRelyingPartyId(value.relyingPartyId)
+    && identityAccessIso(value.expiresAt) && value.userVerification === 'required' && value.residentKey === 'preferred'
+    && value.privateKeyLeavesAuthenticator === false && value.biometricDataRequestedByApplication === false && allowed;
+};
+
+const identityAccessFederatedCeremonyResult = (value: unknown): boolean => identityAccessExact(value, [
+  'flowId', 'provider', 'authorizationUrl', 'expiresAt', 'responseType', 'pkceMethod', 'stateBound', 'nonceBound',
+  'codeVerifierStoredInEncryptedVault', 'codeVerifierExposed', 'tokenBytesExposed', 'providerAvailabilityGuaranteed',
+  'providerDeliveryGuaranteed'
+]) && identityAccessId(value.flowId) && identityAccessProviders.has(String(value.provider))
+  && identityAccessAuthorizationUrl(value.authorizationUrl) && identityAccessIso(value.expiresAt)
+  && value.responseType === 'code' && value.pkceMethod === 'S256' && value.stateBound === true && value.nonceBound === true
+  && value.codeVerifierStoredInEncryptedVault === true && value.codeVerifierExposed === false
+  && value.tokenBytesExposed === false && value.providerAvailabilityGuaranteed === false
+  && value.providerDeliveryGuaranteed === false;
+
+const identityAccessIssuedTemporaryResult = (value: unknown): boolean => {
+  const credential = isObject(value) ? value.credential : undefined;
+  if (!identityAccessExact(value, [
+    'credential', 'qrPayload', 'qrPayloadBytes', 'containsOnlySelectedClaims', 'privateSigningKeyExposed',
+    'networkDeliveryGuaranteed'
+  ]) || !isObject(credential) || !identityAccessTemporaryCredential(credential) || !identityAccessQrPayload(value.qrPayload)
+    || !identityAccessInteger(value.qrPayloadBytes, 1, 4_096)
+    || value.qrPayloadBytes !== new TextEncoder().encode(String(value.qrPayload)).byteLength) return false;
+  return credential.id !== undefined && credential.qrPayloadBytes === value.qrPayloadBytes
+    && value.containsOnlySelectedClaims === true
+    && value.privateSigningKeyExposed === false && value.networkDeliveryGuaranteed === false;
+};
+
+const identityAccessTemporaryVerificationResult = (value: unknown): boolean => {
+  if (!identityAccessExact(value, [
+    'credentialId', 'signatureValid', 'notYetValid', 'expired', 'disclosureValid', 'revocationStatus', 'decision',
+    'audienceMatched', 'issuerIdentityCertified',
+    'verifiedAt', 'offlineSignatureVerified', 'networkUsed', 'remoteRevocationFreshnessGuaranteed',
+    'providerDeliveryGuaranteed', 'disclosedClaimKeys'
+  ]) || !identityAccessId(value.credentialId) || typeof value.signatureValid !== 'boolean'
+    || typeof value.notYetValid !== 'boolean' || typeof value.expired !== 'boolean' || typeof value.disclosureValid !== 'boolean'
+    || !['not_revoked_locally', 'revoked_locally', 'unknown_offline'].includes(String(value.revocationStatus))
+    || !['accepted_locally', 'rejected', 'indeterminate_revocation', 'indeterminate_issuer'].includes(String(value.decision))
+    || typeof value.audienceMatched !== 'boolean' || value.issuerIdentityCertified !== false
+    || !identityAccessIso(value.verifiedAt) || value.offlineSignatureVerified !== value.signatureValid
+    || value.networkUsed !== false || value.remoteRevocationFreshnessGuaranteed !== false
+    || value.providerDeliveryGuaranteed !== false
+    || !identityAccessUniqueStrings(value.disclosedClaimKeys, 1, 8, (item) => identityAccessClaimKeys.has(String(item)))) return false;
+  const cryptographicallyUsable = value.signatureValid && value.disclosureValid && !value.notYetValid && !value.expired;
+  if (value.decision === 'accepted_locally') return cryptographicallyUsable && value.audienceMatched && value.revocationStatus === 'not_revoked_locally';
+  if (value.decision === 'indeterminate_revocation' || value.decision === 'indeterminate_issuer') return cryptographicallyUsable && value.audienceMatched && value.revocationStatus === 'unknown_offline';
+  return !cryptographicallyUsable || !value.audienceMatched || value.revocationStatus === 'revoked_locally';
+};
+
+const identityAccessCompanionResult = (value: unknown): boolean => {
+  if (isObject(value) && value.status === 'snapshot_ready') return identityAccessCompanionMetadata(value, true);
+  return identityAccessExact(value, [
+    'status', 'currentSourceVersion', 'sourceAuthority', 'remoteWritesAccepted', 'conflictResolution',
+    'networkDeliveryGuaranteed'
+  ]) && ['write_forbidden', 'version_conflict', 'device_revoked', 'security_epoch_stale'].includes(String(value.status))
+    && identityAccessRevision(value.currentSourceVersion) && value.sourceAuthority === 'windows_single_writer'
+    && value.remoteWritesAccepted === false && value.conflictResolution === 'reject_remote_and_refresh'
+    && value.networkDeliveryGuaranteed === false;
+};
+
+const identityAccessResult = (channel: string, result: unknown): IpcIntegrationPolicyDecision => {
+  const inspection = inspectIdentityAccessPayload(result, channel, '$result');
+  if (inspection) return inspection;
+  let valid = false;
+  switch (channel) {
+    case 'identityAccess:getCenter': valid = identityAccessCenter(result); break;
+    case 'identityAccess:issueOperationToken': valid = identityAccessOperationTokenResult(result); break;
+    case 'identityAccess:beginPasskeyRegistration': valid = identityAccessChallengeResult(result, 'passkey_registration'); break;
+    case 'identityAccess:beginPasskeyAuthentication': valid = identityAccessChallengeResult(result, 'passkey_authentication'); break;
+    case 'identityAccess:beginFederatedIdentityLink': valid = identityAccessFederatedCeremonyResult(result); break;
+    case 'identityAccess:issueTemporaryCredential': {
+      const receipt = isObject(result) ? result.receipt : undefined;
+      valid = identityAccessExact(result, ['receipt'], ['issued'])
+        && isObject(receipt) && identityAccessMutationReceipt(receipt, channel)
+        && (receipt.replayed === true ? result.issued === undefined : identityAccessIssuedTemporaryResult(result.issued))
+        && (receipt.replayed === true || (isObject(result.issued) && isObject(result.issued.credential)
+          && receipt.resourceId === result.issued.credential.id));
+      break;
+    }
+    case 'identityAccess:verifyTemporaryCredential': valid = identityAccessTemporaryVerificationResult(result); break;
+    case 'identityAccess:createCompanionSnapshot': valid = identityAccessCompanionResult(result); break;
+    case 'identityAccess:completePasskeyRegistration':
+    case 'identityAccess:authenticateWithPasskey':
+    case 'identityAccess:revokePasskey':
+    case 'identityAccess:recoverLostPasskey':
+    case 'identityAccess:completeFederatedIdentityLink':
+    case 'identityAccess:unlinkFederatedIdentity':
+    case 'identityAccess:revokeTemporaryCredential':
+      valid = identityAccessMutationReceipt(result, channel);
+      break;
+    default: return rejected('UNKNOWN_IPC_CHANNEL', '$result');
+  }
+  return valid ? accepted() : rejected('IDENTITY_ACCESS_RESULT_INVALID', '$result');
+};
+
 const privacyOwnershipChannels = new Set([
   'privacyOwnership:getCenter',
   'privacyOwnership:correctAiMemory',
@@ -1432,6 +2004,8 @@ const privacyOwnershipInput = (channel: string, args: readonly unknown[]): IpcIn
 };
 
 export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unknown): IpcIntegrationPolicyDecision => {
+  if (identityAccessChannels.has(channel)) return identityAccessResult(channel, result);
+  if (channel.startsWith('identityAccess:')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
   if (channel !== 'privacyOwnership:exportEncrypted') return accepted();
   if (!exactNested(result, ['fileName', 'artifactSha256', 'artifactSizeBytes', 'createdAt', 'delivery'])) {
     return rejected('PRIVACY_EXPORT_RESULT_INVALID', '$result');
@@ -1446,6 +2020,7 @@ export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unkn
 };
 
 export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unknown[]): IpcIntegrationPolicyDecision => {
+  if (identityAccessChannels.has(channel)) return identityAccessInput(channel, args);
   if (privacyOwnershipChannels.has(channel)) return privacyOwnershipInput(channel, args);
   switch (channel) {
     case 'accessibility:getPreferences':

@@ -459,7 +459,9 @@ export interface NetworkEgressBoundaryView {
   enforcement:'fail-closed';
   authorizedApplicationId:'windows-desktop';
   authorizedPurpose:'external-backup-revocation-list.fetch';
-  authorizedAdapterCount:1;
+  authorizedPurposes:readonly ['external-backup-revocation-list.fetch','oidc.token.exchange','oidc.jwks.fetch'];
+  authorizedAdapters:readonly ['apps/desktop/src/main/secure-revocation-list-fetcher.ts','apps/desktop/src/main/secure-oidc-network-adapter.ts'];
+  authorizedAdapterCount:2;
   directPrimitiveExceptionCount:0;
   allowlistRequired:true;
   minimumTlsVersion:'TLSv1.3';

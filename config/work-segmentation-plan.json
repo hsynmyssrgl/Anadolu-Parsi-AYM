@@ -4,8 +4,8 @@
   "release": "Bronze 04.08.2026.29",
   "rule": "PR-171",
   "policy": "ONE_IN_PROGRESS_PREVIOUS_MUST_HAVE_PASS_AND_PERSISTENT_RECEIPT",
-  "workflowStatus": "COMPLETED",
-  "currentStep": null,
+  "workflowStatus": "IN_PROGRESS",
+  "currentStep": "33-P",
   "steps": [
     {
       "id": "29-A",
@@ -2519,10 +2519,28 @@
       "persistentReceiptStatus": "PASS",
       "completionTransitionStatus": "PASS",
       "persistentReceiptPath": "artifacts/checkpoints/33-O_LIBRARY_RECEIPT.json"
+    },
+    {
+      "id": "33-P",
+      "title": "Passkey, federated kimlik ve doğrulanabilir geçici yetki belgeleri",
+      "scopeRequirement": "B2-02,B6-06,B6-07,EXT-070,EXT-071,EXT-072,EXT-073,EXT-074",
+      "status": "IN_PROGRESS",
+      "validationStatus": "PENDING",
+      "localEvidence": [
+        "config/33-p-passkeys-federated-identity-verifiable-temporary-credentials-scope.json",
+        "config/33-p-passkeys-federated-identity-verifiable-temporary-credentials-inventory.json",
+        "docs/decisions/DEC-227-passkeys-federated-identity-verifiable-temporary-credentials.md",
+        "docs/security/THREAT_MODEL_33_P_PASSKEYS_FEDERATED_IDENTITY_VERIFIABLE_TEMPORARY_CREDENTIALS.md",
+        "artifacts/validation/33-P-passkeys-federated-identity-verifiable-temporary-credentials-boundary.json",
+        "artifacts/validation/33-P-passkeys-federated-identity-verifiable-temporary-credentials-contract.json",
+        "artifacts/validation/33-P-passkeys-federated-identity-verifiable-temporary-credentials-runtime.json"
+      ],
+      "persistentReceiptStatus": "PENDING",
+      "completionTransitionStatus": "PENDING"
     }
   ],
   "recoveryAuthority": "USER_FULL_AUTO_2026-08-14",
-  "recoveryReason": "33-N persistent receipt, source protection and Git remote equality PASS; user authorized automatic sequential execution of all remaining packages.",
-  "updatedAt": "2026-08-14T03:03:17.124Z",
-  "segmentationNote": "33-O is immutable COMPLETED/PASS with exact local and D: receipt. 33-P / DEC-227 is the declared next package and requires its own activation."
+  "recoveryReason": "33-O persistent receipt, source protection and Git remote equality PASS; user authorized automatic sequential execution.",
+  "updatedAt": "2026-08-14T03:37:34.276Z",
+  "segmentationNote": "33-P / DEC-227 is the sole IN_PROGRESS step. Governance is active; implementation, live provider, real authenticator and runtime evidence remain NOT_RUN."
 }

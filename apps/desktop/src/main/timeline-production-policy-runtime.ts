@@ -33,6 +33,7 @@ import type {
   AccountRow,
   AccessibilityPreferencesRepositoryPort,
   FormDraftRepositoryPort,
+  IdentityAccessCredentialRepositoryPort,
   TimelineEventPolicyResourceRepositoryPort,
   ObjectPermissionRepositoryPort,
   ObjectPermissionRow,
@@ -66,6 +67,7 @@ export interface TimelineProductionPolicyRuntimeDependencies {
   readonly timelinePolicyResourceRepository: TimelineEventPolicyResourceRepositoryPort;
   readonly accessibilityPreferencesRepository: AccessibilityPreferencesRepositoryPort;
   readonly formDraftRepository: FormDraftRepositoryPort;
+  readonly identityAccessCredentialRepository: IdentityAccessCredentialRepositoryPort;
   readonly privacyOwnershipDataRightsRepository: PrivacyOwnershipDataRightsRepositoryPort;
   readonly personRepository: PersonRepositoryPort;
   readonly deviceIdentityProvider: Pick<FileDeviceIdentityProvider, 'snapshot'>;
@@ -98,7 +100,17 @@ const timelineResourceTypes = new Set<TimelinePolicyIntent['resourceType']>([
   'privacy_ownership_center',
   'ai_memory_record',
   'data_rights_request',
-  'privacy_incident'
+  'privacy_incident',
+  'identity_access_center',
+  'identity_challenge',
+  'passkey_credential',
+  'federated_identity_link',
+  'temporary_verifiable_credential',
+  'companion_sync_snapshot'
+]);
+const identityAccessResourceTypes = new Set<TimelinePolicyIntent['resourceType']>([
+  'identity_access_center','identity_challenge','passkey_credential','federated_identity_link',
+  'temporary_verifiable_credential','companion_sync_snapshot'
 ]);
 const timelinePurposes = new Set<TimelinePolicyIntent['purpose']>([
   'general',
@@ -708,6 +720,17 @@ const findTimelineResourceForPolicyResolution = (
   resourceType: TimelinePolicyIntent['resourceType'],
   resourceId: string
 ): Result<TimelinePolicyResourceState | null, AppError> => {
+  if(identityAccessResourceTypes.has(resourceType)){
+    if(!context.actor.personId)throw new PlatformPolicyEnforcementError('RESOURCE_RESOLUTION_FAILED','Identity access policy resolution requires an exact person identity');
+    if(resourceType==='identity_access_center'&&resourceId!==context.actor.userId)throw new PlatformPolicyEnforcementError('RESOURCE_RESOLUTION_FAILED','Identity access center identity must match the authenticated account');
+    const found=dependencies.identityAccessCredentialRepository.resolvePolicyResource(execution,Object.freeze({
+      familyId:context.familyId,accountId:context.actor.userId,ownerPersonId:context.actor.personId
+    }),resourceType as 'identity_access_center'|'identity_challenge'|'passkey_credential'|'federated_identity_link'|'temporary_verifiable_credential'|'companion_sync_snapshot',resourceId);
+    if(!found.ok)return found;
+    if(found.value&&(found.value.familyId!==context.familyId||found.value.ownerPersonId!==context.actor.personId||found.value.sensitivity!=='highly_sensitive'))
+      throw new PlatformPolicyEnforcementError('RESOURCE_RESOLUTION_FAILED','Identity access policy resource ownership or sensitivity changed');
+    return ok(found.value?Object.freeze({familyId:found.value.familyId,ownerPersonId:found.value.ownerPersonId,sensitivity:'highly_sensitive' as const,stateFingerprint:found.value.stateFingerprint}):null);
+  }
   if (
     resourceType === 'privacy_ownership_center'
     || resourceType === 'ai_memory_record'
@@ -831,6 +854,10 @@ const loadTimelineResourceSnapshotInTransaction = (
     || ((requestedIntent.resourceType === 'privacy_ownership_center'
       || requestedIntent.resourceType === 'privacy_incident'
       || requestedIntent.resourceType === 'data_rights_request') && requestedIntent.purpose !== 'administration')
+    || (identityAccessResourceTypes.has(requestedIntent.resourceType)
+      && (requestedIntent.purpose !== 'administration'
+        || ((requestedIntent.action === 'create' || requestedIntent.action === 'update') && requestedIntent.targetSensitivity !== 'highly_sensitive')
+        || (requestedIntent.action === 'update' && requestedIntent.sourceResourceMode !== 'preserve')))
     || ((requestedIntent.resourceType === 'event'
       || requestedIntent.resourceType === 'accessibility_preferences'
       || requestedIntent.resourceType === 'form_draft') && requestedIntent.purpose !== 'general')
@@ -880,7 +907,10 @@ const loadTimelineResourceSnapshotInTransaction = (
       && requestedIntent.resourceType !== 'form_draft'
       && requestedIntent.resourceType !== 'ai_memory_record'
       && requestedIntent.resourceType !== 'data_rights_request'
-      && requestedIntent.resourceType !== 'privacy_incident') {
+      && requestedIntent.resourceType !== 'privacy_incident'
+      && requestedIntent.resourceType !== 'passkey_credential'
+      && requestedIntent.resourceType !== 'federated_identity_link'
+      && requestedIntent.resourceType !== 'temporary_verifiable_credential') {
       return invalidAuthority(context, 'Timeline policy create resource already exists');
     }
     if (existing.value) {
@@ -1109,6 +1139,7 @@ const ensureRuntimeConfiguration = (dependencies: TimelineProductionPolicyRuntim
     || typeof dependencies.timelinePolicyResourceRepository?.findTimelineEventForPolicyResolution !== 'function'
     || typeof dependencies.accessibilityPreferencesRepository?.findForPolicyResolution !== 'function'
     || typeof dependencies.formDraftRepository?.findForPolicyResolution !== 'function'
+    || typeof dependencies.identityAccessCredentialRepository?.resolvePolicyResource !== 'function'
     || typeof dependencies.personRepository?.findById !== 'function'
     || typeof dependencies.deviceIdentityProvider?.snapshot !== 'function'
     || typeof dependencies.authorizationProvider?.authorize !== 'function'
