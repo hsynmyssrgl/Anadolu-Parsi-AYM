@@ -64,6 +64,12 @@ Renderer bir mutasyon kimliği üretmez. Main process cihazın yerel imza anahta
 
 Yalnız consumed veya süresi dolmuş passkey challenge satırları system-only repository context ile 30 günlük startup cutoff ya da hesap başına 512 toplam satır sınırında prune edilir; normal insert bakımı 7 günlük terminal grace uygular. Aynı hesapta en çok 32 aktif challenge bulunabilir ve aktif challenge silinemez. Terminal credential metadata compaction exact tombstone/reference kontrollerine bağlıdır; aktif kayıt, grace içindeki kayıt, tombstone’suz kayıt veya hâlâ referanslı mutation silinemez. Local file-first mantıksal envelope silme uygulanmıştır; fiziksel secure erase, backup propagation ve tarihsel audit-retention review açık olduğundan bu requirement kapanışı değildir.
 
+## Dış kanıt intake gerçeği
+
+33-P dış kanıt paketi için fail-closed intake uygulanmıştır. Paket; sekiz exact kanıt sınıfını, Ed25519 signer public-key fingerprintini, exact Git commit/tree bağını ve her dosyanın canonical göreli yolu, byte boyutu ve SHA-256 değerini doğrular. İçerik ayrıca provider, gerçek authenticator, çapraz cihaz, credential verifier, insan UAT ve privacy/legal/identity review alanlarında secret/personal-data taşımayan exact semantik sözleşmeye uymalıdır. İmza, kaynak, süre, dosya ya da semantik sapması paketin tamamını reddeder.
+
+İntake self-testinde geçerli paket, byte tamperi, yabancı signer, yabancı source commit ve süre aşımı sınırları doğrulanır. Bununla birlikte `PASS` yalnız `READY_FOR_GOVERNED_REVIEW` üretir; requirement PASS vermez, registry mutasyonu yapmaz ve persistent receipt yazmaz. actual external evidence `NOT_RUN` durumundadır ve kullanıcıdan bağımsız gerçek cihaz/hesap/reviewer kanıtı olmadan değiştirilemez.
+
 ## Otomatik gate ve açık engeller
 
 `verify:33-p:boundary`, `verify:33-p:contract`, `verify:33-p:targeted` ve `verify:33-p:runtime` gerçek production markerlarını ve stabil yerel snapshot için exact 19 dosya / en az 116 test ratchetini fail-closed ölçer. Migration 93 kaynak hash’i de exact sabitlenir. Her test, dosya, hash veya marker sapması ilgili artifact’ı `FAIL` yapar. Gate’in yerel olarak PASS olması aşağıdaki engelleri kapatmaz:

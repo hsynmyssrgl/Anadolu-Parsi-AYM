@@ -1,0 +1,198 @@
+{
+  "schemaVersion": 1,
+  "step": "33-P",
+  "status": "PASS",
+  "checks": 7,
+  "passed": 7,
+  "failed": 0,
+  "results": [
+    {
+      "id": "valid-signed-exact-bundle-ready-for-review",
+      "status": "PASS",
+      "details": {
+        "schemaVersion": 1,
+        "step": "33-P",
+        "decision": "DEC-227",
+        "status": "PASS",
+        "checks": 32,
+        "passed": 32,
+        "failed": 0,
+        "results": [
+          {
+            "id": "manifest-exact-shape",
+            "status": "PASS"
+          },
+          {
+            "id": "manifest-authority",
+            "status": "PASS"
+          },
+          {
+            "id": "manifest-source-binding",
+            "status": "PASS",
+            "details": {
+              "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "tree": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+            }
+          },
+          {
+            "id": "manifest-host-binding",
+            "status": "PASS"
+          },
+          {
+            "id": "manifest-signer-binding",
+            "status": "PASS"
+          },
+          {
+            "id": "manifest-time-window",
+            "status": "PASS"
+          },
+          {
+            "id": "manifest-ed25519-signature",
+            "status": "PASS"
+          },
+          {
+            "id": "manifest-exact-evidence-set",
+            "status": "PASS"
+          },
+          {
+            "id": "live-provider-account-test-manifest-entry",
+            "status": "PASS"
+          },
+          {
+            "id": "live-provider-account-test-byte-hash-binding",
+            "status": "PASS"
+          },
+          {
+            "id": "live-provider-account-test-semantic-contract",
+            "status": "PASS"
+          },
+          {
+            "id": "real-authenticator-device-test-manifest-entry",
+            "status": "PASS"
+          },
+          {
+            "id": "real-authenticator-device-test-byte-hash-binding",
+            "status": "PASS"
+          },
+          {
+            "id": "real-authenticator-device-test-semantic-contract",
+            "status": "PASS"
+          },
+          {
+            "id": "cross-device-companion-test-manifest-entry",
+            "status": "PASS"
+          },
+          {
+            "id": "cross-device-companion-test-byte-hash-binding",
+            "status": "PASS"
+          },
+          {
+            "id": "cross-device-companion-test-semantic-contract",
+            "status": "PASS"
+          },
+          {
+            "id": "credential-verifier-uat-manifest-entry",
+            "status": "PASS"
+          },
+          {
+            "id": "credential-verifier-uat-byte-hash-binding",
+            "status": "PASS"
+          },
+          {
+            "id": "credential-verifier-uat-semantic-contract",
+            "status": "PASS"
+          },
+          {
+            "id": "human-uat-manifest-entry",
+            "status": "PASS"
+          },
+          {
+            "id": "human-uat-byte-hash-binding",
+            "status": "PASS"
+          },
+          {
+            "id": "human-uat-semantic-contract",
+            "status": "PASS"
+          },
+          {
+            "id": "privacy-review-manifest-entry",
+            "status": "PASS"
+          },
+          {
+            "id": "privacy-review-byte-hash-binding",
+            "status": "PASS"
+          },
+          {
+            "id": "privacy-review-semantic-contract",
+            "status": "PASS"
+          },
+          {
+            "id": "legal-review-manifest-entry",
+            "status": "PASS"
+          },
+          {
+            "id": "legal-review-byte-hash-binding",
+            "status": "PASS"
+          },
+          {
+            "id": "legal-review-semantic-contract",
+            "status": "PASS"
+          },
+          {
+            "id": "identity-review-manifest-entry",
+            "status": "PASS"
+          },
+          {
+            "id": "identity-review-byte-hash-binding",
+            "status": "PASS"
+          },
+          {
+            "id": "identity-review-semantic-contract",
+            "status": "PASS"
+          }
+        ],
+        "closureReadiness": {
+          "status": "READY_FOR_GOVERNED_REVIEW",
+          "requirementPassGranted": false,
+          "registryMutationPerformed": false,
+          "persistentReceiptWritten": false
+        },
+        "limitations": [
+          "İntake doğrulaması dış işlemleri kendisi çalıştırmaz.",
+          "PASS yalnız exact kaynak ve signer bağlı kanıt paketinin gözden geçirmeye hazır olduğunu gösterir.",
+          "Registry, persistent receipt veya requirement durumu ayrı yönetişim kapanışı olmadan değişmez."
+        ],
+        "observedAt": "2026-08-14T12:00:00.000Z"
+      }
+    },
+    {
+      "id": "path-traversal-entry-rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "tampered-evidence-byte-and-semantic-rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "foreign-signer-rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "private-key-material-rejected-before-parse",
+      "status": "PASS"
+    },
+    {
+      "id": "foreign-source-commit-rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "expired-bundle-rejected",
+      "status": "PASS"
+    }
+  ],
+  "actualExternalEvidenceStatus": "NOT_RUN",
+  "requirementPassGranted": false,
+  "registryMutationPerformed": false,
+  "persistentReceiptWritten": false,
+  "generatedAt": "2026-08-14T11:17:12.205Z"
+}

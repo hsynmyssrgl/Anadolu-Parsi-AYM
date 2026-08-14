@@ -31,7 +31,10 @@ const productionPaths=Object.freeze({
   deepLink:'apps/desktop/src/main/oidc-deep-link-callback-registry.ts',temporaryEnvelope:'apps/desktop/src/main/temporary-credential-envelope-adapter.ts',
   companionAdapter:'apps/desktop/src/main/companion-sync-envelope-adapter.ts',dataStore:'apps/desktop/src/main/data-store.ts',
   ipc:'apps/desktop/src/main/ipc-integration-policy.ts',lifecycle:'apps/desktop/src/main/ipc-request-lifecycle.ts',
-  main:'apps/desktop/src/main/main.ts',preload:'apps/desktop/src/main/preload.ts',app:'apps/desktop/src/renderer/App.tsx'
+  main:'apps/desktop/src/main/main.ts',preload:'apps/desktop/src/main/preload.ts',app:'apps/desktop/src/renderer/App.tsx',
+  evidenceIntake:'scripts/lib/identity-access-external-evidence-intake.mjs',
+  evidenceIntakeCli:'scripts/verify-33-p-identity-access-external-evidence-intake.mjs',
+  evidenceIntakeRuntime:'scripts/verify-33-p-identity-access-external-evidence-intake-runtime.mjs'
 });
 const readJson=async path=>JSON.parse(await readFile(resolve(root,path),'utf8'));
 const [scope,inventory,registry,pkg]=await Promise.all([
@@ -41,6 +44,9 @@ const [scope,inventory,registry,pkg]=await Promise.all([
 ]);
 const run=spawnSync(process.execPath,['node_modules/vitest/vitest.mjs','run',...testFiles,'--maxWorkers=1'],{
   cwd:root,encoding:'utf8',windowsHide:true,timeout:300_000,maxBuffer:32*1024*1024,env:process.env
+});
+const evidenceIntakeRun=spawnSync(process.execPath,['scripts/verify-33-p-identity-access-external-evidence-intake-runtime.mjs'],{
+  cwd:root,encoding:'utf8',windowsHide:true,timeout:30_000,maxBuffer:4*1024*1024,env:process.env
 });
 const combined=`${run.stdout??''}\n${run.stderr??''}`;
 const fileMatch=combined.match(/Test Files\s+(?:\d+ failed\s+\|\s+)?(\d+) passed/u);
@@ -59,6 +65,7 @@ const testRatchet=scope.validation?.targetedTestRatchet??0;
 const manualKeys=['liveProviderAccountTest','realAuthenticatorDevice','crossDeviceSync','credentialVerifierUat','humanUat','privacyReview','legalReview','identityReview'];
 const definitions=[
   ['targeted Vitest process exits successfully',run.status===0],
+  ['signed external evidence intake self-test passes without accepting actual external evidence',evidenceIntakeRun.status===0&&`${evidenceIntakeRun.stdout??''}\n${evidenceIntakeRun.stderr??''}`.includes('actual evidence NOT_RUN')&&has('evidenceIntake','READY_FOR_GOVERNED_REVIEW','requirementPassGranted: false','registryMutationPerformed: false','persistentReceiptWritten: false','manifest-ed25519-signature')&&has('evidenceIntakeCli','--trusted-signer-public-key','status: \'NOT_READY\'')],
   ['all inventory-aligned exact local ratchet files pass',run.status===0&&fileRatchet===19&&filesPassed===fileRatchet&&testFiles.length===fileRatchet],
   ['stable local ratchet is at least 116 passing tests without closure semantics',run.status===0&&testRatchet===116&&testsPassed>=testRatchet&&scope.validation?.sourceStabilizationStatus==='STABLE_LOCAL_SNAPSHOT'&&scope.validation?.ratchetSemantics==='EXACT_LOCAL_SNAPSHOT_NOT_REQUIREMENT_CLOSURE'],
   ['package targeted command contains every governed test',testFiles.every(path=>pkg.scripts?.['verify:33-p:targeted']?.includes(path))&&pkg.scripts?.['verify:33-p:targeted']?.includes('--maxWorkers=1')],
@@ -77,9 +84,9 @@ const definitions=[
   ['IPC recursively validates exact commands results quotas and lifecycle',has('ipc','identityAccessInput','IDENTITY_ACCESS_PASSKEY_REGISTRATION_INVALID','IDENTITY_ACCESS_TEMPORARY_CLAIMS_INVALID','identityAccessMutationReceipt','identityAccessCenter')&&has('lifecycle','identityAccessReadChannels','identityAccessWriteChannels','maxConcurrentPerChannel')&&has('preload','CompletePasskeyRegistrationIpcInput','RecoverLostPasskeyIpcInput','createReadOnlyCompanionSnapshot')],
   ['UI preserves challenge retry configured providers secret clearing and write denial',has('app','rememberOperation(key,operation,payload)','Date.parse(operation.payload.challenge.expiresAt)<=Date.now()','nextProviders.filter(item=>item.configured)',"finally{setRecoveryPassword('');setRecoverySecondFactorCode('');setBusy('');}",'Yazma reddini doğrula','resmi kimlik veya hukuk sertifikasyonu yapılmaz')&&testHas('apps/desktop/tests/identity-access-credential-ui.test.ts','never retains password or second-factor secrets','does not misuse productionReady as a start gate')],
   ['DataStore and adapter remain policy transaction and repository backed',has('adapter','RepositoryBackedIdentityAccessCredentialUnitOfWork','policyTransactionRunner','PolicyAuthorizedRepositoryExecutionContext')&&has('dataStore','getIdentityAccessCredentialCenter','completePasskeyRegistration','linkFederatedIdentity','issueTemporaryVerifiableCredential','createReadOnlyCompanionSnapshot')],
-  ['external and manual evidence remain NOT_RUN',manualKeys.every(key=>scope.manualEvidence?.[key]==='NOT_RUN')&&truth.providerExchangePerformed===false&&truth.realAuthenticatorDeviceTestPerformed===false&&truth.crossDeviceSyncPerformed===false],
+  ['external and manual evidence remain NOT_RUN while the signed intake path is locally verified',manualKeys.every(key=>scope.manualEvidence?.[key]==='NOT_RUN')&&truth.providerExchangePerformed===false&&truth.realAuthenticatorDeviceTestPerformed===false&&truth.crossDeviceSyncPerformed===false&&truth.externalEvidenceIntakeImplemented===true&&truth.actualExternalEvidenceIntakeStatus==='NOT_RUN'],
   ['runtime can never count as atomic registry or requirement PASS',scope.status==='IN_PROGRESS'&&inventory.status==='IN_PROGRESS'&&scope.validation?.countsAsRequirementPass===false&&truth.localAutomatedEvidenceCanCloseRequirements===false&&scope.localImplementationChain?.status==='IMPLEMENTED_LOCAL_AUTOMATED'&&scope.localImplementationChain?.acceptanceComplete===false&&scope.registrySemantics?.acceptedScopeRegistryAuthority==='ATOMIC_CLOSURE_STATE'&&scope.registrySemantics?.partialChainMutationPerformedByStarter===false&&inventory.registryReconciliation?.partialRegistryChainMutationPerformed===false&&requirements.every(id=>{const item=registry.requirements?.find(value=>value.id===id);return item?.status!=='COMPLETE'&&item?.chain?.evidence===false;})],
-  ['no completion commands exist',!Object.keys(pkg.scripts??{}).some(name=>/^(?:prepare:33-p|finalize:33-p|verify:33-p:completion)/u.test(name))]
+  ['evidence intake commands exist and no completion commands exist',['verify:33-p:external-evidence-intake','verify:33-p:external-evidence-intake:runtime'].every(name=>typeof pkg.scripts?.[name]==='string')&&!Object.keys(pkg.scripts??{}).some(name=>/^(?:prepare:33-p|finalize:33-p|verify:33-p:completion)/u.test(name))]
 ];
 const checks=definitions.map(([name,passed])=>({name,status:passed?'PASS':'FAIL'}));
 const failures=checks.filter(item=>item.status==='FAIL');
@@ -89,7 +96,7 @@ const report={
   countsAsRequirementPass:false,requirementGateStatus:'BLOCKED_EXTERNAL_MANUAL_AND_PRODUCTION_EVIDENCE',
   sourceStabilizationStatus:'STABLE_LOCAL_SNAPSHOT',ratchetSemantics:'EXACT_LOCAL_SNAPSHOT_NOT_REQUIREMENT_CLOSURE',
   targetedTestFilesPassed:filesPassed,targetedTestsPassed:testsPassed,targetedTestFileRatchet:fileRatchet,targetedTestRatchet:testRatchet,testFiles,
-  externalEvidence:{liveProviderAccountTest:'NOT_RUN',realAuthenticatorDevice:'NOT_RUN',crossDeviceSync:'NOT_RUN',credentialVerifierUat:'NOT_RUN',humanUat:'NOT_RUN',privacyReview:'NOT_RUN',legalReview:'NOT_RUN',identityReview:'NOT_RUN'},
+  externalEvidence:{intakeVerifier:'IMPLEMENTED_LOCAL_SIGNED_SOURCE_BOUND',intakeSelfTest:evidenceIntakeRun.status===0?'PASS':'FAIL',actualIntake:'NOT_RUN',liveProviderAccountTest:'NOT_RUN',realAuthenticatorDevice:'NOT_RUN',crossDeviceSync:'NOT_RUN',credentialVerifierUat:'NOT_RUN',humanUat:'NOT_RUN',privacyReview:'NOT_RUN',legalReview:'NOT_RUN',identityReview:'NOT_RUN'},
   productionBindings:{oidcCodeExchangeAndJwks:'IMPLEMENTED_FAIL_CLOSED_PINNED_NETWORK',providerVisibility:'NETWORK_READY_REGISTRATIONS_ONLY_NO_LIVE_EVIDENCE',appleProtectedClientAuthentication:'UNAVAILABLE',mainOnlyDeepLinkCallback:'IMPLEMENTED_FAIL_CLOSED_PACKAGED_PROTOCOL',packagedProtocolAndLiveCallbackEvidence:'NOT_RUN',manualRendererCallbackCountsAsComplete:false,companionSourceProjection:'IMPLEMENTED_POLICY_AUTHORIZED_SQLITE',companionRecipientKeyEvidence:'NOT_RUN',externalQrIssuerTrust:'NOT_CONFIGURED',localEnvelopeLogicalDeletion:'IMPLEMENTED_FILE_FIRST_OWNER_BOUND',physicalSecureEraseGuaranteed:false,backupPropagationEvidence:'NOT_RUN',systemRetentionCountsAsCentralPepCompletion:false,durablePolicyAuditAndProjectionOutboxPreserved:true,temporaryCredentialLifetimeRetentionRisk:'OPEN'},
   checksPassed:checks.length-failures.length,checksFailed:failures.length,checks,
   process:{exitCode:run.status,signal:run.signal??null,reason:run.status===0?'Local automated matrix completed; external evidence still NOT_RUN.':'Local automated matrix failed closed.'},
