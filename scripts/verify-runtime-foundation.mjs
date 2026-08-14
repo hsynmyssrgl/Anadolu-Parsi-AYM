@@ -164,7 +164,7 @@ try {
       registerCorrelatedIpcHandler({
         ipcMain,
         runtime,
-        channel: 'test:echo',
+        channel: 'formDraft:getWorkspace',
         resolveTrustedRenderer: () => ({ webContentsId: 7, documentUrl: frame.url }),
         transportSessions: new IpcTransportSessionRegistry(),
         requestLifecycles: new IpcRequestLifecycleRegistry(),
@@ -183,11 +183,11 @@ try {
         requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         sessionEpoch: 0,
         requestSequence: 1,
-        channel: 'test:echo',
+        channel: 'formDraft:getWorkspace',
         revisions: createZeroIpcTransportRevisions()
       };
-      const response = await handlers.get('test:echo')({ sender: { id: 7, mainFrame: frame }, senderFrame: frame }, request, 'aile');
-      assert.deepEqual(response.result, { value: 'aile' });
+      const response = await handlers.get('formDraft:getWorkspace')({ sender: { id: 7, mainFrame: frame }, senderFrame: frame }, request, 'aile.workspace');
+      assert.deepEqual(response.result, { value: 'aile.workspace' });
       assert.equal(response.request.requestId, request.requestId);
       assert.equal(runtime.correlation.current(), undefined);
       const log = await readProtectedLog(

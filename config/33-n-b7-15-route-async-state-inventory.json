@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "33-N-B7-15-ROUTE-ASYNC-STATE-INVENTORY",
+  "requirement": "B7-15",
+  "routeCount": 22,
+  "statesPerRoute": ["empty", "loading", "offline", "error", "retry"],
+  "governedBehavior": {
+    "component": "AsyncStatePanel",
+    "empty": "meaningful_text_status",
+    "loading": "meaningful_text_status_aria_busy",
+    "offline": "meaningful_text_assertive_retry",
+    "error": "meaningful_text_assertive_retry",
+    "retry": "named_action_focus_return"
+  },
+  "routes": [
+    {"id":"dashboard","states":["empty","loading","offline","error","retry"]},
+    {"id":"family","states":["empty","loading","offline","error","retry"]},
+    {"id":"households","states":["empty","loading","offline","error","retry"]},
+    {"id":"people-lifecycle","states":["empty","loading","offline","error","retry"]},
+    {"id":"tree","states":["empty","loading","offline","error","retry"]},
+    {"id":"timeline","states":["empty","loading","offline","error","retry"]},
+    {"id":"important-days","states":["empty","loading","offline","error","retry"]},
+    {"id":"archive","states":["empty","loading","offline","error","retry"]},
+    {"id":"finance","states":["empty","loading","offline","error","retry"]},
+    {"id":"health","states":["empty","loading","offline","error","retry"]},
+    {"id":"life-center","states":["empty","loading","offline","error","retry"]},
+    {"id":"automation","states":["empty","loading","offline","error","retry"]},
+    {"id":"reports","states":["empty","loading","offline","error","retry"]},
+    {"id":"location","states":["empty","loading","offline","error","retry"]},
+    {"id":"invitations","states":["empty","loading","offline","error","retry"]},
+    {"id":"data-repair","states":["empty","loading","offline","error","retry"]},
+    {"id":"permissions","states":["empty","loading","offline","error","retry"]},
+    {"id":"ai","states":["empty","loading","offline","error","retry"]},
+    {"id":"legacy","states":["empty","loading","offline","error","retry"]},
+    {"id":"windows-hello","states":["empty","loading","offline","error","retry"]},
+    {"id":"security","states":["empty","loading","offline","error","retry"]},
+    {"id":"settings","states":["empty","loading","offline","error","retry"]}
+  ],
+  "governedStateMappings": 110
+}

@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "step": "33-N",
+  "decision": "DEC-225",
+  "requirements": [
+    "B3-02",
+    "B7-14",
+    "B7-15"
+  ],
+  "status": "PASS",
+  "checksPassed": 28,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "domain exposes bounded canonical JSON draft model",
+      "status": "PASS",
+      "evidence": "packages/domain/src/form-drafts.ts"
+    },
+    {
+      "name": "domain rejects non JSON and nested banking secrets",
+      "status": "PASS",
+      "evidence": "packages/domain/src/form-drafts.ts"
+    },
+    {
+      "name": "public draft view excludes receipt and mutation persistence internals",
+      "status": "PASS",
+      "evidence": "packages/domain/src/form-drafts.ts"
+    },
+    {
+      "name": "application exact command shapes and optimistic revision are enforced",
+      "status": "PASS",
+      "evidence": "packages/application/src/form-draft-use-cases.ts"
+    },
+    {
+      "name": "application binds idempotent replay to request fingerprint",
+      "status": "PASS",
+      "evidence": "packages/application/src/form-draft-use-cases.ts"
+    },
+    {
+      "name": "application undo restores the immediately preceding immutable revision",
+      "status": "PASS",
+      "evidence": "packages/application/src/form-draft-use-cases.ts"
+    },
+    {
+      "name": "application mutation audit and outbox are atomic scope operations",
+      "status": "PASS",
+      "evidence": "packages/application/src/form-draft-use-cases.ts"
+    },
+    {
+      "name": "repository contract separates policy resolution from governed access",
+      "status": "PASS",
+      "evidence": "packages/repository-contracts/src/form-draft-repository.ts"
+    },
+    {
+      "name": "migration 91 installs strict current and mutation history",
+      "status": "PASS",
+      "evidence": "packages/database/src/family-database-migrations.ts"
+    },
+    {
+      "name": "migration 91 enforces idempotency and optimistic revisions",
+      "status": "PASS",
+      "evidence": "packages/database/src/family-database-migrations.ts"
+    },
+    {
+      "name": "migration 91 enforces immediate undo and immutable history",
+      "status": "PASS",
+      "evidence": "packages/database/src/family-database-migrations.ts"
+    },
+    {
+      "name": "migration receipt trigger binds exact active personal subject and resource",
+      "status": "PASS",
+      "evidence": "packages/database/src/family-database-migrations.ts"
+    },
+    {
+      "name": "repository requires exact form_draft policy persistence binding",
+      "status": "PASS",
+      "evidence": "packages/repositories/src/form-draft-repository.ts"
+    },
+    {
+      "name": "repository scopes current and history by account and form key",
+      "status": "PASS",
+      "evidence": "packages/repositories/src/form-draft-repository.ts"
+    },
+    {
+      "name": "central PEP and SQLite UoW runner are reused",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/main/form-draft-application-adapter.ts"
+    },
+    {
+      "name": "production policy resolves form_draft through repository",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/main/timeline-production-policy-runtime.ts"
+    },
+    {
+      "name": "data store composes canonical workspace save and undo use cases",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/main/data-store.ts"
+    },
+    {
+      "name": "IPC policy accepts only exact get save undo inputs",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/main/ipc-integration-policy.ts"
+    },
+    {
+      "name": "main and preload expose canonical workspace save and undo channels",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/main/main.ts;apps/desktop/src/main/preload.ts"
+    },
+    {
+      "name": "renderer global contract exposes workspace only",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/renderer/global.d.ts"
+    },
+    {
+      "name": "async panel covers meaningful states and retry semantics",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/renderer/form-ux.tsx"
+    },
+    {
+      "name": "validation summary announces and links field errors",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/renderer/form-ux.tsx"
+    },
+    {
+      "name": "governed draft controller debounces and fences stale completion",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/renderer/form-ux.tsx"
+    },
+    {
+      "name": "global async guard rejects stale route or session writes",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/renderer/async-state-guard.ts"
+    },
+    {
+      "name": "application integrates governed draft and screen states",
+      "status": "PASS",
+      "evidence": "apps/desktop/src/renderer/App.tsx"
+    },
+    {
+      "name": "negative application repository and IPC suites exist",
+      "status": "PASS",
+      "evidence": "packages/application/tests/form-draft-use-cases.test.ts;packages/repositories/form-draft-repository-policy.test.ts;apps/desktop/tests/form-draft-ipc-integration.test.ts"
+    },
+    {
+      "name": "renderer async guards and production composition runtime suites exist",
+      "status": "PASS",
+      "evidence": "apps/desktop/tests/form-ux.test.ts;apps/desktop/tests/async-state-guard.test.ts;apps/desktop/tests/data-store.test.ts"
+    },
+    {
+      "name": "B7-15 inventory binds 22 routes to five states and 110 behavior mappings",
+      "status": "PASS",
+      "evidence": "config/33-n-b7-15-route-async-state-inventory.json;apps/desktop/tests/b7-15-route-async-state-governance.test.ts;scripts/verify-33-n-b7-15-route-async-state-governance.mjs"
+    }
+  ],
+  "generatedAt": "2026-08-14T00:07:17.638Z"
+}

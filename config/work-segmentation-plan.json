@@ -4,8 +4,8 @@
   "release": "Bronze 04.08.2026.29",
   "rule": "PR-171",
   "policy": "ONE_IN_PROGRESS_PREVIOUS_MUST_HAVE_PASS_AND_PERSISTENT_RECEIPT",
-  "workflowStatus": "COMPLETED",
-  "currentStep": null,
+  "workflowStatus": "IN_PROGRESS",
+  "currentStep": "33-N",
   "steps": [
     {
       "id": "29-A",
@@ -2424,10 +2424,48 @@
       "persistentReceiptStatus": "PASS",
       "completionTransitionStatus": "PASS",
       "persistentReceiptPath": "artifacts/checkpoints/33-M_LIBRARY_RECEIPT.json"
+    },
+    {
+      "id": "33-N",
+      "title": "Taslak, geri alma, canlı doğrulama ve bütünleşik ekran durumları",
+      "scopeRequirement": "B3-02,B7-14,B7-15",
+      "status": "IN_PROGRESS",
+      "validationStatus": "PASS",
+      "localEvidence": [
+        "config/33-n-draft-async-state-ux-scope.json",
+        "config/33-n-draft-async-state-ux-inventory.json",
+        "docs/decisions/DEC-225-draft-async-state-ux.md",
+        "docs/security/THREAT_MODEL_33_N_DRAFT_ASYNC_STATE_UX.md",
+        "artifacts/validation/33-N-draft-async-state-ux-boundary.json",
+        "artifacts/validation/33-N-draft-async-state-ux-contract.json",
+        "artifacts/validation/33-N-draft-async-state-ux-runtime.json",
+        "docs/audit/33-N_DRAFT_ASYNC_STATE_UX_UST_KAPANIS.md",
+        "packages/domain/src/form-drafts.ts",
+        "packages/application/src/form-draft-use-cases.ts",
+        "packages/database/src/family-database-migrations.ts",
+        "packages/repository-contracts/src/form-draft-repository.ts",
+        "packages/repositories/src/form-draft-repository.ts",
+        "apps/desktop/src/main/form-draft-application-adapter.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/renderer/form-ux.tsx",
+        "apps/desktop/src/renderer/async-state-guard.ts",
+        "apps/desktop/src/renderer/route-async-state.ts",
+        "apps/desktop/src/renderer/App.tsx",
+        "packages/application/tests/form-draft-use-cases.test.ts",
+        "packages/repositories/form-draft-repository-policy.test.ts",
+        "apps/desktop/tests/form-draft-ipc-integration.test.ts",
+        "apps/desktop/tests/form-ux.test.ts",
+        "apps/desktop/tests/async-state-guard.test.ts",
+        "apps/desktop/tests/b7-15-route-async-state-governance.test.ts",
+        "config/33-n-b7-15-route-async-state-inventory.json",
+        "scripts/verify-33-n-b7-15-route-async-state-governance.mjs"
+      ],
+      "persistentReceiptStatus": "PENDING",
+      "completionTransitionStatus": "PENDING"
     }
   ],
-  "recoveryAuthority": "NEW_CHAT_HANDOFF_Bronze_04.08.2026.29.md",
-  "recoveryReason": "29-D_FAILED_POSTFLIGHT_EXIT_CODE_1_SPLIT_PER_PR-171",
-  "updatedAt": "2026-08-13T22:10:09.423Z",
-  "segmentationNote": "33-M is immutable COMPLETED/PASS with exact local and D: receipt. 33-N / DEC-225 is the declared next package and requires its own activation."
+  "recoveryAuthority": "USER_FULL_AUTO_2026-08-14",
+  "recoveryReason": "33-M persistent receipt and source protection PASS; user authorized automatic sequential execution of all remaining packages.",
+  "updatedAt": "2026-08-14T00:03:55.888Z",
+  "segmentationNote": "33-N is validated PASS and remains fail-closed IN_PROGRESS until exact local and D: persistent receipt finalization."
 }

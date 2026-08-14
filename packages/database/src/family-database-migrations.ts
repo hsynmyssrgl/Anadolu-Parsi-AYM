@@ -11323,6 +11323,212 @@ BEGIN SELECT RAISE(ABORT,'accessibility preference deletion is forbidden'); END;
 UPDATE database_metadata SET value='REVISION-33-M-ACCESSIBILITY-PREFERENCES',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 
+const governedFormDraftsSql = `CREATE TABLE governed_form_draft_mutations(
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 160),
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 8 AND 128),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  form_key TEXT NOT NULL CHECK(length(form_key) BETWEEN 3 AND 128 AND form_key=trim(form_key) AND form_key NOT GLOB '*[^A-Za-z0-9._:-]*'),
+  resource_id TEXT NOT NULL CHECK(resource_id='form_draft/'||account_id||'/'||form_key),
+  operation TEXT NOT NULL CHECK(operation IN ('save','undo')),
+  previous_revision INTEGER NOT NULL CHECK(previous_revision BETWEEN 0 AND 2147483646),
+  revision INTEGER NOT NULL CHECK(revision=previous_revision+1 AND revision BETWEEN 1 AND 2147483647),
+  payload_json TEXT NOT NULL CHECK(length(CAST(payload_json AS BLOB)) BETWEEN 2 AND 65536 AND json_valid(payload_json)=1 AND json_type(payload_json)='object'),
+  payload_fingerprint TEXT NOT NULL CHECK(length(payload_fingerprint)=64 AND payload_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  restored_from_revision INTEGER,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z' AND julianday(created_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL UNIQUE REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT CHECK(length(policy_receipt_hash)=64 AND policy_receipt_hash NOT GLOB '*[^0-9a-f]*'),
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version=1),
+  policy_receipt_nonce TEXT NOT NULL UNIQUE CHECK(length(trim(policy_receipt_nonce)) BETWEEN 1 AND 256),
+  policy_correlation_id TEXT NOT NULL CHECK(length(trim(policy_correlation_id)) BETWEEN 1 AND 128),
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type='form_draft'),
+  policy_resource_id TEXT NOT NULL CHECK(policy_resource_id=resource_id),
+  policy_action TEXT NOT NULL CHECK(policy_action IN ('create','update')),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='family.write'),
+  CHECK(
+    (operation='save' AND restored_from_revision IS NULL)
+    OR (operation='undo' AND previous_revision>=2 AND restored_from_revision=previous_revision-1)
+  ),
+  UNIQUE(family_id,account_id,form_key,client_operation_id),
+  UNIQUE(account_id,form_key,revision),
+  UNIQUE(resource_id,revision)
+) STRICT;
+
+CREATE TABLE governed_form_drafts(
+  resource_id TEXT PRIMARY KEY,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  form_key TEXT NOT NULL CHECK(length(form_key) BETWEEN 3 AND 128 AND form_key=trim(form_key) AND form_key NOT GLOB '*[^A-Za-z0-9._:-]*'),
+  revision INTEGER NOT NULL CHECK(revision BETWEEN 1 AND 2147483647),
+  payload_json TEXT NOT NULL CHECK(length(CAST(payload_json AS BLOB)) BETWEEN 2 AND 65536 AND json_valid(payload_json)=1 AND json_type(payload_json)='object'),
+  payload_fingerprint TEXT NOT NULL CHECK(length(payload_fingerprint)=64 AND payload_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z' AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND updated_at GLOB '????-??-??T??:??:??.???Z' AND julianday(updated_at) IS NOT NULL),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES governed_form_draft_mutations(id) ON DELETE RESTRICT,
+  CHECK(resource_id='form_draft/'||account_id||'/'||form_key),
+  CHECK(julianday(created_at)<=julianday(updated_at)),
+  UNIQUE(account_id,form_key)
+) STRICT;
+
+CREATE INDEX idx_governed_form_draft_history
+ON governed_form_draft_mutations(family_id,account_id,form_key,revision DESC);
+CREATE INDEX idx_governed_form_drafts_owner
+ON governed_form_drafts(family_id,owner_person_id,account_id,form_key);
+
+CREATE TRIGGER trg_form_draft_account_current_quota
+BEFORE INSERT ON governed_form_draft_mutations
+WHEN NEW.previous_revision=0 AND (
+  SELECT COUNT(*) FROM governed_form_drafts current WHERE current.account_id=NEW.account_id
+)>=32
+BEGIN SELECT RAISE(ABORT,'form draft account current quota exceeded; new writes are denied'); END;
+
+CREATE TRIGGER trg_form_draft_immutable_history_quota
+BEFORE INSERT ON governed_form_draft_mutations
+WHEN (
+  SELECT COUNT(*) FROM governed_form_draft_mutations history WHERE history.resource_id=NEW.resource_id
+)>=256
+BEGIN SELECT RAISE(ABORT,'form draft immutable history quota exceeded; new writes are denied'); END;
+
+CREATE TRIGGER trg_form_draft_idempotency_mismatch
+BEFORE INSERT ON governed_form_draft_mutations
+WHEN EXISTS(
+  SELECT 1 FROM governed_form_draft_mutations prior
+  WHERE prior.family_id=NEW.family_id
+    AND prior.account_id=NEW.account_id
+    AND prior.form_key=NEW.form_key
+    AND prior.client_operation_id=NEW.client_operation_id
+    AND prior.request_fingerprint<>NEW.request_fingerprint
+)
+BEGIN SELECT RAISE(ABORT,'form draft idempotency fingerprint mismatch'); END;
+
+CREATE TRIGGER trg_form_draft_mutation_revision
+BEFORE INSERT ON governed_form_draft_mutations
+WHEN NOT (
+  (NEW.previous_revision=0 AND NEW.revision=1 AND NOT EXISTS(
+    SELECT 1 FROM governed_form_drafts current WHERE current.resource_id=NEW.resource_id
+  ))
+  OR EXISTS(
+    SELECT 1 FROM governed_form_drafts current
+    WHERE current.resource_id=NEW.resource_id
+      AND current.family_id=NEW.family_id
+      AND current.account_id=NEW.account_id
+      AND current.owner_person_id=NEW.owner_person_id
+      AND current.form_key=NEW.form_key
+      AND current.revision=NEW.previous_revision
+      AND NEW.revision=current.revision+1
+  )
+)
+BEGIN SELECT RAISE(ABORT,'form draft optimistic revision mismatch'); END;
+
+CREATE TRIGGER trg_form_draft_undo_payload
+BEFORE INSERT ON governed_form_draft_mutations
+WHEN NEW.operation='undo' AND NOT EXISTS(
+  SELECT 1 FROM governed_form_draft_mutations restored
+  WHERE restored.resource_id=NEW.resource_id
+    AND restored.revision=NEW.restored_from_revision
+    AND restored.payload_json=NEW.payload_json
+    AND restored.payload_fingerprint=NEW.payload_fingerprint
+)
+BEGIN SELECT RAISE(ABORT,'form draft undo must restore the immediately preceding immutable revision'); END;
+
+CREATE TRIGGER trg_form_draft_mutation_policy_receipt
+BEFORE INSERT ON governed_form_draft_mutations
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM platform_policy_transaction_receipts receipt
+  JOIN platform_policy_database_fences fence
+    ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection
+    ON projection.receipt_hash=receipt.receipt_hash AND projection.record_json=receipt.record_json
+  JOIN accounts active_account
+    ON active_account.id=NEW.account_id
+      AND active_account.status='active'
+      AND active_account.person_id=NEW.owner_person_id
+  JOIN people active_person
+    ON active_person.id=NEW.owner_person_id
+      AND active_person.family_id=NEW.family_id
+      AND active_person.status='active'
+  WHERE receipt.receipt_hash=NEW.policy_receipt_hash
+    AND receipt.receipt_version=NEW.policy_receipt_version
+    AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id
+    AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id
+    AND receipt.action=NEW.policy_action
+    AND receipt.capability=NEW.policy_capability
+    AND receipt.resource_type='form_draft'
+    AND receipt.resource_id=NEW.resource_id
+    AND receipt.action=CASE NEW.previous_revision WHEN 0 THEN 'create' ELSE 'update' END
+    AND receipt.capability='family.write'
+    AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.account_id
+    AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.resource.sensitivity')='personal'
+    AND json_extract(receipt.record_json,'$.request.purpose')='general'
+    AND json_extract(receipt.record_json,'$.request.occurredAt')=NEW.created_at
+)
+BEGIN SELECT RAISE(ABORT,'form draft mutation requires an exact active personal policy receipt'); END;
+
+CREATE TRIGGER trg_form_draft_current_insert
+BEFORE INSERT ON governed_form_drafts
+WHEN NOT EXISTS(
+  SELECT 1 FROM governed_form_draft_mutations mutation
+  WHERE mutation.id=NEW.last_mutation_id
+    AND mutation.resource_id=NEW.resource_id
+    AND mutation.family_id=NEW.family_id
+    AND mutation.account_id=NEW.account_id
+    AND mutation.owner_person_id=NEW.owner_person_id
+    AND mutation.form_key=NEW.form_key
+    AND mutation.previous_revision=0
+    AND mutation.revision=NEW.revision
+    AND mutation.payload_json=NEW.payload_json
+    AND mutation.payload_fingerprint=NEW.payload_fingerprint
+    AND mutation.created_at=NEW.created_at
+    AND mutation.created_at=NEW.updated_at
+)
+BEGIN SELECT RAISE(ABORT,'form draft current row requires its exact initial mutation'); END;
+
+CREATE TRIGGER trg_form_draft_current_update
+BEFORE UPDATE ON governed_form_drafts
+WHEN NEW.resource_id<>OLD.resource_id
+  OR NEW.family_id<>OLD.family_id
+  OR NEW.account_id<>OLD.account_id
+  OR NEW.owner_person_id<>OLD.owner_person_id
+  OR NEW.form_key<>OLD.form_key
+  OR NEW.created_at<>OLD.created_at
+  OR NOT EXISTS(
+    SELECT 1 FROM governed_form_draft_mutations mutation
+    WHERE mutation.id=NEW.last_mutation_id
+      AND mutation.resource_id=OLD.resource_id
+      AND mutation.family_id=OLD.family_id
+      AND mutation.account_id=OLD.account_id
+      AND mutation.owner_person_id=OLD.owner_person_id
+      AND mutation.form_key=OLD.form_key
+      AND mutation.previous_revision=OLD.revision
+      AND mutation.revision=NEW.revision
+      AND mutation.payload_json=NEW.payload_json
+      AND mutation.payload_fingerprint=NEW.payload_fingerprint
+      AND mutation.created_at=NEW.updated_at
+  )
+BEGIN SELECT RAISE(ABORT,'form draft update requires its exact next mutation'); END;
+
+CREATE TRIGGER trg_form_draft_mutation_update
+BEFORE UPDATE ON governed_form_draft_mutations
+BEGIN SELECT RAISE(ABORT,'form draft mutations are immutable'); END;
+CREATE TRIGGER trg_form_draft_mutation_delete
+BEFORE DELETE ON governed_form_draft_mutations
+BEGIN SELECT RAISE(ABORT,'form draft mutation deletion is forbidden'); END;
+CREATE TRIGGER trg_form_draft_current_delete
+BEFORE DELETE ON governed_form_drafts
+BEGIN SELECT RAISE(ABORT,'form draft deletion is forbidden'); END;
+
+UPDATE database_metadata SET value='REVISION-33-N-DRAFT-ASYNC-STATE-UX',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -11413,7 +11619,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(87, 'b5_family_emergency_assistance_card_ledger', familyEmergencyAssistanceCardLedgerSql),
   createMigrationDefinition(88, 'b5_family_emergency_card_portability_ledger', familyEmergencyCardPortabilityLedgerSql),
   createMigrationDefinition(89, 'b4_long_term_portfolio_ledger', longTermPortfolioLedgerSql),
-  createMigrationDefinition(90, 'b7_accessibility_preferences', accessibilityPreferencesSql)
+  createMigrationDefinition(90, 'b7_accessibility_preferences', accessibilityPreferencesSql),
+  createMigrationDefinition(91, 'b3_governed_form_drafts', governedFormDraftsSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

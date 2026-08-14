@@ -1377,7 +1377,7 @@ describe('FamilyDataStore', () => {
     ]));
     expect(database.prepare('SELECT COUNT(*) AS total FROM finance_planning_ledger').get()).toEqual({ total: 11 });
     expect(database.prepare('SELECT value FROM database_metadata WHERE key=?').get('schema_generation')).toEqual({
-      value: 'REVISION-33-M-ACCESSIBILITY-PREFERENCES'
+      value: 'REVISION-33-N-DRAFT-ASYNC-STATE-UX'
     });
     const payloads = database.prepare("SELECT payload_json FROM event_outbox WHERE event_type='finance.planning.item_recorded'").all() as Array<{payload_json:string}>;
     expect(JSON.stringify(payloads)).not.toMatch(/1200|10000|5500|Ağustos market|Manuel hedef|Manuel değerleme/u);
@@ -1472,7 +1472,7 @@ describe('FamilyDataStore', () => {
     const outbox = database.prepare("SELECT payload_json FROM event_outbox WHERE event_type='finance.import.batch_committed'").all();
     expect(JSON.stringify(outbox)).not.toMatch(/Market|İade|125\.5|row-expense/u);
     expect(database.prepare('SELECT value FROM database_metadata WHERE key=?').get('schema_generation')).toEqual({
-      value: 'REVISION-33-M-ACCESSIBILITY-PREFERENCES'
+      value: 'REVISION-33-N-DRAFT-ASYNC-STATE-UX'
     });
     database.close();
     expect(store.listAudit(400).some((entry) => entry.action === 'finance.import.batch_committed')).toBe(true);
@@ -2026,6 +2026,42 @@ describe('FamilyDataStore', () => {
     } finally {
       probe.close();
     }
+  });
+
+  it('33-N governed form draft persists autosave history and immediate undo through central PEP/UoW', async () => {
+    const { store, directory } = makeStore();
+    await authenticate(store);
+    expect(await store.getFormDraftWorkspace('workspace.notes')).toEqual({ current: null, history: [] });
+    const first = await store.saveFormDraft({
+      formKey: 'workspace.notes', expectedRevision: 0,
+      clientOperationId: 'form-draft-store-operation-0001', payload: { title: 'Ilk', note: 'Korunan not' }
+    });
+    expect(first).toMatchObject({ revision: 1, payloadJson: '{"note":"Korunan not","title":"Ilk"}' });
+    const replay = await store.saveFormDraft({
+      formKey: 'workspace.notes', expectedRevision: 0,
+      clientOperationId: 'form-draft-store-operation-0001', payload: { title: 'Ilk', note: 'Korunan not' }
+    });
+    expect(replay).toEqual(first);
+    const second = await store.saveFormDraft({
+      formKey: 'workspace.notes', expectedRevision: 1,
+      clientOperationId: 'form-draft-store-operation-0002', payload: { title: 'Ikinci', note: 'Yeni not' }
+    });
+    expect(second.revision).toBe(2);
+    const undone = await store.undoFormDraft({
+      formKey: 'workspace.notes', expectedRevision: 2,
+      clientOperationId: 'form-draft-store-undo-0001'
+    });
+    expect(undone).toMatchObject({ revision: 3, payloadJson: first.payloadJson });
+    const workspace = await store.getFormDraftWorkspace('workspace.notes');
+    expect(workspace.current).toEqual(undone);
+    expect(workspace.history.map((item) => [item.revision, item.operation, item.restoredFromRevision]))
+      .toEqual([[3, 'undo', 1], [2, 'save', null], [1, 'save', null]]);
+    const probe = new DatabaseSync(join(directory, 'family.db'), { readOnly: true });
+    try {
+      expect(probe.prepare('SELECT revision FROM governed_form_drafts').get()).toEqual({ revision: 3 });
+      expect(probe.prepare('SELECT COUNT(*) AS count FROM governed_form_draft_mutations').get()).toEqual({ count: 3 });
+      expect(Number(probe.prepare("SELECT COUNT(*) AS count FROM platform_policy_transaction_receipts WHERE resource_type='form_draft'").get()?.count)).toBeGreaterThanOrEqual(6);
+    } finally { probe.close(); }
   });
 
 });

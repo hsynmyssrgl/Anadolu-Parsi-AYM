@@ -64,6 +64,17 @@ const readLatestWinsChannels = new Set<string>([
   'archive:search',
   'timeline:listArchived'
 ]);
+const formDraftReadChannels = new Set<string>([
+  'formDraft:getWorkspace'
+]);
+const formDraftWriteChannels = new Set<string>([
+  'formDraft:save',
+  'formDraft:undo'
+]);
+const formDraftChannels = new Set<string>([
+  ...formDraftReadChannels,
+  ...formDraftWriteChannels
+]);
 
 const cancellableNetworkChannels = new Set<string>([
   'dataLifecycle:runRevocationSync'
@@ -75,6 +86,12 @@ const cancellableInteractiveAuthenticationChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLifecyclePolicy => {
+  if (formDraftReadChannels.has(channel)) {
+    return Object.freeze({ cancellable: true, latestWins: true, timeoutMs: 10_000 });
+  }
+  if (formDraftWriteChannels.has(channel)) {
+    return Object.freeze({ cancellable: false, latestWins: false, timeoutMs: 0 });
+  }
   if (readLatestWinsChannels.has(channel)) {
     return Object.freeze({ cancellable: true, latestWins: true, timeoutMs: 30_000 });
   }
@@ -121,6 +138,17 @@ const standardAdmissionChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestAdmissionPolicy = (channel: string): IpcRequestAdmissionPolicy => {
+  if (formDraftChannels.has(channel)) {
+    return Object.freeze({
+      enabled: true,
+      priority: 'interactive',
+      priorityWeight: 100,
+      maxConcurrentPerSender: 2,
+      maxConcurrentPerChannel: 1,
+      maxQueuedPerSender: 4,
+      queueTimeoutMs: 2_500
+    });
+  }
   if (interactiveAdmissionChannels.has(channel)) {
     return Object.freeze({
       enabled: true,
@@ -163,6 +191,22 @@ export const resolveIpcRequestAdmissionPolicy = (channel: string): IpcRequestAdm
     maxQueuedPerSender: 0,
     queueTimeoutMs: 0
   });
+};
+
+export interface IpcRequestRatePolicy {
+  readonly enabled: boolean;
+  readonly maxRequestsPerWindow: number;
+  readonly windowMs: number;
+}
+
+export const resolveIpcRequestRatePolicy = (channel: string): IpcRequestRatePolicy => {
+  if (formDraftReadChannels.has(channel)) {
+    return Object.freeze({ enabled: true, maxRequestsPerWindow: 120, windowMs: 60_000 });
+  }
+  if (formDraftWriteChannels.has(channel)) {
+    return Object.freeze({ enabled: true, maxRequestsPerWindow: 32, windowMs: 60_000 });
+  }
+  return Object.freeze({ enabled: false, maxRequestsPerWindow: Number.MAX_SAFE_INTEGER, windowMs: 0 });
 };
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -321,7 +365,7 @@ export interface IpcRequestLease {
   complete(): void;
 }
 
-export type IpcRequestAdmissionErrorKind = 'queue-full' | 'queue-timeout';
+export type IpcRequestAdmissionErrorKind = 'queue-full' | 'queue-timeout' | 'rate-limit';
 
 export class IpcRequestAdmissionError extends Error {
   public override readonly name = 'IpcRequestAdmissionError';
@@ -333,7 +377,9 @@ export class IpcRequestAdmissionError extends Error {
   ) {
     super(kind === 'queue-full'
       ? `IPC geri basınç kuyruğu dolu: ${channel}.`
-      : `IPC isteği geri basınç kuyruğunda süre aşımına uğradı: ${channel}.`);
+      : kind === 'rate-limit'
+        ? `IPC istek hızı sınırı aşıldı: ${channel}.`
+        : `IPC isteği geri basınç kuyruğunda süre aşımına uğradı: ${channel}.`);
   }
 }
 
@@ -350,6 +396,12 @@ export class IpcRequestLifecycleRegistry {
   readonly #activeBySender = new Map<number, Map<string, ActiveIpcRequest>>();
   readonly #runningAdmissionsBySender = new Map<number, Map<string, RunningIpcAdmission>>();
   readonly #queuedAdmissionsBySender = new Map<number, QueuedIpcAdmission[]>();
+  readonly #rateWindowsBySender = new Map<number, Map<string, { startedAt: number; count: number }>>();
+  readonly #now: () => number;
+
+  public constructor(options: { readonly now?: () => number } = {}) {
+    this.#now = options.now ?? (() => Date.now());
+  }
 
   public begin(
     senderId: number,
@@ -413,7 +465,8 @@ export class IpcRequestLifecycleRegistry {
     senderId: number,
     rawRequest: IpcTransportRequestContext,
     lifecyclePolicy = resolveIpcRequestLifecyclePolicy(rawRequest.channel),
-    admissionPolicy = resolveIpcRequestAdmissionPolicy(rawRequest.channel)
+    admissionPolicy = resolveIpcRequestAdmissionPolicy(rawRequest.channel),
+    ratePolicy = resolveIpcRequestRatePolicy(rawRequest.channel)
   ): Promise<IpcRequestLease> {
     if (!Number.isSafeInteger(senderId) || senderId < 0) {
       return Promise.reject(new IpcTransportProtocolError('INVALID_REQUEST_CONTEXT', 'IPC admission gönderici kimliği geçersiz.'));
@@ -422,6 +475,9 @@ export class IpcRequestLifecycleRegistry {
     if (!admissionPolicy.enabled) return Promise.resolve(this.begin(senderId, request, lifecyclePolicy));
     if (this.#hasRequest(senderId, request.requestId)) {
       return Promise.reject(new IpcTransportProtocolError('DUPLICATE_REQUEST_ID', 'IPC admission içinde yinelenen istek kimliği reddedildi.'));
+    }
+    if (!this.#consumeRate(senderId, request.channel, ratePolicy)) {
+      return Promise.reject(new IpcRequestAdmissionError('rate-limit', request.requestId, request.channel));
     }
     if (this.#canStart(senderId, request.channel, admissionPolicy)) {
       return Promise.resolve(this.#startAdmitted(senderId, request, lifecyclePolicy, admissionPolicy, false, Date.now()));
@@ -545,6 +601,7 @@ export class IpcRequestLifecycleRegistry {
       cancelled += 1;
     }
     this.#queuedAdmissionsBySender.delete(senderId);
+    this.#rateWindowsBySender.delete(senderId);
     return cancelled;
   }
 
@@ -565,6 +622,24 @@ export class IpcRequestLifecycleRegistry {
   #hasRequest(senderId: number, requestId: string): boolean {
     return (this.#activeBySender.get(senderId)?.has(requestId) ?? false)
       || this.#findQueued(senderId, requestId) !== undefined;
+  }
+
+  #consumeRate(senderId: number, channel: string, policy: IpcRequestRatePolicy): boolean {
+    if (!policy.enabled) return true;
+    const now = this.#now();
+    let sender = this.#rateWindowsBySender.get(senderId);
+    if (!sender) {
+      sender = new Map();
+      this.#rateWindowsBySender.set(senderId, sender);
+    }
+    const current = sender.get(channel);
+    if (!current || now - current.startedAt >= policy.windowMs || now < current.startedAt) {
+      sender.set(channel, { startedAt: now, count: 1 });
+      return true;
+    }
+    if (current.count >= policy.maxRequestsPerWindow) return false;
+    current.count += 1;
+    return true;
   }
 
   #canStart(senderId: number, channel: string, policy: IpcRequestAdmissionPolicy): boolean {

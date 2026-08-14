@@ -159,7 +159,7 @@
       "passed": true
     },
     {
-      "name": "no repository persistence or migration was added",
+      "name": "no package-owned repository persistence or migration was added",
       "passed": true
     },
     {
@@ -184,8 +184,8 @@
     "routeCount": 22,
     "menuEntryCount": 22,
     "renderedScreenCount": 22,
-    "preloadPairCount": 235,
-    "registeredPreloadPairCount": 235,
+    "preloadPairCount": 262,
+    "registeredPreloadPairCount": 262,
     "classifiedUnusedRendererApiCount": 14,
     "unresolvedUnusedRendererApiCount": 0,
     "unusedRendererApis": [
@@ -253,10 +253,10 @@
     },
     "b901CompletedByThisPackage": false,
     "databaseMigrationRequired": false,
-    "generatedAt": "2026-08-12T12:23:14.570Z"
+    "generatedAt": "2026-08-13T23:44:30.760Z"
   },
-  "latestDatabaseMigration": 77,
+  "latestDatabaseMigration": 91,
   "requirementCompletionClaimed": true,
   "b901CompletedByThisPackage": false,
-  "generatedAt": "2026-08-12T12:23:14.572Z"
+  "generatedAt": "2026-08-13T23:44:30.766Z"
 }

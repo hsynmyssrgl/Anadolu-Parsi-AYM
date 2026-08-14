@@ -6,7 +6,7 @@
 - Renderer menüsü ile gerçek ekran dispatch zincirinin birebirliği
 - Main/preload/renderer API gerçekliği
 - `COMPLETE` gereksinimlerin 13 alanlı kanıt zinciri
-- Tarihsel 14 kullanılmayan renderer API'sinin exact sınıflandırması
+- Güncel 14 kullanılmayan renderer API'sinin exact sınıflandırması
 
 ## Tehditler ve kontroller
 

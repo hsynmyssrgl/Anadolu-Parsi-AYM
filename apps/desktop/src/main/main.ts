@@ -79,6 +79,7 @@ import { ApplicationSecurityProfilePolicy, DerivedDataInheritancePolicy, Immutab
 import type { ApplicationSecurityProfileGateBoundaryView, DerivedDataPolicyBoundaryView, NetworkEgressBoundaryView, PlatformCapabilityManifestGateBoundaryView, PlatformPolicyAstGateBoundaryView, PolicyConformanceSuiteBoundaryView, PolicyDecisionAuditBoundaryView, PolicyServiceAvailabilityBoundaryView, SensitiveLoggingBoundaryView, SourceDeletionPropagationBoundaryView } from '@ppt/domain';
 import { GetProductSurfaceGovernanceUseCase } from '@ppt/application';
 import type { ProductSurfaceGovernanceView } from '@ppt/domain';
+import type { SaveFormDraftInput, UndoFormDraftInput } from '@ppt/domain';
 import { createProductSurfaceGovernanceRepository } from './repository-composition-root.js';
 import { FinanceImportFileSessionRegistry } from './finance-import-file-session.js';
 
@@ -1972,6 +1973,9 @@ function registerIpc(): void {
   });
   registerIpcHandler('accessibility:getPreferences', () => store().getAccessibilityPreferences());
   registerIpcHandler('accessibility:updatePreferences', (_event, input:UpdateAccessibilityPreferencesInput) => store().updateAccessibilityPreferences(input));
+  registerIpcHandler('formDraft:getWorkspace', (_event, formKey:string) => store().getFormDraftWorkspace(formKey));
+  registerIpcHandler('formDraft:save', (_event, input:SaveFormDraftInput) => store().saveFormDraft(input));
+  registerIpcHandler('formDraft:undo', (_event, input:UndoFormDraftInput) => store().undoFormDraft(input));
   registerIpcHandler('finance:list', () => store().listFinanceRecords());
   registerIpcHandler('finance:create', (_event, input:CreateFinanceRecordInput) => store().createFinanceRecord(input));
   registerIpcHandler('finance:listBankInstitutions', () => store().listBankInstitutions());

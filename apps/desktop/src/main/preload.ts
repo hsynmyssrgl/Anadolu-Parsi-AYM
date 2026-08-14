@@ -59,6 +59,7 @@ import type { LoanAccountView, CreateLoanAccountInput, RecordLoanPaymentInput } 
 import type { FinancePlanningWorkspaceView, RecordFinancePlanningItemInput, FinanceImportPreviewView, SelectFinanceImportFileResult, CommitFinanceImportPreviewInput } from '@ppt/domain';
 import type { LongTermPortfolioWorkspaceView, RecordLongTermPortfolioItemInput } from '@ppt/domain';
 import type { AccessibilityPreferencesView, UpdateAccessibilityPreferencesInput } from '@ppt/domain';
+import type { FormDraftView, FormDraftWorkspaceView, SaveFormDraftInput, UndoFormDraftInput } from '@ppt/domain';
 import type { ManagedLifeWorkspaceView, RecordManagedLifeItemInput } from '@ppt/domain';
 
 interface EmergencyCardExportIpcInput {
@@ -408,6 +409,9 @@ contextBridge.exposeInMainWorld('pardus', {
   getAuthState: (): Promise<AuthStateView> => invoke('auth:getState'),
   getAccessibilityPreferences:():Promise<AccessibilityPreferencesView>=>invoke('accessibility:getPreferences'),
   updateAccessibilityPreferences:(input:UpdateAccessibilityPreferencesInput):Promise<AccessibilityPreferencesView>=>invoke('accessibility:updatePreferences',input),
+  getFormDraftWorkspace:(formKey:string):Promise<FormDraftWorkspaceView>=>invoke('formDraft:getWorkspace',formKey),
+  saveFormDraft:(input:SaveFormDraftInput):Promise<FormDraftView>=>invoke('formDraft:save',input),
+  undoFormDraft:(input:UndoFormDraftInput):Promise<FormDraftView>=>invoke('formDraft:undo',input),
   getSessionLockState:():Promise<SessionLockStateView>=>invoke('auth:getSessionLockState'),
   recordSessionActivity:():Promise<SessionLockStateView>=>invoke('auth:recordSessionActivity'),
   lockSession:():Promise<SessionLockStateView>=>invoke('auth:lockSession'),

@@ -175,6 +175,9 @@ import {
   RecordLongTermPortfolioItemUseCase,
   GetAccessibilityPreferencesUseCase,
   UpdateAccessibilityPreferencesUseCase,
+  GetFormDraftWorkspaceUseCase,
+  SaveFormDraftUseCase,
+  UndoFormDraftUseCase,
   ListArchiveItemsUseCase,
   SearchArchiveItemsUseCase,
   PrepareArchiveOpenUseCase,
@@ -208,6 +211,7 @@ import {
   type FinanceApplicationContext,
   type LongTermPortfolioApplicationContext,
   type AccessibilityPreferencesApplicationContext,
+  type FormDraftApplicationContext,
   type ArchiveApplicationContext,
   type LegacyApplicationContext,
   type MembershipApplicationContext,
@@ -286,6 +290,7 @@ import {
   type TimelinePolicyEnforcementPointResolver
 } from './timeline-application-adapter.js';
 import { RepositoryBackedAccessibilityPreferencesUnitOfWork } from './accessibility-preferences-application-adapter.js';
+import { RepositoryBackedFormDraftUnitOfWork } from './form-draft-application-adapter.js';
 import { RepositoryBackedDashboardQueryPort } from './dashboard-application-adapter.js';
 import { RepositoryBackedAuthApplicationUnitOfWork } from './auth-application-adapter.js';
 import {
@@ -422,6 +427,7 @@ import type {
 } from '@ppt/domain';
 import { buildDefaultLongTermPortfolioBootstrap, type LongTermPortfolioWorkspaceView, type RecordLongTermPortfolioItemInput } from '@ppt/domain';
 import type { AccessibilityPreferencesView, UpdateAccessibilityPreferencesInput } from '@ppt/domain';
+import type { FormDraftView, FormDraftWorkspaceView, SaveFormDraftInput, UndoFormDraftInput } from '@ppt/domain';
 import type { ManagedLifeWorkspaceView, RecordManagedLifeItemInput } from '@ppt/domain';
 import type {
   EnrollWindowsHelloInput,
@@ -840,6 +846,9 @@ export class FamilyDataStore {
   readonly #recordLongTermPortfolioItemUseCase: RecordLongTermPortfolioItemUseCase;
   readonly #getAccessibilityPreferencesUseCase: GetAccessibilityPreferencesUseCase;
   readonly #updateAccessibilityPreferencesUseCase: UpdateAccessibilityPreferencesUseCase;
+  readonly #getFormDraftWorkspaceUseCase: GetFormDraftWorkspaceUseCase;
+  readonly #saveFormDraftUseCase: SaveFormDraftUseCase;
+  readonly #undoFormDraftUseCase: UndoFormDraftUseCase;
   readonly #listArchiveItemsUseCase: ListArchiveItemsUseCase;
   readonly #searchArchiveItemsUseCase: SearchArchiveItemsUseCase;
   readonly #prepareArchiveOpenUseCase: PrepareArchiveOpenUseCase;
@@ -1446,6 +1455,7 @@ export class FamilyDataStore {
           trustedDeviceRepository: this.#repositories.trustedDeviceRepository,
           timelinePolicyResourceRepository: this.#repositories.timelineRepository,
           accessibilityPreferencesRepository: this.#repositories.accessibilityPreferencesRepository,
+          formDraftRepository: this.#repositories.formDraftRepository,
           personRepository: this.#repositories.personRepository,
           deviceIdentityProvider: this.#deviceIdentityProvider,
           authorizationProvider: productionArchivePolicy.authorizationProvider,
@@ -1486,6 +1496,16 @@ export class FamilyDataStore {
     this.#updateAccessibilityPreferencesUseCase = new UpdateAccessibilityPreferencesUseCase(
       accessibilityPreferencesUnitOfWork
     );
+    const formDraftUnitOfWork = new RepositoryBackedFormDraftUnitOfWork({
+      transactionExecutor: this.#transactionExecutor,
+      repository: this.#repositories.formDraftRepository,
+      auditRepository: this.#repositories.auditRepository,
+      outboxRepository: this.#repositories.outboxRepository,
+      policyTransactionRunner: timelinePolicyTransactionRunner
+    });
+    this.#getFormDraftWorkspaceUseCase = new GetFormDraftWorkspaceUseCase(formDraftUnitOfWork);
+    this.#saveFormDraftUseCase = new SaveFormDraftUseCase(formDraftUnitOfWork);
+    this.#undoFormDraftUseCase = new UndoFormDraftUseCase(formDraftUnitOfWork);
     const familyDataImportPolicyBatchRunner = new RepositoryBackedFamilyDataImportPolicyBatchRunner({
       transactionExecutor: this.#transactionExecutor,
       locationRunner: locationPolicyTransactionRunner,
@@ -2236,6 +2256,9 @@ export class FamilyDataStore {
     return this.#financeApplicationContext(prefix);
   }
   #accessibilityPreferencesApplicationContext(prefix:string):AccessibilityPreferencesApplicationContext {
+    return this.#financeApplicationContext(prefix);
+  }
+  #formDraftApplicationContext(prefix:string):FormDraftApplicationContext {
     return this.#financeApplicationContext(prefix);
   }
   #dataLifecycleApplicationContext(prefix:string): DataLifecycleApplicationContext {
@@ -3856,6 +3879,42 @@ export class FamilyDataStore {
         outboxEventId:asEventId(randomUUID())
       }
     });
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async getFormDraftWorkspace(formKey:string):Promise<FormDraftWorkspaceView> {
+    const result=await this.#getFormDraftWorkspaceUseCase.execute({
+      context:this.#formDraftApplicationContext('form-draft-workspace'),formKey
+    });
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async saveFormDraft(input:SaveFormDraftInput):Promise<FormDraftView> {
+    const context=this.#formDraftApplicationContext('form-draft-save');
+    const requestFingerprint=createHash('sha256').update(canonicalArchiveOperationValue({
+      familyId:context.familyId,actorUserId:context.actor.userId,actorPersonId:context.actor.personId,input
+    }),'utf8').digest('hex');
+    const result=await this.#saveFormDraftUseCase.execute({context,command:input,identifiers:{
+      mutationId:`form-draft-${randomUUID()}`,
+      requestFingerprint,
+      auditId:randomUUID(),outboxEventId:asEventId(randomUUID())
+    }});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async undoFormDraft(input:UndoFormDraftInput):Promise<FormDraftView> {
+    const context=this.#formDraftApplicationContext('form-draft-undo');
+    const requestFingerprint=createHash('sha256').update(canonicalArchiveOperationValue({
+      familyId:context.familyId,actorUserId:context.actor.userId,actorPersonId:context.actor.personId,input
+    }),'utf8').digest('hex');
+    const result=await this.#undoFormDraftUseCase.execute({context,command:input,identifiers:{
+      mutationId:`form-draft-${randomUUID()}`,
+      requestFingerprint,
+      auditId:randomUUID(),outboxEventId:asEventId(randomUUID())
+    }});
     if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
     return result.value;
   }

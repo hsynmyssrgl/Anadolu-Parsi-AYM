@@ -165,8 +165,8 @@ check('truth excludes execution advice guarantees live delivery and network chan
   && scope.truth?.returnGuaranteed===false && scope.truth?.taxOrLegalAccuracyGuaranteed===false
   && scope.truth?.projectionOutcomeGuaranteed===false && inventory.networkChannels?.length===0);
 check('PPK-021 exact successor ratchet is green', astGate.status==='PASS'
-  && astGate.privilegedSurfaces===566 && astGate.exactAllowlistEntries===566
-  && astGate.surfaceCounts?.USE_CASE_COMPOSITION===288
+  && astGate.privilegedSurfaces===571 && astGate.exactAllowlistEntries===571
+  && astGate.surfaceCounts?.USE_CASE_COMPOSITION===291
   && astGate.directRoleAuthorizationBypasses===0 && astGate.findings.length===0);
 check('PPK-022 exact capability ratchet remains green', capabilityGate.status==='PASS'
   && capabilityGate.capabilitySurfaces===246 && capabilityGate.exactManifestSurfaces===246

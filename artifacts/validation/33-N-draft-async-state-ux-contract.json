@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "step": "33-N",
+  "decision": "DEC-225",
+  "requirements": [
+    "B3-02",
+    "B7-14",
+    "B7-15"
+  ],
+  "status": "PASS",
+  "checksPassed": 17,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "scope binds DEC-225 and exact B3-02 B7-14 B7-15",
+      "status": "PASS"
+    },
+    {
+      "name": "inventory binds exact step decision and requirements",
+      "status": "PASS"
+    },
+    {
+      "name": "scope lifecycle is fail-closed across initial prepared and completed phases",
+      "status": "PASS"
+    },
+    {
+      "name": "inventory lifecycle is phase-consistent with scope and persistent receipt",
+      "status": "PASS"
+    },
+    {
+      "name": "registry requirements are open initially and exact complete only after preparation",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 91 binds exact governed tables and form_draft authority",
+      "status": "PASS"
+    },
+    {
+      "name": "personal central PEP UoW and immutable optimistic persistence are required",
+      "status": "PASS"
+    },
+    {
+      "name": "save and undo are exact governed operations",
+      "status": "PASS"
+    },
+    {
+      "name": "live validation preserves input announces summary and focuses invalid field",
+      "status": "PASS"
+    },
+    {
+      "name": "screen state contract is exact",
+      "status": "PASS"
+    },
+    {
+      "name": "B7-15 route inventory binds exact 22 by 5 governed mappings",
+      "status": "PASS"
+    },
+    {
+      "name": "async stale duplicate and monotonic protections are exact",
+      "status": "PASS"
+    },
+    {
+      "name": "inventory binds migration central PEP IPC renderer and tests",
+      "status": "PASS"
+    },
+    {
+      "name": "no network or operating system write is introduced and root lifecycle enforces 33-N",
+      "status": "PASS"
+    },
+    {
+      "name": "decision binds PEP UoW migration undo IPC UX and fail closed completion",
+      "status": "PASS"
+    },
+    {
+      "name": "threat model covers forged receipt fence race stale async and accessibility negatives",
+      "status": "PASS"
+    },
+    {
+      "name": "automated completion and manual certification truth are separated",
+      "status": "PASS"
+    }
+  ],
+  "governanceState": "VALIDATED_RECEIPT_PENDING",
+  "persistentReceiptStatus": "NOT_RUN",
+  "generatedAt": "2026-08-14T00:05:34.379Z"
+}

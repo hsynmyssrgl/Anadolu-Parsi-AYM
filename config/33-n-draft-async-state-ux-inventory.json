@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "step": "33-N",
+  "decision": "DEC-225",
+  "requirements": [
+    "B3-02",
+    "B7-14",
+    "B7-15"
+  ],
+  "status": "COMPLETE",
+  "surfaces": [
+    {
+      "id": "domain",
+      "paths": [
+        "packages/domain/src/form-drafts.ts"
+      ]
+    },
+    {
+      "id": "application",
+      "paths": [
+        "packages/application/src/form-draft-use-cases.ts"
+      ]
+    },
+    {
+      "id": "repository-contract",
+      "paths": [
+        "packages/repository-contracts/src/form-draft-repository.ts"
+      ]
+    },
+    {
+      "id": "migration-91",
+      "paths": [
+        "packages/database/src/family-database-migrations.ts"
+      ]
+    },
+    {
+      "id": "repository",
+      "paths": [
+        "packages/repositories/src/form-draft-repository.ts"
+      ]
+    },
+    {
+      "id": "central-pep-uow",
+      "paths": [
+        "apps/desktop/src/main/form-draft-application-adapter.ts",
+        "apps/desktop/src/main/timeline-production-policy-runtime.ts"
+      ]
+    },
+    {
+      "id": "composition-ipc-preload",
+      "paths": [
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/renderer/global.d.ts"
+      ]
+    },
+    {
+      "id": "renderer-form-ux",
+      "paths": [
+        "apps/desktop/src/renderer/form-ux.tsx",
+        "apps/desktop/src/renderer/async-state-guard.ts",
+        "apps/desktop/src/renderer/route-async-state.ts",
+        "apps/desktop/src/renderer/App.tsx"
+      ]
+    },
+    {
+      "id": "negative-and-runtime-tests",
+      "paths": [
+        "packages/application/tests/form-draft-use-cases.test.ts",
+        "packages/repositories/form-draft-repository-policy.test.ts",
+        "apps/desktop/tests/form-draft-ipc-integration.test.ts",
+        "apps/desktop/tests/form-ux.test.ts",
+        "apps/desktop/tests/async-state-guard.test.ts",
+        "apps/desktop/tests/data-store.test.ts",
+        "apps/desktop/tests/b7-15-route-async-state-governance.test.ts"
+      ]
+    },
+    {
+      "id": "b7-15-route-state-governance",
+      "paths": [
+        "config/33-n-b7-15-route-async-state-inventory.json",
+        "apps/desktop/src/renderer/route-async-state.ts",
+        "scripts/verify-33-n-b7-15-route-async-state-governance.mjs"
+      ]
+    },
+    {
+      "id": "governance",
+      "paths": [
+        "docs/decisions/DEC-225-draft-async-state-ux.md",
+        "docs/security/THREAT_MODEL_33_N_DRAFT_ASYNC_STATE_UX.md"
+      ]
+    }
+  ],
+  "evidenceOutputs": [
+    "artifacts/validation/33-N-draft-async-state-ux-boundary.json",
+    "artifacts/validation/33-N-draft-async-state-ux-contract.json",
+    "artifacts/validation/33-N-draft-async-state-ux-runtime.json"
+  ],
+  "networkChannels": [],
+  "operatingSystemWrites": [],
+  "openRequirements": [],
+  "validation": {
+    "status": "PASS",
+    "boundaryChecks": 28,
+    "contractChecks": 17,
+    "runtimeChecks": 11,
+    "targetedTestFiles": 7,
+    "targetedTests": 40,
+    "preparedAt": "2026-08-14T00:03:55.888Z"
+  },
+  "openBlockers": [
+    "Persistent local and D: receipt, source protection and Git remote equality are pending."
+  ],
+  "persistentReceiptStatus": "NOT_RUN"
+}

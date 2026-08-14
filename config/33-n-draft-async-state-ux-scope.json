@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "id": "33-N-DRAFT-ASYNC-STATE-UX",
+  "decision": "DEC-225",
+  "requirements": [
+    "B3-02",
+    "B7-14",
+    "B7-15"
+  ],
+  "status": "COMPLETE",
+  "model": {
+    "persistenceAuthority": "central_pep_uow_personal_form_draft",
+    "migration": 91,
+    "tables": [
+      "governed_form_drafts",
+      "governed_form_draft_mutations"
+    ],
+    "resourceType": "form_draft",
+    "resourceIdShape": "form_draft/{accountId}/{formKey}",
+    "operations": [
+      "save",
+      "undo"
+    ],
+    "optimisticRevision": true,
+    "idempotentClientOperation": true,
+    "immutableMutationHistory": true,
+    "maximumPayloadBytes": 65536,
+    "liveValidation": {
+      "errorSummary": true,
+      "focusFirstInvalidField": true,
+      "preserveUserInput": true,
+      "announceStatus": true
+    },
+    "screenStates": [
+      "empty",
+      "loading",
+      "offline",
+      "error",
+      "retry"
+    ],
+    "asyncStateProtection": {
+      "latestWriteWinsPerScope": true,
+      "routeAndSessionInvalidation": true,
+      "duplicateMutationSuppression": true,
+      "monotonicRevisionWatermark": true
+    }
+  },
+  "validation": {
+    "status": "PASS",
+    "boundary": "artifacts/validation/33-N-draft-async-state-ux-boundary.json",
+    "contract": "artifacts/validation/33-N-draft-async-state-ux-contract.json",
+    "runtime": "artifacts/validation/33-N-draft-async-state-ux-runtime.json",
+    "targetedTests": [
+      "packages/application/tests/form-draft-use-cases.test.ts",
+      "packages/repositories/form-draft-repository-policy.test.ts",
+      "apps/desktop/tests/form-draft-ipc-integration.test.ts",
+      "apps/desktop/tests/form-ux.test.ts",
+      "apps/desktop/tests/async-state-guard.test.ts",
+      "apps/desktop/tests/data-store.test.ts",
+      "apps/desktop/tests/b7-15-route-async-state-governance.test.ts"
+    ],
+    "verifiedEvidence": {
+      "boundaryChecksPassed": 28,
+      "contractChecksPassed": 17,
+      "runtimeChecksPassed": 11,
+      "targetedTestFilesPassed": 7,
+      "targetedTestsPassed": 40,
+      "registryTransition": "NOT_RUN",
+      "fullRegression": "NOT_RUN",
+      "productionBuild": "NOT_RUN",
+      "persistentReceipt": "NOT_RUN"
+    },
+    "finalEvidence": {
+      "boundaryChecksPassed": 28,
+      "contractChecksPassed": 17,
+      "runtimeChecksPassed": 11,
+      "targetedTestFilesPassed": 7,
+      "targetedTestsPassed": 40,
+      "fullVitestTestFilesPassed": 140,
+      "fullVitestTestsPassed": 1142,
+      "productionWorkspaceBuildsPassed": 18,
+      "ppk021ExactAllowlistEntries": 571,
+      "ppk021UseCaseCompositionSurfaces": 291,
+      "ppk022CapabilitySurfaces": 246,
+      "networkChannels": 0,
+      "operatingSystemWrites": 0,
+      "latestDatabaseMigration": 91,
+      "migration91Checksum": "7107cbdbe66f05ac6e208bfac39bc4bcc884c679e63af4e49c4a15bacda1b611",
+      "requirementChainsComplete": 3,
+      "automatedClosureEvidenceComplete": true,
+      "manualWindowsNarrator": "NOT_RUN",
+      "manualWindowsMagnifier": "NOT_RUN",
+      "realDevice": "NOT_RUN",
+      "humanUat": "NOT_RUN",
+      "certificationClaimed": false
+    },
+    "preparedAt": "2026-08-14T00:03:55.888Z"
+  },
+  "manualEvidence": {
+    "windowsNarrator": "NOT_RUN",
+    "windowsMagnifier": "NOT_RUN",
+    "realDevice": "NOT_RUN",
+    "humanUat": "NOT_RUN",
+    "certificationClaimed": false
+  },
+  "completionBlockers": [
+    "Persistent local and D: receipt, source protection and Git remote equality are pending."
+  ],
+  "persistentReceiptStatus": "NOT_RUN"
+}

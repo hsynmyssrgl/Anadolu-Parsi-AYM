@@ -5,7 +5,7 @@
 - **B0-03:** Belge, rota, menü ve ekran sayıları 22'de eşitlendi. Tarihsel
   16/17 çelişkisi 17 ürün modülü + 5 yönetişim yüzeyi sınıflandırmasıyla çözüldü.
 - **B0-04:** Feature Reality Gate tam zinciri fail-closed doğruluyor; main/preload
-  kayıtlarından çıkarılan 14 kullanılmayan renderer API'si exact sınıflandırıldı.
+  kayıtlarından çıkarılan güncel 14 kullanılmayan renderer API'si exact sınıflandırıldı.
 
 ## Uygulanan zincir
 

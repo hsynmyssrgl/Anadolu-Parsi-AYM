@@ -46,7 +46,7 @@ export type TimelineDataSensitivity = 'personal' | 'sensitive' | 'highly_sensiti
 export interface TimelinePolicyIntent {
   readonly action: 'read' | 'create' | 'update' | 'delete';
   readonly capability: 'family.read' | 'family.write';
-  readonly resourceType: 'event' | 'accessibility_preferences';
+  readonly resourceType: 'event' | 'accessibility_preferences' | 'form_draft';
   readonly resourceId: string;
   readonly purpose: 'general';
   readonly ownerPersonId?: PersonId;

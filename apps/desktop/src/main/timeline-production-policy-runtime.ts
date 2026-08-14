@@ -32,6 +32,7 @@ import type {
   AccountRepositoryPort,
   AccountRow,
   AccessibilityPreferencesRepositoryPort,
+  FormDraftRepositoryPort,
   TimelineEventPolicyResourceRepositoryPort,
   ObjectPermissionRepositoryPort,
   ObjectPermissionRow,
@@ -63,6 +64,7 @@ export interface TimelineProductionPolicyRuntimeDependencies {
   readonly trustedDeviceRepository: TrustedDeviceRepositoryPort;
   readonly timelinePolicyResourceRepository: TimelineEventPolicyResourceRepositoryPort;
   readonly accessibilityPreferencesRepository: AccessibilityPreferencesRepositoryPort;
+  readonly formDraftRepository: FormDraftRepositoryPort;
   readonly personRepository: PersonRepositoryPort;
   readonly deviceIdentityProvider: Pick<FileDeviceIdentityProvider, 'snapshot'>;
   readonly authorizationProvider: PlatformPolicyAuthorizationProvider;
@@ -89,7 +91,8 @@ const PROJECTION_DRAIN_BATCH_SIZE = 500;
 const REPLAY_PRUNING_BATCH_SIZE = 128;
 const timelineResourceTypes = new Set<TimelinePolicyIntent['resourceType']>([
   'event',
-  'accessibility_preferences'
+  'accessibility_preferences',
+  'form_draft'
 ]);
 
 const nonEmpty = (value: unknown, max = 512): value is string =>
@@ -693,6 +696,32 @@ const findTimelineResourceForPolicyResolution = (
   resourceType: TimelinePolicyIntent['resourceType'],
   resourceId: string
 ): Result<TimelinePolicyResourceState | null, AppError> => {
+  if (resourceType === 'form_draft') {
+    const match = /^form_draft\/([^/]+)\/([A-Za-z0-9._:-]{3,128})$/u.exec(resourceId);
+    if (!match?.[1] || !match[2]) {
+      throw new PlatformPolicyEnforcementError('RESOURCE_RESOLUTION_FAILED', 'Form draft resource identity is invalid');
+    }
+    const found = dependencies.formDraftRepository.findForPolicyResolution(
+      execution,
+      asUserId(match[1]),
+      match[2]
+    );
+    if (!found.ok) return found;
+    return ok(found.value
+      ? Object.freeze({
+          familyId: found.value.familyId,
+          ownerPersonId: found.value.ownerPersonId,
+          sensitivity: 'personal' as const,
+          stateFingerprint: stable({
+            resourceId: found.value.resourceId,
+            revision: found.value.revision,
+            payloadFingerprint: found.value.payloadFingerprint,
+            lastMutationId: found.value.lastMutationId,
+            updatedAt: found.value.updatedAt
+          })
+        })
+      : null);
+  }
   if (resourceType === 'accessibility_preferences') {
     const found = dependencies.accessibilityPreferencesRepository.findForPolicyResolution(
       execution,
@@ -787,7 +816,8 @@ const loadTimelineResourceSnapshotInTransaction = (
       requestedIntent.resourceId
     );
     if (!existing.ok) return existing;
-    if (existing.value && requestedIntent.resourceType !== 'accessibility_preferences') {
+    if (existing.value && requestedIntent.resourceType !== 'accessibility_preferences'
+      && requestedIntent.resourceType !== 'form_draft') {
       return invalidAuthority(context, 'Timeline policy create resource already exists');
     }
     if (existing.value) {
@@ -837,9 +867,12 @@ const loadTimelineResourceSnapshotInTransaction = (
   if (!existing.ok) return existing;
   if (
     !existing.value
-    && requestedIntent.resourceType === 'accessibility_preferences'
+    && (requestedIntent.resourceType === 'accessibility_preferences'
+      || requestedIntent.resourceType === 'form_draft')
     && requestedIntent.action === 'read'
-    && requestedIntent.resourceId === context.actor.userId
+    && (requestedIntent.resourceId === context.actor.userId
+      || (requestedIntent.resourceType === 'form_draft'
+        && requestedIntent.resourceId.startsWith(`form_draft/${context.actor.userId}/`)))
     && context.actor.personId
   ) {
     const resource = Object.freeze({
@@ -852,8 +885,10 @@ const loadTimelineResourceSnapshotInTransaction = (
     return ok(Object.freeze({
       resource,
       stateFingerprint: stable({
-        state: 'logical_account_preference_absent',
+        state: 'logical_personal_resource_absent',
         accountId: context.actor.userId,
+        resourceType: requestedIntent.resourceType,
+        resourceId: requestedIntent.resourceId,
         familyId: context.familyId,
         ownerPersonId: context.actor.personId
       })
@@ -1009,6 +1044,7 @@ const ensureRuntimeConfiguration = (dependencies: TimelineProductionPolicyRuntim
     || typeof dependencies.trustedDeviceRepository?.findActive !== 'function'
     || typeof dependencies.timelinePolicyResourceRepository?.findTimelineEventForPolicyResolution !== 'function'
     || typeof dependencies.accessibilityPreferencesRepository?.findForPolicyResolution !== 'function'
+    || typeof dependencies.formDraftRepository?.findForPolicyResolution !== 'function'
     || typeof dependencies.personRepository?.findById !== 'function'
     || typeof dependencies.deviceIdentityProvider?.snapshot !== 'function'
     || typeof dependencies.authorizationProvider?.authorize !== 'function'

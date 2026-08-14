@@ -30,3 +30,4 @@ export * from './product-surface-governance.js';
 export * from './desktop-security.js';
 export * from './long-term-portfolio.js';
 export * from './accessibility-preferences.js';
+export * from './form-drafts.js';

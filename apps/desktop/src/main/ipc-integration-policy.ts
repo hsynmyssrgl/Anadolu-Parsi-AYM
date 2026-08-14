@@ -21,7 +21,11 @@ export interface IpcIntegrationPolicyDecision {
 
 const accepted = (): IpcIntegrationPolicyDecision => ({ accepted: true });
 const rejected = (reason: string, path = '$'): IpcIntegrationPolicyDecision => ({ accepted: false, reason, path });
-const isObject = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
+const isObject = (value: unknown): value is Record<string, unknown> => {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+};
 const hasOnlyKeys = (value: Record<string, unknown>, keys: readonly string[]): boolean => {
   const allowed = new Set(keys);
   return Object.keys(value).every((key) => allowed.has(key));
@@ -1089,6 +1093,39 @@ const accessibilityPreferencesInput = (args:readonly unknown[]):IpcIntegrationPo
   return valid?accepted():rejected('ACCESSIBILITY_PREFERENCES_ARGUMENT_INVALID','$[0]');
 };
 
+const formDraftKeyInput = (args:readonly unknown[]):IpcIntegrationPolicyDecision =>
+  args.length===1&&typeof args[0]==='string'&&/^[A-Za-z0-9._:-]{3,128}$/u.test(args[0])
+    ?accepted():rejected('FORM_DRAFT_KEY_INVALID','$[0]');
+
+const formDraftPayloadValue = (value:unknown, depth=0):boolean => {
+  if(depth>32)return false;
+  if(value===null||typeof value==='string'||typeof value==='boolean')return true;
+  if(typeof value==='number')return Number.isFinite(value);
+  if(Array.isArray(value))return value.length<=2048&&value.every(item=>formDraftPayloadValue(item,depth+1));
+  if(!isObject(value))return false;
+  return Object.keys(value).length<=2048&&Object.values(value).every(item=>formDraftPayloadValue(item,depth+1));
+};
+
+const formDraftSaveInput = (args:readonly unknown[]):IpcIntegrationPolicyDecision => {
+  if(args.length!==1||!isObject(args[0]))return rejected('FORM_DRAFT_ARGUMENT_INVALID','$[0]');
+  const value=args[0];const secret=containsNestedProhibitedBankingSecret(value);if(secret)return secret;
+  if(!hasOnlyKeys(value,['formKey','expectedRevision','clientOperationId','payload'])
+    ||!boundedString(value.formKey,128)||!/^[A-Za-z0-9._:-]{3,128}$/u.test(String(value.formKey))
+    ||!optionalInteger(value.expectedRevision,0,2_147_483_646)
+    ||!boundedString(value.clientOperationId,128)||!/^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$/u.test(String(value.clientOperationId))
+    ||!isObject(value.payload)||!formDraftPayloadValue(value.payload))return rejected('FORM_DRAFT_ARGUMENT_INVALID','$[0]');
+  try{if(new TextEncoder().encode(JSON.stringify(value.payload)).byteLength>65_536)return rejected('FORM_DRAFT_PAYLOAD_TOO_LARGE','$[0].payload');}
+  catch{return rejected('FORM_DRAFT_ARGUMENT_INVALID','$[0].payload');}
+  return accepted();
+};
+
+const formDraftUndoInput = (args:readonly unknown[]):IpcIntegrationPolicyDecision => exactObject(
+  args,['formKey','expectedRevision','clientOperationId'],
+  value=>boundedString(value.formKey,128)&&/^[A-Za-z0-9._:-]{3,128}$/u.test(String(value.formKey))
+    &&optionalInteger(value.expectedRevision,2,2_147_483_646)
+    &&boundedString(value.clientOperationId,128)&&/^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$/u.test(String(value.clientOperationId))
+);
+
 const financeImportCommitInput = (args: readonly unknown[]): IpcIntegrationPolicyDecision => exactObject(
   args,
   ['previewId','ownerPersonId','privacy','mapping','defaultCurrency','incomeCategoryId','expenseCategoryId','duplicateStrategy'],
@@ -1226,6 +1263,12 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
       return zeroArguments(args);
     case 'accessibility:updatePreferences':
       return accessibilityPreferencesInput(args);
+    case 'formDraft:getWorkspace':
+      return formDraftKeyInput(args);
+    case 'formDraft:save':
+      return formDraftSaveInput(args);
+    case 'formDraft:undo':
+      return formDraftUndoInput(args);
     case 'life:getManagedWorkspace':
       return zeroArguments(args);
     case 'life:recordManagedItem':
@@ -1373,6 +1416,6 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
     case 'catalog:lookup':
       return catalogLookupInput(args);
     default:
-      return accepted();
+      return rejected('UNKNOWN_IPC_CHANNEL', '$');
   }
 };

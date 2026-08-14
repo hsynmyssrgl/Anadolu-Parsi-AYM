@@ -4,6 +4,8 @@ import { navigationReducer, persistNavigationState, readNavigationState } from '
 import brandMarkUrl from './assets/brand-mark.png';
 import { accessibilityAnnouncement, applyAccessibilityProfile, nextRovingIndex, parseAccessibilityPreferences, resolveAccessibilityTheme, serializeAccessibilityPreferences, type AccessibilityAudienceProfile, type AccessibilityPreferences } from './accessibility';
 import { AsyncWriteGuard, MutationRevisionWatermark } from './async-state-guard';
+import { AsyncStatePanel, ValidationSummary, canUndoGovernedDraft, useGovernedDraft, type ValidationIssue } from './form-ux';
+import { resolveRouteAsyncState } from './route-async-state';
 import { DEVICE_REAUTHORIZATION_CONFIRMATION, SECURITY_CENTER_LABEL, SECURITY_CENTER_ROUTE, canSubmitDeviceReauthorization, securityCenterNeedsAttention } from './security-center-navigation';
 import { FinancePlanningPanel } from './FinancePlanningPanel';
 import { LongTermPortfolioPanel } from './LongTermPortfolioPanel';
@@ -51,6 +53,7 @@ import type {
 import type { AuthorizationContextWorkspaceView, AuthorizationPurpose } from '@ppt/domain';
 import type { OfflineCapability, OfflineCapabilityLeaseWorkspaceView, PrivacyControlCenterView } from '@ppt/domain';
 import type { AccessibilityPreferencesView, UpdateAccessibilityPreferencesInput } from '@ppt/domain';
+import type { FormDraftWorkspaceView } from '@ppt/domain';
 import type { ClientDataAccessBoundaryView } from '@ppt/domain';
 import type { NetworkEgressBoundaryView } from '@ppt/domain';
 import type { DerivedDataPolicyBoundaryView } from '@ppt/domain';
@@ -804,6 +807,144 @@ function AiGovernanceScreen() {
   </>;
 }
 
+
+interface WorkspaceNoteDraft { readonly title:string; readonly note:string }
+const EMPTY_WORKSPACE_NOTE:WorkspaceNoteDraft={title:'',note:''};
+const validateWorkspaceNote=(draft:WorkspaceNoteDraft):readonly ValidationIssue[]=>{
+  const issues:ValidationIssue[]=[];
+  if(!draft.title.trim())issues.push({fieldId:'governed-draft-title',message:'Taslak başlığı zorunludur.'});
+  else if(draft.title.trim().length>120)issues.push({fieldId:'governed-draft-title',message:'Taslak başlığı 120 karakteri aşamaz.'});
+  if(draft.note.length>5000)issues.push({fieldId:'governed-draft-note',message:'Taslak notu 5.000 karakteri aşamaz.'});
+  return issues;
+};
+const parseWorkspaceNote=(payloadJson:string):WorkspaceNoteDraft=>{
+  try{const value=JSON.parse(payloadJson) as Record<string,unknown>;return{
+    title:typeof value.title==='string'?value.title:'',note:typeof value.note==='string'?value.note:''
+  };}catch{return EMPTY_WORKSPACE_NOTE;}
+};
+
+interface PendingFormDraftOperation { readonly clientOperationId:string; readonly expectedRevision:number }
+
+function GovernedFormDraftCenter({visible}:{readonly visible:boolean}){
+  const formKey='workspace.notes';
+  const revisionRef=useRef(0);
+  const saveChainRef=useRef<Promise<void>>(Promise.resolve());
+  const operationsRef=useRef(new Map<number,PendingFormDraftOperation>());
+  const undoOperationRef=useRef<PendingFormDraftOperation|undefined>(undefined);
+  const undoInFlightRef=useRef(false);
+  const workspaceRefreshGenerationRef=useRef(0);
+  const [workspace,setWorkspace]=useState<FormDraftWorkspaceView>();
+  const [loadState,setLoadState]=useState<'loading'|'ready'|'error'>('loading');
+  const [online,setOnline]=useState(()=>globalThis.navigator?.onLine!==false);
+  const [historyRefreshError,setHistoryRefreshError]=useState(false);
+  const [undoError,setUndoError]=useState(false);
+  const [undoing,setUndoing]=useState(false);
+  const [validationFocusRequest,setValidationFocusRequest]=useState(0);
+  const refreshWorkspace=async():Promise<boolean>=>{
+    if(!window.pardus)return false;
+    const generation=++workspaceRefreshGenerationRef.current;
+    try{
+      const next=await window.pardus.getFormDraftWorkspace(formKey);
+      if(generation!==workspaceRefreshGenerationRef.current)return false;
+      const nextRevision=next.current?.revision??0;
+      revisionRef.current=Math.max(revisionRef.current,nextRevision);
+      setWorkspace(current=>nextRevision>=(current?.current?.revision??0)?next:current);
+      setHistoryRefreshError(false);
+      return true;
+    }catch{
+      if(generation===workspaceRefreshGenerationRef.current)setHistoryRefreshError(true);
+      return false;
+    }
+  };
+  const load=async()=>{
+    if(!window.pardus)return;
+    const generation=++workspaceRefreshGenerationRef.current;
+    setLoadState('loading');
+    try{
+      const next=await window.pardus.getFormDraftWorkspace(formKey);
+      if(generation!==workspaceRefreshGenerationRef.current)return;
+      setWorkspace(next);revisionRef.current=next.current?.revision??0;
+      draft.reset(next.current?parseWorkspaceNote(next.current.payloadJson):EMPTY_WORKSPACE_NOTE);
+      setHistoryRefreshError(false);setUndoError(false);undoOperationRef.current=undefined;
+      setLoadState('ready');
+    }catch{if(generation===workspaceRefreshGenerationRef.current)setLoadState('error');}
+  };
+  const draft=useGovernedDraft<WorkspaceNoteDraft>(EMPTY_WORKSPACE_NOTE,{
+    debounceMs:700,validate:validateWorkspaceNote,
+    save:async(value,{sequence,signal})=>{
+      const queued=saveChainRef.current.catch(()=>undefined).then(async()=>{
+        if(signal.aborted){operationsRef.current.delete(sequence);return;}
+        const operation=operationsRef.current.get(sequence)??{
+          clientOperationId:`draft-note-${crypto.randomUUID()}`,expectedRevision:revisionRef.current
+        };
+        operationsRef.current.set(sequence,operation);
+        const stored=await window.pardus!.saveFormDraft({
+          formKey,expectedRevision:operation.expectedRevision,clientOperationId:operation.clientOperationId,payload:{title:value.title,note:value.note}
+        });
+        revisionRef.current=Math.max(revisionRef.current,stored.revision);
+        operationsRef.current.delete(sequence);
+        if(!signal.aborted)setWorkspace(current=>({current:stored,history:current?.history??[]}));
+        void refreshWorkspace();
+      });
+      saveChainRef.current=queued;await queued;
+    }
+  });
+  useEffect(()=>{void load();},[]);
+  useEffect(()=>{const onOnline=()=>setOnline(true),onOffline=()=>setOnline(false);globalThis.addEventListener('online',onOnline);globalThis.addEventListener('offline',onOffline);return()=>{globalThis.removeEventListener('online',onOnline);globalThis.removeEventListener('offline',onOffline);};},[]);
+  const wasVisibleRef=useRef(visible);
+  useEffect(()=>{
+    const leavingVisibleRoute=wasVisibleRef.current&&!visible;
+    wasVisibleRef.current=visible;
+    if(leavingVisibleRoute&&draft.state.phase==='dirty')void draft.flush();
+  },[visible,draft.state.phase,draft.flush]);
+  const issues=validateWorkspaceNote(draft.draft);
+  const visibleIssues=draft.state.phase==='invalid'?issues:[];
+  const updateDraft=(value:WorkspaceNoteDraft)=>{undoOperationRef.current=undefined;setUndoError(false);draft.setDraft(value);};
+  const saveNow=async()=>{
+    if(issues.length>0){
+      if(draft.state.phase!=='invalid')draft.setDraft(draft.draft);
+      setValidationFocusRequest(value=>value+1);
+      return;
+    }
+    await draft.flush();
+  };
+  const undo=async()=>{
+    if(!window.pardus||revisionRef.current<2||undoInFlightRef.current||!canUndoGovernedDraft(draft.state.phase))return;
+    const operation=undoOperationRef.current??{
+      clientOperationId:`draft-undo-${crypto.randomUUID()}`,expectedRevision:revisionRef.current
+    };
+    undoOperationRef.current=operation;undoInFlightRef.current=true;setUndoing(true);setUndoError(false);
+    try{
+      const restored=await window.pardus.undoFormDraft({
+        formKey,expectedRevision:operation.expectedRevision,clientOperationId:operation.clientOperationId
+      });
+      revisionRef.current=Math.max(revisionRef.current,restored.revision);
+      undoOperationRef.current=undefined;
+      draft.reset(parseWorkspaceNote(restored.payloadJson));
+      setWorkspace(current=>({current:restored,history:current?.history??[]}));
+      void refreshWorkspace();
+    }catch{setUndoError(true);}
+    finally{undoInFlightRef.current=false;setUndoing(false);}
+  };
+  if(loadState==='loading')return <AsyncStatePanel state="loading" title="Taslak merkezi yükleniyor" message="Kişisel, sürümlü taslak ve değişiklik geçmişi hazırlanıyor."/>;
+  if(loadState==='error')return <AsyncStatePanel state="error" title="Taslak merkezi yüklenemedi" message="Kişisel taslak alanına güvenli erişim kurulamadı." onRetry={load}/>;
+  return <Surface className="workspace-summary governed-draft-center"><SectionHeader eyebrow="B3-02 · B7-14 · B7-15" title="Taslak, otomatik kayıt ve geri alma merkezi"/>
+    {!online&&<AsyncStatePanel state="offline" title="Çevrimdışı çalışma" message="Ağ bağlantısı yok; yerel kayıt isteği yine merkezi PEP/UoW ve offline lease kararına gider. Ağ üzerinden teslim garantisi verilmez." onRetry={async()=>{setOnline(globalThis.navigator?.onLine!==false);if(draft.state.phase==='dirty'||draft.state.phase==='error')await draft.retry();else await refreshWorkspace();}}/>}
+    {!workspace?.current&&<AsyncStatePanel state="empty" title="Henüz kayıtlı taslak yok" message="Başlık ve not yazdığınızda geçerli içerik 700 ms sonra kişisel alana otomatik kaydedilir."/>}
+    {draft.state.phase==='error'&&<AsyncStatePanel state="error" title="Otomatik kayıt tamamlanamadı" message="Girdi ekranda korunuyor; aynı işlem kimliği ve özgün revizyonla güvenli biçimde yeniden denenebilir." onRetry={async()=>{await draft.retry();}}/>}
+    {historyRefreshError&&<AsyncStatePanel state="error" title="Değişiklik geçmişi yenilenemedi" message="Kayıt işlemi tamamlandı; yalnızca geçmiş görünümü güncellenemedi." onRetry={async()=>{await refreshWorkspace();}}/>}
+    {undoError&&<AsyncStatePanel state="error" title="Geri alma tamamlanamadı" message="Ekrandaki veri korunuyor; aynı geri alma işlemi güvenli biçimde yeniden denenebilir." onRetry={undo}/>}
+    <ValidationSummary issues={visibleIssues} focusRequestKey={validationFocusRequest}/>
+    <div className="workspace-form" aria-describedby="governed-draft-status">
+      <label htmlFor="governed-draft-title">Çalışma başlığı<input id="governed-draft-title" value={draft.draft.title} aria-invalid={visibleIssues.some(item=>item.fieldId==='governed-draft-title')} onChange={event=>updateDraft({...draft.draft,title:event.target.value})}/></label>
+      <label htmlFor="governed-draft-note">Çalışma notu<textarea id="governed-draft-note" rows={5} value={draft.draft.note} aria-invalid={visibleIssues.some(item=>item.fieldId==='governed-draft-note')} onChange={event=>updateDraft({...draft.draft,note:event.target.value})}/></label>
+      <div className="button-row"><Button onClick={()=>void saveNow()} disabled={draft.state.phase==='saving'||(issues.length===0&&!['dirty','error'].includes(draft.state.phase))}>Şimdi kaydet</Button><Button onClick={()=>void undo()} disabled={revisionRef.current<2||undoing||!canUndoGovernedDraft(draft.state.phase)}>Son değişikliği geri al</Button></div>
+      <small id="governed-draft-status" aria-live="polite">{undoing?'Geri alınıyor…':draft.state.phase==='saving'?'Kaydediliyor…':draft.state.phase==='saved'?`Otomatik kaydedildi · sürüm ${revisionRef.current}`:draft.state.phase==='invalid'?'Alan hataları düzeltilene kadar kayıt bekliyor.':draft.state.phase==='dirty'?'Değişiklikler otomatik kayıt için bekliyor.':`Güncel sürüm ${revisionRef.current||'yok'}`}</small>
+    </div>
+    <section aria-labelledby="governed-draft-history"><h3 id="governed-draft-history">Değişiklik geçmişi</h3>{!workspace?.history.length?<EmptyState title="Geçmiş henüz boş" body="Her başarılı otomatik kayıt ve geri alma değişmez bir sürüm olarak burada görünür."/>:<div className="stack-list">{workspace.history.map(item=><div className="list-row" key={item.mutationId}><div><strong>Sürüm {item.revision} · {item.operation==='save'?'Kaydedildi':'Geri alındı'}</strong><small>{formatDate(item.createdAt,{dateStyle:'medium',timeStyle:'short'})}{item.restoredFromRevision?` · sürüm ${item.restoredFromRevision} geri yüklendi`:''} · {item.payloadFingerprint.slice(0,12)}</small></div></div>)}</div>}</section>
+    <small>Hassas taslak içeriği localStorage/sessionStorage içine yazılmaz; merkezi kişisel PEP/UoW ve değişmez revizyon geçmişi kullanılır.</small>
+  </Surface>;
+}
 
 function SystemManagementScreen(){
   const [networkEgressBoundary,setNetworkEgressBoundary]=useState<NetworkEgressBoundaryView>();
@@ -1997,6 +2138,7 @@ export function App() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [familyOpen, setFamilyOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(() => new Date());
+  const [networkOnline,setNetworkOnline]=useState(()=>globalThis.navigator?.onLine!==false);
   const [searchActiveIndex, setSearchActiveIndex] = useState(0);
   const mainContentRef = useRef<HTMLElement>(null);
   const searchDialogRef = useRef<HTMLElement>(null);
@@ -2007,6 +2149,7 @@ export function App() {
   const mutationRevisionWatermarkRef = useRef(new MutationRevisionWatermark());
 
   useEffect(() => { persistNavigationState(navigation); }, [navigation]);
+  useEffect(()=>{const online=()=>setNetworkOnline(true),offline=()=>setNetworkOnline(false);globalThis.addEventListener('online',online);globalThis.addEventListener('offline',offline);return()=>{globalThis.removeEventListener('online',online);globalThis.removeEventListener('offline',offline);};},[]);
   useEffect(() => () => asyncWriteGuardRef.current.invalidateAll(), []);
   useEffect(()=>()=>{if(accessibilitySaveTimerRef.current!==undefined)globalThis.clearTimeout(accessibilitySaveTimerRef.current);},[]);
   useEffect(() => { globalThis.localStorage?.setItem('ppt-theme', theme); }, [theme]);
@@ -2412,6 +2555,9 @@ export function App() {
   const activeScreenDataReady=(!graphRequired||loadedSnapshotSections.has('graph'))
     &&(!timelineRequired||loadedSnapshotSections.has('timeline'))
     &&(!auxiliaryRequired||loadedAuxiliaryScreens.has(active));
+  const routeLoadingState=resolveRouteAsyncState(active,'loading');
+  const routeOfflineState=resolveRouteAsyncState(active,'offline');
+  const routeErrorState=resolveRouteAsyncState(active,'error');
   const openImportantDayModal=()=>{void ensureSnapshotSection('timeline').then(()=>setEventModal(true)).catch(error=>setScreenDataError(error instanceof Error?error.message:'Önemli gün verileri yüklenemedi.'));};
 
   let screen: ReactNode;
@@ -2507,7 +2653,19 @@ export function App() {
             </div>
           </div>
         </header>
-        <div className="page-content">{screen}</div>
+        <div className="page-content">
+          <div data-session-draft-host="workspace.notes" hidden={active!=='settings'}>
+            <GovernedFormDraftCenter visible={active==='settings'}/>
+          </div>
+          {!networkOnline&&<AsyncStatePanel state={routeOfflineState.panelState} title={routeOfflineState.title} message={routeOfflineState.message} retryLabel="Yeniden dene" retryFocusTarget={mainContentRef} onRetry={async()=>{setNetworkOnline(globalThis.navigator?.onLine!==false);}}/>}
+          {loading
+            ? <AsyncStatePanel state="loading" title="Aile verileri hazırlanıyor" message="Yetkili kişisel çalışma alanı ve ekran durumu yükleniyor."/>
+            : screenDataError
+              ? <AsyncStatePanel state={routeErrorState.panelState} title={routeErrorState.title} message={`${routeErrorState.message} ${screenDataError}`} retryLabel="Yeniden dene" retryFocusTarget={mainContentRef} onRetry={()=>{setScreenDataError('');setScreenLoadRevision(value=>value+1);}}/>
+              : active!=='dashboard'&&!activeScreenDataReady
+                ? <AsyncStatePanel state={routeLoadingState.panelState} title={routeLoadingState.title} message={routeLoadingState.message}/>
+                : screen}
+        </div>
       </main>
       {searchOpen&&<div className="command-overlay" role="presentation" onMouseDown={()=>setSearchOpen(false)}>
         <section ref={searchDialogRef} className="command-palette" role="dialog" aria-modal="true" aria-labelledby="command-title" aria-describedby="command-help" onMouseDown={(event)=>event.stopPropagation()} onKeyDown={(event)=>{

@@ -1,3 +1,8 @@
+
+## DEC-225 - Taslak ve asenkron durum UX
+
+33-N; B3-02, B7-14 ve B7-15 icin merkezi form_draft PEP/UoW, immutable revision history, immediate undo, accessible validation ve fail-closed async state sozlesmesini baglar. Ayrinti: docs/decisions/DEC-225-draft-async-state-ux.md.
+
 # Ana Karar Kaydı — Build 180
 
 ## DEC-224 — Erişilebilirlik tercih merkezi
@@ -208,7 +213,7 @@ dosyasındadır.
 
 ## DEC-208 — B0-03/B0-04 ürün yüzeyi ve Feature Reality Gate
 
-32-W ile masaüstü ürün yüzeyi tek domain sözleşmesinde 17 ürün modülü + 5 yönetişim yüzeyi = 22 rota olarak sabitlenir; renderer menüsü ve ekran dispatch zinciri aynı kaynaktan türetilir. Tarihsel 16 modül ifadesi, kontrol yüzeyleri ile kullanıcı iş akışlarını karıştırdığı için superseded kabul edilir. Main/preload'da kayıtlı fakat renderer tarafından çağrılmayan exact 14 API kapalı taksonomiyle sınıflandırılır; yeni, eksik, duplicate veya sınıflandırılmamış rota/API drift'i pretypecheck ve prebuild'i fail-closed durdurur. Feature Reality Gate, `COMPLETE` gereksinimlerin 13 zincir alanının tamamını zorunlu tutar ve eksik zincir/sahte API/eksik rota negatif öz-testlerini çalıştırır. Yeni migration, veri taşıma, backfill, cutover veya sahiplik değişimi yoktur. B0-03 ve B0-04 birlikte tamamlanır; B9-01 ve genel Bronze kapanışı açık kalır. Ayrıntılı karar `docs/decisions/DEC-208-b0-03-b0-04-product-surface-governance.md` dosyasındadır.
+32-W ile masaüstü ürün yüzeyi tek domain sözleşmesinde 17 ürün modülü + 5 yönetişim yüzeyi = 22 rota olarak sabitlenir; renderer menüsü ve ekran dispatch zinciri aynı kaynaktan türetilir. Tarihsel 16 modül ifadesi, kontrol yüzeyleri ile kullanıcı iş akışlarını karıştırdığı için superseded kabul edilir. Main/preload'da kayıtlı fakat renderer tarafından çağrılmayan güncel exact 14 API kapalı taksonomiyle sınıflandırılır; yeni, eksik, duplicate veya sınıflandırılmamış rota/API drift'i pretypecheck ve prebuild'i fail-closed durdurur. Feature Reality Gate, `COMPLETE` gereksinimlerin 13 zincir alanının tamamını zorunlu tutar ve eksik zincir/sahte API/eksik rota negatif öz-testlerini çalıştırır. Yeni migration, veri taşıma, backfill, cutover veya sahiplik değişimi yoktur. B0-03 ve B0-04 birlikte tamamlanır; B9-01 ve genel Bronze kapanışı açık kalır. Ayrıntılı karar `docs/decisions/DEC-208-b0-03-b0-04-product-surface-governance.md` dosyasındadır.
 
 ## DEC-207 — PPK-026 typed policy SDK ve XPF-003 ortak finans/sağlık policy yolu
 

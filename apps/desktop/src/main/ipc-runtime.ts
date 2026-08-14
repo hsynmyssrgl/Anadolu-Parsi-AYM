@@ -109,8 +109,10 @@ export const registerCorrelatedIpcHandler = <TArguments extends unknown[], TResu
             reason: payloadDecision.reason,
             argumentCount: payloadDecision.metrics.argumentCount,
             nodeCount: payloadDecision.metrics.nodeCount,
+            payloadNodeCount: payloadDecision.metrics.nodeCount,
             maximumDepth: payloadDecision.metrics.maximumDepth,
-            estimatedBytes: payloadDecision.metrics.estimatedBytes
+            estimatedBytes: payloadDecision.metrics.estimatedBytes,
+            payloadEstimatedBytes: payloadDecision.metrics.estimatedBytes
           }
         });
         throw createAppError({
@@ -269,7 +271,11 @@ export const registerCorrelatedIpcHandler = <TArguments extends unknown[], TResu
             timestamp: input.runtime.clock.now(),
             service: 'desktop-main',
             process: 'electron-main',
-            event: error.kind === 'queue-full' ? 'ipc.request.backpressure_rejected' : 'ipc.request.queue_timed_out',
+            event: error.kind === 'queue-full'
+              ? 'ipc.request.backpressure_rejected'
+              : error.kind === 'rate-limit'
+                ? 'ipc.request.rate_limited'
+                : 'ipc.request.queue_timed_out',
             correlationId,
             durationMs: Date.now() - startedAt,
             outcome: 'failure',
@@ -283,7 +289,7 @@ export const registerCorrelatedIpcHandler = <TArguments extends unknown[], TResu
             }
           });
           input.telemetry.record({
-            channel: input.channel, kind: error.kind, durationMs: Date.now() - startedAt,
+            channel: input.channel, kind: error.kind === 'rate-limit' ? 'queue-full' : error.kind, durationMs: Date.now() - startedAt,
             activeCount: input.requestLifecycles.activeCount(event.sender?.id ?? -1),
             queuedCount: input.requestLifecycles.queuedCount(event.sender?.id ?? -1)
           });
@@ -291,7 +297,9 @@ export const registerCorrelatedIpcHandler = <TArguments extends unknown[], TResu
             code: ERROR_CODES.CORE_UNEXPECTED,
             message: error.kind === 'queue-full'
               ? 'IPC istek yoğunluğu sınırı aşıldı.'
-              : 'IPC isteği yoğunluk kuyruğunda süre aşımına uğradı.',
+              : error.kind === 'rate-limit'
+                ? 'IPC istek hızı bütçesi aşıldı.'
+                : 'IPC isteği yoğunluk kuyruğunda süre aşımına uğradı.',
             category: 'infrastructure',
             retryable: true,
             correlationId,
