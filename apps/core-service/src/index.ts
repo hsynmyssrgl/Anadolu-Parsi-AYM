@@ -13,6 +13,8 @@ export * from './synthetic-rollback-recovery-drill.js';
 export * from './end-to-end-security-evidence-aggregator.js';
 export * from './explicit-user-cutover-approval-receipt.js';
 export * from './versioned-cutover-decision-preflight.js';
+export * from './distributed-core-cluster-runtime.js';
+export * from './distributed-operations-runtime.js';
 export * from './versioned-core-service-api-use-case.js';
 export * from './core-service-method-dispatcher.js';
 export * from './local-admin-server.js';

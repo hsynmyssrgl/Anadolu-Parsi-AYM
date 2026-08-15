@@ -6,7 +6,6 @@ export const APP_META = Object.freeze({
   releaseLabel: 'Bronze 04.08.2026.29',
   releaseId: 'bronze-2026-08-04-r29',
   monthlySequence: 29,
-  owner: 'Hüseyin Müyesseroğlu',
   stage: 'Bronze · Aktif Geliştirme'
 });
 export type AppMeta = typeof APP_META;

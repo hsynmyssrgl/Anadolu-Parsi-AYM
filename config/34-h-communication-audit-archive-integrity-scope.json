@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "34-H-COMMUNICATION-AUDIT-ARCHIVE-INTEGRITY",
+  "step": "34-H",
+  "decision": "DEC-245",
+  "title": "Communication audit and archive integrity",
+  "status": "PLANNED",
+  "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+  "localImplementationStatus": "PARTIAL_LOCAL_FOUNDATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+  "requirements": ["AUD-COM-001","AUD-COM-002","AUD-COM-003","AUD-COM-005"],
+  "dependsOn": ["34-B","34-C","34-D","34-G"],
+  "migrationVersion": 112,
+  "truth": {"appendOnlyContentFreeHashChain":true,"archiveIntegrityCheckpointModeled":true,"productionQueryApiComposed":false,"externalBackupProviderVerified":false,"remoteReplicationVerified":false,"realRestoreDrillPerformed":false,"requirementsClosed":false,"countsAsRequirementPass":false},
+  "manualEvidence": {"realRestoreDrill":"NOT_RUN","remoteReplicationUat":"NOT_RUN","externalBackupReview":"NOT_RUN","securityReview":"NOT_RUN"},
+  "persistentReceiptStatus": "NOT_RUN"
+}

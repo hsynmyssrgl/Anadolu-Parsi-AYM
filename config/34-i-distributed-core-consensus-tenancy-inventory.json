@@ -1,0 +1,6 @@
+{
+  "schemaVersion":1,"step":"34-I","decision":"DEC-246","status":"PLANNED","governanceState":"LOCAL_IMPLEMENTATION_STARTED",
+  "implementationFiles":["packages/domain/src/distributed-core-service.ts","apps/core-service/src/distributed-core-cluster-runtime.ts","packages/database/src/family-database-migrations.ts","apps/desktop/src/renderer/DistributedOperationsPanel.tsx"],
+  "targetedTests":["apps/core-service/tests/distributed-core-cluster-runtime.test.ts","apps/core-service/tests/distributed-core-migration-boundary.test.ts","apps/desktop/tests/remaining-communication-distributed-ui.test.ts"],
+  "consensusProvider":"UNAVAILABLE_FAIL_CLOSED","countsAsRequirementPass":false
+}

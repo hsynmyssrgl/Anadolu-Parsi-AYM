@@ -35,8 +35,8 @@ try {
     ...policyOptions
   });
   assert.ok(migrationSummary, 'Migration özeti üretilmedi.');
-  assert.deepEqual(migrationSummary.appliedVersions, Array.from({ length: 110 }, (_unused, index) => index + 1));
-  assert.equal(migrationSummary.schemaAfter.tableCount, 203);
+  assert.deepEqual(migrationSummary.appliedVersions, Array.from({ length: 115 }, (_unused, index) => index + 1));
+  assert.equal(migrationSummary.schemaAfter.tableCount, 218);
 
   const initialState = store.getAuthState();
   if (!initialState.initialized) {
@@ -74,7 +74,7 @@ try {
   const probe = new DatabaseSync(databasePath, { readOnly: true });
   try {
     const migrations = probe.prepare('SELECT version,success FROM schema_migrations ORDER BY version').all();
-    assert.equal(migrations.length, 110, 'Migration kayıtları eksik.');
+    assert.equal(migrations.length, 115, 'Migration kayıtları eksik.');
     assert.equal(migrations.every((row) => Number(row.success) === 1), true, 'Başarısız migration kaydı bulundu.');
     assert.equal(Boolean(probe.prepare("SELECT 1 AS present FROM sqlite_master WHERE type='table' AND name='database_metadata'").get()), true);
     assert.equal(Boolean(probe.prepare("SELECT 1 AS present FROM sqlite_master WHERE type='table' AND name='local_governed_ocr_source_deletion_recovery_intents'").get()), true);
@@ -114,6 +114,13 @@ try {
     for (const tableName of ['family_meeting_mutations', 'family_meetings', 'family_meeting_participants',
       'family_meeting_agenda_items', 'family_meeting_polls', 'family_meeting_votes', 'family_meeting_decisions',
       'family_meeting_tasks', 'family_meeting_collaboration_items', 'family_meeting_minutes', 'family_meeting_events']) {
+      assert.equal(Boolean(probe.prepare("SELECT 1 AS present FROM sqlite_master WHERE type='table' AND name=?").get(tableName)), true);
+    }
+    for (const tableName of ['communication_file_sharing_centers', 'communication_file_sharing_mutations',
+      'communication_audit_operations', 'communication_audit_events', 'communication_archive_integrity_checkpoints',
+      'distributed_cluster_nodes', 'distributed_mutation_log', 'distributed_cluster_snapshots',
+      'distributed_backup_evidence', 'distributed_update_plans', 'distributed_fault_injection_evidence',
+      'universal_ux_operations', 'universal_ux_preferences', 'policy_weakening_proposals', 'windows_resilience_evidence']) {
       assert.equal(Boolean(probe.prepare("SELECT 1 AS present FROM sqlite_master WHERE type='table' AND name=?").get(tableName)), true);
     }
     const outbox = probe.prepare("SELECT event_type,aggregate_type,aggregate_id,status,attempt_count FROM event_outbox WHERE event_type='family.member.created' ORDER BY occurred_at DESC LIMIT 1").get();

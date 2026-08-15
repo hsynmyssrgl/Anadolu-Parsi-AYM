@@ -1,0 +1,26 @@
+{
+  "schemaVersion":1,
+  "id":"34-L-BRONZE-FINAL-DRIFT-DETERMINISTIC-DELIVERY-CLOSURE",
+  "step":"34-L",
+  "decision":"DEC-249",
+  "title":"Bronze final drift documentation and deterministic delivery closure",
+  "status":"PLANNED_FINAL",
+  "governancePhase":"LOCAL_CLOSURE_AUDIT_STARTED",
+  "localImplementationStatus":"LOCAL_CLOSURE_AUTOMATION_COMPOSED_ACCEPTANCE_BLOCKED",
+  "requirements":["B9-01","B9-02","B9-03"],
+  "dependsOn":["34-K"],
+  "truth":{
+    "deadUiApiVersionIdentityDemoDriftSweepModeled":true,
+    "singleCurrentDocumentationIndexRegenerationModeled":true,
+    "deterministicSourceManifestArchiveReceiptModeled":true,
+    "allRoadmapPackagesAccepted":false,
+    "allExternalEvidenceAvailable":false,
+    "realWindowsAndDistributedUatComplete":false,
+    "requirementsClosed":false,
+    "countsAsRequirementPass":false
+  },
+  "manualEvidence":{"realWindowsLifecycle":"NOT_RUN","sevenDaySoak":"NOT_RUN","realMultiNodeConsensus":"NOT_RUN","realAppleClients":"NOT_RUN","realRemoteProviders":"NOT_RUN","certification":"NOT_RUN"},
+  "persistentReceiptStatus":"PASS_LOCAL_ONLY",
+  "persistentReceiptPath":"artifacts/validation/34-L-bronze-local-closure-receipt.json",
+  "externalPersistentReceiptStatus":"NOT_RUN"
+}

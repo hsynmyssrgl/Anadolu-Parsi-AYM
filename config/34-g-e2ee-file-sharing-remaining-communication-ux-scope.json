@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "34-G-E2EE-FILE-SHARING-REMAINING-COMMUNICATION-UX",
+  "step": "34-G",
+  "decision": "DEC-244",
+  "title": "E2EE file sharing and remaining communication UX",
+  "status": "PLANNED",
+  "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+  "localImplementationStatus": "PARTIAL_LOCAL_FOUNDATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+  "requirements": ["FSH-001","FSH-002","FSH-003","FSH-004","FSH-005","FSH-006","FSH-007","UX-COM-002","UX-COM-005","UX-COM-006","UX-COM-007","UX-COM-008","UX-COM-009","UX-COM-010"],
+  "dependsOn": ["34-A","34-B","34-C","33-R"],
+  "migrationVersion": 111,
+  "truth": {
+    "localDomainUseCaseRepositorySchemaAndUiFoundation": true,
+    "externalLinksDefaultClosed": true,
+    "singleUseRemoteAssistanceConsentRequired": true,
+    "productionFileTransportConfigured": false,
+    "productionMalwareScannerConfigured": false,
+    "remoteAssistanceTransportConfigured": false,
+    "sharePlayAdapterConfigured": false,
+    "voiceExecutionProviderConfigured": false,
+    "networkUsedByCurrentImplementation": false,
+    "requirementsClosed": false,
+    "countsAsRequirementPass": false
+  },
+  "manualEvidence": {"realE2eeTransferUat":"NOT_RUN","realMalwareScannerUat":"NOT_RUN","remoteAssistanceUat":"NOT_RUN","sharePlayUat":"NOT_RUN","accessibilityReview":"NOT_RUN","securityReview":"NOT_RUN"},
+  "persistentReceiptStatus": "NOT_RUN"
+}

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "step": "34-G",
+  "decision": "DEC-244",
+  "status": "PLANNED",
+  "governanceState": "LOCAL_IMPLEMENTATION_STARTED",
+  "implementationFiles": [
+    "packages/domain/src/communication-file-sharing.ts",
+    "packages/application/src/communication-file-sharing-use-cases.ts",
+    "packages/repository-contracts/src/communication-file-sharing-repository.ts",
+    "packages/repositories/src/communication-file-sharing-repository.ts",
+    "packages/database/src/family-database-migrations.ts",
+    "apps/desktop/src/renderer/CommunicationFileSharingPanel.tsx"
+  ],
+  "targetedTests": ["packages/application/tests/communication-file-sharing-use-cases.test.ts","packages/repositories/communication-file-sharing-repository-policy.test.ts","apps/desktop/tests/remaining-communication-distributed-ui.test.ts"],
+  "providerTruth": {"fileTransport":"NOT_CONFIGURED","malwareScanner":"NOT_CONFIGURED","remoteAssistance":"NOT_CONFIGURED","sharePlay":"NOT_CONFIGURED","voiceExecution":"NOT_CONFIGURED"},
+  "countsAsRequirementPass": false
+}

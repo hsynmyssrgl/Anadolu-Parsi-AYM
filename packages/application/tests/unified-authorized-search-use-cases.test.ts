@@ -32,16 +32,16 @@ const candidates: readonly UnifiedAuthorizedSearchCandidate[] = Object.freeze([
   {
     module: 'family',
     resourceType: 'person',
-    resourceId: 'person-ayse',
-    title: 'Ayşe Yılmaz',
-    searchableText: ['Ayşe Yılmaz', 'anne', 'ana kol']
+    resourceId: 'person-search-subject',
+    title: 'Arama Kaydı',
+    searchableText: ['Arama Kaydı', 'ebeveyn', 'ana kol']
   },
   {
     module: 'event',
     resourceType: 'event',
     resourceId: 'event-checkup',
-    title: 'Ayşe kontrol randevusu',
-    searchableText: ['Ayşe kontrol randevusu', 'Hastane', 'önemli gün'],
+    title: 'Arama kontrol randevusu',
+    searchableText: ['Arama kontrol randevusu', 'Hastane', 'önemli gün'],
     occurredAt: asIsoDateTime('2026-08-14T10:00:00.000Z')
   },
   {
@@ -49,7 +49,7 @@ const candidates: readonly UnifiedAuthorizedSearchCandidate[] = Object.freeze([
     resourceType: 'archive_item',
     resourceId: 'archive-report',
     title: 'Kontrol raporu',
-    searchableText: ['Kontrol raporu', 'ayse-kontrol.pdf', 'application/pdf'],
+    searchableText: ['Kontrol raporu', 'search-subject-kontrol.pdf', 'application/pdf'],
     occurredAt: asIsoDateTime('2026-08-13T10:00:00.000Z')
   },
   {
@@ -72,7 +72,7 @@ const source = (
 describe('SearchUnifiedAuthorizedRecordsUseCase', () => {
   it('returns only selected already-authorized sources and never echoes searchable material', async () => {
     const result = await new SearchUnifiedAuthorizedRecordsUseCase(source()).execute(context, {
-      query: 'Ayşe kontrol',
+      query: 'Arama kontrol',
       modules: ['event', 'archive'],
       limit: 10
     });

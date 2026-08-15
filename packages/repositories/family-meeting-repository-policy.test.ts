@@ -34,8 +34,8 @@ describe('34-F family meeting repository and migration boundary', () => {
       'family_meeting_polls', 'family_meeting_tasks', 'family_meeting_votes', 'family_meetings'
     ]);
     expect(runtime.database.prepare("SELECT value FROM database_metadata WHERE key='schema_generation'").get())
-      .toEqual({ value: 'REVISION-34-F-FAMILY-MEETINGS-MINUTES' });
-    expect(FAMILY_DATABASE_MIGRATIONS.at(-1)).toMatchObject({ version: 110,
+      .toEqual({ value: 'REVISION-34-K-WINDOWS-RESILIENCE-UNIVERSAL-UX' });
+    expect(FAMILY_DATABASE_MIGRATIONS.find((migration) => migration.version === 110)).toMatchObject({ version: 110,
       name: 'family_meetings_decisions_consent_minutes', checksum: '8bcc5777aa80794122742bcfd73be036234488f5861adbcd34956c56e6d0d6ac' });
   });
 

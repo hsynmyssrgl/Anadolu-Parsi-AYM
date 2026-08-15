@@ -119,3 +119,6 @@ export * from './communication-realtime-calling-use-cases.js';
 export * from './communication-recording-retention-use-cases.js';
 export * from './local-translation-language-use-cases.js';
 export * from './family-meeting-use-cases.js';
+export * from './communication-file-sharing-use-cases.js';
+export * from './communication-audit-archive-use-cases.js';
+export * from './windows-resilience-universal-ux-use-cases.js';

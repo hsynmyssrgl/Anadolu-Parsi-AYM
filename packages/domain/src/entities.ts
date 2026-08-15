@@ -73,6 +73,7 @@ export type TimelineEventKind =
   | 'residence'
   | 'travel'
   | 'family_meeting'
+  | 'communication_file_sharing'
   | 'other';
 
 export interface TimelineEvent {

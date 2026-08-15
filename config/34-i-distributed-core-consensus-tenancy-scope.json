@@ -1,0 +1,10 @@
+{
+  "schemaVersion":1,"id":"34-I-DISTRIBUTED-CORE-CONSENSUS-TENANCY","step":"34-I","decision":"DEC-246",
+  "title":"Distributed core service consensus and tenancy foundation","status":"PLANNED","governancePhase":"LOCAL_IMPLEMENTATION_STARTED",
+  "localImplementationStatus":"PARTIAL_LOCAL_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE",
+  "requirements":["DHA-001","DHA-002","DHA-003","DHA-004","DHA-005","DHA-006","DHA-007","DHA-008","DHA-009","DHA-010","DHA-011","DHA-012","DHA-013","DHA-020","DHA-021","DHA-022","DHA-023","DHA-024","DHA-029","DHA-034","DHA-035","XPF-005"],
+  "dependsOn":["33-Z","34-H"],"migrationVersion":113,
+  "truth":{"headlessCoreServicePresent":true,"customConsensusAlgorithmImplemented":false,"matureRaftProviderRequired":true,"productionRaftProviderConfigured":false,"termFencingTenancyAndEpochGuardsModeled":true,"networkShareDatabaseRejected":true,"realMultiNodeQuorumVerified":false,"windowsServiceHostVerified":false,"productionMtlsCertificateIssued":false,"requirementsClosed":false,"countsAsRequirementPass":false},
+  "manualEvidence":{"realThreeNodeQuorum":"NOT_RUN","realNetworkPartition":"NOT_RUN","realWindowsServiceLifecycle":"NOT_RUN","realMtlsPairing":"NOT_RUN","realSnapshotBootstrap":"NOT_RUN","securityReview":"NOT_RUN"},
+  "persistentReceiptStatus":"NOT_RUN"
+}

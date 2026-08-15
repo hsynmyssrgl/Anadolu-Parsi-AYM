@@ -17160,6 +17160,302 @@ BEGIN SELECT RAISE(ABORT,'34-F encrypted minutes metadata is durable'); END;
 UPDATE database_metadata SET value='REVISION-34-F-FAMILY-MEETINGS-MINUTES',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 
+const communicationFileSharingSql = `CREATE TABLE communication_file_sharing_mutations(
+  id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  center_id TEXT NOT NULL,
+  actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 256),
+  command_kind TEXT NOT NULL CHECK(command_kind IN (
+    'prepare_file','record_chunk','set_scan','add_version','add_comment','grant_access','revoke_share','link_archive',
+    'update_album','set_notifications','announce_emergency','acknowledge_emergency','request_remote_assistance',
+    'grant_remote_assistance','revoke_remote_assistance','plan_co_watch','prepare_voice_action','confirm_voice_action')),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  expected_revision INTEGER NOT NULL CHECK(expected_revision>=0),
+  revision INTEGER NOT NULL CHECK(revision=expected_revision+1),
+  policy_receipt_id TEXT NOT NULL CHECK(length(policy_receipt_id)=64 AND policy_receipt_id NOT GLOB '*[^0-9a-f]*'),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  occurred_at TEXT NOT NULL,
+  UNIQUE(family_id,owner_person_id,client_operation_id),
+  CHECK(center_id='communication-file-sharing:'||family_id||':'||owner_person_id)
+);
+CREATE INDEX idx_34g_file_sharing_mutations_owner
+ON communication_file_sharing_mutations(family_id,owner_person_id,revision DESC);
+
+CREATE TABLE communication_file_sharing_centers(
+  id TEXT PRIMARY KEY,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  snapshot_json TEXT NOT NULL CHECK(json_valid(snapshot_json)),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES communication_file_sharing_mutations(id) ON DELETE RESTRICT,
+  updated_at TEXT NOT NULL,
+  UNIQUE(family_id,owner_person_id),
+  CHECK(id='communication-file-sharing:'||family_id||':'||owner_person_id),
+  CHECK(json_extract(snapshot_json,'$.schemaVersion')=1),
+  CHECK(json_extract(snapshot_json,'$.centerId')=id),
+  CHECK(json_extract(snapshot_json,'$.ownerPersonId')=owner_person_id),
+  CHECK(json_extract(snapshot_json,'$.revision')=revision),
+  CHECK(json_extract(snapshot_json,'$.truth.externalLinksDefaultClosed')=1),
+  CHECK(json_extract(snapshot_json,'$.truth.productionFileTransportConfigured')=0),
+  CHECK(json_extract(snapshot_json,'$.truth.networkUsedByCurrentImplementation')=0)
+);
+
+CREATE TRIGGER trg_34g_file_sharing_center_insert
+BEFORE INSERT ON communication_file_sharing_centers
+BEGIN
+  SELECT CASE WHEN NOT EXISTS(
+    SELECT 1 FROM communication_file_sharing_mutations mutation
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.family_id=NEW.family_id
+      AND mutation.owner_person_id=NEW.owner_person_id AND mutation.center_id=NEW.id
+      AND mutation.expected_revision=0 AND mutation.revision=NEW.revision
+      AND mutation.state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.updated_at
+  ) THEN RAISE(ABORT,'34-G center insert requires exact mutation receipt') END;
+END;
+CREATE TRIGGER trg_34g_file_sharing_center_update
+BEFORE UPDATE ON communication_file_sharing_centers
+BEGIN
+  SELECT CASE WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.owner_person_id<>OLD.owner_person_id
+    OR NEW.revision<>OLD.revision+1 OR NEW.updated_at<OLD.updated_at OR NOT EXISTS(
+      SELECT 1 FROM communication_file_sharing_mutations mutation
+      WHERE mutation.id=NEW.last_mutation_id AND mutation.family_id=NEW.family_id
+        AND mutation.owner_person_id=NEW.owner_person_id AND mutation.center_id=NEW.id
+        AND mutation.expected_revision=OLD.revision AND mutation.revision=NEW.revision
+        AND mutation.state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.updated_at
+    ) THEN RAISE(ABORT,'34-G center update requires exact next mutation receipt') END;
+END;
+CREATE TRIGGER trg_34g_file_sharing_mutation_update BEFORE UPDATE ON communication_file_sharing_mutations
+BEGIN SELECT RAISE(ABORT,'34-G mutation ledger is immutable'); END;
+CREATE TRIGGER trg_34g_file_sharing_mutation_delete BEFORE DELETE ON communication_file_sharing_mutations
+BEGIN SELECT RAISE(ABORT,'34-G mutation ledger is immutable'); END;
+CREATE TRIGGER trg_34g_file_sharing_center_delete BEFORE DELETE ON communication_file_sharing_centers
+BEGIN SELECT RAISE(ABORT,'34-G center uses logical revocation'); END;
+
+UPDATE database_metadata SET value='REVISION-34-G-COMMUNICATION-FILE-SHARING-UX',
+  updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
+const communicationAuditArchiveSql = `CREATE TABLE communication_audit_operations(
+  client_operation_id TEXT NOT NULL,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  operation_kind TEXT NOT NULL CHECK(operation_kind IN ('audit_append','checkpoint_register')),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  result_id TEXT NOT NULL CHECK(length(result_id)=64 AND result_id NOT GLOB '*[^0-9a-f]*'),
+  PRIMARY KEY(family_id,owner_person_id,client_operation_id)
+);
+CREATE TABLE communication_audit_events(
+  id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  actor_device_id TEXT NOT NULL CHECK(length(trim(actor_device_id)) BETWEEN 2 AND 256),
+  event_kind TEXT NOT NULL CHECK(event_kind IN ('room_joined','room_left','call_started','call_ended','file_shared',
+    'permission_changed','message_created','message_deleted','recording_consent_changed')),
+  resource_type TEXT NOT NULL CHECK(length(trim(resource_type)) BETWEEN 2 AND 128),
+  resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 2 AND 256),
+  resource_version INTEGER NOT NULL CHECK(resource_version>=1),
+  resource_fingerprint TEXT NOT NULL CHECK(length(resource_fingerprint)=64 AND resource_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  previous_hash TEXT NOT NULL CHECK(length(previous_hash)=64 AND previous_hash NOT GLOB '*[^0-9a-f]*'),
+  event_hash TEXT NOT NULL UNIQUE CHECK(length(event_hash)=64 AND event_hash NOT GLOB '*[^0-9a-f]*'),
+  sequence_no INTEGER NOT NULL CHECK(sequence_no>=1),
+  occurred_at TEXT NOT NULL,
+  content_copied INTEGER NOT NULL CHECK(content_copied=0),
+  UNIQUE(family_id,owner_person_id,sequence_no),
+  UNIQUE(family_id,owner_person_id,event_hash)
+);
+CREATE INDEX idx_34h_communication_audit_resource
+ON communication_audit_events(family_id,owner_person_id,resource_type,resource_id,sequence_no DESC);
+CREATE TABLE communication_archive_integrity_checkpoints(
+  id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  archive_generation INTEGER NOT NULL CHECK(archive_generation>=1),
+  vault_manifest_sha256 TEXT NOT NULL CHECK(length(vault_manifest_sha256)=64),
+  database_manifest_sha256 TEXT NOT NULL CHECK(length(database_manifest_sha256)=64),
+  backup_manifest_sha256 TEXT NOT NULL CHECK(length(backup_manifest_sha256)=64),
+  replica_manifest_sha256 TEXT CHECK(replica_manifest_sha256 IS NULL OR length(replica_manifest_sha256)=64),
+  restore_manifest_sha256 TEXT CHECK(restore_manifest_sha256 IS NULL OR length(restore_manifest_sha256)=64),
+  vault_verified INTEGER NOT NULL CHECK(vault_verified IN (0,1)),
+  backup_verified INTEGER NOT NULL CHECK(backup_verified IN (0,1)),
+  replica_verified INTEGER NOT NULL CHECK(replica_verified IN (0,1)),
+  restore_verified INTEGER NOT NULL CHECK(restore_verified IN (0,1)),
+  external_backup_provider_verified INTEGER NOT NULL CHECK(external_backup_provider_verified=0),
+  remote_replication_verified INTEGER NOT NULL CHECK(remote_replication_verified=0),
+  created_at TEXT NOT NULL,
+  UNIQUE(family_id,owner_person_id,archive_generation),
+  CHECK(replica_verified=0 OR replica_manifest_sha256 IS NOT NULL),
+  CHECK(restore_verified=0 OR (restore_manifest_sha256 IS NOT NULL AND backup_verified=1))
+);
+CREATE TRIGGER trg_34h_audit_event_operation
+BEFORE INSERT ON communication_audit_events
+BEGIN SELECT CASE WHEN NOT EXISTS(
+  SELECT 1 FROM communication_audit_operations operation
+  WHERE operation.family_id=NEW.family_id AND operation.owner_person_id=NEW.owner_person_id
+    AND operation.operation_kind='audit_append' AND operation.result_id=NEW.id
+) THEN RAISE(ABORT,'34-H audit event requires operation receipt') END; END;
+CREATE TRIGGER trg_34h_checkpoint_operation
+BEFORE INSERT ON communication_archive_integrity_checkpoints
+BEGIN SELECT CASE WHEN NOT EXISTS(
+  SELECT 1 FROM communication_audit_operations operation
+  WHERE operation.family_id=NEW.family_id AND operation.owner_person_id=NEW.owner_person_id
+    AND operation.operation_kind='checkpoint_register' AND operation.result_id=NEW.id
+) THEN RAISE(ABORT,'34-H archive checkpoint requires operation receipt') END; END;
+CREATE TRIGGER trg_34h_audit_event_update BEFORE UPDATE ON communication_audit_events
+BEGIN SELECT RAISE(ABORT,'34-H communication audit ledger is immutable'); END;
+CREATE TRIGGER trg_34h_audit_event_delete BEFORE DELETE ON communication_audit_events
+BEGIN SELECT RAISE(ABORT,'34-H communication audit ledger is immutable'); END;
+CREATE TRIGGER trg_34h_checkpoint_update BEFORE UPDATE ON communication_archive_integrity_checkpoints
+BEGIN SELECT RAISE(ABORT,'34-H archive checkpoint ledger is immutable'); END;
+CREATE TRIGGER trg_34h_checkpoint_delete BEFORE DELETE ON communication_archive_integrity_checkpoints
+BEGIN SELECT RAISE(ABORT,'34-H archive checkpoint ledger is immutable'); END;
+CREATE TRIGGER trg_34h_operation_update BEFORE UPDATE ON communication_audit_operations
+BEGIN SELECT RAISE(ABORT,'34-H operation ledger is immutable'); END;
+CREATE TRIGGER trg_34h_operation_delete BEFORE DELETE ON communication_audit_operations
+BEGIN SELECT RAISE(ABORT,'34-H operation ledger is immutable'); END;
+
+UPDATE database_metadata SET value='REVISION-34-H-COMMUNICATION-AUDIT-ARCHIVE-INTEGRITY',
+  updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
+const distributedCoreConsensusTenancySql = `CREATE TABLE distributed_cluster_nodes(
+  node_id TEXT PRIMARY KEY,
+  cluster_id TEXT NOT NULL,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  role TEXT NOT NULL CHECK(role IN ('leader','follower','read_replica','witness','backup_only','maintenance')),
+  voter INTEGER NOT NULL CHECK(voter IN (0,1)),
+  term INTEGER NOT NULL CHECK(term>=0),
+  fencing_token INTEGER NOT NULL CHECK(fencing_token>=0),
+  commit_index INTEGER NOT NULL CHECK(commit_index>=0),
+  applied_index INTEGER NOT NULL CHECK(applied_index>=0 AND applied_index<=commit_index),
+  certificate_fingerprint TEXT NOT NULL CHECK(length(certificate_fingerprint)=64),
+  certificate_revoked INTEGER NOT NULL CHECK(certificate_revoked IN (0,1)),
+  key_epoch INTEGER NOT NULL CHECK(key_epoch>=1),
+  policy_version TEXT NOT NULL,
+  revocation_epoch INTEGER NOT NULL CHECK(revocation_epoch>=0),
+  safe_mode INTEGER NOT NULL CHECK(safe_mode IN (0,1)),
+  updated_at TEXT NOT NULL,
+  UNIQUE(cluster_id,family_id,node_id)
+);
+CREATE TABLE distributed_mutation_log(
+  mutation_id TEXT PRIMARY KEY,
+  idempotency_key TEXT NOT NULL UNIQUE,
+  cluster_id TEXT NOT NULL,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  entity_type TEXT NOT NULL,entity_id TEXT NOT NULL,entity_version INTEGER NOT NULL CHECK(entity_version>=1),
+  global_sequence INTEGER NOT NULL CHECK(global_sequence>=1),actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  device_id TEXT NOT NULL,schema_version INTEGER NOT NULL CHECK(schema_version>=1),policy_version TEXT NOT NULL,
+  revocation_epoch INTEGER NOT NULL CHECK(revocation_epoch>=0),key_epoch INTEGER NOT NULL CHECK(key_epoch>=1),
+  payload_sha256 TEXT NOT NULL CHECK(length(payload_sha256)=64),previous_hash TEXT NOT NULL CHECK(length(previous_hash)=64),
+  mutation_hash TEXT NOT NULL UNIQUE CHECK(length(mutation_hash)=64),commit_index INTEGER NOT NULL CHECK(commit_index>=1),
+  provider_evidence_sha256 TEXT NOT NULL CHECK(length(provider_evidence_sha256)=64),occurred_at TEXT NOT NULL,
+  UNIQUE(cluster_id,family_id,global_sequence),UNIQUE(cluster_id,family_id,entity_type,entity_id,entity_version)
+);
+CREATE TABLE distributed_cluster_snapshots(
+  snapshot_id TEXT PRIMARY KEY,cluster_id TEXT NOT NULL,family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  snapshot_index INTEGER NOT NULL CHECK(snapshot_index>=0),snapshot_sha256 TEXT NOT NULL CHECK(length(snapshot_sha256)=64),
+  encrypted_reference TEXT NOT NULL,key_epoch INTEGER NOT NULL CHECK(key_epoch>=1),policy_version TEXT NOT NULL,
+  revocation_epoch INTEGER NOT NULL CHECK(revocation_epoch>=0),provider_evidence_sha256 TEXT NOT NULL CHECK(length(provider_evidence_sha256)=64),
+  verified INTEGER NOT NULL CHECK(verified=1),created_at TEXT NOT NULL,UNIQUE(cluster_id,family_id,snapshot_index)
+);
+CREATE INDEX idx_34i_distributed_mutation_entity ON distributed_mutation_log(cluster_id,family_id,entity_type,entity_id,entity_version);
+CREATE TRIGGER trg_34i_mutation_update BEFORE UPDATE ON distributed_mutation_log
+BEGIN SELECT RAISE(ABORT,'34-I replicated mutation log is immutable'); END;
+CREATE TRIGGER trg_34i_mutation_delete BEFORE DELETE ON distributed_mutation_log
+BEGIN SELECT RAISE(ABORT,'34-I replicated mutation log is immutable'); END;
+CREATE TRIGGER trg_34i_snapshot_update BEFORE UPDATE ON distributed_cluster_snapshots
+BEGIN SELECT RAISE(ABORT,'34-I verified cluster snapshot is immutable'); END;
+CREATE TRIGGER trg_34i_snapshot_delete BEFORE DELETE ON distributed_cluster_snapshots
+BEGIN SELECT RAISE(ABORT,'34-I verified cluster snapshot is immutable'); END;
+UPDATE database_metadata SET value='REVISION-34-I-DISTRIBUTED-CORE-CONSENSUS-TENANCY',
+  updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
+const distributedClientOperationsSql = `CREATE TABLE distributed_backup_evidence(
+  id TEXT PRIMARY KEY,cluster_id TEXT NOT NULL,family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  kind TEXT NOT NULL CHECK(kind IN ('local','external','offline','offsite')),immutable INTEGER NOT NULL CHECK(immutable IN (0,1)),
+  independent_from_replica INTEGER NOT NULL CHECK(independent_from_replica=1),manifest_sha256 TEXT NOT NULL CHECK(length(manifest_sha256)=64),
+  verified_at TEXT NOT NULL,key_epoch INTEGER NOT NULL CHECK(key_epoch>=1),policy_version TEXT NOT NULL,
+  restore_tested INTEGER NOT NULL CHECK(restore_tested IN (0,1)),real_different_device_restore_verified INTEGER NOT NULL CHECK(real_different_device_restore_verified=0)
+);
+CREATE TABLE distributed_update_plans(
+  id TEXT PRIMARY KEY,cluster_id TEXT NOT NULL,family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  node_order_json TEXT NOT NULL CHECK(json_valid(node_order_json)),leader_last INTEGER NOT NULL CHECK(leader_last=1),
+  n_minus_one_compatible INTEGER NOT NULL CHECK(n_minus_one_compatible=1),signed_package_required INTEGER NOT NULL CHECK(signed_package_required=1),
+  rollback_required INTEGER NOT NULL CHECK(rollback_required=1),schema_migration_leader_quorum_only INTEGER NOT NULL CHECK(schema_migration_leader_quorum_only=1),
+  real_update_executed INTEGER NOT NULL CHECK(real_update_executed=0),created_at TEXT NOT NULL
+);
+CREATE TABLE distributed_fault_injection_evidence(
+  id TEXT PRIMARY KEY,cluster_id TEXT NOT NULL,family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  scenario TEXT NOT NULL CHECK(scenario IN ('network_partition','power_loss','disk_full','corruption','clock_skew','certificate_expiry','rolling_update')),
+  synthetic_only INTEGER NOT NULL CHECK(synthetic_only=1),contained INTEGER NOT NULL CHECK(contained IN (0,1)),
+  evidence_sha256 TEXT NOT NULL CHECK(length(evidence_sha256)=64),real_windows_node INTEGER NOT NULL CHECK(real_windows_node=0),created_at TEXT NOT NULL
+);
+CREATE TRIGGER trg_34j_backup_update BEFORE UPDATE ON distributed_backup_evidence
+BEGIN SELECT RAISE(ABORT,'34-J backup evidence is immutable'); END;
+CREATE TRIGGER trg_34j_backup_delete BEFORE DELETE ON distributed_backup_evidence
+BEGIN SELECT RAISE(ABORT,'34-J backup evidence is immutable'); END;
+CREATE TRIGGER trg_34j_fault_update BEFORE UPDATE ON distributed_fault_injection_evidence
+BEGIN SELECT RAISE(ABORT,'34-J fault evidence is immutable'); END;
+CREATE TRIGGER trg_34j_fault_delete BEFORE DELETE ON distributed_fault_injection_evidence
+BEGIN SELECT RAISE(ABORT,'34-J fault evidence is immutable'); END;
+UPDATE database_metadata SET value='REVISION-34-J-DISTRIBUTED-CLIENTS-OPERATIONS-DR',
+  updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
+const windowsResilienceUniversalUxSql = `CREATE TABLE universal_ux_operations(
+  client_operation_id TEXT NOT NULL,family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  operation_kind TEXT NOT NULL CHECK(operation_kind IN ('preferences_update','policy_weakening_record','resilience_evidence_record')),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64),result_id TEXT NOT NULL CHECK(length(result_id)=64),
+  PRIMARY KEY(family_id,owner_person_id,client_operation_id),UNIQUE(result_id)
+);
+CREATE TABLE universal_ux_preferences(
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  preferences_json TEXT NOT NULL CHECK(json_valid(preferences_json)),revision INTEGER NOT NULL CHECK(revision>=1),
+  last_operation_id TEXT NOT NULL UNIQUE CHECK(length(last_operation_id)=64),updated_at TEXT NOT NULL,PRIMARY KEY(family_id,owner_person_id),
+  CHECK(json_extract(preferences_json,'$.revision')=revision)
+);
+CREATE TABLE policy_weakening_proposals(
+  proposal_id TEXT PRIMARY KEY,family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,current_policy_version TEXT NOT NULL,
+  proposed_policy_version TEXT NOT NULL,explicit_user_decision_id TEXT NOT NULL,risk_analysis_sha256 TEXT NOT NULL CHECK(length(risk_analysis_sha256)=64),
+  rollback_plan_sha256 TEXT NOT NULL CHECK(length(rollback_plan_sha256)=64),reason TEXT NOT NULL CHECK(length(trim(reason)) BETWEEN 10 AND 2000),
+  accepted INTEGER NOT NULL CHECK(accepted IN (0,1)),recorded_at TEXT NOT NULL,operation_result_id TEXT NOT NULL UNIQUE REFERENCES universal_ux_operations(result_id) ON DELETE RESTRICT,
+  CHECK(current_policy_version<>proposed_policy_version)
+);
+CREATE TABLE windows_resilience_evidence(
+  id TEXT PRIMARY KEY,family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,evidence_json TEXT NOT NULL CHECK(json_valid(evidence_json)),
+  requirements_closed INTEGER NOT NULL CHECK(requirements_closed IN (0,1)),real_windows_soak INTEGER NOT NULL CHECK(real_windows_soak IN (0,1)),
+  soak_hours INTEGER NOT NULL CHECK(soak_hours>=0),people_count INTEGER NOT NULL CHECK(people_count>=0),event_count INTEGER NOT NULL CHECK(event_count>=0),
+  document_count INTEGER NOT NULL CHECK(document_count>=0),recorded_at TEXT NOT NULL,
+  operation_result_id TEXT NOT NULL UNIQUE REFERENCES universal_ux_operations(result_id) ON DELETE RESTRICT,
+  CHECK(requirements_closed=0 OR (real_windows_soak=1 AND soak_hours>=168 AND people_count>=10000 AND event_count>=100000 AND document_count>=10000))
+);
+CREATE TRIGGER trg_34k_preferences_update BEFORE UPDATE ON universal_ux_preferences
+BEGIN SELECT CASE WHEN NEW.revision<>OLD.revision+1 OR NOT EXISTS(SELECT 1 FROM universal_ux_operations operation
+  WHERE operation.result_id=NEW.last_operation_id AND operation.family_id=NEW.family_id AND operation.owner_person_id=NEW.owner_person_id
+    AND operation.operation_kind='preferences_update') THEN RAISE(ABORT,'34-K UX preferences require exact next operation') END; END;
+CREATE TRIGGER trg_34k_policy_update BEFORE UPDATE ON policy_weakening_proposals
+BEGIN SELECT RAISE(ABORT,'34-K policy weakening proposal is immutable'); END;
+CREATE TRIGGER trg_34k_policy_delete BEFORE DELETE ON policy_weakening_proposals
+BEGIN SELECT RAISE(ABORT,'34-K policy weakening proposal is immutable'); END;
+CREATE TRIGGER trg_34k_resilience_update BEFORE UPDATE ON windows_resilience_evidence
+BEGIN SELECT RAISE(ABORT,'34-K resilience evidence is immutable'); END;
+CREATE TRIGGER trg_34k_resilience_delete BEFORE DELETE ON windows_resilience_evidence
+BEGIN SELECT RAISE(ABORT,'34-K resilience evidence is immutable'); END;
+CREATE TRIGGER trg_34k_operation_update BEFORE UPDATE ON universal_ux_operations
+BEGIN SELECT RAISE(ABORT,'34-K UX operation ledger is immutable'); END;
+CREATE TRIGGER trg_34k_operation_delete BEFORE DELETE ON universal_ux_operations
+BEGIN SELECT RAISE(ABORT,'34-K UX operation ledger is immutable'); END;
+UPDATE database_metadata SET value='REVISION-34-K-WINDOWS-RESILIENCE-UNIVERSAL-UX',
+  updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -17270,7 +17566,12 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(107, 'communication_realtime_calling_accessible_ux', communicationRealtimeCallingSql),
   createMigrationDefinition(108, 'explicit_consent_recording_media_retention', communicationRecordingRetentionSql),
   createMigrationDefinition(109, 'local_first_translation_language', localTranslationLanguageSql),
-  createMigrationDefinition(110, 'family_meetings_decisions_consent_minutes', familyMeetingMinutesSql)
+  createMigrationDefinition(110, 'family_meetings_decisions_consent_minutes', familyMeetingMinutesSql),
+  createMigrationDefinition(111, 'communication_file_sharing_remaining_ux', communicationFileSharingSql),
+  createMigrationDefinition(112, 'communication_audit_archive_integrity', communicationAuditArchiveSql),
+  createMigrationDefinition(113, 'distributed_core_consensus_tenancy', distributedCoreConsensusTenancySql),
+  createMigrationDefinition(114, 'distributed_clients_operations_disaster_recovery', distributedClientOperationsSql),
+  createMigrationDefinition(115, 'windows_resilience_universal_ux', windowsResilienceUniversalUxSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

@@ -1,0 +1,6 @@
+{
+  "schemaVersion":1,"step":"34-J","decision":"DEC-247","status":"PLANNED","governanceState":"LOCAL_IMPLEMENTATION_STARTED",
+  "implementationFiles":["packages/domain/src/distributed-client-operations.ts","apps/core-service/src/distributed-operations-runtime.ts","packages/database/src/family-database-migrations.ts","apps/desktop/src/renderer/DistributedOperationsPanel.tsx"],
+  "targetedTests":["apps/core-service/tests/distributed-operations-runtime.test.ts","apps/core-service/tests/distributed-operations-migration-boundary.test.ts","apps/desktop/tests/remaining-communication-distributed-ui.test.ts"],
+  "providers":{"discovery":"NOT_CONFIGURED","relay":"NOT_CONFIGURED","apple":"NOT_BUILT"},"countsAsRequirementPass":false
+}

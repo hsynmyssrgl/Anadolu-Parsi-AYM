@@ -50,3 +50,8 @@ export * from './communication-realtime-calling.js';
 export * from './communication-recording-retention.js';
 export * from './local-translation-language.js';
 export * from './family-meeting.js';
+export * from './communication-file-sharing.js';
+export * from './communication-audit-archive.js';
+export * from './distributed-core-service.js';
+export * from './distributed-client-operations.js';
+export * from './windows-resilience-universal-ux.js';

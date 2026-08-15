@@ -1,0 +1,10 @@
+{
+  "schemaVersion":1,"id":"34-K-WINDOWS-RESILIENCE-UNIVERSAL-UX","step":"34-K","decision":"DEC-248",
+  "title":"Windows resilience and universal UX consolidation","status":"PLANNED","governancePhase":"LOCAL_IMPLEMENTATION_STARTED",
+  "localImplementationStatus":"PARTIAL_LOCAL_FOUNDATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+  "requirements":["B8-01","B8-04","B8-05","PPK-027","EXT-082","EXT-083","EXT-084","EXT-085","EXT-086","EXT-087","EXT-088","EXT-089","EXT-090"],
+  "dependsOn":["33-N","34-J"],"migrationVersion":115,
+  "truth":{"authorizedUniversalSearchModeled":true,"commandPaletteRecentsFavoritesModeled":true,"personaAndDashboardModesModeled":true,"policyWeakeningEvidenceGateModeled":true,"realWindowsLifecycleVerified":false,"sevenDaySoakVerified":false,"productionCaptureProvidersConfigured":false,"appleWidgetBuilt":false,"windowsMiniPanelBuilt":false,"requirementsClosed":false,"countsAsRequirementPass":false},
+  "manualEvidence":{"realCleanInstall":"NOT_RUN","realUpgrade":"NOT_RUN","realRepair":"NOT_RUN","realUninstallDataProtection":"NOT_RUN","sevenDaySoak":"NOT_RUN","appleWidgetUat":"NOT_RUN","windowsMiniPanelUat":"NOT_RUN","accessibilityReview":"NOT_RUN"},
+  "persistentReceiptStatus":"NOT_RUN"
+}

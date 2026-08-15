@@ -1,0 +1,10 @@
+{
+  "schemaVersion":1,"id":"34-J-DISTRIBUTED-CLIENTS-OPERATIONS-DISASTER-RECOVERY","step":"34-J","decision":"DEC-247",
+  "title":"Distributed clients connectivity operations and disaster recovery","status":"PLANNED","governancePhase":"LOCAL_IMPLEMENTATION_STARTED",
+  "localImplementationStatus":"PARTIAL_LOCAL_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE",
+  "requirements":["B8-02","B8-03","DHA-014","DHA-015","DHA-016","DHA-017","DHA-018","DHA-019","DHA-025","DHA-026","DHA-027","DHA-028","DHA-030","DHA-031","DHA-032","DHA-033","XPF-004","XPF-006"],
+  "dependsOn":["34-I"],"migrationVersion":114,
+  "truth":{"discoveryIsNotTrust":true,"remoteDefaultDisabled":true,"controlPlaneContentProhibited":true,"appleClientsReadOnlyAndCoreAuthorized":true,"replicaSeparatedFromBackup":true,"rollingUpdateLeaderLast":true,"productionDiscoveryConfigured":false,"productionRelayConfigured":false,"appleApplicationBuilt":false,"realDifferentDeviceRestoreVerified":false,"realWindowsFaultMatrixExecuted":false,"requirementsClosed":false,"countsAsRequirementPass":false},
+  "manualEvidence":{"realMdnsDiscovery":"NOT_RUN","realRelayOrVpn":"NOT_RUN","realAppleClient":"NOT_RUN","realDifferentDeviceRestore":"NOT_RUN","realRollingUpdate":"NOT_RUN","realWindowsFaultMatrix":"NOT_RUN"},
+  "persistentReceiptStatus":"NOT_RUN"
+}

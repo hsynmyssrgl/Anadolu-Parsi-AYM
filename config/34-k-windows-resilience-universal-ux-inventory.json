@@ -1,0 +1,6 @@
+{
+  "schemaVersion":1,"step":"34-K","decision":"DEC-248","status":"PLANNED","governanceState":"LOCAL_IMPLEMENTATION_STARTED",
+  "implementationFiles":["packages/domain/src/windows-resilience-universal-ux.ts","packages/application/src/windows-resilience-universal-ux-use-cases.ts","packages/repository-contracts/src/windows-resilience-universal-ux-repository.ts","packages/repositories/src/windows-resilience-universal-ux-repository.ts","packages/database/src/family-database-migrations.ts","apps/desktop/src/renderer/UniversalUxConsolidationPanel.tsx"],
+  "targetedTests":["packages/application/tests/windows-resilience-universal-ux-use-cases.test.ts","packages/repositories/windows-resilience-universal-ux-repository-policy.test.ts","apps/desktop/tests/universal-ux-consolidation-ui.test.ts"],
+  "realWindowsEvidence":"NOT_RUN","countsAsRequirementPass":false
+}

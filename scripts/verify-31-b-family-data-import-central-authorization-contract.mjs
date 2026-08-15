@@ -49,7 +49,7 @@ check(execution.step === '31-B' && ((inProgress31B && String(execution.officialS
 check(runtime.status === 'PASS' && runtime.checkCount === 12 && runtime.external30ZReceipt === 'PASS' && runtime.external31AReceipt === 'PASS', 'fresh family import verifier is 12/12 PASS');
 check(platform.status === 'PASS'
   && platform.directRoleAuthorizationBypasses === 0
-  && platform.exactAllowlistEntries === 851
+  && platform.exactAllowlistEntries === 858
   && platform.surfaceCounts?.USE_CASE_COMPOSITION === 425,
 'current platform policy AST gate is PASS with no direct-role bypass and exact successor ratchet');
 check(service.includes('CentralAuthorizationService') && service.includes("resourceType: 'family_data_import'") && service.includes("purpose: 'administration'"), 'service uses exact central authorization intent');

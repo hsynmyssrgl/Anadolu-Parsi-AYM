@@ -188,7 +188,11 @@ export interface LifePolicyIntent {
     | 'local_translation_profile'
     | 'local_translation_request'
     | 'family_meeting_center'
-    | 'family_meeting';
+    | 'family_meeting'
+    | 'communication_file_sharing_center'
+    | 'communication_file_sharing'
+    | 'communication_audit_archive'
+    | 'windows_resilience_universal_ux';
   readonly resourceId: string;
   readonly purpose: 'general' | 'emergency-offline-portability';
   readonly requestedFields?: readonly string[];

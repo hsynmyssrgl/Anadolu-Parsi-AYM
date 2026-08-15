@@ -1,0 +1,6 @@
+{
+  "schemaVersion":1,"step":"34-H","decision":"DEC-245","status":"PLANNED","governanceState":"LOCAL_IMPLEMENTATION_STARTED",
+  "implementationFiles":["packages/domain/src/communication-audit-archive.ts","packages/application/src/communication-audit-archive-use-cases.ts","packages/repository-contracts/src/communication-audit-archive-repository.ts","packages/repositories/src/communication-audit-archive-repository.ts","packages/database/src/family-database-migrations.ts","apps/desktop/src/renderer/CommunicationAuditArchivePanel.tsx"],
+  "targetedTests":["packages/application/tests/communication-audit-archive-use-cases.test.ts","packages/repositories/communication-audit-archive-repository-policy.test.ts","apps/desktop/tests/remaining-communication-distributed-ui.test.ts"],
+  "contentInAudit":false,"countsAsRequirementPass":false
+}

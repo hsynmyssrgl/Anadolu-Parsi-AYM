@@ -54,6 +54,9 @@ export * from './communication-realtime-calling-repository.js';
 export * from './communication-recording-retention-repository.js';
 export * from './local-translation-language-repository.js';
 export * from './family-meeting-repository.js';
+export * from './communication-file-sharing-repository.js';
+export * from './communication-audit-archive-repository.js';
+export * from './windows-resilience-universal-ux-repository.js';
 
 export * from './backup-repository.js';
 export * from './backup-propagation-repository.js';

@@ -21,7 +21,7 @@ describe('34-D recording repository and migration boundary',()=>{
     expect(tables).toEqual(['communication_recording_consents','communication_recording_events','communication_recording_mutations',
       'communication_recording_requests','communication_recording_retention','communication_recording_segments']);
     expect(runtime.database.prepare("SELECT value FROM database_metadata WHERE key='schema_generation'").get())
-      .toEqual({value:'REVISION-34-F-FAMILY-MEETINGS-MINUTES'});
+      .toEqual({value:'REVISION-34-K-WINDOWS-RESILIENCE-UNIVERSAL-UX'});
   });
 
   it('stores consent and retention metadata without media bytes, paths, keys, tokens or transcript text',()=>{

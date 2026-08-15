@@ -22,7 +22,7 @@ describe('34-E local translation repository and migration boundary',()=>{
     expect(tables).toEqual(['local_translation_dictionary_entries','local_translation_events','local_translation_mutations',
       'local_translation_profiles','local_translation_requests']);
     expect(runtime.database.prepare("SELECT value FROM database_metadata WHERE key='schema_generation'").get())
-      .toEqual({value:'REVISION-34-F-FAMILY-MEETINGS-MINUTES'});
+      .toEqual({value:'REVISION-34-K-WINDOWS-RESILIENCE-UNIVERSAL-UX'});
     expect(FAMILY_DATABASE_MIGRATIONS.find((migration)=>migration.version===109))
       .toMatchObject({version:109,name:'local_first_translation_language'});
   });

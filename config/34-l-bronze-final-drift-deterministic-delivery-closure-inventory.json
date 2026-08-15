@@ -1,0 +1,8 @@
+{
+  "schemaVersion":1,"step":"34-L","decision":"DEC-249","status":"PLANNED_FINAL","governanceState":"LOCAL_CLOSURE_AUDIT_STARTED",
+  "implementationFiles":["scripts/verify-34-l-bronze-final-local-closure.mjs","docs/audit/34-L_BRONZE_FINAL_LOCAL_CLOSURE_AUDIT.md","docs/decisions/DEC-249-bronze-final-drift-deterministic-delivery-closure.md","config/remaining-scope-package-roadmap.json","config/accepted-scope-registry.json"],
+  "requiredGeneratedEvidence":["artifacts/validation/34-L-bronze-final-local-closure-boundary.json","artifacts/validation/34-L-bronze-final-local-closure-contract.json","artifacts/validation/34-L-bronze-final-local-closure-runtime.json","artifacts/validation/34-L-bronze-local-closure-receipt.json"],
+  "localPersistentReceiptStatus":"PASS_LOCAL_ONLY",
+  "externalPersistentReceiptStatus":"NOT_RUN",
+  "countsAsRequirementPass":false
+}
