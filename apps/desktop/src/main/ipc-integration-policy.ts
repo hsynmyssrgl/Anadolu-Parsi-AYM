@@ -3921,6 +3921,145 @@ const communicationRecordingResult=(channel:string,result:unknown):IpcIntegratio
   return valid?accepted():rejected('COMMUNICATION_RECORDING_RESULT_INVALID','$result');
 };
 
+export const LOCAL_TRANSLATION_IPC_CHANNELS=Object.freeze({
+  getCenter:'localTranslation:getCenter',
+  updateProfile:'localTranslation:updateProfile',
+  addDictionary:'localTranslation:addDictionary',
+  updateDictionary:'localTranslation:updateDictionary',
+  deleteDictionary:'localTranslation:deleteDictionary',
+  prepareRequest:'localTranslation:prepareRequest',
+  recordCorrection:'localTranslation:recordCorrection',
+  cancelRequest:'localTranslation:cancelRequest'
+} as const);
+const localTranslationChannels=new Set<string>(Object.values(LOCAL_TRANSLATION_IPC_CHANNELS));
+const localTranslationLanguage=(value:unknown):boolean=>typeof value==='string'
+  &&/^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8}){0,3}$/u.test(value);
+const localTranslationInput=(channel:string,args:readonly unknown[]):IpcIntegrationPolicyDecision=>{
+  if(channel===LOCAL_TRANSLATION_IPC_CHANNELS.getCenter)return zeroArguments(args);
+  if(channel===LOCAL_TRANSLATION_IPC_CHANNELS.updateProfile)return exactObject(args,
+    ['clientOperationId','expectedRevision','preferredLanguage','secondaryLanguages','liveCaptionTranslationEnabled',
+      'translatedSpeechEnabled','preserveOriginalAudio','externalProviderAllowed','encryptedSyncRequested'],value=>
+      communicationIdentifier(value.clientOperationId)&&communicationMessagingRevision(value.expectedRevision,true)
+      &&localTranslationLanguage(value.preferredLanguage)&&Array.isArray(value.secondaryLanguages)
+      &&value.secondaryLanguages.length<=8&&value.secondaryLanguages.every(localTranslationLanguage)
+      &&new Set(value.secondaryLanguages).size===value.secondaryLanguages.length
+      &&['liveCaptionTranslationEnabled','translatedSpeechEnabled','externalProviderAllowed','encryptedSyncRequested']
+        .every(key=>typeof value[key]==='boolean')&&value.preserveOriginalAudio===true);
+  if(channel===LOCAL_TRANSLATION_IPC_CHANNELS.addDictionary)return exactObject(args,
+    ['clientOperationId','expectedRevision','category','sourceLanguage','targetLanguage','sourceTerm','preferredTerm','explicitPermission'],value=>
+      communicationIdentifier(value.clientOperationId)&&communicationMessagingRevision(value.expectedRevision,true)
+      &&['family_name','nickname','place','medical_term'].includes(String(value.category))
+      &&localTranslationLanguage(value.sourceLanguage)&&localTranslationLanguage(value.targetLanguage)
+      &&communicationMessagingText(value.sourceTerm,1,120)&&communicationMessagingText(value.preferredTerm,1,120)
+      &&value.explicitPermission===true);
+  if(channel===LOCAL_TRANSLATION_IPC_CHANNELS.updateDictionary)return exactObject(args,
+    ['clientOperationId','expectedRevision','entryId','category','sourceLanguage','targetLanguage','sourceTerm','preferredTerm','explicitPermission'],value=>
+      communicationIdentifier(value.clientOperationId)&&communicationMessagingRevision(value.expectedRevision)
+      &&communicationIdentifier(value.entryId)&&['family_name','nickname','place','medical_term'].includes(String(value.category))
+      &&localTranslationLanguage(value.sourceLanguage)&&localTranslationLanguage(value.targetLanguage)
+      &&communicationMessagingText(value.sourceTerm,1,120)&&communicationMessagingText(value.preferredTerm,1,120)
+      &&value.explicitPermission===true);
+  if(channel===LOCAL_TRANSLATION_IPC_CHANNELS.deleteDictionary)return exactObject(args,
+    ['clientOperationId','expectedRevision','entryId','reason'],value=>communicationIdentifier(value.clientOperationId)
+      &&communicationMessagingRevision(value.expectedRevision)&&communicationIdentifier(value.entryId)
+      &&communicationMessagingText(value.reason,2,300));
+  if(channel===LOCAL_TRANSLATION_IPC_CHANNELS.prepareRequest)return exactObject(args,
+    ['clientOperationId','expectedRevision','sourceKind','sourceResourceId','targetLanguage','providerMode',
+      'externalPreviewAcknowledged','explicitExternalConsent'],value=>communicationIdentifier(value.clientOperationId)
+      &&value.expectedRevision===0&&['message','live_caption','document','meeting_summary'].includes(String(value.sourceKind))
+      &&communicationIdentifier(value.sourceResourceId)&&localTranslationLanguage(value.targetLanguage)
+      &&['local_offline','external_preview'].includes(String(value.providerMode))
+      &&typeof value.externalPreviewAcknowledged==='boolean'&&typeof value.explicitExternalConsent==='boolean'
+      &&(value.providerMode==='local_offline'
+        ?value.externalPreviewAcknowledged===false&&value.explicitExternalConsent===false
+        :value.externalPreviewAcknowledged===true&&value.explicitExternalConsent===true));
+  if(channel===LOCAL_TRANSLATION_IPC_CHANNELS.recordCorrection)return exactObject(args,
+    ['clientOperationId','expectedRevision','requestId','correctedText','explicitPermission'],value=>
+      communicationIdentifier(value.clientOperationId)&&communicationMessagingRevision(value.expectedRevision)
+      &&communicationIdentifier(value.requestId)&&communicationMessagingText(value.correctedText,1,10_000)
+      &&value.explicitPermission===true);
+  if(channel===LOCAL_TRANSLATION_IPC_CHANNELS.cancelRequest)return exactObject(args,
+    ['clientOperationId','expectedRevision','requestId','reason'],value=>communicationIdentifier(value.clientOperationId)
+      &&communicationMessagingRevision(value.expectedRevision)&&communicationIdentifier(value.requestId)
+      &&communicationMessagingText(value.reason,2,300));
+  return rejected('UNKNOWN_IPC_CHANNEL','$');
+};
+const localTranslationProfileResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['id','preferredLanguage','secondaryLanguages','localFirstRequired','liveCaptionTranslationEnabled',
+    'translatedSpeechEnabled','preserveOriginalAudio','externalProviderAllowed','externalPreviewRequired',
+    'externalConsentRequired','encryptedSyncRequested','encryptedSyncExecuted','revision','updatedAt'])
+  &&communicationIdentifier(value.id)&&localTranslationLanguage(value.preferredLanguage)
+  &&Array.isArray(value.secondaryLanguages)&&value.secondaryLanguages.length<=8
+  &&value.secondaryLanguages.every(localTranslationLanguage)&&value.localFirstRequired===true
+  &&typeof value.liveCaptionTranslationEnabled==='boolean'&&typeof value.translatedSpeechEnabled==='boolean'
+  &&value.preserveOriginalAudio===true&&typeof value.externalProviderAllowed==='boolean'
+  &&value.externalPreviewRequired===true&&value.externalConsentRequired===true
+  &&typeof value.encryptedSyncRequested==='boolean'&&value.encryptedSyncExecuted===false
+  &&communicationMessagingRevision(value.revision,true)&&communicationMessagingIso(value.updatedAt);
+const localTranslationDictionaryResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['id','category','sourceLanguage','targetLanguage','sourceTerm','preferredTerm','explicitPermissionRecorded','enabled','revision','updatedAt'])
+  &&communicationIdentifier(value.id)&&['family_name','nickname','place','medical_term'].includes(String(value.category))
+  &&localTranslationLanguage(value.sourceLanguage)&&localTranslationLanguage(value.targetLanguage)
+  &&communicationMessagingText(value.sourceTerm,1,120)&&communicationMessagingText(value.preferredTerm,1,120)
+  &&value.explicitPermissionRecorded===true&&typeof value.enabled==='boolean'
+  &&communicationMessagingRevision(value.revision)&&communicationMessagingIso(value.updatedAt);
+const localTranslationRequestResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['id','sourceKind','sourceResourceId','targetLanguage','providerMode','state','originalPreservationRequired',
+    'separateTranslationViewRequired','machineTranslationLabelRequired','qualityFlag','externalPreviewAcknowledged',
+    'explicitExternalConsent','correctionRecorded',...(value.correctionSha256===undefined?[]:['correctionSha256','correctionCharacterCount']),
+    'languageDetectionExecuted','translationExecuted','speechToTextExecuted','speakerSeparationExecuted',
+    'liveCaptionTranslationExecuted','textToSpeechExecuted','networkUsed','cloudUsed','revision','createdAt','updatedAt'])
+  &&communicationIdentifier(value.id)&&['message','live_caption','document','meeting_summary'].includes(String(value.sourceKind))
+  &&communicationIdentifier(value.sourceResourceId)&&localTranslationLanguage(value.targetLanguage)
+  &&['local_offline','external_preview'].includes(String(value.providerMode))
+  &&['provider_unavailable','correction_recorded','cancelled'].includes(String(value.state))
+  &&value.originalPreservationRequired===true&&value.separateTranslationViewRequired===true
+  &&value.machineTranslationLabelRequired===true&&['not_evaluated','ambiguous','low_confidence','possible_error'].includes(String(value.qualityFlag))
+  &&typeof value.externalPreviewAcknowledged==='boolean'&&typeof value.explicitExternalConsent==='boolean'
+  &&typeof value.correctionRecorded==='boolean'
+  &&(value.correctionRecorded===false?(value.correctionSha256===undefined&&value.correctionCharacterCount===undefined)
+    :(typeof value.correctionSha256==='string'&&/^[0-9a-f]{64}$/u.test(value.correctionSha256)
+      &&Number.isSafeInteger(value.correctionCharacterCount)&&Number(value.correctionCharacterCount)>=1&&Number(value.correctionCharacterCount)<=10_000))
+  &&['languageDetectionExecuted','translationExecuted','speechToTextExecuted','speakerSeparationExecuted',
+    'liveCaptionTranslationExecuted','textToSpeechExecuted','networkUsed','cloudUsed'].every(key=>value[key]===false)
+  &&communicationMessagingRevision(value.revision)&&communicationMessagingIso(value.createdAt)&&communicationMessagingIso(value.updatedAt);
+const localTranslationTruthResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['commonTranslationProviderPortModeled','localFirstPolicyModeled','originalPreservationContractModeled',
+    'separateMachineTranslationLabelModeled','personalDictionaryModeled','explicitCorrectionPermissionModeled',
+    'externalPreviewAndConsentModeled','rendererProviderAuthority','productionTranslationProviderConfigured',
+    'localLanguagePackInstalled','languageDetectionExecuted','translationExecuted','speechToTextExecuted',
+    'speakerSeparationExecuted','liveCaptionTranslationExecuted','textToSpeechExecuted','originalAudioMuted',
+    'externalProviderConfigured','externalProviderPreviewDelivered','encryptedCrossDevicePreferenceSyncExecuted',
+    'networkUsedByCurrentImplementation'])
+  &&['commonTranslationProviderPortModeled','localFirstPolicyModeled','originalPreservationContractModeled',
+    'separateMachineTranslationLabelModeled','personalDictionaryModeled','explicitCorrectionPermissionModeled',
+    'externalPreviewAndConsentModeled'].every(key=>value[key]===true)
+  &&['rendererProviderAuthority','productionTranslationProviderConfigured','localLanguagePackInstalled','languageDetectionExecuted',
+    'translationExecuted','speechToTextExecuted','speakerSeparationExecuted','liveCaptionTranslationExecuted',
+    'textToSpeechExecuted','originalAudioMuted','externalProviderConfigured','externalProviderPreviewDelivered',
+    'encryptedCrossDevicePreferenceSyncExecuted','networkUsedByCurrentImplementation'].every(key=>value[key]===false);
+const localTranslationCenterResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['schemaVersion','centerId','ownerPersonId','profile','dictionary','requests','truth','generatedAt'])&&value.schemaVersion===1
+  &&communicationIdentifier(value.centerId)&&communicationIdentifier(value.ownerPersonId)&&localTranslationProfileResult(value.profile)
+  &&Array.isArray(value.dictionary)&&value.dictionary.length<=256&&value.dictionary.every(localTranslationDictionaryResult)
+  &&Array.isArray(value.requests)&&value.requests.length<=256&&value.requests.every(localTranslationRequestResult)
+  &&localTranslationTruthResult(value.truth)&&communicationMessagingIso(value.generatedAt);
+const localTranslationReceiptResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['resourceType','resourceId','mutationKind','previousRevision','revision','occurredAt','replayed','providerConfigured',
+    'translationExecuted','networkUsed','cloudUsed'])
+  &&['local_translation_profile','local_translation_request'].includes(String(value.resourceType))
+  &&communicationIdentifier(value.resourceId)&&['profile_update','dictionary_add','dictionary_update','dictionary_delete',
+    'request_prepare','correction_record','request_cancel'].includes(String(value.mutationKind))
+  &&communicationMessagingRevision(value.previousRevision,true)&&communicationMessagingRevision(value.revision)
+  &&Number(value.revision)===Number(value.previousRevision)+1&&communicationMessagingIso(value.occurredAt)
+  &&typeof value.replayed==='boolean'&&value.providerConfigured===false&&value.translationExecuted===false
+  &&value.networkUsed===false&&value.cloudUsed===false;
+const localTranslationResult=(channel:string,result:unknown):IpcIntegrationPolicyDecision=>{
+  const valid=channel===LOCAL_TRANSLATION_IPC_CHANNELS.getCenter
+    ?localTranslationCenterResult(result):localTranslationReceiptResult(result);
+  return valid?accepted():rejected('LOCAL_TRANSLATION_RESULT_INVALID','$result');
+};
+
 export const ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS = Object.freeze({
   listEvidence: 'archive:listRelationEvidence',
   listEvidenceHistory: 'archive:listRelationEvidenceHistory',
@@ -4558,6 +4697,8 @@ export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unkn
   if (channel.startsWith('communicationCalling:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
   if (communicationRecordingChannels.has(channel)) return communicationRecordingResult(channel,result);
   if (channel.startsWith('communicationRecording:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
+  if (localTranslationChannels.has(channel)) return localTranslationResult(channel,result);
+  if (channel.startsWith('localTranslation:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
   if (childEducationChannels.has(channel)) return childEducationResult(channel, result);
   if (channel.startsWith('childEducation:')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
   if (placesTravelChannels.has(channel)) return placesTravelResult(channel, result);
@@ -4616,6 +4757,8 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
   if (channel.startsWith('communicationCalling:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
   if (communicationRecordingChannels.has(channel)) return communicationRecordingInput(channel,args);
   if (channel.startsWith('communicationRecording:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
+  if (localTranslationChannels.has(channel)) return localTranslationInput(channel,args);
+  if (channel.startsWith('localTranslation:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
   if (childEducationChannels.has(channel)) return childEducationInput(channel, args);
   if (channel.startsWith('childEducation:')) return rejected('UNKNOWN_IPC_CHANNEL', '$');
   if (placesTravelChannels.has(channel)) return placesTravelInput(channel, args);

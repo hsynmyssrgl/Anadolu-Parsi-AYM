@@ -39,6 +39,7 @@ import type {
   HouseholdOperationsPolicyResourceRepositoryPort,
   LifePolicyResourceRepositoryPort,
   LifeRecordRow,
+  LocalTranslationPolicyResourceRepositoryPort,
   MemoryStudioPolicyResourceRepositoryPort,
   SignedPluginPlatformPolicyResourceRepositoryPort,
   SmartHomeEnergyPolicyResourceRepositoryPort,
@@ -77,6 +78,7 @@ export interface LifeProductionPolicyRuntimeDependencies {
   readonly childEducationPolicyResourceRepository: ChildEducationPolicyResourceRepositoryPort;
   readonly communicationMessagingPolicyResourceRepository?: CommunicationMessagingPolicyResourceRepositoryPort;
   readonly communicationRecordingPolicyResourceRepository?: CommunicationRecordingPolicyResourceRepositoryPort;
+  readonly localTranslationPolicyResourceRepository?: LocalTranslationPolicyResourceRepositoryPort;
   readonly communicationRealtimeCallingPolicyResourceRepository?: CommunicationRealtimeCallingPolicyResourceRepositoryPort;
   readonly communicationSecurityPolicyResourceRepository?: CommunicationSecurityPolicyResourceRepositoryPort;
   readonly familyAiAssistantPolicyResourceRepository: FamilyAiAssistantPolicyResourceRepositoryPort;
@@ -149,7 +151,10 @@ const lifeResourceTypes = new Set<LifePolicyIntent['resourceType']>([
   'communication_call_session',
   'communication_call_preferences',
   'communication_recording_center',
-  'communication_recording_request'
+  'communication_recording_request',
+  'local_translation_center',
+  'local_translation_profile',
+  'local_translation_request'
 ]);
 
 const nonEmpty = (value: unknown, max = 512): value is string =>
@@ -951,6 +956,17 @@ const findLifeResourceForPolicyResolution = (
           privacy: 'private' as const, stateFingerprint: stable(found.value) })
       : null);
   }
+  if (resourceType === 'local_translation_profile' || resourceType === 'local_translation_request') {
+    if (!dependencies.localTranslationPolicyResourceRepository) throw new PlatformPolicyEnforcementError(
+      'RESOURCE_RESOLUTION_FAILED', 'Local translation policy resource repository is not composed');
+    const found = dependencies.localTranslationPolicyResourceRepository.resolvePolicyResource(
+      execution, resourceType, resourceId);
+    if (!found.ok) return found;
+    return ok(found.value
+      ? Object.freeze({ familyId: found.value.familyId, ownerPersonId: found.value.ownerPersonId,
+          privacy: 'private' as const, stateFingerprint: stable(found.value) })
+      : null);
+  }
   throw new PlatformPolicyEnforcementError(
     'RESOURCE_RESOLUTION_FAILED',
     'Life policy resource type is not supported'
@@ -1027,7 +1043,7 @@ const loadLifeResourceSnapshotInTransaction = (
           'smart_home_camera_consent','smart_home_settings','signed_plugin_installation',
           'communication_device_credential','communication_room','communication_message','communication_presence',
           'communication_retention_policy','communication_call_session','communication_call_preferences',
-          'communication_recording_request'].includes(requestedIntent.resourceType)
+          'communication_recording_request','local_translation_profile','local_translation_request'].includes(requestedIntent.resourceType)
         || existing.value.familyId !== context.familyId
         || existing.value.ownerPersonId !== requestedIntent.ownerPersonId
         || existing.value.privacy !== requestedIntent.privacy

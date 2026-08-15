@@ -92,6 +92,17 @@ import type {
   UpdateCommunicationRecordingRetentionInput,
   WithdrawCommunicationRecordingConsentInput
 } from '@ppt/domain';
+import type {
+  AddLocalTranslationDictionaryEntryInput,
+  CancelLocalTranslationRequestInput,
+  DeleteLocalTranslationDictionaryEntryInput,
+  LocalTranslationCenterView,
+  LocalTranslationMutationReceiptView,
+  PrepareLocalTranslationRequestInput,
+  RecordLocalTranslationCorrectionInput,
+  UpdateLocalTranslationDictionaryEntryInput,
+  UpdateLocalTranslationProfileInput
+} from '@ppt/domain';
 import type { LegacyArchiveOwnershipReattestationView, ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { AssignPersonMembershipInput, CreateFamilyBranchInput, CreateHouseholdInput, FamilyBranch, Household, HouseholdMembershipWorkspaceView, PersonLifecycleProfile, PersonLifecycleWorkspaceView, PersonMembership, UpdatePersonProfileInput } from '@ppt/domain';
 import type { AuthorizationContextWorkspaceView } from '@ppt/domain';
@@ -826,6 +837,21 @@ contextBridge.exposeInMainWorld('pardus', {
     invoke('communicationRecording:updateRetention',input),
   requestCommunicationRecordingDeletion:(input:RequestCommunicationRecordingDeletionInput):Promise<CommunicationRecordingMutationReceiptView>=>
     invoke('communicationRecording:requestDeletion',input),
+  getLocalTranslationCenter:():Promise<LocalTranslationCenterView>=>invoke('localTranslation:getCenter'),
+  updateLocalTranslationProfile:(input:UpdateLocalTranslationProfileInput):Promise<LocalTranslationMutationReceiptView>=>
+    invoke('localTranslation:updateProfile',input),
+  addLocalTranslationDictionaryEntry:(input:AddLocalTranslationDictionaryEntryInput):Promise<LocalTranslationMutationReceiptView>=>
+    invoke('localTranslation:addDictionary',input),
+  updateLocalTranslationDictionaryEntry:(input:UpdateLocalTranslationDictionaryEntryInput):Promise<LocalTranslationMutationReceiptView>=>
+    invoke('localTranslation:updateDictionary',input),
+  deleteLocalTranslationDictionaryEntry:(input:DeleteLocalTranslationDictionaryEntryInput):Promise<LocalTranslationMutationReceiptView>=>
+    invoke('localTranslation:deleteDictionary',input),
+  prepareLocalTranslationRequest:(input:PrepareLocalTranslationRequestInput):Promise<LocalTranslationMutationReceiptView>=>
+    invoke('localTranslation:prepareRequest',input),
+  recordLocalTranslationCorrection:(input:RecordLocalTranslationCorrectionInput):Promise<LocalTranslationMutationReceiptView>=>
+    invoke('localTranslation:recordCorrection',input),
+  cancelLocalTranslationRequest:(input:CancelLocalTranslationRequestInput):Promise<LocalTranslationMutationReceiptView>=>
+    invoke('localTranslation:cancelRequest',input),
   listFinanceValuations:():Promise<FinanceValuationView[]>=>invoke('finance:listValuations'),
   createFinanceValuation:(input:CreateFinanceValuationInput):Promise<FinanceValuationView[]>=>invoke('finance:createValuation',input),
   createMember: (input: CreateFamilyMemberInput): Promise<FamilyMutationResultView> => invoke('family:createMember', input),

@@ -16362,6 +16362,307 @@ BEGIN SELECT RAISE(ABORT,'34-D retention current state is durable'); END;
 UPDATE database_metadata SET value='REVISION-34-D-EXPLICIT-CONSENT-RECORDING-RETENTION',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 
+const localTranslationLanguageSql = `
+CREATE TABLE local_translation_mutations (
+  id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  resource_type TEXT NOT NULL CHECK(resource_type IN ('local_translation_profile','local_translation_request')),
+  resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 8 AND 256),
+  actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  mutation_kind TEXT NOT NULL CHECK(mutation_kind IN ('profile_update','dictionary_add','dictionary_update','dictionary_delete',
+    'request_prepare','correction_record','request_cancel')),
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 256),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  expected_revision INTEGER NOT NULL CHECK(expected_revision>=0),
+  revision INTEGER NOT NULL CHECK(revision=expected_revision+1),
+  resource_state_fingerprint TEXT NOT NULL CHECK(length(resource_state_fingerprint)=64 AND resource_state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version>=1),
+  policy_receipt_nonce TEXT NOT NULL CHECK(length(trim(policy_receipt_nonce)) BETWEEN 16 AND 256),
+  policy_correlation_id TEXT NOT NULL CHECK(length(trim(policy_correlation_id)) BETWEEN 1 AND 256),
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type IN ('local_translation_profile','local_translation_request')),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action IN ('create','update')),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='family.write'),
+  UNIQUE(family_id,actor_account_id,client_operation_id),
+  CHECK(policy_resource_type=resource_type AND policy_resource_id=resource_id),
+  CHECK((resource_type='local_translation_profile' AND mutation_kind IN ('profile_update','dictionary_add','dictionary_update','dictionary_delete'))
+    OR (resource_type='local_translation_request' AND mutation_kind IN ('request_prepare','correction_record','request_cancel'))),
+  CHECK((expected_revision=0 AND policy_action='create' AND mutation_kind IN ('profile_update','dictionary_add','request_prepare'))
+    OR (expected_revision>=1 AND policy_action='update' AND mutation_kind<>'request_prepare'))
+) STRICT;
+
+CREATE INDEX idx_local_translation_mutations_owner
+ON local_translation_mutations(family_id,owner_person_id,occurred_at DESC,id);
+
+CREATE TABLE local_translation_profiles (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  preferred_language TEXT NOT NULL CHECK(length(trim(preferred_language)) BETWEEN 2 AND 40),
+  secondary_languages_json TEXT NOT NULL CHECK(json_valid(secondary_languages_json) AND json_type(secondary_languages_json)='array'
+    AND json_array_length(secondary_languages_json)<=8),
+  local_first_required INTEGER NOT NULL CHECK(local_first_required=1),
+  live_caption_translation_enabled INTEGER NOT NULL CHECK(live_caption_translation_enabled IN (0,1)),
+  translated_speech_enabled INTEGER NOT NULL CHECK(translated_speech_enabled IN (0,1)),
+  preserve_original_audio INTEGER NOT NULL CHECK(preserve_original_audio=1),
+  external_provider_allowed INTEGER NOT NULL CHECK(external_provider_allowed IN (0,1)),
+  encrypted_sync_requested INTEGER NOT NULL CHECK(encrypted_sync_requested IN (0,1)),
+  encrypted_sync_executed INTEGER NOT NULL CHECK(encrypted_sync_executed=0),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES local_translation_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  UNIQUE(family_id,owner_person_id),
+  CHECK(updated_at>=created_at)
+) STRICT;
+
+CREATE TABLE local_translation_dictionary_entries (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  profile_id TEXT NOT NULL REFERENCES local_translation_profiles(id) ON DELETE RESTRICT,
+  category TEXT NOT NULL CHECK(category IN ('family_name','nickname','place','medical_term')),
+  source_language TEXT NOT NULL CHECK(length(trim(source_language)) BETWEEN 2 AND 40),
+  target_language TEXT NOT NULL CHECK(length(trim(target_language)) BETWEEN 2 AND 40),
+  source_term TEXT NOT NULL CHECK(length(source_term)<=120),
+  preferred_term TEXT NOT NULL CHECK(length(preferred_term)<=120),
+  explicit_permission_recorded INTEGER NOT NULL CHECK(explicit_permission_recorded=1),
+  state TEXT NOT NULL CHECK(state IN ('active','deleted')),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES local_translation_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  UNIQUE(family_id,owner_person_id,source_language,target_language,source_term),
+  CHECK(updated_at>=created_at),
+  CHECK((state='active' AND length(trim(source_term)) BETWEEN 1 AND 120 AND length(trim(preferred_term)) BETWEEN 1 AND 120)
+    OR (state='deleted' AND source_term='' AND preferred_term=''))
+) STRICT;
+
+CREATE INDEX idx_local_translation_dictionary_owner
+ON local_translation_dictionary_entries(family_id,owner_person_id,state,updated_at DESC,id);
+
+CREATE TABLE local_translation_requests (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  source_kind TEXT NOT NULL CHECK(source_kind IN ('message','live_caption','document','meeting_summary')),
+  source_resource_id TEXT NOT NULL CHECK(length(trim(source_resource_id)) BETWEEN 2 AND 256),
+  target_language TEXT NOT NULL CHECK(length(trim(target_language)) BETWEEN 2 AND 40),
+  provider_mode TEXT NOT NULL CHECK(provider_mode IN ('local_offline','external_preview')),
+  state TEXT NOT NULL CHECK(state IN ('provider_unavailable','correction_recorded','cancelled')),
+  original_preservation_required INTEGER NOT NULL CHECK(original_preservation_required=1),
+  separate_translation_view_required INTEGER NOT NULL CHECK(separate_translation_view_required=1),
+  machine_translation_label_required INTEGER NOT NULL CHECK(machine_translation_label_required=1),
+  quality_flag TEXT NOT NULL CHECK(quality_flag IN ('not_evaluated','ambiguous','low_confidence','possible_error')),
+  external_preview_acknowledged INTEGER NOT NULL CHECK(external_preview_acknowledged IN (0,1)),
+  explicit_external_consent INTEGER NOT NULL CHECK(explicit_external_consent IN (0,1)),
+  correction_sha256 TEXT CHECK(correction_sha256 IS NULL OR (length(correction_sha256)=64 AND correction_sha256 NOT GLOB '*[^0-9a-f]*')),
+  correction_character_count INTEGER CHECK(correction_character_count IS NULL OR correction_character_count BETWEEN 1 AND 10000),
+  language_detection_executed INTEGER NOT NULL CHECK(language_detection_executed=0),
+  translation_executed INTEGER NOT NULL CHECK(translation_executed=0),
+  speech_to_text_executed INTEGER NOT NULL CHECK(speech_to_text_executed=0),
+  speaker_separation_executed INTEGER NOT NULL CHECK(speaker_separation_executed=0),
+  live_caption_translation_executed INTEGER NOT NULL CHECK(live_caption_translation_executed=0),
+  text_to_speech_executed INTEGER NOT NULL CHECK(text_to_speech_executed=0),
+  network_used INTEGER NOT NULL CHECK(network_used=0),
+  cloud_used INTEGER NOT NULL CHECK(cloud_used=0),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES local_translation_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  CHECK(updated_at>=created_at),
+  CHECK((provider_mode='local_offline' AND external_preview_acknowledged=0 AND explicit_external_consent=0)
+    OR (provider_mode='external_preview' AND external_preview_acknowledged=1 AND explicit_external_consent=1)),
+  CHECK((correction_sha256 IS NULL AND correction_character_count IS NULL)
+    OR (correction_sha256 IS NOT NULL AND correction_character_count IS NOT NULL))
+) STRICT;
+
+CREATE INDEX idx_local_translation_requests_owner
+ON local_translation_requests(family_id,owner_person_id,updated_at DESC,id);
+
+CREATE TABLE local_translation_events (
+  id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  resource_type TEXT NOT NULL CHECK(resource_type IN ('local_translation_profile','local_translation_request')),
+  resource_id TEXT NOT NULL,
+  event_kind TEXT NOT NULL CHECK(event_kind IN ('profile_update','dictionary_add','dictionary_update','dictionary_delete',
+    'request_prepare','correction_record','request_cancel')),
+  resource_revision INTEGER NOT NULL CHECK(resource_revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  mutation_id TEXT NOT NULL UNIQUE REFERENCES local_translation_mutations(id) ON DELETE RESTRICT,
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND julianday(occurred_at) IS NOT NULL)
+) STRICT;
+
+CREATE TRIGGER trg_34e_translation_mutation_insert
+BEFORE INSERT ON local_translation_mutations
+WHEN (SELECT COUNT(*) FROM local_translation_mutations item
+    WHERE item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id)>=4096
+  OR NOT EXISTS(
+    SELECT 1 FROM accounts account
+    JOIN people actor ON actor.id=NEW.actor_person_id AND actor.family_id=NEW.family_id AND actor.status='active'
+    JOIN people owner ON owner.id=NEW.owner_person_id AND owner.family_id=NEW.family_id AND owner.status='active'
+    JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+    JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+    JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+    WHERE account.id=NEW.actor_account_id AND account.person_id=NEW.actor_person_id AND account.status='active'
+      AND receipt.receipt_version=NEW.policy_receipt_version AND receipt.nonce=NEW.policy_receipt_nonce
+      AND receipt.correlation_id=NEW.policy_correlation_id AND receipt.resource_type=NEW.policy_resource_type
+      AND receipt.resource_id=NEW.policy_resource_id AND receipt.action=NEW.policy_action AND receipt.capability=NEW.policy_capability
+      AND receipt.recorded_at=NEW.occurred_at AND json_extract(receipt.record_json,'$.request.purpose')='general'
+      AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+      AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+      AND json_extract(receipt.record_json,'$.request.resource.sensitivity')='highly_sensitive'
+      AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.actor_account_id
+      AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.actor_person_id
+      AND ((NEW.resource_type='local_translation_profile' AND
+          ((NEW.expected_revision=0 AND NOT EXISTS(SELECT 1 FROM local_translation_profiles current WHERE current.id=NEW.resource_id))
+            OR (NEW.expected_revision>=1 AND EXISTS(SELECT 1 FROM local_translation_profiles current
+              WHERE current.id=NEW.resource_id AND current.family_id=NEW.family_id AND current.owner_person_id=NEW.owner_person_id
+                AND current.revision=NEW.expected_revision))))
+        OR (NEW.resource_type='local_translation_request' AND
+          ((NEW.expected_revision=0 AND NOT EXISTS(SELECT 1 FROM local_translation_requests current WHERE current.id=NEW.resource_id))
+            OR (NEW.expected_revision>=1 AND EXISTS(SELECT 1 FROM local_translation_requests current
+              WHERE current.id=NEW.resource_id AND current.family_id=NEW.family_id AND current.owner_person_id=NEW.owner_person_id
+                AND current.revision=NEW.expected_revision)))))
+)
+BEGIN SELECT RAISE(ABORT,'34-E mutation requires exact owner-bound durable PEP receipt and current revision'); END;
+
+CREATE TRIGGER trg_34e_translation_profile_insert
+BEFORE INSERT ON local_translation_profiles
+WHEN EXISTS(SELECT 1 FROM local_translation_profiles item WHERE item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id)
+  OR NOT EXISTS(
+    SELECT 1 FROM local_translation_mutations mutation
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='local_translation_profile'
+      AND mutation.resource_id=NEW.id AND mutation.expected_revision=0 AND mutation.revision=NEW.revision
+      AND mutation.mutation_kind IN ('profile_update','dictionary_add')
+      AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+      AND mutation.actor_person_id=NEW.owner_person_id AND mutation.resource_state_fingerprint=NEW.state_fingerprint
+      AND mutation.occurred_at=NEW.created_at AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+  )
+BEGIN SELECT RAISE(ABORT,'34-E profile insert requires exact owner mutation'); END;
+
+CREATE TRIGGER trg_34e_translation_profile_update
+BEFORE UPDATE ON local_translation_profiles
+WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.owner_person_id<>OLD.owner_person_id OR NEW.created_at<>OLD.created_at
+  OR NOT EXISTS(
+    SELECT 1 FROM local_translation_mutations mutation
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='local_translation_profile'
+      AND mutation.resource_id=NEW.id AND mutation.mutation_kind IN ('profile_update','dictionary_add','dictionary_update','dictionary_delete')
+      AND mutation.expected_revision=OLD.revision AND mutation.revision=NEW.revision AND NEW.revision=OLD.revision+1
+      AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+      AND mutation.actor_person_id=NEW.owner_person_id AND mutation.resource_state_fingerprint=NEW.state_fingerprint
+      AND mutation.occurred_at=NEW.updated_at AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+  )
+BEGIN SELECT RAISE(ABORT,'34-E profile update requires exact owner mutation'); END;
+
+CREATE TRIGGER trg_34e_translation_dictionary_insert
+BEFORE INSERT ON local_translation_dictionary_entries
+WHEN (SELECT COUNT(*) FROM local_translation_dictionary_entries item
+    WHERE item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id)>=256
+  OR NOT EXISTS(
+    SELECT 1 FROM local_translation_mutations mutation
+    JOIN local_translation_profiles profile ON profile.id=NEW.profile_id AND profile.family_id=NEW.family_id
+      AND profile.owner_person_id=NEW.owner_person_id AND profile.last_mutation_id=mutation.id
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='local_translation_profile'
+      AND mutation.resource_id=NEW.profile_id AND mutation.mutation_kind='dictionary_add'
+      AND mutation.revision=profile.revision AND NEW.revision=1 AND NEW.state='active'
+      AND mutation.occurred_at=NEW.created_at
+  )
+BEGIN SELECT RAISE(ABORT,'34-E dictionary insert requires exact profile mutation and quota'); END;
+
+CREATE TRIGGER trg_34e_translation_dictionary_update
+BEFORE UPDATE ON local_translation_dictionary_entries
+WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.owner_person_id<>OLD.owner_person_id
+  OR NEW.profile_id<>OLD.profile_id OR NEW.created_at<>OLD.created_at
+  OR NOT EXISTS(
+    SELECT 1 FROM local_translation_mutations mutation
+    JOIN local_translation_profiles profile ON profile.id=NEW.profile_id AND profile.last_mutation_id=mutation.id
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='local_translation_profile'
+      AND mutation.resource_id=NEW.profile_id AND mutation.mutation_kind IN ('dictionary_update','dictionary_delete')
+      AND mutation.revision=profile.revision AND NEW.revision=OLD.revision+1 AND NEW.updated_at=mutation.occurred_at
+      AND ((mutation.mutation_kind='dictionary_update' AND OLD.state='active' AND NEW.state='active')
+        OR (mutation.mutation_kind='dictionary_delete' AND OLD.state='active' AND NEW.state='deleted'))
+  )
+BEGIN SELECT RAISE(ABORT,'34-E dictionary update requires exact profile mutation and transition'); END;
+
+CREATE TRIGGER trg_34e_translation_request_insert
+BEFORE INSERT ON local_translation_requests
+WHEN (SELECT COUNT(*) FROM local_translation_requests item
+    WHERE item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id)>=256
+  OR NOT EXISTS(
+    SELECT 1 FROM local_translation_mutations mutation
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='local_translation_request'
+      AND mutation.resource_id=NEW.id AND mutation.mutation_kind='request_prepare' AND mutation.expected_revision=0
+      AND mutation.revision=NEW.revision AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+      AND mutation.actor_person_id=NEW.owner_person_id AND mutation.resource_state_fingerprint=NEW.state_fingerprint
+      AND mutation.occurred_at=NEW.created_at AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+      AND NEW.state='provider_unavailable' AND NEW.quality_flag='not_evaluated'
+      AND NEW.correction_sha256 IS NULL AND NEW.correction_character_count IS NULL
+  )
+BEGIN SELECT RAISE(ABORT,'34-E request insert requires exact owner mutation and no-provider truth'); END;
+
+CREATE TRIGGER trg_34e_translation_request_update
+BEFORE UPDATE ON local_translation_requests
+WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.owner_person_id<>OLD.owner_person_id
+  OR NEW.source_kind<>OLD.source_kind OR NEW.source_resource_id<>OLD.source_resource_id
+  OR NEW.target_language<>OLD.target_language OR NEW.provider_mode<>OLD.provider_mode
+  OR NEW.external_preview_acknowledged<>OLD.external_preview_acknowledged OR NEW.explicit_external_consent<>OLD.explicit_external_consent
+  OR NEW.created_at<>OLD.created_at OR NEW.language_detection_executed<>0 OR NEW.translation_executed<>0
+  OR NEW.speech_to_text_executed<>0 OR NEW.speaker_separation_executed<>0
+  OR NEW.live_caption_translation_executed<>0 OR NEW.text_to_speech_executed<>0 OR NEW.network_used<>0 OR NEW.cloud_used<>0
+  OR NOT EXISTS(
+    SELECT 1 FROM local_translation_mutations mutation
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='local_translation_request'
+      AND mutation.resource_id=NEW.id AND mutation.mutation_kind IN ('correction_record','request_cancel')
+      AND mutation.expected_revision=OLD.revision AND mutation.revision=NEW.revision AND NEW.revision=OLD.revision+1
+      AND mutation.resource_state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.updated_at
+      AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+      AND ((mutation.mutation_kind='correction_record' AND OLD.state<>'cancelled' AND NEW.state='correction_recorded'
+          AND NEW.correction_sha256 IS NOT NULL AND NEW.correction_character_count IS NOT NULL)
+        OR (mutation.mutation_kind='request_cancel' AND OLD.state<>'cancelled' AND NEW.state='cancelled'
+          AND NEW.correction_sha256 IS OLD.correction_sha256
+          AND NEW.correction_character_count IS OLD.correction_character_count))
+  )
+BEGIN SELECT RAISE(ABORT,'34-E request update requires exact immutable metadata and transition'); END;
+
+CREATE TRIGGER trg_34e_translation_event_insert
+BEFORE INSERT ON local_translation_events
+WHEN NOT EXISTS(
+  SELECT 1 FROM local_translation_mutations mutation
+  WHERE mutation.id=NEW.mutation_id AND mutation.resource_type=NEW.resource_type AND mutation.resource_id=NEW.resource_id
+    AND mutation.mutation_kind=NEW.event_kind AND mutation.revision=NEW.resource_revision
+    AND mutation.resource_state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.occurred_at
+    AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+)
+BEGIN SELECT RAISE(ABORT,'34-E event requires exact translation mutation'); END;
+
+CREATE TRIGGER trg_34e_translation_mutation_update BEFORE UPDATE ON local_translation_mutations
+BEGIN SELECT RAISE(ABORT,'34-E translation mutation ledger is immutable'); END;
+CREATE TRIGGER trg_34e_translation_mutation_delete BEFORE DELETE ON local_translation_mutations
+BEGIN SELECT RAISE(ABORT,'34-E translation mutation ledger is durable'); END;
+CREATE TRIGGER trg_34e_translation_event_update BEFORE UPDATE ON local_translation_events
+BEGIN SELECT RAISE(ABORT,'34-E translation event ledger is immutable'); END;
+CREATE TRIGGER trg_34e_translation_event_delete BEFORE DELETE ON local_translation_events
+BEGIN SELECT RAISE(ABORT,'34-E translation event ledger is durable'); END;
+CREATE TRIGGER trg_34e_translation_profile_delete BEFORE DELETE ON local_translation_profiles
+BEGIN SELECT RAISE(ABORT,'34-E translation profile is durable'); END;
+CREATE TRIGGER trg_34e_translation_dictionary_delete BEFORE DELETE ON local_translation_dictionary_entries
+BEGIN SELECT RAISE(ABORT,'34-E dictionary uses content-free logical deletion'); END;
+CREATE TRIGGER trg_34e_translation_request_delete BEFORE DELETE ON local_translation_requests
+BEGIN SELECT RAISE(ABORT,'34-E translation request uses logical cancellation'); END;
+
+UPDATE database_metadata SET value='REVISION-34-E-LOCAL-FIRST-TRANSLATION-LANGUAGE',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -16470,7 +16771,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(105, 'communication_policy_mls_foundation', communicationSecurityFoundationSql),
   createMigrationDefinition(106, 'communication_messaging_lifecycle_privacy_presence', communicationMessagingLifecycleSql),
   createMigrationDefinition(107, 'communication_realtime_calling_accessible_ux', communicationRealtimeCallingSql),
-  createMigrationDefinition(108, 'explicit_consent_recording_media_retention', communicationRecordingRetentionSql)
+  createMigrationDefinition(108, 'explicit_consent_recording_media_retention', communicationRecordingRetentionSql),
+  createMigrationDefinition(109, 'local_first_translation_language', localTranslationLanguageSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

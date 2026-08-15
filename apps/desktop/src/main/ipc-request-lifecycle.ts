@@ -227,6 +227,11 @@ const communicationRecordingWriteChannels=new Set<string>(['communicationRecordi
   'communicationRecording:withdrawConsent','communicationRecording:addLateJoiner','communicationRecording:setSegment',
   'communicationRecording:updateRetention','communicationRecording:requestDeletion']);
 const communicationRecordingChannels=new Set<string>([...communicationRecordingReadChannels,...communicationRecordingWriteChannels]);
+const localTranslationReadChannels=new Set<string>(['localTranslation:getCenter']);
+const localTranslationWriteChannels=new Set<string>(['localTranslation:updateProfile','localTranslation:addDictionary',
+  'localTranslation:updateDictionary','localTranslation:deleteDictionary','localTranslation:prepareRequest',
+  'localTranslation:recordCorrection','localTranslation:cancelRequest']);
+const localTranslationChannels=new Set<string>([...localTranslationReadChannels,...localTranslationWriteChannels]);
 
 const cancellableNetworkChannels = new Set<string>([
   'dataLifecycle:runRevocationSync'
@@ -238,6 +243,8 @@ const cancellableInteractiveAuthenticationChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLifecyclePolicy => {
+  if(localTranslationReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
+  if(localTranslationWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
   if(communicationRecordingReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
   if(communicationRecordingWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
   if(communicationCallingReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
@@ -354,6 +361,8 @@ const standardAdmissionChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestAdmissionPolicy = (channel: string): IpcRequestAdmissionPolicy => {
+  if(localTranslationChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
+    maxConcurrentPerSender:2,maxConcurrentPerChannel:1,maxQueuedPerSender:4,queueTimeoutMs:2_500});
   if(communicationRecordingChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
     maxConcurrentPerSender:2,maxConcurrentPerChannel:1,maxQueuedPerSender:4,queueTimeoutMs:2_500});
   if(communicationCallingChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
@@ -482,6 +491,8 @@ export interface IpcRequestRatePolicy {
 }
 
 export const resolveIpcRequestRatePolicy = (channel: string): IpcRequestRatePolicy => {
+  if(localTranslationReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:120,windowMs:60_000});
+  if(localTranslationWriteChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:16,windowMs:60_000});
   if(communicationRecordingReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:120,windowMs:60_000});
   if(communicationRecordingWriteChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:12,windowMs:60_000});
   if(communicationCallingReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:120,windowMs:60_000});

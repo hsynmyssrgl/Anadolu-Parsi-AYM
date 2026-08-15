@@ -35,6 +35,7 @@ import {
   SqliteLegacyRepository,
   SqliteLifeRepository,
   SqliteLocalGovernedOcrRepository,
+  SqliteLocalTranslationLanguageRepository,
   SqliteLongTermPortfolioRepository,
   SqliteMemoryStudioRepository,
   SqliteSmartHomeEnergyRepository,
@@ -109,6 +110,8 @@ import type {
   LifeProjectionRepositoryPort,
   LifeRepositoryPort,
   LocalGovernedOcrRepositoryPort,
+  LocalTranslationLanguageRepositoryPort,
+  LocalTranslationPolicyResourceRepositoryPort,
   MemoryStudioPolicyResourceRepositoryPort,
   MemoryStudioRepositoryPort,
   SmartHomeEnergyPolicyResourceRepositoryPort,
@@ -176,6 +179,7 @@ export interface RepositoryCompositionRoot {
   readonly legacyRepository: LegacyRepositoryPort;
   readonly lifeRepository: LifeRepositoryPort & LifePolicyResourceRepositoryPort & LifeProjectionRepositoryPort;
   readonly localGovernedOcrRepository: LocalGovernedOcrRepositoryPort;
+  readonly localTranslationRepository: LocalTranslationLanguageRepositoryPort & LocalTranslationPolicyResourceRepositoryPort;
   readonly memoryStudioRepository: MemoryStudioRepositoryPort & MemoryStudioPolicyResourceRepositoryPort;
   readonly smartHomeEnergyRepository: SmartHomeEnergyRepositoryPort & SmartHomeEnergyPolicyResourceRepositoryPort;
   readonly signedPluginPlatformRepository: SignedPluginPlatformRepositoryPort & SignedPluginPlatformPolicyResourceRepositoryPort;
@@ -249,6 +253,7 @@ export const createSqliteRepositoryCompositionRoot = (
     legacyRepository: new SqliteLegacyRepository(repositoryOptions),
     lifeRepository: new SqliteLifeRepository(repositoryOptions),
     localGovernedOcrRepository: new SqliteLocalGovernedOcrRepository(repositoryOptions),
+    localTranslationRepository: new SqliteLocalTranslationLanguageRepository(repositoryOptions),
     memoryStudioRepository: new SqliteMemoryStudioRepository(repositoryOptions),
     smartHomeEnergyRepository: new SqliteSmartHomeEnergyRepository(repositoryOptions),
     signedPluginPlatformRepository: new SqliteSignedPluginPlatformRepository(repositoryOptions),

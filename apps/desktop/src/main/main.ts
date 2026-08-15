@@ -53,6 +53,15 @@ import type {
   UpdateCommunicationRecordingRetentionInput,
   WithdrawCommunicationRecordingConsentInput
 } from '@ppt/domain';
+import type {
+  AddLocalTranslationDictionaryEntryInput,
+  CancelLocalTranslationRequestInput,
+  DeleteLocalTranslationDictionaryEntryInput,
+  PrepareLocalTranslationRequestInput,
+  RecordLocalTranslationCorrectionInput,
+  UpdateLocalTranslationDictionaryEntryInput,
+  UpdateLocalTranslationProfileInput
+} from '@ppt/domain';
 import type { ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { UnifiedAuthorizedSearchInput } from '@ppt/domain';
 import type { RecordManagedLifeItemInput } from '@ppt/domain';
@@ -104,6 +113,7 @@ import {
   COMMUNICATION_MESSAGING_IPC_CHANNELS,
   COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS,
   COMMUNICATION_RECORDING_IPC_CHANNELS,
+  LOCAL_TRANSLATION_IPC_CHANNELS,
   PLACES_TRAVEL_ASSET_PET_IPC_CHANNELS,
   HEALTH_CARE_COORDINATION_IPC_CHANNELS,
   HOUSEHOLD_OPERATIONS_IPC_CHANNELS,
@@ -2536,6 +2546,21 @@ function registerIpc(): void {
     async(_event,input:UpdateCommunicationRecordingRetentionInput)=>store().updateCommunicationRecordingRetention(input));
   registerIpcHandler(COMMUNICATION_RECORDING_IPC_CHANNELS.requestDeletion,
     async(_event,input:RequestCommunicationRecordingDeletionInput)=>store().requestCommunicationRecordingDeletion(input));
+  registerIpcHandler(LOCAL_TRANSLATION_IPC_CHANNELS.getCenter,async()=>store().getLocalTranslationCenter());
+  registerIpcHandler(LOCAL_TRANSLATION_IPC_CHANNELS.updateProfile,
+    async(_event,input:UpdateLocalTranslationProfileInput)=>store().updateLocalTranslationProfile(input));
+  registerIpcHandler(LOCAL_TRANSLATION_IPC_CHANNELS.addDictionary,
+    async(_event,input:AddLocalTranslationDictionaryEntryInput)=>store().addLocalTranslationDictionaryEntry(input));
+  registerIpcHandler(LOCAL_TRANSLATION_IPC_CHANNELS.updateDictionary,
+    async(_event,input:UpdateLocalTranslationDictionaryEntryInput)=>store().updateLocalTranslationDictionaryEntry(input));
+  registerIpcHandler(LOCAL_TRANSLATION_IPC_CHANNELS.deleteDictionary,
+    async(_event,input:DeleteLocalTranslationDictionaryEntryInput)=>store().deleteLocalTranslationDictionaryEntry(input));
+  registerIpcHandler(LOCAL_TRANSLATION_IPC_CHANNELS.prepareRequest,
+    async(_event,input:PrepareLocalTranslationRequestInput)=>store().prepareLocalTranslationRequest(input));
+  registerIpcHandler(LOCAL_TRANSLATION_IPC_CHANNELS.recordCorrection,
+    async(_event,input:RecordLocalTranslationCorrectionInput)=>store().recordLocalTranslationCorrection(input));
+  registerIpcHandler(LOCAL_TRANSLATION_IPC_CHANNELS.cancelRequest,
+    async(_event,input:CancelLocalTranslationRequestInput)=>store().cancelLocalTranslationRequest(input));
   registerIpcHandler('finance:listValuations', () => store().listFinanceValuations());
   registerIpcHandler('finance:createValuation', (_event, input:CreateFinanceValuationInput) => store().createFinanceValuation(input));
   registerIpcHandler('family:createRelation', async (_event, input: CreateFamilyRelationInput) => {

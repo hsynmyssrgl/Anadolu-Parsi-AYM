@@ -183,7 +183,10 @@ export interface LifePolicyIntent {
     | 'communication_call_session'
     | 'communication_call_preferences'
     | 'communication_recording_center'
-    | 'communication_recording_request';
+    | 'communication_recording_request'
+    | 'local_translation_center'
+    | 'local_translation_profile'
+    | 'local_translation_request';
   readonly resourceId: string;
   readonly purpose: 'general' | 'emergency-offline-portability';
   readonly requestedFields?: readonly string[];

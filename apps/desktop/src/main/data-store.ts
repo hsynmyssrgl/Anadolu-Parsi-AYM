@@ -221,6 +221,14 @@ import {
   SetCommunicationRecordingSegmentUseCase,
   UpdateCommunicationRecordingRetentionUseCase,
   RequestCommunicationRecordingDeletionUseCase,
+  GetLocalTranslationCenterUseCase,
+  UpdateLocalTranslationProfileUseCase,
+  AddLocalTranslationDictionaryEntryUseCase,
+  UpdateLocalTranslationDictionaryEntryUseCase,
+  DeleteLocalTranslationDictionaryEntryUseCase,
+  PrepareLocalTranslationRequestUseCase,
+  RecordLocalTranslationCorrectionUseCase,
+  CancelLocalTranslationRequestUseCase,
   type CommunicationCallPreflightPort,
   ListLifeRecordsUseCase,
   CreateLifeRecordUseCase,
@@ -405,6 +413,17 @@ import type {
   SetCommunicationHistoryAccessInput
 } from '@ppt/domain';
 import type {
+  AddLocalTranslationDictionaryEntryInput,
+  CancelLocalTranslationRequestInput,
+  DeleteLocalTranslationDictionaryEntryInput,
+  LocalTranslationCenterView,
+  LocalTranslationMutationReceiptView,
+  PrepareLocalTranslationRequestInput,
+  RecordLocalTranslationCorrectionInput,
+  UpdateLocalTranslationDictionaryEntryInput,
+  UpdateLocalTranslationProfileInput
+} from '@ppt/domain';
+import type {
   AnnotateCommunicationMessageInput,
   CommunicationMessageContentView,
   CommunicationMessageView,
@@ -522,6 +541,10 @@ import {
   RepositoryBackedCommunicationRecordingQueryPort,
   RepositoryBackedCommunicationRecordingUnitOfWork
 } from './communication-recording-retention-application-adapter.js';
+import {
+  RepositoryBackedLocalTranslationQueryPort,
+  RepositoryBackedLocalTranslationUnitOfWork
+} from './local-translation-language-application-adapter.js';
 import { CommunicationMessagePayloadVault } from './communication-message-payload-vault.js';
 import {
   RepositoryBackedLocationPolicyTransactionRunner,
@@ -1505,6 +1528,14 @@ export class FamilyDataStore {
   readonly #setCommunicationRecordingSegmentUseCase:SetCommunicationRecordingSegmentUseCase;
   readonly #updateCommunicationRecordingRetentionUseCase:UpdateCommunicationRecordingRetentionUseCase;
   readonly #requestCommunicationRecordingDeletionUseCase:RequestCommunicationRecordingDeletionUseCase;
+  readonly #getLocalTranslationCenterUseCase:GetLocalTranslationCenterUseCase;
+  readonly #updateLocalTranslationProfileUseCase:UpdateLocalTranslationProfileUseCase;
+  readonly #addLocalTranslationDictionaryEntryUseCase:AddLocalTranslationDictionaryEntryUseCase;
+  readonly #updateLocalTranslationDictionaryEntryUseCase:UpdateLocalTranslationDictionaryEntryUseCase;
+  readonly #deleteLocalTranslationDictionaryEntryUseCase:DeleteLocalTranslationDictionaryEntryUseCase;
+  readonly #prepareLocalTranslationRequestUseCase:PrepareLocalTranslationRequestUseCase;
+  readonly #recordLocalTranslationCorrectionUseCase:RecordLocalTranslationCorrectionUseCase;
+  readonly #cancelLocalTranslationRequestUseCase:CancelLocalTranslationRequestUseCase;
   readonly #prepareFamilyEmergencyCardExportUseCase: PrepareFamilyEmergencyCardExportUseCase;
   readonly #recordFamilyEmergencyCardExportCompletionUseCase: RecordFamilyEmergencyCardExportCompletionUseCase;
   readonly #listFinanceRecordsUseCase: ListFinanceRecordsUseCase;
@@ -2030,6 +2061,7 @@ export class FamilyDataStore {
           communicationMessagingPolicyResourceRepository: this.#repositories.communicationMessagingRepository,
           communicationRealtimeCallingPolicyResourceRepository: this.#repositories.communicationRealtimeCallingRepository,
           communicationRecordingPolicyResourceRepository: this.#repositories.communicationRecordingRepository,
+          localTranslationPolicyResourceRepository: this.#repositories.localTranslationRepository,
           communicationSecurityPolicyResourceRepository: this.#repositories.communicationSecurityRepository,
           personRepository: this.#repositories.personRepository,
           deviceIdentityProvider: this.#deviceIdentityProvider,
@@ -2062,6 +2094,8 @@ export class FamilyDataStore {
       communicationRealtimeCallingPolicyResourceRepository: this.#repositories.communicationRealtimeCallingRepository,
       communicationRecordingRepository: this.#repositories.communicationRecordingRepository,
       communicationRecordingPolicyResourceRepository: this.#repositories.communicationRecordingRepository,
+      localTranslationRepository: this.#repositories.localTranslationRepository,
+      localTranslationPolicyResourceRepository: this.#repositories.localTranslationRepository,
       communicationSecurityRepository: this.#repositories.communicationSecurityRepository,
       communicationSecurityPolicyResourceRepository: this.#repositories.communicationSecurityRepository,
       aiConsentRepository: this.#repositories.aiConsentRepository,
@@ -2893,6 +2927,21 @@ export class FamilyDataStore {
     this.#setCommunicationRecordingSegmentUseCase=new SetCommunicationRecordingSegmentUseCase(communicationRecordingUnitOfWork);
     this.#updateCommunicationRecordingRetentionUseCase=new UpdateCommunicationRecordingRetentionUseCase(communicationRecordingUnitOfWork);
     this.#requestCommunicationRecordingDeletionUseCase=new RequestCommunicationRecordingDeletionUseCase(communicationRecordingUnitOfWork);
+    const localTranslationDependencies={...lifeApplicationDependencies,
+      localTranslationRepository:this.#repositories.localTranslationRepository,
+      localTranslationPolicyResourceRepository:this.#repositories.localTranslationRepository} as const;
+    const localTranslationQuery=new RepositoryBackedLocalTranslationQueryPort(
+      localTranslationDependencies,lifePolicyTransactionRunner);
+    const localTranslationUnitOfWork=new RepositoryBackedLocalTranslationUnitOfWork(
+      localTranslationDependencies,lifePolicyTransactionRunner);
+    this.#getLocalTranslationCenterUseCase=new GetLocalTranslationCenterUseCase(localTranslationQuery);
+    this.#updateLocalTranslationProfileUseCase=new UpdateLocalTranslationProfileUseCase(localTranslationUnitOfWork);
+    this.#addLocalTranslationDictionaryEntryUseCase=new AddLocalTranslationDictionaryEntryUseCase(localTranslationUnitOfWork);
+    this.#updateLocalTranslationDictionaryEntryUseCase=new UpdateLocalTranslationDictionaryEntryUseCase(localTranslationUnitOfWork);
+    this.#deleteLocalTranslationDictionaryEntryUseCase=new DeleteLocalTranslationDictionaryEntryUseCase(localTranslationUnitOfWork);
+    this.#prepareLocalTranslationRequestUseCase=new PrepareLocalTranslationRequestUseCase(localTranslationUnitOfWork);
+    this.#recordLocalTranslationCorrectionUseCase=new RecordLocalTranslationCorrectionUseCase(localTranslationUnitOfWork);
+    this.#cancelLocalTranslationRequestUseCase=new CancelLocalTranslationRequestUseCase(localTranslationUnitOfWork);
     this.#prepareArchiveOpenUseCase = new PrepareArchiveOpenUseCase(archiveQuery);
     this.#recordArchiveOpenedUseCase = new RecordArchiveOpenedUseCase(archiveUnitOfWork);
     this.#authorizeEmergencyArchiveReadUseCase = new AuthorizeEmergencyArchiveReadUseCase(archiveUnitOfWork);
@@ -6709,6 +6758,39 @@ export class FamilyDataStore {
   public async requestCommunicationRecordingDeletion(input:RequestCommunicationRecordingDeletionInput):Promise<CommunicationRecordingMutationReceiptView>{
     const result=await this.#requestCommunicationRecordingDeletionUseCase.execute(
       this.#lifeApplicationContext('communication-recording-delete'),input);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async getLocalTranslationCenter():Promise<LocalTranslationCenterView>{
+    const result=await this.#getLocalTranslationCenterUseCase.execute(this.#lifeApplicationContext('local-translation-center'));
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async updateLocalTranslationProfile(input:UpdateLocalTranslationProfileInput):Promise<LocalTranslationMutationReceiptView>{
+    const result=await this.#updateLocalTranslationProfileUseCase.execute(this.#lifeApplicationContext('local-translation-profile'),input);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async addLocalTranslationDictionaryEntry(input:AddLocalTranslationDictionaryEntryInput):Promise<LocalTranslationMutationReceiptView>{
+    const result=await this.#addLocalTranslationDictionaryEntryUseCase.execute(this.#lifeApplicationContext('local-translation-dictionary-add'),input);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async updateLocalTranslationDictionaryEntry(input:UpdateLocalTranslationDictionaryEntryInput):Promise<LocalTranslationMutationReceiptView>{
+    const result=await this.#updateLocalTranslationDictionaryEntryUseCase.execute(this.#lifeApplicationContext('local-translation-dictionary-update'),input);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async deleteLocalTranslationDictionaryEntry(input:DeleteLocalTranslationDictionaryEntryInput):Promise<LocalTranslationMutationReceiptView>{
+    const result=await this.#deleteLocalTranslationDictionaryEntryUseCase.execute(this.#lifeApplicationContext('local-translation-dictionary-delete'),input);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async prepareLocalTranslationRequest(input:PrepareLocalTranslationRequestInput):Promise<LocalTranslationMutationReceiptView>{
+    const result=await this.#prepareLocalTranslationRequestUseCase.execute(this.#lifeApplicationContext('local-translation-request'),input);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async recordLocalTranslationCorrection(input:RecordLocalTranslationCorrectionInput):Promise<LocalTranslationMutationReceiptView>{
+    const result=await this.#recordLocalTranslationCorrectionUseCase.execute(this.#lifeApplicationContext('local-translation-correction'),input);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async cancelLocalTranslationRequest(input:CancelLocalTranslationRequestInput):Promise<LocalTranslationMutationReceiptView>{
+    const result=await this.#cancelLocalTranslationRequestUseCase.execute(this.#lifeApplicationContext('local-translation-cancel'),input);
     if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
   }
 

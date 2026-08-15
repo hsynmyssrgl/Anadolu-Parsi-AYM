@@ -48,3 +48,4 @@ export * from './communication-security-foundation.js';
 export * from './communication-messaging.js';
 export * from './communication-realtime-calling.js';
 export * from './communication-recording-retention.js';
+export * from './local-translation-language.js';

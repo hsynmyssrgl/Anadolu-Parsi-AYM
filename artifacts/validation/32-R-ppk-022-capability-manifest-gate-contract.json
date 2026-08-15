@@ -415,7 +415,7 @@
       "passed": true
     },
     {
-      "name": "decision pins current Desktop OCR capability truth and source ratchet",
+      "name": "decision pins current Desktop OCR capability truth and local translation source ratchet",
       "passed": true
     },
     {
@@ -454,7 +454,7 @@
   "protectedCapabilityFamilies": 7,
   "canonicalApplications": 14,
   "productionSourceZones": 18,
-  "scannedProductionFiles": 519,
+  "scannedProductionFiles": 525,
   "exactCapabilitySurfaces": 360,
   "exactManifestEntries": 360,
   "exactManifestSha256": "755717250f2549229608b38e6ea650a4647f1e0d50aa4c1aa1078acc193302ff",
@@ -475,5 +475,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-15T16:13:06.894Z"
+  "generatedAt": "2026-08-15T17:38:15.257Z"
 }
