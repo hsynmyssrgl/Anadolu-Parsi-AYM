@@ -161,7 +161,10 @@ export interface LifePolicyIntent {
     | 'places_travel_item'
     | 'places_travel_center'
     | 'family_ai_suggestion'
-    | 'family_ai_assistant_center';
+    | 'family_ai_assistant_center'
+    | 'memory_studio_center'
+    | 'memory_studio_record'
+    | 'memory_time_capsule';
   readonly resourceId: string;
   readonly purpose: 'general' | 'emergency-offline-portability';
   readonly requestedFields?: readonly string[];

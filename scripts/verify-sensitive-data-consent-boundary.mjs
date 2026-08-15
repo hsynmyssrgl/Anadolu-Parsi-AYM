@@ -111,7 +111,7 @@ export const verifySensitiveDataConsentBoundary = async () => {
   check('existing AI route remains reachable from canonical navigation', navigation.includes("id: 'ai'"));
   check('no sensitive send upload or transfer IPC action exists', !/ai:(?:send|upload|transfer)Sensitive/iu.test(`${main}\n${preload}`));
   check('PPK-021 exact ratchet accepts the reviewed compositions and zero direct role bypass',
-    astGate.status === 'PASS' && astGate.privilegedSurfaces === 730 && astGate.exactAllowlistEntries === 730
+    astGate.status === 'PASS' && astGate.privilegedSurfaces === 740 && astGate.exactAllowlistEntries === 740
     && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
   check('PPK-022 successor capability ratchet stays exact and green',
     capabilityGate.status === 'PASS' && capabilityGate.capabilitySurfaces === 345

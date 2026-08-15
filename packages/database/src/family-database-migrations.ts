@@ -14291,6 +14291,270 @@ BEFORE DELETE ON family_ai_suggestion_mutations BEGIN SELECT RAISE(ABORT,'33-W f
 UPDATE database_metadata SET value='REVISION-33-W-CONSENT-BOUND-FAMILY-AI-ASSISTANT',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 
+const memoryStudioSql = `
+CREATE TABLE memory_studio_mutations (
+  id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  resource_type TEXT NOT NULL CHECK(resource_type IN ('memory_studio_record','memory_time_capsule')),
+  resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 2 AND 256),
+  actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  mutation_kind TEXT NOT NULL CHECK(mutation_kind IN (
+    'record_create','record_delete','capsule_create','capsule_approve','capsule_revoke_approval',
+    'capsule_seal','capsule_release','capsule_cancel','capsule_rollback'
+  )),
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 256),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  expected_revision INTEGER NOT NULL CHECK(expected_revision>=0),
+  revision INTEGER NOT NULL CHECK(revision=expected_revision+1),
+  resource_state_fingerprint TEXT NOT NULL CHECK(length(resource_state_fingerprint)=64 AND resource_state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  reference_fingerprint TEXT NOT NULL CHECK(length(reference_fingerprint)=64 AND reference_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  reference_count INTEGER NOT NULL CHECK(reference_count BETWEEN 0 AND 96),
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version>=1),
+  policy_receipt_nonce TEXT NOT NULL CHECK(length(trim(policy_receipt_nonce)) BETWEEN 16 AND 256),
+  policy_correlation_id TEXT NOT NULL CHECK(length(trim(policy_correlation_id)) BETWEEN 1 AND 256),
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type IN ('memory_studio_record','memory_time_capsule')),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action IN ('create','update','delete')),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='family.write'),
+  UNIQUE(family_id,actor_account_id,client_operation_id),
+  CHECK(policy_resource_type=resource_type AND policy_resource_id=resource_id),
+  CHECK((mutation_kind='record_create' AND resource_type='memory_studio_record' AND policy_action='create' AND expected_revision=0)
+    OR (mutation_kind='record_delete' AND resource_type='memory_studio_record' AND policy_action='delete' AND expected_revision>=1)
+    OR (mutation_kind='capsule_create' AND resource_type='memory_time_capsule' AND policy_action='create' AND expected_revision=0)
+    OR (mutation_kind IN ('capsule_approve','capsule_revoke_approval','capsule_seal','capsule_release','capsule_rollback')
+      AND resource_type='memory_time_capsule' AND policy_action='update' AND expected_revision>=1)
+    OR (mutation_kind='capsule_cancel' AND resource_type='memory_time_capsule' AND policy_action='delete' AND expected_revision>=1))
+) STRICT;
+
+CREATE INDEX idx_memory_studio_mutations_owner
+ON memory_studio_mutations(family_id,owner_person_id,occurred_at DESC,id);
+
+CREATE TABLE memory_studio_records (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  kind TEXT NOT NULL CHECK(kind IN ('voice_story','transcript','photo_book','annual_album','on_this_day',
+    'duplicate_photo_review','face_group','genealogy_media_link','recipe','tradition','letter','future_message',
+    'family_documentary','printable_book')),
+  status TEXT NOT NULL CHECK(status IN ('active','deleted')),
+  title TEXT NOT NULL CHECK(length(trim(title)) BETWEEN 2 AND 160),
+  summary TEXT CHECK(summary IS NULL OR length(trim(summary)) BETWEEN 2 AND 2000),
+  archive_item_ids_json TEXT NOT NULL CHECK(json_valid(archive_item_ids_json) AND json_type(archive_item_ids_json)='array'
+    AND json_array_length(archive_item_ids_json) BETWEEN 0 AND 32 AND length(archive_item_ids_json)<=8192),
+  person_ids_json TEXT NOT NULL CHECK(json_valid(person_ids_json) AND json_type(person_ids_json)='array'
+    AND json_array_length(person_ids_json) BETWEEN 0 AND 32 AND length(person_ids_json)<=8192),
+  ocr_job_id TEXT,
+  event_date TEXT CHECK(event_date IS NULL OR (length(event_date)=24 AND julianday(event_date) IS NOT NULL)),
+  manual_face_grouping_approved INTEGER NOT NULL CHECK(manual_face_grouping_approved IN (0,1)),
+  reference_fingerprint TEXT NOT NULL CHECK(length(reference_fingerprint)=64 AND reference_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES memory_studio_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  deleted_at TEXT CHECK(deleted_at IS NULL OR (length(deleted_at)=24 AND julianday(deleted_at) IS NOT NULL)),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  CHECK(updated_at>=created_at),
+  CHECK((status='active' AND deleted_at IS NULL) OR (status='deleted' AND deleted_at=updated_at)),
+  CHECK(kind<>'face_group' OR (manual_face_grouping_approved=1 AND json_array_length(archive_item_ids_json)>=1
+    AND json_array_length(person_ids_json)>=1)),
+  CHECK(kind='face_group' OR manual_face_grouping_approved=0),
+  CHECK(kind<>'transcript' OR json_array_length(archive_item_ids_json)>=1 OR ocr_job_id IS NOT NULL),
+  CHECK(summary IS NOT NULL OR json_array_length(archive_item_ids_json)+json_array_length(person_ids_json)+(ocr_job_id IS NOT NULL)>=1)
+) STRICT;
+
+CREATE INDEX idx_memory_studio_records_owner
+ON memory_studio_records(family_id,owner_person_id,updated_at DESC,id);
+
+CREATE TABLE memory_time_capsules (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  title TEXT NOT NULL CHECK(length(trim(title)) BETWEEN 2 AND 160),
+  status TEXT NOT NULL CHECK(status IN ('awaiting_approvals','sealed','released','cancelled','rolled_back')),
+  archive_item_ids_json TEXT NOT NULL CHECK(json_valid(archive_item_ids_json) AND json_type(archive_item_ids_json)='array'
+    AND json_array_length(archive_item_ids_json) BETWEEN 0 AND 32 AND length(archive_item_ids_json)<=8192),
+  memory_record_ids_json TEXT NOT NULL CHECK(json_valid(memory_record_ids_json) AND json_type(memory_record_ids_json)='array'
+    AND json_array_length(memory_record_ids_json) BETWEEN 0 AND 32 AND length(memory_record_ids_json)<=8192),
+  unlock_at TEXT NOT NULL CHECK(length(unlock_at)=24 AND julianday(unlock_at) IS NOT NULL),
+  minimum_approvals INTEGER NOT NULL CHECK(minimum_approvals=2),
+  approvals_json TEXT NOT NULL CHECK(json_valid(approvals_json) AND json_type(approvals_json)='array'
+    AND json_array_length(approvals_json) BETWEEN 0 AND 32 AND length(approvals_json)<=8192),
+  reference_fingerprint TEXT NOT NULL CHECK(length(reference_fingerprint)=64 AND reference_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES memory_studio_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  sealed_at TEXT CHECK(sealed_at IS NULL OR (length(sealed_at)=24 AND julianday(sealed_at) IS NOT NULL)),
+  released_at TEXT CHECK(released_at IS NULL OR (length(released_at)=24 AND julianday(released_at) IS NOT NULL)),
+  cancelled_at TEXT CHECK(cancelled_at IS NULL OR (length(cancelled_at)=24 AND julianday(cancelled_at) IS NOT NULL)),
+  rolled_back_at TEXT CHECK(rolled_back_at IS NULL OR (length(rolled_back_at)=24 AND julianday(rolled_back_at) IS NOT NULL)),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  CHECK(json_array_length(archive_item_ids_json)+json_array_length(memory_record_ids_json)>=1),
+  CHECK(julianday(unlock_at)>=julianday(created_at,'+7 days') AND julianday(unlock_at)<=julianday(created_at,'+100 years')),
+  CHECK(updated_at>=created_at),
+  CHECK((status='awaiting_approvals' AND sealed_at IS NULL AND released_at IS NULL AND cancelled_at IS NULL AND rolled_back_at IS NULL)
+    OR (status='sealed' AND sealed_at IS NOT NULL AND released_at IS NULL AND cancelled_at IS NULL AND rolled_back_at IS NULL)
+    OR (status='released' AND sealed_at IS NOT NULL AND released_at IS NOT NULL AND cancelled_at IS NULL AND rolled_back_at IS NULL)
+    OR (status='cancelled' AND released_at IS NULL AND cancelled_at=updated_at AND rolled_back_at IS NULL)
+    OR (status='rolled_back' AND released_at IS NOT NULL AND rolled_back_at=updated_at AND cancelled_at IS NULL))
+) STRICT;
+
+CREATE INDEX idx_memory_time_capsules_owner
+ON memory_time_capsules(family_id,owner_person_id,updated_at DESC,id);
+
+CREATE TRIGGER trg_33x_memory_mutation_insert
+BEFORE INSERT ON memory_studio_mutations
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM accounts account
+  JOIN people actor ON actor.id=NEW.actor_person_id AND actor.family_id=NEW.family_id AND actor.status='active'
+  JOIN people owner ON owner.id=NEW.owner_person_id AND owner.family_id=NEW.family_id AND owner.status='active'
+  JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+  JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+  WHERE account.id=NEW.actor_account_id AND account.person_id=NEW.actor_person_id AND account.status='active'
+    AND receipt.receipt_version=NEW.policy_receipt_version AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id AND receipt.action=NEW.policy_action
+    AND receipt.capability=NEW.policy_capability AND receipt.recorded_at=NEW.occurred_at
+    AND json_extract(receipt.record_json,'$.request.purpose')='general'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.resource.sensitivity')='highly_sensitive'
+    AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.actor_account_id
+    AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.actor_person_id
+    AND ((NEW.expected_revision=0 AND NEW.actor_person_id=NEW.owner_person_id
+        AND ((NEW.resource_type='memory_studio_record' AND NOT EXISTS(SELECT 1 FROM memory_studio_records item WHERE item.id=NEW.resource_id))
+          OR (NEW.resource_type='memory_time_capsule' AND NOT EXISTS(SELECT 1 FROM memory_time_capsules item WHERE item.id=NEW.resource_id))))
+      OR (NEW.resource_type='memory_studio_record' AND EXISTS(SELECT 1 FROM memory_studio_records item
+        WHERE item.id=NEW.resource_id AND item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id
+          AND item.revision=NEW.expected_revision AND item.reference_fingerprint=NEW.reference_fingerprint))
+      OR (NEW.resource_type='memory_time_capsule' AND EXISTS(SELECT 1 FROM memory_time_capsules item
+        WHERE item.id=NEW.resource_id AND item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id
+          AND item.revision=NEW.expected_revision AND item.reference_fingerprint=NEW.reference_fingerprint)))
+)
+BEGIN SELECT RAISE(ABORT,'33-X mutation requires owner-bound durable PEP receipt and exact parent'); END;
+
+CREATE TRIGGER trg_33x_memory_record_insert
+BEFORE INSERT ON memory_studio_records
+WHEN NOT EXISTS(
+  SELECT 1 FROM memory_studio_mutations mutation
+  WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='memory_studio_record' AND mutation.resource_id=NEW.id
+    AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+    AND mutation.mutation_kind='record_create' AND mutation.expected_revision=0 AND mutation.revision=NEW.revision
+    AND mutation.resource_state_fingerprint=NEW.state_fingerprint AND mutation.reference_fingerprint=NEW.reference_fingerprint
+    AND mutation.reference_count=json_array_length(NEW.archive_item_ids_json)+json_array_length(NEW.person_ids_json)+(NEW.ocr_job_id IS NOT NULL)
+    AND mutation.occurred_at=NEW.created_at AND NEW.updated_at=NEW.created_at
+    AND mutation.policy_receipt_hash=NEW.policy_receipt_hash AND NEW.status='active'
+)
+OR EXISTS(SELECT 1 FROM json_each(NEW.archive_item_ids_json) value WHERE typeof(value.value)<>'text')
+OR EXISTS(SELECT 1 FROM json_each(NEW.person_ids_json) value WHERE typeof(value.value)<>'text')
+OR (SELECT count(*) FROM json_each(NEW.archive_item_ids_json))<>(SELECT count(DISTINCT value) FROM json_each(NEW.archive_item_ids_json))
+OR (SELECT count(*) FROM json_each(NEW.person_ids_json))<>(SELECT count(DISTINCT value) FROM json_each(NEW.person_ids_json))
+BEGIN SELECT RAISE(ABORT,'33-X memory record requires exact mutation and canonical references'); END;
+
+CREATE TRIGGER trg_33x_memory_record_update
+BEFORE UPDATE ON memory_studio_records
+WHEN NEW.id IS NOT OLD.id OR NEW.family_id IS NOT OLD.family_id OR NEW.owner_person_id IS NOT OLD.owner_person_id
+  OR NEW.kind IS NOT OLD.kind OR NEW.title IS NOT OLD.title OR NEW.summary IS NOT OLD.summary
+  OR NEW.archive_item_ids_json IS NOT OLD.archive_item_ids_json OR NEW.person_ids_json IS NOT OLD.person_ids_json
+  OR NEW.ocr_job_id IS NOT OLD.ocr_job_id OR NEW.event_date IS NOT OLD.event_date
+  OR NEW.manual_face_grouping_approved IS NOT OLD.manual_face_grouping_approved
+  OR NEW.reference_fingerprint IS NOT OLD.reference_fingerprint OR NEW.created_at IS NOT OLD.created_at
+  OR NEW.revision<>OLD.revision+1
+  OR NOT EXISTS(SELECT 1 FROM memory_studio_mutations mutation
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='memory_studio_record' AND mutation.resource_id=NEW.id
+      AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+      AND mutation.mutation_kind='record_delete' AND mutation.expected_revision=OLD.revision AND mutation.revision=NEW.revision
+      AND mutation.resource_state_fingerprint=NEW.state_fingerprint AND mutation.reference_fingerprint=NEW.reference_fingerprint
+      AND mutation.occurred_at=NEW.updated_at AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+      AND OLD.status='active' AND NEW.status='deleted' AND NEW.deleted_at=NEW.updated_at)
+  OR EXISTS(SELECT 1 FROM memory_time_capsules capsule, json_each(capsule.memory_record_ids_json) reference
+    WHERE reference.value=NEW.id AND capsule.status IN ('awaiting_approvals','sealed','released'))
+BEGIN SELECT RAISE(ABORT,'33-X memory record deletion requires exact unreferenced tombstone mutation'); END;
+
+CREATE TRIGGER trg_33x_capsule_insert
+BEFORE INSERT ON memory_time_capsules
+WHEN NOT EXISTS(SELECT 1 FROM memory_studio_mutations mutation
+  WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='memory_time_capsule' AND mutation.resource_id=NEW.id
+    AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+    AND mutation.mutation_kind='capsule_create' AND mutation.expected_revision=0 AND mutation.revision=NEW.revision
+    AND mutation.resource_state_fingerprint=NEW.state_fingerprint AND mutation.reference_fingerprint=NEW.reference_fingerprint
+    AND mutation.reference_count=json_array_length(NEW.archive_item_ids_json)+json_array_length(NEW.memory_record_ids_json)
+    AND mutation.occurred_at=NEW.created_at AND NEW.updated_at=NEW.created_at
+    AND mutation.policy_receipt_hash=NEW.policy_receipt_hash AND NEW.status='awaiting_approvals'
+    AND json_array_length(NEW.approvals_json)=0)
+OR EXISTS(SELECT 1 FROM json_each(NEW.archive_item_ids_json) value WHERE typeof(value.value)<>'text')
+OR EXISTS(SELECT 1 FROM json_each(NEW.memory_record_ids_json) value WHERE typeof(value.value)<>'text')
+BEGIN SELECT RAISE(ABORT,'33-X time capsule requires exact mutation and bounded references'); END;
+
+CREATE TRIGGER trg_33x_capsule_update
+BEFORE UPDATE ON memory_time_capsules
+WHEN NEW.id IS NOT OLD.id OR NEW.family_id IS NOT OLD.family_id OR NEW.owner_person_id IS NOT OLD.owner_person_id
+  OR NEW.title IS NOT OLD.title OR NEW.archive_item_ids_json IS NOT OLD.archive_item_ids_json
+  OR NEW.memory_record_ids_json IS NOT OLD.memory_record_ids_json OR NEW.unlock_at IS NOT OLD.unlock_at
+  OR NEW.minimum_approvals IS NOT OLD.minimum_approvals OR NEW.reference_fingerprint IS NOT OLD.reference_fingerprint
+  OR NEW.created_at IS NOT OLD.created_at OR NEW.revision<>OLD.revision+1
+  OR (SELECT count(*) FROM json_each(NEW.approvals_json))<>(SELECT count(DISTINCT json_extract(value,'$.accountId')) FROM json_each(NEW.approvals_json))
+  OR EXISTS(SELECT 1 FROM json_each(NEW.approvals_json) approval
+    WHERE json_type(approval.value)<>'object' OR typeof(json_extract(approval.value,'$.accountId'))<>'text'
+      OR typeof(json_extract(approval.value,'$.personId'))<>'text' OR julianday(json_extract(approval.value,'$.approvedAt')) IS NULL
+      OR NOT EXISTS(SELECT 1 FROM accounts account JOIN people person ON person.id=account.person_id
+        WHERE account.id=json_extract(approval.value,'$.accountId') AND person.id=json_extract(approval.value,'$.personId')
+          AND account.status='active' AND person.status='active' AND person.family_id=NEW.family_id))
+  OR NOT EXISTS(SELECT 1 FROM memory_studio_mutations mutation
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='memory_time_capsule' AND mutation.resource_id=NEW.id
+      AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+      AND mutation.expected_revision=OLD.revision AND mutation.revision=NEW.revision
+      AND mutation.resource_state_fingerprint=NEW.state_fingerprint AND mutation.reference_fingerprint=NEW.reference_fingerprint
+      AND mutation.occurred_at=NEW.updated_at AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+      AND ((mutation.mutation_kind='capsule_approve' AND OLD.status='awaiting_approvals' AND NEW.status='awaiting_approvals'
+          AND json_array_length(NEW.approvals_json)=json_array_length(OLD.approvals_json)+1
+          AND NOT EXISTS(SELECT 1 FROM json_each(OLD.approvals_json) old_approval
+            WHERE NOT EXISTS(SELECT 1 FROM json_each(NEW.approvals_json) new_approval WHERE new_approval.value=old_approval.value))
+          AND NOT EXISTS(SELECT 1 FROM json_each(OLD.approvals_json) approval
+            WHERE json_extract(approval.value,'$.accountId')=mutation.actor_account_id)
+          AND EXISTS(SELECT 1 FROM json_each(NEW.approvals_json) approval
+            WHERE json_extract(approval.value,'$.accountId')=mutation.actor_account_id
+              AND json_extract(approval.value,'$.personId')=mutation.actor_person_id
+              AND json_extract(approval.value,'$.approvedAt')=mutation.occurred_at))
+        OR (mutation.mutation_kind='capsule_revoke_approval' AND OLD.status='awaiting_approvals' AND NEW.status='awaiting_approvals'
+          AND json_array_length(NEW.approvals_json)=json_array_length(OLD.approvals_json)-1
+          AND NOT EXISTS(SELECT 1 FROM json_each(NEW.approvals_json) new_approval
+            WHERE NOT EXISTS(SELECT 1 FROM json_each(OLD.approvals_json) old_approval WHERE old_approval.value=new_approval.value))
+          AND EXISTS(SELECT 1 FROM json_each(OLD.approvals_json) approval
+            WHERE json_extract(approval.value,'$.accountId')=mutation.actor_account_id
+              AND json_extract(approval.value,'$.personId')=mutation.actor_person_id)
+          AND NOT EXISTS(SELECT 1 FROM json_each(NEW.approvals_json) approval
+            WHERE json_extract(approval.value,'$.accountId')=mutation.actor_account_id))
+        OR (mutation.mutation_kind='capsule_seal' AND OLD.status='awaiting_approvals' AND NEW.status='sealed'
+          AND json_array_length(NEW.approvals_json)>=2 AND NEW.sealed_at=NEW.updated_at)
+        OR (mutation.mutation_kind='capsule_release' AND OLD.status='sealed' AND NEW.status='released'
+          AND julianday(NEW.updated_at)>=julianday(NEW.unlock_at) AND NEW.released_at=NEW.updated_at)
+        OR (mutation.mutation_kind='capsule_cancel' AND OLD.status IN ('awaiting_approvals','sealed') AND NEW.status='cancelled'
+          AND NEW.cancelled_at=NEW.updated_at)
+        OR (mutation.mutation_kind='capsule_rollback' AND OLD.status='released' AND NEW.status='rolled_back'
+          AND julianday(NEW.updated_at)<=julianday(OLD.released_at,'+1 day') AND NEW.rolled_back_at=NEW.updated_at)))
+BEGIN SELECT RAISE(ABORT,'33-X time capsule update requires exact approval, waiting and rollback mutation'); END;
+
+CREATE TRIGGER trg_33x_memory_record_delete
+BEFORE DELETE ON memory_studio_records BEGIN SELECT RAISE(ABORT,'33-X memory record history is durable'); END;
+CREATE TRIGGER trg_33x_capsule_delete
+BEFORE DELETE ON memory_time_capsules BEGIN SELECT RAISE(ABORT,'33-X time capsule history is durable'); END;
+CREATE TRIGGER trg_33x_memory_mutation_update
+BEFORE UPDATE ON memory_studio_mutations BEGIN SELECT RAISE(ABORT,'33-X mutation ledger is immutable'); END;
+CREATE TRIGGER trg_33x_memory_mutation_delete
+BEFORE DELETE ON memory_studio_mutations BEGIN SELECT RAISE(ABORT,'33-X mutation ledger is durable'); END;
+
+UPDATE database_metadata SET value='REVISION-33-X-MEMORY-STUDIO-TIME-CAPSULE',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -14392,7 +14656,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(98, 'household_operations_center', householdOperationsCenterSql),
   createMigrationDefinition(99, 'child_education_coordination', childEducationCoordinationSql),
   createMigrationDefinition(100, 'places_travel_asset_pet_workflows', placesTravelAssetPetSql),
-  createMigrationDefinition(101, 'consent_bound_family_ai_assistant', familyAiAssistantSql)
+  createMigrationDefinition(101, 'consent_bound_family_ai_assistant', familyAiAssistantSql),
+  createMigrationDefinition(102, 'memory_studio_time_capsule', memoryStudioSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

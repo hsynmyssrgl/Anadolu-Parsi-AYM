@@ -44,6 +44,7 @@ import type { CreateHouseholdOperationItemInput, DeleteHouseholdOperationItemInp
 import type { ChildEducationCenterView, ChildEducationMutationReceiptView, CreateChildEducationItemInput, DeleteChildEducationItemInput, UpdateChildEducationItemInput } from '@ppt/domain';
 import type { CreatePlacesTravelItemInput, DeletePlacesTravelItemInput, PlacesTravelCenterView, PlacesTravelMutationReceiptView, UpdatePlacesTravelItemInput } from '@ppt/domain';
 import type { FamilyAiAssistantCenterView, FamilyAiSuggestionMutationReceiptView, GenerateFamilyAiSuggestionInput, ReviewFamilyAiSuggestionInput } from '@ppt/domain';
+import type { CreateMemoryStudioRecordInput, DeleteMemoryStudioRecordInput, CreateMemoryTimeCapsuleInput, MemoryStudioCenterView, MemoryStudioMutationReceiptView, ReviewMemoryTimeCapsuleInput, TransitionMemoryTimeCapsuleInput } from '@ppt/domain';
 import type { LegacyArchiveOwnershipReattestationView, ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { AssignPersonMembershipInput, CreateFamilyBranchInput, CreateHouseholdInput, FamilyBranch, Household, HouseholdMembershipWorkspaceView, PersonLifecycleProfile, PersonLifecycleWorkspaceView, PersonMembership, UpdatePersonProfileInput } from '@ppt/domain';
 import type { AuthorizationContextWorkspaceView } from '@ppt/domain';
@@ -700,6 +701,12 @@ contextBridge.exposeInMainWorld('pardus', {
   getFamilyAiAssistantCenter:():Promise<FamilyAiAssistantCenterView>=>invoke('familyAiAssistant:getCenter'),
   generateFamilyAiSuggestion:(input:GenerateFamilyAiSuggestionInput):Promise<FamilyAiSuggestionMutationReceiptView>=>invoke('familyAiAssistant:generate',input),
   reviewFamilyAiSuggestion:(input:ReviewFamilyAiSuggestionInput):Promise<FamilyAiSuggestionMutationReceiptView>=>invoke('familyAiAssistant:review',input),
+  getMemoryStudioCenter:():Promise<MemoryStudioCenterView>=>invoke('memoryStudio:getCenter'),
+  createMemoryStudioRecord:(input:CreateMemoryStudioRecordInput):Promise<MemoryStudioMutationReceiptView>=>invoke('memoryStudio:createRecord',input),
+  deleteMemoryStudioRecord:(input:DeleteMemoryStudioRecordInput):Promise<MemoryStudioMutationReceiptView>=>invoke('memoryStudio:deleteRecord',input),
+  createMemoryTimeCapsule:(input:CreateMemoryTimeCapsuleInput):Promise<MemoryStudioMutationReceiptView>=>invoke('memoryStudio:createCapsule',input),
+  reviewMemoryTimeCapsule:(input:ReviewMemoryTimeCapsuleInput):Promise<MemoryStudioMutationReceiptView>=>invoke('memoryStudio:reviewCapsule',input),
+  transitionMemoryTimeCapsule:(input:TransitionMemoryTimeCapsuleInput):Promise<MemoryStudioMutationReceiptView>=>invoke('memoryStudio:transitionCapsule',input),
   listFinanceValuations:():Promise<FinanceValuationView[]>=>invoke('finance:listValuations'),
   createFinanceValuation:(input:CreateFinanceValuationInput):Promise<FinanceValuationView[]>=>invoke('finance:createValuation',input),
   createMember: (input: CreateFamilyMemberInput): Promise<FamilyMutationResultView> => invoke('family:createMember', input),

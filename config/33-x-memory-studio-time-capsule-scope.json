@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "id": "33-X-MEMORY-STUDIO-TIME-CAPSULE",
+  "step": "33-X",
+  "decision": "DEC-235",
+  "title": "Memory studio and time capsule",
+  "status": "PLANNED",
+  "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+  "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+  "requirements": ["B6-04", "EXT-051", "EXT-052", "EXT-053", "EXT-054", "EXT-055", "EXT-056", "EXT-057"],
+  "dependsOn": ["33-Q", "33-R", "33-W"],
+  "roadmapStatus": "PLANNED",
+  "registrySemantics": {
+    "acceptedScopeRegistryAuthority": "ATOMIC_CLOSURE_STATE",
+    "registryMutationPerformedByStarter": false,
+    "roadmapMutationPerformedByStarter": false,
+    "planOrLedgerActivationPerformedByStarter": false,
+    "activePredecessor": "33-P",
+    "registryEvidenceMustRemainFalseUntilClosure": true
+  },
+  "implementedModel": {
+    "status": "PARTIAL_LOCAL_COMPOSED_AND_TESTED_ACCEPTANCE_INCOMPLETE",
+    "recordKinds": ["voice_story", "transcript", "photo_book", "annual_album", "on_this_day", "duplicate_photo_review", "face_group", "genealogy_media_link", "recipe", "tradition", "letter", "future_message", "family_documentary", "printable_book"],
+    "capsuleStatuses": ["awaiting_approvals", "sealed", "released", "cancelled", "rolled_back"],
+    "minimumDistinctAccountApprovals": 2,
+    "minimumWaitingDays": 7,
+    "maximumRollbackHours": 24,
+    "archiveContentRemainsProtected": true,
+    "metadataAndReferencesOnly": true,
+    "optimisticRevisionRequired": true,
+    "idempotentClientOperationRequired": true,
+    "immutableMutationLedger": true,
+    "existingDigitalLegacyScreenReused": true,
+    "newMenuRouteAdded": false
+  },
+  "truth": {
+    "localOnly": true,
+    "linkedArchiveContentRemainsProtected": true,
+    "newBinaryPayloadStored": false,
+    "transcriptionPerformed": false,
+    "faceRecognitionPerformed": false,
+    "duplicateDetectionPerformed": false,
+    "documentaryRendered": false,
+    "printableBookRendered": false,
+    "printingPerformed": false,
+    "networkUsed": false,
+    "cloudUsed": false,
+    "manualCurationOnly": true,
+    "manualFaceGroupingOnly": true,
+    "externalDeliveryPerformed": "not_performed",
+    "requirementsClosed": false,
+    "countsAsRequirementPass": false
+  },
+  "validation": {
+    "targetedTestFiles": [
+      "packages/application/tests/memory-studio-use-cases.test.ts",
+      "packages/repositories/memory-studio-repository-policy.test.ts",
+      "apps/desktop/tests/memory-studio-data-store.test.ts",
+      "apps/desktop/tests/memory-studio-ipc-integration.test.ts",
+      "apps/desktop/tests/memory-studio-ui.test.ts"
+    ],
+    "targetedTestFileRatchet": 5,
+    "targetedTestRatchet": 21,
+    "migrationVersion": 102,
+    "migrationSha256": "cb719e825fde1269af44900d4ab66d1fa6a550e7cfe1695535a6e4e5c7cceafa",
+    "ppk021": {"status":"PASS","scannedProductionFiles":480,"exactPrivilegedSurfaceCount":740,"exactAllowlistSha256":"be7f27d47e2aa592dd2dc4d077222c030632a346eaad3014288b9b4b8bacf83e","targetedTests":17,"contractChecks":84,"runtimeChecks":20},
+    "ppk022": {"status":"PASS","scannedProductionFiles":480,"exactCapabilitySurfaceCount":345,"exactCapabilityManifestSha256":"1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e","targetedTests":19,"contractChecks":110,"runtimeChecks":24},
+    "countsAsRequirementPass": false
+  },
+  "manualEvidence": {
+    "realFamilyMemoryUat": "NOT_RUN",
+    "realMediaTranscriptionUat": "NOT_RUN",
+    "realFaceGroupingUat": "NOT_RUN",
+    "photoDuplicateDetectionUat": "NOT_RUN",
+    "documentaryBookAndPrintUat": "NOT_RUN",
+    "timeCapsuleReleaseAndRecoveryUat": "NOT_RUN",
+    "privacyLegalReview": "NOT_RUN",
+    "certificationClaimed": false
+  },
+  "persistentReceiptStatus": "NOT_RUN"
+}

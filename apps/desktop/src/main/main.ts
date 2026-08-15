@@ -15,6 +15,7 @@ import type { CreateHouseholdOperationItemInput, DeleteHouseholdOperationItemInp
 import type { CreateChildEducationItemInput, DeleteChildEducationItemInput, UpdateChildEducationItemInput } from '@ppt/domain';
 import type { CreatePlacesTravelItemInput, DeletePlacesTravelItemInput, UpdatePlacesTravelItemInput } from '@ppt/domain';
 import type { GenerateFamilyAiSuggestionInput, ReviewFamilyAiSuggestionInput } from '@ppt/domain';
+import type { CreateMemoryStudioRecordInput, DeleteMemoryStudioRecordInput, CreateMemoryTimeCapsuleInput, ReviewMemoryTimeCapsuleInput, TransitionMemoryTimeCapsuleInput } from '@ppt/domain';
 import type { ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { UnifiedAuthorizedSearchInput } from '@ppt/domain';
 import type { RecordManagedLifeItemInput } from '@ppt/domain';
@@ -59,6 +60,7 @@ import { registerCorrelatedIpcHandler, registerIpcCancellationHandlers, createRu
 import {
   CHILD_EDUCATION_COORDINATION_IPC_CHANNELS,
   FAMILY_AI_ASSISTANT_IPC_CHANNELS,
+  MEMORY_STUDIO_IPC_CHANNELS,
   PLACES_TRAVEL_ASSET_PET_IPC_CHANNELS,
   HEALTH_CARE_COORDINATION_IPC_CHANNELS,
   HOUSEHOLD_OPERATIONS_IPC_CHANNELS,
@@ -2399,6 +2401,17 @@ function registerIpc(): void {
     store().generateFamilyAiSuggestion(input));
   registerIpcHandler(FAMILY_AI_ASSISTANT_IPC_CHANNELS.review,async(_event,input:ReviewFamilyAiSuggestionInput)=>
     store().reviewFamilyAiSuggestion(input));
+  registerIpcHandler(MEMORY_STUDIO_IPC_CHANNELS.getCenter,async()=>store().getMemoryStudioCenter());
+  registerIpcHandler(MEMORY_STUDIO_IPC_CHANNELS.createRecord,async(_event,input:CreateMemoryStudioRecordInput)=>
+    store().createMemoryStudioRecord(input));
+  registerIpcHandler(MEMORY_STUDIO_IPC_CHANNELS.deleteRecord,async(_event,input:DeleteMemoryStudioRecordInput)=>
+    store().deleteMemoryStudioRecord(input));
+  registerIpcHandler(MEMORY_STUDIO_IPC_CHANNELS.createCapsule,async(_event,input:CreateMemoryTimeCapsuleInput)=>
+    store().createMemoryTimeCapsule(input));
+  registerIpcHandler(MEMORY_STUDIO_IPC_CHANNELS.reviewCapsule,async(_event,input:ReviewMemoryTimeCapsuleInput)=>
+    store().reviewMemoryTimeCapsule(input));
+  registerIpcHandler(MEMORY_STUDIO_IPC_CHANNELS.transitionCapsule,async(_event,input:TransitionMemoryTimeCapsuleInput)=>
+    store().transitionMemoryTimeCapsule(input));
   registerIpcHandler('finance:listValuations', () => store().listFinanceValuations());
   registerIpcHandler('finance:createValuation', (_event, input:CreateFinanceValuationInput) => store().createFinanceValuation(input));
   registerIpcHandler('family:createRelation', async (_event, input: CreateFamilyRelationInput) => {

@@ -522,7 +522,12 @@
       "version": 101,
       "name": "consent_bound_family_ai_assistant",
       "checksum": "3758e4c795b59e09b7701dbf6dd3b89c6717506be8e4ee9cc13b8ba20cdf3715"
+    },
+    {
+      "version": 102,
+      "name": "memory_studio_time_capsule",
+      "checksum": "cb719e825fde1269af44900d4ab66d1fa6a550e7cfe1695535a6e4e5c7cceafa"
     }
   ],
-  "generatedAt": "2026-08-15T05:06:43.836Z"
+  "generatedAt": "2026-08-15T06:34:38.543Z"
 }

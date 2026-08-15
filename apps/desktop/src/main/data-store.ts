@@ -165,6 +165,12 @@ import {
   GetFamilyAiAssistantCenterUseCase,
   GenerateFamilyAiSuggestionUseCase,
   ReviewFamilyAiSuggestionUseCase,
+  GetMemoryStudioCenterUseCase,
+  CreateMemoryStudioRecordUseCase,
+  DeleteMemoryStudioRecordUseCase,
+  CreateMemoryTimeCapsuleUseCase,
+  ReviewMemoryTimeCapsuleUseCase,
+  TransitionMemoryTimeCapsuleUseCase,
   ListLifeRecordsUseCase,
   CreateLifeRecordUseCase,
   GetManagedLifeWorkspaceUseCase,
@@ -331,6 +337,7 @@ import {
 import type { AddArchiveItemVersionInput, AddArchiveRelationEvidenceInput, ArchiveRelationEvidenceHistoryView, ArchiveRelationEvidenceView, ChildEducationCenterView, ChildEducationMutationReceiptView, CreateChildEducationItemInput, CreateHouseholdOperationItemInput, DeleteChildEducationItemInput, DeleteHouseholdOperationItemInput, HealthCareCoordinationCenterView, HealthCareMutationReceiptView, HouseholdOperationMutationReceiptView, HouseholdOperationsCenterView, RecordHealthCareEntryInput, RemoveArchiveRelationEvidenceInput, RevokeHealthCareAccessGrantInput, UnifiedAuthorizedSearchInput, UnifiedAuthorizedSearchView, UpdateChildEducationItemInput, UpdateHouseholdOperationItemInput, UpsertHealthCareAccessGrantInput } from '@ppt/domain';
 import type { CreatePlacesTravelItemInput, DeletePlacesTravelItemInput, PlacesTravelCenterView, PlacesTravelMutationReceiptView, UpdatePlacesTravelItemInput } from '@ppt/domain';
 import type { FamilyAiAssistantCenterView, FamilyAiSuggestionMutationReceiptView, GenerateFamilyAiSuggestionInput, ReviewFamilyAiSuggestionInput } from '@ppt/domain';
+import type { CreateMemoryStudioRecordInput, DeleteMemoryStudioRecordInput, CreateMemoryTimeCapsuleInput, MemoryStudioCenterView, MemoryStudioMutationReceiptView, ReviewMemoryTimeCapsuleInput, TransitionMemoryTimeCapsuleInput } from '@ppt/domain';
 import { RepositoryBackedFamilyApplicationUnitOfWork, RepositoryBackedFamilyGraphQueryPort } from './family-application-adapter.js';
 import { RepositoryBackedHouseholdMembershipUnitOfWork } from './household-membership-application-adapter.js';
 import { RepositoryBackedPersonLifecycleUnitOfWork } from './person-lifecycle-application-adapter.js';
@@ -387,6 +394,10 @@ import {
   RepositoryBackedFamilyAiAssistantSourcePort,
   RepositoryBackedFamilyAiAssistantUnitOfWork
 } from './family-ai-assistant-application-adapter.js';
+import {
+  RepositoryBackedMemoryStudioQueryPort,
+  RepositoryBackedMemoryStudioUnitOfWork
+} from './memory-studio-application-adapter.js';
 import {
   RepositoryBackedLocationPolicyTransactionRunner,
   RepositoryBackedLocationUnitOfWork,
@@ -1266,6 +1277,12 @@ export class FamilyDataStore {
   readonly #getFamilyAiAssistantCenterUseCase:GetFamilyAiAssistantCenterUseCase;
   readonly #generateFamilyAiSuggestionUseCase:GenerateFamilyAiSuggestionUseCase;
   readonly #reviewFamilyAiSuggestionUseCase:ReviewFamilyAiSuggestionUseCase;
+  readonly #getMemoryStudioCenterUseCase:GetMemoryStudioCenterUseCase;
+  readonly #createMemoryStudioRecordUseCase:CreateMemoryStudioRecordUseCase;
+  readonly #deleteMemoryStudioRecordUseCase:DeleteMemoryStudioRecordUseCase;
+  readonly #createMemoryTimeCapsuleUseCase:CreateMemoryTimeCapsuleUseCase;
+  readonly #reviewMemoryTimeCapsuleUseCase:ReviewMemoryTimeCapsuleUseCase;
+  readonly #transitionMemoryTimeCapsuleUseCase:TransitionMemoryTimeCapsuleUseCase;
   readonly #prepareFamilyEmergencyCardExportUseCase: PrepareFamilyEmergencyCardExportUseCase;
   readonly #recordFamilyEmergencyCardExportCompletionUseCase: RecordFamilyEmergencyCardExportCompletionUseCase;
   readonly #listFinanceRecordsUseCase: ListFinanceRecordsUseCase;
@@ -1784,6 +1801,7 @@ export class FamilyDataStore {
           childEducationPolicyResourceRepository: this.#repositories.childEducationRepository,
           placesTravelPolicyResourceRepository: this.#repositories.placesTravelRepository,
           familyAiAssistantPolicyResourceRepository: this.#repositories.familyAiAssistantRepository,
+          memoryStudioPolicyResourceRepository: this.#repositories.memoryStudioRepository,
           personRepository: this.#repositories.personRepository,
           deviceIdentityProvider: this.#deviceIdentityProvider,
           authorizationProvider: productionArchivePolicy.authorizationProvider,
@@ -1803,6 +1821,8 @@ export class FamilyDataStore {
       placesTravelPolicyResourceRepository: this.#repositories.placesTravelRepository,
       familyAiAssistantRepository: this.#repositories.familyAiAssistantRepository,
       familyAiAssistantPolicyResourceRepository: this.#repositories.familyAiAssistantRepository,
+      memoryStudioRepository: this.#repositories.memoryStudioRepository,
+      memoryStudioPolicyResourceRepository: this.#repositories.memoryStudioRepository,
       aiConsentRepository: this.#repositories.aiConsentRepository,
       accountRepository: this.#repositories.accountRepository,
       permissionRepository: this.#repositories.objectPermissionRepository,
@@ -2511,6 +2531,17 @@ export class FamilyDataStore {
     this.#getFamilyAiAssistantCenterUseCase=new GetFamilyAiAssistantCenterUseCase(familyAiAssistantQuery);
     this.#generateFamilyAiSuggestionUseCase=new GenerateFamilyAiSuggestionUseCase(familyAiAssistantSource,familyAiAssistantUnitOfWork);
     this.#reviewFamilyAiSuggestionUseCase=new ReviewFamilyAiSuggestionUseCase(familyAiAssistantUnitOfWork);
+    const memoryStudioDependencies={...lifeApplicationDependencies,
+      memoryStudioRepository:this.#repositories.memoryStudioRepository,
+      memoryStudioPolicyResourceRepository:this.#repositories.memoryStudioRepository} as const;
+    const memoryStudioQuery=new RepositoryBackedMemoryStudioQueryPort(memoryStudioDependencies,lifePolicyTransactionRunner);
+    const memoryStudioUnitOfWork=new RepositoryBackedMemoryStudioUnitOfWork(memoryStudioDependencies,lifePolicyTransactionRunner);
+    this.#getMemoryStudioCenterUseCase=new GetMemoryStudioCenterUseCase(memoryStudioQuery);
+    this.#createMemoryStudioRecordUseCase=new CreateMemoryStudioRecordUseCase(memoryStudioUnitOfWork);
+    this.#deleteMemoryStudioRecordUseCase=new DeleteMemoryStudioRecordUseCase(memoryStudioUnitOfWork);
+    this.#createMemoryTimeCapsuleUseCase=new CreateMemoryTimeCapsuleUseCase(memoryStudioUnitOfWork);
+    this.#reviewMemoryTimeCapsuleUseCase=new ReviewMemoryTimeCapsuleUseCase(memoryStudioUnitOfWork);
+    this.#transitionMemoryTimeCapsuleUseCase=new TransitionMemoryTimeCapsuleUseCase(memoryStudioUnitOfWork);
     this.#prepareArchiveOpenUseCase = new PrepareArchiveOpenUseCase(archiveQuery);
     this.#recordArchiveOpenedUseCase = new RecordArchiveOpenedUseCase(archiveUnitOfWork);
     this.#authorizeEmergencyArchiveReadUseCase = new AuthorizeEmergencyArchiveReadUseCase(archiveUnitOfWork);
@@ -6016,6 +6047,36 @@ export class FamilyDataStore {
       context:this.#lifeApplicationContext('family-ai-assistant-review'),command:input});
     if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
     return result.value;
+  }
+
+  public async getMemoryStudioCenter():Promise<MemoryStudioCenterView>{
+    const result=await this.#getMemoryStudioCenterUseCase.execute(this.#lifeApplicationContext('memory-studio-center'));
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async createMemoryStudioRecord(input:CreateMemoryStudioRecordInput):Promise<MemoryStudioMutationReceiptView>{
+    const result=await this.#createMemoryStudioRecordUseCase.execute({context:this.#lifeApplicationContext('memory-studio-record-create'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async deleteMemoryStudioRecord(input:DeleteMemoryStudioRecordInput):Promise<MemoryStudioMutationReceiptView>{
+    const result=await this.#deleteMemoryStudioRecordUseCase.execute({context:this.#lifeApplicationContext('memory-studio-record-delete'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async createMemoryTimeCapsule(input:CreateMemoryTimeCapsuleInput):Promise<MemoryStudioMutationReceiptView>{
+    const result=await this.#createMemoryTimeCapsuleUseCase.execute({context:this.#lifeApplicationContext('memory-time-capsule-create'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async reviewMemoryTimeCapsule(input:ReviewMemoryTimeCapsuleInput):Promise<MemoryStudioMutationReceiptView>{
+    const result=await this.#reviewMemoryTimeCapsuleUseCase.execute({context:this.#lifeApplicationContext('memory-time-capsule-review'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async transitionMemoryTimeCapsule(input:TransitionMemoryTimeCapsuleInput):Promise<MemoryStudioMutationReceiptView>{
+    const result=await this.#transitionMemoryTimeCapsuleUseCase.execute({context:this.#lifeApplicationContext('memory-time-capsule-transition'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
   }
 
   public async listArchiveVersions(itemId:string): Promise<ArchiveVersionView[]> { const result=await this.#listArchiveVersionsUseCase.execute(this.#archiveApplicationContext('archive-versions'),itemId); if(!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`); return [...result.value]; }

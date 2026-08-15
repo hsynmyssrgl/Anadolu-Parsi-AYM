@@ -41,3 +41,4 @@ export * from './household-operations.js';
 export * from './child-education-coordination.js';
 export * from './places-travel-asset-pet.js';
 export * from './family-ai-assistant.js';
+export * from './memory-studio.js';

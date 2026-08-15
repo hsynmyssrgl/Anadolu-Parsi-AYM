@@ -3004,6 +3004,101 @@ const familyAiResult=(channel:string,result:unknown):IpcIntegrationPolicyDecisio
   return valid?accepted():rejected('FAMILY_AI_RESULT_INVALID','$result');
 };
 
+export const MEMORY_STUDIO_IPC_CHANNELS=Object.freeze({
+  getCenter:'memoryStudio:getCenter',createRecord:'memoryStudio:createRecord',deleteRecord:'memoryStudio:deleteRecord',
+  createCapsule:'memoryStudio:createCapsule',reviewCapsule:'memoryStudio:reviewCapsule',transitionCapsule:'memoryStudio:transitionCapsule'
+} as const);
+const memoryStudioChannels=new Set<string>(Object.values(MEMORY_STUDIO_IPC_CHANNELS));
+const memoryStudioRecordKinds=new Set<unknown>(['voice_story','transcript','photo_book','annual_album','on_this_day',
+  'duplicate_photo_review','face_group','genealogy_media_link','recipe','tradition','letter','future_message',
+  'family_documentary','printable_book']);
+const memoryStudioIds=(value:unknown):boolean=>Array.isArray(value)&&value.length<=32
+  &&value.every(healthCareIdentifier)&&new Set(value).size===value.length;
+const memoryStudioInput=(channel:string,args:readonly unknown[]):IpcIntegrationPolicyDecision=>{
+  if(channel===MEMORY_STUDIO_IPC_CHANNELS.getCenter)return zeroArguments(args);
+  if(args.length!==1||!isObject(args[0]))return rejected('MEMORY_STUDIO_OBJECT_REQUIRED','$[0]');const value=args[0];
+  if(channel===MEMORY_STUDIO_IPC_CHANNELS.createRecord){
+    const optional=['summary','archiveItemIds','personIds','ocrJobId','eventDate','manualFaceGroupingApproved']
+      .filter((key)=>value[key]!==undefined);
+    const valid=healthCareExactRecord(value,['clientOperationId','recordId','kind','title',...optional])
+      &&healthCareIdentifier(value.clientOperationId)&&healthCareIdentifier(value.recordId)&&memoryStudioRecordKinds.has(value.kind)
+      &&healthCareText(value.title,2,160)&&(value.summary===undefined||healthCareText(value.summary,2,2000))
+      &&(value.archiveItemIds===undefined||memoryStudioIds(value.archiveItemIds))
+      &&(value.personIds===undefined||memoryStudioIds(value.personIds))
+      &&(value.ocrJobId===undefined||healthCareIdentifier(value.ocrJobId))
+      &&(value.eventDate===undefined||healthCareIso(value.eventDate))
+      &&(value.manualFaceGroupingApproved===undefined||typeof value.manualFaceGroupingApproved==='boolean');
+    return valid?accepted():rejected('MEMORY_STUDIO_CREATE_RECORD_INPUT_INVALID','$[0]');
+  }
+  if(channel===MEMORY_STUDIO_IPC_CHANNELS.deleteRecord)return healthCareExactRecord(value,
+    ['clientOperationId','recordId','expectedRevision'])&&healthCareIdentifier(value.clientOperationId)
+    &&healthCareIdentifier(value.recordId)&&healthCareRevision(value.expectedRevision)&&Number(value.expectedRevision)>=1
+    ?accepted():rejected('MEMORY_STUDIO_DELETE_RECORD_INPUT_INVALID','$[0]');
+  if(channel===MEMORY_STUDIO_IPC_CHANNELS.createCapsule){const optional=['archiveItemIds','memoryRecordIds'].filter((key)=>value[key]!==undefined);
+    return healthCareExactRecord(value,['clientOperationId','capsuleId','title','unlockAt',...optional])
+      &&healthCareIdentifier(value.clientOperationId)&&healthCareIdentifier(value.capsuleId)&&healthCareText(value.title,2,160)
+      &&healthCareIso(value.unlockAt)&&(value.archiveItemIds===undefined||memoryStudioIds(value.archiveItemIds))
+      &&(value.memoryRecordIds===undefined||memoryStudioIds(value.memoryRecordIds))
+      ?accepted():rejected('MEMORY_STUDIO_CREATE_CAPSULE_INPUT_INVALID','$[0]');}
+  if(channel===MEMORY_STUDIO_IPC_CHANNELS.reviewCapsule)return healthCareExactRecord(value,
+    ['clientOperationId','capsuleId','expectedRevision','decision'])&&healthCareIdentifier(value.clientOperationId)
+    &&healthCareIdentifier(value.capsuleId)&&healthCareRevision(value.expectedRevision)&&Number(value.expectedRevision)>=1
+    &&['approve','revoke_approval'].includes(String(value.decision))?accepted():rejected('MEMORY_STUDIO_REVIEW_CAPSULE_INPUT_INVALID','$[0]');
+  if(channel===MEMORY_STUDIO_IPC_CHANNELS.transitionCapsule)return healthCareExactRecord(value,
+    ['clientOperationId','capsuleId','expectedRevision','transition'])&&healthCareIdentifier(value.clientOperationId)
+    &&healthCareIdentifier(value.capsuleId)&&healthCareRevision(value.expectedRevision)&&Number(value.expectedRevision)>=1
+    &&['seal','release','cancel','rollback'].includes(String(value.transition))?accepted():rejected('MEMORY_STUDIO_TRANSITION_CAPSULE_INPUT_INVALID','$[0]');
+  return rejected('UNKNOWN_IPC_CHANNEL','$');
+};
+const memoryStudioRecordResult=(value:unknown):boolean=>{if(!isObject(value))return false;
+  const optional=['summary','ocrJobId','eventDate','deletedAt'].filter((key)=>value[key]!==undefined);
+  return healthCareExactRecord(value,['id','ownerPersonId','kind','status','title','archiveItemIds','personIds',
+    'manualFaceGroupingApproved','revision','createdAt','updatedAt',...optional])&&healthCareIdentifier(value.id)
+    &&healthCareIdentifier(value.ownerPersonId)&&memoryStudioRecordKinds.has(value.kind)&&['active','deleted'].includes(String(value.status))
+    &&healthCareText(value.title,2,160)&&(value.summary===undefined||healthCareText(value.summary,2,2000))
+    &&memoryStudioIds(value.archiveItemIds)&&memoryStudioIds(value.personIds)
+    &&(value.ocrJobId===undefined||healthCareIdentifier(value.ocrJobId))&&(value.eventDate===undefined||healthCareIso(value.eventDate))
+    &&typeof value.manualFaceGroupingApproved==='boolean'&&healthCareRevision(value.revision)&&Number(value.revision)>=1
+    &&healthCareIso(value.createdAt)&&healthCareIso(value.updatedAt)&&(value.deletedAt===undefined||healthCareIso(value.deletedAt));};
+const memoryStudioApprovalResult=(value:unknown):boolean=>healthCareExactRecord(value,['accountId','personId','approvedAt'])
+  &&healthCareIdentifier(value.accountId)&&healthCareIdentifier(value.personId)&&healthCareIso(value.approvedAt);
+const memoryStudioCapsuleResult=(value:unknown):boolean=>{if(!isObject(value))return false;
+  const optional=['sealedAt','releasedAt','cancelledAt','rolledBackAt'].filter((key)=>value[key]!==undefined);
+  return healthCareExactRecord(value,['id','ownerPersonId','title','status','archiveItemIds','memoryRecordIds','unlockAt',
+    'minimumApprovals','approvals','revision','createdAt','updatedAt',...optional])&&healthCareIdentifier(value.id)
+    &&healthCareIdentifier(value.ownerPersonId)&&healthCareText(value.title,2,160)
+    &&['awaiting_approvals','sealed','released','cancelled','rolled_back'].includes(String(value.status))
+    &&memoryStudioIds(value.archiveItemIds)&&memoryStudioIds(value.memoryRecordIds)&&healthCareIso(value.unlockAt)
+    &&value.minimumApprovals===2&&householdArray(value.approvals,32,memoryStudioApprovalResult)
+    &&healthCareRevision(value.revision)&&Number(value.revision)>=1&&healthCareIso(value.createdAt)&&healthCareIso(value.updatedAt)
+    &&(value.sealedAt===undefined||healthCareIso(value.sealedAt))&&(value.releasedAt===undefined||healthCareIso(value.releasedAt))
+    &&(value.cancelledAt===undefined||healthCareIso(value.cancelledAt))&&(value.rolledBackAt===undefined||healthCareIso(value.rolledBackAt));};
+const memoryStudioCenterResult=(value:unknown):boolean=>healthCareExactRecord(value,
+  ['schemaVersion','centerId','ownerPersonId','records','capsules','truth','generatedAt'])&&value.schemaVersion===1
+  &&healthCareIdentifier(value.centerId)&&healthCareIdentifier(value.ownerPersonId)&&householdArray(value.records,500,memoryStudioRecordResult)
+  &&householdArray(value.capsules,200,memoryStudioCapsuleResult)&&healthCareExactRecord(value.truth,
+    ['localOnly','linkedArchiveContentRemainsProtected','newBinaryPayloadStored','transcriptionPerformed','faceRecognitionPerformed',
+      'duplicateDetectionPerformed','documentaryRendered','printableBookRendered','printingPerformed','networkUsed','cloudUsed',
+      'manualCurationOnly','manualFaceGroupingOnly','minimumCapsuleApprovals','waitingPeriodEnforced','externalDeliveryPerformed'])
+  &&value.truth.localOnly===true&&value.truth.linkedArchiveContentRemainsProtected===true&&value.truth.newBinaryPayloadStored===false
+  &&value.truth.transcriptionPerformed===false&&value.truth.faceRecognitionPerformed===false&&value.truth.duplicateDetectionPerformed===false
+  &&value.truth.documentaryRendered===false&&value.truth.printableBookRendered===false&&value.truth.printingPerformed===false
+  &&value.truth.networkUsed===false&&value.truth.cloudUsed===false&&value.truth.manualCurationOnly===true
+  &&value.truth.manualFaceGroupingOnly===true&&value.truth.minimumCapsuleApprovals===2&&value.truth.waitingPeriodEnforced===true
+  &&value.truth.externalDeliveryPerformed==='not_performed'&&healthCareIso(value.generatedAt);
+const memoryStudioReceiptResult=(value:unknown):boolean=>healthCareExactRecord(value,
+  ['resourceType','resourceId','mutationKind','previousRevision','revision','occurredAt','replayed','networkUsed','cloudUsed',
+    'externalDeliveryPerformed'])&&['memory_studio_record','memory_time_capsule'].includes(String(value.resourceType))
+  &&healthCareIdentifier(value.resourceId)&&['record_create','record_delete','capsule_create','capsule_approve',
+    'capsule_revoke_approval','capsule_seal','capsule_release','capsule_cancel','capsule_rollback'].includes(String(value.mutationKind))
+  &&healthCareRevision(value.previousRevision)&&healthCareRevision(value.revision)&&value.revision===Number(value.previousRevision)+1
+  &&healthCareIso(value.occurredAt)&&typeof value.replayed==='boolean'&&value.networkUsed===false&&value.cloudUsed===false
+  &&value.externalDeliveryPerformed==='not_performed';
+const memoryStudioResult=(channel:string,result:unknown):IpcIntegrationPolicyDecision=>{
+  const valid=channel===MEMORY_STUDIO_IPC_CHANNELS.getCenter?memoryStudioCenterResult(result):memoryStudioReceiptResult(result);
+  return valid?accepted():rejected('MEMORY_STUDIO_RESULT_INVALID','$result');
+};
+
 export const ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS = Object.freeze({
   listEvidence: 'archive:listRelationEvidence',
   listEvidenceHistory: 'archive:listRelationEvidenceHistory',
@@ -3627,6 +3722,8 @@ export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unkn
   if (channel === UNIFIED_AUTHORIZED_SEARCH_IPC_CHANNEL) return unifiedAuthorizedSearchResult(result);
   if (familyAiAssistantChannels.has(channel)) return familyAiResult(channel,result);
   if (channel.startsWith('familyAiAssistant:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
+  if (memoryStudioChannels.has(channel)) return memoryStudioResult(channel,result);
+  if (channel.startsWith('memoryStudio:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
   if (childEducationChannels.has(channel)) return childEducationResult(channel, result);
   if (channel.startsWith('childEducation:')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
   if (placesTravelChannels.has(channel)) return placesTravelResult(channel, result);
@@ -3671,6 +3768,8 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
   if (channel === UNIFIED_AUTHORIZED_SEARCH_IPC_CHANNEL) return unifiedAuthorizedSearchInput(args);
   if (familyAiAssistantChannels.has(channel)) return familyAiInput(channel,args);
   if (channel.startsWith('familyAiAssistant:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
+  if (memoryStudioChannels.has(channel)) return memoryStudioInput(channel,args);
+  if (channel.startsWith('memoryStudio:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
   if (childEducationChannels.has(channel)) return childEducationInput(channel, args);
   if (channel.startsWith('childEducation:')) return rejected('UNKNOWN_IPC_CHANNEL', '$');
   if (placesTravelChannels.has(channel)) return placesTravelInput(channel, args);

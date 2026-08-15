@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "step": "33-X",
+  "decision": "DEC-235",
+  "status": "PLANNED",
+  "governanceState": "LOCAL_IMPLEMENTATION_STARTED",
+  "requirements": ["B6-04", "EXT-051", "EXT-052", "EXT-053", "EXT-054", "EXT-055", "EXT-056", "EXT-057"],
+  "implementationChain": {
+    "domain": ["packages/domain/src/memory-studio.ts"],
+    "application": ["packages/application/src/memory-studio-use-cases.ts"],
+    "repositoryContract": ["packages/repository-contracts/src/memory-studio-repository.ts"],
+    "migration": ["packages/database/src/family-database-migrations.ts#102"],
+    "repository": ["packages/repositories/src/memory-studio-repository.ts"],
+    "policyAndComposition": ["apps/desktop/src/main/life-production-policy-runtime.ts", "apps/desktop/src/main/memory-studio-application-adapter.ts", "apps/desktop/src/main/repository-composition-root.ts", "apps/desktop/src/main/data-store.ts"],
+    "ipc": ["apps/desktop/src/main/ipc-integration-policy.ts", "apps/desktop/src/main/ipc-request-lifecycle.ts", "apps/desktop/src/main/main.ts", "apps/desktop/src/main/preload.ts", "apps/desktop/src/renderer/global.d.ts"],
+    "ui": ["apps/desktop/src/renderer/MemoryStudioPanel.tsx", "apps/desktop/src/renderer/App.tsx"]
+  },
+  "implementedTargetedTests": [
+    "packages/application/tests/memory-studio-use-cases.test.ts",
+    "packages/repositories/memory-studio-repository-policy.test.ts",
+    "apps/desktop/tests/memory-studio-data-store.test.ts",
+    "apps/desktop/tests/memory-studio-ipc-integration.test.ts",
+    "apps/desktop/tests/memory-studio-ui.test.ts"
+  ],
+  "securityControls": {
+    "centralPepReceiptFence": true,
+    "ownerAndFamilyBound": true,
+    "protectedArchiveReferenceValidation": true,
+    "minimumTwoDistinctAccountApprovals": true,
+    "minimumSevenDayWaitingPeriod": true,
+    "maximumTwentyFourHourRollback": true,
+    "payloadFreePolicyResolution": true,
+    "contentFreeAuditAndOutbox": true,
+    "boundedIpcAndReadResults": true,
+    "rendererAuthorityExcluded": true,
+    "externalDeliveryExcluded": true,
+    "newBinaryPayloadExcluded": true
+  },
+  "validation": {
+    "targetedTestFileRatchet": 5,
+    "targetedTestRatchet": 21,
+    "migrationVersion": 102,
+    "migrationSha256": "cb719e825fde1269af44900d4ab66d1fa6a550e7cfe1695535a6e4e5c7cceafa",
+    "ppk021": {"status":"PASS","files":480,"surfaces":740,"sha256":"be7f27d47e2aa592dd2dc4d077222c030632a346eaad3014288b9b4b8bacf83e","targeted":17,"contract":84,"runtime":20},
+    "ppk022": {"status":"PASS","files":480,"surfaces":345,"sha256":"1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e","targeted":19,"contract":110,"runtime":24},
+    "countsAsRequirementPass": false
+  },
+  "externalAndManualEvidence": "NOT_RUN",
+  "countsAsRequirementPass": false
+}
