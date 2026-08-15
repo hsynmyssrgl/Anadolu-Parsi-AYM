@@ -502,7 +502,12 @@
       "version": 97,
       "name": "health_care_coordination_elder_support",
       "checksum": "e3d60800e250feb674cd1250449982ac45cd7e700e74a728be7f6500c054d081"
+    },
+    {
+      "version": 98,
+      "name": "household_operations_center",
+      "checksum": "b5a09712e4f9611e928509441005ede824a9fceb516caa3b3d74cf83dc8f4d60"
     }
   ],
-  "generatedAt": "2026-08-15T00:06:28.117Z"
+  "generatedAt": "2026-08-15T01:27:17.065Z"
 }

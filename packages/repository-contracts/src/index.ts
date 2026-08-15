@@ -41,6 +41,7 @@ export * from './derived-data-policy-repository.js';
 export * from './privacy-ownership-data-rights-repository.js';
 export * from './identity-access-credential-repository.js';
 export * from './local-governed-ocr-repository.js';
+export * from './household-operations-repository.js';
 
 export * from './data-lifecycle-repository.js';
 

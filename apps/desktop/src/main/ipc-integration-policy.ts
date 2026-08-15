@@ -2433,6 +2433,184 @@ const healthCareResult = (channel: string, result: unknown): IpcIntegrationPolic
   return valid ? accepted() : rejected('HEALTH_CARE_RESULT_INVALID', '$result');
 };
 
+export const HOUSEHOLD_OPERATIONS_IPC_CHANNELS = Object.freeze({
+  getCenter: 'householdOperations:getCenter',
+  createItem: 'householdOperations:createItem',
+  updateItem: 'householdOperations:updateItem',
+  deleteItem: 'householdOperations:deleteItem'
+} as const);
+const householdOperationsChannels = new Set<string>(Object.values(HOUSEHOLD_OPERATIONS_IPC_CHANNELS));
+const householdOperationWriteChannels = new Set<string>([
+  HOUSEHOLD_OPERATIONS_IPC_CHANNELS.createItem,
+  HOUSEHOLD_OPERATIONS_IPC_CHANNELS.updateItem,
+  HOUSEHOLD_OPERATIONS_IPC_CHANNELS.deleteItem
+]);
+const householdKinds = new Set<unknown>([
+  'shopping_list','shopping_item','stock_item','recipe','meal_plan','chore','routine',
+  'bill','subscription','shared_expense','delivery','guest_access','pet_care'
+]);
+const householdAreas = new Set<unknown>(['shopping','inventory','meals','chores','expenses','deliveries','guests','pets']);
+const householdStatuses = new Set<unknown>([
+  'planned','active','low_stock','due','completed','cancelled','expired','delivered','revoked','deleted'
+]);
+const householdMutableStatuses = new Set<unknown>([...householdStatuses].filter((value) => value !== 'deleted'));
+const householdArray = (
+  value: unknown,
+  maximum: number,
+  validator: (item: unknown) => boolean
+): boolean => Array.isArray(value) && Object.getPrototypeOf(value) === Array.prototype
+  && value.length <= maximum && value.every(validator);
+const householdTextArray = (value: unknown, maximum: number): boolean => householdArray(
+  value,
+  maximum,
+  (item) => healthCareText(item, 1, 80)
+) && new Set(value as readonly unknown[]).size === (value as readonly unknown[]).length;
+const householdShares = (value: unknown): boolean => householdArray(value, 64, (item) =>
+  healthCareExactRecord(item, ['personId','basisPoints']) && healthCareIdentifier(item.personId)
+  && typeof item.basisPoints === 'number' && Number.isSafeInteger(item.basisPoints)
+  && item.basisPoints >= 1 && item.basisPoints <= 10_000)
+  && (value as readonly Record<string, unknown>[]).length >= 2
+  && new Set((value as readonly Record<string, unknown>[]).map((item) => item.personId)).size === (value as readonly unknown[]).length
+  && (value as readonly Record<string, unknown>[]).reduce((total, item) => total + Number(item.basisPoints), 0) === 10_000;
+const householdCreateInput = (value: Record<string, unknown>): boolean => {
+  const optional = [
+    'status','parentItemId','assignedPersonId','stockCategory','quantity','unit','scheduledAt','dueAt','expiresAt',
+    'recurrence','amountMinor','currency','splitShares','ingredientNames','allergenCodes','avoidedAllergenCodes',
+    'providerLabel','trackingLastFour','guestLabel','accessArea','opaquePetReference','note'
+  ].filter((key) => value[key] !== undefined);
+  if (!healthCareExactRecord(value, [
+    'expectedCenterRevision','clientOperationId','itemId','kind','title',...optional
+  ]) || !healthCareRevision(value.expectedCenterRevision) || !healthCareIdentifier(value.clientOperationId)
+    || !healthCareIdentifier(value.itemId) || !householdKinds.has(value.kind) || !healthCareText(value.title, 2, 160)
+    || (value.status !== undefined && !householdMutableStatuses.has(value.status))
+    || (value.parentItemId !== undefined && !healthCareIdentifier(value.parentItemId))
+    || (value.assignedPersonId !== undefined && !healthCareIdentifier(value.assignedPersonId))
+    || (value.stockCategory !== undefined && value.stockCategory !== 'food' && value.stockCategory !== 'cleaning')
+    || (value.quantity !== undefined && (typeof value.quantity !== 'number' || !Number.isFinite(value.quantity) || value.quantity < 0 || value.quantity > 1_000_000_000))
+    || (value.unit !== undefined && !healthCareText(value.unit, 1, 32))
+    || (value.scheduledAt !== undefined && !healthCareIso(value.scheduledAt))
+    || (value.dueAt !== undefined && !healthCareIso(value.dueAt))
+    || (value.expiresAt !== undefined && !healthCareIso(value.expiresAt))
+    || (value.recurrence !== undefined && !healthCareText(value.recurrence, 1, 160))
+    || (value.amountMinor !== undefined && (typeof value.amountMinor !== 'number' || !Number.isSafeInteger(value.amountMinor) || value.amountMinor < 0 || value.amountMinor > 9_000_000_000_000_000))
+    || (value.currency !== undefined && (typeof value.currency !== 'string' || !/^[A-Z]{3}$/u.test(value.currency)))
+    || (value.splitShares !== undefined && !householdShares(value.splitShares))
+    || (value.ingredientNames !== undefined && !householdTextArray(value.ingredientNames, 128))
+    || (value.allergenCodes !== undefined && !householdTextArray(value.allergenCodes, 64))
+    || (value.avoidedAllergenCodes !== undefined && !householdTextArray(value.avoidedAllergenCodes, 64))
+    || (value.providerLabel !== undefined && !healthCareText(value.providerLabel, 1, 120))
+    || (value.trackingLastFour !== undefined && (typeof value.trackingLastFour !== 'string' || !/^[A-Za-z0-9]{4}$/u.test(value.trackingLastFour)))
+    || (value.guestLabel !== undefined && !healthCareText(value.guestLabel, 1, 120))
+    || (value.accessArea !== undefined && !healthCareText(value.accessArea, 1, 120))
+    || (value.opaquePetReference !== undefined && !healthCareText(value.opaquePetReference, 1, 128))
+    || (value.note !== undefined && !healthCareText(value.note, 1, 2_000))) return false;
+  return true;
+};
+const householdUpdateInput = (value: Record<string, unknown>): boolean => {
+  const optional = ['status','assignedPersonId','quantity','scheduledAt','dueAt','expiresAt','note']
+    .filter((key) => value[key] !== undefined);
+  return optional.length >= 1 && healthCareExactRecord(value, [
+    'expectedCenterRevision','expectedItemRevision','clientOperationId','itemId',...optional
+  ]) && healthCareRevision(value.expectedCenterRevision) && healthCareRevision(value.expectedItemRevision)
+    && Number(value.expectedItemRevision) >= 1 && healthCareIdentifier(value.clientOperationId) && healthCareIdentifier(value.itemId)
+    && (value.status === undefined || householdMutableStatuses.has(value.status))
+    && (value.assignedPersonId === undefined || value.assignedPersonId === null || healthCareIdentifier(value.assignedPersonId))
+    && (value.quantity === undefined || (typeof value.quantity === 'number' && Number.isFinite(value.quantity) && value.quantity >= 0 && value.quantity <= 1_000_000_000))
+    && (value.scheduledAt === undefined || value.scheduledAt === null || healthCareIso(value.scheduledAt))
+    && (value.dueAt === undefined || value.dueAt === null || healthCareIso(value.dueAt))
+    && (value.expiresAt === undefined || value.expiresAt === null || healthCareIso(value.expiresAt))
+    && (value.note === undefined || value.note === null || healthCareText(value.note, 1, 2_000));
+};
+const householdInput = (channel: string, args: readonly unknown[]): IpcIntegrationPolicyDecision => {
+  if (channel === HOUSEHOLD_OPERATIONS_IPC_CHANNELS.getCenter) {
+    return args.length === 0 ? accepted() : rejected('HOUSEHOLD_OPERATIONS_ZERO_ARGUMENTS_REQUIRED', '$');
+  }
+  if (args.length !== 1 || !isObject(args[0])) return rejected('HOUSEHOLD_OPERATIONS_OBJECT_REQUIRED', '$[0]');
+  const value = args[0];
+  if (channel === HOUSEHOLD_OPERATIONS_IPC_CHANNELS.createItem) {
+    return householdCreateInput(value) ? accepted() : rejected('HOUSEHOLD_OPERATIONS_CREATE_INPUT_INVALID', '$[0]');
+  }
+  if (channel === HOUSEHOLD_OPERATIONS_IPC_CHANNELS.updateItem) {
+    return householdUpdateInput(value) ? accepted() : rejected('HOUSEHOLD_OPERATIONS_UPDATE_INPUT_INVALID', '$[0]');
+  }
+  if (channel === HOUSEHOLD_OPERATIONS_IPC_CHANNELS.deleteItem) {
+    return healthCareExactRecord(value, [
+      'expectedCenterRevision','expectedItemRevision','clientOperationId','itemId','reason'
+    ]) && healthCareRevision(value.expectedCenterRevision) && healthCareRevision(value.expectedItemRevision)
+      && Number(value.expectedItemRevision) >= 1 && healthCareIdentifier(value.clientOperationId)
+      && healthCareIdentifier(value.itemId) && healthCareText(value.reason, 3, 240)
+      ? accepted() : rejected('HOUSEHOLD_OPERATIONS_DELETE_INPUT_INVALID', '$[0]');
+  }
+  return rejected('UNKNOWN_IPC_CHANNEL', '$');
+};
+const householdItemResult = (value: unknown): boolean => {
+  if (!isObject(value)) return false;
+  const optional = [
+    'parentItemId','assignedPersonId','stockCategory','quantity','unit','scheduledAt','dueAt','expiresAt','recurrence',
+    'amountMinor','currency','splitShares','ingredientNames','allergenCodes','avoidedAllergenCodes','allergyFilterStatus',
+    'providerLabel','trackingLastFour','guestLabel','accessArea','opaquePetReference','note','deletedAt'
+  ].filter((key) => value[key] !== undefined);
+  return healthCareExactRecord(value, [
+    'id','centerId','ownerPersonId','kind','area','title','status','revision','createdAt','updatedAt',...optional
+  ]) && healthCareIdentifier(value.id) && healthCareIdentifier(value.centerId) && healthCareIdentifier(value.ownerPersonId)
+    && householdKinds.has(value.kind) && householdAreas.has(value.area) && healthCareText(value.title, 2, 160)
+    && householdStatuses.has(value.status) && healthCareRevision(value.revision) && Number(value.revision) >= 1
+    && healthCareIso(value.createdAt) && healthCareIso(value.updatedAt)
+    && (value.parentItemId === undefined || healthCareIdentifier(value.parentItemId))
+    && (value.assignedPersonId === undefined || healthCareIdentifier(value.assignedPersonId))
+    && (value.stockCategory === undefined || value.stockCategory === 'food' || value.stockCategory === 'cleaning')
+    && (value.quantity === undefined || (typeof value.quantity === 'number' && Number.isFinite(value.quantity) && value.quantity >= 0))
+    && (value.unit === undefined || healthCareText(value.unit, 1, 32))
+    && (value.scheduledAt === undefined || healthCareIso(value.scheduledAt))
+    && (value.dueAt === undefined || healthCareIso(value.dueAt))
+    && (value.expiresAt === undefined || healthCareIso(value.expiresAt))
+    && (value.recurrence === undefined || healthCareText(value.recurrence, 1, 160))
+    && (value.amountMinor === undefined || (typeof value.amountMinor === 'number' && Number.isSafeInteger(value.amountMinor) && value.amountMinor >= 0))
+    && (value.currency === undefined || (typeof value.currency === 'string' && /^[A-Z]{3}$/u.test(value.currency)))
+    && (value.splitShares === undefined || householdShares(value.splitShares))
+    && (value.ingredientNames === undefined || householdTextArray(value.ingredientNames, 128))
+    && (value.allergenCodes === undefined || householdTextArray(value.allergenCodes, 64))
+    && (value.avoidedAllergenCodes === undefined || householdTextArray(value.avoidedAllergenCodes, 64))
+    && (value.allergyFilterStatus === undefined || value.allergyFilterStatus === 'not_applicable' || value.allergyFilterStatus === 'clear')
+    && (value.providerLabel === undefined || healthCareText(value.providerLabel, 1, 120))
+    && (value.trackingLastFour === undefined || (typeof value.trackingLastFour === 'string' && /^[A-Za-z0-9]{4}$/u.test(value.trackingLastFour)))
+    && (value.guestLabel === undefined || healthCareText(value.guestLabel, 1, 120))
+    && (value.accessArea === undefined || healthCareText(value.accessArea, 1, 120))
+    && (value.opaquePetReference === undefined || healthCareText(value.opaquePetReference, 1, 128))
+    && (value.note === undefined || healthCareText(value.note, 1, 2_000))
+    && (value.deletedAt === undefined || healthCareIso(value.deletedAt));
+};
+const householdCenterResult = (value: unknown): boolean => healthCareExactRecord(value, [
+  'schemaVersion','centerId','revision','items','countsByArea','truth','generatedAt'
+]) && value.schemaVersion === 1 && healthCareIdentifier(value.centerId) && healthCareRevision(value.revision)
+  && householdArray(value.items, 2_000, householdItemResult)
+  && healthCareExactRecord(value.countsByArea, ['shopping','inventory','meals','chores','expenses','deliveries','guests','pets'])
+  && Object.values(value.countsByArea).every((count) => typeof count === 'number' && Number.isSafeInteger(count) && count >= 0)
+  && healthCareExactRecord(value.truth, [
+    'localOnly','externalShoppingOrder','automaticInventoryScan','recipeMedicalAdvice','paymentExecution',
+    'carrierSynchronization','remoteAccessControl','keyCodeStored','petCareDelivery'
+  ]) && value.truth.localOnly === true && value.truth.externalShoppingOrder === 'not_performed'
+  && value.truth.automaticInventoryScan === 'not_configured' && value.truth.recipeMedicalAdvice === 'not_provided'
+  && value.truth.paymentExecution === 'not_performed' && value.truth.carrierSynchronization === 'not_performed'
+  && value.truth.remoteAccessControl === 'not_configured' && value.truth.keyCodeStored === false
+  && value.truth.petCareDelivery === 'not_performed' && healthCareIso(value.generatedAt);
+const householdReceiptResult = (value: unknown): boolean => healthCareExactRecord(value, [
+  'centerId','itemId','mutationKind','previousCenterRevision','centerRevision','previousItemRevision',
+  'itemRevision','occurredAt','replayed','localOnly','externalAction'
+]) && healthCareIdentifier(value.centerId) && healthCareIdentifier(value.itemId)
+  && (value.mutationKind === 'item_create' || value.mutationKind === 'item_update' || value.mutationKind === 'item_delete')
+  && healthCareRevision(value.previousCenterRevision) && healthCareRevision(value.centerRevision)
+  && value.centerRevision === Number(value.previousCenterRevision) + 1
+  && healthCareRevision(value.previousItemRevision) && healthCareRevision(value.itemRevision)
+  && value.itemRevision === Number(value.previousItemRevision) + 1 && healthCareIso(value.occurredAt)
+  && typeof value.replayed === 'boolean' && value.localOnly === true && value.externalAction === 'not_performed';
+const householdResult = (channel: string, result: unknown): IpcIntegrationPolicyDecision => {
+  const valid = channel === HOUSEHOLD_OPERATIONS_IPC_CHANNELS.getCenter
+    ? householdCenterResult(result)
+    : householdOperationWriteChannels.has(channel) && householdReceiptResult(result);
+  return valid ? accepted() : rejected('HOUSEHOLD_OPERATIONS_RESULT_INVALID', '$result');
+};
+
 export const ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS = Object.freeze({
   listEvidence: 'archive:listRelationEvidence',
   listEvidenceHistory: 'archive:listRelationEvidenceHistory',
@@ -3054,6 +3232,8 @@ const policyServiceAvailabilityResult = (
 
 export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unknown): IpcIntegrationPolicyDecision => {
   if (channel === UNIFIED_AUTHORIZED_SEARCH_IPC_CHANNEL) return unifiedAuthorizedSearchResult(result);
+  if (householdOperationsChannels.has(channel)) return householdResult(channel, result);
+  if (channel.startsWith('householdOperations:')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
   if (healthCareCoordinationChannels.has(channel)) return healthCareResult(channel, result);
   if (channel.startsWith('healthCare:')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
   if (archiveEvidenceMediaChannels.has(channel)) return archiveEvidenceMediaResult(channel, result);
@@ -3090,6 +3270,8 @@ export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unkn
 
 export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unknown[]): IpcIntegrationPolicyDecision => {
   if (channel === UNIFIED_AUTHORIZED_SEARCH_IPC_CHANNEL) return unifiedAuthorizedSearchInput(args);
+  if (householdOperationsChannels.has(channel)) return householdInput(channel, args);
+  if (channel.startsWith('householdOperations:')) return rejected('UNKNOWN_IPC_CHANNEL', '$');
   if (healthCareCoordinationChannels.has(channel)) return healthCareInput(channel, args);
   if (channel.startsWith('healthCare:')) return rejected('UNKNOWN_IPC_CHANNEL', '$');
   if (archiveEvidenceMediaChannels.has(channel)) return archiveEvidenceMediaInput(channel, args);

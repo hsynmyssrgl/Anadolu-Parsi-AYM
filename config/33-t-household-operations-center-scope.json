@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "id": "33-T-HOUSEHOLD-OPERATIONS-CENTER",
+  "step": "33-T",
+  "decision": "DEC-231",
+  "title": "Household operations center",
+  "status": "PLANNED",
+  "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+  "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+  "requirements": ["EXT-001", "EXT-002", "EXT-003", "EXT-004", "EXT-005", "EXT-006", "EXT-007", "EXT-008"],
+  "dependsOn": ["33-N"],
+  "roadmapStatus": "PLANNED",
+  "registrySemantics": {
+    "acceptedScopeRegistryAuthority": "ATOMIC_CLOSURE_STATE",
+    "registryMutationPerformedByStarter": false,
+    "roadmapMutationPerformedByStarter": false,
+    "planOrLedgerActivationPerformedByStarter": false,
+    "activePredecessor": "33-P",
+    "currentOpenStatusesIntentional": true,
+    "registryEvidenceMustRemainFalseUntilClosure": true
+  },
+  "implementedModel": {
+    "familyScopedOperationsCenter": {
+      "status": "PARTIAL_LOCAL_COMPOSED_AND_TESTED_ACCEPTANCE_INCOMPLETE",
+      "centralPepReceiptFenceRequired": true,
+      "optimisticCenterAndItemRevisionRequired": true,
+      "idempotentClientOperationRequired": true,
+      "immutableMutationLedger": true,
+      "softDeleteOnly": true,
+      "boundedReadItemLimit": 2000
+    },
+    "operationVocabulary": {
+      "status": "PARTIAL_LOCAL_COMPOSED_AND_TESTED_ACCEPTANCE_INCOMPLETE",
+      "areaCount": 8,
+      "itemKindCount": 13,
+      "areas": ["shopping", "inventory", "meals", "chores", "expenses", "deliveries", "guests", "pets"],
+      "allergyIntersectionDenied": true,
+      "sharedExpenseBasisPointsRequired": 10000,
+      "trackingIdentifierStoredAsLastFourOnly": true,
+      "keyCodeStored": false
+    },
+    "localTruth": {
+      "status": "PARTIAL_LOCAL_COMPOSED_AND_TESTED_ACCEPTANCE_INCOMPLETE",
+      "externalShoppingOrderPerformed": false,
+      "automaticInventoryScanConfigured": false,
+      "recipeMedicalAdviceProvided": false,
+      "paymentExecutionPerformed": false,
+      "carrierSynchronizationPerformed": false,
+      "remoteAccessControlConfigured": false,
+      "petCareDeliveryPerformed": false
+    }
+  },
+  "truth": {
+    "requirementsClosed": false,
+    "countsAsRequirementPass": false,
+    "localDomainContractImplemented": true,
+    "localMigrationRepositoryImplemented": true,
+    "localApplicationUseCasesImplemented": true,
+    "localDesktopDataStoreCompositionImplemented": true,
+    "localIpcBridgeImplemented": true,
+    "localRendererSurfaceImplemented": true,
+    "localTargetedMatrixPassed": true,
+    "ownerFamilyAccountIsolationTested": true,
+    "forgedReceiptRollbackTested": true,
+    "outboxFailureRollbackTested": true,
+    "exactReplayAndMismatchTested": true,
+    "allergyIntersectionTested": true,
+    "sharedExpenseSplitTested": true,
+    "rendererReceivesPolicyReceipt": false,
+    "rendererReceivesFamilyAccountAuthority": false,
+    "fullTrackingIdentifierStored": false,
+    "keyOrAccessCodeStored": false,
+    "externalShoppingOrderPerformed": false,
+    "paymentExecutionPerformed": false,
+    "carrierSynchronizationPerformed": false,
+    "remoteAccessControlPerformed": false,
+    "petCareDeliveryPerformed": false,
+    "physicalDeletionGuaranteed": false,
+    "externalManualAcceptanceCompleted": false,
+    "privacyLegalFinancialNutritionSecurityReviewCompleted": false,
+    "certificationClaimed": false
+  },
+  "validation": {
+    "targetedTestFiles": [
+      "packages/application/tests/household-operations-use-cases.test.ts",
+      "packages/repositories/household-operations-repository-policy.test.ts",
+      "apps/desktop/tests/household-operations-ipc-integration.test.ts",
+      "apps/desktop/tests/household-operations-data-store.test.ts",
+      "apps/desktop/tests/household-operations-ui.test.ts"
+    ],
+    "targetedTestFileRatchet": 5,
+    "targetedTestRatchet": 22,
+    "migrationVersion": 98,
+    "migrationName": "household_operations_center",
+    "migrationSha256": "b5a09712e4f9611e928509441005ede824a9fceb516caa3b3d74cf83dc8f4d60",
+    "dataStoreSmokeChecks": 14,
+    "ppk021": {
+      "status": "PASS",
+      "scannedProductionFiles": 456,
+      "exactPrivilegedSurfaceCount": 707,
+      "exactAllowlistSha256": "bc0faf90dc73cbe8a9acc5be6251ffde44bcd84c69d36f96702540c2d213c6cd",
+      "targetedTests": 17,
+      "contractChecks": 84,
+      "runtimeChecks": 20
+    },
+    "ppk022": {
+      "status": "PASS",
+      "scannedProductionFiles": 456,
+      "exactCapabilitySurfaceCount": 345,
+      "exactCapabilityManifestSha256": "1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e",
+      "targetedTests": 19,
+      "contractChecks": 110,
+      "runtimeChecks": 24
+    },
+    "countsAsRequirementPass": false
+  },
+  "manualEvidence": {
+    "realFamilyHouseholdUat": "NOT_RUN",
+    "realShoppingInventoryMealUat": "NOT_RUN",
+    "realExpenseDeliveryGuestPetUat": "NOT_RUN",
+    "nutritionAllergyReview": "NOT_RUN",
+    "financialReview": "NOT_RUN",
+    "accessibilityReview": "NOT_RUN",
+    "privacyReview": "NOT_RUN",
+    "legalReview": "NOT_RUN",
+    "securityReview": "NOT_RUN",
+    "certificationClaimed": false
+  },
+  "persistentReceiptStatus": "NOT_RUN",
+  "remainingAcceptanceWork": [
+    "33-N ve aktif 33-P yönetişim zincirlerinin atomik kapanışı",
+    "gerçek aile kullanıcılarıyla alışveriş, stok, öğün, görev, gider, teslimat, misafir ve evcil hayvan UAT kanıtı",
+    "beslenme/alerji, finans, erişilebilirlik, gizlilik, hukuk ve güvenlik incelemeleri",
+    "dış sipariş, ödeme, taşıyıcı, uzaktan erişim veya bakım teslimi için ayrı üretim authority ve adapter kabulü",
+    "saklama süresi, kaynak silme yayılımı, yedek yayılımı ve fiziksel silme kabul sözleşmesi"
+  ]
+}

@@ -13451,6 +13451,251 @@ BEFORE DELETE ON health_care_access_grants BEGIN SELECT RAISE(ABORT,'33-S caregi
 UPDATE database_metadata SET value='REVISION-33-S-HEALTH-CARE-COORDINATION',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 
+const householdOperationsCenterSql = `
+CREATE TABLE household_operation_mutations (
+  id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
+  center_id TEXT NOT NULL CHECK(length(trim(center_id)) BETWEEN 3 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  item_id TEXT NOT NULL CHECK(length(trim(item_id)) BETWEEN 2 AND 256),
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  mutation_kind TEXT NOT NULL CHECK(mutation_kind IN ('item_create','item_update','item_delete')),
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 160),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  expected_center_revision INTEGER NOT NULL CHECK(expected_center_revision>=0),
+  center_revision INTEGER NOT NULL CHECK(center_revision=expected_center_revision+1),
+  expected_item_revision INTEGER NOT NULL CHECK(expected_item_revision>=0),
+  item_revision INTEGER NOT NULL CHECK(item_revision=expected_item_revision+1),
+  center_state_fingerprint TEXT NOT NULL CHECK(length(center_state_fingerprint)=64 AND center_state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  item_state_fingerprint TEXT NOT NULL CHECK(length(item_state_fingerprint)=64 AND item_state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL UNIQUE REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version>=1),
+  policy_receipt_nonce TEXT NOT NULL CHECK(length(trim(policy_receipt_nonce)) BETWEEN 1 AND 256),
+  policy_correlation_id TEXT NOT NULL CHECK(length(trim(policy_correlation_id)) BETWEEN 1 AND 256),
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type='household_operation_item'),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action IN ('create','update','delete')),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='family.write'),
+  UNIQUE(family_id,actor_account_id,client_operation_id),
+  CHECK(center_id='household-operations-center:'||family_id),
+  CHECK(policy_resource_id=item_id),
+  CHECK((mutation_kind='item_create' AND policy_action='create' AND expected_item_revision=0)
+    OR (mutation_kind='item_update' AND policy_action='update' AND expected_item_revision>=1)
+    OR (mutation_kind='item_delete' AND policy_action='delete' AND expected_item_revision>=1))
+) STRICT;
+
+CREATE INDEX idx_household_operation_mutations_center
+ON household_operation_mutations(center_id,center_revision DESC,id);
+
+CREATE TABLE household_operations_centers (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 3 AND 256),
+  family_id TEXT NOT NULL UNIQUE REFERENCES families(id) ON DELETE RESTRICT,
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES household_operation_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z' AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND updated_at GLOB '????-??-??T??:??:??.???Z' AND julianday(updated_at) IS NOT NULL),
+  CHECK(id='household-operations-center:'||family_id),
+  CHECK(updated_at>=created_at)
+) STRICT;
+
+CREATE TABLE household_operation_items (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 256),
+  center_id TEXT NOT NULL REFERENCES household_operations_centers(id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  kind TEXT NOT NULL CHECK(kind IN (
+    'shopping_list','shopping_item','stock_item','recipe','meal_plan','chore','routine',
+    'bill','subscription','shared_expense','delivery','guest_access','pet_care'
+  )),
+  area TEXT NOT NULL CHECK(area IN ('shopping','inventory','meals','chores','expenses','deliveries','guests','pets')),
+  title TEXT NOT NULL CHECK(length(trim(title)) BETWEEN 2 AND 160),
+  status TEXT NOT NULL CHECK(status IN ('planned','active','low_stock','due','completed','cancelled','expired','delivered','revoked','deleted')),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  parent_item_id TEXT REFERENCES household_operation_items(id) ON DELETE RESTRICT,
+  assigned_person_id TEXT REFERENCES people(id) ON DELETE RESTRICT,
+  stock_category TEXT CHECK(stock_category IS NULL OR stock_category IN ('food','cleaning')),
+  quantity REAL CHECK(quantity IS NULL OR (quantity>=0 AND quantity<=1000000000)),
+  unit TEXT CHECK(unit IS NULL OR length(trim(unit)) BETWEEN 1 AND 32),
+  scheduled_at TEXT CHECK(scheduled_at IS NULL OR (length(scheduled_at)=24 AND scheduled_at GLOB '????-??-??T??:??:??.???Z' AND julianday(scheduled_at) IS NOT NULL)),
+  due_at TEXT CHECK(due_at IS NULL OR (length(due_at)=24 AND due_at GLOB '????-??-??T??:??:??.???Z' AND julianday(due_at) IS NOT NULL)),
+  expires_at TEXT CHECK(expires_at IS NULL OR (length(expires_at)=24 AND expires_at GLOB '????-??-??T??:??:??.???Z' AND julianday(expires_at) IS NOT NULL)),
+  recurrence TEXT CHECK(recurrence IS NULL OR length(trim(recurrence)) BETWEEN 1 AND 160),
+  amount_minor INTEGER CHECK(amount_minor IS NULL OR (amount_minor>=0 AND amount_minor<=9000000000000000)),
+  currency TEXT CHECK(currency IS NULL OR (length(currency)=3 AND currency NOT GLOB '*[^A-Z]*')),
+  split_shares_json TEXT CHECK(split_shares_json IS NULL OR (json_valid(split_shares_json) AND json_type(split_shares_json)='array' AND json_array_length(split_shares_json) BETWEEN 2 AND 64)),
+  ingredient_names_json TEXT CHECK(ingredient_names_json IS NULL OR (json_valid(ingredient_names_json) AND json_type(ingredient_names_json)='array' AND json_array_length(ingredient_names_json) BETWEEN 1 AND 128)),
+  allergen_codes_json TEXT CHECK(allergen_codes_json IS NULL OR (json_valid(allergen_codes_json) AND json_type(allergen_codes_json)='array' AND json_array_length(allergen_codes_json)<=64)),
+  avoided_allergen_codes_json TEXT CHECK(avoided_allergen_codes_json IS NULL OR (json_valid(avoided_allergen_codes_json) AND json_type(avoided_allergen_codes_json)='array' AND json_array_length(avoided_allergen_codes_json)<=64)),
+  allergy_filter_status TEXT CHECK(allergy_filter_status IS NULL OR allergy_filter_status IN ('not_applicable','clear')),
+  provider_label TEXT CHECK(provider_label IS NULL OR length(trim(provider_label)) BETWEEN 1 AND 120),
+  tracking_last_four TEXT CHECK(tracking_last_four IS NULL OR (length(tracking_last_four)=4 AND tracking_last_four NOT GLOB '*[^A-Za-z0-9]*')),
+  guest_label TEXT CHECK(guest_label IS NULL OR length(trim(guest_label)) BETWEEN 1 AND 120),
+  access_area TEXT CHECK(access_area IS NULL OR length(trim(access_area)) BETWEEN 1 AND 120),
+  opaque_pet_reference TEXT CHECK(opaque_pet_reference IS NULL OR length(trim(opaque_pet_reference)) BETWEEN 1 AND 128),
+  note TEXT CHECK(note IS NULL OR length(note)<=2000),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES household_operation_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z' AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND updated_at GLOB '????-??-??T??:??:??.???Z' AND julianday(updated_at) IS NOT NULL),
+  deleted_at TEXT CHECK(deleted_at IS NULL OR (length(deleted_at)=24 AND deleted_at GLOB '????-??-??T??:??:??.???Z' AND julianday(deleted_at) IS NOT NULL)),
+  CHECK(updated_at>=created_at),
+  CHECK(due_at IS NULL OR scheduled_at IS NULL OR due_at>=scheduled_at),
+  CHECK((status='deleted' AND deleted_at=updated_at) OR (status<>'deleted' AND deleted_at IS NULL)),
+  CHECK((kind='stock_item' AND stock_category IS NOT NULL AND quantity IS NOT NULL AND unit IS NOT NULL)
+    OR (kind<>'stock_item' AND stock_category IS NULL)),
+  CHECK((kind IN ('bill','subscription','shared_expense') AND amount_minor IS NOT NULL AND currency IS NOT NULL)
+    OR (kind NOT IN ('bill','subscription','shared_expense') AND amount_minor IS NULL AND currency IS NULL AND split_shares_json IS NULL)),
+  CHECK((kind='shared_expense' AND split_shares_json IS NOT NULL) OR (kind<>'shared_expense' AND split_shares_json IS NULL)),
+  CHECK((kind='recipe' AND ingredient_names_json IS NOT NULL) OR (kind<>'recipe' AND ingredient_names_json IS NULL)),
+  CHECK((kind='meal_plan' AND parent_item_id IS NOT NULL AND allergy_filter_status='clear')
+    OR (kind<>'meal_plan' AND allergy_filter_status='not_applicable')),
+  CHECK((kind='delivery' AND provider_label IS NOT NULL AND tracking_last_four IS NOT NULL)
+    OR (kind<>'delivery' AND tracking_last_four IS NULL)),
+  CHECK((kind='guest_access' AND guest_label IS NOT NULL AND access_area IS NOT NULL AND scheduled_at IS NOT NULL AND due_at IS NOT NULL)
+    OR (kind<>'guest_access' AND guest_label IS NULL AND access_area IS NULL)),
+  CHECK((kind='pet_care' AND opaque_pet_reference IS NOT NULL) OR (kind<>'pet_care' AND opaque_pet_reference IS NULL))
+) STRICT;
+
+CREATE INDEX idx_household_operation_items_center_area
+ON household_operation_items(center_id,area,updated_at DESC,id);
+CREATE INDEX idx_household_operation_items_assignee
+ON household_operation_items(family_id,assigned_person_id,status,due_at);
+CREATE INDEX idx_household_operation_items_expiry
+ON household_operation_items(family_id,expires_at) WHERE expires_at IS NOT NULL AND status<>'deleted';
+
+CREATE TRIGGER trg_33t_household_mutation_insert
+BEFORE INSERT ON household_operation_mutations
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM accounts account
+  JOIN people actor ON actor.id=NEW.actor_person_id AND actor.family_id=NEW.family_id AND actor.status='active'
+  JOIN people owner ON owner.id=NEW.owner_person_id AND owner.family_id=NEW.family_id AND owner.status='active'
+  JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+  JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+  WHERE account.id=NEW.actor_account_id AND account.person_id=NEW.actor_person_id AND account.status='active'
+    AND receipt.receipt_version=NEW.policy_receipt_version AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id AND receipt.action=NEW.policy_action
+    AND receipt.capability=NEW.policy_capability AND receipt.recorded_at=NEW.occurred_at
+    AND json_extract(receipt.record_json,'$.request.purpose')='general'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.actor_account_id
+    AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.actor_person_id
+    AND (
+      (NEW.expected_center_revision=0 AND NOT EXISTS(SELECT 1 FROM household_operations_centers center WHERE center.id=NEW.center_id))
+      OR EXISTS(SELECT 1 FROM household_operations_centers center WHERE center.id=NEW.center_id AND center.family_id=NEW.family_id AND center.revision=NEW.expected_center_revision)
+    )
+    AND (
+      (NEW.expected_item_revision=0 AND NEW.mutation_kind='item_create' AND NOT EXISTS(SELECT 1 FROM household_operation_items item WHERE item.id=NEW.item_id))
+      OR EXISTS(SELECT 1 FROM household_operation_items item WHERE item.id=NEW.item_id AND item.center_id=NEW.center_id AND item.family_id=NEW.family_id
+        AND item.owner_person_id=NEW.owner_person_id AND item.revision=NEW.expected_item_revision AND item.status<>'deleted')
+    )
+)
+BEGIN SELECT RAISE(ABORT,'33-T household mutation requires exact active family and durable PEP receipt'); END;
+
+CREATE TRIGGER trg_33t_household_center_insert
+BEFORE INSERT ON household_operations_centers
+WHEN NEW.revision<>1 OR NOT EXISTS(
+  SELECT 1 FROM household_operation_mutations mutation
+  WHERE mutation.id=NEW.last_mutation_id AND mutation.center_id=NEW.id AND mutation.family_id=NEW.family_id
+    AND mutation.expected_center_revision=0 AND mutation.center_revision=NEW.revision
+    AND mutation.center_state_fingerprint=NEW.state_fingerprint
+    AND mutation.occurred_at=NEW.created_at AND NEW.updated_at=NEW.created_at
+)
+BEGIN SELECT RAISE(ABORT,'33-T household center requires its exact create mutation'); END;
+
+CREATE TRIGGER trg_33t_household_center_update
+BEFORE UPDATE ON household_operations_centers
+WHEN NEW.id IS NOT OLD.id OR NEW.family_id IS NOT OLD.family_id OR NEW.created_at IS NOT OLD.created_at
+  OR NEW.revision<>OLD.revision+1 OR NOT EXISTS(
+    SELECT 1 FROM household_operation_mutations mutation
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.center_id=NEW.id AND mutation.family_id=NEW.family_id
+      AND mutation.expected_center_revision=OLD.revision AND mutation.center_revision=NEW.revision
+      AND mutation.center_state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.updated_at
+  )
+BEGIN SELECT RAISE(ABORT,'33-T household center update requires its exact next mutation'); END;
+
+CREATE TRIGGER trg_33t_household_item_insert
+BEFORE INSERT ON household_operation_items
+WHEN NOT EXISTS(
+  SELECT 1 FROM household_operation_mutations mutation
+  JOIN household_operations_centers center ON center.id=mutation.center_id
+  JOIN people owner ON owner.id=NEW.owner_person_id AND owner.family_id=NEW.family_id AND owner.status='active'
+  WHERE mutation.id=NEW.last_mutation_id AND mutation.item_id=NEW.id AND mutation.center_id=NEW.center_id
+    AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+    AND mutation.mutation_kind='item_create' AND mutation.expected_item_revision=0 AND mutation.item_revision=NEW.revision
+    AND mutation.item_state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.created_at
+    AND NEW.updated_at=NEW.created_at AND center.last_mutation_id=mutation.id
+    AND center.revision=mutation.center_revision AND center.state_fingerprint=mutation.center_state_fingerprint
+)
+  OR NEW.area<>CASE
+    WHEN NEW.kind IN ('shopping_list','shopping_item') THEN 'shopping'
+    WHEN NEW.kind='stock_item' THEN 'inventory'
+    WHEN NEW.kind IN ('recipe','meal_plan') THEN 'meals'
+    WHEN NEW.kind IN ('chore','routine') THEN 'chores'
+    WHEN NEW.kind IN ('bill','subscription','shared_expense') THEN 'expenses'
+    WHEN NEW.kind='delivery' THEN 'deliveries'
+    WHEN NEW.kind='guest_access' THEN 'guests'
+    ELSE 'pets' END
+  OR (NEW.assigned_person_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM people person WHERE person.id=NEW.assigned_person_id AND person.family_id=NEW.family_id AND person.status='active'))
+  OR (NEW.kind='shopping_item' AND NOT EXISTS(SELECT 1 FROM household_operation_items parent WHERE parent.id=NEW.parent_item_id AND parent.center_id=NEW.center_id AND parent.kind='shopping_list' AND parent.status<>'deleted'))
+  OR (NEW.kind='meal_plan' AND NOT EXISTS(SELECT 1 FROM household_operation_items parent WHERE parent.id=NEW.parent_item_id AND parent.center_id=NEW.center_id AND parent.kind='recipe' AND parent.status<>'deleted'
+      AND NOT EXISTS(SELECT 1 FROM json_each(COALESCE(parent.allergen_codes_json,'[]')) allergen
+        JOIN json_each(COALESCE(NEW.avoided_allergen_codes_json,'[]')) avoided ON avoided.value=allergen.value)))
+  OR (NEW.kind='shared_expense' AND (
+      (SELECT COUNT(*) FROM json_each(NEW.split_shares_json))<>(SELECT COUNT(DISTINCT json_extract(value,'$.personId')) FROM json_each(NEW.split_shares_json))
+      OR (SELECT COALESCE(SUM(CAST(json_extract(value,'$.basisPoints') AS INTEGER)),0) FROM json_each(NEW.split_shares_json))<>10000
+      OR EXISTS(SELECT 1 FROM json_each(NEW.split_shares_json) share WHERE NOT EXISTS(
+        SELECT 1 FROM people person WHERE person.id=json_extract(share.value,'$.personId') AND person.family_id=NEW.family_id AND person.status='active'
+      ))
+    ))
+BEGIN SELECT RAISE(ABORT,'33-T household item requires exact mutation, family assignment and domain invariants'); END;
+
+CREATE TRIGGER trg_33t_household_item_update
+BEFORE UPDATE ON household_operation_items
+WHEN NEW.id IS NOT OLD.id OR NEW.center_id IS NOT OLD.center_id OR NEW.family_id IS NOT OLD.family_id
+  OR NEW.owner_person_id IS NOT OLD.owner_person_id OR NEW.kind IS NOT OLD.kind OR NEW.area IS NOT OLD.area
+  OR NEW.title IS NOT OLD.title OR NEW.parent_item_id IS NOT OLD.parent_item_id
+  OR NEW.stock_category IS NOT OLD.stock_category OR NEW.unit IS NOT OLD.unit OR NEW.recurrence IS NOT OLD.recurrence
+  OR NEW.amount_minor IS NOT OLD.amount_minor OR NEW.currency IS NOT OLD.currency OR NEW.split_shares_json IS NOT OLD.split_shares_json
+  OR NEW.ingredient_names_json IS NOT OLD.ingredient_names_json OR NEW.allergen_codes_json IS NOT OLD.allergen_codes_json
+  OR NEW.avoided_allergen_codes_json IS NOT OLD.avoided_allergen_codes_json OR NEW.allergy_filter_status IS NOT OLD.allergy_filter_status
+  OR NEW.provider_label IS NOT OLD.provider_label OR NEW.tracking_last_four IS NOT OLD.tracking_last_four
+  OR NEW.guest_label IS NOT OLD.guest_label OR NEW.access_area IS NOT OLD.access_area
+  OR NEW.opaque_pet_reference IS NOT OLD.opaque_pet_reference OR NEW.created_at IS NOT OLD.created_at
+  OR NEW.revision<>OLD.revision+1
+  OR (NEW.assigned_person_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM people person WHERE person.id=NEW.assigned_person_id AND person.family_id=NEW.family_id AND person.status='active'))
+  OR NOT EXISTS(
+    SELECT 1 FROM household_operation_mutations mutation
+    JOIN household_operations_centers center ON center.id=mutation.center_id
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.item_id=NEW.id AND mutation.center_id=NEW.center_id
+      AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+      AND mutation.expected_item_revision=OLD.revision AND mutation.item_revision=NEW.revision
+      AND mutation.item_state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.updated_at
+      AND center.last_mutation_id=mutation.id AND center.revision=mutation.center_revision
+      AND center.state_fingerprint=mutation.center_state_fingerprint
+      AND ((mutation.mutation_kind='item_update' AND OLD.status<>'deleted' AND NEW.status<>'deleted' AND NEW.deleted_at IS NULL)
+        OR (mutation.mutation_kind='item_delete' AND OLD.status<>'deleted' AND NEW.status='deleted' AND NEW.deleted_at=NEW.updated_at))
+  )
+BEGIN SELECT RAISE(ABORT,'33-T household item update requires exact immutable fields and next mutation'); END;
+
+CREATE TRIGGER trg_33t_household_center_delete
+BEFORE DELETE ON household_operations_centers BEGIN SELECT RAISE(ABORT,'33-T household center is durable'); END;
+CREATE TRIGGER trg_33t_household_item_delete
+BEFORE DELETE ON household_operation_items BEGIN SELECT RAISE(ABORT,'33-T household item history is durable'); END;
+CREATE TRIGGER trg_33t_household_mutation_update
+BEFORE UPDATE ON household_operation_mutations BEGIN SELECT RAISE(ABORT,'33-T household mutation ledger is immutable'); END;
+CREATE TRIGGER trg_33t_household_mutation_delete
+BEFORE DELETE ON household_operation_mutations BEGIN SELECT RAISE(ABORT,'33-T household mutation ledger is durable'); END;
+
+UPDATE database_metadata SET value='REVISION-33-T-HOUSEHOLD-OPERATIONS',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -13548,7 +13793,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(94, 'local_governed_ocr', localGovernedOcrLedgerSql),
   createMigrationDefinition(95, 'legacy_archive_ownership_reattestation', legacyArchiveOwnershipReattestationSql),
   createMigrationDefinition(96, 'archive_evidence_relations_media_search', archiveEvidenceRelationsMediaLifecycleSql),
-  createMigrationDefinition(97, 'health_care_coordination_elder_support', healthCareCoordinationElderSupportSql)
+  createMigrationDefinition(97, 'health_care_coordination_elder_support', healthCareCoordinationElderSupportSql),
+  createMigrationDefinition(98, 'household_operations_center', householdOperationsCenterSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

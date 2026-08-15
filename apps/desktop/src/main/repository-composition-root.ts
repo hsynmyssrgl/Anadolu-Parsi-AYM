@@ -23,6 +23,7 @@ import {
   SqliteGenealogyRepository,
   SqliteHealthRepository,
   SqliteHouseholdMembershipRepository,
+  SqliteHouseholdOperationsRepository,
   SqliteInvitationRepository,
   SqliteIdentityAccessCredentialRepository,
   SqliteLegacyRepository,
@@ -76,6 +77,8 @@ import type {
   HealthPolicyResourceRepositoryPort,
   HealthRepositoryPort,
   HouseholdMembershipRepositoryPort,
+  HouseholdOperationsPolicyResourceRepositoryPort,
+  HouseholdOperationsRepositoryPort,
   InvitationRepositoryPort,
   IdentityAccessCredentialRepositoryPort,
   LegacyRepositoryPort,
@@ -131,6 +134,7 @@ export interface RepositoryCompositionRoot {
   readonly genealogyRepository: GenealogyRepositoryPort;
   readonly healthRepository: HealthRepositoryPort & HealthPolicyResourceRepositoryPort;
   readonly householdMembershipRepository: HouseholdMembershipRepositoryPort;
+  readonly householdOperationsRepository: HouseholdOperationsRepositoryPort & HouseholdOperationsPolicyResourceRepositoryPort;
   readonly invitationRepository: InvitationRepositoryPort;
   readonly identityAccessCredentialRepository: IdentityAccessCredentialRepositoryPort;
   readonly legacyRepository: LegacyRepositoryPort;
@@ -193,6 +197,7 @@ export const createSqliteRepositoryCompositionRoot = (
     genealogyRepository: new SqliteGenealogyRepository(repositoryOptions),
     healthRepository: new SqliteHealthRepository(repositoryOptions),
     householdMembershipRepository: new SqliteHouseholdMembershipRepository(repositoryOptions),
+    householdOperationsRepository: new SqliteHouseholdOperationsRepository(repositoryOptions),
     invitationRepository: new SqliteInvitationRepository(repositoryOptions),
     identityAccessCredentialRepository: new SqliteIdentityAccessCredentialRepository(repositoryOptions),
     legacyRepository: new SqliteLegacyRepository(repositoryOptions),

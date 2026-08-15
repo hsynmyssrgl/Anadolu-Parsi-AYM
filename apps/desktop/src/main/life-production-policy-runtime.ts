@@ -30,6 +30,7 @@ import {
 import type {
   AccountRepositoryPort,
   AccountRow,
+  HouseholdOperationsPolicyResourceRepositoryPort,
   LifePolicyResourceRepositoryPort,
   LifeRecordRow,
   ObjectPermissionRepositoryPort,
@@ -61,6 +62,7 @@ export interface LifeProductionPolicyRuntimeDependencies {
   readonly permissionRepository: ObjectPermissionRepositoryPort;
   readonly trustedDeviceRepository: TrustedDeviceRepositoryPort;
   readonly lifePolicyResourceRepository: LifePolicyResourceRepositoryPort;
+  readonly householdOperationsPolicyResourceRepository: HouseholdOperationsPolicyResourceRepositoryPort;
   readonly personRepository: PersonRepositoryPort;
   readonly deviceIdentityProvider: Pick<FileDeviceIdentityProvider, 'snapshot'>;
   readonly authorizationProvider: PlatformPolicyAuthorizationProvider;
@@ -95,7 +97,11 @@ const policyActions = new Set<PolicyAction>([
   'record',
   'administer'
 ]);
-const lifeResourceTypes = new Set<LifePolicyIntent['resourceType']>(['life_record']);
+const lifeResourceTypes = new Set<LifePolicyIntent['resourceType']>([
+  'life_record',
+  'household_operation_item',
+  'household_operations_center'
+]);
 
 const nonEmpty = (value: unknown, max = 512): value is string =>
   typeof value === 'string'
@@ -756,6 +762,21 @@ const findLifeResourceForPolicyResolution = (
         })
       : null);
   }
+  if (resourceType === 'household_operation_item') {
+    const found = dependencies.householdOperationsPolicyResourceRepository.findItemForPolicyResolution(
+      execution,
+      resourceId
+    );
+    if (!found.ok) return found;
+    return ok(found.value
+      ? Object.freeze({
+          familyId: found.value.familyId,
+          ownerPersonId: found.value.ownerPersonId,
+          privacy: 'family' as const,
+          stateFingerprint: stable(found.value)
+        })
+      : null);
+  }
   throw new PlatformPolicyEnforcementError(
     'RESOURCE_RESOLUTION_FAILED',
     'Life policy resource type is not supported'
@@ -796,7 +817,9 @@ const loadLifeResourceSnapshotInTransaction = (
       id: '*',
       familyId: context.familyId,
       ownerPersonId: context.actor.personId,
-      sensitivity: 'highly_sensitive' as const
+      sensitivity: requestedIntent.resourceType === 'household_operations_center'
+        ? 'personal' as const
+        : 'highly_sensitive' as const
     });
     return ok(Object.freeze({
       resource,
@@ -820,7 +843,24 @@ const loadLifeResourceSnapshotInTransaction = (
       requestedIntent.resourceId
     );
     if (!existing.ok) return existing;
-    if (existing.value) return invalidAuthority(context, 'Life policy create resource already exists');
+    if (existing.value) {
+      if (
+        requestedIntent.resourceType !== 'household_operation_item'
+        || existing.value.familyId !== context.familyId
+        || existing.value.ownerPersonId !== requestedIntent.ownerPersonId
+        || existing.value.privacy !== requestedIntent.privacy
+      ) return invalidAuthority(context, 'Life policy create resource already exists');
+      return ok(Object.freeze({
+        resource: Object.freeze({
+          type: requestedIntent.resourceType,
+          id: requestedIntent.resourceId,
+          familyId: existing.value.familyId,
+          ownerPersonId: existing.value.ownerPersonId,
+          sensitivity: sensitivityFor(existing.value.privacy)
+        }),
+        stateFingerprint: existing.value.stateFingerprint
+      }));
+    }
     const owner = dependencies.personRepository.findById(execution, requestedIntent.ownerPersonId);
     if (!owner.ok) return owner;
     if (!owner.value || owner.value.familyId !== context.familyId || owner.value.status !== 'active') {
@@ -873,7 +913,7 @@ const loadLifeResourceSnapshotInTransaction = (
   }
 
   const intent = requestedIntent;
-  if (intent.action === 'update') {
+  if (intent.action === 'update' || intent.action === 'delete') {
     if (requestedIntent.ownerPersonId !== undefined || requestedIntent.privacy !== undefined) {
       return invalidAuthority(context, 'Life update policy metadata must be resolved from the durable parent profile');
     }
@@ -1026,6 +1066,7 @@ const ensureRuntimeConfiguration = (dependencies: LifeProductionPolicyRuntimeDep
     || typeof dependencies.lifePolicyResourceRepository?.findManagedLifeProfileForPolicyResolution !== 'function'
     || typeof dependencies.lifePolicyResourceRepository?.findFamilyEmergencyAssistanceProfileForPolicyResolution !== 'function'
     || typeof dependencies.lifePolicyResourceRepository?.findFamilyEmergencyPlanForPolicyResolution !== 'function'
+    || typeof dependencies.householdOperationsPolicyResourceRepository?.findItemForPolicyResolution !== 'function'
     || typeof dependencies.personRepository?.findById !== 'function'
     || typeof dependencies.deviceIdentityProvider?.snapshot !== 'function'
     || typeof dependencies.authorizationProvider?.authorize !== 'function'

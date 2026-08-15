@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "step": "33-T",
+  "decision": "DEC-231",
+  "requirements": ["EXT-001", "EXT-002", "EXT-003", "EXT-004", "EXT-005", "EXT-006", "EXT-007", "EXT-008"],
+  "status": "PLANNED",
+  "implementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+  "countsAsRequirementPass": false,
+  "registryReconciliation": {
+    "registryMutationPerformed": false,
+    "roadmapMutationPerformed": false,
+    "planOrLedgerActivationPerformed": false,
+    "activePredecessor": "33-P",
+    "evidenceChainMustRemainOpen": true
+  },
+  "implementedProductionSurfaces": [
+    {
+      "id": "domain-application",
+      "status": "LOCAL_COMPONENT_TESTED",
+      "paths": ["packages/domain/src/household-operations.ts", "packages/application/src/household-operations-use-cases.ts"]
+    },
+    {
+      "id": "migration-repository",
+      "status": "LOCAL_COMPONENT_TESTED",
+      "paths": [
+        "packages/database/src/family-database-migrations.ts",
+        "packages/repository-contracts/src/household-operations-repository.ts",
+        "packages/repositories/src/household-operations-repository.ts"
+      ],
+      "migrationVersion": 98,
+      "migrationSha256": "b5a09712e4f9611e928509441005ede824a9fceb516caa3b3d74cf83dc8f4d60"
+    },
+    {
+      "id": "desktop-composition-ipc-ui",
+      "status": "LOCAL_COMPONENT_TESTED",
+      "paths": [
+        "apps/desktop/src/main/life-production-policy-runtime.ts",
+        "apps/desktop/src/main/household-operations-application-adapter.ts",
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/main/ipc-request-lifecycle.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/renderer/global.d.ts",
+        "apps/desktop/src/renderer/HouseholdOperationsPanel.tsx",
+        "apps/desktop/src/renderer/App.tsx",
+        "apps/desktop/src/renderer/styles.css"
+      ]
+    }
+  ],
+  "implementedTargetedTests": [
+    "packages/application/tests/household-operations-use-cases.test.ts",
+    "packages/repositories/household-operations-repository-policy.test.ts",
+    "apps/desktop/tests/household-operations-ipc-integration.test.ts",
+    "apps/desktop/tests/household-operations-data-store.test.ts",
+    "apps/desktop/tests/household-operations-ui.test.ts"
+  ],
+  "validation": {
+    "targetedTestFileRatchet": 5,
+    "targetedTestRatchet": 22,
+    "migrationChecks": 9,
+    "dataStoreSmokeChecks": 14,
+    "ppk021": {"status":"PASS","files":456,"surfaces":707,"sha256":"bc0faf90dc73cbe8a9acc5be6251ffde44bcd84c69d36f96702540c2d213c6cd","targeted":17,"contract":84,"runtime":20},
+    "ppk022": {"status":"PASS","files":456,"surfaces":345,"sha256":"1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e","targeted":19,"contract":110,"runtime":24},
+    "countsAsRequirementPass": false
+  },
+  "openAcceptanceBindings": [
+    "ACTIVE_PREDECESSOR_33_P_AND_DEPENDENCY_33_N",
+    "REAL_FAMILY_HOUSEHOLD_UAT_NOT_RUN",
+    "NUTRITION_FINANCIAL_PRIVACY_LEGAL_SECURITY_REVIEW_NOT_RUN",
+    "EXTERNAL_ORDER_PAYMENT_CARRIER_REMOTE_ACCESS_PET_DELIVERY_NOT_CONFIGURED",
+    "RETENTION_SOURCE_DELETION_PHYSICAL_ERASURE_NOT_ACCEPTED"
+  ],
+  "governanceSurfaces": [
+    "config/33-t-household-operations-center-scope.json",
+    "config/33-t-household-operations-center-inventory.json",
+    "docs/decisions/DEC-231-household-operations-center.md",
+    "docs/security/THREAT_MODEL_33_T_HOUSEHOLD_OPERATIONS_CENTER.md",
+    "scripts/verify-33-t-household-operations-center-boundary.mjs",
+    "scripts/verify-33-t-household-operations-center-contract.mjs",
+    "scripts/verify-33-t-household-operations-center-runtime.mjs"
+  ]
+}

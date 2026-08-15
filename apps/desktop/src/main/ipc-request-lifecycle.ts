@@ -164,6 +164,18 @@ const healthCareCoordinationChannels = new Set<string>([
   ...healthCareCoordinationReadChannels,
   ...healthCareCoordinationWriteChannels
 ]);
+const householdOperationsReadChannels = new Set<string>([
+  'householdOperations:getCenter'
+]);
+const householdOperationsWriteChannels = new Set<string>([
+  'householdOperations:createItem',
+  'householdOperations:updateItem',
+  'householdOperations:deleteItem'
+]);
+const householdOperationsChannels = new Set<string>([
+  ...householdOperationsReadChannels,
+  ...householdOperationsWriteChannels
+]);
 
 const cancellableNetworkChannels = new Set<string>([
   'dataLifecycle:runRevocationSync'
@@ -175,6 +187,12 @@ const cancellableInteractiveAuthenticationChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLifecyclePolicy => {
+  if (householdOperationsReadChannels.has(channel)) {
+    return Object.freeze({ cancellable: true, latestWins: true, timeoutMs: 10_000 });
+  }
+  if (householdOperationsWriteChannels.has(channel)) {
+    return Object.freeze({ cancellable: false, latestWins: false, timeoutMs: 0 });
+  }
   if (healthCareCoordinationReadChannels.has(channel)) {
     return Object.freeze({ cancellable: true, latestWins: true, timeoutMs: 10_000 });
   }
@@ -261,6 +279,9 @@ const standardAdmissionChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestAdmissionPolicy = (channel: string): IpcRequestAdmissionPolicy => {
+  if (householdOperationsChannels.has(channel)) {
+    return Object.freeze({ enabled:true, priority:'interactive', priorityWeight:100, maxConcurrentPerSender:2, maxConcurrentPerChannel:1, maxQueuedPerSender:4, queueTimeoutMs:2_500 });
+  }
   if (healthCareCoordinationChannels.has(channel)) {
     return Object.freeze({ enabled:true, priority:'interactive', priorityWeight:100, maxConcurrentPerSender:2, maxConcurrentPerChannel:1, maxQueuedPerSender:4, queueTimeoutMs:2_500 });
   }
@@ -365,6 +386,12 @@ export interface IpcRequestRatePolicy {
 }
 
 export const resolveIpcRequestRatePolicy = (channel: string): IpcRequestRatePolicy => {
+  if (householdOperationsReadChannels.has(channel)) {
+    return Object.freeze({ enabled: true, maxRequestsPerWindow: 60, windowMs: 60_000 });
+  }
+  if (householdOperationsWriteChannels.has(channel)) {
+    return Object.freeze({ enabled: true, maxRequestsPerWindow: 16, windowMs: 60_000 });
+  }
   if (healthCareCoordinationReadChannels.has(channel)) {
     return Object.freeze({ enabled: true, maxRequestsPerWindow: 60, windowMs: 60_000 });
   }

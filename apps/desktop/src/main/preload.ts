@@ -40,6 +40,7 @@ import type { FamilyEventView, FamilyMutationResultView, SetFamilyEventArchivedI
 import type { UnifiedAuthorizedSearchInput, UnifiedAuthorizedSearchView } from '@ppt/domain';
 import type { AddArchiveItemVersionInput, AddArchiveRelationEvidenceInput, ArchiveRelationEvidenceHistoryView, ArchiveRelationEvidenceView, RemoveArchiveRelationEvidenceInput } from '@ppt/domain';
 import type { HealthCareCoordinationCenterView, HealthCareMutationReceiptView, RecordHealthCareEntryInput, RevokeHealthCareAccessGrantInput, UpsertHealthCareAccessGrantInput } from '@ppt/domain';
+import type { CreateHouseholdOperationItemInput, DeleteHouseholdOperationItemInput, HouseholdOperationMutationReceiptView, HouseholdOperationsCenterView, UpdateHouseholdOperationItemInput } from '@ppt/domain';
 import type { LegacyArchiveOwnershipReattestationView, ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { AssignPersonMembershipInput, CreateFamilyBranchInput, CreateHouseholdInput, FamilyBranch, Household, HouseholdMembershipWorkspaceView, PersonLifecycleProfile, PersonLifecycleWorkspaceView, PersonMembership, UpdatePersonProfileInput } from '@ppt/domain';
 import type { AuthorizationContextWorkspaceView } from '@ppt/domain';
@@ -681,6 +682,10 @@ contextBridge.exposeInMainWorld('pardus', {
   recordHealthCareEntry:(input:RecordHealthCareEntryInput):Promise<HealthCareMutationReceiptView>=>invoke('healthCare:recordEntry',input),
   upsertHealthCareAccessGrant:(input:UpsertHealthCareAccessGrantInput):Promise<HealthCareMutationReceiptView>=>invoke('healthCare:upsertGrant',input),
   revokeHealthCareAccessGrant:(input:RevokeHealthCareAccessGrantInput):Promise<HealthCareMutationReceiptView>=>invoke('healthCare:revokeGrant',input),
+  getHouseholdOperationsCenter:():Promise<HouseholdOperationsCenterView>=>invoke('householdOperations:getCenter'),
+  createHouseholdOperationItem:(input:CreateHouseholdOperationItemInput):Promise<HouseholdOperationMutationReceiptView>=>invoke('householdOperations:createItem',input),
+  updateHouseholdOperationItem:(input:UpdateHouseholdOperationItemInput):Promise<HouseholdOperationMutationReceiptView>=>invoke('householdOperations:updateItem',input),
+  deleteHouseholdOperationItem:(input:DeleteHouseholdOperationItemInput):Promise<HouseholdOperationMutationReceiptView>=>invoke('householdOperations:deleteItem',input),
   listFinanceValuations:():Promise<FinanceValuationView[]>=>invoke('finance:listValuations'),
   createFinanceValuation:(input:CreateFinanceValuationInput):Promise<FinanceValuationView[]>=>invoke('finance:createValuation',input),
   createMember: (input: CreateFamilyMemberInput): Promise<FamilyMutationResultView> => invoke('family:createMember', input),

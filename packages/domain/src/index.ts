@@ -37,3 +37,4 @@ export * from './local-governed-ocr.js';
 export * from './unified-authorized-search.js';
 export * from './health-care-coordination.js';
 export * from './archive-evidence-media.js';
+export * from './household-operations.js';

@@ -150,6 +150,10 @@ import {
   RecordHealthCareEntryUseCase,
   UpsertHealthCareAccessGrantUseCase,
   RevokeHealthCareAccessGrantUseCase,
+  GetHouseholdOperationsCenterUseCase,
+  CreateHouseholdOperationItemUseCase,
+  UpdateHouseholdOperationItemUseCase,
+  DeleteHouseholdOperationItemUseCase,
   ListLifeRecordsUseCase,
   CreateLifeRecordUseCase,
   GetManagedLifeWorkspaceUseCase,
@@ -313,7 +317,7 @@ import {
   type WindowsHelloPlatformPort,
   type WindowsHelloDeviceBindingPort
 } from '@ppt/application';
-import type { AddArchiveItemVersionInput, AddArchiveRelationEvidenceInput, ArchiveRelationEvidenceHistoryView, ArchiveRelationEvidenceView, HealthCareCoordinationCenterView, HealthCareMutationReceiptView, RecordHealthCareEntryInput, RemoveArchiveRelationEvidenceInput, RevokeHealthCareAccessGrantInput, UnifiedAuthorizedSearchInput, UnifiedAuthorizedSearchView, UpsertHealthCareAccessGrantInput } from '@ppt/domain';
+import type { AddArchiveItemVersionInput, AddArchiveRelationEvidenceInput, ArchiveRelationEvidenceHistoryView, ArchiveRelationEvidenceView, CreateHouseholdOperationItemInput, DeleteHouseholdOperationItemInput, HealthCareCoordinationCenterView, HealthCareMutationReceiptView, HouseholdOperationMutationReceiptView, HouseholdOperationsCenterView, RecordHealthCareEntryInput, RemoveArchiveRelationEvidenceInput, RevokeHealthCareAccessGrantInput, UnifiedAuthorizedSearchInput, UnifiedAuthorizedSearchView, UpdateHouseholdOperationItemInput, UpsertHealthCareAccessGrantInput } from '@ppt/domain';
 import { RepositoryBackedFamilyApplicationUnitOfWork, RepositoryBackedFamilyGraphQueryPort } from './family-application-adapter.js';
 import { RepositoryBackedHouseholdMembershipUnitOfWork } from './household-membership-application-adapter.js';
 import { RepositoryBackedPersonLifecycleUnitOfWork } from './person-lifecycle-application-adapter.js';
@@ -353,6 +357,10 @@ import {
   nonWritableLifeClusterFence,
   type LifePolicyEnforcementPointResolver
 } from './life-application-adapter.js';
+import {
+  RepositoryBackedHouseholdOperationsQueryPort,
+  RepositoryBackedHouseholdOperationsUnitOfWork
+} from './household-operations-application-adapter.js';
 import {
   RepositoryBackedLocationPolicyTransactionRunner,
   RepositoryBackedLocationUnitOfWork,
@@ -1217,6 +1225,10 @@ export class FamilyDataStore {
   readonly #createLifeRecordUseCase: CreateLifeRecordUseCase;
   readonly #getManagedLifeWorkspaceUseCase: GetManagedLifeWorkspaceUseCase;
   readonly #recordManagedLifeItemUseCase: RecordManagedLifeItemUseCase;
+  readonly #getHouseholdOperationsCenterUseCase: GetHouseholdOperationsCenterUseCase;
+  readonly #createHouseholdOperationItemUseCase: CreateHouseholdOperationItemUseCase;
+  readonly #updateHouseholdOperationItemUseCase: UpdateHouseholdOperationItemUseCase;
+  readonly #deleteHouseholdOperationItemUseCase: DeleteHouseholdOperationItemUseCase;
   readonly #prepareFamilyEmergencyCardExportUseCase: PrepareFamilyEmergencyCardExportUseCase;
   readonly #recordFamilyEmergencyCardExportCompletionUseCase: RecordFamilyEmergencyCardExportCompletionUseCase;
   readonly #listFinanceRecordsUseCase: ListFinanceRecordsUseCase;
@@ -1731,6 +1743,7 @@ export class FamilyDataStore {
           permissionRepository: this.#repositories.objectPermissionRepository,
           trustedDeviceRepository: this.#repositories.trustedDeviceRepository,
           lifePolicyResourceRepository: this.#repositories.lifeRepository,
+          householdOperationsPolicyResourceRepository: this.#repositories.householdOperationsRepository,
           personRepository: this.#repositories.personRepository,
           deviceIdentityProvider: this.#deviceIdentityProvider,
           authorizationProvider: productionArchivePolicy.authorizationProvider,
@@ -1743,6 +1756,7 @@ export class FamilyDataStore {
     const lifeApplicationDependencies = {
       transactionExecutor: this.#transactionExecutor,
       lifeRepository: this.#repositories.lifeRepository,
+      householdOperationsRepository: this.#repositories.householdOperationsRepository,
       accountRepository: this.#repositories.accountRepository,
       permissionRepository: this.#repositories.objectPermissionRepository,
       personRepository: this.#repositories.personRepository,
@@ -2292,6 +2306,18 @@ export class FamilyDataStore {
     this.#createLifeRecordUseCase = new CreateLifeRecordUseCase(lifeUnitOfWork);
     this.#getManagedLifeWorkspaceUseCase = new GetManagedLifeWorkspaceUseCase(lifeQuery);
     this.#recordManagedLifeItemUseCase = new RecordManagedLifeItemUseCase(lifeUnitOfWork);
+    const householdOperationsQuery = new RepositoryBackedHouseholdOperationsQueryPort(
+      lifeApplicationDependencies,
+      lifePolicyTransactionRunner
+    );
+    const householdOperationsUnitOfWork = new RepositoryBackedHouseholdOperationsUnitOfWork(
+      lifeApplicationDependencies,
+      lifePolicyTransactionRunner
+    );
+    this.#getHouseholdOperationsCenterUseCase = new GetHouseholdOperationsCenterUseCase(householdOperationsQuery);
+    this.#createHouseholdOperationItemUseCase = new CreateHouseholdOperationItemUseCase(householdOperationsUnitOfWork);
+    this.#updateHouseholdOperationItemUseCase = new UpdateHouseholdOperationItemUseCase(householdOperationsUnitOfWork);
+    this.#deleteHouseholdOperationItemUseCase = new DeleteHouseholdOperationItemUseCase(householdOperationsUnitOfWork);
     this.#prepareFamilyEmergencyCardExportUseCase = new PrepareFamilyEmergencyCardExportUseCase(
       lifeUnitOfWork,
       () => Date.parse(this.#clock.now())
@@ -4695,6 +4721,47 @@ export class FamilyDataStore {
     });
     if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
     return this.getManagedLifeWorkspace();
+  }
+
+  public async getHouseholdOperationsCenter(): Promise<HouseholdOperationsCenterView> {
+    const result = await this.#getHouseholdOperationsCenterUseCase.execute(
+      this.#lifeApplicationContext('household-operations-center-get')
+    );
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async createHouseholdOperationItem(
+    input: CreateHouseholdOperationItemInput
+  ): Promise<HouseholdOperationMutationReceiptView> {
+    const result = await this.#createHouseholdOperationItemUseCase.execute({
+      context: this.#lifeApplicationContext('household-operation-item-create'),
+      command: input
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async updateHouseholdOperationItem(
+    input: UpdateHouseholdOperationItemInput
+  ): Promise<HouseholdOperationMutationReceiptView> {
+    const result = await this.#updateHouseholdOperationItemUseCase.execute({
+      context: this.#lifeApplicationContext('household-operation-item-update'),
+      command: input
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async deleteHouseholdOperationItem(
+    input: DeleteHouseholdOperationItemInput
+  ): Promise<HouseholdOperationMutationReceiptView> {
+    const result = await this.#deleteHouseholdOperationItemUseCase.execute({
+      context: this.#lifeApplicationContext('household-operation-item-delete'),
+      command: input
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
   }
 
   public async prepareEmergencyCardExport(input: {

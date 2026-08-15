@@ -115,9 +115,9 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 97,
-  "ppk021ExactAllowlistEntries": 699,
+  "latestDatabaseMigration": 98,
+  "ppk021ExactAllowlistEntries": 707,
   "ppk022CapabilitySurfaces": 345,
   "outboundTransferPerformed": false,
-  "generatedAt": "2026-08-15T00:08:33.087Z"
+  "generatedAt": "2026-08-15T01:13:30.993Z"
 }
