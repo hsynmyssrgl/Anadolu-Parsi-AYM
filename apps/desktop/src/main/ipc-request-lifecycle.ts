@@ -176,6 +176,18 @@ const householdOperationsChannels = new Set<string>([
   ...householdOperationsReadChannels,
   ...householdOperationsWriteChannels
 ]);
+const childEducationReadChannels = new Set<string>([
+  'childEducation:getCenter'
+]);
+const childEducationWriteChannels = new Set<string>([
+  'childEducation:createItem',
+  'childEducation:updateItem',
+  'childEducation:deleteItem'
+]);
+const childEducationChannels = new Set<string>([
+  ...childEducationReadChannels,
+  ...childEducationWriteChannels
+]);
 
 const cancellableNetworkChannels = new Set<string>([
   'dataLifecycle:runRevocationSync'
@@ -187,6 +199,12 @@ const cancellableInteractiveAuthenticationChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLifecyclePolicy => {
+  if (childEducationReadChannels.has(channel)) {
+    return Object.freeze({ cancellable: true, latestWins: true, timeoutMs: 10_000 });
+  }
+  if (childEducationWriteChannels.has(channel)) {
+    return Object.freeze({ cancellable: false, latestWins: false, timeoutMs: 0 });
+  }
   if (householdOperationsReadChannels.has(channel)) {
     return Object.freeze({ cancellable: true, latestWins: true, timeoutMs: 10_000 });
   }
@@ -279,6 +297,9 @@ const standardAdmissionChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestAdmissionPolicy = (channel: string): IpcRequestAdmissionPolicy => {
+  if (childEducationChannels.has(channel)) {
+    return Object.freeze({ enabled:true, priority:'interactive', priorityWeight:100, maxConcurrentPerSender:2, maxConcurrentPerChannel:1, maxQueuedPerSender:4, queueTimeoutMs:2_500 });
+  }
   if (householdOperationsChannels.has(channel)) {
     return Object.freeze({ enabled:true, priority:'interactive', priorityWeight:100, maxConcurrentPerSender:2, maxConcurrentPerChannel:1, maxQueuedPerSender:4, queueTimeoutMs:2_500 });
   }
@@ -386,6 +407,12 @@ export interface IpcRequestRatePolicy {
 }
 
 export const resolveIpcRequestRatePolicy = (channel: string): IpcRequestRatePolicy => {
+  if (childEducationReadChannels.has(channel)) {
+    return Object.freeze({ enabled: true, maxRequestsPerWindow: 60, windowMs: 60_000 });
+  }
+  if (childEducationWriteChannels.has(channel)) {
+    return Object.freeze({ enabled: true, maxRequestsPerWindow: 16, windowMs: 60_000 });
+  }
   if (householdOperationsReadChannels.has(channel)) {
     return Object.freeze({ enabled: true, maxRequestsPerWindow: 60, windowMs: 60_000 });
   }

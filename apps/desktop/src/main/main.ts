@@ -12,6 +12,7 @@ import { APP_META, USER_VISIBLE_APP_INFO, type CreateArchiveItemInput, CreateFam
 import type { AddArchiveItemVersionInput, AddArchiveRelationEvidenceInput, RemoveArchiveRelationEvidenceInput } from '@ppt/domain';
 import type { RecordHealthCareEntryInput, RevokeHealthCareAccessGrantInput, UpsertHealthCareAccessGrantInput } from '@ppt/domain';
 import type { CreateHouseholdOperationItemInput, DeleteHouseholdOperationItemInput, UpdateHouseholdOperationItemInput } from '@ppt/domain';
+import type { CreateChildEducationItemInput, DeleteChildEducationItemInput, UpdateChildEducationItemInput } from '@ppt/domain';
 import type { ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { UnifiedAuthorizedSearchInput } from '@ppt/domain';
 import type { RecordManagedLifeItemInput } from '@ppt/domain';
@@ -54,6 +55,7 @@ import {
 import { bootstrapDesktopRuntime, type DesktopRuntime } from './runtime-bootstrap.js';
 import { registerCorrelatedIpcHandler, registerIpcCancellationHandlers, createRuntimeCorrelationId, type IpcHandler } from './ipc-runtime.js';
 import {
+  CHILD_EDUCATION_COORDINATION_IPC_CHANNELS,
   HEALTH_CARE_COORDINATION_IPC_CHANNELS,
   HOUSEHOLD_OPERATIONS_IPC_CHANNELS,
   LOCAL_GOVERNED_OCR_IPC_CHANNELS,
@@ -2372,6 +2374,14 @@ function registerIpc(): void {
     store().updateHouseholdOperationItem(input));
   registerIpcHandler(HOUSEHOLD_OPERATIONS_IPC_CHANNELS.deleteItem, async (_event, input:DeleteHouseholdOperationItemInput) =>
     store().deleteHouseholdOperationItem(input));
+  registerIpcHandler(CHILD_EDUCATION_COORDINATION_IPC_CHANNELS.getCenter, async (_event, input:{readonly childPersonId:string}) =>
+    store().getChildEducationCenter(input.childPersonId));
+  registerIpcHandler(CHILD_EDUCATION_COORDINATION_IPC_CHANNELS.createItem, async (_event, input:CreateChildEducationItemInput) =>
+    store().createChildEducationItem(input));
+  registerIpcHandler(CHILD_EDUCATION_COORDINATION_IPC_CHANNELS.updateItem, async (_event, input:UpdateChildEducationItemInput) =>
+    store().updateChildEducationItem(input));
+  registerIpcHandler(CHILD_EDUCATION_COORDINATION_IPC_CHANNELS.deleteItem, async (_event, input:DeleteChildEducationItemInput) =>
+    store().deleteChildEducationItem(input));
   registerIpcHandler('finance:listValuations', () => store().listFinanceValuations());
   registerIpcHandler('finance:createValuation', (_event, input:CreateFinanceValuationInput) => store().createFinanceValuation(input));
   registerIpcHandler('family:createRelation', async (_event, input: CreateFamilyRelationInput) => {

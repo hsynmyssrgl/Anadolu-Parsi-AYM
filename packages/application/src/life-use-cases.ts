@@ -152,7 +152,12 @@ export interface LifeApplicationContext {
 export interface LifePolicyIntent {
   readonly action: 'read' | 'create' | 'update' | 'delete' | 'share';
   readonly capability: 'family.read' | 'family.write' | 'file.share';
-  readonly resourceType: 'life_record' | 'household_operation_item' | 'household_operations_center';
+  readonly resourceType:
+    | 'life_record'
+    | 'household_operation_item'
+    | 'household_operations_center'
+    | 'child_education_item'
+    | 'child_education_center';
   readonly resourceId: string;
   readonly purpose: 'general' | 'emergency-offline-portability';
   readonly requestedFields?: readonly string[];

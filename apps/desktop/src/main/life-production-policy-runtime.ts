@@ -30,6 +30,7 @@ import {
 import type {
   AccountRepositoryPort,
   AccountRow,
+  ChildEducationPolicyResourceRepositoryPort,
   HouseholdOperationsPolicyResourceRepositoryPort,
   LifePolicyResourceRepositoryPort,
   LifeRecordRow,
@@ -45,6 +46,7 @@ import type {
   TrustedDeviceRepositoryPort,
   TrustedDeviceRow
 } from '@ppt/repository-contracts';
+import { childEducationVisibilityPrivacy } from '@ppt/repository-contracts';
 import type {
   LifePolicyCommittedTransactionInput,
   LifePolicyEnforcementPoint,
@@ -63,6 +65,7 @@ export interface LifeProductionPolicyRuntimeDependencies {
   readonly trustedDeviceRepository: TrustedDeviceRepositoryPort;
   readonly lifePolicyResourceRepository: LifePolicyResourceRepositoryPort;
   readonly householdOperationsPolicyResourceRepository: HouseholdOperationsPolicyResourceRepositoryPort;
+  readonly childEducationPolicyResourceRepository: ChildEducationPolicyResourceRepositoryPort;
   readonly personRepository: PersonRepositoryPort;
   readonly deviceIdentityProvider: Pick<FileDeviceIdentityProvider, 'snapshot'>;
   readonly authorizationProvider: PlatformPolicyAuthorizationProvider;
@@ -100,7 +103,9 @@ const policyActions = new Set<PolicyAction>([
 const lifeResourceTypes = new Set<LifePolicyIntent['resourceType']>([
   'life_record',
   'household_operation_item',
-  'household_operations_center'
+  'household_operations_center',
+  'child_education_item',
+  'child_education_center'
 ]);
 
 const nonEmpty = (value: unknown, max = 512): value is string =>
@@ -777,6 +782,21 @@ const findLifeResourceForPolicyResolution = (
         })
       : null);
   }
+  if (resourceType === 'child_education_item') {
+    const found = dependencies.childEducationPolicyResourceRepository.findItemForPolicyResolution(
+      execution,
+      resourceId
+    );
+    if (!found.ok) return found;
+    return ok(found.value
+      ? Object.freeze({
+          familyId: found.value.familyId,
+          ownerPersonId: found.value.childPersonId,
+          privacy: childEducationVisibilityPrivacy(found.value.visibility),
+          stateFingerprint: stable(found.value)
+        })
+      : null);
+  }
   throw new PlatformPolicyEnforcementError(
     'RESOURCE_RESOLUTION_FAILED',
     'Life policy resource type is not supported'
@@ -819,7 +839,10 @@ const loadLifeResourceSnapshotInTransaction = (
       ownerPersonId: context.actor.personId,
       sensitivity: requestedIntent.resourceType === 'household_operations_center'
         ? 'personal' as const
-        : 'highly_sensitive' as const
+        : 'highly_sensitive' as const,
+      ...(requestedIntent.resourceType === 'child_education_center'
+        ? { dataClasses: Object.freeze(['child'] as const), classificationSource: 'declared' as const }
+        : {})
     });
     return ok(Object.freeze({
       resource,
@@ -845,7 +868,7 @@ const loadLifeResourceSnapshotInTransaction = (
     if (!existing.ok) return existing;
     if (existing.value) {
       if (
-        requestedIntent.resourceType !== 'household_operation_item'
+        !['household_operation_item','child_education_item'].includes(requestedIntent.resourceType)
         || existing.value.familyId !== context.familyId
         || existing.value.ownerPersonId !== requestedIntent.ownerPersonId
         || existing.value.privacy !== requestedIntent.privacy
@@ -856,7 +879,10 @@ const loadLifeResourceSnapshotInTransaction = (
           id: requestedIntent.resourceId,
           familyId: existing.value.familyId,
           ownerPersonId: existing.value.ownerPersonId,
-          sensitivity: sensitivityFor(existing.value.privacy)
+          sensitivity: sensitivityFor(existing.value.privacy),
+          ...(requestedIntent.resourceType === 'child_education_item'
+            ? { dataClasses: Object.freeze(['child'] as const), classificationSource: 'declared' as const }
+            : {})
         }),
         stateFingerprint: existing.value.stateFingerprint
       }));
@@ -871,7 +897,10 @@ const loadLifeResourceSnapshotInTransaction = (
       id: requestedIntent.resourceId,
       familyId: context.familyId,
       ownerPersonId: requestedIntent.ownerPersonId,
-      sensitivity: sensitivityFor(requestedIntent.privacy)
+      sensitivity: sensitivityFor(requestedIntent.privacy),
+      ...(requestedIntent.resourceType === 'child_education_item'
+        ? { dataClasses: Object.freeze(['child'] as const), classificationSource: 'declared' as const }
+        : {})
     });
     return ok(Object.freeze({
       resource,
@@ -932,7 +961,10 @@ const loadLifeResourceSnapshotInTransaction = (
       id: requestedIntent.resourceId,
       familyId: existing.value.familyId,
       ownerPersonId: existing.value.ownerPersonId,
-      sensitivity: sensitivityFor(existing.value.privacy)
+      sensitivity: sensitivityFor(existing.value.privacy),
+      ...(requestedIntent.resourceType === 'child_education_item'
+        ? { dataClasses: Object.freeze(['child'] as const), classificationSource: 'declared' as const }
+        : {})
     });
     return ok(Object.freeze({ resource, stateFingerprint: existing.value.stateFingerprint }));
   }

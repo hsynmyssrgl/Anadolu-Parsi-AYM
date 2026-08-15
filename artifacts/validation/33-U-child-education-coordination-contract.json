@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "step": "33-U",
+  "decision": "DEC-232",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "countsAsRequirementPass": false,
+  "checkCount": 15,
+  "passed": 15,
+  "failed": 0,
+  "migration99Sha256": "38ecd03c71e734d1700f2ee44ece10e47935277e003e7e4ce21da7b6034db98e",
+  "checks": [
+    {
+      "name": "scope inventory and five-test matrix are exact",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 99 source manifest and scope checksums are canonical",
+      "status": "PASS"
+    },
+    {
+      "name": "migration owns exact current item and immutable mutation tables",
+      "status": "PASS"
+    },
+    {
+      "name": "repository contract exposes center item mutation and policy resolution ports",
+      "status": "PASS"
+    },
+    {
+      "name": "repository enforces exact receipt subject purpose and bounded lists",
+      "status": "PASS"
+    },
+    {
+      "name": "desktop adapter persists receipt time and content-free audit outbox transactionally",
+      "status": "PASS"
+    },
+    {
+      "name": "production policy runtime binds child classified owner and adolescent privacy",
+      "status": "PASS"
+    },
+    {
+      "name": "main preload and renderer types expose only four safe methods",
+      "status": "PASS"
+    },
+    {
+      "name": "application tests cover replay private-space age fields update and delete",
+      "status": "PASS"
+    },
+    {
+      "name": "repository tests cover forged scope immutable ledger and bounded policy metadata",
+      "status": "PASS"
+    },
+    {
+      "name": "IPC tests reject renderer authority and unsafe result shapes",
+      "status": "PASS"
+    },
+    {
+      "name": "DataStore tests prove PEP fail closed explicit grant privacy and rollback",
+      "status": "PASS"
+    },
+    {
+      "name": "UI test pins existing route stable retry age privacy and local truth",
+      "status": "PASS"
+    },
+    {
+      "name": "decision and threat model deny external provider payment tracking and acceptance claims",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK ratchets are exact while requirement remains open",
+      "status": "PASS"
+    }
+  ],
+  "generatedAt": "2026-08-15T02:46:41.657Z"
+}

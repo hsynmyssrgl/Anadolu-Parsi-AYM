@@ -13696,6 +13696,176 @@ BEFORE DELETE ON household_operation_mutations BEGIN SELECT RAISE(ABORT,'33-T ho
 UPDATE database_metadata SET value='REVISION-33-T-HOUSEHOLD-OPERATIONS',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 
+const childEducationCoordinationSql = `
+CREATE TABLE child_education_mutations (
+  id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  child_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  item_id TEXT NOT NULL CHECK(length(trim(item_id)) BETWEEN 2 AND 256),
+  actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  mutation_kind TEXT NOT NULL CHECK(mutation_kind IN ('item_create','item_update','item_delete')),
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 256),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  expected_revision INTEGER NOT NULL CHECK(expected_revision>=0),
+  revision INTEGER NOT NULL CHECK(revision=expected_revision+1),
+  item_state_fingerprint TEXT NOT NULL CHECK(length(item_state_fingerprint)=64 AND item_state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version>=1),
+  policy_receipt_nonce TEXT NOT NULL CHECK(length(trim(policy_receipt_nonce)) BETWEEN 16 AND 256),
+  policy_correlation_id TEXT NOT NULL CHECK(length(trim(policy_correlation_id)) BETWEEN 1 AND 256),
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type='child_education_item'),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action IN ('create','update','delete')),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='family.write'),
+  UNIQUE(family_id,actor_account_id,client_operation_id),
+  CHECK(policy_resource_id=item_id),
+  CHECK((mutation_kind='item_create' AND policy_action='create' AND expected_revision=0)
+    OR (mutation_kind='item_update' AND policy_action='update' AND expected_revision>=1)
+    OR (mutation_kind='item_delete' AND policy_action='delete' AND expected_revision>=1))
+) STRICT;
+
+CREATE INDEX idx_child_education_mutations_child
+ON child_education_mutations(family_id,child_person_id,occurred_at DESC,id);
+
+CREATE TABLE child_education_items (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  child_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  kind TEXT NOT NULL CHECK(kind IN (
+    'school','class','timetable','homework','exam','school_event','transport_plan','pickup_authority',
+    'course','sport','certificate','book','allowance_budget','education_goal'
+  )),
+  area TEXT NOT NULL CHECK(area IN ('schoolwork','events_access','activities','money_goals')),
+  title TEXT NOT NULL CHECK(length(trim(title)) BETWEEN 2 AND 160),
+  status TEXT NOT NULL CHECK(status IN ('planned','active','submitted','completed','cancelled','expired','archived','deleted')),
+  visibility TEXT NOT NULL CHECK(visibility IN ('family_coordination','child_and_selected_guardians','adolescent_private')),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  institution_label TEXT CHECK(institution_label IS NULL OR length(trim(institution_label)) BETWEEN 1 AND 120),
+  class_label TEXT CHECK(class_label IS NULL OR length(trim(class_label)) BETWEEN 1 AND 80),
+  subject_label TEXT CHECK(subject_label IS NULL OR length(trim(subject_label)) BETWEEN 1 AND 80),
+  scheduled_at TEXT CHECK(scheduled_at IS NULL OR (length(scheduled_at)=24 AND scheduled_at GLOB '????-??-??T??:??:??.???Z' AND julianday(scheduled_at) IS NOT NULL)),
+  due_at TEXT CHECK(due_at IS NULL OR (length(due_at)=24 AND due_at GLOB '????-??-??T??:??:??.???Z' AND julianday(due_at) IS NOT NULL)),
+  recurrence TEXT CHECK(recurrence IS NULL OR length(trim(recurrence)) BETWEEN 1 AND 160),
+  transport_mode TEXT CHECK(transport_mode IS NULL OR transport_mode IN ('school_service','family_dropoff','public_transport','walking','other')),
+  authority_reference_id TEXT CHECK(authority_reference_id IS NULL OR length(trim(authority_reference_id)) BETWEEN 2 AND 128),
+  amount_minor INTEGER CHECK(amount_minor IS NULL OR (amount_minor>=0 AND amount_minor<=9000000000000000)),
+  currency TEXT CHECK(currency IS NULL OR (length(currency)=3 AND currency NOT GLOB '*[^A-Z]*')),
+  progress_basis_points INTEGER CHECK(progress_basis_points IS NULL OR progress_basis_points BETWEEN 0 AND 10000),
+  certificate_status TEXT CHECK(certificate_status IS NULL OR certificate_status='locally_recorded_unverified'),
+  note TEXT CHECK(note IS NULL OR length(note)<=2000),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES child_education_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z' AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND updated_at GLOB '????-??-??T??:??:??.???Z' AND julianday(updated_at) IS NOT NULL),
+  deleted_at TEXT CHECK(deleted_at IS NULL OR (length(deleted_at)=24 AND deleted_at GLOB '????-??-??T??:??:??.???Z' AND julianday(deleted_at) IS NOT NULL)),
+  CHECK(updated_at>=created_at),
+  CHECK(due_at IS NULL OR scheduled_at IS NULL OR due_at>=scheduled_at),
+  CHECK((status='deleted' AND deleted_at=updated_at AND title='Silindi'
+    AND institution_label IS NULL AND class_label IS NULL AND subject_label IS NULL
+    AND scheduled_at IS NULL AND due_at IS NULL AND recurrence IS NULL AND transport_mode IS NULL
+    AND authority_reference_id IS NULL AND amount_minor IS NULL AND currency IS NULL
+    AND progress_basis_points IS NULL AND certificate_status IS NULL AND note IS NULL)
+    OR (status<>'deleted' AND deleted_at IS NULL)),
+  CHECK(status='deleted' OR (
+    ((kind IN ('school','class','course','sport','certificate')) = (institution_label IS NOT NULL))
+    AND ((kind IN ('timetable','homework','exam')) = (subject_label IS NOT NULL))
+    AND ((kind='transport_plan') = (transport_mode IS NOT NULL))
+    AND ((kind='pickup_authority') = (authority_reference_id IS NOT NULL))
+    AND ((kind='allowance_budget') = (amount_minor IS NOT NULL AND currency IS NOT NULL))
+    AND ((kind='education_goal') = (progress_basis_points IS NOT NULL))
+    AND ((kind='certificate') = (certificate_status IS NOT NULL))
+  ))
+) STRICT;
+
+CREATE INDEX idx_child_education_items_center
+ON child_education_items(family_id,child_person_id,area,updated_at DESC,id);
+CREATE INDEX idx_child_education_items_due
+ON child_education_items(family_id,child_person_id,due_at) WHERE due_at IS NOT NULL AND status<>'deleted';
+
+CREATE TRIGGER trg_33u_child_education_mutation_insert
+BEFORE INSERT ON child_education_mutations
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM accounts account
+  JOIN people actor ON actor.id=NEW.actor_person_id AND actor.family_id=NEW.family_id AND actor.status='active'
+  JOIN people child ON child.id=NEW.child_person_id AND child.family_id=NEW.family_id AND child.status='active'
+    AND child.birth_date IS NOT NULL AND date(child.birth_date)<=date(NEW.occurred_at)
+    AND date(child.birth_date,'+18 years')>date(NEW.occurred_at)
+  JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+  JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+  WHERE account.id=NEW.actor_account_id AND account.person_id=NEW.actor_person_id AND account.status='active'
+    AND receipt.receipt_version=NEW.policy_receipt_version AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id AND receipt.action=NEW.policy_action
+    AND receipt.capability=NEW.policy_capability AND receipt.recorded_at=NEW.occurred_at
+    AND json_extract(receipt.record_json,'$.request.purpose')='general'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.child_person_id
+    AND EXISTS(SELECT 1 FROM json_each(json_extract(receipt.record_json,'$.request.resource.dataClasses')) cls WHERE cls.value='child')
+    AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.actor_account_id
+    AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.actor_person_id
+    AND ((NEW.expected_revision=0 AND NEW.mutation_kind='item_create' AND NOT EXISTS(SELECT 1 FROM child_education_items item WHERE item.id=NEW.item_id))
+      OR EXISTS(SELECT 1 FROM child_education_items item WHERE item.id=NEW.item_id AND item.family_id=NEW.family_id
+        AND item.child_person_id=NEW.child_person_id AND item.revision=NEW.expected_revision AND item.status<>'deleted'))
+)
+BEGIN SELECT RAISE(ABORT,'33-U child education mutation requires minor owner and exact child-classified PEP receipt'); END;
+
+CREATE TRIGGER trg_33u_child_education_item_insert
+BEFORE INSERT ON child_education_items
+WHEN NOT EXISTS(
+  SELECT 1 FROM child_education_mutations mutation
+  JOIN people child ON child.id=NEW.child_person_id AND child.family_id=NEW.family_id
+  WHERE mutation.id=NEW.last_mutation_id AND mutation.item_id=NEW.id AND mutation.family_id=NEW.family_id
+    AND mutation.child_person_id=NEW.child_person_id AND mutation.mutation_kind='item_create'
+    AND mutation.expected_revision=0 AND mutation.revision=NEW.revision
+    AND mutation.item_state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.created_at
+    AND NEW.updated_at=NEW.created_at
+    AND (NEW.visibility<>'adolescent_private' OR (mutation.actor_person_id=NEW.child_person_id
+      AND date(child.birth_date,'+13 years')<=date(mutation.occurred_at)))
+)
+  OR NEW.area<>CASE
+    WHEN NEW.kind IN ('school','class','timetable','homework','exam') THEN 'schoolwork'
+    WHEN NEW.kind IN ('school_event','transport_plan','pickup_authority') THEN 'events_access'
+    WHEN NEW.kind IN ('course','sport','certificate','book') THEN 'activities'
+    ELSE 'money_goals' END
+BEGIN SELECT RAISE(ABORT,'33-U child education item requires exact mutation, area and adolescent privacy ownership'); END;
+
+CREATE TRIGGER trg_33u_child_education_item_update
+BEFORE UPDATE ON child_education_items
+WHEN NEW.id IS NOT OLD.id OR NEW.family_id IS NOT OLD.family_id OR NEW.child_person_id IS NOT OLD.child_person_id
+  OR NEW.kind IS NOT OLD.kind OR NEW.area IS NOT OLD.area OR NEW.created_at IS NOT OLD.created_at
+  OR (NEW.status<>'deleted' AND (NEW.institution_label IS NOT OLD.institution_label OR NEW.class_label IS NOT OLD.class_label
+    OR NEW.subject_label IS NOT OLD.subject_label OR NEW.recurrence IS NOT OLD.recurrence
+    OR NEW.transport_mode IS NOT OLD.transport_mode OR NEW.authority_reference_id IS NOT OLD.authority_reference_id
+    OR NEW.amount_minor IS NOT OLD.amount_minor OR NEW.currency IS NOT OLD.currency
+    OR NEW.certificate_status IS NOT OLD.certificate_status)) OR NEW.revision<>OLD.revision+1
+  OR NOT EXISTS(
+    SELECT 1 FROM child_education_mutations mutation
+    JOIN people child ON child.id=NEW.child_person_id AND child.family_id=NEW.family_id
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.item_id=NEW.id AND mutation.family_id=NEW.family_id
+      AND mutation.child_person_id=NEW.child_person_id AND mutation.expected_revision=OLD.revision
+      AND mutation.revision=NEW.revision AND mutation.item_state_fingerprint=NEW.state_fingerprint
+      AND mutation.occurred_at=NEW.updated_at
+      AND ((mutation.mutation_kind='item_update' AND OLD.status<>'deleted' AND NEW.status<>'deleted' AND NEW.deleted_at IS NULL)
+        OR (mutation.mutation_kind='item_delete' AND OLD.status<>'deleted' AND NEW.status='deleted' AND NEW.deleted_at=NEW.updated_at))
+      AND ((OLD.visibility<>'adolescent_private' AND NEW.visibility<>'adolescent_private')
+        OR (mutation.actor_person_id=NEW.child_person_id AND date(child.birth_date,'+13 years')<=date(mutation.occurred_at)))
+  )
+BEGIN SELECT RAISE(ABORT,'33-U child education update requires immutable identity, exact next mutation and private-zone owner'); END;
+
+CREATE TRIGGER trg_33u_child_education_item_delete
+BEFORE DELETE ON child_education_items BEGIN SELECT RAISE(ABORT,'33-U child education current history is durable'); END;
+CREATE TRIGGER trg_33u_child_education_mutation_update
+BEFORE UPDATE ON child_education_mutations BEGIN SELECT RAISE(ABORT,'33-U child education mutation ledger is immutable'); END;
+CREATE TRIGGER trg_33u_child_education_mutation_delete
+BEFORE DELETE ON child_education_mutations BEGIN SELECT RAISE(ABORT,'33-U child education mutation ledger is durable'); END;
+
+UPDATE database_metadata SET value='REVISION-33-U-CHILD-EDUCATION-COORDINATION',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -13794,7 +13964,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(95, 'legacy_archive_ownership_reattestation', legacyArchiveOwnershipReattestationSql),
   createMigrationDefinition(96, 'archive_evidence_relations_media_search', archiveEvidenceRelationsMediaLifecycleSql),
   createMigrationDefinition(97, 'health_care_coordination_elder_support', healthCareCoordinationElderSupportSql),
-  createMigrationDefinition(98, 'household_operations_center', householdOperationsCenterSql)
+  createMigrationDefinition(98, 'household_operations_center', householdOperationsCenterSql),
+  createMigrationDefinition(99, 'child_education_coordination', childEducationCoordinationSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

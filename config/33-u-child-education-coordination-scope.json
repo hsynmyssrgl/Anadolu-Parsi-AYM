@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "id": "33-U-CHILD-EDUCATION-COORDINATION",
+  "step": "33-U",
+  "decision": "DEC-232",
+  "title": "Child education coordination",
+  "status": "PLANNED",
+  "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+  "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+  "requirements": ["EXT-017", "EXT-018", "EXT-019", "EXT-020", "EXT-022"],
+  "dependsOn": ["33-S", "33-P"],
+  "roadmapStatus": "PLANNED",
+  "registrySemantics": {
+    "acceptedScopeRegistryAuthority": "ATOMIC_CLOSURE_STATE",
+    "registryMutationPerformedByStarter": false,
+    "roadmapMutationPerformedByStarter": false,
+    "planOrLedgerActivationPerformedByStarter": false,
+    "activePredecessor": "33-P",
+    "registryEvidenceMustRemainFalseUntilClosure": true
+  },
+  "implementedModel": {
+    "status": "PARTIAL_LOCAL_COMPOSED_AND_TESTED_ACCEPTANCE_INCOMPLETE",
+    "areas": ["schoolwork", "events_access", "activities", "money_goals"],
+    "itemKinds": ["school", "class", "timetable", "homework", "exam", "school_event", "transport_plan", "pickup_authority", "course", "sport", "certificate", "book", "allowance_budget", "education_goal"],
+    "visibilityZones": ["family_coordination", "child_and_selected_guardians", "adolescent_private"],
+    "childDataClassRequired": true,
+    "minorBirthDateRequired": true,
+    "adolescentPrivateAgeRange": "13-17",
+    "nonOwnerExplicitPermissionRequired": true,
+    "optimisticRevisionRequired": true,
+    "idempotentClientOperationRequired": true,
+    "immutableMutationLedger": true,
+    "contentMinimizedSoftDelete": true,
+    "boundedReadItemLimit": 1000,
+    "existingLifeRouteReused": true,
+    "newMenuRouteAdded": false
+  },
+  "truth": {
+    "localOnly": true,
+    "schoolPortalSyncPerformed": false,
+    "teacherMessagingPerformed": false,
+    "liveTransportTrackingPerformed": false,
+    "pickupCredentialIssuedByThisPackage": false,
+    "allowancePaymentExecuted": false,
+    "certificateVerified": false,
+    "healthDataDuplicated": false,
+    "aiProcessingAllowed": false,
+    "externalSharingAllowed": false,
+    "requirementsClosed": false,
+    "countsAsRequirementPass": false
+  },
+  "validation": {
+    "targetedTestFiles": [
+      "packages/application/tests/child-education-coordination-use-cases.test.ts",
+      "packages/repositories/child-education-coordination-repository-policy.test.ts",
+      "apps/desktop/tests/child-education-coordination-ipc-integration.test.ts",
+      "apps/desktop/tests/child-education-coordination-data-store.test.ts",
+      "apps/desktop/tests/child-education-coordination-ui.test.ts"
+    ],
+    "targetedTestFileRatchet": 5,
+    "targetedTestRatchet": 22,
+    "migrationVersion": 99,
+    "migrationSha256": "38ecd03c71e734d1700f2ee44ece10e47935277e003e7e4ce21da7b6034db98e",
+    "ppk021": {
+      "status": "PASS",
+      "scannedProductionFiles": 462,
+      "exactPrivilegedSurfaceCount": 715,
+      "exactAllowlistSha256": "2e1962cc032e83ef84128f7aa4e266d2f70ca12178c48c5109d6e1849df3073b",
+      "directRoleAuthorizationBypasses": 0
+    },
+    "ppk022": {
+      "status": "PASS",
+      "scannedProductionFiles": 462,
+      "exactCapabilitySurfaceCount": 345,
+      "exactCapabilityManifestSha256": "1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e"
+    },
+    "countsAsRequirementPass": false
+  },
+  "manualEvidence": {
+    "realFamilyUat": "NOT_RUN",
+    "childAndGuardianPrivacyReview": "NOT_RUN",
+    "adolescentSafetyReview": "NOT_RUN",
+    "legalPrivacyReview": "NOT_RUN",
+    "realSchoolWorkflowUat": "NOT_RUN",
+    "realCredentialPickupUat": "NOT_RUN",
+    "certificationClaimed": false
+  },
+  "persistentReceiptStatus": "NOT_RUN"
+}

@@ -2611,6 +2611,179 @@ const householdResult = (channel: string, result: unknown): IpcIntegrationPolicy
   return valid ? accepted() : rejected('HOUSEHOLD_OPERATIONS_RESULT_INVALID', '$result');
 };
 
+export const CHILD_EDUCATION_COORDINATION_IPC_CHANNELS = Object.freeze({
+  getCenter: 'childEducation:getCenter',
+  createItem: 'childEducation:createItem',
+  updateItem: 'childEducation:updateItem',
+  deleteItem: 'childEducation:deleteItem'
+} as const);
+const childEducationChannels = new Set<string>(Object.values(CHILD_EDUCATION_COORDINATION_IPC_CHANNELS));
+const childEducationWriteChannels = new Set<string>([
+  CHILD_EDUCATION_COORDINATION_IPC_CHANNELS.createItem,
+  CHILD_EDUCATION_COORDINATION_IPC_CHANNELS.updateItem,
+  CHILD_EDUCATION_COORDINATION_IPC_CHANNELS.deleteItem
+]);
+const childEducationKinds = new Set<unknown>([
+  'school','class','timetable','homework','exam','school_event','transport_plan','pickup_authority',
+  'course','sport','certificate','book','allowance_budget','education_goal'
+]);
+const childEducationAreas = new Set<unknown>(['schoolwork','events_access','activities','money_goals']);
+const childEducationVisibilities = new Set<unknown>([
+  'family_coordination','child_and_selected_guardians','adolescent_private'
+]);
+const childEducationPrivacyCodes = new Set<unknown>([
+  'family_admin_coordination','owner_and_explicit_permission','adolescent_owner_private'
+]);
+const childEducationStatuses = new Set<unknown>([
+  'planned','active','submitted','completed','cancelled','expired','archived','deleted'
+]);
+const childEducationMutableStatuses = new Set<unknown>([...childEducationStatuses].filter((value) => value !== 'deleted'));
+const childEducationTransportModes = new Set<unknown>([
+  'school_service','family_dropoff','public_transport','walking','other'
+]);
+const childEducationCreateInput = (value: Record<string, unknown>): boolean => {
+  const optional = [
+    'status','institutionLabel','classLabel','subjectLabel','scheduledAt','dueAt','recurrence','transportMode',
+    'authorityReferenceId','amountMinor','currency','progressBasisPoints','note'
+  ].filter((key) => value[key] !== undefined);
+  if (!healthCareExactRecord(value, [
+    'clientOperationId','itemId','childPersonId','kind','title','visibility',...optional
+  ]) || !healthCareIdentifier(value.clientOperationId) || !healthCareIdentifier(value.itemId)
+    || !healthCareIdentifier(value.childPersonId) || !childEducationKinds.has(value.kind)
+    || !healthCareText(value.title, 2, 160) || !childEducationVisibilities.has(value.visibility)
+    || (value.status !== undefined && !childEducationMutableStatuses.has(value.status))
+    || (value.institutionLabel !== undefined && !healthCareText(value.institutionLabel, 1, 120))
+    || (value.classLabel !== undefined && !healthCareText(value.classLabel, 1, 80))
+    || (value.subjectLabel !== undefined && !healthCareText(value.subjectLabel, 1, 80))
+    || (value.scheduledAt !== undefined && !healthCareIso(value.scheduledAt))
+    || (value.dueAt !== undefined && !healthCareIso(value.dueAt))
+    || (value.recurrence !== undefined && !healthCareText(value.recurrence, 1, 160))
+    || (value.transportMode !== undefined && !childEducationTransportModes.has(value.transportMode))
+    || (value.authorityReferenceId !== undefined && !healthCareText(value.authorityReferenceId, 1, 128))
+    || (value.amountMinor !== undefined && (typeof value.amountMinor !== 'number' || !Number.isSafeInteger(value.amountMinor)
+      || value.amountMinor < 0 || value.amountMinor > 9_000_000_000_000_000))
+    || (value.currency !== undefined && (typeof value.currency !== 'string' || !/^[A-Z]{3}$/u.test(value.currency)))
+    || (value.progressBasisPoints !== undefined && (typeof value.progressBasisPoints !== 'number'
+      || !Number.isSafeInteger(value.progressBasisPoints) || value.progressBasisPoints < 0 || value.progressBasisPoints > 10_000))
+    || (value.note !== undefined && !healthCareText(value.note, 1, 2_000))) return false;
+  const institutionRequired = ['school','class','course','sport','certificate'].includes(String(value.kind));
+  const subjectRequired = ['timetable','homework','exam'].includes(String(value.kind));
+  const moneyRequired = value.kind === 'allowance_budget';
+  const goalRequired = value.kind === 'education_goal';
+  return institutionRequired === (value.institutionLabel !== undefined)
+    && subjectRequired === (value.subjectLabel !== undefined)
+    && (value.kind === 'transport_plan') === (value.transportMode !== undefined)
+    && (value.kind === 'pickup_authority') === (value.authorityReferenceId !== undefined)
+    && moneyRequired === (value.amountMinor !== undefined && value.currency !== undefined)
+    && !((value.amountMinor === undefined) !== (value.currency === undefined))
+    && goalRequired === (value.progressBasisPoints !== undefined)
+    && !(typeof value.scheduledAt === 'string' && typeof value.dueAt === 'string' && value.dueAt < value.scheduledAt);
+};
+const childEducationUpdateInput = (value: Record<string, unknown>): boolean => {
+  const optional = ['title','status','visibility','scheduledAt','dueAt','progressBasisPoints','note']
+    .filter((key) => value[key] !== undefined);
+  return optional.length >= 1 && healthCareExactRecord(value, [
+    'clientOperationId','itemId','childPersonId','expectedRevision',...optional
+  ]) && healthCareIdentifier(value.clientOperationId) && healthCareIdentifier(value.itemId)
+    && healthCareIdentifier(value.childPersonId) && healthCareRevision(value.expectedRevision)
+    && Number(value.expectedRevision) >= 1
+    && (value.title === undefined || healthCareText(value.title, 2, 160))
+    && (value.status === undefined || childEducationMutableStatuses.has(value.status))
+    && (value.visibility === undefined || childEducationVisibilities.has(value.visibility))
+    && (value.scheduledAt === undefined || value.scheduledAt === null || healthCareIso(value.scheduledAt))
+    && (value.dueAt === undefined || value.dueAt === null || healthCareIso(value.dueAt))
+    && (value.progressBasisPoints === undefined || value.progressBasisPoints === null
+      || (typeof value.progressBasisPoints === 'number' && Number.isSafeInteger(value.progressBasisPoints)
+        && value.progressBasisPoints >= 0 && value.progressBasisPoints <= 10_000))
+    && (value.note === undefined || value.note === null || healthCareText(value.note, 1, 2_000));
+};
+const childEducationInput = (channel: string, args: readonly unknown[]): IpcIntegrationPolicyDecision => {
+  if (args.length !== 1 || !isObject(args[0])) return rejected('CHILD_EDUCATION_OBJECT_REQUIRED', '$[0]');
+  const value = args[0];
+  if (channel === CHILD_EDUCATION_COORDINATION_IPC_CHANNELS.getCenter) {
+    return healthCareExactRecord(value, ['childPersonId']) && healthCareIdentifier(value.childPersonId)
+      ? accepted() : rejected('CHILD_EDUCATION_CENTER_INPUT_INVALID', '$[0]');
+  }
+  if (channel === CHILD_EDUCATION_COORDINATION_IPC_CHANNELS.createItem) {
+    return childEducationCreateInput(value) ? accepted() : rejected('CHILD_EDUCATION_CREATE_INPUT_INVALID', '$[0]');
+  }
+  if (channel === CHILD_EDUCATION_COORDINATION_IPC_CHANNELS.updateItem) {
+    return childEducationUpdateInput(value) ? accepted() : rejected('CHILD_EDUCATION_UPDATE_INPUT_INVALID', '$[0]');
+  }
+  if (channel === CHILD_EDUCATION_COORDINATION_IPC_CHANNELS.deleteItem) {
+    return healthCareExactRecord(value, ['clientOperationId','itemId','childPersonId','expectedRevision','reason'])
+      && healthCareIdentifier(value.clientOperationId) && healthCareIdentifier(value.itemId)
+      && healthCareIdentifier(value.childPersonId) && healthCareRevision(value.expectedRevision)
+      && Number(value.expectedRevision) >= 1 && healthCareText(value.reason, 3, 240)
+      ? accepted() : rejected('CHILD_EDUCATION_DELETE_INPUT_INVALID', '$[0]');
+  }
+  return rejected('UNKNOWN_IPC_CHANNEL', '$');
+};
+const childEducationItemResult = (value: unknown): boolean => {
+  if (!isObject(value)) return false;
+  const optional = [
+    'institutionLabel','classLabel','subjectLabel','scheduledAt','dueAt','recurrence','transportMode',
+    'authorityReferenceId','amountMinor','currency','progressBasisPoints','certificateStatus','note','deletedAt'
+  ].filter((key) => value[key] !== undefined);
+  return healthCareExactRecord(value, [
+    'id','childPersonId','kind','area','title','status','visibility','privacyExplanationCode','revision',
+    'createdAt','updatedAt',...optional
+  ]) && healthCareIdentifier(value.id) && healthCareIdentifier(value.childPersonId)
+    && childEducationKinds.has(value.kind) && childEducationAreas.has(value.area)
+    && healthCareText(value.title, 2, 160) && childEducationStatuses.has(value.status)
+    && childEducationVisibilities.has(value.visibility) && childEducationPrivacyCodes.has(value.privacyExplanationCode)
+    && healthCareRevision(value.revision) && Number(value.revision) >= 1
+    && (value.institutionLabel === undefined || healthCareText(value.institutionLabel, 1, 120))
+    && (value.classLabel === undefined || healthCareText(value.classLabel, 1, 80))
+    && (value.subjectLabel === undefined || healthCareText(value.subjectLabel, 1, 80))
+    && (value.scheduledAt === undefined || healthCareIso(value.scheduledAt))
+    && (value.dueAt === undefined || healthCareIso(value.dueAt))
+    && (value.recurrence === undefined || healthCareText(value.recurrence, 1, 160))
+    && (value.transportMode === undefined || childEducationTransportModes.has(value.transportMode))
+    && (value.authorityReferenceId === undefined || healthCareText(value.authorityReferenceId, 1, 128))
+    && (value.amountMinor === undefined || (typeof value.amountMinor === 'number' && Number.isSafeInteger(value.amountMinor) && value.amountMinor >= 0))
+    && (value.currency === undefined || (typeof value.currency === 'string' && /^[A-Z]{3}$/u.test(value.currency)))
+    && (value.progressBasisPoints === undefined || (typeof value.progressBasisPoints === 'number'
+      && Number.isSafeInteger(value.progressBasisPoints) && value.progressBasisPoints >= 0 && value.progressBasisPoints <= 10_000))
+    && (value.certificateStatus === undefined || value.certificateStatus === 'locally_recorded_unverified')
+    && (value.note === undefined || healthCareText(value.note, 1, 2_000))
+    && healthCareIso(value.createdAt) && healthCareIso(value.updatedAt)
+    && (value.deletedAt === undefined || healthCareIso(value.deletedAt));
+};
+const childEducationCenterResult = (value: unknown): boolean => healthCareExactRecord(value, [
+  'schemaVersion','centerId','childPersonId','ageBand','viewMode','items','countsByArea','truth','generatedAt'
+]) && value.schemaVersion === 1 && healthCareIdentifier(value.centerId) && healthCareIdentifier(value.childPersonId)
+  && (value.ageBand === 'under_13' || value.ageBand === 'teen')
+  && (value.viewMode === 'guided_child' || value.viewMode === 'teen_standard')
+  && householdArray(value.items, 1_000, childEducationItemResult)
+  && healthCareExactRecord(value.countsByArea, ['schoolwork','events_access','activities','money_goals'])
+  && Object.values(value.countsByArea).every((count) => typeof count === 'number' && Number.isSafeInteger(count) && count >= 0)
+  && healthCareExactRecord(value.truth, [
+    'localOnly','childDataClassEnforced','aiProcessingAllowed','externalSharingAllowed','schoolPortalSync',
+    'teacherMessaging','liveTransportTracking','pickupCredentialIssuance','allowancePaymentExecution',
+    'certificateVerification','healthDataDuplicated','ageAppropriatePresentation'
+  ]) && value.truth.localOnly === true && value.truth.childDataClassEnforced === true
+  && value.truth.aiProcessingAllowed === false && value.truth.externalSharingAllowed === false
+  && value.truth.schoolPortalSync === 'not_configured' && value.truth.teacherMessaging === 'not_performed'
+  && value.truth.liveTransportTracking === 'not_performed'
+  && value.truth.pickupCredentialIssuance === 'managed_separately_in_identity_center'
+  && value.truth.allowancePaymentExecution === 'not_performed'
+  && value.truth.certificateVerification === 'not_performed' && value.truth.healthDataDuplicated === false
+  && value.truth.ageAppropriatePresentation === 'derived_from_local_birth_date' && healthCareIso(value.generatedAt);
+const childEducationReceiptResult = (value: unknown): boolean => healthCareExactRecord(value, [
+  'itemId','childPersonId','mutationKind','previousRevision','revision','occurredAt','replayed','localOnly','externalAction'
+]) && healthCareIdentifier(value.itemId) && healthCareIdentifier(value.childPersonId)
+  && (value.mutationKind === 'item_create' || value.mutationKind === 'item_update' || value.mutationKind === 'item_delete')
+  && healthCareRevision(value.previousRevision) && healthCareRevision(value.revision)
+  && value.revision === Number(value.previousRevision) + 1 && healthCareIso(value.occurredAt)
+  && typeof value.replayed === 'boolean' && value.localOnly === true && value.externalAction === 'not_performed';
+const childEducationResult = (channel: string, result: unknown): IpcIntegrationPolicyDecision => {
+  const valid = channel === CHILD_EDUCATION_COORDINATION_IPC_CHANNELS.getCenter
+    ? childEducationCenterResult(result)
+    : childEducationWriteChannels.has(channel) && childEducationReceiptResult(result);
+  return valid ? accepted() : rejected('CHILD_EDUCATION_RESULT_INVALID', '$result');
+};
+
 export const ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS = Object.freeze({
   listEvidence: 'archive:listRelationEvidence',
   listEvidenceHistory: 'archive:listRelationEvidenceHistory',
@@ -3232,6 +3405,8 @@ const policyServiceAvailabilityResult = (
 
 export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unknown): IpcIntegrationPolicyDecision => {
   if (channel === UNIFIED_AUTHORIZED_SEARCH_IPC_CHANNEL) return unifiedAuthorizedSearchResult(result);
+  if (childEducationChannels.has(channel)) return childEducationResult(channel, result);
+  if (channel.startsWith('childEducation:')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
   if (householdOperationsChannels.has(channel)) return householdResult(channel, result);
   if (channel.startsWith('householdOperations:')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
   if (healthCareCoordinationChannels.has(channel)) return healthCareResult(channel, result);
@@ -3270,6 +3445,8 @@ export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unkn
 
 export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unknown[]): IpcIntegrationPolicyDecision => {
   if (channel === UNIFIED_AUTHORIZED_SEARCH_IPC_CHANNEL) return unifiedAuthorizedSearchInput(args);
+  if (childEducationChannels.has(channel)) return childEducationInput(channel, args);
+  if (channel.startsWith('childEducation:')) return rejected('UNKNOWN_IPC_CHANNEL', '$');
   if (householdOperationsChannels.has(channel)) return householdInput(channel, args);
   if (channel.startsWith('householdOperations:')) return rejected('UNKNOWN_IPC_CHANNEL', '$');
   if (healthCareCoordinationChannels.has(channel)) return healthCareInput(channel, args);

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "step": "33-U",
+  "decision": "DEC-232",
+  "status": "PLANNED",
+  "governanceState": "LOCAL_IMPLEMENTATION_STARTED",
+  "requirements": ["EXT-017", "EXT-018", "EXT-019", "EXT-020", "EXT-022"],
+  "implementationChain": {
+    "domain": ["packages/domain/src/child-education-coordination.ts"],
+    "application": ["packages/application/src/child-education-coordination-use-cases.ts"],
+    "repositoryContract": ["packages/repository-contracts/src/child-education-coordination-repository.ts"],
+    "migration": ["packages/database/src/family-database-migrations.ts#99"],
+    "repository": ["packages/repositories/src/child-education-coordination-repository.ts"],
+    "policyAndComposition": [
+      "apps/desktop/src/main/life-production-policy-runtime.ts",
+      "apps/desktop/src/main/child-education-coordination-application-adapter.ts",
+      "apps/desktop/src/main/repository-composition-root.ts",
+      "apps/desktop/src/main/data-store.ts"
+    ],
+    "ipc": [
+      "apps/desktop/src/main/ipc-integration-policy.ts",
+      "apps/desktop/src/main/ipc-request-lifecycle.ts",
+      "apps/desktop/src/main/main.ts",
+      "apps/desktop/src/main/preload.ts",
+      "apps/desktop/src/renderer/global.d.ts"
+    ],
+    "ui": ["apps/desktop/src/renderer/ChildEducationCoordinationPanel.tsx", "apps/desktop/src/renderer/App.tsx"]
+  },
+  "implementedTargetedTests": [
+    "packages/application/tests/child-education-coordination-use-cases.test.ts",
+    "packages/repositories/child-education-coordination-repository-policy.test.ts",
+    "apps/desktop/tests/child-education-coordination-ipc-integration.test.ts",
+    "apps/desktop/tests/child-education-coordination-data-store.test.ts",
+    "apps/desktop/tests/child-education-coordination-ui.test.ts"
+  ],
+  "securityControls": {
+    "centralPepReceiptFence": true,
+    "childClassifiedReceipt": true,
+    "minorOwnerBound": true,
+    "explicitPermissionForNonOwner": true,
+    "adolescentPrivateOwnerOnly": true,
+    "payloadFreePolicyResolution": true,
+    "contentFreeAuditAndOutbox": true,
+    "boundedIpcAndReadResults": true,
+    "rendererAuthorityExcluded": true,
+    "physicalDeleteClaimed": false
+  },
+  "validation": {
+    "targetedTestFileRatchet": 5,
+    "targetedTestRatchet": 22,
+    "migrationVersion": 99,
+    "migrationSha256": "38ecd03c71e734d1700f2ee44ece10e47935277e003e7e4ce21da7b6034db98e",
+    "ppk021": {"status":"PASS","files":462,"surfaces":715,"sha256":"2e1962cc032e83ef84128f7aa4e266d2f70ca12178c48c5109d6e1849df3073b","targeted":17,"contract":84,"runtime":20},
+    "ppk022": {"status":"PASS","files":462,"surfaces":345,"sha256":"1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e","targeted":19,"contract":110,"runtime":24},
+    "countsAsRequirementPass": false
+  },
+  "externalAndManualEvidence": "NOT_RUN",
+  "countsAsRequirementPass": false
+}

@@ -154,6 +154,10 @@ import {
   CreateHouseholdOperationItemUseCase,
   UpdateHouseholdOperationItemUseCase,
   DeleteHouseholdOperationItemUseCase,
+  GetChildEducationCenterUseCase,
+  CreateChildEducationItemUseCase,
+  UpdateChildEducationItemUseCase,
+  DeleteChildEducationItemUseCase,
   ListLifeRecordsUseCase,
   CreateLifeRecordUseCase,
   GetManagedLifeWorkspaceUseCase,
@@ -317,7 +321,7 @@ import {
   type WindowsHelloPlatformPort,
   type WindowsHelloDeviceBindingPort
 } from '@ppt/application';
-import type { AddArchiveItemVersionInput, AddArchiveRelationEvidenceInput, ArchiveRelationEvidenceHistoryView, ArchiveRelationEvidenceView, CreateHouseholdOperationItemInput, DeleteHouseholdOperationItemInput, HealthCareCoordinationCenterView, HealthCareMutationReceiptView, HouseholdOperationMutationReceiptView, HouseholdOperationsCenterView, RecordHealthCareEntryInput, RemoveArchiveRelationEvidenceInput, RevokeHealthCareAccessGrantInput, UnifiedAuthorizedSearchInput, UnifiedAuthorizedSearchView, UpdateHouseholdOperationItemInput, UpsertHealthCareAccessGrantInput } from '@ppt/domain';
+import type { AddArchiveItemVersionInput, AddArchiveRelationEvidenceInput, ArchiveRelationEvidenceHistoryView, ArchiveRelationEvidenceView, ChildEducationCenterView, ChildEducationMutationReceiptView, CreateChildEducationItemInput, CreateHouseholdOperationItemInput, DeleteChildEducationItemInput, DeleteHouseholdOperationItemInput, HealthCareCoordinationCenterView, HealthCareMutationReceiptView, HouseholdOperationMutationReceiptView, HouseholdOperationsCenterView, RecordHealthCareEntryInput, RemoveArchiveRelationEvidenceInput, RevokeHealthCareAccessGrantInput, UnifiedAuthorizedSearchInput, UnifiedAuthorizedSearchView, UpdateChildEducationItemInput, UpdateHouseholdOperationItemInput, UpsertHealthCareAccessGrantInput } from '@ppt/domain';
 import { RepositoryBackedFamilyApplicationUnitOfWork, RepositoryBackedFamilyGraphQueryPort } from './family-application-adapter.js';
 import { RepositoryBackedHouseholdMembershipUnitOfWork } from './household-membership-application-adapter.js';
 import { RepositoryBackedPersonLifecycleUnitOfWork } from './person-lifecycle-application-adapter.js';
@@ -361,6 +365,10 @@ import {
   RepositoryBackedHouseholdOperationsQueryPort,
   RepositoryBackedHouseholdOperationsUnitOfWork
 } from './household-operations-application-adapter.js';
+import {
+  RepositoryBackedChildEducationCoordinationUnitOfWork,
+  RepositoryBackedChildEducationQueryPort
+} from './child-education-coordination-application-adapter.js';
 import {
   RepositoryBackedLocationPolicyTransactionRunner,
   RepositoryBackedLocationUnitOfWork,
@@ -1229,6 +1237,10 @@ export class FamilyDataStore {
   readonly #createHouseholdOperationItemUseCase: CreateHouseholdOperationItemUseCase;
   readonly #updateHouseholdOperationItemUseCase: UpdateHouseholdOperationItemUseCase;
   readonly #deleteHouseholdOperationItemUseCase: DeleteHouseholdOperationItemUseCase;
+  readonly #getChildEducationCenterUseCase: GetChildEducationCenterUseCase;
+  readonly #createChildEducationItemUseCase: CreateChildEducationItemUseCase;
+  readonly #updateChildEducationItemUseCase: UpdateChildEducationItemUseCase;
+  readonly #deleteChildEducationItemUseCase: DeleteChildEducationItemUseCase;
   readonly #prepareFamilyEmergencyCardExportUseCase: PrepareFamilyEmergencyCardExportUseCase;
   readonly #recordFamilyEmergencyCardExportCompletionUseCase: RecordFamilyEmergencyCardExportCompletionUseCase;
   readonly #listFinanceRecordsUseCase: ListFinanceRecordsUseCase;
@@ -1744,6 +1756,7 @@ export class FamilyDataStore {
           trustedDeviceRepository: this.#repositories.trustedDeviceRepository,
           lifePolicyResourceRepository: this.#repositories.lifeRepository,
           householdOperationsPolicyResourceRepository: this.#repositories.householdOperationsRepository,
+          childEducationPolicyResourceRepository: this.#repositories.childEducationRepository,
           personRepository: this.#repositories.personRepository,
           deviceIdentityProvider: this.#deviceIdentityProvider,
           authorizationProvider: productionArchivePolicy.authorizationProvider,
@@ -1757,6 +1770,8 @@ export class FamilyDataStore {
       transactionExecutor: this.#transactionExecutor,
       lifeRepository: this.#repositories.lifeRepository,
       householdOperationsRepository: this.#repositories.householdOperationsRepository,
+      childEducationRepository: this.#repositories.childEducationRepository,
+      childEducationPolicyResourceRepository: this.#repositories.childEducationRepository,
       accountRepository: this.#repositories.accountRepository,
       permissionRepository: this.#repositories.objectPermissionRepository,
       personRepository: this.#repositories.personRepository,
@@ -2318,6 +2333,18 @@ export class FamilyDataStore {
     this.#createHouseholdOperationItemUseCase = new CreateHouseholdOperationItemUseCase(householdOperationsUnitOfWork);
     this.#updateHouseholdOperationItemUseCase = new UpdateHouseholdOperationItemUseCase(householdOperationsUnitOfWork);
     this.#deleteHouseholdOperationItemUseCase = new DeleteHouseholdOperationItemUseCase(householdOperationsUnitOfWork);
+    const childEducationQuery = new RepositoryBackedChildEducationQueryPort(
+      lifeApplicationDependencies,
+      lifePolicyTransactionRunner
+    );
+    const childEducationUnitOfWork = new RepositoryBackedChildEducationCoordinationUnitOfWork(
+      lifeApplicationDependencies,
+      lifePolicyTransactionRunner
+    );
+    this.#getChildEducationCenterUseCase = new GetChildEducationCenterUseCase(childEducationQuery);
+    this.#createChildEducationItemUseCase = new CreateChildEducationItemUseCase(childEducationUnitOfWork);
+    this.#updateChildEducationItemUseCase = new UpdateChildEducationItemUseCase(childEducationUnitOfWork);
+    this.#deleteChildEducationItemUseCase = new DeleteChildEducationItemUseCase(childEducationUnitOfWork);
     this.#prepareFamilyEmergencyCardExportUseCase = new PrepareFamilyEmergencyCardExportUseCase(
       lifeUnitOfWork,
       () => Date.parse(this.#clock.now())
@@ -4761,6 +4788,38 @@ export class FamilyDataStore {
       command: input
     });
     if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async getChildEducationCenter(childPersonId:string):Promise<ChildEducationCenterView>{
+    const result=await this.#getChildEducationCenterUseCase.execute({
+      context:this.#lifeApplicationContext('child-education-center-get'),childPersonId
+    });
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async createChildEducationItem(input:CreateChildEducationItemInput):Promise<ChildEducationMutationReceiptView>{
+    const result=await this.#createChildEducationItemUseCase.execute({
+      context:this.#lifeApplicationContext('child-education-item-create'),command:input
+    });
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async updateChildEducationItem(input:UpdateChildEducationItemInput):Promise<ChildEducationMutationReceiptView>{
+    const result=await this.#updateChildEducationItemUseCase.execute({
+      context:this.#lifeApplicationContext('child-education-item-update'),command:input
+    });
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async deleteChildEducationItem(input:DeleteChildEducationItemInput):Promise<ChildEducationMutationReceiptView>{
+    const result=await this.#deleteChildEducationItemUseCase.execute({
+      context:this.#lifeApplicationContext('child-education-item-delete'),command:input
+    });
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
     return result.value;
   }
 

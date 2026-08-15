@@ -507,7 +507,12 @@
       "version": 98,
       "name": "household_operations_center",
       "checksum": "b5a09712e4f9611e928509441005ede824a9fceb516caa3b3d74cf83dc8f4d60"
+    },
+    {
+      "version": 99,
+      "name": "child_education_coordination",
+      "checksum": "38ecd03c71e734d1700f2ee44ece10e47935277e003e7e4ce21da7b6034db98e"
     }
   ],
-  "generatedAt": "2026-08-15T01:27:17.065Z"
+  "generatedAt": "2026-08-15T02:47:02.830Z"
 }
