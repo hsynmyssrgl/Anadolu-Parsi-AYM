@@ -16663,6 +16663,503 @@ BEGIN SELECT RAISE(ABORT,'34-E translation request uses logical cancellation'); 
 UPDATE database_metadata SET value='REVISION-34-E-LOCAL-FIRST-TRANSLATION-LANGUAGE',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 
+const familyMeetingMinutesSql = `
+CREATE TABLE family_meeting_mutations (
+  id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  resource_type TEXT NOT NULL CHECK(resource_type='family_meeting'),
+  resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 8 AND 256),
+  actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  mutation_kind TEXT NOT NULL CHECK(mutation_kind IN ('meeting_create','meeting_plan_update','meeting_state_update',
+    'participant_upsert','agenda_upsert','poll_create','vote_cast','decision_record','task_upsert',
+    'collaboration_add','ai_minutes_prepare','minutes_finalize')),
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 256),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  expected_revision INTEGER NOT NULL CHECK(expected_revision>=0),
+  revision INTEGER NOT NULL CHECK(revision=expected_revision+1),
+  resource_state_fingerprint TEXT NOT NULL CHECK(length(resource_state_fingerprint)=64 AND resource_state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version>=1),
+  policy_receipt_nonce TEXT NOT NULL CHECK(length(trim(policy_receipt_nonce)) BETWEEN 16 AND 256),
+  policy_correlation_id TEXT NOT NULL CHECK(length(trim(policy_correlation_id)) BETWEEN 1 AND 256),
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type='family_meeting'),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action IN ('create','update','delete')),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='family.write'),
+  UNIQUE(family_id,actor_account_id,client_operation_id),
+  CHECK(policy_resource_id=resource_id),
+  CHECK((mutation_kind='meeting_create' AND expected_revision=0 AND policy_action='create')
+    OR (mutation_kind='meeting_state_update' AND expected_revision>=1 AND policy_action IN ('update','delete'))
+    OR (mutation_kind NOT IN ('meeting_create','meeting_state_update') AND expected_revision>=1 AND policy_action='update'))
+) STRICT;
+
+CREATE INDEX idx_family_meeting_mutations_owner
+ON family_meeting_mutations(family_id,owner_person_id,occurred_at DESC,id);
+
+CREATE TABLE family_meetings (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  title TEXT NOT NULL CHECK(length(trim(title)) BETWEEN 2 AND 200),
+  recurrence_kind TEXT NOT NULL CHECK(recurrence_kind IN ('once','daily','weekly','monthly')),
+  recurrence_interval INTEGER NOT NULL CHECK(recurrence_interval BETWEEN 1 AND 52),
+  starts_at TEXT NOT NULL CHECK(length(starts_at)=24 AND julianday(starts_at) IS NOT NULL),
+  ends_at TEXT NOT NULL CHECK(length(ends_at)=24 AND julianday(ends_at) IS NOT NULL AND ends_at>starts_at),
+  reminder_minutes INTEGER NOT NULL CHECK(reminder_minutes BETWEEN 0 AND 10080),
+  state TEXT NOT NULL CHECK(state IN ('scheduled','in_progress','completed','cancelled')),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES family_meeting_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  CHECK(updated_at>=created_at)
+) STRICT;
+
+CREATE INDEX idx_family_meetings_owner ON family_meetings(family_id,owner_person_id,updated_at DESC,id);
+
+CREATE TABLE family_meeting_participants (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  meeting_id TEXT NOT NULL REFERENCES family_meetings(id) ON DELETE RESTRICT,
+  participant_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  roles_json TEXT NOT NULL CHECK(json_valid(roles_json)=1 AND json_type(roles_json)='array'
+    AND json_array_length(roles_json) BETWEEN 1 AND 6),
+  attendance TEXT NOT NULL CHECK(attendance IN ('invited','accepted','tentative','declined','attended','absent')),
+  reminder_enabled INTEGER NOT NULL CHECK(reminder_enabled IN (0,1)),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  last_mutation_id TEXT NOT NULL REFERENCES family_meeting_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  UNIQUE(family_id,meeting_id,participant_person_id),
+  CHECK(updated_at>=created_at)
+) STRICT;
+
+CREATE INDEX idx_family_meeting_participants_actor
+ON family_meeting_participants(family_id,participant_person_id,meeting_id);
+
+CREATE TABLE family_meeting_agenda_items (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  meeting_id TEXT NOT NULL REFERENCES family_meetings(id) ON DELETE RESTRICT,
+  title TEXT NOT NULL CHECK(length(trim(title)) BETWEEN 2 AND 500),
+  note_text TEXT CHECK(note_text IS NULL OR length(note_text) BETWEEN 1 AND 4000),
+  item_order INTEGER NOT NULL CHECK(item_order BETWEEN 1 AND 256),
+  pre_read_json TEXT NOT NULL CHECK(json_valid(pre_read_json)=1 AND json_type(pre_read_json)='array'
+    AND json_array_length(pre_read_json)<=16),
+  carry_forward INTEGER NOT NULL CHECK(carry_forward IN (0,1)),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  last_mutation_id TEXT NOT NULL REFERENCES family_meeting_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  UNIQUE(family_id,meeting_id,item_order),
+  CHECK(updated_at>=created_at)
+) STRICT;
+
+CREATE TABLE family_meeting_polls (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  meeting_id TEXT NOT NULL REFERENCES family_meetings(id) ON DELETE RESTRICT,
+  question TEXT NOT NULL CHECK(length(trim(question)) BETWEEN 2 AND 1000),
+  options_json TEXT NOT NULL CHECK(json_valid(options_json)=1 AND json_type(options_json)='array'
+    AND json_array_length(options_json) BETWEEN 2 AND 12),
+  state TEXT NOT NULL CHECK(state='open'),
+  mutation_id TEXT NOT NULL UNIQUE REFERENCES family_meeting_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL)
+) STRICT;
+
+CREATE TABLE family_meeting_votes (
+  id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  meeting_id TEXT NOT NULL REFERENCES family_meetings(id) ON DELETE RESTRICT,
+  poll_id TEXT NOT NULL REFERENCES family_meeting_polls(id) ON DELETE RESTRICT,
+  voter_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  option_id TEXT,
+  abstained INTEGER NOT NULL CHECK(abstained IN (0,1)),
+  opinion_note TEXT CHECK(opinion_note IS NULL OR length(opinion_note) BETWEEN 1 AND 2000),
+  mutation_id TEXT NOT NULL UNIQUE REFERENCES family_meeting_mutations(id) ON DELETE RESTRICT,
+  cast_at TEXT NOT NULL CHECK(length(cast_at)=24 AND julianday(cast_at) IS NOT NULL),
+  UNIQUE(family_id,poll_id,voter_person_id),
+  CHECK((abstained=1 AND option_id IS NULL) OR (abstained=0 AND option_id IS NOT NULL))
+) STRICT;
+
+CREATE TABLE family_meeting_decisions (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  meeting_id TEXT NOT NULL REFERENCES family_meetings(id) ON DELETE RESTRICT,
+  statement TEXT NOT NULL CHECK(length(trim(statement)) BETWEEN 2 AND 4000),
+  source_poll_id TEXT REFERENCES family_meeting_polls(id) ON DELETE RESTRICT,
+  responsible_person_ids_json TEXT NOT NULL CHECK(json_valid(responsible_person_ids_json)=1
+    AND json_type(responsible_person_ids_json)='array' AND json_array_length(responsible_person_ids_json)<=32),
+  ledger_reference TEXT NOT NULL UNIQUE CHECK(length(ledger_reference)=64 AND ledger_reference NOT GLOB '*[^0-9a-f]*'),
+  mutation_id TEXT NOT NULL UNIQUE REFERENCES family_meeting_mutations(id) ON DELETE RESTRICT,
+  recorded_at TEXT NOT NULL CHECK(length(recorded_at)=24 AND julianday(recorded_at) IS NOT NULL)
+) STRICT;
+
+CREATE TABLE family_meeting_tasks (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  meeting_id TEXT NOT NULL REFERENCES family_meetings(id) ON DELETE RESTRICT,
+  decision_id TEXT REFERENCES family_meeting_decisions(id) ON DELETE RESTRICT,
+  title TEXT NOT NULL CHECK(length(trim(title)) BETWEEN 2 AND 1000),
+  responsible_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  due_at TEXT NOT NULL CHECK(length(due_at)=24 AND julianday(due_at) IS NOT NULL),
+  state TEXT NOT NULL CHECK(state IN ('open','in_progress','completed','cancelled')),
+  follow_up_note TEXT CHECK(follow_up_note IS NULL OR length(follow_up_note) BETWEEN 1 AND 2000),
+  carry_forward INTEGER NOT NULL CHECK(carry_forward IN (0,1)),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  last_mutation_id TEXT NOT NULL REFERENCES family_meeting_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  CHECK(updated_at>=created_at)
+) STRICT;
+
+CREATE TABLE family_meeting_collaboration_items (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  meeting_id TEXT NOT NULL REFERENCES family_meetings(id) ON DELETE RESTRICT,
+  kind TEXT NOT NULL CHECK(kind IN ('whiteboard','photo_album','document_annotation')),
+  resource_type TEXT NOT NULL CHECK(resource_type IN ('archive_item','album','whiteboard')),
+  resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 2 AND 256),
+  annotation TEXT CHECK(annotation IS NULL OR length(annotation) BETWEEN 1 AND 4000),
+  added_by_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  mutation_id TEXT NOT NULL UNIQUE REFERENCES family_meeting_mutations(id) ON DELETE RESTRICT,
+  added_at TEXT NOT NULL CHECK(length(added_at)=24 AND julianday(added_at) IS NOT NULL)
+) STRICT;
+
+CREATE TABLE family_meeting_minutes (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  meeting_id TEXT NOT NULL UNIQUE REFERENCES family_meetings(id) ON DELETE RESTRICT,
+  state TEXT NOT NULL CHECK(state IN ('provider_unavailable','pending_human_review','dismissed','sealed_local')),
+  recording_request_id TEXT REFERENCES communication_recording_requests(id) ON DELETE RESTRICT,
+  transcript_consent_verified INTEGER NOT NULL CHECK(transcript_consent_verified IN (0,1)),
+  consent_evidence_sha256 TEXT CHECK(consent_evidence_sha256 IS NULL OR
+    (length(consent_evidence_sha256)=64 AND consent_evidence_sha256 NOT GLOB '*[^0-9a-f]*')),
+  ai_suggestion_generated INTEGER NOT NULL CHECK(ai_suggestion_generated IN (0,1)),
+  human_approval_recorded INTEGER NOT NULL CHECK(human_approval_recorded IN (0,1)),
+  sealed_payload_reference TEXT,
+  payload_sha256 TEXT,
+  payload_size_bytes INTEGER,
+  provider_id TEXT,
+  provider_evidence_sha256 TEXT,
+  payload_revision INTEGER,
+  payload_created_at TEXT,
+  participant_access_json TEXT NOT NULL CHECK(json_valid(participant_access_json)=1
+    AND json_type(participant_access_json)='array' AND json_array_length(participant_access_json)<=32),
+  selected_recording_segments_json TEXT NOT NULL CHECK(json_valid(selected_recording_segments_json)=1
+    AND json_type(selected_recording_segments_json)='array' AND json_array_length(selected_recording_segments_json)<=64),
+  network_used INTEGER NOT NULL CHECK(network_used=0),
+  cloud_used INTEGER NOT NULL CHECK(cloud_used=0),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL REFERENCES family_meeting_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  CHECK(updated_at>=created_at),
+  CHECK((state='provider_unavailable' AND recording_request_id IS NOT NULL AND transcript_consent_verified=1
+      AND consent_evidence_sha256 IS NOT NULL AND ai_suggestion_generated=0 AND human_approval_recorded=0
+      AND sealed_payload_reference IS NULL AND payload_sha256 IS NULL AND payload_size_bytes IS NULL
+      AND provider_id IS NULL AND provider_evidence_sha256 IS NULL AND payload_revision IS NULL AND payload_created_at IS NULL)
+    OR (state='pending_human_review' AND recording_request_id IS NOT NULL AND transcript_consent_verified=1
+      AND consent_evidence_sha256 IS NOT NULL AND ai_suggestion_generated=1 AND human_approval_recorded=0
+      AND sealed_payload_reference IS NOT NULL AND payload_sha256 IS NOT NULL AND payload_size_bytes BETWEEN 1 AND 1048576
+      AND provider_id='protected-side-artifact-store-v1' AND provider_evidence_sha256 IS NOT NULL
+      AND payload_revision=revision AND payload_created_at=updated_at)
+    OR (state='dismissed' AND human_approval_recorded=0)
+    OR (state='sealed_local' AND human_approval_recorded=1 AND json_array_length(participant_access_json)>=1
+      AND sealed_payload_reference IS NOT NULL AND payload_sha256 IS NOT NULL AND payload_size_bytes BETWEEN 1 AND 1048576
+      AND provider_id='protected-side-artifact-store-v1' AND provider_evidence_sha256 IS NOT NULL
+      AND payload_revision=revision AND payload_created_at=updated_at))
+) STRICT;
+
+CREATE TABLE family_meeting_events (
+  id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  meeting_id TEXT NOT NULL REFERENCES family_meetings(id) ON DELETE RESTRICT,
+  event_kind TEXT NOT NULL CHECK(event_kind IN ('meeting_create','meeting_plan_update','meeting_state_update',
+    'participant_upsert','agenda_upsert','poll_create','vote_cast','decision_record','task_upsert',
+    'collaboration_add','ai_minutes_prepare','minutes_finalize')),
+  meeting_revision INTEGER NOT NULL CHECK(meeting_revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  mutation_id TEXT NOT NULL UNIQUE REFERENCES family_meeting_mutations(id) ON DELETE RESTRICT,
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND julianday(occurred_at) IS NOT NULL)
+) STRICT;
+
+CREATE TRIGGER trg_34f_meeting_mutation_insert
+BEFORE INSERT ON family_meeting_mutations
+WHEN (SELECT COUNT(*) FROM family_meeting_mutations item
+    WHERE item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id)>=4096
+  OR NOT EXISTS(
+  SELECT 1 FROM accounts account
+  JOIN people actor ON actor.id=NEW.actor_person_id AND actor.family_id=NEW.family_id AND actor.status='active'
+  JOIN people owner ON owner.id=NEW.owner_person_id AND owner.family_id=NEW.family_id AND owner.status='active'
+  JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+  JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+  WHERE account.id=NEW.actor_account_id AND account.person_id=NEW.actor_person_id AND account.status='active'
+    AND receipt.receipt_version=NEW.policy_receipt_version AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id AND receipt.action=NEW.policy_action AND receipt.capability=NEW.policy_capability
+    AND receipt.recorded_at=NEW.occurred_at AND json_extract(receipt.record_json,'$.request.purpose')='general'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.resource.sensitivity')='personal'
+    AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.actor_account_id
+    AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.actor_person_id
+    AND ((NEW.expected_revision=0 AND NEW.actor_person_id=NEW.owner_person_id
+      AND NOT EXISTS(SELECT 1 FROM family_meetings current WHERE current.id=NEW.resource_id))
+      OR (NEW.expected_revision>=1 AND EXISTS(SELECT 1 FROM family_meetings current
+        WHERE current.id=NEW.resource_id AND current.family_id=NEW.family_id AND current.owner_person_id=NEW.owner_person_id
+          AND current.revision=NEW.expected_revision)))
+)
+BEGIN SELECT RAISE(ABORT,'34-F mutation requires exact owner-bound durable PEP receipt and current revision'); END;
+
+CREATE TRIGGER trg_34f_meeting_insert
+BEFORE INSERT ON family_meetings
+WHEN (SELECT COUNT(*) FROM family_meetings item WHERE item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id)>=128
+  OR NOT EXISTS(
+    SELECT 1 FROM family_meeting_mutations mutation WHERE mutation.id=NEW.last_mutation_id
+      AND mutation.resource_id=NEW.id AND mutation.mutation_kind='meeting_create' AND mutation.expected_revision=0
+      AND mutation.revision=NEW.revision AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+      AND mutation.actor_person_id=NEW.owner_person_id AND mutation.resource_state_fingerprint=NEW.state_fingerprint
+      AND mutation.occurred_at=NEW.created_at AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+      AND NEW.state='scheduled' AND NEW.revision=1
+  )
+BEGIN SELECT RAISE(ABORT,'34-F meeting insert requires exact owner mutation and scheduled state'); END;
+
+CREATE TRIGGER trg_34f_meeting_update
+BEFORE UPDATE ON family_meetings
+WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.owner_person_id<>OLD.owner_person_id OR NEW.created_at<>OLD.created_at
+  OR NOT EXISTS(
+    SELECT 1 FROM family_meeting_mutations mutation WHERE mutation.id=NEW.last_mutation_id
+      AND mutation.resource_id=NEW.id AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+      AND mutation.expected_revision=OLD.revision AND mutation.revision=NEW.revision AND NEW.revision=OLD.revision+1
+      AND mutation.resource_state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.updated_at
+      AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+      AND ((mutation.mutation_kind='meeting_plan_update' AND OLD.state='scheduled' AND NEW.state=OLD.state)
+        OR (mutation.mutation_kind='meeting_state_update'
+          AND ((OLD.state='scheduled' AND NEW.state IN ('in_progress','cancelled'))
+            OR (OLD.state='in_progress' AND NEW.state IN ('completed','cancelled')))
+          AND NEW.title=OLD.title AND NEW.recurrence_kind=OLD.recurrence_kind
+          AND NEW.recurrence_interval=OLD.recurrence_interval AND NEW.starts_at=OLD.starts_at
+          AND NEW.ends_at=OLD.ends_at AND NEW.reminder_minutes=OLD.reminder_minutes)
+        OR (mutation.mutation_kind NOT IN ('meeting_plan_update','meeting_state_update') AND NEW.state=OLD.state
+          AND NEW.title=OLD.title AND NEW.recurrence_kind=OLD.recurrence_kind
+          AND NEW.recurrence_interval=OLD.recurrence_interval AND NEW.starts_at=OLD.starts_at
+          AND NEW.ends_at=OLD.ends_at AND NEW.reminder_minutes=OLD.reminder_minutes))
+  )
+BEGIN SELECT RAISE(ABORT,'34-F meeting update requires exact immutable identity, transition and mutation'); END;
+
+CREATE TRIGGER trg_34f_participant_insert
+BEFORE INSERT ON family_meeting_participants
+WHEN (SELECT COUNT(*) FROM family_meeting_participants item WHERE item.meeting_id=NEW.meeting_id)>=32
+  OR NOT EXISTS(SELECT 1 FROM family_meeting_mutations mutation JOIN family_meetings meeting
+    ON meeting.id=NEW.meeting_id AND meeting.family_id=NEW.family_id AND meeting.owner_person_id=NEW.owner_person_id
+    JOIN people participant ON participant.id=NEW.participant_person_id AND participant.family_id=NEW.family_id AND participant.status='active'
+    WHERE mutation.id=NEW.last_mutation_id AND meeting.last_mutation_id=mutation.id
+      AND mutation.resource_id=NEW.meeting_id AND mutation.mutation_kind IN ('meeting_create','participant_upsert')
+      AND NEW.revision=1 AND NEW.created_at=mutation.occurred_at
+      AND NOT EXISTS(SELECT 1 FROM json_each(NEW.roles_json) role
+        WHERE role.value NOT IN ('host','facilitator','note_taker','translator','caregiver','attendee'))
+      AND (NEW.participant_person_id<>NEW.owner_person_id OR EXISTS(SELECT 1 FROM json_each(NEW.roles_json) role WHERE role.value='host')))
+BEGIN SELECT RAISE(ABORT,'34-F participant insert requires exact mutation, active member and role set'); END;
+
+CREATE TRIGGER trg_34f_participant_update
+BEFORE UPDATE ON family_meeting_participants
+WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.owner_person_id<>OLD.owner_person_id
+  OR NEW.meeting_id<>OLD.meeting_id OR NEW.participant_person_id<>OLD.participant_person_id OR NEW.created_at<>OLD.created_at
+  OR NOT EXISTS(SELECT 1 FROM family_meeting_mutations mutation JOIN family_meetings meeting
+    ON meeting.id=NEW.meeting_id AND meeting.last_mutation_id=mutation.id
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.mutation_kind='participant_upsert'
+      AND NEW.revision=OLD.revision+1 AND NEW.updated_at=mutation.occurred_at
+      AND NOT EXISTS(SELECT 1 FROM json_each(NEW.roles_json) role
+        WHERE role.value NOT IN ('host','facilitator','note_taker','translator','caregiver','attendee'))
+      AND (NEW.participant_person_id<>NEW.owner_person_id OR EXISTS(SELECT 1 FROM json_each(NEW.roles_json) role WHERE role.value='host')))
+BEGIN SELECT RAISE(ABORT,'34-F participant update requires exact mutation and immutable identity'); END;
+
+CREATE TRIGGER trg_34f_agenda_insert
+BEFORE INSERT ON family_meeting_agenda_items
+WHEN (SELECT COUNT(*) FROM family_meeting_agenda_items item WHERE item.meeting_id=NEW.meeting_id)>=256
+  OR NOT EXISTS(SELECT 1 FROM family_meeting_mutations mutation JOIN family_meetings meeting
+    ON meeting.id=NEW.meeting_id AND meeting.last_mutation_id=mutation.id
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.mutation_kind='agenda_upsert'
+      AND NEW.family_id=meeting.family_id AND NEW.owner_person_id=meeting.owner_person_id
+      AND NEW.revision=1 AND NEW.created_at=mutation.occurred_at
+      AND NOT EXISTS(SELECT 1 FROM json_each(NEW.pre_read_json) item
+        WHERE json_extract(item.value,'$.resourceType') NOT IN ('archive_item','communication_message','memory_studio_record')
+          OR length(trim(json_extract(item.value,'$.resourceId'))) NOT BETWEEN 2 AND 256))
+BEGIN SELECT RAISE(ABORT,'34-F agenda insert requires exact mutation and bounded references'); END;
+
+CREATE TRIGGER trg_34f_agenda_update
+BEFORE UPDATE ON family_meeting_agenda_items
+WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.owner_person_id<>OLD.owner_person_id
+  OR NEW.meeting_id<>OLD.meeting_id OR NEW.created_at<>OLD.created_at
+  OR NOT EXISTS(SELECT 1 FROM family_meeting_mutations mutation JOIN family_meetings meeting
+    ON meeting.id=NEW.meeting_id AND meeting.last_mutation_id=mutation.id
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.mutation_kind='agenda_upsert'
+      AND NEW.revision=OLD.revision+1 AND NEW.updated_at=mutation.occurred_at)
+BEGIN SELECT RAISE(ABORT,'34-F agenda update requires exact mutation and immutable identity'); END;
+
+CREATE TRIGGER trg_34f_poll_insert
+BEFORE INSERT ON family_meeting_polls
+WHEN (SELECT COUNT(*) FROM family_meeting_polls item WHERE item.meeting_id=NEW.meeting_id)>=64
+  OR NOT EXISTS(SELECT 1 FROM family_meeting_mutations mutation JOIN family_meetings meeting
+    ON meeting.id=NEW.meeting_id AND meeting.last_mutation_id=mutation.id
+    WHERE mutation.id=NEW.mutation_id AND mutation.mutation_kind='poll_create'
+      AND NEW.family_id=meeting.family_id AND NEW.owner_person_id=meeting.owner_person_id
+      AND NEW.created_at=mutation.occurred_at
+      AND NOT EXISTS(SELECT 1 FROM json_each(NEW.options_json) item
+        WHERE length(trim(json_extract(item.value,'$.id'))) NOT BETWEEN 2 AND 256
+          OR length(trim(json_extract(item.value,'$.label'))) NOT BETWEEN 2 AND 256))
+BEGIN SELECT RAISE(ABORT,'34-F poll insert requires exact mutation and options'); END;
+
+CREATE TRIGGER trg_34f_vote_insert
+BEFORE INSERT ON family_meeting_votes
+WHEN (SELECT COUNT(*) FROM family_meeting_votes item WHERE item.meeting_id=NEW.meeting_id)>=512
+  OR NOT EXISTS(SELECT 1 FROM family_meeting_mutations mutation JOIN family_meetings meeting
+    ON meeting.id=NEW.meeting_id AND meeting.last_mutation_id=mutation.id
+    JOIN family_meeting_polls poll ON poll.id=NEW.poll_id AND poll.meeting_id=NEW.meeting_id AND poll.state='open'
+    JOIN family_meeting_participants participant ON participant.meeting_id=NEW.meeting_id
+      AND participant.participant_person_id=NEW.voter_person_id AND participant.attendance<>'declined'
+    WHERE mutation.id=NEW.mutation_id AND mutation.mutation_kind='vote_cast'
+      AND mutation.actor_person_id=NEW.voter_person_id AND NEW.cast_at=mutation.occurred_at
+      AND ((NEW.abstained=1 AND NEW.option_id IS NULL) OR (NEW.abstained=0 AND EXISTS(
+        SELECT 1 FROM json_each(poll.options_json) option WHERE json_extract(option.value,'$.id')=NEW.option_id))))
+BEGIN SELECT RAISE(ABORT,'34-F vote insert requires exact participant, poll option and mutation'); END;
+
+CREATE TRIGGER trg_34f_decision_insert
+BEFORE INSERT ON family_meeting_decisions
+WHEN (SELECT COUNT(*) FROM family_meeting_decisions item WHERE item.meeting_id=NEW.meeting_id)>=256
+  OR NOT EXISTS(SELECT 1 FROM family_meeting_mutations mutation JOIN family_meetings meeting
+    ON meeting.id=NEW.meeting_id AND meeting.last_mutation_id=mutation.id
+    WHERE mutation.id=NEW.mutation_id AND mutation.mutation_kind='decision_record'
+      AND NEW.family_id=meeting.family_id AND NEW.owner_person_id=meeting.owner_person_id
+      AND NEW.recorded_at=mutation.occurred_at
+      AND (NEW.source_poll_id IS NULL OR EXISTS(SELECT 1 FROM family_meeting_polls poll
+        WHERE poll.id=NEW.source_poll_id AND poll.meeting_id=NEW.meeting_id))
+      AND NOT EXISTS(SELECT 1 FROM json_each(NEW.responsible_person_ids_json) responsible
+        WHERE NOT EXISTS(SELECT 1 FROM family_meeting_participants participant
+          WHERE participant.meeting_id=NEW.meeting_id AND participant.participant_person_id=responsible.value)))
+BEGIN SELECT RAISE(ABORT,'34-F decision insert requires exact append-only ledger mutation'); END;
+
+CREATE TRIGGER trg_34f_task_insert
+BEFORE INSERT ON family_meeting_tasks
+WHEN (SELECT COUNT(*) FROM family_meeting_tasks item WHERE item.meeting_id=NEW.meeting_id)>=256
+  OR NOT EXISTS(SELECT 1 FROM family_meeting_mutations mutation JOIN family_meetings meeting
+    ON meeting.id=NEW.meeting_id AND meeting.last_mutation_id=mutation.id
+    JOIN family_meeting_participants participant ON participant.meeting_id=NEW.meeting_id
+      AND participant.participant_person_id=NEW.responsible_person_id
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.mutation_kind='task_upsert'
+      AND NEW.revision=1 AND NEW.created_at=mutation.occurred_at
+      AND (NEW.decision_id IS NULL OR EXISTS(SELECT 1 FROM family_meeting_decisions decision
+        WHERE decision.id=NEW.decision_id AND decision.meeting_id=NEW.meeting_id)))
+BEGIN SELECT RAISE(ABORT,'34-F task insert requires exact participant, decision and mutation'); END;
+
+CREATE TRIGGER trg_34f_task_update
+BEFORE UPDATE ON family_meeting_tasks
+WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.owner_person_id<>OLD.owner_person_id
+  OR NEW.meeting_id<>OLD.meeting_id OR NEW.created_at<>OLD.created_at
+  OR NOT EXISTS(SELECT 1 FROM family_meeting_mutations mutation JOIN family_meetings meeting
+    ON meeting.id=NEW.meeting_id AND meeting.last_mutation_id=mutation.id
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.mutation_kind='task_upsert'
+      AND NEW.revision=OLD.revision+1 AND NEW.updated_at=mutation.occurred_at)
+BEGIN SELECT RAISE(ABORT,'34-F task update requires exact mutation and immutable identity'); END;
+
+CREATE TRIGGER trg_34f_collaboration_insert
+BEFORE INSERT ON family_meeting_collaboration_items
+WHEN (SELECT COUNT(*) FROM family_meeting_collaboration_items item WHERE item.meeting_id=NEW.meeting_id)>=256
+  OR NOT EXISTS(SELECT 1 FROM family_meeting_mutations mutation JOIN family_meetings meeting
+    ON meeting.id=NEW.meeting_id AND meeting.last_mutation_id=mutation.id
+    JOIN family_meeting_participants participant ON participant.meeting_id=NEW.meeting_id
+      AND participant.participant_person_id=NEW.added_by_person_id AND participant.attendance<>'declined'
+    WHERE mutation.id=NEW.mutation_id AND mutation.mutation_kind='collaboration_add'
+      AND mutation.actor_person_id=NEW.added_by_person_id AND NEW.added_at=mutation.occurred_at)
+BEGIN SELECT RAISE(ABORT,'34-F collaboration insert requires exact participant and mutation'); END;
+
+CREATE TRIGGER trg_34f_minutes_insert
+BEFORE INSERT ON family_meeting_minutes
+WHEN NOT EXISTS(SELECT 1 FROM family_meeting_mutations mutation JOIN family_meetings meeting
+  ON meeting.id=NEW.meeting_id AND meeting.last_mutation_id=mutation.id AND meeting.state='completed'
+  WHERE mutation.id=NEW.last_mutation_id AND mutation.mutation_kind IN ('ai_minutes_prepare','minutes_finalize')
+    AND NEW.family_id=meeting.family_id AND NEW.owner_person_id=meeting.owner_person_id
+    AND NEW.revision=1 AND NEW.created_at=mutation.occurred_at AND NEW.updated_at=mutation.occurred_at
+    AND ((mutation.mutation_kind='ai_minutes_prepare' AND NEW.state IN ('provider_unavailable','pending_human_review'))
+      OR (mutation.mutation_kind='minutes_finalize' AND NEW.state='sealed_local')))
+BEGIN SELECT RAISE(ABORT,'34-F minutes insert requires completed meeting and exact mutation'); END;
+
+CREATE TRIGGER trg_34f_minutes_update
+BEFORE UPDATE ON family_meeting_minutes
+WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.owner_person_id<>OLD.owner_person_id
+  OR NEW.meeting_id<>OLD.meeting_id OR NEW.created_at<>OLD.created_at
+  OR NOT EXISTS(SELECT 1 FROM family_meeting_mutations mutation JOIN family_meetings meeting
+    ON meeting.id=NEW.meeting_id AND meeting.last_mutation_id=mutation.id AND meeting.state='completed'
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.mutation_kind IN ('ai_minutes_prepare','minutes_finalize')
+      AND NEW.revision=OLD.revision+1 AND NEW.updated_at=mutation.occurred_at
+      AND ((mutation.mutation_kind='ai_minutes_prepare' AND OLD.state<>'sealed_local'
+          AND NEW.state IN ('provider_unavailable','pending_human_review'))
+        OR (mutation.mutation_kind='minutes_finalize' AND NEW.state='sealed_local')))
+BEGIN SELECT RAISE(ABORT,'34-F minutes update requires exact human-review or finalize mutation'); END;
+
+CREATE TRIGGER trg_34f_event_insert
+BEFORE INSERT ON family_meeting_events
+WHEN NOT EXISTS(SELECT 1 FROM family_meeting_mutations mutation
+  WHERE mutation.id=NEW.mutation_id AND mutation.resource_id=NEW.meeting_id
+    AND mutation.mutation_kind=NEW.event_kind AND mutation.revision=NEW.meeting_revision
+    AND mutation.resource_state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.occurred_at
+    AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id)
+BEGIN SELECT RAISE(ABORT,'34-F event requires exact family meeting mutation'); END;
+
+CREATE TRIGGER trg_34f_mutation_update BEFORE UPDATE ON family_meeting_mutations
+BEGIN SELECT RAISE(ABORT,'34-F mutation ledger is immutable'); END;
+CREATE TRIGGER trg_34f_mutation_delete BEFORE DELETE ON family_meeting_mutations
+BEGIN SELECT RAISE(ABORT,'34-F mutation ledger is durable'); END;
+CREATE TRIGGER trg_34f_event_update BEFORE UPDATE ON family_meeting_events
+BEGIN SELECT RAISE(ABORT,'34-F event ledger is immutable'); END;
+CREATE TRIGGER trg_34f_event_delete BEFORE DELETE ON family_meeting_events
+BEGIN SELECT RAISE(ABORT,'34-F event ledger is durable'); END;
+CREATE TRIGGER trg_34f_vote_update BEFORE UPDATE ON family_meeting_votes
+BEGIN SELECT RAISE(ABORT,'34-F vote ledger is immutable'); END;
+CREATE TRIGGER trg_34f_vote_delete BEFORE DELETE ON family_meeting_votes
+BEGIN SELECT RAISE(ABORT,'34-F vote ledger is durable'); END;
+CREATE TRIGGER trg_34f_decision_update BEFORE UPDATE ON family_meeting_decisions
+BEGIN SELECT RAISE(ABORT,'34-F decision ledger is immutable'); END;
+CREATE TRIGGER trg_34f_decision_delete BEFORE DELETE ON family_meeting_decisions
+BEGIN SELECT RAISE(ABORT,'34-F decision ledger is durable'); END;
+CREATE TRIGGER trg_34f_poll_update BEFORE UPDATE ON family_meeting_polls
+BEGIN SELECT RAISE(ABORT,'34-F poll definition is immutable'); END;
+CREATE TRIGGER trg_34f_poll_delete BEFORE DELETE ON family_meeting_polls
+BEGIN SELECT RAISE(ABORT,'34-F poll ledger is durable'); END;
+CREATE TRIGGER trg_34f_collaboration_update BEFORE UPDATE ON family_meeting_collaboration_items
+BEGIN SELECT RAISE(ABORT,'34-F collaboration reference ledger is immutable'); END;
+CREATE TRIGGER trg_34f_collaboration_delete BEFORE DELETE ON family_meeting_collaboration_items
+BEGIN SELECT RAISE(ABORT,'34-F collaboration reference ledger is durable'); END;
+CREATE TRIGGER trg_34f_meeting_delete BEFORE DELETE ON family_meetings
+BEGIN SELECT RAISE(ABORT,'34-F meeting uses logical cancellation'); END;
+CREATE TRIGGER trg_34f_participant_delete BEFORE DELETE ON family_meeting_participants
+BEGIN SELECT RAISE(ABORT,'34-F participant history is durable'); END;
+CREATE TRIGGER trg_34f_agenda_delete BEFORE DELETE ON family_meeting_agenda_items
+BEGIN SELECT RAISE(ABORT,'34-F agenda history is durable'); END;
+CREATE TRIGGER trg_34f_task_delete BEFORE DELETE ON family_meeting_tasks
+BEGIN SELECT RAISE(ABORT,'34-F task history is durable'); END;
+CREATE TRIGGER trg_34f_minutes_delete BEFORE DELETE ON family_meeting_minutes
+BEGIN SELECT RAISE(ABORT,'34-F encrypted minutes metadata is durable'); END;
+
+UPDATE database_metadata SET value='REVISION-34-F-FAMILY-MEETINGS-MINUTES',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -16772,7 +17269,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(106, 'communication_messaging_lifecycle_privacy_presence', communicationMessagingLifecycleSql),
   createMigrationDefinition(107, 'communication_realtime_calling_accessible_ux', communicationRealtimeCallingSql),
   createMigrationDefinition(108, 'explicit_consent_recording_media_retention', communicationRecordingRetentionSql),
-  createMigrationDefinition(109, 'local_first_translation_language', localTranslationLanguageSql)
+  createMigrationDefinition(109, 'local_first_translation_language', localTranslationLanguageSql),
+  createMigrationDefinition(110, 'family_meetings_decisions_consent_minutes', familyMeetingMinutesSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

@@ -229,6 +229,21 @@ import {
   PrepareLocalTranslationRequestUseCase,
   RecordLocalTranslationCorrectionUseCase,
   CancelLocalTranslationRequestUseCase,
+  GetFamilyMeetingCenterUseCase,
+  GetFamilyMeetingMinutesUseCase,
+  CreateFamilyMeetingUseCase,
+  UpdateFamilyMeetingPlanUseCase,
+  SetFamilyMeetingStateUseCase,
+  UpsertFamilyMeetingParticipantUseCase,
+  UpsertFamilyMeetingAgendaItemUseCase,
+  CreateFamilyMeetingPollUseCase,
+  CastFamilyMeetingVoteUseCase,
+  RecordFamilyMeetingDecisionUseCase,
+  UpsertFamilyMeetingTaskUseCase,
+  AddFamilyMeetingCollaborationUseCase,
+  PrepareFamilyMeetingAiMinutesUseCase,
+  FinalizeFamilyMeetingMinutesUseCase,
+  unavailableFamilyMeetingAiMinutesProvider,
   type CommunicationCallPreflightPort,
   ListLifeRecordsUseCase,
   CreateLifeRecordUseCase,
@@ -336,6 +351,7 @@ import {
   type LocalGovernedOcrRuntimePort,
   type CommunicationMlsFoundationPort,
   type CommunicationMessagePayloadPort,
+  type FamilyMeetingMinutesArtifactPort,
   ListDataRetentionPoliciesUseCase,
   ListDataLifecycleRecordsUseCase,
   CreateDataRetentionPolicyUseCase,
@@ -411,6 +427,23 @@ import type {
   RemoveCommunicationRoomMemberInput,
   RevokeCommunicationDeviceCredentialInput,
   SetCommunicationHistoryAccessInput
+} from '@ppt/domain';
+import type {
+  AddFamilyMeetingCollaborationInput,
+  CastFamilyMeetingVoteInput,
+  CreateFamilyMeetingInput,
+  CreateFamilyMeetingPollInput,
+  FamilyMeetingCenterView,
+  FamilyMeetingMinutesContentView,
+  FamilyMeetingMutationReceiptView,
+  FinalizeFamilyMeetingMinutesInput,
+  PrepareFamilyMeetingAiMinutesInput,
+  RecordFamilyMeetingDecisionInput,
+  SetFamilyMeetingStateInput,
+  UpdateFamilyMeetingPlanInput,
+  UpsertFamilyMeetingAgendaItemInput,
+  UpsertFamilyMeetingParticipantInput,
+  UpsertFamilyMeetingTaskInput
 } from '@ppt/domain';
 import type {
   AddLocalTranslationDictionaryEntryInput,
@@ -545,7 +578,13 @@ import {
   RepositoryBackedLocalTranslationQueryPort,
   RepositoryBackedLocalTranslationUnitOfWork
 } from './local-translation-language-application-adapter.js';
+import {
+  RepositoryBackedFamilyMeetingQueryPort,
+  RepositoryBackedFamilyMeetingRecordingConsentPort,
+  RepositoryBackedFamilyMeetingUnitOfWork
+} from './family-meeting-application-adapter.js';
 import { CommunicationMessagePayloadVault } from './communication-message-payload-vault.js';
+import { FamilyMeetingMinutesVault } from './family-meeting-minutes-vault.js';
 import {
   RepositoryBackedLocationPolicyTransactionRunner,
   RepositoryBackedLocationUnitOfWork,
@@ -855,6 +894,10 @@ interface DataStoreOptions {
   communicationMessagePayloads?: CommunicationMessagePayloadPort;
   /** Must resolve to a dedicated directory disjoint from archive, database, key and temporary-open storage. */
   communicationMessagePayloadPath?: string;
+  /** Main-only protected family-meeting minutes seam. Renderer code cannot provide or replace this authority. */
+  familyMeetingMinutesArtifacts?: FamilyMeetingMinutesArtifactPort;
+  /** Must resolve to a dedicated directory disjoint from archive, database, key and temporary-open storage. */
+  familyMeetingMinutesPath?: string;
   /** Main-only local media-device preflight. Missing production configuration remains fail-closed. */
   communicationCallPreflight?: CommunicationCallPreflightPort;
   federatedProviderConfigurations?: readonly import('@ppt/repository-contracts').FederatedProviderProvisioningRow[];
@@ -1059,6 +1102,22 @@ const communicationMessagePayloadRoot = (input: {
   return root;
 };
 
+const familyMeetingMinutesRoot = (input: {
+  readonly requestedPath?: string;
+  readonly databasePath: string;
+  readonly archivePath: string;
+  readonly keyPath: string;
+  readonly temporaryOpenPath: string;
+}): string => {
+  const root = resolve(input.requestedPath ?? `${input.databasePath}.family-meeting-minutes`);
+  if (!root.trim() || compositionPathsOverlap(root, input.databasePath) || compositionPathsOverlap(root, input.archivePath)
+    || compositionPathsOverlap(root, input.keyPath) || compositionPathsOverlap(root, input.temporaryOpenPath)) {
+    throw new PlatformPolicyEnforcementError('ENFORCEMENT_UNAVAILABLE',
+      'Family meeting minutes root must be separate from archive, database, key and temporary-open storage');
+  }
+  return root;
+};
+
 const communicationPayloadFailure = (correlationId: Parameters<CommunicationMessagePayloadPort['seal']>[0]['correlationId']) =>
   err(createAppError({ code: ERROR_CODES.AUTHORIZATION_DENIED, category: 'security',
     message: 'Protected communication message payload provider is unavailable.', correlationId }));
@@ -1073,6 +1132,23 @@ const assertCommunicationMessagePayloadPort = (value: CommunicationMessagePayloa
   if (!value || typeof value.seal !== 'function' || typeof value.open !== 'function' || typeof value.discard !== 'function') {
     throw new PlatformPolicyEnforcementError('ENFORCEMENT_UNAVAILABLE',
       'Explicit communication message payload provider is incomplete');
+  }
+  return value;
+};
+const familyMeetingMinutesFailure = (correlationId: Parameters<FamilyMeetingMinutesArtifactPort['seal']>[0]['correlationId']) =>
+  err(createAppError({ code: ERROR_CODES.AUTHORIZATION_DENIED, category: 'security',
+    message: 'Protected family meeting minutes provider is unavailable.', correlationId }));
+const failClosedFamilyMeetingMinutesArtifacts: FamilyMeetingMinutesArtifactPort = Object.freeze({
+  seal: (input: Parameters<FamilyMeetingMinutesArtifactPort['seal']>[0]) => familyMeetingMinutesFailure(input.correlationId),
+  open: (_row: Parameters<FamilyMeetingMinutesArtifactPort['open']>[0], _actorPersonId: string,
+    correlationId: Parameters<FamilyMeetingMinutesArtifactPort['open']>[2]) => familyMeetingMinutesFailure(correlationId),
+  discard: (_reference: string, correlationId: Parameters<FamilyMeetingMinutesArtifactPort['discard']>[1]) =>
+    familyMeetingMinutesFailure(correlationId)
+});
+const assertFamilyMeetingMinutesArtifactPort = (value: FamilyMeetingMinutesArtifactPort): FamilyMeetingMinutesArtifactPort => {
+  if (!value || typeof value.seal !== 'function' || typeof value.open !== 'function' || typeof value.discard !== 'function') {
+    throw new PlatformPolicyEnforcementError('ENFORCEMENT_UNAVAILABLE',
+      'Explicit family meeting minutes provider is incomplete');
   }
   return value;
 };
@@ -1536,6 +1612,20 @@ export class FamilyDataStore {
   readonly #prepareLocalTranslationRequestUseCase:PrepareLocalTranslationRequestUseCase;
   readonly #recordLocalTranslationCorrectionUseCase:RecordLocalTranslationCorrectionUseCase;
   readonly #cancelLocalTranslationRequestUseCase:CancelLocalTranslationRequestUseCase;
+  readonly #getFamilyMeetingCenterUseCase:GetFamilyMeetingCenterUseCase;
+  readonly #getFamilyMeetingMinutesUseCase:GetFamilyMeetingMinutesUseCase;
+  readonly #createFamilyMeetingUseCase:CreateFamilyMeetingUseCase;
+  readonly #updateFamilyMeetingPlanUseCase:UpdateFamilyMeetingPlanUseCase;
+  readonly #setFamilyMeetingStateUseCase:SetFamilyMeetingStateUseCase;
+  readonly #upsertFamilyMeetingParticipantUseCase:UpsertFamilyMeetingParticipantUseCase;
+  readonly #upsertFamilyMeetingAgendaItemUseCase:UpsertFamilyMeetingAgendaItemUseCase;
+  readonly #createFamilyMeetingPollUseCase:CreateFamilyMeetingPollUseCase;
+  readonly #castFamilyMeetingVoteUseCase:CastFamilyMeetingVoteUseCase;
+  readonly #recordFamilyMeetingDecisionUseCase:RecordFamilyMeetingDecisionUseCase;
+  readonly #upsertFamilyMeetingTaskUseCase:UpsertFamilyMeetingTaskUseCase;
+  readonly #addFamilyMeetingCollaborationUseCase:AddFamilyMeetingCollaborationUseCase;
+  readonly #prepareFamilyMeetingAiMinutesUseCase:PrepareFamilyMeetingAiMinutesUseCase;
+  readonly #finalizeFamilyMeetingMinutesUseCase:FinalizeFamilyMeetingMinutesUseCase;
   readonly #prepareFamilyEmergencyCardExportUseCase: PrepareFamilyEmergencyCardExportUseCase;
   readonly #recordFamilyEmergencyCardExportCompletionUseCase: RecordFamilyEmergencyCardExportCompletionUseCase;
   readonly #listFinanceRecordsUseCase: ListFinanceRecordsUseCase;
@@ -2055,6 +2145,7 @@ export class FamilyDataStore {
           childEducationPolicyResourceRepository: this.#repositories.childEducationRepository,
           placesTravelPolicyResourceRepository: this.#repositories.placesTravelRepository,
           familyAiAssistantPolicyResourceRepository: this.#repositories.familyAiAssistantRepository,
+          familyMeetingPolicyResourceRepository: this.#repositories.familyMeetingRepository,
           memoryStudioPolicyResourceRepository: this.#repositories.memoryStudioRepository,
           smartHomeEnergyPolicyResourceRepository: this.#repositories.smartHomeEnergyRepository,
           signedPluginPlatformPolicyResourceRepository: this.#repositories.signedPluginPlatformRepository,
@@ -2082,6 +2173,8 @@ export class FamilyDataStore {
       placesTravelPolicyResourceRepository: this.#repositories.placesTravelRepository,
       familyAiAssistantRepository: this.#repositories.familyAiAssistantRepository,
       familyAiAssistantPolicyResourceRepository: this.#repositories.familyAiAssistantRepository,
+      familyMeetingRepository: this.#repositories.familyMeetingRepository,
+      familyMeetingPolicyResourceRepository: this.#repositories.familyMeetingRepository,
       memoryStudioRepository: this.#repositories.memoryStudioRepository,
       memoryStudioPolicyResourceRepository: this.#repositories.memoryStudioRepository,
       smartHomeEnergyRepository: this.#repositories.smartHomeEnergyRepository,
@@ -2942,6 +3035,46 @@ export class FamilyDataStore {
     this.#prepareLocalTranslationRequestUseCase=new PrepareLocalTranslationRequestUseCase(localTranslationUnitOfWork);
     this.#recordLocalTranslationCorrectionUseCase=new RecordLocalTranslationCorrectionUseCase(localTranslationUnitOfWork);
     this.#cancelLocalTranslationRequestUseCase=new CancelLocalTranslationRequestUseCase(localTranslationUnitOfWork);
+    const familyMeetingMinutesArtifacts=options.familyMeetingMinutesArtifacts!==undefined
+      ?assertFamilyMeetingMinutesArtifactPort(options.familyMeetingMinutesArtifacts)
+      :options.protectedSideArtifacts===undefined
+        ?failClosedFamilyMeetingMinutesArtifacts
+        :new FamilyMeetingMinutesVault({
+            rootDirectory:familyMeetingMinutesRoot({
+              ...(options.familyMeetingMinutesPath===undefined?{}:{requestedPath:options.familyMeetingMinutesPath}),
+              databasePath:storageLayout.databasePath,archivePath:storageLayout.archivePath,
+              keyPath:storageLayout.vaultKeyPath,temporaryOpenPath:storageLayout.temporaryOpenPath
+            }),
+            protectedStore:options.protectedSideArtifacts
+          });
+    const familyMeetingDependencies={...lifeApplicationDependencies,
+      familyMeetingRepository:this.#repositories.familyMeetingRepository,
+      familyMeetingPolicyResourceRepository:this.#repositories.familyMeetingRepository,
+      communicationRecordingRepository:this.#repositories.communicationRecordingRepository,
+      minutesArtifacts:familyMeetingMinutesArtifacts} as const;
+    const familyMeetingQuery=new RepositoryBackedFamilyMeetingQueryPort(
+      familyMeetingDependencies,lifePolicyTransactionRunner);
+    const familyMeetingUnitOfWork=new RepositoryBackedFamilyMeetingUnitOfWork(
+      familyMeetingDependencies,lifePolicyTransactionRunner);
+    const familyMeetingRecordingConsent=new RepositoryBackedFamilyMeetingRecordingConsentPort(
+      familyMeetingDependencies,lifePolicyTransactionRunner);
+    this.#getFamilyMeetingCenterUseCase=new GetFamilyMeetingCenterUseCase(familyMeetingQuery);
+    this.#getFamilyMeetingMinutesUseCase=new GetFamilyMeetingMinutesUseCase(familyMeetingQuery);
+    this.#createFamilyMeetingUseCase=new CreateFamilyMeetingUseCase(familyMeetingUnitOfWork);
+    this.#updateFamilyMeetingPlanUseCase=new UpdateFamilyMeetingPlanUseCase(familyMeetingUnitOfWork);
+    this.#setFamilyMeetingStateUseCase=new SetFamilyMeetingStateUseCase(familyMeetingUnitOfWork);
+    this.#upsertFamilyMeetingParticipantUseCase=new UpsertFamilyMeetingParticipantUseCase(familyMeetingUnitOfWork);
+    this.#upsertFamilyMeetingAgendaItemUseCase=new UpsertFamilyMeetingAgendaItemUseCase(familyMeetingUnitOfWork);
+    this.#createFamilyMeetingPollUseCase=new CreateFamilyMeetingPollUseCase(familyMeetingUnitOfWork);
+    this.#castFamilyMeetingVoteUseCase=new CastFamilyMeetingVoteUseCase(familyMeetingUnitOfWork);
+    this.#recordFamilyMeetingDecisionUseCase=new RecordFamilyMeetingDecisionUseCase(familyMeetingUnitOfWork);
+    this.#upsertFamilyMeetingTaskUseCase=new UpsertFamilyMeetingTaskUseCase(familyMeetingUnitOfWork);
+    this.#addFamilyMeetingCollaborationUseCase=new AddFamilyMeetingCollaborationUseCase(familyMeetingUnitOfWork);
+    this.#prepareFamilyMeetingAiMinutesUseCase=new PrepareFamilyMeetingAiMinutesUseCase(
+      familyMeetingUnitOfWork,familyMeetingRecordingConsent,unavailableFamilyMeetingAiMinutesProvider,
+      familyMeetingMinutesArtifacts);
+    this.#finalizeFamilyMeetingMinutesUseCase=new FinalizeFamilyMeetingMinutesUseCase(
+      familyMeetingUnitOfWork,familyMeetingMinutesArtifacts);
     this.#prepareArchiveOpenUseCase = new PrepareArchiveOpenUseCase(archiveQuery);
     this.#recordArchiveOpenedUseCase = new RecordArchiveOpenedUseCase(archiveUnitOfWork);
     this.#authorizeEmergencyArchiveReadUseCase = new AuthorizeEmergencyArchiveReadUseCase(archiveUnitOfWork);
@@ -6791,6 +6924,64 @@ export class FamilyDataStore {
   }
   public async cancelLocalTranslationRequest(input:CancelLocalTranslationRequestInput):Promise<LocalTranslationMutationReceiptView>{
     const result=await this.#cancelLocalTranslationRequestUseCase.execute(this.#lifeApplicationContext('local-translation-cancel'),input);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async getFamilyMeetingCenter():Promise<FamilyMeetingCenterView>{
+    const result=await this.#getFamilyMeetingCenterUseCase.execute(this.#lifeApplicationContext('family-meeting-center'));
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async getFamilyMeetingMinutes(meetingId:string):Promise<FamilyMeetingMinutesContentView>{
+    const result=await this.#getFamilyMeetingMinutesUseCase.execute(
+      this.#lifeApplicationContext('family-meeting-minutes-read'),meetingId);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async createFamilyMeeting(command:CreateFamilyMeetingInput):Promise<FamilyMeetingMutationReceiptView>{
+    const result=await this.#createFamilyMeetingUseCase.execute({context:this.#lifeApplicationContext('family-meeting-create'),command});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async updateFamilyMeetingPlan(command:UpdateFamilyMeetingPlanInput):Promise<FamilyMeetingMutationReceiptView>{
+    const result=await this.#updateFamilyMeetingPlanUseCase.execute({context:this.#lifeApplicationContext('family-meeting-plan'),command});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async setFamilyMeetingState(command:SetFamilyMeetingStateInput):Promise<FamilyMeetingMutationReceiptView>{
+    const result=await this.#setFamilyMeetingStateUseCase.execute({context:this.#lifeApplicationContext('family-meeting-state'),command});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async upsertFamilyMeetingParticipant(command:UpsertFamilyMeetingParticipantInput):Promise<FamilyMeetingMutationReceiptView>{
+    const result=await this.#upsertFamilyMeetingParticipantUseCase.execute({context:this.#lifeApplicationContext('family-meeting-participant'),command});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async upsertFamilyMeetingAgendaItem(command:UpsertFamilyMeetingAgendaItemInput):Promise<FamilyMeetingMutationReceiptView>{
+    const result=await this.#upsertFamilyMeetingAgendaItemUseCase.execute({context:this.#lifeApplicationContext('family-meeting-agenda'),command});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async createFamilyMeetingPoll(command:CreateFamilyMeetingPollInput):Promise<FamilyMeetingMutationReceiptView>{
+    const result=await this.#createFamilyMeetingPollUseCase.execute({context:this.#lifeApplicationContext('family-meeting-poll'),command});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async castFamilyMeetingVote(command:CastFamilyMeetingVoteInput):Promise<FamilyMeetingMutationReceiptView>{
+    const result=await this.#castFamilyMeetingVoteUseCase.execute({context:this.#lifeApplicationContext('family-meeting-vote'),command});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async recordFamilyMeetingDecision(command:RecordFamilyMeetingDecisionInput):Promise<FamilyMeetingMutationReceiptView>{
+    const result=await this.#recordFamilyMeetingDecisionUseCase.execute({context:this.#lifeApplicationContext('family-meeting-decision'),command});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async upsertFamilyMeetingTask(command:UpsertFamilyMeetingTaskInput):Promise<FamilyMeetingMutationReceiptView>{
+    const result=await this.#upsertFamilyMeetingTaskUseCase.execute({context:this.#lifeApplicationContext('family-meeting-task'),command});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async addFamilyMeetingCollaboration(command:AddFamilyMeetingCollaborationInput):Promise<FamilyMeetingMutationReceiptView>{
+    const result=await this.#addFamilyMeetingCollaborationUseCase.execute({context:this.#lifeApplicationContext('family-meeting-collaboration'),command});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async prepareFamilyMeetingAiMinutes(command:PrepareFamilyMeetingAiMinutesInput):Promise<FamilyMeetingMutationReceiptView>{
+    const result=await this.#prepareFamilyMeetingAiMinutesUseCase.execute({context:this.#lifeApplicationContext('family-meeting-ai-minutes'),command});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async finalizeFamilyMeetingMinutes(command:FinalizeFamilyMeetingMinutesInput):Promise<FamilyMeetingMutationReceiptView>{
+    const result=await this.#finalizeFamilyMeetingMinutesUseCase.execute({context:this.#lifeApplicationContext('family-meeting-minutes-finalize'),command});
     if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
   }
 

@@ -36,6 +36,7 @@ import type {
   CommunicationRealtimeCallingPolicyResourceRepositoryPort,
   CommunicationSecurityPolicyResourceRepositoryPort,
   FamilyAiAssistantPolicyResourceRepositoryPort,
+  FamilyMeetingPolicyResourceRepositoryPort,
   HouseholdOperationsPolicyResourceRepositoryPort,
   LifePolicyResourceRepositoryPort,
   LifeRecordRow,
@@ -82,6 +83,7 @@ export interface LifeProductionPolicyRuntimeDependencies {
   readonly communicationRealtimeCallingPolicyResourceRepository?: CommunicationRealtimeCallingPolicyResourceRepositoryPort;
   readonly communicationSecurityPolicyResourceRepository?: CommunicationSecurityPolicyResourceRepositoryPort;
   readonly familyAiAssistantPolicyResourceRepository: FamilyAiAssistantPolicyResourceRepositoryPort;
+  readonly familyMeetingPolicyResourceRepository?: FamilyMeetingPolicyResourceRepositoryPort;
   readonly memoryStudioPolicyResourceRepository?: MemoryStudioPolicyResourceRepositoryPort;
   readonly smartHomeEnergyPolicyResourceRepository?: SmartHomeEnergyPolicyResourceRepositoryPort;
   readonly signedPluginPlatformPolicyResourceRepository?: SignedPluginPlatformPolicyResourceRepositoryPort;
@@ -154,7 +156,9 @@ const lifeResourceTypes = new Set<LifePolicyIntent['resourceType']>([
   'communication_recording_request',
   'local_translation_center',
   'local_translation_profile',
-  'local_translation_request'
+  'local_translation_request',
+  'family_meeting_center',
+  'family_meeting'
 ]);
 
 const nonEmpty = (value: unknown, max = 512): value is string =>
@@ -967,6 +971,17 @@ const findLifeResourceForPolicyResolution = (
           privacy: 'private' as const, stateFingerprint: stable(found.value) })
       : null);
   }
+  if (resourceType === 'family_meeting') {
+    if (!dependencies.familyMeetingPolicyResourceRepository) throw new PlatformPolicyEnforcementError(
+      'RESOURCE_RESOLUTION_FAILED', 'Family meeting policy resource repository is not composed');
+    const found = dependencies.familyMeetingPolicyResourceRepository.resolvePolicyResource(
+      execution, 'family_meeting', resourceId);
+    if (!found.ok) return found;
+    return ok(found.value
+      ? Object.freeze({ familyId: found.value.familyId, ownerPersonId: found.value.ownerPersonId,
+          privacy: 'family' as const, stateFingerprint: stable(found.value) })
+      : null);
+  }
   throw new PlatformPolicyEnforcementError(
     'RESOURCE_RESOLUTION_FAILED',
     'Life policy resource type is not supported'
@@ -1008,6 +1023,7 @@ const loadLifeResourceSnapshotInTransaction = (
       familyId: context.familyId,
       ownerPersonId: context.actor.personId,
       sensitivity: requestedIntent.resourceType === 'household_operations_center'
+        || requestedIntent.resourceType === 'family_meeting_center'
         ? 'personal' as const
         : 'highly_sensitive' as const,
       ...(requestedIntent.resourceType === 'child_education_center'
@@ -1043,7 +1059,7 @@ const loadLifeResourceSnapshotInTransaction = (
           'smart_home_camera_consent','smart_home_settings','signed_plugin_installation',
           'communication_device_credential','communication_room','communication_message','communication_presence',
           'communication_retention_policy','communication_call_session','communication_call_preferences',
-          'communication_recording_request','local_translation_profile','local_translation_request'].includes(requestedIntent.resourceType)
+          'communication_recording_request','local_translation_profile','local_translation_request','family_meeting'].includes(requestedIntent.resourceType)
         || existing.value.familyId !== context.familyId
         || existing.value.ownerPersonId !== requestedIntent.ownerPersonId
         || existing.value.privacy !== requestedIntent.privacy

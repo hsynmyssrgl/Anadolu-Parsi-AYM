@@ -23,6 +23,9 @@ import {
   shouldInvalidateIpcReadSharing
 } from './ipc-read-sharing.js';
 import type {
+  FamilyMeetingCenterIpcView,
+  FamilyMeetingMinutesIpcView,
+  FamilyMeetingMutationIpcView,
   LocalGovernedOcrCenterIpcView,
   LocalGovernedOcrCorrectIpcInput,
   LocalGovernedOcrCreateIpcInput,
@@ -103,6 +106,20 @@ import type {
   UpdateLocalTranslationDictionaryEntryInput,
   UpdateLocalTranslationProfileInput
 } from '@ppt/domain';
+import type {
+  AddFamilyMeetingCollaborationInput,
+  CastFamilyMeetingVoteInput,
+  CreateFamilyMeetingInput,
+  CreateFamilyMeetingPollInput,
+  FinalizeFamilyMeetingMinutesInput,
+  PrepareFamilyMeetingAiMinutesInput,
+  RecordFamilyMeetingDecisionInput,
+  SetFamilyMeetingStateInput,
+  UpdateFamilyMeetingPlanInput,
+  UpsertFamilyMeetingAgendaItemInput,
+  UpsertFamilyMeetingParticipantInput,
+  UpsertFamilyMeetingTaskInput
+} from '@ppt/domain';
 import type { LegacyArchiveOwnershipReattestationView, ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { AssignPersonMembershipInput, CreateFamilyBranchInput, CreateHouseholdInput, FamilyBranch, Household, HouseholdMembershipWorkspaceView, PersonLifecycleProfile, PersonLifecycleWorkspaceView, PersonMembership, UpdatePersonProfileInput } from '@ppt/domain';
 import type { AuthorizationContextWorkspaceView } from '@ppt/domain';
@@ -169,6 +186,9 @@ export interface EncryptedPrivacyDataExportIpcInput {
   readonly passphrase: string;
 }
 export type {
+  FamilyMeetingCenterIpcView,
+  FamilyMeetingMinutesIpcView,
+  FamilyMeetingMutationIpcView,
   LocalGovernedOcrCenterIpcView,
   LocalGovernedOcrCorrectIpcInput,
   LocalGovernedOcrCreateIpcInput,
@@ -852,6 +872,33 @@ contextBridge.exposeInMainWorld('pardus', {
     invoke('localTranslation:recordCorrection',input),
   cancelLocalTranslationRequest:(input:CancelLocalTranslationRequestInput):Promise<LocalTranslationMutationReceiptView>=>
     invoke('localTranslation:cancelRequest',input),
+  getFamilyMeetingCenter:():Promise<FamilyMeetingCenterIpcView>=>invoke('familyMeeting:getCenter'),
+  getFamilyMeetingMinutes:(input:{readonly meetingId:string}):Promise<FamilyMeetingMinutesIpcView>=>
+    invoke('familyMeeting:getMinutes',input),
+  createFamilyMeeting:(input:CreateFamilyMeetingInput):Promise<FamilyMeetingMutationIpcView>=>
+    invoke('familyMeeting:create',input),
+  updateFamilyMeetingPlan:(input:UpdateFamilyMeetingPlanInput):Promise<FamilyMeetingMutationIpcView>=>
+    invoke('familyMeeting:updatePlan',input),
+  setFamilyMeetingState:(input:SetFamilyMeetingStateInput):Promise<FamilyMeetingMutationIpcView>=>
+    invoke('familyMeeting:setState',input),
+  upsertFamilyMeetingParticipant:(input:UpsertFamilyMeetingParticipantInput):Promise<FamilyMeetingMutationIpcView>=>
+    invoke('familyMeeting:upsertParticipant',input),
+  upsertFamilyMeetingAgendaItem:(input:UpsertFamilyMeetingAgendaItemInput):Promise<FamilyMeetingMutationIpcView>=>
+    invoke('familyMeeting:upsertAgenda',input),
+  createFamilyMeetingPoll:(input:CreateFamilyMeetingPollInput):Promise<FamilyMeetingMutationIpcView>=>
+    invoke('familyMeeting:createPoll',input),
+  castFamilyMeetingVote:(input:CastFamilyMeetingVoteInput):Promise<FamilyMeetingMutationIpcView>=>
+    invoke('familyMeeting:castVote',input),
+  recordFamilyMeetingDecision:(input:RecordFamilyMeetingDecisionInput):Promise<FamilyMeetingMutationIpcView>=>
+    invoke('familyMeeting:recordDecision',input),
+  upsertFamilyMeetingTask:(input:UpsertFamilyMeetingTaskInput):Promise<FamilyMeetingMutationIpcView>=>
+    invoke('familyMeeting:upsertTask',input),
+  addFamilyMeetingCollaboration:(input:AddFamilyMeetingCollaborationInput):Promise<FamilyMeetingMutationIpcView>=>
+    invoke('familyMeeting:addCollaboration',input),
+  prepareFamilyMeetingAiMinutes:(input:PrepareFamilyMeetingAiMinutesInput):Promise<FamilyMeetingMutationIpcView>=>
+    invoke('familyMeeting:prepareAiMinutes',input),
+  finalizeFamilyMeetingMinutes:(input:FinalizeFamilyMeetingMinutesInput):Promise<FamilyMeetingMutationIpcView>=>
+    invoke('familyMeeting:finalizeMinutes',input),
   listFinanceValuations:():Promise<FinanceValuationView[]>=>invoke('finance:listValuations'),
   createFinanceValuation:(input:CreateFinanceValuationInput):Promise<FinanceValuationView[]>=>invoke('finance:createValuation',input),
   createMember: (input: CreateFamilyMemberInput): Promise<FamilyMutationResultView> => invoke('family:createMember', input),

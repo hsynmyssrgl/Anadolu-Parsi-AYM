@@ -62,6 +62,20 @@ import type {
   UpdateLocalTranslationDictionaryEntryInput,
   UpdateLocalTranslationProfileInput
 } from '@ppt/domain';
+import type {
+  AddFamilyMeetingCollaborationInput,
+  CastFamilyMeetingVoteInput,
+  CreateFamilyMeetingInput,
+  CreateFamilyMeetingPollInput,
+  FinalizeFamilyMeetingMinutesInput,
+  PrepareFamilyMeetingAiMinutesInput,
+  RecordFamilyMeetingDecisionInput,
+  SetFamilyMeetingStateInput,
+  UpdateFamilyMeetingPlanInput,
+  UpsertFamilyMeetingAgendaItemInput,
+  UpsertFamilyMeetingParticipantInput,
+  UpsertFamilyMeetingTaskInput
+} from '@ppt/domain';
 import type { ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { UnifiedAuthorizedSearchInput } from '@ppt/domain';
 import type { RecordManagedLifeItemInput } from '@ppt/domain';
@@ -114,6 +128,7 @@ import {
   COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS,
   COMMUNICATION_RECORDING_IPC_CHANNELS,
   LOCAL_TRANSLATION_IPC_CHANNELS,
+  FAMILY_MEETING_IPC_CHANNELS,
   PLACES_TRAVEL_ASSET_PET_IPC_CHANNELS,
   HEALTH_CARE_COORDINATION_IPC_CHANNELS,
   HOUSEHOLD_OPERATIONS_IPC_CHANNELS,
@@ -122,6 +137,9 @@ import {
   projectLocalGovernedOcrMutationIpcView,
   projectLocalGovernedOcrResultIpcView,
   projectLocalGovernedOcrSearchIpcView,
+  projectFamilyMeetingCenterIpcView,
+  projectFamilyMeetingMinutesIpcView,
+  projectFamilyMeetingMutationIpcView,
   type LocalGovernedOcrCorrectIpcInput,
   type LocalGovernedOcrCreateIpcInput,
   type LocalGovernedOcrDeleteIpcInput,
@@ -2561,6 +2579,34 @@ function registerIpc(): void {
     async(_event,input:RecordLocalTranslationCorrectionInput)=>store().recordLocalTranslationCorrection(input));
   registerIpcHandler(LOCAL_TRANSLATION_IPC_CHANNELS.cancelRequest,
     async(_event,input:CancelLocalTranslationRequestInput)=>store().cancelLocalTranslationRequest(input));
+  registerIpcHandler(FAMILY_MEETING_IPC_CHANNELS.getCenter,async()=>
+    projectFamilyMeetingCenterIpcView(await store().getFamilyMeetingCenter()));
+  registerIpcHandler(FAMILY_MEETING_IPC_CHANNELS.getMinutes,async(_event,input:{readonly meetingId:string})=>
+    projectFamilyMeetingMinutesIpcView(await store().getFamilyMeetingMinutes(input.meetingId)));
+  registerIpcHandler(FAMILY_MEETING_IPC_CHANNELS.create,async(_event,input:CreateFamilyMeetingInput)=>
+    projectFamilyMeetingMutationIpcView(await store().createFamilyMeeting(input),'meeting_create'));
+  registerIpcHandler(FAMILY_MEETING_IPC_CHANNELS.updatePlan,async(_event,input:UpdateFamilyMeetingPlanInput)=>
+    projectFamilyMeetingMutationIpcView(await store().updateFamilyMeetingPlan(input),'meeting_plan_update'));
+  registerIpcHandler(FAMILY_MEETING_IPC_CHANNELS.setState,async(_event,input:SetFamilyMeetingStateInput)=>
+    projectFamilyMeetingMutationIpcView(await store().setFamilyMeetingState(input),'meeting_state_update'));
+  registerIpcHandler(FAMILY_MEETING_IPC_CHANNELS.upsertParticipant,async(_event,input:UpsertFamilyMeetingParticipantInput)=>
+    projectFamilyMeetingMutationIpcView(await store().upsertFamilyMeetingParticipant(input),'participant_upsert'));
+  registerIpcHandler(FAMILY_MEETING_IPC_CHANNELS.upsertAgenda,async(_event,input:UpsertFamilyMeetingAgendaItemInput)=>
+    projectFamilyMeetingMutationIpcView(await store().upsertFamilyMeetingAgendaItem(input),'agenda_upsert'));
+  registerIpcHandler(FAMILY_MEETING_IPC_CHANNELS.createPoll,async(_event,input:CreateFamilyMeetingPollInput)=>
+    projectFamilyMeetingMutationIpcView(await store().createFamilyMeetingPoll(input),'poll_create'));
+  registerIpcHandler(FAMILY_MEETING_IPC_CHANNELS.castVote,async(_event,input:CastFamilyMeetingVoteInput)=>
+    projectFamilyMeetingMutationIpcView(await store().castFamilyMeetingVote(input),'vote_cast'));
+  registerIpcHandler(FAMILY_MEETING_IPC_CHANNELS.recordDecision,async(_event,input:RecordFamilyMeetingDecisionInput)=>
+    projectFamilyMeetingMutationIpcView(await store().recordFamilyMeetingDecision(input),'decision_record'));
+  registerIpcHandler(FAMILY_MEETING_IPC_CHANNELS.upsertTask,async(_event,input:UpsertFamilyMeetingTaskInput)=>
+    projectFamilyMeetingMutationIpcView(await store().upsertFamilyMeetingTask(input),'task_upsert'));
+  registerIpcHandler(FAMILY_MEETING_IPC_CHANNELS.addCollaboration,async(_event,input:AddFamilyMeetingCollaborationInput)=>
+    projectFamilyMeetingMutationIpcView(await store().addFamilyMeetingCollaboration(input),'collaboration_add'));
+  registerIpcHandler(FAMILY_MEETING_IPC_CHANNELS.prepareAiMinutes,async(_event,input:PrepareFamilyMeetingAiMinutesInput)=>
+    projectFamilyMeetingMutationIpcView(await store().prepareFamilyMeetingAiMinutes(input),'ai_minutes_prepare'));
+  registerIpcHandler(FAMILY_MEETING_IPC_CHANNELS.finalizeMinutes,async(_event,input:FinalizeFamilyMeetingMinutesInput)=>
+    projectFamilyMeetingMutationIpcView(await store().finalizeFamilyMeetingMinutes(input),'minutes_finalize'));
   registerIpcHandler('finance:listValuations', () => store().listFinanceValuations());
   registerIpcHandler('finance:createValuation', (_event, input:CreateFinanceValuationInput) => store().createFinanceValuation(input));
   registerIpcHandler('family:createRelation', async (_event, input: CreateFamilyRelationInput) => {

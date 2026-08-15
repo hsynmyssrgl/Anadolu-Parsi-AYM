@@ -59,7 +59,7 @@
       "passed": true
     },
     {
-      "name": "manifest contains exactly 360 unique surfaces",
+      "name": "manifest contains exactly 375 unique surfaces",
       "passed": true
     },
     {
@@ -415,7 +415,7 @@
       "passed": true
     },
     {
-      "name": "decision pins current Desktop OCR capability truth and local translation source ratchet",
+      "name": "decision pins current Desktop OCR capability truth and family meeting source ratchet",
       "passed": true
     },
     {
@@ -454,10 +454,10 @@
   "protectedCapabilityFamilies": 7,
   "canonicalApplications": 14,
   "productionSourceZones": 18,
-  "scannedProductionFiles": 525,
-  "exactCapabilitySurfaces": 360,
-  "exactManifestEntries": 360,
-  "exactManifestSha256": "755717250f2549229608b38e6ea650a4647f1e0d50aa4c1aa1078acc193302ff",
+  "scannedProductionFiles": 532,
+  "exactCapabilitySurfaces": 375,
+  "exactManifestEntries": 375,
+  "exactManifestSha256": "8f597570bb8ddcee6fa549badbd87b39754d71687314d9ae8c9a63f3bafc20f8",
   "pinnedBootstrapSurfaces": 26,
   "maliciousAstSelfTests": 33,
   "benignAstSelfTests": 5,
@@ -475,5 +475,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-15T17:38:15.257Z"
+  "generatedAt": "2026-08-15T20:15:39.689Z"
 }

@@ -15,6 +15,10 @@ import {
 import {
   archiveLegacyOwnershipReattestationConfirmation,
   canonicalLocalGovernedOcrSearchTokens,
+  type FamilyMeetingCenterView,
+  type FamilyMeetingMinutesContentView,
+  type FamilyMeetingMutationKind,
+  type FamilyMeetingMutationReceiptView,
   type LocalGovernedOcrCenterView,
   type LocalGovernedOcrMutationReceiptView,
   type LocalGovernedOcrResultView,
@@ -34,6 +38,101 @@ export interface IpcIntegrationPolicyDecision {
   readonly reason?: string;
   readonly path?: string;
 }
+
+export type FamilyMeetingIpcView = Omit<FamilyMeetingCenterView['meetings'][number], 'ownerPersonId' | 'decisions'> & {
+  readonly decisions: readonly Omit<FamilyMeetingCenterView['meetings'][number]['decisions'][number], 'ledgerReference'>[];
+};
+
+export type FamilyMeetingCenterIpcView = Omit<FamilyMeetingCenterView, 'centerId' | 'ownerPersonId' | 'meetings'> & {
+  readonly meetings: readonly FamilyMeetingIpcView[];
+};
+
+export type FamilyMeetingMinutesIpcView = FamilyMeetingMinutesContentView;
+
+export type FamilyMeetingMutationIpcView = Omit<
+  FamilyMeetingMutationReceiptView,
+  'resourceType' | 'resourceId'
+> & {
+  readonly meetingId: string;
+};
+
+export const projectFamilyMeetingCenterIpcView = (
+  center: FamilyMeetingCenterView
+): FamilyMeetingCenterIpcView => {
+  if (center.meetings.some((meeting) => meeting.ownerPersonId !== center.ownerPersonId)) {
+    throw new Error('Family meeting center owner binding is incoherent.');
+  }
+  return {
+    schemaVersion: 1,
+    meetings: center.meetings.map((meeting) => ({
+      id: meeting.id,
+      title: meeting.title,
+      recurrenceKind: meeting.recurrenceKind,
+      recurrenceInterval: meeting.recurrenceInterval,
+      startsAt: meeting.startsAt,
+      endsAt: meeting.endsAt,
+      reminderMinutes: meeting.reminderMinutes,
+      state: meeting.state,
+      participants: meeting.participants.map((participant) => ({ ...participant, roles: [...participant.roles] })),
+      agenda: meeting.agenda.map((item) => ({
+        ...item,
+        preRead: item.preRead.map((reference) => ({ ...reference }))
+      })),
+      polls: meeting.polls.map((poll) => ({
+        ...poll,
+        options: poll.options.map((option) => ({ ...option })),
+        votes: poll.votes.map((vote) => ({ ...vote }))
+      })),
+      decisions: meeting.decisions.map(({ ledgerReference: _ledgerReference, ...decision }) => ({
+        ...decision,
+        responsiblePersonIds: [...decision.responsiblePersonIds]
+      })),
+      tasks: meeting.tasks.map((task) => ({ ...task })),
+      collaboration: meeting.collaboration.map((item) => ({ ...item })),
+      minutes: {
+        ...meeting.minutes,
+        participantAccessPersonIds: [...meeting.minutes.participantAccessPersonIds],
+        selectedRecordingSegmentIds: [...meeting.minutes.selectedRecordingSegmentIds]
+      },
+      revision: meeting.revision,
+      createdAt: meeting.createdAt,
+      updatedAt: meeting.updatedAt
+    })),
+    truth: { ...center.truth },
+    generatedAt: center.generatedAt
+  };
+};
+
+export const projectFamilyMeetingMinutesIpcView = (
+  minutes: FamilyMeetingMinutesContentView
+): FamilyMeetingMinutesIpcView => ({
+  ...minutes,
+  decisions: [...minutes.decisions],
+  tasks: [...minutes.tasks],
+  participantAccessPersonIds: [...minutes.participantAccessPersonIds],
+  selectedRecordingSegmentIds: [...minutes.selectedRecordingSegmentIds]
+});
+
+export const projectFamilyMeetingMutationIpcView = (
+  result: FamilyMeetingMutationReceiptView,
+  expectedMutationKind: FamilyMeetingMutationKind
+): FamilyMeetingMutationIpcView => {
+  if (result.resourceType !== 'family_meeting' || result.mutationKind !== expectedMutationKind) {
+    throw new Error('Family meeting mutation receipt does not match its main IPC operation.');
+  }
+  return {
+    meetingId: result.resourceId,
+    mutationKind: result.mutationKind,
+    previousRevision: result.previousRevision,
+    revision: result.revision,
+    occurredAt: result.occurredAt,
+    replayed: result.replayed,
+    encryptedMinutesPackageWritten: result.encryptedMinutesPackageWritten,
+    aiProviderConfigured: false,
+    networkUsed: false,
+    cloudUsed: false
+  };
+};
 
 export interface LocalGovernedOcrSourceIpcView {
   readonly resourceType: 'archive_item';
@@ -4060,6 +4159,211 @@ const localTranslationResult=(channel:string,result:unknown):IpcIntegrationPolic
   return valid?accepted():rejected('LOCAL_TRANSLATION_RESULT_INVALID','$result');
 };
 
+export const FAMILY_MEETING_IPC_CHANNELS=Object.freeze({
+  getCenter:'familyMeeting:getCenter',
+  getMinutes:'familyMeeting:getMinutes',
+  create:'familyMeeting:create',
+  updatePlan:'familyMeeting:updatePlan',
+  setState:'familyMeeting:setState',
+  upsertParticipant:'familyMeeting:upsertParticipant',
+  upsertAgenda:'familyMeeting:upsertAgenda',
+  createPoll:'familyMeeting:createPoll',
+  castVote:'familyMeeting:castVote',
+  recordDecision:'familyMeeting:recordDecision',
+  upsertTask:'familyMeeting:upsertTask',
+  addCollaboration:'familyMeeting:addCollaboration',
+  prepareAiMinutes:'familyMeeting:prepareAiMinutes',
+  finalizeMinutes:'familyMeeting:finalizeMinutes'
+} as const);
+const familyMeetingChannels=new Set<string>(Object.values(FAMILY_MEETING_IPC_CHANNELS));
+const familyMeetingId=(value:unknown):value is string=>typeof value==='string'&&value===value.trim()
+  &&value.length>=2&&value.length<=256&&/^[A-Za-z0-9][A-Za-z0-9._:@-]*$/u.test(value);
+const familyMeetingText=(value:unknown,minimum:number,maximum:number):value is string=>
+  communicationMessagingText(value,minimum,maximum)&&String(value)===String(value).trim();
+const familyMeetingOptionalText=(value:unknown,maximum:number):boolean=>value===undefined||familyMeetingText(value,1,maximum);
+const familyMeetingCanonicalIds=(value:unknown,minimum:number,maximum:number):value is readonly string[]=>
+  Array.isArray(value)&&Object.getPrototypeOf(value)===Array.prototype&&value.length>=minimum&&value.length<=maximum
+  &&value.every(familyMeetingId)&&new Set(value).size===value.length;
+const familyMeetingCanonicalTexts=(value:unknown,minimum:number,maximum:number,itemMaximum=256):value is readonly string[]=>
+  Array.isArray(value)&&Object.getPrototypeOf(value)===Array.prototype&&value.length>=minimum&&value.length<=maximum
+  &&value.every((item)=>familyMeetingText(item,2,itemMaximum))&&new Set(value).size===value.length;
+const familyMeetingCommonMutation=(value:Record<string,unknown>):boolean=>familyMeetingId(value.clientOperationId)
+  &&communicationMessagingRevision(value.expectedRevision)&&familyMeetingId(value.meetingId);
+const familyMeetingInput=(channel:string,args:readonly unknown[]):IpcIntegrationPolicyDecision=>{
+  if(channel===FAMILY_MEETING_IPC_CHANNELS.getCenter)return zeroArguments(args);
+  if(channel===FAMILY_MEETING_IPC_CHANNELS.getMinutes)return exactObject(args,['meetingId'],value=>familyMeetingId(value.meetingId));
+  if(channel===FAMILY_MEETING_IPC_CHANNELS.create)return exactObject(args,
+    ['clientOperationId','expectedRevision','title','recurrenceKind','recurrenceInterval','startsAt','endsAt','reminderMinutes','participantPersonIds'],value=>
+      familyMeetingId(value.clientOperationId)&&value.expectedRevision===0&&familyMeetingText(value.title,2,200)
+      &&['once','daily','weekly','monthly'].includes(String(value.recurrenceKind))
+      &&Number.isSafeInteger(value.recurrenceInterval)&&Number(value.recurrenceInterval)>=1&&Number(value.recurrenceInterval)<=52
+      &&communicationMessagingIso(value.startsAt)&&communicationMessagingIso(value.endsAt)
+      &&Date.parse(String(value.endsAt))>Date.parse(String(value.startsAt))
+      &&Number.isSafeInteger(value.reminderMinutes)&&Number(value.reminderMinutes)>=0&&Number(value.reminderMinutes)<=10_080
+      &&familyMeetingCanonicalIds(value.participantPersonIds,0,32));
+  if(channel===FAMILY_MEETING_IPC_CHANNELS.updatePlan)return exactObject(args,
+    ['clientOperationId','expectedRevision','meetingId','title','recurrenceKind','recurrenceInterval','startsAt','endsAt','reminderMinutes'],value=>
+      familyMeetingCommonMutation(value)&&familyMeetingText(value.title,2,200)
+      &&['once','daily','weekly','monthly'].includes(String(value.recurrenceKind))
+      &&Number.isSafeInteger(value.recurrenceInterval)&&Number(value.recurrenceInterval)>=1&&Number(value.recurrenceInterval)<=52
+      &&communicationMessagingIso(value.startsAt)&&communicationMessagingIso(value.endsAt)
+      &&Date.parse(String(value.endsAt))>Date.parse(String(value.startsAt))
+      &&Number.isSafeInteger(value.reminderMinutes)&&Number(value.reminderMinutes)>=0&&Number(value.reminderMinutes)<=10_080);
+  if(channel===FAMILY_MEETING_IPC_CHANNELS.setState)return exactObject(args,
+    ['clientOperationId','expectedRevision','meetingId','state','reason'],value=>familyMeetingCommonMutation(value)
+      &&['in_progress','completed','cancelled'].includes(String(value.state))&&familyMeetingText(value.reason,3,500));
+  if(channel===FAMILY_MEETING_IPC_CHANNELS.upsertParticipant)return exactObject(args,
+    ['clientOperationId','expectedRevision','meetingId','participantPersonId','roles','attendance','reminderEnabled'],value=>
+      familyMeetingCommonMutation(value)&&familyMeetingId(value.participantPersonId)
+      &&healthCareCanonicalValues(value.roles,new Set(['host','facilitator','note_taker','translator','caregiver','attendee']),1,6)
+      &&['invited','accepted','tentative','declined','attended','absent'].includes(String(value.attendance))
+      &&typeof value.reminderEnabled==='boolean');
+  if(channel===FAMILY_MEETING_IPC_CHANNELS.upsertAgenda)return exactObject(args,
+    ['clientOperationId','expectedRevision','meetingId','agendaItemId','title','note','order','preRead','carryForwardToNextMeeting'],value=>
+      familyMeetingCommonMutation(value)&&(value.agendaItemId===undefined||familyMeetingId(value.agendaItemId))
+      &&familyMeetingText(value.title,2,500)&&familyMeetingOptionalText(value.note,4_000)
+      &&Number.isSafeInteger(value.order)&&Number(value.order)>=1&&Number(value.order)<=256
+      &&Array.isArray(value.preRead)&&value.preRead.length<=16&&value.preRead.every((item)=>healthCareExactRecord(item,['resourceType','resourceId'])
+        &&['archive_item','communication_message','memory_studio_record'].includes(String(item.resourceType))&&familyMeetingId(item.resourceId))
+      &&typeof value.carryForwardToNextMeeting==='boolean');
+  if(channel===FAMILY_MEETING_IPC_CHANNELS.createPoll)return exactObject(args,
+    ['clientOperationId','expectedRevision','meetingId','question','options'],value=>familyMeetingCommonMutation(value)
+      &&familyMeetingText(value.question,2,1_000)&&familyMeetingCanonicalTexts(value.options,2,12));
+  if(channel===FAMILY_MEETING_IPC_CHANNELS.castVote)return exactObject(args,
+    ['clientOperationId','expectedRevision','meetingId','pollId','optionId','abstain','opinionNote'],value=>familyMeetingCommonMutation(value)
+      &&familyMeetingId(value.pollId)&&(value.optionId===undefined||familyMeetingId(value.optionId))
+      &&typeof value.abstain==='boolean'&&(value.abstain===(value.optionId===undefined))&&familyMeetingOptionalText(value.opinionNote,2_000));
+  if(channel===FAMILY_MEETING_IPC_CHANNELS.recordDecision)return exactObject(args,
+    ['clientOperationId','expectedRevision','meetingId','statement','sourcePollId','responsiblePersonIds'],value=>familyMeetingCommonMutation(value)
+      &&familyMeetingText(value.statement,2,4_000)&&(value.sourcePollId===undefined||familyMeetingId(value.sourcePollId))
+      &&familyMeetingCanonicalIds(value.responsiblePersonIds,0,32));
+  if(channel===FAMILY_MEETING_IPC_CHANNELS.upsertTask)return exactObject(args,
+    ['clientOperationId','expectedRevision','meetingId','taskId','decisionId','title','responsiblePersonId','dueAt','state','followUpNote','carryForwardToNextMeeting'],value=>
+      familyMeetingCommonMutation(value)&&(value.taskId===undefined||familyMeetingId(value.taskId))
+      &&(value.decisionId===undefined||familyMeetingId(value.decisionId))&&familyMeetingText(value.title,2,1_000)
+      &&familyMeetingId(value.responsiblePersonId)&&communicationMessagingIso(value.dueAt)
+      &&['open','in_progress','completed','cancelled'].includes(String(value.state))&&familyMeetingOptionalText(value.followUpNote,2_000)
+      &&typeof value.carryForwardToNextMeeting==='boolean');
+  if(channel===FAMILY_MEETING_IPC_CHANNELS.addCollaboration)return exactObject(args,
+    ['clientOperationId','expectedRevision','meetingId','kind','resourceType','resourceId','annotation'],value=>familyMeetingCommonMutation(value)
+      &&['whiteboard','photo_album','document_annotation'].includes(String(value.kind))
+      &&['archive_item','album','whiteboard'].includes(String(value.resourceType))&&familyMeetingId(value.resourceId)
+      &&familyMeetingOptionalText(value.annotation,4_000));
+  if(channel===FAMILY_MEETING_IPC_CHANNELS.prepareAiMinutes)return exactObject(args,
+    ['clientOperationId','expectedRevision','meetingId','recordingRequestId'],value=>familyMeetingCommonMutation(value)
+      &&familyMeetingId(value.recordingRequestId));
+  if(channel===FAMILY_MEETING_IPC_CHANNELS.finalizeMinutes)return exactObject(args,
+    ['clientOperationId','expectedRevision','meetingId','summary','decisions','tasks','participantAccessPersonIds',
+      'selectedRecordingSegmentIds','explicitHumanApproval','machineGeneratedSource'],value=>familyMeetingCommonMutation(value)
+      &&familyMeetingText(value.summary,2,32_768)&&familyMeetingCanonicalTexts(value.decisions,0,128)
+      &&familyMeetingCanonicalTexts(value.tasks,0,128)&&familyMeetingCanonicalIds(value.participantAccessPersonIds,1,32)
+      &&familyMeetingCanonicalIds(value.selectedRecordingSegmentIds,0,64)&&value.explicitHumanApproval===true
+      &&typeof value.machineGeneratedSource==='boolean');
+  return rejected('UNKNOWN_IPC_CHANNEL','$');
+};
+
+const familyMeetingExact=(value:unknown,required:readonly string[],optional:readonly string[]=[]):value is Record<string,unknown>=>
+  isObject(value)&&healthCareExactRecord(value,[...required,...optional.filter((key)=>value[key]!==undefined)]);
+const familyMeetingPreReadResult=(value:unknown):boolean=>familyMeetingExact(value,['resourceType','resourceId'])
+  &&['archive_item','communication_message','memory_studio_record'].includes(String(value.resourceType))&&familyMeetingId(value.resourceId);
+const familyMeetingParticipantResult=(value:unknown):boolean=>familyMeetingExact(value,
+  ['personId','roles','attendance','reminderEnabled','revision','updatedAt'])&&familyMeetingId(value.personId)
+  &&healthCareCanonicalValues(value.roles,new Set(['host','facilitator','note_taker','translator','caregiver','attendee']),1,6)
+  &&['invited','accepted','tentative','declined','attended','absent'].includes(String(value.attendance))
+  &&typeof value.reminderEnabled==='boolean'&&communicationMessagingRevision(value.revision)&&communicationMessagingIso(value.updatedAt);
+const familyMeetingAgendaResult=(value:unknown):boolean=>familyMeetingExact(value,
+  ['id','title','order','preRead','carryForwardToNextMeeting','revision','updatedAt'],['note'])&&familyMeetingId(value.id)
+  &&familyMeetingText(value.title,2,500)&&familyMeetingOptionalText(value.note,4_000)&&Number.isSafeInteger(value.order)
+  &&Number(value.order)>=1&&Number(value.order)<=256&&Array.isArray(value.preRead)&&value.preRead.length<=16
+  &&value.preRead.every(familyMeetingPreReadResult)&&typeof value.carryForwardToNextMeeting==='boolean'
+  &&communicationMessagingRevision(value.revision)&&communicationMessagingIso(value.updatedAt);
+const familyMeetingVoteResult=(value:unknown):boolean=>familyMeetingExact(value,
+  ['voterPersonId','abstained','castAt'],['optionId','opinionNote'])&&familyMeetingId(value.voterPersonId)
+  &&(value.optionId===undefined||familyMeetingId(value.optionId))&&typeof value.abstained==='boolean'
+  &&(value.abstained===(value.optionId===undefined))&&familyMeetingOptionalText(value.opinionNote,2_000)&&communicationMessagingIso(value.castAt);
+const familyMeetingPollResult=(value:unknown):boolean=>familyMeetingExact(value,
+  ['id','question','options','state','votes','createdAt'])&&familyMeetingId(value.id)&&familyMeetingText(value.question,2,1_000)
+  &&Array.isArray(value.options)&&value.options.length>=2&&value.options.length<=12
+  &&value.options.every((option)=>familyMeetingExact(option,['id','label'])&&familyMeetingId(option.id)&&familyMeetingText(option.label,2,256))
+  &&['open','closed'].includes(String(value.state))&&Array.isArray(value.votes)&&value.votes.length<=32
+  &&value.votes.every(familyMeetingVoteResult)&&communicationMessagingIso(value.createdAt);
+const familyMeetingDecisionResult=(value:unknown):boolean=>familyMeetingExact(value,
+  ['id','statement','responsiblePersonIds','recordedAt'],['sourcePollId'])&&familyMeetingId(value.id)
+  &&familyMeetingText(value.statement,2,4_000)&&(value.sourcePollId===undefined||familyMeetingId(value.sourcePollId))
+  &&familyMeetingCanonicalIds(value.responsiblePersonIds,0,32)&&communicationMessagingIso(value.recordedAt);
+const familyMeetingTaskResult=(value:unknown):boolean=>familyMeetingExact(value,
+  ['id','title','responsiblePersonId','dueAt','state','carryForwardToNextMeeting','revision','updatedAt'],['decisionId','followUpNote'])
+  &&familyMeetingId(value.id)&&(value.decisionId===undefined||familyMeetingId(value.decisionId))&&familyMeetingText(value.title,2,1_000)
+  &&familyMeetingId(value.responsiblePersonId)&&communicationMessagingIso(value.dueAt)
+  &&['open','in_progress','completed','cancelled'].includes(String(value.state))&&familyMeetingOptionalText(value.followUpNote,2_000)
+  &&typeof value.carryForwardToNextMeeting==='boolean'&&communicationMessagingRevision(value.revision)&&communicationMessagingIso(value.updatedAt);
+const familyMeetingCollaborationResult=(value:unknown):boolean=>familyMeetingExact(value,
+  ['id','kind','resourceType','resourceId','addedByPersonId','addedAt'],['annotation'])&&familyMeetingId(value.id)
+  &&['whiteboard','photo_album','document_annotation'].includes(String(value.kind))
+  &&['archive_item','album','whiteboard'].includes(String(value.resourceType))&&familyMeetingId(value.resourceId)
+  &&familyMeetingOptionalText(value.annotation,4_000)&&familyMeetingId(value.addedByPersonId)&&communicationMessagingIso(value.addedAt);
+const familyMeetingMinutesMetadataResult=(value:unknown):boolean=>familyMeetingExact(value,
+  ['id','state','transcriptConsentVerified','aiSuggestionGenerated','humanApprovalRecorded','encryptedPackageAvailable',
+    'participantAccessPersonIds','selectedRecordingSegmentIds','revision','updatedAt','networkUsed','cloudUsed'],['recordingRequestId'])
+  &&familyMeetingId(value.id)&&['not_prepared','provider_unavailable','pending_human_review','dismissed','sealed_local'].includes(String(value.state))
+  &&(value.recordingRequestId===undefined||familyMeetingId(value.recordingRequestId))
+  &&['transcriptConsentVerified','aiSuggestionGenerated','humanApprovalRecorded','encryptedPackageAvailable'].every((key)=>typeof value[key]==='boolean')
+  &&familyMeetingCanonicalIds(value.participantAccessPersonIds,0,32)&&familyMeetingCanonicalIds(value.selectedRecordingSegmentIds,0,64)
+  &&communicationMessagingRevision(value.revision,true)&&communicationMessagingIso(value.updatedAt)&&value.networkUsed===false&&value.cloudUsed===false;
+const familyMeetingTruthResult=(value:unknown):boolean=>familyMeetingExact(value,[
+  'singleAndRecurringSchedulingModeled','agendaPreReadAttendanceReminderModeled','explicitMeetingRolesModeled',
+  'pollVoteAbstentionOpinionModeled','appendOnlyDecisionLedgerModeled','taskFollowUpCarryForwardModeled',
+  'collaborationReferencesModeled','transcriptConsentGateModeled','humanApprovalRequiredForAiMinutes',
+  'encryptedMinutesPackageImplemented','participantScopedMinutesReadImplemented','productionAiMinutesProviderConfigured',
+  'transcriptPayloadReadExecutedByCurrentImplementation','externalCalendarDeliveryExecuted','externalReminderDeliveryExecuted',
+  'remoteCollaborationExecuted','networkUsedByCurrentImplementation'])
+  &&['singleAndRecurringSchedulingModeled','agendaPreReadAttendanceReminderModeled','explicitMeetingRolesModeled',
+    'pollVoteAbstentionOpinionModeled','appendOnlyDecisionLedgerModeled','taskFollowUpCarryForwardModeled',
+    'collaborationReferencesModeled','transcriptConsentGateModeled','humanApprovalRequiredForAiMinutes',
+    'encryptedMinutesPackageImplemented','participantScopedMinutesReadImplemented'].every((key)=>value[key]===true)
+  &&['productionAiMinutesProviderConfigured','transcriptPayloadReadExecutedByCurrentImplementation','externalCalendarDeliveryExecuted',
+    'externalReminderDeliveryExecuted','remoteCollaborationExecuted','networkUsedByCurrentImplementation'].every((key)=>value[key]===false);
+const familyMeetingResultItem=(value:unknown):boolean=>familyMeetingExact(value,
+  ['id','title','recurrenceKind','recurrenceInterval','startsAt','endsAt','reminderMinutes','state','participants','agenda','polls',
+    'decisions','tasks','collaboration','minutes','revision','createdAt','updatedAt'])&&familyMeetingId(value.id)
+  &&familyMeetingText(value.title,2,200)&&['once','daily','weekly','monthly'].includes(String(value.recurrenceKind))
+  &&Number.isSafeInteger(value.recurrenceInterval)&&Number(value.recurrenceInterval)>=1&&Number(value.recurrenceInterval)<=52
+  &&communicationMessagingIso(value.startsAt)&&communicationMessagingIso(value.endsAt)&&Number.isSafeInteger(value.reminderMinutes)
+  &&Number(value.reminderMinutes)>=0&&Number(value.reminderMinutes)<=10_080&&['scheduled','in_progress','completed','cancelled'].includes(String(value.state))
+  &&Array.isArray(value.participants)&&value.participants.length<=32&&value.participants.every(familyMeetingParticipantResult)
+  &&Array.isArray(value.agenda)&&value.agenda.length<=256&&value.agenda.every(familyMeetingAgendaResult)
+  &&Array.isArray(value.polls)&&value.polls.length<=64&&value.polls.every(familyMeetingPollResult)
+  &&Array.isArray(value.decisions)&&value.decisions.length<=256&&value.decisions.every(familyMeetingDecisionResult)
+  &&Array.isArray(value.tasks)&&value.tasks.length<=256&&value.tasks.every(familyMeetingTaskResult)
+  &&Array.isArray(value.collaboration)&&value.collaboration.length<=256&&value.collaboration.every(familyMeetingCollaborationResult)
+  &&familyMeetingMinutesMetadataResult(value.minutes)&&communicationMessagingRevision(value.revision)
+  &&communicationMessagingIso(value.createdAt)&&communicationMessagingIso(value.updatedAt);
+const familyMeetingCenterResult=(value:unknown):boolean=>familyMeetingExact(value,['schemaVersion','meetings','truth','generatedAt'])
+  &&value.schemaVersion===1&&Array.isArray(value.meetings)&&value.meetings.length<=64
+  &&value.meetings.every(familyMeetingResultItem)&&familyMeetingTruthResult(value.truth)&&communicationMessagingIso(value.generatedAt);
+const familyMeetingMinutesResult=(value:unknown):boolean=>familyMeetingExact(value,
+  ['meetingId','minutesRevision','summary','decisions','tasks','participantAccessPersonIds','selectedRecordingSegmentIds',
+    'payloadSource','machineGeneratedSource','humanApproved','networkUsed','cloudUsed'])&&familyMeetingId(value.meetingId)
+  &&communicationMessagingRevision(value.minutesRevision)&&familyMeetingText(value.summary,2,32_768)
+  &&familyMeetingCanonicalTexts(value.decisions,0,128)&&familyMeetingCanonicalTexts(value.tasks,0,128)
+  &&familyMeetingCanonicalIds(value.participantAccessPersonIds,1,32)&&familyMeetingCanonicalIds(value.selectedRecordingSegmentIds,0,64)
+  &&value.payloadSource==='local_sealed_store'&&typeof value.machineGeneratedSource==='boolean'
+  &&value.humanApproved===true&&value.networkUsed===false&&value.cloudUsed===false;
+const familyMeetingMutationResult=(value:unknown):boolean=>familyMeetingExact(value,
+  ['meetingId','mutationKind','previousRevision','revision','occurredAt','replayed','encryptedMinutesPackageWritten',
+    'aiProviderConfigured','networkUsed','cloudUsed'])&&familyMeetingId(value.meetingId)
+  &&['meeting_create','meeting_plan_update','meeting_state_update','participant_upsert','agenda_upsert','poll_create','vote_cast',
+    'decision_record','task_upsert','collaboration_add','ai_minutes_prepare','minutes_finalize'].includes(String(value.mutationKind))
+  &&communicationMessagingRevision(value.previousRevision,true)&&communicationMessagingRevision(value.revision)
+  &&Number(value.revision)===Number(value.previousRevision)+1&&communicationMessagingIso(value.occurredAt)
+  &&typeof value.replayed==='boolean'&&typeof value.encryptedMinutesPackageWritten==='boolean'
+  &&value.aiProviderConfigured===false&&value.networkUsed===false&&value.cloudUsed===false;
+const familyMeetingResult=(channel:string,result:unknown):IpcIntegrationPolicyDecision=>{
+  const valid=channel===FAMILY_MEETING_IPC_CHANNELS.getCenter?familyMeetingCenterResult(result)
+    :channel===FAMILY_MEETING_IPC_CHANNELS.getMinutes?familyMeetingMinutesResult(result):familyMeetingMutationResult(result);
+  return valid?accepted():rejected('FAMILY_MEETING_RESULT_INVALID','$result');
+};
+
 export const ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS = Object.freeze({
   listEvidence: 'archive:listRelationEvidence',
   listEvidenceHistory: 'archive:listRelationEvidenceHistory',
@@ -4699,6 +5003,8 @@ export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unkn
   if (channel.startsWith('communicationRecording:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
   if (localTranslationChannels.has(channel)) return localTranslationResult(channel,result);
   if (channel.startsWith('localTranslation:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
+  if (familyMeetingChannels.has(channel)) return familyMeetingResult(channel,result);
+  if (channel.startsWith('familyMeeting:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
   if (childEducationChannels.has(channel)) return childEducationResult(channel, result);
   if (channel.startsWith('childEducation:')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
   if (placesTravelChannels.has(channel)) return placesTravelResult(channel, result);
@@ -4759,6 +5065,8 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
   if (channel.startsWith('communicationRecording:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
   if (localTranslationChannels.has(channel)) return localTranslationInput(channel,args);
   if (channel.startsWith('localTranslation:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
+  if (familyMeetingChannels.has(channel)) return familyMeetingInput(channel,args);
+  if (channel.startsWith('familyMeeting:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
   if (childEducationChannels.has(channel)) return childEducationInput(channel, args);
   if (channel.startsWith('childEducation:')) return rejected('UNKNOWN_IPC_CHANNEL', '$');
   if (placesTravelChannels.has(channel)) return placesTravelInput(channel, args);

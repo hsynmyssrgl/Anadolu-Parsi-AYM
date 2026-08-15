@@ -22,6 +22,7 @@ import {
   SqliteEntityCatalogRepository,
   SqliteFamilyRepository,
   SqliteFamilyDataImportRepository,
+  SqliteFamilyMeetingRepository,
   SqliteFinanceRepository,
   SqliteFamilyAiAssistantRepository,
   SqliteFormDraftRepository,
@@ -90,6 +91,8 @@ import type {
   EntityCatalogRepositoryPort,
   FamilyRepositoryPort,
   FamilyDataImportRepositoryPort,
+  FamilyMeetingPolicyResourceRepositoryPort,
+  FamilyMeetingRepositoryPort,
   FinancePolicyResourceRepositoryPort,
   FinanceRepositoryPort,
   FamilyAiAssistantPolicyResourceRepositoryPort,
@@ -165,6 +168,7 @@ export interface RepositoryCompositionRoot {
   readonly entityCatalogRepository: EntityCatalogRepositoryPort;
   readonly familyRepository: FamilyRepositoryPort;
   readonly familyDataImportRepository: FamilyDataImportRepositoryPort;
+  readonly familyMeetingRepository: FamilyMeetingRepositoryPort & FamilyMeetingPolicyResourceRepositoryPort;
   readonly financeRepository: FinanceRepositoryPort & FinancePolicyResourceRepositoryPort;
   readonly familyAiAssistantRepository: FamilyAiAssistantRepositoryPort & FamilyAiAssistantPolicyResourceRepositoryPort;
   readonly formDraftRepository: FormDraftRepositoryPort;
@@ -239,6 +243,7 @@ export const createSqliteRepositoryCompositionRoot = (
     entityCatalogRepository: new SqliteEntityCatalogRepository(repositoryOptions),
     familyRepository: new SqliteFamilyRepository(repositoryOptions),
     familyDataImportRepository: new SqliteFamilyDataImportRepository(repositoryOptions),
+    familyMeetingRepository: new SqliteFamilyMeetingRepository(repositoryOptions),
     financeRepository: new SqliteFinanceRepository(repositoryOptions),
     familyAiAssistantRepository: new SqliteFamilyAiAssistantRepository(repositoryOptions),
     formDraftRepository: new SqliteFormDraftRepository(repositoryOptions),

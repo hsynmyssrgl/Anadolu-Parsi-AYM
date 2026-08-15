@@ -232,6 +232,12 @@ const localTranslationWriteChannels=new Set<string>(['localTranslation:updatePro
   'localTranslation:updateDictionary','localTranslation:deleteDictionary','localTranslation:prepareRequest',
   'localTranslation:recordCorrection','localTranslation:cancelRequest']);
 const localTranslationChannels=new Set<string>([...localTranslationReadChannels,...localTranslationWriteChannels]);
+const familyMeetingReadChannels=new Set<string>(['familyMeeting:getCenter','familyMeeting:getMinutes']);
+const familyMeetingWriteChannels=new Set<string>(['familyMeeting:create','familyMeeting:updatePlan','familyMeeting:setState',
+  'familyMeeting:upsertParticipant','familyMeeting:upsertAgenda','familyMeeting:createPoll','familyMeeting:castVote',
+  'familyMeeting:recordDecision','familyMeeting:upsertTask','familyMeeting:addCollaboration','familyMeeting:prepareAiMinutes',
+  'familyMeeting:finalizeMinutes']);
+const familyMeetingChannels=new Set<string>([...familyMeetingReadChannels,...familyMeetingWriteChannels]);
 
 const cancellableNetworkChannels = new Set<string>([
   'dataLifecycle:runRevocationSync'
@@ -243,6 +249,8 @@ const cancellableInteractiveAuthenticationChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLifecyclePolicy => {
+  if(familyMeetingReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
+  if(familyMeetingWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
   if(localTranslationReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
   if(localTranslationWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
   if(communicationRecordingReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
@@ -361,6 +369,8 @@ const standardAdmissionChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestAdmissionPolicy = (channel: string): IpcRequestAdmissionPolicy => {
+  if(familyMeetingChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
+    maxConcurrentPerSender:2,maxConcurrentPerChannel:1,maxQueuedPerSender:4,queueTimeoutMs:2_500});
   if(localTranslationChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
     maxConcurrentPerSender:2,maxConcurrentPerChannel:1,maxQueuedPerSender:4,queueTimeoutMs:2_500});
   if(communicationRecordingChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
@@ -491,6 +501,8 @@ export interface IpcRequestRatePolicy {
 }
 
 export const resolveIpcRequestRatePolicy = (channel: string): IpcRequestRatePolicy => {
+  if(familyMeetingReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:120,windowMs:60_000});
+  if(familyMeetingWriteChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:16,windowMs:60_000});
   if(localTranslationReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:120,windowMs:60_000});
   if(localTranslationWriteChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:16,windowMs:60_000});
   if(communicationRecordingReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:120,windowMs:60_000});

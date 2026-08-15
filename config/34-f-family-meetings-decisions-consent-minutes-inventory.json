@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "step": "34-F",
+  "decision": "DEC-243",
+  "status": "PLANNED",
+  "governanceState": "LOCAL_IMPLEMENTATION_STARTED",
+  "requirements": ["MTG-001", "MTG-002", "MTG-003", "MTG-004", "MTG-005", "MTG-006", "MTG-007", "MTG-008", "MTG-009", "MTG-010"],
+  "implementationChain": {
+    "domain": ["packages/domain/src/family-meeting.ts"],
+    "application": ["packages/application/src/family-meeting-use-cases.ts"],
+    "repositoryContract": ["packages/repository-contracts/src/family-meeting-repository.ts"],
+    "migration": ["packages/database/src/family-database-migrations.ts#110"],
+    "repository": ["packages/repositories/src/family-meeting-repository.ts"],
+    "policyAndComposition": [
+      "apps/desktop/src/main/life-production-policy-runtime.ts",
+      "apps/desktop/src/main/family-meeting-application-adapter.ts",
+      "apps/desktop/src/main/repository-composition-root.ts",
+      "apps/desktop/src/main/data-store.ts"
+    ],
+    "encryptedMinutesVault": ["apps/desktop/src/main/family-meeting-minutes-vault.ts"],
+    "ipc": [
+      "apps/desktop/src/main/ipc-integration-policy.ts",
+      "apps/desktop/src/main/ipc-request-lifecycle.ts",
+      "apps/desktop/src/main/main.ts",
+      "apps/desktop/src/main/preload.ts",
+      "apps/desktop/src/renderer/global.d.ts"
+    ],
+    "ui": ["apps/desktop/src/renderer/FamilyMeetingPanel.tsx", "apps/desktop/src/renderer/App.tsx"]
+  },
+  "implementedTargetedTests": [
+    "packages/application/tests/family-meeting-use-cases.test.ts",
+    "packages/repositories/family-meeting-repository-policy.test.ts",
+    "apps/desktop/tests/family-meeting-minutes-vault.test.ts",
+    "apps/desktop/tests/family-meeting-data-store.test.ts",
+    "apps/desktop/tests/family-meeting-ipc-integration.test.ts",
+    "apps/desktop/tests/family-meeting-ui.test.ts"
+  ],
+  "securityControls": {
+    "centralPepReceiptFence": true,
+    "ownerAccountPersonFamilyBinding": true,
+    "payloadFreePolicyResolution": true,
+    "contentFreeAuditOutboxAndMutationLedger": true,
+    "appendOnlyVoteDecisionPollAndCollaborationLedgers": true,
+    "recordingConsentEvidenceBoundToAiPreparation": true,
+    "humanApprovalBoundToEncryptedMinutes": true,
+    "protectedSideArtifactStoreUsed": true,
+    "safeNoOverwriteMinutesPublication": true,
+    "boundedIpcAndRendererSafeResults": true,
+    "durableWritesNonCancellable": true,
+    "providerNetworkAndCloudForcedFalse": true
+  },
+  "incompleteCapabilities": [
+    "production AI minutes provider and provider-quality evidence",
+    "external calendar and reminder delivery",
+    "remote real-time collaboration and external document upload",
+    "real multi-participant recording consent and attendance UAT",
+    "automatic lifetime retention and mutation-ledger compaction",
+    "backup propagation and physical secure erase evidence",
+    "privacy legal security accessibility and retention reviews"
+  ],
+  "validation": {
+    "targetedTestFileRatchet": 6,
+    "targetedTestRatchet": 31,
+    "migrationVersion": 110,
+    "migrationSha256": "8bcc5777aa80794122742bcfd73be036234488f5861adbcd34956c56e6d0d6ac",
+    "ppk015": {"status":"PASS","files":532,"sourceSha256":"3638caa9263243a507538e7026fbf5a362906f4e774642e6cbc44861dbb718ec","findings":0},
+    "ppk019": {"status":"PASS","files":532,"findings":0},
+    "ppk021": {"status":"PASS","files":532,"surfaces":851,"sha256":"27b67ea57816f95a2293428d96a743b19c1dace6d32bd1a7c8c2dc0af0ad42b2","targeted":17,"contract":84,"runtime":20},
+    "ppk022": {"status":"PASS","files":532,"surfaces":375,"sha256":"8f597570bb8ddcee6fa549badbd87b39754d71687314d9ae8c9a63f3bafc20f8","targeted":19,"contract":110,"runtime":24},
+    "countsAsRequirementPass": false
+  },
+  "externalAndManualEvidence": "NOT_RUN",
+  "countsAsRequirementPass": false
+}

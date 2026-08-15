@@ -186,7 +186,9 @@ export interface LifePolicyIntent {
     | 'communication_recording_request'
     | 'local_translation_center'
     | 'local_translation_profile'
-    | 'local_translation_request';
+    | 'local_translation_request'
+    | 'family_meeting_center'
+    | 'family_meeting';
   readonly resourceId: string;
   readonly purpose: 'general' | 'emergency-offline-portability';
   readonly requestedFields?: readonly string[];

@@ -562,7 +562,12 @@
       "version": 109,
       "name": "local_first_translation_language",
       "checksum": "619461d7ce65e87d9095fc2ea88cf9f801261b9309da67c0b67183c46094e71b"
+    },
+    {
+      "version": 110,
+      "name": "family_meetings_decisions_consent_minutes",
+      "checksum": "8bcc5777aa80794122742bcfd73be036234488f5861adbcd34956c56e6d0d6ac"
     }
   ],
-  "generatedAt": "2026-08-15T17:39:46.405Z"
+  "generatedAt": "2026-08-15T20:17:16.760Z"
 }
