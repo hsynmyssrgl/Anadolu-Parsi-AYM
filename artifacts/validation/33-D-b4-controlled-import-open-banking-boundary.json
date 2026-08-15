@@ -158,7 +158,7 @@
       "passed": true
     },
     {
-      "name": "PPK-021 preserves the historical shared composition under the current exact 763 and 370 successor ratchet",
+      "name": "PPK-021 preserves the historical shared composition under the current exact 779 and 379 successor ratchet",
       "passed": true
     },
     {
@@ -171,7 +171,7 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 104,
+  "latestDatabaseMigration": 105,
   "importTables": 2,
   "persistedImportColumns": 42,
   "prohibitedPersistedColumns": 0,
@@ -180,8 +180,8 @@
   "networkAccessPerformed": false,
   "credentialsCollected": false,
   "externalConsentPerformed": false,
-  "ppk021ExactAllowlistEntries": 763,
-  "ppk021UseCaseCompositionSurfaces": 370,
+  "ppk021ExactAllowlistEntries": 779,
+  "ppk021UseCaseCompositionSurfaces": 379,
   "ppk022CapabilitySurfaces": 345,
-  "generatedAt": "2026-08-15T09:41:31.274Z"
+  "generatedAt": "2026-08-15T11:53:57.681Z"
 }

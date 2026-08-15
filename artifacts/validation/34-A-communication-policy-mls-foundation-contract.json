@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "step": "34-A",
+  "decision": "DEC-238",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "countsAsRequirementPass": false,
+  "migration105Sha256": "3c02d8f0ac6e2b5bf4d6a05bfc73e82fbd14d6144b0c3ef93a49786e45b8b7d7",
+  "checkCount": 14,
+  "passed": 14,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "scope inventory and six-file test matrix are exact",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 105 source manifest and scope checksums are canonical",
+      "status": "PASS"
+    },
+    {
+      "name": "migration owns immutable mutation epoch and current state bindings",
+      "status": "PASS"
+    },
+    {
+      "name": "domain and security fix room history rekey and fail-closed provider evidence truth",
+      "status": "PASS"
+    },
+    {
+      "name": "repository contract exposes exact center device room membership epoch mutation and policy ports",
+      "status": "PASS"
+    },
+    {
+      "name": "application verifies provider evidence after replay and persists content-free audit outbox",
+      "status": "PASS"
+    },
+    {
+      "name": "repository enforces receipt owner trusted-device revision and immutable evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "desktop adapter and runtime compose exact central Life policy resources",
+      "status": "PASS"
+    },
+    {
+      "name": "DataStore keeps current-device derivation and missing production provider fail closed",
+      "status": "PASS"
+    },
+    {
+      "name": "main preload and renderer types expose exact nine safe methods",
+      "status": "PASS"
+    },
+    {
+      "name": "tests cover tamper trust window replay rollback foreign owner revoked device history and no-claim UI",
+      "status": "PASS"
+    },
+    {
+      "name": "decision and threat model deny production MLS messages relay network and acceptance claims",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-015 021 and 022 ratchets are exact PASS",
+      "status": "PASS"
+    },
+    {
+      "name": "production provider conformance delivery and requirement acceptance remain closed",
+      "status": "PASS"
+    }
+  ],
+  "generatedAt": "2026-08-15T11:21:21.120Z"
+}

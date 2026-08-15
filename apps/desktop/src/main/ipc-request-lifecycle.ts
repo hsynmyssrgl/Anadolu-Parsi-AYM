@@ -206,6 +206,12 @@ const signedPluginPlatformReadChannels=new Set<string>(['signedPluginPlatform:ge
 const signedPluginPlatformWriteChannels=new Set<string>(['signedPluginPlatform:setDesiredState','signedPluginPlatform:emergencyDisable',
   'signedPluginPlatform:rollback']);
 const signedPluginPlatformChannels=new Set<string>([...signedPluginPlatformReadChannels,...signedPluginPlatformWriteChannels]);
+const communicationSecurityReadChannels=new Set<string>(['communicationSecurity:getCenter']);
+const communicationSecurityWriteChannels=new Set<string>(['communicationSecurity:registerDeviceCredential',
+  'communicationSecurity:revokeDeviceCredential','communicationSecurity:createRoom','communicationSecurity:addMember',
+  'communicationSecurity:removeMember','communicationSecurity:rekeyRoom','communicationSecurity:setHistoryAccess',
+  'communicationSecurity:freezeRoom']);
+const communicationSecurityChannels=new Set<string>([...communicationSecurityReadChannels,...communicationSecurityWriteChannels]);
 
 const cancellableNetworkChannels = new Set<string>([
   'dataLifecycle:runRevocationSync'
@@ -217,6 +223,8 @@ const cancellableInteractiveAuthenticationChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLifecyclePolicy => {
+  if(communicationSecurityReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
+  if(communicationSecurityWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
   if(signedPluginPlatformReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
   if(signedPluginPlatformWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
   if(smartHomeEnergyReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
@@ -325,6 +333,8 @@ const standardAdmissionChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestAdmissionPolicy = (channel: string): IpcRequestAdmissionPolicy => {
+  if(communicationSecurityChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
+    maxConcurrentPerSender:2,maxConcurrentPerChannel:1,maxQueuedPerSender:4,queueTimeoutMs:2_500});
   if(signedPluginPlatformChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
     maxConcurrentPerSender:2,maxConcurrentPerChannel:1,maxQueuedPerSender:4,queueTimeoutMs:2_500});
   if(smartHomeEnergyChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
@@ -445,6 +455,8 @@ export interface IpcRequestRatePolicy {
 }
 
 export const resolveIpcRequestRatePolicy = (channel: string): IpcRequestRatePolicy => {
+  if(communicationSecurityReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:60,windowMs:60_000});
+  if(communicationSecurityWriteChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:12,windowMs:60_000});
   if(signedPluginPlatformReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:60,windowMs:60_000});
   if(signedPluginPlatformWriteChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:10,windowMs:60_000});
   if(smartHomeEnergyReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:60,windowMs:60_000});

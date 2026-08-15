@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "step": "34-A",
+  "decision": "DEC-238",
+  "status": "PLANNED",
+  "governanceState": "LOCAL_IMPLEMENTATION_STARTED",
+  "requirements": ["PPK-001", "XPF-002", "COM-001", "COM-002", "SEC-COM-001", "SEC-COM-002", "SEC-COM-003", "SEC-COM-004", "SEC-COM-005", "SEC-COM-006", "SEC-COM-007", "SEC-COM-008"],
+  "implementationChain": {
+    "domain": ["packages/domain/src/communication-security-foundation.ts"],
+    "security": ["packages/security/src/communication-mls-provider-evidence.ts"],
+    "application": ["packages/application/src/communication-security-use-cases.ts"],
+    "repositoryContract": ["packages/repository-contracts/src/communication-security-repository.ts"],
+    "migration": ["packages/database/src/family-database-migrations.ts#105"],
+    "repository": ["packages/repositories/src/communication-security-repository.ts"],
+    "policyAndComposition": [
+      "apps/desktop/src/main/life-production-policy-runtime.ts",
+      "apps/desktop/src/main/communication-security-application-adapter.ts",
+      "apps/desktop/src/main/repository-composition-root.ts",
+      "apps/desktop/src/main/data-store.ts"
+    ],
+    "ipc": [
+      "apps/desktop/src/main/ipc-integration-policy.ts",
+      "apps/desktop/src/main/ipc-request-lifecycle.ts",
+      "apps/desktop/src/main/main.ts",
+      "apps/desktop/src/main/preload.ts",
+      "apps/desktop/src/renderer/global.d.ts"
+    ],
+    "ui": ["apps/desktop/src/renderer/CommunicationSecurityPanel.tsx", "apps/desktop/src/renderer/App.tsx"]
+  },
+  "implementedTargetedTests": [
+    "packages/security/tests/communication-mls-provider-evidence.test.ts",
+    "packages/application/tests/communication-security-use-cases.test.ts",
+    "packages/repositories/communication-security-repository-policy.test.ts",
+    "apps/desktop/tests/communication-security-data-store.test.ts",
+    "apps/desktop/tests/communication-security-ipc-integration.test.ts",
+    "apps/desktop/tests/communication-security-ui.test.ts"
+  ],
+  "securityControls": {
+    "canonicalEd25519ProviderEvidence": true,
+    "exactCipherSuiteAndTrustWindow": true,
+    "centralPepReceiptFence": true,
+    "trustedCurrentDeviceBinding": true,
+    "ownerAccountFamilyBinding": true,
+    "immutableMutationAndEpochLedgers": true,
+    "payloadFreePolicyResolution": true,
+    "contentFreeAuditAndOutbox": true,
+    "newMemberHistoryDefaultDeny": true,
+    "revokedDeviceBlocksEpochMutationUntilExplicitRekey": true,
+    "boundedIpcAndRendererSafeResults": true,
+    "privateKeyMessageAndRelayAuthorityExcluded": true
+  },
+  "validation": {
+    "targetedTestFileRatchet": 6,
+    "targetedTestRatchet": 29,
+    "migrationVersion": 105,
+    "migrationSha256": "3c02d8f0ac6e2b5bf4d6a05bfc73e82fbd14d6144b0c3ef93a49786e45b8b7d7",
+    "ppk015": {"status":"PASS","files":500,"sourceSha256":"d04ef936cbf90704f5709cb553d02ed016827ea48ec99a5611b0dd28b8e77ef8","findings":0},
+    "ppk021": {"status":"PASS","files":500,"surfaces":779,"sha256":"6db3beb33e735c2bf46eb2af7250f700cd771536f850b1ffbc9c425556a342f1","targeted":17,"contract":84,"runtime":20},
+    "ppk022": {"status":"PASS","files":500,"surfaces":345,"sha256":"2f58fd1c0a82afa41ca8f1930ae15ebb792075d47d0f9e2e24872c4aa0facd50","targeted":19,"contract":110,"runtime":24},
+    "countsAsRequirementPass": false
+  },
+  "externalAndManualEvidence": "NOT_RUN",
+  "countsAsRequirementPass": false
+}

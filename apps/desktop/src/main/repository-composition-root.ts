@@ -10,6 +10,7 @@ import {
   SqliteBackupQuarantineRepository,
   SqliteBootstrapRepository,
   SqliteChildEducationCoordinationRepository,
+  SqliteCommunicationSecurityRepository,
   SqliteDashboardRepository,
   SqliteDataRepairRepository,
   SqliteDataLifecycleRepository,
@@ -69,6 +70,8 @@ import type {
   BootstrapRepositoryPort,
   ChildEducationCoordinationRepositoryPort,
   ChildEducationPolicyResourceRepositoryPort,
+  CommunicationSecurityPolicyResourceRepositoryPort,
+  CommunicationSecurityRepositoryPort,
   DashboardRepositoryPort,
   DataRepairRepositoryPort,
   DataLifecycleRepositoryPort,
@@ -138,6 +141,7 @@ export interface RepositoryCompositionRoot {
   readonly backupQuarantineRepository: BackupQuarantineRepositoryPort;
   readonly bootstrapRepository: BootstrapRepositoryPort;
   readonly childEducationRepository: ChildEducationCoordinationRepositoryPort & ChildEducationPolicyResourceRepositoryPort;
+  readonly communicationSecurityRepository: CommunicationSecurityRepositoryPort & CommunicationSecurityPolicyResourceRepositoryPort;
   readonly dashboardRepository: DashboardRepositoryPort;
   readonly dataRepairRepository: DataRepairRepositoryPort;
   readonly dataLifecycleRepository: DataLifecycleRepositoryPort;
@@ -207,6 +211,7 @@ export const createSqliteRepositoryCompositionRoot = (
     backupQuarantineRepository: new SqliteBackupQuarantineRepository(repositoryOptions),
     bootstrapRepository: new SqliteBootstrapRepository(repositoryOptions),
     childEducationRepository: new SqliteChildEducationCoordinationRepository(repositoryOptions),
+    communicationSecurityRepository: new SqliteCommunicationSecurityRepository(repositoryOptions),
     dashboardRepository: new SqliteDashboardRepository(repositoryOptions),
     dataRepairRepository: new SqliteDataRepairRepository(repositoryOptions),
     dataLifecycleRepository: new SqliteDataLifecycleRepository(repositoryOptions),

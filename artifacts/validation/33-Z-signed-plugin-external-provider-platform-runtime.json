@@ -11,8 +11,8 @@
   "ppk015": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 493,
-    "sourceInventorySha256": "38a3e4bf23f5302ad9e02c7be94bbb7c6ce62123ac545d6f82944dbab09dae6c",
+    "scannedFiles": 500,
+    "sourceInventorySha256": "d04ef936cbf90704f5709cb553d02ed016827ea48ec99a5611b0dd28b8e77ef8",
     "selfTestAssertions": 7,
     "authorizedExternalEgressAdapters": 2,
     "authorizedEgressPurposeCount": 3,
@@ -24,21 +24,21 @@
   "ppk021": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 493,
-    "privilegedSurfaces": 763,
-    "exactAllowlistEntries": 763,
-    "exactAllowlistSha256": "386c030def9a2dda0dec8a24a8ba3a1ef0abba1b4f068bb3ab43f078d244923e",
+    "scannedFiles": 500,
+    "privilegedSurfaces": 779,
+    "exactAllowlistEntries": 779,
+    "exactAllowlistSha256": "6db3beb33e735c2bf46eb2af7250f700cd771536f850b1ffbc9c425556a342f1",
     "surfaceCounts": {
-      "CRYPTO_GLOBAL": 13,
-      "CRYPTO_IMPORT": 210,
+      "CRYPTO_GLOBAL": 14,
+      "CRYPTO_IMPORT": 214,
       "DATABASE_IMPORT": 21,
       "NETWORK_IMPORT": 11,
-      "REPOSITORY_IMPORT": 62,
+      "REPOSITORY_IMPORT": 63,
       "ROLE_PRESENTATION": 2,
-      "SQL_CALL": 70,
+      "SQL_CALL": 71,
       "SQL_CONSTRUCTOR": 2,
       "SQL_IMPORT": 2,
-      "USE_CASE_COMPOSITION": 370
+      "USE_CASE_COMPOSITION": 379
     },
     "maliciousSelfTestAssertions": 17,
     "benignSelfTestAssertions": 4,
@@ -48,7 +48,7 @@
   "ppk022": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 493,
+    "scannedFiles": 500,
     "capabilitySurfaces": 345,
     "exactManifestSurfaces": 345,
     "exactManifestSha256": "2f58fd1c0a82afa41ca8f1930ae15ebb792075d47d0f9e2e24872c4aa0facd50",
@@ -84,7 +84,7 @@
       "status": "PASS"
     },
     {
-      "name": "data store smoke includes migration 104",
+      "name": "data store smoke includes migration 104 under current migration 105",
       "status": "PASS"
     },
     {
@@ -116,5 +116,5 @@
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-15T09:43:19.727Z"
+  "generatedAt": "2026-08-15T11:21:20.224Z"
 }

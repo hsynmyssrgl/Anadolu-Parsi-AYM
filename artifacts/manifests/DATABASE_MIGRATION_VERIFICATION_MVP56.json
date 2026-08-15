@@ -537,7 +537,12 @@
       "version": 104,
       "name": "signed_plugin_external_provider_platform",
       "checksum": "91a16031e87986f5b6e561cd9e767ad0b7e68d3c030ceace4276441b921b6547"
+    },
+    {
+      "version": 105,
+      "name": "communication_policy_mls_foundation",
+      "checksum": "3c02d8f0ac6e2b5bf4d6a05bfc73e82fbd14d6144b0c3ef93a49786e45b8b7d7"
     }
   ],
-  "generatedAt": "2026-08-15T09:43:06.716Z"
+  "generatedAt": "2026-08-15T11:57:48.052Z"
 }

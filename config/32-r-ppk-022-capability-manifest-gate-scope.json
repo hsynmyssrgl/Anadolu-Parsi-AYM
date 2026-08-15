@@ -23,7 +23,7 @@
     "deployedApplicationCount": 2,
     "applicationsWithDeclaredRuntimeCapabilities": 2,
     "productionSourceZoneCount": 18,
-    "scannedProductionFiles": 493,
+    "scannedProductionFiles": 500,
     "exactCapabilitySurfaceCount": 345,
     "exactCapabilityManifestEntryCount": 345,
     "exactCapabilityManifestSha256": "2f58fd1c0a82afa41ca8f1930ae15ebb792075d47d0f9e2e24872c4aa0facd50",

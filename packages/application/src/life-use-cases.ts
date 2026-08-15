@@ -171,7 +171,10 @@ export interface LifePolicyIntent {
     | 'smart_home_camera_consent'
     | 'smart_home_settings'
     | 'signed_plugin_platform_center'
-    | 'signed_plugin_installation';
+    | 'signed_plugin_installation'
+    | 'communication_security_center'
+    | 'communication_device_credential'
+    | 'communication_room';
   readonly resourceId: string;
   readonly purpose: 'general' | 'emergency-offline-portability';
   readonly requestedFields?: readonly string[];

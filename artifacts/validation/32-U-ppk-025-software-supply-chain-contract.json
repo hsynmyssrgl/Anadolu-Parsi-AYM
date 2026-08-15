@@ -435,7 +435,7 @@
   "selfSignedCertificateGrantsProductionAuthority": false,
   "historicalEvidenceGrantsCurrentAuthority": false,
   "schemaMigrationRequired": false,
-  "latestDatabaseMigration": 104,
+  "latestDatabaseMigration": 105,
   "historicalBackfillPerformed": false,
   "realDataTransferPerformed": false,
   "cutoverPerformed": false,
@@ -443,5 +443,5 @@
   "sqliteOwnershipTransferred": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": false,
-  "generatedAt": "2026-08-15T09:20:59.876Z"
+  "generatedAt": "2026-08-15T11:53:36.649Z"
 }

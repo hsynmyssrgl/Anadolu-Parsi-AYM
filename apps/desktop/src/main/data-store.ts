@@ -188,6 +188,15 @@ import {
   SetSignedPluginDesiredStateUseCase,
   EmergencyDisableSignedPluginUseCase,
   RollbackSignedPluginUseCase,
+  GetCommunicationSecurityCenterUseCase,
+  RegisterCommunicationDeviceCredentialUseCase,
+  RevokeCommunicationDeviceCredentialUseCase,
+  CreateCommunicationRoomUseCase,
+  AddCommunicationRoomMemberUseCase,
+  RemoveCommunicationRoomMemberUseCase,
+  RekeyCommunicationRoomAfterDeviceRevocationUseCase,
+  SetCommunicationHistoryAccessUseCase,
+  FreezeCommunicationRoomUseCase,
   ListLifeRecordsUseCase,
   CreateLifeRecordUseCase,
   GetManagedLifeWorkspaceUseCase,
@@ -292,6 +301,7 @@ import {
   type UnifiedAuthorizedSearchApplicationContext,
   type LocalGovernedOcrOperationIdentifiers,
   type LocalGovernedOcrRuntimePort,
+  type CommunicationMlsFoundationPort,
   ListDataRetentionPoliciesUseCase,
   ListDataLifecycleRecordsUseCase,
   CreateDataRetentionPolicyUseCase,
@@ -357,6 +367,17 @@ import type { FamilyAiAssistantCenterView, FamilyAiSuggestionMutationReceiptView
 import type { CreateMemoryStudioRecordInput, DeleteMemoryStudioRecordInput, CreateMemoryTimeCapsuleInput, MemoryStudioCenterView, MemoryStudioMutationReceiptView, ReviewMemoryTimeCapsuleInput, TransitionMemoryTimeCapsuleInput } from '@ppt/domain';
 import type { GrantSmartHomeCameraConsentInput, RecordSmartHomeObservationInput, RegisterSmartHomeDeviceInput, RevokeSmartHomeCameraConsentInput, SetSmartHomeProcessingInput, SmartHomeEnergyCenterView, SmartHomeMutationReceiptView, UpdateSmartHomeDeviceStatusInput } from '@ppt/domain';
 import type { EmergencyDisableSignedPluginInput, RollbackSignedPluginInput, SetSignedPluginDesiredStateInput, SignedPluginMutationReceiptView, SignedPluginPlatformCenterView, VerifiedSignedPluginReleaseInput } from '@ppt/domain';
+import type {
+  AddCommunicationRoomMemberInput,
+  CommunicationSecurityCenterView,
+  CommunicationSecurityMutationReceiptView,
+  CreateCommunicationRoomInput,
+  FreezeCommunicationRoomInput,
+  RekeyCommunicationRoomAfterDeviceRevocationInput,
+  RemoveCommunicationRoomMemberInput,
+  RevokeCommunicationDeviceCredentialInput,
+  SetCommunicationHistoryAccessInput
+} from '@ppt/domain';
 import { RepositoryBackedFamilyApplicationUnitOfWork, RepositoryBackedFamilyGraphQueryPort } from './family-application-adapter.js';
 import { RepositoryBackedHouseholdMembershipUnitOfWork } from './household-membership-application-adapter.js';
 import { RepositoryBackedPersonLifecycleUnitOfWork } from './person-lifecycle-application-adapter.js';
@@ -425,6 +446,10 @@ import {
   RepositoryBackedSignedPluginPlatformQueryPort,
   RepositoryBackedSignedPluginPlatformUnitOfWork
 } from './signed-plugin-platform-application-adapter.js';
+import {
+  RepositoryBackedCommunicationSecurityQueryPort,
+  RepositoryBackedCommunicationSecurityUnitOfWork
+} from './communication-security-application-adapter.js';
 import {
   RepositoryBackedLocationPolicyTransactionRunner,
   RepositoryBackedLocationUnitOfWork,
@@ -728,6 +753,8 @@ interface DataStoreOptions {
   identityAccessPorts?: Partial<IdentityAccessDataStorePorts>;
   /** Public verification keys only. Missing production trust keeps package registration unavailable. */
   signedPluginTrustedKeys?: readonly TrustedPluginSigningKey[];
+  /** Main-only RFC 9420 provider seam. Missing production configuration keeps all MLS writes unavailable. */
+  communicationMlsFoundation?: CommunicationMlsFoundationPort;
   federatedProviderConfigurations?: readonly import('@ppt/repository-contracts').FederatedProviderProvisioningRow[];
   securityConfig?: {
     sessionIdleTimeoutMinutes: number;
@@ -1058,6 +1085,13 @@ const identityAccessUnavailable = (message: string, correlationId = asCorrelatio
     correlationId
   }));
 
+const communicationMlsUnavailable = (message: string) => err(createAppError({
+  code: ERROR_CODES.AUTHORIZATION_DENIED,
+  category: 'security',
+  message,
+  correlationId: asCorrelationId('communication-mls-provider-unavailable')
+}));
+
 interface ArchiveOperationExpectation {
   readonly resourceType: 'archive_item' | 'archive_retention_policy' | 'archive_category';
   readonly resourceId: string;
@@ -1325,6 +1359,15 @@ export class FamilyDataStore {
   readonly #emergencyDisableSignedPluginUseCase:EmergencyDisableSignedPluginUseCase;
   readonly #rollbackSignedPluginUseCase:RollbackSignedPluginUseCase;
   readonly #signedPluginTrustedKeys:readonly TrustedPluginSigningKey[];
+  readonly #getCommunicationSecurityCenterUseCase:GetCommunicationSecurityCenterUseCase;
+  readonly #registerCommunicationDeviceCredentialUseCase:RegisterCommunicationDeviceCredentialUseCase;
+  readonly #revokeCommunicationDeviceCredentialUseCase:RevokeCommunicationDeviceCredentialUseCase;
+  readonly #createCommunicationRoomUseCase:CreateCommunicationRoomUseCase;
+  readonly #addCommunicationRoomMemberUseCase:AddCommunicationRoomMemberUseCase;
+  readonly #removeCommunicationRoomMemberUseCase:RemoveCommunicationRoomMemberUseCase;
+  readonly #rekeyCommunicationRoomAfterDeviceRevocationUseCase:RekeyCommunicationRoomAfterDeviceRevocationUseCase;
+  readonly #setCommunicationHistoryAccessUseCase:SetCommunicationHistoryAccessUseCase;
+  readonly #freezeCommunicationRoomUseCase:FreezeCommunicationRoomUseCase;
   readonly #prepareFamilyEmergencyCardExportUseCase: PrepareFamilyEmergencyCardExportUseCase;
   readonly #recordFamilyEmergencyCardExportCompletionUseCase: RecordFamilyEmergencyCardExportCompletionUseCase;
   readonly #listFinanceRecordsUseCase: ListFinanceRecordsUseCase;
@@ -1847,6 +1890,7 @@ export class FamilyDataStore {
           memoryStudioPolicyResourceRepository: this.#repositories.memoryStudioRepository,
           smartHomeEnergyPolicyResourceRepository: this.#repositories.smartHomeEnergyRepository,
           signedPluginPlatformPolicyResourceRepository: this.#repositories.signedPluginPlatformRepository,
+          communicationSecurityPolicyResourceRepository: this.#repositories.communicationSecurityRepository,
           personRepository: this.#repositories.personRepository,
           deviceIdentityProvider: this.#deviceIdentityProvider,
           authorizationProvider: productionArchivePolicy.authorizationProvider,
@@ -1872,6 +1916,8 @@ export class FamilyDataStore {
       smartHomeEnergyPolicyResourceRepository: this.#repositories.smartHomeEnergyRepository,
       signedPluginPlatformRepository: this.#repositories.signedPluginPlatformRepository,
       signedPluginPlatformPolicyResourceRepository: this.#repositories.signedPluginPlatformRepository,
+      communicationSecurityRepository: this.#repositories.communicationSecurityRepository,
+      communicationSecurityPolicyResourceRepository: this.#repositories.communicationSecurityRepository,
       aiConsentRepository: this.#repositories.aiConsentRepository,
       accountRepository: this.#repositories.accountRepository,
       permissionRepository: this.#repositories.objectPermissionRepository,
@@ -2613,6 +2659,29 @@ export class FamilyDataStore {
     this.#setSignedPluginDesiredStateUseCase=new SetSignedPluginDesiredStateUseCase(signedPluginPlatformUnitOfWork);
     this.#emergencyDisableSignedPluginUseCase=new EmergencyDisableSignedPluginUseCase(signedPluginPlatformUnitOfWork);
     this.#rollbackSignedPluginUseCase=new RollbackSignedPluginUseCase(signedPluginPlatformUnitOfWork);
+    const communicationSecurityDependencies={...lifeApplicationDependencies,
+      communicationSecurityRepository:this.#repositories.communicationSecurityRepository,
+      communicationSecurityPolicyResourceRepository:this.#repositories.communicationSecurityRepository} as const;
+    const communicationSecurityQuery=new RepositoryBackedCommunicationSecurityQueryPort(
+      communicationSecurityDependencies,lifePolicyTransactionRunner);
+    const communicationSecurityUnitOfWork=new RepositoryBackedCommunicationSecurityUnitOfWork(
+      communicationSecurityDependencies,lifePolicyTransactionRunner);
+    const communicationMlsFoundation:CommunicationMlsFoundationPort=options.communicationMlsFoundation??{
+      provisionDeviceCredential:()=>communicationMlsUnavailable('RFC 9420 MLS cihaz kimliği sağlayıcısı yapılandırılmadı.'),
+      createGroup:()=>communicationMlsUnavailable('RFC 9420 MLS grup sağlayıcısı yapılandırılmadı.'),
+      advanceEpoch:()=>communicationMlsUnavailable('RFC 9420 MLS dönem sağlayıcısı yapılandırılmadı.')
+    };
+    this.#getCommunicationSecurityCenterUseCase=new GetCommunicationSecurityCenterUseCase(communicationSecurityQuery);
+    this.#registerCommunicationDeviceCredentialUseCase=new RegisterCommunicationDeviceCredentialUseCase(
+      communicationSecurityUnitOfWork,communicationMlsFoundation);
+    this.#revokeCommunicationDeviceCredentialUseCase=new RevokeCommunicationDeviceCredentialUseCase(communicationSecurityUnitOfWork);
+    this.#createCommunicationRoomUseCase=new CreateCommunicationRoomUseCase(communicationSecurityUnitOfWork,communicationMlsFoundation);
+    this.#addCommunicationRoomMemberUseCase=new AddCommunicationRoomMemberUseCase(communicationSecurityUnitOfWork,communicationMlsFoundation);
+    this.#removeCommunicationRoomMemberUseCase=new RemoveCommunicationRoomMemberUseCase(communicationSecurityUnitOfWork,communicationMlsFoundation);
+    this.#rekeyCommunicationRoomAfterDeviceRevocationUseCase=new RekeyCommunicationRoomAfterDeviceRevocationUseCase(
+      communicationSecurityUnitOfWork,communicationMlsFoundation);
+    this.#setCommunicationHistoryAccessUseCase=new SetCommunicationHistoryAccessUseCase(communicationSecurityUnitOfWork);
+    this.#freezeCommunicationRoomUseCase=new FreezeCommunicationRoomUseCase(communicationSecurityUnitOfWork);
     this.#prepareArchiveOpenUseCase = new PrepareArchiveOpenUseCase(archiveQuery);
     this.#recordArchiveOpenedUseCase = new RecordArchiveOpenedUseCase(archiveUnitOfWork);
     this.#authorizeEmergencyArchiveReadUseCase = new AuthorizeEmergencyArchiveReadUseCase(archiveUnitOfWork);
@@ -6223,6 +6292,69 @@ export class FamilyDataStore {
 
   public async rollbackSignedPlugin(input:RollbackSignedPluginInput):Promise<SignedPluginMutationReceiptView>{
     const result=await this.#rollbackSignedPluginUseCase.execute({context:this.#lifeApplicationContext('signed-plugin-rollback'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async getCommunicationSecurityCenter():Promise<CommunicationSecurityCenterView>{
+    const result=await this.#getCommunicationSecurityCenterUseCase.execute(
+      this.#lifeApplicationContext('communication-security-center'));
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  /** The renderer cannot choose a trusted-device identity; it is derived from the exact active session. */
+  public async registerCommunicationDeviceCredential(input:{readonly clientOperationId:string;readonly expectedRevision:number})
+  :Promise<CommunicationSecurityMutationReceiptView>{
+    const context=this.#identityAccessApplicationContext('communication-device-credential-register');
+    const result=await this.#registerCommunicationDeviceCredentialUseCase.execute({context,command:{
+      clientOperationId:input.clientOperationId,expectedRevision:input.expectedRevision,
+      trustedDeviceId:context.currentDevice.trustedDeviceId
+    }});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async revokeCommunicationDeviceCredential(input:RevokeCommunicationDeviceCredentialInput)
+  :Promise<CommunicationSecurityMutationReceiptView>{
+    const result=await this.#revokeCommunicationDeviceCredentialUseCase.execute({
+      context:this.#lifeApplicationContext('communication-device-credential-revoke'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async createCommunicationRoom(input:CreateCommunicationRoomInput):Promise<CommunicationSecurityMutationReceiptView>{
+    const result=await this.#createCommunicationRoomUseCase.execute({
+      context:this.#lifeApplicationContext('communication-room-create'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async addCommunicationRoomMember(input:AddCommunicationRoomMemberInput):Promise<CommunicationSecurityMutationReceiptView>{
+    const result=await this.#addCommunicationRoomMemberUseCase.execute({
+      context:this.#lifeApplicationContext('communication-room-member-add'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async removeCommunicationRoomMember(input:RemoveCommunicationRoomMemberInput)
+  :Promise<CommunicationSecurityMutationReceiptView>{
+    const result=await this.#removeCommunicationRoomMemberUseCase.execute({
+      context:this.#lifeApplicationContext('communication-room-member-remove'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async rekeyCommunicationRoomAfterDeviceRevocation(input:RekeyCommunicationRoomAfterDeviceRevocationInput)
+  :Promise<CommunicationSecurityMutationReceiptView>{
+    const result=await this.#rekeyCommunicationRoomAfterDeviceRevocationUseCase.execute({
+      context:this.#lifeApplicationContext('communication-room-device-rekey'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async setCommunicationHistoryAccess(input:SetCommunicationHistoryAccessInput)
+  :Promise<CommunicationSecurityMutationReceiptView>{
+    const result=await this.#setCommunicationHistoryAccessUseCase.execute({
+      context:this.#lifeApplicationContext('communication-room-history-policy'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async freezeCommunicationRoom(input:FreezeCommunicationRoomInput):Promise<CommunicationSecurityMutationReceiptView>{
+    const result=await this.#freezeCommunicationRoomUseCase.execute({
+      context:this.#lifeApplicationContext('communication-room-freeze'),command:input});
     if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
   }
 

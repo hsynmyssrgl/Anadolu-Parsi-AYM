@@ -3288,6 +3288,159 @@ const signedPluginResult=(channel:string,result:unknown):IpcIntegrationPolicyDec
   return valid?accepted():rejected('SIGNED_PLUGIN_RESULT_INVALID','$result');
 };
 
+export const COMMUNICATION_SECURITY_IPC_CHANNELS=Object.freeze({
+  getCenter:'communicationSecurity:getCenter',
+  registerDeviceCredential:'communicationSecurity:registerDeviceCredential',
+  revokeDeviceCredential:'communicationSecurity:revokeDeviceCredential',
+  createRoom:'communicationSecurity:createRoom',
+  addMember:'communicationSecurity:addMember',
+  removeMember:'communicationSecurity:removeMember',
+  rekeyRoom:'communicationSecurity:rekeyRoom',
+  setHistoryAccess:'communicationSecurity:setHistoryAccess',
+  freezeRoom:'communicationSecurity:freezeRoom'
+} as const);
+const communicationSecurityChannels=new Set<string>(Object.values(COMMUNICATION_SECURITY_IPC_CHANNELS));
+const communicationIdentifier=(value:unknown):value is string=>typeof value==='string'&&value===value.trim()
+  &&value.length>=2&&value.length<=256&&/^[A-Za-z0-9][A-Za-z0-9._:@/-]*$/u.test(value);
+const communicationInput=(channel:string,args:readonly unknown[]):IpcIntegrationPolicyDecision=>{
+  if(channel===COMMUNICATION_SECURITY_IPC_CHANNELS.getCenter)return zeroArguments(args);
+  if(args.length!==1||!isObject(args[0]))return rejected('COMMUNICATION_OBJECT_REQUIRED','$[0]');
+  const value=args[0];
+  if(channel===COMMUNICATION_SECURITY_IPC_CHANNELS.registerDeviceCredential)return healthCareExactRecord(value,
+    ['clientOperationId','expectedRevision'])&&communicationIdentifier(value.clientOperationId)&&value.expectedRevision===0
+    ?accepted():rejected('COMMUNICATION_DEVICE_REGISTER_INPUT_INVALID','$[0]');
+  if(channel===COMMUNICATION_SECURITY_IPC_CHANNELS.revokeDeviceCredential)return healthCareExactRecord(value,
+    ['clientOperationId','expectedRevision','deviceCredentialId','confirmation','reason'])
+    &&communicationIdentifier(value.clientOperationId)&&healthCareRevision(value.expectedRevision)&&Number(value.expectedRevision)>=1
+    &&communicationIdentifier(value.deviceCredentialId)&&value.confirmation==='ILETISIM CIHAZ KIMLIGINI IPTAL ET'
+    &&healthCareText(value.reason,3,500)
+    ?accepted():rejected('COMMUNICATION_DEVICE_REVOKE_INPUT_INVALID','$[0]');
+  if(channel===COMMUNICATION_SECURITY_IPC_CHANNELS.createRoom){
+    const keys=['clientOperationId','expectedRevision','ownerDeviceCredentialId','roomType','displayName',
+      ...(value.scopeResourceType===undefined?[]:['scopeResourceType']),...(value.scopeResourceId===undefined?[]:['scopeResourceId'])];
+    const scoped=value.scopeResourceType!==undefined||value.scopeResourceId!==undefined;
+    return healthCareExactRecord(value,keys)&&communicationIdentifier(value.clientOperationId)&&value.expectedRevision===0
+      &&communicationIdentifier(value.ownerDeviceCredentialId)
+      &&['direct','family','household','family_branch','event','care','private_topic'].includes(String(value.roomType))
+      &&healthCareText(value.displayName,2,160)
+      &&(!scoped||(['family','household','family_branch','event','care_context'].includes(String(value.scopeResourceType))
+        &&communicationIdentifier(value.scopeResourceId)))
+      ?accepted():rejected('COMMUNICATION_ROOM_CREATE_INPUT_INVALID','$[0]');
+  }
+  if(channel===COMMUNICATION_SECURITY_IPC_CHANNELS.addMember)return healthCareExactRecord(value,
+    ['clientOperationId','expectedRevision','roomId','memberPersonId','deviceCredentialId','role'])
+    &&communicationIdentifier(value.clientOperationId)&&healthCareRevision(value.expectedRevision)&&Number(value.expectedRevision)>=1
+    &&communicationIdentifier(value.roomId)&&communicationIdentifier(value.memberPersonId)
+    &&communicationIdentifier(value.deviceCredentialId)&&['administrator','member'].includes(String(value.role))
+    ?accepted():rejected('COMMUNICATION_MEMBER_ADD_INPUT_INVALID','$[0]');
+  if(channel===COMMUNICATION_SECURITY_IPC_CHANNELS.removeMember)return healthCareExactRecord(value,
+    ['clientOperationId','expectedRevision','roomId','membershipId','reason'])
+    &&communicationIdentifier(value.clientOperationId)&&healthCareRevision(value.expectedRevision)&&Number(value.expectedRevision)>=1
+    &&communicationIdentifier(value.roomId)&&communicationIdentifier(value.membershipId)&&healthCareText(value.reason,3,500)
+    ?accepted():rejected('COMMUNICATION_MEMBER_REMOVE_INPUT_INVALID','$[0]');
+  if(channel===COMMUNICATION_SECURITY_IPC_CHANNELS.rekeyRoom)return healthCareExactRecord(value,
+    ['clientOperationId','expectedRevision','roomId','revokedDeviceCredentialId','confirmation','reason'])
+    &&communicationIdentifier(value.clientOperationId)&&healthCareRevision(value.expectedRevision)&&Number(value.expectedRevision)>=1
+    &&communicationIdentifier(value.roomId)&&communicationIdentifier(value.revokedDeviceCredentialId)
+    &&value.confirmation==='KAYIP CIHAZ SONRASI ODAYI YENIDEN ANAHTARLA'&&healthCareText(value.reason,3,500)
+    ?accepted():rejected('COMMUNICATION_ROOM_REKEY_INPUT_INVALID','$[0]');
+  if(channel===COMMUNICATION_SECURITY_IPC_CHANNELS.setHistoryAccess)return healthCareExactRecord(value,
+    ['clientOperationId','expectedRevision','roomId','historyAccessMode','reason'])
+    &&communicationIdentifier(value.clientOperationId)&&healthCareRevision(value.expectedRevision)&&Number(value.expectedRevision)>=1
+    &&communicationIdentifier(value.roomId)&&['new_members_no_history','explicit_snapshot_grant'].includes(String(value.historyAccessMode))
+    &&healthCareText(value.reason,3,500)
+    ?accepted():rejected('COMMUNICATION_HISTORY_INPUT_INVALID','$[0]');
+  if(channel===COMMUNICATION_SECURITY_IPC_CHANNELS.freezeRoom)return healthCareExactRecord(value,
+    ['clientOperationId','expectedRevision','roomId','confirmation','reason'])
+    &&communicationIdentifier(value.clientOperationId)&&healthCareRevision(value.expectedRevision)&&Number(value.expectedRevision)>=1
+    &&communicationIdentifier(value.roomId)&&value.confirmation==='ILETISIM ODASINI DONDUR'&&healthCareText(value.reason,3,500)
+    ?accepted():rejected('COMMUNICATION_ROOM_FREEZE_INPUT_INVALID','$[0]');
+  return rejected('UNKNOWN_IPC_CHANNEL','$');
+};
+const communicationDeviceResult=(value:unknown):boolean=>{
+  if(!isObject(value))return false;
+  const keys=['id','trustedDeviceId','status','providerVerified','keyPackageStoredOutsideDatabase','revision','createdAt','updatedAt',
+    ...(value.revokedAt===undefined?[]:['revokedAt'])];
+  return healthCareExactRecord(value,keys)&&communicationIdentifier(value.id)&&communicationIdentifier(value.trustedDeviceId)
+    &&['active','revoked'].includes(String(value.status))&&value.providerVerified===true
+    &&value.keyPackageStoredOutsideDatabase===true&&healthCareRevision(value.revision)&&Number(value.revision)>=1
+    &&healthCareIso(value.createdAt)&&healthCareIso(value.updatedAt)&&(value.revokedAt===undefined||healthCareIso(value.revokedAt));
+};
+const communicationMembershipResult=(value:unknown):boolean=>{
+  if(!isObject(value))return false;
+  const keys=['id','memberPersonId','deviceCredentialId','role','status','joinedAtEpoch','historyVisibleFromEpoch',
+    ...(value.removedAtEpoch===undefined?[]:['removedAtEpoch'])];
+  return healthCareExactRecord(value,keys)&&communicationIdentifier(value.id)&&communicationIdentifier(value.memberPersonId)
+    &&communicationIdentifier(value.deviceCredentialId)&&['owner','administrator','member'].includes(String(value.role))
+    &&['active','removed'].includes(String(value.status))&&Number.isSafeInteger(value.joinedAtEpoch)&&Number(value.joinedAtEpoch)>=1
+    &&Number.isSafeInteger(value.historyVisibleFromEpoch)&&Number(value.historyVisibleFromEpoch)>=Number(value.joinedAtEpoch)
+    &&(value.removedAtEpoch===undefined||(Number.isSafeInteger(value.removedAtEpoch)&&Number(value.removedAtEpoch)>Number(value.joinedAtEpoch)));
+};
+const communicationEpochResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['epoch','cipherSuite','providerEvidenceVerified','sealedProviderStateStored','activeDeviceCredentialCount','createdAt','reason'])
+  &&Number.isSafeInteger(value.epoch)&&Number(value.epoch)>=1
+  &&value.cipherSuite==='MLS_128_DHKEMX25519_AES128GCM_SHA256_Ed25519'
+  &&value.providerEvidenceVerified===true&&value.sealedProviderStateStored===true
+  &&Number.isSafeInteger(value.activeDeviceCredentialCount)&&Number(value.activeDeviceCredentialCount)>=1
+  &&Number(value.activeDeviceCredentialCount)<=128&&healthCareIso(value.createdAt)
+  &&['room_created','member_added','member_removed','device_revoked_recovery'].includes(String(value.reason));
+const communicationRoomResult=(value:unknown):boolean=>{
+  if(!isObject(value))return false;
+  const keys=['id','displayName','roomType','status','historyAccessMode','currentEpoch','memberships','currentEpochEvidence',
+    'revision','createdAt','updatedAt',...(value.scopeResourceType===undefined?[]:['scopeResourceType']),
+    ...(value.scopeResourceId===undefined?[]:['scopeResourceId'])];
+  const scoped=value.scopeResourceType!==undefined||value.scopeResourceId!==undefined;
+  return healthCareExactRecord(value,keys)&&communicationIdentifier(value.id)&&healthCareText(value.displayName,2,160)
+    &&['direct','family','household','family_branch','event','care','private_topic'].includes(String(value.roomType))
+    &&['active','frozen','closed'].includes(String(value.status))
+    &&['new_members_no_history','explicit_snapshot_grant'].includes(String(value.historyAccessMode))
+    &&Number.isSafeInteger(value.currentEpoch)&&Number(value.currentEpoch)>=1&&Array.isArray(value.memberships)
+    &&value.memberships.length>=1&&value.memberships.length<=128&&value.memberships.every(communicationMembershipResult)
+    &&communicationEpochResult(value.currentEpochEvidence)&&healthCareRevision(value.revision)&&Number(value.revision)>=1
+    &&healthCareIso(value.createdAt)&&healthCareIso(value.updatedAt)
+    &&(!scoped||(['family','household','family_branch','event','care_context'].includes(String(value.scopeResourceType))
+      &&communicationIdentifier(value.scopeResourceId)));
+};
+const communicationTruthResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,[
+  'centralPolicyKernelRequired','localRoomAndEpochMetadataRegistryImplemented','opaqueSealedMlsStateRequired',
+  'verifiedProviderEvidenceRequired','newMemberHistoryDefaultDenied','revokedDeviceRekeyWorkflowImplemented',
+  'revokedCredentialBlocksRoomEpochMutationUntilRekey','automaticRoomRekeyOnCredentialRevocation',
+  'contentFreeAuditRequired','rendererKeyMaterialAuthority','rendererRelayAuthority','privateKeyPersistedInDatabase',
+  'messagePlaintextPersistedByFoundation','messageEventSignatureVerificationImplemented','relayDeliveryServiceImplemented',
+  'rfc9420ProviderConfigured','rfc9420ConformanceVerified','forwardSecrecyVerifiedInProduction',
+  'postCompromiseSecurityVerifiedInProduction','relayContentBlindnessVerifiedInProduction','realMessageExchangePerformed',
+  'networkUsedByCurrentImplementation'])
+  &&value.centralPolicyKernelRequired===true&&value.localRoomAndEpochMetadataRegistryImplemented===true
+  &&value.opaqueSealedMlsStateRequired===true&&value.verifiedProviderEvidenceRequired===true
+  &&value.newMemberHistoryDefaultDenied===true&&value.revokedDeviceRekeyWorkflowImplemented===true
+  &&value.revokedCredentialBlocksRoomEpochMutationUntilRekey===true&&value.automaticRoomRekeyOnCredentialRevocation===false
+  &&value.contentFreeAuditRequired===true&&value.rendererKeyMaterialAuthority===false&&value.rendererRelayAuthority===false
+  &&value.privateKeyPersistedInDatabase===false&&value.messagePlaintextPersistedByFoundation===false
+  &&value.messageEventSignatureVerificationImplemented===false&&value.relayDeliveryServiceImplemented===false
+  &&value.rfc9420ProviderConfigured===false&&value.rfc9420ConformanceVerified===false
+  &&value.forwardSecrecyVerifiedInProduction===false&&value.postCompromiseSecurityVerifiedInProduction===false
+  &&value.relayContentBlindnessVerifiedInProduction===false&&value.realMessageExchangePerformed===false
+  &&value.networkUsedByCurrentImplementation===false;
+const communicationCenterResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['schemaVersion','centerId','ownerPersonId','deviceCredentials','rooms','truth','generatedAt'])&&value.schemaVersion===1
+  &&communicationIdentifier(value.centerId)&&communicationIdentifier(value.ownerPersonId)
+  &&Array.isArray(value.deviceCredentials)&&value.deviceCredentials.length<=32&&value.deviceCredentials.every(communicationDeviceResult)
+  &&Array.isArray(value.rooms)&&value.rooms.length<=256&&value.rooms.every(communicationRoomResult)
+  &&communicationTruthResult(value.truth)&&healthCareIso(value.generatedAt);
+const communicationReceiptResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['resourceType','resourceId','mutationKind','previousRevision','revision','occurredAt','replayed','messageContentProcessed','networkUsed'])
+  &&['communication_device_credential','communication_room'].includes(String(value.resourceType))
+  &&communicationIdentifier(value.resourceId)
+  &&['device_credential_register','device_credential_revoke','room_create','member_add','member_remove','history_policy_update',
+    'device_revocation_rekey','room_freeze'].includes(String(value.mutationKind))
+  &&healthCareRevision(value.previousRevision)&&healthCareRevision(value.revision)&&value.revision===Number(value.previousRevision)+1
+  &&healthCareIso(value.occurredAt)&&typeof value.replayed==='boolean'&&value.messageContentProcessed===false&&value.networkUsed===false;
+const communicationResult=(channel:string,result:unknown):IpcIntegrationPolicyDecision=>{
+  const valid=channel===COMMUNICATION_SECURITY_IPC_CHANNELS.getCenter
+    ?communicationCenterResult(result):communicationReceiptResult(result);
+  return valid?accepted():rejected('COMMUNICATION_RESULT_INVALID','$result');
+};
+
 export const ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS = Object.freeze({
   listEvidence: 'archive:listRelationEvidence',
   listEvidenceHistory: 'archive:listRelationEvidenceHistory',
@@ -3917,6 +4070,8 @@ export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unkn
   if (channel.startsWith('smartHomeEnergy:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
   if (signedPluginPlatformChannels.has(channel)) return signedPluginResult(channel,result);
   if (channel.startsWith('signedPluginPlatform:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
+  if (communicationSecurityChannels.has(channel)) return communicationResult(channel,result);
+  if (channel.startsWith('communicationSecurity:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
   if (childEducationChannels.has(channel)) return childEducationResult(channel, result);
   if (channel.startsWith('childEducation:')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
   if (placesTravelChannels.has(channel)) return placesTravelResult(channel, result);
@@ -3967,6 +4122,8 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
   if (channel.startsWith('smartHomeEnergy:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
   if (signedPluginPlatformChannels.has(channel)) return signedPluginInput(channel,args);
   if (channel.startsWith('signedPluginPlatform:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
+  if (communicationSecurityChannels.has(channel)) return communicationInput(channel,args);
+  if (channel.startsWith('communicationSecurity:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
   if (childEducationChannels.has(channel)) return childEducationInput(channel, args);
   if (channel.startsWith('childEducation:')) return rejected('UNKNOWN_IPC_CHANNEL', '$');
   if (placesTravelChannels.has(channel)) return placesTravelInput(channel, args);

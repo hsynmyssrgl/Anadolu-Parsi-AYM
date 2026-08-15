@@ -454,7 +454,7 @@
   "protectedCapabilityFamilies": 7,
   "canonicalApplications": 14,
   "productionSourceZones": 18,
-  "scannedProductionFiles": 493,
+  "scannedProductionFiles": 500,
   "exactCapabilitySurfaces": 345,
   "exactManifestEntries": 345,
   "exactManifestSha256": "2f58fd1c0a82afa41ca8f1930ae15ebb792075d47d0f9e2e24872c4aa0facd50",
@@ -475,5 +475,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-15T08:47:32.025Z"
+  "generatedAt": "2026-08-15T10:42:38.169Z"
 }

@@ -47,6 +47,17 @@ import type { FamilyAiAssistantCenterView, FamilyAiSuggestionMutationReceiptView
 import type { CreateMemoryStudioRecordInput, DeleteMemoryStudioRecordInput, CreateMemoryTimeCapsuleInput, MemoryStudioCenterView, MemoryStudioMutationReceiptView, ReviewMemoryTimeCapsuleInput, TransitionMemoryTimeCapsuleInput } from '@ppt/domain';
 import type { GrantSmartHomeCameraConsentInput, RevokeSmartHomeCameraConsentInput, SetSmartHomeProcessingInput, SmartHomeEnergyCenterView, SmartHomeMutationReceiptView } from '@ppt/domain';
 import type { EmergencyDisableSignedPluginInput, RollbackSignedPluginInput, SetSignedPluginDesiredStateInput, SignedPluginMutationReceiptView, SignedPluginPlatformCenterView } from '@ppt/domain';
+import type {
+  AddCommunicationRoomMemberInput,
+  CommunicationSecurityCenterView,
+  CommunicationSecurityMutationReceiptView,
+  CreateCommunicationRoomInput,
+  FreezeCommunicationRoomInput,
+  RekeyCommunicationRoomAfterDeviceRevocationInput,
+  RemoveCommunicationRoomMemberInput,
+  RevokeCommunicationDeviceCredentialInput,
+  SetCommunicationHistoryAccessInput
+} from '@ppt/domain';
 import type { LegacyArchiveOwnershipReattestationView, ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { AssignPersonMembershipInput, CreateFamilyBranchInput, CreateHouseholdInput, FamilyBranch, Household, HouseholdMembershipWorkspaceView, PersonLifecycleProfile, PersonLifecycleWorkspaceView, PersonMembership, UpdatePersonProfileInput } from '@ppt/domain';
 import type { AuthorizationContextWorkspaceView } from '@ppt/domain';
@@ -717,6 +728,23 @@ contextBridge.exposeInMainWorld('pardus', {
   setSignedPluginDesiredState:(input:SetSignedPluginDesiredStateInput):Promise<SignedPluginMutationReceiptView>=>invoke('signedPluginPlatform:setDesiredState',input),
   emergencyDisableSignedPlugin:(input:EmergencyDisableSignedPluginInput):Promise<SignedPluginMutationReceiptView>=>invoke('signedPluginPlatform:emergencyDisable',input),
   rollbackSignedPlugin:(input:RollbackSignedPluginInput):Promise<SignedPluginMutationReceiptView>=>invoke('signedPluginPlatform:rollback',input),
+  getCommunicationSecurityCenter:():Promise<CommunicationSecurityCenterView>=>invoke('communicationSecurity:getCenter'),
+  registerCommunicationDeviceCredential:(input:{readonly clientOperationId:string;readonly expectedRevision:number})
+    :Promise<CommunicationSecurityMutationReceiptView>=>invoke('communicationSecurity:registerDeviceCredential',input),
+  revokeCommunicationDeviceCredential:(input:RevokeCommunicationDeviceCredentialInput)
+    :Promise<CommunicationSecurityMutationReceiptView>=>invoke('communicationSecurity:revokeDeviceCredential',input),
+  createCommunicationRoom:(input:CreateCommunicationRoomInput):Promise<CommunicationSecurityMutationReceiptView>=>
+    invoke('communicationSecurity:createRoom',input),
+  addCommunicationRoomMember:(input:AddCommunicationRoomMemberInput):Promise<CommunicationSecurityMutationReceiptView>=>
+    invoke('communicationSecurity:addMember',input),
+  removeCommunicationRoomMember:(input:RemoveCommunicationRoomMemberInput):Promise<CommunicationSecurityMutationReceiptView>=>
+    invoke('communicationSecurity:removeMember',input),
+  rekeyCommunicationRoomAfterDeviceRevocation:(input:RekeyCommunicationRoomAfterDeviceRevocationInput)
+    :Promise<CommunicationSecurityMutationReceiptView>=>invoke('communicationSecurity:rekeyRoom',input),
+  setCommunicationHistoryAccess:(input:SetCommunicationHistoryAccessInput):Promise<CommunicationSecurityMutationReceiptView>=>
+    invoke('communicationSecurity:setHistoryAccess',input),
+  freezeCommunicationRoom:(input:FreezeCommunicationRoomInput):Promise<CommunicationSecurityMutationReceiptView>=>
+    invoke('communicationSecurity:freezeRoom',input),
   listFinanceValuations:():Promise<FinanceValuationView[]>=>invoke('finance:listValuations'),
   createFinanceValuation:(input:CreateFinanceValuationInput):Promise<FinanceValuationView[]>=>invoke('finance:createValuation',input),
   createMember: (input: CreateFamilyMemberInput): Promise<FamilyMutationResultView> => invoke('family:createMember', input),

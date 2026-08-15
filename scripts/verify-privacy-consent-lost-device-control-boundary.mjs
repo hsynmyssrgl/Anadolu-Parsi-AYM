@@ -114,8 +114,8 @@ check('truth consistently excludes remote wipe MDM network delivery and location
   && scope.truth?.networkDeliveryGuaranteed === false
   && scope.truth?.locationTransmissionPerformed === false);
 check('PPK-021 exact successor ratchet is green', astGate.status === 'PASS'
-  && astGate.privilegedSurfaces === 763 && astGate.exactAllowlistEntries === 763
-  && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 370
+  && astGate.privilegedSurfaces === 779 && astGate.exactAllowlistEntries === 779
+  && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 379
   && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
 check('PPK-022 exact successor ratchet is green', capabilityGate.status === 'PASS'
   && capabilityGate.capabilitySurfaces === 345 && capabilityGate.exactManifestSurfaces === 345

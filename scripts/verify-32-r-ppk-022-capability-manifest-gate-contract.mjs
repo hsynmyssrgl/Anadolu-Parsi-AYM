@@ -113,7 +113,7 @@ check('bootstrap entries are bounded and Desktop-owned', pinnedEntries.length ==
 check('manifest preserves no-transfer ownership invariants', manifest.invariants?.realDataTransferPerformed === false && manifest.invariants?.sqliteOwnershipTransferred === false && manifest.invariants?.desktopVaultOwnershipPreserved === true);
 
 check('production capability gate passes', gate.status === 'PASS' && gate.findings.length === 0);
-check('gate scans all current production sources', gate.productionSourceZones === 18 && gate.scannedFiles === 493);
+check('gate scans all current production sources', gate.productionSourceZones === 18 && gate.scannedFiles === 500);
 check('gate and manifest cardinality are exact', gate.capabilitySurfaces === 345 && gate.exactManifestSurfaces === 345);
 check('gate manifest hash matches canonical file', gate.exactManifestSha256 === manifestSha256);
 check('gate reports seven families and fourteen applications', gate.protectedCapabilityFamilies === 7 && gate.canonicalApplications === 14);
@@ -176,7 +176,7 @@ check('policy tests cover signed hash and seven families', includesAll(policyTes
 check('policy tests cover malformed unverified and identity mismatch', includesAll(policyTest, ['MALFORMED_REQUEST', 'POLICY_PACKAGE_UNVERIFIED', 'POLICY_PACKAGE_HASH_MISMATCH', 'APPLICATION_ID_MISMATCH', 'APPLICATION_VERSION_MISMATCH', 'CAPABILITY_MANIFEST_HASH_MISMATCH']));
 check('policy tests cover missing unexpected and tampered capability', includesAll(policyTest, ['CAPABILITY_REQUIREMENT_MISSING', 'CAPABILITY_REQUIREMENT_UNEXPECTED', 'MALFORMED_AUTHORITY']));
 check('AST tests cover all seven resource families', includesAll(astTest, ['CAMERA_IMPORT', 'MICROPHONE_IMPORT', 'FILE_IMPORT', 'OCR_IMPORT', 'AI_IMPORT', 'LOCATION_API', 'NETWORK_API']));
-check('AST tests cover exact production and drift denial', includesAll(astTest, ['inventoryPlatformCapabilityManifestSurfaces()', 'inventory.files).toBe(493)', 'toHaveLength(345)', 'UNDECLARED_CAPABILITY_SURFACE', 'CAPABILITY_SURFACE_ENTRY_INVALID', 'APPLICATION_CAPABILITY_BASELINE_MISMATCH']));
+check('AST tests cover exact production and drift denial', includesAll(astTest, ['inventoryPlatformCapabilityManifestSurfaces()', 'inventory.files).toBe(500)', 'toHaveLength(345)', 'UNDECLARED_CAPABILITY_SURFACE', 'CAPABILITY_SURFACE_ENTRY_INVALID', 'APPLICATION_CAPABILITY_BASELINE_MISMATCH']));
 check('integration tests bind runtime startup and bootstrap', includesAll(integrationTest, ['applicationRuntimeCapabilities: PLATFORM_APPLICATION_RUNTIME_CAPABILITY_REQUIREMENTS', "source: 'authenticated-core-service-health'", 'assertPinnedBootstrapRuntimeCapability']));
 
 check('main composes exact capability policy and status use case', includesAll(desktopMain, ['new PlatformCapabilityManifestPolicy()', 'new GetPlatformCapabilityManifestGateBoundaryUseCase(platformCapabilityManifestPolicy)']));
@@ -196,9 +196,9 @@ check('scope records no persistence transfer or cutover', scope.boundaries?.sche
 check('inventory has eight implemented controls', inventory.controls?.length === 8 && inventory.controls.every((item) => item.disposition === 'IMPLEMENTED'));
 check('inventory has zero findings and blockers', inventory.engine?.findings === 0 && inventory.closureSummary?.openBlockerCount === 0 && inventory.closureSummary?.openBlockers?.length === 0);
 check('decision records AST signed runtime and authority separation', includesAll(decision, ['DEC-203', 'exact `kind|path|symbol`', 'imzalı Platform Policy', 'Build manifesti tek başına runtime yetkisi değildir']));
-check('decision pins current Desktop OCR capability truth and source ratchet', includesAll(decision, ['493 dosya / 345 exact capability yüzeyi', manifestSha256, '`ocr-worker` capability kümesi boştur', '`lowPrivilegeSandboxVerified=false`']));
+check('decision pins current Desktop OCR capability truth and source ratchet', includesAll(decision, ['500 dosya / 345 exact capability yüzeyi', manifestSha256, '`ocr-worker` capability kümesi boştur', '`lowPrivilegeSandboxVerified=false`']));
 check('threat model covers all primary resource and manifest evasions', ['Beyansız statik import', 'Dinamik import/require kaçışı', 'Kamera ve mikrofon kaçışı', 'OCR/AI kaçışı', 'Konum kaçışı', 'Manifest içeriği tamperi', 'İmzalı paket ikamesi', 'Pre-handshake boşluğu'].every((marker) => threat.includes(marker)));
-check('master register contains DEC-203 and current exact capability ratchet', masterRegister.includes('## DEC-203') && masterRegister.includes('DEC-203-ppk-022-capability-manifest-build-runtime-gate.md') && masterRegister.includes('493 dosya / 345 exact yüzey') && masterRegister.includes(manifestSha256));
+check('master register contains DEC-203 and current exact capability ratchet', masterRegister.includes('## DEC-203') && masterRegister.includes('DEC-203-ppk-022-capability-manifest-build-runtime-gate.md') && masterRegister.includes('500 dosya / 345 exact yüzey') && masterRegister.includes(manifestSha256));
 check('decision ledger contains active DEC-203', ledger.decisionCount === ledger.decisions.length && ledger.decisions.some((item) => item.id === 'DEC-203' && item.status === 'ACTIVE' && item.requirements?.includes('PPK-022')));
 check('database migration 77 baseline remains present', versions.includes(77) && latestMigration >= 77 && scope.boundaries?.latestDatabaseMigration === 77);
 

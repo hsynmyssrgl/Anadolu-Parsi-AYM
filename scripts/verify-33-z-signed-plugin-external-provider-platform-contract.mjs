@@ -72,10 +72,10 @@ const definitions = [
     'rejects renderer-supplied manifests', 'without a new route'])],
   ['decision and threat model deny execution provider production trust sandbox and acceptance claims', has(decision, ['countsAsRequirementPass=false',
     'NOT_RUN', 'Production imza güveni']) && has(threat, ['Sahte veya değiştirilmiş manifest', 'Renderer otorite yükseltmesi', 'NOT_RUN'])],
-  ['PPK-015 021 and 022 ratchets are exact PASS', p15.status === 'PASS' && p15.files === 493
-    && p15.sourceSha256 === '38a3e4bf23f5302ad9e02c7be94bbb7c6ce62123ac545d6f82944dbab09dae6c' && p15.findings === 0
-    && p21.status === 'PASS' && p21.files === 493 && p21.surfaces === 763 && p21.sha256 === '386c030def9a2dda0dec8a24a8ba3a1ef0abba1b4f068bb3ab43f078d244923e'
-    && p22.status === 'PASS' && p22.files === 493 && p22.surfaces === 345 && p22.sha256 === '2f58fd1c0a82afa41ca8f1930ae15ebb792075d47d0f9e2e24872c4aa0facd50'],
+  ['PPK-015 021 and 022 ratchets are exact PASS', p15.status === 'PASS' && p15.files === 500
+    && p15.sourceSha256 === 'd04ef936cbf90704f5709cb553d02ed016827ea48ec99a5611b0dd28b8e77ef8' && p15.findings === 0
+    && p21.status === 'PASS' && p21.files === 500 && p21.surfaces === 779 && p21.sha256 === '6db3beb33e735c2bf46eb2af7250f700cd771536f850b1ffbc9c425556a342f1'
+    && p22.status === 'PASS' && p22.files === 500 && p22.surfaces === 345 && p22.sha256 === '2f58fd1c0a82afa41ca8f1930ae15ebb792075d47d0f9e2e24872c4aa0facd50'],
   ['production signing external manual evidence and requirement acceptance remain closed', scope.truth?.productionSigningTrustProvisioned === false
     && scope.truth?.productionReleaseEligible === false && scope.truth?.requirementsClosed === false
     && scope.validation.countsAsRequirementPass === false && inventory.validation.countsAsRequirementPass === false]

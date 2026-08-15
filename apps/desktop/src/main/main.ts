@@ -18,6 +18,15 @@ import type { GenerateFamilyAiSuggestionInput, ReviewFamilyAiSuggestionInput } f
 import type { CreateMemoryStudioRecordInput, DeleteMemoryStudioRecordInput, CreateMemoryTimeCapsuleInput, ReviewMemoryTimeCapsuleInput, TransitionMemoryTimeCapsuleInput } from '@ppt/domain';
 import type { GrantSmartHomeCameraConsentInput, RevokeSmartHomeCameraConsentInput, SetSmartHomeProcessingInput } from '@ppt/domain';
 import type { EmergencyDisableSignedPluginInput, RollbackSignedPluginInput, SetSignedPluginDesiredStateInput } from '@ppt/domain';
+import type {
+  AddCommunicationRoomMemberInput,
+  CreateCommunicationRoomInput,
+  FreezeCommunicationRoomInput,
+  RekeyCommunicationRoomAfterDeviceRevocationInput,
+  RemoveCommunicationRoomMemberInput,
+  RevokeCommunicationDeviceCredentialInput,
+  SetCommunicationHistoryAccessInput
+} from '@ppt/domain';
 import type { ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { UnifiedAuthorizedSearchInput } from '@ppt/domain';
 import type { RecordManagedLifeItemInput } from '@ppt/domain';
@@ -65,6 +74,7 @@ import {
   MEMORY_STUDIO_IPC_CHANNELS,
   SMART_HOME_ENERGY_IPC_CHANNELS,
   SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS,
+  COMMUNICATION_SECURITY_IPC_CHANNELS,
   PLACES_TRAVEL_ASSET_PET_IPC_CHANNELS,
   HEALTH_CARE_COORDINATION_IPC_CHANNELS,
   HOUSEHOLD_OPERATIONS_IPC_CHANNELS,
@@ -2430,6 +2440,25 @@ function registerIpc(): void {
     store().emergencyDisableSignedPlugin(input));
   registerIpcHandler(SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.rollback,async(_event,input:RollbackSignedPluginInput)=>
     store().rollbackSignedPlugin(input));
+  registerIpcHandler(COMMUNICATION_SECURITY_IPC_CHANNELS.getCenter,async()=>store().getCommunicationSecurityCenter());
+  registerIpcHandler(COMMUNICATION_SECURITY_IPC_CHANNELS.registerDeviceCredential,
+    async(_event,input:{readonly clientOperationId:string;readonly expectedRevision:number})=>
+      store().registerCommunicationDeviceCredential(input));
+  registerIpcHandler(COMMUNICATION_SECURITY_IPC_CHANNELS.revokeDeviceCredential,
+    async(_event,input:RevokeCommunicationDeviceCredentialInput)=>store().revokeCommunicationDeviceCredential(input));
+  registerIpcHandler(COMMUNICATION_SECURITY_IPC_CHANNELS.createRoom,
+    async(_event,input:CreateCommunicationRoomInput)=>store().createCommunicationRoom(input));
+  registerIpcHandler(COMMUNICATION_SECURITY_IPC_CHANNELS.addMember,
+    async(_event,input:AddCommunicationRoomMemberInput)=>store().addCommunicationRoomMember(input));
+  registerIpcHandler(COMMUNICATION_SECURITY_IPC_CHANNELS.removeMember,
+    async(_event,input:RemoveCommunicationRoomMemberInput)=>store().removeCommunicationRoomMember(input));
+  registerIpcHandler(COMMUNICATION_SECURITY_IPC_CHANNELS.rekeyRoom,
+    async(_event,input:RekeyCommunicationRoomAfterDeviceRevocationInput)=>
+      store().rekeyCommunicationRoomAfterDeviceRevocation(input));
+  registerIpcHandler(COMMUNICATION_SECURITY_IPC_CHANNELS.setHistoryAccess,
+    async(_event,input:SetCommunicationHistoryAccessInput)=>store().setCommunicationHistoryAccess(input));
+  registerIpcHandler(COMMUNICATION_SECURITY_IPC_CHANNELS.freezeRoom,
+    async(_event,input:FreezeCommunicationRoomInput)=>store().freezeCommunicationRoom(input));
   registerIpcHandler('finance:listValuations', () => store().listFinanceValuations());
   registerIpcHandler('finance:createValuation', (_event, input:CreateFinanceValuationInput) => store().createFinanceValuation(input));
   registerIpcHandler('family:createRelation', async (_event, input: CreateFamilyRelationInput) => {

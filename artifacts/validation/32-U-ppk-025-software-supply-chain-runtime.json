@@ -37,8 +37,8 @@
       "testFiles": 3,
       "minimumTests": 22,
       "minimumTestFiles": 3,
-      "outputSha256": "128ebdae40021fa18c260817ed1a06896e8166ca7920a5712af3c019d5648ccf",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n··················································\n\n Test Files  3 passed (3)\n      Tests  50 passed (50)\n   Start at  12:20:35\n   Duration  1.87s (transform 340ms, setup 0ms, import 697ms, tests 182ms, environment 0ms)"
+      "outputSha256": "ef284e8a17d19cd9ce996ec3aed86ad5e1a4b2a941193c91b9156237198add51",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n··················································\n\n Test Files  3 passed (3)\n      Tests  50 passed (50)\n   Start at  14:53:12\n   Duration  1.66s (transform 329ms, setup 0ms, import 678ms, tests 149ms, environment 0ms)"
     },
     {
       "id": "root-typescript",
@@ -64,8 +64,8 @@
         "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-software-supply-chain-boundary.mjs"
       ],
       "expectedOutput": "PPK-025 software supply-chain boundary: PASS",
-      "outputSha256": "d0f7ec310e25790d3209cfdad6e53b60c35e5e2ea2e08cb8d8dd596f0001aa89",
-      "outputTail": "PPK-025 software supply-chain boundary: PASS (2 zones / 742 files / 7 canonical references / 6 malicious / 4 benign / 0 findings)."
+      "outputSha256": "6302f515554ce3f037e297d692b1db30c6ce892f6ee315e8ec0daf9747efc8d1",
+      "outputTail": "PPK-025 software supply-chain boundary: PASS (2 zones / 755 files / 7 canonical references / 6 malicious / 4 benign / 0 findings)."
     },
     {
       "id": "ppk-025-deterministic-sbom",
@@ -79,8 +79,8 @@
         "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-ppk025-sbom.mjs"
       ],
       "expectedOutput": "PPK-025 SBOM verification: PASS",
-      "outputSha256": "5992dfdd2d8c70bad1a77fca105e02c8ebe72c75562e92f0e9a2773c5665494a",
-      "outputTail": "PPK-025 deterministic CycloneDX SBOM: PASS (417 components / 377 external / 417 dependency nodes).\n\n\nPPK-025 SBOM verification: PASS (12/12, sha256=6d77da60660f)."
+      "outputSha256": "431b681cf1f17cd227fb97389358818a4e5bf418f323277e7a83b08ad363ead1",
+      "outputTail": "PPK-025 deterministic CycloneDX SBOM: PASS (417 components / 377 external / 417 dependency nodes).\n\n\nPPK-025 SBOM verification: PASS (12/12, sha256=880b0f4d96c5)."
     },
     {
       "id": "ppk-025-license-and-notices",
@@ -125,8 +125,8 @@
         "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-ppk025-vulnerability-gate.mjs"
       ],
       "expectedOutput": "PPK-025 vulnerability gate: PASS",
-      "outputSha256": "5fcf7dc007346712a43fa39306b9e70d88af2f5a036bc939c5632f2cfb482fff",
-      "outputTail": "npm audit evidence (root-production): PASS — 0 finding(s), lock=f3a5c10e6b8b, sbom=6d77da60660f.\n\n\nnpm audit evidence (root-build-toolchain): PASS — 0 finding(s), lock=f3a5c10e6b8b, sbom=6d77da60660f.\n\n\nnpm audit evidence (windows-packager): PASS — 0 finding(s), lock=8690e463f489, sbom=6d77da60660f.\n\n\nPPK-025 vulnerability gate: PASS (25/25, 3 scopes, 0 findings)."
+      "outputSha256": "284d95c003b43e2bed98a0c966d774b3151a79a0a407bb070a47aa9f325ea5d6",
+      "outputTail": "npm audit evidence (root-production): PASS — 0 finding(s), lock=bc14e53dbb6c, sbom=880b0f4d96c5.\n\n\nnpm audit evidence (root-build-toolchain): PASS — 0 finding(s), lock=bc14e53dbb6c, sbom=880b0f4d96c5.\n\n\nnpm audit evidence (windows-packager): PASS — 0 finding(s), lock=8690e463f489, sbom=880b0f4d96c5.\n\n\nPPK-025 vulnerability gate: PASS (25/25, 3 scopes, 0 findings)."
     },
     {
       "id": "ppk-025-two-graph-registry-signature-evidence",
@@ -188,8 +188,8 @@
         "C:\\Users\\Husey\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe scripts/verify-workspace-dependencies.mjs"
       ],
       "expectedOutput": "acyclic production graph",
-      "outputSha256": "f970d7ee3cdbd9b3095525b81b3c61e9cf3e5b2f4847c5dd84339ac0065d9b5f",
-      "outputTail": "Lockfile integrity verified: 1520 assertions across 18 workspaces.\n\n\nDependency supply verified: 1549 assertions / 377 canonical external tarballs / 2 lock graphs.\n- root: 171 packages / 134 tarballs / f3a5c10e6b8b\n- windows-packager: 246 packages / 243 tarballs / 8690e463f489\n\n\nWorkspace dependency contracts verified: 544 assertions / 18 workspaces / acyclic production graph."
+      "outputSha256": "78273945de216033124cf4b9fcd075bc74cceac0a7a7d0ff2dace8c27dcab8b9",
+      "outputTail": "Lockfile integrity verified: 1523 assertions across 18 workspaces.\n\n\nDependency supply verified: 1549 assertions / 377 canonical external tarballs / 2 lock graphs.\n- root: 171 packages / 134 tarballs / bc14e53dbb6c\n- windows-packager: 246 packages / 243 tarballs / 8690e463f489\n\n\nWorkspace dependency contracts verified: 549 assertions / 18 workspaces / acyclic production graph."
     },
     {
       "id": "ppk-025-build-toolchain-security",
@@ -347,5 +347,5 @@
   "sqliteOwnershipTransferred": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": false,
-  "generatedAt": "2026-08-15T09:25:20.957Z"
+  "generatedAt": "2026-08-15T11:57:55.916Z"
 }
