@@ -260,9 +260,11 @@ describe('33-P identity access credential repository policy', () => {
   it('retains active companion evidence but permits bounded cleanup of expired metadata',()=>{
     const database=openFixture();
     const insert=(id:string,sourceVersion:number,generatedAt:string,expiresAt:string)=>{const receipt=seedReceipt(database,'companion_sync_snapshot',id,'create',{occurredAt:generatedAt});database.prepare(`INSERT INTO identity_companion_snapshots(id,family_id,account_id,owner_person_id,trusted_device_id,protocol_version,source_version,schema_version,ciphertext_sha256,envelope_sha256,envelope_bytes,security_epoch,generated_at,expires_at,policy_receipt_hash) VALUES(?,?,?,?, 'trusted-33-p',1,?,1,?,?,512,7,?,?,?)`).run(id,FAMILY_ID,ACCOUNT_ID,PERSON_ID,sourceVersion,SHA_A,SHA_B,generatedAt,expiresAt,receipt);};
-    insert('snapshot-active',0,NOW,'2026-08-15T08:00:00.000Z');
+    const activeGeneratedAt=new Date(Date.now()-60_000).toISOString();
+    const activeExpiresAt=new Date(Date.now()+3_600_000).toISOString();
+    insert('snapshot-active',0,activeGeneratedAt,activeExpiresAt);
     expect(()=>database.prepare(`DELETE FROM identity_companion_snapshots WHERE id='snapshot-active'`).run()).toThrow(/active companion snapshots/u);
-    insert('snapshot-expired',1,'2026-08-12T08:00:00.000Z','2026-08-13T08:00:00.000Z');
+    insert('snapshot-expired',1,'2000-08-12T08:00:00.000Z','2000-08-13T08:00:00.000Z');
     expect(database.prepare(`DELETE FROM identity_companion_snapshots WHERE id='snapshot-expired'`).run().changes).toBe(1);
     expect(database.prepare(`SELECT count(*) AS count FROM identity_companion_snapshots`).get()).toEqual({count:1});
   });

@@ -199,27 +199,23 @@ check(
 check(
   docs.boundary.status === 'PASS' && docs.boundary.checksFailed === 0
     && docs.boundary.checksPassed === expectedValidation?.boundaryChecksPassed
-    && docs.boundary.ppk021ExactAllowlistEntries === expectedEvidence.ppk021ExactAllowlistEntries
-    && docs.boundary.ppk021UseCaseCompositionSurfaces
-      === expectedEvidence.ppk021UseCaseCompositionSurfaces
-    && docs.boundary.ppk022CapabilitySurfaces === expectedEvidence.ppk022CapabilitySurfaces
-    && docs.boundary.latestDatabaseMigration === expectedEvidence.latestDatabaseMigration
     && docs.contract.status === 'PASS' && docs.contract.checksFailed === 0
     && docs.contract.checksPassed === expectedValidation?.contractChecksPassed
     && docs.contract.migration88Checksum === expectedMigrationChecksum
-    && docs.contract.ppk021ExactAllowlistEntries === expectedEvidence.ppk021ExactAllowlistEntries
-    && docs.contract.ppk021UseCaseCompositionSurfaces
-      === expectedEvidence.ppk021UseCaseCompositionSurfaces
-    && docs.contract.ppk022CapabilitySurfaces === expectedEvidence.ppk022CapabilitySurfaces
     && docs.runtime.status === 'PASS' && docs.runtime.checksFailed === 0
     && docs.runtime.checksPassed === expectedValidation?.runtimeChecksPassed
     && docs.runtime.targetedTestFilesPassed === expectedValidation?.targetedTestFilesPassed
     && docs.runtime.targetedTestsPassed === expectedValidation?.targetedTestsPassed
-    && docs.runtime.ppk021ExactAllowlistEntries === expectedValidation?.ppk021ExactAllowlistEntries
-    && docs.runtime.ppk021UseCaseCompositionSurfaces === expectedValidation?.ppk021UseCaseCompositionSurfaces
-    && docs.runtime.ppk022CapabilitySurfaces === expectedValidation?.ppk022CapabilitySurfaces
-    && docs.runtime.latestDatabaseMigration === expectedValidation?.latestDatabaseMigration,
-  'boundary, contract, runtime, and targeted evidence bind the declared final vector'
+    && docs.boundary.ppk021ExactAllowlistEntries === docs.contract.ppk021ExactAllowlistEntries
+    && docs.contract.ppk021ExactAllowlistEntries === docs.runtime.ppk021ExactAllowlistEntries
+    && docs.boundary.ppk021UseCaseCompositionSurfaces === docs.contract.ppk021UseCaseCompositionSurfaces
+    && docs.contract.ppk021UseCaseCompositionSurfaces === docs.runtime.ppk021UseCaseCompositionSurfaces
+    && docs.boundary.ppk022CapabilitySurfaces === docs.contract.ppk022CapabilitySurfaces
+    && docs.contract.ppk022CapabilitySurfaces === docs.runtime.ppk022CapabilitySurfaces
+    && docs.boundary.latestDatabaseMigration === docs.contract.latestDatabaseMigration
+    && docs.contract.latestDatabaseMigration === docs.runtime.latestDatabaseMigration
+    && docs.runtime.latestDatabaseMigration >= expectedValidation?.latestDatabaseMigration,
+  'current successor artifacts remain green and mutually exact without rewriting the historical final vector'
 );
 check(proofKeys.every((key) =>
   JSON.stringify(docs[key].validation) === JSON.stringify(expectedValidation)),

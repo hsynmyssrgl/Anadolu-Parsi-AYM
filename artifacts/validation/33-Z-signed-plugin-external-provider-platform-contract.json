@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "step": "33-Z",
+  "decision": "DEC-237",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "countsAsRequirementPass": false,
+  "migration104Sha256": "91a16031e87986f5b6e561cd9e767ad0b7e68d3c030ceace4276441b921b6547",
+  "checkCount": 12,
+  "passed": 12,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "scope inventory and six-file test matrix are exact",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 104 source manifest and scope checksums are canonical",
+      "status": "PASS"
+    },
+    {
+      "name": "migration owns immutable release mutation and current installation bindings",
+      "status": "PASS"
+    },
+    {
+      "name": "domain and security fix nine providers capabilities and fail-closed manifest truth",
+      "status": "PASS"
+    },
+    {
+      "name": "repository contract exposes exact center release mutation write and payload-free policy ports",
+      "status": "PASS"
+    },
+    {
+      "name": "repository enforces receipt owner revision and non-runnable truth bindings",
+      "status": "PASS"
+    },
+    {
+      "name": "desktop adapter and runtime compose central Life policy with transactional evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "main preload and renderer types expose exact four safe methods",
+      "status": "PASS"
+    },
+    {
+      "name": "tests cover signature tamper privilege bounds replay rollback owner isolation and renderer authority denial",
+      "status": "PASS"
+    },
+    {
+      "name": "decision and threat model deny execution provider production trust sandbox and acceptance claims",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-015 021 and 022 ratchets are exact PASS",
+      "status": "PASS"
+    },
+    {
+      "name": "production signing external manual evidence and requirement acceptance remain closed",
+      "status": "PASS"
+    }
+  ],
+  "generatedAt": "2026-08-15T09:42:42.079Z"
+}

@@ -52,12 +52,12 @@ const commands = Object.freeze([
   Object.freeze({
     id: 'ppk021-ast-ratchet',
     args: ['scripts/verify-platform-policy-ast-gate.mjs'],
-    expectOutput: '"exactAllowlistEntries": 554'
+    expectOutput: '"exactAllowlistEntries": 763'
   }),
   Object.freeze({
     id: 'ppk022-capability-ratchet',
     args: ['scripts/verify-platform-capability-manifest-gate.mjs'],
-    expectOutput: '"exactManifestSurfaces": 246'
+    expectOutput: '"exactManifestSurfaces": 345'
   }),
   Object.freeze({
     id: 'decision-ledger',
@@ -98,6 +98,7 @@ const failures = results.filter((result) => result.status !== 'PASS').map((resul
 const targeted = results.find((result) => result.id === 'family-emergency-card-portability-targeted-tests');
 let boundary = {};
 let contract = {};
+let latestDatabaseMigration = 88;
 try {
   boundary = JSON.parse(await readFile(
     'artifacts/validation/33-J-family-emergency-card-portability-boundary.json', 'utf8'
@@ -105,6 +106,10 @@ try {
   contract = JSON.parse(await readFile(
     'artifacts/validation/33-J-family-emergency-card-portability-contract.json', 'utf8'
   ));
+  const migrationManifest = JSON.parse(await readFile(
+    'artifacts/manifests/DATABASE_MIGRATION_VERIFICATION_MVP56.json', 'utf8'
+  ));
+  latestDatabaseMigration = migrationManifest.migrationVersions?.at(-1)?.version ?? 88;
 } catch {
   // Failed prerequisites remain visible in result output.
 }
@@ -117,7 +122,7 @@ const report = Object.freeze({
   checksFailed: failures.length,
   targetedTestFilesPassed: targeted?.testFiles ?? 0,
   targetedTestsPassed: targeted?.tests ?? 0,
-  latestDatabaseMigration: 88,
+  latestDatabaseMigration,
   migration88Checksum: boundary.migration88Checksum,
   portabilityItemTypes: 5,
   ipcChannels: 3,

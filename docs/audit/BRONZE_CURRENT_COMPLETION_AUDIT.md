@@ -1,12 +1,12 @@
 # Bronze guncel tamamlama denetimi
 
-Olusturma (UTC): 2026-08-13T03:32:18.305Z
+Olusturma (UTC): 2026-08-15T09:25:20.934Z
 
 ## Sonuc
 
 - Denetim durumu: **PASS_WITH_OPEN_SCOPE**
 - Yetkili kaynak: `06_KOD/app`
-- Guncel adim: **33-J**
+- Guncel adim: **33-P**
 - PPK-002: **COMPLETE**
 - PPK-003: **COMPLETE**
 - PPK-004: **COMPLETE**
@@ -23,19 +23,19 @@ Olusturma (UTC): 2026-08-13T03:32:18.305Z
 ## Yuzde gercekligi
 
 - Resmi agirlikli Bronze ilerlemesi: **%25**
-- Kati gereksinim kapanisi: **%21.1429** (74/350)
-- Uygulama zinciri kapsami: **%21.6286**
-- Yonetisim ve kanit zinciri kapsami: **%55.1429**
+- Kati gereksinim kapanisi: **%30.4469** (109/358)
+- Uygulama zinciri kapsami: **%29.6648**
+- Yonetisim ve kanit zinciri kapsami: **%58.8454**
 
 Bu oranlar farkli seyleri olcer ve tek bir uydurma yuzdede birlestirilemez.
 
 ## Kapsam durumu
 
-- COMPLETE: 74
-- PARTIAL: 26
+- COMPLETE: 109
+- PARTIAL: 25
 - FOUNDATION_STARTED: 1
-- NOT_IMPLEMENTED: 249
-- Toplam acik gereksinim: 276
+- NOT_IMPLEMENTED: 223
+- Toplam acik gereksinim: 249
 
 ## Kural ve kapilar
 
@@ -258,7 +258,6 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | DHA-026 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Backup separation | Replica ile yedeğin ayrılması; immutable/offline/offsite backup |
 | DHA-029 | STARTED_BEFORE_NEW | P0 | PARTIAL | 1/13 | Security operations | Cluster CA, cert rotation, revocation, key epoch, replay/freshness ve rate limit |
 | EXT-078 | STARTED_BEFORE_NEW | P1 | PARTIAL | 2/13 | SIGNED_PLUGIN_PLATFORM | Policy Kernel zorunlu kontrolü |
-| B3-02 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Aile ve Hafıza | Taslak, otomatik kaydetme, geri al ve değişiklik geçmişi |
 | B3-03 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Aile ve Hafıza | Doğrudan medya/belge bağlama ve davetiye yaşam döngüsü |
 | B3-05 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Aile ve Hafıza | Tüm modüllerde yetki filtreli birleşik arama |
 | B5-01 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Sağlık ve Yaşam | Alerji, kronik durum, kan grubu, aşı, ölçüm, randevu ve belge ilişkisi |
@@ -266,9 +265,10 @@ Baslanmis PARTIAL/FOUNDATION_STARTED isler yeni NOT_IMPLEMENTED islerden once; h
 | B6-06 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | AI, Miras ve Entegrasyon | Apple/Google/Microsoft Authorization Code+PKCE+state+nonce+token vault |
 | B8-05 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Dayanıklılık ve Windows | 10k kişi/100k olay/10k belge metadata senaryosu ve 7 günlük soak hedefi |
 | DHA-025 | STARTED_BEFORE_NEW | P1 | PARTIAL | 1/13 | Observability | Yerel-first metrics, traces, structured logs ve correlationId |
-| EXT-036 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | PRIVACY_OWNERSHIP | Kullanıcıya tutulan verileri ve erişen kişileri gösterme |
-| EXT-037 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | PRIVACY_OWNERSHIP | Erişim nedeni ve son erişim geçmişi |
-| EXT-038 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 2/13 | PRIVACY_OWNERSHIP | Açık cihazlar, Apple senkronu, AI/OCR/çeviri işleme görünümü |
+| AI-LNG-001 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 1/13 | AI Dil ve Çeviri | Mesaj dilini algılama ve kullanıcı tercihine göre isteğe bağlı çeviri |
+| AI-LNG-002 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 1/13 | AI Dil ve Çeviri | Orijinal metni her zaman koruma; çeviri ayrı görünüm ve makine çevirisi etiketi |
+| AI-LNG-003 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 1/13 | AI Dil ve Çeviri | Canlı konuşmadan yazıya altyazı ve konuşmacı ayrımı |
+| AI-LNG-007 | NEW_NOT_STARTED | P0 | NOT_IMPLEMENTED | 1/13 | AI Dil ve Çeviri | Belirsiz kelime, düşük güven ve olası hataları görünür işaretleme |
 
 Tam acik-is listesi `artifacts/inventory/BRONZE_CURRENT_COMPLETION_AUDIT.json` icindedir.
 

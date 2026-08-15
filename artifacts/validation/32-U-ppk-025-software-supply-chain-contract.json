@@ -120,9 +120,9 @@
       "passed": true
     },
     {
-      "name": "two lock graphs contain exact 414 component nodes",
+      "name": "two lock graphs contain exact 417 component nodes",
       "passed": true,
-      "detail": "414"
+      "detail": "417"
     },
     {
       "name": "root lock contains exact 18 workspaces",
@@ -130,9 +130,9 @@
       "detail": "18"
     },
     {
-      "name": "two lock graphs contain exact 374 registry tarballs",
+      "name": "two lock graphs contain exact 377 registry tarballs",
       "passed": true,
-      "detail": "374"
+      "detail": "377"
     },
     {
       "name": "all external dependency tarballs use canonical HTTPS npm registry and SHA-512 integrity",
@@ -143,21 +143,21 @@
       "passed": true
     },
     {
-      "name": "policy pins exact 414 374 and 357 coverage",
+      "name": "policy pins exact 417 377 and 358 coverage",
       "passed": true
     },
     {
-      "name": "CycloneDX 1.6 SBOM has exact 414 unique components",
+      "name": "CycloneDX 1.6 SBOM has exact 417 unique components",
       "passed": true
     },
     {
-      "name": "SBOM has exact 414 dependency nodes with known refs",
+      "name": "SBOM has exact 417 dependency nodes with known refs",
       "passed": true
     },
     {
-      "name": "third-party notice inventory has exact 357 components",
+      "name": "third-party notice inventory has exact 358 components",
       "passed": true,
-      "detail": "357"
+      "detail": "358"
     },
     {
       "name": "third-party notice text is non-empty and separately material-bound",
@@ -320,7 +320,7 @@
       "passed": true
     },
     {
-      "name": "targeted tests exercise 414 374 357 and signed happy path",
+      "name": "targeted tests exercise 417 377 358 and signed happy path",
       "passed": true
     },
     {
@@ -336,7 +336,7 @@
       "passed": true
     },
     {
-      "name": "release evidence has exact 18 414 414 374 357 coverage",
+      "name": "release evidence has exact 18 417 417 377 358 coverage",
       "passed": true
     },
     {
@@ -356,7 +356,7 @@
       "passed": true
     },
     {
-      "name": "production model preserves no migration and content-free status",
+      "name": "production model preserves its migration 77 baseline and content-free status",
       "passed": true
     },
     {
@@ -410,10 +410,10 @@
   "coverage": {
     "lockfiles": 2,
     "workspaces": 18,
-    "sbomComponents": 414,
-    "dependencyNodes": 414,
-    "registryPackages": 374,
-    "licenseComponents": 357,
+    "sbomComponents": 417,
+    "dependencyNodes": 417,
+    "registryPackages": 377,
+    "licenseComponents": 358,
     "vulnerabilityScopes": 3,
     "registrySignatureScopes": 2,
     "externalAssets": 5,
@@ -435,7 +435,7 @@
   "selfSignedCertificateGrantsProductionAuthority": false,
   "historicalEvidenceGrantsCurrentAuthority": false,
   "schemaMigrationRequired": false,
-  "latestDatabaseMigration": 77,
+  "latestDatabaseMigration": 104,
   "historicalBackfillPerformed": false,
   "realDataTransferPerformed": false,
   "cutoverPerformed": false,
@@ -443,5 +443,5 @@
   "sqliteOwnershipTransferred": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": false,
-  "generatedAt": "2026-08-12T08:14:14.870Z"
+  "generatedAt": "2026-08-15T09:20:59.876Z"
 }

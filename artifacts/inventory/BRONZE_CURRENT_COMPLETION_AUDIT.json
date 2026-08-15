@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "BRONZE-CURRENT-COMPLETION-AUDIT",
-  "generatedAt": "2026-08-13T03:32:18.305Z",
+  "generatedAt": "2026-08-15T09:25:20.934Z",
   "release": "Bronze 04.08.2026.29",
   "PPK002": "COMPLETE",
   "PPK003": "COMPLETE",
@@ -15,7 +15,7 @@
   "PPK011": "COMPLETE",
   "PPK012": "COMPLETE",
   "authoritativeSource": "06_KOD/app",
-  "currentStep": "33-J",
+  "currentStep": "33-P",
   "status": "PASS_WITH_OPEN_SCOPE",
   "numberingAssessment": {
     "status": "CORRECT_ONLY_WITH_GATED_APPEND_ONLY_NUMBERING",
@@ -29,40 +29,40 @@
   "percentages": {
     "officialWeightedBronzePercent": 25,
     "officialWeightedEvidenceStep": "31-T",
-    "strictRequirementCompletionPercent": 21.1429,
-    "implementationChainCoveragePercent": 21.6286,
-    "governanceEvidenceChainCoveragePercent": 55.1429,
+    "strictRequirementCompletionPercent": 30.4469,
+    "implementationChainCoveragePercent": 29.6648,
+    "governanceEvidenceChainCoveragePercent": 58.8454,
     "interpretation": "These are separate measures and must not be blended into an invented single completion claim."
   },
   "scope": {
-    "total": 350,
+    "total": 358,
     "statusCounts": {
-      "COMPLETE": 74,
+      "COMPLETE": 109,
       "FOUNDATION_STARTED": 1,
-      "NOT_IMPLEMENTED": 249,
-      "PARTIAL": 26
+      "NOT_IMPLEMENTED": 223,
+      "PARTIAL": 25
     },
     "priorityCounts": {
-      "P0": 210,
+      "P0": 218,
       "P1": 135,
       "P2": 5
     },
     "completeByPriority": {
-      "P0": 61,
-      "P1": 13,
+      "P0": 88,
+      "P1": 21,
       "P2": 0
     },
-    "incompleteCount": 276,
-    "strictComplete": 74,
+    "incompleteCount": 249,
+    "strictComplete": 109,
     "implementationCoverage": {
-      "passed": 757,
-      "total": 3500,
-      "percent": 21.6286
+      "passed": 1062,
+      "total": 3580,
+      "percent": 29.6648
     },
     "governanceCoverage": {
-      "passed": 579,
-      "total": 1050,
-      "percent": 55.1429
+      "passed": 632,
+      "total": 1074,
+      "percent": 58.8454
     }
   },
   "rules": {
@@ -94,7 +94,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "Feature Reality Gate: PASS honesty / 350 requirements / surface 17+5=22 / unused API 14+0 / Silver BLOCKED."
+          "Feature Reality Gate: PASS honesty / 358 requirements / surface 17+5=22 / unused API 14+0 / Silver BLOCKED."
         ]
       },
       {
@@ -548,7 +548,7 @@
         "exitCode": 0,
         "status": "PASS",
         "tail": [
-          "Step Checkpoint Gate: PASS (2050 checks / current 33-J)."
+          "Step Checkpoint Gate: PASS (2241 checks / current 33-P)."
         ]
       }
     ],
@@ -558,10 +558,10 @@
       "exitCode": 1,
       "status": "FAIL",
       "tail": [
+        "scope source counts mismatch",
         "complete requirement IDs mismatch",
         "promotion completion percent mismatch",
         "chain evidence coverage mismatch",
-        "active top-level step count mismatch",
         "current step must be 29-D6 or a durably authorized forward step after receipt completion",
         "29-D6 active state mismatch",
         "active governance next task mismatch",
@@ -1222,7 +1222,7 @@
     "freshnessVerifier": "scripts/generate-current-delivery-report.mjs invokes local and external live source-protection verification",
     "officialCompletionClaimed": true,
     "storageBackend": "EXTERNAL_USB_D_DRIVE",
-    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\a5457c98e3de2e0e31cff5e9a10d1572182f09aa38ebbe56d015585eab2e7d43"
+    "externalPath": "D:\\AYM_LIBRARY\\Panthera pardus tulliana\\Anadolu Parsı Aile Yaşam Merkezi\\Bronze 04.08.2026.29\\authoritative-source\\82fe78164d842a960150c5054a1489b68ec3d46de71714bc3164b9211638b120"
   },
   "remainingWork": [
     {
@@ -1661,30 +1661,6 @@
       ]
     },
     {
-      "id": "B3-02",
-      "priority": "P1",
-      "status": "PARTIAL",
-      "workOrderClass": "STARTED_BEFORE_NEW",
-      "area": "Aile ve Hafıza",
-      "title": "Taslak, otomatik kaydetme, geri al ve değişiklik geçmişi",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
       "id": "B3-03",
       "priority": "P1",
       "status": "PARTIAL",
@@ -1849,167 +1825,6 @@
         "menu",
         "targetedTest",
         "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "EXT-036",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "PRIVACY_OWNERSHIP",
-      "title": "Kullanıcıya tutulan verileri ve erişen kişileri gösterme",
-      "completedChainCount": 2,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "evidence"
-      ]
-    },
-    {
-      "id": "EXT-037",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "PRIVACY_OWNERSHIP",
-      "title": "Erişim nedeni ve son erişim geçmişi",
-      "completedChainCount": 2,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "evidence"
-      ]
-    },
-    {
-      "id": "EXT-038",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "PRIVACY_OWNERSHIP",
-      "title": "Açık cihazlar, Apple senkronu, AI/OCR/çeviri işleme görünümü",
-      "completedChainCount": 2,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "evidence"
-      ]
-    },
-    {
-      "id": "EXT-039",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "PRIVACY_OWNERSHIP",
-      "title": "Rıza süreleri, tek dokunuşla iptal ve kayıp cihaz kapatma",
-      "completedChainCount": 2,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "evidence"
-      ]
-    },
-    {
-      "id": "EXT-040",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "PRIVACY_OWNERSHIP",
-      "title": "Şifreli veri dışa aktarma ve veri mirası",
-      "completedChainCount": 2,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "evidence"
-      ]
-    },
-    {
-      "id": "EXT-041",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "PRIVACY_OWNERSHIP",
-      "title": "Türetilmiş veri zinciri ve kaynak silme yayılımı",
-      "completedChainCount": 2,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "evidence"
-      ]
-    },
-    {
-      "id": "EXT-042",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "PRIVACY_OWNERSHIP",
-      "title": "İzin simülasyonu: karşı taraf ne görecek",
-      "completedChainCount": 2,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
         "evidence"
       ]
     },
@@ -2278,276 +2093,12 @@
       ]
     },
     {
-      "id": "AUD-COM-006",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Denetim ve Arşiv",
-      "title": "Kullanıcıya kendi verisini dışa aktarma, saklama süresini görme ve silme talebi",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
       "id": "B2-02",
       "priority": "P0",
       "status": "NOT_IMPLEMENTED",
       "workOrderClass": "NEW_NOT_STARTED",
       "area": "Kimlik ve Güvenlik",
       "title": "FIDO2/WebAuthn güvenlik anahtarı/passkey desteği",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B5-06",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Sağlık ve Yaşam",
-      "title": "Açık rıza, amaç, süre, görünür gösterge, otomatik sonlanma ve audit",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B6-02",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "AI, Miras ve Entegrasyon",
-      "title": "Gör, düzelt, sınırla, sil ve süre sonu",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B7-01",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Erişilebilirlik ve Görsel Kapanış",
-      "title": "Gövde metni varsayılan en az 16 px; 8–13 px yoğun metinleri kaldır",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B7-02",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Erişilebilirlik ve Görsel Kapanış",
-      "title": "Windows 100–225% metin ölçeği ve uygulama içi normal/büyük/çok büyük/özel ölçek",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B7-03",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Erişilebilirlik ve Görsel Kapanış",
-      "title": "100–400% DPI, 1280×720'den 4K'ya ve küçük pencereye reflow",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B7-04",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Erişilebilirlik ve Görsel Kapanış",
-      "title": "Tüm işlevler klavye, mantıklı tab sırası, kısayol ve kaçış davranışı",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B7-05",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Erişilebilirlik ve Görsel Kapanış",
-      "title": "Ad, rol, değer, durum, canlı bölge ve hata duyuruları",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B7-06",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Erişilebilirlik ve Görsel Kapanış",
-      "title": "Yüksek kontrast, forced-colors, renk körlüğü ve renk dışı durum işaretleri",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B7-08",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Erişilebilirlik ve Görsel Kapanış",
-      "title": "En az 44 px hedef, kritik eylemlerde mesafe ve yanlış dokunma koruması",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B7-12",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Erişilebilirlik ve Görsel Kapanış",
-      "title": "Manifestodaki açık tema, teal/gold kimlik, kart, navigasyon ve özgün ikon sistemi",
       "completedChainCount": 1,
       "completionBlockers": [],
       "missingChain": [
@@ -3940,30 +3491,6 @@
       "workOrderClass": "NEW_NOT_STARTED",
       "area": "Kural Değişikliği",
       "title": "Politika zayıflatma yalnız açık kullanıcı kararı, yeni sürüm, risk analizi ve rollback ile",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "PPK-028",
-      "priority": "P0",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "İhlal Müdahalesi",
-      "title": "Politika ihlali şüphesinde oturum/cihaz/capability iptali, karantina ve güvenli olay paketi",
       "completedChainCount": 1,
       "completionBlockers": [],
       "missingChain": [
@@ -6798,174 +6325,6 @@
       "workOrderClass": "NEW_NOT_STARTED",
       "area": "AI, Miras ve Entegrasyon",
       "title": "Zaman kapsülü, açılma koşulu, içerik, iptal ve geri alma",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B7-07",
-      "priority": "P1",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Erişilebilirlik ve Görsel Kapanış",
-      "title": "Windows Magnifier ile odak takibi, yatay kayma ve kesilmeme",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B7-09",
-      "priority": "P1",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Erişilebilirlik ve Görsel Kapanış",
-      "title": "Hareket azaltma, ses kapatma, altyazı, tekrar oynatma ve görsel alternatif",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B7-10",
-      "priority": "P1",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Erişilebilirlik ve Görsel Kapanış",
-      "title": "Kolay Okuma modu, sade dil, adım adım sihirbaz, açıklamalı hata ve yardım",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B7-11",
-      "priority": "P1",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Erişilebilirlik ve Görsel Kapanış",
-      "title": "Genç, standart, ileri yaş, düşük görme ve bakım veren görünüm tercihleri",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B7-13",
-      "priority": "P1",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Erişilebilirlik ve Görsel Kapanış",
-      "title": "Rahat/standart/kompakt görünüm; bilgi saklamadan progressive disclosure",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B7-14",
-      "priority": "P1",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Erişilebilirlik ve Görsel Kapanış",
-      "title": "Canlı doğrulama, taslak/otomatik kayıt, geri al, hata özeti ve alan odağı",
-      "completedChainCount": 1,
-      "completionBlockers": [],
-      "missingChain": [
-        "domain",
-        "schema",
-        "migration",
-        "useCase",
-        "repository",
-        "policy",
-        "apiOrIpc",
-        "ui",
-        "menu",
-        "targetedTest",
-        "decision",
-        "evidence"
-      ]
-    },
-    {
-      "id": "B7-15",
-      "priority": "P1",
-      "status": "NOT_IMPLEMENTED",
-      "workOrderClass": "NEW_NOT_STARTED",
-      "area": "Erişilebilirlik ve Görsel Kapanış",
-      "title": "Her ekran için anlamlı empty/loading/offline/error/retry durumları",
       "completedChainCount": 1,
       "completionBlockers": [],
       "missingChain": [

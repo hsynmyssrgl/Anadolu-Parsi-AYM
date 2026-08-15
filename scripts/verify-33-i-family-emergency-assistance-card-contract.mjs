@@ -82,9 +82,9 @@ check('boundary evidence is exact green under current successor ratchets', bound
   && boundary.emergencyServiceGuarantee === 'not_claimed'
   && Number.isInteger(boundary.ppk021ExactAllowlistEntries)
   && Number.isInteger(boundary.ppk021UseCaseCompositionSurfaces)
-  && boundary.ppk021ExactAllowlistEntries === 554
-  && boundary.ppk021UseCaseCompositionSurfaces === 281
-  && boundary.ppk022CapabilitySurfaces === 246);
+  && boundary.ppk021ExactAllowlistEntries === 763
+  && boundary.ppk021UseCaseCompositionSurfaces === 370
+  && boundary.ppk022CapabilitySurfaces === 345);
 check('DEC-220 is active and decision cardinality is exact', ledger.decisionCount === ledger.decisions?.length
   && ledger.decisions?.some((item) => item.id === 'DEC-220' && item.status === 'ACTIVE'
     && item.requirements?.join(',') === ids.join(',')

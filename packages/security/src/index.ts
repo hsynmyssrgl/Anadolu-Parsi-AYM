@@ -8,6 +8,7 @@ export * from './temporary-verifiable-credential.js';
 export * from './oidc-pkce.js';
 export * from './companion-sync-envelope.js';
 export * from './local-ocr-security.js';
+export * from './signed-plugin-manifest.js';
 
 export * from './session.js';
 export * from './totp.js';

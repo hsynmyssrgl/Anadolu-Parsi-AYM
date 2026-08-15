@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "step": "33-Z",
+  "decision": "DEC-237",
+  "status": "PLANNED",
+  "governanceState": "LOCAL_IMPLEMENTATION_STARTED",
+  "requirements": ["B6-05", "PPK-025", "EXT-075", "EXT-076", "EXT-077", "EXT-078", "EXT-079", "EXT-080", "EXT-081"],
+  "implementationChain": {
+    "domain": ["packages/domain/src/signed-plugin-platform.ts"],
+    "security": ["packages/security/src/signed-plugin-manifest.ts"],
+    "application": ["packages/application/src/signed-plugin-platform-use-cases.ts"],
+    "repositoryContract": ["packages/repository-contracts/src/signed-plugin-platform-repository.ts"],
+    "migration": ["packages/database/src/family-database-migrations.ts#104"],
+    "repository": ["packages/repositories/src/signed-plugin-platform-repository.ts"],
+    "policyAndComposition": [
+      "apps/desktop/src/main/life-production-policy-runtime.ts",
+      "apps/desktop/src/main/signed-plugin-platform-application-adapter.ts",
+      "apps/desktop/src/main/repository-composition-root.ts",
+      "apps/desktop/src/main/data-store.ts"
+    ],
+    "ipc": [
+      "apps/desktop/src/main/ipc-integration-policy.ts",
+      "apps/desktop/src/main/ipc-request-lifecycle.ts",
+      "apps/desktop/src/main/main.ts",
+      "apps/desktop/src/main/preload.ts",
+      "apps/desktop/src/renderer/global.d.ts"
+    ],
+    "ui": ["apps/desktop/src/renderer/SignedPluginPlatformPanel.tsx", "apps/desktop/src/renderer/App.tsx"]
+  },
+  "implementedTargetedTests": [
+    "packages/security/tests/signed-plugin-manifest.test.ts",
+    "packages/application/tests/signed-plugin-platform-use-cases.test.ts",
+    "packages/repositories/signed-plugin-platform-repository-policy.test.ts",
+    "apps/desktop/tests/signed-plugin-platform-data-store.test.ts",
+    "apps/desktop/tests/signed-plugin-platform-ipc-integration.test.ts",
+    "apps/desktop/tests/signed-plugin-platform-ui.test.ts"
+  ],
+  "securityControls": {
+    "ed25519ManifestVerification": true,
+    "exactCanonicalEnvelope": true,
+    "publicHostAllowlistValidation": true,
+    "minimumCapabilityMapping": true,
+    "dataSensitivityPurposeAccessRetentionBinding": true,
+    "sbomLicenseProvenanceHashBinding": true,
+    "centralPepReceiptFence": true,
+    "ownerAccountFamilyBound": true,
+    "immutableReleaseAndMutationLedgers": true,
+    "payloadFreePolicyResolution": true,
+    "contentFreeAuditAndOutbox": true,
+    "boundedIpcAndReadResults": true,
+    "rendererSigningAndInstallAuthorityExcluded": true,
+    "thirdPartyCodeExecutionExcluded": true,
+    "providerConnectionAndCredentialsExcluded": true
+  },
+  "validation": {
+    "targetedTestFileRatchet": 6,
+    "targetedTestRatchet": 26,
+    "migrationVersion": 104,
+    "migrationSha256": "91a16031e87986f5b6e561cd9e767ad0b7e68d3c030ceace4276441b921b6547",
+    "ppk015": {"status":"PASS","files":493,"sourceSha256":"38a3e4bf23f5302ad9e02c7be94bbb7c6ce62123ac545d6f82944dbab09dae6c","findings":0},
+    "ppk021": {"status":"PASS","files":493,"surfaces":763,"sha256":"386c030def9a2dda0dec8a24a8ba3a1ef0abba1b4f068bb3ab43f078d244923e","targeted":17,"contract":84,"runtime":20},
+    "ppk022": {"status":"PASS","files":493,"surfaces":345,"sha256":"2f58fd1c0a82afa41ca8f1930ae15ebb792075d47d0f9e2e24872c4aa0facd50","targeted":19,"contract":110,"runtime":24},
+    "countsAsRequirementPass": false
+  },
+  "externalAndManualEvidence": "NOT_RUN",
+  "countsAsRequirementPass": false
+}

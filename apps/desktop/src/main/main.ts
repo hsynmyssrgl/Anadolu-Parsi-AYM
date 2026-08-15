@@ -17,6 +17,7 @@ import type { CreatePlacesTravelItemInput, DeletePlacesTravelItemInput, UpdatePl
 import type { GenerateFamilyAiSuggestionInput, ReviewFamilyAiSuggestionInput } from '@ppt/domain';
 import type { CreateMemoryStudioRecordInput, DeleteMemoryStudioRecordInput, CreateMemoryTimeCapsuleInput, ReviewMemoryTimeCapsuleInput, TransitionMemoryTimeCapsuleInput } from '@ppt/domain';
 import type { GrantSmartHomeCameraConsentInput, RevokeSmartHomeCameraConsentInput, SetSmartHomeProcessingInput } from '@ppt/domain';
+import type { EmergencyDisableSignedPluginInput, RollbackSignedPluginInput, SetSignedPluginDesiredStateInput } from '@ppt/domain';
 import type { ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { UnifiedAuthorizedSearchInput } from '@ppt/domain';
 import type { RecordManagedLifeItemInput } from '@ppt/domain';
@@ -63,6 +64,7 @@ import {
   FAMILY_AI_ASSISTANT_IPC_CHANNELS,
   MEMORY_STUDIO_IPC_CHANNELS,
   SMART_HOME_ENERGY_IPC_CHANNELS,
+  SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS,
   PLACES_TRAVEL_ASSET_PET_IPC_CHANNELS,
   HEALTH_CARE_COORDINATION_IPC_CHANNELS,
   HOUSEHOLD_OPERATIONS_IPC_CHANNELS,
@@ -2421,6 +2423,13 @@ function registerIpc(): void {
     store().revokeSmartHomeCameraConsent(input));
   registerIpcHandler(SMART_HOME_ENERGY_IPC_CHANNELS.setProcessing,async(_event,input:SetSmartHomeProcessingInput)=>
     store().setSmartHomeProcessing(input));
+  registerIpcHandler(SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.getCenter,async()=>store().getSignedPluginPlatformCenter());
+  registerIpcHandler(SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.setDesiredState,async(_event,input:SetSignedPluginDesiredStateInput)=>
+    store().setSignedPluginDesiredState(input));
+  registerIpcHandler(SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.emergencyDisable,async(_event,input:EmergencyDisableSignedPluginInput)=>
+    store().emergencyDisableSignedPlugin(input));
+  registerIpcHandler(SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.rollback,async(_event,input:RollbackSignedPluginInput)=>
+    store().rollbackSignedPlugin(input));
   registerIpcHandler('finance:listValuations', () => store().listFinanceValuations());
   registerIpcHandler('finance:createValuation', (_event, input:CreateFinanceValuationInput) => store().createFinanceValuation(input));
   registerIpcHandler('family:createRelation', async (_event, input: CreateFamilyRelationInput) => {

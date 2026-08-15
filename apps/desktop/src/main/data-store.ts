@@ -38,7 +38,12 @@ import {
 } from '@ppt/core';
 import { EventDispatcher, createExponentialRetryPolicy, type DomainEvent, type EventDispatchBatchSummary, type EventDispatchStore } from '@ppt/events';
 import type { Logger } from '@ppt/logging';
-import { authorizationRoleMatches, canonicalizePrivacyDataExport } from '@ppt/security';
+import {
+  authorizationRoleMatches,
+  canonicalizePrivacyDataExport,
+  verifySignedPluginManifest,
+  type TrustedPluginSigningKey
+} from '@ppt/security';
 import type { RepositoryExecutionPolicyGuard } from '@ppt/repositories';
 import {
   AppendAuditEntryUseCase, type AuditWriteApplicationContext, GetLatestAuditOccurredAtUseCase, type AuditReadApplicationContext, InstallAuditStorageProtectionUseCase, ListAutomationRulesUseCase, CreateAutomationRuleUseCase, ToggleAutomationRuleUseCase, ListAutomationRunsUseCase, RunAutomationRulesUseCase, type AutomationApplicationContext, GetReportSummaryUseCase, type ReportApplicationContext,
@@ -178,6 +183,11 @@ import {
   GrantSmartHomeCameraConsentUseCase,
   RevokeSmartHomeCameraConsentUseCase,
   SetSmartHomeProcessingUseCase,
+  GetSignedPluginPlatformCenterUseCase,
+  RegisterSignedPluginReleaseUseCase,
+  SetSignedPluginDesiredStateUseCase,
+  EmergencyDisableSignedPluginUseCase,
+  RollbackSignedPluginUseCase,
   ListLifeRecordsUseCase,
   CreateLifeRecordUseCase,
   GetManagedLifeWorkspaceUseCase,
@@ -346,6 +356,7 @@ import type { CreatePlacesTravelItemInput, DeletePlacesTravelItemInput, PlacesTr
 import type { FamilyAiAssistantCenterView, FamilyAiSuggestionMutationReceiptView, GenerateFamilyAiSuggestionInput, ReviewFamilyAiSuggestionInput } from '@ppt/domain';
 import type { CreateMemoryStudioRecordInput, DeleteMemoryStudioRecordInput, CreateMemoryTimeCapsuleInput, MemoryStudioCenterView, MemoryStudioMutationReceiptView, ReviewMemoryTimeCapsuleInput, TransitionMemoryTimeCapsuleInput } from '@ppt/domain';
 import type { GrantSmartHomeCameraConsentInput, RecordSmartHomeObservationInput, RegisterSmartHomeDeviceInput, RevokeSmartHomeCameraConsentInput, SetSmartHomeProcessingInput, SmartHomeEnergyCenterView, SmartHomeMutationReceiptView, UpdateSmartHomeDeviceStatusInput } from '@ppt/domain';
+import type { EmergencyDisableSignedPluginInput, RollbackSignedPluginInput, SetSignedPluginDesiredStateInput, SignedPluginMutationReceiptView, SignedPluginPlatformCenterView, VerifiedSignedPluginReleaseInput } from '@ppt/domain';
 import { RepositoryBackedFamilyApplicationUnitOfWork, RepositoryBackedFamilyGraphQueryPort } from './family-application-adapter.js';
 import { RepositoryBackedHouseholdMembershipUnitOfWork } from './household-membership-application-adapter.js';
 import { RepositoryBackedPersonLifecycleUnitOfWork } from './person-lifecycle-application-adapter.js';
@@ -410,6 +421,10 @@ import {
   RepositoryBackedSmartHomeEnergyQueryPort,
   RepositoryBackedSmartHomeEnergyUnitOfWork
 } from './smart-home-energy-application-adapter.js';
+import {
+  RepositoryBackedSignedPluginPlatformQueryPort,
+  RepositoryBackedSignedPluginPlatformUnitOfWork
+} from './signed-plugin-platform-application-adapter.js';
 import {
   RepositoryBackedLocationPolicyTransactionRunner,
   RepositoryBackedLocationUnitOfWork,
@@ -711,6 +726,8 @@ interface DataStoreOptions {
   sourceDeletionExternalCacheInvalidator?: DesktopSourceDeletionExternalCacheInvalidator;
   /** Missing capabilities remain unavailable; no crypto/provider/vault fallback is synthesized. */
   identityAccessPorts?: Partial<IdentityAccessDataStorePorts>;
+  /** Public verification keys only. Missing production trust keeps package registration unavailable. */
+  signedPluginTrustedKeys?: readonly TrustedPluginSigningKey[];
   federatedProviderConfigurations?: readonly import('@ppt/repository-contracts').FederatedProviderProvisioningRow[];
   securityConfig?: {
     sessionIdleTimeoutMinutes: number;
@@ -1302,6 +1319,12 @@ export class FamilyDataStore {
   readonly #grantSmartHomeCameraConsentUseCase:GrantSmartHomeCameraConsentUseCase;
   readonly #revokeSmartHomeCameraConsentUseCase:RevokeSmartHomeCameraConsentUseCase;
   readonly #setSmartHomeProcessingUseCase:SetSmartHomeProcessingUseCase;
+  readonly #getSignedPluginPlatformCenterUseCase:GetSignedPluginPlatformCenterUseCase;
+  readonly #registerSignedPluginReleaseUseCase:RegisterSignedPluginReleaseUseCase;
+  readonly #setSignedPluginDesiredStateUseCase:SetSignedPluginDesiredStateUseCase;
+  readonly #emergencyDisableSignedPluginUseCase:EmergencyDisableSignedPluginUseCase;
+  readonly #rollbackSignedPluginUseCase:RollbackSignedPluginUseCase;
+  readonly #signedPluginTrustedKeys:readonly TrustedPluginSigningKey[];
   readonly #prepareFamilyEmergencyCardExportUseCase: PrepareFamilyEmergencyCardExportUseCase;
   readonly #recordFamilyEmergencyCardExportCompletionUseCase: RecordFamilyEmergencyCardExportCompletionUseCase;
   readonly #listFinanceRecordsUseCase: ListFinanceRecordsUseCase;
@@ -1491,6 +1514,7 @@ export class FamilyDataStore {
         : {})
     });
     this.#clock = options.clock ?? new SystemClock();
+    this.#signedPluginTrustedKeys=Object.freeze((options.signedPluginTrustedKeys??[]).map(key=>Object.freeze({...key})));
     this.#correlation = options.correlation;
     this.#logger = options.logger;
     const storageLayoutResult = new ResolveFamilyStorageLayoutUseCase(
@@ -1822,6 +1846,7 @@ export class FamilyDataStore {
           familyAiAssistantPolicyResourceRepository: this.#repositories.familyAiAssistantRepository,
           memoryStudioPolicyResourceRepository: this.#repositories.memoryStudioRepository,
           smartHomeEnergyPolicyResourceRepository: this.#repositories.smartHomeEnergyRepository,
+          signedPluginPlatformPolicyResourceRepository: this.#repositories.signedPluginPlatformRepository,
           personRepository: this.#repositories.personRepository,
           deviceIdentityProvider: this.#deviceIdentityProvider,
           authorizationProvider: productionArchivePolicy.authorizationProvider,
@@ -1845,6 +1870,8 @@ export class FamilyDataStore {
       memoryStudioPolicyResourceRepository: this.#repositories.memoryStudioRepository,
       smartHomeEnergyRepository: this.#repositories.smartHomeEnergyRepository,
       smartHomeEnergyPolicyResourceRepository: this.#repositories.smartHomeEnergyRepository,
+      signedPluginPlatformRepository: this.#repositories.signedPluginPlatformRepository,
+      signedPluginPlatformPolicyResourceRepository: this.#repositories.signedPluginPlatformRepository,
       aiConsentRepository: this.#repositories.aiConsentRepository,
       accountRepository: this.#repositories.accountRepository,
       permissionRepository: this.#repositories.objectPermissionRepository,
@@ -2576,6 +2603,16 @@ export class FamilyDataStore {
     this.#grantSmartHomeCameraConsentUseCase=new GrantSmartHomeCameraConsentUseCase(smartHomeEnergyUnitOfWork);
     this.#revokeSmartHomeCameraConsentUseCase=new RevokeSmartHomeCameraConsentUseCase(smartHomeEnergyUnitOfWork);
     this.#setSmartHomeProcessingUseCase=new SetSmartHomeProcessingUseCase(smartHomeEnergyUnitOfWork);
+    const signedPluginPlatformDependencies={...lifeApplicationDependencies,
+      signedPluginPlatformRepository:this.#repositories.signedPluginPlatformRepository,
+      signedPluginPlatformPolicyResourceRepository:this.#repositories.signedPluginPlatformRepository} as const;
+    const signedPluginPlatformQuery=new RepositoryBackedSignedPluginPlatformQueryPort(signedPluginPlatformDependencies,lifePolicyTransactionRunner);
+    const signedPluginPlatformUnitOfWork=new RepositoryBackedSignedPluginPlatformUnitOfWork(signedPluginPlatformDependencies,lifePolicyTransactionRunner);
+    this.#getSignedPluginPlatformCenterUseCase=new GetSignedPluginPlatformCenterUseCase(signedPluginPlatformQuery);
+    this.#registerSignedPluginReleaseUseCase=new RegisterSignedPluginReleaseUseCase(signedPluginPlatformUnitOfWork);
+    this.#setSignedPluginDesiredStateUseCase=new SetSignedPluginDesiredStateUseCase(signedPluginPlatformUnitOfWork);
+    this.#emergencyDisableSignedPluginUseCase=new EmergencyDisableSignedPluginUseCase(signedPluginPlatformUnitOfWork);
+    this.#rollbackSignedPluginUseCase=new RollbackSignedPluginUseCase(signedPluginPlatformUnitOfWork);
     this.#prepareArchiveOpenUseCase = new PrepareArchiveOpenUseCase(archiveQuery);
     this.#recordArchiveOpenedUseCase = new RecordArchiveOpenedUseCase(archiveUnitOfWork);
     this.#authorizeEmergencyArchiveReadUseCase = new AuthorizeEmergencyArchiveReadUseCase(archiveUnitOfWork);
@@ -6148,6 +6185,44 @@ export class FamilyDataStore {
 
   public async setSmartHomeProcessing(input:SetSmartHomeProcessingInput):Promise<SmartHomeMutationReceiptView>{
     const result=await this.#setSmartHomeProcessingUseCase.execute({context:this.#lifeApplicationContext('smart-home-processing-setting'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async getSignedPluginPlatformCenter():Promise<SignedPluginPlatformCenterView>{
+    const result=await this.#getSignedPluginPlatformCenterUseCase.execute(this.#lifeApplicationContext('signed-plugin-platform-center'));
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  /** Main-only cryptographic registration boundary. Renderer IPC never accepts manifests, signatures, keys or paths. */
+  public async registerSignedPluginManifest(input:{readonly clientOperationId:string;readonly expectedRevision:number;readonly envelope:unknown})
+  :Promise<SignedPluginMutationReceiptView>{
+    if(this.#signedPluginTrustedKeys.length===0)throw new Error('[AUTHORIZATION-DENIED] Production plugin signing trust is not provisioned.');
+    const verified=verifySignedPluginManifest(input.envelope,{trustedKeys:this.#signedPluginTrustedKeys,now:()=>new Date(this.#clock.now())});
+    const release:VerifiedSignedPluginReleaseInput=Object.freeze({pluginId:verified.pluginId,displayName:verified.displayName,
+      version:verified.version,manifestSha256:verified.manifestSha256,packageSha256:verified.packageSha256,
+      entrypointSha256:verified.entrypointSha256,sbomSha256:verified.sbomSha256,
+      licenseInventorySha256:verified.licenseInventorySha256,provenanceSha256:verified.provenanceSha256,
+      signerKeyId:verified.signerKeyId,signatureVerified:true,providerKinds:verified.providerKinds,
+      capabilityCodes:verified.capabilityCodes,dataDeclarations:verified.dataDeclarations,egressMode:verified.egressMode,
+      egressHosts:verified.egressHosts,sandboxProfile:'isolated_child_process',filesystemAccess:'none',
+      processSpawnAllowed:false,nativeModulesAllowed:false,networkBrokerOnly:true,issuedAt:verified.issuedAt,expiresAt:verified.expiresAt});
+    const result=await this.#registerSignedPluginReleaseUseCase.execute({context:this.#lifeApplicationContext('signed-plugin-release-register'),
+      command:{clientOperationId:input.clientOperationId,expectedRevision:input.expectedRevision,release}});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async setSignedPluginDesiredState(input:SetSignedPluginDesiredStateInput):Promise<SignedPluginMutationReceiptView>{
+    const result=await this.#setSignedPluginDesiredStateUseCase.execute({context:this.#lifeApplicationContext('signed-plugin-desired-state'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async emergencyDisableSignedPlugin(input:EmergencyDisableSignedPluginInput):Promise<SignedPluginMutationReceiptView>{
+    const result=await this.#emergencyDisableSignedPluginUseCase.execute({context:this.#lifeApplicationContext('signed-plugin-emergency-disable'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async rollbackSignedPlugin(input:RollbackSignedPluginInput):Promise<SignedPluginMutationReceiptView>{
+    const result=await this.#rollbackSignedPluginUseCase.execute({context:this.#lifeApplicationContext('signed-plugin-rollback'),command:input});
     if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
   }
 

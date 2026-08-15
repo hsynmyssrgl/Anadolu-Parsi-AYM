@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "step": "33-Z",
+  "decision": "DEC-237",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "countsAsRequirementPass": false,
+  "targetedTestFilesPassed": 6,
+  "targetedTestsPassed": 26,
+  "migration104Sha256": "91a16031e87986f5b6e561cd9e767ad0b7e68d3c030ceace4276441b921b6547",
+  "ppk015": {
+    "status": "PASS",
+    "productionSourceZones": 18,
+    "scannedFiles": 493,
+    "sourceInventorySha256": "38a3e4bf23f5302ad9e02c7be94bbb7c6ce62123ac545d6f82944dbab09dae6c",
+    "selfTestAssertions": 7,
+    "authorizedExternalEgressAdapters": 2,
+    "authorizedEgressPurposeCount": 3,
+    "authorizedInventorySha256": "8c3764ee962b55dda7fa85520b8fbb34088a65ab722febd30254416b7d6898bb",
+    "localOnlyTransportFiles": 2,
+    "directPrimitiveExceptions": 0,
+    "findings": []
+  },
+  "ppk021": {
+    "status": "PASS",
+    "productionSourceZones": 18,
+    "scannedFiles": 493,
+    "privilegedSurfaces": 763,
+    "exactAllowlistEntries": 763,
+    "exactAllowlistSha256": "386c030def9a2dda0dec8a24a8ba3a1ef0abba1b4f068bb3ab43f078d244923e",
+    "surfaceCounts": {
+      "CRYPTO_GLOBAL": 13,
+      "CRYPTO_IMPORT": 210,
+      "DATABASE_IMPORT": 21,
+      "NETWORK_IMPORT": 11,
+      "REPOSITORY_IMPORT": 62,
+      "ROLE_PRESENTATION": 2,
+      "SQL_CALL": 70,
+      "SQL_CONSTRUCTOR": 2,
+      "SQL_IMPORT": 2,
+      "USE_CASE_COMPOSITION": 370
+    },
+    "maliciousSelfTestAssertions": 17,
+    "benignSelfTestAssertions": 4,
+    "directRoleAuthorizationBypasses": 0,
+    "findings": []
+  },
+  "ppk022": {
+    "status": "PASS",
+    "productionSourceZones": 18,
+    "scannedFiles": 493,
+    "capabilitySurfaces": 345,
+    "exactManifestSurfaces": 345,
+    "exactManifestSha256": "2f58fd1c0a82afa41ca8f1930ae15ebb792075d47d0f9e2e24872c4aa0facd50",
+    "surfaceCounts": {
+      "FILE_DIALOG": 2,
+      "FILE_IMPORT": 288,
+      "NETWORK_API": 2,
+      "NETWORK_IMPORT": 13,
+      "OCR_API": 5,
+      "OCR_IMPORT": 35
+    },
+    "pinnedBootstrapSurfaces": 26,
+    "maliciousSelfTestAssertions": 33,
+    "benignSelfTestAssertions": 5,
+    "canonicalApplications": 14,
+    "protectedCapabilityFamilies": 7,
+    "findings": []
+  },
+  "checkCount": 11,
+  "passed": 11,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "exact six-file local Vitest exits successfully",
+      "status": "PASS"
+    },
+    {
+      "name": "local test result meets exact 6/26 ratchet",
+      "status": "PASS"
+    },
+    {
+      "name": "migration verifier passes exact migration 104 checksum",
+      "status": "PASS"
+    },
+    {
+      "name": "data store smoke includes migration 104",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-015 raw gate matches scope ratchet",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-021 raw gate matches scope ratchet",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-022 raw gate matches scope ratchet",
+      "status": "PASS"
+    },
+    {
+      "name": "all package and desktop typechecks pass",
+      "status": "PASS"
+    },
+    {
+      "name": "33-Z remains planned behind exact dependencies while 33-P stays active",
+      "status": "PASS"
+    },
+    {
+      "name": "execution provider credentials trust sandbox network and release truth remain closed",
+      "status": "PASS"
+    },
+    {
+      "name": "manual evidence receipt and acceptance remain closed",
+      "status": "PASS"
+    }
+  ],
+  "generatedAt": "2026-08-15T09:43:19.727Z"
+}

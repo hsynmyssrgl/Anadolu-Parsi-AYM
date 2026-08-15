@@ -46,6 +46,7 @@ import type { CreatePlacesTravelItemInput, DeletePlacesTravelItemInput, PlacesTr
 import type { FamilyAiAssistantCenterView, FamilyAiSuggestionMutationReceiptView, GenerateFamilyAiSuggestionInput, ReviewFamilyAiSuggestionInput } from '@ppt/domain';
 import type { CreateMemoryStudioRecordInput, DeleteMemoryStudioRecordInput, CreateMemoryTimeCapsuleInput, MemoryStudioCenterView, MemoryStudioMutationReceiptView, ReviewMemoryTimeCapsuleInput, TransitionMemoryTimeCapsuleInput } from '@ppt/domain';
 import type { GrantSmartHomeCameraConsentInput, RevokeSmartHomeCameraConsentInput, SetSmartHomeProcessingInput, SmartHomeEnergyCenterView, SmartHomeMutationReceiptView } from '@ppt/domain';
+import type { EmergencyDisableSignedPluginInput, RollbackSignedPluginInput, SetSignedPluginDesiredStateInput, SignedPluginMutationReceiptView, SignedPluginPlatformCenterView } from '@ppt/domain';
 import type { LegacyArchiveOwnershipReattestationView, ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { AssignPersonMembershipInput, CreateFamilyBranchInput, CreateHouseholdInput, FamilyBranch, Household, HouseholdMembershipWorkspaceView, PersonLifecycleProfile, PersonLifecycleWorkspaceView, PersonMembership, UpdatePersonProfileInput } from '@ppt/domain';
 import type { AuthorizationContextWorkspaceView } from '@ppt/domain';
@@ -712,6 +713,10 @@ contextBridge.exposeInMainWorld('pardus', {
   grantSmartHomeCameraConsent:(input:GrantSmartHomeCameraConsentInput):Promise<SmartHomeMutationReceiptView>=>invoke('smartHomeEnergy:grantCameraConsent',input),
   revokeSmartHomeCameraConsent:(input:RevokeSmartHomeCameraConsentInput):Promise<SmartHomeMutationReceiptView>=>invoke('smartHomeEnergy:revokeCameraConsent',input),
   setSmartHomeProcessing:(input:SetSmartHomeProcessingInput):Promise<SmartHomeMutationReceiptView>=>invoke('smartHomeEnergy:setProcessing',input),
+  getSignedPluginPlatformCenter:():Promise<SignedPluginPlatformCenterView>=>invoke('signedPluginPlatform:getCenter'),
+  setSignedPluginDesiredState:(input:SetSignedPluginDesiredStateInput):Promise<SignedPluginMutationReceiptView>=>invoke('signedPluginPlatform:setDesiredState',input),
+  emergencyDisableSignedPlugin:(input:EmergencyDisableSignedPluginInput):Promise<SignedPluginMutationReceiptView>=>invoke('signedPluginPlatform:emergencyDisable',input),
+  rollbackSignedPlugin:(input:RollbackSignedPluginInput):Promise<SignedPluginMutationReceiptView>=>invoke('signedPluginPlatform:rollback',input),
   listFinanceValuations:():Promise<FinanceValuationView[]>=>invoke('finance:listValuations'),
   createFinanceValuation:(input:CreateFinanceValuationInput):Promise<FinanceValuationView[]>=>invoke('finance:createValuation',input),
   createMember: (input: CreateFamilyMemberInput): Promise<FamilyMutationResultView> => invoke('family:createMember', input),

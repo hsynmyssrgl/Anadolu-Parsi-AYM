@@ -3193,6 +3193,101 @@ const smartHomeResult=(channel:string,result:unknown):IpcIntegrationPolicyDecisi
   return valid?accepted():rejected('SMART_HOME_RESULT_INVALID','$result');
 };
 
+export const SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS=Object.freeze({
+  getCenter:'signedPluginPlatform:getCenter',
+  setDesiredState:'signedPluginPlatform:setDesiredState',
+  emergencyDisable:'signedPluginPlatform:emergencyDisable',
+  rollback:'signedPluginPlatform:rollback'
+} as const);
+const signedPluginPlatformChannels=new Set<string>(Object.values(SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS));
+const signedPluginId=(value:unknown):boolean=>typeof value==='string'&&/^[a-z][a-z0-9.-]{2,63}$/u.test(value);
+const signedPluginSemver=(value:unknown):boolean=>typeof value==='string'
+  &&/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]{1,64})?$/u.test(value);
+const signedPluginInput=(channel:string,args:readonly unknown[]):IpcIntegrationPolicyDecision=>{
+  if(channel===SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.getCenter)return zeroArguments(args);
+  if(args.length!==1||!isObject(args[0]))return rejected('SIGNED_PLUGIN_OBJECT_REQUIRED','$[0]');const value=args[0];
+  if(channel===SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.setDesiredState)return healthCareExactRecord(value,
+    ['clientOperationId','pluginId','expectedRevision','enabled','reason'])&&healthCareIdentifier(value.clientOperationId)
+    &&signedPluginId(value.pluginId)&&healthCareRevision(value.expectedRevision)&&Number(value.expectedRevision)>=1
+    &&typeof value.enabled==='boolean'&&healthCareText(value.reason,3,500)
+    ?accepted():rejected('SIGNED_PLUGIN_DESIRED_STATE_INPUT_INVALID','$[0]');
+  if(channel===SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.emergencyDisable)return healthCareExactRecord(value,
+    ['clientOperationId','pluginId','expectedRevision','confirmation','reason'])&&healthCareIdentifier(value.clientOperationId)
+    &&signedPluginId(value.pluginId)&&healthCareRevision(value.expectedRevision)&&Number(value.expectedRevision)>=1
+    &&value.confirmation==='EKLENTIYI ACIL DURDUR'&&healthCareText(value.reason,3,500)
+    ?accepted():rejected('SIGNED_PLUGIN_EMERGENCY_INPUT_INVALID','$[0]');
+  if(channel===SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.rollback)return healthCareExactRecord(value,
+    ['clientOperationId','pluginId','expectedRevision','targetVersion','confirmation'])&&healthCareIdentifier(value.clientOperationId)
+    &&signedPluginId(value.pluginId)&&healthCareRevision(value.expectedRevision)&&Number(value.expectedRevision)>=1
+    &&signedPluginSemver(value.targetVersion)&&value.confirmation==='ONCEKI SURUME DON'
+    ?accepted():rejected('SIGNED_PLUGIN_ROLLBACK_INPUT_INVALID','$[0]');
+  return rejected('UNKNOWN_IPC_CHANNEL','$');
+};
+const signedPluginReleaseResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['version','providerKinds','capabilityCodes','dataDeclarations','egressMode','egressHostCount','sandboxProfile',
+    'signatureVerified','sbomEvidencePresent','licenseInventoryEvidencePresent','provenanceEvidencePresent','verifiedAt','expiresAt'])
+  &&signedPluginSemver(value.version)&&Array.isArray(value.providerKinds)&&value.providerKinds.length>=1&&value.providerKinds.length<=9
+  &&value.providerKinds.every(item=>['bank','school','matter','fhir','onedrive','maps','ocr','ai','browser'].includes(String(item)))
+  &&new Set(value.providerKinds).size===value.providerKinds.length&&Array.isArray(value.capabilityCodes)
+  &&value.capabilityCodes.length>=1&&value.capabilityCodes.length<=16&&value.capabilityCodes.every(item=>
+    ['bank.read','school.read','matter.read','fhir.read','onedrive.read','maps.read','ocr.process','ai.process','browser.read'].includes(String(item)))
+  &&new Set(value.capabilityCodes).size===value.capabilityCodes.length&&Array.isArray(value.dataDeclarations)
+  &&value.dataDeclarations.length<=32&&value.dataDeclarations.every(item=>isObject(item)&&healthCareExactRecord(item,
+    ['resourceType','sensitivity','purpose','access','retentionDays'])&&healthCareIdentifier(item.resourceType)
+    &&['standard','personal','highly_sensitive'].includes(String(item.sensitivity))
+    &&['general','finance','education','home_automation','health','document_processing','ai_assistance','browser_assistance'].includes(String(item.purpose))
+    &&['read_metadata','read_content','process_local'].includes(String(item.access))&&Number.isSafeInteger(item.retentionDays)
+    &&Number(item.retentionDays)>=0&&Number(item.retentionDays)<=30)
+  &&['none','allowlist'].includes(String(value.egressMode))&&Number.isSafeInteger(value.egressHostCount)
+  &&Number(value.egressHostCount)>=0&&Number(value.egressHostCount)<=16&&value.sandboxProfile==='isolated_child_process'
+  &&value.signatureVerified===true&&value.sbomEvidencePresent===true&&value.licenseInventoryEvidencePresent===true
+  &&value.provenanceEvidencePresent===true&&healthCareIso(value.verifiedAt)&&healthCareIso(value.expiresAt);
+const signedPluginInstallationResult=(value:unknown):boolean=>{
+  if(!isObject(value))return false;
+  const keys=['id','ownerPersonId','displayName','currentRelease','desiredState','runtimeExecutionReady',
+    'externalProviderConnectionReady','rollbackAvailable','revision','createdAt','updatedAt',
+    ...(value.previousVersion===undefined?[]:['previousVersion']),...(value.emergencyDisabledAt===undefined?[]:['emergencyDisabledAt'])];
+  return healthCareExactRecord(value,keys)&&signedPluginId(value.id)&&healthCareIdentifier(value.ownerPersonId)
+    &&healthCareText(value.displayName,2,120)&&signedPluginReleaseResult(value.currentRelease)
+    &&(value.previousVersion===undefined||signedPluginSemver(value.previousVersion))
+    &&['enabled','disabled','emergency_disabled'].includes(String(value.desiredState))&&value.runtimeExecutionReady===false
+    &&value.externalProviderConnectionReady===false&&typeof value.rollbackAvailable==='boolean'
+    &&healthCareRevision(value.revision)&&Number(value.revision)>=1&&healthCareIso(value.createdAt)&&healthCareIso(value.updatedAt)
+    &&(value.emergencyDisabledAt===undefined||healthCareIso(value.emergencyDisabledAt));
+};
+const signedPluginTruthResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,[
+  'localCandidateRegistryImplemented','manifestCryptographyImplemented','verifiedManifestRequired','capabilityDefaultDeny',
+  'networkBrokerRequired','sandboxContractRequired','rollbackRegistryImplemented','emergencyDisableRegistryImplemented',
+  'sbomLicenseAndProvenanceHashesRequired','supplyChainReleaseGateRequired','rendererInstallAuthority',
+  'thirdPartyCodeExecutionPerformed','externalProviderConnectionPerformed','providerCredentialsStored',
+  'productionSigningTrustProvisioned','productionReleaseEligible','sandboxRuntimeVerified','osNetworkIsolationVerified',
+  'providerAvailabilityGuaranteed','networkUsedByCurrentImplementation'])
+  &&value.localCandidateRegistryImplemented===true&&value.manifestCryptographyImplemented===true
+  &&value.verifiedManifestRequired===true&&value.capabilityDefaultDeny===true&&value.networkBrokerRequired===true
+  &&value.sandboxContractRequired===true&&value.rollbackRegistryImplemented===true
+  &&value.emergencyDisableRegistryImplemented===true&&value.sbomLicenseAndProvenanceHashesRequired===true
+  &&value.supplyChainReleaseGateRequired===true&&value.rendererInstallAuthority===false
+  &&value.thirdPartyCodeExecutionPerformed===false&&value.externalProviderConnectionPerformed===false
+  &&value.providerCredentialsStored===false&&value.productionSigningTrustProvisioned===false
+  &&value.productionReleaseEligible===false&&value.sandboxRuntimeVerified===false&&value.osNetworkIsolationVerified===false
+  &&value.providerAvailabilityGuaranteed===false&&value.networkUsedByCurrentImplementation===false;
+const signedPluginCenterResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['schemaVersion','centerId','ownerPersonId','installations','truth','generatedAt'])&&value.schemaVersion===1
+  &&healthCareIdentifier(value.centerId)&&healthCareIdentifier(value.ownerPersonId)&&Array.isArray(value.installations)
+  &&value.installations.length<=200&&value.installations.every(signedPluginInstallationResult)
+  &&signedPluginTruthResult(value.truth)&&healthCareIso(value.generatedAt);
+const signedPluginReceiptResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['pluginId','mutationKind','previousRevision','revision','occurredAt','replayed','runtimeExecutionPerformed',
+    'externalProviderConnectionPerformed','networkUsed'])&&signedPluginId(value.pluginId)
+  &&['release_register','release_update','desired_enable','desired_disable','emergency_disable','release_rollback'].includes(String(value.mutationKind))
+  &&healthCareRevision(value.previousRevision)&&healthCareRevision(value.revision)&&value.revision===Number(value.previousRevision)+1
+  &&healthCareIso(value.occurredAt)&&typeof value.replayed==='boolean'&&value.runtimeExecutionPerformed===false
+  &&value.externalProviderConnectionPerformed===false&&value.networkUsed===false;
+const signedPluginResult=(channel:string,result:unknown):IpcIntegrationPolicyDecision=>{
+  const valid=channel===SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.getCenter?signedPluginCenterResult(result):signedPluginReceiptResult(result);
+  return valid?accepted():rejected('SIGNED_PLUGIN_RESULT_INVALID','$result');
+};
+
 export const ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS = Object.freeze({
   listEvidence: 'archive:listRelationEvidence',
   listEvidenceHistory: 'archive:listRelationEvidenceHistory',
@@ -3820,6 +3915,8 @@ export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unkn
   if (channel.startsWith('memoryStudio:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
   if (smartHomeEnergyChannels.has(channel)) return smartHomeResult(channel,result);
   if (channel.startsWith('smartHomeEnergy:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
+  if (signedPluginPlatformChannels.has(channel)) return signedPluginResult(channel,result);
+  if (channel.startsWith('signedPluginPlatform:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
   if (childEducationChannels.has(channel)) return childEducationResult(channel, result);
   if (channel.startsWith('childEducation:')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
   if (placesTravelChannels.has(channel)) return placesTravelResult(channel, result);
@@ -3868,6 +3965,8 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
   if (channel.startsWith('memoryStudio:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
   if (smartHomeEnergyChannels.has(channel)) return smartHomeInput(channel,args);
   if (channel.startsWith('smartHomeEnergy:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
+  if (signedPluginPlatformChannels.has(channel)) return signedPluginInput(channel,args);
+  if (channel.startsWith('signedPluginPlatform:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
   if (childEducationChannels.has(channel)) return childEducationInput(channel, args);
   if (channel.startsWith('childEducation:')) return rejected('UNKNOWN_IPC_CHANNEL', '$');
   if (placesTravelChannels.has(channel)) return placesTravelInput(channel, args);

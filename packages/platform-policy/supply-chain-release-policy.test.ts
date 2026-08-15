@@ -93,10 +93,10 @@ const options = (): SupplyChainReleasePolicyOptions => ({
   expectedMaterials: materials,
   expectedCoverage: {
     workspaceCount: 18,
-    sbomComponentCount: 414,
-    dependencyNodeCount: 414,
-    externalRegistryPackageCount: 374,
-    licenseInventoryComponentCount: 357
+    sbomComponentCount: 417,
+    dependencyNodeCount: 417,
+    externalRegistryPackageCount: 377,
+    licenseInventoryComponentCount: 358
   },
   expectedExternalAssets: externalAssets,
   trustedProvenanceKeys: [{ keyId: 'release-key-2026', publicKeyPem: provenancePublicKeyPem, status: 'ACTIVE' }],
@@ -351,10 +351,10 @@ describe('32-U PPK-025 supply-chain release policy', () => {
       policy: {
         release: options().expectedRelease,
         lockfiles: [{ scope: 'root', workspaceCount: 18 }],
-        requiredSbomComponentCount: 414,
-        requiredDependencyNodeCount: 414,
-        requiredRegistryPackageCount: 374,
-        requiredLicenseComponentCount: 357,
+        requiredSbomComponentCount: 417,
+        requiredDependencyNodeCount: 417,
+        requiredRegistryPackageCount: 377,
+        requiredLicenseComponentCount: 358,
         vulnerability: {
           maxAgeMs: SUPPLY_CHAIN_VULNERABILITY_MAX_AGE_MS,
           maxFutureSkewMs: SUPPLY_CHAIN_EVIDENCE_MAX_FUTURE_SKEW_MS
@@ -380,7 +380,7 @@ describe('32-U PPK-025 supply-chain release policy', () => {
       (value.externalAssets[0] as { sha256: string }).sha256 = '0'.repeat(64);
     });
     const decision = new SupplyChainReleasePolicy(independentlyDerived).evaluate(forged);
-    expect(independentlyDerived.expectedCoverage.sbomComponentCount).toBe(414);
+    expect(independentlyDerived.expectedCoverage.sbomComponentCount).toBe(417);
     expect(independentlyDerived.expectedRelease.releaseId).toBe('anadolu-parsi-aym-bronze-4.8.2026-29');
     expect(independentlyDerived.expectedExternalAssets[0]?.sha256).toBe('b'.repeat(64));
     expect(decision.reasons).toEqual(expect.arrayContaining([
@@ -421,7 +421,7 @@ describe('32-U PPK-025 supply-chain release policy', () => {
       license: {
         status: 'PASS', failed: 0, failures: [], sbomSha256: SBOM,
         noticesJsonSha256: NOTICES_JSON, noticesTextSha256: NOTICES_TEXT,
-        licenseInventoryComponentCount: 357
+        licenseInventoryComponentCount: 358
       },
       vulnerability: { status: 'PASS', failed: 0, failures: [], sbomSha256: SBOM },
       registry: { status: 'PASS', failed: 0, failures: [] },
@@ -446,7 +446,7 @@ describe('32-U PPK-025 supply-chain release policy', () => {
     const assessment = validatePpk025LocalGateReports({
       policy: {
         release: { version: '4.8.2026-29' },
-        requiredLicenseComponentCount: 357,
+        requiredLicenseComponentCount: 358,
         vulnerability: {
           scopes: ['root-production', 'root-build-toolchain', 'windows-packager'],
           maxAgeMs: SUPPLY_CHAIN_VULNERABILITY_MAX_AGE_MS,

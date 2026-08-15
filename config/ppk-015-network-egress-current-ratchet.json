@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "requirement": "PPK-015",
   "status": "CURRENT_RATCHET",
-  "recordedAt": "2026-08-14",
+  "recordedAt": "2026-08-15",
   "historicalClosure": {
     "step": "32-K",
     "decisionId": "DEC-196",
@@ -16,8 +16,8 @@
   },
   "currentBoundary": {
     "productionSourceZones": 18,
-    "scannedFiles": 486,
-    "sourceInventorySha256": "8395c318268c16bea5fa24d0e3bfc3df63889a8626751e5e3b98fa4d49379c6a",
+    "scannedFiles": 493,
+    "sourceInventorySha256": "38a3e4bf23f5302ad9e02c7be94bbb7c6ce62123ac545d6f82944dbab09dae6c",
     "maliciousSelfTests": 7,
     "findings": 0,
     "authorizedAdapterCount": 2,
@@ -34,7 +34,7 @@
     "authorizedInventorySha256": "8c3764ee962b55dda7fa85520b8fbb34088a65ab722febd30254416b7d6898bb",
     "localOnlyTransportFiles": 2,
     "directPrimitiveExceptionCount": 0,
-    "latestDatabaseMigration": 103
+    "latestDatabaseMigration": 104
   },
   "truth": {
     "historicalClosureReopened": false,

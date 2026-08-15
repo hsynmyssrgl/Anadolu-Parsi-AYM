@@ -47,6 +47,7 @@ export * from './places-travel-asset-pet-repository.js';
 export * from './family-ai-assistant-repository.js';
 export * from './memory-studio-repository.js';
 export * from './smart-home-energy-repository.js';
+export * from './signed-plugin-platform-repository.js';
 
 export * from './data-lifecycle-repository.js';
 

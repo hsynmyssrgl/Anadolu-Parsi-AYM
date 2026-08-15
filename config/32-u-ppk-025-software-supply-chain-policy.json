@@ -27,10 +27,10 @@
       "isolatedToolchain": true
     }
   ],
-  "requiredRegistryPackageCount": 374,
-  "requiredLicenseComponentCount": 357,
-  "requiredSbomComponentCount": 414,
-  "requiredDependencyNodeCount": 414,
+  "requiredRegistryPackageCount": 377,
+  "requiredLicenseComponentCount": 358,
+  "requiredSbomComponentCount": 417,
+  "requiredDependencyNodeCount": 417,
   "requiredVulnerabilityScopes": [
     "root-production",
     "root-build-toolchain",

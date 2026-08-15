@@ -103,7 +103,7 @@
       "integrity": "sha512-zx0EIq78WlY/lBb1uXlziZmDZI4ubcCXIMJ4uGjXzZW0nS19TjSPeXPAjzzTmKQlJUZm0SbmZhPKP7tuQ1SsEw==",
       "license": "MIT",
       "lockPaths": [
-        "tools/windows-packager/package-lock.json:node_modules/@electron/fuses"
+        "tools/windows-packager/package-lock.json:node_modules/app-builder-lib/node_modules/@electron/fuses"
       ],
       "name": "@electron/fuses",
       "resolved": "https://registry.npmjs.org/@electron/fuses/-/fuses-1.8.0.tgz",
@@ -111,6 +111,20 @@
         "windows-packager"
       ],
       "version": "1.8.0"
+    },
+    {
+      "decision": "ALLOW",
+      "integrity": "sha512-LoKJUXNiJ4JM8IIrUltSHI+8pkogaGj5wmJx81jE/Wk3g2w1/kfMbTEKNoY5kitGE8hiC12h32R/1SlywFtxXg==",
+      "license": "MIT",
+      "lockPaths": [
+        "tools/windows-packager/package-lock.json:node_modules/@electron/fuses"
+      ],
+      "name": "@electron/fuses",
+      "resolved": "https://registry.npmjs.org/@electron/fuses/-/fuses-2.1.3.tgz",
+      "scopes": [
+        "windows-packager"
+      ],
+      "version": "2.1.3"
     },
     {
       "decision": "ALLOW",
@@ -2476,9 +2490,9 @@
       "integrity": "sha512-hcg3ZmepS30/7BSFqRvoo3DOMQu7IjqxO5nCDt+zM9XWjb33Wg7ziNT+Qvqbuc3+gWpzO02JubVyk2G4Zvo1OQ==",
       "license": "MIT",
       "lockPaths": [
-        "tools/windows-packager/package-lock.json:node_modules/@electron/fuses/node_modules/fs-extra",
         "tools/windows-packager/package-lock.json:node_modules/@electron/notarize/node_modules/fs-extra",
-        "tools/windows-packager/package-lock.json:node_modules/@malept/flatpak-bundler/node_modules/fs-extra"
+        "tools/windows-packager/package-lock.json:node_modules/@malept/flatpak-bundler/node_modules/fs-extra",
+        "tools/windows-packager/package-lock.json:node_modules/app-builder-lib/node_modules/@electron/fuses/node_modules/fs-extra"
       ],
       "name": "fs-extra",
       "resolved": "https://registry.npmjs.org/fs-extra/-/fs-extra-9.1.0.tgz",
@@ -3084,6 +3098,7 @@
       "integrity": "sha512-zwOTdL3rFQ/lRdBnntKVOX6k5cKJwEc1HdilT71BWEu7J41gXIB2MRp+vxduPSwZJPWBxEzv4yH1wYLJGUHX4Q==",
       "license": "MIT",
       "lockPaths": [
+        "tools/windows-packager/package-lock.json:node_modules/app-builder-lib/node_modules/@electron/fuses/node_modules/jsonfile",
         "tools/windows-packager/package-lock.json:node_modules/jsonfile"
       ],
       "name": "jsonfile",
@@ -4768,6 +4783,7 @@
       "integrity": "sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw==",
       "license": "MIT",
       "lockPaths": [
+        "tools/windows-packager/package-lock.json:node_modules/app-builder-lib/node_modules/@electron/fuses/node_modules/universalify",
         "tools/windows-packager/package-lock.json:node_modules/universalify"
       ],
       "name": "universalify",

@@ -59,7 +59,7 @@ const assets = [
 const policyOptions = (): SupplyChainReleasePolicyOptions => ({
   expectedRelease: { version: '4.8.2026-29', channel: 'Bronze', releaseId: 'release-29', sourceCommitId: commit, sourceTreeId: tree },
   expectedMaterials: hashes,
-  expectedCoverage: { workspaceCount: 18, sbomComponentCount: 414, dependencyNodeCount: 414, externalRegistryPackageCount: 374, licenseInventoryComponentCount: 357 },
+  expectedCoverage: { workspaceCount: 18, sbomComponentCount: 417, dependencyNodeCount: 417, externalRegistryPackageCount: 377, licenseInventoryComponentCount: 358 },
   expectedExternalAssets: assets,
   trustedProvenanceKeys: [{ keyId: 'trusted-release-key', publicKeyPem: provenancePublicKeyPem, status: 'ACTIVE' }],
   expectedPublisherSubject: 'CN=Panthera pardus tulliana',

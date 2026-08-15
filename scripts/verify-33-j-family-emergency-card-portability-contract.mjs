@@ -83,18 +83,19 @@ check('scope truth remains private manual local user-authorized and no external 
   && scope.power?.automaticLowBatteryDetection === 'not_performed'
   && scope.power?.lowBatteryClaimed === false);
 check('boundary evidence is exact green and preserves current platform ratchets', boundary.status === 'PASS'
-  && boundary.checksFailed === 0 && boundary.latestDatabaseMigration === 88
+  && boundary.checksFailed === 0 && boundary.latestDatabaseMigration >= 88
   && boundary.migration88Checksum === '8785551a6ce0facd609e374e7ba65c70d35b552e6f63a7f0b3d790bfbffa2b04'
   && boundary.familyEmergencyCardPortabilityTables === 1 && boundary.portabilityItemTypes === 5
   && boundary.ipcChannels === 3 && boundary.networkChannels === 0
-  && boundary.ppk021ExactAllowlistEntries === 554
-  && boundary.ppk021UseCaseCompositionSurfaces === 281
-  && boundary.ppk022CapabilitySurfaces === 246);
+  && boundary.ppk021ExactAllowlistEntries === 763
+  && boundary.ppk021UseCaseCompositionSurfaces === 370
+  && boundary.ppk022CapabilitySurfaces === 345);
 check('DEC-221 is active and decision cardinality is exact', ledger.decisionCount === ledger.decisions?.length
   && ledger.decisions?.some((item) => item.id === 'DEC-221' && item.status === 'ACTIVE'
     && item.requirements?.join(',') === ids.join(',')
     && item.document === 'docs/decisions/DEC-221-family-emergency-card-portability.md'));
-check('migration 88 is current and source-manifest identity is exact', migrationVersions.at(-1) === 88
+check('migration 88 closure remains exact under additive successors', migrationVersions.includes(88)
+  && (migrationVersions.at(-1) ?? 0) >= 88
   && migrations.includes("createMigrationDefinition(88, 'b5_family_emergency_card_portability_ledger'")
   && migrationManifest.status === 'passed' && migrationManifest.checkCount === 9
   && migration88?.name === 'b5_family_emergency_card_portability_ledger'

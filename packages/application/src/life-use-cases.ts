@@ -169,7 +169,9 @@ export interface LifePolicyIntent {
     | 'smart_home_device'
     | 'smart_home_observation'
     | 'smart_home_camera_consent'
-    | 'smart_home_settings';
+    | 'smart_home_settings'
+    | 'signed_plugin_platform_center'
+    | 'signed_plugin_installation';
   readonly resourceId: string;
   readonly purpose: 'general' | 'emergency-offline-portability';
   readonly requestedFields?: readonly string[];

@@ -14841,6 +14841,213 @@ BEGIN SELECT RAISE(ABORT,'33-Y mutation ledger is durable'); END;
 UPDATE database_metadata SET value='REVISION-33-Y-LOCAL-FIRST-SMART-HOME-ENERGY',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 
+const signedPluginPlatformSql = `
+CREATE TABLE signed_plugin_mutations (
+  id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  resource_type TEXT NOT NULL CHECK(resource_type='signed_plugin_installation'),
+  resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 3 AND 64),
+  actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  mutation_kind TEXT NOT NULL CHECK(mutation_kind IN ('release_register','release_update','desired_enable','desired_disable','emergency_disable','release_rollback')),
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 256),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  expected_revision INTEGER NOT NULL CHECK(expected_revision>=0),
+  revision INTEGER NOT NULL CHECK(revision=expected_revision+1),
+  resource_state_fingerprint TEXT NOT NULL CHECK(length(resource_state_fingerprint)=64 AND resource_state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version>=1),
+  policy_receipt_nonce TEXT NOT NULL CHECK(length(trim(policy_receipt_nonce)) BETWEEN 16 AND 256),
+  policy_correlation_id TEXT NOT NULL CHECK(length(trim(policy_correlation_id)) BETWEEN 1 AND 256),
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type='signed_plugin_installation'),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action IN ('create','update','delete')),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='family.write'),
+  UNIQUE(family_id,actor_account_id,client_operation_id),
+  CHECK(policy_resource_id=resource_id),
+  CHECK((mutation_kind='release_register' AND policy_action='create' AND expected_revision=0)
+    OR (mutation_kind IN ('release_update','desired_enable','desired_disable','release_rollback') AND policy_action='update' AND expected_revision>=1)
+    OR (mutation_kind='emergency_disable' AND policy_action='delete' AND expected_revision>=1))
+) STRICT;
+
+CREATE INDEX idx_signed_plugin_mutations_owner
+ON signed_plugin_mutations(family_id,owner_person_id,occurred_at DESC,id);
+
+CREATE TABLE signed_plugin_releases (
+  id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  plugin_id TEXT NOT NULL CHECK(length(trim(plugin_id)) BETWEEN 3 AND 64),
+  display_name TEXT NOT NULL CHECK(length(trim(display_name)) BETWEEN 2 AND 120),
+  version TEXT NOT NULL CHECK(length(trim(version)) BETWEEN 5 AND 96),
+  manifest_sha256 TEXT NOT NULL CHECK(length(manifest_sha256)=64 AND manifest_sha256 NOT GLOB '*[^0-9a-f]*'),
+  package_sha256 TEXT NOT NULL CHECK(length(package_sha256)=64 AND package_sha256 NOT GLOB '*[^0-9a-f]*'),
+  entrypoint_sha256 TEXT NOT NULL CHECK(length(entrypoint_sha256)=64 AND entrypoint_sha256 NOT GLOB '*[^0-9a-f]*'),
+  sbom_sha256 TEXT NOT NULL CHECK(length(sbom_sha256)=64 AND sbom_sha256 NOT GLOB '*[^0-9a-f]*'),
+  license_inventory_sha256 TEXT NOT NULL CHECK(length(license_inventory_sha256)=64 AND license_inventory_sha256 NOT GLOB '*[^0-9a-f]*'),
+  provenance_sha256 TEXT NOT NULL CHECK(length(provenance_sha256)=64 AND provenance_sha256 NOT GLOB '*[^0-9a-f]*'),
+  signer_key_id TEXT NOT NULL CHECK(length(trim(signer_key_id)) BETWEEN 2 AND 256),
+  provider_kinds_json TEXT NOT NULL CHECK(json_valid(provider_kinds_json) AND json_type(provider_kinds_json)='array'
+    AND json_array_length(provider_kinds_json) BETWEEN 1 AND 9),
+  capability_codes_json TEXT NOT NULL CHECK(json_valid(capability_codes_json) AND json_type(capability_codes_json)='array'
+    AND json_array_length(capability_codes_json) BETWEEN 1 AND 16),
+  data_declarations_json TEXT NOT NULL CHECK(json_valid(data_declarations_json) AND json_type(data_declarations_json)='array'
+    AND json_array_length(data_declarations_json) BETWEEN 0 AND 32),
+  egress_mode TEXT NOT NULL CHECK(egress_mode IN ('none','allowlist')),
+  egress_hosts_json TEXT NOT NULL CHECK(json_valid(egress_hosts_json) AND json_type(egress_hosts_json)='array'
+    AND json_array_length(egress_hosts_json) BETWEEN 0 AND 16),
+  sandbox_profile TEXT NOT NULL CHECK(sandbox_profile='isolated_child_process'),
+  signature_verified INTEGER NOT NULL CHECK(signature_verified=1),
+  verified_at TEXT NOT NULL CHECK(length(verified_at)=24 AND julianday(verified_at) IS NOT NULL),
+  issued_at TEXT NOT NULL CHECK(length(issued_at)=24 AND julianday(issued_at) IS NOT NULL),
+  expires_at TEXT NOT NULL CHECK(length(expires_at)=24 AND julianday(expires_at) IS NOT NULL),
+  release_fingerprint TEXT NOT NULL CHECK(length(release_fingerprint)=64 AND release_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  mutation_id TEXT NOT NULL UNIQUE REFERENCES signed_plugin_mutations(id) ON DELETE RESTRICT,
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  UNIQUE(family_id,owner_person_id,plugin_id,version),
+  CHECK((egress_mode='none' AND json_array_length(egress_hosts_json)=0)
+    OR (egress_mode='allowlist' AND json_array_length(egress_hosts_json) BETWEEN 1 AND 16)),
+  CHECK(julianday(expires_at)>julianday(issued_at) AND julianday(expires_at)<=julianday(issued_at,'+31 days')
+    AND julianday(expires_at)>julianday(verified_at))
+) STRICT;
+
+CREATE INDEX idx_signed_plugin_releases_owner
+ON signed_plugin_releases(family_id,owner_person_id,plugin_id,verified_at DESC,id);
+
+CREATE TABLE signed_plugin_installations (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 3 AND 64),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  display_name TEXT NOT NULL CHECK(length(trim(display_name)) BETWEEN 2 AND 120),
+  current_version TEXT NOT NULL CHECK(length(trim(current_version)) BETWEEN 5 AND 96),
+  current_release_id TEXT NOT NULL REFERENCES signed_plugin_releases(id) ON DELETE RESTRICT,
+  previous_version TEXT CHECK(previous_version IS NULL OR length(trim(previous_version)) BETWEEN 5 AND 96),
+  desired_state TEXT NOT NULL CHECK(desired_state IN ('enabled','disabled','emergency_disabled')),
+  runtime_execution_ready INTEGER NOT NULL CHECK(runtime_execution_ready=0),
+  external_provider_connection_ready INTEGER NOT NULL CHECK(external_provider_connection_ready=0),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES signed_plugin_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  emergency_disabled_at TEXT CHECK(emergency_disabled_at IS NULL OR (length(emergency_disabled_at)=24 AND julianday(emergency_disabled_at) IS NOT NULL)),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  UNIQUE(family_id,owner_person_id,id),
+  CHECK(updated_at>=created_at),
+  CHECK((desired_state='emergency_disabled' AND emergency_disabled_at=updated_at) OR (desired_state<>'emergency_disabled'))
+) STRICT;
+
+CREATE INDEX idx_signed_plugin_installations_owner
+ON signed_plugin_installations(family_id,owner_person_id,updated_at DESC,id);
+
+CREATE TRIGGER trg_33z_signed_plugin_mutation_insert
+BEFORE INSERT ON signed_plugin_mutations
+WHEN NOT EXISTS(
+  SELECT 1 FROM accounts account
+  JOIN people actor ON actor.id=NEW.actor_person_id AND actor.family_id=NEW.family_id AND actor.status='active'
+  JOIN people owner ON owner.id=NEW.owner_person_id AND owner.family_id=NEW.family_id AND owner.status='active'
+  JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+  JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+  WHERE account.id=NEW.actor_account_id AND account.person_id=NEW.actor_person_id AND account.status='active'
+    AND receipt.receipt_version=NEW.policy_receipt_version AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id AND receipt.action=NEW.policy_action AND receipt.capability=NEW.policy_capability
+    AND receipt.recorded_at=NEW.occurred_at AND json_extract(receipt.record_json,'$.request.purpose')='general'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.resource.sensitivity')='highly_sensitive'
+    AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.actor_account_id
+    AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.actor_person_id
+    AND ((NEW.expected_revision=0 AND NEW.actor_person_id=NEW.owner_person_id
+        AND NOT EXISTS(SELECT 1 FROM signed_plugin_installations item WHERE item.id=NEW.resource_id))
+      OR EXISTS(SELECT 1 FROM signed_plugin_installations item WHERE item.id=NEW.resource_id
+        AND item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id AND item.revision=NEW.expected_revision))
+)
+BEGIN SELECT RAISE(ABORT,'33-Z mutation requires exact owner-bound durable PEP receipt and parent'); END;
+
+CREATE TRIGGER trg_33z_signed_plugin_release_insert
+BEFORE INSERT ON signed_plugin_releases
+WHEN NOT EXISTS(
+  SELECT 1 FROM signed_plugin_mutations mutation
+  WHERE mutation.id=NEW.mutation_id AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+    AND mutation.resource_type='signed_plugin_installation' AND mutation.resource_id=NEW.plugin_id
+    AND mutation.mutation_kind IN ('release_register','release_update') AND mutation.occurred_at=NEW.verified_at
+    AND mutation.policy_receipt_hash=NEW.policy_receipt_hash AND NEW.signature_verified=1
+    AND NOT EXISTS(SELECT 1 FROM json_each(NEW.provider_kinds_json) item
+      WHERE item.type<>'text' OR item.value NOT IN ('bank','school','matter','fhir','onedrive','maps','ocr','ai','browser'))
+    AND NOT EXISTS(SELECT 1 FROM json_each(NEW.capability_codes_json) item
+      WHERE item.type<>'text' OR item.value NOT IN ('bank.read','school.read','matter.read','fhir.read','onedrive.read','maps.read','ocr.process','ai.process','browser.read'))
+    AND NOT EXISTS(SELECT 1 FROM json_each(NEW.data_declarations_json) item
+      WHERE json_type(item.value)<>'object' OR json_extract(item.value,'$.retentionDays') NOT BETWEEN 0 AND 30
+        OR json_extract(item.value,'$.sensitivity') NOT IN ('standard','personal','highly_sensitive')
+        OR json_extract(item.value,'$.purpose') NOT IN ('general','finance','education','home_automation','health','document_processing','ai_assistance','browser_assistance')
+        OR json_extract(item.value,'$.access') NOT IN ('read_metadata','read_content','process_local'))
+)
+BEGIN SELECT RAISE(ABORT,'33-Z release requires exact verified manifest, capability, purpose and retention evidence'); END;
+
+CREATE TRIGGER trg_33z_signed_plugin_installation_insert
+BEFORE INSERT ON signed_plugin_installations
+WHEN NOT EXISTS(
+  SELECT 1 FROM signed_plugin_mutations mutation
+  JOIN signed_plugin_releases release ON release.id=NEW.current_release_id
+  WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_id=NEW.id AND mutation.mutation_kind='release_register'
+    AND mutation.expected_revision=0 AND mutation.revision=NEW.revision AND mutation.resource_state_fingerprint=NEW.state_fingerprint
+    AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+    AND mutation.occurred_at=NEW.created_at AND NEW.updated_at=NEW.created_at AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+    AND release.plugin_id=NEW.id AND release.family_id=NEW.family_id AND release.owner_person_id=NEW.owner_person_id
+    AND release.version=NEW.current_version AND release.display_name=NEW.display_name AND NEW.previous_version IS NULL
+    AND NEW.desired_state='disabled' AND NEW.emergency_disabled_at IS NULL
+)
+BEGIN SELECT RAISE(ABORT,'33-Z installation requires exact verified release registration'); END;
+
+CREATE TRIGGER trg_33z_signed_plugin_installation_update
+BEFORE UPDATE ON signed_plugin_installations
+WHEN NEW.id IS NOT OLD.id OR NEW.family_id IS NOT OLD.family_id OR NEW.owner_person_id IS NOT OLD.owner_person_id
+  OR NEW.created_at IS NOT OLD.created_at OR NEW.revision<>OLD.revision+1
+  OR NOT EXISTS(
+    SELECT 1 FROM signed_plugin_mutations mutation
+    JOIN signed_plugin_releases release ON release.id=NEW.current_release_id
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_id=NEW.id
+      AND mutation.expected_revision=OLD.revision AND mutation.revision=NEW.revision
+      AND mutation.resource_state_fingerprint=NEW.state_fingerprint AND mutation.family_id=NEW.family_id
+      AND mutation.owner_person_id=NEW.owner_person_id AND mutation.occurred_at=NEW.updated_at
+      AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+      AND release.plugin_id=NEW.id AND release.family_id=NEW.family_id AND release.owner_person_id=NEW.owner_person_id
+      AND release.version=NEW.current_version AND release.display_name=NEW.display_name
+      AND ((mutation.mutation_kind='release_update' AND NEW.current_release_id<>OLD.current_release_id
+          AND NEW.previous_version=OLD.current_version AND NEW.desired_state='disabled' AND NEW.emergency_disabled_at IS NULL)
+        OR (mutation.mutation_kind='release_rollback' AND OLD.previous_version=NEW.current_version
+          AND NEW.previous_version=OLD.current_version AND NEW.current_release_id<>OLD.current_release_id
+          AND NEW.desired_state='disabled')
+        OR (mutation.mutation_kind='desired_enable' AND NEW.current_release_id=OLD.current_release_id
+          AND NEW.current_version=OLD.current_version AND NEW.display_name=OLD.display_name AND NEW.previous_version IS OLD.previous_version
+          AND OLD.desired_state<>'emergency_disabled' AND NEW.desired_state='enabled' AND NEW.emergency_disabled_at IS OLD.emergency_disabled_at)
+        OR (mutation.mutation_kind='desired_disable' AND NEW.current_release_id=OLD.current_release_id
+          AND NEW.current_version=OLD.current_version AND NEW.display_name=OLD.display_name AND NEW.previous_version IS OLD.previous_version
+          AND NEW.desired_state='disabled' AND NEW.emergency_disabled_at IS OLD.emergency_disabled_at)
+        OR (mutation.mutation_kind='emergency_disable' AND NEW.current_release_id=OLD.current_release_id
+          AND NEW.current_version=OLD.current_version AND NEW.display_name=OLD.display_name AND NEW.previous_version IS OLD.previous_version
+          AND OLD.desired_state<>'emergency_disabled' AND NEW.desired_state='emergency_disabled' AND NEW.emergency_disabled_at=NEW.updated_at))
+  )
+BEGIN SELECT RAISE(ABORT,'33-Z installation update requires exact rollback, desired-state or emergency mutation'); END;
+
+CREATE TRIGGER trg_33z_signed_plugin_release_update BEFORE UPDATE ON signed_plugin_releases
+BEGIN SELECT RAISE(ABORT,'33-Z release evidence is immutable'); END;
+CREATE TRIGGER trg_33z_signed_plugin_release_delete BEFORE DELETE ON signed_plugin_releases
+BEGIN SELECT RAISE(ABORT,'33-Z release evidence is durable'); END;
+CREATE TRIGGER trg_33z_signed_plugin_installation_delete BEFORE DELETE ON signed_plugin_installations
+BEGIN SELECT RAISE(ABORT,'33-Z installation history is durable'); END;
+CREATE TRIGGER trg_33z_signed_plugin_mutation_update BEFORE UPDATE ON signed_plugin_mutations
+BEGIN SELECT RAISE(ABORT,'33-Z mutation ledger is immutable'); END;
+CREATE TRIGGER trg_33z_signed_plugin_mutation_delete BEFORE DELETE ON signed_plugin_mutations
+BEGIN SELECT RAISE(ABORT,'33-Z mutation ledger is durable'); END;
+
+UPDATE database_metadata SET value='REVISION-33-Z-SIGNED-PLUGIN-EXTERNAL-PROVIDER-PLATFORM',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -14944,7 +15151,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(100, 'places_travel_asset_pet_workflows', placesTravelAssetPetSql),
   createMigrationDefinition(101, 'consent_bound_family_ai_assistant', familyAiAssistantSql),
   createMigrationDefinition(102, 'memory_studio_time_capsule', memoryStudioSql),
-  createMigrationDefinition(103, 'local_first_smart_home_energy', smartHomeEnergySql)
+  createMigrationDefinition(103, 'local_first_smart_home_energy', smartHomeEnergySql),
+  createMigrationDefinition(104, 'signed_plugin_external_provider_platform', signedPluginPlatformSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

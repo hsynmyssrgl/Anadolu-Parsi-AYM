@@ -112,3 +112,4 @@ export * from './places-travel-asset-pet-use-cases.js';
 export * from './family-ai-assistant-use-cases.js';
 export * from './memory-studio-use-cases.js';
 export * from './smart-home-energy-use-cases.js';
+export * from './signed-plugin-platform-use-cases.js';

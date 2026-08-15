@@ -34,6 +34,7 @@ import {
   SqliteLongTermPortfolioRepository,
   SqliteMemoryStudioRepository,
   SqliteSmartHomeEnergyRepository,
+  SqliteSignedPluginPlatformRepository,
   SqliteLargeFamilyReadModelRepository,
   SqliteLocationRepository,
   SqliteNotificationStateRepository,
@@ -100,6 +101,8 @@ import type {
   MemoryStudioRepositoryPort,
   SmartHomeEnergyPolicyResourceRepositoryPort,
   SmartHomeEnergyRepositoryPort,
+  SignedPluginPlatformPolicyResourceRepositoryPort,
+  SignedPluginPlatformRepositoryPort,
   LongTermPortfolioRepository,
   LocationPolicyResourceRepositoryPort,
   LocationRepositoryPort,
@@ -159,6 +162,7 @@ export interface RepositoryCompositionRoot {
   readonly localGovernedOcrRepository: LocalGovernedOcrRepositoryPort;
   readonly memoryStudioRepository: MemoryStudioRepositoryPort & MemoryStudioPolicyResourceRepositoryPort;
   readonly smartHomeEnergyRepository: SmartHomeEnergyRepositoryPort & SmartHomeEnergyPolicyResourceRepositoryPort;
+  readonly signedPluginPlatformRepository: SignedPluginPlatformRepositoryPort & SignedPluginPlatformPolicyResourceRepositoryPort;
   readonly largeFamilyReadModelRepository: LargeFamilyReadModelRepositoryPort;
   readonly locationRepository: LocationRepositoryPort & LocationPolicyResourceRepositoryPort;
   readonly notificationStateRepository: NotificationStateRepositoryPort;
@@ -227,6 +231,7 @@ export const createSqliteRepositoryCompositionRoot = (
     localGovernedOcrRepository: new SqliteLocalGovernedOcrRepository(repositoryOptions),
     memoryStudioRepository: new SqliteMemoryStudioRepository(repositoryOptions),
     smartHomeEnergyRepository: new SqliteSmartHomeEnergyRepository(repositoryOptions),
+    signedPluginPlatformRepository: new SqliteSignedPluginPlatformRepository(repositoryOptions),
     largeFamilyReadModelRepository: new SqliteLargeFamilyReadModelRepository(repositoryOptions),
     locationRepository: new SqliteLocationRepository(repositoryOptions),
     notificationStateRepository: new SqliteNotificationStateRepository(repositoryOptions),

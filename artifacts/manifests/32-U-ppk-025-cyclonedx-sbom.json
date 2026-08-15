@@ -10047,50 +10047,6 @@
       "version": "3.1.3"
     },
     {
-      "bom-ref": "urn:ppt:npm:windows-packager:4869c74cc1a2de378d373ab1",
-      "hashes": [
-        {
-          "alg": "SHA-512",
-          "content": "85c8376667a94b7d3fec1485a91be8a370ce310bbb223ab13b99c20edfb333d5d68dbdf75a0ef388d4fe42fa9bb9cdfe816a733b4d89b9b5729361b866fa3539"
-        }
-      ],
-      "licenses": [
-        {
-          "expression": "MIT"
-        }
-      ],
-      "name": "fs-extra",
-      "properties": [
-        {
-          "name": "ppt:dependencyScope",
-          "value": "development"
-        },
-        {
-          "name": "ppt:integrity",
-          "value": "sha512-hcg3ZmepS30/7BSFqRvoo3DOMQu7IjqxO5nCDt+zM9XWjb33Wg7ziNT+Qvqbuc3+gWpzO02JubVyk2G4Zvo1OQ=="
-        },
-        {
-          "name": "ppt:lockfile",
-          "value": "tools/windows-packager/package-lock.json"
-        },
-        {
-          "name": "ppt:lockPath",
-          "value": "node_modules/@electron/fuses/node_modules/fs-extra"
-        },
-        {
-          "name": "ppt:resolved",
-          "value": "https://registry.npmjs.org/fs-extra/-/fs-extra-9.1.0.tgz"
-        },
-        {
-          "name": "ppt:sourceGraph",
-          "value": "windows-packager"
-        }
-      ],
-      "purl": "pkg:npm/fs-extra@9.1.0",
-      "type": "library",
-      "version": "9.1.0"
-    },
-    {
       "bom-ref": "urn:ppt:npm:windows-packager:48f27b39dcd99aae315bae35",
       "hashes": [
         {
@@ -12119,7 +12075,7 @@
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "cf1d0422aefc5a563f9416f5b97973899983648e2e6dc09720c278b868d7cd95b49d2d7d4e348f7973c08f3cd398a425254666d126e66613ca3fbb6e4354ac13"
+          "content": "2e828951736227824cf0822b525b521c8fbca64a206868f9c26271f358c4fd6937836c35fe47cc6d310a368639922b4613c8620b5da1df647fd52972c05b715e"
         }
       ],
       "licenses": [
@@ -12135,7 +12091,7 @@
         },
         {
           "name": "ppt:integrity",
-          "value": "sha512-zx0EIq78WlY/lBb1uXlziZmDZI4ubcCXIMJ4uGjXzZW0nS19TjSPeXPAjzzTmKQlJUZm0SbmZhPKP7tuQ1SsEw=="
+          "value": "sha512-LoKJUXNiJ4JM8IIrUltSHI+8pkogaGj5wmJx81jE/Wk3g2w1/kfMbTEKNoY5kitGE8hiC12h32R/1SlywFtxXg=="
         },
         {
           "name": "ppt:lockfile",
@@ -12147,16 +12103,16 @@
         },
         {
           "name": "ppt:resolved",
-          "value": "https://registry.npmjs.org/@electron/fuses/-/fuses-1.8.0.tgz"
+          "value": "https://registry.npmjs.org/@electron/fuses/-/fuses-2.1.3.tgz"
         },
         {
           "name": "ppt:sourceGraph",
           "value": "windows-packager"
         }
       ],
-      "purl": "pkg:npm/%40electron/fuses@1.8.0",
+      "purl": "pkg:npm/%40electron/fuses@2.1.3",
       "type": "library",
-      "version": "1.8.0"
+      "version": "2.1.3"
     },
     {
       "bom-ref": "urn:ppt:npm:windows-packager:8469a1f1bf8d2545fafcecea",
@@ -13944,6 +13900,50 @@
       "version": "2.0.4"
     },
     {
+      "bom-ref": "urn:ppt:npm:windows-packager:b612322925a3682986e25c0b",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "829b4735082120d9dcfef4c6224d12385185357c3b255ae5454b42a2725196f6b0e83b97d303b925e928f6c5ab301861f8fb18019ee85c088e9dffd42a88328b"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ],
+      "name": "universalify",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "development"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "tools/windows-packager/package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/app-builder-lib/node_modules/@electron/fuses/node_modules/universalify"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/universalify/-/universalify-2.0.1.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "windows-packager"
+        }
+      ],
+      "purl": "pkg:npm/universalify@2.0.1",
+      "type": "library",
+      "version": "2.0.1"
+    },
+    {
       "bom-ref": "urn:ppt:npm:windows-packager:b7757a1b9187e4d6077b9134",
       "hashes": [
         {
@@ -14162,6 +14162,94 @@
       "purl": "pkg:npm/yargs@17.7.3",
       "type": "library",
       "version": "17.7.3"
+    },
+    {
+      "bom-ref": "urn:ppt:npm:windows-packager:bd2a7049f644e3425a8dc396",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "85c8376667a94b7d3fec1485a91be8a370ce310bbb223ab13b99c20edfb333d5d68dbdf75a0ef388d4fe42fa9bb9cdfe816a733b4d89b9b5729361b866fa3539"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ],
+      "name": "fs-extra",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "development"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-hcg3ZmepS30/7BSFqRvoo3DOMQu7IjqxO5nCDt+zM9XWjb33Wg7ziNT+Qvqbuc3+gWpzO02JubVyk2G4Zvo1OQ=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "tools/windows-packager/package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/app-builder-lib/node_modules/@electron/fuses/node_modules/fs-extra"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/fs-extra/-/fs-extra-9.1.0.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "windows-packager"
+        }
+      ],
+      "purl": "pkg:npm/fs-extra@9.1.0",
+      "type": "library",
+      "version": "9.1.0"
+    },
+    {
+      "bom-ref": "urn:ppt:npm:windows-packager:bd9b9b3c9785ede10e84f3dc",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "cf1d0422aefc5a563f9416f5b97973899983648e2e6dc09720c278b868d7cd95b49d2d7d4e348f7973c08f3cd398a425254666d126e66613ca3fbb6e4354ac13"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ],
+      "name": "@electron/fuses",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "development"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-zx0EIq78WlY/lBb1uXlziZmDZI4ubcCXIMJ4uGjXzZW0nS19TjSPeXPAjzzTmKQlJUZm0SbmZhPKP7tuQ1SsEw=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "tools/windows-packager/package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/app-builder-lib/node_modules/@electron/fuses"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/@electron/fuses/-/fuses-1.8.0.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "windows-packager"
+        }
+      ],
+      "purl": "pkg:npm/%40electron/fuses@1.8.0",
+      "type": "library",
+      "version": "1.8.0"
     },
     {
       "bom-ref": "urn:ppt:npm:windows-packager:be19f75f90516df3d4993d45",
@@ -16980,6 +17068,50 @@
       "version": "4.1.0"
     },
     {
+      "bom-ref": "urn:ppt:npm:windows-packager:f6c0999d7d37f8ee171cf9f1",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "cf039374bdeb150fe545d0679ed295397ea4e5c289c047351dd8a54fbd41584bbb278d605c8076311a7ebf176e3d2c1924f581c44cefe321f5c182c91941d7e1"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ],
+      "name": "jsonfile",
+      "properties": [
+        {
+          "name": "ppt:dependencyScope",
+          "value": "development"
+        },
+        {
+          "name": "ppt:integrity",
+          "value": "sha512-zwOTdL3rFQ/lRdBnntKVOX6k5cKJwEc1HdilT71BWEu7J41gXIB2MRp+vxduPSwZJPWBxEzv4yH1wYLJGUHX4Q=="
+        },
+        {
+          "name": "ppt:lockfile",
+          "value": "tools/windows-packager/package-lock.json"
+        },
+        {
+          "name": "ppt:lockPath",
+          "value": "node_modules/app-builder-lib/node_modules/@electron/fuses/node_modules/jsonfile"
+        },
+        {
+          "name": "ppt:resolved",
+          "value": "https://registry.npmjs.org/jsonfile/-/jsonfile-6.2.1.tgz"
+        },
+        {
+          "name": "ppt:sourceGraph",
+          "value": "windows-packager"
+        }
+      ],
+      "purl": "pkg:npm/jsonfile@6.2.1",
+      "type": "library",
+      "version": "6.2.1"
+    },
+    {
       "bom-ref": "urn:ppt:npm:windows-packager:f6fd10d2e1523cd02ee637b8",
       "hashes": [
         {
@@ -17917,6 +18049,7 @@
       "dependsOn": [
         "urn:ppt:npm:root:1747312f048021059a485abd",
         "urn:ppt:npm:root:772d8dbb1be6c61469cfb969",
+        "urn:ppt:npm:root:86ee6ecf076a1aa3b8e5b731",
         "urn:ppt:npm:root:a718f78818dfd639fa4ead13",
         "urn:ppt:npm:root:cac358fdaa9e6fe66c2bdf5f",
         "urn:ppt:npm:root:f4ab94d3b59e15f2a4814ab0"
@@ -19022,15 +19155,6 @@
     },
     {
       "dependsOn": [
-        "urn:ppt:npm:windows-packager:0723d71f10c0d0f1c31c026e",
-        "urn:ppt:npm:windows-packager:1e03c8da408f5ac4c1d02739",
-        "urn:ppt:npm:windows-packager:a5a7392e65259922fe517a14",
-        "urn:ppt:npm:windows-packager:d490a6d4382dfd684072aac4"
-      ],
-      "ref": "urn:ppt:npm:windows-packager:4869c74cc1a2de378d373ab1"
-    },
-    {
-      "dependsOn": [
         "urn:ppt:npm:windows-packager:45a7cd8e86a1d6d446f1e500",
         "urn:ppt:npm:windows-packager:e7b40ffca5b4bcaf4a10ac61"
       ],
@@ -19138,7 +19262,6 @@
         "urn:ppt:npm:windows-packager:6d89996979d904496b999594",
         "urn:ppt:npm:windows-packager:7bf2e14e667cd8302bd2db8f",
         "urn:ppt:npm:windows-packager:80ac844876871bdb473d46d4",
-        "urn:ppt:npm:windows-packager:82b333cc7e26417002b6671a",
         "urn:ppt:npm:windows-packager:8959657bd4511669487401bc",
         "urn:ppt:npm:windows-packager:8c1bb745da2f6b0c421ded9c",
         "urn:ppt:npm:windows-packager:8f0639009f2657879187f69a",
@@ -19149,6 +19272,7 @@
         "urn:ppt:npm:windows-packager:a56424e6db4ecd251b5d8ed5",
         "urn:ppt:npm:windows-packager:aa3759500feb2e2f8b4c321e",
         "urn:ppt:npm:windows-packager:b860c3f2dfc75e2d0b34afe4",
+        "urn:ppt:npm:windows-packager:bd9b9b3c9785ede10e84f3dc",
         "urn:ppt:npm:windows-packager:c37fa2beac2843f961d8a0a2",
         "urn:ppt:npm:windows-packager:c7732b5c10b3b7ce03b532f3",
         "urn:ppt:npm:windows-packager:cc38c6f795314e98696787ba",
@@ -19327,11 +19451,7 @@
       "ref": "urn:ppt:npm:windows-packager:8251d49c63353aa590933522"
     },
     {
-      "dependsOn": [
-        "urn:ppt:npm:windows-packager:085484e408a39549de39582d",
-        "urn:ppt:npm:windows-packager:4869c74cc1a2de378d373ab1",
-        "urn:ppt:npm:windows-packager:e96ac6a56a8f9bb5fdb58952"
-      ],
+      "dependsOn": [],
       "ref": "urn:ppt:npm:windows-packager:82b333cc7e26417002b6671a"
     },
     {
@@ -19410,6 +19530,7 @@
     {
       "dependsOn": [
         "urn:ppt:npm:windows-packager:27dd6bef01874cbdb415f256",
+        "urn:ppt:npm:windows-packager:82b333cc7e26417002b6671a",
         "urn:ppt:npm:windows-packager:fc35b15d51b1b7386919de6e"
       ],
       "ref": "urn:ppt:npm:windows-packager:9339b8a5801c2c8f30653917"
@@ -19575,6 +19696,10 @@
       "ref": "urn:ppt:npm:windows-packager:b4b7d5235efbcec1571e8674"
     },
     {
+      "dependsOn": [],
+      "ref": "urn:ppt:npm:windows-packager:b612322925a3682986e25c0b"
+    },
+    {
       "dependsOn": [
         "urn:ppt:npm:windows-packager:5a9239bf7d1e8a3af3a9bb18",
         "urn:ppt:npm:windows-packager:958e49d9eaa688922f9ef164"
@@ -19620,6 +19745,23 @@
         "urn:ppt:npm:windows-packager:d9e495ab61a788764e67bd9f"
       ],
       "ref": "urn:ppt:npm:windows-packager:bd1626d7a38ade4b7491f426"
+    },
+    {
+      "dependsOn": [
+        "urn:ppt:npm:windows-packager:1e03c8da408f5ac4c1d02739",
+        "urn:ppt:npm:windows-packager:b612322925a3682986e25c0b",
+        "urn:ppt:npm:windows-packager:d490a6d4382dfd684072aac4",
+        "urn:ppt:npm:windows-packager:f6c0999d7d37f8ee171cf9f1"
+      ],
+      "ref": "urn:ppt:npm:windows-packager:bd2a7049f644e3425a8dc396"
+    },
+    {
+      "dependsOn": [
+        "urn:ppt:npm:windows-packager:085484e408a39549de39582d",
+        "urn:ppt:npm:windows-packager:bd2a7049f644e3425a8dc396",
+        "urn:ppt:npm:windows-packager:e96ac6a56a8f9bb5fdb58952"
+      ],
+      "ref": "urn:ppt:npm:windows-packager:bd9b9b3c9785ede10e84f3dc"
     },
     {
       "dependsOn": [],
@@ -19989,6 +20131,13 @@
         "urn:ppt:npm:windows-packager:ef019587cdc66686c3e080a0"
       ],
       "ref": "urn:ppt:npm:windows-packager:f57a54b9d18b618cdcf9c28a"
+    },
+    {
+      "dependsOn": [
+        "urn:ppt:npm:windows-packager:b612322925a3682986e25c0b",
+        "urn:ppt:npm:windows-packager:d490a6d4382dfd684072aac4"
+      ],
+      "ref": "urn:ppt:npm:windows-packager:f6c0999d7d37f8ee171cf9f1"
     },
     {
       "dependsOn": [],
