@@ -11,6 +11,7 @@ import {
   SqliteBootstrapRepository,
   SqliteChildEducationCoordinationRepository,
   SqliteCommunicationMessagingRepository,
+  SqliteCommunicationRecordingRepository,
   SqliteCommunicationRealtimeCallingRepository,
   SqliteCommunicationSecurityRepository,
   SqliteDashboardRepository,
@@ -74,6 +75,8 @@ import type {
   ChildEducationPolicyResourceRepositoryPort,
   CommunicationMessagingPolicyResourceRepositoryPort,
   CommunicationMessagingRepositoryPort,
+  CommunicationRecordingPolicyResourceRepositoryPort,
+  CommunicationRecordingRepositoryPort,
   CommunicationRealtimeCallingPolicyResourceRepositoryPort,
   CommunicationRealtimeCallingRepositoryPort,
   CommunicationSecurityPolicyResourceRepositoryPort,
@@ -148,6 +151,7 @@ export interface RepositoryCompositionRoot {
   readonly bootstrapRepository: BootstrapRepositoryPort;
   readonly childEducationRepository: ChildEducationCoordinationRepositoryPort & ChildEducationPolicyResourceRepositoryPort;
   readonly communicationMessagingRepository: CommunicationMessagingRepositoryPort & CommunicationMessagingPolicyResourceRepositoryPort;
+  readonly communicationRecordingRepository: CommunicationRecordingRepositoryPort & CommunicationRecordingPolicyResourceRepositoryPort;
   readonly communicationRealtimeCallingRepository: CommunicationRealtimeCallingRepositoryPort & CommunicationRealtimeCallingPolicyResourceRepositoryPort;
   readonly communicationSecurityRepository: CommunicationSecurityRepositoryPort & CommunicationSecurityPolicyResourceRepositoryPort;
   readonly dashboardRepository: DashboardRepositoryPort;
@@ -220,6 +224,7 @@ export const createSqliteRepositoryCompositionRoot = (
     bootstrapRepository: new SqliteBootstrapRepository(repositoryOptions),
     childEducationRepository: new SqliteChildEducationCoordinationRepository(repositoryOptions),
     communicationMessagingRepository: new SqliteCommunicationMessagingRepository(repositoryOptions),
+    communicationRecordingRepository: new SqliteCommunicationRecordingRepository(repositoryOptions),
     communicationRealtimeCallingRepository: new SqliteCommunicationRealtimeCallingRepository(repositoryOptions),
     communicationSecurityRepository: new SqliteCommunicationSecurityRepository(repositoryOptions),
     dashboardRepository: new SqliteDashboardRepository(repositoryOptions),

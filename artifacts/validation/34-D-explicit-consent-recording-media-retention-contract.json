@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "step": "34-D",
+  "decision": "DEC-241",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "countsAsRequirementPass": false,
+  "checkCount": 14,
+  "passed": 14,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "governance identities and no-pass truth are exact",
+      "status": "PASS"
+    },
+    {
+      "name": "domain contract carries safe views and false production truth",
+      "status": "PASS"
+    },
+    {
+      "name": "repository contract exposes payload-free policy resolution",
+      "status": "PASS"
+    },
+    {
+      "name": "application keeps capture and artifact truth false",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 108 owns six tables and immutable ledgers",
+      "status": "PASS"
+    },
+    {
+      "name": "migration default-off and no-capture checks are exact",
+      "status": "PASS"
+    },
+    {
+      "name": "repository and adapter require central policy context",
+      "status": "PASS"
+    },
+    {
+      "name": "IPC lifecycle bridge and preload expose eight bounded channels",
+      "status": "PASS"
+    },
+    {
+      "name": "renderer reuses App surface without new route",
+      "status": "PASS"
+    },
+    {
+      "name": "governance documents preserve fail-honest residuals",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted package command is exact",
+      "status": "PASS"
+    },
+    {
+      "name": "governance verifier commands are wired",
+      "status": "PASS"
+    },
+    {
+      "name": "migration and PPK ratchets are exact",
+      "status": "PASS"
+    },
+    {
+      "name": "governance sources are nonempty and uniquely bound",
+      "status": "PASS"
+    }
+  ],
+  "generatedAt": "2026-08-15T16:14:48.990Z"
+}

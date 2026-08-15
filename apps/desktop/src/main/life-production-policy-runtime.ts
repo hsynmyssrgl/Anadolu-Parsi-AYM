@@ -32,6 +32,7 @@ import type {
   AccountRow,
   ChildEducationPolicyResourceRepositoryPort,
   CommunicationMessagingPolicyResourceRepositoryPort,
+  CommunicationRecordingPolicyResourceRepositoryPort,
   CommunicationRealtimeCallingPolicyResourceRepositoryPort,
   CommunicationSecurityPolicyResourceRepositoryPort,
   FamilyAiAssistantPolicyResourceRepositoryPort,
@@ -75,6 +76,7 @@ export interface LifeProductionPolicyRuntimeDependencies {
   readonly householdOperationsPolicyResourceRepository: HouseholdOperationsPolicyResourceRepositoryPort;
   readonly childEducationPolicyResourceRepository: ChildEducationPolicyResourceRepositoryPort;
   readonly communicationMessagingPolicyResourceRepository?: CommunicationMessagingPolicyResourceRepositoryPort;
+  readonly communicationRecordingPolicyResourceRepository?: CommunicationRecordingPolicyResourceRepositoryPort;
   readonly communicationRealtimeCallingPolicyResourceRepository?: CommunicationRealtimeCallingPolicyResourceRepositoryPort;
   readonly communicationSecurityPolicyResourceRepository?: CommunicationSecurityPolicyResourceRepositoryPort;
   readonly familyAiAssistantPolicyResourceRepository: FamilyAiAssistantPolicyResourceRepositoryPort;
@@ -145,7 +147,9 @@ const lifeResourceTypes = new Set<LifePolicyIntent['resourceType']>([
   'communication_retention_policy',
   'communication_call_center',
   'communication_call_session',
-  'communication_call_preferences'
+  'communication_call_preferences',
+  'communication_recording_center',
+  'communication_recording_request'
 ]);
 
 const nonEmpty = (value: unknown, max = 512): value is string =>
@@ -936,6 +940,17 @@ const findLifeResourceForPolicyResolution = (
           privacy: 'private' as const, stateFingerprint: stable(found.value) })
       : null);
   }
+  if (resourceType === 'communication_recording_request') {
+    if (!dependencies.communicationRecordingPolicyResourceRepository) throw new PlatformPolicyEnforcementError(
+      'RESOURCE_RESOLUTION_FAILED', 'Communication recording policy resource repository is not composed');
+    const found = dependencies.communicationRecordingPolicyResourceRepository.resolvePolicyResource(
+      execution, resourceType, resourceId);
+    if (!found.ok) return found;
+    return ok(found.value
+      ? Object.freeze({ familyId: found.value.familyId, ownerPersonId: found.value.ownerPersonId,
+          privacy: 'private' as const, stateFingerprint: stable(found.value) })
+      : null);
+  }
   throw new PlatformPolicyEnforcementError(
     'RESOURCE_RESOLUTION_FAILED',
     'Life policy resource type is not supported'
@@ -1011,7 +1026,8 @@ const loadLifeResourceSnapshotInTransaction = (
           'memory_studio_record','memory_time_capsule','smart_home_device','smart_home_observation',
           'smart_home_camera_consent','smart_home_settings','signed_plugin_installation',
           'communication_device_credential','communication_room','communication_message','communication_presence',
-          'communication_retention_policy','communication_call_session','communication_call_preferences'].includes(requestedIntent.resourceType)
+          'communication_retention_policy','communication_call_session','communication_call_preferences',
+          'communication_recording_request'].includes(requestedIntent.resourceType)
         || existing.value.familyId !== context.familyId
         || existing.value.ownerPersonId !== requestedIntent.ownerPersonId
         || existing.value.privacy !== requestedIntent.privacy

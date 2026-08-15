@@ -213,6 +213,14 @@ import {
   UpdateCommunicationCallControlsUseCase,
   AdvanceCommunicationCallUseCase,
   SetCommunicationCallPreferencesUseCase,
+  GetCommunicationRecordingCenterUseCase,
+  CreateCommunicationRecordingRequestUseCase,
+  DecideCommunicationRecordingConsentUseCase,
+  WithdrawCommunicationRecordingConsentUseCase,
+  AddCommunicationRecordingLateJoinerUseCase,
+  SetCommunicationRecordingSegmentUseCase,
+  UpdateCommunicationRecordingRetentionUseCase,
+  RequestCommunicationRecordingDeletionUseCase,
   type CommunicationCallPreflightPort,
   ListLifeRecordsUseCase,
   CreateLifeRecordUseCase,
@@ -419,6 +427,17 @@ import type {
   SetCommunicationCallPreferencesInput,
   UpdateCommunicationCallControlsInput
 } from '@ppt/domain';
+import type {
+  AddCommunicationRecordingLateJoinerInput,
+  CommunicationRecordingCenterView,
+  CommunicationRecordingMutationReceiptView,
+  CreateCommunicationRecordingRequestInput,
+  DecideCommunicationRecordingConsentInput,
+  RequestCommunicationRecordingDeletionInput,
+  SetCommunicationRecordingSegmentInput,
+  UpdateCommunicationRecordingRetentionInput,
+  WithdrawCommunicationRecordingConsentInput
+} from '@ppt/domain';
 import { RepositoryBackedFamilyApplicationUnitOfWork, RepositoryBackedFamilyGraphQueryPort } from './family-application-adapter.js';
 import { RepositoryBackedHouseholdMembershipUnitOfWork } from './household-membership-application-adapter.js';
 import { RepositoryBackedPersonLifecycleUnitOfWork } from './person-lifecycle-application-adapter.js';
@@ -499,6 +518,10 @@ import {
   RepositoryBackedCommunicationRealtimeCallingQueryPort,
   RepositoryBackedCommunicationRealtimeCallingUnitOfWork
 } from './communication-realtime-calling-application-adapter.js';
+import {
+  RepositoryBackedCommunicationRecordingQueryPort,
+  RepositoryBackedCommunicationRecordingUnitOfWork
+} from './communication-recording-retention-application-adapter.js';
 import { CommunicationMessagePayloadVault } from './communication-message-payload-vault.js';
 import {
   RepositoryBackedLocationPolicyTransactionRunner,
@@ -1474,6 +1497,14 @@ export class FamilyDataStore {
   readonly #updateCommunicationCallControlsUseCase:UpdateCommunicationCallControlsUseCase;
   readonly #advanceCommunicationCallUseCase:AdvanceCommunicationCallUseCase;
   readonly #setCommunicationCallPreferencesUseCase:SetCommunicationCallPreferencesUseCase;
+  readonly #getCommunicationRecordingCenterUseCase:GetCommunicationRecordingCenterUseCase;
+  readonly #createCommunicationRecordingRequestUseCase:CreateCommunicationRecordingRequestUseCase;
+  readonly #decideCommunicationRecordingConsentUseCase:DecideCommunicationRecordingConsentUseCase;
+  readonly #withdrawCommunicationRecordingConsentUseCase:WithdrawCommunicationRecordingConsentUseCase;
+  readonly #addCommunicationRecordingLateJoinerUseCase:AddCommunicationRecordingLateJoinerUseCase;
+  readonly #setCommunicationRecordingSegmentUseCase:SetCommunicationRecordingSegmentUseCase;
+  readonly #updateCommunicationRecordingRetentionUseCase:UpdateCommunicationRecordingRetentionUseCase;
+  readonly #requestCommunicationRecordingDeletionUseCase:RequestCommunicationRecordingDeletionUseCase;
   readonly #prepareFamilyEmergencyCardExportUseCase: PrepareFamilyEmergencyCardExportUseCase;
   readonly #recordFamilyEmergencyCardExportCompletionUseCase: RecordFamilyEmergencyCardExportCompletionUseCase;
   readonly #listFinanceRecordsUseCase: ListFinanceRecordsUseCase;
@@ -1998,6 +2029,7 @@ export class FamilyDataStore {
           signedPluginPlatformPolicyResourceRepository: this.#repositories.signedPluginPlatformRepository,
           communicationMessagingPolicyResourceRepository: this.#repositories.communicationMessagingRepository,
           communicationRealtimeCallingPolicyResourceRepository: this.#repositories.communicationRealtimeCallingRepository,
+          communicationRecordingPolicyResourceRepository: this.#repositories.communicationRecordingRepository,
           communicationSecurityPolicyResourceRepository: this.#repositories.communicationSecurityRepository,
           personRepository: this.#repositories.personRepository,
           deviceIdentityProvider: this.#deviceIdentityProvider,
@@ -2028,6 +2060,8 @@ export class FamilyDataStore {
       communicationMessagingPolicyResourceRepository: this.#repositories.communicationMessagingRepository,
       communicationRealtimeCallingRepository: this.#repositories.communicationRealtimeCallingRepository,
       communicationRealtimeCallingPolicyResourceRepository: this.#repositories.communicationRealtimeCallingRepository,
+      communicationRecordingRepository: this.#repositories.communicationRecordingRepository,
+      communicationRecordingPolicyResourceRepository: this.#repositories.communicationRecordingRepository,
       communicationSecurityRepository: this.#repositories.communicationSecurityRepository,
       communicationSecurityPolicyResourceRepository: this.#repositories.communicationSecurityRepository,
       aiConsentRepository: this.#repositories.aiConsentRepository,
@@ -2844,6 +2878,21 @@ export class FamilyDataStore {
     this.#updateCommunicationCallControlsUseCase=new UpdateCommunicationCallControlsUseCase(communicationRealtimeCallingUnitOfWork);
     this.#advanceCommunicationCallUseCase=new AdvanceCommunicationCallUseCase(communicationRealtimeCallingUnitOfWork);
     this.#setCommunicationCallPreferencesUseCase=new SetCommunicationCallPreferencesUseCase(communicationRealtimeCallingUnitOfWork);
+    const communicationRecordingDependencies={...lifeApplicationDependencies,
+      communicationRecordingRepository:this.#repositories.communicationRecordingRepository,
+      communicationRecordingPolicyResourceRepository:this.#repositories.communicationRecordingRepository} as const;
+    const communicationRecordingQuery=new RepositoryBackedCommunicationRecordingQueryPort(
+      communicationRecordingDependencies,lifePolicyTransactionRunner);
+    const communicationRecordingUnitOfWork=new RepositoryBackedCommunicationRecordingUnitOfWork(
+      communicationRecordingDependencies,lifePolicyTransactionRunner);
+    this.#getCommunicationRecordingCenterUseCase=new GetCommunicationRecordingCenterUseCase(communicationRecordingQuery);
+    this.#createCommunicationRecordingRequestUseCase=new CreateCommunicationRecordingRequestUseCase(communicationRecordingUnitOfWork);
+    this.#decideCommunicationRecordingConsentUseCase=new DecideCommunicationRecordingConsentUseCase(communicationRecordingUnitOfWork);
+    this.#withdrawCommunicationRecordingConsentUseCase=new WithdrawCommunicationRecordingConsentUseCase(communicationRecordingUnitOfWork);
+    this.#addCommunicationRecordingLateJoinerUseCase=new AddCommunicationRecordingLateJoinerUseCase(communicationRecordingUnitOfWork);
+    this.#setCommunicationRecordingSegmentUseCase=new SetCommunicationRecordingSegmentUseCase(communicationRecordingUnitOfWork);
+    this.#updateCommunicationRecordingRetentionUseCase=new UpdateCommunicationRecordingRetentionUseCase(communicationRecordingUnitOfWork);
+    this.#requestCommunicationRecordingDeletionUseCase=new RequestCommunicationRecordingDeletionUseCase(communicationRecordingUnitOfWork);
     this.#prepareArchiveOpenUseCase = new PrepareArchiveOpenUseCase(archiveQuery);
     this.#recordArchiveOpenedUseCase = new RecordArchiveOpenedUseCase(archiveUnitOfWork);
     this.#authorizeEmergencyArchiveReadUseCase = new AuthorizeEmergencyArchiveReadUseCase(archiveUnitOfWork);
@@ -6619,6 +6668,47 @@ export class FamilyDataStore {
   :Promise<CommunicationRealtimeCallingMutationReceiptView>{
     const result=await this.#setCommunicationCallPreferencesUseCase.execute(
       this.#lifeApplicationContext('communication-call-preferences'),input);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async getCommunicationRecordingCenter():Promise<CommunicationRecordingCenterView>{
+    const result=await this.#getCommunicationRecordingCenterUseCase.execute(
+      this.#lifeApplicationContext('communication-recording-center'));
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async createCommunicationRecordingRequest(input:CreateCommunicationRecordingRequestInput):Promise<CommunicationRecordingMutationReceiptView>{
+    const result=await this.#createCommunicationRecordingRequestUseCase.execute(
+      this.#lifeApplicationContext('communication-recording-create'),input);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async decideCommunicationRecordingConsent(input:DecideCommunicationRecordingConsentInput):Promise<CommunicationRecordingMutationReceiptView>{
+    const result=await this.#decideCommunicationRecordingConsentUseCase.execute(
+      this.#lifeApplicationContext('communication-recording-consent'),input);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async withdrawCommunicationRecordingConsent(input:WithdrawCommunicationRecordingConsentInput):Promise<CommunicationRecordingMutationReceiptView>{
+    const result=await this.#withdrawCommunicationRecordingConsentUseCase.execute(
+      this.#lifeApplicationContext('communication-recording-withdraw'),input);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async addCommunicationRecordingLateJoiner(input:AddCommunicationRecordingLateJoinerInput):Promise<CommunicationRecordingMutationReceiptView>{
+    const result=await this.#addCommunicationRecordingLateJoinerUseCase.execute(
+      this.#lifeApplicationContext('communication-recording-late-joiner'),input);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async setCommunicationRecordingSegment(input:SetCommunicationRecordingSegmentInput):Promise<CommunicationRecordingMutationReceiptView>{
+    const result=await this.#setCommunicationRecordingSegmentUseCase.execute(
+      this.#lifeApplicationContext('communication-recording-segment'),input);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async updateCommunicationRecordingRetention(input:UpdateCommunicationRecordingRetentionInput):Promise<CommunicationRecordingMutationReceiptView>{
+    const result=await this.#updateCommunicationRecordingRetentionUseCase.execute(
+      this.#lifeApplicationContext('communication-recording-retention'),input);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+  public async requestCommunicationRecordingDeletion(input:RequestCommunicationRecordingDeletionInput):Promise<CommunicationRecordingMutationReceiptView>{
+    const result=await this.#requestCommunicationRecordingDeletionUseCase.execute(
+      this.#lifeApplicationContext('communication-recording-delete'),input);
     if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
   }
 

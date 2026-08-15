@@ -1377,7 +1377,7 @@ describe('FamilyDataStore', () => {
     ]));
     expect(database.prepare('SELECT COUNT(*) AS total FROM finance_planning_ledger').get()).toEqual({ total: 11 });
     expect(database.prepare('SELECT value FROM database_metadata WHERE key=?').get('schema_generation')).toEqual({
-      value: 'REVISION-34-C-REALTIME-CALLING-ACCESSIBLE-UX'
+      value: 'REVISION-34-D-EXPLICIT-CONSENT-RECORDING-RETENTION'
     });
     const payloads = database.prepare("SELECT payload_json FROM event_outbox WHERE event_type='finance.planning.item_recorded'").all() as Array<{payload_json:string}>;
     expect(JSON.stringify(payloads)).not.toMatch(/1200|10000|5500|Ağustos market|Manuel hedef|Manuel değerleme/u);
@@ -1472,7 +1472,7 @@ describe('FamilyDataStore', () => {
     const outbox = database.prepare("SELECT payload_json FROM event_outbox WHERE event_type='finance.import.batch_committed'").all();
     expect(JSON.stringify(outbox)).not.toMatch(/Market|İade|125\.5|row-expense/u);
     expect(database.prepare('SELECT value FROM database_metadata WHERE key=?').get('schema_generation')).toEqual({
-      value: 'REVISION-34-C-REALTIME-CALLING-ACCESSIBLE-UX'
+      value: 'REVISION-34-D-EXPLICIT-CONSENT-RECORDING-RETENTION'
     });
     database.close();
     expect(store.listAudit(400).some((entry) => entry.action === 'finance.import.batch_committed')).toBe(true);

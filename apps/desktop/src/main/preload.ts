@@ -81,6 +81,17 @@ import type {
   SetCommunicationCallPreferencesInput,
   UpdateCommunicationCallControlsInput
 } from '@ppt/domain';
+import type {
+  AddCommunicationRecordingLateJoinerInput,
+  CommunicationRecordingCenterView,
+  CommunicationRecordingMutationReceiptView,
+  CreateCommunicationRecordingRequestInput,
+  DecideCommunicationRecordingConsentInput,
+  RequestCommunicationRecordingDeletionInput,
+  SetCommunicationRecordingSegmentInput,
+  UpdateCommunicationRecordingRetentionInput,
+  WithdrawCommunicationRecordingConsentInput
+} from '@ppt/domain';
 import type { LegacyArchiveOwnershipReattestationView, ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { AssignPersonMembershipInput, CreateFamilyBranchInput, CreateHouseholdInput, FamilyBranch, Household, HouseholdMembershipWorkspaceView, PersonLifecycleProfile, PersonLifecycleWorkspaceView, PersonMembership, UpdatePersonProfileInput } from '@ppt/domain';
 import type { AuthorizationContextWorkspaceView } from '@ppt/domain';
@@ -799,6 +810,22 @@ contextBridge.exposeInMainWorld('pardus', {
     invoke('communicationCalling:advance',input),
   setCommunicationCallPreferences:(input:SetCommunicationCallPreferencesInput):Promise<CommunicationRealtimeCallingMutationReceiptView>=>
     invoke('communicationCalling:setPreferences',input),
+  getCommunicationRecordingCenter:():Promise<CommunicationRecordingCenterView>=>
+    invoke('communicationRecording:getCenter'),
+  createCommunicationRecordingRequest:(input:CreateCommunicationRecordingRequestInput):Promise<CommunicationRecordingMutationReceiptView>=>
+    invoke('communicationRecording:createRequest',input),
+  decideCommunicationRecordingConsent:(input:DecideCommunicationRecordingConsentInput):Promise<CommunicationRecordingMutationReceiptView>=>
+    invoke('communicationRecording:decideConsent',input),
+  withdrawCommunicationRecordingConsent:(input:WithdrawCommunicationRecordingConsentInput):Promise<CommunicationRecordingMutationReceiptView>=>
+    invoke('communicationRecording:withdrawConsent',input),
+  addCommunicationRecordingLateJoiner:(input:AddCommunicationRecordingLateJoinerInput):Promise<CommunicationRecordingMutationReceiptView>=>
+    invoke('communicationRecording:addLateJoiner',input),
+  setCommunicationRecordingSegment:(input:SetCommunicationRecordingSegmentInput):Promise<CommunicationRecordingMutationReceiptView>=>
+    invoke('communicationRecording:setSegment',input),
+  updateCommunicationRecordingRetention:(input:UpdateCommunicationRecordingRetentionInput):Promise<CommunicationRecordingMutationReceiptView>=>
+    invoke('communicationRecording:updateRetention',input),
+  requestCommunicationRecordingDeletion:(input:RequestCommunicationRecordingDeletionInput):Promise<CommunicationRecordingMutationReceiptView>=>
+    invoke('communicationRecording:requestDeletion',input),
   listFinanceValuations:():Promise<FinanceValuationView[]>=>invoke('finance:listValuations'),
   createFinanceValuation:(input:CreateFinanceValuationInput):Promise<FinanceValuationView[]>=>invoke('finance:createValuation',input),
   createMember: (input: CreateFamilyMemberInput): Promise<FamilyMutationResultView> => invoke('family:createMember', input),

@@ -3799,6 +3799,128 @@ const communicationCallingResult=(channel:string,result:unknown):IpcIntegrationP
   return valid?accepted():rejected('COMMUNICATION_CALL_RESULT_INVALID','$result');
 };
 
+export const COMMUNICATION_RECORDING_IPC_CHANNELS=Object.freeze({
+  getCenter:'communicationRecording:getCenter',
+  createRequest:'communicationRecording:createRequest',
+  decideConsent:'communicationRecording:decideConsent',
+  withdrawConsent:'communicationRecording:withdrawConsent',
+  addLateJoiner:'communicationRecording:addLateJoiner',
+  setSegment:'communicationRecording:setSegment',
+  updateRetention:'communicationRecording:updateRetention',
+  requestDeletion:'communicationRecording:requestDeletion'
+} as const);
+const communicationRecordingChannels=new Set<string>(Object.values(COMMUNICATION_RECORDING_IPC_CHANNELS));
+const recordingRetentionDays=(value:unknown):boolean=>Number.isSafeInteger(value)&&Number(value)>=1&&Number(value)<=3650;
+const communicationRecordingInput=(channel:string,args:readonly unknown[]):IpcIntegrationPolicyDecision=>{
+  if(channel===COMMUNICATION_RECORDING_IPC_CHANNELS.getCenter)return zeroArguments(args);
+  if(channel===COMMUNICATION_RECORDING_IPC_CHANNELS.createRequest)return exactObject(args,
+    ['clientOperationId','expectedRevision','callSessionId','participantPersonIds','noticeVersion','audioDays','videoDays',
+      'transcriptDays','translationDays','persistTranscript','persistTranslation'],value=>
+      communicationIdentifier(value.clientOperationId)&&value.expectedRevision===0&&communicationIdentifier(value.callSessionId)
+      &&Array.isArray(value.participantPersonIds)&&value.participantPersonIds.length>=2&&value.participantPersonIds.length<=16
+      &&value.participantPersonIds.every(communicationIdentifier)&&new Set(value.participantPersonIds).size===value.participantPersonIds.length
+      &&communicationMessagingText(value.noticeVersion,1,64)&&[value.audioDays,value.videoDays,value.transcriptDays,value.translationDays]
+        .every(recordingRetentionDays)&&typeof value.persistTranscript==='boolean'&&typeof value.persistTranslation==='boolean');
+  if(channel===COMMUNICATION_RECORDING_IPC_CHANNELS.decideConsent)return exactObject(args,
+    ['clientOperationId','expectedRevision','requestId','decision','explicitConsent','noticeVersion','ageCategory',
+      'ageAppropriateNoticeAcknowledged'],value=>communicationIdentifier(value.clientOperationId)
+      &&communicationMessagingRevision(value.expectedRevision)&&communicationIdentifier(value.requestId)
+      &&['grant','decline'].includes(String(value.decision))&&value.explicitConsent===true
+      &&communicationMessagingText(value.noticeVersion,1,64)&&['adult','minor_or_unknown'].includes(String(value.ageCategory))
+      &&value.ageAppropriateNoticeAcknowledged===true);
+  if(channel===COMMUNICATION_RECORDING_IPC_CHANNELS.withdrawConsent)return exactObject(args,
+    ['clientOperationId','expectedRevision','requestId','reason'],value=>communicationIdentifier(value.clientOperationId)
+      &&communicationMessagingRevision(value.expectedRevision)&&communicationIdentifier(value.requestId)
+      &&communicationMessagingText(value.reason,2,300));
+  if(channel===COMMUNICATION_RECORDING_IPC_CHANNELS.addLateJoiner)return exactObject(args,
+    ['clientOperationId','expectedRevision','requestId','participantPersonId'],value=>communicationIdentifier(value.clientOperationId)
+      &&communicationMessagingRevision(value.expectedRevision)&&communicationIdentifier(value.requestId)
+      &&communicationIdentifier(value.participantPersonId));
+  if(channel===COMMUNICATION_RECORDING_IPC_CHANNELS.setSegment)return exactObject(args,
+    ['clientOperationId','expectedRevision','requestId','mode','reason'],value=>communicationIdentifier(value.clientOperationId)
+      &&communicationMessagingRevision(value.expectedRevision)&&communicationIdentifier(value.requestId)
+      &&['on_record_requested','off_record'].includes(String(value.mode))&&communicationMessagingText(value.reason,2,300));
+  if(channel===COMMUNICATION_RECORDING_IPC_CHANNELS.updateRetention)return exactObject(args,
+    ['clientOperationId','expectedRevision','requestId','audioDays','videoDays','transcriptDays','translationDays',
+      'persistTranscript','persistTranslation','secureDeletionRequested'],value=>communicationIdentifier(value.clientOperationId)
+      &&communicationMessagingRevision(value.expectedRevision)&&communicationIdentifier(value.requestId)
+      &&[value.audioDays,value.videoDays,value.transcriptDays,value.translationDays].every(recordingRetentionDays)
+      &&[value.persistTranscript,value.persistTranslation,value.secureDeletionRequested].every(item=>typeof item==='boolean'));
+  if(channel===COMMUNICATION_RECORDING_IPC_CHANNELS.requestDeletion)return exactObject(args,
+    ['clientOperationId','expectedRevision','requestId','reason'],value=>communicationIdentifier(value.clientOperationId)
+      &&communicationMessagingRevision(value.expectedRevision)&&communicationIdentifier(value.requestId)
+      &&communicationMessagingText(value.reason,2,300));
+  return rejected('UNKNOWN_IPC_CHANNEL','$');
+};
+const communicationRecordingConsentResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['personId','state','noticeVersion','explicitConsent','ageCategory','ageAppropriateNoticeAcknowledged',
+    'guardianPolicyVerified','revision','updatedAt',...(value.decidedAt===undefined?[]:['decidedAt'])])
+  &&communicationIdentifier(value.personId)&&['pending','granted','declined','withdrawn'].includes(String(value.state))
+  &&communicationMessagingText(value.noticeVersion,1,64)&&typeof value.explicitConsent==='boolean'
+  &&['adult','minor_or_unknown'].includes(String(value.ageCategory))&&typeof value.ageAppropriateNoticeAcknowledged==='boolean'
+  &&value.guardianPolicyVerified===false&&communicationMessagingRevision(value.revision)&&communicationMessagingIso(value.updatedAt)
+  &&(value.decidedAt===undefined||communicationMessagingIso(value.decidedAt));
+const communicationRecordingRetentionResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['audioDays','videoDays','transcriptDays','translationDays','persistTranscript','persistTranslation',
+    'secureDeletionRequested','revision','updatedAt'])
+  &&[value.audioDays,value.videoDays,value.transcriptDays,value.translationDays].every(recordingRetentionDays)
+  &&[value.persistTranscript,value.persistTranslation,value.secureDeletionRequested].every(item=>typeof item==='boolean')
+  &&communicationMessagingRevision(value.revision)&&communicationMessagingIso(value.updatedAt);
+const communicationRecordingSegmentResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['mode','captureStarted','transcriptPersisted','translationPersisted','revision','occurredAt'])
+  &&['on_record_requested','off_record'].includes(String(value.mode))&&value.captureStarted===false
+  &&value.transcriptPersisted===false&&value.translationPersisted===false
+  &&communicationMessagingRevision(value.revision)&&communicationMessagingIso(value.occurredAt);
+const communicationRecordingRequestResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['id','callSessionId','state','noticeVersion','lateJoinerPauseRequired','anyDeclineKeepsCallOffRecord',
+    'visibleRecordingIndicatorActive','audibleRecordingAnnouncementExecuted','recordingRoleBoundToE2eeGroup',
+    'mediaCaptureStarted','participants','retention','segments','revision','createdAt','updatedAt'])
+  &&communicationIdentifier(value.id)&&communicationIdentifier(value.callSessionId)
+  &&['consent_pending','ready_not_recording','paused_for_joiner','off_record','stopped','cancelled','deletion_requested']
+    .includes(String(value.state))&&communicationMessagingText(value.noticeVersion,1,64)
+  &&value.lateJoinerPauseRequired===true&&value.anyDeclineKeepsCallOffRecord===true
+  &&value.visibleRecordingIndicatorActive===false&&value.audibleRecordingAnnouncementExecuted===false
+  &&value.recordingRoleBoundToE2eeGroup===false&&value.mediaCaptureStarted===false
+  &&Array.isArray(value.participants)&&value.participants.length>=2&&value.participants.length<=16
+  &&value.participants.every(communicationRecordingConsentResult)&&communicationRecordingRetentionResult(value.retention)
+  &&Array.isArray(value.segments)&&value.segments.length<=128&&value.segments.every(communicationRecordingSegmentResult)
+  &&communicationMessagingRevision(value.revision)&&communicationMessagingIso(value.createdAt)&&communicationMessagingIso(value.updatedAt);
+const communicationRecordingTruthResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,[
+  'recordingDefaultOff','separateExplicitParticipantConsentModeled','lateJoinerPauseModeled',
+  'declineContinuesCallOffRecordModeled','futureRecordingWithdrawalModeled','onRecordOffRecordSegmentsModeled',
+  'perMediaRetentionModeled','contentFreeConsentAuditModeled','rendererMediaAuthority','productionRecordingProviderConfigured',
+  'actualAudioCaptureExecuted','actualVideoCaptureExecuted','actualTranscriptPersistenceExecuted',
+  'actualTranslationPersistenceExecuted','visibleRedIndicatorUatExecuted','audibleAnnouncementUatExecuted',
+  'e2eeRecorderRoleVerified','encryptedMediaVaultConfigured','mediaHashSignatureVerified','securePhysicalDeletionVerified',
+  'guardianLegalPolicyConfigured','childRecordingLegalReviewCompleted','networkUsedByCurrentImplementation'])
+  &&['recordingDefaultOff','separateExplicitParticipantConsentModeled','lateJoinerPauseModeled',
+    'declineContinuesCallOffRecordModeled','futureRecordingWithdrawalModeled','onRecordOffRecordSegmentsModeled',
+    'perMediaRetentionModeled','contentFreeConsentAuditModeled'].every(key=>value[key]===true)
+  &&['rendererMediaAuthority','productionRecordingProviderConfigured','actualAudioCaptureExecuted','actualVideoCaptureExecuted',
+    'actualTranscriptPersistenceExecuted','actualTranslationPersistenceExecuted','visibleRedIndicatorUatExecuted',
+    'audibleAnnouncementUatExecuted','e2eeRecorderRoleVerified','encryptedMediaVaultConfigured','mediaHashSignatureVerified',
+    'securePhysicalDeletionVerified','guardianLegalPolicyConfigured','childRecordingLegalReviewCompleted',
+    'networkUsedByCurrentImplementation'].every(key=>value[key]===false);
+const communicationRecordingCenterResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['schemaVersion','centerId','ownerPersonId','requests','truth','generatedAt'])&&value.schemaVersion===1
+  &&communicationIdentifier(value.centerId)&&communicationIdentifier(value.ownerPersonId)&&Array.isArray(value.requests)
+  &&value.requests.length<=256&&value.requests.every(communicationRecordingRequestResult)
+  &&communicationRecordingTruthResult(value.truth)&&communicationMessagingIso(value.generatedAt);
+const communicationRecordingReceiptResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['resourceType','resourceId','mutationKind','previousRevision','revision','occurredAt','replayed','mediaCaptureStarted',
+    'mediaArtifactCreated','networkUsed'])&&value.resourceType==='communication_recording_request'
+  &&communicationIdentifier(value.resourceId)&&['recording_request_create','participant_consent_decide',
+    'participant_consent_withdraw','late_joiner_add','recording_segment_change','recording_retention_update',
+    'recording_delete_request'].includes(String(value.mutationKind))
+  &&communicationMessagingRevision(value.previousRevision,true)&&communicationMessagingRevision(value.revision)
+  &&Number(value.revision)===Number(value.previousRevision)+1&&communicationMessagingIso(value.occurredAt)
+  &&typeof value.replayed==='boolean'&&value.mediaCaptureStarted===false&&value.mediaArtifactCreated===false&&value.networkUsed===false;
+const communicationRecordingResult=(channel:string,result:unknown):IpcIntegrationPolicyDecision=>{
+  const valid=channel===COMMUNICATION_RECORDING_IPC_CHANNELS.getCenter
+    ?communicationRecordingCenterResult(result):communicationRecordingReceiptResult(result);
+  return valid?accepted():rejected('COMMUNICATION_RECORDING_RESULT_INVALID','$result');
+};
+
 export const ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS = Object.freeze({
   listEvidence: 'archive:listRelationEvidence',
   listEvidenceHistory: 'archive:listRelationEvidenceHistory',
@@ -4434,6 +4556,8 @@ export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unkn
   if (channel.startsWith('communicationMessaging:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
   if (communicationCallingChannels.has(channel)) return communicationCallingResult(channel,result);
   if (channel.startsWith('communicationCalling:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
+  if (communicationRecordingChannels.has(channel)) return communicationRecordingResult(channel,result);
+  if (channel.startsWith('communicationRecording:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
   if (childEducationChannels.has(channel)) return childEducationResult(channel, result);
   if (channel.startsWith('childEducation:')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
   if (placesTravelChannels.has(channel)) return placesTravelResult(channel, result);
@@ -4490,6 +4614,8 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
   if (channel.startsWith('communicationMessaging:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
   if (communicationCallingChannels.has(channel)) return communicationCallingInput(channel,args);
   if (channel.startsWith('communicationCalling:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
+  if (communicationRecordingChannels.has(channel)) return communicationRecordingInput(channel,args);
+  if (channel.startsWith('communicationRecording:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
   if (childEducationChannels.has(channel)) return childEducationInput(channel, args);
   if (channel.startsWith('childEducation:')) return rejected('UNKNOWN_IPC_CHANNEL', '$');
   if (placesTravelChannels.has(channel)) return placesTravelInput(channel, args);

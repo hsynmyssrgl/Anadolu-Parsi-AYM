@@ -3,7 +3,7 @@
   "step": "32-V",
   "requirement": "PPK-026",
   "status": "PASS",
-  "scannedProductionFiles": 512,
+  "scannedProductionFiles": 518,
   "canonicalFactoryConsumers": 7,
   "maliciousSelfTestAssertions": 14,
   "benignSelfTestAssertions": 4,

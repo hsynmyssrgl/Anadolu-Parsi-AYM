@@ -51,6 +51,7 @@ export * from './signed-plugin-platform-repository.js';
 export * from './communication-security-repository.js';
 export * from './communication-messaging-repository.js';
 export * from './communication-realtime-calling-repository.js';
+export * from './communication-recording-retention-repository.js';
 
 export * from './backup-repository.js';
 export * from './backup-propagation-repository.js';

@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "step": "34-D",
+  "decision": "DEC-241",
+  "status": "PLANNED",
+  "governanceState": "LOCAL_IMPLEMENTATION_STARTED",
+  "requirements": ["REC-001", "REC-002", "REC-003", "REC-004", "REC-005", "REC-006", "REC-007", "REC-008", "REC-009", "REC-010", "REC-011", "AUD-COM-004"],
+  "implementationChain": {
+    "domain": ["packages/domain/src/communication-recording-retention.ts"],
+    "application": ["packages/application/src/communication-recording-retention-use-cases.ts"],
+    "repositoryContract": ["packages/repository-contracts/src/communication-recording-retention-repository.ts"],
+    "migration": ["packages/database/src/family-database-migrations.ts#108"],
+    "repository": ["packages/repositories/src/communication-recording-retention-repository.ts"],
+    "policyAndComposition": [
+      "apps/desktop/src/main/life-production-policy-runtime.ts",
+      "apps/desktop/src/main/communication-recording-retention-application-adapter.ts",
+      "apps/desktop/src/main/repository-composition-root.ts",
+      "apps/desktop/src/main/data-store.ts"
+    ],
+    "ipc": [
+      "apps/desktop/src/main/ipc-integration-policy.ts",
+      "apps/desktop/src/main/ipc-request-lifecycle.ts",
+      "apps/desktop/src/main/main.ts",
+      "apps/desktop/src/main/preload.ts",
+      "apps/desktop/src/renderer/global.d.ts"
+    ],
+    "ui": ["apps/desktop/src/renderer/CommunicationRecordingRetentionPanel.tsx", "apps/desktop/src/renderer/App.tsx"]
+  },
+  "implementedTargetedTests": [
+    "packages/application/tests/communication-recording-retention-use-cases.test.ts",
+    "packages/repositories/communication-recording-retention-repository-policy.test.ts",
+    "apps/desktop/tests/communication-recording-retention-data-store.test.ts",
+    "apps/desktop/tests/communication-recording-retention-ipc-integration.test.ts",
+    "apps/desktop/tests/communication-recording-retention-ui.test.ts"
+  ],
+  "securityControls": {
+    "centralPepReceiptFence": true,
+    "ownerAccountFamilyBinding": true,
+    "explicitSelfConsentOnly": true,
+    "defaultOffAndNoCaptureSchema": true,
+    "immutableMutationConsentSegmentAndEventHistory": true,
+    "payloadFreePolicyResolution": true,
+    "contentFreeAuditAndOutbox": true,
+    "boundedIpcAndRendererSafeResults": true,
+    "rendererMediaNetworkProviderAuthorityExcluded": true,
+    "durableWritesNonCancellable": true,
+    "minorAndUnknownAgeConsentFailsClosed": true
+  },
+  "incompleteCapabilities": [
+    "production audio video transcript and translation recording",
+    "visible red indicator backed by real capture state",
+    "audible recording start and stop announcement",
+    "E2EE recorder role and media-key binding",
+    "encrypted media vault artifact hash signature and access history",
+    "secure physical deletion and backup propagation",
+    "guardian specialist and legal policy for child participants",
+    "retention expiry execution and lifecycle pruning",
+    "real device provider privacy legal security and accessibility UAT"
+  ],
+  "validation": {
+    "targetedTestFileRatchet": 5,
+    "targetedTestRatchet": 23,
+    "migrationVersion": 108,
+    "migrationSha256": "96e3f1fef2c269d2fd5c217ba773cd2f65f0f9e3ce38b902d4d93e9894604d3e",
+    "ppk015": {"status":"PASS","files":519,"sourceSha256":"860bda4c49d7338393a7dba0280bf45c0e2ff40b91dd4918fa7f68c22e6aa4a5","findings":0},
+    "ppk021": {"status":"PASS","files":519,"surfaces":817,"sha256":"c062b81bfa3b52424036f9171b7ae6a415b9e594c1d3d89e4158db1bcc871272","targeted":17,"contract":84,"runtime":20},
+    "ppk022": {"status":"PASS","files":519,"surfaces":360,"sha256":"755717250f2549229608b38e6ea650a4647f1e0d50aa4c1aa1078acc193302ff","targeted":19,"contract":110,"runtime":24},
+    "countsAsRequirementPass": false
+  },
+  "externalAndManualEvidence": "NOT_RUN",
+  "countsAsRequirementPass": false
+}

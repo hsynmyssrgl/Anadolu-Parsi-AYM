@@ -44,6 +44,15 @@ import type {
   SetCommunicationCallPreferencesInput,
   UpdateCommunicationCallControlsInput
 } from '@ppt/domain';
+import type {
+  AddCommunicationRecordingLateJoinerInput,
+  CreateCommunicationRecordingRequestInput,
+  DecideCommunicationRecordingConsentInput,
+  RequestCommunicationRecordingDeletionInput,
+  SetCommunicationRecordingSegmentInput,
+  UpdateCommunicationRecordingRetentionInput,
+  WithdrawCommunicationRecordingConsentInput
+} from '@ppt/domain';
 import type { ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { UnifiedAuthorizedSearchInput } from '@ppt/domain';
 import type { RecordManagedLifeItemInput } from '@ppt/domain';
@@ -94,6 +103,7 @@ import {
   COMMUNICATION_SECURITY_IPC_CHANNELS,
   COMMUNICATION_MESSAGING_IPC_CHANNELS,
   COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS,
+  COMMUNICATION_RECORDING_IPC_CHANNELS,
   PLACES_TRAVEL_ASSET_PET_IPC_CHANNELS,
   HEALTH_CARE_COORDINATION_IPC_CHANNELS,
   HOUSEHOLD_OPERATIONS_IPC_CHANNELS,
@@ -2510,6 +2520,22 @@ function registerIpc(): void {
     async(_event,input:AdvanceCommunicationCallInput)=>store().advanceCommunicationCall(input));
   registerIpcHandler(COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS.setPreferences,
     async(_event,input:SetCommunicationCallPreferencesInput)=>store().setCommunicationCallPreferences(input));
+  registerIpcHandler(COMMUNICATION_RECORDING_IPC_CHANNELS.getCenter,
+    async()=>store().getCommunicationRecordingCenter());
+  registerIpcHandler(COMMUNICATION_RECORDING_IPC_CHANNELS.createRequest,
+    async(_event,input:CreateCommunicationRecordingRequestInput)=>store().createCommunicationRecordingRequest(input));
+  registerIpcHandler(COMMUNICATION_RECORDING_IPC_CHANNELS.decideConsent,
+    async(_event,input:DecideCommunicationRecordingConsentInput)=>store().decideCommunicationRecordingConsent(input));
+  registerIpcHandler(COMMUNICATION_RECORDING_IPC_CHANNELS.withdrawConsent,
+    async(_event,input:WithdrawCommunicationRecordingConsentInput)=>store().withdrawCommunicationRecordingConsent(input));
+  registerIpcHandler(COMMUNICATION_RECORDING_IPC_CHANNELS.addLateJoiner,
+    async(_event,input:AddCommunicationRecordingLateJoinerInput)=>store().addCommunicationRecordingLateJoiner(input));
+  registerIpcHandler(COMMUNICATION_RECORDING_IPC_CHANNELS.setSegment,
+    async(_event,input:SetCommunicationRecordingSegmentInput)=>store().setCommunicationRecordingSegment(input));
+  registerIpcHandler(COMMUNICATION_RECORDING_IPC_CHANNELS.updateRetention,
+    async(_event,input:UpdateCommunicationRecordingRetentionInput)=>store().updateCommunicationRecordingRetention(input));
+  registerIpcHandler(COMMUNICATION_RECORDING_IPC_CHANNELS.requestDeletion,
+    async(_event,input:RequestCommunicationRecordingDeletionInput)=>store().requestCommunicationRecordingDeletion(input));
   registerIpcHandler('finance:listValuations', () => store().listFinanceValuations());
   registerIpcHandler('finance:createValuation', (_event, input:CreateFinanceValuationInput) => store().createFinanceValuation(input));
   registerIpcHandler('family:createRelation', async (_event, input: CreateFamilyRelationInput) => {
