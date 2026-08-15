@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "33-V-PLACES-TRAVEL-ASSET-PET",
+  "step": "33-V",
+  "decision": "DEC-233",
+  "title": "Places travel and remaining asset/pet workflows",
+  "status": "PLANNED",
+  "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+  "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+  "requirements": ["B5-05", "EXT-033", "EXT-035", "EXT-058", "EXT-059", "EXT-060", "EXT-061", "EXT-062", "EXT-063"],
+  "dependsOn": ["33-R", "33-S"],
+  "roadmapStatus": "PLANNED",
+  "registrySemantics": {
+    "acceptedScopeRegistryAuthority": "ATOMIC_CLOSURE_STATE",
+    "registryMutationPerformedByStarter": false,
+    "roadmapMutationPerformedByStarter": false,
+    "planOrLedgerActivationPerformedByStarter": false,
+    "activePredecessor": "33-P",
+    "registryEvidenceMustRemainFalseUntilClosure": true
+  },
+  "implementedModel": {
+    "status": "PARTIAL_LOCAL_COMPOSED_AND_TESTED_ACCEPTANCE_INCOMPLETE",
+    "areas": ["places", "moving", "pet_care", "travel"],
+    "itemKinds": ["stored_place", "moving_inventory", "pet_care_record", "travel_plan", "reservation", "travel_document", "travel_budget", "shared_expense", "packing_item", "travel_requirement", "offline_travel_pack", "language_pack", "travel_album", "expense_settlement"],
+    "visibilityZones": ["family_coordination", "selected_members", "private"],
+    "nonOwnerExplicitPermissionRequired": true,
+    "privateOwnerOnly": true,
+    "activeSameFamilyParticipantsRequired": true,
+    "optimisticRevisionRequired": true,
+    "idempotentClientOperationRequired": true,
+    "immutableMutationLedger": true,
+    "contentMinimizedSoftDelete": true,
+    "boundedReadItemLimit": 1000,
+    "existingLifeRouteReused": true,
+    "newMenuRouteAdded": false
+  },
+  "truth": {
+    "localOnly": true,
+    "mapProviderConfigured": false,
+    "coordinateAddressFallbackAvailable": true,
+    "providerSyncPerformed": false,
+    "externalBookingPerformed": false,
+    "liveTransportTrackingPerformed": false,
+    "paymentExecutionPerformed": false,
+    "documentVerificationPerformed": false,
+    "petHealthAdviceProvided": false,
+    "healthDetailsDuplicated": false,
+    "ocrSuggestionAutomaticallyAccepted": false,
+    "offlinePackDeliveryPerformed": false,
+    "languagePackDownloadPerformed": false,
+    "albumMediaStoredHere": false,
+    "aiProcessingAllowed": false,
+    "externalSharingAllowed": false,
+    "requirementsClosed": false,
+    "countsAsRequirementPass": false
+  },
+  "validation": {
+    "targetedTestFiles": [
+      "packages/application/tests/places-travel-asset-pet-use-cases.test.ts",
+      "packages/repositories/places-travel-asset-pet-repository-policy.test.ts",
+      "apps/desktop/tests/places-travel-asset-pet-ipc-integration.test.ts",
+      "apps/desktop/tests/places-travel-asset-pet-data-store.test.ts",
+      "apps/desktop/tests/places-travel-asset-pet-ui.test.ts"
+    ],
+    "targetedTestFileRatchet": 5,
+    "targetedTestRatchet": 22,
+    "migrationVersion": 100,
+    "migrationSha256": "1cbdd671c0e2d6eb4a58d2d56d84ed63413e5f6585af252eefdaebc5600d18c4",
+    "ppk021": {"status":"PASS","scannedProductionFiles":468,"exactPrivilegedSurfaceCount":723,"exactAllowlistSha256":"ca80025cf1c9f9903550718066197f885666b4b0f931bc8c1826d5c088a22e41","targetedTests":17,"contractChecks":84,"runtimeChecks":20},
+    "ppk022": {"status":"PASS","scannedProductionFiles":468,"exactCapabilitySurfaceCount":345,"exactCapabilityManifestSha256":"1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e","targetedTests":19,"contractChecks":110,"runtimeChecks":24},
+    "countsAsRequirementPass": false
+  },
+  "manualEvidence": {
+    "realFamilyUat": "NOT_RUN",
+    "realMapAndOfflineFallbackUat": "NOT_RUN",
+    "realMovingInventoryUat": "NOT_RUN",
+    "realPetWorkflowReview": "NOT_RUN",
+    "realTravelWorkflowUat": "NOT_RUN",
+    "legalPrivacyReview": "NOT_RUN",
+    "certificationClaimed": false
+  },
+  "persistentReceiptStatus": "NOT_RUN"
+}

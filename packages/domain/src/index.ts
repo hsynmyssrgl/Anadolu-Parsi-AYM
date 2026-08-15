@@ -39,3 +39,4 @@ export * from './health-care-coordination.js';
 export * from './archive-evidence-media.js';
 export * from './household-operations.js';
 export * from './child-education-coordination.js';
+export * from './places-travel-asset-pet.js';

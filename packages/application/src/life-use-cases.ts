@@ -157,7 +157,9 @@ export interface LifePolicyIntent {
     | 'household_operation_item'
     | 'household_operations_center'
     | 'child_education_item'
-    | 'child_education_center';
+    | 'child_education_center'
+    | 'places_travel_item'
+    | 'places_travel_center';
   readonly resourceId: string;
   readonly purpose: 'general' | 'emergency-offline-portability';
   readonly requestedFields?: readonly string[];

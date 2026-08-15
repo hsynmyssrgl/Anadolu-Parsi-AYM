@@ -42,6 +42,7 @@ import type { AddArchiveItemVersionInput, AddArchiveRelationEvidenceInput, Archi
 import type { HealthCareCoordinationCenterView, HealthCareMutationReceiptView, RecordHealthCareEntryInput, RevokeHealthCareAccessGrantInput, UpsertHealthCareAccessGrantInput } from '@ppt/domain';
 import type { CreateHouseholdOperationItemInput, DeleteHouseholdOperationItemInput, HouseholdOperationMutationReceiptView, HouseholdOperationsCenterView, UpdateHouseholdOperationItemInput } from '@ppt/domain';
 import type { ChildEducationCenterView, ChildEducationMutationReceiptView, CreateChildEducationItemInput, DeleteChildEducationItemInput, UpdateChildEducationItemInput } from '@ppt/domain';
+import type { CreatePlacesTravelItemInput, DeletePlacesTravelItemInput, PlacesTravelCenterView, PlacesTravelMutationReceiptView, UpdatePlacesTravelItemInput } from '@ppt/domain';
 import type { LegacyArchiveOwnershipReattestationView, ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { AssignPersonMembershipInput, CreateFamilyBranchInput, CreateHouseholdInput, FamilyBranch, Household, HouseholdMembershipWorkspaceView, PersonLifecycleProfile, PersonLifecycleWorkspaceView, PersonMembership, UpdatePersonProfileInput } from '@ppt/domain';
 import type { AuthorizationContextWorkspaceView } from '@ppt/domain';
@@ -691,6 +692,10 @@ contextBridge.exposeInMainWorld('pardus', {
   createChildEducationItem:(input:CreateChildEducationItemInput):Promise<ChildEducationMutationReceiptView>=>invoke('childEducation:createItem',input),
   updateChildEducationItem:(input:UpdateChildEducationItemInput):Promise<ChildEducationMutationReceiptView>=>invoke('childEducation:updateItem',input),
   deleteChildEducationItem:(input:DeleteChildEducationItemInput):Promise<ChildEducationMutationReceiptView>=>invoke('childEducation:deleteItem',input),
+  getPlacesTravelCenter:(input:{readonly ownerPersonId:string}):Promise<PlacesTravelCenterView>=>invoke('placesTravel:getCenter',input),
+  createPlacesTravelItem:(input:CreatePlacesTravelItemInput):Promise<PlacesTravelMutationReceiptView>=>invoke('placesTravel:createItem',input),
+  updatePlacesTravelItem:(input:UpdatePlacesTravelItemInput):Promise<PlacesTravelMutationReceiptView>=>invoke('placesTravel:updateItem',input),
+  deletePlacesTravelItem:(input:DeletePlacesTravelItemInput):Promise<PlacesTravelMutationReceiptView>=>invoke('placesTravel:deleteItem',input),
   listFinanceValuations:():Promise<FinanceValuationView[]>=>invoke('finance:listValuations'),
   createFinanceValuation:(input:CreateFinanceValuationInput):Promise<FinanceValuationView[]>=>invoke('finance:createValuation',input),
   createMember: (input: CreateFamilyMemberInput): Promise<FamilyMutationResultView> => invoke('family:createMember', input),

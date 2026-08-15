@@ -2784,6 +2784,157 @@ const childEducationResult = (channel: string, result: unknown): IpcIntegrationP
   return valid ? accepted() : rejected('CHILD_EDUCATION_RESULT_INVALID', '$result');
 };
 
+export const PLACES_TRAVEL_ASSET_PET_IPC_CHANNELS = Object.freeze({
+  getCenter:'placesTravel:getCenter',createItem:'placesTravel:createItem',
+  updateItem:'placesTravel:updateItem',deleteItem:'placesTravel:deleteItem'
+} as const);
+const placesTravelChannels=new Set<string>(Object.values(PLACES_TRAVEL_ASSET_PET_IPC_CHANNELS));
+const placesTravelWriteChannels=new Set<string>([
+  PLACES_TRAVEL_ASSET_PET_IPC_CHANNELS.createItem,PLACES_TRAVEL_ASSET_PET_IPC_CHANNELS.updateItem,
+  PLACES_TRAVEL_ASSET_PET_IPC_CHANNELS.deleteItem
+]);
+const placesTravelKinds=new Set<unknown>(['stored_place','moving_inventory','pet_care_record','travel_plan','reservation',
+  'travel_document','travel_budget','shared_expense','packing_item','travel_requirement','offline_travel_pack',
+  'language_pack','travel_album','expense_settlement']);
+const placesTravelAreas=new Set<unknown>(['places','moving','pet_care','travel']);
+const placesTravelVisibilities=new Set<unknown>(['family_coordination','selected_members','private']);
+const placesTravelStatuses=new Set<unknown>(['planned','active','completed','cancelled','expired','settled','deleted']);
+const placesTravelMutableStatuses=new Set<unknown>([...placesTravelStatuses].filter((value)=>value!=='deleted'));
+const placesTravelDocumentKinds=new Set<unknown>(['passport','visa','insurance','reservation_document','other']);
+const placesTravelPetWorkflows=new Set<unknown>(['vaccination','veterinary','microchip','food','insurance','travel_document']);
+const placesTravelRequirementKinds=new Set<unknown>(['health','medication','child','pet']);
+const placesTravelParticipants=(value:unknown):boolean=>Array.isArray(value)&&value.length>=1&&value.length<=50
+  &&value.every(healthCareIdentifier)&&new Set(value).size===value.length;
+const placesTravelDate=(value:unknown):boolean=>typeof value==='string'&&/^\d{4}-\d{2}-\d{2}$/u.test(value)
+  &&Number.isFinite(Date.parse(`${value}T00:00:00.000Z`));
+const placesTravelAmount=(value:unknown):boolean=>typeof value==='number'&&Number.isSafeInteger(value)
+  &&value>=0&&value<=9_000_000_000_000_000;
+const placesTravelCurrency=(value:unknown):boolean=>typeof value==='string'&&/^[A-Z]{3}$/u.test(value);
+const placesTravelCreateInput=(value:Record<string,unknown>):boolean=>{
+  const optional=['status','addressLabel','latitudeE6','longitudeE6','offlineFallbackLabel','participantPersonIds','startsAt','endsAt',
+    'providerLabel','opaqueReference','archiveItemId','expiresOn','documentKind','amountMinor','currency','checklistLabel',
+    'checklistCompleted','petReferenceId','petWorkflow','requirementKind','opaqueRequirementReference','languageCode','ocrJobId','note']
+    .filter((key)=>value[key]!==undefined);
+  return healthCareExactRecord(value,['clientOperationId','itemId','ownerPersonId','kind','title','visibility',...optional])
+    &&healthCareIdentifier(value.clientOperationId)&&healthCareIdentifier(value.itemId)&&healthCareIdentifier(value.ownerPersonId)
+    &&placesTravelKinds.has(value.kind)&&healthCareText(value.title,2,160)&&placesTravelVisibilities.has(value.visibility)
+    &&(value.status===undefined||placesTravelMutableStatuses.has(value.status))
+    &&(value.addressLabel===undefined||healthCareText(value.addressLabel,1,300))
+    &&(value.latitudeE6===undefined||(typeof value.latitudeE6==='number'&&Number.isSafeInteger(value.latitudeE6)&&value.latitudeE6>=-90_000_000&&value.latitudeE6<=90_000_000))
+    &&(value.longitudeE6===undefined||(typeof value.longitudeE6==='number'&&Number.isSafeInteger(value.longitudeE6)&&value.longitudeE6>=-180_000_000&&value.longitudeE6<=180_000_000))
+    &&((value.latitudeE6===undefined)===(value.longitudeE6===undefined))
+    &&(value.offlineFallbackLabel===undefined||healthCareText(value.offlineFallbackLabel,1,300))
+    &&(value.participantPersonIds===undefined||placesTravelParticipants(value.participantPersonIds))
+    &&(value.startsAt===undefined||healthCareIso(value.startsAt))&&(value.endsAt===undefined||healthCareIso(value.endsAt))
+    &&(value.providerLabel===undefined||healthCareText(value.providerLabel,1,160))
+    &&(value.opaqueReference===undefined||healthCareText(value.opaqueReference,1,160))
+    &&(value.archiveItemId===undefined||healthCareIdentifier(value.archiveItemId))
+    &&(value.expiresOn===undefined||placesTravelDate(value.expiresOn))
+    &&(value.documentKind===undefined||placesTravelDocumentKinds.has(value.documentKind))
+    &&(value.amountMinor===undefined||placesTravelAmount(value.amountMinor))
+    &&(value.currency===undefined||placesTravelCurrency(value.currency))
+    &&((value.amountMinor===undefined)===(value.currency===undefined))
+    &&(value.checklistLabel===undefined||healthCareText(value.checklistLabel,1,240))
+    &&(value.checklistCompleted===undefined||typeof value.checklistCompleted==='boolean')
+    &&(value.petReferenceId===undefined||healthCareIdentifier(value.petReferenceId))
+    &&(value.petWorkflow===undefined||placesTravelPetWorkflows.has(value.petWorkflow))
+    &&(value.requirementKind===undefined||placesTravelRequirementKinds.has(value.requirementKind))
+    &&(value.opaqueRequirementReference===undefined||healthCareIdentifier(value.opaqueRequirementReference))
+    &&(value.languageCode===undefined||(typeof value.languageCode==='string'&&/^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8}){0,3}$/u.test(value.languageCode)))
+    &&(value.ocrJobId===undefined||healthCareIdentifier(value.ocrJobId))
+    &&(value.note===undefined||healthCareText(value.note,1,1000));
+};
+const placesTravelUpdateInput=(value:Record<string,unknown>):boolean=>{
+  const optional=['title','status','visibility','startsAt','endsAt','expiresOn','amountMinor','checklistCompleted','note']
+    .filter((key)=>value[key]!==undefined);
+  return optional.length>=1&&healthCareExactRecord(value,['clientOperationId','itemId','ownerPersonId','expectedRevision',...optional])
+    &&healthCareIdentifier(value.clientOperationId)&&healthCareIdentifier(value.itemId)&&healthCareIdentifier(value.ownerPersonId)
+    &&healthCareRevision(value.expectedRevision)&&Number(value.expectedRevision)>=1
+    &&(value.title===undefined||healthCareText(value.title,2,160))
+    &&(value.status===undefined||placesTravelMutableStatuses.has(value.status))
+    &&(value.visibility===undefined||placesTravelVisibilities.has(value.visibility))
+    &&(value.startsAt===undefined||value.startsAt===null||healthCareIso(value.startsAt))
+    &&(value.endsAt===undefined||value.endsAt===null||healthCareIso(value.endsAt))
+    &&(value.expiresOn===undefined||value.expiresOn===null||placesTravelDate(value.expiresOn))
+    &&(value.amountMinor===undefined||value.amountMinor===null||placesTravelAmount(value.amountMinor))
+    &&(value.checklistCompleted===undefined||typeof value.checklistCompleted==='boolean')
+    &&(value.note===undefined||value.note===null||healthCareText(value.note,1,1000));
+};
+const placesTravelInput=(channel:string,args:readonly unknown[]):IpcIntegrationPolicyDecision=>{
+  if(args.length!==1||!isObject(args[0]))return rejected('PLACES_TRAVEL_OBJECT_REQUIRED','$[0]');const value=args[0];
+  if(channel===PLACES_TRAVEL_ASSET_PET_IPC_CHANNELS.getCenter)return healthCareExactRecord(value,['ownerPersonId'])&&healthCareIdentifier(value.ownerPersonId)
+    ?accepted():rejected('PLACES_TRAVEL_CENTER_INPUT_INVALID','$[0]');
+  if(channel===PLACES_TRAVEL_ASSET_PET_IPC_CHANNELS.createItem)return placesTravelCreateInput(value)
+    ?accepted():rejected('PLACES_TRAVEL_CREATE_INPUT_INVALID','$[0]');
+  if(channel===PLACES_TRAVEL_ASSET_PET_IPC_CHANNELS.updateItem)return placesTravelUpdateInput(value)
+    ?accepted():rejected('PLACES_TRAVEL_UPDATE_INPUT_INVALID','$[0]');
+  if(channel===PLACES_TRAVEL_ASSET_PET_IPC_CHANNELS.deleteItem)return healthCareExactRecord(value,
+    ['clientOperationId','itemId','ownerPersonId','expectedRevision','reason'])&&healthCareIdentifier(value.clientOperationId)
+    &&healthCareIdentifier(value.itemId)&&healthCareIdentifier(value.ownerPersonId)&&healthCareRevision(value.expectedRevision)
+    &&Number(value.expectedRevision)>=1&&healthCareText(value.reason,2,500)?accepted():rejected('PLACES_TRAVEL_DELETE_INPUT_INVALID','$[0]');
+  return rejected('UNKNOWN_IPC_CHANNEL','$');
+};
+const placesTravelItemResult=(value:unknown):boolean=>{
+  if(!isObject(value))return false;
+  const optional=['addressLabel','latitudeE6','longitudeE6','offlineFallbackLabel','participantPersonIds','startsAt','endsAt','providerLabel',
+    'opaqueReference','archiveItemId','expiresOn','documentKind','amountMinor','currency','checklistLabel','checklistCompleted',
+    'petReferenceId','petWorkflow','requirementKind','opaqueRequirementReference','languageCode','ocrJobId','note','deletedAt']
+    .filter((key)=>value[key]!==undefined);
+  return healthCareExactRecord(value,['id','ownerPersonId','kind','area','title','status','visibility','revision','createdAt','updatedAt',...optional])
+    &&healthCareIdentifier(value.id)&&healthCareIdentifier(value.ownerPersonId)&&placesTravelKinds.has(value.kind)
+    &&placesTravelAreas.has(value.area)&&healthCareText(value.title,2,160)&&placesTravelStatuses.has(value.status)
+    &&placesTravelVisibilities.has(value.visibility)&&healthCareRevision(value.revision)&&Number(value.revision)>=1
+    &&(value.addressLabel===undefined||healthCareText(value.addressLabel,1,300))
+    &&(value.latitudeE6===undefined||(typeof value.latitudeE6==='number'&&Number.isSafeInteger(value.latitudeE6)))
+    &&(value.longitudeE6===undefined||(typeof value.longitudeE6==='number'&&Number.isSafeInteger(value.longitudeE6)))
+    &&(value.offlineFallbackLabel===undefined||healthCareText(value.offlineFallbackLabel,1,300))
+    &&(value.participantPersonIds===undefined||placesTravelParticipants(value.participantPersonIds))
+    &&(value.startsAt===undefined||healthCareIso(value.startsAt))&&(value.endsAt===undefined||healthCareIso(value.endsAt))
+    &&(value.providerLabel===undefined||healthCareText(value.providerLabel,1,160))
+    &&(value.opaqueReference===undefined||healthCareText(value.opaqueReference,1,160))
+    &&(value.archiveItemId===undefined||healthCareIdentifier(value.archiveItemId))
+    &&(value.expiresOn===undefined||placesTravelDate(value.expiresOn))
+    &&(value.documentKind===undefined||placesTravelDocumentKinds.has(value.documentKind))
+    &&(value.amountMinor===undefined||placesTravelAmount(value.amountMinor))&&(value.currency===undefined||placesTravelCurrency(value.currency))
+    &&(value.checklistLabel===undefined||healthCareText(value.checklistLabel,1,240))
+    &&(value.checklistCompleted===undefined||typeof value.checklistCompleted==='boolean')
+    &&(value.petReferenceId===undefined||healthCareIdentifier(value.petReferenceId))
+    &&(value.petWorkflow===undefined||placesTravelPetWorkflows.has(value.petWorkflow))
+    &&(value.requirementKind===undefined||placesTravelRequirementKinds.has(value.requirementKind))
+    &&(value.opaqueRequirementReference===undefined||healthCareIdentifier(value.opaqueRequirementReference))
+    &&(value.languageCode===undefined||typeof value.languageCode==='string')&&(value.ocrJobId===undefined||healthCareIdentifier(value.ocrJobId))
+    &&(value.note===undefined||healthCareText(value.note,1,1000))&&healthCareIso(value.createdAt)&&healthCareIso(value.updatedAt)
+    &&(value.deletedAt===undefined||healthCareIso(value.deletedAt));
+};
+const placesTravelCenterResult=(value:unknown):boolean=>healthCareExactRecord(value,
+  ['schemaVersion','centerId','ownerPersonId','items','countsByArea','truth','generatedAt'])&&value.schemaVersion===1
+  &&healthCareIdentifier(value.centerId)&&healthCareIdentifier(value.ownerPersonId)&&householdArray(value.items,1000,placesTravelItemResult)
+  &&healthCareExactRecord(value.countsByArea,['places','moving','pet_care','travel'])
+  &&Object.values(value.countsByArea).every((count)=>typeof count==='number'&&Number.isSafeInteger(count)&&count>=0)
+  &&healthCareExactRecord(value.truth,['localOnly','mapProviderConfigured','coordinateAddressFallbackAvailable','schoolOrTravelProviderSync',
+    'externalBookingPerformed','liveTransportTrackingPerformed','paymentExecutionPerformed','documentVerificationPerformed',
+    'petHealthAdviceProvided','healthDetailsDuplicated','ocrSuggestionAutomaticallyAccepted','offlinePackDeliveryPerformed',
+    'languagePackDownloadPerformed','albumMediaStoredHere','aiProcessingAllowed','externalSharingAllowed'])
+  &&value.truth.localOnly===true&&value.truth.mapProviderConfigured===false&&value.truth.coordinateAddressFallbackAvailable===true
+  &&value.truth.schoolOrTravelProviderSync==='not_configured'&&value.truth.externalBookingPerformed==='not_performed'
+  &&value.truth.liveTransportTrackingPerformed==='not_performed'&&value.truth.paymentExecutionPerformed==='not_performed'
+  &&value.truth.documentVerificationPerformed==='not_performed'&&value.truth.petHealthAdviceProvided===false
+  &&value.truth.healthDetailsDuplicated===false&&value.truth.ocrSuggestionAutomaticallyAccepted===false
+  &&value.truth.offlinePackDeliveryPerformed==='not_performed'&&value.truth.languagePackDownloadPerformed==='not_performed'
+  &&value.truth.albumMediaStoredHere===false&&value.truth.aiProcessingAllowed===false&&value.truth.externalSharingAllowed===false
+  &&healthCareIso(value.generatedAt);
+const placesTravelReceiptResult=(value:unknown):boolean=>healthCareExactRecord(value,
+  ['itemId','ownerPersonId','mutationKind','previousRevision','revision','occurredAt','replayed','localOnly','externalAction'])
+  &&healthCareIdentifier(value.itemId)&&healthCareIdentifier(value.ownerPersonId)
+  &&['item_create','item_update','item_delete'].includes(String(value.mutationKind))
+  &&healthCareRevision(value.previousRevision)&&healthCareRevision(value.revision)&&value.revision===Number(value.previousRevision)+1
+  &&healthCareIso(value.occurredAt)&&typeof value.replayed==='boolean'&&value.localOnly===true&&value.externalAction==='not_performed';
+const placesTravelResult=(channel:string,result:unknown):IpcIntegrationPolicyDecision=>{
+  const valid=channel===PLACES_TRAVEL_ASSET_PET_IPC_CHANNELS.getCenter?placesTravelCenterResult(result)
+    :placesTravelWriteChannels.has(channel)&&placesTravelReceiptResult(result);
+  return valid?accepted():rejected('PLACES_TRAVEL_RESULT_INVALID','$result');
+};
+
 export const ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS = Object.freeze({
   listEvidence: 'archive:listRelationEvidence',
   listEvidenceHistory: 'archive:listRelationEvidenceHistory',
@@ -3407,6 +3558,8 @@ export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unkn
   if (channel === UNIFIED_AUTHORIZED_SEARCH_IPC_CHANNEL) return unifiedAuthorizedSearchResult(result);
   if (childEducationChannels.has(channel)) return childEducationResult(channel, result);
   if (channel.startsWith('childEducation:')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
+  if (placesTravelChannels.has(channel)) return placesTravelResult(channel, result);
+  if (channel.startsWith('placesTravel:')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
   if (householdOperationsChannels.has(channel)) return householdResult(channel, result);
   if (channel.startsWith('householdOperations:')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
   if (healthCareCoordinationChannels.has(channel)) return healthCareResult(channel, result);
@@ -3447,6 +3600,8 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
   if (channel === UNIFIED_AUTHORIZED_SEARCH_IPC_CHANNEL) return unifiedAuthorizedSearchInput(args);
   if (childEducationChannels.has(channel)) return childEducationInput(channel, args);
   if (channel.startsWith('childEducation:')) return rejected('UNKNOWN_IPC_CHANNEL', '$');
+  if (placesTravelChannels.has(channel)) return placesTravelInput(channel, args);
+  if (channel.startsWith('placesTravel:')) return rejected('UNKNOWN_IPC_CHANNEL', '$');
   if (householdOperationsChannels.has(channel)) return householdInput(channel, args);
   if (channel.startsWith('householdOperations:')) return rejected('UNKNOWN_IPC_CHANNEL', '$');
   if (healthCareCoordinationChannels.has(channel)) return healthCareInput(channel, args);

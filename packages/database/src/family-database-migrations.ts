@@ -13866,6 +13866,268 @@ BEFORE DELETE ON child_education_mutations BEGIN SELECT RAISE(ABORT,'33-U child 
 UPDATE database_metadata SET value='REVISION-33-U-CHILD-EDUCATION-COORDINATION',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 
+const placesTravelAssetPetSql = `
+CREATE TABLE places_travel_mutations (
+  id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  item_id TEXT NOT NULL CHECK(length(trim(item_id)) BETWEEN 2 AND 256),
+  actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  mutation_kind TEXT NOT NULL CHECK(mutation_kind IN ('item_create','item_update','item_delete')),
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 256),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  expected_revision INTEGER NOT NULL CHECK(expected_revision>=0),
+  revision INTEGER NOT NULL CHECK(revision=expected_revision+1),
+  item_state_fingerprint TEXT NOT NULL CHECK(length(item_state_fingerprint)=64 AND item_state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version>=1),
+  policy_receipt_nonce TEXT NOT NULL CHECK(length(trim(policy_receipt_nonce)) BETWEEN 16 AND 256),
+  policy_correlation_id TEXT NOT NULL CHECK(length(trim(policy_correlation_id)) BETWEEN 1 AND 256),
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type='places_travel_item'),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action IN ('create','update','delete')),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='family.write'),
+  UNIQUE(family_id,actor_account_id,client_operation_id),
+  CHECK(policy_resource_id=item_id),
+  CHECK((mutation_kind='item_create' AND policy_action='create' AND expected_revision=0)
+    OR (mutation_kind='item_update' AND policy_action='update' AND expected_revision>=1)
+    OR (mutation_kind='item_delete' AND policy_action='delete' AND expected_revision>=1))
+) STRICT;
+
+CREATE INDEX idx_places_travel_mutations_owner
+ON places_travel_mutations(family_id,owner_person_id,occurred_at DESC,id);
+
+CREATE TABLE places_travel_items (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  kind TEXT NOT NULL CHECK(kind IN (
+    'stored_place','moving_inventory','pet_care_record','travel_plan','reservation','travel_document',
+    'travel_budget','shared_expense','packing_item','travel_requirement','offline_travel_pack',
+    'language_pack','travel_album','expense_settlement'
+  )),
+  area TEXT NOT NULL CHECK(area IN ('places','moving','pet_care','travel')),
+  title TEXT NOT NULL CHECK(length(trim(title)) BETWEEN 2 AND 160),
+  status TEXT NOT NULL CHECK(status IN ('planned','active','completed','cancelled','expired','settled','deleted')),
+  visibility TEXT NOT NULL CHECK(visibility IN ('family_coordination','selected_members','private')),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  address_label TEXT CHECK(address_label IS NULL OR length(trim(address_label)) BETWEEN 1 AND 300),
+  latitude_e6 INTEGER CHECK(latitude_e6 IS NULL OR latitude_e6 BETWEEN -90000000 AND 90000000),
+  longitude_e6 INTEGER CHECK(longitude_e6 IS NULL OR longitude_e6 BETWEEN -180000000 AND 180000000),
+  offline_fallback_label TEXT CHECK(offline_fallback_label IS NULL OR length(trim(offline_fallback_label)) BETWEEN 1 AND 300),
+  participant_person_ids_json TEXT CHECK(participant_person_ids_json IS NULL OR (json_valid(participant_person_ids_json) AND json_type(participant_person_ids_json)='array' AND json_array_length(participant_person_ids_json) BETWEEN 1 AND 50)),
+  starts_at TEXT CHECK(starts_at IS NULL OR (length(starts_at)=24 AND starts_at GLOB '????-??-??T??:??:??.???Z' AND julianday(starts_at) IS NOT NULL)),
+  ends_at TEXT CHECK(ends_at IS NULL OR (length(ends_at)=24 AND ends_at GLOB '????-??-??T??:??:??.???Z' AND julianday(ends_at) IS NOT NULL)),
+  provider_label TEXT CHECK(provider_label IS NULL OR length(trim(provider_label)) BETWEEN 1 AND 160),
+  opaque_reference TEXT CHECK(opaque_reference IS NULL OR length(trim(opaque_reference)) BETWEEN 1 AND 160),
+  archive_item_id TEXT CHECK(archive_item_id IS NULL OR length(trim(archive_item_id)) BETWEEN 1 AND 160),
+  expires_on TEXT CHECK(expires_on IS NULL OR (length(expires_on)=10 AND expires_on GLOB '????-??-??' AND julianday(expires_on) IS NOT NULL)),
+  document_kind TEXT CHECK(document_kind IS NULL OR document_kind IN ('passport','visa','insurance','reservation_document','other')),
+  amount_minor INTEGER CHECK(amount_minor IS NULL OR amount_minor BETWEEN 0 AND 9000000000000000),
+  currency TEXT CHECK(currency IS NULL OR (length(currency)=3 AND currency NOT GLOB '*[^A-Z]*')),
+  checklist_label TEXT CHECK(checklist_label IS NULL OR length(trim(checklist_label)) BETWEEN 1 AND 240),
+  checklist_completed INTEGER CHECK(checklist_completed IS NULL OR checklist_completed IN (0,1)),
+  pet_reference_id TEXT CHECK(pet_reference_id IS NULL OR length(trim(pet_reference_id)) BETWEEN 1 AND 160),
+  pet_workflow TEXT CHECK(pet_workflow IS NULL OR pet_workflow IN ('vaccination','veterinary','microchip','food','insurance','travel_document')),
+  requirement_kind TEXT CHECK(requirement_kind IS NULL OR requirement_kind IN ('health','medication','child','pet')),
+  opaque_requirement_reference TEXT CHECK(opaque_requirement_reference IS NULL OR length(trim(opaque_requirement_reference)) BETWEEN 1 AND 160),
+  language_code TEXT CHECK(language_code IS NULL OR length(trim(language_code)) BETWEEN 2 AND 35),
+  ocr_job_id TEXT CHECK(ocr_job_id IS NULL OR length(trim(ocr_job_id)) BETWEEN 1 AND 160),
+  note TEXT CHECK(note IS NULL OR length(note)<=1000),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES places_travel_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z' AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND updated_at GLOB '????-??-??T??:??:??.???Z' AND julianday(updated_at) IS NOT NULL),
+  deleted_at TEXT CHECK(deleted_at IS NULL OR (length(deleted_at)=24 AND deleted_at GLOB '????-??-??T??:??:??.???Z' AND julianday(deleted_at) IS NOT NULL)),
+  CHECK(updated_at>=created_at),
+  CHECK(ends_at IS NULL OR starts_at IS NULL OR ends_at>=starts_at),
+  CHECK((latitude_e6 IS NULL)=(longitude_e6 IS NULL)),
+  CHECK((amount_minor IS NULL)=(currency IS NULL)),
+  CHECK((status='deleted' AND deleted_at=updated_at AND title='Silindi'
+    AND address_label IS NULL AND latitude_e6 IS NULL AND longitude_e6 IS NULL AND offline_fallback_label IS NULL
+    AND participant_person_ids_json IS NULL AND starts_at IS NULL AND ends_at IS NULL AND provider_label IS NULL
+    AND opaque_reference IS NULL AND archive_item_id IS NULL AND expires_on IS NULL AND document_kind IS NULL
+    AND amount_minor IS NULL AND currency IS NULL AND checklist_label IS NULL AND checklist_completed IS NULL
+    AND pet_reference_id IS NULL AND pet_workflow IS NULL AND requirement_kind IS NULL
+    AND opaque_requirement_reference IS NULL AND language_code IS NULL AND ocr_job_id IS NULL AND note IS NULL)
+    OR (status<>'deleted' AND deleted_at IS NULL)),
+  CHECK(status='deleted' OR CASE kind
+    WHEN 'stored_place' THEN (address_label IS NOT NULL OR latitude_e6 IS NOT NULL)
+      AND participant_person_ids_json IS NULL AND starts_at IS NULL AND ends_at IS NULL AND provider_label IS NULL
+      AND opaque_reference IS NULL AND archive_item_id IS NULL AND expires_on IS NULL AND document_kind IS NULL
+      AND amount_minor IS NULL AND currency IS NULL AND checklist_label IS NULL AND checklist_completed IS NULL
+      AND pet_reference_id IS NULL AND pet_workflow IS NULL AND requirement_kind IS NULL
+      AND opaque_requirement_reference IS NULL AND language_code IS NULL AND ocr_job_id IS NULL
+    WHEN 'moving_inventory' THEN archive_item_id IS NOT NULL
+      AND address_label IS NULL AND latitude_e6 IS NULL AND longitude_e6 IS NULL AND offline_fallback_label IS NULL
+      AND participant_person_ids_json IS NULL AND starts_at IS NULL AND ends_at IS NULL AND provider_label IS NULL
+      AND opaque_reference IS NULL AND expires_on IS NULL AND document_kind IS NULL AND amount_minor IS NULL AND currency IS NULL
+      AND checklist_label IS NULL AND checklist_completed IS NULL AND pet_reference_id IS NULL AND pet_workflow IS NULL
+      AND requirement_kind IS NULL AND opaque_requirement_reference IS NULL AND language_code IS NULL
+    WHEN 'pet_care_record' THEN pet_reference_id IS NOT NULL AND pet_workflow IS NOT NULL
+      AND address_label IS NULL AND latitude_e6 IS NULL AND longitude_e6 IS NULL AND offline_fallback_label IS NULL
+      AND participant_person_ids_json IS NULL AND starts_at IS NULL AND ends_at IS NULL AND provider_label IS NULL
+      AND opaque_reference IS NULL AND document_kind IS NULL AND amount_minor IS NULL AND currency IS NULL
+      AND checklist_label IS NULL AND checklist_completed IS NULL AND requirement_kind IS NULL
+      AND opaque_requirement_reference IS NULL AND language_code IS NULL AND ocr_job_id IS NULL
+    WHEN 'travel_plan' THEN participant_person_ids_json IS NOT NULL AND starts_at IS NOT NULL AND ends_at IS NOT NULL
+      AND latitude_e6 IS NULL AND longitude_e6 IS NULL AND provider_label IS NULL AND opaque_reference IS NULL
+      AND archive_item_id IS NULL AND expires_on IS NULL AND document_kind IS NULL AND amount_minor IS NULL AND currency IS NULL
+      AND checklist_label IS NULL AND checklist_completed IS NULL AND pet_reference_id IS NULL AND pet_workflow IS NULL
+      AND requirement_kind IS NULL AND opaque_requirement_reference IS NULL AND language_code IS NULL AND ocr_job_id IS NULL
+    WHEN 'reservation' THEN provider_label IS NOT NULL AND opaque_reference IS NOT NULL AND starts_at IS NOT NULL AND ends_at IS NOT NULL
+      AND address_label IS NULL AND latitude_e6 IS NULL AND longitude_e6 IS NULL AND offline_fallback_label IS NULL
+      AND archive_item_id IS NULL AND expires_on IS NULL AND document_kind IS NULL AND amount_minor IS NULL AND currency IS NULL
+      AND checklist_label IS NULL AND checklist_completed IS NULL AND pet_reference_id IS NULL AND pet_workflow IS NULL
+      AND requirement_kind IS NULL AND opaque_requirement_reference IS NULL AND language_code IS NULL AND ocr_job_id IS NULL
+    WHEN 'travel_document' THEN archive_item_id IS NOT NULL AND expires_on IS NOT NULL AND document_kind IS NOT NULL
+      AND address_label IS NULL AND latitude_e6 IS NULL AND longitude_e6 IS NULL AND offline_fallback_label IS NULL
+      AND participant_person_ids_json IS NULL AND starts_at IS NULL AND ends_at IS NULL AND provider_label IS NULL
+      AND opaque_reference IS NULL AND amount_minor IS NULL AND currency IS NULL AND checklist_label IS NULL
+      AND checklist_completed IS NULL AND pet_reference_id IS NULL AND pet_workflow IS NULL AND requirement_kind IS NULL
+      AND opaque_requirement_reference IS NULL AND language_code IS NULL AND ocr_job_id IS NULL
+    WHEN 'travel_budget' THEN amount_minor IS NOT NULL AND currency IS NOT NULL
+      AND address_label IS NULL AND latitude_e6 IS NULL AND longitude_e6 IS NULL AND offline_fallback_label IS NULL
+      AND participant_person_ids_json IS NULL AND provider_label IS NULL AND opaque_reference IS NULL AND archive_item_id IS NULL
+      AND expires_on IS NULL AND document_kind IS NULL AND checklist_label IS NULL AND checklist_completed IS NULL
+      AND pet_reference_id IS NULL AND pet_workflow IS NULL AND requirement_kind IS NULL
+      AND opaque_requirement_reference IS NULL AND language_code IS NULL AND ocr_job_id IS NULL
+    WHEN 'shared_expense' THEN participant_person_ids_json IS NOT NULL AND amount_minor IS NOT NULL AND currency IS NOT NULL
+      AND address_label IS NULL AND latitude_e6 IS NULL AND longitude_e6 IS NULL AND offline_fallback_label IS NULL
+      AND starts_at IS NULL AND ends_at IS NULL AND provider_label IS NULL AND opaque_reference IS NULL AND archive_item_id IS NULL
+      AND expires_on IS NULL AND document_kind IS NULL AND checklist_label IS NULL AND checklist_completed IS NULL
+      AND pet_reference_id IS NULL AND pet_workflow IS NULL AND requirement_kind IS NULL
+      AND opaque_requirement_reference IS NULL AND language_code IS NULL AND ocr_job_id IS NULL
+    WHEN 'packing_item' THEN checklist_label IS NOT NULL
+      AND address_label IS NULL AND latitude_e6 IS NULL AND longitude_e6 IS NULL AND offline_fallback_label IS NULL
+      AND participant_person_ids_json IS NULL AND starts_at IS NULL AND ends_at IS NULL AND provider_label IS NULL
+      AND opaque_reference IS NULL AND archive_item_id IS NULL AND expires_on IS NULL AND document_kind IS NULL
+      AND amount_minor IS NULL AND currency IS NULL AND pet_reference_id IS NULL AND pet_workflow IS NULL
+      AND requirement_kind IS NULL AND opaque_requirement_reference IS NULL AND language_code IS NULL AND ocr_job_id IS NULL
+    WHEN 'travel_requirement' THEN requirement_kind IS NOT NULL AND opaque_requirement_reference IS NOT NULL
+      AND address_label IS NULL AND latitude_e6 IS NULL AND longitude_e6 IS NULL AND offline_fallback_label IS NULL
+      AND participant_person_ids_json IS NULL AND starts_at IS NULL AND ends_at IS NULL AND provider_label IS NULL
+      AND opaque_reference IS NULL AND archive_item_id IS NULL AND expires_on IS NULL AND document_kind IS NULL
+      AND amount_minor IS NULL AND currency IS NULL AND checklist_label IS NULL AND checklist_completed IS NULL
+      AND pet_reference_id IS NULL AND pet_workflow IS NULL AND language_code IS NULL AND ocr_job_id IS NULL
+    WHEN 'offline_travel_pack' THEN archive_item_id IS NOT NULL
+      AND address_label IS NULL AND latitude_e6 IS NULL AND longitude_e6 IS NULL AND offline_fallback_label IS NULL
+      AND participant_person_ids_json IS NULL AND starts_at IS NULL AND ends_at IS NULL AND provider_label IS NULL
+      AND opaque_reference IS NULL AND expires_on IS NULL AND document_kind IS NULL AND amount_minor IS NULL AND currency IS NULL
+      AND checklist_label IS NULL AND checklist_completed IS NULL AND pet_reference_id IS NULL AND pet_workflow IS NULL
+      AND requirement_kind IS NULL AND opaque_requirement_reference IS NULL AND language_code IS NULL AND ocr_job_id IS NULL
+    WHEN 'language_pack' THEN archive_item_id IS NOT NULL AND language_code IS NOT NULL
+      AND address_label IS NULL AND latitude_e6 IS NULL AND longitude_e6 IS NULL AND offline_fallback_label IS NULL
+      AND participant_person_ids_json IS NULL AND starts_at IS NULL AND ends_at IS NULL AND provider_label IS NULL
+      AND opaque_reference IS NULL AND expires_on IS NULL AND document_kind IS NULL AND amount_minor IS NULL AND currency IS NULL
+      AND checklist_label IS NULL AND checklist_completed IS NULL AND pet_reference_id IS NULL AND pet_workflow IS NULL
+      AND requirement_kind IS NULL AND opaque_requirement_reference IS NULL AND ocr_job_id IS NULL
+    WHEN 'travel_album' THEN archive_item_id IS NOT NULL
+      AND address_label IS NULL AND latitude_e6 IS NULL AND longitude_e6 IS NULL AND offline_fallback_label IS NULL
+      AND participant_person_ids_json IS NULL AND starts_at IS NULL AND ends_at IS NULL AND provider_label IS NULL
+      AND opaque_reference IS NULL AND expires_on IS NULL AND document_kind IS NULL AND amount_minor IS NULL AND currency IS NULL
+      AND checklist_label IS NULL AND checklist_completed IS NULL AND pet_reference_id IS NULL AND pet_workflow IS NULL
+      AND requirement_kind IS NULL AND opaque_requirement_reference IS NULL AND language_code IS NULL AND ocr_job_id IS NULL
+    WHEN 'expense_settlement' THEN participant_person_ids_json IS NOT NULL AND amount_minor IS NOT NULL AND currency IS NOT NULL
+      AND address_label IS NULL AND latitude_e6 IS NULL AND longitude_e6 IS NULL AND offline_fallback_label IS NULL
+      AND starts_at IS NULL AND ends_at IS NULL AND provider_label IS NULL AND opaque_reference IS NULL AND archive_item_id IS NULL
+      AND expires_on IS NULL AND document_kind IS NULL AND checklist_label IS NULL AND checklist_completed IS NULL
+      AND pet_reference_id IS NULL AND pet_workflow IS NULL AND requirement_kind IS NULL
+      AND opaque_requirement_reference IS NULL AND language_code IS NULL AND ocr_job_id IS NULL
+    ELSE 0 END),
+  CHECK(area=CASE WHEN kind='stored_place' THEN 'places' WHEN kind='moving_inventory' THEN 'moving'
+    WHEN kind='pet_care_record' THEN 'pet_care' ELSE 'travel' END)
+) STRICT;
+
+CREATE INDEX idx_places_travel_items_center
+ON places_travel_items(family_id,owner_person_id,area,updated_at DESC,id);
+CREATE INDEX idx_places_travel_items_expiry
+ON places_travel_items(family_id,owner_person_id,expires_on) WHERE expires_on IS NOT NULL AND status<>'deleted';
+
+CREATE TRIGGER trg_33v_places_travel_mutation_insert
+BEFORE INSERT ON places_travel_mutations
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM accounts account
+  JOIN people actor ON actor.id=NEW.actor_person_id AND actor.family_id=NEW.family_id AND actor.status='active'
+  JOIN people owner ON owner.id=NEW.owner_person_id AND owner.family_id=NEW.family_id AND owner.status='active'
+  JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+  JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+  WHERE account.id=NEW.actor_account_id AND account.person_id=NEW.actor_person_id AND account.status='active'
+    AND receipt.receipt_version=NEW.policy_receipt_version AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id AND receipt.action=NEW.policy_action
+    AND receipt.capability=NEW.policy_capability AND receipt.recorded_at=NEW.occurred_at
+    AND json_extract(receipt.record_json,'$.request.purpose')='general'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.actor_account_id
+    AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.actor_person_id
+    AND ((NEW.expected_revision=0 AND NEW.mutation_kind='item_create' AND NOT EXISTS(SELECT 1 FROM places_travel_items item WHERE item.id=NEW.item_id))
+      OR EXISTS(SELECT 1 FROM places_travel_items item WHERE item.id=NEW.item_id AND item.family_id=NEW.family_id
+        AND item.owner_person_id=NEW.owner_person_id AND item.revision=NEW.expected_revision AND item.status<>'deleted'))
+)
+BEGIN SELECT RAISE(ABORT,'33-V places/travel mutation requires exact active family and durable PEP receipt'); END;
+
+CREATE TRIGGER trg_33v_places_travel_item_insert
+BEFORE INSERT ON places_travel_items
+WHEN NOT EXISTS(
+  SELECT 1 FROM places_travel_mutations mutation
+  WHERE mutation.id=NEW.last_mutation_id AND mutation.item_id=NEW.id AND mutation.family_id=NEW.family_id
+    AND mutation.owner_person_id=NEW.owner_person_id AND mutation.mutation_kind='item_create'
+    AND mutation.expected_revision=0 AND mutation.revision=NEW.revision
+    AND mutation.item_state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.created_at
+    AND NEW.updated_at=NEW.created_at
+    AND (NEW.visibility<>'private' OR mutation.actor_person_id=NEW.owner_person_id)
+)
+  OR (NEW.participant_person_ids_json IS NOT NULL AND (
+    NOT EXISTS(SELECT 1 FROM json_each(NEW.participant_person_ids_json) participant WHERE participant.value=NEW.owner_person_id)
+    OR EXISTS(SELECT 1 FROM json_each(NEW.participant_person_ids_json) participant
+      LEFT JOIN people person ON person.id=participant.value AND person.family_id=NEW.family_id AND person.status='active'
+      WHERE person.id IS NULL)
+    OR (SELECT count(*) FROM json_each(NEW.participant_person_ids_json))
+      <> (SELECT count(DISTINCT value) FROM json_each(NEW.participant_person_ids_json))
+  ))
+BEGIN SELECT RAISE(ABORT,'33-V places/travel item requires exact mutation, owner and active unique participants'); END;
+
+CREATE TRIGGER trg_33v_places_travel_item_update
+BEFORE UPDATE ON places_travel_items
+WHEN NEW.id IS NOT OLD.id OR NEW.family_id IS NOT OLD.family_id OR NEW.owner_person_id IS NOT OLD.owner_person_id
+  OR NEW.kind IS NOT OLD.kind OR NEW.area IS NOT OLD.area OR NEW.created_at IS NOT OLD.created_at
+  OR (NEW.status<>'deleted' AND (NEW.address_label IS NOT OLD.address_label OR NEW.latitude_e6 IS NOT OLD.latitude_e6
+    OR NEW.longitude_e6 IS NOT OLD.longitude_e6 OR NEW.offline_fallback_label IS NOT OLD.offline_fallback_label
+    OR NEW.participant_person_ids_json IS NOT OLD.participant_person_ids_json OR NEW.provider_label IS NOT OLD.provider_label
+    OR NEW.opaque_reference IS NOT OLD.opaque_reference OR NEW.archive_item_id IS NOT OLD.archive_item_id
+    OR NEW.document_kind IS NOT OLD.document_kind OR NEW.currency IS NOT OLD.currency
+    OR NEW.checklist_label IS NOT OLD.checklist_label OR NEW.pet_reference_id IS NOT OLD.pet_reference_id
+    OR NEW.pet_workflow IS NOT OLD.pet_workflow OR NEW.requirement_kind IS NOT OLD.requirement_kind
+    OR NEW.opaque_requirement_reference IS NOT OLD.opaque_requirement_reference OR NEW.language_code IS NOT OLD.language_code
+    OR NEW.ocr_job_id IS NOT OLD.ocr_job_id)) OR NEW.revision<>OLD.revision+1
+  OR NOT EXISTS(
+    SELECT 1 FROM places_travel_mutations mutation
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.item_id=NEW.id AND mutation.family_id=NEW.family_id
+      AND mutation.owner_person_id=NEW.owner_person_id AND mutation.expected_revision=OLD.revision
+      AND mutation.revision=NEW.revision AND mutation.item_state_fingerprint=NEW.state_fingerprint
+      AND mutation.occurred_at=NEW.updated_at
+      AND ((mutation.mutation_kind='item_update' AND OLD.status<>'deleted' AND NEW.status<>'deleted' AND NEW.deleted_at IS NULL)
+        OR (mutation.mutation_kind='item_delete' AND OLD.status<>'deleted' AND NEW.status='deleted' AND NEW.deleted_at=NEW.updated_at))
+      AND (NEW.visibility<>'private' OR mutation.actor_person_id=NEW.owner_person_id)
+  )
+BEGIN SELECT RAISE(ABORT,'33-V places/travel update requires immutable identity and exact next mutation'); END;
+
+CREATE TRIGGER trg_33v_places_travel_item_delete
+BEFORE DELETE ON places_travel_items BEGIN SELECT RAISE(ABORT,'33-V places/travel current history is durable'); END;
+CREATE TRIGGER trg_33v_places_travel_mutation_update
+BEFORE UPDATE ON places_travel_mutations BEGIN SELECT RAISE(ABORT,'33-V places/travel mutation ledger is immutable'); END;
+CREATE TRIGGER trg_33v_places_travel_mutation_delete
+BEFORE DELETE ON places_travel_mutations BEGIN SELECT RAISE(ABORT,'33-V places/travel mutation ledger is durable'); END;
+
+UPDATE database_metadata SET value='REVISION-33-V-PLACES-TRAVEL-ASSET-PET',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -13965,7 +14227,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(96, 'archive_evidence_relations_media_search', archiveEvidenceRelationsMediaLifecycleSql),
   createMigrationDefinition(97, 'health_care_coordination_elder_support', healthCareCoordinationElderSupportSql),
   createMigrationDefinition(98, 'household_operations_center', householdOperationsCenterSql),
-  createMigrationDefinition(99, 'child_education_coordination', childEducationCoordinationSql)
+  createMigrationDefinition(99, 'child_education_coordination', childEducationCoordinationSql),
+  createMigrationDefinition(100, 'places_travel_asset_pet_workflows', placesTravelAssetPetSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

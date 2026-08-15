@@ -158,6 +158,10 @@ import {
   CreateChildEducationItemUseCase,
   UpdateChildEducationItemUseCase,
   DeleteChildEducationItemUseCase,
+  GetPlacesTravelCenterUseCase,
+  CreatePlacesTravelItemUseCase,
+  UpdatePlacesTravelItemUseCase,
+  DeletePlacesTravelItemUseCase,
   ListLifeRecordsUseCase,
   CreateLifeRecordUseCase,
   GetManagedLifeWorkspaceUseCase,
@@ -322,6 +326,7 @@ import {
   type WindowsHelloDeviceBindingPort
 } from '@ppt/application';
 import type { AddArchiveItemVersionInput, AddArchiveRelationEvidenceInput, ArchiveRelationEvidenceHistoryView, ArchiveRelationEvidenceView, ChildEducationCenterView, ChildEducationMutationReceiptView, CreateChildEducationItemInput, CreateHouseholdOperationItemInput, DeleteChildEducationItemInput, DeleteHouseholdOperationItemInput, HealthCareCoordinationCenterView, HealthCareMutationReceiptView, HouseholdOperationMutationReceiptView, HouseholdOperationsCenterView, RecordHealthCareEntryInput, RemoveArchiveRelationEvidenceInput, RevokeHealthCareAccessGrantInput, UnifiedAuthorizedSearchInput, UnifiedAuthorizedSearchView, UpdateChildEducationItemInput, UpdateHouseholdOperationItemInput, UpsertHealthCareAccessGrantInput } from '@ppt/domain';
+import type { CreatePlacesTravelItemInput, DeletePlacesTravelItemInput, PlacesTravelCenterView, PlacesTravelMutationReceiptView, UpdatePlacesTravelItemInput } from '@ppt/domain';
 import { RepositoryBackedFamilyApplicationUnitOfWork, RepositoryBackedFamilyGraphQueryPort } from './family-application-adapter.js';
 import { RepositoryBackedHouseholdMembershipUnitOfWork } from './household-membership-application-adapter.js';
 import { RepositoryBackedPersonLifecycleUnitOfWork } from './person-lifecycle-application-adapter.js';
@@ -369,6 +374,10 @@ import {
   RepositoryBackedChildEducationCoordinationUnitOfWork,
   RepositoryBackedChildEducationQueryPort
 } from './child-education-coordination-application-adapter.js';
+import {
+  RepositoryBackedPlacesTravelAssetPetUnitOfWork,
+  RepositoryBackedPlacesTravelQueryPort
+} from './places-travel-asset-pet-application-adapter.js';
 import {
   RepositoryBackedLocationPolicyTransactionRunner,
   RepositoryBackedLocationUnitOfWork,
@@ -1241,6 +1250,10 @@ export class FamilyDataStore {
   readonly #createChildEducationItemUseCase: CreateChildEducationItemUseCase;
   readonly #updateChildEducationItemUseCase: UpdateChildEducationItemUseCase;
   readonly #deleteChildEducationItemUseCase: DeleteChildEducationItemUseCase;
+  readonly #getPlacesTravelCenterUseCase: GetPlacesTravelCenterUseCase;
+  readonly #createPlacesTravelItemUseCase: CreatePlacesTravelItemUseCase;
+  readonly #updatePlacesTravelItemUseCase: UpdatePlacesTravelItemUseCase;
+  readonly #deletePlacesTravelItemUseCase: DeletePlacesTravelItemUseCase;
   readonly #prepareFamilyEmergencyCardExportUseCase: PrepareFamilyEmergencyCardExportUseCase;
   readonly #recordFamilyEmergencyCardExportCompletionUseCase: RecordFamilyEmergencyCardExportCompletionUseCase;
   readonly #listFinanceRecordsUseCase: ListFinanceRecordsUseCase;
@@ -1757,6 +1770,7 @@ export class FamilyDataStore {
           lifePolicyResourceRepository: this.#repositories.lifeRepository,
           householdOperationsPolicyResourceRepository: this.#repositories.householdOperationsRepository,
           childEducationPolicyResourceRepository: this.#repositories.childEducationRepository,
+          placesTravelPolicyResourceRepository: this.#repositories.placesTravelRepository,
           personRepository: this.#repositories.personRepository,
           deviceIdentityProvider: this.#deviceIdentityProvider,
           authorizationProvider: productionArchivePolicy.authorizationProvider,
@@ -1772,6 +1786,8 @@ export class FamilyDataStore {
       householdOperationsRepository: this.#repositories.householdOperationsRepository,
       childEducationRepository: this.#repositories.childEducationRepository,
       childEducationPolicyResourceRepository: this.#repositories.childEducationRepository,
+      placesTravelRepository: this.#repositories.placesTravelRepository,
+      placesTravelPolicyResourceRepository: this.#repositories.placesTravelRepository,
       accountRepository: this.#repositories.accountRepository,
       permissionRepository: this.#repositories.objectPermissionRepository,
       personRepository: this.#repositories.personRepository,
@@ -2345,6 +2361,18 @@ export class FamilyDataStore {
     this.#createChildEducationItemUseCase = new CreateChildEducationItemUseCase(childEducationUnitOfWork);
     this.#updateChildEducationItemUseCase = new UpdateChildEducationItemUseCase(childEducationUnitOfWork);
     this.#deleteChildEducationItemUseCase = new DeleteChildEducationItemUseCase(childEducationUnitOfWork);
+    const placesTravelQuery = new RepositoryBackedPlacesTravelQueryPort(
+      lifeApplicationDependencies,
+      lifePolicyTransactionRunner
+    );
+    const placesTravelUnitOfWork = new RepositoryBackedPlacesTravelAssetPetUnitOfWork(
+      lifeApplicationDependencies,
+      lifePolicyTransactionRunner
+    );
+    this.#getPlacesTravelCenterUseCase = new GetPlacesTravelCenterUseCase(placesTravelQuery);
+    this.#createPlacesTravelItemUseCase = new CreatePlacesTravelItemUseCase(placesTravelUnitOfWork);
+    this.#updatePlacesTravelItemUseCase = new UpdatePlacesTravelItemUseCase(placesTravelUnitOfWork);
+    this.#deletePlacesTravelItemUseCase = new DeletePlacesTravelItemUseCase(placesTravelUnitOfWork);
     this.#prepareFamilyEmergencyCardExportUseCase = new PrepareFamilyEmergencyCardExportUseCase(
       lifeUnitOfWork,
       () => Date.parse(this.#clock.now())
@@ -4818,6 +4846,38 @@ export class FamilyDataStore {
   public async deleteChildEducationItem(input:DeleteChildEducationItemInput):Promise<ChildEducationMutationReceiptView>{
     const result=await this.#deleteChildEducationItemUseCase.execute({
       context:this.#lifeApplicationContext('child-education-item-delete'),command:input
+    });
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async getPlacesTravelCenter(ownerPersonId:string):Promise<PlacesTravelCenterView>{
+    const result=await this.#getPlacesTravelCenterUseCase.execute({
+      context:this.#lifeApplicationContext('places-travel-center-get'),ownerPersonId
+    });
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async createPlacesTravelItem(input:CreatePlacesTravelItemInput):Promise<PlacesTravelMutationReceiptView>{
+    const result=await this.#createPlacesTravelItemUseCase.execute({
+      context:this.#lifeApplicationContext('places-travel-item-create'),command:input
+    });
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async updatePlacesTravelItem(input:UpdatePlacesTravelItemInput):Promise<PlacesTravelMutationReceiptView>{
+    const result=await this.#updatePlacesTravelItemUseCase.execute({
+      context:this.#lifeApplicationContext('places-travel-item-update'),command:input
+    });
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async deletePlacesTravelItem(input:DeletePlacesTravelItemInput):Promise<PlacesTravelMutationReceiptView>{
+    const result=await this.#deletePlacesTravelItemUseCase.execute({
+      context:this.#lifeApplicationContext('places-travel-item-delete'),command:input
     });
     if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
     return result.value;

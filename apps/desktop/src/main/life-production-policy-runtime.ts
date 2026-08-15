@@ -36,6 +36,7 @@ import type {
   LifeRecordRow,
   ObjectPermissionRepositoryPort,
   ObjectPermissionRow,
+  PlacesTravelPolicyResourceRepositoryPort,
   PersonRecord,
   PersonRepositoryPort,
   PlatformPolicyTransactionRepositoryPort,
@@ -46,7 +47,7 @@ import type {
   TrustedDeviceRepositoryPort,
   TrustedDeviceRow
 } from '@ppt/repository-contracts';
-import { childEducationVisibilityPrivacy } from '@ppt/repository-contracts';
+import { childEducationVisibilityPrivacy, placesTravelVisibilityPrivacy } from '@ppt/repository-contracts';
 import type {
   LifePolicyCommittedTransactionInput,
   LifePolicyEnforcementPoint,
@@ -66,6 +67,7 @@ export interface LifeProductionPolicyRuntimeDependencies {
   readonly lifePolicyResourceRepository: LifePolicyResourceRepositoryPort;
   readonly householdOperationsPolicyResourceRepository: HouseholdOperationsPolicyResourceRepositoryPort;
   readonly childEducationPolicyResourceRepository: ChildEducationPolicyResourceRepositoryPort;
+  readonly placesTravelPolicyResourceRepository: PlacesTravelPolicyResourceRepositoryPort;
   readonly personRepository: PersonRepositoryPort;
   readonly deviceIdentityProvider: Pick<FileDeviceIdentityProvider, 'snapshot'>;
   readonly authorizationProvider: PlatformPolicyAuthorizationProvider;
@@ -105,7 +107,9 @@ const lifeResourceTypes = new Set<LifePolicyIntent['resourceType']>([
   'household_operation_item',
   'household_operations_center',
   'child_education_item',
-  'child_education_center'
+  'child_education_center',
+  'places_travel_item',
+  'places_travel_center'
 ]);
 
 const nonEmpty = (value: unknown, max = 512): value is string =>
@@ -797,6 +801,18 @@ const findLifeResourceForPolicyResolution = (
         })
       : null);
   }
+  if (resourceType === 'places_travel_item') {
+    const found = dependencies.placesTravelPolicyResourceRepository.findItemForPolicyResolution(execution, resourceId);
+    if (!found.ok) return found;
+    return ok(found.value
+      ? Object.freeze({
+          familyId: found.value.familyId,
+          ownerPersonId: found.value.ownerPersonId,
+          privacy: placesTravelVisibilityPrivacy(found.value.visibility),
+          stateFingerprint: stable(found.value)
+        })
+      : null);
+  }
   throw new PlatformPolicyEnforcementError(
     'RESOURCE_RESOLUTION_FAILED',
     'Life policy resource type is not supported'
@@ -868,7 +884,7 @@ const loadLifeResourceSnapshotInTransaction = (
     if (!existing.ok) return existing;
     if (existing.value) {
       if (
-        !['household_operation_item','child_education_item'].includes(requestedIntent.resourceType)
+        !['household_operation_item','child_education_item','places_travel_item'].includes(requestedIntent.resourceType)
         || existing.value.familyId !== context.familyId
         || existing.value.ownerPersonId !== requestedIntent.ownerPersonId
         || existing.value.privacy !== requestedIntent.privacy

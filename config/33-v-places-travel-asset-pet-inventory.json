@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "step": "33-V",
+  "decision": "DEC-233",
+  "status": "PLANNED",
+  "governanceState": "LOCAL_IMPLEMENTATION_STARTED",
+  "requirements": ["B5-05", "EXT-033", "EXT-035", "EXT-058", "EXT-059", "EXT-060", "EXT-061", "EXT-062", "EXT-063"],
+  "implementationChain": {
+    "domain": ["packages/domain/src/places-travel-asset-pet.ts"],
+    "application": ["packages/application/src/places-travel-asset-pet-use-cases.ts"],
+    "repositoryContract": ["packages/repository-contracts/src/places-travel-asset-pet-repository.ts"],
+    "migration": ["packages/database/src/family-database-migrations.ts#100"],
+    "repository": ["packages/repositories/src/places-travel-asset-pet-repository.ts"],
+    "policyAndComposition": ["apps/desktop/src/main/life-production-policy-runtime.ts", "apps/desktop/src/main/places-travel-asset-pet-application-adapter.ts", "apps/desktop/src/main/repository-composition-root.ts", "apps/desktop/src/main/data-store.ts"],
+    "ipc": ["apps/desktop/src/main/ipc-integration-policy.ts", "apps/desktop/src/main/ipc-request-lifecycle.ts", "apps/desktop/src/main/main.ts", "apps/desktop/src/main/preload.ts", "apps/desktop/src/renderer/global.d.ts"],
+    "ui": ["apps/desktop/src/renderer/PlacesTravelAssetPetPanel.tsx", "apps/desktop/src/renderer/App.tsx"]
+  },
+  "implementedTargetedTests": [
+    "packages/application/tests/places-travel-asset-pet-use-cases.test.ts",
+    "packages/repositories/places-travel-asset-pet-repository-policy.test.ts",
+    "apps/desktop/tests/places-travel-asset-pet-ipc-integration.test.ts",
+    "apps/desktop/tests/places-travel-asset-pet-data-store.test.ts",
+    "apps/desktop/tests/places-travel-asset-pet-ui.test.ts"
+  ],
+  "securityControls": {
+    "centralPepReceiptFence": true,
+    "ownerAndFamilyBound": true,
+    "explicitPermissionForNonOwner": true,
+    "privateOwnerOnly": true,
+    "activeParticipantsValidated": true,
+    "payloadFreePolicyResolution": true,
+    "contentFreeAuditAndOutbox": true,
+    "boundedIpcAndReadResults": true,
+    "rendererAuthorityExcluded": true,
+    "physicalDeleteClaimed": false
+  },
+  "validation": {
+    "targetedTestFileRatchet": 5,
+    "targetedTestRatchet": 22,
+    "migrationVersion": 100,
+    "migrationSha256": "1cbdd671c0e2d6eb4a58d2d56d84ed63413e5f6585af252eefdaebc5600d18c4",
+    "ppk021": {"status":"PASS","files":468,"surfaces":723,"sha256":"ca80025cf1c9f9903550718066197f885666b4b0f931bc8c1826d5c088a22e41","targeted":17,"contract":84,"runtime":20},
+    "ppk022": {"status":"PASS","files":468,"surfaces":345,"sha256":"1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e","targeted":19,"contract":110,"runtime":24},
+    "countsAsRequirementPass": false
+  },
+  "externalAndManualEvidence": "NOT_RUN",
+  "countsAsRequirementPass": false
+}

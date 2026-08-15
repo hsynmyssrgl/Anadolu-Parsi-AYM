@@ -188,6 +188,9 @@ const childEducationChannels = new Set<string>([
   ...childEducationReadChannels,
   ...childEducationWriteChannels
 ]);
+const placesTravelReadChannels=new Set<string>(['placesTravel:getCenter']);
+const placesTravelWriteChannels=new Set<string>(['placesTravel:createItem','placesTravel:updateItem','placesTravel:deleteItem']);
+const placesTravelChannels=new Set<string>([...placesTravelReadChannels,...placesTravelWriteChannels]);
 
 const cancellableNetworkChannels = new Set<string>([
   'dataLifecycle:runRevocationSync'
@@ -199,6 +202,8 @@ const cancellableInteractiveAuthenticationChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLifecyclePolicy => {
+  if(placesTravelReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
+  if(placesTravelWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
   if (childEducationReadChannels.has(channel)) {
     return Object.freeze({ cancellable: true, latestWins: true, timeoutMs: 10_000 });
   }
@@ -297,6 +302,8 @@ const standardAdmissionChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestAdmissionPolicy = (channel: string): IpcRequestAdmissionPolicy => {
+  if(placesTravelChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
+    maxConcurrentPerSender:2,maxConcurrentPerChannel:1,maxQueuedPerSender:4,queueTimeoutMs:2_500});
   if (childEducationChannels.has(channel)) {
     return Object.freeze({ enabled:true, priority:'interactive', priorityWeight:100, maxConcurrentPerSender:2, maxConcurrentPerChannel:1, maxQueuedPerSender:4, queueTimeoutMs:2_500 });
   }
@@ -407,6 +414,8 @@ export interface IpcRequestRatePolicy {
 }
 
 export const resolveIpcRequestRatePolicy = (channel: string): IpcRequestRatePolicy => {
+  if(placesTravelReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:60,windowMs:60_000});
+  if(placesTravelWriteChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:16,windowMs:60_000});
   if (childEducationReadChannels.has(channel)) {
     return Object.freeze({ enabled: true, maxRequestsPerWindow: 60, windowMs: 60_000 });
   }

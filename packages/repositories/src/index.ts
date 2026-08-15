@@ -43,6 +43,7 @@ export * from './legacy-repository.js';
 export * from './life-repository.js';
 export * from './household-operations-repository.js';
 export * from './child-education-coordination-repository.js';
+export * from './places-travel-asset-pet-repository.js';
 
 export * from './backup-repository.js';
 export * from './backup-propagation-repository.js';

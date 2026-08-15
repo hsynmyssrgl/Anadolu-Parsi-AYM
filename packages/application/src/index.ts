@@ -108,3 +108,4 @@ export * from './health-care-coordination-use-cases.js';
 export * from './archive-evidence-media-use-cases.js';
 export * from './household-operations-use-cases.js';
 export * from './child-education-coordination-use-cases.js';
+export * from './places-travel-asset-pet-use-cases.js';
