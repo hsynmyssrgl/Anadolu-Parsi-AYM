@@ -178,7 +178,10 @@ export interface LifePolicyIntent {
     | 'communication_messaging_center'
     | 'communication_message'
     | 'communication_presence'
-    | 'communication_retention_policy';
+    | 'communication_retention_policy'
+    | 'communication_call_center'
+    | 'communication_call_session'
+    | 'communication_call_preferences';
   readonly resourceId: string;
   readonly purpose: 'general' | 'emergency-offline-portability';
   readonly requestedFields?: readonly string[];

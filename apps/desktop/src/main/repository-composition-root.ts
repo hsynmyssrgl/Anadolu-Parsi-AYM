@@ -11,6 +11,7 @@ import {
   SqliteBootstrapRepository,
   SqliteChildEducationCoordinationRepository,
   SqliteCommunicationMessagingRepository,
+  SqliteCommunicationRealtimeCallingRepository,
   SqliteCommunicationSecurityRepository,
   SqliteDashboardRepository,
   SqliteDataRepairRepository,
@@ -73,6 +74,8 @@ import type {
   ChildEducationPolicyResourceRepositoryPort,
   CommunicationMessagingPolicyResourceRepositoryPort,
   CommunicationMessagingRepositoryPort,
+  CommunicationRealtimeCallingPolicyResourceRepositoryPort,
+  CommunicationRealtimeCallingRepositoryPort,
   CommunicationSecurityPolicyResourceRepositoryPort,
   CommunicationSecurityRepositoryPort,
   DashboardRepositoryPort,
@@ -145,6 +148,7 @@ export interface RepositoryCompositionRoot {
   readonly bootstrapRepository: BootstrapRepositoryPort;
   readonly childEducationRepository: ChildEducationCoordinationRepositoryPort & ChildEducationPolicyResourceRepositoryPort;
   readonly communicationMessagingRepository: CommunicationMessagingRepositoryPort & CommunicationMessagingPolicyResourceRepositoryPort;
+  readonly communicationRealtimeCallingRepository: CommunicationRealtimeCallingRepositoryPort & CommunicationRealtimeCallingPolicyResourceRepositoryPort;
   readonly communicationSecurityRepository: CommunicationSecurityRepositoryPort & CommunicationSecurityPolicyResourceRepositoryPort;
   readonly dashboardRepository: DashboardRepositoryPort;
   readonly dataRepairRepository: DataRepairRepositoryPort;
@@ -216,6 +220,7 @@ export const createSqliteRepositoryCompositionRoot = (
     bootstrapRepository: new SqliteBootstrapRepository(repositoryOptions),
     childEducationRepository: new SqliteChildEducationCoordinationRepository(repositoryOptions),
     communicationMessagingRepository: new SqliteCommunicationMessagingRepository(repositoryOptions),
+    communicationRealtimeCallingRepository: new SqliteCommunicationRealtimeCallingRepository(repositoryOptions),
     communicationSecurityRepository: new SqliteCommunicationSecurityRepository(repositoryOptions),
     dashboardRepository: new SqliteDashboardRepository(repositoryOptions),
     dataRepairRepository: new SqliteDataRepairRepository(repositoryOptions),

@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "step": "34-C",
+  "decision": "DEC-240",
+  "status": "PLANNED",
+  "governanceState": "LOCAL_IMPLEMENTATION_STARTED",
+  "requirements": ["RTC-001", "RTC-002", "RTC-003", "RTC-004", "RTC-005", "RTC-006", "RTC-007", "RTC-008", "RTC-009", "RTC-010", "RTC-011", "RTC-012", "RTC-013", "RTC-014", "UX-COM-001", "UX-COM-003", "UX-COM-004", "UX-COM-011", "UX-COM-012"],
+  "implementationChain": {
+    "domain": ["packages/domain/src/communication-realtime-calling.ts"],
+    "application": ["packages/application/src/communication-realtime-calling-use-cases.ts"],
+    "repositoryContract": ["packages/repository-contracts/src/communication-realtime-calling-repository.ts"],
+    "migration": ["packages/database/src/family-database-migrations.ts#107"],
+    "repository": ["packages/repositories/src/communication-realtime-calling-repository.ts"],
+    "policyAndComposition": [
+      "apps/desktop/src/main/life-production-policy-runtime.ts",
+      "apps/desktop/src/main/communication-realtime-calling-application-adapter.ts",
+      "apps/desktop/src/main/repository-composition-root.ts",
+      "apps/desktop/src/main/data-store.ts"
+    ],
+    "ipc": [
+      "apps/desktop/src/main/ipc-integration-policy.ts",
+      "apps/desktop/src/main/ipc-request-lifecycle.ts",
+      "apps/desktop/src/main/main.ts",
+      "apps/desktop/src/main/preload.ts",
+      "apps/desktop/src/renderer/global.d.ts"
+    ],
+    "ui": ["apps/desktop/src/renderer/CommunicationRealtimeCallingPanel.tsx", "apps/desktop/src/renderer/App.tsx"]
+  },
+  "implementedTargetedTests": [
+    "packages/application/tests/communication-realtime-calling-use-cases.test.ts",
+    "packages/repositories/communication-realtime-calling-repository-policy.test.ts",
+    "apps/desktop/tests/communication-realtime-calling-data-store.test.ts",
+    "apps/desktop/tests/communication-realtime-calling-ipc-integration.test.ts",
+    "apps/desktop/tests/communication-realtime-calling-ui.test.ts"
+  ],
+  "securityControls": {
+    "centralPepReceiptFence": true,
+    "ownerAccountFamilyBinding": true,
+    "immutableMutationSessionAndEventHistory": true,
+    "payloadFreePolicyResolution": true,
+    "contentFreeAuditAndOutbox": true,
+    "boundedIpcAndRendererSafeResults": true,
+    "rendererMediaNetworkProviderAuthorityExcluded": true,
+    "durableWritesNonCancellable": true,
+    "preflightAndQualityEvidenceMainOnly": true,
+    "providerMissingFailsClosed": true
+  },
+  "incompleteCapabilities": [
+    "production WebRTC peer connection and media transport",
+    "SFU STUN TURN and short-lived relay credentials",
+    "SFrame and MLS media-key binding",
+    "screen or window capture and background processing",
+    "live caption provider and realtime text transport",
+    "CallKit PushKit Windows call notification and do-not-disturb integration",
+    "real device preflight and quality evidence production wiring",
+    "participant kick and complete host moderation",
+    "session and quality retention pruning",
+    "real one-to-one and group call UAT"
+  ],
+  "validation": {
+    "targetedTestFileRatchet": 5,
+    "targetedTestRatchet": 23,
+    "migrationVersion": 107,
+    "migrationSha256": "299024d7bd040343717abceb2ada6e543a95bea921c7ee6c7d34a10cf2b6515b",
+    "ppk015": {"status":"PASS","files":513,"sourceSha256":"fc468299263f87c8e1e80f4323fa5465998d2326ceab15281290e313401b9fce","findings":0},
+    "ppk021": {"status":"PASS","files":513,"surfaces":805,"sha256":"8a70ce92f886463c2bea5ae997c5956f97cce7dcf17a433587e97f011996e7f6","targeted":17,"contract":84,"runtime":20},
+    "ppk022": {"status":"PASS","files":513,"surfaces":360,"sha256":"755717250f2549229608b38e6ea650a4647f1e0d50aa4c1aa1078acc193302ff","targeted":19,"contract":110,"runtime":24},
+    "countsAsRequirementPass": false
+  },
+  "externalAndManualEvidence": "NOT_RUN",
+  "countsAsRequirementPass": false
+}

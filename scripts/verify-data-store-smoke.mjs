@@ -35,8 +35,8 @@ try {
     ...policyOptions
   });
   assert.ok(migrationSummary, 'Migration özeti üretilmedi.');
-  assert.deepEqual(migrationSummary.appliedVersions, Array.from({ length: 106 }, (_unused, index) => index + 1));
-  assert.equal(migrationSummary.schemaAfter.tableCount, 175);
+  assert.deepEqual(migrationSummary.appliedVersions, Array.from({ length: 107 }, (_unused, index) => index + 1));
+  assert.equal(migrationSummary.schemaAfter.tableCount, 181);
 
   const initialState = store.getAuthState();
   if (!initialState.initialized) {
@@ -74,7 +74,7 @@ try {
   const probe = new DatabaseSync(databasePath, { readOnly: true });
   try {
     const migrations = probe.prepare('SELECT version,success FROM schema_migrations ORDER BY version').all();
-    assert.equal(migrations.length, 106, 'Migration kayıtları eksik.');
+    assert.equal(migrations.length, 107, 'Migration kayıtları eksik.');
     assert.equal(migrations.every((row) => Number(row.success) === 1), true, 'Başarısız migration kaydı bulundu.');
     assert.equal(Boolean(probe.prepare("SELECT 1 AS present FROM sqlite_master WHERE type='table' AND name='database_metadata'").get()), true);
     assert.equal(Boolean(probe.prepare("SELECT 1 AS present FROM sqlite_master WHERE type='table' AND name='local_governed_ocr_source_deletion_recovery_intents'").get()), true);
@@ -97,6 +97,10 @@ try {
       assert.equal(Boolean(probe.prepare("SELECT 1 AS present FROM sqlite_master WHERE type='table' AND name=?").get(tableName)), true);
     }
     for (const tableName of ['communication_messaging_mutations', 'communication_messages', 'communication_message_events', 'communication_delivery_queue', 'communication_presence_profiles', 'communication_retention_policies']) {
+      assert.equal(Boolean(probe.prepare("SELECT 1 AS present FROM sqlite_master WHERE type='table' AND name=?").get(tableName)), true);
+    }
+    for (const tableName of ['communication_call_mutations', 'communication_call_sessions', 'communication_call_participants',
+      'communication_call_events', 'communication_call_preferences', 'communication_call_quality_observations']) {
       assert.equal(Boolean(probe.prepare("SELECT 1 AS present FROM sqlite_master WHERE type='table' AND name=?").get(tableName)), true);
     }
     const outbox = probe.prepare("SELECT event_type,aggregate_type,aggregate_id,status,attempt_count FROM event_outbox WHERE event_type='family.member.created' ORDER BY occurred_at DESC LIMIT 1").get();

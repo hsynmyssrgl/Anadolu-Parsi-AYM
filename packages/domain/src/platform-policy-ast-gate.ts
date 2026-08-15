@@ -18,7 +18,7 @@ export interface PlatformPolicyAstGateBoundaryView {
   readonly protectedRules: readonly PlatformPolicyAstGateRuleId[];
   readonly protectedRuleCount: 6;
   readonly productionSourceZones: 18;
-  readonly exactAllowlistEntries: 795;
+  readonly exactAllowlistEntries: 805;
   readonly directRoleAuthorizationBypasses: 0;
   readonly wildcardsAllowed: false;
   readonly parseFailureDenied: true;

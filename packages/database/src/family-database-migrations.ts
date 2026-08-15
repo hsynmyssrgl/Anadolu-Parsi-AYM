@@ -15734,6 +15734,335 @@ BEGIN SELECT RAISE(ABORT,'34-B delivery queue history is durable'); END;
 UPDATE database_metadata SET value='REVISION-34-B-MESSAGING-LIFECYCLE-PRIVACY-PRESENCE',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 
+const communicationRealtimeCallingSql = `
+CREATE TABLE communication_call_mutations (
+  id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  resource_type TEXT NOT NULL CHECK(resource_type IN ('communication_call_session','communication_call_preferences')),
+  resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 8 AND 256),
+  actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  mutation_kind TEXT NOT NULL CHECK(mutation_kind IN ('call_create','call_preflight_update','call_controls_update',
+    'call_lifecycle_update','call_preferences_update','call_quality_observation')),
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 256),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  expected_revision INTEGER NOT NULL CHECK(expected_revision>=0),
+  revision INTEGER NOT NULL CHECK(revision=expected_revision+1),
+  resource_state_fingerprint TEXT NOT NULL CHECK(length(resource_state_fingerprint)=64 AND resource_state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version>=1),
+  policy_receipt_nonce TEXT NOT NULL CHECK(length(trim(policy_receipt_nonce)) BETWEEN 16 AND 256),
+  policy_correlation_id TEXT NOT NULL CHECK(length(trim(policy_correlation_id)) BETWEEN 1 AND 256),
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type IN ('communication_call_session','communication_call_preferences')),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action IN ('create','update','delete')),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='family.write'),
+  UNIQUE(family_id,actor_account_id,client_operation_id),
+  CHECK(policy_resource_type=resource_type AND policy_resource_id=resource_id),
+  CHECK((resource_type='communication_call_session' AND mutation_kind<>'call_preferences_update')
+    OR (resource_type='communication_call_preferences' AND mutation_kind='call_preferences_update')),
+  CHECK((mutation_kind='call_create' AND expected_revision=0 AND policy_action='create')
+    OR (mutation_kind='call_preferences_update' AND ((expected_revision=0 AND policy_action='create') OR (expected_revision>=1 AND policy_action='update')))
+    OR (mutation_kind='call_lifecycle_update' AND expected_revision>=1 AND policy_action IN ('update','delete'))
+    OR (mutation_kind IN ('call_preflight_update','call_controls_update','call_quality_observation') AND expected_revision>=1 AND policy_action='update'))
+) STRICT;
+
+CREATE INDEX idx_communication_call_mutations_owner
+ON communication_call_mutations(family_id,owner_person_id,occurred_at DESC,id);
+
+CREATE TABLE communication_call_sessions (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  room_id TEXT NOT NULL REFERENCES communication_rooms(id) ON DELETE RESTRICT,
+  topology TEXT NOT NULL CHECK(topology IN ('direct_p2p','family_group_sfu')),
+  requested_media_mode TEXT NOT NULL CHECK(requested_media_mode IN ('audio','video')),
+  state TEXT NOT NULL CHECK(state IN ('planned','preflight_ready','waiting_local','ended','cancelled')),
+  network_state TEXT NOT NULL CHECK(network_state IN ('not_started','local_waiting_only','ended')),
+  waiting_room_enabled INTEGER NOT NULL CHECK(waiting_room_enabled IN (0,1)),
+  meeting_locked INTEGER NOT NULL CHECK(meeting_locked IN (0,1)),
+  audio_only INTEGER NOT NULL CHECK(audio_only IN (0,1)),
+  automatic_audio_fallback_enabled INTEGER NOT NULL CHECK(automatic_audio_fallback_enabled IN (0,1)),
+  background_effect TEXT NOT NULL CHECK(background_effect IN ('off','blur','virtual_background')),
+  captions_requested INTEGER NOT NULL CHECK(captions_requested IN (0,1)),
+  realtime_text_requested INTEGER NOT NULL CHECK(realtime_text_requested IN (0,1)),
+  screen_share_requested INTEGER NOT NULL CHECK(screen_share_requested IN (0,1)),
+  local_hand_raised INTEGER NOT NULL CHECK(local_hand_raised IN (0,1)),
+  pinned_person_id TEXT REFERENCES people(id) ON DELETE RESTRICT,
+  sign_language_pinned_person_id TEXT REFERENCES people(id) ON DELETE RESTRICT,
+  reaction_code TEXT CHECK(reaction_code IS NULL OR length(trim(reaction_code)) BETWEEN 1 AND 32),
+  microphone_check TEXT NOT NULL CHECK(microphone_check IN ('not_run','passed','failed','not_available')),
+  camera_check TEXT NOT NULL CHECK(camera_check IN ('not_run','passed','failed','not_available')),
+  speaker_check TEXT NOT NULL CHECK(speaker_check IN ('not_run','passed','failed','not_available')),
+  noise_reduction_requested INTEGER NOT NULL CHECK(noise_reduction_requested IN (0,1)),
+  echo_cancellation_requested INTEGER NOT NULL CHECK(echo_cancellation_requested IN (0,1)),
+  automatic_gain_control_requested INTEGER NOT NULL CHECK(automatic_gain_control_requested IN (0,1)),
+  preflight_provider_id TEXT CHECK(preflight_provider_id IS NULL OR length(trim(preflight_provider_id)) BETWEEN 2 AND 160),
+  preflight_evidence_sha256 TEXT CHECK(preflight_evidence_sha256 IS NULL OR (length(preflight_evidence_sha256)=64 AND preflight_evidence_sha256 NOT GLOB '*[^0-9a-f]*')),
+  preflight_observed_at TEXT CHECK(preflight_observed_at IS NULL OR (length(preflight_observed_at)=24 AND julianday(preflight_observed_at) IS NOT NULL)),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES communication_call_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  ended_at TEXT CHECK(ended_at IS NULL OR (length(ended_at)=24 AND julianday(ended_at) IS NOT NULL)),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  UNIQUE(family_id,owner_person_id,id),
+  CHECK(updated_at>=created_at),
+  CHECK((state IN ('ended','cancelled') AND network_state='ended' AND ended_at=updated_at)
+    OR (state NOT IN ('ended','cancelled') AND ended_at IS NULL AND network_state<>'ended')),
+  CHECK((state='waiting_local' AND network_state='local_waiting_only') OR state<>'waiting_local'),
+  CHECK((preflight_provider_id IS NULL AND preflight_evidence_sha256 IS NULL AND preflight_observed_at IS NULL)
+    OR (preflight_provider_id IS NOT NULL AND preflight_evidence_sha256 IS NOT NULL AND preflight_observed_at IS NOT NULL)),
+  CHECK(state NOT IN ('preflight_ready','waiting_local') OR (microphone_check='passed' AND speaker_check='passed'
+    AND (requested_media_mode='audio' OR camera_check='passed')))
+) STRICT;
+
+CREATE INDEX idx_communication_call_sessions_owner
+ON communication_call_sessions(family_id,owner_person_id,updated_at DESC,id);
+
+CREATE TABLE communication_call_participants (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  session_id TEXT NOT NULL REFERENCES communication_call_sessions(id) ON DELETE RESTRICT,
+  person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  role TEXT NOT NULL CHECK(role IN ('host','participant')),
+  state TEXT NOT NULL CHECK(state IN ('invited','local_ready','left')),
+  hand_raised INTEGER NOT NULL CHECK(hand_raised IN (0,1)),
+  pinned_locally INTEGER NOT NULL CHECK(pinned_locally IN (0,1)),
+  sign_language_speaker_pinned_locally INTEGER NOT NULL CHECK(sign_language_speaker_pinned_locally IN (0,1)),
+  reaction_code TEXT CHECK(reaction_code IS NULL OR length(trim(reaction_code)) BETWEEN 1 AND 32),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  UNIQUE(family_id,owner_person_id,session_id,person_id),
+  CHECK(updated_at>=created_at),
+  CHECK((role='host' AND state='local_ready' AND person_id=owner_person_id) OR role='participant')
+) STRICT;
+
+CREATE INDEX idx_communication_call_participants_session
+ON communication_call_participants(family_id,owner_person_id,session_id,person_id);
+
+CREATE TABLE communication_call_events (
+  id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  session_id TEXT NOT NULL REFERENCES communication_call_sessions(id) ON DELETE RESTRICT,
+  event_kind TEXT NOT NULL CHECK(event_kind IN ('call_create','call_preflight_update','call_controls_update','call_lifecycle_update','call_quality_observation')),
+  session_revision INTEGER NOT NULL CHECK(session_revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  mutation_id TEXT NOT NULL UNIQUE REFERENCES communication_call_mutations(id) ON DELETE RESTRICT,
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND julianday(occurred_at) IS NOT NULL)
+) STRICT;
+
+CREATE INDEX idx_communication_call_events_session
+ON communication_call_events(family_id,owner_person_id,session_id,session_revision,id);
+
+CREATE TABLE communication_call_preferences (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  simple_mode INTEGER NOT NULL CHECK(simple_mode IN (0,1)),
+  favorite_person_id TEXT REFERENCES people(id) ON DELETE RESTRICT,
+  large_person_cards INTEGER NOT NULL CHECK(large_person_cards IN (0,1)),
+  caption_scale_percent INTEGER NOT NULL CHECK(caption_scale_percent BETWEEN 100 AND 300),
+  screen_reader_announcements INTEGER NOT NULL CHECK(screen_reader_announcements IN (0,1)),
+  keyboard_shortcuts INTEGER NOT NULL CHECK(keyboard_shortcuts IN (0,1)),
+  automatic_audio_fallback_enabled INTEGER NOT NULL CHECK(automatic_audio_fallback_enabled IN (0,1)),
+  noise_reduction_requested INTEGER NOT NULL CHECK(noise_reduction_requested IN (0,1)),
+  echo_cancellation_requested INTEGER NOT NULL CHECK(echo_cancellation_requested IN (0,1)),
+  automatic_gain_control_requested INTEGER NOT NULL CHECK(automatic_gain_control_requested IN (0,1)),
+  background_effect TEXT NOT NULL CHECK(background_effect IN ('off','blur','virtual_background')),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES communication_call_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  UNIQUE(family_id,owner_person_id),
+  CHECK(updated_at>=created_at)
+) STRICT;
+
+CREATE TABLE communication_call_quality_observations (
+  id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  session_id TEXT NOT NULL REFERENCES communication_call_sessions(id) ON DELETE RESTRICT,
+  round_trip_ms INTEGER NOT NULL CHECK(round_trip_ms BETWEEN 0 AND 60000),
+  packet_loss_permille INTEGER NOT NULL CHECK(packet_loss_permille BETWEEN 0 AND 1000),
+  jitter_ms INTEGER NOT NULL CHECK(jitter_ms BETWEEN 0 AND 60000),
+  uplink_kbps INTEGER NOT NULL CHECK(uplink_kbps BETWEEN 0 AND 10000000),
+  downlink_kbps INTEGER NOT NULL CHECK(downlink_kbps BETWEEN 0 AND 10000000),
+  provider_id TEXT NOT NULL CHECK(length(trim(provider_id)) BETWEEN 2 AND 160),
+  provider_evidence_sha256 TEXT NOT NULL CHECK(length(provider_evidence_sha256)=64 AND provider_evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
+  mutation_id TEXT NOT NULL UNIQUE REFERENCES communication_call_mutations(id) ON DELETE RESTRICT,
+  observed_at TEXT NOT NULL CHECK(length(observed_at)=24 AND julianday(observed_at) IS NOT NULL)
+) STRICT;
+
+CREATE INDEX idx_communication_call_quality_session
+ON communication_call_quality_observations(family_id,owner_person_id,session_id,observed_at DESC,id);
+
+CREATE TRIGGER trg_34c_call_mutation_insert
+BEFORE INSERT ON communication_call_mutations
+WHEN NOT EXISTS(
+  SELECT 1 FROM accounts account
+  JOIN people actor ON actor.id=NEW.actor_person_id AND actor.family_id=NEW.family_id AND actor.status='active'
+  JOIN people owner ON owner.id=NEW.owner_person_id AND owner.family_id=NEW.family_id AND owner.status='active'
+  JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+  JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+  WHERE account.id=NEW.actor_account_id AND account.person_id=NEW.actor_person_id AND account.status='active'
+    AND receipt.receipt_version=NEW.policy_receipt_version AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id AND receipt.action=NEW.policy_action AND receipt.capability=NEW.policy_capability
+    AND receipt.recorded_at=NEW.occurred_at AND json_extract(receipt.record_json,'$.request.purpose')='general'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.resource.sensitivity')='highly_sensitive'
+    AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.actor_account_id
+    AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.actor_person_id
+    AND NEW.actor_person_id=NEW.owner_person_id
+    AND ((NEW.resource_type='communication_call_session' AND ((NEW.expected_revision=0
+          AND NOT EXISTS(SELECT 1 FROM communication_call_sessions current WHERE current.id=NEW.resource_id))
+        OR EXISTS(SELECT 1 FROM communication_call_sessions current WHERE current.id=NEW.resource_id
+          AND current.family_id=NEW.family_id AND current.owner_person_id=NEW.owner_person_id AND current.revision=NEW.expected_revision)))
+      OR (NEW.resource_type='communication_call_preferences' AND ((NEW.expected_revision=0
+          AND NOT EXISTS(SELECT 1 FROM communication_call_preferences current WHERE current.id=NEW.resource_id))
+        OR EXISTS(SELECT 1 FROM communication_call_preferences current WHERE current.id=NEW.resource_id
+          AND current.family_id=NEW.family_id AND current.owner_person_id=NEW.owner_person_id AND current.revision=NEW.expected_revision))))
+)
+BEGIN SELECT RAISE(ABORT,'34-C mutation requires exact owner-bound durable PEP receipt and current revision'); END;
+
+CREATE TRIGGER trg_34c_call_session_insert
+BEFORE INSERT ON communication_call_sessions
+WHEN (SELECT COUNT(*) FROM communication_call_sessions item
+    WHERE item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id)>=256
+  OR NOT EXISTS(
+  SELECT 1 FROM communication_call_mutations mutation
+  JOIN communication_rooms room ON room.id=NEW.room_id AND room.family_id=NEW.family_id
+    AND room.owner_person_id=NEW.owner_person_id AND room.status='active'
+  JOIN communication_room_memberships member ON member.room_id=room.id AND member.family_id=NEW.family_id
+    AND member.member_person_id=NEW.owner_person_id AND member.status='active'
+  WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='communication_call_session'
+    AND mutation.resource_id=NEW.id AND mutation.mutation_kind='call_create' AND mutation.expected_revision=0
+    AND mutation.revision=NEW.revision AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+    AND mutation.resource_state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.created_at
+    AND mutation.policy_receipt_hash=NEW.policy_receipt_hash AND NEW.state='planned' AND NEW.network_state='not_started'
+)
+BEGIN SELECT RAISE(ABORT,'34-C call insert requires exact mutation, room membership and receipt'); END;
+
+CREATE TRIGGER trg_34c_call_session_update
+BEFORE UPDATE ON communication_call_sessions
+WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.owner_person_id<>OLD.owner_person_id
+  OR NEW.room_id<>OLD.room_id OR NEW.topology<>OLD.topology OR NEW.requested_media_mode<>OLD.requested_media_mode
+  OR NEW.created_at<>OLD.created_at OR NOT EXISTS(
+    SELECT 1 FROM communication_call_mutations mutation
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='communication_call_session'
+      AND mutation.resource_id=NEW.id AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+      AND mutation.expected_revision=OLD.revision AND mutation.revision=NEW.revision AND NEW.revision=OLD.revision+1
+      AND mutation.resource_state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.updated_at
+      AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+      AND ((mutation.mutation_kind='call_preflight_update' AND OLD.state IN ('planned','preflight_ready') AND NEW.state IN ('planned','preflight_ready'))
+        OR (mutation.mutation_kind='call_controls_update' AND NEW.state=OLD.state AND NEW.network_state=OLD.network_state)
+        OR (mutation.mutation_kind='call_quality_observation' AND NEW.state=OLD.state AND NEW.network_state=OLD.network_state)
+        OR (mutation.mutation_kind='call_lifecycle_update' AND ((OLD.state='preflight_ready' AND NEW.state='waiting_local')
+          OR (OLD.state NOT IN ('ended','cancelled') AND NEW.state IN ('ended','cancelled')))))
+  )
+BEGIN SELECT RAISE(ABORT,'34-C call update requires exact immutable identity, transition and mutation'); END;
+
+CREATE TRIGGER trg_34c_call_participant_insert
+BEFORE INSERT ON communication_call_participants
+WHEN (SELECT COUNT(*) FROM communication_call_participants item WHERE item.session_id=NEW.session_id)>=16
+  OR NOT EXISTS(
+    SELECT 1 FROM communication_call_sessions session
+    JOIN communication_call_mutations mutation ON mutation.id=session.last_mutation_id
+    JOIN people person ON person.id=NEW.person_id AND person.family_id=NEW.family_id AND person.status='active'
+    JOIN communication_room_memberships member ON member.room_id=session.room_id AND member.family_id=NEW.family_id
+      AND member.member_person_id=NEW.person_id AND member.status='active'
+    WHERE session.id=NEW.session_id AND session.family_id=NEW.family_id AND session.owner_person_id=NEW.owner_person_id
+      AND mutation.mutation_kind='call_create' AND mutation.resource_id=NEW.session_id
+  )
+BEGIN SELECT RAISE(ABORT,'34-C participant requires exact active room membership and bounded session'); END;
+
+CREATE TRIGGER trg_34c_call_event_insert
+BEFORE INSERT ON communication_call_events
+WHEN NOT EXISTS(
+  SELECT 1 FROM communication_call_mutations mutation
+  JOIN communication_call_sessions session ON session.id=NEW.session_id AND session.family_id=NEW.family_id
+    AND session.owner_person_id=NEW.owner_person_id AND session.revision=NEW.session_revision
+  WHERE mutation.id=NEW.mutation_id AND mutation.resource_type='communication_call_session'
+    AND mutation.resource_id=NEW.session_id AND mutation.mutation_kind=NEW.event_kind
+    AND mutation.revision=NEW.session_revision AND mutation.resource_state_fingerprint=NEW.state_fingerprint
+    AND mutation.occurred_at=NEW.occurred_at
+)
+BEGIN SELECT RAISE(ABORT,'34-C call event requires exact current session mutation'); END;
+
+CREATE TRIGGER trg_34c_call_preferences_insert
+BEFORE INSERT ON communication_call_preferences
+WHEN NOT EXISTS(
+  SELECT 1 FROM communication_call_mutations mutation
+  WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='communication_call_preferences'
+    AND mutation.resource_id=NEW.id AND mutation.mutation_kind='call_preferences_update' AND mutation.expected_revision=0
+    AND mutation.revision=NEW.revision AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+    AND mutation.resource_state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.created_at
+    AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'34-C preferences insert requires exact owner mutation'); END;
+
+CREATE TRIGGER trg_34c_call_preferences_update
+BEFORE UPDATE ON communication_call_preferences
+WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.owner_person_id<>OLD.owner_person_id OR NEW.created_at<>OLD.created_at
+  OR NOT EXISTS(
+    SELECT 1 FROM communication_call_mutations mutation
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='communication_call_preferences'
+      AND mutation.resource_id=NEW.id AND mutation.mutation_kind='call_preferences_update'
+      AND mutation.expected_revision=OLD.revision AND mutation.revision=NEW.revision AND NEW.revision=OLD.revision+1
+      AND mutation.resource_state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.updated_at
+      AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+  )
+BEGIN SELECT RAISE(ABORT,'34-C preferences update requires exact owner mutation'); END;
+
+CREATE TRIGGER trg_34c_call_quality_insert
+BEFORE INSERT ON communication_call_quality_observations
+WHEN (SELECT COUNT(*) FROM communication_call_quality_observations item
+    WHERE item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id)>=512
+  OR NOT EXISTS(
+  SELECT 1 FROM communication_call_mutations mutation
+  JOIN communication_call_sessions session ON session.id=NEW.session_id AND session.family_id=NEW.family_id
+    AND session.owner_person_id=NEW.owner_person_id
+  WHERE mutation.id=NEW.mutation_id AND mutation.mutation_kind='call_quality_observation'
+    AND mutation.resource_id=NEW.session_id AND mutation.revision=session.revision
+    AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+)
+BEGIN SELECT RAISE(ABORT,'34-C quality observation requires exact current session mutation'); END;
+
+CREATE TRIGGER trg_34c_call_mutation_update BEFORE UPDATE ON communication_call_mutations
+BEGIN SELECT RAISE(ABORT,'34-C mutation ledger is immutable'); END;
+CREATE TRIGGER trg_34c_call_mutation_delete BEFORE DELETE ON communication_call_mutations
+BEGIN SELECT RAISE(ABORT,'34-C mutation ledger is durable'); END;
+CREATE TRIGGER trg_34c_call_event_update BEFORE UPDATE ON communication_call_events
+BEGIN SELECT RAISE(ABORT,'34-C call event ledger is immutable'); END;
+CREATE TRIGGER trg_34c_call_event_delete BEFORE DELETE ON communication_call_events
+BEGIN SELECT RAISE(ABORT,'34-C call event ledger is durable'); END;
+CREATE TRIGGER trg_34c_call_quality_update BEFORE UPDATE ON communication_call_quality_observations
+BEGIN SELECT RAISE(ABORT,'34-C quality evidence is immutable'); END;
+CREATE TRIGGER trg_34c_call_quality_delete BEFORE DELETE ON communication_call_quality_observations
+BEGIN SELECT RAISE(ABORT,'34-C quality evidence is durable'); END;
+CREATE TRIGGER trg_34c_call_session_delete BEFORE DELETE ON communication_call_sessions
+BEGIN SELECT RAISE(ABORT,'34-C call session history is durable'); END;
+CREATE TRIGGER trg_34c_call_participant_update BEFORE UPDATE ON communication_call_participants
+BEGIN SELECT RAISE(ABORT,'34-C initial participant roster is immutable'); END;
+CREATE TRIGGER trg_34c_call_participant_delete BEFORE DELETE ON communication_call_participants
+BEGIN SELECT RAISE(ABORT,'34-C participant roster is durable'); END;
+CREATE TRIGGER trg_34c_call_preferences_delete BEFORE DELETE ON communication_call_preferences
+BEGIN SELECT RAISE(ABORT,'34-C accessibility preferences are durable'); END;
+
+UPDATE database_metadata SET value='REVISION-34-C-REALTIME-CALLING-ACCESSIBLE-UX',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -15840,7 +16169,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(103, 'local_first_smart_home_energy', smartHomeEnergySql),
   createMigrationDefinition(104, 'signed_plugin_external_provider_platform', signedPluginPlatformSql),
   createMigrationDefinition(105, 'communication_policy_mls_foundation', communicationSecurityFoundationSql),
-  createMigrationDefinition(106, 'communication_messaging_lifecycle_privacy_presence', communicationMessagingLifecycleSql)
+  createMigrationDefinition(106, 'communication_messaging_lifecycle_privacy_presence', communicationMessagingLifecycleSql),
+  createMigrationDefinition(107, 'communication_realtime_calling_accessible_ux', communicationRealtimeCallingSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

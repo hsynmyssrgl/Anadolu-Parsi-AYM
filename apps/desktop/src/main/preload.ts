@@ -72,6 +72,15 @@ import type {
   SetCommunicationRetentionPolicyInput,
   UpdateCommunicationDeliveryInput
 } from '@ppt/domain';
+import type {
+  AdvanceCommunicationCallInput,
+  CommunicationRealtimeCallingCenterView,
+  CommunicationRealtimeCallingMutationReceiptView,
+  CreateCommunicationCallInput,
+  RunCommunicationCallPreflightInput,
+  SetCommunicationCallPreferencesInput,
+  UpdateCommunicationCallControlsInput
+} from '@ppt/domain';
 import type { LegacyArchiveOwnershipReattestationView, ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { AssignPersonMembershipInput, CreateFamilyBranchInput, CreateHouseholdInput, FamilyBranch, Household, HouseholdMembershipWorkspaceView, PersonLifecycleProfile, PersonLifecycleWorkspaceView, PersonMembership, UpdatePersonProfileInput } from '@ppt/domain';
 import type { AuthorizationContextWorkspaceView } from '@ppt/domain';
@@ -778,6 +787,18 @@ contextBridge.exposeInMainWorld('pardus', {
     invoke('communicationMessaging:setPresence',input),
   setCommunicationRetentionPolicy:(input:SetCommunicationRetentionPolicyInput):Promise<CommunicationMessagingMutationReceiptView>=>
     invoke('communicationMessaging:setRetentionPolicy',input),
+  getCommunicationRealtimeCallingCenter:():Promise<CommunicationRealtimeCallingCenterView>=>
+    invoke('communicationCalling:getCenter'),
+  createCommunicationCall:(input:CreateCommunicationCallInput):Promise<CommunicationRealtimeCallingMutationReceiptView>=>
+    invoke('communicationCalling:create',input),
+  runCommunicationCallPreflight:(input:RunCommunicationCallPreflightInput):Promise<CommunicationRealtimeCallingMutationReceiptView>=>
+    invoke('communicationCalling:runPreflight',input),
+  updateCommunicationCallControls:(input:UpdateCommunicationCallControlsInput):Promise<CommunicationRealtimeCallingMutationReceiptView>=>
+    invoke('communicationCalling:updateControls',input),
+  advanceCommunicationCall:(input:AdvanceCommunicationCallInput):Promise<CommunicationRealtimeCallingMutationReceiptView>=>
+    invoke('communicationCalling:advance',input),
+  setCommunicationCallPreferences:(input:SetCommunicationCallPreferencesInput):Promise<CommunicationRealtimeCallingMutationReceiptView>=>
+    invoke('communicationCalling:setPreferences',input),
   listFinanceValuations:():Promise<FinanceValuationView[]>=>invoke('finance:listValuations'),
   createFinanceValuation:(input:CreateFinanceValuationInput):Promise<FinanceValuationView[]>=>invoke('finance:createValuation',input),
   createMember: (input: CreateFamilyMemberInput): Promise<FamilyMutationResultView> => invoke('family:createMember', input),

@@ -454,10 +454,10 @@
   "protectedCapabilityFamilies": 7,
   "canonicalApplications": 14,
   "productionSourceZones": 18,
-  "scannedProductionFiles": 507,
+  "scannedProductionFiles": 513,
   "exactCapabilitySurfaces": 360,
   "exactManifestEntries": 360,
-  "exactManifestSha256": "b4b2f09c461235528f98c3f4b942e28a9e3068c71de5697fe116e4b57f54c77c",
+  "exactManifestSha256": "755717250f2549229608b38e6ea650a4647f1e0d50aa4c1aa1078acc193302ff",
   "pinnedBootstrapSurfaces": 26,
   "maliciousAstSelfTests": 33,
   "benignAstSelfTests": 5,
@@ -475,5 +475,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-15T13:53:21.489Z"
+  "generatedAt": "2026-08-15T14:59:21.940Z"
 }

@@ -115,3 +115,4 @@ export * from './smart-home-energy-use-cases.js';
 export * from './signed-plugin-platform-use-cases.js';
 export * from './communication-security-use-cases.js';
 export * from './communication-messaging-use-cases.js';
+export * from './communication-realtime-calling-use-cases.js';

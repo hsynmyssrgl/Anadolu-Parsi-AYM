@@ -171,7 +171,7 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 106,
+  "latestDatabaseMigration": 107,
   "importTables": 2,
   "persistedImportColumns": 42,
   "prohibitedPersistedColumns": 0,
@@ -180,8 +180,8 @@
   "networkAccessPerformed": false,
   "credentialsCollected": false,
   "externalConsentPerformed": false,
-  "ppk021ExactAllowlistEntries": 795,
-  "ppk021UseCaseCompositionSurfaces": 389,
+  "ppk021ExactAllowlistEntries": 805,
+  "ppk021UseCaseCompositionSurfaces": 395,
   "ppk022CapabilitySurfaces": 360,
-  "generatedAt": "2026-08-15T13:50:11.460Z"
+  "generatedAt": "2026-08-15T15:16:13.460Z"
 }

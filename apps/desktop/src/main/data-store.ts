@@ -207,6 +207,13 @@ import {
   UpdateCommunicationDeliveryUseCase,
   SetCommunicationPresenceUseCase,
   SetCommunicationRetentionPolicyUseCase,
+  GetCommunicationRealtimeCallingCenterUseCase,
+  CreateCommunicationCallUseCase,
+  RunCommunicationCallPreflightUseCase,
+  UpdateCommunicationCallControlsUseCase,
+  AdvanceCommunicationCallUseCase,
+  SetCommunicationCallPreferencesUseCase,
+  type CommunicationCallPreflightPort,
   ListLifeRecordsUseCase,
   CreateLifeRecordUseCase,
   GetManagedLifeWorkspaceUseCase,
@@ -403,6 +410,15 @@ import type {
   SetCommunicationRetentionPolicyInput,
   UpdateCommunicationDeliveryInput
 } from '@ppt/domain';
+import type {
+  AdvanceCommunicationCallInput,
+  CommunicationRealtimeCallingCenterView,
+  CommunicationRealtimeCallingMutationReceiptView,
+  CreateCommunicationCallInput,
+  RunCommunicationCallPreflightInput,
+  SetCommunicationCallPreferencesInput,
+  UpdateCommunicationCallControlsInput
+} from '@ppt/domain';
 import { RepositoryBackedFamilyApplicationUnitOfWork, RepositoryBackedFamilyGraphQueryPort } from './family-application-adapter.js';
 import { RepositoryBackedHouseholdMembershipUnitOfWork } from './household-membership-application-adapter.js';
 import { RepositoryBackedPersonLifecycleUnitOfWork } from './person-lifecycle-application-adapter.js';
@@ -479,6 +495,10 @@ import {
   RepositoryBackedCommunicationMessagingQueryPort,
   RepositoryBackedCommunicationMessagingUnitOfWork
 } from './communication-messaging-application-adapter.js';
+import {
+  RepositoryBackedCommunicationRealtimeCallingQueryPort,
+  RepositoryBackedCommunicationRealtimeCallingUnitOfWork
+} from './communication-realtime-calling-application-adapter.js';
 import { CommunicationMessagePayloadVault } from './communication-message-payload-vault.js';
 import {
   RepositoryBackedLocationPolicyTransactionRunner,
@@ -789,6 +809,8 @@ interface DataStoreOptions {
   communicationMessagePayloads?: CommunicationMessagePayloadPort;
   /** Must resolve to a dedicated directory disjoint from archive, database, key and temporary-open storage. */
   communicationMessagePayloadPath?: string;
+  /** Main-only local media-device preflight. Missing production configuration remains fail-closed. */
+  communicationCallPreflight?: CommunicationCallPreflightPort;
   federatedProviderConfigurations?: readonly import('@ppt/repository-contracts').FederatedProviderProvisioningRow[];
   securityConfig?: {
     sessionIdleTimeoutMinutes: number;
@@ -1446,6 +1468,12 @@ export class FamilyDataStore {
   readonly #updateCommunicationDeliveryUseCase:UpdateCommunicationDeliveryUseCase;
   readonly #setCommunicationPresenceUseCase:SetCommunicationPresenceUseCase;
   readonly #setCommunicationRetentionPolicyUseCase:SetCommunicationRetentionPolicyUseCase;
+  readonly #getCommunicationRealtimeCallingCenterUseCase:GetCommunicationRealtimeCallingCenterUseCase;
+  readonly #createCommunicationCallUseCase:CreateCommunicationCallUseCase;
+  readonly #runCommunicationCallPreflightUseCase:RunCommunicationCallPreflightUseCase;
+  readonly #updateCommunicationCallControlsUseCase:UpdateCommunicationCallControlsUseCase;
+  readonly #advanceCommunicationCallUseCase:AdvanceCommunicationCallUseCase;
+  readonly #setCommunicationCallPreferencesUseCase:SetCommunicationCallPreferencesUseCase;
   readonly #prepareFamilyEmergencyCardExportUseCase: PrepareFamilyEmergencyCardExportUseCase;
   readonly #recordFamilyEmergencyCardExportCompletionUseCase: RecordFamilyEmergencyCardExportCompletionUseCase;
   readonly #listFinanceRecordsUseCase: ListFinanceRecordsUseCase;
@@ -1969,6 +1997,7 @@ export class FamilyDataStore {
           smartHomeEnergyPolicyResourceRepository: this.#repositories.smartHomeEnergyRepository,
           signedPluginPlatformPolicyResourceRepository: this.#repositories.signedPluginPlatformRepository,
           communicationMessagingPolicyResourceRepository: this.#repositories.communicationMessagingRepository,
+          communicationRealtimeCallingPolicyResourceRepository: this.#repositories.communicationRealtimeCallingRepository,
           communicationSecurityPolicyResourceRepository: this.#repositories.communicationSecurityRepository,
           personRepository: this.#repositories.personRepository,
           deviceIdentityProvider: this.#deviceIdentityProvider,
@@ -1997,6 +2026,8 @@ export class FamilyDataStore {
       signedPluginPlatformPolicyResourceRepository: this.#repositories.signedPluginPlatformRepository,
       communicationMessagingRepository: this.#repositories.communicationMessagingRepository,
       communicationMessagingPolicyResourceRepository: this.#repositories.communicationMessagingRepository,
+      communicationRealtimeCallingRepository: this.#repositories.communicationRealtimeCallingRepository,
+      communicationRealtimeCallingPolicyResourceRepository: this.#repositories.communicationRealtimeCallingRepository,
       communicationSecurityRepository: this.#repositories.communicationSecurityRepository,
       communicationSecurityPolicyResourceRepository: this.#repositories.communicationSecurityRepository,
       aiConsentRepository: this.#repositories.aiConsentRepository,
@@ -2795,6 +2826,24 @@ export class FamilyDataStore {
     this.#updateCommunicationDeliveryUseCase=new UpdateCommunicationDeliveryUseCase(communicationMessagingUnitOfWork);
     this.#setCommunicationPresenceUseCase=new SetCommunicationPresenceUseCase(communicationMessagingUnitOfWork);
     this.#setCommunicationRetentionPolicyUseCase=new SetCommunicationRetentionPolicyUseCase(communicationMessagingUnitOfWork);
+    const communicationRealtimeCallingDependencies={...lifeApplicationDependencies,
+      communicationRealtimeCallingRepository:this.#repositories.communicationRealtimeCallingRepository,
+      communicationRealtimeCallingPolicyResourceRepository:this.#repositories.communicationRealtimeCallingRepository} as const;
+    const communicationRealtimeCallingQuery=new RepositoryBackedCommunicationRealtimeCallingQueryPort(
+      communicationRealtimeCallingDependencies,lifePolicyTransactionRunner);
+    const communicationRealtimeCallingUnitOfWork=new RepositoryBackedCommunicationRealtimeCallingUnitOfWork(
+      communicationRealtimeCallingDependencies,lifePolicyTransactionRunner);
+    const communicationCallPreflight:CommunicationCallPreflightPort=options.communicationCallPreflight??{
+      run:(context)=>Promise.resolve(err(createAppError({code:ERROR_CODES.AUTHORIZATION_DENIED,category:'security',
+        message:'Yerel kamera, mikrofon ve hoparlör preflight sağlayıcısı yapılandırılmadı.',correlationId:context.correlationId})))
+    };
+    this.#getCommunicationRealtimeCallingCenterUseCase=new GetCommunicationRealtimeCallingCenterUseCase(communicationRealtimeCallingQuery);
+    this.#createCommunicationCallUseCase=new CreateCommunicationCallUseCase(communicationRealtimeCallingUnitOfWork);
+    this.#runCommunicationCallPreflightUseCase=new RunCommunicationCallPreflightUseCase(
+      communicationRealtimeCallingUnitOfWork,communicationCallPreflight);
+    this.#updateCommunicationCallControlsUseCase=new UpdateCommunicationCallControlsUseCase(communicationRealtimeCallingUnitOfWork);
+    this.#advanceCommunicationCallUseCase=new AdvanceCommunicationCallUseCase(communicationRealtimeCallingUnitOfWork);
+    this.#setCommunicationCallPreferencesUseCase=new SetCommunicationCallPreferencesUseCase(communicationRealtimeCallingUnitOfWork);
     this.#prepareArchiveOpenUseCase = new PrepareArchiveOpenUseCase(archiveQuery);
     this.#recordArchiveOpenedUseCase = new RecordArchiveOpenedUseCase(archiveUnitOfWork);
     this.#authorizeEmergencyArchiveReadUseCase = new AuthorizeEmergencyArchiveReadUseCase(archiveUnitOfWork);
@@ -6530,6 +6579,46 @@ export class FamilyDataStore {
   :Promise<CommunicationMessagingMutationReceiptView>{
     const result=await this.#setCommunicationRetentionPolicyUseCase.execute({
       context:this.#lifeApplicationContext('communication-retention-update'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async getCommunicationRealtimeCallingCenter():Promise<CommunicationRealtimeCallingCenterView>{
+    const result=await this.#getCommunicationRealtimeCallingCenterUseCase.execute(
+      this.#lifeApplicationContext('communication-calling-center'));
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async createCommunicationCall(input:CreateCommunicationCallInput):Promise<CommunicationRealtimeCallingMutationReceiptView>{
+    const result=await this.#createCommunicationCallUseCase.execute(
+      this.#lifeApplicationContext('communication-call-create'),input);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async runCommunicationCallPreflight(input:RunCommunicationCallPreflightInput)
+  :Promise<CommunicationRealtimeCallingMutationReceiptView>{
+    const result=await this.#runCommunicationCallPreflightUseCase.execute(
+      this.#lifeApplicationContext('communication-call-preflight'),input);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async updateCommunicationCallControls(input:UpdateCommunicationCallControlsInput)
+  :Promise<CommunicationRealtimeCallingMutationReceiptView>{
+    const result=await this.#updateCommunicationCallControlsUseCase.execute(
+      this.#lifeApplicationContext('communication-call-controls'),input);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async advanceCommunicationCall(input:AdvanceCommunicationCallInput)
+  :Promise<CommunicationRealtimeCallingMutationReceiptView>{
+    const result=await this.#advanceCommunicationCallUseCase.execute(
+      this.#lifeApplicationContext('communication-call-lifecycle'),input);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async setCommunicationCallPreferences(input:SetCommunicationCallPreferencesInput)
+  :Promise<CommunicationRealtimeCallingMutationReceiptView>{
+    const result=await this.#setCommunicationCallPreferencesUseCase.execute(
+      this.#lifeApplicationContext('communication-call-preferences'),input);
     if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
   }
 

@@ -18,7 +18,7 @@
   "signedManifestRuntimeCheckRequired": true,
   "buildManifestAloneGrantsRuntimeAuthority": false,
   "productionSourceZoneCount": 18,
-  "scannedProductionFiles": 507,
+  "scannedProductionFiles": 513,
   "protectedCapabilityFamilies": [
     "camera",
     "microphone",

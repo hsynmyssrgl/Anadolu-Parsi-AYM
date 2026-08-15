@@ -50,6 +50,7 @@ export * from './smart-home-energy-repository.js';
 export * from './signed-plugin-platform-repository.js';
 export * from './communication-security-repository.js';
 export * from './communication-messaging-repository.js';
+export * from './communication-realtime-calling-repository.js';
 
 export * from './data-lifecycle-repository.js';
 

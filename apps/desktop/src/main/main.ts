@@ -37,6 +37,13 @@ import type {
   SetCommunicationRetentionPolicyInput,
   UpdateCommunicationDeliveryInput
 } from '@ppt/domain';
+import type {
+  AdvanceCommunicationCallInput,
+  CreateCommunicationCallInput,
+  RunCommunicationCallPreflightInput,
+  SetCommunicationCallPreferencesInput,
+  UpdateCommunicationCallControlsInput
+} from '@ppt/domain';
 import type { ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { UnifiedAuthorizedSearchInput } from '@ppt/domain';
 import type { RecordManagedLifeItemInput } from '@ppt/domain';
@@ -86,6 +93,7 @@ import {
   SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS,
   COMMUNICATION_SECURITY_IPC_CHANNELS,
   COMMUNICATION_MESSAGING_IPC_CHANNELS,
+  COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS,
   PLACES_TRAVEL_ASSET_PET_IPC_CHANNELS,
   HEALTH_CARE_COORDINATION_IPC_CHANNELS,
   HOUSEHOLD_OPERATIONS_IPC_CHANNELS,
@@ -2490,6 +2498,18 @@ function registerIpc(): void {
     async(_event,input:SetCommunicationPresenceInput)=>store().setCommunicationPresence(input));
   registerIpcHandler(COMMUNICATION_MESSAGING_IPC_CHANNELS.setRetentionPolicy,
     async(_event,input:SetCommunicationRetentionPolicyInput)=>store().setCommunicationRetentionPolicy(input));
+  registerIpcHandler(COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS.getCenter,
+    async()=>store().getCommunicationRealtimeCallingCenter());
+  registerIpcHandler(COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS.create,
+    async(_event,input:CreateCommunicationCallInput)=>store().createCommunicationCall(input));
+  registerIpcHandler(COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS.runPreflight,
+    async(_event,input:RunCommunicationCallPreflightInput)=>store().runCommunicationCallPreflight(input));
+  registerIpcHandler(COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS.updateControls,
+    async(_event,input:UpdateCommunicationCallControlsInput)=>store().updateCommunicationCallControls(input));
+  registerIpcHandler(COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS.advance,
+    async(_event,input:AdvanceCommunicationCallInput)=>store().advanceCommunicationCall(input));
+  registerIpcHandler(COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS.setPreferences,
+    async(_event,input:SetCommunicationCallPreferencesInput)=>store().setCommunicationCallPreferences(input));
   registerIpcHandler('finance:listValuations', () => store().listFinanceValuations());
   registerIpcHandler('finance:createValuation', (_event, input:CreateFinanceValuationInput) => store().createFinanceValuation(input));
   registerIpcHandler('family:createRelation', async (_event, input: CreateFamilyRelationInput) => {

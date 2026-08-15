@@ -3642,6 +3642,163 @@ const communicationMessagingResult=(channel:string,result:unknown):IpcIntegratio
   return valid?accepted():rejected('COMMUNICATION_MESSAGING_RESULT_INVALID','$result');
 };
 
+export const COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS=Object.freeze({
+  getCenter:'communicationCalling:getCenter',
+  create:'communicationCalling:create',
+  runPreflight:'communicationCalling:runPreflight',
+  updateControls:'communicationCalling:updateControls',
+  advance:'communicationCalling:advance',
+  setPreferences:'communicationCalling:setPreferences'
+} as const);
+const communicationCallingChannels=new Set<string>(Object.values(COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS));
+const communicationCallingBackgroundEffects=new Set(['off','blur','virtual_background']);
+const communicationCallingInput=(channel:string,args:readonly unknown[]):IpcIntegrationPolicyDecision=>{
+  if(channel===COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS.getCenter)return zeroArguments(args);
+  if(channel===COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS.create){
+    if(args.length!==1||!isObject(args[0]))return rejected('COMMUNICATION_CALL_CREATE_INPUT_INVALID','$[0]');
+    const value=args[0];
+    return exactObject(args,['clientOperationId','expectedRevision','roomId','topology','requestedMediaMode','invitedPersonIds',
+      'waitingRoomEnabled','automaticAudioFallbackEnabled'],candidate=>communicationIdentifier(candidate.clientOperationId)
+      &&candidate.expectedRevision===0&&communicationIdentifier(candidate.roomId)
+      &&['direct_p2p','family_group_sfu'].includes(String(candidate.topology))
+      &&['audio','video'].includes(String(candidate.requestedMediaMode))&&Array.isArray(candidate.invitedPersonIds)
+      &&candidate.invitedPersonIds.length>=1&&candidate.invitedPersonIds.length<=15
+      &&candidate.invitedPersonIds.every(communicationIdentifier)
+      &&new Set(candidate.invitedPersonIds).size===candidate.invitedPersonIds.length
+      &&(candidate.topology!=='direct_p2p'||candidate.invitedPersonIds.length===1)
+      &&(candidate.topology!=='family_group_sfu'||candidate.invitedPersonIds.length>=2)
+      &&typeof candidate.waitingRoomEnabled==='boolean'&&typeof candidate.automaticAudioFallbackEnabled==='boolean');
+  }
+  if(channel===COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS.runPreflight)return exactObject(args,
+    ['clientOperationId','expectedRevision','sessionId'],value=>communicationIdentifier(value.clientOperationId)
+      &&communicationMessagingRevision(value.expectedRevision)&&communicationIdentifier(value.sessionId));
+  if(channel===COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS.updateControls){
+    if(args.length!==1||!isObject(args[0]))return rejected('COMMUNICATION_CALL_CONTROLS_INPUT_INVALID','$[0]');
+    const value=args[0];
+    const optional=['audioOnly','meetingLocked','backgroundEffect','captionsRequested','realtimeTextRequested','screenShareRequested',
+      'localHandRaised','pinnedPersonId','signLanguagePinnedPersonId','reactionCode'].filter(key=>value[key]!==undefined);
+    return exactObject(args,['clientOperationId','expectedRevision','sessionId',...optional],candidate=>
+      communicationIdentifier(candidate.clientOperationId)&&communicationMessagingRevision(candidate.expectedRevision)
+      &&communicationIdentifier(candidate.sessionId)&&optional.length>=1
+      &&['audioOnly','meetingLocked','captionsRequested','realtimeTextRequested','screenShareRequested','localHandRaised']
+        .every(key=>candidate[key]===undefined||typeof candidate[key]==='boolean')
+      &&(candidate.backgroundEffect===undefined||communicationCallingBackgroundEffects.has(String(candidate.backgroundEffect)))
+      &&(candidate.pinnedPersonId===undefined||communicationIdentifier(candidate.pinnedPersonId))
+      &&(candidate.signLanguagePinnedPersonId===undefined||communicationIdentifier(candidate.signLanguagePinnedPersonId))
+      &&(candidate.reactionCode===undefined||communicationMessagingText(candidate.reactionCode,1,32)));
+  }
+  if(channel===COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS.advance)return exactObject(args,
+    ['clientOperationId','expectedRevision','sessionId','action','reason'],value=>communicationIdentifier(value.clientOperationId)
+      &&communicationMessagingRevision(value.expectedRevision)&&communicationIdentifier(value.sessionId)
+      &&['enter_local_waiting_room','end','cancel'].includes(String(value.action))
+      &&communicationMessagingText(value.reason,3,500));
+  if(channel===COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS.setPreferences){
+    if(args.length!==1||!isObject(args[0]))return rejected('COMMUNICATION_CALL_PREFERENCES_INPUT_INVALID','$[0]');
+    const value=args[0];
+    const keys=['clientOperationId','expectedRevision','simpleMode',...(value.favoritePersonId===undefined?[]:['favoritePersonId']),
+      'largePersonCards','captionScalePercent','screenReaderAnnouncements','keyboardShortcuts','automaticAudioFallbackEnabled',
+      'noiseReductionRequested','echoCancellationRequested','automaticGainControlRequested','backgroundEffect'];
+    return exactObject(args,keys,candidate=>communicationIdentifier(candidate.clientOperationId)
+      &&communicationMessagingRevision(candidate.expectedRevision,true)
+      &&(candidate.favoritePersonId===undefined||communicationIdentifier(candidate.favoritePersonId))
+      &&['simpleMode','largePersonCards','screenReaderAnnouncements','keyboardShortcuts','automaticAudioFallbackEnabled',
+        'noiseReductionRequested','echoCancellationRequested','automaticGainControlRequested']
+        .every(key=>typeof candidate[key]==='boolean')
+      &&Number.isSafeInteger(candidate.captionScalePercent)&&Number(candidate.captionScalePercent)>=100
+      &&Number(candidate.captionScalePercent)<=300
+      &&communicationCallingBackgroundEffects.has(String(candidate.backgroundEffect)));
+  }
+  return rejected('UNKNOWN_IPC_CHANNEL','$');
+};
+const communicationCallingParticipantResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['personId','role','state','handRaised','pinnedLocally','signLanguageSpeakerPinnedLocally','revision','updatedAt',
+    ...(value.reactionCode===undefined?[]:['reactionCode'])])&&communicationIdentifier(value.personId)
+  &&['host','participant'].includes(String(value.role))&&['invited','local_ready','left'].includes(String(value.state))
+  &&[value.handRaised,value.pinnedLocally,value.signLanguageSpeakerPinnedLocally].every(item=>typeof item==='boolean')
+  &&communicationMessagingRevision(value.revision)&&communicationMessagingIso(value.updatedAt)
+  &&(value.reactionCode===undefined||communicationMessagingText(value.reactionCode,1,32));
+const communicationCallingPreflightResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['microphone','camera','speaker','noiseReductionRequested','echoCancellationRequested','automaticGainControlRequested',
+    'providerVerified','networkUsed',...(value.observedAt===undefined?[]:['observedAt'])])
+  &&[value.microphone,value.camera,value.speaker].every(item=>['not_run','passed','failed','not_available'].includes(String(item)))
+  &&[value.noiseReductionRequested,value.echoCancellationRequested,value.automaticGainControlRequested,value.providerVerified]
+    .every(item=>typeof item==='boolean')&&value.networkUsed===false
+  &&(value.observedAt===undefined||communicationMessagingIso(value.observedAt));
+const communicationCallingSessionResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['id','roomId','topology','requestedMediaMode','state','networkState','waitingRoomEnabled','meetingLocked','audioOnly',
+    'automaticAudioFallbackEnabled','backgroundEffect','captionsRequested','realtimeTextRequested','screenShareRequested',
+    'localHandRaised',...(value.pinnedPersonId===undefined?[]:['pinnedPersonId']),
+    ...(value.signLanguagePinnedPersonId===undefined?[]:['signLanguagePinnedPersonId']),'preflight','participants','revision',
+    'createdAt','updatedAt',...(value.endedAt===undefined?[]:['endedAt'])])&&communicationIdentifier(value.id)
+  &&communicationIdentifier(value.roomId)&&['direct_p2p','family_group_sfu'].includes(String(value.topology))
+  &&['audio','video'].includes(String(value.requestedMediaMode))
+  &&['planned','preflight_ready','waiting_local','ended','cancelled'].includes(String(value.state))
+  &&['not_started','local_waiting_only','ended'].includes(String(value.networkState))
+  &&[value.waitingRoomEnabled,value.meetingLocked,value.audioOnly,value.automaticAudioFallbackEnabled,value.captionsRequested,
+    value.realtimeTextRequested,value.screenShareRequested,value.localHandRaised].every(item=>typeof item==='boolean')
+  &&communicationCallingBackgroundEffects.has(String(value.backgroundEffect))
+  &&(value.pinnedPersonId===undefined||communicationIdentifier(value.pinnedPersonId))
+  &&(value.signLanguagePinnedPersonId===undefined||communicationIdentifier(value.signLanguagePinnedPersonId))
+  &&communicationCallingPreflightResult(value.preflight)&&Array.isArray(value.participants)&&value.participants.length<=16
+  &&value.participants.every(communicationCallingParticipantResult)&&communicationMessagingRevision(value.revision)
+  &&communicationMessagingIso(value.createdAt)&&communicationMessagingIso(value.updatedAt)
+  &&(value.endedAt===undefined||communicationMessagingIso(value.endedAt));
+const communicationCallingPreferencesResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['simpleMode',...(value.favoritePersonId===undefined?[]:['favoritePersonId']),'largePersonCards','captionScalePercent',
+    'screenReaderAnnouncements','keyboardShortcuts','automaticAudioFallbackEnabled','noiseReductionRequested',
+    'echoCancellationRequested','automaticGainControlRequested','backgroundEffect','revision','updatedAt'])
+  &&(value.favoritePersonId===undefined||communicationIdentifier(value.favoritePersonId))
+  &&['simpleMode','largePersonCards','screenReaderAnnouncements','keyboardShortcuts','automaticAudioFallbackEnabled',
+    'noiseReductionRequested','echoCancellationRequested','automaticGainControlRequested'].every(key=>typeof value[key]==='boolean')
+  &&Number.isSafeInteger(value.captionScalePercent)&&Number(value.captionScalePercent)>=100&&Number(value.captionScalePercent)<=300
+  &&communicationCallingBackgroundEffects.has(String(value.backgroundEffect))
+  &&communicationMessagingRevision(value.revision,true)&&communicationMessagingIso(value.updatedAt);
+const communicationCallingQualityResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['sessionId','roundTripMs','packetLossPermille','jitterMs','uplinkKbps','downlinkKbps','providerVerified','observedAt'])
+  &&communicationIdentifier(value.sessionId)&&Number.isSafeInteger(value.roundTripMs)&&Number(value.roundTripMs)>=0
+  &&Number(value.roundTripMs)<=60_000&&Number.isSafeInteger(value.packetLossPermille)&&Number(value.packetLossPermille)>=0
+  &&Number(value.packetLossPermille)<=1_000&&Number.isSafeInteger(value.jitterMs)&&Number(value.jitterMs)>=0
+  &&Number(value.jitterMs)<=60_000&&Number.isSafeInteger(value.uplinkKbps)&&Number(value.uplinkKbps)>=0
+  &&Number(value.uplinkKbps)<=10_000_000&&Number.isSafeInteger(value.downlinkKbps)&&Number(value.downlinkKbps)>=0
+  &&Number(value.downlinkKbps)<=10_000_000&&value.providerVerified===true&&communicationMessagingIso(value.observedAt);
+const communicationCallingTruthResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,[
+  'localCallPlanningMetadataImplemented','appendOnlyLifecycleLedgerImplemented','optimisticRevisionRequired',
+  'accessibleCallPreferenceModelImplemented','localPreflightEvidenceContractImplemented','rendererMediaDeviceAuthority',
+  'rendererNetworkAuthority','productionMediaProviderConfigured','webRtcPeerConnectionExecuted','sfuServiceConfigured',
+  'stunTurnServiceConfigured','shortLivedRelayCredentialsIssued','sframeMediaEncryptionExecuted','mlsMediaKeyBindingVerified',
+  'screenOrWindowCaptureImplemented','localBackgroundProcessingImplemented','liveCaptionProviderConfigured',
+  'realtimeTextTransportImplemented','callKitPushKitIntegrated','windowsCallNotificationIntegrated',
+  'doNotDisturbIntegrationImplemented','realDevicePreflightExecuted','realOneToOneCallPerformed','realGroupCallPerformed',
+  'networkUsedByCurrentImplementation'])
+  &&value.localCallPlanningMetadataImplemented===true&&value.appendOnlyLifecycleLedgerImplemented===true
+  &&value.optimisticRevisionRequired===true&&value.accessibleCallPreferenceModelImplemented===true
+  &&value.localPreflightEvidenceContractImplemented===true&&['rendererMediaDeviceAuthority','rendererNetworkAuthority',
+    'productionMediaProviderConfigured','webRtcPeerConnectionExecuted','sfuServiceConfigured','stunTurnServiceConfigured',
+    'shortLivedRelayCredentialsIssued','sframeMediaEncryptionExecuted','mlsMediaKeyBindingVerified','screenOrWindowCaptureImplemented',
+    'localBackgroundProcessingImplemented','liveCaptionProviderConfigured','realtimeTextTransportImplemented',
+    'callKitPushKitIntegrated','windowsCallNotificationIntegrated','doNotDisturbIntegrationImplemented','realDevicePreflightExecuted',
+    'realOneToOneCallPerformed','realGroupCallPerformed','networkUsedByCurrentImplementation'].every(key=>value[key]===false);
+const communicationCallingCenterResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['schemaVersion','centerId','ownerPersonId','sessions','preferences','qualityObservations','truth','generatedAt'])
+  &&value.schemaVersion===1&&communicationIdentifier(value.centerId)&&communicationIdentifier(value.ownerPersonId)
+  &&Array.isArray(value.sessions)&&value.sessions.length<=256&&value.sessions.every(communicationCallingSessionResult)
+  &&communicationCallingPreferencesResult(value.preferences)&&Array.isArray(value.qualityObservations)
+  &&value.qualityObservations.length<=512&&value.qualityObservations.every(communicationCallingQualityResult)
+  &&communicationCallingTruthResult(value.truth)&&communicationMessagingIso(value.generatedAt);
+const communicationCallingReceiptResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['resourceType','resourceId','mutationKind','previousRevision','revision','occurredAt','replayed','mediaTransportStarted','networkUsed'])
+  &&['communication_call_session','communication_call_preferences'].includes(String(value.resourceType))
+  &&communicationIdentifier(value.resourceId)&&['call_create','call_preflight_update','call_controls_update','call_lifecycle_update',
+    'call_preferences_update'].includes(String(value.mutationKind))
+  &&communicationMessagingRevision(value.previousRevision,true)&&communicationMessagingRevision(value.revision)
+  &&Number(value.revision)===Number(value.previousRevision)+1&&communicationMessagingIso(value.occurredAt)
+  &&typeof value.replayed==='boolean'&&value.mediaTransportStarted===false&&value.networkUsed===false;
+const communicationCallingResult=(channel:string,result:unknown):IpcIntegrationPolicyDecision=>{
+  const valid=channel===COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS.getCenter
+    ?communicationCallingCenterResult(result):communicationCallingReceiptResult(result);
+  return valid?accepted():rejected('COMMUNICATION_CALL_RESULT_INVALID','$result');
+};
+
 export const ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS = Object.freeze({
   listEvidence: 'archive:listRelationEvidence',
   listEvidenceHistory: 'archive:listRelationEvidenceHistory',
@@ -4275,6 +4432,8 @@ export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unkn
   if (channel.startsWith('communicationSecurity:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
   if (communicationMessagingChannels.has(channel)) return communicationMessagingResult(channel,result);
   if (channel.startsWith('communicationMessaging:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
+  if (communicationCallingChannels.has(channel)) return communicationCallingResult(channel,result);
+  if (channel.startsWith('communicationCalling:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
   if (childEducationChannels.has(channel)) return childEducationResult(channel, result);
   if (channel.startsWith('childEducation:')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
   if (placesTravelChannels.has(channel)) return placesTravelResult(channel, result);
@@ -4329,6 +4488,8 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
   if (channel.startsWith('communicationSecurity:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
   if (communicationMessagingChannels.has(channel)) return communicationMessagingInput(channel,args);
   if (channel.startsWith('communicationMessaging:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
+  if (communicationCallingChannels.has(channel)) return communicationCallingInput(channel,args);
+  if (channel.startsWith('communicationCalling:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
   if (childEducationChannels.has(channel)) return childEducationInput(channel, args);
   if (channel.startsWith('childEducation:')) return rejected('UNKNOWN_IPC_CHANNEL', '$');
   if (placesTravelChannels.has(channel)) return placesTravelInput(channel, args);

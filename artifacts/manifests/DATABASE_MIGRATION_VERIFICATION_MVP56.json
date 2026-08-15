@@ -547,7 +547,12 @@
       "version": 106,
       "name": "communication_messaging_lifecycle_privacy_presence",
       "checksum": "5b088bb6d759403044f84ad9f2a82be1823e33a17334d7122beed92af56cce50"
+    },
+    {
+      "version": 107,
+      "name": "communication_realtime_calling_accessible_ux",
+      "checksum": "dd80c77b9d70b46e4939ceb3acf8cb7ca8504ed5d001867678b01cd45823dd71"
     }
   ],
-  "generatedAt": "2026-08-15T13:54:51.227Z"
+  "generatedAt": "2026-08-15T15:00:53.235Z"
 }
