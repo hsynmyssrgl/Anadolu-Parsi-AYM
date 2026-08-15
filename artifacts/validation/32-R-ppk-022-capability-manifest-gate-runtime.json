@@ -24,8 +24,8 @@
       "exitCode": 0,
       "signal": null,
       "expectedOutput": "\"status\": \"PASS\"",
-      "outputSha256": "6e5106d4be47901740ce1d64e389488b29ee7c2bdad26d7a793fb3eee7e76ce8",
-      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 447,\n  \"capabilitySurfaces\": 345,\n  \"exactManifestSurfaces\": 345,\n  \"exactManifestSha256\": \"1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e\",\n  \"surfaceCounts\": {\n    \"FILE_DIALOG\": 2,\n    \"FILE_IMPORT\": 288,\n    \"NETWORK_API\": 2,\n    \"NETWORK_IMPORT\": 13,\n    \"OCR_API\": 5,\n    \"OCR_IMPORT\": 35\n  },\n  \"pinnedBootstrapSurfaces\": 26,\n  \"maliciousSelfTestAssertions\": 33,\n  \"benignSelfTestAssertions\": 5,\n  \"canonicalApplications\": 14,\n  \"protectedCapabilityFamilies\": 7,\n  \"findings\": []\n}"
+      "outputSha256": "4ef12d06cdbfc02a9c04591c2f95dc1f619e4b667fa48dab55fd2c741a165c8e",
+      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 450,\n  \"capabilitySurfaces\": 345,\n  \"exactManifestSurfaces\": 345,\n  \"exactManifestSha256\": \"1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e\",\n  \"surfaceCounts\": {\n    \"FILE_DIALOG\": 2,\n    \"FILE_IMPORT\": 288,\n    \"NETWORK_API\": 2,\n    \"NETWORK_IMPORT\": 13,\n    \"OCR_API\": 5,\n    \"OCR_IMPORT\": 35\n  },\n  \"pinnedBootstrapSurfaces\": 26,\n  \"maliciousSelfTestAssertions\": 33,\n  \"benignSelfTestAssertions\": 5,\n  \"canonicalApplications\": 14,\n  \"protectedCapabilityFamilies\": 7,\n  \"findings\": []\n}"
     },
     {
       "id": "ppk-021-ast-ratchet-regression",
@@ -33,8 +33,8 @@
       "exitCode": 0,
       "signal": null,
       "expectedOutput": "\"status\": \"PASS\"",
-      "outputSha256": "84643273eba3ff65e661f01b2ed3c0e75bdf0ed8e339f9403378e8f213f4618a",
-      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 447,\n  \"privilegedSurfaces\": 692,\n  \"exactAllowlistEntries\": 692,\n  \"exactAllowlistSha256\": \"80bb7e2c6777792375260a348c4f0a4870e7f47eefcf940f22d8588682f6ed62\",\n  \"surfaceCounts\": {\n    \"CRYPTO_GLOBAL\": 5,\n    \"CRYPTO_IMPORT\": 199,\n    \"DATABASE_IMPORT\": 21,\n    \"NETWORK_IMPORT\": 11,\n    \"REPOSITORY_IMPORT\": 55,\n    \"ROLE_PRESENTATION\": 1,\n    \"SQL_CALL\": 63,\n    \"SQL_CONSTRUCTOR\": 2,\n    \"SQL_IMPORT\": 2,\n    \"USE_CASE_COMPOSITION\": 333\n  },\n  \"maliciousSelfTestAssertions\": 17,\n  \"benignSelfTestAssertions\": 4,\n  \"directRoleAuthorizationBypasses\": 0,\n  \"findings\": []\n}"
+      "outputSha256": "82a5e36a88386331e34ab7110417a25a82b394800d63e031b4737a56c9b5994d",
+      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 450,\n  \"privilegedSurfaces\": 699,\n  \"exactAllowlistEntries\": 699,\n  \"exactAllowlistSha256\": \"5c99054d510a61c3724124c9e1d0c01973b9048c1c53a24652bce61738c839a5\",\n  \"surfaceCounts\": {\n    \"CRYPTO_GLOBAL\": 6,\n    \"CRYPTO_IMPORT\": 200,\n    \"DATABASE_IMPORT\": 21,\n    \"NETWORK_IMPORT\": 11,\n    \"REPOSITORY_IMPORT\": 55,\n    \"ROLE_PRESENTATION\": 2,\n    \"SQL_CALL\": 63,\n    \"SQL_CONSTRUCTOR\": 2,\n    \"SQL_IMPORT\": 2,\n    \"USE_CASE_COMPOSITION\": 337\n  },\n  \"maliciousSelfTestAssertions\": 17,\n  \"benignSelfTestAssertions\": 4,\n  \"directRoleAuthorizationBypasses\": 0,\n  \"findings\": []\n}"
     },
     {
       "id": "combined-platform-policy-gate",
@@ -52,8 +52,8 @@
       "signal": null,
       "tests": 19,
       "minimumTests": 19,
-      "outputSha256": "f739579ed9e0c746299f3e3c8bd71cb8d4f8dcb64173e457e7dbdcbf71df031e",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n···················\n\n Test Files  3 passed (3)\n      Tests  19 passed (19)\n   Start at  01:02:43\n   Duration  10.17s (transform 1.81s, setup 0ms, import 3.56s, tests 5.74s, environment 0ms)"
+      "outputSha256": "f62a5a6037eff6612febe2cc1dfb45657aed21b673ce722d76507cb2d6468f36",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n···················\n\n Test Files  3 passed (3)\n      Tests  19 passed (19)\n   Start at  02:46:41\n   Duration  9.41s (transform 1.75s, setup 0ms, import 3.42s, tests 5.21s, environment 0ms)"
     },
     {
       "id": "ppk-012-through-ppk-022-security-regression",
@@ -62,8 +62,8 @@
       "signal": null,
       "tests": 277,
       "minimumTests": 264,
-      "outputSha256": "fde7521ec5cf8fe7ed816566555752295032ff1d773a2ce99a8603c87d52cd19",
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·····················································································································································································································································································\n\n Test Files  16 passed (16)\n      Tests  277 passed (277)\n   Start at  01:02:54\n   Duration  27.44s (transform 3.40s, setup 0ms, import 9.34s, tests 13.60s, environment 1ms)"
+      "outputSha256": "d1b26d45d5a56c3418911f431b5efdd6623640e325e58a41d3ee772fa643be6e",
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n·····················································································································································································································································································\n\n Test Files  16 passed (16)\n      Tests  277 passed (277)\n   Start at  02:46:51\n   Duration  25.86s (transform 3.34s, setup 0ms, import 8.87s, tests 12.80s, environment 1ms)"
     },
     {
       "id": "client-data-access-boundary-regression",
@@ -71,8 +71,8 @@
       "exitCode": 0,
       "signal": null,
       "expectedOutput": "\"status\": \"PASS\"",
-      "outputSha256": "5981d9675530125246eafffbd03698deb9a7bfc0cfd0b53816ea4be312e938d7",
-      "outputTail": "{\n  \"status\": \"PASS\",\n  \"clientZones\": 3,\n  \"scannedFiles\": 20,\n  \"selfTestAssertions\": 6,\n  \"directAccessExceptions\": 0,\n  \"findings\": []\n}"
+      "outputSha256": "232d269b451f39395d03d49413d374f35ca9366b8a0e7db74523a6a251e30163",
+      "outputTail": "{\n  \"status\": \"PASS\",\n  \"clientZones\": 3,\n  \"scannedFiles\": 21,\n  \"selfTestAssertions\": 6,\n  \"directAccessExceptions\": 0,\n  \"findings\": []\n}"
     },
     {
       "id": "network-egress-boundary-regression",
@@ -80,8 +80,8 @@
       "exitCode": 0,
       "signal": null,
       "expectedOutput": "\"status\": \"PASS\"",
-      "outputSha256": "f42f2f78e1d856e373a7efcebbad7c244cded71b48269a15c16b39d01aa5bd5a",
-      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 447,\n  \"sourceInventorySha256\": \"4bd8f4e4576bfb2e10abc59a40da80361260a5910ee3045792c18fdf9e23c703\",\n  \"selfTestAssertions\": 7,\n  \"authorizedExternalEgressAdapters\": 2,\n  \"authorizedEgressPurposeCount\": 3,\n  \"authorizedInventorySha256\": \"8c3764ee962b55dda7fa85520b8fbb34088a65ab722febd30254416b7d6898bb\",\n  \"localOnlyTransportFiles\": 2,\n  \"directPrimitiveExceptions\": 0,\n  \"findings\": []\n}"
+      "outputSha256": "6f78ecacb8f78471c160cf8fbbeaf6e6705ecd5b07bfdf855f3680b398c69db9",
+      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 450,\n  \"sourceInventorySha256\": \"80d72868972b8afa4cef63dd6bf0644b5a64aeae0c671e8d3da34a3bf04cb268\",\n  \"selfTestAssertions\": 7,\n  \"authorizedExternalEgressAdapters\": 2,\n  \"authorizedEgressPurposeCount\": 3,\n  \"authorizedInventorySha256\": \"8c3764ee962b55dda7fa85520b8fbb34088a65ab722febd30254416b7d6898bb\",\n  \"localOnlyTransportFiles\": 2,\n  \"directPrimitiveExceptions\": 0,\n  \"findings\": []\n}"
     },
     {
       "id": "data-store-smoke",
@@ -89,8 +89,8 @@
       "exitCode": 0,
       "signal": null,
       "expectedOutput": "\"checks\": 14",
-      "outputSha256": "89dfeb5a0e7e8c552c16bfc79efd81fd939bd7b08b193ff7146ead0bf72d2bb4",
-      "outputTail": "{\n  \"schemaVersion\": 1,\n  \"product\": \"Panthera pardus tulliana\",\n  \"version\": \"24.07.2026.60\",\n  \"milestone\": \"B064-M20 Backup Application Migration\",\n  \"status\": \"passed\",\n  \"checks\": 14,\n  \"peopleBefore\": 1,\n  \"peopleAfter\": 2,\n  \"backupCreated\": true,\n  \"migrationVersions\": [\n    1,\n    2,\n    3,\n    4,\n    5,\n    6,\n    7,\n    8,\n    9,\n    10,\n    11,\n    12,\n    13,\n    14,\n    15,\n    16,\n    17,\n    18,\n    19,\n    20,\n    21,\n    22,\n    23,\n    24,\n    25,\n    26,\n    27,\n    28,\n    29,\n    30,\n    31,\n    32,\n    33,\n    34,\n    35,\n    36,\n    37,\n    38,\n    39,\n    40,\n    41,\n    42,\n    43,\n    44,\n    45,\n    46,\n    47,\n    48,\n    49,\n    50,\n    51,\n    52,\n    53,\n    54,\n    55,\n    56,\n    57,\n    58,\n    59,\n    60,\n    61,\n    62,\n    63,\n    64,\n    65,\n    66,\n    67,\n    68,\n    69,\n    70,\n    71,\n    72,\n    73,\n    74,\n    75,\n    76,\n    77,\n    78,\n    79,\n    80,\n    81,\n    82,\n    83,\n    84,\n    85,\n    86,\n    87,\n    88,\n    89,\n    90,\n    91,\n    92,\n    93,\n    94,\n    95,\n    96\n  ],\n  \"schemaFingerprint\": \"85a91ba81506913674f135d688500596515f2c9121bc7ebb98896070e4f63e01\"\n}"
+      "outputSha256": "95b250a1475270e0aa1dcbb9ec0d169df9d93db03782f377a417aa138df55e2a",
+      "outputTail": "{\n  \"schemaVersion\": 1,\n  \"product\": \"Panthera pardus tulliana\",\n  \"version\": \"24.07.2026.60\",\n  \"milestone\": \"B064-M20 Backup Application Migration\",\n  \"status\": \"passed\",\n  \"checks\": 14,\n  \"peopleBefore\": 1,\n  \"peopleAfter\": 2,\n  \"backupCreated\": true,\n  \"migrationVersions\": [\n    1,\n    2,\n    3,\n    4,\n    5,\n    6,\n    7,\n    8,\n    9,\n    10,\n    11,\n    12,\n    13,\n    14,\n    15,\n    16,\n    17,\n    18,\n    19,\n    20,\n    21,\n    22,\n    23,\n    24,\n    25,\n    26,\n    27,\n    28,\n    29,\n    30,\n    31,\n    32,\n    33,\n    34,\n    35,\n    36,\n    37,\n    38,\n    39,\n    40,\n    41,\n    42,\n    43,\n    44,\n    45,\n    46,\n    47,\n    48,\n    49,\n    50,\n    51,\n    52,\n    53,\n    54,\n    55,\n    56,\n    57,\n    58,\n    59,\n    60,\n    61,\n    62,\n    63,\n    64,\n    65,\n    66,\n    67,\n    68,\n    69,\n    70,\n    71,\n    72,\n    73,\n    74,\n    75,\n    76,\n    77,\n    78,\n    79,\n    80,\n    81,\n    82,\n    83,\n    84,\n    85,\n    86,\n    87,\n    88,\n    89,\n    90,\n    91,\n    92,\n    93,\n    94,\n    95,\n    96,\n    97\n  ],\n  \"schemaFingerprint\": \"b54b651c6619bb8b34f1e375c409713dd87b07c79f49392aa1cda317f9dffe25\"\n}"
     },
     {
       "id": "migration-77-no-ppk022-schema-change",
@@ -98,8 +98,8 @@
       "exitCode": 0,
       "signal": null,
       "expectedOutput": "\"version\": 77",
-      "outputSha256": "7705991e6d301bdc6a4a15b998473b628c8c922f22f0cb84fb03e13d25718bf4",
-      "outputTail": "edger\",\n      \"checksum\": \"0d6bcb5884a7ea2c11c1b1d4e633344e990c18a203e7b6ce6592dcc80f630362\"\n    },\n    {\n      \"version\": 85,\n      \"name\": \"b5_family_emergency_planning_ledger\",\n      \"checksum\": \"73ba7ebb56a98467bccf527a7f7906699e5fb6bb4dad394cd96ec12e77aa3bd2\"\n    },\n    {\n      \"version\": 86,\n      \"name\": \"b5_family_emergency_preparedness_ledger\",\n      \"checksum\": \"ba95e841da7a08977d50e0c9cb441e0743af6fdcb1c6dee9c42bb136e20183dc\"\n    },\n    {\n      \"version\": 87,\n      \"name\": \"b5_family_emergency_assistance_card_ledger\",\n      \"checksum\": \"b424f1fa2d89d6e0b645912444d9d8639de3d6a3ff0a61fa829b1e14c5206097\"\n    },\n    {\n      \"version\": 88,\n      \"name\": \"b5_family_emergency_card_portability_ledger\",\n      \"checksum\": \"8785551a6ce0facd609e374e7ba65c70d35b552e6f63a7f0b3d790bfbffa2b04\"\n    },\n    {\n      \"version\": 89,\n      \"name\": \"b4_long_term_portfolio_ledger\",\n      \"checksum\": \"1e52fa04e4720830ff3300ceb5a71f78aee216c073b4f4786e393fa45063bbe0\"\n    },\n    {\n      \"version\": 90,\n      \"name\": \"b7_accessibility_preferences\",\n      \"checksum\": \"15f69b6269d0cf2002543ff26df0ddea1844497dff8228141dfb451c0341320c\"\n    },\n    {\n      \"version\": 91,\n      \"name\": \"b3_governed_form_drafts\",\n      \"checksum\": \"7107cbdbe66f05ac6e208bfac39bc4bcc884c679e63af4e49c4a15bacda1b611\"\n    },\n    {\n      \"version\": 92,\n      \"name\": \"privacy_ownership_data_rights_incident_control\",\n      \"checksum\": \"a81c13518563172d29aa2b351218faf553a2189616657fc0fbda9b1922eee137\"\n    },\n    {\n      \"version\": 93,\n      \"name\": \"identity_access_credentials\",\n      \"checksum\": \"51191e62bcf4baec07e3eab5985ef4210402cdb8b7416064519ceb082322916a\"\n    },\n    {\n      \"version\": 94,\n      \"name\": \"local_governed_ocr\",\n      \"checksum\": \"08fef61dc21062134716dfae8e78c2256eb5da275eedaf1fe3502a3c2450cb65\"\n    },\n    {\n      \"version\": 95,\n      \"name\": \"legacy_archive_ownership_reattestation\",\n      \"checksum\": \"2a7206f2335ee24e5e6135867dbed5096530477a1e3d514ef2f0ce9683029c90\"\n    },\n    {\n      \"version\": 96,\n      \"name\": \"archive_evidence_relations_media_search\",\n      \"checksum\": \"c00b2a72bf49d2200c85b2045a8ab7a01ef7a41882b2b14eb5a1f4715bde1eb2\"\n    }\n  ],\n  \"generatedAt\": \"2026-08-14T22:03:28.648Z\"\n}"
+      "outputSha256": "29f6b5d6152281e74cbf28752c7b2de0d6620ebb7c113ea2b1b60a485a513cda",
+      "outputTail": "er\",\n      \"checksum\": \"73ba7ebb56a98467bccf527a7f7906699e5fb6bb4dad394cd96ec12e77aa3bd2\"\n    },\n    {\n      \"version\": 86,\n      \"name\": \"b5_family_emergency_preparedness_ledger\",\n      \"checksum\": \"ba95e841da7a08977d50e0c9cb441e0743af6fdcb1c6dee9c42bb136e20183dc\"\n    },\n    {\n      \"version\": 87,\n      \"name\": \"b5_family_emergency_assistance_card_ledger\",\n      \"checksum\": \"b424f1fa2d89d6e0b645912444d9d8639de3d6a3ff0a61fa829b1e14c5206097\"\n    },\n    {\n      \"version\": 88,\n      \"name\": \"b5_family_emergency_card_portability_ledger\",\n      \"checksum\": \"8785551a6ce0facd609e374e7ba65c70d35b552e6f63a7f0b3d790bfbffa2b04\"\n    },\n    {\n      \"version\": 89,\n      \"name\": \"b4_long_term_portfolio_ledger\",\n      \"checksum\": \"1e52fa04e4720830ff3300ceb5a71f78aee216c073b4f4786e393fa45063bbe0\"\n    },\n    {\n      \"version\": 90,\n      \"name\": \"b7_accessibility_preferences\",\n      \"checksum\": \"15f69b6269d0cf2002543ff26df0ddea1844497dff8228141dfb451c0341320c\"\n    },\n    {\n      \"version\": 91,\n      \"name\": \"b3_governed_form_drafts\",\n      \"checksum\": \"7107cbdbe66f05ac6e208bfac39bc4bcc884c679e63af4e49c4a15bacda1b611\"\n    },\n    {\n      \"version\": 92,\n      \"name\": \"privacy_ownership_data_rights_incident_control\",\n      \"checksum\": \"a81c13518563172d29aa2b351218faf553a2189616657fc0fbda9b1922eee137\"\n    },\n    {\n      \"version\": 93,\n      \"name\": \"identity_access_credentials\",\n      \"checksum\": \"51191e62bcf4baec07e3eab5985ef4210402cdb8b7416064519ceb082322916a\"\n    },\n    {\n      \"version\": 94,\n      \"name\": \"local_governed_ocr\",\n      \"checksum\": \"08fef61dc21062134716dfae8e78c2256eb5da275eedaf1fe3502a3c2450cb65\"\n    },\n    {\n      \"version\": 95,\n      \"name\": \"legacy_archive_ownership_reattestation\",\n      \"checksum\": \"2a7206f2335ee24e5e6135867dbed5096530477a1e3d514ef2f0ce9683029c90\"\n    },\n    {\n      \"version\": 96,\n      \"name\": \"archive_evidence_relations_media_search\",\n      \"checksum\": \"c00b2a72bf49d2200c85b2045a8ab7a01ef7a41882b2b14eb5a1f4715bde1eb2\"\n    },\n    {\n      \"version\": 97,\n      \"name\": \"health_care_coordination_elder_support\",\n      \"checksum\": \"e3d60800e250feb674cd1250449982ac45cd7e700e74a728be7f6500c054d081\"\n    }\n  ],\n  \"generatedAt\": \"2026-08-14T23:47:24.636Z\"\n}"
     },
     {
       "id": "foundation-regression",
@@ -134,8 +134,8 @@
       "exitCode": 0,
       "signal": null,
       "expectedOutput": "PASS (43 controlled checks",
-      "outputSha256": "67d7113799fff395ef2c86647b2bc7525297399075d9ae14469e1482f3dfdf55",
-      "outputTail": "30-M predecessor runtime regression: PASS (43 controlled checks; PPK-002 remains PARTIAL).\n\n(node:29144) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "outputSha256": "0a9c240c55d81f42fca26723964ccdb4c3fcc8aebdae653e1e0e893992d7c255",
+      "outputTail": "30-M predecessor runtime regression: PASS (43 controlled checks; PPK-002 remains PARTIAL).\n\n(node:28604) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "id": "core-service-boundary",
@@ -152,8 +152,8 @@
       "exitCode": 0,
       "signal": null,
       "expectedOutput": "30-O Core Service Entrypoint Runtime: PASS (24 assertions).",
-      "outputSha256": "ed98b5a20f1af62b202ea6a69b030239f3040d666d9edc70dda78e4d701e571a",
-      "outputTail": "30-O Core Service Entrypoint Runtime: PASS (24 assertions).\n\n(node:42720) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "outputSha256": "e6b9a231cf4a5bc8a485bb79d390081e2994dda164522f9f43640f4f9a51e0aa",
+      "outputTail": "30-O Core Service Entrypoint Runtime: PASS (24 assertions).\n\n(node:35016) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "id": "desktop-core-service-startup-runtime",
@@ -161,8 +161,8 @@
       "exitCode": 0,
       "signal": null,
       "expectedOutput": "Desktop Core Service Startup Runtime: PASS",
-      "outputSha256": "cf2af18137e83acb45519bb3f9edd0ccbb1e8d6de55dfc67e0b6eeb424cb6519",
-      "outputTail": "Desktop Core Service Startup Runtime: PASS (51 checks).\n\n(node:47832) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "outputSha256": "eb2414e199a847a143faca4f0d10f731076f2712732e80dd785f95e22c9db87b",
+      "outputTail": "Desktop Core Service Startup Runtime: PASS (51 checks).\n\n(node:29884) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "id": "platform-policy-typescript",
@@ -250,7 +250,7 @@
   "targetedTestsMinimum": 19,
   "securityRegressionTestsMinimum": 264,
   "productionSourceZones": 18,
-  "scannedProductionFiles": 447,
+  "scannedProductionFiles": 450,
   "exactCapabilitySurfaces": 345,
   "exactManifestEntries": 345,
   "pinnedBootstrapSurfaces": 26,
@@ -268,5 +268,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-14T22:03:38.533Z"
+  "generatedAt": "2026-08-14T23:47:33.882Z"
 }

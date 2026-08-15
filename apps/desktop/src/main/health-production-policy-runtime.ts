@@ -98,7 +98,8 @@ const policyActions = new Set<PolicyAction>([
 const healthResourceTypes = new Set<HealthPolicyIntent['resourceType']>([
   'health_record',
   'medication_plan',
-  'family_health_history'
+  'family_health_history',
+  'health_care_center'
 ]);
 
 const nonEmpty = (value: unknown, max = 512): value is string =>
@@ -528,7 +529,7 @@ const permissionIsValid = (
     && new Set(row.actions).size === row.actions.length
     && (row.effect === 'allow' || row.effect === 'deny')
     && (row.ownershipBasisPoints === undefined || (row.effect === 'allow' && Number.isInteger(row.ownershipBasisPoints) && row.ownershipBasisPoints >= 1 && row.ownershipBasisPoints <= 10_000))
-    && (row.purpose === 'health' || row.purpose === 'general')
+    && (row.purpose === 'health' || row.purpose === 'care' || row.purpose === 'general')
     && row.familyBranchId === undefined
     && Number.isFinite(now)
     && Number.isFinite(startsAt)
@@ -648,7 +649,7 @@ const loadAuthoritySnapshotInTransaction = (
   if (!permissionsResult.ok) return permissionsResult;
   const healthPermissions = permissionsResult.value.filter((row) =>
     healthResourceTypes.has(row.resourceType as HealthPolicyIntent['resourceType'])
-    && (row.purpose === 'health' || row.purpose === 'general')
+    && (row.purpose === 'health' || row.purpose === 'care' || row.purpose === 'general')
   );
   if (
     healthPermissions.length > 10_000
@@ -755,6 +756,21 @@ const findHealthResourceForPolicyResolution = (
         })
       : null);
   }
+  if (resourceType === 'health_care_center') {
+    const found = dependencies.healthPolicyResourceRepository.findHealthCareCenterForPolicyResolution(
+      execution,
+      resourceId
+    );
+    if (!found.ok) return found;
+    return ok(found.value
+      ? Object.freeze({
+          familyId: found.value.familyId,
+          ownerPersonId: found.value.ownerPersonId,
+          privacy: 'private' as const,
+          stateFingerprint: found.value.stateFingerprint
+        })
+      : null);
+  }
   throw new PlatformPolicyEnforcementError(
     'RESOURCE_RESOLUTION_FAILED',
     'Health policy resource type is not supported'
@@ -768,6 +784,52 @@ const loadHealthResourceSnapshotInTransaction = (
   transaction: TransactionContext
 ): Result<HealthResourceSnapshot, AppError> => {
   const execution = repositoryContext(context, transaction);
+  if (requestedIntent.resourceType === 'health_care_center') {
+    if (
+      requestedIntent.purpose !== 'care'
+      || !nonEmpty(requestedIntent.resourceId, 256)
+      || requestedIntent.resourceId === '*'
+      || !requestedIntent.ownerPersonId
+      || requestedIntent.privacy !== 'private'
+      || requestedIntent.resourceId !== `health-care-center:${requestedIntent.ownerPersonId}`
+      || (requestedIntent.action !== 'read' && requestedIntent.action !== 'update')
+      || requestedIntent.capability !== (requestedIntent.action === 'read' ? 'health.read' : 'health.write')
+    ) return invalidAuthority(context, 'Health care center policy intent is not exact');
+    const existing = findHealthResourceForPolicyResolution(
+      dependencies,
+      execution,
+      requestedIntent.resourceType,
+      requestedIntent.resourceId
+    );
+    if (!existing.ok) return existing;
+    if (existing.value && (
+      existing.value.familyId !== context.familyId
+      || existing.value.ownerPersonId !== requestedIntent.ownerPersonId
+      || existing.value.privacy !== 'private'
+    )) return invalidAuthority(context, 'Health care center policy metadata changed');
+    const owner = dependencies.personRepository.findById(execution, requestedIntent.ownerPersonId);
+    if (!owner.ok) return owner;
+    if (!owner.value || owner.value.familyId !== context.familyId || owner.value.status !== 'active') {
+      return invalidAuthority(context, 'Health care center owner does not exist in the active family');
+    }
+    const resource = Object.freeze({
+      type: 'health_care_center',
+      id: requestedIntent.resourceId,
+      familyId: context.familyId,
+      ownerPersonId: requestedIntent.ownerPersonId,
+      sensitivity: 'highly_sensitive' as const
+    });
+    return ok(Object.freeze({
+      resource,
+      stateFingerprint: existing.value?.stateFingerprint ?? stable({
+        state: 'absent',
+        resourceType: 'health_care_center',
+        resourceId: requestedIntent.resourceId,
+        familyId: context.familyId,
+        ownerPersonId: requestedIntent.ownerPersonId
+      })
+    }));
+  }
   if (
     !healthResourceTypes.has(requestedIntent.resourceType)
     || requestedIntent.purpose !== 'health'
@@ -963,6 +1025,7 @@ const ensureRuntimeConfiguration = (dependencies: HealthProductionPolicyRuntimeD
     || typeof dependencies.healthPolicyResourceRepository?.findHealthRecordForPolicyResolution !== 'function'
     || typeof dependencies.healthPolicyResourceRepository?.findMedicationPlanForPolicyResolution !== 'function'
     || typeof dependencies.healthPolicyResourceRepository?.findFamilyHealthHistoryForPolicyResolution !== 'function'
+    || typeof dependencies.healthPolicyResourceRepository?.findHealthCareCenterForPolicyResolution !== 'function'
     || typeof dependencies.personRepository?.findById !== 'function'
     || typeof dependencies.deviceIdentityProvider?.snapshot !== 'function'
     || typeof dependencies.authorizationProvider?.authorize !== 'function'

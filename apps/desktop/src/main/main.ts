@@ -10,6 +10,7 @@ import { createWebAuthnChallenge, encryptPortableEmergencyPack, sha256Hex, valid
 import { writeContentFreeConsoleEvent } from '@ppt/logging';
 import { APP_META, USER_VISIBLE_APP_INFO, type CreateArchiveItemInput, CreateFamilyEventInput, UpdateFamilyEventInput, SetFamilyEventArchivedInput, UpdateEventParticipantsInput, UpdateEventInvitationInput, UpdateEventNotesInput, AcknowledgeFamilyNotificationInput, CreateFamilyLocationInput, CreateFamilyMemberInput, CreateFamilyRelationInput, LoginInput, SetupAdminInput, ChangePasswordInput, EnableTwoFactorInput, DisableTwoFactorInput, TrustCurrentDeviceInput, ReauthorizeCurrentDeviceInput, CreateFamilyInvitationInput, InspectFamilyInvitationInput, ResendFamilyInvitationInput, AcceptFamilyInvitationInput, UpsertObjectPermissionInput, UpdateFamilyAccountInput, CreateFinanceRecordInput, CreateBankAccountInput, ValidateIbanInput, CreatePaymentCardInput, CreateHealthRecordInput, CreateMedicationPlanInput, CreateFamilyHealthHistoryInput, CreateFinanceValuationInput, CreateLifeRecordInput, CreateAutomationRuleInput, CreateArchiveCategoryInput, UpdateArchiveClassificationInput, UpsertAiConsentInput, AiConsentPurpose, UpsertSensitiveDataConsentInput, SensitiveExportPreviewInput, RunAutomationInput, UpsertDigitalLegacyPlanInput, UpsertLegacyGrantInput, ExecuteLegacyPlanInput, ApproveLegacyExecutionInput, CancelLegacyExecutionInput, ArchiveSearchInput, CreateArchiveRetentionPolicyInput, AssignArchiveRetentionPolicyInput, UpsertBackupTargetInput, MaintenanceResultView, BackupSchedulerResultView, AdaptiveResourceStateView, EnqueueTaskInput, UpsertMaintenancePolicyInput, DiagnosticFilterInput, DiagnosticArchiveSearchInput, MaintenanceHistoryFilterInput, CreateDataRetentionPolicyInput, ArchiveDataResourceInput, RestoreDataResourceInput, RequestDataPurgeInput, CancelDataPurgeInput, ExecuteDataPurgeInput, SetDataLegalHoldInput, UpdateBackupQuarantinePolicyInput, SetBackupQuarantineLegalHoldInput, DestroyBackupQuarantineBatchInput, RegisterExternalBackupCopyInput, ReviewExternalBackupCopyInput, SetExternalBackupCopyLegalHoldInput, AttestExternalBackupCopyDestroyedInput, RegisterExternalBackupEvidenceIssuerInput, RotateExternalBackupEvidenceIssuerInput, RevokeExternalBackupEvidenceIssuerInput, ApplyExternalBackupEvidenceRevocationListInput, UpsertExternalBackupRevocationEndpointInput, PendingRevocationSyncListView, ApplyPendingRevocationSyncInput, RevocationSyncEndpointStateView, RevocationSyncRunResultView, VerifyExternalBackupDestructionEvidenceInput, ApplyFamilyDataImportInput, RollbackFamilyDataImportInput, GenealogyTreePageInput, TimelinePageInput, ArchivePageInput, PersonCatalogPageInput, EventCatalogPageInput, EntityCatalogLookupInput, FamilySnapshotSectionsInput, IpcAdaptiveBudgetMaintenanceOperation, IpcAdaptiveBudgetMaintenanceAuthorizationInput, IpcAdaptiveBudgetMaintenanceReauthenticationInput, IpcAdaptiveBudgetMaintenanceRecoveryInput, UpdateBackupCleanRewritePolicyInput } from '@ppt/domain';
 import type { AddArchiveItemVersionInput, AddArchiveRelationEvidenceInput, RemoveArchiveRelationEvidenceInput } from '@ppt/domain';
+import type { RecordHealthCareEntryInput, RevokeHealthCareAccessGrantInput, UpsertHealthCareAccessGrantInput } from '@ppt/domain';
 import type { ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { UnifiedAuthorizedSearchInput } from '@ppt/domain';
 import type { RecordManagedLifeItemInput } from '@ppt/domain';
@@ -52,6 +53,7 @@ import {
 import { bootstrapDesktopRuntime, type DesktopRuntime } from './runtime-bootstrap.js';
 import { registerCorrelatedIpcHandler, registerIpcCancellationHandlers, createRuntimeCorrelationId, type IpcHandler } from './ipc-runtime.js';
 import {
+  HEALTH_CARE_COORDINATION_IPC_CHANNELS,
   LOCAL_GOVERNED_OCR_IPC_CHANNELS,
   projectLocalGovernedOcrCenterIpcView,
   projectLocalGovernedOcrMutationIpcView,
@@ -2352,6 +2354,14 @@ function registerIpc(): void {
   registerIpcHandler('health:createMedicationPlan', async (_event, input:CreateMedicationPlanInput) => store().createMedicationPlan(input));
   registerIpcHandler('health:listFamilyHistory', async () => store().listFamilyHealthHistory());
   registerIpcHandler('health:createFamilyHistory', async (_event, input:CreateFamilyHealthHistoryInput) => store().createFamilyHealthHistory(input));
+  registerIpcHandler(HEALTH_CARE_COORDINATION_IPC_CHANNELS.getCenter, async (_event, input:{readonly ownerPersonId:string}) =>
+    store().getHealthCareCoordinationCenter(input.ownerPersonId));
+  registerIpcHandler(HEALTH_CARE_COORDINATION_IPC_CHANNELS.recordEntry, async (_event, input:RecordHealthCareEntryInput) =>
+    store().recordHealthCareEntry(input));
+  registerIpcHandler(HEALTH_CARE_COORDINATION_IPC_CHANNELS.upsertGrant, async (_event, input:UpsertHealthCareAccessGrantInput) =>
+    store().upsertHealthCareAccessGrant(input));
+  registerIpcHandler(HEALTH_CARE_COORDINATION_IPC_CHANNELS.revokeGrant, async (_event, input:RevokeHealthCareAccessGrantInput) =>
+    store().revokeHealthCareAccessGrant(input));
   registerIpcHandler('finance:listValuations', () => store().listFinanceValuations());
   registerIpcHandler('finance:createValuation', (_event, input:CreateFinanceValuationInput) => store().createFinanceValuation(input));
   registerIpcHandler('family:createRelation', async (_event, input: CreateFamilyRelationInput) => {

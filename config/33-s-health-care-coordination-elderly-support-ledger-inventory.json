@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "step": "33-S",
+  "decision": "DEC-230",
+  "requirements": ["B5-01", "B5-02", "EXT-021", "EXT-023", "EXT-024", "EXT-025", "EXT-026", "EXT-027", "EXT-028", "EXT-029"],
+  "status": "PLANNED",
+  "implementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+  "countsAsRequirementPass": false,
+  "registryReconciliation": {
+    "registryMutationPerformed": false,
+    "roadmapMutationPerformed": false,
+    "planOrLedgerActivationPerformed": false,
+    "activePredecessor": "33-P",
+    "evidenceChainMustRemainOpen": true
+  },
+  "implementedProductionSurfaces": [
+    {
+      "id": "domain-application",
+      "status": "LOCAL_COMPONENT_TESTED",
+      "paths": [
+        "packages/domain/src/health-care-coordination.ts",
+        "packages/application/src/health-care-coordination-use-cases.ts"
+      ]
+    },
+    {
+      "id": "migration-repository",
+      "status": "LOCAL_COMPONENT_TESTED",
+      "paths": [
+        "packages/database/src/family-database-migrations.ts",
+        "packages/repository-contracts/src/health-repository.ts",
+        "packages/repositories/src/health-repository.ts"
+      ],
+      "migrationVersion": 97,
+      "migrationSha256": "e3d60800e250feb674cd1250449982ac45cd7e700e74a728be7f6500c054d081"
+    },
+    {
+      "id": "desktop-composition-ipc-ui",
+      "status": "LOCAL_COMPONENT_TESTED",
+      "paths": [
+        "apps/desktop/src/main/health-production-policy-runtime.ts",
+        "apps/desktop/src/main/health-application-adapter.ts",
+        "apps/desktop/src/main/data-store.ts",
+        "apps/desktop/src/main/ipc-integration-policy.ts",
+        "apps/desktop/src/main/ipc-request-lifecycle.ts",
+        "apps/desktop/src/main/main.ts",
+        "apps/desktop/src/main/preload.ts",
+        "apps/desktop/src/renderer/global.d.ts",
+        "apps/desktop/src/renderer/HealthCareCoordinationPanel.tsx",
+        "apps/desktop/src/renderer/App.tsx",
+        "apps/desktop/src/renderer/styles.css"
+      ]
+    }
+  ],
+  "implementedTargetedTests": [
+    "packages/application/tests/health-care-coordination-use-cases.test.ts",
+    "packages/repositories/health-care-coordination-repository-policy.test.ts",
+    "apps/desktop/tests/health-care-coordination-ipc-integration.test.ts",
+    "apps/desktop/tests/health-care-coordination-data-store.test.ts",
+    "apps/desktop/tests/health-care-coordination-ui.test.ts"
+  ],
+  "validation": {
+    "targetedTestFileRatchet": 5,
+    "targetedTestRatchet": 20,
+    "migrationChecks": 9,
+    "dataStoreSmokeChecks": 14,
+    "ppk021": {"status":"PASS","files":450,"surfaces":699,"sha256":"5c99054d510a61c3724124c9e1d0c01973b9048c1c53a24652bce61738c839a5","targeted":17,"contract":84,"runtime":20},
+    "ppk022": {"status":"PASS","files":450,"surfaces":345,"sha256":"1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e","targeted":19,"contract":110,"runtime":24},
+    "countsAsRequirementPass": false
+  },
+  "openAcceptanceBindings": [
+    "ACTIVE_PREDECESSOR_33_P",
+    "REAL_CAREGIVER_AND_ELDERLY_USER_UAT_NOT_RUN",
+    "MEDICAL_PRIVACY_LEGAL_SECURITY_REVIEW_NOT_RUN",
+    "SENSOR_EMERGENCY_REMOTE_ASSISTANCE_NOT_CONFIGURED",
+    "RETENTION_SOURCE_DELETION_PHYSICAL_ERASURE_NOT_ACCEPTED"
+  ],
+  "governanceSurfaces": [
+    "config/33-s-health-care-coordination-elderly-support-ledger-scope.json",
+    "config/33-s-health-care-coordination-elderly-support-ledger-inventory.json",
+    "docs/decisions/DEC-230-health-care-coordination-elderly-support-ledger.md",
+    "docs/security/THREAT_MODEL_33_S_HEALTH_CARE_COORDINATION_ELDERLY_SUPPORT_LEDGER.md",
+    "scripts/verify-33-s-health-care-coordination-elderly-support-ledger-boundary.mjs",
+    "scripts/verify-33-s-health-care-coordination-elderly-support-ledger-contract.mjs",
+    "scripts/verify-33-s-health-care-coordination-elderly-support-ledger-runtime.mjs"
+  ]
+}

@@ -40,11 +40,11 @@ export interface HealthApplicationContext {
 }
 
 export interface HealthPolicyIntent {
-  readonly action: 'read' | 'create';
+  readonly action: 'read' | 'create' | 'update';
   readonly capability: 'health.read' | 'health.write';
-  readonly resourceType: 'health_record' | 'medication_plan' | 'family_health_history';
+  readonly resourceType: 'health_record' | 'medication_plan' | 'family_health_history' | 'health_care_center';
   readonly resourceId: string;
-  readonly purpose: 'health';
+  readonly purpose: 'health' | 'care';
   readonly ownerPersonId?: PersonId;
   readonly privacy?: RecordPrivacy;
 }

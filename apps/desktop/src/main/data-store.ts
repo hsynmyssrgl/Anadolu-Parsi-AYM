@@ -146,6 +146,10 @@ import {
   CreateMedicationPlanUseCase,
   ListFamilyHealthHistoryUseCase,
   CreateFamilyHealthHistoryUseCase,
+  GetHealthCareCoordinationCenterUseCase,
+  RecordHealthCareEntryUseCase,
+  UpsertHealthCareAccessGrantUseCase,
+  RevokeHealthCareAccessGrantUseCase,
   ListLifeRecordsUseCase,
   CreateLifeRecordUseCase,
   GetManagedLifeWorkspaceUseCase,
@@ -309,7 +313,7 @@ import {
   type WindowsHelloPlatformPort,
   type WindowsHelloDeviceBindingPort
 } from '@ppt/application';
-import type { AddArchiveItemVersionInput, AddArchiveRelationEvidenceInput, ArchiveRelationEvidenceHistoryView, ArchiveRelationEvidenceView, RemoveArchiveRelationEvidenceInput, UnifiedAuthorizedSearchInput, UnifiedAuthorizedSearchView } from '@ppt/domain';
+import type { AddArchiveItemVersionInput, AddArchiveRelationEvidenceInput, ArchiveRelationEvidenceHistoryView, ArchiveRelationEvidenceView, HealthCareCoordinationCenterView, HealthCareMutationReceiptView, RecordHealthCareEntryInput, RemoveArchiveRelationEvidenceInput, RevokeHealthCareAccessGrantInput, UnifiedAuthorizedSearchInput, UnifiedAuthorizedSearchView, UpsertHealthCareAccessGrantInput } from '@ppt/domain';
 import { RepositoryBackedFamilyApplicationUnitOfWork, RepositoryBackedFamilyGraphQueryPort } from './family-application-adapter.js';
 import { RepositoryBackedHouseholdMembershipUnitOfWork } from './household-membership-application-adapter.js';
 import { RepositoryBackedPersonLifecycleUnitOfWork } from './person-lifecycle-application-adapter.js';
@@ -335,6 +339,7 @@ import { RepositoryBackedAuthorizationQueryPort, RepositoryBackedAuthorizationUn
 import { RepositoryBackedMembershipQueryPort, RepositoryBackedMembershipUnitOfWork } from './membership-application-adapter.js';
 import {
   RepositoryBackedHealthQueryPort,
+  RepositoryBackedHealthCareCoordinationUnitOfWork,
   RepositoryBackedHealthUnitOfWork,
   failClosedHealthPolicyEnforcementPointResolver,
   nonWritableHealthClusterFence,
@@ -1204,6 +1209,10 @@ export class FamilyDataStore {
   readonly #createMedicationPlanUseCase: CreateMedicationPlanUseCase;
   readonly #listFamilyHealthHistoryUseCase: ListFamilyHealthHistoryUseCase;
   readonly #createFamilyHealthHistoryUseCase: CreateFamilyHealthHistoryUseCase;
+  readonly #getHealthCareCoordinationCenterUseCase: GetHealthCareCoordinationCenterUseCase;
+  readonly #recordHealthCareEntryUseCase: RecordHealthCareEntryUseCase;
+  readonly #upsertHealthCareAccessGrantUseCase: UpsertHealthCareAccessGrantUseCase;
+  readonly #revokeHealthCareAccessGrantUseCase: RevokeHealthCareAccessGrantUseCase;
   readonly #listLifeRecordsUseCase: ListLifeRecordsUseCase;
   readonly #createLifeRecordUseCase: CreateLifeRecordUseCase;
   readonly #getManagedLifeWorkspaceUseCase: GetManagedLifeWorkspaceUseCase;
@@ -2260,12 +2269,17 @@ export class FamilyDataStore {
     } as const;
     const healthQuery = new RepositoryBackedHealthQueryPort(healthApplicationDependencies);
     const healthUnitOfWork = new RepositoryBackedHealthUnitOfWork(healthApplicationDependencies);
+    const healthCareUnitOfWork = new RepositoryBackedHealthCareCoordinationUnitOfWork(healthApplicationDependencies);
     this.#listHealthRecordsUseCase = new ListHealthRecordsUseCase(healthQuery);
     this.#createHealthRecordUseCase = new CreateHealthRecordUseCase(healthUnitOfWork);
     this.#listMedicationPlansUseCase = new ListMedicationPlansUseCase(healthQuery);
     this.#createMedicationPlanUseCase = new CreateMedicationPlanUseCase(healthUnitOfWork);
     this.#listFamilyHealthHistoryUseCase = new ListFamilyHealthHistoryUseCase(healthQuery);
     this.#createFamilyHealthHistoryUseCase = new CreateFamilyHealthHistoryUseCase(healthUnitOfWork);
+    this.#getHealthCareCoordinationCenterUseCase = new GetHealthCareCoordinationCenterUseCase(healthQuery);
+    this.#recordHealthCareEntryUseCase = new RecordHealthCareEntryUseCase(healthCareUnitOfWork);
+    this.#upsertHealthCareAccessGrantUseCase = new UpsertHealthCareAccessGrantUseCase(healthCareUnitOfWork);
+    this.#revokeHealthCareAccessGrantUseCase = new RevokeHealthCareAccessGrantUseCase(healthCareUnitOfWork);
     const lifeQuery = new RepositoryBackedLifeQueryPort(
       lifeApplicationDependencies,
       lifePolicyTransactionRunner
@@ -5126,6 +5140,102 @@ export class FamilyDataStore {
     if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
     return [result.value, ...visibleBeforeCommit.filter((record) => record.id !== result.value.id)]
       .sort((left, right) => right.createdAt.localeCompare(left.createdAt) || left.id.localeCompare(right.id));
+  }
+
+  public async getHealthCareCoordinationCenter(
+    ownerPersonId: string
+  ): Promise<HealthCareCoordinationCenterView> {
+    const result = await this.#getHealthCareCoordinationCenterUseCase.execute({
+      context: this.#healthApplicationContext('health-care-center-get'),
+      ownerPersonId
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async recordHealthCareEntry(
+    input: RecordHealthCareEntryInput
+  ): Promise<HealthCareMutationReceiptView> {
+    const context = this.#healthApplicationContext('health-care-entry-record');
+    const requestFingerprint = createHash('sha256').update(canonicalArchiveOperationValue({
+      familyId: context.familyId,
+      actorAccountId: context.actor.userId,
+      actorPersonId: context.actor.personId,
+      input
+    }), 'utf8').digest('hex');
+    const identity = createHash('sha256').update(
+      `${context.familyId}\u0000${context.actor.userId}\u0000${input.clientOperationId}`,
+      'utf8'
+    ).digest('hex');
+    const result = await this.#recordHealthCareEntryUseCase.execute({
+      context,
+      command: input,
+      identifiers: {
+        mutationId: `health-care-mutation:${identity}`,
+        targetId: `health-care-entry:${identity}`,
+        requestFingerprint,
+        auditId: `health-care-audit:${identity}`,
+        outboxEventId: asEventId(`health-care-event:${identity}`)
+      }
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async upsertHealthCareAccessGrant(
+    input: UpsertHealthCareAccessGrantInput
+  ): Promise<HealthCareMutationReceiptView> {
+    const context = this.#healthApplicationContext('health-care-grant-upsert');
+    const requestFingerprint = createHash('sha256').update(canonicalArchiveOperationValue({
+      familyId: context.familyId,
+      actorAccountId: context.actor.userId,
+      actorPersonId: context.actor.personId,
+      input
+    }), 'utf8').digest('hex');
+    const identity = createHash('sha256').update(
+      `${context.familyId}\u0000${context.actor.userId}\u0000${input.clientOperationId}`,
+      'utf8'
+    ).digest('hex');
+    const result = await this.#upsertHealthCareAccessGrantUseCase.execute({
+      context,
+      command: input,
+      identifiers: {
+        mutationId: `health-care-mutation:${identity}`,
+        requestFingerprint,
+        auditId: `health-care-audit:${identity}`,
+        outboxEventId: asEventId(`health-care-event:${identity}`)
+      }
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async revokeHealthCareAccessGrant(
+    input: RevokeHealthCareAccessGrantInput
+  ): Promise<HealthCareMutationReceiptView> {
+    const context = this.#healthApplicationContext('health-care-grant-revoke');
+    const requestFingerprint = createHash('sha256').update(canonicalArchiveOperationValue({
+      familyId: context.familyId,
+      actorAccountId: context.actor.userId,
+      actorPersonId: context.actor.personId,
+      input
+    }), 'utf8').digest('hex');
+    const identity = createHash('sha256').update(
+      `${context.familyId}\u0000${context.actor.userId}\u0000${input.clientOperationId}`,
+      'utf8'
+    ).digest('hex');
+    const result = await this.#revokeHealthCareAccessGrantUseCase.execute({
+      context,
+      command: input,
+      identifiers: {
+        mutationId: `health-care-mutation:${identity}`,
+        requestFingerprint,
+        auditId: `health-care-audit:${identity}`,
+        outboxEventId: asEventId(`health-care-event:${identity}`)
+      }
+    });
+    if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
   }
 
 

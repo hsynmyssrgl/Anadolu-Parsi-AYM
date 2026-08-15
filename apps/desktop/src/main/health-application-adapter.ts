@@ -1,5 +1,6 @@
 import {
   ERROR_CODES,
+  asIsoDateTime,
   asPersonId,
   asUserId,
   createAppError,
@@ -10,6 +11,9 @@ import {
 } from '@ppt/core';
 import type {
   HealthApplicationContext,
+  HealthCareCoordinationQueryPort,
+  HealthCareCoordinationUnitOfWork,
+  HealthCareCoordinationWriteScope,
   HealthPolicyIntent,
   HealthQueryPort,
   HealthUnitOfWork,
@@ -24,10 +28,12 @@ import {
 } from '@ppt/platform-policy';
 import type { TransactionExecutor, TransactionContext } from '@ppt/repository-contracts';
 import type { DomainEvent } from '@ppt/events';
+import type { HealthCareCoordinationCenterView } from '@ppt/domain';
 import type {
   AccountRepositoryPort,
   AuditRepositoryPort,
   HealthRepositoryPort,
+  HealthCareCenterKey,
   ObjectPermissionRepositoryPort,
   OutboxRepositoryPort,
   PersonRepositoryPort,
@@ -362,7 +368,7 @@ const executeGoverned = async <T>(
   }
 };
 
-export class RepositoryBackedHealthQueryPort implements HealthQueryPort {
+export class RepositoryBackedHealthQueryPort implements HealthQueryPort, HealthCareCoordinationQueryPort {
   readonly #authorization = new CentralAuthorizationService();
   public constructor(private readonly dependencies: RepositoryBackedHealthApplicationDependencies) {}
 
@@ -452,6 +458,84 @@ export class RepositoryBackedHealthQueryPort implements HealthQueryPort {
       })
     );
   }
+
+  public async getHealthCareCoordinationCenter(
+    context: HealthApplicationContext,
+    ownerPersonId: string
+  ): Promise<Result<HealthCareCoordinationCenterView, AppError>> {
+    const centerId = `health-care-center:${ownerPersonId}`;
+    const intent: HealthPolicyIntent = {
+      action: 'read',
+      capability: 'health.read',
+      resourceType: 'health_care_center',
+      resourceId: centerId,
+      purpose: 'care',
+      ownerPersonId: asPersonId(ownerPersonId),
+      privacy: 'private'
+    };
+    return executeGoverned(this.dependencies, context, intent, (authorization, enforcementPoint) =>
+      this.dependencies.transactionExecutor.execute(context.correlationId, (transaction) => {
+        const governedInput = { context, intent, authorization, transaction };
+        const established = establishGovernedTransaction(enforcementPoint, governedInput);
+        if (!established.ok) return established;
+        const repository = governedRepositoryContext(context, transaction, authorization, intent);
+        const key: HealthCareCenterKey = {
+          familyId: context.familyId,
+          accountId: context.actor.userId,
+          ownerPersonId: asPersonId(ownerPersonId),
+          centerId
+        };
+        const snapshot = this.dependencies.healthRepository.loadHealthCareCenter(repository, key);
+        if (!snapshot.ok) return snapshot;
+        const entries = Object.freeze(snapshot.value.entries.map((entry) => {
+          const {
+            familyId: _familyId,
+            recordedByAccountId: _accountId,
+            recordedByPersonId: _personId,
+            mutationId: _mutationId,
+            ...view
+          } = entry;
+          return Object.freeze(view);
+        }));
+        const emergencySummary = Object.freeze({
+          allergies: Object.freeze(entries.filter((entry) => entry.kind === 'allergy')),
+          chronicConditions: Object.freeze(entries.filter((entry) => entry.kind === 'chronic_condition')),
+          ...(entries.find((entry) => entry.kind === 'blood_type')
+            ? { bloodType: entries.find((entry) => entry.kind === 'blood_type')! }
+            : {}),
+          activeMedicationConfirmations: Object.freeze(entries.filter((entry) =>
+            entry.kind === 'medication_confirmation' && (entry.status === 'active' || entry.status === 'completed')))
+        });
+        return { ok: true, value: Object.freeze({
+          schemaVersion: 1 as const,
+          centerId,
+          ownerPersonId,
+          revision: snapshot.value.center?.revision ?? 0,
+          entries,
+          caregiverGrants: Object.freeze(snapshot.value.grants.map((grant) => {
+            const { familyId: _familyId, mutationId: _mutationId, ...view } = grant;
+            return Object.freeze(view);
+          })),
+          emergencySummary,
+          visibleScopes: snapshot.value.visibleScopes,
+          canRecord: snapshot.value.canRecord,
+          truncated: snapshot.value.truncated,
+          truth: Object.freeze({
+            localOnly: true as const,
+            medicalVerification: 'not_performed' as const,
+            healthRegistryLookup: 'not_performed' as const,
+            sensorIntegration: 'not_configured' as const,
+            helpDelivery: 'not_performed' as const,
+            emergencyServiceContact: 'not_performed' as const,
+            remoteAssistance: 'not_configured' as const,
+            minimumNecessaryFiltered: true as const,
+            largeTextPresentationAvailable: true as const
+          }),
+          generatedAt: transaction.occurredAt
+        }) };
+      })
+    );
+  }
 }
 
 class RepositoryBackedHealthWriteScope implements HealthWriteScope {
@@ -520,6 +604,161 @@ export class RepositoryBackedHealthUnitOfWork implements HealthUnitOfWork {
           context,
           repository,
           transaction.occurredAt
+        ));
+        if (!result.ok) return result;
+        assertActivePlatformPolicyTransactionContext(authorization, {
+          resourceType: intent.resourceType,
+          resourceId: intent.resourceId,
+          action: intent.action,
+          capability: intent.capability,
+          correlationId: context.correlationId,
+          resourceFamilyId: context.familyId,
+          fenceEpoch: authorization.fenceEpoch,
+          fenceWritable: authorization.fenceWritable
+        });
+        return result;
+      })
+    );
+  }
+}
+
+class RepositoryBackedHealthCareCoordinationWriteScope implements HealthCareCoordinationWriteScope {
+  public constructor(
+    private readonly dependencies: RepositoryBackedHealthApplicationDependencies,
+    private readonly repository: PolicyAuthorizedRepositoryExecutionContext,
+    public readonly occurredAt: HealthCareCoordinationWriteScope['occurredAt']
+  ) {}
+
+  public findPerson(
+    personId: string
+  ): ReturnType<HealthCareCoordinationWriteScope['findPerson']> {
+    const found = this.dependencies.personRepository.findById(this.repository, asPersonId(personId));
+    return found.ok
+      ? { ok: true, value: found.value ? {
+          id: found.value.id,
+          familyId: found.value.familyId,
+          status: found.value.status
+        } : null }
+      : found;
+  }
+
+  public findAccount(
+    accountId: string
+  ): ReturnType<HealthCareCoordinationWriteScope['findAccount']> {
+    const found = this.dependencies.accountRepository.findById(this.repository, asUserId(accountId));
+    return found.ok
+      ? { ok: true, value: found.value ? {
+          id: found.value.id,
+          ...(found.value.personId ? { personId: found.value.personId } : {}),
+          role: found.value.role,
+          status: found.value.status
+        } : null }
+      : found;
+  }
+
+  public findCenter(key: HealthCareCenterKey): ReturnType<HealthCareCoordinationWriteScope['findCenter']> {
+    return this.dependencies.healthRepository.findHealthCareCenter(this.repository, key);
+  }
+
+  public findMutation(
+    key: HealthCareCenterKey,
+    clientOperationId: string
+  ): ReturnType<HealthCareCoordinationWriteScope['findMutation']> {
+    return this.dependencies.healthRepository.findHealthCareMutationByClientOperationId(
+      this.repository,
+      key,
+      clientOperationId
+    );
+  }
+
+  public insertMutation(
+    row: Parameters<HealthCareCoordinationWriteScope['insertMutation']>[0]
+  ): ReturnType<HealthCareCoordinationWriteScope['insertMutation']> {
+    return this.dependencies.healthRepository.insertHealthCareMutation(this.repository, row);
+  }
+
+  public insertCenter(
+    row: Parameters<HealthCareCoordinationWriteScope['insertCenter']>[0]
+  ): ReturnType<HealthCareCoordinationWriteScope['insertCenter']> {
+    return this.dependencies.healthRepository.insertHealthCareCenter(this.repository, row);
+  }
+
+  public saveCenter(
+    row: Parameters<HealthCareCoordinationWriteScope['saveCenter']>[0],
+    expectedRevision: number
+  ): ReturnType<HealthCareCoordinationWriteScope['saveCenter']> {
+    return this.dependencies.healthRepository.saveHealthCareCenter(this.repository, row, expectedRevision);
+  }
+
+  public insertEntry(
+    row: Parameters<HealthCareCoordinationWriteScope['insertEntry']>[0]
+  ): ReturnType<HealthCareCoordinationWriteScope['insertEntry']> {
+    return this.dependencies.healthRepository.insertHealthCareEntry(this.repository, row);
+  }
+
+  public findGrant(
+    key: HealthCareCenterKey,
+    grantId: string
+  ): ReturnType<HealthCareCoordinationWriteScope['findGrant']> {
+    return this.dependencies.healthRepository.findHealthCareAccessGrant(this.repository, key, grantId);
+  }
+
+  public findActiveGrantForActor(
+    key: HealthCareCenterKey
+  ): ReturnType<HealthCareCoordinationWriteScope['findActiveGrantForActor']> {
+    return this.dependencies.healthRepository.findActiveHealthCareAccessGrantForActor(
+      this.repository,
+      key,
+      this.occurredAt
+    );
+  }
+
+  public upsertGrant(
+    row: Parameters<HealthCareCoordinationWriteScope['upsertGrant']>[0],
+    expectedRevision: number | null
+  ): ReturnType<HealthCareCoordinationWriteScope['upsertGrant']> {
+    return this.dependencies.healthRepository.upsertHealthCareAccessGrant(
+      this.repository,
+      row,
+      expectedRevision
+    );
+  }
+
+  public upsertPermission(
+    row: Parameters<HealthCareCoordinationWriteScope['upsertPermission']>[0]
+  ): ReturnType<HealthCareCoordinationWriteScope['upsertPermission']> {
+    return this.dependencies.permissionRepository.upsert(this.repository, row);
+  }
+
+  public appendAudit(
+    input: Parameters<HealthCareCoordinationWriteScope['appendAudit']>[0]
+  ): ReturnType<HealthCareCoordinationWriteScope['appendAudit']> {
+    return this.dependencies.auditRepository.append(this.repository, input);
+  }
+
+  public enqueueEvent<TPayload>(event: DomainEvent<TPayload>): Result<void, AppError> {
+    return this.dependencies.outboxRepository.enqueue(this.repository, event);
+  }
+}
+
+export class RepositoryBackedHealthCareCoordinationUnitOfWork implements HealthCareCoordinationUnitOfWork {
+  public constructor(private readonly dependencies: RepositoryBackedHealthApplicationDependencies) {}
+
+  public execute<T>(
+    context: HealthApplicationContext,
+    intent: HealthPolicyIntent,
+    operation: (scope: HealthCareCoordinationWriteScope) => Result<T, AppError>
+  ): Promise<Result<T, AppError>> {
+    return executeGoverned(this.dependencies, context, intent, (authorization, enforcementPoint) =>
+      this.dependencies.transactionExecutor.execute(context.correlationId, (transaction) => {
+        const governedInput = { context, intent, authorization, transaction };
+        const established = establishGovernedTransaction(enforcementPoint, governedInput);
+        if (!established.ok) return established;
+        const repository = governedRepositoryContext(context, transaction, authorization, intent);
+        const result = operation(new RepositoryBackedHealthCareCoordinationWriteScope(
+          this.dependencies,
+          repository,
+          asIsoDateTime(authorization.receiptRecord.recordedAt)
         ));
         if (!result.ok) return result;
         assertActivePlatformPolicyTransactionContext(authorization, {

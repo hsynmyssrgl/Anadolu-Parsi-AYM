@@ -303,8 +303,8 @@ export const verifyFamilyEmergencyCardPortabilityBoundary = async () => {
     activeReady || completedReady
       || (laterLifecycle.planValid && laterLifecycle.ledgerValid && laterLifecycle.nextTaskValid));
   check('platform policy AST successor ratchet is exact green', astGate.status === 'PASS'
-    && astGate.privilegedSurfaces === 692 && astGate.exactAllowlistEntries === 692
-    && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 333 && astGate.directRoleAuthorizationBypasses === 0);
+    && astGate.privilegedSurfaces === 699 && astGate.exactAllowlistEntries === 699
+    && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 337 && astGate.directRoleAuthorizationBypasses === 0);
   check('platform capability successor ratchet is exact green', capabilityGate.status === 'PASS'
     && capabilityGate.capabilitySurfaces === 345 && capabilityGate.exactManifestSurfaces === 345);
   check('root package exposes boundary targeted contract and runtime commands', includesAll(

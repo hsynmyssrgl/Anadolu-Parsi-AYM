@@ -2235,6 +2235,204 @@ const unifiedAuthorizedSearchResult = (result: unknown): IpcIntegrationPolicyDec
   return accepted();
 };
 
+export const HEALTH_CARE_COORDINATION_IPC_CHANNELS = Object.freeze({
+  getCenter: 'healthCare:getCenter',
+  recordEntry: 'healthCare:recordEntry',
+  upsertGrant: 'healthCare:upsertGrant',
+  revokeGrant: 'healthCare:revokeGrant'
+} as const);
+const healthCareCoordinationChannels = new Set<string>(Object.values(HEALTH_CARE_COORDINATION_IPC_CHANNELS));
+const healthCareWriteChannels = new Set<string>([
+  HEALTH_CARE_COORDINATION_IPC_CHANNELS.recordEntry,
+  HEALTH_CARE_COORDINATION_IPC_CHANNELS.upsertGrant,
+  HEALTH_CARE_COORDINATION_IPC_CHANNELS.revokeGrant
+]);
+const healthCareEntryKinds = new Set<unknown>([
+  'allergy','chronic_condition','blood_type','vaccine','appointment','document_link','care_plan','care_task',
+  'medication_confirmation','transport','caregiver_shift','handover_note','blood_pressure','blood_glucose',
+  'weight','nutrition','hydration','wellbeing_check','help_request','fall_observation','emergency_observation','contact_action'
+]);
+const healthCareScopes = new Set<unknown>([
+  'emergency_summary','care_plan','medication','appointments','measurements','check_ins','alerts','contacts','documents'
+]);
+const healthCareStatuses = new Set<unknown>([
+  'active','scheduled','completed','cancelled','needs_help','observed','not_performed'
+]);
+const healthCareIdentifier = (value: unknown): value is string => typeof value === 'string'
+  && value === value.trim() && value.length >= 2 && value.length <= 160
+  && /^[A-Za-z0-9][A-Za-z0-9._:-]*$/u.test(value);
+const healthCareIso = (value: unknown): value is string => typeof value === 'string'
+  && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u.test(value)
+  && Number.isFinite(Date.parse(value));
+const healthCareRevision = (value: unknown): value is number => typeof value === 'number'
+  && Number.isSafeInteger(value) && value >= 0;
+const healthCareText = (value: unknown, minimum: number, maximum: number): value is string =>
+  typeof value === 'string' && value === value.normalize('NFKC') && value.trim() === value
+  && value.length >= minimum && value.length <= maximum && !/[\p{Cc}\p{Cf}\p{Cs}]/u.test(value);
+const healthCareExactRecord = (value: unknown, keys: readonly string[]): value is Record<string, unknown> => {
+  if (!isObject(value)) return false;
+  const ownKeys = Reflect.ownKeys(value);
+  if (ownKeys.length !== keys.length || ownKeys.some((key) => typeof key === 'symbol')) return false;
+  const allowed = new Set(keys);
+  return (ownKeys as string[]).every((key) => {
+    if (!allowed.has(key) || key === '__proto__' || key === 'prototype' || key === 'constructor') return false;
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    return Boolean(descriptor && !descriptor.get && !descriptor.set && 'value' in descriptor);
+  });
+};
+const healthCareCanonicalValues = (
+  value: unknown,
+  allowed: ReadonlySet<unknown>,
+  minimum: number,
+  maximum: number
+): value is readonly string[] => Array.isArray(value) && Object.getPrototypeOf(value) === Array.prototype
+  && value.length >= minimum && value.length <= maximum
+  && value.every((item) => typeof item === 'string' && allowed.has(item))
+  && new Set(value).size === value.length;
+const healthCareMeasurement = (value: unknown, bloodPressure: boolean): boolean =>
+  healthCareExactRecord(value, bloodPressure ? ['value','secondaryValue','unit'] : ['value','unit'])
+  && typeof value.value === 'number' && Number.isFinite(value.value) && value.value >= 0 && value.value <= 1_000_000_000
+  && (!bloodPressure || (typeof value.secondaryValue === 'number' && Number.isFinite(value.secondaryValue)
+    && value.secondaryValue >= 0 && value.secondaryValue <= 1_000_000_000))
+  && healthCareText(value.unit, 1, 32);
+const healthCareMutationInput = (value: Record<string, unknown>): boolean =>
+  healthCareIdentifier(value.ownerPersonId) && healthCareRevision(value.expectedRevision)
+  && healthCareIdentifier(value.clientOperationId);
+const healthCareInput = (channel: string, args: readonly unknown[]): IpcIntegrationPolicyDecision => {
+  if (args.length !== 1 || !isObject(args[0])) return rejected('HEALTH_CARE_OBJECT_REQUIRED', '$[0]');
+  const input = args[0];
+  if (channel === HEALTH_CARE_COORDINATION_IPC_CHANNELS.getCenter) {
+    return healthCareExactRecord(input, ['ownerPersonId']) && healthCareIdentifier(input.ownerPersonId)
+      ? accepted() : rejected('HEALTH_CARE_CENTER_INPUT_INVALID', '$[0]');
+  }
+  if (channel === HEALTH_CARE_COORDINATION_IPC_CHANNELS.recordEntry) {
+    const optionalKeys = [
+      ...(input.scheduledAt === undefined ? [] : ['scheduledAt']),
+      ...(input.note === undefined ? [] : ['note']),
+      ...(input.measurement === undefined ? [] : ['measurement']),
+      ...(input.relatedHealthRecordId === undefined ? [] : ['relatedHealthRecordId']),
+      ...(input.relatedMedicationPlanId === undefined ? [] : ['relatedMedicationPlanId']),
+      ...(input.relatedArchiveItemId === undefined ? [] : ['relatedArchiveItemId'])
+    ];
+    const keys = ['ownerPersonId','expectedRevision','clientOperationId','kind','title','status','occurredAt',...optionalKeys];
+    if (!healthCareExactRecord(input, keys) || !healthCareMutationInput(input)
+      || !healthCareEntryKinds.has(input.kind) || !healthCareText(input.title, 2, 160)
+      || !healthCareStatuses.has(input.status) || !healthCareIso(input.occurredAt)
+      || (input.scheduledAt !== undefined && !healthCareIso(input.scheduledAt))
+      || (input.note !== undefined && !healthCareText(input.note, 1, 4_096))
+      || (input.relatedHealthRecordId !== undefined && !healthCareIdentifier(input.relatedHealthRecordId))
+      || (input.relatedMedicationPlanId !== undefined && !healthCareIdentifier(input.relatedMedicationPlanId))
+      || (input.relatedArchiveItemId !== undefined && !healthCareIdentifier(input.relatedArchiveItemId))) {
+      return rejected('HEALTH_CARE_ENTRY_INPUT_INVALID', '$[0]');
+    }
+    const measurementKind = ['blood_pressure','blood_glucose','weight','nutrition','hydration'].includes(String(input.kind));
+    const measurementValid = measurementKind
+      ? healthCareMeasurement(input.measurement, input.kind === 'blood_pressure')
+      : input.measurement === undefined;
+    return measurementValid ? accepted() : rejected('HEALTH_CARE_MEASUREMENT_INPUT_INVALID', '$[0].measurement');
+  }
+  if (channel === HEALTH_CARE_COORDINATION_IPC_CHANNELS.upsertGrant) {
+    const keys = input.endsAt === undefined
+      ? ['ownerPersonId','expectedRevision','clientOperationId','grantId','caregiverAccountId','allowedScopes','actions','startsAt']
+      : ['ownerPersonId','expectedRevision','clientOperationId','grantId','caregiverAccountId','allowedScopes','actions','startsAt','endsAt'];
+    const valid = healthCareExactRecord(input, keys) && healthCareMutationInput(input)
+      && healthCareIdentifier(input.grantId) && healthCareIdentifier(input.caregiverAccountId)
+      && healthCareCanonicalValues(input.allowedScopes, healthCareScopes, 1, 9)
+      && healthCareCanonicalValues(input.actions, new Set(['read','record']), 1, 2)
+      && input.actions.includes('read') && healthCareIso(input.startsAt)
+      && (input.endsAt === undefined || (healthCareIso(input.endsAt) && Date.parse(input.endsAt) >= Date.parse(input.startsAt)));
+    return valid ? accepted() : rejected('HEALTH_CARE_GRANT_INPUT_INVALID', '$[0]');
+  }
+  if (channel === HEALTH_CARE_COORDINATION_IPC_CHANNELS.revokeGrant) {
+    return healthCareExactRecord(input, ['ownerPersonId','expectedRevision','clientOperationId','grantId'])
+      && healthCareMutationInput(input) && healthCareIdentifier(input.grantId)
+      ? accepted() : rejected('HEALTH_CARE_GRANT_REVOKE_INPUT_INVALID', '$[0]');
+  }
+  return rejected('UNKNOWN_IPC_CHANNEL', '$');
+};
+const healthCareEntryResult = (value: unknown): boolean => {
+  if (!isObject(value)) return false;
+  const optionalKeys = [
+    ...(value.scheduledAt === undefined ? [] : ['scheduledAt']),
+    ...(value.note === undefined ? [] : ['note']),
+    ...(value.measurement === undefined ? [] : ['measurement']),
+    ...(value.relatedHealthRecordId === undefined ? [] : ['relatedHealthRecordId']),
+    ...(value.relatedMedicationPlanId === undefined ? [] : ['relatedMedicationPlanId']),
+    ...(value.relatedArchiveItemId === undefined ? [] : ['relatedArchiveItemId'])
+  ];
+  const keys = ['id','centerId','ownerPersonId','kind','accessScope','title','status','occurredAt','recordedBy','source','createdAt',...optionalKeys];
+  return healthCareExactRecord(value, keys) && healthCareIdentifier(value.id) && healthCareIdentifier(value.centerId)
+    && healthCareIdentifier(value.ownerPersonId) && healthCareEntryKinds.has(value.kind) && healthCareScopes.has(value.accessScope)
+    && healthCareText(value.title, 2, 160) && healthCareStatuses.has(value.status) && healthCareIso(value.occurredAt)
+    && (value.scheduledAt === undefined || healthCareIso(value.scheduledAt))
+    && (value.note === undefined || healthCareText(value.note, 1, 4_096))
+    && (value.measurement === undefined || healthCareMeasurement(value.measurement, value.kind === 'blood_pressure'))
+    && (value.relatedHealthRecordId === undefined || healthCareIdentifier(value.relatedHealthRecordId))
+    && (value.relatedMedicationPlanId === undefined || healthCareIdentifier(value.relatedMedicationPlanId))
+    && (value.relatedArchiveItemId === undefined || healthCareIdentifier(value.relatedArchiveItemId))
+    && (value.recordedBy === 'owner' || value.recordedBy === 'caregiver' || value.recordedBy === 'family_admin')
+    && value.source === 'manual_local' && healthCareIso(value.createdAt);
+};
+const healthCareGrantResult = (value: unknown): boolean => {
+  if (!isObject(value)) return false;
+  const optionalKeys = [
+    ...(value.endsAt === undefined ? [] : ['endsAt']),
+    ...(value.revokedAt === undefined ? [] : ['revokedAt'])
+  ];
+  return healthCareExactRecord(value, [
+    'id','centerId','ownerPersonId','caregiverAccountId','caregiverPersonId','allowedScopes','actions',
+    'state','startsAt','revision','createdAt','updatedAt',...optionalKeys
+  ]) && healthCareIdentifier(value.id) && healthCareIdentifier(value.centerId) && healthCareIdentifier(value.ownerPersonId)
+    && healthCareIdentifier(value.caregiverAccountId) && healthCareIdentifier(value.caregiverPersonId)
+    && healthCareCanonicalValues(value.allowedScopes, healthCareScopes, 1, 9)
+    && healthCareCanonicalValues(value.actions, new Set(['read','record']), 1, 2)
+    && (value.state === 'active' || value.state === 'revoked') && healthCareIso(value.startsAt)
+    && (value.endsAt === undefined || healthCareIso(value.endsAt)) && healthCareRevision(value.revision) && value.revision >= 1
+    && healthCareIso(value.createdAt) && healthCareIso(value.updatedAt)
+    && ((value.state === 'active' && value.revokedAt === undefined) || (value.state === 'revoked' && healthCareIso(value.revokedAt)));
+};
+const healthCareCenterResult = (value: unknown): boolean => {
+  if (!healthCareExactRecord(value, [
+    'schemaVersion','centerId','ownerPersonId','revision','entries','caregiverGrants','emergencySummary',
+    'visibleScopes','canRecord','truncated','truth','generatedAt'
+  ]) || value.schemaVersion !== 1 || !healthCareIdentifier(value.centerId) || !healthCareIdentifier(value.ownerPersonId)
+    || !healthCareRevision(value.revision) || !Array.isArray(value.entries) || value.entries.length > 500
+    || !value.entries.every(healthCareEntryResult) || !Array.isArray(value.caregiverGrants) || value.caregiverGrants.length > 256
+    || !value.caregiverGrants.every(healthCareGrantResult)
+    || !healthCareCanonicalValues(value.visibleScopes, healthCareScopes, 1, 9)
+    || typeof value.canRecord !== 'boolean' || typeof value.truncated !== 'boolean' || !healthCareIso(value.generatedAt)) return false;
+  const summary = value.emergencySummary;
+  const summaryKeys = isObject(summary) && summary.bloodType === undefined
+    ? ['allergies','chronicConditions','activeMedicationConfirmations']
+    : ['allergies','chronicConditions','bloodType','activeMedicationConfirmations'];
+  if (!healthCareExactRecord(summary, summaryKeys)
+    || !Array.isArray(summary.allergies) || !summary.allergies.every(healthCareEntryResult)
+    || !Array.isArray(summary.chronicConditions) || !summary.chronicConditions.every(healthCareEntryResult)
+    || !(summary.bloodType === undefined || healthCareEntryResult(summary.bloodType))
+    || !Array.isArray(summary.activeMedicationConfirmations) || !summary.activeMedicationConfirmations.every(healthCareEntryResult)) return false;
+  return healthCareExactRecord(value.truth, [
+    'localOnly','medicalVerification','healthRegistryLookup','sensorIntegration','helpDelivery',
+    'emergencyServiceContact','remoteAssistance','minimumNecessaryFiltered','largeTextPresentationAvailable'
+  ]) && value.truth.localOnly === true && value.truth.medicalVerification === 'not_performed'
+    && value.truth.healthRegistryLookup === 'not_performed' && value.truth.sensorIntegration === 'not_configured'
+    && value.truth.helpDelivery === 'not_performed' && value.truth.emergencyServiceContact === 'not_performed'
+    && value.truth.remoteAssistance === 'not_configured' && value.truth.minimumNecessaryFiltered === true
+    && value.truth.largeTextPresentationAvailable === true;
+};
+const healthCareReceiptResult = (value: unknown): boolean => healthCareExactRecord(value, [
+  'centerId','mutationKind','previousRevision','revision','occurredAt','replayed','localOnly','externalDelivery'
+]) && healthCareIdentifier(value.centerId)
+  && (value.mutationKind === 'entry_record' || value.mutationKind === 'grant_upsert' || value.mutationKind === 'grant_revoke')
+  && healthCareRevision(value.previousRevision) && healthCareRevision(value.revision)
+  && value.revision === value.previousRevision + 1 && healthCareIso(value.occurredAt)
+  && typeof value.replayed === 'boolean' && value.localOnly === true && value.externalDelivery === 'not_performed';
+const healthCareResult = (channel: string, result: unknown): IpcIntegrationPolicyDecision => {
+  const valid = channel === HEALTH_CARE_COORDINATION_IPC_CHANNELS.getCenter
+    ? healthCareCenterResult(result)
+    : healthCareWriteChannels.has(channel) && healthCareReceiptResult(result);
+  return valid ? accepted() : rejected('HEALTH_CARE_RESULT_INVALID', '$result');
+};
+
 export const ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS = Object.freeze({
   listEvidence: 'archive:listRelationEvidence',
   listEvidenceHistory: 'archive:listRelationEvidenceHistory',
@@ -2856,6 +3054,8 @@ const policyServiceAvailabilityResult = (
 
 export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unknown): IpcIntegrationPolicyDecision => {
   if (channel === UNIFIED_AUTHORIZED_SEARCH_IPC_CHANNEL) return unifiedAuthorizedSearchResult(result);
+  if (healthCareCoordinationChannels.has(channel)) return healthCareResult(channel, result);
+  if (channel.startsWith('healthCare:')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
   if (archiveEvidenceMediaChannels.has(channel)) return archiveEvidenceMediaResult(channel, result);
   if (channel.startsWith('archive:') && (channel.includes('RelationEvidence') || channel === 'archive:addVersion')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
   if (channel === 'archive:reattestLegacyOwnership') {
@@ -2890,6 +3090,8 @@ export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unkn
 
 export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unknown[]): IpcIntegrationPolicyDecision => {
   if (channel === UNIFIED_AUTHORIZED_SEARCH_IPC_CHANNEL) return unifiedAuthorizedSearchInput(args);
+  if (healthCareCoordinationChannels.has(channel)) return healthCareInput(channel, args);
+  if (channel.startsWith('healthCare:')) return rejected('UNKNOWN_IPC_CHANNEL', '$');
   if (archiveEvidenceMediaChannels.has(channel)) return archiveEvidenceMediaInput(channel, args);
   if (channel.startsWith('archive:') && (channel.includes('RelationEvidence') || channel === 'archive:addVersion')) return rejected('UNKNOWN_IPC_CHANNEL', '$');
   if (localOcrChannels.has(channel)) return localOcrInput(channel, args);

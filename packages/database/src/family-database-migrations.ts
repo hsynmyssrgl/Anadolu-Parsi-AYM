@@ -13166,6 +13166,291 @@ END;
 UPDATE database_metadata SET value='REVISION-33-R-ARCHIVE-EVIDENCE-MEDIA-SEARCH',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 
+const healthCareCoordinationElderSupportSql = `
+CREATE TABLE health_care_mutations (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 128),
+  center_id TEXT NOT NULL CHECK(length(trim(center_id)) BETWEEN 1 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  mutation_kind TEXT NOT NULL CHECK(mutation_kind IN ('entry_record','grant_upsert','grant_revoke')),
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 160),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  expected_revision INTEGER NOT NULL CHECK(expected_revision>=0),
+  revision INTEGER NOT NULL CHECK(revision=expected_revision+1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  target_id TEXT NOT NULL CHECK(length(trim(target_id)) BETWEEN 1 AND 256),
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL UNIQUE REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version>=1),
+  policy_receipt_nonce TEXT NOT NULL CHECK(length(trim(policy_receipt_nonce)) BETWEEN 1 AND 256),
+  policy_correlation_id TEXT NOT NULL CHECK(length(trim(policy_correlation_id)) BETWEEN 1 AND 256),
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type='health_care_center'),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action IN ('create','update')),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='health.write'),
+  UNIQUE(family_id,actor_account_id,client_operation_id),
+  CHECK(center_id='health-care-center:'||owner_person_id),
+  CHECK(policy_resource_id=center_id)
+) STRICT;
+
+CREATE INDEX idx_health_care_mutations_center
+ON health_care_mutations(center_id,revision DESC,id);
+
+CREATE TABLE health_care_centers (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL UNIQUE REFERENCES people(id) ON DELETE RESTRICT,
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES health_care_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z' AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND updated_at GLOB '????-??-??T??:??:??.???Z' AND julianday(updated_at) IS NOT NULL),
+  CHECK(id='health-care-center:'||owner_person_id),
+  CHECK(updated_at>=created_at)
+) STRICT;
+
+CREATE TABLE health_care_entries (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 256),
+  center_id TEXT NOT NULL REFERENCES health_care_centers(id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  kind TEXT NOT NULL CHECK(kind IN (
+    'allergy','chronic_condition','blood_type','vaccine','appointment','document_link',
+    'care_plan','care_task','medication_confirmation','transport','caregiver_shift','handover_note',
+    'blood_pressure','blood_glucose','weight','nutrition','hydration','wellbeing_check','help_request',
+    'fall_observation','emergency_observation','contact_action'
+  )),
+  access_scope TEXT NOT NULL CHECK(access_scope IN (
+    'emergency_summary','care_plan','medication','appointments','measurements','check_ins','alerts','contacts','documents'
+  )),
+  title TEXT NOT NULL CHECK(length(trim(title)) BETWEEN 2 AND 160),
+  status TEXT NOT NULL CHECK(status IN ('active','scheduled','completed','cancelled','needs_help','observed','not_performed')),
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+  scheduled_at TEXT CHECK(scheduled_at IS NULL OR (length(scheduled_at)=24 AND scheduled_at GLOB '????-??-??T??:??:??.???Z' AND julianday(scheduled_at) IS NOT NULL)),
+  note TEXT CHECK(note IS NULL OR length(note)<=4096),
+  measurement_value REAL CHECK(measurement_value IS NULL OR (measurement_value>=0 AND measurement_value<=1000000000)),
+  measurement_secondary_value REAL CHECK(measurement_secondary_value IS NULL OR (measurement_secondary_value>=0 AND measurement_secondary_value<=1000000000)),
+  measurement_unit TEXT CHECK(measurement_unit IS NULL OR length(trim(measurement_unit)) BETWEEN 1 AND 32),
+  related_health_record_id TEXT,
+  related_medication_plan_id TEXT,
+  related_archive_item_id TEXT,
+  recorded_by_role TEXT NOT NULL CHECK(recorded_by_role IN ('owner','caregiver','family_admin')),
+  recorded_by_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  recorded_by_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  mutation_id TEXT NOT NULL UNIQUE REFERENCES health_care_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z' AND julianday(created_at) IS NOT NULL),
+  CHECK((measurement_value IS NULL AND measurement_secondary_value IS NULL AND measurement_unit IS NULL)
+    OR (measurement_value IS NOT NULL AND measurement_unit IS NOT NULL)),
+  CHECK((kind='blood_pressure' AND measurement_value IS NOT NULL AND measurement_secondary_value IS NOT NULL)
+    OR (kind IN ('blood_glucose','weight','nutrition','hydration') AND measurement_value IS NOT NULL AND measurement_secondary_value IS NULL)
+    OR (kind NOT IN ('blood_pressure','blood_glucose','weight','nutrition','hydration') AND measurement_value IS NULL AND measurement_secondary_value IS NULL AND measurement_unit IS NULL))
+) STRICT;
+
+CREATE INDEX idx_health_care_entries_center
+ON health_care_entries(center_id,occurred_at DESC,id);
+CREATE INDEX idx_health_care_entries_scope
+ON health_care_entries(center_id,access_scope,occurred_at DESC);
+
+CREATE TABLE health_care_access_grants (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 1 AND 128),
+  center_id TEXT NOT NULL REFERENCES health_care_centers(id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  caregiver_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  caregiver_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  allowed_scopes_json TEXT NOT NULL CHECK(json_valid(allowed_scopes_json) AND json_type(allowed_scopes_json)='array' AND json_array_length(allowed_scopes_json) BETWEEN 1 AND 9),
+  actions_json TEXT NOT NULL CHECK(json_valid(actions_json) AND json_type(actions_json)='array' AND json_array_length(actions_json) BETWEEN 1 AND 2),
+  state TEXT NOT NULL CHECK(state IN ('active','revoked')),
+  starts_at TEXT NOT NULL CHECK(length(starts_at)=24 AND starts_at GLOB '????-??-??T??:??:??.???Z' AND julianday(starts_at) IS NOT NULL),
+  ends_at TEXT CHECK(ends_at IS NULL OR (length(ends_at)=24 AND ends_at GLOB '????-??-??T??:??:??.???Z' AND julianday(ends_at) IS NOT NULL)),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  mutation_id TEXT NOT NULL UNIQUE REFERENCES health_care_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z' AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND updated_at GLOB '????-??-??T??:??:??.???Z' AND julianday(updated_at) IS NOT NULL),
+  revoked_at TEXT CHECK(revoked_at IS NULL OR (length(revoked_at)=24 AND revoked_at GLOB '????-??-??T??:??:??.???Z' AND julianday(revoked_at) IS NOT NULL)),
+  UNIQUE(center_id,caregiver_account_id),
+  CHECK(ends_at IS NULL OR ends_at>=starts_at),
+  CHECK((state='active' AND revoked_at IS NULL) OR (state='revoked' AND revoked_at=updated_at))
+) STRICT;
+
+CREATE INDEX idx_health_care_grants_subject
+ON health_care_access_grants(caregiver_account_id,state,starts_at,ends_at);
+
+CREATE TRIGGER trg_33s_health_care_mutation_insert
+BEFORE INSERT ON health_care_mutations
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM accounts account
+  JOIN people actor ON actor.id=NEW.actor_person_id AND actor.family_id=NEW.family_id AND actor.status='active'
+  JOIN people owner ON owner.id=NEW.owner_person_id AND owner.family_id=NEW.family_id AND owner.status='active'
+  JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+  JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+  WHERE account.id=NEW.actor_account_id AND account.status='active' AND account.person_id=NEW.actor_person_id
+    AND receipt.receipt_version=NEW.policy_receipt_version AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id AND receipt.action=NEW.policy_action
+    AND receipt.capability=NEW.policy_capability AND receipt.recorded_at=NEW.occurred_at
+    AND json_extract(receipt.record_json,'$.request.purpose')='care'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.actor_account_id
+    AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.actor_person_id
+    AND (
+      (NEW.expected_revision=0 AND NOT EXISTS(SELECT 1 FROM health_care_centers center WHERE center.id=NEW.center_id))
+      OR
+      (NEW.expected_revision>0 AND EXISTS(
+        SELECT 1 FROM health_care_centers center
+        WHERE center.id=NEW.center_id AND center.family_id=NEW.family_id
+          AND center.owner_person_id=NEW.owner_person_id AND center.revision=NEW.expected_revision
+      ))
+    )
+    AND (
+      NEW.actor_person_id=NEW.owner_person_id
+      OR EXISTS(SELECT 1 FROM json_each(json_extract(receipt.record_json,'$.request.subject.roles')) role WHERE role.value='family_admin')
+      OR EXISTS(
+        SELECT 1 FROM health_care_access_grants grant_row
+        WHERE grant_row.center_id=NEW.center_id AND grant_row.caregiver_account_id=NEW.actor_account_id
+          AND grant_row.caregiver_person_id=NEW.actor_person_id AND grant_row.state='active'
+          AND grant_row.starts_at<=NEW.occurred_at AND (grant_row.ends_at IS NULL OR grant_row.ends_at>=NEW.occurred_at)
+          AND NEW.mutation_kind='entry_record'
+          AND EXISTS(SELECT 1 FROM json_each(grant_row.actions_json) action WHERE action.value='record')
+      )
+    )
+)
+BEGIN SELECT RAISE(ABORT,'33-S health care mutation requires an exact owner or minimum-necessary caregiver receipt'); END;
+
+CREATE TRIGGER trg_33s_health_care_center_insert
+BEFORE INSERT ON health_care_centers
+WHEN NEW.revision<>1 OR NOT EXISTS(
+  SELECT 1 FROM health_care_mutations mutation
+  WHERE mutation.id=NEW.last_mutation_id AND mutation.center_id=NEW.id
+    AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+    AND mutation.expected_revision=0 AND mutation.revision=NEW.revision
+    AND mutation.state_fingerprint=NEW.state_fingerprint
+    AND mutation.occurred_at=NEW.created_at AND NEW.updated_at=NEW.created_at
+)
+BEGIN SELECT RAISE(ABORT,'33-S health care center requires its exact create mutation'); END;
+
+CREATE TRIGGER trg_33s_health_care_center_update
+BEFORE UPDATE ON health_care_centers
+WHEN NEW.id IS NOT OLD.id OR NEW.family_id IS NOT OLD.family_id OR NEW.owner_person_id IS NOT OLD.owner_person_id
+  OR NEW.created_at IS NOT OLD.created_at OR NEW.revision<>OLD.revision+1
+  OR NOT EXISTS(
+    SELECT 1 FROM health_care_mutations mutation
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.center_id=NEW.id
+      AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+      AND mutation.expected_revision=OLD.revision AND mutation.revision=NEW.revision
+      AND mutation.state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.updated_at
+  )
+BEGIN SELECT RAISE(ABORT,'33-S health care center update requires its exact next mutation'); END;
+
+CREATE TRIGGER trg_33s_health_care_entry_insert
+BEFORE INSERT ON health_care_entries
+WHEN NOT EXISTS(
+  SELECT 1 FROM health_care_mutations mutation
+  JOIN health_care_centers center ON center.id=mutation.center_id
+  WHERE mutation.id=NEW.mutation_id AND mutation.center_id=NEW.center_id
+    AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+    AND mutation.mutation_kind='entry_record' AND mutation.target_id=NEW.id
+    AND mutation.actor_account_id=NEW.recorded_by_account_id AND mutation.actor_person_id=NEW.recorded_by_person_id
+    AND mutation.occurred_at=NEW.created_at AND center.last_mutation_id=mutation.id
+    AND center.state_fingerprint=mutation.state_fingerprint AND center.revision=mutation.revision
+    AND ((NEW.recorded_by_person_id=NEW.owner_person_id AND NEW.recorded_by_role='owner')
+      OR (NEW.recorded_by_role='family_admin' AND EXISTS(
+        SELECT 1 FROM platform_policy_transaction_receipts receipt
+        WHERE receipt.receipt_hash=mutation.policy_receipt_hash
+          AND EXISTS(SELECT 1 FROM json_each(json_extract(receipt.record_json,'$.request.subject.roles')) role WHERE role.value='family_admin')
+      ))
+      OR (NEW.recorded_by_role='caregiver' AND EXISTS(
+        SELECT 1 FROM health_care_access_grants grant_row
+        WHERE grant_row.center_id=NEW.center_id AND grant_row.caregiver_account_id=NEW.recorded_by_account_id
+          AND grant_row.caregiver_person_id=NEW.recorded_by_person_id AND grant_row.state='active'
+          AND grant_row.starts_at<=NEW.created_at AND (grant_row.ends_at IS NULL OR grant_row.ends_at>=NEW.created_at)
+          AND EXISTS(SELECT 1 FROM json_each(grant_row.actions_json) action WHERE action.value='record')
+          AND EXISTS(SELECT 1 FROM json_each(grant_row.allowed_scopes_json) scope WHERE scope.value=NEW.access_scope)
+      )))
+    AND (NEW.related_health_record_id IS NULL OR EXISTS(
+      SELECT 1 FROM health_records health WHERE health.id=NEW.related_health_record_id AND health.family_id=NEW.family_id AND health.owner_person_id=NEW.owner_person_id
+    ))
+    AND (NEW.related_medication_plan_id IS NULL OR EXISTS(
+      SELECT 1 FROM medication_plans medication WHERE medication.id=NEW.related_medication_plan_id AND medication.family_id=NEW.family_id AND medication.owner_person_id=NEW.owner_person_id
+    ))
+    AND (NEW.related_archive_item_id IS NULL OR EXISTS(
+      SELECT 1 FROM archive_items archive WHERE archive.id=NEW.related_archive_item_id AND archive.family_id=NEW.family_id AND archive.destroyed_at IS NULL
+    ))
+)
+BEGIN SELECT RAISE(ABORT,'33-S health care entry requires exact center state, links and caregiver scope'); END;
+
+CREATE TRIGGER trg_33s_health_care_grant_insert
+BEFORE INSERT ON health_care_access_grants
+WHEN EXISTS(SELECT 1 FROM json_each(NEW.allowed_scopes_json) scope WHERE scope.value NOT IN (
+  'emergency_summary','care_plan','medication','appointments','measurements','check_ins','alerts','contacts','documents'
+)) OR EXISTS(SELECT 1 FROM json_each(NEW.actions_json) action WHERE action.value NOT IN ('read','record'))
+  OR (SELECT COUNT(*) FROM json_each(NEW.allowed_scopes_json))<>(SELECT COUNT(DISTINCT value) FROM json_each(NEW.allowed_scopes_json))
+  OR (SELECT COUNT(*) FROM json_each(NEW.actions_json))<>(SELECT COUNT(DISTINCT value) FROM json_each(NEW.actions_json))
+  OR NOT EXISTS(
+    SELECT 1 FROM health_care_mutations mutation
+    JOIN health_care_centers center ON center.id=mutation.center_id
+    JOIN accounts caregiver ON caregiver.id=NEW.caregiver_account_id AND caregiver.person_id=NEW.caregiver_person_id AND caregiver.status='active'
+    JOIN people caregiver_person ON caregiver_person.id=NEW.caregiver_person_id AND caregiver_person.family_id=NEW.family_id AND caregiver_person.status='active'
+    JOIN object_permissions permission ON permission.id='health-care-permission:'||NEW.id
+    WHERE mutation.id=NEW.mutation_id AND mutation.center_id=NEW.center_id
+      AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+      AND mutation.mutation_kind='grant_upsert' AND mutation.target_id=NEW.id
+      AND mutation.occurred_at=NEW.created_at AND center.last_mutation_id=mutation.id AND center.revision=mutation.revision
+      AND permission.subject_account_id=NEW.caregiver_account_id
+      AND permission.resource_type='health_care_center' AND permission.resource_id=NEW.center_id
+      AND permission.effect='allow' AND permission.purpose='care'
+      AND permission.starts_at=NEW.starts_at AND permission.ends_at IS NEW.ends_at
+      AND EXISTS(SELECT 1 FROM json_each(permission.actions) action WHERE action.value='read')
+      AND (NOT EXISTS(SELECT 1 FROM json_each(NEW.actions_json) action WHERE action.value='record')
+        OR EXISTS(SELECT 1 FROM json_each(permission.actions) action WHERE action.value='update'))
+  )
+BEGIN SELECT RAISE(ABORT,'33-S caregiver grant requires exact active caregiver, mutation and object permission'); END;
+
+CREATE TRIGGER trg_33s_health_care_grant_update
+BEFORE UPDATE ON health_care_access_grants
+WHEN NEW.id IS NOT OLD.id OR NEW.center_id IS NOT OLD.center_id OR NEW.family_id IS NOT OLD.family_id
+  OR NEW.owner_person_id IS NOT OLD.owner_person_id OR NEW.created_at IS NOT OLD.created_at
+  OR NEW.revision<>OLD.revision+1
+  OR EXISTS(SELECT 1 FROM json_each(NEW.allowed_scopes_json) scope WHERE scope.value NOT IN (
+    'emergency_summary','care_plan','medication','appointments','measurements','check_ins','alerts','contacts','documents'
+  )) OR EXISTS(SELECT 1 FROM json_each(NEW.actions_json) action WHERE action.value NOT IN ('read','record'))
+  OR NOT EXISTS(
+    SELECT 1 FROM health_care_mutations mutation
+    JOIN health_care_centers center ON center.id=mutation.center_id
+    JOIN object_permissions permission ON permission.id='health-care-permission:'||NEW.id
+    WHERE mutation.id=NEW.mutation_id AND mutation.center_id=NEW.center_id
+      AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+      AND mutation.target_id=NEW.id AND mutation.expected_revision=center.revision-1 AND mutation.revision=center.revision
+      AND center.last_mutation_id=mutation.id AND mutation.occurred_at=NEW.updated_at
+      AND ((mutation.mutation_kind='grant_upsert' AND NEW.state='active' AND permission.effect='allow')
+        OR (mutation.mutation_kind='grant_revoke' AND OLD.state='active' AND NEW.state='revoked' AND permission.effect='deny'))
+      AND permission.subject_account_id=NEW.caregiver_account_id
+      AND permission.resource_type='health_care_center' AND permission.resource_id=NEW.center_id
+      AND permission.purpose='care'
+  )
+BEGIN SELECT RAISE(ABORT,'33-S caregiver grant update requires an exact permission-bound mutation'); END;
+
+CREATE TRIGGER trg_33s_health_care_center_delete
+BEFORE DELETE ON health_care_centers BEGIN SELECT RAISE(ABORT,'33-S health care center is durable'); END;
+CREATE TRIGGER trg_33s_health_care_entry_update
+BEFORE UPDATE ON health_care_entries BEGIN SELECT RAISE(ABORT,'33-S health care entries are immutable'); END;
+CREATE TRIGGER trg_33s_health_care_entry_delete
+BEFORE DELETE ON health_care_entries BEGIN SELECT RAISE(ABORT,'33-S health care entries are durable'); END;
+CREATE TRIGGER trg_33s_health_care_mutation_update
+BEFORE UPDATE ON health_care_mutations BEGIN SELECT RAISE(ABORT,'33-S health care mutation ledger is immutable'); END;
+CREATE TRIGGER trg_33s_health_care_mutation_delete
+BEFORE DELETE ON health_care_mutations BEGIN SELECT RAISE(ABORT,'33-S health care mutation ledger is durable'); END;
+CREATE TRIGGER trg_33s_health_care_grant_delete
+BEFORE DELETE ON health_care_access_grants BEGIN SELECT RAISE(ABORT,'33-S caregiver grant history is durable'); END;
+
+UPDATE database_metadata SET value='REVISION-33-S-HEALTH-CARE-COORDINATION',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -13262,7 +13547,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(93, 'identity_access_credentials', identityAccessCredentialLedgerSql),
   createMigrationDefinition(94, 'local_governed_ocr', localGovernedOcrLedgerSql),
   createMigrationDefinition(95, 'legacy_archive_ownership_reattestation', legacyArchiveOwnershipReattestationSql),
-  createMigrationDefinition(96, 'archive_evidence_relations_media_search', archiveEvidenceRelationsMediaLifecycleSql)
+  createMigrationDefinition(96, 'archive_evidence_relations_media_search', archiveEvidenceRelationsMediaLifecycleSql),
+  createMigrationDefinition(97, 'health_care_coordination_elder_support', healthCareCoordinationElderSupportSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

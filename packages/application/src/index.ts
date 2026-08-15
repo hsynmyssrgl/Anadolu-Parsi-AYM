@@ -104,4 +104,5 @@ export * from './privacy-ownership-data-rights-use-cases.js';
 export * from './identity-access-credential-use-cases.js';
 export * from './local-governed-ocr-use-cases.js';
 export * from './unified-authorized-search-use-cases.js';
+export * from './health-care-coordination-use-cases.js';
 export * from './archive-evidence-media-use-cases.js';

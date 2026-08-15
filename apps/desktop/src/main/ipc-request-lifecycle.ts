@@ -152,6 +152,18 @@ const archiveEvidenceChannels = new Set<string>([
   ...archiveEvidenceReadChannels,
   ...archiveEvidenceWriteChannels
 ]);
+const healthCareCoordinationReadChannels = new Set<string>([
+  'healthCare:getCenter'
+]);
+const healthCareCoordinationWriteChannels = new Set<string>([
+  'healthCare:recordEntry',
+  'healthCare:upsertGrant',
+  'healthCare:revokeGrant'
+]);
+const healthCareCoordinationChannels = new Set<string>([
+  ...healthCareCoordinationReadChannels,
+  ...healthCareCoordinationWriteChannels
+]);
 
 const cancellableNetworkChannels = new Set<string>([
   'dataLifecycle:runRevocationSync'
@@ -163,6 +175,12 @@ const cancellableInteractiveAuthenticationChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLifecyclePolicy => {
+  if (healthCareCoordinationReadChannels.has(channel)) {
+    return Object.freeze({ cancellable: true, latestWins: true, timeoutMs: 10_000 });
+  }
+  if (healthCareCoordinationWriteChannels.has(channel)) {
+    return Object.freeze({ cancellable: false, latestWins: false, timeoutMs: 0 });
+  }
   if (archiveEvidenceReadChannels.has(channel)) {
     return Object.freeze({ cancellable: true, latestWins: true, timeoutMs: 10_000 });
   }
@@ -243,6 +261,9 @@ const standardAdmissionChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestAdmissionPolicy = (channel: string): IpcRequestAdmissionPolicy => {
+  if (healthCareCoordinationChannels.has(channel)) {
+    return Object.freeze({ enabled:true, priority:'interactive', priorityWeight:100, maxConcurrentPerSender:2, maxConcurrentPerChannel:1, maxQueuedPerSender:4, queueTimeoutMs:2_500 });
+  }
   if (archiveEvidenceChannels.has(channel)) {
     return Object.freeze({ enabled:true, priority:'interactive', priorityWeight:100, maxConcurrentPerSender:2, maxConcurrentPerChannel:1, maxQueuedPerSender:4, queueTimeoutMs:2_500 });
   }
@@ -344,6 +365,12 @@ export interface IpcRequestRatePolicy {
 }
 
 export const resolveIpcRequestRatePolicy = (channel: string): IpcRequestRatePolicy => {
+  if (healthCareCoordinationReadChannels.has(channel)) {
+    return Object.freeze({ enabled: true, maxRequestsPerWindow: 60, windowMs: 60_000 });
+  }
+  if (healthCareCoordinationWriteChannels.has(channel)) {
+    return Object.freeze({ enabled: true, maxRequestsPerWindow: 16, windowMs: 60_000 });
+  }
   if (archiveEvidenceReadChannels.has(channel)) {
     return Object.freeze({ enabled: true, maxRequestsPerWindow: 60, windowMs: 60_000 });
   }

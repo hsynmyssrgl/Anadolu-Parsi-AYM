@@ -9,7 +9,7 @@
     "parserVersion": "7.29.8",
     "syntaxModel": "TYPESCRIPT_AST",
     "productionSourceZones": 18,
-    "scannedFiles": 447,
+    "scannedFiles": 450,
     "capabilitySurfaces": 345,
     "exactManifestEntries": 345,
     "exactManifestSha256": "1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e",
@@ -80,7 +80,7 @@
   ],
   "closureSummary": {
     "reviewedProductionSourceZones": 18,
-    "reviewedProductionFiles": 447,
+    "reviewedProductionFiles": 450,
     "reviewedCapabilitySurfaces": 345,
     "exactManifestEntries": 345,
     "undeclaredCapabilities": 0,

@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "id": "33-S-HEALTH-CARE-COORDINATION-ELDERLY-SUPPORT-LEDGER",
+  "step": "33-S",
+  "decision": "DEC-230",
+  "title": "Health care coordination and elderly support ledger",
+  "status": "PLANNED",
+  "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+  "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+  "requirements": [
+    "B5-01",
+    "B5-02",
+    "EXT-021",
+    "EXT-023",
+    "EXT-024",
+    "EXT-025",
+    "EXT-026",
+    "EXT-027",
+    "EXT-028",
+    "EXT-029"
+  ],
+  "dependsOn": ["33-O", "33-N"],
+  "roadmapStatus": "PLANNED",
+  "registrySemantics": {
+    "acceptedScopeRegistryAuthority": "ATOMIC_CLOSURE_STATE",
+    "registryMutationPerformedByStarter": false,
+    "roadmapMutationPerformedByStarter": false,
+    "planOrLedgerActivationPerformedByStarter": false,
+    "activePredecessor": "33-P",
+    "currentOpenStatusesIntentional": true,
+    "registryEvidenceMustRemainFalseUntilClosure": true
+  },
+  "implementedModel": {
+    "personBoundHealthCareCenter": {
+      "status": "PARTIAL_LOCAL_COMPOSED_AND_TESTED_ACCEPTANCE_INCOMPLETE",
+      "centralPepReceiptFenceRequired": true,
+      "optimisticRevisionRequired": true,
+      "idempotentClientOperationRequired": true,
+      "immutableMutationLedger": true,
+      "entryLimit": 500,
+      "grantLimit": 256
+    },
+    "caregiverMinimumNecessaryAccess": {
+      "status": "PARTIAL_LOCAL_COMPOSED_AND_TESTED_ACCEPTANCE_INCOMPLETE",
+      "explicitGrantRequiredForNonOwner": true,
+      "scopeCount": 9,
+      "actions": ["read", "record"],
+      "generalHealthAccessGranted": false,
+      "revokedGrantReactivationAllowed": false,
+      "directRoleAuthorizationAllowed": false
+    },
+    "localCareLedger": {
+      "status": "PARTIAL_LOCAL_COMPOSED_AND_TESTED_ACCEPTANCE_INCOMPLETE",
+      "entryKindCount": 22,
+      "medicalVerificationPerformed": false,
+      "healthRegistryLookupPerformed": false,
+      "sensorIntegrationConfigured": false,
+      "helpDelivered": false,
+      "emergencyServiceContacted": false,
+      "remoteAssistanceConfigured": false,
+      "largeTextPresentationAvailable": true
+    }
+  },
+  "truth": {
+    "requirementsClosed": false,
+    "countsAsRequirementPass": false,
+    "localDomainContractImplemented": true,
+    "localMigrationRepositoryImplemented": true,
+    "localApplicationUseCasesImplemented": true,
+    "localDesktopDataStoreCompositionImplemented": true,
+    "localIpcBridgeImplemented": true,
+    "localRendererSurfaceImplemented": true,
+    "localTargetedMatrixPassed": true,
+    "ownerFamilyAccountIsolationTested": true,
+    "forgedReceiptRollbackTested": true,
+    "outboxFailureRollbackTested": true,
+    "caregiverMinimumScopeFilteringTested": true,
+    "rendererReceivesPolicyReceipt": false,
+    "rendererReceivesFamilyAccountOwnerAuthority": false,
+    "medicalVerificationPerformed": false,
+    "externalHealthRegistryQueried": false,
+    "sensorOrFallDetectorIntegrated": false,
+    "emergencyServiceContacted": false,
+    "remoteHelpDelivered": false,
+    "physicalDeletionGuaranteed": false,
+    "externalManualAcceptanceCompleted": false,
+    "privacyLegalMedicalSecurityReviewCompleted": false,
+    "certificationClaimed": false
+  },
+  "validation": {
+    "targetedTestFiles": [
+      "packages/application/tests/health-care-coordination-use-cases.test.ts",
+      "packages/repositories/health-care-coordination-repository-policy.test.ts",
+      "apps/desktop/tests/health-care-coordination-ipc-integration.test.ts",
+      "apps/desktop/tests/health-care-coordination-data-store.test.ts",
+      "apps/desktop/tests/health-care-coordination-ui.test.ts"
+    ],
+    "targetedTestFileRatchet": 5,
+    "targetedTestRatchet": 20,
+    "migrationVersion": 97,
+    "migrationName": "health_care_coordination_elder_support",
+    "migrationSha256": "e3d60800e250feb674cd1250449982ac45cd7e700e74a728be7f6500c054d081",
+    "dataStoreSmokeChecks": 14,
+    "ppk021": {
+      "status": "PASS",
+      "scannedProductionFiles": 450,
+      "exactPrivilegedSurfaceCount": 699,
+      "exactAllowlistSha256": "5c99054d510a61c3724124c9e1d0c01973b9048c1c53a24652bce61738c839a5",
+      "targetedTests": 17,
+      "contractChecks": 84,
+      "runtimeChecks": 20
+    },
+    "ppk022": {
+      "status": "PASS",
+      "scannedProductionFiles": 450,
+      "exactCapabilitySurfaceCount": 345,
+      "exactCapabilityManifestSha256": "1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e",
+      "targetedTests": 19,
+      "contractChecks": 110,
+      "runtimeChecks": 24
+    },
+    "countsAsRequirementPass": false
+  },
+  "manualEvidence": {
+    "realCaregiverUat": "NOT_RUN",
+    "realElderlyUserUat": "NOT_RUN",
+    "medicalProfessionalReview": "NOT_RUN",
+    "sensorAdapterUat": "NOT_RUN",
+    "emergencyContactDeliveryUat": "NOT_RUN",
+    "accessibilityReview": "NOT_RUN",
+    "privacyReview": "NOT_RUN",
+    "legalReview": "NOT_RUN",
+    "securityReview": "NOT_RUN",
+    "certificationClaimed": false
+  },
+  "persistentReceiptStatus": "NOT_RUN",
+  "remainingAcceptanceWork": [
+    "33-O, 33-N ve aktif 33-P yönetişim zincirlerinin atomik kapanışı",
+    "gerçek bakım veren ve yaşlı kullanıcı UAT kanıtı",
+    "tıbbi uzman, erişilebilirlik, gizlilik, hukuk ve güvenlik incelemeleri",
+    "sensör, acil iletişim ve uzaktan yardım adapterleri için ayrı üretim yetkisi ve gerçek cihaz kanıtı",
+    "saklama süresi, kaynak silme yayılımı ve fiziksel silme kabul sözleşmesi"
+  ]
+}

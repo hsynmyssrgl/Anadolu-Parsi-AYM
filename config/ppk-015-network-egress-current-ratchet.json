@@ -16,8 +16,8 @@
   },
   "currentBoundary": {
     "productionSourceZones": 18,
-    "scannedFiles": 447,
-    "sourceInventorySha256": "4bd8f4e4576bfb2e10abc59a40da80361260a5910ee3045792c18fdf9e23c703",
+    "scannedFiles": 450,
+    "sourceInventorySha256": "1239531a2394df7d0edafb72588753a41d4508d06996b7dc8e5eb39b717033ad",
     "maliciousSelfTests": 7,
     "findings": 0,
     "authorizedAdapterCount": 2,
@@ -34,7 +34,7 @@
     "authorizedInventorySha256": "8c3764ee962b55dda7fa85520b8fbb34088a65ab722febd30254416b7d6898bb",
     "localOnlyTransportFiles": 2,
     "directPrimitiveExceptionCount": 0,
-    "latestDatabaseMigration": 96
+    "latestDatabaseMigration": 97
   },
   "truth": {
     "historicalClosureReopened": false,

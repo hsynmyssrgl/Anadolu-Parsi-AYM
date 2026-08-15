@@ -39,6 +39,7 @@ import type {
 import type { FamilyEventView, FamilyMutationResultView, SetFamilyEventArchivedInput, UpdateFamilyEventInput } from '@ppt/domain';
 import type { UnifiedAuthorizedSearchInput, UnifiedAuthorizedSearchView } from '@ppt/domain';
 import type { AddArchiveItemVersionInput, AddArchiveRelationEvidenceInput, ArchiveRelationEvidenceHistoryView, ArchiveRelationEvidenceView, RemoveArchiveRelationEvidenceInput } from '@ppt/domain';
+import type { HealthCareCoordinationCenterView, HealthCareMutationReceiptView, RecordHealthCareEntryInput, RevokeHealthCareAccessGrantInput, UpsertHealthCareAccessGrantInput } from '@ppt/domain';
 import type { LegacyArchiveOwnershipReattestationView, ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { AssignPersonMembershipInput, CreateFamilyBranchInput, CreateHouseholdInput, FamilyBranch, Household, HouseholdMembershipWorkspaceView, PersonLifecycleProfile, PersonLifecycleWorkspaceView, PersonMembership, UpdatePersonProfileInput } from '@ppt/domain';
 import type { AuthorizationContextWorkspaceView } from '@ppt/domain';
@@ -676,6 +677,10 @@ contextBridge.exposeInMainWorld('pardus', {
   createMedicationPlan:(input:CreateMedicationPlanInput):Promise<MedicationPlanView[]>=>invoke('health:createMedicationPlan',input),
   listFamilyHealthHistory:():Promise<FamilyHealthHistoryView[]>=>invoke('health:listFamilyHistory'),
   createFamilyHealthHistory:(input:CreateFamilyHealthHistoryInput):Promise<FamilyHealthHistoryView[]>=>invoke('health:createFamilyHistory',input),
+  getHealthCareCoordinationCenter:(input:{readonly ownerPersonId:string}):Promise<HealthCareCoordinationCenterView>=>invoke('healthCare:getCenter',input),
+  recordHealthCareEntry:(input:RecordHealthCareEntryInput):Promise<HealthCareMutationReceiptView>=>invoke('healthCare:recordEntry',input),
+  upsertHealthCareAccessGrant:(input:UpsertHealthCareAccessGrantInput):Promise<HealthCareMutationReceiptView>=>invoke('healthCare:upsertGrant',input),
+  revokeHealthCareAccessGrant:(input:RevokeHealthCareAccessGrantInput):Promise<HealthCareMutationReceiptView>=>invoke('healthCare:revokeGrant',input),
   listFinanceValuations:():Promise<FinanceValuationView[]>=>invoke('finance:listValuations'),
   createFinanceValuation:(input:CreateFinanceValuationInput):Promise<FinanceValuationView[]>=>invoke('finance:createValuation',input),
   createMember: (input: CreateFamilyMemberInput): Promise<FamilyMutationResultView> => invoke('family:createMember', input),
