@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "step": "33-Y",
+  "decision": "DEC-236",
+  "status": "PLANNED",
+  "governanceState": "LOCAL_IMPLEMENTATION_STARTED",
+  "requirements": ["EXT-064", "EXT-065", "EXT-066", "EXT-067", "EXT-068", "EXT-069"],
+  "implementationChain": {
+    "domain": ["packages/domain/src/smart-home-energy.ts"],
+    "application": ["packages/application/src/smart-home-energy-use-cases.ts"],
+    "repositoryContract": ["packages/repository-contracts/src/smart-home-energy-repository.ts"],
+    "migration": ["packages/database/src/family-database-migrations.ts#103"],
+    "repository": ["packages/repositories/src/smart-home-energy-repository.ts"],
+    "policyAndComposition": ["apps/desktop/src/main/life-production-policy-runtime.ts", "apps/desktop/src/main/smart-home-energy-application-adapter.ts", "apps/desktop/src/main/repository-composition-root.ts", "apps/desktop/src/main/data-store.ts"],
+    "ipc": ["apps/desktop/src/main/ipc-integration-policy.ts", "apps/desktop/src/main/ipc-request-lifecycle.ts", "apps/desktop/src/main/main.ts", "apps/desktop/src/main/preload.ts", "apps/desktop/src/renderer/global.d.ts"],
+    "ui": ["apps/desktop/src/renderer/SmartHomeEnergyPanel.tsx", "apps/desktop/src/renderer/App.tsx"]
+  },
+  "implementedTargetedTests": [
+    "packages/application/tests/smart-home-energy-use-cases.test.ts",
+    "packages/repositories/smart-home-energy-repository-policy.test.ts",
+    "apps/desktop/tests/smart-home-energy-data-store.test.ts",
+    "apps/desktop/tests/smart-home-energy-ipc-integration.test.ts",
+    "apps/desktop/tests/smart-home-energy-ui.test.ts"
+  ],
+  "securityControls": {
+    "centralPepReceiptFence": true,
+    "ownerAccountFamilyBound": true,
+    "signedAdapterEvidenceRequired": true,
+    "mainOnlyProviderIngestion": true,
+    "scalarMetadataOnly": true,
+    "visibleBoundedCameraConsent": true,
+    "defaultCameraDeny": true,
+    "hiddenSurveillanceProhibited": true,
+    "payloadFreePolicyResolution": true,
+    "contentFreeAuditAndOutbox": true,
+    "boundedIpcAndReadResults": true,
+    "rendererTrustAuthorityExcluded": true,
+    "deviceActuationExcluded": true,
+    "networkAndCloudExcluded": true
+  },
+  "validation": {
+    "targetedTestFileRatchet": 5,
+    "targetedTestRatchet": 21,
+    "migrationVersion": 103,
+    "migrationSha256": "d41d1a1e1bff6b89638a44096eb2ef62358e4d5370ef82d58ae2f0b4de211513",
+    "ppk021": {"status":"PASS","files":486,"surfaces":751,"sha256":"63e2766aa18e42b1472a9ccf9521c586b81ac19e36d7d9ca72fe48e872be2aa2","targeted":17,"contract":84,"runtime":20},
+    "ppk022": {"status":"PASS","files":486,"surfaces":345,"sha256":"1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e","targeted":19,"contract":110,"runtime":24},
+    "countsAsRequirementPass": false
+  },
+  "externalAndManualEvidence": "NOT_RUN",
+  "countsAsRequirementPass": false
+}

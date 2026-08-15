@@ -33,6 +33,7 @@ import {
   SqliteLocalGovernedOcrRepository,
   SqliteLongTermPortfolioRepository,
   SqliteMemoryStudioRepository,
+  SqliteSmartHomeEnergyRepository,
   SqliteLargeFamilyReadModelRepository,
   SqliteLocationRepository,
   SqliteNotificationStateRepository,
@@ -97,6 +98,8 @@ import type {
   LocalGovernedOcrRepositoryPort,
   MemoryStudioPolicyResourceRepositoryPort,
   MemoryStudioRepositoryPort,
+  SmartHomeEnergyPolicyResourceRepositoryPort,
+  SmartHomeEnergyRepositoryPort,
   LongTermPortfolioRepository,
   LocationPolicyResourceRepositoryPort,
   LocationRepositoryPort,
@@ -155,6 +158,7 @@ export interface RepositoryCompositionRoot {
   readonly lifeRepository: LifeRepositoryPort & LifePolicyResourceRepositoryPort & LifeProjectionRepositoryPort;
   readonly localGovernedOcrRepository: LocalGovernedOcrRepositoryPort;
   readonly memoryStudioRepository: MemoryStudioRepositoryPort & MemoryStudioPolicyResourceRepositoryPort;
+  readonly smartHomeEnergyRepository: SmartHomeEnergyRepositoryPort & SmartHomeEnergyPolicyResourceRepositoryPort;
   readonly largeFamilyReadModelRepository: LargeFamilyReadModelRepositoryPort;
   readonly locationRepository: LocationRepositoryPort & LocationPolicyResourceRepositoryPort;
   readonly notificationStateRepository: NotificationStateRepositoryPort;
@@ -222,6 +226,7 @@ export const createSqliteRepositoryCompositionRoot = (
     lifeRepository: new SqliteLifeRepository(repositoryOptions),
     localGovernedOcrRepository: new SqliteLocalGovernedOcrRepository(repositoryOptions),
     memoryStudioRepository: new SqliteMemoryStudioRepository(repositoryOptions),
+    smartHomeEnergyRepository: new SqliteSmartHomeEnergyRepository(repositoryOptions),
     largeFamilyReadModelRepository: new SqliteLargeFamilyReadModelRepository(repositoryOptions),
     locationRepository: new SqliteLocationRepository(repositoryOptions),
     notificationStateRepository: new SqliteNotificationStateRepository(repositoryOptions),

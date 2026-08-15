@@ -3099,6 +3099,100 @@ const memoryStudioResult=(channel:string,result:unknown):IpcIntegrationPolicyDec
   return valid?accepted():rejected('MEMORY_STUDIO_RESULT_INVALID','$result');
 };
 
+export const SMART_HOME_ENERGY_IPC_CHANNELS=Object.freeze({
+  getCenter:'smartHomeEnergy:getCenter',grantCameraConsent:'smartHomeEnergy:grantCameraConsent',
+  revokeCameraConsent:'smartHomeEnergy:revokeCameraConsent',setProcessing:'smartHomeEnergy:setProcessing'
+} as const);
+const smartHomeEnergyChannels=new Set<string>(Object.values(SMART_HOME_ENERGY_IPC_CHANNELS));
+const smartHomeDeviceKinds=new Set<unknown>(['matter_bridge','smoke_sensor','carbon_monoxide_sensor','water_leak_sensor',
+  'door_sensor','temperature_sensor','humidity_sensor','energy_meter','thermostat','light','smart_plug','camera','doorbell','ev_charger']);
+const smartHomeObservationKinds=new Set<unknown>(['smoke_alarm','carbon_monoxide_alarm','water_leak_alarm','door_open',
+  'temperature_celsius','humidity_percent','energy_kilowatt_hour','power_watts','ev_charge_kilowatt_hour',
+  'thermostat_target_celsius','light_on','smart_plug_on']);
+const smartHomeInput=(channel:string,args:readonly unknown[]):IpcIntegrationPolicyDecision=>{
+  if(channel===SMART_HOME_ENERGY_IPC_CHANNELS.getCenter)return zeroArguments(args);
+  if(args.length!==1||!isObject(args[0]))return rejected('SMART_HOME_OBJECT_REQUIRED','$[0]');const value=args[0];
+  if(channel===SMART_HOME_ENERGY_IPC_CHANNELS.grantCameraConsent)return healthCareExactRecord(value,
+    ['clientOperationId','consentId','deviceId','purpose','expiresAt'])&&healthCareIdentifier(value.clientOperationId)
+    &&healthCareIdentifier(value.consentId)&&healthCareIdentifier(value.deviceId)
+    &&['live_view','doorbell_answer'].includes(String(value.purpose))&&healthCareIso(value.expiresAt)
+    ?accepted():rejected('SMART_HOME_CAMERA_CONSENT_INPUT_INVALID','$[0]');
+  if(channel===SMART_HOME_ENERGY_IPC_CHANNELS.revokeCameraConsent)return healthCareExactRecord(value,
+    ['clientOperationId','consentId','expectedRevision'])&&healthCareIdentifier(value.clientOperationId)
+    &&healthCareIdentifier(value.consentId)&&healthCareRevision(value.expectedRevision)&&Number(value.expectedRevision)>=1
+    ?accepted():rejected('SMART_HOME_CAMERA_REVOKE_INPUT_INVALID','$[0]');
+  if(channel===SMART_HOME_ENERGY_IPC_CHANNELS.setProcessing)return healthCareExactRecord(value,
+    ['clientOperationId','expectedRevision','enabled','reason'])&&healthCareIdentifier(value.clientOperationId)
+    &&healthCareRevision(value.expectedRevision)&&typeof value.enabled==='boolean'&&healthCareText(value.reason,3,500)
+    ?accepted():rejected('SMART_HOME_PROCESSING_INPUT_INVALID','$[0]');
+  return rejected('UNKNOWN_IPC_CHANNEL','$');
+};
+const smartHomeDeviceResult=(value:unknown):boolean=>{if(!isObject(value))return false;
+  const optional=['room'].filter((key)=>value[key]!==undefined);
+  return healthCareExactRecord(value,['id','ownerPersonId','adapterId','providerId','kind','label','status',
+    'signedAdapterEvidencePersisted','revision','createdAt','updatedAt',...optional])&&healthCareIdentifier(value.id)
+    &&healthCareIdentifier(value.ownerPersonId)&&healthCareIdentifier(value.adapterId)&&healthCareIdentifier(value.providerId)
+    &&smartHomeDeviceKinds.has(value.kind)&&healthCareText(value.label,2,120)&&(value.room===undefined||healthCareText(value.room,2,120))
+    &&['active','offline','retired'].includes(String(value.status))&&value.signedAdapterEvidencePersisted===true
+    &&healthCareRevision(value.revision)&&Number(value.revision)>=1&&healthCareIso(value.createdAt)&&healthCareIso(value.updatedAt);};
+const smartHomeObservationResult=(value:unknown):boolean=>{if(!isObject(value))return false;
+  const optional=['numericValue','booleanValue'].filter((key)=>value[key]!==undefined);
+  return healthCareExactRecord(value,['id','deviceId','kind','unit','observedAt','recordedAt',...optional])
+    &&healthCareIdentifier(value.id)&&healthCareIdentifier(value.deviceId)&&smartHomeObservationKinds.has(value.kind)
+    &&['boolean','celsius','percent','watt','kilowatt_hour'].includes(String(value.unit))
+    &&(value.numericValue===undefined||(typeof value.numericValue==='number'&&Number.isFinite(value.numericValue)))
+    &&(value.booleanValue===undefined||typeof value.booleanValue==='boolean')
+    &&((value.unit==='boolean'&&value.booleanValue!==undefined&&value.numericValue===undefined)
+      ||(value.unit!=='boolean'&&value.numericValue!==undefined&&value.booleanValue===undefined))
+    &&healthCareIso(value.observedAt)&&healthCareIso(value.recordedAt);};
+const smartHomeConsentResult=(value:unknown):boolean=>{if(!isObject(value))return false;
+  const optional=['revokedAt'].filter((key)=>value[key]!==undefined);
+  return healthCareExactRecord(value,['id','deviceId','purpose','status','grantedByAccountId','grantedByPersonId',
+    'visibleIndicatorRequired','expiresAt','revision','createdAt','updatedAt',...optional])&&healthCareIdentifier(value.id)
+    &&healthCareIdentifier(value.deviceId)&&['live_view','doorbell_answer'].includes(String(value.purpose))
+    &&['active','revoked'].includes(String(value.status))&&healthCareIdentifier(value.grantedByAccountId)
+    &&healthCareIdentifier(value.grantedByPersonId)&&value.visibleIndicatorRequired===true&&healthCareIso(value.expiresAt)
+    &&healthCareRevision(value.revision)&&Number(value.revision)>=1&&healthCareIso(value.createdAt)&&healthCareIso(value.updatedAt)
+    &&(value.revokedAt===undefined||healthCareIso(value.revokedAt));};
+const smartHomeSettingsResult=(value:unknown):boolean=>healthCareExactRecord(value,
+  ['id','ownerPersonId','processingEnabled','cameraAccessDefaultDenied','hiddenSurveillanceProhibited','revision','createdAt','updatedAt'])
+  &&healthCareIdentifier(value.id)&&healthCareIdentifier(value.ownerPersonId)&&typeof value.processingEnabled==='boolean'
+  &&value.cameraAccessDefaultDenied===true&&value.hiddenSurveillanceProhibited===true&&healthCareRevision(value.revision)
+  &&healthCareIso(value.createdAt)&&healthCareIso(value.updatedAt);
+const smartHomeCenterResult=(value:unknown):boolean=>healthCareExactRecord(value,
+  ['schemaVersion','centerId','ownerPersonId','devices','observations','observationTotal','observationsTruncated',
+    'cameraConsents','settings','truth','generatedAt'])&&value.schemaVersion===1&&healthCareIdentifier(value.centerId)
+  &&healthCareIdentifier(value.ownerPersonId)&&householdArray(value.devices,500,smartHomeDeviceResult)
+  &&householdArray(value.observations,500,smartHomeObservationResult)&&typeof value.observationTotal==='number'
+  &&Number.isSafeInteger(value.observationTotal)&&value.observationTotal>=0&&typeof value.observationsTruncated==='boolean'
+  &&value.observationsTruncated===(value.observationTotal>(value.observations as readonly unknown[]).length)
+  &&householdArray(value.cameraConsents,500,smartHomeConsentResult)&&smartHomeSettingsResult(value.settings)
+  &&healthCareExactRecord(value.truth,['localFirst','cloudUsed','externalDeliveryPerformed','matterCommissioningPerformed',
+    'liveProviderConnectionTested','liveDeviceControlPerformed','sensorProviderIngestionPerformed','rawCameraOrAudioStored',
+    'hiddenSurveillanceProhibited','visibleTimeBoundedCameraConsentRequired','maximumCameraConsentMinutes',
+    'signedAdapterEvidenceRequired','providerAvailabilityGuaranteed','observationPayloadMode','networkUsedByCurrentImplementation'])
+  &&value.truth.localFirst===true&&value.truth.cloudUsed===false&&value.truth.externalDeliveryPerformed==='not_performed'
+  &&value.truth.matterCommissioningPerformed===false&&value.truth.liveProviderConnectionTested===false
+  &&value.truth.liveDeviceControlPerformed===false&&value.truth.sensorProviderIngestionPerformed===false
+  &&value.truth.rawCameraOrAudioStored===false&&value.truth.hiddenSurveillanceProhibited===true
+  &&value.truth.visibleTimeBoundedCameraConsentRequired===true&&value.truth.maximumCameraConsentMinutes===60
+  &&value.truth.signedAdapterEvidenceRequired===true&&value.truth.providerAvailabilityGuaranteed===false
+  &&value.truth.observationPayloadMode==='bounded_scalar_metadata_only'&&value.truth.networkUsedByCurrentImplementation===false
+  &&healthCareIso(value.generatedAt);
+const smartHomeReceiptResult=(value:unknown):boolean=>healthCareExactRecord(value,
+  ['resourceType','resourceId','mutationKind','previousRevision','revision','occurredAt','replayed','networkUsed','cloudUsed',
+    'providerActionPerformed'])&&['smart_home_device','smart_home_observation','smart_home_camera_consent','smart_home_settings']
+    .includes(String(value.resourceType))&&healthCareIdentifier(value.resourceId)
+  &&['device_register','device_status_update','observation_record','camera_consent_grant','camera_consent_revoke',
+    'processing_enable','processing_disable'].includes(String(value.mutationKind))&&healthCareRevision(value.previousRevision)
+  &&healthCareRevision(value.revision)&&value.revision===Number(value.previousRevision)+1&&healthCareIso(value.occurredAt)
+  &&typeof value.replayed==='boolean'&&value.networkUsed===false&&value.cloudUsed===false
+  &&value.providerActionPerformed==='not_performed';
+const smartHomeResult=(channel:string,result:unknown):IpcIntegrationPolicyDecision=>{
+  const valid=channel===SMART_HOME_ENERGY_IPC_CHANNELS.getCenter?smartHomeCenterResult(result):smartHomeReceiptResult(result);
+  return valid?accepted():rejected('SMART_HOME_RESULT_INVALID','$result');
+};
+
 export const ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS = Object.freeze({
   listEvidence: 'archive:listRelationEvidence',
   listEvidenceHistory: 'archive:listRelationEvidenceHistory',
@@ -3724,6 +3818,8 @@ export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unkn
   if (channel.startsWith('familyAiAssistant:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
   if (memoryStudioChannels.has(channel)) return memoryStudioResult(channel,result);
   if (channel.startsWith('memoryStudio:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
+  if (smartHomeEnergyChannels.has(channel)) return smartHomeResult(channel,result);
+  if (channel.startsWith('smartHomeEnergy:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
   if (childEducationChannels.has(channel)) return childEducationResult(channel, result);
   if (channel.startsWith('childEducation:')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
   if (placesTravelChannels.has(channel)) return placesTravelResult(channel, result);
@@ -3770,6 +3866,8 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
   if (channel.startsWith('familyAiAssistant:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
   if (memoryStudioChannels.has(channel)) return memoryStudioInput(channel,args);
   if (channel.startsWith('memoryStudio:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
+  if (smartHomeEnergyChannels.has(channel)) return smartHomeInput(channel,args);
+  if (channel.startsWith('smartHomeEnergy:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
   if (childEducationChannels.has(channel)) return childEducationInput(channel, args);
   if (channel.startsWith('childEducation:')) return rejected('UNKNOWN_IPC_CHANNEL', '$');
   if (placesTravelChannels.has(channel)) return placesTravelInput(channel, args);

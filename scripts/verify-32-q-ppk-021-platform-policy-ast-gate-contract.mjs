@@ -79,7 +79,7 @@ check('lockfile root records exact parser dependency', lockfile.packages?.['']?.
 check('installed parser record is locked', lockfile.packages?.['node_modules/@babel/parser']?.version === '7.29.8');
 check('manifest requires exact default deny', allowlist.defaultDecision === 'DENY' && allowlist.exactMatchRequired === true && allowlist.wildcardsAllowed === false);
 check('manifest binds eighteen production zones', allowlist.productionSourceZoneCount === 18 && scope.boundaries?.productionSourceZoneCount === 18);
-check('manifest contains exactly 740 surfaces', keys.length === 740 && uniqueKeys.size === 740);
+check('manifest contains exactly 751 surfaces', keys.length === 751 && uniqueKeys.size === 751);
 check('manifest keys are stable sorted', keys.every((key, index) => key === sortedKeys[index]));
 check('manifest keys contain no wildcard', keys.every((key) => !/[*?\[\]{}]/u.test(key)));
 check('manifest count map is exact', JSON.stringify(keyCounts) === JSON.stringify(allowlist.expectedSurfaceCounts));
@@ -88,8 +88,8 @@ check('every observed category has a rationale', Object.keys(keyCounts).every((k
 check('manifest records no persistence or ownership change', allowlist.invariants?.migrationRequired === false && allowlist.invariants?.latestDatabaseMigration === 77 && allowlist.invariants?.sqliteOwnershipTransferred === false);
 
 check('production AST gate passes', gate.status === 'PASS' && gate.findings.length === 0);
-check('gate scans the exact current production snapshot', gate.productionSourceZones === 18 && gate.scannedFiles === 480);
-check('gate exact surface and allowance cardinality match', gate.privilegedSurfaces === 740 && gate.exactAllowlistEntries === 740);
+check('gate scans the exact current production snapshot', gate.productionSourceZones === 18 && gate.scannedFiles === 486);
+check('gate exact surface and allowance cardinality match', gate.privilegedSurfaces === 751 && gate.exactAllowlistEntries === 751);
 check('gate manifest hash matches the canonical file', gate.exactAllowlistSha256 === manifestSha256);
 check('gate has zero direct role authorization bypass', gate.directRoleAuthorizationBypasses === 0);
 check('gate executes malicious and benign self-tests', gate.maliciousSelfTestAssertions === 17 && gate.benignSelfTestAssertions === 4);
@@ -116,13 +116,13 @@ check('combined platform policy gate invokes AST gate', includesAll(legacyGate, 
 check('root package exposes all four PPK-021 commands', ['verify:ppk021:ast-gate', 'verify:ppk021:targeted', 'verify:ppk021:contract', 'verify:ppk021:runtime'].every((name) => typeof rootPackage.scripts?.[name] === 'string'));
 
 check('policy declares all six exact rule identifiers', includesAll(policy, ['PLATFORM_POLICY_AST_GATE_RULE_IDS', 'DIRECT_SQL_SQLITE_DENIED', 'DIRECT_REPOSITORY_DATABASE_DENIED', 'DIRECT_CRYPTO_DENIED', 'DIRECT_NETWORK_DENIED', 'DIRECT_ROLE_AUTHORIZATION_DENIED', 'UNAPPROVED_USE_CASE_COMPOSITION_DENIED']));
-check('policy snapshot is exact fail closed', includesAll(policy, ["syntaxModel: 'TYPESCRIPT_AST'", "enforcement: 'fail-closed'", "defaultDecision: 'DENY'", 'exactAllowlistEntries: 740']));
+check('policy snapshot is exact fail closed', includesAll(policy, ["syntaxModel: 'TYPESCRIPT_AST'", "enforcement: 'fail-closed'", "defaultDecision: 'DENY'", 'exactAllowlistEntries: 751']));
 check('policy denies runtime authority inference', includesAll(policy, ['allowlistMutationGrantsRuntimeAuthority: false', 'buildGateReplacesRuntimePolicy: false', 'rendererRoleConditionGrantsAuthority: false']));
 check('policy hides source and manifest material', includesAll(policy, ['sourcePathsExposedToClient: false', 'allowlistHashExposedToClient: false']));
 check('policy verify rejects broadened snapshots', includesAll(policy, ['snapshot.wildcardsAllowed === false', 'snapshot.directRoleAuthorizationBypasses === 0', 'snapshot.protectedRules.every']));
 check('platform policy exports AST gate policy', policyIndex.includes("export * from './platform-policy-ast-gate-policy.js'"));
 
-check('domain boundary is content free and fixed', includesAll(domain, ['PlatformPolicyAstGateBoundaryView', 'protectedRuleCount: 6', 'exactAllowlistEntries: 740', 'sourcePathsExposedToClient: false', 'allowlistHashExposedToClient: false']));
+check('domain boundary is content free and fixed', includesAll(domain, ['PlatformPolicyAstGateBoundaryView', 'protectedRuleCount: 6', 'exactAllowlistEntries: 751', 'sourcePathsExposedToClient: false', 'allowlistHashExposedToClient: false']));
 check('domain exports AST boundary', domainIndex.includes("export * from './platform-policy-ast-gate.js'"));
 check('application use case verifies policy snapshot', includesAll(useCase, ['GetPlatformPolicyAstGateBoundaryUseCase', 'this.policy.verify(snapshot)', 'PLATFORM_POLICY_AST_GATE_SNAPSHOT_INVALID']));
 check('application use case preserves migration truth', includesAll(useCase, ['schemaMigrationRequired: false', 'latestDatabaseMigration: 77']));
@@ -131,7 +131,7 @@ check('application exports AST boundary use case', applicationIndex.includes("ex
 check('policy test covers snapshot broadening and reorder', includesAll(policyTest, ['wildcardsAllowed: true', 'directRoleAuthorizationBypasses: 1', '.reverse()']));
 check('AST test covers six privileged families', includesAll(astTest, ['SQL_IMPORT', 'REPOSITORY_IMPORT', 'DATABASE_IMPORT', 'CRYPTO_IMPORT', 'NETWORK_IMPORT', 'ROLE_CHECK', 'USE_CASE_COMPOSITION']));
 check('AST test covers parse unexpected stale and wildcard denial', includesAll(astTest, ['AST_PARSE_ERROR', 'UNAPPROVED_PRIVILEGED_SURFACE', 'STALE_ALLOWLIST_ENTRY', 'ALLOWLIST_WILDCARD_FORBIDDEN']));
-check('AST test verifies full production manifest exactness', includesAll(astTest, ['inventoryPlatformPolicyAstSurfaces()', 'result.findings).toEqual([])', 'result.allowedCount).toBe(740)', 'inventory.files).toBe(480)']));
+check('AST test verifies full production manifest exactness', includesAll(astTest, ['inventoryPlatformPolicyAstSurfaces()', 'result.findings).toEqual([])', 'result.allowedCount).toBe(751)', 'inventory.files).toBe(486)']));
 check('integration test verifies zero argument and no cache', includesAll(integrationTest, ["evaluateIpcIntegrationPolicy('system:getPlatformPolicyAstGateBoundary', [])", "resolveIpcReadSharingPolicy('system:getPlatformPolicyAstGateBoundary')"]));
 check('integration test verifies no source or hash payload', includesAll(integrationTest, ["Object.hasOwn(view, 'sourcePaths')", "Object.hasOwn(view, 'allowlistHash')"]));
 
@@ -144,16 +144,16 @@ check('IPC sharing marks AST status no-cache', ipcCache.includes("'system:getPla
 check('renderer shows build gate without runtime authority claim', includesAll(renderer, ['PPK-021 · AST güvenlik kapısı', 'AST gate runtime politikasının yerine geçmez', 'doğrudan rol yetkilendirmesi:']));
 check('renderer does not render allowlist paths or hash', !renderer.includes('exactAllowlistSha256') && !renderer.includes('allowedSurfaceKeys'));
 
-check('scope records six rules and 740 exact surfaces', scope.boundaries?.protectedRuleCount === 6 && scope.protectedRules?.length === 6 && scope.boundaries?.scannedProductionFiles === 480 && scope.boundaries?.exactPrivilegedSurfaceCount === 740);
+check('scope records six rules and 751 exact surfaces', scope.boundaries?.protectedRuleCount === 6 && scope.protectedRules?.length === 6 && scope.boundaries?.scannedProductionFiles === 486 && scope.boundaries?.exactPrivilegedSurfaceCount === 751);
 check('scope records runtime-policy non-substitution', scope.boundaries?.allowlistMutationGrantsRuntimeAuthority === false && scope.boundaries?.buildGateReplacesRuntimePolicy === false);
 check('scope records content-free no-cache client boundary', scope.boundaries?.contentFreeStatusIpcRequired === true && scope.boundaries?.policyStatusIpcCacheAllowed === false && scope.boundaries?.sourcePathsExposedToRenderer === false);
 check('scope records no persistence transfer or cutover', scope.boundaries?.schemaMigrationRequired === false && scope.boundaries?.realDataTransferPerformed === false && scope.boundaries?.cutoverPerformed === false && scope.boundaries?.sqliteOwnershipTransferred === false);
 check('inventory has six implemented controls', inventory.controls?.length === 6 && inventory.controls.every((item) => item.disposition === 'IMPLEMENTED'));
 check('inventory has zero gate findings and blockers', inventory.engine?.findings === 0 && inventory.closureSummary?.openBlockerCount === 0 && inventory.closureSummary?.openBlockers?.length === 0);
 check('decision records AST exactness and runtime boundary', includesAll(decision, ['DEC-202', 'TypeScript/JSX AST', 'exact `kind|path|symbol`', 'runtime policy yerine geçmez']));
-check('decision pins the current memory-studio-expanded source ratchet without rewriting historical closure', includesAll(decision, ['480 dosya / 740 exact yüzey', manifestSha256, 'tarihsel kapanış kanıtını yeniden yazmadan']));
+check('decision pins the current smart-home-expanded source ratchet without rewriting historical closure', includesAll(decision, ['486 dosya / 751 exact yüzey', manifestSha256, 'tarihsel kapanış kanıtını yeniden yazmadan']));
 check('threat model covers all primary evasions', ['Regex kaçışı', 'Parçalı dinamik modül adı', 'Doğrudan SQL/SQLite', 'Kripto kaçışı', 'Network kaçışı', 'Rol tabanlı fail-open', 'Politikasız use-case composition', 'Stale izin'].every((marker) => threat.includes(marker)));
-check('master register contains DEC-202 and current exact source ratchet', masterRegister.includes('## DEC-202') && masterRegister.includes('DEC-202-ppk-021-platform-policy-ast-fail-gate.md') && masterRegister.includes('480 dosya / 740 exact yüzey') && masterRegister.includes(manifestSha256));
+check('master register contains DEC-202 and current exact source ratchet', masterRegister.includes('## DEC-202') && masterRegister.includes('DEC-202-ppk-021-platform-policy-ast-fail-gate.md') && masterRegister.includes('486 dosya / 751 exact yüzey') && masterRegister.includes(manifestSha256));
 check('decision ledger contains active DEC-202', ledger.decisionCount === ledger.decisions.length && ledger.decisions.some((item) => item.id === 'DEC-202' && item.status === 'ACTIVE' && item.requirements?.includes('PPK-021')));
 check('database migration 77 baseline remains present', versions.includes(77) && latestMigration >= 77 && scope.boundaries?.latestDatabaseMigration === 77);
 
@@ -183,7 +183,7 @@ const report = {
   failures,
   sourceGate: gate,
   protectedRuleCount: 6,
-  exactAllowlistEntries: 740,
+  exactAllowlistEntries: 751,
   exactAllowlistSha256: manifestSha256,
   directRoleAuthorizationBypasses: 0,
   syntaxModel: 'TYPESCRIPT_AST',

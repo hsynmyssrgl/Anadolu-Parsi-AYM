@@ -16,6 +16,7 @@ import { PlacesTravelAssetPetPanel } from './PlacesTravelAssetPetPanel';
 import { LocalGovernedOcrPanel } from './LocalGovernedOcrPanel';
 import { FamilyAiAssistantPanel } from './FamilyAiAssistantPanel';
 import { MemoryStudioPanel } from './MemoryStudioPanel';
+import { SmartHomeEnergyPanel } from './SmartHomeEnergyPanel';
 import { HealthCareCoordinationPanel } from './HealthCareCoordinationPanel';
 import {
   FAMILY_RELATIONSHIP_CATALOG,
@@ -3051,7 +3052,7 @@ export function App() {
   else if (active === 'important-days') screen = <ImportantDaysScreen snapshot={snapshot} archivedEvents={archivedEvents} onAdd={openImportantDayModal} onEdit={setEditingEvent} onArchive={(eventId)=>setFamilyEventArchived(eventId,true)} onRestore={(eventId)=>setFamilyEventArchived(eventId,false)} onOpenArchive={openEventArchive} />;
   else if (active === 'finance') screen = <FinanceScreen people={snapshot.people} records={financeRecords} valuations={financeValuations} institutions={bankInstitutions} bankAccounts={bankAccounts} paymentCards={paymentCards} loanAccounts={loanAccounts} planningWorkspace={financePlanningWorkspace} longTermPortfolioWorkspace={longTermPortfolioWorkspace} onCreate={createFinance} onCreateValuation={createFinanceValuation} onValidateIban={validateIban} onCreateBankAccount={createBankAccount} onCreatePaymentCard={createPaymentCard} onCreateLoanAccount={createLoanAccount} onRecordLoanPayment={recordLoanPayment} onRecordPlanning={recordFinancePlanningItem} onRecordLongTermPortfolio={recordLongTermPortfolioItem} onPlanningWorkspaceChange={setFinancePlanningWorkspace} />;
   else if (active === 'health') screen = <><HealthScreen people={snapshot.people} records={healthRecords} medications={medicationPlans} history={familyHealthHistory} onCreate={createHealth} onCreateMedication={createMedicationPlan} onCreateHistory={createFamilyHistory} /><section className="workspace-grid"><HealthCareCoordinationPanel people={snapshot.people}/></section></>;
-  else if (active === 'life-center') screen = <><LifeCenterScreen people={snapshot.people} records={lifeRecords} onCreate={createLifeRecord} /><section className="workspace-grid"><ManagedLifePanel people={snapshot.people} workspace={managedLifeWorkspace} onRecord={recordManagedLifeItem}/><HouseholdOperationsPanel people={snapshot.people}/><ChildEducationCoordinationPanel people={snapshot.people}/><PlacesTravelAssetPetPanel people={snapshot.people}/></section></>;
+  else if (active === 'life-center') screen = <><LifeCenterScreen people={snapshot.people} records={lifeRecords} onCreate={createLifeRecord} /><section className="workspace-grid"><ManagedLifePanel people={snapshot.people} workspace={managedLifeWorkspace} onRecord={recordManagedLifeItem}/><HouseholdOperationsPanel people={snapshot.people}/><SmartHomeEnergyPanel/><ChildEducationCoordinationPanel people={snapshot.people}/><PlacesTravelAssetPetPanel people={snapshot.people}/></section></>;
   else if (active === 'automation') screen = <AutomationScreen rules={automationRules} onCreate={createAutomationRule} onToggle={toggleAutomationRule} />;
   else if (active === 'reports') screen = <ReportsScreen report={reportSummary} />;
   else if (active === 'invitations') screen = <InvitationsScreen snapshot={snapshot}/>;

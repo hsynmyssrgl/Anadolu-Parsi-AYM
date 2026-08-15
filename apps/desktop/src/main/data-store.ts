@@ -171,6 +171,13 @@ import {
   CreateMemoryTimeCapsuleUseCase,
   ReviewMemoryTimeCapsuleUseCase,
   TransitionMemoryTimeCapsuleUseCase,
+  GetSmartHomeEnergyCenterUseCase,
+  RegisterSmartHomeDeviceUseCase,
+  UpdateSmartHomeDeviceStatusUseCase,
+  RecordSmartHomeObservationUseCase,
+  GrantSmartHomeCameraConsentUseCase,
+  RevokeSmartHomeCameraConsentUseCase,
+  SetSmartHomeProcessingUseCase,
   ListLifeRecordsUseCase,
   CreateLifeRecordUseCase,
   GetManagedLifeWorkspaceUseCase,
@@ -338,6 +345,7 @@ import type { AddArchiveItemVersionInput, AddArchiveRelationEvidenceInput, Archi
 import type { CreatePlacesTravelItemInput, DeletePlacesTravelItemInput, PlacesTravelCenterView, PlacesTravelMutationReceiptView, UpdatePlacesTravelItemInput } from '@ppt/domain';
 import type { FamilyAiAssistantCenterView, FamilyAiSuggestionMutationReceiptView, GenerateFamilyAiSuggestionInput, ReviewFamilyAiSuggestionInput } from '@ppt/domain';
 import type { CreateMemoryStudioRecordInput, DeleteMemoryStudioRecordInput, CreateMemoryTimeCapsuleInput, MemoryStudioCenterView, MemoryStudioMutationReceiptView, ReviewMemoryTimeCapsuleInput, TransitionMemoryTimeCapsuleInput } from '@ppt/domain';
+import type { GrantSmartHomeCameraConsentInput, RecordSmartHomeObservationInput, RegisterSmartHomeDeviceInput, RevokeSmartHomeCameraConsentInput, SetSmartHomeProcessingInput, SmartHomeEnergyCenterView, SmartHomeMutationReceiptView, UpdateSmartHomeDeviceStatusInput } from '@ppt/domain';
 import { RepositoryBackedFamilyApplicationUnitOfWork, RepositoryBackedFamilyGraphQueryPort } from './family-application-adapter.js';
 import { RepositoryBackedHouseholdMembershipUnitOfWork } from './household-membership-application-adapter.js';
 import { RepositoryBackedPersonLifecycleUnitOfWork } from './person-lifecycle-application-adapter.js';
@@ -398,6 +406,10 @@ import {
   RepositoryBackedMemoryStudioQueryPort,
   RepositoryBackedMemoryStudioUnitOfWork
 } from './memory-studio-application-adapter.js';
+import {
+  RepositoryBackedSmartHomeEnergyQueryPort,
+  RepositoryBackedSmartHomeEnergyUnitOfWork
+} from './smart-home-energy-application-adapter.js';
 import {
   RepositoryBackedLocationPolicyTransactionRunner,
   RepositoryBackedLocationUnitOfWork,
@@ -1283,6 +1295,13 @@ export class FamilyDataStore {
   readonly #createMemoryTimeCapsuleUseCase:CreateMemoryTimeCapsuleUseCase;
   readonly #reviewMemoryTimeCapsuleUseCase:ReviewMemoryTimeCapsuleUseCase;
   readonly #transitionMemoryTimeCapsuleUseCase:TransitionMemoryTimeCapsuleUseCase;
+  readonly #getSmartHomeEnergyCenterUseCase:GetSmartHomeEnergyCenterUseCase;
+  readonly #registerSmartHomeDeviceUseCase:RegisterSmartHomeDeviceUseCase;
+  readonly #updateSmartHomeDeviceStatusUseCase:UpdateSmartHomeDeviceStatusUseCase;
+  readonly #recordSmartHomeObservationUseCase:RecordSmartHomeObservationUseCase;
+  readonly #grantSmartHomeCameraConsentUseCase:GrantSmartHomeCameraConsentUseCase;
+  readonly #revokeSmartHomeCameraConsentUseCase:RevokeSmartHomeCameraConsentUseCase;
+  readonly #setSmartHomeProcessingUseCase:SetSmartHomeProcessingUseCase;
   readonly #prepareFamilyEmergencyCardExportUseCase: PrepareFamilyEmergencyCardExportUseCase;
   readonly #recordFamilyEmergencyCardExportCompletionUseCase: RecordFamilyEmergencyCardExportCompletionUseCase;
   readonly #listFinanceRecordsUseCase: ListFinanceRecordsUseCase;
@@ -1802,6 +1821,7 @@ export class FamilyDataStore {
           placesTravelPolicyResourceRepository: this.#repositories.placesTravelRepository,
           familyAiAssistantPolicyResourceRepository: this.#repositories.familyAiAssistantRepository,
           memoryStudioPolicyResourceRepository: this.#repositories.memoryStudioRepository,
+          smartHomeEnergyPolicyResourceRepository: this.#repositories.smartHomeEnergyRepository,
           personRepository: this.#repositories.personRepository,
           deviceIdentityProvider: this.#deviceIdentityProvider,
           authorizationProvider: productionArchivePolicy.authorizationProvider,
@@ -1823,6 +1843,8 @@ export class FamilyDataStore {
       familyAiAssistantPolicyResourceRepository: this.#repositories.familyAiAssistantRepository,
       memoryStudioRepository: this.#repositories.memoryStudioRepository,
       memoryStudioPolicyResourceRepository: this.#repositories.memoryStudioRepository,
+      smartHomeEnergyRepository: this.#repositories.smartHomeEnergyRepository,
+      smartHomeEnergyPolicyResourceRepository: this.#repositories.smartHomeEnergyRepository,
       aiConsentRepository: this.#repositories.aiConsentRepository,
       accountRepository: this.#repositories.accountRepository,
       permissionRepository: this.#repositories.objectPermissionRepository,
@@ -2542,6 +2564,18 @@ export class FamilyDataStore {
     this.#createMemoryTimeCapsuleUseCase=new CreateMemoryTimeCapsuleUseCase(memoryStudioUnitOfWork);
     this.#reviewMemoryTimeCapsuleUseCase=new ReviewMemoryTimeCapsuleUseCase(memoryStudioUnitOfWork);
     this.#transitionMemoryTimeCapsuleUseCase=new TransitionMemoryTimeCapsuleUseCase(memoryStudioUnitOfWork);
+    const smartHomeEnergyDependencies={...lifeApplicationDependencies,
+      smartHomeEnergyRepository:this.#repositories.smartHomeEnergyRepository,
+      smartHomeEnergyPolicyResourceRepository:this.#repositories.smartHomeEnergyRepository} as const;
+    const smartHomeEnergyQuery=new RepositoryBackedSmartHomeEnergyQueryPort(smartHomeEnergyDependencies,lifePolicyTransactionRunner);
+    const smartHomeEnergyUnitOfWork=new RepositoryBackedSmartHomeEnergyUnitOfWork(smartHomeEnergyDependencies,lifePolicyTransactionRunner);
+    this.#getSmartHomeEnergyCenterUseCase=new GetSmartHomeEnergyCenterUseCase(smartHomeEnergyQuery);
+    this.#registerSmartHomeDeviceUseCase=new RegisterSmartHomeDeviceUseCase(smartHomeEnergyUnitOfWork);
+    this.#updateSmartHomeDeviceStatusUseCase=new UpdateSmartHomeDeviceStatusUseCase(smartHomeEnergyUnitOfWork);
+    this.#recordSmartHomeObservationUseCase=new RecordSmartHomeObservationUseCase(smartHomeEnergyUnitOfWork);
+    this.#grantSmartHomeCameraConsentUseCase=new GrantSmartHomeCameraConsentUseCase(smartHomeEnergyUnitOfWork);
+    this.#revokeSmartHomeCameraConsentUseCase=new RevokeSmartHomeCameraConsentUseCase(smartHomeEnergyUnitOfWork);
+    this.#setSmartHomeProcessingUseCase=new SetSmartHomeProcessingUseCase(smartHomeEnergyUnitOfWork);
     this.#prepareArchiveOpenUseCase = new PrepareArchiveOpenUseCase(archiveQuery);
     this.#recordArchiveOpenedUseCase = new RecordArchiveOpenedUseCase(archiveUnitOfWork);
     this.#authorizeEmergencyArchiveReadUseCase = new AuthorizeEmergencyArchiveReadUseCase(archiveUnitOfWork);
@@ -6076,6 +6110,44 @@ export class FamilyDataStore {
 
   public async transitionMemoryTimeCapsule(input:TransitionMemoryTimeCapsuleInput):Promise<MemoryStudioMutationReceiptView>{
     const result=await this.#transitionMemoryTimeCapsuleUseCase.execute({context:this.#lifeApplicationContext('memory-time-capsule-transition'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async getSmartHomeEnergyCenter():Promise<SmartHomeEnergyCenterView>{
+    const result=await this.#getSmartHomeEnergyCenterUseCase.execute(this.#lifeApplicationContext('smart-home-energy-center'));
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  /** Main-only signed adapter boundary; no renderer bridge is exposed. */
+  public async registerSmartHomeDevice(input:RegisterSmartHomeDeviceInput):Promise<SmartHomeMutationReceiptView>{
+    const result=await this.#registerSmartHomeDeviceUseCase.execute({context:this.#lifeApplicationContext('smart-home-device-register'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  /** Main-only provider lifecycle boundary; no renderer bridge is exposed. */
+  public async updateSmartHomeDeviceStatus(input:UpdateSmartHomeDeviceStatusInput):Promise<SmartHomeMutationReceiptView>{
+    const result=await this.#updateSmartHomeDeviceStatusUseCase.execute({context:this.#lifeApplicationContext('smart-home-device-status'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  /** Main-only bounded scalar observation boundary; raw media is not accepted. */
+  public async recordSmartHomeObservation(input:RecordSmartHomeObservationInput):Promise<SmartHomeMutationReceiptView>{
+    const result=await this.#recordSmartHomeObservationUseCase.execute({context:this.#lifeApplicationContext('smart-home-observation-record'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async grantSmartHomeCameraConsent(input:GrantSmartHomeCameraConsentInput):Promise<SmartHomeMutationReceiptView>{
+    const result=await this.#grantSmartHomeCameraConsentUseCase.execute({context:this.#lifeApplicationContext('smart-home-camera-consent-grant'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async revokeSmartHomeCameraConsent(input:RevokeSmartHomeCameraConsentInput):Promise<SmartHomeMutationReceiptView>{
+    const result=await this.#revokeSmartHomeCameraConsentUseCase.execute({context:this.#lifeApplicationContext('smart-home-camera-consent-revoke'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async setSmartHomeProcessing(input:SetSmartHomeProcessingInput):Promise<SmartHomeMutationReceiptView>{
+    const result=await this.#setSmartHomeProcessingUseCase.execute({context:this.#lifeApplicationContext('smart-home-processing-setting'),command:input});
     if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
   }
 

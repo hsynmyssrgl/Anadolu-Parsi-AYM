@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "step": "33-Y",
+  "decision": "DEC-236",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "countsAsRequirementPass": false,
+  "targetedTestFilesPassed": 5,
+  "targetedTestsPassed": 21,
+  "migration103Sha256": "d41d1a1e1bff6b89638a44096eb2ef62358e4d5370ef82d58ae2f0b4de211513",
+  "ppk021": {
+    "status": "PASS",
+    "productionSourceZones": 18,
+    "scannedFiles": 486,
+    "privilegedSurfaces": 751,
+    "exactAllowlistEntries": 751,
+    "exactAllowlistSha256": "63e2766aa18e42b1472a9ccf9521c586b81ac19e36d7d9ca72fe48e872be2aa2",
+    "surfaceCounts": {
+      "CRYPTO_GLOBAL": 12,
+      "CRYPTO_IMPORT": 206,
+      "DATABASE_IMPORT": 21,
+      "NETWORK_IMPORT": 11,
+      "REPOSITORY_IMPORT": 61,
+      "ROLE_PRESENTATION": 2,
+      "SQL_CALL": 69,
+      "SQL_CONSTRUCTOR": 2,
+      "SQL_IMPORT": 2,
+      "USE_CASE_COMPOSITION": 365
+    },
+    "maliciousSelfTestAssertions": 17,
+    "benignSelfTestAssertions": 4,
+    "directRoleAuthorizationBypasses": 0,
+    "findings": []
+  },
+  "ppk022": {
+    "status": "PASS",
+    "productionSourceZones": 18,
+    "scannedFiles": 486,
+    "capabilitySurfaces": 345,
+    "exactManifestSurfaces": 345,
+    "exactManifestSha256": "1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e",
+    "surfaceCounts": {
+      "FILE_DIALOG": 2,
+      "FILE_IMPORT": 288,
+      "NETWORK_API": 2,
+      "NETWORK_IMPORT": 13,
+      "OCR_API": 5,
+      "OCR_IMPORT": 35
+    },
+    "pinnedBootstrapSurfaces": 26,
+    "maliciousSelfTestAssertions": 33,
+    "benignSelfTestAssertions": 5,
+    "canonicalApplications": 14,
+    "protectedCapabilityFamilies": 7,
+    "findings": []
+  },
+  "checkCount": 10,
+  "passed": 10,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "exact five-file local Vitest exits successfully",
+      "status": "PASS"
+    },
+    {
+      "name": "local test result meets exact 5/21 ratchet",
+      "status": "PASS"
+    },
+    {
+      "name": "migration verifier passes exact migration 103 checksum",
+      "status": "PASS"
+    },
+    {
+      "name": "data store smoke includes migration 103",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-021 raw gate matches scope ratchet",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-022 raw gate matches scope ratchet",
+      "status": "PASS"
+    },
+    {
+      "name": "all package and desktop typechecks pass",
+      "status": "PASS"
+    },
+    {
+      "name": "33-Y remains planned behind exact dependencies while 33-P stays active",
+      "status": "PASS"
+    },
+    {
+      "name": "commissioning provider control camera network cloud and delivery truth remain closed",
+      "status": "PASS"
+    },
+    {
+      "name": "manual evidence receipt and acceptance remain closed",
+      "status": "PASS"
+    }
+  ],
+  "generatedAt": "2026-08-15T07:27:37.141Z"
+}

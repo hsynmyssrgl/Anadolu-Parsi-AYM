@@ -45,6 +45,7 @@ import type { ChildEducationCenterView, ChildEducationMutationReceiptView, Creat
 import type { CreatePlacesTravelItemInput, DeletePlacesTravelItemInput, PlacesTravelCenterView, PlacesTravelMutationReceiptView, UpdatePlacesTravelItemInput } from '@ppt/domain';
 import type { FamilyAiAssistantCenterView, FamilyAiSuggestionMutationReceiptView, GenerateFamilyAiSuggestionInput, ReviewFamilyAiSuggestionInput } from '@ppt/domain';
 import type { CreateMemoryStudioRecordInput, DeleteMemoryStudioRecordInput, CreateMemoryTimeCapsuleInput, MemoryStudioCenterView, MemoryStudioMutationReceiptView, ReviewMemoryTimeCapsuleInput, TransitionMemoryTimeCapsuleInput } from '@ppt/domain';
+import type { GrantSmartHomeCameraConsentInput, RevokeSmartHomeCameraConsentInput, SetSmartHomeProcessingInput, SmartHomeEnergyCenterView, SmartHomeMutationReceiptView } from '@ppt/domain';
 import type { LegacyArchiveOwnershipReattestationView, ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { AssignPersonMembershipInput, CreateFamilyBranchInput, CreateHouseholdInput, FamilyBranch, Household, HouseholdMembershipWorkspaceView, PersonLifecycleProfile, PersonLifecycleWorkspaceView, PersonMembership, UpdatePersonProfileInput } from '@ppt/domain';
 import type { AuthorizationContextWorkspaceView } from '@ppt/domain';
@@ -707,6 +708,10 @@ contextBridge.exposeInMainWorld('pardus', {
   createMemoryTimeCapsule:(input:CreateMemoryTimeCapsuleInput):Promise<MemoryStudioMutationReceiptView>=>invoke('memoryStudio:createCapsule',input),
   reviewMemoryTimeCapsule:(input:ReviewMemoryTimeCapsuleInput):Promise<MemoryStudioMutationReceiptView>=>invoke('memoryStudio:reviewCapsule',input),
   transitionMemoryTimeCapsule:(input:TransitionMemoryTimeCapsuleInput):Promise<MemoryStudioMutationReceiptView>=>invoke('memoryStudio:transitionCapsule',input),
+  getSmartHomeEnergyCenter:():Promise<SmartHomeEnergyCenterView>=>invoke('smartHomeEnergy:getCenter'),
+  grantSmartHomeCameraConsent:(input:GrantSmartHomeCameraConsentInput):Promise<SmartHomeMutationReceiptView>=>invoke('smartHomeEnergy:grantCameraConsent',input),
+  revokeSmartHomeCameraConsent:(input:RevokeSmartHomeCameraConsentInput):Promise<SmartHomeMutationReceiptView>=>invoke('smartHomeEnergy:revokeCameraConsent',input),
+  setSmartHomeProcessing:(input:SetSmartHomeProcessingInput):Promise<SmartHomeMutationReceiptView>=>invoke('smartHomeEnergy:setProcessing',input),
   listFinanceValuations:():Promise<FinanceValuationView[]>=>invoke('finance:listValuations'),
   createFinanceValuation:(input:CreateFinanceValuationInput):Promise<FinanceValuationView[]>=>invoke('finance:createValuation',input),
   createMember: (input: CreateFamilyMemberInput): Promise<FamilyMutationResultView> => invoke('family:createMember', input),

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "step": "33-Y",
+  "decision": "DEC-236",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "countsAsRequirementPass": false,
+  "migration103Sha256": "d41d1a1e1bff6b89638a44096eb2ef62358e4d5370ef82d58ae2f0b4de211513",
+  "checkCount": 11,
+  "passed": 11,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "scope inventory and five-test matrix are exact",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 103 source manifest and scope checksums are canonical",
+      "status": "PASS"
+    },
+    {
+      "name": "migration owns immutable device observation consent settings and mutation ledgers",
+      "status": "PASS"
+    },
+    {
+      "name": "repository contract exposes center current mutation and payload-free policy ports",
+      "status": "PASS"
+    },
+    {
+      "name": "repository enforces receipt owner signature and manifest bindings",
+      "status": "PASS"
+    },
+    {
+      "name": "desktop adapter composes central policy and transactional audit outbox",
+      "status": "PASS"
+    },
+    {
+      "name": "production runtime resolves exact private smart-home owners",
+      "status": "PASS"
+    },
+    {
+      "name": "main preload and renderer expose exact four safe methods",
+      "status": "PASS"
+    },
+    {
+      "name": "tests cover replay forged trust rollback bounded consent no-route and safe IPC",
+      "status": "PASS"
+    },
+    {
+      "name": "decision and threat model deny commissioning provider device control cloud and acceptance claims",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK ratchets are exact PASS while requirement remains open",
+      "status": "PASS"
+    }
+  ],
+  "generatedAt": "2026-08-15T07:27:49.846Z"
+}

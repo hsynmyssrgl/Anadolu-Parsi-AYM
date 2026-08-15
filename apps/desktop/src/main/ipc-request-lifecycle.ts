@@ -198,6 +198,10 @@ const memoryStudioReadChannels=new Set<string>(['memoryStudio:getCenter']);
 const memoryStudioWriteChannels=new Set<string>(['memoryStudio:createRecord','memoryStudio:deleteRecord','memoryStudio:createCapsule',
   'memoryStudio:reviewCapsule','memoryStudio:transitionCapsule']);
 const memoryStudioChannels=new Set<string>([...memoryStudioReadChannels,...memoryStudioWriteChannels]);
+const smartHomeEnergyReadChannels=new Set<string>(['smartHomeEnergy:getCenter']);
+const smartHomeEnergyWriteChannels=new Set<string>(['smartHomeEnergy:grantCameraConsent','smartHomeEnergy:revokeCameraConsent',
+  'smartHomeEnergy:setProcessing']);
+const smartHomeEnergyChannels=new Set<string>([...smartHomeEnergyReadChannels,...smartHomeEnergyWriteChannels]);
 
 const cancellableNetworkChannels = new Set<string>([
   'dataLifecycle:runRevocationSync'
@@ -209,6 +213,8 @@ const cancellableInteractiveAuthenticationChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLifecyclePolicy => {
+  if(smartHomeEnergyReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
+  if(smartHomeEnergyWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
   if(memoryStudioReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
   if(memoryStudioWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
   if(familyAiAssistantReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
@@ -313,6 +319,8 @@ const standardAdmissionChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestAdmissionPolicy = (channel: string): IpcRequestAdmissionPolicy => {
+  if(smartHomeEnergyChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
+    maxConcurrentPerSender:2,maxConcurrentPerChannel:1,maxQueuedPerSender:4,queueTimeoutMs:2_500});
   if(memoryStudioChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
     maxConcurrentPerSender:2,maxConcurrentPerChannel:1,maxQueuedPerSender:4,queueTimeoutMs:2_500});
   if(familyAiAssistantChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
@@ -429,6 +437,8 @@ export interface IpcRequestRatePolicy {
 }
 
 export const resolveIpcRequestRatePolicy = (channel: string): IpcRequestRatePolicy => {
+  if(smartHomeEnergyReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:60,windowMs:60_000});
+  if(smartHomeEnergyWriteChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:12,windowMs:60_000});
   if(memoryStudioReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:60,windowMs:60_000});
   if(memoryStudioWriteChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:12,windowMs:60_000});
   if(familyAiAssistantReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:60,windowMs:60_000});

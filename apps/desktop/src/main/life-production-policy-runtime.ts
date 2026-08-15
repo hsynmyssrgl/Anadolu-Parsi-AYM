@@ -36,6 +36,7 @@ import type {
   LifePolicyResourceRepositoryPort,
   LifeRecordRow,
   MemoryStudioPolicyResourceRepositoryPort,
+  SmartHomeEnergyPolicyResourceRepositoryPort,
   ObjectPermissionRepositoryPort,
   ObjectPermissionRow,
   PlacesTravelPolicyResourceRepositoryPort,
@@ -71,6 +72,7 @@ export interface LifeProductionPolicyRuntimeDependencies {
   readonly childEducationPolicyResourceRepository: ChildEducationPolicyResourceRepositoryPort;
   readonly familyAiAssistantPolicyResourceRepository: FamilyAiAssistantPolicyResourceRepositoryPort;
   readonly memoryStudioPolicyResourceRepository?: MemoryStudioPolicyResourceRepositoryPort;
+  readonly smartHomeEnergyPolicyResourceRepository?: SmartHomeEnergyPolicyResourceRepositoryPort;
   readonly placesTravelPolicyResourceRepository: PlacesTravelPolicyResourceRepositoryPort;
   readonly personRepository: PersonRepositoryPort;
   readonly deviceIdentityProvider: Pick<FileDeviceIdentityProvider, 'snapshot'>;
@@ -118,7 +120,12 @@ const lifeResourceTypes = new Set<LifePolicyIntent['resourceType']>([
   'family_ai_assistant_center',
   'memory_studio_record',
   'memory_time_capsule',
-  'memory_studio_center'
+  'memory_studio_center',
+  'smart_home_energy_center',
+  'smart_home_device',
+  'smart_home_observation',
+  'smart_home_camera_consent',
+  'smart_home_settings'
 ]);
 
 const nonEmpty = (value: unknown, max = 512): value is string =>
@@ -844,6 +851,20 @@ const findLifeResourceForPolicyResolution = (
           privacy: 'private' as const, stateFingerprint: stable(found.value) })
       : null);
   }
+  if (['smart_home_device','smart_home_observation','smart_home_camera_consent','smart_home_settings'].includes(resourceType)) {
+    if (!dependencies.smartHomeEnergyPolicyResourceRepository) throw new PlatformPolicyEnforcementError(
+      'RESOURCE_RESOLUTION_FAILED', 'Smart home policy resource repository is not composed');
+    const found = dependencies.smartHomeEnergyPolicyResourceRepository.resolvePolicyResource(
+      execution,
+      resourceType as 'smart_home_device'|'smart_home_observation'|'smart_home_camera_consent'|'smart_home_settings',
+      resourceId
+    );
+    if (!found.ok) return found;
+    return ok(found.value
+      ? Object.freeze({ familyId: found.value.familyId, ownerPersonId: found.value.ownerPersonId,
+          privacy: 'private' as const, stateFingerprint: stable(found.value) })
+      : null);
+  }
   throw new PlatformPolicyEnforcementError(
     'RESOURCE_RESOLUTION_FAILED',
     'Life policy resource type is not supported'
@@ -916,7 +937,8 @@ const loadLifeResourceSnapshotInTransaction = (
     if (existing.value) {
       if (
         !['household_operation_item','child_education_item','places_travel_item','family_ai_suggestion',
-          'memory_studio_record','memory_time_capsule'].includes(requestedIntent.resourceType)
+          'memory_studio_record','memory_time_capsule','smart_home_device','smart_home_observation',
+          'smart_home_camera_consent','smart_home_settings'].includes(requestedIntent.resourceType)
         || existing.value.familyId !== context.familyId
         || existing.value.ownerPersonId !== requestedIntent.ownerPersonId
         || existing.value.privacy !== requestedIntent.privacy

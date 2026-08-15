@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "id": "33-Y-LOCAL-FIRST-SMART-HOME-ENERGY",
+  "step": "33-Y",
+  "decision": "DEC-236",
+  "title": "Local-first smart home and energy adapters",
+  "status": "PLANNED",
+  "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+  "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+  "requirements": ["EXT-064", "EXT-065", "EXT-066", "EXT-067", "EXT-068", "EXT-069"],
+  "dependsOn": ["33-O", "33-P"],
+  "roadmapStatus": "PLANNED",
+  "registrySemantics": {
+    "acceptedScopeRegistryAuthority": "ATOMIC_CLOSURE_STATE",
+    "registryMutationPerformedByStarter": false,
+    "roadmapMutationPerformedByStarter": false,
+    "planOrLedgerActivationPerformedByStarter": false,
+    "activePredecessor": "33-P",
+    "registryEvidenceMustRemainFalseUntilClosure": true
+  },
+  "implementedModel": {
+    "status": "PARTIAL_LOCAL_COMPOSED_AND_TESTED_ACCEPTANCE_INCOMPLETE",
+    "deviceKinds": 14,
+    "observationKinds": 12,
+    "observationPayloadMode": "bounded_scalar_metadata_only",
+    "signedAdapterEvidenceRequired": true,
+    "cameraAccessDefaultDenied": true,
+    "visibleTimeBoundedCameraConsentRequired": true,
+    "minimumCameraConsentMinutes": 5,
+    "maximumCameraConsentMinutes": 60,
+    "mainOnlyAdapterAndObservationIngestion": true,
+    "rendererSafeChannels": 4,
+    "optimisticRevisionRequired": true,
+    "idempotentClientOperationRequired": true,
+    "immutableMutationLedger": true,
+    "existingLifeCenterScreenReused": true,
+    "newMenuRouteAdded": false
+  },
+  "truth": {
+    "localFirst": true,
+    "cloudUsed": false,
+    "externalDeliveryPerformed": "not_performed",
+    "matterCommissioningPerformed": false,
+    "liveProviderConnectionTested": false,
+    "liveDeviceControlPerformed": false,
+    "sensorProviderIngestionPerformed": false,
+    "rawCameraOrAudioStored": false,
+    "hiddenSurveillanceProhibited": true,
+    "providerAvailabilityGuaranteed": false,
+    "networkUsedByCurrentImplementation": false,
+    "requirementsClosed": false,
+    "countsAsRequirementPass": false
+  },
+  "validation": {
+    "targetedTestFiles": [
+      "packages/application/tests/smart-home-energy-use-cases.test.ts",
+      "packages/repositories/smart-home-energy-repository-policy.test.ts",
+      "apps/desktop/tests/smart-home-energy-data-store.test.ts",
+      "apps/desktop/tests/smart-home-energy-ipc-integration.test.ts",
+      "apps/desktop/tests/smart-home-energy-ui.test.ts"
+    ],
+    "targetedTestFileRatchet": 5,
+    "targetedTestRatchet": 21,
+    "migrationVersion": 103,
+    "migrationSha256": "d41d1a1e1bff6b89638a44096eb2ef62358e4d5370ef82d58ae2f0b4de211513",
+    "ppk021": {"status":"PASS","scannedProductionFiles":486,"exactPrivilegedSurfaceCount":751,"exactAllowlistSha256":"63e2766aa18e42b1472a9ccf9521c586b81ac19e36d7d9ca72fe48e872be2aa2","targetedTests":17,"contractChecks":84,"runtimeChecks":20},
+    "ppk022": {"status":"PASS","scannedProductionFiles":486,"exactCapabilitySurfaceCount":345,"exactCapabilityManifestSha256":"1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e","targetedTests":19,"contractChecks":110,"runtimeChecks":24},
+    "countsAsRequirementPass": false
+  },
+  "manualEvidence": {
+    "realMatterCommissioningUat": "NOT_RUN",
+    "realSensorProviderUat": "NOT_RUN",
+    "realEnergyMeterUat": "NOT_RUN",
+    "realCameraDoorbellUat": "NOT_RUN",
+    "realDeviceControlUat": "NOT_RUN",
+    "privacyAndSafetyReview": "NOT_RUN",
+    "legalReview": "NOT_RUN",
+    "certificationClaimed": false
+  },
+  "persistentReceiptStatus": "NOT_RUN"
+}

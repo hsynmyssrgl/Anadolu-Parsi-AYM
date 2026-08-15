@@ -261,8 +261,8 @@ export const verifyB4ControlledImportOpenBankingBoundary = async () => {
   ]) && includesAll(masterRegister, ['## DEC-215', 'DEC-215-b4-controlled-import-open-banking.md']));
   check('PPK-021 preserves the historical shared composition under the current exact 740 and 358 successor ratchet',
     astKeys.has('USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|CommitFinanceImportBatchUseCase')
-    && astGate.status === 'PASS' && astGate.privilegedSurfaces === 740
-    && astGate.exactAllowlistEntries === 740 && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 358
+    && astGate.status === 'PASS' && astGate.privilegedSurfaces === 751
+    && astGate.exactAllowlistEntries === 751 && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 365
     && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
   check('PPK-022 preserves historical bounded-read surfaces under current exact 345 successor ratchet', capabilityGate.status === 'PASS'
     && capabilityGate.capabilitySurfaces === 345 && capabilityGate.exactManifestSurfaces === 345

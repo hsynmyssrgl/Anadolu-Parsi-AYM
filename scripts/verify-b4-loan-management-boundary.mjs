@@ -229,8 +229,8 @@ export const verifyB4LoanManagementBoundary = async () => {
   check('PPK-021 exact ratchet reviews all three new compositions', [
     'CreateLoanAccountUseCase', 'ListLoanAccountsUseCase', 'RecordLoanPaymentUseCase'
   ].every((symbol) => astKeys.has(`USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|${symbol}`))
-    && astGate.status === 'PASS' && astGate.exactAllowlistEntries === 740
-    && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 358
+    && astGate.status === 'PASS' && astGate.exactAllowlistEntries === 751
+    && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 365
     && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
   check('PPK-022 capability ratchet remains unchanged and green', capabilityGate.status === 'PASS'
     && capabilityGate.capabilitySurfaces === 345

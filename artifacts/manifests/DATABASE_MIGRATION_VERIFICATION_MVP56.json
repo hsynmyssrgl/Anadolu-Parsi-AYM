@@ -527,7 +527,12 @@
       "version": 102,
       "name": "memory_studio_time_capsule",
       "checksum": "cb719e825fde1269af44900d4ab66d1fa6a550e7cfe1695535a6e4e5c7cceafa"
+    },
+    {
+      "version": 103,
+      "name": "local_first_smart_home_energy",
+      "checksum": "d41d1a1e1bff6b89638a44096eb2ef62358e4d5370ef82d58ae2f0b4de211513"
     }
   ],
-  "generatedAt": "2026-08-15T06:34:38.543Z"
+  "generatedAt": "2026-08-15T07:47:06.564Z"
 }

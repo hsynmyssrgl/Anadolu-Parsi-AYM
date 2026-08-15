@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "step": "33-Y",
+  "decision": "DEC-236",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "countsAsRequirementPass": false,
+  "checkCount": 12,
+  "passed": 12,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "scope inventory roadmap and dependency identities are exact",
+      "status": "PASS"
+    },
+    {
+      "name": "registry plan and ledger remain open behind 33-P",
+      "status": "PASS"
+    },
+    {
+      "name": "domain fixes device observation and fail-honest truth vocabularies",
+      "status": "PASS"
+    },
+    {
+      "name": "application exposes exact seven governed use cases",
+      "status": "PASS"
+    },
+    {
+      "name": "application enforces signed adapter scalar observations and bounded visible consent",
+      "status": "PASS"
+    },
+    {
+      "name": "repository uses exact receipt fence owner scope and payload-free resolution",
+      "status": "PASS"
+    },
+    {
+      "name": "desktop adapter composes central PEP and atomic audit outbox",
+      "status": "PASS"
+    },
+    {
+      "name": "DataStore composes seven use cases with main-only provider writes",
+      "status": "PASS"
+    },
+    {
+      "name": "IPC exposes exactly four renderer-safe channels",
+      "status": "PASS"
+    },
+    {
+      "name": "renderer states visible consent and provider no-claim boundary",
+      "status": "PASS"
+    },
+    {
+      "name": "network cloud control camera and provider claims stay false",
+      "status": "PASS"
+    },
+    {
+      "name": "manual evidence receipt and requirement acceptance remain closed",
+      "status": "PASS"
+    }
+  ],
+  "generatedAt": "2026-08-15T07:27:49.732Z"
+}

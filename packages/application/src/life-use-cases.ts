@@ -164,7 +164,12 @@ export interface LifePolicyIntent {
     | 'family_ai_assistant_center'
     | 'memory_studio_center'
     | 'memory_studio_record'
-    | 'memory_time_capsule';
+    | 'memory_time_capsule'
+    | 'smart_home_energy_center'
+    | 'smart_home_device'
+    | 'smart_home_observation'
+    | 'smart_home_camera_consent'
+    | 'smart_home_settings';
   readonly resourceId: string;
   readonly purpose: 'general' | 'emergency-offline-portability';
   readonly requestedFields?: readonly string[];

@@ -14555,6 +14555,292 @@ BEFORE DELETE ON memory_studio_mutations BEGIN SELECT RAISE(ABORT,'33-X mutation
 UPDATE database_metadata SET value='REVISION-33-X-MEMORY-STUDIO-TIME-CAPSULE',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 
+const smartHomeEnergySql = `
+CREATE TABLE smart_home_mutations (
+  id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  resource_type TEXT NOT NULL CHECK(resource_type IN ('smart_home_device','smart_home_observation','smart_home_camera_consent','smart_home_settings')),
+  resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 2 AND 256),
+  actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  mutation_kind TEXT NOT NULL CHECK(mutation_kind IN ('device_register','device_status_update','observation_record',
+    'camera_consent_grant','camera_consent_revoke','processing_enable','processing_disable')),
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 256),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  expected_revision INTEGER NOT NULL CHECK(expected_revision>=0),
+  revision INTEGER NOT NULL CHECK(revision=expected_revision+1),
+  resource_state_fingerprint TEXT NOT NULL CHECK(length(resource_state_fingerprint)=64 AND resource_state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version>=1),
+  policy_receipt_nonce TEXT NOT NULL CHECK(length(trim(policy_receipt_nonce)) BETWEEN 16 AND 256),
+  policy_correlation_id TEXT NOT NULL CHECK(length(trim(policy_correlation_id)) BETWEEN 1 AND 256),
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type IN ('smart_home_device','smart_home_observation','smart_home_camera_consent','smart_home_settings')),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action IN ('create','update','delete')),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='family.write'),
+  UNIQUE(family_id,actor_account_id,client_operation_id),
+  CHECK(policy_resource_type=resource_type AND policy_resource_id=resource_id),
+  CHECK((mutation_kind='device_register' AND resource_type='smart_home_device' AND policy_action='create' AND expected_revision=0)
+    OR (mutation_kind='device_status_update' AND resource_type='smart_home_device' AND policy_action='update' AND expected_revision>=1)
+    OR (mutation_kind='observation_record' AND resource_type='smart_home_observation' AND policy_action='create' AND expected_revision=0)
+    OR (mutation_kind='camera_consent_grant' AND resource_type='smart_home_camera_consent' AND policy_action='create' AND expected_revision=0)
+    OR (mutation_kind='camera_consent_revoke' AND resource_type='smart_home_camera_consent' AND policy_action='delete' AND expected_revision>=1)
+    OR (mutation_kind IN ('processing_enable','processing_disable') AND resource_type='smart_home_settings'
+      AND ((policy_action='create' AND expected_revision=0) OR (policy_action='update' AND expected_revision>=1))))
+) STRICT;
+
+CREATE INDEX idx_smart_home_mutations_owner
+ON smart_home_mutations(family_id,owner_person_id,occurred_at DESC,id);
+
+CREATE TABLE smart_home_devices (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  adapter_id TEXT NOT NULL CHECK(length(trim(adapter_id)) BETWEEN 2 AND 256),
+  provider_id TEXT NOT NULL CHECK(length(trim(provider_id)) BETWEEN 2 AND 256),
+  kind TEXT NOT NULL CHECK(kind IN ('matter_bridge','smoke_sensor','carbon_monoxide_sensor','water_leak_sensor','door_sensor',
+    'temperature_sensor','humidity_sensor','energy_meter','thermostat','light','smart_plug','camera','doorbell','ev_charger')),
+  label TEXT NOT NULL CHECK(length(trim(label)) BETWEEN 2 AND 120),
+  room TEXT CHECK(room IS NULL OR length(trim(room)) BETWEEN 2 AND 120),
+  status TEXT NOT NULL CHECK(status IN ('active','offline','retired')),
+  local_identifier_sha256 TEXT NOT NULL CHECK(length(local_identifier_sha256)=64 AND local_identifier_sha256 NOT GLOB '*[^0-9a-f]*'),
+  adapter_manifest_sha256 TEXT NOT NULL CHECK(length(adapter_manifest_sha256)=64 AND adapter_manifest_sha256 NOT GLOB '*[^0-9a-f]*'),
+  adapter_signer_key_id TEXT NOT NULL CHECK(length(trim(adapter_signer_key_id)) BETWEEN 2 AND 256),
+  signed_adapter_evidence_persisted INTEGER NOT NULL CHECK(signed_adapter_evidence_persisted=1),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES smart_home_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  CHECK(updated_at>=created_at)
+) STRICT;
+
+CREATE INDEX idx_smart_home_devices_owner
+ON smart_home_devices(family_id,owner_person_id,updated_at DESC,id);
+
+CREATE TABLE smart_home_observations (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  device_id TEXT NOT NULL REFERENCES smart_home_devices(id) ON DELETE RESTRICT,
+  kind TEXT NOT NULL CHECK(kind IN ('smoke_alarm','carbon_monoxide_alarm','water_leak_alarm','door_open','temperature_celsius',
+    'humidity_percent','energy_kilowatt_hour','power_watts','ev_charge_kilowatt_hour','thermostat_target_celsius','light_on','smart_plug_on')),
+  unit TEXT NOT NULL CHECK(unit IN ('boolean','celsius','percent','watt','kilowatt_hour')),
+  numeric_value REAL,
+  boolean_value INTEGER CHECK(boolean_value IS NULL OR boolean_value IN (0,1)),
+  observed_at TEXT NOT NULL CHECK(length(observed_at)=24 AND julianday(observed_at) IS NOT NULL),
+  recorded_at TEXT NOT NULL CHECK(length(recorded_at)=24 AND julianday(recorded_at) IS NOT NULL),
+  source_manifest_sha256 TEXT NOT NULL CHECK(length(source_manifest_sha256)=64 AND source_manifest_sha256 NOT GLOB '*[^0-9a-f]*'),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES smart_home_mutations(id) ON DELETE RESTRICT,
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  CHECK((unit='boolean' AND numeric_value IS NULL AND boolean_value IS NOT NULL)
+    OR (unit<>'boolean' AND numeric_value IS NOT NULL AND boolean_value IS NULL)),
+  CHECK(julianday(observed_at)>=julianday(recorded_at,'-30 days') AND julianday(observed_at)<=julianday(recorded_at,'+5 minutes')),
+  CHECK((unit='celsius' AND numeric_value BETWEEN -100 AND 100)
+    OR (unit='percent' AND numeric_value BETWEEN 0 AND 100)
+    OR (unit IN ('watt','kilowatt_hour') AND numeric_value BETWEEN 0 AND 1000000000)
+    OR unit='boolean')
+) STRICT;
+
+CREATE INDEX idx_smart_home_observations_owner
+ON smart_home_observations(family_id,owner_person_id,observed_at DESC,id);
+
+CREATE TABLE smart_home_camera_consents (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  device_id TEXT NOT NULL REFERENCES smart_home_devices(id) ON DELETE RESTRICT,
+  purpose TEXT NOT NULL CHECK(purpose IN ('live_view','doorbell_answer')),
+  status TEXT NOT NULL CHECK(status IN ('active','revoked')),
+  granted_by_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  granted_by_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  visible_indicator_required INTEGER NOT NULL CHECK(visible_indicator_required=1),
+  expires_at TEXT NOT NULL CHECK(length(expires_at)=24 AND julianday(expires_at) IS NOT NULL),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES smart_home_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  revoked_at TEXT CHECK(revoked_at IS NULL OR (length(revoked_at)=24 AND julianday(revoked_at) IS NOT NULL)),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  CHECK(julianday(expires_at)>=julianday(created_at,'+5 minutes') AND julianday(expires_at)<=julianday(created_at,'+60 minutes')),
+  CHECK((status='active' AND revoked_at IS NULL) OR (status='revoked' AND revoked_at=updated_at))
+) STRICT;
+
+CREATE INDEX idx_smart_home_consents_owner
+ON smart_home_camera_consents(family_id,owner_person_id,updated_at DESC,id);
+
+CREATE TABLE smart_home_settings (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  processing_enabled INTEGER NOT NULL CHECK(processing_enabled IN (0,1)),
+  camera_access_default_denied INTEGER NOT NULL CHECK(camera_access_default_denied=1),
+  hidden_surveillance_prohibited INTEGER NOT NULL CHECK(hidden_surveillance_prohibited=1),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES smart_home_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  UNIQUE(family_id,owner_person_id),
+  CHECK(updated_at>=created_at)
+) STRICT;
+
+CREATE TRIGGER trg_33y_smart_home_mutation_insert
+BEFORE INSERT ON smart_home_mutations
+WHEN NOT EXISTS(
+  SELECT 1 FROM accounts account
+  JOIN people actor ON actor.id=NEW.actor_person_id AND actor.family_id=NEW.family_id AND actor.status='active'
+  JOIN people owner ON owner.id=NEW.owner_person_id AND owner.family_id=NEW.family_id AND owner.status='active'
+  JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+  JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+  WHERE account.id=NEW.actor_account_id AND account.person_id=NEW.actor_person_id AND account.status='active'
+    AND receipt.receipt_version=NEW.policy_receipt_version AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id AND receipt.action=NEW.policy_action AND receipt.capability=NEW.policy_capability
+    AND receipt.recorded_at=NEW.occurred_at AND json_extract(receipt.record_json,'$.request.purpose')='general'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.resource.sensitivity')='highly_sensitive'
+    AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.actor_account_id
+    AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.actor_person_id
+    AND ((NEW.expected_revision=0 AND NEW.actor_person_id=NEW.owner_person_id
+        AND ((NEW.resource_type='smart_home_device' AND NOT EXISTS(SELECT 1 FROM smart_home_devices item WHERE item.id=NEW.resource_id))
+          OR (NEW.resource_type='smart_home_observation' AND NOT EXISTS(SELECT 1 FROM smart_home_observations item WHERE item.id=NEW.resource_id))
+          OR (NEW.resource_type='smart_home_camera_consent' AND NOT EXISTS(SELECT 1 FROM smart_home_camera_consents item WHERE item.id=NEW.resource_id))
+          OR (NEW.resource_type='smart_home_settings' AND NOT EXISTS(SELECT 1 FROM smart_home_settings item WHERE item.id=NEW.resource_id))))
+      OR (NEW.resource_type='smart_home_device' AND EXISTS(SELECT 1 FROM smart_home_devices item WHERE item.id=NEW.resource_id
+        AND item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id AND item.revision=NEW.expected_revision))
+      OR (NEW.resource_type='smart_home_camera_consent' AND EXISTS(SELECT 1 FROM smart_home_camera_consents item WHERE item.id=NEW.resource_id
+        AND item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id AND item.revision=NEW.expected_revision))
+      OR (NEW.resource_type='smart_home_settings' AND EXISTS(SELECT 1 FROM smart_home_settings item WHERE item.id=NEW.resource_id
+        AND item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id AND item.revision=NEW.expected_revision)))
+)
+BEGIN SELECT RAISE(ABORT,'33-Y mutation requires owner-bound durable PEP receipt and exact parent'); END;
+
+CREATE TRIGGER trg_33y_smart_home_device_insert
+BEFORE INSERT ON smart_home_devices
+WHEN NOT EXISTS(SELECT 1 FROM smart_home_mutations mutation WHERE mutation.id=NEW.last_mutation_id
+  AND mutation.resource_type='smart_home_device' AND mutation.resource_id=NEW.id AND mutation.family_id=NEW.family_id
+  AND mutation.owner_person_id=NEW.owner_person_id AND mutation.mutation_kind='device_register'
+  AND mutation.expected_revision=0 AND mutation.revision=NEW.revision AND mutation.resource_state_fingerprint=NEW.state_fingerprint
+  AND mutation.occurred_at=NEW.created_at AND NEW.updated_at=NEW.created_at AND mutation.policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'33-Y device requires exact signed-adapter mutation'); END;
+
+CREATE TRIGGER trg_33y_smart_home_device_update
+BEFORE UPDATE ON smart_home_devices
+WHEN NEW.id IS NOT OLD.id OR NEW.family_id IS NOT OLD.family_id OR NEW.owner_person_id IS NOT OLD.owner_person_id
+  OR NEW.adapter_id IS NOT OLD.adapter_id OR NEW.provider_id IS NOT OLD.provider_id OR NEW.kind IS NOT OLD.kind
+  OR NEW.label IS NOT OLD.label OR NEW.room IS NOT OLD.room OR NEW.local_identifier_sha256 IS NOT OLD.local_identifier_sha256
+  OR NEW.adapter_manifest_sha256 IS NOT OLD.adapter_manifest_sha256 OR NEW.adapter_signer_key_id IS NOT OLD.adapter_signer_key_id
+  OR NEW.signed_adapter_evidence_persisted IS NOT OLD.signed_adapter_evidence_persisted OR NEW.created_at IS NOT OLD.created_at
+  OR NEW.revision<>OLD.revision+1 OR OLD.status='retired'
+  OR NOT EXISTS(SELECT 1 FROM smart_home_mutations mutation WHERE mutation.id=NEW.last_mutation_id
+    AND mutation.resource_type='smart_home_device' AND mutation.resource_id=NEW.id AND mutation.family_id=NEW.family_id
+    AND mutation.owner_person_id=NEW.owner_person_id AND mutation.mutation_kind='device_status_update'
+    AND mutation.expected_revision=OLD.revision AND mutation.revision=NEW.revision
+    AND mutation.resource_state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.updated_at
+    AND mutation.policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'33-Y device update requires exact immutable identity and status mutation'); END;
+
+CREATE TRIGGER trg_33y_smart_home_observation_insert
+BEFORE INSERT ON smart_home_observations
+WHEN NOT EXISTS(SELECT 1 FROM smart_home_mutations mutation JOIN smart_home_devices device ON device.id=NEW.device_id
+  WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='smart_home_observation' AND mutation.resource_id=NEW.id
+    AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+    AND mutation.mutation_kind='observation_record' AND mutation.expected_revision=0 AND mutation.revision=1
+    AND mutation.resource_state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.recorded_at
+    AND mutation.policy_receipt_hash=NEW.policy_receipt_hash AND device.family_id=NEW.family_id
+    AND device.owner_person_id=NEW.owner_person_id AND device.status='active'
+    AND device.adapter_manifest_sha256=NEW.source_manifest_sha256
+    AND ((NEW.kind='smoke_alarm' AND device.kind='smoke_sensor')
+      OR (NEW.kind='carbon_monoxide_alarm' AND device.kind='carbon_monoxide_sensor')
+      OR (NEW.kind='water_leak_alarm' AND device.kind='water_leak_sensor')
+      OR (NEW.kind='door_open' AND device.kind IN ('door_sensor','doorbell'))
+      OR (NEW.kind='temperature_celsius' AND device.kind IN ('temperature_sensor','thermostat'))
+      OR (NEW.kind='humidity_percent' AND device.kind='humidity_sensor')
+      OR (NEW.kind IN ('energy_kilowatt_hour','power_watts') AND device.kind IN ('energy_meter','smart_plug','ev_charger'))
+      OR (NEW.kind='ev_charge_kilowatt_hour' AND device.kind='ev_charger')
+      OR (NEW.kind='thermostat_target_celsius' AND device.kind='thermostat')
+      OR (NEW.kind='light_on' AND device.kind='light') OR (NEW.kind='smart_plug_on' AND device.kind='smart_plug')))
+BEGIN SELECT RAISE(ABORT,'33-Y observation requires exact active signed adapter device and scalar mutation'); END;
+
+CREATE TRIGGER trg_33y_smart_home_consent_insert
+BEFORE INSERT ON smart_home_camera_consents
+WHEN NOT EXISTS(SELECT 1 FROM smart_home_mutations mutation JOIN smart_home_devices device ON device.id=NEW.device_id
+  WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='smart_home_camera_consent' AND mutation.resource_id=NEW.id
+    AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+    AND mutation.actor_account_id=NEW.granted_by_account_id AND mutation.actor_person_id=NEW.granted_by_person_id
+    AND mutation.mutation_kind='camera_consent_grant' AND mutation.expected_revision=0 AND mutation.revision=NEW.revision
+    AND mutation.resource_state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.created_at
+    AND NEW.updated_at=NEW.created_at AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+    AND device.family_id=NEW.family_id AND device.owner_person_id=NEW.owner_person_id
+    AND device.status='active' AND device.kind IN ('camera','doorbell') AND NEW.status='active')
+BEGIN SELECT RAISE(ABORT,'33-Y camera consent requires visible bounded owner approval'); END;
+
+CREATE TRIGGER trg_33y_smart_home_consent_update
+BEFORE UPDATE ON smart_home_camera_consents
+WHEN NEW.id IS NOT OLD.id OR NEW.family_id IS NOT OLD.family_id OR NEW.owner_person_id IS NOT OLD.owner_person_id
+  OR NEW.device_id IS NOT OLD.device_id OR NEW.purpose IS NOT OLD.purpose
+  OR NEW.granted_by_account_id IS NOT OLD.granted_by_account_id OR NEW.granted_by_person_id IS NOT OLD.granted_by_person_id
+  OR NEW.visible_indicator_required IS NOT OLD.visible_indicator_required OR NEW.expires_at IS NOT OLD.expires_at
+  OR NEW.created_at IS NOT OLD.created_at OR NEW.revision<>OLD.revision+1 OR OLD.status<>'active' OR NEW.status<>'revoked'
+  OR NEW.revoked_at<>NEW.updated_at
+  OR NOT EXISTS(SELECT 1 FROM smart_home_mutations mutation WHERE mutation.id=NEW.last_mutation_id
+    AND mutation.resource_type='smart_home_camera_consent' AND mutation.resource_id=NEW.id
+    AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+    AND mutation.mutation_kind='camera_consent_revoke' AND mutation.expected_revision=OLD.revision
+    AND mutation.revision=NEW.revision AND mutation.resource_state_fingerprint=NEW.state_fingerprint
+    AND mutation.occurred_at=NEW.updated_at AND mutation.policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'33-Y camera consent revoke requires exact immutable grant mutation'); END;
+
+CREATE TRIGGER trg_33y_smart_home_settings_insert
+BEFORE INSERT ON smart_home_settings
+WHEN NOT EXISTS(SELECT 1 FROM smart_home_mutations mutation WHERE mutation.id=NEW.last_mutation_id
+  AND mutation.resource_type='smart_home_settings' AND mutation.resource_id=NEW.id AND mutation.family_id=NEW.family_id
+  AND mutation.owner_person_id=NEW.owner_person_id AND mutation.mutation_kind IN ('processing_enable','processing_disable')
+  AND mutation.expected_revision=0 AND mutation.revision=NEW.revision AND mutation.resource_state_fingerprint=NEW.state_fingerprint
+  AND mutation.occurred_at=NEW.created_at AND NEW.updated_at=NEW.created_at AND mutation.policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'33-Y settings require exact local processing mutation'); END;
+
+CREATE TRIGGER trg_33y_smart_home_settings_update
+BEFORE UPDATE ON smart_home_settings
+WHEN NEW.id IS NOT OLD.id OR NEW.family_id IS NOT OLD.family_id OR NEW.owner_person_id IS NOT OLD.owner_person_id
+  OR NEW.camera_access_default_denied<>1 OR NEW.hidden_surveillance_prohibited<>1 OR NEW.created_at IS NOT OLD.created_at
+  OR NEW.revision<>OLD.revision+1 OR NEW.processing_enabled=OLD.processing_enabled
+  OR NOT EXISTS(SELECT 1 FROM smart_home_mutations mutation WHERE mutation.id=NEW.last_mutation_id
+    AND mutation.resource_type='smart_home_settings' AND mutation.resource_id=NEW.id
+    AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+    AND mutation.mutation_kind=CASE WHEN NEW.processing_enabled=1 THEN 'processing_enable' ELSE 'processing_disable' END
+    AND mutation.expected_revision=OLD.revision AND mutation.revision=NEW.revision
+    AND mutation.resource_state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.updated_at
+    AND mutation.policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'33-Y settings update requires exact fail-closed processing mutation'); END;
+
+CREATE TRIGGER trg_33y_smart_home_device_delete BEFORE DELETE ON smart_home_devices
+BEGIN SELECT RAISE(ABORT,'33-Y device history is durable'); END;
+CREATE TRIGGER trg_33y_smart_home_observation_update BEFORE UPDATE ON smart_home_observations
+BEGIN SELECT RAISE(ABORT,'33-Y observation ledger is immutable'); END;
+CREATE TRIGGER trg_33y_smart_home_observation_delete BEFORE DELETE ON smart_home_observations
+BEGIN SELECT RAISE(ABORT,'33-Y observation ledger is durable'); END;
+CREATE TRIGGER trg_33y_smart_home_consent_delete BEFORE DELETE ON smart_home_camera_consents
+BEGIN SELECT RAISE(ABORT,'33-Y camera consent history is durable'); END;
+CREATE TRIGGER trg_33y_smart_home_settings_delete BEFORE DELETE ON smart_home_settings
+BEGIN SELECT RAISE(ABORT,'33-Y settings history is durable'); END;
+CREATE TRIGGER trg_33y_smart_home_mutation_update BEFORE UPDATE ON smart_home_mutations
+BEGIN SELECT RAISE(ABORT,'33-Y mutation ledger is immutable'); END;
+CREATE TRIGGER trg_33y_smart_home_mutation_delete BEFORE DELETE ON smart_home_mutations
+BEGIN SELECT RAISE(ABORT,'33-Y mutation ledger is durable'); END;
+
+UPDATE database_metadata SET value='REVISION-33-Y-LOCAL-FIRST-SMART-HOME-ENERGY',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -14657,7 +14943,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(99, 'child_education_coordination', childEducationCoordinationSql),
   createMigrationDefinition(100, 'places_travel_asset_pet_workflows', placesTravelAssetPetSql),
   createMigrationDefinition(101, 'consent_bound_family_ai_assistant', familyAiAssistantSql),
-  createMigrationDefinition(102, 'memory_studio_time_capsule', memoryStudioSql)
+  createMigrationDefinition(102, 'memory_studio_time_capsule', memoryStudioSql),
+  createMigrationDefinition(103, 'local_first_smart_home_energy', smartHomeEnergySql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {
