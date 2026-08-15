@@ -31,6 +31,7 @@ import type {
   AccountRepositoryPort,
   AccountRow,
   ChildEducationPolicyResourceRepositoryPort,
+  FamilyAiAssistantPolicyResourceRepositoryPort,
   HouseholdOperationsPolicyResourceRepositoryPort,
   LifePolicyResourceRepositoryPort,
   LifeRecordRow,
@@ -67,6 +68,7 @@ export interface LifeProductionPolicyRuntimeDependencies {
   readonly lifePolicyResourceRepository: LifePolicyResourceRepositoryPort;
   readonly householdOperationsPolicyResourceRepository: HouseholdOperationsPolicyResourceRepositoryPort;
   readonly childEducationPolicyResourceRepository: ChildEducationPolicyResourceRepositoryPort;
+  readonly familyAiAssistantPolicyResourceRepository: FamilyAiAssistantPolicyResourceRepositoryPort;
   readonly placesTravelPolicyResourceRepository: PlacesTravelPolicyResourceRepositoryPort;
   readonly personRepository: PersonRepositoryPort;
   readonly deviceIdentityProvider: Pick<FileDeviceIdentityProvider, 'snapshot'>;
@@ -109,7 +111,9 @@ const lifeResourceTypes = new Set<LifePolicyIntent['resourceType']>([
   'child_education_item',
   'child_education_center',
   'places_travel_item',
-  'places_travel_center'
+  'places_travel_center',
+  'family_ai_suggestion',
+  'family_ai_assistant_center'
 ]);
 
 const nonEmpty = (value: unknown, max = 512): value is string =>
@@ -813,6 +817,18 @@ const findLifeResourceForPolicyResolution = (
         })
       : null);
   }
+  if (resourceType === 'family_ai_suggestion') {
+    const found = dependencies.familyAiAssistantPolicyResourceRepository.findSuggestionForPolicyResolution(execution, resourceId);
+    if (!found.ok) return found;
+    return ok(found.value
+      ? Object.freeze({
+          familyId: found.value.familyId,
+          ownerPersonId: found.value.ownerPersonId,
+          privacy: 'private' as const,
+          stateFingerprint: stable(found.value)
+        })
+      : null);
+  }
   throw new PlatformPolicyEnforcementError(
     'RESOURCE_RESOLUTION_FAILED',
     'Life policy resource type is not supported'
@@ -884,7 +900,7 @@ const loadLifeResourceSnapshotInTransaction = (
     if (!existing.ok) return existing;
     if (existing.value) {
       if (
-        !['household_operation_item','child_education_item','places_travel_item'].includes(requestedIntent.resourceType)
+        !['household_operation_item','child_education_item','places_travel_item','family_ai_suggestion'].includes(requestedIntent.resourceType)
         || existing.value.familyId !== context.familyId
         || existing.value.ownerPersonId !== requestedIntent.ownerPersonId
         || existing.value.privacy !== requestedIntent.privacy

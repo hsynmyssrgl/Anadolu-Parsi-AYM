@@ -109,3 +109,4 @@ export * from './archive-evidence-media-use-cases.js';
 export * from './household-operations-use-cases.js';
 export * from './child-education-coordination-use-cases.js';
 export * from './places-travel-asset-pet-use-cases.js';
+export * from './family-ai-assistant-use-cases.js';

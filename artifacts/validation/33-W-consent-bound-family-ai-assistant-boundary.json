@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "step": "33-W",
+  "decision": "DEC-234",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "countsAsRequirementPass": false,
+  "checkCount": 12,
+  "passed": 12,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "scope inventory roadmap and dependency identities are exact",
+      "status": "PASS"
+    },
+    {
+      "name": "registry plan and ledger remain open behind 33-P",
+      "status": "PASS"
+    },
+    {
+      "name": "domain fixes fifteen kinds nine modules and fail-honest truth",
+      "status": "PASS"
+    },
+    {
+      "name": "application exposes exact three governed use cases",
+      "status": "PASS"
+    },
+    {
+      "name": "application revalidates source consent and never records downstream action",
+      "status": "PASS"
+    },
+    {
+      "name": "repository uses receipt fence and bounded owner reads",
+      "status": "PASS"
+    },
+    {
+      "name": "desktop adapter applies standard and sensitive consent",
+      "status": "PASS"
+    },
+    {
+      "name": "DataStore composes three safe methods",
+      "status": "PASS"
+    },
+    {
+      "name": "IPC exposes exact three bounded channels",
+      "status": "PASS"
+    },
+    {
+      "name": "renderer states consent local and no-action truth",
+      "status": "PASS"
+    },
+    {
+      "name": "provider network model speech translation OCR and durable-action claims stay false",
+      "status": "PASS"
+    },
+    {
+      "name": "manual evidence persistent receipt and requirement acceptance remain closed",
+      "status": "PASS"
+    }
+  ],
+  "generatedAt": "2026-08-15T05:06:24.208Z"
+}

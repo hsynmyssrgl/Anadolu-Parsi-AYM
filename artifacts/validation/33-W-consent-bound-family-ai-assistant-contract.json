@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "step": "33-W",
+  "decision": "DEC-234",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "countsAsRequirementPass": false,
+  "migration101Sha256": "3758e4c795b59e09b7701dbf6dd3b89c6717506be8e4ee9cc13b8ba20cdf3715",
+  "checkCount": 11,
+  "passed": 11,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "scope inventory and five-test matrix are exact",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 101 source manifest and scope checksums are canonical",
+      "status": "PASS"
+    },
+    {
+      "name": "migration owns immutable current and mutation ledgers",
+      "status": "PASS"
+    },
+    {
+      "name": "repository contract exposes center suggestion mutation and policy ports",
+      "status": "PASS"
+    },
+    {
+      "name": "repository enforces exact receipt and payload-free policy resolution",
+      "status": "PASS"
+    },
+    {
+      "name": "desktop adapter composes central policy consent and transactional audit outbox",
+      "status": "PASS"
+    },
+    {
+      "name": "production runtime resolves exact private suggestion owner",
+      "status": "PASS"
+    },
+    {
+      "name": "main preload and renderer expose exact three safe methods",
+      "status": "PASS"
+    },
+    {
+      "name": "tests cover replay mismatch consent revocation rollback no-action IPC and route",
+      "status": "PASS"
+    },
+    {
+      "name": "decision and threat model deny provider inference downstream action and acceptance claims",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK ratchets are exact PASS while requirement remains open",
+      "status": "PASS"
+    }
+  ],
+  "generatedAt": "2026-08-15T05:06:24.318Z"
+}

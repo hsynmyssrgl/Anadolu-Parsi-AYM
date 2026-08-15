@@ -14,6 +14,7 @@ import { HouseholdOperationsPanel } from './HouseholdOperationsPanel';
 import { ChildEducationCoordinationPanel } from './ChildEducationCoordinationPanel';
 import { PlacesTravelAssetPetPanel } from './PlacesTravelAssetPetPanel';
 import { LocalGovernedOcrPanel } from './LocalGovernedOcrPanel';
+import { FamilyAiAssistantPanel } from './FamilyAiAssistantPanel';
 import { HealthCareCoordinationPanel } from './HealthCareCoordinationPanel';
 import {
   FAMILY_RELATIONSHIP_CATALOG,
@@ -832,7 +833,7 @@ function AiGovernanceScreen() {
       <article className="panel workspace-form">
         <span className="eyebrow">Standart AI kapsamı</span><h2>Kayıt onayı tanımla</h2>
         <label>Amaç<select value={purpose} onChange={e=>{const p=e.target.value as AiConsentPurpose;setPurpose(p);void reload(p);}}><option value="search">Doğal dil arama</option><option value="summary">Özetleme</option><option value="recommendation">Öneri</option><option value="classification">Sınıflandırma</option></select></label>
-        <label>Kaynak<select value={resourceType} onChange={e=>setResourceType(e.target.value)}><option value="event">Zaman tüneli olayları</option><option value="archive_item">Arşiv belgeleri</option></select></label>
+        <label>Kaynak<select value={resourceType} onChange={e=>setResourceType(e.target.value)}><option value="person">Aile üyeleri</option><option value="event">Zaman tüneli olayları</option><option value="archive_item">Arşiv belgeleri</option><option value="finance_record">Finans kayıtları</option><option value="health_record">Sağlık kayıtları</option><option value="life_record">Yaşam kayıtları</option><option value="local_ocr_job">Yerel OCR işleri</option><option value="household_operation_item">Ev operasyon kayıtları</option><option value="places_travel_item">Yer ve seyahat kayıtları</option></select></label>
         <label>Kayıt kimliği<input value={resourceId} onChange={e=>setResourceId(e.target.value)} placeholder="* tüm izinli kayıtlar"/></label>
         <div className="modal-actions"><Button tone="primary" disabled={busy} onClick={()=>void save('granted')}>Onay ver</Button><Button tone="danger" disabled={busy} onClick={()=>void save('revoked')}>Onayı geri çek</Button></div>
       </article>
@@ -866,6 +867,7 @@ function AiGovernanceScreen() {
         {exportPreview&&<><div className="context-stat"><strong>{exportPreview.transferAllowed?'Onaylar tamam':'Aktarım kapalı'}</strong><span>{exportPreview.warning}</span></div>{exportPreview.categories.map(category=><div className="context-stat" key={category.category}><strong>{category.label} · {category.recordCount}</strong><span>{category.approved?'Ayrı dışa gönderim onayı etkin':'Onay yok — engellendi'}</span><small>{category.fieldNames.join(', ')}</small></div>)}<small>Hedef: {exportPreview.destinationLabel} · Bu önizlemede dışa veri aktarımı: {exportPreview.outboundTransferPerformed?'Yapıldı':'Yapılmadı'}</small></>}
       </article>
     </section>
+    <FamilyAiAssistantPanel/>
   </>;
 }
 

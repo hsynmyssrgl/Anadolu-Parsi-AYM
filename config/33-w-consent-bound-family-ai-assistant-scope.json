@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "33-W-CONSENT-BOUND-FAMILY-AI-ASSISTANT",
+  "step": "33-W",
+  "decision": "DEC-234",
+  "title": "Consent-bound family AI assistant",
+  "status": "PLANNED",
+  "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+  "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+  "requirements": ["B6-01", "EXT-043", "EXT-044", "EXT-045", "EXT-046", "EXT-047", "EXT-048", "EXT-049", "EXT-050"],
+  "dependsOn": ["33-O", "33-Q", "33-R", "33-S", "33-T"],
+  "roadmapStatus": "PLANNED",
+  "registrySemantics": {
+    "acceptedScopeRegistryAuthority": "ATOMIC_CLOSURE_STATE",
+    "registryMutationPerformedByStarter": false,
+    "roadmapMutationPerformedByStarter": false,
+    "planOrLedgerActivationPerformedByStarter": false,
+    "activePredecessor": "33-P",
+    "registryEvidenceMustRemainFalseUntilClosure": true
+  },
+  "implementedModel": {
+    "status": "PARTIAL_LOCAL_COMPOSED_AND_TESTED_ACCEPTANCE_INCOMPLETE",
+    "sourceModules": ["family", "event", "archive", "finance", "health", "life", "ocr", "household", "places"],
+    "suggestionKinds": ["authorized_search", "daily_summary", "weekly_summary", "reminder_review", "emergency_bag", "meeting_agenda", "ocr_classification", "duplicate_record", "family_story", "spending_review", "meal_plan", "shopping_list", "plain_explanation", "read_aloud", "translation"],
+    "purposes": ["search", "summary", "recommendation", "classification"],
+    "sourceConsentRequired": true,
+    "financeAndHealthSensitiveConsentRequired": true,
+    "ownerPrivatePolicyBoundary": true,
+    "optimisticRevisionRequired": true,
+    "idempotentClientOperationRequired": true,
+    "immutableMutationLedger": true,
+    "boundedSuggestionReadLimit": 500,
+    "existingAiRouteReused": true,
+    "newMenuRouteAdded": false
+  },
+  "truth": {
+    "localFirst": true,
+    "authorizedSearchAvailableWithoutProvider": true,
+    "providerConfigured": false,
+    "networkUsed": false,
+    "cloudUsed": false,
+    "modelInferencePerformed": false,
+    "speechSynthesisPerformed": false,
+    "translationPerformed": false,
+    "ocrSuggestionAutomaticallyAccepted": false,
+    "durableActionPerformed": "not_performed",
+    "humanConfirmationRequired": true,
+    "confirmationExecutesDownstreamAction": false,
+    "sourceConsentRevalidated": true,
+    "revokedConsentSuggestionsHidden": true,
+    "medicalFinancialOrEmergencyDecisionProvided": false,
+    "rawSourceContentPersisted": false,
+    "rawSourceContentExposedToRenderer": false,
+    "requirementsClosed": false,
+    "countsAsRequirementPass": false
+  },
+  "validation": {
+    "targetedTestFiles": [
+      "packages/application/tests/family-ai-assistant-use-cases.test.ts",
+      "packages/repositories/family-ai-assistant-repository-policy.test.ts",
+      "apps/desktop/tests/family-ai-assistant-data-store.test.ts",
+      "apps/desktop/tests/family-ai-assistant-ipc-integration.test.ts",
+      "apps/desktop/tests/family-ai-assistant-ui.test.ts"
+    ],
+    "targetedTestFileRatchet": 5,
+    "targetedTestRatchet": 20,
+    "migrationVersion": 101,
+    "migrationSha256": "3758e4c795b59e09b7701dbf6dd3b89c6717506be8e4ee9cc13b8ba20cdf3715",
+    "ppk021": {"status":"PASS","scannedProductionFiles":474,"exactPrivilegedSurfaceCount":730,"exactAllowlistSha256":"70db1305706956168b12fff86ad42cd9140227b0bfa0b5bc5e90c976c54ef971","targetedTests":17,"contractChecks":84,"runtimeChecks":20},
+    "ppk022": {"status":"PASS","scannedProductionFiles":474,"exactCapabilitySurfaceCount":345,"exactCapabilityManifestSha256":"1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e","targetedTests":19,"contractChecks":110,"runtimeChecks":24},
+    "countsAsRequirementPass": false
+  },
+  "manualEvidence": {
+    "realFamilyUat": "NOT_RUN",
+    "realProviderAndModelUat": "NOT_RUN",
+    "speechAndTranslationUat": "NOT_RUN",
+    "ocrClassificationUat": "NOT_RUN",
+    "financialMedicalSafetyReview": "NOT_RUN",
+    "privacyLegalReview": "NOT_RUN",
+    "certificationClaimed": false
+  },
+  "persistentReceiptStatus": "NOT_RUN"
+}

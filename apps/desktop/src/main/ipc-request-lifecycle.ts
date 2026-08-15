@@ -191,6 +191,9 @@ const childEducationChannels = new Set<string>([
 const placesTravelReadChannels=new Set<string>(['placesTravel:getCenter']);
 const placesTravelWriteChannels=new Set<string>(['placesTravel:createItem','placesTravel:updateItem','placesTravel:deleteItem']);
 const placesTravelChannels=new Set<string>([...placesTravelReadChannels,...placesTravelWriteChannels]);
+const familyAiAssistantReadChannels=new Set<string>(['familyAiAssistant:getCenter']);
+const familyAiAssistantWriteChannels=new Set<string>(['familyAiAssistant:generate','familyAiAssistant:review']);
+const familyAiAssistantChannels=new Set<string>([...familyAiAssistantReadChannels,...familyAiAssistantWriteChannels]);
 
 const cancellableNetworkChannels = new Set<string>([
   'dataLifecycle:runRevocationSync'
@@ -202,6 +205,8 @@ const cancellableInteractiveAuthenticationChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLifecyclePolicy => {
+  if(familyAiAssistantReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
+  if(familyAiAssistantWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
   if(placesTravelReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
   if(placesTravelWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
   if (childEducationReadChannels.has(channel)) {
@@ -302,6 +307,8 @@ const standardAdmissionChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestAdmissionPolicy = (channel: string): IpcRequestAdmissionPolicy => {
+  if(familyAiAssistantChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
+    maxConcurrentPerSender:2,maxConcurrentPerChannel:1,maxQueuedPerSender:4,queueTimeoutMs:2_500});
   if(placesTravelChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
     maxConcurrentPerSender:2,maxConcurrentPerChannel:1,maxQueuedPerSender:4,queueTimeoutMs:2_500});
   if (childEducationChannels.has(channel)) {
@@ -414,6 +421,8 @@ export interface IpcRequestRatePolicy {
 }
 
 export const resolveIpcRequestRatePolicy = (channel: string): IpcRequestRatePolicy => {
+  if(familyAiAssistantReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:60,windowMs:60_000});
+  if(familyAiAssistantWriteChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:12,windowMs:60_000});
   if(placesTravelReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:60,windowMs:60_000});
   if(placesTravelWriteChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:16,windowMs:60_000});
   if (childEducationReadChannels.has(channel)) {

@@ -44,6 +44,7 @@ export * from './local-governed-ocr-repository.js';
 export * from './household-operations-repository.js';
 export * from './child-education-coordination-repository.js';
 export * from './places-travel-asset-pet-repository.js';
+export * from './family-ai-assistant-repository.js';
 
 export * from './data-lifecycle-repository.js';
 

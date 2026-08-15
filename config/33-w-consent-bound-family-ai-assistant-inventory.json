@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "step": "33-W",
+  "decision": "DEC-234",
+  "status": "PLANNED",
+  "governanceState": "LOCAL_IMPLEMENTATION_STARTED",
+  "requirements": ["B6-01", "EXT-043", "EXT-044", "EXT-045", "EXT-046", "EXT-047", "EXT-048", "EXT-049", "EXT-050"],
+  "implementationChain": {
+    "domain": ["packages/domain/src/family-ai-assistant.ts"],
+    "application": ["packages/application/src/family-ai-assistant-use-cases.ts"],
+    "repositoryContract": ["packages/repository-contracts/src/family-ai-assistant-repository.ts"],
+    "migration": ["packages/database/src/family-database-migrations.ts#101"],
+    "repository": ["packages/repositories/src/family-ai-assistant-repository.ts"],
+    "consent": ["packages/application/src/ai-consent-use-cases.ts", "packages/repositories/src/ai-consent-repository.ts"],
+    "policyAndComposition": ["apps/desktop/src/main/life-production-policy-runtime.ts", "apps/desktop/src/main/family-ai-assistant-application-adapter.ts", "apps/desktop/src/main/repository-composition-root.ts", "apps/desktop/src/main/data-store.ts"],
+    "ipc": ["apps/desktop/src/main/ipc-integration-policy.ts", "apps/desktop/src/main/ipc-request-lifecycle.ts", "apps/desktop/src/main/main.ts", "apps/desktop/src/main/preload.ts", "apps/desktop/src/renderer/global.d.ts"],
+    "ui": ["apps/desktop/src/renderer/FamilyAiAssistantPanel.tsx", "apps/desktop/src/renderer/App.tsx"]
+  },
+  "implementedTargetedTests": [
+    "packages/application/tests/family-ai-assistant-use-cases.test.ts",
+    "packages/repositories/family-ai-assistant-repository-policy.test.ts",
+    "apps/desktop/tests/family-ai-assistant-data-store.test.ts",
+    "apps/desktop/tests/family-ai-assistant-ipc-integration.test.ts",
+    "apps/desktop/tests/family-ai-assistant-ui.test.ts"
+  ],
+  "securityControls": {
+    "centralPepReceiptFence": true,
+    "ownerAndFamilyBound": true,
+    "sourceConsentRevalidated": true,
+    "financeAndHealthSensitiveConsentRequired": true,
+    "payloadFreePolicyResolution": true,
+    "contentFreeAuditAndOutbox": true,
+    "boundedIpcAndReadResults": true,
+    "rendererAuthorityExcluded": true,
+    "downstreamDurableActionExcluded": true,
+    "rawSourceContentExcluded": true
+  },
+  "validation": {
+    "targetedTestFileRatchet": 5,
+    "targetedTestRatchet": 20,
+    "migrationVersion": 101,
+    "migrationSha256": "3758e4c795b59e09b7701dbf6dd3b89c6717506be8e4ee9cc13b8ba20cdf3715",
+    "ppk021": {"status":"PASS","files":474,"surfaces":730,"sha256":"70db1305706956168b12fff86ad42cd9140227b0bfa0b5bc5e90c976c54ef971","targeted":17,"contract":84,"runtime":20},
+    "ppk022": {"status":"PASS","files":474,"surfaces":345,"sha256":"1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e","targeted":19,"contract":110,"runtime":24},
+    "countsAsRequirementPass": false
+  },
+  "externalAndManualEvidence": "NOT_RUN",
+  "countsAsRequirementPass": false
+}

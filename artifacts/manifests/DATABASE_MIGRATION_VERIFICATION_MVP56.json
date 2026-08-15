@@ -517,7 +517,12 @@
       "version": 100,
       "name": "places_travel_asset_pet_workflows",
       "checksum": "1cbdd671c0e2d6eb4a58d2d56d84ed63413e5f6585af252eefdaebc5600d18c4"
+    },
+    {
+      "version": 101,
+      "name": "consent_bound_family_ai_assistant",
+      "checksum": "3758e4c795b59e09b7701dbf6dd3b89c6717506be8e4ee9cc13b8ba20cdf3715"
     }
   ],
-  "generatedAt": "2026-08-15T04:03:33.430Z"
+  "generatedAt": "2026-08-15T05:06:43.836Z"
 }

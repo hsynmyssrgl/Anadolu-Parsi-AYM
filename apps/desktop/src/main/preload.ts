@@ -43,6 +43,7 @@ import type { HealthCareCoordinationCenterView, HealthCareMutationReceiptView, R
 import type { CreateHouseholdOperationItemInput, DeleteHouseholdOperationItemInput, HouseholdOperationMutationReceiptView, HouseholdOperationsCenterView, UpdateHouseholdOperationItemInput } from '@ppt/domain';
 import type { ChildEducationCenterView, ChildEducationMutationReceiptView, CreateChildEducationItemInput, DeleteChildEducationItemInput, UpdateChildEducationItemInput } from '@ppt/domain';
 import type { CreatePlacesTravelItemInput, DeletePlacesTravelItemInput, PlacesTravelCenterView, PlacesTravelMutationReceiptView, UpdatePlacesTravelItemInput } from '@ppt/domain';
+import type { FamilyAiAssistantCenterView, FamilyAiSuggestionMutationReceiptView, GenerateFamilyAiSuggestionInput, ReviewFamilyAiSuggestionInput } from '@ppt/domain';
 import type { LegacyArchiveOwnershipReattestationView, ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { AssignPersonMembershipInput, CreateFamilyBranchInput, CreateHouseholdInput, FamilyBranch, Household, HouseholdMembershipWorkspaceView, PersonLifecycleProfile, PersonLifecycleWorkspaceView, PersonMembership, UpdatePersonProfileInput } from '@ppt/domain';
 import type { AuthorizationContextWorkspaceView } from '@ppt/domain';
@@ -696,6 +697,9 @@ contextBridge.exposeInMainWorld('pardus', {
   createPlacesTravelItem:(input:CreatePlacesTravelItemInput):Promise<PlacesTravelMutationReceiptView>=>invoke('placesTravel:createItem',input),
   updatePlacesTravelItem:(input:UpdatePlacesTravelItemInput):Promise<PlacesTravelMutationReceiptView>=>invoke('placesTravel:updateItem',input),
   deletePlacesTravelItem:(input:DeletePlacesTravelItemInput):Promise<PlacesTravelMutationReceiptView>=>invoke('placesTravel:deleteItem',input),
+  getFamilyAiAssistantCenter:():Promise<FamilyAiAssistantCenterView>=>invoke('familyAiAssistant:getCenter'),
+  generateFamilyAiSuggestion:(input:GenerateFamilyAiSuggestionInput):Promise<FamilyAiSuggestionMutationReceiptView>=>invoke('familyAiAssistant:generate',input),
+  reviewFamilyAiSuggestion:(input:ReviewFamilyAiSuggestionInput):Promise<FamilyAiSuggestionMutationReceiptView>=>invoke('familyAiAssistant:review',input),
   listFinanceValuations:():Promise<FinanceValuationView[]>=>invoke('finance:listValuations'),
   createFinanceValuation:(input:CreateFinanceValuationInput):Promise<FinanceValuationView[]>=>invoke('finance:createValuation',input),
   createMember: (input: CreateFamilyMemberInput): Promise<FamilyMutationResultView> => invoke('family:createMember', input),

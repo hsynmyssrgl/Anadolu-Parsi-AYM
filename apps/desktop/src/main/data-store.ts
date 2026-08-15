@@ -162,6 +162,9 @@ import {
   CreatePlacesTravelItemUseCase,
   UpdatePlacesTravelItemUseCase,
   DeletePlacesTravelItemUseCase,
+  GetFamilyAiAssistantCenterUseCase,
+  GenerateFamilyAiSuggestionUseCase,
+  ReviewFamilyAiSuggestionUseCase,
   ListLifeRecordsUseCase,
   CreateLifeRecordUseCase,
   GetManagedLifeWorkspaceUseCase,
@@ -327,6 +330,7 @@ import {
 } from '@ppt/application';
 import type { AddArchiveItemVersionInput, AddArchiveRelationEvidenceInput, ArchiveRelationEvidenceHistoryView, ArchiveRelationEvidenceView, ChildEducationCenterView, ChildEducationMutationReceiptView, CreateChildEducationItemInput, CreateHouseholdOperationItemInput, DeleteChildEducationItemInput, DeleteHouseholdOperationItemInput, HealthCareCoordinationCenterView, HealthCareMutationReceiptView, HouseholdOperationMutationReceiptView, HouseholdOperationsCenterView, RecordHealthCareEntryInput, RemoveArchiveRelationEvidenceInput, RevokeHealthCareAccessGrantInput, UnifiedAuthorizedSearchInput, UnifiedAuthorizedSearchView, UpdateChildEducationItemInput, UpdateHouseholdOperationItemInput, UpsertHealthCareAccessGrantInput } from '@ppt/domain';
 import type { CreatePlacesTravelItemInput, DeletePlacesTravelItemInput, PlacesTravelCenterView, PlacesTravelMutationReceiptView, UpdatePlacesTravelItemInput } from '@ppt/domain';
+import type { FamilyAiAssistantCenterView, FamilyAiSuggestionMutationReceiptView, GenerateFamilyAiSuggestionInput, ReviewFamilyAiSuggestionInput } from '@ppt/domain';
 import { RepositoryBackedFamilyApplicationUnitOfWork, RepositoryBackedFamilyGraphQueryPort } from './family-application-adapter.js';
 import { RepositoryBackedHouseholdMembershipUnitOfWork } from './household-membership-application-adapter.js';
 import { RepositoryBackedPersonLifecycleUnitOfWork } from './person-lifecycle-application-adapter.js';
@@ -378,6 +382,11 @@ import {
   RepositoryBackedPlacesTravelAssetPetUnitOfWork,
   RepositoryBackedPlacesTravelQueryPort
 } from './places-travel-asset-pet-application-adapter.js';
+import {
+  RepositoryBackedFamilyAiAssistantQueryPort,
+  RepositoryBackedFamilyAiAssistantSourcePort,
+  RepositoryBackedFamilyAiAssistantUnitOfWork
+} from './family-ai-assistant-application-adapter.js';
 import {
   RepositoryBackedLocationPolicyTransactionRunner,
   RepositoryBackedLocationUnitOfWork,
@@ -1254,6 +1263,9 @@ export class FamilyDataStore {
   readonly #createPlacesTravelItemUseCase: CreatePlacesTravelItemUseCase;
   readonly #updatePlacesTravelItemUseCase: UpdatePlacesTravelItemUseCase;
   readonly #deletePlacesTravelItemUseCase: DeletePlacesTravelItemUseCase;
+  readonly #getFamilyAiAssistantCenterUseCase:GetFamilyAiAssistantCenterUseCase;
+  readonly #generateFamilyAiSuggestionUseCase:GenerateFamilyAiSuggestionUseCase;
+  readonly #reviewFamilyAiSuggestionUseCase:ReviewFamilyAiSuggestionUseCase;
   readonly #prepareFamilyEmergencyCardExportUseCase: PrepareFamilyEmergencyCardExportUseCase;
   readonly #recordFamilyEmergencyCardExportCompletionUseCase: RecordFamilyEmergencyCardExportCompletionUseCase;
   readonly #listFinanceRecordsUseCase: ListFinanceRecordsUseCase;
@@ -1771,6 +1783,7 @@ export class FamilyDataStore {
           householdOperationsPolicyResourceRepository: this.#repositories.householdOperationsRepository,
           childEducationPolicyResourceRepository: this.#repositories.childEducationRepository,
           placesTravelPolicyResourceRepository: this.#repositories.placesTravelRepository,
+          familyAiAssistantPolicyResourceRepository: this.#repositories.familyAiAssistantRepository,
           personRepository: this.#repositories.personRepository,
           deviceIdentityProvider: this.#deviceIdentityProvider,
           authorizationProvider: productionArchivePolicy.authorizationProvider,
@@ -1788,6 +1801,9 @@ export class FamilyDataStore {
       childEducationPolicyResourceRepository: this.#repositories.childEducationRepository,
       placesTravelRepository: this.#repositories.placesTravelRepository,
       placesTravelPolicyResourceRepository: this.#repositories.placesTravelRepository,
+      familyAiAssistantRepository: this.#repositories.familyAiAssistantRepository,
+      familyAiAssistantPolicyResourceRepository: this.#repositories.familyAiAssistantRepository,
+      aiConsentRepository: this.#repositories.aiConsentRepository,
       accountRepository: this.#repositories.accountRepository,
       permissionRepository: this.#repositories.objectPermissionRepository,
       personRepository: this.#repositories.personRepository,
@@ -2466,16 +2482,35 @@ export class FamilyDataStore {
     const archiveUnitOfWork = new RepositoryBackedArchiveUnitOfWork(archiveApplicationDependencies);
     this.#listArchiveItemsUseCase = new ListArchiveItemsUseCase(archiveQuery);
     this.#searchArchiveItemsUseCase = new SearchArchiveItemsUseCase(archiveQuery);
-    this.#searchUnifiedAuthorizedRecordsUseCase = new SearchUnifiedAuthorizedRecordsUseCase(
-      new RepositoryBackedUnifiedAuthorizedSearchSourcePort({
-        loadFamilyAndEvents: () => this.getSnapshotSections({ sections: ['graph', 'timeline'] }),
-        listArchive: () => this.listArchive(),
-        listFinance: () => this.listFinanceRecords(),
-        listHealth: () => this.listHealthRecords(),
-        listLife: () => this.listLifeRecords(),
-        now: () => this.#clock.now()
-      })
-    );
+    const unifiedAuthorizedSearchSource = new RepositoryBackedUnifiedAuthorizedSearchSourcePort({
+      loadFamilyAndEvents: () => this.getSnapshotSections({ sections: ['graph', 'timeline'] }),
+      listArchive: () => this.listArchive(),
+      listFinance: () => this.listFinanceRecords(),
+      listHealth: () => this.listHealthRecords(),
+      listLife: () => this.listLifeRecords(),
+      now: () => this.#clock.now()
+    });
+    this.#searchUnifiedAuthorizedRecordsUseCase = new SearchUnifiedAuthorizedRecordsUseCase(unifiedAuthorizedSearchSource);
+    const familyAiAssistantDependencies={...lifeApplicationDependencies,
+      familyAiAssistantRepository:this.#repositories.familyAiAssistantRepository,
+      familyAiAssistantPolicyResourceRepository:this.#repositories.familyAiAssistantRepository,
+      aiConsentRepository:this.#repositories.aiConsentRepository} as const;
+    const familyAiAssistantQuery=new RepositoryBackedFamilyAiAssistantQueryPort(
+      familyAiAssistantDependencies,lifePolicyTransactionRunner);
+    const familyAiAssistantUnitOfWork=new RepositoryBackedFamilyAiAssistantUnitOfWork(
+      familyAiAssistantDependencies,lifePolicyTransactionRunner);
+    const familyAiAssistantSource=new RepositoryBackedFamilyAiAssistantSourcePort({
+      unifiedSource:unifiedAuthorizedSearchSource,
+      loadOcrCenter:()=>this.getLocalGovernedOcrCenter(),
+      loadHouseholdCenter:()=>this.getHouseholdOperationsCenter(),
+      loadPlacesCenter:(ownerPersonId)=>this.getPlacesTravelCenter(ownerPersonId),
+      listConsents:()=>Promise.resolve(this.listAiConsents()),
+      listSensitiveProfiles:()=>Promise.resolve(this.listSensitiveDataProfiles()),
+      now:()=>this.#clock.now()
+    });
+    this.#getFamilyAiAssistantCenterUseCase=new GetFamilyAiAssistantCenterUseCase(familyAiAssistantQuery);
+    this.#generateFamilyAiSuggestionUseCase=new GenerateFamilyAiSuggestionUseCase(familyAiAssistantSource,familyAiAssistantUnitOfWork);
+    this.#reviewFamilyAiSuggestionUseCase=new ReviewFamilyAiSuggestionUseCase(familyAiAssistantUnitOfWork);
     this.#prepareArchiveOpenUseCase = new PrepareArchiveOpenUseCase(archiveQuery);
     this.#recordArchiveOpenedUseCase = new RecordArchiveOpenedUseCase(archiveUnitOfWork);
     this.#authorizeEmergencyArchiveReadUseCase = new AuthorizeEmergencyArchiveReadUseCase(archiveUnitOfWork);
@@ -5955,6 +5990,31 @@ export class FamilyDataStore {
       input
     );
     if (!result.ok) throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async getFamilyAiAssistantCenter():Promise<FamilyAiAssistantCenterView>{
+    const result=await this.#getFamilyAiAssistantCenterUseCase.execute(
+      this.#lifeApplicationContext('family-ai-assistant-center'));
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async generateFamilyAiSuggestion(
+    input:GenerateFamilyAiSuggestionInput
+  ):Promise<FamilyAiSuggestionMutationReceiptView>{
+    const result=await this.#generateFamilyAiSuggestionUseCase.execute({
+      context:this.#lifeApplicationContext('family-ai-assistant-generate'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async reviewFamilyAiSuggestion(
+    input:ReviewFamilyAiSuggestionInput
+  ):Promise<FamilyAiSuggestionMutationReceiptView>{
+    const result=await this.#reviewFamilyAiSuggestionUseCase.execute({
+      context:this.#lifeApplicationContext('family-ai-assistant-review'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
     return result.value;
   }
 

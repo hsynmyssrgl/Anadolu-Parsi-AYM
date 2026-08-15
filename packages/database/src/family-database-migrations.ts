@@ -14128,6 +14128,169 @@ BEFORE DELETE ON places_travel_mutations BEGIN SELECT RAISE(ABORT,'33-V places/t
 UPDATE database_metadata SET value='REVISION-33-V-PLACES-TRAVEL-ASSET-PET',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 
+const familyAiAssistantSql = `
+CREATE TABLE family_ai_suggestion_mutations (
+  id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  suggestion_id TEXT NOT NULL CHECK(length(trim(suggestion_id)) BETWEEN 2 AND 256),
+  actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  mutation_kind TEXT NOT NULL CHECK(mutation_kind IN ('suggestion_generate','suggestion_confirm','suggestion_dismiss')),
+  purpose TEXT NOT NULL CHECK(purpose IN ('search','summary','recommendation','classification')),
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 256),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  expected_revision INTEGER NOT NULL CHECK(expected_revision>=0),
+  revision INTEGER NOT NULL CHECK(revision=expected_revision+1),
+  suggestion_state_fingerprint TEXT NOT NULL CHECK(length(suggestion_state_fingerprint)=64 AND suggestion_state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  source_fingerprint TEXT NOT NULL CHECK(length(source_fingerprint)=64 AND source_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  source_count INTEGER NOT NULL CHECK(source_count BETWEEN 1 AND 24),
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version>=1),
+  policy_receipt_nonce TEXT NOT NULL CHECK(length(trim(policy_receipt_nonce)) BETWEEN 16 AND 256),
+  policy_correlation_id TEXT NOT NULL CHECK(length(trim(policy_correlation_id)) BETWEEN 1 AND 256),
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type='family_ai_suggestion'),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action IN ('create','update')),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='family.write'),
+  UNIQUE(family_id,actor_account_id,client_operation_id),
+  CHECK(policy_resource_id=suggestion_id),
+  CHECK((mutation_kind='suggestion_generate' AND policy_action='create' AND expected_revision=0)
+    OR (mutation_kind IN ('suggestion_confirm','suggestion_dismiss') AND policy_action='update' AND expected_revision>=1))
+) STRICT;
+
+CREATE INDEX idx_family_ai_suggestion_mutations_owner
+ON family_ai_suggestion_mutations(family_id,owner_person_id,occurred_at DESC,id);
+
+CREATE TABLE family_ai_suggestions (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  kind TEXT NOT NULL CHECK(kind IN (
+    'authorized_search','daily_summary','weekly_summary','reminder_review','emergency_bag','meeting_agenda',
+    'ocr_classification','duplicate_record','family_story','spending_review','meal_plan','shopping_list',
+    'plain_explanation','read_aloud','translation'
+  )),
+  purpose TEXT NOT NULL CHECK(purpose IN ('search','summary','recommendation','classification')),
+  status TEXT NOT NULL CHECK(status IN ('pending_confirmation','confirmed','dismissed')),
+  title TEXT NOT NULL CHECK(length(trim(title)) BETWEEN 2 AND 160),
+  explanation TEXT NOT NULL CHECK(length(trim(explanation)) BETWEEN 10 AND 500),
+  confidence_basis_points INTEGER NOT NULL CHECK(confidence_basis_points BETWEEN 0 AND 10000),
+  sources_json TEXT NOT NULL CHECK(json_valid(sources_json) AND json_type(sources_json)='array'
+    AND json_array_length(sources_json) BETWEEN 1 AND 24 AND length(sources_json)<=8192),
+  source_fingerprint TEXT NOT NULL CHECK(length(source_fingerprint)=64 AND source_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES family_ai_suggestion_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z' AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND updated_at GLOB '????-??-??T??:??:??.???Z' AND julianday(updated_at) IS NOT NULL),
+  confirmed_at TEXT CHECK(confirmed_at IS NULL OR (length(confirmed_at)=24 AND julianday(confirmed_at) IS NOT NULL)),
+  dismissed_at TEXT CHECK(dismissed_at IS NULL OR (length(dismissed_at)=24 AND julianday(dismissed_at) IS NOT NULL)),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  CHECK(updated_at>=created_at),
+  CHECK((status='pending_confirmation' AND confirmed_at IS NULL AND dismissed_at IS NULL)
+    OR (status='confirmed' AND confirmed_at=updated_at AND dismissed_at IS NULL)
+    OR (status='dismissed' AND dismissed_at=updated_at AND confirmed_at IS NULL)),
+  CHECK((kind='authorized_search' AND purpose='search')
+    OR (kind IN ('daily_summary','weekly_summary','plain_explanation') AND purpose='summary')
+    OR (kind IN ('ocr_classification','duplicate_record') AND purpose='classification')
+    OR (kind IN ('reminder_review','emergency_bag','meeting_agenda','family_story','spending_review','meal_plan','shopping_list','read_aloud','translation') AND purpose='recommendation'))
+) STRICT;
+
+CREATE INDEX idx_family_ai_suggestions_owner
+ON family_ai_suggestions(family_id,owner_person_id,updated_at DESC,id);
+
+CREATE TRIGGER trg_33w_family_ai_mutation_insert
+BEFORE INSERT ON family_ai_suggestion_mutations
+WHEN NOT EXISTS(
+  SELECT 1
+  FROM accounts account
+  JOIN people actor ON actor.id=NEW.actor_person_id AND actor.family_id=NEW.family_id AND actor.status='active'
+  JOIN people owner ON owner.id=NEW.owner_person_id AND owner.family_id=NEW.family_id AND owner.status='active'
+  JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+  JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+  WHERE account.id=NEW.actor_account_id AND account.person_id=NEW.actor_person_id AND account.status='active'
+    AND NEW.actor_person_id=NEW.owner_person_id
+    AND receipt.receipt_version=NEW.policy_receipt_version AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id AND receipt.action=NEW.policy_action
+    AND receipt.capability=NEW.policy_capability AND receipt.recorded_at=NEW.occurred_at
+    AND json_extract(receipt.record_json,'$.request.purpose')='general'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.resource.sensitivity')='highly_sensitive'
+    AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.actor_account_id
+    AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.actor_person_id
+    AND ((NEW.expected_revision=0 AND NEW.mutation_kind='suggestion_generate'
+        AND NOT EXISTS(SELECT 1 FROM family_ai_suggestions item WHERE item.id=NEW.suggestion_id))
+      OR EXISTS(SELECT 1 FROM family_ai_suggestions item WHERE item.id=NEW.suggestion_id
+        AND item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id
+        AND item.revision=NEW.expected_revision AND item.status='pending_confirmation'
+        AND item.purpose=NEW.purpose AND item.source_fingerprint=NEW.source_fingerprint
+        AND json_array_length(item.sources_json)=NEW.source_count))
+)
+BEGIN SELECT RAISE(ABORT,'33-W family AI mutation requires owner-bound durable PEP receipt and exact parent'); END;
+
+CREATE TRIGGER trg_33w_family_ai_suggestion_insert
+BEFORE INSERT ON family_ai_suggestions
+WHEN NOT EXISTS(
+  SELECT 1 FROM family_ai_suggestion_mutations mutation
+  WHERE mutation.id=NEW.last_mutation_id AND mutation.suggestion_id=NEW.id
+    AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+    AND mutation.actor_person_id=NEW.owner_person_id AND mutation.mutation_kind='suggestion_generate'
+    AND mutation.purpose=NEW.purpose AND mutation.expected_revision=0 AND mutation.revision=NEW.revision
+    AND mutation.suggestion_state_fingerprint=NEW.state_fingerprint
+    AND mutation.source_fingerprint=NEW.source_fingerprint
+    AND mutation.source_count=json_array_length(NEW.sources_json)
+    AND mutation.occurred_at=NEW.created_at AND NEW.updated_at=NEW.created_at
+    AND mutation.policy_receipt_hash=NEW.policy_receipt_hash AND NEW.status='pending_confirmation'
+)
+  OR EXISTS(
+    SELECT 1 FROM json_each(NEW.sources_json) source
+    WHERE json_type(source.value)<>'object'
+      OR json_extract(source.value,'$.module') NOT IN ('family','event','archive','finance','health','life','ocr','household','places')
+      OR json_extract(source.value,'$.resourceType') NOT IN ('person','event','archive_item','finance_record','health_record','life_record','local_ocr_job','household_operation_item','places_travel_item')
+      OR typeof(json_extract(source.value,'$.resourceId'))<>'text'
+      OR length(trim(json_extract(source.value,'$.resourceId'))) NOT BETWEEN 2 AND 256
+      OR (SELECT count(*) FROM json_each(source.value))<>3
+  )
+  OR (SELECT count(*) FROM json_each(NEW.sources_json))<>(SELECT count(DISTINCT json_extract(value,'$.resourceType')||':'||json_extract(value,'$.resourceId')) FROM json_each(NEW.sources_json))
+BEGIN SELECT RAISE(ABORT,'33-W family AI suggestion requires exact mutation and bounded content-minimized sources'); END;
+
+CREATE TRIGGER trg_33w_family_ai_suggestion_update
+BEFORE UPDATE ON family_ai_suggestions
+WHEN NEW.id IS NOT OLD.id OR NEW.family_id IS NOT OLD.family_id OR NEW.owner_person_id IS NOT OLD.owner_person_id
+  OR NEW.kind IS NOT OLD.kind OR NEW.purpose IS NOT OLD.purpose OR NEW.title IS NOT OLD.title
+  OR NEW.explanation IS NOT OLD.explanation OR NEW.confidence_basis_points IS NOT OLD.confidence_basis_points
+  OR NEW.sources_json IS NOT OLD.sources_json OR NEW.source_fingerprint IS NOT OLD.source_fingerprint
+  OR NEW.created_at IS NOT OLD.created_at OR NEW.revision<>OLD.revision+1
+  OR NOT EXISTS(
+    SELECT 1 FROM family_ai_suggestion_mutations mutation
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.suggestion_id=NEW.id
+      AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+      AND mutation.actor_person_id=NEW.owner_person_id AND mutation.expected_revision=OLD.revision
+      AND mutation.revision=NEW.revision AND mutation.purpose=NEW.purpose
+      AND mutation.suggestion_state_fingerprint=NEW.state_fingerprint
+      AND mutation.source_fingerprint=NEW.source_fingerprint
+      AND mutation.source_count=json_array_length(NEW.sources_json)
+      AND mutation.occurred_at=NEW.updated_at AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+      AND ((mutation.mutation_kind='suggestion_confirm' AND OLD.status='pending_confirmation' AND NEW.status='confirmed')
+        OR (mutation.mutation_kind='suggestion_dismiss' AND OLD.status='pending_confirmation' AND NEW.status='dismissed'))
+  )
+BEGIN SELECT RAISE(ABORT,'33-W family AI update requires immutable content and exact human review mutation'); END;
+
+CREATE TRIGGER trg_33w_family_ai_suggestion_delete
+BEFORE DELETE ON family_ai_suggestions BEGIN SELECT RAISE(ABORT,'33-W family AI current history is durable'); END;
+CREATE TRIGGER trg_33w_family_ai_mutation_update
+BEFORE UPDATE ON family_ai_suggestion_mutations BEGIN SELECT RAISE(ABORT,'33-W family AI mutation ledger is immutable'); END;
+CREATE TRIGGER trg_33w_family_ai_mutation_delete
+BEFORE DELETE ON family_ai_suggestion_mutations BEGIN SELECT RAISE(ABORT,'33-W family AI mutation ledger is durable'); END;
+
+UPDATE database_metadata SET value='REVISION-33-W-CONSENT-BOUND-FAMILY-AI-ASSISTANT',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -14228,7 +14391,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(97, 'health_care_coordination_elder_support', healthCareCoordinationElderSupportSql),
   createMigrationDefinition(98, 'household_operations_center', householdOperationsCenterSql),
   createMigrationDefinition(99, 'child_education_coordination', childEducationCoordinationSql),
-  createMigrationDefinition(100, 'places_travel_asset_pet_workflows', placesTravelAssetPetSql)
+  createMigrationDefinition(100, 'places_travel_asset_pet_workflows', placesTravelAssetPetSql),
+  createMigrationDefinition(101, 'consent_bound_family_ai_assistant', familyAiAssistantSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

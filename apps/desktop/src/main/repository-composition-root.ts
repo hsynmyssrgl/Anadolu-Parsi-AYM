@@ -19,6 +19,7 @@ import {
   SqliteFamilyRepository,
   SqliteFamilyDataImportRepository,
   SqliteFinanceRepository,
+  SqliteFamilyAiAssistantRepository,
   SqliteFormDraftRepository,
   SqliteExternalBackupInventoryRepository,
   SqliteGenealogyRepository,
@@ -75,6 +76,8 @@ import type {
   FamilyDataImportRepositoryPort,
   FinancePolicyResourceRepositoryPort,
   FinanceRepositoryPort,
+  FamilyAiAssistantPolicyResourceRepositoryPort,
+  FamilyAiAssistantRepositoryPort,
   FormDraftRepositoryPort,
   ExternalBackupInventoryRepositoryPort,
   GenealogyRepositoryPort,
@@ -135,6 +138,7 @@ export interface RepositoryCompositionRoot {
   readonly familyRepository: FamilyRepositoryPort;
   readonly familyDataImportRepository: FamilyDataImportRepositoryPort;
   readonly financeRepository: FinanceRepositoryPort & FinancePolicyResourceRepositoryPort;
+  readonly familyAiAssistantRepository: FamilyAiAssistantRepositoryPort & FamilyAiAssistantPolicyResourceRepositoryPort;
   readonly formDraftRepository: FormDraftRepositoryPort;
   readonly longTermPortfolioRepository: LongTermPortfolioRepository;
   readonly externalBackupInventoryRepository: ExternalBackupInventoryRepositoryPort;
@@ -200,6 +204,7 @@ export const createSqliteRepositoryCompositionRoot = (
     familyRepository: new SqliteFamilyRepository(repositoryOptions),
     familyDataImportRepository: new SqliteFamilyDataImportRepository(repositoryOptions),
     financeRepository: new SqliteFinanceRepository(repositoryOptions),
+    familyAiAssistantRepository: new SqliteFamilyAiAssistantRepository(repositoryOptions),
     formDraftRepository: new SqliteFormDraftRepository(repositoryOptions),
     longTermPortfolioRepository: new SqliteLongTermPortfolioRepository(repositoryOptions),
     externalBackupInventoryRepository: new SqliteExternalBackupInventoryRepository(repositoryOptions),

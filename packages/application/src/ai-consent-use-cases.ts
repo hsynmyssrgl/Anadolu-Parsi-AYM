@@ -25,6 +25,18 @@ import type {
 } from '@ppt/domain';
 import { AI_CONSENT_PURPOSES, SENSITIVE_DATA_CATEGORIES } from '@ppt/domain';
 
+const STANDARD_AI_CONSENT_RESOURCE_TYPES = Object.freeze([
+  'person',
+  'event',
+  'archive_item',
+  'finance_record',
+  'health_record',
+  'life_record',
+  'local_ocr_job',
+  'household_operation_item',
+  'places_travel_item'
+] as const);
+
 export const SENSITIVE_DATA_PROFILE_RESOURCE_TYPE = 'sensitive_data_profile' as const;
 
 export interface SensitiveDataInventoryProjection {
@@ -249,7 +261,7 @@ export class UpsertAiConsentUseCase {
     if (!AI_CONSENT_PURPOSES.includes(input.command.purpose)) {
       return err(invalid(input.context, 'Standart AI izin amacı geçersizdir.'));
     }
-    if (!['event', 'archive_item'].includes(resourceType)) {
+    if (!(STANDARD_AI_CONSENT_RESOURCE_TYPES as readonly string[]).includes(resourceType)) {
       return err(invalid(input.context, 'Standart AI izin kaynağı geçersizdir.'));
     }
     if (!resourceType || !resourceId) {

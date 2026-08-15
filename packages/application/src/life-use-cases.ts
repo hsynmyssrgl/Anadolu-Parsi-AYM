@@ -159,7 +159,9 @@ export interface LifePolicyIntent {
     | 'child_education_item'
     | 'child_education_center'
     | 'places_travel_item'
-    | 'places_travel_center';
+    | 'places_travel_center'
+    | 'family_ai_suggestion'
+    | 'family_ai_assistant_center';
   readonly resourceId: string;
   readonly purpose: 'general' | 'emergency-offline-portability';
   readonly requestedFields?: readonly string[];
