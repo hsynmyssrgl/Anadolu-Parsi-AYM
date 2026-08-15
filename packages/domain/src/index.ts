@@ -45,3 +45,4 @@ export * from './memory-studio.js';
 export * from './smart-home-energy.js';
 export * from './signed-plugin-platform.js';
 export * from './communication-security-foundation.js';
+export * from './communication-messaging.js';

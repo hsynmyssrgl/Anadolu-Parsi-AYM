@@ -49,9 +49,9 @@ describe('32-R PPK-022 capability manifest AST gate', () => {
     const result = evaluatePlatformCapabilityManifest(inventory, manifest);
     expect(result.findings).toEqual([]);
     expect(inventory.zones).toBe(18);
-    expect(inventory.files).toBe(500);
-    expect(inventory.observations).toHaveLength(345);
-    expect(result.exactSurfaceCount).toBe(345);
+    expect(inventory.files).toBe(507);
+    expect(inventory.observations).toHaveLength(360);
+    expect(result.exactSurfaceCount).toBe(360);
     expect(result.pinnedBootstrapSurfaceCount).toBe(26);
   });
 
@@ -93,9 +93,9 @@ describe('32-R PPK-022 capability manifest AST gate', () => {
     expect(report).toMatchObject({
       status: 'PASS',
       productionSourceZones: 18,
-      scannedFiles: 500,
-      capabilitySurfaces: 345,
-      exactManifestSurfaces: 345,
+      scannedFiles: 507,
+      capabilitySurfaces: 360,
+      exactManifestSurfaces: 360,
       pinnedBootstrapSurfaces: 26,
       maliciousSelfTestAssertions: 33,
       benignSelfTestAssertions: 5,

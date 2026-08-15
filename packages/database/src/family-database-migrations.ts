@@ -15385,6 +15385,355 @@ BEGIN SELECT RAISE(ABORT,'34-A membership history is durable'); END;
 UPDATE database_metadata SET value='REVISION-34-A-COMMUNICATION-POLICY-MLS-FOUNDATION',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
 `;
 
+const communicationMessagingLifecycleSql = `
+CREATE TABLE communication_messaging_mutations (
+  id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  resource_type TEXT NOT NULL CHECK(resource_type IN ('communication_message','communication_presence','communication_retention_policy')),
+  resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 8 AND 256),
+  actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  mutation_kind TEXT NOT NULL CHECK(mutation_kind IN ('message_create','message_edit','message_delete','message_restore','message_annotate','delivery_update','retention_update','presence_update')),
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 256),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  expected_revision INTEGER NOT NULL CHECK(expected_revision>=0),
+  revision INTEGER NOT NULL CHECK(revision=expected_revision+1),
+  resource_state_fingerprint TEXT NOT NULL CHECK(length(resource_state_fingerprint)=64 AND resource_state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version>=1),
+  policy_receipt_nonce TEXT NOT NULL CHECK(length(trim(policy_receipt_nonce)) BETWEEN 16 AND 256),
+  policy_correlation_id TEXT NOT NULL CHECK(length(trim(policy_correlation_id)) BETWEEN 1 AND 256),
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type IN ('communication_message','communication_presence','communication_retention_policy')),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action IN ('create','update','delete')),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='family.write'),
+  UNIQUE(family_id,actor_account_id,client_operation_id),
+  CHECK(policy_resource_type=resource_type AND policy_resource_id=resource_id),
+  CHECK((resource_type='communication_message' AND mutation_kind IN ('message_create','message_edit','message_delete','message_restore','message_annotate','delivery_update'))
+    OR (resource_type='communication_presence' AND mutation_kind='presence_update')
+    OR (resource_type='communication_retention_policy' AND mutation_kind='retention_update')),
+  CHECK((mutation_kind='message_create' AND expected_revision=0 AND policy_action='create')
+    OR (mutation_kind='message_delete' AND expected_revision>=1 AND policy_action='delete')
+    OR (mutation_kind IN ('message_edit','message_restore','message_annotate','delivery_update') AND expected_revision>=1 AND policy_action='update')
+    OR (mutation_kind IN ('presence_update','retention_update') AND ((expected_revision=0 AND policy_action='create') OR (expected_revision>=1 AND policy_action='update'))))
+) STRICT;
+
+CREATE INDEX idx_communication_messaging_mutations_owner
+ON communication_messaging_mutations(family_id,owner_person_id,occurred_at DESC,id);
+
+CREATE TABLE communication_messages (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  room_id TEXT NOT NULL REFERENCES communication_rooms(id) ON DELETE RESTRICT,
+  sender_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  sender_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  content_kind TEXT NOT NULL CHECK(content_kind IN ('text','voice','photo','video','location','document')),
+  content_mime TEXT NOT NULL CHECK(length(trim(content_mime)) BETWEEN 3 AND 192),
+  sealed_payload_reference TEXT NOT NULL CHECK(length(trim(sealed_payload_reference)) BETWEEN 8 AND 512
+    AND instr(sealed_payload_reference,'\\')=0 AND instr(sealed_payload_reference,'://')=0 AND instr(sealed_payload_reference,'..')=0),
+  payload_sha256 TEXT NOT NULL CHECK(length(payload_sha256)=64 AND payload_sha256 NOT GLOB '*[^0-9a-f]*'),
+  payload_size_bytes INTEGER NOT NULL CHECK(payload_size_bytes BETWEEN 1 AND 33554432),
+  provider_id TEXT NOT NULL CHECK(length(trim(provider_id)) BETWEEN 2 AND 160),
+  provider_evidence_sha256 TEXT NOT NULL CHECK(length(provider_evidence_sha256)=64 AND provider_evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
+  payload_revision INTEGER NOT NULL CHECK(payload_revision>=1 AND payload_revision<=revision),
+  payload_created_at TEXT NOT NULL CHECK(length(payload_created_at)=24 AND julianday(payload_created_at) IS NOT NULL),
+  reply_to_message_id TEXT REFERENCES communication_messages(id) ON DELETE RESTRICT,
+  quoted_message_id TEXT REFERENCES communication_messages(id) ON DELETE RESTRICT,
+  thread_root_message_id TEXT REFERENCES communication_messages(id) ON DELETE RESTRICT,
+  state TEXT NOT NULL CHECK(state IN ('draft','queued','scheduled','sealed_local','deleted')),
+  delivery_state TEXT NOT NULL CHECK(delivery_state IN ('not_requested','queued_offline','retry_wait','ready_local','transport_not_configured','cancelled')),
+  scheduled_at TEXT CHECK(scheduled_at IS NULL OR (length(scheduled_at)=24 AND julianday(scheduled_at) IS NOT NULL)),
+  silent INTEGER NOT NULL CHECK(silent IN (0,1)),
+  pinned INTEGER NOT NULL CHECK(pinned IN (0,1)),
+  bookmarked INTEGER NOT NULL CHECK(bookmarked IN (0,1)),
+  reaction_code TEXT CHECK(reaction_code IS NULL OR length(trim(reaction_code)) BETWEEN 1 AND 32),
+  edit_count INTEGER NOT NULL CHECK(edit_count>=0),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES communication_messaging_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  deleted_at TEXT CHECK(deleted_at IS NULL OR (length(deleted_at)=24 AND julianday(deleted_at) IS NOT NULL)),
+  expires_at TEXT CHECK(expires_at IS NULL OR (length(expires_at)=24 AND julianday(expires_at) IS NOT NULL)),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  UNIQUE(family_id,owner_person_id,id),
+  CHECK(updated_at>=created_at),
+  CHECK(payload_created_at>=created_at AND payload_created_at<=updated_at),
+  CHECK((state='deleted' AND deleted_at=updated_at AND delivery_state='cancelled') OR (state<>'deleted' AND deleted_at IS NULL)),
+  CHECK((state='scheduled' AND scheduled_at IS NOT NULL) OR state<>'scheduled'),
+  CHECK(reply_to_message_id IS NULL OR reply_to_message_id<>id),
+  CHECK(quoted_message_id IS NULL OR quoted_message_id<>id)
+) STRICT;
+
+CREATE INDEX idx_communication_messages_owner
+ON communication_messages(family_id,owner_person_id,room_id,updated_at DESC,id);
+CREATE INDEX idx_communication_messages_sender
+ON communication_messages(family_id,owner_person_id,sender_person_id,content_kind,created_at DESC,id);
+
+CREATE TABLE communication_message_events (
+  id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  message_id TEXT NOT NULL REFERENCES communication_messages(id) ON DELETE RESTRICT,
+  room_id TEXT NOT NULL REFERENCES communication_rooms(id) ON DELETE RESTRICT,
+  actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  event_kind TEXT NOT NULL CHECK(event_kind IN ('message_created','message_edited','message_deleted','message_restored','reaction_changed','pin_changed','bookmark_changed','delivery_changed')),
+  message_revision INTEGER NOT NULL CHECK(message_revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  mutation_id TEXT NOT NULL UNIQUE REFERENCES communication_messaging_mutations(id) ON DELETE RESTRICT,
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND julianday(occurred_at) IS NOT NULL)
+) STRICT;
+
+CREATE INDEX idx_communication_message_events_message
+ON communication_message_events(family_id,owner_person_id,message_id,message_revision,id);
+
+CREATE TABLE communication_delivery_queue (
+  message_id TEXT PRIMARY KEY REFERENCES communication_messages(id) ON DELETE RESTRICT,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  state TEXT NOT NULL CHECK(state IN ('not_requested','queued_offline','retry_wait','ready_local','transport_not_configured','cancelled')),
+  attempt_count INTEGER NOT NULL CHECK(attempt_count BETWEEN 0 AND 1000),
+  next_attempt_at TEXT CHECK(next_attempt_at IS NULL OR (length(next_attempt_at)=24 AND julianday(next_attempt_at) IS NOT NULL)),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  last_mutation_id TEXT NOT NULL REFERENCES communication_messaging_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  CHECK(updated_at>=created_at),
+  CHECK((state='retry_wait' AND next_attempt_at IS NOT NULL) OR (state<>'retry_wait' AND next_attempt_at IS NULL))
+) STRICT;
+
+CREATE TABLE communication_presence_profiles (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  status TEXT NOT NULL CHECK(status IN ('online','away','busy','in_meeting','do_not_disturb','invisible','offline')),
+  public_availability TEXT NOT NULL CHECK(public_availability IN ('available','unavailable','hidden')),
+  audience TEXT NOT NULL CHECK(audience IN ('nobody','room_members','selected_people')),
+  last_seen_shared INTEGER NOT NULL CHECK(last_seen_shared IN (0,1)),
+  typing_indicators_enabled INTEGER NOT NULL CHECK(typing_indicators_enabled IN (0,1)),
+  read_receipts_enabled INTEGER NOT NULL CHECK(read_receipts_enabled IN (0,1)),
+  emergency_reachability_enabled INTEGER NOT NULL CHECK(emergency_reachability_enabled IN (0,1)),
+  expires_at TEXT CHECK(expires_at IS NULL OR (length(expires_at)=24 AND julianday(expires_at) IS NOT NULL)),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES communication_messaging_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  UNIQUE(family_id,owner_person_id,person_id),
+  CHECK(owner_person_id=person_id),
+  CHECK((status='invisible' AND public_availability='hidden') OR status<>'invisible')
+) STRICT;
+
+CREATE TABLE communication_retention_policies (
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  room_id TEXT NOT NULL REFERENCES communication_rooms(id) ON DELETE RESTRICT,
+  mode TEXT NOT NULL CHECK(mode IN ('permanent','duration','auto_delete','legal_hold')),
+  duration_days INTEGER CHECK(duration_days IS NULL OR duration_days BETWEEN 1 AND 3650),
+  legal_hold_reason_sha256 TEXT CHECK(legal_hold_reason_sha256 IS NULL OR (length(legal_hold_reason_sha256)=64 AND legal_hold_reason_sha256 NOT GLOB '*[^0-9a-f]*')),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  last_mutation_id TEXT NOT NULL UNIQUE REFERENCES communication_messaging_mutations(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  UNIQUE(family_id,owner_person_id,room_id),
+  CHECK((mode IN ('duration','auto_delete') AND duration_days IS NOT NULL AND legal_hold_reason_sha256 IS NULL)
+    OR (mode='legal_hold' AND duration_days IS NULL AND legal_hold_reason_sha256 IS NOT NULL)
+    OR (mode='permanent' AND duration_days IS NULL AND legal_hold_reason_sha256 IS NULL))
+) STRICT;
+
+CREATE TRIGGER trg_34b_messaging_mutation_insert
+BEFORE INSERT ON communication_messaging_mutations
+WHEN NOT EXISTS(
+  SELECT 1 FROM accounts account
+  JOIN people actor ON actor.id=NEW.actor_person_id AND actor.family_id=NEW.family_id AND actor.status='active'
+  JOIN people owner ON owner.id=NEW.owner_person_id AND owner.family_id=NEW.family_id AND owner.status='active'
+  JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+  JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+  WHERE account.id=NEW.actor_account_id AND account.person_id=NEW.actor_person_id AND account.status='active'
+    AND receipt.receipt_version=NEW.policy_receipt_version AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id AND receipt.resource_type=NEW.policy_resource_type
+    AND receipt.resource_id=NEW.policy_resource_id AND receipt.action=NEW.policy_action AND receipt.capability=NEW.policy_capability
+    AND receipt.recorded_at=NEW.occurred_at AND json_extract(receipt.record_json,'$.request.purpose')='general'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.resource.sensitivity')='highly_sensitive'
+    AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.actor_account_id
+    AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.actor_person_id
+    AND NEW.actor_person_id=NEW.owner_person_id
+    AND ((NEW.resource_type='communication_message' AND ((NEW.expected_revision=0
+          AND NOT EXISTS(SELECT 1 FROM communication_messages current WHERE current.id=NEW.resource_id))
+        OR EXISTS(SELECT 1 FROM communication_messages current WHERE current.id=NEW.resource_id AND current.family_id=NEW.family_id
+          AND current.owner_person_id=NEW.owner_person_id AND current.revision=NEW.expected_revision)))
+      OR (NEW.resource_type='communication_presence' AND ((NEW.expected_revision=0
+          AND NOT EXISTS(SELECT 1 FROM communication_presence_profiles current WHERE current.id=NEW.resource_id))
+        OR EXISTS(SELECT 1 FROM communication_presence_profiles current WHERE current.id=NEW.resource_id AND current.family_id=NEW.family_id
+          AND current.owner_person_id=NEW.owner_person_id AND current.revision=NEW.expected_revision)))
+      OR (NEW.resource_type='communication_retention_policy' AND ((NEW.expected_revision=0
+          AND NOT EXISTS(SELECT 1 FROM communication_retention_policies current WHERE current.id=NEW.resource_id))
+        OR EXISTS(SELECT 1 FROM communication_retention_policies current WHERE current.id=NEW.resource_id AND current.family_id=NEW.family_id
+          AND current.owner_person_id=NEW.owner_person_id AND current.revision=NEW.expected_revision))))
+)
+BEGIN SELECT RAISE(ABORT,'34-B mutation requires exact owner-bound durable PEP receipt and current revision'); END;
+
+CREATE TRIGGER trg_34b_message_insert
+BEFORE INSERT ON communication_messages
+WHEN NOT EXISTS(
+  SELECT 1 FROM communication_messaging_mutations mutation
+  JOIN communication_rooms room ON room.id=NEW.room_id AND room.family_id=NEW.family_id AND room.owner_person_id=NEW.owner_person_id AND room.status='active'
+  JOIN communication_room_memberships member ON member.room_id=room.id AND member.family_id=NEW.family_id
+    AND member.member_person_id=NEW.sender_person_id AND member.status='active'
+  WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='communication_message' AND mutation.resource_id=NEW.id
+    AND mutation.mutation_kind='message_create' AND mutation.expected_revision=0 AND mutation.revision=NEW.revision
+    AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+    AND mutation.actor_account_id=NEW.sender_account_id AND mutation.actor_person_id=NEW.sender_person_id
+    AND mutation.resource_state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.created_at
+    AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'34-B message insert requires exact mutation, room membership and receipt'); END;
+
+CREATE TRIGGER trg_34b_message_update
+BEFORE UPDATE ON communication_messages
+WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.owner_person_id<>OLD.owner_person_id OR NEW.room_id<>OLD.room_id
+  OR NEW.sender_account_id<>OLD.sender_account_id OR NEW.sender_person_id<>OLD.sender_person_id OR NEW.created_at<>OLD.created_at
+  OR NOT EXISTS(
+    SELECT 1 FROM communication_messaging_mutations mutation
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='communication_message' AND mutation.resource_id=NEW.id
+      AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+      AND mutation.expected_revision=OLD.revision AND mutation.revision=NEW.revision
+      AND NEW.revision=OLD.revision+1 AND mutation.resource_state_fingerprint=NEW.state_fingerprint
+      AND mutation.occurred_at=NEW.updated_at AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+      AND ((mutation.mutation_kind='message_delete' AND OLD.state<>'deleted' AND NEW.state='deleted' AND NEW.deleted_at=NEW.updated_at)
+        OR (mutation.mutation_kind='message_restore' AND OLD.state='deleted' AND NEW.state='sealed_local' AND NEW.deleted_at IS NULL)
+        OR (mutation.mutation_kind='message_edit' AND OLD.state<>'deleted' AND NEW.state=OLD.state AND NEW.edit_count=OLD.edit_count+1)
+        OR (mutation.mutation_kind IN ('message_annotate','delivery_update') AND OLD.state<>'deleted' AND NEW.state=OLD.state))
+  )
+BEGIN SELECT RAISE(ABORT,'34-B message update requires exact immutable identity, transition and mutation'); END;
+
+CREATE TRIGGER trg_34b_message_event_insert
+BEFORE INSERT ON communication_message_events
+WHEN NOT EXISTS(
+  SELECT 1 FROM communication_messaging_mutations mutation
+  JOIN communication_messages message ON message.id=NEW.message_id AND message.family_id=NEW.family_id AND message.owner_person_id=NEW.owner_person_id
+  WHERE mutation.id=NEW.mutation_id AND mutation.resource_type='communication_message' AND mutation.resource_id=NEW.message_id
+    AND mutation.actor_account_id=NEW.actor_account_id AND mutation.actor_person_id=NEW.actor_person_id
+    AND mutation.revision=NEW.message_revision AND mutation.resource_state_fingerprint=NEW.state_fingerprint
+    AND mutation.occurred_at=NEW.occurred_at AND message.room_id=NEW.room_id
+    AND ((mutation.mutation_kind='message_create' AND NEW.event_kind='message_created')
+      OR (mutation.mutation_kind='message_edit' AND NEW.event_kind='message_edited')
+      OR (mutation.mutation_kind='message_delete' AND NEW.event_kind='message_deleted')
+      OR (mutation.mutation_kind='message_restore' AND NEW.event_kind='message_restored')
+      OR (mutation.mutation_kind='message_annotate' AND NEW.event_kind IN ('reaction_changed','pin_changed','bookmark_changed'))
+      OR (mutation.mutation_kind='delivery_update' AND NEW.event_kind='delivery_changed'))
+)
+BEGIN SELECT RAISE(ABORT,'34-B message event requires exact current message mutation'); END;
+
+CREATE TRIGGER trg_34b_delivery_insert
+BEFORE INSERT ON communication_delivery_queue
+WHEN NOT EXISTS(
+  SELECT 1 FROM communication_messaging_mutations mutation
+  JOIN communication_messages message ON message.id=NEW.message_id AND message.family_id=NEW.family_id AND message.owner_person_id=NEW.owner_person_id
+  WHERE mutation.id=NEW.last_mutation_id AND mutation.mutation_kind='message_create'
+    AND mutation.resource_id=NEW.message_id AND mutation.revision=NEW.revision
+    AND message.delivery_state=NEW.state AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'34-B delivery insert requires exact message-create mutation'); END;
+
+CREATE TRIGGER trg_34b_delivery_update
+BEFORE UPDATE ON communication_delivery_queue
+WHEN NEW.message_id<>OLD.message_id OR NEW.family_id<>OLD.family_id OR NEW.owner_person_id<>OLD.owner_person_id OR NEW.created_at<>OLD.created_at
+  OR NOT EXISTS(
+    SELECT 1 FROM communication_messaging_mutations mutation
+    JOIN communication_messages message ON message.id=NEW.message_id AND message.revision=NEW.revision AND message.delivery_state=NEW.state
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.mutation_kind='delivery_update' AND mutation.resource_id=NEW.message_id
+      AND OLD.revision<=mutation.expected_revision AND mutation.revision=NEW.revision
+      AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+      AND mutation.occurred_at=NEW.updated_at AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+  )
+BEGIN SELECT RAISE(ABORT,'34-B delivery update requires exact delivery mutation'); END;
+
+CREATE TRIGGER trg_34b_presence_insert
+BEFORE INSERT ON communication_presence_profiles
+WHEN NOT EXISTS(
+  SELECT 1 FROM communication_messaging_mutations mutation
+  WHERE mutation.id=NEW.last_mutation_id AND mutation.mutation_kind='presence_update'
+    AND mutation.resource_type='communication_presence' AND mutation.resource_id=NEW.id
+    AND mutation.expected_revision=0 AND mutation.revision=NEW.revision
+    AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+    AND mutation.actor_person_id=NEW.person_id AND mutation.resource_state_fingerprint=NEW.state_fingerprint
+    AND mutation.occurred_at=NEW.created_at AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'34-B presence insert requires exact owner mutation'); END;
+
+CREATE TRIGGER trg_34b_presence_update
+BEFORE UPDATE ON communication_presence_profiles
+WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.owner_person_id<>OLD.owner_person_id OR NEW.person_id<>OLD.person_id OR NEW.created_at<>OLD.created_at
+  OR NOT EXISTS(
+    SELECT 1 FROM communication_messaging_mutations mutation
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.mutation_kind='presence_update'
+      AND mutation.resource_id=NEW.id AND mutation.expected_revision=OLD.revision AND mutation.revision=NEW.revision
+      AND NEW.revision=OLD.revision+1 AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+      AND mutation.resource_state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.updated_at
+      AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+  )
+BEGIN SELECT RAISE(ABORT,'34-B presence update requires exact owner mutation'); END;
+
+CREATE TRIGGER trg_34b_retention_insert
+BEFORE INSERT ON communication_retention_policies
+WHEN NOT EXISTS(
+  SELECT 1 FROM communication_messaging_mutations mutation
+  JOIN communication_rooms room ON room.id=NEW.room_id AND room.family_id=NEW.family_id AND room.owner_person_id=NEW.owner_person_id
+  WHERE mutation.id=NEW.last_mutation_id AND mutation.mutation_kind='retention_update'
+    AND mutation.resource_type='communication_retention_policy' AND mutation.resource_id=NEW.id
+    AND mutation.expected_revision=0 AND mutation.revision=NEW.revision
+    AND mutation.resource_state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.created_at
+    AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+)
+BEGIN SELECT RAISE(ABORT,'34-B retention insert requires exact room-owner mutation'); END;
+
+CREATE TRIGGER trg_34b_retention_update
+BEFORE UPDATE ON communication_retention_policies
+WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.owner_person_id<>OLD.owner_person_id OR NEW.room_id<>OLD.room_id OR NEW.created_at<>OLD.created_at
+  OR NOT EXISTS(
+    SELECT 1 FROM communication_messaging_mutations mutation
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.mutation_kind='retention_update'
+      AND mutation.resource_id=NEW.id AND mutation.expected_revision=OLD.revision AND mutation.revision=NEW.revision
+      AND NEW.revision=OLD.revision+1 AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
+      AND mutation.resource_state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.updated_at
+      AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
+  )
+BEGIN SELECT RAISE(ABORT,'34-B retention update requires exact room-owner mutation'); END;
+
+CREATE TRIGGER trg_34b_mutation_update BEFORE UPDATE ON communication_messaging_mutations
+BEGIN SELECT RAISE(ABORT,'34-B mutation ledger is immutable'); END;
+CREATE TRIGGER trg_34b_mutation_delete BEFORE DELETE ON communication_messaging_mutations
+BEGIN SELECT RAISE(ABORT,'34-B mutation ledger is durable'); END;
+CREATE TRIGGER trg_34b_event_update BEFORE UPDATE ON communication_message_events
+BEGIN SELECT RAISE(ABORT,'34-B message event ledger is immutable'); END;
+CREATE TRIGGER trg_34b_event_delete BEFORE DELETE ON communication_message_events
+BEGIN SELECT RAISE(ABORT,'34-B message event ledger is durable'); END;
+CREATE TRIGGER trg_34b_message_delete BEFORE DELETE ON communication_messages
+BEGIN SELECT RAISE(ABORT,'34-B message current state uses logical deletion'); END;
+CREATE TRIGGER trg_34b_presence_delete BEFORE DELETE ON communication_presence_profiles
+BEGIN SELECT RAISE(ABORT,'34-B presence current state is durable'); END;
+CREATE TRIGGER trg_34b_retention_delete BEFORE DELETE ON communication_retention_policies
+BEGIN SELECT RAISE(ABORT,'34-B retention policy current state is durable'); END;
+CREATE TRIGGER trg_34b_delivery_delete BEFORE DELETE ON communication_delivery_queue
+BEGIN SELECT RAISE(ABORT,'34-B delivery queue history is durable'); END;
+
+UPDATE database_metadata SET value='REVISION-34-B-MESSAGING-LIFECYCLE-PRIVACY-PRESENCE',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE key='schema_generation';
+`;
+
 export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(1, 'legacy_mvp40_schema', legacySchemaSql),
   createMigrationDefinition(2, 'legacy_mvp40_compatibility', legacyCompatibilitySql),
@@ -15490,7 +15839,8 @@ export const FAMILY_DATABASE_MIGRATIONS = Object.freeze([
   createMigrationDefinition(102, 'memory_studio_time_capsule', memoryStudioSql),
   createMigrationDefinition(103, 'local_first_smart_home_energy', smartHomeEnergySql),
   createMigrationDefinition(104, 'signed_plugin_external_provider_platform', signedPluginPlatformSql),
-  createMigrationDefinition(105, 'communication_policy_mls_foundation', communicationSecurityFoundationSql)
+  createMigrationDefinition(105, 'communication_policy_mls_foundation', communicationSecurityFoundationSql),
+  createMigrationDefinition(106, 'communication_messaging_lifecycle_privacy_presence', communicationMessagingLifecycleSql)
 ]);
 
 export interface RunFamilyDatabaseMigrationsInput {

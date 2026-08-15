@@ -197,6 +197,16 @@ import {
   RekeyCommunicationRoomAfterDeviceRevocationUseCase,
   SetCommunicationHistoryAccessUseCase,
   FreezeCommunicationRoomUseCase,
+  GetCommunicationMessagingCenterUseCase,
+  SearchCommunicationMessagesUseCase,
+  GetCommunicationMessageContentUseCase,
+  CreateCommunicationMessageUseCase,
+  EditCommunicationMessageUseCase,
+  SetCommunicationMessageLifecycleUseCase,
+  AnnotateCommunicationMessageUseCase,
+  UpdateCommunicationDeliveryUseCase,
+  SetCommunicationPresenceUseCase,
+  SetCommunicationRetentionPolicyUseCase,
   ListLifeRecordsUseCase,
   CreateLifeRecordUseCase,
   GetManagedLifeWorkspaceUseCase,
@@ -302,6 +312,7 @@ import {
   type LocalGovernedOcrOperationIdentifiers,
   type LocalGovernedOcrRuntimePort,
   type CommunicationMlsFoundationPort,
+  type CommunicationMessagePayloadPort,
   ListDataRetentionPoliciesUseCase,
   ListDataLifecycleRecordsUseCase,
   CreateDataRetentionPolicyUseCase,
@@ -378,6 +389,20 @@ import type {
   RevokeCommunicationDeviceCredentialInput,
   SetCommunicationHistoryAccessInput
 } from '@ppt/domain';
+import type {
+  AnnotateCommunicationMessageInput,
+  CommunicationMessageContentView,
+  CommunicationMessageView,
+  CommunicationMessagingCenterView,
+  CommunicationMessagingMutationReceiptView,
+  CreateCommunicationMessageInput,
+  EditCommunicationMessageInput,
+  SearchCommunicationMessagesInput,
+  SetCommunicationMessageLifecycleInput,
+  SetCommunicationPresenceInput,
+  SetCommunicationRetentionPolicyInput,
+  UpdateCommunicationDeliveryInput
+} from '@ppt/domain';
 import { RepositoryBackedFamilyApplicationUnitOfWork, RepositoryBackedFamilyGraphQueryPort } from './family-application-adapter.js';
 import { RepositoryBackedHouseholdMembershipUnitOfWork } from './household-membership-application-adapter.js';
 import { RepositoryBackedPersonLifecycleUnitOfWork } from './person-lifecycle-application-adapter.js';
@@ -450,6 +475,11 @@ import {
   RepositoryBackedCommunicationSecurityQueryPort,
   RepositoryBackedCommunicationSecurityUnitOfWork
 } from './communication-security-application-adapter.js';
+import {
+  RepositoryBackedCommunicationMessagingQueryPort,
+  RepositoryBackedCommunicationMessagingUnitOfWork
+} from './communication-messaging-application-adapter.js';
+import { CommunicationMessagePayloadVault } from './communication-message-payload-vault.js';
 import {
   RepositoryBackedLocationPolicyTransactionRunner,
   RepositoryBackedLocationUnitOfWork,
@@ -755,6 +785,10 @@ interface DataStoreOptions {
   signedPluginTrustedKeys?: readonly TrustedPluginSigningKey[];
   /** Main-only RFC 9420 provider seam. Missing production configuration keeps all MLS writes unavailable. */
   communicationMlsFoundation?: CommunicationMlsFoundationPort;
+  /** Main-only protected payload seam. Renderer code cannot provide or replace this authority. */
+  communicationMessagePayloads?: CommunicationMessagePayloadPort;
+  /** Must resolve to a dedicated directory disjoint from archive, database, key and temporary-open storage. */
+  communicationMessagePayloadPath?: string;
   federatedProviderConfigurations?: readonly import('@ppt/repository-contracts').FederatedProviderProvisioningRow[];
   securityConfig?: {
     sessionIdleTimeoutMinutes: number;
@@ -939,6 +973,40 @@ const localGovernedOcrResultRoot = (input: {
     'Local OCR protected result root must be separate from archive, database, key and temporary-open storage'
   );
   return root;
+};
+
+const communicationMessagePayloadRoot = (input: {
+  readonly requestedPath?: string;
+  readonly databasePath: string;
+  readonly archivePath: string;
+  readonly keyPath: string;
+  readonly temporaryOpenPath: string;
+}): string => {
+  const root = resolve(input.requestedPath ?? `${input.databasePath}.communication-message-payloads`);
+  if (!root.trim() || compositionPathsOverlap(root, input.databasePath) || compositionPathsOverlap(root, input.archivePath)
+    || compositionPathsOverlap(root, input.keyPath) || compositionPathsOverlap(root, input.temporaryOpenPath)) {
+    throw new PlatformPolicyEnforcementError('ENFORCEMENT_UNAVAILABLE',
+      'Communication message payload root must be separate from archive, database, key and temporary-open storage');
+  }
+  return root;
+};
+
+const communicationPayloadFailure = (correlationId: Parameters<CommunicationMessagePayloadPort['seal']>[0]['correlationId']) =>
+  err(createAppError({ code: ERROR_CODES.AUTHORIZATION_DENIED, category: 'security',
+    message: 'Protected communication message payload provider is unavailable.', correlationId }));
+const failClosedCommunicationMessagePayloads: CommunicationMessagePayloadPort = Object.freeze({
+  seal: (input: Parameters<CommunicationMessagePayloadPort['seal']>[0]) => communicationPayloadFailure(input.correlationId),
+  open: (_row: Parameters<CommunicationMessagePayloadPort['open']>[0],
+    correlationId: Parameters<CommunicationMessagePayloadPort['open']>[1]) => communicationPayloadFailure(correlationId),
+  discard: (_reference: Parameters<CommunicationMessagePayloadPort['discard']>[0],
+    correlationId: Parameters<CommunicationMessagePayloadPort['discard']>[1]) => communicationPayloadFailure(correlationId)
+});
+const assertCommunicationMessagePayloadPort = (value: CommunicationMessagePayloadPort): CommunicationMessagePayloadPort => {
+  if (!value || typeof value.seal !== 'function' || typeof value.open !== 'function' || typeof value.discard !== 'function') {
+    throw new PlatformPolicyEnforcementError('ENFORCEMENT_UNAVAILABLE',
+      'Explicit communication message payload provider is incomplete');
+  }
+  return value;
 };
 
 const failClosedLocalGovernedOcrPolicyEnforcementPointResolver:
@@ -1368,6 +1436,16 @@ export class FamilyDataStore {
   readonly #rekeyCommunicationRoomAfterDeviceRevocationUseCase:RekeyCommunicationRoomAfterDeviceRevocationUseCase;
   readonly #setCommunicationHistoryAccessUseCase:SetCommunicationHistoryAccessUseCase;
   readonly #freezeCommunicationRoomUseCase:FreezeCommunicationRoomUseCase;
+  readonly #getCommunicationMessagingCenterUseCase:GetCommunicationMessagingCenterUseCase;
+  readonly #searchCommunicationMessagesUseCase:SearchCommunicationMessagesUseCase;
+  readonly #getCommunicationMessageContentUseCase:GetCommunicationMessageContentUseCase;
+  readonly #createCommunicationMessageUseCase:CreateCommunicationMessageUseCase;
+  readonly #editCommunicationMessageUseCase:EditCommunicationMessageUseCase;
+  readonly #setCommunicationMessageLifecycleUseCase:SetCommunicationMessageLifecycleUseCase;
+  readonly #annotateCommunicationMessageUseCase:AnnotateCommunicationMessageUseCase;
+  readonly #updateCommunicationDeliveryUseCase:UpdateCommunicationDeliveryUseCase;
+  readonly #setCommunicationPresenceUseCase:SetCommunicationPresenceUseCase;
+  readonly #setCommunicationRetentionPolicyUseCase:SetCommunicationRetentionPolicyUseCase;
   readonly #prepareFamilyEmergencyCardExportUseCase: PrepareFamilyEmergencyCardExportUseCase;
   readonly #recordFamilyEmergencyCardExportCompletionUseCase: RecordFamilyEmergencyCardExportCompletionUseCase;
   readonly #listFinanceRecordsUseCase: ListFinanceRecordsUseCase;
@@ -1890,6 +1968,7 @@ export class FamilyDataStore {
           memoryStudioPolicyResourceRepository: this.#repositories.memoryStudioRepository,
           smartHomeEnergyPolicyResourceRepository: this.#repositories.smartHomeEnergyRepository,
           signedPluginPlatformPolicyResourceRepository: this.#repositories.signedPluginPlatformRepository,
+          communicationMessagingPolicyResourceRepository: this.#repositories.communicationMessagingRepository,
           communicationSecurityPolicyResourceRepository: this.#repositories.communicationSecurityRepository,
           personRepository: this.#repositories.personRepository,
           deviceIdentityProvider: this.#deviceIdentityProvider,
@@ -1916,6 +1995,8 @@ export class FamilyDataStore {
       smartHomeEnergyPolicyResourceRepository: this.#repositories.smartHomeEnergyRepository,
       signedPluginPlatformRepository: this.#repositories.signedPluginPlatformRepository,
       signedPluginPlatformPolicyResourceRepository: this.#repositories.signedPluginPlatformRepository,
+      communicationMessagingRepository: this.#repositories.communicationMessagingRepository,
+      communicationMessagingPolicyResourceRepository: this.#repositories.communicationMessagingRepository,
       communicationSecurityRepository: this.#repositories.communicationSecurityRepository,
       communicationSecurityPolicyResourceRepository: this.#repositories.communicationSecurityRepository,
       aiConsentRepository: this.#repositories.aiConsentRepository,
@@ -2682,6 +2763,38 @@ export class FamilyDataStore {
       communicationSecurityUnitOfWork,communicationMlsFoundation);
     this.#setCommunicationHistoryAccessUseCase=new SetCommunicationHistoryAccessUseCase(communicationSecurityUnitOfWork);
     this.#freezeCommunicationRoomUseCase=new FreezeCommunicationRoomUseCase(communicationSecurityUnitOfWork);
+    const communicationMessagePayloads=options.communicationMessagePayloads!==undefined
+      ?assertCommunicationMessagePayloadPort(options.communicationMessagePayloads)
+      :options.protectedSideArtifacts===undefined
+        ?failClosedCommunicationMessagePayloads
+        :new CommunicationMessagePayloadVault({
+            rootDirectory:communicationMessagePayloadRoot({
+              ...(options.communicationMessagePayloadPath===undefined?{}:{requestedPath:options.communicationMessagePayloadPath}),
+              databasePath:storageLayout.databasePath,archivePath:storageLayout.archivePath,
+              keyPath:storageLayout.vaultKeyPath,temporaryOpenPath:storageLayout.temporaryOpenPath
+            }),
+            protectedStore:options.protectedSideArtifacts
+          });
+    const communicationMessagingDependencies={...lifeApplicationDependencies,
+      communicationMessagingRepository:this.#repositories.communicationMessagingRepository,
+      communicationMessagingPolicyResourceRepository:this.#repositories.communicationMessagingRepository,
+      communicationMessagePayloads} as const;
+    const communicationMessagingQuery=new RepositoryBackedCommunicationMessagingQueryPort(
+      communicationMessagingDependencies,lifePolicyTransactionRunner);
+    const communicationMessagingUnitOfWork=new RepositoryBackedCommunicationMessagingUnitOfWork(
+      communicationMessagingDependencies,lifePolicyTransactionRunner);
+    this.#getCommunicationMessagingCenterUseCase=new GetCommunicationMessagingCenterUseCase(communicationMessagingQuery);
+    this.#searchCommunicationMessagesUseCase=new SearchCommunicationMessagesUseCase(communicationMessagingQuery);
+    this.#getCommunicationMessageContentUseCase=new GetCommunicationMessageContentUseCase(communicationMessagingQuery);
+    this.#createCommunicationMessageUseCase=new CreateCommunicationMessageUseCase(
+      communicationMessagingUnitOfWork,communicationMessagePayloads);
+    this.#editCommunicationMessageUseCase=new EditCommunicationMessageUseCase(
+      communicationMessagingUnitOfWork,communicationMessagePayloads);
+    this.#setCommunicationMessageLifecycleUseCase=new SetCommunicationMessageLifecycleUseCase(communicationMessagingUnitOfWork);
+    this.#annotateCommunicationMessageUseCase=new AnnotateCommunicationMessageUseCase(communicationMessagingUnitOfWork);
+    this.#updateCommunicationDeliveryUseCase=new UpdateCommunicationDeliveryUseCase(communicationMessagingUnitOfWork);
+    this.#setCommunicationPresenceUseCase=new SetCommunicationPresenceUseCase(communicationMessagingUnitOfWork);
+    this.#setCommunicationRetentionPolicyUseCase=new SetCommunicationRetentionPolicyUseCase(communicationMessagingUnitOfWork);
     this.#prepareArchiveOpenUseCase = new PrepareArchiveOpenUseCase(archiveQuery);
     this.#recordArchiveOpenedUseCase = new RecordArchiveOpenedUseCase(archiveUnitOfWork);
     this.#authorizeEmergencyArchiveReadUseCase = new AuthorizeEmergencyArchiveReadUseCase(archiveUnitOfWork);
@@ -6355,6 +6468,68 @@ export class FamilyDataStore {
   public async freezeCommunicationRoom(input:FreezeCommunicationRoomInput):Promise<CommunicationSecurityMutationReceiptView>{
     const result=await this.#freezeCommunicationRoomUseCase.execute({
       context:this.#lifeApplicationContext('communication-room-freeze'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async getCommunicationMessagingCenter():Promise<CommunicationMessagingCenterView>{
+    const result=await this.#getCommunicationMessagingCenterUseCase.execute(
+      this.#lifeApplicationContext('communication-messaging-center'));
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async searchCommunicationMessages(input:SearchCommunicationMessagesInput):Promise<readonly CommunicationMessageView[]>{
+    const result=await this.#searchCommunicationMessagesUseCase.execute(
+      this.#lifeApplicationContext('communication-message-search'),input);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async getCommunicationMessageContent(messageId:string):Promise<CommunicationMessageContentView>{
+    const result=await this.#getCommunicationMessageContentUseCase.execute(
+      this.#lifeApplicationContext('communication-message-content'),messageId);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async createCommunicationMessage(input:CreateCommunicationMessageInput):Promise<CommunicationMessagingMutationReceiptView>{
+    const result=await this.#createCommunicationMessageUseCase.execute({
+      context:this.#lifeApplicationContext('communication-message-create'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async editCommunicationMessage(input:EditCommunicationMessageInput):Promise<CommunicationMessagingMutationReceiptView>{
+    const result=await this.#editCommunicationMessageUseCase.execute({
+      context:this.#lifeApplicationContext('communication-message-edit'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async setCommunicationMessageLifecycle(input:SetCommunicationMessageLifecycleInput)
+  :Promise<CommunicationMessagingMutationReceiptView>{
+    const result=await this.#setCommunicationMessageLifecycleUseCase.execute({
+      context:this.#lifeApplicationContext('communication-message-lifecycle'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async annotateCommunicationMessage(input:AnnotateCommunicationMessageInput):Promise<CommunicationMessagingMutationReceiptView>{
+    const result=await this.#annotateCommunicationMessageUseCase.execute({
+      context:this.#lifeApplicationContext('communication-message-annotate'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async updateCommunicationDelivery(input:UpdateCommunicationDeliveryInput):Promise<CommunicationMessagingMutationReceiptView>{
+    const result=await this.#updateCommunicationDeliveryUseCase.execute({
+      context:this.#lifeApplicationContext('communication-message-delivery'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async setCommunicationPresence(input:SetCommunicationPresenceInput):Promise<CommunicationMessagingMutationReceiptView>{
+    const result=await this.#setCommunicationPresenceUseCase.execute({
+      context:this.#lifeApplicationContext('communication-presence-update'),command:input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async setCommunicationRetentionPolicy(input:SetCommunicationRetentionPolicyInput)
+  :Promise<CommunicationMessagingMutationReceiptView>{
+    const result=await this.#setCommunicationRetentionPolicyUseCase.execute({
+      context:this.#lifeApplicationContext('communication-retention-update'),command:input});
     if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
   }
 

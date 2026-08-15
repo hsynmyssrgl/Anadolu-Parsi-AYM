@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "step": "34-B",
+  "decision": "DEC-239",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "countsAsRequirementPass": false,
+  "checkCount": 14,
+  "passed": 14,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "contract identity requirements and dependency order are exact",
+      "status": "PASS"
+    },
+    {
+      "name": "decision states partial implementation and exact no-claims",
+      "status": "PASS"
+    },
+    {
+      "name": "threat model covers renderer owner replay payload presence and retention threats",
+      "status": "PASS"
+    },
+    {
+      "name": "migration manifest pins exact version and checksum",
+      "status": "PASS"
+    },
+    {
+      "name": "domain contract exports safe center content receipt and truth views",
+      "status": "PASS"
+    },
+    {
+      "name": "repository contract contains sealed metadata but no plaintext field",
+      "status": "PASS"
+    },
+    {
+      "name": "application hashes text in request fingerprint and emits content-free events",
+      "status": "PASS"
+    },
+    {
+      "name": "repository SQL is exact-owner bounded and has no semantic plaintext column",
+      "status": "PASS"
+    },
+    {
+      "name": "payload vault binds encrypted content identity and fails closed",
+      "status": "PASS"
+    },
+    {
+      "name": "IPC input output and lifecycle policies are exact",
+      "status": "PASS"
+    },
+    {
+      "name": "main preload and global bridge expose every safe method",
+      "status": "PASS"
+    },
+    {
+      "name": "renderer requires explicit reveal and retains operation identity",
+      "status": "PASS"
+    },
+    {
+      "name": "validation ratchet and manual no-claim state are exact",
+      "status": "PASS"
+    },
+    {
+      "name": "governance cannot count as requirement pass",
+      "status": "PASS"
+    }
+  ],
+  "generatedAt": "2026-08-15T13:51:34.968Z"
+}

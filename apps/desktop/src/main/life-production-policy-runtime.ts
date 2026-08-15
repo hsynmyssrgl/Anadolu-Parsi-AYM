@@ -31,6 +31,7 @@ import type {
   AccountRepositoryPort,
   AccountRow,
   ChildEducationPolicyResourceRepositoryPort,
+  CommunicationMessagingPolicyResourceRepositoryPort,
   CommunicationSecurityPolicyResourceRepositoryPort,
   FamilyAiAssistantPolicyResourceRepositoryPort,
   HouseholdOperationsPolicyResourceRepositoryPort,
@@ -72,6 +73,7 @@ export interface LifeProductionPolicyRuntimeDependencies {
   readonly lifePolicyResourceRepository: LifePolicyResourceRepositoryPort;
   readonly householdOperationsPolicyResourceRepository: HouseholdOperationsPolicyResourceRepositoryPort;
   readonly childEducationPolicyResourceRepository: ChildEducationPolicyResourceRepositoryPort;
+  readonly communicationMessagingPolicyResourceRepository?: CommunicationMessagingPolicyResourceRepositoryPort;
   readonly communicationSecurityPolicyResourceRepository?: CommunicationSecurityPolicyResourceRepositoryPort;
   readonly familyAiAssistantPolicyResourceRepository: FamilyAiAssistantPolicyResourceRepositoryPort;
   readonly memoryStudioPolicyResourceRepository?: MemoryStudioPolicyResourceRepositoryPort;
@@ -134,7 +136,11 @@ const lifeResourceTypes = new Set<LifePolicyIntent['resourceType']>([
   'signed_plugin_installation',
   'communication_security_center',
   'communication_device_credential',
-  'communication_room'
+  'communication_room',
+  'communication_messaging_center',
+  'communication_message',
+  'communication_presence',
+  'communication_retention_policy'
 ]);
 
 const nonEmpty = (value: unknown, max = 512): value is string =>
@@ -902,6 +908,18 @@ const findLifeResourceForPolicyResolution = (
           privacy: 'private' as const, stateFingerprint: stable(found.value) })
       : null);
   }
+  if (resourceType === 'communication_message' || resourceType === 'communication_presence'
+    || resourceType === 'communication_retention_policy') {
+    if (!dependencies.communicationMessagingPolicyResourceRepository) throw new PlatformPolicyEnforcementError(
+      'RESOURCE_RESOLUTION_FAILED', 'Communication messaging policy resource repository is not composed');
+    const found = dependencies.communicationMessagingPolicyResourceRepository.resolvePolicyResource(
+      execution, resourceType, resourceId);
+    if (!found.ok) return found;
+    return ok(found.value
+      ? Object.freeze({ familyId: found.value.familyId, ownerPersonId: found.value.ownerPersonId,
+          privacy: 'private' as const, stateFingerprint: stable(found.value) })
+      : null);
+  }
   throw new PlatformPolicyEnforcementError(
     'RESOURCE_RESOLUTION_FAILED',
     'Life policy resource type is not supported'
@@ -976,7 +994,8 @@ const loadLifeResourceSnapshotInTransaction = (
         !['household_operation_item','child_education_item','places_travel_item','family_ai_suggestion',
           'memory_studio_record','memory_time_capsule','smart_home_device','smart_home_observation',
           'smart_home_camera_consent','smart_home_settings','signed_plugin_installation',
-          'communication_device_credential','communication_room'].includes(requestedIntent.resourceType)
+          'communication_device_credential','communication_room','communication_message','communication_presence',
+          'communication_retention_policy'].includes(requestedIntent.resourceType)
         || existing.value.familyId !== context.familyId
         || existing.value.ownerPersonId !== requestedIntent.ownerPersonId
         || existing.value.privacy !== requestedIntent.privacy

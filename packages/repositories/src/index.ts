@@ -49,6 +49,7 @@ export * from './memory-studio-repository.js';
 export * from './smart-home-energy-repository.js';
 export * from './signed-plugin-platform-repository.js';
 export * from './communication-security-repository.js';
+export * from './communication-messaging-repository.js';
 
 export * from './backup-repository.js';
 export * from './backup-propagation-repository.js';

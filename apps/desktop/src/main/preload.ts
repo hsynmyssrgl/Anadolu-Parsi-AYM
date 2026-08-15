@@ -58,6 +58,20 @@ import type {
   RevokeCommunicationDeviceCredentialInput,
   SetCommunicationHistoryAccessInput
 } from '@ppt/domain';
+import type {
+  AnnotateCommunicationMessageInput,
+  CommunicationMessageContentView,
+  CommunicationMessageView,
+  CommunicationMessagingCenterView,
+  CommunicationMessagingMutationReceiptView,
+  CreateCommunicationMessageInput,
+  EditCommunicationMessageInput,
+  SearchCommunicationMessagesInput,
+  SetCommunicationMessageLifecycleInput,
+  SetCommunicationPresenceInput,
+  SetCommunicationRetentionPolicyInput,
+  UpdateCommunicationDeliveryInput
+} from '@ppt/domain';
 import type { LegacyArchiveOwnershipReattestationView, ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { AssignPersonMembershipInput, CreateFamilyBranchInput, CreateHouseholdInput, FamilyBranch, Household, HouseholdMembershipWorkspaceView, PersonLifecycleProfile, PersonLifecycleWorkspaceView, PersonMembership, UpdatePersonProfileInput } from '@ppt/domain';
 import type { AuthorizationContextWorkspaceView } from '@ppt/domain';
@@ -745,6 +759,25 @@ contextBridge.exposeInMainWorld('pardus', {
     invoke('communicationSecurity:setHistoryAccess',input),
   freezeCommunicationRoom:(input:FreezeCommunicationRoomInput):Promise<CommunicationSecurityMutationReceiptView>=>
     invoke('communicationSecurity:freezeRoom',input),
+  getCommunicationMessagingCenter:():Promise<CommunicationMessagingCenterView>=>invoke('communicationMessaging:getCenter'),
+  searchCommunicationMessages:(input:SearchCommunicationMessagesInput):Promise<readonly CommunicationMessageView[]>=>
+    invoke('communicationMessaging:search',input),
+  getCommunicationMessageContent:(input:{readonly messageId:string}):Promise<CommunicationMessageContentView>=>
+    invoke('communicationMessaging:getContent',input),
+  createCommunicationMessage:(input:CreateCommunicationMessageInput):Promise<CommunicationMessagingMutationReceiptView>=>
+    invoke('communicationMessaging:create',input),
+  editCommunicationMessage:(input:EditCommunicationMessageInput):Promise<CommunicationMessagingMutationReceiptView>=>
+    invoke('communicationMessaging:edit',input),
+  setCommunicationMessageLifecycle:(input:SetCommunicationMessageLifecycleInput):Promise<CommunicationMessagingMutationReceiptView>=>
+    invoke('communicationMessaging:setLifecycle',input),
+  annotateCommunicationMessage:(input:AnnotateCommunicationMessageInput):Promise<CommunicationMessagingMutationReceiptView>=>
+    invoke('communicationMessaging:annotate',input),
+  updateCommunicationDelivery:(input:UpdateCommunicationDeliveryInput):Promise<CommunicationMessagingMutationReceiptView>=>
+    invoke('communicationMessaging:updateDelivery',input),
+  setCommunicationPresence:(input:SetCommunicationPresenceInput):Promise<CommunicationMessagingMutationReceiptView>=>
+    invoke('communicationMessaging:setPresence',input),
+  setCommunicationRetentionPolicy:(input:SetCommunicationRetentionPolicyInput):Promise<CommunicationMessagingMutationReceiptView>=>
+    invoke('communicationMessaging:setRetentionPolicy',input),
   listFinanceValuations:():Promise<FinanceValuationView[]>=>invoke('finance:listValuations'),
   createFinanceValuation:(input:CreateFinanceValuationInput):Promise<FinanceValuationView[]>=>invoke('finance:createValuation',input),
   createMember: (input: CreateFamilyMemberInput): Promise<FamilyMutationResultView> => invoke('family:createMember', input),

@@ -542,7 +542,12 @@
       "version": 105,
       "name": "communication_policy_mls_foundation",
       "checksum": "3c02d8f0ac6e2b5bf4d6a05bfc73e82fbd14d6144b0c3ef93a49786e45b8b7d7"
+    },
+    {
+      "version": 106,
+      "name": "communication_messaging_lifecycle_privacy_presence",
+      "checksum": "5b088bb6d759403044f84ad9f2a82be1823e33a17334d7122beed92af56cce50"
     }
   ],
-  "generatedAt": "2026-08-15T11:57:48.052Z"
+  "generatedAt": "2026-08-15T13:54:51.227Z"
 }

@@ -27,6 +27,16 @@ import type {
   RevokeCommunicationDeviceCredentialInput,
   SetCommunicationHistoryAccessInput
 } from '@ppt/domain';
+import type {
+  AnnotateCommunicationMessageInput,
+  CreateCommunicationMessageInput,
+  EditCommunicationMessageInput,
+  SearchCommunicationMessagesInput,
+  SetCommunicationMessageLifecycleInput,
+  SetCommunicationPresenceInput,
+  SetCommunicationRetentionPolicyInput,
+  UpdateCommunicationDeliveryInput
+} from '@ppt/domain';
 import type { ReattestLegacyArchiveOwnershipInput } from '@ppt/domain';
 import type { UnifiedAuthorizedSearchInput } from '@ppt/domain';
 import type { RecordManagedLifeItemInput } from '@ppt/domain';
@@ -75,6 +85,7 @@ import {
   SMART_HOME_ENERGY_IPC_CHANNELS,
   SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS,
   COMMUNICATION_SECURITY_IPC_CHANNELS,
+  COMMUNICATION_MESSAGING_IPC_CHANNELS,
   PLACES_TRAVEL_ASSET_PET_IPC_CHANNELS,
   HEALTH_CARE_COORDINATION_IPC_CHANNELS,
   HOUSEHOLD_OPERATIONS_IPC_CHANNELS,
@@ -2459,6 +2470,26 @@ function registerIpc(): void {
     async(_event,input:SetCommunicationHistoryAccessInput)=>store().setCommunicationHistoryAccess(input));
   registerIpcHandler(COMMUNICATION_SECURITY_IPC_CHANNELS.freezeRoom,
     async(_event,input:FreezeCommunicationRoomInput)=>store().freezeCommunicationRoom(input));
+  registerIpcHandler(COMMUNICATION_MESSAGING_IPC_CHANNELS.getCenter,
+    async()=>store().getCommunicationMessagingCenter());
+  registerIpcHandler(COMMUNICATION_MESSAGING_IPC_CHANNELS.search,
+    async(_event,input:SearchCommunicationMessagesInput)=>store().searchCommunicationMessages(input));
+  registerIpcHandler(COMMUNICATION_MESSAGING_IPC_CHANNELS.getContent,
+    async(_event,input:{readonly messageId:string})=>store().getCommunicationMessageContent(input.messageId));
+  registerIpcHandler(COMMUNICATION_MESSAGING_IPC_CHANNELS.create,
+    async(_event,input:CreateCommunicationMessageInput)=>store().createCommunicationMessage(input));
+  registerIpcHandler(COMMUNICATION_MESSAGING_IPC_CHANNELS.edit,
+    async(_event,input:EditCommunicationMessageInput)=>store().editCommunicationMessage(input));
+  registerIpcHandler(COMMUNICATION_MESSAGING_IPC_CHANNELS.setLifecycle,
+    async(_event,input:SetCommunicationMessageLifecycleInput)=>store().setCommunicationMessageLifecycle(input));
+  registerIpcHandler(COMMUNICATION_MESSAGING_IPC_CHANNELS.annotate,
+    async(_event,input:AnnotateCommunicationMessageInput)=>store().annotateCommunicationMessage(input));
+  registerIpcHandler(COMMUNICATION_MESSAGING_IPC_CHANNELS.updateDelivery,
+    async(_event,input:UpdateCommunicationDeliveryInput)=>store().updateCommunicationDelivery(input));
+  registerIpcHandler(COMMUNICATION_MESSAGING_IPC_CHANNELS.setPresence,
+    async(_event,input:SetCommunicationPresenceInput)=>store().setCommunicationPresence(input));
+  registerIpcHandler(COMMUNICATION_MESSAGING_IPC_CHANNELS.setRetentionPolicy,
+    async(_event,input:SetCommunicationRetentionPolicyInput)=>store().setCommunicationRetentionPolicy(input));
   registerIpcHandler('finance:listValuations', () => store().listFinanceValuations());
   registerIpcHandler('finance:createValuation', (_event, input:CreateFinanceValuationInput) => store().createFinanceValuation(input));
   registerIpcHandler('family:createRelation', async (_event, input: CreateFamilyRelationInput) => {

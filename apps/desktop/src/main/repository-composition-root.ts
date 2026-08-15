@@ -10,6 +10,7 @@ import {
   SqliteBackupQuarantineRepository,
   SqliteBootstrapRepository,
   SqliteChildEducationCoordinationRepository,
+  SqliteCommunicationMessagingRepository,
   SqliteCommunicationSecurityRepository,
   SqliteDashboardRepository,
   SqliteDataRepairRepository,
@@ -70,6 +71,8 @@ import type {
   BootstrapRepositoryPort,
   ChildEducationCoordinationRepositoryPort,
   ChildEducationPolicyResourceRepositoryPort,
+  CommunicationMessagingPolicyResourceRepositoryPort,
+  CommunicationMessagingRepositoryPort,
   CommunicationSecurityPolicyResourceRepositoryPort,
   CommunicationSecurityRepositoryPort,
   DashboardRepositoryPort,
@@ -141,6 +144,7 @@ export interface RepositoryCompositionRoot {
   readonly backupQuarantineRepository: BackupQuarantineRepositoryPort;
   readonly bootstrapRepository: BootstrapRepositoryPort;
   readonly childEducationRepository: ChildEducationCoordinationRepositoryPort & ChildEducationPolicyResourceRepositoryPort;
+  readonly communicationMessagingRepository: CommunicationMessagingRepositoryPort & CommunicationMessagingPolicyResourceRepositoryPort;
   readonly communicationSecurityRepository: CommunicationSecurityRepositoryPort & CommunicationSecurityPolicyResourceRepositoryPort;
   readonly dashboardRepository: DashboardRepositoryPort;
   readonly dataRepairRepository: DataRepairRepositoryPort;
@@ -211,6 +215,7 @@ export const createSqliteRepositoryCompositionRoot = (
     backupQuarantineRepository: new SqliteBackupQuarantineRepository(repositoryOptions),
     bootstrapRepository: new SqliteBootstrapRepository(repositoryOptions),
     childEducationRepository: new SqliteChildEducationCoordinationRepository(repositoryOptions),
+    communicationMessagingRepository: new SqliteCommunicationMessagingRepository(repositoryOptions),
     communicationSecurityRepository: new SqliteCommunicationSecurityRepository(repositoryOptions),
     dashboardRepository: new SqliteDashboardRepository(repositoryOptions),
     dataRepairRepository: new SqliteDataRepairRepository(repositoryOptions),

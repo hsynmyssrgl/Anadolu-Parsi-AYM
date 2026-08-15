@@ -3441,6 +3441,207 @@ const communicationResult=(channel:string,result:unknown):IpcIntegrationPolicyDe
   return valid?accepted():rejected('COMMUNICATION_RESULT_INVALID','$result');
 };
 
+export const COMMUNICATION_MESSAGING_IPC_CHANNELS=Object.freeze({
+  getCenter:'communicationMessaging:getCenter',
+  search:'communicationMessaging:search',
+  getContent:'communicationMessaging:getContent',
+  create:'communicationMessaging:create',
+  edit:'communicationMessaging:edit',
+  setLifecycle:'communicationMessaging:setLifecycle',
+  annotate:'communicationMessaging:annotate',
+  updateDelivery:'communicationMessaging:updateDelivery',
+  setPresence:'communicationMessaging:setPresence',
+  setRetentionPolicy:'communicationMessaging:setRetentionPolicy'
+} as const);
+const communicationMessagingChannels=new Set<string>(Object.values(COMMUNICATION_MESSAGING_IPC_CHANNELS));
+const communicationMessagingContentKinds=new Set(['text','voice','photo','video','location','document']);
+const communicationMessagingIso=(value:unknown):boolean=>typeof value==='string'
+  &&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/u.test(value)&&Number.isFinite(Date.parse(value));
+const communicationMessagingText=(value:unknown,minimum:number,maximum:number):boolean=>typeof value==='string'
+  &&value===value.normalize('NFKC')&&value.trim().length>=minimum&&value.length<=maximum&&!/[\p{Cc}\p{Cf}\p{Cs}]/u.test(value);
+const communicationMessagingRevision=(value:unknown,allowZero=false):boolean=>Number.isSafeInteger(value)
+  &&Number(value)>=(allowZero?0:1)&&Number(value)<=Number.MAX_SAFE_INTEGER;
+const communicationMessagingOptionalId=(value:unknown):boolean=>value===undefined||communicationIdentifier(value);
+const communicationMessagingInput=(channel:string,args:readonly unknown[]):IpcIntegrationPolicyDecision=>{
+  if(channel===COMMUNICATION_MESSAGING_IPC_CHANNELS.getCenter)return zeroArguments(args);
+  if(channel===COMMUNICATION_MESSAGING_IPC_CHANNELS.getContent)return exactObject(args,['messageId'],value=>
+    communicationIdentifier(value.messageId));
+  if(channel===COMMUNICATION_MESSAGING_IPC_CHANNELS.search){
+    if(args.length!==1||!isObject(args[0]))return rejected('COMMUNICATION_MESSAGING_SEARCH_INPUT_INVALID','$[0]');
+    const value=args[0];
+    const keys=['roomId','senderPersonId','contentKind','from','to','includeDeleted','limit'].filter(key=>value[key]!==undefined);
+    return exactObject(args,keys,candidate=>communicationMessagingOptionalId(candidate.roomId)
+      &&communicationMessagingOptionalId(candidate.senderPersonId)
+      &&(candidate.contentKind===undefined||communicationMessagingContentKinds.has(String(candidate.contentKind)))
+      &&(candidate.from===undefined||communicationMessagingIso(candidate.from))
+      &&(candidate.to===undefined||communicationMessagingIso(candidate.to))
+      &&(candidate.from===undefined||candidate.to===undefined||Date.parse(String(candidate.from))<=Date.parse(String(candidate.to)))
+      &&(candidate.includeDeleted===undefined||typeof candidate.includeDeleted==='boolean')
+      &&(candidate.limit===undefined||(Number.isSafeInteger(candidate.limit)&&Number(candidate.limit)>=1&&Number(candidate.limit)<=200)));
+  }
+  if(channel===COMMUNICATION_MESSAGING_IPC_CHANNELS.create){
+    if(args.length!==1||!isObject(args[0]))return rejected('COMMUNICATION_MESSAGING_CREATE_INPUT_INVALID','$[0]');
+    const value=args[0];
+    const keys=['clientOperationId','expectedRevision','roomId','contentKind','contentMime','text',
+      'replyToMessageId','quotedMessageId','threadRootMessageId','scheduledAt','silent'].filter(key=>value[key]!==undefined);
+    return exactObject(args,keys,candidate=>communicationIdentifier(candidate.clientOperationId)&&candidate.expectedRevision===0
+      &&communicationIdentifier(candidate.roomId)&&candidate.contentKind==='text'&&candidate.contentMime==='text/plain'
+      &&communicationMessagingText(candidate.text,1,32_768)
+      &&communicationMessagingOptionalId(candidate.replyToMessageId)&&communicationMessagingOptionalId(candidate.quotedMessageId)
+      &&communicationMessagingOptionalId(candidate.threadRootMessageId)
+      &&(candidate.scheduledAt===undefined||communicationMessagingIso(candidate.scheduledAt))
+      &&(candidate.silent===undefined||typeof candidate.silent==='boolean'));
+  }
+  if(channel===COMMUNICATION_MESSAGING_IPC_CHANNELS.edit)return exactObject(args,
+    ['clientOperationId','expectedRevision','messageId','text','reason'],value=>
+      communicationIdentifier(value.clientOperationId)&&communicationMessagingRevision(value.expectedRevision)
+      &&communicationIdentifier(value.messageId)&&communicationMessagingText(value.text,1,32_768)
+      &&communicationMessagingText(value.reason,3,500));
+  if(channel===COMMUNICATION_MESSAGING_IPC_CHANNELS.setLifecycle)return exactObject(args,
+    ['clientOperationId','expectedRevision','messageId','action','reason'],value=>
+      communicationIdentifier(value.clientOperationId)&&communicationMessagingRevision(value.expectedRevision)
+      &&communicationIdentifier(value.messageId)&&['delete','restore'].includes(String(value.action))
+      &&communicationMessagingText(value.reason,3,500));
+  if(channel===COMMUNICATION_MESSAGING_IPC_CHANNELS.annotate){
+    if(args.length!==1||!isObject(args[0]))return rejected('COMMUNICATION_MESSAGING_ANNOTATE_INPUT_INVALID','$[0]');
+    const value=args[0];
+    const optional=['reactionCode','pinned','bookmarked'].filter(key=>value[key]!==undefined);
+    return exactObject(args,['clientOperationId','expectedRevision','messageId',...optional],candidate=>
+      communicationIdentifier(candidate.clientOperationId)&&communicationMessagingRevision(candidate.expectedRevision)
+      &&communicationIdentifier(candidate.messageId)&&optional.length===1
+      &&(candidate.reactionCode===undefined||communicationMessagingText(candidate.reactionCode,1,32))
+      &&(candidate.pinned===undefined||typeof candidate.pinned==='boolean')
+      &&(candidate.bookmarked===undefined||typeof candidate.bookmarked==='boolean'));
+  }
+  if(channel===COMMUNICATION_MESSAGING_IPC_CHANNELS.updateDelivery)return exactObject(args,
+    ['clientOperationId','expectedRevision','messageId','action'],value=>
+      communicationIdentifier(value.clientOperationId)&&communicationMessagingRevision(value.expectedRevision)
+      &&communicationIdentifier(value.messageId)&&['queue_offline','retry','mark_ready_local','cancel'].includes(String(value.action)));
+  if(channel===COMMUNICATION_MESSAGING_IPC_CHANNELS.setPresence){
+    if(args.length!==1||!isObject(args[0]))return rejected('COMMUNICATION_MESSAGING_PRESENCE_INPUT_INVALID','$[0]');
+    const value=args[0];
+    const keys=['clientOperationId','expectedRevision','status','audience','lastSeenShared','typingIndicatorsEnabled',
+      'readReceiptsEnabled','emergencyReachabilityEnabled','expiresAt'].filter(key=>value[key]!==undefined);
+    return exactObject(args,keys,candidate=>communicationIdentifier(candidate.clientOperationId)
+      &&communicationMessagingRevision(candidate.expectedRevision,true)
+      &&['online','away','busy','in_meeting','do_not_disturb','invisible','offline'].includes(String(candidate.status))
+      &&['nobody','room_members','selected_people'].includes(String(candidate.audience))
+      &&typeof candidate.lastSeenShared==='boolean'&&typeof candidate.typingIndicatorsEnabled==='boolean'
+      &&typeof candidate.readReceiptsEnabled==='boolean'&&typeof candidate.emergencyReachabilityEnabled==='boolean'
+      &&(candidate.expiresAt===undefined||communicationMessagingIso(candidate.expiresAt)));
+  }
+  if(channel===COMMUNICATION_MESSAGING_IPC_CHANNELS.setRetentionPolicy){
+    if(args.length!==1||!isObject(args[0]))return rejected('COMMUNICATION_MESSAGING_RETENTION_INPUT_INVALID','$[0]');
+    const value=args[0];
+    const keys=['clientOperationId','expectedRevision','roomId','mode','durationDays','reason'].filter(key=>value[key]!==undefined);
+    return exactObject(args,keys,candidate=>communicationIdentifier(candidate.clientOperationId)
+      &&communicationMessagingRevision(candidate.expectedRevision,true)&&communicationIdentifier(candidate.roomId)
+      &&['permanent','duration','auto_delete','legal_hold'].includes(String(candidate.mode))
+      &&((['duration','auto_delete'].includes(String(candidate.mode))&&Number.isSafeInteger(candidate.durationDays)
+        &&Number(candidate.durationDays)>=1&&Number(candidate.durationDays)<=3650)
+        ||(!['duration','auto_delete'].includes(String(candidate.mode))&&candidate.durationDays===undefined))
+      &&communicationMessagingText(candidate.reason,3,500));
+  }
+  return rejected('UNKNOWN_IPC_CHANNEL','$');
+};
+const communicationMessagingMessageResult=(value:unknown):boolean=>{
+  if(!isObject(value))return false;
+  const keys=['id','roomId','senderPersonId','contentKind','contentMime','payloadSizeBytes','state','deliveryState',
+    'silent','pinned','bookmarked','edited','deleted','revision','createdAt','updatedAt','sealedPayloadStoredOutsideDatabase',
+    'plaintextPersistedInDatabase',...(value.replyToMessageId===undefined?[]:['replyToMessageId']),
+    ...(value.quotedMessageId===undefined?[]:['quotedMessageId']),...(value.threadRootMessageId===undefined?[]:['threadRootMessageId']),
+    ...(value.scheduledAt===undefined?[]:['scheduledAt']),...(value.reactionCode===undefined?[]:['reactionCode']),
+    ...(value.expiresAt===undefined?[]:['expiresAt'])];
+  return healthCareExactRecord(value,keys)&&communicationIdentifier(value.id)&&communicationIdentifier(value.roomId)
+    &&communicationIdentifier(value.senderPersonId)&&communicationMessagingContentKinds.has(String(value.contentKind))
+    &&typeof value.contentMime==='string'&&value.contentMime.length>=3&&value.contentMime.length<=192
+    &&Number.isSafeInteger(value.payloadSizeBytes)&&Number(value.payloadSizeBytes)>=1&&Number(value.payloadSizeBytes)<=33_554_432
+    &&['draft','queued','scheduled','sealed_local','deleted'].includes(String(value.state))
+    &&['not_requested','queued_offline','retry_wait','ready_local','transport_not_configured','cancelled'].includes(String(value.deliveryState))
+    &&[value.silent,value.pinned,value.bookmarked,value.edited,value.deleted].every(item=>typeof item==='boolean')
+    &&communicationMessagingRevision(value.revision)&&communicationMessagingIso(value.createdAt)&&communicationMessagingIso(value.updatedAt)
+    &&communicationMessagingOptionalId(value.replyToMessageId)&&communicationMessagingOptionalId(value.quotedMessageId)
+    &&communicationMessagingOptionalId(value.threadRootMessageId)
+    &&(value.scheduledAt===undefined||communicationMessagingIso(value.scheduledAt))
+    &&(value.reactionCode===undefined||communicationMessagingText(value.reactionCode,1,32))
+    &&(value.expiresAt===undefined||communicationMessagingIso(value.expiresAt))
+    &&value.sealedPayloadStoredOutsideDatabase===true&&value.plaintextPersistedInDatabase===false;
+};
+const communicationMessagingPresenceResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['personId','status','publicAvailability','audience','lastSeenShared','typingIndicatorsEnabled','readReceiptsEnabled',
+    'activeDeviceDisclosed','preciseActivityDisclosed','emergencyReachabilityEnabled','revision','updatedAt',
+    ...(value.expiresAt===undefined?[]:['expiresAt'])])&&communicationIdentifier(value.personId)
+  &&['online','away','busy','in_meeting','do_not_disturb','invisible','offline'].includes(String(value.status))
+  &&['available','unavailable','hidden'].includes(String(value.publicAvailability))
+  &&['nobody','room_members','selected_people'].includes(String(value.audience))
+  &&[value.lastSeenShared,value.typingIndicatorsEnabled,value.readReceiptsEnabled,value.emergencyReachabilityEnabled]
+    .every(item=>typeof item==='boolean')&&value.activeDeviceDisclosed===false&&value.preciseActivityDisclosed===false
+  &&communicationMessagingRevision(value.revision,true)&&communicationMessagingIso(value.updatedAt)
+  &&(value.expiresAt===undefined||communicationMessagingIso(value.expiresAt));
+const communicationMessagingRetentionResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['roomId','mode','legalHoldReasonRecorded','automaticDeletionScheduled','physicalSecureEraseGuaranteed',
+    'backupPropagationGuaranteed','revision','updatedAt',...(value.durationDays===undefined?[]:['durationDays'])])
+  &&communicationIdentifier(value.roomId)&&['permanent','duration','auto_delete','legal_hold'].includes(String(value.mode))
+  &&(value.durationDays===undefined||(Number.isSafeInteger(value.durationDays)&&Number(value.durationDays)>=1&&Number(value.durationDays)<=3650))
+  &&typeof value.legalHoldReasonRecorded==='boolean'&&typeof value.automaticDeletionScheduled==='boolean'
+  &&value.physicalSecureEraseGuaranteed===false&&value.backupPropagationGuaranteed===false
+  &&communicationMessagingRevision(value.revision)&&communicationMessagingIso(value.updatedAt);
+const communicationMessagingTruthResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,[
+  'appendOnlyMessageEventLedgerImplemented','sealedPayloadReferenceOnlyInDatabase','offlineOutboxMetadataImplemented',
+  'localRetryStateMachineImplemented','replyQuoteThreadReactionPinBookmarkMetadataImplemented','editDeleteRestoreHistoryImplemented',
+  'scheduledAndSilentMetadataImplemented','privacyPreservingPresenceImplemented','defaultPresenceIsAvailabilityOnly',
+  'activeDeviceDisclosureDefaultDenied','exactActivityDisclosureDefaultDenied','contentSearchImplemented','relayDeliveryImplemented',
+  'deliveryReceiptFromRemoteImplemented','messageSignatureVerificationImplemented','automaticPhysicalSecureEraseGuaranteed',
+  'backupDeletionPropagationGuaranteed','calendarPresenceSyncImplemented','productionMlsPayloadProviderConfigured',
+  'realMessageExchangePerformed','networkUsedByCurrentImplementation'])
+  &&value.appendOnlyMessageEventLedgerImplemented===true&&value.sealedPayloadReferenceOnlyInDatabase===true
+  &&value.offlineOutboxMetadataImplemented===true&&value.localRetryStateMachineImplemented===true
+  &&value.replyQuoteThreadReactionPinBookmarkMetadataImplemented===true&&value.editDeleteRestoreHistoryImplemented===true
+  &&value.scheduledAndSilentMetadataImplemented===true&&value.privacyPreservingPresenceImplemented===true
+  &&value.defaultPresenceIsAvailabilityOnly===true&&value.activeDeviceDisclosureDefaultDenied===true
+  &&value.exactActivityDisclosureDefaultDenied===true&&value.contentSearchImplemented===false
+  &&value.relayDeliveryImplemented===false&&value.deliveryReceiptFromRemoteImplemented===false
+  &&value.messageSignatureVerificationImplemented===false&&value.automaticPhysicalSecureEraseGuaranteed===false
+  &&value.backupDeletionPropagationGuaranteed===false&&value.calendarPresenceSyncImplemented===false
+  &&value.productionMlsPayloadProviderConfigured===false&&value.realMessageExchangePerformed===false
+  &&value.networkUsedByCurrentImplementation===false;
+const communicationMessagingCenterResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['schemaVersion','centerId','ownerPersonId','messages','presence','retentionPolicies','truth','generatedAt'])&&value.schemaVersion===1
+  &&communicationIdentifier(value.centerId)&&communicationIdentifier(value.ownerPersonId)&&Array.isArray(value.messages)
+  &&value.messages.length<=10_000&&value.messages.every(communicationMessagingMessageResult)
+  &&communicationMessagingPresenceResult(value.presence)&&Array.isArray(value.retentionPolicies)
+  &&value.retentionPolicies.length<=256&&value.retentionPolicies.every(communicationMessagingRetentionResult)
+  &&communicationMessagingTruthResult(value.truth)&&communicationMessagingIso(value.generatedAt);
+const communicationMessagingContentResult=(value:unknown):boolean=>{
+  if(!isObject(value))return false;
+  const optional=value.text===undefined?['opaqueAttachmentHandle']:['text'];
+  return healthCareExactRecord(value,['messageId','revision','contentKind','contentMime',...optional,'payloadSource','networkUsed','cloudUsed'])
+    &&communicationIdentifier(value.messageId)&&communicationMessagingRevision(value.revision)
+    &&communicationMessagingContentKinds.has(String(value.contentKind))&&typeof value.contentMime==='string'
+    &&value.contentMime.length>=3&&value.contentMime.length<=192
+    &&((value.contentKind==='text'&&communicationMessagingText(value.text,1,32_768)&&value.opaqueAttachmentHandle===undefined)
+      ||(value.contentKind!=='text'&&communicationIdentifier(value.opaqueAttachmentHandle)&&value.text===undefined))
+    &&value.payloadSource==='local_sealed_store'&&value.networkUsed===false&&value.cloudUsed===false;
+};
+const communicationMessagingReceiptResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['resourceType','resourceId','mutationKind','previousRevision','revision','occurredAt','replayed','payloadSealedLocally',
+    'remoteDeliveryPerformed','networkUsed'])
+  &&['communication_message','communication_presence','communication_retention_policy'].includes(String(value.resourceType))
+  &&communicationIdentifier(value.resourceId)&&['message_create','message_edit','message_delete','message_restore','message_annotate',
+    'delivery_update','retention_update','presence_update'].includes(String(value.mutationKind))
+  &&communicationMessagingRevision(value.previousRevision,true)&&communicationMessagingRevision(value.revision)
+  &&Number(value.revision)===Number(value.previousRevision)+1&&communicationMessagingIso(value.occurredAt)
+  &&typeof value.replayed==='boolean'&&typeof value.payloadSealedLocally==='boolean'
+  &&value.remoteDeliveryPerformed===false&&value.networkUsed===false;
+const communicationMessagingResult=(channel:string,result:unknown):IpcIntegrationPolicyDecision=>{
+  const valid=channel===COMMUNICATION_MESSAGING_IPC_CHANNELS.getCenter?communicationMessagingCenterResult(result)
+    :channel===COMMUNICATION_MESSAGING_IPC_CHANNELS.search?Array.isArray(result)&&result.length<=200
+      &&result.every(communicationMessagingMessageResult)
+      :channel===COMMUNICATION_MESSAGING_IPC_CHANNELS.getContent?communicationMessagingContentResult(result)
+        :communicationMessagingReceiptResult(result);
+  return valid?accepted():rejected('COMMUNICATION_MESSAGING_RESULT_INVALID','$result');
+};
+
 export const ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS = Object.freeze({
   listEvidence: 'archive:listRelationEvidence',
   listEvidenceHistory: 'archive:listRelationEvidenceHistory',
@@ -4072,6 +4273,8 @@ export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unkn
   if (channel.startsWith('signedPluginPlatform:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
   if (communicationSecurityChannels.has(channel)) return communicationResult(channel,result);
   if (channel.startsWith('communicationSecurity:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
+  if (communicationMessagingChannels.has(channel)) return communicationMessagingResult(channel,result);
+  if (channel.startsWith('communicationMessaging:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
   if (childEducationChannels.has(channel)) return childEducationResult(channel, result);
   if (channel.startsWith('childEducation:')) return rejected('UNKNOWN_IPC_CHANNEL', '$result');
   if (placesTravelChannels.has(channel)) return placesTravelResult(channel, result);
@@ -4124,6 +4327,8 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
   if (channel.startsWith('signedPluginPlatform:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
   if (communicationSecurityChannels.has(channel)) return communicationInput(channel,args);
   if (channel.startsWith('communicationSecurity:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
+  if (communicationMessagingChannels.has(channel)) return communicationMessagingInput(channel,args);
+  if (channel.startsWith('communicationMessaging:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
   if (childEducationChannels.has(channel)) return childEducationInput(channel, args);
   if (channel.startsWith('childEducation:')) return rejected('UNKNOWN_IPC_CHANNEL', '$');
   if (placesTravelChannels.has(channel)) return placesTravelInput(channel, args);

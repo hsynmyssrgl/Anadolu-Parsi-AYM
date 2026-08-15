@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "step": "34-B",
+  "decision": "DEC-239",
+  "status": "PLANNED",
+  "governanceState": "LOCAL_IMPLEMENTATION_STARTED",
+  "requirements": ["COM-003", "COM-004", "COM-005", "COM-006", "COM-007", "COM-008", "COM-009", "COM-010", "PRS-001", "PRS-002", "PRS-003", "PRS-004", "PRS-005", "PRS-006"],
+  "implementationChain": {
+    "domain": ["packages/domain/src/communication-messaging.ts"],
+    "application": ["packages/application/src/communication-messaging-use-cases.ts"],
+    "repositoryContract": ["packages/repository-contracts/src/communication-messaging-repository.ts"],
+    "migration": ["packages/database/src/family-database-migrations.ts#106"],
+    "repository": ["packages/repositories/src/communication-messaging-repository.ts"],
+    "protectedPayload": ["apps/desktop/src/main/communication-message-payload-vault.ts"],
+    "policyAndComposition": [
+      "apps/desktop/src/main/life-production-policy-runtime.ts",
+      "apps/desktop/src/main/communication-messaging-application-adapter.ts",
+      "apps/desktop/src/main/repository-composition-root.ts",
+      "apps/desktop/src/main/data-store.ts"
+    ],
+    "ipc": [
+      "apps/desktop/src/main/ipc-integration-policy.ts",
+      "apps/desktop/src/main/ipc-request-lifecycle.ts",
+      "apps/desktop/src/main/main.ts",
+      "apps/desktop/src/main/preload.ts",
+      "apps/desktop/src/renderer/global.d.ts"
+    ],
+    "ui": ["apps/desktop/src/renderer/CommunicationMessagingPanel.tsx", "apps/desktop/src/renderer/App.tsx"]
+  },
+  "implementedTargetedTests": [
+    "packages/application/tests/communication-messaging-use-cases.test.ts",
+    "apps/desktop/tests/communication-message-payload-vault.test.ts",
+    "apps/desktop/tests/communication-messaging-data-store.test.ts",
+    "apps/desktop/tests/communication-messaging-ipc-integration.test.ts",
+    "apps/desktop/tests/communication-messaging-ui.test.ts"
+  ],
+  "securityControls": {
+    "centralPepReceiptFence": true,
+    "ownerAccountFamilyBinding": true,
+    "immutableMutationAndMessageEventLedgers": true,
+    "payloadFreePolicyResolution": true,
+    "contentFreeAuditAndOutbox": true,
+    "protectedPayloadOutsideDatabase": true,
+    "payloadReadbackHashSizeIdentityBinding": true,
+    "noOverwriteAndSymlinkRealpathChecks": true,
+    "boundedIpcAndRendererSafeResults": true,
+    "rendererStorageProviderRelayAndReceiptAuthorityExcluded": true,
+    "durableWritesNonCancellable": true,
+    "explicitPolicyDenyBeforePayloadSeal": true
+  },
+  "incompleteCapabilities": [
+    "main-issued media attachment import and retrieval",
+    "reminder execution",
+    "full content search",
+    "real relay delivery and remote receipts",
+    "message signature verification",
+    "multi-device presence aggregation",
+    "selected-people audience enforcement",
+    "automatic presence expiry and calendar sync",
+    "automatic retention execution and payload orphan sweep",
+    "physical secure erase and backup deletion propagation"
+  ],
+  "validation": {
+    "targetedTestFileRatchet": 5,
+    "targetedTestRatchet": 25,
+    "migrationVersion": 106,
+    "migrationSha256": "5b088bb6d759403044f84ad9f2a82be1823e33a17334d7122beed92af56cce50",
+    "ppk015": {"status":"PASS","files":507,"sourceSha256":"12c286d45487c5e498768b396616b3ed7b0ca858a121c012f0db6620f3f709c8","findings":0},
+    "ppk021": {"status":"PASS","files":507,"surfaces":795,"sha256":"d674ad587c9cad96def3d087a86d176aa9dedc9ac69d2c3b0e71cc02cd787348","targeted":17,"contract":84,"runtime":20},
+    "ppk022": {"status":"PASS","files":507,"surfaces":360,"sha256":"b4b2f09c461235528f98c3f4b942e28a9e3068c71de5697fe116e4b57f54c77c","targeted":19,"contract":110,"runtime":24},
+    "countsAsRequirementPass": false
+  },
+  "externalAndManualEvidence": "NOT_RUN",
+  "countsAsRequirementPass": false
+}

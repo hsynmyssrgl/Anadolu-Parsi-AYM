@@ -174,7 +174,11 @@ export interface LifePolicyIntent {
     | 'signed_plugin_installation'
     | 'communication_security_center'
     | 'communication_device_credential'
-    | 'communication_room';
+    | 'communication_room'
+    | 'communication_messaging_center'
+    | 'communication_message'
+    | 'communication_presence'
+    | 'communication_retention_policy';
   readonly resourceId: string;
   readonly purpose: 'general' | 'emergency-offline-portability';
   readonly requestedFields?: readonly string[];

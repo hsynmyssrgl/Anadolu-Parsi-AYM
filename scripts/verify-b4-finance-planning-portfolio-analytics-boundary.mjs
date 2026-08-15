@@ -243,12 +243,12 @@ export const verifyB4FinancePlanningPortfolioAnalyticsBoundary = async () => {
   check('PPK-021 exact ratchet reviews both new compositions', [
     'GetFinancePlanningWorkspaceUseCase', 'RecordFinancePlanningItemUseCase'
   ].every((symbol) => astKeys.has(`USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|${symbol}`))
-    && astGate.status === 'PASS' && astGate.exactAllowlistEntries === 779
-    && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 379
+    && astGate.status === 'PASS' && astGate.exactAllowlistEntries === 795
+    && astGate.surfaceCounts?.USE_CASE_COMPOSITION === 389
     && astGate.directRoleAuthorizationBypasses === 0 && astGate.findings.length === 0);
   check('PPK-022 capability ratchet remains unchanged and green', capabilityGate.status === 'PASS'
-    && capabilityGate.capabilitySurfaces === 345
-    && capabilityGate.exactManifestSurfaces === 345
+    && capabilityGate.capabilitySurfaces === 360
+    && capabilityGate.exactManifestSurfaces === 360
     && capabilityGate.findings.length === 0);
   check('root lifecycle and explicit package scripts bind 33-C', ['pretypecheck', 'prebuild'].every((name) =>
     rootPackage.scripts?.[name]?.includes('verify-b4-finance-planning-portfolio-analytics-boundary.mjs'))
