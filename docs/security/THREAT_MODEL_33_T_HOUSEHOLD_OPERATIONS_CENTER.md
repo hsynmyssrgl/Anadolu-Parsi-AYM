@@ -33,6 +33,10 @@ Tam takip numarası kabul edilmez; yalnız dört alfasayısal karakter ve sağla
 
 Kind/status/area enum’ları, kimlikler, metin, tarih, sayı, array, pay ve IPC toplam boyutları sınırlıdır. Prototype/accessor/symbol, extra key, path, secret, PAN, NaN/sonsuz değer, yinelenen kişi/alerjen ve eksik pay toplamı fail-closed reddedilir. Center listesi 2.000 item üzerinde sessiz kesilmez; sorgu reddedilir.
 
+### Eksik veya zamansal olarak çelişkili iş akışı
+
+Gıda stoğu son kullanma tarihi; öğün planı planlanan zaman; ev işi/rutin kişi ataması; rutin/abonelik tekrar bilgisi; fatura/abonelik son ödeme tarihi; evcil hayvan bakımı zaman gerektirir. Misafir erişimi ve diğer zaman aralıklı kayıtlarda bitiş başlangıçtan önce olamaz. IPC eksik create girdisini uygulamaya ulaşmadan reddeder; application update akışı mevcut ve yeni alanları birlikte değerlendirerek zorunlu alanın temizlenmesini veya zaman sırasının tersine çevrilmesini fail-closed engeller.
+
 ### Statik gate’i runtime yetkisi sanma
 
 PPK-021/022 yalnız build/runtime surface ratchet’idir. Her repository erişiminde merkezi PEP/UoW receipt’i zorunludur; allowlist veya capability manifest tek başına hane verisi yetkisi vermez.

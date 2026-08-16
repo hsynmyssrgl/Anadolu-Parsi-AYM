@@ -572,9 +572,18 @@ export class CreateHouseholdOperationItemUseCase {
       if (input.command.kind === 'stock_item' && (!input.command.stockCategory || input.command.quantity === undefined || !unit.value)) {
         return err(invalid(input.context, 'Stok öğesi kategori, miktar ve birim gerektirir.'));
       }
+      if (input.command.kind === 'stock_item' && input.command.stockCategory === 'food' && !expiresAt.value) {
+        return err(invalid(input.context, 'Gıda stok öğesi son kullanma tarihi gerektirir.'));
+      }
       const expenseKind = input.command.kind === 'bill' || input.command.kind === 'subscription' || input.command.kind === 'shared_expense';
       if (expenseKind && (input.command.amountMinor === undefined || !input.command.currency)) {
         return err(invalid(input.context, 'Gider kaydı tutar ve para birimi gerektirir.'));
+      }
+      if ((input.command.kind === 'bill' || input.command.kind === 'subscription') && !dueAt.value) {
+        return err(invalid(input.context, 'Fatura ve abonelik kaydı son ödeme tarihi gerektirir.'));
+      }
+      if (input.command.kind === 'subscription' && !recurrence.value) {
+        return err(invalid(input.context, 'Abonelik kaydı tekrar bilgisi gerektirir.'));
       }
       if (input.command.kind === 'shared_expense' && !shares.value) {
         return err(invalid(input.context, 'Ortak gider tam pay dağılımı gerektirir.'));
@@ -585,8 +594,17 @@ export class CreateHouseholdOperationItemUseCase {
       if (input.command.kind === 'guest_access' && (!guest.value || !accessArea.value || !scheduledAt.value || !dueAt.value)) {
         return err(invalid(input.context, 'Misafir erişim planı etiket, alan, başlangıç ve bitiş gerektirir.'));
       }
-      if (input.command.kind === 'pet_care' && !pet.value) return err(invalid(input.context, 'Evcil hayvan bakım görevi yerel bir referans gerektirir.'));
+      if ((input.command.kind === 'chore' || input.command.kind === 'routine') && !input.command.assignedPersonId) {
+        return err(invalid(input.context, 'Ev görevi ve rutin etkin bir aile üyesine atanmalıdır.'));
+      }
+      if (input.command.kind === 'routine' && !recurrence.value) {
+        return err(invalid(input.context, 'Tekrarlanan rutin tekrar bilgisi gerektirir.'));
+      }
+      if (input.command.kind === 'pet_care' && (!pet.value || !dueAt.value)) {
+        return err(invalid(input.context, 'Evcil hayvan bakım görevi yerel referans ve zaman gerektirir.'));
+      }
       if (input.command.kind === 'meal_plan') {
+        if (!scheduledAt.value) return err(invalid(input.context, 'Öğün planı planlanan zaman gerektirir.'));
         const blocked = new Set(avoided.value ?? []);
         if ((parent!.allergenCodes ?? []).some((code) => blocked.has(code))) {
           return err(conflict(input.context, 'Öğün planı kaçınılan alerjenlerden birini içeren tarife bağlanamaz.'));
@@ -674,6 +692,46 @@ export class UpdateHouseholdOperationItemUseCase {
       if (currentItem.value.revision !== input.command.expectedItemRevision) return err(conflict(input.context, 'Hane operasyonu öğe revizyonu değişti.'));
       if (typeof input.command.assignedPersonId === 'string') {
         const assigned = ensurePerson(input.context, scope, input.command.assignedPersonId); if (!assigned.ok) return assigned;
+      }
+      if (input.command.quantity !== undefined && currentItem.value.kind !== 'stock_item' && currentItem.value.kind !== 'shopping_item') {
+        return err(invalid(input.context, 'Miktar yalnız stok veya alışveriş öğesinde güncellenebilir.'));
+      }
+      if (Object.prototype.hasOwnProperty.call(input.command, 'assignedPersonId')
+        && !['shopping_list','shopping_item','chore','routine','pet_care'].includes(currentItem.value.kind)) {
+        return err(invalid(input.context, 'Bu hane operasyonu türü kişi ataması kabul etmez.'));
+      }
+      const effectiveAssignedPersonId = input.command.assignedPersonId === undefined
+        ? currentItem.value.assignedPersonId
+        : input.command.assignedPersonId ?? undefined;
+      const effectiveScheduledAt = input.command.scheduledAt === undefined
+        ? currentItem.value.scheduledAt
+        : input.command.scheduledAt === null ? undefined : scheduledAt.value;
+      const effectiveDueAt = input.command.dueAt === undefined
+        ? currentItem.value.dueAt
+        : input.command.dueAt === null ? undefined : dueAt.value;
+      const effectiveExpiresAt = input.command.expiresAt === undefined
+        ? currentItem.value.expiresAt
+        : input.command.expiresAt === null ? undefined : expiresAt.value;
+      if (effectiveScheduledAt && effectiveDueAt && Date.parse(effectiveDueAt) < Date.parse(effectiveScheduledAt)) {
+        return err(invalid(input.context, 'Son tarih planlanan zamandan önce olamaz.'));
+      }
+      if ((currentItem.value.kind === 'chore' || currentItem.value.kind === 'routine') && !effectiveAssignedPersonId) {
+        return err(invalid(input.context, 'Ev görevi ve rutin kişi ataması kaldırılamaz.'));
+      }
+      if (currentItem.value.kind === 'meal_plan' && !effectiveScheduledAt) {
+        return err(invalid(input.context, 'Öğün planının zamanı kaldırılamaz.'));
+      }
+      if (currentItem.value.kind === 'stock_item' && currentItem.value.stockCategory === 'food' && !effectiveExpiresAt) {
+        return err(invalid(input.context, 'Gıda stok öğesinin son kullanma tarihi kaldırılamaz.'));
+      }
+      if ((currentItem.value.kind === 'bill' || currentItem.value.kind === 'subscription') && !effectiveDueAt) {
+        return err(invalid(input.context, 'Fatura ve abonelik son ödeme tarihi kaldırılamaz.'));
+      }
+      if (currentItem.value.kind === 'guest_access' && (!effectiveScheduledAt || !effectiveDueAt)) {
+        return err(invalid(input.context, 'Misafir erişim başlangıç ve bitiş zamanı kaldırılamaz.'));
+      }
+      if (currentItem.value.kind === 'pet_care' && !effectiveDueAt) {
+        return err(invalid(input.context, 'Evcil hayvan bakım zamanı kaldırılamaz.'));
       }
       const base: Record<string, unknown> = {
         ...currentItem.value,

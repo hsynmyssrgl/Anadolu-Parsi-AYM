@@ -84,7 +84,8 @@ describe('33-T household operations use cases',()=>{
     }})).ok).toBe(true);
     const before={items:unit.items.size,mutations:unit.mutations.size,audits:unit.audits.length,events:unit.events.length};
     const denied=await useCase.execute({context,command:{
-      expectedCenterRevision:1,clientOperationId:'operation-meal-33-t',itemId:'meal-33-t',kind:'meal_plan',title:'Akşam öğünü',parentItemId:'recipe-33-t',avoidedAllergenCodes:['süt']
+      expectedCenterRevision:1,clientOperationId:'operation-meal-33-t',itemId:'meal-33-t',kind:'meal_plan',title:'Akşam öğünü',parentItemId:'recipe-33-t',
+      scheduledAt:'2026-08-16T18:00:00.000Z',avoidedAllergenCodes:['süt']
     }});
     expect(denied).toMatchObject({ok:false,error:{category:'conflict'}});
     expect({items:unit.items.size,mutations:unit.mutations.size,audits:unit.audits.length,events:unit.events.length}).toEqual(before);
@@ -92,6 +93,13 @@ describe('33-T household operations use cases',()=>{
 
   it('requires a complete distinct-person split and persists only the valid shared expense',async()=>{
     const unit=new Unit();const useCase=new CreateHouseholdOperationItemUseCase(unit);
+    for(const command of [
+      {expectedCenterRevision:0,clientOperationId:'operation-food-no-expiry-33-t',itemId:'food-no-expiry-33-t',kind:'stock_item' as const,title:'Süt',stockCategory:'food' as const,quantity:1,unit:'litre'},
+      {expectedCenterRevision:0,clientOperationId:'operation-routine-no-repeat-33-t',itemId:'routine-no-repeat-33-t',kind:'routine' as const,title:'Haftalık düzen',assignedPersonId:MEMBER},
+      {expectedCenterRevision:0,clientOperationId:'operation-bill-no-due-33-t',itemId:'bill-no-due-33-t',kind:'bill' as const,title:'Elektrik',amountMinor:10_000,currency:'TRY'},
+      {expectedCenterRevision:0,clientOperationId:'operation-pet-no-time-33-t',itemId:'pet-no-time-33-t',kind:'pet_care' as const,title:'Mavi için su',opaquePetReference:'pet-local-mavi'}
+    ]) expect(await useCase.execute({context,command})).toMatchObject({ok:false,error:{category:'validation'}});
+    expect(unit.items).toHaveLength(0);
     const invalid=await useCase.execute({context,command:{
       expectedCenterRevision:0,clientOperationId:'operation-split-invalid-33-t',itemId:'expense-invalid-33-t',kind:'shared_expense',title:'Market',amountMinor:10_000,currency:'TRY',splitShares:[{personId:OWNER,basisPoints:5000},{personId:MEMBER,basisPoints:4999}]
     }});
@@ -120,6 +128,9 @@ describe('33-T household operations use cases',()=>{
     await create.execute({context,command:{expectedCenterRevision:0,clientOperationId:'operation-chore-create-33-t',itemId:'chore-33-t',kind:'chore',title:'Mutfağı düzenle',assignedPersonId:MEMBER}});
     const updated=await new UpdateHouseholdOperationItemUseCase(unit).execute({context,command:{expectedCenterRevision:1,expectedItemRevision:1,clientOperationId:'operation-chore-update-33-t',itemId:'chore-33-t',status:'completed'}});
     expect(updated).toMatchObject({ok:true,value:{centerRevision:2,itemRevision:2}});
+    const invalidClear=await new UpdateHouseholdOperationItemUseCase(unit).execute({context,command:{expectedCenterRevision:2,expectedItemRevision:2,clientOperationId:'operation-chore-clear-owner-33-t',itemId:'chore-33-t',assignedPersonId:null}});
+    expect(invalidClear).toMatchObject({ok:false,error:{category:'validation'}});
+    expect(unit.items.get('chore-33-t')).toMatchObject({revision:2,assignedPersonId:MEMBER});
     const deleted=await new DeleteHouseholdOperationItemUseCase(unit).execute({context,command:{expectedCenterRevision:2,expectedItemRevision:2,clientOperationId:'operation-chore-delete-33-t',itemId:'chore-33-t',reason:'Görev artık gerekli değil.'}});
     expect(deleted).toMatchObject({ok:true,value:{centerRevision:3,itemRevision:3}});
     expect(unit.items.get('chore-33-t')).toMatchObject({status:'deleted',deletedAt:NOW});

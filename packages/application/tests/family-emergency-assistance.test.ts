@@ -148,6 +148,11 @@ describe('33-I private family emergency assistance boundary', () => {
         itemType: command.itemType
       });
     }
+    expect(inspectManagedLifeDataContract({
+      ...commands[0],
+      planId: '4111111111111111',
+      subjectPersonId: '5555555555554444'
+    })).toMatchObject({ accepted: true, panLikeValueDetected: false });
     expect(inspectManagedLifeDataContract({ ...commands[2], value: 'wrong branch' })).toMatchObject({
       accepted: false, unknownFields: ['$.value']
     });

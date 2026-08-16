@@ -2604,6 +2604,24 @@ const householdCreateInput = (value: Record<string, unknown>): boolean => {
     || (value.accessArea !== undefined && !healthCareText(value.accessArea, 1, 120))
     || (value.opaquePetReference !== undefined && !healthCareText(value.opaquePetReference, 1, 128))
     || (value.note !== undefined && !healthCareText(value.note, 1, 2_000))) return false;
+  if (value.scheduledAt !== undefined && value.dueAt !== undefined
+    && Date.parse(String(value.dueAt)) < Date.parse(String(value.scheduledAt))) return false;
+  if (value.kind === 'shopping_item' && value.parentItemId === undefined) return false;
+  if (value.kind === 'stock_item' && (value.stockCategory === undefined || value.quantity === undefined
+    || value.unit === undefined || (value.stockCategory === 'food' && value.expiresAt === undefined))) return false;
+  if (value.kind === 'recipe' && (!Array.isArray(value.ingredientNames) || value.ingredientNames.length === 0)) return false;
+  if (value.kind === 'meal_plan' && (value.parentItemId === undefined || value.scheduledAt === undefined)) return false;
+  if ((value.kind === 'chore' || value.kind === 'routine') && value.assignedPersonId === undefined) return false;
+  if (value.kind === 'routine' && value.recurrence === undefined) return false;
+  if ((value.kind === 'bill' || value.kind === 'subscription')
+    && (value.amountMinor === undefined || value.currency === undefined || value.dueAt === undefined)) return false;
+  if (value.kind === 'subscription' && value.recurrence === undefined) return false;
+  if (value.kind === 'shared_expense'
+    && (value.amountMinor === undefined || value.currency === undefined || value.splitShares === undefined)) return false;
+  if (value.kind === 'delivery' && (value.providerLabel === undefined || value.trackingLastFour === undefined)) return false;
+  if (value.kind === 'guest_access' && (value.guestLabel === undefined || value.accessArea === undefined
+    || value.scheduledAt === undefined || value.dueAt === undefined)) return false;
+  if (value.kind === 'pet_care' && (value.opaquePetReference === undefined || value.dueAt === undefined)) return false;
   return true;
 };
 const householdUpdateInput = (value: Record<string, unknown>): boolean => {

@@ -131,14 +131,19 @@ export function HouseholdOperationsPanel({people}:{readonly people:readonly Fami
 
   const createReady=title.trim().length>=2
     && (kind!=='shopping_item'||Boolean(parentItemId))
-    && (kind!=='stock_item'||Number.isFinite(Number(quantity))&&Number(quantity)>=0&&unit.trim().length>0)
+    && (kind!=='stock_item'||Number.isFinite(Number(quantity))&&Number(quantity)>=0&&unit.trim().length>0
+      &&(stockCategory!=='food'||Boolean(isoOrUndefined(expiresAt))))
     && (kind!=='recipe'||splitText(ingredients).length>0)
-    && (kind!=='meal_plan'||Boolean(parentItemId))
+    && (kind!=='meal_plan'||Boolean(parentItemId)&&Boolean(isoOrUndefined(scheduledAt)))
+    && (!['chore','routine'].includes(kind)||Boolean(assignedPersonId))
+    && (kind!=='routine'||recurrence.trim().length>0)
     && (!['bill','subscription','shared_expense'].includes(kind)||Number(amount)>=0&&amount.trim()!==''&&/^[A-Z]{3}$/u.test(currency))
+    && (!['bill','subscription'].includes(kind)||Boolean(isoOrUndefined(dueAt)))
+    && (kind!=='subscription'||recurrence.trim().length>0)
     && (kind!=='shared_expense'||people.length>=2)
     && (kind!=='delivery'||providerLabel.trim().length>0&&/^[A-Za-z0-9]{4}$/u.test(trackingLastFour))
     && (kind!=='guest_access'||guestLabel.trim().length>0&&accessArea.trim().length>0&&Boolean(isoOrUndefined(scheduledAt))&&Boolean(isoOrUndefined(dueAt)))
-    && (kind!=='pet_care'||petReference.trim().length>0);
+    && (kind!=='pet_care'||petReference.trim().length>0&&Boolean(isoOrUndefined(dueAt)));
 
   const create=async()=>{
     if(!window.pardus||!createReady||busy)return;
@@ -200,7 +205,7 @@ export function HouseholdOperationsPanel({people}:{readonly people:readonly Fami
           {kind==='stock_item'&&<><label>Stok türü<select value={stockCategory} onChange={(event)=>setStockCategory(event.target.value as 'food'|'cleaning')}><option value="food">Gıda</option><option value="cleaning">Temizlik</option></select></label><label>Miktar<input type="number" min="0" step="0.01" value={quantity} onChange={(event)=>setQuantity(event.target.value)}/></label><label>Birim<input value={unit} onChange={(event)=>setUnit(event.target.value)} maxLength={32}/></label><label>Son kullanım<input type="datetime-local" value={expiresAt} onChange={(event)=>setExpiresAt(event.target.value)}/></label></>}
           {kind==='recipe'&&<><label className="span-2">Malzemeler (virgülle)<input value={ingredients} onChange={(event)=>setIngredients(event.target.value)} placeholder="mercimek, soğan, su"/></label><label className="span-2">Alerjen kodları (virgülle)<input value={allergens} onChange={(event)=>setAllergens(event.target.value)} placeholder="gluten, süt"/></label></>}
           {kind==='meal_plan'&&<><label>Öğün zamanı<input type="datetime-local" value={scheduledAt} onChange={(event)=>setScheduledAt(event.target.value)}/></label><label>Kaçınılan alerjenler<input value={avoidedAllergens} onChange={(event)=>setAvoidedAllergens(event.target.value)} placeholder="gluten, süt"/></label></>}
-          {(kind==='chore'||kind==='routine'||kind==='pet_care'||kind==='shopping_list')&&<label>Atanan kişi<select value={assignedPersonId} onChange={(event)=>setAssignedPersonId(event.target.value)}><option value="">Atama yok</option>{people.map((person)=><option key={person.id} value={person.id}>{person.displayName}</option>)}</select></label>}
+          {(kind==='chore'||kind==='routine'||kind==='pet_care'||kind==='shopping_list'||kind==='shopping_item')&&<label>Atanan kişi<select value={assignedPersonId} onChange={(event)=>setAssignedPersonId(event.target.value)}><option value="">Atama yok</option>{people.map((person)=><option key={person.id} value={person.id}>{person.displayName}</option>)}</select></label>}
           {(kind==='chore'||kind==='routine'||kind==='pet_care'||kind==='shopping_list'||kind==='bill'||kind==='subscription')&&<label>Son tarih<input type="datetime-local" value={dueAt} onChange={(event)=>setDueAt(event.target.value)}/></label>}
           {(kind==='routine'||kind==='subscription')&&<label>Tekrar bilgisi<input value={recurrence} onChange={(event)=>setRecurrence(event.target.value)} placeholder="Her pazartesi" maxLength={160}/></label>}
           {(kind==='bill'||kind==='subscription'||kind==='shared_expense')&&<><label>Tutar<input type="number" min="0" step="0.01" value={amount} onChange={(event)=>setAmount(event.target.value)}/></label><label>Para birimi<input value={currency} onChange={(event)=>setCurrency(event.target.value.toLocaleUpperCase('tr-TR'))} maxLength={3}/></label></>}
@@ -217,7 +222,7 @@ export function HouseholdOperationsPanel({people}:{readonly people:readonly Fami
         <div className="household-list-heading"><h3>{areaOptions.find((option)=>option.value===area)?.label}</h3><Button onClick={()=>void reload()} disabled={loading||busy}>{loading?'Yükleniyor…':'Yenile'}</Button></div>
         {message&&<StatusMessage tone={tone}>{message}</StatusMessage>}
         {!loading&&areaItems.length===0?<EmptyState title="Bu alanda kayıt yok" body="Soldaki formdan yerel ve aile kapsamlı bir operasyon ekleyin."/>:<div className="stack-list">{areaItems.map((entry)=><div className="household-operation-row" key={entry.id}>
-          <div><strong>{entry.title}</strong><small>{statusLabels[entry.status]} · revizyon {entry.revision}{entry.assignedPersonId?` · ${people.find((person)=>person.id===entry.assignedPersonId)?.displayName??'Atanan kişi'}`:''}</small><small>{entry.quantity!==undefined?`${entry.quantity} ${entry.unit??''} · `:''}{entry.amountMinor!==undefined?`${(entry.amountMinor/100).toLocaleString('tr-TR',{minimumFractionDigits:2})} ${entry.currency} · `:''}{entry.trackingLastFour?`takip ••••${entry.trackingLastFour} · `:''}{entry.dueAt?formatDate(entry.dueAt):entry.scheduledAt?formatDate(entry.scheduledAt):entry.note??''}</small></div>
+          <div><strong>{entry.title}</strong><small>{statusLabels[entry.status]} · revizyon {entry.revision}{entry.assignedPersonId?` · ${people.find((person)=>person.id===entry.assignedPersonId)?.displayName??'Atanan kişi'}`:''}</small><small>{entry.quantity!==undefined?`${entry.quantity} ${entry.unit??''} · `:''}{entry.amountMinor!==undefined?`${(entry.amountMinor/100).toLocaleString('tr-TR',{minimumFractionDigits:2})} ${entry.currency} · `:''}{entry.trackingLastFour?`takip ••••${entry.trackingLastFour} · `:''}{entry.expiresAt?`son kullanım ${formatDate(entry.expiresAt)} · `:''}{entry.dueAt?formatDate(entry.dueAt):entry.scheduledAt?formatDate(entry.scheduledAt):entry.note??''}</small></div>
           <div className="household-row-actions"><Button onClick={()=>void updateStatus(entry,entry.kind==='delivery'?'delivered':entry.kind==='guest_access'?'revoked':'completed')} disabled={busy||['completed','delivered','revoked'].includes(entry.status)}>Tamamla</Button><Button tone="danger" onClick={()=>void remove(entry)} disabled={busy}>Sil</Button></div>
         </div>)}</div>}
       </section>

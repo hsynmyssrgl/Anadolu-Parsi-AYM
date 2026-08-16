@@ -231,7 +231,8 @@ const prohibitedKeyTokens = Object.freeze([
   'base64','binary','buffer','blob'
 ]);
 const explicitlyAllowedOpaqueIdentifierKeys = new Set([
-  'archiveitemid','financeassetid','financeexpenseid'
+  'archiveitemid','financeassetid','financeexpenseid',
+  'planid','profileid','subjectpersonid','subjectpetid','responsiblepersonid'
 ]);
 
 const isProhibitedKey = (key: string): boolean => {
@@ -299,7 +300,11 @@ const collectRecursiveSignals = (
 ): void => {
   if (typeof value === 'string') {
     const exactE164Phone = fieldName === 'phoneE164' && /^\+[1-9][0-9]{7,14}$/u.test(value);
-    signals.panLikeValueDetected ||= !exactE164Phone && containsLikelyManagedLifePan(value);
+    const exactOpaqueIdentifier = fieldName !== undefined
+      && explicitlyAllowedOpaqueIdentifierKeys.has(normalizedKey(fieldName));
+    signals.panLikeValueDetected ||= !exactE164Phone
+      && !exactOpaqueIdentifier
+      && containsLikelyManagedLifePan(value);
     signals.pathLikeValueDetected ||= isPathLike(value);
     signals.base64LikeValueDetected ||= isBase64Like(value);
     return;

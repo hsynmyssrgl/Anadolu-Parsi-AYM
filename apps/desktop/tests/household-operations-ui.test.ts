@@ -46,6 +46,12 @@ describe('33-T household operations renderer surface',()=>{
     expect(panel).toContain('Erişim alanı');
     expect(panel).not.toContain('Anahtar kodu<input');
     expect(panel).toContain('Yerel evcil hayvan referansı');
+    expect(panel).toContain("stockCategory!=='food'||Boolean(isoOrUndefined(expiresAt))");
+    expect(panel).toContain("kind!=='meal_plan'||Boolean(parentItemId)&&Boolean(isoOrUndefined(scheduledAt))");
+    expect(panel).toContain("!['chore','routine'].includes(kind)||Boolean(assignedPersonId)");
+    expect(panel).toContain("!['bill','subscription'].includes(kind)||Boolean(isoOrUndefined(dueAt))");
+    expect(panel).toContain("kind!=='pet_care'||petReference.trim().length>0&&Boolean(isoOrUndefined(dueAt))");
+    expect(panel).toContain('son kullanım ${formatDate(entry.expiresAt)}');
   });
 
   it('states external-action limits and provides responsive accessible presentation',()=>{

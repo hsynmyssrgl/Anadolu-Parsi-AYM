@@ -73,7 +73,7 @@ const definitions = [
   ['decision and threat model deny execution provider production trust sandbox and acceptance claims', has(decision, ['countsAsRequirementPass=false',
     'NOT_RUN', 'Production imza güveni']) && has(threat, ['Sahte veya değiştirilmiş manifest', 'Renderer otorite yükseltmesi', 'NOT_RUN'])],
   ['PPK-015 021 and 022 ratchets are exact PASS', p15.status === 'PASS' && p15.files === 555
-    && p15.sourceSha256 === 'a7a93a941f9614c3833cd0b2774a8bb738ea3501284e00cd370891eed2d1fdc8' && p15.findings === 0
+    && p15.sourceSha256 === 'b317ddff292dcc5666f725a43f3425319a1b28fdfd09b6691bb64d3f9b495e6a' && p15.findings === 0
     && p21.status === 'PASS' && p21.files === 555 && p21.surfaces === 873 && p21.sha256 === '843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc'
     && p22.status === 'PASS' && p22.files === 555 && p22.surfaces === 392 && p22.sha256 === 'cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c'],
   ['production signing external manual evidence and requirement acceptance remain closed', scope.truth?.productionSigningTrustProvisioned === false

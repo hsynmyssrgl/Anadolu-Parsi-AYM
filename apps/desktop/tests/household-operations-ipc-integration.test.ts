@@ -143,6 +143,22 @@ describe('33-T household operations IPC boundary', () => {
         { personId: 'person-33-t-member', basisPoints: 4_999 }
       ]
     }])).toMatchObject({ accepted: false });
+    for (const incomplete of [
+      { kind:'stock_item', title:'Süt', stockCategory:'food', quantity:1, unit:'litre' },
+      { kind:'meal_plan', title:'Akşam öğünü', parentItemId:'recipe-33-t' },
+      { kind:'routine', title:'Haftalık düzen', assignedPersonId:OWNER_PERSON_ID },
+      { kind:'bill', title:'Elektrik', amountMinor:1_000, currency:'TRY' },
+      { kind:'pet_care', title:'Mavi için su', opaquePetReference:'pet-local-mavi' },
+      { kind:'guest_access', title:'Akşam misafiri', guestLabel:'Misafir', accessArea:'Salon',
+        scheduledAt:'2026-08-16T20:00:00.000Z', dueAt:'2026-08-16T19:00:00.000Z' }
+    ]) {
+      expect(evaluateIpcIntegrationPolicy(HOUSEHOLD_OPERATIONS_IPC_CHANNELS.createItem, [{
+        expectedCenterRevision:0,
+        clientOperationId:`operation-household-incomplete-${String(incomplete.kind)}`,
+        itemId:`household-item-incomplete-${String(incomplete.kind)}`,
+        ...incomplete
+      }])).toMatchObject({ accepted:false });
+    }
     expect(evaluateIpcIntegrationPolicy('householdOperations:future', []))
       .toMatchObject({ accepted: false, reason: 'UNKNOWN_IPC_CHANNEL' });
   });

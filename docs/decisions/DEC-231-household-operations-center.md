@@ -10,6 +10,8 @@ Aile başına tek `household_operations_center` aggregate kullanılır. Sekiz al
 
 Alışveriş öğesi etkin listeye, öğün planı etkin tarife bağlanır. Tarif alerjenleri ile öğünün kaçınılan alerjenleri kesişirse işlem reddedilir. Ortak giderde etkin ve aynı ailedeki farklı kişilerin basis point toplamı tam 10.000 olmalıdır. Silme fiziksel değildir; immutable mutation ve current row ilişkisi korunarak soft-delete yapılır.
 
+Eksik iş akışı kaydı oluşturulamaz: gıda stoğu son kullanma tarihi, öğün planı zaman, ev işi/rutin etkin kişi ataması, rutin ve abonelik tekrar bilgisi, fatura/abonelik son ödeme tarihi, evcil hayvan bakım görevi ise zaman gerektirir. Güncelleme bu zorunlu alanları kaldıramaz ve etkin başlangıç-bitiş sırasını tersine çeviremez. IPC aynı semantik matrisi dispatch öncesinde uygular; DataStore entegrasyonu sekiz alanın tamamını tek gerçek SQLite/PEP zincirinde doğrular. Stok son kullanma tarihi renderer listesinde açık etiketle gösterilir.
+
 ## Yerel gerçeklik sınırı
 
 Bu paket dış alışveriş siparişi vermez, otomatik stok taraması yapmaz, ödeme çalıştırmaz, taşıyıcı sistemine bağlanmaz, uzaktan anahtar/erişim kontrol etmez ve evcil hayvan bakım hizmeti teslim etmez. Teslimatta yalnız kullanıcı tarafından girilen sağlayıcı etiketi ve son dört karakterlik görünüm ipucu tutulur; tam takip numarası yoktur. Misafir anahtar veya erişim kodu saklanmaz. Alerjen kesişim filtresi tıbbi veya beslenme tavsiyesi değildir.
