@@ -11,10 +11,12 @@ import {
   type UnifiedAuthorizedSearchSourcePort
 } from '@ppt/application';
 import {
+  FAMILY_AI_ASSISTANT_MAX_SUGGESTIONS,
   familyAiAssistantCenterId,
   familyAiAssistantTruth,
   type AiConsentView,
   type FamilyAiAssistantCenterView,
+  type FamilyAiAssistantKind,
   type FamilyAiAssistantModule,
   type FamilyAiAssistantPurpose,
   type FamilyAiAssistantSourceReferenceView,
@@ -55,10 +57,15 @@ export interface RepositoryBackedFamilyAiAssistantSourceDependencies {
 
 const standardModules=new Set<FamilyAiAssistantModule>(['family','event','archive','finance','health','life']);
 const normalized=(value:string):string=>value.normalize('NFKC').toLocaleLowerCase('tr-TR');
-const activeConsent=(consents:readonly AiConsentView[],purpose:FamilyAiAssistantPurpose,resourceType:string,
-  resourceId:string,at:string):boolean=>consents.some((consent)=>consent.purpose===purpose&&consent.resourceType===resourceType
-    &&(consent.resourceId===resourceId||consent.resourceId==='*')&&consent.status==='granted'
-    &&Date.parse(consent.startsAt)<=Date.parse(at)&&(!consent.endsAt||Date.parse(consent.endsAt)>=Date.parse(at)));
+const activeConsent=(consents:readonly AiConsentView[],accountId:string,purpose:string,resourceType:string,
+  resourceId:string,at:string):boolean=>{
+  const evaluatedAt=Date.parse(at);if(!Number.isFinite(evaluatedAt))return false;
+  const matching=consents.filter((consent)=>consent.accountId===accountId&&consent.purpose===purpose
+    &&consent.resourceType===resourceType&&(consent.resourceId===resourceId||consent.resourceId==='*')
+    &&Number.isFinite(Date.parse(consent.startsAt))&&Date.parse(consent.startsAt)<=evaluatedAt
+    &&(!consent.endsAt||(Number.isFinite(Date.parse(consent.endsAt))&&Date.parse(consent.endsAt)>=evaluatedAt)));
+  return !matching.some((consent)=>consent.status==='revoked')&&matching.some((consent)=>consent.status==='granted');
+};
 const sensitiveAllowed=(profiles:readonly SensitiveDataProfileView[],resourceType:string):boolean=>{
   const category=resourceType==='finance_record'?'finance':resourceType==='health_record'?'health':undefined;
   return category===undefined||profiles.find((profile)=>profile.category===category)?.aiProcessing.effectiveStatus==='granted';
@@ -67,13 +74,18 @@ const sensitiveAllowed=(profiles:readonly SensitiveDataProfileView[],resourceTyp
 export class RepositoryBackedFamilyAiAssistantSourcePort implements FamilyAiAssistantSourcePort {
   public constructor(private readonly dependencies:RepositoryBackedFamilyAiAssistantSourceDependencies){}
   public async loadAuthorizedCandidates(context:LifeApplicationContext,input:{readonly purpose:FamilyAiAssistantPurpose;
+    readonly kind:FamilyAiAssistantKind;
     readonly modules:readonly FamilyAiAssistantModule[];readonly query?:string})
   :ReturnType<FamilyAiAssistantSourcePort['loadAuthorizedCandidates']>{
     try{
       const requestedStandard=input.modules.filter((module)=>standardModules.has(module)) as UnifiedAuthorizedSearchModule[];
+      const needsSensitiveProfiles=input.modules.includes('finance')||input.modules.includes('health');
+      const profilesPromise=needsSensitiveProfiles
+        ?Promise.resolve().then(()=>this.dependencies.listSensitiveProfiles()).catch(()=>[])
+        :Promise.resolve([]);
       const [standard,consents,profiles,ocr,household,places]=await Promise.all([
         requestedStandard.length?this.dependencies.unifiedSource.loadAuthorizedCandidates(context,requestedStandard):Promise.resolve(ok([])),
-        this.dependencies.listConsents(),this.dependencies.listSensitiveProfiles(),
+        this.dependencies.listConsents(),profilesPromise,
         input.modules.includes('ocr')?this.dependencies.loadOcrCenter():Promise.resolve(undefined),
         input.modules.includes('household')?this.dependencies.loadHouseholdCenter():Promise.resolve(undefined),
         input.modules.includes('places')&&context.actor.personId?this.dependencies.loadPlacesCenter(context.actor.personId):Promise.resolve(undefined)
@@ -87,13 +99,14 @@ export class RepositoryBackedFamilyAiAssistantSourcePort implements FamilyAiAssi
           occurredAt:job.updatedAt}))??[]),
         ...(household?.items.filter((item)=>item.status!=='deleted').map((item)=>({module:'household' as const,
           resourceType:'household_operation_item' as const,resourceId:item.id,searchableText:[item.title,item.kind,item.area],
-          occurredAt:item.updatedAt}))??[]),
+          occurredAt:item.dueAt??item.scheduledAt??item.expiresAt??item.updatedAt}))??[]),
         ...(places?.items.filter((item)=>item.status!=='deleted').map((item)=>({module:'places' as const,
           resourceType:'places_travel_item' as const,resourceId:item.id,searchableText:[item.title,item.kind,item.area],
-          occurredAt:item.updatedAt}))??[])
+          occurredAt:item.startsAt??item.updatedAt}))??[])
       ];
       const at=this.dependencies.now();const queryTokens=input.query?.normalize('NFKC').trim().toLocaleLowerCase('tr-TR').split(/\s+/u)??[];
-      return ok(Object.freeze(candidates.filter((candidate)=>activeConsent(consents,input.purpose,candidate.resourceType,candidate.resourceId,at)
+      return ok(Object.freeze(candidates.filter((candidate)=>input.modules.includes(candidate.module)
+        &&activeConsent(consents,context.actor.userId,input.purpose,candidate.resourceType,candidate.resourceId,at)
         &&sensitiveAllowed(profiles,candidate.resourceType)
         &&(queryTokens.length===0||queryTokens.every((token)=>candidate.searchableText.some((text)=>normalized(text).includes(token)))))
         .sort((left,right)=>(right.occurredAt??'').localeCompare(left.occurredAt??'')
@@ -107,17 +120,22 @@ export class RepositoryBackedFamilyAiAssistantSourcePort implements FamilyAiAssi
 const keyFor=(context:LifeApplicationContext):FamilyAiAssistantCenterKey=>({familyId:context.familyId,
   accountId:context.actor.userId,actorPersonId:context.actor.personId!,ownerPersonId:context.actor.personId!,
   centerId:familyAiAssistantCenterId(context.familyId,context.actor.personId!)});
-const sourceConsented=(consents:readonly AiConsentView[],purpose:FamilyAiAssistantPurpose,
-  source:FamilyAiAssistantSourceReferenceView,at:string):boolean=>activeConsent(consents,purpose,source.resourceType,source.resourceId,at);
-const sensitiveConsentActive=(consents:readonly AiConsentView[],source:FamilyAiAssistantSourceReferenceView,at:string):boolean=>{
+const sourceConsented=(consents:readonly AiConsentView[],accountId:string,purpose:FamilyAiAssistantPurpose,
+  source:FamilyAiAssistantSourceReferenceView,at:string):boolean=>activeConsent(consents,accountId,purpose,source.resourceType,source.resourceId,at);
+const sensitiveConsentActive=(consents:readonly AiConsentView[],accountId:string,source:FamilyAiAssistantSourceReferenceView,at:string):boolean=>{
   const category=source.resourceType==='finance_record'?'finance':source.resourceType==='health_record'?'health':undefined;
-  return category===undefined||consents.some((consent)=>consent.purpose==='sensitive_processing'
-    &&consent.resourceType==='sensitive_data_profile'&&consent.resourceId===category&&consent.status==='granted'
-    &&Date.parse(consent.startsAt)<=Date.parse(at)&&(!consent.endsAt||Date.parse(consent.endsAt)>=Date.parse(at)));
+  if(category===undefined)return true;const evaluatedAt=Date.parse(at);
+  const matching=consents.filter((consent)=>consent.accountId===accountId&&consent.purpose==='sensitive_processing'
+    &&consent.resourceType==='sensitive_data_profile'&&consent.resourceId===category
+    &&Number.isFinite(Date.parse(consent.startsAt))&&Date.parse(consent.startsAt)<=evaluatedAt
+    &&(!consent.endsAt||(Number.isFinite(Date.parse(consent.endsAt))&&Date.parse(consent.endsAt)>=evaluatedAt)));
+  if(matching.some((consent)=>consent.status==='revoked'))return false;
+  return matching.some((consent)=>{if(consent.status!=='granted'||!consent.endsAt)return false;
+    const duration=Date.parse(consent.endsAt)-Date.parse(consent.startsAt);return duration>=15*60_000&&duration<=43_200*60_000;});
 };
-const allConsented=(consents:readonly AiConsentView[],purpose:FamilyAiAssistantPurpose,
+const allConsented=(consents:readonly AiConsentView[],accountId:string,purpose:FamilyAiAssistantPurpose,
   sources:readonly FamilyAiAssistantSourceReferenceView[],at:string):boolean=>sources.every((source)=>
-    sourceConsented(consents,purpose,source,at)&&sensitiveConsentActive(consents,source,at));
+    sourceConsented(consents,accountId,purpose,source,at)&&sensitiveConsentActive(consents,accountId,source,at));
 
 export class RepositoryBackedFamilyAiAssistantQueryPort implements FamilyAiAssistantQueryPort {
   readonly #runner:RepositoryBackedLifePolicyTransactionRunner;
@@ -130,11 +148,20 @@ export class RepositoryBackedFamilyAiAssistantQueryPort implements FamilyAiAssis
         message:'Aile asistanı kişi bağlı oturum gerektirir.',category:'authorization',correlationId:context.correlationId}));
       const snapshot=this.dependencies.familyAiAssistantRepository.loadCenter(repository,keyFor(context));if(!snapshot.ok)return snapshot;
       const listed=this.dependencies.aiConsentRepository.list(repository,context.actor.userId);if(!listed.ok)return listed;
-      const visible=snapshot.value.suggestions.filter((suggestion)=>allConsented(listed.value,suggestion.purpose,suggestion.sources,repository.occurredAt));
+      const visible=snapshot.value.suggestions.filter((suggestion)=>allConsented(listed.value,context.actor.userId,
+        suggestion.purpose,suggestion.sources,repository.occurredAt));
+      const inactiveConsentSuggestions=snapshot.value.suggestions.filter((suggestion)=>suggestion.status==='pending_confirmation'
+        &&!allConsented(listed.value,context.actor.userId,suggestion.purpose,suggestion.sources,repository.occurredAt))
+        .map((suggestion)=>Object.freeze({id:suggestion.id,revision:suggestion.revision,updatedAt:suggestion.updatedAt}));
+      const used=snapshot.value.suggestions.length;
       return ok(Object.freeze({schemaVersion:1 as const,centerId:keyFor(context).centerId,ownerPersonId:context.actor.personId,
         suggestions:Object.freeze(visible.map(({familyId:_family,stateFingerprint:_state,lastMutationId:_mutation,
           sourceFingerprint:_sourceFingerprint,...view})=>Object.freeze(view))),
-        hiddenAfterConsentRevocationCount:snapshot.value.suggestions.length-visible.length,truth:familyAiAssistantTruth,generatedAt:occurredAt}));
+        inactiveConsentSuggestions:Object.freeze(inactiveConsentSuggestions),
+        hiddenAfterConsentRevocationCount:snapshot.value.suggestions.length-visible.length,
+        suggestionCapacity:Object.freeze({maximum:FAMILY_AI_ASSISTANT_MAX_SUGGESTIONS,used,
+          remaining:FAMILY_AI_ASSISTANT_MAX_SUGGESTIONS-used,limitReached:used>=FAMILY_AI_ASSISTANT_MAX_SUGGESTIONS}),
+        truth:familyAiAssistantTruth,generatedAt:occurredAt}));
     });
   }
 }
@@ -147,7 +174,7 @@ class RepositoryBackedFamilyAiAssistantWriteScope implements FamilyAiAssistantWr
   public findMutation(key:FamilyAiAssistantCenterKey,clientOperationId:string){return this.dependencies.familyAiAssistantRepository.findMutationByClientOperationId(this.repository,key,clientOperationId);}
   public revalidateSourceConsent(purpose:FamilyAiAssistantPurpose,sources:readonly FamilyAiAssistantSourceReferenceView[]){
     const consents=this.dependencies.aiConsentRepository.list(this.repository,this.context.actor.userId);
-    return consents.ok?ok(allConsented(consents.value,purpose,sources,this.repository.occurredAt)):consents;
+    return consents.ok?ok(allConsented(consents.value,this.context.actor.userId,purpose,sources,this.repository.occurredAt)):consents;
   }
   public insertMutation(row:Parameters<FamilyAiAssistantWriteScope['insertMutation']>[0]){return this.dependencies.familyAiAssistantRepository.insertMutation(this.repository,row);}
   public insertSuggestion(row:Parameters<FamilyAiAssistantWriteScope['insertSuggestion']>[0]){return this.dependencies.familyAiAssistantRepository.insertSuggestion(this.repository,row);}

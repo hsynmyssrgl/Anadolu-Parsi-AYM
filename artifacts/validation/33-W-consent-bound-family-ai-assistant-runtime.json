@@ -6,8 +6,8 @@
   "governanceState": "PLANNED",
   "countsAsRequirementPass": false,
   "targetedTestFilesPassed": 5,
-  "targetedTestsPassed": 20,
-  "migration101Sha256": "3758e4c795b59e09b7701dbf6dd3b89c6717506be8e4ee9cc13b8ba20cdf3715",
+  "targetedTestsPassed": 26,
+  "migration101Sha256": "ef3790fad5f64de7bbd089d09a835dcb302092d64ccef6abb85e2105fbab2b5b",
   "ppk021": {
     "status": "PASS",
     "productionSourceZones": 18,
@@ -63,7 +63,7 @@
       "status": "PASS"
     },
     {
-      "name": "local test result meets exact 5/20 ratchet",
+      "name": "local test result meets exact 5/26 ratchet",
       "status": "PASS"
     },
     {
@@ -99,5 +99,5 @@
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-16T05:48:22.612Z"
+  "generatedAt": "2026-08-16T09:27:30.343Z"
 }

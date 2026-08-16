@@ -24,6 +24,23 @@ export const FAMILY_AI_ASSISTANT_MODULES = Object.freeze([
 ] as const);
 export type FamilyAiAssistantModule = (typeof FAMILY_AI_ASSISTANT_MODULES)[number];
 
+export const FAMILY_AI_ASSISTANT_MAX_SUGGESTIONS = 500 as const;
+
+const moduleSet=<T extends readonly FamilyAiAssistantModule[]>(...values:T):T=>Object.freeze(values) as T;
+
+export const FAMILY_AI_ASSISTANT_MODULES_BY_KIND: Readonly<Record<FamilyAiAssistantKind,
+  readonly FamilyAiAssistantModule[]>> = Object.freeze({
+  authorized_search:moduleSet('family','event','archive','finance','health','life'),
+  daily_summary:moduleSet('event','archive','finance','health','life','household','places'),
+  weekly_summary:moduleSet('event','archive','finance','health','life','household','places'),
+  reminder_review:moduleSet('event','archive','finance','health','life','household','places'),
+  emergency_bag:moduleSet('life','household','places'),meeting_agenda:moduleSet('family','event'),
+  ocr_classification:moduleSet('archive','ocr'),duplicate_record:moduleSet('archive','ocr'),
+  family_story:moduleSet('family','event','archive','places'),spending_review:moduleSet('finance','household'),
+  meal_plan:moduleSet('household'),shopping_list:moduleSet('household'),
+  plain_explanation:moduleSet('archive','health','life'),read_aloud:moduleSet('archive'),translation:moduleSet('archive')
+});
+
 export type FamilyAiAssistantPurpose = 'search'|'summary'|'recommendation'|'classification';
 export type FamilyAiSuggestionStatus = 'pending_confirmation'|'confirmed'|'dismissed';
 export type FamilyAiSuggestionReviewDecision = 'confirm'|'dismiss';
@@ -31,6 +48,12 @@ export type FamilyAiSuggestionReviewDecision = 'confirm'|'dismiss';
 export type FamilyAiAssistantSourceResourceType =
   | 'person'|'event'|'archive_item'|'finance_record'|'health_record'|'life_record'
   | 'local_ocr_job'|'household_operation_item'|'places_travel_item';
+
+export const FAMILY_AI_ASSISTANT_RESOURCE_TYPE_BY_MODULE: Readonly<Record<FamilyAiAssistantModule,
+  FamilyAiAssistantSourceResourceType>> = Object.freeze({
+  family:'person',event:'event',archive:'archive_item',finance:'finance_record',health:'health_record',life:'life_record',
+  ocr:'local_ocr_job',household:'household_operation_item',places:'places_travel_item'
+});
 
 export interface FamilyAiAssistantSourceReferenceView {
   readonly module: FamilyAiAssistantModule;
@@ -55,6 +78,13 @@ export interface FamilyAiSuggestionView {
   readonly dismissedAt?: IsoDateTime;
 }
 
+/** Content-free handle that lets the owner dismiss a suggestion after consent revocation. */
+export interface FamilyAiInactiveConsentSuggestionView {
+  readonly id: string;
+  readonly revision: number;
+  readonly updatedAt: IsoDateTime;
+}
+
 export interface FamilyAiAssistantTruthView {
   readonly localFirst: true;
   readonly authorizedSearchAvailableWithoutProvider: true;
@@ -69,6 +99,8 @@ export interface FamilyAiAssistantTruthView {
   readonly humanConfirmationRequired: true;
   readonly confirmationExecutesDownstreamAction: false;
   readonly sourceConsentRevalidated: true;
+  readonly explicitConsentRevocationOverridesBroaderGrant: true;
+  readonly confidenceRepresentsSourceCoverageOnly: true;
   readonly medicalFinancialOrEmergencyDecisionProvided: false;
 }
 
@@ -77,7 +109,14 @@ export interface FamilyAiAssistantCenterView {
   readonly centerId: string;
   readonly ownerPersonId: string;
   readonly suggestions: readonly FamilyAiSuggestionView[];
+  readonly inactiveConsentSuggestions: readonly FamilyAiInactiveConsentSuggestionView[];
   readonly hiddenAfterConsentRevocationCount: number;
+  readonly suggestionCapacity: {
+    readonly maximum: typeof FAMILY_AI_ASSISTANT_MAX_SUGGESTIONS;
+    readonly used: number;
+    readonly remaining: number;
+    readonly limitReached: boolean;
+  };
   readonly truth: FamilyAiAssistantTruthView;
   readonly generatedAt: IsoDateTime;
 }
@@ -136,5 +175,7 @@ export const familyAiAssistantTruth = Object.freeze({
   humanConfirmationRequired:true as const,
   confirmationExecutesDownstreamAction:false as const,
   sourceConsentRevalidated:true as const,
+  explicitConsentRevocationOverridesBroaderGrant:true as const,
+  confidenceRepresentsSourceCoverageOnly:true as const,
   medicalFinancialOrEmergencyDecisionProvided:false as const
 });

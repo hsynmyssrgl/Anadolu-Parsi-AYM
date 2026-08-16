@@ -30,10 +30,11 @@ export function FamilyAiAssistantPanel(){
   const pendingGenerate=useRef<PendingGenerate|undefined>(undefined);
   const pendingReviews=useRef(new Map<string,PendingReview>());
   const reload=async()=>{if(!window.pardus)return;setCenter(await window.pardus.getFamilyAiAssistantCenter());};
+  const refresh=async()=>{setError('');try{await reload();}catch(value){setError(value instanceof Error?value.message:'Aile asistanı yüklenemedi.');}};
   useEffect(()=>{void reload().catch(value=>setError(value instanceof Error?value.message:'Aile asistanı yüklenemedi.'));},[]);
   const generate=async()=>{
     if(!window.pardus)return;setBusy('generate');setError('');
-    const normalized=query.trim();const prior=pendingGenerate.current;
+    const normalized=kind==='authorized_search'?query.trim():'';const prior=pendingGenerate.current;
     const command=prior&&prior.kind===kind&&prior.query===(normalized||undefined)?prior:{
       clientOperationId:crypto.randomUUID(),suggestionId:crypto.randomUUID(),kind,...(normalized?{query:normalized}:{})
     };
@@ -42,7 +43,7 @@ export function FamilyAiAssistantPanel(){
     catch(value){setError(value instanceof Error?value.message:'Öneri üretilemedi; aynı işlem kimliğiyle yeniden deneyebilirsiniz.');}
     finally{setBusy('');}
   };
-  const review=async(suggestion:FamilyAiSuggestionView,decision:FamilyAiSuggestionReviewDecision)=>{
+  const review=async(suggestion:Pick<FamilyAiSuggestionView,'id'|'revision'>,decision:FamilyAiSuggestionReviewDecision)=>{
     if(!window.pardus)return;const key=`${suggestion.id}:${decision}`;setBusy(key);setError('');
     const prior=pendingReviews.current.get(key);const command=prior?.expectedRevision===suggestion.revision?prior:{
       clientOperationId:crypto.randomUUID(),suggestionId:suggestion.id,expectedRevision:suggestion.revision,decision
@@ -53,15 +54,18 @@ export function FamilyAiAssistantPanel(){
     finally{setBusy('');}
   };
   return <Surface className="family-ai-assistant" aria-labelledby="family-ai-assistant-title">
-    <div className="panel-heading"><div><span className="eyebrow">33‑W · onaya bağlı yerel yardımcı</span><h2 id="family-ai-assistant-title">Aile asistanı</h2><p>Yalnız açık izinli ve politika süzgecinden geçen yerel kaynaklardan, otomatik işlem yapmayan inceleme önerileri üretir.</p></div><Button disabled={!!busy} onClick={()=>void reload()}>Yenile</Button></div>
+    <div className="panel-heading"><div><span className="eyebrow">33‑W · onaya bağlı yerel yardımcı</span><h2 id="family-ai-assistant-title">Aile asistanı</h2><p>Yalnız açık izinli ve politika süzgecinden geçen yerel kaynaklardan, otomatik işlem yapmayan inceleme önerileri üretir.</p></div><Button disabled={!!busy} onClick={()=>void refresh()}>Yenile</Button></div>
     <div className="family-ai-truth" aria-label="Aile asistanı doğruluk sınırları"><strong>Yerel ve onaylı çalışma sınırı</strong><span>Ağ, bulut veya model çıkarımı kullanılmaz. Öneriyi onaylamak ödeme, rezervasyon, sağlık, acil durum ya da başka kalıcı bir işlemi yürütmez.</span><span>Kaynak izni geri çekilirse öneri görünmez olur; finans ve sağlık için ayrıca süreli hassas veri onayı gerekir.</span></div>
     {error&&<StatusMessage tone="danger">{error}</StatusMessage>}
     <div className="family-ai-compose">
       <label>Öneri türü<select value={kind} onChange={event=>{setKind(event.target.value as FamilyAiAssistantKind);pendingGenerate.current=undefined;}}>{FAMILY_AI_ASSISTANT_KINDS.map(value=><option key={value} value={value}>{kindLabels[value]}</option>)}</select></label>
-      <label>Yerel arama ifadesi (isteğe bağlı)<input value={query} minLength={2} maxLength={80} onChange={event=>{setQuery(event.target.value);pendingGenerate.current=undefined;}} placeholder="Örneğin: yaklaşan aile işleri"/></label>
-      <Button tone="primary" disabled={!!busy||(query.trim().length===1)} onClick={()=>void generate()}>{busy==='generate'?'Hazırlanıyor…':'İnceleme önerisi hazırla'}</Button>
+      {kind==='authorized_search'&&<label>Yerel arama ifadesi (zorunlu)<input value={query} minLength={2} maxLength={80} required onChange={event=>{setQuery(event.target.value);pendingGenerate.current=undefined;}} placeholder="Örneğin: yaklaşan aile işleri"/></label>}
+      <Button tone="primary" disabled={!!busy||center?.suggestionCapacity.limitReached===true
+        ||(kind==='authorized_search'&&query.trim().length<2)} onClick={()=>void generate()}>{busy==='generate'?'Hazırlanıyor…':'İnceleme önerisi hazırla'}</Button>
     </div>
-    <div className="family-ai-summary"><strong>{center?.suggestions.length??0} görünür öneri</strong><span>{center?.hiddenAfterConsentRevocationCount??0} öneri, kaynak izni geri çekildiği için gizli</span></div>
-    <div className="family-ai-list">{!center?<p>Yerel merkez yükleniyor…</p>:center.suggestions.length===0?<EmptyState title="Görünür öneri yok" body="Önce ilgili kayıtlar için amaç bazlı AI onayı verin; ardından burada yerel bir inceleme önerisi hazırlayın."/>:center.suggestions.map(suggestion=><article key={suggestion.id} className="family-ai-card"><div><span className="eyebrow">{kindLabels[suggestion.kind]} · %{(suggestion.confidenceBasisPoints/100).toLocaleString('tr-TR')}</span><h3>{suggestion.title}</h3><p>{suggestion.explanation}</p><small>{statusLabels[suggestion.status]} · {suggestion.sources.length} içeriksiz kaynak bağı · sürüm {suggestion.revision}</small></div>{suggestion.status==='pending_confirmation'&&<div className="button-row"><Button tone="primary" disabled={!!busy} onClick={()=>void review(suggestion,'confirm')}>{busy===`${suggestion.id}:confirm`?'Kaydediliyor…':'İnceledim, onayla'}</Button><Button disabled={!!busy} onClick={()=>void review(suggestion,'dismiss')}>{busy===`${suggestion.id}:dismiss`?'Kaydediliyor…':'Reddet'}</Button></div>}</article>)}</div>
+    <div className="family-ai-summary"><strong>{center?.suggestions.length??0} görünür öneri</strong><span>{center?.hiddenAfterConsentRevocationCount??0} öneri, kaynak izni artık etkin olmadığı için gizli</span><span>{center?`${center.suggestionCapacity.remaining}/${center.suggestionCapacity.maximum} güvenli yerel kapasite kaldı`:'Kapasite hesaplanıyor'}</span></div>
+    {center?.suggestionCapacity.limitReached&&<StatusMessage tone="danger">Güvenli yerel öneri kapasitesine ulaşıldı; yeni öneri üretimi fail‑closed kapatıldı.</StatusMessage>}
+    <div className="family-ai-list">{!center?<p>Yerel merkez yükleniyor…</p>:center.suggestions.length===0?<EmptyState title="Görünür öneri yok" body="Önce ilgili kayıtlar için amaç bazlı AI onayı verin; ardından burada yerel bir inceleme önerisi hazırlayın."/>:center.suggestions.map(suggestion=><article key={suggestion.id} className="family-ai-card"><div><span className="eyebrow">{kindLabels[suggestion.kind]} · kaynak kapsam göstergesi %{(suggestion.confidenceBasisPoints/100).toLocaleString('tr-TR')}</span><h3>{suggestion.title}</h3><p>{suggestion.explanation}</p><small>{statusLabels[suggestion.status]} · {suggestion.sources.length} içeriksiz kaynak bağı · sürüm {suggestion.revision}</small></div>{suggestion.status==='pending_confirmation'&&<div className="button-row"><Button tone="primary" disabled={!!busy} onClick={()=>void review(suggestion,'confirm')}>{busy===`${suggestion.id}:confirm`?'Kaydediliyor…':'İnceledim, onayla'}</Button><Button disabled={!!busy} onClick={()=>void review(suggestion,'dismiss')}>{busy===`${suggestion.id}:dismiss`?'Kaydediliyor…':'Reddet'}</Button></div>}</article>)}</div>
+    {center&&center.inactiveConsentSuggestions.length>0&&<section aria-label="Kaynak izni artık etkin olmayan öneriler"><h3>Kaynak izni artık etkin olmayan öneriler</h3><p>Kaynak ayrıntıları gizlidir; geri çekilmiş veya süresi dolmuş izne bağlı bu içeriksiz kayıtları yalnız reddedebilirsiniz.</p><div className="family-ai-list">{center.inactiveConsentSuggestions.map(suggestion=><article key={suggestion.id} className="family-ai-card"><div><strong>Gizli öneri</strong><small>Kaynak izni artık etkin değil · sürüm {suggestion.revision}</small></div><Button disabled={!!busy} onClick={()=>void review(suggestion,'dismiss')}>{busy===`${suggestion.id}:dismiss`?'Kaydediliyor…':'Gizli öneriyi reddet'}</Button></article>)}</div></section>}
   </Surface>;
 }

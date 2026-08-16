@@ -14140,12 +14140,14 @@ CREATE TABLE family_ai_suggestion_mutations (
   id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
   family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
-  suggestion_id TEXT NOT NULL CHECK(length(trim(suggestion_id)) BETWEEN 2 AND 256),
+  suggestion_id TEXT NOT NULL CHECK(length(trim(suggestion_id)) BETWEEN 2 AND 160
+    AND substr(suggestion_id,1,1) GLOB '[A-Za-z0-9]' AND suggestion_id NOT GLOB '*[^A-Za-z0-9._:-]*'),
   actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
   actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   mutation_kind TEXT NOT NULL CHECK(mutation_kind IN ('suggestion_generate','suggestion_confirm','suggestion_dismiss')),
   purpose TEXT NOT NULL CHECK(purpose IN ('search','summary','recommendation','classification')),
-  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 256),
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 160
+    AND substr(client_operation_id,1,1) GLOB '[A-Za-z0-9]' AND client_operation_id NOT GLOB '*[^A-Za-z0-9._:-]*'),
   request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
   expected_revision INTEGER NOT NULL CHECK(expected_revision>=0),
   revision INTEGER NOT NULL CHECK(revision=expected_revision+1),
@@ -14171,7 +14173,8 @@ CREATE INDEX idx_family_ai_suggestion_mutations_owner
 ON family_ai_suggestion_mutations(family_id,owner_person_id,occurred_at DESC,id);
 
 CREATE TABLE family_ai_suggestions (
-  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 256),
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 160
+    AND substr(id,1,1) GLOB '[A-Za-z0-9]' AND id NOT GLOB '*[^A-Za-z0-9._:-]*'),
   family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   kind TEXT NOT NULL CHECK(kind IN (
@@ -14259,11 +14262,23 @@ WHEN NOT EXISTS(
     WHERE json_type(source.value)<>'object'
       OR json_extract(source.value,'$.module') NOT IN ('family','event','archive','finance','health','life','ocr','household','places')
       OR json_extract(source.value,'$.resourceType') NOT IN ('person','event','archive_item','finance_record','health_record','life_record','local_ocr_job','household_operation_item','places_travel_item')
+      OR NOT ((json_extract(source.value,'$.module')='family' AND json_extract(source.value,'$.resourceType')='person')
+        OR (json_extract(source.value,'$.module')='event' AND json_extract(source.value,'$.resourceType')='event')
+        OR (json_extract(source.value,'$.module')='archive' AND json_extract(source.value,'$.resourceType')='archive_item')
+        OR (json_extract(source.value,'$.module')='finance' AND json_extract(source.value,'$.resourceType')='finance_record')
+        OR (json_extract(source.value,'$.module')='health' AND json_extract(source.value,'$.resourceType')='health_record')
+        OR (json_extract(source.value,'$.module')='life' AND json_extract(source.value,'$.resourceType')='life_record')
+        OR (json_extract(source.value,'$.module')='ocr' AND json_extract(source.value,'$.resourceType')='local_ocr_job')
+        OR (json_extract(source.value,'$.module')='household' AND json_extract(source.value,'$.resourceType')='household_operation_item')
+        OR (json_extract(source.value,'$.module')='places' AND json_extract(source.value,'$.resourceType')='places_travel_item'))
       OR typeof(json_extract(source.value,'$.resourceId'))<>'text'
-      OR length(trim(json_extract(source.value,'$.resourceId'))) NOT BETWEEN 2 AND 256
+      OR length(trim(json_extract(source.value,'$.resourceId'))) NOT BETWEEN 2 AND 160
+      OR substr(json_extract(source.value,'$.resourceId'),1,1) NOT GLOB '[A-Za-z0-9]'
+      OR json_extract(source.value,'$.resourceId') GLOB '*[^A-Za-z0-9._:-]*'
       OR (SELECT count(*) FROM json_each(source.value))<>3
   )
   OR (SELECT count(*) FROM json_each(NEW.sources_json))<>(SELECT count(DISTINCT json_extract(value,'$.resourceType')||':'||json_extract(value,'$.resourceId')) FROM json_each(NEW.sources_json))
+  OR (SELECT count(*) FROM family_ai_suggestions WHERE family_id=NEW.family_id AND owner_person_id=NEW.owner_person_id)>=500
 BEGIN SELECT RAISE(ABORT,'33-W family AI suggestion requires exact mutation and bounded content-minimized sources'); END;
 
 CREATE TRIGGER trg_33w_family_ai_suggestion_update

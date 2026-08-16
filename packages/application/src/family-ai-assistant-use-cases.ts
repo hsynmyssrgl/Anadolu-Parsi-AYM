@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import {
   ERROR_CODES,
+  asCorrelationId,
   asEventId,
   asIsoDateTime,
   asPersonId,
@@ -13,7 +14,9 @@ import {
 import type { DomainEvent } from '@ppt/events';
 import {
   FAMILY_AI_ASSISTANT_KINDS,
+  FAMILY_AI_ASSISTANT_MODULES_BY_KIND,
   FAMILY_AI_ASSISTANT_MODULES,
+  FAMILY_AI_ASSISTANT_RESOURCE_TYPE_BY_MODULE,
   familyAiAssistantCenterId,
   familyAiAssistantPurposeForKind,
   type FamilyAiAssistantCenterView,
@@ -45,6 +48,7 @@ export interface FamilyAiAssistantAuthorizedCandidate {
 
 export interface FamilyAiAssistantSourcePort {
   loadAuthorizedCandidates(context:LifeApplicationContext,input:{
+    readonly kind:FamilyAiAssistantKind;
     readonly purpose:FamilyAiAssistantPurpose;
     readonly modules:readonly FamilyAiAssistantModule[];
     readonly query?:string;
@@ -73,11 +77,31 @@ export interface FamilyAiAssistantUnitOfWork {
     operation:(scope:FamilyAiAssistantWriteScope)=>Result<T,AppError>):Promise<Result<T,AppError>>;
 }
 
-const SAFE_ID=/^[A-Za-z0-9][A-Za-z0-9._:-]{1,255}$/u;
+const SAFE_ID=/^[A-Za-z0-9][A-Za-z0-9._:-]{1,159}$/u;
 const CONTROL=/[\p{Cc}\p{Cf}\p{Cs}]/u;
 const kinds=new Set<string>(FAMILY_AI_ASSISTANT_KINDS);
 const modules=new Set<string>(FAMILY_AI_ASSISTANT_MODULES);
-const hash=(value:unknown):string=>createHash('sha256').update(JSON.stringify(value),'utf8').digest('hex');
+const canonicalJson=(value:unknown):string=>{
+  if(value===null||typeof value==='string'||typeof value==='boolean')return JSON.stringify(value);
+  if(typeof value==='number')return Number.isFinite(value)?JSON.stringify(value):'null';
+  if(Array.isArray(value))return `[${value.map(canonicalJson).join(',')}]`;
+  if(typeof value==='object'){
+    const record=value as Record<string,unknown>;
+    return `{${Object.keys(record).filter((key)=>record[key]!==undefined).sort()
+      .map((key)=>`${JSON.stringify(key)}:${canonicalJson(record[key])}`).join(',')}}`;
+  }
+  return JSON.stringify(null);
+};
+const hash=(value:unknown):string=>createHash('sha256').update(canonicalJson(value),'utf8').digest('hex');
+const exactRecord=(value:unknown,required:readonly string[],optional:readonly string[]=[]):boolean=>{
+  if(!value||typeof value!=='object'||Array.isArray(value))return false;
+  const prototype=Object.getPrototypeOf(value);if(prototype!==Object.prototype&&prototype!==null)return false;
+  const keys=Reflect.ownKeys(value);if(keys.some((key)=>typeof key==='symbol'))return false;
+  const allowed=new Set([...required,...optional]);if(keys.some((key)=>!allowed.has(String(key))))return false;
+  if(required.some((key)=>!Object.prototype.hasOwnProperty.call(value,key)))return false;
+  return keys.every((key)=>{const descriptor=Object.getOwnPropertyDescriptor(value,key);
+    return Boolean(descriptor&&!descriptor.get&&!descriptor.set&&'value' in descriptor);});
+};
 const error=(context:LifeApplicationContext,code:typeof ERROR_CODES.CORE_INVALID_ARGUMENT|typeof ERROR_CODES.RESOURCE_CONFLICT
   |typeof ERROR_CODES.RESOURCE_NOT_FOUND|typeof ERROR_CODES.AUTHORIZATION_DENIED,message:string,
 category:'validation'|'conflict'|'not_found'|'authorization'):AppError=>createAppError({code,message,category,correlationId:context.correlationId});
@@ -98,34 +122,31 @@ const writeIntent=(suggestionId:string,action:'create'|'update',ownerPersonId?:s
   capability:'family.write',resourceType:'family_ai_suggestion',resourceId:suggestionId,purpose:'general',
   ...(action==='create'&&ownerPersonId?{ownerPersonId:asPersonId(ownerPersonId),privacy:'private' as const}:{})});
 
-const defaultModules:Readonly<Record<FamilyAiAssistantKind,readonly FamilyAiAssistantModule[]>>=Object.freeze({
-  authorized_search:['family','event','archive','finance','health','life'],
-  daily_summary:['event','archive','finance','health','life','household','places'],
-  weekly_summary:['event','archive','finance','health','life','household','places'],
-  reminder_review:['event','finance','health','life','household','places'],
-  emergency_bag:['life','household','places'],meeting_agenda:['family','event'],
-  ocr_classification:['archive','ocr'],duplicate_record:['archive','ocr'],family_story:['family','event','archive','places'],
-  spending_review:['finance','household'],meal_plan:['household'],shopping_list:['household'],
-  plain_explanation:['archive','health','life'],read_aloud:['archive'],translation:['archive']
-});
-
 const canonicalModules=(context:LifeApplicationContext,kind:FamilyAiAssistantKind,input:unknown):Result<readonly FamilyAiAssistantModule[],AppError>=>{
-  if(input===undefined)return ok(defaultModules[kind]);
+  const allowed=FAMILY_AI_ASSISTANT_MODULES_BY_KIND[kind];
+  if(input===undefined)return ok(allowed);
   if(!Array.isArray(input)||input.length<1||input.length>FAMILY_AI_ASSISTANT_MODULES.length
-    ||input.some((item)=>typeof item!=='string'||!modules.has(item))||new Set(input).size!==input.length)
+    ||input.some((item)=>typeof item!=='string'||!modules.has(item)||!allowed.includes(item as FamilyAiAssistantModule))
+    ||new Set(input).size!==input.length)
     return err(invalid(context,'Aile asistanı kaynak modülleri geçersizdir.'));
   return ok(Object.freeze([...input] as FamilyAiAssistantModule[]));
 };
-const query=(context:LifeApplicationContext,value:unknown):Result<string|undefined,AppError>=>{
-  if(value===undefined||value==='')return ok(undefined);
+const query=(context:LifeApplicationContext,kind:FamilyAiAssistantKind,value:unknown):Result<string|undefined,AppError>=>{
+  if(kind!=='authorized_search')return value===undefined?ok(undefined)
+    :err(invalid(context,'Arama ifadesi yalnız izinli yerel arama türünde kullanılabilir.'));
+  if(value===undefined||value==='')return err(invalid(context,'İzinli yerel arama için arama ifadesi zorunludur.'));
   if(typeof value!=='string')return err(invalid(context,'Aile asistanı sorgusu metin olmalıdır.'));
   const normalized=value.normalize('NFKC').trim().replace(/\s+/gu,' ');
   return normalized.length>=2&&normalized.length<=80&&!CONTROL.test(normalized)
     ?ok(normalized):err(invalid(context,'Aile asistanı sorgusu geçersizdir.'));
 };
 const candidateSafe=(candidate:FamilyAiAssistantAuthorizedCandidate):boolean=>modules.has(candidate.module)
+  &&candidate.resourceType===FAMILY_AI_ASSISTANT_RESOURCE_TYPE_BY_MODULE[candidate.module]
   &&SAFE_ID.test(candidate.resourceId)&&candidate.searchableText.length>=1&&candidate.searchableText.length<=12
-  &&candidate.searchableText.every((item)=>typeof item==='string'&&item.length<=1000&&!CONTROL.test(item));
+  &&candidate.searchableText.some((item)=>typeof item==='string'&&item.trim().length>0)
+  &&candidate.searchableText.every((item)=>typeof item==='string'&&item.length<=1000&&!CONTROL.test(item))
+  &&(candidate.occurredAt===undefined||(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u.test(candidate.occurredAt)
+    &&Number.isFinite(Date.parse(candidate.occurredAt))));
 
 const presentation:Readonly<Record<FamilyAiAssistantKind,{readonly title:string;readonly explanation:(count:number)=>string}>>=Object.freeze({
   authorized_search:{title:'İzinli yerel arama sonucu',explanation:(count)=>`${count} izinli yerel kaynak eşleşti; sonuçları kaynağından doğrulayın.`},
@@ -186,14 +207,25 @@ export class GenerateFamilyAiSuggestionUseCase {
   public async execute(input:{readonly context:LifeApplicationContext;readonly command:GenerateFamilyAiSuggestionInput})
   :Promise<Result<FamilyAiSuggestionMutationReceiptView,AppError>>{
     const {context,command}=input;if(!context.actor.personId)return err(denied(context,'Aile asistanı kişi bağlı oturum gerektirir.'));
+    if(!exactRecord(command,['clientOperationId','suggestionId','kind'],['modules','query']))
+      return err(invalid(context,'Aile asistanı üretim komutu yalnız izin verilen alanları taşımalıdır.'));
     if(!SAFE_ID.test(command.clientOperationId)||!SAFE_ID.test(command.suggestionId)||!kinds.has(command.kind))
       return err(invalid(context,'Aile asistanı işlem, öneri veya tür kimliği geçersizdir.'));
     const selected=canonicalModules(context,command.kind,command.modules);if(!selected.ok)return selected;
-    const normalizedQuery=query(context,command.query);if(!normalizedQuery.ok)return normalizedQuery;
+    const normalizedQuery=query(context,command.kind,command.query);if(!normalizedQuery.ok)return normalizedQuery;
     const purpose=familyAiAssistantPurposeForKind(command.kind);
-    const requestFingerprint=hash({command:{...command,modules:selected.value,query:normalizedQuery.value??null},purpose});
+    const requestFingerprint=hash({command:{clientOperationId:command.clientOperationId,suggestionId:command.suggestionId,
+      kind:command.kind,modules:selected.value,query:normalizedQuery.value??null},purpose});
+    const key=keyFor(context);if(!key.ok)return key;const intent=writeIntent(command.suggestionId,'create',context.actor.personId);
+    const preflightContext:LifeApplicationContext={...context,correlationId:asCorrelationId(hash({
+      correlationId:context.correlationId,slot:'family_ai_generate_replay'}))};
+    const preflight=await this.unitOfWork.execute(preflightContext,intent,(scope)=>{
+      const existing=scope.findMutation(key.value,command.clientOperationId);if(!existing.ok)return existing;
+      return replay(context,existing.value,requestFingerprint,'suggestion_generate',command.suggestionId);
+    });
+    if(!preflight.ok)return preflight;if(preflight.value)return ok(preflight.value);
     let loaded:Result<readonly FamilyAiAssistantAuthorizedCandidate[],AppError>;
-    try{loaded=await this.source.loadAuthorizedCandidates(context,{purpose,modules:selected.value,
+    try{loaded=await this.source.loadAuthorizedCandidates(context,{kind:command.kind,purpose,modules:selected.value,
       ...(normalizedQuery.value?{query:normalizedQuery.value}:{})});}catch{return err(denied(context,'İzinli aile asistanı kaynakları yüklenemedi.'));}
     if(!loaded.ok)return loaded;
     if(loaded.value.length<1||loaded.value.length>24||loaded.value.some((candidate)=>!candidateSafe(candidate)
@@ -201,8 +233,8 @@ export class GenerateFamilyAiSuggestionUseCase {
     const sources=canonicalFamilyAiAssistantSources(loaded.value.map(({module,resourceType,resourceId})=>({module,resourceType,resourceId})));
     if(new Set(sources.map((source)=>`${source.resourceType}:${source.resourceId}`)).size!==sources.length)
       return err(invalid(context,'Aile asistanı kaynak kümesi yinelenen kayıt içeriyor.'));
-    const sourceFingerprint=hash(sources);const key=keyFor(context);if(!key.ok)return key;
-    return this.unitOfWork.execute(context,writeIntent(command.suggestionId,'create',context.actor.personId),(scope)=>{
+    const sourceFingerprint=hash(sources);
+    return this.unitOfWork.execute(context,intent,(scope)=>{
       const existingMutation=scope.findMutation(key.value,command.clientOperationId);if(!existingMutation.ok)return existingMutation;
       const replayed=replay(context,existingMutation.value,requestFingerprint,'suggestion_generate',command.suggestionId);
       if(!replayed.ok||replayed.value)return replayed.ok?ok(replayed.value!):replayed;
@@ -232,6 +264,8 @@ export class ReviewFamilyAiSuggestionUseCase {
   public async execute(input:{readonly context:LifeApplicationContext;readonly command:ReviewFamilyAiSuggestionInput})
   :Promise<Result<FamilyAiSuggestionMutationReceiptView,AppError>>{
     const {context,command}=input;if(!context.actor.personId)return err(denied(context,'Aile asistanı kişi bağlı oturum gerektirir.'));
+    if(!exactRecord(command,['clientOperationId','suggestionId','expectedRevision','decision']))
+      return err(invalid(context,'Öneri inceleme komutu yalnız izin verilen alanları taşımalıdır.'));
     if(!SAFE_ID.test(command.clientOperationId)||!SAFE_ID.test(command.suggestionId)||!Number.isSafeInteger(command.expectedRevision)
       ||command.expectedRevision<1||!['confirm','dismiss'].includes(command.decision))return err(invalid(context,'Öneri inceleme komutu geçersizdir.'));
     const key=keyFor(context);if(!key.ok)return key;const mutationKind=command.decision==='confirm'?'suggestion_confirm':'suggestion_dismiss';

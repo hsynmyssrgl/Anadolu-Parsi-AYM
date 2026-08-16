@@ -11,9 +11,11 @@ const suggestion={id:SUGGESTION,ownerPersonId:OWNER,kind:'authorized_search',pur
 const truth={localFirst:true,authorizedSearchAvailableWithoutProvider:true,providerConfigured:false,networkUsed:false,cloudUsed:false,
   modelInferencePerformed:false,speechSynthesisPerformed:false,translationPerformed:false,ocrSuggestionAutomaticallyAccepted:false,
   durableActionPerformed:'not_performed',humanConfirmationRequired:true,confirmationExecutesDownstreamAction:false,
-  sourceConsentRevalidated:true,medicalFinancialOrEmergencyDecisionProvided:false} as const;
+  sourceConsentRevalidated:true,explicitConsentRevocationOverridesBroaderGrant:true,
+  confidenceRepresentsSourceCoverageOnly:true,medicalFinancialOrEmergencyDecisionProvided:false} as const;
 const center={schemaVersion:1,centerId:`family-ai-assistant:family-33-w:${OWNER}`,ownerPersonId:OWNER,suggestions:[suggestion],
-  hiddenAfterConsentRevocationCount:0,truth,generatedAt:NOW} as const;
+  inactiveConsentSuggestions:[],hiddenAfterConsentRevocationCount:0,
+  suggestionCapacity:{maximum:500,used:1,remaining:499,limitReached:false},truth,generatedAt:NOW} as const;
 const receipt={suggestionId:SUGGESTION,mutationKind:'suggestion_generate',previousRevision:0,revision:1,occurredAt:NOW,replayed:false,
   durableActionPerformed:'not_performed',humanConfirmationRecorded:false,networkUsed:false,cloudUsed:false} as const;
 
@@ -24,6 +26,12 @@ describe('33-W family AI assistant IPC boundary',()=>{
       suggestionId:SUGGESTION,kind:'authorized_search',modules:['event'],query:'aile toplantısı'}])).toEqual({accepted:true});
     expect(evaluateIpcIntegrationPolicy(FAMILY_AI_ASSISTANT_IPC_CHANNELS.review,[{clientOperationId:'operation-review-33-w',
       suggestionId:SUGGESTION,expectedRevision:1,decision:'confirm'}])).toEqual({accepted:true});
+    expect(evaluateIpcIntegrationPolicy(FAMILY_AI_ASSISTANT_IPC_CHANNELS.generate,[{clientOperationId:'operation-no-query-33-w',
+      suggestionId:SUGGESTION,kind:'authorized_search'}])).toMatchObject({accepted:false});
+    expect(evaluateIpcIntegrationPolicy(FAMILY_AI_ASSISTANT_IPC_CHANNELS.generate,[{clientOperationId:'operation-cross-module-33-w',
+      suggestionId:SUGGESTION,kind:'meeting_agenda',modules:['finance']}])).toMatchObject({accepted:false});
+    expect(evaluateIpcIntegrationPolicy(FAMILY_AI_ASSISTANT_IPC_CHANNELS.generate,[{clientOperationId:'operation-prompt-33-w',
+      suggestionId:SUGGESTION,kind:'daily_summary',query:'gizli istem'}])).toMatchObject({accepted:false});
   });
 
   it('rejects authority, path, credential and autonomous-action payloads',()=>{
@@ -39,6 +47,11 @@ describe('33-W family AI assistant IPC boundary',()=>{
     expect(evaluateIpcIntegrationResultPolicy(FAMILY_AI_ASSISTANT_IPC_CHANNELS.generate,receipt)).toEqual({accepted:true});
     for(const forged of [{...center,accountId:'private'},{...center,suggestions:[{...suggestion,sourceFingerprint:'a'.repeat(64)}]},
       {...center,suggestions:[{...suggestion,sources:[{...suggestion.sources[0],rawText:'private content'}]}]},
+      {...center,suggestions:[{...suggestion,ownerPersonId:'foreign-owner'}]},
+      {...center,suggestions:[{...suggestion,purpose:'summary'}]},
+      {...center,suggestions:[{...suggestion,sources:[{module:'event',resourceType:'health_record',resourceId:'forged'}]}]},
+      {...center,suggestionCapacity:{maximum:500,used:2,remaining:498,limitReached:false}},
+      {...center,inactiveConsentSuggestions:[{id:'revoked',revision:1,updatedAt:NOW}]},
       {...center,truth:{...truth,networkUsed:true}},{...center,truth:{...truth,providerConfigured:true}},
       {...center,truth:{...truth,confirmationExecutesDownstreamAction:true}},{...receipt,durableActionPerformed:'performed'}])
       expect(evaluateIpcIntegrationResultPolicy('mutationKind' in forged?FAMILY_AI_ASSISTANT_IPC_CHANNELS.generate:

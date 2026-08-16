@@ -27,6 +27,13 @@ describe('33-W family AI assistant renderer surface',()=>{
       expect(panel).not.toContain(forbidden);
   });
 
+  it('requires search text only for search and exposes content-free revoked-consent dismissal',()=>{
+    expect(panel).toContain("kind==='authorized_search'");expect(panel).toContain('Yerel arama ifadesi (zorunlu)');
+    expect(panel).toContain('required');expect(panel).toContain('inactiveConsentSuggestions');
+    expect(panel).toContain('Kaynak ayrıntıları gizlidir');expect(panel).toContain("review(suggestion,'dismiss')");
+    expect(panel).toContain('suggestionCapacity.limitReached');expect(panel).toContain('kaynak kapsam göstergesi');
+  });
+
   it('states consent, local-only and non-autonomous truth boundaries',()=>{
     for(const marker of ['Yalnız açık izinli','Ağ, bulut veya model çıkarımı kullanılmaz','ödem','rezervasyon','sağlık','acil durum',
       'Kaynak izni geri çekilirse','süreli hassas veri onayı'])expect(panel).toContain(marker);

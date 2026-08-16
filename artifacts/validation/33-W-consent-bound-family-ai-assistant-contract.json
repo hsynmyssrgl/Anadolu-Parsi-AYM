@@ -5,7 +5,7 @@
   "status": "PASS",
   "governanceState": "PLANNED",
   "countsAsRequirementPass": false,
-  "migration101Sha256": "3758e4c795b59e09b7701dbf6dd3b89c6717506be8e4ee9cc13b8ba20cdf3715",
+  "migration101Sha256": "ef3790fad5f64de7bbd089d09a835dcb302092d64ccef6abb85e2105fbab2b5b",
   "checkCount": 11,
   "passed": 11,
   "failed": 0,
@@ -27,7 +27,7 @@
       "status": "PASS"
     },
     {
-      "name": "repository enforces exact receipt and payload-free policy resolution",
+      "name": "repository enforces exact receipt payload-free resolution and bounded capacity",
       "status": "PASS"
     },
     {
@@ -43,7 +43,7 @@
       "status": "PASS"
     },
     {
-      "name": "tests cover replay mismatch consent revocation rollback no-action IPC and route",
+      "name": "tests cover canonical replay module pairing deny precedence capacity rollback IPC and route",
       "status": "PASS"
     },
     {
@@ -55,5 +55,5 @@
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-16T05:47:46.847Z"
+  "generatedAt": "2026-08-16T09:26:46.809Z"
 }

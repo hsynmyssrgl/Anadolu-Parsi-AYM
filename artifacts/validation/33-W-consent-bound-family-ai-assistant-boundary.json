@@ -18,7 +18,7 @@
       "status": "PASS"
     },
     {
-      "name": "domain fixes fifteen kinds nine modules and fail-honest truth",
+      "name": "domain fixes fifteen kinds canonical modules and fail-honest truth",
       "status": "PASS"
     },
     {
@@ -30,11 +30,11 @@
       "status": "PASS"
     },
     {
-      "name": "repository uses receipt fence and bounded owner reads",
+      "name": "repository uses receipt fence and bounded owner reads and writes",
       "status": "PASS"
     },
     {
-      "name": "desktop adapter applies standard and sensitive consent",
+      "name": "desktop adapter applies deny-precedence standard and bounded sensitive consent",
       "status": "PASS"
     },
     {
@@ -46,7 +46,7 @@
       "status": "PASS"
     },
     {
-      "name": "renderer states consent local and no-action truth",
+      "name": "renderer states consent local no-action and source-coverage truth",
       "status": "PASS"
     },
     {
@@ -58,5 +58,5 @@
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-16T05:47:46.746Z"
+  "generatedAt": "2026-08-16T09:26:41.400Z"
 }

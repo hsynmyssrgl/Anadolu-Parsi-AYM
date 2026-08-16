@@ -1,6 +1,7 @@
 import { describe,expect,it } from 'vitest';
 import { asCorrelationId,asFamilyId,asIsoDateTime,asPersonId,asUserId,ok,type AppError,type Result } from '@ppt/core';
 import type { DomainEvent } from '@ppt/events';
+import { FAMILY_AI_ASSISTANT_KINDS,FAMILY_AI_ASSISTANT_MODULES_BY_KIND,FAMILY_AI_ASSISTANT_RESOURCE_TYPE_BY_MODULE } from '@ppt/domain';
 import type { FamilyAiSuggestionMutationRow,FamilyAiSuggestionRow } from '@ppt/repository-contracts';
 import {
   GenerateFamilyAiSuggestionUseCase,ReviewFamilyAiSuggestionUseCase,
@@ -17,7 +18,8 @@ const candidate:FamilyAiAssistantAuthorizedCandidate={module:'event',resourceTyp
 
 class MemorySource implements FamilyAiAssistantSourcePort{
   public candidates:readonly FamilyAiAssistantAuthorizedCandidate[]=[candidate];
-  public loadAuthorizedCandidates(){return Promise.resolve(ok(this.candidates));}
+  public calls=0;public inputs:unknown[]=[];
+  public loadAuthorizedCandidates(_context?:unknown,input?:unknown){this.calls+=1;this.inputs.push(input);return Promise.resolve(ok(this.candidates));}
 }
 class MemoryScope implements FamilyAiAssistantWriteScope{
   public readonly occurredAt=NOW;public consent=true;public readonly suggestions=new Map<string,FamilyAiSuggestionRow>();
@@ -46,7 +48,10 @@ describe('33-W consent-bound family AI assistant use cases',()=>{
       modules:['event'] as const,query:'aile toplantısı'};
     expect(await useCase.execute({context,command})).toMatchObject({ok:true,value:{revision:1,replayed:false,networkUsed:false,
       cloudUsed:false,durableActionPerformed:'not_performed'}});
-    expect(await useCase.execute({context,command})).toMatchObject({ok:true,value:{revision:1,replayed:true}});
+    const reordered={kind:command.kind,suggestionId:command.suggestionId,query:command.query,modules:command.modules,
+      clientOperationId:command.clientOperationId};
+    expect(await useCase.execute({context,command:reordered})).toMatchObject({ok:true,value:{revision:1,replayed:true}});
+    expect(source.calls).toBe(1);
     expect(unit.scope.audits).toHaveLength(1);expect(unit.scope.events).toHaveLength(1);
     expect(unit.intents[0]).toMatchObject({resourceType:'family_ai_suggestion',resourceId:'suggestion-33-w',action:'create',privacy:'private'});
     expect(unit.scope.suggestions.get('suggestion-33-w')).toMatchObject({status:'pending_confirmation',sources:[{module:'event',resourceId:'event-33-w'}]});
@@ -79,5 +84,35 @@ describe('33-W consent-bound family AI assistant use cases',()=>{
     const dismiss=await make('suggestion-revoked-dismiss');expect(await new ReviewFamilyAiSuggestionUseCase(dismiss).execute({context,command:{
       clientOperationId:'operation-revoked-dismiss',suggestionId:'suggestion-revoked-dismiss',expectedRevision:1,decision:'dismiss'}}))
       .toMatchObject({ok:true,value:{revision:2,humanConfirmationRecorded:false}});
+  });
+
+  it('pins every workflow to its canonical source modules and purpose',async()=>{
+    for(const [index,kind] of FAMILY_AI_ASSISTANT_KINDS.entries()){
+      const module=FAMILY_AI_ASSISTANT_MODULES_BY_KIND[kind][0]!;const source=new MemorySource();source.candidates=[{
+        module,resourceType:FAMILY_AI_ASSISTANT_RESOURCE_TYPE_BY_MODULE[module],resourceId:`resource-${kind}`,
+        searchableText:[`Kaynak ${kind}`],occurredAt:NOW}];const unit=new MemoryUnit();
+      const result=await new GenerateFamilyAiSuggestionUseCase(source,unit).execute({context,command:{
+        clientOperationId:`operation-kind-${index}`,suggestionId:`suggestion-kind-${index}`,kind,
+        ...(kind==='authorized_search'?{query:'kaynak'}:{})}});
+      expect(result).toMatchObject({ok:true,value:{mutationKind:'suggestion_generate',revision:1}});
+      expect(source.inputs[0]).toMatchObject({kind,modules:FAMILY_AI_ASSISTANT_MODULES_BY_KIND[kind]});
+      expect(unit.scope.suggestions.get(`suggestion-kind-${index}`)?.purpose).toBe(
+        kind==='authorized_search'?'search':['daily_summary','weekly_summary','plain_explanation'].includes(kind)?'summary'
+          :['ocr_classification','duplicate_record'].includes(kind)?'classification':'recommendation');
+    }
+  });
+
+  it('rejects missing search text, cross-workflow modules, extra fields and forged source pairs',async()=>{
+    const source=new MemorySource();const unit=new MemoryUnit();const useCase=new GenerateFamilyAiSuggestionUseCase(source,unit);
+    expect(await useCase.execute({context,command:{clientOperationId:'operation-no-query',suggestionId:'suggestion-no-query',
+      kind:'authorized_search'}})).toMatchObject({ok:false,error:{category:'validation'}});
+    expect(await useCase.execute({context,command:{clientOperationId:'operation-cross-module',suggestionId:'suggestion-cross-module',
+      kind:'meeting_agenda',modules:['finance']}})).toMatchObject({ok:false,error:{category:'validation'}});
+    expect(await useCase.execute({context,command:{clientOperationId:'operation-extra',suggestionId:'suggestion-extra',
+      kind:'meeting_agenda',executePayment:true} as never})).toMatchObject({ok:false,error:{category:'validation'}});
+    source.candidates=[{module:'event',resourceType:'health_record',resourceId:'forged-source',searchableText:['forged']}];
+    expect(await useCase.execute({context,command:{clientOperationId:'operation-forged-source',suggestionId:'suggestion-forged-source',
+      kind:'meeting_agenda',modules:['event']}})).toMatchObject({ok:false,error:{category:'authorization'}});
+    expect(source.calls).toBe(1);
   });
 });

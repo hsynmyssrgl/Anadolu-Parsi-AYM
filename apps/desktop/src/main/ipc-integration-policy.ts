@@ -3118,15 +3118,32 @@ const familyAiModules=new Set<unknown>(['family','event','archive','finance','he
 const familyAiPurposes=new Set<unknown>(['search','summary','recommendation','classification']);
 const familyAiSourceTypes=new Set<unknown>(['person','event','archive_item','finance_record','health_record','life_record',
   'local_ocr_job','household_operation_item','places_travel_item']);
+const familyAiModulesByKind:Readonly<Record<string,readonly string[]>>=Object.freeze({
+  authorized_search:['family','event','archive','finance','health','life'],
+  daily_summary:['event','archive','finance','health','life','household','places'],
+  weekly_summary:['event','archive','finance','health','life','household','places'],
+  reminder_review:['event','archive','finance','health','life','household','places'],
+  emergency_bag:['life','household','places'],meeting_agenda:['family','event'],ocr_classification:['archive','ocr'],
+  duplicate_record:['archive','ocr'],family_story:['family','event','archive','places'],spending_review:['finance','household'],
+  meal_plan:['household'],shopping_list:['household'],plain_explanation:['archive','health','life'],read_aloud:['archive'],translation:['archive']
+});
+const familyAiResourceTypeByModule:Readonly<Record<string,string>>=Object.freeze({family:'person',event:'event',archive:'archive_item',
+  finance:'finance_record',health:'health_record',life:'life_record',ocr:'local_ocr_job',household:'household_operation_item',
+  places:'places_travel_item'});
+const familyAiPurposeByKind=(kind:unknown):string=>kind==='authorized_search'?'search'
+  :['daily_summary','weekly_summary','plain_explanation'].includes(String(kind))?'summary'
+  :['ocr_classification','duplicate_record'].includes(String(kind))?'classification':'recommendation';
 const familyAiInput=(channel:string,args:readonly unknown[]):IpcIntegrationPolicyDecision=>{
   if(channel===FAMILY_AI_ASSISTANT_IPC_CHANNELS.getCenter)return zeroArguments(args);
   if(args.length!==1||!isObject(args[0]))return rejected('FAMILY_AI_OBJECT_REQUIRED','$[0]');const value=args[0];
   if(channel===FAMILY_AI_ASSISTANT_IPC_CHANNELS.generate){const optional=['modules','query'].filter((key)=>value[key]!==undefined);
+    const allowedModules=familyAiModulesByKind[String(value.kind)]??[];
     return healthCareExactRecord(value,['clientOperationId','suggestionId','kind',...optional])
       &&healthCareIdentifier(value.clientOperationId)&&healthCareIdentifier(value.suggestionId)&&familyAiKinds.has(value.kind)
       &&(value.modules===undefined||(Array.isArray(value.modules)&&value.modules.length>=1&&value.modules.length<=9
-        &&value.modules.every((module)=>familyAiModules.has(module))&&new Set(value.modules).size===value.modules.length))
-      &&(value.query===undefined||healthCareText(value.query,2,80))
+        &&value.modules.every((module)=>familyAiModules.has(module)&&allowedModules.includes(String(module)))
+        &&new Set(value.modules).size===value.modules.length))
+      &&(value.kind==='authorized_search'?healthCareText(value.query,2,80):value.query===undefined)
       ?accepted():rejected('FAMILY_AI_GENERATE_INPUT_INVALID','$[0]');}
   if(channel===FAMILY_AI_ASSISTANT_IPC_CHANNELS.review)return healthCareExactRecord(value,
     ['clientOperationId','suggestionId','expectedRevision','decision'])&&healthCareIdentifier(value.clientOperationId)
@@ -3135,34 +3152,57 @@ const familyAiInput=(channel:string,args:readonly unknown[]):IpcIntegrationPolic
   return rejected('UNKNOWN_IPC_CHANNEL','$');
 };
 const familyAiSourceResult=(value:unknown):boolean=>healthCareExactRecord(value,['module','resourceType','resourceId'])
-  &&familyAiModules.has(value.module)&&familyAiSourceTypes.has(value.resourceType)&&healthCareIdentifier(value.resourceId);
+  &&familyAiModules.has(value.module)&&familyAiSourceTypes.has(value.resourceType)
+  &&familyAiResourceTypeByModule[String(value.module)]===value.resourceType&&healthCareIdentifier(value.resourceId);
 const familyAiSuggestionResult=(value:unknown):boolean=>{
   if(!isObject(value))return false;const optional=['confirmedAt','dismissedAt'].filter((key)=>value[key]!==undefined);
   return healthCareExactRecord(value,['id','ownerPersonId','kind','purpose','status','title','explanation','confidenceBasisPoints',
     'sources','revision','createdAt','updatedAt',...optional])&&healthCareIdentifier(value.id)&&healthCareIdentifier(value.ownerPersonId)
     &&familyAiKinds.has(value.kind)&&familyAiPurposes.has(value.purpose)
+    &&value.purpose===familyAiPurposeByKind(value.kind)
     &&['pending_confirmation','confirmed','dismissed'].includes(String(value.status))&&healthCareText(value.title,2,160)
     &&healthCareText(value.explanation,10,500)&&typeof value.confidenceBasisPoints==='number'
     &&Number.isSafeInteger(value.confidenceBasisPoints)&&value.confidenceBasisPoints>=0&&value.confidenceBasisPoints<=10000
     &&Array.isArray(value.sources)&&householdArray(value.sources,24,familyAiSourceResult)&&value.sources.length>=1
+    &&new Set(value.sources.map((source)=>isObject(source)?`${String(source.resourceType)}:${String(source.resourceId)}`:'')).size===value.sources.length
     &&healthCareRevision(value.revision)&&Number(value.revision)>=1&&healthCareIso(value.createdAt)&&healthCareIso(value.updatedAt)
-    &&(value.confirmedAt===undefined||healthCareIso(value.confirmedAt))&&(value.dismissedAt===undefined||healthCareIso(value.dismissedAt));
+    &&(value.confirmedAt===undefined||healthCareIso(value.confirmedAt))&&(value.dismissedAt===undefined||healthCareIso(value.dismissedAt))
+    &&((value.status==='pending_confirmation'&&value.confirmedAt===undefined&&value.dismissedAt===undefined)
+      ||(value.status==='confirmed'&&value.confirmedAt===value.updatedAt&&value.dismissedAt===undefined)
+      ||(value.status==='dismissed'&&value.dismissedAt===value.updatedAt&&value.confirmedAt===undefined));
+};
+const familyAiInactiveSuggestionResult=(value:unknown):boolean=>healthCareExactRecord(value,['id','revision','updatedAt'])
+  &&healthCareIdentifier(value.id)&&healthCareRevision(value.revision)&&Number(value.revision)>=1&&healthCareIso(value.updatedAt);
+const familyAiCenterCollectionsValid=(suggestions:unknown,revoked:unknown,hidden:unknown,capacity:unknown,owner:unknown):boolean=>{
+  if(!Array.isArray(suggestions)||!Array.isArray(revoked)||!Number.isSafeInteger(hidden)||Number(hidden)<0
+    ||!isObject(capacity)||!healthCareExactRecord(capacity,['maximum','used','remaining','limitReached']))return false;
+  return suggestions.every((suggestion)=>isObject(suggestion)&&suggestion.ownerPersonId===owner)
+    &&revoked.length<=Number(hidden)&&capacity.maximum===500&&Number.isSafeInteger(capacity.used)&&Number(capacity.used)>=0
+    &&Number.isSafeInteger(capacity.remaining)&&Number(capacity.remaining)>=0
+    &&Number(capacity.used)+Number(capacity.remaining)===500
+    &&Number(capacity.used)===suggestions.length+Number(hidden)&&capacity.limitReached===(Number(capacity.used)>=500);
 };
 const familyAiCenterResult=(value:unknown):boolean=>healthCareExactRecord(value,
-  ['schemaVersion','centerId','ownerPersonId','suggestions','hiddenAfterConsentRevocationCount','truth','generatedAt'])
+  ['schemaVersion','centerId','ownerPersonId','suggestions','inactiveConsentSuggestions','hiddenAfterConsentRevocationCount',
+    'suggestionCapacity','truth','generatedAt'])
   &&value.schemaVersion===1&&healthCareIdentifier(value.centerId)&&healthCareIdentifier(value.ownerPersonId)
   &&householdArray(value.suggestions,500,familyAiSuggestionResult)&&typeof value.hiddenAfterConsentRevocationCount==='number'
   &&Number.isSafeInteger(value.hiddenAfterConsentRevocationCount)&&value.hiddenAfterConsentRevocationCount>=0
+  &&householdArray(value.inactiveConsentSuggestions,500,familyAiInactiveSuggestionResult)
+  &&familyAiCenterCollectionsValid(value.suggestions,value.inactiveConsentSuggestions,value.hiddenAfterConsentRevocationCount,
+    value.suggestionCapacity,value.ownerPersonId)
   &&healthCareExactRecord(value.truth,['localFirst','authorizedSearchAvailableWithoutProvider','providerConfigured','networkUsed',
     'cloudUsed','modelInferencePerformed','speechSynthesisPerformed','translationPerformed','ocrSuggestionAutomaticallyAccepted',
     'durableActionPerformed','humanConfirmationRequired','confirmationExecutesDownstreamAction','sourceConsentRevalidated',
+    'explicitConsentRevocationOverridesBroaderGrant','confidenceRepresentsSourceCoverageOnly',
     'medicalFinancialOrEmergencyDecisionProvided'])&&value.truth.localFirst===true
   &&value.truth.authorizedSearchAvailableWithoutProvider===true&&value.truth.providerConfigured===false
   &&value.truth.networkUsed===false&&value.truth.cloudUsed===false&&value.truth.modelInferencePerformed===false
   &&value.truth.speechSynthesisPerformed===false&&value.truth.translationPerformed===false
   &&value.truth.ocrSuggestionAutomaticallyAccepted===false&&value.truth.durableActionPerformed==='not_performed'
   &&value.truth.humanConfirmationRequired===true&&value.truth.confirmationExecutesDownstreamAction===false
-  &&value.truth.sourceConsentRevalidated===true&&value.truth.medicalFinancialOrEmergencyDecisionProvided===false
+  &&value.truth.sourceConsentRevalidated===true&&value.truth.explicitConsentRevocationOverridesBroaderGrant===true
+  &&value.truth.confidenceRepresentsSourceCoverageOnly===true&&value.truth.medicalFinancialOrEmergencyDecisionProvided===false
   &&healthCareIso(value.generatedAt);
 const familyAiReceiptResult=(value:unknown):boolean=>healthCareExactRecord(value,
   ['suggestionId','mutationKind','previousRevision','revision','occurredAt','replayed','durableActionPerformed',
@@ -3170,7 +3210,10 @@ const familyAiReceiptResult=(value:unknown):boolean=>healthCareExactRecord(value
   &&['suggestion_generate','suggestion_confirm','suggestion_dismiss'].includes(String(value.mutationKind))
   &&healthCareRevision(value.previousRevision)&&healthCareRevision(value.revision)&&value.revision===Number(value.previousRevision)+1
   &&healthCareIso(value.occurredAt)&&typeof value.replayed==='boolean'&&value.durableActionPerformed==='not_performed'
-  &&typeof value.humanConfirmationRecorded==='boolean'&&value.networkUsed===false&&value.cloudUsed===false;
+  &&typeof value.humanConfirmationRecorded==='boolean'
+  &&value.humanConfirmationRecorded===(value.mutationKind==='suggestion_confirm')
+  &&(value.mutationKind==='suggestion_generate'?value.previousRevision===0&&value.revision===1:Number(value.previousRevision)>=1)
+  &&value.networkUsed===false&&value.cloudUsed===false;
 const familyAiResult=(channel:string,result:unknown):IpcIntegrationPolicyDecision=>{
   const valid=channel===FAMILY_AI_ASSISTANT_IPC_CHANNELS.getCenter?familyAiCenterResult(result):familyAiReceiptResult(result);
   return valid?accepted():rejected('FAMILY_AI_RESULT_INVALID','$result');

@@ -6,6 +6,7 @@ import type {
   FamilyAiSuggestionMutationKind,
   FamilyAiSuggestionStatus
 } from '@ppt/domain';
+import { FAMILY_AI_ASSISTANT_MAX_SUGGESTIONS, FAMILY_AI_ASSISTANT_RESOURCE_TYPE_BY_MODULE } from '@ppt/domain';
 import {
   assertPolicyAuthorizedRepositoryContext,
   canonicalFamilyAiAssistantSources,
@@ -28,13 +29,17 @@ const suggestionSelect=`SELECT id,family_id,owner_person_id,kind,purpose,status,
 const mutationSelect=`SELECT id,family_id,owner_person_id,suggestion_id,actor_account_id,actor_person_id,
   mutation_kind,purpose,client_operation_id,request_fingerprint,expected_revision,revision,
   suggestion_state_fingerprint,source_fingerprint,source_count,occurred_at FROM family_ai_suggestion_mutations`;
+const safeId=(value:unknown):value is string=>typeof value==='string'&&/^[A-Za-z0-9][A-Za-z0-9._:-]{1,159}$/u.test(value);
 
 const sources=(raw:unknown):readonly FamilyAiAssistantSourceReferenceView[]=>{
   const parsed=JSON.parse(String(raw)) as unknown;
   if(!Array.isArray(parsed)||parsed.length<1||parsed.length>24||parsed.some((value)=>!value||typeof value!=='object'
+    ||Object.getPrototypeOf(value)!==Object.prototype||Object.keys(value).sort().join(',')!=='module,resourceId,resourceType'
     ||typeof (value as Record<string,unknown>).module!=='string'
     ||typeof (value as Record<string,unknown>).resourceType!=='string'
-    ||typeof (value as Record<string,unknown>).resourceId!=='string'))throw new Error('Family AI source ledger is invalid');
+    ||!safeId((value as Record<string,unknown>).resourceId)
+    ||FAMILY_AI_ASSISTANT_RESOURCE_TYPE_BY_MODULE[(value as FamilyAiAssistantSourceReferenceView).module]
+      !==(value as FamilyAiAssistantSourceReferenceView).resourceType))throw new Error('Family AI source ledger is invalid');
   return canonicalFamilyAiAssistantSources(parsed as FamilyAiAssistantSourceReferenceView[]);
 };
 const mapSuggestion=(row:Record<string,unknown>):FamilyAiSuggestionRow=>Object.freeze({
@@ -92,9 +97,9 @@ export class SqliteFamilyAiAssistantRepository extends SqliteRepository implemen
   public loadCenter(context:PolicyAuthorizedRepositoryExecutionContext,key:FamilyAiAssistantCenterKey)
   :RepositoryResult<FamilyAiAssistantCenterSnapshotRow>{
     assertKey(context,key,'read');return this.execute(context,()=>{const rows=this.database(context).prepare(
-      `${suggestionSelect} WHERE family_id=? AND owner_person_id=? ORDER BY updated_at DESC,id LIMIT 501`
+      `${suggestionSelect} WHERE family_id=? AND owner_person_id=? ORDER BY updated_at DESC,id LIMIT ${FAMILY_AI_ASSISTANT_MAX_SUGGESTIONS+1}`
     ).all(key.familyId,key.ownerPersonId) as Record<string,unknown>[];
-      if(rows.length>500)throw new Error('Family AI center exceeds its bounded local result contract');
+      if(rows.length>FAMILY_AI_ASSISTANT_MAX_SUGGESTIONS)throw new Error('Family AI center exceeds its bounded local result contract');
       return Object.freeze({suggestions:Object.freeze(rows.map(mapSuggestion))});});
   }
   public findSuggestion(context:PolicyAuthorizedRepositoryExecutionContext,key:FamilyAiAssistantCenterKey,suggestionId:string)
@@ -132,7 +137,11 @@ export class SqliteFamilyAiAssistantRepository extends SqliteRepository implemen
   }
   private writeSuggestion(context:PolicyAuthorizedRepositoryExecutionContext,row:FamilyAiSuggestionRow,expectedRevision:number|null):void{
     const binding=platformPolicyPersistenceBinding(context,'family_ai_suggestion',row.id);if(!binding)throw new Error('Family AI current row requires receipt binding');
-    if(expectedRevision===null){this.database(context).prepare(`INSERT INTO family_ai_suggestions(id,family_id,owner_person_id,kind,
+    if(expectedRevision===null){const count=Number((this.database(context).prepare(
+      'SELECT COUNT(*) AS count FROM family_ai_suggestions WHERE family_id=? AND owner_person_id=?').get(
+        row.familyId,row.ownerPersonId) as {count:number}).count);
+      if(count>=FAMILY_AI_ASSISTANT_MAX_SUGGESTIONS)throw new Error('Family AI owner suggestion capacity is exhausted');
+      this.database(context).prepare(`INSERT INTO family_ai_suggestions(id,family_id,owner_person_id,kind,
       purpose,status,title,explanation,confidence_basis_points,sources_json,source_fingerprint,revision,state_fingerprint,
       last_mutation_id,created_at,updated_at,confirmed_at,dismissed_at,policy_receipt_hash) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(
         row.id,row.familyId,row.ownerPersonId,row.kind,row.purpose,row.status,row.title,row.explanation,row.confidenceBasisPoints,
