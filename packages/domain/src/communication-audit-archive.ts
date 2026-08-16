@@ -11,6 +11,14 @@ export type CommunicationAuditEventKind =
   | 'message_deleted'
   | 'recording_consent_changed';
 
+export type CommunicationAuditResourceType =
+  | 'communication_room'
+  | 'communication_call_session'
+  | 'communication_file_sharing'
+  | 'communication_permission'
+  | 'communication_message'
+  | 'communication_recording_request';
+
 export interface CommunicationAuditEventView {
   readonly id: string;
   readonly familyId: string;
@@ -18,7 +26,7 @@ export interface CommunicationAuditEventView {
   readonly actorPersonId: string;
   readonly actorDeviceId: string;
   readonly eventKind: CommunicationAuditEventKind;
-  readonly resourceType: string;
+  readonly resourceType: CommunicationAuditResourceType;
   readonly resourceId: string;
   readonly resourceVersion: number;
   readonly resourceFingerprint: string;
@@ -58,6 +66,9 @@ export interface CommunicationAuditArchiveTruthView {
   readonly externalBackupProviderVerified: false;
   readonly realRestoreDrillPerformed: false;
   readonly networkUsedByCurrentImplementation: false;
+  readonly productionQueryApiComposed: true;
+  readonly productionEventProducerHooksComposed: false;
+  readonly rendererAuditMutationAuthorityExposed: false;
 }
 
 export interface CommunicationAuditArchiveCenterView {
@@ -69,11 +80,45 @@ export interface CommunicationAuditArchiveCenterView {
   readonly generatedAt: IsoDateTime;
 }
 
+export interface CommunicationAuditSafeEventView {
+  readonly eventKind: CommunicationAuditEventKind;
+  readonly resourceType: CommunicationAuditResourceType;
+  readonly resourceVersion: number;
+  readonly sequence: number;
+  readonly occurredAt: IsoDateTime;
+}
+
+export interface CommunicationArchiveSafeCheckpointView {
+  readonly archiveGeneration: number;
+  readonly vaultVerified: boolean;
+  readonly backupVerified: boolean;
+  readonly replicaVerified: boolean;
+  readonly restoreVerified: boolean;
+  readonly externalBackupProviderVerified: false;
+  readonly remoteReplicationVerified: false;
+  readonly createdAt: IsoDateTime;
+}
+
+export interface CommunicationAuditArchiveSafeCenterView {
+  readonly schemaVersion: 1;
+  readonly eventCount: number;
+  readonly checkpointCount: number;
+  readonly recentEvents: readonly CommunicationAuditSafeEventView[];
+  readonly recentCheckpoints: readonly CommunicationArchiveSafeCheckpointView[];
+  readonly recentEventsTruncated: boolean;
+  readonly recentCheckpointsTruncated: boolean;
+  readonly chainValid: boolean;
+  readonly truth: CommunicationAuditArchiveTruthView;
+  readonly generatedAt: IsoDateTime;
+  readonly networkUsed: false;
+  readonly cloudUsed: false;
+}
+
 export interface AppendCommunicationAuditEventInput {
   readonly clientOperationId: string;
   readonly actorDeviceId: string;
   readonly eventKind: CommunicationAuditEventKind;
-  readonly resourceType: string;
+  readonly resourceType: CommunicationAuditResourceType;
   readonly resourceId: string;
   readonly resourceVersion: number;
   readonly resourceFingerprint: string;
@@ -103,5 +148,8 @@ export const communicationAuditArchiveTruth = Object.freeze({
   productionRemoteReplicationConfigured: false as const,
   externalBackupProviderVerified: false as const,
   realRestoreDrillPerformed: false as const,
-  networkUsedByCurrentImplementation: false as const
+  networkUsedByCurrentImplementation: false as const,
+  productionQueryApiComposed: true as const,
+  productionEventProducerHooksComposed: false as const,
+  rendererAuditMutationAuthorityExposed: false as const
 });

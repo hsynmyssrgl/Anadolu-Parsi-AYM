@@ -26,6 +26,10 @@ import type {
   CommunicationMessageView,
   CommunicationMessagingCenterView,
   CommunicationMessagingMutationReceiptView,
+    CommunicationAuditArchiveSafeCenterView,
+    CommunicationFileSharingRendererCenterView,
+    CommunicationFileSharingRendererMutationReceiptView,
+    CommunicationFileSafePreviewView,
   CreateCommunicationMessageInput,
   EditCommunicationMessageInput,
   SearchCommunicationMessagesInput,
@@ -104,7 +108,11 @@ import type {
   LocalGovernedOcrResultReadIpcInput,
   LocalGovernedOcrSearchIpcInput,
   LocalGovernedOcrSearchIpcView,
-  LocalGovernedOcrSetEnabledIpcInput
+  LocalGovernedOcrSetEnabledIpcInput,
+  CommunicationFileSharingApplyIpcInput,
+  CommunicationFileSharingPrepareCancelledIpcView,
+  CommunicationFileSharingPreviewIpcInput,
+  CommunicationFileSharingSelectIpcInput
 } from '../main/preload.js';
 import type {
   CompanionSyncDenialView,CreateReadOnlyCompanionSnapshotInput,FederatedAuthorizationCeremonyView,FederatedIdentityProvider,
@@ -226,6 +234,13 @@ declare global { interface Window { pardus?: {
   updateCommunicationDelivery(input:UpdateCommunicationDeliveryInput):Promise<CommunicationMessagingMutationReceiptView>;
   setCommunicationPresence(input:SetCommunicationPresenceInput):Promise<CommunicationMessagingMutationReceiptView>;
   setCommunicationRetentionPolicy(input:SetCommunicationRetentionPolicyInput):Promise<CommunicationMessagingMutationReceiptView>;
+  getCommunicationFileSharingCenter():Promise<CommunicationFileSharingRendererCenterView>;
+  getCommunicationAuditArchiveCenter():Promise<CommunicationAuditArchiveSafeCenterView>;
+  getCommunicationFileSafePreview(input:CommunicationFileSharingPreviewIpcInput):Promise<CommunicationFileSafePreviewView>;
+  selectAndPrepareCommunicationFile(input:CommunicationFileSharingSelectIpcInput)
+    :Promise<CommunicationFileSharingRendererMutationReceiptView|CommunicationFileSharingPrepareCancelledIpcView>;
+  applyCommunicationFileSharingCommand(input:CommunicationFileSharingApplyIpcInput)
+    :Promise<CommunicationFileSharingRendererMutationReceiptView>;
   getCommunicationRealtimeCallingCenter():Promise<CommunicationRealtimeCallingCenterView>;
   createCommunicationCall(input:CreateCommunicationCallInput):Promise<CommunicationRealtimeCallingMutationReceiptView>;
   runCommunicationCallPreflight(input:RunCommunicationCallPreflightInput):Promise<CommunicationRealtimeCallingMutationReceiptView>;

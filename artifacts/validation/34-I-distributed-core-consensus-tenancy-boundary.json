@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "step": "34-I",
+  "decision": "DEC-246",
+  "mode": "boundary",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "localImplementationStatus": "LOCAL_HARDENED_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE",
+  "requirementsClosed": false,
+  "countsAsRequirementPass": false,
+  "checkCount": 9,
+  "passed": 9,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "all declared governance source and targeted test files exist",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "packages/domain/src/distributed-core-service.ts pins durableIdempotencyRequired:true",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "packages/domain/src/distributed-core-service.ts pins productionRuntimeComposed:false",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "apps/core-service/src/distributed-core-cluster-runtime.ts pins findByIdempotencyKey",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "apps/core-service/src/distributed-core-cluster-runtime.ts pins commitAndApply",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "apps/core-service/src/distributed-core-cluster-runtime.ts pins allowUnverifiedProviderForTests",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "packages/database/src/family-database-migrations.ts pins createMigrationDefinition(113, 'distributed_core_consensus_tenancy'",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "apps/desktop/src/renderer/DistributedOperationsPanel.tsx pins özel consensus algoritması yazılmamıştır",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "migration 113 is wired",
+      "status": "PASS",
+      "detail": ""
+    }
+  ],
+  "generatedAt": "2026-08-16T03:53:26.466Z"
+}

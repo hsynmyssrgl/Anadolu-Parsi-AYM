@@ -2,8 +2,16 @@
 
 Durum: PLANNED / LOCAL_IMPLEMENTATION_STARTED
 
-34-K yetkili evrensel arama, tek aile görünümü, komut paleti, son kullanılanlar/favoriler, kişisel kart sırası, sessiz saat/haftalık özet, persona modları ve offline/last-sync göstergelerini tek yerel politika modelinde toplar. Arama yalnız `authorized=true` adayları döndürür.
+34-K, tek aile görünümü, komut paleti, son kullanılanlar/favoriler, kişisel kart sırası, sessiz saat/haftalık özet, persona modları ve offline/last-sync göstergeleri için yerel ve fail-closed bir temel kurar. Renderer'daki sabit komut listesi yalnız gezinme önizlemesidir; kişi, belge, ileti veya olay verisinde yetkilendirilmiş evrensel arama değildir.
 
-PPK-027 kapsamında politika zayıflatma açık kullanıcı karar kimliği, farklı yeni sürüm, SHA-256 risk analizi ve rollback planı olmadan kabul edilmez; kabul kaydı bile otomatik aktivasyon yetkisi vermez.
+Evrensel arama adayları renderer ya da çağıran tarafından verilemez. Sonuçlar yalnız yapılandırılmış ve production doğrulaması yapılmış `UniversalUxSearchAuthorityPort` üzerinden gelir; aday bazında yetkilendirme kanıtı yoksa arama kapanır. Bu sağlayıcı henüz production bileşimine bağlanmadığı için arama requirement'ı kapanmaz.
 
-Synthetic crash/recovery kanıtı gerçek Windows installer yaşam döngüsü veya 168 saat soak değildir. QR, kamera, voice, mini panel ve Apple widget yalnız kapalı adapter sözleşmesidir. Migration 115 ve hedefli testler yerel başlangıcı kanıtlar; `countsAsRequirementPass=false` kalır.
+PPK-027 politika zayıflatmasını dört ayrı SHA-256 bağına bağlar: açık kullanıcı kararı, risk analizi, geri alma planı ve önerilen imzalı politika paketi. Kabul ancak production doğrulanmış verifier bütün bağları exact doğrularsa kaydedilir; kabul kaydı otomatik etkinleştirme yetkisi vermez. Verifier yoksa biçimi geçerli öneri yalnız reddedilmiş kanıt olarak kaydedilir.
+
+Windows yaşam döngüsü ve 168 saat soak sonucu çağıran boolean'larından alınmaz. `WindowsResilienceEvidenceProviderPort` gözlemi, sağlayıcı kimliği, kanıt özeti, gözlem zamanı ve gerçek veri sayılarıyla doğrulanır; gelecekte tarihli kanıt reddedilir. Production sağlayıcı bu snapshotta bileşime bağlı değildir.
+
+Migration 115 dört `STRICT` tablo, immutable operasyon/politika/dayanıklılık ledger'ları, exact sahip/aile/hesap/kişi bağı ve writable fence + journal projection içeren dayanıklı PEP receipt zorunluluğu kurar. Migration SHA-256 değeri `e43ccbe70eecee7c7572f3c78cd26f357ab0c69357da712664bb50ed3c81279b` olarak doğrulanmıştır. Üç hedef dosyada 13 test geçer.
+
+Güncel statik ratchet kanıtı: PPK-015 555 dosya / `a7a93a941f9614c3833cd0b2774a8bb738ea3501284e00cd370891eed2d1fdc8`; PPK-021 555 dosya / 873 yüzey / `843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc`; PPK-022 555 dosya / 392 yüzey / `cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c`.
+
+Yerel teknik kanıt 3 dosya/13 hedef testi, 286 dosya/1920 tam regresyon testi, kök typecheck, 16 workspace paket derlemesi, core-service ve desktop derlemelerinde PASS'tir. Gerçek Windows clean install/upgrade/repair/uninstall, 168 saat soak, production arama/verifier sağlayıcıları, QR/kamera/ses, mini panel, Apple widget ve accessibility UAT `NOT_RUN` kalır. Append-only operasyon ve immutable kanıt ledger'larının uzun dönem retention/destruction kararı verilmemiştir. Bu nedenle `countsAsRequirementPass=false` korunur.

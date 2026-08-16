@@ -1,6 +1,55 @@
 {
-  "schemaVersion":1,"step":"34-J","decision":"DEC-247","status":"PLANNED","governanceState":"LOCAL_IMPLEMENTATION_STARTED",
-  "implementationFiles":["packages/domain/src/distributed-client-operations.ts","apps/core-service/src/distributed-operations-runtime.ts","packages/database/src/family-database-migrations.ts","apps/desktop/src/renderer/DistributedOperationsPanel.tsx"],
-  "targetedTests":["apps/core-service/tests/distributed-operations-runtime.test.ts","apps/core-service/tests/distributed-operations-migration-boundary.test.ts","apps/desktop/tests/remaining-communication-distributed-ui.test.ts"],
-  "providers":{"discovery":"NOT_CONFIGURED","relay":"NOT_CONFIGURED","apple":"NOT_BUILT"},"countsAsRequirementPass":false
+  "schemaVersion": 1,
+  "step": "34-J",
+  "decision": "DEC-247",
+  "status": "PLANNED",
+  "governanceState": "LOCAL_IMPLEMENTATION_STARTED",
+  "localImplementationStatus": "LOCAL_HARDENED_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE",
+  "implementationFiles": [
+    "packages/domain/src/distributed-client-operations.ts",
+    "apps/core-service/src/distributed-operations-runtime.ts",
+    "packages/database/src/family-database-migrations.ts",
+    "apps/desktop/src/renderer/DistributedOperationsPanel.tsx"
+  ],
+  "targetedTests": [
+    "apps/core-service/tests/distributed-operations-runtime.test.ts",
+    "apps/core-service/tests/distributed-operations-migration-boundary.test.ts",
+    "apps/desktop/tests/remaining-communication-distributed-ui.test.ts"
+  ],
+  "targetedValidation": {"testFiles": 3, "tests": 10, "status": "PASS"},
+  "migration": {
+    "version": 114,
+    "sha256": "023c2a416901671b1231388563153d661152e372c2ec305a54f8f06874c55f34",
+    "strictTables": true,
+    "backupAndFaultHashChains": true,
+    "leaderLastClusterInventoryTrigger": true,
+    "exactAllNodeUpdateInventory": true,
+    "backupClusterStateEvidenceStored": true,
+    "restoreClaimForcedFalseWithoutEvidence": true,
+    "immutableEvidenceAndPlans": true,
+    "retentionPolicyDecided": false
+  },
+  "runtimeBoundary": {
+    "exactControlPlaneVariants": 5,
+    "productionProvidersRequired": true,
+    "unverifiedProvidersTestOnly": true,
+    "durableIdempotency": true,
+    "providerNetworkEvidence": true,
+    "callerCannotClaimRestoreTested": true,
+    "unknownOrMalformedEvidenceDenied": true,
+    "syntheticFaultEvidenceCannotClaimRealWindows": true
+  },
+  "providers": {
+    "discovery": "NOT_CONFIGURED",
+    "relay": "NOT_CONFIGURED",
+    "backupVerifier": "NOT_CONFIGURED",
+    "updateVerifier": "NOT_CONFIGURED",
+    "apple": "NOT_BUILT"
+  },
+  "ppkEvidence": {
+    "ppk015": {"files": 555, "sha256": "a7a93a941f9614c3833cd0b2774a8bb738ea3501284e00cd370891eed2d1fdc8"},
+    "ppk021": {"files": 555, "surfaces": 873, "sha256": "843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc"},
+    "ppk022": {"files": 555, "surfaces": 392, "sha256": "cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c"}
+  },
+  "countsAsRequirementPass": false
 }

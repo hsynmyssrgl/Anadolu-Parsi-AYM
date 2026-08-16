@@ -10,6 +10,8 @@ import {
   SqliteBackupQuarantineRepository,
   SqliteBootstrapRepository,
   SqliteChildEducationCoordinationRepository,
+  SqliteCommunicationAuditArchiveRepository,
+  SqliteCommunicationFileSharingRepository,
   SqliteCommunicationMessagingRepository,
   SqliteCommunicationRecordingRepository,
   SqliteCommunicationRealtimeCallingRepository,
@@ -75,6 +77,10 @@ import type {
   BootstrapRepositoryPort,
   ChildEducationCoordinationRepositoryPort,
   ChildEducationPolicyResourceRepositoryPort,
+  CommunicationAuditArchivePolicyResourceRepositoryPort,
+  CommunicationAuditArchiveRepositoryPort,
+  CommunicationFileSharingPolicyResourceRepositoryPort,
+  CommunicationFileSharingRepositoryPort,
   CommunicationMessagingPolicyResourceRepositoryPort,
   CommunicationMessagingRepositoryPort,
   CommunicationRecordingPolicyResourceRepositoryPort,
@@ -156,6 +162,8 @@ export interface RepositoryCompositionRoot {
   readonly backupQuarantineRepository: BackupQuarantineRepositoryPort;
   readonly bootstrapRepository: BootstrapRepositoryPort;
   readonly childEducationRepository: ChildEducationCoordinationRepositoryPort & ChildEducationPolicyResourceRepositoryPort;
+  readonly communicationAuditArchiveRepository: CommunicationAuditArchiveRepositoryPort & CommunicationAuditArchivePolicyResourceRepositoryPort;
+  readonly communicationFileSharingRepository: CommunicationFileSharingRepositoryPort & CommunicationFileSharingPolicyResourceRepositoryPort;
   readonly communicationMessagingRepository: CommunicationMessagingRepositoryPort & CommunicationMessagingPolicyResourceRepositoryPort;
   readonly communicationRecordingRepository: CommunicationRecordingRepositoryPort & CommunicationRecordingPolicyResourceRepositoryPort;
   readonly communicationRealtimeCallingRepository: CommunicationRealtimeCallingRepositoryPort & CommunicationRealtimeCallingPolicyResourceRepositoryPort;
@@ -231,6 +239,8 @@ export const createSqliteRepositoryCompositionRoot = (
     backupQuarantineRepository: new SqliteBackupQuarantineRepository(repositoryOptions),
     bootstrapRepository: new SqliteBootstrapRepository(repositoryOptions),
     childEducationRepository: new SqliteChildEducationCoordinationRepository(repositoryOptions),
+    communicationAuditArchiveRepository: new SqliteCommunicationAuditArchiveRepository(repositoryOptions),
+    communicationFileSharingRepository: new SqliteCommunicationFileSharingRepository(repositoryOptions),
     communicationMessagingRepository: new SqliteCommunicationMessagingRepository(repositoryOptions),
     communicationRecordingRepository: new SqliteCommunicationRecordingRepository(repositoryOptions),
     communicationRealtimeCallingRepository: new SqliteCommunicationRealtimeCallingRepository(repositoryOptions),

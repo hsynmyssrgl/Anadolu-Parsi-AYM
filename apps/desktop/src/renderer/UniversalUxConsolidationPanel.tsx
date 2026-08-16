@@ -14,13 +14,14 @@ export function UniversalUxConsolidationPanel(){const [query,setQuery]=useState(
   return <section className="universal-ux panel" aria-labelledby="universal-ux-title"><div className="panel-heading"><div>
     <span className="eyebrow">34-K · Windows dayanıklılık ve evrensel UX</span><h2 id="universal-ux-title">Tek aile görünümü</h2></div></div>
     <div className="communication-recording-truth" role="note"><strong>Bu yüzey yerel UX konsolidasyonudur; gerçek Windows installer yaşam döngüsü ve 7 günlük soak kanıtı yoktur.</strong>
-      <span>Evrensel arama yalnız yetkili kaynak sonuçlarını göstermeyi amaçlar; bu yerel panel üretim indeksine bağlı değildir.</span>
+      <span>Bu liste yalnız sabit gezinme komutlarının yerel önizlemesidir; yetkilendirilmiş evrensel veri araması değildir.</span>
+      <span>Üretim arama yetki sağlayıcısı yapılandırılmamıştır; kişi, belge, ileti ve olay içeriği burada aranmaz.</span>
       <span>QR/barkod, kamera kırpma, sesle form, Windows mini paneli ve Apple widget sağlayıcıları yapılandırılmamıştır.</span>
       <span>Politika zayıflatma otomatik etkinleşmez; açık kullanıcı kararı, yeni sürüm, risk analizi ve rollback kanıtı gerekir.</span></div>
-    <div className="workspace-grid"><section><h3>Komut paleti ve arama</h3><label>Yetkili komutlarda ara<input value={query}
+    <div className="workspace-grid"><section><h3>Komut paleti ve arama</h3><label>Yerel gezinme önizlemesinde ara<input value={query}
       onChange={event=>setQuery(event.target.value)} placeholder="Arşiv, yaşam merkezi, gizlilik…"/></label>
       <ul>{results.map(item=><li key={item.id}><strong>{item.title}</strong><small> · rota {item.id}</small></li>)}</ul>
-      {query&&results.length===0?<p>Yetkili yerel eşleşme yok.</p>:null}</section><section><h3>Kişisel görünüm modu</h3><label>Mod<select value={mode}
+      {query&&results.length===0?<p>Yerel gezinme eşleşmesi yok.</p>:null}</section><section><h3>Kişisel görünüm modu</h3><label>Mod<select value={mode}
         onChange={event=>setMode(event.target.value as (typeof modes)[number])}>{modes.map(item=><option key={item} value={item}>{modeLabel[item]}</option>)}</select></label>
       <p>Seçili mod: <strong>{modeLabel[mode]}</strong>. Bu oturumdaki önizleme kalıcı tercih olarak kaydedilmez.</p></section></div>
     <section><h3>Ana ekran kart sırası</h3><ol>{cards.map((card,index)=><li key={card}><span>{card}</span>{' '}

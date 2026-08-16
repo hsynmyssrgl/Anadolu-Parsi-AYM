@@ -244,6 +244,13 @@ import {
   PrepareFamilyMeetingAiMinutesUseCase,
   FinalizeFamilyMeetingMinutesUseCase,
   unavailableFamilyMeetingAiMinutesProvider,
+  ApplyCommunicationFileSharingCommandUseCase,
+  GetCommunicationFileSharingCenterUseCase,
+  GetCommunicationFileSafePreviewUseCase,
+  MaintainCommunicationFilePayloadVaultUseCase,
+  PrepareCommunicationFileUseCase,
+  GetCommunicationAuditArchiveSafeCenterUseCase,
+  type CommunicationFilePayloadPort,
   type CommunicationCallPreflightPort,
   ListLifeRecordsUseCase,
   CreateLifeRecordUseCase,
@@ -429,6 +436,16 @@ import type {
   SetCommunicationHistoryAccessInput
 } from '@ppt/domain';
 import type {
+  CommunicationAuditArchiveSafeCenterView,
+  CommunicationFileSharingCenterView,
+  CommunicationFileSharingCommand,
+  CommunicationFileSharingMutationReceiptView,
+  CommunicationFileSharingRendererCenterView,
+  CommunicationFileSharingRendererMutationReceiptView,
+  CommunicationFileSafePreviewView,
+  CommunicationFilePayloadMaintenanceView
+} from '@ppt/domain';
+import type {
   AddFamilyMeetingCollaborationInput,
   CastFamilyMeetingVoteInput,
   CreateFamilyMeetingInput,
@@ -567,6 +584,13 @@ import {
   RepositoryBackedCommunicationMessagingUnitOfWork
 } from './communication-messaging-application-adapter.js';
 import {
+  RepositoryBackedCommunicationAuditArchiveQueryPort
+} from './communication-audit-archive-application-adapter.js';
+import {
+  RepositoryBackedCommunicationFileSharingQueryPort,
+  RepositoryBackedCommunicationFileSharingUnitOfWork
+} from './communication-file-sharing-application-adapter.js';
+import {
   RepositoryBackedCommunicationRealtimeCallingQueryPort,
   RepositoryBackedCommunicationRealtimeCallingUnitOfWork
 } from './communication-realtime-calling-application-adapter.js';
@@ -584,6 +608,10 @@ import {
   RepositoryBackedFamilyMeetingUnitOfWork
 } from './family-meeting-application-adapter.js';
 import { CommunicationMessagePayloadVault } from './communication-message-payload-vault.js';
+import {
+  CommunicationFilePayloadVault,
+  type CommunicationFileMalwareScannerPort
+} from './communication-file-payload-vault.js';
 import { FamilyMeetingMinutesVault } from './family-meeting-minutes-vault.js';
 import {
   RepositoryBackedLocationPolicyTransactionRunner,
@@ -894,6 +922,12 @@ interface DataStoreOptions {
   communicationMessagePayloads?: CommunicationMessagePayloadPort;
   /** Must resolve to a dedicated directory disjoint from archive, database, key and temporary-open storage. */
   communicationMessagePayloadPath?: string;
+  /** Main-only encrypted file staging seam. Renderer code cannot provide bytes, paths or sealed references. */
+  communicationFilePayloads?: CommunicationFilePayloadPort;
+  /** Main-only malware verdict provider. Absence is represented as provider_unavailable, never as clean. */
+  communicationFileMalwareScanner?: CommunicationFileMalwareScannerPort;
+  /** Must resolve to a dedicated directory disjoint from archive, message payload, database, key and temporary-open storage. */
+  communicationFilePayloadPath?: string;
   /** Main-only protected family-meeting minutes seam. Renderer code cannot provide or replace this authority. */
   familyMeetingMinutesArtifacts?: FamilyMeetingMinutesArtifactPort;
   /** Must resolve to a dedicated directory disjoint from archive, database, key and temporary-open storage. */
@@ -1102,6 +1136,24 @@ const communicationMessagePayloadRoot = (input: {
   return root;
 };
 
+const communicationFilePayloadRoot = (input: {
+  readonly requestedPath?: string;
+  readonly databasePath: string;
+  readonly archivePath: string;
+  readonly keyPath: string;
+  readonly temporaryOpenPath: string;
+  readonly messagePayloadPath: string;
+}): string => {
+  const root = resolve(input.requestedPath ?? `${input.databasePath}.communication-file-payloads`);
+  if (!root.trim() || compositionPathsOverlap(root, input.databasePath) || compositionPathsOverlap(root, input.archivePath)
+    || compositionPathsOverlap(root, input.keyPath) || compositionPathsOverlap(root, input.temporaryOpenPath)
+    || compositionPathsOverlap(root, input.messagePayloadPath)) {
+    throw new PlatformPolicyEnforcementError('ENFORCEMENT_UNAVAILABLE',
+      'Communication file payload root must be separate from message payload, archive, database, key and temporary-open storage');
+  }
+  return root;
+};
+
 const familyMeetingMinutesRoot = (input: {
   readonly requestedPath?: string;
   readonly databasePath: string;
@@ -1135,6 +1187,50 @@ const assertCommunicationMessagePayloadPort = (value: CommunicationMessagePayloa
   }
   return value;
 };
+const communicationFilePayloadFailure = (correlationId: Parameters<CommunicationFilePayloadPort['seal']>[0]['correlationId']) =>
+  err(createAppError({ code: ERROR_CODES.AUTHORIZATION_DENIED, category: 'security',
+    message: 'Protected communication file payload provider is unavailable.', correlationId }));
+const failClosedCommunicationFilePayloads: CommunicationFilePayloadPort = Object.freeze({
+  seal: (input: Parameters<CommunicationFilePayloadPort['seal']>[0]) => communicationFilePayloadFailure(input.correlationId),
+  open: (input: Parameters<CommunicationFilePayloadPort['open']>[0]) => communicationFilePayloadFailure(input.correlationId),
+  discard: (_reference: Parameters<CommunicationFilePayloadPort['discard']>[0],
+    correlationId: Parameters<CommunicationFilePayloadPort['discard']>[1]) => communicationFilePayloadFailure(correlationId),
+  sweepOrphans: (input: Parameters<CommunicationFilePayloadPort['sweepOrphans']>[0]) =>
+    communicationFilePayloadFailure(input.correlationId)
+});
+const assertCommunicationFilePayloadPort = (value: CommunicationFilePayloadPort): CommunicationFilePayloadPort => {
+  if (!value || typeof value.seal !== 'function' || typeof value.open !== 'function' || typeof value.discard !== 'function'
+    || typeof value.sweepOrphans !== 'function') {
+    throw new PlatformPolicyEnforcementError('ENFORCEMENT_UNAVAILABLE',
+      'Explicit communication file payload provider is incomplete');
+  }
+  return value;
+};
+const projectCommunicationFileSharingCenter = (
+  value: CommunicationFileSharingCenterView
+): CommunicationFileSharingRendererCenterView => Object.freeze({ schemaVersion: 1,
+  files: Object.freeze(value.files.map((file) => Object.freeze({ id: file.id,
+    ...(file.roomId === undefined ? {} : { roomId: file.roomId }),
+    ...(file.meetingId === undefined ? {} : { meetingId: file.meetingId }), displayName: file.displayName,
+    mimeType: file.mimeType, totalBytes: file.totalBytes, totalChunks: file.totalChunks,
+    verifiedChunkCount: file.chunks.length, state: file.state, scanState: file.scanState,
+    versionCount: file.versions.length, comments: Object.freeze([...file.comments]),
+    accessGrants: Object.freeze([...file.accessGrants]),
+    ...(file.archiveItemId === undefined ? {} : { archiveItemId: file.archiveItemId }),
+    ...(file.albumId === undefined ? {} : { albumId: file.albumId }), selectedForStory: file.selectedForStory,
+    likedByPersonIds: Object.freeze([...file.likedByPersonIds]), externalLinkEnabled: false,
+    externalLinkAccessCodeRequired: true, revision: file.revision, createdAt: file.createdAt, updatedAt: file.updatedAt }))),
+  notificationProfile: value.notificationProfile, emergencyAnnouncements: value.emergencyAnnouncements,
+  remoteAssistance: value.remoteAssistance, coWatchSessions: value.coWatchSessions, voiceActions: value.voiceActions,
+  truth: value.truth, revision: value.revision, generatedAt: value.generatedAt });
+const projectCommunicationFileSharingReceipt = (
+  value: CommunicationFileSharingMutationReceiptView
+): CommunicationFileSharingRendererMutationReceiptView => Object.freeze({ commandKind: value.commandKind,
+  previousRevision: value.previousRevision, revision: value.revision, occurredAt: value.occurredAt,
+  replayed: value.replayed, externalOperationPerformed: false, networkUsed: false });
+const communicationFileSharingMainOnlyCommandKinds=new Set<CommunicationFileSharingCommand['kind']>([
+  'prepare_file','record_chunk','set_scan','add_version'
+]);
 const familyMeetingMinutesFailure = (correlationId: Parameters<FamilyMeetingMinutesArtifactPort['seal']>[0]['correlationId']) =>
   err(createAppError({ code: ERROR_CODES.AUTHORIZATION_DENIED, category: 'security',
     message: 'Protected family meeting minutes provider is unavailable.', correlationId }));
@@ -1590,6 +1686,12 @@ export class FamilyDataStore {
   readonly #updateCommunicationDeliveryUseCase:UpdateCommunicationDeliveryUseCase;
   readonly #setCommunicationPresenceUseCase:SetCommunicationPresenceUseCase;
   readonly #setCommunicationRetentionPolicyUseCase:SetCommunicationRetentionPolicyUseCase;
+  readonly #getCommunicationFileSharingCenterUseCase:GetCommunicationFileSharingCenterUseCase;
+  readonly #getCommunicationAuditArchiveSafeCenterUseCase:GetCommunicationAuditArchiveSafeCenterUseCase;
+  readonly #getCommunicationFileSafePreviewUseCase:GetCommunicationFileSafePreviewUseCase;
+  readonly #maintainCommunicationFilePayloadVaultUseCase:MaintainCommunicationFilePayloadVaultUseCase;
+  readonly #prepareCommunicationFileUseCase:PrepareCommunicationFileUseCase;
+  readonly #applyCommunicationFileSharingCommandUseCase:ApplyCommunicationFileSharingCommandUseCase;
   readonly #getCommunicationRealtimeCallingCenterUseCase:GetCommunicationRealtimeCallingCenterUseCase;
   readonly #createCommunicationCallUseCase:CreateCommunicationCallUseCase;
   readonly #runCommunicationCallPreflightUseCase:RunCommunicationCallPreflightUseCase;
@@ -2143,9 +2245,11 @@ export class FamilyDataStore {
           lifePolicyResourceRepository: this.#repositories.lifeRepository,
           householdOperationsPolicyResourceRepository: this.#repositories.householdOperationsRepository,
           childEducationPolicyResourceRepository: this.#repositories.childEducationRepository,
+          communicationAuditArchivePolicyResourceRepository: this.#repositories.communicationAuditArchiveRepository,
           placesTravelPolicyResourceRepository: this.#repositories.placesTravelRepository,
           familyAiAssistantPolicyResourceRepository: this.#repositories.familyAiAssistantRepository,
           familyMeetingPolicyResourceRepository: this.#repositories.familyMeetingRepository,
+          communicationFileSharingPolicyResourceRepository: this.#repositories.communicationFileSharingRepository,
           memoryStudioPolicyResourceRepository: this.#repositories.memoryStudioRepository,
           smartHomeEnergyPolicyResourceRepository: this.#repositories.smartHomeEnergyRepository,
           signedPluginPlatformPolicyResourceRepository: this.#repositories.signedPluginPlatformRepository,
@@ -2169,12 +2273,16 @@ export class FamilyDataStore {
       householdOperationsRepository: this.#repositories.householdOperationsRepository,
       childEducationRepository: this.#repositories.childEducationRepository,
       childEducationPolicyResourceRepository: this.#repositories.childEducationRepository,
+      communicationAuditArchiveRepository: this.#repositories.communicationAuditArchiveRepository,
+      communicationAuditArchivePolicyResourceRepository: this.#repositories.communicationAuditArchiveRepository,
       placesTravelRepository: this.#repositories.placesTravelRepository,
       placesTravelPolicyResourceRepository: this.#repositories.placesTravelRepository,
       familyAiAssistantRepository: this.#repositories.familyAiAssistantRepository,
       familyAiAssistantPolicyResourceRepository: this.#repositories.familyAiAssistantRepository,
       familyMeetingRepository: this.#repositories.familyMeetingRepository,
       familyMeetingPolicyResourceRepository: this.#repositories.familyMeetingRepository,
+      communicationFileSharingRepository: this.#repositories.communicationFileSharingRepository,
+      communicationFileSharingPolicyResourceRepository: this.#repositories.communicationFileSharingRepository,
       memoryStudioRepository: this.#repositories.memoryStudioRepository,
       memoryStudioPolicyResourceRepository: this.#repositories.memoryStudioRepository,
       smartHomeEnergyRepository: this.#repositories.smartHomeEnergyRepository,
@@ -2955,16 +3063,17 @@ export class FamilyDataStore {
       communicationSecurityUnitOfWork,communicationMlsFoundation);
     this.#setCommunicationHistoryAccessUseCase=new SetCommunicationHistoryAccessUseCase(communicationSecurityUnitOfWork);
     this.#freezeCommunicationRoomUseCase=new FreezeCommunicationRoomUseCase(communicationSecurityUnitOfWork);
+    const communicationMessagePayloadPath=communicationMessagePayloadRoot({
+      ...(options.communicationMessagePayloadPath===undefined?{}:{requestedPath:options.communicationMessagePayloadPath}),
+      databasePath:storageLayout.databasePath,archivePath:storageLayout.archivePath,
+      keyPath:storageLayout.vaultKeyPath,temporaryOpenPath:storageLayout.temporaryOpenPath
+    });
     const communicationMessagePayloads=options.communicationMessagePayloads!==undefined
       ?assertCommunicationMessagePayloadPort(options.communicationMessagePayloads)
       :options.protectedSideArtifacts===undefined
         ?failClosedCommunicationMessagePayloads
         :new CommunicationMessagePayloadVault({
-            rootDirectory:communicationMessagePayloadRoot({
-              ...(options.communicationMessagePayloadPath===undefined?{}:{requestedPath:options.communicationMessagePayloadPath}),
-              databasePath:storageLayout.databasePath,archivePath:storageLayout.archivePath,
-              keyPath:storageLayout.vaultKeyPath,temporaryOpenPath:storageLayout.temporaryOpenPath
-            }),
+            rootDirectory:communicationMessagePayloadPath,
             protectedStore:options.protectedSideArtifacts
           });
     const communicationMessagingDependencies={...lifeApplicationDependencies,
@@ -2987,6 +3096,43 @@ export class FamilyDataStore {
     this.#updateCommunicationDeliveryUseCase=new UpdateCommunicationDeliveryUseCase(communicationMessagingUnitOfWork);
     this.#setCommunicationPresenceUseCase=new SetCommunicationPresenceUseCase(communicationMessagingUnitOfWork);
     this.#setCommunicationRetentionPolicyUseCase=new SetCommunicationRetentionPolicyUseCase(communicationMessagingUnitOfWork);
+    const communicationFilePayloads=options.communicationFilePayloads!==undefined
+      ?assertCommunicationFilePayloadPort(options.communicationFilePayloads)
+      :options.protectedSideArtifacts===undefined
+        ?failClosedCommunicationFilePayloads
+        :new CommunicationFilePayloadVault({
+            rootDirectory:communicationFilePayloadRoot({
+              ...(options.communicationFilePayloadPath===undefined?{}:{requestedPath:options.communicationFilePayloadPath}),
+              databasePath:storageLayout.databasePath,archivePath:storageLayout.archivePath,
+              keyPath:storageLayout.vaultKeyPath,temporaryOpenPath:storageLayout.temporaryOpenPath,
+              messagePayloadPath:communicationMessagePayloadPath
+            }),
+            protectedStore:options.protectedSideArtifacts,
+            ...(options.communicationFileMalwareScanner===undefined?{}:{malwareScanner:options.communicationFileMalwareScanner})
+          });
+    const communicationFileSharingDependencies={...lifeApplicationDependencies,
+      communicationFileSharingRepository:this.#repositories.communicationFileSharingRepository,
+      communicationFileSharingPolicyResourceRepository:this.#repositories.communicationFileSharingRepository} as const;
+    const communicationFileSharingQuery=new RepositoryBackedCommunicationFileSharingQueryPort(
+      communicationFileSharingDependencies,lifePolicyTransactionRunner);
+    const communicationFileSharingUnitOfWork=new RepositoryBackedCommunicationFileSharingUnitOfWork(
+      communicationFileSharingDependencies,lifePolicyTransactionRunner);
+    this.#getCommunicationFileSharingCenterUseCase=new GetCommunicationFileSharingCenterUseCase(communicationFileSharingQuery);
+    this.#getCommunicationFileSafePreviewUseCase=new GetCommunicationFileSafePreviewUseCase(
+      communicationFileSharingQuery,communicationFilePayloads);
+    this.#maintainCommunicationFilePayloadVaultUseCase=new MaintainCommunicationFilePayloadVaultUseCase(
+      communicationFileSharingQuery,communicationFilePayloads);
+    this.#prepareCommunicationFileUseCase=new PrepareCommunicationFileUseCase(
+      communicationFileSharingUnitOfWork,communicationFilePayloads);
+    this.#applyCommunicationFileSharingCommandUseCase=new ApplyCommunicationFileSharingCommandUseCase(
+      communicationFileSharingUnitOfWork);
+    const communicationAuditArchiveDependencies={...lifeApplicationDependencies,
+      communicationAuditArchiveRepository:this.#repositories.communicationAuditArchiveRepository,
+      communicationAuditArchivePolicyResourceRepository:this.#repositories.communicationAuditArchiveRepository} as const;
+    const communicationAuditArchiveQuery=new RepositoryBackedCommunicationAuditArchiveQueryPort(
+      communicationAuditArchiveDependencies,lifePolicyTransactionRunner);
+    this.#getCommunicationAuditArchiveSafeCenterUseCase=new GetCommunicationAuditArchiveSafeCenterUseCase(
+      communicationAuditArchiveQuery);
     const communicationRealtimeCallingDependencies={...lifeApplicationDependencies,
       communicationRealtimeCallingRepository:this.#repositories.communicationRealtimeCallingRepository,
       communicationRealtimeCallingPolicyResourceRepository:this.#repositories.communicationRealtimeCallingRepository} as const;
@@ -6811,6 +6957,55 @@ export class FamilyDataStore {
     const result=await this.#setCommunicationRetentionPolicyUseCase.execute({
       context:this.#lifeApplicationContext('communication-retention-update'),command:input});
     if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  public async getCommunicationFileSharingCenter():Promise<CommunicationFileSharingRendererCenterView>{
+    const result=await this.#getCommunicationFileSharingCenterUseCase.execute(
+      this.#lifeApplicationContext('communication-file-sharing-center'));
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return projectCommunicationFileSharingCenter(result.value);
+  }
+
+  public async getCommunicationFileSafePreview(fileId:string):Promise<CommunicationFileSafePreviewView>{
+    const result=await this.#getCommunicationFileSafePreviewUseCase.execute(
+      this.#lifeApplicationContext('communication-file-sharing-safe-preview'),fileId);
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  /** Main-only scheduled maintenance. It derives the exact owner and live payload references through a fresh PEP read. */
+  public async maintainCommunicationFilePayloadVault():Promise<CommunicationFilePayloadMaintenanceView>{
+    const result=await this.#maintainCommunicationFilePayloadVaultUseCase.execute(
+      this.#lifeApplicationContext('communication-file-payload-maintenance'));
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  public async getCommunicationAuditArchiveCenter():Promise<CommunicationAuditArchiveSafeCenterView>{
+    const result=await this.#getCommunicationAuditArchiveSafeCenterUseCase.execute(
+      this.#lifeApplicationContext('communication-audit-archive-center'));
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return result.value;
+  }
+
+  /** Main-only file selection boundary. Renderer IPC never supplies paths, raw bytes, hashes or sealed references. */
+  public async prepareCommunicationFile(input:{readonly clientOperationId:string;readonly expectedRevision:number;
+    readonly roomId?:string;readonly meetingId?:string;readonly displayName:string;readonly mimeType:string;
+    readonly bytes:Uint8Array}):Promise<CommunicationFileSharingRendererMutationReceiptView>{
+    const result=await this.#prepareCommunicationFileUseCase.execute({
+      context:this.#lifeApplicationContext('communication-file-sharing-prepare'),...input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return projectCommunicationFileSharingReceipt(result.value);
+  }
+
+  public async applyCommunicationFileSharingCommand(input:{readonly clientOperationId:string;readonly expectedRevision:number;
+    readonly command:CommunicationFileSharingCommand}):Promise<CommunicationFileSharingRendererMutationReceiptView>{
+    if(communicationFileSharingMainOnlyCommandKinds.has(input.command.kind))
+      throw new Error('[AUTHORIZATION-DENIED] File payload, chunk and scan evidence are main-process authorities.');
+    const result=await this.#applyCommunicationFileSharingCommandUseCase.execute({
+      context:this.#lifeApplicationContext('communication-file-sharing-mutate'),...input});
+    if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);
+    return projectCommunicationFileSharingReceipt(result.value);
   }
 
   public async getCommunicationRealtimeCallingCenter():Promise<CommunicationRealtimeCallingCenterView>{

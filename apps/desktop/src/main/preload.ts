@@ -37,7 +37,11 @@ import type {
   LocalGovernedOcrResultReadIpcInput,
   LocalGovernedOcrSearchIpcInput,
   LocalGovernedOcrSearchIpcView,
-  LocalGovernedOcrSetEnabledIpcInput
+  LocalGovernedOcrSetEnabledIpcInput,
+  CommunicationFileSharingApplyIpcInput,
+  CommunicationFileSharingPrepareCancelledIpcView,
+  CommunicationFileSharingPreviewIpcInput,
+  CommunicationFileSharingSelectIpcInput
 } from './ipc-integration-policy.js';
 import type { FamilyEventView, FamilyMutationResultView, SetFamilyEventArchivedInput, UpdateFamilyEventInput } from '@ppt/domain';
 import type { UnifiedAuthorizedSearchInput, UnifiedAuthorizedSearchView } from '@ppt/domain';
@@ -60,6 +64,12 @@ import type {
   RemoveCommunicationRoomMemberInput,
   RevokeCommunicationDeviceCredentialInput,
   SetCommunicationHistoryAccessInput
+} from '@ppt/domain';
+import type {
+  CommunicationAuditArchiveSafeCenterView,
+  CommunicationFileSharingRendererCenterView,
+  CommunicationFileSharingRendererMutationReceiptView,
+  CommunicationFileSafePreviewView
 } from '@ppt/domain';
 import type {
   AnnotateCommunicationMessageInput,
@@ -200,7 +210,11 @@ export type {
   LocalGovernedOcrResultReadIpcInput,
   LocalGovernedOcrSearchIpcInput,
   LocalGovernedOcrSearchIpcView,
-  LocalGovernedOcrSetEnabledIpcInput
+  LocalGovernedOcrSetEnabledIpcInput,
+  CommunicationFileSharingApplyIpcInput,
+  CommunicationFileSharingPrepareCancelledIpcView,
+  CommunicationFileSharingPreviewIpcInput,
+  CommunicationFileSharingSelectIpcInput
 };
 export interface CompletePasskeyRegistrationIpcInput {
   readonly expectedRevision:number;readonly clientOperationId:string;readonly challengeId:string;readonly displayName:string;
@@ -829,6 +843,17 @@ contextBridge.exposeInMainWorld('pardus', {
     invoke('communicationMessaging:setPresence',input),
   setCommunicationRetentionPolicy:(input:SetCommunicationRetentionPolicyInput):Promise<CommunicationMessagingMutationReceiptView>=>
     invoke('communicationMessaging:setRetentionPolicy',input),
+  getCommunicationFileSharingCenter:():Promise<CommunicationFileSharingRendererCenterView>=>
+    invoke('communicationFileSharing:getCenter'),
+  getCommunicationAuditArchiveCenter:():Promise<CommunicationAuditArchiveSafeCenterView>=>
+    invoke('communicationAuditArchive:getCenter'),
+  getCommunicationFileSafePreview:(input:CommunicationFileSharingPreviewIpcInput):Promise<CommunicationFileSafePreviewView>=>
+    invoke('communicationFileSharing:getSafePreview',input),
+  selectAndPrepareCommunicationFile:(input:CommunicationFileSharingSelectIpcInput)
+    :Promise<CommunicationFileSharingRendererMutationReceiptView|CommunicationFileSharingPrepareCancelledIpcView>=>
+    invoke('communicationFileSharing:selectAndPrepare',input),
+  applyCommunicationFileSharingCommand:(input:CommunicationFileSharingApplyIpcInput)
+    :Promise<CommunicationFileSharingRendererMutationReceiptView>=>invoke('communicationFileSharing:apply',input),
   getCommunicationRealtimeCallingCenter:():Promise<CommunicationRealtimeCallingCenterView>=>
     invoke('communicationCalling:getCenter'),
   createCommunicationCall:(input:CreateCommunicationCallInput):Promise<CommunicationRealtimeCallingMutationReceiptView>=>

@@ -249,7 +249,7 @@ export const verifyFamilyEmergencyPreparednessBoundary = async () => {
     && Object.values(item.chain).every((value) => value === true)));
   check('platform policy and capability gates remain exact PASS', astGate.status === 'PASS'
     && capabilityGate.status === 'PASS' && astGate.directRoleAuthorizationBypasses === 0);
-  check('PPK-022 current successor ratchet remains exact', capabilityGate.exactManifestSurfaces === 375);
+  check('PPK-022 current successor ratchet remains exact', capabilityGate.exactManifestSurfaces === 392);
   check('root package exposes boundary targeted contract runtime and completion commands',
     includesAll(JSON.stringify(rootPackage.scripts), [
       'verify:b5-family-emergency-preparedness:boundary',

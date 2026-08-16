@@ -6,6 +6,7 @@ import {
   AppendCommunicationAuditEventUseCase,
   RegisterCommunicationArchiveCheckpointUseCase,
   communicationAuditArchiveCenter,
+  communicationAuditArchiveSafeCenter,
   verifyCommunicationAuditChain,
   type CommunicationAuditArchiveUnitOfWork,
   type CommunicationAuditArchiveWriteScope,
@@ -20,7 +21,8 @@ const NOW=asIsoDateTime('2026-08-16T01:00:00.000Z');
 class State{public events:CommunicationAuditEventView[]=[];public checkpoints:CommunicationArchiveIntegrityCheckpointView[]=[];
   public operations=new Map<string,CommunicationAuditOperationRow>();public clone(){const next=new State();next.events=[...this.events];
     next.checkpoints=[...this.checkpoints];next.operations=new Map(this.operations);return next;}}
-class Scope implements CommunicationAuditArchiveWriteScope{public readonly key={familyId:FAMILY,ownerPersonId:OWNER};
+class Scope implements CommunicationAuditArchiveWriteScope{public readonly key={familyId:FAMILY,accountId:'account-owner-34-h',
+  actorPersonId:OWNER,ownerPersonId:OWNER};
   public readonly occurredAt=NOW;public constructor(private readonly state:State){}public listEvents(){return ok(Object.freeze([...this.state.events]));}
   public listCheckpoints(){return ok(Object.freeze([...this.state.checkpoints]));}public findOperation(id:string){return ok(this.state.operations.get(id)??null);}
   public appendEvent(event:CommunicationAuditEventView,operation:CommunicationAuditOperationRow){this.state.events.push(event);
@@ -35,7 +37,7 @@ describe('34-H communication audit and archive integrity use cases',()=>{
     const first=await useCase.execute({context:CONTEXT,command:{clientOperationId:'audit-room-34-h',actorDeviceId:'device-34-h',
       eventKind:'room_joined',resourceType:'communication_room',resourceId:'room-34-h',resourceVersion:2,resourceFingerprint:'a'.repeat(64)}});
     const second=await useCase.execute({context:CONTEXT,command:{clientOperationId:'audit-file-34-h',actorDeviceId:'device-34-h',
-      eventKind:'file_shared',resourceType:'communication_file_share',resourceId:'file-34-h',resourceVersion:1,resourceFingerprint:'b'.repeat(64)}});
+      eventKind:'file_shared',resourceType:'communication_file_sharing',resourceId:'file-34-h',resourceVersion:1,resourceFingerprint:'b'.repeat(64)}});
     expect(first.ok&&second.ok).toBe(true);expect(verifyCommunicationAuditChain(unit.state.events)).toBe(true);
     expect(unit.state.events[0]).toMatchObject({sequence:1,previousHash:'0'.repeat(64),contentCopiedToAudit:false});
     expect(unit.state.events[1]?.previousHash).toBe(unit.state.events[0]?.eventHash);
@@ -45,6 +47,13 @@ describe('34-H communication audit and archive integrity use cases',()=>{
     const replay=await useCase.execute({context:CONTEXT,command:{clientOperationId:'audit-room-34-h',actorDeviceId:'device-34-h',
       eventKind:'room_joined',resourceType:'communication_room',resourceId:'room-34-h',resourceVersion:2,resourceFingerprint:'a'.repeat(64)}});
     expect(replay).toEqual(first);
+    expect(unit.intents[0]).toMatchObject({resourceType:'communication_audit_archive',action:'create',capability:'family.write',
+      ownerPersonId:OWNER,privacy:'private'});
+    expect(unit.state.operations.get('audit-room-34-h')?.policyResourceId).toMatch(/^communication-audit:[0-9a-f]{64}$/u);
+    const mismatched=await useCase.execute({context:CONTEXT,command:{clientOperationId:'audit-mismatch-34-h',actorDeviceId:'device-34-h',
+      eventKind:'file_shared',resourceType:'communication_message',resourceId:'file-34-h',resourceVersion:1,
+      resourceFingerprint:'c'.repeat(64)}});
+    expect(mismatched).toMatchObject({ok:false,error:{category:'validation'}});
   });
   it('records only evidence-backed local integrity checkpoints and never implies remote verification',async()=>{const unit=new Unit();
     const useCase=new RegisterCommunicationArchiveCheckpointUseCase(unit);const invalid=await useCase.execute({context:CONTEXT,command:{
@@ -57,6 +66,11 @@ describe('34-H communication audit and archive integrity use cases',()=>{
       externalBackupProviderVerified:false,remoteReplicationVerified:false});
     const center=communicationAuditArchiveCenter(unit.state.events,unit.state.checkpoints,NOW);
     expect(center).toMatchObject({chainValid:true,truth:{contentExcludedFromAuditByConstruction:true,
-      productionRemoteReplicationConfigured:false,realRestoreDrillPerformed:false}});
+      productionRemoteReplicationConfigured:false,realRestoreDrillPerformed:false,productionQueryApiComposed:true,
+      productionEventProducerHooksComposed:false,rendererAuditMutationAuthorityExposed:false}});
+    const safe=communicationAuditArchiveSafeCenter(center);
+    expect(safe).toMatchObject({eventCount:0,checkpointCount:1,networkUsed:false,cloudUsed:false,
+      recentCheckpoints:[{archiveGeneration:1,externalBackupProviderVerified:false,remoteReplicationVerified:false}]});
+    expect(JSON.stringify(safe)).not.toMatch(/manifestSha|person|device|resourceId|eventHash|previousHash/iu);
   });
 });

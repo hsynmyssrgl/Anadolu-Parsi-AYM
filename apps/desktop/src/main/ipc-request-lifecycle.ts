@@ -218,6 +218,15 @@ const communicationMessagingWriteChannels=new Set<string>(['communicationMessagi
   'communicationMessaging:setLifecycle','communicationMessaging:annotate','communicationMessaging:updateDelivery',
   'communicationMessaging:setPresence','communicationMessaging:setRetentionPolicy']);
 const communicationMessagingChannels=new Set<string>([...communicationMessagingReadChannels,...communicationMessagingWriteChannels]);
+const communicationFileSharingReadChannels=new Set<string>([
+  'communicationFileSharing:getCenter','communicationFileSharing:getSafePreview'
+]);
+const communicationAuditArchiveReadChannels=new Set<string>(['communicationAuditArchive:getCenter']);
+const communicationFileSharingWriteChannels=new Set<string>(['communicationFileSharing:selectAndPrepare',
+  'communicationFileSharing:apply']);
+const communicationFileSharingChannels=new Set<string>([
+  ...communicationFileSharingReadChannels,...communicationFileSharingWriteChannels
+]);
 const communicationCallingReadChannels=new Set<string>(['communicationCalling:getCenter']);
 const communicationCallingWriteChannels=new Set<string>(['communicationCalling:create','communicationCalling:runPreflight',
   'communicationCalling:updateControls','communicationCalling:advance','communicationCalling:setPreferences']);
@@ -249,6 +258,7 @@ const cancellableInteractiveAuthenticationChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLifecyclePolicy => {
+  if(communicationAuditArchiveReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
   if(familyMeetingReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
   if(familyMeetingWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
   if(localTranslationReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
@@ -259,6 +269,8 @@ export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLif
   if(communicationCallingWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
   if(communicationMessagingReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
   if(communicationMessagingWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
+  if(communicationFileSharingReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
+  if(communicationFileSharingWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
   if(communicationSecurityReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
   if(communicationSecurityWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
   if(signedPluginPlatformReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
@@ -369,6 +381,8 @@ const standardAdmissionChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestAdmissionPolicy = (channel: string): IpcRequestAdmissionPolicy => {
+  if(communicationAuditArchiveReadChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
+    maxConcurrentPerSender:2,maxConcurrentPerChannel:1,maxQueuedPerSender:4,queueTimeoutMs:2_500});
   if(familyMeetingChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
     maxConcurrentPerSender:2,maxConcurrentPerChannel:1,maxQueuedPerSender:4,queueTimeoutMs:2_500});
   if(localTranslationChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
@@ -378,6 +392,8 @@ export const resolveIpcRequestAdmissionPolicy = (channel: string): IpcRequestAdm
   if(communicationCallingChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
     maxConcurrentPerSender:2,maxConcurrentPerChannel:1,maxQueuedPerSender:4,queueTimeoutMs:2_500});
   if(communicationMessagingChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
+    maxConcurrentPerSender:2,maxConcurrentPerChannel:1,maxQueuedPerSender:4,queueTimeoutMs:2_500});
+  if(communicationFileSharingChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
     maxConcurrentPerSender:2,maxConcurrentPerChannel:1,maxQueuedPerSender:4,queueTimeoutMs:2_500});
   if(communicationSecurityChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
     maxConcurrentPerSender:2,maxConcurrentPerChannel:1,maxQueuedPerSender:4,queueTimeoutMs:2_500});
@@ -501,6 +517,7 @@ export interface IpcRequestRatePolicy {
 }
 
 export const resolveIpcRequestRatePolicy = (channel: string): IpcRequestRatePolicy => {
+  if(communicationAuditArchiveReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:120,windowMs:60_000});
   if(familyMeetingReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:120,windowMs:60_000});
   if(familyMeetingWriteChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:16,windowMs:60_000});
   if(localTranslationReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:120,windowMs:60_000});
@@ -511,6 +528,8 @@ export const resolveIpcRequestRatePolicy = (channel: string): IpcRequestRatePoli
   if(communicationCallingWriteChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:16,windowMs:60_000});
   if(communicationMessagingReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:120,windowMs:60_000});
   if(communicationMessagingWriteChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:24,windowMs:60_000});
+  if(communicationFileSharingReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:120,windowMs:60_000});
+  if(communicationFileSharingWriteChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:16,windowMs:60_000});
   if(communicationSecurityReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:60,windowMs:60_000});
   if(communicationSecurityWriteChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:12,windowMs:60_000});
   if(signedPluginPlatformReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:60,windowMs:60_000});

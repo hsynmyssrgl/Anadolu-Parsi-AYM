@@ -51,12 +51,22 @@ if (mode === 'contract' || mode === 'runtime') {
   const registry = json('config/accepted-scope-registry.json');
   const decision = read(governanceFiles[2]);
   const threat = read(governanceFiles[3]);
+  const audit = read(governanceFiles[4]);
   const steps = roadmap.packages.map((item) => item.step);
   const assigned = roadmap.packages.flatMap((item) => item.requirementIds);
   check('34-L identity and final planned state are exact', scope.step === '34-L' && scope.decision === 'DEC-249'
     && scope.status === 'PLANNED_FINAL' && inventory.status === 'PLANNED_FINAL');
   check('acceptance remains fail-honest', scope.truth?.requirementsClosed === false
     && scope.truth?.countsAsRequirementPass === false && inventory.countsAsRequirementPass === false);
+  check('current local validation evidence is exact and remains non-accepting', scope.validation?.localPackageBoundaries?.checks === 51
+    && scope.validation?.localPackageContracts?.checks === 30
+    && scope.validation?.localPackageRuntimes?.checks === 171
+    && scope.validation?.targeted?.files === 12 && scope.validation?.targeted?.tests === 47
+    && scope.validation?.fullRegression?.files === 286 && scope.validation?.fullRegression?.tests === 1920
+    && scope.validation?.productionBuilds?.workspaces === 18
+    && scope.validation?.artifactIndex?.files === 6627 && scope.validation?.artifactIndex?.documents === 3830
+    && inventory.localEvidence?.fullRegressionTests === 1920
+    && audit.includes('286/286') && audit.includes('1920/1920'));
   check('local receipt is real while manual and external evidence remain NOT_RUN', Object.values(scope.manualEvidence ?? {}).every((value) => value === 'NOT_RUN')
     && scope.persistentReceiptStatus === 'PASS_LOCAL_ONLY'
     && scope.persistentReceiptPath === 'artifacts/validation/34-L-bronze-local-closure-receipt.json'

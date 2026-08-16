@@ -5,7 +5,9 @@ import {
   type AppendCommunicationAuditEventInput,
   type CommunicationArchiveIntegrityCheckpointView,
   type CommunicationAuditArchiveCenterView,
+  type CommunicationAuditArchiveSafeCenterView,
   type CommunicationAuditEventView,
+  type CommunicationAuditResourceType,
   type RegisterCommunicationArchiveCheckpointInput
 } from '@ppt/domain';
 import type {
@@ -33,9 +35,11 @@ export interface CommunicationAuditArchiveUnitOfWork {
     operation: (scope: CommunicationAuditArchiveWriteScope) => Result<T, AppError>): Promise<Result<T, AppError>>;
 }
 
-const SAFE = /^[A-Za-z0-9][A-Za-z0-9._:@/-]{1,255}$/u;
+const SAFE = /^[A-Za-z0-9][A-Za-z0-9._:@/-]{1,127}$/u;
 const SHA = /^[0-9a-f]{64}$/u;
 const ZERO_HASH = '0'.repeat(64);
+const SAFE_EVENT_LIMIT = 100;
+const SAFE_CHECKPOINT_LIMIT = 50;
 const hash = (value: unknown): string => createHash('sha256').update(JSON.stringify(value), 'utf8').digest('hex');
 const appError = (context: LifeApplicationContext, code: AppError['code'], category: AppError['category'], message: string) =>
   createAppError({ code, category, message, correlationId: context.correlationId });
@@ -45,8 +49,21 @@ const conflict = (context: LifeApplicationContext, message: string) => appError(
 
 export const communicationAuditArchiveReadIntent = (): LifePolicyIntent => ({ action: 'read', capability: 'family.read',
   resourceType: 'communication_audit_archive', resourceId: '*', purpose: 'general' });
-export const communicationAuditArchiveWriteIntent = (resourceId: string): LifePolicyIntent => ({ action: 'create',
-  capability: 'family.write', resourceType: 'communication_audit_archive', resourceId, purpose: 'general' });
+export const communicationAuditPolicyResourceId = (context: LifeApplicationContext, clientOperationId: string): string =>
+  `communication-audit:${hash({ familyId: context.familyId, ownerPersonId: context.actor.personId, clientOperationId })}`;
+export const communicationAuditArchiveWriteIntent = (context: LifeApplicationContext, clientOperationId: string): LifePolicyIntent => ({
+  action: 'create', capability: 'family.write', resourceType: 'communication_audit_archive',
+  resourceId: communicationAuditPolicyResourceId(context, clientOperationId), purpose: 'general',
+  ...(context.actor.personId ? { ownerPersonId: context.actor.personId, privacy: 'private' as const } : {})
+});
+
+const resourceTypeForEvent = Object.freeze({
+  room_joined: 'communication_room', room_left: 'communication_room',
+  call_started: 'communication_call_session', call_ended: 'communication_call_session',
+  file_shared: 'communication_file_sharing', permission_changed: 'communication_permission',
+  message_created: 'communication_message', message_deleted: 'communication_message',
+  recording_consent_changed: 'communication_recording_request'
+} satisfies Readonly<Record<CommunicationAuditEventView['eventKind'], CommunicationAuditResourceType>>);
 
 const eventMaterial = (event: Omit<CommunicationAuditEventView, 'eventHash'|'contentCopiedToAudit'>) => ({
   id: event.id, familyId: event.familyId, ownerPersonId: event.ownerPersonId, actorPersonId: event.actorPersonId,
@@ -76,9 +93,37 @@ export const communicationAuditArchiveCenter = (
   checkpoints: Object.freeze([...checkpoints].sort((left, right) => right.archiveGeneration - left.archiveGeneration)),
   chainValid: verifyCommunicationAuditChain(events), truth: communicationAuditArchiveTruth, generatedAt: asIsoDateTime(generatedAt) });
 
+export const communicationAuditArchiveSafeCenter = (
+  center: CommunicationAuditArchiveCenterView
+): CommunicationAuditArchiveSafeCenterView => Object.freeze({ schemaVersion: 1,
+  eventCount: center.events.length, checkpointCount: center.checkpoints.length,
+  recentEvents: Object.freeze(center.events.slice(0, SAFE_EVENT_LIMIT).map((event) => Object.freeze({
+    eventKind: event.eventKind, resourceType: event.resourceType, resourceVersion: event.resourceVersion,
+    sequence: event.sequence, occurredAt: event.occurredAt
+  }))),
+  recentCheckpoints: Object.freeze(center.checkpoints.slice(0, SAFE_CHECKPOINT_LIMIT).map((checkpoint) => Object.freeze({
+    archiveGeneration: checkpoint.archiveGeneration, vaultVerified: checkpoint.vaultVerified,
+    backupVerified: checkpoint.backupVerified, replicaVerified: checkpoint.replicaVerified,
+    restoreVerified: checkpoint.restoreVerified, externalBackupProviderVerified: false,
+    remoteReplicationVerified: false, createdAt: checkpoint.createdAt
+  }))),
+  recentEventsTruncated: center.events.length > SAFE_EVENT_LIMIT,
+  recentCheckpointsTruncated: center.checkpoints.length > SAFE_CHECKPOINT_LIMIT,
+  chainValid: center.chainValid, truth: center.truth, generatedAt: center.generatedAt,
+  networkUsed: false, cloudUsed: false
+});
+
 export class GetCommunicationAuditArchiveCenterUseCase {
   public constructor(private readonly query: CommunicationAuditArchiveQueryPort) {}
   public execute(context: LifeApplicationContext) { return this.query.load(context); }
+}
+
+export class GetCommunicationAuditArchiveSafeCenterUseCase {
+  public constructor(private readonly query: CommunicationAuditArchiveQueryPort) {}
+  public async execute(context: LifeApplicationContext): Promise<Result<CommunicationAuditArchiveSafeCenterView, AppError>> {
+    const loaded = await this.query.load(context);
+    return loaded.ok ? ok(communicationAuditArchiveSafeCenter(loaded.value)) : loaded;
+  }
 }
 
 export class AppendCommunicationAuditEventUseCase {
@@ -86,11 +131,13 @@ export class AppendCommunicationAuditEventUseCase {
   public execute(input: { readonly context: LifeApplicationContext; readonly command: AppendCommunicationAuditEventInput }) {
     const { context, command } = input; const ownerPersonId = context.actor.personId;
     if (!ownerPersonId) return Promise.resolve(err(denied(context, 'İletişim denetimi kişi bağlı oturum gerektirir.')));
-    if (![command.clientOperationId,command.actorDeviceId,command.resourceType,command.resourceId].every((value) => SAFE.test(value))
+    if (![command.clientOperationId,command.actorDeviceId,command.resourceId].every((value) => SAFE.test(value))
+      || command.resourceType !== resourceTypeForEvent[command.eventKind]
       || !Number.isSafeInteger(command.resourceVersion) || command.resourceVersion < 1 || !SHA.test(command.resourceFingerprint))
       return Promise.resolve(err(invalid(context, 'İletişim denetim olayı yalnız güvenli kimlik/hash/sürüm metadatası kabul eder.')));
     const requestFingerprint = hash(command);
-    return this.uow.execute(context, communicationAuditArchiveWriteIntent(command.resourceId), (scope) => {
+    const policyResourceId = communicationAuditPolicyResourceId(context, command.clientOperationId);
+    return this.uow.execute(context, communicationAuditArchiveWriteIntent(context, command.clientOperationId), (scope) => {
       const prior = scope.findOperation(command.clientOperationId); if (!prior.ok) return prior;
       if (prior.value) return prior.value.operationKind === 'audit_append' && prior.value.requestFingerprint === requestFingerprint
         ? ok(prior.value.resultId) : err(conflict(context, 'Aynı clientOperationId farklı denetim olayına aittir.'));
@@ -108,7 +155,7 @@ export class AppendCommunicationAuditEventUseCase {
         contentCopiedToAudit: false });
       const operation: CommunicationAuditOperationRow = Object.freeze({ clientOperationId: command.clientOperationId,
         familyId: scope.key.familyId, ownerPersonId: scope.key.ownerPersonId, operationKind: 'audit_append',
-        requestFingerprint, resultId: event.id });
+        requestFingerprint, resultId: event.id, policyResourceId });
       const saved = scope.appendEvent(event, operation); return saved.ok ? ok(event.id) : saved;
     });
   }
@@ -127,7 +174,8 @@ export class RegisterCommunicationArchiveCheckpointUseCase {
       || (command.restoreVerified && (!command.restoreManifestSha256 || !command.backupVerified)))
       return Promise.resolve(err(invalid(context, 'İletişim arşiv bütünlük checkpoint kanıtı eksik veya geçersizdir.')));
     const requestFingerprint = hash(command);
-    return this.uow.execute(context, communicationAuditArchiveWriteIntent(`archive-checkpoint-${command.archiveGeneration}`), (scope) => {
+    const policyResourceId = communicationAuditPolicyResourceId(context, command.clientOperationId);
+    return this.uow.execute(context, communicationAuditArchiveWriteIntent(context, command.clientOperationId), (scope) => {
       const prior = scope.findOperation(command.clientOperationId); if (!prior.ok) return prior;
       if (prior.value) return prior.value.operationKind === 'checkpoint_register' && prior.value.requestFingerprint === requestFingerprint
         ? ok(prior.value.resultId) : err(conflict(context, 'Aynı clientOperationId farklı arşiv checkpoint işlemine aittir.'));
@@ -145,7 +193,7 @@ export class RegisterCommunicationArchiveCheckpointUseCase {
         externalBackupProviderVerified: false, remoteReplicationVerified: false, createdAt: scope.occurredAt });
       const operation: CommunicationAuditOperationRow = Object.freeze({ clientOperationId: command.clientOperationId,
         familyId: scope.key.familyId, ownerPersonId: scope.key.ownerPersonId, operationKind: 'checkpoint_register',
-        requestFingerprint, resultId: checkpoint.id });
+        requestFingerprint, resultId: checkpoint.id, policyResourceId });
       const saved = scope.appendCheckpoint(checkpoint, operation); return saved.ok ? ok(checkpoint.id) : saved;
     });
   }

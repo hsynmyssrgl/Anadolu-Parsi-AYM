@@ -19,6 +19,7 @@ import {
   type FamilyMeetingMinutesContentView,
   type FamilyMeetingMutationKind,
   type FamilyMeetingMutationReceiptView,
+  type CommunicationFileSharingCommand,
   type LocalGovernedOcrCenterView,
   type LocalGovernedOcrMutationReceiptView,
   type LocalGovernedOcrResultView,
@@ -3741,6 +3742,284 @@ const communicationMessagingResult=(channel:string,result:unknown):IpcIntegratio
   return valid?accepted():rejected('COMMUNICATION_MESSAGING_RESULT_INVALID','$result');
 };
 
+export const COMMUNICATION_FILE_SHARING_IPC_CHANNELS=Object.freeze({
+  getCenter:'communicationFileSharing:getCenter',
+  getSafePreview:'communicationFileSharing:getSafePreview',
+  selectAndPrepare:'communicationFileSharing:selectAndPrepare',
+  apply:'communicationFileSharing:apply'
+} as const);
+export interface CommunicationFileSharingPreviewIpcInput { readonly fileId:string; }
+export interface CommunicationFileSharingSelectIpcInput {
+  readonly clientOperationId:string;
+  readonly expectedRevision:number;
+  readonly roomId?:string;
+  readonly meetingId?:string;
+}
+export type CommunicationFileSharingRendererCommand=Exclude<CommunicationFileSharingCommand,
+  {readonly kind:'prepare_file'|'record_chunk'|'set_scan'|'add_version'}>;
+export interface CommunicationFileSharingApplyIpcInput {
+  readonly clientOperationId:string;
+  readonly expectedRevision:number;
+  readonly command:CommunicationFileSharingRendererCommand;
+}
+export interface CommunicationFileSharingPrepareCancelledIpcView { readonly canceled:true; }
+const communicationFileSharingChannels=new Set<string>(Object.values(COMMUNICATION_FILE_SHARING_IPC_CHANNELS));
+const communicationFileSharingId=(value:unknown):boolean=>communicationIdentifier(value);
+const communicationFileSharingText=(value:unknown,minimum:number,maximum:number):boolean=>
+  communicationMessagingText(value,minimum,maximum);
+const communicationFileSharingClock=(value:unknown):boolean=>typeof value==='string'
+  &&/^([01]\d|2[0-3]):[0-5]\d$/u.test(value);
+const communicationFileSharingCanonicalIds=(value:unknown,maximum:number):boolean=>Array.isArray(value)
+  &&value.length<=maximum&&value.every(communicationFileSharingId)
+  &&value.every((item,index)=>index===0||String(value[index-1]).localeCompare(String(item))<0);
+const communicationFileSharingCommandInput=(value:unknown):boolean=>{
+  if(!isObject(value)||typeof value.kind!=='string')return false;
+  if(value.kind==='add_comment')return healthCareExactRecord(value,['kind','fileId','commentId','body'])
+    &&communicationFileSharingId(value.fileId)&&communicationFileSharingId(value.commentId)
+    &&communicationFileSharingText(value.body,1,4_000);
+  if(value.kind==='grant_access')return healthCareExactRecord(value,
+    ['kind','fileId','grantId','personId','mode','startsAt','endsAt'])&&communicationFileSharingId(value.fileId)
+    &&communicationFileSharingId(value.grantId)&&communicationFileSharingId(value.personId)
+    &&['preview_only','download'].includes(String(value.mode))&&communicationMessagingIso(value.startsAt)
+    &&communicationMessagingIso(value.endsAt)&&Date.parse(String(value.startsAt))<Date.parse(String(value.endsAt));
+  if(value.kind==='revoke_share')return healthCareExactRecord(value,['kind','fileId'])&&communicationFileSharingId(value.fileId);
+  if(value.kind==='link_archive')return healthCareExactRecord(value,['kind','fileId','archiveItemId'])
+    &&communicationFileSharingId(value.fileId)&&communicationFileSharingId(value.archiveItemId);
+  if(value.kind==='update_album')return healthCareExactRecord(value,
+    ['kind','fileId','albumId','selectedForStory','likedByPersonIds'])&&communicationFileSharingId(value.fileId)
+    &&communicationFileSharingId(value.albumId)&&typeof value.selectedForStory==='boolean'
+    &&communicationFileSharingCanonicalIds(value.likedByPersonIds,128);
+  if(value.kind==='set_notifications')return healthCareExactRecord(value,
+    ['kind','quietHoursEnabled','quietHoursStart','quietHoursEnd','nonEmergencyDigestEnabled','roomOverrides','personOverrides'])
+    &&typeof value.quietHoursEnabled==='boolean'&&communicationFileSharingClock(value.quietHoursStart)
+    &&communicationFileSharingClock(value.quietHoursEnd)&&typeof value.nonEmergencyDigestEnabled==='boolean'
+    &&Array.isArray(value.roomOverrides)&&value.roomOverrides.length<=128&&value.roomOverrides.every((item)=>
+      isObject(item)&&healthCareExactRecord(item,['roomId','muted'])&&communicationFileSharingId(item.roomId)
+        &&typeof item.muted==='boolean')
+    &&Array.isArray(value.personOverrides)&&value.personOverrides.length<=128&&value.personOverrides.every((item)=>
+      isObject(item)&&healthCareExactRecord(item,['personId','muted'])&&communicationFileSharingId(item.personId)
+        &&typeof item.muted==='boolean');
+  if(value.kind==='announce_emergency')return healthCareExactRecord(value,['kind','announcementId','title'])
+    &&communicationFileSharingId(value.announcementId)&&communicationFileSharingText(value.title,2,500);
+  if(value.kind==='acknowledge_emergency')return healthCareExactRecord(value,['kind','announcementId'])
+    &&communicationFileSharingId(value.announcementId);
+  if(value.kind==='request_remote_assistance')return healthCareExactRecord(value,
+    ['kind','sessionId','helperPersonId','allowedControls','endsAt'])&&communicationFileSharingId(value.sessionId)
+    &&communicationFileSharingId(value.helperPersonId)&&Array.isArray(value.allowedControls)
+    &&value.allowedControls.length>=1&&value.allowedControls.length<=3
+    &&value.allowedControls.every((item)=>['pointer','keyboard','annotate'].includes(String(item)))
+    &&new Set(value.allowedControls).size===value.allowedControls.length&&communicationMessagingIso(value.endsAt);
+  if(value.kind==='grant_remote_assistance')return healthCareExactRecord(value,['kind','sessionId','explicitSingleUseConsent'])
+    &&communicationFileSharingId(value.sessionId)&&value.explicitSingleUseConsent===true;
+  if(value.kind==='revoke_remote_assistance')return healthCareExactRecord(value,['kind','sessionId'])
+    &&communicationFileSharingId(value.sessionId);
+  if(value.kind==='plan_co_watch')return healthCareExactRecord(value,
+    ['kind','sessionId','mediaReference','narrationEnabled'])&&communicationFileSharingId(value.sessionId)
+    &&communicationFileSharingText(value.mediaReference,2,500)&&typeof value.narrationEnabled==='boolean';
+  if(value.kind==='prepare_voice_action')return healthCareExactRecord(value,['kind','actionId','action','targetReference'])
+    &&communicationFileSharingId(value.actionId)&&['call','send_message','join_meeting'].includes(String(value.action))
+    &&communicationFileSharingText(value.targetReference,2,500);
+  if(value.kind==='confirm_voice_action')return healthCareExactRecord(value,['kind','actionId','explicitConfirmation'])
+    &&communicationFileSharingId(value.actionId)&&value.explicitConfirmation===true;
+  return false;
+};
+const communicationFileSharingInput=(channel:string,args:readonly unknown[]):IpcIntegrationPolicyDecision=>{
+  if(channel===COMMUNICATION_FILE_SHARING_IPC_CHANNELS.getCenter)return zeroArguments(args);
+  if(channel===COMMUNICATION_FILE_SHARING_IPC_CHANNELS.getSafePreview)return exactObject(args,['fileId'],
+    value=>communicationFileSharingId(value.fileId));
+  if(channel===COMMUNICATION_FILE_SHARING_IPC_CHANNELS.selectAndPrepare){
+    if(args.length!==1||!isObject(args[0]))return rejected('COMMUNICATION_FILE_SHARING_PREPARE_INPUT_INVALID','$[0]');
+    const value=args[0];
+    const keys=['clientOperationId','expectedRevision',...(value.roomId===undefined?[]:['roomId']),
+      ...(value.meetingId===undefined?[]:['meetingId'])];
+    return exactObject(args,keys,candidate=>communicationFileSharingId(candidate.clientOperationId)
+      &&communicationMessagingRevision(candidate.expectedRevision,true)
+      &&(communicationFileSharingId(candidate.roomId)||communicationFileSharingId(candidate.meetingId))
+      &&(candidate.roomId===undefined||communicationFileSharingId(candidate.roomId))
+      &&(candidate.meetingId===undefined||communicationFileSharingId(candidate.meetingId)));
+  }
+  if(channel===COMMUNICATION_FILE_SHARING_IPC_CHANNELS.apply)return exactObject(args,
+    ['clientOperationId','expectedRevision','command'],value=>communicationFileSharingId(value.clientOperationId)
+      &&communicationMessagingRevision(value.expectedRevision,true)&&communicationFileSharingCommandInput(value.command));
+  return rejected('UNKNOWN_IPC_CHANNEL','$');
+};
+const communicationFileSharingCommentResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['id','authorPersonId','body','createdAt'])&&communicationFileSharingId(value.id)
+  &&communicationFileSharingId(value.authorPersonId)&&communicationFileSharingText(value.body,1,4_000)
+  &&communicationMessagingIso(value.createdAt);
+const communicationFileSharingGrantResult=(value:unknown):boolean=>{
+  if(!isObject(value))return false;
+  const keys=['id','personId','mode','startsAt','endsAt',...(value.revokedAt===undefined?[]:['revokedAt'])];
+  return healthCareExactRecord(value,keys)&&communicationFileSharingId(value.id)&&communicationFileSharingId(value.personId)
+    &&['preview_only','download'].includes(String(value.mode))&&communicationMessagingIso(value.startsAt)
+    &&communicationMessagingIso(value.endsAt)&&(value.revokedAt===undefined||communicationMessagingIso(value.revokedAt));
+};
+const communicationFileSharingFileResult=(value:unknown):boolean=>{
+  if(!isObject(value))return false;
+  const keys=['id',...(value.roomId===undefined?[]:['roomId']),...(value.meetingId===undefined?[]:['meetingId']),
+    'displayName','mimeType','totalBytes','totalChunks','verifiedChunkCount','state','scanState','versionCount','comments',
+    'accessGrants',...(value.archiveItemId===undefined?[]:['archiveItemId']),...(value.albumId===undefined?[]:['albumId']),
+    'selectedForStory','likedByPersonIds','externalLinkEnabled','externalLinkAccessCodeRequired','revision','createdAt','updatedAt'];
+  return healthCareExactRecord(value,keys)&&communicationFileSharingId(value.id)
+    &&(value.roomId===undefined||communicationFileSharingId(value.roomId))
+    &&(value.meetingId===undefined||communicationFileSharingId(value.meetingId))
+    &&communicationFileSharingText(value.displayName,1,255)&&typeof value.mimeType==='string'&&value.mimeType.length<=192
+    &&Number.isSafeInteger(value.totalBytes)&&Number(value.totalBytes)>=1&&Number(value.totalBytes)<=64*1024*1024
+    &&Number.isSafeInteger(value.totalChunks)&&Number(value.totalChunks)>=1&&Number(value.totalChunks)<=16
+    &&Number.isSafeInteger(value.verifiedChunkCount)&&Number(value.verifiedChunkCount)>=0
+    &&Number(value.verifiedChunkCount)<=Number(value.totalChunks)
+    &&['prepared_local','transferring_local','paused','scan_required','ready_local','quarantined','revoked'].includes(String(value.state))
+    &&['not_run','clean','malicious','provider_unavailable'].includes(String(value.scanState))
+    &&Number.isSafeInteger(value.versionCount)&&Number(value.versionCount)>=1&&Number(value.versionCount)<=32
+    &&Array.isArray(value.comments)&&value.comments.length<=256&&value.comments.every(communicationFileSharingCommentResult)
+    &&Array.isArray(value.accessGrants)&&value.accessGrants.length<=256&&value.accessGrants.every(communicationFileSharingGrantResult)
+    &&(value.archiveItemId===undefined||communicationFileSharingId(value.archiveItemId))
+    &&(value.albumId===undefined||communicationFileSharingId(value.albumId))&&typeof value.selectedForStory==='boolean'
+    &&communicationFileSharingCanonicalIds(value.likedByPersonIds,128)&&value.externalLinkEnabled===false
+    &&value.externalLinkAccessCodeRequired===true&&communicationMessagingRevision(value.revision)
+    &&communicationMessagingIso(value.createdAt)&&communicationMessagingIso(value.updatedAt);
+};
+const communicationFileSharingTruthResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,[
+  'e2eeEnvelopeMetadataRequired','resumableChunkAndFullHashVerificationModeled',
+  'versionCommentRelationAndSingleArchiveCopyModeled','timeBoundPreviewAndDownloadGrantsModeled',
+  'localMalwareQuarantineGateModeled','albumSelectionLikesAndStoryTransferModeled','externalLinksDefaultClosed',
+  'externalLinksRequireExpiryAndAccessCode','quietHoursAndNonEmergencyDigestModeled',
+  'emergencyAnnouncementNotEmergencyService','remoteAssistanceSingleUseConsentRequired',
+  'remoteAssistanceSensitiveDesktopHidden','voiceActionConfirmationRequired','productionFileTransportConfigured',
+  'productionMalwareScannerConfigured','remoteAssistanceTransportConfigured','sharePlayAdapterConfigured',
+  'voiceExecutionProviderConfigured','networkUsedByCurrentImplementation'])
+  &&Object.values(value).every((item)=>typeof item==='boolean')
+  &&value.e2eeEnvelopeMetadataRequired===true&&value.externalLinksDefaultClosed===true
+  &&value.productionFileTransportConfigured===false&&value.productionMalwareScannerConfigured===false
+  &&value.remoteAssistanceTransportConfigured===false&&value.sharePlayAdapterConfigured===false
+  &&value.voiceExecutionProviderConfigured===false&&value.networkUsedByCurrentImplementation===false;
+const communicationFileSharingNotificationResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,[
+  'quietHoursEnabled','quietHoursStart','quietHoursEnd','nonEmergencyDigestEnabled','roomOverrides','personOverrides'])
+  &&typeof value.quietHoursEnabled==='boolean'&&communicationFileSharingClock(value.quietHoursStart)
+  &&communicationFileSharingClock(value.quietHoursEnd)&&typeof value.nonEmergencyDigestEnabled==='boolean'
+  &&Array.isArray(value.roomOverrides)&&value.roomOverrides.length<=128&&value.roomOverrides.every((item)=>isObject(item)
+    &&healthCareExactRecord(item,['roomId','muted'])&&communicationFileSharingId(item.roomId)&&typeof item.muted==='boolean')
+  &&Array.isArray(value.personOverrides)&&value.personOverrides.length<=128&&value.personOverrides.every((item)=>isObject(item)
+    &&healthCareExactRecord(item,['personId','muted'])&&communicationFileSharingId(item.personId)&&typeof item.muted==='boolean');
+const communicationFileSharingEmergencyResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,[
+  'id','title','createdByPersonId','acknowledgedPersonIds','emergencyServiceGuaranteed','localDeliveryOnly','createdAt'])
+  &&communicationFileSharingId(value.id)&&communicationFileSharingText(value.title,2,500)
+  &&communicationFileSharingId(value.createdByPersonId)&&communicationFileSharingCanonicalIds(value.acknowledgedPersonIds,128)
+  &&value.emergencyServiceGuaranteed===false&&value.localDeliveryOnly===true&&communicationMessagingIso(value.createdAt);
+const communicationFileSharingRemoteResult=(value:unknown):boolean=>{
+  if(!isObject(value))return false;
+  const keys=['id','requesterPersonId','helperPersonId','state','singleUseConsent','visibleIndicatorRequired',
+    'secureDesktopAndPasswordsHidden','allowedControls','endsAt',...(value.revokedAt===undefined?[]:['revokedAt']),
+    'remoteTransportConfigured'];
+  return healthCareExactRecord(value,keys)&&communicationFileSharingId(value.id)
+    &&communicationFileSharingId(value.requesterPersonId)&&communicationFileSharingId(value.helperPersonId)
+    &&['consent_pending','active_local_plan','revoked','expired'].includes(String(value.state))
+    &&value.singleUseConsent===true&&value.visibleIndicatorRequired===true&&value.secureDesktopAndPasswordsHidden===true
+    &&Array.isArray(value.allowedControls)&&value.allowedControls.length>=1&&value.allowedControls.length<=3
+    &&value.allowedControls.every((item)=>['pointer','keyboard','annotate'].includes(String(item)))
+    &&new Set(value.allowedControls).size===value.allowedControls.length&&communicationMessagingIso(value.endsAt)
+    &&(value.revokedAt===undefined||communicationMessagingIso(value.revokedAt))&&value.remoteTransportConfigured===false;
+};
+const communicationFileSharingCoWatchResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,[
+  'id','mediaReference','narrationEnabled','state','sharePlayAdapterConfigured'])&&communicationFileSharingId(value.id)
+  &&communicationFileSharingText(value.mediaReference,2,500)&&typeof value.narrationEnabled==='boolean'
+  &&['local_plan','cancelled'].includes(String(value.state))&&value.sharePlayAdapterConfigured===false;
+const communicationFileSharingVoiceResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,[
+  'id','action','targetReference','state','executedExternally'])&&communicationFileSharingId(value.id)
+  &&['call','send_message','join_meeting'].includes(String(value.action))
+  &&communicationFileSharingText(value.targetReference,2,500)
+  &&['confirmation_required','confirmed_local_only','cancelled'].includes(String(value.state))
+  &&value.executedExternally===false;
+const communicationFileSharingCenterResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['schemaVersion','files','notificationProfile','emergencyAnnouncements','remoteAssistance','coWatchSessions','voiceActions',
+    'truth','revision','generatedAt'])&&value.schemaVersion===1&&Array.isArray(value.files)&&value.files.length<=128
+  &&value.files.every(communicationFileSharingFileResult)&&communicationFileSharingNotificationResult(value.notificationProfile)
+  &&Array.isArray(value.emergencyAnnouncements)&&value.emergencyAnnouncements.length<=128
+  &&value.emergencyAnnouncements.every(communicationFileSharingEmergencyResult)
+  &&Array.isArray(value.remoteAssistance)&&value.remoteAssistance.length<=128
+  &&value.remoteAssistance.every(communicationFileSharingRemoteResult)&&Array.isArray(value.coWatchSessions)
+  &&value.coWatchSessions.length<=128&&value.coWatchSessions.every(communicationFileSharingCoWatchResult)
+  &&Array.isArray(value.voiceActions)&&value.voiceActions.length<=128&&value.voiceActions.every(communicationFileSharingVoiceResult)
+  &&communicationFileSharingTruthResult(value.truth)&&communicationMessagingRevision(value.revision,true)
+  &&communicationMessagingIso(value.generatedAt);
+const communicationFileSharingReceiptResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['commandKind','previousRevision','revision','occurredAt','replayed','externalOperationPerformed','networkUsed'])
+  &&['prepare_file','add_comment','grant_access','revoke_share','link_archive','update_album','set_notifications',
+    'announce_emergency','acknowledge_emergency','request_remote_assistance','grant_remote_assistance',
+    'revoke_remote_assistance','plan_co_watch','prepare_voice_action','confirm_voice_action'].includes(String(value.commandKind))
+  &&communicationMessagingRevision(value.previousRevision,true)&&communicationMessagingRevision(value.revision)
+  &&Number(value.revision)===Number(value.previousRevision)+1&&communicationMessagingIso(value.occurredAt)
+  &&typeof value.replayed==='boolean'&&value.externalOperationPerformed===false&&value.networkUsed===false;
+const communicationFileSharingPreviewResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,[
+  'schemaVersion','fileId','displayName','mimeType','text','totalBytes','scanState','accessMode','renderingMode','truncated',
+  'payloadSource','networkUsed','cloudUsed'])&&value.schemaVersion===1&&communicationFileSharingId(value.fileId)
+  &&communicationFileSharingText(value.displayName,1,255)
+  &&['text/plain','text/markdown','text/csv','application/json'].includes(String(value.mimeType))
+  &&typeof value.text==='string'&&value.text.length<=256*1024
+  &&!/[\p{Cf}\p{Cs}\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f]/u.test(value.text)
+  &&Number.isSafeInteger(value.totalBytes)&&Number(value.totalBytes)>=1&&Number(value.totalBytes)<=256*1024
+  &&value.scanState==='clean'&&value.accessMode==='owner'&&value.renderingMode==='escaped_plain_text'
+  &&value.truncated===false&&value.payloadSource==='local_protected_payload'
+  &&value.networkUsed===false&&value.cloudUsed===false;
+const communicationFileSharingResult=(channel:string,result:unknown):IpcIntegrationPolicyDecision=>{
+  const valid=channel===COMMUNICATION_FILE_SHARING_IPC_CHANNELS.getCenter?communicationFileSharingCenterResult(result)
+    :channel===COMMUNICATION_FILE_SHARING_IPC_CHANNELS.getSafePreview?communicationFileSharingPreviewResult(result)
+    :channel===COMMUNICATION_FILE_SHARING_IPC_CHANNELS.selectAndPrepare&&isObject(result)
+      &&healthCareExactRecord(result,['canceled'])&&result.canceled===true
+      ?true:communicationFileSharingReceiptResult(result);
+  return valid?accepted():rejected('COMMUNICATION_FILE_SHARING_RESULT_INVALID','$result');
+};
+
+export const COMMUNICATION_AUDIT_ARCHIVE_IPC_CHANNELS=Object.freeze({
+  getCenter:'communicationAuditArchive:getCenter'
+} as const);
+const communicationAuditArchiveChannels=new Set<string>(Object.values(COMMUNICATION_AUDIT_ARCHIVE_IPC_CHANNELS));
+const communicationAuditArchiveInput=(channel:string,args:readonly unknown[]):IpcIntegrationPolicyDecision=>
+  channel===COMMUNICATION_AUDIT_ARCHIVE_IPC_CHANNELS.getCenter?zeroArguments(args):rejected('UNKNOWN_IPC_CHANNEL','$');
+const communicationAuditEventKinds=new Set(['room_joined','room_left','call_started','call_ended','file_shared',
+  'permission_changed','message_created','message_deleted','recording_consent_changed']);
+const communicationAuditResourceTypes=new Set(['communication_room','communication_call_session','communication_file_sharing',
+  'communication_permission','communication_message','communication_recording_request']);
+const communicationAuditSafeEventResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['eventKind','resourceType','resourceVersion','sequence','occurredAt'])
+  &&communicationAuditEventKinds.has(String(value.eventKind))&&communicationAuditResourceTypes.has(String(value.resourceType))
+  &&Number.isSafeInteger(value.resourceVersion)&&Number(value.resourceVersion)>=1
+  &&Number.isSafeInteger(value.sequence)&&Number(value.sequence)>=1&&communicationMessagingIso(value.occurredAt);
+const communicationAuditSafeCheckpointResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
+  ['archiveGeneration','vaultVerified','backupVerified','replicaVerified','restoreVerified',
+    'externalBackupProviderVerified','remoteReplicationVerified','createdAt'])
+  &&Number.isSafeInteger(value.archiveGeneration)&&Number(value.archiveGeneration)>=1
+  &&[value.vaultVerified,value.backupVerified,value.replicaVerified,value.restoreVerified].every(item=>typeof item==='boolean')
+  &&value.externalBackupProviderVerified===false&&value.remoteReplicationVerified===false
+  &&communicationMessagingIso(value.createdAt);
+const communicationAuditTruthResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,[
+  'appendOnlyHashChainedAuditImplemented','membershipCallFileAndPermissionEventsModeled','contentExcludedFromAuditByConstruction',
+  'identityHashAndVersionMetadataOnly','vaultDatabaseBackupRestoreCheckpointModeled','mutationAndCheckpointDeleteBlocked',
+  'productionRemoteReplicationConfigured','externalBackupProviderVerified','realRestoreDrillPerformed',
+  'networkUsedByCurrentImplementation','productionQueryApiComposed','productionEventProducerHooksComposed',
+  'rendererAuditMutationAuthorityExposed'])
+  &&value.appendOnlyHashChainedAuditImplemented===true&&value.membershipCallFileAndPermissionEventsModeled===true
+  &&value.contentExcludedFromAuditByConstruction===true&&value.identityHashAndVersionMetadataOnly===true
+  &&value.vaultDatabaseBackupRestoreCheckpointModeled===true&&value.mutationAndCheckpointDeleteBlocked===true
+  &&value.productionRemoteReplicationConfigured===false&&value.externalBackupProviderVerified===false
+  &&value.realRestoreDrillPerformed===false&&value.networkUsedByCurrentImplementation===false
+  &&value.productionQueryApiComposed===true&&value.productionEventProducerHooksComposed===false
+  &&value.rendererAuditMutationAuthorityExposed===false;
+const communicationAuditArchiveResult=(channel:string,result:unknown):IpcIntegrationPolicyDecision=>{
+  const valid=channel===COMMUNICATION_AUDIT_ARCHIVE_IPC_CHANNELS.getCenter&&isObject(result)
+    &&healthCareExactRecord(result,['schemaVersion','eventCount','checkpointCount','recentEvents','recentCheckpoints',
+      'recentEventsTruncated','recentCheckpointsTruncated','chainValid','truth','generatedAt','networkUsed','cloudUsed'])
+    &&result.schemaVersion===1&&Number.isSafeInteger(result.eventCount)&&Number(result.eventCount)>=0&&Number(result.eventCount)<=100000
+    &&Number.isSafeInteger(result.checkpointCount)&&Number(result.checkpointCount)>=0&&Number(result.checkpointCount)<=1000
+    &&Array.isArray(result.recentEvents)&&result.recentEvents.length<=100&&result.recentEvents.every(communicationAuditSafeEventResult)
+    &&Array.isArray(result.recentCheckpoints)&&result.recentCheckpoints.length<=50
+    &&result.recentCheckpoints.every(communicationAuditSafeCheckpointResult)
+    &&typeof result.recentEventsTruncated==='boolean'&&typeof result.recentCheckpointsTruncated==='boolean'
+    &&typeof result.chainValid==='boolean'&&communicationAuditTruthResult(result.truth)
+    &&communicationMessagingIso(result.generatedAt)&&result.networkUsed===false&&result.cloudUsed===false;
+  return valid?accepted():rejected('COMMUNICATION_AUDIT_ARCHIVE_RESULT_INVALID','$result');
+};
+
 export const COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS=Object.freeze({
   getCenter:'communicationCalling:getCenter',
   create:'communicationCalling:create',
@@ -4997,6 +5276,10 @@ export const evaluateIpcIntegrationResultPolicy = (channel: string, result: unkn
   if (channel.startsWith('communicationSecurity:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
   if (communicationMessagingChannels.has(channel)) return communicationMessagingResult(channel,result);
   if (channel.startsWith('communicationMessaging:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
+  if (communicationFileSharingChannels.has(channel)) return communicationFileSharingResult(channel,result);
+  if (channel.startsWith('communicationFileSharing:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
+  if (communicationAuditArchiveChannels.has(channel)) return communicationAuditArchiveResult(channel,result);
+  if (channel.startsWith('communicationAuditArchive:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
   if (communicationCallingChannels.has(channel)) return communicationCallingResult(channel,result);
   if (channel.startsWith('communicationCalling:')) return rejected('UNKNOWN_IPC_CHANNEL','$result');
   if (communicationRecordingChannels.has(channel)) return communicationRecordingResult(channel,result);
@@ -5059,6 +5342,10 @@ export const evaluateIpcIntegrationPolicy = (channel: string, args: readonly unk
   if (channel.startsWith('communicationSecurity:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
   if (communicationMessagingChannels.has(channel)) return communicationMessagingInput(channel,args);
   if (channel.startsWith('communicationMessaging:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
+  if (communicationFileSharingChannels.has(channel)) return communicationFileSharingInput(channel,args);
+  if (channel.startsWith('communicationFileSharing:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
+  if (communicationAuditArchiveChannels.has(channel)) return communicationAuditArchiveInput(channel,args);
+  if (channel.startsWith('communicationAuditArchive:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
   if (communicationCallingChannels.has(channel)) return communicationCallingInput(channel,args);
   if (channel.startsWith('communicationCalling:')) return rejected('UNKNOWN_IPC_CHANNEL','$');
   if (communicationRecordingChannels.has(channel)) return communicationRecordingInput(channel,args);

@@ -17162,9 +17162,11 @@ UPDATE database_metadata SET value='REVISION-34-F-FAMILY-MEETINGS-MINUTES',updat
 
 const communicationFileSharingSql = `CREATE TABLE communication_file_sharing_mutations(
   id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
-  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   center_id TEXT NOT NULL,
+  resource_type TEXT NOT NULL CHECK(resource_type IN ('communication_file_sharing_center','communication_file_sharing')),
+  resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 8 AND 256),
   actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
   actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 256),
@@ -17175,58 +17177,132 @@ const communicationFileSharingSql = `CREATE TABLE communication_file_sharing_mut
   request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
   expected_revision INTEGER NOT NULL CHECK(expected_revision>=0),
   revision INTEGER NOT NULL CHECK(revision=expected_revision+1),
-  policy_receipt_id TEXT NOT NULL CHECK(length(policy_receipt_id)=64 AND policy_receipt_id NOT GLOB '*[^0-9a-f]*'),
   state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
-  occurred_at TEXT NOT NULL,
-  UNIQUE(family_id,owner_person_id,client_operation_id),
-  CHECK(center_id='communication-file-sharing:'||family_id||':'||owner_person_id)
-);
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version>=1),
+  policy_receipt_nonce TEXT NOT NULL CHECK(length(trim(policy_receipt_nonce)) BETWEEN 16 AND 256),
+  policy_correlation_id TEXT NOT NULL CHECK(length(trim(policy_correlation_id)) BETWEEN 1 AND 256),
+  policy_resource_type TEXT NOT NULL CHECK(policy_resource_type IN ('communication_file_sharing_center','communication_file_sharing')),
+  policy_resource_id TEXT NOT NULL,
+  policy_action TEXT NOT NULL CHECK(policy_action IN ('create','update','delete')),
+  policy_capability TEXT NOT NULL CHECK(policy_capability='family.write'),
+  UNIQUE(family_id,actor_account_id,client_operation_id),
+  CHECK(center_id='communication-file-sharing:'||family_id||':'||owner_person_id),
+  CHECK(policy_resource_type=resource_type AND policy_resource_id=resource_id),
+  CHECK((command_kind IN ('prepare_file','record_chunk','set_scan','add_version','add_comment','grant_access','revoke_share','link_archive','update_album')
+      AND resource_type='communication_file_sharing')
+    OR (command_kind IN ('set_notifications','announce_emergency','acknowledge_emergency','request_remote_assistance',
+      'grant_remote_assistance','revoke_remote_assistance','plan_co_watch','prepare_voice_action','confirm_voice_action')
+      AND resource_type='communication_file_sharing_center' AND resource_id=center_id)),
+  CHECK((command_kind='prepare_file' AND policy_action='create')
+    OR (command_kind='revoke_share' AND policy_action='delete')
+    OR (command_kind NOT IN ('prepare_file','revoke_share') AND resource_type='communication_file_sharing' AND policy_action='update')
+    OR (resource_type='communication_file_sharing_center'
+      AND ((expected_revision=0 AND policy_action='create') OR (expected_revision>=1 AND policy_action='update'))))
+) STRICT;
 CREATE INDEX idx_34g_file_sharing_mutations_owner
-ON communication_file_sharing_mutations(family_id,owner_person_id,revision DESC);
+ON communication_file_sharing_mutations(family_id,owner_person_id,occurred_at DESC,id);
 
 CREATE TABLE communication_file_sharing_centers(
   id TEXT PRIMARY KEY,
-  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
-  snapshot_json TEXT NOT NULL CHECK(json_valid(snapshot_json)),
+  snapshot_json TEXT NOT NULL CHECK(json_valid(snapshot_json)=1 AND json_type(snapshot_json)='object' AND length(snapshot_json)<=8388608),
   revision INTEGER NOT NULL CHECK(revision>=1),
   state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
   last_mutation_id TEXT NOT NULL UNIQUE REFERENCES communication_file_sharing_mutations(id) ON DELETE RESTRICT,
-  updated_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND updated_at GLOB '????-??-??T??:??:??.???Z' AND julianday(updated_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
   UNIQUE(family_id,owner_person_id),
   CHECK(id='communication-file-sharing:'||family_id||':'||owner_person_id),
   CHECK(json_extract(snapshot_json,'$.schemaVersion')=1),
   CHECK(json_extract(snapshot_json,'$.centerId')=id),
   CHECK(json_extract(snapshot_json,'$.ownerPersonId')=owner_person_id),
   CHECK(json_extract(snapshot_json,'$.revision')=revision),
+  CHECK(json_array_length(snapshot_json,'$.files')<=128),
+  CHECK(json_array_length(snapshot_json,'$.emergencyAnnouncements')<=128),
+  CHECK(json_array_length(snapshot_json,'$.remoteAssistance')<=64),
+  CHECK(json_array_length(snapshot_json,'$.coWatchSessions')<=128),
+  CHECK(json_array_length(snapshot_json,'$.voiceActions')<=128),
   CHECK(json_extract(snapshot_json,'$.truth.externalLinksDefaultClosed')=1),
   CHECK(json_extract(snapshot_json,'$.truth.productionFileTransportConfigured')=0),
+  CHECK(json_extract(snapshot_json,'$.truth.productionMalwareScannerConfigured')=0),
   CHECK(json_extract(snapshot_json,'$.truth.networkUsedByCurrentImplementation')=0)
-);
+) STRICT;
+
+CREATE TRIGGER trg_34g_file_sharing_mutation_insert
+BEFORE INSERT ON communication_file_sharing_mutations
+WHEN (SELECT COUNT(*) FROM communication_file_sharing_mutations item
+    WHERE item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id)>=4096
+  OR NOT EXISTS(
+    SELECT 1 FROM accounts account
+    JOIN people actor ON actor.id=NEW.actor_person_id AND actor.family_id=NEW.family_id AND actor.status='active'
+    JOIN people owner ON owner.id=NEW.owner_person_id AND owner.family_id=NEW.family_id AND owner.status='active'
+    JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+    JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name
+      AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+    JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+    WHERE account.id=NEW.actor_account_id AND account.person_id=NEW.actor_person_id AND account.status='active'
+      AND receipt.receipt_version=NEW.policy_receipt_version AND receipt.nonce=NEW.policy_receipt_nonce
+      AND receipt.correlation_id=NEW.policy_correlation_id AND receipt.resource_type=NEW.policy_resource_type
+      AND receipt.resource_id=NEW.policy_resource_id AND receipt.action=NEW.policy_action
+      AND receipt.capability=NEW.policy_capability AND receipt.recorded_at=NEW.occurred_at
+      AND json_extract(receipt.record_json,'$.request.purpose')='general'
+      AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+      AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+      AND json_extract(receipt.record_json,'$.request.resource.sensitivity')='highly_sensitive'
+      AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.actor_account_id
+      AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.actor_person_id
+      AND ((NEW.expected_revision=0 AND NOT EXISTS(SELECT 1 FROM communication_file_sharing_centers current
+            WHERE current.id=NEW.center_id))
+        OR (NEW.expected_revision>=1 AND EXISTS(SELECT 1 FROM communication_file_sharing_centers current
+            WHERE current.id=NEW.center_id AND current.family_id=NEW.family_id
+              AND current.owner_person_id=NEW.owner_person_id AND current.revision=NEW.expected_revision)))
+      AND (NEW.resource_type='communication_file_sharing_center'
+        OR (NEW.command_kind='prepare_file' AND NOT EXISTS(
+          SELECT 1 FROM communication_file_sharing_centers current,json_each(current.snapshot_json,'$.files') file
+          WHERE json_extract(file.value,'$.id')=NEW.resource_id))
+        OR (NEW.command_kind<>'prepare_file' AND EXISTS(
+          SELECT 1 FROM communication_file_sharing_centers current,json_each(current.snapshot_json,'$.files') file
+          WHERE current.id=NEW.center_id AND json_extract(file.value,'$.id')=NEW.resource_id)))
+  )
+BEGIN SELECT RAISE(ABORT,'34-G mutation requires exact owner-bound durable PEP receipt and current resource'); END;
 
 CREATE TRIGGER trg_34g_file_sharing_center_insert
 BEFORE INSERT ON communication_file_sharing_centers
-BEGIN
-  SELECT CASE WHEN NOT EXISTS(
+WHEN EXISTS(SELECT 1 FROM json_each(NEW.snapshot_json,'$.files') file
+    WHERE json_extract(file.value,'$.externalLinkEnabled')<>0
+      OR json_extract(file.value,'$.externalLinkAccessCodeRequired')<>1
+      OR json_array_length(file.value,'$.versions') NOT BETWEEN 1 AND 32
+      OR json_array_length(file.value,'$.comments')>256 OR json_array_length(file.value,'$.accessGrants')>256)
+  OR NOT EXISTS(
     SELECT 1 FROM communication_file_sharing_mutations mutation
     WHERE mutation.id=NEW.last_mutation_id AND mutation.family_id=NEW.family_id
       AND mutation.owner_person_id=NEW.owner_person_id AND mutation.center_id=NEW.id
       AND mutation.expected_revision=0 AND mutation.revision=NEW.revision
       AND mutation.state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.updated_at
-  ) THEN RAISE(ABORT,'34-G center insert requires exact mutation receipt') END;
-END;
+      AND mutation.policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'34-G center insert requires exact mutation and safe file metadata'); END;
+
 CREATE TRIGGER trg_34g_file_sharing_center_update
 BEFORE UPDATE ON communication_file_sharing_centers
-BEGIN
-  SELECT CASE WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.owner_person_id<>OLD.owner_person_id
-    OR NEW.revision<>OLD.revision+1 OR NEW.updated_at<OLD.updated_at OR NOT EXISTS(
-      SELECT 1 FROM communication_file_sharing_mutations mutation
-      WHERE mutation.id=NEW.last_mutation_id AND mutation.family_id=NEW.family_id
-        AND mutation.owner_person_id=NEW.owner_person_id AND mutation.center_id=NEW.id
-        AND mutation.expected_revision=OLD.revision AND mutation.revision=NEW.revision
-        AND mutation.state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.updated_at
-    ) THEN RAISE(ABORT,'34-G center update requires exact next mutation receipt') END;
-END;
+WHEN NEW.id<>OLD.id OR NEW.family_id<>OLD.family_id OR NEW.owner_person_id<>OLD.owner_person_id
+  OR NEW.revision<>OLD.revision+1 OR NEW.updated_at<OLD.updated_at
+  OR EXISTS(SELECT 1 FROM json_each(NEW.snapshot_json,'$.files') file
+    WHERE json_extract(file.value,'$.externalLinkEnabled')<>0
+      OR json_extract(file.value,'$.externalLinkAccessCodeRequired')<>1
+      OR json_array_length(file.value,'$.versions') NOT BETWEEN 1 AND 32
+      OR json_array_length(file.value,'$.comments')>256 OR json_array_length(file.value,'$.accessGrants')>256)
+  OR NOT EXISTS(
+    SELECT 1 FROM communication_file_sharing_mutations mutation
+    WHERE mutation.id=NEW.last_mutation_id AND mutation.family_id=NEW.family_id
+      AND mutation.owner_person_id=NEW.owner_person_id AND mutation.center_id=NEW.id
+      AND mutation.expected_revision=OLD.revision AND mutation.revision=NEW.revision
+      AND mutation.state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.updated_at
+      AND mutation.policy_receipt_hash=NEW.policy_receipt_hash)
+BEGIN SELECT RAISE(ABORT,'34-G center update requires exact next mutation and safe file metadata'); END;
+
 CREATE TRIGGER trg_34g_file_sharing_mutation_update BEFORE UPDATE ON communication_file_sharing_mutations
 BEGIN SELECT RAISE(ABORT,'34-G mutation ledger is immutable'); END;
 CREATE TRIGGER trg_34g_file_sharing_mutation_delete BEFORE DELETE ON communication_file_sharing_mutations
@@ -17239,71 +17315,115 @@ UPDATE database_metadata SET value='REVISION-34-G-COMMUNICATION-FILE-SHARING-UX'
 `;
 
 const communicationAuditArchiveSql = `CREATE TABLE communication_audit_operations(
-  client_operation_id TEXT NOT NULL,
-  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 128),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   operation_kind TEXT NOT NULL CHECK(operation_kind IN ('audit_append','checkpoint_register')),
   request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
-  result_id TEXT NOT NULL CHECK(length(result_id)=64 AND result_id NOT GLOB '*[^0-9a-f]*'),
-  PRIMARY KEY(family_id,owner_person_id,client_operation_id)
-);
+  result_id TEXT NOT NULL UNIQUE CHECK(length(result_id)=64 AND result_id NOT GLOB '*[^0-9a-f]*'),
+  policy_resource_id TEXT NOT NULL UNIQUE CHECK(length(trim(policy_resource_id)) BETWEEN 2 AND 256),
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+  policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version>=1),
+  policy_receipt_nonce TEXT NOT NULL CHECK(length(trim(policy_receipt_nonce)) BETWEEN 16 AND 256),
+  policy_correlation_id TEXT NOT NULL CHECK(length(trim(policy_correlation_id)) BETWEEN 1 AND 256),
+  PRIMARY KEY(family_id,owner_person_id,client_operation_id),
+  CHECK(actor_person_id=owner_person_id)
+) STRICT;
 CREATE TABLE communication_audit_events(
   id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
-  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
-  actor_device_id TEXT NOT NULL CHECK(length(trim(actor_device_id)) BETWEEN 2 AND 256),
+  actor_device_id TEXT NOT NULL CHECK(length(trim(actor_device_id)) BETWEEN 2 AND 128),
   event_kind TEXT NOT NULL CHECK(event_kind IN ('room_joined','room_left','call_started','call_ended','file_shared',
     'permission_changed','message_created','message_deleted','recording_consent_changed')),
-  resource_type TEXT NOT NULL CHECK(length(trim(resource_type)) BETWEEN 2 AND 128),
-  resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 2 AND 256),
+  resource_type TEXT NOT NULL CHECK(resource_type IN ('communication_room','communication_call_session',
+    'communication_file_sharing','communication_permission','communication_message','communication_recording_request')),
+  resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 2 AND 128),
   resource_version INTEGER NOT NULL CHECK(resource_version>=1),
   resource_fingerprint TEXT NOT NULL CHECK(length(resource_fingerprint)=64 AND resource_fingerprint NOT GLOB '*[^0-9a-f]*'),
   previous_hash TEXT NOT NULL CHECK(length(previous_hash)=64 AND previous_hash NOT GLOB '*[^0-9a-f]*'),
   event_hash TEXT NOT NULL UNIQUE CHECK(length(event_hash)=64 AND event_hash NOT GLOB '*[^0-9a-f]*'),
   sequence_no INTEGER NOT NULL CHECK(sequence_no>=1),
-  occurred_at TEXT NOT NULL,
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
   content_copied INTEGER NOT NULL CHECK(content_copied=0),
   UNIQUE(family_id,owner_person_id,sequence_no),
   UNIQUE(family_id,owner_person_id,event_hash)
-);
+) STRICT;
 CREATE INDEX idx_34h_communication_audit_resource
 ON communication_audit_events(family_id,owner_person_id,resource_type,resource_id,sequence_no DESC);
 CREATE TABLE communication_archive_integrity_checkpoints(
   id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
-  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   archive_generation INTEGER NOT NULL CHECK(archive_generation>=1),
-  vault_manifest_sha256 TEXT NOT NULL CHECK(length(vault_manifest_sha256)=64),
-  database_manifest_sha256 TEXT NOT NULL CHECK(length(database_manifest_sha256)=64),
-  backup_manifest_sha256 TEXT NOT NULL CHECK(length(backup_manifest_sha256)=64),
-  replica_manifest_sha256 TEXT CHECK(replica_manifest_sha256 IS NULL OR length(replica_manifest_sha256)=64),
-  restore_manifest_sha256 TEXT CHECK(restore_manifest_sha256 IS NULL OR length(restore_manifest_sha256)=64),
+  vault_manifest_sha256 TEXT NOT NULL CHECK(length(vault_manifest_sha256)=64 AND vault_manifest_sha256 NOT GLOB '*[^0-9a-f]*'),
+  database_manifest_sha256 TEXT NOT NULL CHECK(length(database_manifest_sha256)=64 AND database_manifest_sha256 NOT GLOB '*[^0-9a-f]*'),
+  backup_manifest_sha256 TEXT NOT NULL CHECK(length(backup_manifest_sha256)=64 AND backup_manifest_sha256 NOT GLOB '*[^0-9a-f]*'),
+  replica_manifest_sha256 TEXT CHECK(replica_manifest_sha256 IS NULL OR (length(replica_manifest_sha256)=64 AND replica_manifest_sha256 NOT GLOB '*[^0-9a-f]*')),
+  restore_manifest_sha256 TEXT CHECK(restore_manifest_sha256 IS NULL OR (length(restore_manifest_sha256)=64 AND restore_manifest_sha256 NOT GLOB '*[^0-9a-f]*')),
   vault_verified INTEGER NOT NULL CHECK(vault_verified IN (0,1)),
   backup_verified INTEGER NOT NULL CHECK(backup_verified IN (0,1)),
   replica_verified INTEGER NOT NULL CHECK(replica_verified IN (0,1)),
   restore_verified INTEGER NOT NULL CHECK(restore_verified IN (0,1)),
   external_backup_provider_verified INTEGER NOT NULL CHECK(external_backup_provider_verified=0),
   remote_replication_verified INTEGER NOT NULL CHECK(remote_replication_verified=0),
-  created_at TEXT NOT NULL,
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z' AND julianday(created_at) IS NOT NULL),
   UNIQUE(family_id,owner_person_id,archive_generation),
   CHECK(replica_verified=0 OR replica_manifest_sha256 IS NOT NULL),
   CHECK(restore_verified=0 OR (restore_manifest_sha256 IS NOT NULL AND backup_verified=1))
-);
+) STRICT;
+CREATE TRIGGER trg_34h_operation_insert BEFORE INSERT ON communication_audit_operations
+WHEN (NEW.operation_kind='audit_append' AND (SELECT COUNT(*) FROM communication_audit_operations item
+      WHERE item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id AND item.operation_kind='audit_append')>=100000)
+  OR (NEW.operation_kind='checkpoint_register' AND (SELECT COUNT(*) FROM communication_audit_operations item
+      WHERE item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id AND item.operation_kind='checkpoint_register')>=1000)
+  OR NOT EXISTS(
+    SELECT 1 FROM accounts account
+    JOIN people actor ON actor.id=NEW.actor_person_id AND actor.family_id=NEW.family_id AND actor.status='active'
+    JOIN people owner ON owner.id=NEW.owner_person_id AND owner.family_id=NEW.family_id AND owner.status='active'
+    JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+    JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name
+      AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+    JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+    WHERE account.id=NEW.actor_account_id AND account.person_id=NEW.actor_person_id AND account.status='active'
+      AND receipt.receipt_version=NEW.policy_receipt_version AND receipt.nonce=NEW.policy_receipt_nonce
+      AND receipt.correlation_id=NEW.policy_correlation_id AND receipt.resource_type='communication_audit_archive'
+      AND receipt.resource_id=NEW.policy_resource_id AND receipt.action='create' AND receipt.capability='family.write'
+      AND receipt.recorded_at=NEW.occurred_at AND json_extract(receipt.record_json,'$.request.purpose')='general'
+      AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+      AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+      AND json_extract(receipt.record_json,'$.request.resource.sensitivity')='highly_sensitive'
+      AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.actor_account_id
+      AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.actor_person_id)
+BEGIN SELECT RAISE(ABORT,'34-H operation requires exact owner-bound durable PEP receipt'); END;
 CREATE TRIGGER trg_34h_audit_event_operation
 BEFORE INSERT ON communication_audit_events
-BEGIN SELECT CASE WHEN NOT EXISTS(
-  SELECT 1 FROM communication_audit_operations operation
-  WHERE operation.family_id=NEW.family_id AND operation.owner_person_id=NEW.owner_person_id
-    AND operation.operation_kind='audit_append' AND operation.result_id=NEW.id
-) THEN RAISE(ABORT,'34-H audit event requires operation receipt') END; END;
+WHEN NOT EXISTS(
+    SELECT 1 FROM communication_audit_operations operation
+    WHERE operation.family_id=NEW.family_id AND operation.owner_person_id=NEW.owner_person_id
+      AND operation.actor_person_id=NEW.actor_person_id AND operation.operation_kind='audit_append'
+      AND operation.result_id=NEW.id AND operation.occurred_at=NEW.occurred_at)
+  OR NEW.sequence_no<>(SELECT COALESCE(MAX(event.sequence_no),0)+1 FROM communication_audit_events event
+    WHERE event.family_id=NEW.family_id AND event.owner_person_id=NEW.owner_person_id)
+  OR NEW.previous_hash<>COALESCE((SELECT event.event_hash FROM communication_audit_events event
+    WHERE event.family_id=NEW.family_id AND event.owner_person_id=NEW.owner_person_id
+    ORDER BY event.sequence_no DESC LIMIT 1),'0000000000000000000000000000000000000000000000000000000000000000')
+BEGIN SELECT RAISE(ABORT,'34-H audit event requires exact operation receipt and chain head'); END;
 CREATE TRIGGER trg_34h_checkpoint_operation
 BEFORE INSERT ON communication_archive_integrity_checkpoints
-BEGIN SELECT CASE WHEN NOT EXISTS(
-  SELECT 1 FROM communication_audit_operations operation
-  WHERE operation.family_id=NEW.family_id AND operation.owner_person_id=NEW.owner_person_id
-    AND operation.operation_kind='checkpoint_register' AND operation.result_id=NEW.id
-) THEN RAISE(ABORT,'34-H archive checkpoint requires operation receipt') END; END;
+WHEN NOT EXISTS(
+    SELECT 1 FROM communication_audit_operations operation
+    WHERE operation.family_id=NEW.family_id AND operation.owner_person_id=NEW.owner_person_id
+      AND operation.operation_kind='checkpoint_register' AND operation.result_id=NEW.id
+      AND operation.occurred_at=NEW.created_at)
+  OR NEW.archive_generation<=(SELECT COALESCE(MAX(checkpoint.archive_generation),0)
+    FROM communication_archive_integrity_checkpoints checkpoint
+    WHERE checkpoint.family_id=NEW.family_id AND checkpoint.owner_person_id=NEW.owner_person_id)
+BEGIN SELECT RAISE(ABORT,'34-H archive checkpoint requires exact operation receipt and next generation'); END;
 CREATE TRIGGER trg_34h_audit_event_update BEFORE UPDATE ON communication_audit_events
 BEGIN SELECT RAISE(ABORT,'34-H communication audit ledger is immutable'); END;
 CREATE TRIGGER trg_34h_audit_event_delete BEFORE DELETE ON communication_audit_events
@@ -17322,50 +17442,118 @@ UPDATE database_metadata SET value='REVISION-34-H-COMMUNICATION-AUDIT-ARCHIVE-IN
 `;
 
 const distributedCoreConsensusTenancySql = `CREATE TABLE distributed_cluster_nodes(
-  node_id TEXT PRIMARY KEY,
-  cluster_id TEXT NOT NULL,
-  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  node_id TEXT PRIMARY KEY CHECK(length(node_id) BETWEEN 2 AND 256),
+  cluster_id TEXT NOT NULL CHECK(length(cluster_id) BETWEEN 2 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   role TEXT NOT NULL CHECK(role IN ('leader','follower','read_replica','witness','backup_only','maintenance')),
   voter INTEGER NOT NULL CHECK(voter IN (0,1)),
   term INTEGER NOT NULL CHECK(term>=0),
   fencing_token INTEGER NOT NULL CHECK(fencing_token>=0),
   commit_index INTEGER NOT NULL CHECK(commit_index>=0),
   applied_index INTEGER NOT NULL CHECK(applied_index>=0 AND applied_index<=commit_index),
-  certificate_fingerprint TEXT NOT NULL CHECK(length(certificate_fingerprint)=64),
+  certificate_fingerprint TEXT NOT NULL CHECK(length(certificate_fingerprint)=64 AND certificate_fingerprint NOT GLOB '*[^0-9a-f]*'),
   certificate_revoked INTEGER NOT NULL CHECK(certificate_revoked IN (0,1)),
   key_epoch INTEGER NOT NULL CHECK(key_epoch>=1),
-  policy_version TEXT NOT NULL,
+  policy_version TEXT NOT NULL CHECK(length(policy_version) BETWEEN 2 AND 256),
   revocation_epoch INTEGER NOT NULL CHECK(revocation_epoch>=0),
   safe_mode INTEGER NOT NULL CHECK(safe_mode IN (0,1)),
-  updated_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND updated_at GLOB '????-??-??T??:??:??.???Z'),
   UNIQUE(cluster_id,family_id,node_id)
-);
+) STRICT;
 CREATE TABLE distributed_mutation_log(
-  mutation_id TEXT PRIMARY KEY,
-  idempotency_key TEXT NOT NULL UNIQUE,
-  cluster_id TEXT NOT NULL,
-  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
-  entity_type TEXT NOT NULL,entity_id TEXT NOT NULL,entity_version INTEGER NOT NULL CHECK(entity_version>=1),
+  mutation_id TEXT PRIMARY KEY CHECK(length(mutation_id) BETWEEN 2 AND 256),
+  idempotency_key TEXT NOT NULL UNIQUE CHECK(length(idempotency_key) BETWEEN 2 AND 256),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  cluster_id TEXT NOT NULL CHECK(length(cluster_id) BETWEEN 2 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  node_id TEXT NOT NULL REFERENCES distributed_cluster_nodes(node_id) ON DELETE RESTRICT,
+  leader_term INTEGER NOT NULL CHECK(leader_term>=0),fencing_token INTEGER NOT NULL CHECK(fencing_token>=1),
+  entity_type TEXT NOT NULL CHECK(length(entity_type) BETWEEN 2 AND 256),
+  entity_id TEXT NOT NULL CHECK(length(entity_id) BETWEEN 2 AND 256),entity_version INTEGER NOT NULL CHECK(entity_version>=1),
   global_sequence INTEGER NOT NULL CHECK(global_sequence>=1),actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
-  device_id TEXT NOT NULL,schema_version INTEGER NOT NULL CHECK(schema_version>=1),policy_version TEXT NOT NULL,
+  device_id TEXT NOT NULL CHECK(length(device_id) BETWEEN 2 AND 256),schema_version INTEGER NOT NULL CHECK(schema_version>=1),
+  policy_version TEXT NOT NULL CHECK(length(policy_version) BETWEEN 2 AND 256),
   revocation_epoch INTEGER NOT NULL CHECK(revocation_epoch>=0),key_epoch INTEGER NOT NULL CHECK(key_epoch>=1),
-  payload_sha256 TEXT NOT NULL CHECK(length(payload_sha256)=64),previous_hash TEXT NOT NULL CHECK(length(previous_hash)=64),
-  mutation_hash TEXT NOT NULL UNIQUE CHECK(length(mutation_hash)=64),commit_index INTEGER NOT NULL CHECK(commit_index>=1),
-  provider_evidence_sha256 TEXT NOT NULL CHECK(length(provider_evidence_sha256)=64),occurred_at TEXT NOT NULL,
+  payload_sha256 TEXT NOT NULL CHECK(length(payload_sha256)=64 AND payload_sha256 NOT GLOB '*[^0-9a-f]*'),
+  previous_hash TEXT NOT NULL CHECK(length(previous_hash)=64 AND previous_hash NOT GLOB '*[^0-9a-f]*'),
+  mutation_hash TEXT NOT NULL UNIQUE CHECK(length(mutation_hash)=64 AND mutation_hash NOT GLOB '*[^0-9a-f]*'),
+  commit_index INTEGER NOT NULL CHECK(commit_index>=1),
+  provider_id TEXT NOT NULL CHECK(length(provider_id) BETWEEN 2 AND 256),
+  provider_evidence_sha256 TEXT NOT NULL CHECK(length(provider_evidence_sha256)=64 AND provider_evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
+  projection_sha256 TEXT NOT NULL CHECK(length(projection_sha256)=64 AND projection_sha256 NOT GLOB '*[^0-9a-f]*'),
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z'),
   UNIQUE(cluster_id,family_id,global_sequence),UNIQUE(cluster_id,family_id,entity_type,entity_id,entity_version)
-);
+) STRICT;
 CREATE TABLE distributed_cluster_snapshots(
-  snapshot_id TEXT PRIMARY KEY,cluster_id TEXT NOT NULL,family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
-  snapshot_index INTEGER NOT NULL CHECK(snapshot_index>=0),snapshot_sha256 TEXT NOT NULL CHECK(length(snapshot_sha256)=64),
-  encrypted_reference TEXT NOT NULL,key_epoch INTEGER NOT NULL CHECK(key_epoch>=1),policy_version TEXT NOT NULL,
-  revocation_epoch INTEGER NOT NULL CHECK(revocation_epoch>=0),provider_evidence_sha256 TEXT NOT NULL CHECK(length(provider_evidence_sha256)=64),
-  verified INTEGER NOT NULL CHECK(verified=1),created_at TEXT NOT NULL,UNIQUE(cluster_id,family_id,snapshot_index)
-);
+  snapshot_id TEXT PRIMARY KEY CHECK(length(snapshot_id) BETWEEN 2 AND 256),
+  cluster_id TEXT NOT NULL CHECK(length(cluster_id) BETWEEN 2 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  node_id TEXT NOT NULL REFERENCES distributed_cluster_nodes(node_id) ON DELETE RESTRICT,
+  leader_term INTEGER NOT NULL CHECK(leader_term>=0),fencing_token INTEGER NOT NULL CHECK(fencing_token>=1),
+  snapshot_index INTEGER NOT NULL CHECK(snapshot_index>=0),
+  snapshot_sha256 TEXT NOT NULL CHECK(length(snapshot_sha256)=64 AND snapshot_sha256 NOT GLOB '*[^0-9a-f]*'),
+  encrypted_reference TEXT NOT NULL CHECK(length(encrypted_reference) BETWEEN 2 AND 512),
+  key_epoch INTEGER NOT NULL CHECK(key_epoch>=1),policy_version TEXT NOT NULL CHECK(length(policy_version) BETWEEN 2 AND 256),
+  revocation_epoch INTEGER NOT NULL CHECK(revocation_epoch>=0),
+  provider_id TEXT NOT NULL CHECK(length(provider_id) BETWEEN 2 AND 256),
+  provider_evidence_sha256 TEXT NOT NULL CHECK(length(provider_evidence_sha256)=64 AND provider_evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
+  verified INTEGER NOT NULL CHECK(verified=1),
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z'),
+  UNIQUE(cluster_id,family_id,snapshot_index)
+) STRICT;
 CREATE INDEX idx_34i_distributed_mutation_entity ON distributed_mutation_log(cluster_id,family_id,entity_type,entity_id,entity_version);
+CREATE TRIGGER trg_34i_node_update BEFORE UPDATE ON distributed_cluster_nodes
+WHEN NEW.node_id<>OLD.node_id OR NEW.cluster_id<>OLD.cluster_id OR NEW.family_id<>OLD.family_id
+  OR NEW.term<OLD.term OR NEW.fencing_token<OLD.fencing_token OR NEW.commit_index<OLD.commit_index
+  OR NEW.applied_index<OLD.applied_index OR NEW.key_epoch<OLD.key_epoch OR NEW.revocation_epoch<OLD.revocation_epoch
+BEGIN SELECT RAISE(ABORT,'34-I node identity or monotonic state cannot regress'); END;
+CREATE TRIGGER trg_34i_node_delete BEFORE DELETE ON distributed_cluster_nodes
+BEGIN SELECT RAISE(ABORT,'34-I node evidence requires a governed decommission ledger'); END;
+CREATE TRIGGER trg_34i_mutation_insert BEFORE INSERT ON distributed_mutation_log
+WHEN NOT EXISTS(
+    SELECT 1 FROM distributed_cluster_nodes n
+    WHERE n.node_id=NEW.node_id AND n.cluster_id=NEW.cluster_id AND n.family_id=NEW.family_id
+      AND n.role='leader' AND n.term=NEW.leader_term AND n.fencing_token=NEW.fencing_token
+      AND n.safe_mode=0 AND n.certificate_revoked=0 AND n.policy_version=NEW.policy_version
+      AND n.revocation_epoch=NEW.revocation_epoch AND n.key_epoch=NEW.key_epoch
+  )
+  OR NOT EXISTS(SELECT 1 FROM people p WHERE p.id=NEW.actor_person_id AND p.family_id=NEW.family_id AND p.status='active')
+  OR NEW.global_sequence<>COALESCE((
+    SELECT MAX(m.global_sequence) FROM distributed_mutation_log m
+    WHERE m.cluster_id=NEW.cluster_id AND m.family_id=NEW.family_id
+  ),0)+1
+  OR NEW.previous_hash<>COALESCE((
+    SELECT m.mutation_hash FROM distributed_mutation_log m
+    WHERE m.cluster_id=NEW.cluster_id AND m.family_id=NEW.family_id
+    ORDER BY m.global_sequence DESC LIMIT 1
+  ),'0000000000000000000000000000000000000000000000000000000000000000')
+  OR NEW.commit_index<=COALESCE((
+    SELECT MAX(m.commit_index) FROM distributed_mutation_log m
+    WHERE m.cluster_id=NEW.cluster_id AND m.family_id=NEW.family_id
+  ),0)
+  OR NEW.entity_version<>COALESCE((
+    SELECT MAX(m.entity_version) FROM distributed_mutation_log m
+    WHERE m.cluster_id=NEW.cluster_id AND m.family_id=NEW.family_id
+      AND m.entity_type=NEW.entity_type AND m.entity_id=NEW.entity_id
+  ),0)+1
+BEGIN SELECT RAISE(ABORT,'34-I mutation chain, leader fence or tenancy evidence mismatch'); END;
 CREATE TRIGGER trg_34i_mutation_update BEFORE UPDATE ON distributed_mutation_log
 BEGIN SELECT RAISE(ABORT,'34-I replicated mutation log is immutable'); END;
 CREATE TRIGGER trg_34i_mutation_delete BEFORE DELETE ON distributed_mutation_log
 BEGIN SELECT RAISE(ABORT,'34-I replicated mutation log is immutable'); END;
+CREATE TRIGGER trg_34i_snapshot_insert BEFORE INSERT ON distributed_cluster_snapshots
+WHEN NOT EXISTS(
+    SELECT 1 FROM distributed_cluster_nodes n
+    WHERE n.node_id=NEW.node_id AND n.cluster_id=NEW.cluster_id AND n.family_id=NEW.family_id
+      AND n.role='leader' AND n.term=NEW.leader_term AND n.fencing_token=NEW.fencing_token
+      AND n.safe_mode=0 AND n.certificate_revoked=0 AND n.policy_version=NEW.policy_version
+      AND n.revocation_epoch=NEW.revocation_epoch AND n.key_epoch=NEW.key_epoch
+  )
+  OR NEW.snapshot_index<=COALESCE((
+    SELECT MAX(s.snapshot_index) FROM distributed_cluster_snapshots s
+    WHERE s.cluster_id=NEW.cluster_id AND s.family_id=NEW.family_id
+  ),-1)
+BEGIN SELECT RAISE(ABORT,'34-I snapshot leader fence, tenancy or monotonic index mismatch'); END;
 CREATE TRIGGER trg_34i_snapshot_update BEFORE UPDATE ON distributed_cluster_snapshots
 BEGIN SELECT RAISE(ABORT,'34-I verified cluster snapshot is immutable'); END;
 CREATE TRIGGER trg_34i_snapshot_delete BEFORE DELETE ON distributed_cluster_snapshots
@@ -17375,29 +17563,124 @@ UPDATE database_metadata SET value='REVISION-34-I-DISTRIBUTED-CORE-CONSENSUS-TEN
 `;
 
 const distributedClientOperationsSql = `CREATE TABLE distributed_backup_evidence(
-  id TEXT PRIMARY KEY,cluster_id TEXT NOT NULL,family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
-  kind TEXT NOT NULL CHECK(kind IN ('local','external','offline','offsite')),immutable INTEGER NOT NULL CHECK(immutable IN (0,1)),
-  independent_from_replica INTEGER NOT NULL CHECK(independent_from_replica=1),manifest_sha256 TEXT NOT NULL CHECK(length(manifest_sha256)=64),
-  verified_at TEXT NOT NULL,key_epoch INTEGER NOT NULL CHECK(key_epoch>=1),policy_version TEXT NOT NULL,
-  restore_tested INTEGER NOT NULL CHECK(restore_tested IN (0,1)),real_different_device_restore_verified INTEGER NOT NULL CHECK(real_different_device_restore_verified=0)
-);
+  id TEXT PRIMARY KEY CHECK(length(id) BETWEEN 2 AND 256),
+  client_operation_id TEXT NOT NULL UNIQUE CHECK(length(client_operation_id) BETWEEN 2 AND 256),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  cluster_id TEXT NOT NULL CHECK(length(cluster_id) BETWEEN 2 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  backup_sequence INTEGER NOT NULL CHECK(backup_sequence>=1),
+  kind TEXT NOT NULL CHECK(kind IN ('local','external','offline','offsite')),
+  storage_target_id TEXT NOT NULL CHECK(length(storage_target_id) BETWEEN 2 AND 256),
+  immutable INTEGER NOT NULL CHECK(immutable=1),independent_from_replica INTEGER NOT NULL CHECK(independent_from_replica=1),
+  manifest_sha256 TEXT NOT NULL CHECK(length(manifest_sha256)=64 AND manifest_sha256 NOT GLOB '*[^0-9a-f]*'),
+  cluster_state_evidence_sha256 TEXT NOT NULL CHECK(length(cluster_state_evidence_sha256)=64 AND cluster_state_evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
+  source_commit_index INTEGER NOT NULL CHECK(source_commit_index>=0),verified_size_bytes INTEGER NOT NULL CHECK(verified_size_bytes>=1),
+  verified_at TEXT NOT NULL CHECK(length(verified_at)=24 AND verified_at GLOB '????-??-??T??:??:??.???Z'),
+  key_epoch INTEGER NOT NULL CHECK(key_epoch>=1),policy_version TEXT NOT NULL CHECK(length(policy_version) BETWEEN 2 AND 256),
+  provider_id TEXT NOT NULL CHECK(length(provider_id) BETWEEN 2 AND 256),
+  provider_production_verified INTEGER NOT NULL CHECK(provider_production_verified IN (0,1)),
+  provider_evidence_sha256 TEXT NOT NULL CHECK(length(provider_evidence_sha256)=64 AND provider_evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
+  previous_evidence_sha256 TEXT NOT NULL CHECK(length(previous_evidence_sha256)=64 AND previous_evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
+  evidence_sha256 TEXT NOT NULL UNIQUE CHECK(length(evidence_sha256)=64 AND evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
+  restore_tested INTEGER NOT NULL CHECK(restore_tested=0),
+  real_different_device_restore_verified INTEGER NOT NULL CHECK(real_different_device_restore_verified=0),
+  UNIQUE(cluster_id,family_id,backup_sequence)
+) STRICT;
 CREATE TABLE distributed_update_plans(
-  id TEXT PRIMARY KEY,cluster_id TEXT NOT NULL,family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
-  node_order_json TEXT NOT NULL CHECK(json_valid(node_order_json)),leader_last INTEGER NOT NULL CHECK(leader_last=1),
-  n_minus_one_compatible INTEGER NOT NULL CHECK(n_minus_one_compatible=1),signed_package_required INTEGER NOT NULL CHECK(signed_package_required=1),
-  rollback_required INTEGER NOT NULL CHECK(rollback_required=1),schema_migration_leader_quorum_only INTEGER NOT NULL CHECK(schema_migration_leader_quorum_only=1),
-  real_update_executed INTEGER NOT NULL CHECK(real_update_executed=0),created_at TEXT NOT NULL
-);
+  id TEXT PRIMARY KEY CHECK(length(id) BETWEEN 2 AND 256),
+  client_operation_id TEXT NOT NULL UNIQUE CHECK(length(client_operation_id) BETWEEN 2 AND 256),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  cluster_id TEXT NOT NULL CHECK(length(cluster_id) BETWEEN 2 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  node_order_json TEXT NOT NULL CHECK(json_valid(node_order_json) AND json_type(node_order_json)='array'),
+  leader_last INTEGER NOT NULL CHECK(leader_last=1),n_minus_one_compatible INTEGER NOT NULL CHECK(n_minus_one_compatible=1),
+  signed_package_required INTEGER NOT NULL CHECK(signed_package_required=1),package_signature_verified INTEGER NOT NULL CHECK(package_signature_verified=1),
+  rollback_required INTEGER NOT NULL CHECK(rollback_required=1),
+  schema_migration_leader_quorum_only INTEGER NOT NULL CHECK(schema_migration_leader_quorum_only=1),
+  current_version TEXT NOT NULL CHECK(length(current_version) BETWEEN 2 AND 256),
+  target_version TEXT NOT NULL CHECK(length(target_version) BETWEEN 2 AND 256 AND target_version<>current_version),
+  package_sha256 TEXT NOT NULL CHECK(length(package_sha256)=64 AND package_sha256 NOT GLOB '*[^0-9a-f]*'),
+  cluster_state_evidence_sha256 TEXT NOT NULL CHECK(length(cluster_state_evidence_sha256)=64 AND cluster_state_evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
+  verifier_id TEXT NOT NULL CHECK(length(verifier_id) BETWEEN 2 AND 256),
+  verifier_production_verified INTEGER NOT NULL CHECK(verifier_production_verified IN (0,1)),
+  signature_evidence_sha256 TEXT NOT NULL CHECK(length(signature_evidence_sha256)=64 AND signature_evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
+  plan_sha256 TEXT NOT NULL UNIQUE CHECK(length(plan_sha256)=64 AND plan_sha256 NOT GLOB '*[^0-9a-f]*'),
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z'),
+  real_update_executed INTEGER NOT NULL CHECK(real_update_executed=0)
+) STRICT;
 CREATE TABLE distributed_fault_injection_evidence(
-  id TEXT PRIMARY KEY,cluster_id TEXT NOT NULL,family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  id TEXT PRIMARY KEY CHECK(length(id) BETWEEN 2 AND 256),
+  client_operation_id TEXT NOT NULL UNIQUE CHECK(length(client_operation_id) BETWEEN 2 AND 256),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  cluster_id TEXT NOT NULL CHECK(length(cluster_id) BETWEEN 2 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  fault_sequence INTEGER NOT NULL CHECK(fault_sequence>=1),
   scenario TEXT NOT NULL CHECK(scenario IN ('network_partition','power_loss','disk_full','corruption','clock_skew','certificate_expiry','rolling_update')),
   synthetic_only INTEGER NOT NULL CHECK(synthetic_only=1),contained INTEGER NOT NULL CHECK(contained IN (0,1)),
-  evidence_sha256 TEXT NOT NULL CHECK(length(evidence_sha256)=64),real_windows_node INTEGER NOT NULL CHECK(real_windows_node=0),created_at TEXT NOT NULL
-);
+  provider_id TEXT NOT NULL CHECK(length(provider_id) BETWEEN 2 AND 256),
+  provider_evidence_sha256 TEXT NOT NULL CHECK(length(provider_evidence_sha256)=64 AND provider_evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
+  previous_evidence_sha256 TEXT NOT NULL CHECK(length(previous_evidence_sha256)=64 AND previous_evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
+  evidence_sha256 TEXT NOT NULL UNIQUE CHECK(length(evidence_sha256)=64 AND evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
+  real_windows_node INTEGER NOT NULL CHECK(real_windows_node=0),
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z'),
+  UNIQUE(cluster_id,family_id,fault_sequence)
+) STRICT;
+CREATE INDEX idx_34j_backup_cluster_sequence ON distributed_backup_evidence(cluster_id,family_id,backup_sequence);
+CREATE INDEX idx_34j_fault_cluster_sequence ON distributed_fault_injection_evidence(cluster_id,family_id,fault_sequence);
+CREATE TRIGGER trg_34j_backup_insert BEFORE INSERT ON distributed_backup_evidence
+WHEN NOT EXISTS(
+    SELECT 1 FROM distributed_cluster_nodes n WHERE n.cluster_id=NEW.cluster_id AND n.family_id=NEW.family_id
+      AND n.certificate_revoked=0 AND n.key_epoch=NEW.key_epoch AND n.policy_version=NEW.policy_version
+  )
+  OR NEW.source_commit_index>COALESCE((
+    SELECT MAX(n.commit_index) FROM distributed_cluster_nodes n WHERE n.cluster_id=NEW.cluster_id AND n.family_id=NEW.family_id
+  ),0)
+  OR NEW.backup_sequence<>COALESCE((
+    SELECT MAX(b.backup_sequence) FROM distributed_backup_evidence b WHERE b.cluster_id=NEW.cluster_id AND b.family_id=NEW.family_id
+  ),0)+1
+  OR NEW.previous_evidence_sha256<>COALESCE((
+    SELECT b.evidence_sha256 FROM distributed_backup_evidence b WHERE b.cluster_id=NEW.cluster_id AND b.family_id=NEW.family_id
+    ORDER BY b.backup_sequence DESC LIMIT 1
+  ),'0000000000000000000000000000000000000000000000000000000000000000')
+BEGIN SELECT RAISE(ABORT,'34-J backup chain, cluster state or epoch evidence mismatch'); END;
+CREATE TRIGGER trg_34j_update_plan_insert BEFORE INSERT ON distributed_update_plans
+WHEN json_array_length(NEW.node_order_json)<2 OR json_array_length(NEW.node_order_json)>64
+  OR EXISTS(SELECT 1 FROM json_each(NEW.node_order_json) WHERE type<>'text')
+  OR (SELECT COUNT(DISTINCT value) FROM json_each(NEW.node_order_json))<>json_array_length(NEW.node_order_json)
+  OR (SELECT COUNT(*) FROM distributed_cluster_nodes n
+      WHERE n.cluster_id=NEW.cluster_id AND n.family_id=NEW.family_id)<>json_array_length(NEW.node_order_json)
+  OR EXISTS(
+    SELECT 1 FROM json_each(NEW.node_order_json) j LEFT JOIN distributed_cluster_nodes n
+      ON n.node_id=j.value AND n.cluster_id=NEW.cluster_id AND n.family_id=NEW.family_id
+    WHERE n.node_id IS NULL
+  )
+  OR (SELECT COUNT(*) FROM distributed_cluster_nodes n
+      WHERE n.cluster_id=NEW.cluster_id AND n.family_id=NEW.family_id AND n.role='leader')<>1
+  OR NOT EXISTS(
+    SELECT 1 FROM distributed_cluster_nodes n
+    WHERE n.node_id=json_extract(NEW.node_order_json,'$['||(json_array_length(NEW.node_order_json)-1)||']')
+      AND n.cluster_id=NEW.cluster_id AND n.family_id=NEW.family_id AND n.role='leader'
+      AND n.safe_mode=0 AND n.certificate_revoked=0
+  )
+BEGIN SELECT RAISE(ABORT,'34-J update plan requires exact healthy leader-last cluster inventory'); END;
+CREATE TRIGGER trg_34j_fault_insert BEFORE INSERT ON distributed_fault_injection_evidence
+WHEN NOT EXISTS(SELECT 1 FROM distributed_cluster_nodes n WHERE n.cluster_id=NEW.cluster_id AND n.family_id=NEW.family_id)
+  OR NEW.fault_sequence<>COALESCE((
+    SELECT MAX(f.fault_sequence) FROM distributed_fault_injection_evidence f WHERE f.cluster_id=NEW.cluster_id AND f.family_id=NEW.family_id
+  ),0)+1
+  OR NEW.previous_evidence_sha256<>COALESCE((
+    SELECT f.evidence_sha256 FROM distributed_fault_injection_evidence f WHERE f.cluster_id=NEW.cluster_id AND f.family_id=NEW.family_id
+    ORDER BY f.fault_sequence DESC LIMIT 1
+  ),'0000000000000000000000000000000000000000000000000000000000000000')
+BEGIN SELECT RAISE(ABORT,'34-J fault evidence chain or cluster tenancy mismatch'); END;
 CREATE TRIGGER trg_34j_backup_update BEFORE UPDATE ON distributed_backup_evidence
 BEGIN SELECT RAISE(ABORT,'34-J backup evidence is immutable'); END;
 CREATE TRIGGER trg_34j_backup_delete BEFORE DELETE ON distributed_backup_evidence
 BEGIN SELECT RAISE(ABORT,'34-J backup evidence is immutable'); END;
+CREATE TRIGGER trg_34j_update_plan_update BEFORE UPDATE ON distributed_update_plans
+BEGIN SELECT RAISE(ABORT,'34-J rolling update plan is immutable'); END;
+CREATE TRIGGER trg_34j_update_plan_delete BEFORE DELETE ON distributed_update_plans
+BEGIN SELECT RAISE(ABORT,'34-J rolling update plan is immutable'); END;
 CREATE TRIGGER trg_34j_fault_update BEFORE UPDATE ON distributed_fault_injection_evidence
 BEGIN SELECT RAISE(ABORT,'34-J fault evidence is immutable'); END;
 CREATE TRIGGER trg_34j_fault_delete BEFORE DELETE ON distributed_fault_injection_evidence
@@ -17407,39 +17690,192 @@ UPDATE database_metadata SET value='REVISION-34-J-DISTRIBUTED-CLIENTS-OPERATIONS
 `;
 
 const windowsResilienceUniversalUxSql = `CREATE TABLE universal_ux_operations(
-  client_operation_id TEXT NOT NULL,family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 128),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
+  actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   operation_kind TEXT NOT NULL CHECK(operation_kind IN ('preferences_update','policy_weakening_record','resilience_evidence_record')),
-  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64),result_id TEXT NOT NULL CHECK(length(result_id)=64),
-  PRIMARY KEY(family_id,owner_person_id,client_operation_id),UNIQUE(result_id)
-);
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
+  result_id TEXT NOT NULL UNIQUE CHECK(length(result_id)=64 AND result_id NOT GLOB '*[^0-9a-f]*'),
+  policy_resource_id TEXT NOT NULL CHECK(length(trim(policy_resource_id)) BETWEEN 2 AND 256),
+  occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
+  result_requirements_closed INTEGER NOT NULL CHECK(result_requirements_closed IN (0,1)),
+  policy_receipt_hash TEXT NOT NULL UNIQUE REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT
+    CHECK(length(policy_receipt_hash)=64 AND policy_receipt_hash NOT GLOB '*[^0-9a-f]*'),
+  policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version>=1),
+  policy_receipt_nonce TEXT NOT NULL CHECK(length(trim(policy_receipt_nonce)) BETWEEN 16 AND 256),
+  policy_correlation_id TEXT NOT NULL CHECK(length(trim(policy_correlation_id)) BETWEEN 1 AND 256),
+  PRIMARY KEY(family_id,owner_person_id,client_operation_id),
+  CHECK(actor_person_id=owner_person_id),
+  CHECK(operation_kind='resilience_evidence_record' OR result_requirements_closed=0)
+) STRICT;
 CREATE TABLE universal_ux_preferences(
-  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
-  preferences_json TEXT NOT NULL CHECK(json_valid(preferences_json)),revision INTEGER NOT NULL CHECK(revision>=1),
-  last_operation_id TEXT NOT NULL UNIQUE CHECK(length(last_operation_id)=64),updated_at TEXT NOT NULL,PRIMARY KEY(family_id,owner_person_id),
-  CHECK(json_extract(preferences_json,'$.revision')=revision)
-);
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  preferences_json TEXT NOT NULL CHECK(json_valid(preferences_json) AND json_type(preferences_json)='object'),
+  revision INTEGER NOT NULL CHECK(revision>=1),
+  last_operation_id TEXT NOT NULL UNIQUE REFERENCES universal_ux_operations(result_id) ON DELETE RESTRICT
+    CHECK(length(last_operation_id)=64 AND last_operation_id NOT GLOB '*[^0-9a-f]*'),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND updated_at GLOB '????-??-??T??:??:??.???Z' AND julianday(updated_at) IS NOT NULL),
+  PRIMARY KEY(family_id,owner_person_id),
+  CHECK(json_extract(preferences_json,'$.revision')=revision),
+  CHECK(json_extract(preferences_json,'$.updatedAt')=updated_at),
+  CHECK(json_extract(preferences_json,'$.mode') IN ('standard','easy_read','guest','child','senior','caregiver','kitchen_tablet')),
+  CHECK(json_type(preferences_json,'$.favoriteRouteIds')='array' AND json_array_length(preferences_json,'$.favoriteRouteIds')<=64),
+  CHECK(json_type(preferences_json,'$.recentRouteIds')='array' AND json_array_length(preferences_json,'$.recentRouteIds')<=64),
+  CHECK(json_type(preferences_json,'$.dashboardCardIds')='array' AND json_array_length(preferences_json,'$.dashboardCardIds')<=32),
+  CHECK(json_type(preferences_json,'$.quietHoursEnabled') IN ('true','false')),
+  CHECK(json_extract(preferences_json,'$.quietHoursStart') GLOB '[0-2][0-9]:[0-5][0-9]'
+    AND substr(json_extract(preferences_json,'$.quietHoursStart'),1,2) BETWEEN '00' AND '23'),
+  CHECK(json_extract(preferences_json,'$.quietHoursEnd') GLOB '[0-2][0-9]:[0-5][0-9]'
+    AND substr(json_extract(preferences_json,'$.quietHoursEnd'),1,2) BETWEEN '00' AND '23'),
+  CHECK(json_type(preferences_json,'$.weeklyDigestEnabled') IN ('true','false')),
+  CHECK(json_extract(preferences_json,'$.quietHoursEnabled')=0 OR
+    json_extract(preferences_json,'$.quietHoursStart')<>json_extract(preferences_json,'$.quietHoursEnd'))
+) STRICT;
 CREATE TABLE policy_weakening_proposals(
-  proposal_id TEXT PRIMARY KEY,family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
-  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,current_policy_version TEXT NOT NULL,
-  proposed_policy_version TEXT NOT NULL,explicit_user_decision_id TEXT NOT NULL,risk_analysis_sha256 TEXT NOT NULL CHECK(length(risk_analysis_sha256)=64),
-  rollback_plan_sha256 TEXT NOT NULL CHECK(length(rollback_plan_sha256)=64),reason TEXT NOT NULL CHECK(length(trim(reason)) BETWEEN 10 AND 2000),
-  accepted INTEGER NOT NULL CHECK(accepted IN (0,1)),recorded_at TEXT NOT NULL,operation_result_id TEXT NOT NULL UNIQUE REFERENCES universal_ux_operations(result_id) ON DELETE RESTRICT,
-  CHECK(current_policy_version<>proposed_policy_version)
-);
-CREATE TABLE windows_resilience_evidence(
-  id TEXT PRIMARY KEY,family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
-  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,evidence_json TEXT NOT NULL CHECK(json_valid(evidence_json)),
-  requirements_closed INTEGER NOT NULL CHECK(requirements_closed IN (0,1)),real_windows_soak INTEGER NOT NULL CHECK(real_windows_soak IN (0,1)),
-  soak_hours INTEGER NOT NULL CHECK(soak_hours>=0),people_count INTEGER NOT NULL CHECK(people_count>=0),event_count INTEGER NOT NULL CHECK(event_count>=0),
-  document_count INTEGER NOT NULL CHECK(document_count>=0),recorded_at TEXT NOT NULL,
+  proposal_id TEXT PRIMARY KEY CHECK(length(trim(proposal_id)) BETWEEN 2 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  current_policy_version TEXT NOT NULL CHECK(length(trim(current_policy_version)) BETWEEN 2 AND 256),
+  proposed_policy_version TEXT NOT NULL CHECK(length(trim(proposed_policy_version)) BETWEEN 2 AND 256),
+  explicit_user_decision_id TEXT NOT NULL CHECK(length(trim(explicit_user_decision_id)) BETWEEN 2 AND 256),
+  explicit_user_decision_sha256 TEXT NOT NULL CHECK(length(explicit_user_decision_sha256)=64 AND explicit_user_decision_sha256 NOT GLOB '*[^0-9a-f]*'),
+  risk_analysis_sha256 TEXT NOT NULL CHECK(length(risk_analysis_sha256)=64 AND risk_analysis_sha256 NOT GLOB '*[^0-9a-f]*'),
+  rollback_plan_sha256 TEXT NOT NULL CHECK(length(rollback_plan_sha256)=64 AND rollback_plan_sha256 NOT GLOB '*[^0-9a-f]*'),
+  proposed_policy_package_sha256 TEXT NOT NULL CHECK(length(proposed_policy_package_sha256)=64 AND proposed_policy_package_sha256 NOT GLOB '*[^0-9a-f]*'),
+  reason TEXT NOT NULL CHECK(length(trim(reason)) BETWEEN 10 AND 2000 AND reason=trim(reason)),
+  accepted INTEGER NOT NULL CHECK(accepted IN (0,1)),
+  decision_reason TEXT NOT NULL CHECK(decision_reason IN ('VERIFIED_EXPLICIT_DECISION_RISK_ROLLBACK_AND_SIGNED_PACKAGE','POLICY_WEAKENING_VERIFICATION_REQUIRED')),
+  verification_provider_id TEXT NOT NULL CHECK(length(trim(verification_provider_id)) BETWEEN 2 AND 256),
+  verification_provider_production_verified INTEGER NOT NULL CHECK(verification_provider_production_verified IN (0,1)),
+  verification_evidence_sha256 TEXT CHECK(verification_evidence_sha256 IS NULL OR
+    (length(verification_evidence_sha256)=64 AND verification_evidence_sha256 NOT GLOB '*[^0-9a-f]*')),
+  network_used INTEGER CHECK(network_used IS NULL OR network_used IN (0,1)),
+  recorded_at TEXT NOT NULL CHECK(length(recorded_at)=24 AND recorded_at GLOB '????-??-??T??:??:??.???Z' AND julianday(recorded_at) IS NOT NULL),
   operation_result_id TEXT NOT NULL UNIQUE REFERENCES universal_ux_operations(result_id) ON DELETE RESTRICT,
-  CHECK(requirements_closed=0 OR (real_windows_soak=1 AND soak_hours>=168 AND people_count>=10000 AND event_count>=100000 AND document_count>=10000))
-);
+  CHECK(current_policy_version<>proposed_policy_version),
+  CHECK((accepted=1 AND decision_reason='VERIFIED_EXPLICIT_DECISION_RISK_ROLLBACK_AND_SIGNED_PACKAGE'
+      AND verification_provider_production_verified=1 AND verification_evidence_sha256 IS NOT NULL AND network_used IS NOT NULL)
+    OR (accepted=0 AND decision_reason='POLICY_WEAKENING_VERIFICATION_REQUIRED'))
+) STRICT;
+CREATE TABLE windows_resilience_evidence(
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 256),
+  family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
+  owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
+  provider_id TEXT NOT NULL CHECK(length(trim(provider_id)) BETWEEN 2 AND 256),
+  provider_configured INTEGER NOT NULL CHECK(provider_configured IN (0,1)),
+  provider_production_verified INTEGER NOT NULL CHECK(provider_production_verified IN (0,1)),
+  provider_evidence_sha256 TEXT NOT NULL CHECK(length(provider_evidence_sha256)=64 AND provider_evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
+  observed_at TEXT NOT NULL CHECK(length(observed_at)=24 AND observed_at GLOB '????-??-??T??:??:??.???Z' AND julianday(observed_at) IS NOT NULL),
+  network_used INTEGER NOT NULL CHECK(network_used IN (0,1)),
+  crash_safe_transaction_synthetic_pass INTEGER NOT NULL CHECK(crash_safe_transaction_synthetic_pass IN (0,1)),
+  startup_recovery_synthetic_pass INTEGER NOT NULL CHECK(startup_recovery_synthetic_pass IN (0,1)),
+  installer_clean_install_real_windows_pass INTEGER NOT NULL CHECK(installer_clean_install_real_windows_pass IN (0,1)),
+  installer_upgrade_real_windows_pass INTEGER NOT NULL CHECK(installer_upgrade_real_windows_pass IN (0,1)),
+  installer_repair_real_windows_pass INTEGER NOT NULL CHECK(installer_repair_real_windows_pass IN (0,1)),
+  installer_uninstall_data_protection_real_windows_pass INTEGER NOT NULL CHECK(installer_uninstall_data_protection_real_windows_pass IN (0,1)),
+  people_count INTEGER NOT NULL CHECK(people_count BETWEEN 0 AND 1000000),
+  event_count INTEGER NOT NULL CHECK(event_count BETWEEN 0 AND 10000000),
+  document_count INTEGER NOT NULL CHECK(document_count BETWEEN 0 AND 1000000),
+  soak_hours INTEGER NOT NULL CHECK(soak_hours BETWEEN 0 AND 8760),
+  real_windows_soak INTEGER NOT NULL CHECK(real_windows_soak IN (0,1)),
+  requirements_closed INTEGER NOT NULL CHECK(requirements_closed IN (0,1)),
+  recorded_at TEXT NOT NULL CHECK(length(recorded_at)=24 AND recorded_at GLOB '????-??-??T??:??:??.???Z' AND julianday(recorded_at) IS NOT NULL),
+  operation_result_id TEXT NOT NULL UNIQUE REFERENCES universal_ux_operations(result_id) ON DELETE RESTRICT,
+  CHECK(provider_production_verified=0 OR provider_configured=1),
+  CHECK(julianday(observed_at)<=julianday(recorded_at)),
+  CHECK(requirements_closed=CASE WHEN provider_configured=1 AND provider_production_verified=1
+    AND crash_safe_transaction_synthetic_pass=1 AND startup_recovery_synthetic_pass=1
+    AND installer_clean_install_real_windows_pass=1 AND installer_upgrade_real_windows_pass=1
+    AND installer_repair_real_windows_pass=1 AND installer_uninstall_data_protection_real_windows_pass=1
+    AND people_count>=10000 AND event_count>=100000 AND document_count>=10000
+    AND soak_hours>=168 AND real_windows_soak=1 THEN 1 ELSE 0 END)
+) STRICT;
+CREATE TRIGGER trg_34k_operation_insert BEFORE INSERT ON universal_ux_operations
+WHEN NOT EXISTS(
+  SELECT 1 FROM accounts account
+  JOIN people actor ON actor.id=NEW.actor_person_id AND actor.family_id=NEW.family_id AND actor.status='active'
+  JOIN people owner ON owner.id=NEW.owner_person_id AND owner.family_id=NEW.family_id AND owner.status='active'
+  JOIN platform_policy_transaction_receipts receipt ON receipt.receipt_hash=NEW.policy_receipt_hash
+  JOIN platform_policy_database_fences fence ON fence.fence_name=receipt.fence_name
+    AND fence.epoch=receipt.fence_epoch AND fence.writable=1
+  JOIN platform_policy_journal_projection_outbox projection ON projection.receipt_hash=receipt.receipt_hash
+  WHERE account.id=NEW.actor_account_id AND account.person_id=NEW.actor_person_id AND account.status='active'
+    AND receipt.receipt_version=NEW.policy_receipt_version AND receipt.nonce=NEW.policy_receipt_nonce
+    AND receipt.correlation_id=NEW.policy_correlation_id AND receipt.resource_type='windows_resilience_universal_ux'
+    AND receipt.resource_id=NEW.policy_resource_id
+    AND receipt.action=CASE WHEN NEW.operation_kind='preferences_update' THEN 'update' ELSE 'create' END
+    AND receipt.capability='family.write' AND receipt.recorded_at=NEW.occurred_at
+    AND json_extract(receipt.record_json,'$.request.purpose')='general'
+    AND json_extract(receipt.record_json,'$.request.resource.familyId')=NEW.family_id
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id
+    AND json_extract(receipt.record_json,'$.request.resource.sensitivity')='personal'
+    AND json_extract(receipt.record_json,'$.request.subject.accountId')=NEW.actor_account_id
+    AND json_extract(receipt.record_json,'$.request.subject.personId')=NEW.actor_person_id)
+BEGIN SELECT RAISE(ABORT,'34-K operation requires exact owner-bound durable PEP receipt'); END;
+CREATE TRIGGER trg_34k_preferences_insert BEFORE INSERT ON universal_ux_preferences
+WHEN NEW.revision<>1 OR NOT EXISTS(SELECT 1 FROM universal_ux_operations operation
+    WHERE operation.result_id=NEW.last_operation_id AND operation.family_id=NEW.family_id
+      AND operation.owner_person_id=NEW.owner_person_id AND operation.operation_kind='preferences_update'
+      AND operation.policy_resource_id='universal-ux:'||NEW.owner_person_id AND operation.occurred_at=NEW.updated_at
+      AND operation.result_requirements_closed=0)
+  OR (SELECT COUNT(*) FROM json_each(NEW.preferences_json))<>10
+  OR EXISTS(SELECT 1 FROM json_each(NEW.preferences_json) item WHERE item.key NOT IN ('mode','favoriteRouteIds',
+    'recentRouteIds','dashboardCardIds','quietHoursEnabled','quietHoursStart','quietHoursEnd','weeklyDigestEnabled','revision','updatedAt'))
+  OR EXISTS(SELECT 1 FROM json_each(NEW.preferences_json,'$.favoriteRouteIds') item
+    WHERE item.type<>'text' OR length(trim(item.value)) NOT BETWEEN 2 AND 256)
+  OR EXISTS(SELECT 1 FROM json_each(NEW.preferences_json,'$.recentRouteIds') item
+    WHERE item.type<>'text' OR length(trim(item.value)) NOT BETWEEN 2 AND 256)
+  OR EXISTS(SELECT 1 FROM json_each(NEW.preferences_json,'$.dashboardCardIds') item
+    WHERE item.type<>'text' OR length(trim(item.value)) NOT BETWEEN 2 AND 256)
+  OR (SELECT COUNT(*) FROM json_each(NEW.preferences_json,'$.favoriteRouteIds'))<>
+    (SELECT COUNT(DISTINCT value) FROM json_each(NEW.preferences_json,'$.favoriteRouteIds'))
+  OR (SELECT COUNT(*) FROM json_each(NEW.preferences_json,'$.recentRouteIds'))<>
+    (SELECT COUNT(DISTINCT value) FROM json_each(NEW.preferences_json,'$.recentRouteIds'))
+  OR (SELECT COUNT(*) FROM json_each(NEW.preferences_json,'$.dashboardCardIds'))<>
+    (SELECT COUNT(DISTINCT value) FROM json_each(NEW.preferences_json,'$.dashboardCardIds'))
+BEGIN SELECT RAISE(ABORT,'34-K UX preferences require exact initial operation and bounded schema'); END;
 CREATE TRIGGER trg_34k_preferences_update BEFORE UPDATE ON universal_ux_preferences
-BEGIN SELECT CASE WHEN NEW.revision<>OLD.revision+1 OR NOT EXISTS(SELECT 1 FROM universal_ux_operations operation
-  WHERE operation.result_id=NEW.last_operation_id AND operation.family_id=NEW.family_id AND operation.owner_person_id=NEW.owner_person_id
-    AND operation.operation_kind='preferences_update') THEN RAISE(ABORT,'34-K UX preferences require exact next operation') END; END;
+WHEN NEW.family_id<>OLD.family_id OR NEW.owner_person_id<>OLD.owner_person_id OR NEW.revision<>OLD.revision+1
+  OR NOT EXISTS(SELECT 1 FROM universal_ux_operations operation
+    WHERE operation.result_id=NEW.last_operation_id AND operation.family_id=NEW.family_id
+      AND operation.owner_person_id=NEW.owner_person_id AND operation.operation_kind='preferences_update'
+      AND operation.policy_resource_id='universal-ux:'||NEW.owner_person_id AND operation.occurred_at=NEW.updated_at
+      AND operation.result_requirements_closed=0)
+  OR (SELECT COUNT(*) FROM json_each(NEW.preferences_json))<>10
+  OR EXISTS(SELECT 1 FROM json_each(NEW.preferences_json) item WHERE item.key NOT IN ('mode','favoriteRouteIds',
+    'recentRouteIds','dashboardCardIds','quietHoursEnabled','quietHoursStart','quietHoursEnd','weeklyDigestEnabled','revision','updatedAt'))
+  OR EXISTS(SELECT 1 FROM json_each(NEW.preferences_json,'$.favoriteRouteIds') item
+    WHERE item.type<>'text' OR length(trim(item.value)) NOT BETWEEN 2 AND 256)
+  OR EXISTS(SELECT 1 FROM json_each(NEW.preferences_json,'$.recentRouteIds') item
+    WHERE item.type<>'text' OR length(trim(item.value)) NOT BETWEEN 2 AND 256)
+  OR EXISTS(SELECT 1 FROM json_each(NEW.preferences_json,'$.dashboardCardIds') item
+    WHERE item.type<>'text' OR length(trim(item.value)) NOT BETWEEN 2 AND 256)
+  OR (SELECT COUNT(*) FROM json_each(NEW.preferences_json,'$.favoriteRouteIds'))<>
+    (SELECT COUNT(DISTINCT value) FROM json_each(NEW.preferences_json,'$.favoriteRouteIds'))
+  OR (SELECT COUNT(*) FROM json_each(NEW.preferences_json,'$.recentRouteIds'))<>
+    (SELECT COUNT(DISTINCT value) FROM json_each(NEW.preferences_json,'$.recentRouteIds'))
+  OR (SELECT COUNT(*) FROM json_each(NEW.preferences_json,'$.dashboardCardIds'))<>
+    (SELECT COUNT(DISTINCT value) FROM json_each(NEW.preferences_json,'$.dashboardCardIds'))
+BEGIN SELECT RAISE(ABORT,'34-K UX preferences require exact next operation and immutable owner'); END;
+CREATE TRIGGER trg_34k_policy_insert BEFORE INSERT ON policy_weakening_proposals
+WHEN NOT EXISTS(SELECT 1 FROM universal_ux_operations operation
+  WHERE operation.result_id=NEW.operation_result_id AND operation.family_id=NEW.family_id
+    AND operation.owner_person_id=NEW.owner_person_id AND operation.operation_kind='policy_weakening_record'
+    AND operation.policy_resource_id=NEW.proposal_id AND operation.occurred_at=NEW.recorded_at
+    AND operation.result_requirements_closed=0)
+BEGIN SELECT RAISE(ABORT,'34-K policy weakening proposal requires exact operation receipt'); END;
+CREATE TRIGGER trg_34k_resilience_insert BEFORE INSERT ON windows_resilience_evidence
+WHEN NOT EXISTS(SELECT 1 FROM universal_ux_operations operation
+  WHERE operation.result_id=NEW.operation_result_id AND operation.family_id=NEW.family_id
+    AND operation.owner_person_id=NEW.owner_person_id AND operation.operation_kind='resilience_evidence_record'
+    AND operation.policy_resource_id=NEW.id AND operation.occurred_at=NEW.recorded_at
+    AND operation.result_requirements_closed=NEW.requirements_closed)
+BEGIN SELECT RAISE(ABORT,'34-K resilience evidence requires exact operation receipt'); END;
+CREATE TRIGGER trg_34k_preferences_delete BEFORE DELETE ON universal_ux_preferences
+BEGIN SELECT RAISE(ABORT,'34-K UX preferences require governed logical replacement'); END;
 CREATE TRIGGER trg_34k_policy_update BEFORE UPDATE ON policy_weakening_proposals
 BEGIN SELECT RAISE(ABORT,'34-K policy weakening proposal is immutable'); END;
 CREATE TRIGGER trg_34k_policy_delete BEFORE DELETE ON policy_weakening_proposals

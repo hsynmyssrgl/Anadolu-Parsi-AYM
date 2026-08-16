@@ -31,6 +31,8 @@ import type {
   AccountRepositoryPort,
   AccountRow,
   ChildEducationPolicyResourceRepositoryPort,
+  CommunicationAuditArchivePolicyResourceRepositoryPort,
+  CommunicationFileSharingPolicyResourceRepositoryPort,
   CommunicationMessagingPolicyResourceRepositoryPort,
   CommunicationRecordingPolicyResourceRepositoryPort,
   CommunicationRealtimeCallingPolicyResourceRepositoryPort,
@@ -77,6 +79,8 @@ export interface LifeProductionPolicyRuntimeDependencies {
   readonly lifePolicyResourceRepository: LifePolicyResourceRepositoryPort;
   readonly householdOperationsPolicyResourceRepository: HouseholdOperationsPolicyResourceRepositoryPort;
   readonly childEducationPolicyResourceRepository: ChildEducationPolicyResourceRepositoryPort;
+  readonly communicationAuditArchivePolicyResourceRepository?: CommunicationAuditArchivePolicyResourceRepositoryPort;
+  readonly communicationFileSharingPolicyResourceRepository?: CommunicationFileSharingPolicyResourceRepositoryPort;
   readonly communicationMessagingPolicyResourceRepository?: CommunicationMessagingPolicyResourceRepositoryPort;
   readonly communicationRecordingPolicyResourceRepository?: CommunicationRecordingPolicyResourceRepositoryPort;
   readonly localTranslationPolicyResourceRepository?: LocalTranslationPolicyResourceRepositoryPort;
@@ -158,7 +162,10 @@ const lifeResourceTypes = new Set<LifePolicyIntent['resourceType']>([
   'local_translation_profile',
   'local_translation_request',
   'family_meeting_center',
-  'family_meeting'
+  'family_meeting',
+  'communication_file_sharing_center',
+  'communication_file_sharing',
+  'communication_audit_archive'
 ]);
 
 const nonEmpty = (value: unknown, max = 512): value is string =>
@@ -982,6 +989,27 @@ const findLifeResourceForPolicyResolution = (
           privacy: 'family' as const, stateFingerprint: stable(found.value) })
       : null);
   }
+  if (resourceType === 'communication_file_sharing_center' || resourceType === 'communication_file_sharing') {
+    if (!dependencies.communicationFileSharingPolicyResourceRepository) throw new PlatformPolicyEnforcementError(
+      'RESOURCE_RESOLUTION_FAILED', 'Communication file sharing policy resource repository is not composed');
+    const found = dependencies.communicationFileSharingPolicyResourceRepository.resolvePolicyResource(
+      execution, resourceType, resourceId);
+    if (!found.ok) return found;
+    return ok(found.value
+      ? Object.freeze({ familyId: found.value.familyId, ownerPersonId: found.value.ownerPersonId,
+          privacy: 'private' as const, stateFingerprint: stable(found.value) })
+      : null);
+  }
+  if (resourceType === 'communication_audit_archive') {
+    if (!dependencies.communicationAuditArchivePolicyResourceRepository) throw new PlatformPolicyEnforcementError(
+      'RESOURCE_RESOLUTION_FAILED', 'Communication audit archive policy resource repository is not composed');
+    const found = dependencies.communicationAuditArchivePolicyResourceRepository.resolvePolicyResource(execution, resourceId);
+    if (!found.ok) return found;
+    return ok(found.value
+      ? Object.freeze({ familyId: found.value.familyId, ownerPersonId: found.value.ownerPersonId,
+          privacy: 'private' as const, stateFingerprint: found.value.stateFingerprint })
+      : null);
+  }
   throw new PlatformPolicyEnforcementError(
     'RESOURCE_RESOLUTION_FAILED',
     'Life policy resource type is not supported'
@@ -1059,7 +1087,8 @@ const loadLifeResourceSnapshotInTransaction = (
           'smart_home_camera_consent','smart_home_settings','signed_plugin_installation',
           'communication_device_credential','communication_room','communication_message','communication_presence',
           'communication_retention_policy','communication_call_session','communication_call_preferences',
-          'communication_recording_request','local_translation_profile','local_translation_request','family_meeting'].includes(requestedIntent.resourceType)
+          'communication_recording_request','local_translation_profile','local_translation_request','family_meeting',
+          'communication_file_sharing_center','communication_file_sharing','communication_audit_archive'].includes(requestedIntent.resourceType)
         || existing.value.familyId !== context.familyId
         || existing.value.ownerPersonId !== requestedIntent.ownerPersonId
         || existing.value.privacy !== requestedIntent.privacy

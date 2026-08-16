@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "step": "34-K",
+  "decision": "DEC-248",
+  "mode": "contract",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "localImplementationStatus": "PARTIAL_LOCAL_FOUNDATION_ACCEPTANCE_INCOMPLETE",
+  "requirementsClosed": false,
+  "countsAsRequirementPass": false,
+  "checkCount": 4,
+  "passed": 4,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "governance identity is exact",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "fail-honest status remains non-accepting",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "manual evidence retains NOT_RUN facts",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "decision and threat model reject false closure",
+      "status": "PASS",
+      "detail": ""
+    }
+  ],
+  "generatedAt": "2026-08-15T22:04:56.452Z"
+}

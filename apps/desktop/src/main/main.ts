@@ -1,7 +1,7 @@
 import { app, BrowserWindow, dialog, ipcMain, powerMonitor, protocol, safeStorage, shell, type IpcMainInvokeEvent } from 'electron';
 import { fileURLToPath } from 'node:url';
 import { basename, dirname, extname, isAbsolute, join, resolve } from 'node:path';
-import { closeSync, existsSync, fstatSync, fsyncSync, linkSync, lstatSync, mkdirSync, openSync, readFileSync, readSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { closeSync, constants, existsSync, fstatSync, fsyncSync, linkSync, lstatSync, mkdirSync, openSync, readFileSync, readSync, realpathSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { createHash, randomUUID } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
@@ -125,6 +125,8 @@ import {
   SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS,
   COMMUNICATION_SECURITY_IPC_CHANNELS,
   COMMUNICATION_MESSAGING_IPC_CHANNELS,
+  COMMUNICATION_FILE_SHARING_IPC_CHANNELS,
+  COMMUNICATION_AUDIT_ARCHIVE_IPC_CHANNELS,
   COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS,
   COMMUNICATION_RECORDING_IPC_CHANNELS,
   LOCAL_TRANSLATION_IPC_CHANNELS,
@@ -147,7 +149,10 @@ import {
   type LocalGovernedOcrRerunIpcInput,
   type LocalGovernedOcrResultReadIpcInput,
   type LocalGovernedOcrSearchIpcInput,
-  type LocalGovernedOcrSetEnabledIpcInput
+  type LocalGovernedOcrSetEnabledIpcInput,
+  type CommunicationFileSharingApplyIpcInput,
+  type CommunicationFileSharingPreviewIpcInput,
+  type CommunicationFileSharingSelectIpcInput
 } from './ipc-integration-policy.js';
 import { IpcTransportSessionRegistry } from './ipc-transport-context.js';
 import { countedStrongAuthenticationFailureCode, getIpcRequestAbortSignal, getIpcRequestContext, IpcRequestLifecycleRegistry } from './ipc-request-lifecycle.js';
@@ -300,6 +305,45 @@ class PrivacyExportCancelledError extends Error {
     this.name = 'PrivacyExportCancelledError';
   }
 }
+
+const COMMUNICATION_FILE_SELECTION_MAX_BYTES=64*1024*1024;
+const normalizeSelectedFilePath=(value:string):string=>process.platform==='win32'
+  ?resolve(value).toLocaleLowerCase('en-US'):resolve(value);
+const communicationFileMimeType=(bytes:Uint8Array,fileName:string):string=>{
+  if(bytes.byteLength>=8&&Buffer.from(bytes.subarray(0,8)).equals(Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a])))return'image/png';
+  if(bytes.byteLength>=3&&bytes[0]===0xff&&bytes[1]===0xd8&&bytes[2]===0xff)return'image/jpeg';
+  if(bytes.byteLength>=6&&['GIF87a','GIF89a'].includes(Buffer.from(bytes.subarray(0,6)).toString('ascii')))return'image/gif';
+  if(bytes.byteLength>=12&&Buffer.from(bytes.subarray(0,4)).toString('ascii')==='RIFF'
+    &&Buffer.from(bytes.subarray(8,12)).toString('ascii')==='WEBP')return'image/webp';
+  if(bytes.byteLength>=5&&Buffer.from(bytes.subarray(0,5)).toString('ascii')==='%PDF-')return'application/pdf';
+  if(bytes.byteLength>=12&&Buffer.from(bytes.subarray(4,8)).toString('ascii')==='ftyp')return'video/mp4';
+  const extension=extname(fileName).toLowerCase();
+  return extension==='.txt'?'text/plain':extension==='.json'?'application/json':extension==='.csv'?'text/csv'
+    :'application/octet-stream';
+};
+const readCommunicationFileForMainAuthority=(selectedPath:string):{
+  readonly displayName:string;readonly mimeType:string;readonly bytes:Buffer
+}=>{
+  if(!isAbsolute(selectedPath))throw new Error('[AUTHORIZATION-DENIED] Selected communication file path is not absolute.');
+  const selected=resolve(selectedPath);const stat=lstatSync(selected);
+  if(!stat.isFile()||stat.isSymbolicLink()||stat.nlink!==1||stat.size<1||stat.size>COMMUNICATION_FILE_SELECTION_MAX_BYTES)
+    throw new Error('[AUTHORIZATION-DENIED] Selected communication file metadata is unsafe or outside the local limit.');
+  if(normalizeSelectedFilePath(realpathSync(selected))!==normalizeSelectedFilePath(selected))
+    throw new Error('[AUTHORIZATION-DENIED] Selected communication file path traverses a reparse point.');
+  const descriptor=openSync(selected,constants.O_RDONLY|(constants.O_NOFOLLOW??0));
+  try{
+    const opened=fstatSync(descriptor);
+    if(!opened.isFile()||opened.nlink!==1||opened.dev!==stat.dev||opened.ino!==stat.ino||opened.size!==stat.size)
+      throw new Error('[AUTHORIZATION-DENIED] Selected communication file identity changed while opening.');
+    const bytes=readFileSync(descriptor);
+    if(bytes.byteLength!==stat.size){bytes.fill(0);throw new Error('[AUTHORIZATION-DENIED] Selected communication file readback size changed.');}
+    const displayName=basename(selected).normalize('NFKC').trim();
+    if(displayName.length<1||displayName.length>255||/[\p{Cc}\p{Cf}\p{Cs}]/u.test(displayName)){
+      bytes.fill(0);throw new Error('[AUTHORIZATION-DENIED] Selected communication file name is invalid.');
+    }
+    return Object.freeze({displayName,mimeType:communicationFileMimeType(bytes,displayName),bytes});
+  }finally{closeSync(descriptor);}
+};
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 protocol.registerSchemesAsPrivileged([{
@@ -2536,6 +2580,25 @@ function registerIpc(): void {
     async(_event,input:SetCommunicationPresenceInput)=>store().setCommunicationPresence(input));
   registerIpcHandler(COMMUNICATION_MESSAGING_IPC_CHANNELS.setRetentionPolicy,
     async(_event,input:SetCommunicationRetentionPolicyInput)=>store().setCommunicationRetentionPolicy(input));
+  registerIpcHandler(COMMUNICATION_FILE_SHARING_IPC_CHANNELS.getCenter,
+    async()=>store().getCommunicationFileSharingCenter());
+  registerIpcHandler(COMMUNICATION_AUDIT_ARCHIVE_IPC_CHANNELS.getCenter,
+    async()=>store().getCommunicationAuditArchiveCenter());
+  registerIpcHandler(COMMUNICATION_FILE_SHARING_IPC_CHANNELS.getSafePreview,
+    async(_event,input:CommunicationFileSharingPreviewIpcInput)=>store().getCommunicationFileSafePreview(input.fileId));
+  registerIpcHandler(COMMUNICATION_FILE_SHARING_IPC_CHANNELS.selectAndPrepare,
+    async(_event,input:CommunicationFileSharingSelectIpcInput)=>{
+      const selection=await dialog.showOpenDialog({title:'Yerel olarak şifrelenecek iletişim dosyasını seç',
+        properties:['openFile'],filters:[{name:'Desteklenen yerel dosyalar',
+          extensions:['pdf','png','jpg','jpeg','gif','webp','mp4','txt','json','csv']}]});
+      if(selection.canceled||!selection.filePaths[0])return Object.freeze({canceled:true as const});
+      const selected=readCommunicationFileForMainAuthority(selection.filePaths[0]);
+      try{return await store().prepareCommunicationFile({...input,displayName:selected.displayName,
+        mimeType:selected.mimeType,bytes:selected.bytes});}
+      finally{selected.bytes.fill(0);}
+    });
+  registerIpcHandler(COMMUNICATION_FILE_SHARING_IPC_CHANNELS.apply,
+    async(_event,input:CommunicationFileSharingApplyIpcInput)=>store().applyCommunicationFileSharingCommand(input));
   registerIpcHandler(COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS.getCenter,
     async()=>store().getCommunicationRealtimeCallingCenter());
   registerIpcHandler(COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS.create,
@@ -2879,6 +2942,14 @@ function startBackgroundSchedulers(): void {
         );
       });
       if(!current.isAuthenticated()) return;
+      const communicationFileMaintenance=await current.maintainCommunicationFilePayloadVault().catch((error:unknown)=>{
+        current.recordDiagnostic('error','communication.file_payload_maintenance_failed',
+          'İletişim dosyası payload bakım çevrimi tamamlanamadı.',error instanceof Error?error.name:typeof error);
+        return undefined;
+      });
+      if(communicationFileMaintenance&&communicationFileMaintenance.rejectedFiles>0)current.recordDiagnostic('warning',
+        'communication.file_payload_maintenance_rejected','Bazı iletişim dosyası payload adayları güvenle sınıflandırılamadığı için korundu.',
+        `scanned=${communicationFileMaintenance.scannedFiles};deleted=${communicationFileMaintenance.deletedFiles};rejected=${communicationFileMaintenance.rejectedFiles}`);
       const ocrAuthorization = await current.reconcileLocalGovernedOcrAuthorizations().catch((error: unknown) => {
         current.recordDiagnostic(
           'error',

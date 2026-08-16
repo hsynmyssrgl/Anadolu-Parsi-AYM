@@ -1380,7 +1380,12 @@ describe('FamilyDataStore', () => {
       value: 'REVISION-34-K-WINDOWS-RESILIENCE-UNIVERSAL-UX'
     });
     const payloads = database.prepare("SELECT payload_json FROM event_outbox WHERE event_type='finance.planning.item_recorded'").all() as Array<{payload_json:string}>;
-    expect(JSON.stringify(payloads)).not.toMatch(/1200|10000|5500|Ağustos market|Manuel hedef|Manuel değerleme/u);
+    const parsedPayloads = payloads.map(({ payload_json }) => JSON.parse(payload_json) as Record<string, unknown>);
+    const allowedPayloadKeys = new Set(['itemId','itemType','parentId','ownerPersonId','privacy']);
+    expect(parsedPayloads.every((payload) => Object.keys(payload).every((key) => allowedPayloadKeys.has(key)))).toBe(true);
+    const contentOnly = parsedPayloads.map(({ itemId: _itemId, parentId: _parentId,
+      ownerPersonId: _ownerPersonId, ...payload }) => payload);
+    expect(JSON.stringify(contentOnly)).not.toMatch(/1200|10000|5500|Ağustos market|Manuel hedef|Manuel değerleme/u);
     expect(() => database.exec(`
       INSERT INTO finance_planning_ledger(
         id,family_id,owner_person_id,item_type,parent_item_id,name,category_kind,

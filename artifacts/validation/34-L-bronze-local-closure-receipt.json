@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "id": "34-L-BRONZE-LOCAL-CLOSURE-efecaee59249f72a456890da",
+  "step": "34-L",
+  "decision": "DEC-249",
+  "status": "PASS_LOCAL_ONLY",
+  "sourceBaseHead": "09e1165ce4e6f38c7dc03c4203f6a1289e4ae91e",
+  "finalCommitBinding": "THIS_RECEIPT_IS_TRACKED_BY_THE_FINAL_DELIVERY_COMMIT",
+  "evidence": [
+    {
+      "path": "artifacts/validation/34-L-bronze-final-local-closure-boundary.json",
+      "bytes": 1594,
+      "sha256": "25bc05db3870bdca77f07a2e2871b1c403920f1288a925a9bfbed93551e8bc67",
+      "status": "PASS",
+      "countsAsRequirementPass": false
+    },
+    {
+      "path": "artifacts/validation/34-L-bronze-final-local-closure-contract.json",
+      "bytes": 2362,
+      "sha256": "4e10b21b0be1adf000ae8f020d4ddafeaac8dd591208116a304b0de8ce94f106",
+      "status": "PASS",
+      "countsAsRequirementPass": false
+    },
+    {
+      "path": "artifacts/validation/34-L-bronze-final-local-closure-runtime.json",
+      "bytes": 27575,
+      "sha256": "82b935bbab1088f6919e33e173d0fe8ce6012934bbacba47eecdf7bac71e3eda",
+      "status": "PASS",
+      "countsAsRequirementPass": false
+    },
+    {
+      "path": "artifacts/validation/34-G-e2ee-file-sharing-remaining-communication-ux-boundary.json",
+      "bytes": 2543,
+      "sha256": "dc7908791c39e33cb81eec3618ac21eb1550143cd9037b00d9ff4729e0bade5a",
+      "status": "PASS",
+      "countsAsRequirementPass": false
+    },
+    {
+      "path": "artifacts/validation/34-G-e2ee-file-sharing-remaining-communication-ux-contract.json",
+      "bytes": 1107,
+      "sha256": "7f6e2b9a5bc0c43ddf0bd5f3632b1c22bbfb1b411d4db5af8aad3b6c6e4e75c7",
+      "status": "PASS",
+      "countsAsRequirementPass": false
+    },
+    {
+      "path": "artifacts/validation/34-G-e2ee-file-sharing-remaining-communication-ux-runtime.json",
+      "bytes": 24956,
+      "sha256": "87e1688730b581f0166bb38505f8d40393e7b4bc007a3bfe1fc40dd2471bab86",
+      "status": "PASS",
+      "countsAsRequirementPass": false
+    },
+    {
+      "path": "artifacts/validation/34-H-communication-audit-archive-integrity-boundary.json",
+      "bytes": 1899,
+      "sha256": "fe33164bf3c553f40f8beba3c79d0e2a8f39aa3653b5093e88f49194822bdb26",
+      "status": "PASS",
+      "countsAsRequirementPass": false
+    },
+    {
+      "path": "artifacts/validation/34-H-communication-audit-archive-integrity-contract.json",
+      "bytes": 1110,
+      "sha256": "bee57ff3633e89e8697902cf50318e3bbe75da39d4c94d05cef9cd134295de79",
+      "status": "PASS",
+      "countsAsRequirementPass": false
+    },
+    {
+      "path": "artifacts/validation/34-H-communication-audit-archive-integrity-runtime.json",
+      "bytes": 24313,
+      "sha256": "3687881164da069f50d2f3f101eb2ff206b38e5f1d36e8c4b9261017569dce2b",
+      "status": "PASS",
+      "countsAsRequirementPass": false
+    },
+    {
+      "path": "artifacts/validation/34-I-distributed-core-consensus-tenancy-boundary.json",
+      "bytes": 1817,
+      "sha256": "d206f93cd821b583d915ae197fe76895bf0c3f57a9b87e624e2a54c7d6f4b8d8",
+      "status": "PASS",
+      "countsAsRequirementPass": false
+    },
+    {
+      "path": "artifacts/validation/34-I-distributed-core-consensus-tenancy-contract.json",
+      "bytes": 1116,
+      "sha256": "283ebabf50e3ddaca38a2d2898a880963f0915458a69dfa9fe3aa716abd0a8cb",
+      "status": "PASS",
+      "countsAsRequirementPass": false
+    },
+    {
+      "path": "artifacts/validation/34-I-distributed-core-consensus-tenancy-runtime.json",
+      "bytes": 24231,
+      "sha256": "66a5ad2fb8fbec659a94f0555656ea96f8a3e287b1d3f62c5b8663caeee0c542",
+      "status": "PASS",
+      "countsAsRequirementPass": false
+    },
+    {
+      "path": "artifacts/validation/34-J-distributed-clients-operations-disaster-recovery-boundary.json",
+      "bytes": 2017,
+      "sha256": "a46816fa8f00440ba79b81cd0b32368e750a48d2af024dfb1aaf99a254c7cd99",
+      "status": "PASS",
+      "countsAsRequirementPass": false
+    },
+    {
+      "path": "artifacts/validation/34-J-distributed-clients-operations-disaster-recovery-contract.json",
+      "bytes": 1116,
+      "sha256": "31eea5eb916170b3374bb468fca990d38855821568c523a9a46eb1dff3164762",
+      "status": "PASS",
+      "countsAsRequirementPass": false
+    },
+    {
+      "path": "artifacts/validation/34-J-distributed-clients-operations-disaster-recovery-runtime.json",
+      "bytes": 24429,
+      "sha256": "036204c60648640a7f7bfe8ba1a3533135e71b327631b8dbe8f0cca534cb7ac6",
+      "status": "PASS",
+      "countsAsRequirementPass": false
+    },
+    {
+      "path": "artifacts/validation/34-K-windows-resilience-universal-ux-boundary.json",
+      "bytes": 1321,
+      "sha256": "1e6db7730e40636413288b907b076104ea1fd98088b825d86f9b04d58ce602e8",
+      "status": "PASS",
+      "countsAsRequirementPass": false
+    },
+    {
+      "path": "artifacts/validation/34-K-windows-resilience-universal-ux-contract.json",
+      "bytes": 849,
+      "sha256": "bc28eb815d9c9b6a61c7d77d8b5c03040184cb61886bb019fe9bd1c8bf776274",
+      "status": "PASS",
+      "countsAsRequirementPass": false
+    },
+    {
+      "path": "artifacts/validation/34-K-windows-resilience-universal-ux-runtime.json",
+      "bytes": 24539,
+      "sha256": "81fb636f9907fb8f8c197329e3b14741500387a834011e4c30ae7f8af749cd59",
+      "status": "PASS",
+      "countsAsRequirementPass": false
+    }
+  ],
+  "evidenceSetSha256": "efecaee59249f72a456890da46c20288ba8cee0ef093c6b7e936a8ad8df35065",
+  "localAutomatedEvidenceComplete": true,
+  "requirementsClosed": false,
+  "countsAsRequirementPass": false,
+  "manualEvidence": {
+    "realWindowsLifecycle": "NOT_RUN",
+    "sevenDaySoak": "NOT_RUN",
+    "realMultiNodeConsensus": "NOT_RUN",
+    "realAppleClients": "NOT_RUN",
+    "realRemoteProviders": "NOT_RUN",
+    "certification": "NOT_RUN"
+  },
+  "openRequirements": [
+    "33-P independent signed identity evidence and governed acceptance",
+    "real OCR and AI/provider integrations",
+    "production communication transport, relay and media providers",
+    "real multi-node Raft, mTLS, failover and disaster-recovery drills",
+    "real Apple clients and remote collaboration",
+    "real Windows installer lifecycle and 168-hour soak",
+    "independent review and certification evidence"
+  ],
+  "externalClaimsMade": false,
+  "generatedAt": "2026-08-16T05:05:57.609Z"
+}

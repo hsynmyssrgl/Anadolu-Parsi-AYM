@@ -20,6 +20,16 @@
     "countsAsRequirementPass":false
   },
   "manualEvidence":{"realWindowsLifecycle":"NOT_RUN","sevenDaySoak":"NOT_RUN","realMultiNodeConsensus":"NOT_RUN","realAppleClients":"NOT_RUN","realRemoteProviders":"NOT_RUN","certification":"NOT_RUN"},
+  "validation":{
+    "localPackageBoundaries":{"status":"PASS","checks":51},
+    "localPackageContracts":{"status":"PASS","checks":30},
+    "localPackageRuntimes":{"status":"PASS","checks":171},
+    "targeted":{"status":"PASS","files":12,"tests":47},
+    "fullRegression":{"status":"PASS","files":286,"tests":1920},
+    "rootTypecheck":"PASS",
+    "productionBuilds":{"status":"PASS","workspaces":18},
+    "artifactIndex":{"status":"PASS","checks":20949,"files":6627,"documents":3830}
+  },
   "persistentReceiptStatus":"PASS_LOCAL_ONLY",
   "persistentReceiptPath":"artifacts/validation/34-L-bronze-local-closure-receipt.json",
   "externalPersistentReceiptStatus":"NOT_RUN"

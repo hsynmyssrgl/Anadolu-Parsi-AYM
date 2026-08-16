@@ -2,6 +2,13 @@ import type { IsoDateTime } from '@ppt/core';
 
 export const COMMUNICATION_FILE_MAX_BYTES = 2 * 1024 * 1024 * 1024;
 export const COMMUNICATION_FILE_CHUNK_BYTES = 4 * 1024 * 1024;
+export const COMMUNICATION_FILE_LOCAL_STAGING_MAX_BYTES = 64 * 1024 * 1024;
+export const COMMUNICATION_FILE_SAFE_PREVIEW_MAX_BYTES = 256 * 1024;
+export const COMMUNICATION_FILE_ORPHAN_GRACE_MS = 24 * 60 * 60 * 1_000;
+export const COMMUNICATION_FILE_MAX_FILES_PER_OWNER = 128;
+export const COMMUNICATION_FILE_MAX_VERSIONS = 32;
+export const COMMUNICATION_FILE_MAX_COMMENTS = 256;
+export const COMMUNICATION_FILE_MAX_ACCESS_GRANTS = 256;
 
 export type CommunicationFileShareState =
   | 'prepared_local'
@@ -27,6 +34,8 @@ export interface CommunicationFileVersionView {
   readonly contentSha256: string;
   readonly sizeBytes: number;
   readonly sealedPayloadReference: string;
+  readonly providerId: 'protected-side-artifact-store-v1';
+  readonly providerEvidenceSha256: string;
   readonly createdByPersonId: string;
   readonly createdAt: IsoDateTime;
 }
@@ -58,8 +67,12 @@ export interface CommunicationFileShareView {
   readonly totalChunks: number;
   readonly fullContentSha256: string;
   readonly sealedPayloadReference: string;
+  readonly providerId: 'protected-side-artifact-store-v1';
+  readonly providerEvidenceSha256: string;
   readonly state: CommunicationFileShareState;
   readonly scanState: CommunicationFileScanState;
+  readonly scanProviderId?: string;
+  readonly scanEvidenceSha256?: string;
   readonly chunks: readonly CommunicationFileChunkReceiptView[];
   readonly versions: readonly CommunicationFileVersionView[];
   readonly comments: readonly CommunicationFileCommentView[];
@@ -165,12 +178,19 @@ export interface CommunicationFileSharingCenterView {
 export type CommunicationFileSharingCommand =
   | { readonly kind: 'prepare_file'; readonly fileId: string; readonly roomId?: string; readonly meetingId?: string;
       readonly displayName: string; readonly mimeType: string; readonly totalBytes: number; readonly totalChunks: number;
-      readonly fullContentSha256: string; readonly sealedPayloadReference: string }
+      readonly fullContentSha256: string; readonly sealedPayloadReference: string;
+      readonly providerId: 'protected-side-artifact-store-v1'; readonly providerEvidenceSha256: string;
+      readonly verifiedChunks: readonly { readonly chunkIndex: number; readonly offsetBytes: number;
+        readonly sizeBytes: number; readonly sha256: string }[];
+      readonly scanState: Exclude<CommunicationFileScanState, 'not_run'>; readonly scanProviderId?: string;
+      readonly scanEvidenceSha256?: string }
   | { readonly kind: 'record_chunk'; readonly fileId: string; readonly chunkIndex: number; readonly offsetBytes: number;
       readonly sizeBytes: number; readonly sha256: string }
-  | { readonly kind: 'set_scan'; readonly fileId: string; readonly scanState: Exclude<CommunicationFileScanState, 'not_run'> }
+  | { readonly kind: 'set_scan'; readonly fileId: string; readonly scanState: Exclude<CommunicationFileScanState, 'not_run'>;
+      readonly scanProviderId?: string; readonly scanEvidenceSha256?: string }
   | { readonly kind: 'add_version'; readonly fileId: string; readonly contentSha256: string; readonly sizeBytes: number;
-      readonly sealedPayloadReference: string }
+       readonly sealedPayloadReference: string; readonly providerId: 'protected-side-artifact-store-v1';
+       readonly providerEvidenceSha256: string }
   | { readonly kind: 'add_comment'; readonly fileId: string; readonly commentId: string; readonly body: string }
   | { readonly kind: 'grant_access'; readonly fileId: string; readonly grantId: string; readonly personId: string;
       readonly mode: CommunicationFileAccessMode; readonly startsAt: string; readonly endsAt: string }
@@ -202,6 +222,79 @@ export interface CommunicationFileSharingMutationReceiptView {
   readonly replayed: boolean;
   readonly externalOperationPerformed: false;
   readonly networkUsed: false;
+}
+
+export interface CommunicationFileShareRendererView {
+  readonly id: string;
+  readonly roomId?: string;
+  readonly meetingId?: string;
+  readonly displayName: string;
+  readonly mimeType: string;
+  readonly totalBytes: number;
+  readonly totalChunks: number;
+  readonly verifiedChunkCount: number;
+  readonly state: CommunicationFileShareState;
+  readonly scanState: CommunicationFileScanState;
+  readonly versionCount: number;
+  readonly comments: readonly CommunicationFileCommentView[];
+  readonly accessGrants: readonly CommunicationFileAccessGrantView[];
+  readonly archiveItemId?: string;
+  readonly albumId?: string;
+  readonly selectedForStory: boolean;
+  readonly likedByPersonIds: readonly string[];
+  readonly externalLinkEnabled: false;
+  readonly externalLinkAccessCodeRequired: true;
+  readonly revision: number;
+  readonly createdAt: IsoDateTime;
+  readonly updatedAt: IsoDateTime;
+}
+
+export interface CommunicationFileSharingRendererCenterView {
+  readonly schemaVersion: 1;
+  readonly files: readonly CommunicationFileShareRendererView[];
+  readonly notificationProfile: CommunicationNotificationProfileView;
+  readonly emergencyAnnouncements: readonly CommunicationEmergencyAnnouncementView[];
+  readonly remoteAssistance: readonly CommunicationRemoteAssistanceView[];
+  readonly coWatchSessions: readonly CommunicationCoWatchView[];
+  readonly voiceActions: readonly CommunicationVoiceActionView[];
+  readonly truth: CommunicationFileSharingTruthView;
+  readonly revision: number;
+  readonly generatedAt: IsoDateTime;
+}
+
+export interface CommunicationFileSharingRendererMutationReceiptView {
+  readonly commandKind: CommunicationFileSharingCommand['kind'];
+  readonly previousRevision: number;
+  readonly revision: number;
+  readonly occurredAt: IsoDateTime;
+  readonly replayed: boolean;
+  readonly externalOperationPerformed: false;
+  readonly networkUsed: false;
+}
+
+export interface CommunicationFileSafePreviewView {
+  readonly schemaVersion: 1;
+  readonly fileId: string;
+  readonly displayName: string;
+  readonly mimeType: 'text/plain' | 'text/markdown' | 'text/csv' | 'application/json';
+  readonly text: string;
+  readonly totalBytes: number;
+  readonly scanState: 'clean';
+  readonly accessMode: 'owner';
+  readonly renderingMode: 'escaped_plain_text';
+  readonly truncated: false;
+  readonly payloadSource: 'local_protected_payload';
+  readonly networkUsed: false;
+  readonly cloudUsed: false;
+}
+
+export interface CommunicationFilePayloadMaintenanceView {
+  readonly scannedFiles: number;
+  readonly deletedFiles: number;
+  readonly rejectedFiles: number;
+  readonly completedAt: IsoDateTime;
+  readonly networkUsed: false;
+  readonly cloudUsed: false;
 }
 
 export const communicationFileSharingTruth = Object.freeze({

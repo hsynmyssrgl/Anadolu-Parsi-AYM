@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "step": "34-L",
+  "decision": "DEC-249",
+  "mode": "contract",
+  "status": "PASS",
+  "governanceState": "PLANNED_FINAL",
+  "localImplementationStatus": "LOCAL_CLOSURE_AUTOMATION_COMPOSED_ACCEPTANCE_BLOCKED",
+  "requirementsClosed": false,
+  "countsAsRequirementPass": false,
+  "checkCount": 13,
+  "passed": 13,
+  "failed": 0,
+  "evidenceDigest": "a47a10417d0434b4f215a0e0baab7cf43d9b36a44e0132359e0715ca288a67a1",
+  "checks": [
+    {
+      "name": "34-L identity and final planned state are exact",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "acceptance remains fail-honest",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "current local validation evidence is exact and remains non-accepting",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "local receipt is real while manual and external evidence remain NOT_RUN",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "roadmap identity is complete and non-duplicated",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "roadmap acceptance states were not invented",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "accepted registry count and identities are stable",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "decision and threat model reject false closure",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "34-G contract",
+      "status": "PASS",
+      "exitCode": 0,
+      "output": "34-G contract: PASS (6/6; requirement PASS=false; write=false).\n"
+    },
+    {
+      "name": "34-H contract",
+      "status": "PASS",
+      "exitCode": 0,
+      "output": "34-H contract: PASS (6/6; requirement PASS=false; write=false).\n"
+    },
+    {
+      "name": "34-I contract",
+      "status": "PASS",
+      "exitCode": 0,
+      "output": "34-I contract: PASS (6/6; requirement PASS=false; write=false).\n"
+    },
+    {
+      "name": "34-J contract",
+      "status": "PASS",
+      "exitCode": 0,
+      "output": "34-J contract: PASS (6/6; requirement PASS=false; write=false).\n"
+    },
+    {
+      "name": "34-K contract",
+      "status": "PASS",
+      "exitCode": 0,
+      "output": "34-K contract: PASS (6/6; requirement PASS=false; write=false).\n"
+    }
+  ],
+  "generatedAt": "2026-08-16T05:04:47.169Z"
+}

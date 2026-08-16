@@ -16,7 +16,18 @@ describe('34-H communication audit archive migration boundary',()=>{
     expect(tables).toEqual(['communication_archive_integrity_checkpoints','communication_audit_events','communication_audit_operations']);
     const sql=(runtime.database.prepare("SELECT sql FROM sqlite_master WHERE type='trigger' AND name LIKE 'trg_34h_%'").all() as Array<{sql:string}>).map(row=>row.sql).join('\n');
     expect(sql).toContain('communication audit ledger is immutable');expect(sql).toContain('archive checkpoint ledger is immutable');
+    expect(sql).toContain('operation requires exact owner-bound durable PEP receipt');
+    expect(sql).toContain('platform_policy_database_fences');expect(sql).toContain('platform_policy_journal_projection_outbox');
+    expect(sql).toContain('exact operation receipt and chain head');
     const columns=(runtime.database.prepare(`SELECT p.name FROM pragma_table_info('communication_audit_events') p ORDER BY p.cid`).all() as Array<{name:string}>).map(row=>row.name).join('\n');
     expect(columns).toContain('resource_fingerprint');expect(columns).not.toMatch(/content_text|message_text|payload|plaintext|ciphertext/iu);
+    const operationColumns=(runtime.database.prepare(`SELECT p.name FROM pragma_table_info('communication_audit_operations') p ORDER BY p.cid`).all() as Array<{name:string}>).map(row=>row.name);
+    for(const name of ['actor_account_id','actor_person_id','policy_resource_id','occurred_at','policy_receipt_hash',
+      'policy_receipt_version','policy_receipt_nonce','policy_correlation_id'])expect(operationColumns).toContain(name);
+    expect(()=>runtime.database.prepare(`INSERT INTO communication_audit_operations(client_operation_id,family_id,
+      owner_person_id,actor_account_id,actor_person_id,operation_kind,request_fingerprint,result_id,policy_resource_id,
+      occurred_at,policy_receipt_hash,policy_receipt_version,policy_receipt_nonce,policy_correlation_id)
+      VALUES('forged','missing-family','missing-person','missing-account','missing-person','audit_append',?,?,'forged-policy',?, ?,1,'forged-nonce-value','forged-correlation')`)
+      .run('a'.repeat(64),'b'.repeat(64),'2026-08-16T01:10:00.000Z','c'.repeat(64))).toThrow();
   });
 });

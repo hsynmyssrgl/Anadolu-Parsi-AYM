@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "step": "34-K",
+  "decision": "DEC-248",
+  "mode": "boundary",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "localImplementationStatus": "PARTIAL_LOCAL_FOUNDATION_ACCEPTANCE_INCOMPLETE",
+  "requirementsClosed": false,
+  "countsAsRequirementPass": false,
+  "checkCount": 6,
+  "passed": 6,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "all declared governance source and targeted test files exist",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "packages/domain/src/windows-resilience-universal-ux.ts pins evaluatePolicyWeakening",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "packages/application/src/windows-resilience-universal-ux-use-cases.ts pins requirementsClosed",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "packages/database/src/family-database-migrations.ts pins createMigrationDefinition(115, 'windows_resilience_universal_ux'",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "apps/desktop/src/renderer/UniversalUxConsolidationPanel.tsx pins 7 günlük soak kanıtı yoktur",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "migration 115 is wired",
+      "status": "PASS",
+      "detail": ""
+    }
+  ],
+  "generatedAt": "2026-08-15T22:04:56.373Z"
+}

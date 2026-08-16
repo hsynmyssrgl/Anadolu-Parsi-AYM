@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "step": "34-G",
+  "decision": "DEC-244",
+  "mode": "boundary",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "localImplementationStatus": "LOCAL_PRODUCTION_COMPOSITION_ACCEPTANCE_INCOMPLETE",
+  "requirementsClosed": false,
+  "countsAsRequirementPass": false,
+  "checkCount": 13,
+  "passed": 13,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "all declared governance source and targeted test files exist",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "packages/domain/src/communication-file-sharing.ts pins COMMUNICATION_FILE_SAFE_PREVIEW_MAX_BYTES",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "packages/application/src/communication-file-sharing-use-cases.ts pins GetCommunicationFileSafePreviewUseCase",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "packages/application/src/communication-file-sharing-use-cases.ts pins MaintainCommunicationFilePayloadVaultUseCase",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "packages/database/src/family-database-migrations.ts pins createMigrationDefinition(111, 'communication_file_sharing_remaining_ux'",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "apps/desktop/src/main/communication-file-payload-vault.ts pins WindowsDefenderCommunicationFileMalwareScanner",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "apps/desktop/src/main/communication-file-payload-vault.ts pins #recoverInterruptedPublications",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "apps/desktop/src/main/communication-file-payload-vault.ts pins sweepOrphans",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "apps/desktop/src/main/communication-file-sharing-application-adapter.ts pins RepositoryBackedCommunicationFileSharingUnitOfWork",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "apps/desktop/src/main/ipc-integration-policy.ts pins getSafePreview",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "apps/desktop/src/main/data-store.ts pins maintainCommunicationFilePayloadVault",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "apps/desktop/src/renderer/CommunicationFileSharingPanel.tsx pins Güvenli düz metin önizleme",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "migration 111 is wired",
+      "status": "PASS",
+      "detail": ""
+    }
+  ],
+  "generatedAt": "2026-08-16T03:52:32.941Z"
+}

@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "step": "34-J",
+  "decision": "DEC-247",
+  "mode": "boundary",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "localImplementationStatus": "LOCAL_HARDENED_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE",
+  "requirementsClosed": false,
+  "countsAsRequirementPass": false,
+  "checkCount": 10,
+  "passed": 10,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "all declared governance source and targeted test files exist",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "packages/domain/src/distributed-client-operations.ts pins durableOperationsEvidenceRequired: true",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "packages/domain/src/distributed-client-operations.ts pins productionRuntimeComposed: false",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "apps/core-service/src/distributed-operations-runtime.ts pins validateControlPlaneEnvelope",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "apps/core-service/src/distributed-operations-runtime.ts pins verifyAndRegisterBackup",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "apps/core-service/src/distributed-operations-runtime.ts pins createRollingUpdatePlan",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "apps/core-service/src/distributed-operations-runtime.ts pins allowUnverifiedProvidersForTests",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "packages/database/src/family-database-migrations.ts pins createMigrationDefinition(114, 'distributed_clients_operations_disaster_recovery'",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "apps/desktop/src/renderer/DistributedOperationsPanel.tsx pins Remote bağlantı varsayılan kapalıdır",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "migration 114 is wired",
+      "status": "PASS",
+      "detail": ""
+    }
+  ],
+  "generatedAt": "2026-08-16T03:53:46.347Z"
+}

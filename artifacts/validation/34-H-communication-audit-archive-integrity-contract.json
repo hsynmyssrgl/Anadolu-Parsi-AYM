@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "step": "34-H",
+  "decision": "DEC-245",
+  "mode": "contract",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "localImplementationStatus": "LOCAL_PRODUCTION_QUERY_COMPOSED_ACCEPTANCE_INCOMPLETE",
+  "requirementsClosed": false,
+  "countsAsRequirementPass": false,
+  "checkCount": 6,
+  "passed": 6,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "governance identity is exact",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "local implementation status is exact and non-accepting",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "fail-honest status remains non-accepting",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "manual evidence retains NOT_RUN facts",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "decision and threat model reject false closure",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "current migration and PPK evidence is pinned exactly",
+      "status": "PASS",
+      "detail": ""
+    }
+  ],
+  "generatedAt": "2026-08-16T03:53:02.363Z"
+}

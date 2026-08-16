@@ -4,15 +4,30 @@
   "decision": "DEC-244",
   "status": "PLANNED",
   "governanceState": "LOCAL_IMPLEMENTATION_STARTED",
+  "localImplementationStatus": "LOCAL_PRODUCTION_COMPOSITION_ACCEPTANCE_INCOMPLETE",
   "implementationFiles": [
     "packages/domain/src/communication-file-sharing.ts",
     "packages/application/src/communication-file-sharing-use-cases.ts",
     "packages/repository-contracts/src/communication-file-sharing-repository.ts",
     "packages/repositories/src/communication-file-sharing-repository.ts",
     "packages/database/src/family-database-migrations.ts",
-    "apps/desktop/src/renderer/CommunicationFileSharingPanel.tsx"
+    "apps/desktop/src/main/communication-file-sharing-application-adapter.ts",
+    "apps/desktop/src/main/communication-file-payload-vault.ts",
+    "apps/desktop/src/main/life-production-policy-runtime.ts",
+    "apps/desktop/src/main/repository-composition-root.ts",
+    "apps/desktop/src/main/data-store.ts",
+    "apps/desktop/src/main/ipc-integration-policy.ts",
+    "apps/desktop/src/main/ipc-request-lifecycle.ts",
+    "apps/desktop/src/main/main.ts",
+    "apps/desktop/src/main/preload.ts",
+    "apps/desktop/src/renderer/global.d.ts",
+    "apps/desktop/src/renderer/CommunicationFileSharingPanel.tsx",
+    "apps/desktop/src/renderer/styles.css"
   ],
-  "targetedTests": ["packages/application/tests/communication-file-sharing-use-cases.test.ts","packages/repositories/communication-file-sharing-repository-policy.test.ts","apps/desktop/tests/remaining-communication-distributed-ui.test.ts"],
-  "providerTruth": {"fileTransport":"NOT_CONFIGURED","malwareScanner":"NOT_CONFIGURED","remoteAssistance":"NOT_CONFIGURED","sharePlay":"NOT_CONFIGURED","voiceExecution":"NOT_CONFIGURED"},
+  "targetedTests": ["packages/application/tests/communication-file-sharing-use-cases.test.ts","packages/repositories/communication-file-sharing-repository-policy.test.ts","apps/desktop/tests/communication-file-payload-vault.test.ts","apps/desktop/tests/communication-file-sharing-ipc-integration.test.ts","apps/desktop/tests/communication-file-sharing-ipc-bridge.test.ts","apps/desktop/tests/remaining-communication-distributed-ui.test.ts"],
+  "targetedRatchet": {"files":6,"tests":34},
+  "maintenanceTruth": {"hardLinkCrashRecovery":"IMPLEMENTED_AND_TESTED","exactPayloadRetryReuse":"IMPLEMENTED_AND_TESTED","ownerBoundOrphanSweep":"OPPORTUNISTIC_AND_AUTHENTICATED_SCHEDULED","scheduledBackgroundSweep":"IMPLEMENTED_FOR_ACTIVE_AUTHENTICATED_OWNER"},
+  "providerTruth": {"fileTransport":"NOT_CONFIGURED","malwareScanner":"IMPLEMENTED_NOT_PRODUCTION_COMPOSED_OR_UAT_VERIFIED","remoteAssistance":"NOT_CONFIGURED","sharePlay":"NOT_CONFIGURED","voiceExecution":"NOT_CONFIGURED"},
+  "openResiduals": ["NO_REAL_E2EE_TRANSPORT_UAT","NO_PRODUCTION_MALWARE_SCANNER_COMPOSITION_OR_UAT","NO_REAL_SAFE_PREVIEW_UAT","MUTATION_LEDGER_LIFETIME_CAP_REVIEW_OPEN","NO_REMOTE_ASSISTANCE_PROVIDER","NO_SHAREPLAY_ADAPTER","NO_VOICE_EXECUTION_PROVIDER","NO_FORMAL_PERSISTENT_CLOSURE_RECEIPT"],
   "countsAsRequirementPass": false
 }
