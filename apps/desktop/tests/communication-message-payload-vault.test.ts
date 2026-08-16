@@ -87,4 +87,16 @@ describe('34-B protected communication message payload vault', () => {
     expect(vault.discard(sealed.value.sealedPayloadReference, CORRELATION)).toEqual({ ok: true, value: undefined });
     expect(vault.discard(sealed.value.sealedPayloadReference, CORRELATION)).toEqual({ ok: true, value: undefined });
   });
+
+  it('repairs an interrupted hard-link publication and sweeps only old unreferenced owner payloads', () => {
+    const { directory, protectedStore, vault } = openVault(); const sealed = sealText(vault);
+    if (!sealed.ok) throw new Error('fixture');
+    const root = join(directory, 'payloads'); const target = join(root, sealed.value.sealedPayloadReference);
+    const temporary = join(root, '.comm-message-999-0123456789abcdef.tmp'); linkSync(target, temporary);
+    const recovered = new CommunicationMessagePayloadVault({ rootDirectory: root, protectedStore });
+    expect(recovered.open(rowFor(sealed.value), CORRELATION)).toMatchObject({ ok: true, value: { text: 'Şifreli aile mesajı' } });
+    expect(recovered.sweepOrphans({ familyId: 'family-34-b-vault', ownerPersonId: 'person-34-b-vault',
+      referencedPayloads: [], completedBefore: '2026-08-16T12:00:00.000Z', maximumCandidates: 64,
+      correlationId: CORRELATION })).toEqual({ ok: true, value: { scannedFiles: 1, deletedFiles: 1, rejectedFiles: 0 } });
+  });
 });

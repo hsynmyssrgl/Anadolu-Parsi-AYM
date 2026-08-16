@@ -31,7 +31,9 @@ const checks=[
   ['registry plan and ledger stay open behind the active predecessor',registryItems.every(item=>item&&item.status!=='COMPLETE'
     &&item.chain?.evidence===false)&&plan.currentStep==='33-P'&&ledger.activeMicroStep==='33-P'],
   ['domain fixes message presence retention and no-claim truth',has(domain,['COMMUNICATION_MESSAGE_CONTENT_KINDS',"'document'",
-    'CommunicationMessagingCenterView','CommunicationMessagingMutationReceiptView','contentSearchImplemented: false',
+    'CommunicationMessagingCenterView','CommunicationMessagingMutationReceiptView','contentSearchImplemented: true',
+    'rendererMediaAttachmentSelectionImplemented: true','effectivePresenceExpiryEnforced: true',
+    'automaticRetentionExecutionImplemented: true','payloadOrphanSweepImplemented: true',
     'relayDeliveryImplemented: false','networkUsedByCurrentImplementation: false'])],
   ['application implements governed lifecycle with idempotency audit and outbox',has(application,['CreateCommunicationMessageUseCase',
     'EditCommunicationMessageUseCase','SetCommunicationMessageLifecycleUseCase','AnnotateCommunicationMessageUseCase',
@@ -42,23 +44,29 @@ const checks=[
     &&!repository.includes('message_plaintext')],
   ['protected payload vault enforces no overwrite identity readback and zeroization',has(vault,['ProtectedSideArtifactStore',
     "openSync(temporary, 'wx', 0o600)",'linkSync(temporary, target)','stat.nlink !== 1','opened.dev !== stat.dev',
-    'readback.equals(plaintext)','plaintext.fill(0)','networkUsed: false','cloudUsed: false'])],
+    'readback.equals(plaintext)','plaintext.fill(0)','sweepOrphans','recoverInterruptedPublications',
+    'networkUsed: false','cloudUsed: false'])],
   ['desktop composes central Life PEP repository and fail-closed payload authority',has(adapter,['RepositoryBackedCommunicationMessagingUnitOfWork',
     'RepositoryBackedLifePolicyTransactionRunner','auditRepository.append','outboxRepository.enqueue'])&&has(dataStore,[
     'communicationMessagePayloadPath','CommunicationMessagePayloadVault','Protected communication message payload provider is unavailable.',
-    'getCommunicationMessagingCenter','createCommunicationMessage','setCommunicationRetentionPolicy'])],
-  ['IPC exposes exact ten channels and rejects renderer attachment authority',has(ipc,["getCenter:'communicationMessaging:getCenter'",
+    'getCommunicationMessagingCenter','createCommunicationMessage','setCommunicationRetentionPolicy',
+    'maintainCommunicationMessagingLifecycle'])],
+  ['IPC exposes exact ten channels and revalidates bounded attachment identifiers',has(ipc,["getCenter:'communicationMessaging:getCenter'",
     "search:'communicationMessaging:search'","getContent:'communicationMessaging:getContent'","create:'communicationMessaging:create'",
     "edit:'communicationMessaging:edit'","setLifecycle:'communicationMessaging:setLifecycle'","annotate:'communicationMessaging:annotate'",
     "updateDelivery:'communicationMessaging:updateDelivery'","setPresence:'communicationMessaging:setPresence'",
-    "setRetentionPolicy:'communicationMessaging:setRetentionPolicy'","candidate.contentKind==='text'",
+    "setRetentionPolicy:'communicationMessaging:setRetentionPolicy'","candidate.contentKind==='location'",
+    'communicationIdentifier(candidate.opaqueAttachmentHandle)',
     "channel.startsWith('communicationMessaging:')"])],
   ['renderer reuses system screen and states local-only limits',has(panel,['CommunicationMessagingPanel','Bu sürüm yalnız yerel ve ağsız çalışır.',
-    'İçeriği açıkça göster','Relay teslimi','fiziksel güvenli silme','Medya eki için main-issued güvenli seçim akışı henüz yoktur.'])],
-  ['incomplete capabilities remain explicitly false',scope.truth?.fullContentSearchImplemented===false
-    &&scope.truth?.rendererMediaAttachmentSelectionImplemented===false&&scope.truth?.reminderExecutionImplemented===false
+    'İçeriği açıkça göster','Relay teslimi','fiziksel güvenli silme','Ana süreçte dosya seç ve şifrele',
+    'Yetkili yerel aramayı uygula'])],
+  ['implemented local capabilities and remaining no-claims stay exact',scope.truth?.fullContentSearchImplemented===true
+    &&scope.truth?.rendererMediaAttachmentSelectionImplemented===true&&scope.truth?.automaticPresenceExpiryExecutionImplemented===true
+    &&scope.truth?.automaticRetentionExecutionImplemented===true&&scope.truth?.payloadOrphanSweepImplemented===true
+    &&scope.truth?.reminderExecutionImplemented===false
     &&scope.truth?.remoteRelayDeliveryImplemented===false&&scope.truth?.realMessageExchangePerformed===false
-    &&scope.truth?.multiDevicePresenceAggregationImplemented===false&&scope.truth?.automaticRetentionExecutionImplemented===false
+    &&scope.truth?.multiDevicePresenceAggregationImplemented===false&&scope.truth?.selectedPeopleAudienceEnforcementImplemented===false
     &&scope.truth?.physicalSecureEraseGuaranteed===false&&scope.truth?.backupDeletionPropagationGuaranteed===false
     &&scope.truth?.networkUsedByCurrentImplementation===false],
   ['manual evidence receipt and requirement acceptance remain closed',manualNotRun
@@ -66,14 +74,14 @@ const checks=[
     &&scope.truth?.requirementsClosed===false&&scope.truth?.countsAsRequirementPass===false
     &&inventory.countsAsRequirementPass===false],
   ['local ratchet is exact without granting requirement pass',scope.validation?.targetedTestFileRatchet===5
-    &&scope.validation?.targetedTestRatchet===25&&scope.validation?.migrationVersion===106
+    &&scope.validation?.targetedTestRatchet===29&&scope.validation?.migrationVersion===106
     &&scope.validation?.migrationSha256==='5b088bb6d759403044f84ad9f2a82be1823e33a17334d7122beed92af56cce50'
-    &&scope.validation?.ppk015?.status==='PASS'&&scope.validation?.ppk015?.files===507
-    &&scope.validation?.ppk015?.sourceSha256==='12c286d45487c5e498768b396616b3ed7b0ca858a121c012f0db6620f3f709c8'
-    &&scope.validation?.ppk021?.status==='PASS'&&scope.validation?.ppk021?.surfaces===795
-    &&scope.validation?.ppk021?.sha256==='d674ad587c9cad96def3d087a86d176aa9dedc9ac69d2c3b0e71cc02cd787348'
-    &&scope.validation?.ppk022?.status==='PASS'&&scope.validation?.ppk022?.surfaces===360
-    &&scope.validation?.ppk022?.sha256==='b4b2f09c461235528f98c3f4b942e28a9e3068c71de5697fe116e4b57f54c77c'
+    &&scope.validation?.ppk015?.status==='PASS'&&scope.validation?.ppk015?.files===555
+    &&scope.validation?.ppk015?.sourceSha256==='3339ac01f3721afd2668c2d494f41ac36750c842e2a02a5fe2571c68fa593cfa'
+    &&scope.validation?.ppk021?.status==='PASS'&&scope.validation?.ppk021?.surfaces===874
+    &&scope.validation?.ppk021?.sha256==='930119485fa3459f55ed3f23909ba9846560e785030bb991b5fb3105383d5d1a'
+    &&scope.validation?.ppk022?.status==='PASS'&&scope.validation?.ppk022?.surfaces===392
+    &&scope.validation?.ppk022?.sha256==='cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c'
     &&scope.validation?.countsAsRequirementPass===false&&inventory.validation?.countsAsRequirementPass===false]
 ];
 const results=checks.map(([name,passed])=>({name,status:passed?'PASS':'FAIL'}));const failures=results.filter(item=>item.status==='FAIL');

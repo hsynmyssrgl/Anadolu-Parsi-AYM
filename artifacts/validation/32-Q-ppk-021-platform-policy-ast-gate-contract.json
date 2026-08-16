@@ -54,7 +54,7 @@
       "passed": true
     },
     {
-      "name": "manifest contains exactly 873 surfaces",
+      "name": "manifest contains exactly 874 surfaces",
       "passed": true
     },
     {
@@ -282,7 +282,7 @@
       "passed": true
     },
     {
-      "name": "scope records six rules and 873 exact surfaces",
+      "name": "scope records six rules and 874 exact surfaces",
       "passed": true
     },
     {
@@ -310,7 +310,7 @@
       "passed": true
     },
     {
-      "name": "decision pins the current Windows resilience source ratchet without rewriting historical closure",
+      "name": "decision pins the current messaging maintenance source ratchet without rewriting historical closure",
       "passed": true
     },
     {
@@ -351,9 +351,9 @@
     "status": "PASS",
     "productionSourceZones": 18,
     "scannedFiles": 555,
-    "privilegedSurfaces": 873,
-    "exactAllowlistEntries": 873,
-    "exactAllowlistSha256": "843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc",
+    "privilegedSurfaces": 874,
+    "exactAllowlistEntries": 874,
+    "exactAllowlistSha256": "930119485fa3459f55ed3f23909ba9846560e785030bb991b5fb3105383d5d1a",
     "surfaceCounts": {
       "CRYPTO_GLOBAL": 21,
       "CRYPTO_IMPORT": 234,
@@ -364,7 +364,7 @@
       "SQL_CALL": 79,
       "SQL_CONSTRUCTOR": 2,
       "SQL_IMPORT": 2,
-      "USE_CASE_COMPOSITION": 431
+      "USE_CASE_COMPOSITION": 432
     },
     "maliciousSelfTestAssertions": 17,
     "benignSelfTestAssertions": 4,
@@ -372,8 +372,8 @@
     "findings": []
   },
   "protectedRuleCount": 6,
-  "exactAllowlistEntries": 873,
-  "exactAllowlistSha256": "843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc",
+  "exactAllowlistEntries": 874,
+  "exactAllowlistSha256": "930119485fa3459f55ed3f23909ba9846560e785030bb991b5fb3105383d5d1a",
   "directRoleAuthorizationBypasses": 0,
   "syntaxModel": "TYPESCRIPT_AST",
   "regexOnlyGateAccepted": false,
@@ -387,5 +387,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-16T13:44:06.630Z"
+  "generatedAt": "2026-08-16T15:48:18.033Z"
 }

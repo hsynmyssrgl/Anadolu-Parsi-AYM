@@ -3821,6 +3821,7 @@ export const COMMUNICATION_MESSAGING_IPC_CHANNELS=Object.freeze({
 } as const);
 const communicationMessagingChannels=new Set<string>(Object.values(COMMUNICATION_MESSAGING_IPC_CHANNELS));
 const communicationMessagingContentKinds=new Set(['text','voice','photo','video','location','document']);
+const communicationMessagingDocumentMimes=new Set(['application/pdf','text/plain','application/json','text/csv']);
 const communicationMessagingIso=(value:unknown):boolean=>typeof value==='string'
   &&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/u.test(value)&&Number.isFinite(Date.parse(value));
 const communicationMessagingText=(value:unknown,minimum:number,maximum:number):boolean=>typeof value==='string'
@@ -3835,8 +3836,9 @@ const communicationMessagingInput=(channel:string,args:readonly unknown[]):IpcIn
   if(channel===COMMUNICATION_MESSAGING_IPC_CHANNELS.search){
     if(args.length!==1||!isObject(args[0]))return rejected('COMMUNICATION_MESSAGING_SEARCH_INPUT_INVALID','$[0]');
     const value=args[0];
-    const keys=['roomId','senderPersonId','contentKind','from','to','includeDeleted','limit'].filter(key=>value[key]!==undefined);
+    const keys=['queryText','roomId','senderPersonId','contentKind','from','to','includeDeleted','limit'].filter(key=>value[key]!==undefined);
     return exactObject(args,keys,candidate=>communicationMessagingOptionalId(candidate.roomId)
+      &&(candidate.queryText===undefined||communicationMessagingText(candidate.queryText,1,128))
       &&communicationMessagingOptionalId(candidate.senderPersonId)
       &&(candidate.contentKind===undefined||communicationMessagingContentKinds.has(String(candidate.contentKind)))
       &&(candidate.from===undefined||communicationMessagingIso(candidate.from))
@@ -3848,11 +3850,23 @@ const communicationMessagingInput=(channel:string,args:readonly unknown[]):IpcIn
   if(channel===COMMUNICATION_MESSAGING_IPC_CHANNELS.create){
     if(args.length!==1||!isObject(args[0]))return rejected('COMMUNICATION_MESSAGING_CREATE_INPUT_INVALID','$[0]');
     const value=args[0];
-    const keys=['clientOperationId','expectedRevision','roomId','contentKind','contentMime','text',
+    const keys=['clientOperationId','expectedRevision','roomId','contentKind','contentMime','text','opaqueAttachmentHandle',
       'replyToMessageId','quotedMessageId','threadRootMessageId','scheduledAt','silent'].filter(key=>value[key]!==undefined);
     return exactObject(args,keys,candidate=>communicationIdentifier(candidate.clientOperationId)&&candidate.expectedRevision===0
-      &&communicationIdentifier(candidate.roomId)&&candidate.contentKind==='text'&&candidate.contentMime==='text/plain'
-      &&communicationMessagingText(candidate.text,1,32_768)
+      &&communicationIdentifier(candidate.roomId)&&communicationMessagingContentKinds.has(String(candidate.contentKind))
+      &&typeof candidate.contentMime==='string'&&/^[a-z0-9][a-z0-9.+-]{0,63}\/[a-z0-9][a-z0-9.+-]{0,127}$/u.test(candidate.contentMime)
+      &&((candidate.contentKind==='text'&&candidate.contentMime==='text/plain'
+          &&communicationMessagingText(candidate.text,1,32_768)&&candidate.opaqueAttachmentHandle===undefined)
+        ||(candidate.contentKind==='location'&&candidate.contentMime==='application/vnd.ppt.location+text'
+          &&communicationMessagingText(candidate.text,1,2_000)&&candidate.opaqueAttachmentHandle===undefined)
+        ||(candidate.contentKind==='voice'&&String(candidate.contentMime).startsWith('audio/')&&candidate.text===undefined
+          &&communicationIdentifier(candidate.opaqueAttachmentHandle))
+        ||(candidate.contentKind==='photo'&&String(candidate.contentMime).startsWith('image/')&&candidate.text===undefined
+          &&communicationIdentifier(candidate.opaqueAttachmentHandle))
+        ||(candidate.contentKind==='video'&&String(candidate.contentMime).startsWith('video/')&&candidate.text===undefined
+          &&communicationIdentifier(candidate.opaqueAttachmentHandle))
+        ||(candidate.contentKind==='document'&&communicationMessagingDocumentMimes.has(String(candidate.contentMime))
+          &&candidate.text===undefined&&communicationIdentifier(candidate.opaqueAttachmentHandle)))
       &&communicationMessagingOptionalId(candidate.replyToMessageId)&&communicationMessagingOptionalId(candidate.quotedMessageId)
       &&communicationMessagingOptionalId(candidate.threadRootMessageId)
       &&(candidate.scheduledAt===undefined||communicationMessagingIso(candidate.scheduledAt))
@@ -3956,7 +3970,10 @@ const communicationMessagingTruthResult=(value:unknown):boolean=>isObject(value)
   'appendOnlyMessageEventLedgerImplemented','sealedPayloadReferenceOnlyInDatabase','offlineOutboxMetadataImplemented',
   'localRetryStateMachineImplemented','replyQuoteThreadReactionPinBookmarkMetadataImplemented','editDeleteRestoreHistoryImplemented',
   'scheduledAndSilentMetadataImplemented','privacyPreservingPresenceImplemented','defaultPresenceIsAvailabilityOnly',
-  'activeDeviceDisclosureDefaultDenied','exactActivityDisclosureDefaultDenied','contentSearchImplemented','relayDeliveryImplemented',
+  'activeDeviceDisclosureDefaultDenied','exactActivityDisclosureDefaultDenied','contentSearchImplemented',
+  'rendererMediaAttachmentSelectionImplemented','effectivePresenceExpiryEnforced','automaticRetentionExecutionImplemented',
+  'payloadOrphanSweepImplemented','reminderExecutionImplemented','multiDevicePresenceAggregationImplemented',
+  'selectedPeopleAudienceEnforcementImplemented','relayDeliveryImplemented',
   'deliveryReceiptFromRemoteImplemented','messageSignatureVerificationImplemented','automaticPhysicalSecureEraseGuaranteed',
   'backupDeletionPropagationGuaranteed','calendarPresenceSyncImplemented','productionMlsPayloadProviderConfigured',
   'realMessageExchangePerformed','networkUsedByCurrentImplementation'])
@@ -3965,7 +3982,11 @@ const communicationMessagingTruthResult=(value:unknown):boolean=>isObject(value)
   &&value.replyQuoteThreadReactionPinBookmarkMetadataImplemented===true&&value.editDeleteRestoreHistoryImplemented===true
   &&value.scheduledAndSilentMetadataImplemented===true&&value.privacyPreservingPresenceImplemented===true
   &&value.defaultPresenceIsAvailabilityOnly===true&&value.activeDeviceDisclosureDefaultDenied===true
-  &&value.exactActivityDisclosureDefaultDenied===true&&value.contentSearchImplemented===false
+  &&value.exactActivityDisclosureDefaultDenied===true&&value.contentSearchImplemented===true
+  &&value.rendererMediaAttachmentSelectionImplemented===true&&value.effectivePresenceExpiryEnforced===true
+  &&value.automaticRetentionExecutionImplemented===true&&value.payloadOrphanSweepImplemented===true
+  &&value.reminderExecutionImplemented===false&&value.multiDevicePresenceAggregationImplemented===false
+  &&value.selectedPeopleAudienceEnforcementImplemented===false
   &&value.relayDeliveryImplemented===false&&value.deliveryReceiptFromRemoteImplemented===false
   &&value.messageSignatureVerificationImplemented===false&&value.automaticPhysicalSecureEraseGuaranteed===false
   &&value.backupDeletionPropagationGuaranteed===false&&value.calendarPresenceSyncImplemented===false
@@ -3985,8 +4006,10 @@ const communicationMessagingContentResult=(value:unknown):boolean=>{
     &&communicationIdentifier(value.messageId)&&communicationMessagingRevision(value.revision)
     &&communicationMessagingContentKinds.has(String(value.contentKind))&&typeof value.contentMime==='string'
     &&value.contentMime.length>=3&&value.contentMime.length<=192
-    &&((value.contentKind==='text'&&communicationMessagingText(value.text,1,32_768)&&value.opaqueAttachmentHandle===undefined)
-      ||(value.contentKind!=='text'&&communicationIdentifier(value.opaqueAttachmentHandle)&&value.text===undefined))
+    &&((['text','location'].includes(String(value.contentKind))&&communicationMessagingText(value.text,1,32_768)
+        &&value.opaqueAttachmentHandle===undefined)
+      ||(['voice','photo','video','document'].includes(String(value.contentKind))
+        &&communicationIdentifier(value.opaqueAttachmentHandle)&&value.text===undefined))
     &&value.payloadSource==='local_sealed_store'&&value.networkUsed===false&&value.cloudUsed===false;
 };
 const communicationMessagingReceiptResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,

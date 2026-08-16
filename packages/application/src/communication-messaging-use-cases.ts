@@ -11,6 +11,7 @@ import {
   type Result
 } from '@ppt/core';
 import {
+  COMMUNICATION_MESSAGE_ORPHAN_GRACE_MS,
   COMMUNICATION_MESSAGE_CONTENT_KINDS,
   communicationMessagingCenterId,
   type AnnotateCommunicationMessageInput,
@@ -35,6 +36,7 @@ import type {
   CommunicationMessageEventRow,
   CommunicationMessageRow,
   CommunicationMessagingCenterKey,
+  CommunicationMessagingAttachmentGuardRow,
   CommunicationMessagingMutationRow,
   CommunicationMessagingRoomGuardRow,
   CommunicationPresenceRow,
@@ -46,6 +48,10 @@ export interface CommunicationMessagingQueryPort {
   getCenter(context: LifeApplicationContext): Promise<Result<CommunicationMessagingCenterView, AppError>>;
   search(context: LifeApplicationContext, input: SearchCommunicationMessagesInput): Promise<Result<readonly CommunicationMessageView[], AppError>>;
   getContent(context: LifeApplicationContext, messageId: string): Promise<Result<CommunicationMessageContentView, AppError>>;
+  getMaintenanceState(context: LifeApplicationContext): Promise<Result<Readonly<{
+    rows: readonly CommunicationMessageRow[];
+    occurredAt: CommunicationMessagingMutationRow['occurredAt'];
+  }>, AppError>>;
 }
 
 export interface CommunicationMessagePayloadPort {
@@ -64,12 +70,16 @@ export interface CommunicationMessagePayloadPort {
   }>): Result<VerifiedSealedCommunicationPayloadInput, AppError>;
   open(row: CommunicationMessageRow, correlationId: LifeApplicationContext['correlationId']): Result<CommunicationMessageContentView, AppError>;
   discard(sealedPayloadReference: string, correlationId: LifeApplicationContext['correlationId']): Result<void, AppError>;
+  sweepOrphans(input: Readonly<{ familyId: string; ownerPersonId: string; referencedPayloads: readonly string[];
+    completedBefore: string; maximumCandidates: number; correlationId: LifeApplicationContext['correlationId'] }>)
+  : Result<Readonly<{ scannedFiles: number; deletedFiles: number; rejectedFiles: number }>, AppError>;
 }
 
 export interface CommunicationMessagingWriteScope {
   readonly occurredAt: CommunicationMessagingMutationRow['occurredAt'];
   readonly ownerPersonId: CommunicationMessagingCenterKey['ownerPersonId'];
   findRoomGuard(roomId: string): Result<CommunicationMessagingRoomGuardRow | null, AppError>;
+  findAttachmentGuard(fileId: string): Result<CommunicationMessagingAttachmentGuardRow | null, AppError>;
   findMessage(messageId: string): Result<CommunicationMessageRow | null, AppError>;
   findPresence(): Result<CommunicationPresenceRow | null, AppError>;
   findRetentionPolicy(roomId: string): Result<CommunicationRetentionPolicyRow | null, AppError>;
@@ -103,6 +113,7 @@ export interface CommunicationMessagingUnitOfWork {
 
 const SAFE_ID = /^[A-Za-z0-9][A-Za-z0-9._:@/-]{1,255}$/u;
 const MIME = /^[a-z0-9][a-z0-9.+-]{0,63}\/[a-z0-9][a-z0-9.+-]{0,127}$/u;
+const COMMUNICATION_DOCUMENT_MIME_TYPES = new Set(['application/pdf', 'text/plain', 'application/json', 'text/csv']);
 const CONTROL = /[\p{Cc}\p{Cf}\p{Cs}]/u;
 const hash = (value: unknown): string => createHash('sha256').update(JSON.stringify(value), 'utf8').digest('hex');
 const validIsoDateTime = (value: unknown): value is string => typeof value === 'string'
@@ -243,6 +254,25 @@ export class GetCommunicationMessageContentUseCase {
   public execute(context: LifeApplicationContext, messageId: string) { return this.query.getContent(context, messageId); }
 }
 
+export class MaintainCommunicationMessagePayloadVaultUseCase {
+  public constructor(
+    private readonly query: CommunicationMessagingQueryPort,
+    private readonly payloads: CommunicationMessagePayloadPort
+  ) {}
+  public async execute(context: LifeApplicationContext): Promise<Result<Readonly<{
+    scannedFiles: number; deletedFiles: number; rejectedFiles: number; completedAt: CommunicationMessagingMutationRow['occurredAt'];
+  }>, AppError>> {
+    const actor = actorPerson(context); if (!actor.ok) return actor;
+    const loaded = await this.query.getMaintenanceState(context); if (!loaded.ok) return loaded;
+    const referencedPayloads = Object.freeze([...new Set(loaded.value.rows.map((row) => row.sealedPayloadReference))]
+      .sort((left, right) => left.localeCompare(right)));
+    const completedBefore = new Date(Date.parse(loaded.value.occurredAt) - COMMUNICATION_MESSAGE_ORPHAN_GRACE_MS).toISOString();
+    const swept = this.payloads.sweepOrphans({ familyId: context.familyId, ownerPersonId: actor.value,
+      referencedPayloads, completedBefore, maximumCandidates: 64, correlationId: context.correlationId });
+    return swept.ok ? ok(Object.freeze({ ...swept.value, completedAt: loaded.value.occurredAt })) : swept;
+  }
+}
+
 export class CreateCommunicationMessageUseCase {
   public constructor(private readonly uow: CommunicationMessagingUnitOfWork, private readonly payloads: CommunicationMessagePayloadPort) {}
   public async execute(input: { context: LifeApplicationContext; command: CreateCommunicationMessageInput }) {
@@ -255,9 +285,12 @@ export class CreateCommunicationMessageUseCase {
     if (command.text !== undefined && normalizedTextValue === null)
       return Promise.resolve(err(invalid(context, 'Mesaj metni geçersizdir.')));
     const normalizedText = normalizedTextValue ?? undefined;
-    if (command.contentKind === 'text' && !normalizedText) return Promise.resolve(err(invalid(context, 'Metin mesajı boş veya sınır dışıdır.')));
-    if (command.contentKind !== 'text' && (!command.opaqueAttachmentHandle || !SAFE_ID.test(command.opaqueAttachmentHandle)))
+    const textual = command.contentKind === 'text' || command.contentKind === 'location';
+    if (textual && !normalizedText) return Promise.resolve(err(invalid(context, 'Metin veya konum mesajı boş ya da sınır dışıdır.')));
+    if (!textual && (!command.opaqueAttachmentHandle || !SAFE_ID.test(command.opaqueAttachmentHandle)))
       return Promise.resolve(err(invalid(context, 'Medya mesajı main-process tarafından verilmiş opaque handle gerektirir.')));
+    if (textual && command.opaqueAttachmentHandle !== undefined)
+      return Promise.resolve(err(invalid(context, 'Metin veya konum mesajı dosya handle alanı taşıyamaz.')));
     const id = communicationMessageId(context, command.clientOperationId);
     if (command.scheduledAt !== undefined && !validIsoDateTime(command.scheduledAt))
       return Promise.resolve(err(invalid(context, 'Zamanlanmış mesaj tarihi geçersizdir.')));
@@ -269,6 +302,17 @@ export class CreateCommunicationMessageUseCase {
       if (!replayed.ok || replayed.value) return replayed as Result<CommunicationMessagingMutationReceiptView, AppError>;
       const guard = scope.findRoomGuard(command.roomId); if (!guard.ok) return guard;
       if (!guard.value || !ownerMembershipActive(guard.value, actor.value)) return err(denied(context, 'Etkin oda üyeliği bulunamadı.'));
+      if (!textual) {
+        const attachment = scope.findAttachmentGuard(command.opaqueAttachmentHandle!); if (!attachment.ok) return attachment;
+        const mimeAllowed = command.contentKind === 'voice' ? command.contentMime.startsWith('audio/')
+          : command.contentKind === 'photo' ? command.contentMime.startsWith('image/')
+            : command.contentKind === 'video' ? command.contentMime.startsWith('video/')
+              : command.contentKind === 'document' && COMMUNICATION_DOCUMENT_MIME_TYPES.has(command.contentMime);
+        if (!attachment.value || attachment.value.ownerPersonId !== actor.value || attachment.value.roomId !== command.roomId
+          || attachment.value.mimeType !== command.contentMime || attachment.value.state !== 'ready_local'
+          || attachment.value.scanState !== 'clean' || !mimeAllowed)
+          return err(denied(context, 'Mesaj eki aynı odada temiz ve yerel olarak hazır bir dosya olmalıdır.'));
+      }
       for (const related of [command.replyToMessageId, command.quotedMessageId, command.threadRootMessageId]) {
         if (!related) continue;
         const found = scope.findMessage(related); if (!found.ok) return found;
@@ -278,6 +322,13 @@ export class CreateCommunicationMessageUseCase {
       const occurredAt = scope.occurredAt;
       if (command.scheduledAt && Date.parse(command.scheduledAt) <= Date.parse(occurredAt))
         return err(invalid(context, 'Zamanlanmış mesaj gelecekte olmalıdır.'));
+      const retention = scope.findRetentionPolicy(command.roomId); if (!retention.ok) return retention;
+      const expiryDays = retention.value && ['duration','auto_delete'].includes(retention.value.mode)
+        ? retention.value.durationDays : undefined;
+      const expiresAt = expiryDays === undefined ? undefined
+        : asIsoDateTime(new Date(Date.parse(occurredAt) + expiryDays * 24 * 60 * 60 * 1_000).toISOString());
+      if (expiresAt && command.scheduledAt && Date.parse(command.scheduledAt) >= Date.parse(expiresAt))
+        return err(invalid(context, 'Mesaj zamanlaması oda saklama süresinin dışında kalamaz.'));
       const sealed = this.payloads.seal({ familyId: context.familyId, ownerPersonId: actor.value,
         roomId: command.roomId, messageId: id, revision: 1, contentKind: command.contentKind,
         contentMime: command.contentMime, ...(normalizedText === undefined ? {} : { text: normalizedText }),
@@ -298,7 +349,8 @@ export class CreateCommunicationMessageUseCase {
         state: command.scheduledAt ? 'scheduled' : 'sealed_local', deliveryState: 'transport_not_configured',
         ...(command.scheduledAt ? { scheduledAt: asIsoDateTime(command.scheduledAt) } : {}),
         silent: command.silent === true, pinned: false, bookmarked: false, editCount: 0, revision: 1,
-        lastMutationId: mutationId(context, command.clientOperationId, requestFingerprint), createdAt: occurredAt, updatedAt: occurredAt
+        lastMutationId: mutationId(context, command.clientOperationId, requestFingerprint), createdAt: occurredAt, updatedAt: occurredAt,
+        ...(expiresAt ? { expiresAt } : {})
       });
       const row: CommunicationMessageRow = Object.freeze({ ...base, stateFingerprint: messageFingerprint(base) });
       const mutation: CommunicationMessagingMutationRow = Object.freeze({

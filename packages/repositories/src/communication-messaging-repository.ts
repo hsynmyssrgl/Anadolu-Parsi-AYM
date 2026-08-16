@@ -23,6 +23,7 @@ import {
   type CommunicationMessageEventRow,
   type CommunicationMessageRow,
   type CommunicationMessagingCenterKey,
+  type CommunicationMessagingAttachmentGuardRow,
   type CommunicationMessagingCenterSnapshotRow,
   type CommunicationMessagingMutationRow,
   type CommunicationMessagingPolicyResourceRepositoryPort,
@@ -254,6 +255,26 @@ export class SqliteCommunicationMessagingRepository extends SqliteRepository imp
         .all(key.familyId, key.ownerPersonId, roomId) as Record<string, unknown>[];
       if (members.length > 128) throw new Error('Communication room membership guard exceeds its bound');
       return Object.freeze({ room: mapRoom(raw), memberships: Object.freeze(members.map(mapMembership)) }) satisfies CommunicationMessagingRoomGuardRow;
+    });
+  }
+  public findAttachmentGuard(context: PolicyAuthorizedRepositoryExecutionContext, key: CommunicationMessagingCenterKey, fileId: string)
+  : RepositoryResult<CommunicationMessagingAttachmentGuardRow | null> {
+    assertKey(context, key, 'write');
+    return this.execute(context, () => {
+      const row = this.database(context).prepare(`SELECT json_extract(file.value,'$.id') id,
+        json_extract(file.value,'$.ownerPersonId') owner_person_id,json_extract(file.value,'$.roomId') room_id,
+        json_extract(file.value,'$.mimeType') mime_type,json_extract(file.value,'$.totalBytes') total_bytes,
+        json_extract(file.value,'$.state') state,json_extract(file.value,'$.scanState') scan_state
+        FROM communication_file_sharing_centers center,json_each(center.snapshot_json,'$.files') file
+        WHERE center.family_id=? AND center.owner_person_id=? AND json_extract(file.value,'$.id')=? LIMIT 2`)
+        .all(key.familyId, key.ownerPersonId, fileId) as Record<string, unknown>[];
+      if (row.length > 1) throw new Error('Communication attachment identity is not unique');
+      const found = row[0];
+      if (!found) return null;
+      return Object.freeze({ id: String(found.id), ownerPersonId: asPersonId(String(found.owner_person_id)),
+        roomId: String(found.room_id), mimeType: String(found.mime_type), totalBytes: Number(found.total_bytes),
+        state: String(found.state) as CommunicationMessagingAttachmentGuardRow['state'],
+        scanState: String(found.scan_state) as CommunicationMessagingAttachmentGuardRow['scanState'] });
     });
   }
   public findMessage(context: PolicyAuthorizedRepositoryExecutionContext, key: CommunicationMessagingCenterKey, messageId: string) {

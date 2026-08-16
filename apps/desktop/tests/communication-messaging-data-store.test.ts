@@ -4,7 +4,7 @@ import { readdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { ok } from '@ppt/core';
+import { asIsoDateTime, ok, type Clock } from '@ppt/core';
 import type { CommunicationMlsFoundationPort } from '@ppt/application';
 import {
   PlatformPolicyKernel,
@@ -14,6 +14,7 @@ import {
 } from '@ppt/platform-policy';
 import { computePlatformPolicyReceiptHash, computePlatformPolicyReceiptRecordHash } from '@ppt/repositories';
 import { FamilyDataStore } from '../src/main/data-store.js';
+import type { CommunicationFileMalwareScannerPort } from '../src/main/communication-file-payload-vault.js';
 import type { DeviceSecretProtector } from '../src/main/device-secret-protector.js';
 import { ProtectedSideArtifactStore } from '../src/main/protected-side-artifact-store.js';
 
@@ -76,16 +77,20 @@ afterEach(() => {
   for (const directory of directories.splice(0)) rmSync(directory, { recursive: true, force: true });
 });
 
-const makeStore = (input: { governed: boolean; protectedPayloads: boolean }) => {
+const cleanFileScanner:CommunicationFileMalwareScannerPort=Object.freeze({scan:()=>ok(Object.freeze({
+  verdict:'clean' as const,providerId:'34-b-local-test-scanner',evidenceSha256:'c'.repeat(64)}))});
+const makeStore = (input: { governed: boolean; protectedPayloads: boolean; clock?: Clock; cleanFileScanner?: boolean }) => {
   const directory = mkdtempSync(join(tmpdir(), 'ppt-34b-messaging-')); directories.push(directory);
   const databasePath = join(directory, 'family.db');
   const protectedSideArtifacts = input.protectedPayloads ? new ProtectedSideArtifactStore({
     keyPath: join(directory, 'protected', 'payload.key'), applicationVersion: '34-b-test', protector,
-    now: () => '2026-08-15T12:00:00.000Z'
+    now: () => input.clock?.now() ?? asIsoDateTime('2026-08-15T12:00:00.000Z')
   }) : undefined;
   if (protectedSideArtifacts) protectedStores.push(protectedSideArtifacts);
   const store = new FamilyDataStore({ databasePath, seed: false, communicationMlsFoundation: new TestMlsProvider(),
-    ...(protectedSideArtifacts ? { protectedSideArtifacts, communicationMessagePayloadPath: join(directory, 'messages') } : {}),
+    ...(protectedSideArtifacts ? { protectedSideArtifacts, communicationMessagePayloadPath: join(directory, 'messages'),
+      ...(input.cleanFileScanner?{communicationFileMalwareScanner:cleanFileScanner}:{}) } : {}),
+    ...(input.clock ? { clock: input.clock } : {}),
     ...(input.governed ? { archivePolicyAuthorizationProvider: authorizationProvider,
       archivePolicyReceiptSink: { append: () => undefined, ensure: projectionProof, verifyProjectionProof: () => true },
       archivePolicyVersion: POLICY_VERSION, archiveClusterFence: () => ({ writable: true, epoch: 106 }) } : {}) });
@@ -98,7 +103,8 @@ const allow = (store: FamilyDataStore, accountId: string) => {
     ['communication_security_center',['read']], ['communication_device_credential',['create','delete']],
     ['communication_room',['create','update','delete']], ['communication_messaging_center',['read']],
     ['communication_message',['create','update','delete']], ['communication_presence',['create','update']],
-    ['communication_retention_policy',['create','update']]
+    ['communication_retention_policy',['create','update']],['communication_file_sharing_center',['read','create','update']],
+    ['communication_file_sharing',['read','create','update','delete']]
   ] as const) store.upsertPermission({ subjectAccountId: accountId, resourceType, resourceId: '*',
     actions: [...actions], effect: 'allow', purpose: 'general' });
 };
@@ -172,6 +178,66 @@ describe('34-B communication messaging DataStore production composition', () => 
       expect(() => tamper.prepare('UPDATE communication_messages SET revision=99 WHERE id=?').run(created.resourceId))
         .toThrow(/exact immutable identity/i);
     } finally { tamper.close(); }
+  });
+
+  it('searches sealed local content and enforces presence and retention expiry through main-only maintenance', async () => {
+    let now=asIsoDateTime('2026-08-15T12:00:00.000Z');const clock:Clock={now:()=>now};
+    const {store,accountId,databasePath}=makeStore({governed:true,protectedPayloads:true,clock});allow(store,accountId);
+    const room=await createRoom(store);
+    await store.setCommunicationRetentionPolicy({clientOperationId:'retention-expiry-e2e',expectedRevision:0,
+      roomId:room.resourceId,mode:'auto_delete',durationDays:1,reason:'Bir günlük yerel saklama.'});
+    const textMessage=await store.createCommunicationMessage({clientOperationId:'search-text-message',expectedRevision:0,
+      roomId:room.resourceId,contentKind:'text',contentMime:'text/plain',text:'Benzersiz erguvan anahtar sözcüğü'});
+    await store.createCommunicationMessage({clientOperationId:'search-location-message',expectedRevision:0,
+      roomId:room.resourceId,contentKind:'location',contentMime:'application/vnd.ppt.location+text',text:'Kadıköy buluşma noktası'});
+    const matches=await store.searchCommunicationMessages({queryText:'ERGUVAN',roomId:room.resourceId,limit:20});
+    expect(matches).toHaveLength(1);expect(matches[0]).toMatchObject({id:textMessage.resourceId,contentKind:'text'});
+    expect(JSON.stringify(matches)).not.toContain('erguvan');
+    await store.setCommunicationPresence({clientOperationId:'presence-expiry-e2e',expectedRevision:0,status:'busy',
+      audience:'room_members',lastSeenShared:false,typingIndicatorsEnabled:false,readReceiptsEnabled:false,
+      emergencyReachabilityEnabled:false,expiresAt:'2026-08-15T13:00:00.000Z'});
+    now=asIsoDateTime('2026-08-17T12:00:00.000Z');
+    expect(store.login({email:'communication-34b@example.test',password:PASSWORD}).authenticated).toBe(true);
+    expect((await store.getCommunicationMessagingCenter()).presence).toMatchObject({status:'offline',audience:'nobody',
+      activeDeviceDisclosed:false,preciseActivityDisclosed:false});
+    const maintenance=await store.maintainCommunicationMessagingLifecycle();
+    expect(maintenance).toMatchObject({expiredMessagesDeleted:2,expiredPresenceProfilesHidden:1,
+      physicalSecureEraseGuaranteed:false,backupPropagationGuaranteed:false,networkUsed:false,cloudUsed:false,failedOperations:0});
+    const center=await store.getCommunicationMessagingCenter();
+    expect(center.messages).toHaveLength(2);expect(center.messages.every(message=>message.deleted)).toBe(true);
+    expect(center.presence).toMatchObject({status:'offline',audience:'nobody'});expect(center.presence.expiresAt).toBeUndefined();
+    const database=new DatabaseSync(databasePath,{readOnly:true});try{
+      expect(database.prepare("SELECT COUNT(*) count FROM communication_messages WHERE state='deleted'").get()).toEqual({count:2});
+      expect(database.prepare('SELECT status,audience,expires_at FROM communication_presence_profiles').get())
+        .toEqual({status:'offline',audience:'nobody',expires_at:null});
+      expect(JSON.stringify(database.prepare('SELECT * FROM communication_messages').all())).not.toMatch(/erguvan|Kadıköy/u);
+    }finally{database.close();}
+  });
+
+  it('accepts only a clean same-room protected media attachment and persists no media bytes',async()=>{
+    const {store,accountId,databasePath}=makeStore({governed:true,protectedPayloads:true,cleanFileScanner:true});allow(store,accountId);
+    const room=await createRoom(store);
+    const prepared=await store.prepareCommunicationFile({clientOperationId:'prepare-photo-message',expectedRevision:0,
+      roomId:room.resourceId,displayName:'aile-fotografi.jpg',mimeType:'image/jpeg',
+      bytes:new Uint8Array([0xff,0xd8,0xff,0xe0,0x00,0x10,0x4a,0x46,0x49,0x46,0xff,0xd9])});
+    const fileCenter=await store.getCommunicationFileSharingCenter();
+    const file=fileCenter.files.find(candidate=>candidate.createdAt===prepared.occurredAt&&candidate.roomId===room.resourceId);
+    expect(file).toMatchObject({displayName:'aile-fotografi.jpg',mimeType:'image/jpeg',state:'ready_local',scanState:'clean'});
+    const created=await store.createCommunicationMessage({clientOperationId:'create-photo-message',expectedRevision:0,
+      roomId:room.resourceId,contentKind:'photo',contentMime:'image/jpeg',opaqueAttachmentHandle:file!.id});
+    expect(await store.getCommunicationMessageContent(created.resourceId)).toMatchObject({contentKind:'photo',
+      contentMime:'image/jpeg',opaqueAttachmentHandle:file!.id,networkUsed:false,cloudUsed:false});
+    await expect(store.createCommunicationMessage({clientOperationId:'create-mismatched-photo',expectedRevision:0,
+      roomId:room.resourceId,contentKind:'voice',contentMime:'image/jpeg',opaqueAttachmentHandle:file!.id}))
+      .rejects.toThrow(/uyuşmuyor|geçersiz|temiz ve yerel olarak hazır/i);
+    await expect(store.createCommunicationMessage({clientOperationId:'create-image-as-document',expectedRevision:0,
+      roomId:room.resourceId,contentKind:'document',contentMime:'image/jpeg',opaqueAttachmentHandle:file!.id}))
+      .rejects.toThrow(/uyuşmuyor|geçersiz|temiz ve yerel olarak hazır/i);
+    const database=new DatabaseSync(databasePath,{readOnly:true});try{
+      expect(JSON.stringify(database.prepare('SELECT * FROM communication_messages').all()))
+        .not.toContain(Buffer.from([0xff,0xd8,0xff,0xe0]).toString('hex'));
+      expect(database.prepare('SELECT COUNT(*) count FROM communication_messages').get()).toEqual({count:1});
+    }finally{database.close();}
   });
 
   it('rejects an explicit central-policy deny before sealing or persisting a message', async () => {

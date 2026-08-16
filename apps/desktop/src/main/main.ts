@@ -310,14 +310,19 @@ const COMMUNICATION_FILE_SELECTION_MAX_BYTES=64*1024*1024;
 const normalizeSelectedFilePath=(value:string):string=>process.platform==='win32'
   ?resolve(value).toLocaleLowerCase('en-US'):resolve(value);
 const communicationFileMimeType=(bytes:Uint8Array,fileName:string):string=>{
+  const extension=extname(fileName).toLowerCase();
   if(bytes.byteLength>=8&&Buffer.from(bytes.subarray(0,8)).equals(Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a])))return'image/png';
   if(bytes.byteLength>=3&&bytes[0]===0xff&&bytes[1]===0xd8&&bytes[2]===0xff)return'image/jpeg';
   if(bytes.byteLength>=6&&['GIF87a','GIF89a'].includes(Buffer.from(bytes.subarray(0,6)).toString('ascii')))return'image/gif';
   if(bytes.byteLength>=12&&Buffer.from(bytes.subarray(0,4)).toString('ascii')==='RIFF'
     &&Buffer.from(bytes.subarray(8,12)).toString('ascii')==='WEBP')return'image/webp';
   if(bytes.byteLength>=5&&Buffer.from(bytes.subarray(0,5)).toString('ascii')==='%PDF-')return'application/pdf';
-  if(bytes.byteLength>=12&&Buffer.from(bytes.subarray(4,8)).toString('ascii')==='ftyp')return'video/mp4';
-  const extension=extname(fileName).toLowerCase();
+  if(bytes.byteLength>=12&&Buffer.from(bytes.subarray(0,4)).toString('ascii')==='RIFF'
+    &&Buffer.from(bytes.subarray(8,12)).toString('ascii')==='WAVE')return'audio/wav';
+  if((bytes.byteLength>=3&&Buffer.from(bytes.subarray(0,3)).toString('ascii')==='ID3')
+    ||(bytes.byteLength>=2&&bytes[0]===0xff&&((bytes[1]??0)&0xe0)===0xe0))return'audio/mpeg';
+  if(bytes.byteLength>=12&&Buffer.from(bytes.subarray(4,8)).toString('ascii')==='ftyp')
+    return extension==='.m4a'?'audio/mp4':'video/mp4';
   return extension==='.txt'?'text/plain':extension==='.json'?'application/json':extension==='.csv'?'text/csv'
     :'application/octet-stream';
 };
@@ -2590,7 +2595,7 @@ function registerIpc(): void {
     async(_event,input:CommunicationFileSharingSelectIpcInput)=>{
       const selection=await dialog.showOpenDialog({title:'Yerel olarak şifrelenecek iletişim dosyasını seç',
         properties:['openFile'],filters:[{name:'Desteklenen yerel dosyalar',
-          extensions:['pdf','png','jpg','jpeg','gif','webp','mp4','txt','json','csv']}]});
+          extensions:['pdf','png','jpg','jpeg','gif','webp','mp4','m4a','mp3','wav','txt','json','csv']}]});
       if(selection.canceled||!selection.filePaths[0])return Object.freeze({canceled:true as const});
       const selected=readCommunicationFileForMainAuthority(selection.filePaths[0]);
       try{return await store().prepareCommunicationFile({...input,displayName:selected.displayName,
@@ -2942,6 +2947,15 @@ function startBackgroundSchedulers(): void {
         );
       });
       if(!current.isAuthenticated()) return;
+      const communicationMessagingMaintenance=await current.maintainCommunicationMessagingLifecycle().catch((error:unknown)=>{
+        current.recordDiagnostic('error','communication.messaging_maintenance_failed',
+          'Mesaj saklama, presence süresi veya payload bakım çevrimi tamamlanamadı.',error instanceof Error?error.name:typeof error);
+        return undefined;
+      });
+      if(communicationMessagingMaintenance&&(communicationMessagingMaintenance.failedOperations>0
+        ||communicationMessagingMaintenance.rejectedPayloadFiles>0))current.recordDiagnostic('warning',
+        'communication.messaging_maintenance_pending','Bazı mesajlaşma bakım adayları güvenle tamamlanamadığı için sonraki çevrime bırakıldı.',
+        `failed=${communicationMessagingMaintenance.failedOperations};rejected=${communicationMessagingMaintenance.rejectedPayloadFiles}`);
       const communicationFileMaintenance=await current.maintainCommunicationFilePayloadVault().catch((error:unknown)=>{
         current.recordDiagnostic('error','communication.file_payload_maintenance_failed',
           'İletişim dosyası payload bakım çevrimi tamamlanamadı.',error instanceof Error?error.name:typeof error);

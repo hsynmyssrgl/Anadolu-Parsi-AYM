@@ -28,8 +28,9 @@ const testFiles=scope.validation?.targetedTestFiles??[];
 const checks=[
   ['contract identity requirements and dependency order are exact',scope.step==='34-B'&&scope.decision==='DEC-239'
     &&exact(scope.requirements,requirements)&&exact(inventory.requirements,requirements)&&exact(scope.dependsOn,['34-A','33-N'])],
-  ['decision states partial implementation and exact no-claims',has(decision,['`LOCAL_IMPLEMENTATION_STARTED`','`countsAsRequirementPass=false`',
-    'Renderer oluşturma yüzeyi yalnız metin mesajını kabul eder','Tam metin içerik araması yoktur.','fiziksel secure erase'])],
+  ['decision states expanded local implementation and exact no-claims',has(decision,['`LOCAL_IMPLEMENTATION_STARTED`','`countsAsRequirementPass=false`',
+    'aynı sahip, aynı oda, `ready_local`, temiz tarama kanıtı','yalnız main-process kasasında yetkili metin/konum araması',
+    'hatırlatma yürütücüsü yoktur','fiziksel secure erase'])],
   ['threat model covers renderer owner replay payload presence and retention threats',has(threat,['Renderer güvenilir payload',
     'Başka aile/kişi mesajına erişim','Replay veya revision atlama','DB\'de plaintext sızıntısı','Presence ile aktif cihaz',
     'Retent' ,'Fail-closed ve no-claim sınırları'])],
@@ -42,12 +43,13 @@ const checks=[
     'providerEvidenceSha256','CommunicationMessagingPolicyResourceRepositoryPort'])&&!/messagePlaintext|plaintextContent/u.test(contract)],
   ['application hashes text in request fingerprint and emits content-free events',has(application,[
     "hash({ ...command, text: normalizedText === undefined ? null : hash(normalizedText) })",'communication.messaging.changed',
+    'findAttachmentGuard','expiresAt','MaintainCommunicationMessagePayloadVaultUseCase',
     'payloadSealedLocally','remoteDeliveryPerformed: false','networkUsed: false'])],
   ['repository SQL is exact-owner bounded and has no semantic plaintext column',has(repository,['LIMIT 10001','LIMIT 257',
     'family_id=? AND owner_person_id=?','platformPolicyPersistenceBinding'])&&!/message_plaintext|payload_text/u.test(repository)],
   ['payload vault binds encrypted content identity and fails closed',has(vault,['PAYLOAD_KIND','MAX_FILES = 10_000',
     'MAX_TOTAL_BYTES = 512 * 1024 * 1024','providerEvidenceSha256','payload.revision !== row.payloadRevision',
-    'failure(correlationId'])],
+    'sweepOrphans','recoverInterruptedPublications','failure(correlationId'])],
   ['IPC input output and lifecycle policies are exact',has(ipc,['COMMUNICATION_MESSAGING_IPC_CHANNELS',
     'COMMUNICATION_MESSAGING_RESULT_INVALID','remoteDeliveryPerformed===false','networkUsed===false'])
     &&has(lifecycle,['communicationMessagingReadChannels','communicationMessagingWriteChannels','maxRequestsPerWindow:24'])],
@@ -58,10 +60,10 @@ const checks=[
   ['renderer requires explicit reveal and retains operation identity',has(panel,['operations.current.get(key)','operations.current.delete(key)',
     'İçeriği açıkça göster','Aynı işlem kimliğiyle yeniden deneyebilirsiniz.'])],
   ['validation ratchet and manual no-claim state are exact',scope.validation?.targetedTestFileRatchet===5
-    &&scope.validation?.targetedTestRatchet===25&&scope.validation?.migrationVersion===106
-    &&scope.validation?.ppk015?.status==='PASS'&&scope.validation?.ppk015?.files===507
-    &&scope.validation?.ppk021?.status==='PASS'&&scope.validation?.ppk021?.runtime===20
-    &&scope.validation?.ppk022?.status==='PASS'&&scope.validation?.ppk022?.runtime===24
+    &&scope.validation?.targetedTestRatchet===29&&scope.validation?.migrationVersion===106
+    &&scope.validation?.ppk015?.status==='PASS'&&scope.validation?.ppk015?.files===555
+    &&scope.validation?.ppk021?.status==='PASS'&&scope.validation?.ppk021?.surfaces===874&&scope.validation?.ppk021?.runtime===20
+    &&scope.validation?.ppk022?.status==='PASS'&&scope.validation?.ppk022?.surfaces===392&&scope.validation?.ppk022?.runtime===24
     &&Object.entries(scope.manualEvidence??{}).filter(([key])=>key!=='certificationClaimed').every(([,value])=>value==='NOT_RUN')
     &&scope.manualEvidence?.certificationClaimed===false&&scope.persistentReceiptStatus==='NOT_RUN'],
   ['governance cannot count as requirement pass',scope.status==='PLANNED'&&inventory.status==='PLANNED'

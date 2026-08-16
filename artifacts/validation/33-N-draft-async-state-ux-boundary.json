@@ -152,5 +152,5 @@
       "evidence": "config/33-n-b7-15-route-async-state-inventory.json;apps/desktop/tests/b7-15-route-async-state-governance.test.ts;scripts/verify-33-n-b7-15-route-async-state-governance.mjs"
     }
   ],
-  "generatedAt": "2026-08-16T14:22:46.626Z"
+  "generatedAt": "2026-08-16T16:04:33.068Z"
 }

@@ -119,7 +119,14 @@ export interface CommunicationMessagingTruthView {
   readonly defaultPresenceIsAvailabilityOnly: true;
   readonly activeDeviceDisclosureDefaultDenied: true;
   readonly exactActivityDisclosureDefaultDenied: true;
-  readonly contentSearchImplemented: false;
+  readonly contentSearchImplemented: true;
+  readonly rendererMediaAttachmentSelectionImplemented: true;
+  readonly effectivePresenceExpiryEnforced: true;
+  readonly automaticRetentionExecutionImplemented: true;
+  readonly payloadOrphanSweepImplemented: true;
+  readonly reminderExecutionImplemented: false;
+  readonly multiDevicePresenceAggregationImplemented: false;
+  readonly selectedPeopleAudienceEnforcementImplemented: false;
   readonly relayDeliveryImplemented: false;
   readonly deliveryReceiptFromRemoteImplemented: false;
   readonly messageSignatureVerificationImplemented: false;
@@ -224,6 +231,8 @@ export interface SetCommunicationPresenceInput {
 }
 
 export interface SearchCommunicationMessagesInput {
+  /** Main-process local sealed-content query. Plaintext is never returned by this search operation. */
+  readonly queryText?: string;
   readonly roomId?: string;
   readonly senderPersonId?: string;
   readonly contentKind?: CommunicationMessageContentKind;
@@ -232,6 +241,22 @@ export interface SearchCommunicationMessagesInput {
   readonly includeDeleted?: boolean;
   readonly limit?: number;
 }
+
+export interface CommunicationMessagingMaintenanceView {
+  readonly expiredMessagesDeleted: number;
+  readonly expiredPresenceProfilesHidden: number;
+  readonly scannedPayloadFiles: number;
+  readonly deletedOrphanPayloadFiles: number;
+  readonly rejectedPayloadFiles: number;
+  readonly failedOperations: number;
+  readonly completedAt: IsoDateTime;
+  readonly physicalSecureEraseGuaranteed: false;
+  readonly backupPropagationGuaranteed: false;
+  readonly networkUsed: false;
+  readonly cloudUsed: false;
+}
+
+export const COMMUNICATION_MESSAGE_ORPHAN_GRACE_MS = 24 * 60 * 60 * 1_000;
 
 export type CommunicationMessagingMutationKind =
   | 'message_create'
@@ -276,7 +301,14 @@ export const communicationMessagingTruth = Object.freeze({
   defaultPresenceIsAvailabilityOnly: true as const,
   activeDeviceDisclosureDefaultDenied: true as const,
   exactActivityDisclosureDefaultDenied: true as const,
-  contentSearchImplemented: false as const,
+  contentSearchImplemented: true as const,
+  rendererMediaAttachmentSelectionImplemented: true as const,
+  effectivePresenceExpiryEnforced: true as const,
+  automaticRetentionExecutionImplemented: true as const,
+  payloadOrphanSweepImplemented: true as const,
+  reminderExecutionImplemented: false as const,
+  multiDevicePresenceAggregationImplemented: false as const,
+  selectedPeopleAudienceEnforcementImplemented: false as const,
   relayDeliveryImplemented: false as const,
   deliveryReceiptFromRemoteImplemented: false as const,
   messageSignatureVerificationImplemented: false as const,

@@ -157,6 +157,16 @@ export interface CommunicationMessagingRoomGuardRow {
   readonly memberships: readonly CommunicationRoomMembershipRow[];
 }
 
+export interface CommunicationMessagingAttachmentGuardRow {
+  readonly id: string;
+  readonly ownerPersonId: PersonId;
+  readonly roomId: string;
+  readonly mimeType: string;
+  readonly totalBytes: number;
+  readonly state: 'prepared_local' | 'transferring_local' | 'paused' | 'scan_required' | 'ready_local' | 'quarantined' | 'revoked';
+  readonly scanState: 'not_run' | 'clean' | 'malicious' | 'provider_unavailable';
+}
+
 export interface CommunicationMessagingRepositoryPort {
   loadCenter(
     context: PolicyAuthorizedRepositoryExecutionContext,
@@ -172,6 +182,11 @@ export interface CommunicationMessagingRepositoryPort {
     key: CommunicationMessagingCenterKey,
     roomId: string
   ): RepositoryResult<CommunicationMessagingRoomGuardRow | null>;
+  findAttachmentGuard(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    key: CommunicationMessagingCenterKey,
+    fileId: string
+  ): RepositoryResult<CommunicationMessagingAttachmentGuardRow | null>;
   findMessage(
     context: PolicyAuthorizedRepositoryExecutionContext,
     key: CommunicationMessagingCenterKey,

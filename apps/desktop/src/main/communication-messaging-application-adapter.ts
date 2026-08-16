@@ -49,7 +49,7 @@ const presenceView = (
   personId: string,
   row: CommunicationPresenceRow | null,
   generatedAt: CommunicationMessagingCenterView['generatedAt']
-): CommunicationPresenceView => row ? Object.freeze({
+): CommunicationPresenceView => row && (!row.expiresAt || Date.parse(row.expiresAt) > Date.parse(generatedAt)) ? Object.freeze({
   personId: row.personId, status: row.status, publicAvailability: row.publicAvailability, audience: row.audience,
   lastSeenShared: row.lastSeenShared, typingIndicatorsEnabled: row.typingIndicatorsEnabled,
   readReceiptsEnabled: row.readReceiptsEnabled, activeDeviceDisclosed: false, preciseActivityDisclosed: false,
@@ -58,7 +58,8 @@ const presenceView = (
 }) : Object.freeze({
   personId, status: 'offline', publicAvailability: 'unavailable', audience: 'nobody', lastSeenShared: false,
   typingIndicatorsEnabled: false, readReceiptsEnabled: false, activeDeviceDisclosed: false,
-  preciseActivityDisclosed: false, emergencyReachabilityEnabled: false, revision: 0, updatedAt: generatedAt
+  preciseActivityDisclosed: false, emergencyReachabilityEnabled: false,
+  ...(row?.expiresAt ? { expiresAt: row.expiresAt } : {}), revision: row?.revision ?? 0, updatedAt: row?.updatedAt ?? generatedAt
 });
 
 const retentionView = (row: CommunicationRetentionPolicyRow)
@@ -93,7 +94,20 @@ export class RepositoryBackedCommunicationMessagingQueryPort implements Communic
     return this.#runner.execute(context, communicationMessagingReadIntent(), ({ repository }) => {
       if (!context.actor.personId) return denied(context, 'Mesaj araması kişi bağlı oturum gerektirir.');
       const found = this.dependencies.communicationMessagingRepository.searchMessages(repository, keyFor(context, context.actor.personId), input);
-      return found.ok ? ok(Object.freeze(found.value.map(communicationMessageRowToView))) : found;
+      if (!found.ok) return found;
+      if (input.queryText === undefined) return ok(Object.freeze(found.value.map(communicationMessageRowToView)));
+      const queryText = input.queryText.normalize('NFKC').trim().toLocaleLowerCase('tr-TR');
+      if (queryText.length < 1 || queryText.length > 128 || /[\p{Cc}\p{Cf}\p{Cs}]/u.test(queryText))
+        return denied(context, 'Mesaj içerik araması sorgusu geçersizdir.');
+      const matched = [];
+      for (const row of found.value) {
+        if (row.state === 'deleted' || !['text','location'].includes(row.contentKind)) continue;
+        const opened = this.dependencies.communicationMessagePayloads.open(row, context.correlationId);
+        if (!opened.ok) return opened;
+        if (opened.value.text?.normalize('NFKC').toLocaleLowerCase('tr-TR').includes(queryText))
+          matched.push(communicationMessageRowToView(row));
+      }
+      return ok(Object.freeze(matched));
     });
   }
   public getContent(context: LifeApplicationContext, messageId: string) {
@@ -103,6 +117,13 @@ export class RepositoryBackedCommunicationMessagingQueryPort implements Communic
       if (!found.ok) return found;
       if (!found.value || found.value.state === 'deleted') return missing(context, 'Mesaj içeriği bulunamadı.');
       return this.dependencies.communicationMessagePayloads.open(found.value, context.correlationId);
+    });
+  }
+  public getMaintenanceState(context: LifeApplicationContext): ReturnType<CommunicationMessagingQueryPort['getMaintenanceState']> {
+    return this.#runner.execute(context, communicationMessagingReadIntent(), ({ repository, occurredAt }) => {
+      if (!context.actor.personId) return denied(context, 'Mesaj payload bakımı kişi bağlı oturum gerektirir.');
+      const snapshot = this.dependencies.communicationMessagingRepository.loadCenter(repository, keyFor(context, context.actor.personId));
+      return snapshot.ok ? ok(Object.freeze({ rows: snapshot.value.messages, occurredAt })) : snapshot;
     });
   }
 }
@@ -121,6 +142,9 @@ class RepositoryBackedCommunicationMessagingWriteScope implements CommunicationM
     this.ownerPersonId = asPersonId(owner); this.#key = keyFor(context, this.ownerPersonId);
   }
   public findRoomGuard(roomId: string) { return this.dependencies.communicationMessagingRepository.findRoomGuard(this.repository, this.#key, roomId); }
+  public findAttachmentGuard(fileId: string) {
+    return this.dependencies.communicationMessagingRepository.findAttachmentGuard(this.repository, this.#key, fileId);
+  }
   public findMessage(messageId: string) { return this.dependencies.communicationMessagingRepository.findMessage(this.repository, this.#key, messageId); }
   public findPresence() { return this.dependencies.communicationMessagingRepository.findPresence(this.repository, this.#key); }
   public findRetentionPolicy(roomId: string) { return this.dependencies.communicationMessagingRepository.findRetentionPolicy(this.repository, this.#key, roomId); }

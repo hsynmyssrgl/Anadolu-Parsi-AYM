@@ -28,6 +28,7 @@ import { ProtectedSideArtifactStore, type ProtectedSideArtifactEnvelope } from '
 
 const PAYLOAD_KIND = 'communication-message-sealed-payload-v1';
 const REFERENCE = /^comm-message-[0-9a-f]{64}\.pptmsg$/u;
+const TEMPORARY = /^\.comm-message-[0-9]+-[0-9a-f]{16}\.tmp$/u;
 const IDENTIFIER = /^[A-Za-z0-9][A-Za-z0-9._:@-]{1,255}$/u;
 const MIME = /^[a-z0-9][a-z0-9.+-]{0,63}\/[a-z0-9][a-z0-9.+-]{0,127}$/u;
 const SHA256 = /^[0-9a-f]{64}$/u;
@@ -94,7 +95,7 @@ const parsePayload = (bytes: Buffer): StoredCommunicationMessagePayload => {
     || !['text','voice','photo','video','location','document'].includes(String(value.contentKind))
     || typeof value.contentMime !== 'string' || !MIME.test(value.contentMime)
     || !validIso(value.occurredAt) || value.networkUsed !== false || value.cloudUsed !== false
-    || (value.contentKind === 'text'
+    || (['text','location'].includes(String(value.contentKind))
       ? typeof value.text !== 'string' || value.text.length < 1 || value.text.length > 32_768
         || Object.hasOwn(value, 'opaqueAttachmentHandle')
       : !safeId(value.opaqueAttachmentHandle) || Object.hasOwn(value, 'text'))) {
@@ -112,12 +113,13 @@ export class CommunicationMessagePayloadVault implements CommunicationMessagePay
     const stat = lstatSync(options.rootDirectory);
     if (!stat.isDirectory() || stat.isSymbolicLink()) throw new Error('Communication payload root must be a real directory');
     this.#root = realpathSync(options.rootDirectory);
+    this.#recoverInterruptedPublications();
   }
 
   public seal(input: Parameters<CommunicationMessagePayloadPort['seal']>[0]): Result<VerifiedSealedCommunicationPayloadInput, AppError> {
     if (!safeId(input.familyId) || !safeId(input.ownerPersonId) || !safeId(input.roomId) || !safeId(input.messageId)
       || !Number.isSafeInteger(input.revision) || input.revision < 1 || !MIME.test(input.contentMime) || !validIso(input.occurredAt)
-      || (input.contentKind === 'text'
+      || (['text','location'].includes(input.contentKind)
         ? typeof input.text !== 'string' || input.text.length < 1 || input.text.length > 32_768 || input.opaqueAttachmentHandle !== undefined
         : !safeId(input.opaqueAttachmentHandle) || input.text !== undefined))
       return failure(input.correlationId, 'Mesaj kasası girdisi güvenlik sözleşmesine uymuyor.');
@@ -178,11 +180,82 @@ export class CommunicationMessagePayloadVault implements CommunicationMessagePay
     catch { return failure(correlationId, 'Mesaj kasası güvenli mantıksal silme işlemi başarısız.'); }
   }
 
+  public sweepOrphans(input: Parameters<CommunicationMessagePayloadPort['sweepOrphans']>[0])
+  : ReturnType<CommunicationMessagePayloadPort['sweepOrphans']> {
+    if (!safeId(input.familyId) || !safeId(input.ownerPersonId) || !validIso(input.completedBefore)
+      || !Number.isSafeInteger(input.maximumCandidates) || input.maximumCandidates < 1 || input.maximumCandidates > 128
+      || !Array.isArray(input.referencedPayloads) || input.referencedPayloads.length > MAX_FILES
+      || input.referencedPayloads.some((reference, index) => !REFERENCE.test(reference)
+        || (index > 0 && String(input.referencedPayloads[index - 1]).localeCompare(reference) >= 0)))
+      return failure(input.correlationId, 'Mesaj payload kasası yetim bakım girdisi geçersizdir.');
+    try {
+      this.#assertRoot();
+      const inventory = readdirSync(this.#root, { withFileTypes: true });
+      if (inventory.length > MAX_FILES || inventory.some((entry) => !entry.isFile() || entry.isSymbolicLink()
+        || !REFERENCE.test(entry.name))) return failure(input.correlationId, 'Mesaj payload kasası envanteri güvenli değildir.');
+      const entries = inventory.sort((left, right) => left.name.localeCompare(right.name));
+      if (entries.length === 0) return ok(Object.freeze({ scannedFiles: 0, deletedFiles: 0, rejectedFiles: 0 }));
+      const retained = new Set(input.referencedPayloads);
+      const rotation = Number.parseInt(hash(Buffer.from(`${input.familyId}:${input.ownerPersonId}:${input.completedBefore.slice(0, 10)}`,
+        'utf8')).slice(0, 8), 16) % entries.length;
+      const scanCount = Math.min(entries.length, input.maximumCandidates); let deletedFiles = 0; let rejectedFiles = 0;
+      for (let offset = 0; offset < scanCount; offset += 1) {
+        const entry = entries[(rotation + offset) % entries.length]; if (!entry) continue;
+        let encrypted: Buffer | undefined; let plaintext: Buffer | undefined;
+        try {
+          encrypted = this.#raw(entry.name); plaintext = this.options.protectedStore.openEnvelope(parseEnvelope(encrypted));
+          const payload = parsePayload(plaintext);
+          const expected = `comm-message-${hash(Buffer.from(JSON.stringify({ familyId: payload.familyId,
+            ownerPersonId: payload.ownerPersonId, roomId: payload.roomId, messageId: payload.messageId,
+            revision: payload.revision, payloadSha256: hash(plaintext) }), 'utf8'))}.pptmsg`;
+          if (expected !== entry.name) throw new Error('Communication payload orphan identity is invalid');
+          if (payload.familyId !== input.familyId || payload.ownerPersonId !== input.ownerPersonId
+            || retained.has(entry.name) || Date.parse(payload.occurredAt) >= Date.parse(input.completedBefore)) continue;
+          this.#remove(entry.name);
+          if (existsSync(join(this.#root, entry.name))) throw new Error('Communication payload orphan deletion readback failed');
+          deletedFiles += 1;
+        } catch { rejectedFiles += 1; }
+        finally { encrypted?.fill(0); plaintext?.fill(0); }
+      }
+      return ok(Object.freeze({ scannedFiles: scanCount, deletedFiles, rejectedFiles }));
+    } catch { return failure(input.correlationId, 'Mesaj payload kasası yetim bakımı başarısız.'); }
+  }
+
   #path(reference: string): string {
     if (!REFERENCE.test(reference)) throw new Error('Invalid communication payload reference');
     const path = join(this.#root, reference);
     if (!samePath(realpathSync(dirname(path)), this.#root)) throw new Error('Communication payload path escaped its root');
     return path;
+  }
+  #assertRoot(): void {
+    const stat = lstatSync(this.#root);
+    if (!stat.isDirectory() || stat.isSymbolicLink() || !samePath(realpathSync(this.#root), this.#root))
+      throw new Error('Communication payload root identity is invalid');
+  }
+  #recoverInterruptedPublications(): void {
+    this.#assertRoot();
+    const entries = readdirSync(this.#root, { withFileTypes: true });
+    if (entries.length > MAX_FILES + 64 || entries.some((entry) => !entry.isFile() || entry.isSymbolicLink()
+      || (!REFERENCE.test(entry.name) && !TEMPORARY.test(entry.name))))
+      throw new Error('Communication payload startup inventory is unsafe');
+    for (const entry of entries.filter((candidate) => TEMPORARY.test(candidate.name))) {
+      const temporary = join(this.#root, entry.name); const tempStat = lstatSync(temporary);
+      if (!tempStat.isFile() || tempStat.isSymbolicLink() || ![1, 2].includes(tempStat.nlink))
+        throw new Error('Communication payload temporary publication is unsafe');
+      if (tempStat.nlink === 2) {
+        const linked = entries.filter((candidate) => REFERENCE.test(candidate.name)).filter((candidate) => {
+          const stat = lstatSync(join(this.#root, candidate.name));
+          return stat.isFile() && !stat.isSymbolicLink() && stat.dev === tempStat.dev && stat.ino === tempStat.ino;
+        });
+        if (linked.length !== 1) throw new Error('Communication payload interrupted publication cannot be recovered');
+      }
+      rmSync(temporary, { force: false });
+    }
+    for (const entry of readdirSync(this.#root, { withFileTypes: true })) {
+      if (!REFERENCE.test(entry.name)) continue;
+      const stat = lstatSync(join(this.#root, entry.name));
+      if (!stat.isFile() || stat.isSymbolicLink() || stat.nlink !== 1) throw new Error('Communication payload publication identity is unsafe');
+    }
   }
   #raw(reference: string): Buffer {
     const path = this.#path(reference); const stat = lstatSync(path);

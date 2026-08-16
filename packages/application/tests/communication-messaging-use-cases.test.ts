@@ -84,6 +84,9 @@ class Scope implements CommunicationMessagingWriteScope {
   public readonly ownerPersonId = OWNER;
   public constructor(private readonly state: State, private readonly failOutbox: boolean) {}
   public findRoomGuard(roomId: string) { return ok(roomId === ROOM.id ? Object.freeze({ room: ROOM, memberships: Object.freeze([MEMBERSHIP]) }) : null); }
+  public findAttachmentGuard(fileId: string) { return ok(fileId === 'comm-file-clean-voice-34-b' ? Object.freeze({ id: fileId,
+    ownerPersonId: OWNER, roomId: ROOM.id, mimeType: 'audio/mpeg', totalBytes: 1024,
+    state: 'ready_local' as const, scanState: 'clean' as const }) : null); }
   public findMessage(id: string) { return ok(this.state.messages.get(id) ?? null); }
   public findPresence() { return ok(this.state.presence); }
   public findRetentionPolicy(roomId: string) { return ok(this.state.retention.get(roomId) ?? null); }
@@ -142,6 +145,7 @@ class Payloads implements CommunicationMessagePayloadPort {
       category: 'not_found', correlationId: CONTEXT.correlationId }));
   }
   public discard(reference: string) { this.discarded.push(reference); this.values.delete(reference); return ok(undefined); }
+  public sweepOrphans() { return ok(Object.freeze({ scannedFiles: 0, deletedFiles: 0, rejectedFiles: 0 })); }
 }
 
 const createMessage = (unit: Unit, payloads: Payloads, clientOperationId = 'create-message-34-b') =>
@@ -173,6 +177,26 @@ describe('34-B communication messaging use cases', () => {
       contentMime: 'text/plain', text: 'Geçmiş tarihli', scheduledAt: '2026-08-14T12:00:00.000Z'
     }})).toMatchObject({ ok: false, error: { category: 'validation' } });
     expect(payloads.calls).toBe(1);
+  });
+
+  it('accepts only a clean same-room attachment and derives expiry from the active room retention decision', async () => {
+    const unit = new Unit(); const payloads = new Payloads();
+    expect(await new SetCommunicationRetentionPolicyUseCase(unit).execute({ context: CONTEXT, command: {
+      clientOperationId: 'retention-before-media-34-b', expectedRevision: 0, roomId: ROOM.id,
+      mode: 'auto_delete', durationDays: 7, reason: 'Yedi günlük yerel saklama.'
+    }})).toMatchObject({ ok: true });
+    const created = await new CreateCommunicationMessageUseCase(unit, payloads).execute({ context: CONTEXT, command: {
+      clientOperationId: 'create-voice-34-b', expectedRevision: 0, roomId: ROOM.id, contentKind: 'voice',
+      contentMime: 'audio/mpeg', opaqueAttachmentHandle: 'comm-file-clean-voice-34-b'
+    }});
+    expect(created).toMatchObject({ ok: true, value: { payloadSealedLocally: true } });
+    if (!created.ok) throw new Error(created.error.message);
+    expect(unit.state.messages.get(created.value.resourceId)).toMatchObject({ contentKind: 'voice',
+      expiresAt: '2026-08-22T12:00:00.000Z' });
+    expect(await new CreateCommunicationMessageUseCase(unit, payloads).execute({ context: CONTEXT, command: {
+      clientOperationId: 'create-foreign-voice-34-b', expectedRevision: 0, roomId: ROOM.id, contentKind: 'voice',
+      contentMime: 'audio/mpeg', opaqueAttachmentHandle: 'comm-file-foreign-voice-34-b'
+    }})).toMatchObject({ ok: false, error: { category: 'authorization' } });
   });
 
   it('edits, deletes and restores with exact revision-bound event history', async () => {

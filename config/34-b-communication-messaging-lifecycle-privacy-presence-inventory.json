@@ -46,28 +46,29 @@
     "boundedIpcAndRendererSafeResults": true,
     "rendererStorageProviderRelayAndReceiptAuthorityExcluded": true,
     "durableWritesNonCancellable": true,
-    "explicitPolicyDenyBeforePayloadSeal": true
+    "explicitPolicyDenyBeforePayloadSeal": true,
+    "mainOnlySealedContentSearch": true,
+    "sameOwnerSameRoomCleanAttachmentGuard": true,
+    "effectivePresenceExpiryAndMainOnlyRetentionExecutor": true,
+    "payloadCrashRecoveryAndBoundedOrphanSweep": true
   },
   "incompleteCapabilities": [
-    "main-issued media attachment import and retrieval",
     "reminder execution",
-    "full content search",
     "real relay delivery and remote receipts",
     "message signature verification",
     "multi-device presence aggregation",
     "selected-people audience enforcement",
-    "automatic presence expiry and calendar sync",
-    "automatic retention execution and payload orphan sweep",
+    "calendar presence sync",
     "physical secure erase and backup deletion propagation"
   ],
   "validation": {
     "targetedTestFileRatchet": 5,
-    "targetedTestRatchet": 25,
+    "targetedTestRatchet": 29,
     "migrationVersion": 106,
     "migrationSha256": "5b088bb6d759403044f84ad9f2a82be1823e33a17334d7122beed92af56cce50",
-    "ppk015": {"status":"PASS","files":507,"sourceSha256":"12c286d45487c5e498768b396616b3ed7b0ca858a121c012f0db6620f3f709c8","findings":0},
-    "ppk021": {"status":"PASS","files":507,"surfaces":795,"sha256":"d674ad587c9cad96def3d087a86d176aa9dedc9ac69d2c3b0e71cc02cd787348","targeted":17,"contract":84,"runtime":20},
-    "ppk022": {"status":"PASS","files":507,"surfaces":360,"sha256":"b4b2f09c461235528f98c3f4b942e28a9e3068c71de5697fe116e4b57f54c77c","targeted":19,"contract":110,"runtime":24},
+    "ppk015": {"status":"PASS","files":555,"sourceSha256":"3339ac01f3721afd2668c2d494f41ac36750c842e2a02a5fe2571c68fa593cfa","findings":0},
+    "ppk021": {"status":"PASS","files":555,"surfaces":874,"sha256":"930119485fa3459f55ed3f23909ba9846560e785030bb991b5fb3105383d5d1a","targeted":17,"contract":84,"runtime":20},
+    "ppk022": {"status":"PASS","files":555,"surfaces":392,"sha256":"cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c","targeted":19,"contract":110,"runtime":24},
     "countsAsRequirementPass": false
   },
   "externalAndManualEvidence": "NOT_RUN",

@@ -14,7 +14,7 @@ const run=(name,command,args)=>{const result=spawnSync(command,args,{cwd:root,en
 const results=[];
 results.push(run('boundary',node,['scripts/verify-34-b-communication-messaging-lifecycle-privacy-presence-boundary.mjs','--no-write']));
 results.push(run('contract',node,['scripts/verify-34-b-communication-messaging-lifecycle-privacy-presence-contract.mjs','--no-write']));
-results.push(run('targeted 5 files 25 tests',node,npmArgs(['run','verify:34-b:targeted'])));
+results.push(run('targeted 5 files 29 tests',node,npmArgs(['run','verify:34-b:targeted'])));
 for(const workspace of ['@ppt/domain','@ppt/repository-contracts','@ppt/application','@ppt/database','@ppt/repositories','@ppt/desktop'])
   results.push(run(`typecheck ${workspace}`,node,npmArgs(['run','typecheck','--workspace',workspace])));
 results.push(run('migration verifier',node,npmArgs(['run','verify:migrations'])));
@@ -23,10 +23,10 @@ results.push(run('PPK-022 runtime',node,npmArgs(['run','verify:ppk022:runtime'])
 results.push(run('PPK-015 current runtime',node,npmArgs(['run','verify:ppk015:egress:runtime'])));
 const failures=results.filter(item=>item.status==='FAIL');
 const report={schemaVersion:1,step:'34-B',decision:'DEC-239',status:failures.length?'FAIL':'PASS',governanceState:'PLANNED',
-  countsAsRequirementPass:false,targetedTestFiles:5,targetedTests:25,checkCount:results.length,
+  countsAsRequirementPass:false,targetedTestFiles:5,targetedTests:29,checkCount:results.length,
   passed:results.length-failures.length,failed:failures.length,checks:results,generatedAt:new Date().toISOString()};
 if(!noWrite){await mkdir(resolve(root,'artifacts/validation'),{recursive:true});await writeFile(resolve(root,
   'artifacts/validation/34-B-communication-messaging-lifecycle-privacy-presence-runtime.json'),`${JSON.stringify(report,null,2)}\n`,'utf8');}
 if(failures.length){console.error(`34-B runtime: FAIL (${failures.length}/${results.length}).`);
   for(const item of failures)console.error(`${item.name}: exit ${item.exitCode}`);process.exit(1);}
-console.log(`34-B runtime: PASS (${results.length}/${results.length}; 5 files/25 tests; requirement PASS=false; write=${!noWrite}).`);
+console.log(`34-B runtime: PASS (${results.length}/${results.length}; 5 files/29 tests; requirement PASS=false; write=${!noWrite}).`);

@@ -27,7 +27,10 @@ describe('34-B communication messaging renderer surface',()=>{
     expect(panel).toContain('İçeriği gizle');
     expect(panel).toContain('Mesaj metni uygulama veritabanına yazılmaz');
     for(const forbidden of ['sealedPayloadReference','payloadSha256','providerEvidenceSha256','policyReceiptHash',
-      'communicationMessagePayloadPath','opaqueAttachmentHandle','relayUrl','privateKey','ciphertext'])expect(panel).not.toContain(forbidden);
+      'communicationMessagePayloadPath','relayUrl','privateKey','ciphertext'])expect(panel).not.toContain(forbidden);
+    expect(panel).toContain('opaqueAttachmentHandle:preparedAttachment!.fileId');
+    expect(panel).toContain("file.state!=='ready_local'||file.scanState!=='clean'");
+    expect(panel).toContain('if(candidates.length!==1)');
   });
 
   it('presents local-only delivery, privacy-preserving presence and honest retention limits',()=>{
@@ -35,13 +38,14 @@ describe('34-B communication messaging renderer surface',()=>{
       'gerçek mesaj alışverişi uygulanmadı','fiziksel güvenli silme','yedeklerden yayılım garantisi yoktur',
       "audience:presenceStatus==='invisible'?'nobody':'room_members'",'lastSeenShared:false',
       'typingIndicatorsEnabled:false','readReceiptsEnabled:false'])expect(panel).toContain(marker);
-    expect(panel).toContain("contentKind:'text'");
-    expect(panel).toContain("contentMime:'text/plain'");
+    expect(panel).toContain("contentKind==='location'?'application/vnd.ppt.location+text'");
+    expect(panel).toContain("contentKind==='text'?'text/plain'");
   });
 
   it('provides accessible bounded controls for compose, lifecycle, retry, presence and retention',()=>{
     for(const label of ['Yerel kasaya mühürle','Offline kuyruğa al','Yerel retry','Yerel olarak sil','Geri al',
-      'Presence kararını kaydet','Saklamayı güncelle','Metadata filtresini uygula'])expect(panel).toContain(label);
+      'Presence kararını kaydet','Saklamayı güncelle','Yetkili yerel aramayı uygula','Ana süreçte dosya seç ve şifrele',
+      'Yanıtla','Alıntıla','Konu dizisi'])expect(panel).toContain(label);
     expect(panel).toContain('maxLength={32_768}');
     expect(panel).toContain('aria-labelledby="communication-messaging-title"');
     expect(styles).toContain('.communication-messaging');

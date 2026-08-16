@@ -59,7 +59,7 @@
     "SQL_CALL": 79,
     "SQL_CONSTRUCTOR": 2,
     "SQL_IMPORT": 2,
-    "USE_CASE_COMPOSITION": 431
+    "USE_CASE_COMPOSITION": 432
   },
   "allowedSurfaceKeys": [
     "CRYPTO_GLOBAL|apps/desktop/src/main/preload.ts|randomUUID",
@@ -750,6 +750,7 @@
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|LoginWithWindowsHelloUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|LogoutUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|MaintainCommunicationFilePayloadVaultUseCase",
+    "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|MaintainCommunicationMessagePayloadVaultUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ManageAiMemoryUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ManageDataRightsRequestUseCase",
     "USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|ManagePrivacyIncidentUseCase",

@@ -207,6 +207,7 @@ import {
   UpdateCommunicationDeliveryUseCase,
   SetCommunicationPresenceUseCase,
   SetCommunicationRetentionPolicyUseCase,
+  MaintainCommunicationMessagePayloadVaultUseCase,
   GetCommunicationRealtimeCallingCenterUseCase,
   CreateCommunicationCallUseCase,
   RunCommunicationCallPreflightUseCase,
@@ -479,6 +480,7 @@ import type {
   CommunicationMessageContentView,
   CommunicationMessageView,
   CommunicationMessagingCenterView,
+  CommunicationMessagingMaintenanceView,
   CommunicationMessagingMutationReceiptView,
   CreateCommunicationMessageInput,
   EditCommunicationMessageInput,
@@ -1179,10 +1181,13 @@ const failClosedCommunicationMessagePayloads: CommunicationMessagePayloadPort = 
   open: (_row: Parameters<CommunicationMessagePayloadPort['open']>[0],
     correlationId: Parameters<CommunicationMessagePayloadPort['open']>[1]) => communicationPayloadFailure(correlationId),
   discard: (_reference: Parameters<CommunicationMessagePayloadPort['discard']>[0],
-    correlationId: Parameters<CommunicationMessagePayloadPort['discard']>[1]) => communicationPayloadFailure(correlationId)
+    correlationId: Parameters<CommunicationMessagePayloadPort['discard']>[1]) => communicationPayloadFailure(correlationId),
+  sweepOrphans: (input: Parameters<CommunicationMessagePayloadPort['sweepOrphans']>[0]) =>
+    communicationPayloadFailure(input.correlationId)
 });
 const assertCommunicationMessagePayloadPort = (value: CommunicationMessagePayloadPort): CommunicationMessagePayloadPort => {
-  if (!value || typeof value.seal !== 'function' || typeof value.open !== 'function' || typeof value.discard !== 'function') {
+  if (!value || typeof value.seal !== 'function' || typeof value.open !== 'function' || typeof value.discard !== 'function'
+    || typeof value.sweepOrphans !== 'function') {
     throw new PlatformPolicyEnforcementError('ENFORCEMENT_UNAVAILABLE',
       'Explicit communication message payload provider is incomplete');
   }
@@ -1687,6 +1692,7 @@ export class FamilyDataStore {
   readonly #updateCommunicationDeliveryUseCase:UpdateCommunicationDeliveryUseCase;
   readonly #setCommunicationPresenceUseCase:SetCommunicationPresenceUseCase;
   readonly #setCommunicationRetentionPolicyUseCase:SetCommunicationRetentionPolicyUseCase;
+  readonly #maintainCommunicationMessagePayloadVaultUseCase:MaintainCommunicationMessagePayloadVaultUseCase;
   readonly #getCommunicationFileSharingCenterUseCase:GetCommunicationFileSharingCenterUseCase;
   readonly #getCommunicationAuditArchiveSafeCenterUseCase:GetCommunicationAuditArchiveSafeCenterUseCase;
   readonly #getCommunicationFileSafePreviewUseCase:GetCommunicationFileSafePreviewUseCase;
@@ -3097,6 +3103,8 @@ export class FamilyDataStore {
     this.#updateCommunicationDeliveryUseCase=new UpdateCommunicationDeliveryUseCase(communicationMessagingUnitOfWork);
     this.#setCommunicationPresenceUseCase=new SetCommunicationPresenceUseCase(communicationMessagingUnitOfWork);
     this.#setCommunicationRetentionPolicyUseCase=new SetCommunicationRetentionPolicyUseCase(communicationMessagingUnitOfWork);
+    this.#maintainCommunicationMessagePayloadVaultUseCase=new MaintainCommunicationMessagePayloadVaultUseCase(
+      communicationMessagingQuery,communicationMessagePayloads);
     const communicationFilePayloads=options.communicationFilePayloads!==undefined
       ?assertCommunicationFilePayloadPort(options.communicationFilePayloads)
       :options.protectedSideArtifacts===undefined
@@ -6960,6 +6968,45 @@ export class FamilyDataStore {
     const result=await this.#setCommunicationRetentionPolicyUseCase.execute({
       context:this.#lifeApplicationContext('communication-retention-update'),command:input});
     if(!result.ok)throw new Error(`[${result.error.code}] ${result.error.message}`);return result.value;
+  }
+
+  /** Main-only scheduled maintenance; renderer code has no channel for this authority. */
+  public async maintainCommunicationMessagingLifecycle():Promise<CommunicationMessagingMaintenanceView>{
+    const center=await this.getCommunicationMessagingCenter();const nowMs=Date.parse(center.generatedAt);
+    let expiredMessagesDeleted=0;let expiredPresenceProfilesHidden=0;let failedOperations=0;
+    const retentionByRoom=new Map(center.retentionPolicies.map(policy=>[policy.roomId,policy] as const));
+    for(const message of center.messages){
+      const policy=retentionByRoom.get(message.roomId);
+      if(message.deleted||policy?.mode==='legal_hold'||policy?.mode==='permanent')continue;
+      const effectiveExpiresAt=policy&&['duration','auto_delete'].includes(policy.mode)&&policy.durationDays
+        ?new Date(Date.parse(message.createdAt)+policy.durationDays*86_400_000).toISOString()
+        :message.expiresAt;
+      if(!effectiveExpiresAt||Date.parse(effectiveExpiresAt)>nowMs)continue;
+      const digest=createHash('sha256').update(`communication-retention\0${message.id}\0${effectiveExpiresAt}`,'utf8').digest('hex');
+      try{
+        await this.setCommunicationMessageLifecycle({clientOperationId:`comm-retention-${digest.slice(0,48)}`,
+          expectedRevision:message.revision,messageId:message.id,action:'delete',
+          reason:'Süresi dolan yerel mesaj saklama kararı yürütüldü.'});
+        expiredMessagesDeleted+=1;
+      }catch{failedOperations+=1;}
+    }
+    if(center.presence.expiresAt&&Date.parse(center.presence.expiresAt)<=nowMs){
+      const digest=createHash('sha256').update(
+        `communication-presence-expiry\0${center.ownerPersonId}\0${center.presence.expiresAt}`,'utf8').digest('hex');
+      try{
+        await this.setCommunicationPresence({clientOperationId:`comm-presence-expiry-${digest.slice(0,40)}`,
+          expectedRevision:center.presence.revision,status:'offline',audience:'nobody',lastSeenShared:false,
+          typingIndicatorsEnabled:false,readReceiptsEnabled:false,emergencyReachabilityEnabled:false});
+        expiredPresenceProfilesHidden+=1;
+      }catch{failedOperations+=1;}
+    }
+    const swept=await this.#maintainCommunicationMessagePayloadVaultUseCase.execute(
+      this.#lifeApplicationContext('communication-message-payload-maintenance'));
+    if(!swept.ok)throw new Error(`[${swept.error.code}] ${swept.error.message}`);
+    return Object.freeze({expiredMessagesDeleted,expiredPresenceProfilesHidden,
+      scannedPayloadFiles:swept.value.scannedFiles,deletedOrphanPayloadFiles:swept.value.deletedFiles,
+      rejectedPayloadFiles:swept.value.rejectedFiles,failedOperations,completedAt:swept.value.completedAt,
+      physicalSecureEraseGuaranteed:false,backupPropagationGuaranteed:false,networkUsed:false,cloudUsed:false});
   }
 
   public async getCommunicationFileSharingCenter():Promise<CommunicationFileSharingRendererCenterView>{
