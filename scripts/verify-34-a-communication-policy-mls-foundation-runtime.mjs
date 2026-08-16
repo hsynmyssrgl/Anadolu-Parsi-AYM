@@ -52,9 +52,9 @@ const manualNotRun = Object.entries(scope.manualEvidence ?? {})
 
 const definitions = [
   ['exact six-file local Vitest exits successfully', vitest.status === 0 && vitest.signal === null],
-  ['local test result meets exact 6/29 ratchet', files === 6 && tests === 29
-    && scope.validation.targetedTestFileRatchet === 6 && scope.validation.targetedTestRatchet === 29
-    && inventory.validation.targetedTestFileRatchet === 6 && inventory.validation.targetedTestRatchet === 29],
+  ['local test result meets exact 6/37 ratchet', files === 6 && tests === 37
+    && scope.validation.targetedTestFileRatchet === 6 && scope.validation.targetedTestRatchet === 37
+    && inventory.validation.targetedTestFileRatchet === 6 && inventory.validation.targetedTestRatchet === 37],
   ['migration verifier passes exact migration 105 checksum', migration.status === 0 && migrationReport?.status === 'passed'
     && migrationReport?.checkCount === 9 && m105?.name === 'communication_policy_mls_foundation'
     && m105?.checksum === scope.validation.migrationSha256],
@@ -76,7 +76,10 @@ const definitions = [
   ['production MLS messages relay network and conformance truth remain closed', scope.truth.rfc9420ProviderConfigured === false
     && scope.truth.rfc9420ConformanceVerified === false && scope.truth.messageContentStoredOrProcessed === false
     && scope.truth.messageEventSignatureVerificationImplemented === false && scope.truth.relayDeliveryServiceImplemented === false
-    && scope.truth.networkUsedByCurrentImplementation === false],
+    && scope.truth.networkUsedByCurrentImplementation === false
+    && scope.truth.scopedResourceAuthorizationImplemented === false
+    && scope.truth.boundedMetadataStorageEnforced === true
+    && scope.truth.automaticRetentionRecoveryImplemented === false],
   ['manual evidence receipt and acceptance remain closed', manualNotRun && scope.manualEvidence.certificationClaimed === false
     && scope.validation.countsAsRequirementPass === false && inventory.validation.countsAsRequirementPass === false
     && scope.persistentReceiptStatus === 'NOT_RUN']
@@ -93,9 +96,9 @@ if (!noWrite) {
   await writeFile(resolve(root, 'artifacts/validation/34-A-communication-policy-mls-foundation-runtime.json'), `${JSON.stringify(report, null, 2)}\n`, 'utf8');
 }
 if (failures.length) {
-  console.error(`34-A runtime: FAIL (${failures.length}/${checks.length}; ${files}/6 files; ${tests}/29 tests).`);
+  console.error(`34-A runtime: FAIL (${failures.length}/${checks.length}; ${files}/6 files; ${tests}/37 tests).`);
   for (const item of failures) console.error(item.name);
   console.error(vitestText.slice(-4000));
   process.exit(1);
 }
-console.log(`34-A runtime: PASS (${checks.length}/${checks.length}; ${files}/6 files; ${tests}/29 tests; requirement PASS=false; write=${!noWrite}).`);
+console.log(`34-A runtime: PASS (${checks.length}/${checks.length}; ${files}/6 files; ${tests}/37 tests; requirement PASS=false; write=${!noWrite}).`);

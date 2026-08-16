@@ -37,8 +37,10 @@ class TestMlsProvider implements CommunicationMlsFoundationPort{
     providerAttestationSha256:sha({attestation:input.trustedDeviceId}),providerEvidenceVerified:true as const,createdAt:input.occurredAt});}
   createGroup(input:Parameters<CommunicationMlsFoundationPort['createGroup']>[0]){return ok(this.epoch(input.roomId,1,
     sha({group:input.roomId}),input.membershipDigestSha256,'room_created',input.occurredAt));}
-  advanceEpoch(input:Parameters<CommunicationMlsFoundationPort['advanceEpoch']>[0]){return ok(this.epoch(input.roomId,
-    input.currentEpoch+1,input.groupIdSha256,input.membershipDigestSha256,input.reason,input.occurredAt));}
+  advanceEpoch(input:Parameters<CommunicationMlsFoundationPort['advanceEpoch']>[0]){return ok({
+    ...this.epoch(input.roomId,input.currentEpoch+1,input.groupIdSha256,input.membershipDigestSha256,input.reason,input.occurredAt),
+    previousEpoch:input.currentEpoch,previousCommitSha256:input.previousCommitSha256,
+    previousConfirmedTranscriptHashSha256:input.previousConfirmedTranscriptHashSha256});}
   private epoch(roomId:string,epoch:number,groupIdSha256:string,membershipDigestSha256:string,
     reason:'room_created'|'member_added'|'member_removed'|'device_revoked_recovery',createdAt:string){return {roomId,epoch,
       cipherSuite:'MLS_128_DHKEMX25519_AES128GCM_SHA256_Ed25519' as const,groupIdSha256,

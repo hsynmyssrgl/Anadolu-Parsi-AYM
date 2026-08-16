@@ -40,18 +40,23 @@ const definitions = [
   ['registry plan and ledger remain open behind 33-P', registryItems.every((item) => item && item.status !== 'COMPLETE' && item.chain?.evidence === false)
     && plan.currentStep === '33-P' && ledger.activeMicroStep === '33-P'],
   ['domain fixes seven rooms history and fail-honest production truth', has(domain, ['COMMUNICATION_ROOM_TYPES', "'private_topic'",
+    'COMMUNICATION_SECURITY_STORAGE_LIMITS', 'deviceCredentialsPerOwner: 32', 'roomsPerOwner: 256', 'membershipsPerRoom: 128',
     'new_members_no_history', 'revokedDeviceRekeyWorkflowImplemented: true', 'automaticRoomRekeyOnCredentialRevocation: false',
-    'messageEventSignatureVerificationImplemented: false', 'relayDeliveryServiceImplemented: false', 'networkUsedByCurrentImplementation: false'])],
+    'messageEventSignatureVerificationImplemented: false', 'relayDeliveryServiceImplemented: false', 'networkUsedByCurrentImplementation: false',
+    'scopedResourceAuthorizationImplemented: false', 'automaticRetentionRecoveryImplemented: false'])],
   ['security requires canonical Ed25519 provider evidence and exact cipher suite', has(security, ['canonicalizeCommunicationMlsProviderEvidence',
     'verifyCommunicationMlsProviderEvidence', 'createPublicKey', 'verify(null,', 'MLS_128_DHKEMX25519_AES128GCM_SHA256_Ed25519',
+    'providerImplementation === evidence.providerImplementation', 'previousConfirmedTranscriptHashSha256', 'canonicalArray',
     'matchingKeys.length !== 1'])],
   ['application exposes exact nine governed use cases and content-free evidence', has(application, ['GetCommunicationSecurityCenterUseCase',
     'RegisterCommunicationDeviceCredentialUseCase', 'RevokeCommunicationDeviceCredentialUseCase', 'CreateCommunicationRoomUseCase',
     'AddCommunicationRoomMemberUseCase', 'RemoveCommunicationRoomMemberUseCase', 'RekeyCommunicationRoomAfterDeviceRevocationUseCase',
-    'SetCommunicationHistoryAccessUseCase', 'FreezeCommunicationRoomUseCase', 'scope.appendAudit', 'scope.enqueueEvent'])],
+    'SetCommunicationHistoryAccessUseCase', 'FreezeCommunicationRoomUseCase', 'ensureStorageCapacity', 'exactCommand',
+    'İptal edilmiş cihaz üyeliği yalnız açık kayıp-cihaz rekey akışıyla kaldırılabilir.', 'scope.appendAudit', 'scope.enqueueEvent'])],
   ['repository uses exact receipt owner device revision and immutable ledger bindings', has(repository, ['resolvePolicyResource',
     'communication_security_mutations', 'communication_device_credentials', 'communication_mls_epochs', 'communication_rooms',
-    'communication_room_memberships', 'assertPolicyAuthorizedRepositoryContext'])],
+    'communication_room_memberships', 'getStorageUsage(', 'COMMUNICATION_SECURITY_STORAGE_LIMITS',
+    'previous_confirmed_transcript_hash_sha256', 'assertPolicyAuthorizedRepositoryContext'])],
   ['desktop adapter and DataStore compose central Life PEP with fail-closed provider default', has(adapter, ['RepositoryBackedCommunicationSecurityUnitOfWork',
     'RepositoryBackedLifePolicyTransactionRunner', 'auditRepository.append', 'outboxRepository.enqueue'])
     && has(dataStore, ['communicationMlsFoundation?: CommunicationMlsFoundationPort', 'RFC 9420 MLS cihaz kimliği sağlayıcısı yapılandırılmadı.',
@@ -63,17 +68,23 @@ const definitions = [
     "channel.startsWith('communicationSecurity:')"])],
   ['renderer reuses system surface and states every cryptographic no-claim boundary', has(panel, ['CommunicationSecurityPanel',
     'Bu ekran mesaj göndermez ve anahtar yönetmez.', 'const providerReady=false;', 'Production RFC 9420 sağlayıcısı',
-    'gerçek ağ teslimi doğrulanmadı', '0</strong> gönderilmiş mesaj'])],
+    'gerçek ağ teslimi doğrulanmadı', 'Kapsamlı kaynak yetkilendirmesi henüz uygulanmadı',
+    'otomatik retention ve kapasite kurtarma yoktur', 'replacementDeviceCredentialId', '0</strong> gönderilmiş mesaj'])],
   ['provider conformance messages relay network and production guarantees stay false', scope.truth?.rfc9420ProviderConfigured === false
     && scope.truth?.rfc9420ConformanceVerified === false && scope.truth?.forwardSecrecyVerifiedInProduction === false
     && scope.truth?.postCompromiseSecurityVerifiedInProduction === false && scope.truth?.messageContentStoredOrProcessed === false
     && scope.truth?.messageEventSignatureVerificationImplemented === false && scope.truth?.relayDeliveryServiceImplemented === false
-    && scope.truth?.networkUsedByCurrentImplementation === false],
+    && scope.truth?.networkUsedByCurrentImplementation === false
+    && scope.truth?.scopedResourceAuthorizationImplemented === false
+    && scope.truth?.boundedMetadataStorageEnforced === true
+    && scope.truth?.automaticRetentionRecoveryImplemented === false
+    && scope.truth?.providerEpochContinuityBound === true
+    && scope.truth?.soleOwnerReplacementRecoveryImplemented === true],
   ['manual receipt and requirement acceptance remain closed', manualNotRun && scope.manualEvidence?.certificationClaimed === false
     && scope.persistentReceiptStatus === 'NOT_RUN' && scope.truth?.requirementsClosed === false
     && scope.truth?.countsAsRequirementPass === false && inventory.countsAsRequirementPass === false],
   ['local validation ratchets are exact but do not grant requirement PASS', scope.validation?.targetedTestFileRatchet === 6
-    && scope.validation?.targetedTestRatchet === 29 && scope.validation?.migrationVersion === 105
+    && scope.validation?.targetedTestRatchet === 37 && scope.validation?.migrationVersion === 105
     && scope.validation?.countsAsRequirementPass === false && inventory.validation?.countsAsRequirementPass === false]
 ];
 

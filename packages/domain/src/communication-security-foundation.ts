@@ -18,6 +18,20 @@ export type CommunicationDeviceCredentialStatus = 'active' | 'revoked';
 export type CommunicationHistoryAccessMode = 'new_members_no_history' | 'explicit_snapshot_grant';
 export type CommunicationMlsCipherSuite = 'MLS_128_DHKEMX25519_AES128GCM_SHA256_Ed25519';
 
+export const COMMUNICATION_SECURITY_STORAGE_LIMITS = Object.freeze({
+  deviceCredentialsPerOwner: 32,
+  roomsPerOwner: 256,
+  membershipsPerRoom: 128,
+  epochsPerRoom: 4_096,
+  mutationsPerOwner: 100_000
+} as const);
+
+export interface CommunicationSecurityCapacityView {
+  readonly current: number;
+  readonly limit: number;
+  readonly limitReached: boolean;
+}
+
 export interface CommunicationDeviceCredentialView {
   readonly id: string;
   readonly trustedDeviceId: string;
@@ -62,6 +76,10 @@ export interface CommunicationRoomView {
   readonly currentEpoch: number;
   readonly memberships: readonly CommunicationRoomMembershipView[];
   readonly currentEpochEvidence: CommunicationMlsEpochView;
+  readonly storageCapacity: Readonly<{
+    memberships: CommunicationSecurityCapacityView;
+    epochs: CommunicationSecurityCapacityView;
+  }>;
   readonly revision: number;
   readonly createdAt: IsoDateTime;
   readonly updatedAt: IsoDateTime;
@@ -90,6 +108,9 @@ export interface CommunicationSecurityTruthView {
   readonly relayContentBlindnessVerifiedInProduction: false;
   readonly realMessageExchangePerformed: false;
   readonly networkUsedByCurrentImplementation: false;
+  readonly scopedResourceAuthorizationImplemented: false;
+  readonly boundedMetadataStorageEnforced: true;
+  readonly automaticRetentionRecoveryImplemented: false;
 }
 
 export interface CommunicationSecurityCenterView {
@@ -98,6 +119,11 @@ export interface CommunicationSecurityCenterView {
   readonly ownerPersonId: string;
   readonly deviceCredentials: readonly CommunicationDeviceCredentialView[];
   readonly rooms: readonly CommunicationRoomView[];
+  readonly storageCapacity: Readonly<{
+    deviceCredentials: CommunicationSecurityCapacityView;
+    rooms: CommunicationSecurityCapacityView;
+    mutations: CommunicationSecurityCapacityView;
+  }>;
   readonly truth: CommunicationSecurityTruthView;
   readonly generatedAt: IsoDateTime;
 }
@@ -138,6 +164,9 @@ export interface VerifiedCommunicationMlsEpochInput {
   readonly providerEvidenceVerified: true;
   readonly createdAt: string;
   readonly reason: CommunicationMlsEpochReason;
+  readonly previousEpoch?: number;
+  readonly previousCommitSha256?: string;
+  readonly previousConfirmedTranscriptHashSha256?: string;
 }
 
 export interface RegisterCommunicationDeviceCredentialInput {
@@ -194,6 +223,7 @@ export interface RekeyCommunicationRoomAfterDeviceRevocationInput {
   readonly expectedRevision: number;
   readonly roomId: string;
   readonly revokedDeviceCredentialId: string;
+  readonly replacementDeviceCredentialId?: string;
   readonly confirmation: 'KAYIP CIHAZ SONRASI ODAYI YENIDEN ANAHTARLA';
   readonly reason: string;
 }
@@ -255,5 +285,8 @@ export const communicationSecurityTruth = Object.freeze({
   postCompromiseSecurityVerifiedInProduction: false as const,
   relayContentBlindnessVerifiedInProduction: false as const,
   realMessageExchangePerformed: false as const,
-  networkUsedByCurrentImplementation: false as const
+  networkUsedByCurrentImplementation: false as const,
+  scopedResourceAuthorizationImplemented: false as const,
+  boundedMetadataStorageEnforced: true as const,
+  automaticRetentionRecoveryImplemented: false as const
 });

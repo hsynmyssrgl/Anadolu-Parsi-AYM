@@ -10,6 +10,7 @@ import {
 import {
   communicationSecurityCenterId,
   communicationSecurityTruth,
+  COMMUNICATION_SECURITY_STORAGE_LIMITS,
   type CommunicationSecurityCenterView
 } from '@ppt/domain';
 import type { DomainEvent } from '@ppt/events';
@@ -76,7 +77,7 @@ export class RepositoryBackedCommunicationSecurityQueryPort implements Communica
           updatedAt: row.updatedAt,
           ...(row.revokedAt ? { revokedAt: row.revokedAt } : {})
         }))),
-        rooms: Object.freeze(snapshot.value.rooms.map(({ room, memberships, currentEpoch }) => Object.freeze({
+        rooms: Object.freeze(snapshot.value.rooms.map(({ room, memberships, currentEpoch, epochCount }) => Object.freeze({
           id: room.id,
           displayName: room.displayName,
           roomType: room.roomType,
@@ -104,10 +105,26 @@ export class RepositoryBackedCommunicationSecurityQueryPort implements Communica
             createdAt: currentEpoch.createdAt,
             reason: currentEpoch.reason
           }),
+          storageCapacity: Object.freeze({
+            memberships: Object.freeze({ current: memberships.length,
+              limit: COMMUNICATION_SECURITY_STORAGE_LIMITS.membershipsPerRoom,
+              limitReached: memberships.length >= COMMUNICATION_SECURITY_STORAGE_LIMITS.membershipsPerRoom }),
+            epochs: Object.freeze({ current: epochCount, limit: COMMUNICATION_SECURITY_STORAGE_LIMITS.epochsPerRoom,
+              limitReached: epochCount >= COMMUNICATION_SECURITY_STORAGE_LIMITS.epochsPerRoom })
+          }),
           revision: room.revision,
           createdAt: room.createdAt,
           updatedAt: room.updatedAt
         }))),
+        storageCapacity: Object.freeze({
+          deviceCredentials: Object.freeze({ current: snapshot.value.deviceCredentials.length,
+            limit: COMMUNICATION_SECURITY_STORAGE_LIMITS.deviceCredentialsPerOwner,
+            limitReached: snapshot.value.deviceCredentials.length >= COMMUNICATION_SECURITY_STORAGE_LIMITS.deviceCredentialsPerOwner }),
+          rooms: Object.freeze({ current: snapshot.value.rooms.length, limit: COMMUNICATION_SECURITY_STORAGE_LIMITS.roomsPerOwner,
+            limitReached: snapshot.value.rooms.length >= COMMUNICATION_SECURITY_STORAGE_LIMITS.roomsPerOwner }),
+          mutations: Object.freeze({ current: snapshot.value.mutationCount, limit: COMMUNICATION_SECURITY_STORAGE_LIMITS.mutationsPerOwner,
+            limitReached: snapshot.value.mutationCount >= COMMUNICATION_SECURITY_STORAGE_LIMITS.mutationsPerOwner })
+        }),
         truth: communicationSecurityTruth,
         generatedAt: occurredAt
       });
@@ -156,6 +173,10 @@ class RepositoryBackedCommunicationSecurityWriteScope implements CommunicationSe
   public findMutation(clientOperationId: string) {
     return this.dependencies.communicationSecurityRepository.findMutationByClientOperationId(
       this.repository, this.#key, clientOperationId);
+  }
+  public getStorageUsage(roomId?: string) {
+    return this.dependencies.communicationSecurityRepository.getStorageUsage(
+      this.repository, this.#key, roomId);
   }
   public insertMutation(row: Parameters<CommunicationSecurityWriteScope['insertMutation']>[0]) {
     return this.dependencies.communicationSecurityRepository.insertMutation(this.repository, row);

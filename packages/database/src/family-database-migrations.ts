@@ -15245,11 +15245,11 @@ CREATE TABLE communication_security_mutations (
   family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   resource_type TEXT NOT NULL CHECK(resource_type IN ('communication_device_credential','communication_room')),
-  resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 8 AND 256),
+  resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 8 AND 160),
   actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
   actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   mutation_kind TEXT NOT NULL CHECK(mutation_kind IN ('device_credential_register','device_credential_revoke','room_create','member_add','member_remove','history_policy_update','device_revocation_rekey','room_freeze')),
-  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 256),
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 160),
   request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
   expected_revision INTEGER NOT NULL CHECK(expected_revision>=0),
   revision INTEGER NOT NULL CHECK(revision=expected_revision+1),
@@ -15276,7 +15276,7 @@ CREATE INDEX idx_communication_security_mutations_owner
 ON communication_security_mutations(family_id,owner_person_id,occurred_at DESC,id);
 
 CREATE TABLE communication_device_credentials (
-  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 256),
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 160),
   family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
   owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
@@ -15309,7 +15309,7 @@ CREATE TABLE communication_mls_epochs (
   id TEXT PRIMARY KEY CHECK(length(id)=64 AND id NOT GLOB '*[^0-9a-f]*'),
   family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
-  room_id TEXT NOT NULL CHECK(length(trim(room_id)) BETWEEN 8 AND 256),
+  room_id TEXT NOT NULL CHECK(length(trim(room_id)) BETWEEN 8 AND 160),
   epoch INTEGER NOT NULL CHECK(epoch>=1),
   cipher_suite TEXT NOT NULL CHECK(cipher_suite='MLS_128_DHKEMX25519_AES128GCM_SHA256_Ed25519'),
   group_id_sha256 TEXT NOT NULL CHECK(length(group_id_sha256)=64 AND group_id_sha256 NOT GLOB '*[^0-9a-f]*'),
@@ -15325,25 +15325,33 @@ CREATE TABLE communication_mls_epochs (
   provider_evidence_verified INTEGER NOT NULL CHECK(provider_evidence_verified=1),
   active_device_credential_count INTEGER NOT NULL CHECK(active_device_credential_count BETWEEN 1 AND 128),
   reason TEXT NOT NULL CHECK(reason IN ('room_created','member_added','member_removed','device_revoked_recovery')),
+  previous_epoch INTEGER CHECK(previous_epoch IS NULL OR previous_epoch>=1),
+  previous_commit_sha256 TEXT CHECK(previous_commit_sha256 IS NULL OR (length(previous_commit_sha256)=64 AND previous_commit_sha256 NOT GLOB '*[^0-9a-f]*')),
+  previous_confirmed_transcript_hash_sha256 TEXT CHECK(previous_confirmed_transcript_hash_sha256 IS NULL
+    OR (length(previous_confirmed_transcript_hash_sha256)=64 AND previous_confirmed_transcript_hash_sha256 NOT GLOB '*[^0-9a-f]*')),
   mutation_id TEXT NOT NULL UNIQUE REFERENCES communication_security_mutations(id) ON DELETE RESTRICT,
   created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
   policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
   UNIQUE(family_id,owner_person_id,room_id,epoch),
-  UNIQUE(family_id,owner_person_id,room_id,commit_sha256)
+  UNIQUE(family_id,owner_person_id,room_id,commit_sha256),
+  CHECK((reason='room_created' AND epoch=1 AND previous_epoch IS NULL AND previous_commit_sha256 IS NULL
+      AND previous_confirmed_transcript_hash_sha256 IS NULL)
+    OR (reason<>'room_created' AND previous_epoch=epoch-1 AND previous_commit_sha256 IS NOT NULL
+      AND previous_confirmed_transcript_hash_sha256 IS NOT NULL))
 ) STRICT;
 
 CREATE INDEX idx_communication_mls_epochs_room
 ON communication_mls_epochs(family_id,owner_person_id,room_id,epoch DESC);
 
 CREATE TABLE communication_rooms (
-  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 256),
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 160),
   family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
   owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   display_name TEXT NOT NULL CHECK(length(trim(display_name)) BETWEEN 2 AND 160),
   room_type TEXT NOT NULL CHECK(room_type IN ('direct','family','household','family_branch','event','care','private_topic')),
   scope_resource_type TEXT CHECK(scope_resource_type IS NULL OR scope_resource_type IN ('family','household','family_branch','event','care_context')),
-  scope_resource_id TEXT CHECK(scope_resource_id IS NULL OR length(trim(scope_resource_id)) BETWEEN 2 AND 256),
+  scope_resource_id TEXT CHECK(scope_resource_id IS NULL OR length(trim(scope_resource_id)) BETWEEN 2 AND 160),
   masked_room_ref_sha256 TEXT NOT NULL UNIQUE CHECK(length(masked_room_ref_sha256)=64 AND masked_room_ref_sha256 NOT GLOB '*[^0-9a-f]*'),
   provider_group_id_sha256 TEXT NOT NULL CHECK(length(provider_group_id_sha256)=64 AND provider_group_id_sha256 NOT GLOB '*[^0-9a-f]*'),
   status TEXT NOT NULL CHECK(status IN ('active','frozen','closed')),
@@ -15357,7 +15365,7 @@ CREATE TABLE communication_rooms (
   updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
   policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
   UNIQUE(family_id,owner_person_id,id),
-  CHECK((scope_resource_type IS NULL AND scope_resource_id IS NULL) OR (scope_resource_type IS NOT NULL AND scope_resource_id IS NOT NULL)),
+  CHECK(scope_resource_type IS NULL AND scope_resource_id IS NULL),
   CHECK(updated_at>=created_at)
 ) STRICT;
 
@@ -15365,7 +15373,7 @@ CREATE INDEX idx_communication_rooms_owner
 ON communication_rooms(family_id,owner_person_id,status,updated_at DESC,id);
 
 CREATE TABLE communication_room_memberships (
-  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 256),
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 8 AND 160),
   family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   room_id TEXT NOT NULL REFERENCES communication_rooms(id) ON DELETE RESTRICT,
@@ -15392,7 +15400,9 @@ ON communication_room_memberships(family_id,room_id,status,member_person_id,id);
 
 CREATE TRIGGER trg_34a_communication_mutation_insert
 BEFORE INSERT ON communication_security_mutations
-WHEN NOT EXISTS(
+WHEN (SELECT COUNT(*) FROM communication_security_mutations item
+      WHERE item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id)>=100000
+  OR NOT EXISTS(
   SELECT 1 FROM accounts account
   JOIN people actor ON actor.id=NEW.actor_person_id AND actor.family_id=NEW.family_id AND actor.status='active'
   JOIN people owner ON owner.id=NEW.owner_person_id AND owner.family_id=NEW.family_id AND owner.status='active'
@@ -15421,7 +15431,9 @@ BEGIN SELECT RAISE(ABORT,'34-A mutation requires exact owner-bound durable PEP r
 
 CREATE TRIGGER trg_34a_device_credential_insert
 BEFORE INSERT ON communication_device_credentials
-WHEN NOT EXISTS(
+WHEN (SELECT COUNT(*) FROM communication_device_credentials item
+      WHERE item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id)>=32
+  OR NOT EXISTS(
   SELECT 1 FROM communication_security_mutations mutation
   JOIN trusted_devices device ON device.id=NEW.trusted_device_id
   WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='communication_device_credential'
@@ -15457,7 +15469,9 @@ BEGIN SELECT RAISE(ABORT,'34-A device credential revocation requires exact immut
 
 CREATE TRIGGER trg_34a_mls_epoch_insert
 BEFORE INSERT ON communication_mls_epochs
-WHEN NOT EXISTS(
+WHEN (SELECT COUNT(*) FROM communication_mls_epochs item WHERE item.family_id=NEW.family_id
+      AND item.owner_person_id=NEW.owner_person_id AND item.room_id=NEW.room_id)>=4096
+  OR NOT EXISTS(
   SELECT 1 FROM communication_security_mutations mutation
   WHERE mutation.id=NEW.mutation_id AND mutation.resource_type='communication_room' AND mutation.resource_id=NEW.room_id
     AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
@@ -15468,19 +15482,33 @@ WHEN NOT EXISTS(
           AND NOT EXISTS(SELECT 1 FROM communication_rooms room WHERE room.id=NEW.room_id))
       OR (mutation.mutation_kind='member_add' AND NEW.reason='member_added'
           AND EXISTS(SELECT 1 FROM communication_rooms room WHERE room.id=NEW.room_id AND room.current_epoch=NEW.epoch-1
-            AND room.provider_group_id_sha256=NEW.group_id_sha256))
+            AND room.provider_group_id_sha256=NEW.group_id_sha256
+            AND EXISTS(SELECT 1 FROM communication_mls_epochs previous WHERE previous.id=room.current_epoch_id
+              AND previous.epoch=NEW.previous_epoch AND previous.commit_sha256=NEW.previous_commit_sha256
+              AND previous.confirmed_transcript_hash_sha256=NEW.previous_confirmed_transcript_hash_sha256
+              AND previous.provider_id=NEW.provider_id AND previous.provider_implementation=NEW.provider_implementation)))
       OR (mutation.mutation_kind='member_remove' AND NEW.reason='member_removed'
           AND EXISTS(SELECT 1 FROM communication_rooms room WHERE room.id=NEW.room_id AND room.current_epoch=NEW.epoch-1
-            AND room.provider_group_id_sha256=NEW.group_id_sha256))
+            AND room.provider_group_id_sha256=NEW.group_id_sha256
+            AND EXISTS(SELECT 1 FROM communication_mls_epochs previous WHERE previous.id=room.current_epoch_id
+              AND previous.epoch=NEW.previous_epoch AND previous.commit_sha256=NEW.previous_commit_sha256
+              AND previous.confirmed_transcript_hash_sha256=NEW.previous_confirmed_transcript_hash_sha256
+              AND previous.provider_id=NEW.provider_id AND previous.provider_implementation=NEW.provider_implementation)))
       OR (mutation.mutation_kind='device_revocation_rekey' AND NEW.reason='device_revoked_recovery'
           AND EXISTS(SELECT 1 FROM communication_rooms room WHERE room.id=NEW.room_id AND room.current_epoch=NEW.epoch-1
-            AND room.provider_group_id_sha256=NEW.group_id_sha256)))
+            AND room.provider_group_id_sha256=NEW.group_id_sha256
+            AND EXISTS(SELECT 1 FROM communication_mls_epochs previous WHERE previous.id=room.current_epoch_id
+              AND previous.epoch=NEW.previous_epoch AND previous.commit_sha256=NEW.previous_commit_sha256
+              AND previous.confirmed_transcript_hash_sha256=NEW.previous_confirmed_transcript_hash_sha256
+              AND previous.provider_id=NEW.provider_id AND previous.provider_implementation=NEW.provider_implementation))))
 )
 BEGIN SELECT RAISE(ABORT,'34-A MLS epoch requires verified monotonic provider evidence and exact mutation'); END;
 
 CREATE TRIGGER trg_34a_room_insert
 BEFORE INSERT ON communication_rooms
-WHEN NOT EXISTS(
+WHEN (SELECT COUNT(*) FROM communication_rooms item
+      WHERE item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id)>=256
+  OR NOT EXISTS(
   SELECT 1 FROM communication_security_mutations mutation
   JOIN communication_mls_epochs epoch ON epoch.id=NEW.current_epoch_id
   WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='communication_room' AND mutation.resource_id=NEW.id
@@ -15525,18 +15553,26 @@ BEGIN SELECT RAISE(ABORT,'34-A room update requires exact epoch, history or fail
 
 CREATE TRIGGER trg_34a_membership_insert
 BEFORE INSERT ON communication_room_memberships
-WHEN NOT EXISTS(
+WHEN (SELECT COUNT(*) FROM communication_room_memberships item WHERE item.family_id=NEW.family_id
+      AND item.owner_person_id=NEW.owner_person_id AND item.room_id=NEW.room_id)>=128
+  OR NOT EXISTS(
   SELECT 1 FROM communication_security_mutations mutation
   JOIN communication_rooms room ON room.id=NEW.room_id
   JOIN communication_device_credentials credential ON credential.id=NEW.device_credential_id
   WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='communication_room' AND mutation.resource_id=NEW.room_id
-    AND mutation.mutation_kind IN ('room_create','member_add') AND mutation.family_id=NEW.family_id
+    AND mutation.mutation_kind IN ('room_create','member_add','device_revocation_rekey') AND mutation.family_id=NEW.family_id
     AND mutation.owner_person_id=NEW.owner_person_id AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
     AND room.family_id=NEW.family_id AND room.owner_person_id=NEW.owner_person_id AND room.current_epoch=NEW.joined_at_epoch
     AND credential.family_id=NEW.family_id AND credential.owner_person_id=NEW.member_person_id AND credential.status='active'
     AND NEW.status='active' AND NEW.history_visible_from_epoch=NEW.joined_at_epoch AND NEW.removed_at_epoch IS NULL
     AND ((mutation.mutation_kind='room_create' AND NEW.role='owner' AND NEW.member_person_id=NEW.owner_person_id)
-      OR (mutation.mutation_kind='member_add' AND NEW.role IN ('administrator','member')))
+      OR (mutation.mutation_kind='member_add' AND NEW.role IN ('administrator','member'))
+      OR (mutation.mutation_kind='device_revocation_rekey' AND EXISTS(
+        SELECT 1 FROM communication_room_memberships removed
+        WHERE removed.room_id=NEW.room_id AND removed.family_id=NEW.family_id
+          AND removed.owner_person_id=NEW.owner_person_id AND removed.member_person_id=NEW.member_person_id
+          AND removed.role=NEW.role AND removed.status='removed' AND removed.last_mutation_id=mutation.id
+          AND removed.removed_at_epoch=room.current_epoch AND removed.device_credential_id<>NEW.device_credential_id)))
 )
 BEGIN SELECT RAISE(ABORT,'34-A membership requires active credential and no pre-join history'); END;
 
@@ -15544,19 +15580,33 @@ CREATE TRIGGER trg_34a_membership_update
 BEFORE UPDATE ON communication_room_memberships
 WHEN NEW.id IS NOT OLD.id OR NEW.family_id IS NOT OLD.family_id OR NEW.owner_person_id IS NOT OLD.owner_person_id
   OR NEW.room_id IS NOT OLD.room_id OR NEW.member_person_id IS NOT OLD.member_person_id
-  OR NEW.device_credential_id IS NOT OLD.device_credential_id OR NEW.role IS NOT OLD.role
-  OR NEW.joined_at_epoch IS NOT OLD.joined_at_epoch OR NEW.history_visible_from_epoch IS NOT OLD.history_visible_from_epoch
-  OR NEW.created_at IS NOT OLD.created_at OR NEW.revision<>OLD.revision+1 OR OLD.status<>'active' OR NEW.status<>'removed'
+  OR NEW.device_credential_id IS NOT OLD.device_credential_id OR NEW.created_at IS NOT OLD.created_at
+  OR NEW.revision<>OLD.revision+1
   OR NOT EXISTS(
     SELECT 1 FROM communication_security_mutations mutation
     JOIN communication_rooms room ON room.id=NEW.room_id
+    JOIN communication_device_credentials credential ON credential.id=NEW.device_credential_id
     WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='communication_room' AND mutation.resource_id=NEW.room_id
-      AND mutation.mutation_kind IN ('member_remove','device_revocation_rekey')
       AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
       AND mutation.policy_receipt_hash=NEW.policy_receipt_hash AND mutation.occurred_at=NEW.updated_at
-      AND room.current_epoch=NEW.removed_at_epoch
+      AND credential.family_id=NEW.family_id AND credential.owner_person_id=NEW.member_person_id
+      AND ((mutation.mutation_kind IN ('member_add','device_revocation_rekey') AND OLD.status='removed' AND NEW.status='active'
+          AND credential.status='active' AND NEW.removed_at_epoch IS NULL
+          AND NEW.joined_at_epoch=room.current_epoch AND NEW.history_visible_from_epoch=NEW.joined_at_epoch
+          AND ((NEW.role='owner' AND NEW.member_person_id=NEW.owner_person_id)
+            OR NEW.role IN ('administrator','member'))
+          AND (mutation.mutation_kind='member_add' OR EXISTS(
+            SELECT 1 FROM communication_room_memberships removed
+            WHERE removed.room_id=NEW.room_id AND removed.family_id=NEW.family_id
+              AND removed.owner_person_id=NEW.owner_person_id AND removed.member_person_id=NEW.member_person_id
+              AND removed.role=NEW.role AND removed.status='removed' AND removed.last_mutation_id=mutation.id
+              AND removed.removed_at_epoch=room.current_epoch AND removed.device_credential_id<>NEW.device_credential_id)))
+        OR (mutation.mutation_kind IN ('member_remove','device_revocation_rekey')
+          AND OLD.status='active' AND NEW.status='removed' AND NEW.removed_at_epoch=room.current_epoch
+          AND NEW.role=OLD.role AND NEW.joined_at_epoch=OLD.joined_at_epoch
+          AND NEW.history_visible_from_epoch=OLD.history_visible_from_epoch))
   )
-BEGIN SELECT RAISE(ABORT,'34-A membership removal requires exact room rekey mutation'); END;
+BEGIN SELECT RAISE(ABORT,'34-A membership transition requires exact room epoch mutation'); END;
 
 CREATE TRIGGER trg_34a_communication_mutation_update BEFORE UPDATE ON communication_security_mutations
 BEGIN SELECT RAISE(ABORT,'34-A communication mutation ledger is immutable'); END;

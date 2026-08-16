@@ -5,7 +5,7 @@
   "status": "PASS",
   "governanceState": "PLANNED",
   "countsAsRequirementPass": false,
-  "migration105Sha256": "3c02d8f0ac6e2b5bf4d6a05bfc73e82fbd14d6144b0c3ef93a49786e45b8b7d7",
+  "migration105Sha256": "7756e6e14267e84eb3c7643b4da3534178bf706a2ed551af6f9068451ecfb4f8",
   "checkCount": 14,
   "passed": 14,
   "failed": 0,
@@ -51,7 +51,7 @@
       "status": "PASS"
     },
     {
-      "name": "tests cover tamper trust window replay rollback foreign owner revoked device history and no-claim UI",
+      "name": "tests cover canonical attacks continuity capacity recovery replay rollback owner and no-claim UI",
       "status": "PASS"
     },
     {
@@ -67,5 +67,5 @@
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-16T08:40:06.179Z"
+  "generatedAt": "2026-08-16T13:32:45.086Z"
 }

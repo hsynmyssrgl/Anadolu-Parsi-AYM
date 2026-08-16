@@ -6,13 +6,13 @@
   "governanceState": "PLANNED",
   "countsAsRequirementPass": false,
   "targetedTestFilesPassed": 6,
-  "targetedTestsPassed": 29,
-  "migration105Sha256": "3c02d8f0ac6e2b5bf4d6a05bfc73e82fbd14d6144b0c3ef93a49786e45b8b7d7",
+  "targetedTestsPassed": 37,
+  "migration105Sha256": "7756e6e14267e84eb3c7643b4da3534178bf706a2ed551af6f9068451ecfb4f8",
   "ppk015": {
     "status": "PASS",
     "productionSourceZones": 18,
     "scannedFiles": 555,
-    "sourceInventorySha256": "a7a93a941f9614c3833cd0b2774a8bb738ea3501284e00cd370891eed2d1fdc8",
+    "sourceInventorySha256": "dd1bb1f82808dd42e3182773b2ea92b759cef4c5473543ca2d804f30e6079e59",
     "selfTestAssertions": 7,
     "authorizedExternalEgressAdapters": 2,
     "authorizedEgressPurposeCount": 3,
@@ -76,7 +76,7 @@
       "status": "PASS"
     },
     {
-      "name": "local test result meets exact 6/29 ratchet",
+      "name": "local test result meets exact 6/37 ratchet",
       "status": "PASS"
     },
     {
@@ -116,5 +116,5 @@
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-16T06:02:40.682Z"
+  "generatedAt": "2026-08-16T13:33:28.593Z"
 }

@@ -107,6 +107,9 @@ export interface CommunicationMlsEpochRow {
   readonly providerEvidenceVerified: true;
   readonly activeDeviceCredentialCount: number;
   readonly reason: CommunicationMlsEpochReason;
+  readonly previousEpoch?: number;
+  readonly previousCommitSha256?: string;
+  readonly previousConfirmedTranscriptHashSha256?: string;
   readonly mutationId: string;
   readonly createdAt: IsoDateTime;
 }
@@ -132,14 +135,29 @@ export interface CommunicationRoomSnapshotRow {
   readonly room: CommunicationRoomRow;
   readonly memberships: readonly CommunicationRoomMembershipRow[];
   readonly currentEpoch: CommunicationMlsEpochRow;
+  readonly epochCount: number;
 }
 
 export interface CommunicationSecurityCenterSnapshotRow {
   readonly deviceCredentials: readonly CommunicationDeviceCredentialRow[];
   readonly rooms: readonly CommunicationRoomSnapshotRow[];
+  readonly mutationCount: number;
+}
+
+export interface CommunicationSecurityStorageUsageRow {
+  readonly deviceCredentialCount: number;
+  readonly roomCount: number;
+  readonly mutationCount: number;
+  readonly membershipCount: number;
+  readonly epochCount: number;
 }
 
 export interface CommunicationSecurityRepositoryPort {
+  getStorageUsage(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    key: CommunicationSecurityCenterKey,
+    roomId?: string
+  ): RepositoryResult<CommunicationSecurityStorageUsageRow>;
   loadCenter(
     context: PolicyAuthorizedRepositoryExecutionContext,
     key: CommunicationSecurityCenterKey

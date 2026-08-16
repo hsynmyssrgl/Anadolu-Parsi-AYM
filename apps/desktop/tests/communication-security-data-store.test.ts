@@ -76,19 +76,28 @@ class TestMlsProvider implements CommunicationMlsFoundationPort {
   public advanceEpoch(input: Parameters<CommunicationMlsFoundationPort['advanceEpoch']>[0]) {
     this.advanceCalls += 1;
     return ok(this.epoch(input.roomId, input.currentEpoch + 1, input.groupIdSha256,
-      input.membershipDigestSha256, input.reason, input.occurredAt));
+      input.membershipDigestSha256, input.reason, input.occurredAt, {
+        previousEpoch: input.currentEpoch, previousCommitSha256: input.previousCommitSha256,
+        previousConfirmedTranscriptHashSha256: input.previousConfirmedTranscriptHashSha256,
+        providerId: input.providerId, providerImplementation: input.providerImplementation
+      }));
   }
   private epoch(roomId: string, epoch: number, groupIdSha256: string, membershipDigestSha256: string,
-    reason: 'room_created'|'member_added'|'member_removed'|'device_revoked_recovery', createdAt: string) {
+    reason: 'room_created'|'member_added'|'member_removed'|'device_revoked_recovery', createdAt: string,
+    previous?: Readonly<{previousEpoch:number;previousCommitSha256:string;previousConfirmedTranscriptHashSha256:string;
+      providerId:string;providerImplementation:string}>) {
     return {
       roomId, epoch, cipherSuite: 'MLS_128_DHKEMX25519_AES128GCM_SHA256_Ed25519' as const,
       groupIdSha256, commitSha256: sha({ roomId, epoch, reason, kind: 'commit' }),
       confirmedTranscriptHashSha256: sha({ roomId, epoch, reason, kind: 'transcript' }),
       groupContextSha256: sha({ roomId, epoch, reason, kind: 'context' }), membershipDigestSha256,
       sealedStateReference: `mls-vault:room:${roomId}:epoch:${epoch}`,
-      providerId: 'test-rfc9420-provider', providerImplementation: 'test-rfc9420-adapter',
+      providerId: previous?.providerId??'test-rfc9420-provider',
+      providerImplementation: previous?.providerImplementation??'test-rfc9420-adapter',
       providerAttestationSha256: sha({ roomId, epoch, reason, kind: 'attestation' }),
-      providerEvidenceVerified: true as const, createdAt, reason
+      providerEvidenceVerified: true as const, createdAt, reason,
+      ...(previous?{previousEpoch:previous.previousEpoch,previousCommitSha256:previous.previousCommitSha256,
+        previousConfirmedTranscriptHashSha256:previous.previousConfirmedTranscriptHashSha256}:{})
     };
   }
 }
@@ -168,6 +177,12 @@ describe('34-A communication security DataStore integration', () => {
     expect(await store.registerCommunicationDeviceCredential({
       clientOperationId: 'register-current-device', expectedRevision: 0
     })).toMatchObject({ replayed: true, resourceId: registered.resourceId });
+    await expect(store.createCommunicationRoom({
+      clientOperationId: 'reject-scoped-room', expectedRevision: 0,
+      ownerDeviceCredentialId: registered.resourceId, roomType: 'family', displayName: 'Kapsamlı oda',
+      scopeResourceType: 'family', scopeResourceId: 'family-resource-34-a'
+    })).rejects.toThrow(/geçersiz/u);
+    expect(provider.createCalls).toBe(0);
     const roomTypes = ['direct','family','household','family_branch','event','care','private_topic'] as const;
     for (const [index, roomType] of roomTypes.entries()) {
       const result = await store.createCommunicationRoom({
@@ -181,7 +196,14 @@ describe('34-A communication security DataStore integration', () => {
     expect(center.rooms.map((room) => room.roomType).sort()).toEqual([...roomTypes].sort());
     expect(center.rooms.every((room) => room.historyAccessMode === 'new_members_no_history'
       && room.currentEpochEvidence.providerEvidenceVerified
-      && room.currentEpochEvidence.sealedProviderStateStored)).toBe(true);
+      && room.currentEpochEvidence.sealedProviderStateStored
+      && room.storageCapacity.memberships.current === 1
+      && room.storageCapacity.epochs.current === 1)).toBe(true);
+    expect(center.storageCapacity).toEqual({
+      deviceCredentials: { current: 1, limit: 32, limitReached: false },
+      rooms: { current: 7, limit: 256, limitReached: false },
+      mutations: { current: 8, limit: 100000, limitReached: false }
+    });
     expect(center.truth).toMatchObject({
       rfc9420ProviderConfigured: false,
       rfc9420ConformanceVerified: false,
@@ -190,7 +212,10 @@ describe('34-A communication security DataStore integration', () => {
       automaticRoomRekeyOnCredentialRevocation: false,
       messageEventSignatureVerificationImplemented: false,
       relayDeliveryServiceImplemented: false,
-      networkUsedByCurrentImplementation: false
+      networkUsedByCurrentImplementation: false,
+      scopedResourceAuthorizationImplemented: false,
+      boundedMetadataStorageEnforced: true,
+      automaticRetentionRecoveryImplemented: false
     });
     const serialized = JSON.stringify(center);
     for (const forbidden of [

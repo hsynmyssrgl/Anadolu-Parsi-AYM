@@ -48,11 +48,16 @@ export function CommunicationSecurityPanel(){
   const removeMember=(room:CommunicationRoomView,membershipId:string)=>window.pardus&&mutate(
     `remove:${room.id}:${room.revision}:${membershipId}`,clientOperationId=>window.pardus!.removeCommunicationRoomMember({
       clientOperationId,expectedRevision:room.revision,roomId:room.id,membershipId,reason:'Kullanıcı oda üyeliğini kaldırdı.'}));
-  const rekeyRoom=(room:CommunicationRoomView,deviceCredentialId:string)=>window.pardus&&mutate(
+  const rekeyRoom=(room:CommunicationRoomView,deviceCredentialId:string,memberPersonId:string)=>{
+    const replacement=memberPersonId===center?.ownerPersonId
+      ?activeCredentials.find(item=>item.id!==deviceCredentialId):undefined;
+    return window.pardus&&mutate(
     `rekey:${room.id}:${room.revision}:${deviceCredentialId}`,clientOperationId=>
       window.pardus!.rekeyCommunicationRoomAfterDeviceRevocation({clientOperationId,expectedRevision:room.revision,
         roomId:room.id,revokedDeviceCredentialId:deviceCredentialId,
+        ...(replacement?{replacementDeviceCredentialId:replacement.id}:{}),
         confirmation:'KAYIP CIHAZ SONRASI ODAYI YENIDEN ANAHTARLA',reason:'İptal edilmiş cihaz sonrası oda dönemi yenileniyor.'}));
+  };
   const setHistory=(room:CommunicationRoomView)=>window.pardus&&mutate(`history:${room.id}:${room.revision}`,
     clientOperationId=>window.pardus!.setCommunicationHistoryAccess({clientOperationId,expectedRevision:room.revision,
       roomId:room.id,historyAccessMode:room.historyAccessMode==='new_members_no_history'
@@ -67,13 +72,19 @@ export function CommunicationSecurityPanel(){
     <div className="communication-security-truth" role="note"><strong>Bu ekran mesaj göndermez ve anahtar yönetmez.</strong>
       <span>Yalnız merkezî politika receipt’iyle bağlı oda, üyelik, cihaz kimliği ve şifreli sağlayıcı durumuna ait güvenli metadata gösterilir.</span>
       <span>Production RFC 9420 sağlayıcısı, ileri gizlilik, saldırı sonrası güvenlik, relay içerik körlüğü, mesaj imzası ve gerçek ağ teslimi doğrulanmadı.</span>
-      <span>Yeni üyeler katılım öncesi geçmişi varsayılan göremez; explicit snapshot kararı bu foundation içinde içerik paylaşmaz.</span></div>
+      <span>Yeni üyeler katılım öncesi geçmişi varsayılan göremez; explicit snapshot kararı bu foundation içinde içerik paylaşmaz.</span>
+      <span>Kapsamlı kaynak yetkilendirmesi henüz uygulanmadı; kapsam bağlı oda oluşturma reddedilir.</span>
+      <span>Metadata kotaları fail-closed uygulanır; otomatik retention ve kapasite kurtarma yoktur.</span></div>
     {error&&<p className="status-message danger">{error}</p>}
     {!center?<p>İletişim güvenlik merkezi yükleniyor…</p>:<>
       <div className="communication-security-summary"><span><strong>{center.deviceCredentials.length}</strong> cihaz kimliği</span>
-        <span><strong>{center.rooms.length}</strong> yerel oda kaydı</span><span><strong>0</strong> gönderilmiş mesaj</span></div>
+        <span><strong>{center.rooms.length}</strong> yerel oda kaydı</span><span><strong>0</strong> gönderilmiş mesaj</span>
+        <span>Cihaz {center.storageCapacity.deviceCredentials.current}/{center.storageCapacity.deviceCredentials.limit}</span>
+        <span>Oda {center.storageCapacity.rooms.current}/{center.storageCapacity.rooms.limit}</span>
+        <span>İşlem {center.storageCapacity.mutations.current}/{center.storageCapacity.mutations.limit}</span></div>
       <div className="communication-security-actions">
-        <button type="button" disabled={Boolean(busy)||!providerReady} onClick={()=>void registerDevice()}>Bu cihaz için MLS kimliği oluştur</button>
+        <button type="button" disabled={Boolean(busy)||!providerReady||center.storageCapacity.deviceCredentials.limitReached
+          ||center.storageCapacity.mutations.limitReached} onClick={()=>void registerDevice()}>Bu cihaz için MLS kimliği oluştur</button>
         <small>Production MLS sağlayıcısı yapılandırılmadığı için kriptografik yazmalar fail-closed kapalıdır.</small>
       </div>
       <div className="communication-security-create" aria-label="İletişim odası oluşturma">
@@ -82,7 +93,8 @@ export function CommunicationSecurityPanel(){
           {Object.entries(roomLabels).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select>
         <select aria-label="Oda sahibi cihaz kimliği" value={ownerCredentialId} onChange={event=>setOwnerCredentialId(event.target.value)}>
           <option value="">Cihaz kimliği seçin</option>{activeCredentials.map(item=><option key={item.id} value={item.id}>{item.id}</option>)}</select>
-        <button type="button" disabled={Boolean(busy)||!providerReady||!roomName.trim()||!ownerCredentialId}
+        <button type="button" disabled={Boolean(busy)||!providerReady||!roomName.trim()||!ownerCredentialId
+          ||center.storageCapacity.rooms.limitReached||center.storageCapacity.mutations.limitReached}
           onClick={()=>void createRoom()}>Oda temelini oluştur</button>
       </div>
       <div className="communication-security-devices">{center.deviceCredentials.map(device=>{
@@ -90,24 +102,32 @@ export function CommunicationSecurityPanel(){
           member.status==='active'&&member.deviceCredentialId===device.id));
         return <article key={device.id}><strong>{device.trustedDeviceId}</strong><span>{device.status==='active'?'Etkin':'İptal edildi'}</span>
           <small>Sağlayıcı kanıtı doğrulandı; key package uygulama veritabanında tutulmaz.</small>
-          <button type="button" disabled={Boolean(busy)||device.status!=='active'||(used&&!providerReady)}
+          <button type="button" disabled={Boolean(busy)||device.status!=='active'||center.storageCapacity.mutations.limitReached
+            ||(used&&!providerReady)}
             onClick={()=>void revokeDevice(device)}>Cihaz kimliğini iptal et</button></article>;})}</div>
       {center.rooms.map(room=><article className="communication-security-room" key={room.id}>
         <div><strong>{room.displayName}</strong><small>{roomLabels[room.roomType]} · dönem {room.currentEpoch} · {room.status}</small></div>
         <p>{room.historyAccessMode==='new_members_no_history'?'Yeni üyeler geçmişi göremez.':'Geçmiş için ayrı snapshot kararı seçili; içerik aktarımı yok.'}</p>
+        <small>Üyelik {room.storageCapacity.memberships.current}/{room.storageCapacity.memberships.limit} · dönem kanıtı {room.storageCapacity.epochs.current}/{room.storageCapacity.epochs.limit}</small>
         <ul>{room.memberships.map(member=><li key={member.id}><span>{member.memberPersonId} · {member.role} · dönem {member.joinedAtEpoch}</span>
-          {member.role!=='owner'&&member.status==='active'&&<><button type="button" disabled={Boolean(busy)||!providerReady}
-            onClick={()=>void removeMember(room,member.id)}>Üyeyi dönem yenileyerek çıkar</button>
-            <button type="button" disabled={Boolean(busy)||!providerReady}
-              onClick={()=>void rekeyRoom(room,member.deviceCredentialId)}>Kayıp cihaz sonrası rekey</button></>}</li>)}</ul>
+          {member.status==='active'&&<>{member.role!=='owner'&&<button type="button" disabled={Boolean(busy)||!providerReady
+            ||room.storageCapacity.epochs.limitReached||center.storageCapacity.mutations.limitReached}
+            onClick={()=>void removeMember(room,member.id)}>Üyeyi dönem yenileyerek çıkar</button>}
+            <button type="button" disabled={Boolean(busy)||!providerReady||room.storageCapacity.epochs.limitReached
+              ||center.storageCapacity.mutations.limitReached||(member.role==='owner'&&!activeCredentials.some(item=>item.id!==member.deviceCredentialId))}
+              onClick={()=>void rekeyRoom(room,member.deviceCredentialId,member.memberPersonId)}>Kayıp cihaz sonrası rekey</button></>}</li>)}</ul>
         <div className="communication-security-member-form"><input aria-label="Üye kişi kimliği" value={memberPersonId}
           onChange={event=>setMemberPersonId(event.target.value)} /><input aria-label="Üye cihaz kimliği" value={memberCredentialId}
           onChange={event=>setMemberCredentialId(event.target.value)} /><button type="button"
-          disabled={Boolean(busy)||!providerReady||!memberPersonId.trim()||!memberCredentialId.trim()}
+          disabled={Boolean(busy)||!providerReady||!memberPersonId.trim()||!memberCredentialId.trim()
+            ||room.storageCapacity.memberships.limitReached||room.storageCapacity.epochs.limitReached
+            ||center.storageCapacity.mutations.limitReached}
           onClick={()=>void addMember(room)}>Üye ekle</button></div>
-        <div className="communication-security-room-actions"><button type="button" disabled={Boolean(busy)||room.status!=='active'}
+        <div className="communication-security-room-actions"><button type="button" disabled={Boolean(busy)||room.status!=='active'
+          ||center.storageCapacity.mutations.limitReached}
           onClick={()=>void setHistory(room)}>Geçmiş politikasını değiştir</button><button type="button"
-          disabled={Boolean(busy)||room.status!=='active'} onClick={()=>void freezeRoom(room)}>Odayı dondur</button></div>
+          disabled={Boolean(busy)||room.status!=='active'||center.storageCapacity.mutations.limitReached}
+          onClick={()=>void freezeRoom(room)}>Odayı dondur</button></div>
       </article>)}</>}
   </section>;
 }

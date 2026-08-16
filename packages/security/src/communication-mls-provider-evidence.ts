@@ -17,6 +17,7 @@ const EPOCH_REASONS = new Set<CommunicationMlsEpochReason>([
 
 export interface TrustedCommunicationMlsProviderKey {
   readonly providerId: string;
+  readonly providerImplementation: string;
   readonly keyId: string;
   readonly publicKeyPem: string;
   readonly validFrom: string;
@@ -43,6 +44,9 @@ export interface CommunicationMlsEpochAttestationPayload {
   readonly sealedStateReference: string;
   readonly createdAt: string;
   readonly reason: CommunicationMlsEpochReason;
+  readonly previousEpoch?: number;
+  readonly previousCommitSha256?: string;
+  readonly previousConfirmedTranscriptHashSha256?: string;
 }
 
 export type CommunicationMlsProviderAttestation =
@@ -74,11 +78,26 @@ export interface VerifyCommunicationMlsProviderEvidenceOptions {
 const plainRecord = (value: unknown): value is Record<string, unknown> => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const prototype = Object.getPrototypeOf(value);
-  return prototype === Object.prototype || prototype === null;
+  if (prototype !== Object.prototype && prototype !== null) return false;
+  return Reflect.ownKeys(value).every((key) => {
+    if (typeof key !== 'string') return false;
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    return descriptor !== undefined && descriptor.enumerable === true && 'value' in descriptor;
+  });
+};
+
+const canonicalArray = (value: unknown[]): boolean => {
+  const ownKeys = Reflect.ownKeys(value);
+  if (ownKeys.some((key) => typeof key !== 'string')) return false;
+  const dataKeys = ownKeys.filter((key) => key !== 'length');
+  if (dataKeys.length !== value.length) return false;
+  return dataKeys.every((key, index) => key === String(index)
+    && Object.getOwnPropertyDescriptor(value, key)?.enumerable === true
+    && 'value' in Object.getOwnPropertyDescriptor(value, key)!);
 };
 
 const exactKeys = (value: Record<string, unknown>, expected: readonly string[]): boolean => {
-  const actual = Object.keys(value).sort();
+  const actual = Reflect.ownKeys(value).filter((key): key is string => typeof key === 'string').sort();
   return actual.length === expected.length && actual.every((key, index) => key === [...expected].sort()[index]);
 };
 
@@ -88,7 +107,10 @@ export const canonicalizeCommunicationMlsProviderEvidence = (value: unknown): st
     if (!Number.isSafeInteger(value)) throw new Error('MLS evidence contains a non-integer number.');
     return String(value);
   }
-  if (Array.isArray(value)) return `[${value.map(canonicalizeCommunicationMlsProviderEvidence).join(',')}]`;
+  if (Array.isArray(value)) {
+    if (!canonicalArray(value)) throw new Error('MLS evidence arrays must be dense canonical data arrays.');
+    return `[${value.map(canonicalizeCommunicationMlsProviderEvidence).join(',')}]`;
+  }
   if (!plainRecord(value)) throw new Error('MLS evidence must contain only plain canonical JSON objects.');
   return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonicalizeCommunicationMlsProviderEvidence(value[key])}`).join(',')}}`;
 };
@@ -120,13 +142,23 @@ const validateEnvelope = (value: unknown): CommunicationMlsProviderAttestation =
       || !validId(payload.trustedDeviceId) || !validHash(payload.deviceCredentialSha256)
       || !validHash(payload.keyPackageSha256) || !safeReference(payload.sealedCredentialReference)
       || !Number.isFinite(parseIso(payload.createdAt))) throw new Error('MLS device credential evidence is invalid.');
-  } else if (!exactKeys(payload, ['cipherSuite','commitSha256','confirmedTranscriptHashSha256','createdAt','epoch','groupContextSha256','groupIdSha256','membershipDigestSha256','reason','roomId','sealedStateReference'])
+  } else {
+    const advanced = payload.reason !== 'room_created';
+    const expectedKeys = ['cipherSuite','commitSha256','confirmedTranscriptHashSha256','createdAt','epoch','groupContextSha256',
+      'groupIdSha256','membershipDigestSha256','reason','roomId','sealedStateReference',
+      ...(advanced ? ['previousCommitSha256','previousConfirmedTranscriptHashSha256','previousEpoch'] : [])];
+    if (!exactKeys(payload, expectedKeys)
     || !validId(payload.roomId) || !Number.isSafeInteger(payload.epoch) || Number(payload.epoch) < 1
     || payload.cipherSuite !== CIPHER_SUITE || !validHash(payload.groupIdSha256) || !validHash(payload.commitSha256)
     || !validHash(payload.confirmedTranscriptHashSha256) || !validHash(payload.groupContextSha256)
     || !validHash(payload.membershipDigestSha256) || !safeReference(payload.sealedStateReference)
     || typeof payload.reason !== 'string' || !EPOCH_REASONS.has(payload.reason as CommunicationMlsEpochReason)
-    || !Number.isFinite(parseIso(payload.createdAt))) throw new Error('MLS epoch evidence is invalid.');
+    || !Number.isFinite(parseIso(payload.createdAt))
+    || (advanced && (!Number.isSafeInteger(payload.previousEpoch) || Number(payload.previousEpoch) < 1
+      || Number(payload.epoch) !== Number(payload.previousEpoch) + 1
+      || !validHash(payload.previousCommitSha256) || !validHash(payload.previousConfirmedTranscriptHashSha256)))
+    || (!advanced && Number(payload.epoch) !== 1)) throw new Error('MLS epoch evidence is invalid.');
+  }
   return value as unknown as CommunicationMlsProviderAttestation;
 };
 
@@ -144,7 +176,17 @@ export const verifyCommunicationMlsProviderEvidence = (
     throw new Error('MLS provider verification clock or skew policy is invalid.');
   }
   if (timestamp > now + skew) throw new Error('MLS provider evidence is from the future.');
-  const matchingKeys = options.trustedKeys.filter((key) => key.providerId === evidence.providerId && key.keyId === evidence.providerKeyId);
+  if (!Array.isArray(options.trustedKeys) || options.trustedKeys.length < 1 || options.trustedKeys.length > 32
+    || !canonicalArray(options.trustedKeys as unknown[])) throw new Error('MLS provider trusted key registry is invalid.');
+  for (const key of options.trustedKeys) {
+    if (!plainRecord(key) || !exactKeys(key as unknown as Record<string, unknown>, [
+      'keyId','providerId','providerImplementation','publicKeyPem','validFrom',...(key.validUntil === undefined ? [] : ['validUntil'])
+    ]) || !validId(key.providerId) || !validId(key.providerImplementation) || !validId(key.keyId)) {
+      throw new Error('MLS provider trusted key registry is invalid.');
+    }
+  }
+  const matchingKeys = options.trustedKeys.filter((key) => key.providerId === evidence.providerId
+    && key.providerImplementation === evidence.providerImplementation && key.keyId === evidence.providerKeyId);
   if (matchingKeys.length !== 1) throw new Error('MLS provider trusted key identity is missing or ambiguous.');
   const trusted = matchingKeys[0]!;
   const validFrom = parseIso(trusted.validFrom);
@@ -172,8 +214,14 @@ export const verifyCommunicationMlsProviderEvidence = (
   });
   const canonical = canonicalizeCommunicationMlsProviderEvidence(signed);
   const signature = Buffer.from(evidence.signature.valueBase64Url, 'base64url');
-  if (signature.length !== 64 || !verify(null, Buffer.from(canonical, 'utf8'), publicKey, signature)) {
-    throw new Error('MLS provider evidence signature is invalid.');
+  const message = Buffer.from(canonical, 'utf8');
+  try {
+    if (signature.length !== 64 || !verify(null, message, publicKey, signature)) {
+      throw new Error('MLS provider evidence signature is invalid.');
+    }
+  } finally {
+    signature.fill(0);
+    message.fill(0);
   }
   const providerAttestationSha256 = createHash('sha256')
     .update(canonicalizeCommunicationMlsProviderEvidence(evidence), 'utf8').digest('hex');
@@ -203,6 +251,10 @@ export const verifyCommunicationMlsProviderEvidence = (
     providerAttestationSha256,
     providerEvidenceVerified: true,
     createdAt: evidence.payload.createdAt,
-    reason: evidence.payload.reason
+    reason: evidence.payload.reason,
+    ...(evidence.payload.previousEpoch === undefined ? {} : { previousEpoch: evidence.payload.previousEpoch }),
+    ...(evidence.payload.previousCommitSha256 === undefined ? {} : { previousCommitSha256: evidence.payload.previousCommitSha256 }),
+    ...(evidence.payload.previousConfirmedTranscriptHashSha256 === undefined
+      ? {} : { previousConfirmedTranscriptHashSha256: evidence.payload.previousConfirmedTranscriptHashSha256 })
   });
 };

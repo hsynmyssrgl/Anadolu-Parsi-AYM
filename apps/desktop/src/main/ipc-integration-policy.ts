@@ -3658,7 +3658,7 @@ export const COMMUNICATION_SECURITY_IPC_CHANNELS=Object.freeze({
 } as const);
 const communicationSecurityChannels=new Set<string>(Object.values(COMMUNICATION_SECURITY_IPC_CHANNELS));
 const communicationIdentifier=(value:unknown):value is string=>typeof value==='string'&&value===value.trim()
-  &&value.length>=2&&value.length<=256&&/^[A-Za-z0-9][A-Za-z0-9._:@/-]*$/u.test(value);
+  &&value.length>=2&&value.length<=160&&/^[A-Za-z0-9][A-Za-z0-9._:@/-]*$/u.test(value);
 const communicationInput=(channel:string,args:readonly unknown[]):IpcIntegrationPolicyDecision=>{
   if(channel===COMMUNICATION_SECURITY_IPC_CHANNELS.getCenter)return zeroArguments(args);
   if(args.length!==1||!isObject(args[0]))return rejected('COMMUNICATION_OBJECT_REQUIRED','$[0]');
@@ -3673,15 +3673,11 @@ const communicationInput=(channel:string,args:readonly unknown[]):IpcIntegration
     &&healthCareText(value.reason,3,500)
     ?accepted():rejected('COMMUNICATION_DEVICE_REVOKE_INPUT_INVALID','$[0]');
   if(channel===COMMUNICATION_SECURITY_IPC_CHANNELS.createRoom){
-    const keys=['clientOperationId','expectedRevision','ownerDeviceCredentialId','roomType','displayName',
-      ...(value.scopeResourceType===undefined?[]:['scopeResourceType']),...(value.scopeResourceId===undefined?[]:['scopeResourceId'])];
-    const scoped=value.scopeResourceType!==undefined||value.scopeResourceId!==undefined;
-    return healthCareExactRecord(value,keys)&&communicationIdentifier(value.clientOperationId)&&value.expectedRevision===0
+    return healthCareExactRecord(value,['clientOperationId','expectedRevision','ownerDeviceCredentialId','roomType','displayName'])
+      &&communicationIdentifier(value.clientOperationId)&&value.expectedRevision===0
       &&communicationIdentifier(value.ownerDeviceCredentialId)
       &&['direct','family','household','family_branch','event','care','private_topic'].includes(String(value.roomType))
       &&healthCareText(value.displayName,2,160)
-      &&(!scoped||(['family','household','family_branch','event','care_context'].includes(String(value.scopeResourceType))
-        &&communicationIdentifier(value.scopeResourceId)))
       ?accepted():rejected('COMMUNICATION_ROOM_CREATE_INPUT_INVALID','$[0]');
   }
   if(channel===COMMUNICATION_SECURITY_IPC_CHANNELS.addMember)return healthCareExactRecord(value,
@@ -3695,12 +3691,17 @@ const communicationInput=(channel:string,args:readonly unknown[]):IpcIntegration
     &&communicationIdentifier(value.clientOperationId)&&healthCareRevision(value.expectedRevision)&&Number(value.expectedRevision)>=1
     &&communicationIdentifier(value.roomId)&&communicationIdentifier(value.membershipId)&&healthCareText(value.reason,3,500)
     ?accepted():rejected('COMMUNICATION_MEMBER_REMOVE_INPUT_INVALID','$[0]');
-  if(channel===COMMUNICATION_SECURITY_IPC_CHANNELS.rekeyRoom)return healthCareExactRecord(value,
-    ['clientOperationId','expectedRevision','roomId','revokedDeviceCredentialId','confirmation','reason'])
+  if(channel===COMMUNICATION_SECURITY_IPC_CHANNELS.rekeyRoom){
+    const keys=['clientOperationId','expectedRevision','roomId','revokedDeviceCredentialId','confirmation','reason',
+      ...(value.replacementDeviceCredentialId===undefined?[]:['replacementDeviceCredentialId'])];
+    return healthCareExactRecord(value,keys)
     &&communicationIdentifier(value.clientOperationId)&&healthCareRevision(value.expectedRevision)&&Number(value.expectedRevision)>=1
     &&communicationIdentifier(value.roomId)&&communicationIdentifier(value.revokedDeviceCredentialId)
+    &&(value.replacementDeviceCredentialId===undefined||(communicationIdentifier(value.replacementDeviceCredentialId)
+      &&value.replacementDeviceCredentialId!==value.revokedDeviceCredentialId))
     &&value.confirmation==='KAYIP CIHAZ SONRASI ODAYI YENIDEN ANAHTARLA'&&healthCareText(value.reason,3,500)
     ?accepted():rejected('COMMUNICATION_ROOM_REKEY_INPUT_INVALID','$[0]');
+  }
   if(channel===COMMUNICATION_SECURITY_IPC_CHANNELS.setHistoryAccess)return healthCareExactRecord(value,
     ['clientOperationId','expectedRevision','roomId','historyAccessMode','reason'])
     &&communicationIdentifier(value.clientOperationId)&&healthCareRevision(value.expectedRevision)&&Number(value.expectedRevision)>=1
@@ -3740,13 +3741,14 @@ const communicationEpochResult=(value:unknown):boolean=>isObject(value)&&healthC
   &&value.providerEvidenceVerified===true&&value.sealedProviderStateStored===true
   &&Number.isSafeInteger(value.activeDeviceCredentialCount)&&Number(value.activeDeviceCredentialCount)>=1
   &&Number(value.activeDeviceCredentialCount)<=128&&healthCareIso(value.createdAt)
-  &&['room_created','member_added','member_removed','device_revoked_recovery'].includes(String(value.reason));
+    &&['room_created','member_added','member_removed','device_revoked_recovery'].includes(String(value.reason));
+const communicationCapacityResult=(value:unknown,limit:number):boolean=>isObject(value)
+  &&healthCareExactRecord(value,['current','limit','limitReached'])&&Number.isSafeInteger(value.current)
+  &&Number(value.current)>=0&&value.limit===limit&&value.limitReached===(Number(value.current)>=limit);
 const communicationRoomResult=(value:unknown):boolean=>{
   if(!isObject(value))return false;
-  const keys=['id','displayName','roomType','status','historyAccessMode','currentEpoch','memberships','currentEpochEvidence',
-    'revision','createdAt','updatedAt',...(value.scopeResourceType===undefined?[]:['scopeResourceType']),
-    ...(value.scopeResourceId===undefined?[]:['scopeResourceId'])];
-  const scoped=value.scopeResourceType!==undefined||value.scopeResourceId!==undefined;
+  const keys=['id','displayName','roomType','status','historyAccessMode','currentEpoch','memberships','currentEpochEvidence','storageCapacity',
+    'revision','createdAt','updatedAt'];
   return healthCareExactRecord(value,keys)&&communicationIdentifier(value.id)&&healthCareText(value.displayName,2,160)
     &&['direct','family','household','family_branch','event','care','private_topic'].includes(String(value.roomType))
     &&['active','frozen','closed'].includes(String(value.status))
@@ -3754,9 +3756,10 @@ const communicationRoomResult=(value:unknown):boolean=>{
     &&Number.isSafeInteger(value.currentEpoch)&&Number(value.currentEpoch)>=1&&Array.isArray(value.memberships)
     &&value.memberships.length>=1&&value.memberships.length<=128&&value.memberships.every(communicationMembershipResult)
     &&communicationEpochResult(value.currentEpochEvidence)&&healthCareRevision(value.revision)&&Number(value.revision)>=1
-    &&healthCareIso(value.createdAt)&&healthCareIso(value.updatedAt)
-    &&(!scoped||(['family','household','family_branch','event','care_context'].includes(String(value.scopeResourceType))
-      &&communicationIdentifier(value.scopeResourceId)));
+    &&isObject(value.storageCapacity)&&healthCareExactRecord(value.storageCapacity,['epochs','memberships'])
+    &&communicationCapacityResult(value.storageCapacity.memberships,128)
+    &&communicationCapacityResult(value.storageCapacity.epochs,4096)
+    &&healthCareIso(value.createdAt)&&healthCareIso(value.updatedAt);
 };
 const communicationTruthResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,[
   'centralPolicyKernelRequired','localRoomAndEpochMetadataRegistryImplemented','opaqueSealedMlsStateRequired',
@@ -3766,7 +3769,8 @@ const communicationTruthResult=(value:unknown):boolean=>isObject(value)&&healthC
   'messagePlaintextPersistedByFoundation','messageEventSignatureVerificationImplemented','relayDeliveryServiceImplemented',
   'rfc9420ProviderConfigured','rfc9420ConformanceVerified','forwardSecrecyVerifiedInProduction',
   'postCompromiseSecurityVerifiedInProduction','relayContentBlindnessVerifiedInProduction','realMessageExchangePerformed',
-  'networkUsedByCurrentImplementation'])
+  'networkUsedByCurrentImplementation','scopedResourceAuthorizationImplemented','boundedMetadataStorageEnforced',
+  'automaticRetentionRecoveryImplemented'])
   &&value.centralPolicyKernelRequired===true&&value.localRoomAndEpochMetadataRegistryImplemented===true
   &&value.opaqueSealedMlsStateRequired===true&&value.verifiedProviderEvidenceRequired===true
   &&value.newMemberHistoryDefaultDenied===true&&value.revokedDeviceRekeyWorkflowImplemented===true
@@ -3777,12 +3781,17 @@ const communicationTruthResult=(value:unknown):boolean=>isObject(value)&&healthC
   &&value.rfc9420ProviderConfigured===false&&value.rfc9420ConformanceVerified===false
   &&value.forwardSecrecyVerifiedInProduction===false&&value.postCompromiseSecurityVerifiedInProduction===false
   &&value.relayContentBlindnessVerifiedInProduction===false&&value.realMessageExchangePerformed===false
-  &&value.networkUsedByCurrentImplementation===false;
+  &&value.networkUsedByCurrentImplementation===false&&value.scopedResourceAuthorizationImplemented===false
+  &&value.boundedMetadataStorageEnforced===true&&value.automaticRetentionRecoveryImplemented===false;
 const communicationCenterResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
-  ['schemaVersion','centerId','ownerPersonId','deviceCredentials','rooms','truth','generatedAt'])&&value.schemaVersion===1
+  ['schemaVersion','centerId','ownerPersonId','deviceCredentials','rooms','storageCapacity','truth','generatedAt'])&&value.schemaVersion===1
   &&communicationIdentifier(value.centerId)&&communicationIdentifier(value.ownerPersonId)
   &&Array.isArray(value.deviceCredentials)&&value.deviceCredentials.length<=32&&value.deviceCredentials.every(communicationDeviceResult)
   &&Array.isArray(value.rooms)&&value.rooms.length<=256&&value.rooms.every(communicationRoomResult)
+  &&isObject(value.storageCapacity)&&healthCareExactRecord(value.storageCapacity,['deviceCredentials','mutations','rooms'])
+  &&communicationCapacityResult(value.storageCapacity.deviceCredentials,32)
+  &&communicationCapacityResult(value.storageCapacity.rooms,256)
+  &&communicationCapacityResult(value.storageCapacity.mutations,100000)
   &&communicationTruthResult(value.truth)&&healthCareIso(value.generatedAt);
 const communicationReceiptResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
   ['resourceType','resourceId','mutationKind','previousRevision','revision','occurredAt','replayed','messageContentProcessed','networkUsed'])

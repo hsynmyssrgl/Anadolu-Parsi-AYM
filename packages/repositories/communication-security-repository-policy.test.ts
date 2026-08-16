@@ -237,6 +237,17 @@ describe('34-A communication security repository policy boundary', () => {
     const harness = openHarness(); const credentialRows = createCredentialRows();
     await persistCredential(harness, credentialRows);
     const rows = createRoomRows(credentialRows.credential.id);
+    const scopedRejected = await withReceipt(harness, {
+      action: 'create', resourceType: 'communication_room', resourceId: rows.room.id
+    }, (repository, context) => {
+      const mutation = repository.insertMutation(context, rows.mutation); if (!mutation.ok) return mutation;
+      const epoch = repository.insertEpoch(context, rows.epoch); if (!epoch.ok) return epoch;
+      return repository.insertRoom(context, { ...rows.room,
+        scopeResourceType: 'family', scopeResourceId: 'family-resource-34-a' });
+    });
+    expect(scopedRejected.ok).toBe(false);
+    expect(harness.runtime.database.prepare('SELECT COUNT(*) count FROM communication_rooms').get()).toEqual({ count: 0 });
+    expect(harness.runtime.database.prepare('SELECT COUNT(*) count FROM communication_mls_epochs').get()).toEqual({ count: 0 });
     const result = await withReceipt(harness, {
       action: 'create', resourceType: 'communication_room', resourceId: rows.room.id
     }, (repository, context) => {
@@ -246,6 +257,12 @@ describe('34-A communication security repository policy boundary', () => {
       return repository.insertMembership(context, rows.membership);
     });
     expect(result.ok).toBe(true);
+    expect(await withReceipt(harness, {
+      action: 'update', resourceType: 'communication_room', resourceId: rows.room.id
+    }, (repository, context) => repository.getStorageUsage(context, key, rows.room.id))).toMatchObject({
+      ok: true,
+      value: { deviceCredentialCount: 1, roomCount: 1, mutationCount: 2, membershipCount: 1, epochCount: 1 }
+    });
     expect(await withReceipt(harness, {
       action: 'read', resourceType: 'communication_security_center', resourceId: '*'
     }, (repository, context) => repository.loadCenter(context, key))).toMatchObject({
@@ -316,5 +333,106 @@ describe('34-A communication security repository policy boundary', () => {
       id: rows.credential.id, familyId: FAMILY, ownerPersonId: OWNER, revision: 1, status: 'active'
     }});
     expect(JSON.stringify(resolved)).not.toMatch(/sealed|deviceCredential|keyPackage|provider/i);
+  });
+
+  it('binds epoch advancement to the prior provider chain and atomically restores a sole owner with a replacement device', async () => {
+    const harness = openHarness(); const first = createCredentialRows();
+    expect((await persistCredential(harness, first)).ok).toBe(true);
+    const secondTrustedDevice = 'trusted-device-34-a-replacement';
+    harness.runtime.database.prepare(`INSERT INTO trusted_devices(
+      id,account_id,device_id,display_name,fingerprint,public_key_pem,trusted_at,last_seen_at,revoked_at,created_at,security_epoch
+    ) VALUES(?,?,?,?,?,?,?,?,?,?,?)`).run(
+      secondTrustedDevice, ACCOUNT, 'device-34-a-replacement', 'Owner replacement device', 'e'.repeat(64),
+      '-----BEGIN PUBLIC KEY-----\nTEST\n-----END PUBLIC KEY-----', NOW, NOW, null, NOW, 0
+    );
+    const secondMutation: CommunicationSecurityMutationRow = {
+      ...first.mutation, id: 'a'.repeat(64), resourceId: 'comm-device-owner-replacement-34-a',
+      clientOperationId: 'register-owner-replacement-34-a', requestFingerprint: 'b'.repeat(64),
+      resourceStateFingerprint: 'c'.repeat(64)
+    };
+    const secondCredential: CommunicationDeviceCredentialRow = {
+      ...first.credential, id: secondMutation.resourceId, trustedDeviceId: secondTrustedDevice,
+      deviceCredentialSha256: 'd'.repeat(64), keyPackageSha256: 'e'.repeat(64),
+      sealedCredentialReference: 'mls-vault:device:owner-replacement-34-a',
+      providerAttestationSha256: 'f'.repeat(64), stateFingerprint: secondMutation.resourceStateFingerprint,
+      lastMutationId: secondMutation.id
+    };
+    expect((await persistCredential(harness, { mutation: secondMutation, credential: secondCredential })).ok).toBe(true);
+    const roomRows = createRoomRows(first.credential.id);
+    expect((await withReceipt(harness, { action: 'create', resourceType: 'communication_room', resourceId: roomRows.room.id },
+      (repository, context) => {
+        const mutation = repository.insertMutation(context, roomRows.mutation); if (!mutation.ok) return mutation;
+        const epoch = repository.insertEpoch(context, roomRows.epoch); if (!epoch.ok) return epoch;
+        const room = repository.insertRoom(context, roomRows.room); if (!room.ok) return room;
+        return repository.insertMembership(context, roomRows.membership);
+      })).ok).toBe(true);
+
+    const revokeMutation: CommunicationSecurityMutationRow = {
+      ...first.mutation, id: '4'.repeat(64), mutationKind: 'device_credential_revoke',
+      clientOperationId: 'revoke-owner-lost-34-a', requestFingerprint: '5'.repeat(64),
+      expectedRevision: 1, revision: 2, resourceStateFingerprint: '6'.repeat(64)
+    };
+    const revokedCredential: CommunicationDeviceCredentialRow = {
+      ...first.credential, status: 'revoked', revision: 2, stateFingerprint: revokeMutation.resourceStateFingerprint,
+      lastMutationId: revokeMutation.id, updatedAt: NOW, revokedAt: NOW
+    };
+    expect((await withReceipt(harness, {
+      action: 'delete', resourceType: 'communication_device_credential', resourceId: first.credential.id
+    }, (repository, context) => {
+      const mutation = repository.insertMutation(context, revokeMutation); if (!mutation.ok) return mutation;
+      return repository.saveDeviceCredential(context, revokedCredential, 1);
+    })).ok).toBe(true);
+
+    const rekeyMutation: CommunicationSecurityMutationRow = {
+      ...roomRows.mutation, id: 'd'.repeat(64), mutationKind: 'device_revocation_rekey',
+      clientOperationId: 'rekey-owner-replacement-34-a', requestFingerprint: 'e'.repeat(64),
+      expectedRevision: 1, revision: 2, resourceStateFingerprint: 'f'.repeat(64)
+    };
+    const epochTwo: CommunicationMlsEpochRow = {
+      ...roomRows.epoch, id: '3'.repeat(64), epoch: 2, commitSha256: '4'.repeat(64),
+      confirmedTranscriptHashSha256: '5'.repeat(64), groupContextSha256: '6'.repeat(64),
+      membershipDigestSha256: '0'.repeat(64), sealedStateReference: 'mls-vault:room:family-34-a:epoch:2',
+      activeDeviceCredentialCount: 1, reason: 'device_revoked_recovery', previousEpoch: 1,
+      previousCommitSha256: roomRows.epoch.commitSha256,
+      previousConfirmedTranscriptHashSha256: roomRows.epoch.confirmedTranscriptHashSha256,
+      mutationId: rekeyMutation.id
+    };
+    const roomTwo: CommunicationRoomRow = {
+      ...roomRows.room, currentEpoch: 2, currentEpochId: epochTwo.id, revision: 2,
+      stateFingerprint: rekeyMutation.resourceStateFingerprint, lastMutationId: rekeyMutation.id, updatedAt: NOW
+    };
+    const removedOwner: CommunicationRoomMembershipRow = {
+      ...roomRows.membership, status: 'removed', removedAtEpoch: 2, revision: 2,
+      stateFingerprint: '1'.repeat(64), lastMutationId: rekeyMutation.id, updatedAt: NOW
+    };
+    const replacementOwner: CommunicationRoomMembershipRow = {
+      ...roomRows.membership, id: 'comm-membership-owner-replacement-34-a', deviceCredentialId: secondCredential.id,
+      joinedAtEpoch: 2, historyVisibleFromEpoch: 2, revision: 1, stateFingerprint: '2'.repeat(64),
+      lastMutationId: rekeyMutation.id, createdAt: NOW, updatedAt: NOW
+    };
+
+    expect((await withReceipt(harness, { action: 'update', resourceType: 'communication_room', resourceId: roomRows.room.id },
+      (repository, context) => {
+        const mutation = repository.insertMutation(context, rekeyMutation); if (!mutation.ok) return mutation;
+        const forgedEpoch = repository.insertEpoch(context, { ...epochTwo, providerId: 'substituted-provider' });
+        return forgedEpoch;
+      })).ok).toBe(false);
+    expect(harness.runtime.database.prepare('SELECT COUNT(*) count FROM communication_mls_epochs WHERE room_id=?')
+      .get(roomRows.room.id)).toEqual({ count: 1 });
+
+    expect((await withReceipt(harness, { action: 'update', resourceType: 'communication_room', resourceId: roomRows.room.id },
+      (repository, context) => {
+        const mutation = repository.insertMutation(context, rekeyMutation); if (!mutation.ok) return mutation;
+        const epoch = repository.insertEpoch(context, epochTwo); if (!epoch.ok) return epoch;
+        const room = repository.saveRoom(context, roomTwo, 1); if (!room.ok) return room;
+        const removed = repository.saveMembership(context, removedOwner, 1); if (!removed.ok) return removed;
+        return repository.insertMembership(context, replacementOwner);
+      })).ok).toBe(true);
+    expect(harness.runtime.database.prepare(`SELECT device_credential_id,status,role,joined_at_epoch
+      FROM communication_room_memberships WHERE room_id=? ORDER BY joined_at_epoch,device_credential_id`).all(roomRows.room.id))
+      .toEqual([
+        { device_credential_id: first.credential.id, status: 'removed', role: 'owner', joined_at_epoch: 1 },
+        { device_credential_id: secondCredential.id, status: 'active', role: 'owner', joined_at_epoch: 2 }
+      ]);
   });
 });

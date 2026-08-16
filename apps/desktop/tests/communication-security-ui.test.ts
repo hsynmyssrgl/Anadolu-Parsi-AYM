@@ -36,9 +36,11 @@ describe('34-A communication policy and MLS foundation renderer surface', () => 
       'mesaj imzası', 'gerçek ağ teslimi doğrulanmadı',
       'Yeni üyeler katılım öncesi geçmişi varsayılan göremez',
       'explicit snapshot kararı bu foundation içinde içerik paylaşmaz',
+      'Kapsamlı kaynak yetkilendirmesi henüz uygulanmadı',
+      'otomatik retention ve kapasite kurtarma yoktur',
       '0</strong> gönderilmiş mesaj'
     ]) expect(panel).toContain(marker);
-    expect(panel).toContain('disabled={Boolean(busy)||!providerReady}');
+    expect(panel).toContain('disabled={Boolean(busy)||!providerReady');
     expect(panel).not.toMatch(/RFC 9420 uyumludur|ileri gizlilik sağlanır|relay içeriği göremez|mesaj teslim edildi/iu);
   });
 
@@ -51,6 +53,10 @@ describe('34-A communication policy and MLS foundation renderer surface', () => 
       'aria-label="Oda adı"', 'maxLength={160}', 'aria-label="Oda türü"',
       'aria-label="Oda sahibi cihaz kimliği"', 'aria-label="Üye kişi kimliği"',
       'aria-label="Üye cihaz kimliği"'
+    ]) expect(panel).toContain(marker);
+    for (const marker of [
+      'center.storageCapacity.deviceCredentials', 'center.storageCapacity.rooms', 'center.storageCapacity.mutations',
+      'room.storageCapacity.memberships', 'room.storageCapacity.epochs', 'replacementDeviceCredentialId'
     ]) expect(panel).toContain(marker);
     for (const selector of [
       '.communication-security{', '.communication-security-truth{', '.communication-security-summary{',

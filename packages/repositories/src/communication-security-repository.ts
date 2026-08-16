@@ -1,14 +1,15 @@
 import { asFamilyId, asIsoDateTime, asPersonId } from '@ppt/core';
-import type {
-  CommunicationDeviceCredentialStatus,
-  CommunicationHistoryAccessMode,
-  CommunicationMembershipRole,
-  CommunicationMembershipStatus,
-  CommunicationMlsEpochReason,
-  CommunicationRoomStatus,
-  CommunicationRoomType,
-  CommunicationSecurityMutationKind,
-  CommunicationSecurityResourceType
+import {
+  COMMUNICATION_SECURITY_STORAGE_LIMITS,
+  type CommunicationDeviceCredentialStatus,
+  type CommunicationHistoryAccessMode,
+  type CommunicationMembershipRole,
+  type CommunicationMembershipStatus,
+  type CommunicationMlsEpochReason,
+  type CommunicationRoomStatus,
+  type CommunicationRoomType,
+  type CommunicationSecurityMutationKind,
+  type CommunicationSecurityResourceType
 } from '@ppt/domain';
 import {
   assertPolicyAuthorizedRepositoryContext,
@@ -20,6 +21,7 @@ import {
   type CommunicationSecurityCenterKey,
   type CommunicationSecurityCenterSnapshotRow,
   type CommunicationSecurityMutationRow,
+  type CommunicationSecurityStorageUsageRow,
   type CommunicationSecurityPolicyResourceRepositoryPort,
   type CommunicationSecurityRepositoryPort,
   type PolicyAuthorizedRepositoryExecutionContext,
@@ -42,7 +44,8 @@ const membershipSelect = `SELECT id,family_id,owner_person_id,room_id,member_per
 const epochSelect = `SELECT id,family_id,owner_person_id,room_id,epoch,cipher_suite,group_id_sha256,commit_sha256,
   confirmed_transcript_hash_sha256,group_context_sha256,membership_digest_sha256,sealed_state_reference,provider_id,
   provider_implementation,provider_attestation_sha256,provider_evidence_verified,active_device_credential_count,
-  reason,mutation_id,created_at FROM communication_mls_epochs`;
+  reason,previous_epoch,previous_commit_sha256,previous_confirmed_transcript_hash_sha256,mutation_id,created_at
+  FROM communication_mls_epochs`;
 const mutationSelect = `SELECT id,family_id,owner_person_id,resource_type,resource_id,actor_account_id,actor_person_id,
   mutation_kind,client_operation_id,request_fingerprint,expected_revision,revision,resource_state_fingerprint,occurred_at
   FROM communication_security_mutations`;
@@ -90,6 +93,10 @@ const mapEpoch = (row: Record<string, unknown>): CommunicationMlsEpochRow => Obj
   providerId: String(row.provider_id), providerImplementation: String(row.provider_implementation),
   providerAttestationSha256: String(row.provider_attestation_sha256), providerEvidenceVerified: true,
   activeDeviceCredentialCount: Number(row.active_device_credential_count), reason: String(row.reason) as CommunicationMlsEpochReason,
+  ...(row.previous_epoch === null || row.previous_epoch === undefined ? {} : { previousEpoch: Number(row.previous_epoch) }),
+  ...(row.previous_commit_sha256 ? { previousCommitSha256: String(row.previous_commit_sha256) } : {}),
+  ...(row.previous_confirmed_transcript_hash_sha256
+    ? { previousConfirmedTranscriptHashSha256: String(row.previous_confirmed_transcript_hash_sha256) } : {}),
   mutationId: String(row.mutation_id), createdAt: asIsoDateTime(String(row.created_at))
 });
 const mapMutation = (row: Record<string, unknown>): CommunicationSecurityMutationRow => Object.freeze({
@@ -164,26 +171,60 @@ export class SqliteCommunicationSecurityRepository extends SqliteRepository impl
     });
   }
 
+  public getStorageUsage(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    key: CommunicationSecurityCenterKey,
+    roomId?: string
+  ): RepositoryResult<CommunicationSecurityStorageUsageRow> {
+    assertKey(context, key, 'write');
+    if (roomId !== undefined && context.policyAuthorization.resourceType !== 'communication_room') {
+      throw new Error('Communication room storage usage requires an exact room receipt');
+    }
+    return this.execute(context, () => {
+      const database = this.database(context);
+      const count = (table: string, suffix = '', parameters: readonly unknown[] = []): number => Number(
+        (database.prepare(`SELECT COUNT(*) count FROM ${table} WHERE family_id=? AND owner_person_id=?${suffix}`)
+          .get(key.familyId, key.ownerPersonId, ...parameters) as { count: number }).count
+      );
+      return Object.freeze({
+        deviceCredentialCount: count('communication_device_credentials'),
+        roomCount: count('communication_rooms'),
+        mutationCount: count('communication_security_mutations'),
+        membershipCount: roomId === undefined ? 0 : count('communication_room_memberships', ' AND room_id=?', [roomId]),
+        epochCount: roomId === undefined ? 0 : count('communication_mls_epochs', ' AND room_id=?', [roomId])
+      });
+    });
+  }
+
   public loadCenter(context: PolicyAuthorizedRepositoryExecutionContext, key: CommunicationSecurityCenterKey)
   : RepositoryResult<CommunicationSecurityCenterSnapshotRow> {
     assertKey(context, key, 'read');
     return this.execute(context, () => {
-      const deviceRows = this.database(context).prepare(`${deviceSelect} WHERE family_id=? AND owner_person_id=? ORDER BY updated_at DESC,id LIMIT 33`)
+      const limits = COMMUNICATION_SECURITY_STORAGE_LIMITS;
+      const deviceRows = this.database(context).prepare(`${deviceSelect} WHERE family_id=? AND owner_person_id=? ORDER BY updated_at DESC,id LIMIT ${limits.deviceCredentialsPerOwner + 1}`)
         .all(key.familyId, key.ownerPersonId) as Record<string, unknown>[];
-      const roomRows = this.database(context).prepare(`${roomSelect} WHERE family_id=? AND owner_person_id=? ORDER BY updated_at DESC,id LIMIT 257`)
+      const roomRows = this.database(context).prepare(`${roomSelect} WHERE family_id=? AND owner_person_id=? ORDER BY updated_at DESC,id LIMIT ${limits.roomsPerOwner + 1}`)
         .all(key.familyId, key.ownerPersonId) as Record<string, unknown>[];
-      if (deviceRows.length > 32 || roomRows.length > 256) throw new Error('Communication center exceeds its bounded metadata contract');
+      if (deviceRows.length > limits.deviceCredentialsPerOwner || roomRows.length > limits.roomsPerOwner)
+        throw new Error('Communication center exceeds its bounded metadata contract');
       const rooms: CommunicationRoomSnapshotRow[] = roomRows.map((raw) => {
         const room = mapRoom(raw);
-        const membershipsRaw = this.database(context).prepare(`${membershipSelect} WHERE family_id=? AND owner_person_id=? AND room_id=? ORDER BY created_at,id LIMIT 129`)
+        const membershipsRaw = this.database(context).prepare(`${membershipSelect} WHERE family_id=? AND owner_person_id=? AND room_id=? ORDER BY created_at,id LIMIT ${limits.membershipsPerRoom + 1}`)
           .all(key.familyId, key.ownerPersonId, room.id) as Record<string, unknown>[];
-        if (membershipsRaw.length > 128) throw new Error('Communication room membership contract is exceeded');
+        if (membershipsRaw.length > limits.membershipsPerRoom) throw new Error('Communication room membership contract is exceeded');
         const epochRaw = this.database(context).prepare(`${epochSelect} WHERE id=? AND family_id=? AND owner_person_id=? AND room_id=? AND epoch=?`)
           .get(room.currentEpochId, key.familyId, key.ownerPersonId, room.id, room.currentEpoch) as Record<string, unknown> | undefined;
         if (!epochRaw) throw new Error('Communication current epoch binding is missing');
-        return Object.freeze({ room, memberships: Object.freeze(membershipsRaw.map(mapMembership)), currentEpoch: mapEpoch(epochRaw) });
+        const epochCount = Number((this.database(context).prepare(`SELECT COUNT(*) count FROM communication_mls_epochs
+          WHERE family_id=? AND owner_person_id=? AND room_id=?`).get(key.familyId, key.ownerPersonId, room.id) as { count: number }).count);
+        if (epochCount > limits.epochsPerRoom) throw new Error('Communication room epoch contract is exceeded');
+        return Object.freeze({ room, memberships: Object.freeze(membershipsRaw.map(mapMembership)),
+          currentEpoch: mapEpoch(epochRaw), epochCount });
       });
-      return Object.freeze({ deviceCredentials: Object.freeze(deviceRows.map(mapDevice)), rooms: Object.freeze(rooms) });
+      const mutationCount = Number((this.database(context).prepare(`SELECT COUNT(*) count FROM communication_security_mutations
+        WHERE family_id=? AND owner_person_id=?`).get(key.familyId, key.ownerPersonId) as { count: number }).count);
+      if (mutationCount > limits.mutationsPerOwner) throw new Error('Communication mutation contract is exceeded');
+      return Object.freeze({ deviceCredentials: Object.freeze(deviceRows.map(mapDevice)), rooms: Object.freeze(rooms), mutationCount });
     });
   }
 
@@ -224,9 +265,10 @@ export class SqliteCommunicationSecurityRepository extends SqliteRepository impl
   public listMemberships(context: PolicyAuthorizedRepositoryExecutionContext, key: CommunicationSecurityCenterKey, roomId: string) {
     assertKey(context, key, 'write');
     return this.execute(context, () => {
-      const rows = this.database(context).prepare(`${membershipSelect} WHERE family_id=? AND owner_person_id=? AND room_id=? ORDER BY created_at,id LIMIT 129`)
+      const rows = this.database(context).prepare(`${membershipSelect} WHERE family_id=? AND owner_person_id=? AND room_id=? ORDER BY created_at,id LIMIT ${COMMUNICATION_SECURITY_STORAGE_LIMITS.membershipsPerRoom + 1}`)
         .all(key.familyId, key.ownerPersonId, roomId) as Record<string, unknown>[];
-      if (rows.length > 128) throw new Error('Communication membership read exceeds its bound');
+      if (rows.length > COMMUNICATION_SECURITY_STORAGE_LIMITS.membershipsPerRoom)
+        throw new Error('Communication membership read exceeds its bound');
       return Object.freeze(rows.map(mapMembership));
     });
   }
@@ -297,11 +339,13 @@ export class SqliteCommunicationSecurityRepository extends SqliteRepository impl
       id,family_id,owner_person_id,room_id,epoch,cipher_suite,group_id_sha256,commit_sha256,
       confirmed_transcript_hash_sha256,group_context_sha256,membership_digest_sha256,sealed_state_reference,
       provider_id,provider_implementation,provider_attestation_sha256,provider_evidence_verified,
-      active_device_credential_count,reason,mutation_id,created_at,policy_receipt_hash)
-      VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(row.id,row.familyId,row.ownerPersonId,row.roomId,row.epoch,
+      active_device_credential_count,reason,previous_epoch,previous_commit_sha256,previous_confirmed_transcript_hash_sha256,
+      mutation_id,created_at,policy_receipt_hash)
+      VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(row.id,row.familyId,row.ownerPersonId,row.roomId,row.epoch,
         row.cipherSuite,row.groupIdSha256,row.commitSha256,row.confirmedTranscriptHashSha256,row.groupContextSha256,
         row.membershipDigestSha256,row.sealedStateReference,row.providerId,row.providerImplementation,row.providerAttestationSha256,
-        1,row.activeDeviceCredentialCount,row.reason,row.mutationId,row.createdAt,binding.receiptHash); });
+        1,row.activeDeviceCredentialCount,row.reason,row.previousEpoch??null,row.previousCommitSha256??null,
+        row.previousConfirmedTranscriptHashSha256??null,row.mutationId,row.createdAt,binding.receiptHash); });
   }
   public insertRoom(context: PolicyAuthorizedRepositoryExecutionContext, row: CommunicationRoomRow) {
     const binding = currentBinding(context, 'communication_room', row.id, row.familyId);
@@ -337,10 +381,10 @@ export class SqliteCommunicationSecurityRepository extends SqliteRepository impl
   public saveMembership(context: PolicyAuthorizedRepositoryExecutionContext, row: CommunicationRoomMembershipRow, expectedRevision: number) {
     const binding = currentBinding(context, 'communication_room', row.roomId, row.familyId);
     return this.execute(context, () => {
-      const result = this.database(context).prepare(`UPDATE communication_room_memberships SET status=?,removed_at_epoch=?,revision=?,
-        state_fingerprint=?,last_mutation_id=?,updated_at=?,policy_receipt_hash=?
-        WHERE id=? AND family_id=? AND owner_person_id=? AND room_id=? AND revision=?`).run(row.status,row.removedAtEpoch??null,
-          row.revision,row.stateFingerprint,row.lastMutationId,row.updatedAt,binding.receiptHash,
+      const result = this.database(context).prepare(`UPDATE communication_room_memberships SET role=?,status=?,joined_at_epoch=?,
+        history_visible_from_epoch=?,removed_at_epoch=?,revision=?,state_fingerprint=?,last_mutation_id=?,updated_at=?,policy_receipt_hash=?
+        WHERE id=? AND family_id=? AND owner_person_id=? AND room_id=? AND revision=?`).run(row.role,row.status,row.joinedAtEpoch,
+          row.historyVisibleFromEpoch,row.removedAtEpoch??null,row.revision,row.stateFingerprint,row.lastMutationId,row.updatedAt,binding.receiptHash,
           row.id,row.familyId,row.ownerPersonId,row.roomId,expectedRevision);
       if (Number(result.changes) !== 1) throw new Error('Communication membership optimistic revision conflict');
     });

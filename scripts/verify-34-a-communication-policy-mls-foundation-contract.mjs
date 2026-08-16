@@ -49,24 +49,27 @@ const p22 = scope.validation.ppk022;
 const definitions = [
   ['scope inventory and six-file test matrix are exact', exact(scope.requirements, inventory.requirements)
     && exact(scope.validation.targetedTestFiles, targetedTestFiles) && exact(inventory.implementedTargetedTests, targetedTestFiles)
-    && tests.length === 6 && scope.validation.targetedTestFileRatchet === 6 && scope.validation.targetedTestRatchet === 29],
+    && tests.length === 6 && scope.validation.targetedTestFileRatchet === 6 && scope.validation.targetedTestRatchet === 37],
   ['migration 105 source manifest and scope checksums are canonical', migration?.name === 'communication_policy_mls_foundation'
     && migration?.checksum === migrationSha256 && migrationSha256 === scope.validation.migrationSha256
-    && migrationSha256 === '3c02d8f0ac6e2b5bf4d6a05bfc73e82fbd14d6144b0c3ef93a49786e45b8b7d7'],
+    && migrationSha256 === '7756e6e14267e84eb3c7643b4da3534178bf706a2ed551af6f9068451ecfb4f8'],
   ['migration owns immutable mutation epoch and current state bindings', has(migrations, ['communication_security_mutations',
     'communication_device_credentials', 'communication_mls_epochs', 'communication_rooms', 'communication_room_memberships',
-    'trg_34a_communication_mutation_update', 'trg_34a_communication_mutation_delete', 'trg_34a_mls_epoch_update', 'trg_34a_mls_epoch_delete'])],
+    'trg_34a_communication_mutation_update', 'trg_34a_communication_mutation_delete', 'trg_34a_mls_epoch_update', 'trg_34a_mls_epoch_delete',
+    'CHECK(scope_resource_type IS NULL AND scope_resource_id IS NULL)', 'previous_confirmed_transcript_hash_sha256',
+    '>=100000', '>=4096', '>=256', '>=128', '>=32'])],
   ['domain and security fix room history rekey and fail-closed provider evidence truth', has(domain, ['COMMUNICATION_ROOM_TYPES',
     'revokedCredentialBlocksRoomEpochMutationUntilRekey: true', 'rfc9420ProviderConfigured: false',
     'messageEventSignatureVerificationImplemented: false']) && has(security, ['verifyCommunicationMlsProviderEvidence',
-    'MLS_128_DHKEMX25519_AES128GCM_SHA256_Ed25519', 'matchingKeys.length !== 1', 'providerEvidenceVerified: true'])],
+    'MLS_128_DHKEMX25519_AES128GCM_SHA256_Ed25519', 'providerImplementation === evidence.providerImplementation',
+    'previousConfirmedTranscriptHashSha256', 'canonicalArray', 'matchingKeys.length !== 1', 'providerEvidenceVerified: true'])],
   ['repository contract exposes exact center device room membership epoch mutation and policy ports', has(contract, ['loadCenter(',
     'findDeviceCredential(', 'findDeviceCredentialByTrustedDeviceId(', 'findFamilyDeviceCredentialForRoom(', 'findRoom(', 'listMemberships(',
     'findMembership(', 'findEpoch(', 'findMutationByClientOperationId(', 'insertMutation(', 'insertDeviceCredential(', 'saveDeviceCredential(',
-    'insertEpoch(', 'insertRoom(', 'saveRoom(', 'insertMembership(', 'saveMembership(', 'resolvePolicyResource('])],
+    'getStorageUsage(', 'insertEpoch(', 'insertRoom(', 'saveRoom(', 'insertMembership(', 'saveMembership(', 'resolvePolicyResource('])],
   ['application verifies provider evidence after replay and persists content-free audit outbox', has(application, ['findMutation(command.clientOperationId)',
-    'providerEvidenceVerified !== true', 'scope.insertMutation', 'scope.appendAudit', 'scope.enqueueEvent',
-    'RekeyCommunicationRoomAfterDeviceRevocationUseCase', 'new_members_no_history'])],
+    'providerEvidenceVerified !== true', 'ensureStorageCapacity', 'exactCommand', 'scope.insertMutation', 'scope.appendAudit', 'scope.enqueueEvent',
+    'replacementDeviceCredentialId', 'RekeyCommunicationRoomAfterDeviceRevocationUseCase', 'new_members_no_history'])],
   ['repository enforces receipt owner trusted-device revision and immutable evidence', has(repository, ['assertPolicyAuthorizedRepositoryContext',
     'writeBinding(context, row)', 'state_fingerprint', 'policy_receipt_hash', 'communication_mls_epochs'])],
   ['desktop adapter and runtime compose exact central Life policy resources', has(adapter, ['RepositoryBackedCommunicationSecurityUnitOfWork',
@@ -81,14 +84,16 @@ const definitions = [
     'registerCommunicationDeviceCredential', 'revokeCommunicationDeviceCredential', 'createCommunicationRoom', 'addCommunicationRoomMember',
     'removeCommunicationRoomMember', 'rekeyCommunicationRoomAfterDeviceRevocation', 'setCommunicationHistoryAccess', 'freezeCommunicationRoom'])
     && has(globalTypes, ['getCommunicationSecurityCenter', 'registerCommunicationDeviceCredential', 'rekeyCommunicationRoomAfterDeviceRevocation'])],
-  ['tests cover tamper trust window replay rollback foreign owner revoked device history and no-claim UI', has(tests.join('\n'), ['ambiguous key identities',
+  ['tests cover canonical attacks continuity capacity recovery replay rollback owner and no-claim UI', has(tests.join('\n'), ['ambiguous key identities',
+    'rejects accessors, symbols and sparse trusted-key registries', 'rejects provider substitution and broken previous-epoch evidence',
+    'recovers a revoked sole-owner device', 'scopeResourceType: \'family\'', 'getStorageUsage(context, key, rows.room.id)',
     'replays exactly', 'outbox failure', 'foreign owner receipt', 'trusted-device revocation', 'new_members_no_history',
     'without a new route', 'const providerReady=false;'])],
   ['decision and threat model deny production MLS messages relay network and acceptance claims', has(decision, ['countsAsRequirementPass=false',
     'Production `CommunicationMlsFoundationPort`', 'NOT_RUN']) && has(threat, ['Sahte sağlayıcı kanıtı', 'Renderer anahtar veya mesaj otoritesi',
     'İptal edilmiş cihazla epoch ilerletme', 'NOT_RUN'])],
   ['PPK-015 021 and 022 ratchets are exact PASS', p15.status === 'PASS' && p15.files === 555
-    && p15.sourceSha256 === 'dd417d3278b872587fa1ef32cda41e5dcf44a22c9781f29c311d78d845d48e29' && p15.findings === 0
+    && p15.sourceSha256 === 'dd1bb1f82808dd42e3182773b2ea92b759cef4c5473543ca2d804f30e6079e59' && p15.findings === 0
     && p21.status === 'PASS' && p21.files === 555 && p21.surfaces === 873 && p21.sha256 === '843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc'
     && p22.status === 'PASS' && p22.files === 555 && p22.surfaces === 392 && p22.sha256 === 'cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c'],
   ['production provider conformance delivery and requirement acceptance remain closed', scope.truth?.rfc9420ProviderConfigured === false

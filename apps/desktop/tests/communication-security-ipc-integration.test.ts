@@ -28,7 +28,8 @@ const truth = {
   rfc9420ProviderConfigured: false, rfc9420ConformanceVerified: false,
   forwardSecrecyVerifiedInProduction: false, postCompromiseSecurityVerifiedInProduction: false,
   relayContentBlindnessVerifiedInProduction: false, realMessageExchangePerformed: false,
-  networkUsedByCurrentImplementation: false
+  networkUsedByCurrentImplementation: false, scopedResourceAuthorizationImplemented: false,
+  boundedMetadataStorageEnforced: true, automaticRetentionRecoveryImplemented: false
 };
 const center = {
   schemaVersion: 1,
@@ -50,8 +51,17 @@ const center = {
       providerEvidenceVerified: true, sealedProviderStateStored: true, activeDeviceCredentialCount: 1,
       createdAt: NOW, reason: 'room_created'
     },
+    storageCapacity: {
+      memberships: { current: 1, limit: 128, limitReached: false },
+      epochs: { current: 1, limit: 4096, limitReached: false }
+    },
     revision: 1, createdAt: NOW, updatedAt: NOW
   }],
+  storageCapacity: {
+    deviceCredentials: { current: 1, limit: 32, limitReached: false },
+    rooms: { current: 1, limit: 256, limitReached: false },
+    mutations: { current: 2, limit: 100000, limitReached: false }
+  },
   truth,
   generatedAt: NOW
 };
@@ -94,6 +104,11 @@ describe('34-A communication security IPC boundary', () => {
     ]);
     for (const [channel, args] of valid) expect(evaluateIpcIntegrationPolicy(channel, args).accepted).toBe(true);
     expect(evaluateIpcIntegrationPolicy('communicationSecurity:sendMessage', [{}]).accepted).toBe(false);
+    expect(evaluateIpcIntegrationPolicy(COMMUNICATION_SECURITY_IPC_CHANNELS.rekeyRoom, [{
+      clientOperationId: 'rekey-owner-room-34-a', expectedRevision: 2, roomId: 'comm-room-34-a',
+      revokedDeviceCredentialId: 'comm-device-owner-old-34-a', replacementDeviceCredentialId: 'comm-device-owner-new-34-a',
+      confirmation: 'KAYIP CIHAZ SONRASI ODAYI YENIDEN ANAHTARLA', reason: 'Yedek cihazla yeniden anahtarla.'
+    }]).accepted).toBe(true);
   });
 
   it('rejects renderer-supplied key material, provider evidence, relay authority, paths and prototype tricks', () => {
@@ -105,6 +120,13 @@ describe('34-A communication security IPC boundary', () => {
       { token: 'secret' }, { path: 'C:\\keys\\mls.bin' }, { message: 'plaintext' }
     ]) expect(evaluateIpcIntegrationPolicy(COMMUNICATION_SECURITY_IPC_CHANNELS.createRoom, [{ ...base, ...extra }]).accepted)
       .toBe(false);
+    expect(evaluateIpcIntegrationPolicy(COMMUNICATION_SECURITY_IPC_CHANNELS.createRoom, [{ ...base,
+      scopeResourceType: 'family', scopeResourceId: 'family-resource-34-a' }]).accepted).toBe(false);
+    expect(evaluateIpcIntegrationPolicy(COMMUNICATION_SECURITY_IPC_CHANNELS.rekeyRoom, [{
+      clientOperationId: 'rekey-room-34-a', expectedRevision: 2, roomId: 'comm-room-34-a',
+      revokedDeviceCredentialId: 'same-device-34-a', replacementDeviceCredentialId: 'same-device-34-a',
+      confirmation: 'KAYIP CIHAZ SONRASI ODAYI YENIDEN ANAHTARLA', reason: 'Aynı cihaz reddedilmeli.'
+    }]).accepted).toBe(false);
     const inherited = Object.create({ privateKey: 'secret' }) as Record<string, unknown>;
     Object.assign(inherited, base);
     expect(evaluateIpcIntegrationPolicy(COMMUNICATION_SECURITY_IPC_CHANNELS.createRoom, [inherited]).accepted).toBe(false);
@@ -121,6 +143,9 @@ describe('34-A communication security IPC boundary', () => {
       .toBe(false);
     expect(evaluateIpcIntegrationResultPolicy(COMMUNICATION_SECURITY_IPC_CHANNELS.setHistoryAccess,
       { ...receipt, networkUsed: true }).accepted).toBe(false);
+    expect(evaluateIpcIntegrationResultPolicy(COMMUNICATION_SECURITY_IPC_CHANNELS.getCenter, {
+      ...center, rooms: [{ ...center.rooms[0], scopeResourceType: 'family', scopeResourceId: 'family-resource-34-a' }]
+    }).accepted).toBe(false);
   });
 
   it('keeps reads cancellable and every durable MLS metadata write non-cancellable and bounded', () => {
