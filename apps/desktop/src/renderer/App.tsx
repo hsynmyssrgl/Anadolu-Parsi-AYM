@@ -2,7 +2,7 @@ import { useEffect, useMemo, useReducer, useRef, useState, type CSSProperties, t
 import { Button, EmptyState, Modal, PageHeader, SectionHeader, StatRow, StatusMessage, Surface, VisuallyHidden } from './ui';
 import { navigationReducer, persistNavigationState, readNavigationState } from './navigation';
 import brandMarkUrl from './assets/brand-mark.png';
-import { accessibilityAnnouncement, applyAccessibilityProfile, nextRovingIndex, parseAccessibilityPreferences, resolveAccessibilityTheme, serializeAccessibilityPreferences, type AccessibilityAudienceProfile, type AccessibilityPreferences } from './accessibility';
+import { FIRST_RUN_NARRATION_TEXT, accessibilityAnnouncement, applyAccessibilityProfile, cancelFirstRunNarration, isFirstRunIntroductionComplete, nextRovingIndex, parseAccessibilityPreferences, persistBrandAudioMuted, persistFirstRunIntroductionComplete, readBootstrapPreference, readBrandAudioMuted, resolveAccessibilityTheme, serializeAccessibilityPreferences, startFirstRunNarration, writeBootstrapPreference, type AccessibilityAudienceProfile, type AccessibilityPreferences, type BootstrapPreferenceStorage, type FirstRunNarrationStatus } from './accessibility';
 import { AsyncWriteGuard, MutationRevisionWatermark } from './async-state-guard';
 import { AsyncStatePanel, ValidationSummary, canUndoGovernedDraft, useGovernedDraft, type ValidationIssue } from './form-ux';
 import { resolveRouteAsyncState } from './route-async-state';
@@ -139,19 +139,38 @@ const navGroups: ReadonlyArray<{ readonly label: string; readonly items: readonl
       .map((route) => route.id)
   }));
 
+const browserPreferenceStorage = (): BootstrapPreferenceStorage | undefined => {
+  try {
+    return globalThis.localStorage;
+  } catch {
+    return undefined;
+  }
+};
+
+const browserSpeechSynthesis = (): SpeechSynthesis | undefined => {
+  try {
+    return globalThis.speechSynthesis;
+  } catch {
+    return undefined;
+  }
+};
+
 const readSidebarState = (): boolean =>
-  globalThis.localStorage?.getItem('ppt-sidebar-collapsed') === 'true';
+  readBootstrapPreference(browserPreferenceStorage(), 'ppt-sidebar-collapsed') === 'true';
 
 const readAccessibilityPreferences = (): AccessibilityPreferences => {
-  const raw = globalThis.localStorage?.getItem('ppt-accessibility') ?? null;
+  const storage = browserPreferenceStorage();
+  const raw = readBootstrapPreference(storage, 'ppt-accessibility');
   const parsed = parseAccessibilityPreferences(raw, {
     highContrast: globalThis.matchMedia?.('(prefers-contrast: more)').matches ?? false,
     reduceMotion: globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
   });
-  const legacyTheme = globalThis.localStorage?.getItem('ppt-theme');
-  return raw && raw.includes('"theme"') || legacyTheme !== 'light' && legacyTheme !== 'dark'
-    ? parsed
-    : { ...parsed, theme: legacyTheme };
+  const legacyTheme = readBootstrapPreference(storage, 'ppt-theme');
+  let resolved:AccessibilityPreferences=parsed;
+  if(!raw?.includes('"theme"')&&(legacyTheme==='light'||legacyTheme==='dark'))resolved={...parsed,theme:legacyTheme};
+  return raw?.includes('"audioMuted"')
+    ? resolved
+    : { ...resolved, audioMuted:readBrandAudioMuted(storage, resolved.audioMuted) };
 };
 
 const rendererAccessibilityPreferences = (
@@ -618,29 +637,43 @@ function ArchiveScreen({ revision, snapshot, eventFilter, onEventFilterChange, o
   </>;
 }
 
-const FIRST_RUN_INTRO_KEY='ppt-first-run-intro-v1';
-const BRAND_AUDIO_DISABLED_KEY='ppt-brand-audio-disabled-v1';
-
 function playParsBrandSound(): void {
-  if(globalThis.localStorage?.getItem(BRAND_AUDIO_DISABLED_KEY)==='1')return;
-  const AudioContextCtor=globalThis.AudioContext ?? (globalThis as typeof globalThis & {webkitAudioContext?:typeof AudioContext}).webkitAudioContext;
-  if(!AudioContextCtor)return;
-  const ctx=new AudioContextCtor();
-  const master=ctx.createGain();master.gain.setValueAtTime(0.0001,ctx.currentTime);master.gain.exponentialRampToValueAtTime(0.16,ctx.currentTime+0.05);master.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+0.9);master.connect(ctx.destination);
-  const low=ctx.createOscillator();low.type='sawtooth';low.frequency.setValueAtTime(92,ctx.currentTime);low.frequency.exponentialRampToValueAtTime(48,ctx.currentTime+0.8);const lowGain=ctx.createGain();lowGain.gain.value=0.55;low.connect(lowGain).connect(master);
-  const buffer=ctx.createBuffer(1,Math.floor(ctx.sampleRate*0.9),ctx.sampleRate);const data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*(1-i/data.length);const noise=ctx.createBufferSource();noise.buffer=buffer;const filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=420;const noiseGain=ctx.createGain();noiseGain.gain.value=0.28;noise.connect(filter).connect(noiseGain).connect(master);
-  low.start();noise.start();low.stop(ctx.currentTime+0.9);noise.stop(ctx.currentTime+0.9);globalThis.setTimeout(()=>void ctx.close(),1100);
+  if(readBrandAudioMuted(browserPreferenceStorage()))return;
+  try {
+    const AudioContextCtor=globalThis.AudioContext ?? (globalThis as typeof globalThis & {webkitAudioContext?:typeof AudioContext}).webkitAudioContext;
+    if(!AudioContextCtor)return;
+    const ctx=new AudioContextCtor();
+    const master=ctx.createGain();master.gain.setValueAtTime(0.0001,ctx.currentTime);master.gain.exponentialRampToValueAtTime(0.16,ctx.currentTime+0.05);master.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+0.9);master.connect(ctx.destination);
+    const low=ctx.createOscillator();low.type='sawtooth';low.frequency.setValueAtTime(92,ctx.currentTime);low.frequency.exponentialRampToValueAtTime(48,ctx.currentTime+0.8);const lowGain=ctx.createGain();lowGain.gain.value=0.55;low.connect(lowGain).connect(master);
+    const buffer=ctx.createBuffer(1,Math.floor(ctx.sampleRate*0.9),ctx.sampleRate);const data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*(1-i/data.length);const noise=ctx.createBufferSource();noise.buffer=buffer;const filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=420;const noiseGain=ctx.createGain();noiseGain.gain.value=0.28;noise.connect(filter).connect(noiseGain).connect(master);
+    low.start();noise.start();low.stop(ctx.currentTime+0.9);noise.stop(ctx.currentTime+0.9);globalThis.setTimeout(()=>void ctx.close().catch(()=>undefined),1100);
+  } catch {
+    // Browser audio is optional; the visible introduction remains authoritative.
+  }
 }
 
-function FirstRunIntroduction({onComplete}:{onComplete:()=>void}){
-  const [muted,setMuted]=useState(globalThis.localStorage?.getItem(BRAND_AUDIO_DISABLED_KEY)==='1');
-  const [speaking,setSpeaking]=useState(false);
-  const narration='Anadolu Parsı Aile Yaşam Merkezine hoş geldiniz. Bu uygulama aile kayıtlarınızı yerel, kontrollü ve güvenli biçimde yönetmek için tasarlandı. Kişisel verileriniz siz giriş yapmadan açılmaz. İlk kurulumda güçlü bir kimlik ve kurtarma yöntemi oluşturacağız.';
-  const speak=()=>{if(muted||!('speechSynthesis' in globalThis))return;globalThis.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(narration);utterance.lang='tr-TR';utterance.rate=0.9;utterance.pitch=0.82;utterance.onstart=()=>setSpeaking(true);utterance.onend=()=>setSpeaking(false);utterance.onerror=()=>setSpeaking(false);globalThis.speechSynthesis.speak(utterance);};
-  useEffect(()=>{speak();return()=>globalThis.speechSynthesis?.cancel();},[]);
-  const toggleMuted=()=>{const next=!muted;setMuted(next);globalThis.localStorage?.setItem(BRAND_AUDIO_DISABLED_KEY,next?'1':'0');if(next)globalThis.speechSynthesis?.cancel();else globalThis.setTimeout(speak,0);};
-  const complete=()=>{globalThis.speechSynthesis?.cancel();globalThis.localStorage?.setItem(FIRST_RUN_INTRO_KEY,'1');playParsBrandSound();onComplete();};
-  return <main className="first-run-shell"><section className="first-run-card"><div className="first-run-brand"><img src={brandMarkUrl} alt=""/><span className="eyebrow">İlk kurulum</span><h1>Anadolu Parsı<br/><small>Aile Yaşam Merkezi</small></h1></div><p className="first-run-lead">Aile hafızası, belgeler, sağlık, finans ve yaşam kayıtları için güvenli yerel merkez.</p><div className="first-run-points"><div><strong>Gizlilik</strong><span>Kişisel veri kasası giriş yapılmadan açılmaz.</span></div><div><strong>Kontrol</strong><span>Yetkiler kimlik sağlayıcısından bağımsızdır.</span></div><div><strong>Dayanıklılık</strong><span>Yedekleme ve kurtarma güvenlik tasarımının parçasıdır.</span></div></div><div className="first-run-caption" aria-live="polite"><strong>Sesli anlatım</strong><p>{narration}</p></div><div className="first-run-actions"><Button onClick={toggleMuted}>{muted?'Sesi aç':'Sesi kapat'}</Button><Button onClick={speak} disabled={muted||speaking}>{speaking?'Anlatılıyor…':'Yeniden anlat'}</Button><Button tone="primary" onClick={complete}>İlk kuruluma geç</Button></div><button className="first-run-skip" type="button" onClick={complete}>Tanıtımı geç</button></section></main>;
+function FirstRunIntroduction({audioMuted,onAudioMutedChange,onComplete}:{audioMuted:boolean;onAudioMutedChange:(muted:boolean)=>void;onComplete:()=>void}){
+  const [narrationStatus,setNarrationStatus]=useState<FirstRunNarrationStatus>(audioMuted?'muted':'idle');
+  const narrationEnvironment=():{synthesis?:SpeechSynthesis;createUtterance?:(text:string)=>SpeechSynthesisUtterance}=>{
+    try {
+      const synthesis=globalThis.speechSynthesis;
+      const Utterance=globalThis.SpeechSynthesisUtterance;
+      return synthesis&&Utterance?{synthesis,createUtterance:(text:string)=>new Utterance(text)}:{};
+    } catch {
+      return {};
+    }
+  };
+  const cancelNarration=()=>cancelFirstRunNarration(narrationEnvironment().synthesis);
+  const speak=(muted=audioMuted)=>{
+    const environment=narrationEnvironment();
+    return startFirstRunNarration({muted,synthesis:environment.synthesis,createUtterance:environment.createUtterance,onStatus:setNarrationStatus});
+  };
+  useEffect(()=>{if(audioMuted){cancelNarration();setNarrationStatus('muted');return;}speak(false);return()=>{cancelNarration();};},[audioMuted]);
+  const toggleMuted=()=>{const next=!audioMuted;onAudioMutedChange(next);if(next){cancelNarration();setNarrationStatus('muted');}};
+  const complete=()=>{cancelNarration();persistFirstRunIntroductionComplete(browserPreferenceStorage());playParsBrandSound();onComplete();};
+  const speaking=narrationStatus==='speaking';
+  const narrationStatusText=audioMuted?'Ses kapalı; anlatım metni görünür.':narrationStatus==='unavailable'?'Bu cihazda yerel sesli anlatım kullanılamıyor; metin görünür.':narrationStatus==='error'?'Sesli anlatım başlatılamadı; metin görünür.':speaking?'Türkçe anlatım oynatılıyor.':'Türkçe anlatım hazır.';
+  return <main className="first-run-shell"><section className="first-run-card"><div className="first-run-brand"><img src={brandMarkUrl} alt=""/><span className="eyebrow">İlk kurulum</span><h1>Anadolu Parsı<br/><small>Aile Yaşam Merkezi</small></h1></div><p className="first-run-lead">Aile hafızası, belgeler, sağlık, finans ve yaşam kayıtları için güvenli yerel merkez.</p><div className="first-run-points"><div><strong>Gizlilik</strong><span>Kişisel veri kasası giriş yapılmadan açılmaz.</span></div><div><strong>Kontrol</strong><span>Yetkiler kimlik sağlayıcısından bağımsızdır.</span></div><div><strong>Dayanıklılık</strong><span>Yedekleme ve kurtarma güvenlik tasarımının parçasıdır.</span></div></div><div className="first-run-caption" aria-live="polite"><strong>Sesli anlatım</strong><p>{FIRST_RUN_NARRATION_TEXT}</p><small role="status">{narrationStatusText}</small></div><div className="first-run-actions"><Button onClick={toggleMuted}>{audioMuted?'Sesi aç':'Sesi kapat'}</Button><Button onClick={()=>speak(false)} disabled={audioMuted||speaking||narrationStatus==='unavailable'}>{speaking?'Anlatılıyor…':'Yeniden anlat'}</Button><Button tone="primary" onClick={complete}>İlk kuruluma geç</Button></div><button className="first-run-skip" type="button" onClick={complete}>Tanıtımı geç</button></section></main>;
 }
 
 
@@ -1842,7 +1875,7 @@ function SettingsSecurity({auth,accessibility,onAccessibilityChange,onFamilyData
     <PrivacyOwnershipCenter/>
     <IdentityAccessCredentialCenter trustedDevices={devices}/>
     <SectionHeader eyebrow="Yerel koruma" title="Güvenlik ve yedekleme"/>
-    <div className="button-row"><Button onClick={()=>globalThis.dispatchEvent(new CustomEvent('ppt-replay-intro'))}>Tanıtımı yeniden oynat</Button><Button onClick={()=>{const disabled=globalThis.localStorage?.getItem(BRAND_AUDIO_DISABLED_KEY)==='1';globalThis.localStorage?.setItem(BRAND_AUDIO_DISABLED_KEY,disabled?'0':'1');setMessage(disabled?'Marka sesi açıldı.':'Marka sesi kapatıldı.');}}>Marka sesini aç/kapat</Button></div>
+    <div className="button-row"><Button onClick={()=>globalThis.dispatchEvent(new CustomEvent('ppt-replay-intro'))}>Tanıtımı yeniden oynat</Button><Button onClick={()=>{const audioMuted=!accessibility.audioMuted;onAccessibilityChange({...accessibility,audioMuted});setMessage(audioMuted?'Marka ve anlatım sesi kapatıldı.':'Marka ve anlatım sesi açıldı.');}}>Marka ve anlatım sesini aç/kapat</Button></div>
     <p>Oturum: {auth.displayName??'Yönetici'} · 2FA {auth.twoFactorEnabled?'açık':'kapalı'}</p>
     <section className="privacy-control-center">
       <h3>Gizlilik, süreli rıza ve kayıp cihaz kapatma merkezi</h3>
@@ -2581,7 +2614,7 @@ export function App() {
   const [screenDataError,setScreenDataError]=useState('');
   const [screenLoadRevision,setScreenLoadRevision]=useState(0);
   const [loading, setLoading] = useState(!shellPreviewMode);
-  const [firstRunIntroCompleted,setFirstRunIntroCompleted]=useState(shellPreviewMode||globalThis.localStorage?.getItem(FIRST_RUN_INTRO_KEY)==='1');
+  const [firstRunIntroCompleted,setFirstRunIntroCompleted]=useState(shellPreviewMode||isFirstRunIntroductionComplete(browserPreferenceStorage()));
   const [auth, setAuth] = useState<AuthStateView>(shellPreviewMode
     ? {initialized:true,authenticated:true,displayName:'Yerel Kullanıcı',role:'family_admin',twoFactorEnabled:true}
     : {initialized:false,authenticated:false});
@@ -2640,10 +2673,10 @@ export function App() {
   useEffect(()=>{const online=()=>setNetworkOnline(true),offline=()=>setNetworkOnline(false);globalThis.addEventListener('online',online);globalThis.addEventListener('offline',offline);return()=>{globalThis.removeEventListener('online',online);globalThis.removeEventListener('offline',offline);};},[]);
   useEffect(() => () => asyncWriteGuardRef.current.invalidateAll(), []);
   useEffect(()=>()=>{if(accessibilitySaveTimerRef.current!==undefined)globalThis.clearTimeout(accessibilitySaveTimerRef.current);},[]);
-  useEffect(() => { globalThis.localStorage?.setItem('ppt-theme', theme); }, [theme]);
-  useEffect(() => { globalThis.localStorage?.setItem('ppt-accessibility', serializeAccessibilityPreferences(accessibility));globalThis.localStorage?.setItem(BRAND_AUDIO_DISABLED_KEY,accessibility.audioMuted?'1':'0');if(accessibility.audioMuted)globalThis.speechSynthesis?.cancel(); }, [accessibility]);
+  useEffect(() => { writeBootstrapPreference(browserPreferenceStorage(), 'ppt-theme', theme); }, [theme]);
+  useEffect(() => { const storage=browserPreferenceStorage();writeBootstrapPreference(storage,'ppt-accessibility',serializeAccessibilityPreferences(accessibility));persistBrandAudioMuted(storage,accessibility.audioMuted);if(accessibility.audioMuted)cancelFirstRunNarration(browserSpeechSynthesis()); }, [accessibility]);
   useEffect(()=>{const query=globalThis.matchMedia?.('(prefers-color-scheme: dark)');if(!query)return;const update=()=>setSystemDark(query.matches);query.addEventListener?.('change',update);return()=>query.removeEventListener?.('change',update);},[]);
-  useEffect(() => { globalThis.localStorage?.setItem('ppt-sidebar-collapsed', String(sidebarCollapsed)); }, [sidebarCollapsed]);
+  useEffect(() => { writeBootstrapPreference(browserPreferenceStorage(), 'ppt-sidebar-collapsed', String(sidebarCollapsed)); }, [sidebarCollapsed]);
   useEffect(()=>{const replay=()=>setFirstRunIntroCompleted(false);globalThis.addEventListener('ppt-replay-intro',replay);return()=>globalThis.removeEventListener('ppt-replay-intro',replay);},[]);
   useEffect(() => {
     const clock = globalThis.setInterval(() => setCurrentTime(new Date()), 30_000);
@@ -3028,11 +3061,12 @@ export function App() {
     ? <SessionLockOverlay state={sessionLock} twoFactorEnabled={Boolean(auth.twoFactorEnabled)} onContinue={continueSession} onLockNow={lockSessionNow} onUnlock={unlockSession}/>
     : null;
 
-  if(!loading && !firstRunIntroCompleted) return auth.authenticated&&sessionOverlay
-    ? <><div aria-hidden="true"><FirstRunIntroduction onComplete={()=>setFirstRunIntroCompleted(true)}/></div>{sessionOverlay}</>
-    : <FirstRunIntroduction onComplete={()=>setFirstRunIntroCompleted(true)}/>;
-  if(!loading && !auth.authenticated) return <AuthScreen auth={auth} onSetup={setupAdmin} onLogin={login} onWindowsHelloLogin={loginWithWindowsHello} onInvitationAccepted={completeInvitationAcceptance}/>;
-  if(!loading && auth.authenticated && !auth.twoFactorEnabled) {
+  if(!firstRunIntroCompleted) return auth.authenticated&&sessionOverlay
+    ? sessionOverlay
+    : <FirstRunIntroduction audioMuted={accessibility.audioMuted} onAudioMutedChange={(audioMuted)=>updateAccessibility({...accessibility,audioMuted})} onComplete={()=>setFirstRunIntroCompleted(true)}/>;
+  if(loading)return <main className="first-run-shell"><section className="first-run-card"><div className="loading-screen"><div className="loader"/><strong>Güvenli başlangıç hazırlanıyor…</strong><small>Kimlik durumu doğrulanmadan aile verileri ve normal uygulama ekranı açılmaz.</small></div></section></main>;
+  if(!auth.authenticated) return <AuthScreen auth={auth} onSetup={setupAdmin} onLogin={login} onWindowsHelloLogin={loginWithWindowsHello} onInvitationAccepted={completeInvitationAcceptance}/>;
+  if(auth.authenticated && !auth.twoFactorEnabled) {
     const setup=<FirstRunSecuritySetup onComplete={(state)=>{setAuth(state);void bootstrapAuthenticatedSession();}}/>;
     return sessionOverlay?<><div aria-hidden="true">{setup}</div>{sessionOverlay}</>:setup;
   }
@@ -3049,8 +3083,7 @@ export function App() {
   const openImportantDayModal=()=>{void ensureSnapshotSection('timeline').then(()=>setEventModal(true)).catch(error=>setScreenDataError(error instanceof Error?error.message:'Önemli gün verileri yüklenemedi.'));};
 
   let screen: ReactNode;
-  if (loading) screen = <div className="loading-screen"><div className="loader" /><strong>Aile verileri hazırlanıyor…</strong></div>;
-  else if(screenDataError)screen=<div className="loading-screen"><StatusMessage tone="danger">{screenDataError}</StatusMessage><Button onClick={()=>{setScreenDataError('');setScreenLoadRevision(value=>value+1);}}>Yeniden dene</Button></div>;
+  if(screenDataError)screen=<div className="loading-screen"><StatusMessage tone="danger">{screenDataError}</StatusMessage><Button onClick={()=>{setScreenDataError('');setScreenLoadRevision(value=>value+1);}}>Yeniden dene</Button></div>;
   else if(active!=='dashboard'&&!activeScreenDataReady)screen=<div className="loading-screen"><div className="loader"/><strong>{activeItem.label} verileri yükleniyor…</strong></div>;
   else if (active === 'dashboard') screen = <Dashboard overview={dashboardOverview} onNavigate={setActive} onAddMember={()=>setMemberModal(true)} onAddImportantDay={openImportantDayModal} />;
   else if (active === 'family') screen = <FamilyScreen revision={catalogRevision} onAdd={() => setMemberModal(true)} />;

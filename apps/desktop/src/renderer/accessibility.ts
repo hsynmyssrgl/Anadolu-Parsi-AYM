@@ -17,6 +17,118 @@ export interface AccessibilityPreferences {
   audioMuted: boolean;
 }
 
+export const FIRST_RUN_INTRO_STORAGE_KEY = 'ppt-first-run-intro-v1';
+export const BRAND_AUDIO_DISABLED_STORAGE_KEY = 'ppt-brand-audio-disabled-v1';
+export const FIRST_RUN_NARRATION_TEXT = 'Anadolu Parsı Aile Yaşam Merkezine hoş geldiniz. Bu uygulama aile kayıtlarınızı yerel, kontrollü ve güvenli biçimde yönetmek için tasarlandı. Kişisel verileriniz siz giriş yapmadan açılmaz. İlk kurulumda güçlü bir kimlik ve kurtarma yöntemi oluşturacağız.';
+
+export interface BootstrapPreferenceStorage {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+}
+
+export type FirstRunNarrationStatus = 'idle' | 'muted' | 'speaking' | 'ready' | 'unavailable' | 'error';
+
+export interface FirstRunNarrationUtterance {
+  lang: string;
+  rate: number;
+  pitch: number;
+}
+
+export interface FirstRunNarrationSynthesis<TUtterance extends FirstRunNarrationUtterance> {
+  cancel(): void;
+  speak(utterance: TUtterance): void;
+}
+
+export const readBootstrapPreference = (
+  storage: BootstrapPreferenceStorage | undefined,
+  key: string
+): string | null => {
+  try {
+    return storage?.getItem(key) ?? null;
+  } catch {
+    return null;
+  }
+};
+
+export const writeBootstrapPreference = (
+  storage: BootstrapPreferenceStorage | undefined,
+  key: string,
+  value: string
+): boolean => {
+  try {
+    if (!storage) return false;
+    storage.setItem(key, value);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export const isFirstRunIntroductionComplete = (storage: BootstrapPreferenceStorage | undefined): boolean =>
+  readBootstrapPreference(storage, FIRST_RUN_INTRO_STORAGE_KEY) === '1';
+
+export const persistFirstRunIntroductionComplete = (storage: BootstrapPreferenceStorage | undefined): boolean =>
+  writeBootstrapPreference(storage, FIRST_RUN_INTRO_STORAGE_KEY, '1');
+
+export const readBrandAudioMuted = (
+  storage: BootstrapPreferenceStorage | undefined,
+  fallback = false
+): boolean => {
+  const value = readBootstrapPreference(storage, BRAND_AUDIO_DISABLED_STORAGE_KEY);
+  return value === null ? fallback : value === '1';
+};
+
+export const persistBrandAudioMuted = (
+  storage: BootstrapPreferenceStorage | undefined,
+  muted: boolean
+): boolean => writeBootstrapPreference(storage, BRAND_AUDIO_DISABLED_STORAGE_KEY, muted ? '1' : '0');
+
+export const cancelFirstRunNarration = (
+  synthesis: Pick<FirstRunNarrationSynthesis<FirstRunNarrationUtterance>, 'cancel'> | undefined
+): boolean => {
+  try {
+    if (!synthesis) return false;
+    synthesis.cancel();
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export const startFirstRunNarration = <TUtterance extends FirstRunNarrationUtterance>(input: {
+  muted: boolean;
+  synthesis: FirstRunNarrationSynthesis<TUtterance> | undefined;
+  createUtterance: ((text: string) => TUtterance) | undefined;
+  onStatus: (status: FirstRunNarrationStatus) => void;
+}): FirstRunNarrationStatus => {
+  if (input.muted) {
+    input.onStatus('muted');
+    return 'muted';
+  }
+  if (!input.synthesis || !input.createUtterance) {
+    input.onStatus('unavailable');
+    return 'unavailable';
+  }
+  try {
+    input.synthesis.cancel();
+    const utterance = input.createUtterance(FIRST_RUN_NARRATION_TEXT);
+    utterance.lang = 'tr-TR';
+    utterance.rate = 0.9;
+    utterance.pitch = 0.82;
+    Object.assign(utterance, {
+      onstart:() => input.onStatus('speaking'),
+      onend:() => input.onStatus('ready'),
+      onerror:() => input.onStatus('error')
+    });
+    input.onStatus('speaking');
+    input.synthesis.speak(utterance);
+    return 'speaking';
+  } catch {
+    input.onStatus('error');
+    return 'error';
+  }
+};
+
 export const DEFAULT_ACCESSIBILITY_PREFERENCES: AccessibilityPreferences = Object.freeze({
   textScale: 'standard',
   textScalePercent: 100,
