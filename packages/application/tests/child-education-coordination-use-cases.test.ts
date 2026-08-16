@@ -66,8 +66,11 @@ describe('33-U child education coordination use cases',()=>{
     const unit=new MemoryUnit();const create=new CreateChildEducationItemUseCase(unit);
     const created=await create.execute({context:context(TEEN),command:{clientOperationId:'operation-private-create',
       itemId:'homework-private',childPersonId:TEEN,kind:'homework',title:'Kişisel çalışma notu',
-      visibility:'adolescent_private',subjectLabel:'Matematik'}});
+      visibility:'adolescent_private',subjectLabel:'Matematik',dueAt:'2026-08-20T15:00:00.000Z'}});
     expect(created).toMatchObject({ok:true});
+    const invalidClear=await new UpdateChildEducationItemUseCase(unit).execute({context:context(TEEN),command:{
+      clientOperationId:'operation-private-clear-due',itemId:'homework-private',childPersonId:TEEN,expectedRevision:1,dueAt:null}});
+    expect(invalidClear).toMatchObject({ok:false,error:{category:'validation'}});
     const denied=await new UpdateChildEducationItemUseCase(unit).execute({context:context(),command:{
       clientOperationId:'operation-private-parent',itemId:'homework-private',childPersonId:TEEN,expectedRevision:1,status:'completed'}});
     expect(denied).toMatchObject({ok:false,error:{category:'authorization'}});
@@ -82,12 +85,21 @@ describe('33-U child education coordination use cases',()=>{
 
   it('enforces allowance, goal, transport and pickup fields without payment or live-tracking claims',async()=>{
     const unit=new MemoryUnit();const create=new CreateChildEducationItemUseCase(unit);
+    for(const command of [
+      {clientOperationId:'operation-class-no-label',itemId:'class-no-label',childPersonId:TEEN,kind:'class' as const,title:'10-A',visibility:'family_coordination' as const,institutionLabel:'Örnek okul'},
+      {clientOperationId:'operation-homework-no-due',itemId:'homework-no-due',childPersonId:TEEN,kind:'homework' as const,title:'Matematik ödevi',visibility:'family_coordination' as const,subjectLabel:'Matematik'},
+      {clientOperationId:'operation-exam-no-time',itemId:'exam-no-time',childPersonId:TEEN,kind:'exam' as const,title:'Fen sınavı',visibility:'family_coordination' as const,subjectLabel:'Fen'},
+      {clientOperationId:'operation-event-no-time',itemId:'event-no-time',childPersonId:TEEN,kind:'school_event' as const,title:'Okul gezisi',visibility:'family_coordination' as const,institutionLabel:'Örnek okul'},
+      {clientOperationId:'operation-pickup-no-window',itemId:'pickup-no-window',childPersonId:TEEN,kind:'pickup_authority' as const,title:'Teslim yetkisi',visibility:'family_coordination' as const,authorityReferenceId:'opaque-credential'},
+      {clientOperationId:'operation-course-no-time',itemId:'course-no-time',childPersonId:TEEN,kind:'course' as const,title:'Kodlama kursu',visibility:'family_coordination' as const,institutionLabel:'Yerel kurs'}
+    ]) expect(await create.execute({context:context(),command})).toMatchObject({ok:false,error:{category:'validation'}});
     expect(await create.execute({context:context(),command:{clientOperationId:'operation-budget',itemId:'budget-33-u',
       childPersonId:TEEN,kind:'allowance_budget',title:'Aylık harçlık planı',visibility:'family_coordination',amountMinor:10000,currency:'TRY'}})).toMatchObject({ok:true});
     expect(await create.execute({context:context(),command:{clientOperationId:'operation-bad-budget',itemId:'budget-bad',
       childPersonId:TEEN,kind:'allowance_budget',title:'Eksik bütçe',visibility:'family_coordination'}})).toMatchObject({ok:false});
     expect(await create.execute({context:context(),command:{clientOperationId:'operation-pickup',itemId:'pickup-33-u',
-      childPersonId:TEEN,kind:'pickup_authority',title:'Teslim yetkisi',visibility:'family_coordination',authorityReferenceId:'opaque-credential-33-p'}})).toMatchObject({ok:true});
+      childPersonId:TEEN,kind:'pickup_authority',title:'Teslim yetkisi',visibility:'family_coordination',authorityReferenceId:'opaque-credential-33-p',
+      scheduledAt:'2026-08-16T08:00:00.000Z',dueAt:'2026-08-16T18:00:00.000Z'}})).toMatchObject({ok:true});
   });
 
   it('updates then content-minimizes deletion while keeping audit and outbox payload free of note text',async()=>{
@@ -96,6 +108,10 @@ describe('33-U child education coordination use cases',()=>{
       kind:'education_goal',title:'Okuma hedefi',visibility:'family_coordination',progressBasisPoints:1000,note:'Özel ayrıntı'}});
     expect(await new UpdateChildEducationItemUseCase(unit).execute({context:context(),command:{clientOperationId:'operation-goal-update',
       itemId:'goal-33-u',childPersonId:TEEN,expectedRevision:1,progressBasisPoints:5000,status:'active'}})).toMatchObject({ok:true,value:{revision:2}});
+    expect(await new UpdateChildEducationItemUseCase(unit).execute({context:context(),command:{clientOperationId:'operation-goal-selected-visibility',
+      itemId:'goal-33-u',childPersonId:TEEN,expectedRevision:2,visibility:'child_and_selected_guardians'}}))
+      .toMatchObject({ok:false,error:{category:'authorization'}});
+    expect(unit.scope.items.get('goal-33-u')).toMatchObject({visibility:'family_coordination',revision:2});
     expect(await new DeleteChildEducationItemUseCase(unit).execute({context:context(),command:{clientOperationId:'operation-goal-delete',
       itemId:'goal-33-u',childPersonId:TEEN,expectedRevision:2,reason:'Artık gerekli değil'}})).toMatchObject({ok:true,value:{revision:3}});
     expect(unit.scope.items.get('goal-33-u')).toMatchObject({status:'deleted',title:'Silindi',revision:3});

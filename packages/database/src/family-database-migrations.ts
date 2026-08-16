@@ -13769,8 +13769,11 @@ CREATE TABLE child_education_items (
     AND progress_basis_points IS NULL AND certificate_status IS NULL AND note IS NULL)
     OR (status<>'deleted' AND deleted_at IS NULL)),
   CHECK(status='deleted' OR (
-    ((kind IN ('school','class','course','sport','certificate')) = (institution_label IS NOT NULL))
+    ((kind IN ('school','class','school_event','course','sport','certificate')) = (institution_label IS NOT NULL))
     AND ((kind IN ('timetable','homework','exam')) = (subject_label IS NOT NULL))
+    AND ((kind='class') = (class_label IS NOT NULL))
+    AND (kind NOT IN ('timetable','exam','school_event','transport_plan','pickup_authority','course','sport') OR scheduled_at IS NOT NULL)
+    AND (kind NOT IN ('homework','pickup_authority') OR due_at IS NOT NULL)
     AND ((kind='transport_plan') = (transport_mode IS NOT NULL))
     AND ((kind='pickup_authority') = (authority_reference_id IS NOT NULL))
     AND ((kind='allowance_budget') = (amount_minor IS NOT NULL AND currency IS NOT NULL))

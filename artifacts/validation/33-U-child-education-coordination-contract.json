@@ -8,7 +8,7 @@
   "checkCount": 15,
   "passed": 15,
   "failed": 0,
-  "migration99Sha256": "38ecd03c71e734d1700f2ee44ece10e47935277e003e7e4ce21da7b6034db98e",
+  "migration99Sha256": "9eb3952ac53f823ae6d12aae09d41748a6a445cd9d4dce11df9d3a47b58a8e25",
   "checks": [
     {
       "name": "scope inventory and five-test matrix are exact",
@@ -19,7 +19,7 @@
       "status": "PASS"
     },
     {
-      "name": "migration owns exact current item and immutable mutation tables",
+      "name": "migration owns immutable ledgers and exact required kind fields",
       "status": "PASS"
     },
     {
@@ -43,23 +43,23 @@
       "status": "PASS"
     },
     {
-      "name": "application tests cover replay private-space age fields update and delete",
+      "name": "application tests cover replay private-space required fields target visibility update and delete",
       "status": "PASS"
     },
     {
-      "name": "repository tests cover forged scope immutable ledger and bounded policy metadata",
+      "name": "repository tests cover forged scope required class label immutable ledger and bounded metadata",
       "status": "PASS"
     },
     {
-      "name": "IPC tests reject renderer authority and unsafe result shapes",
+      "name": "IPC tests reject renderer authority incomplete kind fields and unsafe results",
       "status": "PASS"
     },
     {
-      "name": "DataStore tests prove PEP fail closed explicit grant privacy and rollback",
+      "name": "DataStore tests prove PEP fail closed all fourteen kinds privacy and rollback",
       "status": "PASS"
     },
     {
-      "name": "UI test pins existing route stable retry age privacy and local truth",
+      "name": "UI test pins existing route required kind summaries age privacy and local truth",
       "status": "PASS"
     },
     {
@@ -71,5 +71,5 @@
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-16T05:41:39.304Z"
+  "generatedAt": "2026-08-16T08:17:20.940Z"
 }

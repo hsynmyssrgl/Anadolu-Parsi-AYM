@@ -2784,12 +2784,18 @@ const childEducationCreateInput = (value: Record<string, unknown>): boolean => {
     || (value.progressBasisPoints !== undefined && (typeof value.progressBasisPoints !== 'number'
       || !Number.isSafeInteger(value.progressBasisPoints) || value.progressBasisPoints < 0 || value.progressBasisPoints > 10_000))
     || (value.note !== undefined && !healthCareText(value.note, 1, 2_000))) return false;
-  const institutionRequired = ['school','class','course','sport','certificate'].includes(String(value.kind));
+  const institutionRequired = ['school','class','school_event','course','sport','certificate'].includes(String(value.kind));
   const subjectRequired = ['timetable','homework','exam'].includes(String(value.kind));
+  const scheduleRequired = ['timetable','exam','school_event','transport_plan','pickup_authority','course','sport']
+    .includes(String(value.kind));
+  const dueRequired = value.kind === 'homework' || value.kind === 'pickup_authority';
   const moneyRequired = value.kind === 'allowance_budget';
   const goalRequired = value.kind === 'education_goal';
   return institutionRequired === (value.institutionLabel !== undefined)
     && subjectRequired === (value.subjectLabel !== undefined)
+    && (value.kind === 'class') === (value.classLabel !== undefined)
+    && (!scheduleRequired || value.scheduledAt !== undefined)
+    && (!dueRequired || value.dueAt !== undefined)
     && (value.kind === 'transport_plan') === (value.transportMode !== undefined)
     && (value.kind === 'pickup_authority') === (value.authorityReferenceId !== undefined)
     && moneyRequired === (value.amountMinor !== undefined && value.currency !== undefined)

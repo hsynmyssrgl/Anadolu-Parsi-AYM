@@ -26,7 +26,7 @@
       "status": "PASS"
     },
     {
-      "name": "application enforces age private space pickup budget and local truth",
+      "name": "application enforces age private space kind schema target visibility and local truth",
       "status": "PASS"
     },
     {
@@ -38,11 +38,11 @@
       "status": "PASS"
     },
     {
-      "name": "IPC exposes exact four channels with bounded safe results",
+      "name": "IPC exposes exact four channels and mirrors required kind fields",
       "status": "PASS"
     },
     {
-      "name": "renderer extends Life route with age privacy and local-only boundaries",
+      "name": "renderer extends Life route with required schedule summaries and local-only boundaries",
       "status": "PASS"
     },
     {
@@ -58,5 +58,5 @@
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-16T05:41:39.203Z"
+  "generatedAt": "2026-08-16T08:17:20.409Z"
 }

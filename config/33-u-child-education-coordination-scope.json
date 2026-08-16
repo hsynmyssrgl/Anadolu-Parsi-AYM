@@ -27,13 +27,21 @@
     "minorBirthDateRequired": true,
     "adolescentPrivateAgeRange": "13-17",
     "nonOwnerExplicitPermissionRequired": true,
+    "targetVisibilityAuthorizationRequired": true,
+    "classLabelRequired": true,
+    "homeworkDueDateRequired": true,
+    "scheduledKinds": ["timetable", "exam", "school_event", "transport_plan", "pickup_authority", "course", "sport"],
+    "pickupAuthorityValidityWindowRequired": true,
     "optimisticRevisionRequired": true,
     "idempotentClientOperationRequired": true,
     "immutableMutationLedger": true,
     "contentMinimizedSoftDelete": true,
     "boundedReadItemLimit": 1000,
     "existingLifeRouteReused": true,
-    "newMenuRouteAdded": false
+    "newMenuRouteAdded": false,
+    "allFourteenKindsEndToEndDataStoreTested": true,
+    "requiredLifecycleTimeRemovalRejected": true,
+    "scheduleDueBudgetAndProgressRendered": true
   },
   "truth": {
     "localOnly": true,
@@ -60,7 +68,7 @@
     "targetedTestFileRatchet": 5,
     "targetedTestRatchet": 22,
     "migrationVersion": 99,
-    "migrationSha256": "38ecd03c71e734d1700f2ee44ece10e47935277e003e7e4ce21da7b6034db98e",
+    "migrationSha256": "9eb3952ac53f823ae6d12aae09d41748a6a445cd9d4dce11df9d3a47b58a8e25",
     "ppk021": {
       "status": "PASS",
       "scannedProductionFiles": 555,

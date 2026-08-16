@@ -62,6 +62,17 @@ describe('33-U child education coordination IPC boundary',()=>{
       clientOperationId:'operation-child-cross-kind-33-u',itemId:ITEM,childPersonId:CHILD,kind:'homework',
       title:'Ödev',visibility:'family_coordination',subjectLabel:'Matematik',amountMinor:1_000,currency:'TRY'
     }])).toMatchObject({accepted:false});
+    for(const incomplete of [
+      {kind:'class',title:'10-A sınıfı',institutionLabel:'Örnek okul'},
+      {kind:'homework',title:'Matematik ödevi',subjectLabel:'Matematik'},
+      {kind:'exam',title:'Fen sınavı',subjectLabel:'Fen'},
+      {kind:'school_event',title:'Okul gezisi',institutionLabel:'Örnek okul'},
+      {kind:'pickup_authority',title:'Teslim yetkisi',authorityReferenceId:'opaque-credential-33-p'},
+      {kind:'course',title:'Kodlama kursu',institutionLabel:'Yerel kurs'}
+    ]) expect(evaluateIpcIntegrationPolicy(CHILD_EDUCATION_COORDINATION_IPC_CHANNELS.createItem,[{
+      clientOperationId:`operation-child-incomplete-${incomplete.kind}`,itemId:`item-child-incomplete-${incomplete.kind}`,
+      childPersonId:CHILD,visibility:'family_coordination',...incomplete
+    }])).toMatchObject({accepted:false});
     expect(evaluateIpcIntegrationPolicy('childEducation:future',[]))
       .toMatchObject({accepted:false,reason:'UNKNOWN_IPC_CHANNEL'});
   });

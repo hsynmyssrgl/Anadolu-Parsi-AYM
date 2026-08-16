@@ -39,6 +39,11 @@ describe('33-U child education coordination renderer surface',()=>{
     expect(panel).toContain('Ergen özel alanı');
     expect(panel).toContain('Kimlik Merkezi referansı');
     expect(panel).not.toContain('Teslim kodu');
+    expect(panel).toContain("kind!=='class'||classLabel.trim().length>0");
+    expect(panel).toContain("!scheduleRequired||Boolean(isoOrUndefined(scheduledAt))");
+    expect(panel).toContain("!dueRequired||Boolean(isoOrUndefined(dueAt))");
+    expect(panel).toContain("entry.dueAt?`son tarih ${new Date(entry.dueAt).toLocaleString('tr-TR')}`");
+    expect(panel).toContain("entry.progressBasisPoints!==undefined?`ilerleme %${entry.progressBasisPoints/100}`");
   });
 
   it('states local-only boundaries and provides responsive accessible presentation',()=>{

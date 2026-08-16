@@ -90,6 +90,14 @@ const visibilities = new Set<string>(CHILD_EDUCATION_VISIBILITIES);
 const statuses = new Set<ChildEducationItemView['status']>([
   'planned','active','submitted','completed','cancelled','expired','archived'
 ]);
+const institutionRequiredKinds = new Set<ChildEducationItemView['kind']>([
+  'school','class','school_event','course','sport','certificate'
+]);
+const subjectRequiredKinds = new Set<ChildEducationItemView['kind']>(['timetable','homework','exam']);
+const scheduleRequiredKinds = new Set<ChildEducationItemView['kind']>([
+  'timetable','exam','school_event','transport_plan','pickup_authority','course','sport'
+]);
+const dueRequiredKinds = new Set<ChildEducationItemView['kind']>(['homework','pickup_authority']);
 
 const hash = (value: unknown): string => createHash('sha256')
   .update(JSON.stringify(value), 'utf8')
@@ -294,10 +302,19 @@ const normalizedCreate = (
   const authority = optionalText(context,input.authorityReferenceId,'Teslim yetkisi referansı',128); if (!authority.ok) return authority;
   const note = optionalText(context,input.note,'Not',2000); if (!note.ok) return note;
   if (scheduled.value && due.value && due.value < scheduled.value) return err(invalid(context,'Bitiş/vade başlangıçtan önce olamaz.'));
-  const institutionRequired = ['school','class','course','sport','certificate'].includes(input.kind);
-  const subjectRequired = ['timetable','homework','exam'].includes(input.kind);
+  const institutionRequired = institutionRequiredKinds.has(input.kind);
+  const subjectRequired = subjectRequiredKinds.has(input.kind);
   if (institutionRequired !== Boolean(institution.value) || subjectRequired !== Boolean(subject.value)) {
     return err(invalid(context,'Eğitim türü kurum veya ders alanıyla exact eşleşmelidir.'));
+  }
+  if ((input.kind === 'class') !== Boolean(classLabel.value)) {
+    return err(invalid(context,'Sınıf kaydı kurum ve sınıf etiketi gerektirir; diğer türler sınıf etiketi kabul etmez.'));
+  }
+  if (scheduleRequiredKinds.has(input.kind) && !scheduled.value) {
+    return err(invalid(context,'Bu eğitim kaydı planlanan başlangıç zamanı gerektirir.'));
+  }
+  if (dueRequiredKinds.has(input.kind) && !due.value) {
+    return err(invalid(context,'Ödev ve teslim yetkisi son tarih gerektirir.'));
   }
   if ((input.kind === 'transport_plan') !== Boolean(input.transportMode)
     || (input.kind === 'pickup_authority') !== Boolean(authority.value)) {
@@ -451,11 +468,19 @@ export class UpdateChildEducationItemUseCase {
       if(found.value.visibility==='adolescent_private'&&input.context.actor.personId!==input.command.childPersonId)
         return err(denied(input.context,'Ergen özel alanı yalnız kayıt sahibi tarafından güncellenebilir.'));
       const allowed=authorize(input.context,scope,'update',input.command.itemId,input.command.childPersonId,found.value.visibility); if(!allowed.ok)return allowed;
+      if(nextVisibility!==found.value.visibility){
+        const nextAllowed=authorize(input.context,scope,'update',input.command.itemId,input.command.childPersonId,nextVisibility);
+        if(!nextAllowed.ok)return nextAllowed;
+      }
       const nextTitle=input.command.title===undefined?ok(found.value.title):text(input.context,input.command.title,'Başlık',2,160); if(!nextTitle.ok)return nextTitle;
       if(input.command.status!==undefined&&!statuses.has(input.command.status))return err(invalid(input.context,'Durum geçersizdir.'));
       const scheduled=input.command.scheduledAt===null?ok(undefined):input.command.scheduledAt===undefined?ok(found.value.scheduledAt):timestamp(input.context,input.command.scheduledAt,'Başlangıç'); if(!scheduled.ok)return scheduled;
       const due=input.command.dueAt===null?ok(undefined):input.command.dueAt===undefined?ok(found.value.dueAt):timestamp(input.context,input.command.dueAt,'Bitiş/vade'); if(!due.ok)return due;
       if(scheduled.value&&due.value&&due.value<scheduled.value)return err(invalid(input.context,'Bitiş/vade başlangıçtan önce olamaz.'));
+      if(scheduleRequiredKinds.has(found.value.kind)&&!scheduled.value)
+        return err(invalid(input.context,'Bu eğitim kaydının başlangıç zamanı kaldırılamaz.'));
+      if(dueRequiredKinds.has(found.value.kind)&&!due.value)
+        return err(invalid(input.context,'Ödev veya teslim yetkisinin son tarihi kaldırılamaz.'));
       const progress=input.command.progressBasisPoints===null?undefined:input.command.progressBasisPoints??found.value.progressBasisPoints;
       if(progress!==undefined&&(!Number.isInteger(progress)||progress<0||progress>10_000))return err(invalid(input.context,'İlerleme 0–10000 baz puan olmalıdır.'));
       const note=input.command.note===null?ok(undefined):input.command.note===undefined?ok(found.value.note):optionalText(input.context,input.command.note,'Not',2000); if(!note.ok)return note;

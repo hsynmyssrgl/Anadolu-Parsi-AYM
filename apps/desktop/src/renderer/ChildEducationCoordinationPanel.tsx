@@ -52,6 +52,16 @@ const ageAt=(birthDate:string):number=>{
   if(now.getUTCMonth()<birth.getUTCMonth()||(now.getUTCMonth()===birth.getUTCMonth()&&now.getUTCDate()<birth.getUTCDate()))age-=1;
   return age;
 };
+const itemSummary=(entry:ChildEducationItemView):string=>[
+  entry.institutionLabel,entry.classLabel,entry.subjectLabel,
+  entry.scheduledAt?`başlangıç ${new Date(entry.scheduledAt).toLocaleString('tr-TR')}`:undefined,
+  entry.dueAt?`son tarih ${new Date(entry.dueAt).toLocaleString('tr-TR')}`:undefined,
+  entry.recurrence?`tekrar ${entry.recurrence}`:undefined,
+  entry.amountMinor!==undefined?`${(entry.amountMinor/100).toLocaleString('tr-TR',{minimumFractionDigits:2})} ${entry.currency}`:undefined,
+  entry.progressBasisPoints!==undefined?`ilerleme %${entry.progressBasisPoints/100}`:undefined,
+  entry.transportMode?`ulaşım ${entry.transportMode}`:undefined,
+  entry.note
+].filter((value):value is string=>Boolean(value)).join(' · ');
 interface PendingCreate{readonly fingerprint:string;readonly clientOperationId:string;readonly itemId:string}
 
 export function ChildEducationCoordinationPanel({people}:{readonly people:readonly FamilyMemberView[]}){
@@ -93,10 +103,15 @@ export function ChildEducationCoordinationPanel({people}:{readonly people:readon
 
   const areaItems=useMemo(()=>center?.items.filter((item)=>item.area===area&&item.status!=='deleted')??[],[area,center]);
   const changeArea=(next:ChildEducationArea)=>{setArea(next);setKind(kindsByArea[next][0]!.value);setMessage('');pendingCreate.current=undefined;};
-  const institutionRequired=['school','class','course','sport','certificate'].includes(kind);
+  const institutionRequired=['school','class','school_event','course','sport','certificate'].includes(kind);
   const subjectRequired=['timetable','homework','exam'].includes(kind);
+  const scheduleRequired=['timetable','exam','school_event','transport_plan','pickup_authority','course','sport'].includes(kind);
+  const dueRequired=['homework','pickup_authority'].includes(kind);
   const createReady=Boolean(childPersonId)&&title.trim().length>=2
     &&(!institutionRequired||institutionLabel.trim().length>0)&&(!subjectRequired||subjectLabel.trim().length>0)
+    &&(kind!=='class'||classLabel.trim().length>0)
+    &&(!scheduleRequired||Boolean(isoOrUndefined(scheduledAt)))
+    &&(!dueRequired||Boolean(isoOrUndefined(dueAt)))
     &&(kind!=='pickup_authority'||authorityReferenceId.trim().length>0)
     &&(kind!=='allowance_budget'||amount.trim()!==''&&Number(amount)>=0&&/^[A-Z]{3}$/u.test(currency));
 
@@ -174,7 +189,7 @@ export function ChildEducationCoordinationPanel({people}:{readonly people:readon
         </div><Button tone="primary" onClick={()=>void create()} disabled={!createReady||busy}>{busy?'Kaydediliyor…':'Yerel kayıt oluştur'}</Button></section>
         <section className="child-education-list" aria-live="polite"><div className="child-education-list-heading"><h3>{areaOptions.find((option)=>option.value===area)?.label}</h3><Button onClick={()=>void reload()} disabled={loading||busy}>{loading?'Yükleniyor…':'Yenile'}</Button></div>
           {message&&<StatusMessage tone={tone}>{message}</StatusMessage>}
-          {!loading&&areaItems.length===0?<EmptyState title="Bu alanda kayıt yok" body="Soldaki formdan yaşa uygun, yerel bir koordinasyon kaydı ekleyin."/>:<div className="stack-list">{areaItems.map((entry)=><div className="child-education-row" key={entry.id}><div><strong>{entry.title}</strong><small>{statusLabels[entry.status]} · {privacyLabels[entry.visibility]} · revizyon {entry.revision}</small><small>{entry.institutionLabel??entry.subjectLabel??entry.note??'Yalnız yerel kayıt'}</small></div><div className="child-education-actions"><Button onClick={()=>void updateStatus(entry,'completed')} disabled={busy||entry.status==='completed'}>Tamamla</Button><Button tone="danger" onClick={()=>void remove(entry)} disabled={busy}>Sil</Button></div></div>)}</div>}
+          {!loading&&areaItems.length===0?<EmptyState title="Bu alanda kayıt yok" body="Soldaki formdan yaşa uygun, yerel bir koordinasyon kaydı ekleyin."/>:<div className="stack-list">{areaItems.map((entry)=><div className="child-education-row" key={entry.id}><div><strong>{entry.title}</strong><small>{statusLabels[entry.status]} · {privacyLabels[entry.visibility]} · revizyon {entry.revision}</small><small>{itemSummary(entry)||'Yalnız yerel kayıt'}</small></div><div className="child-education-actions"><Button onClick={()=>void updateStatus(entry,'completed')} disabled={busy||entry.status==='completed'}>Tamamla</Button><Button tone="danger" onClick={()=>void remove(entry)} disabled={busy}>Sil</Button></div></div>)}</div>}
         </section>
       </div>
     </>}

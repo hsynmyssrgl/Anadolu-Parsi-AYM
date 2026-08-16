@@ -116,6 +116,11 @@ describe('33-U child education repository policy boundary',()=>{
     const harness=openHarness();const bad=mutation('bad-area-33-u');
     expect((await withReceipt(harness,{action:'create',resourceId:bad.itemId,ownerPersonId:CHILD},(repository,context)=>{
       const ledger=repository.insertMutation(context,bad);return ledger.ok?repository.insertItem(context,item(bad,{area:'activities'})):ledger;})).ok).toBe(false);
+    const incomplete=mutation('class-no-label-33-u',{id:'e'.repeat(64),clientOperationId:'operation-class-no-label',
+      itemStateFingerprint:'f'.repeat(64)});
+    expect((await withReceipt(harness,{action:'create',resourceId:incomplete.itemId,ownerPersonId:CHILD},(repository,context)=>{
+      const ledger=repository.insertMutation(context,incomplete);return ledger.ok?repository.insertItem(context,item(incomplete,{
+        kind:'class',institutionLabel:'Örnek okul',classLabel:undefined})):ledger;})).ok).toBe(false);
     const row=mutation('immutable-33-u',{id:'d'.repeat(64),clientOperationId:'operation-immutable'});
     expect((await withReceipt(harness,{action:'create',resourceId:row.itemId,ownerPersonId:CHILD},(repository,context)=>{
       const ledger=repository.insertMutation(context,row);return ledger.ok?repository.insertItem(context,item(row)):ledger;})).ok).toBe(true);

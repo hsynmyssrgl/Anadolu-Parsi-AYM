@@ -511,7 +511,7 @@
     {
       "version": 99,
       "name": "child_education_coordination",
-      "checksum": "38ecd03c71e734d1700f2ee44ece10e47935277e003e7e4ce21da7b6034db98e"
+      "checksum": "9eb3952ac53f823ae6d12aae09d41748a6a445cd9d4dce11df9d3a47b58a8e25"
     },
     {
       "version": 100,
@@ -594,5 +594,5 @@
       "checksum": "e43ccbe70eecee7c7572f3c78cd26f357ab0c69357da712664bb50ed3c81279b"
     }
   ],
-  "generatedAt": "2026-08-16T07:08:14.210Z"
+  "generatedAt": "2026-08-16T08:17:44.400Z"
 }

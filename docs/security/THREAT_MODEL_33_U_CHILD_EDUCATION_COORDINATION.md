@@ -17,6 +17,8 @@ Rol sunumu yetki değildir. Çocuk-sahipli kayda non-owner erişimi için exact 
 
 `adolescent_private`, açık grant bulunsa bile yalnız 13–17 yaş kayıt sahibinin mutasyonuna izin verir. 13 yaş altı veya başka aktör fail-closed reddedilir. Gerçek çocuk/vasi gizlilik UAT’si `NOT_RUN` olduğundan ürün kabulü iddia edilmez.
 
+Görünürlük güncellemesi yalnız eski gizlilik düzeyine göre değerlendirilmez. Uygulama hem mevcut hem hedef görünürlük için merkezi izin kararı ister; böylece seçili vasi izniyle alınan bir kayıt aile geneline genişletilemez. Sınıf etiketi, ödev vadesi, zamanlı eğitim/etkinlik/ulaşım kayıtlarının başlangıcı ve teslim yetkisinin başlangıç-bitiş penceresi application, IPC ve SQLite CHECK katmanlarında birlikte zorunludur. Güncelleme bu zorunlu zamanları silemez.
+
 ### Renderer’dan yetki veya gizli veri enjeksiyonu
 
 IPC yalnız çocuk kimliği ve sınırlı domain alanlarını kabul eder. Account/family/policy receipt/hash/path/token/PIN/prototype/accessor/extra key yüzeyleri reddedilir. Safe result, AI/dış paylaşım/senkronizasyon overclaim’lerini reddeder.
