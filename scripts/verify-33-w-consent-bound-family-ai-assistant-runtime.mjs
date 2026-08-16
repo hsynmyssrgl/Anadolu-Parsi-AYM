@@ -21,6 +21,7 @@ const vitestText=output(vitest);
 const files=Number(vitestText.match(/Test Files\s+(\d+) passed/u)?.[1]??0);
 const tests=Number(vitestText.match(/Tests\s+(\d+) passed/u)?.[1]??0);
 const migration=execute(['scripts/verify-database-migrations.mjs']);const migrationReport=parse(migration);const m101=migrationReport?.migrationVersions?.find((item)=>item.version===101);
+const latestMigrationVersion=migrationReport?.migrationVersions?.at(-1)?.version;
 const smoke=execute(['scripts/verify-data-store-smoke.mjs']);const smokeReport=parse(smoke);
 const gate21=execute(['scripts/verify-platform-policy-ast-gate.mjs']);const p21=parse(gate21);
 const gate22=execute(['scripts/verify-platform-capability-manifest-gate.mjs']);const p22=parse(gate22);
@@ -36,7 +37,7 @@ const definitions=[
   ['exact five-file local Vitest exits successfully',vitest.status===0&&vitest.signal===null],
   ['local test result meets exact 5/20 ratchet',files===5&&tests===20&&scope.validation.targetedTestFileRatchet===5&&scope.validation.targetedTestRatchet===20&&inventory.validation.targetedTestRatchet===20],
   ['migration verifier passes exact migration 101 checksum',migration.status===0&&migrationReport?.status==='passed'&&migrationReport?.checkCount===9&&m101?.name==='consent_bound_family_ai_assistant'&&m101?.checksum===scope.validation.migrationSha256],
-  ['data store smoke includes migration 101',smoke.status===0&&smokeReport?.status==='passed'&&smokeReport?.migrationVersions?.at(-1)===101],
+  ['data store smoke includes migration 101 and reaches the current migration head',smoke.status===0&&smokeReport?.status==='passed'&&smokeReport?.migrationVersions?.includes(101)&&smokeReport?.migrationVersions?.at(-1)===latestMigrationVersion],
   ['PPK-021 raw gate matches scope ratchet',gate21.status===0&&p21?.status==='PASS'&&p21?.scannedFiles===scope.validation.ppk021.scannedProductionFiles&&p21?.privilegedSurfaces===scope.validation.ppk021.exactPrivilegedSurfaceCount&&p21?.exactAllowlistSha256===scope.validation.ppk021.exactAllowlistSha256],
   ['PPK-022 raw gate matches scope ratchet',gate22.status===0&&p22?.status==='PASS'&&p22?.scannedFiles===scope.validation.ppk022.scannedProductionFiles&&p22?.capabilitySurfaces===scope.validation.ppk022.exactCapabilitySurfaceCount&&p22?.exactManifestSha256===scope.validation.ppk022.exactCapabilityManifestSha256],
   ['all package and desktop typechecks pass',Object.values(types).every((result)=>result.status===0)],

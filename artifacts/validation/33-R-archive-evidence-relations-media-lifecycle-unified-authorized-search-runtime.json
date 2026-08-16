@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "step": "33-R",
+  "decision": "DEC-229",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "automatedRuntimeStatus": "LOCAL_COMPOSED_COMPONENT_MATRIX_PASS",
+  "countsAsRequirementPass": false,
+  "targetedTestFilesPassed": 8,
+  "targetedTestsPassed": 30,
+  "targetedTestFileRatchet": 8,
+  "targetedTestRatchet": 30,
+  "migration96Sha256": "c00b2a72bf49d2200c85b2045a8ab7a01ef7a41882b2b14eb5a1f4715bde1eb2",
+  "ppk021": {
+    "status": "PASS",
+    "productionSourceZones": 18,
+    "scannedFiles": 555,
+    "privilegedSurfaces": 873,
+    "exactAllowlistEntries": 873,
+    "exactAllowlistSha256": "843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc",
+    "surfaceCounts": {
+      "CRYPTO_GLOBAL": 21,
+      "CRYPTO_IMPORT": 234,
+      "DATABASE_IMPORT": 21,
+      "NETWORK_IMPORT": 11,
+      "REPOSITORY_IMPORT": 70,
+      "ROLE_PRESENTATION": 2,
+      "SQL_CALL": 79,
+      "SQL_CONSTRUCTOR": 2,
+      "SQL_IMPORT": 2,
+      "USE_CASE_COMPOSITION": 431
+    },
+    "maliciousSelfTestAssertions": 17,
+    "benignSelfTestAssertions": 4,
+    "directRoleAuthorizationBypasses": 0,
+    "findings": []
+  },
+  "ppk022": {
+    "status": "PASS",
+    "productionSourceZones": 18,
+    "scannedFiles": 555,
+    "capabilitySurfaces": 392,
+    "exactManifestSurfaces": 392,
+    "exactManifestSha256": "cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c",
+    "surfaceCounts": {
+      "FILE_DIALOG": 2,
+      "FILE_IMPORT": 335,
+      "NETWORK_API": 2,
+      "NETWORK_IMPORT": 13,
+      "OCR_API": 5,
+      "OCR_IMPORT": 35
+    },
+    "pinnedBootstrapSurfaces": 26,
+    "maliciousSelfTestAssertions": 33,
+    "benignSelfTestAssertions": 5,
+    "canonicalApplications": 14,
+    "protectedCapabilityFamilies": 7,
+    "findings": []
+  },
+  "checkCount": 11,
+  "passed": 11,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "exact eight-file local Vitest process exits successfully",
+      "status": "PASS"
+    },
+    {
+      "name": "local test result meets exact 8/30 ratchet",
+      "status": "PASS"
+    },
+    {
+      "name": "migration verifier passes with exact migration 96 checksum",
+      "status": "PASS"
+    },
+    {
+      "name": "data store smoke passes current schema checks",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-021 raw gate passes exact 555/873 ratchet",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-022 raw gate passes exact 555/392 ratchet",
+      "status": "PASS"
+    },
+    {
+      "name": "domain application contract repository and database typechecks pass",
+      "status": "PASS"
+    },
+    {
+      "name": "desktop Electron typecheck passes",
+      "status": "PASS"
+    },
+    {
+      "name": "desktop renderer typecheck passes",
+      "status": "PASS"
+    },
+    {
+      "name": "33-R stays planned behind 33-Q while 33-P remains active",
+      "status": "PASS"
+    },
+    {
+      "name": "manual evidence certification and requirement pass remain closed",
+      "status": "PASS"
+    }
+  ],
+  "generatedAt": "2026-08-16T05:29:26.615Z"
+}

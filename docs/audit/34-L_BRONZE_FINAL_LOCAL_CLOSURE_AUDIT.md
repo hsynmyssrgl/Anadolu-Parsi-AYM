@@ -17,7 +17,7 @@ Bu kayıt yerel kodlama kapsamını izler; ürün/sertifikasyon kapanışı değ
 - Birleşik hedefli matris: `12/12` dosya, `47/47` test `PASS`.
 - Tam Vitest regresyonu: `286/286` test dosyası, `1920/1920` test `PASS`.
 - Kök typecheck ve 18 workspace production build'i `PASS`.
-- Belge/kod indeksi: `6627` dosya, `3830` belge ve `20949` doğrulama kontrolü `PASS`.
+- Belge/kod indeksi: `6635` dosya, `3838` belge ve `20981` doğrulama kontrolü `PASS`.
 - Persistent receipt: `artifacts/validation/34-L-bronze-local-closure-receipt.json`; yalnız yerel kanıt statüsü `PASS_LOCAL_ONLY`.
 
 ## Açık kalan kabul kanıtları

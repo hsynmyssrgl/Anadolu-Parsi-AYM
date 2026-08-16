@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "step": "33-S",
+  "decision": "DEC-230",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "countsAsRequirementPass": false,
+  "checkCount": 12,
+  "passed": 12,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "scope inventory and roadmap identities are exact",
+      "status": "PASS"
+    },
+    {
+      "name": "registry plan and ledger remain intentionally open",
+      "status": "PASS"
+    },
+    {
+      "name": "domain covers local care records scopes grants emergency summary and truth",
+      "status": "PASS"
+    },
+    {
+      "name": "application implements exact four governed use cases",
+      "status": "PASS"
+    },
+    {
+      "name": "application uses minimum necessary grant without direct role authorization",
+      "status": "PASS"
+    },
+    {
+      "name": "repository filters non-owner records through exact active grant scopes",
+      "status": "PASS"
+    },
+    {
+      "name": "DataStore composes all four health coordination use cases",
+      "status": "PASS"
+    },
+    {
+      "name": "IPC exposes exact four channels with bounded safe results",
+      "status": "PASS"
+    },
+    {
+      "name": "renderer extends existing health screen and states local-only limits",
+      "status": "PASS"
+    },
+    {
+      "name": "truth excludes medical sensor emergency and remote claims",
+      "status": "PASS"
+    },
+    {
+      "name": "local tests cannot become requirement acceptance",
+      "status": "PASS"
+    },
+    {
+      "name": "manual evidence certification and persistent receipt remain closed",
+      "status": "PASS"
+    }
+  ],
+  "generatedAt": "2026-08-16T05:32:53.441Z"
+}

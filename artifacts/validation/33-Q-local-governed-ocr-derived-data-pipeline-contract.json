@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 3,
+  "step": "33-Q",
+  "decision": "DEC-228",
+  "requirements": [
+    "B3-04",
+    "OCR-001",
+    "OCR-002",
+    "OCR-003",
+    "OCR-004",
+    "OCR-005",
+    "OCR-006",
+    "OCR-007",
+    "OCR-008",
+    "OCR-009",
+    "OCR-010",
+    "OCR-011",
+    "OCR-012",
+    "OCR-013",
+    "OCR-014",
+    "OCR-015",
+    "OCR-016",
+    "OCR-017",
+    "OCR-018",
+    "OCR-019",
+    "OCR-020",
+    "XPF-001"
+  ],
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "implementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+  "automatedContractStatus": "LOCAL_COMPOSED_SOURCE_PASS",
+  "countsAsRequirementPass": false,
+  "activePredecessor": "33-P",
+  "localTargetedTestFiles": [
+    "packages/application/tests/local-governed-ocr-use-cases.test.ts",
+    "packages/repositories/local-governed-ocr-repository-policy.test.ts",
+    "packages/database/transaction-async.test.ts",
+    "packages/security/tests/local-ocr-security.test.ts",
+    "apps/desktop/tests/local-ocr-input-adapter.test.ts",
+    "apps/desktop/tests/local-ocr-worker.test.ts",
+    "apps/desktop/tests/windows-media-ocr-engine-adapter.test.ts",
+    "apps/desktop/tests/local-governed-ocr-runtime-adapter.test.ts",
+    "apps/desktop/tests/local-governed-ocr-application-adapter.test.ts",
+    "apps/desktop/tests/local-governed-ocr-production-policy-runtime.test.ts",
+    "apps/desktop/tests/local-governed-ocr-ipc-integration.test.ts",
+    "apps/desktop/tests/local-governed-ocr-ipc-bridge.test.ts",
+    "apps/desktop/tests/local-governed-ocr-ui.test.ts",
+    "apps/desktop/tests/local-governed-ocr-data-store-production.test.ts",
+    "apps/desktop/tests/local-governed-ocr-malicious-document-matrix.test.ts",
+    "packages/application/tests/archive-legacy-ownership-reattestation.test.ts",
+    "apps/desktop/tests/archive-core-table-receipt-fence.test.ts",
+    "apps/desktop/tests/archive-legacy-ownership-reattestation-data-store.test.ts",
+    "apps/desktop/tests/archive-legacy-ownership-reattestation-ipc-ui.test.ts",
+    "apps/desktop/tests/local-governed-ocr-search-index.test.ts"
+  ],
+  "targetedTestRatchet": {
+    "files": 20,
+    "tests": 147
+  },
+  "migration94Sha256": "08fef61dc21062134716dfae8e78c2256eb5da275eedaf1fe3502a3c2450cb65",
+  "migration95Sha256": "2a7206f2335ee24e5e6135867dbed5096530477a1e3d514ef2f0ce9683029c90",
+  "checksPassed": 16,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "snapshot remains planned partial and behind active 33-P",
+      "status": "PASS"
+    },
+    {
+      "name": "accepted registry remains exact open atomic closure authority",
+      "status": "PASS"
+    },
+    {
+      "name": "implemented targeted inventory is the exact 20-file local snapshot",
+      "status": "PASS"
+    },
+    {
+      "name": "domain and application contracts bind limits local execution and no low-privilege overclaim",
+      "status": "PASS"
+    },
+    {
+      "name": "repository and migration bind metadata lineage retention and immutable source-delete child ledger",
+      "status": "PASS"
+    },
+    {
+      "name": "legacy ownerless archive reattestation is exact actor-bound strong-authenticated and immutable",
+      "status": "PASS"
+    },
+    {
+      "name": "central PEP UoW keeps ocr_process and sensitive_processing separate and leases exact runtime authority",
+      "status": "PASS"
+    },
+    {
+      "name": "security and worker are local bounded child-process components with PDF malware and low privilege fail-closed",
+      "status": "PASS"
+    },
+    {
+      "name": "sealed result vault is owner-bound encrypted quota-limited and scheduled maintenance is separately authorized",
+      "status": "PASS"
+    },
+    {
+      "name": "encrypted full-text index is content-bound policy-filtered and emits only masked bounded snippets",
+      "status": "PASS"
+    },
+    {
+      "name": "DataStore production facade composes PEP UoW vault runtime and hashes corrected text metadata",
+      "status": "PASS"
+    },
+    {
+      "name": "desktop exposes exactly ten safe renderer OCR methods and keeps source deletion main-only",
+      "status": "PASS"
+    },
+    {
+      "name": "Archive UI uses the safe bridge with explicit reveal idempotent retry and no remote truth claim",
+      "status": "PASS"
+    },
+    {
+      "name": "source deletion and current sealed-result authorization reconciliation are validated while future owners remain open",
+      "status": "PASS"
+    },
+    {
+      "name": "capability manifest grants aggregate desktop OCR only and no separate worker or sandbox claim",
+      "status": "PASS"
+    },
+    {
+      "name": "local two-phase cancellation is true while external acceptance and no-claim truth stays fail-closed",
+      "status": "PASS"
+    }
+  ],
+  "generatedAt": "2026-08-16T05:25:04.444Z"
+}

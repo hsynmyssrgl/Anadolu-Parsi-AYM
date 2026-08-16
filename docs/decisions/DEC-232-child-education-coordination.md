@@ -6,7 +6,7 @@
 
 Her kalıcı yazım merkezi PEP tarafından üretilmiş taze, yazılabilir ve projection kanıtlı makbuza; `familyId + actorAccountId + actorPersonId + childPersonId`; `purpose=general`; `dataClasses=['child']`; optimistic revision ve idempotent client operation kimliğine bağlanır. Çocuk sahibi olmayan aktör için rol tek başına yetki değildir; açık nesne izni gerekir. `adolescent_private` yalnız 13–17 yaşındaki kayıt sahibinin mutasyonuna açıktır. Silme fiziksel silme iddiası üretmez; hassas alanları boşaltılmış, dayanıklı `Silindi` mezar taşı bırakır.
 
-Migration 99 iki tablo ekler: `child_education_mutations` ve `child_education_items`. Kanonik checksum `38ecd03c71e734d1700f2ee44ece10e47935277e003e7e4ce21da7b6034db98e` değeridir. PPK-021 güncel ratchet’i 462 dosya / 715 yüzey / `2e1962cc032e83ef84128f7aa4e266d2f70ca12178c48c5109d6e1849df3073b`; PPK-022 ratchet’i 462 dosya / 345 yüzey / `1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e` değerindedir. Statik manifest runtime yetkisi değildir.
+Migration 99 iki tablo ekler: `child_education_mutations` ve `child_education_items`. Kanonik checksum `38ecd03c71e734d1700f2ee44ece10e47935277e003e7e4ce21da7b6034db98e` değeridir. PPK-021 güncel ratchet’i 555 dosya / 873 yüzey / `843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc`; PPK-022 ratchet’i 555 dosya / 392 yüzey / `cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c` değerindedir. Statik manifest runtime yetkisi değildir.
 
 ## Dürüst kapsam sınırları
 

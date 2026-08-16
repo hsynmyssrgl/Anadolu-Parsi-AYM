@@ -20,4 +20,4 @@ Uygulanan yüzey yerel metadata/reference yönetimi ve zaman kapsülü durum mak
 
 ## Yerel kanıt
 
-Migration 102 `memory_studio_time_capsule` SHA-256 değeri `cb719e825fde1269af44900d4ab66d1fa6a550e7cfe1695535a6e4e5c7cceafa` ile doğrulanır. Beş hedef dosyada 21 test; PPK-021 için 480 dosya / 740 exact yüzey ve `be7f27d47e2aa592dd2dc4d077222c030632a346eaad3014288b9b4b8bacf83e`; PPK-022 için 480 dosya / 345 exact yüzey ve `1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e` ratchetleri yerel teknik kanıttır. Bu kanıtlar kabul, sertifikasyon, basım veya harici teslimat iddiası değildir.
+Migration 102 `memory_studio_time_capsule` SHA-256 değeri `cb719e825fde1269af44900d4ab66d1fa6a550e7cfe1695535a6e4e5c7cceafa` ile doğrulanır. Beş hedef dosyada 21 test; PPK-021 için 555 dosya / 873 exact yüzey ve `843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc`; PPK-022 için 555 dosya / 392 exact yüzey ve `cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c` ratchetleri yerel teknik kanıttır. Bu kanıtlar kabul, sertifikasyon, basım veya harici teslimat iddiası değildir.

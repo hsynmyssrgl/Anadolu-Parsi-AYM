@@ -292,9 +292,9 @@
   "ppkGateEvidence": {
     "ppk021": {
       "status": "PASS",
-      "scannedProductionFiles": 442,
-      "exactPrivilegedSurfaceCount": 685,
-      "exactAllowlistSha256": "7713c4b422c9822f6a5505b7245e27032f34872e98843d3126cf6de9a285759e",
+      "scannedProductionFiles": 555,
+      "exactPrivilegedSurfaceCount": 873,
+      "exactAllowlistSha256": "843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc",
       "targetedTestsPassed": 17,
       "contractChecksPassed": 84,
       "runtimeChecksPassed": 20,
@@ -302,9 +302,9 @@
     },
     "ppk022": {
       "status": "PASS",
-      "scannedProductionFiles": 442,
-      "exactCapabilitySurfaceCount": 345,
-      "exactCapabilityManifestSha256": "1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e",
+      "scannedProductionFiles": 555,
+      "exactCapabilitySurfaceCount": 392,
+      "exactCapabilityManifestSha256": "cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c",
       "targetedTestsPassed": 19,
       "contractChecksPassed": 110,
       "runtimeChecksPassed": 24,
@@ -392,9 +392,9 @@
     "External provider privacy contract, region, retention and deletion evidence"
   ],
   "validation": {
-    "boundary": "STARTER_NOT_RUN",
-    "contract": "STARTER_NOT_RUN",
-    "runtime": "LOCAL_COMPOSED_COMPONENT_MATRIX_PASS",
+    "boundary": "LOCAL_COMPOSED_SOURCE_PASS_12_OF_12",
+    "contract": "LOCAL_COMPOSED_SOURCE_PASS_16_OF_16",
+    "runtime": "LOCAL_COMPOSED_COMPONENT_MATRIX_PASS_12_OF_12",
     "targetedTests": "20_FILES_147_TESTS_PASS",
     "sourceStabilizationStatus": "STABLE_LOCAL_SNAPSHOT",
     "ratchetSemantics": "EXACT_LOCAL_SNAPSHOT_NOT_REQUIREMENT_CLOSURE",

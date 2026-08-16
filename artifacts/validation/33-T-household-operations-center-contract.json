@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "step": "33-T",
+  "decision": "DEC-231",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "countsAsRequirementPass": false,
+  "checkCount": 15,
+  "passed": 15,
+  "failed": 0,
+  "migration98Sha256": "b5a09712e4f9611e928509441005ede824a9fceb516caa3b3d74cf83dc8f4d60",
+  "checks": [
+    {
+      "name": "scope inventory and five-test matrix are exact",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 98 source manifest and scope checksums are canonical",
+      "status": "PASS"
+    },
+    {
+      "name": "migration owns exact current item and immutable mutation tables",
+      "status": "PASS"
+    },
+    {
+      "name": "repository contract exposes center item mutation and policy resolution ports",
+      "status": "PASS"
+    },
+    {
+      "name": "repository enforces exact receipt subject purpose and bounded lists",
+      "status": "PASS"
+    },
+    {
+      "name": "desktop adapter persists receipt time and content-free audit outbox transactionally",
+      "status": "PASS"
+    },
+    {
+      "name": "production policy runtime binds collection create replay and exact existing item metadata",
+      "status": "PASS"
+    },
+    {
+      "name": "main preload and renderer types expose only four safe methods",
+      "status": "PASS"
+    },
+    {
+      "name": "application tests cover replay mismatch allergy split and soft delete",
+      "status": "PASS"
+    },
+    {
+      "name": "repository tests cover forged receipt invariants and immutability",
+      "status": "PASS"
+    },
+    {
+      "name": "IPC tests reject renderer authority and unsafe result shapes",
+      "status": "PASS"
+    },
+    {
+      "name": "DataStore tests prove PEP fail closed replay filter and full rollback",
+      "status": "PASS"
+    },
+    {
+      "name": "UI test pins existing route stable retry and local truth boundaries",
+      "status": "PASS"
+    },
+    {
+      "name": "decision and threat model deny external order payment access and acceptance claims",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK ratchets are exact while requirement remains open",
+      "status": "PASS"
+    }
+  ],
+  "generatedAt": "2026-08-16T05:37:26.395Z"
+}

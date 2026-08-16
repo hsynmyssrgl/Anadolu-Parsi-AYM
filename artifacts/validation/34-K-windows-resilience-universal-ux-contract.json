@@ -5,15 +5,20 @@
   "mode": "contract",
   "status": "PASS",
   "governanceState": "PLANNED",
-  "localImplementationStatus": "PARTIAL_LOCAL_FOUNDATION_ACCEPTANCE_INCOMPLETE",
+  "localImplementationStatus": "LOCAL_HARDENED_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE",
   "requirementsClosed": false,
   "countsAsRequirementPass": false,
-  "checkCount": 4,
-  "passed": 4,
+  "checkCount": 6,
+  "passed": 6,
   "failed": 0,
   "checks": [
     {
       "name": "governance identity is exact",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "local implementation status is exact and non-accepting",
       "status": "PASS",
       "detail": ""
     },
@@ -31,7 +36,12 @@
       "name": "decision and threat model reject false closure",
       "status": "PASS",
       "detail": ""
+    },
+    {
+      "name": "current migration and PPK evidence is pinned exactly",
+      "status": "PASS",
+      "detail": ""
     }
   ],
-  "generatedAt": "2026-08-15T22:04:56.452Z"
+  "generatedAt": "2026-08-16T06:45:41.828Z"
 }

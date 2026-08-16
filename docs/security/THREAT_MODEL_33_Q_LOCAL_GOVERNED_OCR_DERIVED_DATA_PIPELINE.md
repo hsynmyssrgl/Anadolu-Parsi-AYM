@@ -3,7 +3,7 @@
 - Durum: `PLANNED / LOCAL_IMPLEMENTATION_STARTED`
 - Yerel uygulama: `PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED / ACCEPTANCE_INCOMPLETE`
 - Requirement PASS: `false`
-- Yerel otomatik bileşen kanıtı: `20 dosya / 147 test PASS`
+- Yerel otomatik bileşen kanıtı: boundary `12/12`, contract `16/16`, runtime `12/12` ve `20 dosya / 147 test PASS`
 - Production runtime ve dış/manuel kanıt: `NOT_RUN`
 
 | Tehdit | Zorunlu fail-closed kontrol | Mevcut gerçek / açık risk |
@@ -18,7 +18,7 @@
 | Uzun OCR çalışırken kullanıcı iptal isteği işlem kilidi arkasında kalır | Worker çalışması uzun ömürlü yazma transaction’ı dışında yürütülür; cancel admission ayrı, eşzamanlı ve yetkili bir transaction ile aktif worker’a ulaşır. | `job_run_begin` kısa transactionı, detached main-only worker lease’i, FIFO kısa transaction kuyruğu ve terminal `job_run` finalizasyonu uygulanmıştır. Production executor probe’unda running Cancel runtime’a ulaşır, commit olur ve finalizasyon sonra tamamlanır; iki fazlı run/cancel local kanıtı `PASS`. Gerçek cihaz/human UAT `NOT_RUN`. |
 | Renderer veya main process sınırsız parser çalıştırır | Renderer yalnız dar IPC komutu gönderir; main yetki/admission yapar; parser/OCR ayrı process içinde çalışır. | Dokuz dar IPC yöntemi ve main-only source-delete production source/testte vardır; parser bounded child process içindedir. Düşük yetkili sandbox doğrulanmamıştır. |
 | Worker ağdan sessiz bulut OCR’a geçer | `ocr-worker` için ağ capability’si varsayılan deny; PPK-022 exact AST/build/runtime manifesti ve OS-enforced network sandbox. | Aggregate `windows-desktop` `ocr.process` ayrı worker kimliği değildir ve aynı aggregate kimlikte `network.access` vardır. `ocr-worker=[]`, sonuç alanında network/cloud false ve lowPrivilege false korunur; self-report OS-enforced ağ izolasyonu değildir. Residual açık. |
-| AST/capability gate PASS sonucu worker sandbox acceptance sayılır | PPK-021 ve PPK-022 build/runtime yüzey ratchetleri ile process identity/sandbox/PEP kanıtları ayrı tutulur. | Current gate 442/685 ve 442/345 PASS; yine de `ocr-worker=[]`, lowPrivilege=false ve workerNetworkIsolation=false. Requirement PASS değildir. |
+| AST/capability gate PASS sonucu worker sandbox acceptance sayılır | PPK-021 ve PPK-022 build/runtime yüzey ratchetleri ile process identity/sandbox/PEP kanıtları ayrı tutulur. | Current gate 555/873 ve 555/392 PASS; yine de `ocr-worker=[]`, lowPrivilege=false ve workerNetworkIsolation=false. Requirement PASS değildir. |
 | Platform OCR yokken sessiz dış sağlayıcı kullanılır | Yalnız envanterli offline fallback; harici sağlayıcı ayrı açık rıza ve görünür seçim olmadan unavailable. | Windows adapter production facade’a bound; default malware provider yokken run fail-closed. Apple/offline providerlar `NOT_IMPLEMENTED`, harici sağlayıcı `NOT_CONFIGURED`. |
 | Harici sağlayıcı gereğinden fazla belge alır | Gönderim önizlemesi, redaksiyon, minimum sayfa/bölge, exact provider/region/retention/deletion/contract ve tek kullanımlık karar. | Privacy contract ve canlı provider kanıtı `NOT_RUN`; provider availability/delivery garantisi yoktur. |
 | Şifre çözülmüş belge veya OCR metni temp/log/cache’te kalır | Bounded memory/read stream, sıfırlama, şifreli result/index, içeriksiz log, crash/timeout cleanup ve düz metin dosya yasağı. | Owner-bound encrypted envelope vault, hardlink-safe publish/startup repair ve distinct maintenance PEP altında bounded orphan taraması testlidir; plaintext UAT/adversarial acceptance açık. |

@@ -5,11 +5,11 @@
   "mode": "boundary",
   "status": "PASS",
   "governanceState": "PLANNED",
-  "localImplementationStatus": "PARTIAL_LOCAL_FOUNDATION_ACCEPTANCE_INCOMPLETE",
+  "localImplementationStatus": "LOCAL_HARDENED_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE",
   "requirementsClosed": false,
   "countsAsRequirementPass": false,
-  "checkCount": 6,
-  "passed": 6,
+  "checkCount": 10,
+  "passed": 10,
   "failed": 0,
   "checks": [
     {
@@ -18,12 +18,27 @@
       "detail": ""
     },
     {
-      "name": "packages/domain/src/windows-resilience-universal-ux.ts pins evaluatePolicyWeakening",
+      "name": "packages/domain/src/windows-resilience-universal-ux.ts pins callerSuppliedSearchAuthorizationAccepted: false",
       "status": "PASS",
       "detail": ""
     },
     {
-      "name": "packages/application/src/windows-resilience-universal-ux-use-cases.ts pins requirementsClosed",
+      "name": "packages/domain/src/windows-resilience-universal-ux.ts pins operationLedgerRetentionPolicyDecided: false",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "packages/application/src/windows-resilience-universal-ux-use-cases.ts pins UniversalUxSearchAuthorityPort",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "packages/application/src/windows-resilience-universal-ux-use-cases.ts pins WindowsResilienceEvidenceProviderPort",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "packages/repositories/src/windows-resilience-universal-ux-repository.ts pins exact durable policy receipt",
       "status": "PASS",
       "detail": ""
     },
@@ -33,7 +48,12 @@
       "detail": ""
     },
     {
-      "name": "apps/desktop/src/renderer/UniversalUxConsolidationPanel.tsx pins 7 günlük soak kanıtı yoktur",
+      "name": "packages/database/src/family-database-migrations.ts pins 34-K operation requires exact owner-bound durable PEP receipt",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "apps/desktop/src/renderer/UniversalUxConsolidationPanel.tsx pins yetkilendirilmiş evrensel veri araması değildir",
       "status": "PASS",
       "detail": ""
     },
@@ -43,5 +63,5 @@
       "detail": ""
     }
   ],
-  "generatedAt": "2026-08-15T22:04:56.373Z"
+  "generatedAt": "2026-08-16T06:45:41.743Z"
 }

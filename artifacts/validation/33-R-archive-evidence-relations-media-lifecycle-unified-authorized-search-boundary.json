@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "step": "33-R",
+  "decision": "DEC-229",
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+  "countsAsRequirementPass": false,
+  "checkCount": 12,
+  "passed": 12,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "scope and inventory identities are exact",
+      "status": "PASS"
+    },
+    {
+      "name": "roadmap keeps 33-R planned behind 33-Q",
+      "status": "PASS"
+    },
+    {
+      "name": "registry plan and ledger remain intentionally open",
+      "status": "PASS"
+    },
+    {
+      "name": "domain binds evidence confidence status history and version input",
+      "status": "PASS"
+    },
+    {
+      "name": "unified search domain is bounded and covers six modules",
+      "status": "PASS"
+    },
+    {
+      "name": "application implements evidence and media mutations",
+      "status": "PASS"
+    },
+    {
+      "name": "application unified search uses authorized source port",
+      "status": "PASS"
+    },
+    {
+      "name": "repository keeps exact evidence current and immutable history operations",
+      "status": "PASS"
+    },
+    {
+      "name": "DataStore composes all five archive operations and unified search",
+      "status": "PASS"
+    },
+    {
+      "name": "IPC has five archive channels and one unified search channel",
+      "status": "PASS"
+    },
+    {
+      "name": "renderer discloses immutable history and no filesystem authority",
+      "status": "PASS"
+    },
+    {
+      "name": "truth and manual evidence remain fail honest",
+      "status": "PASS"
+    }
+  ],
+  "generatedAt": "2026-08-16T05:28:46.019Z"
+}

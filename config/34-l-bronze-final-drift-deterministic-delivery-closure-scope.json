@@ -28,7 +28,7 @@
     "fullRegression":{"status":"PASS","files":286,"tests":1920},
     "rootTypecheck":"PASS",
     "productionBuilds":{"status":"PASS","workspaces":18},
-    "artifactIndex":{"status":"PASS","checks":20949,"files":6627,"documents":3830}
+    "artifactIndex":{"status":"PASS","checks":20981,"files":6635,"documents":3838}
   },
   "persistentReceiptStatus":"PASS_LOCAL_ONLY",
   "persistentReceiptPath":"artifacts/validation/34-L-bronze-local-closure-receipt.json",

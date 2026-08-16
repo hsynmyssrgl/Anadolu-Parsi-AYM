@@ -18,4 +18,4 @@ Uygulanan yüzey imzalı-adapter metadata sınırı, immutable mutation ledger, 
 
 ## Yerel kanıt
 
-Migration 103 `local_first_smart_home_energy` SHA-256 değeri `d41d1a1e1bff6b89638a44096eb2ef62358e4d5370ef82d58ae2f0b4de211513` ile doğrulanır. Beş hedef dosyada 21 test; PPK-021 için 486 dosya / 751 exact yüzey ve `63e2766aa18e42b1472a9ccf9521c586b81ac19e36d7d9ca72fe48e872be2aa2`; PPK-022 için 486 dosya / 345 exact yüzey ve `1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e` yerel teknik kanıttır. Bunlar dış sağlayıcı, gerçek cihaz, güvenlik sertifikasyonu veya requirement kapanışı değildir.
+Migration 103 `local_first_smart_home_energy` SHA-256 değeri `d41d1a1e1bff6b89638a44096eb2ef62358e4d5370ef82d58ae2f0b4de211513` ile doğrulanır. Beş hedef dosyada 21 test; PPK-021 için 555 dosya / 873 exact yüzey ve `843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc`; PPK-022 için 555 dosya / 392 exact yüzey ve `cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c` yerel teknik kanıttır. Bunlar dış sağlayıcı, gerçek cihaz, güvenlik sertifikasyonu veya requirement kapanışı değildir.

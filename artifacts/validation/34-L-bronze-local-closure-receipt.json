@@ -1,140 +1,140 @@
 {
   "schemaVersion": 1,
-  "id": "34-L-BRONZE-LOCAL-CLOSURE-efecaee59249f72a456890da",
+  "id": "34-L-BRONZE-LOCAL-CLOSURE-9d6f47b1a15a2fd0410a7d78",
   "step": "34-L",
   "decision": "DEC-249",
   "status": "PASS_LOCAL_ONLY",
-  "sourceBaseHead": "09e1165ce4e6f38c7dc03c4203f6a1289e4ae91e",
+  "sourceBaseHead": "57c02f7052c67af7dde4e559f0cff8d282e40e73",
   "finalCommitBinding": "THIS_RECEIPT_IS_TRACKED_BY_THE_FINAL_DELIVERY_COMMIT",
   "evidence": [
     {
       "path": "artifacts/validation/34-L-bronze-final-local-closure-boundary.json",
       "bytes": 1594,
-      "sha256": "25bc05db3870bdca77f07a2e2871b1c403920f1288a925a9bfbed93551e8bc67",
+      "sha256": "e99cc91d50bae1d78fa27638f39cb5fc266ac93c32802a130da1a6a5ae3eaabf",
       "status": "PASS",
       "countsAsRequirementPass": false
     },
     {
       "path": "artifacts/validation/34-L-bronze-final-local-closure-contract.json",
       "bytes": 2362,
-      "sha256": "4e10b21b0be1adf000ae8f020d4ddafeaac8dd591208116a304b0de8ce94f106",
+      "sha256": "754841c77601da89268d077ab4e5c9b070e5076bd3826598ab1db859e7eb911a",
       "status": "PASS",
       "countsAsRequirementPass": false
     },
     {
       "path": "artifacts/validation/34-L-bronze-final-local-closure-runtime.json",
       "bytes": 27575,
-      "sha256": "82b935bbab1088f6919e33e173d0fe8ce6012934bbacba47eecdf7bac71e3eda",
+      "sha256": "d696ede95c084a6895721612fe1f241dac1e9f14b3f4d764c000db6c1c4a0b08",
       "status": "PASS",
       "countsAsRequirementPass": false
     },
     {
       "path": "artifacts/validation/34-G-e2ee-file-sharing-remaining-communication-ux-boundary.json",
       "bytes": 2543,
-      "sha256": "dc7908791c39e33cb81eec3618ac21eb1550143cd9037b00d9ff4729e0bade5a",
+      "sha256": "f23e3f6ea663aca9cd0a97fa714951103167760b0744c93b858f3ac8eab16fbd",
       "status": "PASS",
       "countsAsRequirementPass": false
     },
     {
       "path": "artifacts/validation/34-G-e2ee-file-sharing-remaining-communication-ux-contract.json",
       "bytes": 1107,
-      "sha256": "7f6e2b9a5bc0c43ddf0bd5f3632b1c22bbfb1b411d4db5af8aad3b6c6e4e75c7",
+      "sha256": "5df507047e8b82125465fefb9abc99146eebdac7470727057c9e0ae646b61c0d",
       "status": "PASS",
       "countsAsRequirementPass": false
     },
     {
       "path": "artifacts/validation/34-G-e2ee-file-sharing-remaining-communication-ux-runtime.json",
       "bytes": 24956,
-      "sha256": "87e1688730b581f0166bb38505f8d40393e7b4bc007a3bfe1fc40dd2471bab86",
+      "sha256": "e579eb8ccabb6b066a03f8199bb071f2ff735e6bc3567393029606bc70037c03",
       "status": "PASS",
       "countsAsRequirementPass": false
     },
     {
       "path": "artifacts/validation/34-H-communication-audit-archive-integrity-boundary.json",
       "bytes": 1899,
-      "sha256": "fe33164bf3c553f40f8beba3c79d0e2a8f39aa3653b5093e88f49194822bdb26",
+      "sha256": "5fef267142d5c717c93e9f23c4d49d1f83466ca96ef739e8f80b3cb7f26e2d4e",
       "status": "PASS",
       "countsAsRequirementPass": false
     },
     {
       "path": "artifacts/validation/34-H-communication-audit-archive-integrity-contract.json",
       "bytes": 1110,
-      "sha256": "bee57ff3633e89e8697902cf50318e3bbe75da39d4c94d05cef9cd134295de79",
+      "sha256": "dfc1ce6ee7e55c3a769c1a47b1a04dc48d69a4bf9967388ea374cf800a278ecd",
       "status": "PASS",
       "countsAsRequirementPass": false
     },
     {
       "path": "artifacts/validation/34-H-communication-audit-archive-integrity-runtime.json",
       "bytes": 24313,
-      "sha256": "3687881164da069f50d2f3f101eb2ff206b38e5f1d36e8c4b9261017569dce2b",
+      "sha256": "248e01e191f9fbcd73d44abbefb01560f1a6a82ed756b87ce64a892397e7c0ac",
       "status": "PASS",
       "countsAsRequirementPass": false
     },
     {
       "path": "artifacts/validation/34-I-distributed-core-consensus-tenancy-boundary.json",
       "bytes": 1817,
-      "sha256": "d206f93cd821b583d915ae197fe76895bf0c3f57a9b87e624e2a54c7d6f4b8d8",
+      "sha256": "cca01c0a059bad508c8789714be80de3eacc262a607967a1b30ef9e933a978fc",
       "status": "PASS",
       "countsAsRequirementPass": false
     },
     {
       "path": "artifacts/validation/34-I-distributed-core-consensus-tenancy-contract.json",
       "bytes": 1116,
-      "sha256": "283ebabf50e3ddaca38a2d2898a880963f0915458a69dfa9fe3aa716abd0a8cb",
+      "sha256": "cd7ba34d174b44c093c268a8f160adc384dd0d2c60ef541b264476f357bc63a6",
       "status": "PASS",
       "countsAsRequirementPass": false
     },
     {
       "path": "artifacts/validation/34-I-distributed-core-consensus-tenancy-runtime.json",
       "bytes": 24231,
-      "sha256": "66a5ad2fb8fbec659a94f0555656ea96f8a3e287b1d3f62c5b8663caeee0c542",
+      "sha256": "50fc5bc48444068168452a496146268bc0dbc963bd0997b907de8beca674a7f0",
       "status": "PASS",
       "countsAsRequirementPass": false
     },
     {
       "path": "artifacts/validation/34-J-distributed-clients-operations-disaster-recovery-boundary.json",
       "bytes": 2017,
-      "sha256": "a46816fa8f00440ba79b81cd0b32368e750a48d2af024dfb1aaf99a254c7cd99",
+      "sha256": "6ba5271017e2d6a5cf774d9644fa9e336e9f57a214f1b681962db83a20afd5e1",
       "status": "PASS",
       "countsAsRequirementPass": false
     },
     {
       "path": "artifacts/validation/34-J-distributed-clients-operations-disaster-recovery-contract.json",
       "bytes": 1116,
-      "sha256": "31eea5eb916170b3374bb468fca990d38855821568c523a9a46eb1dff3164762",
+      "sha256": "042254c9a8c2f465426b76d442e1416e052dcf4d5cc1264a8c0ee9e0ca95fbfd",
       "status": "PASS",
       "countsAsRequirementPass": false
     },
     {
       "path": "artifacts/validation/34-J-distributed-clients-operations-disaster-recovery-runtime.json",
       "bytes": 24429,
-      "sha256": "036204c60648640a7f7bfe8ba1a3533135e71b327631b8dbe8f0cca534cb7ac6",
+      "sha256": "2c72c7e1245a5e914cecc0015096952d216b73e7fdcd025db00043ef7e5a4195",
       "status": "PASS",
       "countsAsRequirementPass": false
     },
     {
       "path": "artifacts/validation/34-K-windows-resilience-universal-ux-boundary.json",
-      "bytes": 1321,
-      "sha256": "1e6db7730e40636413288b907b076104ea1fd98088b825d86f9b04d58ce602e8",
+      "bytes": 2127,
+      "sha256": "445e2db375a70a489fdfafb8fffe61341de5bb6272c47a601d63108be36ae4e6",
       "status": "PASS",
       "countsAsRequirementPass": false
     },
     {
       "path": "artifacts/validation/34-K-windows-resilience-universal-ux-contract.json",
-      "bytes": 849,
-      "sha256": "bc28eb815d9c9b6a61c7d77d8b5c03040184cb61886bb019fe9bd1c8bf776274",
+      "bytes": 1116,
+      "sha256": "3ba734729f45ef4fdb16603b28b59f414df4232a20a55b6f08b2716f9407459c",
       "status": "PASS",
       "countsAsRequirementPass": false
     },
     {
       "path": "artifacts/validation/34-K-windows-resilience-universal-ux-runtime.json",
       "bytes": 24539,
-      "sha256": "81fb636f9907fb8f8c197329e3b14741500387a834011e4c30ae7f8af749cd59",
+      "sha256": "9e74cd4ec437f1a58a0c43c9e1f8b1a4080f3812538b16d6be4fd847e8778cd3",
       "status": "PASS",
       "countsAsRequirementPass": false
     }
   ],
-  "evidenceSetSha256": "efecaee59249f72a456890da46c20288ba8cee0ef093c6b7e936a8ad8df35065",
+  "evidenceSetSha256": "9d6f47b1a15a2fd0410a7d78bd8dbcb38c7590f7ceeb87f1fc21a0de032dada3",
   "localAutomatedEvidenceComplete": true,
   "requirementsClosed": false,
   "countsAsRequirementPass": false,
@@ -156,5 +156,5 @@
     "independent review and certification evidence"
   ],
   "externalClaimsMade": false,
-  "generatedAt": "2026-08-16T05:05:57.609Z"
+  "generatedAt": "2026-08-16T06:51:27.576Z"
 }

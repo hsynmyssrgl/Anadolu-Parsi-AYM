@@ -14,7 +14,7 @@ Alışveriş öğesi etkin listeye, öğün planı etkin tarife bağlanır. Tari
 
 Bu paket dış alışveriş siparişi vermez, otomatik stok taraması yapmaz, ödeme çalıştırmaz, taşıyıcı sistemine bağlanmaz, uzaktan anahtar/erişim kontrol etmez ve evcil hayvan bakım hizmeti teslim etmez. Teslimatta yalnız kullanıcı tarafından girilen sağlayıcı etiketi ve son dört karakterlik görünüm ipucu tutulur; tam takip numarası yoktur. Misafir anahtar veya erişim kodu saklanmaz. Alerjen kesişim filtresi tıbbi veya beslenme tavsiyesi değildir.
 
-Migration 98 üç tabloyu ekler: `household_operation_mutations`, `household_operations_centers`, `household_operation_items`. Kanonik checksum `b5a09712e4f9611e928509441005ede824a9fceb516caa3b3d74cf83dc8f4d60` değeridir. PPK-021 güncel ratchet’i 456 dosya / 707 yüzey / `bc0faf90dc73cbe8a9acc5be6251ffde44bcd84c69d36f96702540c2d213c6cd`; PPK-022 ratchet’i 456 dosya / 345 yüzey / `1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e` değerindedir. Statik manifest runtime yetkisi değildir.
+Migration 98 üç tabloyu ekler: `household_operation_mutations`, `household_operations_centers`, `household_operation_items`. Kanonik checksum `b5a09712e4f9611e928509441005ede824a9fceb516caa3b3d74cf83dc8f4d60` değeridir. PPK-021 güncel ratchet’i 555 dosya / 873 yüzey / `843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc`; PPK-022 ratchet’i 555 dosya / 392 yüzey / `cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c` değerindedir. Statik manifest runtime yetkisi değildir.
 
 ## Fail-honest sınırlar
 

@@ -20,6 +20,7 @@ const parseJson=(result)=>{try{return JSON.parse(clean(result.stdout).trim());}c
 const vitest=execute(['node_modules/vitest/vitest.mjs','run',...testFiles,'--maxWorkers=1']);const vitestOutput=combined(vitest);
 const filesPassed=Number(vitestOutput.match(/Test Files\s+(\d+) passed/u)?.[1]??0);const testsPassed=Number(vitestOutput.match(/Tests\s+(\d+) passed/u)?.[1]??0);
 const migration=execute(['scripts/verify-database-migrations.mjs']);const migrationReport=parseJson(migration);const migration99=migrationReport?.migrationVersions?.find((item)=>item.version===99);
+const latestMigrationVersion=migrationReport?.migrationVersions?.at(-1)?.version;
 const smoke=execute(['scripts/verify-data-store-smoke.mjs']);const smokeReport=parseJson(smoke);
 const ppk021=execute(['scripts/verify-platform-policy-ast-gate.mjs']);const ppk021Report=parseJson(ppk021);
 const ppk022=execute(['scripts/verify-platform-capability-manifest-gate.mjs']);const ppk022Report=parseJson(ppk022);
@@ -32,9 +33,9 @@ const definitions=[
   ['exact five-file local Vitest process exits successfully',vitest.status===0&&vitest.signal===null],
   ['local test result meets exact 5/22 ratchet',filesPassed===5&&testsPassed===22&&scope.validation?.targetedTestFileRatchet===5&&scope.validation?.targetedTestRatchet===22&&inventory.validation?.targetedTestFileRatchet===5&&inventory.validation?.targetedTestRatchet===22],
   ['migration verifier passes exact migration 99 checksum',migration.status===0&&migrationReport?.status==='passed'&&migrationReport?.checkCount===9&&migration99?.name==='child_education_coordination'&&migration99?.checksum==='38ecd03c71e734d1700f2ee44ece10e47935277e003e7e4ce21da7b6034db98e'],
-  ['data store smoke passes migration 99 and 14 logical checks',smoke.status===0&&smokeReport?.status==='passed'&&smokeReport?.checks===14&&smokeReport?.migrationVersions?.at(-1)===99],
-  ['PPK-021 raw gate passes exact 462/715 ratchet',ppk021.status===0&&ppk021Report?.status==='PASS'&&ppk021Report?.scannedFiles===462&&ppk021Report?.privilegedSurfaces===715&&ppk021Report?.exactAllowlistSha256==='2e1962cc032e83ef84128f7aa4e266d2f70ca12178c48c5109d6e1849df3073b'&&ppk021Report?.directRoleAuthorizationBypasses===0],
-  ['PPK-022 raw gate passes exact 462/345 ratchet',ppk022.status===0&&ppk022Report?.status==='PASS'&&ppk022Report?.scannedFiles===462&&ppk022Report?.capabilitySurfaces===345&&ppk022Report?.exactManifestSha256==='1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e'],
+  ['data store smoke includes migration 99, reaches the current migration head and passes 14 logical checks',smoke.status===0&&smokeReport?.status==='passed'&&smokeReport?.checks===14&&smokeReport?.migrationVersions?.includes(99)&&smokeReport?.migrationVersions?.at(-1)===latestMigrationVersion],
+  ['PPK-021 raw gate passes exact 555/873 ratchet',ppk021.status===0&&ppk021Report?.status==='PASS'&&ppk021Report?.scannedFiles===555&&ppk021Report?.privilegedSurfaces===873&&ppk021Report?.exactAllowlistSha256==='843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc'&&ppk021Report?.directRoleAuthorizationBypasses===0],
+  ['PPK-022 raw gate passes exact 555/392 ratchet',ppk022.status===0&&ppk022Report?.status==='PASS'&&ppk022Report?.scannedFiles===555&&ppk022Report?.capabilitySurfaces===392&&ppk022Report?.exactManifestSha256==='cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c'],
   ['domain application contract repository and database typechecks pass',['domain','application','repositoryContracts','repositories','database'].every((key)=>typechecks[key].status===0)],
   ['desktop Electron typecheck passes',typechecks.desktopElectron.status===0],
   ['desktop renderer typecheck passes',typechecks.desktopRenderer.status===0],

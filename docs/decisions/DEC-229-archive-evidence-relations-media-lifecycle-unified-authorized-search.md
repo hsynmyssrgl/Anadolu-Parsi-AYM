@@ -16,7 +16,7 @@ Birleşik arama family, event, archive, finance, health ve life kaynaklarını y
 
 Migration 96 `archive_relation_evidence` current tablosunu ve `archive_relation_evidence_mutations` immutable ledger’ını ekler; archive version trigger’ını v1=create, vN=update receipt gerçeğine hizalar. Migration checksum’u `c00b2a72bf49d2200c85b2045a8ab7a01ef7a41882b2b14eb5a1f4715bde1eb2` değeridir. Owner/account/family/resource uyuşmazlığı, future evidence date, forged receipt, stale revision, duplicate operation mismatch ve current/history fiziksel silme girişimi fail-closed reddedilir.
 
-PPK-021 güncel ratchet’i 447 dosya / 692 yüzey / `80bb7e2c6777792375260a348c4f0a4870e7f47eefcf940f22d8588682f6ed62`; PPK-022 ratchet’i 447 dosya / 345 yüzey / `1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e` değerindedir. Statik manifest girdileri runtime yetkisi değildir; merkezi policy ve repository receipt bağları ayrıca zorunludur.
+PPK-021 güncel ratchet’i 555 dosya / 873 yüzey / `843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc`; PPK-022 ratchet’i 555 dosya / 392 yüzey / `cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c` değerindedir. Statik manifest girdileri runtime yetkisi değildir; merkezi policy ve repository receipt bağları ayrıca zorunludur.
 
 ## Fail-honest sınırlar
 

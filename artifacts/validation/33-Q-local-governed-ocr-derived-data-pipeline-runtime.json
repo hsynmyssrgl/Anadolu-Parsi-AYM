@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 3,
+  "step": "33-Q",
+  "decision": "DEC-228",
+  "requirements": [
+    "B3-04",
+    "OCR-001",
+    "OCR-002",
+    "OCR-003",
+    "OCR-004",
+    "OCR-005",
+    "OCR-006",
+    "OCR-007",
+    "OCR-008",
+    "OCR-009",
+    "OCR-010",
+    "OCR-011",
+    "OCR-012",
+    "OCR-013",
+    "OCR-014",
+    "OCR-015",
+    "OCR-016",
+    "OCR-017",
+    "OCR-018",
+    "OCR-019",
+    "OCR-020",
+    "XPF-001"
+  ],
+  "status": "PASS",
+  "governanceState": "PLANNED",
+  "implementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+  "automatedRuntimeStatus": "LOCAL_COMPOSED_COMPONENT_MATRIX_PASS",
+  "countsAsRequirementPass": false,
+  "requirementGateStatus": "BLOCKED_BY_33_P_AND_OPEN_TECHNICAL_EXTERNAL_MANUAL_EVIDENCE",
+  "activePredecessor": "33-P",
+  "sourceStabilizationStatus": "STABLE_LOCAL_SNAPSHOT",
+  "ratchetSemantics": "EXACT_LOCAL_SNAPSHOT_NOT_REQUIREMENT_CLOSURE",
+  "targetedTestFilesPassed": 20,
+  "targetedTestsPassed": 147,
+  "targetedTestFileRatchet": 20,
+  "targetedTestRatchet": 147,
+  "testFiles": [
+    "packages/application/tests/local-governed-ocr-use-cases.test.ts",
+    "packages/repositories/local-governed-ocr-repository-policy.test.ts",
+    "packages/database/transaction-async.test.ts",
+    "packages/security/tests/local-ocr-security.test.ts",
+    "apps/desktop/tests/local-ocr-input-adapter.test.ts",
+    "apps/desktop/tests/local-ocr-worker.test.ts",
+    "apps/desktop/tests/windows-media-ocr-engine-adapter.test.ts",
+    "apps/desktop/tests/local-governed-ocr-runtime-adapter.test.ts",
+    "apps/desktop/tests/local-governed-ocr-application-adapter.test.ts",
+    "apps/desktop/tests/local-governed-ocr-production-policy-runtime.test.ts",
+    "apps/desktop/tests/local-governed-ocr-ipc-integration.test.ts",
+    "apps/desktop/tests/local-governed-ocr-ipc-bridge.test.ts",
+    "apps/desktop/tests/local-governed-ocr-ui.test.ts",
+    "apps/desktop/tests/local-governed-ocr-data-store-production.test.ts",
+    "apps/desktop/tests/local-governed-ocr-malicious-document-matrix.test.ts",
+    "packages/application/tests/archive-legacy-ownership-reattestation.test.ts",
+    "apps/desktop/tests/archive-core-table-receipt-fence.test.ts",
+    "apps/desktop/tests/archive-legacy-ownership-reattestation-data-store.test.ts",
+    "apps/desktop/tests/archive-legacy-ownership-reattestation-ipc-ui.test.ts",
+    "apps/desktop/tests/local-governed-ocr-search-index.test.ts"
+  ],
+  "migration94Sha256": "08fef61dc21062134716dfae8e78c2256eb5da275eedaf1fe3502a3c2450cb65",
+  "migration95Sha256": "2a7206f2335ee24e5e6135867dbed5096530477a1e3d514ef2f0ce9683029c90",
+  "ppkGateEvidence": {
+    "ppk021": {
+      "status": "PASS",
+      "scannedProductionFiles": 555,
+      "exactPrivilegedSurfaceCount": 873,
+      "exactAllowlistSha256": "843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc",
+      "targetedTestsPassed": 17,
+      "contractChecksPassed": 84,
+      "runtimeChecksPassed": 20,
+      "findings": 0
+    },
+    "ppk022": {
+      "status": "PASS",
+      "scannedProductionFiles": 555,
+      "exactCapabilitySurfaceCount": 392,
+      "exactCapabilityManifestSha256": "cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c",
+      "targetedTestsPassed": 19,
+      "contractChecksPassed": 110,
+      "runtimeChecksPassed": 24,
+      "canonicalAvailabilityChecksPassed": 19,
+      "findings": 0
+    },
+    "truth": "PPK build/runtime gate PASS yalnız mevcut aggregate windows-desktop OCR yüzeyini envanterler; ocr-worker boş, lowPrivilege false ve worker network isolation false kalır."
+  },
+  "openAcceptanceBindings": {
+    "activePredecessor": "33-P",
+    "malwareProvider": "UNAVAILABLE_FAIL_CLOSED",
+    "pdfLanes": "UNSUPPORTED_FAIL_CLOSED",
+    "lowPrivilegeSandbox": "NOT_VERIFIED",
+    "concurrentRunCancel": "LOCAL_TWO_PHASE_PRODUCTION_EXECUTOR_PROBE_PASS_EXTERNAL_UAT_NOT_RUN",
+    "sourceDeleteCrashAutoResume": "LOCAL_AUTHENTICATED_RESTART_AUTO_RESUME_PASS_FUTURE_DERIVED_OWNERS_OPEN",
+    "permissionOrConsentRevocationPurge": "CURRENT_SEALED_RESULT_AUTO_RECONCILE_PASS_FUTURE_DERIVED_OWNERS_OPEN",
+    "scheduledOrphanSweepAuthority": "LOCAL_DISTINCT_MAINTENANCE_PEP_PASS_EXTERNAL_UAT_NOT_RUN",
+    "retentionExpiryPurge": "CURRENT_SEALED_RESULT_PASS_FUTURE_DERIVED_OWNERS_OPEN",
+    "legacyArchiveOwnershipReattestation": "LOCAL_OWNERLESS_TO_ACTOR_PASS_INDEPENDENT_ATTESTATION_AND_MANUAL_UAT_NOT_RUN",
+    "fullTextIndexAndMaskedSnippet": "LOCAL_POLICY_FILTERED_ENCRYPTED_INDEX_AND_MASKED_SNIPPET_PASS_LEGACY_V1_RERUN_REQUIRED_EXTERNAL_UAT_NOT_RUN",
+    "realDeviceExternalAndManualEvidence": "NOT_RUN"
+  },
+  "checksPassed": 12,
+  "checksFailed": 0,
+  "checks": [
+    {
+      "name": "exact 20-file local Vitest process exits successfully",
+      "status": "PASS"
+    },
+    {
+      "name": "local test result meets the exact 20/147 ratchet",
+      "status": "PASS"
+    },
+    {
+      "name": "migration 94 and 95 manifests and canonical source hashes remain exact",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-021 runtime artifact is PASS at the exact current ratchet",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK-022 runtime artifact is PASS at the exact current ratchet",
+      "status": "PASS"
+    },
+    {
+      "name": "PPK capability runtime preserves aggregate desktop and empty worker truth",
+      "status": "PASS"
+    },
+    {
+      "name": "33-Q remains planned behind 33-P and accepted registry stays open",
+      "status": "PASS"
+    },
+    {
+      "name": "local composition tests do not close successful production OCR acceptance",
+      "status": "PASS"
+    },
+    {
+      "name": "encrypted policy-filtered search and masked snippets are local while legacy and external acceptance stay fail-closed",
+      "status": "PASS"
+    },
+    {
+      "name": "two-phase cancellation source-delete recovery and current sealed-result retention/orphan reconciliation are locally validated",
+      "status": "PASS"
+    },
+    {
+      "name": "external manual UAT legal privacy security and certification evidence remains NOT_RUN",
+      "status": "PASS"
+    },
+    {
+      "name": "legacy ownerless archive reattestation is local actor-bound and not an acceptance overclaim",
+      "status": "PASS"
+    }
+  ],
+  "process": {
+    "exitCode": 0,
+    "signal": null,
+    "reason": "Local composed component matrix completed; requirement, external and manual evidence remain open."
+  },
+  "generatedAt": "2026-08-16T05:25:43.982Z"
+}

@@ -29,6 +29,7 @@ const tests = Number(vitestText.match(/Tests\s+(?:\d+ failed\s+\|\s+)?(\d+) pass
 const migration = execute(['scripts/verify-database-migrations.mjs']);
 const migrationReport = parse(migration);
 const m105 = migrationReport?.migrationVersions?.find((item) => item.version === 105);
+const latestMigrationVersion = migrationReport?.migrationVersions?.at(-1)?.version;
 const smoke = execute(['scripts/verify-data-store-smoke.mjs']);
 const smokeReport = parse(smoke);
 const gate15 = execute(['scripts/verify-network-egress-boundary.mjs']);
@@ -57,8 +58,8 @@ const definitions = [
   ['migration verifier passes exact migration 105 checksum', migration.status === 0 && migrationReport?.status === 'passed'
     && migrationReport?.checkCount === 9 && m105?.name === 'communication_policy_mls_foundation'
     && m105?.checksum === scope.validation.migrationSha256],
-  ['data store smoke reaches migration 105 and exact current schema', smoke.status === 0 && smokeReport?.status === 'passed'
-    && smokeReport?.migrationVersions?.at(-1) === 105],
+  ['data store smoke includes migration 105 and reaches the current schema head', smoke.status === 0 && smokeReport?.status === 'passed'
+    && smokeReport?.migrationVersions?.includes(105) && smokeReport?.migrationVersions?.at(-1) === latestMigrationVersion],
   ['PPK-015 raw gate matches scope ratchet', gate15.status === 0 && p15?.status === 'PASS'
     && p15?.scannedFiles === scope.validation.ppk015.files && p15?.sourceInventorySha256 === scope.validation.ppk015.sourceSha256
     && p15?.authorizedInventorySha256 === scope.validation.ppk015.authorizedInventorySha256 && p15?.findings?.length === 0],

@@ -33,7 +33,7 @@ const [scope, inventory, migrationManifest, migrations, contract, repository, ad
   readText('apps/desktop/tests/health-care-coordination-ui.test.ts')
 ]);
 
-const migrationMatch = migrations.match(/const healthCareCoordinationElderSupportSql = `([\s\S]*?)`;\r?\n\r?\n(?=export const FAMILY_DATABASE_MIGRATIONS)/u);
+const migrationMatch = migrations.match(/const healthCareCoordinationElderSupportSql = `([\s\S]*?)`;\r?\n\r?\n(?=const [A-Za-z_$][A-Za-z0-9_$]*Sql =|export const FAMILY_DATABASE_MIGRATIONS)/u);
 const migrationSha256 = migrationMatch ? createHash('sha256').update(`${migrationMatch[1].replace(/\r\n/g,'\n').trim()}\n`).digest('hex') : '';
 const migration97 = migrationManifest.migrationVersions?.find((item) => item.version === 97);
 const testFiles = scope.validation?.targetedTestFiles ?? [];
@@ -72,12 +72,12 @@ const definitions = [
   ['decision and threat model deny external medical and acceptance claims', hasAll(decision,
     ['countsAsRequirementPass=false', 'tıbbi doğrulama', 'NOT_RUN']) && hasAll(threat,
     ['Direct role authorization yasaktır', 'sağlık registry sorgusu', 'certification'])],
-  ['PPK ratchets are exact while requirement remains open', scope.validation?.ppk021?.scannedProductionFiles === 450
-    && scope.validation?.ppk021?.exactPrivilegedSurfaceCount === 699
-    && scope.validation?.ppk021?.exactAllowlistSha256 === '5c99054d510a61c3724124c9e1d0c01973b9048c1c53a24652bce61738c839a5'
-    && scope.validation?.ppk022?.scannedProductionFiles === 450
-    && scope.validation?.ppk022?.exactCapabilitySurfaceCount === 345
-    && scope.validation?.ppk022?.exactCapabilityManifestSha256 === '1b8625264023eb79d3f36a3c25ca19480569bea6aa1f4589841b1b4d14d5ec3e'
+  ['PPK ratchets are exact while requirement remains open', scope.validation?.ppk021?.scannedProductionFiles === 555
+    && scope.validation?.ppk021?.exactPrivilegedSurfaceCount === 873
+    && scope.validation?.ppk021?.exactAllowlistSha256 === '843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc'
+    && scope.validation?.ppk022?.scannedProductionFiles === 555
+    && scope.validation?.ppk022?.exactCapabilitySurfaceCount === 392
+    && scope.validation?.ppk022?.exactCapabilityManifestSha256 === 'cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c'
     && scope.validation?.countsAsRequirementPass === false && inventory.validation?.countsAsRequirementPass === false]
 ];
 

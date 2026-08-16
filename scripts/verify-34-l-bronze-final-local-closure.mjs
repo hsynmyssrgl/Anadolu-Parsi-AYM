@@ -64,7 +64,7 @@ if (mode === 'contract' || mode === 'runtime') {
     && scope.validation?.targeted?.files === 12 && scope.validation?.targeted?.tests === 47
     && scope.validation?.fullRegression?.files === 286 && scope.validation?.fullRegression?.tests === 1920
     && scope.validation?.productionBuilds?.workspaces === 18
-    && scope.validation?.artifactIndex?.files === 6627 && scope.validation?.artifactIndex?.documents === 3830
+    && scope.validation?.artifactIndex?.files === 6635 && scope.validation?.artifactIndex?.documents === 3838
     && inventory.localEvidence?.fullRegressionTests === 1920
     && audit.includes('286/286') && audit.includes('1920/1920'));
   check('local receipt is real while manual and external evidence remain NOT_RUN', Object.values(scope.manualEvidence ?? {}).every((value) => value === 'NOT_RUN')
