@@ -18,7 +18,10 @@
 6. **Gözlem türü karıştırma:** Observation türü, birim ve cihaz türü eşliği application ve migration triggerlarında doğrulanır; sayı aralığı ve zaman penceresi sınırlandırılır.
 7. **Replay ve yarış:** `clientOperationId`, request fingerprint, optimistic revision, immutable mutation ledger ve current-row last-mutation bağı zorunludur.
 8. **Ağ/bulut/sağlayıcı yanılgısı:** Ağ ve bulut kullanılmaz; Matter commissioning, live provider, sensör ingestion ve provider availability truth alanları false kalır.
+9. **Dekoratif işleme tercihi ve süresi dolmuş izin:** İşleme kapalıyken yeni observation uygulama ve SQL trigger sınırında reddedilir. Durable izin satırı süresi dolduğunda renderer-safe görünüm `expired` üretir; aktif gibi sunamaz.
+10. **Komut karışıklığı ve zaman geri sarma:** Komutlar exact plain-object/own-property sözleşmesiyle, canonical fingerprint ve exact UTC zaman biçimiyle doğrulanır. Cihaz, izin ve ayar güncellemeleri zamanı geriye taşıyamaz; no-op mutation reddedilir.
+11. **Sınırsız disk büyümesi:** Sahip başına 500 cihaz, 50.000 gözlem, 2.000 kamera izni ve 100.000 mutation sınırı hem uygulama hem migration triggerında fail-closed uygulanır. Otomatik retention/kurtarma uygulanmamıştır; kapasite dolduğunda yazımın kapanması açık ürün ve retention riskidir.
 
 ## Açık kanıtlar
 
-Gerçek Matter, sensör sağlayıcısı, enerji sayacı, kamera/kapı zili ve cihaz kontrolü UAT'ları ile privacy/safety ve legal incelemeler `NOT_RUN` durumundadır. Persistent governance receipt yoktur; registry ve roadmap kapanmamıştır. `33-Y` yalnız kısmi yerel teknik kanıttır ve `countsAsRequirementPass=false` kalır.
+Gerçek Matter, sensör sağlayıcısı, enerji sayacı, kamera/kapı zili ve cihaz kontrolü UAT'ları ile otomatik retention tasarımı, privacy/safety ve legal incelemeler `NOT_RUN` durumundadır. Persistent governance receipt yoktur; registry ve roadmap kapanmamıştır. `33-Y` yalnız kısmi yerel teknik kanıttır ve `countsAsRequirementPass=false` kalır.

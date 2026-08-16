@@ -3405,7 +3405,8 @@ const smartHomeDeviceResult=(value:unknown):boolean=>{if(!isObject(value))return
     &&healthCareIdentifier(value.ownerPersonId)&&healthCareIdentifier(value.adapterId)&&healthCareIdentifier(value.providerId)
     &&smartHomeDeviceKinds.has(value.kind)&&healthCareText(value.label,2,120)&&(value.room===undefined||healthCareText(value.room,2,120))
     &&['active','offline','retired'].includes(String(value.status))&&value.signedAdapterEvidencePersisted===true
-    &&healthCareRevision(value.revision)&&Number(value.revision)>=1&&healthCareIso(value.createdAt)&&healthCareIso(value.updatedAt);};
+    &&healthCareRevision(value.revision)&&Number(value.revision)>=1&&healthCareIso(value.createdAt)&&healthCareIso(value.updatedAt)
+    &&Date.parse(String(value.updatedAt))>=Date.parse(String(value.createdAt));};
 const smartHomeObservationResult=(value:unknown):boolean=>{if(!isObject(value))return false;
   const optional=['numericValue','booleanValue'].filter((key)=>value[key]!==undefined);
   return healthCareExactRecord(value,['id','deviceId','kind','unit','observedAt','recordedAt',...optional])
@@ -3415,41 +3416,89 @@ const smartHomeObservationResult=(value:unknown):boolean=>{if(!isObject(value))r
     &&(value.booleanValue===undefined||typeof value.booleanValue==='boolean')
     &&((value.unit==='boolean'&&value.booleanValue!==undefined&&value.numericValue===undefined)
       ||(value.unit!=='boolean'&&value.numericValue!==undefined&&value.booleanValue===undefined))
-    &&healthCareIso(value.observedAt)&&healthCareIso(value.recordedAt);};
+    &&((['smoke_alarm','carbon_monoxide_alarm','water_leak_alarm','door_open','light_on','smart_plug_on'].includes(String(value.kind))&&value.unit==='boolean')
+      ||(['temperature_celsius','thermostat_target_celsius'].includes(String(value.kind))&&value.unit==='celsius')
+      ||(value.kind==='humidity_percent'&&value.unit==='percent')||(value.kind==='power_watts'&&value.unit==='watt')
+      ||(['energy_kilowatt_hour','ev_charge_kilowatt_hour'].includes(String(value.kind))&&value.unit==='kilowatt_hour'))
+    &&(value.numericValue===undefined||(value.kind==='temperature_celsius'&&value.numericValue>=-100&&value.numericValue<=100)
+      ||(value.kind==='thermostat_target_celsius'&&value.numericValue>=-50&&value.numericValue<=60)
+      ||(value.kind==='humidity_percent'&&value.numericValue>=0&&value.numericValue<=100)
+      ||(!['temperature_celsius','thermostat_target_celsius','humidity_percent'].includes(String(value.kind))
+        &&value.numericValue>=0&&value.numericValue<=1_000_000_000))
+    &&healthCareIso(value.observedAt)&&healthCareIso(value.recordedAt)
+    &&Date.parse(String(value.observedAt))>=Date.parse(String(value.recordedAt))-30*86_400_000
+    &&Date.parse(String(value.observedAt))<=Date.parse(String(value.recordedAt))+5*60_000;};
 const smartHomeConsentResult=(value:unknown):boolean=>{if(!isObject(value))return false;
   const optional=['revokedAt'].filter((key)=>value[key]!==undefined);
-  return healthCareExactRecord(value,['id','deviceId','purpose','status','grantedByAccountId','grantedByPersonId',
-    'visibleIndicatorRequired','expiresAt','revision','createdAt','updatedAt',...optional])&&healthCareIdentifier(value.id)
+  return healthCareExactRecord(value,['id','deviceId','purpose','status','effectiveStatus','visibleIndicatorRequired',
+    'expiresAt','revision','createdAt','updatedAt',...optional])&&healthCareIdentifier(value.id)
     &&healthCareIdentifier(value.deviceId)&&['live_view','doorbell_answer'].includes(String(value.purpose))
-    &&['active','revoked'].includes(String(value.status))&&healthCareIdentifier(value.grantedByAccountId)
-    &&healthCareIdentifier(value.grantedByPersonId)&&value.visibleIndicatorRequired===true&&healthCareIso(value.expiresAt)
+    &&['active','revoked'].includes(String(value.status))&&['active','expired','revoked'].includes(String(value.effectiveStatus))
+    &&value.visibleIndicatorRequired===true&&healthCareIso(value.expiresAt)
     &&healthCareRevision(value.revision)&&Number(value.revision)>=1&&healthCareIso(value.createdAt)&&healthCareIso(value.updatedAt)
-    &&(value.revokedAt===undefined||healthCareIso(value.revokedAt));};
+    &&Date.parse(String(value.updatedAt))>=Date.parse(String(value.createdAt))
+    &&Date.parse(String(value.expiresAt))>=Date.parse(String(value.createdAt))+5*60_000
+    &&Date.parse(String(value.expiresAt))<=Date.parse(String(value.createdAt))+60*60_000
+    &&(value.revokedAt===undefined||healthCareIso(value.revokedAt))
+    &&((value.status==='revoked'&&value.effectiveStatus==='revoked'&&value.revokedAt===value.updatedAt)
+      ||(value.status==='active'&&['active','expired'].includes(String(value.effectiveStatus))&&value.revokedAt===undefined));};
 const smartHomeSettingsResult=(value:unknown):boolean=>healthCareExactRecord(value,
   ['id','ownerPersonId','processingEnabled','cameraAccessDefaultDenied','hiddenSurveillanceProhibited','revision','createdAt','updatedAt'])
   &&healthCareIdentifier(value.id)&&healthCareIdentifier(value.ownerPersonId)&&typeof value.processingEnabled==='boolean'
   &&value.cameraAccessDefaultDenied===true&&value.hiddenSurveillanceProhibited===true&&healthCareRevision(value.revision)
-  &&healthCareIso(value.createdAt)&&healthCareIso(value.updatedAt);
-const smartHomeCenterResult=(value:unknown):boolean=>healthCareExactRecord(value,
-  ['schemaVersion','centerId','ownerPersonId','devices','observations','observationTotal','observationsTruncated',
-    'cameraConsents','settings','truth','generatedAt'])&&value.schemaVersion===1&&healthCareIdentifier(value.centerId)
-  &&healthCareIdentifier(value.ownerPersonId)&&householdArray(value.devices,500,smartHomeDeviceResult)
-  &&householdArray(value.observations,500,smartHomeObservationResult)&&typeof value.observationTotal==='number'
-  &&Number.isSafeInteger(value.observationTotal)&&value.observationTotal>=0&&typeof value.observationsTruncated==='boolean'
-  &&value.observationsTruncated===(value.observationTotal>(value.observations as readonly unknown[]).length)
-  &&householdArray(value.cameraConsents,500,smartHomeConsentResult)&&smartHomeSettingsResult(value.settings)
-  &&healthCareExactRecord(value.truth,['localFirst','cloudUsed','externalDeliveryPerformed','matterCommissioningPerformed',
-    'liveProviderConnectionTested','liveDeviceControlPerformed','sensorProviderIngestionPerformed','rawCameraOrAudioStored',
-    'hiddenSurveillanceProhibited','visibleTimeBoundedCameraConsentRequired','maximumCameraConsentMinutes',
-    'signedAdapterEvidenceRequired','providerAvailabilityGuaranteed','observationPayloadMode','networkUsedByCurrentImplementation'])
-  &&value.truth.localFirst===true&&value.truth.cloudUsed===false&&value.truth.externalDeliveryPerformed==='not_performed'
-  &&value.truth.matterCommissioningPerformed===false&&value.truth.liveProviderConnectionTested===false
-  &&value.truth.liveDeviceControlPerformed===false&&value.truth.sensorProviderIngestionPerformed===false
-  &&value.truth.rawCameraOrAudioStored===false&&value.truth.hiddenSurveillanceProhibited===true
-  &&value.truth.visibleTimeBoundedCameraConsentRequired===true&&value.truth.maximumCameraConsentMinutes===60
-  &&value.truth.signedAdapterEvidenceRequired===true&&value.truth.providerAvailabilityGuaranteed===false
-  &&value.truth.observationPayloadMode==='bounded_scalar_metadata_only'&&value.truth.networkUsedByCurrentImplementation===false
-  &&healthCareIso(value.generatedAt);
+  &&healthCareIso(value.createdAt)&&healthCareIso(value.updatedAt)
+  &&Date.parse(String(value.updatedAt))>=Date.parse(String(value.createdAt));
+const smartHomeCapacityBandResult=(value:unknown,maximum:number):boolean=>healthCareExactRecord(value,
+  ['current','maximum','remaining','limitReached'])&&healthCareRevision(value.current)&&value.maximum===maximum
+  &&value.current<=maximum&&value.remaining===maximum-value.current&&value.limitReached===(value.current>=maximum);
+const smartHomeCenterResult=(value:unknown):boolean=>{
+  if(!healthCareExactRecord(value,['schemaVersion','centerId','ownerPersonId','devices','observations','observationTotal',
+    'observationsTruncated','cameraConsents','cameraConsentTotal','cameraConsentsTruncated','storageCapacity','settings','truth','generatedAt']))return false;
+  const storage=value.storageCapacity;
+  if(value.schemaVersion!==1||!healthCareIdentifier(value.centerId)||!healthCareIdentifier(value.ownerPersonId)
+    ||!String(value.centerId).endsWith(`:${String(value.ownerPersonId)}`)||!householdArray(value.devices,500,smartHomeDeviceResult)
+    ||!householdArray(value.observations,500,smartHomeObservationResult)||!householdArray(value.cameraConsents,500,smartHomeConsentResult)
+    ||!healthCareRevision(value.observationTotal)||!healthCareRevision(value.cameraConsentTotal)
+    ||typeof value.observationsTruncated!=='boolean'||typeof value.cameraConsentsTruncated!=='boolean'
+    ||value.observationTotal<(value.observations as readonly unknown[]).length
+    ||value.cameraConsentTotal<(value.cameraConsents as readonly unknown[]).length
+    ||value.observationsTruncated!==(value.observationTotal>(value.observations as readonly unknown[]).length)
+    ||value.cameraConsentsTruncated!==(value.cameraConsentTotal>(value.cameraConsents as readonly unknown[]).length)
+    ||!smartHomeSettingsResult(value.settings)||!healthCareIso(value.generatedAt)
+    ||!healthCareExactRecord(storage,['devices','observations','cameraConsents','mutations'])
+    ||!smartHomeCapacityBandResult(storage.devices,500)
+    ||!smartHomeCapacityBandResult(storage.observations,50_000)
+    ||!smartHomeCapacityBandResult(storage.cameraConsents,2_000)
+    ||!smartHomeCapacityBandResult(storage.mutations,100_000)
+    ||(storage.devices as Record<string,unknown>).current!==(value.devices as readonly unknown[]).length
+    ||(storage.observations as Record<string,unknown>).current!==value.observationTotal
+    ||(storage.cameraConsents as Record<string,unknown>).current!==value.cameraConsentTotal
+    ||!healthCareExactRecord(value.truth,['localFirst','cloudUsed','externalDeliveryPerformed','matterCommissioningPerformed',
+      'liveProviderConnectionTested','liveDeviceControlPerformed','sensorProviderIngestionPerformed','rawCameraOrAudioStored',
+      'hiddenSurveillanceProhibited','visibleTimeBoundedCameraConsentRequired','maximumCameraConsentMinutes',
+      'signedAdapterEvidenceRequired','providerAvailabilityGuaranteed','observationPayloadMode','networkUsedByCurrentImplementation',
+      'processingDisabledBlocksNewObservations','expiredConsentPresentedAsActive','boundedStorageCapsEnforced',
+      'automaticRetentionRecoveryImplemented']))return false;
+  if(value.truth.localFirst!==true||value.truth.cloudUsed!==false||value.truth.externalDeliveryPerformed!=='not_performed'
+    ||value.truth.matterCommissioningPerformed!==false||value.truth.liveProviderConnectionTested!==false
+    ||value.truth.liveDeviceControlPerformed!==false||value.truth.sensorProviderIngestionPerformed!==false
+    ||value.truth.rawCameraOrAudioStored!==false||value.truth.hiddenSurveillanceProhibited!==true
+    ||value.truth.visibleTimeBoundedCameraConsentRequired!==true||value.truth.maximumCameraConsentMinutes!==60
+    ||value.truth.signedAdapterEvidenceRequired!==true||value.truth.providerAvailabilityGuaranteed!==false
+    ||value.truth.observationPayloadMode!=='bounded_scalar_metadata_only'||value.truth.networkUsedByCurrentImplementation!==false
+    ||value.truth.processingDisabledBlocksNewObservations!==true||value.truth.expiredConsentPresentedAsActive!==false
+    ||value.truth.boundedStorageCapsEnforced!==true||value.truth.automaticRetentionRecoveryImplemented!==false)return false;
+  const owner=String(value.ownerPersonId);const generatedAt=Date.parse(String(value.generatedAt));
+  const devices=value.devices as readonly Record<string,unknown>[];const deviceIds=new Set(devices.map(item=>String(item.id)));
+  if(devices.some(item=>item.ownerPersonId!==owner||Date.parse(String(item.updatedAt))>generatedAt)
+    ||(value.settings as Record<string,unknown>).ownerPersonId!==owner
+    ||Date.parse(String((value.settings as Record<string,unknown>).updatedAt))>generatedAt)return false;
+  if((value.observations as readonly Record<string,unknown>[]).some(item=>!deviceIds.has(String(item.deviceId))
+    ||Date.parse(String(item.recordedAt))>generatedAt))return false;
+  return !(value.cameraConsents as readonly Record<string,unknown>[]).some(item=>!deviceIds.has(String(item.deviceId))
+    ||Date.parse(String(item.updatedAt))>generatedAt
+    ||(item.status==='active'&&item.effectiveStatus!==(Date.parse(String(item.expiresAt))<=generatedAt?'expired':'active')));
+};
 const smartHomeReceiptResult=(value:unknown):boolean=>healthCareExactRecord(value,
   ['resourceType','resourceId','mutationKind','previousRevision','revision','occurredAt','replayed','networkUsed','cloudUsed',
     'providerActionPerformed'])&&['smart_home_device','smart_home_observation','smart_home_camera_consent','smart_home_settings']
@@ -3459,8 +3508,16 @@ const smartHomeReceiptResult=(value:unknown):boolean=>healthCareExactRecord(valu
   &&healthCareRevision(value.revision)&&value.revision===Number(value.previousRevision)+1&&healthCareIso(value.occurredAt)
   &&typeof value.replayed==='boolean'&&value.networkUsed===false&&value.cloudUsed===false
   &&value.providerActionPerformed==='not_performed';
+const smartHomeReceiptMatchesChannel=(channel:string,value:unknown):boolean=>isObject(value)&&(
+  (channel===SMART_HOME_ENERGY_IPC_CHANNELS.grantCameraConsent&&value.resourceType==='smart_home_camera_consent'
+    &&value.mutationKind==='camera_consent_grant'&&value.previousRevision===0&&value.revision===1)
+  ||(channel===SMART_HOME_ENERGY_IPC_CHANNELS.revokeCameraConsent&&value.resourceType==='smart_home_camera_consent'
+    &&value.mutationKind==='camera_consent_revoke'&&Number(value.previousRevision)>=1)
+  ||(channel===SMART_HOME_ENERGY_IPC_CHANNELS.setProcessing&&value.resourceType==='smart_home_settings'
+    &&['processing_enable','processing_disable'].includes(String(value.mutationKind))));
 const smartHomeResult=(channel:string,result:unknown):IpcIntegrationPolicyDecision=>{
-  const valid=channel===SMART_HOME_ENERGY_IPC_CHANNELS.getCenter?smartHomeCenterResult(result):smartHomeReceiptResult(result);
+  const valid=channel===SMART_HOME_ENERGY_IPC_CHANNELS.getCenter?smartHomeCenterResult(result)
+    :smartHomeReceiptResult(result)&&smartHomeReceiptMatchesChannel(channel,result);
   return valid?accepted():rejected('SMART_HOME_RESULT_INVALID','$result');
 };
 

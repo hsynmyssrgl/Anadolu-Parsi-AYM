@@ -26,15 +26,24 @@ const center = {
     booleanValue: true, observedAt: NOW, recordedAt: NOW }],
   observationTotal: 1, observationsTruncated: false,
   cameraConsents: [{ id: 'consent-33-y', deviceId: 'doorbell-33-y', purpose: 'doorbell_answer', status: 'active',
-    grantedByAccountId: 'account-33-y', grantedByPersonId: 'person-33-y', visibleIndicatorRequired: true,
+    effectiveStatus: 'active', visibleIndicatorRequired: true,
     expiresAt: '2026-08-15T10:15:00.000Z', revision: 1, createdAt: NOW, updatedAt: NOW }],
+  cameraConsentTotal: 1, cameraConsentsTruncated: false,
+  storageCapacity: {
+    devices: { current: 1, maximum: 500, remaining: 499, limitReached: false },
+    observations: { current: 1, maximum: 50_000, remaining: 49_999, limitReached: false },
+    cameraConsents: { current: 1, maximum: 2_000, remaining: 1_999, limitReached: false },
+    mutations: { current: 3, maximum: 100_000, remaining: 99_997, limitReached: false }
+  },
   settings: { id: 'smart-home-settings:person-33-y', ownerPersonId: 'person-33-y', processingEnabled: true,
     cameraAccessDefaultDenied: true, hiddenSurveillanceProhibited: true, revision: 1, createdAt: NOW, updatedAt: NOW },
   truth: { localFirst: true, cloudUsed: false, externalDeliveryPerformed: 'not_performed', matterCommissioningPerformed: false,
     liveProviderConnectionTested: false, liveDeviceControlPerformed: false, sensorProviderIngestionPerformed: false,
     rawCameraOrAudioStored: false, hiddenSurveillanceProhibited: true, visibleTimeBoundedCameraConsentRequired: true,
     maximumCameraConsentMinutes: 60, signedAdapterEvidenceRequired: true, providerAvailabilityGuaranteed: false,
-    observationPayloadMode: 'bounded_scalar_metadata_only', networkUsedByCurrentImplementation: false }, generatedAt: NOW
+    observationPayloadMode: 'bounded_scalar_metadata_only', networkUsedByCurrentImplementation: false,
+    processingDisabledBlocksNewObservations: true, expiredConsentPresentedAsActive: false, boundedStorageCapsEnforced: true,
+    automaticRetentionRecoveryImplemented: false }, generatedAt: NOW
 };
 
 describe('33-Y smart home and energy IPC boundary', () => {
@@ -67,6 +76,19 @@ describe('33-Y smart home and energy IPC boundary', () => {
       { ...center, adapterManifestSha256: 'a'.repeat(64) }).accepted).toBe(false);
     expect(evaluateIpcIntegrationResultPolicy(SMART_HOME_ENERGY_IPC_CHANNELS.grantCameraConsent,
       { ...receipt, policyReceiptHash: 'b'.repeat(64) }).accepted).toBe(false);
+    expect(evaluateIpcIntegrationResultPolicy(SMART_HOME_ENERGY_IPC_CHANNELS.revokeCameraConsent, receipt).accepted).toBe(false);
+    expect(evaluateIpcIntegrationResultPolicy(SMART_HOME_ENERGY_IPC_CHANNELS.getCenter,
+      { ...center, devices: [{ ...center.devices[0], ownerPersonId: 'person-foreign-33-y' }] }).accepted).toBe(false);
+    expect(evaluateIpcIntegrationResultPolicy(SMART_HOME_ENERGY_IPC_CHANNELS.getCenter,
+      { ...center, observationTotal: 0 }).accepted).toBe(false);
+    expect(evaluateIpcIntegrationResultPolicy(SMART_HOME_ENERGY_IPC_CHANNELS.getCenter,
+      { ...center, observations: [{ ...center.observations[0], unit: 'watt', numericValue: 1, booleanValue: undefined }] }).accepted).toBe(false);
+    expect(evaluateIpcIntegrationResultPolicy(SMART_HOME_ENERGY_IPC_CHANNELS.getCenter,
+      { ...center, cameraConsents: [{ ...center.cameraConsents[0], grantedByAccountId: 'account-private-33-y' }] }).accepted).toBe(false);
+    const expired={...center,generatedAt:'2026-08-15T10:20:00.000Z',cameraConsents:[{...center.cameraConsents[0],effectiveStatus:'expired'}]};
+    expect(evaluateIpcIntegrationResultPolicy(SMART_HOME_ENERGY_IPC_CHANNELS.getCenter,expired).accepted).toBe(true);
+    expect(evaluateIpcIntegrationResultPolicy(SMART_HOME_ENERGY_IPC_CHANNELS.getCenter,
+      {...expired,cameraConsents:[{...expired.cameraConsents[0],effectiveStatus:'active'}]}).accepted).toBe(false);
   });
 
   it('keeps reads cancellable and durable mutations non-cancellable and bounded', () => {

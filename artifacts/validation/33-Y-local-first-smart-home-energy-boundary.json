@@ -5,8 +5,8 @@
   "status": "PASS",
   "governanceState": "PLANNED",
   "countsAsRequirementPass": false,
-  "checkCount": 12,
-  "passed": 12,
+  "checkCount": 13,
+  "passed": 13,
   "failed": 0,
   "checks": [
     {
@@ -18,7 +18,7 @@
       "status": "PASS"
     },
     {
-      "name": "domain fixes device observation and fail-honest truth vocabularies",
+      "name": "domain fixes device observation capacity and fail-honest truth vocabularies",
       "status": "PASS"
     },
     {
@@ -26,11 +26,11 @@
       "status": "PASS"
     },
     {
-      "name": "application enforces signed adapter scalar observations and bounded visible consent",
+      "name": "application enforces exact commands processing gate capacity and bounded visible consent",
       "status": "PASS"
     },
     {
-      "name": "repository uses exact receipt fence owner scope and payload-free resolution",
+      "name": "repository uses exact receipt fence owner scope bounded usage and payload-free resolution",
       "status": "PASS"
     },
     {
@@ -42,11 +42,15 @@
       "status": "PASS"
     },
     {
+      "name": "adapter and IPC redact grant actors and expose bounded effective state",
+      "status": "PASS"
+    },
+    {
       "name": "IPC exposes exactly four renderer-safe channels",
       "status": "PASS"
     },
     {
-      "name": "renderer states visible consent and provider no-claim boundary",
+      "name": "renderer states capacity retention and provider no-claim boundary",
       "status": "PASS"
     },
     {
@@ -58,5 +62,5 @@
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-16T05:54:49.701Z"
+  "generatedAt": "2026-08-16T11:23:33.999Z"
 }

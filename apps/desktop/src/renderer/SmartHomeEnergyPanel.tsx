@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import type { SmartHomeCameraConsentView, SmartHomeEnergyCenterView } from '@ppt/domain';
+import type { SmartHomeCameraConsentCenterItemView, SmartHomeEnergyCenterView } from '@ppt/domain';
 
 const deviceLabels:Record<string,string>={matter_bridge:'Matter köprüsü',smoke_sensor:'Duman sensörü',
   carbon_monoxide_sensor:'CO sensörü',water_leak_sensor:'Su kaçağı sensörü',door_sensor:'Kapı sensörü',
@@ -10,26 +10,41 @@ const observationLabels:Record<string,string>={smoke_alarm:'Duman alarmı',carbo
   energy_kilowatt_hour:'Enerji',power_watts:'Güç',ev_charge_kilowatt_hour:'Araç şarjı',
   thermostat_target_celsius:'Termostat hedefi',light_on:'Aydınlatma',smart_plug_on:'Akıllı priz'};
 const unitLabels:Record<string,string>={boolean:'',celsius:'°C',percent:'%',watt:'W',kilowatt_hour:'kWh'};
+interface PendingGrant{readonly signature:string;readonly clientOperationId:string;readonly consentId:string;readonly expiresAt:string}
 
 export function SmartHomeEnergyPanel(){
   const [center,setCenter]=useState<SmartHomeEnergyCenterView>();const [error,setError]=useState('');const [busy,setBusy]=useState(false);
   const [deviceId,setDeviceId]=useState('');const [purpose,setPurpose]=useState<'live_view'|'doorbell_answer'>('live_view');
   const [minutes,setMinutes]=useState(15);const operationIds=useRef(new Map<string,string>());
+  const pendingGrant=useRef<PendingGrant|undefined>(undefined);
   const operation=(key:string)=>{const existing=operationIds.current.get(key);if(existing)return existing;
     const id=crypto.randomUUID();operationIds.current.set(key,id);return id;};
-  const refresh=async()=>{if(!window.pardus)return;setError('');try{const next=await window.pardus.getSmartHomeEnergyCenter();
+  const reload=async()=>{if(!window.pardus)return;const next=await window.pardus.getSmartHomeEnergyCenter();
     setCenter(next);if(!deviceId){const first=next.devices.find(item=>['camera','doorbell'].includes(item.kind)&&item.status==='active');
-      if(first)setDeviceId(first.id);}}catch(caught){setError(caught instanceof Error?caught.message:'Akıllı ev merkezi yüklenemedi.');}};
-  useEffect(()=>{void refresh();},[]);
+      if(first)setDeviceId(first.id);}};
+  const refresh=async()=>{setError('');try{await reload();}catch(caught){setError(caught instanceof Error?caught.message:'Akıllı ev merkezi yüklenemedi.');}};
+  useEffect(()=>{void reload().catch(caught=>setError(caught instanceof Error?caught.message:'Akıllı ev merkezi yüklenemedi.'));},[]);
   const cameras=useMemo(()=>center?.devices.filter(item=>['camera','doorbell'].includes(item.kind)&&item.status==='active')??[],[center]);
-  const activeConsents=useMemo(()=>center?.cameraConsents.filter(item=>item.status==='active'&&Date.parse(item.expiresAt)>Date.now())??[],[center]);
-  const mutate=async(key:string,run:(clientOperationId:string)=>Promise<unknown>)=>{setBusy(true);setError('');try{await run(operation(key));
-    operationIds.current.delete(key);await refresh();}catch(caught){setError(caught instanceof Error
-      ?`${caught.message} Aynı işlem kimliğiyle yeniden deneyebilirsiniz.`:'Akıllı ev işlemi tamamlanamadı.');}finally{setBusy(false);}};
-  const grant=async(event:FormEvent)=>{event.preventDefault();if(!window.pardus||!deviceId)return;const consentId=crypto.randomUUID();
-    await mutate(`grant:${consentId}`,id=>window.pardus!.grantSmartHomeCameraConsent({clientOperationId:id,consentId,deviceId,purpose,
-      expiresAt:new Date(Date.now()+Math.min(60,Math.max(5,minutes))*60_000).toISOString()}));};
-  const revoke=async(consent:SmartHomeCameraConsentView)=>{if(!window.pardus)return;
+  const selectedCamera=useMemo(()=>cameras.find(item=>item.id===deviceId),[cameras,deviceId]);
+  const activeConsents=useMemo(()=>center?.cameraConsents.filter(item=>item.effectiveStatus==='active')??[],[center]);
+  const visibleConsents=useMemo(()=>center?.cameraConsents.filter(item=>item.effectiveStatus!=='revoked')??[],[center]);
+  const writesBlocked=center?.storageCapacity.mutations.limitReached===true;
+  const mutate=async(key:string,run:(clientOperationId:string)=>Promise<unknown>,fixedClientOperationId?:string):Promise<boolean>=>{
+    setBusy(true);setError('');try{await run(fixedClientOperationId??operation(key));
+    operationIds.current.delete(key);try{await reload();}catch(caught){setError(caught instanceof Error
+      ?`İşlem kaydedildi; görünüm yenilenemedi: ${caught.message}`:'İşlem kaydedildi; görünüm yenilenemedi.');}return true;
+    }catch(caught){setError(caught instanceof Error?`${caught.message} Aynı işlem kimliğiyle yeniden deneyebilirsiniz.`
+      :'Akıllı ev işlemi tamamlanamadı; aynı işlem kimliğiyle yeniden deneyebilirsiniz.');return false;}finally{setBusy(false);}};
+  const grant=async(event:FormEvent)=>{event.preventDefault();if(!window.pardus||!deviceId)return;
+    if(!Number.isInteger(minutes)||minutes<5||minutes>60){setError('İzin süresi 5 ile 60 dakika arasında tam sayı olmalıdır.');return;}
+    if(purpose==='doorbell_answer'&&selectedCamera?.kind!=='doorbell'){setError('Kapı zilini yanıtlama amacı yalnız kapı zili cihazında kullanılabilir.');return;}
+    const signature=JSON.stringify({deviceId,purpose,minutes});let command=pendingGrant.current;
+    if(!command||command.signature!==signature){command={signature,clientOperationId:crypto.randomUUID(),consentId:crypto.randomUUID(),
+      expiresAt:new Date(Date.now()+minutes*60_000).toISOString()};pendingGrant.current=command;}
+    const succeeded=await mutate('grant-camera',id=>window.pardus!.grantSmartHomeCameraConsent({clientOperationId:id,
+      consentId:command!.consentId,deviceId,purpose,expiresAt:command!.expiresAt}),command.clientOperationId);
+    if(succeeded)pendingGrant.current=undefined;};
+  const revoke=async(consent:SmartHomeCameraConsentCenterItemView)=>{if(!window.pardus)return;
     await mutate(`revoke:${consent.id}:${consent.revision}`,id=>window.pardus!.revokeSmartHomeCameraConsent({clientOperationId:id,
       consentId:consent.id,expectedRevision:consent.revision}));};
   const toggleProcessing=async()=>{if(!window.pardus||!center)return;const enabled=!center.settings.processingEnabled;
@@ -44,8 +59,14 @@ export function SmartHomeEnergyPanel(){
     {!center?<p>Yerel merkez yükleniyor…</p>:<>
       <div className="smart-home-summary"><span><strong>{center.devices.length}</strong> cihaz metadatası</span>
         <span><strong>{center.observationTotal}</strong> sensör/enerji gözlemi</span><span><strong>{activeConsents.length}</strong> etkin süreli izin</span>
-        <button type="button" disabled={busy} onClick={()=>void toggleProcessing()}>{center.settings.processingEnabled?'Yerel işlemeyi kapat':'Yerel işlemeyi aç'}</button></div>
+        <button type="button" disabled={busy||writesBlocked} onClick={()=>void toggleProcessing()}>{center.settings.processingEnabled?'Yerel işlemeyi kapat':'Yerel işlemeyi aç'}</button></div>
+      <div className="smart-home-summary" aria-label="Akıllı ev güvenli yerel kapasitesi"><span>Cihaz: {center.storageCapacity.devices.remaining}/{center.storageCapacity.devices.maximum}</span>
+        <span>Gözlem: {center.storageCapacity.observations.remaining}/{center.storageCapacity.observations.maximum}</span>
+        <span>İzin: {center.storageCapacity.cameraConsents.remaining}/{center.storageCapacity.cameraConsents.maximum}</span>
+        <span>İşlem: {center.storageCapacity.mutations.remaining}/{center.storageCapacity.mutations.maximum}</span></div>
+      {Object.values(center.storageCapacity).some(item=>item.limitReached)&&<p className="status-message danger">Güvenli yerel kapasite sınırına ulaşılan türde yeni yazım fail‑closed kapatıldı; otomatik retention kurtarması uygulanmadı.</p>}
       {center.observationsTruncated&&<p className="status-message warning">Son 500 gözlem gösteriliyor; toplam sayı ayrıca korunur.</p>}
+      {center.cameraConsentsTruncated&&<p className="status-message warning">Son 500 kamera izni gösteriliyor; toplam {center.cameraConsentTotal} kayıt korunur.</p>}
       <div className="smart-home-grid"><article aria-labelledby="smart-home-devices-title"><h3 id="smart-home-devices-title">Cihaz envanteri</h3>
         {center.devices.length===0?<p>İmzalı bir yerel adapter tarafından doğrulanmış cihaz yok.</p>:center.devices.map(device=><div className="smart-home-row" key={device.id}>
           <div><strong>{device.label}</strong><small>{deviceLabels[device.kind]??device.kind}{device.room?` · ${device.room}`:''}</small>
@@ -55,12 +76,13 @@ export function SmartHomeEnergyPanel(){
             <div><strong>{observationLabels[item.kind]??item.kind}</strong><small>{new Date(item.observedAt).toLocaleString('tr-TR')}</small></div>
             <span>{item.booleanValue===undefined?item.numericValue:item.booleanValue?'Evet':'Hayır'} {unitLabels[item.unit]}</span></div>)}</article></div>
       <article className="smart-home-consent" aria-labelledby="smart-home-consent-title"><h3 id="smart-home-consent-title">Görünür ve süreli kamera izni</h3>
-        {cameras.length===0?<p>Etkin kamera veya kapı zili yok; izin verilemez.</p>:<form onSubmit={event=>void grant(event)}><label>Cihaz<select value={deviceId} onChange={event=>setDeviceId(event.target.value)}>{cameras.map(device=><option key={device.id} value={device.id}>{device.label}</option>)}</select></label>
-          <label>Amaç<select value={purpose} onChange={event=>setPurpose(event.target.value as typeof purpose)}><option value="live_view">Canlı görünüm</option><option value="doorbell_answer">Kapı zilini yanıtlama</option></select></label>
-          <label>Süre (dakika)<input type="number" min={5} max={60} value={minutes} onChange={event=>setMinutes(Number(event.target.value))}/></label>
-          <button type="submit" disabled={busy||!deviceId}>Süreli izin ver</button></form>}
-        {activeConsents.map(consent=><div className="smart-home-row" key={consent.id}><div><strong>{consent.purpose==='live_view'?'Canlı görünüm':'Kapı zili'}</strong>
-          <small>{consent.deviceId} · {new Date(consent.expiresAt).toLocaleTimeString('tr-TR')}</small></div><button type="button" disabled={busy} onClick={()=>void revoke(consent)}>İzni geri al</button></div>)}</article>
+        {cameras.length===0?<p>Etkin kamera veya kapı zili yok; izin verilemez.</p>:<form onSubmit={event=>void grant(event)}><label>Cihaz<select value={deviceId} onChange={event=>{setDeviceId(event.target.value);pendingGrant.current=undefined;}}>{cameras.map(device=><option key={device.id} value={device.id}>{device.label}</option>)}</select></label>
+          <label>Amaç<select value={purpose} onChange={event=>{setPurpose(event.target.value as typeof purpose);pendingGrant.current=undefined;}}><option value="live_view">Canlı görünüm</option><option value="doorbell_answer" disabled={selectedCamera?.kind!=='doorbell'}>Kapı zilini yanıtlama</option></select></label>
+          <label>Süre (dakika)<input type="number" min={5} max={60} step={1} value={minutes} onChange={event=>{setMinutes(Number(event.target.value));pendingGrant.current=undefined;}}/></label>
+          <button type="submit" disabled={busy||!deviceId||writesBlocked||center.storageCapacity.cameraConsents.limitReached}>Süreli izin ver</button></form>}
+        {visibleConsents.map(consent=><div className="smart-home-row" key={consent.id}><div><strong>{consent.purpose==='live_view'?'Canlı görünüm':'Kapı zili'}</strong>
+          <small>{consent.deviceId} · {consent.effectiveStatus==='expired'?'Süresi doldu':new Date(consent.expiresAt).toLocaleTimeString('tr-TR')}</small></div>
+          <button type="button" disabled={busy||writesBlocked} onClick={()=>void revoke(consent)}>{consent.effectiveStatus==='expired'?'Süresi dolan kaydı kapat':'İzni geri al'}</button></div>)}</article>
     </>}
   </section>;
 }

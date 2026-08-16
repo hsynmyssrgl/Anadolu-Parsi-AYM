@@ -13,6 +13,10 @@ import {
 import type { DomainEvent } from '@ppt/events';
 import {
   SMART_HOME_DEVICE_KINDS,
+  SMART_HOME_MAX_CAMERA_CONSENTS,
+  SMART_HOME_MAX_DEVICES,
+  SMART_HOME_MAX_MUTATIONS,
+  SMART_HOME_MAX_OBSERVATIONS,
   SMART_HOME_OBSERVATION_KINDS,
   type GrantSmartHomeCameraConsentInput,
   type RecordSmartHomeObservationInput,
@@ -34,7 +38,8 @@ import type {
   SmartHomeEnergyCenterKey,
   SmartHomeMutationRow,
   SmartHomeObservationRow,
-  SmartHomeSettingsRow
+  SmartHomeSettingsRow,
+  SmartHomeStorageUsageRow
 } from '@ppt/repository-contracts';
 import type { LifeApplicationContext, LifePolicyIntent } from './life-use-cases.js';
 
@@ -48,6 +53,7 @@ export interface SmartHomeEnergyWriteScope {
   findDevice(deviceId: string): Result<SmartHomeDeviceRow | null, AppError>;
   findConsent(consentId: string): Result<SmartHomeCameraConsentRow | null, AppError>;
   findSettings(): Result<SmartHomeSettingsRow | null, AppError>;
+  getStorageUsage(): Result<SmartHomeStorageUsageRow, AppError>;
   findMutation(clientOperationId: string): Result<SmartHomeMutationRow | null, AppError>;
   insertMutation(row: SmartHomeMutationRow): Result<void, AppError>;
   insertDevice(row: SmartHomeDeviceRow): Result<void, AppError>;
@@ -76,15 +82,36 @@ export interface SmartHomeEnergyUnitOfWork {
   ): Promise<Result<T, AppError>>;
 }
 
-const SAFE_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{1,255}$/u;
+const SAFE_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{1,159}$/u;
 const SHA256 = /^[a-f0-9]{64}$/u;
 const CONTROL = /[\p{Cc}\p{Cf}\p{Cs}]/u;
+const EXACT_ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u;
 const deviceKinds = new Set<string>(SMART_HOME_DEVICE_KINDS);
 const observationKinds = new Set<string>(SMART_HOME_OBSERVATION_KINDS);
 const booleanKinds = new Set<SmartHomeObservationKind>([
   'smoke_alarm', 'carbon_monoxide_alarm', 'water_leak_alarm', 'door_open', 'light_on', 'smart_plug_on'
 ]);
-const hash = (value: unknown): string => createHash('sha256').update(JSON.stringify(value), 'utf8').digest('hex');
+const canonicalJson = (value: unknown): string => {
+  if (value === null || typeof value === 'string' || typeof value === 'boolean') return JSON.stringify(value);
+  if (typeof value === 'number') return Number.isFinite(value) ? JSON.stringify(value) : 'null';
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
+  if (typeof value === 'object') {
+    const record = value as Record<string, unknown>;
+    return `{${Object.keys(record).filter((key) => record[key] !== undefined).sort()
+      .map((key) => `${JSON.stringify(key)}:${canonicalJson(record[key])}`).join(',')}}`;
+  }
+  return JSON.stringify(null);
+};
+const hash = (value: unknown): string => createHash('sha256').update(canonicalJson(value), 'utf8').digest('hex');
+const exactRecord = (value: unknown, required: readonly string[], optional: readonly string[] = []): boolean => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const prototype = Object.getPrototypeOf(value); if (prototype !== Object.prototype && prototype !== null) return false;
+  const keys = Reflect.ownKeys(value); if (keys.some((key) => typeof key === 'symbol')) return false;
+  const allowed = new Set([...required, ...optional]); if (keys.some((key) => !allowed.has(String(key)))) return false;
+  if (required.some((key) => !Object.prototype.hasOwnProperty.call(value, key))) return false;
+  return keys.every((key) => { const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    return Boolean(descriptor && !descriptor.get && !descriptor.set && 'value' in descriptor); });
+};
 
 const appError = (
   context: LifeApplicationContext,
@@ -126,9 +153,34 @@ const revision = (context: LifeApplicationContext, value: unknown, allowZero = f
     ? ok(Number(value)) : err(invalid(context, 'Beklenen sürüm geçersizdir.'));
 
 const parseDate = (context: LifeApplicationContext, value: unknown, field: string): Result<ReturnType<typeof asIsoDateTime>, AppError> => {
-  if (typeof value !== 'string' || !Number.isFinite(Date.parse(value))) return err(invalid(context, `${field} zamanı geçersizdir.`));
-  return ok(asIsoDateTime(new Date(value).toISOString()));
+  if (typeof value !== 'string' || !EXACT_ISO.test(value) || !Number.isFinite(Date.parse(value)) ||
+    new Date(value).toISOString() !== value) return err(invalid(context, `${field} zamanı geçersizdir.`));
+  return ok(asIsoDateTime(value));
 };
+
+type CapacityKind = 'device' | 'observation' | 'camera_consent' | 'mutation_only';
+const ensureCapacity = (
+  context: LifeApplicationContext,
+  usage: SmartHomeStorageUsageRow,
+  kind: CapacityKind
+): Result<void, AppError> => {
+  if (usage.mutationCount >= SMART_HOME_MAX_MUTATIONS)
+    return err(conflict(context, 'Akıllı ev mutation kapasitesi doludur; yeni yazım fail-closed kapatıldı.'));
+  if (kind === 'device' && usage.deviceCount >= SMART_HOME_MAX_DEVICES)
+    return err(conflict(context, 'Akıllı ev cihaz kapasitesi doludur.'));
+  if (kind === 'observation' && usage.observationCount >= SMART_HOME_MAX_OBSERVATIONS)
+    return err(conflict(context, 'Akıllı ev gözlem kapasitesi doludur.'));
+  if (kind === 'camera_consent' && usage.cameraConsentCount >= SMART_HOME_MAX_CAMERA_CONSENTS)
+    return err(conflict(context, 'Akıllı ev kamera izin kapasitesi doludur.'));
+  return ok(undefined);
+};
+
+const requireMonotonicTime = (
+  context: LifeApplicationContext,
+  occurredAt: string,
+  previousUpdatedAt: string
+): Result<void, AppError> => Date.parse(occurredAt) >= Date.parse(previousUpdatedAt)
+  ? ok(undefined) : err(conflict(context, 'Akıllı ev durum zamanı geriye gidemez.'));
 
 export const smartHomeEnergyReadIntent = (): LifePolicyIntent => ({
   action: 'read', capability: 'family.read', resourceType: 'smart_home_energy_center', resourceId: '*', purpose: 'general'
@@ -270,18 +322,27 @@ export class RegisterSmartHomeDeviceUseCase {
   public async execute(input: { readonly context: LifeApplicationContext; readonly command: RegisterSmartHomeDeviceInput })
   : Promise<Result<SmartHomeMutationReceiptView, AppError>> {
     const { context, command } = input; const actor = requireActor(context); if (!actor.ok) return actor;
+    if (!exactRecord(command, ['clientOperationId', 'deviceId', 'adapterId', 'providerId', 'kind', 'label',
+      'localIdentifierSha256', 'adapterManifestSha256', 'adapterSignerKeyId', 'adapterSignatureVerified'], ['room']))
+      return err(invalid(context, 'Cihaz kayıt komutu exact sözleşmeyle eşleşmiyor.'));
     if (![command.clientOperationId, command.deviceId, command.adapterId, command.providerId, command.adapterSignerKeyId].every(SAFE_ID.test.bind(SAFE_ID)) ||
       !deviceKinds.has(command.kind) || !SHA256.test(command.localIdentifierSha256) || !SHA256.test(command.adapterManifestSha256) ||
       command.adapterSignatureVerified !== true) return err(denied(context, 'Cihaz yalnız doğrulanmış imzalı adapter kanıtıyla kaydedilebilir.'));
     const label = normalizeText(context, command.label, 'Cihaz etiketi', 2, 120); if (!label.ok) return label;
     const room = normalizeText(context, command.room, 'Oda', 2, 120, true); if (!room.ok) return room;
-    const requestFingerprint = hash({ ...command, label: label.value, room: room.value ?? null });
+    const requestFingerprint = hash({ clientOperationId: command.clientOperationId, deviceId: command.deviceId,
+      adapterId: command.adapterId, providerId: command.providerId, kind: command.kind, label: label.value,
+      room: room.value ?? null, localIdentifierSha256: command.localIdentifierSha256,
+      adapterManifestSha256: command.adapterManifestSha256, adapterSignerKeyId: command.adapterSignerKeyId,
+      adapterSignatureVerified: true });
     return this.unitOfWork.execute(context, writeIntent('smart_home_device', command.deviceId, 'create', actor.value), (scope) => {
       const prior = scope.findMutation(command.clientOperationId); if (!prior.ok) return prior;
       const replayed = replay(context, prior.value, requestFingerprint, 'device_register', 'smart_home_device', command.deviceId);
       if (!replayed.ok || replayed.value) return replayed.ok ? ok(replayed.value!) : replayed;
       const found = scope.findDevice(command.deviceId); if (!found.ok) return found;
       if (found.value) return err(conflict(context, 'Akıllı ev cihaz kimliği zaten kullanılıyor.'));
+      const usage = scope.getStorageUsage(); if (!usage.ok) return usage;
+      const capacity = ensureCapacity(context, usage.value, 'device'); if (!capacity.ok) return capacity;
       const occurredAt = asIsoDateTime(scope.occurredAt); const id = mutationId(context, command.clientOperationId, requestFingerprint);
       const base: Omit<SmartHomeDeviceRow, 'stateFingerprint'> = { id: command.deviceId, familyId: context.familyId,
         ownerPersonId: scope.ownerPersonId, adapterId: command.adapterId, providerId: command.providerId,
@@ -303,19 +364,25 @@ export class UpdateSmartHomeDeviceStatusUseCase {
   public async execute(input: { readonly context: LifeApplicationContext; readonly command: UpdateSmartHomeDeviceStatusInput })
   : Promise<Result<SmartHomeMutationReceiptView, AppError>> {
     const { context, command } = input; const actor = requireActor(context); if (!actor.ok) return actor;
+    if (!exactRecord(command, ['clientOperationId', 'deviceId', 'expectedRevision', 'status']))
+      return err(invalid(context, 'Cihaz durum komutu exact sözleşmeyle eşleşmiyor.'));
     const expected = revision(context, command.expectedRevision); if (!expected.ok) return expected;
     if (!SAFE_ID.test(command.clientOperationId) || !SAFE_ID.test(command.deviceId) ||
       !['active', 'offline', 'retired'].includes(command.status)) return err(invalid(context, 'Cihaz durum komutu geçersizdir.'));
-    const requestFingerprint = hash(command);
+    const requestFingerprint = hash({ clientOperationId: command.clientOperationId, deviceId: command.deviceId,
+      expectedRevision: expected.value, status: command.status });
     return this.unitOfWork.execute(context, writeIntent('smart_home_device', command.deviceId, 'update'), (scope) => {
       const prior = scope.findMutation(command.clientOperationId); if (!prior.ok) return prior;
       const replayed = replay(context, prior.value, requestFingerprint, 'device_status_update', 'smart_home_device', command.deviceId);
       if (!replayed.ok || replayed.value) return replayed.ok ? ok(replayed.value!) : replayed;
       const found = scope.findDevice(command.deviceId); if (!found.ok) return found;
       if (!found.value) return err(missing(context, 'Akıllı ev cihazı bulunamadı.'));
-      if (found.value.revision !== expected.value || found.value.status === 'retired')
+      if (found.value.revision !== expected.value || found.value.status === 'retired' || found.value.status === command.status)
         return err(conflict(context, 'Cihaz sürümü veya durumu değişti.'));
       const occurredAt = asIsoDateTime(scope.occurredAt); const nextRevision = found.value.revision + 1;
+      const monotonic = requireMonotonicTime(context, occurredAt, found.value.updatedAt); if (!monotonic.ok) return monotonic;
+      const usage = scope.getStorageUsage(); if (!usage.ok) return usage;
+      const capacity = ensureCapacity(context, usage.value, 'mutation_only'); if (!capacity.ok) return capacity;
       const id = mutationId(context, command.clientOperationId, requestFingerprint);
       const base: Omit<SmartHomeDeviceRow, 'stateFingerprint'> = { ...found.value, status: command.status,
         revision: nextRevision, lastMutationId: id, updatedAt: occurredAt };
@@ -333,6 +400,9 @@ export class RecordSmartHomeObservationUseCase {
   public async execute(input: { readonly context: LifeApplicationContext; readonly command: RecordSmartHomeObservationInput })
   : Promise<Result<SmartHomeMutationReceiptView, AppError>> {
     const { context, command } = input; const actor = requireActor(context); if (!actor.ok) return actor;
+    if (!exactRecord(command, ['clientOperationId', 'observationId', 'deviceId', 'expectedDeviceRevision', 'kind',
+      'observedAt', 'sourceManifestSha256'], ['numericValue', 'booleanValue']))
+      return err(invalid(context, 'Sensör gözlem komutu exact sözleşmeyle eşleşmiyor.'));
     const expected = revision(context, command.expectedDeviceRevision); if (!expected.ok) return expected;
     if (![command.clientOperationId, command.observationId, command.deviceId].every(SAFE_ID.test.bind(SAFE_ID)) ||
       !observationKinds.has(command.kind) || !SHA256.test(command.sourceManifestSha256))
@@ -342,18 +412,25 @@ export class RecordSmartHomeObservationUseCase {
     if (booleanObservation ? (typeof command.booleanValue !== 'boolean' || command.numericValue !== undefined)
       : (typeof command.numericValue !== 'number' || command.booleanValue !== undefined || !validNumericObservation(kind, command.numericValue)))
       return err(invalid(context, 'Sensör gözlem değeri tür veya güvenli aralıkla eşleşmiyor.'));
-    const requestFingerprint = hash({ ...command, observedAt: observedAt.value });
+    const requestFingerprint = hash({ clientOperationId: command.clientOperationId, observationId: command.observationId,
+      deviceId: command.deviceId, expectedDeviceRevision: expected.value, kind, numericValue: command.numericValue ?? null,
+      booleanValue: command.booleanValue ?? null, observedAt: observedAt.value, sourceManifestSha256: command.sourceManifestSha256 });
     return this.unitOfWork.execute(context, writeIntent('smart_home_observation', command.observationId, 'create', actor.value), (scope) => {
-      const now = Date.parse(scope.occurredAt); const observed = Date.parse(observedAt.value);
-      if (observed < now - 30 * 86_400_000 || observed > now + 5 * 60_000)
-        return err(invalid(context, 'Sensör gözlem zamanı izin verilen yerel pencerenin dışındadır.'));
       const prior = scope.findMutation(command.clientOperationId); if (!prior.ok) return prior;
       const replayed = replay(context, prior.value, requestFingerprint, 'observation_record', 'smart_home_observation', command.observationId);
       if (!replayed.ok || replayed.value) return replayed.ok ? ok(replayed.value!) : replayed;
+      const now = Date.parse(scope.occurredAt); const observed = Date.parse(observedAt.value);
+      if (observed < now - 30 * 86_400_000 || observed > now + 5 * 60_000)
+        return err(invalid(context, 'Sensör gözlem zamanı izin verilen yerel pencerenin dışındadır.'));
+      const settings = scope.findSettings(); if (!settings.ok) return settings;
+      if (!settings.value?.processingEnabled)
+        return err(denied(context, 'Yeni sensör gözlemleri için yerel işleme açık olmalıdır.'));
       const device = scope.findDevice(command.deviceId); if (!device.ok) return device;
       if (!device.value || device.value.status !== 'active') return err(denied(context, 'Gözlem için etkin ve yetkili cihaz gerekir.'));
       if (device.value.revision !== expected.value || device.value.adapterManifestSha256 !== command.sourceManifestSha256 ||
         !(compatibleKinds[kind] ?? []).includes(device.value.kind)) return err(denied(context, 'Gözlem cihaz sürümü, türü veya imzalı adapter kanıtıyla eşleşmiyor.'));
+      const usage = scope.getStorageUsage(); if (!usage.ok) return usage;
+      const capacity = ensureCapacity(context, usage.value, 'observation'); if (!capacity.ok) return capacity;
       const occurredAt = asIsoDateTime(scope.occurredAt); const id = mutationId(context, command.clientOperationId, requestFingerprint);
       const base: Omit<SmartHomeObservationRow, 'stateFingerprint'> = { id: command.observationId, familyId: context.familyId,
         ownerPersonId: scope.ownerPersonId, deviceId: command.deviceId, kind, unit: unitFor(kind),
@@ -374,22 +451,29 @@ export class GrantSmartHomeCameraConsentUseCase {
   public async execute(input: { readonly context: LifeApplicationContext; readonly command: GrantSmartHomeCameraConsentInput })
   : Promise<Result<SmartHomeMutationReceiptView, AppError>> {
     const { context, command } = input; const actor = requireActor(context); if (!actor.ok) return actor;
+    if (!exactRecord(command, ['clientOperationId', 'consentId', 'deviceId', 'purpose', 'expiresAt']))
+      return err(invalid(context, 'Kamera izin komutu exact sözleşmeyle eşleşmiyor.'));
     if (![command.clientOperationId, command.consentId, command.deviceId].every(SAFE_ID.test.bind(SAFE_ID)) ||
       !['live_view', 'doorbell_answer'].includes(command.purpose)) return err(invalid(context, 'Kamera izin komutu geçersizdir.'));
     const expiresAt = parseDate(context, command.expiresAt, 'İzin bitiş'); if (!expiresAt.ok) return expiresAt;
-    const requestFingerprint = hash({ ...command, expiresAt: expiresAt.value });
+    const requestFingerprint = hash({ clientOperationId: command.clientOperationId, consentId: command.consentId,
+      deviceId: command.deviceId, purpose: command.purpose, expiresAt: expiresAt.value });
     return this.unitOfWork.execute(context, writeIntent('smart_home_camera_consent', command.consentId, 'create', actor.value), (scope) => {
-      const now = Date.parse(scope.occurredAt); const expiry = Date.parse(expiresAt.value);
-      if (expiry < now + 5 * 60_000 || expiry > now + 60 * 60_000)
-        return err(invalid(context, 'Kamera izni 5 ile 60 dakika arasında ve süreli olmalıdır.'));
       const prior = scope.findMutation(command.clientOperationId); if (!prior.ok) return prior;
       const replayed = replay(context, prior.value, requestFingerprint, 'camera_consent_grant', 'smart_home_camera_consent', command.consentId);
       if (!replayed.ok || replayed.value) return replayed.ok ? ok(replayed.value!) : replayed;
+      const now = Date.parse(scope.occurredAt); const expiry = Date.parse(expiresAt.value);
+      if (expiry < now + 5 * 60_000 || expiry > now + 60 * 60_000)
+        return err(invalid(context, 'Kamera izni 5 ile 60 dakika arasında ve süreli olmalıdır.'));
       const found = scope.findConsent(command.consentId); if (!found.ok) return found;
       if (found.value) return err(conflict(context, 'Kamera izin kimliği zaten kullanılıyor.'));
       const device = scope.findDevice(command.deviceId); if (!device.ok) return device;
       if (!device.value || device.value.status !== 'active' || !['camera', 'doorbell'].includes(device.value.kind))
         return err(denied(context, 'Görünür süreli izin yalnız etkin kamera veya kapı zili için verilebilir.'));
+      if (command.purpose === 'doorbell_answer' && device.value.kind !== 'doorbell')
+        return err(denied(context, 'Kapı zilini yanıtlama izni yalnız kapı zili cihazı için verilebilir.'));
+      const usage = scope.getStorageUsage(); if (!usage.ok) return usage;
+      const capacity = ensureCapacity(context, usage.value, 'camera_consent'); if (!capacity.ok) return capacity;
       const occurredAt = asIsoDateTime(scope.occurredAt); const id = mutationId(context, command.clientOperationId, requestFingerprint);
       const base: Omit<SmartHomeCameraConsentRow, 'stateFingerprint'> = { id: command.consentId, familyId: context.familyId,
         ownerPersonId: scope.ownerPersonId, deviceId: command.deviceId, purpose: command.purpose, status: 'active',
@@ -409,9 +493,12 @@ export class RevokeSmartHomeCameraConsentUseCase {
   public async execute(input: { readonly context: LifeApplicationContext; readonly command: RevokeSmartHomeCameraConsentInput })
   : Promise<Result<SmartHomeMutationReceiptView, AppError>> {
     const { context, command } = input; const actor = requireActor(context); if (!actor.ok) return actor;
+    if (!exactRecord(command, ['clientOperationId', 'consentId', 'expectedRevision']))
+      return err(invalid(context, 'İzin iptal komutu exact sözleşmeyle eşleşmiyor.'));
     const expected = revision(context, command.expectedRevision); if (!expected.ok) return expected;
     if (!SAFE_ID.test(command.clientOperationId) || !SAFE_ID.test(command.consentId)) return err(invalid(context, 'İzin iptal komutu geçersizdir.'));
-    const requestFingerprint = hash(command);
+    const requestFingerprint = hash({ clientOperationId: command.clientOperationId, consentId: command.consentId,
+      expectedRevision: expected.value });
     return this.unitOfWork.execute(context, writeIntent('smart_home_camera_consent', command.consentId, 'delete'), (scope) => {
       const prior = scope.findMutation(command.clientOperationId); if (!prior.ok) return prior;
       const replayed = replay(context, prior.value, requestFingerprint, 'camera_consent_revoke', 'smart_home_camera_consent', command.consentId);
@@ -420,6 +507,9 @@ export class RevokeSmartHomeCameraConsentUseCase {
       if (!found.value) return err(missing(context, 'Kamera izni bulunamadı.'));
       if (found.value.revision !== expected.value || found.value.status !== 'active') return err(conflict(context, 'Kamera izni sürümü veya durumu değişti.'));
       const occurredAt = asIsoDateTime(scope.occurredAt); const nextRevision = found.value.revision + 1;
+      const monotonic = requireMonotonicTime(context, occurredAt, found.value.updatedAt); if (!monotonic.ok) return monotonic;
+      const usage = scope.getStorageUsage(); if (!usage.ok) return usage;
+      const capacity = ensureCapacity(context, usage.value, 'mutation_only'); if (!capacity.ok) return capacity;
       const id = mutationId(context, command.clientOperationId, requestFingerprint);
       const base: Omit<SmartHomeCameraConsentRow, 'stateFingerprint'> = { ...found.value, status: 'revoked',
         revision: nextRevision, lastMutationId: id, updatedAt: occurredAt, revokedAt: occurredAt };
@@ -437,10 +527,13 @@ export class SetSmartHomeProcessingUseCase {
   public async execute(input: { readonly context: LifeApplicationContext; readonly command: SetSmartHomeProcessingInput })
   : Promise<Result<SmartHomeMutationReceiptView, AppError>> {
     const { context, command } = input; const actor = requireActor(context); if (!actor.ok) return actor;
+    if (!exactRecord(command, ['clientOperationId', 'expectedRevision', 'enabled', 'reason']))
+      return err(invalid(context, 'Yerel işleme ayarı exact sözleşmeyle eşleşmiyor.'));
     const expected = revision(context, command.expectedRevision, true); if (!expected.ok) return expected;
     if (!SAFE_ID.test(command.clientOperationId) || typeof command.enabled !== 'boolean') return err(invalid(context, 'Yerel işleme ayarı geçersizdir.'));
     const reason = normalizeText(context, command.reason, 'Gerekçe', 3, 500); if (!reason.ok) return reason;
-    const settingsId = `smart-home-settings:${actor.value}`; const requestFingerprint = hash({ ...command, reason: reason.value });
+    const settingsId = `smart-home-settings:${actor.value}`; const requestFingerprint = hash({ clientOperationId: command.clientOperationId,
+      expectedRevision: expected.value, enabled: command.enabled, reason: reason.value });
     const kind: SmartHomeMutationKind = command.enabled ? 'processing_enable' : 'processing_disable';
     return this.unitOfWork.execute(context, writeIntent('smart_home_settings', settingsId, expected.value === 0 ? 'create' : 'update',
       expected.value === 0 ? actor.value : undefined), (scope) => {
@@ -450,7 +543,12 @@ export class SetSmartHomeProcessingUseCase {
       const found = scope.findSettings(); if (!found.ok) return found;
       if ((expected.value === 0 && found.value) || (expected.value > 0 && (!found.value || found.value.revision !== expected.value)))
         return err(conflict(context, 'Yerel işleme ayarı sürümü değişti.'));
+      if (found.value?.processingEnabled === command.enabled)
+        return err(conflict(context, 'Yerel işleme ayarı değişmedi.'));
       const occurredAt = asIsoDateTime(scope.occurredAt); const nextRevision = expected.value + 1;
+      if (found.value) { const monotonic = requireMonotonicTime(context, occurredAt, found.value.updatedAt); if (!monotonic.ok) return monotonic; }
+      const usage = scope.getStorageUsage(); if (!usage.ok) return usage;
+      const capacity = ensureCapacity(context, usage.value, 'mutation_only'); if (!capacity.ok) return capacity;
       const id = mutationId(context, command.clientOperationId, requestFingerprint);
       const base: Omit<SmartHomeSettingsRow, 'stateFingerprint'> = { id: settingsId, familyId: context.familyId,
         ownerPersonId: scope.ownerPersonId, processingEnabled: command.enabled, cameraAccessDefaultDenied: true,

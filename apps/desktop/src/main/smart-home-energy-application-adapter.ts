@@ -7,7 +7,16 @@ import {
   type SmartHomeEnergyUnitOfWork,
   type SmartHomeEnergyWriteScope
 } from '@ppt/application';
-import { smartHomeEnergyCenterId, smartHomeEnergyTruth, type SmartHomeEnergyCenterView } from '@ppt/domain';
+import {
+  SMART_HOME_MAX_CAMERA_CONSENTS,
+  SMART_HOME_MAX_DEVICES,
+  SMART_HOME_MAX_MUTATIONS,
+  SMART_HOME_MAX_OBSERVATIONS,
+  smartHomeEnergyCenterId,
+  smartHomeEnergyTruth,
+  type SmartHomeCapacityBandView,
+  type SmartHomeEnergyCenterView
+} from '@ppt/domain';
 import type { DomainEvent } from '@ppt/events';
 import type {
   PolicyAuthorizedRepositoryExecutionContext,
@@ -33,6 +42,9 @@ const keyFor = (
   ownerPersonId: NonNullable<LifeApplicationContext['actor']['personId']>
 ): SmartHomeEnergyCenterKey => ({ familyId: context.familyId, accountId: context.actor.userId,
   actorPersonId: context.actor.personId!, ownerPersonId, centerId: smartHomeEnergyCenterId(context.familyId, ownerPersonId) });
+const capacityBand = (current: number, maximum: number): SmartHomeCapacityBandView => Object.freeze({
+  current, maximum, remaining: Math.max(0, maximum - current), limitReached: current >= maximum
+});
 
 export class RepositoryBackedSmartHomeEnergyQueryPort implements SmartHomeEnergyQueryPort {
   readonly #runner: RepositoryBackedLifePolicyTransactionRunner;
@@ -51,8 +63,12 @@ export class RepositoryBackedSmartHomeEnergyQueryPort implements SmartHomeEnergy
         lastMutationId: _mutation, ...view }) => Object.freeze(view));
       const observations = snapshot.value.observations.map(({ familyId: _family, ownerPersonId: _owner,
         sourceManifestSha256: _manifest, stateFingerprint: _state, lastMutationId: _mutation, ...view }) => Object.freeze(view));
+      const generated = Date.parse(occurredAt);
       const cameraConsents = snapshot.value.cameraConsents.map(({ familyId: _family, stateFingerprint: _state,
-        lastMutationId: _mutation, ...view }) => Object.freeze(view));
+        lastMutationId: _mutation, grantedByAccountId: _account, grantedByPersonId: _person, ...view }) => Object.freeze({
+          ...view, effectiveStatus: view.status === 'revoked' ? 'revoked' as const
+            : Date.parse(view.expiresAt) <= generated ? 'expired' as const : 'active' as const
+        }));
       const settings = snapshot.value.settings
         ? (({ familyId: _family, stateFingerprint: _state, lastMutationId: _mutation, ...view }) => Object.freeze(view))(snapshot.value.settings)
         : Object.freeze({ id: `smart-home-settings:${context.actor.personId}`, ownerPersonId: context.actor.personId,
@@ -62,7 +78,14 @@ export class RepositoryBackedSmartHomeEnergyQueryPort implements SmartHomeEnergy
         ownerPersonId: context.actor.personId, devices: Object.freeze(devices), observations: Object.freeze(observations),
         observationTotal: snapshot.value.observationTotal,
         observationsTruncated: snapshot.value.observationTotal > snapshot.value.observations.length,
-        cameraConsents: Object.freeze(cameraConsents), settings, truth: smartHomeEnergyTruth, generatedAt: occurredAt });
+        cameraConsents: Object.freeze(cameraConsents), cameraConsentTotal: snapshot.value.cameraConsentTotal,
+        cameraConsentsTruncated: snapshot.value.cameraConsentTotal > snapshot.value.cameraConsents.length,
+        storageCapacity: Object.freeze({
+          devices: capacityBand(snapshot.value.storageUsage.deviceCount, SMART_HOME_MAX_DEVICES),
+          observations: capacityBand(snapshot.value.storageUsage.observationCount, SMART_HOME_MAX_OBSERVATIONS),
+          cameraConsents: capacityBand(snapshot.value.storageUsage.cameraConsentCount, SMART_HOME_MAX_CAMERA_CONSENTS),
+          mutations: capacityBand(snapshot.value.storageUsage.mutationCount, SMART_HOME_MAX_MUTATIONS)
+        }), settings, truth: smartHomeEnergyTruth, generatedAt: occurredAt });
       return ok(view);
     });
   }
@@ -82,6 +105,7 @@ class RepositoryBackedSmartHomeEnergyWriteScope implements SmartHomeEnergyWriteS
   public findDevice(deviceId: string) { return this.dependencies.smartHomeEnergyRepository.findDevice(this.repository, this.#key, deviceId); }
   public findConsent(consentId: string) { return this.dependencies.smartHomeEnergyRepository.findConsent(this.repository, this.#key, consentId); }
   public findSettings() { return this.dependencies.smartHomeEnergyRepository.findSettings(this.repository, this.#key); }
+  public getStorageUsage() { return this.dependencies.smartHomeEnergyRepository.getStorageUsage(this.repository, this.#key); }
   public findMutation(clientOperationId: string) {
     return this.dependencies.smartHomeEnergyRepository.findMutationByClientOperationId(this.repository, this.#key, clientOperationId);
   }

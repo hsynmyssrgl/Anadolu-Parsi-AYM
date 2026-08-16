@@ -14644,12 +14644,14 @@ CREATE TABLE smart_home_mutations (
   family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   resource_type TEXT NOT NULL CHECK(resource_type IN ('smart_home_device','smart_home_observation','smart_home_camera_consent','smart_home_settings')),
-  resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 2 AND 256),
+  resource_id TEXT NOT NULL CHECK(length(resource_id) BETWEEN 2 AND 160 AND resource_id=trim(resource_id)
+    AND resource_id GLOB '[A-Za-z0-9]*' AND resource_id NOT GLOB '*[^A-Za-z0-9._:-]*'),
   actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
   actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   mutation_kind TEXT NOT NULL CHECK(mutation_kind IN ('device_register','device_status_update','observation_record',
     'camera_consent_grant','camera_consent_revoke','processing_enable','processing_disable')),
-  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 256),
+  client_operation_id TEXT NOT NULL CHECK(length(client_operation_id) BETWEEN 2 AND 160 AND client_operation_id=trim(client_operation_id)
+    AND client_operation_id GLOB '[A-Za-z0-9]*' AND client_operation_id NOT GLOB '*[^A-Za-z0-9._:-]*'),
   request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
   expected_revision INTEGER NOT NULL CHECK(expected_revision>=0),
   revision INTEGER NOT NULL CHECK(revision=expected_revision+1),
@@ -14678,11 +14680,14 @@ CREATE INDEX idx_smart_home_mutations_owner
 ON smart_home_mutations(family_id,owner_person_id,occurred_at DESC,id);
 
 CREATE TABLE smart_home_devices (
-  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 256),
+  id TEXT PRIMARY KEY CHECK(length(id) BETWEEN 2 AND 160 AND id=trim(id)
+    AND id GLOB '[A-Za-z0-9]*' AND id NOT GLOB '*[^A-Za-z0-9._:-]*'),
   family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
-  adapter_id TEXT NOT NULL CHECK(length(trim(adapter_id)) BETWEEN 2 AND 256),
-  provider_id TEXT NOT NULL CHECK(length(trim(provider_id)) BETWEEN 2 AND 256),
+  adapter_id TEXT NOT NULL CHECK(length(adapter_id) BETWEEN 2 AND 160 AND adapter_id=trim(adapter_id)
+    AND adapter_id GLOB '[A-Za-z0-9]*' AND adapter_id NOT GLOB '*[^A-Za-z0-9._:-]*'),
+  provider_id TEXT NOT NULL CHECK(length(provider_id) BETWEEN 2 AND 160 AND provider_id=trim(provider_id)
+    AND provider_id GLOB '[A-Za-z0-9]*' AND provider_id NOT GLOB '*[^A-Za-z0-9._:-]*'),
   kind TEXT NOT NULL CHECK(kind IN ('matter_bridge','smoke_sensor','carbon_monoxide_sensor','water_leak_sensor','door_sensor',
     'temperature_sensor','humidity_sensor','energy_meter','thermostat','light','smart_plug','camera','doorbell','ev_charger')),
   label TEXT NOT NULL CHECK(length(trim(label)) BETWEEN 2 AND 120),
@@ -14690,14 +14695,18 @@ CREATE TABLE smart_home_devices (
   status TEXT NOT NULL CHECK(status IN ('active','offline','retired')),
   local_identifier_sha256 TEXT NOT NULL CHECK(length(local_identifier_sha256)=64 AND local_identifier_sha256 NOT GLOB '*[^0-9a-f]*'),
   adapter_manifest_sha256 TEXT NOT NULL CHECK(length(adapter_manifest_sha256)=64 AND adapter_manifest_sha256 NOT GLOB '*[^0-9a-f]*'),
-  adapter_signer_key_id TEXT NOT NULL CHECK(length(trim(adapter_signer_key_id)) BETWEEN 2 AND 256),
+  adapter_signer_key_id TEXT NOT NULL CHECK(length(adapter_signer_key_id) BETWEEN 2 AND 160 AND adapter_signer_key_id=trim(adapter_signer_key_id)
+    AND adapter_signer_key_id GLOB '[A-Za-z0-9]*' AND adapter_signer_key_id NOT GLOB '*[^A-Za-z0-9._:-]*'),
   signed_adapter_evidence_persisted INTEGER NOT NULL CHECK(signed_adapter_evidence_persisted=1),
   revision INTEGER NOT NULL CHECK(revision>=1),
   state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
   last_mutation_id TEXT NOT NULL UNIQUE REFERENCES smart_home_mutations(id) ON DELETE RESTRICT,
-  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
-  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z'
+    AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND updated_at GLOB '????-??-??T??:??:??.???Z'
+    AND julianday(updated_at) IS NOT NULL),
   policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  UNIQUE(family_id,owner_person_id,local_identifier_sha256),
   CHECK(updated_at>=created_at)
 ) STRICT;
 
@@ -14705,7 +14714,8 @@ CREATE INDEX idx_smart_home_devices_owner
 ON smart_home_devices(family_id,owner_person_id,updated_at DESC,id);
 
 CREATE TABLE smart_home_observations (
-  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 256),
+  id TEXT PRIMARY KEY CHECK(length(id) BETWEEN 2 AND 160 AND id=trim(id)
+    AND id GLOB '[A-Za-z0-9]*' AND id NOT GLOB '*[^A-Za-z0-9._:-]*'),
   family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   device_id TEXT NOT NULL REFERENCES smart_home_devices(id) ON DELETE RESTRICT,
@@ -14714,12 +14724,15 @@ CREATE TABLE smart_home_observations (
   unit TEXT NOT NULL CHECK(unit IN ('boolean','celsius','percent','watt','kilowatt_hour')),
   numeric_value REAL,
   boolean_value INTEGER CHECK(boolean_value IS NULL OR boolean_value IN (0,1)),
-  observed_at TEXT NOT NULL CHECK(length(observed_at)=24 AND julianday(observed_at) IS NOT NULL),
-  recorded_at TEXT NOT NULL CHECK(length(recorded_at)=24 AND julianday(recorded_at) IS NOT NULL),
+  observed_at TEXT NOT NULL CHECK(length(observed_at)=24 AND observed_at GLOB '????-??-??T??:??:??.???Z'
+    AND julianday(observed_at) IS NOT NULL),
+  recorded_at TEXT NOT NULL CHECK(length(recorded_at)=24 AND recorded_at GLOB '????-??-??T??:??:??.???Z'
+    AND julianday(recorded_at) IS NOT NULL),
   source_manifest_sha256 TEXT NOT NULL CHECK(length(source_manifest_sha256)=64 AND source_manifest_sha256 NOT GLOB '*[^0-9a-f]*'),
   state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
   last_mutation_id TEXT NOT NULL UNIQUE REFERENCES smart_home_mutations(id) ON DELETE RESTRICT,
   policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
+  UNIQUE(family_id,owner_person_id,device_id,kind,observed_at),
   CHECK((unit='boolean' AND numeric_value IS NULL AND boolean_value IS NOT NULL)
     OR (unit<>'boolean' AND numeric_value IS NOT NULL AND boolean_value IS NULL)),
   CHECK(julianday(observed_at)>=julianday(recorded_at,'-30 days') AND julianday(observed_at)<=julianday(recorded_at,'+5 minutes')),
@@ -14733,7 +14746,8 @@ CREATE INDEX idx_smart_home_observations_owner
 ON smart_home_observations(family_id,owner_person_id,observed_at DESC,id);
 
 CREATE TABLE smart_home_camera_consents (
-  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 256),
+  id TEXT PRIMARY KEY CHECK(length(id) BETWEEN 2 AND 160 AND id=trim(id)
+    AND id GLOB '[A-Za-z0-9]*' AND id NOT GLOB '*[^A-Za-z0-9._:-]*'),
   family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   device_id TEXT NOT NULL REFERENCES smart_home_devices(id) ON DELETE RESTRICT,
@@ -14742,13 +14756,17 @@ CREATE TABLE smart_home_camera_consents (
   granted_by_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
   granted_by_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   visible_indicator_required INTEGER NOT NULL CHECK(visible_indicator_required=1),
-  expires_at TEXT NOT NULL CHECK(length(expires_at)=24 AND julianday(expires_at) IS NOT NULL),
+  expires_at TEXT NOT NULL CHECK(length(expires_at)=24 AND expires_at GLOB '????-??-??T??:??:??.???Z'
+    AND julianday(expires_at) IS NOT NULL),
   revision INTEGER NOT NULL CHECK(revision>=1),
   state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
   last_mutation_id TEXT NOT NULL UNIQUE REFERENCES smart_home_mutations(id) ON DELETE RESTRICT,
-  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
-  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
-  revoked_at TEXT CHECK(revoked_at IS NULL OR (length(revoked_at)=24 AND julianday(revoked_at) IS NOT NULL)),
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z'
+    AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND updated_at GLOB '????-??-??T??:??:??.???Z'
+    AND julianday(updated_at) IS NOT NULL),
+  revoked_at TEXT CHECK(revoked_at IS NULL OR (length(revoked_at)=24 AND revoked_at GLOB '????-??-??T??:??:??.???Z'
+    AND julianday(revoked_at) IS NOT NULL)),
   policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
   CHECK(julianday(expires_at)>=julianday(created_at,'+5 minutes') AND julianday(expires_at)<=julianday(created_at,'+60 minutes')),
   CHECK((status='active' AND revoked_at IS NULL) OR (status='revoked' AND revoked_at=updated_at))
@@ -14758,7 +14776,8 @@ CREATE INDEX idx_smart_home_consents_owner
 ON smart_home_camera_consents(family_id,owner_person_id,updated_at DESC,id);
 
 CREATE TABLE smart_home_settings (
-  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 256),
+  id TEXT PRIMARY KEY CHECK(length(id) BETWEEN 2 AND 160 AND id=trim(id)
+    AND id GLOB '[A-Za-z0-9]*' AND id NOT GLOB '*[^A-Za-z0-9._:-]*'),
   family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   processing_enabled INTEGER NOT NULL CHECK(processing_enabled IN (0,1)),
@@ -14767,12 +14786,38 @@ CREATE TABLE smart_home_settings (
   revision INTEGER NOT NULL CHECK(revision>=1),
   state_fingerprint TEXT NOT NULL CHECK(length(state_fingerprint)=64 AND state_fingerprint NOT GLOB '*[^0-9a-f]*'),
   last_mutation_id TEXT NOT NULL UNIQUE REFERENCES smart_home_mutations(id) ON DELETE RESTRICT,
-  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND julianday(created_at) IS NOT NULL),
-  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND julianday(updated_at) IS NOT NULL),
+  created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z'
+    AND julianday(created_at) IS NOT NULL),
+  updated_at TEXT NOT NULL CHECK(length(updated_at)=24 AND updated_at GLOB '????-??-??T??:??:??.???Z'
+    AND julianday(updated_at) IS NOT NULL),
   policy_receipt_hash TEXT NOT NULL REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT,
   UNIQUE(family_id,owner_person_id),
   CHECK(updated_at>=created_at)
 ) STRICT;
+
+CREATE TRIGGER trg_33y_smart_home_mutation_capacity
+BEFORE INSERT ON smart_home_mutations
+WHEN (SELECT COUNT(*) FROM smart_home_mutations item
+  WHERE item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id)>=100000
+BEGIN SELECT RAISE(ABORT,'33-Y mutation capacity reached'); END;
+
+CREATE TRIGGER trg_33y_smart_home_device_capacity
+BEFORE INSERT ON smart_home_devices
+WHEN (SELECT COUNT(*) FROM smart_home_devices item
+  WHERE item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id)>=500
+BEGIN SELECT RAISE(ABORT,'33-Y device capacity reached'); END;
+
+CREATE TRIGGER trg_33y_smart_home_observation_capacity
+BEFORE INSERT ON smart_home_observations
+WHEN (SELECT COUNT(*) FROM smart_home_observations item
+  WHERE item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id)>=50000
+BEGIN SELECT RAISE(ABORT,'33-Y observation capacity reached'); END;
+
+CREATE TRIGGER trg_33y_smart_home_consent_capacity
+BEFORE INSERT ON smart_home_camera_consents
+WHEN (SELECT COUNT(*) FROM smart_home_camera_consents item
+  WHERE item.family_id=NEW.family_id AND item.owner_person_id=NEW.owner_person_id)>=2000
+BEGIN SELECT RAISE(ABORT,'33-Y camera consent capacity reached'); END;
 
 CREATE TRIGGER trg_33y_smart_home_mutation_insert
 BEFORE INSERT ON smart_home_mutations
@@ -14823,7 +14868,7 @@ WHEN NEW.id IS NOT OLD.id OR NEW.family_id IS NOT OLD.family_id OR NEW.owner_per
   OR NEW.label IS NOT OLD.label OR NEW.room IS NOT OLD.room OR NEW.local_identifier_sha256 IS NOT OLD.local_identifier_sha256
   OR NEW.adapter_manifest_sha256 IS NOT OLD.adapter_manifest_sha256 OR NEW.adapter_signer_key_id IS NOT OLD.adapter_signer_key_id
   OR NEW.signed_adapter_evidence_persisted IS NOT OLD.signed_adapter_evidence_persisted OR NEW.created_at IS NOT OLD.created_at
-  OR NEW.revision<>OLD.revision+1 OR OLD.status='retired'
+  OR NEW.revision<>OLD.revision+1 OR OLD.status='retired' OR NEW.status=OLD.status OR NEW.updated_at<OLD.updated_at
   OR NOT EXISTS(SELECT 1 FROM smart_home_mutations mutation WHERE mutation.id=NEW.last_mutation_id
     AND mutation.resource_type='smart_home_device' AND mutation.resource_id=NEW.id AND mutation.family_id=NEW.family_id
     AND mutation.owner_person_id=NEW.owner_person_id AND mutation.mutation_kind='device_status_update'
@@ -14835,6 +14880,8 @@ BEGIN SELECT RAISE(ABORT,'33-Y device update requires exact immutable identity a
 CREATE TRIGGER trg_33y_smart_home_observation_insert
 BEFORE INSERT ON smart_home_observations
 WHEN NOT EXISTS(SELECT 1 FROM smart_home_mutations mutation JOIN smart_home_devices device ON device.id=NEW.device_id
+  JOIN smart_home_settings settings ON settings.family_id=NEW.family_id AND settings.owner_person_id=NEW.owner_person_id
+    AND settings.processing_enabled=1
   WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='smart_home_observation' AND mutation.resource_id=NEW.id
     AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
     AND mutation.mutation_kind='observation_record' AND mutation.expected_revision=0 AND mutation.revision=1
@@ -14864,7 +14911,9 @@ WHEN NOT EXISTS(SELECT 1 FROM smart_home_mutations mutation JOIN smart_home_devi
     AND mutation.resource_state_fingerprint=NEW.state_fingerprint AND mutation.occurred_at=NEW.created_at
     AND NEW.updated_at=NEW.created_at AND mutation.policy_receipt_hash=NEW.policy_receipt_hash
     AND device.family_id=NEW.family_id AND device.owner_person_id=NEW.owner_person_id
-    AND device.status='active' AND device.kind IN ('camera','doorbell') AND NEW.status='active')
+    AND device.status='active' AND NEW.status='active'
+    AND ((NEW.purpose='live_view' AND device.kind IN ('camera','doorbell'))
+      OR (NEW.purpose='doorbell_answer' AND device.kind='doorbell')))
 BEGIN SELECT RAISE(ABORT,'33-Y camera consent requires visible bounded owner approval'); END;
 
 CREATE TRIGGER trg_33y_smart_home_consent_update
@@ -14874,6 +14923,7 @@ WHEN NEW.id IS NOT OLD.id OR NEW.family_id IS NOT OLD.family_id OR NEW.owner_per
   OR NEW.granted_by_account_id IS NOT OLD.granted_by_account_id OR NEW.granted_by_person_id IS NOT OLD.granted_by_person_id
   OR NEW.visible_indicator_required IS NOT OLD.visible_indicator_required OR NEW.expires_at IS NOT OLD.expires_at
   OR NEW.created_at IS NOT OLD.created_at OR NEW.revision<>OLD.revision+1 OR OLD.status<>'active' OR NEW.status<>'revoked'
+  OR NEW.updated_at<OLD.updated_at
   OR NEW.revoked_at<>NEW.updated_at
   OR NOT EXISTS(SELECT 1 FROM smart_home_mutations mutation WHERE mutation.id=NEW.last_mutation_id
     AND mutation.resource_type='smart_home_camera_consent' AND mutation.resource_id=NEW.id
@@ -14896,7 +14946,7 @@ CREATE TRIGGER trg_33y_smart_home_settings_update
 BEFORE UPDATE ON smart_home_settings
 WHEN NEW.id IS NOT OLD.id OR NEW.family_id IS NOT OLD.family_id OR NEW.owner_person_id IS NOT OLD.owner_person_id
   OR NEW.camera_access_default_denied<>1 OR NEW.hidden_surveillance_prohibited<>1 OR NEW.created_at IS NOT OLD.created_at
-  OR NEW.revision<>OLD.revision+1 OR NEW.processing_enabled=OLD.processing_enabled
+  OR NEW.revision<>OLD.revision+1 OR NEW.processing_enabled=OLD.processing_enabled OR NEW.updated_at<OLD.updated_at
   OR NOT EXISTS(SELECT 1 FROM smart_home_mutations mutation WHERE mutation.id=NEW.last_mutation_id
     AND mutation.resource_type='smart_home_settings' AND mutation.resource_id=NEW.id
     AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id

@@ -5,7 +5,7 @@
   "status": "PASS",
   "governanceState": "PLANNED",
   "countsAsRequirementPass": false,
-  "migration103Sha256": "d41d1a1e1bff6b89638a44096eb2ef62358e4d5370ef82d58ae2f0b4de211513",
+  "migration103Sha256": "5aeba0e97de40f58119c08d215771146fbf065b9d51645c428735038a358cd80",
   "checkCount": 11,
   "passed": 11,
   "failed": 0,
@@ -19,15 +19,15 @@
       "status": "PASS"
     },
     {
-      "name": "migration owns immutable device observation consent settings and mutation ledgers",
+      "name": "migration owns immutable bounded ledgers and exact state guards",
       "status": "PASS"
     },
     {
-      "name": "repository contract exposes center current mutation and payload-free policy ports",
+      "name": "repository contract exposes center current usage mutation and payload-free policy ports",
       "status": "PASS"
     },
     {
-      "name": "repository enforces receipt owner signature and manifest bindings",
+      "name": "repository enforces receipt owner signature manifest and usage bindings",
       "status": "PASS"
     },
     {
@@ -43,11 +43,11 @@
       "status": "PASS"
     },
     {
-      "name": "tests cover replay forged trust rollback bounded consent no-route and safe IPC",
+      "name": "tests cover replay processing disable capacity SQL chronology redaction and safe IPC",
       "status": "PASS"
     },
     {
-      "name": "decision and threat model deny commissioning provider device control cloud and acceptance claims",
+      "name": "decision and threat model deny retention commissioning provider control and acceptance claims",
       "status": "PASS"
     },
     {
@@ -55,5 +55,5 @@
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-16T05:54:49.826Z"
+  "generatedAt": "2026-08-16T11:23:34.564Z"
 }

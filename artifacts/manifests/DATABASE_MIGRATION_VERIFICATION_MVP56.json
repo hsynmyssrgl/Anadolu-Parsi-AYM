@@ -531,7 +531,7 @@
     {
       "version": 103,
       "name": "local_first_smart_home_energy",
-      "checksum": "d41d1a1e1bff6b89638a44096eb2ef62358e4d5370ef82d58ae2f0b4de211513"
+      "checksum": "5aeba0e97de40f58119c08d215771146fbf065b9d51645c428735038a358cd80"
     },
     {
       "version": 104,
@@ -594,5 +594,5 @@
       "checksum": "e43ccbe70eecee7c7572f3c78cd26f357ab0c69357da712664bb50ed3c81279b"
     }
   ],
-  "generatedAt": "2026-08-16T10:31:38.314Z"
+  "generatedAt": "2026-08-16T11:23:59.874Z"
 }

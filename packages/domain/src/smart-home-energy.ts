@@ -34,6 +34,11 @@ export const SMART_HOME_OBSERVATION_KINDS = Object.freeze([
 ] as const);
 export type SmartHomeObservationKind = (typeof SMART_HOME_OBSERVATION_KINDS)[number];
 
+export const SMART_HOME_MAX_DEVICES = 500;
+export const SMART_HOME_MAX_OBSERVATIONS = 50_000;
+export const SMART_HOME_MAX_CAMERA_CONSENTS = 2_000;
+export const SMART_HOME_MAX_MUTATIONS = 100_000;
+
 export type SmartHomeObservationUnit = 'boolean' | 'celsius' | 'percent' | 'watt' | 'kilowatt_hour';
 export type SmartHomeDeviceStatus = 'active' | 'offline' | 'retired';
 export type SmartHomeCameraConsentStatus = 'active' | 'revoked';
@@ -80,6 +85,28 @@ export interface SmartHomeCameraConsentView {
   readonly revokedAt?: IsoDateTime;
 }
 
+export type SmartHomeCameraConsentEffectiveStatus = 'active' | 'expired' | 'revoked';
+
+/** Renderer-safe consent projection. Durable actor identities remain main-process only. */
+export interface SmartHomeCameraConsentCenterItemView extends Omit<SmartHomeCameraConsentView,
+  'grantedByAccountId' | 'grantedByPersonId'> {
+  readonly effectiveStatus: SmartHomeCameraConsentEffectiveStatus;
+}
+
+export interface SmartHomeCapacityBandView {
+  readonly current: number;
+  readonly maximum: number;
+  readonly remaining: number;
+  readonly limitReached: boolean;
+}
+
+export interface SmartHomeStorageCapacityView {
+  readonly devices: SmartHomeCapacityBandView;
+  readonly observations: SmartHomeCapacityBandView;
+  readonly cameraConsents: SmartHomeCapacityBandView;
+  readonly mutations: SmartHomeCapacityBandView;
+}
+
 export interface SmartHomeSettingsView {
   readonly id: string;
   readonly ownerPersonId: string;
@@ -107,6 +134,10 @@ export interface SmartHomeEnergyTruthView {
   readonly providerAvailabilityGuaranteed: false;
   readonly observationPayloadMode: 'bounded_scalar_metadata_only';
   readonly networkUsedByCurrentImplementation: false;
+  readonly processingDisabledBlocksNewObservations: true;
+  readonly expiredConsentPresentedAsActive: false;
+  readonly boundedStorageCapsEnforced: true;
+  readonly automaticRetentionRecoveryImplemented: false;
 }
 
 export interface SmartHomeEnergyCenterView {
@@ -117,7 +148,10 @@ export interface SmartHomeEnergyCenterView {
   readonly observations: readonly SmartHomeObservationView[];
   readonly observationTotal: number;
   readonly observationsTruncated: boolean;
-  readonly cameraConsents: readonly SmartHomeCameraConsentView[];
+  readonly cameraConsents: readonly SmartHomeCameraConsentCenterItemView[];
+  readonly cameraConsentTotal: number;
+  readonly cameraConsentsTruncated: boolean;
+  readonly storageCapacity: SmartHomeStorageCapacityView;
   readonly settings: SmartHomeSettingsView;
   readonly truth: SmartHomeEnergyTruthView;
   readonly generatedAt: IsoDateTime;
@@ -226,5 +260,9 @@ export const smartHomeEnergyTruth = Object.freeze({
   signedAdapterEvidenceRequired: true as const,
   providerAvailabilityGuaranteed: false as const,
   observationPayloadMode: 'bounded_scalar_metadata_only' as const,
-  networkUsedByCurrentImplementation: false as const
+  networkUsedByCurrentImplementation: false as const,
+  processingDisabledBlocksNewObservations: true as const,
+  expiredConsentPresentedAsActive: false as const,
+  boundedStorageCapsEnforced: true as const,
+  automaticRetentionRecoveryImplemented: false as const
 });

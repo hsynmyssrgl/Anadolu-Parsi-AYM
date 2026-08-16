@@ -6,8 +6,8 @@
   "governanceState": "PLANNED",
   "countsAsRequirementPass": false,
   "targetedTestFilesPassed": 5,
-  "targetedTestsPassed": 21,
-  "migration103Sha256": "d41d1a1e1bff6b89638a44096eb2ef62358e4d5370ef82d58ae2f0b4de211513",
+  "targetedTestsPassed": 25,
+  "migration103Sha256": "5aeba0e97de40f58119c08d215771146fbf065b9d51645c428735038a358cd80",
   "ppk021": {
     "status": "PASS",
     "productionSourceZones": 18,
@@ -54,8 +54,8 @@
     "protectedCapabilityFamilies": 7,
     "findings": []
   },
-  "checkCount": 10,
-  "passed": 10,
+  "checkCount": 11,
+  "passed": 11,
   "failed": 0,
   "checks": [
     {
@@ -63,7 +63,7 @@
       "status": "PASS"
     },
     {
-      "name": "local test result meets exact 5/21 ratchet",
+      "name": "local test result meets exact 5/25 ratchet",
       "status": "PASS"
     },
     {
@@ -95,9 +95,13 @@
       "status": "PASS"
     },
     {
+      "name": "bounded storage is enforced without claiming automatic retention recovery",
+      "status": "PASS"
+    },
+    {
       "name": "manual evidence receipt and acceptance remain closed",
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-16T05:55:27.180Z"
+  "generatedAt": "2026-08-16T11:24:13.355Z"
 }

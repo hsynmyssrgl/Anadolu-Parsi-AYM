@@ -20,7 +20,8 @@ import {
   type SmartHomeEnergyRepositoryPort,
   type SmartHomeMutationRow,
   type SmartHomeObservationRow,
-  type SmartHomeSettingsRow
+  type SmartHomeSettingsRow,
+  type SmartHomeStorageUsageRow
 } from '@ppt/repository-contracts';
 import { platformPolicyPersistenceBinding } from './platform-policy-transaction-repository.js';
 import { SqliteRepository } from './sqlite-base.js';
@@ -120,6 +121,19 @@ const writeBinding = (context: PolicyAuthorizedRepositoryExecutionContext, row: 
 
 export class SqliteSmartHomeEnergyRepository extends SqliteRepository implements
   SmartHomeEnergyRepositoryPort, SmartHomeEnergyPolicyResourceRepositoryPort {
+  private storageUsage(context: PolicyAuthorizedRepositoryExecutionContext, key: SmartHomeEnergyCenterKey): SmartHomeStorageUsageRow {
+    const database = this.database(context);
+    const row = database.prepare(`SELECT
+      (SELECT COUNT(*) FROM smart_home_devices WHERE family_id=? AND owner_person_id=?) device_count,
+      (SELECT COUNT(*) FROM smart_home_observations WHERE family_id=? AND owner_person_id=?) observation_count,
+      (SELECT COUNT(*) FROM smart_home_camera_consents WHERE family_id=? AND owner_person_id=?) camera_consent_count,
+      (SELECT COUNT(*) FROM smart_home_mutations WHERE family_id=? AND owner_person_id=?) mutation_count`).get(
+        key.familyId, key.ownerPersonId, key.familyId, key.ownerPersonId, key.familyId, key.ownerPersonId,
+        key.familyId, key.ownerPersonId
+      ) as Record<string, unknown>;
+    return Object.freeze({ deviceCount: Number(row.device_count), observationCount: Number(row.observation_count),
+      cameraConsentCount: Number(row.camera_consent_count), mutationCount: Number(row.mutation_count) });
+  }
   public resolvePolicyResource(context: RepositoryExecutionContext, resourceType: SmartHomeMutationRow['resourceType'], resourceId: string)
   : ReturnType<SmartHomeEnergyPolicyResourceRepositoryPort['resolvePolicyResource']> {
     return this.execute(context, () => {
@@ -141,19 +155,18 @@ export class SqliteSmartHomeEnergyRepository extends SqliteRepository implements
   : RepositoryResult<SmartHomeEnergyCenterSnapshotRow> {
     assertKey(context, key, 'read'); return this.execute(context, () => {
       const database = this.database(context);
-      const devices = database.prepare(`${deviceSelect} WHERE family_id=? AND owner_person_id=? ORDER BY updated_at DESC,id LIMIT 501`)
+      const devices = database.prepare(`${deviceSelect} WHERE family_id=? AND owner_person_id=? ORDER BY updated_at DESC,id LIMIT 500`)
         .all(key.familyId, key.ownerPersonId) as Record<string, unknown>[];
       const observations = database.prepare(`${observationSelect} WHERE family_id=? AND owner_person_id=? ORDER BY observed_at DESC,id LIMIT 500`)
         .all(key.familyId, key.ownerPersonId) as Record<string, unknown>[];
-      const total = Number((database.prepare(`SELECT COUNT(*) count FROM smart_home_observations WHERE family_id=? AND owner_person_id=?`)
-        .get(key.familyId, key.ownerPersonId) as { count: number }).count);
-      const consents = database.prepare(`${consentSelect} WHERE family_id=? AND owner_person_id=? ORDER BY updated_at DESC,id LIMIT 501`)
+      const consents = database.prepare(`${consentSelect} WHERE family_id=? AND owner_person_id=? ORDER BY updated_at DESC,id LIMIT 500`)
         .all(key.familyId, key.ownerPersonId) as Record<string, unknown>[];
       const settings = database.prepare(`${settingsSelect} WHERE family_id=? AND owner_person_id=?`)
         .get(key.familyId, key.ownerPersonId) as Record<string, unknown> | undefined;
-      if (devices.length > 500 || consents.length > 500) throw new Error('Smart home center exceeds its bounded current-row contract');
+      const usage = this.storageUsage(context, key);
       return Object.freeze({ devices: Object.freeze(devices.map(mapDevice)), observations: Object.freeze(observations.map(mapObservation)),
-        observationTotal: total, cameraConsents: Object.freeze(consents.map(mapConsent)), settings: settings ? mapSettings(settings) : null });
+        observationTotal: usage.observationCount, cameraConsents: Object.freeze(consents.map(mapConsent)),
+        cameraConsentTotal: usage.cameraConsentCount, storageUsage: usage, settings: settings ? mapSettings(settings) : null });
     });
   }
   public findDevice(context: PolicyAuthorizedRepositoryExecutionContext, key: SmartHomeEnergyCenterKey, deviceId: string)
@@ -177,11 +190,16 @@ export class SqliteSmartHomeEnergyRepository extends SqliteRepository implements
         .get(key.familyId, key.ownerPersonId) as Record<string, unknown> | undefined; return row ? mapSettings(row) : null;
     });
   }
+  public getStorageUsage(context: PolicyAuthorizedRepositoryExecutionContext, key: SmartHomeEnergyCenterKey)
+  : RepositoryResult<SmartHomeStorageUsageRow> {
+    assertKey(context, key, 'write'); return this.execute(context, () => this.storageUsage(context, key));
+  }
   public findMutationByClientOperationId(context: PolicyAuthorizedRepositoryExecutionContext, key: SmartHomeEnergyCenterKey, clientOperationId: string)
   : RepositoryResult<SmartHomeMutationRow | null> {
     assertKey(context, key, 'write'); return this.execute(context, () => {
-      const row = this.database(context).prepare(`${mutationSelect} WHERE family_id=? AND actor_account_id=? AND client_operation_id=?`)
-        .get(key.familyId, key.accountId, clientOperationId) as Record<string, unknown> | undefined; return row ? mapMutation(row) : null;
+      const row = this.database(context).prepare(`${mutationSelect} WHERE family_id=? AND owner_person_id=? AND actor_account_id=? AND client_operation_id=?`)
+        .get(key.familyId, key.ownerPersonId, key.accountId, clientOperationId) as Record<string, unknown> | undefined;
+      return row ? mapMutation(row) : null;
     });
   }
   public insertMutation(context: PolicyAuthorizedRepositoryExecutionContext, row: SmartHomeMutationRow): RepositoryResult<void> {

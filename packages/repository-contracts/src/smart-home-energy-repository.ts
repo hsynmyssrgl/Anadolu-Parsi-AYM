@@ -70,11 +70,20 @@ export interface SmartHomeMutationRow {
   readonly occurredAt: IsoDateTime;
 }
 
+export interface SmartHomeStorageUsageRow {
+  readonly deviceCount: number;
+  readonly observationCount: number;
+  readonly cameraConsentCount: number;
+  readonly mutationCount: number;
+}
+
 export interface SmartHomeEnergyCenterSnapshotRow {
   readonly devices: readonly SmartHomeDeviceRow[];
   readonly observations: readonly SmartHomeObservationRow[];
   readonly observationTotal: number;
   readonly cameraConsents: readonly SmartHomeCameraConsentRow[];
+  readonly cameraConsentTotal: number;
+  readonly storageUsage: SmartHomeStorageUsageRow;
   readonly settings: SmartHomeSettingsRow | null;
 }
 
@@ -97,6 +106,10 @@ export interface SmartHomeEnergyRepositoryPort {
     context: PolicyAuthorizedRepositoryExecutionContext,
     key: SmartHomeEnergyCenterKey
   ): RepositoryResult<SmartHomeSettingsRow | null>;
+  getStorageUsage(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    key: SmartHomeEnergyCenterKey
+  ): RepositoryResult<SmartHomeStorageUsageRow>;
   findMutationByClientOperationId(
     context: PolicyAuthorizedRepositoryExecutionContext,
     key: SmartHomeEnergyCenterKey,

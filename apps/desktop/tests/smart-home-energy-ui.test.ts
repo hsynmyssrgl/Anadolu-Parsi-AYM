@@ -19,11 +19,15 @@ describe('33-Y smart home and energy renderer surface', () => {
     for (const forbidden of ['registerSmartHomeDevice', 'recordSmartHomeObservation', 'updateSmartHomeDeviceStatus'])
       expect(panel).not.toContain(`.${forbidden}(`);
     expect(panel).toContain('operationIds.current.get(key)');
+    expect(panel).toContain('pendingGrant.current');
+    expect(panel).toContain('command.signature!==signature');
+    expect(panel).toContain('fixedClientOperationId??operation(key)');
     expect(panel).toContain('Aynı işlem kimliğiyle yeniden deneyebilirsiniz');
+    expect(panel).toContain('İşlem kaydedildi; görünüm yenilenemedi');
   });
 
   it('enforces visible time-bounded consent and states every no-claim boundary', () => {
-    for (const marker of ['min={5}', 'max={60}', 'Math.min(60,Math.max(5,minutes))', 'Gizli gözetim yasaktır',
+    for (const marker of ['min={5}', 'max={60}', 'Number.isInteger(minutes)', "purpose==='doorbell_answer'", 'Gizli gözetim yasaktır',
       'Ham kamera/ses saklanmaz', 'varsayılan kapalı', 'Matter eşleme', 'canlı sağlayıcı bağlantısı',
       'cihaz kontrolü', 'bulut ve haricî teslimat bu pakette yapılmadı']) expect(panel).toContain(marker);
     expect(panel).not.toMatch(/Matter cihazlarını eşler|kamerayı uzaktan açar|buluta yükler|sağlayıcı kullanılabilirliği garanti/iu);
@@ -34,5 +38,7 @@ describe('33-Y smart home and energy renderer surface', () => {
       'smart-home-consent-title']) expect(panel).toContain(`aria-labelledby="${labelledBy}"`);
     for (const selector of ['.smart-home-energy{', '.smart-home-truth{', '.smart-home-grid{', '.smart-home-row{',
       '.smart-home-consent form{', '@media(max-width:900px)']) expect(styles).toContain(selector);
+    for(const marker of ['storageCapacity.devices.remaining','storageCapacity.observations.remaining',
+      'storageCapacity.cameraConsents.remaining','storageCapacity.mutations.remaining','effectiveStatus'])expect(panel).toContain(marker);
   });
 });
