@@ -12,8 +12,8 @@
     "statement": "All written project rules are binding and non-skippable. Every ACTIVE rule must be fail-closed enforced or explicitly BLOCKED/NOT_RUN until evidence exists."
   },
   "sourceFingerprint": {
-    "sha256": "45d79e67d091575934f8c3b7d364d1bb3ed5111791d3ce3d60dbe3f289be8a02",
-    "fileCount": 2520
+    "sha256": "ab6c6c563b5cb202c107db9d0397a19cfdd4b1effbb1c7191e976e812ef6c25e",
+    "fileCount": 2528
   },
   "status": "PASS",
   "results": [
@@ -87,7 +87,7 @@
       "script": "scripts/verify-core-service-local-admin-runtime-wrapper.mjs",
       "exitCode": 0,
       "stdout": "Core Service Local Admin Runtime: PASS (50 checks).",
-      "stderr": "(node:7132) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:26472) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/verify-desktop-core-service-startup-contract.mjs",
@@ -99,7 +99,7 @@
       "script": "scripts/verify-desktop-core-service-startup-runtime-wrapper.mjs",
       "exitCode": 0,
       "stdout": "Desktop Core Service Startup Runtime: PASS (51 checks).",
-      "stderr": "(node:3388) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:3644) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/verify-system-health-core-service-ipc-contract.mjs",
@@ -111,20 +111,20 @@
       "script": "scripts/verify-system-health-core-service-ipc-runtime-wrapper.mjs",
       "exitCode": 0,
       "stdout": "System Health Core Service IPC Runtime: PASS (10 checks).",
-      "stderr": "(node:5748) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:22252) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/generate-project-artifact-index-v2.mjs",
       "exitCode": 0,
-      "stdout": "Artifact indexes generated: 6616 files / 3830 documents.",
+      "stdout": "Artifact indexes generated: 6627 files / 3830 documents.",
       "stderr": ""
     },
     {
       "script": "scripts/verify-project-artifact-index-v2.mjs",
       "exitCode": 0,
-      "stdout": "Complete Document/Artifact Index: PASS (20927 checks / 6616 files / 3830 documents).",
+      "stdout": "Complete Document/Artifact Index: PASS (20949 checks / 6627 files / 3830 documents).",
       "stderr": ""
     }
   ],
-  "generatedAt": "2026-08-15T22:21:24.912Z"
+  "generatedAt": "2026-08-16T05:14:06.873Z"
 }
