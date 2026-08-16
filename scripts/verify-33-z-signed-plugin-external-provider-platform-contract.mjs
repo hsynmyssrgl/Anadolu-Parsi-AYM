@@ -47,18 +47,21 @@ const p22 = scope.validation.ppk022;
 const definitions = [
   ['scope inventory and six-file test matrix are exact', exact(scope.requirements, inventory.requirements)
     && exact(scope.validation.targetedTestFiles, targetedTestFiles) && exact(inventory.implementedTargetedTests, targetedTestFiles)
-    && tests.length === 6 && scope.validation.targetedTestFileRatchet === 6 && scope.validation.targetedTestRatchet === 26],
+    && tests.length === 6 && scope.validation.targetedTestFileRatchet === 6 && scope.validation.targetedTestRatchet === 30],
   ['migration 104 source manifest and scope checksums are canonical', migration?.name === 'signed_plugin_external_provider_platform'
     && migration?.checksum === migrationSha256 && migrationSha256 === scope.validation.migrationSha256
-    && migrationSha256 === '91a16031e87986f5b6e561cd9e767ad0b7e68d3c030ceace4276441b921b6547'],
+    && migrationSha256 === '6380b0fde34fd54d9743d234ad7915f4ddd81564a90681164596e77691f9edf5'],
   ['migration owns immutable release mutation and current installation bindings', has(migrations, ['signed_plugin_mutations', 'signed_plugin_releases',
     'signed_plugin_installations', 'trg_33z_signed_plugin_release_update', 'trg_33z_signed_plugin_release_delete',
     'trg_33z_signed_plugin_mutation_update', 'trg_33z_signed_plugin_mutation_delete'])],
   ['domain and security fix nine providers capabilities and fail-closed manifest truth', has(domain, ['SIGNED_PLUGIN_PROVIDER_KINDS',
-    'SIGNED_PLUGIN_CAPABILITY_CODES', 'thirdPartyCodeExecutionPerformed: false']) && has(security, ['ppt-signed-plugin-manifest',
-    'verifySignedPluginManifest', 'SIGNATURE_INVALID', 'UNTRUSTED_SIGNER', 'filesystemAccess !== \'none\'', 'networkBrokerOnly !== true'])],
-  ['repository contract exposes exact center release mutation write and payload-free policy ports', has(contract, ['loadCenter(', 'findInstallation(',
-    'findRelease(', 'findMutationByClientOperationId(', 'insertMutation(', 'insertRelease(', 'insertInstallation(', 'saveInstallation(', 'resolvePolicyResource('])],
+    'SIGNED_PLUGIN_CAPABILITY_CODES', 'minimumHostVersionEnforced: true', 'boundedStorageCapsEnforced: true',
+    'thirdPartyCodeExecutionPerformed: false']) && has(security, ['ppt-signed-plugin-manifest', 'hostVersion',
+    'verifySignedPluginManifest', 'SIGNATURE_INVALID', 'UNTRUSTED_SIGNER', 'publicKey.asymmetricKeyType !== \'ed25519\'',
+    'filesystemAccess !== \'none\'', 'networkBrokerOnly !== true'])],
+  ['repository contract exposes exact center release mutation capacity write and payload-free policy ports', has(contract, ['loadCenter(',
+    'getStorageUsage(', 'minimumHostVersion', 'findInstallation(', 'findRelease(', 'findMutationByClientOperationId(',
+    'insertMutation(', 'insertRelease(', 'insertInstallation(', 'saveInstallation(', 'resolvePolicyResource('])],
   ['repository enforces receipt owner revision and non-runnable truth bindings', has(repository, ['writeBinding(context, row)',
     'assertPolicyAuthorizedRepositoryContext', 'runtime_execution_ready=0', 'external_provider_connection_ready=0', 'state_fingerprint'])],
   ['desktop adapter and runtime compose central Life policy with transactional evidence', has(adapter, ['RepositoryBackedSignedPluginPlatformUnitOfWork',
@@ -67,13 +70,13 @@ const definitions = [
     'SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.setDesiredState', 'SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.emergencyDisable', 'SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.rollback'])
     && has(preload, ['getSignedPluginPlatformCenter', 'setSignedPluginDesiredState', 'emergencyDisableSignedPlugin', 'rollbackSignedPlugin'])
     && has(globalTypes, ['getSignedPluginPlatformCenter', 'setSignedPluginDesiredState', 'emergencyDisableSignedPlugin', 'rollbackSignedPlugin'])],
-  ['tests cover signature tamper privilege bounds replay rollback owner isolation and renderer authority denial', has(tests.join('\n'), ['payload tampering',
-    'missing minimum capability', 'replays exactly', 'exact previous signed release', 'forged owner receipt', 'downstream failure',
-    'rejects renderer-supplied manifests', 'without a new route'])],
+  ['tests cover signature tamper privilege bounds replay rollback emergency lock owner isolation capacity and renderer denial', has(tests.join('\n'), ['payload tampering',
+    'undeclared-provider capabilities', 'replays exactly', 'exact previous signed release', 'keeps emergency disable locked',
+    'bounded-capacity overflow', 'forged owner receipt', 'downstream failure', 'rejects renderer-supplied manifests', 'without a new route'])],
   ['decision and threat model deny execution provider production trust sandbox and acceptance claims', has(decision, ['countsAsRequirementPass=false',
     'NOT_RUN', 'Production imza güveni']) && has(threat, ['Sahte veya değiştirilmiş manifest', 'Renderer otorite yükseltmesi', 'NOT_RUN'])],
   ['PPK-015 021 and 022 ratchets are exact PASS', p15.status === 'PASS' && p15.files === 555
-    && p15.sourceSha256 === 'dd417d3278b872587fa1ef32cda41e5dcf44a22c9781f29c311d78d845d48e29' && p15.findings === 0
+    && p15.sourceSha256 === 'aa3dd95d42449907db73c768a556affd194f97a0752a9c9ac53a3bf2491b6bc4' && p15.findings === 0
     && p21.status === 'PASS' && p21.files === 555 && p21.surfaces === 873 && p21.sha256 === '843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc'
     && p22.status === 'PASS' && p22.files === 555 && p22.surfaces === 392 && p22.sha256 === 'cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c'],
   ['production signing external manual evidence and requirement acceptance remain closed', scope.truth?.productionSigningTrustProvisioned === false

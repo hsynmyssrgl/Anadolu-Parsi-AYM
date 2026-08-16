@@ -424,6 +424,7 @@ import type { FamilyAiAssistantCenterView, FamilyAiSuggestionMutationReceiptView
 import type { CreateMemoryStudioRecordInput, DeleteMemoryStudioRecordInput, CreateMemoryTimeCapsuleInput, MemoryStudioCenterView, MemoryStudioMutationReceiptView, ReviewMemoryTimeCapsuleInput, TransitionMemoryTimeCapsuleInput } from '@ppt/domain';
 import type { GrantSmartHomeCameraConsentInput, RecordSmartHomeObservationInput, RegisterSmartHomeDeviceInput, RevokeSmartHomeCameraConsentInput, SetSmartHomeProcessingInput, SmartHomeEnergyCenterView, SmartHomeMutationReceiptView, UpdateSmartHomeDeviceStatusInput } from '@ppt/domain';
 import type { EmergencyDisableSignedPluginInput, RollbackSignedPluginInput, SetSignedPluginDesiredStateInput, SignedPluginMutationReceiptView, SignedPluginPlatformCenterView, VerifiedSignedPluginReleaseInput } from '@ppt/domain';
+import { APP_META } from '@ppt/domain';
 import type {
   AddCommunicationRoomMemberInput,
   CommunicationSecurityCenterView,
@@ -6805,9 +6806,11 @@ export class FamilyDataStore {
   public async registerSignedPluginManifest(input:{readonly clientOperationId:string;readonly expectedRevision:number;readonly envelope:unknown})
   :Promise<SignedPluginMutationReceiptView>{
     if(this.#signedPluginTrustedKeys.length===0)throw new Error('[AUTHORIZATION-DENIED] Production plugin signing trust is not provisioned.');
-    const verified=verifySignedPluginManifest(input.envelope,{trustedKeys:this.#signedPluginTrustedKeys,now:()=>new Date(this.#clock.now())});
+    const verified=verifySignedPluginManifest(input.envelope,{trustedKeys:this.#signedPluginTrustedKeys,
+      hostVersion:APP_META.packageVersion,now:()=>new Date(this.#clock.now())});
     const release:VerifiedSignedPluginReleaseInput=Object.freeze({pluginId:verified.pluginId,displayName:verified.displayName,
-      version:verified.version,manifestSha256:verified.manifestSha256,packageSha256:verified.packageSha256,
+      version:verified.version,minimumHostVersion:verified.minimumHostVersion,
+      manifestSha256:verified.manifestSha256,packageSha256:verified.packageSha256,
       entrypointSha256:verified.entrypointSha256,sbomSha256:verified.sbomSha256,
       licenseInventorySha256:verified.licenseInventorySha256,provenanceSha256:verified.provenanceSha256,
       signerKeyId:verified.signerKeyId,signatureVerified:true,providerKinds:verified.providerKinds,

@@ -10,12 +10,14 @@ export function SignedPluginPlatformPanel(){
   const operations=useRef(new Map<string,string>());
   const operationId=(key:string)=>{const current=operations.current.get(key);if(current)return current;const next=crypto.randomUUID();
     operations.current.set(key,next);return next;};
-  const refresh=async()=>{if(!window.pardus)return;setError('');try{setCenter(await window.pardus.getSignedPluginPlatformCenter());}
-    catch(caught){setError(caught instanceof Error?caught.message:'İmzalı eklenti merkezi yüklenemedi.');}};
+  const refresh=async():Promise<boolean>=>{if(!window.pardus)return false;setError('');
+    try{setCenter(await window.pardus.getSignedPluginPlatformCenter());return true;}
+    catch(caught){setError(caught instanceof Error?caught.message:'İmzalı eklenti merkezi yüklenemedi.');return false;}};
   useEffect(()=>{void refresh();},[]);
-  const mutate=async(key:string,run:(clientOperationId:string)=>Promise<unknown>)=>{setBusy(key);setError('');try{await run(operationId(key));
-    operations.current.delete(key);await refresh();}catch(caught){setError(caught instanceof Error
-      ?`${caught.message} Aynı işlem kimliğiyle yeniden deneyebilirsiniz.`:'Eklenti durumu değiştirilemedi.');}finally{setBusy('');}};
+  const mutate=async(key:string,run:(clientOperationId:string)=>Promise<unknown>)=>{setBusy(key);setError('');
+    try{await run(operationId(key));operations.current.delete(key);if(!await refresh())setError('Değişiklik kaydedildi; güncel merkez yeniden yüklenemedi. Yenileyin.');}
+    catch(caught){setError(caught instanceof Error?`${caught.message} Aynı işlem kimliğiyle yeniden deneyebilirsiniz.`
+      :'Eklenti durumu değiştirilemedi. Aynı işlem kimliği korunuyor.');}finally{setBusy('');}};
   const toggle=async(item:SignedPluginInstallationView)=>{if(!window.pardus)return;const enabled=item.desiredState!=='enabled';
     await mutate(`desired:${item.id}:${item.revision}:${enabled}`,clientOperationId=>window.pardus!.setSignedPluginDesiredState({
       clientOperationId,pluginId:item.id,expectedRevision:item.revision,enabled,
@@ -36,19 +38,24 @@ export function SignedPluginPlatformPanel(){
       <span>Production imza güveni, gerçek sandbox/ağ izolasyonu ve banka, okul, Matter, FHIR, OneDrive, harita, OCR, AI veya tarayıcı bağlantısı doğrulanmadı.</span></div>
     {error&&<p className="status-message danger">{error}</p>}
     {!center?<p>Yerel eklenti merkezi yükleniyor…</p>:<>
-      <div className="signed-plugin-summary"><span><strong>{center.installations.length}</strong> yerel aday</span>
+      <div className="signed-plugin-summary"><span><strong>{center.installationTotal}</strong> yerel aday</span>
         <span><strong>{center.installations.filter(item=>item.desiredState==='enabled').length}</strong> etkin olması istenen</span>
-        <span><strong>0</strong> çalıştırılmış eklenti</span></div>
-      {center.installations.length===0?<p>Güvenilir production anahtarıyla doğrulanmış eklenti adayı yok.</p>:center.installations.map(item=><article className="signed-plugin-card" key={item.id}>
+        <span><strong>0</strong> çalıştırılmış eklenti</span>
+        <span><strong>{center.storageCapacity.installations.remaining}</strong> kurulum yuvası kaldı</span>
+        <span><strong>{center.storageCapacity.mutations.remaining}</strong> mutasyon yuvası kaldı</span></div>
+      {center.installations.length===0?<p>Yerel güvenilen imza anahtarıyla doğrulanmış eklenti adayı yok.</p>:center.installations.map(item=><article className="signed-plugin-card" key={item.id}>
         <div className="signed-plugin-card-heading"><div><strong>{item.displayName}</strong><small>{item.id} · {item.currentRelease.version}</small></div>
           <span>{desiredStateLabel[item.desiredState]}</span></div>
         <p>{item.currentRelease.providerKinds.map(kind=>providerLabels[kind]??kind).join(', ')}</p>
         <small>{item.currentRelease.capabilityCodes.join(' · ')} · {item.currentRelease.egressMode==='none'?'Ağ yok':`${item.currentRelease.egressHostCount} exact egress hostu`}</small>
-        <small>İmza, SBOM, lisans ve provenance hash kanıtları mevcut · sandbox beyanı var; runtime doğrulaması yok.</small>
-        <div className="signed-plugin-actions"><button type="button" disabled={Boolean(busy)||item.desiredState==='emergency_disabled'} onClick={()=>void toggle(item)}>
+        <small>Minimum uygulama {item.currentRelease.minimumHostVersion} · manifest {item.currentRelease.manifestStatus==='valid'?'geçerli':'süresi dolmuş'} · sürüm geçmişi {item.releaseHistoryCount}/64.</small>
+        <small>İmza, SBOM, lisans ve provenance hash kanıtları mevcut · sandbox beyanı var; runtime doğrulaması yok. Otomatik retention kurtarma yok.</small>
+        <div className="signed-plugin-actions"><button type="button" disabled={Boolean(busy)||item.desiredState==='emergency_disabled'
+          ||(item.desiredState!=='enabled'&&item.currentRelease.manifestStatus==='expired')} onClick={()=>void toggle(item)}>
           {item.desiredState==='enabled'?'Kapat':'Etkin olmasını iste'}</button>
           <button type="button" disabled={Boolean(busy)||item.desiredState==='emergency_disabled'} onClick={()=>void emergency(item)}>Acil kapat</button>
-          <button type="button" disabled={Boolean(busy)||!item.rollbackAvailable||!item.previousVersion} onClick={()=>void rollback(item)}>Önceki sürüme dön</button></div>
+          <button type="button" disabled={Boolean(busy)||item.desiredState==='emergency_disabled'||!item.rollbackAvailable
+            ||!item.previousVersion} onClick={()=>void rollback(item)}>Önceki sürüme dön</button></div>
       </article>)}</>}
   </section>;
 }

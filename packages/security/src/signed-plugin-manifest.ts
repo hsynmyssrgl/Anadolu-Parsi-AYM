@@ -76,6 +76,7 @@ export interface VerifiedSignedPluginManifest {
   readonly pluginId: string;
   readonly displayName: string;
   readonly version: string;
+  readonly minimumHostVersion: string;
   readonly manifestSha256: string;
   readonly packageSha256: string;
   readonly entrypointSha256: string;
@@ -101,6 +102,7 @@ export interface VerifiedSignedPluginManifest {
 
 export interface VerifySignedPluginManifestOptions {
   readonly trustedKeys: readonly TrustedPluginSigningKey[];
+  readonly hostVersion: string;
   readonly now?: () => Date;
   readonly maximumLifetimeMs?: number;
   readonly maximumFutureSkewMs?: number;
@@ -120,7 +122,8 @@ const SHA256 = /^[a-f0-9]{64}$/u;
 const GIT_ID = /^[a-f0-9]{40}$/u;
 const SAFE_ID = /^[a-z][a-z0-9.-]{2,63}$/u;
 const RESOURCE = /^[a-z][a-z0-9._:-]{1,127}$/u;
-const SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]{1,64})?$/u;
+const SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/u;
+const EXACT_ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u;
 const BASE64URL = /^[A-Za-z0-9_-]+$/u;
 const CONTROL = /[\p{Cc}\p{Cf}\p{Cs}]/u;
 const providerKinds = new Set<string>(VERIFIED_PLUGIN_PROVIDER_KINDS);
@@ -134,11 +137,40 @@ const plainRecord = (value: unknown): value is Record<string, unknown> => {
   return prototype === Object.prototype || prototype === null;
 };
 const exactKeys = (value: Record<string, unknown>, expected: readonly string[]): boolean => {
-  const actual = Object.keys(value).sort();
+  const ownKeys = Reflect.ownKeys(value);
+  if (ownKeys.some((key) => typeof key === 'symbol')) return false;
+  const actual = ownKeys.map(String).sort();
   const canonical = [...expected].sort();
-  return actual.length === canonical.length && actual.every((key, index) => key === canonical[index]);
+  return actual.length === canonical.length && actual.every((key, index) => key === canonical[index])
+    && ownKeys.every((key) => {
+      const descriptor = Object.getOwnPropertyDescriptor(value, key);
+      return Boolean(descriptor && descriptor.enumerable && !descriptor.get && !descriptor.set && 'value' in descriptor);
+    });
 };
 const unique = (values: readonly string[]): boolean => new Set(values).size === values.length;
+const validSemver = (value: unknown): value is string => {
+  if (typeof value !== 'string' || value.length < 5 || value.length > 96) return false;
+  const match = SEMVER.exec(value); if (!match) return false;
+  return !match[4]?.split('.').some((part) => /^\d+$/u.test(part) && part.length > 1 && part.startsWith('0'));
+};
+const compareSemver = (left: string, right: string): number => {
+  const l = SEMVER.exec(left)!; const r = SEMVER.exec(right)!;
+  for (let index = 1; index <= 3; index += 1) {
+    const a = l[index]!; const b = r[index]!;
+    if (a.length !== b.length) return a.length - b.length; if (a !== b) return a < b ? -1 : 1;
+  }
+  const lp = l[4]?.split('.'); const rp = r[4]?.split('.');
+  if (!lp && !rp) return 0; if (!lp) return 1; if (!rp) return -1;
+  for (let index = 0; index < Math.max(lp.length, rp.length); index += 1) {
+    const a = lp[index]; const b = rp[index]; if (a === undefined) return -1; if (b === undefined) return 1; if (a === b) continue;
+    const an = /^\d+$/u.test(a); const bn = /^\d+$/u.test(b);
+    if (an && bn) return a.length === b.length ? (a < b ? -1 : 1) : a.length - b.length;
+    if (an !== bn) return an ? -1 : 1; return a < b ? -1 : 1;
+  }
+  return 0;
+};
+const exactIso = (value: unknown): value is string => typeof value === 'string' && EXACT_ISO.test(value)
+  && Number.isFinite(Date.parse(value)) && new Date(value).toISOString() === value;
 
 export const canonicalizeSignedPluginManifest = (value: unknown): string => {
   if (value === null || typeof value === 'string' || typeof value === 'boolean') return JSON.stringify(value);
@@ -168,7 +200,8 @@ const assertShape: (value: unknown) => asserts value is SignedPluginManifestEnve
   }
   if (!plainRecord(value.signature) || !exactKeys(value.signature, ['algorithm', 'keyId', 'valueBase64Url'])
     || value.signature.algorithm !== 'Ed25519' || typeof value.signature.keyId !== 'string' || !SAFE_ID.test(value.signature.keyId)
-    || typeof value.signature.valueBase64Url !== 'string' || !BASE64URL.test(value.signature.valueBase64Url)) {
+    || typeof value.signature.valueBase64Url !== 'string' || value.signature.valueBase64Url.length !== 86
+    || !BASE64URL.test(value.signature.valueBase64Url)) {
     throw new SignedPluginManifestVerificationError('MALFORMED', 'Signed plugin signature is malformed.');
   }
   const manifest = value.manifest;
@@ -180,8 +213,7 @@ const assertShape: (value: unknown) => asserts value is SignedPluginManifestEnve
   if (typeof manifest.pluginId !== 'string' || !SAFE_ID.test(manifest.pluginId)
     || typeof manifest.displayName !== 'string' || manifest.displayName.normalize('NFKC').trim() !== manifest.displayName
     || manifest.displayName.length < 2 || manifest.displayName.length > 120 || CONTROL.test(manifest.displayName)
-    || typeof manifest.version !== 'string' || !SEMVER.test(manifest.version)
-    || typeof manifest.minimumHostVersion !== 'string' || !SEMVER.test(manifest.minimumHostVersion)
+    || !validSemver(manifest.version) || !validSemver(manifest.minimumHostVersion)
     || typeof manifest.sourceCommitId !== 'string' || !GIT_ID.test(manifest.sourceCommitId)
     || ![manifest.packageSha256, manifest.entrypointSha256, manifest.sbomSha256, manifest.licenseInventorySha256, manifest.provenanceSha256]
       .every((hash) => typeof hash === 'string' && SHA256.test(hash) && !/^0{64}$/u.test(hash))) {
@@ -198,8 +230,17 @@ const assertShape: (value: unknown) => asserts value is SignedPluginManifestEnve
       throw new SignedPluginManifestVerificationError('POLICY_DENIED', 'Every provider must have one explicit capability.');
     }
   }
-  if (!Array.isArray(manifest.dataDeclarations) || manifest.dataDeclarations.length > 32) {
+  for (const capability of manifest.capabilityCodes as string[]) {
+    if (!(manifest.providerKinds as string[]).includes(capability.split('.')[0]!)) {
+      throw new SignedPluginManifestVerificationError('POLICY_DENIED', 'Every capability must belong to one declared provider.');
+    }
+  }
+  if (!Array.isArray(manifest.dataDeclarations) || manifest.dataDeclarations.length < 1 || manifest.dataDeclarations.length > 32) {
     throw new SignedPluginManifestVerificationError('POLICY_DENIED', 'Data declaration count is outside policy.');
+  }
+  if (!unique((manifest.dataDeclarations as SignedPluginManifestDataDeclaration[]).map((item) =>
+    `${item.resourceType}\u0000${item.sensitivity}\u0000${item.purpose}\u0000${item.access}\u0000${item.retentionDays}`))) {
+    throw new SignedPluginManifestVerificationError('POLICY_DENIED', 'Data declarations must be unique.');
   }
   for (const declaration of manifest.dataDeclarations) {
     if (!plainRecord(declaration) || !exactKeys(declaration, ['resourceType', 'sensitivity', 'purpose', 'access', 'retentionDays'])
@@ -224,8 +265,7 @@ const assertShape: (value: unknown) => asserts value is SignedPluginManifestEnve
     || manifest.sandbox.networkBrokerOnly !== true) {
     throw new SignedPluginManifestVerificationError('POLICY_DENIED', 'Sandbox declaration is not fail-closed.');
   }
-  if (typeof manifest.issuedAt !== 'string' || typeof manifest.expiresAt !== 'string'
-    || !Number.isFinite(Date.parse(manifest.issuedAt)) || !Number.isFinite(Date.parse(manifest.expiresAt))) {
+  if (!exactIso(manifest.issuedAt) || !exactIso(manifest.expiresAt)) {
     throw new SignedPluginManifestVerificationError('MALFORMED', 'Manifest time binding is invalid.');
   }
   };
@@ -240,19 +280,26 @@ export const verifySignedPluginManifest = (
   const expiresAt = Date.parse(value.manifest.expiresAt);
   const maximumFutureSkewMs = options.maximumFutureSkewMs ?? SIGNED_PLUGIN_MANIFEST_MAX_FUTURE_SKEW_MS;
   const maximumLifetimeMs = options.maximumLifetimeMs ?? SIGNED_PLUGIN_MANIFEST_MAX_LIFETIME_MS;
+  if (!validSemver(options.hostVersion) || compareSemver(options.hostVersion, value.manifest.minimumHostVersion) < 0) {
+    throw new SignedPluginManifestVerificationError('POLICY_DENIED', 'Manifest requires a newer host version.');
+  }
   if (issuedAt > now + maximumFutureSkewMs || expiresAt <= now || expiresAt <= issuedAt || expiresAt - issuedAt > maximumLifetimeMs) {
     throw new SignedPluginManifestVerificationError('MANIFEST_EXPIRED', 'Manifest is expired or outside the trusted time window.');
   }
   const trusted = options.trustedKeys.find((key) => key.keyId === value.signature.keyId && key.status === 'ACTIVE');
-  if (!trusted || options.trustedKeys.filter((key) => key.keyId === value.signature.keyId).length !== 1) {
+  if (!trusted || options.trustedKeys.filter((key) => key.keyId === value.signature.keyId).length !== 1
+    || typeof trusted.publicKeyPem !== 'string' || trusted.publicKeyPem.length < 64 || trusted.publicKeyPem.length > 4_096) {
     throw new SignedPluginManifestVerificationError('UNTRUSTED_SIGNER', 'Manifest signer is not uniquely trusted.');
   }
   const canonical = canonicalizeSignedPluginManifest(value.manifest);
   let signature: Buffer | undefined;
   try {
+    if (value.signature.valueBase64Url.length !== 86) throw new Error('invalid signature size');
     signature = Buffer.from(value.signature.valueBase64Url, 'base64url');
+    const publicKey = createPublicKey(trusted.publicKeyPem);
     if (signature.length !== 64 || signature.toString('base64url') !== value.signature.valueBase64Url
-      || !verifySignature(null, Buffer.from(canonical, 'utf8'), createPublicKey(trusted.publicKeyPem), signature)) {
+      || publicKey.asymmetricKeyType !== 'ed25519'
+      || !verifySignature(null, Buffer.from(canonical, 'utf8'), publicKey, signature)) {
       throw new Error('invalid signature');
     }
   } catch {
@@ -264,6 +311,7 @@ export const verifySignedPluginManifest = (
     pluginId: value.manifest.pluginId,
     displayName: value.manifest.displayName,
     version: value.manifest.version,
+    minimumHostVersion: value.manifest.minimumHostVersion,
     manifestSha256: createHash('sha256').update(canonical, 'utf8').digest('hex'),
     packageSha256: value.manifest.packageSha256,
     entrypointSha256: value.manifest.entrypointSha256,

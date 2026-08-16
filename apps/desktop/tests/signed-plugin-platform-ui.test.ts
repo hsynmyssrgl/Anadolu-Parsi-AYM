@@ -22,13 +22,15 @@ describe('33-Z signed plugin platform renderer surface', () => {
     }
     expect(panel).toContain('operations.current.get(key)');
     expect(panel).toContain('Aynı işlem kimliğiyle yeniden deneyebilirsiniz');
+    expect(panel).toContain('Değişiklik kaydedildi; güncel merkez yeniden yüklenemedi');
+    expect(panel.indexOf('operations.current.delete(key)')).toBeGreaterThan(panel.indexOf('await run(operationId(key))'));
   });
 
   it('states every non-execution and external-provider no-claim boundary', () => {
     for (const marker of [
       'Bu ekran eklenti kodu çalıştırmaz', 'Production imza güveni', 'gerçek sandbox/ağ izolasyonu',
       'banka, okul, Matter, FHIR, OneDrive, harita, OCR, AI veya tarayıcı bağlantısı doğrulanmadı',
-      '0</strong> çalıştırılmış eklenti'
+      '0</strong> çalıştırılmış eklenti', 'Otomatik retention kurtarma yok', 'Minimum uygulama'
     ]) expect(panel).toContain(marker);
     expect(panel).not.toMatch(/eklenti kodunu çalıştırır|production için uygundur|sağlayıcı bağlantısı hazırdır/iu);
   });
@@ -36,6 +38,8 @@ describe('33-Z signed plugin platform renderer surface', () => {
   it('keeps the registry and emergency actions accessible and responsive', () => {
     expect(panel).toContain('aria-labelledby="signed-plugin-platform-title"');
     for (const label of ['Etkin olmasını iste', 'Acil kapat', 'Önceki sürüme dön']) expect(panel).toContain(label);
+    expect(panel).toContain("item.desiredState==='emergency_disabled'||!item.rollbackAvailable");
+    expect(panel).toContain('Yerel güvenilen imza anahtarıyla doğrulanmış eklenti adayı yok');
     for (const selector of [
       '.signed-plugin-platform{', '.signed-plugin-truth{', '.signed-plugin-summary{', '.signed-plugin-card{',
       '.signed-plugin-actions{', '@media(max-width:900px)'

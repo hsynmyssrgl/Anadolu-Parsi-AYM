@@ -8,6 +8,9 @@ import {
   type SignedPluginPlatformWriteScope
 } from '@ppt/application';
 import {
+  SIGNED_PLUGIN_MAX_INSTALLATIONS,
+  SIGNED_PLUGIN_MAX_MUTATIONS,
+  SIGNED_PLUGIN_MAX_RELEASES_PER_PLUGIN,
   signedPluginPlatformCenterId,
   signedPluginPlatformTruth,
   type SignedPluginPlatformCenterView,
@@ -47,8 +50,9 @@ const keyFor = (
   ownerPersonId,
   centerId: signedPluginPlatformCenterId(context.familyId, ownerPersonId)
 });
-const releaseView = (row: SignedPluginReleaseRow): SignedPluginReleaseView => Object.freeze({
+const releaseView = (row: SignedPluginReleaseRow, generatedAt: string): SignedPluginReleaseView => Object.freeze({
   version: row.version,
+  minimumHostVersion: row.minimumHostVersion,
   providerKinds: Object.freeze([...row.providerKinds]),
   capabilityCodes: Object.freeze([...row.capabilityCodes]),
   dataDeclarations: Object.freeze(row.dataDeclarations.map((item) => Object.freeze({ ...item }))),
@@ -60,7 +64,8 @@ const releaseView = (row: SignedPluginReleaseRow): SignedPluginReleaseView => Ob
   licenseInventoryEvidencePresent: true,
   provenanceEvidencePresent: true,
   verifiedAt: row.verifiedAt,
-  expiresAt: row.expiresAt
+  expiresAt: row.expiresAt,
+  manifestStatus: Date.parse(row.expiresAt) > Date.parse(generatedAt) ? 'valid' : 'expired'
 });
 
 export class RepositoryBackedSignedPluginPlatformQueryPort implements SignedPluginPlatformQueryPort {
@@ -77,16 +82,19 @@ export class RepositoryBackedSignedPluginPlatformQueryPort implements SignedPlug
       const key = keyFor(context, context.actor.personId);
       const snapshot = this.dependencies.signedPluginPlatformRepository.loadCenter(repository, key);
       if (!snapshot.ok) return snapshot;
-      const installations = snapshot.value.map(({ installation, currentRelease, releaseCount }) => Object.freeze({
+      const installations = snapshot.value.installations.map(({ installation, currentRelease, releaseCount }) => Object.freeze({
         id: installation.id,
         ownerPersonId: installation.ownerPersonId,
         displayName: installation.displayName,
-        currentRelease: releaseView(currentRelease),
+        currentRelease: releaseView(currentRelease, occurredAt),
         ...(installation.previousVersion ? { previousVersion: installation.previousVersion } : {}),
         desiredState: installation.desiredState,
         runtimeExecutionReady: false as const,
         externalProviderConnectionReady: false as const,
-        rollbackAvailable: releaseCount > 1 && Boolean(installation.previousVersion),
+        rollbackAvailable: installation.desiredState !== 'emergency_disabled'
+          && releaseCount > 1 && Boolean(installation.previousVersion),
+        releaseHistoryCount: releaseCount,
+        releaseHistoryLimitReached: releaseCount >= SIGNED_PLUGIN_MAX_RELEASES_PER_PLUGIN,
         revision: installation.revision,
         createdAt: installation.createdAt,
         updatedAt: installation.updatedAt,
@@ -97,6 +105,21 @@ export class RepositoryBackedSignedPluginPlatformQueryPort implements SignedPlug
         centerId: key.centerId,
         ownerPersonId: context.actor.personId,
         installations: Object.freeze(installations),
+        installationTotal: snapshot.value.installationTotal,
+        storageCapacity: Object.freeze({
+          installations: Object.freeze({
+            current: snapshot.value.installationTotal,
+            maximum: SIGNED_PLUGIN_MAX_INSTALLATIONS,
+            remaining: Math.max(0, SIGNED_PLUGIN_MAX_INSTALLATIONS - snapshot.value.installationTotal),
+            limitReached: snapshot.value.installationTotal >= SIGNED_PLUGIN_MAX_INSTALLATIONS
+          }),
+          mutations: Object.freeze({
+            current: snapshot.value.mutationCount,
+            maximum: SIGNED_PLUGIN_MAX_MUTATIONS,
+            remaining: Math.max(0, SIGNED_PLUGIN_MAX_MUTATIONS - snapshot.value.mutationCount),
+            limitReached: snapshot.value.mutationCount >= SIGNED_PLUGIN_MAX_MUTATIONS
+          })
+        }),
         truth: signedPluginPlatformTruth,
         generatedAt: occurredAt
       });
@@ -124,6 +147,9 @@ class RepositoryBackedSignedPluginPlatformWriteScope implements SignedPluginPlat
   }
   public findRelease(pluginId: string, version: string) {
     return this.dependencies.signedPluginPlatformRepository.findRelease(this.repository, this.#key, pluginId, version);
+  }
+  public getStorageUsage(pluginId: string) {
+    return this.dependencies.signedPluginPlatformRepository.getStorageUsage(this.repository, this.#key, pluginId);
   }
   public findMutation(clientOperationId: string) {
     return this.dependencies.signedPluginPlatformRepository.findMutationByClientOperationId(this.repository, this.#key, clientOperationId);

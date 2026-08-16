@@ -28,6 +28,7 @@ export interface SignedPluginReleaseRow {
   readonly pluginId: string;
   readonly displayName: string;
   readonly version: string;
+  readonly minimumHostVersion: string;
   readonly manifestSha256: string;
   readonly packageSha256: string;
   readonly entrypointSha256: string;
@@ -74,6 +75,18 @@ export interface SignedPluginInstallationSnapshotRow {
   readonly releaseCount: number;
 }
 
+export interface SignedPluginStorageUsageRow {
+  readonly installationCount: number;
+  readonly releaseCount: number;
+  readonly mutationCount: number;
+}
+
+export interface SignedPluginPlatformCenterSnapshotRow {
+  readonly installations: readonly SignedPluginInstallationSnapshotRow[];
+  readonly installationTotal: number;
+  readonly mutationCount: number;
+}
+
 export interface SignedPluginMutationRow {
   readonly id: string;
   readonly familyId: FamilyId;
@@ -95,7 +108,12 @@ export interface SignedPluginPlatformRepositoryPort {
   loadCenter(
     context: PolicyAuthorizedRepositoryExecutionContext,
     key: SignedPluginPlatformCenterKey
-  ): RepositoryResult<readonly SignedPluginInstallationSnapshotRow[]>;
+  ): RepositoryResult<SignedPluginPlatformCenterSnapshotRow>;
+  getStorageUsage(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    key: SignedPluginPlatformCenterKey,
+    pluginId: string
+  ): RepositoryResult<SignedPluginStorageUsageRow>;
   findInstallation(
     context: PolicyAuthorizedRepositoryExecutionContext,
     key: SignedPluginPlatformCenterKey,

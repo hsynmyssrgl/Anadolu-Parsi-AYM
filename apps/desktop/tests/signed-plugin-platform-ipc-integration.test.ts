@@ -26,7 +26,9 @@ const truth = {
   externalProviderConnectionPerformed: false, providerCredentialsStored: false,
   productionSigningTrustProvisioned: false, productionReleaseEligible: false,
   sandboxRuntimeVerified: false, osNetworkIsolationVerified: false,
-  providerAvailabilityGuaranteed: false, networkUsedByCurrentImplementation: false
+  providerAvailabilityGuaranteed: false, networkUsedByCurrentImplementation: false,
+  minimumHostVersionEnforced: true, emergencyDisableRequiresNewHigherSignedRelease: true,
+  boundedStorageCapsEnforced: true, automaticRetentionRecoveryImplemented: false
 };
 const center = {
   schemaVersion: 1,
@@ -35,16 +37,22 @@ const center = {
   installations: [{
     id: 'local.bank-reader', ownerPersonId: 'person-33-z', displayName: 'Yerel banka okuyucu',
     currentRelease: {
-      version: '1.0.0', providerKinds: ['bank'], capabilityCodes: ['bank.read'],
+      version: '1.0.0', minimumHostVersion: '4.8.2026-29', providerKinds: ['bank'], capabilityCodes: ['bank.read'],
       dataDeclarations: [{ resourceType: 'finance_record', sensitivity: 'highly_sensitive', purpose: 'finance',
         access: 'read_metadata', retentionDays: 0 }], egressMode: 'none', egressHostCount: 0,
       sandboxProfile: 'isolated_child_process', signatureVerified: true, sbomEvidencePresent: true,
       licenseInventoryEvidencePresent: true, provenanceEvidencePresent: true, verifiedAt: NOW,
-      expiresAt: '2026-08-20T10:00:00.000Z'
+      expiresAt: '2026-08-20T10:00:00.000Z', manifestStatus: 'valid'
     },
     desiredState: 'disabled', runtimeExecutionReady: false, externalProviderConnectionReady: false,
-    rollbackAvailable: false, revision: 1, createdAt: NOW, updatedAt: NOW
+    rollbackAvailable: false, releaseHistoryCount: 1, releaseHistoryLimitReached: false,
+    revision: 1, createdAt: NOW, updatedAt: NOW
   }],
+  installationTotal: 1,
+  storageCapacity: {
+    installations: { current: 1, maximum: 200, remaining: 199, limitReached: false },
+    mutations: { current: 1, maximum: 100000, remaining: 99999, limitReached: false }
+  },
   truth,
   generatedAt: NOW
 };
@@ -87,6 +95,8 @@ describe('33-Z signed plugin platform IPC boundary', () => {
   it('accepts only safe center and receipt projections', () => {
     expect(evaluateIpcIntegrationResultPolicy(SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.getCenter, center).accepted).toBe(true);
     expect(evaluateIpcIntegrationResultPolicy(SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.setDesiredState, receipt).accepted).toBe(true);
+    expect(evaluateIpcIntegrationResultPolicy(SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.emergencyDisable, receipt).accepted).toBe(false);
+    expect(evaluateIpcIntegrationResultPolicy(SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.rollback, receipt).accepted).toBe(false);
     for (const extra of [
       { manifestSha256: 'a'.repeat(64) }, { signerKeyId: 'plugin-root' }, { publicKeyPem: 'PUBLIC KEY' },
       { egressHosts: ['api.example.com'] }, { packagePath: 'C:\\plugins\\bank.zip' }

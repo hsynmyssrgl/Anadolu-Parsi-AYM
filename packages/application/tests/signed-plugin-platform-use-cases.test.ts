@@ -39,6 +39,7 @@ const release = (version = '1.0.0'): VerifiedSignedPluginReleaseInput => ({
   pluginId: 'local.bank-reader',
   displayName: 'Yerel banka okuyucu',
   version,
+  minimumHostVersion: '4.8.2026-29',
   manifestSha256: 'a'.repeat(64),
   packageSha256: 'b'.repeat(64),
   entrypointSha256: 'c'.repeat(64),
@@ -73,10 +74,16 @@ class Scope implements SignedPluginPlatformWriteScope {
   public readonly installations = new Map<string, SignedPluginInstallationRow>();
   public readonly releases = new Map<string, SignedPluginReleaseRow>();
   public readonly mutations = new Map<string, SignedPluginMutationRow>();
+  public storageUsageOverride?: { installationCount: number; releaseCount: number; mutationCount: number };
   public readonly audits: unknown[] = [];
   public readonly events: DomainEvent<unknown>[] = [];
   public findInstallation(id: string) { return ok(this.installations.get(id) ?? null); }
   public findRelease(pluginId: string, version: string) { return ok(this.releases.get(`${pluginId}@${version}`) ?? null); }
+  public getStorageUsage(pluginId: string) { return ok(this.storageUsageOverride ?? {
+    installationCount: this.installations.size,
+    releaseCount: [...this.releases.values()].filter((row) => row.pluginId === pluginId).length,
+    mutationCount: this.mutations.size
+  }); }
   public findMutation(id: string) { return ok(this.mutations.get(id) ?? null); }
   public insertMutation(row: SignedPluginMutationRow) { this.mutations.set(row.clientOperationId, row); return ok(undefined); }
   public insertRelease(row: SignedPluginReleaseRow) { this.releases.set(`${row.pluginId}@${row.version}`, row); return ok(undefined); }
@@ -148,27 +155,37 @@ describe('33-Z signed plugin platform use cases', () => {
     expect(await new SetSignedPluginDesiredStateUseCase(unit).execute({ context, command: {
       clientOperationId: 'safe-disable-expired', pluginId: 'local.bank-reader', expectedRevision: 3,
       enabled: false, reason: 'Süresi geçmiş aday güvenli biçimde kapatılır.'
-    } })).toMatchObject({ ok: true, value: { mutationKind: 'desired_disable', revision: 4 } });
+    } })).toMatchObject({ ok: false, error: { category: 'conflict' } });
   });
 
   it('persists emergency disable and requires a newer signed release before re-enable', async () => {
     const unit = new Unit();
     await register(unit);
+    expect(await register(unit, '1.1.0', 1, 'register-v2-before-emergency'))
+      .toMatchObject({ ok: true, value: { mutationKind: 'release_update', revision: 2 } });
     const desired = new SetSignedPluginDesiredStateUseCase(unit);
     expect(await desired.execute({ context, command: {
-      clientOperationId: 'enable-v1', pluginId: 'local.bank-reader', expectedRevision: 1,
+      clientOperationId: 'enable-v2', pluginId: 'local.bank-reader', expectedRevision: 2,
       enabled: true, reason: 'Yerel inceleme tamamlandi.'
-    } })).toMatchObject({ ok: true, value: { mutationKind: 'desired_enable', revision: 2 } });
+    } })).toMatchObject({ ok: true, value: { mutationKind: 'desired_enable', revision: 3 } });
     expect(await new EmergencyDisableSignedPluginUseCase(unit).execute({ context, command: {
-      clientOperationId: 'emergency-stop', pluginId: 'local.bank-reader', expectedRevision: 2,
+      clientOperationId: 'emergency-stop', pluginId: 'local.bank-reader', expectedRevision: 3,
       confirmation: 'EKLENTIYI ACIL DURDUR', reason: 'Supheli yerel paket davranisi.'
-    } })).toMatchObject({ ok: true, value: { mutationKind: 'emergency_disable', revision: 3 } });
+    } })).toMatchObject({ ok: true, value: { mutationKind: 'emergency_disable', revision: 4 } });
     expect(await desired.execute({ context, command: {
-      clientOperationId: 'enable-again', pluginId: 'local.bank-reader', expectedRevision: 3,
+      clientOperationId: 'enable-again', pluginId: 'local.bank-reader', expectedRevision: 4,
       enabled: true, reason: 'Tekrar etkinlestirme denemesi.'
     } })).toMatchObject({ ok: false, error: { category: 'conflict' } });
-    expect(await register(unit, '1.1.0', 3, 'register-after-emergency')).toMatchObject({ ok: true, value: { revision: 4 } });
-    expect(unit.scope.installations.get('local.bank-reader')).toMatchObject({ desiredState: 'disabled', currentVersion: '1.1.0' });
+    expect(await desired.execute({ context, command: {
+      clientOperationId: 'disable-after-emergency', pluginId: 'local.bank-reader', expectedRevision: 4,
+      enabled: false, reason: 'Acil durumu normal kapalı duruma çevirme denemesi.'
+    } })).toMatchObject({ ok: false, error: { category: 'conflict' } });
+    expect(await new RollbackSignedPluginUseCase(unit).execute({ context, command: {
+      clientOperationId: 'rollback-after-emergency', pluginId: 'local.bank-reader', expectedRevision: 4,
+      targetVersion: '1.0.0', confirmation: 'ONCEKI SURUME DON'
+    } })).toMatchObject({ ok: false, error: { category: 'conflict' } });
+    expect(await register(unit, '1.2.0', 4, 'register-after-emergency')).toMatchObject({ ok: true, value: { revision: 5 } });
+    expect(unit.scope.installations.get('local.bank-reader')).toMatchObject({ desiredState: 'disabled', currentVersion: '1.2.0' });
   });
 
   it('rejects expired or forged release evidence before durable writes', async () => {
@@ -184,5 +201,20 @@ describe('33-Z signed plugin platform use cases', () => {
     } })).toMatchObject({ ok: false, error: { category: 'authorization' } });
     expect(unit.scope.mutations.size).toBe(0);
     expect(unit.scope.installations.size).toBe(0);
+  });
+
+  it('rejects extra command fields, forged verified metadata and bounded-capacity overflow', async () => {
+    const unit = new Unit();
+    const useCase = new RegisterSignedPluginReleaseUseCase(unit);
+    expect(await useCase.execute({ context, command: {
+      clientOperationId: 'extra-field', expectedRevision: 0, release: release(), token: 'secret'
+    } as never })).toMatchObject({ ok: false, error: { category: 'validation' } });
+    expect(await useCase.execute({ context, command: {
+      clientOperationId: 'undeclared-provider', expectedRevision: 0,
+      release: { ...release(), capabilityCodes: ['bank.read', 'maps.read'] }
+    } })).toMatchObject({ ok: false, error: { category: 'authorization' } });
+    unit.scope.storageUsageOverride = { installationCount: 200, releaseCount: 0, mutationCount: 0 };
+    expect(await register(unit, '1.0.0', 0, 'capacity-full')).toMatchObject({ ok: false, error: { category: 'conflict' } });
+    expect(unit.scope.mutations.size).toBe(0);
   });
 });

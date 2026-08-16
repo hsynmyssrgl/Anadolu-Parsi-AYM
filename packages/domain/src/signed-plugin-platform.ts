@@ -26,6 +26,10 @@ export const SIGNED_PLUGIN_CAPABILITY_CODES = Object.freeze([
 ] as const);
 export type SignedPluginCapabilityCode = (typeof SIGNED_PLUGIN_CAPABILITY_CODES)[number];
 
+export const SIGNED_PLUGIN_MAX_INSTALLATIONS = 200;
+export const SIGNED_PLUGIN_MAX_RELEASES_PER_PLUGIN = 64;
+export const SIGNED_PLUGIN_MAX_MUTATIONS = 100_000;
+
 export type SignedPluginDataSensitivity = 'standard' | 'personal' | 'highly_sensitive';
 export type SignedPluginDataPurpose =
   | 'general'
@@ -49,6 +53,7 @@ export interface SignedPluginDataDeclarationView {
 
 export interface SignedPluginReleaseView {
   readonly version: string;
+  readonly minimumHostVersion: string;
   readonly providerKinds: readonly SignedPluginProviderKind[];
   readonly capabilityCodes: readonly SignedPluginCapabilityCode[];
   readonly dataDeclarations: readonly SignedPluginDataDeclarationView[];
@@ -61,6 +66,7 @@ export interface SignedPluginReleaseView {
   readonly provenanceEvidencePresent: true;
   readonly verifiedAt: IsoDateTime;
   readonly expiresAt: IsoDateTime;
+  readonly manifestStatus: 'valid' | 'expired';
 }
 
 export interface SignedPluginInstallationView {
@@ -73,10 +79,24 @@ export interface SignedPluginInstallationView {
   readonly runtimeExecutionReady: false;
   readonly externalProviderConnectionReady: false;
   readonly rollbackAvailable: boolean;
+  readonly releaseHistoryCount: number;
+  readonly releaseHistoryLimitReached: boolean;
   readonly revision: number;
   readonly createdAt: IsoDateTime;
   readonly updatedAt: IsoDateTime;
   readonly emergencyDisabledAt?: IsoDateTime;
+}
+
+export interface SignedPluginCapacityBandView {
+  readonly current: number;
+  readonly maximum: number;
+  readonly remaining: number;
+  readonly limitReached: boolean;
+}
+
+export interface SignedPluginStorageCapacityView {
+  readonly installations: SignedPluginCapacityBandView;
+  readonly mutations: SignedPluginCapacityBandView;
 }
 
 export interface SignedPluginPlatformTruthView {
@@ -100,6 +120,10 @@ export interface SignedPluginPlatformTruthView {
   readonly osNetworkIsolationVerified: false;
   readonly providerAvailabilityGuaranteed: false;
   readonly networkUsedByCurrentImplementation: false;
+  readonly minimumHostVersionEnforced: true;
+  readonly emergencyDisableRequiresNewHigherSignedRelease: true;
+  readonly boundedStorageCapsEnforced: true;
+  readonly automaticRetentionRecoveryImplemented: false;
 }
 
 export interface SignedPluginPlatformCenterView {
@@ -107,6 +131,8 @@ export interface SignedPluginPlatformCenterView {
   readonly centerId: string;
   readonly ownerPersonId: string;
   readonly installations: readonly SignedPluginInstallationView[];
+  readonly installationTotal: number;
+  readonly storageCapacity: SignedPluginStorageCapacityView;
   readonly truth: SignedPluginPlatformTruthView;
   readonly generatedAt: IsoDateTime;
 }
@@ -116,6 +142,7 @@ export interface VerifiedSignedPluginReleaseInput {
   readonly pluginId: string;
   readonly displayName: string;
   readonly version: string;
+  readonly minimumHostVersion: string;
   readonly manifestSha256: string;
   readonly packageSha256: string;
   readonly entrypointSha256: string;
@@ -214,5 +241,9 @@ export const signedPluginPlatformTruth = Object.freeze({
   sandboxRuntimeVerified: false as const,
   osNetworkIsolationVerified: false as const,
   providerAvailabilityGuaranteed: false as const,
-  networkUsedByCurrentImplementation: false as const
+  networkUsedByCurrentImplementation: false as const,
+  minimumHostVersionEnforced: true as const,
+  emergencyDisableRequiresNewHigherSignedRelease: true as const,
+  boundedStorageCapsEnforced: true as const,
+  automaticRetentionRecoveryImplemented: false as const
 });

@@ -11,7 +11,7 @@ const now=new Date('2026-08-15T12:00:00.000Z');
 const pair=generateKeyPairSync('ed25519');
 const keyId='plugin-root-2026';
 const manifest=():SignedPluginManifest=>({
-  pluginId:'bank-read-adapter',displayName:'Banka Salt Okunur Adapteri',version:'1.0.0',minimumHostVersion:'4.8.2026',
+  pluginId:'bank-read-adapter',displayName:'Banka Salt Okunur Adapteri',version:'1.0.0',minimumHostVersion:'4.8.2026-29',
   sourceCommitId:'1'.repeat(40),packageSha256:'1'.repeat(64),entrypointSha256:'2'.repeat(64),sbomSha256:'3'.repeat(64),
   licenseInventorySha256:'4'.repeat(64),provenanceSha256:'5'.repeat(64),providerKinds:['bank'],capabilityCodes:['bank.read'],
   dataDeclarations:[{resourceType:'finance_record',sensitivity:'highly_sensitive',purpose:'finance',access:'read_metadata',retentionDays:0}],
@@ -21,12 +21,14 @@ const manifest=():SignedPluginManifest=>({
 });
 const envelope=(value=manifest()):SignedPluginManifestEnvelope=>({format:'ppt-signed-plugin-manifest',version:1,manifest:value,
   signature:{algorithm:'Ed25519',keyId,valueBase64Url:sign(null,Buffer.from(canonicalizeSignedPluginManifest(value),'utf8'),pair.privateKey).toString('base64url')}});
-const options={trustedKeys:[{keyId,publicKeyPem:pair.publicKey.export({type:'spki',format:'pem'}).toString(),status:'ACTIVE' as const}],now:()=>now};
+const options={trustedKeys:[{keyId,publicKeyPem:pair.publicKey.export({type:'spki',format:'pem'}).toString(),status:'ACTIVE' as const}],
+  hostVersion:'4.8.2026-29',now:()=>now};
 
 describe('33-Z signed plugin manifest verification',()=>{
   it('verifies exact Ed25519 evidence and returns only bounded metadata',()=>{
     const result=verifySignedPluginManifest(envelope(),options);
-    expect(result).toMatchObject({pluginId:'bank-read-adapter',version:'1.0.0',signatureVerified:true,egressMode:'allowlist',
+    expect(result).toMatchObject({pluginId:'bank-read-adapter',version:'1.0.0',minimumHostVersion:'4.8.2026-29',
+      signatureVerified:true,egressMode:'allowlist',
       sandboxProfile:'isolated_child_process',processSpawnAllowed:false,nativeModulesAllowed:false,networkBrokerOnly:true});
     expect(result.manifestSha256).toMatch(/^[a-f0-9]{64}$/u);
     expect(JSON.stringify(result)).not.toContain('PRIVATE KEY');
@@ -52,6 +54,28 @@ describe('33-Z signed plugin manifest verification',()=>{
     expect(()=>verifySignedPluginManifest(envelope(noCapability),options)).toThrowError(/explicit capability/iu);
     const retention={...manifest(),dataDeclarations:[{...manifest().dataDeclarations[0]!,retentionDays:31}]};
     expect(()=>verifySignedPluginManifest(envelope(retention),options)).toThrowError(/retention/iu);
+  });
+
+  it('rejects undeclared-provider capabilities, empty data scope and a newer required host',()=>{
+    const undeclared={...manifest(),providerKinds:['bank' as const],capabilityCodes:['bank.read','maps.read'] as const};
+    expect(()=>verifySignedPluginManifest(envelope(undeclared),options)).toThrowError(/declared provider/iu);
+    const empty={...manifest(),dataDeclarations:[]};
+    expect(()=>verifySignedPluginManifest(envelope(empty),options)).toThrowError(/declaration count/iu);
+    const newer={...manifest(),minimumHostVersion:'999999999999999999999.0.0'};
+    expect(()=>verifySignedPluginManifest(envelope(newer),options)).toThrowError(/newer host/iu);
+  });
+
+  it('rejects accessors, symbols, non-canonical time and a non-Ed25519 trusted key',()=>{
+    const withAccessor=Object.defineProperty({...envelope()},'destinationPath',{enumerable:true,get:()=> 'C:/plugins'});
+    expect(()=>verifySignedPluginManifest(withAccessor,options)).toThrowError(/malformed/iu);
+    const withSymbol={...envelope(),[Symbol('authority')]:'hidden'};
+    expect(()=>verifySignedPluginManifest(withSymbol,options)).toThrowError(/malformed/iu);
+    const nonCanonical={...manifest(),issuedAt:'2026-08-15T11:00:00Z'};
+    expect(()=>verifySignedPluginManifest(envelope(nonCanonical),options)).toThrowError(/time binding/iu);
+    const rsa=generateKeyPairSync('rsa',{modulusLength:2048});
+    expect(()=>verifySignedPluginManifest(envelope(),{...options,trustedKeys:[{keyId,
+      publicKeyPem:rsa.publicKey.export({type:'spki',format:'pem'}).toString(),status:'ACTIVE'}]}))
+      .toThrowError(/signature verification failed/iu);
   });
 
   it('rejects expired evidence, future evidence and untrusted signer',()=>{

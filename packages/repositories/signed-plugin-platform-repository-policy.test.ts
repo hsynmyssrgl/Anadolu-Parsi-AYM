@@ -195,7 +195,7 @@ const createRows = () => {
   };
   const release: SignedPluginReleaseRow = {
     id: '4'.repeat(64), familyId: FAMILY, ownerPersonId: OWNER, pluginId: mutation.resourceId,
-    displayName: 'Yerel banka okuyucu', version: '1.0.0', manifestSha256: '5'.repeat(64),
+    displayName: 'Yerel banka okuyucu', version: '1.0.0', minimumHostVersion: '4.8.2026-29', manifestSha256: '5'.repeat(64),
     packageSha256: '6'.repeat(64), entrypointSha256: '7'.repeat(64), sbomSha256: '8'.repeat(64),
     licenseInventorySha256: '9'.repeat(64), provenanceSha256: 'a'.repeat(64), signerKeyId: 'trusted-key-33-z',
     providerKinds: ['bank'], capabilityCodes: ['bank.read'], dataDeclarations: [{
@@ -233,8 +233,13 @@ describe('33-Z signed plugin repository policy boundary', () => {
       action: 'read', resourceType: 'signed_plugin_platform_center', resourceId: '*'
     }, (repository, context) => repository.loadCenter(context, key))).toMatchObject({
       ok: true,
-      value: [{ installation: { id: 'local.bank-reader', desiredState: 'disabled' }, releaseCount: 1 }]
+      value: { installations: [{ installation: { id: 'local.bank-reader', desiredState: 'disabled' }, releaseCount: 1 }],
+        installationTotal: 1, mutationCount: 1 }
     });
+    expect(harness.runtime.transactionExecutor.execute(asCorrelationId('33-z-foreign-owner-resolver'), (transaction) =>
+      harness.repository.resolvePolicyResource({ ...repositoryContext(transaction), actor: {
+        userId: ACCOUNT, personId: OTHER, roles: ['family_admin']
+      } }, 'signed_plugin_installation', 'local.bank-reader'))).toMatchObject({ ok: true, value: null });
   });
 
   it('updates desired state only through the exact revision-bound mutation', async () => {
@@ -292,5 +297,44 @@ describe('33-Z signed plugin repository policy boundary', () => {
     expect(() => harness.runtime.database.prepare('DELETE FROM signed_plugin_mutations').run()).toThrow();
     expect(harness.runtime.database.prepare('SELECT COUNT(*) count FROM signed_plugin_releases').get()).toEqual({ count: 1 });
     expect(harness.runtime.database.prepare('SELECT COUNT(*) count FROM signed_plugin_mutations').get()).toEqual({ count: 1 });
+  });
+
+  it('keeps emergency disable locked until an exact higher signed release replaces it', async () => {
+    const harness = openHarness();
+    const rows = createRows();
+    await withReceipt(harness, {
+      action: 'create', resourceType: 'signed_plugin_installation', resourceId: rows.installation.id
+    }, (repository, context) => {
+      const ledger = repository.insertMutation(context, rows.mutation); if (!ledger.ok) return ledger;
+      const inserted = repository.insertRelease(context, rows.release);
+      return inserted.ok ? repository.insertInstallation(context, rows.installation) : inserted;
+    });
+    now = asIsoDateTime('2026-08-15T12:00:01.000Z');
+    const emergencyMutation: SignedPluginMutationRow = { ...rows.mutation, id: 'c'.repeat(64),
+      mutationKind: 'emergency_disable', clientOperationId: 'emergency-lock', requestFingerprint: 'd'.repeat(64),
+      expectedRevision: 1, revision: 2, resourceStateFingerprint: 'e'.repeat(64), occurredAt: now };
+    const emergency: SignedPluginInstallationRow = { ...rows.installation, desiredState: 'emergency_disabled',
+      revision: 2, stateFingerprint: emergencyMutation.resourceStateFingerprint, lastMutationId: emergencyMutation.id,
+      updatedAt: now, emergencyDisabledAt: now };
+    expect((await withReceipt(harness, { action: 'delete', resourceType: 'signed_plugin_installation',
+      resourceId: emergency.id }, (repository, policy) => {
+      const ledger = repository.insertMutation(policy, emergencyMutation);
+      return ledger.ok ? repository.saveInstallation(policy, emergency, 1) : ledger;
+    })).ok).toBe(true);
+    now = asIsoDateTime('2026-08-15T12:00:02.000Z');
+    const bypassMutation: SignedPluginMutationRow = { ...emergencyMutation, id: 'f'.repeat(64),
+      mutationKind: 'desired_disable', clientOperationId: 'bypass-emergency-lock', requestFingerprint: '1'.repeat(64),
+      expectedRevision: 2, revision: 3, resourceStateFingerprint: '2'.repeat(64), occurredAt: now };
+    const { emergencyDisabledAt: _emergencyDisabledAt, ...emergencyBase } = emergency;
+    const bypass: SignedPluginInstallationRow = { ...emergencyBase, desiredState: 'disabled', revision: 3,
+      stateFingerprint: bypassMutation.resourceStateFingerprint, lastMutationId: bypassMutation.id, updatedAt: now };
+    expect((await withReceipt(harness, { action: 'update', resourceType: 'signed_plugin_installation',
+      resourceId: bypass.id }, (repository, policy) => {
+      const ledger = repository.insertMutation(policy, bypassMutation);
+      return ledger.ok ? repository.saveInstallation(policy, bypass, 2) : ledger;
+    })).ok).toBe(false);
+    expect(harness.runtime.database.prepare('SELECT desired_state,revision FROM signed_plugin_installations').get())
+      .toEqual({ desired_state: 'emergency_disabled', revision: 2 });
+    expect(harness.runtime.database.prepare('SELECT COUNT(*) count FROM signed_plugin_mutations').get()).toEqual({ count: 2 });
   });
 });

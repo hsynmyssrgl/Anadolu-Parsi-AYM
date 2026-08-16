@@ -1,10 +1,13 @@
 import { asFamilyId, asIsoDateTime, asPersonId } from '@ppt/core';
-import type {
-  SignedPluginCapabilityCode,
-  SignedPluginDataDeclarationView,
-  SignedPluginDesiredState,
-  SignedPluginMutationKind,
-  SignedPluginProviderKind
+import {
+  APP_META,
+  SIGNED_PLUGIN_MAX_INSTALLATIONS,
+  SIGNED_PLUGIN_MAX_RELEASES_PER_PLUGIN,
+  type SignedPluginCapabilityCode,
+  type SignedPluginDataDeclarationView,
+  type SignedPluginDesiredState,
+  type SignedPluginMutationKind,
+  type SignedPluginProviderKind
 } from '@ppt/domain';
 import {
   assertPolicyAuthorizedRepositoryContext,
@@ -15,17 +18,38 @@ import {
   type SignedPluginInstallationSnapshotRow,
   type SignedPluginMutationRow,
   type SignedPluginPlatformCenterKey,
+  type SignedPluginPlatformCenterSnapshotRow,
   type SignedPluginPlatformPolicyResourceRepositoryPort,
   type SignedPluginPlatformRepositoryPort,
-  type SignedPluginReleaseRow
+  type SignedPluginReleaseRow,
+  type SignedPluginStorageUsageRow
 } from '@ppt/repository-contracts';
 import { platformPolicyPersistenceBinding } from './platform-policy-transaction-repository.js';
 import { SqliteRepository } from './sqlite-base.js';
 
+const SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*))?$/u;
+const validSemver = (value: string): boolean => value.length >= 5 && value.length <= 96 && SEMVER.test(value);
+const compareSemver = (left: string, right: string): number => {
+  const l = SEMVER.exec(left)!; const r = SEMVER.exec(right)!;
+  for (let index = 1; index <= 3; index += 1) {
+    const a = l[index]!; const b = r[index]!;
+    if (a.length !== b.length) return a.length - b.length; if (a !== b) return a < b ? -1 : 1;
+  }
+  const lp = l[4]?.split('.'); const rp = r[4]?.split('.');
+  if (!lp && !rp) return 0; if (!lp) return 1; if (!rp) return -1;
+  for (let index = 0; index < Math.max(lp.length, rp.length); index += 1) {
+    const a = lp[index]; const b = rp[index]; if (a === undefined) return -1; if (b === undefined) return 1;
+    if (a === b) continue; const an = /^\d+$/u.test(a); const bn = /^\d+$/u.test(b);
+    if (an && bn) return a.length === b.length ? (a < b ? -1 : 1) : a.length - b.length;
+    if (an !== bn) return an ? -1 : 1; return a < b ? -1 : 1;
+  }
+  return 0;
+};
+
 const installationSelect = `SELECT id,family_id,owner_person_id,display_name,current_version,current_release_id,
   previous_version,desired_state,runtime_execution_ready,external_provider_connection_ready,revision,state_fingerprint,
   last_mutation_id,created_at,updated_at,emergency_disabled_at FROM signed_plugin_installations`;
-const releaseSelect = `SELECT id,family_id,owner_person_id,plugin_id,display_name,version,manifest_sha256,package_sha256,
+const releaseSelect = `SELECT id,family_id,owner_person_id,plugin_id,display_name,version,minimum_host_version,manifest_sha256,package_sha256,
   entrypoint_sha256,sbom_sha256,license_inventory_sha256,provenance_sha256,signer_key_id,provider_kinds_json,
   capability_codes_json,data_declarations_json,egress_mode,egress_hosts_json,sandbox_profile,signature_verified,
   verified_at,issued_at,expires_at,release_fingerprint,mutation_id FROM signed_plugin_releases`;
@@ -64,6 +88,7 @@ const mapRelease = (row: Record<string, unknown>): SignedPluginReleaseRow => Obj
   pluginId: String(row.plugin_id),
   displayName: String(row.display_name),
   version: String(row.version),
+  minimumHostVersion: String(row.minimum_host_version),
   manifestSha256: String(row.manifest_sha256),
   packageSha256: String(row.package_sha256),
   entrypointSha256: String(row.entrypoint_sha256),
@@ -151,9 +176,9 @@ export class SqliteSignedPluginPlatformRepository extends SqliteRepository imple
     resourceId: string
   ): ReturnType<SignedPluginPlatformPolicyResourceRepositoryPort['resolvePolicyResource']> {
     return this.execute(context, () => {
-      if (resourceType !== 'signed_plugin_installation') return null;
+      if (resourceType !== 'signed_plugin_installation' || !context.actor.personId) return null;
       const row = this.database(context).prepare(`SELECT id,family_id,owner_person_id,revision,desired_state,state_fingerprint
-        FROM signed_plugin_installations WHERE id=?`).get(resourceId) as Record<string, unknown> | undefined;
+        FROM signed_plugin_installations WHERE id=? AND owner_person_id=?`).get(resourceId, context.actor.personId) as Record<string, unknown> | undefined;
       return row ? Object.freeze({ id: String(row.id), familyId: asFamilyId(String(row.family_id)),
         ownerPersonId: asPersonId(String(row.owner_person_id)), revision: Number(row.revision),
         status: String(row.desired_state) as SignedPluginDesiredState, stateFingerprint: String(row.state_fingerprint) }) : null;
@@ -163,23 +188,46 @@ export class SqliteSignedPluginPlatformRepository extends SqliteRepository imple
   public loadCenter(
     context: PolicyAuthorizedRepositoryExecutionContext,
     key: SignedPluginPlatformCenterKey
-  ): RepositoryResult<readonly SignedPluginInstallationSnapshotRow[]> {
+  ): RepositoryResult<SignedPluginPlatformCenterSnapshotRow> {
     assertKey(context, key, 'read');
     return this.execute(context, () => {
       const rows = this.database(context).prepare(`${installationSelect}
-        WHERE family_id=? AND owner_person_id=? ORDER BY updated_at DESC,id LIMIT 201`)
-        .all(key.familyId, key.ownerPersonId) as Record<string, unknown>[];
-      if (rows.length > 200) throw new Error('Signed plugin center exceeds its bounded installation contract');
-      return Object.freeze(rows.map((installationRaw) => {
+        WHERE family_id=? AND owner_person_id=? ORDER BY updated_at DESC,id LIMIT ?`)
+        .all(key.familyId, key.ownerPersonId, SIGNED_PLUGIN_MAX_INSTALLATIONS + 1) as Record<string, unknown>[];
+      if (rows.length > SIGNED_PLUGIN_MAX_INSTALLATIONS)
+        throw new Error('Signed plugin center exceeds its bounded installation contract');
+      const installations: readonly SignedPluginInstallationSnapshotRow[] = Object.freeze(rows.map((installationRaw) => {
         const installation = mapInstallation(installationRaw);
         const releaseRaw = this.database(context).prepare(`${releaseSelect} WHERE id=? AND family_id=? AND owner_person_id=? AND plugin_id=?`)
           .get(installation.currentReleaseId, key.familyId, key.ownerPersonId, installation.id) as Record<string, unknown> | undefined;
         if (!releaseRaw) throw new Error('Signed plugin current release binding is missing');
         const releaseCount = Number((this.database(context).prepare(`SELECT COUNT(*) count FROM signed_plugin_releases
           WHERE family_id=? AND owner_person_id=? AND plugin_id=?`).get(key.familyId, key.ownerPersonId, installation.id) as { count: number }).count);
-        if (releaseCount < 1 || releaseCount > 64) throw new Error('Signed plugin release history exceeds its bounded contract');
+        if (releaseCount < 1 || releaseCount > SIGNED_PLUGIN_MAX_RELEASES_PER_PLUGIN)
+          throw new Error('Signed plugin release history exceeds its bounded contract');
         return Object.freeze({ installation, currentRelease: mapRelease(releaseRaw), releaseCount });
       }));
+      const mutationCount = Number((this.database(context).prepare(`SELECT COUNT(*) count FROM signed_plugin_mutations
+        WHERE family_id=? AND owner_person_id=?`).get(key.familyId, key.ownerPersonId) as { count: number }).count);
+      return Object.freeze({ installations, installationTotal: rows.length, mutationCount });
+    });
+  }
+
+  public getStorageUsage(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    key: SignedPluginPlatformCenterKey,
+    pluginId: string
+  ): RepositoryResult<SignedPluginStorageUsageRow> {
+    assertKey(context, key, 'write');
+    return this.execute(context, () => {
+      const database = this.database(context);
+      const installationCount = Number((database.prepare(`SELECT COUNT(*) count FROM signed_plugin_installations
+        WHERE family_id=? AND owner_person_id=?`).get(key.familyId, key.ownerPersonId) as { count: number }).count);
+      const releaseCount = Number((database.prepare(`SELECT COUNT(*) count FROM signed_plugin_releases
+        WHERE family_id=? AND owner_person_id=? AND plugin_id=?`).get(key.familyId, key.ownerPersonId, pluginId) as { count: number }).count);
+      const mutationCount = Number((database.prepare(`SELECT COUNT(*) count FROM signed_plugin_mutations
+        WHERE family_id=? AND owner_person_id=?`).get(key.familyId, key.ownerPersonId) as { count: number }).count);
+      return Object.freeze({ installationCount, releaseCount, mutationCount });
     });
   }
 
@@ -217,8 +265,9 @@ export class SqliteSignedPluginPlatformRepository extends SqliteRepository imple
   ): RepositoryResult<SignedPluginMutationRow | null> {
     assertKey(context, key, 'write');
     return this.execute(context, () => {
-      const row = this.database(context).prepare(`${mutationSelect} WHERE family_id=? AND actor_account_id=? AND client_operation_id=?`)
-        .get(key.familyId, key.accountId, clientOperationId) as Record<string, unknown> | undefined;
+      const row = this.database(context).prepare(`${mutationSelect}
+        WHERE family_id=? AND owner_person_id=? AND actor_account_id=? AND client_operation_id=?`)
+        .get(key.familyId, key.ownerPersonId, key.accountId, clientOperationId) as Record<string, unknown> | undefined;
       return row ? mapMutation(row) : null;
     });
   }
@@ -248,13 +297,23 @@ export class SqliteSignedPluginPlatformRepository extends SqliteRepository imple
       resourceFamilyId: row.familyId });
     const binding = platformPolicyPersistenceBinding(context, 'signed_plugin_installation', row.pluginId);
     if (!binding || !['create', 'update'].includes(binding.action)) throw new Error('Signed plugin release receipt is missing');
+    if (!validSemver(row.version) || !validSemver(row.minimumHostVersion)
+      || compareSemver(APP_META.packageVersion, row.minimumHostVersion) < 0)
+      throw new Error('Signed plugin release host-version binding is invalid');
     return this.execute(context, () => {
+      const current = this.database(context).prepare(`SELECT current_version FROM signed_plugin_installations
+        WHERE id=? AND family_id=? AND owner_person_id=?`).get(row.pluginId, row.familyId, row.ownerPersonId) as
+        { current_version: string } | undefined;
+      if ((binding.action === 'create' && current)
+        || (binding.action === 'update' && (!current || !validSemver(current.current_version)
+          || compareSemver(row.version, current.current_version) <= 0)))
+        throw new Error('Signed plugin release must be a strictly higher owner-bound version');
       this.database(context).prepare(`INSERT INTO signed_plugin_releases(id,family_id,owner_person_id,plugin_id,display_name,
-        version,manifest_sha256,package_sha256,entrypoint_sha256,sbom_sha256,license_inventory_sha256,provenance_sha256,
+        version,minimum_host_version,manifest_sha256,package_sha256,entrypoint_sha256,sbom_sha256,license_inventory_sha256,provenance_sha256,
         signer_key_id,provider_kinds_json,capability_codes_json,data_declarations_json,egress_mode,egress_hosts_json,
         sandbox_profile,signature_verified,verified_at,issued_at,expires_at,release_fingerprint,mutation_id,policy_receipt_hash)
-        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(row.id,row.familyId,row.ownerPersonId,row.pluginId,
-          row.displayName,row.version,row.manifestSha256,row.packageSha256,row.entrypointSha256,row.sbomSha256,
+        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(row.id,row.familyId,row.ownerPersonId,row.pluginId,
+          row.displayName,row.version,row.minimumHostVersion,row.manifestSha256,row.packageSha256,row.entrypointSha256,row.sbomSha256,
           row.licenseInventorySha256,row.provenanceSha256,row.signerKeyId,JSON.stringify(row.providerKinds),
           JSON.stringify(row.capabilityCodes),JSON.stringify(row.dataDeclarations),row.egressMode,JSON.stringify(row.egressHosts),
           row.sandboxProfile,1,row.verifiedAt,row.issuedAt,row.expiresAt,row.releaseFingerprint,row.mutationId,binding.receiptHash);

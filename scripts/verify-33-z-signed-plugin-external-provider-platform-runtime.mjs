@@ -53,9 +53,9 @@ const manualNotRun = Object.entries(scope.manualEvidence ?? {})
 
 const definitions = [
   ['exact six-file local Vitest exits successfully', vitest.status === 0 && vitest.signal === null],
-  ['local test result meets exact 6/26 ratchet', files === 6 && tests === 26
-    && scope.validation.targetedTestFileRatchet === 6 && scope.validation.targetedTestRatchet === 26
-    && inventory.validation.targetedTestFileRatchet === 6 && inventory.validation.targetedTestRatchet === 26],
+  ['local test result meets exact 6/30 ratchet', files === 6 && tests === 30
+    && scope.validation.targetedTestFileRatchet === 6 && scope.validation.targetedTestRatchet === 30
+    && inventory.validation.targetedTestFileRatchet === 6 && inventory.validation.targetedTestRatchet === 30],
   ['migration verifier passes exact migration 104 checksum', migration.status === 0 && migrationReport?.status === 'passed'
     && migrationReport?.checkCount === 9 && m104?.name === 'signed_plugin_external_provider_platform'
     && m104?.checksum === scope.validation.migrationSha256],
@@ -95,9 +95,9 @@ if (!noWrite) {
   await writeFile(resolve(root, 'artifacts/validation/33-Z-signed-plugin-external-provider-platform-runtime.json'), `${JSON.stringify(report, null, 2)}\n`, 'utf8');
 }
 if (failures.length) {
-  console.error(`33-Z runtime: FAIL (${failures.length}/${checks.length}; ${files}/6 files; ${tests}/26 tests).`);
+  console.error(`33-Z runtime: FAIL (${failures.length}/${checks.length}; ${files}/6 files; ${tests}/30 tests).`);
   for (const item of failures) console.error(item.name);
   console.error(vitestText.slice(-4000));
   process.exit(1);
 }
-console.log(`33-Z runtime: PASS (${checks.length}/${checks.length}; ${files}/6 files; ${tests}/26 tests; requirement PASS=false; write=${!noWrite}).`);
+console.log(`33-Z runtime: PASS (${checks.length}/${checks.length}; ${files}/6 files; ${tests}/30 tests; requirement PASS=false; write=${!noWrite}).`);

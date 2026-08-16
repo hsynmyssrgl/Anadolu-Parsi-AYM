@@ -116,7 +116,7 @@ const manifest = (version = '1.0.0'): SignedPluginManifest => {
     pluginId: 'local.bank-reader',
     displayName: 'Yerel banka okuyucu',
     version,
-    minimumHostVersion: '4.8.2026',
+    minimumHostVersion: '4.8.2026-29',
     sourceCommitId: '1'.repeat(40),
     packageSha256: '1'.repeat(64),
     entrypointSha256: '2'.repeat(64),
@@ -186,6 +186,10 @@ describe('33-Z signed plugin DataStore integration', () => {
       clientOperationId: 'emergency-v1', pluginId: 'local.bank-reader', expectedRevision: 2,
       confirmation: 'EKLENTIYI ACIL DURDUR', reason: 'Supheli yerel paket davranisi.'
     })).toMatchObject({ mutationKind: 'emergency_disable', revision: 3 });
+    await expect(store.setSignedPluginDesiredState({
+      clientOperationId: 'disable-after-emergency', pluginId: 'local.bank-reader', expectedRevision: 3,
+      enabled: false, reason: 'Acil kilidi normal kapalı duruma çevirme denemesi.'
+    })).rejects.toThrow(/acil kapatma yeni imzalı sürüm gerektiriyor/i);
     expect(await store.registerSignedPluginManifest({
       clientOperationId: 'register-v2', expectedRevision: 3, envelope: envelope(manifest('1.1.0'))
     })).toMatchObject({ mutationKind: 'release_update', revision: 4 });
@@ -196,17 +200,26 @@ describe('33-Z signed plugin DataStore integration', () => {
     const center = await store.getSignedPluginPlatformCenter();
     expect(center).toMatchObject({
       installations: [{
-        id: 'local.bank-reader', currentRelease: { version: '1.0.0', signatureVerified: true },
+        id: 'local.bank-reader', currentRelease: { version: '1.0.0', minimumHostVersion: '4.8.2026-29',
+          signatureVerified: true, manifestStatus: 'valid' },
         previousVersion: '1.1.0', desiredState: 'disabled', rollbackAvailable: true,
+        releaseHistoryCount: 2, releaseHistoryLimitReached: false,
         runtimeExecutionReady: false, externalProviderConnectionReady: false
       }],
+      installationTotal: 1,
+      storageCapacity: { installations: { current: 1, maximum: 200, remaining: 199, limitReached: false },
+        mutations: { current: 5, maximum: 100000, remaining: 99995, limitReached: false } },
       truth: {
         manifestCryptographyImplemented: true,
         productionSigningTrustProvisioned: false,
         productionReleaseEligible: false,
         thirdPartyCodeExecutionPerformed: false,
         externalProviderConnectionPerformed: false,
-        networkUsedByCurrentImplementation: false
+        networkUsedByCurrentImplementation: false,
+        minimumHostVersionEnforced: true,
+        emergencyDisableRequiresNewHigherSignedRelease: true,
+        boundedStorageCapsEnforced: true,
+        automaticRetentionRecoveryImplemented: false
       }
     });
     const serialized = JSON.stringify(center);

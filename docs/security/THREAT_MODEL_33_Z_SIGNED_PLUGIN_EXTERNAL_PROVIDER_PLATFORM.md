@@ -10,13 +10,13 @@
 
 ## Tehditler ve kontroller
 
-1. **Sahte veya değiştirilmiş manifest:** Exact anahtar kümesi ve canonical JSON Ed25519 ile doğrulanır; tanınmayan, retired, duplicate veya geçersiz signer fail-closed reddedilir.
-2. **Aşırı yetki:** Her provider en az bir exact capability gerektirir. Bilinmeyen veya duplicate provider/capability, wildcard egress, private/local/IP/scheme/path host ve otuz günü aşan retention reddedilir.
+1. **Sahte veya değiştirilmiş manifest:** Symbol, accessor, non-enumerable veya extra alan taşımayan exact anahtar kümesi ve canonical JSON Ed25519 ile doğrulanır; tanınmayan, retired, duplicate, Ed25519 dışı veya geçersiz signer fail-closed reddedilir. Minimum host sürümünü aşan manifest kurulamaz.
+2. **Aşırı yetki:** Her provider exact capability gerektirir ve her capability bildirilmiş provider'a geri bağlanır. Bilinmeyen veya duplicate provider/capability, boş veri kapsamı, wildcard egress, private/local/IP/scheme/path host ve otuz günü aşan retention reddedilir.
 3. **Supply-chain kanıtı yanıltması:** Paket, entrypoint, SBOM, lisans ve provenance hashleri manifest imzasına bağlıdır; fakat hash varlığı üretim provenance veya zafiyet temizliği iddiası değildir. PPK-025 production kanıtı açık kalır.
 4. **Renderer otorite yükseltmesi:** IPC yalnız merkezi okuma, istenen durum, acil kapatma ve rollback taşır. Manifest, imza, anahtar, hash, paket yolu, token, credential ve host listesi renderer'a kapalıdır.
 5. **Yabancı sahip kaydı:** Bütün current ve ledger satırları exact aile, hesap ve kişi sahibiyle, merkezi receipt/fence ve policy projection ile bağlanır.
-6. **Replay ve yarış:** `clientOperationId`, request fingerprint, optimistic revision, immutable mutation ledger ve current-row last-mutation bağı zorunludur.
-7. **Kötü sürüme dönüş:** Güncelleme yalnız daha yüksek sürümü kaydeder ve kapalı başlatır. Rollback yalnız exact önceki ve süresi geçerli release'e yapılır. Acil kapatma yeni imzalı sürüm olmadan yeniden etkinleştirilemez.
+6. **Replay, yarış ve disk tüketimi:** 160 karakterle sınırlı `clientOperationId`, canonical request fingerprint, optimistic revision, immutable mutation ledger ve current-row last-mutation bağı zorunludur. Owner başına 200 kurulum/100.000 mutasyon ve eklenti başına 64 sürüm üst sınırı vardır; otomatik retention kurtarması yoktur ve kapasite dolunca yeni yazım fail-closed durur.
+7. **Kötü sürüme dönüş ve acil kilit kaçışı:** Güncelleme yalnız daha yüksek sürümü kaydeder ve kapalı başlatır. Rollback yalnız exact önceki ve süresi geçerli release'e yapılır. Acil kapatma normal kapatma veya rollback ile temizlenemez; yalnız daha yüksek yeni imzalı sürüm kilidi kaldırır.
 8. **Kod çalıştırma veya provider bağlantısı yanıltması:** Truth alanları runtime execution, provider connection, credential storage, production trust, release eligibility, sandbox ve OS network isolation için false kalır; bu paket ağ kullanmaz.
 
 ## Açık kanıtlar

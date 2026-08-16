@@ -536,7 +536,7 @@
     {
       "version": 104,
       "name": "signed_plugin_external_provider_platform",
-      "checksum": "91a16031e87986f5b6e561cd9e767ad0b7e68d3c030ceace4276441b921b6547"
+      "checksum": "6380b0fde34fd54d9743d234ad7915f4ddd81564a90681164596e77691f9edf5"
     },
     {
       "version": 105,
@@ -594,5 +594,5 @@
       "checksum": "e43ccbe70eecee7c7572f3c78cd26f357ab0c69357da712664bb50ed3c81279b"
     }
   ],
-  "generatedAt": "2026-08-16T11:23:59.874Z"
+  "generatedAt": "2026-08-16T12:34:34.026Z"
 }

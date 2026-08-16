@@ -3529,38 +3529,43 @@ export const SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS=Object.freeze({
 } as const);
 const signedPluginPlatformChannels=new Set<string>(Object.values(SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS));
 const signedPluginId=(value:unknown):boolean=>typeof value==='string'&&/^[a-z][a-z0-9.-]{2,63}$/u.test(value);
+const signedPluginOperationId=(value:unknown):boolean=>typeof value==='string'
+  &&/^[A-Za-z0-9][A-Za-z0-9._:-]{1,159}$/u.test(value);
 const signedPluginSemver=(value:unknown):boolean=>typeof value==='string'
-  &&/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]{1,64})?$/u.test(value);
+  &&value.length>=5&&value.length<=96
+  &&/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*)?$/u.test(value);
 const signedPluginInput=(channel:string,args:readonly unknown[]):IpcIntegrationPolicyDecision=>{
   if(channel===SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.getCenter)return zeroArguments(args);
   if(args.length!==1||!isObject(args[0]))return rejected('SIGNED_PLUGIN_OBJECT_REQUIRED','$[0]');const value=args[0];
   if(channel===SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.setDesiredState)return healthCareExactRecord(value,
-    ['clientOperationId','pluginId','expectedRevision','enabled','reason'])&&healthCareIdentifier(value.clientOperationId)
+    ['clientOperationId','pluginId','expectedRevision','enabled','reason'])&&signedPluginOperationId(value.clientOperationId)
     &&signedPluginId(value.pluginId)&&healthCareRevision(value.expectedRevision)&&Number(value.expectedRevision)>=1
     &&typeof value.enabled==='boolean'&&healthCareText(value.reason,3,500)
     ?accepted():rejected('SIGNED_PLUGIN_DESIRED_STATE_INPUT_INVALID','$[0]');
   if(channel===SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.emergencyDisable)return healthCareExactRecord(value,
-    ['clientOperationId','pluginId','expectedRevision','confirmation','reason'])&&healthCareIdentifier(value.clientOperationId)
+    ['clientOperationId','pluginId','expectedRevision','confirmation','reason'])&&signedPluginOperationId(value.clientOperationId)
     &&signedPluginId(value.pluginId)&&healthCareRevision(value.expectedRevision)&&Number(value.expectedRevision)>=1
     &&value.confirmation==='EKLENTIYI ACIL DURDUR'&&healthCareText(value.reason,3,500)
     ?accepted():rejected('SIGNED_PLUGIN_EMERGENCY_INPUT_INVALID','$[0]');
   if(channel===SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.rollback)return healthCareExactRecord(value,
-    ['clientOperationId','pluginId','expectedRevision','targetVersion','confirmation'])&&healthCareIdentifier(value.clientOperationId)
+    ['clientOperationId','pluginId','expectedRevision','targetVersion','confirmation'])&&signedPluginOperationId(value.clientOperationId)
     &&signedPluginId(value.pluginId)&&healthCareRevision(value.expectedRevision)&&Number(value.expectedRevision)>=1
     &&signedPluginSemver(value.targetVersion)&&value.confirmation==='ONCEKI SURUME DON'
     ?accepted():rejected('SIGNED_PLUGIN_ROLLBACK_INPUT_INVALID','$[0]');
   return rejected('UNKNOWN_IPC_CHANNEL','$');
 };
 const signedPluginReleaseResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
-  ['version','providerKinds','capabilityCodes','dataDeclarations','egressMode','egressHostCount','sandboxProfile',
-    'signatureVerified','sbomEvidencePresent','licenseInventoryEvidencePresent','provenanceEvidencePresent','verifiedAt','expiresAt'])
-  &&signedPluginSemver(value.version)&&Array.isArray(value.providerKinds)&&value.providerKinds.length>=1&&value.providerKinds.length<=9
+  ['version','minimumHostVersion','providerKinds','capabilityCodes','dataDeclarations','egressMode','egressHostCount','sandboxProfile',
+    'signatureVerified','sbomEvidencePresent','licenseInventoryEvidencePresent','provenanceEvidencePresent','verifiedAt','expiresAt',
+    'manifestStatus'])
+  &&signedPluginSemver(value.version)&&signedPluginSemver(value.minimumHostVersion)
+  &&Array.isArray(value.providerKinds)&&value.providerKinds.length>=1&&value.providerKinds.length<=9
   &&value.providerKinds.every(item=>['bank','school','matter','fhir','onedrive','maps','ocr','ai','browser'].includes(String(item)))
   &&new Set(value.providerKinds).size===value.providerKinds.length&&Array.isArray(value.capabilityCodes)
   &&value.capabilityCodes.length>=1&&value.capabilityCodes.length<=16&&value.capabilityCodes.every(item=>
     ['bank.read','school.read','matter.read','fhir.read','onedrive.read','maps.read','ocr.process','ai.process','browser.read'].includes(String(item)))
   &&new Set(value.capabilityCodes).size===value.capabilityCodes.length&&Array.isArray(value.dataDeclarations)
-  &&value.dataDeclarations.length<=32&&value.dataDeclarations.every(item=>isObject(item)&&healthCareExactRecord(item,
+  &&value.dataDeclarations.length>=1&&value.dataDeclarations.length<=32&&value.dataDeclarations.every(item=>isObject(item)&&healthCareExactRecord(item,
     ['resourceType','sensitivity','purpose','access','retentionDays'])&&healthCareIdentifier(item.resourceType)
     &&['standard','personal','highly_sensitive'].includes(String(item.sensitivity))
     &&['general','finance','education','home_automation','health','document_processing','ai_assistance','browser_assistance'].includes(String(item.purpose))
@@ -3569,19 +3574,26 @@ const signedPluginReleaseResult=(value:unknown):boolean=>isObject(value)&&health
   &&['none','allowlist'].includes(String(value.egressMode))&&Number.isSafeInteger(value.egressHostCount)
   &&Number(value.egressHostCount)>=0&&Number(value.egressHostCount)<=16&&value.sandboxProfile==='isolated_child_process'
   &&value.signatureVerified===true&&value.sbomEvidencePresent===true&&value.licenseInventoryEvidencePresent===true
-  &&value.provenanceEvidencePresent===true&&healthCareIso(value.verifiedAt)&&healthCareIso(value.expiresAt);
+  &&value.provenanceEvidencePresent===true&&healthCareIso(value.verifiedAt)&&healthCareIso(value.expiresAt)
+  &&['valid','expired'].includes(String(value.manifestStatus));
 const signedPluginInstallationResult=(value:unknown):boolean=>{
   if(!isObject(value))return false;
   const keys=['id','ownerPersonId','displayName','currentRelease','desiredState','runtimeExecutionReady',
-    'externalProviderConnectionReady','rollbackAvailable','revision','createdAt','updatedAt',
+    'externalProviderConnectionReady','rollbackAvailable','releaseHistoryCount','releaseHistoryLimitReached',
+    'revision','createdAt','updatedAt',
     ...(value.previousVersion===undefined?[]:['previousVersion']),...(value.emergencyDisabledAt===undefined?[]:['emergencyDisabledAt'])];
   return healthCareExactRecord(value,keys)&&signedPluginId(value.id)&&healthCareIdentifier(value.ownerPersonId)
     &&healthCareText(value.displayName,2,120)&&signedPluginReleaseResult(value.currentRelease)
     &&(value.previousVersion===undefined||signedPluginSemver(value.previousVersion))
     &&['enabled','disabled','emergency_disabled'].includes(String(value.desiredState))&&value.runtimeExecutionReady===false
     &&value.externalProviderConnectionReady===false&&typeof value.rollbackAvailable==='boolean'
+    &&(value.desiredState!=='emergency_disabled'||value.rollbackAvailable===false)
+    &&Number.isSafeInteger(value.releaseHistoryCount)&&Number(value.releaseHistoryCount)>=1&&Number(value.releaseHistoryCount)<=64
+    &&typeof value.releaseHistoryLimitReached==='boolean'
+    &&value.releaseHistoryLimitReached===(Number(value.releaseHistoryCount)>=64)
     &&healthCareRevision(value.revision)&&Number(value.revision)>=1&&healthCareIso(value.createdAt)&&healthCareIso(value.updatedAt)
-    &&(value.emergencyDisabledAt===undefined||healthCareIso(value.emergencyDisabledAt));
+    &&(value.desiredState==='emergency_disabled'
+      ?healthCareIso(value.emergencyDisabledAt):value.emergencyDisabledAt===undefined);
 };
 const signedPluginTruthResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,[
   'localCandidateRegistryImplemented','manifestCryptographyImplemented','verifiedManifestRequired','capabilityDefaultDeny',
@@ -3589,7 +3601,8 @@ const signedPluginTruthResult=(value:unknown):boolean=>isObject(value)&&healthCa
   'sbomLicenseAndProvenanceHashesRequired','supplyChainReleaseGateRequired','rendererInstallAuthority',
   'thirdPartyCodeExecutionPerformed','externalProviderConnectionPerformed','providerCredentialsStored',
   'productionSigningTrustProvisioned','productionReleaseEligible','sandboxRuntimeVerified','osNetworkIsolationVerified',
-  'providerAvailabilityGuaranteed','networkUsedByCurrentImplementation'])
+  'providerAvailabilityGuaranteed','networkUsedByCurrentImplementation','minimumHostVersionEnforced',
+  'emergencyDisableRequiresNewHigherSignedRelease','boundedStorageCapsEnforced','automaticRetentionRecoveryImplemented'])
   &&value.localCandidateRegistryImplemented===true&&value.manifestCryptographyImplemented===true
   &&value.verifiedManifestRequired===true&&value.capabilityDefaultDeny===true&&value.networkBrokerRequired===true
   &&value.sandboxContractRequired===true&&value.rollbackRegistryImplemented===true
@@ -3598,11 +3611,22 @@ const signedPluginTruthResult=(value:unknown):boolean=>isObject(value)&&healthCa
   &&value.thirdPartyCodeExecutionPerformed===false&&value.externalProviderConnectionPerformed===false
   &&value.providerCredentialsStored===false&&value.productionSigningTrustProvisioned===false
   &&value.productionReleaseEligible===false&&value.sandboxRuntimeVerified===false&&value.osNetworkIsolationVerified===false
-  &&value.providerAvailabilityGuaranteed===false&&value.networkUsedByCurrentImplementation===false;
+  &&value.providerAvailabilityGuaranteed===false&&value.networkUsedByCurrentImplementation===false
+  &&value.minimumHostVersionEnforced===true&&value.emergencyDisableRequiresNewHigherSignedRelease===true
+  &&value.boundedStorageCapsEnforced===true&&value.automaticRetentionRecoveryImplemented===false;
+const signedPluginCapacityBand=(value:unknown,maximum:number):boolean=>isObject(value)
+  &&healthCareExactRecord(value,['current','maximum','remaining','limitReached'])
+  &&Number.isSafeInteger(value.current)&&Number(value.current)>=0&&Number(value.current)<=maximum
+  &&value.maximum===maximum&&value.remaining===maximum-Number(value.current)
+  &&value.limitReached===(Number(value.current)>=maximum);
 const signedPluginCenterResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
-  ['schemaVersion','centerId','ownerPersonId','installations','truth','generatedAt'])&&value.schemaVersion===1
+  ['schemaVersion','centerId','ownerPersonId','installations','installationTotal','storageCapacity','truth','generatedAt'])&&value.schemaVersion===1
   &&healthCareIdentifier(value.centerId)&&healthCareIdentifier(value.ownerPersonId)&&Array.isArray(value.installations)
   &&value.installations.length<=200&&value.installations.every(signedPluginInstallationResult)
+  &&Number.isSafeInteger(value.installationTotal)&&Number(value.installationTotal)===value.installations.length
+  &&isObject(value.storageCapacity)&&healthCareExactRecord(value.storageCapacity,['installations','mutations'])
+  &&signedPluginCapacityBand(value.storageCapacity.installations,200)
+  &&signedPluginCapacityBand(value.storageCapacity.mutations,100000)
   &&signedPluginTruthResult(value.truth)&&healthCareIso(value.generatedAt);
 const signedPluginReceiptResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
   ['pluginId','mutationKind','previousRevision','revision','occurredAt','replayed','runtimeExecutionPerformed',
@@ -3612,7 +3636,12 @@ const signedPluginReceiptResult=(value:unknown):boolean=>isObject(value)&&health
   &&healthCareIso(value.occurredAt)&&typeof value.replayed==='boolean'&&value.runtimeExecutionPerformed===false
   &&value.externalProviderConnectionPerformed===false&&value.networkUsed===false;
 const signedPluginResult=(channel:string,result:unknown):IpcIntegrationPolicyDecision=>{
-  const valid=channel===SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.getCenter?signedPluginCenterResult(result):signedPluginReceiptResult(result);
+  const receiptMatches=channel===SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.setDesiredState&&isObject(result)
+      &&['desired_enable','desired_disable'].includes(String(result.mutationKind))
+    ||channel===SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.emergencyDisable&&isObject(result)&&result.mutationKind==='emergency_disable'
+    ||channel===SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.rollback&&isObject(result)&&result.mutationKind==='release_rollback';
+  const valid=channel===SIGNED_PLUGIN_PLATFORM_IPC_CHANNELS.getCenter?signedPluginCenterResult(result)
+    :signedPluginReceiptResult(result)&&receiptMatches;
   return valid?accepted():rejected('SIGNED_PLUGIN_RESULT_INVALID','$result');
 };
 
