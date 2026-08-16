@@ -3227,7 +3227,7 @@ const memoryStudioChannels=new Set<string>(Object.values(MEMORY_STUDIO_IPC_CHANN
 const memoryStudioRecordKinds=new Set<unknown>(['voice_story','transcript','photo_book','annual_album','on_this_day',
   'duplicate_photo_review','face_group','genealogy_media_link','recipe','tradition','letter','future_message',
   'family_documentary','printable_book']);
-const memoryStudioIds=(value:unknown):boolean=>Array.isArray(value)&&value.length<=32
+const memoryStudioIds=(value:unknown):value is readonly string[]=>Array.isArray(value)&&value.length<=32
   &&value.every(healthCareIdentifier)&&new Set(value).size===value.length;
 const memoryStudioInput=(channel:string,args:readonly unknown[]):IpcIntegrationPolicyDecision=>{
   if(channel===MEMORY_STUDIO_IPC_CHANNELS.getCenter)return zeroArguments(args);
@@ -3242,7 +3242,13 @@ const memoryStudioInput=(channel:string,args:readonly unknown[]):IpcIntegrationP
       &&(value.personIds===undefined||memoryStudioIds(value.personIds))
       &&(value.ocrJobId===undefined||healthCareIdentifier(value.ocrJobId))
       &&(value.eventDate===undefined||healthCareIso(value.eventDate))
-      &&(value.manualFaceGroupingApproved===undefined||typeof value.manualFaceGroupingApproved==='boolean');
+      &&(value.manualFaceGroupingApproved===undefined||typeof value.manualFaceGroupingApproved==='boolean')
+      &&(value.summary!==undefined||(Array.isArray(value.archiveItemIds)&&value.archiveItemIds.length>0)
+        ||(Array.isArray(value.personIds)&&value.personIds.length>0)||value.ocrJobId!==undefined)
+      &&(value.kind==='face_group'?value.manualFaceGroupingApproved===true&&Array.isArray(value.archiveItemIds)
+        &&value.archiveItemIds.length>0&&Array.isArray(value.personIds)&&value.personIds.length>0
+        :value.manualFaceGroupingApproved!==true)
+      &&(value.kind!=='transcript'||(Array.isArray(value.archiveItemIds)&&value.archiveItemIds.length>0)||value.ocrJobId!==undefined);
     return valid?accepted():rejected('MEMORY_STUDIO_CREATE_RECORD_INPUT_INVALID','$[0]');
   }
   if(channel===MEMORY_STUDIO_IPC_CHANNELS.deleteRecord)return healthCareExactRecord(value,
@@ -3254,6 +3260,8 @@ const memoryStudioInput=(channel:string,args:readonly unknown[]):IpcIntegrationP
       &&healthCareIdentifier(value.clientOperationId)&&healthCareIdentifier(value.capsuleId)&&healthCareText(value.title,2,160)
       &&healthCareIso(value.unlockAt)&&(value.archiveItemIds===undefined||memoryStudioIds(value.archiveItemIds))
       &&(value.memoryRecordIds===undefined||memoryStudioIds(value.memoryRecordIds))
+      &&((Array.isArray(value.archiveItemIds)&&value.archiveItemIds.length>0)
+        ||(Array.isArray(value.memoryRecordIds)&&value.memoryRecordIds.length>0))
       ?accepted():rejected('MEMORY_STUDIO_CREATE_CAPSULE_INPUT_INVALID','$[0]');}
   if(channel===MEMORY_STUDIO_IPC_CHANNELS.reviewCapsule)return healthCareExactRecord(value,
     ['clientOperationId','capsuleId','expectedRevision','decision'])&&healthCareIdentifier(value.clientOperationId)
@@ -3269,38 +3277,75 @@ const memoryStudioRecordResult=(value:unknown):boolean=>{if(!isObject(value))ret
   const optional=['summary','ocrJobId','eventDate','deletedAt'].filter((key)=>value[key]!==undefined);
   return healthCareExactRecord(value,['id','ownerPersonId','kind','status','title','archiveItemIds','personIds',
     'manualFaceGroupingApproved','revision','createdAt','updatedAt',...optional])&&healthCareIdentifier(value.id)
-    &&healthCareIdentifier(value.ownerPersonId)&&memoryStudioRecordKinds.has(value.kind)&&['active','deleted'].includes(String(value.status))
+    &&healthCareIdentifier(value.ownerPersonId)&&memoryStudioRecordKinds.has(value.kind)&&value.status==='active'
     &&healthCareText(value.title,2,160)&&(value.summary===undefined||healthCareText(value.summary,2,2000))
     &&memoryStudioIds(value.archiveItemIds)&&memoryStudioIds(value.personIds)
     &&(value.ocrJobId===undefined||healthCareIdentifier(value.ocrJobId))&&(value.eventDate===undefined||healthCareIso(value.eventDate))
-    &&typeof value.manualFaceGroupingApproved==='boolean'&&healthCareRevision(value.revision)&&Number(value.revision)>=1
-    &&healthCareIso(value.createdAt)&&healthCareIso(value.updatedAt)&&(value.deletedAt===undefined||healthCareIso(value.deletedAt));};
-const memoryStudioApprovalResult=(value:unknown):boolean=>healthCareExactRecord(value,['accountId','personId','approvedAt'])
-  &&healthCareIdentifier(value.accountId)&&healthCareIdentifier(value.personId)&&healthCareIso(value.approvedAt);
+    &&typeof value.manualFaceGroupingApproved==='boolean'
+    &&(value.kind==='face_group'?value.manualFaceGroupingApproved===true&&value.archiveItemIds.length>0&&value.personIds.length>0
+      :value.manualFaceGroupingApproved===false)
+    &&(value.kind!=='transcript'||value.archiveItemIds.length>0||value.ocrJobId!==undefined)
+    &&healthCareRevision(value.revision)&&Number(value.revision)>=1&&healthCareIso(value.createdAt)&&healthCareIso(value.updatedAt)
+    &&Date.parse(String(value.updatedAt))>=Date.parse(String(value.createdAt))
+    &&value.deletedAt===undefined;};
+const memoryStudioMaximumUnlockAt=(createdAt:unknown):number=>{const value=new Date(String(createdAt));
+  value.setUTCFullYear(value.getUTCFullYear()+100);return value.getTime();};
 const memoryStudioCapsuleResult=(value:unknown):boolean=>{if(!isObject(value))return false;
   const optional=['sealedAt','releasedAt','cancelledAt','rolledBackAt'].filter((key)=>value[key]!==undefined);
   return healthCareExactRecord(value,['id','ownerPersonId','title','status','archiveItemIds','memoryRecordIds','unlockAt',
-    'minimumApprovals','approvals','revision','createdAt','updatedAt',...optional])&&healthCareIdentifier(value.id)
+    'minimumApprovals','approvalCount','currentAccountApprovalRecorded','revision','createdAt','updatedAt',...optional])&&healthCareIdentifier(value.id)
     &&healthCareIdentifier(value.ownerPersonId)&&healthCareText(value.title,2,160)
     &&['awaiting_approvals','sealed','released','cancelled','rolled_back'].includes(String(value.status))
-    &&memoryStudioIds(value.archiveItemIds)&&memoryStudioIds(value.memoryRecordIds)&&healthCareIso(value.unlockAt)
-    &&value.minimumApprovals===2&&householdArray(value.approvals,32,memoryStudioApprovalResult)
+    &&memoryStudioIds(value.archiveItemIds)&&memoryStudioIds(value.memoryRecordIds)
+    &&value.archiveItemIds.length+value.memoryRecordIds.length>=1&&healthCareIso(value.unlockAt)
+    &&value.minimumApprovals===2&&Number.isSafeInteger(value.approvalCount)&&Number(value.approvalCount)>=0
+    &&Number(value.approvalCount)<=32&&typeof value.currentAccountApprovalRecorded==='boolean'
     &&healthCareRevision(value.revision)&&Number(value.revision)>=1&&healthCareIso(value.createdAt)&&healthCareIso(value.updatedAt)
+    &&Date.parse(String(value.updatedAt))>=Date.parse(String(value.createdAt))
+    &&Date.parse(String(value.unlockAt))>=Date.parse(String(value.createdAt))+7*86_400_000
+    &&Date.parse(String(value.unlockAt))<=memoryStudioMaximumUnlockAt(value.createdAt)
+    &&(!['sealed','released','rolled_back'].includes(String(value.status))||Number(value.approvalCount)>=2)
     &&(value.sealedAt===undefined||healthCareIso(value.sealedAt))&&(value.releasedAt===undefined||healthCareIso(value.releasedAt))
-    &&(value.cancelledAt===undefined||healthCareIso(value.cancelledAt))&&(value.rolledBackAt===undefined||healthCareIso(value.rolledBackAt));};
-const memoryStudioCenterResult=(value:unknown):boolean=>healthCareExactRecord(value,
-  ['schemaVersion','centerId','ownerPersonId','records','capsules','truth','generatedAt'])&&value.schemaVersion===1
-  &&healthCareIdentifier(value.centerId)&&healthCareIdentifier(value.ownerPersonId)&&householdArray(value.records,500,memoryStudioRecordResult)
-  &&householdArray(value.capsules,200,memoryStudioCapsuleResult)&&healthCareExactRecord(value.truth,
+    &&(value.cancelledAt===undefined||healthCareIso(value.cancelledAt))&&(value.rolledBackAt===undefined||healthCareIso(value.rolledBackAt))
+    &&((value.status==='awaiting_approvals'&&value.sealedAt===undefined&&value.releasedAt===undefined
+        &&value.cancelledAt===undefined&&value.rolledBackAt===undefined)
+      ||(value.status==='sealed'&&value.sealedAt===value.updatedAt&&value.releasedAt===undefined
+        &&value.cancelledAt===undefined&&value.rolledBackAt===undefined)
+      ||(value.status==='released'&&value.sealedAt!==undefined&&value.releasedAt===value.updatedAt
+        &&Date.parse(String(value.updatedAt))>=Date.parse(String(value.unlockAt))
+        &&value.cancelledAt===undefined&&value.rolledBackAt===undefined)
+      ||(value.status==='cancelled'&&value.releasedAt===undefined&&value.cancelledAt===value.updatedAt&&value.rolledBackAt===undefined)
+      ||(value.status==='rolled_back'&&value.releasedAt!==undefined&&value.rolledBackAt===value.updatedAt
+        &&Date.parse(String(value.updatedAt))>=Date.parse(String(value.releasedAt))
+        &&Date.parse(String(value.updatedAt))<=Date.parse(String(value.releasedAt))+86_400_000&&value.cancelledAt===undefined));};
+const memoryStudioCapacityResult=(value:unknown,maximum:number,minimumUsed:number,exactUsed:boolean):boolean=>isObject(value)
+  &&healthCareExactRecord(value,['maximum','used','remaining','limitReached'])&&value.maximum===maximum
+  &&Number.isSafeInteger(value.used)&&Number(value.used)>=minimumUsed&&Number(value.used)<=maximum
+  &&Number.isSafeInteger(value.remaining)&&Number(value.remaining)===maximum-Number(value.used)
+  &&value.limitReached===(Number(value.used)>=maximum)&&(!exactUsed||Number(value.used)===minimumUsed);
+const memoryStudioCenterResult=(value:unknown):boolean=>{if(!isObject(value)||!Array.isArray(value.records)||!Array.isArray(value.capsules))return false;
+  const records=value.records;const capsules=value.capsules;
+  return healthCareExactRecord(value,
+  ['schemaVersion','centerId','ownerPersonId','records','capsules','storageCapacity','truth','generatedAt'])&&value.schemaVersion===1
+  &&healthCareIdentifier(value.centerId)&&healthCareIdentifier(value.ownerPersonId)&&householdArray(records,500,memoryStudioRecordResult)
+  &&householdArray(capsules,200,memoryStudioCapsuleResult)
+  &&records.every((record:unknown)=>isObject(record)&&record.ownerPersonId===value.ownerPersonId)
+  &&capsules.every((capsule:unknown)=>isObject(capsule)&&capsule.ownerPersonId===value.ownerPersonId)
+  &&isObject(value.storageCapacity)&&healthCareExactRecord(value.storageCapacity,['records','capsules'])
+  &&memoryStudioCapacityResult(value.storageCapacity.records,500,records.length,false)
+  &&memoryStudioCapacityResult(value.storageCapacity.capsules,200,capsules.length,true)
+  &&healthCareExactRecord(value.truth,
     ['localOnly','linkedArchiveContentRemainsProtected','newBinaryPayloadStored','transcriptionPerformed','faceRecognitionPerformed',
       'duplicateDetectionPerformed','documentaryRendered','printableBookRendered','printingPerformed','networkUsed','cloudUsed',
-      'manualCurationOnly','manualFaceGroupingOnly','minimumCapsuleApprovals','waitingPeriodEnforced','externalDeliveryPerformed'])
+      'manualCurationOnly','manualFaceGroupingOnly','minimumCapsuleApprovals','waitingPeriodEnforced',
+      'sourceReferencesRevalidatedAtSealAndRelease','monotonicStateTimeEnforced','externalDeliveryPerformed'])
   &&value.truth.localOnly===true&&value.truth.linkedArchiveContentRemainsProtected===true&&value.truth.newBinaryPayloadStored===false
   &&value.truth.transcriptionPerformed===false&&value.truth.faceRecognitionPerformed===false&&value.truth.duplicateDetectionPerformed===false
   &&value.truth.documentaryRendered===false&&value.truth.printableBookRendered===false&&value.truth.printingPerformed===false
   &&value.truth.networkUsed===false&&value.truth.cloudUsed===false&&value.truth.manualCurationOnly===true
   &&value.truth.manualFaceGroupingOnly===true&&value.truth.minimumCapsuleApprovals===2&&value.truth.waitingPeriodEnforced===true
-  &&value.truth.externalDeliveryPerformed==='not_performed'&&healthCareIso(value.generatedAt);
+  &&value.truth.sourceReferencesRevalidatedAtSealAndRelease===true&&value.truth.monotonicStateTimeEnforced===true
+  &&value.truth.externalDeliveryPerformed==='not_performed'&&healthCareIso(value.generatedAt);};
 const memoryStudioReceiptResult=(value:unknown):boolean=>healthCareExactRecord(value,
   ['resourceType','resourceId','mutationKind','previousRevision','revision','occurredAt','replayed','networkUsed','cloudUsed',
     'externalDeliveryPerformed'])&&['memory_studio_record','memory_time_capsule'].includes(String(value.resourceType))
@@ -3309,8 +3354,19 @@ const memoryStudioReceiptResult=(value:unknown):boolean=>healthCareExactRecord(v
   &&healthCareRevision(value.previousRevision)&&healthCareRevision(value.revision)&&value.revision===Number(value.previousRevision)+1
   &&healthCareIso(value.occurredAt)&&typeof value.replayed==='boolean'&&value.networkUsed===false&&value.cloudUsed===false
   &&value.externalDeliveryPerformed==='not_performed';
+const memoryStudioReceiptMatchesChannel=(channel:string,value:unknown):boolean=>isObject(value)&&(
+  (channel===MEMORY_STUDIO_IPC_CHANNELS.createRecord&&value.resourceType==='memory_studio_record'&&value.mutationKind==='record_create')
+  ||(channel===MEMORY_STUDIO_IPC_CHANNELS.deleteRecord&&value.resourceType==='memory_studio_record'&&value.mutationKind==='record_delete')
+  ||(channel===MEMORY_STUDIO_IPC_CHANNELS.createCapsule&&value.resourceType==='memory_time_capsule'&&value.mutationKind==='capsule_create')
+  ||(channel===MEMORY_STUDIO_IPC_CHANNELS.reviewCapsule&&value.resourceType==='memory_time_capsule'
+    &&['capsule_approve','capsule_revoke_approval'].includes(String(value.mutationKind)))
+  ||(channel===MEMORY_STUDIO_IPC_CHANNELS.transitionCapsule&&value.resourceType==='memory_time_capsule'
+    &&['capsule_seal','capsule_release','capsule_cancel','capsule_rollback'].includes(String(value.mutationKind))))
+  &&(['record_create','capsule_create'].includes(String(value.mutationKind))
+    ?value.previousRevision===0&&value.revision===1:Number(value.previousRevision)>=1);
 const memoryStudioResult=(channel:string,result:unknown):IpcIntegrationPolicyDecision=>{
-  const valid=channel===MEMORY_STUDIO_IPC_CHANNELS.getCenter?memoryStudioCenterResult(result):memoryStudioReceiptResult(result);
+  const valid=channel===MEMORY_STUDIO_IPC_CHANNELS.getCenter?memoryStudioCenterResult(result)
+    :memoryStudioReceiptResult(result)&&memoryStudioReceiptMatchesChannel(channel,result);
   return valid?accepted():rejected('MEMORY_STUDIO_RESULT_INVALID','$result');
 };
 

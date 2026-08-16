@@ -6,6 +6,7 @@ import type {
   MemoryTimeCapsuleApprovalView,
   MemoryTimeCapsuleStatus
 } from '@ppt/domain';
+import { MEMORY_STUDIO_MAX_CAPSULES, MEMORY_STUDIO_MAX_RECORDS } from '@ppt/domain';
 import {
   assertPolicyAuthorizedRepositoryContext,
   canonicalMemoryStudioReferences,
@@ -33,19 +34,24 @@ const capsuleSelect = `SELECT id,family_id,owner_person_id,title,status,archive_
 const mutationSelect = `SELECT id,family_id,owner_person_id,resource_type,resource_id,actor_account_id,
   actor_person_id,mutation_kind,client_operation_id,request_fingerprint,expected_revision,revision,
   resource_state_fingerprint,reference_fingerprint,reference_count,occurred_at FROM memory_studio_mutations`;
+const safeId = (value: unknown): value is string => typeof value === 'string' && /^[A-Za-z0-9][A-Za-z0-9._:-]{1,159}$/u.test(value);
+const exactIso = (value: unknown): value is string => typeof value === 'string' &&
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u.test(value) && Number.isFinite(Date.parse(value)) &&
+  new Date(value).toISOString() === value;
 
 const stringArray = (raw: unknown, maximum = 32): readonly string[] => {
   const parsed = JSON.parse(String(raw)) as unknown;
-  if (!Array.isArray(parsed) || parsed.length > maximum || parsed.some((item) => typeof item !== 'string') ||
+  if (!Array.isArray(parsed) || parsed.length > maximum || parsed.some((item) => !safeId(item)) ||
     new Set(parsed).size !== parsed.length) throw new Error('Memory studio reference list is invalid');
   return Object.freeze([...parsed].sort((left, right) => left.localeCompare(right)));
 };
 const approvals = (raw: unknown): readonly MemoryTimeCapsuleApprovalView[] => {
   const parsed = JSON.parse(String(raw)) as unknown;
   if (!Array.isArray(parsed) || parsed.length > 32 || parsed.some((item) => !item || typeof item !== 'object' ||
-    typeof (item as Record<string, unknown>).accountId !== 'string' ||
-    typeof (item as Record<string, unknown>).personId !== 'string' ||
-    typeof (item as Record<string, unknown>).approvedAt !== 'string')) throw new Error('Memory capsule approval ledger is invalid');
+    Object.getPrototypeOf(item) !== Object.prototype || Object.keys(item).sort().join(',') !== 'accountId,approvedAt,personId' ||
+    !safeId((item as Record<string, unknown>).accountId) || !safeId((item as Record<string, unknown>).personId) ||
+    !exactIso((item as Record<string, unknown>).approvedAt)) || new Set((parsed as Array<Record<string, unknown>>)
+      .map((item) => item.accountId)).size !== parsed.length) throw new Error('Memory capsule approval ledger is invalid');
   return Object.freeze((parsed as Array<{ accountId: string; personId: string; approvedAt: string }>).map((item) => Object.freeze({
     accountId: item.accountId, personId: item.personId, approvedAt: asIsoDateTime(item.approvedAt)
   })).sort((left, right) => left.accountId.localeCompare(right.accountId)));
@@ -134,11 +140,12 @@ export class SqliteMemoryStudioRepository extends SqliteRepository implements
   public loadCenter(context: PolicyAuthorizedRepositoryExecutionContext, key: MemoryStudioCenterKey)
   : RepositoryResult<MemoryStudioCenterSnapshotRow> {
     assertKey(context, key, 'read'); return this.execute(context, () => {
-      const records = this.database(context).prepare(`${recordSelect} WHERE family_id=? AND owner_person_id=? ORDER BY updated_at DESC,id LIMIT 501`)
+      const records = this.database(context).prepare(`${recordSelect} WHERE family_id=? AND owner_person_id=? ORDER BY updated_at DESC,id LIMIT ${MEMORY_STUDIO_MAX_RECORDS + 1}`)
         .all(key.familyId, key.ownerPersonId) as Record<string, unknown>[];
-      const capsules = this.database(context).prepare(`${capsuleSelect} WHERE family_id=? AND owner_person_id=? ORDER BY updated_at DESC,id LIMIT 201`)
+      const capsules = this.database(context).prepare(`${capsuleSelect} WHERE family_id=? AND owner_person_id=? ORDER BY updated_at DESC,id LIMIT ${MEMORY_STUDIO_MAX_CAPSULES + 1}`)
         .all(key.familyId, key.ownerPersonId) as Record<string, unknown>[];
-      if (records.length > 500 || capsules.length > 200) throw new Error('Memory studio center exceeds its bounded local result contract');
+      if (records.length > MEMORY_STUDIO_MAX_RECORDS || capsules.length > MEMORY_STUDIO_MAX_CAPSULES)
+        throw new Error('Memory studio center exceeds its bounded local result contract');
       return Object.freeze({ records: Object.freeze(records.map(mapRecord)), capsules: Object.freeze(capsules.map(mapCapsule)) });
     });
   }
@@ -218,7 +225,11 @@ export class SqliteMemoryStudioRepository extends SqliteRepository implements
   }
   private writeRecord(context: PolicyAuthorizedRepositoryExecutionContext, row: MemoryStudioRecordRow, expectedRevision: number | null): void {
     const binding = platformPolicyPersistenceBinding(context, 'memory_studio_record', row.id); if (!binding) throw new Error('Memory record receipt missing');
-    if (expectedRevision === null) { this.database(context).prepare(`INSERT INTO memory_studio_records(id,family_id,owner_person_id,
+    if (expectedRevision === null) { const count = Number((this.database(context).prepare(
+      'SELECT COUNT(*) count FROM memory_studio_records WHERE family_id=? AND owner_person_id=?').get(
+        row.familyId, row.ownerPersonId) as { count: number }).count);
+      if (count >= MEMORY_STUDIO_MAX_RECORDS) throw new Error('Memory studio record capacity is exhausted');
+      this.database(context).prepare(`INSERT INTO memory_studio_records(id,family_id,owner_person_id,
       kind,status,title,summary,archive_item_ids_json,person_ids_json,ocr_job_id,event_date,manual_face_grouping_approved,
       reference_fingerprint,revision,state_fingerprint,last_mutation_id,created_at,updated_at,deleted_at,policy_receipt_hash)
       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(row.id, row.familyId, row.ownerPersonId, row.kind, row.status, row.title,
@@ -243,7 +254,11 @@ export class SqliteMemoryStudioRepository extends SqliteRepository implements
   }
   private writeCapsule(context: PolicyAuthorizedRepositoryExecutionContext, row: MemoryTimeCapsuleRow, expectedRevision: number | null): void {
     const binding = platformPolicyPersistenceBinding(context, 'memory_time_capsule', row.id); if (!binding) throw new Error('Time capsule receipt missing');
-    if (expectedRevision === null) { this.database(context).prepare(`INSERT INTO memory_time_capsules(id,family_id,owner_person_id,
+    if (expectedRevision === null) { const count = Number((this.database(context).prepare(
+      'SELECT COUNT(*) count FROM memory_time_capsules WHERE family_id=? AND owner_person_id=?').get(
+        row.familyId, row.ownerPersonId) as { count: number }).count);
+      if (count >= MEMORY_STUDIO_MAX_CAPSULES) throw new Error('Memory studio capsule capacity is exhausted');
+      this.database(context).prepare(`INSERT INTO memory_time_capsules(id,family_id,owner_person_id,
       title,status,archive_item_ids_json,memory_record_ids_json,unlock_at,minimum_approvals,approvals_json,reference_fingerprint,
       revision,state_fingerprint,last_mutation_id,created_at,updated_at,sealed_at,released_at,cancelled_at,rolled_back_at,policy_receipt_hash)
       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(row.id, row.familyId, row.ownerPersonId, row.title, row.status,

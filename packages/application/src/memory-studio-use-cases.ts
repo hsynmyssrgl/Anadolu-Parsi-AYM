@@ -70,11 +70,32 @@ export interface MemoryStudioUnitOfWork {
   ): Promise<Result<T, AppError>>;
 }
 
-const SAFE_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{1,255}$/u;
+const SAFE_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{1,159}$/u;
 const CONTROL = /[\p{Cc}\p{Cf}\p{Cs}]/u;
+const EXACT_ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u;
 const recordKinds = new Set<string>(MEMORY_STUDIO_RECORD_KINDS);
-const hash = (value: unknown): string => createHash('sha256').update(JSON.stringify(value), 'utf8').digest('hex');
+const canonicalJson = (value: unknown): string => {
+  if (value === null || typeof value === 'string' || typeof value === 'boolean') return JSON.stringify(value);
+  if (typeof value === 'number') return Number.isFinite(value) ? JSON.stringify(value) : 'null';
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
+  if (typeof value === 'object') {
+    const record = value as Record<string, unknown>;
+    return `{${Object.keys(record).filter((key) => record[key] !== undefined).sort()
+      .map((key) => `${JSON.stringify(key)}:${canonicalJson(record[key])}`).join(',')}}`;
+  }
+  return JSON.stringify(null);
+};
+const hash = (value: unknown): string => createHash('sha256').update(canonicalJson(value), 'utf8').digest('hex');
 const canonicalIds = (values: readonly string[]): readonly string[] => Object.freeze([...new Set(values)].sort());
+const exactRecord = (value: unknown, required: readonly string[], optional: readonly string[] = []): boolean => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const prototype = Object.getPrototypeOf(value); if (prototype !== Object.prototype && prototype !== null) return false;
+  const keys = Reflect.ownKeys(value); if (keys.some((key) => typeof key === 'symbol')) return false;
+  const allowed = new Set([...required, ...optional]); if (keys.some((key) => !allowed.has(String(key)))) return false;
+  if (required.some((key) => !Object.prototype.hasOwnProperty.call(value, key))) return false;
+  return keys.every((key) => { const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    return Boolean(descriptor && !descriptor.get && !descriptor.set && 'value' in descriptor); });
+};
 
 const appError = (
   context: LifeApplicationContext,
@@ -124,8 +145,12 @@ const ids = (
 };
 
 const date = (context: LifeApplicationContext, value: unknown, field: string): Result<ReturnType<typeof asIsoDateTime>, AppError> => {
-  if (typeof value !== 'string' || !Number.isFinite(Date.parse(value))) return err(invalid(context, `${field} zamanı geçersizdir.`));
-  return ok(asIsoDateTime(new Date(value).toISOString()));
+  if (typeof value !== 'string' || !EXACT_ISO.test(value) || !Number.isFinite(Date.parse(value)) || new Date(value).toISOString() !== value)
+    return err(invalid(context, `${field} zamanı geçersizdir.`));
+  return ok(asIsoDateTime(value));
+};
+const addUtcYears = (instant: number, years: number): number => {
+  const value = new Date(instant); value.setUTCFullYear(value.getUTCFullYear() + years); return value.getTime();
 };
 
 export const memoryStudioReadIntent = (): LifePolicyIntent => ({
@@ -216,6 +241,9 @@ export class CreateMemoryStudioRecordUseCase {
   public async execute(input: { readonly context: LifeApplicationContext; readonly command: CreateMemoryStudioRecordInput })
   : Promise<Result<MemoryStudioMutationReceiptView, AppError>> {
     const { context, command } = input; const actor = requireActor(context); if (!actor.ok) return actor;
+    if (!exactRecord(command, ['clientOperationId', 'recordId', 'kind', 'title'],
+      ['summary', 'archiveItemIds', 'personIds', 'ocrJobId', 'eventDate', 'manualFaceGroupingApproved']))
+      return err(invalid(context, 'Hafıza kaydı komutu yalnız izin verilen alanları taşımalıdır.'));
     if (!SAFE_ID.test(command.clientOperationId) || !SAFE_ID.test(command.recordId) || !recordKinds.has(command.kind))
       return err(invalid(context, 'Hafıza kaydı işlem, kayıt veya tür kimliği geçersizdir.'));
     const title = normalizeText(context, command.title, 'Başlık', 2, 160); if (!title.ok) return title;
@@ -229,13 +257,16 @@ export class CreateMemoryStudioRecordUseCase {
       return err(invalid(context, 'Hafıza kaydı en az bir yerel kaynak veya kullanıcı özeti içermelidir.'));
     if (command.kind === 'face_group' && (command.manualFaceGroupingApproved !== true || archiveItemIds.value.length === 0 || personIds.value.length === 0))
       return err(denied(context, 'Yüz grubu yalnız açık manuel onay, arşiv medyası ve kişi seçimiyle oluşturulabilir.'));
+    if (command.kind !== 'face_group' && command.manualFaceGroupingApproved === true)
+      return err(invalid(context, 'Manuel yüz gruplama onayı yalnız kişi grubu kaydında kullanılabilir.'));
     if (command.kind === 'transcript' && archiveItemIds.value.length === 0 && !command.ocrJobId)
       return err(invalid(context, 'Transkript kaydı korunan arşiv veya yerel OCR referansı gerektirir.'));
     const references = canonicalMemoryStudioReferences({ archiveItemIds: archiveItemIds.value, personIds: personIds.value,
       memoryRecordIds: [], ...(command.ocrJobId ? { ocrJobId: command.ocrJobId } : {}) });
-    const requestFingerprint = hash({ ...command, title: title.value, summary: summary.value ?? null,
-      archiveItemIds: references.archiveItemIds, personIds: references.personIds, eventDate: eventDate ?? null,
-      manualFaceGroupingApproved: command.manualFaceGroupingApproved === true });
+    const requestFingerprint = hash({ clientOperationId: command.clientOperationId, recordId: command.recordId,
+      kind: command.kind, title: title.value, summary: summary.value ?? null, archiveItemIds: references.archiveItemIds,
+      personIds: references.personIds, ocrJobId: references.ocrJobId ?? null, eventDate: eventDate ?? null,
+      manualFaceGroupingApproved: command.kind === 'face_group' });
     return this.unitOfWork.execute(context, writeIntent('memory_studio_record', command.recordId, 'create', actor.value), (scope) => {
       const prior = scope.findMutation(command.clientOperationId); if (!prior.ok) return prior;
       const replayed = replay(context, prior.value, requestFingerprint, 'record_create', 'memory_studio_record', command.recordId);
@@ -268,9 +299,12 @@ export class DeleteMemoryStudioRecordUseCase {
   public async execute(input: { readonly context: LifeApplicationContext; readonly command: DeleteMemoryStudioRecordInput })
   : Promise<Result<MemoryStudioMutationReceiptView, AppError>> {
     const { context, command } = input; const actor = requireActor(context); if (!actor.ok) return actor;
+    if (!exactRecord(command, ['clientOperationId', 'recordId', 'expectedRevision']))
+      return err(invalid(context, 'Hafıza kaydı silme komutu yalnız izin verilen alanları taşımalıdır.'));
     if (!SAFE_ID.test(command.clientOperationId) || !SAFE_ID.test(command.recordId) || !Number.isSafeInteger(command.expectedRevision) || command.expectedRevision < 1)
       return err(invalid(context, 'Hafıza kaydı silme komutu geçersizdir.'));
-    const requestFingerprint = hash(command);
+    const requestFingerprint = hash({ clientOperationId: command.clientOperationId, recordId: command.recordId,
+      expectedRevision: command.expectedRevision });
     return this.unitOfWork.execute(context, writeIntent('memory_studio_record', command.recordId, 'delete'), (scope) => {
       const prior = scope.findMutation(command.clientOperationId); if (!prior.ok) return prior;
       const replayed = replay(context, prior.value, requestFingerprint, 'record_delete', 'memory_studio_record', command.recordId);
@@ -279,6 +313,8 @@ export class DeleteMemoryStudioRecordUseCase {
       if (!current.value) return err(missing(context, 'Hafıza kaydı bulunamadı.'));
       if (current.value.revision !== command.expectedRevision || current.value.status !== 'active')
         return err(conflict(context, 'Hafıza kaydı sürümü veya durumu değişti.'));
+      if (Date.parse(scope.occurredAt) < Date.parse(current.value.updatedAt))
+        return err(conflict(context, 'Hafıza kaydı zamanı son kalıcı durumdan geriye gidemez.'));
       const occurredAt = asIsoDateTime(scope.occurredAt); const revision = current.value.revision + 1;
       const id = mutationId(context, command.clientOperationId, requestFingerprint);
       const base: Omit<MemoryStudioRecordRow, 'stateFingerprint'> = { ...current.value, status: 'deleted', revision,
@@ -300,6 +336,8 @@ export class CreateMemoryTimeCapsuleUseCase {
   public async execute(input: { readonly context: LifeApplicationContext; readonly command: CreateMemoryTimeCapsuleInput })
   : Promise<Result<MemoryStudioMutationReceiptView, AppError>> {
     const { context, command } = input; const actor = requireActor(context); if (!actor.ok) return actor;
+    if (!exactRecord(command, ['clientOperationId', 'capsuleId', 'title', 'unlockAt'], ['archiveItemIds', 'memoryRecordIds']))
+      return err(invalid(context, 'Zaman kapsülü oluşturma komutu yalnız izin verilen alanları taşımalıdır.'));
     if (!SAFE_ID.test(command.clientOperationId) || !SAFE_ID.test(command.capsuleId))
       return err(invalid(context, 'Zaman kapsülü işlem veya kapsül kimliği geçersizdir.'));
     const title = normalizeText(context, command.title, 'Başlık', 2, 160); if (!title.ok) return title;
@@ -310,15 +348,16 @@ export class CreateMemoryTimeCapsuleUseCase {
     const unlock = date(context, command.unlockAt, 'Açılma'); if (!unlock.ok) return unlock;
     const references = canonicalMemoryStudioReferences({ archiveItemIds: archiveItemIds.value, personIds: [],
       memoryRecordIds: memoryRecordIds.value });
-    const requestFingerprint = hash({ ...command, title: title.value, archiveItemIds: references.archiveItemIds,
-      memoryRecordIds: references.memoryRecordIds, unlockAt: unlock.value });
+    const requestFingerprint = hash({ clientOperationId: command.clientOperationId, capsuleId: command.capsuleId,
+      title: title.value, archiveItemIds: references.archiveItemIds, memoryRecordIds: references.memoryRecordIds,
+      unlockAt: unlock.value });
     return this.unitOfWork.execute(context, writeIntent('memory_time_capsule', command.capsuleId, 'create', actor.value), (scope) => {
-      const now = Date.parse(scope.occurredAt); const unlockAt = Date.parse(unlock.value);
-      if (unlockAt < now + 7 * 86_400_000 || unlockAt > now + 100 * 365.25 * 86_400_000)
-        return err(invalid(context, 'Zaman kapsülü açılma tarihi en az 7 gün ve en çok 100 yıl ileride olmalıdır.'));
       const prior = scope.findMutation(command.clientOperationId); if (!prior.ok) return prior;
       const replayed = replay(context, prior.value, requestFingerprint, 'capsule_create', 'memory_time_capsule', command.capsuleId);
       if (!replayed.ok || replayed.value) return replayed.ok ? ok(replayed.value!) : replayed;
+      const now = Date.parse(scope.occurredAt); const unlockAt = Date.parse(unlock.value);
+      if (unlockAt < now + 7 * 86_400_000 || unlockAt > addUtcYears(now, 100))
+        return err(invalid(context, 'Zaman kapsülü açılma tarihi en az 7 gün ve en çok 100 yıl ileride olmalıdır.'));
       const current = scope.findCapsule(command.capsuleId); if (!current.ok) return current;
       if (current.value) return err(conflict(context, 'Zaman kapsülü kimliği zaten kullanılıyor.'));
       const validReferences = scope.validateOwnedReferences(references); if (!validReferences.ok) return validReferences;
@@ -346,11 +385,14 @@ export class ReviewMemoryTimeCapsuleUseCase {
   public async execute(input: { readonly context: LifeApplicationContext; readonly command: ReviewMemoryTimeCapsuleInput })
   : Promise<Result<MemoryStudioMutationReceiptView, AppError>> {
     const { context, command } = input; const actor = requireActor(context); if (!actor.ok) return actor;
+    if (!exactRecord(command, ['clientOperationId', 'capsuleId', 'expectedRevision', 'decision']))
+      return err(invalid(context, 'Zaman kapsülü onay komutu yalnız izin verilen alanları taşımalıdır.'));
     if (!SAFE_ID.test(command.clientOperationId) || !SAFE_ID.test(command.capsuleId) || !Number.isSafeInteger(command.expectedRevision) ||
       command.expectedRevision < 1 || !['approve', 'revoke_approval'].includes(command.decision))
       return err(invalid(context, 'Zaman kapsülü onay komutu geçersizdir.'));
     const mutationKind: MemoryStudioMutationKind = command.decision === 'approve' ? 'capsule_approve' : 'capsule_revoke_approval';
-    const requestFingerprint = hash(command);
+    const requestFingerprint = hash({ clientOperationId: command.clientOperationId, capsuleId: command.capsuleId,
+      expectedRevision: command.expectedRevision, decision: command.decision });
     return this.unitOfWork.execute(context, writeIntent('memory_time_capsule', command.capsuleId, 'update'), (scope) => {
       const prior = scope.findMutation(command.clientOperationId); if (!prior.ok) return prior;
       const replayed = replay(context, prior.value, requestFingerprint, mutationKind, 'memory_time_capsule', command.capsuleId);
@@ -359,6 +401,8 @@ export class ReviewMemoryTimeCapsuleUseCase {
       if (!current.value) return err(missing(context, 'Zaman kapsülü bulunamadı.'));
       if (current.value.revision !== command.expectedRevision || current.value.status !== 'awaiting_approvals')
         return err(conflict(context, 'Yalnız onay bekleyen güncel kapsülün onayları değiştirilebilir.'));
+      if (Date.parse(scope.occurredAt) < Date.parse(current.value.updatedAt))
+        return err(conflict(context, 'Zaman kapsülü zamanı son kalıcı durumdan geriye gidemez.'));
       const own = current.value.approvals.find((approval) => approval.accountId === context.actor.userId);
       if (command.decision === 'approve' && own) return err(conflict(context, 'Bu hesap kapsülü daha önce onayladı.'));
       if (command.decision === 'revoke_approval' && !own) return err(conflict(context, 'Bu hesabın geri alınacak kapsül onayı yok.'));
@@ -387,12 +431,15 @@ export class TransitionMemoryTimeCapsuleUseCase {
   public async execute(input: { readonly context: LifeApplicationContext; readonly command: TransitionMemoryTimeCapsuleInput })
   : Promise<Result<MemoryStudioMutationReceiptView, AppError>> {
     const { context, command } = input; const actor = requireActor(context); if (!actor.ok) return actor;
+    if (!exactRecord(command, ['clientOperationId', 'capsuleId', 'expectedRevision', 'transition']))
+      return err(invalid(context, 'Zaman kapsülü geçiş komutu yalnız izin verilen alanları taşımalıdır.'));
     if (!SAFE_ID.test(command.clientOperationId) || !SAFE_ID.test(command.capsuleId) || !Number.isSafeInteger(command.expectedRevision) ||
       command.expectedRevision < 1 || !['seal', 'release', 'cancel', 'rollback'].includes(command.transition))
       return err(invalid(context, 'Zaman kapsülü geçiş komutu geçersizdir.'));
     const mutationKind = `capsule_${command.transition}` as MemoryStudioMutationKind;
     const action = command.transition === 'cancel' ? 'delete' as const : 'update' as const;
-    const requestFingerprint = hash(command);
+    const requestFingerprint = hash({ clientOperationId: command.clientOperationId, capsuleId: command.capsuleId,
+      expectedRevision: command.expectedRevision, transition: command.transition });
     return this.unitOfWork.execute(context, writeIntent('memory_time_capsule', command.capsuleId, action), (scope) => {
       const prior = scope.findMutation(command.clientOperationId); if (!prior.ok) return prior;
       const replayed = replay(context, prior.value, requestFingerprint, mutationKind, 'memory_time_capsule', command.capsuleId);
@@ -400,6 +447,15 @@ export class TransitionMemoryTimeCapsuleUseCase {
       const current = scope.findCapsule(command.capsuleId); if (!current.ok) return current;
       if (!current.value) return err(missing(context, 'Zaman kapsülü bulunamadı.'));
       if (current.value.revision !== command.expectedRevision) return err(conflict(context, 'Zaman kapsülü sürümü değişti.'));
+      if (Date.parse(scope.occurredAt) < Date.parse(current.value.updatedAt))
+        return err(conflict(context, 'Zaman kapsülü zamanı son kalıcı durumdan geriye gidemez.'));
+      if (command.transition === 'seal' || command.transition === 'release') {
+        const references = canonicalMemoryStudioReferences({ archiveItemIds: current.value.archiveItemIds, personIds: [],
+          memoryRecordIds: current.value.memoryRecordIds });
+        const validReferences = scope.validateOwnedReferences(references); if (!validReferences.ok) return validReferences;
+        if (!validReferences.value) return err(denied(context,
+          'Zaman kapsülü yalnız hâlâ mevcut ve aynı sahipteki korunan kaynaklarla mühürlenebilir veya açılabilir.'));
+      }
       const occurredAt = asIsoDateTime(scope.occurredAt); const now = Date.parse(occurredAt);
       let status: MemoryTimeCapsuleRow['status'];
       const timestamps: Record<string, ReturnType<typeof asIsoDateTime>> = {};
@@ -416,7 +472,8 @@ export class TransitionMemoryTimeCapsuleUseCase {
           return err(conflict(context, 'Yalnız açılmamış zaman kapsülü iptal edilebilir.'));
         status = 'cancelled'; timestamps.cancelledAt = occurredAt;
       } else {
-        if (current.value.status !== 'released' || !current.value.releasedAt || now > Date.parse(current.value.releasedAt) + 86_400_000)
+        if (current.value.status !== 'released' || !current.value.releasedAt || now < Date.parse(current.value.releasedAt)
+          || now > Date.parse(current.value.releasedAt) + 86_400_000)
           return err(denied(context, 'Yerel kapsül açılışı yalnız ilk 24 saat içinde geri alınabilir.'));
         status = 'rolled_back'; timestamps.rolledBackAt = occurredAt;
       }

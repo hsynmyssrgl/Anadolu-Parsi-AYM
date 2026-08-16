@@ -5,8 +5,8 @@
   "status": "PASS",
   "governanceState": "PLANNED",
   "countsAsRequirementPass": false,
-  "checkCount": 12,
-  "passed": 12,
+  "checkCount": 15,
+  "passed": 15,
   "failed": 0,
   "checks": [
     {
@@ -18,7 +18,7 @@
       "status": "PASS"
     },
     {
-      "name": "domain fixes fourteen record kinds and fail-honest truth",
+      "name": "domain fixes fourteen record kinds bounded capacity and fail-honest truth",
       "status": "PASS"
     },
     {
@@ -30,7 +30,11 @@
       "status": "PASS"
     },
     {
-      "name": "repository uses exact receipt fence and owner-bound references",
+      "name": "application canonicalizes replay and rejects time rollback or stale transition sources",
+      "status": "PASS"
+    },
+    {
+      "name": "repository uses exact receipt fence owner-bound references strict approvals and capacity",
       "status": "PASS"
     },
     {
@@ -46,7 +50,11 @@
       "status": "PASS"
     },
     {
-      "name": "renderer states manual local no-delivery truth",
+      "name": "IPC returns capacity and current-account approval truth without approval identities",
+      "status": "PASS"
+    },
+    {
+      "name": "renderer states manual local no-delivery truth and preserves failed retry input",
       "status": "PASS"
     },
     {
@@ -54,9 +62,13 @@
       "status": "PASS"
     },
     {
+      "name": "retention approval discovery and continuous historical authorization remain explicitly open",
+      "status": "PASS"
+    },
+    {
       "name": "manual evidence persistent receipt and requirement acceptance remain closed",
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-16T05:50:49.196Z"
+  "generatedAt": "2026-08-16T10:31:05.445Z"
 }

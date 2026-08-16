@@ -14319,14 +14319,16 @@ CREATE TABLE memory_studio_mutations (
   family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   resource_type TEXT NOT NULL CHECK(resource_type IN ('memory_studio_record','memory_time_capsule')),
-  resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 2 AND 256),
+  resource_id TEXT NOT NULL CHECK(length(trim(resource_id)) BETWEEN 2 AND 160
+    AND substr(resource_id,1,1) GLOB '[A-Za-z0-9]' AND resource_id NOT GLOB '*[^A-Za-z0-9._:-]*'),
   actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
   actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   mutation_kind TEXT NOT NULL CHECK(mutation_kind IN (
     'record_create','record_delete','capsule_create','capsule_approve','capsule_revoke_approval',
     'capsule_seal','capsule_release','capsule_cancel','capsule_rollback'
   )),
-  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 256),
+  client_operation_id TEXT NOT NULL CHECK(length(trim(client_operation_id)) BETWEEN 2 AND 160
+    AND substr(client_operation_id,1,1) GLOB '[A-Za-z0-9]' AND client_operation_id NOT GLOB '*[^A-Za-z0-9._:-]*'),
   request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
   expected_revision INTEGER NOT NULL CHECK(expected_revision>=0),
   revision INTEGER NOT NULL CHECK(revision=expected_revision+1),
@@ -14356,7 +14358,8 @@ CREATE INDEX idx_memory_studio_mutations_owner
 ON memory_studio_mutations(family_id,owner_person_id,occurred_at DESC,id);
 
 CREATE TABLE memory_studio_records (
-  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 256),
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 160
+    AND substr(id,1,1) GLOB '[A-Za-z0-9]' AND id NOT GLOB '*[^A-Za-z0-9._:-]*'),
   family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   kind TEXT NOT NULL CHECK(kind IN ('voice_story','transcript','photo_book','annual_album','on_this_day',
@@ -14369,8 +14372,10 @@ CREATE TABLE memory_studio_records (
     AND json_array_length(archive_item_ids_json) BETWEEN 0 AND 32 AND length(archive_item_ids_json)<=8192),
   person_ids_json TEXT NOT NULL CHECK(json_valid(person_ids_json) AND json_type(person_ids_json)='array'
     AND json_array_length(person_ids_json) BETWEEN 0 AND 32 AND length(person_ids_json)<=8192),
-  ocr_job_id TEXT,
-  event_date TEXT CHECK(event_date IS NULL OR (length(event_date)=24 AND julianday(event_date) IS NOT NULL)),
+  ocr_job_id TEXT CHECK(ocr_job_id IS NULL OR (length(ocr_job_id) BETWEEN 2 AND 160
+    AND substr(ocr_job_id,1,1) GLOB '[A-Za-z0-9]' AND ocr_job_id NOT GLOB '*[^A-Za-z0-9._:-]*')),
+  event_date TEXT CHECK(event_date IS NULL OR (length(event_date)=24
+    AND event_date GLOB '????-??-??T??:??:??.???Z' AND julianday(event_date) IS NOT NULL)),
   manual_face_grouping_approved INTEGER NOT NULL CHECK(manual_face_grouping_approved IN (0,1)),
   reference_fingerprint TEXT NOT NULL CHECK(length(reference_fingerprint)=64 AND reference_fingerprint NOT GLOB '*[^0-9a-f]*'),
   revision INTEGER NOT NULL CHECK(revision>=1),
@@ -14393,7 +14398,8 @@ CREATE INDEX idx_memory_studio_records_owner
 ON memory_studio_records(family_id,owner_person_id,updated_at DESC,id);
 
 CREATE TABLE memory_time_capsules (
-  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 256),
+  id TEXT PRIMARY KEY CHECK(length(trim(id)) BETWEEN 2 AND 160
+    AND substr(id,1,1) GLOB '[A-Za-z0-9]' AND id NOT GLOB '*[^A-Za-z0-9._:-]*'),
   family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   owner_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   title TEXT NOT NULL CHECK(length(trim(title)) BETWEEN 2 AND 160),
@@ -14477,8 +14483,26 @@ WHEN NOT EXISTS(
 )
 OR EXISTS(SELECT 1 FROM json_each(NEW.archive_item_ids_json) value WHERE typeof(value.value)<>'text')
 OR EXISTS(SELECT 1 FROM json_each(NEW.person_ids_json) value WHERE typeof(value.value)<>'text')
+OR EXISTS(SELECT 1 FROM json_each(NEW.archive_item_ids_json) value
+  WHERE length(value.value) NOT BETWEEN 2 AND 160 OR substr(value.value,1,1) NOT GLOB '[A-Za-z0-9]'
+    OR value.value GLOB '*[^A-Za-z0-9._:-]*')
+OR EXISTS(SELECT 1 FROM json_each(NEW.person_ids_json) value
+  WHERE length(value.value) NOT BETWEEN 2 AND 160 OR substr(value.value,1,1) NOT GLOB '[A-Za-z0-9]'
+    OR value.value GLOB '*[^A-Za-z0-9._:-]*')
 OR (SELECT count(*) FROM json_each(NEW.archive_item_ids_json))<>(SELECT count(DISTINCT value) FROM json_each(NEW.archive_item_ids_json))
 OR (SELECT count(*) FROM json_each(NEW.person_ids_json))<>(SELECT count(DISTINCT value) FROM json_each(NEW.person_ids_json))
+OR EXISTS(SELECT 1 FROM json_each(NEW.archive_item_ids_json) reference WHERE NOT EXISTS(
+  SELECT 1 FROM archive_items item JOIN platform_policy_transaction_receipts receipt
+    ON receipt.receipt_hash=item.policy_receipt_hash
+  WHERE item.id=reference.value AND item.family_id=NEW.family_id AND item.destroyed_at IS NULL
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id))
+OR EXISTS(SELECT 1 FROM json_each(NEW.person_ids_json) reference WHERE NOT EXISTS(
+  SELECT 1 FROM people person WHERE person.id=reference.value AND person.family_id=NEW.family_id AND person.status='active'))
+OR (NEW.ocr_job_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM local_governed_ocr_jobs job
+  WHERE job.id=NEW.ocr_job_id AND job.family_id=NEW.family_id AND job.owner_person_id=NEW.owner_person_id
+    AND job.status<>'deleted'))
+OR (SELECT count(*) FROM memory_studio_records
+  WHERE family_id=NEW.family_id AND owner_person_id=NEW.owner_person_id)>=500
 BEGIN SELECT RAISE(ABORT,'33-X memory record requires exact mutation and canonical references'); END;
 
 CREATE TRIGGER trg_33x_memory_record_update
@@ -14489,7 +14513,7 @@ WHEN NEW.id IS NOT OLD.id OR NEW.family_id IS NOT OLD.family_id OR NEW.owner_per
   OR NEW.ocr_job_id IS NOT OLD.ocr_job_id OR NEW.event_date IS NOT OLD.event_date
   OR NEW.manual_face_grouping_approved IS NOT OLD.manual_face_grouping_approved
   OR NEW.reference_fingerprint IS NOT OLD.reference_fingerprint OR NEW.created_at IS NOT OLD.created_at
-  OR NEW.revision<>OLD.revision+1
+  OR NEW.revision<>OLD.revision+1 OR NEW.updated_at<OLD.updated_at
   OR NOT EXISTS(SELECT 1 FROM memory_studio_mutations mutation
     WHERE mutation.id=NEW.last_mutation_id AND mutation.resource_type='memory_studio_record' AND mutation.resource_id=NEW.id
       AND mutation.family_id=NEW.family_id AND mutation.owner_person_id=NEW.owner_person_id
@@ -14514,6 +14538,24 @@ WHEN NOT EXISTS(SELECT 1 FROM memory_studio_mutations mutation
     AND json_array_length(NEW.approvals_json)=0)
 OR EXISTS(SELECT 1 FROM json_each(NEW.archive_item_ids_json) value WHERE typeof(value.value)<>'text')
 OR EXISTS(SELECT 1 FROM json_each(NEW.memory_record_ids_json) value WHERE typeof(value.value)<>'text')
+OR EXISTS(SELECT 1 FROM json_each(NEW.archive_item_ids_json) value
+  WHERE length(value.value) NOT BETWEEN 2 AND 160 OR substr(value.value,1,1) NOT GLOB '[A-Za-z0-9]'
+    OR value.value GLOB '*[^A-Za-z0-9._:-]*')
+OR EXISTS(SELECT 1 FROM json_each(NEW.memory_record_ids_json) value
+  WHERE length(value.value) NOT BETWEEN 2 AND 160 OR substr(value.value,1,1) NOT GLOB '[A-Za-z0-9]'
+    OR value.value GLOB '*[^A-Za-z0-9._:-]*')
+OR (SELECT count(*) FROM json_each(NEW.archive_item_ids_json))<>(SELECT count(DISTINCT value) FROM json_each(NEW.archive_item_ids_json))
+OR (SELECT count(*) FROM json_each(NEW.memory_record_ids_json))<>(SELECT count(DISTINCT value) FROM json_each(NEW.memory_record_ids_json))
+OR EXISTS(SELECT 1 FROM json_each(NEW.archive_item_ids_json) reference WHERE NOT EXISTS(
+  SELECT 1 FROM archive_items item JOIN platform_policy_transaction_receipts receipt
+    ON receipt.receipt_hash=item.policy_receipt_hash
+  WHERE item.id=reference.value AND item.family_id=NEW.family_id AND item.destroyed_at IS NULL
+    AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id))
+OR EXISTS(SELECT 1 FROM json_each(NEW.memory_record_ids_json) reference WHERE NOT EXISTS(
+  SELECT 1 FROM memory_studio_records record WHERE record.id=reference.value AND record.family_id=NEW.family_id
+    AND record.owner_person_id=NEW.owner_person_id AND record.status='active'))
+OR (SELECT count(*) FROM memory_time_capsules
+  WHERE family_id=NEW.family_id AND owner_person_id=NEW.owner_person_id)>=200
 BEGIN SELECT RAISE(ABORT,'33-X time capsule requires exact mutation and bounded references'); END;
 
 CREATE TRIGGER trg_33x_capsule_update
@@ -14522,11 +14564,20 @@ WHEN NEW.id IS NOT OLD.id OR NEW.family_id IS NOT OLD.family_id OR NEW.owner_per
   OR NEW.title IS NOT OLD.title OR NEW.archive_item_ids_json IS NOT OLD.archive_item_ids_json
   OR NEW.memory_record_ids_json IS NOT OLD.memory_record_ids_json OR NEW.unlock_at IS NOT OLD.unlock_at
   OR NEW.minimum_approvals IS NOT OLD.minimum_approvals OR NEW.reference_fingerprint IS NOT OLD.reference_fingerprint
-  OR NEW.created_at IS NOT OLD.created_at OR NEW.revision<>OLD.revision+1
+  OR NEW.created_at IS NOT OLD.created_at OR NEW.revision<>OLD.revision+1 OR NEW.updated_at<OLD.updated_at
   OR (SELECT count(*) FROM json_each(NEW.approvals_json))<>(SELECT count(DISTINCT json_extract(value,'$.accountId')) FROM json_each(NEW.approvals_json))
   OR EXISTS(SELECT 1 FROM json_each(NEW.approvals_json) approval
-    WHERE json_type(approval.value)<>'object' OR typeof(json_extract(approval.value,'$.accountId'))<>'text'
+    WHERE json_type(approval.value)<>'object' OR (SELECT count(*) FROM json_each(approval.value))<>3
+      OR typeof(json_extract(approval.value,'$.accountId'))<>'text'
       OR typeof(json_extract(approval.value,'$.personId'))<>'text' OR julianday(json_extract(approval.value,'$.approvedAt')) IS NULL
+      OR length(json_extract(approval.value,'$.accountId')) NOT BETWEEN 2 AND 160
+      OR substr(json_extract(approval.value,'$.accountId'),1,1) NOT GLOB '[A-Za-z0-9]'
+      OR json_extract(approval.value,'$.accountId') GLOB '*[^A-Za-z0-9._:-]*'
+      OR length(json_extract(approval.value,'$.personId')) NOT BETWEEN 2 AND 160
+      OR substr(json_extract(approval.value,'$.personId'),1,1) NOT GLOB '[A-Za-z0-9]'
+      OR json_extract(approval.value,'$.personId') GLOB '*[^A-Za-z0-9._:-]*'
+      OR length(json_extract(approval.value,'$.approvedAt'))<>24
+      OR json_extract(approval.value,'$.approvedAt') NOT GLOB '????-??-??T??:??:??.???Z'
       OR NOT EXISTS(SELECT 1 FROM accounts account JOIN people person ON person.id=account.person_id
         WHERE account.id=json_extract(approval.value,'$.accountId') AND person.id=json_extract(approval.value,'$.personId')
           AND account.status='active' AND person.status='active' AND person.family_id=NEW.family_id))
@@ -14562,7 +14613,17 @@ WHEN NEW.id IS NOT OLD.id OR NEW.family_id IS NOT OLD.family_id OR NEW.owner_per
         OR (mutation.mutation_kind='capsule_cancel' AND OLD.status IN ('awaiting_approvals','sealed') AND NEW.status='cancelled'
           AND NEW.cancelled_at=NEW.updated_at)
         OR (mutation.mutation_kind='capsule_rollback' AND OLD.status='released' AND NEW.status='rolled_back'
+          AND julianday(NEW.updated_at)>=julianday(OLD.released_at)
           AND julianday(NEW.updated_at)<=julianday(OLD.released_at,'+1 day') AND NEW.rolled_back_at=NEW.updated_at)))
+  OR (NEW.status IN ('sealed','released') AND (
+    EXISTS(SELECT 1 FROM json_each(NEW.archive_item_ids_json) reference WHERE NOT EXISTS(
+      SELECT 1 FROM archive_items item JOIN platform_policy_transaction_receipts receipt
+        ON receipt.receipt_hash=item.policy_receipt_hash
+      WHERE item.id=reference.value AND item.family_id=NEW.family_id AND item.destroyed_at IS NULL
+        AND json_extract(receipt.record_json,'$.request.resource.ownerPersonId')=NEW.owner_person_id))
+    OR EXISTS(SELECT 1 FROM json_each(NEW.memory_record_ids_json) reference WHERE NOT EXISTS(
+      SELECT 1 FROM memory_studio_records record WHERE record.id=reference.value AND record.family_id=NEW.family_id
+        AND record.owner_person_id=NEW.owner_person_id AND record.status='active'))))
 BEGIN SELECT RAISE(ABORT,'33-X time capsule update requires exact approval, waiting and rollback mutation'); END;
 
 CREATE TRIGGER trg_33x_memory_record_delete

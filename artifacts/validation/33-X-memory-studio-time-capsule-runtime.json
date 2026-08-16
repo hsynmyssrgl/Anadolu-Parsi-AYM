@@ -6,8 +6,8 @@
   "governanceState": "PLANNED",
   "countsAsRequirementPass": false,
   "targetedTestFilesPassed": 5,
-  "targetedTestsPassed": 21,
-  "migration102Sha256": "cb719e825fde1269af44900d4ab66d1fa6a550e7cfe1695535a6e4e5c7cceafa",
+  "targetedTestsPassed": 28,
+  "migration102Sha256": "0a3313d1e74c92a22202051ccd2032a4b8a62e7079e93083a6f0d1aa706ac04e",
   "ppk021": {
     "status": "PASS",
     "productionSourceZones": 18,
@@ -54,8 +54,8 @@
     "protectedCapabilityFamilies": 7,
     "findings": []
   },
-  "checkCount": 10,
-  "passed": 10,
+  "checkCount": 11,
+  "passed": 11,
   "failed": 0,
   "checks": [
     {
@@ -63,7 +63,7 @@
       "status": "PASS"
     },
     {
-      "name": "local test result meets exact 5/21 ratchet",
+      "name": "local test result meets exact 5/28 ratchet",
       "status": "PASS"
     },
     {
@@ -95,9 +95,13 @@
       "status": "PASS"
     },
     {
+      "name": "capacity retention approval discovery and historical authorization truth stay fail honest",
+      "status": "PASS"
+    },
+    {
       "name": "manual evidence receipt and acceptance remain closed",
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-16T05:51:25.868Z"
+  "generatedAt": "2026-08-16T10:31:51.722Z"
 }

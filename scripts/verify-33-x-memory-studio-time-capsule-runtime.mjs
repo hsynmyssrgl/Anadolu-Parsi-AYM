@@ -35,7 +35,7 @@ const registryItems=requirements.map((id)=>registry.requirements?.find((item)=>i
 const manual=Object.entries(scope.manualEvidence??{}).filter(([key])=>key!=='certificationClaimed').every(([,value])=>value==='NOT_RUN');
 const definitions=[
   ['exact five-file local Vitest exits successfully',vitest.status===0&&vitest.signal===null],
-  ['local test result meets exact 5/21 ratchet',files===5&&tests===21&&scope.validation.targetedTestFileRatchet===5&&scope.validation.targetedTestRatchet===21&&inventory.validation.targetedTestRatchet===21],
+  ['local test result meets exact 5/28 ratchet',files===5&&tests===28&&scope.validation.targetedTestFileRatchet===5&&scope.validation.targetedTestRatchet===28&&inventory.validation.targetedTestRatchet===28],
   ['migration verifier passes exact migration 102 checksum',migration.status===0&&migrationReport?.status==='passed'&&migrationReport?.checkCount===9&&m102?.name==='memory_studio_time_capsule'&&m102?.checksum===scope.validation.migrationSha256],
   ['data store smoke includes migration 102 and reaches the current migration head',smoke.status===0&&smokeReport?.status==='passed'&&smokeReport?.migrationVersions?.includes(102)&&smokeReport?.migrationVersions?.at(-1)===latestMigrationVersion],
   ['PPK-021 raw gate matches scope ratchet',gate21.status===0&&p21?.status==='PASS'&&p21?.scannedFiles===scope.validation.ppk021.scannedProductionFiles&&p21?.privilegedSurfaces===scope.validation.ppk021.exactPrivilegedSurfaceCount&&p21?.exactAllowlistSha256===scope.validation.ppk021.exactAllowlistSha256],
@@ -43,6 +43,7 @@ const definitions=[
   ['all package and desktop typechecks pass',Object.values(types).every((result)=>result.status===0)],
   ['33-X remains planned behind exact dependencies while 33-P stays active',roadmapItem?.status==='PLANNED'&&JSON.stringify(roadmapItem.dependsOn)===JSON.stringify(dependencies)&&plan.currentStep==='33-P'&&ledger.activeMicroStep==='33-P'&&registryItems.every((item)=>item&&item.status!=='COMPLETE'&&item.chain?.evidence===false)],
   ['automation rendering print network cloud and delivery truth remain closed',scope.truth.localOnly===true&&scope.truth.transcriptionPerformed===false&&scope.truth.faceRecognitionPerformed===false&&scope.truth.duplicateDetectionPerformed===false&&scope.truth.documentaryRendered===false&&scope.truth.printableBookRendered===false&&scope.truth.printingPerformed===false&&scope.truth.networkUsed===false&&scope.truth.cloudUsed===false&&scope.truth.externalDeliveryPerformed==='not_performed'],
+  ['capacity retention approval discovery and historical authorization truth stay fail honest',scope.truth.boundedStorageCapacityEnforced===true&&scope.truth.rendererApprovalIdentitiesExposed===false&&scope.truth.terminalRetentionAndCapacityRecoveryImplemented===false&&scope.truth.familyApprovalInboxImplemented===false&&scope.truth.historicalReferenceAuthorizationContinuouslyRevalidated===false],
   ['manual evidence receipt and acceptance remain closed',manual&&scope.manualEvidence.certificationClaimed===false&&scope.validation.countsAsRequirementPass===false&&inventory.validation.countsAsRequirementPass===false&&scope.persistentReceiptStatus==='NOT_RUN']
 ];
 const checks=definitions.map(([name,passed])=>({name,status:passed?'PASS':'FAIL'}));

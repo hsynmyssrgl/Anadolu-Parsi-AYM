@@ -8,11 +8,17 @@ const receipt={resourceType:'memory_studio_record',resourceId:'record-33-x',muta
   revision:1,occurredAt:NOW,replayed:false,networkUsed:false,cloudUsed:false,externalDeliveryPerformed:'not_performed'};
 const center={schemaVersion:1,centerId:'memory-studio:family:person',ownerPersonId:'person-owner',records:[{id:'record-33-x',
   ownerPersonId:'person-owner',kind:'recipe',status:'active',title:'Aile tarifi',summary:'Yerel kullanıcı açıklaması',
-  archiveItemIds:[],personIds:[],manualFaceGroupingApproved:false,revision:1,createdAt:NOW,updatedAt:NOW}],capsules:[],
+  archiveItemIds:[],personIds:[],manualFaceGroupingApproved:false,revision:1,createdAt:NOW,updatedAt:NOW}],capsules:[{
+  id:'capsule-33-x',ownerPersonId:'person-owner',title:'Geleceğe mesaj',status:'awaiting_approvals',archiveItemIds:[],
+  memoryRecordIds:['record-33-x'],unlockAt:'2026-08-23T12:00:00.000Z',minimumApprovals:2,approvalCount:1,
+  currentAccountApprovalRecorded:true,revision:2,createdAt:NOW,updatedAt:NOW}],storageCapacity:{
+  records:{maximum:500,used:1,remaining:499,limitReached:false},
+  capsules:{maximum:200,used:1,remaining:199,limitReached:false}},
   truth:{localOnly:true,linkedArchiveContentRemainsProtected:true,newBinaryPayloadStored:false,transcriptionPerformed:false,
     faceRecognitionPerformed:false,duplicateDetectionPerformed:false,documentaryRendered:false,printableBookRendered:false,
     printingPerformed:false,networkUsed:false,cloudUsed:false,manualCurationOnly:true,manualFaceGroupingOnly:true,
-    minimumCapsuleApprovals:2,waitingPeriodEnforced:true,externalDeliveryPerformed:'not_performed'},generatedAt:NOW};
+    minimumCapsuleApprovals:2,waitingPeriodEnforced:true,sourceReferencesRevalidatedAtSealAndRelease:true,
+    monotonicStateTimeEnforced:true,externalDeliveryPerformed:'not_performed'},generatedAt:NOW};
 
 describe('33-X memory studio IPC boundary',()=>{
   it('accepts the six exact renderer commands and rejects unknown or extra authority fields',()=>{
@@ -33,11 +39,25 @@ describe('33-X memory studio IPC boundary',()=>{
   });
 
   it('rejects paths, secrets, prototypes and oversized manual text recursively',()=>{
-    const base={clientOperationId:'operation-33-x',recordId:'record-33-x',kind:'letter',title:'Mektup'};
+    const base={clientOperationId:'operation-33-x',recordId:'record-33-x',kind:'letter',title:'Mektup',summary:'Yerel mektup özeti'};
     for(const extra of [{path:'C:\\secret.txt'},{token:'secret-token'},{summary:'x'.repeat(2001)}])
       expect(evaluateIpcIntegrationPolicy(MEMORY_STUDIO_IPC_CHANNELS.createRecord,[{...base,...extra}]).accepted).toBe(false);
     const polluted=Object.create({admin:true}) as Record<string,unknown>;Object.assign(polluted,base);
     expect(evaluateIpcIntegrationPolicy(MEMORY_STUDIO_IPC_CHANNELS.createRecord,[polluted]).accepted).toBe(false);
+    const accessor={...base};Object.defineProperty(accessor,'summary',{get:()=> 'gizli',enumerable:true});
+    expect(evaluateIpcIntegrationPolicy(MEMORY_STUDIO_IPC_CHANNELS.createRecord,[accessor]).accepted).toBe(false);
+  });
+
+  it('rejects semantically incomplete records, empty capsules and oversized identifiers',()=>{
+    expect(evaluateIpcIntegrationPolicy(MEMORY_STUDIO_IPC_CHANNELS.createRecord,[{clientOperationId:'operation-face-33-x',
+      recordId:'face-33-x',kind:'face_group',title:'Aile yüz grubu',archiveItemIds:['archive-33-x'],
+      personIds:['person-33-x']}]).accepted).toBe(false);
+    expect(evaluateIpcIntegrationPolicy(MEMORY_STUDIO_IPC_CHANNELS.createRecord,[{clientOperationId:'operation-transcript-33-x',
+      recordId:'transcript-33-x',kind:'transcript',title:'Yerel transkript',summary:'Kaynağı olmayan metin'}]).accepted).toBe(false);
+    expect(evaluateIpcIntegrationPolicy(MEMORY_STUDIO_IPC_CHANNELS.createCapsule,[{clientOperationId:'operation-empty-33-x',
+      capsuleId:'capsule-empty-33-x',title:'Boş kapsül',unlockAt:'2026-08-23T12:00:00.000Z'}]).accepted).toBe(false);
+    expect(evaluateIpcIntegrationPolicy(MEMORY_STUDIO_IPC_CHANNELS.deleteRecord,[{clientOperationId:`x${'a'.repeat(160)}`,
+      recordId:'record-33-x',expectedRevision:1}]).accepted).toBe(false);
   });
 
   it('accepts exact safe center and receipt results but rejects leaked hashes or receipt authority',()=>{
@@ -45,6 +65,13 @@ describe('33-X memory studio IPC boundary',()=>{
     expect(evaluateIpcIntegrationResultPolicy(MEMORY_STUDIO_IPC_CHANNELS.createRecord,receipt).accepted).toBe(true);
     expect(evaluateIpcIntegrationResultPolicy(MEMORY_STUDIO_IPC_CHANNELS.getCenter,{...center,policyReceiptHash:'a'.repeat(64)}).accepted).toBe(false);
     expect(evaluateIpcIntegrationResultPolicy(MEMORY_STUDIO_IPC_CHANNELS.createRecord,{...receipt,stateFingerprint:'b'.repeat(64)}).accepted).toBe(false);
+    expect(evaluateIpcIntegrationResultPolicy(MEMORY_STUDIO_IPC_CHANNELS.getCenter,{...center,capsules:[{
+      ...center.capsules[0],approvals:[{accountId:'account-secret',personId:'person-owner',approvedAt:NOW}]}]}).accepted).toBe(false);
+    expect(evaluateIpcIntegrationResultPolicy(MEMORY_STUDIO_IPC_CHANNELS.getCenter,{...center,records:[{
+      ...center.records[0],ownerPersonId:'person-foreign'}]}).accepted).toBe(false);
+    expect(evaluateIpcIntegrationResultPolicy(MEMORY_STUDIO_IPC_CHANNELS.getCenter,{...center,capsules:[{
+      ...center.capsules[0],status:'sealed'}]}).accepted).toBe(false);
+    expect(evaluateIpcIntegrationResultPolicy(MEMORY_STUDIO_IPC_CHANNELS.createCapsule,receipt).accepted).toBe(false);
   });
 
   it('keeps reads cancellable and every durable mutation non-cancellable and rate bounded',()=>{

@@ -165,6 +165,70 @@ describe('33-X memory studio repository policy boundary', () => {
     expect((harness.runtime.database.prepare("SELECT COUNT(*) count FROM memory_studio_mutations WHERE mutation_kind='capsule_approve'").get() as { count: number }).count).toBe(0);
   });
 
+  it('rejects approval payload smuggling and backwards state time without leaving ledger rows', async () => {
+    const harness = openHarness(); const source = mutation('memory_studio_record', 'strict-source-33-x');
+    await withReceipt(harness, { action: 'create', resourceType: 'memory_studio_record', resourceId: source.resourceId }, (repo, ctx) => {
+      const ledger = repo.insertMutation(ctx, source); return ledger.ok ? repo.insertRecord(ctx, record(source)) : ledger;
+    });
+    const created = mutation('memory_time_capsule', 'strict-capsule-33-x', { id: '1'.repeat(64),
+      mutationKind: 'capsule_create', clientOperationId: 'operation-strict-capsule-create', requestFingerprint: '2'.repeat(64),
+      resourceStateFingerprint: '3'.repeat(64), referenceFingerprint: '4'.repeat(64), referenceCount: 1 });
+    await withReceipt(harness, { action: 'create', resourceType: 'memory_time_capsule', resourceId: created.resourceId },
+      (repo, ctx) => { const ledger = repo.insertMutation(ctx, created);
+        return ledger.ok ? repo.insertCapsule(ctx, capsule(created, source.resourceId)) : ledger; });
+    const smuggled = mutation('memory_time_capsule', created.resourceId, { id: '5'.repeat(64),
+      mutationKind: 'capsule_approve', clientOperationId: 'operation-smuggled-approval', requestFingerprint: '6'.repeat(64),
+      expectedRevision: 1, revision: 2, resourceStateFingerprint: '7'.repeat(64), referenceFingerprint: '4'.repeat(64), referenceCount: 1 });
+    const smuggledResult = await withReceipt(harness,
+      { action: 'update', resourceType: 'memory_time_capsule', resourceId: created.resourceId }, (repo, ctx) => {
+        const ledger = repo.insertMutation(ctx, smuggled); if (!ledger.ok) return ledger;
+        return repo.saveCapsule(ctx, capsule(smuggled, source.resourceId, { approvals: [{ accountId: ACCOUNT_A,
+          personId: OWNER, approvedAt: now, authority: 'forged' }] as never }), 1);
+      });
+    expect(smuggledResult.ok).toBe(false);
+    const approved = mutation('memory_time_capsule', created.resourceId, { id: '8'.repeat(64),
+      mutationKind: 'capsule_approve', clientOperationId: 'operation-valid-approval', requestFingerprint: '9'.repeat(64),
+      expectedRevision: 1, revision: 2, resourceStateFingerprint: 'a'.repeat(64), referenceFingerprint: '4'.repeat(64), referenceCount: 1 });
+    expect((await withReceipt(harness, { action: 'update', resourceType: 'memory_time_capsule', resourceId: created.resourceId },
+      (repo, ctx) => { const ledger = repo.insertMutation(ctx, approved); return ledger.ok ? repo.saveCapsule(ctx,
+        capsule(approved, source.resourceId, { approvals: [{ accountId: ACCOUNT_A, personId: OWNER, approvedAt: now }] }), 1) : ledger; })).ok).toBe(true);
+    const originalTime = now; now = asIsoDateTime('2026-08-14T12:00:00.000Z');
+    const backwards = mutation('memory_time_capsule', created.resourceId, { id: 'b'.repeat(64),
+      mutationKind: 'capsule_revoke_approval', clientOperationId: 'operation-backwards-revoke', requestFingerprint: 'c'.repeat(64),
+      expectedRevision: 2, revision: 3, resourceStateFingerprint: 'd'.repeat(64), referenceFingerprint: '4'.repeat(64), referenceCount: 1 });
+    const backwardsResult = await withReceipt(harness,
+      { action: 'update', resourceType: 'memory_time_capsule', resourceId: created.resourceId }, (repo, ctx) => {
+        const ledger = repo.insertMutation(ctx, backwards); if (!ledger.ok) return ledger;
+        return repo.saveCapsule(ctx, capsule(backwards, source.resourceId, { approvals: [], createdAt: originalTime, updatedAt: now }), 2);
+      });
+    expect(backwardsResult.ok).toBe(false);
+    expect((harness.runtime.database.prepare("SELECT COUNT(*) count FROM memory_studio_mutations WHERE client_operation_id IN ('operation-smuggled-approval','operation-backwards-revoke')").get() as { count: number }).count).toBe(0);
+    expect((harness.runtime.database.prepare("SELECT revision,approvals_json FROM memory_time_capsules WHERE id='strict-capsule-33-x'").get() as { revision: number; approvals_json: string }))
+      .toEqual({ revision: 2, approvals_json: JSON.stringify([{ accountId: ACCOUNT_A, personId: OWNER, approvedAt: originalTime }]) });
+  });
+
+  it('enforces the durable per-owner record capacity before the center can be bricked', async () => {
+    const harness = openHarness();
+    for (let index = 1; index <= 500; index += 1) {
+      const resourceId = `capacity-record-${index}`;
+      const created = mutation('memory_studio_record', resourceId, { id: index.toString(16).padStart(64, '0'),
+        clientOperationId: `operation-capacity-${index}`, requestFingerprint: '1'.repeat(64),
+        resourceStateFingerprint: '2'.repeat(64), referenceFingerprint: '3'.repeat(64) });
+      const result = await withReceipt(harness, { action: 'create', resourceType: 'memory_studio_record', resourceId },
+        (repo, ctx) => { const ledger = repo.insertMutation(ctx, created); return ledger.ok ? repo.insertRecord(ctx, record(created)) : ledger; });
+      expect(result.ok).toBe(true);
+    }
+    const overflow = mutation('memory_studio_record', 'capacity-record-overflow', { id: 'f'.repeat(64),
+      clientOperationId: 'operation-capacity-overflow', requestFingerprint: '4'.repeat(64),
+      resourceStateFingerprint: '5'.repeat(64), referenceFingerprint: '6'.repeat(64) });
+    const rejected = await withReceipt(harness,
+      { action: 'create', resourceType: 'memory_studio_record', resourceId: overflow.resourceId },
+      (repo, ctx) => { const ledger = repo.insertMutation(ctx, overflow); return ledger.ok ? repo.insertRecord(ctx, record(overflow)) : ledger; });
+    expect(rejected.ok).toBe(false);
+    expect((harness.runtime.database.prepare('SELECT COUNT(*) count FROM memory_studio_records').get() as { count: number }).count).toBe(500);
+    expect((harness.runtime.database.prepare('SELECT COUNT(*) count FROM memory_studio_mutations').get() as { count: number }).count).toBe(500);
+  }, 60_000);
+
   it('returns payload-free metadata for central preauthorization', async () => {
     const harness = openHarness(); const created = mutation('memory_studio_record', 'preauth-record-33-x');
     await withReceipt(harness, { action: 'create', resourceType: 'memory_studio_record', resourceId: created.resourceId }, (repo, ctx) => {

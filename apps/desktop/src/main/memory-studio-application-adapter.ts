@@ -7,7 +7,13 @@ import {
   type MemoryStudioUnitOfWork,
   type MemoryStudioWriteScope
 } from '@ppt/application';
-import { memoryStudioCenterId, memoryStudioTruth, type MemoryStudioCenterView } from '@ppt/domain';
+import {
+  MEMORY_STUDIO_MAX_CAPSULES,
+  MEMORY_STUDIO_MAX_RECORDS,
+  memoryStudioCenterId,
+  memoryStudioTruth,
+  type MemoryStudioCenterView
+} from '@ppt/domain';
 import type { DomainEvent } from '@ppt/events';
 import type {
   MemoryStudioCenterKey,
@@ -49,10 +55,19 @@ export class RepositoryBackedMemoryStudioQueryPort implements MemoryStudioQueryP
         familyId: _family, stateFingerprint: _state, lastMutationId: _mutation, referenceFingerprint: _reference, ...view
       }) => Object.freeze(view));
       const capsules = snapshot.value.capsules.map(({
-        familyId: _family, stateFingerprint: _state, lastMutationId: _mutation, referenceFingerprint: _reference, ...view
-      }) => Object.freeze(view));
+        familyId: _family, stateFingerprint: _state, lastMutationId: _mutation, referenceFingerprint: _reference,
+        approvals, ...view
+      }) => Object.freeze({ ...view, approvalCount: approvals.length,
+        currentAccountApprovalRecorded: approvals.some((approval) => approval.accountId === context.actor.userId) }));
+      const recordCount = snapshot.value.records.length; const capsuleCount = snapshot.value.capsules.length;
       const view: MemoryStudioCenterView = Object.freeze({ schemaVersion: 1, centerId: keyFor(context, context.actor.personId).centerId,
         ownerPersonId: context.actor.personId, records: Object.freeze(records), capsules: Object.freeze(capsules),
+        storageCapacity: Object.freeze({
+          records: Object.freeze({ maximum: MEMORY_STUDIO_MAX_RECORDS, used: recordCount,
+            remaining: MEMORY_STUDIO_MAX_RECORDS - recordCount, limitReached: recordCount >= MEMORY_STUDIO_MAX_RECORDS }),
+          capsules: Object.freeze({ maximum: MEMORY_STUDIO_MAX_CAPSULES, used: capsuleCount,
+            remaining: MEMORY_STUDIO_MAX_CAPSULES - capsuleCount, limitReached: capsuleCount >= MEMORY_STUDIO_MAX_CAPSULES })
+        }),
         truth: memoryStudioTruth, generatedAt: occurredAt });
       return ok(view);
     });

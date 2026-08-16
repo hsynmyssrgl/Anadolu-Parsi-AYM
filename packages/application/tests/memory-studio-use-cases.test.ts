@@ -82,6 +82,86 @@ describe('33-X memory studio and local time capsule use cases', () => {
       .toMatchObject({ ok: false, error: { category: 'authorization' } });
   });
 
+  it('rejects non-canonical commands, extra fields and overlong identifiers before persistence', async () => {
+    const unit = new MemoryUnit(); const useCase = new CreateMemoryStudioRecordUseCase(unit);
+    expect(await useCase.execute({ context: context('account-owner-33-x'), command: {
+      clientOperationId: 'operation-extra-33-x', recordId: 'record-extra-33-x', kind: 'recipe', title: 'Aile tarifi',
+      summary: 'Yerel tarif', policyReceipt: 'forged'
+    } as never })).toMatchObject({ ok: false, error: { category: 'validation' } });
+    expect(await useCase.execute({ context: context('account-owner-33-x'), command: {
+      clientOperationId: `x${'a'.repeat(160)}`, recordId: 'record-long-33-x', kind: 'recipe', title: 'Aile tarifi',
+      summary: 'Yerel tarif'
+    } })).toMatchObject({ ok: false, error: { category: 'validation' } });
+    expect(await useCase.execute({ context: context('account-owner-33-x'), command: {
+      clientOperationId: 'operation-date-33-x', recordId: 'record-date-33-x', kind: 'on_this_day', title: 'Bugün',
+      summary: 'Yerel anı', eventDate: '2026-08-15T12:00:00Z'
+    } })).toMatchObject({ ok: false, error: { category: 'validation' } });
+    expect(await useCase.execute({ context: context('account-owner-33-x'), command: {
+      clientOperationId: 'operation-false-face-33-x', recordId: 'record-false-face-33-x', kind: 'recipe',
+      title: 'Tarif', summary: 'Yerel tarif', manualFaceGroupingApproved: true
+    } })).toMatchObject({ ok: false, error: { category: 'validation' } });
+    expect(unit.scope.mutations).toHaveLength(0);
+  });
+
+  it('replays a canonical capsule create after the relative creation window has elapsed', async () => {
+    const unit = new MemoryUnit(); const useCase = new CreateMemoryTimeCapsuleUseCase(unit);
+    const command = { clientOperationId: 'operation-aging-replay-33-x', capsuleId: 'capsule-aging-replay-33-x',
+      title: 'Geleceğe not', memoryRecordIds: ['record-33-x'], unlockAt: '2026-08-23T12:00:00.000Z' };
+    expect(await useCase.execute({ context: context('account-owner-33-x'), command })).toMatchObject({ ok: true,
+      value: { revision: 1, replayed: false } });
+    unit.scope.occurredAt = asIsoDateTime('2026-09-01T12:00:00.000Z');
+    expect(await useCase.execute({ context: context('account-owner-33-x'), command: {
+      unlockAt: command.unlockAt, memoryRecordIds: ['record-33-x'], title: command.title,
+      capsuleId: command.capsuleId, clientOperationId: command.clientOperationId
+    } })).toMatchObject({ ok: true, value: { revision: 1, replayed: true } });
+    expect(unit.scope.mutations).toHaveLength(1);
+  });
+
+  it('allows only the approving account to revoke its own approval', async () => {
+    const unit = new MemoryUnit(); const create = new CreateMemoryTimeCapsuleUseCase(unit);
+    await create.execute({ context: context('account-a-33-x'), command: { clientOperationId: 'operation-revoke-capsule-create',
+      capsuleId: 'capsule-revoke-33-x', title: 'Onay geri alma', memoryRecordIds: ['record-33-x'],
+      unlockAt: '2026-08-23T12:00:00.000Z' } });
+    const review = new ReviewMemoryTimeCapsuleUseCase(unit);
+    await review.execute({ context: context('account-a-33-x'), command: { clientOperationId: 'operation-revoke-approve-a',
+      capsuleId: 'capsule-revoke-33-x', expectedRevision: 1, decision: 'approve' } });
+    expect(await review.execute({ context: context('account-b-33-x'), command: { clientOperationId: 'operation-revoke-wrong-account',
+      capsuleId: 'capsule-revoke-33-x', expectedRevision: 2, decision: 'revoke_approval' } }))
+      .toMatchObject({ ok: false, error: { category: 'conflict' } });
+    expect(await review.execute({ context: context('account-a-33-x'), command: { clientOperationId: 'operation-revoke-own-account',
+      capsuleId: 'capsule-revoke-33-x', expectedRevision: 2, decision: 'revoke_approval' } }))
+      .toMatchObject({ ok: true, value: { revision: 3, mutationKind: 'capsule_revoke_approval' } });
+    expect(unit.scope.capsules.get('capsule-revoke-33-x')?.approvals).toEqual([]);
+  });
+
+  it('rejects clock rollback and revalidates linked sources before seal and release', async () => {
+    const unit = new MemoryUnit(); const create = new CreateMemoryTimeCapsuleUseCase(unit);
+    await create.execute({ context: context('account-a-33-x'), command: { clientOperationId: 'operation-revalidate-create',
+      capsuleId: 'capsule-revalidate-33-x', title: 'Kaynak doğrulama', memoryRecordIds: ['record-33-x'],
+      unlockAt: '2026-08-23T12:00:00.000Z' } });
+    const review = new ReviewMemoryTimeCapsuleUseCase(unit);
+    await review.execute({ context: context('account-a-33-x'), command: { clientOperationId: 'operation-revalidate-approve-a',
+      capsuleId: 'capsule-revalidate-33-x', expectedRevision: 1, decision: 'approve' } });
+    await review.execute({ context: context('account-b-33-x'), command: { clientOperationId: 'operation-revalidate-approve-b',
+      capsuleId: 'capsule-revalidate-33-x', expectedRevision: 2, decision: 'approve' } });
+    const transition = new TransitionMemoryTimeCapsuleUseCase(unit);
+    unit.scope.validReferences = false;
+    expect(await transition.execute({ context: context('account-a-33-x'), command: { clientOperationId: 'operation-revalidate-seal-deny',
+      capsuleId: 'capsule-revalidate-33-x', expectedRevision: 3, transition: 'seal' } }))
+      .toMatchObject({ ok: false, error: { category: 'authorization' } });
+    unit.scope.validReferences = true; unit.scope.occurredAt = asIsoDateTime('2026-08-14T12:00:00.000Z');
+    expect(await transition.execute({ context: context('account-a-33-x'), command: { clientOperationId: 'operation-clock-rollback-deny',
+      capsuleId: 'capsule-revalidate-33-x', expectedRevision: 3, transition: 'seal' } }))
+      .toMatchObject({ ok: false, error: { category: 'conflict' } });
+    unit.scope.occurredAt = asIsoDateTime('2026-08-15T12:00:00.000Z');
+    expect(await transition.execute({ context: context('account-a-33-x'), command: { clientOperationId: 'operation-revalidate-seal',
+      capsuleId: 'capsule-revalidate-33-x', expectedRevision: 3, transition: 'seal' } })).toMatchObject({ ok: true });
+    unit.scope.validReferences = false; unit.scope.occurredAt = asIsoDateTime('2026-08-23T12:00:00.000Z');
+    expect(await transition.execute({ context: context('account-a-33-x'), command: { clientOperationId: 'operation-revalidate-release-deny',
+      capsuleId: 'capsule-revalidate-33-x', expectedRevision: 4, transition: 'release' } }))
+      .toMatchObject({ ok: false, error: { category: 'authorization' } });
+  });
+
   it('requires two distinct accounts and the waiting period before local release', async () => {
     const unit = new MemoryUnit(); const create = new CreateMemoryTimeCapsuleUseCase(unit);
     expect(await create.execute({ context: context('account-a-33-x'), command: { clientOperationId: 'operation-capsule-33-x',

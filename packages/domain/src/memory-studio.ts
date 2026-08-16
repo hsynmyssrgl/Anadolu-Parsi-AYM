@@ -18,6 +18,9 @@ export const MEMORY_STUDIO_RECORD_KINDS = Object.freeze([
 ] as const);
 export type MemoryStudioRecordKind = (typeof MEMORY_STUDIO_RECORD_KINDS)[number];
 
+export const MEMORY_STUDIO_MAX_RECORDS = 500 as const;
+export const MEMORY_STUDIO_MAX_CAPSULES = 200 as const;
+
 export type MemoryStudioRecordStatus = 'active' | 'deleted';
 export type MemoryTimeCapsuleStatus =
   | 'awaiting_approvals'
@@ -69,6 +72,12 @@ export interface MemoryTimeCapsuleView {
   readonly rolledBackAt?: IsoDateTime;
 }
 
+/** Renderer-safe capsule view; internal account/person approval identities never leave main. */
+export interface MemoryTimeCapsuleCenterItemView extends Omit<MemoryTimeCapsuleView, 'approvals'> {
+  readonly approvalCount: number;
+  readonly currentAccountApprovalRecorded: boolean;
+}
+
 export interface MemoryStudioTruthView {
   readonly localOnly: true;
   readonly linkedArchiveContentRemainsProtected: true;
@@ -85,6 +94,8 @@ export interface MemoryStudioTruthView {
   readonly manualFaceGroupingOnly: true;
   readonly minimumCapsuleApprovals: 2;
   readonly waitingPeriodEnforced: true;
+  readonly sourceReferencesRevalidatedAtSealAndRelease: true;
+  readonly monotonicStateTimeEnforced: true;
   readonly externalDeliveryPerformed: 'not_performed';
 }
 
@@ -93,7 +104,21 @@ export interface MemoryStudioCenterView {
   readonly centerId: string;
   readonly ownerPersonId: string;
   readonly records: readonly MemoryStudioRecordView[];
-  readonly capsules: readonly MemoryTimeCapsuleView[];
+  readonly capsules: readonly MemoryTimeCapsuleCenterItemView[];
+  readonly storageCapacity: {
+    readonly records: {
+      readonly maximum: typeof MEMORY_STUDIO_MAX_RECORDS;
+      readonly used: number;
+      readonly remaining: number;
+      readonly limitReached: boolean;
+    };
+    readonly capsules: {
+      readonly maximum: typeof MEMORY_STUDIO_MAX_CAPSULES;
+      readonly used: number;
+      readonly remaining: number;
+      readonly limitReached: boolean;
+    };
+  };
   readonly truth: MemoryStudioTruthView;
   readonly generatedAt: IsoDateTime;
 }
@@ -183,5 +208,7 @@ export const memoryStudioTruth = Object.freeze({
   manualFaceGroupingOnly: true as const,
   minimumCapsuleApprovals: 2 as const,
   waitingPeriodEnforced: true as const,
+  sourceReferencesRevalidatedAtSealAndRelease: true as const,
+  monotonicStateTimeEnforced: true as const,
   externalDeliveryPerformed: 'not_performed' as const
 });

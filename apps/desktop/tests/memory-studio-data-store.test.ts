@@ -49,17 +49,27 @@ describe('33-X memory studio DataStore integration',()=>{
       expectedRevision:1,decision:'approve'})).toMatchObject({revision:2,mutationKind:'capsule_approve'});
     await expect(store.transitionMemoryTimeCapsule({clientOperationId:'operation-seal-denied-33-x',capsuleId:'capsule-33-x',
       expectedRevision:2,transition:'seal'})).rejects.toThrow(/iki ayrı hesap onayı/i);
-    expect(await store.getMemoryStudioCenter()).toMatchObject({records:[{id:'record-33-x',status:'active'}],
-      capsules:[{id:'capsule-33-x',status:'awaiting_approvals',minimumApprovals:2,approvals:[{accountId}]}],
+    const center=await store.getMemoryStudioCenter();
+    expect(center).toMatchObject({records:[{id:'record-33-x',status:'active'}],
+      capsules:[{id:'capsule-33-x',status:'awaiting_approvals',minimumApprovals:2,approvalCount:1,
+        currentAccountApprovalRecorded:true}],storageCapacity:{records:{maximum:500,used:1,remaining:499,limitReached:false},
+        capsules:{maximum:200,used:1,remaining:199,limitReached:false}},
       truth:{localOnly:true,newBinaryPayloadStored:false,transcriptionPerformed:false,faceRecognitionPerformed:false,
-        duplicateDetectionPerformed:false,networkUsed:false,cloudUsed:false,externalDeliveryPerformed:'not_performed'}});
+        duplicateDetectionPerformed:false,sourceReferencesRevalidatedAtSealAndRelease:true,monotonicStateTimeEnforced:true,
+        networkUsed:false,cloudUsed:false,externalDeliveryPerformed:'not_performed'}});
+    expect(JSON.stringify(center)).not.toContain('"accountId"');
+    expect(JSON.stringify(center)).not.toContain('"approvals"');
+    expect(await store.reviewMemoryTimeCapsule({clientOperationId:'operation-revoke-33-x',capsuleId:'capsule-33-x',
+      expectedRevision:2,decision:'revoke_approval'})).toMatchObject({revision:3,mutationKind:'capsule_revoke_approval'});
+    expect(await store.reviewMemoryTimeCapsule({clientOperationId:'operation-reapprove-33-x',capsuleId:'capsule-33-x',
+      expectedRevision:3,decision:'approve'})).toMatchObject({revision:4,mutationKind:'capsule_approve'});
     const injector=new DatabaseSync(databasePath);try{injector.exec(`CREATE TRIGGER test_33x_memory_outbox_failure BEFORE INSERT ON event_outbox WHEN NEW.event_type='memory_studio.record_create' BEGIN SELECT RAISE(ABORT,'controlled 33-X outbox failure'); END;`);}finally{injector.close();}
     await expect(store.createMemoryStudioRecord({clientOperationId:'operation-rollback-33-x',recordId:'record-rollback-33-x',
       kind:'tradition',title:'Yerel gelenek',summary:'Bu satır rollback ile kalıcılaşmamalı.'})).rejects.toThrow(/SQLite|beklenmeyen/i);
     store.close();stores.splice(stores.indexOf(store),1);const database=new DatabaseSync(databasePath,{readOnly:true});try{
       expect(database.prepare('SELECT COUNT(*) count FROM memory_studio_records').get()).toEqual({count:1});
       expect(database.prepare('SELECT COUNT(*) count FROM memory_time_capsules').get()).toEqual({count:1});
-      expect(database.prepare('SELECT COUNT(*) count FROM memory_studio_mutations').get()).toEqual({count:3});
+      expect(database.prepare('SELECT COUNT(*) count FROM memory_studio_mutations').get()).toEqual({count:5});
       expect(database.prepare("SELECT COUNT(*) count FROM memory_studio_records WHERE id='record-rollback-33-x'").get()).toEqual({count:0});
       const metadata=JSON.stringify({audits:database.prepare("SELECT action,resource_type,resource_id FROM audit_log WHERE action LIKE 'memory_studio.%'").all(),
         events:database.prepare("SELECT event_type,aggregate_type,aggregate_id,payload_json FROM event_outbox WHERE event_type LIKE 'memory_studio.%'").all()});

@@ -16,10 +16,13 @@ describe('33-X memory studio renderer surface',()=>{
   it('exposes the complete manual record and two-approval capsule workflow',()=>{
     for(const method of ['getMemoryStudioCenter','createMemoryStudioRecord','deleteMemoryStudioRecord','createMemoryTimeCapsule',
       'reviewMemoryTimeCapsule','transitionMemoryTimeCapsule'])expect(panel).toContain(`.${method}(`);
-    for(const marker of ['face_group','manualFaceGroupingApproved','minimumApprovals','approve','seal','release','rollback'])
+    for(const marker of ['face_group','manualFaceGroupingApproved','minimumApprovals','approvalCount','currentAccountApprovalRecorded',
+      'approve','revoke_approval','seal','release','rollback','Onayımı geri al','storageCapacity','limitReached'])
       expect(panel).toContain(marker);
     expect(panel).toContain('aynı işlem kimliğiyle yeniden deneyebilirsiniz');
+    expect(panel).toContain('İşlem kaydedildi; görünüm yenilenemedi');
     expect(panel).toContain('crypto.randomUUID()');
+    expect(panel).toContain('if(succeeded)');
   });
 
   it('states the local no-claim boundary instead of promising unavailable media automation',()=>{
