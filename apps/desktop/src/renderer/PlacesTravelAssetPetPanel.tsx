@@ -28,6 +28,22 @@ const kinds:Readonly<Record<PlacesTravelArea,ReadonlyArray<{readonly value:Place
 };
 const kindLabel=new Map(Object.values(kinds).flat().map((entry)=>[entry.value,entry.label]));
 const iso=(value:string):string|undefined=>value?new Date(value).toISOString():undefined;
+const itemSummary=(item:PlacesTravelItemView):string=>{
+  const details:string[]=[];
+  if(item.offlineFallbackLabel||item.addressLabel)details.push(item.offlineFallbackLabel??item.addressLabel!);
+  if(item.latitudeE6!==undefined&&item.longitudeE6!==undefined)details.push('Koordinat '+(item.latitudeE6/1_000_000).toFixed(6)+', '+(item.longitudeE6/1_000_000).toFixed(6));
+  if(item.startsAt&&item.endsAt)details.push(item.startsAt.slice(0,16).replace('T',' ')+' → '+item.endsAt.slice(0,16).replace('T',' '));
+  if(item.expiresOn)details.push('Geçerlilik '+item.expiresOn);
+  if(item.participantPersonIds)details.push(String(item.participantPersonIds.length)+' katılımcı');
+  if(item.amountMinor!==undefined&&item.currency)details.push((item.amountMinor/100).toFixed(2)+' '+item.currency);
+  if(item.checklistLabel)details.push((item.checklistCompleted?'Tamamlandı':'Bekliyor')+' · '+item.checklistLabel);
+  if(item.petWorkflow)details.push('Evcil hayvan akışı: '+item.petWorkflow);
+  if(item.requirementKind)details.push('Gereksinim: '+item.requirementKind);
+  if(item.languageCode)details.push('Dil: '+item.languageCode);
+  if(item.providerLabel)details.push('Sağlayıcı etiketi: '+item.providerLabel);
+  const summary=details.join(' · ');
+  return summary.length>0?summary:(item.note??'Yerel opak kayıt');
+};
 interface PendingCreate{readonly fingerprint:string;readonly clientOperationId:string;readonly itemId:string}
 
 export function PlacesTravelAssetPetPanel({people}:{readonly people:readonly FamilyMemberView[]}){
@@ -57,28 +73,32 @@ export function PlacesTravelAssetPetPanel({people}:{readonly people:readonly Fam
   useEffect(()=>{setParticipants((current)=>current.includes(ownerPersonId)?current:[ownerPersonId]);void reload();},[ownerPersonId]);
   const items=useMemo(()=>center?.items.filter((item)=>item.area===area&&item.status!=='deleted')??[],[area,center]);
   const selectArea=(next:PlacesTravelArea)=>{setArea(next);setKind(kinds[next][0]!.value);pendingCreate.current=undefined;setMessage('');};
-  const participantRequired=['travel_plan','shared_expense','expense_settlement'].includes(kind);
+  const participantRequired=['travel_plan','reservation','shared_expense','expense_settlement'].includes(kind);
   const ready=title.trim().length>=2&&Boolean(ownerPersonId)
     &&(kind!=='stored_place'||address.trim().length>0||latitude!==''&&longitude!=='')
+    &&(kind!=='travel_plan'||address.trim().length>0||fallback.trim().length>0)
     &&(!['moving_inventory','travel_document','offline_travel_pack','language_pack','travel_album'].includes(kind)||archiveItemId.trim().length>0)
     &&(kind!=='pet_care_record'||petReference.trim().length>0)
-    &&(!['travel_plan','reservation'].includes(kind)||Boolean(iso(startsAt))&&Boolean(iso(endsAt)))
+    &&(!['travel_plan','reservation','travel_budget'].includes(kind)||Boolean(iso(startsAt))&&Boolean(iso(endsAt)))
     &&(kind!=='reservation'||provider.trim().length>0&&reference.trim().length>0)
+    &&(!['shared_expense','expense_settlement'].includes(kind)||reference.trim().length>0)
     &&(kind!=='travel_document'||expiresOn.length===10)
     &&(!['travel_budget','shared_expense','expense_settlement'].includes(kind)||amount!==''&&Number(amount)>=0)
     &&(kind!=='packing_item'||checklist.trim().length>0)
     &&(kind!=='travel_requirement'||requirementReference.trim().length>0)
-    &&(!participantRequired||participants.includes(ownerPersonId)&&participants.length>=(kind==='travel_plan'?1:2));
+    &&(!participantRequired||participants.includes(ownerPersonId)&&participants.length>=(['shared_expense','expense_settlement'].includes(kind)?2:1));
   const payload=()=>({ownerPersonId,kind,title:title.normalize('NFKC').trim(),visibility,
     ...(kind==='stored_place'&&address.trim()?{addressLabel:address.normalize('NFKC').trim()}:{}),
     ...(kind==='stored_place'&&latitude!==''&&longitude!==''?{latitudeE6:Math.round(Number(latitude)*1_000_000),longitudeE6:Math.round(Number(longitude)*1_000_000)}:{}),
     ...(kind==='stored_place'&&fallback.trim()||kind==='travel_plan'&&fallback.trim()?{offlineFallbackLabel:fallback.normalize('NFKC').trim()}:{}),
-    ...(participantRequired||kind==='reservation'?{participantPersonIds:participants}:{}),
+    ...(participantRequired?{participantPersonIds:participants}:{}),
     ...(['travel_plan','reservation','travel_budget'].includes(kind)&&iso(startsAt)?{startsAt:iso(startsAt)}:{}),
     ...(['travel_plan','reservation','travel_budget'].includes(kind)&&iso(endsAt)?{endsAt:iso(endsAt)}:{}),
-    ...(kind==='reservation'?{providerLabel:provider.normalize('NFKC').trim(),opaqueReference:reference.normalize('NFKC').trim()}:{}),
+    ...(kind==='reservation'?{providerLabel:provider.normalize('NFKC').trim()}:{}),
+    ...(['reservation','shared_expense','expense_settlement'].includes(kind)?{opaqueReference:reference.normalize('NFKC').trim()}:{}),
     ...(['moving_inventory','travel_document','offline_travel_pack','language_pack','travel_album'].includes(kind)||kind==='pet_care_record'&&archiveItemId.trim()?{archiveItemId:archiveItemId.normalize('NFKC').trim()}:{}),
     ...(kind==='travel_document'?{expiresOn,documentKind}:{}),
+    ...(kind==='pet_care_record'&&expiresOn.length===10?{expiresOn}:{}),
     ...(['travel_budget','shared_expense','expense_settlement'].includes(kind)?{amountMinor:Math.round(Number(amount)*100),currency}:{}),
     ...(kind==='packing_item'?{checklistLabel:checklist.normalize('NFKC').trim(),checklistCompleted:false}:{}),
     ...(kind==='pet_care_record'?{petReferenceId:petReference.normalize('NFKC').trim(),petWorkflow}:{}),
@@ -116,10 +136,11 @@ export function PlacesTravelAssetPetPanel({people}:{readonly people:readonly Fam
         {kind==='stored_place'&&<><label>Enlem<input type="number" min="-90" max="90" step="0.000001" value={latitude} onChange={(event)=>setLatitude(event.target.value)}/></label><label>Boylam<input type="number" min="-180" max="180" step="0.000001" value={longitude} onChange={(event)=>setLongitude(event.target.value)}/></label></>}
         {(participantRequired||kind==='reservation')&&<label className="span-2">Katılımcılar<select multiple value={[...participants]} onChange={(event)=>setParticipants(Array.from(event.currentTarget.selectedOptions,(option)=>option.value))}>{activePeople.map((person)=><option key={person.id} value={person.id}>{person.displayName}</option>)}</select></label>}
         {['travel_plan','reservation','travel_budget'].includes(kind)&&<><label>Başlangıç<input type="datetime-local" value={startsAt} onChange={(event)=>setStartsAt(event.target.value)}/></label><label>Bitiş<input type="datetime-local" value={endsAt} onChange={(event)=>setEndsAt(event.target.value)}/></label></>}
-        {kind==='reservation'&&<><label>Sağlayıcı etiketi<input value={provider} onChange={(event)=>setProvider(event.target.value)} maxLength={160}/></label><label>Opak rezervasyon referansı<input value={reference} onChange={(event)=>setReference(event.target.value)} maxLength={160}/></label></>}
+        {kind==='reservation'&&<label>Sağlayıcı etiketi<input value={provider} onChange={(event)=>setProvider(event.target.value)} maxLength={160}/></label>}
+        {['reservation','shared_expense','expense_settlement'].includes(kind)&&<label>Opak seyahat / gider referansı<input value={reference} onChange={(event)=>setReference(event.target.value)} maxLength={160}/></label>}
         {(['moving_inventory','travel_document','offline_travel_pack','language_pack','travel_album','pet_care_record'].includes(kind))&&<label>Opak arşiv öğesi<input value={archiveItemId} onChange={(event)=>setArchiveItemId(event.target.value)} maxLength={160}/></label>}
         {kind==='moving_inventory'&&<label>Yerel OCR iş kimliği (opsiyonel)<input value={ocrJobId} onChange={(event)=>setOcrJobId(event.target.value)} maxLength={160}/></label>}
-        {kind==='pet_care_record'&&<><label>Opak hayvan referansı<input value={petReference} onChange={(event)=>setPetReference(event.target.value)} maxLength={160}/></label><label>İş akışı<select value={petWorkflow} onChange={(event)=>setPetWorkflow(event.target.value as typeof petWorkflow)}><option value="vaccination">Aşı</option><option value="veterinary">Veteriner</option><option value="microchip">Mikroçip</option><option value="food">Mama</option><option value="insurance">Sigorta</option><option value="travel_document">Seyahat belgesi</option></select></label></>}
+        {kind==='pet_care_record'&&<><label>Opak hayvan referansı<input value={petReference} onChange={(event)=>setPetReference(event.target.value)} maxLength={160}/></label><label>İş akışı<select value={petWorkflow} onChange={(event)=>setPetWorkflow(event.target.value as typeof petWorkflow)}><option value="vaccination">Aşı</option><option value="veterinary">Veteriner</option><option value="microchip">Mikroçip</option><option value="food">Mama</option><option value="insurance">Sigorta</option><option value="travel_document">Seyahat belgesi</option></select></label><label>Hatırlatma / belge bitiş tarihi (opsiyonel)<input type="date" value={expiresOn} onChange={(event)=>setExpiresOn(event.target.value)}/></label></>}
         {kind==='travel_document'&&<><label>Belge türü<select value={documentKind} onChange={(event)=>setDocumentKind(event.target.value as typeof documentKind)}><option value="passport">Pasaport</option><option value="visa">Vize</option><option value="insurance">Sigorta</option><option value="reservation_document">Rezervasyon belgesi</option><option value="other">Diğer</option></select></label><label>Geçerlilik tarihi<input type="date" value={expiresOn} onChange={(event)=>setExpiresOn(event.target.value)}/></label></>}
         {['travel_budget','shared_expense','expense_settlement'].includes(kind)&&<><label>Tutar<input type="number" min="0" step="0.01" value={amount} onChange={(event)=>setAmount(event.target.value)}/></label><label>Para birimi<input value={currency} onChange={(event)=>setCurrency(event.target.value.toUpperCase())} maxLength={3}/></label></>}
         {kind==='packing_item'&&<label>Valiz öğesi<input value={checklist} onChange={(event)=>setChecklist(event.target.value)} maxLength={240}/></label>}
@@ -128,7 +149,7 @@ export function PlacesTravelAssetPetPanel({people}:{readonly people:readonly Fam
         <label className="span-2">Not<input value={note} onChange={(event)=>setNote(event.target.value)} maxLength={1000}/></label>
       </div><Button tone="primary" onClick={()=>void create()} disabled={!ready||busy}>{busy?'Kaydediliyor…':'Yerel kayıt oluştur'}</Button></section>
       <section className="child-education-list" aria-live="polite"><div className="child-education-list-heading"><h3>{areas.find((entry)=>entry.value===area)?.label}</h3><Button onClick={()=>void reload()} disabled={loading||busy}>{loading?'Yükleniyor…':'Yenile'}</Button></div>
-        {message&&<StatusMessage tone={tone}>{message}</StatusMessage>}{!loading&&items.length===0?<EmptyState title="Bu alanda kayıt yok" body="Soldaki formdan yalnız yerel bir kayıt ekleyin."/>:<div className="stack-list">{items.map((item)=><div className="child-education-row" key={item.id}><div><strong>{item.title}</strong><small>{kindLabel.get(item.kind)} · {item.status} · revizyon {item.revision}</small><small>{item.offlineFallbackLabel??item.addressLabel??item.providerLabel??item.note??'Yerel opak kayıt'}</small></div><div className="child-education-actions"><Button onClick={()=>void complete(item)} disabled={busy||item.status==='completed'}>Tamamla</Button><Button tone="danger" onClick={()=>void remove(item)} disabled={busy}>Sil</Button></div></div>)}</div>}
+        {message&&<StatusMessage tone={tone}>{message}</StatusMessage>}{!loading&&items.length===0?<EmptyState title="Bu alanda kayıt yok" body="Soldaki formdan yalnız yerel bir kayıt ekleyin."/>:<div className="stack-list">{items.map((item)=><div className="child-education-row" key={item.id}><div><strong>{item.title}</strong><small>{kindLabel.get(item.kind)} · {item.status} · revizyon {item.revision}</small><small>{itemSummary(item)}</small></div><div className="child-education-actions"><Button onClick={()=>void complete(item)} disabled={busy||item.status==='completed'}>Tamamla</Button><Button tone="danger" onClick={()=>void remove(item)} disabled={busy}>Sil</Button></div></div>)}</div>}
       </section></div></>}
   </Surface>;
 }

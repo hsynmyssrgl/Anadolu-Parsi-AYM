@@ -21,9 +21,15 @@ describe('33-V places travel asset and pet renderer surface',()=>{
       expect(panel).not.toContain(forbidden);
   });
   it('keeps coordinates participants documents budgets packs OCR and pet references explicit',()=>{
-    for(const marker of ['Enlem','Boylam','Katılımcılar','Opak rezervasyon referansı','Opak arşiv öğesi','Yerel OCR iş kimliği',
-      'Opak hayvan referansı','Pasaport','Tutar','Valiz öğesi','Opak gereksinim referansı','Dil kodu'])expect(panel).toContain(marker);
+    for(const marker of ['Enlem','Boylam','Katılımcılar','Opak seyahat / gider referansı','Opak arşiv öğesi','Yerel OCR iş kimliği',
+      'Opak hayvan referansı','Hatırlatma / belge bitiş tarihi','Pasaport','Tutar','Valiz öğesi','Opak gereksinim referansı','Dil kodu'])expect(panel).toContain(marker);
     expect(panel).toContain("useState<PlacesTravelVisibility>('private')");expect(panel).toContain('selected_members');
+  });
+  it('renders meaningful local summaries for coordinates dates participants budgets and workflow state',()=>{
+    for(const marker of ['itemSummary(item)','Koordinat','Geçerlilik','katılımcı','item.amountMinor/100','Evcil hayvan akışı',
+      'Gereksinim:','Sağlayıcı etiketi:'])expect(panel).toContain(marker);
+    expect(panel).toContain("['travel_plan','reservation','shared_expense','expense_settlement']");
+    expect(panel).toContain("['travel_plan','reservation','travel_budget']");
   });
   it('states local-only no-claim boundaries in responsive accessible presentation',()=>{
     expect(panel).toContain('Harita, rezervasyon, ödeme, belge doğrulama, canlı takip veya dış paylaşım yapılmaz');

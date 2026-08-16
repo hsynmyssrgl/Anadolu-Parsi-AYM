@@ -5,7 +5,7 @@
   "status": "PASS",
   "governanceState": "PLANNED",
   "countsAsRequirementPass": false,
-  "migration100Sha256": "1cbdd671c0e2d6eb4a58d2d56d84ed63413e5f6585af252eefdaebc5600d18c4",
+  "migration100Sha256": "99039cdc9ebebaa727db0b9b8bc51c416e8f77c8bc4a5a9b9b119b9fb73c03dd",
   "checkCount": 11,
   "passed": 11,
   "failed": 0,
@@ -27,7 +27,7 @@
       "status": "PASS"
     },
     {
-      "name": "repository enforces exact receipt and payload-free policy resolution",
+      "name": "repository enforces exact owner-bound receipt and payload-free policy resolution",
       "status": "PASS"
     },
     {
@@ -35,7 +35,7 @@
       "status": "PASS"
     },
     {
-      "name": "production runtime resolves exact owner and visibility privacy",
+      "name": "production runtime resolves exact center and item owner privacy",
       "status": "PASS"
     },
     {
@@ -43,7 +43,7 @@
       "status": "PASS"
     },
     {
-      "name": "tests cover replay owner participants workflows rollback IPC and route",
+      "name": "tests cover replay owner binding visibility laundering all workflows rollback IPC and route",
       "status": "PASS"
     },
     {
@@ -55,5 +55,5 @@
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-16T05:44:38.639Z"
+  "generatedAt": "2026-08-16T08:45:31.145Z"
 }

@@ -26,11 +26,11 @@
       "status": "PASS"
     },
     {
-      "name": "application enforces private owner participants and no claims",
+      "name": "application enforces owner participants current-target visibility and workflow shapes",
       "status": "PASS"
     },
     {
-      "name": "repository uses exact PEP receipt and bounded results",
+      "name": "repository uses exact owner-bound PEP receipt and bounded results",
       "status": "PASS"
     },
     {
@@ -38,11 +38,11 @@
       "status": "PASS"
     },
     {
-      "name": "IPC exposes four bounded channels",
+      "name": "IPC exposes four bounded channels with the canonical field matrix",
       "status": "PASS"
     },
     {
-      "name": "renderer reuses Life route and states local truth",
+      "name": "renderer reuses Life route and presents meaningful local summaries",
       "status": "PASS"
     },
     {
@@ -58,5 +58,5 @@
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-16T05:44:38.532Z"
+  "generatedAt": "2026-08-16T08:45:31.038Z"
 }

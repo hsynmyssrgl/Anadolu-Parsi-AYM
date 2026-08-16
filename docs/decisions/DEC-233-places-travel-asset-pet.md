@@ -4,9 +4,9 @@ Durum: `PLANNED / LOCAL_IMPLEMENTATION_STARTED`. Bu karar 33‑V’nin yerel bil
 
 ## Karar
 
-Mevcut Yaşam Merkezi içinde dört alan ve on dört kanonik kayıt türü kullanılır. Her kayıt aynı aile, sahip kişi, görünürlük, merkezi PEP makbuzu, iyimser revizyon ve idempotent işlem kimliğiyle bağlanır. Özel kayıtları yalnız sahibi yönetir; diğer görünürlüklerde sahip dışı erişim açık izin gerektirir. Katılımcılar etkin aynı-aile kişileridir ve sahip listede bulunur.
+Mevcut Yaşam Merkezi içinde dört alan ve on dört kanonik kayıt türü kullanılır. Her kayıt aynı aile, sahip kişi, görünürlük, merkezi PEP makbuzu, iyimser revizyon ve idempotent işlem kimliğiyle bağlanır. Merkez okuma makbuzu da istenen sahip kişiye birebir bağlıdır. Özel kayıtları yalnız sahibi yönetir; görünürlük değişiminde hem mevcut hem hedef politika değerlendirilir ve diğer görünürlüklerde sahip dışı erişim açık izin gerektirir. Katılımcılar etkin aynı-aile kişileridir ve sahip listede bulunur.
 
-Koordinat ile adres etiketi çevrimdışı geri dönüş olarak birlikte veya ayrı saklanabilir. Taşınma OCR alanı yalnız opak yerel iş kimliğidir ve öneriyi otomatik kabul etmez. Pasaport, vize, sigorta, paket, dil ve albüm içerikleri burada çoğaltılmaz; yalnız opak arşiv öğesi kimliği tutulur. Sağlık, ilaç, çocuk ve evcil hayvan gereksinimleri ayrıntıyı çoğaltmadan opak referansa bağlanır.
+Koordinat ile adres etiketi çevrimdışı geri dönüş olarak birlikte veya ayrı saklanabilir. Seyahat planı yer etiketi, katılımcı ve tarih; rezervasyon katılımcı, sağlayıcı, opak referans ve tarih; bütçe tarih aralığı; ortak gider ve kapatma ise en az iki katılımcı ile opak seyahat/gider referansı gerektirir. Bu matris uygulama, IPC ve SQLite tarafından aynı şekilde reddedilir veya kabul edilir. Taşınma OCR alanı yalnız opak yerel iş kimliğidir ve öneriyi otomatik kabul etmez. Pasaport, vize, sigorta, paket, dil ve albüm içerikleri burada çoğaltılmaz; yalnız opak arşiv öğesi kimliği tutulur. Sağlık, ilaç, çocuk ve evcil hayvan gereksinimleri ayrıntıyı çoğaltmadan opak referansa bağlanır.
 
 ## Kesin sınırlar
 

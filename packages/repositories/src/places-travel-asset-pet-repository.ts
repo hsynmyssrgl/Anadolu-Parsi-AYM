@@ -84,6 +84,7 @@ const assertKey=(context:PolicyAuthorizedRepositoryExecutionContext,key:PlacesTr
   if(authorization.purpose!=='general'||authorization.subject.accountId!==key.accountId
     ||authorization.subject.personId!==key.actorPersonId||!authorization.subject.familyIds.includes(key.familyId)
     ||authorization.resourceFamilyId!==key.familyId||key.centerId!==`places-travel-center:${key.familyId}:${key.ownerPersonId}`
+    ||authorization.receiptRecord.request.resource.ownerPersonId!==key.ownerPersonId
     ||(mode==='read'&&authorization.action!=='read')
     ||(mode==='write'&&!['create','update','delete'].includes(authorization.action)))
     throw new Error('Places/travel repository key does not match the exact policy receipt');

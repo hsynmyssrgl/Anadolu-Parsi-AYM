@@ -2930,10 +2930,52 @@ const placesTravelRequirementKinds=new Set<unknown>(['health','medication','chil
 const placesTravelParticipants=(value:unknown):boolean=>Array.isArray(value)&&value.length>=1&&value.length<=50
   &&value.every(healthCareIdentifier)&&new Set(value).size===value.length;
 const placesTravelDate=(value:unknown):boolean=>typeof value==='string'&&/^\d{4}-\d{2}-\d{2}$/u.test(value)
-  &&Number.isFinite(Date.parse(`${value}T00:00:00.000Z`));
+  &&Number.isFinite(Date.parse(`${value}T00:00:00.000Z`))
+  &&new Date(Date.parse(`${value}T00:00:00.000Z`)).toISOString().slice(0,10)===value;
 const placesTravelAmount=(value:unknown):boolean=>typeof value==='number'&&Number.isSafeInteger(value)
   &&value>=0&&value<=9_000_000_000_000_000;
 const placesTravelCurrency=(value:unknown):boolean=>typeof value==='string'&&/^[A-Z]{3}$/u.test(value);
+const placesTravelSpecificFields=Object.freeze(['addressLabel','latitudeE6','longitudeE6','offlineFallbackLabel','participantPersonIds',
+  'startsAt','endsAt','providerLabel','opaqueReference','archiveItemId','expiresOn','documentKind','amountMinor','currency',
+  'checklistLabel','checklistCompleted','petReferenceId','petWorkflow','requirementKind','opaqueRequirementReference','languageCode','ocrJobId']);
+const placesTravelAllowedFields:Readonly<Record<string,ReadonlySet<string>>>=Object.freeze({
+  stored_place:new Set(['addressLabel','latitudeE6','longitudeE6','offlineFallbackLabel']),
+  moving_inventory:new Set(['archiveItemId','ocrJobId']),
+  pet_care_record:new Set(['archiveItemId','expiresOn','petReferenceId','petWorkflow']),
+  travel_plan:new Set(['addressLabel','offlineFallbackLabel','participantPersonIds','startsAt','endsAt']),
+  reservation:new Set(['participantPersonIds','startsAt','endsAt','providerLabel','opaqueReference']),
+  travel_document:new Set(['archiveItemId','expiresOn','documentKind']),
+  travel_budget:new Set(['startsAt','endsAt','amountMinor','currency']),
+  shared_expense:new Set(['participantPersonIds','opaqueReference','amountMinor','currency']),
+  packing_item:new Set(['checklistLabel','checklistCompleted']),
+  travel_requirement:new Set(['requirementKind','opaqueRequirementReference']),
+  offline_travel_pack:new Set(['archiveItemId']),language_pack:new Set(['archiveItemId','languageCode']),
+  travel_album:new Set(['archiveItemId']),expense_settlement:new Set(['participantPersonIds','opaqueReference','amountMinor','currency'])
+});
+const placesTravelSpecificShape=(value:Record<string,unknown>):boolean=>{
+  const kind=typeof value.kind==='string'?value.kind:'';const allowed=placesTravelAllowedFields[kind];if(!allowed)return false;
+  if(placesTravelSpecificFields.some((field)=>value[field]!==undefined&&!allowed.has(field)))return false;
+  const participants=Array.isArray(value.participantPersonIds)?value.participantPersonIds:undefined;
+  const ownerIncluded=participants?.includes(value.ownerPersonId)===true;
+  const hasCoordinates=value.latitudeE6!==undefined&&value.longitudeE6!==undefined;
+  const dates=typeof value.startsAt==='string'&&typeof value.endsAt==='string'&&value.endsAt>=value.startsAt;
+  const amount=value.amountMinor!==undefined&&value.currency!==undefined;
+  if(kind==='stored_place')return typeof value.addressLabel==='string'||hasCoordinates;
+  if(kind==='moving_inventory')return typeof value.archiveItemId==='string';
+  if(kind==='pet_care_record')return typeof value.petReferenceId==='string'&&placesTravelPetWorkflows.has(value.petWorkflow);
+  if(kind==='travel_plan')return ownerIncluded&&dates&&(typeof value.addressLabel==='string'||typeof value.offlineFallbackLabel==='string');
+  if(kind==='reservation')return ownerIncluded&&dates&&typeof value.providerLabel==='string'&&typeof value.opaqueReference==='string';
+  if(kind==='travel_document')return typeof value.archiveItemId==='string'&&typeof value.expiresOn==='string'
+    &&placesTravelDocumentKinds.has(value.documentKind);
+  if(kind==='travel_budget')return dates&&amount;
+  if(kind==='shared_expense'||kind==='expense_settlement')return Boolean(participants&&participants.length>=2&&ownerIncluded&&amount
+    &&typeof value.opaqueReference==='string');
+  if(kind==='packing_item')return typeof value.checklistLabel==='string';
+  if(kind==='travel_requirement')return placesTravelRequirementKinds.has(value.requirementKind)
+    &&typeof value.opaqueRequirementReference==='string';
+  if(kind==='offline_travel_pack'||kind==='travel_album')return typeof value.archiveItemId==='string';
+  return kind==='language_pack'&&typeof value.archiveItemId==='string'&&typeof value.languageCode==='string';
+};
 const placesTravelCreateInput=(value:Record<string,unknown>):boolean=>{
   const optional=['status','addressLabel','latitudeE6','longitudeE6','offlineFallbackLabel','participantPersonIds','startsAt','endsAt',
     'providerLabel','opaqueReference','archiveItemId','expiresOn','documentKind','amountMinor','currency','checklistLabel',
@@ -2966,7 +3008,8 @@ const placesTravelCreateInput=(value:Record<string,unknown>):boolean=>{
     &&(value.opaqueRequirementReference===undefined||healthCareIdentifier(value.opaqueRequirementReference))
     &&(value.languageCode===undefined||(typeof value.languageCode==='string'&&/^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8}){0,3}$/u.test(value.languageCode)))
     &&(value.ocrJobId===undefined||healthCareIdentifier(value.ocrJobId))
-    &&(value.note===undefined||healthCareText(value.note,1,1000));
+    &&(value.note===undefined||healthCareText(value.note,1,1000))
+    &&placesTravelSpecificShape(value);
 };
 const placesTravelUpdateInput=(value:Record<string,unknown>):boolean=>{
   const optional=['title','status','visibility','startsAt','endsAt','expiresOn','amountMinor','checklistCompleted','note']
@@ -3009,8 +3052,11 @@ const placesTravelItemResult=(value:unknown):boolean=>{
     &&placesTravelAreas.has(value.area)&&healthCareText(value.title,2,160)&&placesTravelStatuses.has(value.status)
     &&placesTravelVisibilities.has(value.visibility)&&healthCareRevision(value.revision)&&Number(value.revision)>=1
     &&(value.addressLabel===undefined||healthCareText(value.addressLabel,1,300))
-    &&(value.latitudeE6===undefined||(typeof value.latitudeE6==='number'&&Number.isSafeInteger(value.latitudeE6)))
-    &&(value.longitudeE6===undefined||(typeof value.longitudeE6==='number'&&Number.isSafeInteger(value.longitudeE6)))
+    &&(value.latitudeE6===undefined||(typeof value.latitudeE6==='number'&&Number.isSafeInteger(value.latitudeE6)
+      &&value.latitudeE6>=-90_000_000&&value.latitudeE6<=90_000_000))
+    &&(value.longitudeE6===undefined||(typeof value.longitudeE6==='number'&&Number.isSafeInteger(value.longitudeE6)
+      &&value.longitudeE6>=-180_000_000&&value.longitudeE6<=180_000_000))
+    &&((value.latitudeE6===undefined)===(value.longitudeE6===undefined))
     &&(value.offlineFallbackLabel===undefined||healthCareText(value.offlineFallbackLabel,1,300))
     &&(value.participantPersonIds===undefined||placesTravelParticipants(value.participantPersonIds))
     &&(value.startsAt===undefined||healthCareIso(value.startsAt))&&(value.endsAt===undefined||healthCareIso(value.endsAt))
@@ -3026,9 +3072,11 @@ const placesTravelItemResult=(value:unknown):boolean=>{
     &&(value.petWorkflow===undefined||placesTravelPetWorkflows.has(value.petWorkflow))
     &&(value.requirementKind===undefined||placesTravelRequirementKinds.has(value.requirementKind))
     &&(value.opaqueRequirementReference===undefined||healthCareIdentifier(value.opaqueRequirementReference))
-    &&(value.languageCode===undefined||typeof value.languageCode==='string')&&(value.ocrJobId===undefined||healthCareIdentifier(value.ocrJobId))
+    &&(value.languageCode===undefined||(typeof value.languageCode==='string'&&/^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8}){0,3}$/u.test(value.languageCode)))
+    &&(value.ocrJobId===undefined||healthCareIdentifier(value.ocrJobId))
     &&(value.note===undefined||healthCareText(value.note,1,1000))&&healthCareIso(value.createdAt)&&healthCareIso(value.updatedAt)
-    &&(value.deletedAt===undefined||healthCareIso(value.deletedAt));
+    &&(value.deletedAt===undefined||healthCareIso(value.deletedAt))
+    &&(value.status==='deleted'||placesTravelSpecificShape(value));
 };
 const placesTravelCenterResult=(value:unknown):boolean=>healthCareExactRecord(value,
   ['schemaVersion','centerId','ownerPersonId','items','countsByArea','truth','generatedAt'])&&value.schemaVersion===1

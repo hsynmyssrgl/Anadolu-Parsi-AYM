@@ -60,7 +60,7 @@ export class RepositoryBackedPlacesTravelQueryPort implements PlacesTravelAssetP
     this.#runner=runner??new RepositoryBackedLifePolicyTransactionRunner(dependencies);
   }
   public getCenter(context:LifeApplicationContext,ownerPersonId:string):ReturnType<PlacesTravelAssetPetQueryPort['getCenter']>{
-    return this.#runner.execute<PlacesTravelCenterView>(context,placesTravelReadIntent(),({repository,occurredAt})=>{
+    return this.#runner.execute<PlacesTravelCenterView>(context,placesTravelReadIntent(ownerPersonId),({repository,occurredAt})=>{
       if(!context.actor.personId)return err(createAppError({code:ERROR_CODES.AUTHORIZATION_DENIED,
         message:'Yer ve seyahat merkezi kişi bağlı oturum gerektirir.',category:'authorization',correlationId:context.correlationId}));
       const loaded=this.dependencies.placesTravelRepository.loadCenter(repository,keyFor(context,ownerPersonId));if(!loaded.ok)return loaded;

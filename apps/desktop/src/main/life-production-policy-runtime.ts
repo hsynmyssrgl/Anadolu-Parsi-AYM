@@ -1045,11 +1045,25 @@ const loadLifeResourceSnapshotInTransaction = (
   ) return invalidAuthority(context, 'Life policy intent is not a supported exact operation');
   if (requestedIntent.action === 'read' && requestedIntent.resourceId === '*') {
     if (!context.actor.personId) return invalidAuthority(context, 'Life collection read requires an exact person identity');
+    const placesTravelCollection = requestedIntent.resourceType === 'places_travel_center';
+    if (placesTravelCollection
+      ? !requestedIntent.ownerPersonId || requestedIntent.privacy !== 'family'
+      : requestedIntent.ownerPersonId !== undefined || requestedIntent.privacy !== undefined) {
+      return invalidAuthority(context, 'Life collection read owner metadata does not match the exact resource contract');
+    }
+    const collectionOwnerPersonId = placesTravelCollection ? requestedIntent.ownerPersonId! : context.actor.personId;
+    if (placesTravelCollection) {
+      const owner = dependencies.personRepository.findById(execution, collectionOwnerPersonId);
+      if (!owner.ok) return owner;
+      if (!owner.value || owner.value.familyId !== context.familyId || owner.value.status !== 'active') {
+        return invalidAuthority(context, 'Life collection owner does not exist in the active family');
+      }
+    }
     const resource = Object.freeze({
       type: requestedIntent.resourceType,
       id: '*',
       familyId: context.familyId,
-      ownerPersonId: context.actor.personId,
+      ownerPersonId: collectionOwnerPersonId,
       sensitivity: requestedIntent.resourceType === 'household_operations_center'
         || requestedIntent.resourceType === 'family_meeting_center'
         ? 'personal' as const
@@ -1064,7 +1078,8 @@ const loadLifeResourceSnapshotInTransaction = (
         scope: 'life_collection',
         resourceType: requestedIntent.resourceType,
         familyId: context.familyId,
-        actorPersonId: context.actor.personId
+        actorPersonId: context.actor.personId,
+        ownerPersonId: collectionOwnerPersonId
       })
     }));
   }

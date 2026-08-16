@@ -26,6 +26,35 @@ describe('33-V places travel asset and pet IPC boundary',()=>{
     expect(evaluateIpcIntegrationPolicy(PLACES_TRAVEL_ASSET_PET_IPC_CHANNELS.deleteItem,[{clientOperationId:'operation-place-delete',
       itemId:ITEM,ownerPersonId:OWNER,expectedRevision:2,reason:'Kullanıcı yerel kaydı kaldırdı.'}])).toEqual({accepted:true});
   });
+  it('enforces the canonical field matrix for all fourteen workflow kinds',()=>{
+    const common={clientOperationId:'operation-workflow-33-v',ownerPersonId:OWNER,title:'Yerel iş akışı',visibility:'private'} as const;
+    const member='person-member-33-v';const startsAt='2026-09-01T08:00:00.000Z';const endsAt='2026-09-02T18:00:00.000Z';
+    const commands=[
+      {...common,itemId:'workflow-place',kind:'stored_place',latitudeE6:41015137,longitudeE6:28979430},
+      {...common,itemId:'workflow-moving',kind:'moving_inventory',archiveItemId:'archive-moving',ocrJobId:'ocr-moving'},
+      {...common,itemId:'workflow-pet',kind:'pet_care_record',petReferenceId:'pet-opaque',petWorkflow:'vaccination',expiresOn:'2027-05-31'},
+      {...common,itemId:'workflow-plan',kind:'travel_plan',offlineFallbackLabel:'Yerel buluşma',participantPersonIds:[OWNER],startsAt,endsAt},
+      {...common,itemId:'workflow-reservation',kind:'reservation',participantPersonIds:[OWNER],startsAt,endsAt,providerLabel:'Yerel otel',opaqueReference:'reservation-opaque'},
+      {...common,itemId:'workflow-document',kind:'travel_document',archiveItemId:'archive-passport',expiresOn:'2030-01-01',documentKind:'passport'},
+      {...common,itemId:'workflow-budget',kind:'travel_budget',startsAt,endsAt,amountMinor:100000,currency:'TRY'},
+      {...common,itemId:'workflow-expense',kind:'shared_expense',participantPersonIds:[OWNER,member],opaqueReference:'trip-expense',amountMinor:10000,currency:'TRY'},
+      {...common,itemId:'workflow-packing',kind:'packing_item',checklistLabel:'Şarj cihazı',checklistCompleted:false},
+      {...common,itemId:'workflow-requirement',kind:'travel_requirement',requirementKind:'health',opaqueRequirementReference:'requirement-health'},
+      {...common,itemId:'workflow-offline',kind:'offline_travel_pack',archiveItemId:'archive-offline'},
+      {...common,itemId:'workflow-language',kind:'language_pack',archiveItemId:'archive-language',languageCode:'tr-TR'},
+      {...common,itemId:'workflow-album',kind:'travel_album',archiveItemId:'archive-album'},
+      {...common,itemId:'workflow-settlement',kind:'expense_settlement',participantPersonIds:[OWNER,member],opaqueReference:'expense-ledger',amountMinor:10000,currency:'TRY'}
+    ];
+    for(const command of commands)expect(evaluateIpcIntegrationPolicy(PLACES_TRAVEL_ASSET_PET_IPC_CHANNELS.createItem,[command])).toEqual({accepted:true});
+    for(const invalid of [
+      {...common,itemId:'invalid-date',kind:'travel_document',archiveItemId:'archive-invalid',expiresOn:'2026-02-31',documentKind:'passport'},
+      {...common,itemId:'invalid-plan',kind:'travel_plan',participantPersonIds:[OWNER],startsAt,endsAt},
+      {...common,itemId:'invalid-reservation',kind:'reservation',startsAt,endsAt,providerLabel:'Yerel otel',opaqueReference:'reservation-opaque'},
+      {...common,itemId:'invalid-budget',kind:'travel_budget',amountMinor:1000,currency:'TRY'},
+      {...common,itemId:'invalid-settlement',kind:'expense_settlement',participantPersonIds:[OWNER,member],amountMinor:1000,currency:'TRY'},
+      {...common,itemId:'cross-kind',kind:'stored_place',addressLabel:'Yerel adres',archiveItemId:'forbidden-cross-kind'}
+    ])expect(evaluateIpcIntegrationPolicy(PLACES_TRAVEL_ASSET_PET_IPC_CHANNELS.createItem,[invalid])).toMatchObject({accepted:false});
+  });
   it('rejects renderer authority secrets paths and unknown channels',()=>{
     for(const forbidden of [{accountId:'forged'},{familyId:'forged'},{policyReceiptHash:'a'.repeat(64)},
       {sourcePath:'C:\\private\\travel.json'},{bookingToken:'secret'},{paymentCard:'4111111111111111'}])

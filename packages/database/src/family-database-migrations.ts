@@ -13975,12 +13975,14 @@ CREATE TABLE places_travel_items (
       AND opaque_reference IS NULL AND document_kind IS NULL AND amount_minor IS NULL AND currency IS NULL
       AND checklist_label IS NULL AND checklist_completed IS NULL AND requirement_kind IS NULL
       AND opaque_requirement_reference IS NULL AND language_code IS NULL AND ocr_job_id IS NULL
-    WHEN 'travel_plan' THEN participant_person_ids_json IS NOT NULL AND starts_at IS NOT NULL AND ends_at IS NOT NULL
+    WHEN 'travel_plan' THEN (address_label IS NOT NULL OR offline_fallback_label IS NOT NULL)
+      AND participant_person_ids_json IS NOT NULL AND starts_at IS NOT NULL AND ends_at IS NOT NULL
       AND latitude_e6 IS NULL AND longitude_e6 IS NULL AND provider_label IS NULL AND opaque_reference IS NULL
       AND archive_item_id IS NULL AND expires_on IS NULL AND document_kind IS NULL AND amount_minor IS NULL AND currency IS NULL
       AND checklist_label IS NULL AND checklist_completed IS NULL AND pet_reference_id IS NULL AND pet_workflow IS NULL
       AND requirement_kind IS NULL AND opaque_requirement_reference IS NULL AND language_code IS NULL AND ocr_job_id IS NULL
-    WHEN 'reservation' THEN provider_label IS NOT NULL AND opaque_reference IS NOT NULL AND starts_at IS NOT NULL AND ends_at IS NOT NULL
+    WHEN 'reservation' THEN participant_person_ids_json IS NOT NULL AND provider_label IS NOT NULL
+      AND opaque_reference IS NOT NULL AND starts_at IS NOT NULL AND ends_at IS NOT NULL
       AND address_label IS NULL AND latitude_e6 IS NULL AND longitude_e6 IS NULL AND offline_fallback_label IS NULL
       AND archive_item_id IS NULL AND expires_on IS NULL AND document_kind IS NULL AND amount_minor IS NULL AND currency IS NULL
       AND checklist_label IS NULL AND checklist_completed IS NULL AND pet_reference_id IS NULL AND pet_workflow IS NULL
@@ -13991,15 +13993,16 @@ CREATE TABLE places_travel_items (
       AND opaque_reference IS NULL AND amount_minor IS NULL AND currency IS NULL AND checklist_label IS NULL
       AND checklist_completed IS NULL AND pet_reference_id IS NULL AND pet_workflow IS NULL AND requirement_kind IS NULL
       AND opaque_requirement_reference IS NULL AND language_code IS NULL AND ocr_job_id IS NULL
-    WHEN 'travel_budget' THEN amount_minor IS NOT NULL AND currency IS NOT NULL
+    WHEN 'travel_budget' THEN starts_at IS NOT NULL AND ends_at IS NOT NULL AND amount_minor IS NOT NULL AND currency IS NOT NULL
       AND address_label IS NULL AND latitude_e6 IS NULL AND longitude_e6 IS NULL AND offline_fallback_label IS NULL
       AND participant_person_ids_json IS NULL AND provider_label IS NULL AND opaque_reference IS NULL AND archive_item_id IS NULL
       AND expires_on IS NULL AND document_kind IS NULL AND checklist_label IS NULL AND checklist_completed IS NULL
       AND pet_reference_id IS NULL AND pet_workflow IS NULL AND requirement_kind IS NULL
       AND opaque_requirement_reference IS NULL AND language_code IS NULL AND ocr_job_id IS NULL
-    WHEN 'shared_expense' THEN participant_person_ids_json IS NOT NULL AND amount_minor IS NOT NULL AND currency IS NOT NULL
+    WHEN 'shared_expense' THEN participant_person_ids_json IS NOT NULL AND opaque_reference IS NOT NULL
+      AND amount_minor IS NOT NULL AND currency IS NOT NULL
       AND address_label IS NULL AND latitude_e6 IS NULL AND longitude_e6 IS NULL AND offline_fallback_label IS NULL
-      AND starts_at IS NULL AND ends_at IS NULL AND provider_label IS NULL AND opaque_reference IS NULL AND archive_item_id IS NULL
+      AND starts_at IS NULL AND ends_at IS NULL AND provider_label IS NULL AND archive_item_id IS NULL
       AND expires_on IS NULL AND document_kind IS NULL AND checklist_label IS NULL AND checklist_completed IS NULL
       AND pet_reference_id IS NULL AND pet_workflow IS NULL AND requirement_kind IS NULL
       AND opaque_requirement_reference IS NULL AND language_code IS NULL AND ocr_job_id IS NULL
@@ -14033,9 +14036,10 @@ CREATE TABLE places_travel_items (
       AND opaque_reference IS NULL AND expires_on IS NULL AND document_kind IS NULL AND amount_minor IS NULL AND currency IS NULL
       AND checklist_label IS NULL AND checklist_completed IS NULL AND pet_reference_id IS NULL AND pet_workflow IS NULL
       AND requirement_kind IS NULL AND opaque_requirement_reference IS NULL AND language_code IS NULL AND ocr_job_id IS NULL
-    WHEN 'expense_settlement' THEN participant_person_ids_json IS NOT NULL AND amount_minor IS NOT NULL AND currency IS NOT NULL
+    WHEN 'expense_settlement' THEN participant_person_ids_json IS NOT NULL AND opaque_reference IS NOT NULL
+      AND amount_minor IS NOT NULL AND currency IS NOT NULL
       AND address_label IS NULL AND latitude_e6 IS NULL AND longitude_e6 IS NULL AND offline_fallback_label IS NULL
-      AND starts_at IS NULL AND ends_at IS NULL AND provider_label IS NULL AND opaque_reference IS NULL AND archive_item_id IS NULL
+      AND starts_at IS NULL AND ends_at IS NULL AND provider_label IS NULL AND archive_item_id IS NULL
       AND expires_on IS NULL AND document_kind IS NULL AND checklist_label IS NULL AND checklist_completed IS NULL
       AND pet_reference_id IS NULL AND pet_workflow IS NULL AND requirement_kind IS NULL
       AND opaque_requirement_reference IS NULL AND language_code IS NULL AND ocr_job_id IS NULL

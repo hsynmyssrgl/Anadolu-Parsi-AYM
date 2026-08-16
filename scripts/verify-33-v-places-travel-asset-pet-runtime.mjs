@@ -17,7 +17,7 @@ const requirements=scope.requirements;const roadmapItem=roadmap.packages?.find((
 const manual=Object.entries(scope.manualEvidence??{}).filter(([key])=>key!=='certificationClaimed').every(([,value])=>value==='NOT_RUN');
 const definitions=[
   ['exact five-file local Vitest exits successfully',vitest.status===0&&vitest.signal===null],
-  ['local test result meets exact 5/22 ratchet',files===5&&tests===22&&scope.validation.targetedTestFileRatchet===5&&scope.validation.targetedTestRatchet===22&&inventory.validation.targetedTestRatchet===22],
+  ['local test result meets exact 5/27 ratchet',files===5&&tests===27&&scope.validation.targetedTestFileRatchet===5&&scope.validation.targetedTestRatchet===27&&inventory.validation.targetedTestRatchet===27],
   ['migration verifier passes exact migration 100 checksum',migration.status===0&&migrationReport?.status==='passed'&&migrationReport?.checkCount===9&&m100?.name==='places_travel_asset_pet_workflows'&&m100?.checksum===scope.validation.migrationSha256],
   ['data store smoke includes migration 100 and reaches the current migration head',smoke.status===0&&smokeReport?.status==='passed'&&smokeReport?.migrationVersions?.includes(100)&&smokeReport?.migrationVersions?.at(-1)===latestMigrationVersion],
   ['PPK-021 raw gate matches scope ratchet',gate21.status===0&&p21?.status==='PASS'&&p21?.scannedFiles===scope.validation.ppk021.scannedProductionFiles&&p21?.privilegedSurfaces===scope.validation.ppk021.exactPrivilegedSurfaceCount&&p21?.exactAllowlistSha256===scope.validation.ppk021.exactAllowlistSha256],

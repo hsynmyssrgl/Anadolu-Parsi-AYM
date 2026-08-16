@@ -4,6 +4,7 @@ import type { DomainEvent } from '@ppt/events';
 import type { PlacesTravelItemRow,PlacesTravelMutationRow } from '@ppt/repository-contracts';
 import {
   CreatePlacesTravelItemUseCase,DeletePlacesTravelItemUseCase,UpdatePlacesTravelItemUseCase,
+  placesTravelReadIntent,
   type LifeApplicationContext,type LifePolicyIntent,type PlacesTravelAssetPetUnitOfWork,type PlacesTravelAssetPetWriteScope
 } from '../src/index.js';
 
@@ -47,10 +48,12 @@ describe('33-V places travel asset and pet use cases',()=>{
     const unit=new MemoryUnit();const create=new CreatePlacesTravelItemUseCase(unit);
     const denied=await create.execute({context:context(MEMBER),command:{clientOperationId:'operation-private-denied',itemId:'private-trip',
       ownerPersonId:OWNER,kind:'travel_plan',title:'Özel gezi',visibility:'private',participantPersonIds:[OWNER,MEMBER],
+      offlineFallbackLabel:'Yerel buluşma etiketi',
       startsAt:'2026-09-01T08:00:00.000Z',endsAt:'2026-09-02T18:00:00.000Z'}});
     expect(denied).toMatchObject({ok:false,error:{category:'authorization'}});
     const missingOwner=await create.execute({context:context(),command:{clientOperationId:'operation-missing-owner',itemId:'bad-trip',
       ownerPersonId:OWNER,kind:'travel_plan',title:'Eksik gezi',visibility:'family_coordination',participantPersonIds:[MEMBER],
+      offlineFallbackLabel:'Yerel buluşma etiketi',
       startsAt:'2026-09-01T08:00:00.000Z',endsAt:'2026-09-02T18:00:00.000Z'}});
     expect(missingOwner).toMatchObject({ok:false,error:{category:'validation'}});
   });
@@ -63,7 +66,8 @@ describe('33-V places travel asset and pet use cases',()=>{
     expect(await create.execute({context:context(),command:{clientOperationId:'operation-document',itemId:'document-33-v',ownerPersonId:OWNER,
       kind:'travel_document',title:'Pasaport süresi',visibility:'private',archiveItemId:'archive-passport',expiresOn:'2030-01-01',documentKind:'passport'}})).toMatchObject({ok:true});
     expect(await create.execute({context:context(),command:{clientOperationId:'operation-expense',itemId:'expense-33-v',ownerPersonId:OWNER,
-      kind:'shared_expense',title:'Konaklama paylaşımı',visibility:'selected_members',participantPersonIds:[OWNER,MEMBER],amountMinor:125000,currency:'TRY'}})).toMatchObject({ok:true});
+      kind:'shared_expense',title:'Konaklama paylaşımı',visibility:'selected_members',participantPersonIds:[OWNER,MEMBER],
+      opaqueReference:'trip-expense-opaque',amountMinor:125000,currency:'TRY'}})).toMatchObject({ok:true});
     expect(JSON.stringify(unit.scope.events)).not.toContain('opaque-reservation');
   });
 
@@ -74,6 +78,53 @@ describe('33-V places travel asset and pet use cases',()=>{
     expect(await create.execute({context:context(),command:{clientOperationId:'operation-pet',itemId:'pet-33-v',ownerPersonId:OWNER,
       kind:'pet_care_record',title:'Aşı belgesi hatırlatması',visibility:'private',petReferenceId:'pet-opaque',petWorkflow:'vaccination'}})).toMatchObject({ok:true});
     expect(JSON.stringify(unit.scope.events)).not.toContain('ocr-job-opaque');expect(JSON.stringify(unit.scope.events)).not.toContain('pet-opaque');
+  });
+
+  it('covers every pet and travel-requirement workflow as opaque local references',async()=>{
+    const unit=new MemoryUnit();const create=new CreatePlacesTravelItemUseCase(unit);
+    for(const workflow of ['vaccination','veterinary','microchip','food','insurance','travel_document'] as const){
+      expect(await create.execute({context:context(),command:{clientOperationId:`operation-pet-${workflow}`,itemId:`pet-${workflow}`,
+        ownerPersonId:OWNER,kind:'pet_care_record',title:`Evcil hayvan ${workflow}`,visibility:'private',
+        petReferenceId:'pet-opaque-33-v',petWorkflow:workflow,...(['vaccination','insurance','travel_document'].includes(workflow)
+          ?{expiresOn:'2027-05-31'}:{})}})).toMatchObject({ok:true});
+    }
+    for(const requirementKind of ['health','medication','child','pet'] as const){
+      expect(await create.execute({context:context(),command:{clientOperationId:`operation-requirement-${requirementKind}`,
+        itemId:`requirement-${requirementKind}`,ownerPersonId:OWNER,kind:'travel_requirement',title:`Gereksinim ${requirementKind}`,
+        visibility:'private',requirementKind,opaqueRequirementReference:`requirement-${requirementKind}-opaque`}})).toMatchObject({ok:true});
+    }
+    const evidence=JSON.stringify({audits:unit.scope.audits,events:unit.scope.events});
+    expect(evidence).not.toContain('pet-opaque-33-v');expect(evidence).not.toContain('requirement-health-opaque');
+  });
+
+  it('requires exact dates destinations participants and expense linkage',async()=>{
+    const unit=new MemoryUnit();const create=new CreatePlacesTravelItemUseCase(unit);
+    expect(await create.execute({context:context(),command:{clientOperationId:'operation-invalid-date',itemId:'document-invalid-date',
+      ownerPersonId:OWNER,kind:'travel_document',title:'Geçersiz tarih',visibility:'private',archiveItemId:'archive-invalid-date',
+      expiresOn:'2026-02-31',documentKind:'passport'}})).toMatchObject({ok:false,error:{category:'validation'}});
+    expect(await create.execute({context:context(),command:{clientOperationId:'operation-trip-no-place',itemId:'trip-no-place',
+      ownerPersonId:OWNER,kind:'travel_plan',title:'Yersiz plan',visibility:'private',participantPersonIds:[OWNER],
+      startsAt:'2026-09-01T08:00:00.000Z',endsAt:'2026-09-02T18:00:00.000Z'}})).toMatchObject({ok:false,error:{category:'validation'}});
+    expect(await create.execute({context:context(),command:{clientOperationId:'operation-reservation-no-people',itemId:'reservation-no-people',
+      ownerPersonId:OWNER,kind:'reservation',title:'Katılımcısız rezervasyon',visibility:'private',providerLabel:'Yerel otel',
+      opaqueReference:'reservation-opaque',startsAt:'2026-09-01T08:00:00.000Z',endsAt:'2026-09-02T18:00:00.000Z'}}))
+      .toMatchObject({ok:false,error:{category:'validation'}});
+    expect(await create.execute({context:context(),command:{clientOperationId:'operation-budget-no-dates',itemId:'budget-no-dates',
+      ownerPersonId:OWNER,kind:'travel_budget',title:'Tarihsiz bütçe',visibility:'private',amountMinor:1000,currency:'TRY'}}))
+      .toMatchObject({ok:false,error:{category:'validation'}});
+    expect(await create.execute({context:context(),command:{clientOperationId:'operation-settlement-no-ref',itemId:'settlement-no-ref',
+      ownerPersonId:OWNER,kind:'expense_settlement',title:'Bağsız kapatma',visibility:'private',participantPersonIds:[OWNER,MEMBER],
+      amountMinor:1000,currency:'TRY'}})).toMatchObject({ok:false,error:{category:'validation'}});
+  });
+
+  it('binds center reads to the requested owner and prevents visibility laundering',async()=>{
+    expect(placesTravelReadIntent(OWNER)).toMatchObject({resourceType:'places_travel_center',resourceId:'*',ownerPersonId:OWNER,privacy:'family'});
+    const unit=new MemoryUnit();const create=new CreatePlacesTravelItemUseCase(unit);const update=new UpdatePlacesTravelItemUseCase(unit);
+    expect(await create.execute({context:context(),command:{clientOperationId:'operation-private-create',itemId:'private-visibility-item',
+      ownerPersonId:OWNER,kind:'stored_place',title:'Özel buluşma yeri',visibility:'private',addressLabel:'Yerel adres'}})).toMatchObject({ok:true});
+    expect(await update.execute({context:context(MEMBER),command:{clientOperationId:'operation-private-launder',itemId:'private-visibility-item',
+      ownerPersonId:OWNER,expectedRevision:1,visibility:'family_coordination'}})).toMatchObject({ok:false,error:{category:'authorization'}});
+    expect(unit.scope.items.get('private-visibility-item')).toMatchObject({visibility:'private',revision:1});
   });
 
   it('updates common workflow state then deletes to a content-free durable tombstone',async()=>{

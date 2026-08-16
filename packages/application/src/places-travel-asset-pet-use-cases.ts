@@ -87,14 +87,22 @@ const text=(context:LifeApplicationContext,value:unknown,label:string,min:number
 };
 const optionalText=(context:LifeApplicationContext,value:unknown,label:string,max:number):Result<string|undefined,AppError>=>
   value===undefined?ok(undefined):text(context,value,label,1,max);
+const optionalIdentifier=(context:LifeApplicationContext,value:unknown,label:string):Result<string|undefined,AppError>=>{
+  if(value===undefined)return ok(undefined);
+  const normalized=typeof value==='string'?value.normalize('NFKC').trim():'';
+  return SAFE_ID.test(normalized)?ok(normalized):err(invalid(context,`${label} geçersizdir.`));
+};
 const timestamp=(context:LifeApplicationContext,value:unknown,label:string):Result<PlacesTravelMutationRow['occurredAt']|undefined,AppError>=>{
   if(value===undefined)return ok(undefined);
-  if(typeof value!=='string'||!Number.isFinite(Date.parse(value)))return err(invalid(context,`${label} geçersizdir.`));
-  return ok(asIsoDateTime(new Date(Date.parse(value)).toISOString()));
+  const parsed=typeof value==='string'?Date.parse(value):Number.NaN;
+  if(typeof value!=='string'||!Number.isFinite(parsed)||new Date(parsed).toISOString()!==value)return err(invalid(context,`${label} geçersizdir.`));
+  return ok(asIsoDateTime(value));
 };
 const date=(context:LifeApplicationContext,value:unknown,label:string):Result<ReturnType<typeof asIsoDate>|undefined,AppError>=>{
   if(value===undefined)return ok(undefined);
-  if(typeof value!=='string'||!DATE.test(value)||Number.isNaN(Date.parse(`${value}T00:00:00.000Z`)))return err(invalid(context,`${label} geçersizdir.`));
+  const parsed=typeof value==='string'?Date.parse(`${value}T00:00:00.000Z`):Number.NaN;
+  if(typeof value!=='string'||!DATE.test(value)||!Number.isFinite(parsed)
+    ||new Date(parsed).toISOString().slice(0,10)!==value)return err(invalid(context,`${label} geçersizdir.`));
   return ok(asIsoDate(value));
 };
 const identifiers=(context:LifeApplicationContext,values:unknown):Result<readonly string[]|undefined,AppError>=>{
@@ -110,7 +118,8 @@ const keyFor=(context:LifeApplicationContext,ownerPersonId:string):Result<Places
   return ok(Object.freeze({familyId:context.familyId,accountId:context.actor.userId,actorPersonId:context.actor.personId,
     ownerPersonId:asPersonId(ownerPersonId),centerId:placesTravelCenterId(context.familyId,ownerPersonId)}));
 };
-const readIntent=():LifePolicyIntent=>({action:'read',capability:'family.read',resourceType:'places_travel_center',resourceId:'*',purpose:'general'});
+const readIntent=(ownerPersonId:string):LifePolicyIntent=>({action:'read',capability:'family.read',resourceType:'places_travel_center',
+  resourceId:'*',purpose:'general',ownerPersonId:asPersonId(ownerPersonId),privacy:'family'});
 const writeIntent=(itemId:string,action:'create'|'update'|'delete',ownerPersonId?:string,visibility?:PlacesTravelVisibility):LifePolicyIntent=>({
   action,capability:'family.write',resourceType:'places_travel_item',resourceId:itemId,purpose:'general',
   ...(action==='create'&&ownerPersonId&&visibility?{ownerPersonId:asPersonId(ownerPersonId),privacy:placesTravelVisibilityPrivacy(visibility)}:{})
@@ -124,13 +133,13 @@ const allowedFields:Readonly<Record<string,ReadonlySet<string>>>=Object.freeze({
   reservation:new Set(['participantPersonIds','startsAt','endsAt','providerLabel','opaqueReference']),
   travel_document:new Set(['archiveItemId','expiresOn','documentKind']),
   travel_budget:new Set(['startsAt','endsAt','amountMinor','currency']),
-  shared_expense:new Set(['participantPersonIds','amountMinor','currency']),
+  shared_expense:new Set(['participantPersonIds','opaqueReference','amountMinor','currency']),
   packing_item:new Set(['checklistLabel','checklistCompleted']),
   travel_requirement:new Set(['requirementKind','opaqueRequirementReference']),
   offline_travel_pack:new Set(['archiveItemId']),
   language_pack:new Set(['archiveItemId','languageCode']),
   travel_album:new Set(['archiveItemId']),
-  expense_settlement:new Set(['participantPersonIds','amountMinor','currency'])
+  expense_settlement:new Set(['participantPersonIds','opaqueReference','amountMinor','currency'])
 });
 const specificFields=['addressLabel','latitudeE6','longitudeE6','offlineFallbackLabel','participantPersonIds','startsAt','endsAt',
   'providerLabel','opaqueReference','archiveItemId','expiresOn','documentKind','amountMinor','currency','checklistLabel',
@@ -145,11 +154,16 @@ const validateSpecific=(context:LifeApplicationContext,row:Record<string,unknown
   if(kind==='stored_place'&&!(typeof row.addressLabel==='string'||hasCoordinates))return err(invalid(context,'Kayıtlı yer adres etiketi veya koordinat gerektirir.'));
   if(kind==='moving_inventory'&&typeof row.archiveItemId!=='string')return err(invalid(context,'Taşınma envanteri opak arşiv öğesi gerektirir.'));
   if(kind==='pet_care_record'&&(!row.petReferenceId||!petWorkflows.has(String(row.petWorkflow))))return err(invalid(context,'Evcil hayvan kaydı opak hayvan referansı ve iş akışı gerektirir.'));
-  if(kind==='travel_plan'&&(!participants?.length||!row.startsAt||!row.endsAt))return err(invalid(context,'Seyahat planı katılımcı ve tarih aralığı gerektirir.'));
-  if(kind==='reservation'&&(!row.providerLabel||!row.opaqueReference||!row.startsAt||!row.endsAt))return err(invalid(context,'Rezervasyon yerel sağlayıcı etiketi, opak referans ve tarih gerektirir.'));
+  if(kind==='travel_plan'&&(!participants?.length||!row.startsAt||!row.endsAt||!row.addressLabel&&!row.offlineFallbackLabel))
+    return err(invalid(context,'Seyahat planı yer etiketi, katılımcı ve tarih aralığı gerektirir.'));
+  if(kind==='reservation'&&(!participants?.length||!row.providerLabel||!row.opaqueReference||!row.startsAt||!row.endsAt))
+    return err(invalid(context,'Rezervasyon katılımcı, yerel sağlayıcı etiketi, opak referans ve tarih gerektirir.'));
   if(kind==='travel_document'&&(!row.archiveItemId||!row.expiresOn||!documentKinds.has(String(row.documentKind))))return err(invalid(context,'Seyahat belgesi opak arşiv öğesi, tür ve süre gerektirir.'));
   if(['travel_budget','shared_expense','expense_settlement'].includes(kind)&&!commonAmount)return err(invalid(context,'Bütçe ve gider kaydı geçerli tutar ve para birimi gerektirir.'));
+  if(kind==='travel_budget'&&(!row.startsAt||!row.endsAt))return err(invalid(context,'Seyahat bütçesi tarih aralığı gerektirir.'));
   if(['shared_expense','expense_settlement'].includes(kind)&&(!participants||participants.length<2))return err(invalid(context,'Ortak gider en az iki katılımcı gerektirir.'));
+  if(['shared_expense','expense_settlement'].includes(kind)&&!row.opaqueReference)
+    return err(invalid(context,'Ortak gider ve kapatma kaydı opak seyahat veya gider referansı gerektirir.'));
   if(kind==='packing_item'&&typeof row.checklistLabel!=='string')return err(invalid(context,'Valiz öğesi checklist etiketi gerektirir.'));
   if(kind==='travel_requirement'&&(!requirementKinds.has(String(row.requirementKind))||!row.opaqueRequirementReference))return err(invalid(context,'Seyahat gereksinimi tür ve opak referans gerektirir.'));
   if(['offline_travel_pack','travel_album'].includes(kind)&&!row.archiveItemId)return err(invalid(context,'Yerel paket veya albüm opak arşiv öğesi gerektirir.'));
@@ -167,11 +181,12 @@ const normalizedCreate=(context:LifeApplicationContext,input:CreatePlacesTravelI
   const fallback=optionalText(context,input.offlineFallbackLabel,'Çevrimdışı yer etiketi',300);if(!fallback.ok)return fallback;
   const provider=optionalText(context,input.providerLabel,'Sağlayıcı etiketi',160);if(!provider.ok)return provider;
   const reference=optionalText(context,input.opaqueReference,'Opak referans',160);if(!reference.ok)return reference;
-  const archive=optionalText(context,input.archiveItemId,'Arşiv öğesi',160);if(!archive.ok)return archive;
-  const pet=optionalText(context,input.petReferenceId,'Evcil hayvan referansı',160);if(!pet.ok)return pet;
-  const requirement=optionalText(context,input.opaqueRequirementReference,'Gereksinim referansı',160);if(!requirement.ok)return requirement;
+  const archive=optionalIdentifier(context,input.archiveItemId,'Arşiv öğesi');if(!archive.ok)return archive;
+  const pet=optionalIdentifier(context,input.petReferenceId,'Evcil hayvan referansı');if(!pet.ok)return pet;
+  const requirement=optionalIdentifier(context,input.opaqueRequirementReference,'Gereksinim referansı');if(!requirement.ok)return requirement;
   const checklist=optionalText(context,input.checklistLabel,'Checklist etiketi',240);if(!checklist.ok)return checklist;
-  const ocr=optionalText(context,input.ocrJobId,'OCR iş kimliği',160);if(!ocr.ok)return ocr;
+  const ocr=optionalIdentifier(context,input.ocrJobId,'OCR iş kimliği');if(!ocr.ok)return ocr;
+  const language=optionalText(context,input.languageCode,'Dil kodu',35);if(!language.ok)return language;
   const note=optionalText(context,input.note,'Not',1000);if(!note.ok)return note;
   const participants=identifiers(context,input.participantPersonIds);if(!participants.ok)return participants;
   const starts=timestamp(context,input.startsAt,'Başlangıç');if(!starts.ok)return starts;
@@ -193,7 +208,7 @@ const normalizedCreate=(context:LifeApplicationContext,input:CreatePlacesTravelI
     ...(input.currency?{currency:input.currency.toUpperCase()}:{}),...(checklist.value?{checklistLabel:checklist.value}:{}),
     ...(input.checklistCompleted===undefined?{}:{checklistCompleted:input.checklistCompleted}),...(pet.value?{petReferenceId:pet.value}:{}),
     ...(input.petWorkflow?{petWorkflow:input.petWorkflow}:{}),...(input.requirementKind?{requirementKind:input.requirementKind}:{}),
-    ...(requirement.value?{opaqueRequirementReference:requirement.value}:{}),...(input.languageCode?{languageCode:input.languageCode}:{}),
+    ...(requirement.value?{opaqueRequirementReference:requirement.value}:{}),...(language.value?{languageCode:language.value}:{}),
     ...(ocr.value?{ocrJobId:ocr.value}:{}),...(note.value?{note:note.value}:{})});
   const shape=validateSpecific(context,row);return shape.ok?ok(row):shape;
 };
@@ -302,7 +317,12 @@ export class UpdatePlacesTravelItemUseCase {
       if(!found.value||found.value.status==='deleted')return err(missing(input.context,'Güncellenecek yer/seyahat kaydı bulunamadı.'));
       if(found.value.revision!==input.command.expectedRevision)return err(conflict(input.context,'Yer/seyahat kaydı revizyonu değişti.'));
       const nextVisibility=input.command.visibility??found.value.visibility;
-      const allowed=authorize(input.context,scope,'update',input.command.itemId,input.command.ownerPersonId,nextVisibility);if(!allowed.ok)return allowed;
+      const currentAllowed=authorize(input.context,scope,'update',input.command.itemId,input.command.ownerPersonId,found.value.visibility);
+      if(!currentAllowed.ok)return currentAllowed;
+      if(nextVisibility!==found.value.visibility){
+        const targetAllowed=authorize(input.context,scope,'update',input.command.itemId,input.command.ownerPersonId,nextVisibility);
+        if(!targetAllowed.ok)return targetAllowed;
+      }
       const nextTitle=input.command.title===undefined?ok(found.value.title):text(input.context,input.command.title,'Başlık',2,160);if(!nextTitle.ok)return nextTitle;
       if(input.command.status!==undefined&&!statuses.has(input.command.status)||input.command.visibility!==undefined&&!visibilities.has(input.command.visibility))return err(invalid(input.context,'Durum veya görünürlük geçersizdir.'));
       const starts=input.command.startsAt===null?ok(undefined):input.command.startsAt===undefined?ok(found.value.startsAt):timestamp(input.context,input.command.startsAt,'Başlangıç');if(!starts.ok)return starts;

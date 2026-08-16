@@ -66,10 +66,11 @@ const item=(row:PlacesTravelMutationRow,overrides:Partial<PlacesTravelItemRow>={
 describe('33-V places travel repository policy boundary',()=>{
   it('persists and reads an exact receipt-bound local place',async()=>{const h=openHarness();const row=mutation('place-33-v');
     expect((await withReceipt(h,{action:'create',resourceId:row.itemId,ownerPersonId:OWNER},(repo,ctx)=>{const ledger=repo.insertMutation(ctx,row);return ledger.ok?repo.insertItem(ctx,item(row)):ledger;})).ok).toBe(true);
-    const loaded=await withReceipt(h,{action:'read',resourceId:'*'},(repo,ctx)=>repo.loadCenter(ctx,key));
+    const loaded=await withReceipt(h,{action:'read',resourceId:'*',ownerPersonId:OWNER},(repo,ctx)=>repo.loadCenter(ctx,key));
     expect(loaded).toMatchObject({ok:true,value:{owner:{id:OWNER},items:[{id:row.itemId,addressLabel:'Parkın kuzey kapısı'}]}});
   });
   it('rejects forged owner and foreign-family receipts without persistence',async()=>{const h=openHarness();const row=mutation('forged-33-v');
+    expect((await withReceipt(h,{action:'read',resourceId:'*',ownerPersonId:ACTOR},(repo,ctx)=>repo.loadCenter(ctx,key))).ok).toBe(false);
     expect((await withReceipt(h,{action:'create',resourceId:row.itemId,ownerPersonId:ACTOR},(repo,ctx)=>repo.insertMutation(ctx,row))).ok).toBe(false);
     expect((await withReceipt(h,{action:'create',resourceId:row.itemId,ownerPersonId:OWNER,familyId:FOREIGN},(repo,ctx)=>repo.insertMutation(ctx,row))).ok).toBe(false);
     expect((h.runtime.database.prepare('SELECT COUNT(*) AS count FROM places_travel_mutations').get() as {count:number}).count).toBe(0);
@@ -84,7 +85,8 @@ describe('33-V places travel repository policy boundary',()=>{
     const row=mutation('trip-33-v',{id:'d'.repeat(64),clientOperationId:'operation-trip'});
     expect((await withReceipt(h,{action:'create',resourceId:row.itemId,ownerPersonId:OWNER},(repo,ctx)=>{const ledger=repo.insertMutation(ctx,row);
       return ledger.ok?repo.insertItem(ctx,item(row,{kind:'travel_plan',area:'travel',addressLabel:undefined,
-        participantPersonIds:[OWNER,MEMBER],startsAt:NOW,endsAt:asIsoDateTime('2026-08-16T16:00:00.000Z')})):ledger;})).ok).toBe(true);
+        offlineFallbackLabel:'Yerel buluşma etiketi',participantPersonIds:[OWNER,MEMBER],startsAt:NOW,
+        endsAt:asIsoDateTime('2026-08-16T16:00:00.000Z')})):ledger;})).ok).toBe(true);
     expect(()=>h.runtime.database.prepare('DELETE FROM places_travel_items WHERE id=?').run(row.itemId)).toThrow(/durable/u);
     expect(()=>h.runtime.database.prepare('UPDATE places_travel_mutations SET client_operation_id=? WHERE id=?').run('forged',row.id)).toThrow(/immutable/u);
   });
