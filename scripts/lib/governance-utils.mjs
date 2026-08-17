@@ -22,7 +22,13 @@ export const SELF_INDEX_PATHS = new Set([
 export const DERIVED_DOCUMENT_INDEX_PATHS = SELF_INDEX_PATHS;
 
 export const DOCUMENT_EXTENSIONS = new Set(['.md','.pdf','.docx','.txt','.rtf','.json','.csv','.yml','.yaml','.html']);
-export const EXCLUDED_DIRECTORIES = new Set(['node_modules','dist','release','coverage','.git','.idea','.vscode']);
+// Versioned 34-L receipts attest one exact local checkout and are intentionally
+// git-ignored. Indexing them would make the tracked complete-tree manifest
+// non-portable and fail every clean clone before it produces its own receipt.
+export const EXCLUDED_DIRECTORIES = new Set([
+  'node_modules','dist','release','coverage','.git','.idea','.vscode',
+  '34-L-bronze-local-closure-receipts'
+]);
 
 export const stableJson = (value) => JSON.stringify(value, Object.keys(value ?? {}).sort());
 export const sha256Bytes = (bytes) => createHash('sha256').update(bytes).digest('hex');
