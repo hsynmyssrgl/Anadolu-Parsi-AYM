@@ -85,6 +85,7 @@ import {
   CommitFullBackupRestoreUseCase,
   DiscardFullBackupRestoreUseCase,
   StoreArchiveFileUseCase,
+  type ArchiveVaultFilePort,
   MaterializeArchiveFileUseCase,
   ReadArchiveFileBytesUseCase,
   DestroyArchiveFileUseCase,
@@ -1500,6 +1501,7 @@ export class FamilyDataStore {
   readonly #commitFullBackupRestoreUseCase: CommitFullBackupRestoreUseCase;
   readonly #discardFullBackupRestoreUseCase: DiscardFullBackupRestoreUseCase;
   readonly #storeArchiveFileUseCase: StoreArchiveFileUseCase;
+  readonly #archiveVaultFiles: ArchiveVaultFilePort;
   readonly #materializeArchiveFileUseCase: MaterializeArchiveFileUseCase;
   readonly #readArchiveFileBytesUseCase: ReadArchiveFileBytesUseCase;
   readonly #destroyArchiveFileUseCase: DestroyArchiveFileUseCase;
@@ -1995,6 +1997,7 @@ export class FamilyDataStore {
       ...(archiveVaultKeyProvider ? { keyProvider: archiveVaultKeyProvider } : {}),
       temporaryOpenPath: storageLayout.temporaryOpenPath
     });
+    this.#archiveVaultFiles = archiveVaultFiles;
     this.#storeArchiveFileUseCase = new StoreArchiveFileUseCase(archiveVaultFiles);
     this.#materializeArchiveFileUseCase = new MaterializeArchiveFileUseCase(archiveVaultFiles);
     this.#readArchiveFileBytesUseCase = new ReadArchiveFileBytesUseCase(archiveVaultFiles);
@@ -7258,12 +7261,27 @@ export class FamilyDataStore {
   }
   public async addArchiveItemVersionFile(sourcePath:string,input:AddArchiveItemVersionInput&{readonly clientOperationId:string}):Promise<ArchiveVersionView[]>{
     const itemId=input.itemId.trim();
-    const operationId=this.#archiveOperationId(input.clientOperationId);
-    const versionId=deterministicArchiveIdentifier(operationId,'version');
+    this.#archiveOperationId(input.clientOperationId);
     const fileContext=this.#archiveApplicationContext('archive-version-file');
+    const inspected=this.#archiveVaultFiles.inspect?.({sourcePath},fileContext.correlationId);
+    if(!inspected)throw new Error('[CORE-UNEXPECTED-001] Arşiv kaynak dosyası inceleme sınırı yapılandırılmamış.');
+    if(!inspected.ok)throw new Error(`[${inspected.error.code}] ${inspected.error.message}`);
+    const normalizedNote=input.note?.normalize('NFKC').trim();
+    const operationSeed=canonicalArchiveOperationValue({
+      actorAccountId:fileContext.actor.userId,familyId:fileContext.familyId,mutation:'archive.version.add',
+      itemId,sourceSha256:inspected.value.sha256,sourceSizeBytes:inspected.value.sizeBytes,
+      ...(normalizedNote?{note:normalizedNote}:{})
+    });
+    const operationId=deterministicArchiveIdentifier(operationSeed,'archive-version-operation');
+    const versionId=deterministicArchiveIdentifier(operationId,'version');
     const stored=this.#storeArchiveFileUseCase.execute(fileContext.correlationId,{sourcePath,itemId:versionId});
     if(!stored.ok)throw new Error(`[${stored.error.code}] ${stored.error.message}`);
-    const command={itemId,originalName:stored.value.originalName,storedName:stored.value.storedName,mimeType:stored.value.mimeType,sizeBytes:stored.value.sizeBytes,sha256:stored.value.sha256,...(input.note?.trim()?{note:input.note.trim()}:{})};
+    if(stored.value.originalName!==inspected.value.originalName||stored.value.mimeType!==inspected.value.mimeType
+      ||stored.value.sizeBytes!==inspected.value.sizeBytes||stored.value.sha256!==inspected.value.sha256){
+      if(stored.value.createdNewFile)this.#destroyArchiveFileUseCase.execute(fileContext.correlationId,{storedName:stored.value.storedName,secureDestroy:false});
+      throw new Error('[CORE-INVALID-001] Arşiv kaynak dosyası inceleme ile kasa yazımı arasında değişti.');
+    }
+    const command={itemId,originalName:stored.value.originalName,storedName:stored.value.storedName,mimeType:stored.value.mimeType,sizeBytes:stored.value.sizeBytes,sha256:stored.value.sha256,...(normalizedNote?{note:normalizedNote}:{})};
     const context=this.#archiveDirectMutationContext('archive.version.add',operationId,command,fileContext.correlationId);
     const result=await this.#addArchiveItemVersionUseCase.execute({context,command,identifiers:{versionId,auditId:deterministicArchiveIdentifier(operationId,'audit'),outboxEventId:asEventId(deterministicArchiveIdentifier(operationId,'outbox'))}});
     if(!result.ok){

@@ -74,23 +74,23 @@ const definitions = [
     ['owner-bound evidence', 'foreign-family relation', 'receipt for another archive resource', 'version two'])],
   ['archive receipt-fence regression accepts v1 create and rejects v2 create replay', hasAll(archiveReceiptFenceTest,
     ['versionNo: 1', 'fresh exact parent create or update policy receipt', 'replayed and cross-resource SQL'])],
-  ['DataStore test proves encrypted files replay rollback and no raw metadata leak', hasAll(evidenceDataStoreTest,
-    ['persists/replays relation evidence', 'without leaking plaintext or paths', 'audit_log', 'event_outbox'])],
+  ['DataStore test proves encrypted files restart replay rollback and no raw metadata leak', hasAll(evidenceDataStoreTest,
+    ['persists/replays relation evidence', 'without leaking plaintext or paths', 'restartte-degisen-renderer-kimligi', 'audit_log', 'event_outbox'])],
   ['IPC and UI tests pin safe keys channels and immutable history disclosure', hasAll(evidenceIpcUiTest,
     ['ARCHIVE_EVIDENCE_MEDIA_IPC_CHANNELS', 'rejecting renderer authority fields', 'immutable-history truth'])],
   ['unified search tests cover six modules bounds and fail closed source errors', hasAll(searchApplicationTest,
     ['selected already-authorized sources', 'fails closed without partial output', 'duplicate modules', 'module/resource mismatches'])
       && hasAll(searchAdapterTest, ['selected governed sources', 'fails the whole source load'])
       && hasAll(searchIpcUiTest, ['unifiedSearch:search', 'query echo', 'module/resource mismatch'])],
-  ['decision and threat model record no false atomicity or acceptance claim', hasAll(decision,
-    ['countsAsRequirementPass=false', 'restart-durable pending recovery garantisi değildir', 'NOT_RUN'])
+  ['decision and threat model record bounded restart recovery without false atomicity or acceptance claim', hasAll(decision,
+    ['countsAsRequirementPass=false', 'Process restart sonrası renderer kimliği değişse bile', 'genel filesystem/SQLite crash atomikliği', 'NOT_RUN'])
       && hasAll(threat, ['filesystem ile SQLite arasında sahte atomiklik', 'kısmi sonuç dönmez', 'certification'])],
-  ['PPK ratchets are pinned exactly while requirement remains open', scope.validation?.ppk021?.scannedProductionFiles === 555
-    && scope.validation?.ppk021?.exactPrivilegedSurfaceCount === 873
-    && scope.validation?.ppk021?.exactAllowlistSha256 === '843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc'
-    && scope.validation?.ppk022?.scannedProductionFiles === 555
-    && scope.validation?.ppk022?.exactCapabilitySurfaceCount === 392
-    && scope.validation?.ppk022?.exactCapabilityManifestSha256 === 'cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c'
+  ['PPK ratchets are pinned exactly while requirement remains open', scope.validation?.ppk021?.scannedProductionFiles === 556
+    && scope.validation?.ppk021?.exactPrivilegedSurfaceCount === 876
+    && scope.validation?.ppk021?.exactAllowlistSha256 === '709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0'
+    && scope.validation?.ppk022?.scannedProductionFiles === 556
+    && scope.validation?.ppk022?.exactCapabilitySurfaceCount === 395
+    && scope.validation?.ppk022?.exactCapabilityManifestSha256 === 'a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e'
     && scope.validation?.countsAsRequirementPass === false && inventory.validation?.countsAsRequirementPass === false]
 ];
 

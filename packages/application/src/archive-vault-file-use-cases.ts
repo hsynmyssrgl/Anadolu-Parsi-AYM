@@ -17,7 +17,18 @@ export interface StoredArchiveFile {
   readonly createdNewFile: boolean;
 }
 
+export interface ArchiveSourceFileMetadata {
+  readonly originalName: string;
+  readonly mimeType: string;
+  readonly sizeBytes: number;
+  readonly sha256: string;
+}
+
 export interface ArchiveVaultFilePort {
+  inspect?(
+    input: { readonly sourcePath: string },
+    correlationId: CorrelationId
+  ): Result<ArchiveSourceFileMetadata, AppError>;
   store(
     input: { readonly sourcePath: string; readonly itemId: string },
     correlationId: CorrelationId

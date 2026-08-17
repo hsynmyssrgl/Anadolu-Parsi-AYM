@@ -89,6 +89,16 @@ describe('33-R archive evidence/media DataStore integration',()=>{
     expect(history.map(value=>value.mutationKind)).toEqual(['evidence_remove','evidence_create']);
 
     store.close();stores.splice(stores.indexOf(store),1);
+    const restarted=new FamilyDataStore({
+      databasePath,seed:false,archivePath:join(directory,'archive-vault'),
+      archivePolicyAuthorizationProvider:provider,
+      archivePolicyReceiptSink:{append:()=>undefined,ensure:projectionProof,verifyProjectionProof:()=>true},
+      archivePolicyVersion:policyVersion,archiveClusterFence:()=>({writable:true,epoch:96})
+    });
+    stores.push(restarted);
+    restarted.login({email:'33r@example.test',password:'Guclu33RArsivParolasi!'});
+    expect(await restarted.addArchiveItemVersionFile(secondPath,{...versionInput,clientOperationId:'restartte-degisen-renderer-kimligi'})).toEqual(versions);
+    restarted.close();stores.splice(stores.indexOf(restarted),1);
     const database=new DatabaseSync(databasePath,{readOnly:true});
     try{
       expect(database.prepare('SELECT COUNT(*) count FROM archive_relation_evidence_mutations').get()).toEqual({count:2});

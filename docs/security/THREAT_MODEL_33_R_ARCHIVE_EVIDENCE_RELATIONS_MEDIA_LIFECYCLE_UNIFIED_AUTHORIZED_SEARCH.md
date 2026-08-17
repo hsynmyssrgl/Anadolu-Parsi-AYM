@@ -32,7 +32,7 @@ Dosya seçici yalnız ana süreçtedir. Renderer path/stored name/raw bytes/anah
 
 ### Dosya ile SQLite arasında crash penceresi
 
-Bilinen non-commit sonucunda sahip olunan yeni dosya temizlenir; belirsiz commit sonucunda retry doğrulaması için şifreli dosya korunur. Bu tasarım filesystem ile SQLite arasında sahte atomiklik veya restart-durable otomatik recovery iddiası üretmez. Manuel aynı-operation retry kanıtı ile persistent recovery kanıtı ayrı tutulur.
+Bilinen non-commit sonucunda sahip olunan yeni dosya temizlenir; belirsiz commit sonucunda retry doğrulaması için şifreli dosya korunur. Main-process inspection aile/actor/kayıt/not/SHA-256/boyut bağıyla deterministik operation ve version kimliği üretir; restart sonrası aynı byte-exact dosya aynı kasaya ve aynı idempotent SQLite sonucuna bağlanır, farklı dosya reddedilir. Bu tasarım filesystem ile SQLite arasında sahte atomiklik veya kullanıcı seçimi olmadan otomatik recovery iddiası üretmez.
 
 ### Birleşik aramada yetkisiz sonuç sızıntısı
 
@@ -48,7 +48,7 @@ PPK-021/022 allowlist ve capability manifesti yalnız build/runtime surface ratc
 
 ## Açık riskler
 
-- Process restart sonrası belirsiz evidence/version mutation recovery kanıtı yoktur.
+- Process restart sonrası aynı dosya ve semantik girdinin version mutation replay kanıtı vardır; evidence mutation ve kullanıcı seçimi olmadan otomatik devam kapsam dışıdır.
 - Archive file ile SQLite metadata arasında genel crash-atomicity garantisi yoktur.
 - Legacy ownerless archive reattestation gerçek kullanıcı UAT’si yapılmamıştır.
 - Büyük aile ölçeği, erişilebilirlik, gizlilik, hukuk ve bağımsız güvenlik incelemesi `NOT_RUN` durumundadır.

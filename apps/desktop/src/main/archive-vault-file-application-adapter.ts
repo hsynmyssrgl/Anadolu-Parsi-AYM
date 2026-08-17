@@ -32,6 +32,28 @@ export class FileSystemArchiveVaultFilePort implements ArchiveVaultFilePort {
     mkdirSync(options.archivePath, { recursive: true });
   }
 
+  public inspect(
+    input: { readonly sourcePath: string },
+    correlationId: CorrelationId
+  ): ReturnType<NonNullable<ArchiveVaultFilePort['inspect']>> {
+    let plain: Buffer | undefined;
+    try {
+      plain = readFileSync(input.sourcePath);
+      return ok({
+        originalName: basename(input.sourcePath),
+        mimeType: extname(input.sourcePath).toLowerCase() === '.pdf'
+          ? 'application/pdf'
+          : 'application/octet-stream',
+        sizeBytes: plain.length,
+        sha256: createHash('sha256').update(plain).digest('hex')
+      });
+    } catch (error) {
+      return err(this.#error(correlationId, 'Arşiv kaynak dosyası incelenemedi.', error));
+    } finally {
+      plain?.fill(0);
+    }
+  }
+
   public store(
     input: { readonly sourcePath: string; readonly itemId: string },
     correlationId: CorrelationId

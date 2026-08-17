@@ -52,7 +52,7 @@
       "mainProcessFilePicker": true,
       "rendererPathAuthority": false,
       "unknownCommitPreservesEncryptedFileForRetry": true,
-      "restartDurablePendingRecoveryGuaranteed": false
+      "restartDurablePendingRecoveryGuaranteed": true
     },
     "unifiedAuthorizedSearch": {
       "status": "PARTIAL_LOCAL_COMPOSED_AND_TESTED_ACCEPTANCE_INCOMPLETE",
@@ -92,7 +92,7 @@
     "rendererReceivesRawFilePath": false,
     "rendererReceivesPolicyReceipt": false,
     "rendererReceivesAccountFamilyOwnerAuthority": false,
-    "restartDurableMutationRecoveryValidated": false,
+    "restartDurableMutationRecoveryValidated": true,
     "archiveFileAndSqliteAtomicityGuaranteed": false,
     "legacyOwnerlessArchiveAutomaticallyTrusted": false,
     "externalManualAcceptanceCompleted": false,
@@ -118,18 +118,18 @@
     "dataStoreSmokeChecks": 14,
     "ppk021": {
       "status": "PASS",
-      "scannedProductionFiles": 555,
-      "exactPrivilegedSurfaceCount": 873,
-      "exactAllowlistSha256": "843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc",
+      "scannedProductionFiles": 556,
+      "exactPrivilegedSurfaceCount": 876,
+      "exactAllowlistSha256": "709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0",
       "targetedTests": 17,
       "contractChecks": 84,
       "runtimeChecks": 20
     },
     "ppk022": {
       "status": "PASS",
-      "scannedProductionFiles": 555,
-      "exactCapabilitySurfaceCount": 392,
-      "exactCapabilityManifestSha256": "cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c",
+      "scannedProductionFiles": 556,
+      "exactCapabilitySurfaceCount": 395,
+      "exactCapabilityManifestSha256": "a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e",
       "targetedTests": 19,
       "contractChecks": 110,
       "runtimeChecks": 24
@@ -152,7 +152,6 @@
   "persistentReceiptStatus": "NOT_RUN",
   "remainingAcceptanceWork": [
     "33-P ve 33-Q atomik yönetişim kapanışlarının tamamlanması",
-    "belirsiz commit sonrası restart-durable mutation recovery sözleşmesi",
     "archive dosyası ile SQLite metadata arasındaki crash recovery kabulü",
     "legacy ownerless archive yeniden doğrulama UAT kanıtı",
     "gerçek kullanıcı, büyük aile, erişilebilirlik, gizlilik, hukuk ve güvenlik kabul kanıtları"
