@@ -175,12 +175,47 @@ const TIME = /^([01]\d|2[0-3]):[0-5]\d$/u;
 const ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u;
 const CONTROL = /[\u0000-\u001f\u007f]/u;
 const SOURCES = new Set<UniversalSearchSource>(['inbox', 'person', 'event', 'document', 'message', 'command']);
+const ZERO_SHA256 = '0'.repeat(64);
+
+const isExactPlainDataObject = (
+  value: unknown,
+  requiredKeys: readonly string[],
+  optionalKeys: readonly string[] = []
+): value is Record<string, unknown> => {
+  try {
+    if (value === null || typeof value !== 'object' || Array.isArray(value) ||
+      Object.getPrototypeOf(value) !== Object.prototype || Object.getOwnPropertySymbols(value).length !== 0) return false;
+    const keys = Object.keys(value);
+    const allowed = new Set([...requiredKeys, ...optionalKeys]);
+    if (keys.length < requiredKeys.length || keys.length > allowed.size ||
+      requiredKeys.some(key => !Object.prototype.hasOwnProperty.call(value, key)) ||
+      keys.some(key => !allowed.has(key))) return false;
+    const descriptors = Object.getOwnPropertyDescriptors(value);
+    return keys.every(key => descriptors[key]?.enumerable === true && 'value' in descriptors[key]!);
+  } catch {
+    return false;
+  }
+};
+
+const isDensePlainDataArray = (value: unknown, maximum: number): value is readonly unknown[] => {
+  try {
+    if (!Array.isArray(value) || Object.getPrototypeOf(value) !== Array.prototype ||
+      Object.getOwnPropertySymbols(value).length !== 0 || value.length > maximum || Object.keys(value).length !== value.length) {
+      return false;
+    }
+    const descriptors = Object.getOwnPropertyDescriptors(value);
+    return Array.from({length: value.length}, (_unused, index) => String(index))
+      .every(key => descriptors[key]?.enumerable === true && 'value' in descriptors[key]!);
+  } catch {
+    return false;
+  }
+};
 
 export const isSafeUniversalUxIdentifier = (value: unknown): value is string =>
   typeof value === 'string' && SAFE.test(value);
 
 export const isUniversalUxSha256 = (value: unknown): value is string =>
-  typeof value === 'string' && SHA.test(value);
+  typeof value === 'string' && SHA.test(value) && value !== ZERO_SHA256;
 
 export const isCanonicalUniversalUxIsoDateTime = (value: unknown): value is string => {
   if (typeof value !== 'string' || !ISO.test(value)) return false;
@@ -193,21 +228,19 @@ export const isSafeUniversalUxText = (value: unknown, minimum: number, maximum: 
   value.length >= minimum && value.length <= maximum && !CONTROL.test(value);
 
 const validUniqueIds = (values: unknown, maximum: number): values is readonly string[] =>
-  Array.isArray(values) && values.length <= maximum && values.every(isSafeUniversalUxIdentifier) &&
+  isDensePlainDataArray(values, maximum) && values.every(isSafeUniversalUxIdentifier) &&
   new Set(values).size === values.length;
 
 const validUniqueTexts = (values: unknown, maximum: number): values is readonly string[] =>
-  Array.isArray(values) && values.length <= maximum && values.every(value => isSafeUniversalUxText(value, 1, 128)) &&
+  isDensePlainDataArray(values, maximum) && values.every(value => isSafeUniversalUxText(value, 1, 128)) &&
   new Set(values).size === values.length;
 
 export const isUniversalUxPreferencesView = (value: unknown): value is UniversalUxPreferencesView => {
-  if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
+  if (!isExactPlainDataObject(value, [
+    'dashboardCardIds', 'favoriteRouteIds', 'mode', 'quietHoursEnabled', 'quietHoursEnd',
+    'quietHoursStart', 'recentRouteIds', 'revision', 'updatedAt', 'weeklyDigestEnabled'
+  ])) return false;
   const item = value as Partial<UniversalUxPreferencesView>;
-  if (Object.getPrototypeOf(value) !== Object.prototype ||
-    Object.keys(value).sort().join(',') !== [
-      'dashboardCardIds', 'favoriteRouteIds', 'mode', 'quietHoursEnabled', 'quietHoursEnd',
-      'quietHoursStart', 'recentRouteIds', 'revision', 'updatedAt', 'weeklyDigestEnabled'
-    ].sort().join(',')) return false;
   return UNIVERSAL_UX_MODES.includes(item.mode as UniversalUxMode) &&
     validUniqueIds(item.favoriteRouteIds, 64) && validUniqueIds(item.recentRouteIds, 64) &&
     validUniqueIds(item.dashboardCardIds, 32) && typeof item.quietHoursEnabled === 'boolean' &&
@@ -222,12 +255,20 @@ export const evaluatePolicyWeakening = (
   input: PolicyWeakeningProposalInput,
   verification: PolicyWeakeningVerificationView
 ): PolicyWeakeningDecisionView => {
-  const evidenceShapeValid = [input.proposalId, input.currentPolicyVersion, input.proposedPolicyVersion,
+  const inputShapeValid = isExactPlainDataObject(input, [
+    'proposalId', 'currentPolicyVersion', 'proposedPolicyVersion', 'explicitUserDecisionId',
+    'explicitUserDecisionSha256', 'riskAnalysisSha256', 'rollbackPlanSha256', 'proposedPolicyPackageSha256', 'reason'
+  ]);
+  const verificationShapeValid = isExactPlainDataObject(verification, [
+    'providerId', 'providerConfigured', 'providerProductionVerified', 'verified', 'networkUsed'
+  ], ['explicitUserDecisionSha256', 'riskAnalysisSha256', 'rollbackPlanSha256', 'proposedPolicyPackageSha256',
+    'providerEvidenceSha256']);
+  const evidenceShapeValid = inputShapeValid && [input.proposalId, input.currentPolicyVersion, input.proposedPolicyVersion,
     input.explicitUserDecisionId].every(isSafeUniversalUxIdentifier) &&
     input.currentPolicyVersion !== input.proposedPolicyVersion &&
     [input.explicitUserDecisionSha256, input.riskAnalysisSha256, input.rollbackPlanSha256,
       input.proposedPolicyPackageSha256].every(isUniversalUxSha256) && isSafeUniversalUxText(input.reason, 10, 2000);
-  const verificationExact = evidenceShapeValid && verification.providerConfigured === true &&
+  const verificationExact = evidenceShapeValid && verificationShapeValid && verification.providerConfigured === true &&
     verification.providerProductionVerified === true && verification.verified === true &&
     isSafeUniversalUxIdentifier(verification.providerId) &&
     verification.explicitUserDecisionSha256 === input.explicitUserDecisionSha256 &&
@@ -240,11 +281,12 @@ export const evaluatePolicyWeakening = (
     evidenceShapeValid,
     reason: verificationExact ? 'VERIFIED_EXPLICIT_DECISION_RISK_ROLLBACK_AND_SIGNED_PACKAGE' :
       evidenceShapeValid ? 'POLICY_WEAKENING_VERIFICATION_REQUIRED' : 'POLICY_WEAKENING_EVIDENCE_INCOMPLETE',
-    verificationProviderId: isSafeUniversalUxIdentifier(verification.providerId) ? verification.providerId : 'invalid-provider',
-    verificationProviderProductionVerified: verification.providerProductionVerified === true,
-    ...(isUniversalUxSha256(verification.providerEvidenceSha256) ?
+    verificationProviderId: verificationShapeValid && isSafeUniversalUxIdentifier(verification.providerId) ?
+      verification.providerId : 'invalid-provider',
+    verificationProviderProductionVerified: verificationShapeValid && verification.providerProductionVerified === true,
+    ...(verificationShapeValid && isUniversalUxSha256(verification.providerEvidenceSha256) ?
       {verificationEvidenceSha256: verification.providerEvidenceSha256} : {}),
-    networkUsed: typeof verification.networkUsed === 'boolean' ? verification.networkUsed : null,
+    networkUsed: verificationShapeValid && typeof verification.networkUsed === 'boolean' ? verification.networkUsed : null,
     requiresNewSignedPolicyPackage: true,
     automaticActivationAllowed: false
   });
@@ -257,10 +299,12 @@ export const searchUniversalUx = (
 ): readonly UniversalSearchResultView[] => {
   const normalizedQuery = typeof query === 'string' ? query.normalize('NFKC').trim() : '';
   if (!isSafeUniversalUxText(normalizedQuery, 1, 256) || !Number.isSafeInteger(limit) || limit < 1 || limit > 100 ||
-    !Array.isArray(candidates) || candidates.length > 500) throw new Error('Universal search input is invalid');
+    !isDensePlainDataArray(candidates, 500)) throw new Error('Universal search input is invalid');
   const ids = new Set<string>();
   for (const candidate of candidates) {
-    if (!candidate || candidate.authorized !== true || !isSafeUniversalUxIdentifier(candidate.id) ||
+    if (!isExactPlainDataObject(candidate, [
+      'id', 'source', 'title', 'keywords', 'routeId', 'authorized', 'authorizationEvidenceSha256'
+    ], ['occurredAt']) || candidate.authorized !== true || !isSafeUniversalUxIdentifier(candidate.id) ||
       !SOURCES.has(candidate.source) || !isSafeUniversalUxText(candidate.title, 1, 256) ||
       !validUniqueTexts(candidate.keywords, 32) ||
       !isSafeUniversalUxIdentifier(candidate.routeId) || !isUniversalUxSha256(candidate.authorizationEvidenceSha256) ||
@@ -290,6 +334,13 @@ export const searchUniversalUx = (
 export const assessWindowsResilienceEvidence = (
   input: WindowsResilienceEvidenceObservation
 ): WindowsResilienceEvidenceView => {
+  if (!isExactPlainDataObject(input, [
+    'providerId', 'providerConfigured', 'providerProductionVerified', 'providerEvidenceSha256', 'observedAt',
+    'networkUsed', 'crashSafeTransactionSyntheticPass', 'startupRecoverySyntheticPass',
+    'installerCleanInstallRealWindowsPass', 'installerUpgradeRealWindowsPass', 'installerRepairRealWindowsPass',
+    'installerUninstallDataProtectionRealWindowsPass', 'peopleCount', 'eventCount', 'documentCount', 'soakHours',
+    'realWindowsSoak'
+  ])) throw new Error('Windows resilience evidence observation is invalid');
   const booleanFields = [input.providerConfigured, input.providerProductionVerified, input.networkUsed,
     input.crashSafeTransactionSyntheticPass, input.startupRecoverySyntheticPass,
     input.installerCleanInstallRealWindowsPass, input.installerUpgradeRealWindowsPass,

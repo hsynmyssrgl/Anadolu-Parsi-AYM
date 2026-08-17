@@ -17968,13 +17968,16 @@ const windowsResilienceUniversalUxSql = `CREATE TABLE universal_ux_operations(
   actor_account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE RESTRICT,
   actor_person_id TEXT NOT NULL REFERENCES people(id) ON DELETE RESTRICT,
   operation_kind TEXT NOT NULL CHECK(operation_kind IN ('preferences_update','policy_weakening_record','resilience_evidence_record')),
-  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
-  result_id TEXT NOT NULL UNIQUE CHECK(length(result_id)=64 AND result_id NOT GLOB '*[^0-9a-f]*'),
+  request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'
+    AND request_fingerprint<>'0000000000000000000000000000000000000000000000000000000000000000'),
+  result_id TEXT NOT NULL UNIQUE CHECK(length(result_id)=64 AND result_id NOT GLOB '*[^0-9a-f]*'
+    AND result_id<>'0000000000000000000000000000000000000000000000000000000000000000'),
   policy_resource_id TEXT NOT NULL CHECK(length(trim(policy_resource_id)) BETWEEN 2 AND 256),
   occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z' AND julianday(occurred_at) IS NOT NULL),
   result_requirements_closed INTEGER NOT NULL CHECK(result_requirements_closed IN (0,1)),
   policy_receipt_hash TEXT NOT NULL UNIQUE REFERENCES platform_policy_transaction_receipts(receipt_hash) ON DELETE RESTRICT
-    CHECK(length(policy_receipt_hash)=64 AND policy_receipt_hash NOT GLOB '*[^0-9a-f]*'),
+    CHECK(length(policy_receipt_hash)=64 AND policy_receipt_hash NOT GLOB '*[^0-9a-f]*'
+      AND policy_receipt_hash<>'0000000000000000000000000000000000000000000000000000000000000000'),
   policy_receipt_version INTEGER NOT NULL CHECK(policy_receipt_version>=1),
   policy_receipt_nonce TEXT NOT NULL CHECK(length(trim(policy_receipt_nonce)) BETWEEN 16 AND 256),
   policy_correlation_id TEXT NOT NULL CHECK(length(trim(policy_correlation_id)) BETWEEN 1 AND 256),
@@ -18013,17 +18016,22 @@ CREATE TABLE policy_weakening_proposals(
   current_policy_version TEXT NOT NULL CHECK(length(trim(current_policy_version)) BETWEEN 2 AND 256),
   proposed_policy_version TEXT NOT NULL CHECK(length(trim(proposed_policy_version)) BETWEEN 2 AND 256),
   explicit_user_decision_id TEXT NOT NULL CHECK(length(trim(explicit_user_decision_id)) BETWEEN 2 AND 256),
-  explicit_user_decision_sha256 TEXT NOT NULL CHECK(length(explicit_user_decision_sha256)=64 AND explicit_user_decision_sha256 NOT GLOB '*[^0-9a-f]*'),
-  risk_analysis_sha256 TEXT NOT NULL CHECK(length(risk_analysis_sha256)=64 AND risk_analysis_sha256 NOT GLOB '*[^0-9a-f]*'),
-  rollback_plan_sha256 TEXT NOT NULL CHECK(length(rollback_plan_sha256)=64 AND rollback_plan_sha256 NOT GLOB '*[^0-9a-f]*'),
-  proposed_policy_package_sha256 TEXT NOT NULL CHECK(length(proposed_policy_package_sha256)=64 AND proposed_policy_package_sha256 NOT GLOB '*[^0-9a-f]*'),
+  explicit_user_decision_sha256 TEXT NOT NULL CHECK(length(explicit_user_decision_sha256)=64 AND explicit_user_decision_sha256 NOT GLOB '*[^0-9a-f]*'
+    AND explicit_user_decision_sha256<>'0000000000000000000000000000000000000000000000000000000000000000'),
+  risk_analysis_sha256 TEXT NOT NULL CHECK(length(risk_analysis_sha256)=64 AND risk_analysis_sha256 NOT GLOB '*[^0-9a-f]*'
+    AND risk_analysis_sha256<>'0000000000000000000000000000000000000000000000000000000000000000'),
+  rollback_plan_sha256 TEXT NOT NULL CHECK(length(rollback_plan_sha256)=64 AND rollback_plan_sha256 NOT GLOB '*[^0-9a-f]*'
+    AND rollback_plan_sha256<>'0000000000000000000000000000000000000000000000000000000000000000'),
+  proposed_policy_package_sha256 TEXT NOT NULL CHECK(length(proposed_policy_package_sha256)=64 AND proposed_policy_package_sha256 NOT GLOB '*[^0-9a-f]*'
+    AND proposed_policy_package_sha256<>'0000000000000000000000000000000000000000000000000000000000000000'),
   reason TEXT NOT NULL CHECK(length(trim(reason)) BETWEEN 10 AND 2000 AND reason=trim(reason)),
   accepted INTEGER NOT NULL CHECK(accepted IN (0,1)),
   decision_reason TEXT NOT NULL CHECK(decision_reason IN ('VERIFIED_EXPLICIT_DECISION_RISK_ROLLBACK_AND_SIGNED_PACKAGE','POLICY_WEAKENING_VERIFICATION_REQUIRED')),
   verification_provider_id TEXT NOT NULL CHECK(length(trim(verification_provider_id)) BETWEEN 2 AND 256),
   verification_provider_production_verified INTEGER NOT NULL CHECK(verification_provider_production_verified IN (0,1)),
   verification_evidence_sha256 TEXT CHECK(verification_evidence_sha256 IS NULL OR
-    (length(verification_evidence_sha256)=64 AND verification_evidence_sha256 NOT GLOB '*[^0-9a-f]*')),
+    (length(verification_evidence_sha256)=64 AND verification_evidence_sha256 NOT GLOB '*[^0-9a-f]*'
+      AND verification_evidence_sha256<>'0000000000000000000000000000000000000000000000000000000000000000')),
   network_used INTEGER CHECK(network_used IS NULL OR network_used IN (0,1)),
   recorded_at TEXT NOT NULL CHECK(length(recorded_at)=24 AND recorded_at GLOB '????-??-??T??:??:??.???Z' AND julianday(recorded_at) IS NOT NULL),
   operation_result_id TEXT NOT NULL UNIQUE REFERENCES universal_ux_operations(result_id) ON DELETE RESTRICT,
@@ -18039,7 +18047,8 @@ CREATE TABLE windows_resilience_evidence(
   provider_id TEXT NOT NULL CHECK(length(trim(provider_id)) BETWEEN 2 AND 256),
   provider_configured INTEGER NOT NULL CHECK(provider_configured IN (0,1)),
   provider_production_verified INTEGER NOT NULL CHECK(provider_production_verified IN (0,1)),
-  provider_evidence_sha256 TEXT NOT NULL CHECK(length(provider_evidence_sha256)=64 AND provider_evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
+  provider_evidence_sha256 TEXT NOT NULL CHECK(length(provider_evidence_sha256)=64 AND provider_evidence_sha256 NOT GLOB '*[^0-9a-f]*'
+    AND provider_evidence_sha256<>'0000000000000000000000000000000000000000000000000000000000000000'),
   observed_at TEXT NOT NULL CHECK(length(observed_at)=24 AND observed_at GLOB '????-??-??T??:??:??.???Z' AND julianday(observed_at) IS NOT NULL),
   network_used INTEGER NOT NULL CHECK(network_used IN (0,1)),
   crash_safe_transaction_synthetic_pass INTEGER NOT NULL CHECK(crash_safe_transaction_synthetic_pass IN (0,1)),
@@ -18058,6 +18067,7 @@ CREATE TABLE windows_resilience_evidence(
   operation_result_id TEXT NOT NULL UNIQUE REFERENCES universal_ux_operations(result_id) ON DELETE RESTRICT,
   CHECK(provider_production_verified=0 OR provider_configured=1),
   CHECK(julianday(observed_at)<=julianday(recorded_at)),
+  CHECK(julianday(recorded_at)-julianday(observed_at)<=1),
   CHECK(requirements_closed=CASE WHEN provider_configured=1 AND provider_production_verified=1
     AND crash_safe_transaction_synthetic_pass=1 AND startup_recovery_synthetic_pass=1
     AND installer_clean_install_real_windows_pass=1 AND installer_upgrade_real_windows_pass=1

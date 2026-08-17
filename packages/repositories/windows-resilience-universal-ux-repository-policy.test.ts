@@ -44,7 +44,7 @@ describe('34-K resilience universal UX migration boundary', () => {
     const runtime = open();
     const migration = FAMILY_DATABASE_MIGRATIONS.at(-1);
     expect(migration).toMatchObject({version: 115, name: 'windows_resilience_universal_ux',
-      checksum: 'e43ccbe70eecee7c7572f3c78cd26f357ab0c69357da712664bb50ed3c81279b'});
+      checksum: 'e9e67d7ef5c3097f4e39ea3a01aca76a7f9b64fe5b54de8da4de8cfbfc42e5cc'});
     expect(runtime.database.prepare("SELECT value FROM database_metadata WHERE key='schema_generation'").get())
       .toEqual({value: 'REVISION-34-K-WINDOWS-RESILIENCE-UNIVERSAL-UX'});
     const tableRows = runtime.database.prepare(`SELECT name,sql FROM sqlite_master WHERE type='table' AND name IN
@@ -52,6 +52,9 @@ describe('34-K resilience universal UX migration boundary', () => {
       ORDER BY name`).all() as Array<{name: string; sql: string}>;
     expect(tableRows).toHaveLength(4);
     for (const row of tableRows) expect(row.sql).toMatch(/\) STRICT$/u);
+    const schemaSql = tableRows.map(row => row.sql).join('\n');
+    expect(schemaSql).toContain("provider_evidence_sha256<>'0000000000000000000000000000000000000000000000000000000000000000'");
+    expect(schemaSql).toContain('julianday(recorded_at)-julianday(observed_at)<=1');
     const operationColumns = (runtime.database.prepare("SELECT name FROM pragma_table_info('universal_ux_operations')")
       .all() as Array<{name: string}>).map(row => row.name);
     for (const column of ['actor_account_id', 'actor_person_id', 'policy_resource_id', 'occurred_at',

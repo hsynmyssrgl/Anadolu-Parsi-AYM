@@ -15,6 +15,7 @@ import {
   evaluatePolicyWeakening,
   isSafeUniversalUxIdentifier,
   isUniversalUxPreferencesView,
+  isUniversalUxSha256,
   searchUniversalUx,
   type PolicyWeakeningProposalInput,
   type PolicyWeakeningVerificationView,
@@ -127,6 +128,26 @@ export const unavailableWindowsResilienceEvidenceProvider: WindowsResilienceEvid
 
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/u;
 
+const isExactProviderDataObject = (
+  value: unknown,
+  requiredKeys: readonly string[],
+  optionalKeys: readonly string[] = []
+): value is Record<string, unknown> => {
+  try {
+    if (value === null || typeof value !== 'object' || Array.isArray(value) ||
+      Object.getPrototypeOf(value) !== Object.prototype || Object.getOwnPropertySymbols(value).length !== 0) return false;
+    const keys = Object.keys(value);
+    const allowed = new Set([...requiredKeys, ...optionalKeys]);
+    if (keys.length < requiredKeys.length || keys.length > allowed.size ||
+      requiredKeys.some(key => !Object.prototype.hasOwnProperty.call(value, key)) ||
+      keys.some(key => !allowed.has(key))) return false;
+    const descriptors = Object.getOwnPropertyDescriptors(value);
+    return keys.every(key => descriptors[key]?.enumerable === true && 'value' in descriptors[key]!);
+  } catch {
+    return false;
+  }
+};
+
 const canonicalJson = (value: unknown): string => {
   if (value === null || typeof value !== 'object') return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
@@ -221,7 +242,8 @@ export class SearchUniversalUxUseCase {
     }
     try {
       const resolved = await this.authority.searchAuthorized({context: input.context, query: input.query, limit});
-      if (typeof resolved.networkUsed !== 'boolean' || !/^[0-9a-f]{64}$/u.test(resolved.providerEvidenceSha256)) {
+      if (!isExactProviderDataObject(resolved, ['candidates', 'providerEvidenceSha256', 'networkUsed']) ||
+        typeof resolved.networkUsed !== 'boolean' || !isUniversalUxSha256(resolved.providerEvidenceSha256)) {
         return err(denied(input.context, 'Evrensel arama yetki kanıtı geçersizdir.'));
       }
       return ok(searchUniversalUx(input.query, resolved.candidates, limit));
@@ -344,7 +366,10 @@ export class RecordPolicyWeakeningProposalUseCase {
       verification = {providerId: this.verifier.providerId, providerConfigured: this.verifier.configured,
         providerProductionVerified: this.verifier.productionVerified, verified: false, networkUsed: null};
     }
-    if (verification.providerId !== this.verifier.providerId ||
+    if (!isExactProviderDataObject(verification, [
+      'providerId', 'providerConfigured', 'providerProductionVerified', 'verified', 'networkUsed'
+    ], ['explicitUserDecisionSha256', 'riskAnalysisSha256', 'rollbackPlanSha256', 'proposedPolicyPackageSha256',
+      'providerEvidenceSha256']) || verification.providerId !== this.verifier.providerId ||
       verification.providerConfigured !== this.verifier.configured ||
       verification.providerProductionVerified !== this.verifier.productionVerified) {
       return err(denied(context, 'Politika zayıflatma doğrulayıcı kimliği uyuşmuyor.'));
@@ -407,16 +432,16 @@ export class RecordWindowsResilienceEvidenceUseCase {
     } catch {
       return err(unexpected(context, 'Windows dayanıklılık kanıtı doğrulanamadı.'));
     }
-    if (observed.providerId !== this.provider.providerId ||
-      observed.providerConfigured !== this.provider.configured ||
-      observed.providerProductionVerified !== this.provider.productionVerified) {
-      return err(denied(context, 'Windows dayanıklılık sağlayıcı kimliği uyuşmuyor.'));
-    }
     let assessed;
     try {
       assessed = assessWindowsResilienceEvidence(observed);
     } catch {
       return err(invalid(context, 'Windows dayanıklılık kanıtı geçersizdir.'));
+    }
+    if (assessed.providerId !== this.provider.providerId ||
+      assessed.providerConfigured !== this.provider.configured ||
+      assessed.providerProductionVerified !== this.provider.productionVerified) {
+      return err(denied(context, 'Windows dayanıklılık sağlayıcı kimliği uyuşmuyor.'));
     }
     const policyResourceId = input.evidenceId;
     const requestFingerprint = hash({familyId: context.familyId, ownerPersonId: owner,
@@ -427,8 +452,10 @@ export class RecordWindowsResilienceEvidenceUseCase {
       if (prior.value) return prior.value.operationKind === 'resilience_evidence_record' &&
         prior.value.requestFingerprint === requestFingerprint && prior.value.policyResourceId === policyResourceId ?
         ok(receipt(prior.value, true)) : err(conflict(context, 'İşlem kimliği farklı dayanıklılık kanıtına aittir.'));
-      if (Date.parse(assessed.observedAt) > Date.parse(scope.occurredAt)) {
-        return err(invalid(context, 'Windows dayanıklılık kanıtı gelecekte gözlemlenmiş olamaz.'));
+      const observedAtMs = Date.parse(assessed.observedAt);
+      const recordedAtMs = Date.parse(scope.occurredAt);
+      if (observedAtMs > recordedAtMs || recordedAtMs - observedAtMs > 86_400_000) {
+        return err(invalid(context, 'Windows dayanıklılık kanıtı gelecekte veya 24 saatten eski olamaz.'));
       }
       const evidence: WindowsResilienceEvidenceRow = Object.freeze({...assessed, id: input.evidenceId,
         familyId: asFamilyId(context.familyId), ownerPersonId: asPersonId(owner), recordedAt: scope.occurredAt});

@@ -45,11 +45,11 @@ const packages={
   '34-K':{slug:'windows-resilience-universal-ux',decision:'DEC-248',migration:115,
     scope:'config/34-k-windows-resilience-universal-ux-scope.json',inventory:'config/34-k-windows-resilience-universal-ux-inventory.json',
     decisionFile:'docs/decisions/DEC-248-windows-resilience-universal-ux.md',threat:'docs/security/THREAT_MODEL_34_K_WINDOWS_RESILIENCE_UNIVERSAL_UX.md',
-    localStatus:'LOCAL_HARDENED_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE',expectedTestFiles:3,expectedTests:13,
-    validation:{migrationSha256:'e43ccbe70eecee7c7572f3c78cd26f357ab0c69357da712664bb50ed3c81279b',
-      ppk015Sha256:'dd417d3278b872587fa1ef32cda41e5dcf44a22c9781f29c311d78d845d48e29',
-      ppk021Count:873,ppk021Sha256:'843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc',
-      ppk022Count:392,ppk022Sha256:'cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c'},
+    localStatus:'LOCAL_HARDENED_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE',expectedTestFiles:3,expectedTests:16,
+    validation:{migrationSha256:'e9e67d7ef5c3097f4e39ea3a01aca76a7f9b64fe5b54de8da4de8cfbfc42e5cc',
+      ppk015Sha256:'9f390fd90375bb41505118e8e18dbe0d8868732f588bde80c80c409491edc2e7',
+      ppk021Count:876,ppk021Sha256:'709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0',
+      ppk022Count:395,ppk022Sha256:'a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e'},
     tests:['packages/application/tests/windows-resilience-universal-ux-use-cases.test.ts','packages/repositories/windows-resilience-universal-ux-repository-policy.test.ts','apps/desktop/tests/universal-ux-consolidation-ui.test.ts'],
     markers:[['packages/domain/src/windows-resilience-universal-ux.ts','callerSuppliedSearchAuthorizationAccepted: false'],['packages/domain/src/windows-resilience-universal-ux.ts','operationLedgerRetentionPolicyDecided: false'],['packages/application/src/windows-resilience-universal-ux-use-cases.ts','UniversalUxSearchAuthorityPort'],['packages/application/src/windows-resilience-universal-ux-use-cases.ts','WindowsResilienceEvidenceProviderPort'],['packages/repositories/src/windows-resilience-universal-ux-repository.ts','exact durable policy receipt'],['packages/database/src/family-database-migrations.ts',"createMigrationDefinition(115, 'windows_resilience_universal_ux'"],['packages/database/src/family-database-migrations.ts','34-K operation requires exact owner-bound durable PEP receipt'],['apps/desktop/src/renderer/UniversalUxConsolidationPanel.tsx','yetkilendirilmiş evrensel veri araması değildir']]}
 };

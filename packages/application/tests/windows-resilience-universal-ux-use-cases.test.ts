@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { asCorrelationId, asFamilyId, asPersonId, asUserId, ok, type AppError, type Result } from '@ppt/core';
+import { isUniversalUxPreferencesView } from '@ppt/domain';
 import type {
   PolicyWeakeningProposalRow,
   UniversalUxOperationRow,
@@ -165,6 +166,43 @@ describe('34-K Windows resilience and universal UX use cases', () => {
       routeId: 'life-center', score: 2, authorizationFiltered: true, authorizationEvidenceSha256: '1'.repeat(64)}]});
   });
 
+  it('rejects zero search evidence and accessor-backed authority candidates without reading accessors', async () => {
+    const zeroEvidenceAuthority: UniversalUxSearchAuthorityPort = Object.freeze({...searchAuthority,
+      searchAuthorized: async () => ({candidates: Object.freeze([]), providerEvidenceSha256: '0'.repeat(64),
+        networkUsed: false})});
+    expect(await new SearchUniversalUxUseCase(zeroEvidenceAuthority).execute({context: CONTEXT, query: 'sağlık'}))
+      .toMatchObject({ok: false, error: {category: 'authorization'}});
+
+    let accessorReads = 0;
+    const candidate: Record<string, unknown> = {
+      id: 'accessor-result', source: 'inbox', keywords: Object.freeze(['sağlık']), routeId: 'life-center',
+      authorized: true, authorizationEvidenceSha256: '1'.repeat(64)
+    };
+    Object.defineProperty(candidate, 'title', {enumerable: true, get: () => {
+      accessorReads += 1;
+      return 'Sağlık sonucu';
+    }});
+    const accessorAuthority: UniversalUxSearchAuthorityPort = Object.freeze({...searchAuthority,
+      searchAuthorized: async () => ({candidates: Object.freeze([candidate]) as never,
+        providerEvidenceSha256: SHA, networkUsed: false})});
+    expect(await new SearchUniversalUxUseCase(accessorAuthority).execute({context: CONTEXT, query: 'sağlık'}))
+      .toMatchObject({ok: false, error: {category: 'authorization'}});
+    expect(accessorReads).toBe(0);
+  });
+
+  it('rejects accessor-backed preference data before reading its values', () => {
+    let accessorReads = 0;
+    const preferences: Record<string, unknown> = {mode: 'standard', recentRouteIds: [], dashboardCardIds: [],
+      quietHoursEnabled: false, quietHoursStart: '22:00', quietHoursEnd: '07:00', weeklyDigestEnabled: true,
+      revision: 1, updatedAt: '2026-08-16T02:30:00.000Z'};
+    Object.defineProperty(preferences, 'favoriteRouteIds', {enumerable: true, get: () => {
+      accessorReads += 1;
+      return [];
+    }});
+    expect(isUniversalUxPreferencesView(preferences)).toBe(false);
+    expect(accessorReads).toBe(0);
+  });
+
   it('persists bounded owner preferences and replays exact identity without a second write', async () => {
     const unit = new Unit();
     const useCase = new UpdateUniversalUxPreferencesUseCase(unit);
@@ -219,6 +257,15 @@ describe('34-K Windows resilience and universal UX use cases', () => {
     const result = await new RecordWindowsResilienceEvidenceUseCase(unit,
       resilienceProvider(true, '2026-08-17T02:29:00.000Z')).execute({context: CONTEXT,
       clientOperationId: 'resilience-future-34-k', evidenceId: 'evidence-future-34-k'});
+    expect(result).toMatchObject({ok: false, error: {category: 'validation'}});
+    expect(unit.state.evidence).toEqual([]);
+  });
+
+  it('rejects provider evidence older than the bounded 24-hour freshness window', async () => {
+    const unit = new Unit();
+    const result = await new RecordWindowsResilienceEvidenceUseCase(unit,
+      resilienceProvider(true, '2026-08-14T02:29:00.000Z')).execute({context: CONTEXT,
+      clientOperationId: 'resilience-stale-34-k', evidenceId: 'evidence-stale-34-k'});
     expect(result).toMatchObject({ok: false, error: {category: 'validation'}});
     expect(unit.state.evidence).toEqual([]);
   });
