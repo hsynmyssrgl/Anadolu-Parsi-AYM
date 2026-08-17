@@ -33,6 +33,12 @@ describe('34-I distributed core migration boundary',()=>{
     ).all() as Array<{name:string;strict:number}>;
     expect(tables).toHaveLength(3);
     expect(tables.every(row=>row.strict===1)).toBe(true);
+    const mutationTable=runtime.database.prepare(
+      "SELECT sql FROM sqlite_master WHERE type='table' AND name='distributed_mutation_log'"
+    ).get() as {sql:string};
+    expect(mutationTable.sql.replaceAll(/\s+/gu,'')).toContain(
+      'PRIMARYKEY(cluster_id,family_id,mutation_id),UNIQUE(cluster_id,family_id,idempotency_key)'
+    );
     const triggerRows=runtime.database.prepare(
       "SELECT sql FROM sqlite_master WHERE type='trigger' AND name LIKE 'trg_34i_%'"
     ).all() as Array<{sql:string}>;
@@ -42,6 +48,8 @@ describe('34-I distributed core migration boundary',()=>{
     expect(sql).toContain('mutation chain, leader fence or tenancy evidence mismatch');
     expect(sql).toContain('snapshot leader fence, tenancy or monotonic index mismatch');
     expect(sql).toContain('node identity or monotonic state cannot regress');
+    expect(sql).toContain('n.commit_index=NEW.commit_index AND n.applied_index=NEW.commit_index');
+    expect(sql).toContain('NEW.snapshot_index<=n.applied_index');
   });
 
   it('accepts only exact leader-bound chains and rejects regressions, forged actors and stale snapshots',()=>{
@@ -55,6 +63,7 @@ describe('34-I distributed core migration boundary',()=>{
       'INSERT INTO distributed_cluster_nodes(node_id,cluster_id,family_id,role,voter,term,fencing_token,commit_index,applied_index,certificate_fingerprint,certificate_revoked,key_epoch,policy_version,revocation_epoch,safe_mode,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
     ).run('node-34-i','cluster-34-i','family-34-i','leader',1,4,5,0,0,'a'.repeat(64),0,3,'policy-34-i',2,0,
       '2026-08-16T01:30:00.000Z');
+    runtime.database.prepare("UPDATE distributed_cluster_nodes SET commit_index=1,applied_index=1 WHERE node_id='node-34-i'").run();
     const insertMutation=runtime.database.prepare(
       'INSERT INTO distributed_mutation_log(mutation_id,idempotency_key,request_fingerprint,cluster_id,family_id,node_id,leader_term,fencing_token,entity_type,entity_id,entity_version,global_sequence,actor_person_id,device_id,schema_version,policy_version,revocation_epoch,key_epoch,payload_sha256,previous_hash,mutation_hash,commit_index,provider_id,provider_evidence_sha256,projection_sha256,occurred_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
     );
@@ -77,5 +86,8 @@ describe('34-I distributed core migration boundary',()=>{
     expect(()=>insertSnapshot.run('snapshot-stale','cluster-34-i','family-34-i','node-34-i',4,5,0,'4'.repeat(64),
       'opaque-envelope-2',3,'policy-34-i',2,'synthetic-provider','6'.repeat(64),1,'2026-08-16T01:33:00.000Z'))
       .toThrow(/snapshot leader fence/);
+    runtime.database.prepare("UPDATE distributed_cluster_nodes SET certificate_revoked=1 WHERE node_id='node-34-i'").run();
+    expect(()=>runtime.database.prepare("UPDATE distributed_cluster_nodes SET certificate_revoked=0 WHERE node_id='node-34-i'").run())
+      .toThrow(/cannot regress/);
   });
 });

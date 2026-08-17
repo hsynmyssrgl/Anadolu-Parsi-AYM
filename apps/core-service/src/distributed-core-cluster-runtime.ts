@@ -21,10 +21,10 @@ export interface DistributedCommittedMutationRecord {
   readonly providerEvidenceSha256:string;readonly projectionSha256:string;readonly providerId:string;
 }
 export interface DistributedCorePersistencePort {
-  lastMutation(clusterId:string,familyId:string):DistributedMutationEnvelope|null;
+  head(clusterId:string,familyId:string):DistributedCommittedMutationRecord|null;
   entityVersion(clusterId:string,familyId:string,entityType:string,entityId:string):number;
-  findByIdempotencyKey(idempotencyKey:string):DistributedCommittedMutationRecord|null;
-  findByMutationId(mutationId:string):DistributedCommittedMutationRecord|null;
+  findByIdempotencyKey(clusterId:string,familyId:string,idempotencyKey:string):DistributedCommittedMutationRecord|null;
+  findByMutationId(clusterId:string,familyId:string,mutationId:string):DistributedCommittedMutationRecord|null;
   commitAndApply(input:{readonly mutation:DistributedMutationEnvelope;readonly requestFingerprint:string;
     readonly commitIndex:number;readonly providerEvidenceSha256:string;readonly providerId:string}):
     {readonly projectionSha256:string};
@@ -48,6 +48,7 @@ export interface DistributedSnapshotVerificationDecision {
 }
 
 const SHA=/^[0-9a-f]{64}$/u;
+const ZERO_SHA='0'.repeat(64);
 const SAFE=/^[A-Za-z0-9][A-Za-z0-9._:@/-]{1,255}$/u;
 const CANONICAL_ISO=/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u;
 const safeInteger=(value:number,minimum=0):boolean=>Number.isSafeInteger(value)&&value>=minimum;
@@ -78,7 +79,8 @@ const validMutation=(mutation:DistributedMutationEnvelope):boolean=>
   &&hash(mutationBase(mutation))===mutation.mutationHash;
 const validCommittedRecord=(record:DistributedCommittedMutationRecord):boolean=>
   validMutation(record.mutation)&&SHA.test(record.requestFingerprint)&&safeInteger(record.commitIndex,1)
-  &&SHA.test(record.providerEvidenceSha256)&&SHA.test(record.projectionSha256)&&SAFE.test(record.providerId);
+  &&SHA.test(record.providerEvidenceSha256)&&record.providerEvidenceSha256!==ZERO_SHA
+  &&SHA.test(record.projectionSha256)&&record.projectionSha256!==ZERO_SHA&&SAFE.test(record.providerId);
 const denied=(reason:string,provider:MatureRaftProviderPort,networkUsed:boolean|null=false,
   consensusCommitted=false):DistributedCoreMutationDecision=>Object.freeze({accepted:false,reason,
   providerId:provider.providerId,productionConsensusVerified:false,networkUsed,replayed:false,
@@ -147,8 +149,8 @@ export class DistributedCoreClusterRuntime {
     let replay:DistributedCommittedMutationRecord|null;
     let reusedMutation:DistributedCommittedMutationRecord|null;
     try {
-      replay=this.options.persistence.findByIdempotencyKey(input.idempotencyKey);
-      reusedMutation=this.options.persistence.findByMutationId(input.mutationId);
+      replay=this.options.persistence.findByIdempotencyKey(input.clusterId,input.familyId,input.idempotencyKey);
+      reusedMutation=this.options.persistence.findByMutationId(input.clusterId,input.familyId,input.mutationId);
     } catch {
       this.enterSafeMode();return denied('PERSISTENCE_READ_FAILED',provider);
     }
@@ -168,17 +170,21 @@ export class DistributedCoreClusterRuntime {
     if(!this.#isLeader()||this.#safeMode||!this.#quorumHealthy)return denied('LEADER_NOT_WRITABLE',provider);
     if(input.term!==this.#term||input.fencingToken!==this.#fencingToken)return denied('STALE_FENCING_TOKEN',provider);
     let currentVersion:number;
-    let previous:DistributedMutationEnvelope|null;
+    let previousRecord:DistributedCommittedMutationRecord|null;
     try {
       currentVersion=this.options.persistence.entityVersion(input.clusterId,input.familyId,input.entityType,input.entityId);
-      previous=this.options.persistence.lastMutation(input.clusterId,input.familyId);
+      previousRecord=this.options.persistence.head(input.clusterId,input.familyId);
     } catch {
       this.enterSafeMode();return denied('PERSISTENCE_READ_FAILED',provider);
     }
     if(!safeInteger(currentVersion)||currentVersion!==input.expectedEntityVersion) {
       return denied('ENTITY_VERSION_CONFLICT',provider);
     }
-    if(previous&&!validMutation(previous)){this.enterSafeMode();return denied('PREVIOUS_CHAIN_INVALID',provider);}
+    if(previousRecord&&(!validCommittedRecord(previousRecord)
+      ||previousRecord.mutation.clusterId!==input.clusterId||previousRecord.mutation.familyId!==input.familyId)) {
+      this.enterSafeMode();return denied('PREVIOUS_CHAIN_INVALID',provider);
+    }
+    const previous=previousRecord?.mutation;
     const base=Object.freeze({mutationId:input.mutationId,idempotencyKey:input.idempotencyKey,
       clusterId:input.clusterId,familyId:input.familyId,entityType:input.entityType,entityId:input.entityId,
       entityVersion:currentVersion+1,globalSequence:(previous?.globalSequence??0)+1,actorPersonId:input.actorPersonId,
@@ -193,13 +199,14 @@ export class DistributedCoreClusterRuntime {
     } catch {
       this.enterSafeMode();return denied('RAFT_PROVIDER_ERROR',provider,null);
     }
-    if(typeof proposed.networkUsed!=='boolean') {
+    if(typeof proposed.networkUsed!=='boolean'||typeof proposed.accepted!=='boolean'
+      ||typeof proposed.majorityConfirmed!=='boolean'||proposed.accepted!==proposed.majorityConfirmed) {
       this.enterSafeMode();return denied('RAFT_PROVIDER_EVIDENCE_INVALID',provider,null);
     }
-    if(!proposed.accepted||!proposed.majorityConfirmed)return denied(proposed.reason??'MAJORITY_NOT_CONFIRMED',
-      provider,proposed.networkUsed);
+    if(proposed.accepted!==true)return denied('MAJORITY_NOT_CONFIRMED',provider,proposed.networkUsed);
     if(!safeInteger(proposed.commitIndex,1)||!proposed.providerEvidenceSha256
-      ||!SHA.test(proposed.providerEvidenceSha256)) {
+      ||!SHA.test(proposed.providerEvidenceSha256)||proposed.providerEvidenceSha256===ZERO_SHA
+      ||proposed.commitIndex<=(previousRecord?.commitIndex??0)) {
       this.enterSafeMode();return denied('RAFT_PROVIDER_EVIDENCE_INVALID',provider,proposed.networkUsed);
     }
     let projection:{readonly projectionSha256:string};
@@ -209,7 +216,7 @@ export class DistributedCoreClusterRuntime {
     } catch {
       this.enterSafeMode();return denied('COMMITTED_LOCAL_APPLY_FAILED',provider,proposed.networkUsed,true);
     }
-    if(!SHA.test(projection.projectionSha256)){
+    if(!SHA.test(projection.projectionSha256)||projection.projectionSha256===ZERO_SHA){
       this.enterSafeMode();return denied('COMMITTED_LOCAL_PROJECTION_INVALID',provider,proposed.networkUsed,true);
     }
     return Object.freeze({accepted:true,reason:'COMMITTED',mutation,commitIndex:proposed.commitIndex,
@@ -226,7 +233,7 @@ export class DistributedCoreClusterRuntime {
       return Object.freeze({verified:false,reason:'RAFT_PROVIDER_UNVERIFIED',providerId:provider.providerId,
         productionConsensusVerified:false,networkUsed:false});
     }
-    if(!SHA.test(input.snapshotSha256)||!safeInteger(input.snapshotIndex)
+    if(!SHA.test(input.snapshotSha256)||input.snapshotSha256===ZERO_SHA||!safeInteger(input.snapshotIndex,1)
       ||input.policyVersion!==this.options.policyVersion||input.revocationEpoch!==this.options.revocationEpoch
       ||input.keyEpoch!==this.options.keyEpoch) {
       return Object.freeze({verified:false,reason:'SNAPSHOT_INPUT_INVALID',providerId:provider.providerId,
@@ -240,8 +247,9 @@ export class DistributedCoreClusterRuntime {
         providerId:provider.providerId,productionConsensusVerified:false,networkUsed:null});
     }
     if(typeof verified.networkUsed!=='boolean'||verified.verified!==true
-      ||!verified.providerEvidenceSha256||!SHA.test(verified.providerEvidenceSha256)) {
-      return Object.freeze({verified:false,reason:verified.reason??'SNAPSHOT_PROVIDER_EVIDENCE_INVALID',
+      ||!verified.providerEvidenceSha256||!SHA.test(verified.providerEvidenceSha256)
+      ||verified.providerEvidenceSha256===ZERO_SHA) {
+      return Object.freeze({verified:false,reason:verified.verified===false?'SNAPSHOT_NOT_VERIFIED':'SNAPSHOT_PROVIDER_EVIDENCE_INVALID',
         providerId:provider.providerId,productionConsensusVerified:false,
         networkUsed:typeof verified.networkUsed==='boolean'?verified.networkUsed:null});
     }

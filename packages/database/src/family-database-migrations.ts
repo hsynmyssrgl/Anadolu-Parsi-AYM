@@ -17695,7 +17695,7 @@ const distributedCoreConsensusTenancySql = `CREATE TABLE distributed_cluster_nod
   role TEXT NOT NULL CHECK(role IN ('leader','follower','read_replica','witness','backup_only','maintenance')),
   voter INTEGER NOT NULL CHECK(voter IN (0,1)),
   term INTEGER NOT NULL CHECK(term>=0),
-  fencing_token INTEGER NOT NULL CHECK(fencing_token>=0),
+  fencing_token INTEGER NOT NULL CHECK(fencing_token>=1),
   commit_index INTEGER NOT NULL CHECK(commit_index>=0),
   applied_index INTEGER NOT NULL CHECK(applied_index>=0 AND applied_index<=commit_index),
   certificate_fingerprint TEXT NOT NULL CHECK(length(certificate_fingerprint)=64 AND certificate_fingerprint NOT GLOB '*[^0-9a-f]*'),
@@ -17708,8 +17708,8 @@ const distributedCoreConsensusTenancySql = `CREATE TABLE distributed_cluster_nod
   UNIQUE(cluster_id,family_id,node_id)
 ) STRICT;
 CREATE TABLE distributed_mutation_log(
-  mutation_id TEXT PRIMARY KEY CHECK(length(mutation_id) BETWEEN 2 AND 256),
-  idempotency_key TEXT NOT NULL UNIQUE CHECK(length(idempotency_key) BETWEEN 2 AND 256),
+  mutation_id TEXT NOT NULL CHECK(length(mutation_id) BETWEEN 2 AND 256),
+  idempotency_key TEXT NOT NULL CHECK(length(idempotency_key) BETWEEN 2 AND 256),
   request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
   cluster_id TEXT NOT NULL CHECK(length(cluster_id) BETWEEN 2 AND 256),
   family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
@@ -17729,6 +17729,7 @@ CREATE TABLE distributed_mutation_log(
   provider_evidence_sha256 TEXT NOT NULL CHECK(length(provider_evidence_sha256)=64 AND provider_evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
   projection_sha256 TEXT NOT NULL CHECK(length(projection_sha256)=64 AND projection_sha256 NOT GLOB '*[^0-9a-f]*'),
   occurred_at TEXT NOT NULL CHECK(length(occurred_at)=24 AND occurred_at GLOB '????-??-??T??:??:??.???Z'),
+  PRIMARY KEY(cluster_id,family_id,mutation_id),UNIQUE(cluster_id,family_id,idempotency_key),
   UNIQUE(cluster_id,family_id,global_sequence),UNIQUE(cluster_id,family_id,entity_type,entity_id,entity_version)
 ) STRICT;
 CREATE TABLE distributed_cluster_snapshots(
@@ -17737,7 +17738,7 @@ CREATE TABLE distributed_cluster_snapshots(
   family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
   node_id TEXT NOT NULL REFERENCES distributed_cluster_nodes(node_id) ON DELETE RESTRICT,
   leader_term INTEGER NOT NULL CHECK(leader_term>=0),fencing_token INTEGER NOT NULL CHECK(fencing_token>=1),
-  snapshot_index INTEGER NOT NULL CHECK(snapshot_index>=0),
+  snapshot_index INTEGER NOT NULL CHECK(snapshot_index>=1),
   snapshot_sha256 TEXT NOT NULL CHECK(length(snapshot_sha256)=64 AND snapshot_sha256 NOT GLOB '*[^0-9a-f]*'),
   encrypted_reference TEXT NOT NULL CHECK(length(encrypted_reference) BETWEEN 2 AND 512),
   key_epoch INTEGER NOT NULL CHECK(key_epoch>=1),policy_version TEXT NOT NULL CHECK(length(policy_version) BETWEEN 2 AND 256),
@@ -17753,6 +17754,9 @@ CREATE TRIGGER trg_34i_node_update BEFORE UPDATE ON distributed_cluster_nodes
 WHEN NEW.node_id<>OLD.node_id OR NEW.cluster_id<>OLD.cluster_id OR NEW.family_id<>OLD.family_id
   OR NEW.term<OLD.term OR NEW.fencing_token<OLD.fencing_token OR NEW.commit_index<OLD.commit_index
   OR NEW.applied_index<OLD.applied_index OR NEW.key_epoch<OLD.key_epoch OR NEW.revocation_epoch<OLD.revocation_epoch
+  OR (NEW.term>OLD.term AND NEW.fencing_token<=OLD.fencing_token)
+  OR (NEW.role='leader' AND OLD.role<>'leader' AND NEW.fencing_token<=OLD.fencing_token)
+  OR NEW.certificate_revoked<OLD.certificate_revoked
 BEGIN SELECT RAISE(ABORT,'34-I node identity or monotonic state cannot regress'); END;
 CREATE TRIGGER trg_34i_node_delete BEFORE DELETE ON distributed_cluster_nodes
 BEGIN SELECT RAISE(ABORT,'34-I node evidence requires a governed decommission ledger'); END;
@@ -17763,6 +17767,7 @@ WHEN NOT EXISTS(
       AND n.role='leader' AND n.term=NEW.leader_term AND n.fencing_token=NEW.fencing_token
       AND n.safe_mode=0 AND n.certificate_revoked=0 AND n.policy_version=NEW.policy_version
       AND n.revocation_epoch=NEW.revocation_epoch AND n.key_epoch=NEW.key_epoch
+      AND n.commit_index=NEW.commit_index AND n.applied_index=NEW.commit_index
   )
   OR NOT EXISTS(SELECT 1 FROM people p WHERE p.id=NEW.actor_person_id AND p.family_id=NEW.family_id AND p.status='active')
   OR NEW.global_sequence<>COALESCE((
@@ -17783,6 +17788,10 @@ WHEN NOT EXISTS(
     WHERE m.cluster_id=NEW.cluster_id AND m.family_id=NEW.family_id
       AND m.entity_type=NEW.entity_type AND m.entity_id=NEW.entity_id
   ),0)+1
+  OR NEW.occurred_at<COALESCE((
+    SELECT MAX(m.occurred_at) FROM distributed_mutation_log m
+    WHERE m.cluster_id=NEW.cluster_id AND m.family_id=NEW.family_id
+  ),NEW.occurred_at)
 BEGIN SELECT RAISE(ABORT,'34-I mutation chain, leader fence or tenancy evidence mismatch'); END;
 CREATE TRIGGER trg_34i_mutation_update BEFORE UPDATE ON distributed_mutation_log
 BEGIN SELECT RAISE(ABORT,'34-I replicated mutation log is immutable'); END;
@@ -17795,11 +17804,16 @@ WHEN NOT EXISTS(
       AND n.role='leader' AND n.term=NEW.leader_term AND n.fencing_token=NEW.fencing_token
       AND n.safe_mode=0 AND n.certificate_revoked=0 AND n.policy_version=NEW.policy_version
       AND n.revocation_epoch=NEW.revocation_epoch AND n.key_epoch=NEW.key_epoch
+      AND NEW.snapshot_index<=n.applied_index
   )
   OR NEW.snapshot_index<=COALESCE((
     SELECT MAX(s.snapshot_index) FROM distributed_cluster_snapshots s
     WHERE s.cluster_id=NEW.cluster_id AND s.family_id=NEW.family_id
   ),-1)
+  OR NEW.created_at<COALESCE((
+    SELECT MAX(s.created_at) FROM distributed_cluster_snapshots s
+    WHERE s.cluster_id=NEW.cluster_id AND s.family_id=NEW.family_id
+  ),NEW.created_at)
 BEGIN SELECT RAISE(ABORT,'34-I snapshot leader fence, tenancy or monotonic index mismatch'); END;
 CREATE TRIGGER trg_34i_snapshot_update BEFORE UPDATE ON distributed_cluster_snapshots
 BEGIN SELECT RAISE(ABORT,'34-I verified cluster snapshot is immutable'); END;

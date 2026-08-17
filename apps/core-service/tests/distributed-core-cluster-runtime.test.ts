@@ -10,18 +10,20 @@ class Persistence implements DistributedCorePersistencePort {
   public readonly records:DistributedCommittedMutationRecord[]=[];
   public readonly versions=new Map<string,number>();
   public failCommit=false;
-  public lastMutation(clusterId:string,familyId:string){
+  public head(clusterId:string,familyId:string){
     return this.records.filter(record=>record.mutation.clusterId===clusterId&&record.mutation.familyId===familyId)
-      .at(-1)?.mutation??null;
+      .at(-1)??null;
   }
   public entityVersion(clusterId:string,familyId:string,type:string,id:string){
     return this.versions.get([clusterId,familyId,type,id].join(':'))??0;
   }
-  public findByIdempotencyKey(idempotencyKey:string){
-    return this.records.find(record=>record.mutation.idempotencyKey===idempotencyKey)??null;
+  public findByIdempotencyKey(clusterId:string,familyId:string,idempotencyKey:string){
+    return this.records.find(record=>record.mutation.clusterId===clusterId&&record.mutation.familyId===familyId
+      &&record.mutation.idempotencyKey===idempotencyKey)??null;
   }
-  public findByMutationId(mutationId:string){
-    return this.records.find(record=>record.mutation.mutationId===mutationId)??null;
+  public findByMutationId(clusterId:string,familyId:string,mutationId:string){
+    return this.records.find(record=>record.mutation.clusterId===clusterId&&record.mutation.familyId===familyId
+      &&record.mutation.mutationId===mutationId)??null;
   }
   public commitAndApply(input:Omit<DistributedCommittedMutationRecord,'projectionSha256'>){
     if(this.failCommit)throw new Error('synthetic local transaction failure');
@@ -101,6 +103,16 @@ describe('34-I distributed core consensus and tenancy foundation',()=>{
       .toMatchObject({accepted:false,reason:'IDEMPOTENCY_KEY_REUSED'});
     expect(active.propose({...input,idempotencyKey:'idempotency-other-34-i'}))
       .toMatchObject({accepted:false,reason:'MUTATION_ID_REUSED'});
+    expect(active.propose({...input,mutationId:'mutation-next-34-i',idempotencyKey:'idempotency-next-34-i',
+      expectedEntityVersion:1,payloadSha256:'6'.repeat(64),occurredAt:'2026-08-16T01:31:00.000Z'}))
+      .toMatchObject({accepted:false,reason:'RAFT_PROVIDER_EVIDENCE_INVALID'});
+    expect(active.state()).toMatchObject({safeMode:true,writable:false});
+    const otherTenant=new DistributedCoreClusterRuntime({clusterId:'cluster-34-i',familyId:'family-other-34-i',
+      nodeId:'node-other-34-i',policyVersion:'policy-34-i',revocationEpoch:2,keyEpoch:3,
+      provider:providerFixture(),persistence,allowUnverifiedProviderForTests:true});
+    otherTenant.assumeRole({role:'leader',term:4,fencingToken:5,quorumHealthy:true});
+    expect(otherTenant.propose({...input,familyId:'family-other-34-i',entityId:'health-other-34-i'}))
+      .toMatchObject({accepted:true,reason:'COMMITTED',replayed:false});
   });
 
   it('rejects malformed tenant, epoch, timestamp, numeric and provider evidence inputs',()=>{
@@ -115,6 +127,14 @@ describe('34-I distributed core consensus and tenancy foundation',()=>{
     forged.assumeRole({role:'leader',term:4,fencingToken:5,quorumHealthy:true});
     expect(forged.propose(input)).toMatchObject({accepted:false,reason:'RAFT_PROVIDER_EVIDENCE_INVALID'});
     expect(forged.state()).toMatchObject({safeMode:true,writable:false});
+    const malformedBoolean=runtime({provider:providerFixture({propose:()=>({accepted:'yes' as unknown as boolean,
+      majorityConfirmed:true,commitIndex:1,providerEvidenceSha256:'8'.repeat(64),networkUsed:false})})});
+    malformedBoolean.assumeRole({role:'leader',term:4,fencingToken:5,quorumHealthy:true});
+    expect(malformedBoolean.propose(input)).toMatchObject({reason:'RAFT_PROVIDER_EVIDENCE_INVALID'});
+    const rejected=runtime({provider:providerFixture({propose:()=>({accepted:false,majorityConfirmed:false,
+      commitIndex:0,networkUsed:false,reason:'provider secret detail'})})});
+    rejected.assumeRole({role:'leader',term:4,fencingToken:5,quorumHealthy:true});
+    expect(rejected.propose(input)).toMatchObject({reason:'MAJORITY_NOT_CONFIRMED'});
   });
 
   it('distinguishes a consensus commit from failed atomic local application',()=>{
@@ -140,6 +160,12 @@ describe('34-I distributed core consensus and tenancy foundation',()=>{
     expect(throwing.verifyBootstrapSnapshot({snapshotSha256:'6'.repeat(64),snapshotIndex:1,
       policyVersion:'policy-34-i',revocationEpoch:2,keyEpoch:3})).toMatchObject({
         verified:false,reason:'RAFT_PROVIDER_ERROR',networkUsed:null
+      });
+    const rejected=runtime({provider:providerFixture({verifySnapshot:()=>({verified:false,networkUsed:false,
+      reason:'provider secret detail'})})});
+    expect(rejected.verifyBootstrapSnapshot({snapshotSha256:'6'.repeat(64),snapshotIndex:1,
+      policyVersion:'policy-34-i',revocationEpoch:2,keyEpoch:3})).toMatchObject({
+        verified:false,reason:'SNAPSHOT_NOT_VERIFIED',networkUsed:false
       });
   });
 
