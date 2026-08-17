@@ -69,12 +69,13 @@ if (mode === 'contract' || mode === 'runtime') {
     && scope.validation?.localPackageContracts?.checks === 30
     && scope.validation?.localPackageRuntimes?.checks === 171
     && scope.validation?.targeted?.files === 12 && scope.validation?.targeted?.tests === 50
-    && scope.validation?.fullRegression?.status === 'NOT_RUN_AFTER_34_K_HARDENING'
-    && scope.validation?.rootTypecheck === 'NOT_RUN_AFTER_34_K_HARDENING'
-    && scope.validation?.productionBuilds?.status === 'NOT_RUN_AFTER_34_K_HARDENING'
-    && scope.validation?.artifactIndex?.files === 6635 && scope.validation?.artifactIndex?.documents === 3838
-    && inventory.localEvidence?.fullRegressionStatus === 'NOT_RUN_AFTER_34_K_HARDENING'
-    && audit.includes('12/12') && audit.includes('50/50'));
+    && scope.validation?.fullRegression?.status === 'PASS' && scope.validation?.fullRegression?.files === 287
+    && scope.validation?.fullRegression?.tests === 1971 && scope.validation?.rootTypecheck === 'PASS'
+    && scope.validation?.productionBuilds?.status === 'PASS' && scope.validation?.productionBuilds?.workspaces === 18
+    && scope.validation?.artifactIndex?.checks === 20999 && scope.validation?.artifactIndex?.files === 6641
+    && scope.validation?.artifactIndex?.documents === 3841 && inventory.localEvidence?.fullRegressionStatus === 'PASS'
+    && inventory.localEvidence?.fullRegressionFiles === 287 && inventory.localEvidence?.fullRegressionTests === 1971
+    && audit.includes('287/287') && audit.includes('1971/1971'));
   check('local receipt is real while manual and external evidence remain NOT_RUN', Object.values(scope.manualEvidence ?? {}).every((value) => value === 'NOT_RUN')
     && scope.persistentReceiptStatus === 'STALE_SOURCE_HEAD'
     && scope.persistentReceiptPath === 'artifacts/validation/34-L-bronze-local-closure-receipt.json'

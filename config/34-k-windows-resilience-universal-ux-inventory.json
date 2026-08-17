@@ -22,7 +22,7 @@
     "migration115Sha256": "e9e67d7ef5c3097f4e39ea3a01aca76a7f9b64fe5b54de8da4de8cfbfc42e5cc",
     "targetedFiles": 3,
     "targetedTests": 16,
-    "fullRegression": {"status": "NOT_RUN_AFTER_HARDENING", "files": 286, "tests": 1920},
+    "fullRegression": {"status": "PASS", "files": 287, "tests": 1971},
     "rootTypecheck": "PASS",
     "workspaceBuilds": {"status": "PASS", "packages": 16, "coreService": true, "desktop": true},
     "ppk015": {"files": 556, "sha256": "182b50cca03307c6d475e969d77f02894017c220db4a71b952e1812adeebb155"},
