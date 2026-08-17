@@ -25,6 +25,7 @@ import {
   UpsertFamilyMeetingParticipantUseCase,
   UpsertFamilyMeetingTaskUseCase,
   unavailableFamilyMeetingAiMinutesProvider,
+  type FamilyMeetingAiMinutesProviderPort,
   type FamilyMeetingMinutesArtifactPort,
   type FamilyMeetingRecordingConsentPort,
   type FamilyMeetingUnitOfWork,
@@ -188,8 +189,16 @@ describe('34-F family meeting application', () => {
       preRead: [{ resourceType: 'archive_item', resourceId: 'archive-budget-34-f' }], carryForwardToNextMeeting: true
     } })).toMatchObject({ ok: true, value: { revision: 4 } });
     expect(uow.agenda[0]).toMatchObject({ title: 'Budget review', carryForwardToNextMeeting: true });
+    expect(await new UpsertFamilyMeetingParticipantUseCase(uow).execute({ context, command: {
+      clientOperationId: 'participant-decline-34-f', expectedRevision: 4, meetingId,
+      participantPersonId: 'person-member-34-f', roles: ['attendee'], attendance: 'declined', reminderEnabled: false
+    } })).toMatchObject({ ok: true, value: { revision: 5 } });
+    expect(await new RecordFamilyMeetingDecisionUseCase(uow).execute({ context, command: {
+      clientOperationId: 'declined-responsible-34-f', expectedRevision: 5, meetingId,
+      statement: 'Declined participant should not receive responsibility.', responsiblePersonIds: ['person-member-34-f']
+    } })).toMatchObject({ ok: false, error: { code: 'PERMISSION-DENIED-001' } });
     expect(await new SetFamilyMeetingStateUseCase(uow).execute({ context, command: {
-      clientOperationId: 'invalid-complete-34-f', expectedRevision: 4, meetingId, state: 'completed', reason: 'Skipped start.'
+      clientOperationId: 'invalid-complete-34-f', expectedRevision: 5, meetingId, state: 'completed', reason: 'Skipped start.'
     } })).toMatchObject({ ok: false, error: { code: 'RESOURCE-CONFLICT-001' } });
   });
 
@@ -229,7 +238,9 @@ describe('34-F family meeting application', () => {
 
   it('requires verified recording consent and stays fail-closed when the production AI provider is unavailable', async () => {
     const uow = new MemoryFamilyMeetingUnitOfWork(); const meetingId = await createMeeting(uow); await completeMeeting(uow, meetingId);
-    const consent: FamilyMeetingRecordingConsentPort = { verify: async () => ok({ verified: true, evidenceSha256: 'c'.repeat(64) }) };
+    const consent: FamilyMeetingRecordingConsentPort = { verify: async () => ok({ verified: true,
+      recordingRequestId: 'recording-request-34-f',
+      participantPersonIds: ['person-host-34-f','person-member-34-f'], evidenceSha256: 'c'.repeat(64) }) };
     const artifacts = new MemoryMinutesArtifacts();
     const result = await new PrepareFamilyMeetingAiMinutesUseCase(
       uow, consent, unavailableFamilyMeetingAiMinutesProvider, artifacts
@@ -240,6 +251,23 @@ describe('34-F family meeting application', () => {
     expect(uow.minutes).toMatchObject({ state: 'provider_unavailable', transcriptConsentVerified: true,
       consentEvidenceSha256: 'c'.repeat(64), aiSuggestionGenerated: false, humanApprovalRecorded: false });
     expect(artifacts.payloads.size).toBe(0);
+  });
+
+  it('rejects recording consent that belongs to a different participant set before provider or artifact access', async () => {
+    const uow = new MemoryFamilyMeetingUnitOfWork(); const meetingId = await createMeeting(uow); await completeMeeting(uow, meetingId);
+    let providerCalls = 0;
+    const consent: FamilyMeetingRecordingConsentPort = { verify: async () => ok({ verified: true,
+      recordingRequestId: 'recording-request-34-f', participantPersonIds: ['person-host-34-f','person-outsider-34-f'],
+      evidenceSha256: 'c'.repeat(64) }) };
+    const provider: FamilyMeetingAiMinutesProviderPort = { configured: true, generate: () => {
+      providerCalls += 1; return ok({ summary: 'should not run', decisions: [], tasks: [] });
+    } };
+    const artifacts = new MemoryMinutesArtifacts();
+    expect(await new PrepareFamilyMeetingAiMinutesUseCase(uow, consent, provider, artifacts).execute({ context, command: {
+      clientOperationId: 'ai-prepare-wrong-consent-34-f', expectedRevision: 3, meetingId,
+      recordingRequestId: 'recording-request-34-f' } })).toMatchObject({ ok: false, error: { code: 'PERMISSION-DENIED-001' } });
+    expect(providerCalls).toBe(0); expect(artifacts.payloads.size).toBe(0); expect(uow.minutes).toBeNull();
+    expect(uow.mutations).toHaveLength(3);
   });
 
   it('seals only human-approved minutes for meeting participants and derives the machine-source truth', async () => {

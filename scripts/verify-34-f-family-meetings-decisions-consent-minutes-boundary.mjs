@@ -60,7 +60,7 @@ const checks=[
     &&scope.manualEvidence?.certificationClaimed===false&&scope.persistentReceiptStatus==='NOT_RUN'
     &&scope.truth?.requirementsClosed===false&&scope.truth?.countsAsRequirementPass===false&&inventory.countsAsRequirementPass===false],
   ['local test and migration ratchets are exact',scope.validation?.targetedTestFileRatchet===6
-    &&scope.validation?.targetedTestRatchet===31&&scope.validation?.migrationVersion===110
+    &&scope.validation?.targetedTestRatchet===32&&scope.validation?.migrationVersion===110
     &&scope.validation?.migrationSha256==='8bcc5777aa80794122742bcfd73be036234488f5861adbcd34956c56e6d0d6ac'],
   ['PPK ratchets are closed without requirement pass',scope.validation?.ppk015?.status==='PASS'
     &&scope.validation?.ppk019?.status==='PASS'&&scope.validation?.ppk021?.status==='PASS'

@@ -12,7 +12,7 @@ const run=(name,command,args)=>{const result=spawnSync(command,args,{cwd:root,en
 const results=[];
 results.push(run('boundary',node,['scripts/verify-34-f-family-meetings-decisions-consent-minutes-boundary.mjs','--no-write']));
 results.push(run('contract',node,['scripts/verify-34-f-family-meetings-decisions-consent-minutes-contract.mjs','--no-write']));
-results.push(run('targeted 6 files 31 tests',node,npmArgs(['run','verify:34-f:targeted'])));
+results.push(run('targeted 6 files 32 tests',node,npmArgs(['run','verify:34-f:targeted'])));
 for(const workspace of ['@ppt/domain','@ppt/repository-contracts','@ppt/application','@ppt/database','@ppt/repositories','@ppt/desktop'])
   results.push(run(`typecheck ${workspace}`,node,npmArgs(['run','typecheck','--workspace',workspace])));
 results.push(run('migration verifier',node,npmArgs(['run','verify:migrations'])));
@@ -23,10 +23,10 @@ results.push(run('PPK-022 runtime',node,npmArgs(['run','verify:ppk022:runtime'])
 results.push(run('PPK-015 current runtime',node,npmArgs(['run','verify:ppk015:egress:runtime'])));
 const failures=results.filter(item=>item.status==='FAIL');
 const report={schemaVersion:1,step:'34-F',decision:'DEC-243',status:failures.length?'FAIL':'PASS',governanceState:'PLANNED',
-  countsAsRequirementPass:false,targetedTestFiles:6,targetedTests:31,checkCount:results.length,
+  countsAsRequirementPass:false,targetedTestFiles:6,targetedTests:32,checkCount:results.length,
   passed:results.length-failures.length,failed:failures.length,checks:results,generatedAt:new Date().toISOString()};
 if(!noWrite){await mkdir(resolve(root,'artifacts/validation'),{recursive:true});await writeFile(resolve(root,
   'artifacts/validation/34-F-family-meetings-decisions-consent-minutes-runtime.json'),`${JSON.stringify(report,null,2)}\n`,'utf8');}
 if(failures.length){console.error(`34-F runtime: FAIL (${failures.length}/${results.length}).`);
   for(const item of failures)console.error(`${item.name}: exit ${item.exitCode}`);process.exit(1);}
-console.log(`34-F runtime: PASS (${results.length}/${results.length}; 6 files/31 tests; requirement PASS=false; write=${!noWrite}).`);
+console.log(`34-F runtime: PASS (${results.length}/${results.length}; 6 files/32 tests; requirement PASS=false; write=${!noWrite}).`);

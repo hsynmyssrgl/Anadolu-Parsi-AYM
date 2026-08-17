@@ -142,7 +142,9 @@ export class RepositoryBackedFamilyMeetingRecordingConsentPort implements Family
         consents:snapshot.consents.map((consent)=>({personId:consent.participantPersonId,state:consent.state,
           explicitConsent:consent.explicitConsent,noticeVersion:consent.noticeVersion,revision:consent.revision}))
           .sort((left,right)=>left.personId.localeCompare(right.personId))}),'utf8').digest('hex');
-      return ok(Object.freeze({verified:true,evidenceSha256}));
+      return ok(Object.freeze({verified:true,recordingRequestId:snapshot.request.id,
+        participantPersonIds:Object.freeze(snapshot.consents.map((consent)=>consent.participantPersonId).sort()),
+        evidenceSha256}));
     });
   }
 }

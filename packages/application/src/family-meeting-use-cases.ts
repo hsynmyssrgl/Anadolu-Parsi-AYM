@@ -86,6 +86,8 @@ export interface FamilyMeetingMinutesArtifactPort {
 
 export interface FamilyMeetingRecordingConsentEvidence {
   readonly verified: boolean;
+  readonly recordingRequestId?: string;
+  readonly participantPersonIds?: readonly string[];
   readonly evidenceSha256?: string;
 }
 
@@ -362,6 +364,16 @@ const validPerson = (
 };
 const participantFor = (snapshot: FamilyMeetingSnapshotRow, personId: string) =>
   snapshot.participants.find((item) => item.participantPersonId === personId);
+const participatingPersonIds = (snapshot: FamilyMeetingSnapshotRow): readonly string[] => Object.freeze(
+  snapshot.participants
+    .filter((participant) => participant.attendance !== 'declined')
+    .map((participant) => participant.participantPersonId)
+    .sort()
+);
+const isParticipating = (snapshot: FamilyMeetingSnapshotRow, personId: string): boolean => {
+  const participant = participantFor(snapshot, personId);
+  return !!participant && participant.attendance !== 'declined';
+};
 const hasAnyRole = (snapshot: FamilyMeetingSnapshotRow, personId: string, permittedRoles: readonly FamilyMeetingRole[]): boolean => {
   if (snapshot.meeting.ownerPersonId === personId && permittedRoles.indexOf('host') >= 0) return true;
   const participant = participantFor(snapshot, personId);
@@ -635,7 +647,7 @@ export class RecordFamilyMeetingDecisionUseCase {
     return executeExistingMutation({...input,uow:this.uow,kind:'decision_record',allowedRoles:['host','facilitator','note_taker'],
       build:(scope,snapshot,id)=>{
         if(input.command.sourcePollId&&!snapshot.polls.some((item)=>item.id===input.command.sourcePollId))return err(missing(input.context,'Karara bağlı anket bulunamadı.'));
-        for(const personId of responsible){if(!participantFor(snapshot,personId))return err(denied(input.context,'Karar sorumlusu toplantı katılımcısı değildir.'));}
+        for(const personId of responsible){if(!isParticipating(snapshot,personId))return err(denied(input.context,'Karar sorumlusu etkin toplantı katılımcısı değildir.'));}
         const decisionId=deterministicId('meeting-decision',input.context,input.command.clientOperationId);
         const row:FamilyMeetingDecisionRow=Object.freeze({id:decisionId,familyId:snapshot.meeting.familyId,
           ownerPersonId:snapshot.meeting.ownerPersonId,meetingId:snapshot.meeting.id,statement,
@@ -657,7 +669,7 @@ export class UpsertFamilyMeetingTaskUseCase {
       return Promise.resolve(err(invalid(input.context,'Toplantı görevi geçersizdir.')));
     return executeExistingMutation({...input,uow:this.uow,kind:'task_upsert',allowedRoles:['host','facilitator','note_taker'],
       build:(scope,snapshot,id)=>{
-        if(!participantFor(snapshot,input.command.responsiblePersonId))return err(denied(input.context,'Görev sorumlusu toplantı katılımcısı değildir.'));
+        if(!isParticipating(snapshot,input.command.responsiblePersonId))return err(denied(input.context,'Görev sorumlusu etkin toplantı katılımcısı değildir.'));
         if(input.command.decisionId&&!snapshot.decisions.some((item)=>item.id===input.command.decisionId))return err(missing(input.context,'Göreve bağlı karar bulunamadı.'));
         const taskId=input.command.taskId??deterministicId('meeting-task',input.context,input.command.clientOperationId);
         if(!SAFE_ID.test(taskId))return err(invalid(input.context,'Görev kimliği geçersizdir.'));
@@ -707,11 +719,22 @@ export class PrepareFamilyMeetingAiMinutesUseCase {
     if(!evidence.ok)return evidence;
     if(!evidence.value.verified||!evidence.value.evidenceSha256||!SHA256.test(evidence.value.evidenceSha256))
       return err(denied(input.context,'Rızalı transkript kanıtı doğrulanmadan AI tutanak önerisi hazırlanamaz.'));
+    if(evidence.value.recordingRequestId!==input.command.recordingRequestId
+      ||!evidence.value.participantPersonIds
+      ||!evidence.value.participantPersonIds.every((personId)=>SAFE_ID.test(personId)))
+      return err(denied(input.context,'Kayıt rızası toplantı ve katılımcı kimliklerine bağlı değildir.'));
+    const consentedParticipantPersonIds=Object.freeze([...new Set(evidence.value.participantPersonIds)].sort());
+    if(consentedParticipantPersonIds.length!==evidence.value.participantPersonIds.length)
+      return err(denied(input.context,'Kayıt rızası katılımcı kümesi yinelenemez.'));
     const consentEvidenceSha256 = evidence.value.evidenceSha256;
     let sealed:VerifiedSealedFamilyMeetingMinutesInput|undefined;
     const result=await executeExistingMutation({...input,uow:this.uow,kind:'ai_minutes_prepare',allowedRoles:['host','note_taker'],
       build:(scope,snapshot,id)=>{
         if(snapshot.meeting.state!=='completed')return err(conflict(input.context,'AI tutanak önerisi yalnız tamamlanmış toplantıda hazırlanabilir.'));
+        const meetingParticipantPersonIds=participatingPersonIds(snapshot);
+        if(meetingParticipantPersonIds.length!==consentedParticipantPersonIds.length
+          ||meetingParticipantPersonIds.some((personId,index)=>personId!==consentedParticipantPersonIds[index]))
+          return err(denied(input.context,'Kayıt rızası etkin toplantı katılımcılarının tamamıyla birebir eşleşmiyor.'));
         const current=snapshot.minutes;
         if(current?.state==='sealed_local')return err(conflict(input.context,'Mühürlü toplantı tutanağı yeniden hazırlanamaz.'));
         let generated=false;
