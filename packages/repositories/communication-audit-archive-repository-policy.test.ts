@@ -19,6 +19,7 @@ describe('34-H communication audit archive migration boundary',()=>{
     expect(sql).toContain('operation requires exact owner-bound durable PEP receipt');
     expect(sql).toContain('platform_policy_database_fences');expect(sql).toContain('platform_policy_journal_projection_outbox');
     expect(sql).toContain('exact operation receipt and chain head');
+    expect(sql).toContain('NEW.archive_generation<>(SELECT COALESCE(MAX(checkpoint.archive_generation),0)+1');
     const columns=(runtime.database.prepare(`SELECT p.name FROM pragma_table_info('communication_audit_events') p ORDER BY p.cid`).all() as Array<{name:string}>).map(row=>row.name).join('\n');
     expect(columns).toContain('resource_fingerprint');expect(columns).not.toMatch(/content_text|message_text|payload|plaintext|ciphertext/iu);
     const operationColumns=(runtime.database.prepare(`SELECT p.name FROM pragma_table_info('communication_audit_operations') p ORDER BY p.cid`).all() as Array<{name:string}>).map(row=>row.name);

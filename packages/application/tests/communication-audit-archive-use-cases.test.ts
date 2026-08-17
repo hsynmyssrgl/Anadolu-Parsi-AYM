@@ -44,6 +44,8 @@ describe('34-H communication audit and archive integrity use cases',()=>{
     expect(JSON.stringify(unit.state.events)).not.toMatch(/message body|payload|plaintext/iu);
     const tampered=unit.state.events.map((event,index)=>index===0?{...event,resourceVersion:99}:event);
     expect(verifyCommunicationAuditChain(tampered)).toBe(false);
+    const mixedOwner=unit.state.events.map((event,index)=>index===1?{...event,ownerPersonId:'person-other-34-h'}:event);
+    expect(verifyCommunicationAuditChain(mixedOwner)).toBe(false);
     const replay=await useCase.execute({context:CONTEXT,command:{clientOperationId:'audit-room-34-h',actorDeviceId:'device-34-h',
       eventKind:'room_joined',resourceType:'communication_room',resourceId:'room-34-h',resourceVersion:2,resourceFingerprint:'a'.repeat(64)}});
     expect(replay).toEqual(first);
@@ -64,6 +66,10 @@ describe('34-H communication audit and archive integrity use cases',()=>{
       backupManifestSha256:'3'.repeat(64),restoreManifestSha256:'4'.repeat(64),vaultVerified:true,backupVerified:true,replicaVerified:false,restoreVerified:true}});
     expect(valid.ok).toBe(true);expect(unit.state.checkpoints[0]).toMatchObject({restoreVerified:true,
       externalBackupProviderVerified:false,remoteReplicationVerified:false});
+    expect(await useCase.execute({context:CONTEXT,command:{clientOperationId:'checkpoint-gap-34-h',archiveGeneration:3,
+      vaultManifestSha256:'5'.repeat(64),databaseManifestSha256:'6'.repeat(64),backupManifestSha256:'7'.repeat(64),
+      vaultVerified:true,backupVerified:true,replicaVerified:false,restoreVerified:false}}))
+      .toMatchObject({ok:false,error:{category:'conflict'}});
     const center=communicationAuditArchiveCenter(unit.state.events,unit.state.checkpoints,NOW);
     expect(center).toMatchObject({chainValid:true,truth:{contentExcludedFromAuditByConstruction:true,
       productionRemoteReplicationConfigured:false,realRestoreDrillPerformed:false,productionQueryApiComposed:true,

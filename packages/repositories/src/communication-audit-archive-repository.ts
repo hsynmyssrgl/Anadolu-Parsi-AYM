@@ -19,6 +19,14 @@ const assertKey = (key: CommunicationAuditArchiveKey): void => {
     || key.actorPersonId !== key.ownerPersonId) throw new Error('Communication audit archive key is invalid');
 };
 const stable = (value: unknown): string => createHash('sha256').update(JSON.stringify(value), 'utf8').digest('hex');
+const eventResourceType = Object.freeze({room_joined:'communication_room',room_left:'communication_room',
+  call_started:'communication_call_session',call_ended:'communication_call_session',file_shared:'communication_file_sharing',
+  permission_changed:'communication_permission',message_created:'communication_message',message_deleted:'communication_message',
+  recording_consent_changed:'communication_recording_request'} satisfies Readonly<Record<CommunicationAuditEventKind,CommunicationAuditResourceType>>);
+const eventMaterial=(event:CommunicationAuditEventView)=>({id:event.id,familyId:event.familyId,
+  ownerPersonId:event.ownerPersonId,actorPersonId:event.actorPersonId,actorDeviceId:event.actorDeviceId,
+  eventKind:event.eventKind,resourceType:event.resourceType,resourceId:event.resourceId,resourceVersion:event.resourceVersion,
+  resourceFingerprint:event.resourceFingerprint,previousHash:event.previousHash,sequence:event.sequence,occurredAt:event.occurredAt});
 const operationSelect = `SELECT client_operation_id,family_id,owner_person_id,operation_kind,request_fingerprint,
   result_id,policy_resource_id FROM communication_audit_operations`;
 const mapEvent = (row: Record<string,unknown>): CommunicationAuditEventView => Object.freeze({
@@ -95,6 +103,7 @@ export class SqliteCommunicationAuditArchiveRepository extends SqliteRepository 
     if(operation.familyId!==key.familyId||operation.ownerPersonId!==key.ownerPersonId||operation.resultId!==event.id
       ||operation.operationKind!=='audit_append'||operation.policyResourceId!==context.policyAuthorization.resourceId
       ||event.familyId!==key.familyId||event.ownerPersonId!==key.ownerPersonId||event.actorPersonId!==key.actorPersonId
+      ||eventResourceType[event.eventKind]!==event.resourceType||stable(eventMaterial(event))!==event.eventHash
       ||event.contentCopiedToAudit!==false)throw new Error('Communication audit event binding is invalid');
     return this.execute(context,()=>{const database=this.database(context);
       database.prepare(`INSERT INTO communication_audit_operations(client_operation_id,family_id,owner_person_id,

@@ -17667,7 +17667,7 @@ WHEN NOT EXISTS(
     WHERE operation.family_id=NEW.family_id AND operation.owner_person_id=NEW.owner_person_id
       AND operation.operation_kind='checkpoint_register' AND operation.result_id=NEW.id
       AND operation.occurred_at=NEW.created_at)
-  OR NEW.archive_generation<=(SELECT COALESCE(MAX(checkpoint.archive_generation),0)
+  OR NEW.archive_generation<>(SELECT COALESCE(MAX(checkpoint.archive_generation),0)+1
     FROM communication_archive_integrity_checkpoints checkpoint
     WHERE checkpoint.family_id=NEW.family_id AND checkpoint.owner_person_id=NEW.owner_person_id)
 BEGIN SELECT RAISE(ABORT,'34-H archive checkpoint requires exact operation receipt and next generation'); END;

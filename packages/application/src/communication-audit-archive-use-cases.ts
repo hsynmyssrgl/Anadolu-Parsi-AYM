@@ -74,12 +74,17 @@ const eventMaterial = (event: Omit<CommunicationAuditEventView, 'eventHash'|'con
 
 export const verifyCommunicationAuditChain = (events: readonly CommunicationAuditEventView[]): boolean => {
   const ordered = [...events].sort((left, right) => left.sequence - right.sequence);
-  let previousHash = ZERO_HASH; let sequence = 1;
+  const familyId=ordered[0]?.familyId;const ownerPersonId=ordered[0]?.ownerPersonId;
+  const ids=new Set<string>();const hashes=new Set<string>();
+  let previousHash = ZERO_HASH; let sequence = 1;let previousOccurredAt='';
   for (const event of ordered) {
     const { eventHash: _eventHash, contentCopiedToAudit: _contentCopiedToAudit, ...material } = event;
-    if (event.sequence !== sequence || event.previousHash !== previousHash || event.contentCopiedToAudit !== false
+    if (event.familyId!==familyId||event.ownerPersonId!==ownerPersonId||event.actorPersonId!==ownerPersonId
+      ||resourceTypeForEvent[event.eventKind]!==event.resourceType||ids.has(event.id)||hashes.has(event.eventHash)
+      ||(previousOccurredAt!==''&&event.occurredAt<previousOccurredAt)
+      ||event.sequence !== sequence || event.previousHash !== previousHash || event.contentCopiedToAudit !== false
       || hash(eventMaterial(material)) !== event.eventHash) return false;
-    previousHash = event.eventHash; sequence += 1;
+    ids.add(event.id);hashes.add(event.eventHash);previousHash = event.eventHash;previousOccurredAt=event.occurredAt;sequence += 1;
   }
   return true;
 };
@@ -167,6 +172,8 @@ export class RegisterCommunicationArchiveCheckpointUseCase {
     const { context, command } = input; const ownerPersonId = context.actor.personId;
     if (!ownerPersonId) return Promise.resolve(err(denied(context, 'İletişim arşiv bütünlüğü kişi bağlı oturum gerektirir.')));
     if (!SAFE.test(command.clientOperationId) || !Number.isSafeInteger(command.archiveGeneration) || command.archiveGeneration < 1
+      || ![command.vaultVerified,command.backupVerified,command.replicaVerified,command.restoreVerified]
+        .every((value)=>typeof value==='boolean')
       || ![command.vaultManifestSha256,command.databaseManifestSha256,command.backupManifestSha256].every((value) => SHA.test(value))
       || (command.replicaManifestSha256 !== undefined && !SHA.test(command.replicaManifestSha256))
       || (command.restoreManifestSha256 !== undefined && !SHA.test(command.restoreManifestSha256))
@@ -180,9 +187,11 @@ export class RegisterCommunicationArchiveCheckpointUseCase {
       if (prior.value) return prior.value.operationKind === 'checkpoint_register' && prior.value.requestFingerprint === requestFingerprint
         ? ok(prior.value.resultId) : err(conflict(context, 'Aynı clientOperationId farklı arşiv checkpoint işlemine aittir.'));
       const checkpoints = scope.listCheckpoints(); if (!checkpoints.ok) return checkpoints;
-      if (checkpoints.value.some((candidate) => candidate.archiveGeneration === command.archiveGeneration))
-        return err(conflict(context, 'Arşiv generation checkpoint kaydı değiştirilemez.'));
-      const checkpoint: CommunicationArchiveIntegrityCheckpointView = Object.freeze({ id: hash({ context: context.familyId, command }),
+      if (checkpoints.value.length>=1_000)return err(conflict(context,'İletişim arşiv checkpoint kotası doldu.'));
+      const expectedGeneration=(checkpoints.value.reduce((maximum,candidate)=>Math.max(maximum,candidate.archiveGeneration),0))+1;
+      if (command.archiveGeneration!==expectedGeneration)
+        return err(conflict(context, 'Arşiv generation checkpoint kaydı kesintisiz bir sonraki nesil olmalıdır.'));
+      const checkpoint: CommunicationArchiveIntegrityCheckpointView = Object.freeze({ id: hash({ familyId:context.familyId,ownerPersonId,command }),
         familyId: context.familyId, archiveGeneration: command.archiveGeneration,
         vaultManifestSha256: command.vaultManifestSha256, databaseManifestSha256: command.databaseManifestSha256,
         backupManifestSha256: command.backupManifestSha256,
