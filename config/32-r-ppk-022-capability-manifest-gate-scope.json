@@ -14,6 +14,7 @@
     "wildcardsAllowed": false,
     "parseFailureDenied": true,
     "unresolvedDynamicImportDenied": true,
+    "unresolvedDynamicExecutionDenied": true,
     "newSurfaceDenied": true,
     "staleSurfaceDenied": true,
     "duplicateSurfaceDenied": true,
@@ -23,10 +24,10 @@
     "deployedApplicationCount": 2,
     "applicationsWithDeclaredRuntimeCapabilities": 2,
     "productionSourceZoneCount": 18,
-    "scannedProductionFiles": 555,
-    "exactCapabilitySurfaceCount": 392,
-    "exactCapabilityManifestEntryCount": 392,
-    "exactCapabilityManifestSha256": "cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c",
+    "scannedProductionFiles": 556,
+    "exactCapabilitySurfaceCount": 395,
+    "exactCapabilityManifestEntryCount": 395,
+    "exactCapabilityManifestSha256": "a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e",
     "pinnedBootstrapSurfaceCount": 26,
     "pinnedBootstrapFileSurfaceCount": 24,
     "pinnedBootstrapNetworkSurfaceCount": 2,
@@ -63,7 +64,7 @@
     "sqliteOwnershipTransferred": false
   },
   "applicationRuntimeCapabilities": {
-    "windows-desktop": ["file.access", "network.access", "ocr.process"],
+    "windows-desktop": ["camera.access", "file.access", "microphone.access", "network.access", "ocr.process"],
     "windows-core-service": ["file.access", "network.access"],
     "windows-cluster-agent": [],
     "macos-companion": [],
@@ -79,9 +80,11 @@
     "signed-plugin": []
   },
   "surfaceCounts": {
+    "CAMERA_API": 1,
     "FILE_DIALOG": 2,
-    "FILE_IMPORT": 318,
-    "NETWORK_API": 2,
+    "FILE_IMPORT": 335,
+    "MICROPHONE_API": 1,
+    "NETWORK_API": 3,
     "NETWORK_IMPORT": 13,
     "OCR_API": 5,
     "OCR_IMPORT": 35

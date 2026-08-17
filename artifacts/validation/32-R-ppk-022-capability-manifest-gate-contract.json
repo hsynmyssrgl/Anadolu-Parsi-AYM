@@ -5,8 +5,8 @@
   "requirement": "PPK-022",
   "phase": "CAPABILITY_MANIFEST_BUILD_RUNTIME_GATE_CONTRACT",
   "status": "PASS",
-  "checkCount": 110,
-  "passed": 110,
+  "checkCount": 111,
+  "passed": 111,
   "failed": 0,
   "failures": [],
   "checks": [
@@ -59,7 +59,7 @@
       "passed": true
     },
     {
-      "name": "manifest contains exactly 392 unique surfaces",
+      "name": "manifest contains exactly 395 unique surfaces",
       "passed": true
     },
     {
@@ -99,11 +99,11 @@
       "passed": true
     },
     {
-      "name": "only Desktop OCR plus file and network are deployed",
+      "name": "only Desktop camera file microphone network and OCR capabilities are deployed",
       "passed": true
     },
     {
-      "name": "local OCR stays in windows-desktop while ocr-worker remains undeployed and low privilege is not claimed",
+      "name": "local OCR and local call preflight stay aggregate Desktop capabilities without separate worker claims",
       "passed": true
     },
     {
@@ -167,6 +167,10 @@
       "passed": true
     },
     {
+      "name": "scanner inventories literal executeJavaScript capabilities and rejects unresolved dynamic execution",
+      "passed": true
+    },
+    {
       "name": "scanner tracks aliases computed APIs and browser globals",
       "passed": true
     },
@@ -207,7 +211,7 @@
       "passed": true
     },
     {
-      "name": "gate self-tests all seven families and dynamic escape",
+      "name": "gate self-tests all seven families and dynamic execution escapes",
       "passed": true
     },
     {
@@ -343,7 +347,7 @@
       "passed": true
     },
     {
-      "name": "AST tests cover exact production and drift denial",
+      "name": "AST tests cover exact production dynamic execution and drift denial",
       "passed": true
     },
     {
@@ -391,7 +395,7 @@
       "passed": true
     },
     {
-      "name": "scope denies missing unexpected malformed and unverified authority",
+      "name": "scope denies missing unexpected malformed dynamic execution and unverified authority",
       "passed": true
     },
     {
@@ -415,7 +419,7 @@
       "passed": true
     },
     {
-      "name": "decision pins current Desktop OCR capability truth and communication audit source ratchet",
+      "name": "decision pins current Desktop OCR and call-preflight capability truth",
       "passed": true
     },
     {
@@ -454,12 +458,12 @@
   "protectedCapabilityFamilies": 7,
   "canonicalApplications": 14,
   "productionSourceZones": 18,
-  "scannedProductionFiles": 555,
-  "exactCapabilitySurfaces": 392,
-  "exactManifestEntries": 392,
-  "exactManifestSha256": "cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c",
+  "scannedProductionFiles": 556,
+  "exactCapabilitySurfaces": 395,
+  "exactManifestEntries": 395,
+  "exactManifestSha256": "a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e",
   "pinnedBootstrapSurfaces": 26,
-  "maliciousAstSelfTests": 33,
+  "maliciousAstSelfTests": 35,
   "benignAstSelfTests": 5,
   "gateFindings": 0,
   "signedManifestHashBindingRequired": true,
@@ -475,5 +479,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-16T15:49:34.099Z"
+  "generatedAt": "2026-08-17T03:39:44.064Z"
 }

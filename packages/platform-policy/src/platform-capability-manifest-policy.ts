@@ -11,7 +11,7 @@ export const PLATFORM_APPLICATION_RUNTIME_CAPABILITY_REQUIREMENTS: Readonly<Reco
   PlatformApplicationId,
   readonly PlatformRuntimeCapability[]
 >> = Object.freeze({
-  'windows-desktop': Object.freeze(['file.access', 'network.access', 'ocr.process'] as const),
+  'windows-desktop': Object.freeze(['camera.access', 'file.access', 'microphone.access', 'network.access', 'ocr.process'] as const),
   'windows-core-service': Object.freeze(['file.access', 'network.access'] as const),
   'windows-cluster-agent': Object.freeze([] as const),
   'macos-companion': Object.freeze([] as const),
@@ -27,7 +27,7 @@ export const PLATFORM_APPLICATION_RUNTIME_CAPABILITY_REQUIREMENTS: Readonly<Reco
   'signed-plugin': Object.freeze([] as const)
 });
 
-export const PPK022_EXPECTED_AST_CAPABILITY_SURFACE_COUNT = 392 as const;
+export const PPK022_EXPECTED_AST_CAPABILITY_SURFACE_COUNT = 395 as const;
 
 export type PlatformCapabilityManifestAuthoritySource =
   | 'core-service-kernel'

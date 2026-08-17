@@ -4350,9 +4350,10 @@ const communicationCallingInput=(channel:string,args:readonly unknown[]):IpcInte
       &&['audioOnly','meetingLocked','captionsRequested','realtimeTextRequested','screenShareRequested','localHandRaised']
         .every(key=>candidate[key]===undefined||typeof candidate[key]==='boolean')
       &&(candidate.backgroundEffect===undefined||communicationCallingBackgroundEffects.has(String(candidate.backgroundEffect)))
-      &&(candidate.pinnedPersonId===undefined||communicationIdentifier(candidate.pinnedPersonId))
-      &&(candidate.signLanguagePinnedPersonId===undefined||communicationIdentifier(candidate.signLanguagePinnedPersonId))
-      &&(candidate.reactionCode===undefined||communicationMessagingText(candidate.reactionCode,1,32)));
+      &&(candidate.pinnedPersonId===undefined||candidate.pinnedPersonId===null||communicationIdentifier(candidate.pinnedPersonId))
+      &&(candidate.signLanguagePinnedPersonId===undefined||candidate.signLanguagePinnedPersonId===null
+        ||communicationIdentifier(candidate.signLanguagePinnedPersonId))
+      &&(candidate.reactionCode===undefined||candidate.reactionCode===null||communicationMessagingText(candidate.reactionCode,1,32)));
   }
   if(channel===COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS.advance)return exactObject(args,
     ['clientOperationId','expectedRevision','sessionId','action','reason'],value=>communicationIdentifier(value.clientOperationId)
@@ -4430,7 +4431,8 @@ const communicationCallingQualityResult=(value:unknown):boolean=>isObject(value)
   &&Number(value.downlinkKbps)<=10_000_000&&value.providerVerified===true&&communicationMessagingIso(value.observedAt);
 const communicationCallingTruthResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,[
   'localCallPlanningMetadataImplemented','appendOnlyLifecycleLedgerImplemented','optimisticRevisionRequired',
-  'accessibleCallPreferenceModelImplemented','localPreflightEvidenceContractImplemented','rendererMediaDeviceAuthority',
+  'accessibleCallPreferenceModelImplemented','localPreflightEvidenceContractImplemented','localMediaPreflightProviderConfigured',
+  'localMediaPreflightExecuted','physicalMediaDeviceFunctionalityCertified','rendererMediaDeviceAuthority',
   'rendererNetworkAuthority','productionMediaProviderConfigured','webRtcPeerConnectionExecuted','sfuServiceConfigured',
   'stunTurnServiceConfigured','shortLivedRelayCredentialsIssued','sframeMediaEncryptionExecuted','mlsMediaKeyBindingVerified',
   'screenOrWindowCaptureImplemented','localBackgroundProcessingImplemented','liveCaptionProviderConfigured',
@@ -4439,7 +4441,10 @@ const communicationCallingTruthResult=(value:unknown):boolean=>isObject(value)&&
   'networkUsedByCurrentImplementation'])
   &&value.localCallPlanningMetadataImplemented===true&&value.appendOnlyLifecycleLedgerImplemented===true
   &&value.optimisticRevisionRequired===true&&value.accessibleCallPreferenceModelImplemented===true
-  &&value.localPreflightEvidenceContractImplemented===true&&['rendererMediaDeviceAuthority','rendererNetworkAuthority',
+  &&value.localPreflightEvidenceContractImplemented===true
+  &&typeof value.localMediaPreflightProviderConfigured==='boolean'&&typeof value.localMediaPreflightExecuted==='boolean'
+  &&(value.localMediaPreflightExecuted!==true||value.localMediaPreflightProviderConfigured===true)
+  &&['physicalMediaDeviceFunctionalityCertified','rendererMediaDeviceAuthority','rendererNetworkAuthority',
     'productionMediaProviderConfigured','webRtcPeerConnectionExecuted','sfuServiceConfigured','stunTurnServiceConfigured',
     'shortLivedRelayCredentialsIssued','sframeMediaEncryptionExecuted','mlsMediaKeyBindingVerified','screenOrWindowCaptureImplemented',
     'localBackgroundProcessingImplemented','liveCaptionProviderConfigured','realtimeTextTransportImplemented',

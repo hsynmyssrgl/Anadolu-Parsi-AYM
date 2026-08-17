@@ -96,6 +96,9 @@ export interface CommunicationRealtimeCallingTruthView {
   readonly optimisticRevisionRequired: true;
   readonly accessibleCallPreferenceModelImplemented: true;
   readonly localPreflightEvidenceContractImplemented: true;
+  readonly localMediaPreflightProviderConfigured: boolean;
+  readonly localMediaPreflightExecuted: boolean;
+  readonly physicalMediaDeviceFunctionalityCertified: false;
   readonly rendererMediaDeviceAuthority: false;
   readonly rendererNetworkAuthority: false;
   readonly productionMediaProviderConfigured: false;
@@ -184,9 +187,9 @@ export interface UpdateCommunicationCallControlsInput {
   readonly realtimeTextRequested?: boolean;
   readonly screenShareRequested?: boolean;
   readonly localHandRaised?: boolean;
-  readonly pinnedPersonId?: string;
-  readonly signLanguagePinnedPersonId?: string;
-  readonly reactionCode?: string;
+  readonly pinnedPersonId?: string | null;
+  readonly signLanguagePinnedPersonId?: string | null;
+  readonly reactionCode?: string | null;
 }
 
 export interface AdvanceCommunicationCallInput {
@@ -254,6 +257,9 @@ export const communicationRealtimeCallingTruth = Object.freeze({
   optimisticRevisionRequired: true as const,
   accessibleCallPreferenceModelImplemented: true as const,
   localPreflightEvidenceContractImplemented: true as const,
+  localMediaPreflightProviderConfigured: false,
+  localMediaPreflightExecuted: false,
+  physicalMediaDeviceFunctionalityCertified: false as const,
   rendererMediaDeviceAuthority: false as const,
   rendererNetworkAuthority: false as const,
   productionMediaProviderConfigured: false as const,

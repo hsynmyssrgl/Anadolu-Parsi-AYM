@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import {
   ERROR_CODES,
+  asCorrelationId,
   asEventId,
   asIsoDateTime,
   asPersonId,
@@ -50,7 +51,13 @@ export interface CommunicationRealtimeCallingQueryPort {
 export interface CommunicationCallPreflightPort {
   run(
     context: LifeApplicationContext,
-    input: Readonly<{ sessionId: string }>
+    input: Readonly<{
+      sessionId: string;
+      requestedMediaMode: CommunicationCallSessionRow['requestedMediaMode'];
+      noiseReductionRequested: boolean;
+      echoCancellationRequested: boolean;
+      automaticGainControlRequested: boolean;
+    }>
   ): Promise<Result<VerifiedCommunicationCallPreflightInput, AppError>>;
 }
 
@@ -218,9 +225,13 @@ export const communicationCallSessionRowToView = (
     providerVerified: snapshot.session.preflightEvidenceSha256 !== undefined, networkUsed: false,
     ...(snapshot.session.preflightObservedAt ? { observedAt: snapshot.session.preflightObservedAt } : {}) }),
   participants: Object.freeze(snapshot.participants.map((row) => Object.freeze({ personId: row.personId, role: row.role,
-    state: row.state, handRaised: row.handRaised, pinnedLocally: row.pinnedLocally,
-    signLanguageSpeakerPinnedLocally: row.signLanguageSpeakerPinnedLocally,
-    ...(row.reactionCode ? { reactionCode: row.reactionCode } : {}), revision: row.revision, updatedAt: row.updatedAt }))),
+    state: row.state, handRaised: row.role === 'host' ? snapshot.session.localHandRaised : row.handRaised,
+    pinnedLocally: snapshot.session.pinnedPersonId === row.personId,
+    signLanguageSpeakerPinnedLocally: snapshot.session.signLanguagePinnedPersonId === row.personId,
+    ...(row.role === 'host' && snapshot.session.reactionCode
+      ? { reactionCode: snapshot.session.reactionCode }
+      : row.reactionCode ? { reactionCode: row.reactionCode } : {}),
+    revision: row.revision, updatedAt: row.updatedAt }))),
   revision: snapshot.session.revision, createdAt: snapshot.session.createdAt, updatedAt: snapshot.session.updatedAt,
   ...(snapshot.session.endedAt ? { endedAt: snapshot.session.endedAt } : {})
 });
@@ -310,14 +321,56 @@ export class RunCommunicationCallPreflightUseCase {
     const person = actorPerson(context); if (!person.ok) return person;
     const expected = revision(context, input.expectedRevision); if (!expected.ok) return expected;
     if (!SAFE_ID.test(input.clientOperationId) || !SAFE_ID.test(input.sessionId)) return err(invalid(context, 'Preflight girdisi geçersizdir.'));
-    const evidence = await this.preflight.run(context, Object.freeze({ sessionId: input.sessionId }));
+    const requestFingerprint = hash(input);
+    const intent = communicationRealtimeCallingWriteIntent('communication_call_session', input.sessionId, 'update');
+    const preflightContext: LifeApplicationContext = Object.freeze({ ...context,
+      correlationId: asCorrelationId(`communication-call-preflight-${hash({
+        correlationId: context.correlationId,
+        sessionId: input.sessionId,
+        clientOperationId: input.clientOperationId,
+        phase: 'authorize'
+      }).slice(0, 48)}`) });
+    type PreflightPreparation = Readonly<{
+      kind: 'replayed';
+      receipt: CommunicationRealtimeCallingMutationReceiptView;
+    }> | Readonly<{
+      kind: 'run';
+      requestedMediaMode: CommunicationCallSessionRow['requestedMediaMode'];
+      noiseReductionRequested: boolean;
+      echoCancellationRequested: boolean;
+      automaticGainControlRequested: boolean;
+    }>;
+    const prepared = await this.unitOfWork.execute<PreflightPreparation>(preflightContext, intent, (scope) => {
+      const foundMutation = scope.findMutation(input.clientOperationId); if (!foundMutation.ok) return foundMutation;
+      const replayed = replay(context, foundMutation.value, 'communication_call_session', input.sessionId,
+        'call_preflight_update', requestFingerprint, expected.value);
+      if (!replayed.ok) return replayed;
+      if (replayed.value) return ok(Object.freeze({ kind: 'replayed' as const, receipt: replayed.value }));
+      const found = scope.findSession(input.sessionId); if (!found.ok) return found;
+      if (!found.value) return err(missing(context, 'Çağrı oturumu bulunamadı.'));
+      const current = found.value.session;
+      if (current.revision !== expected.value || !['planned', 'preflight_ready'].includes(current.state))
+        return err(conflict(context, 'Çağrı preflight sürümü veya durumu uyuşmuyor.'));
+      return ok(Object.freeze({
+        kind: 'run' as const,
+        requestedMediaMode: current.requestedMediaMode,
+        noiseReductionRequested: current.noiseReductionRequested,
+        echoCancellationRequested: current.echoCancellationRequested,
+        automaticGainControlRequested: current.automaticGainControlRequested
+      }));
+    });
+    if (!prepared.ok) return prepared;
+    if (prepared.value.kind === 'replayed') return ok(prepared.value.receipt);
+    const evidence = await this.preflight.run(context, Object.freeze({ sessionId: input.sessionId,
+      requestedMediaMode: prepared.value.requestedMediaMode,
+      noiseReductionRequested: prepared.value.noiseReductionRequested,
+      echoCancellationRequested: prepared.value.echoCancellationRequested,
+      automaticGainControlRequested: prepared.value.automaticGainControlRequested }));
     if (!evidence.ok) return evidence;
     if (evidence.value.sessionId !== input.sessionId || evidence.value.providerVerified !== true || evidence.value.networkUsed !== false
       || !SAFE_ID.test(evidence.value.providerId) || !SHA256.test(evidence.value.providerEvidenceSha256) || !validIso(evidence.value.observedAt))
       return err(denied(context, 'Preflight kanıtı güvenilir değildir.'));
-    const requestFingerprint = hash({ input, evidence: evidence.value });
-    return this.unitOfWork.execute(context,
-      communicationRealtimeCallingWriteIntent('communication_call_session', input.sessionId, 'update'), (scope) => {
+    return this.unitOfWork.execute(context, intent, (scope) => {
         const foundMutation = scope.findMutation(input.clientOperationId); if (!foundMutation.ok) return foundMutation;
         const replayed = replay(context, foundMutation.value, 'communication_call_session', input.sessionId,
           'call_preflight_update', requestFingerprint, expected.value);
@@ -327,6 +380,10 @@ export class RunCommunicationCallPreflightUseCase {
         const current = found.value.session;
         if (current.revision !== expected.value || !['planned', 'preflight_ready'].includes(current.state))
           return err(conflict(context, 'Çağrı preflight sürümü veya durumu uyuşmuyor.'));
+        const observedAtMs = Date.parse(evidence.value.observedAt);
+        const authorizedAtMs = Date.parse(scope.occurredAt);
+        if (observedAtMs > authorizedAtMs + 5_000 || authorizedAtMs - observedAtMs > 120_000)
+          return err(denied(context, 'Preflight kanıtı güncel yetkilendirme penceresine ait değildir.'));
         const cameraAccepted = current.requestedMediaMode === 'audio' || evidence.value.camera === 'passed';
         const ready = evidence.value.microphone === 'passed' && evidence.value.speaker === 'passed' && cameraAccepted;
         const mutation = mutationId(context, input.clientOperationId, requestFingerprint);
@@ -390,30 +447,44 @@ abstract class CommunicationCallSessionMutationUseCase<TInput extends { clientOp
 export class UpdateCommunicationCallControlsUseCase extends CommunicationCallSessionMutationUseCase<UpdateCommunicationCallControlsInput> {
   public constructor(unitOfWork: CommunicationRealtimeCallingUnitOfWork) { super(unitOfWork); }
   public execute(context: LifeApplicationContext, input: UpdateCommunicationCallControlsInput) {
-    if (input.backgroundEffect && !['off', 'blur', 'virtual_background'].includes(input.backgroundEffect))
+    const booleanFields = ['audioOnly', 'meetingLocked', 'captionsRequested', 'realtimeTextRequested',
+      'screenShareRequested', 'localHandRaised'] as const;
+    const optionalFields = [...booleanFields, 'backgroundEffect', 'pinnedPersonId', 'signLanguagePinnedPersonId', 'reactionCode'] as const;
+    if (!optionalFields.some((field) => Object.prototype.hasOwnProperty.call(input, field))
+      || booleanFields.some((field) => input[field] !== undefined && typeof input[field] !== 'boolean'))
+      return Promise.resolve(err(invalid(context, 'En az bir geçerli çağrı denetimi gerekir.')));
+    if (input.backgroundEffect !== undefined && !['off', 'blur', 'virtual_background'].includes(input.backgroundEffect))
       return Promise.resolve(err(invalid(context, 'Arka plan tercihi geçersizdir.')));
-    if (input.reactionCode !== undefined && !normalizedText(input.reactionCode, 1, 32))
+    if (input.reactionCode !== undefined && input.reactionCode !== null && !normalizedText(input.reactionCode, 1, 32))
       return Promise.resolve(err(invalid(context, 'Tepki kodu geçersizdir.')));
     for (const optionalId of [input.pinnedPersonId, input.signLanguagePinnedPersonId])
-      if (optionalId !== undefined && !SAFE_ID.test(optionalId)) return Promise.resolve(err(invalid(context, 'Sabitlenen kişi kimliği geçersizdir.')));
+      if (optionalId !== undefined && optionalId !== null && !SAFE_ID.test(optionalId))
+        return Promise.resolve(err(invalid(context, 'Sabitlenen kişi kimliği geçersizdir.')));
     return this.executeMutation(context, input, 'call_controls_update', 'update', 'communication.call.controls', (current) => {
       if (['ended', 'cancelled'].includes(current.session.state)) return err(conflict(context, 'Sona ermiş çağrı denetimleri değiştirilemez.'));
+      if (current.session.requestedMediaMode === 'audio' && input.audioOnly === false)
+        return err(conflict(context, 'Yalnız ses olarak planlanan çağrı görüntülü moda yükseltilemez.'));
       const activeIds = new Set(current.participants.filter((row) => row.state !== 'left').map((row) => row.personId));
-      if ((input.pinnedPersonId && !activeIds.has(asPersonId(input.pinnedPersonId)))
-        || (input.signLanguagePinnedPersonId && !activeIds.has(asPersonId(input.signLanguagePinnedPersonId))))
+      if ((typeof input.pinnedPersonId === 'string' && !activeIds.has(asPersonId(input.pinnedPersonId)))
+        || (typeof input.signLanguagePinnedPersonId === 'string' && !activeIds.has(asPersonId(input.signLanguagePinnedPersonId))))
         return err(denied(context, 'Sabitlenen kişi çağrı katılımcısı değildir.'));
-      return ok(Object.freeze({ ...current.session,
+      const next: { -readonly [K in keyof CommunicationCallSessionRow]: CommunicationCallSessionRow[K] } = { ...current.session,
         ...(input.audioOnly === undefined ? {} : { audioOnly: input.audioOnly }),
         ...(input.meetingLocked === undefined ? {} : { meetingLocked: input.meetingLocked }),
         ...(input.backgroundEffect === undefined ? {} : { backgroundEffect: input.backgroundEffect }),
         ...(input.captionsRequested === undefined ? {} : { captionsRequested: input.captionsRequested }),
         ...(input.realtimeTextRequested === undefined ? {} : { realtimeTextRequested: input.realtimeTextRequested }),
         ...(input.screenShareRequested === undefined ? {} : { screenShareRequested: input.screenShareRequested }),
-        ...(input.localHandRaised === undefined ? {} : { localHandRaised: input.localHandRaised }),
-        ...(input.pinnedPersonId === undefined ? {} : { pinnedPersonId: asPersonId(input.pinnedPersonId) }),
-        ...(input.signLanguagePinnedPersonId === undefined ? {} : { signLanguagePinnedPersonId: asPersonId(input.signLanguagePinnedPersonId) }),
-        ...(input.reactionCode === undefined ? {} : { reactionCode: normalizedText(input.reactionCode, 1, 32)! })
-      }));
+        ...(input.localHandRaised === undefined ? {} : { localHandRaised: input.localHandRaised })
+      };
+      if (input.pinnedPersonId === null) delete next.pinnedPersonId;
+      else if (input.pinnedPersonId !== undefined) next.pinnedPersonId = asPersonId(input.pinnedPersonId);
+      if (input.signLanguagePinnedPersonId === null) delete next.signLanguagePinnedPersonId;
+      else if (input.signLanguagePinnedPersonId !== undefined)
+        next.signLanguagePinnedPersonId = asPersonId(input.signLanguagePinnedPersonId);
+      if (input.reactionCode === null) delete next.reactionCode;
+      else if (input.reactionCode !== undefined) next.reactionCode = normalizedText(input.reactionCode, 1, 32)!;
+      return ok(Object.freeze(next));
     });
   }
 }
@@ -507,6 +578,11 @@ export class RecordCommunicationCallQualityObservationUseCase {
       if (!found.value) return err(missing(context, 'Çağrı oturumu bulunamadı.'));
       if (found.value.session.revision !== expected.value || ['ended', 'cancelled'].includes(found.value.session.state))
         return err(conflict(context, 'Çağrı kalite gözlemi sürümü veya durumu uyuşmuyor.'));
+      const observedAtMs = Date.parse(observation.observedAt);
+      const authorizedAtMs = Date.parse(scope.occurredAt);
+      if (observedAtMs > authorizedAtMs + 5_000 || authorizedAtMs - observedAtMs > 120_000
+        || observedAtMs < Date.parse(found.value.session.createdAt))
+        return err(denied(context, 'Çağrı kalite kanıtı güncel oturum ve yetkilendirme penceresine ait değildir.'));
       const mutation = mutationId(context, input.clientOperationId, requestFingerprint);
       const base: Omit<CommunicationCallSessionRow, 'stateFingerprint'> = Object.freeze({ ...found.value.session,
         revision: expected.value + 1, lastMutationId: mutation, updatedAt: scope.occurredAt });

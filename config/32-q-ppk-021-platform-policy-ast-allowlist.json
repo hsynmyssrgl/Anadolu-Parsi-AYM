@@ -51,7 +51,7 @@
   },
   "expectedSurfaceCounts": {
     "CRYPTO_GLOBAL": 21,
-    "CRYPTO_IMPORT": 234,
+    "CRYPTO_IMPORT": 236,
     "DATABASE_IMPORT": 21,
     "NETWORK_IMPORT": 11,
     "REPOSITORY_IMPORT": 70,
@@ -116,6 +116,8 @@
     "CRYPTO_IMPORT|apps/desktop/src/main/backup-purge-propagation-file-application-adapter.ts|node:crypto:createHash",
     "CRYPTO_IMPORT|apps/desktop/src/main/backup-quarantine-file-application-adapter.ts|node:crypto:createHash",
     "CRYPTO_IMPORT|apps/desktop/src/main/backup-target-file-application-adapter.ts|node:crypto:createHash",
+    "CRYPTO_IMPORT|apps/desktop/src/main/communication-call-preflight-adapter.ts|node:crypto:createHash",
+    "CRYPTO_IMPORT|apps/desktop/src/main/communication-call-preflight-adapter.ts|node:crypto:randomUUID",
     "CRYPTO_IMPORT|apps/desktop/src/main/communication-file-payload-vault.ts|node:crypto:createHash",
     "CRYPTO_IMPORT|apps/desktop/src/main/communication-file-payload-vault.ts|node:crypto:randomBytes",
     "CRYPTO_IMPORT|apps/desktop/src/main/communication-message-payload-vault.ts|node:crypto:createHash",

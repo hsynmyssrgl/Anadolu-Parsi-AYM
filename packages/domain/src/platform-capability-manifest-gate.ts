@@ -17,7 +17,7 @@ export interface PlatformCapabilityManifestGateBoundaryView {
   readonly protectedCapabilityCount: 7;
   readonly canonicalApplicationCount: 14;
   readonly applicationsWithRuntimeCapabilities: 2;
-  readonly exactAstSurfaceCount: 392;
+  readonly exactAstSurfaceCount: 395;
   readonly signedManifestHashBindingRequired: true;
   readonly authenticatedRuntimeAuthorityRequired: true;
   readonly exactRuntimeCoverageRequired: true;

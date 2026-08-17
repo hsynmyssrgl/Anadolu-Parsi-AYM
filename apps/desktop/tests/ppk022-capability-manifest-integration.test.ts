@@ -17,7 +17,7 @@ describe('32-R PPK-022 Desktop/Core Service capability manifest integration', ()
       enforcement: 'build-and-runtime-fail-closed',
       protectedCapabilityCount: 7,
       canonicalApplicationCount: 14,
-      exactAstSurfaceCount: 392,
+      exactAstSurfaceCount: 395,
       signedManifestHashBindingRequired: true,
       authenticatedRuntimeAuthorityRequired: true,
       bootstrapNetworkCapabilityPinned: true,
@@ -48,7 +48,7 @@ describe('32-R PPK-022 Desktop/Core Service capability manifest integration', ()
     expect(desktopMain).toContain("assertPinnedBootstrapRuntimeCapability('windows-desktop', 'file.access')");
     expect(desktopMain).toContain("assertPinnedBootstrapRuntimeCapability('windows-desktop', 'network.access')");
     expect(PLATFORM_APPLICATION_RUNTIME_CAPABILITY_REQUIREMENTS['windows-desktop']).toEqual([
-      'file.access', 'network.access', 'ocr.process'
+      'camera.access', 'file.access', 'microphone.access', 'network.access', 'ocr.process'
     ]);
     expect(PLATFORM_APPLICATION_RUNTIME_CAPABILITY_REQUIREMENTS['ocr-worker']).toEqual([]);
     expect(readFileSync('packages/security/src/local-ocr-security.ts', 'utf8'))

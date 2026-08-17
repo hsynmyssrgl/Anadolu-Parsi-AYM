@@ -76,7 +76,7 @@ const applicationIds = [
 ];
 const expectedApplications = Object.fromEntries(applicationIds.map((id) => [id,
   id === 'windows-desktop'
-    ? ['file.access', 'network.access', 'ocr.process']
+    ? ['camera.access', 'file.access', 'microphone.access', 'network.access', 'ocr.process']
     : id === 'windows-core-service' ? ['file.access', 'network.access'] : []
 ]));
 const observedCounts = Object.fromEntries([...new Set(entries.map((entry) => entry.key.split('|', 1)[0]))]
@@ -97,7 +97,7 @@ check('installed AST parser is locked', lockfile.packages?.['node_modules/@babel
 check('manifest is exact default deny', manifest.defaultDecision === 'DENY' && manifest.exactMatchRequired === true && manifest.wildcardsAllowed === false);
 check('manifest requires signed runtime check without static authority', manifest.signedManifestRuntimeCheckRequired === true && manifest.buildManifestAloneGrantsRuntimeAuthority === false);
 check('manifest binds eighteen production zones', manifest.productionSourceZoneCount === 18 && scope.boundaries?.productionSourceZoneCount === 18);
-check('manifest contains exactly 392 unique surfaces', entries.length === 392 && new Set(keys).size === 392);
+check('manifest contains exactly 395 unique surfaces', entries.length === 395 && new Set(keys).size === 395);
 check('manifest surface keys are stable sorted', keys.every((key, index) => key === sortedKeys[index]));
 check('manifest contains no wildcard keys', keys.every((key) => !/[*?\[\]{}]/u.test(key)));
 check('manifest entries have exact schema', entries.every((entry) => Object.keys(entry).sort().join('|') === 'applicationIds|capability|key|runtimeEnforcement'));
@@ -107,17 +107,17 @@ check('manifest surface counts are exact', JSON.stringify(observedCounts) === JS
 check('manifest hash binds scope and inventory', manifestSha256 === scope.boundaries?.exactCapabilityManifestSha256 && manifestSha256 === inventory.engine?.exactManifestSha256);
 check('application registry lists all fourteen exact profiles', JSON.stringify(manifest.applicationRuntimeCapabilities) === JSON.stringify(expectedApplications));
 check('only two deployed applications hold capabilities', Object.values(manifest.applicationRuntimeCapabilities).filter((values) => values.length > 0).length === 2);
-check('only Desktop OCR plus file and network are deployed', [...new Set(Object.values(manifest.applicationRuntimeCapabilities).flat())].sort().join('|') === 'file.access|network.access|ocr.process');
-check('local OCR stays in windows-desktop while ocr-worker remains undeployed and low privilege is not claimed', manifest.applicationRuntimeCapabilities['windows-desktop']?.join('|') === 'file.access|network.access|ocr.process' && manifest.applicationRuntimeCapabilities['ocr-worker']?.length === 0 && ocrSecurity.includes('readonly lowPrivilegeSandboxVerified: false;'));
+check('only Desktop camera file microphone network and OCR capabilities are deployed', [...new Set(Object.values(manifest.applicationRuntimeCapabilities).flat())].sort().join('|') === 'camera.access|file.access|microphone.access|network.access|ocr.process');
+check('local OCR and local call preflight stay aggregate Desktop capabilities without separate worker claims', manifest.applicationRuntimeCapabilities['windows-desktop']?.join('|') === 'camera.access|file.access|microphone.access|network.access|ocr.process' && manifest.applicationRuntimeCapabilities['ocr-worker']?.length === 0 && manifest.applicationRuntimeCapabilities['communication-service']?.length === 0 && ocrSecurity.includes('readonly lowPrivilegeSandboxVerified: false;'));
 check('bootstrap entries are bounded and Desktop-owned', pinnedEntries.length === 26 && pinnedEntries.every((entry) => entry.applicationIds.includes('windows-desktop')) && pinnedEntries.filter((entry) => entry.capability === 'file.access').length === 24 && pinnedEntries.filter((entry) => entry.capability === 'network.access').length === 2);
 check('manifest preserves no-transfer ownership invariants', manifest.invariants?.realDataTransferPerformed === false && manifest.invariants?.sqliteOwnershipTransferred === false && manifest.invariants?.desktopVaultOwnershipPreserved === true);
 
 check('production capability gate passes', gate.status === 'PASS' && gate.findings.length === 0);
-check('gate scans all current production sources', gate.productionSourceZones === 18 && gate.scannedFiles === 555);
-check('gate and manifest cardinality are exact', gate.capabilitySurfaces === 392 && gate.exactManifestSurfaces === 392);
+check('gate scans all current production sources', gate.productionSourceZones === 18 && gate.scannedFiles === 556);
+check('gate and manifest cardinality are exact', gate.capabilitySurfaces === 395 && gate.exactManifestSurfaces === 395);
 check('gate manifest hash matches canonical file', gate.exactManifestSha256 === manifestSha256);
 check('gate reports seven families and fourteen applications', gate.protectedCapabilityFamilies === 7 && gate.canonicalApplications === 14);
-check('gate executes malicious and benign self tests', gate.maliciousSelfTestAssertions === 33 && gate.benignSelfTestAssertions === 5);
+check('gate executes malicious and benign self tests', gate.maliciousSelfTestAssertions === 35 && gate.benignSelfTestAssertions === 5);
 check('gate reports exact bootstrap and surface counts', gate.pinnedBootstrapSurfaces === 26 && JSON.stringify(gate.surfaceCounts) === JSON.stringify(manifest.surfaceCounts));
 
 check('scanner uses TypeScript JSX AST', includesAll(scanner, ["import { parse } from '@babel/parser'", "'typescript'", "'jsx'", 'walk(ast']));
@@ -126,6 +126,7 @@ check('scanner covers static dynamic require and builtin imports', includesAll(s
 check('scanner covers protected re-export and TypeScript import equals', includesAll(scanner, ["node.type === 'ExportNamedDeclaration'", "node.type === 'ExportAllDeclaration'", "node.type === 'TSImportEqualsDeclaration'", '*import-equals*']));
 check('scanner covers createRequire aliases', includesAll(scanner, ['CREATE_REQUIRE_FACTORY', 'DYNAMIC_REQUIRE_FUNCTION', '*createRequire*']));
 check('scanner rejects unresolved dynamic resource imports', includesAll(scanner, ['CAPABILITY_DYNAMIC_IMPORT_UNRESOLVED', 'Non-literal dynamic import cannot prove a resource capability']));
+check('scanner inventories literal executeJavaScript capabilities and rejects unresolved dynamic execution', includesAll(scanner, ['CAPABILITY_DYNAMIC_EXECUTION_UNRESOLVED', 'Non-literal executeJavaScript source cannot prove a resource capability', 'executeJavaScript.mediaDevices']));
 check('scanner tracks aliases computed APIs and browser globals', includesAll(scanner, ['aliases = new Map()', 'memberName', 'NETWORK_GLOBALS', 'FILE_GLOBALS']));
 check('scanner covers destructuring assignment and Reflect invocation aliases', includesAll(scanner, ["node.id?.type === 'ObjectPattern'", "node.type === 'AssignmentExpression'", "receiver === 'Reflect'", 'targetAlias.kind']));
 check('scanner covers JSX file and capture inputs', includesAll(scanner, ["node.type === 'JSXOpeningElement'", "attributes.type === 'file'", 'jsx.input[type=file][capture]']));
@@ -136,7 +137,7 @@ check('gate rejects malformed duplicate new stale and wildcard entries', include
 check('gate binds exact application ownership by source prefix', includesAll(gateScript, ['APPLICATION_OWNERS_BY_SOURCE_PREFIX', 'expectedApplicationsForSurfaceKey', '!same(applicationIds, expectedApplications)']));
 check('gate binds exact bootstrap versus signed-startup enforcement stage', includesAll(gateScript, ['PINNED_BOOTSTRAP_SURFACE_KEYS', "? 'PINNED_BOOTSTRAP_THEN_SIGNED'", 'entry.runtimeEnforcement !== expectedEnforcement']));
 check('gate rejects exact application baseline drift', includesAll(gateScript, ['APPLICATION_CAPABILITY_REGISTRY_INVALID', 'APPLICATION_CAPABILITY_BASELINE_MISMATCH', 'OBSERVED_CAPABILITY_COVERAGE_MISMATCH']));
-check('gate self-tests all seven families and dynamic escape', includesAll(gateScript, ["'FILE_IMPORT'", "'CAMERA_API'", "'MICROPHONE_API'", "'OCR_IMPORT'", "'AI_IMPORT'", "'LOCATION_API'", "'NETWORK_API'", "'CAPABILITY_DYNAMIC_IMPORT_UNRESOLVED'"]));
+check('gate self-tests all seven families and dynamic execution escapes', includesAll(gateScript, ["'FILE_IMPORT'", "'CAMERA_API'", "'MICROPHONE_API'", "'OCR_IMPORT'", "'AI_IMPORT'", "'LOCATION_API'", "'NETWORK_API'", "'CAPABILITY_DYNAMIC_IMPORT_UNRESOLVED'", "'CAPABILITY_DYNAMIC_EXECUTION_UNRESOLVED'"]));
 
 check('root pretypecheck includes capability gate', rootPackage.scripts?.pretypecheck?.includes('verify-platform-capability-manifest-gate.mjs'));
 check('root prebuild includes capability gate before governed preflight', rootPackage.scripts?.prebuild?.indexOf('verify-platform-capability-manifest-gate.mjs') >= 0 && rootPackage.scripts.prebuild.indexOf('verify-platform-capability-manifest-gate.mjs') < rootPackage.scripts.prebuild.indexOf('require-current-governed-preflight.mjs'));
@@ -163,10 +164,10 @@ check('Core Service verifies signed package coverage before server construction'
 check('Core Service fails closed on missing or denied manifest', includesAll(coreMain, ['Core Service signed capability manifest is missing', 'Core Service runtime capability coverage denied']));
 check('Desktop startup reads only authenticated Core Service authority', includesAll(startup, ["source: 'authenticated-core-service-health'", "evaluateCoverage(\n    'windows-desktop'", 'Desktop runtime capability manifest coverage was denied']));
 check('Desktop startup verifies package and application versions first', startup.indexOf('POLICY_PACKAGE_MISMATCH') < startup.indexOf('desktopCapabilityCoverage') && startup.indexOf('APPLICATION_VERSION_MISMATCH') < startup.indexOf('desktopCapabilityCoverage'));
-check('real Desktop startup runtime fixture carries exact signed capabilities', includesAll(startupRuntime, ["applicationRuntimeCapabilities:{'windows-desktop':['file.access','network.access','ocr.process'],'windows-core-service':['file.access','network.access']}", "runtimeCapabilities.join('|')==='file.access|network.access|ocr.process'"]));
+check('real Desktop startup runtime fixture carries exact signed capabilities', includesAll(startupRuntime, ["applicationRuntimeCapabilities:{'windows-desktop':['camera.access','file.access','microphone.access','network.access','ocr.process'],'windows-core-service':['file.access','network.access']}", "runtimeCapabilities.join('|')==='camera.access|file.access|microphone.access|network.access|ocr.process'"]));
 check('Desktop bootstrap pins file and network capabilities before operational startup', includesAll(desktopMain, ["assertPinnedBootstrapRuntimeCapability('windows-desktop', 'file.access')", "assertPinnedBootstrapRuntimeCapability('windows-desktop', 'network.access')"]));
 
-check('domain boundary is fixed and content free', includesAll(domain, ['PlatformCapabilityManifestGateBoundaryView', 'protectedCapabilityCount: 7', 'canonicalApplicationCount: 14', 'exactAstSurfaceCount: 392', 'sourcePathsExposedToClient: false', 'manifestHashesExposedToClient: false']));
+check('domain boundary is fixed and content free', includesAll(domain, ['PlatformCapabilityManifestGateBoundaryView', 'protectedCapabilityCount: 7', 'canonicalApplicationCount: 14', 'exactAstSurfaceCount: 395', 'sourcePathsExposedToClient: false', 'manifestHashesExposedToClient: false']));
 check('domain exports capability gate boundary', domainIndex.includes("export * from './platform-capability-manifest-gate.js'"));
 check('application use case verifies policy snapshot', includesAll(useCase, ['GetPlatformCapabilityManifestGateBoundaryUseCase', 'this.policy.verifySnapshot(snapshot)', 'PLATFORM_CAPABILITY_MANIFEST_GATE_SNAPSHOT_INVALID']));
 check('application boundary preserves no migration truth', includesAll(useCase, ['schemaMigrationRequired: false', 'latestDatabaseMigration: 77']));
@@ -176,7 +177,7 @@ check('policy tests cover signed hash and seven families', includesAll(policyTes
 check('policy tests cover malformed unverified and identity mismatch', includesAll(policyTest, ['MALFORMED_REQUEST', 'POLICY_PACKAGE_UNVERIFIED', 'POLICY_PACKAGE_HASH_MISMATCH', 'APPLICATION_ID_MISMATCH', 'APPLICATION_VERSION_MISMATCH', 'CAPABILITY_MANIFEST_HASH_MISMATCH']));
 check('policy tests cover missing unexpected and tampered capability', includesAll(policyTest, ['CAPABILITY_REQUIREMENT_MISSING', 'CAPABILITY_REQUIREMENT_UNEXPECTED', 'MALFORMED_AUTHORITY']));
 check('AST tests cover all seven resource families', includesAll(astTest, ['CAMERA_IMPORT', 'MICROPHONE_IMPORT', 'FILE_IMPORT', 'OCR_IMPORT', 'AI_IMPORT', 'LOCATION_API', 'NETWORK_API']));
-check('AST tests cover exact production and drift denial', includesAll(astTest, ['inventoryPlatformCapabilityManifestSurfaces()', 'inventory.files).toBe(555)', 'toHaveLength(392)', 'UNDECLARED_CAPABILITY_SURFACE', 'CAPABILITY_SURFACE_ENTRY_INVALID', 'APPLICATION_CAPABILITY_BASELINE_MISMATCH']));
+check('AST tests cover exact production dynamic execution and drift denial', includesAll(astTest, ['inventoryPlatformCapabilityManifestSurfaces()', 'inventory.files).toBe(556)', 'toHaveLength(395)', 'CAPABILITY_DYNAMIC_EXECUTION_UNRESOLVED', 'UNDECLARED_CAPABILITY_SURFACE', 'CAPABILITY_SURFACE_ENTRY_INVALID', 'APPLICATION_CAPABILITY_BASELINE_MISMATCH']));
 check('integration tests bind runtime startup and bootstrap', includesAll(integrationTest, ['applicationRuntimeCapabilities: PLATFORM_APPLICATION_RUNTIME_CAPABILITY_REQUIREMENTS', "source: 'authenticated-core-service-health'", 'assertPinnedBootstrapRuntimeCapability']));
 
 check('main composes exact capability policy and status use case', includesAll(desktopMain, ['new PlatformCapabilityManifestPolicy()', 'new GetPlatformCapabilityManifestGateBoundaryUseCase(platformCapabilityManifestPolicy)']));
@@ -190,15 +191,15 @@ check('renderer does not expose source or manifest hash material', !renderer.inc
 
 check('scope records all seven exact protected families', scope.boundaries?.protectedCapabilityFamilyCount === 7 && scope.boundaries?.protectedCapabilityFamilies?.join('|') === 'camera|microphone|file|ocr|ai|location|network');
 check('scope records exact signed runtime authority chain', scope.boundaries?.signedApplicationManifestRequired === true && scope.boundaries?.runtimeCapabilitiesIncludedInManifestHash === true && scope.boundaries?.authenticatedCoreServiceHealthRequired === true && scope.boundaries?.exactRuntimeCoverageRequired === true);
-check('scope denies missing unexpected malformed and unverified authority', scope.boundaries?.missingRuntimeCapabilityDenied === true && scope.boundaries?.unexpectedRuntimeCapabilityDenied === true && scope.boundaries?.malformedRuntimeAuthorityDenied === true && scope.boundaries?.unverifiedPolicyPackageDenied === true);
+check('scope denies missing unexpected malformed dynamic execution and unverified authority', scope.boundaries?.unresolvedDynamicExecutionDenied === true && scope.boundaries?.missingRuntimeCapabilityDenied === true && scope.boundaries?.unexpectedRuntimeCapabilityDenied === true && scope.boundaries?.malformedRuntimeAuthorityDenied === true && scope.boundaries?.unverifiedPolicyPackageDenied === true);
 check('scope preserves offline cache and no-cache fences', scope.boundaries?.offlineCapabilityLeasePreserved === true && scope.boundaries?.policySensitiveNoCachePreserved === true && scope.boundaries?.policyStatusIpcCacheAllowed === false);
 check('scope records no persistence transfer or cutover', scope.boundaries?.schemaMigrationRequired === false && scope.boundaries?.realDataTransferPerformed === false && scope.boundaries?.cutoverPerformed === false && scope.boundaries?.sqliteOwnershipTransferred === false);
 check('inventory has eight implemented controls', inventory.controls?.length === 8 && inventory.controls.every((item) => item.disposition === 'IMPLEMENTED'));
 check('inventory has zero findings and blockers', inventory.engine?.findings === 0 && inventory.closureSummary?.openBlockerCount === 0 && inventory.closureSummary?.openBlockers?.length === 0);
 check('decision records AST signed runtime and authority separation', includesAll(decision, ['DEC-203', 'exact `kind|path|symbol`', 'imzalı Platform Policy', 'Build manifesti tek başına runtime yetkisi değildir']));
-check('decision pins current Desktop OCR capability truth and communication audit source ratchet', includesAll(decision, ['555 dosya / 392 exact capability yüzeyi', manifestSha256, '`ocr-worker` capability kümesi boştur', '`lowPrivilegeSandboxVerified=false`']));
+check('decision pins current Desktop OCR and call-preflight capability truth', includesAll(decision, ['556 dosya / 395 exact capability yüzeyi', manifestSha256, '`ocr-worker` capability kümesi boştur', '`communication-service` capability kümesi boştur', '`lowPrivilegeSandboxVerified=false`']));
 check('threat model covers all primary resource and manifest evasions', ['Beyansız statik import', 'Dinamik import/require kaçışı', 'Kamera ve mikrofon kaçışı', 'OCR/AI kaçışı', 'Konum kaçışı', 'Manifest içeriği tamperi', 'İmzalı paket ikamesi', 'Pre-handshake boşluğu'].every((marker) => threat.includes(marker)));
-check('master register contains DEC-203 and current exact capability ratchet', masterRegister.includes('## DEC-203') && masterRegister.includes('DEC-203-ppk-022-capability-manifest-build-runtime-gate.md') && masterRegister.includes('555 dosya / 392 exact yüzey') && masterRegister.includes(manifestSha256));
+check('master register contains DEC-203 and current exact capability ratchet', masterRegister.includes('## DEC-203') && masterRegister.includes('DEC-203-ppk-022-capability-manifest-build-runtime-gate.md') && masterRegister.includes('556 dosya / 395 exact yüzey') && masterRegister.includes(manifestSha256));
 check('decision ledger contains active DEC-203', ledger.decisionCount === ledger.decisions.length && ledger.decisions.some((item) => item.id === 'DEC-203' && item.status === 'ACTIVE' && item.requirements?.includes('PPK-022')));
 check('database migration 77 baseline remains present', versions.includes(77) && latestMigration >= 77 && scope.boundaries?.latestDatabaseMigration === 77);
 

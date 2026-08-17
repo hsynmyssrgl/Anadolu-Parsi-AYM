@@ -38,7 +38,8 @@ export class RepositoryBackedCommunicationRealtimeCallingQueryPort implements Co
   readonly #runner: RepositoryBackedLifePolicyTransactionRunner;
   public constructor(
     private readonly dependencies: RepositoryBackedCommunicationRealtimeCallingDependencies,
-    runner?: RepositoryBackedLifePolicyTransactionRunner
+    runner?: RepositoryBackedLifePolicyTransactionRunner,
+    private readonly localMediaPreflightProviderConfigured = false
   ) { this.#runner = runner ?? new RepositoryBackedLifePolicyTransactionRunner(dependencies); }
   public getCenter(context: LifeApplicationContext): ReturnType<CommunicationRealtimeCallingQueryPort['getCenter']> {
     return this.#runner.execute(context, communicationRealtimeCallingReadIntent(), ({ repository, occurredAt }) => {
@@ -57,7 +58,12 @@ export class RepositoryBackedCommunicationRealtimeCallingQueryPort implements Co
           jitterMs: row.jitterMs, uplinkKbps: row.uplinkKbps, downlinkKbps: row.downlinkKbps,
           providerVerified: true as const, observedAt: row.observedAt
         }))),
-        truth: communicationRealtimeCallingTruth,
+        truth: Object.freeze({ ...communicationRealtimeCallingTruth,
+          localMediaPreflightProviderConfigured: this.localMediaPreflightProviderConfigured,
+          localMediaPreflightExecuted: snapshot.value.sessions.some(({ session }) =>
+            session.preflightProviderId !== undefined && session.preflightEvidenceSha256 !== undefined
+              && session.preflightObservedAt !== undefined)
+        }),
         generatedAt: occurredAt
       });
       return ok(view);

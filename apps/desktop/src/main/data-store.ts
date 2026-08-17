@@ -3145,14 +3145,14 @@ export class FamilyDataStore {
     const communicationRealtimeCallingDependencies={...lifeApplicationDependencies,
       communicationRealtimeCallingRepository:this.#repositories.communicationRealtimeCallingRepository,
       communicationRealtimeCallingPolicyResourceRepository:this.#repositories.communicationRealtimeCallingRepository} as const;
-    const communicationRealtimeCallingQuery=new RepositoryBackedCommunicationRealtimeCallingQueryPort(
-      communicationRealtimeCallingDependencies,lifePolicyTransactionRunner);
-    const communicationRealtimeCallingUnitOfWork=new RepositoryBackedCommunicationRealtimeCallingUnitOfWork(
-      communicationRealtimeCallingDependencies,lifePolicyTransactionRunner);
     const communicationCallPreflight:CommunicationCallPreflightPort=options.communicationCallPreflight??{
       run:(context)=>Promise.resolve(err(createAppError({code:ERROR_CODES.AUTHORIZATION_DENIED,category:'security',
         message:'Yerel kamera, mikrofon ve hoparlör preflight sağlayıcısı yapılandırılmadı.',correlationId:context.correlationId})))
     };
+    const communicationRealtimeCallingQuery=new RepositoryBackedCommunicationRealtimeCallingQueryPort(
+      communicationRealtimeCallingDependencies,lifePolicyTransactionRunner,options.communicationCallPreflight!==undefined);
+    const communicationRealtimeCallingUnitOfWork=new RepositoryBackedCommunicationRealtimeCallingUnitOfWork(
+      communicationRealtimeCallingDependencies,lifePolicyTransactionRunner);
     this.#getCommunicationRealtimeCallingCenterUseCase=new GetCommunicationRealtimeCallingCenterUseCase(communicationRealtimeCallingQuery);
     this.#createCommunicationCallUseCase=new CreateCommunicationCallUseCase(communicationRealtimeCallingUnitOfWork);
     this.#runCommunicationCallPreflightUseCase=new RunCommunicationCallPreflightUseCase(

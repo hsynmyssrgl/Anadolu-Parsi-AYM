@@ -11,7 +11,7 @@
 
 - Renderer medya cihazı, provider, ağ, relay credential, ekran yakalama veya kalite kanıtı otoritesi değildir.
 - DataStore yalnız merkezi Life PEP, repository resolver ve aynı SQLite transaction üzerinden yazım yapar.
-- Preflight ve kalite kanıtı yalnız gelecekteki güvenilir main-process adapterından gelebilir; production adapterı yoksa işlem reddedilir.
+- Preflight yalnız production main-process adaptöründen gelebilir; kalite kanıtı sağlayıcısı yoksa kalite yazımı reddedilir.
 - Yerel bekleme durumu gerçek bağlantı, teslim, çağrı veya ağ kanıtı değildir.
 
 ## Tehditler ve kontroller
@@ -21,7 +21,8 @@
 | Renderer'ın medya/provider/ağ yetkisi enjekte etmesi | Altı exact kanal, recursive plain-object/prototype/accessor/symbol/unknown-field ve safe-result doğrulaması | Gerçek medya providerı yok |
 | Başka aile veya kişinin oturumuna erişim | Exact account/person/family/owner PEP receipt ve owner filtreli repository sorguları | Gerçek çoklu hesap UAT yapılmadı |
 | Replay veya revision atlama | Unique client operation, request fingerprint, optimistic revision, state fingerprint ve mutation/current trigger bağı | Yaşam boyu mutation/event retention incelemesi yapılmadı |
-| Sahte preflight veya kalite iddiası | Renderer bu alanları gönderemez; main-only verified input ve `providerVerified:true` zorunlu | Production evidence adapterı bağlı değil |
+| Sahte preflight veya kalite iddiası | Renderer bu alanları gönderemez; main-only verified input ve `providerVerified:true` zorunlu; preflight oturum/PEP kontrolünden sonra çalışır, replay cihaz açmaz ve kanıt 120 saniyede bayatlar | Fiziksel cihaz UAT yapılmadı; quality evidence adapterı bağlı değil |
+| Statik taramadan saklanan medya API'si | Literal `executeJavaScript` kaynağı kamera/mikrofon capability olarak envanterlenir; çözülemeyen dinamik yürütme build'i durdurur | Aggregate Windows Desktop capability ayrı servis/sandbox veya fiziksel cihaz sertifikası değildir |
 | Yerel planın gerçek çağrı sayılması | Truth alanlarında provider/WebRTC/SFU/STUN/TURN/SFrame/MLS/network ve gerçek çağrı false | Gerçek cihaz ve ağ UAT yok |
 | Screen-share isteğinin yakalama sayılması | Yalnız boolean istek metadata'sı; renderer capture handle veremez | Screen/window capture uygulanmadı |
 | Altyazı ve RTT isteğinin taşıma sayılması | İstek metadata'sı ile provider/transport truth'u ayrıdır | Canlı caption ve RTT transport yok |

@@ -31,6 +31,7 @@ import {
   RunCommunicationCallPreflightUseCase,
   SetCommunicationCallPreferencesUseCase,
   UpdateCommunicationCallControlsUseCase,
+  communicationCallSessionRowToView,
   type CommunicationCallPreflightPort,
   type CommunicationRealtimeCallingUnitOfWork,
   type CommunicationRealtimeCallingWriteScope,
@@ -128,11 +129,30 @@ describe('34-C realtime calling use cases',()=>{
       providerId:'main-local-device-provider',providerEvidenceSha256:'a'.repeat(64),providerVerified:true,networkUsed:false,observedAt:NOW}));
     expect(await new RunCommunicationCallPreflightUseCase(unit,preflight).execute(CONTEXT,{clientOperationId:'preflight-34-c',
       expectedRevision:1,sessionId:created.value.resourceId})).toMatchObject({ok:true,value:{revision:2}});
+    expect(await new RunCommunicationCallPreflightUseCase(unit,preflight).execute(CONTEXT,{clientOperationId:'preflight-34-c',
+      expectedRevision:1,sessionId:created.value.resourceId})).toMatchObject({ok:true,value:{revision:2,replayed:true}});
     expect(await new AdvanceCommunicationCallUseCase(unit).execute(CONTEXT,{clientOperationId:'waiting-34-c',expectedRevision:2,
       sessionId:created.value.resourceId,action:'enter_local_waiting_room',reason:'Kullanıcı yerel bekleme alanını açtı.'}))
       .toMatchObject({ok:true,value:{revision:3,networkUsed:false}});
     expect(unit.state.sessions.get(created.value.resourceId)).toMatchObject({state:'waiting_local',networkState:'local_waiting_only'});
     expect(preflight.calls).toBe(1);
+  });
+
+  it('authorizes the exact session before device access and rejects stale evidence without writes',async()=>{
+    const unit=new Unit();const created=await create(unit);if(!created.ok)throw new Error(created.error.message);
+    const stale=new Preflight(Object.freeze({sessionId:created.value.resourceId,microphone:'passed',camera:'passed',speaker:'passed',
+      providerId:'main-local-device-provider',providerEvidenceSha256:'a'.repeat(64),providerVerified:true,networkUsed:false,
+      observedAt:asIsoDateTime('2026-08-15T13:00:00.000Z')}));
+    expect(await new RunCommunicationCallPreflightUseCase(unit,stale).execute(CONTEXT,{clientOperationId:'stale-preflight-34-c',
+      expectedRevision:1,sessionId:created.value.resourceId})).toMatchObject({ok:false,error:{category:'authorization'}});
+    expect(unit.state.sessions.get(created.value.resourceId)).toMatchObject({revision:1});
+    expect(unit.state.sessions.get(created.value.resourceId)).not.toHaveProperty('preflightEvidenceSha256');
+    expect(unit.state.mutations.has('stale-preflight-34-c')).toBe(false);expect(stale.calls).toBe(1);
+    const missing=new Preflight(Object.freeze({sessionId:'missing-call-34-c',microphone:'passed',camera:'passed',speaker:'passed',
+      providerId:'main-local-device-provider',providerEvidenceSha256:'a'.repeat(64),providerVerified:true,networkUsed:false,observedAt:NOW}));
+    expect(await new RunCommunicationCallPreflightUseCase(unit,missing).execute(CONTEXT,{clientOperationId:'missing-preflight-34-c',
+      expectedRevision:1,sessionId:'missing-call-34-c'})).toMatchObject({ok:false,error:{category:'not_found'}});
+    expect(missing.calls).toBe(0);
   });
 
   it('updates accessible local controls and blocks pinning a non-participant',async()=>{
@@ -142,8 +162,21 @@ describe('34-C realtime calling use cases',()=>{
       pinnedPersonId:INVITED,signLanguagePinnedPersonId:INVITED,reactionCode:'wave'})).toMatchObject({ok:true,value:{revision:2}});
     expect(unit.state.sessions.get(created.value.resourceId)).toMatchObject({audioOnly:true,meetingLocked:true,captionsRequested:true,
       realtimeTextRequested:true,localHandRaised:true,pinnedPersonId:INVITED,signLanguagePinnedPersonId:INVITED,reactionCode:'wave'});
-    expect(await new UpdateCommunicationCallControlsUseCase(unit).execute(CONTEXT,{clientOperationId:'bad-pin-34-c',expectedRevision:2,
+    expect(communicationCallSessionRowToView({session:unit.state.sessions.get(created.value.resourceId)!,
+      participants:unit.state.participants.get(created.value.resourceId)!}).participants).toEqual(expect.arrayContaining([
+        expect.objectContaining({role:'host',handRaised:true,reactionCode:'wave'}),
+        expect.objectContaining({personId:INVITED,pinnedLocally:true,signLanguageSpeakerPinnedLocally:true})
+      ]));
+    expect(await new UpdateCommunicationCallControlsUseCase(unit).execute(CONTEXT,{clientOperationId:'clear-controls-34-c',expectedRevision:2,
+      sessionId:created.value.resourceId,pinnedPersonId:null,signLanguagePinnedPersonId:null,reactionCode:null}))
+      .toMatchObject({ok:true,value:{revision:3}});
+    expect(unit.state.sessions.get(created.value.resourceId)).not.toHaveProperty('pinnedPersonId');
+    expect(unit.state.sessions.get(created.value.resourceId)).not.toHaveProperty('signLanguagePinnedPersonId');
+    expect(unit.state.sessions.get(created.value.resourceId)).not.toHaveProperty('reactionCode');
+    expect(await new UpdateCommunicationCallControlsUseCase(unit).execute(CONTEXT,{clientOperationId:'bad-pin-34-c',expectedRevision:3,
       sessionId:created.value.resourceId,pinnedPersonId:'person-foreign-34-c'})).toMatchObject({ok:false,error:{category:'authorization'}});
+    expect(await new UpdateCommunicationCallControlsUseCase(unit).execute(CONTEXT,{clientOperationId:'empty-controls-34-c',expectedRevision:3,
+      sessionId:created.value.resourceId})).toMatchObject({ok:false,error:{category:'validation'}});
   });
 
   it('persists bounded accessibility preferences and verified quality metadata without provider secrets',async()=>{

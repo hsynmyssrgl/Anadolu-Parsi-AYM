@@ -81,7 +81,7 @@ describe('34-C realtime calling DataStore production composition',()=>{
   });
 
   it('persists and exactly replays accessible preferences while every media/network truth remains false',async()=>{
-    const {store,accountId}=makeStore({governed:true});allow(store,accountId);const command={clientOperationId:'preferences-e2e-34-c',
+    const {store,accountId}=makeStore({governed:true,verifiedPreflight:true});allow(store,accountId);const command={clientOperationId:'preferences-e2e-34-c',
       expectedRevision:0,simpleMode:true,largePersonCards:true,captionScalePercent:150,screenReaderAnnouncements:true,
       keyboardShortcuts:true,automaticAudioFallbackEnabled:true,noiseReductionRequested:true,echoCancellationRequested:true,
       automaticGainControlRequested:true,backgroundEffect:'off' as const};
@@ -90,18 +90,19 @@ describe('34-C realtime calling DataStore production composition',()=>{
     await expect(store.setCommunicationCallPreferences({...command,simpleMode:false})).rejects.toThrow(/clientOperationId|farklı/i);
     expect(await store.getCommunicationRealtimeCallingCenter()).toMatchObject({preferences:{simpleMode:true,captionScalePercent:150},
       sessions:[],qualityObservations:[],truth:{productionMediaProviderConfigured:false,webRtcPeerConnectionExecuted:false,
+        localMediaPreflightProviderConfigured:true,localMediaPreflightExecuted:false,physicalMediaDeviceFunctionalityCertified:false,
         sfuServiceConfigured:false,stunTurnServiceConfigured:false,sframeMediaEncryptionExecuted:false,
         liveCaptionProviderConfigured:false,realOneToOneCallPerformed:false,realGroupCallPerformed:false,
         networkUsedByCurrentImplementation:false}});
   });
 
-  it('rejects a non-member invite and the default unconfigured preflight without partial writes',async()=>{
+  it('rejects a non-member invite and a missing session before invoking preflight without partial writes',async()=>{
     const {store,accountId,databasePath}=makeStore({governed:true});allow(store,accountId);const room=await createOwnerRoom(store);
     await expect(store.createCommunicationCall({clientOperationId:'foreign-call-e2e-34-c',expectedRevision:0,roomId:room.resourceId,
       topology:'direct_p2p',requestedMediaMode:'video',invitedPersonIds:['person-not-in-room-34-c'],waitingRoomEnabled:true,
       automaticAudioFallbackEnabled:true})).rejects.toThrow();
     await expect(store.runCommunicationCallPreflight({clientOperationId:'missing-preflight-e2e-34-c',expectedRevision:1,
-      sessionId:'communication-call-does-not-exist-34-c'})).rejects.toThrow(/preflight|yapılandırılmadı/i);
+      sessionId:'communication-call-does-not-exist-34-c'})).rejects.toThrow(/policy|bulunamadı|resolved/i);
     const database=new DatabaseSync(databasePath,{readOnly:true});try{
       expect(database.prepare('SELECT COUNT(*) count FROM communication_call_sessions').get()).toEqual({count:0});
       expect(database.prepare('SELECT COUNT(*) count FROM communication_call_mutations').get()).toEqual({count:0});

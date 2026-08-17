@@ -14,6 +14,7 @@
     "policyAndComposition": [
       "apps/desktop/src/main/life-production-policy-runtime.ts",
       "apps/desktop/src/main/communication-realtime-calling-application-adapter.ts",
+      "apps/desktop/src/main/communication-call-preflight-adapter.ts",
       "apps/desktop/src/main/repository-composition-root.ts",
       "apps/desktop/src/main/data-store.ts"
     ],
@@ -31,7 +32,8 @@
     "packages/repositories/communication-realtime-calling-repository-policy.test.ts",
     "apps/desktop/tests/communication-realtime-calling-data-store.test.ts",
     "apps/desktop/tests/communication-realtime-calling-ipc-integration.test.ts",
-    "apps/desktop/tests/communication-realtime-calling-ui.test.ts"
+    "apps/desktop/tests/communication-realtime-calling-ui.test.ts",
+    "apps/desktop/tests/communication-call-preflight-adapter.test.ts"
   ],
   "securityControls": {
     "centralPepReceiptFence": true,
@@ -43,7 +45,12 @@
     "rendererMediaNetworkProviderAuthorityExcluded": true,
     "durableWritesNonCancellable": true,
     "preflightAndQualityEvidenceMainOnly": true,
-    "providerMissingFailsClosed": true
+    "providerMissingFailsClosed": true,
+    "preflightSessionAuthorizedBeforeDeviceAccess": true,
+    "preflightReplayDoesNotReopenDevices": true,
+    "preflightEvidenceFreshnessBounded": true,
+    "dynamicMediaExecutionAstInventoried": true,
+    "physicalDeviceFunctionalityCertificationClaimed": false
   },
   "incompleteCapabilities": [
     "production WebRTC peer connection and media transport",
@@ -52,19 +59,19 @@
     "screen or window capture and background processing",
     "live caption provider and realtime text transport",
     "CallKit PushKit Windows call notification and do-not-disturb integration",
-    "real device preflight and quality evidence production wiring",
+    "real device preflight UAT and quality evidence production wiring",
     "participant kick and complete host moderation",
     "session and quality retention pruning",
     "real one-to-one and group call UAT"
   ],
   "validation": {
-    "targetedTestFileRatchet": 5,
-    "targetedTestRatchet": 23,
+    "targetedTestFileRatchet": 6,
+    "targetedTestRatchet": 26,
     "migrationVersion": 107,
     "migrationSha256": "299024d7bd040343717abceb2ada6e543a95bea921c7ee6c7d34a10cf2b6515b",
-    "ppk015": {"status":"PASS","files":513,"sourceSha256":"fc468299263f87c8e1e80f4323fa5465998d2326ceab15281290e313401b9fce","findings":0},
-    "ppk021": {"status":"PASS","files":513,"surfaces":805,"sha256":"8a70ce92f886463c2bea5ae997c5956f97cce7dcf17a433587e97f011996e7f6","targeted":17,"contract":84,"runtime":20},
-    "ppk022": {"status":"PASS","files":513,"surfaces":360,"sha256":"755717250f2549229608b38e6ea650a4647f1e0d50aa4c1aa1078acc193302ff","targeted":19,"contract":110,"runtime":24},
+    "ppk015": {"status":"PASS","files":556,"sourceSha256":"db215d6ab557250c77093ca45222b676b771bbf638e540ba0a68a5ec9b6dffb1","findings":0},
+    "ppk021": {"status":"PASS","files":556,"surfaces":876,"sha256":"709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0","targeted":17,"contract":84,"runtime":20},
+    "ppk022": {"status":"PASS","files":556,"surfaces":395,"sha256":"a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e","targeted":19,"contract":111,"runtime":24},
     "countsAsRequirementPass": false
   },
   "externalAndManualEvidence": "NOT_RUN",

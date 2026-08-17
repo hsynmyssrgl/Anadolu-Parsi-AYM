@@ -167,6 +167,10 @@ import { IpcAdaptiveBudgetMaintenanceReauthenticationStateStore } from './ipc-ad
 import { deriveIpcAdaptiveBudgetMaintenanceRecoveryContextKey, deriveIpcAdaptiveBudgetMaintenanceRecoveryCooldownContextKey, evaluateIpcAdaptiveBudgetMaintenanceRecoveryAuthority, parseIpcAdaptiveBudgetMaintenanceRecoveryInput } from './ipc-adaptive-budget-maintenance-lock-recovery.js';
 import { isSafeExternalHttpsUrl, normalizeTrustedRendererDocumentUrl, type TrustedRendererDescriptor } from './ipc-sender-trust.js';
 import { installRendererSessionSecurity, type RendererSecurityWebContentsLike } from './renderer-session-security.js';
+import {
+  ElectronCommunicationCallPreflightPort,
+  type CommunicationCallPreflightWindowLike
+} from './communication-call-preflight-adapter.js';
 import { PRIMARY_RENDERER_DOCUMENT_URL, PRIMARY_RENDERER_ORIGIN, PRIMARY_RENDERER_SCHEME, resolvePrimaryRendererAssetPath } from './renderer-protocol.js';
 import {
   ElectronSafeStorageDeviceSecretProtector,
@@ -1159,6 +1163,10 @@ function store(windowsHelloPlatformOverride?: WindowsHelloPlatformPort): FamilyD
           ]);
         }
       },
+      communicationCallPreflight:new ElectronCommunicationCallPreflightPort({
+        windows:{create:(options)=>new BrowserWindow(options) as unknown as CommunicationCallPreflightWindowLike},
+        clock:()=>current.clock.now()
+      }),
       identityAccessPorts:identityAccess.ports,
       federatedProviderConfigurations:identityAccess.providerConfigurations,
       securityConfig: current.config.security,

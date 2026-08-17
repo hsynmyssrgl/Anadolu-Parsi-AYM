@@ -15,6 +15,7 @@ const paths={
   domain:'packages/domain/src/communication-realtime-calling.ts',contract:'packages/repository-contracts/src/communication-realtime-calling-repository.ts',
   application:'packages/application/src/communication-realtime-calling-use-cases.ts',repository:'packages/repositories/src/communication-realtime-calling-repository.ts',
   adapter:'apps/desktop/src/main/communication-realtime-calling-application-adapter.ts',migration:'packages/database/src/family-database-migrations.ts',
+  preflightAdapter:'apps/desktop/src/main/communication-call-preflight-adapter.ts',
   ipc:'apps/desktop/src/main/ipc-integration-policy.ts',lifecycle:'apps/desktop/src/main/ipc-request-lifecycle.ts',
   main:'apps/desktop/src/main/main.ts',preload:'apps/desktop/src/main/preload.ts',global:'apps/desktop/src/renderer/global.d.ts',
   panel:'apps/desktop/src/renderer/CommunicationRealtimeCallingPanel.tsx',app:'apps/desktop/src/renderer/App.tsx',package:'package.json'
@@ -30,7 +31,11 @@ const checks=[
   ['repository contract exposes payload-free policy resolution',has(content.contract,['CommunicationRealtimeCallingRepositoryPort',
     'CommunicationRealtimeCallingPolicyResourceRepositoryPort','resolvePolicyResource','insertMutation','saveSession','appendQualityObservation'])],
   ['application keeps preflight and quality behind trusted inputs',has(content.application,['CommunicationCallPreflightPort',
-    'RecordCommunicationCallQualityInput','providerVerified !== true','networkUsed !== false','RecordCommunicationCallQualityObservationUseCase'])],
+    'RecordCommunicationCallQualityInput','providerVerified !== true','networkUsed !== false','RecordCommunicationCallQualityObservationUseCase',
+    'PreflightPreparation','authorizedAtMs - observedAtMs > 120_000'])],
+  ['production local preflight is isolated bounded and content free',has(content.preflightAdapter,['ElectronCommunicationCallPreflightPort',
+    'sandbox: true','setPermissionRequestHandler','setDisplayMediaRequestHandler','executeJavaScript<unknown>',
+    'providerEvidenceSha256','networkUsed: false as const'])],
   ['migration 107 owns six tables and immutable ledgers',has(content.migration,["createMigrationDefinition(107, 'communication_realtime_calling_accessible_ux'",
     'CREATE TABLE communication_call_mutations','CREATE TABLE communication_call_sessions','CREATE TABLE communication_call_participants',
     'CREATE TABLE communication_call_events','CREATE TABLE communication_call_preferences','CREATE TABLE communication_call_quality_observations',
@@ -51,7 +56,7 @@ const checks=[
   ['governance documents preserve fail-honest residuals',has(content.decision,['countsAsRequirementPass=false','WebRTC','SFU','STUN/TURN',
     'SFrame','NOT_RUN'])&&has(content.threat,['Renderer medya cihazı','Yaşam boyu mutation/event retention','kalıcı governance receipt'])],
   ['targeted package command is exact',pkg.scripts?.['verify:34-c:targeted']===
-    'vitest run packages/application/tests/communication-realtime-calling-use-cases.test.ts packages/repositories/communication-realtime-calling-repository-policy.test.ts apps/desktop/tests/communication-realtime-calling-data-store.test.ts apps/desktop/tests/communication-realtime-calling-ipc-integration.test.ts apps/desktop/tests/communication-realtime-calling-ui.test.ts --maxWorkers=1'],
+    'vitest run packages/application/tests/communication-realtime-calling-use-cases.test.ts packages/repositories/communication-realtime-calling-repository-policy.test.ts apps/desktop/tests/communication-call-preflight-adapter.test.ts apps/desktop/tests/communication-realtime-calling-data-store.test.ts apps/desktop/tests/communication-realtime-calling-ipc-integration.test.ts apps/desktop/tests/communication-realtime-calling-ui.test.ts --maxWorkers=1'],
   ['governance verifier commands are wired',pkg.scripts?.['verify:34-c:realtime-calling-media-accessible-ux:boundary']
     &&pkg.scripts?.['verify:34-c:realtime-calling-media-accessible-ux:contract']&&pkg.scripts?.['verify:34-c:realtime-calling-media-accessible-ux:runtime']],
   ['migration checksum ratchet is exact',scope.validation?.migrationSha256==='299024d7bd040343717abceb2ada6e543a95bea921c7ee6c7d34a10cf2b6515b'],

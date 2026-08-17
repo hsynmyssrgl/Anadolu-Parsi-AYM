@@ -398,6 +398,33 @@ export const scanPlatformCapabilityManifestSource = (pathInput, source) => {
       if (name === 'sendBeacon' && /(?:^|\.)navigator$/u.test(receiver)) add('NETWORK_API', 'sendBeacon', node);
       if (name === 'openExternal' && /(?:^|\.)shell$/u.test(receiver)) add('NETWORK_API', 'shell.openExternal', node);
       if (name === 'loadURL' || name === 'downloadURL') add('NETWORK_API', name, node);
+      if (name === 'executeJavaScript') {
+        const executableSource = literalString(unwrap(node.arguments?.[0]));
+        if (executableSource === undefined) {
+          observations.push({
+            key: `CAPABILITY_DYNAMIC_EXECUTION_UNRESOLVED|${path}|executeJavaScript`,
+            kind: 'CAPABILITY_DYNAMIC_EXECUTION_UNRESOLVED',
+            path,
+            detail: 'Non-literal executeJavaScript source cannot prove a resource capability.',
+            capability: null,
+            line: nodeLine(node)
+          });
+        } else {
+          if (/\b(?:navigator\.)?mediaDevices\s*\.\s*(?:getUserMedia|enumerateDevices)\s*\(/u.test(executableSource)) {
+            add('CAMERA_API', 'executeJavaScript.mediaDevices', node);
+            add('MICROPHONE_API', 'executeJavaScript.mediaDevices', node);
+          }
+          if (/\b(?:fetch|WebSocket|EventSource|XMLHttpRequest)\s*\(?/u.test(executableSource)) {
+            add('NETWORK_API', 'executeJavaScript.network', node);
+          }
+          if (/\b(?:showOpenFilePicker|showSaveFilePicker|showDirectoryPicker|FileReader)\b/u.test(executableSource)) {
+            add('FILE_GLOBAL', 'executeJavaScript.file', node);
+          }
+          if (/\bnavigator\s*\.\s*geolocation\s*\.\s*(?:getCurrentPosition|watchPosition)\s*\(/u.test(executableSource)) {
+            add('LOCATION_API', 'executeJavaScript.geolocation', node);
+          }
+        }
+      }
       if (name === 'open' && /^(?:globalThis|window|self)$/u.test(receiver)) add('NETWORK_API', 'window.open', node);
       if (name && ['assign', 'replace'].includes(name) && /(?:^|\.)location$/u.test(receiver)) add('NETWORK_API', `location.${name}`, node);
       if (name && ['call', 'apply', 'bind'].includes(name)) {

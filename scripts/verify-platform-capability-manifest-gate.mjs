@@ -20,7 +20,7 @@ const RUNTIME_CAPABILITIES = Object.freeze([
   'ai.process', 'location.access', 'network.access'
 ]);
 const EXPECTED_APPLICATION_CAPABILITIES = Object.freeze({
-  'windows-desktop': Object.freeze(['file.access', 'network.access', 'ocr.process']),
+  'windows-desktop': Object.freeze(['camera.access', 'file.access', 'microphone.access', 'network.access', 'ocr.process']),
   'windows-core-service': Object.freeze(['file.access', 'network.access']),
   'windows-cluster-agent': Object.freeze([]),
   'macos-companion': Object.freeze([]),
@@ -119,7 +119,9 @@ const selfTest = () => {
     ["const view = <input type=\"file\" capture />", 'CAMERA_API', 'apps/example/src/bypass.tsx'],
     ["import { dialog as chooser } from 'electron'; chooser.showOpenDialog({})", 'FILE_DIALOG'],
     ["import { net as transport } from 'electron'; transport.request(url)", 'NETWORK_API'],
-    ["new MediaRecorder(stream)", 'MICROPHONE_API']
+    ["new MediaRecorder(stream)", 'MICROPHONE_API'],
+    ["webContents.executeJavaScript(`navigator.mediaDevices.getUserMedia({video:true})`)", 'CAMERA_API'],
+    ["webContents.executeJavaScript(buildScript())", 'CAPABILITY_DYNAMIC_EXECUTION_UNRESOLVED']
   ];
   const maliciousFailures = malicious.filter(([source, expected, fixturePath = 'apps/example/src/bypass.ts']) =>
     !scanPlatformCapabilityManifestSource(fixturePath, source)

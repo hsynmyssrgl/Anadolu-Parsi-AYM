@@ -8,7 +8,7 @@ const json=async path=>JSON.parse(await readFile(resolve(root,path),'utf8'));
 const source=async path=>readFile(resolve(root,path),'utf8');
 const has=(text,markers)=>markers.every(marker=>text.includes(marker));
 const exact=(left,right)=>JSON.stringify(left)===JSON.stringify(right);
-const [scope,inventory,registry,roadmap,plan,ledger,domain,application,repository,adapter,dataStore,ipc,panel]=await Promise.all([
+const [scope,inventory,registry,roadmap,plan,ledger,domain,application,repository,adapter,preflightAdapter,dataStore,ipc,panel]=await Promise.all([
   json('config/34-c-realtime-calling-media-accessible-ux-scope.json'),
   json('config/34-c-realtime-calling-media-accessible-ux-inventory.json'),
   json('config/accepted-scope-registry.json'),json('config/remaining-scope-package-roadmap.json'),
@@ -17,6 +17,7 @@ const [scope,inventory,registry,roadmap,plan,ledger,domain,application,repositor
   source('packages/application/src/communication-realtime-calling-use-cases.ts'),
   source('packages/repositories/src/communication-realtime-calling-repository.ts'),
   source('apps/desktop/src/main/communication-realtime-calling-application-adapter.ts'),
+  source('apps/desktop/src/main/communication-call-preflight-adapter.ts'),
   source('apps/desktop/src/main/data-store.ts'),source('apps/desktop/src/main/ipc-integration-policy.ts'),
   source('apps/desktop/src/renderer/CommunicationRealtimeCallingPanel.tsx')
 ]);
@@ -31,7 +32,7 @@ const checks=[
   ['registry plan and ledger remain open behind predecessor',registryItems.every(item=>item&&item.status!=='COMPLETE'
     &&item.chain?.evidence===false)&&plan.currentStep==='33-P'&&ledger.activeMicroStep==='33-P'],
   ['domain distinguishes local planning from real media',has(domain,['CommunicationRealtimeCallingTruthView',
-    'rendererMediaDeviceAuthority: false','productionMediaProviderConfigured: false','webRtcPeerConnectionExecuted: false',
+    'rendererMediaDeviceAuthority: false','productionMediaProviderConfigured: false','physicalMediaDeviceFunctionalityCertified: false','webRtcPeerConnectionExecuted: false',
     'realOneToOneCallPerformed: false','networkUsedByCurrentImplementation: false'])],
   ['application provides governed lifecycle and main-only evidence ports',has(application,['CreateCommunicationCallUseCase',
     'RunCommunicationCallPreflightUseCase','UpdateCommunicationCallControlsUseCase','AdvanceCommunicationCallUseCase',
@@ -39,9 +40,10 @@ const checks=[
   ['repository is owner scoped and metadata only',has(repository,['SqliteCommunicationRealtimeCallingRepository',
     'communication_call_mutations','communication_call_sessions','communication_call_quality_observations','family_id=? AND owner_person_id=?',
     'resolvePolicyResource'])&&!repository.includes('media_plaintext')&&!repository.includes('relay_credential')],
-  ['desktop composes central Life PEP and fail-closed preflight',has(adapter,['RepositoryBackedCommunicationRealtimeCallingUnitOfWork',
-    'RepositoryBackedLifePolicyTransactionRunner','auditRepository.append','outboxRepository.enqueue'])&&has(dataStore,[
-    'communicationCallPreflight:CommunicationCallPreflightPort=options.communicationCallPreflight??','AUTHORIZATION_DENIED','getCommunicationRealtimeCallingCenter',
+  ['desktop composes central Life PEP and bounded local preflight',has(adapter,['RepositoryBackedCommunicationRealtimeCallingUnitOfWork',
+    'RepositoryBackedLifePolicyTransactionRunner','auditRepository.append','outboxRepository.enqueue'])&&has(preflightAdapter,[
+    'ElectronCommunicationCallPreflightPort','sandbox: true','setPermissionRequestHandler','setDisplayMediaRequestHandler','executeJavaScript<unknown>'])
+    &&has(dataStore,['options.communicationCallPreflight!==undefined','AUTHORIZATION_DENIED','getCommunicationRealtimeCallingCenter',
     'createCommunicationCall','setCommunicationCallPreferences'])],
   ['IPC exposes six safe channels and no quality authority',has(ipc,["getCenter:'communicationCalling:getCenter'",
     "create:'communicationCalling:create'","runPreflight:'communicationCalling:runPreflight'",
@@ -52,6 +54,8 @@ const checks=[
     'getCommunicationRealtimeCallingCenter','runCommunicationCallPreflight','meetingLocked','pinnedPersonId',
     'signLanguagePinnedPersonId','production ortamında'])],
   ['production media and OS integrations remain explicitly false',scope.truth?.productionMediaProviderConfigured===false
+    &&scope.truth?.localMediaPreflightProviderConfigured===true&&scope.truth?.localMediaPreflightExecuted===false
+    &&scope.truth?.physicalMediaDeviceFunctionalityCertified===false
     &&scope.truth?.webRtcPeerConnectionExecuted===false&&scope.truth?.sfuServiceConfigured===false
     &&scope.truth?.stunTurnServiceConfigured===false&&scope.truth?.sframeMediaEncryptionExecuted===false
     &&scope.truth?.screenOrWindowCaptureImplemented===false&&scope.truth?.liveCaptionProviderConfigured===false
@@ -63,12 +67,12 @@ const checks=[
   ['manual evidence receipt and requirement acceptance remain closed',manualNotRun
     &&scope.manualEvidence?.certificationClaimed===false&&scope.persistentReceiptStatus==='NOT_RUN'
     &&scope.truth?.requirementsClosed===false&&scope.truth?.countsAsRequirementPass===false&&inventory.countsAsRequirementPass===false],
-  ['local ratchet is exact without granting requirement pass',scope.validation?.targetedTestFileRatchet===5
-    &&scope.validation?.targetedTestRatchet===23&&scope.validation?.migrationVersion===107
+  ['local ratchet is exact without granting requirement pass',scope.validation?.targetedTestFileRatchet===6
+    &&scope.validation?.targetedTestRatchet===26&&scope.validation?.migrationVersion===107
     &&scope.validation?.migrationSha256==='299024d7bd040343717abceb2ada6e543a95bea921c7ee6c7d34a10cf2b6515b'
-    &&scope.validation?.ppk015?.files===513&&scope.validation?.ppk015?.sourceSha256==='fc468299263f87c8e1e80f4323fa5465998d2326ceab15281290e313401b9fce'
-    &&scope.validation?.ppk021?.surfaces===805&&scope.validation?.ppk021?.sha256==='8a70ce92f886463c2bea5ae997c5956f97cce7dcf17a433587e97f011996e7f6'
-    &&scope.validation?.ppk022?.surfaces===360&&scope.validation?.ppk022?.sha256==='755717250f2549229608b38e6ea650a4647f1e0d50aa4c1aa1078acc193302ff'
+    &&scope.validation?.ppk015?.files===556&&scope.validation?.ppk015?.sourceSha256==='db215d6ab557250c77093ca45222b676b771bbf638e540ba0a68a5ec9b6dffb1'
+    &&scope.validation?.ppk021?.surfaces===876&&scope.validation?.ppk021?.sha256==='709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0'
+    &&scope.validation?.ppk022?.surfaces===395&&scope.validation?.ppk022?.sha256==='a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e'
     &&scope.validation?.countsAsRequirementPass===false&&inventory.validation?.countsAsRequirementPass===false]
 ];
 const results=checks.map(([name,passed])=>({name,status:passed?'PASS':'FAIL'}));

@@ -18,7 +18,7 @@
   "signedManifestRuntimeCheckRequired": true,
   "buildManifestAloneGrantsRuntimeAuthority": false,
   "productionSourceZoneCount": 18,
-  "scannedProductionFiles": 555,
+  "scannedProductionFiles": 556,
   "protectedCapabilityFamilies": [
     "camera",
     "microphone",
@@ -29,17 +29,21 @@
     "network"
   ],
   "surfaceCounts": {
+    "CAMERA_API": 1,
     "FILE_DIALOG": 2,
     "FILE_IMPORT": 335,
-    "NETWORK_API": 2,
+    "MICROPHONE_API": 1,
+    "NETWORK_API": 3,
     "NETWORK_IMPORT": 13,
     "OCR_API": 5,
     "OCR_IMPORT": 35
   },
-  "exactCapabilitySurfaceCount": 392,
+  "exactCapabilitySurfaceCount": 395,
   "applicationRuntimeCapabilities": {
     "windows-desktop": [
+      "camera.access",
       "file.access",
+      "microphone.access",
       "network.access",
       "ocr.process"
     ],
@@ -61,6 +65,14 @@
     "signed-plugin": []
   },
   "surfaces": [
+    {
+      "key": "CAMERA_API|apps/desktop/src/main/communication-call-preflight-adapter.ts|executeJavaScript.mediaDevices",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "camera.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
     {
       "key": "FILE_DIALOG|apps/desktop/src/main/main.ts|showOpenDialog",
       "applicationIds": [
@@ -2763,6 +2775,22 @@
       ],
       "capability": "file.access",
       "runtimeEnforcement": "PINNED_BOOTSTRAP_THEN_SIGNED"
+    },
+    {
+      "key": "MICROPHONE_API|apps/desktop/src/main/communication-call-preflight-adapter.ts|executeJavaScript.mediaDevices",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "microphone.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "NETWORK_API|apps/desktop/src/main/communication-call-preflight-adapter.ts|loadURL",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "network.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
     },
     {
       "key": "NETWORK_API|apps/desktop/src/main/main.ts|loadURL",

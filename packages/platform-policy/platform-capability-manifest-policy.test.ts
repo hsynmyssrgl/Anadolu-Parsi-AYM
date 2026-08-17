@@ -74,16 +74,18 @@ describe('32-R PPK-022 signed runtime capability manifest policy', () => {
   it('binds the seven-family runtime capability list into the signed application manifest hash', () => {
     const { policyKernel, manifest } = setup();
     expect(PLATFORM_RUNTIME_CAPABILITIES).toHaveLength(7);
-    expect(manifest.runtimeCapabilities).toEqual(['file.access', 'network.access', 'ocr.process']);
+    expect(manifest.runtimeCapabilities).toEqual(['camera.access', 'file.access', 'microphone.access', 'network.access', 'ocr.process']);
     expect(manifest.capabilityManifestSha256).toBe(platformCapabilityManifestHash(manifest));
     expect(policyKernel.verifyPolicyPackage(policyKernel.policyPackage)).toBe(true);
   });
 
-  it('allows only file and network capabilities declared by the exact signed manifest', () => {
+  it('allows only capabilities declared by the exact signed manifest', () => {
     const { policy, authority, request } = setup();
     expect(policy.authorize(request('file.access'), authority)).toMatchObject({ allowed: true, reason: 'ALLOW_CAPABILITY' });
     expect(policy.authorize(request('network.access'), authority)).toMatchObject({ allowed: true, reason: 'ALLOW_CAPABILITY' });
-    expect(policy.authorize(request('camera.access'), authority)).toMatchObject({ allowed: false, reason: 'CAPABILITY_NOT_DECLARED' });
+    expect(policy.authorize(request('camera.access'), authority)).toMatchObject({ allowed: true, reason: 'ALLOW_CAPABILITY' });
+    expect(policy.authorize(request('microphone.access'), authority)).toMatchObject({ allowed: true, reason: 'ALLOW_CAPABILITY' });
+    expect(policy.authorize(request('location.access'), authority)).toMatchObject({ allowed: false, reason: 'CAPABILITY_NOT_DECLARED' });
   });
 
   it('rejects malformed, unverified and package-hash mismatched runtime authority', () => {
@@ -111,7 +113,7 @@ describe('32-R PPK-022 signed runtime capability manifest policy', () => {
     const missing = rebuiltManifest(manifest, ['file.access']);
     expect(policy.evaluateCoverage('windows-desktop', { ...authority, manifest: missing }))
       .toMatchObject({ allowed: false, reason: 'CAPABILITY_REQUIREMENT_MISSING' });
-    const unexpected = rebuiltManifest(manifest, ['camera.access', 'file.access', 'network.access', 'ocr.process']);
+    const unexpected = rebuiltManifest(manifest, ['camera.access', 'file.access', 'location.access', 'microphone.access', 'network.access', 'ocr.process']);
     expect(policy.evaluateCoverage('windows-desktop', { ...authority, manifest: unexpected }))
       .toMatchObject({ allowed: false, reason: 'CAPABILITY_REQUIREMENT_UNEXPECTED' });
   });
@@ -148,7 +150,7 @@ describe('32-R PPK-022 signed runtime capability manifest policy', () => {
       gateVersion: 'PPK-022-V1',
       protectedCapabilityCount: 7,
       canonicalApplicationCount: 14,
-      exactAstSurfaceCount: 392,
+      exactAstSurfaceCount: 395,
       bootstrapNetworkCapabilityPinned: true,
       buildManifestAloneGrantsRuntimeAuthority: false,
       latestDatabaseMigration: 77
@@ -157,7 +159,7 @@ describe('32-R PPK-022 signed runtime capability manifest policy', () => {
 
   it('never allows a capability from a signed but production-baseline-broadened manifest', () => {
     const { policy, authority, manifest, request } = setup();
-    const broadened = rebuiltManifest(manifest, ['camera.access', 'file.access', 'network.access', 'ocr.process']);
+    const broadened = rebuiltManifest(manifest, ['camera.access', 'file.access', 'microphone.access', 'network.access', 'ocr.process', 'location.access']);
     expect(policy.authorize({
       ...request('file.access'),
       capabilityManifestSha256: broadened.capabilityManifestSha256

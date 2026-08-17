@@ -22,7 +22,8 @@ describe('34-C realtime calling renderer surface',()=>{
 
   it('states provider and delivery limits without claiming a real call or network use',()=>{
     for(const marker of ['Bu sürüm gerçek çağrı başlatmaz ve ağ kullanmaz.','WebRTC, SFU, STUN/TURN, SFrame/MLS',
-      'production ortamında yapılandırılmadı','güvenli biçimde reddedilir','yalnız yerel planlama metadatasıdır'])
+      'production ortamında yapılandırılmadı','güvenli biçimde reddedilir','yalnız yerel planlama metadatasıdır',
+      'fiziksel kamera, mikrofon veya duyulabilir hoparlör işlevini sertifikalandırmaz'])
       expect(panel).toContain(marker);
     for(const forbidden of ['providerEvidenceSha256','turnCredential','sframeKey','mediaStreamId','screenCaptureSourceId',
       'recordCommunicationCallQuality','navigator.mediaDevices','RTCPeerConnection'])expect(panel).not.toContain(forbidden);
@@ -32,7 +33,7 @@ describe('34-C realtime calling renderer surface',()=>{
     for(const label of ['Yerel çağrı planı oluştur','Sade ve büyük görünümü aç','Yerel ön kontrolü çalıştır','Yalnız sese geç',
       'Altyazı iste','RTT iste','Ekran paylaşımı iste','El kaldır','Yerel toplantı planını kilitle','Yerel olarak sabitle',
       'İşaret dili konuşmacısı olarak sabitle','Yerel bekleme alanına geç',
-      'Planı sonlandır','Planı iptal et'])
+      'Yerel sabitlemeyi kaldır','İşaret dili sabitlemesini kaldır','Planı sonlandır','Planı iptal et'])
       expect(panel).toContain(label);
     expect(panel).toContain('aria-labelledby="communication-calling-title"');
     expect(panel).toContain("invitedPersonIds.length<=15");

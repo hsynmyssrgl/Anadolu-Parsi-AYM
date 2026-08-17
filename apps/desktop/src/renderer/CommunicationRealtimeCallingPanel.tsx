@@ -47,9 +47,12 @@ export function CommunicationRealtimeCallingPanel(){
       window.pardus!.updateCommunicationCallControls({clientOperationId,expectedRevision:session.revision,sessionId:session.id,
         [field]:!session[field]}));
   const pinParticipant=(session:CommunicationCallSessionView,personId:string,signLanguage:boolean)=>window.pardus&&mutate(
-    `${signLanguage?'sign-pin':'pin'}:${session.id}:${session.revision}:${personId}`,clientOperationId=>
+    `${signLanguage?'sign-pin':'pin'}:${session.id}:${session.revision}:${personId}:${
+      signLanguage?session.signLanguagePinnedPersonId===personId:session.pinnedPersonId===personId}`,clientOperationId=>
       window.pardus!.updateCommunicationCallControls({clientOperationId,expectedRevision:session.revision,sessionId:session.id,
-        ...(signLanguage?{signLanguagePinnedPersonId:personId}:{pinnedPersonId:personId})}));
+        ...(signLanguage
+          ?{signLanguagePinnedPersonId:session.signLanguagePinnedPersonId===personId?null:personId}
+          :{pinnedPersonId:session.pinnedPersonId===personId?null:personId})}));
   const advance=(session:CommunicationCallSessionView,action:'enter_local_waiting_room'|'end'|'cancel')=>window.pardus&&mutate(
     `${action}:${session.id}:${session.revision}`,clientOperationId=>window.pardus!.advanceCommunicationCall({clientOperationId,
       expectedRevision:session.revision,sessionId:session.id,action,
@@ -67,7 +70,8 @@ export function CommunicationRealtimeCallingPanel(){
       <button type="button" onClick={()=>void refresh()} disabled={Boolean(busy)}>Yenile</button></div>
     <div className="communication-calling-truth" role="note"><strong>Bu sürüm gerçek çağrı başlatmaz ve ağ kullanmaz.</strong>
       <span>WebRTC, SFU, STUN/TURN, SFrame/MLS, ekran paylaşımı, canlı altyazı, RTT taşıması ve işletim sistemi çağrı bildirimleri production ortamında yapılandırılmadı.</span>
-      <span>Ön kontrol yalnız güvenilir main-process sağlayıcısı bağlandığında kanıt üretir; şu an destek yoksa güvenli biçimde reddedilir.</span>
+      <span>Yerel cihaz ön kontrolü: {center?.truth.localMediaPreflightProviderConfigured?'güvenilir main-process sağlayıcısı hazır':'sağlayıcı yok; güvenli biçimde reddedilir'}.</span>
+      <span>Bu ön kontrol yalnız işletim sistemi erişimini, canlı track durumunu ve yerel ses çıkış yolunu sınar; fiziksel kamera, mikrofon veya duyulabilir hoparlör işlevini sertifikalandırmaz.</span>
       <span>Bekleme alanı, el kaldırma, sabitleme, erişilebilirlik ve arka plan seçenekleri yalnız yerel planlama metadatasıdır.</span></div>
     {error&&<p className="status-message danger" role="alert">{error}</p>}
     {!center?<p>Çağrı çalışma alanı yükleniyor…</p>:<>
@@ -91,13 +95,19 @@ export function CommunicationRealtimeCallingPanel(){
           <ul className="communication-calling-participants" aria-label="Yerel katılımcı planı">{session.participants.map(participant=><li key={participant.personId}>
             <span>{participant.role==='host'?'Yerel ev sahibi':'Davetli'} · {participant.state}</span>
             <button type="button" disabled={Boolean(busy)||['ended','cancelled'].includes(session.state)}
-              onClick={()=>void pinParticipant(session,participant.personId,false)}>Yerel olarak sabitle</button>
+              aria-pressed={session.pinnedPersonId===participant.personId}
+              onClick={()=>void pinParticipant(session,participant.personId,false)}>{session.pinnedPersonId===participant.personId
+                ?'Yerel sabitlemeyi kaldır':'Yerel olarak sabitle'}</button>
             <button type="button" disabled={Boolean(busy)||['ended','cancelled'].includes(session.state)}
-              onClick={()=>void pinParticipant(session,participant.personId,true)}>İşaret dili konuşmacısı olarak sabitle</button>
+              aria-pressed={session.signLanguagePinnedPersonId===participant.personId}
+              onClick={()=>void pinParticipant(session,participant.personId,true)}>{session.signLanguagePinnedPersonId===participant.personId
+                ?'İşaret dili sabitlemesini kaldır':'İşaret dili konuşmacısı olarak sabitle'}</button>
           </li>)}</ul>
           <div className="communication-calling-actions">
             <button type="button" disabled={Boolean(busy)||['ended','cancelled'].includes(session.state)} onClick={()=>void preflight(session)}>Yerel ön kontrolü çalıştır</button>
-            <button type="button" disabled={Boolean(busy)||['ended','cancelled'].includes(session.state)} onClick={()=>void control(session,'audioOnly')}>{session.audioOnly?'Görüntü iste':'Yalnız sese geç'}</button>
+            <button type="button" disabled={Boolean(busy)||['ended','cancelled'].includes(session.state)
+              ||session.requestedMediaMode==='audio'} onClick={()=>void control(session,'audioOnly')}>{session.requestedMediaMode==='audio'
+                ?'Yalnız ses planı':session.audioOnly?'Görüntü iste':'Yalnız sese geç'}</button>
             <button type="button" disabled={Boolean(busy)||['ended','cancelled'].includes(session.state)} onClick={()=>void control(session,'captionsRequested')}>{session.captionsRequested?'Altyazı isteğini kapat':'Altyazı iste'}</button>
             <button type="button" disabled={Boolean(busy)||['ended','cancelled'].includes(session.state)} onClick={()=>void control(session,'realtimeTextRequested')}>{session.realtimeTextRequested?'RTT isteğini kapat':'RTT iste'}</button>
             <button type="button" disabled={Boolean(busy)||['ended','cancelled'].includes(session.state)} onClick={()=>void control(session,'screenShareRequested')}>{session.screenShareRequested?'Ekran paylaşımı isteğini kapat':'Ekran paylaşımı iste'}</button>

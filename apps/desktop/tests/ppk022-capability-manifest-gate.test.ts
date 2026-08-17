@@ -33,6 +33,8 @@ describe('32-R PPK-022 capability manifest AST gate', () => {
     expect(kinds("import { createRequire } from 'node:module'; const req=createRequire(import.meta.url); req('node:fs')")).toContain('FILE_IMPORT');
     expect(kinds("const { fetch: send }=globalThis; Reflect.apply(send, globalThis, [url])")).toContain('NETWORK_API');
     expect(kinds("const media=navigator.mediaDevices; media.getUserMedia({video:true})")).toEqual(expect.arrayContaining(['CAMERA_API', 'MICROPHONE_API']));
+    expect(kinds("webContents.executeJavaScript(`navigator.mediaDevices.getUserMedia({video:true})`)")).toEqual(expect.arrayContaining(['CAMERA_API', 'MICROPHONE_API']));
+    expect(kinds("webContents.executeJavaScript(buildScript())")).toContain('CAPABILITY_DYNAMIC_EXECUTION_UNRESOLVED');
     expect(kinds("const { getCurrentPosition: locate }=navigator.geolocation; locate(done)")).toContain('LOCATION_API');
     expect(kinds("import { dialog } from 'electron'; const { showOpenDialog: choose }=dialog; choose({})")).toContain('FILE_DIALOG');
     expect(scanPlatformCapabilityManifestSource('apps/untrusted/src/bypass.tsx', 'const view=<input type="file" capture />').map((item) => item.kind))
@@ -49,9 +51,9 @@ describe('32-R PPK-022 capability manifest AST gate', () => {
     const result = evaluatePlatformCapabilityManifest(inventory, manifest);
     expect(result.findings).toEqual([]);
     expect(inventory.zones).toBe(18);
-    expect(inventory.files).toBe(555);
-    expect(inventory.observations).toHaveLength(392);
-    expect(result.exactSurfaceCount).toBe(392);
+    expect(inventory.files).toBe(556);
+    expect(inventory.observations).toHaveLength(395);
+    expect(result.exactSurfaceCount).toBe(395);
     expect(result.pinnedBootstrapSurfaceCount).toBe(26);
   });
 
@@ -93,11 +95,11 @@ describe('32-R PPK-022 capability manifest AST gate', () => {
     expect(report).toMatchObject({
       status: 'PASS',
       productionSourceZones: 18,
-      scannedFiles: 555,
-      capabilitySurfaces: 392,
-      exactManifestSurfaces: 392,
+      scannedFiles: 556,
+      capabilitySurfaces: 395,
+      exactManifestSurfaces: 395,
       pinnedBootstrapSurfaces: 26,
-      maliciousSelfTestAssertions: 33,
+      maliciousSelfTestAssertions: 35,
       benignSelfTestAssertions: 5,
       canonicalApplications: 14,
       protectedCapabilityFamilies: 7,

@@ -24,7 +24,9 @@ const preferences={simpleMode:false,largePersonCards:true,captionScalePercent:12
   keyboardShortcuts:true,automaticAudioFallbackEnabled:true,noiseReductionRequested:true,echoCancellationRequested:true,
   automaticGainControlRequested:true,backgroundEffect:'off',revision:0,updatedAt:NOW};
 const truth={localCallPlanningMetadataImplemented:true,appendOnlyLifecycleLedgerImplemented:true,optimisticRevisionRequired:true,
-  accessibleCallPreferenceModelImplemented:true,localPreflightEvidenceContractImplemented:true,rendererMediaDeviceAuthority:false,
+  accessibleCallPreferenceModelImplemented:true,localPreflightEvidenceContractImplemented:true,
+  localMediaPreflightProviderConfigured:true,localMediaPreflightExecuted:false,physicalMediaDeviceFunctionalityCertified:false,
+  rendererMediaDeviceAuthority:false,
   rendererNetworkAuthority:false,productionMediaProviderConfigured:false,webRtcPeerConnectionExecuted:false,sfuServiceConfigured:false,
   stunTurnServiceConfigured:false,shortLivedRelayCredentialsIssued:false,sframeMediaEncryptionExecuted:false,
   mlsMediaKeyBindingVerified:false,screenOrWindowCaptureImplemented:false,localBackgroundProcessingImplemented:false,
@@ -56,6 +58,9 @@ describe('34-C realtime calling IPC boundary',()=>{
         automaticGainControlRequested:true,backgroundEffect:'off'}]]
     ]);
     for(const [channel,args] of valid)expect(evaluateIpcIntegrationPolicy(channel,args),channel).toMatchObject({accepted:true});
+    expect(evaluateIpcIntegrationPolicy(COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS.updateControls,[{
+      clientOperationId:'clear-call-pin-34-c',expectedRevision:1,sessionId:session.id,pinnedPersonId:null,
+      signLanguagePinnedPersonId:null,reactionCode:null}]).accepted).toBe(true);
     expect(evaluateIpcIntegrationPolicy('communicationCalling:connect',[{}]).accepted).toBe(false);
   });
 
@@ -78,6 +83,7 @@ describe('34-C realtime calling IPC boundary',()=>{
     expect(evaluateIpcIntegrationResultPolicy(COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS.create,receipt).accepted).toBe(true);
     for(const unsafe of [{...center,providerEvidenceSha256:'a'.repeat(64)},{...center,turnCredential:'secret'},
       {...center,truth:{...truth,webRtcPeerConnectionExecuted:true}},{...center,truth:{...truth,networkUsedByCurrentImplementation:true}},
+      {...center,truth:{...truth,localMediaPreflightProviderConfigured:false,localMediaPreflightExecuted:true}},
       {...center,sessions:[{...session,preflight:{...session.preflight,providerId:'unsafe'}}]}])
       expect(evaluateIpcIntegrationResultPolicy(COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS.getCenter,unsafe).accepted).toBe(false);
     expect(evaluateIpcIntegrationResultPolicy(COMMUNICATION_REALTIME_CALLING_IPC_CHANNELS.create,
