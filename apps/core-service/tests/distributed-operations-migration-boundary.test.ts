@@ -45,6 +45,13 @@ describe('34-J distributed operations migration boundary', () => {
     ).all() as Array<{name: string; strict: number}>;
     expect(tables).toHaveLength(3);
     expect(tables.every(row => row.strict === 1)).toBe(true);
+    const tableDefinitions=(runtime.database.prepare(
+      "SELECT sql FROM sqlite_master WHERE type='table' AND name IN ('distributed_backup_evidence','distributed_update_plans','distributed_fault_injection_evidence')"
+    ).all() as Array<{sql:string}>).map(row=>row.sql.replaceAll(/\s+/gu,''));
+    expect(tableDefinitions).toHaveLength(3);
+    expect(tableDefinitions.every(sql=>sql.includes(
+      'PRIMARYKEY(cluster_id,family_id,id),UNIQUE(cluster_id,family_id,client_operation_id)'
+    ))).toBe(true);
     const sql = (runtime.database.prepare("SELECT sql FROM sqlite_master WHERE type='trigger' AND name LIKE 'trg_34j_%'")
       .all() as Array<{sql: string}>).map(row => row.sql).join('\n');
     for (const marker of ['backup chain, cluster state or epoch evidence mismatch',
@@ -52,6 +59,7 @@ describe('34-J distributed operations migration boundary', () => {
       'backup evidence is immutable', 'rolling update plan is immutable', 'fault evidence is immutable']) {
       expect(sql).toContain(marker);
     }
+    expect(sql).toContain('n.safe_mode<>0 OR n.certificate_revoked<>0');
   });
 
   it('accepts only exact cluster-bound backup, update and fault chains', () => {

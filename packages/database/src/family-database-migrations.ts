@@ -17824,8 +17824,8 @@ UPDATE database_metadata SET value='REVISION-34-I-DISTRIBUTED-CORE-CONSENSUS-TEN
 `;
 
 const distributedClientOperationsSql = `CREATE TABLE distributed_backup_evidence(
-  id TEXT PRIMARY KEY CHECK(length(id) BETWEEN 2 AND 256),
-  client_operation_id TEXT NOT NULL UNIQUE CHECK(length(client_operation_id) BETWEEN 2 AND 256),
+  id TEXT NOT NULL CHECK(length(id) BETWEEN 2 AND 256),
+  client_operation_id TEXT NOT NULL CHECK(length(client_operation_id) BETWEEN 2 AND 256),
   request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
   cluster_id TEXT NOT NULL CHECK(length(cluster_id) BETWEEN 2 AND 256),
   family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
@@ -17833,23 +17833,24 @@ const distributedClientOperationsSql = `CREATE TABLE distributed_backup_evidence
   kind TEXT NOT NULL CHECK(kind IN ('local','external','offline','offsite')),
   storage_target_id TEXT NOT NULL CHECK(length(storage_target_id) BETWEEN 2 AND 256),
   immutable INTEGER NOT NULL CHECK(immutable=1),independent_from_replica INTEGER NOT NULL CHECK(independent_from_replica=1),
-  manifest_sha256 TEXT NOT NULL CHECK(length(manifest_sha256)=64 AND manifest_sha256 NOT GLOB '*[^0-9a-f]*'),
-  cluster_state_evidence_sha256 TEXT NOT NULL CHECK(length(cluster_state_evidence_sha256)=64 AND cluster_state_evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
-  source_commit_index INTEGER NOT NULL CHECK(source_commit_index>=0),verified_size_bytes INTEGER NOT NULL CHECK(verified_size_bytes>=1),
+  manifest_sha256 TEXT NOT NULL CHECK(length(manifest_sha256)=64 AND manifest_sha256 NOT GLOB '*[^0-9a-f]*' AND manifest_sha256<>'0000000000000000000000000000000000000000000000000000000000000000'),
+  cluster_state_evidence_sha256 TEXT NOT NULL CHECK(length(cluster_state_evidence_sha256)=64 AND cluster_state_evidence_sha256 NOT GLOB '*[^0-9a-f]*' AND cluster_state_evidence_sha256<>'0000000000000000000000000000000000000000000000000000000000000000'),
+  source_commit_index INTEGER NOT NULL CHECK(source_commit_index>=1),verified_size_bytes INTEGER NOT NULL CHECK(verified_size_bytes>=1),
   verified_at TEXT NOT NULL CHECK(length(verified_at)=24 AND verified_at GLOB '????-??-??T??:??:??.???Z'),
   key_epoch INTEGER NOT NULL CHECK(key_epoch>=1),policy_version TEXT NOT NULL CHECK(length(policy_version) BETWEEN 2 AND 256),
   provider_id TEXT NOT NULL CHECK(length(provider_id) BETWEEN 2 AND 256),
   provider_production_verified INTEGER NOT NULL CHECK(provider_production_verified IN (0,1)),
-  provider_evidence_sha256 TEXT NOT NULL CHECK(length(provider_evidence_sha256)=64 AND provider_evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
+  provider_evidence_sha256 TEXT NOT NULL CHECK(length(provider_evidence_sha256)=64 AND provider_evidence_sha256 NOT GLOB '*[^0-9a-f]*' AND provider_evidence_sha256<>'0000000000000000000000000000000000000000000000000000000000000000'),
   previous_evidence_sha256 TEXT NOT NULL CHECK(length(previous_evidence_sha256)=64 AND previous_evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
-  evidence_sha256 TEXT NOT NULL UNIQUE CHECK(length(evidence_sha256)=64 AND evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
+  evidence_sha256 TEXT NOT NULL UNIQUE CHECK(length(evidence_sha256)=64 AND evidence_sha256 NOT GLOB '*[^0-9a-f]*' AND evidence_sha256<>'0000000000000000000000000000000000000000000000000000000000000000'),
   restore_tested INTEGER NOT NULL CHECK(restore_tested=0),
   real_different_device_restore_verified INTEGER NOT NULL CHECK(real_different_device_restore_verified=0),
+  PRIMARY KEY(cluster_id,family_id,id),UNIQUE(cluster_id,family_id,client_operation_id),
   UNIQUE(cluster_id,family_id,backup_sequence)
 ) STRICT;
 CREATE TABLE distributed_update_plans(
-  id TEXT PRIMARY KEY CHECK(length(id) BETWEEN 2 AND 256),
-  client_operation_id TEXT NOT NULL UNIQUE CHECK(length(client_operation_id) BETWEEN 2 AND 256),
+  id TEXT NOT NULL CHECK(length(id) BETWEEN 2 AND 256),
+  client_operation_id TEXT NOT NULL CHECK(length(client_operation_id) BETWEEN 2 AND 256),
   request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
   cluster_id TEXT NOT NULL CHECK(length(cluster_id) BETWEEN 2 AND 256),
   family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
@@ -17860,18 +17861,19 @@ CREATE TABLE distributed_update_plans(
   schema_migration_leader_quorum_only INTEGER NOT NULL CHECK(schema_migration_leader_quorum_only=1),
   current_version TEXT NOT NULL CHECK(length(current_version) BETWEEN 2 AND 256),
   target_version TEXT NOT NULL CHECK(length(target_version) BETWEEN 2 AND 256 AND target_version<>current_version),
-  package_sha256 TEXT NOT NULL CHECK(length(package_sha256)=64 AND package_sha256 NOT GLOB '*[^0-9a-f]*'),
-  cluster_state_evidence_sha256 TEXT NOT NULL CHECK(length(cluster_state_evidence_sha256)=64 AND cluster_state_evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
+  package_sha256 TEXT NOT NULL CHECK(length(package_sha256)=64 AND package_sha256 NOT GLOB '*[^0-9a-f]*' AND package_sha256<>'0000000000000000000000000000000000000000000000000000000000000000'),
+  cluster_state_evidence_sha256 TEXT NOT NULL CHECK(length(cluster_state_evidence_sha256)=64 AND cluster_state_evidence_sha256 NOT GLOB '*[^0-9a-f]*' AND cluster_state_evidence_sha256<>'0000000000000000000000000000000000000000000000000000000000000000'),
   verifier_id TEXT NOT NULL CHECK(length(verifier_id) BETWEEN 2 AND 256),
   verifier_production_verified INTEGER NOT NULL CHECK(verifier_production_verified IN (0,1)),
-  signature_evidence_sha256 TEXT NOT NULL CHECK(length(signature_evidence_sha256)=64 AND signature_evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
-  plan_sha256 TEXT NOT NULL UNIQUE CHECK(length(plan_sha256)=64 AND plan_sha256 NOT GLOB '*[^0-9a-f]*'),
+  signature_evidence_sha256 TEXT NOT NULL CHECK(length(signature_evidence_sha256)=64 AND signature_evidence_sha256 NOT GLOB '*[^0-9a-f]*' AND signature_evidence_sha256<>'0000000000000000000000000000000000000000000000000000000000000000'),
+  plan_sha256 TEXT NOT NULL UNIQUE CHECK(length(plan_sha256)=64 AND plan_sha256 NOT GLOB '*[^0-9a-f]*' AND plan_sha256<>'0000000000000000000000000000000000000000000000000000000000000000'),
   created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z'),
-  real_update_executed INTEGER NOT NULL CHECK(real_update_executed=0)
+  real_update_executed INTEGER NOT NULL CHECK(real_update_executed=0),
+  PRIMARY KEY(cluster_id,family_id,id),UNIQUE(cluster_id,family_id,client_operation_id)
 ) STRICT;
 CREATE TABLE distributed_fault_injection_evidence(
-  id TEXT PRIMARY KEY CHECK(length(id) BETWEEN 2 AND 256),
-  client_operation_id TEXT NOT NULL UNIQUE CHECK(length(client_operation_id) BETWEEN 2 AND 256),
+  id TEXT NOT NULL CHECK(length(id) BETWEEN 2 AND 256),
+  client_operation_id TEXT NOT NULL CHECK(length(client_operation_id) BETWEEN 2 AND 256),
   request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint)=64 AND request_fingerprint NOT GLOB '*[^0-9a-f]*'),
   cluster_id TEXT NOT NULL CHECK(length(cluster_id) BETWEEN 2 AND 256),
   family_id TEXT NOT NULL REFERENCES families(id) ON DELETE RESTRICT,
@@ -17879,11 +17881,12 @@ CREATE TABLE distributed_fault_injection_evidence(
   scenario TEXT NOT NULL CHECK(scenario IN ('network_partition','power_loss','disk_full','corruption','clock_skew','certificate_expiry','rolling_update')),
   synthetic_only INTEGER NOT NULL CHECK(synthetic_only=1),contained INTEGER NOT NULL CHECK(contained IN (0,1)),
   provider_id TEXT NOT NULL CHECK(length(provider_id) BETWEEN 2 AND 256),
-  provider_evidence_sha256 TEXT NOT NULL CHECK(length(provider_evidence_sha256)=64 AND provider_evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
+  provider_evidence_sha256 TEXT NOT NULL CHECK(length(provider_evidence_sha256)=64 AND provider_evidence_sha256 NOT GLOB '*[^0-9a-f]*' AND provider_evidence_sha256<>'0000000000000000000000000000000000000000000000000000000000000000'),
   previous_evidence_sha256 TEXT NOT NULL CHECK(length(previous_evidence_sha256)=64 AND previous_evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
-  evidence_sha256 TEXT NOT NULL UNIQUE CHECK(length(evidence_sha256)=64 AND evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
+  evidence_sha256 TEXT NOT NULL UNIQUE CHECK(length(evidence_sha256)=64 AND evidence_sha256 NOT GLOB '*[^0-9a-f]*' AND evidence_sha256<>'0000000000000000000000000000000000000000000000000000000000000000'),
   real_windows_node INTEGER NOT NULL CHECK(real_windows_node=0),
   created_at TEXT NOT NULL CHECK(length(created_at)=24 AND created_at GLOB '????-??-??T??:??:??.???Z'),
+  PRIMARY KEY(cluster_id,family_id,id),UNIQUE(cluster_id,family_id,client_operation_id),
   UNIQUE(cluster_id,family_id,fault_sequence)
 ) STRICT;
 CREATE INDEX idx_34j_backup_cluster_sequence ON distributed_backup_evidence(cluster_id,family_id,backup_sequence);
@@ -17903,6 +17906,8 @@ WHEN NOT EXISTS(
     SELECT b.evidence_sha256 FROM distributed_backup_evidence b WHERE b.cluster_id=NEW.cluster_id AND b.family_id=NEW.family_id
     ORDER BY b.backup_sequence DESC LIMIT 1
   ),'0000000000000000000000000000000000000000000000000000000000000000')
+  OR NEW.verified_at<COALESCE((SELECT MAX(b.verified_at) FROM distributed_backup_evidence b
+    WHERE b.cluster_id=NEW.cluster_id AND b.family_id=NEW.family_id),NEW.verified_at)
 BEGIN SELECT RAISE(ABORT,'34-J backup chain, cluster state or epoch evidence mismatch'); END;
 CREATE TRIGGER trg_34j_update_plan_insert BEFORE INSERT ON distributed_update_plans
 WHEN json_array_length(NEW.node_order_json)<2 OR json_array_length(NEW.node_order_json)>64
@@ -17910,6 +17915,10 @@ WHEN json_array_length(NEW.node_order_json)<2 OR json_array_length(NEW.node_orde
   OR (SELECT COUNT(DISTINCT value) FROM json_each(NEW.node_order_json))<>json_array_length(NEW.node_order_json)
   OR (SELECT COUNT(*) FROM distributed_cluster_nodes n
       WHERE n.cluster_id=NEW.cluster_id AND n.family_id=NEW.family_id)<>json_array_length(NEW.node_order_json)
+  OR EXISTS(SELECT 1 FROM distributed_cluster_nodes n WHERE n.cluster_id=NEW.cluster_id AND n.family_id=NEW.family_id
+      AND (n.safe_mode<>0 OR n.certificate_revoked<>0))
+  OR (SELECT COUNT(DISTINCT n.policy_version||':'||n.key_epoch||':'||n.revocation_epoch||':'||n.commit_index)
+      FROM distributed_cluster_nodes n WHERE n.cluster_id=NEW.cluster_id AND n.family_id=NEW.family_id)<>1
   OR EXISTS(
     SELECT 1 FROM json_each(NEW.node_order_json) j LEFT JOIN distributed_cluster_nodes n
       ON n.node_id=j.value AND n.cluster_id=NEW.cluster_id AND n.family_id=NEW.family_id
@@ -17933,6 +17942,8 @@ WHEN NOT EXISTS(SELECT 1 FROM distributed_cluster_nodes n WHERE n.cluster_id=NEW
     SELECT f.evidence_sha256 FROM distributed_fault_injection_evidence f WHERE f.cluster_id=NEW.cluster_id AND f.family_id=NEW.family_id
     ORDER BY f.fault_sequence DESC LIMIT 1
   ),'0000000000000000000000000000000000000000000000000000000000000000')
+  OR NEW.created_at<COALESCE((SELECT MAX(f.created_at) FROM distributed_fault_injection_evidence f
+    WHERE f.cluster_id=NEW.cluster_id AND f.family_id=NEW.family_id),NEW.created_at)
 BEGIN SELECT RAISE(ABORT,'34-J fault evidence chain or cluster tenancy mismatch'); END;
 CREATE TRIGGER trg_34j_backup_update BEFORE UPDATE ON distributed_backup_evidence
 BEGIN SELECT RAISE(ABORT,'34-J backup evidence is immutable'); END;

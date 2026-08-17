@@ -25,10 +25,12 @@
     "appleClientsReadOnlyAndCoreAuthorized": true,
     "replicaSeparatedFromBackup": true,
     "durableBackupHashChainAndIdempotencyImplemented": true,
+    "tenantScopedOperationsIdempotencyImplemented": true,
     "backupBoundToClusterStateEvidence": true,
     "callerCannotClaimRestoreTested": true,
     "currentRuntimeRestoreTested": false,
     "rollingUpdateLeaderLastQuorumAndSignatureBound": true,
+    "rollingUpdateCompatibilityAndRollbackEvidenceRequired": true,
     "durableSyntheticFaultEvidenceChainImplemented": true,
     "strictMonotonicTimerAndSyncBudgetValidationImplemented": true,
     "productionRuntimeComposed": false,
@@ -47,10 +49,10 @@
   },
   "targetedValidation": {"testFiles": 3, "tests": 10, "status": "PASS"},
   "validation": {
-    "migration114Sha256": "023c2a416901671b1231388563153d661152e372c2ec305a54f8f06874c55f34",
-    "ppk015": {"status": "PASS", "scannedFiles": 555, "sourceInventorySha256": "dd417d3278b872587fa1ef32cda41e5dcf44a22c9781f29c311d78d845d48e29"},
-    "ppk021": {"status": "PASS", "scannedFiles": 555, "exactSurfaces": 873, "sha256": "843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc"},
-    "ppk022": {"status": "PASS", "scannedFiles": 555, "exactSurfaces": 392, "sha256": "cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c"}
+    "migration114Sha256": "ed39e408cbba4cc1b97d9e2e0a902f1b6573639c56a7585c3d44f48078e761fb",
+    "ppk015": {"status": "PASS", "scannedFiles": 556, "sourceInventorySha256": "c5f155e40ddc3052f3f5635e7279a18a630f51559d3a544fed036b5ab9718540"},
+    "ppk021": {"status": "PASS", "scannedFiles": 556, "exactSurfaces": 876, "sha256": "709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0"},
+    "ppk022": {"status": "PASS", "scannedFiles": 556, "exactSurfaces": 395, "sha256": "a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e"}
   },
   "manualEvidence": {
     "realMdnsDiscovery": "NOT_RUN",

@@ -134,6 +134,8 @@ export interface DistributedSignedUpdateVerifierPort {
     readonly packageSha256: string;
   }): {
     readonly verified: boolean;
+    readonly nMinusOneCompatible: boolean;
+    readonly rollbackArtifactVerified: boolean;
     readonly signatureEvidenceSha256?: string;
     readonly reason?: string;
   };
@@ -149,13 +151,13 @@ export interface DistributedFaultInjectionPort {
 }
 
 export interface DistributedOperationsPersistencePort {
-  findBackupByClientOperationId(clientOperationId: string): DistributedBackupEvidenceView | null;
+  findBackupByClientOperationId(clusterId:string,familyId:string,clientOperationId:string):DistributedBackupEvidenceView|null;
   lastBackup(clusterId: string, familyId: string): DistributedBackupEvidenceView | null;
   insertBackup(evidence: DistributedBackupEvidenceView): void;
   listBackups(clusterId: string, familyId: string, limit: number): readonly DistributedBackupEvidenceView[];
-  findUpdatePlanByClientOperationId(clientOperationId: string): DistributedUpdatePlanView | null;
+  findUpdatePlanByClientOperationId(clusterId:string,familyId:string,clientOperationId:string):DistributedUpdatePlanView|null;
   insertUpdatePlan(plan: DistributedUpdatePlanView): void;
-  findFaultByClientOperationId(clientOperationId: string): DistributedFaultEvidenceView | null;
+  findFaultByClientOperationId(clusterId:string,familyId:string,clientOperationId:string):DistributedFaultEvidenceView|null;
   lastFault(clusterId: string, familyId: string): DistributedFaultEvidenceView | null;
   insertFault(evidence: DistributedFaultEvidenceView): void;
 }
@@ -209,6 +211,7 @@ const SAFE_REASON = /^[A-Z][A-Z0-9_]{1,127}$/u;
 const ZERO_SHA = '0'.repeat(64);
 
 const safeInteger = (value: number, minimum = 0): boolean => Number.isSafeInteger(value) && value >= minimum;
+const nonZeroSha=(value:string):boolean=>SHA.test(value)&&value!==ZERO_SHA;
 const canonical = (value: Record<string, unknown>): string => JSON.stringify(
   Object.entries(value).sort(([left], [right]) => left.localeCompare(right))
 );
@@ -236,9 +239,10 @@ const validBackup = (value: DistributedBackupEvidenceView): boolean =>
   [value.id, value.clientOperationId, value.clusterId, value.familyId, value.storageTargetId,
     value.policyVersion, value.providerId].every(isSafeDistributedIdentifier) &&
   ['local', 'external', 'offline', 'offsite'].includes(value.kind) &&
-  SHA.test(value.requestFingerprint) && SHA.test(value.manifestSha256) &&
-  SHA.test(value.clusterStateEvidenceSha256) && SHA.test(value.providerEvidenceSha256) &&
+  SHA.test(value.requestFingerprint)&&nonZeroSha(value.manifestSha256)&&
+  nonZeroSha(value.clusterStateEvidenceSha256)&&nonZeroSha(value.providerEvidenceSha256)&&
   SHA.test(value.previousEvidenceSha256) && SHA.test(value.evidenceSha256) && safeInteger(value.backupSequence, 1) &&
+  (value.backupSequence===1)===(value.previousEvidenceSha256===ZERO_SHA)&&
   safeInteger(value.sourceCommitIndex) && safeInteger(value.verifiedSizeBytes, 1) && safeInteger(value.keyEpoch, 1) &&
   isCanonicalDistributedIsoDateTime(value.verifiedAt) && value.immutable === true && value.independentFromReplica === true &&
   typeof value.providerProductionVerified === 'boolean' && value.restoreTested === false &&
@@ -258,8 +262,8 @@ const validBackup = (value: DistributedBackupEvidenceView): boolean =>
 const validUpdatePlan = (value: DistributedUpdatePlanView): boolean =>
   [value.id, value.clientOperationId, value.clusterId, value.familyId, value.currentVersion,
     value.targetVersion, value.verifierId].every(isSafeDistributedIdentifier) && SHA.test(value.requestFingerprint) &&
-  SHA.test(value.packageSha256) && SHA.test(value.clusterStateEvidenceSha256) &&
-  SHA.test(value.signatureEvidenceSha256) && SHA.test(value.planSha256) &&
+  nonZeroSha(value.packageSha256)&&nonZeroSha(value.clusterStateEvidenceSha256)&&
+  nonZeroSha(value.signatureEvidenceSha256)&&SHA.test(value.planSha256)&&
   isCanonicalDistributedIsoDateTime(value.createdAt) && value.nodeOrder.length >= 2 && value.nodeOrder.length <= 64 &&
   new Set(value.nodeOrder).size === value.nodeOrder.length && value.nodeOrder.every(isSafeDistributedIdentifier) &&
   value.leaderLast === true && value.nMinusOneCompatibilityRequired === true && value.signedPackageRequired === true &&
@@ -282,8 +286,9 @@ const validUpdatePlan = (value: DistributedUpdatePlanView): boolean =>
 
 const validFault = (value: DistributedFaultEvidenceView): boolean =>
   [value.id, value.clientOperationId, value.clusterId, value.familyId, value.providerId].every(isSafeDistributedIdentifier) &&
-  SHA.test(value.requestFingerprint) && SHA.test(value.providerEvidenceSha256) &&
+  SHA.test(value.requestFingerprint)&&nonZeroSha(value.providerEvidenceSha256)&&
   SHA.test(value.previousEvidenceSha256) && SHA.test(value.evidenceSha256) &&
+  (value.faultSequence===1)===(value.previousEvidenceSha256===ZERO_SHA)&&
   safeInteger(value.faultSequence, 1) && isCanonicalDistributedIsoDateTime(value.createdAt) &&
   ['network_partition', 'power_loss', 'disk_full', 'corruption', 'clock_skew',
     'certificate_expiry', 'rolling_update'].includes(value.scenario) &&
@@ -338,7 +343,8 @@ export const unavailableDistributedUpdateVerifier: DistributedSignedUpdateVerifi
   configured: false,
   productionVerified: false,
   verifierId: 'unavailable-update-verifier',
-  verify: () => ({verified: false, reason: 'UPDATE_VERIFIER_NOT_CONFIGURED'})
+  verify:()=>({verified:false,nMinusOneCompatible:false,rollbackArtifactVerified:false,
+    reason:'UPDATE_VERIFIER_NOT_CONFIGURED'})
 });
 
 export class DistributedOperationsRuntime {
@@ -382,7 +388,7 @@ export class DistributedOperationsRuntime {
     try {
       const result = provider.discover({clusterId: this.options.clusterId, familyId: this.options.familyId});
       if (!Array.isArray(result.candidates) || result.candidates.length > 64 || typeof result.networkUsed !== 'boolean' ||
-        !SHA.test(result.providerEvidenceSha256)) {
+        !nonZeroSha(result.providerEvidenceSha256)) {
         return Object.freeze({status: 'EVIDENCE_INVALID', candidates: Object.freeze([]), providerId: provider.providerId,
           providerProductionVerified: provider.productionVerified, networkUsed: typeof result.networkUsed === 'boolean' ? result.networkUsed : null});
       }
@@ -451,15 +457,16 @@ export class DistributedOperationsRuntime {
       const authorization = this.options.authorization.authorizeRemoteConnection({clusterId: this.options.clusterId,
         familyId: this.options.familyId, deviceId: input.deviceId, deviceCertificateId: input.deviceCertificateId,
         policyVersion: this.options.policyVersion, keyEpoch: this.options.keyEpoch, revocationEpoch: this.options.revocationEpoch});
-      if (typeof authorization.networkUsed !== 'boolean' || !authorization.decisionEvidenceSha256 ||
-        !SHA.test(authorization.decisionEvidenceSha256) || authorization.allowed !== true) {
+      if (typeof authorization.networkUsed !== 'boolean'||!authorization.decisionEvidenceSha256
+        ||!nonZeroSha(authorization.decisionEvidenceSha256)||authorization.allowed!==true) {
         return distributedRemoteConnectivity({...base, networkUsed: typeof authorization.networkUsed === 'boolean' ?
           authorization.networkUsed : null, reason: safeReason(authorization.reason, 'REMOTE_AUTHORIZATION_DENIED')});
       }
       const result = provider.connect({clusterId: this.options.clusterId, familyId: this.options.familyId,
         deviceId: input.deviceId, mode: input.mode, outboundOnly: true, encryptedEnvelopeOnly: true});
-      if (typeof result.networkUsed !== 'boolean' || !result.providerEvidenceSha256 || !SHA.test(result.providerEvidenceSha256) ||
-        (result.connected && (!result.connectionId || !isSafeDistributedIdentifier(result.connectionId)))) {
+      if (typeof result.networkUsed!=='boolean'||typeof result.connected!=='boolean'||!result.providerEvidenceSha256
+        ||!nonZeroSha(result.providerEvidenceSha256)||(result.connected&&(!result.connectionId
+          ||!isSafeDistributedIdentifier(result.connectionId)))) {
         return distributedRemoteConnectivity({...base, networkUsed: typeof result.networkUsed === 'boolean' ?
           result.networkUsed || authorization.networkUsed : null, reason: 'RELAY_EVIDENCE_INVALID'});
       }
@@ -481,8 +488,8 @@ export class DistributedOperationsRuntime {
     }
     try {
       const result = provider.disconnect(input);
-      const evidenceValid = typeof result.networkUsed === 'boolean' && !!result.providerEvidenceSha256 &&
-        SHA.test(result.providerEvidenceSha256);
+      const evidenceValid=typeof result.networkUsed==='boolean'&&typeof result.disconnected==='boolean'
+        &&!!result.providerEvidenceSha256&&nonZeroSha(result.providerEvidenceSha256);
       return distributedRemoteConnectivity({...base, networkUsed: evidenceValid ? result.networkUsed : null,
         reason: evidenceValid && result.disconnected ? 'DISCONNECTED' : safeReason(result.reason, 'DISCONNECT_FAILED')});
     } catch {
@@ -509,7 +516,7 @@ export class DistributedOperationsRuntime {
         policyVersion: this.options.policyVersion, keyEpoch: this.options.keyEpoch, revocationEpoch: this.options.revocationEpoch,
         ...input});
       if (typeof result.allowed !== 'boolean' || typeof result.networkUsed !== 'boolean' ||
-        !result.decisionEvidenceSha256 || !SHA.test(result.decisionEvidenceSha256)) {
+        !result.decisionEvidenceSha256||!nonZeroSha(result.decisionEvidenceSha256)) {
         return Object.freeze({allowed: false, reason: 'AUTHORIZATION_EVIDENCE_INVALID', ...base,
           networkUsed: typeof result.networkUsed === 'boolean' ? result.networkUsed : null});
       }
@@ -531,13 +538,14 @@ export class DistributedOperationsRuntime {
     const kindKeys = specific[value.kind];
     if (!kindKeys || !exactKeys(value, [...common, ...kindKeys]) || typeof value.clusterId !== 'string' ||
       typeof value.nodeId !== 'string' || typeof value.occurredAt !== 'string' ||
-      !isSafeDistributedIdentifier(value.clusterId) || !isSafeDistributedIdentifier(value.nodeId) ||
+      !isSafeDistributedIdentifier(value.clusterId)||value.clusterId!==this.options.clusterId
+      ||!isSafeDistributedIdentifier(value.nodeId) ||
       !isCanonicalDistributedIsoDateTime(value.occurredAt)) return false;
     switch (value.kind) {
-      case 'rendezvous': return typeof value.encryptedEnvelopeSha256 === 'string' && SHA.test(value.encryptedEnvelopeSha256);
+      case 'rendezvous': return typeof value.encryptedEnvelopeSha256==='string'&&nonZeroSha(value.encryptedEnvelopeSha256);
       case 'certificate_revocation': return typeof value.certificateRevocationEpoch === 'number' &&
-        safeInteger(value.certificateRevocationEpoch);
-      case 'apns_wake': return typeof value.wakeTokenSha256 === 'string' && SHA.test(value.wakeTokenSha256);
+        safeInteger(value.certificateRevocationEpoch)&&value.certificateRevocationEpoch>=this.options.revocationEpoch;
+      case 'apns_wake': return typeof value.wakeTokenSha256==='string'&&nonZeroSha(value.wakeTokenSha256);
       case 'witness_vote': return typeof value.witnessVote === 'boolean';
       case 'health': return typeof value.healthState === 'string' && ['healthy', 'degraded', 'unhealthy'].includes(value.healthState);
       default: return false;
@@ -556,13 +564,15 @@ export class DistributedOperationsRuntime {
     const baseDecision = {providerId: provider.providerId, providerProductionVerified: provider.productionVerified};
     if (![input.id, input.clientOperationId].every(isSafeDistributedIdentifier) ||
       !['local', 'external', 'offline', 'offsite'].includes(input.kind) || !SHA.test(input.manifestSha256) ||
-      !safeInteger(input.sourceCommitIndex) || !isCanonicalDistributedIsoDateTime(input.verifiedAt)) {
+      !safeInteger(input.sourceCommitIndex,1)||input.manifestSha256===ZERO_SHA
+      ||!isCanonicalDistributedIsoDateTime(input.verifiedAt)) {
       return Object.freeze({accepted: false, reason: 'BACKUP_INPUT_INVALID', replayed: false, ...baseDecision, networkUsed: false});
     }
     const requestFingerprint = hash({...input, clusterId: this.options.clusterId, familyId: this.options.familyId,
       policyVersion: this.options.policyVersion, keyEpoch: this.options.keyEpoch});
     try {
-      const replay = this.options.persistence.findBackupByClientOperationId(input.clientOperationId);
+      const replay=this.options.persistence.findBackupByClientOperationId(this.options.clusterId,this.options.familyId,
+        input.clientOperationId);
       if (replay) {
         if (!validBackup(replay) || replay.requestFingerprint !== requestFingerprint || replay.id !== input.id ||
           replay.clusterId !== this.options.clusterId || replay.familyId !== this.options.familyId) {
@@ -591,7 +601,7 @@ export class DistributedOperationsRuntime {
     }
     if ((!this.options.clusterState.productionVerified && this.options.allowUnverifiedProvidersForTests !== true) ||
       !safeInteger(clusterState.commitIndex) || input.sourceCommitIndex > clusterState.commitIndex ||
-      !SHA.test(clusterState.evidenceSha256)) {
+      !nonZeroSha(clusterState.evidenceSha256)) {
       return Object.freeze({accepted: false, reason: 'CLUSTER_STATE_UNVERIFIED', replayed: false,
         ...baseDecision, networkUsed: false});
     }
@@ -602,7 +612,7 @@ export class DistributedOperationsRuntime {
         verified.independentFromReplica !== true || verified.manifestSha256 !== input.manifestSha256 ||
         !verified.storageTargetId || !isSafeDistributedIdentifier(verified.storageTargetId) ||
         !safeInteger(verified.verifiedSizeBytes ?? -1, 1) || !verified.providerEvidenceSha256 ||
-        !SHA.test(verified.providerEvidenceSha256)) {
+        !nonZeroSha(verified.providerEvidenceSha256)) {
         return Object.freeze({accepted: false, reason: safeReason(verified.reason, 'BACKUP_EVIDENCE_INVALID'),
           replayed: false, ...baseDecision, networkUsed: verified.networkUsed});
       }
@@ -662,7 +672,8 @@ export class DistributedOperationsRuntime {
     }
     const requestFingerprint = hash({...input, clusterId: this.options.clusterId, familyId: this.options.familyId});
     try {
-      const replay = this.options.persistence.findUpdatePlanByClientOperationId(input.clientOperationId);
+      const replay=this.options.persistence.findUpdatePlanByClientOperationId(this.options.clusterId,this.options.familyId,
+        input.clientOperationId);
       if (replay) {
         if (!validUpdatePlan(replay) || replay.requestFingerprint !== requestFingerprint || replay.id !== input.id ||
           replay.clusterId !== this.options.clusterId || replay.familyId !== this.options.familyId) {
@@ -681,13 +692,14 @@ export class DistributedOperationsRuntime {
     try {
       const clusterState = this.options.clusterState.current({clusterId: this.options.clusterId, familyId: this.options.familyId});
       if ((!this.options.clusterState.productionVerified && this.options.allowUnverifiedProvidersForTests !== true) ||
-        !clusterState.quorumHealthy || !SHA.test(clusterState.evidenceSha256) ||
+        !clusterState.quorumHealthy||!nonZeroSha(clusterState.evidenceSha256) ||
         !isSafeDistributedIdentifier(clusterState.leaderNodeId) || !safeInteger(clusterState.commitIndex)) {
         return Object.freeze({accepted: false, reason: 'CLUSTER_STATE_UNVERIFIED', replayed: false, ...baseDecision});
       }
       const signature = verifier.verify({currentVersion: input.currentVersion, targetVersion: input.targetVersion,
         packageSha256: input.packageSha256});
-      if (signature.verified !== true || !signature.signatureEvidenceSha256 || !SHA.test(signature.signatureEvidenceSha256)) {
+      if (signature.verified!==true||signature.nMinusOneCompatible!==true||signature.rollbackArtifactVerified!==true
+        ||!signature.signatureEvidenceSha256||!nonZeroSha(signature.signatureEvidenceSha256)) {
         return Object.freeze({accepted: false, reason: safeReason(signature.reason, 'UPDATE_SIGNATURE_INVALID'),
           replayed: false, ...baseDecision});
       }
@@ -738,7 +750,8 @@ export class DistributedOperationsRuntime {
     }
     const requestFingerprint = hash({...input, clusterId: this.options.clusterId, familyId: this.options.familyId});
     try {
-      const replay = this.options.persistence.findFaultByClientOperationId(input.clientOperationId);
+      const replay=this.options.persistence.findFaultByClientOperationId(this.options.clusterId,this.options.familyId,
+        input.clientOperationId);
       if (replay) {
         if (!validFault(replay) || replay.requestFingerprint !== requestFingerprint || replay.id !== input.id ||
           replay.clusterId !== this.options.clusterId || replay.familyId !== this.options.familyId) {
@@ -755,7 +768,7 @@ export class DistributedOperationsRuntime {
     }
     try {
       const result = provider.run(input.scenario);
-      if (typeof result.contained !== 'boolean' || !SHA.test(result.evidenceSha256) ||
+      if (typeof result.contained!=='boolean'||!nonZeroSha(result.evidenceSha256) ||
         !isSafeDistributedIdentifier(provider.providerId)) {
         return Object.freeze({accepted: false, reason: 'FAULT_PROVIDER_EVIDENCE_INVALID', replayed: false});
       }

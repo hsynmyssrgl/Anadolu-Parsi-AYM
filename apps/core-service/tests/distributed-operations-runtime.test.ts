@@ -29,7 +29,8 @@ class MemoryPersistence implements DistributedOperationsPersistencePort {
   public readonly backups: DistributedBackupEvidenceView[] = [];
   public readonly updates: DistributedUpdatePlanView[] = [];
   public readonly faults: DistributedFaultEvidenceView[] = [];
-  public findBackupByClientOperationId(id: string) { return this.backups.find(value => value.clientOperationId === id) ?? null; }
+  public findBackupByClientOperationId(clusterId:string,familyId:string,id:string) { return this.backups.find(value =>
+    value.clusterId===clusterId&&value.familyId===familyId&&value.clientOperationId===id)??null; }
   public lastBackup(clusterId: string, familyId: string) {
     return [...this.backups].reverse().find(value => value.clusterId === clusterId && value.familyId === familyId) ?? null;
   }
@@ -37,9 +38,11 @@ class MemoryPersistence implements DistributedOperationsPersistencePort {
   public listBackups(clusterId: string, familyId: string, limit: number) {
     return this.backups.filter(value => value.clusterId === clusterId && value.familyId === familyId).slice(-limit);
   }
-  public findUpdatePlanByClientOperationId(id: string) { return this.updates.find(value => value.clientOperationId === id) ?? null; }
+  public findUpdatePlanByClientOperationId(clusterId:string,familyId:string,id:string) { return this.updates.find(value =>
+    value.clusterId===clusterId&&value.familyId===familyId&&value.clientOperationId===id)??null; }
   public insertUpdatePlan(value: DistributedUpdatePlanView) { this.updates.push(value); }
-  public findFaultByClientOperationId(id: string) { return this.faults.find(value => value.clientOperationId === id) ?? null; }
+  public findFaultByClientOperationId(clusterId:string,familyId:string,id:string) { return this.faults.find(value =>
+    value.clusterId===clusterId&&value.familyId===familyId&&value.clientOperationId===id)??null; }
   public lastFault(clusterId: string, familyId: string) {
     return [...this.faults].reverse().find(value => value.clusterId === clusterId && value.familyId === familyId) ?? null;
   }
@@ -63,7 +66,8 @@ const updateVerifier: DistributedSignedUpdateVerifierPort = {
   configured: true,
   productionVerified: false,
   verifierId: 'test-update-verifier',
-  verify: () => ({verified: true, signatureEvidenceSha256: 'e'.repeat(64)})
+  verify:()=>({verified:true,nMinusOneCompatible:true,rollbackArtifactVerified:true,
+    signatureEvidenceSha256:'e'.repeat(64)})
 };
 const authorization: DistributedClientAuthorizationPort = {
   configured: true,
@@ -116,6 +120,10 @@ describe('34-J distributed clients, connectivity, operations and disaster recove
       occurredAt: '2026-08-16T02:00:00.000Z', healthState: {message: 'secret'}})).toBe(false);
     expect(operations.validateControlPlaneEnvelope({kind: 'health', clusterId: 'cluster-34-j', nodeId: 'node-34-j',
       occurredAt: '2026-08-16T02:00:00.000Z', healthState: 'healthy', payload: 'secret'})).toBe(false);
+    expect(operations.validateControlPlaneEnvelope({kind:'health',clusterId:'other-cluster-34-j',nodeId:'node-34-j',
+      occurredAt:'2026-08-16T02:00:00.000Z',healthState:'healthy'})).toBe(false);
+    expect(operations.validateControlPlaneEnvelope({kind:'certificate_revocation',clusterId:'cluster-34-j',
+      nodeId:'node-34-j',occurredAt:'2026-08-16T02:00:00.000Z',certificateRevocationEpoch:1})).toBe(false);
     const accessor = Object.defineProperty({}, 'kind', {enumerable: true, get: () => 'health'});
     expect(operations.validateControlPlaneEnvelope(accessor)).toBe(false);
   });
@@ -155,6 +163,8 @@ describe('34-J distributed clients, connectivity, operations and disaster recove
     expect(operations.backups()).toHaveLength(1);
     expect(makeRuntime({persistence, clusterState, backupVerifier}).verifyAndRegisterBackup({...input,
       id: 'backup-unverified-34-j', clientOperationId: 'backup-unverified-operation-34-j'}).reason).toBe('BACKUP_VERIFIER_UNVERIFIED');
+    expect(operations.verifyAndRegisterBackup({...input,id:'backup-zero-34-j',clientOperationId:'backup-zero-operation-34-j',
+      manifestSha256:'0'.repeat(64)}).reason).toBe('BACKUP_INPUT_INVALID');
   });
 
   it('creates only signed quorum-bound leader-last update plans and replays them exactly', () => {
@@ -173,6 +183,11 @@ describe('34-J distributed clients, connectivity, operations and disaster recove
     expect(makeRuntime({persistence: new MemoryPersistence(), clusterState: wrongLeaderState, updateVerifier,
       allowUnverifiedProvidersForTests: true}).createRollingUpdatePlan({...input, id: 'update-wrong-leader',
         clientOperationId: 'update-wrong-leader-operation'}).reason).toBe('CLUSTER_LEADER_ORDER_MISMATCH');
+    const incompatible={...updateVerifier,verify:()=>({verified:true,nMinusOneCompatible:false,
+      rollbackArtifactVerified:true,signatureEvidenceSha256:'e'.repeat(64)})};
+    expect(makeRuntime({persistence:new MemoryPersistence(),clusterState,updateVerifier:incompatible,
+      allowUnverifiedProvidersForTests:true}).createRollingUpdatePlan({...input,id:'update-incompatible-34-j',
+        clientOperationId:'update-incompatible-operation-34-j'}).reason).toBe('UPDATE_SIGNATURE_INVALID');
   });
 
   it('uses strict monotonic time, bounded sync budgets and derived Apple staleness', () => {
