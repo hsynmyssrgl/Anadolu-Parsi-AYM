@@ -76,11 +76,11 @@ if (mode === 'contract' || mode === 'runtime') {
     && scope.validation?.artifactIndex?.documents === 3841 && inventory.localEvidence?.fullRegressionStatus === 'PASS'
     && inventory.localEvidence?.fullRegressionFiles === 287 && inventory.localEvidence?.fullRegressionTests === 1971
     && audit.includes('287/287') && audit.includes('1971/1971'));
-  check('local receipt is real while manual and external evidence remain NOT_RUN', Object.values(scope.manualEvidence ?? {}).every((value) => value === 'NOT_RUN')
-    && scope.persistentReceiptStatus === 'STALE_SOURCE_HEAD'
-    && scope.persistentReceiptPath === 'artifacts/validation/34-L-bronze-local-closure-receipt.json'
+  check('versioned local receipt rollover is supported while manual and external evidence remain NOT_RUN', Object.values(scope.manualEvidence ?? {}).every((value) => value === 'NOT_RUN')
+    && scope.persistentReceiptStatus === 'VERSIONED_LOCAL_RECEIPT_SUPPORTED'
+    && scope.persistentReceiptPathPattern === 'artifacts/validation/34-L-bronze-local-closure-receipts/<source-head>-<evidence-digest>.json'
     && scope.externalPersistentReceiptStatus === 'NOT_RUN'
-    && inventory.localPersistentReceiptStatus === 'STALE_SOURCE_HEAD'
+    && inventory.localPersistentReceiptStatus === 'VERSIONED_LOCAL_RECEIPT_SUPPORTED'
     && inventory.externalPersistentReceiptStatus === 'NOT_RUN');
   check('roadmap identity is complete and non-duplicated', roadmap.packageCount === 26 && steps.length === 26
     && new Set(steps).size === 26 && assigned.length === 274 && new Set(assigned).size === 274);

@@ -18,7 +18,7 @@ Bu kayıt yerel kodlama kapsamını izler; ürün/sertifikasyon kapanışı değ
 - Tam Vitest regresyonu: `287/287` test dosyası, `1971/1971` test `PASS`.
 - Kök typecheck ve 18 workspace production build'i `PASS`.
 - Belge/kod indeksi: `6641` dosya, `3841` belge ve `20999` doğrulama kontrolü `PASS`.
-- Persistent receipt: `artifacts/validation/34-L-bronze-local-closure-receipt.json`; kaynak HEAD'i eskidir ve statüsü `STALE_SOURCE_HEAD` olarak ele alınır. No-overwrite rollover yapılmadan güncel kanıt sayılamaz.
+- Persistent receipt: `artifacts/validation/34-L-bronze-local-closure-receipts/<source-head>-<evidence-digest>.json`; no-overwrite versioned rollover desteklenir. Eski sabit receipt tarihsel kalır ve güncel kaynak kanıtı sayılmaz.
 
 ## Açık kalan kabul kanıtları
 

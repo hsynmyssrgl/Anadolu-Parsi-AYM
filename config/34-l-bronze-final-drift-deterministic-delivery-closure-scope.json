@@ -30,7 +30,7 @@
     "productionBuilds":{"status":"PASS","workspaces":18},
     "artifactIndex":{"status":"PASS","checks":20999,"files":6641,"documents":3841}
   },
-  "persistentReceiptStatus":"STALE_SOURCE_HEAD",
-  "persistentReceiptPath":"artifacts/validation/34-L-bronze-local-closure-receipt.json",
+  "persistentReceiptStatus":"VERSIONED_LOCAL_RECEIPT_SUPPORTED",
+  "persistentReceiptPathPattern":"artifacts/validation/34-L-bronze-local-closure-receipts/<source-head>-<evidence-digest>.json",
   "externalPersistentReceiptStatus":"NOT_RUN"
 }

@@ -37,7 +37,9 @@ for (const path of evidencePaths) {
     status: parsed.status, sourceBaseHead: parsed.sourceBaseHead, countsAsRequirementPass: false }));
 }
 
-const target = resolve(root, 'artifacts/validation/34-L-bronze-local-closure-receipt.json');
+const evidenceSetSha256 = sha256(Buffer.from(JSON.stringify(evidence)));
+const receiptPath = `artifacts/validation/34-L-bronze-local-closure-receipts/${sourceBaseHead}-${evidenceSetSha256.slice(0, 16)}.json`;
+const target = resolve(root, receiptPath);
 const checksumTarget = `${target}.sha256`;
 if (existsSync(target) || existsSync(checksumTarget)) {
   if (!existsSync(target) || !existsSync(checksumTarget)) throw new Error('Existing receipt publication is incomplete.');
@@ -50,9 +52,9 @@ if (existsSync(target) || existsSync(checksumTarget)) {
     parsed.finalCommitBindingEstablished !== false || parsed.requirementsClosed !== false ||
     parsed.countsAsRequirementPass !== false || !exactEvidence ||
     checksum !== `${sha256(bytes)}  ${basename(target)}`) {
-    throw new Error('Existing local closure receipt is stale; governed rollover is required and overwrite is forbidden.');
+    throw new Error('Existing versioned local closure receipt is malformed; overwrite is forbidden.');
   }
-  console.log(JSON.stringify({ status: parsed.status, path: 'artifacts/validation/34-L-bronze-local-closure-receipt.json',
+  console.log(JSON.stringify({ status: parsed.status, path: receiptPath,
     sha256: sha256(bytes), sourceBaseHead, reused: true, requirementsClosed: false }));
   process.exit(0);
 }
@@ -71,7 +73,6 @@ for (const entry of dirtyEntries) {
 
 const scope = JSON.parse(await readFile(resolve(root,
   'config/34-l-bronze-final-drift-deterministic-delivery-closure-scope.json'), 'utf8'));
-const evidenceSetSha256 = sha256(Buffer.from(JSON.stringify(evidence)));
 const receipt = Object.freeze({
   schemaVersion: 2,
   id: `34-L-BRONZE-LOCAL-CLOSURE-${evidenceSetSha256.slice(0, 24)}`,
@@ -91,7 +92,7 @@ const receipt = Object.freeze({
   generatedAt: new Date().toISOString()
 });
 const receiptBytes = Buffer.from(`${JSON.stringify(receipt, null, 2)}\n`, 'utf8');
-await mkdir(resolve(root, 'artifacts/validation'), { recursive: true });
+await mkdir(resolve(root, 'artifacts/validation/34-L-bronze-local-closure-receipts'), { recursive: true });
 const handle = await open(target, 'wx', 0o600);
 try {
   await handle.writeFile(receiptBytes);
@@ -110,5 +111,5 @@ try {
   await checksumHandle.close();
 }
 if (!(await readFile(checksumTarget)).equals(checksumBytes)) throw new Error('Receipt checksum readback mismatch.');
-console.log(JSON.stringify({ status: receipt.status, path: 'artifacts/validation/34-L-bronze-local-closure-receipt.json',
+console.log(JSON.stringify({ status: receipt.status, path: receiptPath,
   sha256: sha256(readback), sourceBaseHead, reused: false, requirementsClosed: false }));

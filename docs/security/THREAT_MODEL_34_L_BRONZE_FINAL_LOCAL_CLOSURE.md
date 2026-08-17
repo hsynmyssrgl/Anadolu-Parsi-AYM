@@ -3,7 +3,7 @@
 - Eski artifact veya takip referansı güncel kanıt sayılmaz; step/mode, kaynak HEAD, 24 saatlik tazelik ve requirement-false alanları exact doğrulanır.
 - `PASS` doğrulayıcı sonucu requirement kabulüne otomatik dönüştürülemez.
 - Manifest/index/source receipt üretiminden sonra çalışma ağacı değişirse kaynak koruması geçersizdir.
-- Sabit receipt dosyası sessizce üzerine yazılamaz; eski receipt governed rollover yapılana kadar `STALE_SOURCE_HEAD` ve fail-closed kabul edilir.
+- Receipt dosyası sessizce üzerine yazılamaz; her kaynak HEAD'i ve evidence digesti ayrı versioned no-overwrite receipt üretir, eski sabit receipt yalnız tarihsel kalır.
 - GitHub ve D: eşitliği canlı uç hash'iyle doğrulanır; yalnız local tracking ref yeterli değildir.
 - Harici takvim, AI, relay, Raft, mTLS, Apple, Windows installer, soak veya sertifikasyon kanıtı uydurulamaz.
 
