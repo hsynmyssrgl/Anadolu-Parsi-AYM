@@ -62,9 +62,10 @@ const checks=[
     &&scope.truth?.requirementsClosed===false&&scope.truth?.countsAsRequirementPass===false&&inventory.countsAsRequirementPass===false],
   ['local test and migration ratchets are exact',scope.validation?.targetedTestFileRatchet===5
     &&scope.validation?.targetedTestRatchet===23&&scope.validation?.migrationVersion===108
-    &&scope.validation?.migrationSha256==='96e3f1fef2c269d2fd5c217ba773cd2f65f0f9e3ce38b902d4d93e9894604d3e'],
+    &&scope.validation?.migrationSha256==='45f60e7ff16f505386a75a4737d5b6bc4e0bc4c07e4b042594e40418ff20626e'],
   ['PPK ratchets are closed without granting requirement pass',scope.validation?.ppk015?.status==='PASS'
     &&scope.validation?.ppk021?.status==='PASS'&&scope.validation?.ppk022?.status==='PASS'
+    &&scope.truth?.callRosterAndActiveRoomMembershipBound===true
     &&scope.validation?.countsAsRequirementPass===false&&inventory.validation?.countsAsRequirementPass===false]
 ];
 const results=checks.map(([name,passed])=>({name,status:passed?'PASS':'FAIL'}));

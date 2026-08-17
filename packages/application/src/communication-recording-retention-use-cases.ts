@@ -7,6 +7,7 @@ import {
   err,
   ok,
   type AppError,
+  type PersonId,
   type Result
 } from '@ppt/core';
 import {
@@ -46,6 +47,7 @@ export interface CommunicationRecordingWriteScope {
   readonly ownerPersonId: CommunicationRecordingCenterKey['ownerPersonId'];
   findRequest(requestId: string): Result<CommunicationRecordingRequestSnapshotRow | null, AppError>;
   findCallGuard(callSessionId: string): Result<CommunicationRecordingCallGuardRow | null, AppError>;
+  isEligibleLateJoiner(callSessionId: string, participantPersonId: PersonId): Result<boolean, AppError>;
   findMutation(clientOperationId: string): Result<CommunicationRecordingMutationRow | null, AppError>;
   insertMutation(row: CommunicationRecordingMutationRow): Result<void, AppError>;
   insertRequest(row: CommunicationRecordingRequestRow): Result<void, AppError>;
@@ -387,6 +389,12 @@ export class AddCommunicationRecordingLateJoinerUseCase {
         if (snapshot.consents.some((item) => item.participantPersonId === input.participantPersonId))
           return err(conflict(context, 'Katılımcı kayıt rızası listesinde zaten vardır.'));
         if (snapshot.consents.length >= 16) return err(conflict(context, 'Kayıt katılımcı sınırı aşılmıştır.'));
+        const guard = scope.findCallGuard(snapshot.request.callSessionId); if (!guard.ok) return guard;
+        if (!guard.value || ['ended','cancelled'].includes(guard.value.state))
+          return err(conflict(context, 'Sona ermiş veya bulunamayan çağrıya geç katılımcı eklenemez.'));
+        const eligible = scope.isEligibleLateJoiner(snapshot.request.callSessionId, asPersonId(input.participantPersonId));
+        if (!eligible.ok) return eligible;
+        if (!eligible.value) return err(denied(context, 'Geç katılan kişi çağrının etkin oda üyeliğiyle doğrulanamadı.'));
         const lateConsent: CommunicationRecordingConsentRow = Object.freeze({ id: consentId(input.requestId, input.participantPersonId),
           familyId: context.familyId, ownerPersonId: scope.ownerPersonId, requestId: input.requestId,
           participantPersonId: asPersonId(input.participantPersonId), state: 'pending',
@@ -407,9 +415,18 @@ export class SetCommunicationRecordingSegmentUseCase {
     return executeRequestMutation(this.unitOfWork, context, input, 'recording_segment_change', input, 'update',
       (scope, snapshot, identity) => {
         const owner = requireOwner(context, scope); if (!owner.ok) return owner;
+        const guard = scope.findCallGuard(snapshot.request.callSessionId); if (!guard.ok) return guard;
+        if (!guard.value || ['ended','cancelled'].includes(guard.value.state))
+          return err(conflict(context, 'Sona ermiş veya bulunamayan çağrıda kayıt bölümü değiştirilemez.'));
+        const callParticipants = [...new Set(guard.value.participantPersonIds)].sort();
+        const consentParticipants = snapshot.consents.map((item) => item.participantPersonId).sort();
+        if (callParticipants.some((personId) => !consentParticipants.includes(personId)))
+          return err(denied(context, 'Çağrıdaki her katılımcı için ayrı kayıt rızası olmadan bölüm değiştirilemez.'));
         const allGranted = snapshot.consents.length >= 2 && snapshot.consents.every((item) => item.state === 'granted');
         if (input.mode === 'on_record_requested' && (!allGranted || snapshot.request.state !== 'ready_not_recording'))
           return err(denied(context, 'Tüm katılımcılar açık rıza vermeden on-record bölümü istenemez.'));
+        if (snapshot.segments.at(-1)?.mode === input.mode)
+          return err(conflict(context, 'Kayıt bölümü zaten istenen moddadır.'));
         const next = nextRequest(snapshot.request, input.mode === 'off_record' ? 'off_record' : 'ready_not_recording', identity, scope.occurredAt);
         const segment: CommunicationRecordingSegmentRow = Object.freeze({ id: hash({ segment: identity }),
           familyId: context.familyId, ownerPersonId: scope.ownerPersonId, requestId: input.requestId,

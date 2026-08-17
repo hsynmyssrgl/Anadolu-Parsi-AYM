@@ -113,6 +113,9 @@ describe('34-D recording and retention DataStore production composition',()=>{
     const created=await store.createCommunicationRecordingRequest(createInput);expect(created).toMatchObject({revision:1,replayed:false,
       mediaCaptureStarted:false,mediaArtifactCreated:false,networkUsed:false});expect(await store.createCommunicationRecordingRequest(createInput))
       .toMatchObject({revision:1,replayed:true});
+    const outsider=store.createMember({displayName:'34-D Oda Dışı Kişi',relationshipType:'Yakın',generation:1,branch:'Ana Dal'});
+    await expect(store.addCommunicationRecordingLateJoiner({clientOperationId:'outsider-late-joiner-34-d',expectedRevision:1,
+      requestId:created.resourceId,participantPersonId:outsider.entityId})).rejects.toThrow(/etkin oda üyeliği/i);
     await store.decideCommunicationRecordingConsent({clientOperationId:'admin-consent-34-d',expectedRevision:1,
       requestId:created.resourceId,decision:'grant',explicitConsent:true,noticeVersion:'recording-notice-v1',ageCategory:'adult',
       ageAppropriateNoticeAcknowledged:true});

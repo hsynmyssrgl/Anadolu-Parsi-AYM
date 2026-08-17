@@ -16509,8 +16509,14 @@ WHEN (SELECT COUNT(*) FROM communication_recording_consents item WHERE item.requ
       AND ((mutation.mutation_kind='recording_request_create' AND EXISTS(
           SELECT 1 FROM communication_call_participants call_participant
           WHERE call_participant.session_id=request.call_session_id AND call_participant.person_id=NEW.participant_person_id
-            AND call_participant.family_id=NEW.family_id AND call_participant.owner_person_id=NEW.owner_person_id))
-        OR (mutation.mutation_kind='late_joiner_add' AND mutation.expected_revision=request.revision))
+            AND call_participant.family_id=NEW.family_id AND call_participant.owner_person_id=NEW.owner_person_id
+            AND call_participant.state<>'left'))
+        OR (mutation.mutation_kind='late_joiner_add' AND mutation.expected_revision=request.revision AND EXISTS(
+          SELECT 1 FROM communication_call_sessions session
+          JOIN communication_room_memberships membership ON membership.room_id=session.room_id
+            AND membership.family_id=session.family_id AND membership.owner_person_id=session.owner_person_id
+            AND membership.member_person_id=NEW.participant_person_id AND membership.status='active'
+          WHERE session.id=request.call_session_id AND session.state NOT IN ('ended','cancelled'))))
       AND NEW.state='pending' AND NEW.explicit_consent=0 AND NEW.revision=1
   )
 BEGIN SELECT RAISE(ABORT,'34-D consent insert requires exact participant, notice and request mutation'); END;

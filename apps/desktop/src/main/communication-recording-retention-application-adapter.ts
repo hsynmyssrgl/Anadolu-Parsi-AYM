@@ -68,6 +68,8 @@ class RepositoryBackedCommunicationRecordingWriteScope implements CommunicationR
   }
   public findRequest(requestId:string){return this.dependencies.communicationRecordingRepository.findRequest(this.repository,this.#key,requestId);}
   public findCallGuard(callSessionId:string){return this.dependencies.communicationRecordingRepository.findCallGuard(this.repository,this.#key,callSessionId);}
+  public isEligibleLateJoiner(callSessionId:string,participantPersonId:Parameters<CommunicationRecordingWriteScope['isEligibleLateJoiner']>[1]){
+    return this.dependencies.communicationRecordingRepository.isEligibleLateJoiner(this.repository,this.#key,callSessionId,participantPersonId);}
   public findMutation(clientOperationId:string){return this.dependencies.communicationRecordingRepository.findMutationByClientOperationId(this.repository,this.#key,clientOperationId);}
   public insertMutation(row:Parameters<CommunicationRecordingWriteScope['insertMutation']>[0]){return this.dependencies.communicationRecordingRepository.insertMutation(this.repository,row);}
   public insertRequest(row:Parameters<CommunicationRecordingWriteScope['insertRequest']>[0]){return this.dependencies.communicationRecordingRepository.insertRequest(this.repository,row);}

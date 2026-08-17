@@ -149,6 +149,12 @@ export interface CommunicationRecordingRepositoryPort {
     key: CommunicationRecordingCenterKey,
     callSessionId: string
   ): RepositoryResult<CommunicationRecordingCallGuardRow | null>;
+  isEligibleLateJoiner(
+    context: PolicyAuthorizedRepositoryExecutionContext,
+    key: CommunicationRecordingCenterKey,
+    callSessionId: string,
+    participantPersonId: PersonId
+  ): RepositoryResult<boolean>;
   findMutationByClientOperationId(
     context: PolicyAuthorizedRepositoryExecutionContext,
     key: CommunicationRecordingCenterKey,

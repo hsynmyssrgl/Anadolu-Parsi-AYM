@@ -39,6 +39,7 @@ const FAMILY=asFamilyId('family-34-d');
 const OWNER=asPersonId('person-owner-34-d');
 const INVITED=asPersonId('person-invited-34-d');
 const LATE=asPersonId('person-late-34-d');
+const OUTSIDER=asPersonId('person-outsider-34-d');
 const NOW=asIsoDateTime('2026-08-15T16:00:00.000Z');
 const context=(personId=OWNER,accountId='account-owner-34-d'):LifeApplicationContext=>Object.freeze({familyId:FAMILY,
   actor:Object.freeze({userId:asUserId(accountId),role:'family_admin',personId}),correlationId:asCorrelationId(`correlation-${accountId}`)});
@@ -53,12 +54,15 @@ class State{
 }
 class Scope implements CommunicationRecordingWriteScope{
   readonly occurredAt=NOW;readonly ownerPersonId=OWNER;
-  constructor(private readonly state:State,private readonly appContext:LifeApplicationContext,private readonly failOutbox:boolean){}
+  constructor(private readonly state:State,private readonly appContext:LifeApplicationContext,private readonly failOutbox:boolean,
+    private readonly eligibleLateJoiners:ReadonlySet<string>){}
   findRequest(requestId:string){const request=this.state.requests.get(requestId);if(!request)return ok(null);return ok(Object.freeze({request,
     consents:Object.freeze(this.state.consents.get(requestId)??[]),retention:this.state.retentions.get(requestId)!,
     segments:Object.freeze(this.state.segments.get(requestId)??[])}));}
   findCallGuard(callSessionId:string){return ok(callSessionId==='call-session-34-d'?Object.freeze({id:callSessionId,familyId:FAMILY,
     ownerPersonId:OWNER,state:'planned',participantPersonIds:Object.freeze([OWNER,INVITED])}):null);}
+  isEligibleLateJoiner(callSessionId:string,participantPersonId:typeof OWNER){return ok(callSessionId==='call-session-34-d'
+    &&this.eligibleLateJoiners.has(participantPersonId));}
   findMutation(clientOperationId:string){return ok(this.state.mutations.find((row)=>row.clientOperationId===clientOperationId
     &&row.actorAccountId===this.appContext.actor.userId)??null);}
   insertMutation(row:CommunicationRecordingMutationRow){this.state.mutations.push(row);return ok(undefined);}
@@ -79,9 +83,9 @@ class Scope implements CommunicationRecordingWriteScope{
     category:'internal',message:'outbox failed',correlationId:this.appContext.correlationId}));this.state.outbox.push(event as DomainEvent<unknown>);return ok(undefined);}
 }
 class Unit implements CommunicationRecordingUnitOfWork{
-  state=new State();intents:LifePolicyIntent[]=[];failOutbox=false;
+  state=new State();intents:LifePolicyIntent[]=[];failOutbox=false;eligibleLateJoiners=new Set<string>([LATE]);
   execute<T>(appContext:LifeApplicationContext,intent:LifePolicyIntent,operation:(scope:CommunicationRecordingWriteScope)=>Result<T,AppError>){
-    this.intents.push(intent);const draft=this.state.clone();const result=operation(new Scope(draft,appContext,this.failOutbox));
+    this.intents.push(intent);const draft=this.state.clone();const result=operation(new Scope(draft,appContext,this.failOutbox,this.eligibleLateJoiners));
     if(result.ok)this.state=draft;return Promise.resolve(result);}
 }
 const create=async(unit:Unit,id='recording-create-34-d')=>new CreateCommunicationRecordingRequestUseCase(unit).execute(context(),{
@@ -116,6 +120,9 @@ describe('34-D explicit-consent recording and retention use cases',()=>{
     expect(await new SetCommunicationRecordingSegmentUseCase(unit).execute(context(),{clientOperationId:'segment-34-d',expectedRevision:3,
       requestId:created.value.resourceId,mode:'on_record_requested',reason:'Tüm katılımcılar açık rıza verdi.'}))
       .toMatchObject({ok:true,value:{revision:4,mediaCaptureStarted:false}});
+    expect(await new SetCommunicationRecordingSegmentUseCase(unit).execute(context(),{clientOperationId:'segment-repeat-34-d',expectedRevision:4,
+      requestId:created.value.resourceId,mode:'on_record_requested',reason:'Aynı bölüm tekrar istenmemelidir.'}))
+      .toMatchObject({ok:false,error:{category:'conflict'}});
     expect(unit.state.segments.get(created.value.resourceId)?.[0]).toMatchObject({mode:'on_record_requested',captureStarted:false,
       transcriptPersisted:false,translationPersisted:false});
   });
@@ -129,6 +136,9 @@ describe('34-D explicit-consent recording and retention use cases',()=>{
       requestId:created.value.resourceId,participantPersonId:LATE})).toMatchObject({ok:true,value:{revision:2}});
     expect(unit.state.requests.get(created.value.resourceId)).toMatchObject({state:'paused_for_joiner'});
     expect(unit.state.consents.get(created.value.resourceId)?.find((item)=>item.participantPersonId===LATE)).toMatchObject({state:'pending'});
+    expect(await new AddCommunicationRecordingLateJoinerUseCase(unit).execute(context(),{clientOperationId:'outsider-34-d',expectedRevision:2,
+      requestId:created.value.resourceId,participantPersonId:OUTSIDER})).toMatchObject({ok:false,error:{category:'authorization'}});
+    expect(unit.state.consents.get(created.value.resourceId)).toHaveLength(3);
   });
 
   it('turns the request off-record when consent is declined or later withdrawn',async()=>{

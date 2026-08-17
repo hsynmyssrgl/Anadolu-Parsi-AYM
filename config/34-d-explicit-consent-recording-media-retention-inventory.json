@@ -36,6 +36,7 @@
   "securityControls": {
     "centralPepReceiptFence": true,
     "ownerAccountFamilyBinding": true,
+    "callRosterAndActiveRoomMembershipBinding": true,
     "explicitSelfConsentOnly": true,
     "defaultOffAndNoCaptureSchema": true,
     "immutableMutationConsentSegmentAndEventHistory": true,
@@ -61,10 +62,10 @@
     "targetedTestFileRatchet": 5,
     "targetedTestRatchet": 23,
     "migrationVersion": 108,
-    "migrationSha256": "96e3f1fef2c269d2fd5c217ba773cd2f65f0f9e3ce38b902d4d93e9894604d3e",
-    "ppk015": {"status":"PASS","files":519,"sourceSha256":"860bda4c49d7338393a7dba0280bf45c0e2ff40b91dd4918fa7f68c22e6aa4a5","findings":0},
-    "ppk021": {"status":"PASS","files":519,"surfaces":817,"sha256":"c062b81bfa3b52424036f9171b7ae6a415b9e594c1d3d89e4158db1bcc871272","targeted":17,"contract":84,"runtime":20},
-    "ppk022": {"status":"PASS","files":519,"surfaces":360,"sha256":"755717250f2549229608b38e6ea650a4647f1e0d50aa4c1aa1078acc193302ff","targeted":19,"contract":110,"runtime":24},
+    "migrationSha256": "45f60e7ff16f505386a75a4737d5b6bc4e0bc4c07e4b042594e40418ff20626e",
+    "ppk015": {"status":"PASS","files":556,"sourceSha256":"99205e9f450128725fbfc4e00117c5b8e93a04735a3215eea5df969a610d2124","findings":0},
+    "ppk021": {"status":"PASS","files":556,"surfaces":876,"sha256":"709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0","targeted":17,"contract":84,"runtime":20},
+    "ppk022": {"status":"PASS","files":556,"surfaces":395,"sha256":"a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e","targeted":19,"contract":111,"runtime":24},
     "countsAsRequirementPass": false
   },
   "externalAndManualEvidence": "NOT_RUN",

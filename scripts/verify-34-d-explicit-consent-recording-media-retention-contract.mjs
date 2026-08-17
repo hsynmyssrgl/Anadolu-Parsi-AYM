@@ -54,7 +54,7 @@ const checks=[
     'vitest run packages/application/tests/communication-recording-retention-use-cases.test.ts packages/repositories/communication-recording-retention-repository-policy.test.ts apps/desktop/tests/communication-recording-retention-data-store.test.ts apps/desktop/tests/communication-recording-retention-ipc-integration.test.ts apps/desktop/tests/communication-recording-retention-ui.test.ts --maxWorkers=1'],
   ['governance verifier commands are wired',pkg.scripts?.['verify:34-d:explicit-consent-recording-media-retention:boundary']
     &&pkg.scripts?.['verify:34-d:explicit-consent-recording-media-retention:contract']&&pkg.scripts?.['verify:34-d:explicit-consent-recording-media-retention:runtime']],
-  ['migration and PPK ratchets are exact',scope.validation?.migrationSha256==='96e3f1fef2c269d2fd5c217ba773cd2f65f0f9e3ce38b902d4d93e9894604d3e'
+  ['migration and PPK ratchets are exact',scope.validation?.migrationSha256==='45f60e7ff16f505386a75a4737d5b6bc4e0bc4c07e4b042594e40418ff20626e'
     &&scope.validation?.ppk015?.status==='PASS'&&scope.validation?.ppk021?.status==='PASS'&&scope.validation?.ppk022?.status==='PASS'],
   ['governance sources are nonempty and uniquely bound',new Set(Object.values(paths)).size===Object.keys(paths).length
     &&Object.values(content).every(value=>value.length>20)&&sha(content.scope)!==sha(content.inventory)]

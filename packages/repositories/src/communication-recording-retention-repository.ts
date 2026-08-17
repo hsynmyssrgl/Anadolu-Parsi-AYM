@@ -181,13 +181,28 @@ export class SqliteCommunicationRecordingRepository extends SqliteRepository imp
         WHERE id=? AND family_id=? AND owner_person_id=?`).get(callSessionId,key.familyId,key.ownerPersonId) as Record<string,unknown>|undefined;
       if(!session)return null;
       const participants=this.database(context).prepare(`SELECT person_id FROM communication_call_participants
-        WHERE session_id=? AND family_id=? AND owner_person_id=? ORDER BY person_id LIMIT 17`)
+        WHERE session_id=? AND family_id=? AND owner_person_id=? AND state<>'left' ORDER BY person_id LIMIT 17`)
         .all(callSessionId,key.familyId,key.ownerPersonId) as Array<{person_id:string}>;
       if(participants.length<2||participants.length>16)throw new Error('Communication call participant guard is invalid');
       return Object.freeze({id:String(session.id),familyId:asFamilyId(String(session.family_id)),
         ownerPersonId:asPersonId(String(session.owner_person_id)),state:String(session.state),
         participantPersonIds:Object.freeze(participants.map((row)=>asPersonId(String(row.person_id))))});
     });
+  }
+
+  public isEligibleLateJoiner(context: PolicyAuthorizedRepositoryExecutionContext, key: CommunicationRecordingCenterKey,
+    callSessionId: string, participantPersonId: CommunicationRecordingCallGuardRow['ownerPersonId']): RepositoryResult<boolean> {
+    assertAccess(context,key);
+    return this.execute(context, () => Boolean(this.database(context).prepare(`SELECT 1 present
+      FROM communication_call_sessions session
+      JOIN communication_room_memberships membership ON membership.room_id=session.room_id
+        AND membership.family_id=session.family_id AND membership.owner_person_id=session.owner_person_id
+        AND membership.member_person_id=? AND membership.status='active'
+      JOIN people participant ON participant.id=membership.member_person_id AND participant.family_id=session.family_id
+        AND participant.status='active'
+      WHERE session.id=? AND session.family_id=? AND session.owner_person_id=?
+        AND session.state NOT IN ('ended','cancelled') LIMIT 1`)
+      .get(participantPersonId,callSessionId,key.familyId,key.ownerPersonId)));
   }
 
   public findMutationByClientOperationId(context: PolicyAuthorizedRepositoryExecutionContext, key: CommunicationRecordingCenterKey,

@@ -51,6 +51,8 @@ describe('34-D recording repository and migration boundary',()=>{
     const source=readFileSync('packages/repositories/src/communication-recording-retention-repository.ts','utf8');
     expect(source).toContain("platformPolicyPersistenceBinding(context, row.resourceType, row.resourceId)");
     expect(source).toContain("platformPolicyPersistenceBinding(context, 'communication_recording_request', requestId)");
+    expect(source).toContain("membership.member_person_id=? AND membership.status='active'");
+    expect(source).toContain("AND state<>'left' ORDER BY person_id LIMIT 17");
     expect(source).toContain('SELECT id,family_id,owner_person_id,revision,state status,state_fingerprint');
     const resolver=source.slice(source.indexOf('public resolvePolicyResource'),source.indexOf('private snapshot'));
     expect(resolver).not.toMatch(/notice_version|participant_person_id|audio_days|video_days|segment|reason|payload/iu);
