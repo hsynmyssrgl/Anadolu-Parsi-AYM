@@ -83,6 +83,9 @@ export interface CommunicationFilePayloadPort {
 export interface CommunicationFileSharingWriteScope {
   readonly key: CommunicationFileSharingCenterKey;
   readonly occurredAt: CommunicationFileSharingMutationRow['occurredAt'];
+  findPerson(personId: string): RepositoryResult<{
+    readonly id: string; readonly familyId: string; readonly status: string;
+  } | null>;
   load(): RepositoryResult<CommunicationFileSharingCenterRow | null>;
   findMutation(clientOperationId: string): RepositoryResult<CommunicationFileSharingMutationRow | null>;
   save(
@@ -110,6 +113,11 @@ const SEALED_REFERENCE = /^comm-file-[0-9a-f]{64}\.pptshare$/u;
 const MIME = /^[a-z0-9][a-z0-9.+-]{0,63}\/[a-z0-9][a-z0-9.+-]{0,127}$/u;
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/u;
 const CONTROL = /[\p{Cc}\p{Cf}\p{Cs}]/u;
+const COMMAND_KINDS = new Set<CommunicationFileSharingCommand['kind']>([
+  'prepare_file','record_chunk','set_scan','add_version','add_comment','grant_access','revoke_share','link_archive',
+  'update_album','set_notifications','announce_emergency','acknowledge_emergency','request_remote_assistance',
+  'grant_remote_assistance','revoke_remote_assistance','plan_co_watch','prepare_voice_action','confirm_voice_action'
+]);
 const hash = (value: unknown): string => createHash('sha256').update(JSON.stringify(value), 'utf8').digest('hex');
 const normalizedText = (value: unknown, minimum: number, maximum: number): string | null => {
   if (typeof value !== 'string') return null;
@@ -197,6 +205,30 @@ const canonicalIds = (values: readonly string[], maximum: number): readonly stri
   return result.length === values.length ? Object.freeze(result) : null;
 };
 
+const referencedPersonIds = (command: CommunicationFileSharingCommand): readonly string[] => {
+  if (command.kind === 'grant_access') return Object.freeze([command.personId]);
+  if (command.kind === 'update_album') return command.likedByPersonIds;
+  if (command.kind === 'set_notifications') return Object.freeze(command.personOverrides.map((item) => item.personId));
+  if (command.kind === 'request_remote_assistance') return Object.freeze([command.helperPersonId]);
+  return Object.freeze([]);
+};
+const validateReferencedPersons = (
+  context: LifeApplicationContext,
+  scope: CommunicationFileSharingWriteScope,
+  command: CommunicationFileSharingCommand
+): Result<void, AppError> => {
+  const ids = canonicalIds(referencedPersonIds(command), 256);
+  if (!ids) return err(invalid(context, 'İletişim kişi başvuruları geçersiz veya yinelenmiştir.'));
+  if (command.kind === 'request_remote_assistance' && command.helperPersonId === context.actor.personId)
+    return err(denied(context, 'Uzaktan yardım isteyen kişi kendisini yardımcı olarak seçemez.'));
+  for (const personId of ids) {
+    const found = scope.findPerson(personId); if (!found.ok) return found;
+    if (!found.value || found.value.familyId !== context.familyId || found.value.status !== 'active')
+      return err(denied(context, 'İletişim kişi başvurusu aynı etkin aileye ait değildir.'));
+  }
+  return ok(undefined);
+};
+
 const reduce = (
   context: LifeApplicationContext,
   center: CommunicationFileSharingCenterView,
@@ -255,6 +287,7 @@ const reduce = (
     const existing = file.chunks.find((candidate) => candidate.chunkIndex === command.chunkIndex);
     if (existing && (existing.sha256 !== command.sha256 || existing.sizeBytes !== command.sizeBytes))
       return err(conflict(context, 'Aynı dosya parçası farklı hash veya boyutla yeniden sunuldu.'));
+    if (existing) return err(conflict(context, 'Doğrulanmış dosya parçası aynı değerlerle yeniden kaydedilemez.'));
     const chunks = existing ? file.chunks : Object.freeze([...file.chunks, Object.freeze({ chunkIndex: command.chunkIndex,
       offsetBytes: command.offsetBytes, sizeBytes: command.sizeBytes, sha256: command.sha256, verifiedAt: at })]
       .sort((left, right) => left.chunkIndex - right.chunkIndex));
@@ -264,10 +297,14 @@ const reduce = (
   } else if (command.kind === 'set_scan') {
     if (!file || file.state !== 'scan_required' || file.chunks.length !== file.totalChunks)
       return err(conflict(context, 'Tüm parçalar doğrulanmadan tarama sonucu kaydedilemez.'));
-    if (command.scanState === 'provider_unavailable'
+    if (!['clean','malicious','provider_unavailable'].includes(command.scanState)
+      || (command.scanState === 'provider_unavailable'
       ? command.scanProviderId !== undefined || command.scanEvidenceSha256 !== undefined
-      : !normalizedText(command.scanProviderId, 2, 128) || !SHA256.test(command.scanEvidenceSha256 ?? ''))
+      : !normalizedText(command.scanProviderId, 2, 128) || !SHA256.test(command.scanEvidenceSha256 ?? '')))
       return err(invalid(context, 'Zararlı dosya tarama kanıtı geçersizdir.'));
+    if (file.scanState === command.scanState && file.scanProviderId === command.scanProviderId
+      && file.scanEvidenceSha256 === command.scanEvidenceSha256)
+      return err(conflict(context, 'Aynı zararlı dosya tarama sonucu yeniden kaydedilemez.'));
     const state = command.scanState === 'clean' ? 'ready_local' as const
       : command.scanState === 'malicious' ? 'quarantined' as const : 'scan_required' as const;
     const updated = Object.freeze({ ...file, scanState: command.scanState, state,
@@ -279,7 +316,9 @@ const reduce = (
     if (!file || file.state === 'revoked' || file.versions.length >= COMMUNICATION_FILE_MAX_VERSIONS
       || !SHA256.test(command.contentSha256) || !SEALED_REFERENCE.test(command.sealedPayloadReference)
       || command.providerId !== 'protected-side-artifact-store-v1' || !SHA256.test(command.providerEvidenceSha256)
-      || !Number.isSafeInteger(command.sizeBytes) || command.sizeBytes < 1 || command.sizeBytes > COMMUNICATION_FILE_MAX_BYTES)
+      || !Number.isSafeInteger(command.sizeBytes) || command.sizeBytes < 1 || command.sizeBytes > COMMUNICATION_FILE_MAX_BYTES
+      || file.versions.some((version) => version.contentSha256 === command.contentSha256
+        || version.sealedPayloadReference === command.sealedPayloadReference))
       return err(invalid(context, 'Dosya sürümü geçersizdir.'));
     const version = Object.freeze({ version: file.versions.length + 1, contentSha256: command.contentSha256,
       sizeBytes: command.sizeBytes, sealedPayloadReference: command.sealedPayloadReference,
@@ -305,6 +344,7 @@ const reduce = (
     if (!file || file.state !== 'ready_local' || file.accessGrants.length >= COMMUNICATION_FILE_MAX_ACCESS_GRANTS
       || !SAFE_ID.test(command.grantId) || !SAFE_ID.test(command.personId)
       || !validIso(command.startsAt) || !validIso(command.endsAt) || Date.parse(command.endsAt) <= Date.parse(command.startsAt)
+      || !['preview_only','download'].includes(command.mode)
       || Date.parse(command.endsAt) - Date.parse(command.startsAt) > 31 * 86_400_000
       || file.accessGrants.some((candidate) => candidate.id === command.grantId))
       return err(invalid(context, 'Süreli dosya erişim izni geçersizdir.'));
@@ -320,13 +360,16 @@ const reduce = (
       revision: file.revision + 1, updatedAt: at });
     next = Object.freeze({ ...center, files: replaceFile(center, updated), revision: center.revision + 1, generatedAt: at });
   } else if (command.kind === 'link_archive') {
-    if (!file || !SAFE_ID.test(command.archiveItemId) || (file.archiveItemId && file.archiveItemId !== command.archiveItemId))
+    if (!file || !SAFE_ID.test(command.archiveItemId) || file.archiveItemId)
       return err(conflict(context, 'Dosya yalnız tek arşiv kopyasına bağlanabilir.'));
     const updated = Object.freeze({ ...file, archiveItemId: command.archiveItemId, revision: file.revision + 1, updatedAt: at });
     next = Object.freeze({ ...center, files: replaceFile(center, updated), revision: center.revision + 1, generatedAt: at });
   } else if (command.kind === 'update_album') {
     const likes = canonicalIds(command.likedByPersonIds, 128);
     if (!file || !SAFE_ID.test(command.albumId) || !likes) return err(invalid(context, 'Albüm ortak seçim kaydı geçersizdir.'));
+    if (file.albumId === command.albumId && file.selectedForStory === command.selectedForStory
+      && file.likedByPersonIds.length === likes.length && file.likedByPersonIds.every((personId,index)=>personId===likes[index]))
+      return err(conflict(context, 'Albüm ortak seçim kaydı değişmemiştir.'));
     const updated = Object.freeze({ ...file, albumId: command.albumId, selectedForStory: command.selectedForStory,
       likedByPersonIds: likes, revision: file.revision + 1, updatedAt: at });
     next = Object.freeze({ ...center, files: replaceFile(center, updated), revision: center.revision + 1, generatedAt: at });
@@ -336,6 +379,11 @@ const reduce = (
       || command.roomOverrides.some((item) => !SAFE_ID.test(item.roomId) || typeof item.muted !== 'boolean')
       || command.personOverrides.some((item) => !SAFE_ID.test(item.personId) || typeof item.muted !== 'boolean'))
       return err(invalid(context, 'Bildirim ve sessiz saat ayarı geçersizdir.'));
+    const profileFingerprint=hash(center.notificationProfile);
+    const nextProfile=Object.freeze({quietHoursEnabled:command.quietHoursEnabled,quietHoursStart:command.quietHoursStart,
+      quietHoursEnd:command.quietHoursEnd,nonEmergencyDigestEnabled:command.nonEmergencyDigestEnabled,
+      roomOverrides:Object.freeze([...command.roomOverrides]),personOverrides:Object.freeze([...command.personOverrides])});
+    if(profileFingerprint===hash(nextProfile))return err(conflict(context,'Bildirim ve sessiz saat ayarı değişmemiştir.'));
     next = Object.freeze({ ...center, notificationProfile: Object.freeze({
       quietHoursEnabled: command.quietHoursEnabled, quietHoursStart: command.quietHoursStart,
       quietHoursEnd: command.quietHoursEnd, nonEmergencyDigestEnabled: command.nonEmergencyDigestEnabled,
@@ -353,6 +401,8 @@ const reduce = (
   } else if (command.kind === 'acknowledge_emergency') {
     const announcement = center.emergencyAnnouncements.find((candidate) => candidate.id === command.announcementId);
     if (!announcement) return err(missing(context, 'Acil aile duyurusu bulunamadı.'));
+    if (announcement.acknowledgedPersonIds.includes(actorPersonId))
+      return err(conflict(context, 'Acil aile duyurusu daha önce onaylandı.'));
     const acknowledgedPersonIds = Object.freeze([...new Set([...announcement.acknowledgedPersonIds, actorPersonId])].sort());
     next = Object.freeze({ ...center, emergencyAnnouncements: Object.freeze(center.emergencyAnnouncements.map((candidate) =>
       candidate.id === announcement.id ? Object.freeze({ ...candidate, acknowledgedPersonIds }) : candidate)),
@@ -360,6 +410,7 @@ const reduce = (
   } else if (command.kind === 'request_remote_assistance') {
     const controls = canonicalIds(command.allowedControls, 3) as readonly ('pointer'|'keyboard'|'annotate')[] | null;
     if (!SAFE_ID.test(command.sessionId) || !SAFE_ID.test(command.helperPersonId) || !controls || controls.length < 1
+      || controls.some((control)=>!['pointer','keyboard','annotate'].includes(control))
       || !validIso(command.endsAt) || Date.parse(command.endsAt) <= Date.parse(at)
       || Date.parse(command.endsAt) - Date.parse(at) > 60 * 60_000 || center.remoteAssistance.length >= 64
       || center.remoteAssistance.some((candidate) => candidate.id === command.sessionId))
@@ -394,19 +445,21 @@ const reduce = (
       sharePlayAdapterConfigured: false as const }), ...center.coWatchSessions]), revision: center.revision + 1, generatedAt: at });
   } else if (command.kind === 'prepare_voice_action') {
     const target = normalizedText(command.targetReference, 2, 512);
-    if (!SAFE_ID.test(command.actionId) || !target || center.voiceActions.length >= 128
+    if (!SAFE_ID.test(command.actionId) || !['call','send_message','join_meeting'].includes(command.action) || !target || center.voiceActions.length >= 128
       || center.voiceActions.some((candidate) => candidate.id === command.actionId))
       return err(invalid(context, 'Sesli işlem hazırlığı geçersizdir.'));
     next = Object.freeze({ ...center, voiceActions: Object.freeze([Object.freeze({ id: command.actionId,
       action: command.action, targetReference: target, state: 'confirmation_required' as const,
       executedExternally: false as const }), ...center.voiceActions]), revision: center.revision + 1, generatedAt: at });
-  } else {
+  } else if (command.kind === 'confirm_voice_action') {
     const action = center.voiceActions.find((candidate) => candidate.id === command.actionId);
     if (!action || action.state !== 'confirmation_required' || command.explicitConfirmation !== true)
       return err(denied(context, 'Sesli işlem açık onay olmadan ilerleyemez.'));
     next = Object.freeze({ ...center, voiceActions: Object.freeze(center.voiceActions.map((candidate) => candidate.id === action.id
       ? Object.freeze({ ...candidate, state: 'confirmed_local_only' as const }) : candidate)),
       revision: center.revision + 1, generatedAt: at });
+  } else {
+    return err(invalid(context, 'Dosya paylaşım komut türü geçersizdir.'));
   }
   return ok(next);
 };
@@ -600,7 +653,8 @@ export class ApplyCommunicationFileSharingCommandUseCase {
     const { context, clientOperationId, expectedRevision, command } = input;
     if (!context.actor.personId) return Promise.resolve(err(denied(context, 'İletişim dosya paylaşımı kişi bağlı oturum gerektirir.')));
     const actorPersonId = context.actor.personId;
-    if (!SAFE_ID.test(clientOperationId) || !Number.isSafeInteger(expectedRevision) || expectedRevision < 0)
+    if (!command || typeof command !== 'object' || !COMMAND_KINDS.has(command.kind)
+      || !SAFE_ID.test(clientOperationId) || !Number.isSafeInteger(expectedRevision) || expectedRevision < 0)
       return Promise.resolve(err(invalid(context, 'Dosya paylaşım işlem kimliği veya sürümü geçersizdir.')));
     const requestFingerprint = hash({ expectedRevision, command });
     const key = communicationFileSharingKey(context, actorPersonId);
@@ -615,6 +669,7 @@ export class ApplyCommunicationFileSharingCommandUseCase {
       const loaded = scope.load(); if (!loaded.ok) return loaded;
       const current = loaded.value?.snapshot ?? emptyCommunicationFileSharingCenter(scope.key, scope.occurredAt);
       if (current.revision !== expectedRevision) return err(conflict(context, 'Dosya paylaşım merkezi sürümü değişti.'));
+      const persons=validateReferencedPersons(context,scope,command);if(!persons.ok)return persons;
       const reduced = reduce(context, current, command, scope.occurredAt); if (!reduced.ok) return reduced;
       const stateFingerprint = hash(reduced.value);
       const mutation: CommunicationFileSharingMutationRow = Object.freeze({ id: hash({ clientOperationId,

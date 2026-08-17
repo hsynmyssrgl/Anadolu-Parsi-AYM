@@ -48,6 +48,8 @@ class Scope implements CommunicationFileSharingWriteScope {
   public readonly key=communicationFileSharingKey(CONTEXT,OWNER);
   public readonly occurredAt=NOW;
   public constructor(private readonly state:State,private readonly failAudit:boolean){}
+  public findPerson(personId:string){return ok(['person-owner-34-g','person-member-34-g','person-helper-34-g'].includes(personId)
+    ?Object.freeze({id:personId,familyId:FAMILY,status:'active'}):null);}
   public load(){return ok(this.state.row);}
   public findMutation(clientOperationId:string){return ok(this.state.mutations.get(clientOperationId)??null);}
   public save(row:CommunicationFileSharingCenterRow,mutation:CommunicationFileSharingMutationRow,expectedRevision:number){
@@ -138,9 +140,14 @@ describe('34-G communication file sharing and remaining UX use cases',()=>{
       scanProviderId:'local-scanner-34-g',scanEvidenceSha256:'d'.repeat(64)})).ok).toBe(true);
     expect((await apply(unit,'grant-preview-34-g',2,{kind:'grant_access',fileId,grantId:'grant-34-g',
       personId:'person-member-34-g',mode:'preview_only',startsAt:NOW,endsAt:'2026-08-17T00:20:00.000Z'})).ok).toBe(true);
+    expect(await apply(unit,'grant-foreign-34-g',3,{kind:'grant_access',fileId,grantId:'grant-foreign-34-g',
+      personId:'person-foreign-34-g',mode:'download',startsAt:NOW,endsAt:'2026-08-17T00:20:00.000Z'}))
+      .toMatchObject({ok:false,error:{category:'authorization'}});
     expect((await apply(unit,'archive-link-34-g',3,{kind:'link_archive',fileId,archiveItemId:'archive-item-34-g'})).ok).toBe(true);
     expect(await apply(unit,'archive-link-conflict-34-g',4,{kind:'link_archive',fileId,
       archiveItemId:'archive-item-other-34-g'})).toMatchObject({ok:false,error:{category:'conflict'}});
+    expect(await apply(unit,'archive-link-same-34-g',4,{kind:'link_archive',fileId,
+      archiveItemId:'archive-item-34-g'})).toMatchObject({ok:false,error:{category:'conflict'}});
     expect((await apply(unit,'version-2-34-g',4,{kind:'add_version',fileId,contentSha256:'e'.repeat(64),sizeBytes:500,
       sealedPayloadReference:`comm-file-${'f'.repeat(64)}.pptshare`,providerId:'protected-side-artifact-store-v1',
       providerEvidenceSha256:'1'.repeat(64)})).ok).toBe(true);
@@ -184,7 +191,17 @@ describe('34-G communication file sharing and remaining UX use cases',()=>{
     await apply(unit,'notifications-34-g',0,{kind:'set_notifications',quietHoursEnabled:true,
       quietHoursStart:'22:30',quietHoursEnd:'07:30',nonEmergencyDigestEnabled:true,
       roomOverrides:[{roomId:'room-quiet-34-g',muted:true}],personOverrides:[]});
+    expect(await apply(unit,'notifications-noop-34-g',1,{kind:'set_notifications',quietHoursEnabled:true,
+      quietHoursStart:'22:30',quietHoursEnd:'07:30',nonEmergencyDigestEnabled:true,
+      roomOverrides:[{roomId:'room-quiet-34-g',muted:true}],personOverrides:[]}))
+      .toMatchObject({ok:false,error:{category:'conflict'}});
     await apply(unit,'emergency-34-g',1,{kind:'announce_emergency',announcementId:'announcement-34-g',title:'Aile durum bildirimi'});
+    expect(await apply(unit,'support-foreign-34-g',2,{kind:'request_remote_assistance',sessionId:'support-foreign-34-g',
+      helperPersonId:'person-foreign-34-g',allowedControls:['pointer'],endsAt:'2026-08-16T01:00:00.000Z'}))
+      .toMatchObject({ok:false,error:{category:'authorization'}});
+    expect(await apply(unit,'support-self-34-g',2,{kind:'request_remote_assistance',sessionId:'support-self-34-g',
+      helperPersonId:'person-owner-34-g',allowedControls:['pointer'],endsAt:'2026-08-16T01:00:00.000Z'}))
+      .toMatchObject({ok:false,error:{category:'authorization'}});
     await apply(unit,'support-request-34-g',2,{kind:'request_remote_assistance',sessionId:'support-34-g',
       helperPersonId:'person-helper-34-g',allowedControls:['annotate','pointer'],endsAt:'2026-08-16T01:00:00.000Z'});
     await apply(unit,'support-grant-34-g',3,{kind:'grant_remote_assistance',sessionId:'support-34-g',explicitSingleUseConsent:true});

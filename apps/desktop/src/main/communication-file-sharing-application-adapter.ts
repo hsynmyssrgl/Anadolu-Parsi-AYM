@@ -84,6 +84,7 @@ class RepositoryBackedCommunicationFileSharingWriteScope implements Communicatio
     if (!context.actor.personId || !owner) throw new Error('Communication file sharing durable owner context is incomplete');
     this.key = keyFor(context, asPersonId(owner));
   }
+  public findPerson(personId:string){return this.dependencies.personRepository.findById(this.repository,asPersonId(personId));}
   public load() { return this.dependencies.communicationFileSharingRepository.load(this.repository, this.key); }
   public findMutation(clientOperationId: string) {
     return this.dependencies.communicationFileSharingRepository.findMutation(this.repository, this.key, clientOperationId);
