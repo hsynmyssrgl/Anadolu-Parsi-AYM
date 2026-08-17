@@ -3,6 +3,7 @@
   "step": "34-L",
   "decision": "DEC-249",
   "mode": "boundary",
+  "sourceBaseHead": "f915b3c05344e8aa9b7fa7ed0fb8cdb2516cac00",
   "status": "PASS",
   "governanceState": "PLANNED_FINAL",
   "localImplementationStatus": "LOCAL_CLOSURE_AUTOMATION_COMPOSED_ACCEPTANCE_BLOCKED",
@@ -54,5 +55,5 @@
       "output": "34-K boundary: PASS (10/10; requirement PASS=false; write=false).\n"
     }
   ],
-  "generatedAt": "2026-08-16T06:50:17.663Z"
+  "generatedAt": "2026-08-17T06:44:31.669Z"
 }

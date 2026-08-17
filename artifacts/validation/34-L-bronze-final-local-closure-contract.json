@@ -3,6 +3,7 @@
   "step": "34-L",
   "decision": "DEC-249",
   "mode": "contract",
+  "sourceBaseHead": "f915b3c05344e8aa9b7fa7ed0fb8cdb2516cac00",
   "status": "PASS",
   "governanceState": "PLANNED_FINAL",
   "localImplementationStatus": "LOCAL_CLOSURE_AUTOMATION_COMPOSED_ACCEPTANCE_BLOCKED",
@@ -11,7 +12,7 @@
   "checkCount": 13,
   "passed": 13,
   "failed": 0,
-  "evidenceDigest": "a47a10417d0434b4f215a0e0baab7cf43d9b36a44e0132359e0715ca288a67a1",
+  "evidenceDigest": "ef97d2f6bf3af2bf58710091d72d2ed14953afd62632d13ae8dbf8a0c270a233",
   "checks": [
     {
       "name": "34-L identity and final planned state are exact",
@@ -29,7 +30,7 @@
       "detail": ""
     },
     {
-      "name": "local receipt is real while manual and external evidence remain NOT_RUN",
+      "name": "versioned local receipt rollover is supported while manual and external evidence remain NOT_RUN",
       "status": "PASS",
       "detail": ""
     },
@@ -84,5 +85,5 @@
       "output": "34-K contract: PASS (6/6; requirement PASS=false; write=false).\n"
     }
   ],
-  "generatedAt": "2026-08-16T06:50:18.128Z"
+  "generatedAt": "2026-08-17T06:44:32.494Z"
 }
