@@ -34,6 +34,7 @@ import {
   runFamilyDatabaseMigrations
 } from '../packages/database/dist/index.js';
 
+const noWrite = process.argv.includes('--no-write');
 const root = mkdtempSync(join(tmpdir(), 'panthera-mvp44-migrations-'));
 const checks = [];
 const expectedVersions = FAMILY_DATABASE_MIGRATIONS.map((migration) => migration.version);
@@ -273,11 +274,13 @@ try {
     })),
     generatedAt: new Date().toISOString()
   };
-  mkdirSync('artifacts/manifests', { recursive: true });
-  writeFileSync(
-    'artifacts/manifests/DATABASE_MIGRATION_VERIFICATION_MVP56.json',
-    JSON.stringify(report, null, 2) + '\n'
-  );
+  if (!noWrite) {
+    mkdirSync('artifacts/manifests', { recursive: true });
+    writeFileSync(
+      'artifacts/manifests/DATABASE_MIGRATION_VERIFICATION_MVP56.json',
+      JSON.stringify(report, null, 2) + '\n'
+    );
+  }
   console.log(JSON.stringify(report, null, 2));
 } finally {
   rmSync(root, { recursive: true, force: true });

@@ -4,6 +4,7 @@ import {
   validateCompleteRequirement
 } from './lib/product-surface-governance-analysis.mjs';
 
+const noWrite = process.argv.includes('--no-write');
 const registry = JSON.parse(await readFile('config/accepted-scope-registry.json', 'utf8'));
 const failures = [];
 let checks = 0;
@@ -89,8 +90,10 @@ const report = {
   failures,
   generatedAt: new Date().toISOString()
 };
-await mkdir('artifacts/validation', { recursive: true });
-await writeFile('artifacts/validation/feature-reality-gate.json', `${JSON.stringify(report, null, 2)}\n`);
+if (!noWrite) {
+  await mkdir('artifacts/validation', { recursive: true });
+  await writeFile('artifacts/validation/feature-reality-gate.json', `${JSON.stringify(report, null, 2)}\n`);
+}
 if (failures.length) {
   console.error(failures.join('\n'));
   process.exit(1);

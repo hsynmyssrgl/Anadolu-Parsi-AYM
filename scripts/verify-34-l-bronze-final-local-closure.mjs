@@ -126,10 +126,10 @@ if (mode === 'runtime') {
     'apps/desktop/tsconfig.renderer.json'
   ];
   for (const project of projects) run(`typecheck ${project}`, [resolve(root, 'node_modules/typescript/bin/tsc'), '-p', project, '--noEmit']);
-  run('migration verification', ['scripts/verify-database-migrations.mjs']);
-  run('monthly release identity', ['scripts/verify-monthly-release-contract.mjs']);
-  run('personal identity sweep', ['scripts/verify-personal-identity-sweep.mjs']);
-  run('feature reality gate', ['scripts/verify-feature-reality-gate.mjs']);
+  run('migration verification', ['scripts/verify-database-migrations.mjs', '--no-write']);
+  run('monthly release identity', ['scripts/verify-monthly-release-contract.mjs', '--no-write']);
+  run('personal identity sweep', ['scripts/verify-personal-identity-sweep.mjs', '--no-write']);
+  run('feature reality gate', ['scripts/verify-feature-reality-gate.mjs', '--no-write']);
   run('current document and artifact index', ['scripts/verify-project-artifact-index-v2.mjs', '--no-report']);
   const statusResult = spawnSync('git', ['-c', 'safe.directory=C:/PPT/AYM/06_KOD/app', 'status', '--porcelain=v1',
     '--untracked-files=all'], { cwd: root, encoding: 'utf8', stdio: 'pipe', maxBuffer: 8 * 1024 * 1024 });
