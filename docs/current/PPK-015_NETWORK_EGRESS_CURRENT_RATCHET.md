@@ -18,7 +18,7 @@ Güncel politika 2 adapter ve 3 purpose içerir:
 
 OIDC adaptörü yalnız tam token ve JWKS primary/secondary SPKI pinleri, TLS 1.3, işletim sistemi sertifika güveni, public DNS, çözümlenen ve bağlanılan IP eşitliği, redirect yasağı, exact JSON içerik türü, boyut ve süre sınırlarıyla çalışır. Sağlayıcı görünürlüğü secure-network-ready profile ve main-only deep-link callback kaydına bağlıdır. Apple, korumalı `private_key_jwt` assertion sağlayıcısı olmadığı sürece görünmez. Provider availability veya delivery garantisi verilmez.
 
-Güncel kaynak ratchet'i 18 source zone, 556 dosya, 7 malicious self-test, 2 adapter, 3 purpose, sıfır doğrudan primitive istisnası ve sıfır bulgudur. Üretim kaynak özeti `99205e9f450128725fbfc4e00117c5b8e93a04735a3215eea5df969a610d2124`; yetkili adapter/purpose özeti `8c3764ee962b55dda7fa85520b8fbb34088a65ab722febd30254416b7d6898bb` değeridir. Yerel çağrı preflight ve kayıt-rıza metadata zinciri dış ağa çıkmaz; bu nedenle yetkili external egress adapter/purpose sayısını genişletmez.
+Güncel kaynak ratchet'i 18 source zone, 556 dosya, 7 malicious self-test, 2 adapter, 3 purpose, sıfır doğrudan primitive istisnası ve sıfır bulgudur. Üretim kaynak özeti `757e5451cf3704257fd8937eca81fb21334b88c4218550ba24e4c9945cd9e0f9`; yetkili adapter/purpose özeti `8c3764ee962b55dda7fa85520b8fbb34088a65ab722febd30254416b7d6898bb` değeridir. Yerel çağrı preflight, kayıt-rıza ve sağlayıcısız çeviri hazırlık zinciri dış ağa çıkmaz; bu nedenle yetkili external egress adapter/purpose sayısını genişletmez.
 
 ## Migration ayrımı
 

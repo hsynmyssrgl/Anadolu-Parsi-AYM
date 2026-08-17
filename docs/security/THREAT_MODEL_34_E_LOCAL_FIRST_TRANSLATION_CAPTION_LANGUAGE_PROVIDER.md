@@ -19,10 +19,12 @@ Requirement kabulü: false
 4. Düzeltme plaintext sızıntısı: current satırda yalnız SHA-256 ve karakter sayısı; mutation/event/audit/outbox content-free kalır.
 5. Sözlük silme sızıntısı: silinen girdinin kaynak ve tercih terimi boşaltılır, append-only kanıt korunur.
 6. Sahte provider başarısı: şema ve IPC sonucu providerConfigured, execution, network ve cloud alanlarını false'a kilitler.
-7. Onaysız dış sağlayıcı hazırlığı: `external_preview` yalnız preview acknowledgement ve explicit consent birlikte true ise kabul edilir; yine de içerik aktarılmaz.
-8. Renderer authority genişlemesi: sekiz exact kanal, recursive plain-object kontrolü, extra key/path/credential/prototype reddi, bounded admission/rate ve non-cancellable durable write uygulanır.
-9. Transaction parçalanması: downstream audit/outbox hatası mutation, current row ve event'i birlikte rollback eder.
-10. Kalıcı kota DoS'u: owner başına 256 sözlük girdisi, 256 talep ve 4096 mutation sınırı vardır. Yaşam boyu prune/retention politikası henüz tasarlanmamıştır ve residual risk olarak açıktır.
+7. Onaysız dış sağlayıcı hazırlığı: `external_preview` yalnız profil düzeyinde dış sağlayıcı izni, preview acknowledgement ve explicit consent birlikte true ise kabul edilir; yine de içerik aktarılmaz.
+8. Düşük entropili düzeltme metninin hash üzerinden tahmini: düzeltme plaintext'i ve SHA-256 özeti renderer sonucundan çıkarılır; yalnız varlık ve sınırlı karakter sayısı gösterilir.
+9. Sözlük kimliği kaydırma: mevcut girdinin kaynak dil, hedef dil ve kaynak terim üçlüsü değiştirilemez; yeni terim yeni açık izinle eklenir.
+10. Renderer authority genişlemesi: sekiz exact kanal, recursive plain-object kontrolü, extra key/path/credential/prototype reddi, bounded admission/rate ve non-cancellable durable write uygulanır.
+11. Transaction parçalanması: downstream audit/outbox hatası mutation, current row ve event'i birlikte rollback eder.
+12. Kalıcı kota DoS'u: owner başına 256 sözlük girdisi, 256 talep ve 4096 mutation sınırı vardır. Yaşam boyu prune/retention politikası henüz tasarlanmamıştır ve residual risk olarak açıktır.
 
 ## Açık riskler
 

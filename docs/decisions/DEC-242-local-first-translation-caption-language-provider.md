@@ -23,9 +23,11 @@ Bu nedenle `countsAsRequirementPass=false`; gerçek provider, gerçek cihaz ve k
 
 - Migration 109: `619461d7ce65e87d9095fc2ea88cf9f801261b9309da67c0b67183c46094e71b`
 - Hedefli matris: 5 dosya / 23 test
-- PPK-015: 525 dosya, sıfır bulgu
+- PPK-015: 556 dosya, sıfır bulgu
 - PPK-019: sıfır bulgu
-- PPK-021: 525 dosya / 829 yüzey / `8c5f8d1d8a0fd3a8f2afca2828d616c3b8f42cc6f849fcc91096ac1f2d7fd306`
-- PPK-022: 525 dosya / 360 yüzey / `755717250f2549229608b38e6ea650a4647f1e0d50aa4c1aa1078acc193302ff`
+- PPK-021: 556 dosya / 876 yüzey / `709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0`
+- PPK-022: 556 dosya / 395 yüzey / `a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e`
+
+Dış sağlayıcı önizlemesi ayrıca profil düzeyinde etkin olmalıdır. Kişisel sözlük girdisinin kaynak dil/hedef dil/kaynak terim kimliği güncellemeyle değiştirilemez. Düzeltme metni ve onun SHA-256 özeti renderer'a verilmez; yalnız düzeltme varlığı ile sınırlandırılmış karakter sayısı gösterilir.
 
 Gerçek provider, network, cihazlar arası senkronizasyon, gizlilik, hukuk, güvenlik, erişilebilirlik ve dil kalitesi UAT kanıtları `NOT_RUN` durumundadır.

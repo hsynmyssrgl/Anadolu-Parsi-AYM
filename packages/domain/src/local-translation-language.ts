@@ -50,7 +50,6 @@ export interface LocalTranslationRequestView {
   readonly externalPreviewAcknowledged: boolean;
   readonly explicitExternalConsent: boolean;
   readonly correctionRecorded: boolean;
-  readonly correctionSha256?: string;
   readonly correctionCharacterCount?: number;
   readonly languageDetectionExecuted: false;
   readonly translationExecuted: false;

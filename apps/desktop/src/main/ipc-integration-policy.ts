@@ -4678,7 +4678,7 @@ const localTranslationDictionaryResult=(value:unknown):boolean=>isObject(value)&
 const localTranslationRequestResult=(value:unknown):boolean=>isObject(value)&&healthCareExactRecord(value,
   ['id','sourceKind','sourceResourceId','targetLanguage','providerMode','state','originalPreservationRequired',
     'separateTranslationViewRequired','machineTranslationLabelRequired','qualityFlag','externalPreviewAcknowledged',
-    'explicitExternalConsent','correctionRecorded',...(value.correctionSha256===undefined?[]:['correctionSha256','correctionCharacterCount']),
+    'explicitExternalConsent','correctionRecorded',...(value.correctionCharacterCount===undefined?[]:['correctionCharacterCount']),
     'languageDetectionExecuted','translationExecuted','speechToTextExecuted','speakerSeparationExecuted',
     'liveCaptionTranslationExecuted','textToSpeechExecuted','networkUsed','cloudUsed','revision','createdAt','updatedAt'])
   &&communicationIdentifier(value.id)&&['message','live_caption','document','meeting_summary'].includes(String(value.sourceKind))
@@ -4689,9 +4689,9 @@ const localTranslationRequestResult=(value:unknown):boolean=>isObject(value)&&he
   &&value.machineTranslationLabelRequired===true&&['not_evaluated','ambiguous','low_confidence','possible_error'].includes(String(value.qualityFlag))
   &&typeof value.externalPreviewAcknowledged==='boolean'&&typeof value.explicitExternalConsent==='boolean'
   &&typeof value.correctionRecorded==='boolean'
-  &&(value.correctionRecorded===false?(value.correctionSha256===undefined&&value.correctionCharacterCount===undefined)
-    :(typeof value.correctionSha256==='string'&&/^[0-9a-f]{64}$/u.test(value.correctionSha256)
-      &&Number.isSafeInteger(value.correctionCharacterCount)&&Number(value.correctionCharacterCount)>=1&&Number(value.correctionCharacterCount)<=10_000))
+  &&(value.correctionRecorded===false?value.correctionCharacterCount===undefined
+    :(Number.isSafeInteger(value.correctionCharacterCount)&&Number(value.correctionCharacterCount)>=1
+      &&Number(value.correctionCharacterCount)<=10_000))
   &&['languageDetectionExecuted','translationExecuted','speechToTextExecuted','speakerSeparationExecuted',
     'liveCaptionTranslationExecuted','textToSpeechExecuted','networkUsed','cloudUsed'].every(key=>value[key]===false)
   &&communicationMessagingRevision(value.revision)&&communicationMessagingIso(value.createdAt)&&communicationMessagingIso(value.updatedAt);

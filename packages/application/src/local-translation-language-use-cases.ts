@@ -175,7 +175,7 @@ const requestView = (row: LocalTranslationRequestRow): LocalTranslationRequestVi
   separateTranslationViewRequired: true, machineTranslationLabelRequired: true, qualityFlag: row.qualityFlag,
   externalPreviewAcknowledged: row.externalPreviewAcknowledged, explicitExternalConsent: row.explicitExternalConsent,
   correctionRecorded: row.correctionSha256 !== undefined,
-  ...(row.correctionSha256 ? { correctionSha256: row.correctionSha256, correctionCharacterCount: row.correctionCharacterCount } : {}),
+  ...(row.correctionSha256 ? { correctionCharacterCount: row.correctionCharacterCount } : {}),
   languageDetectionExecuted: false, translationExecuted: false, speechToTextExecuted: false,
   speakerSeparationExecuted: false, liveCaptionTranslationExecuted: false, textToSpeechExecuted: false,
   networkUsed: false, cloudUsed: false, revision: row.revision, createdAt: row.createdAt, updatedAt: row.updatedAt
@@ -325,6 +325,13 @@ export class UpdateLocalTranslationProfileUseCase {
     const normalized = Object.freeze({ ...input, preferredLanguage: preferred, secondaryLanguages: secondary });
     return executeProfileMutation(this.unitOfWork, context, input, 'profile_update', normalized, (scope, current, identity) => {
       const person = context.actor.personId!; const key = localTranslationKey(context, person);
+      if (current && current.preferredLanguage === preferred
+        && JSON.stringify(current.secondaryLanguages) === JSON.stringify(secondary)
+        && current.liveCaptionTranslationEnabled === input.liveCaptionTranslationEnabled
+        && current.translatedSpeechEnabled === input.translatedSpeechEnabled
+        && current.externalProviderAllowed === input.externalProviderAllowed
+        && current.encryptedSyncRequested === input.encryptedSyncRequested)
+        return err(conflict(context, 'Dil profili zaten istenen durumdadır.'));
       const base = nextProfileBase(key, current, identity, scope.occurredAt);
       return ok({ nextProfile: Object.freeze({ ...base, preferredLanguage: preferred,
         secondaryLanguages: Object.freeze(secondary), liveCaptionTranslationEnabled: input.liveCaptionTranslationEnabled,
@@ -371,6 +378,11 @@ export class UpdateLocalTranslationDictionaryEntryUseCase {
     return executeProfileMutation(this.unitOfWork, context, input, 'dictionary_update', normalized, (scope, current, identity) => {
       const found = scope.findDictionaryEntry(input.entryId); if (!found.ok) return found;
       if (!found.value || found.value.state !== 'active') return err(missing(context, 'Etkin kişisel sözlük girdisi bulunamadı.'));
+      if (found.value.sourceLanguage !== sourceLanguage || found.value.targetLanguage !== targetLanguage
+        || found.value.sourceTerm !== sourceTerm)
+        return err(conflict(context, 'Kişisel sözlük kaynak kimliği değiştirilemez; yeni terim ayrı izinle eklenmelidir.'));
+      if (found.value.category === input.category && found.value.preferredTerm === preferredTerm)
+        return err(conflict(context, 'Kişisel sözlük girdisi zaten istenen durumdadır.'));
       const key = localTranslationKey(context, context.actor.personId!);
       const row: LocalTranslationDictionaryEntryRow = Object.freeze({ ...found.value, category: input.category,
         sourceLanguage, targetLanguage, sourceTerm, preferredTerm, revision: found.value.revision + 1,
@@ -440,6 +452,9 @@ export class PrepareLocalTranslationRequestUseCase {
       const prior = scope.findMutation(input.clientOperationId); if (!prior.ok) return prior;
       const repeated = replay(context, prior.value, 'local_translation_request', id, 'request_prepare', fingerprint, 0);
       if (!repeated.ok || repeated.value) return repeated as Result<LocalTranslationMutationReceiptView, AppError>;
+      const profile = scope.findProfile(); if (!profile.ok) return profile;
+      if (input.providerMode === 'external_preview' && profile.value?.externalProviderAllowed !== true)
+        return err(denied(context, 'Dış sağlayıcı önizlemesi profil düzeyinde ayrıca etkinleştirilmelidir.'));
       const identity = mutationIdentity(context, input.clientOperationId, fingerprint);
       const base: Omit<LocalTranslationRequestRow, 'stateFingerprint'> = Object.freeze({ id, familyId: context.familyId,
         ownerPersonId: scope.ownerPersonId, sourceKind: input.sourceKind, sourceResourceId: input.sourceResourceId,
@@ -465,11 +480,14 @@ export class RecordLocalTranslationCorrectionUseCase {
     const corrected = normalizedText(input.correctedText, 1, 10_000);
     if (!SAFE_ID.test(input.clientOperationId) || !SAFE_ID.test(input.requestId) || !corrected || input.explicitPermission !== true)
       return Promise.resolve(err(invalid(context, 'Çeviri düzeltme girdisi geçersizdir.')));
-    const fingerprintValue = Object.freeze({ ...input, correctedTextSha256: hash(corrected), correctedText: undefined });
+    const correctedTextSha256 = hash(corrected);
+    const fingerprintValue = Object.freeze({ ...input, correctedTextSha256, correctedText: undefined });
     return executeRequestMutation(this.unitOfWork, context, input, 'correction_record', fingerprintValue, (scope, current, identity) => {
       if (current.state === 'cancelled') return err(conflict(context, 'İptal edilmiş çeviri talebi düzeltilemez.'));
+      if (current.correctionSha256 === correctedTextSha256)
+        return err(conflict(context, 'Aynı çeviri düzeltmesi yeniden kaydedilemez.'));
       return ok(Object.freeze({ ...current, state: 'correction_recorded', qualityFlag: 'not_evaluated',
-        correctionSha256: hash(corrected), correctionCharacterCount: [...corrected].length,
+        correctionSha256: correctedTextSha256, correctionCharacterCount: [...corrected].length,
         revision: current.revision + 1, lastMutationId: identity, updatedAt: scope.occurredAt }));
     });
   }

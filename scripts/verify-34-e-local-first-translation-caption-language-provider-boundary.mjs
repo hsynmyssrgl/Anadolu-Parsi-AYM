@@ -60,7 +60,9 @@ const checks=[
     &&scope.validation?.migrationSha256==='619461d7ce65e87d9095fc2ea88cf9f801261b9309da67c0b67183c46094e71b'],
   ['PPK ratchets are closed without requirement pass',scope.validation?.ppk015?.status==='PASS'
     &&scope.validation?.ppk019?.status==='PASS'&&scope.validation?.ppk021?.status==='PASS'
-    &&scope.validation?.ppk022?.status==='PASS'&&scope.validation?.countsAsRequirementPass===false]
+    &&scope.validation?.ppk022?.status==='PASS'&&scope.validation?.countsAsRequirementPass===false
+    &&scope.truth?.externalPreviewProfileOptInEnforced===true&&scope.truth?.dictionarySourceIdentityImmutable===true
+    &&scope.truth?.correctionDigestExposedToRenderer===false]
 ];
 const results=checks.map(([name,passed])=>({name,status:passed?'PASS':'FAIL'}));const failures=results.filter(item=>item.status==='FAIL');
 const report={schemaVersion:1,step:'34-E',decision:'DEC-242',status:failures.length?'FAIL':'PASS',governanceState:'PLANNED',

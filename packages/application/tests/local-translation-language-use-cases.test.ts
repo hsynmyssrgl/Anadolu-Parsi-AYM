@@ -79,6 +79,8 @@ describe('34-E local translation language application',()=>{
     expect(uow.intents[0]).toMatchObject({resourceType:'local_translation_profile',action:'create',capability:'family.write'});
     const mismatch={...profileInput(),preferredLanguage:'de'};
     expect(await useCase.execute(context,mismatch)).toMatchObject({ok:false,error:{code:'RESOURCE-CONFLICT-001'}});
+    expect(await useCase.execute(context,{...profileInput(1),clientOperationId:'profile-noop-34-e'}))
+      .toMatchObject({ok:false,error:{code:'RESOURCE-CONFLICT-001'}});
   });
 
   it('adds, updates and content-clears a personal dictionary entry only with explicit permission',async()=>{
@@ -87,10 +89,16 @@ describe('34-E local translation language application',()=>{
       sourceLanguage:'tr',targetLanguage:'en',sourceTerm:'Yılmaz',preferredTerm:'Yilmaz',explicitPermission:true});
     expect(added).toMatchObject({ok:true,value:{revision:1}});const entry=uow.dictionary[0]!;
     const update=new UpdateLocalTranslationDictionaryEntryUseCase(uow);
+    expect(await update.execute(context,{clientOperationId:'dictionary-source-change-34-e',expectedRevision:1,entryId:entry.id,
+      category:'family_name',sourceLanguage:'tr',targetLanguage:'en',sourceTerm:'Yıldız',preferredTerm:'Yildiz family',
+      explicitPermission:true})).toMatchObject({ok:false,error:{code:'RESOURCE-CONFLICT-001'}});
     expect(await update.execute(context,{clientOperationId:'dictionary-update-34-e',expectedRevision:1,entryId:entry.id,
       category:'family_name',sourceLanguage:'tr',targetLanguage:'en',sourceTerm:'Yılmaz',preferredTerm:'Yılmaz family',
       explicitPermission:true})).toMatchObject({ok:true,value:{revision:2}});
     expect(uow.dictionary[0]).toMatchObject({preferredTerm:'Yılmaz family',state:'active',revision:2});
+    expect(await update.execute(context,{clientOperationId:'dictionary-noop-34-e',expectedRevision:2,entryId:entry.id,
+      category:'family_name',sourceLanguage:'tr',targetLanguage:'en',sourceTerm:'Yılmaz',preferredTerm:'Yılmaz family',
+      explicitPermission:true})).toMatchObject({ok:false,error:{code:'RESOURCE-CONFLICT-001'}});
     const remove=new DeleteLocalTranslationDictionaryEntryUseCase(uow);
     expect(await remove.execute(context,{clientOperationId:'dictionary-delete-34-e',expectedRevision:2,entryId:entry.id,
       reason:'Artık kullanmıyorum.'})).toMatchObject({ok:true,value:{revision:3}});
@@ -106,6 +114,9 @@ describe('34-E local translation language application',()=>{
     const input={clientOperationId:'external-valid-34-e',expectedRevision:0 as const,sourceKind:'message' as const,
       sourceResourceId:'message-34-e',targetLanguage:'en',providerMode:'external_preview' as const,
       externalPreviewAcknowledged:true,explicitExternalConsent:true};
+    expect(await useCase.execute(context,input)).toMatchObject({ok:false,error:{code:'PERMISSION-DENIED-001'}});
+    expect(await new UpdateLocalTranslationProfileUseCase(uow).execute(context,{...profileInput(),
+      clientOperationId:'external-profile-34-e',externalProviderAllowed:true,encryptedSyncRequested:false})).toMatchObject({ok:true});
     expect(await useCase.execute(context,input)).toMatchObject({ok:true,value:{providerConfigured:false,
       translationExecuted:false,networkUsed:false,cloudUsed:false}});
     expect(uow.requests[0]).toMatchObject({state:'provider_unavailable',externalPreviewAcknowledged:true,
@@ -124,6 +135,11 @@ describe('34-E local translation language application',()=>{
       correctedText:'Düzeltilmiş metin',explicitPermission:true})).toMatchObject({ok:true,value:{revision:2}});
     expect(uow.requests[0]).toMatchObject({state:'correction_recorded',correctionCharacterCount:17});
     expect(JSON.stringify(uow.mutations)).not.toContain('Düzeltilmiş metin');
+    const projected=localTranslationSnapshotToCenterView({profile:uow.profile,dictionary:uow.dictionary,requests:uow.requests},
+      localTranslationKey(context,context.actor.personId!),at);
+    expect(projected.requests[0]).not.toHaveProperty('correctionSha256');
+    expect(await correct.execute(context,{clientOperationId:'correction-noop-34-e',expectedRevision:2,requestId,
+      correctedText:'Düzeltilmiş metin',explicitPermission:true})).toMatchObject({ok:false,error:{code:'RESOURCE-CONFLICT-001'}});
     const cancel=new CancelLocalTranslationRequestUseCase(uow);
     expect(await cancel.execute(context,{clientOperationId:'cancel-34-e',expectedRevision:2,requestId,
       reason:'Artık gerekli değil.'})).toMatchObject({ok:true,value:{revision:3}});
