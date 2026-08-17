@@ -180,8 +180,8 @@
   "networkAccessPerformed": false,
   "credentialsCollected": false,
   "externalConsentPerformed": false,
-  "ppk021ExactAllowlistEntries": 874,
+  "ppk021ExactAllowlistEntries": 876,
   "ppk021UseCaseCompositionSurfaces": 432,
-  "ppk022CapabilitySurfaces": 392,
-  "generatedAt": "2026-08-16T16:03:43.451Z"
+  "ppk022CapabilitySurfaces": 395,
+  "generatedAt": "2026-08-17T06:38:51.907Z"
 }

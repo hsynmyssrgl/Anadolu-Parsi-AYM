@@ -43,8 +43,8 @@
     "ppk021": {
       "status": "PASS",
       "scannedProductionFiles": 555,
-      "exactPrivilegedSurfaceCount": 873,
-      "exactAllowlistSha256": "843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc",
+      "exactPrivilegedSurfaceCount": 874,
+      "exactAllowlistSha256": "930119485fa3459f55ed3f23909ba9846560e785030bb991b5fb3105383d5d1a",
       "targetedTestsPassed": 17,
       "contractChecksPassed": 84,
       "runtimeChecksPassed": 20,
@@ -115,5 +115,5 @@
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-16T05:25:04.322Z"
+  "generatedAt": "2026-08-16T23:38:53.668Z"
 }
