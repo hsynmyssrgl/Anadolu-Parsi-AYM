@@ -47,7 +47,7 @@ const packages={
     decisionFile:'docs/decisions/DEC-248-windows-resilience-universal-ux.md',threat:'docs/security/THREAT_MODEL_34_K_WINDOWS_RESILIENCE_UNIVERSAL_UX.md',
     localStatus:'LOCAL_HARDENED_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE',expectedTestFiles:3,expectedTests:16,
     validation:{migrationSha256:'e9e67d7ef5c3097f4e39ea3a01aca76a7f9b64fe5b54de8da4de8cfbfc42e5cc',
-      ppk015Sha256:'9f390fd90375bb41505118e8e18dbe0d8868732f588bde80c80c409491edc2e7',
+      ppk015Sha256:'182b50cca03307c6d475e969d77f02894017c220db4a71b952e1812adeebb155',
       ppk021Count:876,ppk021Sha256:'709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0',
       ppk022Count:395,ppk022Sha256:'a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e'},
     tests:['packages/application/tests/windows-resilience-universal-ux-use-cases.test.ts','packages/repositories/windows-resilience-universal-ux-repository-policy.test.ts','apps/desktop/tests/universal-ux-consolidation-ui.test.ts'],

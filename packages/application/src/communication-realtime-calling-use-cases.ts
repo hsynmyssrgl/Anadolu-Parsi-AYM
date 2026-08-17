@@ -61,6 +61,13 @@ export interface CommunicationCallPreflightPort {
   ): Promise<Result<VerifiedCommunicationCallPreflightInput, AppError>>;
 }
 
+const isCommunicationCallHost = (value: CommunicationCallParticipantRow['role']): boolean => {
+  switch (value) {
+    case 'host': return true;
+    default: return false;
+  }
+};
+
 export interface CommunicationRealtimeCallingWriteScope {
   readonly occurredAt: CommunicationRealtimeCallingMutationRow['occurredAt'];
   readonly ownerPersonId: CommunicationRealtimeCallingCenterKey['ownerPersonId'];
@@ -225,10 +232,10 @@ export const communicationCallSessionRowToView = (
     providerVerified: snapshot.session.preflightEvidenceSha256 !== undefined, networkUsed: false,
     ...(snapshot.session.preflightObservedAt ? { observedAt: snapshot.session.preflightObservedAt } : {}) }),
   participants: Object.freeze(snapshot.participants.map((row) => Object.freeze({ personId: row.personId, role: row.role,
-    state: row.state, handRaised: row.role === 'host' ? snapshot.session.localHandRaised : row.handRaised,
+    state: row.state, handRaised: isCommunicationCallHost(row.role) ? snapshot.session.localHandRaised : row.handRaised,
     pinnedLocally: snapshot.session.pinnedPersonId === row.personId,
     signLanguageSpeakerPinnedLocally: snapshot.session.signLanguagePinnedPersonId === row.personId,
-    ...(row.role === 'host' && snapshot.session.reactionCode
+    ...(isCommunicationCallHost(row.role) && snapshot.session.reactionCode
       ? { reactionCode: snapshot.session.reactionCode }
       : row.reactionCode ? { reactionCode: row.reactionCode } : {}),
     revision: row.revision, updatedAt: row.updatedAt }))),

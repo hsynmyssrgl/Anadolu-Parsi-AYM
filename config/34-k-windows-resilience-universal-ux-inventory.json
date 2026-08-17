@@ -25,7 +25,7 @@
     "fullRegression": {"status": "NOT_RUN_AFTER_HARDENING", "files": 286, "tests": 1920},
     "rootTypecheck": "PASS",
     "workspaceBuilds": {"status": "PASS", "packages": 16, "coreService": true, "desktop": true},
-    "ppk015": {"files": 556, "sha256": "9f390fd90375bb41505118e8e18dbe0d8868732f588bde80c80c409491edc2e7"},
+    "ppk015": {"files": 556, "sha256": "182b50cca03307c6d475e969d77f02894017c220db4a71b952e1812adeebb155"},
     "ppk021": {"files": 556, "surfaces": 876, "sha256": "709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0"},
     "ppk022": {"files": 556, "surfaces": 395, "sha256": "a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e"}
   },
