@@ -21,7 +21,14 @@ const run = (name, args) => {
   const result = spawnSync(process.execPath, args, { cwd: root, encoding: 'utf8', stdio: 'pipe', maxBuffer: 96 * 1024 * 1024 });
   const output = `${result.error?.stack ?? ''}${result.stdout ?? ''}${result.stderr ?? ''}`;
   checks.push({ name, status: result.status === 0 ? 'PASS' : 'FAIL', exitCode: result.status ?? 1, output: output.slice(-20000) });
+  return { result, output };
 };
+const headResult = spawnSync('git', ['-c', 'safe.directory=C:/PPT/AYM/06_KOD/app', 'rev-parse', 'HEAD'],
+  { cwd: root, encoding: 'utf8', stdio: 'pipe' });
+if (headResult.status !== 0 || !/^[0-9a-f]{40}\s*$/u.test(headResult.stdout ?? '')) {
+  throw new Error('Cannot resolve exact source HEAD.');
+}
+const sourceBaseHead = headResult.stdout.trim();
 
 const governanceFiles = [
   'config/34-l-bronze-final-drift-deterministic-delivery-closure-scope.json',
@@ -61,17 +68,18 @@ if (mode === 'contract' || mode === 'runtime') {
   check('current local validation evidence is exact and remains non-accepting', scope.validation?.localPackageBoundaries?.checks === 51
     && scope.validation?.localPackageContracts?.checks === 30
     && scope.validation?.localPackageRuntimes?.checks === 171
-    && scope.validation?.targeted?.files === 12 && scope.validation?.targeted?.tests === 47
-    && scope.validation?.fullRegression?.files === 286 && scope.validation?.fullRegression?.tests === 1920
-    && scope.validation?.productionBuilds?.workspaces === 18
+    && scope.validation?.targeted?.files === 12 && scope.validation?.targeted?.tests === 50
+    && scope.validation?.fullRegression?.status === 'NOT_RUN_AFTER_34_K_HARDENING'
+    && scope.validation?.rootTypecheck === 'NOT_RUN_AFTER_34_K_HARDENING'
+    && scope.validation?.productionBuilds?.status === 'NOT_RUN_AFTER_34_K_HARDENING'
     && scope.validation?.artifactIndex?.files === 6635 && scope.validation?.artifactIndex?.documents === 3838
-    && inventory.localEvidence?.fullRegressionTests === 1920
-    && audit.includes('286/286') && audit.includes('1920/1920'));
+    && inventory.localEvidence?.fullRegressionStatus === 'NOT_RUN_AFTER_34_K_HARDENING'
+    && audit.includes('12/12') && audit.includes('50/50'));
   check('local receipt is real while manual and external evidence remain NOT_RUN', Object.values(scope.manualEvidence ?? {}).every((value) => value === 'NOT_RUN')
-    && scope.persistentReceiptStatus === 'PASS_LOCAL_ONLY'
+    && scope.persistentReceiptStatus === 'STALE_SOURCE_HEAD'
     && scope.persistentReceiptPath === 'artifacts/validation/34-L-bronze-local-closure-receipt.json'
     && scope.externalPersistentReceiptStatus === 'NOT_RUN'
-    && inventory.localPersistentReceiptStatus === 'PASS_LOCAL_ONLY'
+    && inventory.localPersistentReceiptStatus === 'STALE_SOURCE_HEAD'
     && inventory.externalPersistentReceiptStatus === 'NOT_RUN');
   check('roadmap identity is complete and non-duplicated', roadmap.packageCount === 26 && steps.length === 26
     && new Set(steps).size === 26 && assigned.length === 274 && new Set(assigned).size === 274);
@@ -102,7 +110,10 @@ if (mode === 'runtime') {
     'apps/desktop/tests/remaining-communication-distributed-ui.test.ts',
     'apps/desktop/tests/universal-ux-consolidation-ui.test.ts'
   ];
-  run('34-G..34-K targeted tests', [resolve(root, 'node_modules/vitest/vitest.mjs'), 'run', ...tests, '--maxWorkers=1']);
+  const targeted = run('34-G..34-K targeted tests', [resolve(root, 'node_modules/vitest/vitest.mjs'), 'run',
+    ...tests, '--maxWorkers=1']);
+  check('combined targeted runtime ratchet is exact', targeted.result.status === 0
+    && targeted.output.includes('Test Files  12 passed (12)') && targeted.output.includes('Tests  50 passed (50)'));
   const projects = [
     'packages/domain/tsconfig.json',
     'packages/repository-contracts/tsconfig.json',
@@ -119,6 +130,18 @@ if (mode === 'runtime') {
   run('personal identity sweep', ['scripts/verify-personal-identity-sweep.mjs']);
   run('feature reality gate', ['scripts/verify-feature-reality-gate.mjs']);
   run('current document and artifact index', ['scripts/verify-project-artifact-index-v2.mjs', '--no-report']);
+  const statusResult = spawnSync('git', ['-c', 'safe.directory=C:/PPT/AYM/06_KOD/app', 'status', '--porcelain=v1',
+    '--untracked-files=all'], { cwd: root, encoding: 'utf8', stdio: 'pipe', maxBuffer: 8 * 1024 * 1024 });
+  const allowedEvidenceChanges = new Set([
+    'artifacts/validation/34-L-bronze-final-local-closure-boundary.json',
+    'artifacts/validation/34-L-bronze-final-local-closure-contract.json',
+    'artifacts/validation/34-L-bronze-final-local-closure-runtime.json'
+  ]);
+  const unexpectedChanges = statusResult.status === 0 ? statusResult.stdout.split(/\r?\n/u).filter(Boolean)
+    .filter((line) => !allowedEvidenceChanges.has(line.slice(3).replaceAll('\\', '/'))) : [];
+  check('deterministic delivery worktree contains only closure evidence changes',
+    statusResult.status === 0 && unexpectedChanges.length === 0,
+    statusResult.status === 0 ? unexpectedChanges.slice(0, 100).join('\n') : statusResult.stderr);
 }
 
 const failures = checks.filter((item) => item.status === 'FAIL');
@@ -127,6 +150,7 @@ const report = {
   step: '34-L',
   decision: 'DEC-249',
   mode,
+  sourceBaseHead,
   status: failures.length ? 'FAIL' : 'PASS',
   governanceState: 'PLANNED_FINAL',
   localImplementationStatus: 'LOCAL_CLOSURE_AUTOMATION_COMPOSED_ACCEPTANCE_BLOCKED',

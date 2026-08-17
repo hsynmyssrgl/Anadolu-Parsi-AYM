@@ -6,4 +6,4 @@ Durum: PLANNED_FINAL / LOCAL_CLOSURE_AUDIT_STARTED
 
 33-P–34-K paketlerinde harici kimlik sağlayıcısı, gerçek OCR/provider, üretim iletişim servisleri, gerçek Raft/mTLS cluster, Apple istemcileri, Windows installer yaşam döngüsü, 168 saat soak ve bağımsız inceleme kanıtları tamamlanmadan registry/roadmap atomik kapanışı yapılamaz. Bu nedenle yerel closure runtime `PASS` olsa bile `countsAsRequirementPass=false` ve 34-L `PLANNED_FINAL` kalır.
 
-Persistent receipt, kaynak koruma ve yerel/D:/GitHub HEAD eşitliği yalnız gerçekten üretilen hash ve yollarla kaydedilir; sertifikasyon veya uzak hizmet başarı iddiası içermez.
+Persistent receipt yalnız exact step/mode, 24 saatlik tazelik, aynı kaynak HEAD'i ve evidence-only unstaged çalışma ağacı doğrulanırsa no-overwrite atomik yayınla oluşturulur. Mevcut receipt eski HEAD'e bağlı olduğundan `STALE_SOURCE_HEAD` sayılır; kaynak koruma veya yerel/D:/GitHub HEAD eşitliği kanıtlanmış değildir. Sertifikasyon veya uzak hizmet başarı iddiası içermez.

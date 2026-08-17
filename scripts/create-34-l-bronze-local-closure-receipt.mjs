@@ -1,67 +1,114 @@
 import { createHash } from 'node:crypto';
-import { readFile, mkdir, writeFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { mkdir, open, readFile } from 'node:fs/promises';
 import { basename, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const root = resolve(process.cwd());
 if (root !== resolve('C:\\PPT\\AYM', '06_KOD', 'app')) throw new Error(`Unsafe source root: ${root}`);
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
-const evidencePaths = [
+const evidencePaths = Object.freeze([
   'artifacts/validation/34-L-bronze-final-local-closure-boundary.json',
   'artifacts/validation/34-L-bronze-final-local-closure-contract.json',
-  'artifacts/validation/34-L-bronze-final-local-closure-runtime.json',
-  ...['34-G', '34-H', '34-I', '34-J', '34-K'].flatMap((step) => {
-    const slugs = {
-      '34-G': 'e2ee-file-sharing-remaining-communication-ux',
-      '34-H': 'communication-audit-archive-integrity',
-      '34-I': 'distributed-core-consensus-tenancy',
-      '34-J': 'distributed-clients-operations-disaster-recovery',
-      '34-K': 'windows-resilience-universal-ux'
-    };
-    return ['boundary', 'contract', 'runtime'].map((mode) => `artifacts/validation/${step}-${slugs[step]}-${mode}.json`);
-  })
-];
+  'artifacts/validation/34-L-bronze-final-local-closure-runtime.json'
+]);
+const expectedModes = new Map(evidencePaths.map((path) => [path,
+  path.endsWith('-boundary.json') ? 'boundary' : path.endsWith('-contract.json') ? 'contract' : 'runtime']));
+const git = (args) => spawnSync('git', ['-c', 'safe.directory=C:/PPT/AYM/06_KOD/app', ...args],
+  { cwd: root, encoding: 'utf8', stdio: 'pipe', maxBuffer: 8 * 1024 * 1024 });
+const headResult = git(['rev-parse', 'HEAD']);
+if (headResult.status !== 0 || !/^[0-9a-f]{40}\s*$/u.test(headResult.stdout ?? '')) {
+  throw new Error('Cannot resolve source base HEAD.');
+}
+const sourceBaseHead = headResult.stdout.trim();
+
 const evidence = [];
 for (const path of evidencePaths) {
   const bytes = await readFile(resolve(root, path));
   const parsed = JSON.parse(bytes.toString('utf8'));
-  if (parsed.status !== 'PASS') throw new Error(`Evidence is not PASS: ${path}`);
-  evidence.push({ path, bytes: bytes.length, sha256: sha256(bytes), status: parsed.status,
-    countsAsRequirementPass: parsed.countsAsRequirementPass === true });
+  const generatedAtMs = Date.parse(parsed.generatedAt);
+  if (parsed.schemaVersion !== 1 || parsed.step !== '34-L' || parsed.decision !== 'DEC-249' ||
+    parsed.mode !== expectedModes.get(path) || parsed.status !== 'PASS' || parsed.requirementsClosed !== false ||
+    parsed.countsAsRequirementPass !== false || parsed.sourceBaseHead !== sourceBaseHead ||
+    !Number.isFinite(generatedAtMs) || Math.abs(Date.now() - generatedAtMs) > 86_400_000) {
+    throw new Error(`Evidence is stale, malformed or not source-bound: ${path}`);
+  }
+  evidence.push(Object.freeze({ path, bytes: bytes.length, sha256: sha256(bytes), mode: parsed.mode,
+    status: parsed.status, sourceBaseHead: parsed.sourceBaseHead, countsAsRequirementPass: false }));
 }
-if (evidence.some((item) => item.countsAsRequirementPass)) throw new Error('Local evidence must not grant requirement acceptance.');
-const head = spawnSync('git', ['-c', 'safe.directory=C:/PPT/AYM/06_KOD/app', 'rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' });
-if (head.status !== 0) throw new Error(`Cannot resolve source base HEAD: ${head.stderr}`);
-const scope = JSON.parse(await readFile(resolve(root, 'config/34-l-bronze-final-drift-deterministic-delivery-closure-scope.json'), 'utf8'));
-const receipt = {
-  schemaVersion: 1,
-  id: `34-L-BRONZE-LOCAL-CLOSURE-${sha256(Buffer.from(JSON.stringify(evidence))).slice(0, 24)}`,
+
+const target = resolve(root, 'artifacts/validation/34-L-bronze-local-closure-receipt.json');
+const checksumTarget = `${target}.sha256`;
+if (existsSync(target) || existsSync(checksumTarget)) {
+  if (!existsSync(target) || !existsSync(checksumTarget)) throw new Error('Existing receipt publication is incomplete.');
+  const bytes = await readFile(target);
+  const parsed = JSON.parse(bytes.toString('utf8'));
+  const checksum = (await readFile(checksumTarget, 'ascii')).trim();
+  const exactEvidence = Array.isArray(parsed.evidence) && parsed.evidence.length === evidence.length &&
+    parsed.evidence.every((item, index) => item?.path === evidence[index].path && item.sha256 === evidence[index].sha256);
+  if (parsed.sourceBaseHead !== sourceBaseHead || parsed.status !== 'PASS_LOCAL_ONLY' ||
+    parsed.finalCommitBindingEstablished !== false || parsed.requirementsClosed !== false ||
+    parsed.countsAsRequirementPass !== false || !exactEvidence ||
+    checksum !== `${sha256(bytes)}  ${basename(target)}`) {
+    throw new Error('Existing local closure receipt is stale; governed rollover is required and overwrite is forbidden.');
+  }
+  console.log(JSON.stringify({ status: parsed.status, path: 'artifacts/validation/34-L-bronze-local-closure-receipt.json',
+    sha256: sha256(bytes), sourceBaseHead, reused: true, requirementsClosed: false }));
+  process.exit(0);
+}
+
+const statusResult = git(['status', '--porcelain=v1', '-z', '--untracked-files=all']);
+if (statusResult.status !== 0) throw new Error('Cannot inspect worktree state before receipt creation.');
+const allowedDirty = new Set(evidencePaths);
+const dirtyEntries = (statusResult.stdout ?? '').split('\0').filter(Boolean);
+for (const entry of dirtyEntries) {
+  const status = entry.slice(0, 2);
+  const path = entry.slice(3).replaceAll('\\', '/');
+  if (!allowedDirty.has(path) || ![' M', '??'].includes(status)) {
+    throw new Error(`Receipt creation requires an evidence-only unstaged worktree; blocked by ${status} ${path}`);
+  }
+}
+
+const scope = JSON.parse(await readFile(resolve(root,
+  'config/34-l-bronze-final-drift-deterministic-delivery-closure-scope.json'), 'utf8'));
+const evidenceSetSha256 = sha256(Buffer.from(JSON.stringify(evidence)));
+const receipt = Object.freeze({
+  schemaVersion: 2,
+  id: `34-L-BRONZE-LOCAL-CLOSURE-${evidenceSetSha256.slice(0, 24)}`,
   step: '34-L',
   decision: 'DEC-249',
   status: 'PASS_LOCAL_ONLY',
-  sourceBaseHead: head.stdout.trim(),
-  finalCommitBinding: 'THIS_RECEIPT_IS_TRACKED_BY_THE_FINAL_DELIVERY_COMMIT',
+  sourceBaseHead,
+  finalCommitBindingEstablished: false,
+  finalCommitBinding: 'NOT_ESTABLISHED_PRECOMMIT_LOCAL_EVIDENCE',
   evidence,
-  evidenceSetSha256: sha256(Buffer.from(JSON.stringify(evidence))),
+  evidenceSetSha256,
   localAutomatedEvidenceComplete: true,
   requirementsClosed: false,
   countsAsRequirementPass: false,
   manualEvidence: scope.manualEvidence,
-  openRequirements: [
-    '33-P independent signed identity evidence and governed acceptance',
-    'real OCR and AI/provider integrations',
-    'production communication transport, relay and media providers',
-    'real multi-node Raft, mTLS, failover and disaster-recovery drills',
-    'real Apple clients and remote collaboration',
-    'real Windows installer lifecycle and 168-hour soak',
-    'independent review and certification evidence'
-  ],
   externalClaimsMade: false,
   generatedAt: new Date().toISOString()
-};
-const target = resolve(root, 'artifacts/validation/34-L-bronze-local-closure-receipt.json');
+});
+const receiptBytes = Buffer.from(`${JSON.stringify(receipt, null, 2)}\n`, 'utf8');
 await mkdir(resolve(root, 'artifacts/validation'), { recursive: true });
-await writeFile(target, `${JSON.stringify(receipt, null, 2)}\n`, 'utf8');
-const bytes = await readFile(target);
-await writeFile(`${target}.sha256`, `${sha256(bytes)}  ${basename(target)}\n`, 'ascii');
-console.log(JSON.stringify({ status: receipt.status, path: 'artifacts/validation/34-L-bronze-local-closure-receipt.json', sha256: sha256(bytes), requirementsClosed: false }));
+const handle = await open(target, 'wx', 0o600);
+try {
+  await handle.writeFile(receiptBytes);
+  await handle.sync();
+} finally {
+  await handle.close();
+}
+const readback = await readFile(target);
+if (!readback.equals(receiptBytes)) throw new Error('Receipt readback mismatch.');
+const checksumBytes = Buffer.from(`${sha256(readback)}  ${basename(target)}\n`, 'ascii');
+const checksumHandle = await open(checksumTarget, 'wx', 0o600);
+try {
+  await checksumHandle.writeFile(checksumBytes);
+  await checksumHandle.sync();
+} finally {
+  await checksumHandle.close();
+}
+if (!(await readFile(checksumTarget)).equals(checksumBytes)) throw new Error('Receipt checksum readback mismatch.');
+console.log(JSON.stringify({ status: receipt.status, path: 'artifacts/validation/34-L-bronze-local-closure-receipt.json',
+  sha256: sha256(readback), sourceBaseHead, reused: false, requirementsClosed: false }));

@@ -24,13 +24,13 @@
     "localPackageBoundaries":{"status":"PASS","checks":51},
     "localPackageContracts":{"status":"PASS","checks":30},
     "localPackageRuntimes":{"status":"PASS","checks":171},
-    "targeted":{"status":"PASS","files":12,"tests":47},
-    "fullRegression":{"status":"PASS","files":286,"tests":1920},
-    "rootTypecheck":"PASS",
-    "productionBuilds":{"status":"PASS","workspaces":18},
+    "targeted":{"status":"PASS","files":12,"tests":50},
+    "fullRegression":{"status":"NOT_RUN_AFTER_34_K_HARDENING","files":286,"tests":1920},
+    "rootTypecheck":"NOT_RUN_AFTER_34_K_HARDENING",
+    "productionBuilds":{"status":"NOT_RUN_AFTER_34_K_HARDENING","workspaces":18},
     "artifactIndex":{"status":"PASS","checks":20981,"files":6635,"documents":3838}
   },
-  "persistentReceiptStatus":"PASS_LOCAL_ONLY",
+  "persistentReceiptStatus":"STALE_SOURCE_HEAD",
   "persistentReceiptPath":"artifacts/validation/34-L-bronze-local-closure-receipt.json",
   "externalPersistentReceiptStatus":"NOT_RUN"
 }

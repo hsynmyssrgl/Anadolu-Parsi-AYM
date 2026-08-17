@@ -54,6 +54,9 @@ const packages={
     markers:[['packages/domain/src/windows-resilience-universal-ux.ts','callerSuppliedSearchAuthorizationAccepted: false'],['packages/domain/src/windows-resilience-universal-ux.ts','operationLedgerRetentionPolicyDecided: false'],['packages/application/src/windows-resilience-universal-ux-use-cases.ts','UniversalUxSearchAuthorityPort'],['packages/application/src/windows-resilience-universal-ux-use-cases.ts','WindowsResilienceEvidenceProviderPort'],['packages/repositories/src/windows-resilience-universal-ux-repository.ts','exact durable policy receipt'],['packages/database/src/family-database-migrations.ts',"createMigrationDefinition(115, 'windows_resilience_universal_ux'"],['packages/database/src/family-database-migrations.ts','34-K operation requires exact owner-bound durable PEP receipt'],['apps/desktop/src/renderer/UniversalUxConsolidationPanel.tsx','yetkilendirilmiş evrensel veri araması değildir']]}
 };
 const selected=packages[step];if(!selected||!['boundary','contract','runtime'].includes(mode))throw new Error('Usage: node verify-remaining-package-local-foundation.mjs <34-G..34-K> <boundary|contract|runtime> [--no-write]');
+const headResult=spawnSync('git',['-c','safe.directory=C:/PPT/AYM/06_KOD/app','rev-parse','HEAD'],{cwd:root,encoding:'utf8'});
+if(headResult.status!==0||!/^[0-9a-f]{40}\s*$/u.test(headResult.stdout??''))throw new Error('Cannot resolve exact source HEAD.');
+const sourceBaseHead=headResult.stdout.trim();
 const read=path=>readFileSync(resolve(root,path),'utf8');const json=path=>JSON.parse(read(path));const checks=[];
 const check=(name,passed,detail='')=>checks.push({name,status:passed?'PASS':'FAIL',detail});
 const baseFiles=[selected.scope,selected.inventory,selected.decisionFile,selected.threat,...selected.markers.map(item=>item[0]),...selected.tests];
@@ -97,7 +100,7 @@ if(mode==='runtime'){
   const projects=['packages/domain/tsconfig.json','packages/repository-contracts/tsconfig.json','packages/application/tsconfig.json','packages/database/tsconfig.json','packages/repositories/tsconfig.json','apps/core-service/tsconfig.json','apps/desktop/tsconfig.electron.json','apps/desktop/tsconfig.renderer.json'];
   for(const project of projects)run(`typecheck ${project}`,[resolve(root,'node_modules/typescript/bin/tsc'),'-p',project,'--noEmit']);
 }
-const failures=checks.filter(item=>item.status==='FAIL');const report={schemaVersion:1,step,decision:selected.decision,mode,
+const failures=checks.filter(item=>item.status==='FAIL');const report={schemaVersion:1,step,decision:selected.decision,mode,sourceBaseHead,
   status:failures.length?'FAIL':'PASS',governanceState:'PLANNED',localImplementationStatus:selected.localStatus??'PARTIAL_LOCAL_FOUNDATION_ACCEPTANCE_INCOMPLETE',
   requirementsClosed:false,countsAsRequirementPass:false,checkCount:checks.length,passed:checks.length-failures.length,failed:failures.length,
   checks,generatedAt:new Date().toISOString()};
