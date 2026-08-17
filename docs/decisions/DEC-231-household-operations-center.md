@@ -16,7 +16,7 @@ Eksik iş akışı kaydı oluşturulamaz: gıda stoğu son kullanma tarihi, öğ
 
 Bu paket dış alışveriş siparişi vermez, otomatik stok taraması yapmaz, ödeme çalıştırmaz, taşıyıcı sistemine bağlanmaz, uzaktan anahtar/erişim kontrol etmez ve evcil hayvan bakım hizmeti teslim etmez. Teslimatta yalnız kullanıcı tarafından girilen sağlayıcı etiketi ve son dört karakterlik görünüm ipucu tutulur; tam takip numarası yoktur. Misafir anahtar veya erişim kodu saklanmaz. Alerjen kesişim filtresi tıbbi veya beslenme tavsiyesi değildir.
 
-Migration 98 üç tabloyu ekler: `household_operation_mutations`, `household_operations_centers`, `household_operation_items`. Kanonik checksum `b5a09712e4f9611e928509441005ede824a9fceb516caa3b3d74cf83dc8f4d60` değeridir. PPK-021 güncel ratchet’i 555 dosya / 873 yüzey / `843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc`; PPK-022 ratchet’i 555 dosya / 392 yüzey / `cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c` değerindedir. Statik manifest runtime yetkisi değildir.
+Migration 98 üç tabloyu ekler: `household_operation_mutations`, `household_operations_centers`, `household_operation_items`. Kanonik checksum `b5a09712e4f9611e928509441005ede824a9fceb516caa3b3d74cf83dc8f4d60` değeridir. PPK-021 güncel ratchet’i 556 dosya / 876 yüzey / `709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0`; PPK-022 ratchet’i 556 dosya / 395 yüzey / `a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e` değerindedir. Statik manifest runtime yetkisi değildir.
 
 ## Fail-honest sınırlar
 

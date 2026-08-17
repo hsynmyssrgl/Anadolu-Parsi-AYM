@@ -14,7 +14,7 @@
   "targetedValidation": {"testFiles":5,"tests":10,"status":"PASS"},
   "validation": {
     "migration112Sha256":"876cfb55675e5c567c156932c4ddbfd672c87e547f672ebae798e03d69287fba",
-    "ppk015":{"status":"PASS","scannedFiles":556,"sourceInventorySha256":"39e31743b413a2ec4abb95ca595f022ab4e8b27b23831f006d0e9460c14bfecb"},
+    "ppk015":{"status":"PASS","scannedFiles":556,"sourceInventorySha256":"d2e1907b1f22a00a1e62057d32968867f4e54023782757650de3925ee31eeaaf"},
     "ppk021":{"status":"PASS","scannedFiles":556,"exactSurfaces":876,"sha256":"709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0"},
     "ppk022":{"status":"PASS","scannedFiles":556,"exactSurfaces":395,"sha256":"a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e"}
   },

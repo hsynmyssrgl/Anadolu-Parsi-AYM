@@ -24,4 +24,4 @@ Yerel yetkili arama ve kural tabanlı öneri üretimi uygulanmıştır. Herhangi
 
 ## Yerel kanıt
 
-Migration 101 `consent_bound_family_ai_assistant` SHA-256 değeri `ef3790fad5f64de7bbd089d09a835dcb302092d64ccef6abb85e2105fbab2b5b` ile doğrulanır. Beş hedef dosyada 26 test; PPK-021 için 555 dosya / 873 exact yüzey ve `843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc`; PPK-022 için 555 dosya / 392 exact yüzey ve `cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c` ratchetleri yerel teknik kanıttır. Bu kanıtlar kabul, sertifikasyon veya harici servis kullanılabilirliği iddiası değildir.
+Migration 101 `consent_bound_family_ai_assistant` SHA-256 değeri `ef3790fad5f64de7bbd089d09a835dcb302092d64ccef6abb85e2105fbab2b5b` ile doğrulanır. Beş hedef dosyada 26 test; PPK-021 için 556 dosya / 876 exact yüzey ve `709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0`; PPK-022 için 556 dosya / 395 exact yüzey ve `a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e` ratchetleri yerel teknik kanıttır. Bu kanıtlar kabul, sertifikasyon veya harici servis kullanılabilirliği iddiası değildir.

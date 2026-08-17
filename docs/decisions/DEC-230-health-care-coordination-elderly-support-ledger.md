@@ -14,7 +14,7 @@ Bakım veren erişimi rol adından türetilmez. Veri sahibi dışındaki erişim
 
 Bu paket tıbbi doğrulama veya dış sağlık kayıt sistemi sorgusu yapmaz. Düşme/acil kayıtları kullanıcı gözlemidir; sensör adapteri, acil servis araması, yardım teslimi ve uzaktan yardım yapılandırılmamıştır. Büyük metin yalnız erişilebilir sunum seçeneğidir; sağlık sonucunun veya yardımın gerçekleştiğini kanıtlamaz.
 
-Migration 97 dört tabloyu ekler: `health_care_mutations`, `health_care_centers`, `health_care_entries`, `health_care_access_grants`. Kanonik checksum `e3d60800e250feb674cd1250449982ac45cd7e700e74a728be7f6500c054d081` değeridir. PPK-021 güncel ratchet’i 555 dosya / 873 yüzey / `843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc`; PPK-022 ratchet’i 555 dosya / 392 yüzey / `cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c` değerindedir. Statik manifest runtime yetkisi değildir.
+Migration 97 dört tabloyu ekler: `health_care_mutations`, `health_care_centers`, `health_care_entries`, `health_care_access_grants`. Kanonik checksum `e3d60800e250feb674cd1250449982ac45cd7e700e74a728be7f6500c054d081` değeridir. PPK-021 güncel ratchet’i 556 dosya / 876 yüzey / `709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0`; PPK-022 ratchet’i 556 dosya / 395 yüzey / `a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e` değerindedir. Statik manifest runtime yetkisi değildir.
 
 ## Fail-honest sınırlar
 
