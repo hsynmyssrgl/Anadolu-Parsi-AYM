@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 2,
+  "id": "34-L-BRONZE-LOCAL-CLOSURE-ae7b7137e42c278eccdcc4d5",
+  "step": "34-L",
+  "decision": "DEC-249",
+  "status": "PASS_LOCAL_ONLY",
+  "sourceBaseHead": "3cc913c826dedb829e757420cce50f35c3172c3d",
+  "finalCommitBindingEstablished": false,
+  "finalCommitBinding": "NOT_ESTABLISHED_PRECOMMIT_LOCAL_EVIDENCE",
+  "evidence": [
+    {
+      "path": "artifacts/validation/34-L-bronze-final-local-closure-boundary.json",
+      "bytes": 1658,
+      "sha256": "d78f7148ccac899335448db90384731802c4dcf7fa4b832b22cd2c3270578377",
+      "mode": "boundary",
+      "status": "PASS",
+      "sourceBaseHead": "3cc913c826dedb829e757420cce50f35c3172c3d",
+      "countsAsRequirementPass": false
+    },
+    {
+      "path": "artifacts/validation/34-L-bronze-final-local-closure-contract.json",
+      "bytes": 2450,
+      "sha256": "973473fa09f3608291a2158af9607027799421573b8f53e6c3d1278594755df1",
+      "mode": "contract",
+      "status": "PASS",
+      "sourceBaseHead": "3cc913c826dedb829e757420cce50f35c3172c3d",
+      "countsAsRequirementPass": false
+    },
+    {
+      "path": "artifacts/validation/34-L-bronze-final-local-closure-runtime.json",
+      "bytes": 27923,
+      "sha256": "c3c3891742e076f2cb10d1160ba9d715d914c4c3d08b8ed70c2c1ed1ec29df36",
+      "mode": "runtime",
+      "status": "PASS",
+      "sourceBaseHead": "3cc913c826dedb829e757420cce50f35c3172c3d",
+      "countsAsRequirementPass": false
+    }
+  ],
+  "evidenceSetSha256": "ae7b7137e42c278eccdcc4d51b87a242acbd6797f1a332911b8ed6b5c7e2cf02",
+  "localAutomatedEvidenceComplete": true,
+  "requirementsClosed": false,
+  "countsAsRequirementPass": false,
+  "manualEvidence": {
+    "realWindowsLifecycle": "NOT_RUN",
+    "sevenDaySoak": "NOT_RUN",
+    "realMultiNodeConsensus": "NOT_RUN",
+    "realAppleClients": "NOT_RUN",
+    "realRemoteProviders": "NOT_RUN",
+    "certification": "NOT_RUN"
+  },
+  "externalClaimsMade": false,
+  "generatedAt": "2026-08-18T03:04:15.103Z"
+}
