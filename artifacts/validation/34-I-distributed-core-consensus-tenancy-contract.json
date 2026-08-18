@@ -3,6 +3,7 @@
   "step": "34-I",
   "decision": "DEC-246",
   "mode": "contract",
+  "sourceBaseHead": "e4cf36c020e9c0f695fa5c1b1e695651615bb23f",
   "status": "PASS",
   "governanceState": "PLANNED",
   "localImplementationStatus": "LOCAL_HARDENED_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE",
@@ -28,7 +29,7 @@
       "detail": ""
     },
     {
-      "name": "manual evidence retains NOT_RUN facts",
+      "name": "manual evidence records only exact local observations and retains external NOT_RUN facts",
       "status": "PASS",
       "detail": ""
     },
@@ -43,5 +44,5 @@
       "detail": ""
     }
   ],
-  "generatedAt": "2026-08-17T05:43:46.588Z"
+  "generatedAt": "2026-08-18T02:46:19.646Z"
 }

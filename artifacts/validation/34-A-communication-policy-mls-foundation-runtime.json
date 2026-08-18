@@ -11,8 +11,8 @@
   "ppk015": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 555,
-    "sourceInventorySha256": "dd1bb1f82808dd42e3182773b2ea92b759cef4c5473543ca2d804f30e6079e59",
+    "scannedFiles": 563,
+    "sourceInventorySha256": "2a8d8006b6bd5c00d79f1bf69eb1f5a553ece32dd2dd3c96d40454bfcff29f7f",
     "selfTestAssertions": 7,
     "authorizedExternalEgressAdapters": 2,
     "authorizedEgressPurposeCount": 3,
@@ -24,13 +24,13 @@
   "ppk021": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 555,
-    "privilegedSurfaces": 873,
-    "exactAllowlistEntries": 873,
-    "exactAllowlistSha256": "843cb93dce2402bbaeb3d44b5538b88a3a55f4832436ad23aaf61937bc8c99dc",
+    "scannedFiles": 563,
+    "privilegedSurfaces": 886,
+    "exactAllowlistEntries": 886,
+    "exactAllowlistSha256": "58a90febf9382776c2b1472e6ffd6a645c9a24a4cd69e499a8afc1fff2e72b30",
     "surfaceCounts": {
       "CRYPTO_GLOBAL": 21,
-      "CRYPTO_IMPORT": 234,
+      "CRYPTO_IMPORT": 246,
       "DATABASE_IMPORT": 21,
       "NETWORK_IMPORT": 11,
       "REPOSITORY_IMPORT": 70,
@@ -38,7 +38,7 @@
       "SQL_CALL": 79,
       "SQL_CONSTRUCTOR": 2,
       "SQL_IMPORT": 2,
-      "USE_CASE_COMPOSITION": 431
+      "USE_CASE_COMPOSITION": 432
     },
     "maliciousSelfTestAssertions": 17,
     "benignSelfTestAssertions": 4,
@@ -48,20 +48,22 @@
   "ppk022": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 555,
-    "capabilitySurfaces": 392,
-    "exactManifestSurfaces": 392,
-    "exactManifestSha256": "cb879c739cb8ef3a2e92d1f0e451cd21ba7e9d4b0fcd519f343cddd725c9745c",
+    "scannedFiles": 563,
+    "capabilitySurfaces": 422,
+    "exactManifestSurfaces": 422,
+    "exactManifestSha256": "dc0234d84a50ff1872f9cde4fb7ab286446b236a69019034055fa938dbb3be1e",
     "surfaceCounts": {
+      "CAMERA_API": 1,
       "FILE_DIALOG": 2,
-      "FILE_IMPORT": 335,
-      "NETWORK_API": 2,
+      "FILE_IMPORT": 362,
+      "MICROPHONE_API": 1,
+      "NETWORK_API": 3,
       "NETWORK_IMPORT": 13,
       "OCR_API": 5,
       "OCR_IMPORT": 35
     },
     "pinnedBootstrapSurfaces": 26,
-    "maliciousSelfTestAssertions": 33,
+    "maliciousSelfTestAssertions": 35,
     "benignSelfTestAssertions": 5,
     "canonicalApplications": 14,
     "protectedCapabilityFamilies": 7,
@@ -116,5 +118,5 @@
       "status": "PASS"
     }
   ],
-  "generatedAt": "2026-08-16T13:33:28.593Z"
+  "generatedAt": "2026-08-18T02:19:55.198Z"
 }

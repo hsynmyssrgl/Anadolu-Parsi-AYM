@@ -3,13 +3,14 @@
   "step": "34-K",
   "decision": "DEC-248",
   "mode": "boundary",
+  "sourceBaseHead": "e4cf36c020e9c0f695fa5c1b1e695651615bb23f",
   "status": "PASS",
   "governanceState": "PLANNED",
   "localImplementationStatus": "LOCAL_HARDENED_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE",
   "requirementsClosed": false,
   "countsAsRequirementPass": false,
-  "checkCount": 10,
-  "passed": 10,
+  "checkCount": 11,
+  "passed": 11,
   "failed": 0,
   "checks": [
     {
@@ -19,6 +20,11 @@
     },
     {
       "name": "packages/domain/src/windows-resilience-universal-ux.ts pins callerSuppliedSearchAuthorizationAccepted: false",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "packages/domain/src/windows-resilience-universal-ux.ts pins productionUniversalSearchAuthorityComposed: true",
       "status": "PASS",
       "detail": ""
     },
@@ -53,7 +59,7 @@
       "detail": ""
     },
     {
-      "name": "apps/desktop/src/renderer/UniversalUxConsolidationPanel.tsx pins yetkilendirilmiş evrensel veri araması değildir",
+      "name": "apps/desktop/src/renderer/UniversalUxConsolidationPanel.tsx pins searchUnifiedAuthorizedRecords({query:normalized,limit:25})",
       "status": "PASS",
       "detail": ""
     },
@@ -63,5 +69,5 @@
       "detail": ""
     }
   ],
-  "generatedAt": "2026-08-16T06:45:41.743Z"
+  "generatedAt": "2026-08-18T02:47:16.551Z"
 }

@@ -3,6 +3,7 @@
   "step": "34-J",
   "decision": "DEC-247",
   "mode": "boundary",
+  "sourceBaseHead": "e4cf36c020e9c0f695fa5c1b1e695651615bb23f",
   "status": "PASS",
   "governanceState": "PLANNED",
   "localImplementationStatus": "LOCAL_HARDENED_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE",
@@ -63,5 +64,5 @@
       "detail": ""
     }
   ],
-  "generatedAt": "2026-08-17T05:52:01.994Z"
+  "generatedAt": "2026-08-18T02:46:45.109Z"
 }

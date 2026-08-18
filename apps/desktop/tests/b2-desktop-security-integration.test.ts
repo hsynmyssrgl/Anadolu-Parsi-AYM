@@ -72,6 +72,7 @@ describe('B2-03/B2-04 desktop integration', () => {
     const afterPack=readFileSync('apps/desktop/scripts/apply-electron-fuses.mjs','utf8');
     const asarRepair=readFileSync('apps/desktop/scripts/repair-electron-asar-integrity.mjs','utf8');
     const builderRunner=readFileSync('apps/desktop/scripts/run-electron-builder.mjs','utf8');
+    const windowsSecurityProbe=readFileSync('apps/desktop/src/main/windows-security-evidence-probe.ts','utf8');
     expect(main).toContain("protocol.registerSchemesAsPrivileged");
     expect(main).toContain('protocol.handle(PRIMARY_RENDERER_SCHEME');
     expect(main).not.toContain('window.loadFile(');
@@ -91,5 +92,8 @@ describe('B2-03/B2-04 desktop integration', () => {
     expect(asarRepair).toContain('Electron executable ASAR integrity readback failed.');
     expect(builderRunner).toContain("['--win', 'dir', '--config.forceCodeSigning=false']");
     expect(builderRunner).toContain("['--win', 'nsis']");
+    expect(windowsSecurityProbe).toContain("import { assertWindowsEfsEncrypted } from './windows-efs-protection.js';");
+    expect(windowsSecurityProbe).toContain("assertWindowsEfsEncrypted(dirname(snapshotPath), 'EFS staging directory')");
+    expect(windowsSecurityProbe).not.toContain("-Command', script, path");
   });
 });

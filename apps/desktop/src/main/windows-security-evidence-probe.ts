@@ -1,5 +1,4 @@
 import { createHash } from 'node:crypto';
-import { spawnSync } from 'node:child_process';
 import {
   existsSync,
   readFileSync,
@@ -10,6 +9,7 @@ import { dirname, join } from 'node:path';
 import { WINDOWS_DPAPI_PROTECTION_ID, type DeviceSecretProtector } from './device-secret-protector.js';
 import type { ProtectedSideArtifactStore } from './protected-side-artifact-store.js';
 import { VolatileSqliteSession } from './volatile-sqlite-session.js';
+import { assertWindowsEfsEncrypted } from './windows-efs-protection.js';
 
 export interface WindowsSecurityEvidenceProbeReport {
   readonly schemaVersion: 1;
@@ -37,25 +37,6 @@ export interface WindowsSecurityEvidenceProbeReport {
   readonly probeMarkerSha256: string;
   readonly generatedAt: string;
 }
-
-const assertWindowsEncryptedAttribute = (path: string, label: string): void => {
-  const script = [
-    '$item = Get-Item -LiteralPath $args[0] -Force;',
-    'if (($item.Attributes -band [IO.FileAttributes]::Encrypted) -eq 0) {',
-    `  Write-Error '${label} is not EFS encrypted.';`,
-    '  exit 7;',
-    '}',
-    'exit 0;'
-  ].join(' ');
-  const result = spawnSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', script, path], {
-    encoding: 'utf8',
-    windowsHide: true,
-    timeout: 15_000
-  });
-  if (result.error || result.status !== 0) {
-    throw new Error(`${label} EFS attribute verification failed: ${result.error?.message ?? result.stderr ?? `exit=${String(result.status)}`}`);
-  }
-};
 
 const listFilesRecursive = (root: string): string[] => {
   if (!existsSync(root)) return [];
@@ -138,8 +119,8 @@ export const runWindowsSecurityEvidenceProbe = (input: {
     if (roundTrip?.value !== marker) throw new Error('Memory-only SQLite probe row round-trip failed.');
 
     session.withSnapshot((snapshotPath) => {
-      assertWindowsEncryptedAttribute(dirname(snapshotPath), 'EFS staging directory');
-      assertWindowsEncryptedAttribute(snapshotPath, 'EFS SQLite snapshot');
+      assertWindowsEfsEncrypted(dirname(snapshotPath), 'EFS staging directory');
+      assertWindowsEfsEncrypted(snapshotPath, 'EFS SQLite snapshot');
       const bytes = readFileSync(snapshotPath);
       if (!bytes.subarray(0, 16).toString('utf8').startsWith('SQLite format 3')) {
         throw new Error('EFS snapshot is not a valid SQLite image for the authenticated Windows process.');
