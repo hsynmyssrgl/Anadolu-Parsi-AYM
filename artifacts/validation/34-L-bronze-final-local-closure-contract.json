@@ -3,7 +3,7 @@
   "step": "34-L",
   "decision": "DEC-249",
   "mode": "contract",
-  "sourceBaseHead": "826bd8f55e1d614148b12550e21c01252a9543ee",
+  "sourceBaseHead": "3cc913c826dedb829e757420cce50f35c3172c3d",
   "status": "PASS",
   "governanceState": "PLANNED_FINAL",
   "localImplementationStatus": "LOCAL_CLOSURE_AUTOMATION_COMPOSED_ACCEPTANCE_BLOCKED",
@@ -85,5 +85,5 @@
       "output": "34-K contract: PASS (6/6; requirement PASS=false; write=false).\n"
     }
   ],
-  "generatedAt": "2026-08-18T01:36:28.329Z"
+  "generatedAt": "2026-08-18T03:03:09.849Z"
 }
