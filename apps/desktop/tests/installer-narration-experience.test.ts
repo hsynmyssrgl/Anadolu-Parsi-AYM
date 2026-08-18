@@ -37,6 +37,8 @@ describe('installer animation, narration and Silver help experience', () => {
     expect(uninstallerSource).toContain(
       'ExecWait \'"$INSTDIR\\Anadolu Parsı Aile Yaşam Merkezi.exe" --uninstall-backup-assistant\' $0'
     );
+    expect(uninstallerSource).toMatch(/MessageBox MB_YESNOCANCEL\|MB_ICONQUESTION [^\r\n]+ IDYES aym_uninstall_backup IDNO aym_uninstall_delete\r?\n\s+Goto aym_uninstall_cancel/u);
+    expect(uninstallerSource).not.toContain('IDCANCEL aym_uninstall_cancel');
     expect(uninstallerSource.match(/\bExec(?:Wait|Shell)?\b/gu)).toEqual(['ExecWait']);
     expect(uninstallerSource).not.toMatch(/https?:|nsExec|inetc|download/iu);
     const artifactTemplate=packageJson.build.win?.artifactName??packageJson.build.artifactName??'';

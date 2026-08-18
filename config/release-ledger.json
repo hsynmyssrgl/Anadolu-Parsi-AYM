@@ -4,15 +4,16 @@
   "counterPolicy": "MONTHLY_RESET_CONTINUE_FROM_HISTORICAL_COUNT",
   "current": {
     "channel": "Bronze",
-    "date": "2026-08-04",
-    "displayDate": "04.08.2026",
-    "monthlySequence": 29,
-    "version": "04.08.2026.29",
-    "visibleRelease": "Bronze 04.08.2026.29",
-    "packageVersion": "4.8.2026-29",
-    "releaseId": "bronze-2026-08-04-r29",
+    "date": "2026-08-18",
+    "displayDate": "18.08.2026",
+    "monthlySequence": 30,
+    "version": "18.08.2026.30",
+    "visibleRelease": "Bronze 18.08.2026.30",
+    "packageVersion": "18.8.2026-30",
+    "releaseId": "bronze-2026-08-18-r30",
     "status": "IN_PROGRESS",
-    "parentRelease": "Bronze 04.08.2026.28",
+    "parentRelease": "Bronze 04.08.2026.29",
+    "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı.",
     "parentSourceSha256": "d65e908bf8157d2eff111dcdbbae2762cb48a527021b97c3df26f463e993dea4"
   },
   "august2026HistoricalCountBeforeCurrent": 26,
@@ -55,6 +56,16 @@
       "releaseId": "bronze-2026-08-04-r29",
       "status": "IN_PROGRESS",
       "summary": "Universal fail-closed rule enforcement and PR-171 checkpoint execution lock."
+    },
+    {
+      "channel": "Bronze",
+      "date": "2026-08-18",
+      "monthlySequence": 30,
+      "version": "18.08.2026.30",
+      "packageVersion": "18.8.2026-30",
+      "releaseId": "bronze-2026-08-18-r30",
+      "status": "IN_PROGRESS",
+      "summary": "Resmî derleme numarası yalnız paketleme yetkisi tarafından ayrıldı."
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "name": "@ppt/database",
-  "version": "4.8.2026-29",
+  "version": "18.8.2026-30",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -9,8 +9,8 @@
     ".": "./dist/index.js"
   },
   "dependencies": {
-    "@ppt/contracts": "4.8.2026-29",
-    "@ppt/core": "4.8.2026-29"
+    "@ppt/contracts": "18.8.2026-30",
+    "@ppt/core": "18.8.2026-30"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

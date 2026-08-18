@@ -1,21 +1,21 @@
 {
   "name": "@ppt/core-service",
-  "version": "4.8.2026-29",
+  "version": "18.8.2026-30",
   "private": true,
   "type": "module",
   "main": "dist/main.js",
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@ppt/core": "4.8.2026-29",
-    "@ppt/core-service-contracts": "4.8.2026-29",
-    "@ppt/domain": "4.8.2026-29",
-    "@ppt/logging": "4.8.2026-29",
-    "@ppt/platform-policy": "4.8.2026-29",
-    "@ppt/security": "4.8.2026-29"
+    "@ppt/core": "18.8.2026-30",
+    "@ppt/core-service-contracts": "18.8.2026-30",
+    "@ppt/domain": "18.8.2026-30",
+    "@ppt/logging": "18.8.2026-30",
+    "@ppt/platform-policy": "18.8.2026-30",
+    "@ppt/security": "18.8.2026-30"
   },
   "devDependencies": {
-    "@ppt/core-service-client": "4.8.2026-29",
-    "@ppt/database": "4.8.2026-29"
+    "@ppt/core-service-client": "18.8.2026-30",
+    "@ppt/database": "18.8.2026-30"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

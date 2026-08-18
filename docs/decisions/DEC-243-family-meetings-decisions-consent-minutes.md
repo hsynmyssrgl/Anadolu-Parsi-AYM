@@ -27,7 +27,7 @@ Bu nedenle `countsAsRequirementPass=false`; gerçek katılımcı, kayıt rızas�
 
 - Migration 110: `8bcc5777aa80794122742bcfd73be036234488f5861adbcd34956c56e6d0d6ac`
 - Hedefli matris: 6 dosya / 32 test
-- PPK-015: 563 dosya / `2a8d8006b6bd5c00d79f1bf69eb1f5a553ece32dd2dd3c96d40454bfcff29f7f` / sıfır bulgu
+- PPK-015: 563 dosya / `f6fb78533a4776d3286a98e8caa3342549ad9f7c7672a1a1061cd483f2820c1b` / sıfır bulgu
 - PPK-019: 563 dosya / sıfır bulgu
 - PPK-021: 563 dosya / 886 yüzey / `58a90febf9382776c2b1472e6ffd6a645c9a24a4cd69e499a8afc1fff2e72b30`
 - PPK-022: 563 dosya / 422 yüzey / `dc0234d84a50ff1872f9cde4fb7ab286446b236a69019034055fa938dbb3be1e`

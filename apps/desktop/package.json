@@ -1,25 +1,25 @@
 {
   "name": "@ppt/desktop",
-  "version": "4.8.2026-29",
+  "version": "18.8.2026-30",
   "private": true,
   "type": "module",
   "main": "dist/main/main.mjs",
   "dependencies": {
-    "@ppt/application": "4.8.2026-29",
-    "@ppt/config": "4.8.2026-29",
-    "@ppt/contracts": "4.8.2026-29",
-    "@ppt/core": "4.8.2026-29",
-    "@ppt/core-service-client": "4.8.2026-29",
-    "@ppt/core-service-contracts": "4.8.2026-29",
-    "@ppt/database": "4.8.2026-29",
-    "@ppt/domain": "4.8.2026-29",
-    "@ppt/events": "4.8.2026-29",
-    "@ppt/infrastructure": "4.8.2026-29",
-    "@ppt/logging": "4.8.2026-29",
-    "@ppt/platform-policy": "4.8.2026-29",
-    "@ppt/repositories": "4.8.2026-29",
-    "@ppt/repository-contracts": "4.8.2026-29",
-    "@ppt/security": "4.8.2026-29",
+    "@ppt/application": "18.8.2026-30",
+    "@ppt/config": "18.8.2026-30",
+    "@ppt/contracts": "18.8.2026-30",
+    "@ppt/core": "18.8.2026-30",
+    "@ppt/core-service-client": "18.8.2026-30",
+    "@ppt/core-service-contracts": "18.8.2026-30",
+    "@ppt/database": "18.8.2026-30",
+    "@ppt/domain": "18.8.2026-30",
+    "@ppt/events": "18.8.2026-30",
+    "@ppt/infrastructure": "18.8.2026-30",
+    "@ppt/logging": "18.8.2026-30",
+    "@ppt/platform-policy": "18.8.2026-30",
+    "@ppt/repositories": "18.8.2026-30",
+    "@ppt/repository-contracts": "18.8.2026-30",
+    "@ppt/security": "18.8.2026-30",
     "react": "19.2.7",
     "react-dom": "19.2.7"
   },
@@ -64,7 +64,7 @@
       "target": [
         "nsis"
       ],
-      "artifactName": "Anadolu-Parsi-Aile-Yasam-Merkezi-Bronze-04.08.2026.29-${arch}-Kurulum.${ext}",
+      "artifactName": "Anadolu-Parsi-Aile-Yasam-Merkezi-Bronze-18.08.2026.30-${arch}-Kurulum.${ext}",
       "icon": "build/icon.ico",
       "requestedExecutionLevel": "asInvoker"
     },
@@ -84,7 +84,7 @@
       "uninstallerIcon": "build/icon.ico"
     },
     "copyright": "Copyright © 2026 Panthera pardus tulliana",
-    "artifactName": "Anadolu-Parsi-Aile-Yasam-Merkezi-Bronze-04.08.2026.29-${arch}-Kurulum.${ext}"
+    "artifactName": "Anadolu-Parsi-Aile-Yasam-Merkezi-Bronze-18.08.2026.30-${arch}-Kurulum.${ext}"
   },
   "description": "Anadolu Parsı yerel öncelikli aile yaşam, güvenlik ve dijital hafıza merkezi.",
   "author": {

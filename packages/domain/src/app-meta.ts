@@ -1,11 +1,11 @@
 export const APP_META = Object.freeze({
   name: 'Anadolu Parsı Aile Yaşam Merkezi',
   edition: 'Bronze',
-  version: '04.08.2026.29',
-  packageVersion: '4.8.2026-29',
-  releaseLabel: 'Bronze 04.08.2026.29',
-  releaseId: 'bronze-2026-08-04-r29',
-  monthlySequence: 29,
+  version: '18.08.2026.30',
+  packageVersion: '18.8.2026-30',
+  releaseLabel: 'Bronze 18.08.2026.30',
+  releaseId: 'bronze-2026-08-18-r30',
+  monthlySequence: 30,
   stage: 'Bronze · Aktif Geliştirme'
 });
 export type AppMeta = typeof APP_META;

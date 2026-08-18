@@ -173,7 +173,8 @@ FunctionEnd
 !macroend
 
 !macro customUnInstall
-  MessageBox MB_YESNOCANCEL|MB_ICONQUESTION "Kişisel verileriniz için bir seçim yapın.$\r$\n$\r$\nEvet: Şifreli verileri Belgeler'e ve kurulu eşitleme klasörlerine yedekle, ardından bu bilgisayardaki uygulama verilerini sil.$\r$\n$\r$\nHayır: Yedek oluşturmadan bu bilgisayardaki uygulama verilerini tamamen sil.$\r$\n$\r$\nİptal: Kaldırmayı durdur." IDYES aym_uninstall_backup IDNO aym_uninstall_delete IDCANCEL aym_uninstall_cancel
+  MessageBox MB_YESNOCANCEL|MB_ICONQUESTION "Kişisel verileriniz için bir seçim yapın.$\r$\n$\r$\nEvet: Şifreli verileri Belgeler'e ve kurulu eşitleme klasörlerine yedekle, ardından bu bilgisayardaki uygulama verilerini sil.$\r$\n$\r$\nHayır: Yedek oluşturmadan bu bilgisayardaki uygulama verilerini tamamen sil.$\r$\n$\r$\nİptal: Kaldırmayı durdur." IDYES aym_uninstall_backup IDNO aym_uninstall_delete
+  Goto aym_uninstall_cancel
 aym_uninstall_backup:
   ExecWait '"$INSTDIR\Anadolu Parsı Aile Yaşam Merkezi.exe" --uninstall-backup-assistant' $0
   ${If} $0 != 0

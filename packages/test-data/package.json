@@ -1,6 +1,6 @@
 {
   "name": "@ppt/test-data",
-  "version": "4.8.2026-29",
+  "version": "18.8.2026-30",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -9,7 +9,7 @@
     ".": "./dist/index.js"
   },
   "dependencies": {
-    "@ppt/domain": "4.8.2026-29"
+    "@ppt/domain": "18.8.2026-30"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
