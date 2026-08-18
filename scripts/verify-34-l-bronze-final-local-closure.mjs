@@ -72,8 +72,8 @@ if (mode === 'contract' || mode === 'runtime') {
     && scope.validation?.fullRegression?.status === 'PASS' && scope.validation?.fullRegression?.files === 301
     && scope.validation?.fullRegression?.tests === 2018 && scope.validation?.rootTypecheck === 'PASS'
     && scope.validation?.productionBuilds?.status === 'PASS' && scope.validation?.productionBuilds?.workspaces === 18
-    && scope.validation?.artifactIndex?.checks === 19316 && scope.validation?.artifactIndex?.files === 5968
-    && scope.validation?.artifactIndex?.documents === 3670 && inventory.localEvidence?.fullRegressionStatus === 'PASS'
+    && scope.validation?.artifactIndex?.checks === 19320 && scope.validation?.artifactIndex?.files === 5969
+    && scope.validation?.artifactIndex?.documents === 3671 && inventory.localEvidence?.fullRegressionStatus === 'PASS'
     && inventory.localEvidence?.fullRegressionFiles === 301 && inventory.localEvidence?.fullRegressionTests === 2018
     && audit.includes('301/301') && audit.includes('2018/2018'));
   check('versioned local receipt rollover is supported while manual and external evidence remain NOT_RUN', Object.values(scope.manualEvidence ?? {}).every((value) => value === 'NOT_RUN')

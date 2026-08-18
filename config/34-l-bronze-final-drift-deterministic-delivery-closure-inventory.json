@@ -2,7 +2,7 @@
   "schemaVersion":1,"step":"34-L","decision":"DEC-249","status":"PLANNED_FINAL","governanceState":"LOCAL_CLOSURE_AUDIT_STARTED",
   "implementationFiles":["scripts/verify-34-l-bronze-final-local-closure.mjs","docs/audit/34-L_BRONZE_FINAL_LOCAL_CLOSURE_AUDIT.md","docs/decisions/DEC-249-bronze-final-drift-deterministic-delivery-closure.md","config/remaining-scope-package-roadmap.json","config/accepted-scope-registry.json"],
   "requiredGeneratedEvidence":["artifacts/validation/34-L-bronze-final-local-closure-boundary.json","artifacts/validation/34-L-bronze-final-local-closure-contract.json","artifacts/validation/34-L-bronze-final-local-closure-runtime.json","artifacts/validation/34-L-bronze-local-closure-receipts/<source-head>-<evidence-digest>.json"],
-  "localEvidence":{"boundaries":52,"contracts":30,"runtimes":172,"targetedFiles":12,"targetedTests":50,"fullRegressionStatus":"PASS","fullRegressionFiles":301,"fullRegressionTests":2018,"rootTypecheck":"PASS","productionBuildStatus":"PASS","productionBuilds":18,"artifactIndexChecks":19316,"artifactIndexFiles":5968,"artifactIndexDocuments":3670},
+  "localEvidence":{"boundaries":52,"contracts":30,"runtimes":172,"targetedFiles":12,"targetedTests":50,"fullRegressionStatus":"PASS","fullRegressionFiles":301,"fullRegressionTests":2018,"rootTypecheck":"PASS","productionBuildStatus":"PASS","productionBuilds":18,"artifactIndexChecks":19320,"artifactIndexFiles":5969,"artifactIndexDocuments":3671},
   "localPersistentReceiptStatus":"VERSIONED_LOCAL_RECEIPT_SUPPORTED",
   "externalPersistentReceiptStatus":"NOT_RUN",
   "countsAsRequirementPass":false
