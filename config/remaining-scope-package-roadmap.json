@@ -186,7 +186,7 @@
       "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
       "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
       "countsAsRequirementPass": false,
-      "openReason": "Varsayılan malware/PDF sağlayıcısı, düşük-yetkili worker izolasyonu, çalışan işi eşzamanlı iptal, kaynak silme crash auto-resume, zamanlanmış orphan/retention sweep ve gerçek Windows UAT tamamlanmadı.",
+      "openReason": "Varsayılan gerçek malware/PDF sağlayıcısı, doğrulanmış düşük-yetkili worker ve işletim sistemi ağ izolasyonu, gerçek Windows/Apple cihaz kabulü, denetlenmiş offline fallback ile haricî ve insan UAT kanıtları tamamlanmadı. Yerel eşzamanlı iptal, kaynak silme crash auto-resume, retention purge ve owner-bound zamanlanmış orphan sweep testleri PASS durumundadır.",
       "missingEvidence": [
         "realWindowsLocalOcr",
         "realAppleVisionOcr",
@@ -1154,7 +1154,7 @@
     "secondStep": "33-N",
     "finalStep": "34-L"
   },
-  "updatedAt": "2026-08-18T03:30:00+03:00",
+  "updatedAt": "2026-08-18T04:25:08+03:00",
   "completedRequirementCount": 25,
   "remainingRequirementCount": 249,
   "documentationStatusRule": {

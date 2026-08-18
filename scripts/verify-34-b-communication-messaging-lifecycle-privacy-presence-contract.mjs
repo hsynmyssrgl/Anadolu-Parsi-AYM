@@ -61,9 +61,9 @@ const checks=[
     'İçeriği açıkça göster','Aynı işlem kimliğiyle yeniden deneyebilirsiniz.'])],
   ['validation ratchet and manual no-claim state are exact',scope.validation?.targetedTestFileRatchet===5
     &&scope.validation?.targetedTestRatchet===29&&scope.validation?.migrationVersion===106
-    &&scope.validation?.ppk015?.status==='PASS'&&scope.validation?.ppk015?.files===556
-    &&scope.validation?.ppk021?.status==='PASS'&&scope.validation?.ppk021?.surfaces===876&&scope.validation?.ppk021?.runtime===20
-    &&scope.validation?.ppk022?.status==='PASS'&&scope.validation?.ppk022?.surfaces===395&&scope.validation?.ppk022?.runtime===24
+    &&scope.validation?.ppk015?.status==='PASS'&&scope.validation?.ppk015?.files===563
+    &&scope.validation?.ppk021?.status==='PASS'&&scope.validation?.ppk021?.surfaces===886&&scope.validation?.ppk021?.runtime===20
+    &&scope.validation?.ppk022?.status==='PASS'&&scope.validation?.ppk022?.surfaces===422&&scope.validation?.ppk022?.runtime===24
     &&Object.entries(scope.manualEvidence??{}).filter(([key])=>key!=='certificationClaimed').every(([,value])=>value==='NOT_RUN')
     &&scope.manualEvidence?.certificationClaimed===false&&scope.persistentReceiptStatus==='NOT_RUN'],
   ['governance cannot count as requirement pass',scope.status==='PLANNED'&&inventory.status==='PLANNED'

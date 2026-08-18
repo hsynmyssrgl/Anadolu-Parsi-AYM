@@ -86,12 +86,12 @@ const definitions = [
     && migration96?.checksum === 'c00b2a72bf49d2200c85b2045a8ab7a01ef7a41882b2b14eb5a1f4715bde1eb2'],
   ['data store smoke passes current schema checks', smoke.status === 0 && smokeReport?.status === 'passed'
     && smokeReport?.checks === 14],
-  ['PPK-021 raw gate passes exact 556/876 ratchet', ppk021.status === 0 && ppk021Report?.status === 'PASS'
-    && ppk021Report?.scannedFiles === 556 && ppk021Report?.privilegedSurfaces === 876
-    && ppk021Report?.exactAllowlistSha256 === '709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0'],
-  ['PPK-022 raw gate passes exact 556/395 ratchet', ppk022.status === 0 && ppk022Report?.status === 'PASS'
-    && ppk022Report?.scannedFiles === 556 && ppk022Report?.capabilitySurfaces === 395
-    && ppk022Report?.exactManifestSha256 === 'a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e'],
+  ['PPK-021 raw gate passes exact 563/886 ratchet', ppk021.status === 0 && ppk021Report?.status === 'PASS'
+    && ppk021Report?.scannedFiles === 563 && ppk021Report?.privilegedSurfaces === 886
+    && ppk021Report?.exactAllowlistSha256 === '58a90febf9382776c2b1472e6ffd6a645c9a24a4cd69e499a8afc1fff2e72b30'],
+  ['PPK-022 raw gate passes exact 563/422 ratchet', ppk022.status === 0 && ppk022Report?.status === 'PASS'
+    && ppk022Report?.scannedFiles === 563 && ppk022Report?.capabilitySurfaces === 422
+    && ppk022Report?.exactManifestSha256 === 'dc0234d84a50ff1872f9cde4fb7ab286446b236a69019034055fa938dbb3be1e'],
   ['domain application contract repository and database typechecks pass',
     ['domain', 'application', 'repositoryContracts', 'repositories', 'database'].every((key) => typechecks[key].status === 0)],
   ['desktop Electron typecheck passes', typechecks.desktopElectron.status === 0],

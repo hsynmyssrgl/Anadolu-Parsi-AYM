@@ -13,7 +13,7 @@ for (const name of configFiles.filter((value) => /^(33-[m-z]|34-[a-l])-.*-scope\
 
 const openReasons = {
   '33-P': 'Gerçek passkey/authenticator, canlı ve güvenilen federated kimlik sağlayıcısı, cross-device doğrulama, insan UAT ile gizlilik/kimlik incelemeleri tamamlanmadı.',
-  '33-Q': 'Varsayılan malware/PDF sağlayıcısı, düşük-yetkili worker izolasyonu, çalışan işi eşzamanlı iptal, kaynak silme crash auto-resume, zamanlanmış orphan/retention sweep ve gerçek Windows UAT tamamlanmadı.',
+  '33-Q': 'Varsayılan gerçek malware/PDF sağlayıcısı, doğrulanmış düşük-yetkili worker ve işletim sistemi ağ izolasyonu, gerçek Windows/Apple cihaz kabulü, denetlenmiş offline fallback ile haricî ve insan UAT kanıtları tamamlanmadı. Yerel eşzamanlı iptal, kaynak silme crash auto-resume, retention purge ve owner-bound zamanlanmış orphan sweep testleri PASS durumundadır.',
   '33-R': 'Gerçek büyük arşiv, medya yaşam döngüsü, arama doğruluğu/performansı ve kullanıcı UAT kanıtları tamamlanmadı.',
   '33-S': 'Gerçek sağlık/bakım sağlayıcıları, cihaz akışları, klinik doğruluk ve hukuk-gizlilik incelemesi tamamlanmadı.',
   '33-T': 'Gerçek hane verisi, uzun süreli görev/teslimat akışı ve farklı kullanıcı profilleriyle UAT tamamlanmadı.',
@@ -59,7 +59,7 @@ for (const item of roadmap.packages) {
   item.currentStatusSource = configFiles.find((name) => name.toUpperCase().startsWith(`${step}-`) && name.endsWith('-scope.json')) ?? null;
 }
 
-roadmap.updatedAt = '2026-08-18T03:30:00+03:00';
+roadmap.updatedAt = '2026-08-18T04:25:08+03:00';
 roadmap.documentationStatusRule = {
   requiredForEveryOpenPackage: ['status', 'localImplementationStatus', 'openReason', 'missingEvidence', 'countsAsRequirementPass'],
   requiredForEveryClosedPackage: ['status', 'localImplementationStatus', 'closureReason', 'missingEvidence', 'countsAsRequirementPass'],

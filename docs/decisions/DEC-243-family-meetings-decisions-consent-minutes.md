@@ -27,9 +27,9 @@ Bu nedenle `countsAsRequirementPass=false`; gerçek katılımcı, kayıt rızas�
 
 - Migration 110: `8bcc5777aa80794122742bcfd73be036234488f5861adbcd34956c56e6d0d6ac`
 - Hedefli matris: 6 dosya / 32 test
-- PPK-015: 556 dosya / `d2e1907b1f22a00a1e62057d32968867f4e54023782757650de3925ee31eeaaf` / sıfır bulgu
-- PPK-019: 556 dosya / sıfır bulgu
-- PPK-021: 556 dosya / 876 yüzey / `709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0`
-- PPK-022: 556 dosya / 395 yüzey / `a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e`
+- PPK-015: 563 dosya / `b2f30c8f337a59dbfb5692749ddffa4a06d810e39ac28a278410d70079d8ea35` / sıfır bulgu
+- PPK-019: 563 dosya / sıfır bulgu
+- PPK-021: 563 dosya / 886 yüzey / `58a90febf9382776c2b1472e6ffd6a645c9a24a4cd69e499a8afc1fff2e72b30`
+- PPK-022: 563 dosya / 422 yüzey / `dc0234d84a50ff1872f9cde4fb7ab286446b236a69019034055fa938dbb3be1e`
 
 Gerçek çok katılımcılı UAT, AI provider, dış takvim/hatırlatıcı, uzaktan işbirliği, gizlilik, hukuk, güvenlik, erişilebilirlik ve retention kanıtları `NOT_RUN` durumundadır.

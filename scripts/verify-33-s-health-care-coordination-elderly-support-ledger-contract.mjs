@@ -72,12 +72,12 @@ const definitions = [
   ['decision and threat model deny external medical and acceptance claims', hasAll(decision,
     ['countsAsRequirementPass=false', 'tıbbi doğrulama', 'NOT_RUN']) && hasAll(threat,
     ['Direct role authorization yasaktır', 'sağlık registry sorgusu', 'certification'])],
-  ['PPK ratchets are exact while requirement remains open', scope.validation?.ppk021?.scannedProductionFiles === 556
-    && scope.validation?.ppk021?.exactPrivilegedSurfaceCount === 876
-    && scope.validation?.ppk021?.exactAllowlistSha256 === '709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0'
-    && scope.validation?.ppk022?.scannedProductionFiles === 556
-    && scope.validation?.ppk022?.exactCapabilitySurfaceCount === 395
-    && scope.validation?.ppk022?.exactCapabilityManifestSha256 === 'a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e'
+  ['PPK ratchets are exact while requirement remains open', scope.validation?.ppk021?.scannedProductionFiles === 563
+    && scope.validation?.ppk021?.exactPrivilegedSurfaceCount === 886
+    && scope.validation?.ppk021?.exactAllowlistSha256 === '58a90febf9382776c2b1472e6ffd6a645c9a24a4cd69e499a8afc1fff2e72b30'
+    && scope.validation?.ppk022?.scannedProductionFiles === 563
+    && scope.validation?.ppk022?.exactCapabilitySurfaceCount === 422
+    && scope.validation?.ppk022?.exactCapabilityManifestSha256 === 'dc0234d84a50ff1872f9cde4fb7ab286446b236a69019034055fa938dbb3be1e'
     && scope.validation?.countsAsRequirementPass === false && inventory.validation?.countsAsRequirementPass === false]
 ];
 
