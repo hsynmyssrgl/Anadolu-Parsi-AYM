@@ -1,3 +1,8 @@
+import type { IsoDateTime, UserId } from '@ppt/core';
+
+export const asIsoDateTime = (value: string): IsoDateTime => value as IsoDateTime;
+export const asUserId = (value: string): UserId => value as UserId;
+
 export {
   USER_VISIBLE_APP_INFO,
   USER_VISIBLE_DELIVERY_FILE_NAME,
@@ -13,6 +18,7 @@ export {
 } from './validation.js';
 export {
   OBJECT_PERMISSION_ACTIONS,
+  archiveLegacyOwnershipReattestationConfirmation,
   type ObjectPermissionAction
 } from './app-data.js';
 export {
@@ -28,3 +34,9 @@ export {
   type ProductScreenId,
   type ProductSurfaceKind
 } from './product-surface-governance.js';
+export {
+  TEMPORARY_CREDENTIAL_DISCLOSURE_RULES,
+  TEMPORARY_CREDENTIAL_PURPOSE_BY_KIND
+} from './identity-access-credentials.js';
+export { FAMILY_AI_ASSISTANT_KINDS } from './family-ai-assistant.js';
+export { MEMORY_STUDIO_RECORD_KINDS } from './memory-studio.js';

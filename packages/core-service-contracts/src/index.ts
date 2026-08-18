@@ -21,6 +21,11 @@ export type {
 export const CORE_SERVICE_LOCAL_ADMIN_PROTOCOL_VERSION = 1 as const;
 export const CORE_SERVICE_LOCAL_ADMIN_MAX_MESSAGE_BYTES = 64 * 1024;
 export const CORE_SERVICE_APPLICATION_API_VERSION = 'v1' as const;
+export const CORE_SERVICE_DEFAULT_POLICY_VERSION = 'PPT-PLATFORM-POLICY-2026-08-04-V1' as const;
+export const CORE_SERVICE_COMPANION_BOOTSTRAP_KIND = 'ppt-core-service-companion-bootstrap' as const;
+export const CORE_SERVICE_COMPANION_READY_KIND = 'ppt-core-service-companion-ready' as const;
+export const CORE_SERVICE_COMPANION_FAILURE_KIND = 'ppt-core-service-companion-failure' as const;
+export const CORE_SERVICE_COMPANION_SHUTDOWN_KIND = 'ppt-core-service-companion-shutdown' as const;
 export const CORE_SERVICE_APPLICATION_ID = 'windows-core-service' as const;
 export const CORE_SERVICE_LOCAL_ADMIN_CLIENT_APPLICATION_ID = 'windows-desktop' as const;
 export const CORE_SERVICE_API_MAXIMUM_REQUEST_AGE_MS = 30_000;

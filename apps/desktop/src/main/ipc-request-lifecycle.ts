@@ -256,8 +256,10 @@ const cancellableInteractiveAuthenticationChannels = new Set<string>([
   'auth:loginWithWindowsHello',
   'auth:reauthenticateWithWindowsHello'
 ]);
+const destructiveSystemChannels = new Set<string>(['system:factoryReset']);
 
 export const resolveIpcRequestLifecyclePolicy = (channel: string): IpcRequestLifecyclePolicy => {
+  if (destructiveSystemChannels.has(channel)) return Object.freeze({ cancellable: false, latestWins: false, timeoutMs: 0 });
   if(communicationAuditArchiveReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
   if(familyMeetingReadChannels.has(channel))return Object.freeze({cancellable:true,latestWins:true,timeoutMs:10_000});
   if(familyMeetingWriteChannels.has(channel))return Object.freeze({cancellable:false,latestWins:false,timeoutMs:0});
@@ -381,6 +383,8 @@ const standardAdmissionChannels = new Set<string>([
 ]);
 
 export const resolveIpcRequestAdmissionPolicy = (channel: string): IpcRequestAdmissionPolicy => {
+  if (destructiveSystemChannels.has(channel)) return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
+    maxConcurrentPerSender:1,maxConcurrentPerChannel:1,maxQueuedPerSender:0,queueTimeoutMs:0});
   if(communicationAuditArchiveReadChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
     maxConcurrentPerSender:2,maxConcurrentPerChannel:1,maxQueuedPerSender:4,queueTimeoutMs:2_500});
   if(familyMeetingChannels.has(channel))return Object.freeze({enabled:true,priority:'interactive',priorityWeight:100,
@@ -517,6 +521,7 @@ export interface IpcRequestRatePolicy {
 }
 
 export const resolveIpcRequestRatePolicy = (channel: string): IpcRequestRatePolicy => {
+  if (destructiveSystemChannels.has(channel)) return Object.freeze({enabled:true,maxRequestsPerWindow:3,windowMs:60_000});
   if(communicationAuditArchiveReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:120,windowMs:60_000});
   if(familyMeetingReadChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:120,windowMs:60_000});
   if(familyMeetingWriteChannels.has(channel))return Object.freeze({enabled:true,maxRequestsPerWindow:16,windowMs:60_000});

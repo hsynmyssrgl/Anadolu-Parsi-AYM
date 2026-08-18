@@ -123,7 +123,7 @@ export interface WindowsResilienceUniversalUxTruthView {
   readonly callerSuppliedResilienceClosureAccepted: false;
   readonly durableOwnerBoundPolicyReceiptRequired: true;
   readonly operationLedgerRetentionPolicyDecided: false;
-  readonly productionUniversalSearchAuthorityComposed: false;
+  readonly productionUniversalSearchAuthorityComposed: true;
   readonly productionPolicyWeakeningVerifierComposed: false;
   readonly productionWindowsResilienceProviderComposed: false;
   readonly productionEvidenceProvidersComposed: false;
@@ -157,7 +157,7 @@ export const windowsResilienceUniversalUxTruth: WindowsResilienceUniversalUxTrut
   callerSuppliedResilienceClosureAccepted: false,
   durableOwnerBoundPolicyReceiptRequired: true,
   operationLedgerRetentionPolicyDecided: false,
-  productionUniversalSearchAuthorityComposed: false,
+  productionUniversalSearchAuthorityComposed: true,
   productionPolicyWeakeningVerifierComposed: false,
   productionWindowsResilienceProviderComposed: false,
   productionEvidenceProvidersComposed: false,

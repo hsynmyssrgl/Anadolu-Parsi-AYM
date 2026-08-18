@@ -20,7 +20,7 @@ check(ELECTRON_FUSE_POLICY.EnableNodeOptionsEnvironmentVariable === false, 'NODE
 check(ELECTRON_FUSE_POLICY.EnableNodeCliInspectArguments === false, 'Node CLI inspect arguments are disabled');
 check(ELECTRON_FUSE_POLICY.EnableEmbeddedAsarIntegrityValidation === true, 'embedded ASAR integrity validation is enabled');
 check(ELECTRON_FUSE_POLICY.OnlyLoadAppFromAsar === true, 'only ASAR application loading is enabled');
-check(ELECTRON_FUSE_POLICY.LoadBrowserProcessSpecificV8Snapshot === true, 'browser-specific V8 snapshot loading is enabled');
+check(ELECTRON_FUSE_POLICY.LoadBrowserProcessSpecificV8Snapshot === false, 'standard packaged V8 snapshot loading is retained');
 check(ELECTRON_FUSE_POLICY.GrantFileProtocolExtraPrivileges === false, 'file protocol extra privileges are disabled');
 check(ELECTRON_FUSE_POLICY.WasmTrapHandlers === true, 'WebAssembly trap handlers remain enabled with guard-region enforcement');
 

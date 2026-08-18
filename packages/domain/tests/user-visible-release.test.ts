@@ -10,9 +10,9 @@ import {
 describe('user-visible release boundary', () => {
   it('projects only the public release DTO and preserves the canonical label', () => {
     expect(USER_VISIBLE_APP_INFO).toEqual({
-      name: 'Anadolu Parsı Aile Yaşam Merkezi',
-      releaseLabel: 'Bronze 04.08.2026.29',
-      channel: 'Bronze',
+      name: APP_META.name,
+      releaseLabel: APP_META.releaseLabel,
+      channel: APP_META.edition,
       stage: 'Bronze · Aktif Geliştirme'
     });
     expect(Object.keys(USER_VISIBLE_APP_INFO).sort()).toEqual(['channel', 'name', 'releaseLabel', 'stage']);
@@ -20,9 +20,9 @@ describe('user-visible release boundary', () => {
   });
 
   it('creates the canonical user delivery filename without legacy tokens', () => {
-    expect(USER_VISIBLE_DELIVERY_FILE_NAME).toBe('Anadolu_Parsi_Aile_Yasam_Merkezi_Bronze_04.08.2026.29.json');
+    expect(USER_VISIBLE_DELIVERY_FILE_NAME).toBe(`Anadolu_Parsi_Aile_Yasam_Merkezi_${APP_META.releaseLabel.replaceAll(' ', '_')}.json`);
     expect(createUserVisibleDeliveryFileName(APP_META.name, APP_META.releaseLabel, 'zip'))
-      .toBe('Anadolu_Parsi_Aile_Yasam_Merkezi_Bronze_04.08.2026.29.zip');
+      .toBe(`Anadolu_Parsi_Aile_Yasam_Merkezi_${APP_META.releaseLabel.replaceAll(' ', '_')}.zip`);
     expect(USER_VISIBLE_DELIVERY_FILE_NAME).not.toMatch(/RC2?|MVP|Build/iu);
   });
 

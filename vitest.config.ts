@@ -7,6 +7,7 @@ const workspaceSource = (path: string): string =>
 export default defineConfig({
   resolve: {
     alias: {
+      '@ppt/domain/renderer': workspaceSource('./packages/domain/src/renderer.ts'),
       '@ppt/application': workspaceSource('./packages/application/src/index.ts'),
       '@ppt/config': workspaceSource('./packages/config/src/index.ts'),
       '@ppt/contracts': workspaceSource('./packages/contracts/src/index.ts'),

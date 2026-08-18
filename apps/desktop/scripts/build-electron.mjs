@@ -1,12 +1,14 @@
 import { spawnSync } from 'node:child_process';
-import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const desktopRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const repositoryRoot = resolve(desktopRoot, '../..');
 const mainSourceRoot = resolve(desktopRoot, 'src/main');
+const coreServiceSourceRoot = resolve(repositoryRoot, 'apps/core-service/src');
 const outputDirectory = resolve(desktopRoot, 'dist/main');
+const coreServiceOutputDirectory = resolve(desktopRoot, 'dist/core-service');
 const temporaryDirectory = resolve(desktopRoot, '.tmp-electron-build');
 const compilerEntry = resolve(repositoryRoot, 'node_modules/typescript/bin/tsc');
 
@@ -26,6 +28,7 @@ const runTypeScript = (args) => {
 };
 
 await rm(outputDirectory, { recursive: true, force: true });
+await rm(coreServiceOutputDirectory, { recursive: true, force: true });
 await rm(temporaryDirectory, { recursive: true, force: true });
 await mkdir(outputDirectory, { recursive: true });
 await mkdir(temporaryDirectory, { recursive: true });
@@ -48,9 +51,35 @@ try {
     outputDirectory
   ]);
 
+  await mkdir(coreServiceOutputDirectory, { recursive: true });
+  runTypeScript([
+    '-p',
+    resolve(repositoryRoot, 'apps/core-service/tsconfig.json'),
+    '--noEmit',
+    'false',
+    '--declaration',
+    'false',
+    '--declarationMap',
+    'false',
+    '--sourceMap',
+    'true',
+    '--rootDir',
+    coreServiceSourceRoot,
+    '--outDir',
+    coreServiceOutputDirectory
+  ]);
+
   await rename(
     resolve(outputDirectory, 'main.js'),
     resolve(outputDirectory, 'main.mjs')
+  );
+  await copyFile(
+    resolve(desktopRoot, 'src/renderer/assets/brand-mark.png'),
+    resolve(outputDirectory, 'tray-icon.png')
+  );
+  await copyFile(
+    resolve(repositoryRoot, 'config/gold-activation-trust.json'),
+    resolve(outputDirectory, 'gold-activation-trust.json')
   );
 
   const preloadCommonJsSources = [

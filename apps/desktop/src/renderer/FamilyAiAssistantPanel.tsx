@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import {
-  FAMILY_AI_ASSISTANT_KINDS,
-  type FamilyAiAssistantCenterView,
-  type FamilyAiAssistantKind,
-  type FamilyAiSuggestionReviewDecision,
-  type FamilyAiSuggestionView
+import { FAMILY_AI_ASSISTANT_KINDS } from '@ppt/domain/renderer';
+import type {
+  FamilyAiAssistantCenterView,
+  FamilyAiAssistantKind,
+  FamilyAiSuggestionReviewDecision,
+  FamilyAiSuggestionView
 } from '@ppt/domain';
 import { Button, EmptyState, StatusMessage, Surface } from './ui';
 

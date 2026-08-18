@@ -12,8 +12,8 @@
     "statement": "All written project rules are binding and non-skippable. Every ACTIVE rule must be fail-closed enforced or explicitly BLOCKED/NOT_RUN until evidence exists."
   },
   "sourceFingerprint": {
-    "sha256": "622d65e692a5d6358dd0062491fbc7058263b08ba6fd049de7992fbfdf4231e5",
-    "fileCount": 2528
+    "sha256": "de2ea33ed57f6a61ed90c131c63516885a24c4126dcb1de4ed7518d005c65ebd",
+    "fileCount": 2574
   },
   "status": "PASS",
   "results": [
@@ -26,7 +26,13 @@
     {
       "script": "scripts/verify-user-decision-ledger.mjs",
       "exitCode": 0,
-      "stdout": "User Decision Ledger: PASS (413 checks / 78 decisions).",
+      "stdout": "User Decision Ledger: PASS (449 checks / 82 decisions).",
+      "stderr": ""
+    },
+    {
+      "script": "scripts/verify-documentation-synchronization-policy.mjs",
+      "exitCode": 0,
+      "stdout": "Documentation synchronization policy: PASS (253 checks / 3 governed decisions).",
       "stderr": ""
     },
     {
@@ -50,7 +56,7 @@
     {
       "script": "scripts/verify-workspace-dependencies.mjs",
       "exitCode": 0,
-      "stdout": "Workspace dependency contracts verified: 563 assertions / 18 workspaces / acyclic production graph.",
+      "stdout": "Workspace dependency contracts verified: 569 assertions / 18 workspaces / acyclic production graph.",
       "stderr": ""
     },
     {
@@ -87,7 +93,7 @@
       "script": "scripts/verify-core-service-local-admin-runtime-wrapper.mjs",
       "exitCode": 0,
       "stdout": "Core Service Local Admin Runtime: PASS (50 checks).",
-      "stderr": "(node:31732) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:27292) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/verify-desktop-core-service-startup-contract.mjs",
@@ -99,7 +105,7 @@
       "script": "scripts/verify-desktop-core-service-startup-runtime-wrapper.mjs",
       "exitCode": 0,
       "stdout": "Desktop Core Service Startup Runtime: PASS (51 checks).",
-      "stderr": "(node:13492) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:31176) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/verify-system-health-core-service-ipc-contract.mjs",
@@ -111,20 +117,20 @@
       "script": "scripts/verify-system-health-core-service-ipc-runtime-wrapper.mjs",
       "exitCode": 0,
       "stdout": "System Health Core Service IPC Runtime: PASS (10 checks).",
-      "stderr": "(node:25044) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
+      "stderr": "(node:23384) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-workspace-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)"
     },
     {
       "script": "scripts/generate-project-artifact-index-v2.mjs",
       "exitCode": 0,
-      "stdout": "Artifact indexes generated: 6637 files / 3839 documents.",
+      "stdout": "Artifact indexes generated: 5968 files / 3670 documents.",
       "stderr": ""
     },
     {
       "script": "scripts/verify-project-artifact-index-v2.mjs",
       "exitCode": 0,
-      "stdout": "Complete Document/Artifact Index: PASS (20987 checks / 6637 files / 3839 documents).",
+      "stdout": "Complete Document/Artifact Index: PASS (19316 checks / 5968 files / 3670 documents).",
       "stderr": ""
     }
   ],
-  "generatedAt": "2026-08-16T15:51:42.786Z"
+  "generatedAt": "2026-08-18T00:49:10.078Z"
 }

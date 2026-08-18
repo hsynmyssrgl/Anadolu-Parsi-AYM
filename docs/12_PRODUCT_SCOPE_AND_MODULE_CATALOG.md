@@ -1,6 +1,8 @@
 # Ürün Kapsamı ve Modül Kataloğu — Build 183
 
-**Aktif sürüm:** 02.08.2026.228
+**Aktif sürüm:** Bronze 04.08.2026.29
+
+> 17.08.2026 güncellik bağı: 358 gereksinimin canlı durum dağılımı ve 26 paketlik 33-M–34-L uygulama/kanıt matrisi `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md` içindedir. Aşağıdaki eski build sınıflamaları tarihsel bağlam olarak korunur.
 
 ## Ürün tanımı
 

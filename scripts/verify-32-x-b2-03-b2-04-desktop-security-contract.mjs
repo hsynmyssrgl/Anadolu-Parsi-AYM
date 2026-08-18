@@ -19,7 +19,7 @@ const [
   packagerLock, astAllowlist, capabilityManifest, binaryProof, domain, domainIndex,
   application, applicationIndex, session, adapter, dataStore, main, protocol,
   senderTrust, sessionSecurity, ipcPolicy, preload, declarations, renderer, domainRenderer,
-  fusePolicy, fuseApplication, staticFuseVerifier, binaryProbe, sessionTest,
+  fusePolicy, fuseApplication, asarRepair, staticFuseVerifier, binaryProbe, sessionTest,
   applicationTest, integrationTest, decision, threatModel, audit, currentContract,
   masterRegister, traceability, securityStandard, migrations
 ] = await Promise.all([
@@ -52,6 +52,7 @@ const [
   readText('packages/domain/src/renderer.ts'),
   readText('apps/desktop/scripts/electron-fuse-policy.mjs'),
   readText('apps/desktop/scripts/apply-electron-fuses.mjs'),
+  readText('apps/desktop/scripts/repair-electron-asar-integrity.mjs'),
   readText('scripts/verify-electron-fuse-policy.mjs'),
   readText('scripts/probe-electron-fuse-binary.mjs'),
   readText('packages/security/tests/session-lock.test.ts'),
@@ -89,6 +90,8 @@ const completeChain = (item) => item?.status === 'COMPLETE'
   && Object.values(item.chain ?? {}).every((value) => value === true);
 const astKeys = new Set(astAllowlist?.allowedSurfaceKeys ?? []);
 const capabilityKeys = new Set((capabilityManifest?.surfaces ?? []).map((item) => item.key));
+const expectedAstSurfaceCount = Object.values(astAllowlist?.expectedSurfaceCounts ?? {})
+  .reduce((total, count) => total + (Number.isSafeInteger(count) ? count : 0), 0);
 
 check('scope identity and two-requirement completion are exact', scope?.schemaVersion === 1
   && scope?.id === '32-X-B2-03-B2-04-DESKTOP-SECURITY'
@@ -177,12 +180,17 @@ check('renderer browser-safe entry excludes the Node crypto export graph', inclu
 check('fuse policy contains all nine reviewed values', includesAll(fusePolicy, [
   'RunAsNode: false', 'EnableCookieEncryption: true', 'EnableNodeOptionsEnvironmentVariable: false',
   'EnableNodeCliInspectArguments: false', 'EnableEmbeddedAsarIntegrityValidation: true',
-  'OnlyLoadAppFromAsar: true', 'LoadBrowserProcessSpecificV8Snapshot: true',
+  'OnlyLoadAppFromAsar: true', 'LoadBrowserProcessSpecificV8Snapshot: false',
   'GrantFileProtocolExtraPrivileges: false', 'WasmTrapHandlers: true'
 ]));
 check('afterPack strictly requires and reads back all fuses', includesAll(fuseApplication, [
-  'strictlyRequireAllFuses: true', '[FuseV1Options.WasmTrapHandlers]', 'getCurrentFuseWire', 'verifyElectronFuseBinary'
+  'strictlyRequireAllFuses: true', '[FuseV1Options.WasmTrapHandlers]', 'getCurrentFuseWire', 'verifyElectronFuseBinary',
+  'repairAndVerifyPackagedAsarIntegrity'
 ]) && desktopPackage?.build?.afterPack === 'scripts/apply-electron-fuses.mjs' && desktopPackage?.build?.asar === true);
+check('afterPack reconciles transformed ASAR entries and reads back the executable seal', includesAll(asarRepair, [
+  'ASAR entry integrity readback failed.', 'Electron executable ASAR integrity readback failed.',
+  "entry.type === 'INTEGRITY'", "entry.id === 'ELECTRONASAR'"
+]));
 check('fuse tooling is Electron 43 compatible and lock-pinned', packagerPackage?.devDependencies?.['@electron/fuses'] === '2.1.3'
   && packagerLock?.packages?.['node_modules/@electron/fuses']?.version === '2.1.3');
 check('static and binary fuse verifiers are fail closed', includesAll(staticFuseVerifier, [
@@ -229,14 +237,18 @@ check('root scripts and mandatory pre-gates are bound', [
 ].every((name) => typeof rootPackage?.scripts?.[name] === 'string')
   && ['pretypecheck', 'prebuild'].every((name) => rootPackage?.scripts?.[name]?.includes('verify-desktop-security-boundary.mjs')));
 check('PPK-021 exact privileged additions remain governed', [
-  'NETWORK_IMPORT|apps/desktop/src/main/main.ts|electron:net',
   'USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetDesktopSecurityPostureUseCase',
   'USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|GetSessionLockStateUseCase',
   'USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|LockSessionUseCase',
   'USE_CASE_COMPOSITION|apps/desktop/src/main/data-store.ts|RecordSessionActivityUseCase'
-].every((key) => astKeys.has(key)) && astKeys.size === 545);
+].every((key) => astKeys.has(key))
+  && !astKeys.has('NETWORK_IMPORT|apps/desktop/src/main/main.ts|electron:net')
+  && expectedAstSurfaceCount > 0
+  && astKeys.size === expectedAstSurfaceCount);
 check('PPK-022 custom protocol fetch remains governed',
-  capabilityKeys.has('NETWORK_API|apps/desktop/src/main/main.ts|fetch') && capabilityKeys.size === 242);
+  capabilityKeys.has('FILE_IMPORT|apps/desktop/src/main/main.ts|node:fs/promises:readFile')
+  && !capabilityKeys.has('NETWORK_API|apps/desktop/src/main/main.ts|fetch')
+  && capabilityKeys.size === capabilityManifest?.exactCapabilitySurfaceCount);
 check('no package-owned persistence migration or cutover was added', migrationVersions.includes(77) && latestMigration >= 77
   && scope?.repositoryDecision?.includes('yeni kalıcı session repository')
   && scope?.migrationDecision?.includes('latest migration 77'));

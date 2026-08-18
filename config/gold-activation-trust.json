@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "productId": "tr.anadoluparsi.aileyasammerkezi",
+  "algorithm": "Ed25519",
+  "status": "NOT_PROVISIONED",
+  "publicKeyPem": null,
+  "privateKeyInRepositoryAllowed": false,
+  "note": "Gold aktivasyon özel anahtarı yalnız ayrı yönetici aracında ve depo dışında tutulur."
+}

@@ -1,12 +1,14 @@
 # Kanonik Kural Sicili
 
 - Görünür sürüm: **Bronze 04.08.2026.29**
-- Sicil kimliği: `PPT-CANONICAL-RULE-REGISTRY-V8`
-- Toplam kural: **200**
-- Aktif kural: **186**
+- Sicil kimliği: `PPT-CANONICAL-RULE-REGISTRY-V9`
+- Toplam kural: **208**
+- Aktif kural: **194**
 - Açıkça superseded tarihsel kural: **14**
-- Kural SHA-256: `e7250a55d92c6313367e570128a1f236de4f415eae11a1d9f18d9f6debef306f`
+- Kural SHA-256: `5e7e45b7c2ae9f3c7465866a58d9d389ef6a793dab855a68a1434e003eade081`
 - Makine okunur tek aktif kaynak: `config/canonical-rule-registry.json`
+
+`PR-186` her bağlayıcı kararın aynı sürümde DEC ve makine defterine kaydını, `PR-187` bilinen belge/kod/kural driftinde kapanış yasağını getirir. `DEC-251` ve `config/documentation-synchronization-policy.json` bu iki kuralı karar anında DEC + etkilenen belge + iş listesi açık/kapalı/neden güncellemesi olarak fail-closed uygular.
 
 ## Aşılmaz uygulama
 

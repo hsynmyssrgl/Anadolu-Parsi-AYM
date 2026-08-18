@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain, powerMonitor, protocol, safeStorage, shell, type IpcMainInvokeEvent } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, Menu, powerMonitor, protocol, safeStorage, shell, Tray, utilityProcess, type IpcMainInvokeEvent } from 'electron';
 import { fileURLToPath } from 'node:url';
 import { basename, dirname, extname, isAbsolute, join, resolve } from 'node:path';
 import { closeSync, constants, existsSync, fstatSync, fsyncSync, linkSync, lstatSync, mkdirSync, openSync, readFileSync, readSync, realpathSync, rmSync, statSync, writeFileSync } from 'node:fs';
@@ -196,11 +196,15 @@ import { runWindowsSecurityEvidenceProbe, type WindowsSecurityEvidenceProbeRepor
 import { runWindowsOpen021EfsEvidenceProbe, type WindowsOpen021EfsEvidenceProbeReport } from './windows-open021-efs-evidence-probe.js';
 import { runWindowsOpen022SideArtifactEvidenceProbe, type WindowsOpen022SideArtifactEvidenceProbeReport } from './windows-open022-side-artifact-evidence-probe.js';
 import { connectCoreServiceAtStartup, type CoreServiceStartupConnectionResult } from './core-service-startup-connection.js';
+import { CoreServiceCompanionManager } from './core-service-companion-manager.js';
 import { PlatformPolicyReceiptFileSink } from './platform-policy-receipt-file-sink.js';
 import { PlatformPolicyDecisionAuditInspectionAdapter } from './policy-decision-audit-application-adapter.js';
 import { DesktopUniversalApiPolicyEnforcement } from './desktop-universal-api-policy-enforcement.js';
 import { DesktopRepositoryPolicyScope } from './desktop-repository-policy-scope.js';
 import { PolicyServiceAvailabilityApplicationAdapter } from './policy-service-availability-application-adapter.js';
+import { ProductLicenseManager } from './product-license-manager.js';
+import { createVerifiedUninstallBackups, discoverUninstallBackupTargets } from './uninstall-backup-assistant.js';
+import { FACTORY_RESET_CONFIRMATION, FactoryResetManager } from './factory-reset-manager.js';
 import { ApplicationSecurityProfilePolicy, DerivedDataInheritancePolicy, ImmutablePolicyDecisionAuditPolicy, NetworkEgressPolicy, PlatformCapabilityManifestPolicy, PlatformPolicyAstGatePolicy, PlatformPolicyConformanceSuite, PolicyServiceAvailabilityPolicy, SensitiveLogPolicy, SourceDeletionPropagationPolicy, assertPinnedBootstrapRuntimeCapability } from '@ppt/platform-policy';
 import type { ApplicationSecurityProfileGateBoundaryView, DerivedDataPolicyBoundaryView, NetworkEgressBoundaryView, PlatformCapabilityManifestGateBoundaryView, PlatformPolicyAstGateBoundaryView, PolicyConformanceSuiteBoundaryView, PolicyDecisionAuditBoundaryView, PolicyServiceAvailabilityBoundaryView, SensitiveLoggingBoundaryView, SourceDeletionPropagationBoundaryView } from '@ppt/domain';
 import { GetProductSurfaceGovernanceUseCase } from '@ppt/application';
@@ -384,9 +388,15 @@ const getProductSurfaceGovernanceUseCase = new GetProductSurfaceGovernanceUseCas
   createProductSurfaceGovernanceRepository()
 );
 const currentProductName = 'Anadolu Parsı Aile Yaşam Merkezi';
+const uninstallBackupAssistantRequested = process.argv.includes('--uninstall-backup-assistant');
 assertPinnedBootstrapRuntimeCapability('windows-desktop', 'file.access');
 assertPinnedBootstrapRuntimeCapability('windows-desktop', 'network.access');
-const volatileRuntimeRoot = join(app.getPath('temp'), 'Anadolu-Parsi-Aile-Yasam-Merkezi', `runtime-${process.pid}`);
+const volatileRuntimeBase = join(app.getPath('temp'), 'Anadolu-Parsi-Aile-Yasam-Merkezi');
+const volatileRuntimeCleanupMarker = join(volatileRuntimeBase, 'last-runtime-root.txt');
+const volatileRuntimeRoot = join(
+  volatileRuntimeBase,
+  `runtime-${process.pid}-${Date.now().toString(36)}`
+);
 rmSync(volatileRuntimeRoot, { recursive: true, force: true });
 mkdirSync(join(volatileRuntimeRoot, 'browser-session'), { recursive: true, mode: 0o700 });
 mkdirSync(join(volatileRuntimeRoot, 'crash'), { recursive: true, mode: 0o700 });
@@ -404,7 +414,41 @@ if (process.env.PPT_WINDOWS_LAUNCH_USER_DATA_PATH) {
   app.setPath('userData', currentUserDataPath);
 }
 const singleInstanceLock = app.requestSingleInstanceLock();
-if (!singleInstanceLock) app.quit();
+if (!singleInstanceLock) {
+  if (uninstallBackupAssistantRequested) app.exit(5);
+  else app.quit();
+}
+else {
+  // The previous Chromium process may release its cache handles only after the
+  // Electron main process exits. Clean exactly that recorded, direct child on
+  // the next successful primary launch; never touch a live process or symlink.
+  try {
+    const previousRuntimeRoot = resolve(readFileSync(volatileRuntimeCleanupMarker, 'utf8').trim());
+    const previousName = basename(previousRuntimeRoot);
+    const previousMatch = /^runtime-(\d+)(?:-[a-z0-9]+)?$/u.exec(previousName);
+    const previousProcessId = Number(previousMatch?.[1]);
+    let previousProcessAlive = false;
+    if (Number.isSafeInteger(previousProcessId) && previousProcessId > 0) {
+      try { process.kill(previousProcessId, 0); previousProcessAlive = true; }
+      catch (error) { previousProcessAlive = (error as NodeJS.ErrnoException).code === 'EPERM'; }
+    }
+    if (
+      previousMatch
+      && dirname(previousRuntimeRoot) === resolve(volatileRuntimeBase)
+      && previousRuntimeRoot !== volatileRuntimeRoot
+      && !previousProcessAlive
+      && existsSync(previousRuntimeRoot)
+    ) {
+      const previousStat = lstatSync(previousRuntimeRoot);
+      if (previousStat.isDirectory() && !previousStat.isSymbolicLink()) {
+        try { rmSync(previousRuntimeRoot, { recursive: true, force: true, maxRetries: 4, retryDelay: 100 }); }
+        catch { /* Leave the locked residue untouched; normal OS temp maintenance remains safe. */ }
+      }
+    }
+  } catch { /* No valid previous-runtime marker exists yet. */ }
+  mkdirSync(volatileRuntimeBase, { recursive: true, mode: 0o700 });
+  writeFileSync(volatileRuntimeCleanupMarker, `${volatileRuntimeRoot}\n`, { encoding: 'utf8', mode: 0o600 });
+}
 app.setAppUserModelId('tr.anadoluparsi.aileyasammerkezi');
 
 type LocalGovernedOcrBridgeValue<T> = T | Promise<T>;
@@ -431,6 +475,7 @@ interface LocalGovernedOcrIpcDataStoreBridge {
 let dataStore: FamilyDataStore | undefined;
 let desktopRuntime: DesktopRuntime | undefined;
 let coreServiceStartupConnection: CoreServiceStartupConnectionResult | undefined;
+let coreServiceCompanionManager: CoreServiceCompanionManager | undefined;
 let archivePolicyReceiptSink: PlatformPolicyReceiptFileSink | undefined;
 let desktopUniversalApiPolicyEnforcement: DesktopUniversalApiPolicyEnforcement | undefined;
 let evaluatePolicyServiceAvailabilityUseCase: EvaluatePolicyServiceAvailabilityUseCase | undefined;
@@ -442,6 +487,9 @@ let schedulerStartedAt: string | undefined;
 let lastSchedulerCycleAt: string | undefined;
 let lastSchedulerResult: BackupSchedulerResultView | undefined;
 let primaryWindow: BrowserWindow | undefined;
+let applicationTray: Tray | undefined;
+let explicitApplicationQuit = false;
+let closeToTrayNoticeShown = false;
 let trustedRenderer: TrustedRendererDescriptor | undefined;
 let coordinatedWindowsHelloPlatform: WindowsHelloPlatformCoordinator | undefined;
 let windowsHelloOperationInProgress = false;
@@ -656,6 +704,9 @@ async function withExclusiveWindowsHelloOperation<TResult>(operation: () => Prom
 }
 
 let osSecretProtector: DeviceSecretProtector | undefined;
+let productLicenseManager: ProductLicenseManager | undefined;
+let factoryResetManager: FactoryResetManager | undefined;
+let productLicenseTimer: NodeJS.Timeout | undefined;
 let startupSecurityReport: StartupSecurityPreflightReport | undefined;
 let windowsSecurityEvidenceReport: WindowsSecurityEvidenceProbeReport | undefined;
 let windowsOpen021EfsEvidenceReport: WindowsOpen021EfsEvidenceProbeReport | undefined;
@@ -663,6 +714,7 @@ let windowsOpen022SideArtifactEvidenceReport: WindowsOpen022SideArtifactEvidence
 type StartupStage =
   | 'WAITING_FOR_APP_READY'
   | 'SAFE_STORAGE_INITIALIZATION'
+  | 'PRODUCT_LICENSE_INITIALIZATION'
   | 'RUNTIME_BOOTSTRAP'
   | 'CORE_SERVICE_CONNECTION'
   | 'POLICY_RECEIPT_JOURNAL_VERIFICATION'
@@ -677,6 +729,7 @@ type StartupStage =
   | 'WINDOW_CREATION'
   | 'READY';
 let startupStage: StartupStage = 'WAITING_FOR_APP_READY';
+let startupIpcRegistrationChannel: string | undefined;
 
 const writeEarlyStartupFailureEvidence = (error: unknown, origin: string): void => {
   const outputPath = process.env.PPT_WINDOWS_STARTUP_DIAGNOSTIC_PATH;
@@ -694,6 +747,7 @@ const writeEarlyStartupFailureEvidence = (error: unknown, origin: string): void 
     fatal: true,
     origin,
     startupStage,
+    failedIpcChannel: startupStage === 'IPC_REGISTRATION' ? startupIpcRegistrationChannel ?? null : null,
     errorName,
     errorFingerprint,
     generatedAt: new Date().toISOString()
@@ -959,6 +1013,26 @@ function openVolatileUserDataSession(initialDatabaseBytes: Buffer): void {
   }
 }
 
+function openUpgradableUserDataSession(userVault: UserDataVault, initialDatabaseBytes: Buffer): void {
+  try {
+    const current = runtime();
+    const snapshot = userVault.createUpgradeRollbackSnapshot({
+      directory: join(app.getPath('userData'), 'safety-backups', 'surum-yukseltme'),
+      applicationVersion: APP_META.version,
+      createdAt: current.clock.now()
+    });
+    if (snapshot) current.logger.info({
+      timestamp: current.clock.now(), service: 'desktop-main', process: 'electron-main',
+      event: 'database.upgrade.rollback_snapshot_verified', correlationId: createRuntimeCorrelationId('migration'), outcome: 'success',
+      metadata: { applicationVersion: snapshot.applicationVersion, encryptedAtRest: snapshot.encryptedAtRest,
+        readbackVerified: snapshot.readbackVerified, containerSha256: snapshot.containerSha256, containerSizeBytes: snapshot.containerSizeBytes }
+    });
+    openVolatileUserDataSession(initialDatabaseBytes);
+  } finally {
+    initialDatabaseBytes.fill(0);
+  }
+}
+
 function checkpointUserDataSession(): void {
   const session = userDataSqliteSession;
   const userVault = userDataVault;
@@ -1203,6 +1277,7 @@ function registerIpcHandler<TArguments extends unknown[], TResult>(
   channel: string,
   handler: IpcHandler<TArguments, TResult>
 ): void {
+  startupIpcRegistrationChannel = channel;
   const policyEnforcement = universalApiPolicyEnforcement();
   policyEnforcement.registerClientApplicationServiceChannel(channel);
   registerCorrelatedIpcHandler({
@@ -1218,6 +1293,7 @@ function registerIpcHandler<TArguments extends unknown[], TResult>(
     policyEnforcement,
     handler
   });
+  startupIpcRegistrationChannel = undefined;
 }
 
 function adaptiveMaintenanceAuthSnapshot(): { readonly fingerprint: string; readonly authority: ReturnType<typeof evaluateIpcAdaptiveBudgetMaintenanceAuthority>; readonly role: string; readonly trustedDevice: boolean } {
@@ -1413,7 +1489,7 @@ function registerIpc(): void {
     const userVault = vault();
     if (!userVault.isInitialized()) throw new Error('İlk kurulum tamamlanmamış.');
     try {
-      if (!userVault.isUnlocked()) openVolatileUserDataSession(userVault.unlock(input.password));
+      if (!userVault.isUnlocked()) openUpgradableUserDataSession(userVault,userVault.unlock(input.password));
       const current = store().getAuthState();
       const accountId = input.accountId ?? current.profiles?.[0]?.id;
       if (!accountId) throw new Error('Yerel kullanıcı profili bulunamadı.');
@@ -1511,7 +1587,7 @@ function registerIpc(): void {
       }
       try {
         requireActiveIpcRequest(signal);
-        openVolatileUserDataSession(unlocked.databaseBytes);
+        openUpgradableUserDataSession(userVault,unlocked.databaseBytes);
         const result = await store(prepared.replayPlatform).loginWithWindowsHello({
           ...input,
           accountId: unlocked.accountId
@@ -1791,6 +1867,24 @@ function registerIpc(): void {
   registerIpcHandler('system:listBackupRuns', (_event,limit?:number) => store().listBackupRuns(limit));
   registerIpcHandler('system:runBackupTarget', (_event,id:string) => store().runBackupTarget(id));
   registerIpcHandler('system:runAllBackups', () => store().runAllBackupTargets());
+  registerIpcHandler('system:factoryReset', async (_event,input:{readonly password:string;readonly code?:string;readonly confirmation:string}) => {
+    if(!factoryResetManager)throw new Error('Fabrika ayarı yöneticisi hazır değil.');
+    if(!input||typeof input!=='object'||Object.getPrototypeOf(input)!==Object.prototype)throw new Error('Fabrika ayarı isteği geçersiz.');
+    const keys=Object.keys(input).sort();
+    if(keys.some(key=>!['code','confirmation','password'].includes(key))||!keys.includes('confirmation')||!keys.includes('password')
+      ||typeof input.password!=='string'||input.password.length<1||input.password.length>1024
+      ||(input.code!==undefined&&(typeof input.code!=='string'||input.code.length>256))
+      ||input.confirmation!==FACTORY_RESET_CONFIRMATION)throw new Error('Fabrika ayarı isteği geçersiz.');
+    const plan=store().prepareFactoryReset(input);
+    await factoryResetManager.request(plan.backupArtifactPaths,FACTORY_RESET_CONFIRMATION);
+    stopBackgroundSchedulers();
+    stopVaultSessionGuard();
+    discardVolatileUserDataSession();
+    vault().discardSession();
+    app.relaunch();
+    setImmediate(()=>app.exit(0));
+    return Object.freeze({restarting:true,noBackupCreated:true,knownBackupCount:plan.backupArtifactPaths.length});
+  });
   registerIpcHandler('system:runDueBackups', (_event,at?:string) => store().runDueBackupTargets(at));
   registerIpcHandler('system:adaptiveState', () => store().getAdaptiveResourceState());
   registerIpcHandler('system:capturePerformance', () => store().capturePerformanceSample());
@@ -3103,6 +3197,64 @@ async function openArchiveInSecurePreview(itemId: string, operationId: string): 
   return { opened: true };
 }
 
+function showPrimaryWindow(): void {
+  const window = primaryWindow;
+  if (!window || window.isDestroyed()) {
+    createWindow();
+    return;
+  }
+  if (window.isMinimized()) window.restore();
+  window.show();
+  window.focus();
+}
+
+function lockApplicationFromTray(): void {
+  try {
+    if (dataStore) dataStore.logout();
+  } finally {
+    financeImportFileSessions.clear();
+    emergencyCardExportReauthenticationGuard.clearAll();
+    offlineSensitiveCache.lock('NO_LEASE');
+    try { sealUserDataSession(); } catch { /* renderer reload remains fail-closed */ }
+  }
+  const window = primaryWindow;
+  if (window && !window.isDestroyed()) window.webContents.reload();
+  showPrimaryWindow();
+}
+
+async function requestExplicitApplicationQuit(): Promise<void> {
+  const options = {
+    type: 'warning' as const,
+    title: 'Anadolu Parsı AYM',
+    message: 'Uygulamayı tamamen kapatmak istiyor musunuz?',
+    detail: 'Arka plan görevleri durdurulacak ve açık kullanıcı veri oturumu güvenle kilitlenecek.',
+    buttons: ['Tamamen kapat', 'Vazgeç'],
+    defaultId: 1,
+    cancelId: 1,
+    noLink: true
+  };
+  const window = primaryWindow;
+  const result = window && !window.isDestroyed()
+    ? await dialog.showMessageBox(window, options)
+    : await dialog.showMessageBox(options);
+  if (result.response !== 0) return;
+  explicitApplicationQuit = true;
+  app.quit();
+}
+
+function createApplicationTray(): void {
+  if (applicationTray) return;
+  applicationTray = new Tray(join(currentDir, 'tray-icon.png'));
+  applicationTray.setToolTip('Anadolu Parsı AYM');
+  applicationTray.setContextMenu(Menu.buildFromTemplate([
+    { label: 'Uygulamayı aç', click: () => showPrimaryWindow() },
+    { label: 'Kilitle', click: () => lockApplicationFromTray() },
+    { type: 'separator' },
+    { label: 'Tamamen kapat', click: () => { void requestExplicitApplicationQuit(); } }
+  ]));
+  applicationTray.on('double-click', () => showPrimaryWindow());
+}
+
 function createWindow(): void {
   const configuredRendererUrl = process.env.PPT_RENDERER_URL;
   const rendererDocumentUrl = configuredRendererUrl
@@ -3113,7 +3265,9 @@ function createWindow(): void {
     height: 980,
     minWidth: 1180,
     minHeight: 760,
-    backgroundColor: '#06111e',
+    // Binding visual baseline: never flash the retired dark shell before the
+    // renderer paints the warm-white Bronze onboarding surface.
+    backgroundColor: '#FDFDFC',
     show: false,
     autoHideMenuBar: true,
     webPreferences: createSecureRendererPreferences(
@@ -3152,6 +3306,19 @@ function createWindow(): void {
     return { action: 'deny' };
   });
 
+  window.on('close', (event) => {
+    if (explicitApplicationQuit) return;
+    event.preventDefault();
+    window.hide();
+    if (!closeToTrayNoticeShown && applicationTray) {
+      closeToTrayNoticeShown = true;
+      applicationTray.displayBalloon({
+        title: 'Anadolu Parsı AYM',
+        content: 'Uygulama tamamen kapanmadı; sistem tepsisinde çalışmaya devam ediyor.',
+        noSound: true
+      });
+    }
+  });
 
   window.once('closed', () => {
     ipcTransportSessions.clearSender(primaryWebContentsId);
@@ -3198,16 +3365,36 @@ function createWindow(): void {
 
 app.on('second-instance', (_event,commandLine) => {
   captureOidcDeepLinkArguments(commandLine);
-  const window = BrowserWindow.getAllWindows()[0];
-  if (!window) return;
-  if (window.isMinimized()) window.restore();
-  window.show();
-  window.focus();
+  showPrimaryWindow();
 });
 
 app.on('open-url',(event,url)=>{event.preventDefault();captureOidcDeepLinkArguments([url]);});
 
 app.whenReady().then(async () => {
+  if (uninstallBackupAssistantRequested) {
+    const targets = await discoverUninstallBackupTargets({
+      documentsPath: app.getPath('documents'), homePath: app.getPath('home'), environment: process.env
+    });
+    const targetLines = targets.map((target) => `• ${target.kind}: ${target.rootPath}`).join('\n');
+    const decision = await dialog.showMessageBox({
+      type: 'question', title: 'Anadolu Parsı AYM kaldırma yedeği',
+      message: 'Şifreli kişisel veriler kaldırılmadan önce yedeklensin mi?',
+      detail: `Yedek aynı anda aşağıdaki kullanılabilir konumlara yazılacak ve SHA-256 ile doğrulanacak. Bulut istemcisinin gerçekten eşitlediği iddia edilmez.\n\n${targetLines}`,
+      buttons: ['Yedekle ve kaldırmaya devam et', 'İptal'], defaultId: 1, cancelId: 1, noLink: true
+    });
+    if (decision.response !== 0) { app.exit(2); return; }
+    const result = await createVerifiedUninstallBackups({
+      userDataPath: app.getPath('userData'), targets, createdAt: new Date().toISOString(), applicationVersion: APP_META.version
+    });
+    await dialog.showMessageBox({
+      type: 'info', title: 'Anadolu Parsı AYM kaldırma yedeği',
+      message: result.status === 'no_data' ? 'Yedeklenecek kişisel veri bulunmadı.' : 'Kaldırma yedekleri doğrulandı.',
+      detail: result.status === 'no_data' ? 'Kaldırma işlemine devam edilebilir.' : `${result.copiedFiles} dosya, ${result.backupDirectories.length} hedefe doğrulanarak kopyalandı.`,
+      buttons: ['Tamam']
+    });
+    app.exit(0);
+    return;
+  }
   const rendererRoot = resolve(currentDir, '../renderer');
   const rendererMediaTypes=Object.freeze(new Map<string,string>([['.html','text/html; charset=utf-8'],['.js','text/javascript; charset=utf-8'],['.css','text/css; charset=utf-8'],['.json','application/json; charset=utf-8'],['.svg','image/svg+xml'],['.png','image/png'],['.ico','image/x-icon'],['.woff2','font/woff2'],['.wasm','application/wasm']]));
   protocol.handle(PRIMARY_RENDERER_SCHEME, async (request) => {
@@ -3221,6 +3408,101 @@ app.whenReady().then(async () => {
   osSecretProtector = process.platform === 'win32'
     ? new WindowsDpapiDeviceSecretProtector({ required: true })
     : new ElectronSafeStorageDeviceSecretProtector(safeStorage, app.isPackaged);
+  startupStage = 'PRODUCT_LICENSE_INITIALIZATION';
+  const licenseTrust = JSON.parse(await readFile(join(currentDir, 'gold-activation-trust.json'), 'utf8')) as {
+    readonly schemaVersion: number;
+    readonly productId: string;
+    readonly algorithm: string;
+    readonly status: string;
+    readonly publicKeyPem: string | null;
+    readonly privateKeyInRepositoryAllowed: boolean;
+  };
+  if (licenseTrust.schemaVersion !== 1 || licenseTrust.productId !== 'tr.anadoluparsi.aileyasammerkezi'
+    || licenseTrust.algorithm !== 'Ed25519' || licenseTrust.privateKeyInRepositoryAllowed !== false
+    || (licenseTrust.publicKeyPem !== null && !licenseTrust.publicKeyPem.includes('BEGIN PUBLIC KEY'))) {
+    throw new Error('Gold aktivasyon güven yapılandırması geçersiz.');
+  }
+  const licenseDeviceBinding = createHash('sha256').update([
+    process.env.COMPUTERNAME ?? 'unknown-computer',
+    process.env.USERDOMAIN ?? 'unknown-domain',
+    process.env.USERNAME ?? 'unknown-user',
+    app.getPath('home')
+  ].join('\u0000'), 'utf8').digest('hex');
+  const bindingOutputArgument = process.argv.find((argument) => argument.startsWith('--write-license-device-binding='));
+  if (bindingOutputArgument) {
+    const outputPath = bindingOutputArgument.slice('--write-license-device-binding='.length);
+    if (!isAbsolute(outputPath) || existsSync(outputPath)) throw new Error('Cihaz bağı çıktı yolu mutlak ve yeni olmalıdır.');
+    mkdirSync(dirname(outputPath), { recursive: true, mode: 0o700 });
+    writeFileSync(outputPath, `${licenseDeviceBinding}\n`, { encoding: 'utf8', flag: 'wx', mode: 0o600 });
+    explicitApplicationQuit = true;
+    app.quit();
+    return;
+  }
+  const localLicenseRoot = join(process.env.LOCALAPPDATA ?? app.getPath('appData'), 'PPT', 'AYM-Lisans');
+  const roamingLicenseRoot = join(app.getPath('appData'), 'Panthera-Pardus-Tulliana', 'AYM-Lisans');
+  factoryResetManager = new FactoryResetManager({
+    markerPath: join(localLicenseRoot, 'bekleyen-fabrika-ayari.pptreset'),
+    protector: osSecretProtector,
+    userDataPath: app.getPath('userData')
+  });
+  await factoryResetManager.executePending();
+  const productReleaseChannel = USER_VISIBLE_APP_INFO.channel;
+  productLicenseManager = new ProductLicenseManager({
+    primaryPath: join(localLicenseRoot, 'lisans-kaydi.pptlicense'),
+    anchorPath: join(roamingLicenseRoot, 'lisans-capa-kaydi.pptlicense'),
+    protector: osSecretProtector,
+    channel: productReleaseChannel,
+    deviceBindingSha256: licenseDeviceBinding,
+    ...(licenseTrust.status === 'PROVISIONED' && licenseTrust.publicKeyPem ? { goldPublicKeyPem: licenseTrust.publicKeyPem } : {})
+  });
+  let licenseStatus = await productLicenseManager.initialize();
+  const activationArgument = process.argv.find((argument) => argument.startsWith('--install-gold-activation='));
+  if (activationArgument) {
+    const activationPath = activationArgument.slice('--install-gold-activation='.length);
+    if (!isAbsolute(activationPath)) throw new Error('Gold aktivasyon dosyası mutlak bir yol olmalıdır.');
+    const metadata = lstatSync(activationPath);
+    if (!metadata.isFile() || metadata.isSymbolicLink() || metadata.nlink !== 1 || metadata.size < 64 || metadata.size > 4096) {
+      throw new Error('Gold aktivasyon dosyası güvenilir değil.');
+    }
+    licenseStatus = await productLicenseManager.activateGold((await readFile(activationPath, 'utf8')).trim());
+    await dialog.showMessageBox({ type: 'info', title: 'Anadolu Parsı AYM', message: 'Gold aktivasyonu doğrulandı.', detail: 'Bu cihaz için sınırsız kullanım etkinleştirildi.', buttons: ['Tamam'] });
+    explicitApplicationQuit = true;
+    app.quit();
+    return;
+  }
+  if (!licenseStatus.allowed) {
+    await dialog.showMessageBox({
+      type: 'error', title: 'Anadolu Parsı AYM', message: '30 günlük kullanım süresi sona erdi.',
+      detail: productReleaseChannel === 'Gold'
+        ? 'Uygulamayı açmak için bu cihaza ait geçerli Gold aktivasyonunu ayrı yönetici aracıyla kurun.'
+        : `${productReleaseChannel} sürümü süre sonunda kullanılamaz. Kişisel verileriniz silinmedi.`,
+      buttons: ['Kapat']
+    });
+    explicitApplicationQuit = true;
+    app.quit();
+    return;
+  }
+  const scheduleLicenseRefresh = (): void => {
+    const remaining = Math.max(60_000, Date.parse(productLicenseManager!.status().trialEndsAt) - Date.now() + 1_000);
+    productLicenseTimer = setTimeout(async () => {
+      try {
+        const refreshed = await productLicenseManager!.refresh();
+        if (!refreshed.allowed) {
+          await dialog.showMessageBox({ type: 'error', title: 'Anadolu Parsı AYM', message: 'Kullanım süresi sona erdi.', detail: 'Açık oturum güvenle kapatılıyor; kişisel verileriniz silinmeyecek.', buttons: ['Kapat'] });
+          explicitApplicationQuit = true;
+          app.quit();
+          return;
+        }
+        scheduleLicenseRefresh();
+      } catch (error) {
+        writeEarlyStartupFailureEvidence(error, 'product-license-refresh');
+        explicitApplicationQuit = true;
+        app.quit();
+      }
+    }, Math.min(remaining, 12 * 60 * 60_000));
+    productLicenseTimer.unref();
+  };
+  scheduleLicenseRefresh();
   const protectedArtifacts = new ProtectedSideArtifactStore({
     keyPath: join(app.getPath('userData'), 'secrets', 'side-artifact-key.json'),
     applicationVersion: APP_META.version,
@@ -3236,8 +3518,24 @@ app.whenReady().then(async () => {
     ...(process.env.PPT_RUNTIME_ENV ? { environment: process.env.PPT_RUNTIME_ENV } : {})
   });
   startupStage = 'CORE_SERVICE_CONNECTION';
+  const coreServiceAuthorityPath = join(runtime().config.paths.secrets, 'core-service-connection.pptsecret');
+  coreServiceCompanionManager = new CoreServiceCompanionManager({
+    modulePath: join(currentDir, '../core-service/companion.js'),
+    authorityPath: coreServiceAuthorityPath,
+    provisioningPath: join(runtime().config.paths.secrets, 'core-service-device-provisioning.pptsecret'),
+    policyJournalAuthorityPath: join(runtime().config.paths.data, 'core-service-policy-journal-authority.json'),
+    protectedStore: runtime().protectedArtifacts,
+    clock: () => runtime().clock.now(),
+    fork: (modulePath, options) => utilityProcess.fork(modulePath, [], {
+      env: options.env,
+      execArgv: [...options.execArgv],
+      stdio: options.stdio,
+      serviceName: options.serviceName
+    })
+  });
+  await coreServiceCompanionManager.start();
   coreServiceStartupConnection = await connectCoreServiceAtStartup({
-    authorityPath: join(runtime().config.paths.secrets, 'core-service-connection.pptsecret'),
+    authorityPath: coreServiceAuthorityPath,
     authorityReader: runtime().protectedArtifacts,
     clock: () => runtime().clock.now()
   });
@@ -3385,6 +3683,7 @@ app.whenReady().then(async () => {
     startupStage = 'IPC_REGISTRATION';
     registerIpc();
     startupStage = 'WINDOW_CREATION';
+    createApplicationTray();
     createWindow();
     startupStage = 'READY';
     runtime().logger.info({
@@ -3402,13 +3701,20 @@ app.whenReady().then(async () => {
     });
   });
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    showPrimaryWindow();
   });
 }).catch((error: unknown) => {
+  coreServiceCompanionManager?.dispose();
+  coreServiceCompanionManager = undefined;
   exitAfterFatalStartupError(error, 'app.whenReady');
 });
 
 app.on('before-quit', () => {
+  explicitApplicationQuit = true;
+  if (productLicenseTimer) clearTimeout(productLicenseTimer);
+  productLicenseTimer = undefined;
+  coreServiceCompanionManager?.dispose();
+  coreServiceCompanionManager = undefined;
   financeImportFileSessions.dispose();
   if (desktopRuntime) {
     desktopRuntime.logger.info({
@@ -3430,6 +3736,8 @@ app.on('before-quit', () => {
   ipcAdaptiveBudgetMaintenanceReauthenticationGuard.clearMemory();
   emergencyCardExportReauthenticationGuard.clearMemory();
   ipcAdaptiveResourceBudget.clear({ persist: false });
+  applicationTray?.destroy();
+  applicationTray = undefined;
   try {
     sealUserDataSession();
   } finally {
@@ -3442,8 +3750,19 @@ app.on('before-quit', () => {
       getPolicyServiceAvailabilityBoundaryUseCase = undefined;
     }
     try { desktopRuntime?.protectedArtifacts.dispose(); }
-    finally { rmSync(volatileRuntimeRoot, { recursive: true, force: true }); }
+    finally {
+      // Chromium can retain Windows handles for session/cache files until the
+      // BrowserWindow teardown is complete. Volatile cleanup must never turn a
+      // normal application exit into an uncaught EPERM/EBUSY main-process error.
+      try { rmSync(volatileRuntimeRoot, { recursive: true, force: true }); }
+      catch { /* will-quit retries after all windows have closed */ }
+    }
   }
+});
+
+app.on('will-quit', () => {
+  try { rmSync(volatileRuntimeRoot, { recursive: true, force: true }); }
+  catch { /* OS temporary-storage maintenance may remove a still-locked residue later. */ }
 });
 
 app.on('window-all-closed', () => {

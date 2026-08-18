@@ -521,6 +521,7 @@ contextBridge.exposeInMainWorld('pardus', {
   listBackupRuns:(limit?:number):Promise<BackupRunView[]>=>invoke('system:listBackupRuns',limit),
   runBackupTarget:(id:string):Promise<BackupRunResultView>=>invoke('system:runBackupTarget',id),
   runAllBackups:():Promise<BackupRunResultView[]>=>invoke('system:runAllBackups'),
+  factoryResetToInitialState:(input:{readonly password:string;readonly code?:string;readonly confirmation:'ILK KURULUM ANINA DON'}):Promise<{readonly restarting:true;readonly noBackupCreated:true;readonly knownBackupCount:number}>=>invoke('system:factoryReset',input),
   runDueBackups:(at?:string):Promise<BackupSchedulerResultView>=>invoke('system:runDueBackups',at),
   getAdaptiveState:():Promise<AdaptiveResourceStateView>=>invoke('system:adaptiveState'),
   capturePerformance:():Promise<PerformanceSampleView>=>invoke('system:capturePerformance'),

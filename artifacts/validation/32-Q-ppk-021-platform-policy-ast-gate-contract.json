@@ -54,7 +54,7 @@
       "passed": true
     },
     {
-      "name": "manifest contains exactly 876 surfaces",
+      "name": "manifest contains exactly 886 surfaces",
       "passed": true
     },
     {
@@ -282,7 +282,7 @@
       "passed": true
     },
     {
-      "name": "scope records six rules and 876 exact surfaces",
+      "name": "scope records six rules and 886 exact surfaces",
       "passed": true
     },
     {
@@ -310,7 +310,7 @@
       "passed": true
     },
     {
-      "name": "decision pins the current local media preflight source ratchet without rewriting historical closure",
+      "name": "decision pins the current local source ratchet without rewriting historical closure",
       "passed": true
     },
     {
@@ -350,13 +350,13 @@
   "sourceGate": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 556,
-    "privilegedSurfaces": 876,
-    "exactAllowlistEntries": 876,
-    "exactAllowlistSha256": "709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0",
+    "scannedFiles": 563,
+    "privilegedSurfaces": 886,
+    "exactAllowlistEntries": 886,
+    "exactAllowlistSha256": "58a90febf9382776c2b1472e6ffd6a645c9a24a4cd69e499a8afc1fff2e72b30",
     "surfaceCounts": {
       "CRYPTO_GLOBAL": 21,
-      "CRYPTO_IMPORT": 236,
+      "CRYPTO_IMPORT": 246,
       "DATABASE_IMPORT": 21,
       "NETWORK_IMPORT": 11,
       "REPOSITORY_IMPORT": 70,
@@ -372,8 +372,8 @@
     "findings": []
   },
   "protectedRuleCount": 6,
-  "exactAllowlistEntries": 876,
-  "exactAllowlistSha256": "709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0",
+  "exactAllowlistEntries": 886,
+  "exactAllowlistSha256": "58a90febf9382776c2b1472e6ffd6a645c9a24a4cd69e499a8afc1fff2e72b30",
   "directRoleAuthorizationBypasses": 0,
   "syntaxModel": "TYPESCRIPT_AST",
   "regexOnlyGateAccepted": false,
@@ -387,5 +387,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-17T07:30:33.040Z"
+  "generatedAt": "2026-08-18T00:22:42.518Z"
 }

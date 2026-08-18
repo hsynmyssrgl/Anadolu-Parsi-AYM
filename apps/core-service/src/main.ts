@@ -10,12 +10,14 @@ import {
   PlatformPolicyKernel,
   createPlatformCapabilityManifestAuthority
 } from '@ppt/platform-policy';
-import { CORE_SERVICE_APPLICATION_API_VERSION } from '@ppt/core-service-contracts';
+import {
+  CORE_SERVICE_APPLICATION_API_VERSION,
+  CORE_SERVICE_DEFAULT_POLICY_VERSION
+} from '@ppt/core-service-contracts';
 import { CoreServiceLocalAdminServer } from './local-admin-server.js';
 import { CoreServiceRuntime } from './core-service-runtime.js';
 import { CoreServicePolicyJournalMonotonicAuthority } from './policy-journal-monotonic-authority.js';
 
-const DEFAULT_POLICY_VERSION = 'PPT-PLATFORM-POLICY-2026-08-04-V1';
 const LOCAL_ADMIN_ENDPOINT_ENV = 'PPT_CORE_SERVICE_LOCAL_ADMIN_ENDPOINT';
 const LOCAL_ADMIN_TOKEN_ENV = 'PPT_CORE_SERVICE_LOCAL_ADMIN_TOKEN';
 const POLICY_SIGNING_KEY_ENV = 'PPT_POLICY_SIGNING_KEY_HEX';
@@ -66,7 +68,7 @@ export const readCoreServiceProcessConfiguration = (
   const localAdminEndpoint = requiredEnvironmentValue(environment, LOCAL_ADMIN_ENDPOINT_ENV);
   const localAdminToken = requiredEnvironmentValue(environment, LOCAL_ADMIN_TOKEN_ENV);
   const configuredKey = requiredEnvironmentValue(environment, POLICY_SIGNING_KEY_ENV);
-  const policyVersion = environment.PPT_POLICY_VERSION ?? DEFAULT_POLICY_VERSION;
+  const policyVersion = environment.PPT_POLICY_VERSION ?? CORE_SERVICE_DEFAULT_POLICY_VERSION;
   const policyJournalAuthorityPath = requiredEnvironmentValue(environment, POLICY_JOURNAL_AUTHORITY_PATH_ENV);
 
   validateLocalEndpoint(localAdminEndpoint, platform);

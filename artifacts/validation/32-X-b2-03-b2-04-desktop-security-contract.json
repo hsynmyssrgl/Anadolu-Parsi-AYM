@@ -6,7 +6,7 @@
     "B2-04"
   ],
   "status": "PASS",
-  "checksPassed": 37,
+  "checksPassed": 38,
   "checksFailed": 0,
   "checks": [
     {
@@ -94,6 +94,10 @@
       "passed": true
     },
     {
+      "name": "afterPack reconciles transformed ASAR entries and reads back the executable seal",
+      "passed": true
+    },
+    {
       "name": "fuse tooling is Electron 43 compatible and lock-pinned",
       "passed": true
     },
@@ -159,10 +163,10 @@
     }
   ],
   "failures": [],
-  "latestDatabaseMigration": 82,
+  "latestDatabaseMigration": 115,
   "requirementCompletionClaimed": true,
   "b202CompletedByThisPackage": false,
   "ppk025CompletedByThisPackage": false,
   "b901CompletedByThisPackage": false,
-  "generatedAt": "2026-08-12T17:50:26.265Z"
+  "generatedAt": "2026-08-17T08:33:03.383Z"
 }

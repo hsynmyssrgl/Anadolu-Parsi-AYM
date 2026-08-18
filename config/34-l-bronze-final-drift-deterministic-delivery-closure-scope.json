@@ -21,14 +21,14 @@
   },
   "manualEvidence":{"realWindowsLifecycle":"NOT_RUN","sevenDaySoak":"NOT_RUN","realMultiNodeConsensus":"NOT_RUN","realAppleClients":"NOT_RUN","realRemoteProviders":"NOT_RUN","certification":"NOT_RUN"},
   "validation":{
-    "localPackageBoundaries":{"status":"PASS","checks":51},
+    "localPackageBoundaries":{"status":"PASS","checks":52},
     "localPackageContracts":{"status":"PASS","checks":30},
-    "localPackageRuntimes":{"status":"PASS","checks":171},
+    "localPackageRuntimes":{"status":"PASS","checks":172},
     "targeted":{"status":"PASS","files":12,"tests":50},
-    "fullRegression":{"status":"PASS","files":287,"tests":1971},
+    "fullRegression":{"status":"PASS","files":301,"tests":2018},
     "rootTypecheck":"PASS",
     "productionBuilds":{"status":"PASS","workspaces":18},
-    "artifactIndex":{"status":"PASS","checks":20999,"files":6641,"documents":3841}
+    "artifactIndex":{"status":"PASS","checks":19316,"files":5968,"documents":3670}
   },
   "persistentReceiptStatus":"VERSIONED_LOCAL_RECEIPT_SUPPORTED",
   "persistentReceiptPathPattern":"artifacts/validation/34-L-bronze-local-closure-receipts/<source-head>-<evidence-digest>.json",

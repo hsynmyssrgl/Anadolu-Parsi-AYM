@@ -18,7 +18,7 @@
   "signedManifestRuntimeCheckRequired": true,
   "buildManifestAloneGrantsRuntimeAuthority": false,
   "productionSourceZoneCount": 18,
-  "scannedProductionFiles": 556,
+  "scannedProductionFiles": 563,
   "protectedCapabilityFamilies": [
     "camera",
     "microphone",
@@ -31,14 +31,14 @@
   "surfaceCounts": {
     "CAMERA_API": 1,
     "FILE_DIALOG": 2,
-    "FILE_IMPORT": 335,
+    "FILE_IMPORT": 362,
     "MICROPHONE_API": 1,
     "NETWORK_API": 3,
     "NETWORK_IMPORT": 13,
     "OCR_API": 5,
     "OCR_IMPORT": 35
   },
-  "exactCapabilitySurfaceCount": 395,
+  "exactCapabilitySurfaceCount": 422,
   "applicationRuntimeCapabilities": {
     "windows-desktop": [
       "camera.access",
@@ -835,6 +835,62 @@
     },
     {
       "key": "FILE_IMPORT|apps/desktop/src/main/device-identity.ts|node:fs:writeFileSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/factory-reset-manager.ts|node:fs:existsSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/factory-reset-manager.ts|node:fs/promises:lstat",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/factory-reset-manager.ts|node:fs/promises:mkdir",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/factory-reset-manager.ts|node:fs/promises:readFile",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/factory-reset-manager.ts|node:fs/promises:rename",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/factory-reset-manager.ts|node:fs/promises:rm",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/factory-reset-manager.ts|node:fs/promises:writeFile",
       "applicationIds": [
         "windows-desktop"
       ],
@@ -1906,6 +1962,62 @@
       "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
     },
     {
+      "key": "FILE_IMPORT|apps/desktop/src/main/product-license-manager.ts|node:fs/promises:lstat",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/product-license-manager.ts|node:fs/promises:mkdir",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/product-license-manager.ts|node:fs/promises:readFile",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/product-license-manager.ts|node:fs/promises:realpath",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/product-license-manager.ts|node:fs/promises:rename",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/product-license-manager.ts|node:fs/promises:rm",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/product-license-manager.ts|node:fs/promises:writeFile",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
       "key": "FILE_IMPORT|apps/desktop/src/main/protected-side-artifact-logger.ts|node:fs:existsSync",
       "applicationIds": [
         "windows-desktop"
@@ -2410,6 +2522,78 @@
       "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
     },
     {
+      "key": "FILE_IMPORT|apps/desktop/src/main/uninstall-backup-assistant.ts|node:fs:createReadStream",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/uninstall-backup-assistant.ts|node:fs/promises:access",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/uninstall-backup-assistant.ts|node:fs/promises:copyFile",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/uninstall-backup-assistant.ts|node:fs/promises:lstat",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/uninstall-backup-assistant.ts|node:fs/promises:mkdir",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/uninstall-backup-assistant.ts|node:fs/promises:readdir",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/uninstall-backup-assistant.ts|node:fs/promises:readFile",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/uninstall-backup-assistant.ts|node:fs/promises:realpath",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/uninstall-backup-assistant.ts|node:fs/promises:writeFile",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
       "key": "FILE_IMPORT|apps/desktop/src/main/user-data-vault.ts|node:fs:chmodSync",
       "applicationIds": [
         "windows-desktop"
@@ -2418,7 +2602,31 @@
       "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
     },
     {
+      "key": "FILE_IMPORT|apps/desktop/src/main/user-data-vault.ts|node:fs:constants",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/user-data-vault.ts|node:fs:copyFileSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
       "key": "FILE_IMPORT|apps/desktop/src/main/user-data-vault.ts|node:fs:existsSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/user-data-vault.ts|node:fs:lstatSync",
       "applicationIds": [
         "windows-desktop"
       ],
@@ -2451,6 +2659,14 @@
     },
     {
       "key": "FILE_IMPORT|apps/desktop/src/main/user-data-vault.ts|node:fs:rmSync",
+      "applicationIds": [
+        "windows-desktop"
+      ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/user-data-vault.ts|node:fs:statSync",
       "applicationIds": [
         "windows-desktop"
       ],

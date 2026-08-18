@@ -45,7 +45,7 @@ describe('B2-03/B2-04 desktop integration', () => {
 
   it('keeps renderer preferences and all nine Electron fuses fail-closed', () => {
     expect(assertSecureRendererPreferences(createSecureRendererPreferences('preload.cjs',false))).toMatchObject({sandbox:true,contextIsolation:true,nodeIntegration:false,webSecurity:true,webviewTag:false});
-    expect(ELECTRON_FUSE_POLICY).toEqual({RunAsNode:false,EnableCookieEncryption:true,EnableNodeOptionsEnvironmentVariable:false,EnableNodeCliInspectArguments:false,EnableEmbeddedAsarIntegrityValidation:true,OnlyLoadAppFromAsar:true,LoadBrowserProcessSpecificV8Snapshot:true,GrantFileProtocolExtraPrivileges:false,WasmTrapHandlers:true});
+    expect(ELECTRON_FUSE_POLICY).toEqual({RunAsNode:false,EnableCookieEncryption:true,EnableNodeOptionsEnvironmentVariable:false,EnableNodeCliInspectArguments:false,EnableEmbeddedAsarIntegrityValidation:true,OnlyLoadAppFromAsar:true,LoadBrowserProcessSpecificV8Snapshot:false,GrantFileProtocolExtraPrivileges:false,WasmTrapHandlers:true});
     expect(DESKTOP_SECURITY_POSTURE.electron.fileProtocolPrimaryRendererAllowed).toBe(false);
   });
 
@@ -62,15 +62,34 @@ describe('B2-03/B2-04 desktop integration', () => {
     expect(renderer).toContain('unlockSession');
     expect(renderer).toContain("from '@ppt/domain/renderer';");
     expect(rendererDomainEntry).toContain('PRODUCT_NAVIGATION_ROUTES');
-    expect(rendererDomainEntry).not.toContain('@ppt/core');
+    expect(rendererDomainEntry).toContain("import type { IsoDateTime, UserId } from '@ppt/core';");
+    expect(rendererDomainEntry).not.toMatch(/import\s+(?!type\b)[^;]+from\s+['"]@ppt\/core['"]/u);
   });
 
   it('binds the custom protocol and mandatory afterPack fuse hook', () => {
     const main=readFileSync('apps/desktop/src/main/main.ts','utf8');
     const packageJson=JSON.parse(readFileSync('apps/desktop/package.json','utf8'));
+    const afterPack=readFileSync('apps/desktop/scripts/apply-electron-fuses.mjs','utf8');
+    const asarRepair=readFileSync('apps/desktop/scripts/repair-electron-asar-integrity.mjs','utf8');
+    const builderRunner=readFileSync('apps/desktop/scripts/run-electron-builder.mjs','utf8');
     expect(main).toContain("protocol.registerSchemesAsPrivileged");
     expect(main).toContain('protocol.handle(PRIMARY_RENDERER_SCHEME');
     expect(main).not.toContain('window.loadFile(');
+    expect(main).toContain('`runtime-${process.pid}-${Date.now().toString(36)}`');
+    expect(main).toContain('catch { /* will-quit retries after all windows have closed */ }');
+    expect(main).toContain("app.on('will-quit', () => {");
+    expect(main).toContain('catch { /* OS temporary-storage maintenance may remove a still-locked residue later. */ }');
+    expect(main).toContain('volatileRuntimeCleanupMarker');
+    expect(main).toContain('previousProcessAlive');
+    expect(main).toContain('dirname(previousRuntimeRoot) === resolve(volatileRuntimeBase)');
+    expect(main).toContain('!previousStat.isSymbolicLink()');
+    expect(main).toContain('maxRetries: 4');
+    expect(main).not.toContain('finally { rmSync(volatileRuntimeRoot, { recursive: true, force: true }); }');
     expect(packageJson.build.afterPack).toBe('scripts/apply-electron-fuses.mjs');
+    expect(afterPack).toContain('repairAndVerifyPackagedAsarIntegrity');
+    expect(asarRepair).toContain('ASAR entry integrity readback failed.');
+    expect(asarRepair).toContain('Electron executable ASAR integrity readback failed.');
+    expect(builderRunner).toContain("['--win', 'dir', '--config.forceCodeSigning=false']");
+    expect(builderRunner).toContain("['--win', 'nsis']");
   });
 });

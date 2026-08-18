@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { MEMORY_STUDIO_RECORD_KINDS, type MemoryStudioCenterView, type MemoryStudioRecordKind,
-  type MemoryTimeCapsuleCenterItemView } from '@ppt/domain';
+import { MEMORY_STUDIO_RECORD_KINDS } from '@ppt/domain/renderer';
+import type { MemoryStudioCenterView, MemoryStudioRecordKind,
+  MemoryTimeCapsuleCenterItemView } from '@ppt/domain';
 import { Button, EmptyState, StatusMessage, Surface } from './ui';
 
 const kindLabels:Readonly<Record<MemoryStudioRecordKind,string>>=Object.freeze({

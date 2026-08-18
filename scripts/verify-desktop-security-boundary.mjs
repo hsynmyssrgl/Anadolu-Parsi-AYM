@@ -105,7 +105,9 @@ export const verifyDesktopSecurityBoundary = async () => {
   ]));
   check('renderer runtime uses the browser-safe domain entry without the Node crypto export graph', includesAll(domainRenderer, [
     'OBJECT_PERMISSION_ACTIONS', 'FAMILY_RELATIONSHIP_CATALOG', 'PRODUCT_NAVIGATION_GROUPS', 'PRODUCT_NAVIGATION_ROUTES'
-  ]) && !domainRenderer.includes('@ppt/core') && !domainRenderer.includes('./index.js')
+  ]) && domainRenderer.includes("import type { IsoDateTime, UserId } from '@ppt/core';")
+    && !/import\s+(?!type\b)[^;]+from\s+['"]@ppt\/core['"]/u.test(domainRenderer)
+    && !domainRenderer.includes('./index.js')
     && renderer.includes("from '@ppt/domain/renderer';")
     && !renderer.includes("import { FAMILY_RELATIONSHIP_CATALOG, OBJECT_PERMISSION_ACTIONS, PRODUCT_NAVIGATION_GROUPS, PRODUCT_NAVIGATION_ROUTES, getFamilyRelationship, type FamilyRelationshipCategory, type FamilyRelationshipCode } from '@ppt/domain';"));
   check('manual lock is reachable from the profile menu', renderer.includes('Şimdi kilitle'));
@@ -116,7 +118,7 @@ export const verifyDesktopSecurityBoundary = async () => {
     && ELECTRON_FUSE_POLICY.EnableNodeCliInspectArguments === false
     && ELECTRON_FUSE_POLICY.EnableEmbeddedAsarIntegrityValidation === true
     && ELECTRON_FUSE_POLICY.OnlyLoadAppFromAsar === true
-    && ELECTRON_FUSE_POLICY.LoadBrowserProcessSpecificV8Snapshot === true
+    && ELECTRON_FUSE_POLICY.LoadBrowserProcessSpecificV8Snapshot === false
     && ELECTRON_FUSE_POLICY.GrantFileProtocolExtraPrivileges === false
     && ELECTRON_FUSE_POLICY.WasmTrapHandlers === true);
   check('packaging requires ASAR and afterPack fuse mutation', desktopPackage.build?.asar === true

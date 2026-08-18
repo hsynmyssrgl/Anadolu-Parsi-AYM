@@ -1,6 +1,19 @@
 # Açık ve Ertelenmiş Maddeler — Build 183
 
-**Aktif sürüm:** 02.08.2026.228
+**Aktif sürüm:** Bronze 04.08.2026.29
+
+> 17.08.2026 güncellik bağı: Aşağıdaki Build228 ve önceki listeler tarihsel durumu korur. Güncel dış bağımlılıklar, 33-P–34-L kabul engelleri ve installer/başlangıç gerçeği `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md` içinde tek matriste tutulur.
+
+## 17.08.2026 güncel Core Service ve dağıtım durumu
+
+- **Yerel olarak kapatıldı:** Core Service gerçek ayrı utility companion sürecinde başlar; bağlantı yetkisi her açılışta yeni local named-pipe ve 48 baytlık token ile kurulur.
+- **Yerel olarak kapatıldı:** Kalıcı politika imza anahtarı CurrentUser DPAPI korumalı yan-artifact içinde tutulur; bozuk veya değişmiş provisioning sessizce yenilenmez ve fail-closed reddedilir.
+- **Yerel olarak kapatıldı:** Companion masaüstü ASAR paketinde `dist/core-service/companion.js` olarak bulunur; güncel `win-unpacked` uygulaması aynı profilde iki ardışık açılışta DPAPI `created`/`verified` ve güvenli renderer politikasıyla PASS vermiştir.
+- **Açık — dış kaynak gerekli:** Production Authenticode kod imzalama sertifikası, beklenen yayıncı subject'i ve izinli sertifika thumbprint/SHA-256 değerleri sağlanmadı. Bu nedenle signed-only `package:win` kapısı bilinçli olarak installer üretmez.
+- **Kısmi yerel PASS:** Eski `C:\\Program Files\\@pptdesktop` kurulumu kendi kaldırıcısıyla silindi; güncel imzasız yerel paket `C:\\Program Files\\PPT\\AYM` altına kuruldu. Masaüstü/Başlat kısayolları, kurulu dosya SHA-256 eşliği, yanıt veren ana pencere, renderer ve Core Service utility süreci doğrulandı.
+- **Açık — dış/manuel kanıt gerekli:** Production Authenticode sertifikası ve signed installer; temiz işletim sistemi kurulumu, upgrade, repair, yeni kurulumun uninstall/veri koruma yaşam döngüsü, yeniden başlatma/güç kesintisi ve uzun süreli çalışma henüz doğrulanmadı.
+- **Açık — mimari kapsam:** Windows SCM hizmeti, makine hesabı ACL sahipliği, politika imza anahtarı rotasyonu/iptali, çoklu node quorum/failover ve uzun süreli soak bu companion düzeltmesinin kapsamında değildir.
+- **Kabul sonucu:** Yerel kaynak/build/unpacked-launch PASS; imzalı installer ve requirement PASS **değildir**.
 
 ## Build228 resmî Bronze kapanışı
 

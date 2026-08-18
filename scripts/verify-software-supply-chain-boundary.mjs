@@ -141,7 +141,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   if (desktopPackage.build?.forceCodeSigning !== true) {
     failures.push({ kind: 'FORCE_CODE_SIGNING_DISABLED', path: 'apps/desktop/package.json', detail: String(desktopPackage.build?.forceCodeSigning) });
   }
-  if (!String(desktopPackage.build?.win?.artifactName ?? '').includes('04.08.2026.29')) {
+  const activeRelease = JSON.parse(await readFile('config/release-ledger.json', 'utf8')).current;
+  if (!String(desktopPackage.build?.win?.artifactName ?? '').includes(activeRelease.version)) {
     failures.push({ kind: 'WINDOWS_ARTIFACT_VERSION_DRIFT', path: 'apps/desktop/package.json', detail: String(desktopPackage.build?.win?.artifactName) });
   }
   if (failures.length > 0) {

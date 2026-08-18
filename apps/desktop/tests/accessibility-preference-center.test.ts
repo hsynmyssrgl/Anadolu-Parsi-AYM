@@ -106,7 +106,7 @@ describe('33-M accessibility preference center', () => {
     });
     expect(result).toBe('speaking');
     expect(cancelCount).toBe(1);
-    expect(spoken).toMatchObject({text:FIRST_RUN_NARRATION_TEXT,lang:'tr-TR',rate:0.9,pitch:0.82});
+    expect(spoken).toMatchObject({text:FIRST_RUN_NARRATION_TEXT,lang:'tr-TR',rate:0.88,pitch:0.95});
     expect(statuses).toEqual(['speaking']);
     spoken?.onend?.();
     expect(statuses).toEqual(['speaking','ready']);

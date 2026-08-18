@@ -13,6 +13,8 @@
   ],
   "scripts": {
     "clean": "node scripts/clean.mjs",
+    "release:preview-version": "node scripts/allocate-monthly-release-version.mjs --preview",
+    "release:allocate-version": "node scripts/allocate-monthly-release-version.mjs",
     "build:packages": "npm run build:foundation && npm run build --workspace @ppt/core-service-contracts && npm run build --workspace @ppt/core-service-client && npm run build --workspace @ppt/application && npm run build --workspace @ppt/infrastructure && npm run build --workspace @ppt/test-data",
     "build": "npm run clean && npm run build:packages && npm run build --workspace @ppt/core-service && npm run build --workspace @ppt/desktop",
     "pretypecheck": "node scripts/verify-client-data-access-boundary.mjs && node scripts/verify-versioned-core-service-api-boundary.mjs && node scripts/verify-network-egress-boundary.mjs && node scripts/verify-derived-data-policy-boundary.mjs && node scripts/verify-sensitive-log-boundary.mjs && node scripts/verify-immutable-policy-decision-audit-boundary.mjs && node scripts/verify-source-deletion-propagation-boundary.mjs && node scripts/verify-policy-conformance-suite-boundary.mjs && node scripts/verify-platform-policy-ast-gate.mjs && node scripts/verify-platform-capability-manifest-gate.mjs && node scripts/verify-application-security-profile-gate.mjs && node scripts/verify-policy-service-availability-boundary.mjs && node scripts/verify-software-supply-chain-boundary.mjs && node scripts/verify-ppk026-policy-client.mjs && node scripts/verify-typed-policy-sdk-boundary.mjs && node scripts/verify-product-surface-governance.mjs && node scripts/verify-desktop-security-boundary.mjs && node scripts/verify-sensitive-data-consent-boundary.mjs && node scripts/verify-b4-banking-foundation-boundary.mjs && node scripts/verify-b4-payment-card-management-boundary.mjs && node scripts/verify-b4-loan-management-boundary.mjs && node scripts/verify-b4-finance-planning-portfolio-analytics-boundary.mjs && node scripts/verify-b4-controlled-import-open-banking-boundary.mjs && node scripts/verify-b5-category-life-home-vehicle-boundary.mjs && node scripts/verify-home-inventory-utility-belongings-boundary.mjs && node scripts/verify-family-emergency-planning-boundary.mjs && node scripts/verify-family-emergency-preparedness-boundary.mjs && node scripts/verify-family-emergency-assistance-card-boundary.mjs && node scripts/verify-family-emergency-card-portability-boundary.mjs && node scripts/verify-privacy-consent-lost-device-control-boundary.mjs && node scripts/verify-long-term-portfolio-boundary.mjs && node scripts/verify-33-m-accessibility-boundary.mjs && node scripts/verify-33-n-draft-async-state-ux-boundary.mjs",
@@ -603,6 +605,7 @@
     "generate:artifact-index:v2": "node scripts/generate-project-artifact-index-v2.mjs",
     "verify:rules": "node scripts/verify-canonical-rule-registry.mjs",
     "verify:decisions": "node scripts/verify-user-decision-ledger.mjs",
+    "verify:documentation-sync": "node scripts/verify-documentation-synchronization-policy.mjs",
     "verify:active-release:v2": "node scripts/verify-active-release-contract-v2.mjs",
     "verify:document-index:v2": "node scripts/verify-project-artifact-index-v2.mjs",
     "verify:conversation-capacity": "node scripts/verify-conversation-capacity-policy.mjs",

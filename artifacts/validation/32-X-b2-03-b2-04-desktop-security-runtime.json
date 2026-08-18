@@ -14,7 +14,7 @@
       "status": "PASS",
       "exitCode": 0,
       "signal": null,
-      "outputTail": "B2-03/B2-04 desktop security contract: PASS (37/37 checks)."
+      "outputTail": "B2-03/B2-04 desktop security contract: PASS (38/38 checks)."
     },
     {
       "id": "desktop-security-boundary",
@@ -28,21 +28,21 @@
       "status": "PASS",
       "exitCode": 0,
       "signal": null,
-      "outputTail": "{\n  \"status\": \"PASS\",\n  \"checks\": 11,\n  \"policy\": {\n    \"RunAsNode\": false,\n    \"EnableCookieEncryption\": true,\n    \"EnableNodeOptionsEnvironmentVariable\": false,\n    \"EnableNodeCliInspectArguments\": false,\n    \"EnableEmbeddedAsarIntegrityValidation\": true,\n    \"OnlyLoadAppFromAsar\": true,\n    \"LoadBrowserProcessSpecificV8Snapshot\": true,\n    \"GrantFileProtocolExtraPrivileges\": false,\n    \"WasmTrapHandlers\": true\n  }\n}"
+      "outputTail": "{\n  \"status\": \"PASS\",\n  \"checks\": 11,\n  \"policy\": {\n    \"RunAsNode\": false,\n    \"EnableCookieEncryption\": true,\n    \"EnableNodeOptionsEnvironmentVariable\": false,\n    \"EnableNodeCliInspectArguments\": false,\n    \"EnableEmbeddedAsarIntegrityValidation\": true,\n    \"OnlyLoadAppFromAsar\": true,\n    \"LoadBrowserProcessSpecificV8Snapshot\": false,\n    \"GrantFileProtocolExtraPrivileges\": false,\n    \"WasmTrapHandlers\": true\n  }\n}"
     },
     {
       "id": "ppk021-ast-ratchet",
       "status": "PASS",
       "exitCode": 0,
       "signal": null,
-      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 379,\n  \"privilegedSurfaces\": 543,\n  \"exactAllowlistEntries\": 543,\n  \"exactAllowlistSha256\": \"d6cb28c686caa25d9071f9ba1fb221ddeb5fe1b19433551671f6bce5e679fb29\",\n  \"surfaceCounts\": {\n    \"CRYPTO_GLOBAL\": 2,\n    \"CRYPTO_IMPORT\": 128,\n    \"DATABASE_IMPORT\": 21,\n    \"NETWORK_IMPORT\": 8,\n    \"REPOSITORY_IMPORT\": 48,\n    \"ROLE_PRESENTATION\": 1,\n    \"SQL_CALL\": 56,\n    \"SQL_CONSTRUCTOR\": 2,\n    \"SQL_IMPORT\": 2,\n    \"USE_CASE_COMPOSITION\": 275\n  },\n  \"maliciousSelfTestAssertions\": 17,\n  \"benignSelfTestAssertions\": 4,\n  \"directRoleAuthorizationBypasses\": 0,\n  \"findings\": []\n}"
+      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 556,\n  \"privilegedSurfaces\": 876,\n  \"exactAllowlistEntries\": 876,\n  \"exactAllowlistSha256\": \"709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0\",\n  \"surfaceCounts\": {\n    \"CRYPTO_GLOBAL\": 21,\n    \"CRYPTO_IMPORT\": 236,\n    \"DATABASE_IMPORT\": 21,\n    \"NETWORK_IMPORT\": 11,\n    \"REPOSITORY_IMPORT\": 70,\n    \"ROLE_PRESENTATION\": 2,\n    \"SQL_CALL\": 79,\n    \"SQL_CONSTRUCTOR\": 2,\n    \"SQL_IMPORT\": 2,\n    \"USE_CASE_COMPOSITION\": 432\n  },\n  \"maliciousSelfTestAssertions\": 17,\n  \"benignSelfTestAssertions\": 4,\n  \"directRoleAuthorizationBypasses\": 0,\n  \"findings\": []\n}"
     },
     {
       "id": "ppk022-capability-ratchet",
       "status": "PASS",
       "exitCode": 0,
       "signal": null,
-      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 379,\n  \"capabilitySurfaces\": 242,\n  \"exactManifestSurfaces\": 242,\n  \"exactManifestSha256\": \"93ea91572d01e46eb535c2634b62d084f455a92829ac5f2620a7ae9bd5a423ac\",\n  \"surfaceCounts\": {\n    \"FILE_DIALOG\": 2,\n    \"FILE_IMPORT\": 229,\n    \"NETWORK_API\": 3,\n    \"NETWORK_IMPORT\": 8\n  },\n  \"pinnedBootstrapSurfaces\": 26,\n  \"maliciousSelfTestAssertions\": 33,\n  \"benignSelfTestAssertions\": 5,\n  \"canonicalApplications\": 14,\n  \"protectedCapabilityFamilies\": 7,\n  \"findings\": []\n}"
+      "outputTail": "{\n  \"status\": \"PASS\",\n  \"productionSourceZones\": 18,\n  \"scannedFiles\": 556,\n  \"capabilitySurfaces\": 395,\n  \"exactManifestSurfaces\": 395,\n  \"exactManifestSha256\": \"a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e\",\n  \"surfaceCounts\": {\n    \"CAMERA_API\": 1,\n    \"FILE_DIALOG\": 2,\n    \"FILE_IMPORT\": 335,\n    \"MICROPHONE_API\": 1,\n    \"NETWORK_API\": 3,\n    \"NETWORK_IMPORT\": 13,\n    \"OCR_API\": 5,\n    \"OCR_IMPORT\": 35\n  },\n  \"pinnedBootstrapSurfaces\": 26,\n  \"maliciousSelfTestAssertions\": 35,\n  \"benignSelfTestAssertions\": 5,\n  \"canonicalApplications\": 14,\n  \"protectedCapabilityFamilies\": 7,\n  \"findings\": []\n}"
     },
     {
       "id": "desktop-security-targeted-tests",
@@ -51,7 +51,7 @@
       "signal": null,
       "tests": 11,
       "testFiles": 3,
-      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n···········\n\n Test Files  3 passed (3)\n      Tests  11 passed (11)\n   Start at  20:50:34\n   Duration  4.45s (transform 1.61s, setup 0ms, import 3.38s, tests 39ms, environment 0ms)"
+      "outputTail": "RUN  v4.1.10 C:/PPT/AYM/06_KOD/app\n\n···········\n\n Test Files  3 passed (3)\n      Tests  11 passed (11)\n   Start at  11:33:10\n   Duration  5.77s (transform 2.58s, setup 0ms, import 4.99s, tests 25ms, environment 0ms)"
     },
     {
       "id": "root-typescript",
@@ -65,17 +65,17 @@
       "status": "PASS",
       "exitCode": 0,
       "signal": null,
-      "outputTail": "Feature Reality Gate: PASS honesty / 350 requirements / surface 17+5=22 / unused API 14+0 / Silver BLOCKED."
+      "outputTail": "Feature Reality Gate: PASS honesty / 358 requirements / surface 17+5=22 / unused API 14+0 / Silver BLOCKED."
     },
     {
       "id": "decision-ledger",
       "status": "PASS",
       "exitCode": 0,
       "signal": null,
-      "outputTail": "User Decision Ledger: PASS (368 checks / 69 decisions)."
+      "outputTail": "User Decision Ledger: PASS (413 checks / 78 decisions)."
     }
   ],
   "failures": [],
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-12T17:50:41.349Z"
+  "generatedAt": "2026-08-17T08:33:19.026Z"
 }

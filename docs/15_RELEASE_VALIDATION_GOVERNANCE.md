@@ -1,6 +1,10 @@
 # Sürüm ve Doğrulama Yönetişimi — Build 183
 
-**Aktif sürüm:** 02.08.2026.228
+**Aktif sürüm:** Bronze 04.08.2026.29
+
+> 17.08.2026 güncellik bağı: Yerel boundary/contract/runtime/test/build PASS sonuçları gerçek cihaz, gerçek sağlayıcı, hukuk-gizlilik, sertifikasyon veya üretim UAT kanıtı değildir. `NOT_RUN`, `PARTIAL`, `BLOCKED` ve `countsAsRequirementPass=false` hiçbir zaman terfi PASS'i sayılamaz; güncel kanıt özeti `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md` içindedir.
+
+> DEC-251 belge kapısı: Her yeni kararın DEC, makine defteri, etkilenen aktif belgeler ve iş listesi açık/kapalı/neden alanları aynı değişiklikte güncellenmeden kapanış yasaktır. DEC-252 sonrasında tarihsel build/arşiv/checkpoint içeriği tekrar denetlenmez; yalnız aktif ve yeni belgeler bu kapıya girer.
 
 ## 1. Kanal modeli
 

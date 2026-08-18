@@ -7,9 +7,9 @@ const packages={
     decisionFile:'docs/decisions/DEC-244-e2ee-file-sharing-remaining-communication-ux.md',threat:'docs/security/THREAT_MODEL_34_G_E2EE_FILE_SHARING_REMAINING_COMMUNICATION_UX.md',
     localStatus:'LOCAL_PRODUCTION_COMPOSITION_ACCEPTANCE_INCOMPLETE',expectedTestFiles:6,expectedTests:34,
     validation:{migrationSha256:'7d87d405a85196a2f76a765899adf7b734858f7dc2b1715c59577d0048838700',
-      ppk015Sha256:'d2e1907b1f22a00a1e62057d32968867f4e54023782757650de3925ee31eeaaf',
-      ppk021Count:876,ppk021Sha256:'709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0',
-      ppk022Count:395,ppk022Sha256:'a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e'},
+      ppk015Sha256:'b2f30c8f337a59dbfb5692749ddffa4a06d810e39ac28a278410d70079d8ea35',
+      ppk021Count:886,ppk021Sha256:'58a90febf9382776c2b1472e6ffd6a645c9a24a4cd69e499a8afc1fff2e72b30',
+      ppk022Count:422,ppk022Sha256:'dc0234d84a50ff1872f9cde4fb7ab286446b236a69019034055fa938dbb3be1e'},
     tests:['packages/application/tests/communication-file-sharing-use-cases.test.ts','packages/repositories/communication-file-sharing-repository-policy.test.ts','apps/desktop/tests/communication-file-payload-vault.test.ts','apps/desktop/tests/communication-file-sharing-ipc-integration.test.ts','apps/desktop/tests/communication-file-sharing-ipc-bridge.test.ts','apps/desktop/tests/remaining-communication-distributed-ui.test.ts'],
     markers:[['packages/domain/src/communication-file-sharing.ts','COMMUNICATION_FILE_SAFE_PREVIEW_MAX_BYTES'],['packages/application/src/communication-file-sharing-use-cases.ts','GetCommunicationFileSafePreviewUseCase'],['packages/application/src/communication-file-sharing-use-cases.ts','MaintainCommunicationFilePayloadVaultUseCase'],['packages/database/src/family-database-migrations.ts',"createMigrationDefinition(111, 'communication_file_sharing_remaining_ux'"],['apps/desktop/src/main/communication-file-payload-vault.ts','WindowsDefenderCommunicationFileMalwareScanner'],['apps/desktop/src/main/communication-file-payload-vault.ts','#recoverInterruptedPublications'],['apps/desktop/src/main/communication-file-payload-vault.ts','sweepOrphans'],['apps/desktop/src/main/communication-file-sharing-application-adapter.ts','RepositoryBackedCommunicationFileSharingUnitOfWork'],['apps/desktop/src/main/ipc-integration-policy.ts','getSafePreview'],['apps/desktop/src/main/data-store.ts','maintainCommunicationFilePayloadVault'],['apps/desktop/src/renderer/CommunicationFileSharingPanel.tsx','Güvenli düz metin önizleme']]},
   '34-H':{slug:'communication-audit-archive-integrity',decision:'DEC-245',migration:112,
@@ -17,9 +17,9 @@ const packages={
     decisionFile:'docs/decisions/DEC-245-communication-audit-archive-integrity.md',threat:'docs/security/THREAT_MODEL_34_H_COMMUNICATION_AUDIT_ARCHIVE_INTEGRITY.md',
     localStatus:'LOCAL_PRODUCTION_QUERY_COMPOSED_ACCEPTANCE_INCOMPLETE',expectedTestFiles:5,expectedTests:10,
     validation:{migrationSha256:'876cfb55675e5c567c156932c4ddbfd672c87e547f672ebae798e03d69287fba',
-      ppk015Sha256:'d2e1907b1f22a00a1e62057d32968867f4e54023782757650de3925ee31eeaaf',
-      ppk021Count:876,ppk021Sha256:'709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0',
-      ppk022Count:395,ppk022Sha256:'a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e'},
+      ppk015Sha256:'b2f30c8f337a59dbfb5692749ddffa4a06d810e39ac28a278410d70079d8ea35',
+      ppk021Count:886,ppk021Sha256:'58a90febf9382776c2b1472e6ffd6a645c9a24a4cd69e499a8afc1fff2e72b30',
+      ppk022Count:422,ppk022Sha256:'dc0234d84a50ff1872f9cde4fb7ab286446b236a69019034055fa938dbb3be1e'},
     tests:['packages/application/tests/communication-audit-archive-use-cases.test.ts','packages/repositories/communication-audit-archive-repository-policy.test.ts','apps/desktop/tests/communication-audit-archive-ipc-integration.test.ts','apps/desktop/tests/communication-audit-archive-ipc-bridge.test.ts','apps/desktop/tests/remaining-communication-distributed-ui.test.ts'],
     markers:[['packages/domain/src/communication-audit-archive.ts','productionQueryApiComposed: true'],['packages/application/src/communication-audit-archive-use-cases.ts','communicationAuditArchiveSafeCenter'],['packages/database/src/family-database-migrations.ts',"createMigrationDefinition(112, 'communication_audit_archive_integrity'"],['packages/repositories/src/communication-audit-archive-repository.ts','exact durable policy receipt'],['apps/desktop/src/main/communication-audit-archive-application-adapter.ts','RepositoryBackedCommunicationAuditArchiveQueryPort'],['apps/desktop/src/main/ipc-integration-policy.ts','COMMUNICATION_AUDIT_ARCHIVE_IPC_CHANNELS'],['apps/desktop/src/renderer/CommunicationAuditArchivePanel.tsx','İçerikten ayrı denetim zinciri']]},
   '34-I':{slug:'distributed-core-consensus-tenancy',decision:'DEC-246',migration:113,
@@ -27,9 +27,9 @@ const packages={
     decisionFile:'docs/decisions/DEC-246-distributed-core-consensus-tenancy.md',threat:'docs/security/THREAT_MODEL_34_I_DISTRIBUTED_CORE_CONSENSUS_TENANCY.md',
     localStatus:'LOCAL_HARDENED_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE',expectedTestFiles:3,expectedTests:10,
     validation:{migrationSha256:'3f7b7e02e462744f704ced2255b75d712b90930c807889f13f8dd1d4d2f6e596',
-      ppk015Sha256:'d2e1907b1f22a00a1e62057d32968867f4e54023782757650de3925ee31eeaaf',
-      ppk021Count:876,ppk021Sha256:'709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0',
-      ppk022Count:395,ppk022Sha256:'a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e'},
+      ppk015Sha256:'b2f30c8f337a59dbfb5692749ddffa4a06d810e39ac28a278410d70079d8ea35',
+      ppk021Count:886,ppk021Sha256:'58a90febf9382776c2b1472e6ffd6a645c9a24a4cd69e499a8afc1fff2e72b30',
+      ppk022Count:422,ppk022Sha256:'dc0234d84a50ff1872f9cde4fb7ab286446b236a69019034055fa938dbb3be1e'},
     tests:['apps/core-service/tests/distributed-core-cluster-runtime.test.ts','apps/core-service/tests/distributed-core-migration-boundary.test.ts','apps/desktop/tests/remaining-communication-distributed-ui.test.ts'],
     markers:[['packages/domain/src/distributed-core-service.ts','durableIdempotencyRequired:true'],['packages/domain/src/distributed-core-service.ts','productionRuntimeComposed:false'],['apps/core-service/src/distributed-core-cluster-runtime.ts','findByIdempotencyKey'],['apps/core-service/src/distributed-core-cluster-runtime.ts','commitAndApply'],['apps/core-service/src/distributed-core-cluster-runtime.ts','allowUnverifiedProviderForTests'],['packages/database/src/family-database-migrations.ts',"createMigrationDefinition(113, 'distributed_core_consensus_tenancy'"],['apps/desktop/src/renderer/DistributedOperationsPanel.tsx','özel consensus algoritması yazılmamıştır']]},
   '34-J':{slug:'distributed-clients-operations-disaster-recovery',decision:'DEC-247',migration:114,
@@ -37,9 +37,9 @@ const packages={
     decisionFile:'docs/decisions/DEC-247-distributed-clients-operations-disaster-recovery.md',threat:'docs/security/THREAT_MODEL_34_J_DISTRIBUTED_CLIENTS_OPERATIONS_DR.md',
     localStatus:'LOCAL_HARDENED_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE',expectedTestFiles:3,expectedTests:10,
     validation:{migrationSha256:'ed39e408cbba4cc1b97d9e2e0a902f1b6573639c56a7585c3d44f48078e761fb',
-      ppk015Sha256:'d2e1907b1f22a00a1e62057d32968867f4e54023782757650de3925ee31eeaaf',
-      ppk021Count:876,ppk021Sha256:'709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0',
-      ppk022Count:395,ppk022Sha256:'a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e'},
+      ppk015Sha256:'b2f30c8f337a59dbfb5692749ddffa4a06d810e39ac28a278410d70079d8ea35',
+      ppk021Count:886,ppk021Sha256:'58a90febf9382776c2b1472e6ffd6a645c9a24a4cd69e499a8afc1fff2e72b30',
+      ppk022Count:422,ppk022Sha256:'dc0234d84a50ff1872f9cde4fb7ab286446b236a69019034055fa938dbb3be1e'},
     tests:['apps/core-service/tests/distributed-operations-runtime.test.ts','apps/core-service/tests/distributed-operations-migration-boundary.test.ts','apps/desktop/tests/remaining-communication-distributed-ui.test.ts'],
     markers:[['packages/domain/src/distributed-client-operations.ts','durableOperationsEvidenceRequired: true'],['packages/domain/src/distributed-client-operations.ts','productionRuntimeComposed: false'],['apps/core-service/src/distributed-operations-runtime.ts','validateControlPlaneEnvelope'],['apps/core-service/src/distributed-operations-runtime.ts','verifyAndRegisterBackup'],['apps/core-service/src/distributed-operations-runtime.ts','createRollingUpdatePlan'],['apps/core-service/src/distributed-operations-runtime.ts','allowUnverifiedProvidersForTests'],['packages/database/src/family-database-migrations.ts',"createMigrationDefinition(114, 'distributed_clients_operations_disaster_recovery'"],['apps/desktop/src/renderer/DistributedOperationsPanel.tsx','Remote bağlantı varsayılan kapalıdır']]},
   '34-K':{slug:'windows-resilience-universal-ux',decision:'DEC-248',migration:115,
@@ -47,11 +47,11 @@ const packages={
     decisionFile:'docs/decisions/DEC-248-windows-resilience-universal-ux.md',threat:'docs/security/THREAT_MODEL_34_K_WINDOWS_RESILIENCE_UNIVERSAL_UX.md',
     localStatus:'LOCAL_HARDENED_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE',expectedTestFiles:3,expectedTests:16,
     validation:{migrationSha256:'e9e67d7ef5c3097f4e39ea3a01aca76a7f9b64fe5b54de8da4de8cfbfc42e5cc',
-      ppk015Sha256:'d2e1907b1f22a00a1e62057d32968867f4e54023782757650de3925ee31eeaaf',
-      ppk021Count:876,ppk021Sha256:'709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0',
-      ppk022Count:395,ppk022Sha256:'a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e'},
+      ppk015Sha256:'b2f30c8f337a59dbfb5692749ddffa4a06d810e39ac28a278410d70079d8ea35',
+      ppk021Count:886,ppk021Sha256:'58a90febf9382776c2b1472e6ffd6a645c9a24a4cd69e499a8afc1fff2e72b30',
+      ppk022Count:422,ppk022Sha256:'dc0234d84a50ff1872f9cde4fb7ab286446b236a69019034055fa938dbb3be1e'},
     tests:['packages/application/tests/windows-resilience-universal-ux-use-cases.test.ts','packages/repositories/windows-resilience-universal-ux-repository-policy.test.ts','apps/desktop/tests/universal-ux-consolidation-ui.test.ts'],
-    markers:[['packages/domain/src/windows-resilience-universal-ux.ts','callerSuppliedSearchAuthorizationAccepted: false'],['packages/domain/src/windows-resilience-universal-ux.ts','operationLedgerRetentionPolicyDecided: false'],['packages/application/src/windows-resilience-universal-ux-use-cases.ts','UniversalUxSearchAuthorityPort'],['packages/application/src/windows-resilience-universal-ux-use-cases.ts','WindowsResilienceEvidenceProviderPort'],['packages/repositories/src/windows-resilience-universal-ux-repository.ts','exact durable policy receipt'],['packages/database/src/family-database-migrations.ts',"createMigrationDefinition(115, 'windows_resilience_universal_ux'"],['packages/database/src/family-database-migrations.ts','34-K operation requires exact owner-bound durable PEP receipt'],['apps/desktop/src/renderer/UniversalUxConsolidationPanel.tsx','yetkilendirilmiş evrensel veri araması değildir']]}
+    markers:[['packages/domain/src/windows-resilience-universal-ux.ts','callerSuppliedSearchAuthorizationAccepted: false'],['packages/domain/src/windows-resilience-universal-ux.ts','productionUniversalSearchAuthorityComposed: true'],['packages/domain/src/windows-resilience-universal-ux.ts','operationLedgerRetentionPolicyDecided: false'],['packages/application/src/windows-resilience-universal-ux-use-cases.ts','UniversalUxSearchAuthorityPort'],['packages/application/src/windows-resilience-universal-ux-use-cases.ts','WindowsResilienceEvidenceProviderPort'],['packages/repositories/src/windows-resilience-universal-ux-repository.ts','exact durable policy receipt'],['packages/database/src/family-database-migrations.ts',"createMigrationDefinition(115, 'windows_resilience_universal_ux'"],['packages/database/src/family-database-migrations.ts','34-K operation requires exact owner-bound durable PEP receipt'],['apps/desktop/src/renderer/UniversalUxConsolidationPanel.tsx','searchUnifiedAuthorizedRecords({query:normalized,limit:25})']]}
 };
 const selected=packages[step];if(!selected||!['boundary','contract','runtime'].includes(mode))throw new Error('Usage: node verify-remaining-package-local-foundation.mjs <34-G..34-K> <boundary|contract|runtime> [--no-write]');
 const headResult=spawnSync('git',['-c','safe.directory=C:/PPT/AYM/06_KOD/app','rev-parse','HEAD'],{cwd:root,encoding:'utf8'});
@@ -70,7 +70,24 @@ if(mode==='contract'||mode==='runtime'){
   check('governance identity is exact',scope.step===step&&scope.decision===selected.decision&&inventory.step===step&&inventory.decision===selected.decision);
   if(selected.localStatus)check('local implementation status is exact and non-accepting',scope.localImplementationStatus===selected.localStatus&&inventory.localImplementationStatus===selected.localStatus);
   check('fail-honest status remains non-accepting',scope.status==='PLANNED'&&scope.truth?.requirementsClosed===false&&scope.truth?.countsAsRequirementPass===false&&inventory.countsAsRequirementPass===false);
-  check('manual evidence retains NOT_RUN facts',Object.values(scope.manualEvidence??{}).every(value=>value==='NOT_RUN'));
+  const manualEvidence = scope.manualEvidence ?? {};
+  const manualEvidenceExact = step === '34-K'
+    ? Object.entries(manualEvidence).every(([key,value])=>key === 'installedApplicationLaunch'
+      ? value === 'PASS_LOCAL_UNSIGNED'
+      : key === 'productionUniversalSearchAuthority'
+        ? value === 'PASS_LOCAL_REPOSITORY_BACKED_REALTIME_POLICY_FILTERED'
+        : value === 'NOT_RUN')
+      && scope.truth?.oldMisdirectedInstallationRemoved === true
+      && scope.truth?.unsignedLocalFixedPathInstallVerified === true
+      && scope.truth?.installedApplicationLaunchVerified === true
+      && scope.validation?.installedApplicationEvidence?.status === 'PASS_LOCAL_UNSIGNED_NOT_RELEASE_ACCEPTANCE'
+      && scope.validation?.installedApplicationEvidence?.installPath === 'C:\\Program Files\\PPT\\AYM'
+      && scope.validation?.installedApplicationEvidence?.signature === 'NotSigned'
+      && scope.validation?.installedApplicationEvidence?.mainWindowResponding === true
+      && scope.validation?.installedApplicationEvidence?.rendererProcessObserved === true
+      && scope.validation?.installedApplicationEvidence?.coreServiceUtilityProcessObserved === true
+    : Object.values(manualEvidence).every(value=>value==='NOT_RUN');
+  check('manual evidence records only exact local observations and retains external NOT_RUN facts',manualEvidenceExact);
   check('decision and threat model reject false closure',decision.includes('countsAsRequirementPass=false')&&threat.includes('Residual risk'));
   if(selected.validation)check('current migration and PPK evidence is pinned exactly',
     scope.validation?.[`migration${selected.migration}Sha256`]===selected.validation.migrationSha256

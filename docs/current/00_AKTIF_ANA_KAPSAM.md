@@ -3,7 +3,11 @@
 - Aktif kanal ve sürüm: **Bronze 04.08.2026.29**
 - Kapsam kararı: Kullanıcının 4 Ağustos 2026 tarihli açık onayıyla, bu kaynaktaki bütün kabul edilmiş kapsam girdileri bağlayıcıdır.
 - Gereksinim sicili: `config/accepted-scope-registry.json`
-- Toplam izlenen gereksinim: **344**
+- Toplam izlenen gereksinim: **358**
+- Canlı durum dağılımı (17.08.2026): **109 COMPLETE, 25 PARTIAL, 1 FOUNDATION_STARTED, 223 NOT_IMPLEMENTED**.
+- Güncel birleşik anlatım: `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md`
+- Tüm belge türü denetimi: `docs/current/12_TUM_BELGE_TURLERI_DENETIMI.md`
+- Karar-belge eşzamanlılık politikası: `config/documentation-synchronization-policy.json`
 - Durum: Bronze aktif geliştirme; Silver'a geçiş yasaktır.
 
 ## Tek tamamlanma tanımı

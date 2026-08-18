@@ -1,4 +1,4 @@
-import { PRODUCT_NAVIGATION_ROUTES } from '@ppt/domain';
+import { PRODUCT_NAVIGATION_ROUTES } from '@ppt/domain/renderer';
 
 export type ProductNavigationRouteId = (typeof PRODUCT_NAVIGATION_ROUTES)[number]['id'];
 

@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "PPT-SYNCHRONOUS-DECISION-DOCUMENTATION-POLICY-V1",
+  "release": "Bronze 04.08.2026.29",
+  "effectiveFromDecision": "DEC-251",
+  "decision": "DEC-251",
+  "failClosed": true,
+  "waiverAllowed": false,
+  "decisionMustUpdateInSameChange": [
+    "config/user-decision-ledger.json",
+    "docs/decisions/DEC-<number>-<slug>.md",
+    "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+    "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
+    "kararın etkilediği bütün aktif belge kaynakları",
+    "iş durumunu etkiliyorsa config/remaining-scope-package-roadmap.json",
+    "belge otoritesini etkiliyorsa config/active-document-set.json"
+  ],
+  "mandatoryDecisionFields": [
+    "id",
+    "date",
+    "acceptedAt",
+    "title",
+    "status",
+    "source",
+    "document",
+    "documents",
+    "workListImpact",
+    "syncStatus"
+  ],
+  "allowedSyncStatus": [
+    "SYNCHRONIZED"
+  ],
+  "openWorkItemRequiredFields": [
+    "status",
+    "localImplementationStatus",
+    "openReason",
+    "missingEvidence",
+    "countsAsRequirementPass",
+    "currentStatusSource"
+  ],
+  "openWorkItemRule": "Açık kalan her iş; yerel olarak neyin bulunduğunu, neden açık kaldığını, hangi kanıtın eksik olduğunu ve requirement PASS sayılıp sayılmadığını aynı kayıtta gösterir.",
+  "completionRule": "Karar ve etkilenen belgeler aynı değişiklikte senkron değilse karar veya iş tamamlandı sayılamaz.",
+  "historicalRecordRule": "Tarihsel kayıt yerinde değiştirilmez; yeni gerçek yeni sürüm ve yeni karar olarak eklenir.",
+  "historicalContentReview": {
+    "decision": "DEC-252",
+    "oneTimeBaseline": "artifacts/manifests/ALL_PROJECT_DOCUMENT_FORMAT_AUDIT.json",
+    "futureMode": "FROZEN_BASELINE_NOT_REOPENED_NOT_REVALIDATED",
+    "excludedFromFutureDecisionSync": true,
+    "excludedFromActiveSemanticReview": true,
+    "inventoryClassificationAllowed": true,
+    "rule": "Son temel sonrasında eski build, arşiv ve checkpoint belgelerinin içeriği yeniden kontrol edilmez; yalnız tarihsel ve aktif olmayan kayıt olarak korunur."
+  },
+  "gate": "scripts/verify-documentation-synchronization-policy.mjs",
+  "evidence": "artifacts/validation/documentation-synchronization-policy.json"
+}

@@ -6,7 +6,7 @@
   "sourceBinary": "electron.exe",
   "probeBinary": "electron-fuse-probe.exe",
   "sourceSha256": "8593db40c0c6e5e3c4b6b0a225b1dc9a549ecdf10f6cf2010cf5b6ce869ce07f",
-  "fusedSha256": "32f786add6ef497ede8b248b5ebff23c3fc7f9c16e12b866e4383f41ec048c61",
+  "fusedSha256": "c8f60f006ff5991d52eda0bc37f007a9d4cd83793a2db548455202d842d3a054",
   "binaryChanged": true,
   "policyId": "B2-04-ELECTRON-FUSE-V1",
   "fuseVersion": "1",
@@ -17,11 +17,11 @@
     "EnableNodeCliInspectArguments": false,
     "EnableEmbeddedAsarIntegrityValidation": true,
     "OnlyLoadAppFromAsar": true,
-    "LoadBrowserProcessSpecificV8Snapshot": true,
+    "LoadBrowserProcessSpecificV8Snapshot": false,
     "GrantFileProtocolExtraPrivileges": false,
     "WasmTrapHandlers": true
   },
   "independentReadbackMatched": true,
   "productionSigningOrder": "afterPack-fuses-before-signing",
-  "generatedAt": "2026-08-12T10:36:02.863Z"
+  "generatedAt": "2026-08-17T08:30:22.599Z"
 }

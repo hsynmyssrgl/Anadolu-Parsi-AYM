@@ -1,0 +1,10 @@
+{
+  "name": "anadolu-parsi-gold-aktivasyon-yoneticisi",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Gold cihaz aktivasyon anahtarını uygulamadan ayrı yöneten yerel yönetici aracı.",
+  "scripts": {
+    "calistir": "node yonetici.mjs"
+  }
+}

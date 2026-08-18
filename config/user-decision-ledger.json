@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "PPT-USER-DECISION-LEDGER-V1",
   "release": "Bronze 04.08.2026.29",
-  "decisionCount": 78,
+  "decisionCount": 82,
   "decisions": [
     {
       "id": "DEC-121",
@@ -1990,6 +1990,112 @@
         "docs/security/THREAT_MODEL_33_J_FAMILY_EMERGENCY_CARD_PORTABILITY.md",
         "docs/audit/33-J_FAMILY_EMERGENCY_CARD_PORTABILITY_UST_KAPANIS.md",
         "config/33-j-family-emergency-card-portability-inventory.json"
+      ]
+    },
+    {
+      "id": "DEC-250",
+      "date": "2026-08-17",
+      "acceptedAt": "2026-08-17",
+      "title": "Güncel dokümantasyon yenilemesi ve tarihsel kayıtların korunması",
+      "status": "ACTIVE",
+      "source": "Açık kullanıcı kararı: geçmiş kayıtlar kalsın, yeni versiyon olarak düzenle",
+      "document": "docs/decisions/DEC-250-current-documentation-refresh-historical-preservation.md",
+      "requirements": [],
+      "codeAreas": [
+        "docs/current",
+        "config/active-document-set.json",
+        "scripts/generate-current-master-documentation.py"
+      ],
+      "evidence": [
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
+        "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_17.08.2026_V1.docx",
+        "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_17.08.2026_V1.pdf"
+      ]
+    },
+    {
+      "id": "DEC-251",
+      "date": "2026-08-17",
+      "acceptedAt": "2026-08-17T13:10:00+03:00",
+      "title": "Karar anında eşzamanlı belge ve iş listesi güncellemesi",
+      "status": "ACTIVE",
+      "source": "Açık kullanıcı kararı: bundan sonraki her karar anında güncellenecek belgelerde; açık ve kapalı işler gerekçeleriyle yazılacak",
+      "document": "docs/decisions/DEC-251-synchronous-decision-documentation-enforcement.md",
+      "documents": [
+        "config/documentation-synchronization-policy.json",
+        "config/active-document-set.json",
+        "config/remaining-scope-package-roadmap.json",
+        "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
+        "docs/current/12_TUM_BELGE_TURLERI_DENETIMI.md"
+      ],
+      "workListImpact": "Her açık iş için yerel durum, açık kalma nedeni, eksik kanıt ve requirement PASS alanları zorunlu; eşzamanlı belge zinciri eksikse tamamlanma yasak",
+      "syncStatus": "SYNCHRONIZED",
+      "requirements": [],
+      "codeAreas": [
+        "scripts/verify-documentation-synchronization-policy.mjs",
+        "scripts/audit-all-project-documents.py",
+        "scripts/generate-current-master-documentation.py"
+      ],
+      "evidence": [
+        "artifacts/validation/documentation-synchronization-policy.json",
+        "artifacts/manifests/ALL_PROJECT_DOCUMENT_FORMAT_AUDIT.json"
+      ]
+    },
+    {
+      "id": "DEC-252",
+      "date": "2026-08-17",
+      "acceptedAt": "2026-08-17T13:20:00+03:00",
+      "title": "Tarihsel kayıtların gelecek içerik denetimlerinden çıkarılması",
+      "status": "ACTIVE",
+      "source": "Açık kullanıcı kararı: bu düzenlemeden sonra eski kayıtlar kontrol edilmesin",
+      "document": "docs/decisions/DEC-252-freeze-historical-records-from-future-content-review.md",
+      "documents": [
+        "config/documentation-synchronization-policy.json",
+        "config/active-document-set.json",
+        "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
+        "docs/current/12_TUM_BELGE_TURLERI_DENETIMI.md"
+      ],
+      "workListImpact": "Tarihsel build/arşiv/checkpoint kayıtları son temel sonrasında aktif içerik doğrulama iş listesinden çıkarıldı; yalnız yeni ve aktif belgeler denetlenecek",
+      "syncStatus": "SYNCHRONIZED",
+      "requirements": [],
+      "codeAreas": [
+        "scripts/audit-all-project-documents.py",
+        "scripts/verify-documentation-synchronization-policy.mjs"
+      ],
+      "evidence": [
+        "artifacts/manifests/ALL_PROJECT_DOCUMENT_FORMAT_AUDIT.json"
+      ]
+    },
+    {
+      "id": "DEC-253",
+      "date": "2026-08-17",
+      "acceptedAt": "2026-08-17T13:25:00+03:00",
+      "title": "Animasyonlu kurulum, yenilenmiş anlatım ve Silver sesli Yardım Merkezi",
+      "status": "ACTIVE",
+      "source": "Açık kullanıcı kararları: kurulum ekranlarına animasyon ekle; anlatımı ve kurulum metinlerini yeniden düzenle; Silver için gerçek sesli anlatımlı Yardım menüsü oluştur",
+      "document": "docs/decisions/DEC-253-animated-installer-narration-and-silver-help-center.md",
+      "documents": [
+        "config/remaining-scope-package-roadmap.json",
+        "docs/04_RELEASE_PLAN.md",
+        "docs/current/03_AKTIF_UX_ERISILEBILIRLIK_SOZLESMESI.md",
+        "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+        "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md"
+      ],
+      "workListImpact": "34-K yerel kaynak kapsamına animasyonlu kurulum, üç adımlı anlatım ve F1 sesli Yardım Merkezi eklendi; gerçek Windows, Türkçe ses, Narrator ve erişilebilirlik UAT kanıtları eksik olduğundan paket açık ve countsAsRequirementPass=false kalır",
+      "syncStatus": "SYNCHRONIZED",
+      "requirements": [],
+      "codeAreas": [
+        "apps/desktop/build/installer.nsh",
+        "apps/desktop/scripts/verify-installer.mjs",
+        "apps/desktop/src/renderer/accessibility.ts",
+        "apps/desktop/src/renderer/NarratedHelpCenter.tsx",
+        "apps/desktop/src/renderer/App.tsx",
+        "apps/desktop/src/renderer/styles.css"
+      ],
+      "evidence": [
+        "apps/desktop/tests/installer-narration-experience.test.ts",
+        "apps/desktop/tests/narrated-help-center.test.ts"
       ]
     }
   ]

@@ -21,6 +21,8 @@ const SHA = {
 const createPolicy = () => {
   const policy = new ClientDataAccessBoundaryPolicy();
   policy.registerApplicationServiceChannel('family:getSnapshot');
+  policy.registerApplicationServiceChannel('data-repair:workspace');
+  policy.registerApplicationServiceChannel('archive:operationIdentity:acquire');
   policy.registerApplicationServiceChannel('auth:login', true);
   return policy;
 };

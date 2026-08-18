@@ -1,6 +1,8 @@
 # Sürüm Planı ve Kanal Kuralları — Build 183
 
-**Aktif sürüm:** 02.08.2026.228
+**Aktif sürüm:** Bronze 04.08.2026.29
+
+> 17.08.2026 güncellik bağı: 34-L yerel kapanış otomasyonu PASS kanıtları üretmiştir; ancak `allRoadmapPackagesAccepted=false`, `countsAsRequirementPass=false` ve dış/manuel kanıtlar `NOT_RUN` olduğundan Silver/Gold terfisi yoktur. Güncel özet `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md` içindedir.
 
 **Katı politika:** `PPT-LIFECYCLE-STRICT-V1`
 
@@ -19,6 +21,8 @@ Yalnız ağır haricî API üretim adaptörü geçici olarak askıya alınabilir
 ## Silver
 
 Silver yeni ürün özelliği kabul etmez. Mevcut altyapı iyileştirilir, hata düzeltmeleri yapılır ve temiz kurulum, tam TypeScript, birim/entegrasyon, Electron production build, smoke, güvenlik, performans, erişilebilirlik, yedek/restore, gerçek Windows ve installer testleri yürütülür.
+
+`DEC-253` kapsamındaki animasyonlu kurulum, üç adımlı ilk açılış anlatımı ve F1 Sesli Yardım Merkezi Bronze kaynakta uygulanır. Silver'da yeni yardım özelliği eklenmez; gerçek Windows ekranları, Türkçe ses kalitesi, Narrator, tam klavye, büyütme, yüksek kontrast, hareket azaltma ve kullanıcı kabul testleriyle mevcut uygulama doğrulanır.
 
 ## Gold
 

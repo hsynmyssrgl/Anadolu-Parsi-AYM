@@ -8,6 +8,7 @@ import {
   getCurrentFuseWire
 } from '../../../tools/windows-packager/node_modules/@electron/fuses/dist/index.js';
 import { ELECTRON_FUSE_POLICY, ELECTRON_FUSE_POLICY_ID } from './electron-fuse-policy.mjs';
+import { repairAndVerifyPackagedAsarIntegrity } from './repair-electron-asar-integrity.mjs';
 
 export const expectedFuseConfiguration = Object.freeze({
   version: FuseVersion.V1,
@@ -44,6 +45,10 @@ export const applyElectronFusePolicy = async (executablePath) => {
 
 export default async function applyElectronFusesAfterPack(context) {
   const executablePath = resolve(context.appOutDir, `${context.packager.appInfo.productFilename}.exe`);
+  const asarIntegrity = await repairAndVerifyPackagedAsarIntegrity({
+    appOutDir: context.appOutDir,
+    executableName: `${context.packager.appInfo.productFilename}.exe`
+  });
   const result = await applyElectronFusePolicy(executablePath);
-  process.stdout.write(`${JSON.stringify({ status: 'PASS', ...result })}\n`);
+  process.stdout.write(`${JSON.stringify({ status: 'PASS', asarIntegrity, ...result })}\n`);
 }

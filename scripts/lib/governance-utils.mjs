@@ -26,7 +26,7 @@ export const DOCUMENT_EXTENSIONS = new Set(['.md','.pdf','.docx','.txt','.rtf','
 // git-ignored. Indexing them would make the tracked complete-tree manifest
 // non-portable and fail every clean clone before it produces its own receipt.
 export const EXCLUDED_DIRECTORIES = new Set([
-  'node_modules','dist','release','coverage','.git','.idea','.vscode',
+  'node_modules','dist','release','coverage','.git','.idea','.vscode','.tmp','.tmp-runtime-dist','tmp',
   '34-L-bronze-local-closure-receipts'
 ]);
 
@@ -54,7 +54,7 @@ export function classifyPath(path, activeAuthority=new Set()) {
   const base=path.split('/').at(-1) ?? path;
   if (activeAuthority.has(path)) return 'ACTIVE_AUTHORITY';
   if (/^(BRONZE_04\.08\.2026\.28_|BUILD_STATUS\.md$|README\.md$|START_HERE_TR\.md$|PAKET_OZETI_TR\.md$|DELIVERY_SUMMARY_TR\.md$|VERIFICATION_REPORT\.md$)/.test(base)) return 'ACTIVE_REFERENCE';
-  if (/BUILD\d+|BRONZE_RC2|BRONZE_MVP|MVP\d+|RC2|MASTER_PROJECT_DOCUMENTATION_BUILD\d+/i.test(path)) return 'HISTORICAL';
+  if (/BUILD\d+|BRONZE_RC2|BRONZE_MVP|MVP\d+|RC2|MASTER_PROJECT_DOCUMENTATION_BUILD\d+|MASTER_PROJE_DOKUMANTASYONU_BRONZE_04\.08\.2026\.28/i.test(path)) return 'HISTORICAL';
   if (path.startsWith('docs/current/')) return 'ACTIVE_REFERENCE';
   if (path.startsWith('config/')) return 'ACTIVE_REFERENCE';
   if (path.startsWith('docs/decisions/') || path.startsWith('docs/adr/')) return 'ACTIVE_REFERENCE';

@@ -8,6 +8,15 @@
   "brandFamily": "Panthera pardus tulliana",
   "brandFamilyVisibleInApplicationUi": false,
   "logoSubject": "Anadolu parsı",
+  "brandMark": {
+    "path": "apps/desktop/src/renderer/assets/brand-mark.png",
+    "style": "warm_bronze_anatolian_leopard",
+    "sha256": "8eed255430dd27c886ad2808071cfb114923230bd8712db8f03d46d2f0ef641a",
+    "width": 512,
+    "height": 512,
+    "transparentBackground": true,
+    "approvedDate": "2026-08-17"
+  },
   "productionPersonalOrDemoContentAllowed": false,
   "typography": {
     "sourceOfTruth": "apps/desktop/src/renderer/typography.css",
@@ -41,6 +50,60 @@
       "icon": "#edca62",
       "edge": "#f0cc58"
     }
+  },
+  "releaseChannelSurfacePalettes": {
+    "Bronze": {
+      "background": "#F4F3F0",
+      "panel": "#FDFDFC",
+      "panelSecondary": "#F7F5F1",
+      "text": "#333537",
+      "muted": "#777B7A",
+      "border": "#DEDCD6",
+      "accent": "#A5672F",
+      "accentSoft": "#FFD39B",
+      "accentEdge": "#DC9852",
+      "accentStrong": "#71441F",
+      "primary": "#467259",
+      "primaryHover": "#36563F",
+      "focus": "#4F91FF"
+    },
+    "Silver": {
+      "background": "#F2F4F5",
+      "panel": "#FCFDFD",
+      "panelSecondary": "#E9EEF1",
+      "text": "#30383E",
+      "muted": "#6E7B84",
+      "border": "#CED7DD",
+      "accent": "#718494",
+      "accentSoft": "#D4DDE4",
+      "accentEdge": "#AEBCC7",
+      "accentStrong": "#4F5F6B",
+      "primary": "#607888",
+      "primaryHover": "#4F6573",
+      "focus": "#4F91FF"
+    },
+    "Gold": {
+      "background": "#F7F3E8",
+      "panel": "#FFFDF6",
+      "panelSecondary": "#FAF5E7",
+      "text": "#3B3527",
+      "muted": "#746B58",
+      "border": "#E3D8B8",
+      "accent": "#A57E17",
+      "accentSoft": "#FFE9A0",
+      "accentEdge": "#F0CC58",
+      "accentStrong": "#6E5411",
+      "primary": "#8A6A18",
+      "primaryHover": "#6E5411",
+      "focus": "#4F91FF"
+    }
+  },
+  "releasePaletteRule": {
+    "source": "visible release stage",
+    "mapping": "Bronze->Bronze, Silver->Silver, Gold->Gold",
+    "scope": "startup, authentication, main shell, help surfaces and Windows installer",
+    "fallback": "Bronze before renderer bootstrap",
+    "mismatchPolicy": "fail build and packaging verification"
   },
   "shell": {
     "background": "#F4F3F0",

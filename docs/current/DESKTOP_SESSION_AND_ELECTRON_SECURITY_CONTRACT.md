@@ -36,13 +36,16 @@ Bu belge B2-03 ve B2-04 için çalışan güncel masaüstü davranışını öze
 | EnableNodeCliInspectArguments | Kapalı |
 | EnableEmbeddedAsarIntegrityValidation | Açık |
 | OnlyLoadAppFromAsar | Açık |
-| LoadBrowserProcessSpecificV8Snapshot | Açık |
+| LoadBrowserProcessSpecificV8Snapshot | Kapalı; paket ayrı `browser_v8_context_snapshot.bin` üretmediği için Electron'ın standart doğrulanmış snapshot'ı kullanılır |
 | GrantFileProtocolExtraPrivileges | Kapalı |
 | WasmTrapHandlers | Açık |
 
 Paketleme `afterPack` aşamasında tüm dokuz fuse'u
 `strictlyRequireAllFuses: true` ile yazar ve bağımsız readback yapar. İşlem kod
 imzalamadan önce gerçekleşir.
+
+Windows kurulum paketi tüm kullanıcılar için yükseltilmiş NSIS modunda çalışır
+ve uygulamayı sabit olarak `C:\Program Files\PPT\AYM` dizinine kurar.
 
 ## Kanıtlar
 

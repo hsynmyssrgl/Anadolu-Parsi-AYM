@@ -6,6 +6,7 @@
     "config/project-constitution.json",
     "config/active-governance-ledger.json",
     "config/user-decision-ledger.json",
+    "config/documentation-synchronization-policy.json",
     "config/accepted-scope-registry.json",
     "docs/current/10_TUM_KURALLAR_ASILAMAZ_YURUTME_SOZLESMESI.md",
     "config/work-segmentation-plan.json",
@@ -23,7 +24,24 @@
     "docs/current/06_KANONIK_KURAL_SICILI.md",
     "docs/current/07_TESLIM_SOHBET_VE_KALICI_KAYIT_SOZLESMESI.md",
     "docs/current/08_TUM_BELGELER_DIZINI.md",
-    "docs/current/09_KULLANICI_KARARLARI_KAYDI.md"
+    "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
+    "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
+    "docs/current/12_TUM_BELGE_TURLERI_DENETIMI.md",
+    "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_17.08.2026_V1.docx",
+    "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_17.08.2026_V1.pdf"
+  ],
+  "currentMasterDocumentation": {
+    "version": "GUNCEL-2026-08-17-V1",
+    "status": "ACTIVE_WORKING_REFERENCE_NOT_BUILD_CLOSURE",
+    "source": "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
+    "docx": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_17.08.2026_V1.docx",
+    "pdf": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_17.08.2026_V1.pdf",
+    "asOf": "2026-08-17",
+    "historicalBuildArtifactsImmutable": true
+  },
+  "supersededActiveReferences": [
+    "docs/current/MASTER_PROJE_DOKUMANTASYONU_BRONZE_04.08.2026.28.docx",
+    "docs/current/MASTER_PROJE_DOKUMANTASYONU_BRONZE_04.08.2026.28.pdf"
   ],
   "historicalDocuments": "HISTORY_ONLY_DO_NOT_OVERRIDE_ACTIVE_DOCUMENTS",
   "exhaustiveInventory": "artifacts/manifests/ALL_DOCUMENTS_INDEX.json"

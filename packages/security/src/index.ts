@@ -9,6 +9,7 @@ export * from './oidc-pkce.js';
 export * from './companion-sync-envelope.js';
 export * from './local-ocr-security.js';
 export * from './signed-plugin-manifest.js';
+export * from './product-license.js';
 export * from './communication-mls-provider-evidence.js';
 
 export * from './session.js';

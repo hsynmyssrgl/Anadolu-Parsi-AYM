@@ -19,7 +19,12 @@ export interface AccessibilityPreferences {
 
 export const FIRST_RUN_INTRO_STORAGE_KEY = 'ppt-first-run-intro-v1';
 export const BRAND_AUDIO_DISABLED_STORAGE_KEY = 'ppt-brand-audio-disabled-v1';
-export const FIRST_RUN_NARRATION_TEXT = 'Anadolu Parsı Aile Yaşam Merkezine hoş geldiniz. Bu uygulama aile kayıtlarınızı yerel, kontrollü ve güvenli biçimde yönetmek için tasarlandı. Kişisel verileriniz siz giriş yapmadan açılmaz. İlk kurulumda güçlü bir kimlik ve kurtarma yöntemi oluşturacağız.';
+export const FIRST_RUN_NARRATION_STEPS = Object.freeze([
+  'Birinci adım: Bu bilgisayardaki yerel aile alanınızı oluşturun.',
+  'İkinci adım: Güçlü parolanızı belirleyin ve kurtarma kodlarınızı uygulamanın dışında güvenli bir yerde saklayın.',
+  'Üçüncü adım: Yazı boyutu, kontrast, hareket ve ses tercihlerinizi seçin.'
+]);
+export const FIRST_RUN_NARRATION_TEXT = `Anadolu Parsı Aile Yaşam Merkezine hoş geldiniz. Bu kısa tanıtımda üç adımı birlikte tamamlayacağız. ${FIRST_RUN_NARRATION_STEPS.join(' ')} Kişisel verileriniz siz giriş yapmadan açılmaz. Kurulum sırasında aile veriniz uzak bir sağlayıcıya gönderilmez.`;
 
 export interface BootstrapPreferenceStorage {
   getItem(key: string): string | null;
@@ -97,6 +102,7 @@ export const cancelFirstRunNarration = (
 
 export const startFirstRunNarration = <TUtterance extends FirstRunNarrationUtterance>(input: {
   muted: boolean;
+  rate?: 'normal' | 'slow';
   synthesis: FirstRunNarrationSynthesis<TUtterance> | undefined;
   createUtterance: ((text: string) => TUtterance) | undefined;
   onStatus: (status: FirstRunNarrationStatus) => void;
@@ -113,8 +119,8 @@ export const startFirstRunNarration = <TUtterance extends FirstRunNarrationUtter
     input.synthesis.cancel();
     const utterance = input.createUtterance(FIRST_RUN_NARRATION_TEXT);
     utterance.lang = 'tr-TR';
-    utterance.rate = 0.9;
-    utterance.pitch = 0.82;
+    utterance.rate = input.rate === 'slow' ? 0.72 : 0.88;
+    utterance.pitch = 0.95;
     Object.assign(utterance, {
       onstart:() => input.onStatus('speaking'),
       onend:() => input.onStatus('ready'),

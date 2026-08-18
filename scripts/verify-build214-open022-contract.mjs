@@ -40,7 +40,10 @@ check('runtime temp is under volatile root', runtime.includes("temp: join(input.
 check('browser session is redirected to volatile root', main.includes("app.setPath('sessionData', join(volatileRuntimeRoot, 'browser-session'))"));
 check('crash dumps are redirected to volatile root', main.includes("app.setPath('crashDumps', join(volatileRuntimeRoot, 'crash'))"));
 check('volatile root is cleaned at startup', main.includes("rmSync(volatileRuntimeRoot, { recursive: true, force: true })"));
-check('volatile root is cleaned on normal quit', main.lastIndexOf("rmSync(volatileRuntimeRoot, { recursive: true, force: true })") > main.indexOf("app.on('before-quit'"));
+check('volatile root is unique per process launch', main.includes('`runtime-${process.pid}-${Date.now().toString(36)}`'));
+check('volatile root cleanup cannot crash normal Windows quit', main.includes("app.on('before-quit'") && main.includes('catch { /* will-quit retries after all windows have closed */ }'));
+check('volatile root cleanup retries after every window closes', main.includes("app.on('will-quit'") && main.includes('OS temporary-storage maintenance may remove a still-locked residue later'));
+check('locked volatile residue is retried only on a later primary launch', main.includes('volatileRuntimeCleanupMarker') && main.includes('previousProcessAlive') && main.includes("dirname(previousRuntimeRoot) === resolve(volatileRuntimeBase)") && main.includes('!previousStat.isSymbolicLink()') && main.includes('maxRetries: 4'));
 check('operational exports have protected port', adapter.includes('class ProtectedOperationalArtifactFilePort'));
 check('security receipts can use protected store', receipts.includes('protectedArtifacts.writeText'));
 check('startup preflight supports protected writer', preflight.includes('writeEvidence?:') && preflight.includes('input.writeEvidence'));

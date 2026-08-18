@@ -36,7 +36,14 @@
         "B7-13"
       ],
       "leverage": "One renderer preference model, typography token layer and semantic interaction contract closes thirteen cross-screen requirements.",
-      "status": "COMPLETED"
+      "status": "COMPLETED",
+      "governancePhase": null,
+      "localImplementationStatus": "ACCEPTED_COMPLETED_WITH_PERSISTENT_RECEIPT",
+      "countsAsRequirementPass": true,
+      "openReason": null,
+      "closureReason": "Kapalı: erişilebilirlik tercih merkezi için yerel zincir, doğrulama ve kalıcı kabul receipti tamamlandı.",
+      "missingEvidence": [],
+      "currentStatusSource": "33-m-accessibility-preference-center-scope.json"
     },
     {
       "order": 2,
@@ -54,7 +61,14 @@
         "B7-15"
       ],
       "leverage": "A shared draft/undo state machine and empty-loading-offline-error-retry component set applies to every later module.",
-      "status": "COMPLETED"
+      "status": "COMPLETED",
+      "governancePhase": null,
+      "localImplementationStatus": "ACCEPTED_COMPLETED_WITH_PERSISTENT_RECEIPT",
+      "countsAsRequirementPass": true,
+      "openReason": null,
+      "closureReason": "Kapalı: taslak ve asenkron durum UX paketi için yerel zincir, doğrulama ve kalıcı kabul receipti tamamlandı.",
+      "missingEvidence": [],
+      "currentStatusSource": "33-n-draft-async-state-ux-scope.json"
     },
     {
       "order": 3,
@@ -81,7 +95,14 @@
         "EXT-042"
       ],
       "leverage": "Reuses central PEP/UoW, immutable audit, trusted devices, consent, encrypted export, derived-data lineage and deletion propagation.",
-      "status": "COMPLETED"
+      "status": "COMPLETED",
+      "governancePhase": null,
+      "localImplementationStatus": "ACCEPTED_COMPLETED_WITH_PERSISTENT_RECEIPT",
+      "countsAsRequirementPass": true,
+      "openReason": null,
+      "closureReason": "Kapalı: gizlilik, sahiplik, veri hakları ve yerel olay kontrol paketi için yerel zincir, doğrulama ve kalıcı kabul receipti tamamlandı.",
+      "missingEvidence": [],
+      "currentStatusSource": "33-o-privacy-ownership-data-rights-incident-control-scope.json"
     },
     {
       "order": 4,
@@ -104,7 +125,23 @@
         "EXT-074"
       ],
       "leverage": "Shares device trust, challenge, strong authentication, encrypted token vault and minimum-disclosure QR credential boundaries.",
-      "status": "IN_PROGRESS"
+      "status": "IN_PROGRESS",
+      "governancePhase": "PARTIAL_LOCAL_IMPLEMENTATION_PRODUCTION_AND_EXTERNAL_EVIDENCE_BLOCKED",
+      "localImplementationStatus": "IMPLEMENTED_LOCAL_AUTOMATED",
+      "countsAsRequirementPass": false,
+      "openReason": "Gerçek passkey/authenticator, canlı ve güvenilen federated kimlik sağlayıcısı, cross-device doğrulama, insan UAT ile gizlilik/kimlik incelemeleri tamamlanmadı.",
+      "missingEvidence": [
+        "liveProviderAccountTest",
+        "realAuthenticatorDevice",
+        "crossDeviceSync",
+        "credentialVerifierUat",
+        "humanUat",
+        "privacyReview",
+        "legalReview",
+        "identityReview"
+      ],
+      "currentStatusSource": "33-p-passkeys-federated-identity-verifiable-temporary-credentials-scope.json",
+      "closureReason": null
     },
     {
       "order": 5,
@@ -145,7 +182,28 @@
         "XPF-001"
       ],
       "leverage": "Uses the encrypted archive vault, capability gates, consent, derived-policy inheritance, deletion propagation, content-free audit and worker isolation.",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+      "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+      "countsAsRequirementPass": false,
+      "openReason": "Varsayılan malware/PDF sağlayıcısı, düşük-yetkili worker izolasyonu, çalışan işi eşzamanlı iptal, kaynak silme crash auto-resume, zamanlanmış orphan/retention sweep ve gerçek Windows UAT tamamlanmadı.",
+      "missingEvidence": [
+        "realWindowsLocalOcr",
+        "realAppleVisionOcr",
+        "offlineFallback",
+        "maliciousDocumentMatrix",
+        "multilingualAndHandwriting",
+        "lowQualityAndAccessibility",
+        "crossDevice",
+        "legacyArchiveOwnershipReattestation",
+        "externalProviderPrivacyContract",
+        "humanUat",
+        "privacyReview",
+        "legalReview",
+        "securityReview"
+      ],
+      "currentStatusSource": "33-q-local-governed-ocr-derived-data-pipeline-scope.json",
+      "closureReason": null
     },
     {
       "order": 6,
@@ -163,7 +221,22 @@
         "B3-05"
       ],
       "leverage": "Builds on governed OCR indexes, archive versions, permissions and central read-policy filtering.",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+      "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+      "countsAsRequirementPass": false,
+      "openReason": "Gerçek büyük arşiv, medya yaşam döngüsü, arama doğruluğu/performansı ve kullanıcı UAT kanıtları tamamlanmadı.",
+      "missingEvidence": [
+        "realUserArchiveEvidenceUat",
+        "realMediaVersionRecoveryUat",
+        "largeFamilyUnifiedSearchUat",
+        "accessibilityReview",
+        "privacyReview",
+        "legalReview",
+        "securityReview"
+      ],
+      "currentStatusSource": "33-r-archive-evidence-relations-media-lifecycle-unified-authorized-search-scope.json",
+      "closureReason": null
     },
     {
       "order": 7,
@@ -189,7 +262,24 @@
         "EXT-029"
       ],
       "leverage": "Extends existing life/health records, central PEP/UoW, emergency cards, reminders and minimum-necessary caregiver access.",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+      "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+      "countsAsRequirementPass": false,
+      "openReason": "Gerçek sağlık/bakım sağlayıcıları, cihaz akışları, klinik doğruluk ve hukuk-gizlilik incelemesi tamamlanmadı.",
+      "missingEvidence": [
+        "realCaregiverUat",
+        "realElderlyUserUat",
+        "medicalProfessionalReview",
+        "sensorAdapterUat",
+        "emergencyContactDeliveryUat",
+        "accessibilityReview",
+        "privacyReview",
+        "legalReview",
+        "securityReview"
+      ],
+      "currentStatusSource": "33-s-health-care-coordination-elderly-support-ledger-scope.json",
+      "closureReason": null
     },
     {
       "order": 8,
@@ -212,7 +302,24 @@
         "EXT-008"
       ],
       "leverage": "One assigned-task/list/schedule ledger supports shopping, inventory, meals, chores, expenses, deliveries, guests and pet care.",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+      "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+      "countsAsRequirementPass": false,
+      "openReason": "Gerçek hane verisi, uzun süreli görev/teslimat akışı ve farklı kullanıcı profilleriyle UAT tamamlanmadı.",
+      "missingEvidence": [
+        "realFamilyHouseholdUat",
+        "realShoppingInventoryMealUat",
+        "realExpenseDeliveryGuestPetUat",
+        "nutritionAllergyReview",
+        "financialReview",
+        "accessibilityReview",
+        "privacyReview",
+        "legalReview",
+        "securityReview"
+      ],
+      "currentStatusSource": "33-t-household-operations-center-scope.json",
+      "closureReason": null
     },
     {
       "order": 9,
@@ -233,7 +340,21 @@
         "EXT-022"
       ],
       "leverage": "Reuses schedules, tasks, credentials, finance planning and child-specific privacy obligations.",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+      "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+      "countsAsRequirementPass": false,
+      "openReason": "Çocuk/veli mahremiyeti, okul/servis sağlayıcısı, yaşa uygun açıklama ve hukuk-gizlilik/UAT kanıtı tamamlanmadı.",
+      "missingEvidence": [
+        "realFamilyUat",
+        "childAndGuardianPrivacyReview",
+        "adolescentSafetyReview",
+        "legalPrivacyReview",
+        "realSchoolWorkflowUat",
+        "realCredentialPickupUat"
+      ],
+      "currentStatusSource": "33-u-child-education-coordination-scope.json",
+      "closureReason": null
     },
     {
       "order": 10,
@@ -258,7 +379,21 @@
         "EXT-063"
       ],
       "leverage": "Combines stored places/offline fallback, documents, health constraints, budgets, checklists and album linkage.",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+      "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+      "countsAsRequirementPass": false,
+      "openReason": "Gerçek harita, seyahat, araç/evcil hayvan sağlayıcıları, çevrimdışı saha akışı ve UAT tamamlanmadı.",
+      "missingEvidence": [
+        "realFamilyUat",
+        "realMapAndOfflineFallbackUat",
+        "realMovingInventoryUat",
+        "realPetWorkflowReview",
+        "realTravelWorkflowUat",
+        "legalPrivacyReview"
+      ],
+      "currentStatusSource": "33-v-places-travel-asset-pet-scope.json",
+      "closureReason": null
     },
     {
       "order": 11,
@@ -286,7 +421,21 @@
         "EXT-050"
       ],
       "leverage": "A single local-first suggestion pipeline serves summaries and reminders while every durable action requires human confirmation.",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+      "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+      "countsAsRequirementPass": false,
+      "openReason": "Gerçek AI sağlayıcısı, model/veri sözleşmesi, maliyet-mahremiyet sınırı, güvenlik değerlendirmesi ve insan UAT tamamlanmadı.",
+      "missingEvidence": [
+        "realFamilyUat",
+        "realProviderAndModelUat",
+        "speechAndTranslationUat",
+        "ocrClassificationUat",
+        "financialMedicalSafetyReview",
+        "privacyLegalReview"
+      ],
+      "currentStatusSource": "33-w-consent-bound-family-ai-assistant-scope.json",
+      "closureReason": null
     },
     {
       "order": 12,
@@ -311,7 +460,24 @@
         "EXT-057"
       ],
       "leverage": "Reuses archive relationships, governed transcription/OCR, consent and append-only release/revocation workflows.",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+      "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+      "countsAsRequirementPass": false,
+      "openReason": "Gerçek ses/transkript, yüz gruplama, basılı çıktı, zaman kapsülü rıza akışı ve insan UAT tamamlanmadı.",
+      "missingEvidence": [
+        "realFamilyMemoryUat",
+        "realMediaTranscriptionUat",
+        "realFaceGroupingUat",
+        "photoDuplicateDetectionUat",
+        "documentaryBookAndPrintUat",
+        "timeCapsuleReleaseAndRecoveryUat",
+        "multiAccountApprovalDiscoveryUat",
+        "terminalRetentionAndCapacityRecoveryReview",
+        "privacyLegalReview"
+      ],
+      "currentStatusSource": "33-x-memory-studio-time-capsule-scope.json",
+      "closureReason": null
     },
     {
       "order": 13,
@@ -333,7 +499,22 @@
         "EXT-069"
       ],
       "leverage": "One signed adapter boundary, capability manifest and time-bounded consent model covers Matter, sensors, energy and visible camera permissions.",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+      "localImplementationStatus": "PARTIAL_LOCAL_IMPLEMENTATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+      "countsAsRequirementPass": false,
+      "openReason": "Gerçek Matter/enerji cihazları, üretici adaptörleri, güvenlik/safety değerlendirmesi ve saha UAT tamamlanmadı.",
+      "missingEvidence": [
+        "realMatterCommissioningUat",
+        "realSensorProviderUat",
+        "realEnergyMeterUat",
+        "realCameraDoorbellUat",
+        "realDeviceControlUat",
+        "privacyAndSafetyReview",
+        "legalReview"
+      ],
+      "currentStatusSource": "33-y-local-first-smart-home-energy-scope.json",
+      "closureReason": null
     },
     {
       "order": 14,
@@ -359,7 +540,33 @@
         "EXT-081"
       ],
       "leverage": "Unifies signed manifests, sandboxing, egress allowlists, SBOM/provenance, rollback and provider adapters.",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+      "localImplementationStatus": "PARTIAL_LOCAL_CANDIDATE_REGISTRY_COMPOSED_ACCEPTANCE_INCOMPLETE",
+      "countsAsRequirementPass": false,
+      "openReason": "Üretim kod imzalama sertifikası, gerçek eklenti sağlayıcıları, dağıtım/rollback ve güven zinciri kanıtı tamamlanmadı.",
+      "missingEvidence": [
+        "productionSigningTrustProvisioning",
+        "productionCodeSigningCertificate",
+        "realSignedPackageAuthenticode",
+        "realSandboxRuntimeUat",
+        "realOsNetworkIsolationUat",
+        "realBankProviderUat",
+        "realSchoolProviderUat",
+        "realMatterProviderUat",
+        "realFhirProviderUat",
+        "realOneDriveProviderUat",
+        "realMapsProviderUat",
+        "realOcrProviderUat",
+        "realAiProviderUat",
+        "realBrowserProviderUat",
+        "vulnerabilityAndLicenseReview",
+        "privacyReview",
+        "legalReview",
+        "securityReview"
+      ],
+      "currentStatusSource": "33-z-signed-plugin-external-provider-platform-scope.json",
+      "closureReason": null
     },
     {
       "order": 15,
@@ -387,7 +594,27 @@
         "SEC-COM-008"
       ],
       "leverage": "Establishes one centrally governed encrypted room/device/key epoch foundation before all messaging and calling features.",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+      "localImplementationStatus": "PARTIAL_LOCAL_POLICY_METADATA_FOUNDATION_COMPOSED_ACCEPTANCE_INCOMPLETE",
+      "countsAsRequirementPass": false,
+      "openReason": "Gerçek MLS sağlayıcısı, çoklu istemci birlikte çalışabilirliği, cihaz kimliği ve haricî güvenlik incelemesi tamamlanmadı.",
+      "missingEvidence": [
+        "productionRfc9420Provider",
+        "rfc9420ConformanceSuite",
+        "realMultiDeviceForwardSecrecyUat",
+        "realPostCompromiseSecurityUat",
+        "realLostDeviceGroupRecoveryUat",
+        "realMessageEventSignatureUat",
+        "realRelayContentBlindnessUat",
+        "realNetworkDeliveryUat",
+        "metadataTrafficAnalysisReview",
+        "retentionAndPrivacyReview",
+        "legalReview",
+        "securityReview"
+      ],
+      "currentStatusSource": "34-a-communication-policy-mls-foundation-scope.json",
+      "closureReason": null
     },
     {
       "order": 16,
@@ -417,7 +644,29 @@
         "PRS-006"
       ],
       "leverage": "One append-only message event log, offline outbox, retention model and time-bounded visibility policy covers fourteen requirements.",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+      "localImplementationStatus": "EXPANDED_LOCAL_COMPOSED_AND_TESTED_ACCEPTANCE_INCOMPLETE",
+      "countsAsRequirementPass": false,
+      "openReason": "Gerçek çoklu istemci mesaj teslimi, presence, çevrimdışı/replay ve uzun süreli yaşam döngüsü UAT tamamlanmadı.",
+      "missingEvidence": [
+        "realTextMessageExchangeUat",
+        "realVoicePhotoVideoLocationDocumentUat",
+        "realMultiDevicePresenceAggregationUat",
+        "realScheduledReminderUat",
+        "realRelayDeliveryAndReceiptUat",
+        "messageSignatureVerificationUat",
+        "contentSearchAuthorizationUat",
+        "retentionExpiryAndOrphanSweepUat",
+        "physicalSecureEraseEvidence",
+        "backupDeletionPropagationEvidence",
+        "privacyReview",
+        "legalReview",
+        "securityReview",
+        "accessibilityReview"
+      ],
+      "currentStatusSource": "34-b-communication-messaging-lifecycle-privacy-presence-scope.json",
+      "closureReason": null
     },
     {
       "order": 17,
@@ -453,7 +702,32 @@
         "UX-COM-012"
       ],
       "leverage": "A shared WebRTC/SFU/SFrame session boundary also supplies preflight, fallback, quality, RTT, captions and accessible controls.",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+      "localImplementationStatus": "PARTIAL_LOCAL_COMPOSED_AND_TESTED_ACCEPTANCE_INCOMPLETE",
+      "countsAsRequirementPass": false,
+      "openReason": "Gerçek WebRTC/SFU/TURN, kamera-mikrofon cihazları, ağ bozulması ve erişilebilir çağrı UAT tamamlanmadı.",
+      "missingEvidence": [
+        "realOneToOneCallUat",
+        "realGroupCallUat",
+        "realWebRtcSfuStunTurnUat",
+        "realSFrameMlsMediaBindingUat",
+        "realScreenShareUat",
+        "realBackgroundProcessingUat",
+        "realLiveCaptionAndRttUat",
+        "realDevicePreflightUat",
+        "realIosCallKitPushKitUat",
+        "realWindowsNotificationUat",
+        "realDoNotDisturbUat",
+        "multiPartyHostModerationUat",
+        "retentionAndPruneReview",
+        "privacyReview",
+        "legalReview",
+        "securityReview",
+        "accessibilityReview"
+      ],
+      "currentStatusSource": "34-c-realtime-calling-media-accessible-ux-scope.json",
+      "closureReason": null
     },
     {
       "order": 18,
@@ -481,7 +755,29 @@
         "AUD-COM-004"
       ],
       "leverage": "Reuses consent expiry/revocation, E2EE group roles, encrypted vault, retention and content-free signed audit.",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+      "localImplementationStatus": "PARTIAL_LOCAL_COMPOSED_AND_TESTED_ACCEPTANCE_INCOMPLETE",
+      "countsAsRequirementPass": false,
+      "openReason": "Kayıt için gerçek katılımcı rızası, medya saklama/imha, hukuk-gizlilik incelemesi ve cihaz UAT tamamlanmadı.",
+      "missingEvidence": [
+        "realRecordingProviderUat",
+        "realAudioVideoRecordingUat",
+        "realTranscriptTranslationPersistenceUat",
+        "visibleRedIndicatorUat",
+        "audibleStartStopAnnouncementUat",
+        "lateJoinerPauseRealCaptureUat",
+        "e2eeRecorderRoleUat",
+        "encryptedMediaVaultHashSignatureUat",
+        "securePhysicalDeletionAndBackupPropagationUat",
+        "guardianLegalPolicyUat",
+        "privacyReview",
+        "legalReview",
+        "securityReview",
+        "accessibilityReview"
+      ],
+      "currentStatusSource": "34-d-explicit-consent-recording-media-retention-scope.json",
+      "closureReason": null
     },
     {
       "order": 19,
@@ -510,7 +806,28 @@
         "AI-LNG-011"
       ],
       "leverage": "One TranslationProviderPort and inherited-policy result model serves messages, captions, documents and meeting summaries.",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+      "localImplementationStatus": "PARTIAL_LOCAL_COMPOSED_AND_TESTED_ACCEPTANCE_INCOMPLETE",
+      "countsAsRequirementPass": false,
+      "openReason": "Gerçek çeviri/altyazı sağlayıcısı, dil kalite ölçümü, cihaz performansı ve insan UAT tamamlanmadı.",
+      "missingEvidence": [
+        "realLocalLanguagePackUat",
+        "realLanguageDetectionUat",
+        "realTranslationUat",
+        "realSpeechToTextAndLiveCaptionUat",
+        "realSpeakerDiarizationUat",
+        "realTextToSpeechOriginalAudioUat",
+        "externalProviderPreviewConsentUat",
+        "encryptedCrossDevicePreferenceSyncUat",
+        "privacyReview",
+        "legalReview",
+        "securityReview",
+        "accessibilityReview",
+        "languageQualityReview"
+      ],
+      "currentStatusSource": "34-e-local-first-translation-caption-language-provider-scope.json",
+      "closureReason": null
     },
     {
       "order": 20,
@@ -538,7 +855,27 @@
         "MTG-010"
       ],
       "leverage": "Combines calendar, roles, append-only decisions/tasks, authorized documents and human-approved AI minutes.",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+      "localImplementationStatus": "PARTIAL_LOCAL_COMPOSED_AND_TESTED_ACCEPTANCE_INCOMPLETE",
+      "countsAsRequirementPass": false,
+      "openReason": "Gerçek aile toplantısı, karar/rıza uyuşmazlığı, tutanak UAT ve hukuk-gizlilik incelemesi tamamlanmadı.",
+      "missingEvidence": [
+        "realMultiParticipantMeetingUat",
+        "realRecurringReminderUat",
+        "realRecordingConsentUat",
+        "realAiMinutesProviderUat",
+        "realEncryptedMinutesRecoveryUat",
+        "externalCalendarReminderUat",
+        "remoteCollaborationUat",
+        "privacyReview",
+        "legalReview",
+        "securityReview",
+        "accessibilityReview",
+        "retentionReview"
+      ],
+      "currentStatusSource": "34-f-family-meetings-decisions-consent-minutes-scope.json",
+      "closureReason": null
     },
     {
       "order": 21,
@@ -570,7 +907,24 @@
         "UX-COM-010"
       ],
       "leverage": "Reuses encrypted content-addressed vault, resumable chunks, malware quarantine, consent and accessible communication surfaces.",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+      "localImplementationStatus": "LOCAL_PRODUCTION_COMPOSITION_ACCEPTANCE_INCOMPLETE",
+      "countsAsRequirementPass": false,
+      "openReason": "Gerçek çoklu cihaz E2EE dosya aktarımı, büyük dosya/kesinti, sağlayıcı ve kullanıcı UAT tamamlanmadı.",
+      "missingEvidence": [
+        "realE2eeTransferUat",
+        "realMalwareScannerUat",
+        "safePreviewUat",
+        "remoteAssistanceUat",
+        "sharePlayUat",
+        "voiceExecutionUat",
+        "accessibilityReview",
+        "securityReview",
+        "privacyRetentionReview"
+      ],
+      "currentStatusSource": "34-g-e2ee-file-sharing-remaining-communication-ux-scope.json",
+      "closureReason": null
     },
     {
       "order": 22,
@@ -592,7 +946,19 @@
         "AUD-COM-005"
       ],
       "leverage": "Extends immutable content-free audit and encrypted archive/backup integrity across completed communication surfaces.",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+      "localImplementationStatus": "LOCAL_PRODUCTION_QUERY_COMPOSED_ACCEPTANCE_INCOMPLETE",
+      "countsAsRequirementPass": false,
+      "openReason": "Gerçek uzun süreli iletişim audit/arşiv bütünlüğü, saklama/imha ve bağımsız inceleme tamamlanmadı.",
+      "missingEvidence": [
+        "realRestoreDrill",
+        "remoteReplicationUat",
+        "externalBackupReview",
+        "securityReview"
+      ],
+      "currentStatusSource": "34-h-communication-audit-archive-integrity-scope.json",
+      "closureReason": null
     },
     {
       "order": 23,
@@ -630,7 +996,23 @@
         "XPF-005"
       ],
       "leverage": "One service/consensus/log/projection/security architecture establishes the dependency base for clients, failover and operations.",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+      "localImplementationStatus": "LOCAL_HARDENED_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE",
+      "countsAsRequirementPass": false,
+      "openReason": "Gerçek çoklu node quorum/witness/failover, mTLS kimliği, ağ bölünmesi ve uzun süreli soak tamamlanmadı.",
+      "missingEvidence": [
+        "realThreeNodeQuorum",
+        "realNetworkPartition",
+        "realWindowsServiceLifecycle",
+        "realMtlsPairing",
+        "realSnapshotBootstrap",
+        "realAutomaticFailover",
+        "localVolumeIdentityReview",
+        "securityReview"
+      ],
+      "currentStatusSource": "34-i-distributed-core-consensus-tenancy-scope.json",
+      "closureReason": null
     },
     {
       "order": 24,
@@ -663,7 +1045,23 @@
         "XPF-006"
       ],
       "leverage": "Builds Apple clients, discovery/relay/control plane, observability, backup/DR, rolling updates and fault injection on the completed cluster base.",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+      "localImplementationStatus": "LOCAL_HARDENED_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE",
+      "countsAsRequirementPass": false,
+      "openReason": "Gerçek dağıtık istemciler, Apple companion, operasyon/felaket kurtarma ve saha provası tamamlanmadı.",
+      "missingEvidence": [
+        "realMdnsDiscovery",
+        "realRelayOrVpn",
+        "realAppleClient",
+        "realDifferentDeviceRestore",
+        "realRollingUpdate",
+        "realWindowsFaultMatrix",
+        "realBreakGlassRecovery",
+        "securityReview"
+      ],
+      "currentStatusSource": "34-j-distributed-clients-operations-disaster-recovery-scope.json",
+      "closureReason": null
     },
     {
       "order": 25,
@@ -692,7 +1090,26 @@
         "EXT-090"
       ],
       "leverage": "Unifies crash recovery/install/scale validation with shared inbox, search, drafts, modes, offline status and cross-platform shells.",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "governancePhase": "LOCAL_IMPLEMENTATION_STARTED",
+      "localImplementationStatus": "LOCAL_HARDENED_FAIL_CLOSED_FOUNDATION_ACCEPTANCE_INCOMPLETE",
+      "countsAsRequirementPass": false,
+      "openReason": "Animasyonlu kurulum, sesli Yardım Merkezi, DPAPI korumalı Core Service companion ve gerçek repository-backed anlık evrensel arama yerel kaynakta oluşturulup hedef testlerle doğrulandı. Production Authenticode sertifikası sağlanmadı; temiz işletim sistemi, signed installer, upgrade/repair/yeni uninstall-veri koruma, yeniden başlatma/güç kesintisi, 168 saat soak, üretim politika-zayıflatma doğrulayıcısı ve erişilebilirlik UAT tamamlanmadı.",
+      "missingEvidence": [
+        "productionCodeSigningCertificate",
+        "signedInstallerAndInstalledExecutableAuthenticode",
+        "realCleanInstall",
+        "realUpgrade",
+        "realRepair",
+        "realUninstallDataProtection",
+        "sevenDaySoak",
+        "productionPolicyWeakeningVerifier",
+        "appleWidgetUat",
+        "windowsMiniPanelUat",
+        "accessibilityReview"
+      ],
+      "currentStatusSource": "34-k-windows-resilience-universal-ux-scope.json",
+      "closureReason": null
     },
     {
       "order": 26,
@@ -710,7 +1127,21 @@
         "B9-03"
       ],
       "leverage": "Runs final dead-surface/drift sweep, canonical documentation consolidation and deterministic source/artifact receipt only after all feature packages.",
-      "status": "PLANNED_FINAL"
+      "status": "PLANNED_FINAL",
+      "governancePhase": "LOCAL_CLOSURE_AUDIT_STARTED",
+      "localImplementationStatus": "LOCAL_CLOSURE_AUTOMATION_COMPOSED_ACCEPTANCE_BLOCKED",
+      "countsAsRequirementPass": false,
+      "openReason": "Bütün roadmap paketleri kabul edilmedi; gerçek Windows/dağıtık/Apple/uzak sağlayıcı/soak/sertifikasyon ve dış incelemeler NOT_RUN kaldı.",
+      "missingEvidence": [
+        "realWindowsLifecycle",
+        "sevenDaySoak",
+        "realMultiNodeConsensus",
+        "realAppleClients",
+        "realRemoteProviders",
+        "certification"
+      ],
+      "currentStatusSource": "34-l-bronze-final-drift-deterministic-delivery-closure-scope.json",
+      "closureReason": null
     }
   ],
   "validationInvariants": {
@@ -723,7 +1154,25 @@
     "secondStep": "33-N",
     "finalStep": "34-L"
   },
-  "updatedAt": "2026-08-14T03:37:34.276Z",
+  "updatedAt": "2026-08-18T03:30:00+03:00",
   "completedRequirementCount": 25,
-  "remainingRequirementCount": 249
+  "remainingRequirementCount": 249,
+  "documentationStatusRule": {
+    "requiredForEveryOpenPackage": [
+      "status",
+      "localImplementationStatus",
+      "openReason",
+      "missingEvidence",
+      "countsAsRequirementPass"
+    ],
+    "requiredForEveryClosedPackage": [
+      "status",
+      "localImplementationStatus",
+      "closureReason",
+      "missingEvidence",
+      "countsAsRequirementPass"
+    ],
+    "rule": "Açık kalan her iş; neyin yerel olarak tamamlandığını, neden açık kaldığını ve hangi kanıtın eksik olduğunu göstermelidir. PARTIAL, BLOCKED ve NOT_RUN tamamlandı sayılamaz.",
+    "decision": "DEC-251"
+  }
 }

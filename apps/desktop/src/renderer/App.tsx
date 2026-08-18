@@ -2,7 +2,7 @@ import { useEffect, useMemo, useReducer, useRef, useState, type CSSProperties, t
 import { Button, EmptyState, Modal, PageHeader, SectionHeader, StatRow, StatusMessage, Surface, VisuallyHidden } from './ui';
 import { navigationReducer, persistNavigationState, readNavigationState } from './navigation';
 import brandMarkUrl from './assets/brand-mark.png';
-import { FIRST_RUN_NARRATION_TEXT, accessibilityAnnouncement, applyAccessibilityProfile, cancelFirstRunNarration, isFirstRunIntroductionComplete, nextRovingIndex, parseAccessibilityPreferences, persistBrandAudioMuted, persistFirstRunIntroductionComplete, readBootstrapPreference, readBrandAudioMuted, resolveAccessibilityTheme, serializeAccessibilityPreferences, startFirstRunNarration, writeBootstrapPreference, type AccessibilityAudienceProfile, type AccessibilityPreferences, type BootstrapPreferenceStorage, type FirstRunNarrationStatus } from './accessibility';
+import { FIRST_RUN_NARRATION_STEPS, FIRST_RUN_NARRATION_TEXT, accessibilityAnnouncement, applyAccessibilityProfile, cancelFirstRunNarration, isFirstRunIntroductionComplete, nextRovingIndex, parseAccessibilityPreferences, persistBrandAudioMuted, persistFirstRunIntroductionComplete, readBootstrapPreference, readBrandAudioMuted, resolveAccessibilityTheme, serializeAccessibilityPreferences, startFirstRunNarration, writeBootstrapPreference, type AccessibilityAudienceProfile, type AccessibilityPreferences, type BootstrapPreferenceStorage, type FirstRunNarrationStatus } from './accessibility';
 import { AsyncWriteGuard, MutationRevisionWatermark } from './async-state-guard';
 import { AsyncStatePanel, ValidationSummary, canUndoGovernedDraft, useGovernedDraft, type ValidationIssue } from './form-ux';
 import { resolveRouteAsyncState } from './route-async-state';
@@ -23,6 +23,7 @@ import { CommunicationMessagingPanel } from './CommunicationMessagingPanel';
 import { CommunicationRealtimeCallingPanel } from './CommunicationRealtimeCallingPanel';
 import { CommunicationRecordingRetentionPanel } from './CommunicationRecordingRetentionPanel';
 import { LocalTranslationLanguagePanel } from './LocalTranslationLanguagePanel';
+import { NarratedHelpCenter } from './NarratedHelpCenter';
 import { FamilyMeetingPanel } from './FamilyMeetingPanel';
 import { UniversalUxConsolidationPanel } from './UniversalUxConsolidationPanel';
 import { CommunicationFileSharingPanel } from './CommunicationFileSharingPanel';
@@ -34,7 +35,12 @@ import {
   OBJECT_PERMISSION_ACTIONS,
   PRODUCT_NAVIGATION_GROUPS,
   PRODUCT_NAVIGATION_ROUTES,
+  TEMPORARY_CREDENTIAL_DISCLOSURE_RULES,
+  TEMPORARY_CREDENTIAL_PURPOSE_BY_KIND,
   USER_VISIBLE_APP_INFO,
+  archiveLegacyOwnershipReattestationConfirmation,
+  asIsoDateTime,
+  asUserId,
   getFamilyRelationship,
   type FamilyRelationshipCategory,
   type FamilyRelationshipCode,
@@ -90,8 +96,6 @@ import type { DesktopSecurityPostureView, SessionLockStateView, UnlockSessionInp
 import type { DataRepairEntitySnapshot, DataRepairIssue, DataRepairOperation, DataRepairWorkspaceView } from '@ppt/domain';
 import type { LoginWithWindowsHelloInput, WindowsHelloAuthenticationOutcome, WindowsHelloEnrollmentView, WindowsHelloStateView } from '@ppt/domain';
 import type { CoreServiceApiBoundaryStatusContract, CoreServiceHealthContract } from '@ppt/core-service-contracts';
-import { archiveLegacyOwnershipReattestationConfirmation } from '@ppt/domain';
-import { asIsoDateTime, asUserId } from '@ppt/core';
 import type { SensitiveDataCategory, SensitiveDataConsentPurpose, SensitiveDataProfileView, SensitiveExportPreviewView } from '@ppt/domain';
 import type { BankInstitutionView, BankAccountView, CreateBankAccountInput, IbanStructuralValidationView, ValidateIbanInput, PaymentCardView, CreatePaymentCardInput } from '@ppt/domain';
 import type { LoanAccountView, CreateLoanAccountInput, RecordLoanPaymentInput } from '@ppt/domain';
@@ -99,10 +103,6 @@ import type { FinancePlanningWorkspaceView, RecordFinancePlanningItemInput } fro
 import type { LongTermPortfolioWorkspaceView, RecordLongTermPortfolioItemInput } from '@ppt/domain';
 import type { ManagedLifeWorkspaceView, RecordManagedLifeItemInput } from '@ppt/domain';
 import type { PrivacyOwnershipControlCenterView } from '@ppt/domain';
-import {
-  TEMPORARY_CREDENTIAL_DISCLOSURE_RULES,
-  TEMPORARY_CREDENTIAL_PURPOSE_BY_KIND
-} from '@ppt/domain';
 import type {
   CompanionSyncDenialView,
   FederatedAuthorizationCeremonyView,
@@ -119,10 +119,9 @@ import type {
 } from '@ppt/domain';
 
 type ReleaseChannel = 'bronze' | 'silver' | 'gold';
-const releaseChannelFromStage = (stage: string): ReleaseChannel => {
-  const normalized = stage.toLocaleLowerCase('tr-TR');
-  if (normalized.includes('gold')) return 'gold';
-  if (normalized.includes('silver')) return 'silver';
+const releaseChannelFromInfo = (channel: UserVisibleAppInfo['channel']): ReleaseChannel => {
+  if (channel === 'Gold') return 'gold';
+  if (channel === 'Silver') return 'silver';
   return 'bronze';
 };
 
@@ -654,6 +653,7 @@ function playParsBrandSound(): void {
 
 function FirstRunIntroduction({audioMuted,onAudioMutedChange,onComplete}:{audioMuted:boolean;onAudioMutedChange:(muted:boolean)=>void;onComplete:()=>void}){
   const [narrationStatus,setNarrationStatus]=useState<FirstRunNarrationStatus>(audioMuted?'muted':'idle');
+  const [narrationRate,setNarrationRate]=useState<'normal'|'slow'>('normal');
   const narrationEnvironment=():{synthesis?:SpeechSynthesis;createUtterance?:(text:string)=>SpeechSynthesisUtterance}=>{
     try {
       const synthesis=globalThis.speechSynthesis;
@@ -666,14 +666,14 @@ function FirstRunIntroduction({audioMuted,onAudioMutedChange,onComplete}:{audioM
   const cancelNarration=()=>cancelFirstRunNarration(narrationEnvironment().synthesis);
   const speak=(muted=audioMuted)=>{
     const environment=narrationEnvironment();
-    return startFirstRunNarration({muted,synthesis:environment.synthesis,createUtterance:environment.createUtterance,onStatus:setNarrationStatus});
+    return startFirstRunNarration({muted,rate:narrationRate,synthesis:environment.synthesis,createUtterance:environment.createUtterance,onStatus:setNarrationStatus});
   };
   useEffect(()=>{if(audioMuted){cancelNarration();setNarrationStatus('muted');return;}speak(false);return()=>{cancelNarration();};},[audioMuted]);
   const toggleMuted=()=>{const next=!audioMuted;onAudioMutedChange(next);if(next){cancelNarration();setNarrationStatus('muted');}};
   const complete=()=>{cancelNarration();persistFirstRunIntroductionComplete(browserPreferenceStorage());playParsBrandSound();onComplete();};
   const speaking=narrationStatus==='speaking';
   const narrationStatusText=audioMuted?'Ses kapalı; anlatım metni görünür.':narrationStatus==='unavailable'?'Bu cihazda yerel sesli anlatım kullanılamıyor; metin görünür.':narrationStatus==='error'?'Sesli anlatım başlatılamadı; metin görünür.':speaking?'Türkçe anlatım oynatılıyor.':'Türkçe anlatım hazır.';
-  return <main className="first-run-shell"><section className="first-run-card"><div className="first-run-brand"><img src={brandMarkUrl} alt=""/><span className="eyebrow">İlk kurulum</span><h1>Anadolu Parsı<br/><small>Aile Yaşam Merkezi</small></h1></div><p className="first-run-lead">Aile hafızası, belgeler, sağlık, finans ve yaşam kayıtları için güvenli yerel merkez.</p><div className="first-run-points"><div><strong>Gizlilik</strong><span>Kişisel veri kasası giriş yapılmadan açılmaz.</span></div><div><strong>Kontrol</strong><span>Yetkiler kimlik sağlayıcısından bağımsızdır.</span></div><div><strong>Dayanıklılık</strong><span>Yedekleme ve kurtarma güvenlik tasarımının parçasıdır.</span></div></div><div className="first-run-caption" aria-live="polite"><strong>Sesli anlatım</strong><p>{FIRST_RUN_NARRATION_TEXT}</p><small role="status">{narrationStatusText}</small></div><div className="first-run-actions"><Button onClick={toggleMuted}>{audioMuted?'Sesi aç':'Sesi kapat'}</Button><Button onClick={()=>speak(false)} disabled={audioMuted||speaking||narrationStatus==='unavailable'}>{speaking?'Anlatılıyor…':'Yeniden anlat'}</Button><Button tone="primary" onClick={complete}>İlk kuruluma geç</Button></div><button className="first-run-skip" type="button" onClick={complete}>Tanıtımı geç</button></section></main>;
+  return <main className="first-run-shell"><section className="first-run-card"><div className="first-run-brand"><img src={brandMarkUrl} alt=""/><span className="eyebrow">İlk kurulum · 3 kısa adım</span><h1>Anadolu Parsı<br/><small>Aile Yaşam Merkezi</small></h1></div><p className="first-run-lead">Aile hafızası, belgeler, sağlık, finans ve yaşam kayıtları için güvenli yerel merkez.</p><ol className="first-run-steps">{FIRST_RUN_NARRATION_STEPS.map((step,index)=><li key={step}><span>{index+1}</span><p>{step.replace(/^(Birinci|İkinci|Üçüncü) adım:\s*/u,'')}</p></li>)}</ol><div className="first-run-caption" aria-live="polite"><strong>Sesli anlatım metni</strong><p>{FIRST_RUN_NARRATION_TEXT}</p><small role="status">{narrationStatusText} · {narrationRate==='slow'?'Yavaş hız':'Normal hız'}</small></div><div className="first-run-actions"><Button onClick={toggleMuted}>{audioMuted?'Sesi aç':'Sesi kapat'}</Button><Button onClick={()=>{if(speaking){cancelNarration();setNarrationStatus('idle');}else speak(false);}} disabled={audioMuted||narrationStatus==='unavailable'}>{speaking?'Anlatımı durdur':'Baştan anlat'}</Button><Button onClick={()=>{cancelNarration();setNarrationStatus('idle');setNarrationRate(value=>value==='normal'?'slow':'normal');}}>{narrationRate==='slow'?'Normal hız':'Daha yavaş'}</Button><Button tone="primary" onClick={complete}>Güvenli kuruluma başla</Button></div><button className="first-run-skip" type="button" onClick={complete}>Tanıtımı şimdilik geç</button></section></main>;
 }
 
 
@@ -752,14 +752,22 @@ function AuthScreen({ auth, onSetup, onLogin, onWindowsHelloLogin, onInvitationA
   const [displayName,setDisplayName]=useState('');
   const [selectedAccountId,setSelectedAccountId]=useState(auth.profiles?.[0]?.id ?? '');
   const [password,setPassword]=useState('');
+  const [passwordVisible,setPasswordVisible]=useState(false);
   const [secondFactorCode,setSecondFactorCode]=useState('');
   const [error,setError]=useState('');
   const [busy,setBusy]=useState(false);
   const [helloBusy,setHelloBusy]=useState(false);
+  const [submitAttempted,setSubmitAttempted]=useState(false);
   const [helloState,setHelloState]=useState<WindowsHelloStateView|null>(null);
   const [externalProviders,setExternalProviders]=useState<ExternalIdentityProviderView[]>([]);
+  const familyNameRef=useRef<HTMLInputElement>(null);
+  const displayNameRef=useRef<HTMLInputElement>(null);
+  const passwordRef=useRef<HTMLInputElement>(null);
   const passwordAssessment=assessPassword(password);
   const profiles=auth.profiles ?? [];
+  const familyNameInvalid=submitAttempted&&!auth.initialized&&familyName.trim().length<2;
+  const displayNameInvalid=submitAttempted&&!auth.initialized&&displayName.trim().length<2;
+  const passwordInvalid=submitAttempted&&(!auth.initialized?!passwordAssessment.valid:password.length===0);
   useEffect(()=>{if(!selectedAccountId&&profiles[0])setSelectedAccountId(profiles[0].id);},[profiles,selectedAccountId]);
   useEffect(()=>{void window.pardus?.getExternalIdentityProviders().then(setExternalProviders).catch(()=>setExternalProviders([]));},[]);
   useEffect(()=>{
@@ -774,12 +782,15 @@ function AuthScreen({ auth, onSetup, onLogin, onWindowsHelloLogin, onInvitationA
     catch(caught){setError(caught instanceof Error?caught.message:'Windows Hello ile giriş tamamlanamadı.');}
     finally{setHelloBusy(false);}
   };
-  const submit=async(e:FormEvent)=>{
-    e.preventDefault();
+  const submit=async()=>{
+    if(busy||helloBusy)return;
+    setSubmitAttempted(true);
     setError('');
     if(auth.initialized&&profiles.length>0&&!selectedAccountId){setError('Devam etmek için bir profil seçin.');return;}
-    if(!auth.initialized&&(familyName.trim().length<2||displayName.trim().length<2)){setError('Aile adı ve ad soyad en az 2 karakter olmalıdır.');return;}
-    if(!auth.initialized&&!passwordAssessment.valid){setError('Parola bütün güvenlik koşullarını karşılamalıdır.');return;}
+    if(!auth.initialized&&familyName.trim().length<2){setError('Aile adı en az 2 karakter olmalıdır. Eksik alan işaretlendi.');familyNameRef.current?.focus();return;}
+    if(!auth.initialized&&displayName.trim().length<2){setError('Adınız ve soyadınız en az 2 karakter olmalıdır. Eksik alan işaretlendi.');displayNameRef.current?.focus();return;}
+    if(!auth.initialized&&!passwordAssessment.valid){setError('Parola en az 12 karakter; büyük harf, küçük harf, rakam ve simge içermelidir.');passwordRef.current?.focus();return;}
+    if(auth.initialized&&password.length===0){setError('Devam etmek için yerel parolanızı yazın.');passwordRef.current?.focus();return;}
     setBusy(true);
     try{
       if(auth.initialized)await onLogin({...(selectedAccountId?{accountId:selectedAccountId}:{}),password,...(secondFactorCode.trim()?{secondFactorCode:secondFactorCode.trim()}:{})});
@@ -794,16 +805,17 @@ function AuthScreen({ auth, onSetup, onLogin, onWindowsHelloLogin, onInvitationA
       <div className="auth-trust"><span>✓</span><div><strong>Veriler bu bilgisayarda kalır</strong><small>E-posta hesabı veya çevrim içi üyelik gerekmez.</small></div></div>
     </section>
     <section className="auth-entry">
-      <form className="auth-form" aria-labelledby="auth-title" noValidate onSubmit={e=>void submit(e)}>
+      <form className="auth-form" aria-labelledby="auth-title" noValidate onSubmit={event=>{event.preventDefault();void submit();}}>
         <div className="auth-heading"><span className="eyebrow">{auth.initialized?'Tekrar hoş geldiniz':'İlk başlangıç'}</span><h2 id="auth-title">{auth.initialized?'Profilinizi seçin':'Ailenizi oluşturalım'}</h2><p>{auth.initialized?'Aile yaşam alanınıza yerel parolanızla devam edin.':'Birkaç bilgiyle kişisel aile alanınızı hazırlayın.'}</p></div>
-        {!auth.initialized&&<div className="auth-fields"><label>Aile adı<input autoFocus autoComplete="organization" value={familyName} onChange={e=>setFamilyName(e.target.value)} required minLength={2} placeholder="Örn. Yılmaz Ailesi"/></label><label>Adınız ve soyadınız<input autoComplete="name" value={displayName} onChange={e=>setDisplayName(e.target.value)} required minLength={2} placeholder="Aile yöneticisinin adı"/></label></div>}
+        {!auth.initialized&&<div className="auth-fields"><label>Aile adı<input ref={familyNameRef} autoFocus autoComplete="organization" value={familyName} onChange={event=>{setFamilyName(event.target.value);setError('');}} required minLength={2} aria-invalid={familyNameInvalid} placeholder="Örn. Yılmaz Ailesi"/></label><label>Adınız ve soyadınız<input ref={displayNameRef} autoComplete="name" value={displayName} onChange={event=>{setDisplayName(event.target.value);setError('');}} required minLength={2} aria-invalid={displayNameInvalid} placeholder="Aile yöneticisinin adı"/></label></div>}
         {auth.initialized&&profiles.length>0&&<div className="profile-grid" role="radiogroup" aria-label="Yerel profiller">{profiles.map(profile=><button type="button" role="radio" aria-checked={selectedAccountId===profile.id} className={`profile-card ${selectedAccountId===profile.id?'selected':''}`} key={profile.id} onClick={()=>setSelectedAccountId(profile.id)}><span>{profile.initials}</span><div><strong>{profile.displayName}</strong><small>{profile.role==='family_admin'?'Aile yöneticisi':'Aile üyesi'}</small></div><i>{selectedAccountId===profile.id?'✓':''}</i></button>)}</div>}
-        <div className="auth-fields"><label>Yerel parola<input type="password" autoComplete={auth.initialized?'current-password':'new-password'} value={password} onChange={e=>setPassword(e.target.value)} required minLength={12} placeholder="Parolanızı yazın"/>{!auth.initialized&&<div className="password-checklist" aria-live="polite"><strong>{passwordAssessment.remainingCharacters?`${passwordAssessment.remainingCharacters} karakter daha gerekli`:'Uzunluk koşulu tamam'}</strong><span className={passwordAssessment.checks.uppercase?'ok':''}>Büyük harf</span><span className={passwordAssessment.checks.lowercase?'ok':''}>Küçük harf</span><span className={passwordAssessment.checks.digit?'ok':''}>Rakam</span><span className={passwordAssessment.checks.symbol?'ok':''}>Sembol</span></div>}</label>{auth.initialized&&<label>İki aşamalı doğrulama kodu <small>(etkinse)</small><input value={secondFactorCode} onChange={e=>setSecondFactorCode(e.target.value)} inputMode="numeric" autoComplete="one-time-code" placeholder="6 haneli kod veya kurtarma kodu"/></label>}</div>
+        <div className="auth-fields"><label>Yerel parola<div className="password-input-shell"><input id="local-password" ref={passwordRef} type={passwordVisible?'text':'password'} autoComplete={auth.initialized?'current-password':'new-password'} value={password} onChange={event=>{setPassword(event.target.value);setError('');}} required minLength={12} aria-invalid={passwordInvalid} placeholder="Parolanızı yazın"/><button type="button" className="password-visibility-toggle" aria-controls="local-password" aria-pressed={passwordVisible} aria-label={passwordVisible?'Parolayı gizle':'Parolayı göster'} onClick={()=>setPasswordVisible(value=>!value)}>{passwordVisible?'Gizle':'Göster'}</button></div>{!auth.initialized&&<div className="password-checklist" aria-live="polite"><strong>{passwordAssessment.remainingCharacters?`${passwordAssessment.remainingCharacters} karakter daha gerekli`:'Uzunluk koşulu tamam'}</strong><span className={passwordAssessment.checks.uppercase?'ok':''}>Büyük harf</span><span className={passwordAssessment.checks.lowercase?'ok':''}>Küçük harf</span><span className={passwordAssessment.checks.digit?'ok':''}>Rakam</span><span className={passwordAssessment.checks.symbol?'ok':''}>Sembol</span></div>}</label>{auth.initialized&&<label>İki aşamalı doğrulama kodu <small>(etkinse)</small><input value={secondFactorCode} onChange={e=>setSecondFactorCode(e.target.value)} inputMode="numeric" autoComplete="one-time-code" placeholder="6 haneli kod veya kurtarma kodu"/></label>}</div>
         {externalProviders.some(p=>p.productionReady)&&<div className="external-identity-ready" aria-label="Haricî kimlik sağlayıcıları">{externalProviders.filter(p=>p.productionReady).map(p=><span key={p.id}>{p.label}</span>)}</div>}
         {error&&<div className="form-error" role="alert">{error}</div>}
         {auth.initialized&&helloState?.enrolled&&<Button type="button" tone="primary" disabled={busy||helloBusy||helloState.availability!=='available'} onClick={()=>void loginWithHello()}>{helloBusy?'Windows Hello bekleniyor…':'Windows Hello ile devam et'}</Button>}
         {auth.initialized&&helloState?.enrolled&&helloState.availability!=='available'&&<StatusMessage tone="info">{windowsHelloOutcomeMessage(helloState.availability)}</StatusMessage>}
-        <Button tone="primary" type="submit" disabled={busy||helloBusy}>{busy?'Hazırlanıyor…':auth.initialized?'Aile alanına gir':'Aile alanımı oluştur'}</Button>
+        <Button tone="primary" type="button" disabled={busy||helloBusy} aria-describedby="auth-submit-guidance" onClick={()=>void submit()}>{busy?'Hazırlanıyor…':auth.initialized?'Aile alanına gir':'Aile alanımı oluştur'}</Button>
+        <p id="auth-submit-guidance" className="auth-submit-guidance" aria-live="polite">{busy?'Güvenli yerel alan hazırlanıyor; lütfen bekleyin.':auth.initialized?'Profil ve parola doğrulandıktan sonra aile alanınız açılır.':'Düğmeye bastığınızda eksik alan gösterilir; bilgiler uygunsa güvenli kurulum başlar.'}</p>
         <small className="auth-footnote">{USER_VISIBLE_APP_INFO.releaseLabel} · {USER_VISIBLE_APP_INFO.stage}</small>
       </form>
       {auth.initialized&&<InvitationAcceptancePanel onAccepted={onInvitationAccepted}/>}
@@ -1069,6 +1081,11 @@ function SystemManagementScreen(){
   const [policyServiceAvailabilityBoundary,setPolicyServiceAvailabilityBoundary]=useState<PolicyServiceAvailabilityBoundaryView>();
   const [productSurfaceGovernance,setProductSurfaceGovernance]=useState<ProductSurfaceGovernanceView>();
   const [desktopSecurityPosture,setDesktopSecurityPosture]=useState<DesktopSecurityPostureView>();
+  const [factoryResetOpen,setFactoryResetOpen]=useState(false);
+  const [factoryResetPassword,setFactoryResetPassword]=useState('');
+  const [factoryResetCode,setFactoryResetCode]=useState('');
+  const [factoryResetConfirmation,setFactoryResetConfirmation]=useState('');
+  const [factoryResetBusy,setFactoryResetBusy]=useState(false);
   const [health,setHealth]=useState<SystemHealthView>(); const [coreServiceHealth,setCoreServiceHealth]=useState<CoreServiceHealthContract>(); const [coreServiceApiBoundary,setCoreServiceApiBoundary]=useState<CoreServiceApiBoundaryStatusContract>(); const [targets,setTargets]=useState<BackupTargetView[]>([]); const [runs,setRuns]=useState<BackupRunView[]>([]); const [performance,setPerformance]=useState<PerformanceSampleView[]>([]); const [trend,setTrend]=useState<PerformanceTrendView>(); const [tasks,setTasks]=useState<BackgroundTaskView[]>([]); const [scheduler,setScheduler]=useState<SchedulerStatusView>(); const [diagnostics,setDiagnostics]=useState<DiagnosticEntryView[]>([]); const [result,setResult]=useState<MaintenanceResultView>(); const [backupMessage,setBackupMessage]=useState(''); const [queue,setQueue]=useState<QueuedTaskView[]>([]); const [policy,setPolicy]=useState<MaintenancePolicyView>(); const [notifications,setNotifications]=useState<HealthNotificationView[]>([]); const [systemMessage,setSystemMessage]=useState(''); const [healthScore,setHealthScore]=useState<SystemHealthScoreView>(); const [reportHistory,setReportHistory]=useState<DiagnosticReportHistoryView[]>([]); const [diagQuery,setDiagQuery]=useState(''); const [diagSeverity,setDiagSeverity]=useState(''); const [healthHistory,setHealthHistory]=useState<SystemHealthHistoryView[]>([]); const [healthTrend,setHealthTrend]=useState<SystemHealthTrendView>(); const [archives,setArchives]=useState<DiagnosticArchiveView[]>([]); const [anomalies,setAnomalies]=useState<PerformanceAnomalyView[]>([]); const [recommendations,setRecommendations]=useState<MaintenanceRecommendationView[]>([]); const [reportContent,setReportContent]=useState<DiagnosticReportContentView>(); const [verificationMessage,setVerificationMessage]=useState(''); const [healthDays,setHealthDays]=useState(30); const [performanceHours,setPerformanceHours]=useState(24); const [compareLeft,setCompareLeft]=useState(''); const [compareRight,setCompareRight]=useState(''); const [comparison,setComparison]=useState<DiagnosticReportComparisonView>(); const [archiveContent,setArchiveContent]=useState<DiagnosticArchiveContentView>(); const [archiveId,setArchiveId]=useState(''); const [archiveQuery,setArchiveQuery]=useState(''); const [maintenanceHistory,setMaintenanceHistory]=useState<MaintenanceHistoryView[]>([]); const [exportHistory,setExportHistory]=useState<ExportArtifactView[]>([]); const [ipcTelemetry,setIpcTelemetry]=useState<IpcPerformanceTelemetryView>(); const [ipcMaintenanceAuthority,setIpcMaintenanceAuthority]=useState<IpcAdaptiveBudgetMaintenanceAuthorityView>(); const [ipcMaintenanceRecoveryAuthority,setIpcMaintenanceRecoveryAuthority]=useState<IpcAdaptiveBudgetMaintenanceRecoveryAuthorityView>(); const [ipcMaintenancePassword,setIpcMaintenancePassword]=useState(''); const [ipcMaintenanceCode,setIpcMaintenanceCode]=useState(''); const [ipcMaintenanceRecoveryConfirmation,setIpcMaintenanceRecoveryConfirmation]=useState(''); const [ipcMaintenanceBusy,setIpcMaintenanceBusy]=useState(false);
   const refresh=async()=>{if(!window.pardus)return; const [h,coreHealth,apiBoundary,t,r,p,tr,bg,sc,d,q,mp,n,hs,rh,hh,ht,ar,an,mr,mhist,exports,ipc,ipcAuthority,ipcRecoveryAuthority]=await Promise.all([window.pardus.getSystemHealth(),window.pardus.getCoreServiceHealth().catch(()=>undefined),window.pardus.getCoreServiceApiBoundary().catch(()=>undefined),window.pardus.listBackupTargets(),window.pardus.listBackupRuns(30),window.pardus.listPerformance(30),window.pardus.getPerformanceTrend(performanceHours),window.pardus.listBackgroundTasks(30),window.pardus.getSchedulerStatus(),window.pardus.listDiagnostics(50),window.pardus.listQueuedTasks(40),window.pardus.getMaintenancePolicy(),window.pardus.listHealthNotifications(40),window.pardus.getHealthScore(),window.pardus.listDiagnosticReports(20),window.pardus.listHealthHistory(Math.max(30,healthDays*4)),window.pardus.getHealthTrend(healthDays),window.pardus.listDiagnosticArchives(20),window.pardus.getPerformanceAnomalies(performanceHours),window.pardus.getMaintenanceRecommendations(),window.pardus.listMaintenanceHistory(30),window.pardus.listExportArtifacts(30),window.pardus.getIpcPerformanceTelemetry(),window.pardus.getIpcAdaptiveBudgetMaintenanceAuthority(),window.pardus.getIpcAdaptiveBudgetMaintenanceRecoveryAuthority()]);setHealth(h);setCoreServiceHealth(coreHealth);setCoreServiceApiBoundary(apiBoundary);setTargets(t);setRuns(r);setPerformance(p);setTrend(tr);setTasks(bg);setScheduler(sc);setDiagnostics(d);setQueue(q);setPolicy(mp);setNotifications(n);setHealthScore(hs);setReportHistory(rh);setHealthHistory(hh);setHealthTrend(ht);setArchives(ar);setAnomalies(an);setRecommendations(mr);setMaintenanceHistory(mhist);setExportHistory(exports);setIpcTelemetry(ipc);setIpcMaintenanceAuthority(ipcAuthority);setIpcMaintenanceRecoveryAuthority(ipcRecoveryAuthority);};
   useEffect(()=>{void refresh();const timer=setInterval(()=>void refresh(),30_000);return()=>clearInterval(timer);},[]);
@@ -1113,9 +1130,13 @@ function SystemManagementScreen(){
   const exportIpcAdaptiveDiagnostics=async()=>{if(!window.pardus||!ipcMaintenanceCredentialsReady)return;setIpcMaintenanceBusy(true);try{const exported=await window.pardus.exportIpcAdaptiveBudgetDiagnostics({password:ipcMaintenancePassword,...(ipcMaintenanceCode?{code:ipcMaintenanceCode}:{})});setSystemMessage(exported.canceled?'Tanı paketi dışa aktarılmadı.':`Adaptif IPC tanı paketi kaydedildi · ${exported.sha256?.slice(0,12)??'SHA yok'}`);}catch(error){setSystemMessage(error instanceof Error?error.message:'Güçlü doğrulama başarısız.');}finally{clearIpcMaintenanceCredentials();setIpcMaintenanceBusy(false);await refreshIpcMaintenanceAuthority();}};
   const resetIpcAdaptiveBudget=async()=>{if(!window.pardus||!ipcMaintenanceCredentialsReady)return;setIpcMaintenanceBusy(true);try{const reset=await window.pardus.resetIpcAdaptiveBudget({password:ipcMaintenancePassword,...(ipcMaintenanceCode?{code:ipcMaintenanceCode}:{})});setSystemMessage(reset.canceled?'Adaptif bütçe sıfırlanmadı.':'Adaptif bütçe baseline moduna sıfırlandı.');if(!reset.canceled)await refresh();}catch(error){setSystemMessage(error instanceof Error?error.message:'Güçlü doğrulama başarısız.');}finally{clearIpcMaintenanceCredentials();setIpcMaintenanceBusy(false);await refreshIpcMaintenanceAuthority();}};
   const recoverIpcAdaptiveBudgetMaintenanceLock=async()=>{if(!window.pardus||!ipcMaintenanceRecoveryReady)return;setIpcMaintenanceBusy(true);try{const recovered=await window.pardus.recoverIpcAdaptiveBudgetMaintenanceLock({password:ipcMaintenancePassword,...(ipcMaintenanceCode?{code:ipcMaintenanceCode}:{}),confirmation:'BAKIM KİLİDİNİ SIFIRLA'});setSystemMessage(recovered.canceled?'Bakım kilidi kurtarma iptal edildi.':`Bakım kilidi temizlendi · güvenlik dönemi ${recovered.securityEpoch??'—'} · ${recovered.revokedTrustedDeviceCount??0} güvenilir cihaz bağı iptal edildi.`);}catch(error){setSystemMessage(error instanceof Error?error.message:'Bakım kilidi kurtarma doğrulaması başarısız.');}finally{clearIpcMaintenanceCredentials();setIpcMaintenanceBusy(false);await refreshIpcMaintenanceAuthority();}};
+  const closeFactoryReset=()=>{setFactoryResetOpen(false);setFactoryResetPassword('');setFactoryResetCode('');setFactoryResetConfirmation('');};
+  const factoryResetReady=factoryResetPassword.length>0&&factoryResetConfirmation==='ILK KURULUM ANINA DON';
+  const performFactoryReset=async()=>{if(!window.pardus||!factoryResetReady)return;setFactoryResetBusy(true);setSystemMessage('');try{await window.pardus.factoryResetToInitialState({password:factoryResetPassword,...(factoryResetCode.trim()?{code:factoryResetCode.trim()}:{}),confirmation:'ILK KURULUM ANINA DON'});setSystemMessage('Kişisel veriler siliniyor; uygulama ilk kurulum ekranıyla yeniden başlatılıyor.');}catch(error){setSystemMessage(error instanceof Error?error.message:'İlk kurulum durumuna dönüş başlatılamadı.');setFactoryResetBusy(false);setFactoryResetPassword('');setFactoryResetCode('');}};
   const bytes=(n:number)=>new Intl.NumberFormat('tr-TR',{style:'unit',unit:'megabyte',maximumFractionDigits:1}).format(n/1048576);
   const trendLabel=trend?.direction==='improving'?'İyileşiyor':trend?.direction==='degrading'?'Baskı artıyor':'Dengeli';
   return <section><PageHeader eyebrow="Sistem yönetimi" title="Sistem, bakım ve operasyon" description="Yedek hedeflerini, performansı, bakım görevlerini ve tanılama işlemlerini yönetin." actions={<Button onClick={()=>void refresh()}>Yenile</Button>}/><UniversalUxConsolidationPanel/><DistributedOperationsPanel/><CommunicationAuditArchivePanel/><CommunicationFileSharingPanel/><CommunicationSecurityPanel/><CommunicationMessagingPanel/><CommunicationRealtimeCallingPanel/><CommunicationRecordingRetentionPanel/><LocalTranslationLanguagePanel/><SignedPluginPlatformPanel/>
+  <article className="panel factory-reset-panel"><div className="section-heading"><div><span className="eyebrow">Geri alınamaz yerel işlem</span><h2>İlk kurulum anına dön</h2><p>Tüm kişisel veriler, yönetilen yerel yedekler ve oturumlar silinir. İşlem yeni yedek oluşturmaz; Gold etkinleştirmesi ve deneme başlangıcı sıfırlanmaz.</p></div>{!factoryResetOpen&&<Button tone="danger" onClick={()=>setFactoryResetOpen(true)}>İlk kurulum anına dön</Button>}</div>{factoryResetOpen&&<div className="factory-reset-confirmation" role="alert" aria-live="assertive"><strong>Bu işlem geri alınamaz.</strong><p>Uygulamanın erişemediği OneDrive, Google Drive, iCloud veya başka haricî kopyalar otomatik silinmiş sayılmaz. Kayıtlı haricî yedek kanıtı varsa işlem güvenli biçimde reddedilir.</p><div className="form-grid"><label>Yerel parola<input type="password" autoComplete="current-password" maxLength={1024} value={factoryResetPassword} onChange={event=>setFactoryResetPassword(event.target.value)}/></label><label>2FA / kurtarma kodu (etkinse)<input autoComplete="one-time-code" maxLength={256} value={factoryResetCode} onChange={event=>setFactoryResetCode(event.target.value.replace(/\s+/g,''))}/></label><label className="span-2">Onaylamak için yazın: <code>ILK KURULUM ANINA DON</code><input value={factoryResetConfirmation} autoComplete="off" maxLength={23} onChange={event=>setFactoryResetConfirmation(event.target.value)}/></label></div><div className="button-row"><Button tone="danger" disabled={!factoryResetReady||factoryResetBusy} onClick={()=>void performFactoryReset()}>{factoryResetBusy?'Silme hazırlanıyor…':'Evet, tüm kişisel verileri sil'}</Button><Button disabled={factoryResetBusy} onClick={closeFactoryReset}>Hayır, vazgeç</Button></div></div>}</article>
   <Surface className="workspace-summary"><SectionHeader eyebrow="B2-03 / B2-04 · masaüstü güvenlik kapanışı" title="Oturum kilidi ve Electron sertleştirmesi"/><div className="notes-card"><strong>{desktopSecurityPosture?.enforcement==='fail-closed'?'Fail-closed masaüstü güvenlik sözleşmesi etkin':'Masaüstü güvenlik durumu doğrulanamadı'}</strong><small>Boşta kilit {desktopSecurityPosture?.session.idleTimeoutMinutes??15} dakika · erişilebilir uyarı {desktopSecurityPosture?.session.warningBeforeSeconds??60} saniye · açık form durumu kilitte korunur</small><small>Renderer {desktopSecurityPosture?.electron.primaryRendererProtocol??'doğrulanamadı'} · sandbox/context isolation etkin · gezinme, yeni pencere ve izinler varsayılan reddedilir</small><small>Fuse doğrulaması zorunlu · RunAsNode/Node seçenekleri kapalı · ASAR bütünlüğü ve yalnız ASAR yükleme açık</small></div></Surface>
   <Surface className="workspace-summary"><SectionHeader eyebrow="B0-03 / B0-04 · ürün yüzeyi gerçeklik kapısı" title="Belge, rota, menü, ekran ve API envanteri tek sözleşmede"/><div className="notes-card"><strong>{productSurfaceGovernance?.enforcement==='fail-closed'&&productSurfaceGovernance.unresolvedUnusedRendererApiCount===0?'Ürün yüzeyi zinciri doğrulandı':'Ürün yüzeyi zinciri doğrulanamadı'}</strong><small>{productSurfaceGovernance?.productModuleCount??0} ürün modülü + {productSurfaceGovernance?.governanceSurfaceCount??0} yönetişim yüzeyi = {productSurfaceGovernance?.navigationRouteCount??0} kanonik rota</small><small>Menü {productSurfaceGovernance?.menuEntryCount??0} · ekran {productSurfaceGovernance?.renderedScreenCount??0} · sınıflandırılmış kullanılmayan renderer API {productSurfaceGovernance?.classifiedUnusedRendererApiCount??0}</small><small>Çözümlenmemiş API {productSurfaceGovernance?.unresolvedUnusedRendererApiCount??0} · eksik zincir build kapanışını fail-closed durdurur · veritabanı göçü gerekmez</small></div></Surface>
   {policyServiceAvailabilityBoundary&&<article className={`panel health-alert ${policyServiceAvailabilityBoundary.mode==='read-write'?'info':policyServiceAvailabilityBoundary.mode==='read-only'?'warning':'critical'}`}><h2>PPK-024 · Politika servisi çalışma modu</h2><strong>{policyServiceAvailabilityBoundary.mode==='read-write'?'Okuma ve yazma açık':policyServiceAvailabilityBoundary.mode==='read-only'?'Salt okunur — değişiklikler kapalı':'Erişim güvenli biçimde durduruldu'}</strong><p>{policyServiceAvailabilityBoundary.reason}</p><small>İmza {policyServiceAvailabilityBoundary.policyPackageVerified?'doğrulandı':'doğrulanamadı'} · canlılık {policyServiceAvailabilityBoundary.observationFresh?'güncel':'güncel değil'} · istemci bu göstergeden ek yetki türetemez.</small></article>}
@@ -2652,8 +2673,14 @@ export function App() {
   const accessibilitySaveChainRef=useRef<Promise<void>>(Promise.resolve());
   const [systemDark,setSystemDark]=useState(()=>globalThis.matchMedia?.('(prefers-color-scheme: dark)').matches??true);
   const theme=resolveAccessibilityTheme(accessibility.theme,systemDark);
+  const releaseChannel=releaseChannelFromInfo(appInfo.channel);
+  useEffect(()=>{
+    document.documentElement.dataset.releaseChannel=releaseChannel;
+    return()=>{delete document.documentElement.dataset.releaseChannel;};
+  },[releaseChannel]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(readSidebarState);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -2685,7 +2712,16 @@ export function App() {
         event.preventDefault();
         setSearchOpen(true);
       }
+      if (event.key === 'F1') {
+        event.preventDefault();
+        setHelpOpen(true);
+        setSearchOpen(false);
+        setNotificationOpen(false);
+        setProfileOpen(false);
+        setFamilyOpen(false);
+      }
       if (event.key === 'Escape') {
+        setHelpOpen(false);
         setSearchOpen(false);
         setNotificationOpen(false);
         setProfileOpen(false);
@@ -3031,7 +3067,7 @@ export function App() {
     else{const target=archivedEvents.find((event)=>event.id===eventId);if(target){const {archivedAt:_archivedAt,...restored}=target;setArchivedEvents((current)=>current.filter((event)=>event.id!==eventId));setSnapshot((current)=>({...current,events:[restored,...current.events],lastUpdatedAt:new Date().toISOString()}));}}
   };
 
-  const setupAdmin=async(input:SetupAdminInput)=>{if(window.pardus){const ticket=asyncWriteGuardRef.current.start('auth-transition');const state=await window.pardus.setupAdmin(input);if(!asyncWriteGuardRef.current.commit(ticket,()=>setAuth(state)))return;await bootstrapAuthenticatedSession();}};
+  const setupAdmin=async(input:SetupAdminInput)=>{if(!window.pardus)throw new Error('Güvenli kurulum bağlantısı başlatılamadı. Uygulamayı kapatıp yeniden açın.');const ticket=asyncWriteGuardRef.current.start('auth-transition');const state=await window.pardus.setupAdmin(input);if(!asyncWriteGuardRef.current.commit(ticket,()=>setAuth(state)))return;await bootstrapAuthenticatedSession();};
   const login=async(input:LoginInput)=>{if(window.pardus){const ticket=asyncWriteGuardRef.current.start('auth-transition');const state=await window.pardus.login(input);if(!asyncWriteGuardRef.current.commit(ticket,()=>setAuth(state)))return;await bootstrapAuthenticatedSession();}};
   const loginWithWindowsHello=async(input:LoginWithWindowsHelloInput)=>{if(window.pardus){const ticket=asyncWriteGuardRef.current.start('auth-transition');const result=await window.pardus.loginWithWindowsHello(input);if(!result.authenticated)throw new Error(windowsHelloOutcomeMessage(result.outcome));const state=await window.pardus.getAuthState();if(!asyncWriteGuardRef.current.commit(ticket,()=>setAuth(state)))return;await bootstrapAuthenticatedSession();}};
   const completeInvitationAcceptance=async(state:AuthStateView)=>{const ticket=asyncWriteGuardRef.current.start('auth-transition');if(!asyncWriteGuardRef.current.commit(ticket,()=>setAuth(state)))return;await bootstrapAuthenticatedSession();};
@@ -3110,7 +3146,7 @@ export function App() {
   else screen = <PlaceholderScreen screen={active} snapshot={snapshot} auth={auth} />;
 
   return (<>
-    <div aria-hidden={sessionOverlayVisible?true:undefined} className={`app-shell ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`} data-theme={theme} data-release-channel={releaseChannelFromStage(appInfo.stage)} data-text-scale={accessibility.textScale} data-high-contrast={accessibility.highContrast ? 'true' : 'false'} data-reduce-motion={accessibility.reduceMotion ? 'true' : 'false'} data-density={accessibility.density} data-reading-mode={accessibility.readingMode} data-audience-profile={accessibility.audienceProfile} data-captions-enabled={accessibility.captionsEnabled?'true':'false'} data-audio-muted={accessibility.audioMuted?'true':'false'} style={{'--accessibility-text-scale':accessibility.textScalePercent/100} as CSSProperties}>
+    <div aria-hidden={sessionOverlayVisible?true:undefined} className={`app-shell ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`} data-theme={theme} data-release-channel={releaseChannel} data-text-scale={accessibility.textScale} data-high-contrast={accessibility.highContrast ? 'true' : 'false'} data-reduce-motion={accessibility.reduceMotion ? 'true' : 'false'} data-density={accessibility.density} data-reading-mode={accessibility.readingMode} data-audience-profile={accessibility.audienceProfile} data-captions-enabled={accessibility.captionsEnabled?'true':'false'} data-audio-muted={accessibility.audioMuted?'true':'false'} style={{'--accessibility-text-scale':accessibility.textScalePercent/100} as CSSProperties}>
       <VisuallyHidden as="div"><div aria-live="polite" aria-atomic="true">{accessibilityAnnouncement(activeItem.label)}</div></VisuallyHidden>
       <a className="skip-link" href="#main-content">Ana içeriğe geç</a>
       <aside className="sidebar">
@@ -3146,6 +3182,7 @@ export function App() {
           <div className="breadcrumb"><span aria-hidden="true">{activeItem.icon}</span><strong id="current-section-title">{activeItem.label}</strong></div>
           <div className="topbar-center">{now}</div>
           <div className="topbar-actions">
+            <button type="button" className="help-trigger" aria-haspopup="dialog" aria-expanded={helpOpen} aria-controls="narrated-help-dialog" onClick={()=>{setHelpOpen(true);setSearchOpen(false);setNotificationOpen(false);setProfileOpen(false);setFamilyOpen(false);}}><span aria-hidden="true">?</span><span>Yardım</span><kbd>F1</kbd></button>
             <div className="topbar-control">
               <button type="button" className="notification" aria-expanded={notificationOpen} aria-controls="notification-menu" aria-haspopup="dialog" aria-label={`${activeNotifications.length} okunmamış bildirim`} onClick={()=>{setNotificationOpen((value)=>!value);setProfileOpen(false);setFamilyOpen(false);}}>♢{activeNotifications.length>0&&<i>{activeNotifications.length}</i>}</button>
               {notificationOpen&&<div id="notification-menu" className="menu-popover notification-popover" role="dialog" aria-label="Bildirim merkezi">
@@ -3204,6 +3241,7 @@ export function App() {
           <footer id="command-help"><span>↑↓ Gezin</span><span>Enter Aç</span><span>Esc Kapat</span></footer>
         </section>
       </div>}
+      {helpOpen&&<NarratedHelpCenter activeScreenLabel={activeItem.label} audioMuted={accessibility.audioMuted} onAudioMutedChange={(audioMuted)=>updateAccessibility({...accessibility,audioMuted})} onClose={()=>setHelpOpen(false)}/>}
       {memberModal && <AddMemberModal fallbackPeople={snapshot.people} onClose={() => setMemberModal(false)} onSave={createMember} />}
       {locationModal && <AddLocationModal onClose={() => setLocationModal(false)} onSave={createLocation} />}
       {relationModal && <AddRelationModal fallbackPeople={snapshot.people} onClose={()=>setRelationModal(false)} onSave={createRelation} />}

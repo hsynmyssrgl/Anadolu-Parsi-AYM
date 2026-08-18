@@ -2,7 +2,7 @@
 
 - Görünür sürüm: **Bronze 04.08.2026.29**
 - Makine okunur defter: `config/user-decision-ledger.json`
-- Aktif karar sayısı: **52**
+- Aktif karar sayısı: **82**
 
 Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağlayıcı kullanıcı kararlarını karar düzeyinde, etkilediği kural/belge/kod alanlarıyla saklar. Ham konuşma erişimi olmadan “tam transcript” iddiası yapılmaz.
 
@@ -60,3 +60,16 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 - `DEC-196` — PPK-015 zero-exception allowlisted TLS/mTLS network egress policy top closure
 - `DEC-197` — PPK-016 fail-closed derived-data policy inheritance and immutable lineage metadata top closure
 - `DEC-198` — PPK-017 fail-closed content-free sensitive logging and diagnostic boundary top closure
+- `DEC-199`–`DEC-224` — PPK-018–PPK-028 ve 32-X/33-A–33-M yerel yönetişim ve ürün paket kararları
+- `DEC-250` — Güncel dokümantasyon yenilemesi ve tarihsel kayıtların korunması
+- `DEC-251` — Karar anında eşzamanlı belge ve iş listesi güncellemesi; eksik senkronizasyon fail-closed
+- `DEC-252` — Tarihsel kayıtların son temel sonrasında gelecek içerik denetimlerinden çıkarılması
+- `DEC-253` — Animasyonlu kurulum ekranları, yenilenmiş üç adımlı anlatım ve Silver doğrulamasına hazırlanmış F1 sesli Yardım Merkezi
+
+## Bundan sonraki kararlar için zorunlu eşzamanlılık kuralı
+
+`DEC-251` ve `config/documentation-synchronization-policy.json` gereği her yeni bağlayıcı karar aynı değişiklikte DEC dosyasına, makine defterine, etkilenen aktif belgelere ve iş listesine işlenir. Açık kalan işlerde yerel durum, açık kalma nedeni, eksik kanıt ve `countsAsRequirementPass` alanları zorunludur. Bu zincir eksikse karar veya iş tamamlandı sayılamaz.
+
+`DEC-252` gereği bu yenilemedeki kapsamlı tarihsel tarama son temeldir. Bundan sonra eski build, arşiv ve checkpoint belgelerinin içeriği yeniden denetlenmez veya güncel karar kaynağı sayılmaz; yalnız değişmez `HISTORICAL` kayıt olarak korunur. Yeni denetimler aktif ve yeni belgelere uygulanır.
+
+Makine defteri yalnız açık kullanıcı kararlarını tutar. Türetilmiş paket/mimari kararlarının eksiksiz DEC-090–DEC-252 dizini ve dosya yolları `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md` içindedir.

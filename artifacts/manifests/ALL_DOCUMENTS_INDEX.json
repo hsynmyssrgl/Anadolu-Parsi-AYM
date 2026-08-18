@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "release": "Bronze 04.08.2026.29",
   "releaseId": "bronze-2026-08-04-r29",
-  "generatedAt": "2026-08-17T06:26:35.270Z",
+  "generatedAt": "2026-08-18T00:49:08.977Z",
   "selfIndexedPaths": [
     "SHA256SUMS.txt",
     "artifacts/manifests/ALL_DOCUMENTS_INDEX.csv",
@@ -14,7 +14,7 @@
     "docs/current/08_TUM_BELGELER_DIZINI.md",
     "manifest.json"
   ],
-  "documentCount": 3841,
+  "documentCount": 3670,
   "documents": [
     {
       "path": ".github/workflows/ci.yml",
@@ -30,1526 +30,6 @@
       "sha256": "8933cb4e76e6322ae9f1601facbb1bdc6e7ec1be6c4db9d3e1e9aed64512beb2",
       "extension": ".yml",
       "classification": "HISTORICAL",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/33-n-independent-ipc-payload-security.json",
-      "bytes": 410,
-      "sha256": "2a9d2e62f15f57417accbdec14ad8d028c1f65efc38cc2bb400da879d00bc321",
-      "extension": ".json",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/33-n-independent-migration-artifact-backup.json",
-      "bytes": 16446,
-      "sha256": "0192e41db1e3cb72b2a1cc4176e1ea8fef1ca8ff6f0f90750356f9174599d936",
-      "extension": ".json",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/33-n-independent-source-preflight.json",
-      "bytes": 8776,
-      "sha256": "160ec166db54e6109b5287df141d091517b1d46008cdf2e6e81116c2ee4d02c4",
-      "extension": ".json",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/33x-ppk015.txt",
-      "bytes": 948,
-      "sha256": "0ca78dd5baa165cafebbb51b65ef504186457a17e7d183341358f98cc81d4d6f",
-      "extension": ".txt",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/33x-ppk021.txt",
-      "bytes": 7260,
-      "sha256": "1882051678f614f8f4755a972663e540e40295a71942989c6c74ec182fa7ffce",
-      "extension": ".txt",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/33x-ppk022.txt",
-      "bytes": 1202,
-      "sha256": "1f130aef90330f934d9ea538d39d20ce49dbad0d3728efc9d6f8374bf81b252a",
-      "extension": ".txt",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/33x-root-build.txt",
-      "bytes": 22120,
-      "sha256": "5a300b0bc89e7211d8e2ea0c8160bd27bc56d622ba0ec39051db597f3cff0e97",
-      "extension": ".txt",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/build137-backup-propagation-runtime/fs-target/.purge-quarantine/propagation-137/manifest.json",
-      "bytes": 841,
-      "sha256": "1a4d23b82a83ddd544d76d8d6c4fdc8ef6ae17e3176a338b921df83ac5ac8060",
-      "extension": ".json",
-      "classification": "HISTORICAL",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/electron-v43.2.0-win32-x64/LICENSES.chromium.html",
-      "bytes": 20313957,
-      "sha256": "b911161e6594ec76b872498b423c54406168f2974e0d407a847f7de1e5ff94dd",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/electron-v43.2.0-win32-x64/vk_swiftshader_icd.json",
-      "bytes": 106,
-      "sha256": "32d83ff113fef532a9f97e0d2831f8656628ab1c99e9060f0332b1532839afd9",
-      "extension": ".json",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-access.md",
-      "bytes": 3664,
-      "sha256": "9bed45cc470a641f8547effbd42c56532bad389a53e5ad476e13b652c929e003",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-adduser.md",
-      "bytes": 1847,
-      "sha256": "6336a1dd7d10f9ebac6c63e50efa26972ef98a67487f36a0d4c312e1d1dfd424",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-audit.md",
-      "bytes": 15656,
-      "sha256": "02ec56ff5b4e0d4844a4d853d050d91aecb2048bc37d36771fdd35e55a8417d4",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-bugs.md",
-      "bytes": 2996,
-      "sha256": "4bc9eaa17e062e8951b1ed4c0ca1a3d2643d945e622259e45326bc6f5b52d74e",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-cache.md",
-      "bytes": 2962,
-      "sha256": "297f8d37336788840cd8f704555dbf1bb78e3069549e5812936b25e44ad8c1d1",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-ci.md",
-      "bytes": 9125,
-      "sha256": "b581dc2e34c23cb24dd675cd7a2424f1bf3322d9556b0fa8da53378455c9fb95",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-completion.md",
-      "bytes": 909,
-      "sha256": "4411bb315b5ba43bd49093d706377e6f8d584f3fa8ce0c8dc154f3eb646edb92",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-config.md",
-      "bytes": 4093,
-      "sha256": "fdd84f305c78c1ba0a81dbdba81b4f621aeb66bfeb6f83af43eb91a164a72862",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-dedupe.md",
-      "bytes": 8895,
-      "sha256": "6a3a4ea972df3ff8b54efe1f885057dcc0808206761a0a83f9a2516064d202ca",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-deprecate.md",
-      "bytes": 1741,
-      "sha256": "d5f3e76782efa893542760c35e9b0d7bbad308215cbac5e54b80ec2ff406c937",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-diff.md",
-      "bytes": 9109,
-      "sha256": "5e41e4678a8e5b7a75d0dded72f7e995758763d1b641fa5fdf2e356db176ccd5",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-dist-tag.md",
-      "bytes": 5181,
-      "sha256": "5202de93f65c367e19cc080950360ef5e0c34f1ad5298aad53b95c2a82152d8b",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-docs.md",
-      "bytes": 2974,
-      "sha256": "fd702e68439d3ca8c42ef5373e3074747f1aa6b96a78b017e03abeb3af5a66c6",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-doctor.md",
-      "bytes": 5057,
-      "sha256": "9fd66a257e1302b1d3934a38dac5689a11fd49edede47b9b88125e84bd9d1499",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-edit.md",
-      "bytes": 1091,
-      "sha256": "0c963c7173235a2ed13a9b3805dd22846141d37b6292763aff34f6c6184cea66",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-exec.md",
-      "bytes": 11401,
-      "sha256": "f4f13c63519522a403e5f18d673b3b01e7bb9439483e06f6271c7c0777af5530",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-explain.md",
-      "bytes": 2795,
-      "sha256": "d91b6ca57ff183ddeef4d9f266dd722ba8fd14807ffb7fb507b32507bbb8735f",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-explore.md",
-      "bytes": 1006,
-      "sha256": "c64b90730fbb1a38cdb7588ee138788631813718c441b5149fe032072d77bad0",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-find-dupes.md",
-      "bytes": 6797,
-      "sha256": "4972f44483b49ef2aa7d4b00a6e51261c8381660e39f3c6c7d1da9d9534d68b2",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-fund.md",
-      "bytes": 3673,
-      "sha256": "515a69961231c3e97c9c71c6b60bce08730610c61e5297acc52a23bb7ba8073f",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-help-search.md",
-      "bytes": 756,
-      "sha256": "1c16f53fa1f443a84cb0fc7cc2d7d1a7ce695d973c9608a1fdb8b648379f21d1",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-help.md",
-      "bytes": 1004,
-      "sha256": "c8484fe0f3f65d8a385de8803cc7159a4569f980496d2317fa72a8afdf1d234d",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-hook.md",
-      "bytes": 2394,
-      "sha256": "4356065a8cf501bcdd1fb5df1c0f814fcd11eb5b3dd931bb5759f571390b6640",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-init.md",
-      "bytes": 9855,
-      "sha256": "11f84967de1d16b4b0def66738c2c9a75767680b3054f2f9fa060ecfe0cece11",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-install-ci-test.md",
-      "bytes": 7434,
-      "sha256": "85277610fec7227ed4e4a45f8ea5e3a190bc8736e900a1706182a5e88d9c6e5f",
-      "extension": ".md",
-      "classification": "TEST_OR_GATE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-install-test.md",
-      "bytes": 9814,
-      "sha256": "dfe931478e2cafa60b3015baef7e21a8f7658a52ad116f836b33a05f8491819b",
-      "extension": ".md",
-      "classification": "TEST_OR_GATE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-install.md",
-      "bytes": 24985,
-      "sha256": "d0bac6211516cb696f1c2448190aa5a52d481dbfa33f87d04e0c0df8f4e5ec99",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-link.md",
-      "bytes": 11742,
-      "sha256": "43eed851bfea925a66d5d36f3e3789c39421fd6268e5abad603535ff9d02d2c5",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-login.md",
-      "bytes": 2171,
-      "sha256": "35e5fb73fa24a969791a5f89c9b8e994527955c3786a02438f7f449c5f375aec",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-logout.md",
-      "bytes": 1749,
-      "sha256": "818dbaf9f62cc4346730df0b8d27932ed9d682afd83454a1629865f9815fd554",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-ls.md",
-      "bytes": 8547,
-      "sha256": "4417f0b7057cf18db0b118e045ad7e3e4d80c9d098e51f26531230372844a9b1",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-org.md",
-      "bytes": 1975,
-      "sha256": "484137b8385cd316f28a3c10aee4888050c9fd52e3a6c13195448d7e03f641c2",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-outdated.md",
-      "bytes": 5779,
-      "sha256": "3262e6aafdb506ee3b439a885ff9d9e9856593fe20beb62ce5eae6b0e60262a7",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-owner.md",
-      "bytes": 3093,
-      "sha256": "1d847cafefbbb7318baa150d86fda528c5232cebd497121eb953b5c7206645cf",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-pack.md",
-      "bytes": 3448,
-      "sha256": "a4c88e5397699f6ad7b4380d307c222b838987edc8691dc500abed7456ed0057",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-ping.md",
-      "bytes": 769,
-      "sha256": "73a4fb43b5bf524b46e7e3f94e1cafc11e91c9dffd7b5b4cb46bd9ad6a29f46e",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-pkg.md",
-      "bytes": 8129,
-      "sha256": "b02a444a0231135b5fac2414cf31a373c340ef899252131470d2b62d1b2b94bd",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-prefix.md",
-      "bytes": 1211,
-      "sha256": "67e8363284fc39163c8a26151432cc38997912ffa434d46b94dc9c03892ebb6c",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-profile.md",
-      "bytes": 3102,
-      "sha256": "1c422dafcde0750d40e04a0d7e7bff0cde20a6fa845f5678fe0dd5d0b29d4fb5",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-prune.md",
-      "bytes": 5745,
-      "sha256": "1cd70b892df25b7ff0596d916baddbe6b239fdcff19e5b48be410c9934d32ceb",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-publish.md",
-      "bytes": 7622,
-      "sha256": "a8baea016301aeb3b64d7b618bb957d20e4c221869188e5a542999a1c3b6d647",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-query.md",
-      "bytes": 6959,
-      "sha256": "28157236c43b938bda1f1cfde8019cd3fb238f221e71157020dcd7116f403183",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-rebuild.md",
-      "bytes": 5001,
-      "sha256": "7ea1f23fc1abe55937c7e5ad941b57be1ce5379a17842a0d3389aeaabeae441d",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-repo.md",
-      "bytes": 2754,
-      "sha256": "08192b0ccf3e531be8bdeb56918009dd51b0a787730367fd7fa028d654181e66",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-restart.md",
-      "bytes": 1473,
-      "sha256": "bc9c3440203b1bdcca575ffb3725555171d13fffcb537b9ba3367f4c6252be2a",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-root.md",
-      "bytes": 1097,
-      "sha256": "0a45501f99737d8c794d33f634ed0b37e82b9bec23764c4673594df6e837bb0f",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-run-script.md",
-      "bytes": 7561,
-      "sha256": "a8929982aa2dba6a0c8079e76aefa3cd6e956eb455878abba81d9e71a8d15da0",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-sbom.md",
-      "bytes": 8338,
-      "sha256": "229dc531d5bff8099538a8e6cc445f15bc21aac0e0a58ee74ee7d212a13bee5d",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-search.md",
-      "bytes": 3464,
-      "sha256": "ccf46c65b291dd1313872b432e1fc8b3a8450cc6fb8e0a433ca02da55096bb14",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-shrinkwrap.md",
-      "bytes": 923,
-      "sha256": "28954ad7d148cfb76c8299815afb13bb7ad299ae1a3707b73ba9ae7dfe951584",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-star.md",
-      "bytes": 1713,
-      "sha256": "8f20446a5dc85c0b2b91809d73dee64d44443f6be6d27a5fce4acbff59d9116d",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-stars.md",
-      "bytes": 743,
-      "sha256": "f42889da229a2c49cbd26145b414c71a8f31d54b597fcf91f84e59681888e7ae",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-start.md",
-      "bytes": 1667,
-      "sha256": "ac47a0cbf6e83328528c7d8e479d3f3da0e050eb4ce34064e3f9bde746c1beb4",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-stop.md",
-      "bytes": 1341,
-      "sha256": "c0d945aa6049e1c71bcde146e706d9036f6cd37313862e81c5a796ad02c4f3f3",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-team.md",
-      "bytes": 4090,
-      "sha256": "8c07bbd46928afc21795a5a121afe69af19a4a35afc63f827df38b1d850355fb",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-test.md",
-      "bytes": 1234,
-      "sha256": "c4c4038313838604bc32f45d4304bd4b4eb1a406b9e4b432f827ba50a8dca75c",
-      "extension": ".md",
-      "classification": "TEST_OR_GATE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-token.md",
-      "bytes": 2893,
-      "sha256": "b3a4095bb8986b8271b375d7ba63bcc820053105666699fbb0ebcb68044be0ab",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-uninstall.md",
-      "bytes": 4447,
-      "sha256": "2e427a5bfe52f226104b11e1c4bc0340dc23a951fc48446c547fc47825d3c89a",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-unpublish.md",
-      "bytes": 4491,
-      "sha256": "3f2df0e564a79a93a75a10461d04c5f7f4cffd2713dffad8c4b59ce181ac6405",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-unstar.md",
-      "bytes": 1574,
-      "sha256": "5380eb51ea823196f221937de5b85e5db1730f8c0e8aa9dfa4c680ff63739245",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-update.md",
-      "bytes": 11871,
-      "sha256": "332115994e69d1a3998587cffd0068c29e16ca71b0b30e344e5c4870f437369a",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-version.md",
-      "bytes": 6902,
-      "sha256": "d3fb7b687cbf53b089049640183a5219c1f3d85aa90127d21466a273ff5c18e0",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-view.md",
-      "bytes": 5612,
-      "sha256": "ff6c14b4a8a66b56de020d9a13aac190c4a31cb7da7a02e2e277272b1a8a0ea5",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm-whoami.md",
-      "bytes": 800,
-      "sha256": "e302860e0bfb1c43a00a575c705f0b1f036793af1c4654e360b2d2f65b459580",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npm.md",
-      "bytes": 5670,
-      "sha256": "7b0fef24e67cf0b1eb3a36d01868c97a7d384ab2311c589eecfdead81ae67163",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/commands/npx.md",
-      "bytes": 5896,
-      "sha256": "bba3d288daed1267bdf9b3e83524a35a76aa3006df3530581a437fd3a8f92302",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/configuring-npm/folders.md",
-      "bytes": 8142,
-      "sha256": "c63a0283b16a9b43fb4aa0562a58f31537029237185ee097d2cfaa91d9c7b2e3",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/configuring-npm/install.md",
-      "bytes": 2810,
-      "sha256": "6ecbee745eff913e326367a80794bacef624590d7fcd0903a5972ed3d672e683",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/configuring-npm/npm-shrinkwrap-json.md",
-      "bytes": 1251,
-      "sha256": "951ba5c3a35c84e986a75ad008b8d3df169de1694e394a8c0ec9524e8d4018d5",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/configuring-npm/npmrc.md",
-      "bytes": 4081,
-      "sha256": "376d23b77315c6aaba4fa02f0a488de4d3b7094cf5cccdf0f6d5ac620ee8b3ca",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/configuring-npm/package-json.md",
-      "bytes": 34521,
-      "sha256": "ea69e0a46b4f931c29a69ba5065470006751b0f682ed11e1a17e6655272d8228",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/configuring-npm/package-lock-json.md",
-      "bytes": 10215,
-      "sha256": "df60da5a96d86f0b449939730e0f200d09b0d20ac4534f7b60053e4b96de8433",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/using-npm/config.md",
-      "bytes": 46443,
-      "sha256": "b81b537edbde314f7a4422c44d5313dc501a598ae1ed8ac10e06e1cd2229961c",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/using-npm/dependency-selectors.md",
-      "bytes": 12144,
-      "sha256": "2bf63caf04eb3161a3c66090028bbeb3b49610d082205c72e8ae12cb17ec8b02",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/using-npm/developers.md",
-      "bytes": 7826,
-      "sha256": "1c12a06c8dffc55064ddb360d03ba169d82900fb9fa46688d863fad0682c1fb1",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/using-npm/logging.md",
-      "bytes": 3896,
-      "sha256": "93e1cfaef738d47b0a5d9f7c1ec38be94d5ca65764a35f604048c88597536999",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/using-npm/orgs.md",
-      "bytes": 2246,
-      "sha256": "69ef2cdcc7215534d8c0dd9a779889d9253adee797bdc8bda7bf03f66076290a",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/using-npm/package-spec.md",
-      "bytes": 2885,
-      "sha256": "e8304ce6d781353cba18fc93bbbdc78686696250ad78eef963c62908ceb65d83",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/using-npm/registry.md",
-      "bytes": 3634,
-      "sha256": "1b0eb0c21f0e14e4840ff560149d213db475be5799ae3aae644208b73bf9c843",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/using-npm/removal.md",
-      "bytes": 1651,
-      "sha256": "8710a668c9c19d479525a0ee9c79342bace401ec9c33c0f5fcc009ec74ee9c2f",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/using-npm/scope.md",
-      "bytes": 5159,
-      "sha256": "684bb13d70095cd4ad1050b2dcf6e72366ae209f2ce7c534dbc253c3bbd25e46",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/using-npm/scripts.md",
-      "bytes": 12265,
-      "sha256": "9c43b7ebb28bce4e4267092554419c2b1d1cde56cfbe46d74ece728fb64392e2",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/content/using-npm/workspaces.md",
-      "bytes": 6115,
-      "sha256": "ecea82b761999c0fac8ddcc844b55523039770a80448a9e1f73ba35fc087fa11",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-access.html",
-      "bytes": 8605,
-      "sha256": "88ab4011e84b5ef8c812f06ce23f5b6391eaaa63dc35851faf54027b5afc6dcf",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-adduser.html",
-      "bytes": 6554,
-      "sha256": "348b88b36e98db2b4fe8367b0cabf328d87201faac14cde085337bd4d9008daa",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-audit.html",
-      "bytes": 24698,
-      "sha256": "d9226c3233f0805ef9e14a131957fb35f10776f89fe76195b0e3e12b63006aaf",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-bugs.html",
-      "bytes": 8121,
-      "sha256": "e16291ab39896d838a6a7b3ca19c14542efa925ceaed552e41069ccd7fe4cdf4",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-cache.html",
-      "bytes": 7822,
-      "sha256": "76c29c5639864e5ac40686f6813d7fbc0ce52f1d96ef7aedd11de04b5268871a",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-ci.html",
-      "bytes": 16401,
-      "sha256": "57cb304eff09ef18352a9b54394b14bd3bbc9c46c22d56abf8813a85a034c57e",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-completion.html",
-      "bytes": 5006,
-      "sha256": "dd395031df08b32f121e339d1efd1a2ba8b901d5b9da7f8b3faa5a14449657c3",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-config.html",
-      "bytes": 9903,
-      "sha256": "864aa25364aa5fc9b3e138bed8d7d3ab3568f33eef641039798fac7cd6c49d97",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-dedupe.html",
-      "bytes": 16013,
-      "sha256": "3305c1c7ed1ad21e4d1b5e10766a460263d7ac4eef356cf9561dc8759cc7d55b",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-deprecate.html",
-      "bytes": 6304,
-      "sha256": "43508d1a66ea190312bda0f56c3e0ed408e7a30df46cbb513734703909e12fee",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-diff.html",
-      "bytes": 14891,
-      "sha256": "a4f69668ddaff6ddd0a2606571ab7f1300af8b40a1051f912c2d3d7cb100789c",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-dist-tag.html",
-      "bytes": 10780,
-      "sha256": "668df51fa8496eb0110e59e1e98e245ab93aa2ebc0121ee7933ae04720bc2ada",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-docs.html",
-      "bytes": 8063,
-      "sha256": "aa51f80ec120f0c1537f4c51848a60a15186a7c8b09d54b2d20af3e45f8e225f",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-doctor.html",
-      "bytes": 10560,
-      "sha256": "2ae06ed4654f85bff854d566f03614ad31125da5c1ca374070be35de37f8108d",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-edit.html",
-      "bytes": 5392,
-      "sha256": "3461f9ab1039512fa7ba0e6be284b60d85899a6e5b16cd05823eeeb812316b0f",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-exec.html",
-      "bytes": 18959,
-      "sha256": "533eee2d38be61436711b9d4cd4b40e949b7e40bf93db59becd8cae76fa9c955",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-explain.html",
-      "bytes": 7467,
-      "sha256": "3f294d31903d868077e8922e2123518b78df36f25b7772e8c06c75a206e540ee",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-explore.html",
-      "bytes": 5297,
-      "sha256": "49a9d5baf30bb32a4ed6eae8fba39961c0e385171979e5d9fe2db3b2ede9a590",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-find-dupes.html",
-      "bytes": 13416,
-      "sha256": "1a1ea943cf5b8c83c693b82ba8283f28a3a9676a4409cf402634765fa66336ac",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-fund.html",
-      "bytes": 8399,
-      "sha256": "9e8d558024147607f6ae92e73ad36a41e791ab725adbd85368595fb911812950",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-help-search.html",
-      "bytes": 4971,
-      "sha256": "46eff41c47a63985fd2c70f7ad5ff6bf961dbb8a2717a60e1614059c213ec108",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-help.html",
-      "bytes": 5299,
-      "sha256": "10d2c71ceac7c835b6c9ce7d84e8440d7f27c76f6fd3eb4cb7fcd807ad874297",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-hook.html",
-      "bytes": 7201,
-      "sha256": "f451717bd9c5e38d14a7c3919afcba0084c9b98096e48536a08ee8b526f325fb",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-init.html",
-      "bytes": 17422,
-      "sha256": "5bfb1eadef4e974ca7a5475035a98036bec68ff85a6389ad1e1c1692d780dce6",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-install-ci-test.html",
-      "bytes": 14304,
-      "sha256": "7a47ff24af8bcc9bd27461e2378256d3da6adf98e59790b8662c23608c4cc80a",
-      "extension": ".html",
-      "classification": "TEST_OR_GATE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-install-test.html",
-      "bytes": 18065,
-      "sha256": "b3b454fbb6d3041f8e45ab8fbdf67a281ab0e4a855093f8519218b8353848e91",
-      "extension": ".html",
-      "classification": "TEST_OR_GATE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-install.html",
-      "bytes": 36713,
-      "sha256": "8dc4e20aae0319e854b0f7e738fb77e2c1b4121456cfa10070b0d009d6c54c7a",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-link.html",
-      "bytes": 19953,
-      "sha256": "378a320af4bd08b8ce79d2bcdaa915407c37389c5bbec940241c037e9573ac27",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-login.html",
-      "bytes": 6976,
-      "sha256": "28b931d843eaee1c86e177245c0965a97e1a5e60d13c951f17ada56680894711",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-logout.html",
-      "bytes": 6194,
-      "sha256": "95228239724799cc654d39d24b57ec39ad1aaf0a5205db73c3eccd6ac2aa39e1",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-ls.html",
-      "bytes": 15690,
-      "sha256": "a42928db67b3e62023c3b8d529fd0119c209a5f5c57e19233c7a083013bd66c1",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-org.html",
-      "bytes": 6830,
-      "sha256": "1cf33ebb2d6366570636a21fe9c32064f7faf84cc53805f23d431f5dd4a66de2",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-outdated.html",
-      "bytes": 11475,
-      "sha256": "6b984c4ded162a3edd6fe2cb21f48f06abfbfeecf00ecba73d1eafd3de208e8b",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-owner.html",
-      "bytes": 7965,
-      "sha256": "20f79990f21381e2e1f6d25e1bbf175c94fc7b9c53242f32bef0c062c9497f93",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-pack.html",
-      "bytes": 8669,
-      "sha256": "6629a992fcf1b0dcd5e00609d4f655e08ed68cb9d802779fba0193558a33e604",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-ping.html",
-      "bytes": 5045,
-      "sha256": "d8027de59e8d127eeb146b5ffdbb00ba9d90d4955ee78f1d26957906184f5744",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-pkg.html",
-      "bytes": 13621,
-      "sha256": "f7a6e75f1fbb649c964a16b0a4d9058fe0a4f7fb1e6f78f17bcb9c4acd901c46",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-prefix.html",
-      "bytes": 5688,
-      "sha256": "1ccb4514cfa0c333dbf2fb0c47bcecb88649e1e01e8b1fc7c6ad3a7f93ef09c3",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-profile.html",
-      "bytes": 8113,
-      "sha256": "47a6eb8b109fdc1793687d0255d0c1e938b9011ed209c8550ed6f76d11e58bb4",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-prune.html",
-      "bytes": 11776,
-      "sha256": "97169269794539100718d0d9616e0699133ea0d790304d0f71f6dc2c181016ea",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-publish.html",
-      "bytes": 14191,
-      "sha256": "3cd4d323b4591725691dcdf8621cc61885cccc3364c11f84d83dfbc66532a46b",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-query.html",
-      "bytes": 12166,
-      "sha256": "de007dd48823e05c4f9e1801982c882cfb3c2a15372e3048fd93b61e41cd0551",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-rebuild.html",
-      "bytes": 10751,
-      "sha256": "7a9daec57272f6a09440c7fb301c5ebb6e886fd2898f3b57a4399558b677a459",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-repo.html",
-      "bytes": 7743,
-      "sha256": "e5f12a8f22d71462eb9b51c9a50ab28bec3ba18daac72dcb9399be418c08b5c6",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-restart.html",
-      "bytes": 6144,
-      "sha256": "786978d5ba5615c7b38c2f0b02e495e60177cf76179dfe45d3f66ac14a23bfa7",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-root.html",
-      "bytes": 5427,
-      "sha256": "df57a2af566b4303fcaa3b8ee2561121619531c199b42404d39e14007521eb7a",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-run-script.html",
-      "bytes": 14089,
-      "sha256": "5cc2d8795b7a117918d13d7276a04da95417ba965530f415cca002c756d34629",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-sbom.html",
-      "bytes": 13203,
-      "sha256": "ad713d76b457d54e7ee6ce1c265e204f60db4bd34ada239187a8b83e75cc59b3",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-search.html",
-      "bytes": 9144,
-      "sha256": "374372d837c32301afe4d6cbd7e5d296a727fbb3f389449761f77d65c010f46d",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-shrinkwrap.html",
-      "bytes": 5057,
-      "sha256": "731dd1451bec92844f2af4778db59b717bf97c98c51fe1cbab4dd6519dbd0bf5",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-star.html",
-      "bytes": 6513,
-      "sha256": "480242af537dbdaac6def34ccbc9d6cbe1e9cc5075444c6b92eaadb2920b9cf5",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-stars.html",
-      "bytes": 5008,
-      "sha256": "0b62c9f410aea0d82f0ce63c174d6e390f58ee8f48a512254aa19e1d605f8eae",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-start.html",
-      "bytes": 6412,
-      "sha256": "8bf7c9462461b9f4f7f6851a1c97ec52bff7bfbe716e88d585093097549de2c4",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-stop.html",
-      "bytes": 5972,
-      "sha256": "a65e3cfe102f5e69f2c70689abf7b7083350ae8dd819f5512bea252bf994449b",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-team.html",
-      "bytes": 9366,
-      "sha256": "afd651bceb97df8955d1d3a6cc8c2032f72dd069c1e25fc6ca82b952dc618d93",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-test.html",
-      "bytes": 5852,
-      "sha256": "ee53276fd345a3aad7e0a21e5cc41cac00e35657fd24f91920ab35056d124727",
-      "extension": ".html",
-      "classification": "TEST_OR_GATE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-token.html",
-      "bytes": 7753,
-      "sha256": "1a7433f78324c59c3b6f8a23b2ca0b0fbc4076a60364d95705542dd68b706abb",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-uninstall.html",
-      "bytes": 10190,
-      "sha256": "935d8c9f55e653d69820dc3f290e2f0dfbf330b3f88edadfe449dbed80ac5cba",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-unpublish.html",
-      "bytes": 9698,
-      "sha256": "7a956cf95622ab733e36c7cf5a164b58a210eae57870fecc83dc6db34439a1ac",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-unstar.html",
-      "bytes": 6365,
-      "sha256": "48396fd54aaeda6c18f0e720025659eeb6a682d8a1adc16332a1f7616c9bd277",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-update.html",
-      "bytes": 20904,
-      "sha256": "0f88c09a8e66573a96e53703e1862b71759cbb9293ada492be12a7e4b8263025",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-version.html",
-      "bytes": 13307,
-      "sha256": "1f64e523378e59aa3d6dc3ead43e298ee0cdd5c28179cb5ddd608db7baed310e",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-view.html",
-      "bytes": 11236,
-      "sha256": "268d6b931c5517e609f04eb5049d30d6b51530266b938e4e552b75afc7ae6602",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm-whoami.html",
-      "bytes": 5040,
-      "sha256": "57ec37d66b6bd3fa6c339410f7145a24eab5af1fd88612b64b1eac7ab468df15",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npm.html",
-      "bytes": 11426,
-      "sha256": "7c0a1a125dc99a826f575aefea019371be3a5cf0352f55e0728da16ff87fd7fd",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/commands/npx.html",
-      "bytes": 11304,
-      "sha256": "462ee9ec79c5e7188ef4acf865b4589e10c35e58e8e1dac0129cfee0ae40f564",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/configuring-npm/folders.html",
-      "bytes": 14297,
-      "sha256": "1aa6d161eac124c7dcb62baa5b57532dbc0e1c945dd271595754f22a771f6a0b",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/configuring-npm/install.html",
-      "bytes": 7821,
-      "sha256": "66d130cdbb6c9aef604479bf4e83488084febb97d5643165e5c11e9203ca00df",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/configuring-npm/npm-global.html",
-      "bytes": 14297,
-      "sha256": "1aa6d161eac124c7dcb62baa5b57532dbc0e1c945dd271595754f22a771f6a0b",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/configuring-npm/npm-json.html",
-      "bytes": 47915,
-      "sha256": "7df892d8e3bb2ebb66f318396bd027d9e192d9b8c04d324c03b7a52d9dc40447",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/configuring-npm/npm-shrinkwrap-json.html",
-      "bytes": 5367,
-      "sha256": "f27d409df8c2c83dab7345262f7a0aba35aa677e42a77ffdb1b81c2c4744efe8",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/configuring-npm/npmrc.html",
-      "bytes": 9357,
-      "sha256": "9525e181d9a950df9f60cf71dd237de669d935da7143092595f4bcbd234823cf",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/configuring-npm/package-json.html",
-      "bytes": 47915,
-      "sha256": "7df892d8e3bb2ebb66f318396bd027d9e192d9b8c04d324c03b7a52d9dc40447",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/configuring-npm/package-lock-json.html",
-      "bytes": 16263,
-      "sha256": "ecc48d31bd3505621d27d25eb69407e95b08e3f57c12e31b4d29013d98127f1d",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/using-npm/config.html",
-      "bytes": 75798,
-      "sha256": "bd9b76debdd6e652e985b399d5d8941b05cd4706d7bddb69ffb691836f0fa63d",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/using-npm/dependency-selectors.html",
-      "bytes": 20044,
-      "sha256": "974e683d51a66b817aa555f3d266063c52995b4a60c1799c2b1c8b67a4ec2f73",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/using-npm/developers.html",
-      "bytes": 14672,
-      "sha256": "1678a772cbe89615ee65e8da522457c05721bcee49f7e8ebd44af93a00c6cefe",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/using-npm/logging.html",
-      "bytes": 9466,
-      "sha256": "240f99e3a90e31551ec4b1948e280eb522e0e7f434848ee3c7d2e030457e5025",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/using-npm/orgs.html",
-      "bytes": 7239,
-      "sha256": "80ae75d5949c5cc0f0afb9efb8095aa6090f1385e3463a977c7ac6baf3cede15",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/using-npm/package-spec.html",
-      "bytes": 8041,
-      "sha256": "926808a8665e2ab1ddd4a130d3bef0dc587e8e7c1cb8a9acfa35030ba8927aff",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/using-npm/registry.html",
-      "bytes": 8744,
-      "sha256": "4971586700e254052f30975ecad9caf0f1bd7bd4ac0486ef600fbb654adee7fc",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/using-npm/removal.html",
-      "bytes": 5812,
-      "sha256": "b2cdef324557ae894d1a3f30b0a9612c8d03538bb908a31b24c3ec8946b640e5",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/using-npm/scope.html",
-      "bytes": 10670,
-      "sha256": "de4003759cf3436d28b89dadfdbbe767d871d207a615b5dfa75f926804b8752b",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/using-npm/scripts.html",
-      "bytes": 22625,
-      "sha256": "af3765347f1eee802cb71e5dd63ab6cac7fd00bb38ef8fe6cbc62b04797c1eea",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/docs/output/using-npm/workspaces.html",
-      "bytes": 11866,
-      "sha256": "bcb1eb7b48bffd2a3d95e0322d06692e62d37852a35483afc1f29d99d78492fa",
-      "extension": ".html",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/package.json",
-      "bytes": 6647,
-      "sha256": "9147a2f60170daeb373e6410793668cdb9528bd2860aef1a77619714b3dfb85e",
-      "extension": ".json",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/npm-10.9.2/package/README.md",
-      "bytes": 4043,
-      "sha256": "ec67df6a6b31f9641b74bbcbea148e29e0f2bb27a1479f601de0722e28cc25b0",
-      "extension": ".md",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/ppk002-diagnostics/secrets/device-identity.json",
-      "bytes": 468,
-      "sha256": "5c95932462128e120bbcb83aa59d9f46913bd5d7f40e6e4b9a6eb69d27458b20",
-      "extension": ".json",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/ppk002-runtime/secrets/device-identity.json",
-      "bytes": 468,
-      "sha256": "a9db9ca144bf23e4ac8f3b9b22456f4eb984552960ac75332231ae1b2a6ea80a",
-      "extension": ".json",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/ppk025-production-audit-raw-remediated.json",
-      "bytes": 364,
-      "sha256": "aee8b3484354432326ada742211955c4accae912f57b7ddf78f717ea1cb045a4",
-      "extension": ".json",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/ppk025-production-audit-raw.json",
-      "bytes": 364,
-      "sha256": "38279ac6efbd422c26cdae2e7b6ac4a4cbd556d6b9230471c8c96711011e54d8",
-      "extension": ".json",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/ppk025-production-audit-report-remediated.json",
-      "bytes": 498,
-      "sha256": "8efd2626f7ab3b270e731d3af91dd9bdc0e9020f9a049a927953b8027052a518",
-      "extension": ".json",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/ppk025-production-audit-report.json",
-      "bytes": 498,
-      "sha256": "ffdac74576f477d07e2bfdac21e93d32d9a438a67c0f90dec429a9f36d0815c0",
-      "extension": ".json",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/ppk025-toolchain-audit-raw-remediated.json",
-      "bytes": 364,
-      "sha256": "aee8b3484354432326ada742211955c4accae912f57b7ddf78f717ea1cb045a4",
-      "extension": ".json",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/ppk025-toolchain-audit-raw.json",
-      "bytes": 1134,
-      "sha256": "02d1a84f40f1a9a303efb7ea5c01d8b99c118a01eb93cf651c9740a9b762e4a2",
-      "extension": ".json",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/ppk025-toolchain-audit-report-remediated.json",
-      "bytes": 503,
-      "sha256": "35fb544ca861194b6a322132fa7f8426a02676633b22a793601de8b84ae7346e",
-      "extension": ".json",
-      "classification": "ACTIVE_REFERENCE",
-      "isDocument": true
-    },
-    {
-      "path": ".tmp/ppk025-toolchain-audit-report.json",
-      "bytes": 644,
-      "sha256": "1e86e44422be207cadb0834f152d62315c9695dfae9fe345eeab7aa230a782d0",
-      "extension": ".json",
-      "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
@@ -1594,8 +74,8 @@
     },
     {
       "path": "apps/desktop/package.json",
-      "bytes": 3385,
-      "sha256": "c7908270e04efa8e7e76f70137b8ece44e9a77853feb408b9a569b448a1b4a56",
+      "bytes": 3409,
+      "sha256": "fb428c5e9449d22269e099be82a45cb0f4603d48f1510b2b1d05c2205bdb2617",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -6713,6 +5193,14 @@
       "isDocument": true
     },
     {
+      "path": "artifacts/manifests/ALL_PROJECT_DOCUMENT_FORMAT_AUDIT.json",
+      "bytes": 13325163,
+      "sha256": "30c90dee54f08c0e514fdd71b0583b1e68a31618c5798e101e2f00b26afeabb3",
+      "extension": ".json",
+      "classification": "GENERATED",
+      "isDocument": true
+    },
+    {
       "path": "artifacts/manifests/ARCHIVE_CLASSIFICATION_VERIFICATION_BUILD72.json",
       "bytes": 746,
       "sha256": "bc6fafa77a8d63f95702c7303ae810d740fdbab489240de706bb266d85b251ad",
@@ -7283,7 +5771,7 @@
     {
       "path": "artifacts/manifests/DATA_STORE_SMOKE_MVP60.json",
       "bytes": 1303,
-      "sha256": "8d53423fdf6ba3981e0c59e3bd9b0feba05f208ffe7f4b067d3002b97739d5b4",
+      "sha256": "78cde90c66c6d50e7a66ac8a15386fccca2a31458f171a9dfa088c9461ccb287",
       "extension": ".json",
       "classification": "HISTORICAL",
       "isDocument": true
@@ -7395,7 +5883,7 @@
     {
       "path": "artifacts/manifests/DATABASE_MIGRATION_VERIFICATION_MVP56.json",
       "bytes": 20605,
-      "sha256": "c5738826572e789bc4c2dc0fb65422f66c3b834f801f0b9ec090b34c9bfaa03f",
+      "sha256": "370dd7657fed7b413520c36d5e533dadc300ceea5f748b932c3d7b72b2ed9524",
       "extension": ".json",
       "classification": "HISTORICAL",
       "isDocument": true
@@ -10267,7 +8755,7 @@
     {
       "path": "artifacts/validation/30-O-core-service-entrypoint-runtime.json",
       "bytes": 74999,
-      "sha256": "00f917a5aa72b95e8f9004461a49bcf76e3afac3a98765aa23448a76abaaae87",
+      "sha256": "86d49e627d0d1cbb2fb66cf5ce3e97715b278fc2787e15bf3ff7090bb9c6bc7c",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15539,7 +14027,7 @@
     {
       "path": "artifacts/validation/32-K-ppk-015-network-egress-contract.json",
       "bytes": 6434,
-      "sha256": "43c1d56574f7bb6e36470c5aac532a00dabc2d709f6935ebeeae74dc2ed95860",
+      "sha256": "6d04f71eb1b600881970dbcf02cb287185e4270322d8e09452c995b417941bb6",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15547,7 +14035,7 @@
     {
       "path": "artifacts/validation/32-K-ppk-015-network-egress-runtime.json",
       "bytes": 13445,
-      "sha256": "74fca96246dc50305b6bc86ff8e3ba4cbf3db8ec34ed0b694460d74e6cd47519",
+      "sha256": "3b4bf2c4f69cbd878297cf643b9a7308d6467611a5e59bd20950dc05599b24d9",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15634,8 +14122,8 @@
     },
     {
       "path": "artifacts/validation/32-Q-ppk-021-platform-policy-ast-gate-contract.json",
-      "bytes": 9756,
-      "sha256": "9a61eefa5bdcecddb531e9cd85a9e355bec091594fe36456a859f52c52414446",
+      "bytes": 9740,
+      "sha256": "19a908218e937b2cdb8ab977b82b244763233d25e8bdcd3aceea04cc9806cb7f",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15643,23 +14131,23 @@
     {
       "path": "artifacts/validation/32-Q-ppk-021-platform-policy-ast-gate-runtime.json",
       "bytes": 15852,
-      "sha256": "af6248bbe711dd8a55c022d206ba7518726f91e1a4ce7cbca8451d5f8a5ca5c6",
+      "sha256": "c1689cb5c7931cff535f3361f184d9aeff17526476e29d50bbe7be9807072bf9",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
     },
     {
       "path": "artifacts/validation/32-R-ppk-022-capability-manifest-gate-contract.json",
-      "bytes": 12651,
-      "sha256": "48405ed9f142449ea351ad0ef917a0e696090cb655e936b247eb9d95df71d359",
+      "bytes": 12628,
+      "sha256": "52ad3d3594a393d6236fded733aa7170399f049cd5fc9539a06ddf7d1cac8e19",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
     },
     {
       "path": "artifacts/validation/32-R-ppk-022-capability-manifest-gate-runtime.json",
-      "bytes": 18470,
-      "sha256": "95b87855c9ae00efd5790c466f3c315a723bc03e6542d43d1ca39853dc2f6b09",
+      "bytes": 18472,
+      "sha256": "86b5d6ee67c0577c3f0ff3c7ce054e8e34b411f325fffdc30ce1f63d8010d9a6",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15867,7 +14355,7 @@
     {
       "path": "artifacts/validation/32-V-ppk-026-typed-policy-sdk-boundary.json",
       "bytes": 246,
-      "sha256": "08d573a273a3add8934f9f2da905c0c254a3ffb3ebf021d2b3385a4b7b11661d",
+      "sha256": "7d06a079a546db6dc50ef99424a641b9ac884a32c0ef3f1d74621c640245203a",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15891,7 +14379,7 @@
     {
       "path": "artifacts/validation/32-W-b0-03-b0-04-product-surface-boundary.json",
       "bytes": 2106,
-      "sha256": "b1be0a1fab1968a1f9fde59b066d4c1dd98bf016a780e7c0a1a4224ab7be36ec",
+      "sha256": "6d90de92e204d3ad811e25fad41c5b04d3e82638e9e9caf871486550cf2dcfc3",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15915,31 +14403,31 @@
     {
       "path": "artifacts/validation/32-X-b2-03-b2-04-desktop-security-boundary.json",
       "bytes": 3192,
-      "sha256": "1edd619d74d1eb03dd3ba7554a649a3e40e22329892c97f354225ae422be0b34",
+      "sha256": "8c4d1a79851e0b06c112703e0f41b8a4f08787eed60d19415c4f5d9ab4e39e15",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
     },
     {
       "path": "artifacts/validation/32-X-b2-03-b2-04-desktop-security-contract.json",
-      "bytes": 4369,
-      "sha256": "4bfbcd75201bf78b805a99a1f50f6c238a2f46ac36aa148f21542ccf618c26e1",
+      "bytes": 4502,
+      "sha256": "c494153b9f70b30f268464a010f4ed43b59778bb13dbab594b8a3c4064f454a2",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
     },
     {
       "path": "artifacts/validation/32-X-b2-03-b2-04-desktop-security-runtime.json",
-      "bytes": 3885,
-      "sha256": "4807adaa53ad7ed07f521e0ab4b43e31585cd28bbd9a05985b40b5e999604b5d",
+      "bytes": 3987,
+      "sha256": "664428e441c19a591556212aa561ad511cc604e38b9d140ba0d4de15a3c9e106",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
     },
     {
       "path": "artifacts/validation/32-X-electron-fuse-binary-proof.json",
-      "bytes": 953,
-      "sha256": "9c5461f1e9367efbad96b8d6cecde536f840235e98f93909ddca7c23092e3420",
+      "bytes": 954,
+      "sha256": "f6a113835e564880e04d8f73e39a0346877bde0a9f09e6d16869f5d5a67e9e28",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15947,7 +14435,7 @@
     {
       "path": "artifacts/validation/32-Y-b2-05-b6-03-sensitive-data-consent-boundary.json",
       "bytes": 3234,
-      "sha256": "3e6e1437759f419cb12f2ec92b2815e4f51c667b1b5551523df6a2e48263e85f",
+      "sha256": "76b0815d0e9962f569d3d265d5e928c7d665d45ed3c0e10e46b602499bc0289e",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15971,7 +14459,7 @@
     {
       "path": "artifacts/validation/32-Z-b4-banking-foundation-boundary.json",
       "bytes": 4183,
-      "sha256": "95d769d65166fae0c848843fd0c931e8a096ba5251ccb1848286f81e99c7d979",
+      "sha256": "9de75171124e810138f71164ea2ca0f7717ce27eabbf1469c2092a9d53aee5bc",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -15995,7 +14483,7 @@
     {
       "path": "artifacts/validation/33-A-b4-payment-card-management-boundary.json",
       "bytes": 4672,
-      "sha256": "723dd202153588d9697d8703a643622c23f34fc2050bb864bd79f3fa724d5051",
+      "sha256": "9a7004769d144f0392f0837355404b834bcc22eee1558af2504d35d73b2e3085",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16019,7 +14507,7 @@
     {
       "path": "artifacts/validation/33-B-b4-loan-management-boundary.json",
       "bytes": 4916,
-      "sha256": "42bec5ac58048935af892791803f092ecd147bfea77d1a6702aee299ad5704ed",
+      "sha256": "723e700f46d9c9a8753437fa7dc396fdd254c000dcc8f3b467a7f32c5182cdd4",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16043,7 +14531,7 @@
     {
       "path": "artifacts/validation/33-C-b4-finance-planning-portfolio-analytics-boundary.json",
       "bytes": 5449,
-      "sha256": "54ccbcb4d82412d71fb183dd42253be08f363a121762a13f4214a291b1b71607",
+      "sha256": "a1c6f037258a75a69fb9741664391fbecde7d9b6960cdbb7bf9b85838c5e82f0",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16115,7 +14603,7 @@
     {
       "path": "artifacts/validation/33-D-b4-controlled-import-open-banking-boundary.json",
       "bytes": 5681,
-      "sha256": "3a718a2078b756311631434c7d179da1502aa0ff8e226f3e50841564392596ea",
+      "sha256": "da0467a3d58bdbfeee9317cca9aa2b4b2352f4fd1c13adbee40fda13d5f15064",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16187,7 +14675,7 @@
     {
       "path": "artifacts/validation/33-E-b5-category-life-home-vehicle-boundary.json",
       "bytes": 6509,
-      "sha256": "81cee55804e40df49f39455b01d8ce9be8bde3b0c542a4b4ac065ca76388b337",
+      "sha256": "da5dca855e3d39a9505b8afad87829afb11f6a22390f710cf6f0d2c9446761da",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16259,7 +14747,7 @@
     {
       "path": "artifacts/validation/33-F-home-inventory-utility-belongings-boundary.json",
       "bytes": 6263,
-      "sha256": "1dca136541bf7f89b70ac41e35d9c25a75744865685471bbb068ec8ea11c195e",
+      "sha256": "d2199c86ef55813797c008ec61e82e43e66e7929ff914a6dd01806dfddd58a94",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16331,7 +14819,7 @@
     {
       "path": "artifacts/validation/33-G-family-emergency-planning-boundary.json",
       "bytes": 6281,
-      "sha256": "c4bd065e5dfaece601ed835b4a880937bec5f23146a7c44d455a0e89eea1f634",
+      "sha256": "1cc131f70ac399776f503fd3570dfc699e042b95187c4eafe5c07e074e998277",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16403,7 +14891,7 @@
     {
       "path": "artifacts/validation/33-H-family-emergency-preparedness-boundary.json",
       "bytes": 6606,
-      "sha256": "80eb37087a0b46aa909f0ca5e8e6a8aeb2bdf6a0b699a3f5a24d7d6c415be3bf",
+      "sha256": "814b75fcef3d7113a4d0fa737dd7c75ec5f91b18c04025cd8ab7f53cb7bcb00e",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16475,7 +14963,7 @@
     {
       "path": "artifacts/validation/33-I-family-emergency-assistance-card-boundary.json",
       "bytes": 7223,
-      "sha256": "4b312f7b3dfbcea6f537c1e6b672414b064866116a93bb0d2a222c50d1c895c3",
+      "sha256": "2c80072b2f829a9ac89d9aa0120703ba70525e8a25f0421573b089596d485dc8",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16547,7 +15035,7 @@
     {
       "path": "artifacts/validation/33-J-family-emergency-card-portability-boundary.json",
       "bytes": 7769,
-      "sha256": "91a35b365241bbe8550ed468175b63aafa971280060f3e471f819d4c03ff05da",
+      "sha256": "bbe623cbb61907333d19dd1747f61d41a8679ad2901001087b75b65ed7c83a94",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16619,7 +15107,7 @@
     {
       "path": "artifacts/validation/33-K-privacy-consent-lost-device-control-boundary.json",
       "bytes": 2838,
-      "sha256": "0dedf7355ba08b605c139a7156b000702b08020bdfc4314f78043526f761a3bb",
+      "sha256": "57c853efd76477f7f4346d13d25e1d73f6079b1b05931510bf8264b71b36dbea",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16691,7 +15179,7 @@
     {
       "path": "artifacts/validation/33-L-long-term-portfolio-boundary.json",
       "bytes": 4118,
-      "sha256": "4ac890924358af49b6cd2eb993b569bd955dcf507695814e4e3c0dd8dc3863d9",
+      "sha256": "83ac8e0c45e54364cb76cf85ec8225a78475bdde80ffe206caa2ee895fb0000a",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16763,7 +15251,7 @@
     {
       "path": "artifacts/validation/33-M-accessibility-boundary.json",
       "bytes": 5254,
-      "sha256": "27ca381eaabb63affd2bc2b02737859f3d52f6c8e721d34931b63fc242df618c",
+      "sha256": "cec711bff801fbecd9870e528efeaa5553c7327ef40308778398ec199aa1501a",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -16843,7 +15331,7 @@
     {
       "path": "artifacts/validation/33-N-draft-async-state-ux-boundary.json",
       "bytes": 5651,
-      "sha256": "6be170f2500c9a6d15457f43008c8c8bd13196193b1265630e7cb018d4db0505",
+      "sha256": "2e030bf897ad4d3e2dacde7b89cfc5a7c771d98edcee8dc89383def489cd834c",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17514,24 +16002,24 @@
     },
     {
       "path": "artifacts/validation/34-L-bronze-final-local-closure-boundary.json",
-      "bytes": 1594,
-      "sha256": "e99cc91d50bae1d78fa27638f39cb5fc266ac93c32802a130da1a6a5ae3eaabf",
+      "bytes": 1658,
+      "sha256": "25f05f3de33364fd3dfb075b3ee7b67b03899a9358487fcbc5c032cb6a1c1f97",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
     },
     {
       "path": "artifacts/validation/34-L-bronze-final-local-closure-contract.json",
-      "bytes": 2362,
-      "sha256": "754841c77601da89268d077ab4e5c9b070e5076bd3826598ab1db859e7eb911a",
+      "bytes": 2450,
+      "sha256": "b94a92399ee0bd530f692b88ea8c67587cd4c893675756be834163240e18d701",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
     },
     {
       "path": "artifacts/validation/34-L-bronze-final-local-closure-runtime.json",
-      "bytes": 27575,
-      "sha256": "d696ede95c084a6895721612fe1f241dac1e9f14b3f4d764c000db6c1c4a0b08",
+      "bytes": 27923,
+      "sha256": "eadccf4fe46099fae26282d844de4647505ba3d06d57ae5d18baafbe0335757b",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17555,7 +16043,7 @@
     {
       "path": "artifacts/validation/active-release-contract-v2.json",
       "bytes": 186,
-      "sha256": "2ecef30b3016891794df49cee088311663a44744500eb4e9945a56445a872828",
+      "sha256": "cad09d9d17b0fa149a9c9d2a0c9eba26efadad9ce797c539e76c881a85edc4ca",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -17675,7 +16163,7 @@
     {
       "path": "artifacts/validation/build124-product-and-feature-contract.json",
       "bytes": 1626,
-      "sha256": "1cc70fda900ba2a3a104db7064a87008c7374fd70fc10d5f19e92c20aa08b150",
+      "sha256": "bf6a859b10a83cdd1bf66a97c80ecca00a95f3568004c66693228c2fdb3a98c9",
       "extension": ".json",
       "classification": "HISTORICAL",
       "isDocument": true
@@ -18001,6 +16489,14 @@
       "isDocument": true
     },
     {
+      "path": "artifacts/validation/build179-release-theme-family-relationship-contract.json",
+      "bytes": 3304,
+      "sha256": "8a0bfbcb04ded9a31986802082590a84ce183cdd2b7da5db87a726f50a91814c",
+      "extension": ".json",
+      "classification": "HISTORICAL",
+      "isDocument": true
+    },
+    {
       "path": "artifacts/validation/build181-revocation-sync-durability-contract.json",
       "bytes": 3548,
       "sha256": "5a06621ee8822cfcfa87875befcbce920f81696110a4752ca91d1472639c53f4",
@@ -18011,7 +16507,7 @@
     {
       "path": "artifacts/validation/build208-project-constitution-contract.json",
       "bytes": 580,
-      "sha256": "4a3719773301e284e1438931edfa3f42d0fe84a642416b111ca6e76c5f655b7b",
+      "sha256": "ab2f047ec24ac940680c1b7bd1a5cf67babe546a46159dab12b72b042c4347f8",
       "extension": ".json",
       "classification": "HISTORICAL",
       "isDocument": true
@@ -18027,7 +16523,7 @@
     {
       "path": "artifacts/validation/build209-secure-onboarding-vault-contract.json",
       "bytes": 444,
-      "sha256": "4af4a640ad6d9fc3962a3951d078d81a7388b05282d5f9f57eb712985e38556e",
+      "sha256": "43a66103416ca2d02b7bd9adaf78ef0f86247440964c465701f6f4bd4a3d8056",
       "extension": ".json",
       "classification": "HISTORICAL",
       "isDocument": true
@@ -18036,6 +16532,14 @@
       "path": "artifacts/validation/build209-user-data-vault-runtime.json",
       "bytes": 401,
       "sha256": "58b3c1cabc0b494719b0c127fafb4cebe8ab424fb073af1554e4ae4fcac4695a",
+      "extension": ".json",
+      "classification": "HISTORICAL",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/build212-ui-visual-baseline-provenance-contract.json",
+      "bytes": 3084,
+      "sha256": "6919a26f37fb874ac4cd68a8931db884d4e47cc191913a51e32bd47ecc2c1e01",
       "extension": ".json",
       "classification": "HISTORICAL",
       "isDocument": true
@@ -18058,8 +16562,8 @@
     },
     {
       "path": "artifacts/validation/build214-open022-contract.json",
-      "bytes": 1278,
-      "sha256": "3d55694e3155fcb240b178298c502d5f0e70223e3b1f3a65914b6db759fa3032",
+      "bytes": 1479,
+      "sha256": "bbf483ff76e1b448c390fa8c6bd3694e56478a7fd2b8e4480c7a337cd6eb79b5",
       "extension": ".json",
       "classification": "HISTORICAL",
       "isDocument": true
@@ -18131,7 +16635,7 @@
     {
       "path": "artifacts/validation/build228-personal-identity-sweep.json",
       "bytes": 176,
-      "sha256": "61689c8c3074244f3db7eb54a83e8fef4f30d0c96d56251635d9c5d6942c717e",
+      "sha256": "27ded7d39e892344fc9c0808a5f6de5211ea5f1e2a4dba9479c3b57f1d8182e5",
       "extension": ".json",
       "classification": "HISTORICAL",
       "isDocument": true
@@ -18139,7 +16643,7 @@
     {
       "path": "artifacts/validation/canonical-rule-registry-gate.json",
       "bytes": 322,
-      "sha256": "a2f3bc4be1c3f8d45147250b465836b0302dade397fc685b78d4655e84c49307",
+      "sha256": "59371b2cce3ad1a25a86a59d2733520a6c0f68c8f28f0dc0987ad2dee41e4ad5",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -18155,7 +16659,7 @@
     {
       "path": "artifacts/validation/conversation-capacity.json",
       "bytes": 241,
-      "sha256": "c1d7c9d00244fce184300985361995bf88687e2f057ab60a20f8029d9dcb935d",
+      "sha256": "9a9024190b6dfdaabf794205310909f2862f0dd4093b62325af479eb26b2daf4",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -18163,7 +16667,7 @@
     {
       "path": "artifacts/validation/core-service-boundary.json",
       "bytes": 123,
-      "sha256": "3170af11eb04888fe36d344a992a291b580728941b5722ed88b04e8669d725ac",
+      "sha256": "9b98cdd521e6a2fc2d3de691ab9c2756690fe45433b2101424534f62c44eebf5",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -18171,7 +16675,7 @@
     {
       "path": "artifacts/validation/core-service-local-admin-contract.json",
       "bytes": 260,
-      "sha256": "ca46055469b5c775d49065675c70fd76e23b51c58c21ae8ec626c708fb083141",
+      "sha256": "d9d65704a79c018514dc3f2b2eabca544487ed226a3fcf877b07246d7f84fcca",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -18195,7 +16699,7 @@
     {
       "path": "artifacts/validation/desktop-core-service-startup-contract.json",
       "bytes": 161,
-      "sha256": "bd7e19c1611a696dd202cac24ad0de12f33f4b6d1bba698c008ba677135be90b",
+      "sha256": "2f92208c2b761743fc160d98824531215f43b98b2431b006462a98e76d17eb0d",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -18203,7 +16707,7 @@
     {
       "path": "artifacts/validation/desktop-core-service-startup-runtime.json",
       "bytes": 161,
-      "sha256": "89882396837c5c4ef9f02d837928c464b38a1b1a8770dbf404d4e626eede1423",
+      "sha256": "7eb8937d1152f962b2433e5f2e0a75b3e6dceab20547828737133ca14d05b4df",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -18217,9 +16721,17 @@
       "isDocument": true
     },
     {
+      "path": "artifacts/validation/documentation-synchronization-policy.json",
+      "bytes": 283,
+      "sha256": "3be97e7c1340ab225fe0722451accf4b853ac13aad18d16ad7ac032a28a1a012",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
       "path": "artifacts/validation/feature-reality-gate.json",
       "bytes": 673,
-      "sha256": "83646cff99fa7a2d4f44896b5bb74ee8346f6a83f4166dea9925711aaeb65c3a",
+      "sha256": "7ba8908bbf37d23bbf3003a17bfb08e7d899dcaff61b1eeb980baa63cf921db4",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -18242,8 +16754,8 @@
     },
     {
       "path": "artifacts/validation/governed-preflight.json",
-      "bytes": 5939,
-      "sha256": "b714c91712ef964ef60c512d8b08b813d97b15b8f3495c5004a10530333a5b29",
+      "bytes": 6166,
+      "sha256": "2892787e1d726db26043d4abf3a5655512262db41f6c4f46a8ab226de3f7c2e3",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -18275,7 +16787,7 @@
     {
       "path": "artifacts/validation/monthly-release-contract.json",
       "bytes": 162,
-      "sha256": "9cb88adf84310566ad9a340fb9528e536729368b104baba234063a791c93564a",
+      "sha256": "d8c71ff134a6c14f6a7925a6435737ca4755cc740af34965494f7bb324ca84a4",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -18291,7 +16803,7 @@
     {
       "path": "artifacts/validation/platform-capability-manifest-gate.json",
       "bytes": 624,
-      "sha256": "42bda8f3c839d621c4bfe25834fca2f0ae0f67b6f5fca15ddacda82d571b4a49",
+      "sha256": "d5fe8f1d44edb36a03cd5abc1ba23cfd990fbe1a08d80e3b47043e951735e76b",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -18299,7 +16811,7 @@
     {
       "path": "artifacts/validation/platform-policy-ast-gate.json",
       "bytes": 646,
-      "sha256": "2b8f859e24642ff0de4e28016c7d83e014b52bdcf66088e59bf7817ea646ea9b",
+      "sha256": "d9d42f824768b188d510b6cb75bc344cb65a08629aa4cf670737561303354e6b",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -18307,7 +16819,7 @@
     {
       "path": "artifacts/validation/platform-policy-gate.json",
       "bytes": 2203,
-      "sha256": "fa41a1b170d87a5f6bfbb2ed7095a81fa56ae46eca2fb8c7e77ab80dbb4fef54",
+      "sha256": "cbcfc17192192394cc57aebcb1c468f9c7267e48a8af4ba90bad0d7790b7e798",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -18339,7 +16851,7 @@
     {
       "path": "artifacts/validation/project-artifact-index-gate-v2.json",
       "bytes": 212,
-      "sha256": "5a58af5b22f88d17de5e917fa369159e5fbe7457a51f1e13c4726576bc56845f",
+      "sha256": "b085260488567d9f57c91d0a0267e2be5f838b9aa7dbb597561b9a16b56d8b2d",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -18371,7 +16883,7 @@
     {
       "path": "artifacts/validation/step-checkpoint-gate.json",
       "bytes": 188,
-      "sha256": "fa461de3e42a108a7e4a794f827c52750795c21ae41755cb8dcca1e6fb7acb38",
+      "sha256": "29fef92dae8aa0f81467d28fefcf4b8e916d98f39a4dffe5dffce333b43427d4",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -18387,7 +16899,7 @@
     {
       "path": "artifacts/validation/system-health-core-service-ipc-contract.json",
       "bytes": 161,
-      "sha256": "1f2a3515a260baf5d9ccfb34f6df4553469ba6cc5494b5ddfbf2e2ad6cda1b15",
+      "sha256": "3d678d0145eaf4fdc95341b65600722d958fad71d81c2f2e03ae5c3dbfbf8d21",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -18395,7 +16907,7 @@
     {
       "path": "artifacts/validation/system-health-core-service-ipc-runtime.json",
       "bytes": 161,
-      "sha256": "f44be7a3db06ac0903b3a742e23d804f189d314e297c6311510ac6c7ee2eaeaa",
+      "sha256": "5b6ad8b4444b71a7630315b2f51be67f55483c5d0902a9bf132a171f82a62cc9",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -18403,7 +16915,7 @@
     {
       "path": "artifacts/validation/universal-rule-enforcement-gate.json",
       "bytes": 299,
-      "sha256": "88d4baefed6d623fdfa28cac2346b93b5871069f282b476eaa5051f873171791",
+      "sha256": "a6cbc69479448428b1690ffa5111421a620fd236ba2cf72575722bdf3aea0e27",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -18419,7 +16931,31 @@
     {
       "path": "artifacts/validation/user-decision-ledger-gate.json",
       "bytes": 181,
-      "sha256": "5a11064b1e18cb768c06a674dece6899eef6e0d33c2a3155b73202c6689ef217",
+      "sha256": "c10ab495c29a36cfb6a95f333fb32adb7216313f62b42cfef2e90514ce8c4e7d",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/windows-open021-packaged-launch-probe.json",
+      "bytes": 5029,
+      "sha256": "514a9701fd3cf35a75e126d9e51fbe9bd162a59a6553e4ca9aab8ee33614968e",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/windows-open022-packaged-launch-probe.json",
+      "bytes": 6831,
+      "sha256": "0f8505622e4d1ac9173390d7b9d857f81918a6d9ba72dc892c80d916406bd5a7",
+      "extension": ".json",
+      "classification": "EVIDENCE",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/validation/windows-packaged-launch-probe.json",
+      "bytes": 17049,
+      "sha256": "4f6168efebfd44bf0f121f7046e3b529fa58a87398fe636d6557aa87b44f36d7",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22714,8 +21250,8 @@
     },
     {
       "path": "config/32-q-ppk-021-platform-policy-ast-allowlist.json",
-      "bytes": 89112,
-      "sha256": "709379784b8e59727f58d54c6187a4f2924d19c0bcefbe6efb976ed64f825dd0",
+      "bytes": 90026,
+      "sha256": "58a90febf9382776c2b1472e6ffd6a645c9a24a4cd69e499a8afc1fff2e72b30",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -22723,7 +21259,7 @@
     {
       "path": "config/32-q-ppk-021-platform-policy-ast-gate-inventory.json",
       "bytes": 3669,
-      "sha256": "e1db0f0f3308ca797ef4a1fa881c7a31f0d7a0bfc8285a27cc2a518a2c410782",
+      "sha256": "b462ef5837b109737656cf8c09ae23b2eefa3198220387eb7ced3f8f139fe68b",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -22731,7 +21267,7 @@
     {
       "path": "config/32-q-ppk-021-platform-policy-ast-gate-scope.json",
       "bytes": 6621,
-      "sha256": "f5d491f2250a858766d93539bfb7f02e8f230a2eb14d9c2a792b01ec2ae301f9",
+      "sha256": "2c5dba3eb7b0ee34a5f8d7f3e4f079e06d8e556ca5fd3b6f005c390eea61f5d5",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -22739,7 +21275,7 @@
     {
       "path": "config/32-r-ppk-022-capability-manifest-gate-inventory.json",
       "bytes": 5071,
-      "sha256": "9d434e50c4708df18cbde15e5d047f2037b6357cd82179cb5db863e10ad09468",
+      "sha256": "e0b671f28674d4beea31b4fcc7f8c6acf1ae2e085a8aa87d4141c4dd9252177c",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -22747,15 +21283,15 @@
     {
       "path": "config/32-r-ppk-022-capability-manifest-gate-scope.json",
       "bytes": 7858,
-      "sha256": "b6ff7cb9c6d65da2b2428e2f88e63920be227c47049e35ad6243cf7f19ea980c",
+      "sha256": "1b2f315a03d271c0426a504da479edbe5b04ccf1279c41cc2ff7cb11a67d4b64",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "config/32-r-ppk-022-capability-surface-manifest.json",
-      "bytes": 109094,
-      "sha256": "a3b3f91af4a08d2b4fcb58d71b67a9e40283e6b94364a64519409c4d44a21d0e",
+      "bytes": 116185,
+      "sha256": "dc0234d84a50ff1872f9cde4fb7ab286446b236a69019034055fa938dbb3be1e",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -22882,8 +21418,8 @@
     },
     {
       "path": "config/32-x-b2-03-b2-04-desktop-security-inventory.json",
-      "bytes": 2819,
-      "sha256": "21d207948196b283e4e155df09a5db75dd4a595156145953235cec0985df1a7a",
+      "bytes": 2820,
+      "sha256": "d9e7d5e6e9d31dd67e0954e294d5ec2bddeb1c339143b9ae99ad1f52e00b38f7",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23203,7 +21739,7 @@
     {
       "path": "config/33-q-local-governed-ocr-derived-data-pipeline-inventory.json",
       "bytes": 20588,
-      "sha256": "f2b6b9470f41a048e887c63f602129a71c9e1b60489742d6f7065b2a4cfbc040",
+      "sha256": "bfebe88edd75e2548c04390c93f5cf42eadb8d7dd2e1092b15154ff201a1129b",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23218,16 +21754,16 @@
     },
     {
       "path": "config/33-r-archive-evidence-relations-media-lifecycle-unified-authorized-search-inventory.json",
-      "bytes": 4419,
-      "sha256": "497e007270054ea430ce1901e3d6619c6a7b22a7d40c992cb9c9f5add67526c2",
+      "bytes": 4364,
+      "sha256": "1f92efbdc523fc1f5fb188d1c5b77b97689a204fd455c821cb91a05aa556f0de",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "config/33-r-archive-evidence-relations-media-lifecycle-unified-authorized-search-scope.json",
-      "bytes": 6652,
-      "sha256": "7d96dbb0edb4fde182ae9c75954b74331192db5139838ffe44c13f99bb0325d9",
+      "bytes": 6571,
+      "sha256": "2598bb5bcd655de531ebf5c537ffe972e320fe85ae010d7a584a1f390ddbefbb",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23235,7 +21771,7 @@
     {
       "path": "config/33-s-health-care-coordination-elderly-support-ledger-inventory.json",
       "bytes": 3851,
-      "sha256": "c0ad25e5e998a6776952e6844932b334d2c6cd51f3ad24f0ee0492d4c12a36b3",
+      "sha256": "4926edff2b86de96efd4c73b379228ff98ac441ea05f8a21e3bc3ad40356f7a2",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23243,7 +21779,7 @@
     {
       "path": "config/33-s-health-care-coordination-elderly-support-ledger-scope.json",
       "bytes": 5482,
-      "sha256": "ca894f2a3eaadcd4853011a31285051f2b8acf55a72730a8ae6d2a9c2e7567a8",
+      "sha256": "d31d1e8ed3ffc8379de711f5365edb26fe011112c213dcb0f1c90306d5aabd72",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23251,7 +21787,7 @@
     {
       "path": "config/33-t-household-operations-center-inventory.json",
       "bytes": 3723,
-      "sha256": "a9cd10ba243e24f9c14fd11d2b66c3ec01c5fd939228746155923a06e03f8750",
+      "sha256": "438586b0224755f307b710ef1d7d3ef33ede6b7f6693006fb9ec76654199dbc9",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23259,7 +21795,7 @@
     {
       "path": "config/33-t-household-operations-center-scope.json",
       "bytes": 6167,
-      "sha256": "14278a668faecfa1c1f85f9e48c65971dda14268ffa01b3d6b19dd86fac15842",
+      "sha256": "3872843005dc7968d2fab5b6f39efdd36cf8a6c0f2905b454d8ff88136d8b1be",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23267,7 +21803,7 @@
     {
       "path": "config/33-u-child-education-coordination-inventory.json",
       "bytes": 2953,
-      "sha256": "c1edec981fed1a05ec1a86c3c8d6291348bf82e451890e5a0bdc636368bec0f1",
+      "sha256": "29d07383141e7913cf493fc03395c539531339541a0fd2d70cec6091758ee7c1",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23275,7 +21811,7 @@
     {
       "path": "config/33-u-child-education-coordination-scope.json",
       "bytes": 4127,
-      "sha256": "5b90fdfc5e55b6e9e4a2dcac52c6e05bf211c6f222899246f49b40064033595d",
+      "sha256": "b98fbb656f1f2e8f4441dd86c04a0586df2a6f575452c81e8c41a3230f598bdc",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23283,7 +21819,7 @@
     {
       "path": "config/33-v-places-travel-asset-pet-inventory.json",
       "bytes": 2943,
-      "sha256": "ab3909b14b5de7d28ff2ee74ccd17e5aee3bb884bb74ad1d138f7d4ec3cce3cd",
+      "sha256": "3bc3201dafa6cc09ba6bd33af3e381054c31a797fcb42a79f7479b51e51bc977",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23291,7 +21827,7 @@
     {
       "path": "config/33-v-places-travel-asset-pet-scope.json",
       "bytes": 4125,
-      "sha256": "930b1038822b757d140beda76fa83029df230a3a7551667f3404dba635c83adc",
+      "sha256": "3d6fa95d601ab0b37b4dd518e7f769973c8971df2c3e2350aec90a7541ef1662",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23299,7 +21835,7 @@
     {
       "path": "config/33-w-consent-bound-family-ai-assistant-inventory.json",
       "bytes": 3244,
-      "sha256": "f2822d50ccaeab6e884b0d253fc8d8ac0a3a95170562905acda1328f597de792",
+      "sha256": "16e9f25e38b191aa1de77052c259dbedc169349397150615c2909d3ed538a57f",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23307,7 +21843,7 @@
     {
       "path": "config/33-w-consent-bound-family-ai-assistant-scope.json",
       "bytes": 4806,
-      "sha256": "20acb8e364abd2af12594269faeccda96061e621f9f78adf3a1601fff28dd1a6",
+      "sha256": "1aab39c8391f9d15903747950dfa1cd8948fb23110b5001d81082be43d6d435e",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23315,7 +21851,7 @@
     {
       "path": "config/33-x-memory-studio-time-capsule-inventory.json",
       "bytes": 3215,
-      "sha256": "ace6a53f549c73f100fbf4ae5a885fe64ce0f624756b5d2b8f679d780980e596",
+      "sha256": "c4d81c45738a4b2c8e5a7a539e5d4525f06eb97cfaa208df283aab73e666ee7e",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23323,7 +21859,7 @@
     {
       "path": "config/33-x-memory-studio-time-capsule-scope.json",
       "bytes": 4553,
-      "sha256": "f64d2a628b105a9af51711c6f90ef3a0bced100a4fa44f2be7cf3a0cd2d93bff",
+      "sha256": "b552557563acee8545b58ffef248a50a9c529bbf77d901bc4f6f3a5cb1142d42",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23331,7 +21867,7 @@
     {
       "path": "config/33-y-local-first-smart-home-energy-inventory.json",
       "bytes": 3131,
-      "sha256": "75ed281c61055dbf3b7f498034160156353366e4f1e8fdc1086c9796cef73cb9",
+      "sha256": "fb3e62f4ba471f2946fb16105a482c236ce95d14545eb6272967033fb2ef4196",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23339,7 +21875,7 @@
     {
       "path": "config/33-y-local-first-smart-home-energy-scope.json",
       "bytes": 3956,
-      "sha256": "4bc6bc326ba73c3b0113df559ba8e709516058cca6a4997ba30e633acbd90364",
+      "sha256": "e6e9b8fd9a22f7b1ee25038d2474a53665a7375e15606b26b095874e1a59b022",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23347,7 +21883,7 @@
     {
       "path": "config/33-z-signed-plugin-external-provider-platform-inventory.json",
       "bytes": 3616,
-      "sha256": "3b029f744207d0f13ac46bb7556fa87679e3f80b7cf56ea83c4244f4ceb10112",
+      "sha256": "87677f18169afbd149430350d2c6feac4035b80468a0a66c37cf1c9a3ad90dfc",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23355,7 +21891,7 @@
     {
       "path": "config/33-z-signed-plugin-external-provider-platform-scope.json",
       "bytes": 4974,
-      "sha256": "5bf85aeab6dfd570ce8f6359d157250ea3abd1f546126358a0ebcc03f56f2faf",
+      "sha256": "c18b9f78220abe32645ad09025a9cc184bc9c665a4e35d514b3147876c2f5204",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23363,7 +21899,7 @@
     {
       "path": "config/34-a-communication-policy-mls-foundation-inventory.json",
       "bytes": 3741,
-      "sha256": "87189757f7824e848d23fd68924ad2efe19a6b42648508ecc5567dd55b5d4d5e",
+      "sha256": "ae1d1834ac5f819d20e1e1a367bae4390cf46d7232e0df02ebefb693741ee836",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23371,7 +21907,7 @@
     {
       "path": "config/34-a-communication-policy-mls-foundation-scope.json",
       "bytes": 4710,
-      "sha256": "467543fd262af38ac450979e6d0c2ec2fee96eaecb5ec643851fa14229fde377",
+      "sha256": "1f28fd3fdf7930cd6c91bfe464ad99c8e81527b1f1975f3b5ef9e5ce3836a387",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23379,7 +21915,7 @@
     {
       "path": "config/34-b-communication-messaging-lifecycle-privacy-presence-inventory.json",
       "bytes": 3839,
-      "sha256": "1a49ef166eef2f75d9cd345bd3b988cd2f9cb71f521dc59a078810c2dde4c4b5",
+      "sha256": "b2693a7488b088a05d0085dd89003be60e1e3015f1680b65c9da96fa79ab55d5",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23387,7 +21923,7 @@
     {
       "path": "config/34-b-communication-messaging-lifecycle-privacy-presence-scope.json",
       "bytes": 4991,
-      "sha256": "bd637d49fea64c71ac8e6d50329982e05c0ea4a4b1fc6862382a560ffa15b255",
+      "sha256": "d089da84c7aead7046bf0c0b1c5139b8275aa355e34fc0aded266ce27625e5b3",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23395,7 +21931,7 @@
     {
       "path": "config/34-c-realtime-calling-media-accessible-ux-inventory.json",
       "bytes": 4259,
-      "sha256": "f771d144448f7476cbd0c11329c21b6a5552e76c8994174f29ff5e74e15dc927",
+      "sha256": "ea20835cb8c5a5aa37f1dc9d8b3d442cd3e264a663c1c1dea9e13f362f47fff1",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23403,7 +21939,7 @@
     {
       "path": "config/34-c-realtime-calling-media-accessible-ux-scope.json",
       "bytes": 5294,
-      "sha256": "1a17dd30fb23fa41c85b072c79d16fdd22d1d2040cf72a27199105d6b7128f4d",
+      "sha256": "f45089992f749289e9e087370448a73b2890c0003e28cf971a5c4147a8284afa",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23411,7 +21947,7 @@
     {
       "path": "config/34-d-explicit-consent-recording-media-retention-inventory.json",
       "bytes": 3884,
-      "sha256": "4d235b9317ea0f1bf8c8ff5757aac3c9f36b353eeb8afe823b7debaed9ed99f0",
+      "sha256": "8d33f93296948987dd6bdc3b68e0c681dfdff21cea10352c9f6d41512456953a",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23419,7 +21955,7 @@
     {
       "path": "config/34-d-explicit-consent-recording-media-retention-scope.json",
       "bytes": 4542,
-      "sha256": "6d182931578216f3feff4932438ea782c7fc061d94a54beba294bc043d4c4f08",
+      "sha256": "8e9229f5d20ada21874dc2911d9d7fd10c5708e99048924c31ef85ca26f502e3",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23427,7 +21963,7 @@
     {
       "path": "config/34-e-local-first-translation-caption-language-provider-inventory.json",
       "bytes": 3894,
-      "sha256": "fab79738ed69d3b42f9812485380fa4cdc00273b9f8fcafb600a1a779bfb64a9",
+      "sha256": "0672253f8b728e200d8708b4d5a18db0764631ff53b612944947482203e5c9cd",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23435,7 +21971,7 @@
     {
       "path": "config/34-e-local-first-translation-caption-language-provider-scope.json",
       "bytes": 4490,
-      "sha256": "527a8f52fc721444301416941f0c9c2d442a19962cfae917678e6eefc359996c",
+      "sha256": "0a9f23bedcaceab4a640ed46fd582b28200224b97a36cbf6b94f21f8a530f4c8",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23443,7 +21979,7 @@
     {
       "path": "config/34-f-family-meetings-decisions-consent-minutes-inventory.json",
       "bytes": 3781,
-      "sha256": "f683b19177038a81f68660d65457f8c65b15f8926626d427853541c044c863c0",
+      "sha256": "b806b25ed2db8ecb67ff2f07d99679379d874b9e28da732979e704852f9854cb",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23451,7 +21987,7 @@
     {
       "path": "config/34-f-family-meetings-decisions-consent-minutes-scope.json",
       "bytes": 4648,
-      "sha256": "55058c1efcfeb00b28bb95440742e9a42539e19081cbfd5758f1cefb59bb7566",
+      "sha256": "bafc143f95263449a44b94a805d837a8e896a402a2452a7de36092d4cd51c01a",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23467,7 +22003,7 @@
     {
       "path": "config/34-g-e2ee-file-sharing-remaining-communication-ux-scope.json",
       "bytes": 2850,
-      "sha256": "ceeec9039854d5f209f4bc86fa64b3ef64ef7c5e9dd4e21dc4bf6e1e118cdac1",
+      "sha256": "494012ac222312ba032cb83cf78b5ddcd926018e06a7ade08b1ca7e57817209c",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23483,7 +22019,7 @@
     {
       "path": "config/34-h-communication-audit-archive-integrity-scope.json",
       "bytes": 1757,
-      "sha256": "09fcf1d3ab398808efd61566418a3c536f811730173170d03b673720b3746e00",
+      "sha256": "6e138a37c8e62a86935eb84fb670c7033f41985e02808bc517939f469c41c481",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23491,7 +22027,7 @@
     {
       "path": "config/34-i-distributed-core-consensus-tenancy-inventory.json",
       "bytes": 1930,
-      "sha256": "5dfb9a2f894cae41d89c5b1e7c701c518b4276a8866cd543b8de981b96ea95b1",
+      "sha256": "6b94717acf719da6326d03914b59d3fc81a711a159130a4142f645a1f1739951",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23499,7 +22035,7 @@
     {
       "path": "config/34-i-distributed-core-consensus-tenancy-scope.json",
       "bytes": 2903,
-      "sha256": "267def72394e77a933f4b149ca51192426909ef159746964d74080a0cc153043",
+      "sha256": "88d054a0fae8719ad01752bf3b176cad845a508696ba530d9c02e2906d3c4ce8",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23507,7 +22043,7 @@
     {
       "path": "config/34-j-distributed-clients-operations-disaster-recovery-inventory.json",
       "bytes": 2349,
-      "sha256": "954be503f57afa463334ebccc0ab1c10cc1931a98d467f75675c4cc110e66456",
+      "sha256": "f70745d73cfb010e658e7b41ed48ced5faf6519c8aa3e234ebe8d16d32efc082",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23515,39 +22051,39 @@
     {
       "path": "config/34-j-distributed-clients-operations-disaster-recovery-scope.json",
       "bytes": 3206,
-      "sha256": "1a14fca33c262cd3bdc31fab1ae6a61edc271c3838251b22f710e555d1493e43",
+      "sha256": "6f62606621cd1e56118f36b5b16d67728176c9c9a150e57290f5af1ae05aa100",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "config/34-k-windows-resilience-universal-ux-inventory.json",
-      "bytes": 2290,
-      "sha256": "eb58624da8d86c93b512cbc79235a8913b3c4ff105c6ac6fd6670810aa60bcfc",
+      "bytes": 3871,
+      "sha256": "5d901351183d34c5a1427b3adbc2c66fb531d0a770e193a22abbb20ffc924ee1",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "config/34-k-windows-resilience-universal-ux-scope.json",
-      "bytes": 2988,
-      "sha256": "ed46c177ca9c68dfafe033de2f9124c6ca2c3d9878a5bb039e8bff082889e4cc",
+      "bytes": 4909,
+      "sha256": "52b60e975f1e7407c4c302e21dbdfe0350ec02ce8264e990f67f09338682b8d1",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "config/34-l-bronze-final-drift-deterministic-delivery-closure-inventory.json",
-      "bytes": 1210,
-      "sha256": "6a26867a06b41697919aca6fc8306d6ab479e3a03689e0198201e9aa9ae1097a",
+      "bytes": 1262,
+      "sha256": "3c666fd440ba00a270a12989997c0609aa0232540d8f80bdc8f6485fe10105b0",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "config/34-l-bronze-final-drift-deterministic-delivery-closure-scope.json",
-      "bytes": 1792,
-      "sha256": "bb8c1f08e717db02cc22d18ccfc28c702246962cb72d7c112d832ce46e07b0d1",
+      "bytes": 1776,
+      "sha256": "df0c75fe45c1c1b374158e90a478031ca524d139a69ac1b077503b2abc0eb3f7",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23570,8 +22106,8 @@
     },
     {
       "path": "config/active-document-set.json",
-      "bytes": 1307,
-      "sha256": "3e700aa3bbfbf7cbb2f342b95b886148a810d991c54743ed1d25d84c5d0179b2",
+      "bytes": 2252,
+      "sha256": "def4c29808f3868d092fc338cb2feea0d95ef11b5b6399beb263c9af7ce82a76",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23681,6 +22217,22 @@
       "isDocument": true
     },
     {
+      "path": "config/documentation-synchronization-policy.json",
+      "bytes": 2240,
+      "sha256": "e7516ec5a38a145ba3d63f6aaaefcf05c899bbe90086187e4e490764160b7083",
+      "extension": ".json",
+      "classification": "ACTIVE_AUTHORITY",
+      "isDocument": true
+    },
+    {
+      "path": "config/gold-activation-trust.json",
+      "bytes": 306,
+      "sha256": "185b4e57b03500465ca7e545fe2bff11183124e82b012ad0c1239771ad38560e",
+      "extension": ".json",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
       "path": "config/in-use-user-data-protection.json",
       "bytes": 725,
       "sha256": "a1dab42ce3be3dad80e1eba42afabf6f54aa71b598d44b7644252c712f7ddd5d",
@@ -23755,7 +22307,7 @@
     {
       "path": "config/ppk-015-network-egress-current-ratchet.json",
       "bytes": 1802,
-      "sha256": "7edd28c074edc8cf21385fdc1f3b62461f7d575d86c1677dd4b76be55693e4c4",
+      "sha256": "d738cc4d70c4bcf2a1e3da2d529fe815fa0ea61ab16f1ed39be789ab04d7aaeb",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23810,8 +22362,8 @@
     },
     {
       "path": "config/remaining-scope-package-roadmap.json",
-      "bytes": 18800,
-      "sha256": "9ebd5b8f75536c150d36a954215229f9bcadd7ac5ff80bd1c013e480e214ccb9",
+      "bytes": 40006,
+      "sha256": "a6f06e8e499261a437c1a884aabe82b2562578c17ee07694576d9e1e1662bdcc",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -23842,16 +22394,16 @@
     },
     {
       "path": "config/ui-visual-reference-manifest.json",
-      "bytes": 3385,
-      "sha256": "a1dc6481025056d7a56429138f4e10f034c69e6b50ab9776dfc23347e478e701",
+      "bytes": 5279,
+      "sha256": "3b37ce88dc94698aeb6b7251291079f17d017c2b3d7dc3bf5947108abedacc20",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "config/user-decision-ledger.json",
-      "bytes": 90266,
-      "sha256": "a3381737fcaaea7785cfac9074b1fab5b6e97c68889f9d398336da427b45799f",
+      "bytes": 95486,
+      "sha256": "dec9ee69af8dae00a80db6f6785738d162560b23b6ed64da4aa63eb8b7795b80",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -24026,8 +22578,8 @@
     },
     {
       "path": "docs/00_SCOPE_FREEZE.md",
-      "bytes": 8841,
-      "sha256": "f9f173ece42afa9944595d7ec0b3a48bd65ae166c2a7816e24421ace1ac218d2",
+      "bytes": 9196,
+      "sha256": "ac5a349a665a14ff1737d3da4953a352dfafee88d08bf5c0fb09eefcf382ab40",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -24082,8 +22634,8 @@
     },
     {
       "path": "docs/04_RELEASE_PLAN.md",
-      "bytes": 7357,
-      "sha256": "da7ec49324342257a076d70728f869dfbd97b9123601a3a6527ac5e953393e87",
+      "bytes": 8058,
+      "sha256": "f439e62adeeb7302b8820bf88cc1379e98aa3290761f53fd253870264be1a220",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -24106,8 +22658,8 @@
     },
     {
       "path": "docs/06_OPEN_ITEMS_AFTER_CODING_START.md",
-      "bytes": 22192,
-      "sha256": "c4779df8bca5942c8e32c87f477efae300b02a98b65dc62a17c615d099dafcac",
+      "bytes": 24435,
+      "sha256": "654351628e0c341b11e353caa7483c90593fba229445c2678163bb457fd48335",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -24122,32 +22674,32 @@
     },
     {
       "path": "docs/09_ACTIVE_DEVELOPMENT_STATUS.md",
-      "bytes": 485,
-      "sha256": "5440233d1188de6a3a99edd8a203c3f5a56533c1f747316e4098cd57ac028915",
+      "bytes": 1475,
+      "sha256": "a59f0bb6dfd780699e42543607e9404d5c1c00cb0d99924f7c1ce21f66fcd0dc",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "docs/10_MASTER_DECISION_REGISTER.md",
-      "bytes": 106884,
-      "sha256": "5ddd207d57cbe1d45fdd79cdb330106eec386962042f3caa4edab9baa7e84557",
+      "bytes": 108807,
+      "sha256": "7b961bbba82192b136135520677c684cb19680e02a3d48c7367959353e351f84",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "docs/11_DOCUMENT_AUTHORITY_MATRIX.md",
-      "bytes": 28848,
-      "sha256": "d5d66e7e11797be20eab6cbb2265e24a0b8beadc401bef0a54dffc9ec0fd64b6",
+      "bytes": 30299,
+      "sha256": "e068d8f477cc71d102eedabae9a02eea2eea1d69c07ccca55d33712c9994279c",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "docs/12_PRODUCT_SCOPE_AND_MODULE_CATALOG.md",
-      "bytes": 11084,
-      "sha256": "69c13ca2d20d4fff66f0b4aee21a2ee94f944d97d51a6bdaa5354a8b9e9ccc7a",
+      "bytes": 11359,
+      "sha256": "117d4cb49f0cbfedd1ae705313e4088b703dc4b1aa20381063ad68a1a3427d55",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -24170,8 +22722,8 @@
     },
     {
       "path": "docs/15_RELEASE_VALIDATION_GOVERNANCE.md",
-      "bytes": 10814,
-      "sha256": "96252e1ae3f016d980558fb02d8f7b72a5ded2885cf5a5faaf4b38fb467a786c",
+      "bytes": 11540,
+      "sha256": "4984288dcf1f1b143a54e91db45b1fdcc97af067cfaa5d42e38501f1e8015e6f",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -25826,8 +24378,8 @@
     },
     {
       "path": "docs/audit/34-L_BRONZE_FINAL_LOCAL_CLOSURE_AUDIT.md",
-      "bytes": 2567,
-      "sha256": "d8f8a800aa0fe5f5127a46beac9a4356aac743521c296451c33d742edb3723f9",
+      "bytes": 2444,
+      "sha256": "dbcaadd5701aca8fec45061b1e99cdc7c6469efc25f337da615c8ca3af49b345",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -26002,8 +24554,8 @@
     },
     {
       "path": "docs/current/00_AKTIF_ANA_KAPSAM.md",
-      "bytes": 2385,
-      "sha256": "2d65c3d6c12828933c4698c91902d706f07efaf26c48b1877a9b08e2ff03c390",
+      "bytes": 2758,
+      "sha256": "bc4f6e25841f4fcdf9041d85b2bace94b3c34c4cff9c0536329dc5f283fb796d",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -26018,24 +24570,24 @@
     },
     {
       "path": "docs/current/02_AKTIF_PLATFORM_MIMARISI.md",
-      "bytes": 1092,
-      "sha256": "e8534645d7e634b8c7b9e866af52f4952167866c29a94cdacce53ea74d140f77",
+      "bytes": 2030,
+      "sha256": "6a0ef55531e433131e34b70ed903f86dd1cd848e5c787f30bcc5ebef8b4c43dc",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
     },
     {
       "path": "docs/current/03_AKTIF_UX_ERISILEBILIRLIK_SOZLESMESI.md",
-      "bytes": 819,
-      "sha256": "70fb903e5b63569e5bdb211d9af04c5d6977de7b41649f3057777653b77c987f",
+      "bytes": 2438,
+      "sha256": "f42deedccf34cea95c07a1c060b0542a4577a9622382f08e2ea70ecfda3422a0",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
     },
     {
       "path": "docs/current/04_AKTIF_BRONZE_YOL_HARITASI.md",
-      "bytes": 1036,
-      "sha256": "f78e8b547232a524ba3d559a4270167ece4d233ee9b379cd191da0b283c87483",
+      "bytes": 1570,
+      "sha256": "89ecf20b84262fa6da3f58756c0a1485e107a245caae715d8401cccf076f68bf",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -26050,16 +24602,16 @@
     },
     {
       "path": "docs/current/06_KANONIK_KURAL_SICILI.md",
-      "bytes": 846,
-      "sha256": "5a91dde131cafe3d581fbf0814a5de3150fe6a700644d8bc4b662a784215758e",
+      "bytes": 1199,
+      "sha256": "9bae0db6a691a2627937f2db92fcbe2eb531db1e416e7ad1f4373abe34568d50",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
     },
     {
       "path": "docs/current/07_TESLIM_SOHBET_VE_KALICI_KAYIT_SOZLESMESI.md",
-      "bytes": 1053,
-      "sha256": "cd10a24a4defc3008d38a7da74ea1805eb848014aeb7236e4dc2f6c8bb7c9b03",
+      "bytes": 1435,
+      "sha256": "ee8b722d79a6865a47bc48a58f0dd4bbe2a2bf87e7e01ba98356be8bc79b17ee",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -26074,8 +24626,8 @@
     },
     {
       "path": "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
-      "bytes": 4788,
-      "sha256": "fc2d6b8e75fb0bf7f3dcb04dbba720cc05f8e27cc70a071770cbc64b5bd43651",
+      "bytes": 6341,
+      "sha256": "56a10b29dfb9d6b055d173b80204b43981fcfdaa5276122c119453bd30b78fc5",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -26084,6 +24636,22 @@
       "path": "docs/current/10_TUM_KURALLAR_ASILAMAZ_YURUTME_SOZLESMESI.md",
       "bytes": 1387,
       "sha256": "676747b74fcd2e8aaf291bb8909d034d222805dd850295296c81387b12f6f635",
+      "extension": ".md",
+      "classification": "ACTIVE_AUTHORITY",
+      "isDocument": true
+    },
+    {
+      "path": "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
+      "bytes": 110874,
+      "sha256": "e968031c4b2cd4ac18f14bd8d733f47734dce12014f1d17838b04eb6ce8119ab",
+      "extension": ".md",
+      "classification": "ACTIVE_AUTHORITY",
+      "isDocument": true
+    },
+    {
+      "path": "docs/current/12_TUM_BELGE_TURLERI_DENETIMI.md",
+      "bytes": 2419,
+      "sha256": "fd2b25bb1c55a4e85c8a19641ddace57880e3a6d12ea1d5fb20271e2835dfaa5",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -26154,8 +24722,8 @@
     },
     {
       "path": "docs/current/DESKTOP_SESSION_AND_ELECTRON_SECURITY_CONTRACT.md",
-      "bytes": 2113,
-      "sha256": "fe031f166a1fa2131d045ae7eeabe56d487e950935333c3efc87f3ce3a1e584c",
+      "bytes": 2403,
+      "sha256": "4f64888b5ff9f81410c8dbbac79dfe41b4ba41b3c51ba54c387d734880aac7a6",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -26165,7 +24733,7 @@
       "bytes": 50355,
       "sha256": "62bf23a4820fa9b2cd4c36a9c90079f066b7e3d139482da9a9213302ede3a73e",
       "extension": ".docx",
-      "classification": "ACTIVE_REFERENCE",
+      "classification": "HISTORICAL",
       "isDocument": true
     },
     {
@@ -26173,7 +24741,23 @@
       "bytes": 270037,
       "sha256": "f9ab09e6930ddb03e06dcb4a6576886e633ffeb25e309ae53aeb57cdb7e7639c",
       "extension": ".pdf",
-      "classification": "ACTIVE_REFERENCE",
+      "classification": "HISTORICAL",
+      "isDocument": true
+    },
+    {
+      "path": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_17.08.2026_V1.docx",
+      "bytes": 347679,
+      "sha256": "a551300ae443f3a756aa718ec311d06b4d99b889232155d39ee88fe53c46415e",
+      "extension": ".docx",
+      "classification": "ACTIVE_AUTHORITY",
+      "isDocument": true
+    },
+    {
+      "path": "docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_17.08.2026_V1.pdf",
+      "bytes": 478084,
+      "sha256": "f93dc2f9b8af7a9cc73b9b8c1699ff195f9e44dba7e1004bded1dd24fdda289f",
+      "extension": ".pdf",
+      "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
     },
     {
@@ -26498,8 +25082,8 @@
     },
     {
       "path": "docs/current/PPK-015_NETWORK_EGRESS_CURRENT_RATCHET.md",
-      "bytes": 3038,
-      "sha256": "51ab8a4346b6a0648d275bd3f84efa1f1dc9b15594f7d8dd3294f104b7ed8aad",
+      "bytes": 3208,
+      "sha256": "871881ca47ccf13485194c8d35bd9635af9e2480cadb4f4b924ceb7209dd25c5",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -27394,16 +25978,16 @@
     },
     {
       "path": "docs/decisions/DEC-202-ppk-021-platform-policy-ast-fail-gate.md",
-      "bytes": 4272,
-      "sha256": "95bed19b616072cea6ea786ba4bb384171e7356727e3d1540f9d73ab7e6a3651",
+      "bytes": 4412,
+      "sha256": "2cd66edd2ee5d6e8b5a68c086995fd88b43e6b30530d64e7b86e09771cc98c50",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "docs/decisions/DEC-203-ppk-022-capability-manifest-build-runtime-gate.md",
-      "bytes": 5047,
-      "sha256": "c7f99a42413f026840c32926400de3890da738727ed8477e435ed7ff628e982d",
+      "bytes": 5251,
+      "sha256": "af58025175cdcfc1a4b3e6e9ccfac6ca2e8c33659aa902ae6c79d5b670d117cc",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -27603,15 +26187,15 @@
     {
       "path": "docs/decisions/DEC-228-local-governed-ocr-derived-data-pipeline.md",
       "bytes": 21506,
-      "sha256": "eb184e0873b6b4d52b842789730b3ad07906513ff91d3306114bde070d7339a2",
+      "sha256": "24cf666821af84b41221eab54153e2042c95d77eb8d576553ec45f38985ce469",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "docs/decisions/DEC-229-archive-evidence-relations-media-lifecycle-unified-authorized-search.md",
-      "bytes": 3716,
-      "sha256": "191ae2656711e4254d159d078dcdfb26f377aa67f008f16a63643128ba81fa9a",
+      "bytes": 4114,
+      "sha256": "d964d156bfbed371542cc9b5b15eba30d4c58b4fe9dc083a0606a4681b8ffd7f",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -27619,7 +26203,7 @@
     {
       "path": "docs/decisions/DEC-230-health-care-coordination-elderly-support-ledger.md",
       "bytes": 3197,
-      "sha256": "51000e9195977d6f5aaf31ebac352ad1d993b8b7f23b946137a7ff18fc6df27a",
+      "sha256": "ab306ef7f9274df9ce5101723b49762bc47ea981dab34798018a11e08616a88d",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -27627,7 +26211,7 @@
     {
       "path": "docs/decisions/DEC-231-household-operations-center.md",
       "bytes": 4017,
-      "sha256": "df0afa6b44628854259d99ff4508b2fc37ad710cda8f371e3ea24a504f531b7f",
+      "sha256": "5019238649e14878c82b63ea8d0146697caf1a348a5691b875a2708a89ce25a6",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -27635,7 +26219,7 @@
     {
       "path": "docs/decisions/DEC-232-child-education-coordination.md",
       "bytes": 3109,
-      "sha256": "7e9da377ae27d8fafa8a1ae25204c11f0a7a44a45884945396f57d460ba626a5",
+      "sha256": "d5b20dcadeb72a87fb123670d0ffe198e4375bfffb03eb6ae053b26275569d79",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -27651,7 +26235,7 @@
     {
       "path": "docs/decisions/DEC-234-consent-bound-family-ai-assistant.md",
       "bytes": 3968,
-      "sha256": "6e355327a8c95a8e00599eb324397743ba8faaa9bbf9adc67fe212f32e6dd788",
+      "sha256": "346f01740d8fc444db45ca93a410e26644e53c9121080d5ac75023734fe103e8",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -27659,7 +26243,7 @@
     {
       "path": "docs/decisions/DEC-235-memory-studio-time-capsule.md",
       "bytes": 3998,
-      "sha256": "4ee80fe8e4a085c4837f83b4a23c48e3d613bf51bfda0147759feedf620d4325",
+      "sha256": "4c568a7aeb6a5fd38adaa5623a54e3c12fe1ed24e1b2de724296240f43cfc2ca",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -27667,7 +26251,7 @@
     {
       "path": "docs/decisions/DEC-236-local-first-smart-home-energy-adapters.md",
       "bytes": 3177,
-      "sha256": "27f5f0bd90cdc6377c4e9e0d434bace3a4e033646b01b2ee9e04bd8576c846e1",
+      "sha256": "0b17d31fbb04b8fa156ab516ca32cdef93524c661d7baaee12fa6b76fe62841c",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -27675,7 +26259,7 @@
     {
       "path": "docs/decisions/DEC-237-signed-plugin-external-provider-platform.md",
       "bytes": 3397,
-      "sha256": "a090293f00660751f6d444eb1c92ff771a7c9962456152d14a192377ee1fa3b2",
+      "sha256": "e2d1b367065bf81fd7d34f0e2e2369c59ee8b3f3b4677040e0b0f20607ce62ba",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -27683,7 +26267,7 @@
     {
       "path": "docs/decisions/DEC-238-communication-policy-mls-foundation.md",
       "bytes": 4255,
-      "sha256": "fc984d8c7de54e2ac0e5a2168249ad7a88f6ff3e89f74704f53eb377cd909093",
+      "sha256": "9244cc4bc776ca256412bad9673e405ec250a3241ae0b8367be35c9e6e43e290",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -27723,7 +26307,7 @@
     {
       "path": "docs/decisions/DEC-243-family-meetings-decisions-consent-minutes.md",
       "bytes": 3563,
-      "sha256": "c4d27d7cd8fb5e35a3e801e15d9b172f5243070629d88c42902abf098efc3479",
+      "sha256": "2e43029aa1b44112f7b1eae01c1257efb3d633725979f57eca12ba33e0ac7bb5",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -27762,16 +26346,48 @@
     },
     {
       "path": "docs/decisions/DEC-248-windows-resilience-universal-ux.md",
-      "bytes": 3191,
-      "sha256": "965296e7644ab9071a32124d6c1240dd2f687218da81ae17cbfb49752978961a",
+      "bytes": 3840,
+      "sha256": "903592f2f6239052b0fa7e4b44d153d4109e7c3084ba8f614518d531c03eb54a",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "docs/decisions/DEC-249-bronze-final-drift-deterministic-delivery-closure.md",
-      "bytes": 1190,
-      "sha256": "1d57f992f131eecc9fb50411e1daa55fe405ba93db3b28efe6469e457784cecf",
+      "bytes": 1300,
+      "sha256": "e5857f97acf58f4116fe65179f447477cab86959fa14b60e385db649b3350bdc",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": "docs/decisions/DEC-250-current-documentation-refresh-historical-preservation.md",
+      "bytes": 1670,
+      "sha256": "b4b6b8ebe64b3e39ecea177e903537423c5717fa3151ed3325aba3770a050b6c",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": "docs/decisions/DEC-251-synchronous-decision-documentation-enforcement.md",
+      "bytes": 1893,
+      "sha256": "dc8bdb00294fcb75b7bae0699b63580f7b2cb6956e1dcf53213e5822bd474276",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": "docs/decisions/DEC-252-freeze-historical-records-from-future-content-review.md",
+      "bytes": 1591,
+      "sha256": "ad846e1c681b61f85713be0baca4377d70172843252547abcea4af707630a869",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": "docs/decisions/DEC-253-animated-installer-narration-and-silver-help-center.md",
+      "bytes": 2760,
+      "sha256": "4add588c4e4bfada2938f7c47470c391eee3459cd2383300449183d56ea4ff1e",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -28283,15 +26899,15 @@
     {
       "path": "docs/security/THREAT_MODEL_33_Q_LOCAL_GOVERNED_OCR_DERIVED_DATA_PIPELINE.md",
       "bytes": 16330,
-      "sha256": "465cfdb6bde62b3f779dff632192d574179509acb20b527d53ff4a0412b3420d",
+      "sha256": "6d7aeadf9366aeca420cea39a00f2101d8469594f5246729cc650eb9689966d6",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "docs/security/THREAT_MODEL_33_R_ARCHIVE_EVIDENCE_RELATIONS_MEDIA_LIFECYCLE_UNIFIED_AUTHORIZED_SEARCH.md",
-      "bytes": 3985,
-      "sha256": "fbb92494e706359e9e7fcae9a3caecfc1452d73cf244c53d978ba4568fa3ee59",
+      "bytes": 4259,
+      "sha256": "a4b6a035f98197ad640e3bf2bf007b184784ac8a74d7c839dda8fda9451baba3",
       "extension": ".md",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -28442,16 +27058,16 @@
     },
     {
       "path": "docs/security/THREAT_MODEL_34_K_WINDOWS_RESILIENCE_UNIVERSAL_UX.md",
-      "bytes": 2323,
-      "sha256": "485fcdc19e5e4a7d576aaf72c407171a28659d38c8e9ebdf0a8f1d73b36abfc9",
+      "bytes": 2395,
+      "sha256": "e6f7fe4bf5ce4b6a03d0bdab6a1ab8ec35a0decc912985528d8f4ec02c84d09e",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "docs/security/THREAT_MODEL_34_L_BRONZE_FINAL_LOCAL_CLOSURE.md",
-      "bytes": 900,
-      "sha256": "e1875c6282c573a6062f6e1e155af4485ac2b60b37877f864d19340ff42d32d4",
+      "bytes": 926,
+      "sha256": "3b672f94f521d7483bab8e5a41d3adba4d6014b83cfcfd73fcbe7b3653b4aa47",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -28482,8 +27098,8 @@
     },
     {
       "path": "docs/ui/UI_VISUAL_REFERENCE_MANIFESTO.md",
-      "bytes": 1532,
-      "sha256": "5201d2fb6f018de32c75fe5dbe7bf0786072b96bf3d5ec3e6b95772ec9742905",
+      "bytes": 2454,
+      "sha256": "e54806d2747d72d7021927f9d0bd6887f838e1812115f8e941d4d1e54db0fef2",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -28514,8 +27130,8 @@
     },
     {
       "path": "package.json",
-      "bytes": 121530,
-      "sha256": "ea39d32aaf4eca1c0381da46ef8a272a9cf96f13aaf07f82eeb46d3d29819478",
+      "bytes": 121806,
+      "sha256": "4aa156ececf670ecf49fb4abc4aff494729f427e292c29a1351b8072ed95b449",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -30676,6 +29292,22 @@
       "path": "tools/electron-builder-squirrel-windows-stub/package.json",
       "bytes": 252,
       "sha256": "52031f120f139bd59dbce1c96cc70d92ab526dcd0dd6a6f3fa3e2582c0b7c058",
+      "extension": ".json",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": "tools/gold-aktivasyon-yoneticisi/KULLANIM.md",
+      "bytes": 712,
+      "sha256": "450788e39830d11cf5e9a31e7f149dd7ed8f300a5e7148d27492d45ef8c1eb2c",
+      "extension": ".md",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
+      "path": "tools/gold-aktivasyon-yoneticisi/package.json",
+      "bytes": 280,
+      "sha256": "c665bbb746bcccb223d41c9d4d4266a1efd64b82111814838b72c79187580be9",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true

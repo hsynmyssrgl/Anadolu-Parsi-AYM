@@ -30,7 +30,7 @@
     { "name": "EnableNodeCliInspectArguments", "value": false },
     { "name": "EnableEmbeddedAsarIntegrityValidation", "value": true },
     { "name": "OnlyLoadAppFromAsar", "value": true },
-    { "name": "LoadBrowserProcessSpecificV8Snapshot", "value": true },
+    { "name": "LoadBrowserProcessSpecificV8Snapshot", "value": false },
     { "name": "GrantFileProtocolExtraPrivileges", "value": false },
     { "name": "WasmTrapHandlers", "value": true }
   ],

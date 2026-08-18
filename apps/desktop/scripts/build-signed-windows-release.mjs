@@ -53,6 +53,7 @@ if (activeDownloadOverrides.length > 0) {
   process.exit(1);
 }
 
+await script('scripts/allocate-monthly-release-version.mjs');
 await script('scripts/run-governed-preflight.mjs');
 await npm('run', 'pretypecheck');
 await script('scripts/verify-software-supply-chain-boundary.mjs');
@@ -95,7 +96,8 @@ if (
 
 await run({ executable: node, args: [resolve(import.meta.dirname, 'run-electron-builder.mjs')], cwd: resolve(root, 'apps/desktop') });
 const releaseRoot = resolve(root, 'apps/desktop/release');
-const installerName = `Anadolu-Parsi-Aile-Yasam-Merkezi-Bronze-04.08.2026.29-x64-Kurulum.exe`;
+const activeRelease = JSON.parse(await readFile(resolve(root, 'config/release-ledger.json'), 'utf8')).current;
+const installerName = `Anadolu-Parsi-Aile-Yasam-Merkezi-${activeRelease.channel}-${activeRelease.version}-x64-Kurulum.exe`;
 const installerPath = resolve(releaseRoot, installerName);
 if (!existsSync(installerPath)) throw new Error('Signed installer output is missing after electron-builder.');
 const signatureVerifierPath = resolve(root, 'scripts/verify-ppk025-windows-package-signature.ps1');
@@ -117,7 +119,7 @@ const installedExecutablePath = resolve(installRoot, `${productName}.exe`);
 const uninstallPath = resolve(installRoot, `Uninstall ${productName}.exe`);
 try {
   await run({ executable: installerPath, args: ['/S', `/D=${installRoot}`], cwd: root });
-  if (!existsSync(installedExecutablePath)) throw new Error('Installed main executable is missing after the silent current-user install.');
+  if (!existsSync(installedExecutablePath)) throw new Error('Installed main executable is missing after the isolated silent install smoke test.');
   await run({
     executable: 'powershell.exe',
     args: [

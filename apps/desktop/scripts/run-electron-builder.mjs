@@ -5,7 +5,9 @@ import { resolve } from 'node:path';
 const root = resolve(import.meta.dirname, '../../..');
 const cacheRoot = resolve(root, 'artifacts/validation/electron-cache');
 const builderCli = resolve(root, 'tools/windows-packager/node_modules/electron-builder/cli.js');
-const packageMode = process.argv.includes('--dir') ? ['--win', 'dir'] : ['--win', 'nsis'];
+const packageMode = process.argv.includes('--dir')
+  ? ['--win', 'dir', '--config.forceCodeSigning=false']
+  : ['--win', 'nsis'];
 if (!existsSync(builderCli)) {
   console.error('Windows paketleme bağımlılıkları kurulmamış. Önce kökte `npm run windows-packager:install` komutunu çalıştırın.');
   process.exit(1);

@@ -1,12 +1,18 @@
-# Belge Yetki ve İzlenebilirlik Matrisi — Build 228
+# Belge Yetki ve İzlenebilirlik Matrisi — Bronze 04.08.2026.29
 
-**Aktif sürüm:** 02.08.2026.228
+**Aktif sürüm:** Bronze 04.08.2026.29
+
+**Güncel master sürüm:** `docs/current/MASTER_PROJE_DOKUMANTASYONU_GUNCEL_17.08.2026_V1.docx/.pdf`
+**Güncel birleşik kaynak:** `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md`
 
 ## Yetkili aktif belgeler
 
 | Belge | Yetki alanı | Bağlayıcılık |
 |---|---|---|
-| `docs/10_MASTER_DECISION_REGISTER.md` | Tüm kararların önceliği ve ana kaydı | En üst proje karar kaydı |
+| `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md` | DEC-090–DEC-252 karar dizini, 208 kanonik kural, paket/iş akışı ve açık kanıt matrisi | En güncel birleşik çalışma kaydı |
+| `config/documentation-synchronization-policy.json` | Her kararın DEC + etkilenen aktif belgeler + iş listesi açık/kapalı/neden alanlarıyla aynı değişiklikte güncellenmesi | Fail-closed karar-belge eşzamanlılık otoritesi |
+| `docs/current/12_TUM_BELGE_TURLERI_DENETIMI.md` | Tüm belge türlerinin son temel ve aktif denetim özeti | DEC-252 sonrasında tarihsel içerik yeniden incelenmez |
+| `docs/10_MASTER_DECISION_REGISTER.md` | Build228'e kadar karar anlatımı; sonraki karar dosyaları için tarihsel başlangıç kaydı | Güncel birleşik sicile bağlı tarihsel/yardımcı kayıt |
 | `docs/00_SCOPE_FREEZE.md` | Ürün sınırı, kullanıcılar, modüller ve kapsam dışı alanlar | Aktif kapsam tabanı |
 | `docs/01_TECHNICAL_STACK.md` | Platform, teknoloji ve katman seçimi | Aktif teknik taban |
 | `docs/02_SECURITY_BASELINE.md` | Kimlik, yetki, Electron, AI ve veri güvenliği | Zorunlu güvenlik tabanı |
@@ -46,15 +52,18 @@ Aşağıdaki belgeler silinmez ancak yeni geliştirmede doğrudan bağlayıcı d
 Tarihsel belge, aktif kayda aykırıysa aktif karar uygulanır. Tarihsel kanıtın
 üzerine yazılmaz; yeni revizyon oluşturulur.
 
+`DEC-252` gereği 17 Ağustos 2026 kapsamlı taraması tarihsel içerik için son temeldir. Bundan sonra eski build, arşiv ve checkpoint belgeleri yeniden okunmaz, render edilmez veya semantik güncellik denetimine sokulmaz; yalnız `HISTORICAL` sınıfında korunur. Yeni kontroller aktif ve yeni belgelere uygulanır.
+
 ## Belge güncelleme akışı
 
-1. Karar `DEC-xxx` kimliğiyle kaydedilir.
-2. Etkilenen kapsam/mimari/güvenlik/UI/test belgesi güncellenir.
+1. Karar `DEC-xxx` kimliği ve makine defteri kaydıyla aynı değişiklikte kaydedilir.
+2. Etkilenen kapsam/mimari/güvenlik/UI/test belgesi ile iş listesinin açık/kapalı/neden alanları aynı değişiklikte güncellenir.
 3. Gereksinim izlenebilirlik tablosuna kod veya plan karşılığı eklenir.
 4. Aktif teslim belgeleri sürümle eşleştirilir.
 5. Hedefli belge yönetişimi doğrulaması çalıştırılır.
 6. Güvenlik kararlarında ilgili ADR ve kaynak sözleşmesi güncellenir.
 7. Kaynak manifesti ve deterministik ZIP yeniden üretilir.
+8. `scripts/verify-documentation-synchronization-policy.mjs` PASS değilse karar veya iş tamamlanmış sayılamaz.
 
 ## Çelişki kontrolleri
 

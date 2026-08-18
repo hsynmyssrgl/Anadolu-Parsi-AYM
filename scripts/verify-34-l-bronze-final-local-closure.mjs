@@ -65,17 +65,17 @@ if (mode === 'contract' || mode === 'runtime') {
     && scope.status === 'PLANNED_FINAL' && inventory.status === 'PLANNED_FINAL');
   check('acceptance remains fail-honest', scope.truth?.requirementsClosed === false
     && scope.truth?.countsAsRequirementPass === false && inventory.countsAsRequirementPass === false);
-  check('current local validation evidence is exact and remains non-accepting', scope.validation?.localPackageBoundaries?.checks === 51
+  check('current local validation evidence is exact and remains non-accepting', scope.validation?.localPackageBoundaries?.checks === 52
     && scope.validation?.localPackageContracts?.checks === 30
-    && scope.validation?.localPackageRuntimes?.checks === 171
+    && scope.validation?.localPackageRuntimes?.checks === 172
     && scope.validation?.targeted?.files === 12 && scope.validation?.targeted?.tests === 50
-    && scope.validation?.fullRegression?.status === 'PASS' && scope.validation?.fullRegression?.files === 287
-    && scope.validation?.fullRegression?.tests === 1971 && scope.validation?.rootTypecheck === 'PASS'
+    && scope.validation?.fullRegression?.status === 'PASS' && scope.validation?.fullRegression?.files === 301
+    && scope.validation?.fullRegression?.tests === 2018 && scope.validation?.rootTypecheck === 'PASS'
     && scope.validation?.productionBuilds?.status === 'PASS' && scope.validation?.productionBuilds?.workspaces === 18
-    && scope.validation?.artifactIndex?.checks === 20999 && scope.validation?.artifactIndex?.files === 6641
-    && scope.validation?.artifactIndex?.documents === 3841 && inventory.localEvidence?.fullRegressionStatus === 'PASS'
-    && inventory.localEvidence?.fullRegressionFiles === 287 && inventory.localEvidence?.fullRegressionTests === 1971
-    && audit.includes('287/287') && audit.includes('1971/1971'));
+    && scope.validation?.artifactIndex?.checks === 19316 && scope.validation?.artifactIndex?.files === 5968
+    && scope.validation?.artifactIndex?.documents === 3670 && inventory.localEvidence?.fullRegressionStatus === 'PASS'
+    && inventory.localEvidence?.fullRegressionFiles === 301 && inventory.localEvidence?.fullRegressionTests === 2018
+    && audit.includes('301/301') && audit.includes('2018/2018'));
   check('versioned local receipt rollover is supported while manual and external evidence remain NOT_RUN', Object.values(scope.manualEvidence ?? {}).every((value) => value === 'NOT_RUN')
     && scope.persistentReceiptStatus === 'VERSIONED_LOCAL_RECEIPT_SUPPORTED'
     && scope.persistentReceiptPathPattern === 'artifacts/validation/34-L-bronze-local-closure-receipts/<source-head>-<evidence-digest>.json'

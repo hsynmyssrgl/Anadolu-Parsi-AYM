@@ -37,10 +37,11 @@ describe('32-U PPK-025 Desktop software supply-chain release boundary', () => {
       scripts: Record<string, string>;
       build: { forceCodeSigning: boolean; win: { artifactName: string } };
     };
+    const activeRelease = (JSON.parse(readSource('config/release-ledger.json')) as { current: { channel: string; version: string } }).current;
     expect(desktopPackage.scripts['package:win']).toBe('node scripts/build-signed-windows-release.mjs');
     expect(desktopPackage.scripts['package:win:dir']).not.toContain('build-signed-windows-release.mjs');
     expect(desktopPackage.build.forceCodeSigning).toBe(true);
-    expect(desktopPackage.build.win.artifactName).toContain('Bronze-04.08.2026.29');
+    expect(desktopPackage.build.win.artifactName).toContain(`${activeRelease.channel}-${activeRelease.version}`);
   });
 
   it('fails before packaging when external production signing trust is absent', () => {

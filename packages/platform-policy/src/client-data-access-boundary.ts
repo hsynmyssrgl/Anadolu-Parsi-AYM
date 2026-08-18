@@ -99,7 +99,7 @@ export interface ClientDataAccessBoundarySnapshot {
   ];
 }
 
-const CHANNEL_PATTERN = /^[a-zA-Z][a-zA-Z0-9]*:[a-zA-Z][a-zA-Z0-9]*$/u;
+const CHANNEL_PATTERN = /^[a-zA-Z][a-zA-Z0-9]*(?:-[a-zA-Z0-9]+)*(?::[a-zA-Z][a-zA-Z0-9]*)+$/u;
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
 const allowedTransports = new Set<ClientDataAccessTransport>([
   'typed-electron-ipc',

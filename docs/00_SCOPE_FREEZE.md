@@ -1,6 +1,8 @@
 # Aktif Kapsam ve Değişiklik Yönetimi — Build 188
 
-**Aktif sürüm:** 02.08.2026.228
+**Aktif sürüm:** Bronze 04.08.2026.29
+
+> 17.08.2026 güncellik bağı: Toplam kabul edilmiş gereksinim 358'dir. Canlı sayım ve 33-M–34-L paket eşlemesi `config/accepted-scope-registry.json`, `config/remaining-scope-package-roadmap.json` ve `docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md` üzerinden okunur. Aşağıdaki Build bölümleri tarihsel karar bağlamını korur.
 
 **Ürün:** Anadolu Parsı Aile Yaşam Merkezi  
 **Marka kimliği:** Panthera pardus tulliana  

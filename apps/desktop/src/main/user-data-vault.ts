@@ -1,6 +1,6 @@
-import { createCipheriv, createDecipheriv, randomBytes, randomUUID, scryptSync } from 'node:crypto';
-import { chmodSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { createCipheriv, createDecipheriv, createHash, randomBytes, randomUUID, scryptSync } from 'node:crypto';
+import { chmodSync, constants, copyFileSync, existsSync, lstatSync, mkdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { dirname, isAbsolute, join, resolve } from 'node:path';
 import type { DeviceSecretProtector } from './device-secret-protector.js';
 import {
   WindowsHelloVaultUnlockGrant,
@@ -91,6 +91,21 @@ export interface UserDataVaultOptions {
   readonly protector: DeviceSecretProtector;
 }
 
+export interface UpgradeRollbackSnapshot {
+  readonly schemaVersion: 1;
+  readonly kind: 'encrypted-upgrade-rollback';
+  readonly applicationVersion: string;
+  readonly createdAt: string;
+  readonly headerFile: string;
+  readonly containerFile: string;
+  readonly headerSha256: string;
+  readonly containerSha256: string;
+  readonly headerSizeBytes: number;
+  readonly containerSizeBytes: number;
+  readonly encryptedAtRest: true;
+  readonly readbackVerified: true;
+}
+
 const encrypt = (key: Buffer, plain: Buffer): CipherEnvelope => {
   const iv = randomBytes(12);
   const cipher = createCipheriv('aes-256-gcm', key, iv);
@@ -114,6 +129,15 @@ const parseEnvelope = (value: string): CipherEnvelope => {
 
 const sha256Pattern = /^[a-f0-9]{64}$/u;
 const base64Pattern = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u;
+const safeVersionPattern = /^[0-9A-Za-z][0-9A-Za-z._-]{0,127}$/u;
+const sha256File = (path: string): string => createHash('sha256').update(readFileSync(path)).digest('hex');
+
+const exactRegularFile = (path: string, maximumBytes: number): void => {
+  const metadata = lstatSync(path);
+  if (!metadata.isFile() || metadata.isSymbolicLink() || metadata.nlink !== 1 || metadata.size < 1 || metadata.size > maximumBytes) {
+    throw new Error('Yükseltme geri dönüş kaynağı güvenilir bir normal dosya değil.');
+  }
+};
 
 const isWindowsHelloKeySlot = (value: unknown): value is WindowsHelloVaultKeySlot => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
@@ -168,6 +192,64 @@ export class UserDataVault {
 
   public isInitialized(): boolean { return existsSync(this.options.headerPath); }
   public isUnlocked(): boolean { return Boolean(this.dataKey); }
+
+  public createUpgradeRollbackSnapshot(input: { readonly directory: string; readonly applicationVersion: string; readonly createdAt?: string }): UpgradeRollbackSnapshot | undefined {
+    if (!this.dataKey) throw new Error('Kullanıcı veri kasası açılmadan yükseltme geri dönüş kopyası oluşturulamaz.');
+    if (!isAbsolute(input.directory) || !safeVersionPattern.test(input.applicationVersion)) throw new Error('Yükseltme geri dönüş hedefi geçersiz.');
+    if (!existsSync(this.options.containerPath)) return undefined;
+    exactRegularFile(this.options.headerPath, 4 * 1024 * 1024);
+    exactRegularFile(this.options.containerPath, 4 * 1024 * 1024 * 1024);
+    const directory = resolve(input.directory);
+    mkdirSync(directory, { recursive: true, mode: 0o700 });
+    try { chmodSync(directory, 0o700); } catch { /* Windows ACL/DPAPI ve şifreli kaynak zarfı asıl kontroldür. */ }
+    const stem = `surum-${input.applicationVersion}-oncesi`;
+    const headerFile = `${stem}.baslik.pptrollback`;
+    const containerFile = `${stem}.kasa.pptrollback`;
+    const manifestFile = `${stem}.manifest.json`;
+    const headerTarget = join(directory, headerFile);
+    const containerTarget = join(directory, containerFile);
+    const manifestTarget = join(directory, manifestFile);
+    if (existsSync(manifestTarget)) {
+      exactRegularFile(manifestTarget, 64 * 1024);
+      const existing = JSON.parse(readFileSync(manifestTarget, 'utf8')) as Partial<UpgradeRollbackSnapshot>;
+      if (existing.schemaVersion !== 1 || existing.kind !== 'encrypted-upgrade-rollback'
+        || existing.applicationVersion !== input.applicationVersion || existing.headerFile !== headerFile
+        || existing.containerFile !== containerFile || existing.encryptedAtRest !== true || existing.readbackVerified !== true
+        || !existsSync(headerTarget) || !existsSync(containerTarget)) throw new Error('Mevcut yükseltme geri dönüş manifesti geçersiz.');
+      exactRegularFile(headerTarget, 4 * 1024 * 1024);
+      exactRegularFile(containerTarget, 4 * 1024 * 1024 * 1024);
+      if (existing.headerSha256 !== sha256File(headerTarget) || existing.containerSha256 !== sha256File(containerTarget)
+        || existing.headerSizeBytes !== statSync(headerTarget).size || existing.containerSizeBytes !== statSync(containerTarget).size) {
+        throw new Error('Mevcut yükseltme geri dönüş kopyasının bütünlüğü bozulmuş.');
+      }
+      return Object.freeze(existing as UpgradeRollbackSnapshot);
+    }
+    if (existsSync(headerTarget) || existsSync(containerTarget)) throw new Error('Eksik yükseltme geri dönüş yayını güvenli biçimde yeniden kullanılamaz.');
+    try {
+      copyFileSync(this.options.headerPath, headerTarget, constants.COPYFILE_EXCL);
+      copyFileSync(this.options.containerPath, containerTarget, constants.COPYFILE_EXCL);
+      try { chmodSync(headerTarget, 0o600); chmodSync(containerTarget, 0o600); } catch { /* best effort */ }
+      const evidence: UpgradeRollbackSnapshot = Object.freeze({
+        schemaVersion: 1, kind: 'encrypted-upgrade-rollback', applicationVersion: input.applicationVersion,
+        createdAt: input.createdAt ?? new Date().toISOString(), headerFile, containerFile,
+        headerSha256: sha256File(headerTarget), containerSha256: sha256File(containerTarget),
+        headerSizeBytes: statSync(headerTarget).size, containerSizeBytes: statSync(containerTarget).size,
+        encryptedAtRest: true, readbackVerified: true
+      });
+      if (evidence.headerSha256 !== sha256File(this.options.headerPath) || evidence.containerSha256 !== sha256File(this.options.containerPath)) {
+        throw new Error('Yükseltme geri dönüş kopyası geri-okuma doğrulamasından geçemedi.');
+      }
+      const temporaryManifest = `${manifestTarget}.tmp-${randomUUID()}`;
+      writeFileSync(temporaryManifest, `${JSON.stringify(evidence, null, 2)}\n`, { encoding: 'utf8', mode: 0o600, flag: 'wx' });
+      renameSync(temporaryManifest, manifestTarget);
+      return evidence;
+    } catch (error) {
+      rmSync(headerTarget, { force: true });
+      rmSync(containerTarget, { force: true });
+      rmSync(manifestTarget, { force: true });
+      throw error;
+    }
+  }
 
   private readHeader(): VaultHeader {
     const parsed = JSON.parse(readFileSync(this.options.headerPath, 'utf8')) as Partial<VaultHeader>;

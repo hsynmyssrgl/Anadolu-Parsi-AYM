@@ -7,7 +7,7 @@ check(/^\d{2}\.\d{2}\.\d{4}\.\d+$/.test(current.version),`version=${current.vers
 check(/^\d{1,2}\.\d{1,2}\.\d{4}-\d+$/.test(current.packageVersion),`packageVersion=${current.packageVersion}`);
 const currentMonth=current.date.slice(0,7);
 const currentMonthEntries=ledger.entries.filter(entry=>entry.date?.startsWith(`${currentMonth}-`));
-const historicalCount=ledger.august2026HistoricalCountBeforeCurrent;
+const historicalCount=currentMonth==='2026-08'?ledger.august2026HistoricalCountBeforeCurrent:0;
 check(Number.isInteger(current.monthlySequence)&&current.monthlySequence>0,`monthly sequence=${current.monthlySequence}`);
 check(Number.isInteger(historicalCount)&&historicalCount>=0,`historical monthly count=${historicalCount}`);
 check(currentMonthEntries.length>0,`no release entries found for ${currentMonth}`);

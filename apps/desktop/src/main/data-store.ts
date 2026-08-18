@@ -8549,6 +8549,20 @@ export class FamilyDataStore {
       return copy;
     });
   }
+  public prepareFactoryReset(input: { readonly password:string; readonly code?:string; readonly confirmation:string }): { readonly backupArtifactPaths:readonly string[]; readonly externalBackupBlockers:number } {
+    this.#requireAuth();
+    if(input.confirmation!=='ILK KURULUM ANINA DON')throw new Error('İlk kurulum durumuna dönüş onayı geçersiz.');
+    this.verifyStrongAuthentication({password:input.password,...(input.code?{code:input.code}:{})});
+    const externalBlockers=this.listExternalBackupCopies(500).filter(copy=>copy.status!=='destroyed');
+    if(externalBlockers.length>0)throw new Error(`Uygulamanın fiziksel olarak silemediği ${externalBlockers.length} haricî yedek kaydı var. Önce bu kopyaları yok edip kanıtını kaydedin.`);
+    const paths=new Set<string>();
+    for(const target of this.listBackupTargets()){
+      const listed=this.#listBackupArtifactsUseCase.execute(this.#backupSafetyCorrelationId('factory-reset-backup-list'),target.path);
+      if(!listed.ok)throw new Error(`Yedek hedefi doğrulanamadı; fabrika ayarı güvenle başlatılmadı: ${listed.error.message}`);
+      for(const path of listed.value)paths.add(path);
+    }
+    return Object.freeze({backupArtifactPaths:Object.freeze([...paths]),externalBackupBlockers:0});
+  }
   public upsertBackupTarget(input:UpsertBackupTargetInput): BackupTargetView[] { const id=input.id??randomUUID(),schedule=input.schedule??'manual',next=this.#nextBackupRun(schedule),context=this.#backupApplicationContext('backup-target-upsert'); const r=this.#upsertBackupTargetUseCase.execute(context,input,id,nowIso(),next);if(!r.ok)throw new Error(`[${r.error.code}] ${r.error.message}`);this.#writeAudit('backup_target.upserted','backup_target',id,nowIso());return this.listBackupTargets(); }
   public listBackupRuns(limit=100): BackupRunView[] { const r=this.#listBackupRunsUseCase.execute(this.#backupApplicationContext('backup-run-list'),limit);if(!r.ok)throw new Error(`[${r.error.code}] ${r.error.message}`);return [...r.value]; }
   #applyBackupRetention(targetId:string,targetPath:string,retentionCount:number):void {
