@@ -1,8 +1,8 @@
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { resolveUiLocalization, type DashboardOverviewView, type FamilyEventView } from '@ppt/domain';
-import { Dashboard } from '../src/renderer/App';
+import { resolveUiLocalization, type DashboardOverviewView, type FamilyAppSnapshot, type FamilyEventView } from '@ppt/domain';
+import { Dashboard, FamilyScreen, TreeScreen } from '../src/renderer/App';
 import { LocalizationProvider } from '../src/renderer/localization';
 
 const event: FamilyEventView = {
@@ -32,6 +32,23 @@ const renderDashboard = (locale: 'tr-TR' | 'en-US', justStarted = false): string
   createElement(Dashboard, { overview: overview(justStarted), onNavigate: () => undefined, onAddMember: () => undefined, onAddImportantDay: () => undefined })
 ));
 
+const renderFamilyScreen = (locale: 'tr-TR' | 'en-US'): string => renderToStaticMarkup(createElement(
+  LocalizationProvider,
+  { bootstrap: resolveUiLocalization(locale) },
+  createElement(FamilyScreen, { onAdd: () => undefined })
+));
+
+const emptySnapshot: FamilyAppSnapshot = {
+  family: { id: 'family-1', name: 'ParsYuva' }, people: [], relations: [], locations: [], events: [], notifications: [],
+  lastUpdatedAt: '2026-08-19T10:00:00.000Z'
+};
+
+const renderTreeScreen = (locale: 'tr-TR' | 'en-US'): string => renderToStaticMarkup(createElement(
+  LocalizationProvider,
+  { bootstrap: resolveUiLocalization(locale) },
+  createElement(TreeScreen, { snapshot: emptySnapshot, onAddRelation: () => undefined })
+));
+
 describe('app shell English localization wave nineteen', () => {
   it('renders the populated dashboard without visible Turkish copy in English', () => {
     const html = renderDashboard('en-US');
@@ -56,5 +73,27 @@ describe('app shell English localization wave nineteen', () => {
   it('does not pin dashboard event formatting to the Turkish locale', () => {
     const source = String(Dashboard);
     expect(source).not.toContain("toLocaleDateString('tr-TR'");
+  });
+
+  it('renders the bounded family catalog without visible Turkish copy in English', () => {
+    const html = renderFamilyScreen('en-US');
+    expect(html).toContain('Family members');
+    expect(html).toContain('Search family members');
+    expect(html).not.toMatch(/[ÇĞİÖŞÜçğıöşü]/u);
+  });
+
+  it('preserves the Turkish family catalog copy', () => {
+    expect(renderFamilyScreen('tr-TR')).toContain('Aile üyeleri');
+  });
+
+  it('renders the bounded family tree without visible Turkish copy in English', () => {
+    const html = renderTreeScreen('en-US');
+    expect(html).toContain('Family tree');
+    expect(html).toContain('Keyset pagination');
+    expect(html).not.toMatch(/[ÇĞİÖŞÜçğıöşü]/u);
+  });
+
+  it('preserves the Turkish family-tree copy', () => {
+    expect(renderTreeScreen('tr-TR')).toContain('Soy ağacı');
   });
 });

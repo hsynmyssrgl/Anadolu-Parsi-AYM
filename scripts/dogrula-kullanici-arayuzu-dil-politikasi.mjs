@@ -71,7 +71,7 @@ check(JSON.stringify(policy.coverage.translatedFeaturePanelWaveSeventeen)===JSON
   &&policy.coverage.translatedFeaturePanelWaveSeventeenEnglishVisibleTurkishTextCount===0,'feature-panel wave-seventeen truth mismatch');
 check(JSON.stringify(policy.coverage.translatedFeaturePanelWaveEighteen)===JSON.stringify(['ManagedLifePanel'])
   &&policy.coverage.translatedFeaturePanelWaveEighteenEnglishVisibleTurkishTextCount===0,'feature-panel wave-eighteen truth mismatch');
-check(JSON.stringify(policy.coverage.translatedApplicationShellWaveOne)===JSON.stringify(['Dashboard','FirstUseDashboard'])
+check(JSON.stringify(policy.coverage.translatedApplicationShellWaveOne)===JSON.stringify(['Dashboard','FirstUseDashboard','PersonCatalogControls','FamilyScreen','TreeScreen'])
   &&policy.coverage.translatedApplicationShellWaveOneEnglishVisibleTurkishTextCount===0,'application-shell wave-one truth mismatch');
 check(domain.includes("primaryLanguage === 'tr' ? 'tr' : 'en'")&&domain.includes("resolveUiLocalization('en-US')"),'domain fallback resolver missing');
 check(main.includes('resolveUiLocalization(app.getLocale())')&&main.includes("registerIpcHandler('app:getLocalizationBootstrap'"),'main system-locale authority missing');
@@ -106,7 +106,9 @@ check(managedLife.includes('useLocalization()')&&managedLife.includes('localizeM
   &&managedLifeLocalization.includes("'Yaşam Merkezi, ev envanteri ve acil durum':'Life Center, home inventory, and emergencies'"),'managed-life English localization binding missing');
 check(rendererApp.includes("text('Aile yaşamı panosu','Family life dashboard')")
   &&rendererApp.includes("text('Aile alanınız hazır','Your family space is ready')")
-  &&rendererApp.includes('toLocaleDateString(locale'),'application-shell dashboard English localization binding missing');
+  &&rendererApp.includes("text('Aile üyeleri','Family members')")
+  &&rendererApp.includes("text('Soy ağacı','Family tree')")
+  &&rendererApp.includes('toLocaleDateString(locale'),'application-shell wave-one English localization binding missing');
 for(const [name,source,marker] of [
   ['communication audit',communicationAudit,"text('Denetim zinciri yükleniyor','Loading audit chain')"],
   ['communication recording',communicationRecording,"text('Görüşme kaydı rıza planı','Call recording consent plan')"],

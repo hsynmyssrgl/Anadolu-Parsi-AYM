@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "id": "PARSYUVA-AYM-INGILIZCE-ANA-KABUK-DALGA-BIR-20260819-01",
-  "executedAt": "2026-08-19T17:48:55+03:00",
-  "repositoryBaseCommitAtExecution": "e31a3101cfef4841f843683b1d4986eb55dea9fc",
+  "executedAt": "2026-08-19T17:56:40+03:00",
+  "repositoryBaseCommitAtExecution": "a593f1509f5e262672ae76684ff9a1d880b35d55",
   "workItem": "IS-0106",
-  "result": {"status":"PASS_WITH_REMAINING_APP_SHELL_OPEN","targetedTestFilesPassed":1,"targetedTestFilesTotal":1,"targetedTestsPassed":4,"targetedTestsTotal":4,"desktopTypecheck":"PASS"},
-  "translatedSurfaces": ["Dashboard", "FirstUseDashboard", "DashboardEventListItem"],
+  "result": {"status":"PASS_WITH_REMAINING_APP_SHELL_OPEN","targetedTestFilesPassed":1,"targetedTestFilesTotal":1,"targetedTestsPassed":8,"targetedTestsTotal":8,"desktopTypecheck":"PASS"},
+  "translatedSurfaces": ["Dashboard", "FirstUseDashboard", "DashboardEventListItem", "PersonCatalogControls", "FamilyScreen", "TreeScreen"],
   "englishLocaleVisibleTurkishCharacterCount": 0,
   "turkishLocalePreserved": true,
   "localeAwareDateFormatting": true,
   "remainingApplicationShellAuditOpen": true,
   "fullApplicationEnglishPass": false,
   "requirementPass": false,
-  "note": "Ana kabuk birinci dalga, dolu pano ile ilk-kullanim panosunu ve olay tarih/konum sunumunu iki dilli hale getirir; kalan ana kabuk ekranlari aciktir."
+  "note": "Ana kabuk birinci dalga, dolu/ilk-kullanim panolari, kisi/olay katalog kontrolleri, aile uyeleri ve buyuk soy agaci ekranini iki dilli hale getirir; kalan ana kabuk ekranlari aciktir."
 }

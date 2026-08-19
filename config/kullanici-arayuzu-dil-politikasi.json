@@ -108,10 +108,10 @@
     "translatedFeaturePanelWaveSeventeenEnglishVisibleTurkishTextCount": 0,
     "translatedFeaturePanelWaveEighteen": ["ManagedLifePanel"],
     "translatedFeaturePanelWaveEighteenEnglishVisibleTurkishTextCount": 0,
-    "translatedApplicationShellWaveOne": ["Dashboard", "FirstUseDashboard"],
+    "translatedApplicationShellWaveOne": ["Dashboard", "FirstUseDashboard", "PersonCatalogControls", "FamilyScreen", "TreeScreen"],
     "translatedApplicationShellWaveOneEnglishVisibleTurkishTextCount": 0,
     "openSurface": "remaining-feature-panel-copy",
-    "openReason": "İlk yirmi dört uzman panel ile ana ve ilk-kullanım panosu iki dillidir; ana uygulama kabuğunun kalan ekranlarındaki tarihsel görünür Türkçe metinlerin son taraması sürmektedir.",
+    "openReason": "İlk yirmi dört uzman panel ile ana pano, ilk-kullanım panosu, kişi kataloğu, aile üyeleri ve soy ağacı ekranları iki dillidir; ana uygulama kabuğunun kalan ekranlarındaki tarihsel görünür Türkçe metinlerin son taraması sürmektedir.",
     "countsAsFullApplicationEnglishPass": false
   },
   "failClosed": true,

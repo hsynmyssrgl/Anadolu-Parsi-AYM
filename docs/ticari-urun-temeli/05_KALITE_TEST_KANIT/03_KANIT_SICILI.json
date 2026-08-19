@@ -359,9 +359,9 @@
       "kapsam": "English ana uygulama kabugu yerellestirme birinci dalgasi",
       "durum": "PASS_WITH_REMAINING_APP_SHELL_OPEN",
       "kaynak": "05_KALITE_TEST_KANIT/35_INGILIZCE_ANA_KABUK_DALGA_BIR_KANITI.json",
-      "uretimZamani": "2026-08-19T17:48:55+03:00",
+      "uretimZamani": "2026-08-19T17:56:40+03:00",
       "disKaynak": false,
-      "not": "Ana ve ilk-kullanim panosu English locale renderinda gorunur Turkce karakter sifir; kalan ana kabuk ekranlari acik."
+      "not": "Ana/ilk-kullanim panosu, katalog kontrolleri, aile uyeleri ve soy agaci English locale renderinda gorunur Turkce karakter sifir; kalan ana kabuk ekranlari acik."
     }
   ]
 }

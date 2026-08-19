@@ -11,7 +11,7 @@
   "workItemCount": 49,
   "fileCount": 68,
   "sourceFileCount": 67,
-  "sourceFingerprintSha256": "e81ffddf9da11044fec73f4999066648cf3031088d9cdfcf8b78fe153f0d5a14",
+  "sourceFingerprintSha256": "47c11d0925f8df1487ba3b2342cb6bcaa0edf7b3fbbe0cff34e81a448c17914f",
   "checks": 880,
   "status": "PASS",
   "commercialReleaseEligible": false,
@@ -120,8 +120,8 @@
     },
     {
       "path": "05_KALITE_TEST_KANIT/03_KANIT_SICILI.json",
-      "bytes": 16210,
-      "sha256": "ef4345ea4e6abbd2a3437f04f39a0bf8da619abd6662a26d9746368be3eecfe8"
+      "bytes": 16255,
+      "sha256": "42ad014a2a401b8630c365d1e5e4d8e7e21f669b2b6ed253d1ea7dd7a435c72c"
     },
     {
       "path": "05_KALITE_TEST_KANIT/05_GIT_YEDEK_DOGRULAMA_KANITI.json",
@@ -275,8 +275,8 @@
     },
     {
       "path": "05_KALITE_TEST_KANIT/35_INGILIZCE_ANA_KABUK_DALGA_BIR_KANITI.json",
-      "bytes": 913,
-      "sha256": "05f6fad26b045187395d911bb244cd0fbfa1d6658885cfc09d71fcdd539bd884"
+      "bytes": 1003,
+      "sha256": "f176bd31f6bd3cb1a6e48fbbc98b6886eb5ad58c30ddc2486b99141ac016bc35"
     },
     {
       "path": "06_DIS_KAYNAK_VE_LISANS/01_TICARI_LISANS_ENVANTERI.md",
@@ -305,8 +305,8 @@
     },
     {
       "path": "08_IS_LISTESI/01_ANA_IS_LISTESI.md",
-      "bytes": 6541,
-      "sha256": "d30fdc3ab0431e92e1c259e50d52a19c6d40a9e8e6905aaecd16264444aa804b"
+      "bytes": 6572,
+      "sha256": "f4cc0b0c3141a73ca409f41f6b1d1641fd6af93814fbda046ad7616c2b1dd8f9"
     },
     {
       "path": "08_IS_LISTESI/02_DIS_KAYNAK_GEREKTIREN_ISLER.md",
@@ -315,8 +315,8 @@
     },
     {
       "path": "08_IS_LISTESI/03_ANA_IS_SICILI.json",
-      "bytes": 18362,
-      "sha256": "eaa5adf3bc53346633f5e3164b9562a4d146bcfb321103156c39c556edbbe880"
+      "bytes": 18378,
+      "sha256": "3ee9bc216e55b4e80c477af64857460c4c9766918ad393701967865250ddcf5f"
     },
     {
       "path": "08_IS_LISTESI/04_IS_YURUTME_SIRASI.md",
@@ -354,5 +354,5 @@
       "sha256": "3b489e065d5b3cc6d84a81ac26775a144c0babca825dbd943364c74f7f309527"
     }
   ],
-  "generatedAt": "2026-08-19T14:50:19.646Z"
+  "generatedAt": "2026-08-19T14:58:00.039Z"
 }
