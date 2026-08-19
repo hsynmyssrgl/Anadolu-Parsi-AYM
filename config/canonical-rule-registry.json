@@ -1533,7 +1533,7 @@
     },
     {
       "id": "PR-215",
-      "text": "Uygulama ve kurulum sihirbazı açılış dilini kurulduğu makinenin işletim sistemi dilinden belirler. Türkçe ve İngilizce desteklenir; sistem dili desteklenmiyorsa veya güvenilir biçimde çözülemiyorsa kullanıcı verisi açılmadan önce İngilizce güvenli varsayılan olarak seçilir. Dil seçimi ana süreçte yapılır, renderer yalnız doğrulanmış dil/locale görünümünü alır; İngilizce sözlük eksik anahtarları Türkçeye sessizce düşüremez.",
+      "text": "Uygulama ve kurulum sihirbazı ilk açılış dilini kurulduğu makinenin işletim sistemi dilinden belirler. Türkçe ve İngilizce desteklenir; sistem dili desteklenmiyorsa veya güvenilir biçimde çözülemiyorsa kullanıcı verisi açılmadan önce İngilizce güvenli varsayılan olarak seçilir. Kullanıcı Ayarlar üzerinden sistem, Türkçe veya İngilizce tercihini değiştirebilir; tercih ana süreçte doğrulanıp kalıcı saklanır ve sonraki açılışlarda sistem dilinin önüne geçer. Renderer dili doğrudan seçemez; yalnız doğrulanmış tercih isteği gönderir ve doğrulanmış dil/locale görünümünü alır. İngilizce sözlük eksik anahtarları Türkçeye sessizce düşüremez.",
       "state": "ACTIVE",
       "source": "USER_DECISION_DEC-255",
       "effectiveRelease": "Bronze 18.08.2026.32"
@@ -1553,5 +1553,5 @@
       "effectiveRelease": "Bronze 19.08.2026.33"
     }
   ],
-  "rulesSha256": "b79db92a03d559f33ccd49348bad159a70b6034fbcf10a07abe5a407549bf0be"
+  "rulesSha256": "5b83854fb2d21e978ffe1dc79cfbcf180547f42d06cd32a8ba7918a58cf1a0ed"
 }

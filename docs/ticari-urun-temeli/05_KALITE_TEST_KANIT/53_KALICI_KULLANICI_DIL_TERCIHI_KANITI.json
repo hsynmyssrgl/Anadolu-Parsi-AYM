@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-KALICI-KULLANICI-DIL-TERCIHI-20260819-01",
+  "executedAt": "2026-08-19T19:47:51+03:00",
+  "repositoryBaseCommitAtExecution": "4059c51144438d19eb7af95b73b8a9b01efa1f4d",
+  "workItem": "IS-0106",
+  "result": {"status":"PASS_WITH_REMAINING_APP_SHELL_OPEN","targetedTestFilesPassed":3,"targetedTestFilesTotal":3,"targetedTestsPassed":20,"targetedTestsTotal":20,"desktopTypecheck":"PASS","uiLocalizationGate":"PASS_99_OF_99"},
+  "firstLaunchUsesSystemLanguage": true,
+  "unsupportedSystemLanguageFallsBackToEnglish": true,
+  "persistentPreferences": ["system", "tr", "en"],
+  "preferenceAuthority": "electron-main",
+  "rendererDirectLanguageAuthority": false,
+  "preferenceSurvivesRestart": true,
+  "malformedPreferenceFailsClosedToSystem": true,
+  "settingsSelectorImplemented": true,
+  "remainingApplicationShellAuditOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "Ilk kurulumda sistem dili kullanilir; kullanici daha sonra Ayarlar uzerinden sistem, Turkce veya English secimini bu cihaz icin kalici olarak degistirebilir."
+}

@@ -4,7 +4,7 @@
 - Karar: **DEC-129**
 - Kanonik kural sayısı: **217**
 - Aktif kural: **197**
-- Kural SHA-256: `b79db92a03d559f33ccd49348bad159a70b6034fbcf10a07abe5a407549bf0be`
+- Kural SHA-256: `5b83854fb2d21e978ffe1dc79cfbcf180547f42d06cd32a8ba7918a58cf1a0ed`
 
 ## Değişmez çalışma ilkesi
 

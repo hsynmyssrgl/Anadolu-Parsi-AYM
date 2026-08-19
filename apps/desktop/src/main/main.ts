@@ -11,6 +11,7 @@ import { writeContentFreeConsoleEvent } from '@ppt/logging';
 import { APP_META, USER_VISIBLE_APP_INFO, resolveUiLocalization, type UiLocalizationBootstrapView, type CreateArchiveItemInput, CreateFamilyEventInput, UpdateFamilyEventInput, SetFamilyEventArchivedInput, UpdateEventParticipantsInput, UpdateEventInvitationInput, UpdateEventNotesInput, AcknowledgeFamilyNotificationInput, CreateFamilyLocationInput, CreateFamilyMemberInput, CreateFamilyRelationInput, LoginInput, SetupAdminInput, ChangePasswordInput, EnableTwoFactorInput, DisableTwoFactorInput, TrustCurrentDeviceInput, ReauthorizeCurrentDeviceInput, CreateFamilyInvitationInput, InspectFamilyInvitationInput, ResendFamilyInvitationInput, AcceptFamilyInvitationInput, UpsertObjectPermissionInput, UpdateFamilyAccountInput, CreateFinanceRecordInput, CreateBankAccountInput, ValidateIbanInput, CreatePaymentCardInput, CreateHealthRecordInput, CreateMedicationPlanInput, CreateFamilyHealthHistoryInput, CreateFinanceValuationInput, CreateLifeRecordInput, CreateAutomationRuleInput, CreateArchiveCategoryInput, UpdateArchiveClassificationInput, UpsertAiConsentInput, AiConsentPurpose, UpsertSensitiveDataConsentInput, SensitiveExportPreviewInput, RunAutomationInput, UpsertDigitalLegacyPlanInput, UpsertLegacyGrantInput, ExecuteLegacyPlanInput, ApproveLegacyExecutionInput, CancelLegacyExecutionInput, ArchiveSearchInput, CreateArchiveRetentionPolicyInput, AssignArchiveRetentionPolicyInput, UpsertBackupTargetInput, MaintenanceResultView, BackupSchedulerResultView, AdaptiveResourceStateView, EnqueueTaskInput, UpsertMaintenancePolicyInput, DiagnosticFilterInput, DiagnosticArchiveSearchInput, MaintenanceHistoryFilterInput, CreateDataRetentionPolicyInput, ArchiveDataResourceInput, RestoreDataResourceInput, RequestDataPurgeInput, CancelDataPurgeInput, ExecuteDataPurgeInput, SetDataLegalHoldInput, UpdateBackupQuarantinePolicyInput, SetBackupQuarantineLegalHoldInput, DestroyBackupQuarantineBatchInput, RegisterExternalBackupCopyInput, ReviewExternalBackupCopyInput, SetExternalBackupCopyLegalHoldInput, AttestExternalBackupCopyDestroyedInput, RegisterExternalBackupEvidenceIssuerInput, RotateExternalBackupEvidenceIssuerInput, RevokeExternalBackupEvidenceIssuerInput, ApplyExternalBackupEvidenceRevocationListInput, UpsertExternalBackupRevocationEndpointInput, PendingRevocationSyncListView, ApplyPendingRevocationSyncInput, RevocationSyncEndpointStateView, RevocationSyncRunResultView, VerifyExternalBackupDestructionEvidenceInput, ApplyFamilyDataImportInput, RollbackFamilyDataImportInput, GenealogyTreePageInput, TimelinePageInput, ArchivePageInput, PersonCatalogPageInput, EventCatalogPageInput, EntityCatalogLookupInput, FamilySnapshotSectionsInput, IpcAdaptiveBudgetMaintenanceOperation, IpcAdaptiveBudgetMaintenanceAuthorizationInput, IpcAdaptiveBudgetMaintenanceReauthenticationInput, IpcAdaptiveBudgetMaintenanceRecoveryInput, UpdateBackupCleanRewritePolicyInput } from '@ppt/domain';
 import type { AddArchiveItemVersionInput, AddArchiveRelationEvidenceInput, RemoveArchiveRelationEvidenceInput } from '@ppt/domain';
 import { STABLE_USER_DATA_DIRECTORY_NAME } from '@ppt/domain';
+import type { UiLanguagePreference } from '@ppt/domain';
 import type { RecordHealthCareEntryInput, RevokeHealthCareAccessGrantInput, UpsertHealthCareAccessGrantInput } from '@ppt/domain';
 import type { CreateHouseholdOperationItemInput, DeleteHouseholdOperationItemInput, UpdateHouseholdOperationItemInput } from '@ppt/domain';
 import type { CreateChildEducationItemInput, DeleteChildEducationItemInput, UpdateChildEducationItemInput } from '@ppt/domain';
@@ -210,6 +211,7 @@ import { PolicyServiceAvailabilityApplicationAdapter } from './policy-service-av
 import { ProductLicenseManager } from './product-license-manager.js';
 import { createVerifiedUninstallBackups, discoverUninstallBackupTargets } from './uninstall-backup-assistant.js';
 import { FACTORY_RESET_CONFIRMATION, FactoryResetManager } from './factory-reset-manager.js';
+import { readUiLanguagePreference, writeUiLanguagePreference } from './ui-language-preference-store.js';
 import { ApplicationSecurityProfilePolicy, DerivedDataInheritancePolicy, ImmutablePolicyDecisionAuditPolicy, NetworkEgressPolicy, PlatformCapabilityManifestPolicy, PlatformPolicyAstGatePolicy, PlatformPolicyConformanceSuite, PolicyServiceAvailabilityPolicy, SensitiveLogPolicy, SourceDeletionPropagationPolicy, assertPinnedBootstrapRuntimeCapability } from '@ppt/platform-policy';
 import type { ApplicationSecurityProfileGateBoundaryView, DerivedDataPolicyBoundaryView, NetworkEgressBoundaryView, PlatformCapabilityManifestGateBoundaryView, PlatformPolicyAstGateBoundaryView, PolicyConformanceSuiteBoundaryView, PolicyDecisionAuditBoundaryView, PolicyServiceAvailabilityBoundaryView, SensitiveLoggingBoundaryView, SourceDeletionPropagationBoundaryView } from '@ppt/domain';
 import { GetProductSurfaceGovernanceUseCase } from '@ppt/application';
@@ -394,6 +396,7 @@ const getProductSurfaceGovernanceUseCase = new GetProductSurfaceGovernanceUseCas
 );
 const currentProductName = APP_META.name;
 let uiLocalizationBootstrap: Readonly<UiLocalizationBootstrapView> = resolveUiLocalization(undefined);
+const uiLanguagePreferencePath=():string=>join(app.getPath('userData'),'preferences','ui-language.json');
 const mainText = (turkish: string, english: string): string =>
   uiLocalizationBootstrap.language === 'tr' ? turkish : english;
 const uninstallBackupAssistantRequested = process.argv.includes('--uninstall-backup-assistant');
@@ -1476,6 +1479,11 @@ function registerIpc(): void {
   });
   registerIpcHandler('app:getInfo', () => USER_VISIBLE_APP_INFO);
   registerIpcHandler('app:getLocalizationBootstrap', () => uiLocalizationBootstrap);
+  registerIpcHandler('app:setLanguagePreference', (_event, preference:UiLanguagePreference) => {
+    writeUiLanguagePreference(uiLanguagePreferencePath(),preference);
+    uiLocalizationBootstrap=resolveUiLocalization(app.getLocale(),preference);
+    return uiLocalizationBootstrap;
+  });
   registerIpcHandler('auth:getExternalIdentityProviders', () => (oidcDeepLinkProtocolRegistered?oidcFederatedIdentity?.listVisibleConfiguredProviders()??[]:[]).map(({provider})=>({id:provider,label:provider==='apple'?'Apple ile devam et':provider==='google'?'Google ile devam et':'Microsoft ile devam et',configured:true,productionReady:false})));
   registerIpcHandler('auth:getState', () => dataStore ? dataStore.getAuthState() : lockedAuthState());
   registerIpcHandler('auth:getSessionLockState', () => {
@@ -3404,7 +3412,7 @@ app.on('second-instance', (_event,commandLine) => {
 app.on('open-url',(event,url)=>{event.preventDefault();captureOidcDeepLinkArguments([url]);});
 
 app.whenReady().then(async () => {
-  uiLocalizationBootstrap = resolveUiLocalization(app.getLocale());
+  uiLocalizationBootstrap = resolveUiLocalization(app.getLocale(),readUiLanguagePreference(uiLanguagePreferencePath()));
   if (uninstallBackupAssistantRequested) {
     const targets = await discoverUninstallBackupTargets({
       documentsPath: app.getPath('documents'), homePath: app.getPath('home'), environment: process.env

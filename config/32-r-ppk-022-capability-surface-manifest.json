@@ -18,7 +18,7 @@
   "signedManifestRuntimeCheckRequired": true,
   "buildManifestAloneGrantsRuntimeAuthority": false,
   "productionSourceZoneCount": 18,
-  "scannedProductionFiles": 569,
+  "scannedProductionFiles": 585,
   "protectedCapabilityFamilies": [
     "camera",
     "microphone",
@@ -31,14 +31,14 @@
   "surfaceCounts": {
     "CAMERA_API": 1,
     "FILE_DIALOG": 2,
-    "FILE_IMPORT": 367,
+    "FILE_IMPORT": 376,
     "MICROPHONE_API": 1,
     "NETWORK_API": 3,
     "NETWORK_IMPORT": 14,
     "OCR_API": 6,
     "OCR_IMPORT": 41
   },
-  "exactCapabilitySurfaceCount": 435,
+  "exactCapabilitySurfaceCount": 444,
   "applicationRuntimeCapabilities": {
     "windows-desktop": [
       "camera.access",
@@ -2558,6 +2558,60 @@
       "applicationIds": [
         "windows-desktop"
       ],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/ui-language-preference-store.ts|node:fs:closeSync",
+      "applicationIds": ["windows-desktop"],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/ui-language-preference-store.ts|node:fs:existsSync",
+      "applicationIds": ["windows-desktop"],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/ui-language-preference-store.ts|node:fs:fsyncSync",
+      "applicationIds": ["windows-desktop"],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/ui-language-preference-store.ts|node:fs:mkdirSync",
+      "applicationIds": ["windows-desktop"],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/ui-language-preference-store.ts|node:fs:openSync",
+      "applicationIds": ["windows-desktop"],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/ui-language-preference-store.ts|node:fs:readFileSync",
+      "applicationIds": ["windows-desktop"],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/ui-language-preference-store.ts|node:fs:renameSync",
+      "applicationIds": ["windows-desktop"],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/ui-language-preference-store.ts|node:fs:rmSync",
+      "applicationIds": ["windows-desktop"],
+      "capability": "file.access",
+      "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
+    },
+    {
+      "key": "FILE_IMPORT|apps/desktop/src/main/ui-language-preference-store.ts|node:fs:writeFileSync",
+      "applicationIds": ["windows-desktop"],
       "capability": "file.access",
       "runtimeEnforcement": "SIGNED_MANIFEST_STARTUP"
     },

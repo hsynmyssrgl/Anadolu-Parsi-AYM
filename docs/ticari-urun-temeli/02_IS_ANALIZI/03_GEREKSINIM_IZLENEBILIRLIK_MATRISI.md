@@ -5,7 +5,7 @@
 | TIC-REQ-001 | Tek aktif ticari belge girisi | PR-177, PR-214, DEC-259 | docs/ticari-urun-temeli | Ticari temel gate | IS-0001, IS-0004 |
 | TIC-REQ-002 | Her karar aninda senkron kayit | DEC-251, DEC-259 | user-decision-ledger ve current docs | documentation sync gate | IS-0005 |
 | TIC-REQ-003 | Kanal bazli Bronze/Silver/Gold tema | PR-141 | renderer theme tokenlari ve installer | screenshot/contrast | IS-0102 |
-| TIC-REQ-004 | Sistem dili TR/EN, bilinmeyende English | PR-215, DEC-255 | main locale resolver, dictionaries, NSIS | localization gate | IS-0106 |
+| TIC-REQ-004 | İlk açılışta sistem dili TR/EN, bilinmeyende English; sonrasında kalıcı kullanıcı tercihi | PR-215, DEC-255 | main locale resolver, persistent preference store, Settings selector, dictionaries, NSIS | localization gate | IS-0106 |
 | TIC-REQ-005 | Marka adi yalniz ParsYuva AYM | PR-209, PR-217 | title, installer, shortcut, help | brand identity gate | IS-0101 |
 | TIC-REQ-006 | Tek gercek installer ilerlemesi | PR-216, DEC-256 | installer.nsh | installer narration test | IS-0201 |
 | TIC-REQ-007 | Kapanista hata yok, X tepsiye kucultur | Kullanici karari | Electron main/session lifecycle | kurulu binary UAT | IS-0204 |

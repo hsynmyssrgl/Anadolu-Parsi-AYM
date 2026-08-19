@@ -22,6 +22,7 @@ describe('system-language UI localization',()=>{
   it('selects Turkish only for Turkish Windows locales and safely falls back to English',()=>{
     expect(resolveUiLocalization('tr-TR')).toMatchObject({language:'tr',locale:'tr-TR',fallbackUsed:false});
     expect(resolveUiLocalization('en-GB')).toMatchObject({language:'en',locale:'en-US',fallbackUsed:false});
+    expect(resolveUiLocalization('tr-TR','en')).toMatchObject({source:'user',preference:'en',language:'en',locale:'en-US',fallbackUsed:false});
     for(const unsupported of ['de-DE','fr-FR','ar-SA','ja-JP','']){
       expect(resolveUiLocalization(unsupported)).toMatchObject({language:'en',locale:'en-US',fallbackUsed:true});
     }
@@ -56,9 +57,11 @@ describe('system-language UI localization',()=>{
     const rendererMain=readFileSync(resolve(root,'apps/desktop/src/renderer/main.tsx'),'utf8');
     const installer=readFileSync(resolve(root,'apps/desktop/build/installer.nsh'),'utf8');
     const packageJson=JSON.parse(readFileSync(resolve(root,'apps/desktop/package.json'),'utf8')) as {build:{nsis:{installerLanguages:string[];multiLanguageInstaller:boolean;license?:string}}};
-    expect(main).toContain('resolveUiLocalization(app.getLocale())');
+    expect(main).toContain('resolveUiLocalization(app.getLocale(),readUiLanguagePreference(uiLanguagePreferencePath()))');
     expect(main).toContain("registerIpcHandler('app:getLocalizationBootstrap'");
+    expect(main).toContain("registerIpcHandler('app:setLanguagePreference'");
     expect(preload).toContain("getLocalizationBootstrap: (): Promise<UiLocalizationBootstrapView> => invoke('app:getLocalizationBootstrap')");
+    expect(preload).toContain("setLanguagePreference: (preference:UiLanguagePreference):Promise<UiLocalizationBootstrapView> => invoke('app:setLanguagePreference',preference)");
     expect(rendererMain).toContain('DEFAULT_UI_LOCALIZATION');
     expect(rendererMain).toContain('document.documentElement.lang = localization.locale');
     expect(packageJson.build.nsis).toMatchObject({multiLanguageInstaller:true,installerLanguages:['en_US','tr_TR']});

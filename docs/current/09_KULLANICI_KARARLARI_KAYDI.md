@@ -66,7 +66,7 @@ Bu kayıt, konuşmanın kelimesi kelimesine kopyası olduğunu iddia etmez. Bağ
 - `DEC-252` — Tarihsel kayıtların son temel sonrasında gelecek içerik denetimlerinden çıkarılması
 - `DEC-253` — Animasyonlu kurulum ekranları, yenilenmiş üç adımlı anlatım ve Silver doğrulamasına hazırlanmış F1 sesli Yardım Merkezi
 - `DEC-254` — ParsYuva AYM marka kimliği, güncelleme uyumluluğu ve kurumsallaşma/global marka yol haritası
-- `DEC-255` — Makinenin sistem dilinden Türkçe/İngilizce arayüz seçimi; desteklenmeyen dilde İngilizce güvenli varsayılan ve iki dilli kurulum altyapısı
+- `DEC-255` — İlk açılışta makinenin sistem dilinden Türkçe/İngilizce arayüz seçimi; desteklenmeyen dilde İngilizce güvenli varsayılan; sonrasında Ayarlar üzerinden kalıcı `system|tr|en` kullanıcı tercihi ve iki dilli kurulum altyapısı
 - `DEC-256` — Kurulum öncesi sahte hareketli ilerlemenin kaldırılması; tek yerel NSIS ilerleme çubuğu ve gerçek yüzde görünümü
 - `DEC-257` — Ürün ve belge başlıklarında yalnız ParsYuva AYM kullanılması; AYM ile Aile Yaşam Merkezi ifadesinin aynı başlıkta tekrarlanmasının yasaklanması
 - `DEC-258` — MapLibre GL JS ve PMTiles tabanlı çevrimdışı aile haritası; üretim harita paketi ayrı lisans, atıf ve bütünlük kanıtına bağlıdır

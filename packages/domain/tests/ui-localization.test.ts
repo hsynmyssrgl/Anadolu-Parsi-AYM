@@ -17,7 +17,8 @@ describe('UI localization system-language boundary', () => {
       language,
       locale,
       fallbackUsed: false,
-      source: 'system'
+      source: 'system',
+      preference: 'system'
     });
   });
 
@@ -28,7 +29,8 @@ describe('UI localization system-language boundary', () => {
         language: 'en',
         locale: 'en-US',
         fallbackUsed: true,
-        source: 'system'
+        source: 'system',
+        preference: 'system'
       });
     }
   );
@@ -36,11 +38,17 @@ describe('UI localization system-language boundary', () => {
   it('keeps the no-bootstrap renderer default fail-safe in English', () => {
     expect(DEFAULT_UI_LOCALIZATION).toEqual({
       source: 'system',
+      preference: 'system',
       systemLocale: 'en-US',
       language: 'en',
       locale: 'en-US',
       fallbackUsed: false,
       supportedLanguages: ['tr', 'en']
     });
+  });
+
+  it('lets an explicit user preference override the detected system language',()=>{
+    expect(resolveUiLocalization('tr-TR','en')).toMatchObject({source:'user',preference:'en',systemLocale:'tr-TR',language:'en',locale:'en-US',fallbackUsed:false});
+    expect(resolveUiLocalization('de-DE','tr')).toMatchObject({source:'user',preference:'tr',systemLocale:'de-DE',language:'tr',locale:'tr-TR',fallbackUsed:false});
   });
 });

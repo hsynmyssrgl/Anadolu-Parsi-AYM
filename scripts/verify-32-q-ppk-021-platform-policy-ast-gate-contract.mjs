@@ -88,7 +88,7 @@ check('every observed category has a rationale', Object.keys(keyCounts).every((k
 check('manifest records no persistence or ownership change', allowlist.invariants?.migrationRequired === false && allowlist.invariants?.latestDatabaseMigration === 77 && allowlist.invariants?.sqliteOwnershipTransferred === false);
 
 check('production AST gate passes', gate.status === 'PASS' && gate.findings.length === 0);
-check('gate scans the exact current production snapshot', gate.productionSourceZones === 18 && gate.scannedFiles === 569);
+check('gate scans the exact current production snapshot', gate.productionSourceZones === 18 && gate.scannedFiles === 585);
 check('gate exact surface and allowance cardinality match', gate.privilegedSurfaces === 889 && gate.exactAllowlistEntries === 889);
 check('gate manifest hash matches the canonical file', gate.exactAllowlistSha256 === manifestSha256);
 check('gate has zero direct role authorization bypass', gate.directRoleAuthorizationBypasses === 0);
@@ -131,7 +131,7 @@ check('application exports AST boundary use case', applicationIndex.includes("ex
 check('policy test covers snapshot broadening and reorder', includesAll(policyTest, ['wildcardsAllowed: true', 'directRoleAuthorizationBypasses: 1', '.reverse()']));
 check('AST test covers six privileged families', includesAll(astTest, ['SQL_IMPORT', 'REPOSITORY_IMPORT', 'DATABASE_IMPORT', 'CRYPTO_IMPORT', 'NETWORK_IMPORT', 'ROLE_CHECK', 'USE_CASE_COMPOSITION']));
 check('AST test covers parse unexpected stale and wildcard denial', includesAll(astTest, ['AST_PARSE_ERROR', 'UNAPPROVED_PRIVILEGED_SURFACE', 'STALE_ALLOWLIST_ENTRY', 'ALLOWLIST_WILDCARD_FORBIDDEN']));
-check('AST test verifies full production manifest exactness', includesAll(astTest, ['inventoryPlatformPolicyAstSurfaces()', 'result.findings).toEqual([])', 'result.allowedCount).toBe(889)', 'inventory.files).toBe(569)']));
+check('AST test verifies full production manifest exactness', includesAll(astTest, ['inventoryPlatformPolicyAstSurfaces()', 'result.findings).toEqual([])', 'result.allowedCount).toBe(889)', 'inventory.files).toBe(585)']));
 check('integration test verifies zero argument and no cache', includesAll(integrationTest, ["evaluateIpcIntegrationPolicy('system:getPlatformPolicyAstGateBoundary', [])", "resolveIpcReadSharingPolicy('system:getPlatformPolicyAstGateBoundary')"]));
 check('integration test verifies no source or hash payload', includesAll(integrationTest, ["Object.hasOwn(view, 'sourcePaths')", "Object.hasOwn(view, 'allowlistHash')"]));
 
@@ -144,7 +144,7 @@ check('IPC sharing marks AST status no-cache', ipcCache.includes("'system:getPla
 check('renderer shows build gate without runtime authority claim', includesAll(renderer, ['PPK-021 · AST güvenlik kapısı', 'AST gate runtime politikasının yerine geçmez', 'doğrudan rol yetkilendirmesi:']));
 check('renderer does not render allowlist paths or hash', !renderer.includes('exactAllowlistSha256') && !renderer.includes('allowedSurfaceKeys'));
 
-check('scope records six rules and 889 exact surfaces', scope.boundaries?.protectedRuleCount === 6 && scope.protectedRules?.length === 6 && scope.boundaries?.scannedProductionFiles === 569 && scope.boundaries?.exactPrivilegedSurfaceCount === 889);
+check('scope records six rules and 889 exact surfaces', scope.boundaries?.protectedRuleCount === 6 && scope.protectedRules?.length === 6 && scope.boundaries?.scannedProductionFiles === 585 && scope.boundaries?.exactPrivilegedSurfaceCount === 889);
 check('scope records runtime-policy non-substitution', scope.boundaries?.allowlistMutationGrantsRuntimeAuthority === false && scope.boundaries?.buildGateReplacesRuntimePolicy === false);
 check('scope records content-free no-cache client boundary', scope.boundaries?.contentFreeStatusIpcRequired === true && scope.boundaries?.policyStatusIpcCacheAllowed === false && scope.boundaries?.sourcePathsExposedToRenderer === false);
 check('scope records no persistence transfer or cutover', scope.boundaries?.schemaMigrationRequired === false && scope.boundaries?.realDataTransferPerformed === false && scope.boundaries?.cutoverPerformed === false && scope.boundaries?.sqliteOwnershipTransferred === false);

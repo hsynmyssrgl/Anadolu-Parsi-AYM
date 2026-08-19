@@ -2,13 +2,14 @@
 
 ## Karar
 
-ParsYuva AYM ve Windows kurulum sihirbazı açılış dilini kurulduğu makinenin işletim sistemi dilinden belirler. Türkçe ve İngilizce desteklenir. Sistem dili desteklenmiyorsa, boşsa veya güvenilir biçimde çözülemiyorsa İngilizce kullanıcı verisi açılmadan önce güvenli varsayılan olarak seçilir.
+ParsYuva AYM ve Windows kurulum sihirbazı ilk açılış dilini kurulduğu makinenin işletim sistemi dilinden belirler. Türkçe ve İngilizce desteklenir. Sistem dili desteklenmiyorsa, boşsa veya güvenilir biçimde çözülemiyorsa İngilizce kullanıcı verisi açılmadan önce güvenli varsayılan olarak seçilir. Kullanıcı daha sonra Ayarlar üzerinden `Sistem dilini kullan`, `Türkçe` veya `English` seçebilir; seçim bu cihazdaki sonraki açılışlar için kalıcıdır.
 
-Dil kararı Electron ana sürecinde `app.getLocale()` üzerinden verilir. Renderer dili seçemez; preload köprüsünden yalnız doğrulanmış `language`, `locale`, `fallbackUsed` ve desteklenen dil listesini alır. Köprü hatasında renderer İngilizce başlar ve Türkçe ilk-kare parlaması üretmez.
+Dil kararı Electron ana sürecinde `app.getLocale()` ve ana sürecin doğruladığı kalıcı kullanıcı tercihi üzerinden verilir. Renderer yalnız `system|tr|en` isteği gönderebilir; dili kendi başına uygulayamaz. Ana süreç tercihi `userData/preferences/ui-language.json` altında atomik olarak saklar ve preload köprüsünden doğrulanmış `source`, `preference`, `language`, `locale`, `fallbackUsed` ve desteklenen dil listesini verir. Köprü hatasında renderer İngilizce başlar ve Türkçe ilk-kare parlaması üretmez.
 
 ## Uygulanan kapsam
 
 - Türkçe/İngilizce kanonik dil çözümleyicisi ve desteklenmeyen dil için İngilizce fallback.
+- İlk açılışta sistem dili; sonraki açılışlarda Ayarlar üzerinden değiştirilebilen ve ana süreçte kalıcı saklanan `system|tr|en` kullanıcı tercihi.
 - İlk tanıtım, güvenlik kurulumu, aile alanı oluşturma/giriş, parola gösterme, ana menü, komut araması ve sistem tepsisi çekirdek metinleri.
 - Türkçe ve İngilizce sesli ilk tanıtım ile F1 Sesli Yardım Merkezi.
 - İngilizce varsayılan, Türkçe destekli NSIS kurulum metinleri ve iki yerelleştirilmiş lisans.
@@ -95,6 +96,9 @@ Dil kararı Electron ana sürecinde `app.getLocale()` üzerinden verilir. Render
 - `apps/desktop/tests/app-shell-localization-wave-thirty-four.test.ts`
 - `apps/desktop/tests/app-shell-localization-wave-thirty-five.test.ts`
 - `apps/desktop/tests/app-shell-localization-wave-thirty-six.test.ts`
+- `packages/domain/tests/ui-localization.test.ts`
+- `apps/desktop/tests/ui-system-localization.test.ts`
+- `apps/desktop/tests/ui-language-preference-store.test.ts`
 - `apps/desktop/tests/accessibility-preference-center.test.ts`
 - `apps/desktop/tests/narrated-help-center.test.ts`
 - `apps/desktop/tests/installer-narration-experience.test.ts`

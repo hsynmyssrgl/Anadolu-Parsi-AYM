@@ -8,7 +8,7 @@
       "kapsam": "Kanonik kural sicili ve governed preflight",
       "durum": "PASS",
       "kaynak": "06_KOD/app/artifacts/validation/governed-preflight.json",
-      "sha256": "b79db92a03d559f33ccd49348bad159a70b6034fbcf10a07abe5a407549bf0be",
+      "sha256": "5b83854fb2d21e978ffe1dc79cfbcf180547f42d06cd32a8ba7918a58cf1a0ed",
       "uretimZamani": "2026-08-19T00:00:00+03:00",
       "disKaynak": false,
       "not": "Kural SHA degeridir; yeni kaynak degisikliklerinden sonra preflight yeniden kosulmalidir."
@@ -532,6 +532,16 @@
       "uretimZamani": "2026-08-19T19:37:15+03:00",
       "disKaynak": false,
       "not": "Baglamsal Yetkiler English locale renderinda gorunur Turkce karakter sifir; yonetici, amac, aile dali, sahiplik, ret ve sonlu kira sinirlari korunur."
+    },
+    {
+      "id": "KANIT-0054",
+      "tur": "TEST",
+      "kapsam": "Ilk acilista sistem dili ve sonrasinda kalici kullanici dil tercihi",
+      "durum": "PASS_WITH_REMAINING_APP_SHELL_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/53_KALICI_KULLANICI_DIL_TERCIHI_KANITI.json",
+      "uretimZamani": "2026-08-19T19:47:51+03:00",
+      "disKaynak": false,
+      "not": "Ilk acilista sistem dili, bilinmeyen dilde English fallback ve Ayarlar uzerinden main-process dogrulamali kalici system/tr/en tercihi PASS."
     }
   ]
 }

@@ -30,7 +30,7 @@
 ## 3. Kapsam ve kural özeti
 
 - Gereksinim: **358** — COMPLETE 109, PARTIAL 25, FOUNDATION_STARTED 1, NOT_IMPLEMENTED 223.
-- Kural sicili: **PPT-CANONICAL-RULE-REGISTRY-V13**, toplam 217, aktif 197, superseded 20, SHA-256 `b79db92a03d559f33ccd49348bad159a70b6034fbcf10a07abe5a407549bf0be`.
+- Kural sicili: **PPT-CANONICAL-RULE-REGISTRY-V13**, toplam 217, aktif 197, superseded 20, SHA-256 `5b83854fb2d21e978ffe1dc79cfbcf180547f42d06cd32a8ba7918a58cf1a0ed`.
 - Kullanıcı karar defteri: **86** açık kullanıcı kararı.
 
 ## 4. İş akışları
@@ -658,7 +658,7 @@ Canlı kaynak ve JSON sicilleri taranır → açık/kapalı/neden matrisi günce
 - **PR-212 [ACTIVE]** — ParsYuva sonrası yeni kalıcı belge, kaynak, görsel, hash ve teslim kanıtlarının kurumsal kütüphane yolu /ParsYuva/ParsYuva AYM/<Görünür Sürüm> şeklindedir. Önceki /Panthera pardus tulliana/Anadolu Parsı Aile Yaşam Merkezi kayıtları tarihsel ve değişmez kalır; yeni ürün dalına otomatik taşınmaz, güncel kaynak veya tamamlanma kanıtı sayılmaz.
 - **PR-213 [ACTIVE]** — Platform ve cihaz çalışma alanları Microsoft/Windows, Apple/macOS/iOS, ortak cihaz sözleşmeleri ve gelecek Android kapsamı olarak ayrı tutulur. Bir platformun kodu veya kanıtı diğer platformun gerçek cihaz, mağaza, imza ya da UAT kanıtı sayılamaz.
 - **PR-214 [ACTIVE]** — Güncel ana belgeler yapı, karar, kural, kurumsallaşma, platform ve cihaz, test ve kanıt, kullanıcı belgeleri konularına göre kurumsal klasörlerde sınıflandırılır. Dosya adları Türkçe anlamlı ve ASCII karakterli olur; tarihsel kayıtların adı, içeriği ve konumu yeniden yazılmaz.
-- **PR-215 [ACTIVE]** — Uygulama ve kurulum sihirbazı açılış dilini kurulduğu makinenin işletim sistemi dilinden belirler. Türkçe ve İngilizce desteklenir; sistem dili desteklenmiyorsa veya güvenilir biçimde çözülemiyorsa kullanıcı verisi açılmadan önce İngilizce güvenli varsayılan olarak seçilir. Dil seçimi ana süreçte yapılır, renderer yalnız doğrulanmış dil/locale görünümünü alır; İngilizce sözlük eksik anahtarları Türkçeye sessizce düşüremez.
+- **PR-215 [ACTIVE]** — Uygulama ve kurulum sihirbazı ilk açılış dilini kurulduğu makinenin işletim sistemi dilinden belirler. Türkçe ve İngilizce desteklenir; bilinmeyen dilde İngilizce güvenli varsayılandır. Kullanıcı Ayarlar üzerinden sistem, Türkçe veya İngilizce tercihini değiştirebilir; tercih ana süreçte doğrulanıp kalıcı saklanır ve sonraki açılışlarda uygulanır. Renderer dili doğrudan seçemez ve İngilizce sözlük Türkçeye sessizce düşemez.
 - **PR-216 [ACTIVE]** — Kurulum öncesi karşılama ve hazır sayfaları işlem yapmıyorsa hareketli ilerleme göstergesi kullanamaz. Kurulum boyunca yalnız gerçek dosya kurulumunu izleyen tek ilerleme çubuğu gösterilir; yüzde değeri NSIS'in yerel kurulum ilerlemesinden okunur ve dekoratif veya simüle ilerleme yasaktır.
 - **PR-217 [ACTIVE]** — Ürün ve belge başlıklarında yalnız ParsYuva AYM kullanılır. AYM kısaltması Aile Yaşam Merkezi anlamını zaten taşıdığı için aynı başlıkta ParsYuva AYM ile Aile Yaşam Merkezi birlikte tekrar edilemez. Açık uzun ad yalnız kısaltmanın açıklanması gereken ayrı tanıtım veya hukuk metninde kullanılabilir.
 

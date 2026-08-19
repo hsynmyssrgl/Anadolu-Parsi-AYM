@@ -2135,7 +2135,7 @@
       "acceptedAt": "2026-08-18T23:00:00+03:00",
       "title": "Sistem dili algılama ve İngilizce arayüz altyapısı",
       "status": "ACTIVE",
-      "source": "Açık kullanıcı kararı: uygulama dili makinenin sistem diline bakmalı; desteklenmeyen dilde İngilizce açılmalı ve İngilizce altyapı kurulmalı",
+      "source": "Açık kullanıcı kararı: ilk kuruluşta makinenin sistem dili kullanılmalı; sonrasında kullanıcı Ayarlar üzerinden dili değiştirebilmeli; desteklenmeyen sistem dilinde İngilizce açılmalı",
       "document": "docs/decisions/DEC-255-sistem-dili-ve-ingilizce-arayuz-altyapisi.md",
       "documents": [
         "config/kullanici-arayuzu-dil-politikasi.json",
@@ -2143,7 +2143,7 @@
         "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
         "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md"
       ],
-      "workListImpact": "Sistem dili çözümleyicisi, İngilizce güvenli varsayılan, ana süreç/preload/renderer zinciri, ilk kurulum-giriş-ana kabuk-sesli yardım ve iki dilli NSIS tamamlandı; bütün özellik panellerinin İngilizce metin kapsamı PARTIAL ve sonraki dil paketinde açık kalır",
+      "workListImpact": "Sistem dili çözümleyicisi, İngilizce güvenli varsayılan, ana süreçte kalıcı system|tr|en kullanıcı tercihi, Ayarlar seçicisi, ana süreç/preload/renderer zinciri, ilk kurulum-giriş-ana kabuk-sesli yardım ve iki dilli NSIS tamamlandı; bütün özellik panellerinin İngilizce metin kapsamı PARTIAL ve sonraki dil paketinde açık kalır",
       "syncStatus": "SYNCHRONIZED",
       "requirements": [],
       "codeAreas": [

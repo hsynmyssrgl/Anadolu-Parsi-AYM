@@ -290,7 +290,7 @@ export function LocalGovernedOcrPanel({ selectedSource }: LocalGovernedOcrPanelP
         <div>
           <small>{text('Seçili arşiv belgesi','Selected archive document')}</small>
           <strong>{selectedSource?.title ?? text('Belge seçilmedi','No document selected')}</strong>
-          <span>{selectedSource ? `${selectedSource.originalName} · ${selectedSource.mimeType} · ${(selectedSource.sizeBytes / 1_024).toFixed(1)} KB` : text('OCR işi oluşturmak için listeden bir belge seçin.','Select a document from the list to create an OCR job.')}</span>
+          <span>{selectedSource ? `${selectedSource.originalName} · ${selectedSource.mimeType} · ${(selectedSource.sizeBytes / 1_024).toFixed(1)} KB` : text('OCR işi oluşturmak için listeden bir belge seçin.','Choose a document in the list to create an OCR job.')}</span>
         </div>
         <label>{text('Dil ipuçları','Language hints')}
           <input value={languageInput} onChange={(event) => setLanguageInput(event.target.value)} aria-invalid={!languagesValid} placeholder="tr-TR, en-US" />

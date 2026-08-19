@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "release": "Bronze 19.08.2026.33",
   "releaseId": "bronze-2026-08-19-r33",
-  "generatedAt": "2026-08-19T16:38:50.653Z",
+  "generatedAt": "2026-08-19T17:06:42.172Z",
   "selfIndexedPaths": [
     "SHA256SUMS.txt",
     "artifacts/manifests/ALL_DOCUMENTS_INDEX.csv",
@@ -15,16 +15,16 @@
     "manifest.json"
   ],
   "summary": {
-    "totalFiles": 6152,
-    "totalDocuments": 3776,
+    "totalFiles": 6155,
+    "totalDocuments": 3777,
     "classifications": {
       "ACTIVE_AUTHORITY": 30,
-      "ACTIVE_REFERENCE": 858,
+      "ACTIVE_REFERENCE": 859,
       "EVIDENCE": 1413,
       "GENERATED": 655,
       "HISTORICAL": 1578,
-      "SOURCE_CODE": 609,
-      "TEST_OR_GATE": 1009
+      "SOURCE_CODE": 610,
+      "TEST_OR_GATE": 1010
     }
   },
   "files": [
@@ -1534,8 +1534,8 @@
     },
     {
       "path": "apps/desktop/src/main/main.ts",
-      "bytes": 232919,
-      "sha256": "bc4c1d55bf2d9f4b82b2d1e1ca626947c427ed3ab5d502d99396dbd2d15ee885",
+      "bytes": 233528,
+      "sha256": "8316db29493e97ed933226eccc00f06e33fa384cf2eb00ecb9cc181432608552",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -1670,8 +1670,8 @@
     },
     {
       "path": "apps/desktop/src/main/preload.ts",
-      "bytes": 86611,
-      "sha256": "c5584108a4d6db7f86816edac7ab937d53ab97d1c5f533ec2de4a8f6746fd127",
+      "bytes": 86780,
+      "sha256": "3fc309cfaa92d87a275b64533a4f4cd0e8f2d952abacacd6d49419b3bfef8192",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -1893,6 +1893,14 @@
       "isDocument": false
     },
     {
+      "path": "apps/desktop/src/main/ui-language-preference-store.ts",
+      "bytes": 1635,
+      "sha256": "d8aafbcfca74e2ee9344091f81c8252ada243993c41cf09edb5c31a2649d040b",
+      "extension": ".ts",
+      "classification": "SOURCE_CODE",
+      "isDocument": false
+    },
+    {
       "path": "apps/desktop/src/main/unified-authorized-search-application-adapter.ts",
       "bytes": 5176,
       "sha256": "c42f0dde42a8d5d9e4c9c25fb96e1647f7fa9d22c2ef7bb993f98f18e876d7b6",
@@ -2014,16 +2022,16 @@
     },
     {
       "path": "apps/desktop/src/renderer/App.tsx",
-      "bytes": 555066,
-      "sha256": "da2f3efee92a30d21353bb31c441fdf510429181599b06faf889bba5b84bf3be",
+      "bytes": 556986,
+      "sha256": "3831101725a20f73d01f6916b0b1dbff3cc3d80da9d706fafde2232e51ce019c",
       "extension": ".tsx",
       "classification": "SOURCE_CODE",
       "isDocument": false
     },
     {
       "path": "apps/desktop/src/renderer/ArsivMerkeziYerellestirme.tsx",
-      "bytes": 9988,
-      "sha256": "f6e5478bfe25dcd48ec5dc28c964f1cbdcb8f70f673879b7dcb8ec3f01e68af8",
+      "bytes": 9986,
+      "sha256": "16a4a334f90e6b01fb17bfd25dbc5dc64c28c5262f8e5c87e2a8b03e52d3269b",
       "extension": ".tsx",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -2174,8 +2182,8 @@
     },
     {
       "path": "apps/desktop/src/renderer/global.d.ts",
-      "bytes": 54107,
-      "sha256": "d9dc42ffa2aed82ff4032f4efe315899f7a0e55a789ad3df384fe806ee1d89d3",
+      "bytes": 54224,
+      "sha256": "014d473b8a1718013edd2f48644af465e8b3aeb57a9e326ec7deffbe8d4e8d33",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -2214,8 +2222,8 @@
     },
     {
       "path": "apps/desktop/src/renderer/LocalGovernedOcrPanel.tsx",
-      "bytes": 24526,
-      "sha256": "0de93eac3a89561b5370bb8a11b63aead1926f683a0cdbf3848495a7c62a0baf",
+      "bytes": 24524,
+      "sha256": "b9ce86519ad6c1cb93bd381abb5adcd0ab76d1a9d5377d55d63fdc59dec9a0d2",
       "extension": ".tsx",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -2382,8 +2390,8 @@
     },
     {
       "path": "apps/desktop/src/renderer/VeriYasamDongusuYerellestirme.tsx",
-      "bytes": 17332,
-      "sha256": "54b102fadd372c2a8e5fb9884e2f4f90012e6752432f9a6a651a9c66363d4cb9",
+      "bytes": 17336,
+      "sha256": "53b95178e9e33cceb40b819f422fcaf1514dcf5e80d725d86233e195817749ee",
       "extension": ".tsx",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -3879,7 +3887,7 @@
     {
       "path": "apps/desktop/tests/ppk021-platform-policy-ast-gate.test.ts",
       "bytes": 5218,
-      "sha256": "79162d0c25dcb3fa6c50d1ef6326c689dcf7bd95b9da0bdd6cd59aedf6ada4d0",
+      "sha256": "4b692d5810df7366a59fd9ec52de3c9cf2c37b28f5e6a0394470acbe1bbcac2e",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -3887,7 +3895,7 @@
     {
       "path": "apps/desktop/tests/ppk022-capability-manifest-gate.test.ts",
       "bytes": 6727,
-      "sha256": "e0d7395fdb65a401cd66f7ea73ee251da17122dc0fe59e299bce9316e57d5c76",
+      "sha256": "1e56c2dc0be0e72cfb8d5ae693132dd917cceba256eae8b371a6b5a739c25fa3",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -3895,7 +3903,7 @@
     {
       "path": "apps/desktop/tests/ppk022-capability-manifest-integration.test.ts",
       "bytes": 3920,
-      "sha256": "44b6312be676937c46639ad9ed849f8855155d5b056eb426d51bb1d4b484bcd9",
+      "sha256": "6fc6548ec83df35639f4fb2468fbfb92b4e6ad35c094ceff7c765d69d2d3ffe6",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -4093,9 +4101,17 @@
       "isDocument": false
     },
     {
+      "path": "apps/desktop/tests/ui-language-preference-store.test.ts",
+      "bytes": 1699,
+      "sha256": "0cf06a0583433826aaf98106fc0ba4048dba7749e7005cace5127255933e0da3",
+      "extension": ".ts",
+      "classification": "TEST_OR_GATE",
+      "isDocument": false
+    },
+    {
       "path": "apps/desktop/tests/ui-system-localization.test.ts",
-      "bytes": 4161,
-      "sha256": "1f13c8fec404f3272009327b051db6da6d8fa6e5c58090ac6f96992464deafed",
+      "bytes": 4614,
+      "sha256": "b4778de1ce6c33046ef59090982322ac17df1d22421d5556ad57f02daa820f2f",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -10415,7 +10431,7 @@
     {
       "path": "artifacts/manifests/DATABASE_MIGRATION_VERIFICATION_MVP56.json",
       "bytes": 20605,
-      "sha256": "de0f7e39871b9b829aa462a4b5c2b6f48002b067ddd07fce2f67033c01718b31",
+      "sha256": "394a2bf9719f0870652c4ba939ee3771b698659c602393bb9ae303a4e638a0a0",
       "extension": ".json",
       "classification": "HISTORICAL",
       "isDocument": true
@@ -13503,7 +13519,7 @@
     {
       "path": "artifacts/validation/30-O-core-service-entrypoint-runtime.json",
       "bytes": 74999,
-      "sha256": "a7b86b676c8b904ac8b24d31053a4882ca1a6b03aba4f3b9aa39a9914712abd3",
+      "sha256": "4cd4db90020ab287ac9ca8ec6d227ece13cbfad5b2b80213eb0901f8b0739e82",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -19511,7 +19527,7 @@
     {
       "path": "artifacts/validation/32-K-ppk-015-network-egress-contract.json",
       "bytes": 6434,
-      "sha256": "90d3ebc93023bfed06c0d98ea09ad50873ed7c15f03fca8ee866b67c8b9edbeb",
+      "sha256": "53aa3f50085c81d4fdf8715bfe0295dda91e7405f83551faac1ddd06e8b131ec",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -19519,7 +19535,7 @@
     {
       "path": "artifacts/validation/32-K-ppk-015-network-egress-runtime.json",
       "bytes": 13446,
-      "sha256": "2b8c671dedec59525d9a7764f705cef9aab8c07c74f66991637be8ce0d418399",
+      "sha256": "cc34e774e27778bb0594a1e37115cfa5432524ae06e9679d006c7a3e601a7427",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -19607,15 +19623,15 @@
     {
       "path": "artifacts/validation/32-Q-ppk-021-platform-policy-ast-gate-contract.json",
       "bytes": 9709,
-      "sha256": "4788975443f9416ff107116605fd75bbd7cf4a2c6b77c2ebe337972d78f4551d",
+      "sha256": "a09792ab6918bb369d2cf978a3b75a2f03c7081efa73fae9c4185ec3df16a7e9",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
     },
     {
       "path": "artifacts/validation/32-Q-ppk-021-platform-policy-ast-gate-runtime.json",
-      "bytes": 15851,
-      "sha256": "25400cadfbd0d9632a547d9ff804e1000c8a74119ed71412b861ccfde4bfd7f8",
+      "bytes": 15852,
+      "sha256": "03337f784fd9e36575f0af730fa2ab997c087d358b32175ffbf55baefb5c7777",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -19623,7 +19639,7 @@
     {
       "path": "artifacts/validation/32-R-ppk-022-capability-manifest-gate-contract.json",
       "bytes": 12662,
-      "sha256": "25a556fb034d25e5b8157dc3b121e99269be4405b2e281e60482c60368118193",
+      "sha256": "455eb24bc70941def5548bd90b77cc3f375778cf78f82be0a279dcdb461d4650",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -19631,7 +19647,7 @@
     {
       "path": "artifacts/validation/32-R-ppk-022-capability-manifest-gate-runtime.json",
       "bytes": 18471,
-      "sha256": "ca555b39f6ed3e02f7d2b77651b70d67a32f85e096bccf4e82cbe09ddb4b5d58",
+      "sha256": "2ff751a62ce83928a96f089ba39c0ef87d278763e1b08cf676706b93a05abe7b",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22111,7 +22127,7 @@
     {
       "path": "artifacts/validation/active-release-contract-v2.json",
       "bytes": 186,
-      "sha256": "37a4a912f94b3bcf93e9dd6e050e8c44f78acf53bc3cc2623cea9372dc7dd959",
+      "sha256": "0c4e909fde38b1c5926b1816b79e317643a003000738f57388b88c7484ae5a41",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22735,7 +22751,7 @@
     {
       "path": "artifacts/validation/canonical-rule-registry-gate.json",
       "bytes": 322,
-      "sha256": "80cf962f3eb6481444da6acd44f462f710533f8c885a1b3eb22c1be4aac8c4b8",
+      "sha256": "b9b33a9ed1015a321952d8843f1751f8f829b90dac3fc5ceda6d749e3c938b75",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22751,7 +22767,7 @@
     {
       "path": "artifacts/validation/conversation-capacity.json",
       "bytes": 241,
-      "sha256": "2065537256ac0b39de19e90df0ba7d5282d4564d19ec563f28842bfb27a34290",
+      "sha256": "3c861b8c7e6fa95ab1f0c661db59c1a7da7e81cc90314bd1a36a70b5a4558167",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22759,7 +22775,7 @@
     {
       "path": "artifacts/validation/core-service-boundary.json",
       "bytes": 123,
-      "sha256": "af6056427cd771badcf9db848114c0435b03017842150d46540b78699e7bf3ed",
+      "sha256": "ecae0144ea7c24b030b15ace9c2f9db3acc93e7900cd51a5bf35cc86cdc6637e",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22767,7 +22783,7 @@
     {
       "path": "artifacts/validation/core-service-local-admin-contract.json",
       "bytes": 260,
-      "sha256": "ed92afa2e00e18996603f8fd3ccb36a0661f701eb04cf56f7c2a430f4a20b218",
+      "sha256": "ba2f42dbe04a410e7452dc104012cfd5b2a9b76346d96669898a76ea1b27f9f2",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22791,7 +22807,7 @@
     {
       "path": "artifacts/validation/desktop-core-service-startup-contract.json",
       "bytes": 161,
-      "sha256": "af9fa88ee58f9c3e64cbde1027275947aecf727f5677129d403989f9c3e9e1b3",
+      "sha256": "82bc58dbf9aa45e648dcc898f8f9ce76c0d4bd6fd2afb6ec0142642fefe26eb8",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22799,7 +22815,7 @@
     {
       "path": "artifacts/validation/desktop-core-service-startup-runtime.json",
       "bytes": 161,
-      "sha256": "072fa9228b7d6266cc84b31dc87c549f1848bce0b0d0c3d7029abb1a56941916",
+      "sha256": "0b1ce247a8c23195789f570b9ce9d6c16ff992505546c4425b50a75210b22ad3",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22815,7 +22831,7 @@
     {
       "path": "artifacts/validation/documentation-synchronization-policy.json",
       "bytes": 283,
-      "sha256": "b30af02b43f550e0d8694f000064ef30d2619d3a9ab16513aee5b4f4e9f827af",
+      "sha256": "98d24181da85f8c09b8eb9437a481307b6aa43ad98455c3c579dc309960c5cff",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22831,7 +22847,7 @@
     {
       "path": "artifacts/validation/feature-reality-gate.json",
       "bytes": 673,
-      "sha256": "2495231362a5d4128e7a3a60d58548c57e80cc2cccae948ebd1e2b42e67de0e9",
+      "sha256": "f0bceb694d7ac440df1222957a9be75e87a518b74bf2087759c7bfd3e1077afd",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22854,8 +22870,8 @@
     },
     {
       "path": "artifacts/validation/governed-preflight.json",
-      "bytes": 6618,
-      "sha256": "83d4404173af0b3b3f60355b1a7d0273e638729bbabe4aa5fdf77592d46da735",
+      "bytes": 6788,
+      "sha256": "9cf8b67e150a5e4d3195b02a69411a7c35e9fecabf2c4d00398c288f42a923f1",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22903,7 +22919,7 @@
     {
       "path": "artifacts/validation/platform-capability-manifest-gate.json",
       "bytes": 624,
-      "sha256": "fa4de112b5ab5d7b3d5aa6058a3fb6cc1f197350f9b328a0b5e11606be19fe28",
+      "sha256": "0fc0c0d2f6a6a28f8b18c50a19d9cb852f9584c3ae9e061342ff0fbc9f1bf0f5",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22911,7 +22927,7 @@
     {
       "path": "artifacts/validation/platform-policy-ast-gate.json",
       "bytes": 646,
-      "sha256": "004e591fa4799a41d8fa26e07a0d1854e1255101f3012f0a552774209a681e3c",
+      "sha256": "4bbab79ce0cb06a87e27e025902e45fe1027d776e72fa8085599249583c6bcd2",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22919,7 +22935,7 @@
     {
       "path": "artifacts/validation/platform-policy-gate.json",
       "bytes": 2203,
-      "sha256": "8b3838ef9b7df00439abd050c853fee06d692a24b36e0401739e42880f047704",
+      "sha256": "8df0170991bd7d700b226f0f7aa2242e0e3262fdeecb34df4ca96ddcef66fbe3",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22951,7 +22967,7 @@
     {
       "path": "artifacts/validation/project-artifact-index-gate-v2.json",
       "bytes": 212,
-      "sha256": "c78c6734bdc8a0bb88c63fdb60924b340e9b39cd54191a958b669dbafef4d403",
+      "sha256": "b46950c9d9411a7f393bbaa1bce56e5f9667e1264bc7163450ab8ca673607f1f",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22983,7 +22999,7 @@
     {
       "path": "artifacts/validation/step-checkpoint-gate.json",
       "bytes": 188,
-      "sha256": "0a8534d3113732d92717a8242d3c5fd15b504aae497da4cbbbb9d3ef56ac8302",
+      "sha256": "26f38092e4c1f971d275de8786d2d49ef0114d29fd83b7a1a9f878c0e2909cf4",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22999,7 +23015,7 @@
     {
       "path": "artifacts/validation/system-health-core-service-ipc-contract.json",
       "bytes": 161,
-      "sha256": "b4ff45413d02e51bf64f27216ddca0d8ffd3b189ebf6257d61f0ad2c9f7e8610",
+      "sha256": "4019f4c9741e2d5f929269878a2cd2c182aa534693fa3836dd4ff302b7894580",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23007,7 +23023,7 @@
     {
       "path": "artifacts/validation/system-health-core-service-ipc-runtime.json",
       "bytes": 161,
-      "sha256": "9a045522c6b193c949c3646148b966f082f609a5e4ca7e5cbc17e9cb9bfe0c00",
+      "sha256": "0493e64f4d28f6ea0bf7593dcead6b8bb6535c029f2e3154b8b1947d98332846",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23023,7 +23039,7 @@
     {
       "path": "artifacts/validation/universal-rule-enforcement-gate.json",
       "bytes": 299,
-      "sha256": "82503b5916546ca95541fe99deff9010126bc0704077d26d1f9d19295941e951",
+      "sha256": "c6e1169fc4abc4dbbaf8a3659b4fb991845fa92ff46000a445628b8a32708afa",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -23039,7 +23055,7 @@
     {
       "path": "artifacts/validation/user-decision-ledger-gate.json",
       "bytes": 181,
-      "sha256": "0c0ef4e69b482b82f87782aa3c6993175894217e16b01fb152a126c4875a3d38",
+      "sha256": "f1f4c3aafe4c5e040d43b983471d871c7cb50de55631e9852187a745bf21d0d0",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -27535,7 +27551,7 @@
     {
       "path": "config/32-q-ppk-021-platform-policy-ast-gate-inventory.json",
       "bytes": 3669,
-      "sha256": "1fcf14ec6f9e4acb152e8e36466c9a5efeb30cc57b1667fba28f0648b0486c2a",
+      "sha256": "bd9739634880656da383457a1c8378444939f502a6326f2cbea87a7a93f36e48",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -27543,7 +27559,7 @@
     {
       "path": "config/32-q-ppk-021-platform-policy-ast-gate-scope.json",
       "bytes": 6621,
-      "sha256": "31179bec816da0d6f6975e3d63bac0af618a46485d0f558f6a9fe73aba473b09",
+      "sha256": "09d81da1b9f9035c8aee177bf59b158291e462963736a24843fa5d78ee4c52c7",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -27551,7 +27567,7 @@
     {
       "path": "config/32-r-ppk-022-capability-manifest-gate-inventory.json",
       "bytes": 5071,
-      "sha256": "b9ec548d61f8dd70b16896156c2ee07853152f051fb9485e2f9acf241bdb3ede",
+      "sha256": "6743e3d791932fec7cfa6fa08db581e455240ab5dce266e9f70bd855e6497d07",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -27559,15 +27575,15 @@
     {
       "path": "config/32-r-ppk-022-capability-manifest-gate-scope.json",
       "bytes": 7858,
-      "sha256": "65112d903d33db884f693cba095d1aa027e4cae3e7851ba8d2489677768b8960",
+      "sha256": "a66bca1a264f00e671e2f184b4ce2c3ddbb9ce96f308cc1acef3bf45e51b7a22",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "config/32-r-ppk-022-capability-surface-manifest.json",
-      "bytes": 119847,
-      "sha256": "dbffb20c1cc054e08361bb91da7f9805d6e1b629ee6838db9306c1521c727787",
+      "bytes": 122075,
+      "sha256": "881cf34eb037ff1c00061aeb3cae5fb8aabf08773d94c27395bcfb54e338c880",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -28399,7 +28415,7 @@
     {
       "path": "config/active-governance-ledger.json",
       "bytes": 50374,
-      "sha256": "7ba619fb3c6373110ef558929841eb21c0dcab297969c71eebed89dd324ad230",
+      "sha256": "b8cd66207c312834825cac9b39d2a52d658d7182dbc1a7d0f4bf446e03b3ba47",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -28446,8 +28462,8 @@
     },
     {
       "path": "config/canonical-rule-registry.json",
-      "bytes": 84578,
-      "sha256": "6aedb712d2cf3aa788a8e7bb286912bd830f294814cf298ee9edc7dc59093cef",
+      "bytes": 84816,
+      "sha256": "a9907173513cf6535bfa805be7c27df9fa996e64ea5c844c227be2c760f92045",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -28518,8 +28534,8 @@
     },
     {
       "path": "config/kullanici-arayuzu-dil-politikasi.json",
-      "bytes": 8665,
-      "sha256": "e7d7bc3109c69296354d94ce406ca429c76b30a09d635aa2abfc358edb653009",
+      "bytes": 8981,
+      "sha256": "0538a7793105fd30f8f4b67f484807df96774d08a1cae27527b24062ed560507",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -28591,7 +28607,7 @@
     {
       "path": "config/ppk-015-network-egress-current-ratchet.json",
       "bytes": 1802,
-      "sha256": "f239337fd6cc904655ae9b28a00b993c46a40f2321c26ba82b64decda682fd48",
+      "sha256": "ace2ee4cbb6c4045540b5582d56d917cdfa436d578c7ffed9be3113bc0d14653",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -28607,7 +28623,7 @@
     {
       "path": "config/project-constitution.json",
       "bytes": 3084,
-      "sha256": "96a81a3d97c3bfa291cd8f04f650864542e79ad1bcfed0a4b0c3dcc281f7e52b",
+      "sha256": "ecf30676d90a3dbc69939a77f2c67b720f7f82f8033424e66393c01c78ef9779",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -28655,7 +28671,7 @@
     {
       "path": "config/rule-acknowledgement.json",
       "bytes": 719,
-      "sha256": "e97402d464ce1d95314f2dede82adb95ff7394c98c7fd0ba607b40d45892bc32",
+      "sha256": "c78e8c7987d0822928a6553423774f3528ca08b700b4fdecd7d90afa773308f8",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -28663,7 +28679,7 @@
     {
       "path": "config/rule-enforcement-registry.json",
       "bytes": 92100,
-      "sha256": "6e954c4a97c660fbd106a70ae5aebd768caa7f872237eb96a3d1bd1b704cb9e0",
+      "sha256": "0b72604b1a60a8c5cd624fc68fa55d5fa0633b8dccdbe75527490cc68af0aa12",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -28686,8 +28702,8 @@
     },
     {
       "path": "config/user-decision-ledger.json",
-      "bytes": 103807,
-      "sha256": "130e0e13df8806ecf137a2d3f7200deb0362cbd834158526ea4f575c187038ea",
+      "bytes": 103931,
+      "sha256": "8873ddb094532fe37aa29133d9d89a85c7ea405f6757615a8d1cc1f2d9694a9d",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -31038,8 +31054,8 @@
     },
     {
       "path": "docs/current/06_KANONIK_KURAL_SICILI.md",
-      "bytes": 2105,
-      "sha256": "59bdb699f938fadcc112c32d0ecd525c4212f9e346aae714810b40f6a9ab2083",
+      "bytes": 2224,
+      "sha256": "ec42f0397182fd5cc42dd17db61ddd6d06b5725aaf5624c9ee185cb9400a9b7b",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -31062,8 +31078,8 @@
     },
     {
       "path": "docs/current/09_KULLANICI_KARARLARI_KAYDI.md",
-      "bytes": 7247,
-      "sha256": "b30bdaf14bd600ec5ef730e2e8c9bc3d6a54bcc92827ab085e5be5ab79f222d9",
+      "bytes": 7341,
+      "sha256": "bcf34e9434edf4836b8d36ead5eedcb20d53e8ecbd0652789601e6f4d1eb59fd",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -31071,15 +31087,15 @@
     {
       "path": "docs/current/10_TUM_KURALLAR_ASILAMAZ_YURUTME_SOZLESMESI.md",
       "bytes": 1387,
-      "sha256": "c024d963da44c5ffe453bda611b3f3f24bd64370cd6ab4d63028fd32d6213135",
+      "sha256": "9b0e820be43ba8747b2e227ab53e2d194319f2d093fd2cd24b5c255f68417572",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
     },
     {
       "path": "docs/current/11_GUNCEL_KARAR_KURAL_IS_AKISI_SICILI.md",
-      "bytes": 116711,
-      "sha256": "647728f8b884de91d6e35a84998edddc8b0a4ef2bf45ae8bf3618cbd193e4a37",
+      "bytes": 116705,
+      "sha256": "811aa02655b017e2cba0e96550911bc981b8db75fb35587961ba9b47924a1a48",
       "extension": ".md",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -31567,7 +31583,7 @@
     {
       "path": "docs/current/PPK-015_NETWORK_EGRESS_CURRENT_RATCHET.md",
       "bytes": 3987,
-      "sha256": "d0b0249616bfa5284331ade5cb15439c1f57645efdb3917caee3e4e469dc5467",
+      "sha256": "3b2e89599632bb4a1d0500cc8f673cfd49b20fa16c38fb6a3fa1c5938fd2f5ee",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -32886,8 +32902,8 @@
     },
     {
       "path": "docs/decisions/DEC-255-sistem-dili-ve-ingilizce-arayuz-altyapisi.md",
-      "bytes": 13537,
-      "sha256": "cb8b5256c481cc4bbf90a505d089e0c350ca8fcee018628f05ce5aa8e7fe77e5",
+      "bytes": 14271,
+      "sha256": "7c40c2471a68cdb50c7b32d9930d6fdf4811dfaa5549bb34a3bd7934ba8407d6",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -33631,7 +33647,7 @@
     {
       "path": "docs/ticari-urun-temeli/00_OKU_BENI.md",
       "bytes": 3419,
-      "sha256": "d1d40d18e5b07bf4d5f00a85c564398adcea92bfc305d5f7ea9cc5a0a19e71f5",
+      "sha256": "3949212930ac2bb0391a8257360dbda7a498ce8800228d4c237781739398ce48",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -33639,7 +33655,7 @@
     {
       "path": "docs/ticari-urun-temeli/00_TEMEL_SURUM_MANIFESTOSU.json",
       "bytes": 1099,
-      "sha256": "ebbd0f6507838697b2c997d60525b4d8fe23dd804a5a8702127fa709c3cf6e48",
+      "sha256": "6c52d58119d5213364a0aa4165be74c8c1537095daadbb8279b8dcd85a240049",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -33671,7 +33687,7 @@
     {
       "path": "docs/ticari-urun-temeli/01_YONETIM/04_AKTIF_KURAL_SICILI.json",
       "bytes": 2678,
-      "sha256": "26d4f0c95500dc718fd2580348ca2013b045d78991e374fc903d9a6afee342f7",
+      "sha256": "0c6b66c8a018e38451ab3953bb3a330b85a70cad933e7cac12ee51f03d3f5b18",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -33710,8 +33726,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/02_IS_ANALIZI/03_GEREKSINIM_IZLENEBILIRLIK_MATRISI.md",
-      "bytes": 3532,
-      "sha256": "959fddf1355266f7fa2bac7fabe11aa3a12b83715c3cb037077d5a67dc83cca2",
+      "bytes": 3640,
+      "sha256": "8c2b08d0c2d6b6b68153303f82d722a5ffa4a2d4fc60fb74dbb1ab14cbaac1a3",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -33790,16 +33806,16 @@
     },
     {
       "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/03_KANIT_SICILI.json",
-      "bytes": 24985,
-      "sha256": "f821156e7b05bbc95ff443611646c4f761f3d23652444fb8142eec5e60ea837e",
+      "bytes": 25501,
+      "sha256": "765e830253e911f391e192cd38738bf1411a13b365d31f32388b133904b4f022",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json",
-      "bytes": 16647,
-      "sha256": "9d518410eaddcba882f55a3b53d2b5babede3e39444b91e53a734bc7eedf9a75",
+      "bytes": 16847,
+      "sha256": "10e6abd38253efeeaa477d6df5471a79c94a62a04c4d863c5f2aa505e2967755",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -34189,6 +34205,14 @@
       "isDocument": true
     },
     {
+      "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/53_KALICI_KULLANICI_DIL_TERCIHI_KANITI.json",
+      "bytes": 1112,
+      "sha256": "5285d44dcdb733a94d5bcfc689ad30cf04c7b6291cd349be01f4dd0191c59009",
+      "extension": ".json",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
       "path": "docs/ticari-urun-temeli/06_DIS_KAYNAK_VE_LISANS/01_TICARI_LISANS_ENVANTERI.md",
       "bytes": 3440,
       "sha256": "3bcbdfd7eea28bd097c28396336eb3637c73386bd9b72b465a1049a8353ee18b",
@@ -34246,8 +34270,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json",
-      "bytes": 20206,
-      "sha256": "f715810a37f7eae16ab68ec5d559c3e314efeaa6abae31f27e1218f68d8f6680",
+      "bytes": 20282,
+      "sha256": "34175aab2a03850b2d7dee8af125a5fd8614a845d95b18a98dcac9d76e15119a",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -36167,7 +36191,7 @@
     {
       "path": "packages/domain/src/platform-capability-manifest-gate.ts",
       "bytes": 1229,
-      "sha256": "3aad25b09ad61193192af5fce882a001d72da90ccf1c6691b45a026d0d681ecf",
+      "sha256": "76db72e3ba84a20f33aa67c4de0a795c8cb0527309e99ce68285d4453eb738f0",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -36230,8 +36254,8 @@
     },
     {
       "path": "packages/domain/src/renderer.ts",
-      "bytes": 1492,
-      "sha256": "5b4a6949828127ceab193b92a6b98751114d8f2c9afdb78c714a25ff3f205496",
+      "bytes": 1521,
+      "sha256": "a910bcb8a1bbf4b7ab63f134878ca4e310e419c8f7a5b401b6646bd554476ed4",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -36294,8 +36318,8 @@
     },
     {
       "path": "packages/domain/src/ui-localization.ts",
-      "bytes": 1342,
-      "sha256": "44e87329bce2ae44eeff83b7ed6c8729358a0a500e22f3d96f709ab29b74e3cc",
+      "bytes": 1635,
+      "sha256": "4eac007961cd0c0e25783f06128c592632c49c4f432d53bfffd5ca135a713ef1",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -36342,8 +36366,8 @@
     },
     {
       "path": "packages/domain/tests/ui-localization.test.ts",
-      "bytes": 1310,
-      "sha256": "1351a48d7f3659848fce77bec5ac3cfba1b46349721e8a3b3a70b39cae220787",
+      "bytes": 1817,
+      "sha256": "0535a08a59800d7835cd99afff7827e6a8b64a5872725d68f5cb0a9724feb7ac",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -36503,7 +36527,7 @@
     {
       "path": "packages/platform-policy/platform-capability-manifest-policy.test.ts",
       "bytes": 9243,
-      "sha256": "fd084bd22fbf00bcf2efba5e1bd6c66a1d72e289d85fcdb5e75d56b384a7568e",
+      "sha256": "be07870dad478d8df04fd5129efaf04589ac13af708b65a297d4efc5cfe2a770",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -36631,7 +36655,7 @@
     {
       "path": "packages/platform-policy/src/platform-capability-manifest-policy.ts",
       "bytes": 16197,
-      "sha256": "6f69e18e85b50fdab8ba39474a28da888d6d89302c8cd14e1cfd313b801434f7",
+      "sha256": "3a048a3fa3336cd99a1ca0d4d34c54646aa75e19ac757807f3655f4545d64f7b",
       "extension": ".ts",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -41054,8 +41078,8 @@
     },
     {
       "path": "scripts/dogrula-kullanici-arayuzu-dil-politikasi.mjs",
-      "bytes": 28835,
-      "sha256": "3bb9235e7a33f2a5ab44eb223ba9fc1dadfa4c13e269de6d9f58986e02fb7b78",
+      "bytes": 29742,
+      "sha256": "5628991a80ed5d3efd1439a884baf233632a87201e9c994c6de0afec8aebb280",
       "extension": ".mjs",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -43967,7 +43991,7 @@
     {
       "path": "scripts/verify-32-q-ppk-021-platform-policy-ast-gate-contract.mjs",
       "bytes": 20879,
-      "sha256": "9ae8b294051a60d2364ce9bedd90143462f03016b21a359bf6e0ced3d6326d33",
+      "sha256": "e14115166416823a67942fadca905c443f6d539d5325bd9694cd4955121ab568",
       "extension": ".mjs",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -43983,7 +44007,7 @@
     {
       "path": "scripts/verify-32-r-ppk-022-capability-manifest-gate-contract.mjs",
       "bytes": 30733,
-      "sha256": "3483f051c79a3fbfac1a9ace8fc2f3fcfc7222edca2df69ea2fe82d9499a12e2",
+      "sha256": "7e6409f8b54feab6f62ef74fe3d7c44b1b78fd8778c9609799337c3f95926506",
       "extension": ".mjs",
       "classification": "TEST_OR_GATE",
       "isDocument": false

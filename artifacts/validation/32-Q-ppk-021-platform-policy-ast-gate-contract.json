@@ -350,7 +350,7 @@
   "sourceGate": {
     "status": "PASS",
     "productionSourceZones": 18,
-    "scannedFiles": 569,
+    "scannedFiles": 585,
     "privilegedSurfaces": 889,
     "exactAllowlistEntries": 889,
     "exactAllowlistSha256": "3a297f74d43d4675090a709d4359af9245c2971a7fc338afef2fb87b1c8608dd",
@@ -387,5 +387,5 @@
   "cutoverAuthorityAttached": false,
   "successorRequirementCompletedByThisPackage": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-19T10:19:45.153Z"
+  "generatedAt": "2026-08-19T17:03:01.615Z"
 }

@@ -7,7 +7,7 @@ const exactCopy: Readonly<Record<string,string>> = {
   'Ara':'Search','Arşiv etiketi':'Archive tag','Arşiv hassasiyet seviyesi':'Archive sensitivity level','Arşiv kategorileri':'Archive categories',
   'Arşiv kategorisi':'Archive category','Arşiv MIME türü':'Archive MIME type','Arşiv sayfası yüklenemedi.':'The archive page could not be loaded.',
   'Arşiv sürümleri yüklenemedi.':'Archive versions could not be loaded.','Arşivde başlık, dosya adı veya etiket ara':'Search archive title, file name, or tag',
-  'Aynı':'Same','Ayrıntıları görmek için listeden bir belge seçin.':'Select a document from the list to view its details.',
+  'Aynı':'Same','Ayrıntıları görmek için listeden bir belge seçin.':'Choose a document in the list to view its details.',
   'Bağlı önemli gün':'Linked important date','Başlık, dosya adı veya etiket ara':'Search title, file name, or tag','Belge ayrıntısı':'Document details',
   'Belge bulunamadı':'No document found','Belge seçilmedi':'No document selected','Belge, aile ilişkisi, tarih ve güven düzeyi birlikte kaydedilir.':'The document, family relationship, date, and confidence level are recorded together.',
   'Belgeler':'Documents','Boyut':'Size','Boyut farkı':'Size difference','Bu belge güvenli biçimde imha edilecek. Devam edilsin mi?':'This document will be securely destroyed. Continue?',

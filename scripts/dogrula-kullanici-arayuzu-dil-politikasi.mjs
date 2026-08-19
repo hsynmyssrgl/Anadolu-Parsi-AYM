@@ -35,6 +35,10 @@ check(policy.ruleId==='PR-215'&&policy.decisionId==='DEC-255','policy rule/decis
 check(JSON.stringify(policy.supportedLanguages)===JSON.stringify(['tr','en']),'supported language order mismatch');
 check(policy.fallbackLanguage==='en'&&policy.fallbackLocale==='en-US','English fallback missing');
 check(policy.rendererMayChooseLanguage===false&&policy.resolutionProcess==='electron-main','renderer must not choose language');
+check(policy.firstLaunchPreference==='system'&&policy.persistentUserPreferenceAllowed===true
+  &&policy.persistentPreferenceAuthority==='electron-main'
+  &&JSON.stringify(policy.persistentPreferenceValues)===JSON.stringify(['system','tr','en'])
+  &&policy.userPreferenceOverridesSystemAfterFirstLaunch===true,'persistent user language preference truth mismatch');
 check(policy.coverage.foundationStatus==='COMPLETE'&&policy.coverage.coreUserJourneyStatus==='COMPLETE','localization foundation incomplete');
 check(policy.coverage.fullFeaturePanelTranslationStatus==='PARTIAL'&&policy.coverage.countsAsFullApplicationEnglishPass===false,'partial full-feature truth missing');
 check(JSON.stringify(policy.coverage.translatedFeaturePanelWaveOne)===JSON.stringify([
@@ -165,8 +169,12 @@ check(rendererApp.includes('export function PermissionsScreen')&&rendererApp.inc
   &&permissionsLocalization.includes("'Bağlamsal Yetkiler':'Contextual Permissions'")
   &&permissionsLocalization.includes("'Sahiplik oranı':'Ownership share'"),'permissions localization binding missing');
 check(domain.includes("primaryLanguage === 'tr' ? 'tr' : 'en'")&&domain.includes("resolveUiLocalization('en-US')"),'domain fallback resolver missing');
-check(main.includes('resolveUiLocalization(app.getLocale())')&&main.includes("registerIpcHandler('app:getLocalizationBootstrap'"),'main system-locale authority missing');
-check(preload.includes("invoke('app:getLocalizationBootstrap')")&&globalTypes.includes('getLocalizationBootstrap()'),'preload/global localization bridge missing');
+check(main.includes('resolveUiLocalization(app.getLocale(),readUiLanguagePreference(uiLanguagePreferencePath()))')
+  &&main.includes("registerIpcHandler('app:getLocalizationBootstrap'")&&main.includes("registerIpcHandler('app:setLanguagePreference'"),'main locale and persistent preference authority missing');
+check(preload.includes("invoke('app:getLocalizationBootstrap')")&&preload.includes("invoke('app:setLanguagePreference',preference)")
+  &&globalTypes.includes('getLocalizationBootstrap()')&&globalTypes.includes('setLanguagePreference(preference:UiLanguagePreference)'),'preload/global localization bridge missing');
+check(rendererApp.includes("'Uygulama dili':'Application language'")&&rendererApp.includes("value=\"system\"")
+  &&rendererApp.includes('changeLanguagePreference(event.target.value as UiLanguagePreference)'),'settings language preference UI missing');
 check(rendererMain.includes('DEFAULT_UI_LOCALIZATION')&&rendererMain.includes('document.documentElement.lang = localization.locale'),'English-first renderer bootstrap missing');
 check(localization.includes("fallbackUsed")===false,'renderer dictionary must not mutate fallback truth');
 check(localization.includes("'auth.createFamily':'Let’s create your family'")&&localization.includes("'shell.help':'Help'"),'English core dictionary missing');

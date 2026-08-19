@@ -36,7 +36,7 @@ Bu klasor ParsYuva AYM icin bugun baslatilan ilk temiz ticari urun belge temelid
 
 ## Kaynak gercekligi
 
-19.08.2026 tarihinde kanonik kural sicilinde 217 kural ve `b79db92a03d559f33ccd49348bad159a70b6034fbcf10a07abe5a407549bf0be` SHA-256 ozeti bulunmaktadir. `GOVERNED_PREFLIGHT` ayni tarihte PASS olmustur. Calisma agaci temiz degildir; bu nedenle yeni teslim, kurulum veya uretim imzasi kaniti uretilmeden once degisiklikler kapsamli regresyondan gecmelidir.
+19.08.2026 tarihinde kanonik kural sicilinde 217 kural ve `5b83854fb2d21e978ffe1dc79cfbcf180547f42d06cd32a8ba7918a58cf1a0ed` SHA-256 ozeti bulunmaktadir. `GOVERNED_PREFLIGHT` ayni tarihte PASS olmustur. Calisma agaci temiz degildir; bu nedenle yeni teslim, kurulum veya uretim imzasi kaniti uretilmeden once degisiklikler kapsamli regresyondan gecmelidir.
 
 Kanonik ticari belge koku kaynak kodla birlikte `C:\PPT\AYM\06_KOD\app\docs\ticari-urun-temeli` altinda Git tarafindan izlenir. `C:\PPT\AYM\12_TICARI_URUN_TEMEL_SURUMU` yalniz ayni klasore baglanan kullanici uyumluluk yoludur. GitHub ve `D:\GitYedekleri` bare remote readback kaniti `05_KALITE_TEST_KANIT/05_GIT_YEDEK_DOGRULAMA_KANITI.json` dosyasinda tutulur.
 

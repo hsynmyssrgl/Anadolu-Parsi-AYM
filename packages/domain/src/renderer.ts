@@ -16,6 +16,7 @@ export {
   resolveUiLocalization,
   type SupportedUiLanguage,
   type SupportedUiLocale,
+  type UiLanguagePreference,
   type UiLocalizationBootstrapView
 } from './ui-localization.js';
 export {

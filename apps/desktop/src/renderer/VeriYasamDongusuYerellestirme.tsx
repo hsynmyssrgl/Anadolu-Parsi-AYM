@@ -134,7 +134,7 @@ const exactCopy: Readonly<Record<string,string>> = {
   'Saklama süresi (gün)':'Retention period (days)',
   'Saklanıyor':'Retained',
   'Sağlık kaydı':'Health record',
-  'Son alım:':'Last fetch:',
+  'Son alım:':'Last retrieval:',
   'Son kullanıcı teyidi:':'Latest user attestation:',
   'Son tanı:':'Latest diagnostic:',
   'Son yayılım:':'Latest propagation:',
