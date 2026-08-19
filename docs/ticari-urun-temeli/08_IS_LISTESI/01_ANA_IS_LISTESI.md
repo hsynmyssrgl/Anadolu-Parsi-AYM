@@ -56,7 +56,7 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 | IS-0404 | Windows Defender OCR tarayicisi | Codex | DEVAM | Gercek temiz/zararli/timeout testleri |
 | IS-0405 | PDF OCR rasterizer | Codex | ACIK | Aktif icerik red + bounded page raster |
 | IS-0406 | OCR low-privilege OS sandbox | Codex | ACIK | AppContainer/low integrity kaniti |
-| IS-0407 | OCR run/cancel transaction topolojisi | Codex | ACIK | Eszamanli cancel gercek runtimea ulasir |
+| IS-0407 | OCR run/cancel transaction topolojisi | Codex | TAMAMLANDI | Gercek SQLite DataStore akisi ve 3 dosya/27 test PASS |
 
 ## 5. Yedekleme, bulut ve veri haklari
 

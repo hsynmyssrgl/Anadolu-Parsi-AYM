@@ -3,7 +3,7 @@
   "id": "PARSYUVA-AYM-ANA-IS-SICILI-V1",
   "kaynak": "01_ANA_IS_LISTESI.md",
   "toplamIs": 49,
-  "tamamlandi": 10,
+  "tamamlandi": 11,
   "requirementPass": false,
   "izinliDurumlar": ["TAMAMLANDI", "DEVAM", "ACIK", "BLOCKED", "NOT_RUN"],
   "isler": [
@@ -41,7 +41,7 @@
     {"id":"IS-0404","alan":"Yerel AI OCR Harita","is":"Windows Defender OCR tarayicisi","sorumlu":"Codex","durum":"DEVAM","kabul":"Gercek temiz zararli ve timeout testleri","kanit":[],"disKaynakGerekli":false,"acikNedeni":"Yeni production baglantisi henuz dogrulanmadi.","bagimliliklar":[],"requirementPass":false},
     {"id":"IS-0405","alan":"Yerel AI OCR Harita","is":"PDF OCR rasterizer","sorumlu":"Codex","durum":"ACIK","kabul":"Aktif icerik red ve sinirli sayfa raster","kanit":[],"disKaynakGerekli":true,"acikNedeni":"Lisans ve sandbox kosullarini karsilayan rasterizer secilmedi.","bagimliliklar":["IS-0404"],"requirementPass":false},
     {"id":"IS-0406","alan":"Yerel AI OCR Harita","is":"OCR dusuk yetkili isletim sistemi sandboxi","sorumlu":"Codex","durum":"ACIK","kabul":"AppContainer veya low integrity kaniti","kanit":[],"disKaynakGerekli":false,"acikNedeni":"Mevcut child process low privilege degil.","bagimliliklar":["IS-0404"],"requirementPass":false},
-    {"id":"IS-0407","alan":"Yerel AI OCR Harita","is":"OCR run cancel transaction topolojisi","sorumlu":"Codex","durum":"ACIK","kabul":"Eszamanli cancel gercek runtimea ulasir","kanit":[],"disKaynakGerekli":false,"acikNedeni":"Uzun transaction canceli runtimea ulasmadan engelliyor.","bagimliliklar":[],"requirementPass":false},
+    {"id":"IS-0407","alan":"Yerel AI OCR Harita","is":"OCR run cancel transaction topolojisi","sorumlu":"Codex","durum":"TAMAMLANDI","kabul":"Eszamanli cancel gercek runtimea ulasir","kanit":["05_KALITE_TEST_KANIT/12_OCR_ESZAMANLI_IPTAL_KANITI.json"],"disKaynakGerekli":false,"acikNedeni":"","bagimliliklar":[],"requirementPass":true},
 
     {"id":"IS-0501","alan":"Yedekleme","is":"Yerel ve senkron klasor yedegi","sorumlu":"Codex","durum":"DEVAM","kabul":"Sifreli coklu hedef ve readback PASS","kanit":[],"disKaynakGerekli":false,"acikNedeni":"Coklu hedef full restore matrisi tamamlanmadi.","bagimliliklar":[],"requirementPass":false},
     {"id":"IS-0502","alan":"Yedekleme","is":"OneDrive Graph adapteri","sorumlu":"Codex Kullanici Microsoft","durum":"BLOCKED","kabul":"OAuth app minimum scope upload readback delete","kanit":[],"disKaynakGerekli":true,"acikNedeni":"Microsoft uygulama kaydi ve tenant yetkisi yok.","bagimliliklar":["IS-0501"],"requirementPass":false},

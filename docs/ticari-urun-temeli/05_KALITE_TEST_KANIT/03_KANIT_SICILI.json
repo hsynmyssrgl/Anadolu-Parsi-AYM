@@ -122,6 +122,16 @@
       "uretimZamani": "2026-08-19T14:36:00+03:00",
       "disKaynak": false,
       "not": "Otomatik kapilar PASS; gercek Narrator, Magnifier, klavye ve insan UAT kaniti NOT_RUN."
+    },
+    {
+      "id": "KANIT-0013",
+      "tur": "TEST",
+      "kapsam": "OCR eszamanli run ve cancel transaction topolojisi",
+      "durum": "PASS",
+      "kaynak": "05_KALITE_TEST_KANIT/12_OCR_ESZAMANLI_IPTAL_KANITI.json",
+      "uretimZamani": "2026-08-19T15:16:12+03:00",
+      "disKaynak": false,
+      "not": "Gercek SQLite DataStore akisi worker beklerken cancel isteginin runtimea ulastigini ve 1-2-3-4 revizyon zincirini kanitladi."
     }
   ]
 }

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-OCR-ESZAMANLI-IPTAL-20260819-01",
+  "executedAt": "2026-08-19T15:16:12+03:00",
+  "repositoryBaseCommitAtExecution": "3f9cd0a42c78754dffb5cbe4a3e24bdedb2a854b",
+  "workItem": "IS-0407",
+  "result": {
+    "status": "PASS",
+    "targetedTestFilesPassed": 3,
+    "targetedTestFilesTotal": 3,
+    "targetedTestsPassed": 27,
+    "targetedTestsTotal": 27,
+    "productionDataStoreConcurrencyTest": "PASS"
+  },
+  "verifiedTopology": {
+    "beginTransaction": "short_commit_before_worker",
+    "workerExecution": "outside_database_transaction",
+    "concurrentCancellationReachedRuntime": true,
+    "finalJobStatus": "cancelled",
+    "durableRevisionChain": [1, 2, 3, 4],
+    "mutationKinds": ["job_create", "job_run_begin", "job_cancel", "job_run"],
+    "networkUsed": false,
+    "cloudUsed": false
+  },
+  "commands": [
+    "npx vitest run apps/desktop/tests/local-governed-ocr-data-store-production.test.ts apps/desktop/tests/local-governed-ocr-application-adapter.test.ts packages/application/tests/local-governed-ocr-use-cases.test.ts"
+  ],
+  "requirementPass": true,
+  "note": "Gercek SQLite kullanan FamilyDataStore testinde worker beklerken cancel istegi runtime requestCancellation metoduna ulasti; begin, cancel ve final ledger revizyonlari atomik ve sirali kaldi."
+}

@@ -138,11 +138,31 @@ interface RuntimeResult {
 class DeterministicBoundedOcrRuntime implements LocalGovernedOcrRuntimePort {
   readonly #results = new Map<string, RuntimeResult>();
   readonly #runCounts = new Map<string, number>();
+  readonly #cancelledJobs = new Set<string>();
+  #blockedRunGate: Promise<void> | undefined;
+  #releaseBlockedRun: (() => void) | undefined;
+  #notifyBlockedRun: (() => void) | undefined;
   public runCalls = 0;
+  public cancellationCalls = 0;
   public purgeCalls = 0;
   public mismatchNextRun = false;
   public failNextPurge = false;
   public failAfterNextPurge = false;
+
+  public blockNextRunUntilCancellation(): Promise<void> {
+    if (this.#blockedRunGate) throw new Error('A blocked OCR run is already arranged.');
+    let notify!: () => void;
+    let release!: () => void;
+    const entered = new Promise<void>((resolve) => { notify = resolve; });
+    this.#blockedRunGate = new Promise<void>((resolve) => { release = resolve; });
+    this.#notifyBlockedRun = notify;
+    this.#releaseBlockedRun = release;
+    return entered;
+  }
+
+  public releaseBlockedRunForTest(): void {
+    this.#releaseBlockedRun?.();
+  }
 
   public hasResult(jobId: string): boolean {
     return this.#results.has(jobId);
@@ -154,6 +174,22 @@ class DeterministicBoundedOcrRuntime implements LocalGovernedOcrRuntimePort {
     this.runCalls += 1;
     const runCount = (this.#runCounts.get(input.jobId) ?? 0) + 1;
     this.#runCounts.set(input.jobId, runCount);
+    const blockedRunGate = this.#blockedRunGate;
+    if (blockedRunGate) {
+      this.#notifyBlockedRun?.();
+      await blockedRunGate;
+      this.#blockedRunGate = undefined;
+      this.#releaseBlockedRun = undefined;
+      this.#notifyBlockedRun = undefined;
+      if (this.#cancelledJobs.delete(input.jobId)) {
+        return ok({
+          status: 'cancelled',
+          cancelledAt: asIsoDateTime(new Date(Date.now() + this.runCalls).toISOString()),
+          networkUsed: false,
+          cloudUsed: false
+        });
+      }
+    }
     const text = `${RAW_OCR_TEXT}:${input.jobId}:run-${runCount}`;
     const contentSha256 = createHash('sha256').update(text, 'utf8').digest('hex');
     const sealedResultId = createHash('sha256')
@@ -244,7 +280,12 @@ class DeterministicBoundedOcrRuntime implements LocalGovernedOcrRuntimePort {
     });
   }
 
-  public async requestCancellation(): ReturnType<LocalGovernedOcrRuntimePort['requestCancellation']> {
+  public async requestCancellation(
+    input: Parameters<LocalGovernedOcrRuntimePort['requestCancellation']>[0]
+  ): ReturnType<LocalGovernedOcrRuntimePort['requestCancellation']> {
+    this.cancellationCalls += 1;
+    this.#cancelledJobs.add(input.jobId);
+    this.#releaseBlockedRun?.();
     return ok({ accepted: true });
   }
 
@@ -540,6 +581,67 @@ describe('33-Q Local OCR DataStore production composition', () => {
       expect(fixture.requests.some((request) => request.capability === 'archive.ocr'
         && request.action === 'process')).toBe(true);
     } finally {
+      fixture.store.close();
+    }
+  });
+
+  it('lets a concurrent cancel reach the real DataStore runtime after the short begin transaction commits', async () => {
+    const runtime = new DeterministicBoundedOcrRuntime();
+    const fixture = await prepareOcrFixture({ runtime });
+    let runPromise: ReturnType<FamilyDataStore['runLocalGovernedOcrJob']> | undefined;
+    try {
+      const created = await fixture.store.createLocalGovernedOcrJob({
+        sourceResourceType: 'archive_item',
+        sourceResourceId: fixture.sourceId,
+        languageHints: ['tr-TR'],
+        expectedRevision: 0,
+        clientOperationId: '33-q-concurrent-cancel-create'
+      });
+      const workerEntered = runtime.blockNextRunUntilCancellation();
+      runPromise = fixture.store.runLocalGovernedOcrJob({
+        jobId: created.resourceId,
+        expectedRevision: 1,
+        clientOperationId: '33-q-concurrent-cancel-run'
+      });
+      const started = await Promise.race([
+        workerEntered.then(() => true),
+        new Promise<false>((resolve) => setTimeout(() => resolve(false), 2_000))
+      ]);
+      if (!started) {
+        runtime.releaseBlockedRunForTest();
+        await runPromise.catch(() => undefined);
+        throw new Error('OCR worker did not start after its short begin transaction.');
+      }
+
+      const running = (await fixture.store.getLocalGovernedOcrCenter()).jobs
+        .find((job) => job.id === created.resourceId);
+      expect(running).toMatchObject({ status: 'running', revision: 2 });
+      const cancelled = await fixture.store.cancelLocalGovernedOcrJob({
+        jobId: created.resourceId,
+        expectedRevision: 2,
+        clientOperationId: '33-q-concurrent-cancel-request'
+      });
+      expect(cancelled).toMatchObject({ mutationKind: 'job_cancel', revision: 3, replayed: false });
+      expect(runtime.cancellationCalls).toBe(1);
+
+      const completedRun = await runPromise;
+      expect(completedRun).toMatchObject({ mutationKind: 'job_run', revision: 4, replayed: false });
+      const final = (await fixture.store.getLocalGovernedOcrCenter()).jobs
+        .find((job) => job.id === created.resourceId);
+      expect(final).toMatchObject({ status: 'cancelled', revision: 4, resultAvailable: false });
+      expect(runtime.hasResult(created.resourceId)).toBe(false);
+      expect(inspectDatabase(fixture.databasePath, (database) => database.prepare(`
+        SELECT mutation_kind,previous_revision,revision FROM local_governed_ocr_mutations
+        WHERE resource_id=? ORDER BY revision
+      `).all(created.resourceId))).toEqual([
+        { mutation_kind: 'job_create', previous_revision: 0, revision: 1 },
+        { mutation_kind: 'job_run_begin', previous_revision: 1, revision: 2 },
+        { mutation_kind: 'job_cancel', previous_revision: 2, revision: 3 },
+        { mutation_kind: 'job_run', previous_revision: 3, revision: 4 }
+      ]);
+    } finally {
+      runtime.releaseBlockedRunForTest();
+      if (runPromise) await runPromise.catch(() => undefined);
       fixture.store.close();
     }
   });
