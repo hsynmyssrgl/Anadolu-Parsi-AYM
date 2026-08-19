@@ -9,10 +9,10 @@
   "canonicalRuleSha256": "b79db92a03d559f33ccd49348bad159a70b6034fbcf10a07abe5a407549bf0be",
   "decision": "DEC-259",
   "workItemCount": 49,
-  "fileCount": 70,
-  "sourceFileCount": 69,
-  "sourceFingerprintSha256": "4a2691b3c0b0252977cb9139b702191265da464bc8ae48be4d9462cda95ba300",
-  "checks": 894,
+  "fileCount": 71,
+  "sourceFileCount": 70,
+  "sourceFingerprintSha256": "e9b029be260d9b84085ff8542e9454442c0d2b0a0276adb419114eb2e34b2008",
+  "checks": 901,
   "status": "PASS",
   "commercialReleaseEligible": false,
   "externalEvidenceDefaultsToNotRun": true,
@@ -120,8 +120,8 @@
     },
     {
       "path": "05_KALITE_TEST_KANIT/03_KANIT_SICILI.json",
-      "bytes": 17217,
-      "sha256": "cee8a09695d132e00f94ac3ccac0ca9ea95606753223232bdd4c86960626e723"
+      "bytes": 17734,
+      "sha256": "a167806b72c6c7d15d486fe9f53f34edaba2523482c440925c2bd6172c91aa04"
     },
     {
       "path": "05_KALITE_TEST_KANIT/05_GIT_YEDEK_DOGRULAMA_KANITI.json",
@@ -289,6 +289,11 @@
       "sha256": "254c3c6753221e7f1ab8be5b8a1439f12340bd09f2e21ff6531a830d5935819a"
     },
     {
+      "path": "05_KALITE_TEST_KANIT/38_INGILIZCE_ANA_KABUK_DALGA_DORT_KANITI.json",
+      "bytes": 881,
+      "sha256": "d1588f54e5442aa18ceb3bb97c549e6c0ba1ddabf0ffa6c0af9052dd904d393e"
+    },
+    {
       "path": "06_DIS_KAYNAK_VE_LISANS/01_TICARI_LISANS_ENVANTERI.md",
       "bytes": 3440,
       "sha256": "3bcbdfd7eea28bd097c28396336eb3637c73386bd9b72b465a1049a8353ee18b"
@@ -325,8 +330,8 @@
     },
     {
       "path": "08_IS_LISTESI/03_ANA_IS_SICILI.json",
-      "bytes": 18552,
-      "sha256": "c34900cd511d8d3218f2549824cb04ddd09ab673b2df4021571d0e6efcdaae08"
+      "bytes": 18638,
+      "sha256": "c247fc24d3db05bd33da228c6dd60e934af70b401ffa35d2b49dfadfa0b9f472"
     },
     {
       "path": "08_IS_LISTESI/04_IS_YURUTME_SIRASI.md",
@@ -364,5 +369,5 @@
       "sha256": "3b489e065d5b3cc6d84a81ac26775a144c0babca825dbd943364c74f7f309527"
     }
   ],
-  "generatedAt": "2026-08-19T15:08:34.044Z"
+  "generatedAt": "2026-08-19T15:18:19.025Z"
 }

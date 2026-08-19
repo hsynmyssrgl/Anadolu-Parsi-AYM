@@ -114,8 +114,10 @@
     "translatedApplicationShellWaveTwoEnglishVisibleTurkishTextCount": 0,
     "translatedApplicationShellWaveThree": ["UnifiedAuthorizedSearchPanel"],
     "translatedApplicationShellWaveThreeEnglishVisibleTurkishTextCount": 0,
+    "translatedApplicationShellWaveFour": ["ArchiveScreen"],
+    "translatedApplicationShellWaveFourEnglishVisibleTurkishTextCount": 0,
     "openSurface": "remaining-feature-panel-copy",
-    "openReason": "İlk yirmi dört uzman panel ile ana pano, kişi kataloğu, aile, soy ağacı, zaman tüneli, önemli günler ve birleşik yetkili arama iki dillidir; ana uygulama kabuğunun kalan ekranlarındaki tarihsel görünür Türkçe metinlerin son taraması sürmektedir.",
+    "openReason": "İlk yirmi dört uzman panel ile ana pano, kişi kataloğu, aile, soy ağacı, zaman tüneli, önemli günler, birleşik yetkili arama ve Doküman Merkezi iki dillidir; ana uygulama kabuğunun kalan ekranlarındaki tarihsel görünür Türkçe metinlerin son taraması sürmektedir.",
     "countsAsFullApplicationEnglishPass": false
   },
   "failClosed": true,
