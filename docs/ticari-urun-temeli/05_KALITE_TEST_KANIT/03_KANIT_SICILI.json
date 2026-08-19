@@ -202,6 +202,16 @@
       "uretimZamani": "2026-08-19T16:10:00+03:00",
       "disKaynak": false,
       "not": "Uc iletisim guvenlik ve denetim paneli English locale renderinda gorunur Turkce karakter sifir; tam uygulama English PASS iddiasi yok."
+    },
+    {
+      "id": "KANIT-0021",
+      "tur": "TEST",
+      "kapsam": "English uzman panel yerellestirme dorduncu dalgasi",
+      "durum": "PASS_WITH_REMAINING_PANELS_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/20_INGILIZCE_UZMAN_PANEL_DALGA_DORT_KANITI.json",
+      "uretimZamani": "2026-08-19T16:12:00+03:00",
+      "disKaynak": false,
+      "not": "Gercek zamanli cagri paneli English locale renderinda gorunur Turkce karakter sifir; mesajlasma, dosya paylasimi ve kalan paneller acik."
     }
   ]
 }

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-INGILIZCE-UZMAN-PANEL-DALGA-DORT-20260819-01",
+  "executedAt": "2026-08-19T16:12:00+03:00",
+  "repositoryBaseCommitAtExecution": "a0b6b64c74eeb0fc3f3df20417270c725f12b030",
+  "workItem": "IS-0106",
+  "result": {
+    "status": "PASS_WITH_REMAINING_PANELS_OPEN",
+    "targetedTestFilesPassed": 1,
+    "targetedTestFilesTotal": 1,
+    "targetedTestsPassed": 2,
+    "targetedTestsTotal": 2,
+    "desktopTypecheck": "PASS"
+  },
+  "translatedPanels": ["CommunicationRealtimeCallingPanel"],
+  "englishLocaleVisibleTurkishCharacterCount": 0,
+  "turkishLocalePreserved": true,
+  "remainingFeaturePanelsOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "Dorduncu dalga gercek zamanli cagri hazirligi panelinde iki dilli gorunur metin kapisini tamamlar; mesajlasma, dosya paylasimi ve diger paneller aciktir."
+}

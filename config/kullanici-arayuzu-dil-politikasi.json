@@ -41,7 +41,8 @@
       "family-ai-assistant-panel",
       "communication-audit-archive-panel",
       "communication-recording-retention-panel",
-      "communication-security-panel"
+      "communication-security-panel",
+      "communication-realtime-calling-panel"
     ],
     "translatedFeaturePanelWaveOne": [
       "DistributedOperationsPanel",
@@ -61,8 +62,12 @@
       "CommunicationSecurityPanel"
     ],
     "translatedFeaturePanelWaveThreeEnglishVisibleTurkishTextCount": 0,
+    "translatedFeaturePanelWaveFour": [
+      "CommunicationRealtimeCallingPanel"
+    ],
+    "translatedFeaturePanelWaveFourEnglishVisibleTurkishTextCount": 0,
     "openSurface": "remaining-feature-panel-copy",
-    "openReason": "İlk dokuz uzman panel iki dilli ve English locale görünür Türkçe metin sayısı sıfırdır; kalan geniş özellik panellerindeki tarihsel Türkçe metinler henüz bütünüyle taşınmadı.",
+    "openReason": "İlk on uzman panel iki dilli ve English locale görünür Türkçe metin sayısı sıfırdır; mesajlaşma, dosya paylaşımı ve kalan geniş özellik panellerindeki tarihsel Türkçe metinler henüz bütünüyle taşınmadı.",
     "countsAsFullApplicationEnglishPass": false
   },
   "failClosed": true,

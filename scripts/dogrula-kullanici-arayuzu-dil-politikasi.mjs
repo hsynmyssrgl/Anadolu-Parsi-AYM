@@ -6,7 +6,7 @@ const check=(condition,message)=>{checks+=1;if(!condition)failures.push(message)
 const read=(path)=>readFile(path,'utf8');
 const policy=JSON.parse(await read('config/kullanici-arayuzu-dil-politikasi.json'));
 const desktopPackage=JSON.parse(await read('apps/desktop/package.json'));
-const [domain,main,preload,globalTypes,rendererMain,localization,accessibility,help,installer,distributed,universalUx,signedPlugin,familyMap,localTranslation,familyAi,communicationAudit,communicationRecording,communicationSecurity]=await Promise.all([
+const [domain,main,preload,globalTypes,rendererMain,localization,accessibility,help,installer,distributed,universalUx,signedPlugin,familyMap,localTranslation,familyAi,communicationAudit,communicationRecording,communicationSecurity,communicationCalling]=await Promise.all([
   read('packages/domain/src/ui-localization.ts'),read('apps/desktop/src/main/main.ts'),read('apps/desktop/src/main/preload.ts'),
   read('apps/desktop/src/renderer/global.d.ts'),read('apps/desktop/src/renderer/main.tsx'),read('apps/desktop/src/renderer/localization.tsx'),
   read('apps/desktop/src/renderer/accessibility.ts'),read('apps/desktop/src/renderer/NarratedHelpCenter.tsx'),read('apps/desktop/build/installer.nsh'),
@@ -14,7 +14,7 @@ const [domain,main,preload,globalTypes,rendererMain,localization,accessibility,h
   read('apps/desktop/src/renderer/SignedPluginPlatformPanel.tsx'),read('apps/desktop/src/renderer/FamilyLocationMap.tsx'),
   read('apps/desktop/src/renderer/LocalTranslationLanguagePanel.tsx'),read('apps/desktop/src/renderer/FamilyAiAssistantPanel.tsx'),
   read('apps/desktop/src/renderer/CommunicationAuditArchivePanel.tsx'),read('apps/desktop/src/renderer/CommunicationRecordingRetentionPanel.tsx'),
-  read('apps/desktop/src/renderer/CommunicationSecurityPanel.tsx')
+  read('apps/desktop/src/renderer/CommunicationSecurityPanel.tsx'),read('apps/desktop/src/renderer/CommunicationRealtimeCallingPanel.tsx')
 ]);
 
 check(policy.ruleId==='PR-215'&&policy.decisionId==='DEC-255','policy rule/decision binding mismatch');
@@ -32,6 +32,9 @@ check(JSON.stringify(policy.coverage.translatedFeaturePanelWaveTwo)===JSON.strin
 check(JSON.stringify(policy.coverage.translatedFeaturePanelWaveThree)===JSON.stringify([
   'CommunicationAuditArchivePanel','CommunicationRecordingRetentionPanel','CommunicationSecurityPanel'
 ])&&policy.coverage.translatedFeaturePanelWaveThreeEnglishVisibleTurkishTextCount===0,'feature-panel wave-three truth mismatch');
+check(JSON.stringify(policy.coverage.translatedFeaturePanelWaveFour)===JSON.stringify([
+  'CommunicationRealtimeCallingPanel'
+])&&policy.coverage.translatedFeaturePanelWaveFourEnglishVisibleTurkishTextCount===0,'feature-panel wave-four truth mismatch');
 check(domain.includes("primaryLanguage === 'tr' ? 'tr' : 'en'")&&domain.includes("resolveUiLocalization('en-US')"),'domain fallback resolver missing');
 check(main.includes('resolveUiLocalization(app.getLocale())')&&main.includes("registerIpcHandler('app:getLocalizationBootstrap'"),'main system-locale authority missing');
 check(preload.includes("invoke('app:getLocalizationBootstrap')")&&globalTypes.includes('getLocalizationBootstrap()'),'preload/global localization bridge missing');
@@ -47,6 +50,7 @@ for(const [name,source,marker] of [
   ['universal UX',universalUx,"text('Tek aile görünümü','Unified family view')"],
   ['signed plugin',signedPlugin,"text('Eklenti ve dış sağlayıcı platformu','Plugin and external provider platform')"]
 ]) check(source.includes("useLocalization()")&&source.includes(marker),`${name} English localization binding missing`);
+check(communicationCalling.includes("useLocalization()")&&communicationCalling.includes("text('Gerçek zamanlı çağrı hazırlığı','Real-time call preparation')"),'communication calling English localization binding missing');
 for(const [name,source,marker] of [
   ['communication audit',communicationAudit,"text('Denetim zinciri yükleniyor','Loading audit chain')"],
   ['communication recording',communicationRecording,"text('Görüşme kaydı rıza planı','Call recording consent plan')"],
