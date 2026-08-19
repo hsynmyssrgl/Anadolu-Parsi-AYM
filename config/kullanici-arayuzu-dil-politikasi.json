@@ -50,7 +50,8 @@
       "memory-studio-panel",
       "places-travel-asset-pet-panel",
       "health-care-coordination-panel",
-      "child-education-coordination-panel"
+      "child-education-coordination-panel",
+      "household-operations-panel"
     ],
     "translatedFeaturePanelWaveOne": [
       "DistributedOperationsPanel",
@@ -90,8 +91,10 @@
     "translatedFeaturePanelWaveElevenEnglishVisibleTurkishTextCount": 0,
     "translatedFeaturePanelWaveTwelve": ["ChildEducationCoordinationPanel"],
     "translatedFeaturePanelWaveTwelveEnglishVisibleTurkishTextCount": 0,
+    "translatedFeaturePanelWaveThirteen": ["HouseholdOperationsPanel"],
+    "translatedFeaturePanelWaveThirteenEnglishVisibleTurkishTextCount": 0,
     "openSurface": "remaining-feature-panel-copy",
-    "openReason": "İlk on sekiz uzman panel iki dilli ve English locale görünür Türkçe metin sayısı sıfırdır; kalan geniş özellik panellerindeki tarihsel Türkçe metinler henüz bütünüyle taşınmadı.",
+    "openReason": "İlk on dokuz uzman panel iki dilli ve English locale görünür Türkçe metin sayısı sıfırdır; kalan geniş özellik panellerindeki tarihsel Türkçe metinler henüz bütünüyle taşınmadı.",
     "countsAsFullApplicationEnglishPass": false
   },
   "failClosed": true,

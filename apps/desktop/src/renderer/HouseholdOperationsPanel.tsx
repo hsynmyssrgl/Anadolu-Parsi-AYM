@@ -9,33 +9,7 @@ import type {
   HouseholdOperationsCenterView
 } from '@ppt/domain';
 import { Button, EmptyState, SectionHeader, StatusMessage, Surface } from './ui';
-
-const areaOptions: ReadonlyArray<{ readonly value: HouseholdOperationArea; readonly label: string }> = [
-  { value:'shopping',label:'Alışveriş' },
-  { value:'inventory',label:'Stok' },
-  { value:'meals',label:'Öğün ve tarif' },
-  { value:'chores',label:'Görev ve rutin' },
-  { value:'expenses',label:'Giderler' },
-  { value:'deliveries',label:'Teslimatlar' },
-  { value:'guests',label:'Misafir erişimi' },
-  { value:'pets',label:'Evcil hayvan' }
-];
-
-const kindsByArea: Readonly<Record<HouseholdOperationArea, ReadonlyArray<{ readonly value: HouseholdOperationKind; readonly label: string }>>> = {
-  shopping: [{ value:'shopping_list',label:'Alışveriş listesi' },{ value:'shopping_item',label:'Liste öğesi' }],
-  inventory: [{ value:'stock_item',label:'Stok öğesi' }],
-  meals: [{ value:'recipe',label:'Tarif' },{ value:'meal_plan',label:'Öğün planı' }],
-  chores: [{ value:'chore',label:'Ev görevi' },{ value:'routine',label:'Tekrarlanan rutin' }],
-  expenses: [{ value:'bill',label:'Fatura' },{ value:'subscription',label:'Abonelik' },{ value:'shared_expense',label:'Paylaşılan gider' }],
-  deliveries: [{ value:'delivery',label:'Teslimat takibi' }],
-  guests: [{ value:'guest_access',label:'Misafir erişim planı' }],
-  pets: [{ value:'pet_care',label:'Evcil hayvan bakımı' }]
-};
-
-const statusLabels: Readonly<Record<HouseholdOperationStatus,string>> = {
-  planned:'Planlandı',active:'Etkin',low_stock:'Azaldı',due:'Bekliyor',completed:'Tamamlandı',
-  cancelled:'İptal edildi',expired:'Süresi doldu',delivered:'Teslim edildi',revoked:'Geri alındı',deleted:'Silindi'
-};
+import { selectUiCopy, useLocalization } from './localization';
 
 const splitText = (value:string):readonly string[] => [...new Set(value.split(',').map((part)=>part.normalize('NFKC').trim()).filter(Boolean))];
 const isoOrUndefined = (value:string):string|undefined => {
@@ -43,9 +17,9 @@ const isoOrUndefined = (value:string):string|undefined => {
   const parsed=new Date(value);
   return Number.isFinite(parsed.getTime())?parsed.toISOString():undefined;
 };
-const formatDate = (value:string|undefined):string => value
-  ? new Intl.DateTimeFormat('tr-TR',{dateStyle:'medium',timeStyle:'short'}).format(new Date(value))
-  : 'Tarih yok';
+const formatDate = (value:string|undefined,locale:string,noDate:string):string => value
+  ? new Intl.DateTimeFormat(locale,{dateStyle:'medium',timeStyle:'short'}).format(new Date(value))
+  : noDate;
 
 interface PendingCreate {
   readonly fingerprint:string;
@@ -55,6 +29,24 @@ interface PendingCreate {
 }
 
 export function HouseholdOperationsPanel({people}:{readonly people:readonly FamilyMemberView[]}){
+  const { language, locale }=useLocalization();const text=(turkish:string,english:string)=>selectUiCopy(language,turkish,english);
+  const areaOptions: ReadonlyArray<{ readonly value: HouseholdOperationArea; readonly label: string }> = [
+    { value:'shopping',label:text('Alışveriş','Shopping') },{ value:'inventory',label:text('Stok','Inventory') },
+    { value:'meals',label:text('Öğün ve tarif','Meals and recipes') },{ value:'chores',label:text('Görev ve rutin','Chores and routines') },
+    { value:'expenses',label:text('Giderler','Expenses') },{ value:'deliveries',label:text('Teslimatlar','Deliveries') },
+    { value:'guests',label:text('Misafir erişimi','Guest access') },{ value:'pets',label:text('Evcil hayvan','Pets') }
+  ];
+  const kindsByArea: Readonly<Record<HouseholdOperationArea, ReadonlyArray<{ readonly value: HouseholdOperationKind; readonly label: string }>>> = {
+    shopping: [{ value:'shopping_list',label:text('Alışveriş listesi','Shopping list') },{ value:'shopping_item',label:text('Liste öğesi','List item') }],
+    inventory: [{ value:'stock_item',label:text('Stok öğesi','Stock item') }],meals: [{ value:'recipe',label:text('Tarif','Recipe') },{ value:'meal_plan',label:text('Öğün planı','Meal plan') }],
+    chores: [{ value:'chore',label:text('Ev görevi','Chore') },{ value:'routine',label:text('Tekrarlanan rutin','Recurring routine') }],
+    expenses: [{ value:'bill',label:text('Fatura','Bill') },{ value:'subscription',label:text('Abonelik','Subscription') },{ value:'shared_expense',label:text('Paylaşılan gider','Shared expense') }],
+    deliveries: [{ value:'delivery',label:text('Teslimat takibi','Delivery tracking') }],guests: [{ value:'guest_access',label:text('Misafir erişim planı','Guest access plan') }],pets: [{ value:'pet_care',label:text('Evcil hayvan bakımı','Pet care') }]
+  };
+  const statusLabels: Readonly<Record<HouseholdOperationStatus,string>> = {
+    planned:text('Planlandı','Planned'),active:text('Etkin','Active'),low_stock:text('Azaldı','Low stock'),due:text('Bekliyor','Due'),completed:text('Tamamlandı','Completed'),
+    cancelled:text('İptal edildi','Canceled'),expired:text('Süresi doldu','Expired'),delivered:text('Teslim edildi','Delivered'),revoked:text('Geri alındı','Revoked'),deleted:text('Silindi','Deleted')
+  };
   const [center,setCenter]=useState<HouseholdOperationsCenterView>();
   const [area,setArea]=useState<HouseholdOperationArea>('shopping');
   const [kind,setKind]=useState<HouseholdOperationKind>('shopping_list');
@@ -64,7 +56,7 @@ export function HouseholdOperationsPanel({people}:{readonly people:readonly Fami
   const [assignedPersonId,setAssignedPersonId]=useState('');
   const [stockCategory,setStockCategory]=useState<'food'|'cleaning'>('food');
   const [quantity,setQuantity]=useState('1');
-  const [unit,setUnit]=useState('adet');
+  const [unit,setUnit]=useState(text('adet','items'));
   const [scheduledAt,setScheduledAt]=useState('');
   const [dueAt,setDueAt]=useState('');
   const [expiresAt,setExpiresAt]=useState('');
@@ -92,7 +84,7 @@ export function HouseholdOperationsPanel({people}:{readonly people:readonly Fami
     if(!window.pardus)return;
     setLoading(true);
     try{setCenter(await window.pardus.getHouseholdOperationsCenter());setMessage('');}
-    catch(error){setCenter(undefined);setTone('danger');setMessage(error instanceof Error?error.message:'Hane operasyonları yüklenemedi.');}
+    catch(error){setCenter(undefined);setTone('danger');setMessage(error instanceof Error?error.message:text('Hane operasyonları yüklenemedi.','Household operations could not be loaded.'));}
     finally{setLoading(false);}
   };
   useEffect(()=>{void reload();},[]);
@@ -156,8 +148,8 @@ export function HouseholdOperationsPanel({people}:{readonly people:readonly Fami
       await window.pardus.createHouseholdOperationItem({
         ...payload,expectedCenterRevision:identity.expectedCenterRevision,clientOperationId:identity.clientOperationId,itemId:identity.itemId
       } as CreateHouseholdOperationItemInput);
-      pendingCreate.current=undefined;setTitle('');setNote('');await reload();setTone('success');setMessage('Yerel hane operasyonu kaydedildi.');
-    }catch(error){setTone('danger');setMessage(`${error instanceof Error?error.message:'Kayıt oluşturulamadı.'} Değişiklik yapmazsanız aynı işlem kimliğiyle yeniden deneyebilirsiniz.`);}
+      pendingCreate.current=undefined;setTitle('');setNote('');await reload();setTone('success');setMessage(text('Yerel hane operasyonu kaydedildi.','The local household operation was saved.'));
+    }catch(error){setTone('danger');setMessage(`${error instanceof Error?error.message:text('Kayıt oluşturulamadı.','The record could not be created.')} ${text('Değişiklik yapmazsanız aynı işlem kimliğiyle yeniden deneyebilirsiniz.','If you make no changes, you can retry with the same operation identifier.')}`);}
     finally{setBusy(false);}
   };
 
@@ -170,60 +162,60 @@ export function HouseholdOperationsPanel({people}:{readonly people:readonly Fami
   const updateStatus=async(item:HouseholdOperationItemView,next:Exclude<HouseholdOperationStatus,'deleted'>)=>{
     if(!window.pardus||busy)return;
     const key=`update:${item.id}`;const identity=mutationIdentity(key,item,next);setBusy(true);setMessage('');
-    try{await window.pardus.updateHouseholdOperationItem({...identity,itemId:item.id,status:next});pendingMutations.current.delete(key);await reload();setTone('success');setMessage('Durum yerel olarak güncellendi.');}
-    catch(error){setTone('danger');setMessage(`${error instanceof Error?error.message:'Durum güncellenemedi.'} Aynı işlem kimliğiyle yeniden deneyebilirsiniz.`);}
+    try{await window.pardus.updateHouseholdOperationItem({...identity,itemId:item.id,status:next});pendingMutations.current.delete(key);await reload();setTone('success');setMessage(text('Durum yerel olarak güncellendi.','The state was updated locally.'));}
+    catch(error){setTone('danger');setMessage(`${error instanceof Error?error.message:text('Durum güncellenemedi.','The state could not be updated.')} ${text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation identifier.')}`);}
     finally{setBusy(false);}
   };
   const remove=async(item:HouseholdOperationItemView)=>{
     if(!window.pardus||busy)return;
-    const reason='Kullanıcı hane operasyonunu yerel görünümden kaldırdı.';const key=`delete:${item.id}`;
+    const reason=text('Kullanıcı hane operasyonunu yerel görünümden kaldırdı.','The user removed the household operation from the local view.');const key=`delete:${item.id}`;
     const identity=mutationIdentity(key,item,reason);setBusy(true);setMessage('');
-    try{await window.pardus.deleteHouseholdOperationItem({...identity,itemId:item.id,reason});pendingMutations.current.delete(key);await reload();setTone('success');setMessage('Kayıt yerel olarak silindi.');}
-    catch(error){setTone('danger');setMessage(`${error instanceof Error?error.message:'Kayıt silinemedi.'} Aynı işlem kimliğiyle yeniden deneyebilirsiniz.`);}
+    try{await window.pardus.deleteHouseholdOperationItem({...identity,itemId:item.id,reason});pendingMutations.current.delete(key);await reload();setTone('success');setMessage(text('Kayıt yerel olarak silindi.','The record was deleted locally.'));}
+    catch(error){setTone('danger');setMessage(`${error instanceof Error?error.message:text('Kayıt silinemedi.','The record could not be deleted.')} ${text('Aynı işlem kimliğiyle yeniden deneyebilirsiniz.','You can retry with the same operation identifier.')}`);}
     finally{setBusy(false);}
   };
 
   return <Surface className="household-operations-panel">
-    <SectionHeader eyebrow="33-T · yerel hane koordinasyonu" title="Hane operasyonları merkezi"/>
+    <SectionHeader eyebrow={text('33-T · yerel hane koordinasyonu','33-T · local household coordination')} title={text('Hane operasyonları merkezi','Household operations center')}/>
     <div className="household-operations-truth" role="note">
-      <strong>Bu merkez kayıt tutar; dış sipariş, ödeme, kargo senkronizasyonu veya uzaktan anahtar kontrolü yapmaz.</strong>
-      <span>Tam takip numarası ve anahtar kodu saklanmaz. Tarif filtresi tıbbi tavsiye değildir; evcil hayvan bakımı dış hizmet teslimi oluşturmaz.</span>
+      <strong>{text('Bu merkez kayıt tutar; dış sipariş, ödeme, kargo senkronizasyonu veya uzaktan anahtar kontrolü yapmaz.','This center stores records; it does not place external orders, process payments, synchronize shipments, or control remote keys.')}</strong>
+      <span>{text('Tam takip numarası ve anahtar kodu saklanmaz. Tarif filtresi tıbbi tavsiye değildir; evcil hayvan bakımı dış hizmet teslimi oluşturmaz.','Full tracking numbers and access codes are not stored. Recipe filtering is not medical advice, and pet-care records do not create an external service delivery.')}</span>
     </div>
-    <nav className="household-area-tabs" aria-label="Hane operasyonu alanları">
+    <nav className="household-area-tabs" aria-label={text('Hane operasyonu alanları','Household operation areas')}>
       {areaOptions.map((option)=><button key={option.value} type="button" className={area===option.value?'is-active':''} aria-pressed={area===option.value} onClick={()=>changeArea(option.value)}>
         <span>{option.label}</span><strong>{center?.countsByArea[option.value]??0}</strong>
       </button>)}
     </nav>
     <div className="household-operations-layout">
-      <section className="household-operation-form" aria-label="Yeni hane operasyonu">
-        <h3>Yeni kayıt</h3>
+      <section className="household-operation-form" aria-label={text('Yeni hane operasyonu','New household operation')}>
+        <h3>{text('Yeni kayıt','New record')}</h3>
         <div className="form-grid">
-          <label>Kayıt türü<select value={kind} onChange={(event)=>changeKind(event.target.value as HouseholdOperationKind)}>{kindsByArea[area].map((option)=><option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
-          <label>Başlık<input value={title} onChange={(event)=>setTitle(event.target.value)} maxLength={160}/></label>
-          <label>Durum<select value={status} onChange={(event)=>setStatus(event.target.value as Exclude<HouseholdOperationStatus,'deleted'>)}><option value="planned">Planlandı</option><option value="active">Etkin</option><option value="due">Bekliyor</option><option value="low_stock">Azaldı</option></select></label>
-          {(kind==='shopping_item'||kind==='meal_plan')&&<label>{kind==='shopping_item'?'Alışveriş listesi':'Bağlı tarif'}<select value={parentItemId} onChange={(event)=>setParentItemId(event.target.value)}><option value="">Seçin</option>{parentOptions.map((entry)=><option key={entry.id} value={entry.id}>{entry.title}</option>)}</select></label>}
-          {kind==='stock_item'&&<><label>Stok türü<select value={stockCategory} onChange={(event)=>setStockCategory(event.target.value as 'food'|'cleaning')}><option value="food">Gıda</option><option value="cleaning">Temizlik</option></select></label><label>Miktar<input type="number" min="0" step="0.01" value={quantity} onChange={(event)=>setQuantity(event.target.value)}/></label><label>Birim<input value={unit} onChange={(event)=>setUnit(event.target.value)} maxLength={32}/></label><label>Son kullanım<input type="datetime-local" value={expiresAt} onChange={(event)=>setExpiresAt(event.target.value)}/></label></>}
-          {kind==='recipe'&&<><label className="span-2">Malzemeler (virgülle)<input value={ingredients} onChange={(event)=>setIngredients(event.target.value)} placeholder="mercimek, soğan, su"/></label><label className="span-2">Alerjen kodları (virgülle)<input value={allergens} onChange={(event)=>setAllergens(event.target.value)} placeholder="gluten, süt"/></label></>}
-          {kind==='meal_plan'&&<><label>Öğün zamanı<input type="datetime-local" value={scheduledAt} onChange={(event)=>setScheduledAt(event.target.value)}/></label><label>Kaçınılan alerjenler<input value={avoidedAllergens} onChange={(event)=>setAvoidedAllergens(event.target.value)} placeholder="gluten, süt"/></label></>}
-          {(kind==='chore'||kind==='routine'||kind==='pet_care'||kind==='shopping_list'||kind==='shopping_item')&&<label>Atanan kişi<select value={assignedPersonId} onChange={(event)=>setAssignedPersonId(event.target.value)}><option value="">Atama yok</option>{people.map((person)=><option key={person.id} value={person.id}>{person.displayName}</option>)}</select></label>}
-          {(kind==='chore'||kind==='routine'||kind==='pet_care'||kind==='shopping_list'||kind==='bill'||kind==='subscription')&&<label>Son tarih<input type="datetime-local" value={dueAt} onChange={(event)=>setDueAt(event.target.value)}/></label>}
-          {(kind==='routine'||kind==='subscription')&&<label>Tekrar bilgisi<input value={recurrence} onChange={(event)=>setRecurrence(event.target.value)} placeholder="Her pazartesi" maxLength={160}/></label>}
-          {(kind==='bill'||kind==='subscription'||kind==='shared_expense')&&<><label>Tutar<input type="number" min="0" step="0.01" value={amount} onChange={(event)=>setAmount(event.target.value)}/></label><label>Para birimi<input value={currency} onChange={(event)=>setCurrency(event.target.value.toLocaleUpperCase('tr-TR'))} maxLength={3}/></label></>}
-          {kind==='shared_expense'&&<label className="span-2">İlk iki aile üyesi arasında ilk kişinin payı: %{shareBasisPoints/100}<input type="range" min="1" max="9999" value={shareBasisPoints} onChange={(event)=>setShareBasisPoints(Number(event.target.value))}/><small>{people[0]?.displayName??'İlk kişi'} %{shareBasisPoints/100} · {people[1]?.displayName??'İkinci kişi'} %{(10_000-shareBasisPoints)/100}</small></label>}
-          {kind==='delivery'&&<><label>Taşıyıcı etiketi<input value={providerLabel} onChange={(event)=>setProviderLabel(event.target.value)} maxLength={120}/></label><label>Takip son dört<input value={trackingLastFour} onChange={(event)=>setTrackingLastFour(event.target.value)} maxLength={4} pattern="[A-Za-z0-9]{4}"/></label></>}
-          {kind==='guest_access'&&<><label>Misafir etiketi<input value={guestLabel} onChange={(event)=>setGuestLabel(event.target.value)} maxLength={120}/></label><label>Erişim alanı<input value={accessArea} onChange={(event)=>setAccessArea(event.target.value)} placeholder="Salon" maxLength={120}/></label><label>Başlangıç<input type="datetime-local" value={scheduledAt} onChange={(event)=>setScheduledAt(event.target.value)}/></label><label>Bitiş<input type="datetime-local" value={dueAt} onChange={(event)=>setDueAt(event.target.value)}/></label></>}
-          {kind==='pet_care'&&<label>Yerel evcil hayvan referansı<input value={petReference} onChange={(event)=>setPetReference(event.target.value)} placeholder="Kedi · Mavi" maxLength={128}/></label>}
-          <label className="span-2">Not<input value={note} onChange={(event)=>setNote(event.target.value)} maxLength={2000}/></label>
+          <label>{text('Kayıt türü','Record type')}<select value={kind} onChange={(event)=>changeKind(event.target.value as HouseholdOperationKind)}>{kindsByArea[area].map((option)=><option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
+          <label>{text('Başlık','Title')}<input value={title} onChange={(event)=>setTitle(event.target.value)} maxLength={160}/></label>
+          <label>{text('Durum','State')}<select value={status} onChange={(event)=>setStatus(event.target.value as Exclude<HouseholdOperationStatus,'deleted'>)}><option value="planned">{text('Planlandı','Planned')}</option><option value="active">{text('Etkin','Active')}</option><option value="due">{text('Bekliyor','Due')}</option><option value="low_stock">{text('Azaldı','Low stock')}</option></select></label>
+          {(kind==='shopping_item'||kind==='meal_plan')&&<label>{kind==='shopping_item'?text('Alışveriş listesi','Shopping list'):text('Bağlı tarif','Linked recipe')}<select value={parentItemId} onChange={(event)=>setParentItemId(event.target.value)}><option value="">{text('Seçin','Select')}</option>{parentOptions.map((entry)=><option key={entry.id} value={entry.id}>{entry.title}</option>)}</select></label>}
+          {kind==='stock_item'&&<><label>{text('Stok türü','Stock type')}<select value={stockCategory} onChange={(event)=>setStockCategory(event.target.value as 'food'|'cleaning')}><option value="food">{text('Gıda','Food')}</option><option value="cleaning">{text('Temizlik','Cleaning')}</option></select></label><label>{text('Miktar','Quantity')}<input type="number" min="0" step="0.01" value={quantity} onChange={(event)=>setQuantity(event.target.value)}/></label><label>{text('Birim','Unit')}<input value={unit} onChange={(event)=>setUnit(event.target.value)} maxLength={32}/></label><label>{text('Son kullanım','Expiry')}<input type="datetime-local" value={expiresAt} onChange={(event)=>setExpiresAt(event.target.value)}/></label></>}
+          {kind==='recipe'&&<><label className="span-2">{text('Malzemeler (virgülle)','Ingredients (comma separated)')}<input value={ingredients} onChange={(event)=>setIngredients(event.target.value)} placeholder={text('mercimek, soğan, su','lentils, onion, water')}/></label><label className="span-2">{text('Alerjen kodları (virgülle)','Allergen codes (comma separated)')}<input value={allergens} onChange={(event)=>setAllergens(event.target.value)} placeholder={text('gluten, süt','gluten, milk')}/></label></>}
+          {kind==='meal_plan'&&<><label>{text('Öğün zamanı','Meal time')}<input type="datetime-local" value={scheduledAt} onChange={(event)=>setScheduledAt(event.target.value)}/></label><label>{text('Kaçınılan alerjenler','Avoided allergens')}<input value={avoidedAllergens} onChange={(event)=>setAvoidedAllergens(event.target.value)} placeholder={text('gluten, süt','gluten, milk')}/></label></>}
+          {(kind==='chore'||kind==='routine'||kind==='pet_care'||kind==='shopping_list'||kind==='shopping_item')&&<label>{text('Atanan kişi','Assigned person')}<select value={assignedPersonId} onChange={(event)=>setAssignedPersonId(event.target.value)}><option value="">{text('Atama yok','Not assigned')}</option>{people.map((person)=><option key={person.id} value={person.id}>{person.displayName}</option>)}</select></label>}
+          {(kind==='chore'||kind==='routine'||kind==='pet_care'||kind==='shopping_list'||kind==='bill'||kind==='subscription')&&<label>{text('Son tarih','Due date')}<input type="datetime-local" value={dueAt} onChange={(event)=>setDueAt(event.target.value)}/></label>}
+          {(kind==='routine'||kind==='subscription')&&<label>{text('Tekrar bilgisi','Recurrence')}<input value={recurrence} onChange={(event)=>setRecurrence(event.target.value)} placeholder={text('Her pazartesi','Every Monday')} maxLength={160}/></label>}
+          {(kind==='bill'||kind==='subscription'||kind==='shared_expense')&&<><label>{text('Tutar','Amount')}<input type="number" min="0" step="0.01" value={amount} onChange={(event)=>setAmount(event.target.value)}/></label><label>{text('Para birimi','Currency')}<input value={currency} onChange={(event)=>setCurrency(event.target.value.toLocaleUpperCase(locale))} maxLength={3}/></label></>}
+          {kind==='shared_expense'&&<label className="span-2">{text('İlk iki aile üyesi arasında ilk kişinin payı','First person share among the first two family members')}: %{shareBasisPoints/100}<input type="range" min="1" max="9999" value={shareBasisPoints} onChange={(event)=>setShareBasisPoints(Number(event.target.value))}/><small>{people[0]?.displayName??text('İlk kişi','First person')} %{shareBasisPoints/100} · {people[1]?.displayName??text('İkinci kişi','Second person')} %{(10_000-shareBasisPoints)/100}</small></label>}
+          {kind==='delivery'&&<><label>{text('Taşıyıcı etiketi','Carrier label')}<input value={providerLabel} onChange={(event)=>setProviderLabel(event.target.value)} maxLength={120}/></label><label>{text('Takip son dört','Last four tracking characters')}<input value={trackingLastFour} onChange={(event)=>setTrackingLastFour(event.target.value)} maxLength={4} pattern="[A-Za-z0-9]{4}"/></label></>}
+          {kind==='guest_access'&&<><label>{text('Misafir etiketi','Guest label')}<input value={guestLabel} onChange={(event)=>setGuestLabel(event.target.value)} maxLength={120}/></label><label>{text('Erişim alanı','Access area')}<input value={accessArea} onChange={(event)=>setAccessArea(event.target.value)} placeholder={text('Salon','Living room')} maxLength={120}/></label><label>{text('Başlangıç','Start')}<input type="datetime-local" value={scheduledAt} onChange={(event)=>setScheduledAt(event.target.value)}/></label><label>{text('Bitiş','End')}<input type="datetime-local" value={dueAt} onChange={(event)=>setDueAt(event.target.value)}/></label></>}
+          {kind==='pet_care'&&<label>{text('Yerel evcil hayvan referansı','Local pet reference')}<input value={petReference} onChange={(event)=>setPetReference(event.target.value)} placeholder={text('Kedi · Mavi','Cat · Blue')} maxLength={128}/></label>}
+          <label className="span-2">{text('Not','Note')}<input value={note} onChange={(event)=>setNote(event.target.value)} maxLength={2000}/></label>
         </div>
-        <Button tone="primary" onClick={()=>void create()} disabled={!createReady||busy}>{busy?'Kaydediliyor…':'Yerel kayıt oluştur'}</Button>
-        {kind==='shared_expense'&&people.length<2&&<StatusMessage tone="danger">Paylaşılan gider için en az iki etkin aile üyesi gerekir.</StatusMessage>}
+        <Button tone="primary" onClick={()=>void create()} disabled={!createReady||busy}>{busy?text('Kaydediliyor…','Saving…'):text('Yerel kayıt oluştur','Create local record')}</Button>
+        {kind==='shared_expense'&&people.length<2&&<StatusMessage tone="danger">{text('Paylaşılan gider için en az iki etkin aile üyesi gerekir.','A shared expense requires at least two active family members.')}</StatusMessage>}
       </section>
       <section className="household-operation-list" aria-live="polite">
-        <div className="household-list-heading"><h3>{areaOptions.find((option)=>option.value===area)?.label}</h3><Button onClick={()=>void reload()} disabled={loading||busy}>{loading?'Yükleniyor…':'Yenile'}</Button></div>
+        <div className="household-list-heading"><h3>{areaOptions.find((option)=>option.value===area)?.label}</h3><Button onClick={()=>void reload()} disabled={loading||busy}>{loading?text('Yükleniyor…','Loading…'):text('Yenile','Refresh')}</Button></div>
         {message&&<StatusMessage tone={tone}>{message}</StatusMessage>}
-        {!loading&&areaItems.length===0?<EmptyState title="Bu alanda kayıt yok" body="Soldaki formdan yerel ve aile kapsamlı bir operasyon ekleyin."/>:<div className="stack-list">{areaItems.map((entry)=><div className="household-operation-row" key={entry.id}>
-          <div><strong>{entry.title}</strong><small>{statusLabels[entry.status]} · revizyon {entry.revision}{entry.assignedPersonId?` · ${people.find((person)=>person.id===entry.assignedPersonId)?.displayName??'Atanan kişi'}`:''}</small><small>{entry.quantity!==undefined?`${entry.quantity} ${entry.unit??''} · `:''}{entry.amountMinor!==undefined?`${(entry.amountMinor/100).toLocaleString('tr-TR',{minimumFractionDigits:2})} ${entry.currency} · `:''}{entry.trackingLastFour?`takip ••••${entry.trackingLastFour} · `:''}{entry.expiresAt?`son kullanım ${formatDate(entry.expiresAt)} · `:''}{entry.dueAt?formatDate(entry.dueAt):entry.scheduledAt?formatDate(entry.scheduledAt):entry.note??''}</small></div>
-          <div className="household-row-actions"><Button onClick={()=>void updateStatus(entry,entry.kind==='delivery'?'delivered':entry.kind==='guest_access'?'revoked':'completed')} disabled={busy||['completed','delivered','revoked'].includes(entry.status)}>Tamamla</Button><Button tone="danger" onClick={()=>void remove(entry)} disabled={busy}>Sil</Button></div>
+        {!loading&&areaItems.length===0?<EmptyState title={text('Bu alanda kayıt yok','No records in this area')} body={text('Soldaki formdan yerel ve aile kapsamlı bir operasyon ekleyin.','Use the form on the left to add a local, family-scoped operation.')}/>:<div className="stack-list">{areaItems.map((entry)=><div className="household-operation-row" key={entry.id}>
+          <div><strong>{entry.title}</strong><small>{statusLabels[entry.status]} · {text('revizyon','revision')} {entry.revision}{entry.assignedPersonId?` · ${people.find((person)=>person.id===entry.assignedPersonId)?.displayName??text('Atanan kişi','Assigned person')}`:''}</small><small>{entry.quantity!==undefined?`${entry.quantity} ${entry.unit??''} · `:''}{entry.amountMinor!==undefined?`${(entry.amountMinor/100).toLocaleString(locale,{minimumFractionDigits:2})} ${entry.currency} · `:''}{entry.trackingLastFour?`${text('takip','tracking')} ••••${entry.trackingLastFour} · `:''}{entry.expiresAt?`${text('son kullanım','expiry')} ${formatDate(entry.expiresAt,locale,text('Tarih yok','No date'))} · `:''}{entry.dueAt?formatDate(entry.dueAt,locale,text('Tarih yok','No date')):entry.scheduledAt?formatDate(entry.scheduledAt,locale,text('Tarih yok','No date')):entry.note??''}</small></div>
+          <div className="household-row-actions"><Button onClick={()=>void updateStatus(entry,entry.kind==='delivery'?'delivered':entry.kind==='guest_access'?'revoked':'completed')} disabled={busy||['completed','delivered','revoked'].includes(entry.status)}>{text('Tamamla','Complete')}</Button><Button tone="danger" onClick={()=>void remove(entry)} disabled={busy}>{text('Sil','Delete')}</Button></div>
         </div>)}</div>}
       </section>
     </div>

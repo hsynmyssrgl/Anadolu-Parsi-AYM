@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-INGILIZCE-UZMAN-PANEL-DALGA-ON-UC-20260819-01",
+  "executedAt": "2026-08-19T16:53:00+03:00",
+  "repositoryBaseCommitAtExecution": "567701a2235bdcc4fec32479bf500ba5ba68db6a",
+  "workItem": "IS-0106",
+  "result": {"status":"PASS_WITH_REMAINING_PANELS_OPEN","targetedTestFilesPassed":1,"targetedTestFilesTotal":1,"targetedTestsPassed":2,"targetedTestsTotal":2,"desktopTypecheck":"PASS"},
+  "translatedPanels": ["HouseholdOperationsPanel"],
+  "englishLocaleVisibleTurkishCharacterCount": 0,
+  "turkishLocalePreserved": true,
+  "remainingFeaturePanelsOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "On ucuncu dalga hane operasyonlari panelinde iki dilli gorunur metin kapisini tamamlar; kalan paneller aciktir."
+}
