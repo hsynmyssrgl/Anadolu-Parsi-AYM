@@ -452,6 +452,16 @@
       "uretimZamani": "2026-08-19T18:48:00+03:00",
       "disKaynak": false,
       "not": "Veri Yasam Dongusu yonetici yuzeyi English locale renderinda gorunur Turkce karakter sifir; fiziksel imha ve dis kopya sinirlari korunur."
+    },
+    {
+      "id": "KANIT-0046",
+      "tur": "TEST",
+      "kapsam": "English ana uygulama kabugu yerellestirme on birinci dalgasi",
+      "durum": "PASS_WITH_REMAINING_APP_SHELL_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/45_INGILIZCE_ANA_KABUK_DALGA_ON_BIR_KANITI.json",
+      "uretimZamani": "2026-08-19T18:59:46+03:00",
+      "disKaynak": false,
+      "not": "Sistem, Bakim ve Operasyon merkezi English locale renderinda gorunur Turkce karakter sifir; fabrika ayari ve fail-closed politika sinirlari korunur."
     }
   ]
 }
