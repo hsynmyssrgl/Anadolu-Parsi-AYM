@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-INGILIZCE-ANA-KABUK-DALGA-ON-ALTI-20260819-01",
+  "executedAt": "2026-08-19T19:27:01+03:00",
+  "repositoryBaseCommitAtExecution": "af17712c499530e7464fbb78aa472b1ab8c29618",
+  "workItem": "IS-0106",
+  "result": {"status":"PASS_WITH_REMAINING_APP_SHELL_OPEN","targetedTestFilesPassed":2,"targetedTestFilesTotal":2,"targetedTestsPassed":6,"targetedTestsTotal":6,"desktopTypecheck":"PASS"},
+  "translatedSurfaces": ["HouseholdMembershipScreen", "PersonLifecycleScreen", "InvitationsScreen"],
+  "englishLocaleVisibleTurkishCharacterCount": 0,
+  "turkishLocalePreserved": true,
+  "historicalMembershipSemanticsPreserved": true,
+  "reversibleProfileLifecycleSemanticsPreserved": true,
+  "oneTimeInvitationSemanticsPreserved": true,
+  "remainingApplicationShellAuditOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "Ana kabuk on altinci dalga Hane/Uyelik, Kisi Yasam Dongusu ve Profil Davetleri yuzeylerini iki dilli hale getirir."
+}

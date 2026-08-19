@@ -502,6 +502,16 @@
       "uretimZamani": "2026-08-19T19:22:05+03:00",
       "disKaynak": false,
       "not": "Veri Onarma Merkezi ve oturum kilidi English locale renderinda gorunur Turkce karakter sifir; onizleme, geri alma ve yeniden dogrulama sinirlari korunur."
+    },
+    {
+      "id": "KANIT-0051",
+      "tur": "TEST",
+      "kapsam": "English ana uygulama kabugu yerellestirme on altinci dalgasi",
+      "durum": "PASS_WITH_REMAINING_APP_SHELL_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/50_INGILIZCE_ANA_KABUK_DALGA_ON_ALTI_KANITI.json",
+      "uretimZamani": "2026-08-19T19:27:01+03:00",
+      "disKaynak": false,
+      "not": "Hane/Uyelik, Kisi Yasam Dongusu ve Profil Davetleri yuzeyleri English locale renderinda gorunur Turkce karakter sifir; tarihceli uyelik, geri alinabilir profil ve tek kullanimlik davet semantigi korunur."
     }
   ]
 }

@@ -138,8 +138,10 @@
     "translatedApplicationShellWaveFourteenEnglishVisibleTurkishTextCount": 0,
     "translatedApplicationShellWaveFifteen": ["DataRepairScreen", "SessionLockOverlay"],
     "translatedApplicationShellWaveFifteenEnglishVisibleTurkishTextCount": 0,
+    "translatedApplicationShellWaveSixteen": ["HouseholdMembershipScreen", "PersonLifecycleScreen", "InvitationsScreen"],
+    "translatedApplicationShellWaveSixteenEnglishVisibleTurkishTextCount": 0,
     "openSurface": "remaining-feature-panel-copy",
-    "openReason": "İlk yirmi dört uzman panel ile ana pano, kişi kataloğu, aile, soy ağacı, zaman tüneli, önemli günler, birleşik yetkili arama, Doküman Merkezi, ilk kurulum/giriş, aile daveti, ilişki ekleme, dijital miras, AI izin merkezi, yönetilen taslak merkezi, Windows Hello, geçersiz menü hedefi, Veri Yaşam Döngüsü, Sistem/Bakım, Gizlilik/Sahiplik, aile olay/konum, Sağlık, Yaşam, Otomasyon, Raporlama, Veri Onarma ve Oturum Kilidi yüzeyleri iki dillidir; ana uygulama kabuğunun kalan ekranlarındaki tarihsel görünür Türkçe metinlerin son taraması sürmektedir.",
+    "openReason": "İlk yirmi dört uzman panel ile ana pano, kişi kataloğu, aile, soy ağacı, zaman tüneli, önemli günler, birleşik yetkili arama, Doküman Merkezi, ilk kurulum/giriş, aile daveti, ilişki ekleme, dijital miras, AI izin merkezi, yönetilen taslak merkezi, Windows Hello, geçersiz menü hedefi, Veri Yaşam Döngüsü, Sistem/Bakım, Gizlilik/Sahiplik, aile olay/konum, Sağlık, Yaşam, Otomasyon, Raporlama, Veri Onarma, Oturum Kilidi, Hane/Üyelik, Kişi Yaşam Döngüsü ve Profil Davetleri yüzeyleri iki dillidir; ana uygulama kabuğunun kalan ekranlarındaki tarihsel görünür Türkçe metinlerin son taraması sürmektedir.",
     "countsAsFullApplicationEnglishPass": false
   },
   "failClosed": true,
