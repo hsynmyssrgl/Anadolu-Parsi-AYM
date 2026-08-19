@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-SURUM-PALET-EKRAN-GORUNTULERI-V1",
+  "renderer": "electron-capturePage",
+  "platform": "win32",
+  "electronVersion": "43.2.0",
+  "viewport": {
+    "width": 1280,
+    "height": 800,
+    "zoomFactor": 1,
+    "deviceScaleFactor": 1
+  },
+  "networkUsed": false,
+  "userOrDemoDataIncluded": false,
+  "sourceCssSha256": "fd256f45d730517421e7848e0ba59b26d5b60c3b00e81e9b055a5c7b96efaf48",
+  "visualManifestSha256": "38ba569894559d37670b179cad3f44a3038205100094ef40d05df5b48af2a3a8",
+  "entries": [
+    {
+      "channel": "Bronze",
+      "path": "apps/desktop/tests/fixtures/surum-paletleri/bronze-palet-ekran-goruntusu.png",
+      "sha256": "324d4e2e593e699d3730c70e1b4f107e43eec994810c29d47956926f7e9b7c6d",
+      "width": 1280,
+      "height": 800,
+      "bytes": 260065,
+      "computedTokens": {
+        "background": "#F4F3F0",
+        "panel": "#FDFDFC",
+        "panel-secondary": "#F7F5F1",
+        "text": "#333537",
+        "muted": "#676B6A",
+        "border": "#8E8A82",
+        "accent": "#A5672F",
+        "accent-soft": "#FFD39B",
+        "accent-edge": "#DC9852",
+        "accent-strong": "#71441F",
+        "primary": "#467259",
+        "primary-hover": "#36563F",
+        "focus": "#3979E6"
+      }
+    },
+    {
+      "channel": "Silver",
+      "path": "apps/desktop/tests/fixtures/surum-paletleri/silver-palet-ekran-goruntusu.png",
+      "sha256": "a83e8f992705a41fe46c535a9b9f563421aaf393e704358bbae6e5de72456527",
+      "width": 1280,
+      "height": 800,
+      "bytes": 260277,
+      "computedTokens": {
+        "background": "#F2F4F5",
+        "panel": "#FCFDFD",
+        "panel-secondary": "#E9EEF1",
+        "text": "#30383E",
+        "muted": "#5F6B73",
+        "border": "#7C8992",
+        "accent": "#718494",
+        "accent-soft": "#D4DDE4",
+        "accent-edge": "#AEBCC7",
+        "accent-strong": "#4F5F6B",
+        "primary": "#607888",
+        "primary-hover": "#4F6573",
+        "focus": "#3979E6"
+      }
+    },
+    {
+      "channel": "Gold",
+      "path": "apps/desktop/tests/fixtures/surum-paletleri/gold-palet-ekran-goruntusu.png",
+      "sha256": "2f833ac67189e960172584da555ed91ba04ca74c077ac8204f54175fb58c0179",
+      "width": 1280,
+      "height": 800,
+      "bytes": 261946,
+      "computedTokens": {
+        "background": "#F7F3E8",
+        "panel": "#FFFDF6",
+        "panel-secondary": "#FAF5E7",
+        "text": "#3B3527",
+        "muted": "#746B58",
+        "border": "#8D7D50",
+        "accent": "#A57E17",
+        "accent-soft": "#FFE9A0",
+        "accent-edge": "#F0CC58",
+        "accent-strong": "#6E5411",
+        "primary": "#8A6A18",
+        "primary-hover": "#6E5411",
+        "focus": "#3979E6"
+      }
+    }
+  ]
+}

@@ -17,7 +17,7 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 | ID | Is | Sorumlu | Durum | Kabul |
 |---|---|---|---|---|
 | IS-0101 | ParsYuva AYM marka tutarliligi | Codex | TAMAMLANDI | Pencere/installer/yardim/rapor ayni ad |
-| IS-0102 | Bronze/Silver/Gold merkezi tema tokenlari | Codex | DEVAM | 3 kanal kontrast ve screenshot testi |
+| IS-0102 | Bronze/Silver/Gold merkezi tema tokenlari | Codex | TAMAMLANDI | Token, kontrast, build ve sabit DPI ekran goruntusu matrisi PASS |
 | IS-0103 | Acik beyaz zemin ve saydamlik sistemi | Codex | ACIK | Reduced motion/transparency ile UAT |
 | IS-0104 | Sol/alt/sag tipografi orani | Codex | ACIK | %200 zoomda tasma yok |
 | IS-0105 | Tum menu-islev parite taramasi | Codex | TAMAMLANDI | Yetim menu/API sayisi 0 |

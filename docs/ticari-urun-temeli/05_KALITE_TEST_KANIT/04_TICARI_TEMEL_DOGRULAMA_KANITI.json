@@ -9,10 +9,10 @@
   "canonicalRuleSha256": "b79db92a03d559f33ccd49348bad159a70b6034fbcf10a07abe5a407549bf0be",
   "decision": "DEC-259",
   "workItemCount": 49,
-  "fileCount": 46,
-  "sourceFileCount": 45,
-  "sourceFingerprintSha256": "f5f56bf2e293a56566cbab7e05227236502f78cfb61c95a27883fb85cc8f705a",
-  "checks": 723,
+  "fileCount": 47,
+  "sourceFileCount": 46,
+  "sourceFingerprintSha256": "820e507cce9c491d3b7b66052d0f6402d24632492de45a3e3861be5c3eb55feb",
+  "checks": 731,
   "status": "PASS",
   "commercialReleaseEligible": false,
   "externalEvidenceDefaultsToNotRun": true,
@@ -105,8 +105,8 @@
     },
     {
       "path": "04_URUN_TASARIMI/02_SURUM_RENK_PALETLERI.md",
-      "bytes": 1704,
-      "sha256": "c9d54e68347abcaa42da8c12b5714eb7cfbb11279c906df6acdb55997b404bf6"
+      "bytes": 3360,
+      "sha256": "00cc2ab40f4a349d2fd48b82197b913e532f43e5caa1dd3ccb730fb6e8fba9a9"
     },
     {
       "path": "05_KALITE_TEST_KANIT/01_TEST_VE_KABUL_STRATEJISI.md",
@@ -120,8 +120,8 @@
     },
     {
       "path": "05_KALITE_TEST_KANIT/03_KANIT_SICILI.json",
-      "bytes": 5736,
-      "sha256": "31d8e7d06d5b72a6980653a579167acdb757c37c7054b1c8133dade43d1096ad"
+      "bytes": 6191,
+      "sha256": "6fc66ae777bdf3eb68a070c9a1b20488a19996e2fedaafd3095271075cbc52ab"
     },
     {
       "path": "05_KALITE_TEST_KANIT/05_GIT_YEDEK_DOGRULAMA_KANITI.json",
@@ -169,6 +169,11 @@
       "sha256": "064b20b0c54d46f68cc901bd7e2976bb08c3e335823ee291fb97b73079eef630"
     },
     {
+      "path": "05_KALITE_TEST_KANIT/14_SURUM_PALET_KONTRAST_KANITI.json",
+      "bytes": 1843,
+      "sha256": "7449e5a1c819729b4bdfb37943cecd3d73499b636ae477a8567793e074e1a83f"
+    },
+    {
       "path": "06_DIS_KAYNAK_VE_LISANS/01_TICARI_LISANS_ENVANTERI.md",
       "bytes": 3440,
       "sha256": "3bcbdfd7eea28bd097c28396336eb3637c73386bd9b72b465a1049a8353ee18b"
@@ -195,8 +200,8 @@
     },
     {
       "path": "08_IS_LISTESI/01_ANA_IS_LISTESI.md",
-      "bytes": 6366,
-      "sha256": "d359e15cda1ebeeb1d7be3ad8b63858196efd3ffaf21dbea517d4fe3f58bd290"
+      "bytes": 6399,
+      "sha256": "8751c0f6453b0a6dc2b88e9249ff41c0ff0e21b27dca2f1b40470ca348d18392"
     },
     {
       "path": "08_IS_LISTESI/02_DIS_KAYNAK_GEREKTIREN_ISLER.md",
@@ -205,8 +210,8 @@
     },
     {
       "path": "08_IS_LISTESI/03_ANA_IS_SICILI.json",
-      "bytes": 16586,
-      "sha256": "6be48b2a19f62711acb737b134a3600cb13ee5c50ef5135196983e104660ae0e"
+      "bytes": 16693,
+      "sha256": "11beea1d62ed39a2a9b1eb41443835b3bcf253ae008ff5030d0b54c889212765"
     },
     {
       "path": "08_IS_LISTESI/04_IS_YURUTME_SIRASI.md",
@@ -244,5 +249,5 @@
       "sha256": "3b489e065d5b3cc6d84a81ac26775a144c0babca825dbd943364c74f7f309527"
     }
   ],
-  "generatedAt": "2026-08-19T12:19:22.005Z"
+  "generatedAt": "2026-08-19T12:38:27.286Z"
 }

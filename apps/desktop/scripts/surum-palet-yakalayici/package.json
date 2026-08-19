@@ -1,0 +1,6 @@
+{
+  "name": "parsyuva-aym-surum-palet-yakalayici",
+  "private": true,
+  "type": "module",
+  "main": "palet-yakalayici.cjs"
+}

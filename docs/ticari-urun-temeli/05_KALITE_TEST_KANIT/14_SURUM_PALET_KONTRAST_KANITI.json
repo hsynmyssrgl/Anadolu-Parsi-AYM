@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-SURUM-PALET-KONTRAST-20260819-01",
+  "executedAt": "2026-08-19T15:23:18+03:00",
+  "repositoryBaseCommitAtExecution": "a4adcf6583095d44b8e6ab8ebf71e124a19ead43",
+  "workItem": "IS-0102",
+  "result": {
+    "status": "PASS",
+    "targetedTestFilesPassed": 2,
+    "targetedTestFilesTotal": 2,
+    "targetedTestsPassed": 12,
+    "targetedTestsTotal": 12,
+    "desktopTypecheck": "PASS",
+    "rendererProductionBuild": "PASS"
+  },
+  "minimumContrast": {
+    "normalAndMutedText": "4.5:1",
+    "primaryButtonText": "4.5:1",
+    "accentText": "4.5:1",
+    "requiredControlBoundary": "3:1",
+    "keyboardFocusIndicator": "3:1"
+  },
+  "screenshotMatrix": {
+    "renderer": "Electron 43.2.0 capturePage",
+    "platform": "win32",
+    "viewport": "1280x800 at device scale factor 1",
+    "networkUsed": false,
+    "userOrDemoDataIncluded": false,
+    "BronzeSha256": "324d4e2e593e699d3730c70e1b4f107e43eec994810c29d47956926f7e9b7c6d",
+    "SilverSha256": "a83e8f992705a41fe46c535a9b9f563421aaf393e704358bbae6e5de72456527",
+    "GoldSha256": "2f833ac67189e960172584da555ed91ba04ca74c077ac8204f54175fb58c0179"
+  },
+  "verified": [
+    "Bronze Silver and Gold palettes are selected only through release tokens",
+    "later light-theme rules cannot restore Bronze-only border or action colors",
+    "opaque high-contrast and unsupported-backdrop fallbacks remain present",
+    "production renderer build consumes the corrected palette CSS",
+    "three full-shell Electron PNG files have exact dimensions SHA-256 and computed-token bindings",
+    "the three channel screenshots are byte-distinct and future drift fails the visual contract test"
+  ],
+  "open": [],
+  "requirementPass": true,
+  "note": "Kontrast, merkezi token zinciri ve sabit Windows DPI tam-shell ekran goruntusu matrisi otomatik olarak PASS."
+}

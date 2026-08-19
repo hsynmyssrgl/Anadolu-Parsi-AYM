@@ -13,6 +13,9 @@ Uygulama, installer, tanitim, yardim ve raporlar etkin surum kanalini ana koddan
 | `--release-accent-soft` | `#FFD39B` | Secili zemin |
 | `--release-accent-edge` | `#DC9852` | Ikincil vurgu |
 | `--release-primary` | `#467259` | Ana eylem |
+| `--release-muted` | `#676B6A` | Kucuk metin; acik zeminde AA |
+| `--release-border` | `#8E8A82` | Zorunlu kontrol siniri; 3:1 |
+| `--release-focus` | `#3979E6` | Klavye odagi; 3:1 |
 
 ## Silver
 
@@ -23,6 +26,9 @@ Uygulama, installer, tanitim, yardim ve raporlar etkin surum kanalini ana koddan
 | `--release-accent-soft` | `#D4DDE4` | Secili zemin |
 | `--release-accent-edge` | `#AEBCC7` | Ikincil vurgu |
 | `--release-primary` | `#607888` | Ana eylem |
+| `--release-muted` | `#5F6B73` | Kucuk metin; acik zeminde AA |
+| `--release-border` | `#7C8992` | Zorunlu kontrol siniri; 3:1 |
+| `--release-focus` | `#3979E6` | Klavye odagi; 3:1 |
 
 ## Gold
 
@@ -33,6 +39,9 @@ Uygulama, installer, tanitim, yardim ve raporlar etkin surum kanalini ana koddan
 | `--release-accent-soft` | `#FFE9A0` | Secili zemin |
 | `--release-accent-edge` | `#F0CC58` | Ikincil vurgu |
 | `--release-primary` | `#8A6A18` | Ana eylem |
+| `--release-muted` | `#746B58` | Kucuk metin; acik zeminde AA |
+| `--release-border` | `#8D7D50` | Zorunlu kontrol siniri; 3:1 |
+| `--release-focus` | `#3979E6` | Klavye odagi; 3:1 |
 
 ## Saydamlik
 
@@ -44,3 +53,17 @@ Apple benzeri saydamlik; beyaz zemin uzerinde hafif blur, sinir ve golge olarak 
 - Installer buyuk renk alani etkin kanal rengindedir.
 - Mavi varsayilan NSIS gorseli kalmaz.
 - Ekran goruntusu kontrast ve tema snapshot testi her kanal icin kosar.
+- Normal ve sessiz metin kontrasti en az 4.5:1; kontrol siniri ve odak gostergesi en az 3:1 olur.
+- Acik tema bloklari kanal tokenlarini yeniden tanimlayamaz; tum renkler `--release-*` zincirinden gelir.
+
+## Kalici ekran goruntusu referanslari
+
+Referanslar gercek Electron Chromium ile Windows uzerinde, `1280x800`, yuzde 100 olcek, ag kapali ve kullanici/ornek verisi olmadan uretilir. Uretim komutu `npm run capture:release-palettes` olur. Paketleme oncesi test, dosyanin PNG basligini, boyutunu, SHA-256 degerini, hesaplanan CSS tokenlarini ve uc kanal goruntusunun birbirinden farkli oldugunu dogrular.
+
+| Kanal | Referans |
+|---|---|
+| Bronze | `apps/desktop/tests/fixtures/surum-paletleri/bronze-palet-ekran-goruntusu.png` |
+| Silver | `apps/desktop/tests/fixtures/surum-paletleri/silver-palet-ekran-goruntusu.png` |
+| Gold | `apps/desktop/tests/fixtures/surum-paletleri/gold-palet-ekran-goruntusu.png` |
+
+Beklenen hashler ve yakalama ortami `config/ui-visual-reference-manifest.json` icinde baglayicidir. CSS veya palet degisirse ekran goruntuleri bilincli olarak yeniden uretilmeden test gecmez.

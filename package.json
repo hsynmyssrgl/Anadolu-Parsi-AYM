@@ -44,6 +44,7 @@
     "verify:migrations": "tsc -p tests/smoke/tsconfig.data-store.json && node scripts/verify-database-migrations.mjs",
     "verify:version": "node scripts/verify-monthly-release-contract.mjs",
     "verify:brand-identity": "node scripts/verify-product-brand-identity.mjs",
+    "capture:release-palettes": "node apps/desktop/scripts/surum-palet-ekran-goruntuleri.mjs",
     "verify:ui-localization": "node scripts/dogrula-kullanici-arayuzu-dil-politikasi.mjs",
     "verify:electron-main": "tsc -p tests/smoke/tsconfig.electron-main.json",
     "verify:repositories": "tsc -p tests/smoke/tsconfig.data-store.json && node scripts/verify-repository-outbox.mjs",

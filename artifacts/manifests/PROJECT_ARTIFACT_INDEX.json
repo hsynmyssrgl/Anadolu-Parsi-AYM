@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "release": "Bronze 19.08.2026.33",
   "releaseId": "bronze-2026-08-19-r33",
-  "generatedAt": "2026-08-19T12:19:36.695Z",
+  "generatedAt": "2026-08-19T12:38:42.047Z",
   "selfIndexedPaths": [
     "SHA256SUMS.txt",
     "artifacts/manifests/ALL_DOCUMENTS_INDEX.csv",
@@ -15,16 +15,16 @@
     "manifest.json"
   ],
   "summary": {
-    "totalFiles": 6048,
-    "totalDocuments": 3734,
+    "totalFiles": 6061,
+    "totalDocuments": 3738,
     "classifications": {
       "ACTIVE_AUTHORITY": 30,
-      "ACTIVE_REFERENCE": 818,
+      "ACTIVE_REFERENCE": 820,
       "EVIDENCE": 1413,
-      "GENERATED": 651,
+      "GENERATED": 655,
       "HISTORICAL": 1578,
-      "SOURCE_CODE": 591,
-      "TEST_OR_GATE": 967
+      "SOURCE_CODE": 594,
+      "TEST_OR_GATE": 971
     }
   },
   "files": [
@@ -651,6 +651,38 @@
       "extension": ".mjs",
       "classification": "SOURCE_CODE",
       "isDocument": false
+    },
+    {
+      "path": "apps/desktop/scripts/surum-palet-ekran-goruntuleri.mjs",
+      "bytes": 1522,
+      "sha256": "989734169148f45fec7f8265f5358e3a65fd2bcd703f4a76dae2c2c25af5d1bd",
+      "extension": ".mjs",
+      "classification": "SOURCE_CODE",
+      "isDocument": false
+    },
+    {
+      "path": "apps/desktop/scripts/surum-palet-yakalayici/main.cjs",
+      "bytes": 194,
+      "sha256": "6926ec1d0d7fc7721d1269bad333cd30495d853d0831014ae530fa48f49ad5d5",
+      "extension": ".cjs",
+      "classification": "SOURCE_CODE",
+      "isDocument": false
+    },
+    {
+      "path": "apps/desktop/scripts/surum-palet-yakalayici/main.mjs",
+      "bytes": 8000,
+      "sha256": "58ea1097c7eb039a18d91ef51088163f43ddaecda4a73c4fe320e7c86532c12c",
+      "extension": ".mjs",
+      "classification": "SOURCE_CODE",
+      "isDocument": false
+    },
+    {
+      "path": "apps/desktop/scripts/surum-palet-yakalayici/package.json",
+      "bytes": 113,
+      "sha256": "e0a55d9bf480d656199c6878fde4dd3428ba6f70d126167bde9d593f698dfb42",
+      "extension": ".json",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
     },
     {
       "path": "apps/desktop/scripts/verify-installer.mjs",
@@ -2246,8 +2278,8 @@
     },
     {
       "path": "apps/desktop/src/renderer/styles.css",
-      "bytes": 152758,
-      "sha256": "2095897c31e1261faae82e517aa18ec5c891d0d1672058627cfbb402a9606177",
+      "bytes": 153381,
+      "sha256": "fd256f45d730517421e7848e0ba59b26d5b60c3b00e81e9b055a5c7b96efaf48",
       "extension": ".css",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -2526,8 +2558,8 @@
     },
     {
       "path": "apps/desktop/tests/brand-release-visual-contract.test.ts",
-      "bytes": 12486,
-      "sha256": "a0812374a14c66a4f17398d8f4e90cc8ae93e26ffafa3cc05e36976f2f00ec28",
+      "bytes": 18476,
+      "sha256": "16d129bac962d266554fe9f9f0b1d30f70e142f81a2d660cb77e2ff1eeba9129",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -2865,6 +2897,38 @@
       "bytes": 12386,
       "sha256": "9bcad913abebce8864ecc53879feb8a455fc837bb9578b12ef2d224f72d9f9b0",
       "extension": ".ts",
+      "classification": "TEST_OR_GATE",
+      "isDocument": false
+    },
+    {
+      "path": "apps/desktop/tests/fixtures/surum-paletleri/bronze-palet-ekran-goruntusu.png",
+      "bytes": 260065,
+      "sha256": "324d4e2e593e699d3730c70e1b4f107e43eec994810c29d47956926f7e9b7c6d",
+      "extension": ".png",
+      "classification": "TEST_OR_GATE",
+      "isDocument": false
+    },
+    {
+      "path": "apps/desktop/tests/fixtures/surum-paletleri/gold-palet-ekran-goruntusu.png",
+      "bytes": 261946,
+      "sha256": "2f833ac67189e960172584da555ed91ba04ca74c077ac8204f54175fb58c0179",
+      "extension": ".png",
+      "classification": "TEST_OR_GATE",
+      "isDocument": false
+    },
+    {
+      "path": "apps/desktop/tests/fixtures/surum-paletleri/PALET_EKRAN_GORUNTUSU_MANIFESTI.json",
+      "bytes": 2716,
+      "sha256": "dfb61f63d92170c1270954999aa1b9996172dad4d98d02877614e6ef21f24fb8",
+      "extension": ".json",
+      "classification": "TEST_OR_GATE",
+      "isDocument": true
+    },
+    {
+      "path": "apps/desktop/tests/fixtures/surum-paletleri/silver-palet-ekran-goruntusu.png",
+      "bytes": 260277,
+      "sha256": "a83e8f992705a41fe46c535a9b9f563421aaf393e704358bbae6e5de72456527",
+      "extension": ".png",
       "classification": "TEST_OR_GATE",
       "isDocument": false
     },
@@ -11179,6 +11243,38 @@
       "extension": ".json",
       "classification": "GENERATED",
       "isDocument": true
+    },
+    {
+      "path": "artifacts/reports/surum-paletleri/bronze-palet-ekran-goruntusu.png",
+      "bytes": 257268,
+      "sha256": "9c1dacf6c9f9e090ab500a503db57c3a08b80c6e9a64e56e3316cfb57607d035",
+      "extension": ".png",
+      "classification": "GENERATED",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/reports/surum-paletleri/gold-palet-ekran-goruntusu.png",
+      "bytes": 258790,
+      "sha256": "7d0a323659f39fb297202060a7219d401c36d8addfe8f58b7579a989dc27c717",
+      "extension": ".png",
+      "classification": "GENERATED",
+      "isDocument": false
+    },
+    {
+      "path": "artifacts/reports/surum-paletleri/PALET_EKRAN_GORUNTUSU_MANIFESTI.json",
+      "bytes": 2649,
+      "sha256": "026d0758f514909ae2ecfa823c13651276449df474d0fffad28b7def775dfa45",
+      "extension": ".json",
+      "classification": "GENERATED",
+      "isDocument": true
+    },
+    {
+      "path": "artifacts/reports/surum-paletleri/silver-palet-ekran-goruntusu.png",
+      "bytes": 257289,
+      "sha256": "a1dba09835a65bbcba3c721c5b0694277ce4d6ba341de2230dc15af5cb2affb9",
+      "extension": ".png",
+      "classification": "GENERATED",
+      "isDocument": false
     },
     {
       "path": "artifacts/validation/29-D1-library-readback-verification.json",
@@ -21591,7 +21687,7 @@
     {
       "path": "artifacts/validation/active-release-contract-v2.json",
       "bytes": 186,
-      "sha256": "4c23ec1af97bab196c19a7bfc270262ce84ef02e5fd8369d3fdcfd7db473a66c",
+      "sha256": "bef2d26de6a7cf0412e4ef75fe969af191d6c72ed9b2f5dce9e7485e0074b7b8",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22215,7 +22311,7 @@
     {
       "path": "artifacts/validation/canonical-rule-registry-gate.json",
       "bytes": 322,
-      "sha256": "902576dd6297b8f6f8fa4485d9b14af75af7eb8520d06c0aed383cd449f99094",
+      "sha256": "bba902e763a8ce05c296b9bf28113a4c0899f8b2949cf68458d1185157d66f77",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22231,7 +22327,7 @@
     {
       "path": "artifacts/validation/conversation-capacity.json",
       "bytes": 241,
-      "sha256": "b883d6a6cfac25f899d4cca7d4f26d6ab9ea240594eec34d8d5d7a87df2c5710",
+      "sha256": "f875c18292283dbf19e70047e29c8d7273b291894db4a2f8d694e6b3611c3e93",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22239,7 +22335,7 @@
     {
       "path": "artifacts/validation/core-service-boundary.json",
       "bytes": 123,
-      "sha256": "af7c0d05c859976219d5bc4dbd2974c54ede790617baada4b6e49eee972b3f44",
+      "sha256": "362f4c5606943924b5f8aec56fcdbe0b657c20fec076e1ad6f9c8883bb9ee6b1",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22247,7 +22343,7 @@
     {
       "path": "artifacts/validation/core-service-local-admin-contract.json",
       "bytes": 260,
-      "sha256": "0ecb557d97e8a6c4c43e8bca01131f52c7ffc45ec06685485773731d4a1c3a0d",
+      "sha256": "321aea6ac2ec154542b6e73a219b46520536f0159ddbcd08624ec74b4f4b038b",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22271,7 +22367,7 @@
     {
       "path": "artifacts/validation/desktop-core-service-startup-contract.json",
       "bytes": 161,
-      "sha256": "5f80fd6b3b21e29a87996701537e4fe151714493ad6691648d5aba160307c828",
+      "sha256": "b3276885f5bef935136f848e64abe0aaf17ff90d8728993b16622415af9d2dc7",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22279,7 +22375,7 @@
     {
       "path": "artifacts/validation/desktop-core-service-startup-runtime.json",
       "bytes": 161,
-      "sha256": "ad164b75700eae541321baa38ee160bc77d6f185bc005d14c16c23830118e8f9",
+      "sha256": "f171b6f42dd1a5578adbf75fd3c105c1a9fcd329d2a98d8e0eecc607b213ba07",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22295,7 +22391,7 @@
     {
       "path": "artifacts/validation/documentation-synchronization-policy.json",
       "bytes": 283,
-      "sha256": "0b5b9bca2c46b1f8d51d9bd076932f30e1bc33296506fa0b0fe5f10a31a54248",
+      "sha256": "2c9baf1ca7f23e97dba20dabced5be216336972bf7e6453a1cbc5c56b011bf7b",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22311,7 +22407,7 @@
     {
       "path": "artifacts/validation/feature-reality-gate.json",
       "bytes": 673,
-      "sha256": "8ef4905ee3f5856c42337bc5379fcd37d0fd7d5e12995ea2b100a7175067fbf5",
+      "sha256": "daf792095aaf93cd82afe8d3ef41b9d25da1b43d21c4827fcbece8a7799ba3ca",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22334,8 +22430,8 @@
     },
     {
       "path": "artifacts/validation/governed-preflight.json",
-      "bytes": 6619,
-      "sha256": "9574a36135fcca092bedb1bf8b8c83d2f9421c407940bfc1d736b3b2ee619ab3",
+      "bytes": 6617,
+      "sha256": "5217a9482bed82bd146caa62dbace05c499723f3b6ecb80b8c0129a6e0b2dd58",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22399,7 +22495,7 @@
     {
       "path": "artifacts/validation/platform-policy-gate.json",
       "bytes": 2203,
-      "sha256": "7a8069474b34d237e2c11f58c58595f2f31476f9e085fe4040841fe52b8704fa",
+      "sha256": "185f8d916f72a295374d8d00917d79d37b8f7b8980de83d2ebb3c2bf8b8ddeb0",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22431,7 +22527,7 @@
     {
       "path": "artifacts/validation/project-artifact-index-gate-v2.json",
       "bytes": 212,
-      "sha256": "3aa0d9db899b0c2b1d148cd0da0220d81b344a0bd8fa1aac5cb7ccc1d50ce144",
+      "sha256": "dcdccb4335aa3b4ee2ba75a7adf0816fa9285b9be51f187dd6272f43862b4823",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22463,7 +22559,7 @@
     {
       "path": "artifacts/validation/step-checkpoint-gate.json",
       "bytes": 188,
-      "sha256": "89eb5dbb21200c01fe3df74372165292addcb4f1e0e8c72b3b51e780a0a87e03",
+      "sha256": "a827b82fe323fe09dd77b0de0222c3d52dced038f1a25f0be2ae6afd00a5f4fe",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22479,7 +22575,7 @@
     {
       "path": "artifacts/validation/system-health-core-service-ipc-contract.json",
       "bytes": 161,
-      "sha256": "16f06f03cdb20efa6e0661949d67387bf595508cc22c88ae26166cd5130d4cf9",
+      "sha256": "60f16c1af730248c90eebd6e4c7e5eb1eb77231305d575f208b9b44361727275",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22487,7 +22583,7 @@
     {
       "path": "artifacts/validation/system-health-core-service-ipc-runtime.json",
       "bytes": 161,
-      "sha256": "bee64e0072e9aca29753ec69d61b575a9aaae1cf4232fae57fb1b5de12d547ce",
+      "sha256": "ccf9e4b71c1c89a7529eae8380291f305d2732c5a8da5d09df36bbb6bdaeb75c",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22503,7 +22599,7 @@
     {
       "path": "artifacts/validation/universal-rule-enforcement-gate.json",
       "bytes": 299,
-      "sha256": "c37b0d50ad9660acebe911dea9d76a9ce0f6836b73c81a08c2241bd0fe7c2fac",
+      "sha256": "3f6773822c04bcc6fc689144bc09b18adf84777ad24ed08d5153a0af7da1e9a7",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22519,7 +22615,7 @@
     {
       "path": "artifacts/validation/user-decision-ledger-gate.json",
       "bytes": 181,
-      "sha256": "95f043ce1279ab2569cb9d99ef622d2420e3f48ec2dda30c3fcb0bbf25abda47",
+      "sha256": "6264a923bb4505b919873e9f30e8d864798b0d02f9fd87dcb502464197899efa",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -28158,8 +28254,8 @@
     },
     {
       "path": "config/ui-visual-reference-manifest.json",
-      "bytes": 5285,
-      "sha256": "3290d464f739b9c5523ee9e96be7a16822d999b47aac2aa542a0c7a8ddd05663",
+      "bytes": 6434,
+      "sha256": "38ba569894559d37670b179cad3f44a3038205100094ef40d05df5b48af2a3a8",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -33246,8 +33342,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/04_URUN_TASARIMI/02_SURUM_RENK_PALETLERI.md",
-      "bytes": 1704,
-      "sha256": "c9d54e68347abcaa42da8c12b5714eb7cfbb11279c906df6acdb55997b404bf6",
+      "bytes": 3360,
+      "sha256": "00cc2ab40f4a349d2fd48b82197b913e532f43e5caa1dd3ccb730fb6e8fba9a9",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -33270,16 +33366,16 @@
     },
     {
       "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/03_KANIT_SICILI.json",
-      "bytes": 5736,
-      "sha256": "31d8e7d06d5b72a6980653a579167acdb757c37c7054b1c8133dade43d1096ad",
+      "bytes": 6191,
+      "sha256": "6fc66ae777bdf3eb68a070c9a1b20488a19996e2fedaafd3095271075cbc52ab",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json",
-      "bytes": 8797,
-      "sha256": "97d575a000e0b321f40b77a3a064e823b61ad6f89b82b3ca1937e557ce3c5c92",
+      "bytes": 8988,
+      "sha256": "d9c73b46348f2ede4624b66515118c28a8194916eea4ac9e22914dc507290ed3",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -33357,6 +33453,14 @@
       "isDocument": true
     },
     {
+      "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/14_SURUM_PALET_KONTRAST_KANITI.json",
+      "bytes": 1843,
+      "sha256": "7449e5a1c819729b4bdfb37943cecd3d73499b636ae477a8567793e074e1a83f",
+      "extension": ".json",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
       "path": "docs/ticari-urun-temeli/06_DIS_KAYNAK_VE_LISANS/01_TICARI_LISANS_ENVANTERI.md",
       "bytes": 3440,
       "sha256": "3bcbdfd7eea28bd097c28396336eb3637c73386bd9b72b465a1049a8353ee18b",
@@ -33398,8 +33502,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/08_IS_LISTESI/01_ANA_IS_LISTESI.md",
-      "bytes": 6366,
-      "sha256": "d359e15cda1ebeeb1d7be3ad8b63858196efd3ffaf21dbea517d4fe3f58bd290",
+      "bytes": 6399,
+      "sha256": "8751c0f6453b0a6dc2b88e9249ff41c0ff0e21b27dca2f1b40470ca348d18392",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -33414,8 +33518,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json",
-      "bytes": 16586,
-      "sha256": "6be48b2a19f62711acb737b134a3600cb13ee5c50ef5135196983e104660ae0e",
+      "bytes": 16693,
+      "sha256": "11beea1d62ed39a2a9b1eb41443835b3bcf253ae008ff5030d0b54c889212765",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -33574,8 +33678,8 @@
     },
     {
       "path": "package.json",
-      "bytes": 122162,
-      "sha256": "ae843fce35b3c2e578d59411a4b57f41e3ce0226006aa30237f237d9cdb335c5",
+      "bytes": 122257,
+      "sha256": "9fbd9b0047ccd97c95b36d9bad9e25c2df014c198d9108ead2c4aca6d6da4684",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true

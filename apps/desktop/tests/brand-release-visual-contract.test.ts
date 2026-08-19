@@ -14,6 +14,18 @@ const memoryStudioPanelUrl = new URL('../src/renderer/MemoryStudioPanel.tsx', im
 const rendererDomainUrl = new URL('../../../packages/domain/src/renderer.ts', import.meta.url);
 const rendererDirectoryUrl = new URL('../src/renderer/', import.meta.url);
 
+const relativeLuminance = (hex: string): number => {
+  const channels = [1, 3, 5].map((offset) => Number.parseInt(hex.slice(offset, offset + 2), 16) / 255)
+    .map((channel) => channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * channels[0]! + 0.7152 * channels[1]! + 0.0722 * channels[2]!;
+};
+
+const contrastRatio = (left: string, right: string): number => {
+  const first = relativeLuminance(left);
+  const second = relativeLuminance(right);
+  return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
+};
+
 describe('approved brand and release-channel visual contract', () => {
   it('keeps renderer runtime imports on browser-safe package surfaces', async () => {
     const [app, routeState, familyAiPanel, memoryStudioPanel, rendererDomain] = await Promise.all([
@@ -73,9 +85,9 @@ describe('approved brand and release-channel visual contract', () => {
     expect(styles).toContain('--release-menu-icon:#edca62');
     expect(styles).toContain('--release-menu-edge:#f0cc58');
     expect(manifest.releaseChannelSurfacePalettes).toEqual({
-      Bronze:{background:'#F4F3F0',panel:'#FDFDFC',panelSecondary:'#F7F5F1',text:'#333537',muted:'#777B7A',border:'#DEDCD6',accent:'#A5672F',accentSoft:'#FFD39B',accentEdge:'#DC9852',accentStrong:'#71441F',primary:'#467259',primaryHover:'#36563F',focus:'#4F91FF'},
-      Silver:{background:'#F2F4F5',panel:'#FCFDFD',panelSecondary:'#E9EEF1',text:'#30383E',muted:'#6E7B84',border:'#CED7DD',accent:'#718494',accentSoft:'#D4DDE4',accentEdge:'#AEBCC7',accentStrong:'#4F5F6B',primary:'#607888',primaryHover:'#4F6573',focus:'#4F91FF'},
-      Gold:{background:'#F7F3E8',panel:'#FFFDF6',panelSecondary:'#FAF5E7',text:'#3B3527',muted:'#746B58',border:'#E3D8B8',accent:'#A57E17',accentSoft:'#FFE9A0',accentEdge:'#F0CC58',accentStrong:'#6E5411',primary:'#8A6A18',primaryHover:'#6E5411',focus:'#4F91FF'}
+      Bronze:{background:'#F4F3F0',panel:'#FDFDFC',panelSecondary:'#F7F5F1',text:'#333537',muted:'#676B6A',border:'#8E8A82',accent:'#A5672F',accentSoft:'#FFD39B',accentEdge:'#DC9852',accentStrong:'#71441F',primary:'#467259',primaryHover:'#36563F',focus:'#3979E6'},
+      Silver:{background:'#F2F4F5',panel:'#FCFDFD',panelSecondary:'#E9EEF1',text:'#30383E',muted:'#5F6B73',border:'#7C8992',accent:'#718494',accentSoft:'#D4DDE4',accentEdge:'#AEBCC7',accentStrong:'#4F5F6B',primary:'#607888',primaryHover:'#4F6573',focus:'#3979E6'},
+      Gold:{background:'#F7F3E8',panel:'#FFFDF6',panelSecondary:'#FAF5E7',text:'#3B3527',muted:'#746B58',border:'#8D7D50',accent:'#A57E17',accentSoft:'#FFE9A0',accentEdge:'#F0CC58',accentStrong:'#6E5411',primary:'#8A6A18',primaryHover:'#6E5411',focus:'#3979E6'}
     });
     expect(manifest.releasePaletteRule).toMatchObject({
       source:'visible release stage',mapping:'Bronze->Bronze, Silver->Silver, Gold->Gold',fallback:'Bronze before renderer bootstrap',mismatchPolicy:'fail build and packaging verification'
@@ -106,6 +118,123 @@ describe('approved brand and release-channel visual contract', () => {
       '.app-shell[data-high-contrast="true"]',
       '@supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px)))'
     ]) expect(styles).toContain(marker);
+  });
+
+  it('keeps text, controls and keyboard focus accessible in every release palette', async () => {
+    const manifest = JSON.parse(await readFile(manifestUrl, 'utf8')) as {
+      releaseChannelSurfacePalettes: Record<string, Record<string, string>>;
+    };
+    for (const [channel, palette] of Object.entries(manifest.releaseChannelSurfacePalettes)) {
+      expect(contrastRatio(palette.text!, palette.background!), `${channel} normal text`).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio(palette.muted!, palette.background!), `${channel} muted text`).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio(palette.primary!, '#FFFFFF'), `${channel} primary button text`).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio(palette.accentStrong!, palette.accentSoft!), `${channel} accent text`).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio(palette.border!, palette.background!), `${channel} required control boundary`).toBeGreaterThanOrEqual(3);
+      expect(contrastRatio(palette.focus!, palette.background!), `${channel} keyboard focus`).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it('does not let later light-theme declarations restore Bronze-only colors', async () => {
+    const styles = await readFile(stylesUrl, 'utf8');
+    const paletteEnd = styles.indexOf('.app-shell:not([data-theme="light"])');
+    expect(paletteEnd).toBeGreaterThan(0);
+    const laterStyles = styles.slice(paletteEnd);
+    expect(laterStyles).not.toMatch(/--(?:bg|bg-soft|sidebar|panel|panel-2|border|blue|shell-accent):\s*#[0-9a-f]{6}/iu);
+    expect(laterStyles).toContain('--border: var(--release-border);');
+    expect(laterStyles).toContain('--shell-accent: var(--release-primary);');
+  });
+
+  it('pins deterministic full-shell Electron screenshots for every release channel', async () => {
+    const [styles, rawManifest] = await Promise.all([
+      readFile(stylesUrl),
+      readFile(manifestUrl)
+    ]);
+    const manifest = JSON.parse(rawManifest.toString('utf8')) as {
+      releaseChannelSurfacePalettes: Record<string, Record<string, string>>;
+      releaseChannelScreenshotBaselines: {
+        manifest: string;
+        renderer: string;
+        platform: string;
+        electronVersion: string;
+        viewport: Record<string, number>;
+        channels: Record<string, { path: string; sha256: string }>;
+        mismatchPolicy: string;
+      };
+    };
+    const screenshotManifestUrl = new URL(
+      `../../../${manifest.releaseChannelScreenshotBaselines.manifest}`,
+      import.meta.url
+    );
+    const screenshotManifest = JSON.parse(await readFile(screenshotManifestUrl, 'utf8')) as {
+      renderer: string;
+      platform: string;
+      electronVersion: string;
+      viewport: Record<string, number>;
+      networkUsed: boolean;
+      userOrDemoDataIncluded: boolean;
+      sourceCssSha256: string;
+      visualManifestSha256: string;
+      entries: Array<{
+        channel: string;
+        path: string;
+        sha256: string;
+        width: number;
+        height: number;
+        computedTokens: Record<string, string>;
+      }>;
+    };
+    const baselines = manifest.releaseChannelScreenshotBaselines;
+    expect(screenshotManifest).toMatchObject({
+      renderer: baselines.renderer,
+      platform: baselines.platform,
+      electronVersion: baselines.electronVersion,
+      viewport: baselines.viewport,
+      networkUsed: false,
+      userOrDemoDataIncluded: false,
+      sourceCssSha256: createHash('sha256').update(styles).digest('hex'),
+      visualManifestSha256: createHash('sha256').update(rawManifest).digest('hex')
+    });
+    expect(baselines.mismatchPolicy).toBe('fail visual contract test before packaging');
+    expect(screenshotManifest.entries.map((entry) => entry.channel)).toEqual(['Bronze', 'Silver', 'Gold']);
+
+    const paletteKeys = {
+      background: 'background',
+      panel: 'panel',
+      'panel-secondary': 'panelSecondary',
+      text: 'text',
+      muted: 'muted',
+      border: 'border',
+      accent: 'accent',
+      'accent-soft': 'accentSoft',
+      'accent-edge': 'accentEdge',
+      'accent-strong': 'accentStrong',
+      primary: 'primary',
+      'primary-hover': 'primaryHover',
+      focus: 'focus'
+    } as const;
+    const distinctHashes = new Set<string>();
+    for (const entry of screenshotManifest.entries) {
+      const baseline = baselines.channels[entry.channel];
+      const palette = manifest.releaseChannelSurfacePalettes[entry.channel];
+      expect(baseline, `${entry.channel} screenshot baseline`).toBeDefined();
+      expect(palette, `${entry.channel} palette`).toBeDefined();
+      expect(entry).toMatchObject({
+        path: baseline!.path,
+        sha256: baseline!.sha256,
+        width: baselines.viewport.width,
+        height: baselines.viewport.height
+      });
+      const png = await readFile(new URL(`../../../${entry.path}`, import.meta.url));
+      expect(png.subarray(0, 8).toString('hex')).toBe('89504e470d0a1a0a');
+      expect(png.readUInt32BE(16)).toBe(baselines.viewport.width);
+      expect(png.readUInt32BE(20)).toBe(baselines.viewport.height);
+      expect(createHash('sha256').update(png).digest('hex')).toBe(entry.sha256);
+      expect(entry.computedTokens).toEqual(Object.fromEntries(
+        Object.entries(paletteKeys).map(([cssKey, manifestKey]) => [cssKey, palette![manifestKey]!.toUpperCase()])
+      ));
+      distinctHashes.add(entry.sha256);
+    }
+    expect(distinctHashes.size).toBe(3);
   });
 
   it('pins the approved transparent warm-Bronze Anadolu parsı mark', async () => {
@@ -149,7 +278,7 @@ describe('approved brand and release-channel visual contract', () => {
     expect(manifest.approvedReferenceCharacteristics.theme).toBe('light');
     expect(manifest.shell).toMatchObject({
       background:'#F4F3F0',panel:'#FDFDFC',panelSecondary:'#F7F5F1',text:'#333537',
-      muted:'#777B7A',border:'#DEDCD6',primary:'#467259',primarySoft:'#A3AE95',focus:'#4F91FF'
+      muted:'#676B6A',border:'#8E8A82',primary:'#467259',primarySoft:'#A3AE95',focus:'#3979E6'
     });
     expect(manifest.minimumInteractionTargetPx).toBe(44);
     expect(main).toContain("backgroundColor: '#FDFDFC'");
