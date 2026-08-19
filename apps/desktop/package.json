@@ -1,25 +1,25 @@
 {
   "name": "@ppt/desktop",
-  "version": "19.8.2026-33",
+  "version": "19.8.2026-34",
   "private": true,
   "type": "module",
   "main": "dist/main/main.mjs",
   "dependencies": {
-    "@ppt/application": "19.8.2026-33",
-    "@ppt/config": "19.8.2026-33",
-    "@ppt/contracts": "19.8.2026-33",
-    "@ppt/core": "19.8.2026-33",
-    "@ppt/core-service-client": "19.8.2026-33",
-    "@ppt/core-service-contracts": "19.8.2026-33",
-    "@ppt/database": "19.8.2026-33",
-    "@ppt/domain": "19.8.2026-33",
-    "@ppt/events": "19.8.2026-33",
-    "@ppt/infrastructure": "19.8.2026-33",
-    "@ppt/logging": "19.8.2026-33",
-    "@ppt/platform-policy": "19.8.2026-33",
-    "@ppt/repositories": "19.8.2026-33",
-    "@ppt/repository-contracts": "19.8.2026-33",
-    "@ppt/security": "19.8.2026-33",
+    "@ppt/application": "19.8.2026-34",
+    "@ppt/config": "19.8.2026-34",
+    "@ppt/contracts": "19.8.2026-34",
+    "@ppt/core": "19.8.2026-34",
+    "@ppt/core-service-client": "19.8.2026-34",
+    "@ppt/core-service-contracts": "19.8.2026-34",
+    "@ppt/database": "19.8.2026-34",
+    "@ppt/domain": "19.8.2026-34",
+    "@ppt/events": "19.8.2026-34",
+    "@ppt/infrastructure": "19.8.2026-34",
+    "@ppt/logging": "19.8.2026-34",
+    "@ppt/platform-policy": "19.8.2026-34",
+    "@ppt/repositories": "19.8.2026-34",
+    "@ppt/repository-contracts": "19.8.2026-34",
+    "@ppt/security": "19.8.2026-34",
     "maplibre-gl": "6.4.1",
     "pmtiles": "4.5.0",
     "react": "19.2.7",
@@ -66,7 +66,7 @@
       "target": [
         "nsis"
       ],
-      "artifactName": "ParsYuva-AYM-Bronze-19.08.2026.33-${arch}-Kurulum.${ext}",
+      "artifactName": "ParsYuva-AYM-Bronze-19.08.2026.34-${arch}-Kurulum.${ext}",
       "icon": "build/icon.ico",
       "requestedExecutionLevel": "asInvoker"
     },
@@ -90,7 +90,7 @@
       "uninstallerIcon": "build/icon.ico"
     },
     "copyright": "Copyright © 2026 ParsYuva",
-    "artifactName": "ParsYuva-AYM-Bronze-19.08.2026.33-${arch}-Kurulum.${ext}"
+    "artifactName": "ParsYuva-AYM-Bronze-19.08.2026.34-${arch}-Kurulum.${ext}"
   },
   "description": "ParsYuva AYM yerel öncelikli aile yaşam, güvenlik ve dijital hafıza merkezi.",
   "author": {

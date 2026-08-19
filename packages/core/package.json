@@ -1,6 +1,6 @@
 {
   "name": "@ppt/core",
-  "version": "19.8.2026-33",
+  "version": "19.8.2026-34",
   "private": true,
   "type": "module",
   "main": "dist/index.js",

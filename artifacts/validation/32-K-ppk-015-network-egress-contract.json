@@ -144,7 +144,7 @@
     {
       "name": "source gate scans the exact current production inventory",
       "status": "PASS",
-      "detail": "18/585/6fe3b8ffd7291c8424f4b81bc160d336d6788252d27d2b2f315f05f995f7398f"
+      "detail": "18/585/0c7907ed784d24fd03879de89c08e960512246c8055de3d5681fc61fcf341478"
     },
     {
       "name": "source gate keeps exact current malicious self-test and zero finding ratchets",
@@ -194,7 +194,7 @@
     "sourceScan": {
       "zones": 18,
       "files": 585,
-      "sourceInventorySha256": "6fe3b8ffd7291c8424f4b81bc160d336d6788252d27d2b2f315f05f995f7398f",
+      "sourceInventorySha256": "0c7907ed784d24fd03879de89c08e960512246c8055de3d5681fc61fcf341478",
       "findings": []
     },
     "authorizedAdapters": [
@@ -214,5 +214,5 @@
   "sqliteOwnershipTransferred": false,
   "cutoverAuthorityAttached": false,
   "requirementCompletionClaimed": true,
-  "generatedAt": "2026-08-19T17:02:28.251Z"
+  "generatedAt": "2026-08-19T17:39:23.870Z"
 }

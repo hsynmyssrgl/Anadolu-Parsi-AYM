@@ -1,6 +1,6 @@
 # Kullanıcı Kararları Kaydı
 
-- Görünür sürüm: **Bronze 19.08.2026.33**
+- Görünür sürüm: **Bronze 19.08.2026.34**
 - Makine okunur defter: `config/user-decision-ledger.json`
 - Aktif karar sayısı: **86**
 

@@ -2,7 +2,7 @@
 
 - Belge sürümü: **GUNCEL-2026-08-19-V3**
 - Tarih: **19.08.2026**
-- Görünür ürün sürümü: **Bronze 19.08.2026.33**
+- Görünür ürün sürümü: **Bronze 19.08.2026.34**
 - Kaynak HEAD: `9274e5c9b77415c4add209b963870eac4b721c84`
 - Statü: **ACTIVE_WORKING_REFERENCE_NOT_BUILD_CLOSURE**
 - Kararlar: **DEC-250, DEC-251, DEC-252, DEC-253, DEC-254**

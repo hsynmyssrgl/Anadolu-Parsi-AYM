@@ -18,7 +18,7 @@
 
 ## Güncel durum — 19.08.2026
 
-- Aktif sürüm: Bronze 19.08.2026.33
+- Aktif sürüm: Bronze 19.08.2026.34
 - Silver: BLOCKED
 - 33-M–34-L paketlerinde yerel kaynak, sözleşme, hedefli test ve closure otomasyonu önemli ölçüde oluşturulmuştur; ancak roadmap kabul durumları dış ve manuel kanıt eksikleri nedeniyle atomik olarak kapatılmamıştır.
 - 34-L yerel kapanış kaydı: 287 test dosyası / 1971 test, root typecheck ve 18 workspace production build PASS. Bu kanıtlar gerçek Windows installer yaşam döngüsü, 168 saat soak, gerçek çoklu node, gerçek Apple istemcileri, gerçek uzak sağlayıcılar veya sertifikasyon yerine geçmez.

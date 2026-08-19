@@ -1,6 +1,6 @@
 # ParsYuva AYM — Aktif Ana Kapsam
 
-- Aktif kanal ve sürüm: **Bronze 19.08.2026.33**
+- Aktif kanal ve sürüm: **Bronze 19.08.2026.34**
 - Ana marka: **ParsYuva**; açıklayıcı uzun ad: **ParsYuva Aile Yaşam Merkezi**.
 - Kurumsallaşma planı: `docs/current/13_KURUMSALLASMA_VE_GLOBAL_MARKA_PLANI.md`; dış şirket/marka/alan adı işlemleri henüz `NOT_RUN` ve requirement PASS değildir.
 - Kapsam kararı: Kullanıcının 4 Ağustos 2026 tarihli açık onayıyla, bu kaynaktaki bütün kabul edilmiş kapsam girdileri bağlayıcıdır.

@@ -1,6 +1,6 @@
 # Tüm Kurallar Aşılamaz Yürütme Sözleşmesi
 
-- Sürüm: **Bronze 19.08.2026.33**
+- Sürüm: **Bronze 19.08.2026.34**
 - Karar: **DEC-129**
 - Kanonik kural sayısı: **217**
 - Aktif kural: **197**
