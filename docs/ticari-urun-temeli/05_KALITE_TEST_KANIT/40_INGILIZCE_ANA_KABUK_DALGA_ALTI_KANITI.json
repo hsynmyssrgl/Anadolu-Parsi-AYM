@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-INGILIZCE-ANA-KABUK-DALGA-ALTI-20260819-01",
+  "executedAt": "2026-08-19T18:28:42+03:00",
+  "repositoryBaseCommitAtExecution": "9c8a6a2a44b1205fc6de14fcf15739f91595aa50",
+  "workItem": "IS-0106",
+  "result": {"status":"PASS_WITH_REMAINING_APP_SHELL_OPEN","targetedTestFilesPassed":2,"targetedTestFilesTotal":2,"targetedTestsPassed":6,"targetedTestsTotal":6,"desktopTypecheck":"PASS"},
+  "translatedSurfaces": ["AddRelationModal", "DigitalLegacyScreen"],
+  "englishLocaleVisibleTurkishCharacterCount": 0,
+  "turkishLocalePreserved": true,
+  "localizedGovernanceNotes": true,
+  "remainingApplicationShellAuditOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "Ana kabuk altinci dalga aile iliskisi ekleme ve dijital miras yonetimi metinlerini iki dilli hale getirir."
+}

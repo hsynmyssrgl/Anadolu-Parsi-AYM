@@ -6,7 +6,7 @@ const check=(condition,message)=>{checks+=1;if(!condition)failures.push(message)
 const read=(path)=>readFile(path,'utf8');
 const policy=JSON.parse(await read('config/kullanici-arayuzu-dil-politikasi.json'));
 const desktopPackage=JSON.parse(await read('apps/desktop/package.json'));
-const [domain,main,preload,globalTypes,rendererMain,rendererApp,localization,accessibility,help,installer,distributed,universalUx,signedPlugin,familyMap,localTranslation,familyAi,communicationAudit,communicationRecording,communicationSecurity,communicationCalling,smartHome,financeImport,communicationMessaging,communicationFileSharing,memoryStudio,placesTravel,healthCare,childEducation,householdOperations,familyMeeting,financePlanning,localOcr,longTermPortfolio,managedLife,managedLifeLocalization,archiveLocalization]=await Promise.all([
+const [domain,main,preload,globalTypes,rendererMain,rendererApp,localization,accessibility,help,installer,distributed,universalUx,signedPlugin,familyMap,localTranslation,familyAi,communicationAudit,communicationRecording,communicationSecurity,communicationCalling,smartHome,financeImport,communicationMessaging,communicationFileSharing,memoryStudio,placesTravel,healthCare,childEducation,householdOperations,familyMeeting,financePlanning,localOcr,longTermPortfolio,managedLife,managedLifeLocalization,archiveLocalization,digitalLegacyLocalization]=await Promise.all([
   read('packages/domain/src/ui-localization.ts'),read('apps/desktop/src/main/main.ts'),read('apps/desktop/src/main/preload.ts'),
   read('apps/desktop/src/renderer/global.d.ts'),read('apps/desktop/src/renderer/main.tsx'),read('apps/desktop/src/renderer/App.tsx'),read('apps/desktop/src/renderer/localization.tsx'),
   read('apps/desktop/src/renderer/accessibility.ts'),read('apps/desktop/src/renderer/NarratedHelpCenter.tsx'),read('apps/desktop/build/installer.nsh'),
@@ -22,7 +22,8 @@ const [domain,main,preload,globalTypes,rendererMain,rendererApp,localization,acc
   read('apps/desktop/src/renderer/HouseholdOperationsPanel.tsx'),read('apps/desktop/src/renderer/FamilyMeetingPanel.tsx'),
   read('apps/desktop/src/renderer/FinancePlanningPanel.tsx'),read('apps/desktop/src/renderer/LocalGovernedOcrPanel.tsx'),
   read('apps/desktop/src/renderer/LongTermPortfolioPanel.tsx'),read('apps/desktop/src/renderer/ManagedLifePanel.tsx'),
-  read('apps/desktop/src/renderer/YonetilenYasamYerellestirme.tsx'),read('apps/desktop/src/renderer/ArsivMerkeziYerellestirme.tsx')
+  read('apps/desktop/src/renderer/YonetilenYasamYerellestirme.tsx'),read('apps/desktop/src/renderer/ArsivMerkeziYerellestirme.tsx'),
+  read('apps/desktop/src/renderer/DijitalMirasYerellestirme.tsx')
 ]);
 
 check(policy.ruleId==='PR-215'&&policy.decisionId==='DEC-255','policy rule/decision binding mismatch');
@@ -88,6 +89,12 @@ check(JSON.stringify(policy.coverage.translatedApplicationShellWaveFive)===JSON.
 check(rendererApp.includes('export function InvitationAcceptancePanel')&&rendererApp.includes("text('Davetle katılın','Join by invitation')")
   &&rendererApp.includes('export function AuthScreen'),'auth and invitation localization binding missing');
 check(localization.includes("t: (key,variables={})=>translateUiMessageForLanguage(bootstrap.language,key,variables)"),'provider-local message resolver missing');
+check(JSON.stringify(policy.coverage.translatedApplicationShellWaveSix)===JSON.stringify(['AddRelationModal','DigitalLegacyScreen'])
+  &&policy.coverage.translatedApplicationShellWaveSixEnglishVisibleTurkishTextCount===0,'application-shell wave-six truth mismatch');
+check(rendererApp.includes('export function AddRelationModal')&&rendererApp.includes('export function DigitalLegacyScreen')
+  &&rendererApp.includes('return localizeDigitalLegacyNode(panel,language);'),'relationship and digital-legacy localization binding missing');
+check(digitalLegacyLocalization.includes("'Dijital Miras Yönetimi':'Digital Legacy Management'")
+  &&digitalLegacyLocalization.includes("element.props['data-localization-preserve']===true"),'digital-legacy translation or user-value preservation missing');
 check(domain.includes("primaryLanguage === 'tr' ? 'tr' : 'en'")&&domain.includes("resolveUiLocalization('en-US')"),'domain fallback resolver missing');
 check(main.includes('resolveUiLocalization(app.getLocale())')&&main.includes("registerIpcHandler('app:getLocalizationBootstrap'"),'main system-locale authority missing');
 check(preload.includes("invoke('app:getLocalizationBootstrap')")&&globalTypes.includes('getLocalizationBootstrap()'),'preload/global localization bridge missing');

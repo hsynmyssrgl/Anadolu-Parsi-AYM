@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { USER_VISIBLE_APP_INFO } from '@ppt/domain/renderer';
+import { useLocalization } from './localization';
 
 export function PageHeader({ eyebrow, title, description, actions }: { eyebrow?: string; title: string; description: string; actions?: ReactNode }) {
   return <div className="page-header"><div>{eyebrow && <span className="eyebrow">{eyebrow}</span>}<h1>{title}</h1><p>{description}</p></div>{actions && <div className="header-actions">{actions}</div>}</div>;
@@ -14,6 +15,7 @@ export function EmptyState({ title, body }: { title: string; body: string }) {
 }
 
 export function Modal({ title, subtitle, onClose, children }: { title: string; subtitle: string; onClose: () => void; children: ReactNode }) {
+  const {language}=useLocalization();
   const dialogRef = useRef<HTMLElement>(null);
   const titleId = useId();
   const descriptionId = useId();
@@ -34,7 +36,7 @@ export function Modal({ title, subtitle, onClose, children }: { title: string; s
     document.addEventListener('keydown', handleKeyDown);
     return () => { document.removeEventListener('keydown', handleKeyDown); previousFocus?.focus(); };
   }, [onClose]);
-  return <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) onClose(); }}><section ref={dialogRef} className="modal" role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId}><div className="modal-header"><div><span className="eyebrow">{USER_VISIBLE_APP_INFO.releaseLabel}</span><h2 id={titleId}>{title}</h2><p id={descriptionId}>{subtitle}</p></div><button className="icon-button" type="button" onClick={onClose} aria-label={`${title} penceresini kapat`}>×</button></div>{children}</section></div>;
+  return <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) onClose(); }}><section ref={dialogRef} className="modal" role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId}><div className="modal-header"><div><span className="eyebrow">{USER_VISIBLE_APP_INFO.releaseLabel}</span><h2 id={titleId}>{title}</h2><p id={descriptionId}>{subtitle}</p></div><button className="icon-button" type="button" onClick={onClose} aria-label={language==='tr'?`${title} penceresini kapat`:`Close ${title} dialog`}>×</button></div>{children}</section></div>;
 }
 
 export function Surface({ children, className = '', as = 'article' }: { children: ReactNode; className?: string; as?: 'article' | 'section' | 'aside' }) {
