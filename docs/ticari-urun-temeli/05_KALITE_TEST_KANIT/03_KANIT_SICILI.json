@@ -132,6 +132,16 @@
       "uretimZamani": "2026-08-19T15:16:12+03:00",
       "disKaynak": false,
       "not": "Gercek SQLite DataStore akisi worker beklerken cancel isteginin runtimea ulastigini ve 1-2-3-4 revizyon zincirini kanitladi."
+    },
+    {
+      "id": "KANIT-0014",
+      "tur": "TEST",
+      "kapsam": "Yerel 30 gunluk lisans ve Gold aktivasyon protokolu",
+      "durum": "PASS_WITH_PRODUCTION_TRUST_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/13_YEREL_LISANS_DOGRULAMA_KANITI.json",
+      "uretimZamani": "2026-08-19T15:18:30+03:00",
+      "disKaynak": false,
+      "not": "4 dosya 13 test ve typecheck PASS; uretim Gold anahtari, imzali yonetici ve geri alinamaz zaman otoritesi acik."
     }
   ]
 }

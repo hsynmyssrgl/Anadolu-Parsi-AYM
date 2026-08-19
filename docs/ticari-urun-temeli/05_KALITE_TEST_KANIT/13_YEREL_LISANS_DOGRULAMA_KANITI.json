@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-YEREL-LISANS-20260819-01",
+  "executedAt": "2026-08-19T15:18:30+03:00",
+  "repositoryBaseCommitAtExecution": "0aeaff4ea861490e542944be054aacd3e28b8464",
+  "workItems": ["IS-0301", "IS-0302", "IS-0303"],
+  "result": {
+    "status": "PASS_WITH_PRODUCTION_TRUST_OPEN",
+    "targetedTestFilesPassed": 4,
+    "targetedTestFilesTotal": 4,
+    "targetedTestsPassed": 13,
+    "targetedTestsTotal": 13,
+    "securityTypecheck": "PASS",
+    "desktopTypecheck": "PASS"
+  },
+  "verified": [
+    "Bronze Silver and unactivated Gold expire after exactly 30 days",
+    "clock rollback malformed ledger forged signature and foreign-device activation fail closed",
+    "Gold activation is canonical device-bound Ed25519 and perpetual only after public-key verification",
+    "the client and repository do not contain a production private key",
+    "the separate administrator tool writes activation codes with no-overwrite semantics and never prints the code",
+    "two protected local ledger copies are reconciled and conflicting copies fail closed"
+  ],
+  "open": [
+    "config/gold-activation-trust.json remains NOT_PROVISIONED",
+    "production private-key custody rotation recovery and operator audit are not provisioned",
+    "a local administrator can remove both local ledger roots; no external or TPM-backed monotonic license authority exists",
+    "the separate manager binary is not production code-signed"
+  ],
+  "requirementPass": false,
+  "note": "Yerel uygulama ve protokol testleri PASS olsa da uretim guven kokleri ve geri alinamaz lisans zaman otoritesi olmadan ticari lisans gereksinimleri tamamlanmis sayilmaz."
+}

@@ -40,9 +40,9 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 
 | ID | Is | Sorumlu | Durum | Kabul |
 |---|---|---|---|---|
-| IS-0301 | 30 gunluk deneme modeli | Codex + Kullanici | ACIK | Urun kararlari + tahrif testleri |
-| IS-0302 | Gold aktivasyon formati | Codex + Kullanici | ACIK | Private key clientta yok |
-| IS-0303 | Gold aktivasyon yonetim uygulamasi | Codex | ACIK | Ayrik, imzali, auditli arac |
+| IS-0301 | 30 gunluk deneme modeli | Codex + Kullanici | DEVAM | Yerel 30 gun/saat geri alma PASS; geri alinamaz monoton otorite acik |
+| IS-0302 | Gold aktivasyon formati | Codex + Kullanici | DEVAM | Ed25519 ve private-key ayrimi PASS; uretim trust kaydi acik |
+| IS-0303 | Gold aktivasyon yonetim uygulamasi | Codex | DEVAM | Ayrik arac PASS; uretim anahtari/audit/kod imzasi acik |
 | IS-0304 | Windows Hello/passkey gercek UAT | Kullanici + Codex | NOT_RUN | Desteklenen gercek cihaz kaniti |
 | IS-0305 | Uretim kod imzalama | Dis + Kullanici + Codex | BLOCKED | Sertifika/provenance/Authenticode PASS |
 
