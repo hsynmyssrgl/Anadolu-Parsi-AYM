@@ -1,7 +1,7 @@
 {
   "status": "PASS",
   "productionSourceZones": 18,
-  "scannedFiles": 572,
+  "scannedFiles": 573,
   "privilegedSurfaces": 889,
   "exactAllowlistEntries": 889,
   "exactAllowlistSha256": "3a297f74d43d4675090a709d4359af9245c2971a7fc338afef2fb87b1c8608dd",

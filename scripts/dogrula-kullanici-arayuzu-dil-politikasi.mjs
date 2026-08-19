@@ -6,7 +6,7 @@ const check=(condition,message)=>{checks+=1;if(!condition)failures.push(message)
 const read=(path)=>readFile(path,'utf8');
 const policy=JSON.parse(await read('config/kullanici-arayuzu-dil-politikasi.json'));
 const desktopPackage=JSON.parse(await read('apps/desktop/package.json'));
-const [domain,main,preload,globalTypes,rendererMain,rendererApp,localization,accessibility,help,installer,distributed,universalUx,signedPlugin,familyMap,localTranslation,familyAi,communicationAudit,communicationRecording,communicationSecurity,communicationCalling,smartHome,financeImport,communicationMessaging,communicationFileSharing,memoryStudio,placesTravel,healthCare,childEducation,householdOperations,familyMeeting,financePlanning,localOcr,longTermPortfolio,managedLife,managedLifeLocalization,archiveLocalization,digitalLegacyLocalization]=await Promise.all([
+const [domain,main,preload,globalTypes,rendererMain,rendererApp,localization,accessibility,help,installer,distributed,universalUx,signedPlugin,familyMap,localTranslation,familyAi,communicationAudit,communicationRecording,communicationSecurity,communicationCalling,smartHome,financeImport,communicationMessaging,communicationFileSharing,memoryStudio,placesTravel,healthCare,childEducation,householdOperations,familyMeeting,financePlanning,localOcr,longTermPortfolio,managedLife,managedLifeLocalization,archiveLocalization,digitalLegacyLocalization,aiGovernanceLocalization]=await Promise.all([
   read('packages/domain/src/ui-localization.ts'),read('apps/desktop/src/main/main.ts'),read('apps/desktop/src/main/preload.ts'),
   read('apps/desktop/src/renderer/global.d.ts'),read('apps/desktop/src/renderer/main.tsx'),read('apps/desktop/src/renderer/App.tsx'),read('apps/desktop/src/renderer/localization.tsx'),
   read('apps/desktop/src/renderer/accessibility.ts'),read('apps/desktop/src/renderer/NarratedHelpCenter.tsx'),read('apps/desktop/build/installer.nsh'),
@@ -23,7 +23,7 @@ const [domain,main,preload,globalTypes,rendererMain,rendererApp,localization,acc
   read('apps/desktop/src/renderer/FinancePlanningPanel.tsx'),read('apps/desktop/src/renderer/LocalGovernedOcrPanel.tsx'),
   read('apps/desktop/src/renderer/LongTermPortfolioPanel.tsx'),read('apps/desktop/src/renderer/ManagedLifePanel.tsx'),
   read('apps/desktop/src/renderer/YonetilenYasamYerellestirme.tsx'),read('apps/desktop/src/renderer/ArsivMerkeziYerellestirme.tsx'),
-  read('apps/desktop/src/renderer/DijitalMirasYerellestirme.tsx')
+  read('apps/desktop/src/renderer/DijitalMirasYerellestirme.tsx'),read('apps/desktop/src/renderer/YapayZekaYonetisimiYerellestirme.tsx')
 ]);
 
 check(policy.ruleId==='PR-215'&&policy.decisionId==='DEC-255','policy rule/decision binding mismatch');
@@ -95,6 +95,10 @@ check(rendererApp.includes('export function AddRelationModal')&&rendererApp.incl
   &&rendererApp.includes('return localizeDigitalLegacyNode(panel,language);'),'relationship and digital-legacy localization binding missing');
 check(digitalLegacyLocalization.includes("'Dijital Miras Yönetimi':'Digital Legacy Management'")
   &&digitalLegacyLocalization.includes("element.props['data-localization-preserve']===true"),'digital-legacy translation or user-value preservation missing');
+check(JSON.stringify(policy.coverage.translatedApplicationShellWaveSeven)===JSON.stringify(['AiGovernanceScreen'])
+  &&policy.coverage.translatedApplicationShellWaveSevenEnglishVisibleTurkishTextCount===0,'application-shell wave-seven truth mismatch');
+check(rendererApp.includes('export function AiGovernanceScreen')&&rendererApp.includes('return localizeAiGovernanceNode(panel,language);')
+  &&aiGovernanceLocalization.includes("'Yapay zekâ izin merkezi':'AI consent center'"),'AI-governance localization binding missing');
 check(domain.includes("primaryLanguage === 'tr' ? 'tr' : 'en'")&&domain.includes("resolveUiLocalization('en-US')"),'domain fallback resolver missing');
 check(main.includes('resolveUiLocalization(app.getLocale())')&&main.includes("registerIpcHandler('app:getLocalizationBootstrap'"),'main system-locale authority missing');
 check(preload.includes("invoke('app:getLocalizationBootstrap')")&&globalTypes.includes('getLocalizationBootstrap()'),'preload/global localization bridge missing');

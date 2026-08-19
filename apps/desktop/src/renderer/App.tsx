@@ -27,6 +27,7 @@ import { LocalTranslationLanguagePanel } from './LocalTranslationLanguagePanel';
 import { NarratedHelpCenter } from './NarratedHelpCenter';
 import { localizeArchiveCenterNode, translateArchiveCenterCopy } from './ArsivMerkeziYerellestirme';
 import { localizeDigitalLegacyNode, translateDigitalLegacyCopy } from './DijitalMirasYerellestirme';
+import { localizeAiGovernanceNode, translateAiGovernanceCopy } from './YapayZekaYonetisimiYerellestirme';
 import { FamilyMeetingPanel } from './FamilyMeetingPanel';
 import { UniversalUxConsolidationPanel } from './UniversalUxConsolidationPanel';
 import { FamilyLocationMap } from './FamilyLocationMap';
@@ -903,7 +904,8 @@ export function DigitalLegacyScreen({ snapshot }: { snapshot: FamilyAppSnapshot 
   return localizeDigitalLegacyNode(panel,language);
 }
 
-function AiGovernanceScreen() {
+export function AiGovernanceScreen() {
+  const {language}=useLocalization();
   const [purpose,setPurpose]=useState<AiConsentPurpose>('search');
   const [resourceType,setResourceType]=useState('event');
   const [resourceId,setResourceId]=useState('*');
@@ -915,8 +917,8 @@ function AiGovernanceScreen() {
   const [durationMinutes,setDurationMinutes]=useState(1_440);
   const [explicitConsent,setExplicitConsent]=useState(false);
   const [exportCategories,setExportCategories]=useState<SensitiveDataCategory[]>(['child','health','finance','location']);
-  const [destinationLabel,setDestinationLabel]=useState('Kullanıcının seçtiği dış hedef');
-  const [businessPurpose,setBusinessPurpose]=useState('Aile yöneticisinin açıkça belirttiği paylaşım amacı');
+  const [destinationLabel,setDestinationLabel]=useState(()=>translateAiGovernanceCopy('Kullanıcının seçtiği dış hedef',language));
+  const [businessPurpose,setBusinessPurpose]=useState(()=>translateAiGovernanceCopy('Aile yöneticisinin açıkça belirttiği paylaşım amacı',language));
   const [exportPreview,setExportPreview]=useState<SensitiveExportPreviewView>();
   const [error,setError]=useState('');
   const [busy,setBusy]=useState(false);
@@ -928,15 +930,15 @@ function AiGovernanceScreen() {
     const [c,v,s]=await Promise.all([window.pardus.listAiConsents(),window.pardus.previewAiAccess(p),window.pardus.listSensitiveDataProfiles()]);
     setConsents(c);setPreview(v);setProfiles(s);
   };
-  useEffect(()=>{void reload().catch(e=>setError(e instanceof Error?e.message:'İzin merkezi yüklenemedi.'));},[]);
+  useEffect(()=>{void reload().catch(e=>setError(e instanceof Error?e.message:translateAiGovernanceCopy('İzin merkezi yüklenemedi.',language)));},[]);
 
-  const run=async(action:()=>Promise<void>)=>{setBusy(true);setError('');try{await action();}catch(e){setError(e instanceof Error?e.message:'İşlem tamamlanamadı.');}finally{setBusy(false)}};
+  const run=async(action:()=>Promise<void>)=>{setBusy(true);setError('');try{await action();}catch(e){setError(e instanceof Error?e.message:translateAiGovernanceCopy('İşlem tamamlanamadı.',language));}finally{setBusy(false)}};
   const save=async(status:'granted'|'revoked')=>run(async()=>{if(!window.pardus)return;setConsents(await window.pardus.upsertAiConsent({purpose,resourceType,resourceId,status}));setPreview(await window.pardus.previewAiAccess(purpose));});
   const saveSensitive=async(status:'granted'|'revoked')=>run(async()=>{if(!window.pardus)return;setProfiles(await window.pardus.upsertSensitiveDataConsent({category:sensitiveCategory,purpose:sensitivePurpose,status,durationMinutes,explicitConsent}));setExplicitConsent(false);setExportPreview(undefined);});
   const createExportPreview=async()=>run(async()=>{if(!window.pardus)return;setExportPreview(await window.pardus.previewSensitiveExport({categories:exportCategories,destinationLabel,businessPurpose}));});
   const toggleExportCategory=(category:SensitiveDataCategory)=>setExportCategories(current=>current.includes(category)?current.filter(item=>item!==category):[...current,category]);
 
-  return <>
+  const panel=<>
     <PageHeader eyebrow="Açık onay ve varsayılan ret" title="Yapay zekâ izin merkezi" description="Yapay zekâ işleme izinlerini ve çocuk, sağlık, finans, konum verilerinin dışa gönderim onaylarını birbirinden bağımsız yönetin."/>
     {error&&<StatusMessage tone="danger">{error}</StatusMessage>}
     <section className="workspace-grid">
@@ -979,6 +981,7 @@ function AiGovernanceScreen() {
     </section>
     <FamilyAiAssistantPanel/>
   </>;
+  return localizeAiGovernanceNode(panel,language);
 }
 
 

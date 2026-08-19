@@ -412,6 +412,16 @@
       "uretimZamani": "2026-08-19T18:28:42+03:00",
       "disKaynak": false,
       "not": "Aile iliskisi ekleme ve Dijital Miras English locale renderinda gorunur Turkce karakter sifir; kalan ana kabuk ekranlari aciktir."
+    },
+    {
+      "id": "KANIT-0042",
+      "tur": "TEST",
+      "kapsam": "English ana uygulama kabugu yerellestirme yedinci dalgasi",
+      "durum": "PASS_WITH_REMAINING_APP_SHELL_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/41_INGILIZCE_ANA_KABUK_DALGA_YEDI_KANITI.json",
+      "uretimZamani": "2026-08-19T18:32:43+03:00",
+      "disKaynak": false,
+      "not": "AI izin merkezi English locale renderinda gorunur Turkce karakter sifir; kalan ana kabuk ekranlari aciktir."
     }
   ]
 }
