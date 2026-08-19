@@ -492,6 +492,16 @@
       "uretimZamani": "2026-08-19T19:18:04+03:00",
       "disKaynak": false,
       "not": "Saglik, Yasam, Otomasyon ve Raporlama merkezleri English locale renderinda gorunur Turkce karakter sifir; gizlilik ve yerel isleme semantigi korunur."
+    },
+    {
+      "id": "KANIT-0050",
+      "tur": "TEST",
+      "kapsam": "English ana uygulama kabugu yerellestirme on besinci dalgasi",
+      "durum": "PASS_WITH_REMAINING_APP_SHELL_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/49_INGILIZCE_ANA_KABUK_DALGA_ON_BES_KANITI.json",
+      "uretimZamani": "2026-08-19T19:22:05+03:00",
+      "disKaynak": false,
+      "not": "Veri Onarma Merkezi ve oturum kilidi English locale renderinda gorunur Turkce karakter sifir; onizleme, geri alma ve yeniden dogrulama sinirlari korunur."
     }
   ]
 }

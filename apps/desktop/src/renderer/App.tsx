@@ -35,6 +35,7 @@ import { localizeSystemMaintenanceNode } from './SistemBakimYerellestirme';
 import { localizePrivacyOwnershipNode } from './GizlilikSahiplikYerellestirme';
 import { localizeFamilyFormsNode } from './AileFormlariYerellestirme';
 import { localizeOperationsCenterNode } from './YasamSaglikOtomasyonYerellestirme';
+import { localizeRepairAndSessionNode } from './VeriOnarmaOturumYerellestirme';
 import { FamilyMeetingPanel } from './FamilyMeetingPanel';
 import { UniversalUxConsolidationPanel } from './UniversalUxConsolidationPanel';
 import { FamilyLocationMap } from './FamilyLocationMap';
@@ -2338,7 +2339,8 @@ const dataRepairSnapshotLabel = (snapshot: DataRepairEntitySnapshot): string => 
   return `${snapshot.row.personId} · ${snapshot.row.role} · ${snapshot.row.status}`;
 };
 
-function DataRepairScreen() {
+export function DataRepairScreen() {
+  const {language}=useLocalization();
   const [workspace,setWorkspace]=useState<DataRepairWorkspaceView>({issues:[],operations:[]});
   const [selectedIssueId,setSelectedIssueId]=useState('');
   const [reason,setReason]=useState('');
@@ -2408,8 +2410,8 @@ function DataRepairScreen() {
     setPreview(operation);setSelectedIssueId(operation.issueId);setReason(operation.reason);setConfirmed(false);setMessage('');
   };
 
-  if(loading)return <div className="loading-screen"><div className="loader"/><strong>Veriler güvenle taranıyor…</strong></div>;
-  return <>
+  if(loading)return localizeRepairAndSessionNode(<div className="loading-screen"><div className="loader"/><strong>Veriler güvenle taranıyor…</strong></div>,language);
+  const panel=<>
     <PageHeader eyebrow="Yönetici denetimli ve geri alınabilir" title="Veri Onarma Merkezi" description="Olası yinelenen kişileri, bozuk aile bağlarını ve tutarsız üyelikleri önce görün; değişikliği incelemeden hiçbir onarma uygulanmaz."/>
     {message&&<StatusMessage tone={messageTone}>{message}</StatusMessage>}
     <section className="workspace-grid data-repair-workspace">
@@ -2433,6 +2435,7 @@ function DataRepairScreen() {
       </Surface>
     </section>
   </>;
+  return localizeRepairAndSessionNode(panel,language);
 }
 
 function PermissionsScreen({ auth }: { auth: AuthStateView }) {
@@ -2654,13 +2657,14 @@ export function ReportsScreen({report}:{report:ReportSummaryView|undefined}){
   return localizeOperationsCenterNode(panel,language);
 }
 
-function SessionLockOverlay({state,twoFactorEnabled,onContinue,onLockNow,onUnlock}:{
+export function SessionLockOverlay({state,twoFactorEnabled,onContinue,onLockNow,onUnlock}:{
   state:SessionLockStateView;
   twoFactorEnabled:boolean;
   onContinue:()=>Promise<void>;
   onLockNow:()=>Promise<void>;
   onUnlock:(input:UnlockSessionInput)=>Promise<void>;
 }){
+  const {language}=useLocalization();
   const rootRef=useRef<HTMLDivElement>(null);
   const [password,setPassword]=useState('');
   const [secondFactorCode,setSecondFactorCode]=useState('');
@@ -2688,7 +2692,7 @@ function SessionLockOverlay({state,twoFactorEnabled,onContinue,onLockNow,onUnloc
     }catch(caught){setError(caught instanceof Error?caught.message:'Oturum yeniden açılamadı.');}
     finally{setBusy(false);}
   };
-  if(state.status==='warning')return <div ref={rootRef} className="session-lock-backdrop warning" role="alertdialog" aria-modal="true" aria-labelledby="session-warning-title" aria-describedby="session-warning-description">
+  if(state.status==='warning')return localizeRepairAndSessionNode(<div ref={rootRef} className="session-lock-backdrop warning" role="alertdialog" aria-modal="true" aria-labelledby="session-warning-title" aria-describedby="session-warning-description">
     <section className="session-lock-card">
       <span className="session-lock-icon" aria-hidden="true">⌛</span>
       <span className="eyebrow">Güvenli oturum uyarısı</span>
@@ -2696,8 +2700,8 @@ function SessionLockOverlay({state,twoFactorEnabled,onContinue,onLockNow,onUnloc
       <p id="session-warning-description">Kaydedilmemiş form bilgileriniz ekranda korunacak. Devam etmek için etkinliğinizi doğrulayın veya şimdi kilitleyin.</p>
       <div className="button-row"><Button tone="primary" autoFocus onClick={()=>void onContinue()}>Oturuma devam et</Button><Button onClick={()=>void onLockNow()}>Şimdi kilitle</Button></div>
     </section>
-  </div>;
-  return <div ref={rootRef} className="session-lock-backdrop locked" role="dialog" aria-modal="true" aria-labelledby="session-lock-title" aria-describedby="session-lock-description">
+  </div>,language);
+  const panel=<div ref={rootRef} className="session-lock-backdrop locked" role="dialog" aria-modal="true" aria-labelledby="session-lock-title" aria-describedby="session-lock-description">
     <form className="session-lock-card" onSubmit={event=>void submitUnlock(event)}>
       <span className="session-lock-icon" aria-hidden="true">▣</span>
       <span className="eyebrow">Oturum güvenli biçimde kilitlendi</span>
@@ -2710,6 +2714,7 @@ function SessionLockOverlay({state,twoFactorEnabled,onContinue,onLockNow,onUnloc
       <small aria-live="polite">Kilit sırasında arka plan işlemleri oturum süresini uzatamaz.</small>
     </form>
   </div>;
+  return localizeRepairAndSessionNode(panel,language);
 }
 
 export function App() {

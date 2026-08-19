@@ -6,7 +6,7 @@ const check=(condition,message)=>{checks+=1;if(!condition)failures.push(message)
 const read=(path)=>readFile(path,'utf8');
 const policy=JSON.parse(await read('config/kullanici-arayuzu-dil-politikasi.json'));
 const desktopPackage=JSON.parse(await read('apps/desktop/package.json'));
-const [domain,main,preload,globalTypes,rendererMain,rendererApp,localization,accessibility,help,installer,distributed,universalUx,signedPlugin,familyMap,localTranslation,familyAi,communicationAudit,communicationRecording,communicationSecurity,communicationCalling,smartHome,financeImport,communicationMessaging,communicationFileSharing,memoryStudio,placesTravel,healthCare,childEducation,householdOperations,familyMeeting,financePlanning,localOcr,longTermPortfolio,managedLife,managedLifeLocalization,archiveLocalization,digitalLegacyLocalization,aiGovernanceLocalization,draftCenterLocalization,windowsHelloLocalization,dataLifecycleLocalization,systemMaintenanceLocalization,privacyOwnershipLocalization,familyFormsLocalization,operationsLocalization]=await Promise.all([
+const [domain,main,preload,globalTypes,rendererMain,rendererApp,localization,accessibility,help,installer,distributed,universalUx,signedPlugin,familyMap,localTranslation,familyAi,communicationAudit,communicationRecording,communicationSecurity,communicationCalling,smartHome,financeImport,communicationMessaging,communicationFileSharing,memoryStudio,placesTravel,healthCare,childEducation,householdOperations,familyMeeting,financePlanning,localOcr,longTermPortfolio,managedLife,managedLifeLocalization,archiveLocalization,digitalLegacyLocalization,aiGovernanceLocalization,draftCenterLocalization,windowsHelloLocalization,dataLifecycleLocalization,systemMaintenanceLocalization,privacyOwnershipLocalization,familyFormsLocalization,operationsLocalization,repairSessionLocalization]=await Promise.all([
   read('packages/domain/src/ui-localization.ts'),read('apps/desktop/src/main/main.ts'),read('apps/desktop/src/main/preload.ts'),
   read('apps/desktop/src/renderer/global.d.ts'),read('apps/desktop/src/renderer/main.tsx'),read('apps/desktop/src/renderer/App.tsx'),read('apps/desktop/src/renderer/localization.tsx'),
   read('apps/desktop/src/renderer/accessibility.ts'),read('apps/desktop/src/renderer/NarratedHelpCenter.tsx'),read('apps/desktop/build/installer.nsh'),
@@ -27,7 +27,7 @@ const [domain,main,preload,globalTypes,rendererMain,rendererApp,localization,acc
   read('apps/desktop/src/renderer/TaslakMerkeziYerellestirme.tsx'),read('apps/desktop/src/renderer/WindowsHelloYerellestirme.tsx'),
   read('apps/desktop/src/renderer/VeriYasamDongusuYerellestirme.tsx'),read('apps/desktop/src/renderer/SistemBakimYerellestirme.tsx'),
   read('apps/desktop/src/renderer/GizlilikSahiplikYerellestirme.tsx'),read('apps/desktop/src/renderer/AileFormlariYerellestirme.tsx'),
-  read('apps/desktop/src/renderer/YasamSaglikOtomasyonYerellestirme.tsx')
+  read('apps/desktop/src/renderer/YasamSaglikOtomasyonYerellestirme.tsx'),read('apps/desktop/src/renderer/VeriOnarmaOturumYerellestirme.tsx')
 ]);
 
 check(policy.ruleId==='PR-215'&&policy.decisionId==='DEC-255','policy rule/decision binding mismatch');
@@ -141,6 +141,12 @@ check(rendererApp.includes('export function HealthScreen')&&rendererApp.includes
   &&rendererApp.includes('return localizeOperationsCenterNode(panel,language);')
   &&operationsLocalization.includes("'Sağlık merkezi':'Health center'")
   &&operationsLocalization.includes("'Raporlama merkezi':'Reporting center'"),'health-life-automation-report localization binding missing');
+check(JSON.stringify(policy.coverage.translatedApplicationShellWaveFifteen)===JSON.stringify(['DataRepairScreen','SessionLockOverlay'])
+  &&policy.coverage.translatedApplicationShellWaveFifteenEnglishVisibleTurkishTextCount===0,'application-shell wave-fifteen truth mismatch');
+check(rendererApp.includes('export function DataRepairScreen')&&rendererApp.includes('export function SessionLockOverlay')
+  &&rendererApp.includes('return localizeRepairAndSessionNode(panel,language);')
+  &&repairSessionLocalization.includes("'Veri Onarma Merkezi':'Data Repair Center'")
+  &&repairSessionLocalization.includes("'Oturum güvenli biçimde kilitlendi':'Session locked securely'"),'data-repair or session-lock localization binding missing');
 check(domain.includes("primaryLanguage === 'tr' ? 'tr' : 'en'")&&domain.includes("resolveUiLocalization('en-US')"),'domain fallback resolver missing');
 check(main.includes('resolveUiLocalization(app.getLocale())')&&main.includes("registerIpcHandler('app:getLocalizationBootstrap'"),'main system-locale authority missing');
 check(preload.includes("invoke('app:getLocalizationBootstrap')")&&globalTypes.includes('getLocalizationBootstrap()'),'preload/global localization bridge missing');

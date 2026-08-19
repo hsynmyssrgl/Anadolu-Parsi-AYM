@@ -46,6 +46,7 @@ Dil kararı Electron ana sürecinde `app.getLocale()` üzerinden verilir. Render
 - Gizlilik, Sahiplik ve Olay Kontrol Merkezi'nin envanter, AI hafıza denetimi, veri hakları, şifreli dışa aktarım, olay containment ve salt-okunur izin simülasyonu metinleri; ana kabuk on ikinci dalga render ve sözlük testlerinde görünür Türkçe karakter sayısı sıfırdır. Uzaktan silme, MDM, ağ teslimi, harici kopya silme veya hukuk/gizlilik sertifikasyonu garantisi eklenmez.
 - Aile üyesi, önemli gün ekleme/düzenleme, konum ekleme ve Konum/Harita yüzeyleri; ana kabuk on üçüncü dalga render testinde görünür Türkçe karakter sayısı sıfırdır. Yakınlık kataloğu ve yapay zekâ işleme izni semantiği değiştirilmez.
 - Sağlık, Yaşam, Bildirim/Otomasyon ve Raporlama merkezleri; ana kabuk on dördüncü dalga render testinde görünür Türkçe karakter sayısı sıfırdır. Sağlık gizliliği, yerel otomasyon ve rapor kapsamı semantiği değiştirilmez.
+- Veri Onarma Merkezi ile oturum uyarı/kilit yüzeyleri; ana kabuk on beşinci dalga render ve sözlük testlerinde görünür Türkçe karakter sayısı sıfırdır. Onarma için zorunlu önizleme/geri alma ve kilit için yeniden doğrulama semantiği korunur.
 
 ## Açık kalan iş
 
@@ -87,6 +88,7 @@ Dil kararı Electron ana sürecinde `app.getLocale()` üzerinden verilir. Render
 - `apps/desktop/tests/app-shell-localization-wave-thirty.test.ts`
 - `apps/desktop/tests/app-shell-localization-wave-thirty-one.test.ts`
 - `apps/desktop/tests/app-shell-localization-wave-thirty-two.test.ts`
+- `apps/desktop/tests/app-shell-localization-wave-thirty-three.test.ts`
 - `apps/desktop/tests/accessibility-preference-center.test.ts`
 - `apps/desktop/tests/narrated-help-center.test.ts`
 - `apps/desktop/tests/installer-narration-experience.test.ts`
