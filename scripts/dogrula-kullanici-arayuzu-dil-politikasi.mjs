@@ -6,9 +6,9 @@ const check=(condition,message)=>{checks+=1;if(!condition)failures.push(message)
 const read=(path)=>readFile(path,'utf8');
 const policy=JSON.parse(await read('config/kullanici-arayuzu-dil-politikasi.json'));
 const desktopPackage=JSON.parse(await read('apps/desktop/package.json'));
-const [domain,main,preload,globalTypes,rendererMain,localization,accessibility,help,installer,distributed,universalUx,signedPlugin,familyMap,localTranslation,familyAi,communicationAudit,communicationRecording,communicationSecurity,communicationCalling,smartHome,financeImport,communicationMessaging,communicationFileSharing,memoryStudio,placesTravel,healthCare,childEducation,householdOperations,familyMeeting,financePlanning,localOcr,longTermPortfolio,managedLife,managedLifeLocalization]=await Promise.all([
+const [domain,main,preload,globalTypes,rendererMain,rendererApp,localization,accessibility,help,installer,distributed,universalUx,signedPlugin,familyMap,localTranslation,familyAi,communicationAudit,communicationRecording,communicationSecurity,communicationCalling,smartHome,financeImport,communicationMessaging,communicationFileSharing,memoryStudio,placesTravel,healthCare,childEducation,householdOperations,familyMeeting,financePlanning,localOcr,longTermPortfolio,managedLife,managedLifeLocalization]=await Promise.all([
   read('packages/domain/src/ui-localization.ts'),read('apps/desktop/src/main/main.ts'),read('apps/desktop/src/main/preload.ts'),
-  read('apps/desktop/src/renderer/global.d.ts'),read('apps/desktop/src/renderer/main.tsx'),read('apps/desktop/src/renderer/localization.tsx'),
+  read('apps/desktop/src/renderer/global.d.ts'),read('apps/desktop/src/renderer/main.tsx'),read('apps/desktop/src/renderer/App.tsx'),read('apps/desktop/src/renderer/localization.tsx'),
   read('apps/desktop/src/renderer/accessibility.ts'),read('apps/desktop/src/renderer/NarratedHelpCenter.tsx'),read('apps/desktop/build/installer.nsh'),
   read('apps/desktop/src/renderer/DistributedOperationsPanel.tsx'),read('apps/desktop/src/renderer/UniversalUxConsolidationPanel.tsx'),
   read('apps/desktop/src/renderer/SignedPluginPlatformPanel.tsx'),read('apps/desktop/src/renderer/FamilyLocationMap.tsx'),
@@ -71,6 +71,8 @@ check(JSON.stringify(policy.coverage.translatedFeaturePanelWaveSeventeen)===JSON
   &&policy.coverage.translatedFeaturePanelWaveSeventeenEnglishVisibleTurkishTextCount===0,'feature-panel wave-seventeen truth mismatch');
 check(JSON.stringify(policy.coverage.translatedFeaturePanelWaveEighteen)===JSON.stringify(['ManagedLifePanel'])
   &&policy.coverage.translatedFeaturePanelWaveEighteenEnglishVisibleTurkishTextCount===0,'feature-panel wave-eighteen truth mismatch');
+check(JSON.stringify(policy.coverage.translatedApplicationShellWaveOne)===JSON.stringify(['Dashboard','FirstUseDashboard'])
+  &&policy.coverage.translatedApplicationShellWaveOneEnglishVisibleTurkishTextCount===0,'application-shell wave-one truth mismatch');
 check(domain.includes("primaryLanguage === 'tr' ? 'tr' : 'en'")&&domain.includes("resolveUiLocalization('en-US')"),'domain fallback resolver missing');
 check(main.includes('resolveUiLocalization(app.getLocale())')&&main.includes("registerIpcHandler('app:getLocalizationBootstrap'"),'main system-locale authority missing');
 check(preload.includes("invoke('app:getLocalizationBootstrap')")&&globalTypes.includes('getLocalizationBootstrap()'),'preload/global localization bridge missing');
@@ -102,6 +104,9 @@ check(localOcr.includes("useLocalization()")&&localOcr.includes("text('Yerel OCR
 check(longTermPortfolio.includes("useLocalization()")&&longTermPortfolio.includes("text('Uzun Vadeli Portföy','Long-Term Portfolio')"),'long-term portfolio English localization binding missing');
 check(managedLife.includes('useLocalization()')&&managedLife.includes('localizeManagedLifeNode(panel, language)')
   &&managedLifeLocalization.includes("'Yaşam Merkezi, ev envanteri ve acil durum':'Life Center, home inventory, and emergencies'"),'managed-life English localization binding missing');
+check(rendererApp.includes("text('Aile yaşamı panosu','Family life dashboard')")
+  &&rendererApp.includes("text('Aile alanınız hazır','Your family space is ready')")
+  &&rendererApp.includes('toLocaleDateString(locale'),'application-shell dashboard English localization binding missing');
 for(const [name,source,marker] of [
   ['communication audit',communicationAudit,"text('Denetim zinciri yükleniyor','Loading audit chain')"],
   ['communication recording',communicationRecording,"text('Görüşme kaydı rıza planı','Call recording consent plan')"],

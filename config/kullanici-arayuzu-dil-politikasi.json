@@ -108,8 +108,10 @@
     "translatedFeaturePanelWaveSeventeenEnglishVisibleTurkishTextCount": 0,
     "translatedFeaturePanelWaveEighteen": ["ManagedLifePanel"],
     "translatedFeaturePanelWaveEighteenEnglishVisibleTurkishTextCount": 0,
+    "translatedApplicationShellWaveOne": ["Dashboard", "FirstUseDashboard"],
+    "translatedApplicationShellWaveOneEnglishVisibleTurkishTextCount": 0,
     "openSurface": "remaining-feature-panel-copy",
-    "openReason": "İlk yirmi dört uzman panel iki dilli ve English locale görünür Türkçe metin sayısı sıfırdır; ana uygulama kabuğundaki tarihsel görünür Türkçe metinlerin son taraması henüz tamamlanmadı.",
+    "openReason": "İlk yirmi dört uzman panel ile ana ve ilk-kullanım panosu iki dillidir; ana uygulama kabuğunun kalan ekranlarındaki tarihsel görünür Türkçe metinlerin son taraması sürmektedir.",
     "countsAsFullApplicationEnglishPass": false
   },
   "failClosed": true,

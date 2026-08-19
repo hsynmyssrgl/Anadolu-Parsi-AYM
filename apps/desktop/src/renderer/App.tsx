@@ -219,13 +219,13 @@ const mergeSnapshotPatch = (current: FamilyAppSnapshot, patch: FamilySnapshotPat
 const formatDate = (iso: string, options?: Intl.DateTimeFormatOptions): string =>
   new Intl.DateTimeFormat(getActiveUiLocale(), options ?? { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(iso));
 
-const yearsOld = (birthDate?: string): string => {
-  if (!birthDate) return 'Yaş bilgisi yok';
+const yearsOld = (birthDate: string | undefined, language: 'tr' | 'en' = getActiveUiLocale() === 'tr-TR' ? 'tr' : 'en'): string => {
+  if (!birthDate) return language === 'tr' ? 'Yaş bilgisi yok' : 'Age unavailable';
   const today = new Date();
   const birth = new Date(birthDate);
   let age = today.getFullYear() - birth.getFullYear();
   if (today < new Date(today.getFullYear(), birth.getMonth(), birth.getDate())) age -= 1;
-  return `${age} yaş`;
+  return language === 'tr' ? `${age} yaş` : `${age} years old`;
 };
 
 
@@ -251,61 +251,63 @@ const fallbackDashboardOverview = (snapshot: FamilyAppSnapshot): DashboardOvervi
   };
 };
 
-function Dashboard({ overview, onNavigate, onAddMember, onAddImportantDay }: { overview: DashboardOverviewView; onNavigate: (id: ScreenId) => void; onAddMember:()=>void; onAddImportantDay:()=>void }) {
+export function Dashboard({ overview, onNavigate, onAddMember, onAddImportantDay }: { overview: DashboardOverviewView; onNavigate: (id: ScreenId) => void; onAddMember:()=>void; onAddImportantDay:()=>void }) {
+  const { language } = useLocalization();
+  const text = (tr: string, en: string): string => language === 'tr' ? tr : en;
   const readyModules = overview.modules.filter((module) => module.state === 'ready').length;
   const attentionModules = overview.modules.filter((module) => module.state === 'attention');
   const moduleCount=(id:DashboardOverviewView['modules'][number]['id'])=>overview.modules.find(module=>module.id===id)?.recordCount??0;
   const justStarted=overview.memberCount===1&&moduleCount('tree')===0&&moduleCount('timeline')===0&&moduleCount('location')===0;
   if(justStarted)return <>
-    <PageHeader eyebrow={overview.family.name} title="Aile alanınız hazır" description="İlk kayıtları birlikte oluşturalım. Eklediğiniz her bilgi yalnız bu bilgisayarda saklanır."/>
+    <PageHeader eyebrow={overview.family.name} title={text('Aile alanınız hazır','Your family space is ready')} description={text('İlk kayıtları birlikte oluşturalım. Eklediğiniz her bilgi yalnız bu bilgisayarda saklanır.','Let’s create the first records together. Everything you add is stored only on this computer.')}/>
     <section className="welcome-panel panel">
-      <div className="welcome-copy"><span className="eyebrow">Hoş geldiniz</span><h2>Aile hikâyeniz burada başlıyor.</h2><p>Önce aile üyelerinizi ekleyin, aralarındaki bağları kurun; ardından önemli günleri ve anıları kaydedin.</p><div className="welcome-actions"><Button tone="primary" onClick={onAddMember}>＋ İlk aile üyesini ekle</Button><Button onClick={onAddImportantDay}>□ Önemli gün oluştur</Button></div></div>
+      <div className="welcome-copy"><span className="eyebrow">{text('Hoş geldiniz','Welcome')}</span><h2>{text('Aile hikâyeniz burada başlıyor.','Your family story starts here.')}</h2><p>{text('Önce aile üyelerinizi ekleyin, aralarındaki bağları kurun; ardından önemli günleri ve anıları kaydedin.','First add family members and connect their relationships, then record important dates and memories.')}</p><div className="welcome-actions"><Button tone="primary" onClick={onAddMember}>{text('＋ İlk aile üyesini ekle','＋ Add the first family member')}</Button><Button onClick={onAddImportantDay}>{text('□ Önemli gün oluştur','□ Create an important date')}</Button></div></div>
       <div className="welcome-mark" aria-hidden="true"><span>♙</span><i/><span>♙</span><i/><span>♙</span></div>
     </section>
     <section className="onboarding-grid">
-      <button className="onboarding-card done" onClick={()=>onNavigate('family')}><span>✓</span><small>1. adım</small><strong>Aile alanı oluşturuldu</strong><p>Yerel yönetici profiliniz güvenli biçimde hazır.</p></button>
-      <button className="onboarding-card active" onClick={onAddMember}><span>＋</span><small>2. adım</small><strong>Aile üyelerini ekleyin</strong><p>Eş, çocuk, anne, baba ve diğer yakınlarınızı kaydedin.</p></button>
-      <button className="onboarding-card" onClick={()=>onNavigate('tree')}><span>⌘</span><small>3. adım</small><strong>Aile bağlarını kurun</strong><p>Kişileri birbirine bağlayarak soy ağacınızı oluşturun.</p></button>
-      <button className="onboarding-card" onClick={onAddImportantDay}><span>□</span><small>4. adım</small><strong>İlk önemli günü ekleyin</strong><p>Doğum günü, buluşma ve özel anları unutmayın.</p></button>
+      <button className="onboarding-card done" onClick={()=>onNavigate('family')}><span>✓</span><small>{text('1. adım','Step 1')}</small><strong>{text('Aile alanı oluşturuldu','Family space created')}</strong><p>{text('Yerel yönetici profiliniz güvenli biçimde hazır.','Your local administrator profile is securely ready.')}</p></button>
+      <button className="onboarding-card active" onClick={onAddMember}><span>＋</span><small>{text('2. adım','Step 2')}</small><strong>{text('Aile üyelerini ekleyin','Add family members')}</strong><p>{text('Eş, çocuk, anne, baba ve diğer yakınlarınızı kaydedin.','Record spouses, children, parents, and other relatives.')}</p></button>
+      <button className="onboarding-card" onClick={()=>onNavigate('tree')}><span>⌘</span><small>{text('3. adım','Step 3')}</small><strong>{text('Aile bağlarını kurun','Connect family relationships')}</strong><p>{text('Kişileri birbirine bağlayarak soy ağacınızı oluşturun.','Build your family tree by connecting people.')}</p></button>
+      <button className="onboarding-card" onClick={onAddImportantDay}><span>□</span><small>{text('4. adım','Step 4')}</small><strong>{text('İlk önemli günü ekleyin','Add the first important date')}</strong><p>{text('Doğum günü, buluşma ve özel anları unutmayın.','Remember birthdays, gatherings, and special moments.')}</p></button>
     </section>
-    <section className="privacy-reminder panel"><span>◉</span><div><strong>Yerel ve size ait</strong><p>Bulut hesabı yok. E-posta girişi yok. Verileriniz sizin belirlediğiniz yedekler dışında bu bilgisayardan ayrılmaz.</p></div><Button onClick={()=>onNavigate('settings')}>Yedeklemeyi ayarla</Button></section>
+    <section className="privacy-reminder panel"><span>◉</span><div><strong>{text('Yerel ve size ait','Local and yours')}</strong><p>{text('Bulut hesabı yok. E-posta girişi yok. Verileriniz sizin belirlediğiniz yedekler dışında bu bilgisayardan ayrılmaz.','No cloud account. No email sign-in. Your data never leaves this computer except through backups you explicitly choose.')}</p></div><Button onClick={()=>onNavigate('settings')}>{text('Yedeklemeyi ayarla','Configure backup')}</Button></section>
   </>;
   return (
     <>
-      <PageHeader eyebrow={overview.family.name} title="Aile yaşamı panosu" description="Ailenizin kayıtları, yaklaşan günleri ve dijital hafızası tek yerde." />
+      <PageHeader eyebrow={overview.family.name} title={text('Aile yaşamı panosu','Family life dashboard')} description={text('Ailenizin kayıtları, yaklaşan günleri ve dijital hafızası tek yerde.','Your family records, upcoming dates, and digital memory in one place.')} />
       <section className="metric-grid">
-        <article className="metric-card"><span className="metric-icon blue">♙</span><div><small>Aile üyeleri</small><strong>{overview.memberCount}</strong><p>{overview.generationCount} nesil kayıtlı</p></div></article>
-        <article className="metric-card"><span className="metric-icon red">□</span><div><small>Yaklaşan önemli gün</small><strong>{overview.upcomingImportantDayCount}</strong><p>{overview.nextImportantDayInDays === undefined ? 'Yeni kayıt bekleniyor' : `${overview.nextImportantDayInDays} gün içinde`}</p></div></article>
-        <article className="metric-card"><span className="metric-icon green">◷</span><div><small>Zaman tüneli</small><strong>{overview.timelineEventCount}</strong><p>Kişisel ve aile olayları</p></div></article>
-        <article className="metric-card"><span className="metric-icon amber">▣</span><div><small>İlişkili içerik</small><strong>{overview.relatedContentCount}</strong><p>Fotoğraf, davetiye, belge ve arşiv</p></div></article>
+        <article className="metric-card"><span className="metric-icon blue">♙</span><div><small>{text('Aile üyeleri','Family members')}</small><strong>{overview.memberCount}</strong><p>{language==='tr'?`${overview.generationCount} nesil kayıtlı`:`${overview.generationCount} generations recorded`}</p></div></article>
+        <article className="metric-card"><span className="metric-icon red">□</span><div><small>{text('Yaklaşan önemli gün','Upcoming important date')}</small><strong>{overview.upcomingImportantDayCount}</strong><p>{overview.nextImportantDayInDays === undefined ? text('Yeni kayıt bekleniyor','Awaiting a new record') : language==='tr'?`${overview.nextImportantDayInDays} gün içinde`:`in ${overview.nextImportantDayInDays} days`}</p></div></article>
+        <article className="metric-card"><span className="metric-icon green">◷</span><div><small>{text('Zaman tüneli','Timeline')}</small><strong>{overview.timelineEventCount}</strong><p>{text('Kişisel ve aile olayları','Personal and family events')}</p></div></article>
+        <article className="metric-card"><span className="metric-icon amber">▣</span><div><small>{text('İlişkili içerik','Related content')}</small><strong>{overview.relatedContentCount}</strong><p>{text('Fotoğraf, davetiye, belge ve arşiv','Photos, invitations, documents, and archive items')}</p></div></article>
       </section>
       <section className="dashboard-grid">
         <article className="panel upcoming-card">
-          <div className="panel-heading"><div><span className="eyebrow">Takvim</span><h2>Yaklaşan önemli günler</h2></div><button className="text-button" onClick={() => onNavigate('important-days')}>Tümünü gör</button></div>
+          <div className="panel-heading"><div><span className="eyebrow">{text('Takvim','Calendar')}</span><h2>{text('Yaklaşan önemli günler','Upcoming important dates')}</h2></div><button className="text-button" onClick={() => onNavigate('important-days')}>{text('Tümünü gör','View all')}</button></div>
           <div className="stack-list">
-            {overview.upcomingImportantDays.length === 0 && <EmptyState title="Yaklaşan gün yok" body="Yeni bir önemli gün ekleyerek başlayın." />}
+            {overview.upcomingImportantDays.length === 0 && <EmptyState title={text('Yaklaşan gün yok','No upcoming dates')} body={text('Yeni bir önemli gün ekleyerek başlayın.','Start by adding an important date.')} />}
             {overview.upcomingImportantDays.slice(0, 4).map((event) => <EventListItem event={event} key={event.id} />)}
           </div>
         </article>
         <article className="panel timeline-card">
-          <div className="panel-heading"><div><span className="eyebrow">Aile hafızası</span><h2>Son zaman tüneli kayıtları</h2></div><button className="text-button" onClick={() => onNavigate('timeline')}>Zaman tüneline git</button></div>
+          <div className="panel-heading"><div><span className="eyebrow">{text('Aile hafızası','Family memory')}</span><h2>{text('Son zaman tüneli kayıtları','Latest timeline records')}</h2></div><button className="text-button" onClick={() => onNavigate('timeline')}>{text('Zaman tüneline git','Open timeline')}</button></div>
           <div className="mini-timeline">
             {overview.recentEvents.map((event) => (
-              <div className="mini-timeline-row" key={event.id}><span className="timeline-dot" /><time>{formatDate(event.startAt)}</time><div><strong>{event.title}</strong><p>{event.description}</p><small>⌖ {event.locationLabel ?? 'Konum eklenmemiş'} · {event.attachmentCount} içerik</small></div></div>
+              <div className="mini-timeline-row" key={event.id}><span className="timeline-dot" /><time>{formatDate(event.startAt)}</time><div><strong>{event.title}</strong><p>{event.description}</p><small>⌖ {event.locationLabel ?? text('Konum eklenmemiş','No location added')} · {language==='tr'?`${event.attachmentCount} içerik`:`${event.attachmentCount} items`}</small></div></div>
             ))}
           </div>
         </article>
         <article className="panel ai-card">
-          <div className="ai-orb">✣</div><span className="eyebrow">Ana merkez durumu</span><h2>{readyModules}/{overview.modules.length} modül veri almaya hazır</h2>
-          <p>{attentionModules.length > 0 ? `${attentionModules.length} modül dikkat bekliyor.` : 'Kritik bekleyen modül uyarısı bulunmuyor.'}</p>
-          <div className="module-readiness">{overview.modules.slice(0,6).map((module)=><button key={module.id} onClick={()=>onNavigate(module.id as ScreenId)}><span className={`module-state ${module.state}`} /> <strong>{module.label}</strong><small>{module.detail}</small></button>)}</div>
-          <Button onClick={() => onNavigate('settings')}>Sistem merkezini aç</Button>
+          <div className="ai-orb">✣</div><span className="eyebrow">{text('Ana merkez durumu','Main center status')}</span><h2>{language==='tr'?`${readyModules}/${overview.modules.length} modül veri almaya hazır`:`${readyModules}/${overview.modules.length} modules ready for data`}</h2>
+          <p>{attentionModules.length > 0 ? (language==='tr'?`${attentionModules.length} modül dikkat bekliyor.`:`${attentionModules.length} modules need attention.`) : text('Kritik bekleyen modül uyarısı bulunmuyor.','There are no critical pending module alerts.')}</p>
+          <div className="module-readiness">{overview.modules.slice(0,6).map((module)=><button key={module.id} onClick={()=>onNavigate(module.id as ScreenId)}><span className={`module-state ${module.state}`} /> <strong>{localizeNavigationLabel(module.id,module.label)}</strong><small>{module.recordCount>0?text('Modül verisi hazır','Module data ready'):text('Kayıt bekleniyor','Awaiting records')}</small></button>)}</div>
+          <Button onClick={() => onNavigate('settings')}>{text('Sistem merkezini aç','Open system center')}</Button>
         </article>
         <article className="panel quick-actions">
-          <span className="eyebrow">Hızlı işlemler</span><h2>Bugün ne yapmak istersiniz?</h2>
-          <button onClick={() => onNavigate('family')}><span>＋</span><div><strong>Aile üyesi ekle</strong><small>Kişi ve üyelik kaydı</small></div></button>
-          <button onClick={() => onNavigate('important-days')}><span>□</span><div><strong>Önemli gün oluştur</strong><small>Yer, davetiye ve katılımcılar</small></div></button>
-          <button onClick={() => onNavigate('tree')}><span>⌘</span><div><strong>Soy ağacını incele</strong><small>Nesiller ve aile dalları</small></div></button>
+          <span className="eyebrow">{text('Hızlı işlemler','Quick actions')}</span><h2>{text('Bugün ne yapmak istersiniz?','What would you like to do today?')}</h2>
+          <button onClick={() => onNavigate('family')}><span>＋</span><div><strong>{text('Aile üyesi ekle','Add family member')}</strong><small>{text('Kişi ve üyelik kaydı','Person and membership record')}</small></div></button>
+          <button onClick={() => onNavigate('important-days')}><span>□</span><div><strong>{text('Önemli gün oluştur','Create important date')}</strong><small>{text('Yer, davetiye ve katılımcılar','Place, invitation, and participants')}</small></div></button>
+          <button onClick={() => onNavigate('tree')}><span>⌘</span><div><strong>{text('Soy ağacını incele','Review family tree')}</strong><small>{text('Nesiller ve aile dalları','Generations and family branches')}</small></div></button>
         </article>
       </section>
     </>
@@ -313,12 +315,13 @@ function Dashboard({ overview, onNavigate, onAddMember, onAddImportantDay }: { o
 }
 
 function EventListItem({ event, selected, onClick }: { event: FamilyEventView; selected?: boolean; onClick?: () => void }) {
+  const { language, locale } = useLocalization();
   const date = new Date(event.startAt);
   return (
     <button className={`event-list-item ${selected ? 'selected' : ''}`} onClick={onClick}>
-      <span className="calendar-tile"><small>{date.toLocaleDateString('tr-TR', { month: 'short' }).toLocaleUpperCase('tr-TR')}</small><strong>{date.getDate()}</strong></span>
+      <span className="calendar-tile"><small>{date.toLocaleDateString(locale, { month: 'short' }).toLocaleUpperCase(locale)}</small><strong>{date.getDate()}</strong></span>
       <span className="event-copy"><strong>{event.title}</strong><small>{formatDate(event.startAt, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</small></span>
-      <span className="event-location">⌖ {event.locationLabel ?? 'Konum yok'}</span>
+      <span className="event-location">⌖ {event.locationLabel ?? (language==='tr'?'Konum yok':'No location')}</span>
     </button>
   );
 }

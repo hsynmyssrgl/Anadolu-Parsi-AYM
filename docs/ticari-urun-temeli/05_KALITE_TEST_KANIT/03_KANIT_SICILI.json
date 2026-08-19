@@ -352,6 +352,16 @@
       "uretimZamani": "2026-08-19T17:41:42+03:00",
       "disKaynak": false,
       "not": "Yonetilen yasam paneli English locale renderinda gorunur Turkce karakter sifir; ana uygulama kabugu son taramasi acik."
+    },
+    {
+      "id": "KANIT-0036",
+      "tur": "TEST",
+      "kapsam": "English ana uygulama kabugu yerellestirme birinci dalgasi",
+      "durum": "PASS_WITH_REMAINING_APP_SHELL_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/35_INGILIZCE_ANA_KABUK_DALGA_BIR_KANITI.json",
+      "uretimZamani": "2026-08-19T17:48:55+03:00",
+      "disKaynak": false,
+      "not": "Ana ve ilk-kullanim panosu English locale renderinda gorunur Turkce karakter sifir; kalan ana kabuk ekranlari acik."
     }
   ]
 }
