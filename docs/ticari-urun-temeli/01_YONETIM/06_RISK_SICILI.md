@@ -11,7 +11,7 @@
 
 | ID | Risk | Olasilik | Etki | Puan | Durum | Azaltma | Bagli is |
 |---|---|---:|---:|---:|---|---|---|
-| RISK-001 | Kirli calisma agacinda ilgisiz degisikligin teslim edilmesi | 4 | 5 | 20 | ACIK | Kapsam bazli diff, teslim dalı, iki asamali review | IS-0002 |
+| RISK-001 | Kirli calisma agacinda ilgisiz degisikligin teslim edilmesi | 4 | 5 | 20 | KAPANDI | Kapsam bazli diff, tam test, tek teslim commit'i ve iki remote readback | IS-0002 |
 | RISK-002 | Imzasiz Windows binarysinin guvenilir yayin sayilmasi | 5 | 5 | 25 | BLOCKED_EXTERNAL | Uretim sertifikasi, provenance ve Authenticode gate | IS-0305 |
 | RISK-003 | Kullanici verisinin update/uninstall sirasinda kaybi | 3 | 5 | 15 | ACIK | N-1 migration, backup/readback, rollback ve destructive receipt | IS-0205, IS-0206 |
 | RISK-004 | Lisans veya veri kosulu belirsiz bilesenin ticari pakete girmesi | 3 | 5 | 15 | ACIK | SBOM, lisans allowlist, provenance ve NOTICE | IS-0602 |
@@ -26,7 +26,7 @@
 | RISK-013 | Hukuk/vergi/gizlilik incelemesi olmadan ticari yayin | 4 | 5 | 20 | BLOCKED_EXTERNAL | Yetkili uzman onayi ve ulkeye gore belge seti | IS-0701, IS-0703, IS-0704 |
 | RISK-014 | Yedek silme ve fabrika ayari iddiasinin dis hedeflerde gerceklesmemesi | 3 | 5 | 15 | ACIK | Hedef bazli silme receipt, pending truth ve retry | IS-0207, IS-0506 |
 | RISK-015 | Ucuncu taraf binary/model guncellemesinde supply-chain degisikligi | 3 | 5 | 15 | ACIK | Exact surum/hash, imza, kaynak ve yeniden lisans incelemesi | IS-0602, IS-0603 |
-| RISK-016 | Ticari belge kokunun Git ve uzak yedek disinda kalmasi | 4 | 4 | 16 | ACIK | Kapsamli depo karari, sifreli uzak yedek, commit ve tag kaniti | IS-0003 |
+| RISK-016 | Ticari belge kokunun Git ve uzak yedek disinda kalmasi | 4 | 4 | 16 | KAPANDI | Kanonik kok Git icine tasindi; GitHub ve yerel bare remote ayni committe dogrulandi | IS-0003 |
 
 ## Kapanis kurali
 

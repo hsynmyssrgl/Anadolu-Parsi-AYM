@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { dirname, resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -30,6 +31,7 @@ const stable = (value) => Array.isArray(value)
     ? `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stable(value[key])}`).join(',')}}`
     : JSON.stringify(value);
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
+const git = (args) => execFileSync('git', args, { cwd: REPO, encoding: 'utf8', windowsHide: true }).trim();
 
 const expectedSections = [
   '01_YONETIM',
@@ -219,6 +221,23 @@ for (const evidence of evidenceRegistry.kayitlar ?? []) {
   evidenceIds.add(evidence.id);
   if (evidence.disKaynak) check(evidence.durum !== 'PASS', `${evidence.id} dis kaynak kanitsiz PASS olamaz`);
 }
+
+const gitEvidence = await readJson(resolve(ROOT, '05_KALITE_TEST_KANIT', '05_GIT_YEDEK_DOGRULAMA_KANITI.json'));
+const normalizedRepo = REPO.replaceAll('\\', '/').toLowerCase();
+check(git(['rev-parse', '--show-toplevel']).replaceAll('\\', '/').toLowerCase() === normalizedRepo, 'ticari temel kanonik Git deposunda degil');
+check(git(['ls-files', '--error-unmatch', 'docs/ticari-urun-temeli/00_OKU_BENI.md']) === 'docs/ticari-urun-temeli/00_OKU_BENI.md', 'ticari temel girisi Git tarafindan izlenmiyor');
+check(gitEvidence.status === 'PASS', 'Git yedek kaniti PASS degil');
+check(/^[a-f0-9]{40}$/.test(gitEvidence.commit), 'Git yedek commit kimligi gecersiz');
+for (const ref of ['HEAD', 'github/main', 'backup/main']) {
+  let ancestor = false;
+  try {
+    execFileSync('git', ['merge-base', '--is-ancestor', gitEvidence.commit, ref], { cwd: REPO, windowsHide: true, stdio: 'ignore' });
+    ancestor = true;
+  } catch {}
+  check(ancestor, `Git yedek commit ${ref} tarihinde yok`);
+}
+check(gitEvidence.github?.commit === gitEvidence.commit && gitEvidence.github?.status === 'PASS', 'GitHub yedek kaniti uyusmuyor');
+check(gitEvidence.localBackup?.commit === gitEvidence.commit && gitEvidence.localBackup?.status === 'PASS', 'yerel bare Git yedek kaniti uyusmuyor');
 
 const packageJson = await readJson(resolve(REPO, 'package.json'));
 const preflightSource = await readText(resolve(REPO, 'scripts', 'run-governed-preflight.mjs'));

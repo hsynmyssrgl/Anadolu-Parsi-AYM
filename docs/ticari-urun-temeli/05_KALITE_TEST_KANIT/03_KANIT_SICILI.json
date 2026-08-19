@@ -21,7 +21,7 @@
       "kaynak": "05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json",
       "uretimZamani": "2026-08-19T13:03:52+03:00",
       "disKaynak": false,
-      "not": "651 kontrol, 37 dosya, 49 is ve 217 kural bagi PASS."
+      "not": "667 kontrol, 38 dosya, 49 is ve 217 kural bagi PASS."
     },
     {
       "id": "KANIT-0003",
@@ -52,6 +52,16 @@
       "uretimZamani": "2026-08-19T00:00:00+03:00",
       "disKaynak": true,
       "not": "Tek kullanicili yerel kullanim bu kaniti gelistirme icin engellemez; ticari yayin iddiasini engeller."
+    },
+    {
+      "id": "KANIT-0006",
+      "tur": "BELGE",
+      "kapsam": "GitHub ve yerel bare Git yedegi",
+      "durum": "PASS",
+      "kaynak": "05_KALITE_TEST_KANIT/05_GIT_YEDEK_DOGRULAMA_KANITI.json",
+      "uretimZamani": "2026-08-19T13:48:04+03:00",
+      "disKaynak": false,
+      "not": "Ayni commit main, github/main ve backup/main referanslarinda dogrulanmistir."
     }
   ]
 }

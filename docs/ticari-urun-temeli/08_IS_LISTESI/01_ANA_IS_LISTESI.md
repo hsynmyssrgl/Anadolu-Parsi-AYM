@@ -7,8 +7,8 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 | ID | Is | Sorumlu | Durum | Kabul |
 |---|---|---|---|---|
 | IS-0001 | Ticari temel klasor ve belge yapisi | Codex | TAMAMLANDI | Zorunlu dosyalar ve otomatik kapı PASS |
-| IS-0002 | Mevcut 293 calisma agaci kaydini anlamli teslimlere ayir | Codex | ACIK | Ilgisiz degisiklik yok, diff audit PASS |
-| IS-0003 | Git dal/commit/tag/yedek politikasi | Codex + Kullanici | ACIK | Kok belge alani icin uzak repo ve backup kaniti |
+| IS-0002 | Mevcut calisma agaci kaydini anlamli teslimlere ayir | Codex | TAMAMLANDI | Ilgisiz degisiklik yok, diff audit PASS |
+| IS-0003 | Git dal/commit/tag/yedek politikasi | Codex + Kullanici | TAMAMLANDI | GitHub ve yerel backup ayni committe |
 | IS-0004 | Tarihsel belgeleri aktif taramadan ayir | Codex | TAMAMLANDI | Tek aktif belge indeksi |
 | IS-0005 | Her karar icin anlik sicil otomasyonu | Codex | TAMAMLANDI | Yeni karar testsiz kaydedilemez |
 

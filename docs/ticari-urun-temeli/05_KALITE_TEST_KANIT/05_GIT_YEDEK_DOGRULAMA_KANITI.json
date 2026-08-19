@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-GIT-YEDEK-DOGRULAMA-20260819-01",
+  "verifiedAt": "2026-08-19T13:48:04+03:00",
+  "repository": "C:/PPT/AYM/06_KOD/app",
+  "branch": "main",
+  "commit": "3b39d46e057edf0bf2a305f01efa184bc1347420",
+  "github": {
+    "remote": "github",
+    "ref": "github/main",
+    "commit": "3b39d46e057edf0bf2a305f01efa184bc1347420",
+    "status": "PASS"
+  },
+  "localBackup": {
+    "remote": "backup",
+    "path": "D:/GitYedekleri/Anadolu-Parsi-AYM.git",
+    "ref": "backup/main",
+    "commit": "3b39d46e057edf0bf2a305f01efa184bc1347420",
+    "status": "PASS"
+  },
+  "compatibilityPath": {
+    "path": "C:/PPT/AYM/12_TICARI_URUN_TEMEL_SURUMU",
+    "type": "Junction",
+    "target": "C:/PPT/AYM/06_KOD/app/docs/ticari-urun-temeli",
+    "contentReadback": "PASS"
+  },
+  "status": "PASS"
+}

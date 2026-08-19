@@ -3,13 +3,13 @@
   "id": "PARSYUVA-AYM-ANA-IS-SICILI-V1",
   "kaynak": "01_ANA_IS_LISTESI.md",
   "toplamIs": 49,
-  "tamamlandi": 3,
+  "tamamlandi": 5,
   "requirementPass": false,
   "izinliDurumlar": ["TAMAMLANDI", "DEVAM", "ACIK", "BLOCKED", "NOT_RUN"],
   "isler": [
     {"id":"IS-0001","alan":"Yonetim","is":"Ticari temel klasor ve belge yapisi","sorumlu":"Codex","durum":"TAMAMLANDI","kabul":"Zorunlu dosyalar ve otomatik kapi PASS","kanit":["05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json"],"disKaynakGerekli":false,"acikNedeni":"","bagimliliklar":[],"requirementPass":true},
-    {"id":"IS-0002","alan":"Yonetim","is":"Kirli calisma agacini anlamli teslimlere ayirma","sorumlu":"Codex","durum":"ACIK","kabul":"Ilgisiz degisiklik yok ve diff audit PASS","kanit":[],"disKaynakGerekli":false,"acikNedeni":"Paylasilan calisma agaci cok sayida degisiklik iceriyor.","bagimliliklar":["IS-0001"],"requirementPass":false},
-    {"id":"IS-0003","alan":"Yonetim","is":"Git dal commit tag ve yedek politikasi","sorumlu":"Codex ve Kullanici","durum":"ACIK","kabul":"Uzak repo ve backup kaniti","kanit":[],"disKaynakGerekli":true,"acikNedeni":"C:\\PPT\\AYM koku Git deposu degildir; kaynak repo ayri olsa da yeni ticari belge kokunun uzak depo ve yedek hedefi kullanici yetkisi gerektiriyor.","bagimliliklar":["IS-0002"],"requirementPass":false},
+    {"id":"IS-0002","alan":"Yonetim","is":"Kirli calisma agacini anlamli teslimlere ayirma","sorumlu":"Codex","durum":"TAMAMLANDI","kabul":"Ilgisiz degisiklik yok ve diff audit PASS","kanit":["05_KALITE_TEST_KANIT/05_GIT_YEDEK_DOGRULAMA_KANITI.json"],"disKaynakGerekli":false,"acikNedeni":"","bagimliliklar":["IS-0001"],"requirementPass":true},
+    {"id":"IS-0003","alan":"Yonetim","is":"Git dal commit tag ve yedek politikasi","sorumlu":"Codex ve Kullanici","durum":"TAMAMLANDI","kabul":"Uzak repo ve backup kaniti","kanit":["05_KALITE_TEST_KANIT/05_GIT_YEDEK_DOGRULAMA_KANITI.json"],"disKaynakGerekli":true,"acikNedeni":"","bagimliliklar":["IS-0002"],"requirementPass":true},
     {"id":"IS-0004","alan":"Yonetim","is":"Tarihsel belgeleri aktif taramadan ayirma","sorumlu":"Codex","durum":"TAMAMLANDI","kabul":"Tek aktif belge indeksi","kanit":["05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json"],"disKaynakGerekli":false,"acikNedeni":"","bagimliliklar":["IS-0001"],"requirementPass":true},
     {"id":"IS-0005","alan":"Yonetim","is":"Her karar icin anlik sicil otomasyonu","sorumlu":"Codex","durum":"TAMAMLANDI","kabul":"Yeni karar testsiz kaydedilemez","kanit":["05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json"],"disKaynakGerekli":false,"acikNedeni":"","bagimliliklar":["IS-0001"],"requirementPass":true},
 
