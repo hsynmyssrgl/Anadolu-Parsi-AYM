@@ -342,6 +342,16 @@
       "uretimZamani": "2026-08-19T17:21:48+03:00",
       "disKaynak": false,
       "not": "Uzun vadeli portfoy paneli English locale renderinda gorunur Turkce karakter sifir; kalan paneller acik."
+    },
+    {
+      "id": "KANIT-0035",
+      "tur": "TEST",
+      "kapsam": "English uzman panel yerellestirme on sekizinci dalgasi",
+      "durum": "PASS_WITH_REMAINING_APP_SHELL_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/34_INGILIZCE_UZMAN_PANEL_DALGA_ON_SEKIZ_KANITI.json",
+      "uretimZamani": "2026-08-19T17:41:42+03:00",
+      "disKaynak": false,
+      "not": "Yonetilen yasam paneli English locale renderinda gorunur Turkce karakter sifir; ana uygulama kabugu son taramasi acik."
     }
   ]
 }

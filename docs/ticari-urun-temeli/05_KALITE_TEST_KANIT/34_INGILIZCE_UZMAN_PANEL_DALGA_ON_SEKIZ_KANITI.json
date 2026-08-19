@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-INGILIZCE-UZMAN-PANEL-DALGA-ON-SEKIZ-20260819-01",
+  "executedAt": "2026-08-19T17:41:42+03:00",
+  "repositoryBaseCommitAtExecution": "eb36a61225c9e032e16b4fe28145e61aa6c8572a",
+  "workItem": "IS-0106",
+  "result": {"status":"PASS_WITH_REMAINING_APP_SHELL_OPEN","targetedTestFilesPassed":1,"targetedTestFilesTotal":1,"targetedTestsPassed":5,"targetedTestsTotal":5,"desktopTypecheck":"PASS"},
+  "translatedPanels": ["ManagedLifePanel"],
+  "englishLocaleVisibleTurkishCharacterCount": 0,
+  "turkishLocalePreserved": true,
+  "remainingFeaturePanelsOpen": false,
+  "remainingApplicationShellAuditOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "On sekizinci dalga yonetilen yasam, ev envanteri ve acil durum panelindeki gorunur metinleri ve locale-uyumlu tarih/sayi bicimlendirmesini tamamlar; ana uygulama kabugu son taramasi aciktir."
+}
