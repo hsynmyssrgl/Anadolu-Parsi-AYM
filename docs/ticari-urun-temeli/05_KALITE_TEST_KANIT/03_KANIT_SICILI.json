@@ -152,6 +152,16 @@
       "uretimZamani": "2026-08-19T15:23:18+03:00",
       "disKaynak": false,
       "not": "Uc kanal token, kontrast ve sabit 1280x800 Electron ekran goruntusu matrisi PASS; hash uyusmazligi paketleme oncesi testi durdurur."
+    },
+    {
+      "id": "KANIT-0016",
+      "tur": "TEST",
+      "kapsam": "Yuzde 200 metin olceginde sol alt ana ve baglamsal tipografi yerlesimi",
+      "durum": "PASS",
+      "kaynak": "05_KALITE_TEST_KANIT/15_TIPOGRAFI_YUZDE_200_KANITI.json",
+      "uretimZamani": "2026-08-19T15:44:55+03:00",
+      "disKaynak": false,
+      "not": "Gercek Electron goruntusu ve DOM olcumleri 10 bolgede yatay tasma 0, kesilen metin 0 ve sabit PNG hashini kanitladi."
     }
   ]
 }

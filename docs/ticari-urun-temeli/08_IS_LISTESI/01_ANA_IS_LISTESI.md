@@ -19,7 +19,7 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 | IS-0101 | ParsYuva AYM marka tutarliligi | Codex | TAMAMLANDI | Pencere/installer/yardim/rapor ayni ad |
 | IS-0102 | Bronze/Silver/Gold merkezi tema tokenlari | Codex | TAMAMLANDI | Token, kontrast, build ve sabit DPI ekran goruntusu matrisi PASS |
 | IS-0103 | Acik beyaz zemin ve saydamlik sistemi | Codex | ACIK | Reduced motion/transparency ile UAT |
-| IS-0104 | Sol/alt/sag tipografi orani | Codex | ACIK | %200 zoomda tasma yok |
+| IS-0104 | Sol/alt/sag tipografi orani | Codex | TAMAMLANDI | %200 metin olceginde yatay tasma ve kesilen metin 0 |
 | IS-0105 | Tum menu-islev parite taramasi | Codex | TAMAMLANDI | Yetim menu/API sayisi 0 |
 | IS-0106 | Tam English uzman panel cevirisi | Codex | ACIK | Gorunur Turkce sabit metin 0 (English locale) |
 | IS-0107 | Ilk tanitim ve yardim sesli anlatim | Codex | DEVAM | TR/EN metin-ses, fallback ve erisilebilirlik PASS |

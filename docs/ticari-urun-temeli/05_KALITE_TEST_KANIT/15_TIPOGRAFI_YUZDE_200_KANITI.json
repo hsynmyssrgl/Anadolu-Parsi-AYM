@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-TIPOGRAFI-YUZDE-200-20260819-01",
+  "executedAt": "2026-08-19T15:44:55+03:00",
+  "repositoryBaseCommitAtExecution": "1af21a1c31376351e60b36bee397dfa145939185",
+  "workItem": "IS-0104",
+  "result": {
+    "status": "PASS",
+    "targetedTestFilesPassed": 2,
+    "targetedTestFilesTotal": 2,
+    "targetedTestsPassed": 12,
+    "targetedTestsTotal": 12,
+    "desktopTypecheck": "PASS",
+    "rendererProductionBuild": "PASS",
+    "electronCapture": "PASS_4_OF_4"
+  },
+  "capture": {
+    "path": "apps/desktop/tests/fixtures/surum-paletleri/bronze-200-yuzde-tipografi-ekran-goruntusu.png",
+    "sha256": "535bd6872425e1311a7767019254b79b1c7d37271853adb8405f57812aa6d189",
+    "viewport": "1280x800",
+    "deviceScaleFactor": 1,
+    "textScalePercent": 200,
+    "sidebarWidthPx": 383,
+    "requiredSidebarWidthPx": 360,
+    "checkedRegions": 10,
+    "maximumHorizontalOverflowPx": 0,
+    "clippedTextElements": 0,
+    "verticalPageScroll": "ALLOWED_AND_PRESENT"
+  },
+  "verified": [
+    "the production styles.css and typography.css are both loaded by the Electron capture",
+    "the left brand logo remains visible and does not shrink at 200 percent text scale",
+    "family name navigation and lower status typography remain readable without clipping",
+    "main and contextual card text scales proportionally without horizontal overflow or overlap",
+    "PNG dimensions SHA-256 and DOM layout measurements are pinned by the visual contract test"
+  ],
+  "externalAccessibilityUat": "Still tracked separately by IS-0605 and does not invalidate this deterministic IS-0104 layout result.",
+  "requirementPass": true,
+  "note": "IS-0104 otomatik Windows Electron yerlesim ve goruntu kanitiyla tamamlandi; Narrator Magnifier ve insan UAT ayri IS-0605 kapsaminda acik kalir."
+}

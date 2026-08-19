@@ -1672,6 +1672,36 @@ linear-gradient(145deg,#071a2d 0%,#0b2744 52%,#0b1c31 100%)}
   }
   .app-shell :is(.span-2, .span-3) { grid-column: auto; }
 }
+@media (min-width: 801px) {
+  .app-shell[data-text-scale="extra-large"] {
+    grid-template-columns: minmax(360px, 30vw) minmax(0, 1fr);
+  }
+  .app-shell[data-text-scale="extra-large"] .window-brand {
+    min-height: 88px;
+    height: auto;
+    align-items: center;
+  }
+  .app-shell[data-text-scale="extra-large"] .brand-icon {
+    width: 44px;
+    height: 44px;
+  }
+  .app-shell[data-text-scale="extra-large"] :is(.brand-copy strong, .brand-copy small, .family-copy strong) {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+  }
+  .app-shell[data-text-scale="extra-large"] .family-switcher {
+    min-height: 96px;
+    grid-template-columns: 48px minmax(0, 1fr) 24px;
+  }
+  .app-shell[data-text-scale="extra-large"] .sidebar-footer .sync-state {
+    grid-template-columns: 36px minmax(0, 1fr) 26px;
+  }
+  .app-shell[data-text-scale="extra-large"] .edition-line {
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+}
 @media (max-width: 800px) {
   .app-shell { grid-template-columns: minmax(0, 1fr); }
   .app-shell .sidebar { position: relative; width: 100%; max-height: none; }

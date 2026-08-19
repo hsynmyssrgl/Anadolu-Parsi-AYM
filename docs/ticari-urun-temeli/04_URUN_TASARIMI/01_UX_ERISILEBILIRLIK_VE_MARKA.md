@@ -12,6 +12,7 @@
 - Govde metni en az 16 px hedeflenir.
 - Form etiketi, yardim, sol alt bilgi ve sag panel metinleri ana icerikle orantili olmalidir.
 - Metin %200 buyutmede tasma veya ust uste binme yapmamalidir.
+- %200 metinde sol alan en az 360 px'e genisler; logo daralmaz, aile adi ve alt durum metni kesilmez. Ana icerikte yatay kaydirma uretilmez; gerekli dikey kaydirma korunur.
 - Kurulum metinleri sistem DPI degerlerinde okunabilir kalir.
 
 ## Renk ve kontrast
@@ -40,4 +41,3 @@
 ## Menu-islev paritesi
 
 Her ekran icin su dörtlü zorunludur: `menu/arama erisimi + calisan islev + yetki siniri + hedef test`. Eksik herhangi bir parca urun yuzeyi kapisini FAIL yapar.
-

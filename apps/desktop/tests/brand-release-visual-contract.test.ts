@@ -4,6 +4,7 @@ import { parse } from '@babel/parser';
 import { describe, expect, it } from 'vitest';
 
 const stylesUrl = new URL('../src/renderer/styles.css', import.meta.url);
+const typographyUrl = new URL('../src/renderer/typography.css', import.meta.url);
 const brandMarkUrl = new URL('../src/renderer/assets/brand-mark.png', import.meta.url);
 const manifestUrl = new URL('../../../config/ui-visual-reference-manifest.json', import.meta.url);
 const appUrl = new URL('../src/renderer/App.tsx', import.meta.url);
@@ -145,8 +146,9 @@ describe('approved brand and release-channel visual contract', () => {
   });
 
   it('pins deterministic full-shell Electron screenshots for every release channel', async () => {
-    const [styles, rawManifest] = await Promise.all([
+    const [styles, typography, rawManifest] = await Promise.all([
       readFile(stylesUrl),
+      readFile(typographyUrl),
       readFile(manifestUrl)
     ]);
     const manifest = JSON.parse(rawManifest.toString('utf8')) as {
@@ -158,6 +160,17 @@ describe('approved brand and release-channel visual contract', () => {
         electronVersion: string;
         viewport: Record<string, number>;
         channels: Record<string, { path: string; sha256: string }>;
+        typographyScaleBaseline: {
+          captureId: string;
+          channel: string;
+          textScalePercent: number;
+          path: string;
+          sha256: string;
+          requiredSidebarWidthPx: number;
+          maximumHorizontalOverflowPx: number;
+          maximumClippedTextElements: number;
+          verticalPageScrollAllowed: boolean;
+        };
         mismatchPolicy: string;
       };
     };
@@ -172,15 +185,31 @@ describe('approved brand and release-channel visual contract', () => {
       viewport: Record<string, number>;
       networkUsed: boolean;
       userOrDemoDataIncluded: boolean;
-      sourceCssSha256: string;
+      sourceStylesCssSha256: string;
+      sourceTypographyCssSha256: string;
+      combinedCssSha256: string;
       visualManifestSha256: string;
       entries: Array<{
+        captureId: string;
         channel: string;
+        textScalePercent: number;
         path: string;
         sha256: string;
         width: number;
         height: number;
         computedTokens: Record<string, string>;
+        layoutChecks: {
+          rootWidth: number;
+          rootHeight: number;
+          regions: Record<string, {
+            clientWidth: number;
+            scrollWidth: number;
+            clientHeight: number;
+            scrollHeight: number;
+            horizontalOverflow: number;
+          }>;
+          clippedText: Array<Record<string, string>>;
+        };
       }>;
     };
     const baselines = manifest.releaseChannelScreenshotBaselines;
@@ -191,11 +220,14 @@ describe('approved brand and release-channel visual contract', () => {
       viewport: baselines.viewport,
       networkUsed: false,
       userOrDemoDataIncluded: false,
-      sourceCssSha256: createHash('sha256').update(styles).digest('hex'),
+      sourceStylesCssSha256: createHash('sha256').update(styles).digest('hex'),
+      sourceTypographyCssSha256: createHash('sha256').update(typography).digest('hex'),
+      combinedCssSha256: createHash('sha256').update(Buffer.concat([styles, Buffer.from('\n'), typography])).digest('hex'),
       visualManifestSha256: createHash('sha256').update(rawManifest).digest('hex')
     });
     expect(baselines.mismatchPolicy).toBe('fail visual contract test before packaging');
-    expect(screenshotManifest.entries.map((entry) => entry.channel)).toEqual(['Bronze', 'Silver', 'Gold']);
+    const channelEntries = screenshotManifest.entries.filter((entry) => entry.textScalePercent === 100);
+    expect(channelEntries.map((entry) => entry.captureId)).toEqual(['Bronze', 'Silver', 'Gold']);
 
     const paletteKeys = {
       background: 'background',
@@ -213,7 +245,7 @@ describe('approved brand and release-channel visual contract', () => {
       focus: 'focus'
     } as const;
     const distinctHashes = new Set<string>();
-    for (const entry of screenshotManifest.entries) {
+    for (const entry of channelEntries) {
       const baseline = baselines.channels[entry.channel];
       const palette = manifest.releaseChannelSurfacePalettes[entry.channel];
       expect(baseline, `${entry.channel} screenshot baseline`).toBeDefined();
@@ -235,6 +267,28 @@ describe('approved brand and release-channel visual contract', () => {
       distinctHashes.add(entry.sha256);
     }
     expect(distinctHashes.size).toBe(3);
+
+    const typographyBaseline = baselines.typographyScaleBaseline;
+    const typographyEntry = screenshotManifest.entries.find((entry) => entry.captureId === typographyBaseline.captureId);
+    expect(typographyEntry).toBeDefined();
+    expect(typographyEntry).toMatchObject({
+      channel: typographyBaseline.channel,
+      textScalePercent: typographyBaseline.textScalePercent,
+      path: typographyBaseline.path,
+      sha256: typographyBaseline.sha256,
+      width: baselines.viewport.width,
+      height: baselines.viewport.height
+    });
+    const typographyPng = await readFile(new URL(`../../../${typographyBaseline.path}`, import.meta.url));
+    expect(createHash('sha256').update(typographyPng).digest('hex')).toBe(typographyBaseline.sha256);
+    expect(typographyEntry!.layoutChecks.regions['.sidebar']!.clientWidth).toBeGreaterThanOrEqual(typographyBaseline.requiredSidebarWidthPx);
+    for (const [selector, region] of Object.entries(typographyEntry!.layoutChecks.regions)) {
+      expect(region.horizontalOverflow, `${selector} horizontal overflow at 200 percent`).toBeLessThanOrEqual(typographyBaseline.maximumHorizontalOverflowPx);
+    }
+    expect(typographyEntry!.layoutChecks.clippedText).toHaveLength(typographyBaseline.maximumClippedTextElements);
+    expect(typographyBaseline.verticalPageScrollAllowed).toBe(true);
+    expect(typographyEntry!.layoutChecks.regions['.page-content']!.scrollHeight)
+      .toBeGreaterThanOrEqual(typographyEntry!.layoutChecks.regions['.page-content']!.clientHeight);
   });
 
   it('pins the approved transparent warm-Bronze Anadolu parsı mark', async () => {
