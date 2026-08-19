@@ -21,7 +21,7 @@ Durumlar: `TAMAMLANDI`, `DEVAM`, `ACIK`, `BLOCKED`, `NOT_RUN`.
 | IS-0103 | Acik beyaz zemin ve saydamlik sistemi | Codex | TAMAMLANDI | Normal cam ve opak reduced-motion/transparency Electron matrisi PASS |
 | IS-0104 | Sol/alt/sag tipografi orani | Codex | TAMAMLANDI | %200 metin olceginde yatay tasma ve kesilen metin 0 |
 | IS-0105 | Tum menu-islev parite taramasi | Codex | TAMAMLANDI | Yetim menu/API sayisi 0 |
-| IS-0106 | Tam English uzman panel cevirisi | Codex | DEVAM | Ilk 12 uzman panel PASS; kalan panellerde gorunur Turkce sabit metin 0 (English locale) |
+| IS-0106 | Tam English uzman panel cevirisi | Codex | DEVAM | Ilk 13 uzman panel PASS; kalan panellerde gorunur Turkce sabit metin 0 (English locale) |
 | IS-0107 | Ilk tanitim ve yardim sesli anlatim | Codex | DEVAM | TR/EN metin-ses, fallback ve erisilebilirlik PASS |
 
 ## 2. Kurulum, acilis ve yasam dongusu

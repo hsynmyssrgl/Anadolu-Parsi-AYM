@@ -6,7 +6,7 @@ const check=(condition,message)=>{checks+=1;if(!condition)failures.push(message)
 const read=(path)=>readFile(path,'utf8');
 const policy=JSON.parse(await read('config/kullanici-arayuzu-dil-politikasi.json'));
 const desktopPackage=JSON.parse(await read('apps/desktop/package.json'));
-const [domain,main,preload,globalTypes,rendererMain,localization,accessibility,help,installer,distributed,universalUx,signedPlugin,familyMap,localTranslation,familyAi,communicationAudit,communicationRecording,communicationSecurity,communicationCalling,smartHome,financeImport]=await Promise.all([
+const [domain,main,preload,globalTypes,rendererMain,localization,accessibility,help,installer,distributed,universalUx,signedPlugin,familyMap,localTranslation,familyAi,communicationAudit,communicationRecording,communicationSecurity,communicationCalling,smartHome,financeImport,communicationMessaging]=await Promise.all([
   read('packages/domain/src/ui-localization.ts'),read('apps/desktop/src/main/main.ts'),read('apps/desktop/src/main/preload.ts'),
   read('apps/desktop/src/renderer/global.d.ts'),read('apps/desktop/src/renderer/main.tsx'),read('apps/desktop/src/renderer/localization.tsx'),
   read('apps/desktop/src/renderer/accessibility.ts'),read('apps/desktop/src/renderer/NarratedHelpCenter.tsx'),read('apps/desktop/build/installer.nsh'),
@@ -15,7 +15,8 @@ const [domain,main,preload,globalTypes,rendererMain,localization,accessibility,h
   read('apps/desktop/src/renderer/LocalTranslationLanguagePanel.tsx'),read('apps/desktop/src/renderer/FamilyAiAssistantPanel.tsx'),
   read('apps/desktop/src/renderer/CommunicationAuditArchivePanel.tsx'),read('apps/desktop/src/renderer/CommunicationRecordingRetentionPanel.tsx'),
   read('apps/desktop/src/renderer/CommunicationSecurityPanel.tsx'),read('apps/desktop/src/renderer/CommunicationRealtimeCallingPanel.tsx'),
-  read('apps/desktop/src/renderer/SmartHomeEnergyPanel.tsx'),read('apps/desktop/src/renderer/FinanceImportPanel.tsx')
+  read('apps/desktop/src/renderer/SmartHomeEnergyPanel.tsx'),read('apps/desktop/src/renderer/FinanceImportPanel.tsx'),
+  read('apps/desktop/src/renderer/CommunicationMessagingPanel.tsx')
 ]);
 
 check(policy.ruleId==='PR-215'&&policy.decisionId==='DEC-255','policy rule/decision binding mismatch');
@@ -40,6 +41,8 @@ check(JSON.stringify(policy.coverage.translatedFeaturePanelWaveFive)===JSON.stri
   &&policy.coverage.translatedFeaturePanelWaveFiveEnglishVisibleTurkishTextCount===0,'feature-panel wave-five truth mismatch');
 check(JSON.stringify(policy.coverage.translatedFeaturePanelWaveSix)===JSON.stringify(['FinanceImportPanel'])
   &&policy.coverage.translatedFeaturePanelWaveSixEnglishVisibleTurkishTextCount===0,'feature-panel wave-six truth mismatch');
+check(JSON.stringify(policy.coverage.translatedFeaturePanelWaveSeven)===JSON.stringify(['CommunicationMessagingPanel'])
+  &&policy.coverage.translatedFeaturePanelWaveSevenEnglishVisibleTurkishTextCount===0,'feature-panel wave-seven truth mismatch');
 check(domain.includes("primaryLanguage === 'tr' ? 'tr' : 'en'")&&domain.includes("resolveUiLocalization('en-US')"),'domain fallback resolver missing');
 check(main.includes('resolveUiLocalization(app.getLocale())')&&main.includes("registerIpcHandler('app:getLocalizationBootstrap'"),'main system-locale authority missing');
 check(preload.includes("invoke('app:getLocalizationBootstrap')")&&globalTypes.includes('getLocalizationBootstrap()'),'preload/global localization bridge missing');
@@ -58,6 +61,7 @@ for(const [name,source,marker] of [
 check(communicationCalling.includes("useLocalization()")&&communicationCalling.includes("text('Gerçek zamanlı çağrı hazırlığı','Real-time call preparation')"),'communication calling English localization binding missing');
 check(smartHome.includes("useLocalization()")&&smartHome.includes("text('Akıllı ev ve enerji','Smart home and energy')"),'smart-home English localization binding missing');
 check(financeImport.includes("useLocalization()")&&financeImport.includes("text('Kontrollü hareket aktarımı ve OHVPS adapter sınırı','Controlled transaction import and OHVPS adapter boundary')"),'finance import English localization binding missing');
+check(communicationMessaging.includes("useLocalization()")&&communicationMessaging.includes("text('Yerel, mühürlü mesajlaşma çalışma alanı','Local sealed messaging workspace')"),'communication messaging English localization binding missing');
 for(const [name,source,marker] of [
   ['communication audit',communicationAudit,"text('Denetim zinciri yükleniyor','Loading audit chain')"],
   ['communication recording',communicationRecording,"text('Görüşme kaydı rıza planı','Call recording consent plan')"],

@@ -44,7 +44,8 @@
       "communication-security-panel",
       "communication-realtime-calling-panel",
       "smart-home-energy-panel",
-      "finance-import-panel"
+      "finance-import-panel",
+      "communication-messaging-panel"
     ],
     "translatedFeaturePanelWaveOne": [
       "DistributedOperationsPanel",
@@ -72,8 +73,10 @@
     "translatedFeaturePanelWaveFiveEnglishVisibleTurkishTextCount": 0,
     "translatedFeaturePanelWaveSix": ["FinanceImportPanel"],
     "translatedFeaturePanelWaveSixEnglishVisibleTurkishTextCount": 0,
+    "translatedFeaturePanelWaveSeven": ["CommunicationMessagingPanel"],
+    "translatedFeaturePanelWaveSevenEnglishVisibleTurkishTextCount": 0,
     "openSurface": "remaining-feature-panel-copy",
-    "openReason": "İlk on iki uzman panel iki dilli ve English locale görünür Türkçe metin sayısı sıfırdır; mesajlaşma, dosya paylaşımı ve kalan geniş özellik panellerindeki tarihsel Türkçe metinler henüz bütünüyle taşınmadı.",
+    "openReason": "İlk on üç uzman panel iki dilli ve English locale görünür Türkçe metin sayısı sıfırdır; dosya paylaşımı ve kalan geniş özellik panellerindeki tarihsel Türkçe metinler henüz bütünüyle taşınmadı.",
     "countsAsFullApplicationEnglishPass": false
   },
   "failClosed": true,

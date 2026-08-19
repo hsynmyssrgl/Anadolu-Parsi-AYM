@@ -232,6 +232,16 @@
       "uretimZamani": "2026-08-19T16:19:00+03:00",
       "disKaynak": false,
       "not": "Finans ice aktarma paneli English locale renderinda gorunur Turkce karakter sifir; kalan paneller acik."
+    },
+    {
+      "id": "KANIT-0024",
+      "tur": "TEST",
+      "kapsam": "English uzman panel yerellestirme yedinci dalgasi",
+      "durum": "PASS_WITH_REMAINING_PANELS_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/23_INGILIZCE_UZMAN_PANEL_DALGA_YEDI_KANITI.json",
+      "uretimZamani": "2026-08-19T16:24:00+03:00",
+      "disKaynak": false,
+      "not": "Yerel muhurlu mesajlasma paneli English locale renderinda gorunur Turkce karakter sifir; dosya paylasimi ve kalan paneller acik."
     }
   ]
 }

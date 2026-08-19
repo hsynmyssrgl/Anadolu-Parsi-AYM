@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-INGILIZCE-UZMAN-PANEL-DALGA-YEDI-20260819-01",
+  "executedAt": "2026-08-19T16:24:00+03:00",
+  "repositoryBaseCommitAtExecution": "5a268a02fa52eeee8d078859cfedcb25c04daca6",
+  "workItem": "IS-0106",
+  "result": {"status":"PASS_WITH_REMAINING_PANELS_OPEN","targetedTestFilesPassed":1,"targetedTestFilesTotal":1,"targetedTestsPassed":2,"targetedTestsTotal":2,"desktopTypecheck":"PASS"},
+  "translatedPanels": ["CommunicationMessagingPanel"],
+  "englishLocaleVisibleTurkishCharacterCount": 0,
+  "turkishLocalePreserved": true,
+  "remainingFeaturePanelsOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "Yedinci dalga yerel muhurlu mesajlasma panelinde iki dilli gorunur metin kapisini tamamlar; dosya paylasimi ve kalan paneller aciktir."
+}
