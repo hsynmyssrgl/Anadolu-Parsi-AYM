@@ -222,6 +222,16 @@
       "uretimZamani": "2026-08-19T16:15:00+03:00",
       "disKaynak": false,
       "not": "Akilli ev ve enerji paneli English locale renderinda gorunur Turkce karakter sifir; kalan paneller acik."
+    },
+    {
+      "id": "KANIT-0023",
+      "tur": "TEST",
+      "kapsam": "English uzman panel yerellestirme altinci dalgasi",
+      "durum": "PASS_WITH_REMAINING_PANELS_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/22_INGILIZCE_UZMAN_PANEL_DALGA_ALTI_KANITI.json",
+      "uretimZamani": "2026-08-19T16:19:00+03:00",
+      "disKaynak": false,
+      "not": "Finans ice aktarma paneli English locale renderinda gorunur Turkce karakter sifir; kalan paneller acik."
     }
   ]
 }

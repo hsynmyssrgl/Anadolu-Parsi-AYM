@@ -8,6 +8,7 @@ import type {
   RecordPrivacy
 } from '@ppt/domain';
 import { Button, EmptyState, SectionHeader, StatusMessage, Surface } from './ui';
+import { selectUiCopy, useLocalization } from './localization';
 
 interface FinanceImportPanelProps {
   readonly people: readonly FamilyMemberView[];
@@ -24,10 +25,10 @@ const findHeader = (headers: readonly string[], candidates: readonly string[]): 
   return candidates.some((candidate) => normalized.includes(candidate));
 }) ?? '';
 
-const formatMoney = (amount: number, currency: string): string =>
-  `${amount.toLocaleString('tr-TR', { maximumFractionDigits: 2 })} ${currency}`;
-
 export function FinanceImportPanel({ people, workspace, onWorkspaceChange }: FinanceImportPanelProps) {
+  const {language,locale}=useLocalization();const text=(turkish:string,english:string)=>selectUiCopy(language,turkish,english);
+  const formatMoney=(amount:number,currency:string):string=>`${amount.toLocaleString(locale,{maximumFractionDigits:2})} ${currency}`;
+  const privacyLabel=(value:RecordPrivacy)=>language==='tr'?privacyLabels[value]:({private:'Private',selected_members:'Selected members',family:'Family'} as const)[value];
   const [preview, setPreview] = useState<FinanceImportPreviewView>();
   const [ownerPersonId, setOwnerPersonId] = useState(people[0]?.id ?? '');
   const [privacy, setPrivacy] = useState<RecordPrivacy>('private');
@@ -67,7 +68,7 @@ export function FinanceImportPanel({ people, workspace, onWorkspaceChange }: Fin
     setExternalIdColumn(findHeader(next.headers, ['external_id','fitid','referans','reference']));
     setAmountMode(debit || credit ? 'debit_credit_columns' : 'signed');
     setMessageTone('success');
-    setMessage(`${next.totalRows} satır süreli önizlemeye alındı; eşleme için örnek hücreler gösterilir, dosya yolu aktarılmaz ve ayrıştırılmış satırlar süre sonunda silinir.`);
+    setMessage(`${next.totalRows} ${text('satır süreli önizlemeye alındı; eşleme için örnek hücreler gösterilir, dosya yolu aktarılmaz ve ayrıştırılmış satırlar süre sonunda silinir.','rows were loaded into a time-bound preview; sample cells are shown for mapping, the file path is not exposed and parsed rows are deleted when the preview expires.')}`);
   };
 
   const selectFile = async (): Promise<void> => {
@@ -77,7 +78,7 @@ export function FinanceImportPanel({ people, workspace, onWorkspaceChange }: Fin
       if (result?.preview) installPreview(result.preview);
     } catch (error) {
       setMessageTone('danger');
-      setMessage(error instanceof Error ? error.message : 'Finans dosyası önizlenemedi.');
+      setMessage(error instanceof Error ? error.message : text('Finans dosyası önizlenemedi.','The finance file could not be previewed.'));
     } finally { setBusy(false); }
   };
 
@@ -88,7 +89,7 @@ export function FinanceImportPanel({ people, workspace, onWorkspaceChange }: Fin
       if (result) installPreview(result);
     } catch (error) {
       setMessageTone('danger');
-      setMessage(error instanceof Error ? error.message : 'OHVPS sandbox önizlemesi oluşturulamadı.');
+      setMessage(error instanceof Error ? error.message : text('OHVPS sandbox önizlemesi oluşturulamadı.','The OHVPS sandbox preview could not be created.'));
     } finally { setBusy(false); }
   };
 
@@ -122,16 +123,16 @@ export function FinanceImportPanel({ people, workspace, onWorkspaceChange }: Fin
       setPreview(undefined);
       setMessageTone('success');
       setMessage(batch
-        ? `${batch.importedRows} hareket kaydedildi; ${batch.duplicateRows} tekrar ${duplicateStrategy === 'skip' ? 'atlandı' : 'bulundu'}.`
-        : 'Finans içe aktarma paketi kaydedildi.');
+        ? `${batch.importedRows} ${text('hareket kaydedildi;','transactions saved;')} ${batch.duplicateRows} ${text('tekrar','duplicates')} ${duplicateStrategy === 'skip' ? text('atlandı','skipped') : text('bulundu','found')}.`
+        : text('Finans içe aktarma paketi kaydedildi.','The finance import package was saved.'));
     } catch (error) {
       setMessageTone('danger');
-      setMessage(error instanceof Error ? error.message : 'Finans hareketleri içe aktarılamadı.');
+      setMessage(error instanceof Error ? error.message : text('Finans hareketleri içe aktarılamadı.','Finance transactions could not be imported.'));
     } finally { setBusy(false); }
   };
 
   const headerOptions = preview?.headers ?? [];
-  const optionalHeader = (value: string, setter: (next: string) => void, label: string) => <label>{label}<select value={value} onChange={(event) => setter(event.target.value)}><option value="">Kullanma</option>{headerOptions.map((header) => <option value={header} key={header}>{header}</option>)}</select></label>;
+  const optionalHeader = (value: string, setter: (next: string) => void, label: string) => <label>{label}<select value={value} onChange={(event) => setter(event.target.value)}><option value="">{text('Kullanma','Do not use')}</option>{headerOptions.map((header) => <option value={header} key={header}>{header}</option>)}</select></label>;
   const commitReady = Boolean(preview && ownerPersonId && dateColumn && /^[A-Z]{3}$/u.test(defaultCurrency)
     && (amountMode === 'debit_credit_columns' ? debitColumn || creditColumn : amountColumn)
     && (amountMode !== 'absolute_with_direction' || directionColumn)
@@ -139,61 +140,61 @@ export function FinanceImportPanel({ people, workspace, onWorkspaceChange }: Fin
 
   return <>
     <Surface className="span-2 workspace-summary">
-      <SectionHeader eyebrow="B4-13 · B4-14" title="Kontrollü hareket aktarımı ve OHVPS adapter sınırı"/>
+      <SectionHeader eyebrow="B4-13 · B4-14" title={text('Kontrollü hareket aktarımı ve OHVPS adapter sınırı','Controlled transaction import and OHVPS adapter boundary')}/>
       <div className="notes-card">
-        <strong>Canlı banka bağlantısı yok; kimlik bilgisi, token veya harici onay toplanmaz.</strong>
-        <small>OHVPS adapter: yerel sözleşme · Sandbox: sentetik veri · Manuel fallback: UTF-8 CSV/TSV/OFX/QFX ve XLSX · Ağ erişimi yapılmadı</small>
+        <strong>{text('Canlı banka bağlantısı yok; kimlik bilgisi, token veya harici onay toplanmaz.','There is no live bank connection; credentials, tokens and external authorization are not collected.')}</strong>
+        <small>{text('OHVPS adapter: yerel sözleşme · Sandbox: sentetik veri · Manuel fallback: UTF-8 CSV/TSV/OFX/QFX ve XLSX · Ağ erişimi yapılmadı','OHVPS adapter: local contract · Sandbox: synthetic data · Manual fallback: UTF-8 CSV/TSV/OFX/QFX and XLSX · Network access was not used')}</small>
       </div>
       <div className="button-row">
-        <Button tone="primary" disabled={busy} onClick={() => void selectFile()}>Dosya seç ve önizle</Button>
-        <Button disabled={busy} onClick={() => void startSandbox()}>Sentetik OHVPS sandbox</Button>
+        <Button tone="primary" disabled={busy} onClick={() => void selectFile()}>{text('Dosya seç ve önizle','Select file and preview')}</Button>
+        <Button disabled={busy} onClick={() => void startSandbox()}>{text('Sentetik OHVPS sandbox','Synthetic OHVPS sandbox')}</Button>
       </div>
       {message && <StatusMessage tone={messageTone}>{message}</StatusMessage>}
     </Surface>
 
     {preview && <Surface className="span-2 workspace-summary">
-      <SectionHeader eyebrow={`${preview.sourceFormat.toUpperCase()} · ${preview.totalRows} satır`} title={preview.fileName}/>
+      <SectionHeader eyebrow={`${preview.sourceFormat.toUpperCase()} · ${preview.totalRows} ${text('satır','rows')}`} title={preview.fileName}/>
       <div className="metric-row">
         <span>SHA-256 <strong>{preview.fileSha256.slice(0, 16)}…</strong></span>
-        <span>Ham dosya baytları <strong>{preview.rawFileRetained ? 'saklandı' : 'saklanmadı'}</strong></span>
-        <span>Ayrıştırılmış satırlar <strong>{preview.parsedRowsRetainedUntilExpiry ? 'süre sonuna kadar bellekte' : 'saklanmıyor'}</strong></span>
-        <span>Örnek hücreler <strong>{preview.sampleCellValuesExposed ? 'eşleme için gösteriliyor' : 'gizli'}</strong></span>
-        <span>Dosya yolu <strong>{preview.filePathExposed ? 'açık' : 'gizli'}</strong></span>
-        <span>Önizleme sonu <strong>{new Date(preview.expiresAt).toLocaleTimeString('tr-TR')}</strong></span>
+        <span>{text('Ham dosya baytları','Raw file bytes')} <strong>{preview.rawFileRetained ? text('saklandı','retained') : text('saklanmadı','not retained')}</strong></span>
+        <span>{text('Ayrıştırılmış satırlar','Parsed rows')} <strong>{preview.parsedRowsRetainedUntilExpiry ? text('süre sonuna kadar bellekte','in memory until expiry') : text('saklanmıyor','not retained')}</strong></span>
+        <span>{text('Örnek hücreler','Sample cells')} <strong>{preview.sampleCellValuesExposed ? text('eşleme için gösteriliyor','shown for mapping') : text('gizli','hidden')}</strong></span>
+        <span>{text('Dosya yolu','File path')} <strong>{preview.filePathExposed ? text('açık','exposed') : text('gizli','hidden')}</strong></span>
+        <span>{text('Önizleme sonu','Preview expires')} <strong>{new Date(preview.expiresAt).toLocaleTimeString(locale)}</strong></span>
       </div>
       {preview.warnings.map((warning) => <small key={warning}>{warning}</small>)}
       <div className="form-grid">
-        <label>Kayıt sahibi<select value={ownerPersonId} onChange={(event) => { setOwnerPersonId(event.target.value); setIncomeCategoryId(''); setExpenseCategoryId(''); }}><option value="">Seçin</option>{people.map((person) => <option value={person.id} key={person.id}>{person.displayName}</option>)}</select></label>
-        <label>Gizlilik<select value={privacy} onChange={(event) => { setPrivacy(event.target.value as RecordPrivacy); setIncomeCategoryId(''); setExpenseCategoryId(''); }}>{Object.entries(privacyLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label>
-        <label>Tarih sütunu<select value={dateColumn} onChange={(event) => setDateColumn(event.target.value)}><option value="">Seçin</option>{headerOptions.map((header) => <option value={header} key={header}>{header}</option>)}</select></label>
-        <label>Tutar modeli<select value={amountMode} onChange={(event) => setAmountMode(event.target.value as FinanceImportAmountMode)}><option value="signed">İşaretli tutar (+ gelir / − gider)</option><option value="absolute_with_direction">Mutlak tutar + yön sütunu</option><option value="debit_credit_columns">Ayrı borç / alacak sütunları</option></select></label>
-        {amountMode !== 'debit_credit_columns' && optionalHeader(amountColumn, setAmountColumn, 'Tutar sütunu')}
-        {amountMode === 'debit_credit_columns' && <>{optionalHeader(debitColumn, setDebitColumn, 'Borç / gider sütunu')}{optionalHeader(creditColumn, setCreditColumn, 'Alacak / gelir sütunu')}</>}
-        {amountMode === 'absolute_with_direction' && optionalHeader(directionColumn, setDirectionColumn, 'Gelir / gider yönü')}
-        {optionalHeader(descriptionColumn, setDescriptionColumn, 'Açıklama sütunu')}
-        {optionalHeader(currencyColumn, setCurrencyColumn, 'Para birimi sütunu')}
-        {optionalHeader(externalIdColumn, setExternalIdColumn, 'Harici hareket kimliği')}
-        <label>Varsayılan para birimi<input maxLength={3} value={defaultCurrency} onChange={(event) => setDefaultCurrency(event.target.value.toUpperCase())}/></label>
-        <label>Gelir kategorisi<select value={incomeCategoryId} onChange={(event) => setIncomeCategoryId(event.target.value)}><option value="">Gelir yok / seçilmedi</option>{incomeCategories.map((category) => <option value={category.id} key={category.id}>{category.name}</option>)}</select></label>
-        <label>Gider kategorisi<select value={expenseCategoryId} onChange={(event) => setExpenseCategoryId(event.target.value)}><option value="">Gider yok / seçilmedi</option>{expenseCategories.map((category) => <option value={category.id} key={category.id}>{category.name}</option>)}</select></label>
-        <label>Tekrar politikası<select value={duplicateStrategy} onChange={(event) => setDuplicateStrategy(event.target.value as 'skip'|'reject')}><option value="skip">Tekrarları atla</option><option value="reject">Tekrarda tüm paketi reddet</option></select></label>
+        <label>{text('Kayıt sahibi','Record owner')}<select value={ownerPersonId} onChange={(event) => { setOwnerPersonId(event.target.value); setIncomeCategoryId(''); setExpenseCategoryId(''); }}><option value="">{text('Seçin','Select')}</option>{people.map((person) => <option value={person.id} key={person.id}>{person.displayName}</option>)}</select></label>
+        <label>{text('Gizlilik','Privacy')}<select value={privacy} onChange={(event) => { setPrivacy(event.target.value as RecordPrivacy); setIncomeCategoryId(''); setExpenseCategoryId(''); }}>{Object.keys(privacyLabels).map(value => <option value={value} key={value}>{privacyLabel(value as RecordPrivacy)}</option>)}</select></label>
+        <label>{text('Tarih sütunu','Date column')}<select value={dateColumn} onChange={(event) => setDateColumn(event.target.value)}><option value="">{text('Seçin','Select')}</option>{headerOptions.map((header) => <option value={header} key={header}>{header}</option>)}</select></label>
+        <label>{text('Tutar modeli','Amount model')}<select value={amountMode} onChange={(event) => setAmountMode(event.target.value as FinanceImportAmountMode)}><option value="signed">{text('İşaretli tutar (+ gelir / − gider)','Signed amount (+ income / − expense)')}</option><option value="absolute_with_direction">{text('Mutlak tutar + yön sütunu','Absolute amount + direction column')}</option><option value="debit_credit_columns">{text('Ayrı borç / alacak sütunları','Separate debit / credit columns')}</option></select></label>
+        {amountMode !== 'debit_credit_columns' && optionalHeader(amountColumn, setAmountColumn, text('Tutar sütunu','Amount column'))}
+        {amountMode === 'debit_credit_columns' && <>{optionalHeader(debitColumn, setDebitColumn, text('Borç / gider sütunu','Debit / expense column'))}{optionalHeader(creditColumn, setCreditColumn, text('Alacak / gelir sütunu','Credit / income column'))}</>}
+        {amountMode === 'absolute_with_direction' && optionalHeader(directionColumn, setDirectionColumn, text('Gelir / gider yönü','Income / expense direction'))}
+        {optionalHeader(descriptionColumn, setDescriptionColumn, text('Açıklama sütunu','Description column'))}
+        {optionalHeader(currencyColumn, setCurrencyColumn, text('Para birimi sütunu','Currency column'))}
+        {optionalHeader(externalIdColumn, setExternalIdColumn, text('Harici hareket kimliği','External transaction ID'))}
+        <label>{text('Varsayılan para birimi','Default currency')}<input maxLength={3} value={defaultCurrency} onChange={(event) => setDefaultCurrency(event.target.value.toUpperCase())}/></label>
+        <label>{text('Gelir kategorisi','Income category')}<select value={incomeCategoryId} onChange={(event) => setIncomeCategoryId(event.target.value)}><option value="">{text('Gelir yok / seçilmedi','No income / not selected')}</option>{incomeCategories.map((category) => <option value={category.id} key={category.id}>{category.name}</option>)}</select></label>
+        <label>{text('Gider kategorisi','Expense category')}<select value={expenseCategoryId} onChange={(event) => setExpenseCategoryId(event.target.value)}><option value="">{text('Gider yok / seçilmedi','No expense / not selected')}</option>{expenseCategories.map((category) => <option value={category.id} key={category.id}>{category.name}</option>)}</select></label>
+        <label>{text('Tekrar politikası','Duplicate policy')}<select value={duplicateStrategy} onChange={(event) => setDuplicateStrategy(event.target.value as 'skip'|'reject')}><option value="skip">{text('Tekrarları atla','Skip duplicates')}</option><option value="reject">{text('Tekrarda tüm paketi reddet','Reject entire package on duplicate')}</option></select></label>
       </div>
-      {categories.length === 0 && <StatusMessage tone="danger">Seçilen sahip ve gizlilik için gelir/gider kategorisi yok. Önce planlama defterinde kategori oluşturun.</StatusMessage>}
+      {categories.length === 0 && <StatusMessage tone="danger">{text('Seçilen sahip ve gizlilik için gelir/gider kategorisi yok. Önce planlama defterinde kategori oluşturun.','No income/expense category exists for the selected owner and privacy level. Create a category in the planning ledger first.')}</StatusMessage>}
       <div className="context-stat">
-        <strong>Örnek satırlar</strong>
+        <strong>{text('Örnek satırlar','Sample rows')}</strong>
         {preview.sampleRows.slice(0, 5).map((row) => <small key={row.rowNumber}>#{row.rowNumber} · {row.values.slice(0, 6).join(' · ')}</small>)}
       </div>
-      <Button tone="primary" disabled={busy || !commitReady} onClick={() => void commit()}>Eşlemeyi doğrula ve tek işlemde kaydet</Button>
+      <Button tone="primary" disabled={busy || !commitReady} onClick={() => void commit()}>{text('Eşlemeyi doğrula ve tek işlemde kaydet','Verify mapping and save in one operation')}</Button>
     </Surface>}
 
     <Surface className="span-2 workspace-summary">
-      <SectionHeader eyebrow="Append-only içe aktarma defteri" title={`${workspace?.importBatches.length ?? 0} paket · ${workspace?.importedCashFlowEntries.length ?? 0} hareket`}/>
-      {(workspace?.importBatches.length ?? 0) === 0 ? <EmptyState title="İçe aktarma paketi yok" body="Dosya fallback veya sentetik sandbox sonucu burada bütünlük özetiyle görünür."/> : workspace?.importBatches.slice(0, 8).map((batch) => <div className="context-stat" key={batch.id}>
-        <strong>{batch.fileName} · {batch.importedRows}/{batch.totalRows} kaydedildi</strong>
-        <span>{batch.sourceMode === 'sandbox' ? 'Sentetik sandbox' : batch.sourceFormat.toUpperCase()} · {batch.duplicateRows} tekrar · {batch.defaultCurrency}</span>
-        <small>{new Date(batch.createdAt).toLocaleString('tr-TR')} · {batch.fileSha256.slice(0, 16)}… · ağ/kimlik bilgisi/harici onay yok</small>
+      <SectionHeader eyebrow={text('Append-only içe aktarma defteri','Append-only import ledger')} title={`${workspace?.importBatches.length ?? 0} ${text('paket','packages')} · ${workspace?.importedCashFlowEntries.length ?? 0} ${text('hareket','transactions')}`}/>
+      {(workspace?.importBatches.length ?? 0) === 0 ? <EmptyState title={text('İçe aktarma paketi yok','No import package')} body={text('Dosya fallback veya sentetik sandbox sonucu burada bütünlük özetiyle görünür.','A file fallback or synthetic sandbox result appears here with an integrity summary.')}/> : workspace?.importBatches.slice(0, 8).map((batch) => <div className="context-stat" key={batch.id}>
+        <strong>{batch.fileName} · {batch.importedRows}/{batch.totalRows} {text('kaydedildi','saved')}</strong>
+        <span>{batch.sourceMode === 'sandbox' ? text('Sentetik sandbox','Synthetic sandbox') : batch.sourceFormat.toUpperCase()} · {batch.duplicateRows} {text('tekrar','duplicates')} · {batch.defaultCurrency}</span>
+        <small>{new Date(batch.createdAt).toLocaleString(locale)} · {batch.fileSha256.slice(0, 16)}… · {text('ağ/kimlik bilgisi/harici onay yok','no network/credentials/external authorization')}</small>
       </div>)}
-      {workspace?.importedCashFlowEntries.slice(0, 6).map((entry) => <div className="list-row" key={entry.id}><div><strong>{entry.description ?? 'Finans hareketi'}</strong><small>{entry.dataSource === 'sandbox' ? 'sentetik' : 'dosya'} · {new Date(entry.occurredAt).toLocaleDateString('tr-TR')}</small></div><span>{entry.direction === 'expense' ? '−' : '+'}{formatMoney(entry.amount, entry.currency)}</span></div>)}
+      {workspace?.importedCashFlowEntries.slice(0, 6).map((entry) => <div className="list-row" key={entry.id}><div><strong>{entry.description ?? text('Finans hareketi','Finance transaction')}</strong><small>{entry.dataSource === 'sandbox' ? text('sentetik','synthetic') : text('dosya','file')} · {new Date(entry.occurredAt).toLocaleDateString(locale)}</small></div><span>{entry.direction === 'expense' ? '−' : '+'}{formatMoney(entry.amount, entry.currency)}</span></div>)}
     </Surface>
   </>;
 }

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-INGILIZCE-UZMAN-PANEL-DALGA-ALTI-20260819-01",
+  "executedAt": "2026-08-19T16:19:00+03:00",
+  "repositoryBaseCommitAtExecution": "66049e17a1faf250bda2b17d119d4b78ec655be5",
+  "workItem": "IS-0106",
+  "result": {"status":"PASS_WITH_REMAINING_PANELS_OPEN","targetedTestFilesPassed":1,"targetedTestFilesTotal":1,"targetedTestsPassed":2,"targetedTestsTotal":2,"desktopTypecheck":"PASS"},
+  "translatedPanels": ["FinanceImportPanel"],
+  "englishLocaleVisibleTurkishCharacterCount": 0,
+  "turkishLocalePreserved": true,
+  "remainingFeaturePanelsOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "Altinci dalga finans ice aktarma panelinde iki dilli gorunur metin kapisini tamamlar; kalan paneller aciktir."
+}
