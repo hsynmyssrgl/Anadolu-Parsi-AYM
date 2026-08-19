@@ -37,6 +37,7 @@ import { localizeFamilyFormsNode } from './AileFormlariYerellestirme';
 import { localizeOperationsCenterNode } from './YasamSaglikOtomasyonYerellestirme';
 import { localizeRepairAndSessionNode } from './VeriOnarmaOturumYerellestirme';
 import { localizeHouseholdLifecycleNode } from './HaneKisiDavetYerellestirme';
+import { localizeIdentityAccessNode } from './KimlikErisimYerellestirme';
 import { FamilyMeetingPanel } from './FamilyMeetingPanel';
 import { UniversalUxConsolidationPanel } from './UniversalUxConsolidationPanel';
 import { FamilyLocationMap } from './FamilyLocationMap';
@@ -1622,7 +1623,8 @@ const temporaryClaimLabels:Readonly<Record<TemporaryCredentialClaimKey,string>>=
 
 const federatedProviderLabels:Readonly<Record<FederatedIdentityProvider,string>>=Object.freeze({apple:'Apple',google:'Google',microsoft:'Microsoft'});
 
-function IdentityAccessCredentialCenter({trustedDevices}:{trustedDevices:readonly TrustedDeviceView[]}) {
+export function IdentityAccessCredentialCenter({trustedDevices}:{trustedDevices:readonly TrustedDeviceView[]}) {
+  const {language}=useLocalization();
   const [center,setCenter]=useState<IdentityAccessCredentialCenterView|null>(null);
   const [providers,setProviders]=useState<ExternalIdentityProviderView[]>([]);
   const [phase,setPhase]=useState<'loading'|'ready'|'error'>('loading');
@@ -1813,15 +1815,15 @@ function IdentityAccessCredentialCenter({trustedDevices}:{trustedDevices:readonl
     finally{setBusy('');}
   };
 
-  if(phase==='loading')return <AsyncStatePanel state="loading" title="Kimlik ve geçici yetki merkezi yükleniyor" message="Passkey, bağlı hesap, süreli belge ve companion metadata görünümü hazırlanıyor."/>;
-  if(phase==='error')return <AsyncStatePanel state="error" title="Kimlik ve geçici yetki merkezi yüklenemedi" message={message||'Yetkili yerel görünüm kurulamadı.'} onRetry={load}/>;
-  if(!center)return <AsyncStatePanel state="empty" title="Kimlik ve geçici yetki merkezi boş" message="Bu hesap için yetkili yerel görünüm bulunamadı."/>;
+  if(phase==='loading')return localizeIdentityAccessNode(<AsyncStatePanel state="loading" title="Kimlik ve geçici yetki merkezi yükleniyor" message="Passkey, bağlı hesap, süreli belge ve companion metadata görünümü hazırlanıyor."/>,language);
+  if(phase==='error')return localizeIdentityAccessNode(<AsyncStatePanel state="error" title="Kimlik ve geçici yetki merkezi yüklenemedi" message={message||'Yetkili yerel görünüm kurulamadı.'} onRetry={load}/>,language);
+  if(!center)return localizeIdentityAccessNode(<AsyncStatePanel state="empty" title="Kimlik ve geçici yetki merkezi boş" message="Bu hesap için yetkili yerel görünüm bulunamadı."/>,language);
   const allEmpty=center.passkeys.length===0&&center.federatedLinks.length===0&&center.temporaryCredentials.length===0&&center.companionSnapshots.length===0;
   const activePasskeys=center.passkeys.filter(item=>item.status==='active');
   const configuredProviders=providers.filter(item=>item.configured);
   const currentRules=TEMPORARY_CREDENTIAL_DISCLOSURE_RULES[temporaryKind];
   const activeDevices=trustedDevices.filter(item=>!item.revokedAt);
-  return <section className="identity-access-center" aria-label="Kimlik, passkey ve geçici yetki merkezi" aria-describedby="identity-access-description">
+  const panel=<section className="identity-access-center" aria-label="Kimlik, passkey ve geçici yetki merkezi" aria-describedby="identity-access-description">
     <SectionHeader eyebrow="B2-02 · B6-06 · B6-07" title="Kimlik, passkey ve geçici yetki merkezi" action={<Button disabled={Boolean(busy)} onClick={()=>void load()}>Merkezi yenile</Button>}/>
     <p id="identity-access-description">Bu tek merkez yalnız yerel olarak doğrulanmış tören metadata’sını yönetir. Biyometrik veri veya passkey özel anahtarı uygulamaya gelmez; uzak attestation, resmi kimlik veya hukuk sertifikasyonu yapılmaz. Sağlayıcı kullanılabilirliği, uzak iptal güncelliği ve ağ teslimi garanti edilmez.</p>
     <div className="identity-truth-strip" role="list" aria-label="Kimlik ve yetki sınırları"><span role="listitem">Özel anahtar saklanmaz</span><span role="listitem">Biyometrik veri saklanmaz</span><span role="listitem">Token baytları gösterilmez</span><span role="listitem">Windows tek yazardır</span></div>
@@ -1833,6 +1835,7 @@ function IdentityAccessCredentialCenter({trustedDevices}:{trustedDevices:readonl
       <section className="identity-access-card"><h3>Salt okunur companion snapshot</h3><p>Windows tek yazardır. Companion yalnız şifreli, süreli ve salt okunur snapshot alabilir; uzak yazma, çatışma birleştirme veya ağ teslimi yoktur.</p>{activeDevices.length===0?<AsyncStatePanel state="empty" title="Uygun güvenilir cihaz yok" message="Snapshot için aynı hesap ve güvenlik döneminde etkin bir güvenilir cihaz gerekir."/>:<><label>Hedef güvenilir cihaz<select value={companionDeviceId} onChange={event=>setCompanionDeviceId(event.target.value)}>{activeDevices.map(item=><option value={item.id} key={item.id}>{item.displayName}{item.current?' · bu cihaz':''}</option>)}</select></label><label>Bilinen kaynak sürümü <small>(isteğe bağlı)</small><input type="number" min={0} step={1} value={knownSourceVersion} onChange={event=>setKnownSourceVersion(event.target.value)}/></label><div className="button-row"><Button tone="primary" disabled={Boolean(busy)||!companionDeviceId} onClick={()=>void createCompanion('read_only')}>Şifreli salt okunur kopya oluştur</Button><Button disabled={Boolean(busy)||!companionDeviceId} onClick={()=>void createCompanion('write')}>Yazma reddini doğrula</Button></div></>}{companionResult&&<StatusMessage tone={companionResult.status==='snapshot_ready'?'success':'warning'}>{companionResult.status==='snapshot_ready'?`Hazır · kaynak v${companionResult.sourceVersion} · ${companionResult.envelopeBytes} bayt · ağ teslimi yok`:`Reddedildi: ${companionResult.status} · güncel kaynak v${companionResult.currentSourceVersion} · uzak yazma kabul edilmez`}</StatusMessage>}{companionResult?.status==='snapshot_ready'&&<Button onClick={()=>void navigator.clipboard.writeText(companionResult.encryptedEnvelopeBase64Url)}>Şifreli envelope’u kopyala</Button>}{center.companionSnapshots.length===0?<EmptyState title="Companion snapshot yok" body="Üretilen metadata yalnız yerel merkezde listelenir; teslim sonucu iddia edilmez."/>:center.companionSnapshots.slice(0,6).map(item=><div className="identity-record" key={item.id}><div><strong>Kaynak v{item.sourceVersion} · Şema v{item.schemaVersion}</strong><small>{formatDate(item.generatedAt,{dateStyle:'short',timeStyle:'short'})} · {item.envelopeBytes} bayt · salt okunur</small></div></div>)}</section>
     </div>{busy&&<StatusMessage tone="info">İşlem sürüyor; ikinci gönderim kilitli ve retry kimliği korunuyor.</StatusMessage>}{message&&<StatusMessage>{message}</StatusMessage>}
   </section>;
+  return localizeIdentityAccessNode(panel,language);
 }
 
 function SettingsSecurity({auth,accessibility,onAccessibilityChange,onFamilyDataChanged}:{auth:AuthStateView;accessibility:AccessibilityPreferences;onAccessibilityChange:(next:AccessibilityPreferences)=>void;onFamilyDataChanged:()=>Promise<void>}) {

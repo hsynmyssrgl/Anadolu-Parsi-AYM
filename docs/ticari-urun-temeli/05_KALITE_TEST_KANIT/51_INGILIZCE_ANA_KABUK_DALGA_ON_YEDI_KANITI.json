@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-INGILIZCE-ANA-KABUK-DALGA-ON-YEDI-20260819-01",
+  "executedAt": "2026-08-19T19:33:08+03:00",
+  "repositoryBaseCommitAtExecution": "4fe9369a8836ea00b29ee85c6a65a82edae8f8b7",
+  "workItem": "IS-0106",
+  "result": {"status":"PASS_WITH_REMAINING_APP_SHELL_OPEN","targetedTestFilesPassed":2,"targetedTestFilesTotal":2,"targetedTestsPassed":6,"targetedTestsTotal":6,"desktopTypecheck":"PASS"},
+  "translatedSurfaces": ["IdentityAccessCredentialCenter"],
+  "englishLocaleVisibleTurkishCharacterCount": 0,
+  "turkishLocalePreserved": true,
+  "privateKeyAndBiometricAbsenceSemanticsPreserved": true,
+  "configuredProviderOnlySemanticsPreserved": true,
+  "minimumDisclosureSemanticsPreserved": true,
+  "windowsSingleWriterSemanticsPreserved": true,
+  "remainingApplicationShellAuditOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "Ana kabuk on yedinci dalga Kimlik/Erisim Merkezi yuzeyini iki dilli hale getirir."
+}

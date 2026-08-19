@@ -512,6 +512,16 @@
       "uretimZamani": "2026-08-19T19:27:01+03:00",
       "disKaynak": false,
       "not": "Hane/Uyelik, Kisi Yasam Dongusu ve Profil Davetleri yuzeyleri English locale renderinda gorunur Turkce karakter sifir; tarihceli uyelik, geri alinabilir profil ve tek kullanimlik davet semantigi korunur."
+    },
+    {
+      "id": "KANIT-0052",
+      "tur": "TEST",
+      "kapsam": "English ana uygulama kabugu yerellestirme on yedinci dalgasi",
+      "durum": "PASS_WITH_REMAINING_APP_SHELL_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/51_INGILIZCE_ANA_KABUK_DALGA_ON_YEDI_KANITI.json",
+      "uretimZamani": "2026-08-19T19:33:08+03:00",
+      "disKaynak": false,
+      "not": "Kimlik/Erisim Merkezi English locale renderinda gorunur Turkce karakter sifir; private-key/biometri yoklugu, minimum disclosure ve Windows tek-yazar sinirlari korunur."
     }
   ]
 }
