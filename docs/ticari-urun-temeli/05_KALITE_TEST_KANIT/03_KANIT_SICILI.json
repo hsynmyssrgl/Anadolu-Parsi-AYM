@@ -372,6 +372,16 @@
       "uretimZamani": "2026-08-19T18:03:39+03:00",
       "disKaynak": false,
       "not": "Zaman tuneli ve onemli gunler English locale renderinda gorunur Turkce karakter sifir; kalan ana kabuk ekranlari acik."
+    },
+    {
+      "id": "KANIT-0038",
+      "tur": "TEST",
+      "kapsam": "English ana uygulama kabugu yerellestirme ucuncu dalgasi",
+      "durum": "PASS_WITH_REMAINING_APP_SHELL_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/37_INGILIZCE_ANA_KABUK_DALGA_UC_KANITI.json",
+      "uretimZamani": "2026-08-19T18:07:10+03:00",
+      "disKaynak": false,
+      "not": "Birlesik yetkili arama English locale renderinda gorunur Turkce karakter sifir; kalan ana kabuk ekranlari acik."
     }
   ]
 }

@@ -75,6 +75,8 @@ check(JSON.stringify(policy.coverage.translatedApplicationShellWaveOne)===JSON.s
   &&policy.coverage.translatedApplicationShellWaveOneEnglishVisibleTurkishTextCount===0,'application-shell wave-one truth mismatch');
 check(JSON.stringify(policy.coverage.translatedApplicationShellWaveTwo)===JSON.stringify(['TimelineScreen','ImportantDaysScreen'])
   &&policy.coverage.translatedApplicationShellWaveTwoEnglishVisibleTurkishTextCount===0,'application-shell wave-two truth mismatch');
+check(JSON.stringify(policy.coverage.translatedApplicationShellWaveThree)===JSON.stringify(['UnifiedAuthorizedSearchPanel'])
+  &&policy.coverage.translatedApplicationShellWaveThreeEnglishVisibleTurkishTextCount===0,'application-shell wave-three truth mismatch');
 check(domain.includes("primaryLanguage === 'tr' ? 'tr' : 'en'")&&domain.includes("resolveUiLocalization('en-US')"),'domain fallback resolver missing');
 check(main.includes('resolveUiLocalization(app.getLocale())')&&main.includes("registerIpcHandler('app:getLocalizationBootstrap'"),'main system-locale authority missing');
 check(preload.includes("invoke('app:getLocalizationBootstrap')")&&globalTypes.includes('getLocalizationBootstrap()'),'preload/global localization bridge missing');
@@ -114,6 +116,8 @@ check(rendererApp.includes("text('Aile yaşamı panosu','Family life dashboard')
 check(rendererApp.includes("text('Zaman tüneli','Timeline')")
   &&rendererApp.includes("text('Önemli günler','Important dates')")
   &&rendererApp.includes("text('Anılar ve etkinlikler merkezi','Memories and events center')"),'application-shell wave-two English localization binding missing');
+check(rendererApp.includes("text('Tüm modüllerde ara','Search all modules')")
+  &&rendererApp.includes("text('Birleşik ara','Unified search')"),'application-shell wave-three English localization binding missing');
 for(const [name,source,marker] of [
   ['communication audit',communicationAudit,"text('Denetim zinciri yükleniyor','Loading audit chain')"],
   ['communication recording',communicationRecording,"text('Görüşme kaydı rıza planı','Call recording consent plan')"],

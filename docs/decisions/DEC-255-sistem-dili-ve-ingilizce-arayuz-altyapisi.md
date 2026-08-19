@@ -34,10 +34,11 @@ Dil kararı Electron ana sürecinde `app.getLocale()` üzerinden verilir. Render
 - Ana aile panosu ile ilk-kullanım panosunun Türkçe/İngilizce görünür metinleri ve locale-uyumlu tarih biçimleri; ana kabuk birinci dalga render testinde görünür Türkçe karakter sayısı sıfırdır.
 - Arama destekli kişi/olay katalog kontrolleri, aile üyeleri ve büyük soy ağacı ekranlarının Türkçe/İngilizce görünür metinleri; aynı ana kabuk render dalgasında görünür Türkçe karakter sayısı sıfırdır.
 - Zaman tüneli ile önemli günler ekranlarının filtre, arşivleme, davetiye, not ve locale-uyumlu tarih metinleri; ana kabuk ikinci dalga render testinde görünür Türkçe karakter sayısı sıfırdır.
+- Birleşik yetkili arama panelinin kaynak-yetkisi ve kısmi sonuç vermeme gerçeğini koruyan Türkçe/İngilizce metinleri; ana kabuk üçüncü dalga render testinde görünür Türkçe karakter sayısı sıfırdır.
 
 ## Açık kalan iş
 
-İlk yirmi dört uzman panel ile ana pano, kişi kataloğu, aile, soy ağacı, zaman tüneli ve önemli gün ekranları tamamlanmış olsa da ana uygulama kabuğunun kalan ekranlarındaki tarihsel görünür Türkçe metinlerin son taraması henüz bitmedi. Bu nedenle İngilizce altyapı ve çekirdek kullanıcı yolculuğu `COMPLETE`, uygulamanın uçtan uca bütün ekran İngilizcesi `PARTIAL` ve `countsAsFullApplicationEnglishPass=false` durumundadır. Eksik metinler Türkçeye sessiz fallback yapılarak tamamlanmış sayılamaz.
+İlk yirmi dört uzman panel ile ana pano, kişi kataloğu, aile, soy ağacı, zaman tüneli, önemli günler ve birleşik yetkili arama tamamlanmış olsa da ana uygulama kabuğunun kalan ekranlarındaki tarihsel görünür Türkçe metinlerin son taraması henüz bitmedi. Bu nedenle İngilizce altyapı ve çekirdek kullanıcı yolculuğu `COMPLETE`, uygulamanın uçtan uca bütün ekran İngilizcesi `PARTIAL` ve `countsAsFullApplicationEnglishPass=false` durumundadır. Eksik metinler Türkçeye sessiz fallback yapılarak tamamlanmış sayılamaz.
 
 ## Kanıt
 
@@ -63,6 +64,7 @@ Dil kararı Electron ana sürecinde `app.getLocale()` üzerinden verilir. Render
 - `apps/desktop/tests/feature-panel-localization-wave-eighteen.test.ts`
 - `apps/desktop/tests/app-shell-localization-wave-nineteen.test.ts`
 - `apps/desktop/tests/app-shell-localization-wave-twenty.test.ts`
+- `apps/desktop/tests/app-shell-localization-wave-twenty-one.test.ts`
 - `apps/desktop/tests/accessibility-preference-center.test.ts`
 - `apps/desktop/tests/narrated-help-center.test.ts`
 - `apps/desktop/tests/installer-narration-experience.test.ts`
