@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-INGILIZCE-UZMAN-PANEL-DALGA-BES-20260819-01",
+  "executedAt": "2026-08-19T16:15:00+03:00",
+  "repositoryBaseCommitAtExecution": "8e7d56e2dda54521b38414f0f51b766607876177",
+  "workItem": "IS-0106",
+  "result": {"status":"PASS_WITH_REMAINING_PANELS_OPEN","targetedTestFilesPassed":1,"targetedTestFilesTotal":1,"targetedTestsPassed":2,"targetedTestsTotal":2,"desktopTypecheck":"PASS"},
+  "translatedPanels": ["SmartHomeEnergyPanel"],
+  "englishLocaleVisibleTurkishCharacterCount": 0,
+  "turkishLocalePreserved": true,
+  "remainingFeaturePanelsOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "Besinci dalga akilli ev ve enerji panelinde iki dilli gorunur metin kapisini tamamlar; kalan paneller aciktir."
+}

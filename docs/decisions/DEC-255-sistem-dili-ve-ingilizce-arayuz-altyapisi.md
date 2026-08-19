@@ -17,6 +17,7 @@ Dil kararı Electron ana sürecinde `app.getLocale()` üzerinden verilir. Render
 - Aile konum haritası, yerel çeviri/dil ve aile AI panellerinin Türkçe/İngilizce görünür metinleri; ikinci English locale render dalgasında görünür Türkçe karakter sayısı sıfırdır.
 - İletişim denetimi, kayıt/saklama ve iletişim güvenliği panellerinin Türkçe/İngilizce görünür metinleri; üçüncü English locale render dalgasında görünür Türkçe karakter sayısı sıfırdır.
 - Gerçek zamanlı çağrı hazırlığı panelinin Türkçe/İngilizce görünür metinleri; dördüncü English locale render dalgasında görünür Türkçe karakter sayısı sıfırdır.
+- Akıllı ev ve enerji panelinin Türkçe/İngilizce görünür metinleri; beşinci English locale render dalgasında görünür Türkçe karakter sayısı sıfırdır.
 
 ## Açık kalan iş
 
@@ -30,6 +31,7 @@ Dil kararı Electron ana sürecinde `app.getLocale()` üzerinden verilir. Render
 - `apps/desktop/tests/feature-panel-localization-wave-two.test.ts`
 - `apps/desktop/tests/feature-panel-localization-wave-three.test.ts`
 - `apps/desktop/tests/feature-panel-localization-wave-four.test.ts`
+- `apps/desktop/tests/feature-panel-localization-wave-five.test.ts`
 - `apps/desktop/tests/accessibility-preference-center.test.ts`
 - `apps/desktop/tests/narrated-help-center.test.ts`
 - `apps/desktop/tests/installer-narration-experience.test.ts`

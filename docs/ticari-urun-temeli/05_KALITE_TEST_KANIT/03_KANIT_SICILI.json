@@ -212,6 +212,16 @@
       "uretimZamani": "2026-08-19T16:12:00+03:00",
       "disKaynak": false,
       "not": "Gercek zamanli cagri paneli English locale renderinda gorunur Turkce karakter sifir; mesajlasma, dosya paylasimi ve kalan paneller acik."
+    },
+    {
+      "id": "KANIT-0022",
+      "tur": "TEST",
+      "kapsam": "English uzman panel yerellestirme besinci dalgasi",
+      "durum": "PASS_WITH_REMAINING_PANELS_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/21_INGILIZCE_UZMAN_PANEL_DALGA_BES_KANITI.json",
+      "uretimZamani": "2026-08-19T16:15:00+03:00",
+      "disKaynak": false,
+      "not": "Akilli ev ve enerji paneli English locale renderinda gorunur Turkce karakter sifir; kalan paneller acik."
     }
   ]
 }
