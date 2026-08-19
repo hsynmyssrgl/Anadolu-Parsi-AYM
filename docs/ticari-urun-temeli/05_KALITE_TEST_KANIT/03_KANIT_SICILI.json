@@ -312,6 +312,16 @@
       "uretimZamani": "2026-08-19T16:59:00+03:00",
       "disKaynak": false,
       "not": "Aile toplantilari paneli English locale renderinda gorunur Turkce karakter sifir; kalan paneller acik."
+    },
+    {
+      "id": "KANIT-0032",
+      "tur": "TEST",
+      "kapsam": "English uzman panel yerellestirme on besinci dalgasi",
+      "durum": "PASS_WITH_REMAINING_PANELS_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/31_INGILIZCE_UZMAN_PANEL_DALGA_ON_BES_KANITI.json",
+      "uretimZamani": "2026-08-19T17:05:00+03:00",
+      "disKaynak": false,
+      "not": "Finans planlama paneli English locale renderinda gorunur Turkce karakter sifir; kalan paneller acik."
     }
   ]
 }

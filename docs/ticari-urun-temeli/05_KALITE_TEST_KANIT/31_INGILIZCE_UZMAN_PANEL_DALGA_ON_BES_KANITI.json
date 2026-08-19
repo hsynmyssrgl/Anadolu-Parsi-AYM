@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-INGILIZCE-UZMAN-PANEL-DALGA-ON-BES-20260819-01",
+  "executedAt": "2026-08-19T17:05:00+03:00",
+  "repositoryBaseCommitAtExecution": "c84527867632ea735eb25f13ce2d87cff0186f46",
+  "workItem": "IS-0106",
+  "result": {"status":"PASS_WITH_REMAINING_PANELS_OPEN","targetedTestFilesPassed":1,"targetedTestFilesTotal":1,"targetedTestsPassed":2,"targetedTestsTotal":2,"desktopTypecheck":"PASS"},
+  "translatedPanels": ["FinancePlanningPanel"],
+  "englishLocaleVisibleTurkishCharacterCount": 0,
+  "turkishLocalePreserved": true,
+  "remainingFeaturePanelsOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "On besinci dalga finans planlama panelinde iki dilli gorunur metin kapisini tamamlar; kalan paneller aciktir."
+}

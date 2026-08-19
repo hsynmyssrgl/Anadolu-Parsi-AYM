@@ -13,6 +13,7 @@ import type {
 } from '@ppt/domain';
 import { Button, EmptyState, SectionHeader, StatusMessage, Surface } from './ui';
 import { FinanceImportPanel } from './FinanceImportPanel';
+import { selectUiCopy, useLocalization } from './localization';
 
 interface FinancePlanningPanelProps {
   readonly people: readonly FamilyMemberView[];
@@ -21,50 +22,41 @@ interface FinancePlanningPanelProps {
   readonly onWorkspaceChange: (workspace: FinancePlanningWorkspaceView) => void;
 }
 
-const modeLabels: Record<FinancePlanningItemType, string> = {
-  category: 'Gelir / gider kategorisi',
-  cash_flow: 'Nakit akışı',
-  budget: 'Aylık bütçe revizyonu',
-  recurring_rule: 'Yinelenen işlem',
-  recurring_state: 'Yinelenen işlem durumu',
-  goal: 'Finansal hedef',
-  goal_progress: 'Hedef ilerlemesi',
-  asset: 'Portföy varlığı',
-  asset_valuation: 'Portföy değerlemesi'
-};
-
-const categoryLabels: Record<FinanceCategoryKind, string> = { income: 'Gelir', expense: 'Gider' };
-const frequencyLabels: Record<FinanceRecurringFrequency, string> = {
-  weekly: 'Haftalık', monthly: 'Aylık', quarterly: 'Üç aylık', yearly: 'Yıllık'
-};
-const recurringStatusLabels: Record<FinanceRecurringStatus, string> = {
-  active: 'Aktif', paused: 'Duraklatıldı', ended: 'Sona erdi'
-};
-const goalKindLabels: Record<FinanceGoalKind, string> = {
-  savings: 'Birikim', debt_reduction: 'Borç azaltma', investment: 'Yatırım', purchase: 'Satın alma',
-  emergency_fund: 'Acil durum fonu', other: 'Diğer'
-};
-const assetClassLabels: Record<FinanceAssetClass, string> = {
-  cash: 'Nakit', deposit: 'Mevduat', precious_metal_fx: 'Altın / döviz', investment: 'Yatırım',
-  pension: 'Bireysel emeklilik', real_estate: 'Gayrimenkul', vehicle: 'Araç'
-};
-const privacyLabels: Record<RecordPrivacy, string> = {
-  private: 'Özel', selected_members: 'Seçili üyeler', family: 'Aile'
-};
-
 const localDateTime = (): string => {
   const value = new Date();
   return new Date(value.getTime() - value.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
 };
 const localMonth = (): string => localDateTime().slice(0, 7);
 const toIso = (value: string): string => new Date(value).toISOString();
-const formatDate = (value: string): string => new Intl.DateTimeFormat('tr-TR', {
+const formatDate = (value: string, locale: string): string => new Intl.DateTimeFormat(locale, {
   dateStyle: 'short', timeStyle: 'short'
 }).format(new Date(value));
-const formatMoney = (value: number, currency: string): string =>
-  `${value.toLocaleString('tr-TR', { maximumFractionDigits: 2 })} ${currency}`;
+const formatMoney = (value: number, currency: string, locale: string): string =>
+  `${value.toLocaleString(locale, { maximumFractionDigits: 2 })} ${currency}`;
 
 export function FinancePlanningPanel({ people, workspace, onRecord, onWorkspaceChange }: FinancePlanningPanelProps) {
+  const { language, locale } = useLocalization();
+  const text = (turkish: string, english: string): string => selectUiCopy(language, turkish, english);
+  const modeLabels: Record<FinancePlanningItemType, string> = {
+    category: text('Gelir / gider kategorisi','Income / expense category'), cash_flow: text('Nakit akışı','Cash flow'),
+    budget: text('Aylık bütçe revizyonu','Monthly budget revision'), recurring_rule: text('Yinelenen işlem','Recurring transaction'),
+    recurring_state: text('Yinelenen işlem durumu','Recurring transaction state'), goal: text('Finansal hedef','Financial goal'),
+    goal_progress: text('Hedef ilerlemesi','Goal progress'), asset: text('Portföy varlığı','Portfolio asset'), asset_valuation: text('Portföy değerlemesi','Portfolio valuation')
+  };
+  const categoryLabels: Record<FinanceCategoryKind, string> = { income: text('Gelir','Income'), expense: text('Gider','Expense') };
+  const frequencyLabels: Record<FinanceRecurringFrequency, string> = { weekly: text('Haftalık','Weekly'), monthly: text('Aylık','Monthly'), quarterly: text('Üç aylık','Quarterly'), yearly: text('Yıllık','Yearly') };
+  const recurringStatusLabels: Record<FinanceRecurringStatus, string> = { active: text('Aktif','Active'), paused: text('Duraklatıldı','Paused'), ended: text('Sona erdi','Ended') };
+  const goalKindLabels: Record<FinanceGoalKind, string> = {
+    savings: text('Birikim','Savings'), debt_reduction: text('Borç azaltma','Debt reduction'), investment: text('Yatırım','Investment'), purchase: text('Satın alma','Purchase'),
+    emergency_fund: text('Acil durum fonu','Emergency fund'), other: text('Diğer','Other')
+  };
+  const assetClassLabels: Record<FinanceAssetClass, string> = {
+    cash: text('Nakit','Cash'), deposit: text('Mevduat','Deposit'), precious_metal_fx: text('Altın / döviz','Precious metals / FX'), investment: text('Yatırım','Investment'),
+    pension: text('Bireysel emeklilik','Private pension'), real_estate: text('Gayrimenkul','Real estate'), vehicle: text('Araç','Vehicle')
+  };
+  const privacyLabels: Record<RecordPrivacy, string> = { private: text('Özel','Private'), selected_members: text('Seçili üyeler','Selected members'), family: text('Aile','Family') };
+  const money = (value: number, currency: string): string => formatMoney(value, currency, locale);
+  const date = (value: string): string => formatDate(value, locale);
   const [mode, setMode] = useState<FinancePlanningItemType>('category');
   const [scope, setScope] = useState('family');
   const [ownerPersonId, setOwnerPersonId] = useState(people[0]?.id ?? '');
@@ -196,13 +188,13 @@ export function FinancePlanningPanel({ people, workspace, onRecord, onWorkspaceC
       }
       await onRecord(input);
       setMessageTone('success');
-      setMessage(`${modeLabels[mode]} eklemeli finans defterine kaydedildi.`);
+      setMessage(`${modeLabels[mode]} ${text('eklemeli finans defterine kaydedildi.','was saved to the append-only finance ledger.')}`);
       if (mode === 'category' || mode === 'goal' || mode === 'asset') setName('');
       if (mode !== 'category') setDescription('');
       setNote('');
     } catch (error) {
       setMessageTone('danger');
-      setMessage(error instanceof Error ? error.message : 'Finans planlama kaydı eklenemedi.');
+      setMessage(error instanceof Error ? error.message : text('Finans planlama kaydı eklenemedi.','The finance planning record could not be added.'));
     }
   };
 
@@ -223,114 +215,114 @@ export function FinancePlanningPanel({ people, workspace, onRecord, onWorkspaceC
 
   return <>
     <Surface className="span-2 workspace-summary">
-      <SectionHeader eyebrow="B4-10 · B4-11 · B4-12" title="Bütçe, hedef, portföy ve net değer merkezi"/>
+      <SectionHeader eyebrow="B4-10 · B4-11 · B4-12" title={text('Bütçe, hedef, portföy ve net değer merkezi','Budget, goals, portfolio, and net worth center')}/>
       <div className="notes-card">
-        <strong>Her para birimi ayrı hesaplanır; yapay kur dönüşümü yapılmaz.</strong>
-        <small>Veri kaynağı manuel · Banka eşitlemesi yapılmadı · Dış fiyat doğrulaması yapılmadı · Ödeme icrası yapılmadı</small>
+        <strong>{text('Her para birimi ayrı hesaplanır; yapay kur dönüşümü yapılmaz.','Each currency is calculated separately; no artificial exchange-rate conversion is performed.')}</strong>
+        <small>{text('Veri kaynağı manuel · Banka eşitlemesi yapılmadı · Dış fiyat doğrulaması yapılmadı · Ödeme icrası yapılmadı','Data source: manual · Bank synchronization: not performed · External price verification: not performed · Payment execution: not performed')}</small>
       </div>
-      <label>Analiz kapsamı<select value={scope} onChange={(event) => setScope(event.target.value)}>
-        <option value="family">Tüm aile</option>
+      <label>{text('Analiz kapsamı','Analysis scope')}<select value={scope} onChange={(event) => setScope(event.target.value)}>
+        <option value="family">{text('Tüm aile','Whole family')}</option>
         {people.map((person) => <option key={person.id} value={person.id}>{person.displayName}</option>)}
       </select></label>
       <div className="workspace-grid">
         {(activeSummary?.currencySummaries ?? []).map((summary) => <div className="context-stat" key={summary.currency}>
-          <strong>{summary.currency} · Net değer {formatMoney(summary.netWorth, summary.currency)}</strong>
-          <span>Varlık {formatMoney(summary.assetValue, summary.currency)} · Borç {formatMoney(summary.liabilityValue, summary.currency)}</span>
-          <small>Borç oranı {summary.debtRatioBasisPoints === undefined ? 'hesaplanamadı' : `%${(summary.debtRatioBasisPoints / 100).toLocaleString('tr-TR', { maximumFractionDigits: 2 })}`} · Gerçekleşen gelir {formatMoney(summary.realizedIncome, summary.currency)} · gider {formatMoney(summary.realizedExpense, summary.currency)}</small>
+          <strong>{summary.currency} · {text('Net değer','Net worth')} {money(summary.netWorth, summary.currency)}</strong>
+          <span>{text('Varlık','Assets')} {money(summary.assetValue, summary.currency)} · {text('Borç','Liabilities')} {money(summary.liabilityValue, summary.currency)}</span>
+          <small>{text('Borç oranı','Debt ratio')} {summary.debtRatioBasisPoints === undefined ? text('hesaplanamadı','not calculated') : `%${(summary.debtRatioBasisPoints / 100).toLocaleString(locale, { maximumFractionDigits: 2 })}`} · {text('Gerçekleşen gelir','Realized income')} {money(summary.realizedIncome, summary.currency)} · {text('gider','expense')} {money(summary.realizedExpense, summary.currency)}</small>
         </div>)}
       </div>
-      {(activeSummary?.currencySummaries.length ?? 0) === 0 && <EmptyState title="Bu kapsamda finans özeti yok" body="Kategori, nakit akışı veya portföy varlığı eklediğinizde para birimi bazlı özet oluşur."/>}
+      {(activeSummary?.currencySummaries.length ?? 0) === 0 && <EmptyState title={text('Bu kapsamda finans özeti yok','No finance summary in this scope')} body={text('Kategori, nakit akışı veya portföy varlığı eklediğinizde para birimi bazlı özet oluşur.','A currency-based summary is created when you add a category, cash flow, or portfolio asset.')}/>} 
     </Surface>
 
     <FinanceImportPanel people={people} workspace={workspace} onWorkspaceChange={onWorkspaceChange}/>
 
     <Surface className="workspace-form">
-      <SectionHeader eyebrow="Append-only finans defteri" title="Planlama kaydı ekle"/>
-      <label>İşlem türü<select value={mode} onChange={(event) => setMode(event.target.value as FinancePlanningItemType)}>
+      <SectionHeader eyebrow={text('Append-only finans defteri','Append-only finance ledger')} title={text('Planlama kaydı ekle','Add planning record')}/>
+      <label>{text('İşlem türü','Operation type')}<select value={mode} onChange={(event) => setMode(event.target.value as FinancePlanningItemType)}>
         {Object.entries(modeLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
       </select></label>
       {requiresOwner && <>
-        <label>Kayıt sahibi<select value={ownerPersonId} onChange={(event) => setOwnerPersonId(event.target.value)}>
-          <option value="">Seçin</option>{people.map((person) => <option key={person.id} value={person.id}>{person.displayName}</option>)}
+        <label>{text('Kayıt sahibi','Record owner')}<select value={ownerPersonId} onChange={(event) => setOwnerPersonId(event.target.value)}>
+          <option value="">{text('Seçin','Select')}</option>{people.map((person) => <option key={person.id} value={person.id}>{person.displayName}</option>)}
         </select></label>
-        <label>Gizlilik<select value={privacy} onChange={(event) => setPrivacy(event.target.value as RecordPrivacy)}>
+        <label>{text('Gizlilik','Privacy')}<select value={privacy} onChange={(event) => setPrivacy(event.target.value as RecordPrivacy)}>
           {Object.entries(privacyLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
         </select></label>
       </>}
-      {(mode === 'category' || mode === 'goal' || mode === 'asset') && <label>{mode === 'goal' ? 'Hedef başlığı' : mode === 'asset' ? 'Varlık adı' : 'Kategori adı'}<input maxLength={120} value={name} onChange={(event) => setName(event.target.value)}/></label>}
-      {mode === 'category' && <label>Kategori türü<select value={categoryKind} onChange={(event) => setCategoryKind(event.target.value as FinanceCategoryKind)}>{Object.entries(categoryLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>}
-      {requiresCategory && <label>Kategori<select value={categoryId} onChange={(event) => setCategoryId(event.target.value)}><option value="">Seçin</option>{workspace?.categories.map((category) => <option key={category.id} value={category.id}>{category.name} · {categoryLabels[category.kind]}</option>)}</select></label>}
-      {(mode === 'cash_flow' || mode === 'budget' || mode === 'recurring_rule' || mode === 'goal_progress') && <label>Tutar<input type="number" min="0" step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)}/></label>}
-      {(mode === 'cash_flow' || mode === 'budget' || mode === 'recurring_rule' || mode === 'goal' || mode === 'asset') && <label>Para birimi<input maxLength={3} value={currency} onChange={(event) => setCurrency(event.target.value.toUpperCase())}/></label>}
-      {mode === 'cash_flow' && <label>Durum<select value={cashStatus} onChange={(event) => setCashStatus(event.target.value as 'planned' | 'realized')}><option value="planned">Planlandı</option><option value="realized">Gerçekleşti</option></select></label>}
-      {mode === 'budget' && <label>Bütçe dönemi<input type="month" value={periodMonth} onChange={(event) => setPeriodMonth(event.target.value)}/></label>}
+      {(mode === 'category' || mode === 'goal' || mode === 'asset') && <label>{mode === 'goal' ? text('Hedef başlığı','Goal title') : mode === 'asset' ? text('Varlık adı','Asset name') : text('Kategori adı','Category name')}<input maxLength={120} value={name} onChange={(event) => setName(event.target.value)}/></label>}
+      {mode === 'category' && <label>{text('Kategori türü','Category type')}<select value={categoryKind} onChange={(event) => setCategoryKind(event.target.value as FinanceCategoryKind)}>{Object.entries(categoryLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>}
+      {requiresCategory && <label>{text('Kategori','Category')}<select value={categoryId} onChange={(event) => setCategoryId(event.target.value)}><option value="">{text('Seçin','Select')}</option>{workspace?.categories.map((category) => <option key={category.id} value={category.id}>{category.name} · {categoryLabels[category.kind]}</option>)}</select></label>}
+      {(mode === 'cash_flow' || mode === 'budget' || mode === 'recurring_rule' || mode === 'goal_progress') && <label>{text('Tutar','Amount')}<input type="number" min="0" step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)}/></label>}
+      {(mode === 'cash_flow' || mode === 'budget' || mode === 'recurring_rule' || mode === 'goal' || mode === 'asset') && <label>{text('Para birimi','Currency')}<input maxLength={3} value={currency} onChange={(event) => setCurrency(event.target.value.toLocaleUpperCase(locale))}/></label>}
+      {mode === 'cash_flow' && <label>{text('Durum','State')}<select value={cashStatus} onChange={(event) => setCashStatus(event.target.value as 'planned' | 'realized')}><option value="planned">{text('Planlandı','Planned')}</option><option value="realized">{text('Gerçekleşti','Realized')}</option></select></label>}
+      {mode === 'budget' && <label>{text('Bütçe dönemi','Budget period')}<input type="month" value={periodMonth} onChange={(event) => setPeriodMonth(event.target.value)}/></label>}
       {mode === 'recurring_rule' && <>
-        <label>Sıklık<select value={frequency} onChange={(event) => setFrequency(event.target.value as FinanceRecurringFrequency)}>{Object.entries(frequencyLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-        <label>Tekrar aralığı<input type="number" min="1" max="120" step="1" value={intervalCount} onChange={(event) => setIntervalCount(event.target.value)}/></label>
-        <label>Sonraki işlem<input type="datetime-local" value={nextOccurrenceAt} onChange={(event) => setNextOccurrenceAt(event.target.value)}/></label>
-        <label>Bitiş (isteğe bağlı)<input type="datetime-local" value={endsAt} onChange={(event) => setEndsAt(event.target.value)}/></label>
+        <label>{text('Sıklık','Frequency')}<select value={frequency} onChange={(event) => setFrequency(event.target.value as FinanceRecurringFrequency)}>{Object.entries(frequencyLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+        <label>{text('Tekrar aralığı','Recurrence interval')}<input type="number" min="1" max="120" step="1" value={intervalCount} onChange={(event) => setIntervalCount(event.target.value)}/></label>
+        <label>{text('Sonraki işlem','Next transaction')}<input type="datetime-local" value={nextOccurrenceAt} onChange={(event) => setNextOccurrenceAt(event.target.value)}/></label>
+        <label>{text('Bitiş (isteğe bağlı)','End (optional)')}<input type="datetime-local" value={endsAt} onChange={(event) => setEndsAt(event.target.value)}/></label>
       </>}
       {mode === 'recurring_state' && <>
-        <label>Yinelenen işlem<select value={recurringRuleId} onChange={(event) => setRecurringRuleId(event.target.value)}><option value="">Seçin</option>{workspace?.recurringRules.map((rule) => <option key={rule.id} value={rule.id}>{rule.description ?? categoryLabels[rule.direction]} · {formatMoney(rule.amount, rule.currency)}</option>)}</select></label>
-        <label>Yeni durum<select value={recurringStatus} onChange={(event) => setRecurringStatus(event.target.value as FinanceRecurringStatus)}>{Object.entries(recurringStatusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+        <label>{text('Yinelenen işlem','Recurring transaction')}<select value={recurringRuleId} onChange={(event) => setRecurringRuleId(event.target.value)}><option value="">{text('Seçin','Select')}</option>{workspace?.recurringRules.map((rule) => <option key={rule.id} value={rule.id}>{rule.description ?? categoryLabels[rule.direction]} · {money(rule.amount, rule.currency)}</option>)}</select></label>
+        <label>{text('Yeni durum','New state')}<select value={recurringStatus} onChange={(event) => setRecurringStatus(event.target.value as FinanceRecurringStatus)}>{Object.entries(recurringStatusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
       </>}
       {mode === 'goal' && <>
-        <label>Hedef türü<select value={goalKind} onChange={(event) => setGoalKind(event.target.value as FinanceGoalKind)}>{Object.entries(goalKindLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-        <label>Hedef tutar<input type="number" min="0.01" step="0.01" value={targetAmount} onChange={(event) => setTargetAmount(event.target.value)}/></label>
-        <label>Başlangıç tutarı<input type="number" min="0" step="0.01" value={initialAmount} onChange={(event) => setInitialAmount(event.target.value)}/></label>
-        <label>Hedef tarihi<input type="datetime-local" value={dueAt} onChange={(event) => setDueAt(event.target.value)}/></label>
+        <label>{text('Hedef türü','Goal type')}<select value={goalKind} onChange={(event) => setGoalKind(event.target.value as FinanceGoalKind)}>{Object.entries(goalKindLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+        <label>{text('Hedef tutar','Target amount')}<input type="number" min="0.01" step="0.01" value={targetAmount} onChange={(event) => setTargetAmount(event.target.value)}/></label>
+        <label>{text('Başlangıç tutarı','Initial amount')}<input type="number" min="0" step="0.01" value={initialAmount} onChange={(event) => setInitialAmount(event.target.value)}/></label>
+        <label>{text('Hedef tarihi','Target date')}<input type="datetime-local" value={dueAt} onChange={(event) => setDueAt(event.target.value)}/></label>
       </>}
-      {mode === 'goal_progress' && <label>Hedef<select value={goalId} onChange={(event) => setGoalId(event.target.value)}><option value="">Seçin</option>{workspace?.goals.map((goal) => <option key={goal.id} value={goal.id}>{goal.title} · {formatMoney(goal.currentAmount, goal.currency)} / {formatMoney(goal.targetAmount, goal.currency)}</option>)}</select></label>}
-      {mode === 'asset' && <label>Varlık sınıfı<select value={assetClass} onChange={(event) => setAssetClass(event.target.value as FinanceAssetClass)}>{Object.entries(assetClassLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>}
-      {mode === 'asset_valuation' && <label>Portföy varlığı<select value={assetId} onChange={(event) => setAssetId(event.target.value)}><option value="">Seçin</option>{workspace?.portfolioAssets.map((asset) => <option key={asset.id} value={asset.id}>{asset.name} · {assetClassLabels[asset.assetClass]}</option>)}</select></label>}
+      {mode === 'goal_progress' && <label>{text('Hedef','Goal')}<select value={goalId} onChange={(event) => setGoalId(event.target.value)}><option value="">{text('Seçin','Select')}</option>{workspace?.goals.map((goal) => <option key={goal.id} value={goal.id}>{goal.title} · {money(goal.currentAmount, goal.currency)} / {money(goal.targetAmount, goal.currency)}</option>)}</select></label>}
+      {mode === 'asset' && <label>{text('Varlık sınıfı','Asset class')}<select value={assetClass} onChange={(event) => setAssetClass(event.target.value as FinanceAssetClass)}>{Object.entries(assetClassLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>}
+      {mode === 'asset_valuation' && <label>{text('Portföy varlığı','Portfolio asset')}<select value={assetId} onChange={(event) => setAssetId(event.target.value)}><option value="">{text('Seçin','Select')}</option>{workspace?.portfolioAssets.map((asset) => <option key={asset.id} value={asset.id}>{asset.name} · {assetClassLabels[asset.assetClass]}</option>)}</select></label>}
       {(mode === 'asset' || mode === 'asset_valuation') && <>
-        <label>Miktar<input type="number" min="0.000001" step="any" value={quantity} onChange={(event) => setQuantity(event.target.value)}/></label>
-        <label>Birim değer<input type="number" min="0" step="any" value={unitValue} onChange={(event) => setUnitValue(event.target.value)}/></label>
-        <div className="notes-card"><strong>Hesaplanan piyasa değeri: {(Number(quantity || '0') * Number(unitValue || '0')).toLocaleString('tr-TR', { maximumFractionDigits: 2 })} {mode === 'asset' ? currency : workspace?.portfolioAssets.find((asset) => asset.id === assetId)?.currency ?? ''}</strong><small>Birim değer kullanıcı beyanıdır; dış piyasa fiyatı alınmaz.</small></div>
+        <label>{text('Miktar','Quantity')}<input type="number" min="0.000001" step="any" value={quantity} onChange={(event) => setQuantity(event.target.value)}/></label>
+        <label>{text('Birim değer','Unit value')}<input type="number" min="0" step="any" value={unitValue} onChange={(event) => setUnitValue(event.target.value)}/></label>
+        <div className="notes-card"><strong>{text('Hesaplanan piyasa değeri:','Calculated market value:')} {(Number(quantity || '0') * Number(unitValue || '0')).toLocaleString(locale, { maximumFractionDigits: 2 })} {mode === 'asset' ? currency : workspace?.portfolioAssets.find((asset) => asset.id === assetId)?.currency ?? ''}</strong><small>{text('Birim değer kullanıcı beyanıdır; dış piyasa fiyatı alınmaz.','The unit value is user-provided; no external market price is retrieved.')}</small></div>
       </>}
-      {(mode === 'cash_flow' || mode === 'recurring_rule') && <label>Açıklama<input maxLength={240} value={description} onChange={(event) => setDescription(event.target.value)}/></label>}
-      {(mode === 'goal_progress' || mode === 'asset' || mode === 'asset_valuation') && <label>Not<input maxLength={500} value={note} onChange={(event) => setNote(event.target.value)}/></label>}
-      {(mode === 'cash_flow' || mode === 'recurring_rule' || mode === 'recurring_state' || mode === 'goal_progress' || mode === 'asset' || mode === 'asset_valuation') && <label>{mode === 'recurring_rule' ? 'Başlangıç' : mode === 'asset' || mode === 'asset_valuation' ? 'Değerleme zamanı' : 'Kayıt zamanı'}<input type="datetime-local" value={occurredAt} onChange={(event) => setOccurredAt(event.target.value)}/></label>}
-      <Button tone="primary" disabled={!canSubmit} onClick={() => void submit()}>{modeLabels[mode]} kaydet</Button>
+      {(mode === 'cash_flow' || mode === 'recurring_rule') && <label>{text('Açıklama','Description')}<input maxLength={240} value={description} onChange={(event) => setDescription(event.target.value)}/></label>}
+      {(mode === 'goal_progress' || mode === 'asset' || mode === 'asset_valuation') && <label>{text('Not','Note')}<input maxLength={500} value={note} onChange={(event) => setNote(event.target.value)}/></label>}
+      {(mode === 'cash_flow' || mode === 'recurring_rule' || mode === 'recurring_state' || mode === 'goal_progress' || mode === 'asset' || mode === 'asset_valuation') && <label>{mode === 'recurring_rule' ? text('Başlangıç','Start') : mode === 'asset' || mode === 'asset_valuation' ? text('Değerleme zamanı','Valuation time') : text('Kayıt zamanı','Record time')}<input type="datetime-local" value={occurredAt} onChange={(event) => setOccurredAt(event.target.value)}/></label>}
+      <Button tone="primary" disabled={!canSubmit} onClick={() => void submit()}>{language === 'tr' ? `${modeLabels[mode]} kaydet` : `Save ${modeLabels[mode].toLocaleLowerCase(locale)}`}</Button>
       {message && <StatusMessage tone={messageTone}>{message}</StatusMessage>}
     </Surface>
 
     <Surface className="workspace-summary">
-      <SectionHeader eyebrow="Bütçe gerçekleşme analizi" title={`${visibleBudgetVariances.length} kategori dönemi`}/>
-      {visibleBudgetVariances.length === 0 ? <EmptyState title="Bütçe farkı yok" body="Aynı kategori, ay ve para biriminde bütçe ile gerçekleşen akış bulunduğunda fark hesaplanır."/> : visibleBudgetVariances.map((item) => <div className="context-stat" key={item.budgetRevisionId}>
+      <SectionHeader eyebrow={text('Bütçe gerçekleşme analizi','Budget realization analysis')} title={`${visibleBudgetVariances.length} ${text('kategori dönemi','category periods')}`}/>
+      {visibleBudgetVariances.length === 0 ? <EmptyState title={text('Bütçe farkı yok','No budget variance')} body={text('Aynı kategori, ay ve para biriminde bütçe ile gerçekleşen akış bulunduğunda fark hesaplanır.','Variance is calculated when a budget and realized flow exist for the same category, month, and currency.')}/> : visibleBudgetVariances.map((item) => <div className="context-stat" key={item.budgetRevisionId}>
         <strong>{item.categoryName} · {item.periodMonth}</strong>
-        <span>Plan {formatMoney(item.plannedAmount, item.currency)} · Gerçekleşen {formatMoney(item.realizedAmount, item.currency)}</span>
-        <small>Fark {formatMoney(item.varianceAmount, item.currency)} · {item.overBudget ? 'Bütçe aşıldı' : item.belowIncomeTarget ? 'Gelir hedefinin altında' : 'Plan içinde'}</small>
+        <span>{text('Plan','Plan')} {money(item.plannedAmount, item.currency)} · {text('Gerçekleşen','Realized')} {money(item.realizedAmount, item.currency)}</span>
+        <small>{text('Fark','Variance')} {money(item.varianceAmount, item.currency)} · {item.overBudget ? text('Bütçe aşıldı','Over budget') : item.belowIncomeTarget ? text('Gelir hedefinin altında','Below income target') : text('Plan içinde','Within plan')}</small>
       </div>)}
     </Surface>
 
     <Surface className="workspace-summary">
-      <SectionHeader eyebrow="Yaklaşan ödemeler" title={`${visibleUpcoming.length} kayıt`}/>
-      {visibleUpcoming.length === 0 ? <EmptyState title="Yaklaşan ödeme yok" body="Kart, kredi, borç, yinelenen gider veya planlı nakit akışı vadeleri burada birleşir."/> : visibleUpcoming.slice(0, 20).map((item) => <div className="context-stat" key={`${item.source}-${item.id}`}>
-        <strong>{item.title} · {formatMoney(item.amount, item.currency)}</strong>
-        <span>{formatDate(item.dueAt)} · {item.source.replaceAll('_', ' ')}</span>
-        <small>Ödeme icrası yapılmadı; yalnız takip görünümüdür.</small>
+      <SectionHeader eyebrow={text('Yaklaşan ödemeler','Upcoming payments')} title={`${visibleUpcoming.length} ${text('kayıt','records')}`}/>
+      {visibleUpcoming.length === 0 ? <EmptyState title={text('Yaklaşan ödeme yok','No upcoming payments')} body={text('Kart, kredi, borç, yinelenen gider veya planlı nakit akışı vadeleri burada birleşir.','Due dates for cards, loans, debts, recurring expenses, and planned cash flows are combined here.')}/> : visibleUpcoming.slice(0, 20).map((item) => <div className="context-stat" key={`${item.source}-${item.id}`}>
+        <strong>{item.title} · {money(item.amount, item.currency)}</strong>
+        <span>{date(item.dueAt)} · {item.source.replaceAll('_', ' ')}</span>
+        <small>{text('Ödeme icrası yapılmadı; yalnız takip görünümüdür.','No payment was executed; this is a tracking view only.')}</small>
       </div>)}
     </Surface>
 
     <Surface className="workspace-summary">
-      <SectionHeader eyebrow="Kategoriler ve nakit akışı" title={`${workspace?.categories.length ?? 0} kategori · ${workspace?.cashFlowEntries.length ?? 0} hareket`}/>
-      {workspace?.categories.map((category) => <div className="context-stat" key={category.id}><strong>{category.name} · {categoryLabels[category.kind]}</strong><span>{workspace.cashFlowEntries.filter((entry) => entry.categoryId === category.id).length} nakit akışı · {people.find((person) => person.id === category.ownerPersonId)?.displayName ?? category.ownerPersonId}</span></div>)}
+      <SectionHeader eyebrow={text('Kategoriler ve nakit akışı','Categories and cash flow')} title={`${workspace?.categories.length ?? 0} ${text('kategori','categories')} · ${workspace?.cashFlowEntries.length ?? 0} ${text('hareket','entries')}`}/>
+      {workspace?.categories.map((category) => <div className="context-stat" key={category.id}><strong>{category.name} · {categoryLabels[category.kind]}</strong><span>{workspace.cashFlowEntries.filter((entry) => entry.categoryId === category.id).length} {text('nakit akışı','cash flows')} · {people.find((person) => person.id === category.ownerPersonId)?.displayName ?? category.ownerPersonId}</span></div>)}
     </Surface>
 
     <Surface className="workspace-summary">
-      <SectionHeader eyebrow="Yinelenen işlemler" title={`${workspace?.recurringRules.length ?? 0} kural`}/>
-      {(workspace?.recurringRules.length ?? 0) === 0 ? <EmptyState title="Yinelenen işlem yok" body="Düzenli gelir ve giderleri kategoriye bağlı olarak tanımlayın."/> : workspace?.recurringRules.map((rule) => <div className="context-stat" key={rule.id}><strong>{rule.description ?? categoryLabels[rule.direction]} · {formatMoney(rule.amount, rule.currency)}</strong><span>{frequencyLabels[rule.frequency]} / {rule.intervalCount} · {recurringStatusLabels[rule.currentStatus]} · sonraki {formatDate(rule.nextOccurrenceAt)}</span></div>)}
+      <SectionHeader eyebrow={text('Yinelenen işlemler','Recurring transactions')} title={`${workspace?.recurringRules.length ?? 0} ${text('kural','rules')}`}/>
+      {(workspace?.recurringRules.length ?? 0) === 0 ? <EmptyState title={text('Yinelenen işlem yok','No recurring transactions')} body={text('Düzenli gelir ve giderleri kategoriye bağlı olarak tanımlayın.','Define regular income and expenses linked to a category.')}/> : workspace?.recurringRules.map((rule) => <div className="context-stat" key={rule.id}><strong>{rule.description ?? categoryLabels[rule.direction]} · {money(rule.amount, rule.currency)}</strong><span>{frequencyLabels[rule.frequency]} / {rule.intervalCount} · {recurringStatusLabels[rule.currentStatus]} · {text('sonraki','next')} {date(rule.nextOccurrenceAt)}</span></div>)}
     </Surface>
 
     <Surface className="workspace-summary">
-      <SectionHeader eyebrow="Finansal hedefler" title={`${workspace?.goals.length ?? 0} hedef`}/>
-      {(workspace?.goals.length ?? 0) === 0 ? <EmptyState title="Finansal hedef yok" body="Birikim, borç azaltma, yatırım veya satın alma hedefi ekleyin."/> : workspace?.goals.map((goal) => <div className="context-stat" key={goal.id}><strong>{goal.title} · %{(goal.completionBasisPoints / 100).toLocaleString('tr-TR', { maximumFractionDigits: 2 })}</strong><span>{formatMoney(goal.currentAmount, goal.currency)} / {formatMoney(goal.targetAmount, goal.currency)} · {goalKindLabels[goal.kind]}</span><small>{goal.achieved ? 'Hedefe ulaşıldı' : goal.dueAt ? `Hedef tarihi ${formatDate(goal.dueAt)}` : 'Hedef tarihi yok'} · {goal.progressHistory.length} ilerleme kaydı</small></div>)}
+      <SectionHeader eyebrow={text('Finansal hedefler','Financial goals')} title={`${workspace?.goals.length ?? 0} ${text('hedef','goals')}`}/>
+      {(workspace?.goals.length ?? 0) === 0 ? <EmptyState title={text('Finansal hedef yok','No financial goals')} body={text('Birikim, borç azaltma, yatırım veya satın alma hedefi ekleyin.','Add a savings, debt reduction, investment, or purchase goal.')}/> : workspace?.goals.map((goal) => <div className="context-stat" key={goal.id}><strong>{goal.title} · %{(goal.completionBasisPoints / 100).toLocaleString(locale, { maximumFractionDigits: 2 })}</strong><span>{money(goal.currentAmount, goal.currency)} / {money(goal.targetAmount, goal.currency)} · {goalKindLabels[goal.kind]}</span><small>{goal.achieved ? text('Hedefe ulaşıldı','Goal achieved') : goal.dueAt ? `${text('Hedef tarihi','Target date')} ${date(goal.dueAt)}` : text('Hedef tarihi yok','No target date')} · {goal.progressHistory.length} {text('ilerleme kaydı','progress records')}</small></div>)}
     </Surface>
 
     <Surface className="workspace-summary">
-      <SectionHeader eyebrow="Portföy görünümü" title={`${workspace?.portfolioAssets.length ?? 0} varlık`}/>
-      {(workspace?.portfolioAssets.length ?? 0) === 0 ? <EmptyState title="Portföy varlığı yok" body="Nakit, mevduat, altın/döviz, yatırım, emeklilik, gayrimenkul veya araç ekleyin."/> : workspace?.portfolioAssets.map((asset) => <div className="context-stat" key={asset.id}><strong>{asset.name} · {formatMoney(asset.currentMarketValue, asset.currency)}</strong><span>{assetClassLabels[asset.assetClass]} · {asset.currentQuantity.toLocaleString('tr-TR')} × {formatMoney(asset.currentUnitValue, asset.currency)}</span><small>Değerleme {formatDate(asset.currentValuedAt)} · {asset.valuationHistory.length} ek değerleme · dış fiyat doğrulaması yapılmadı</small></div>)}
+      <SectionHeader eyebrow={text('Portföy görünümü','Portfolio view')} title={`${workspace?.portfolioAssets.length ?? 0} ${text('varlık','assets')}`}/>
+      {(workspace?.portfolioAssets.length ?? 0) === 0 ? <EmptyState title={text('Portföy varlığı yok','No portfolio assets')} body={text('Nakit, mevduat, altın/döviz, yatırım, emeklilik, gayrimenkul veya araç ekleyin.','Add cash, deposits, precious metals or FX, investments, pensions, real estate, or vehicles.')}/> : workspace?.portfolioAssets.map((asset) => <div className="context-stat" key={asset.id}><strong>{asset.name} · {money(asset.currentMarketValue, asset.currency)}</strong><span>{assetClassLabels[asset.assetClass]} · {asset.currentQuantity.toLocaleString(locale)} × {money(asset.currentUnitValue, asset.currency)}</span><small>{text('Değerleme','Valuation')} {date(asset.currentValuedAt)} · {asset.valuationHistory.length} {text('ek değerleme · dış fiyat doğrulaması yapılmadı','additional valuations · external price verification not performed')}</small></div>)}
     </Surface>
   </>;
 }

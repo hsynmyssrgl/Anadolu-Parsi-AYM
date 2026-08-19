@@ -27,10 +27,11 @@ Dil kararı Electron ana sürecinde `app.getLocale()` üzerinden verilir. Render
 - Çocuk ve eğitim koordinasyonu panelinin Türkçe/İngilizce görünür metinleri; on ikinci English locale render dalgasında görünür Türkçe karakter sayısı sıfırdır.
 - Hane operasyonları panelinin Türkçe/İngilizce görünür metinleri; on üçüncü English locale render dalgasında görünür Türkçe karakter sayısı sıfırdır.
 - Aile toplantıları panelinin Türkçe/İngilizce görünür metinleri; on dördüncü English locale render dalgasında görünür Türkçe karakter sayısı sıfırdır.
+- Finans planlama panelinin Türkçe/İngilizce görünür metinleri; on beşinci English locale render dalgasında görünür Türkçe karakter sayısı sıfırdır.
 
 ## Açık kalan iş
 
-İlk yirmi uzman panel tamamlanmış olsa da kalan geniş özellik panellerindeki tarihsel Türkçe metinlerin tamamı henüz İngilizce sözlük anahtarlarına taşınmadı. Bu nedenle İngilizce altyapı ve çekirdek kullanıcı yolculuğu `COMPLETE`, uygulamanın uçtan uca bütün ekran İngilizcesi `PARTIAL` ve `countsAsFullApplicationEnglishPass=false` durumundadır. Eksik metinler Türkçeye sessiz fallback yapılarak tamamlanmış sayılamaz.
+İlk yirmi bir uzman panel tamamlanmış olsa da kalan geniş özellik panellerindeki tarihsel Türkçe metinlerin tamamı henüz İngilizce sözlük anahtarlarına taşınmadı. Bu nedenle İngilizce altyapı ve çekirdek kullanıcı yolculuğu `COMPLETE`, uygulamanın uçtan uca bütün ekran İngilizcesi `PARTIAL` ve `countsAsFullApplicationEnglishPass=false` durumundadır. Eksik metinler Türkçeye sessiz fallback yapılarak tamamlanmış sayılamaz.
 
 ## Kanıt
 
@@ -50,6 +51,7 @@ Dil kararı Electron ana sürecinde `app.getLocale()` üzerinden verilir. Render
 - `apps/desktop/tests/feature-panel-localization-wave-twelve.test.ts`
 - `apps/desktop/tests/feature-panel-localization-wave-thirteen.test.ts`
 - `apps/desktop/tests/feature-panel-localization-wave-fourteen.test.ts`
+- `apps/desktop/tests/feature-panel-localization-wave-fifteen.test.ts`
 - `apps/desktop/tests/accessibility-preference-center.test.ts`
 - `apps/desktop/tests/narrated-help-center.test.ts`
 - `apps/desktop/tests/installer-narration-experience.test.ts`
