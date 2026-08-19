@@ -282,6 +282,16 @@
       "uretimZamani": "2026-08-19T16:43:00+03:00",
       "disKaynak": false,
       "not": "Saglik ve bakim koordinasyonu paneli English locale renderinda gorunur Turkce karakter sifir; kalan paneller acik."
+    },
+    {
+      "id": "KANIT-0029",
+      "tur": "TEST",
+      "kapsam": "English uzman panel yerellestirme on ikinci dalgasi",
+      "durum": "PASS_WITH_REMAINING_PANELS_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/28_INGILIZCE_UZMAN_PANEL_DALGA_ON_IKI_KANITI.json",
+      "uretimZamani": "2026-08-19T16:47:00+03:00",
+      "disKaynak": false,
+      "not": "Cocuk ve egitim koordinasyonu paneli English locale renderinda gorunur Turkce karakter sifir; kalan paneller acik."
     }
   ]
 }

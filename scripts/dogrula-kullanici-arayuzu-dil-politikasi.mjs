@@ -6,7 +6,7 @@ const check=(condition,message)=>{checks+=1;if(!condition)failures.push(message)
 const read=(path)=>readFile(path,'utf8');
 const policy=JSON.parse(await read('config/kullanici-arayuzu-dil-politikasi.json'));
 const desktopPackage=JSON.parse(await read('apps/desktop/package.json'));
-const [domain,main,preload,globalTypes,rendererMain,localization,accessibility,help,installer,distributed,universalUx,signedPlugin,familyMap,localTranslation,familyAi,communicationAudit,communicationRecording,communicationSecurity,communicationCalling,smartHome,financeImport,communicationMessaging,communicationFileSharing,memoryStudio,placesTravel,healthCare]=await Promise.all([
+const [domain,main,preload,globalTypes,rendererMain,localization,accessibility,help,installer,distributed,universalUx,signedPlugin,familyMap,localTranslation,familyAi,communicationAudit,communicationRecording,communicationSecurity,communicationCalling,smartHome,financeImport,communicationMessaging,communicationFileSharing,memoryStudio,placesTravel,healthCare,childEducation]=await Promise.all([
   read('packages/domain/src/ui-localization.ts'),read('apps/desktop/src/main/main.ts'),read('apps/desktop/src/main/preload.ts'),
   read('apps/desktop/src/renderer/global.d.ts'),read('apps/desktop/src/renderer/main.tsx'),read('apps/desktop/src/renderer/localization.tsx'),
   read('apps/desktop/src/renderer/accessibility.ts'),read('apps/desktop/src/renderer/NarratedHelpCenter.tsx'),read('apps/desktop/build/installer.nsh'),
@@ -18,7 +18,7 @@ const [domain,main,preload,globalTypes,rendererMain,localization,accessibility,h
   read('apps/desktop/src/renderer/SmartHomeEnergyPanel.tsx'),read('apps/desktop/src/renderer/FinanceImportPanel.tsx'),
   read('apps/desktop/src/renderer/CommunicationMessagingPanel.tsx'),read('apps/desktop/src/renderer/CommunicationFileSharingPanel.tsx'),
   read('apps/desktop/src/renderer/MemoryStudioPanel.tsx'),read('apps/desktop/src/renderer/PlacesTravelAssetPetPanel.tsx'),
-  read('apps/desktop/src/renderer/HealthCareCoordinationPanel.tsx')
+  read('apps/desktop/src/renderer/HealthCareCoordinationPanel.tsx'),read('apps/desktop/src/renderer/ChildEducationCoordinationPanel.tsx')
 ]);
 
 check(policy.ruleId==='PR-215'&&policy.decisionId==='DEC-255','policy rule/decision binding mismatch');
@@ -53,6 +53,8 @@ check(JSON.stringify(policy.coverage.translatedFeaturePanelWaveTen)===JSON.strin
   &&policy.coverage.translatedFeaturePanelWaveTenEnglishVisibleTurkishTextCount===0,'feature-panel wave-ten truth mismatch');
 check(JSON.stringify(policy.coverage.translatedFeaturePanelWaveEleven)===JSON.stringify(['HealthCareCoordinationPanel'])
   &&policy.coverage.translatedFeaturePanelWaveElevenEnglishVisibleTurkishTextCount===0,'feature-panel wave-eleven truth mismatch');
+check(JSON.stringify(policy.coverage.translatedFeaturePanelWaveTwelve)===JSON.stringify(['ChildEducationCoordinationPanel'])
+  &&policy.coverage.translatedFeaturePanelWaveTwelveEnglishVisibleTurkishTextCount===0,'feature-panel wave-twelve truth mismatch');
 check(domain.includes("primaryLanguage === 'tr' ? 'tr' : 'en'")&&domain.includes("resolveUiLocalization('en-US')"),'domain fallback resolver missing');
 check(main.includes('resolveUiLocalization(app.getLocale())')&&main.includes("registerIpcHandler('app:getLocalizationBootstrap'"),'main system-locale authority missing');
 check(preload.includes("invoke('app:getLocalizationBootstrap')")&&globalTypes.includes('getLocalizationBootstrap()'),'preload/global localization bridge missing');
@@ -76,6 +78,7 @@ check(communicationFileSharing.includes("useLocalization()")&&communicationFileS
 check(memoryStudio.includes("useLocalization()")&&memoryStudio.includes("text('Hafıza stüdyosu','Memory studio')"),'memory studio English localization binding missing');
 check(placesTravel.includes("useLocalization()")&&placesTravel.includes("text('Yer ve seyahat merkezi','Places and travel center')"),'places and travel English localization binding missing');
 check(healthCare.includes("useLocalization()")&&healthCare.includes("text('Sağlık koordinasyonu ve yaşlı desteği','Health coordination and elder support')"),'health-care English localization binding missing');
+check(childEducation.includes("useLocalization()")&&childEducation.includes("text('Çocuk eğitim merkezi','Child education center')"),'child-education English localization binding missing');
 for(const [name,source,marker] of [
   ['communication audit',communicationAudit,"text('Denetim zinciri yükleniyor','Loading audit chain')"],
   ['communication recording',communicationRecording,"text('Görüşme kaydı rıza planı','Call recording consent plan')"],
