@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-INGILIZCE-UZMAN-PANEL-DALGA-SEKIZ-20260819-01",
+  "executedAt": "2026-08-19T16:29:00+03:00",
+  "repositoryBaseCommitAtExecution": "9ef125d22e7260ff5cf34e4452c460ed91001fa1",
+  "workItem": "IS-0106",
+  "result": {"status":"PASS_WITH_REMAINING_PANELS_OPEN","targetedTestFilesPassed":1,"targetedTestFilesTotal":1,"targetedTestsPassed":2,"targetedTestsTotal":2,"desktopTypecheck":"PASS"},
+  "translatedPanels": ["CommunicationFileSharingPanel"],
+  "englishLocaleVisibleTurkishCharacterCount": 0,
+  "turkishLocalePreserved": true,
+  "remainingFeaturePanelsOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "Sekizinci dalga dosya paylasimi ve aile iletisim araclari panelinde iki dilli gorunur metin kapisini tamamlar; kalan paneller aciktir."
+}
