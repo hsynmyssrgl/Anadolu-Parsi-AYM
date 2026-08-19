@@ -126,8 +126,10 @@
     "translatedApplicationShellWaveEightEnglishVisibleTurkishTextCount": 0,
     "translatedApplicationShellWaveNine": ["WindowsHelloScreen", "PlaceholderScreen"],
     "translatedApplicationShellWaveNineEnglishVisibleTurkishTextCount": 0,
+    "translatedApplicationShellWaveTen": ["DataLifecycleSettings"],
+    "translatedApplicationShellWaveTenEnglishVisibleTurkishTextCount": 0,
     "openSurface": "remaining-feature-panel-copy",
-    "openReason": "İlk yirmi dört uzman panel ile ana pano, kişi kataloğu, aile, soy ağacı, zaman tüneli, önemli günler, birleşik yetkili arama, Doküman Merkezi, ilk kurulum/giriş, aile daveti, ilişki ekleme, dijital miras, AI izin merkezi, yönetilen taslak merkezi, Windows Hello ve geçersiz menü hedefi iki dillidir; ana uygulama kabuğunun kalan ekranlarındaki tarihsel görünür Türkçe metinlerin son taraması sürmektedir.",
+    "openReason": "İlk yirmi dört uzman panel ile ana pano, kişi kataloğu, aile, soy ağacı, zaman tüneli, önemli günler, birleşik yetkili arama, Doküman Merkezi, ilk kurulum/giriş, aile daveti, ilişki ekleme, dijital miras, AI izin merkezi, yönetilen taslak merkezi, Windows Hello, geçersiz menü hedefi ve Veri Yaşam Döngüsü iki dillidir; ana uygulama kabuğunun kalan ekranlarındaki tarihsel görünür Türkçe metinlerin son taraması sürmektedir.",
     "countsAsFullApplicationEnglishPass": false
   },
   "failClosed": true,

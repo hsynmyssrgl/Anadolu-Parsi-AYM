@@ -442,6 +442,16 @@
       "uretimZamani": "2026-08-19T18:41:00+03:00",
       "disKaynak": false,
       "not": "Windows Hello ve gecersiz menu hedefi English locale renderinda gorunur Turkce karakter sifir; kalan ana kabuk ekranlari aciktir."
+    },
+    {
+      "id": "KANIT-0045",
+      "tur": "TEST",
+      "kapsam": "English ana uygulama kabugu yerellestirme onuncu dalgasi",
+      "durum": "PASS_WITH_REMAINING_APP_SHELL_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/44_INGILIZCE_ANA_KABUK_DALGA_ON_KANITI.json",
+      "uretimZamani": "2026-08-19T18:48:00+03:00",
+      "disKaynak": false,
+      "not": "Veri Yasam Dongusu yonetici yuzeyi English locale renderinda gorunur Turkce karakter sifir; fiziksel imha ve dis kopya sinirlari korunur."
     }
   ]
 }

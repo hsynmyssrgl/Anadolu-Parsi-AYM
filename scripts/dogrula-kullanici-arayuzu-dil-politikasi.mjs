@@ -6,7 +6,7 @@ const check=(condition,message)=>{checks+=1;if(!condition)failures.push(message)
 const read=(path)=>readFile(path,'utf8');
 const policy=JSON.parse(await read('config/kullanici-arayuzu-dil-politikasi.json'));
 const desktopPackage=JSON.parse(await read('apps/desktop/package.json'));
-const [domain,main,preload,globalTypes,rendererMain,rendererApp,localization,accessibility,help,installer,distributed,universalUx,signedPlugin,familyMap,localTranslation,familyAi,communicationAudit,communicationRecording,communicationSecurity,communicationCalling,smartHome,financeImport,communicationMessaging,communicationFileSharing,memoryStudio,placesTravel,healthCare,childEducation,householdOperations,familyMeeting,financePlanning,localOcr,longTermPortfolio,managedLife,managedLifeLocalization,archiveLocalization,digitalLegacyLocalization,aiGovernanceLocalization,draftCenterLocalization,windowsHelloLocalization]=await Promise.all([
+const [domain,main,preload,globalTypes,rendererMain,rendererApp,localization,accessibility,help,installer,distributed,universalUx,signedPlugin,familyMap,localTranslation,familyAi,communicationAudit,communicationRecording,communicationSecurity,communicationCalling,smartHome,financeImport,communicationMessaging,communicationFileSharing,memoryStudio,placesTravel,healthCare,childEducation,householdOperations,familyMeeting,financePlanning,localOcr,longTermPortfolio,managedLife,managedLifeLocalization,archiveLocalization,digitalLegacyLocalization,aiGovernanceLocalization,draftCenterLocalization,windowsHelloLocalization,dataLifecycleLocalization]=await Promise.all([
   read('packages/domain/src/ui-localization.ts'),read('apps/desktop/src/main/main.ts'),read('apps/desktop/src/main/preload.ts'),
   read('apps/desktop/src/renderer/global.d.ts'),read('apps/desktop/src/renderer/main.tsx'),read('apps/desktop/src/renderer/App.tsx'),read('apps/desktop/src/renderer/localization.tsx'),
   read('apps/desktop/src/renderer/accessibility.ts'),read('apps/desktop/src/renderer/NarratedHelpCenter.tsx'),read('apps/desktop/build/installer.nsh'),
@@ -24,7 +24,8 @@ const [domain,main,preload,globalTypes,rendererMain,rendererApp,localization,acc
   read('apps/desktop/src/renderer/LongTermPortfolioPanel.tsx'),read('apps/desktop/src/renderer/ManagedLifePanel.tsx'),
   read('apps/desktop/src/renderer/YonetilenYasamYerellestirme.tsx'),read('apps/desktop/src/renderer/ArsivMerkeziYerellestirme.tsx'),
   read('apps/desktop/src/renderer/DijitalMirasYerellestirme.tsx'),read('apps/desktop/src/renderer/YapayZekaYonetisimiYerellestirme.tsx'),
-  read('apps/desktop/src/renderer/TaslakMerkeziYerellestirme.tsx'),read('apps/desktop/src/renderer/WindowsHelloYerellestirme.tsx')
+  read('apps/desktop/src/renderer/TaslakMerkeziYerellestirme.tsx'),read('apps/desktop/src/renderer/WindowsHelloYerellestirme.tsx'),
+  read('apps/desktop/src/renderer/VeriYasamDongusuYerellestirme.tsx')
 ]);
 
 check(policy.ruleId==='PR-215'&&policy.decisionId==='DEC-255','policy rule/decision binding mismatch');
@@ -109,6 +110,11 @@ check(JSON.stringify(policy.coverage.translatedApplicationShellWaveNine)===JSON.
 check(rendererApp.includes('export function WindowsHelloScreen')&&rendererApp.includes('return localizeWindowsHelloNode(panel,language);')
   &&rendererApp.includes("text('Gezinme','Navigation')")
   &&windowsHelloLocalization.includes("'Cihaz bağlı kimlik':'Device-bound identity'"),'Windows Hello or invalid-route localization binding missing');
+check(JSON.stringify(policy.coverage.translatedApplicationShellWaveTen)===JSON.stringify(['DataLifecycleSettings'])
+  &&policy.coverage.translatedApplicationShellWaveTenEnglishVisibleTurkishTextCount===0,'application-shell wave-ten truth mismatch');
+check(rendererApp.includes('export function DataLifecycleSettings')&&rendererApp.includes('return localizeDataLifecycleNode(panel,language);')
+  &&dataLifecycleLocalization.includes("'Veri saklama ve güvenli silme':'Data retention and secure deletion'")
+  &&dataLifecycleLocalization.includes('does not by itself guarantee the absolute physical destruction'),'data-lifecycle localization or fail-honest wording missing');
 check(domain.includes("primaryLanguage === 'tr' ? 'tr' : 'en'")&&domain.includes("resolveUiLocalization('en-US')"),'domain fallback resolver missing');
 check(main.includes('resolveUiLocalization(app.getLocale())')&&main.includes("registerIpcHandler('app:getLocalizationBootstrap'"),'main system-locale authority missing');
 check(preload.includes("invoke('app:getLocalizationBootstrap')")&&globalTypes.includes('getLocalizationBootstrap()'),'preload/global localization bridge missing');
