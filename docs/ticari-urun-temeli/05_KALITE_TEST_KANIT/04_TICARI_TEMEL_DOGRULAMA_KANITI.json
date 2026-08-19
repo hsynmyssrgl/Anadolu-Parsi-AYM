@@ -9,10 +9,10 @@
   "canonicalRuleSha256": "b79db92a03d559f33ccd49348bad159a70b6034fbcf10a07abe5a407549bf0be",
   "decision": "DEC-259",
   "workItemCount": 49,
-  "fileCount": 75,
-  "sourceFileCount": 74,
-  "sourceFingerprintSha256": "e8af9b7ea206d5112a1e607bed29f9d1d6de1df9b0cd17715a27adb48c797f0a",
-  "checks": 929,
+  "fileCount": 76,
+  "sourceFileCount": 75,
+  "sourceFingerprintSha256": "6329ed2627d2824f1d2b46b74089a636cb7b379bfee1a3807ebb40a04b19cfd1",
+  "checks": 936,
   "status": "PASS",
   "commercialReleaseEligible": false,
   "externalEvidenceDefaultsToNotRun": true,
@@ -120,8 +120,8 @@
     },
     {
       "path": "05_KALITE_TEST_KANIT/03_KANIT_SICILI.json",
-      "bytes": 19689,
-      "sha256": "2d58137a001dc22d5dbdc46c7b0ad0b86d5e5f88025a3de79e35e0c0b0ef8750"
+      "bytes": 20190,
+      "sha256": "3fbe33c5b81fb21fc09aa41e9aba63d9d709bcc9b6dc568f531f4fddedf3f2c1"
     },
     {
       "path": "05_KALITE_TEST_KANIT/05_GIT_YEDEK_DOGRULAMA_KANITI.json",
@@ -314,6 +314,11 @@
       "sha256": "5a0d0f279aa11c8d7dadb9887a8536a26ec360611ca0d6ca58ee337d23f7042c"
     },
     {
+      "path": "05_KALITE_TEST_KANIT/43_INGILIZCE_ANA_KABUK_DALGA_DOKUZ_KANITI.json",
+      "bytes": 886,
+      "sha256": "146f162d3d116ad697ad13a7773244a1c0bbb7f956e9635c237ab7cdd4b23366"
+    },
+    {
       "path": "06_DIS_KAYNAK_VE_LISANS/01_TICARI_LISANS_ENVANTERI.md",
       "bytes": 3440,
       "sha256": "3bcbdfd7eea28bd097c28396336eb3637c73386bd9b72b465a1049a8353ee18b"
@@ -350,8 +355,8 @@
     },
     {
       "path": "08_IS_LISTESI/03_ANA_IS_SICILI.json",
-      "bytes": 19176,
-      "sha256": "07c1a9d941f417a80f6387e47a15e1745094969ef24afcadc2ccb1307bb612d9"
+      "bytes": 19292,
+      "sha256": "27f6462eee6c9a22278b9330ee969dc0d396dac536920fe525155ea7a6498e6f"
     },
     {
       "path": "08_IS_LISTESI/04_IS_YURUTME_SIRASI.md",
@@ -389,5 +394,5 @@
       "sha256": "3b489e065d5b3cc6d84a81ac26775a144c0babca825dbd943364c74f7f309527"
     }
   ],
-  "generatedAt": "2026-08-19T15:37:02.868Z"
+  "generatedAt": "2026-08-19T15:43:29.144Z"
 }

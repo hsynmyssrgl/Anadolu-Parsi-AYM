@@ -432,6 +432,16 @@
       "uretimZamani": "2026-08-19T18:35:47+03:00",
       "disKaynak": false,
       "not": "Yonetilen taslak merkezi English locale renderinda gorunur Turkce karakter sifir; kalan ana kabuk ekranlari aciktir."
+    },
+    {
+      "id": "KANIT-0044",
+      "tur": "TEST",
+      "kapsam": "English ana uygulama kabugu yerellestirme dokuzuncu dalgasi",
+      "durum": "PASS_WITH_REMAINING_APP_SHELL_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/43_INGILIZCE_ANA_KABUK_DALGA_DOKUZ_KANITI.json",
+      "uretimZamani": "2026-08-19T18:41:00+03:00",
+      "disKaynak": false,
+      "not": "Windows Hello ve gecersiz menu hedefi English locale renderinda gorunur Turkce karakter sifir; kalan ana kabuk ekranlari aciktir."
     }
   ]
 }

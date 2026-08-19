@@ -34,9 +34,10 @@
         "05_KALITE_TEST_KANIT/35_INGILIZCE_ANA_KABUK_DALGA_BIR_KANITI.json","05_KALITE_TEST_KANIT/36_INGILIZCE_ANA_KABUK_DALGA_IKI_KANITI.json",
         "05_KALITE_TEST_KANIT/37_INGILIZCE_ANA_KABUK_DALGA_UC_KANITI.json","05_KALITE_TEST_KANIT/38_INGILIZCE_ANA_KABUK_DALGA_DORT_KANITI.json",
         "05_KALITE_TEST_KANIT/39_INGILIZCE_ANA_KABUK_DALGA_BES_KANITI.json","05_KALITE_TEST_KANIT/40_INGILIZCE_ANA_KABUK_DALGA_ALTI_KANITI.json",
-        "05_KALITE_TEST_KANIT/41_INGILIZCE_ANA_KABUK_DALGA_YEDI_KANITI.json","05_KALITE_TEST_KANIT/42_INGILIZCE_ANA_KABUK_DALGA_SEKIZ_KANITI.json"
+        "05_KALITE_TEST_KANIT/41_INGILIZCE_ANA_KABUK_DALGA_YEDI_KANITI.json","05_KALITE_TEST_KANIT/42_INGILIZCE_ANA_KABUK_DALGA_SEKIZ_KANITI.json",
+        "05_KALITE_TEST_KANIT/43_INGILIZCE_ANA_KABUK_DALGA_DOKUZ_KANITI.json"
       ],
-      "disKaynakGerekli":false,"acikNedeni":"Ilk yirmi dort uzman panel ile pano, katalog, aile, soy agaci, zaman tuneli, onemli gunler, birlesik arama, Dokuman Merkezi, ilk kurulum/giris, aile daveti, iliski ekleme, dijital miras, AI izin merkezi ve yonetilen taslak merkezi PASS; kalan ana kabuk gorunur metin taramasi acik.","bagimliliklar":[],"requirementPass":false
+      "disKaynakGerekli":false,"acikNedeni":"Ilk yirmi dort uzman panel ile pano, katalog, aile, soy agaci, zaman tuneli, onemli gunler, birlesik arama, Dokuman Merkezi, ilk kurulum/giris, aile daveti, iliski ekleme, dijital miras, AI izin merkezi, yonetilen taslak merkezi, Windows Hello ve gecersiz menu hedefi PASS; kalan ana kabuk gorunur metin taramasi acik.","bagimliliklar":[],"requirementPass":false
     },
     {"id":"IS-0107","alan":"Urun Tasarimi","is":"Ilk tanitim ve yardim sesli anlatim","sorumlu":"Codex","durum":"DEVAM","kabul":"TR ve EN metin ses fallback ve erisilebilirlik PASS","kanit":[],"disKaynakGerekli":false,"acikNedeni":"Tam menu kapsami ve UAT bekleniyor.","bagimliliklar":["IS-0106"],"requirementPass":false},
 

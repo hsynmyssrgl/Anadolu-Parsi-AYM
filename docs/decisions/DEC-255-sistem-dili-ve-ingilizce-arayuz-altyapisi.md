@@ -40,10 +40,11 @@ Dil kararı Electron ana sürecinde `app.getLocale()` üzerinden verilir. Render
 - Aile ilişkisi ekleme penceresi ile Dijital Miras ekranının Türkçe/İngilizce metinleri; ana kabuk altıncı dalga render testinde görünür Türkçe karakter sayısı sıfırdır. Yönetim kayıtlarına giren onay, geri alma ve iptal açıklamaları seçili dilde üretilir.
 - Yapay Zekâ İzin Merkezi'nin standart AI izni, süreli hassas veri rızası ve dışa gönderim önizlemesi metinleri; ana kabuk yedinci dalga render testinde görünür Türkçe karakter sayısı sıfırdır. Bu üç yetki yüzeyi birbirinden bağımsız kalır.
 - Yönetilen Taslak Merkezi'nin doğrulama, çevrimdışı durum, otomatik kayıt, geri alma ve değişmez sürüm geçmişi metinleri; ana kabuk sekizinci dalga render testinde görünür Türkçe karakter sayısı sıfırdır.
+- Windows Hello kayıt, cihaz bağı, güçlü yeniden doğrulama ve açık parola-yedeği metinleri ile geçersiz menü hedefi; ana kabuk dokuzuncu dalga render testinde görünür Türkçe karakter sayısı sıfırdır. Yerel parola yedeği Windows Hello iptalinde otomatik gönderilmez.
 
 ## Açık kalan iş
 
-İlk yirmi dört uzman panel ile ana pano, kişi kataloğu, aile, soy ağacı, zaman tüneli, önemli günler, birleşik yetkili arama, Doküman Merkezi, ilk kurulum/giriş, aile daveti, ilişki ekleme, dijital miras, AI izin merkezi ve yönetilen taslak merkezi tamamlanmış olsa da ana uygulama kabuğunun kalan ekranlarındaki tarihsel görünür Türkçe metinlerin son taraması henüz bitmedi. Bu nedenle İngilizce altyapı ve çekirdek kullanıcı yolculuğu `COMPLETE`, uygulamanın uçtan uca bütün ekran İngilizcesi `PARTIAL` ve `countsAsFullApplicationEnglishPass=false` durumundadır. Eksik metinler Türkçeye sessiz fallback yapılarak tamamlanmış sayılamaz.
+İlk yirmi dört uzman panel ile ana pano, kişi kataloğu, aile, soy ağacı, zaman tüneli, önemli günler, birleşik yetkili arama, Doküman Merkezi, ilk kurulum/giriş, aile daveti, ilişki ekleme, dijital miras, AI izin merkezi, yönetilen taslak merkezi, Windows Hello ve geçersiz menü hedefi tamamlanmış olsa da ana uygulama kabuğunun kalan ekranlarındaki tarihsel görünür Türkçe metinlerin son taraması henüz bitmedi. Bu nedenle İngilizce altyapı ve çekirdek kullanıcı yolculuğu `COMPLETE`, uygulamanın uçtan uca bütün ekran İngilizcesi `PARTIAL` ve `countsAsFullApplicationEnglishPass=false` durumundadır. Eksik metinler Türkçeye sessiz fallback yapılarak tamamlanmış sayılamaz.
 
 ## Kanıt
 
@@ -75,6 +76,7 @@ Dil kararı Electron ana sürecinde `app.getLocale()` üzerinden verilir. Render
 - `apps/desktop/tests/app-shell-localization-wave-twenty-four.test.ts`
 - `apps/desktop/tests/app-shell-localization-wave-twenty-five.test.ts`
 - `apps/desktop/tests/app-shell-localization-wave-twenty-six.test.ts`
+- `apps/desktop/tests/app-shell-localization-wave-twenty-seven.test.ts`
 - `apps/desktop/tests/accessibility-preference-center.test.ts`
 - `apps/desktop/tests/narrated-help-center.test.ts`
 - `apps/desktop/tests/installer-narration-experience.test.ts`

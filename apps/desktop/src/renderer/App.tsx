@@ -29,6 +29,7 @@ import { localizeArchiveCenterNode, translateArchiveCenterCopy } from './ArsivMe
 import { localizeDigitalLegacyNode, translateDigitalLegacyCopy } from './DijitalMirasYerellestirme';
 import { localizeAiGovernanceNode, translateAiGovernanceCopy } from './YapayZekaYonetisimiYerellestirme';
 import { localizeDraftCenterNode, translateDraftCenterCopy } from './TaslakMerkeziYerellestirme';
+import { localizeWindowsHelloNode, translateWindowsHelloCopy } from './WindowsHelloYerellestirme';
 import { FamilyMeetingPanel } from './FamilyMeetingPanel';
 import { UniversalUxConsolidationPanel } from './UniversalUxConsolidationPanel';
 import { FamilyLocationMap } from './FamilyLocationMap';
@@ -1223,7 +1224,8 @@ function SystemManagementScreen(){
 
 function PlaceholderScreen({ screen, snapshot, auth }: { screen: ScreenId; snapshot: FamilyAppSnapshot; auth:AuthStateView }) {
   void snapshot; void auth;
-  return <><PageHeader eyebrow="Gezinme" title="Bölüm bulunamadı" description={`${screen} bölümü bu sürümün gezinme sözleşmesinde yer almıyor.`}/><EmptyState title="Geçersiz menü hedefi" body="Sol menüden kullanılabilir bir bölüm seçin."/></>;
+  const {language}=useLocalization();const text=(tr:string,en:string)=>language==='tr'?tr:en;
+  return <><PageHeader eyebrow={text('Gezinme','Navigation')} title={text('Bölüm bulunamadı','Section not found')} description={text(`${screen} bölümü bu sürümün gezinme sözleşmesinde yer almıyor.`,`${screen} is not part of this release's navigation contract.`)}/><EmptyState title={text('Geçersiz menü hedefi','Invalid menu destination')} body={text('Sol menüden kullanılabilir bir bölüm seçin.','Select an available section from the left menu.')}/></>;
 }
 
 
@@ -1344,21 +1346,22 @@ KANIT İPTAL LİSTESİ ${signerIssuerId} ${sequenceNumber}`,'');if(confirmation=
   </section>;
 }
 
-const windowsHelloAvailabilityLabel: Record<WindowsHelloStateView['availability'],string> = {
-  available:'Kullanılabilir',
-  device_not_present:'Donanım bulunamadı',
-  not_configured_for_user:'Windows Hello yapılandırılmamış',
-  disabled_by_policy:'Sistem politikasıyla kapalı',
-  device_busy:'Başka işlem kullanıyor',
-  platform_not_supported:'Platform desteklemiyor',
-  error:'Uygunluk belirlenemedi'
+const windowsHelloAvailabilityLabel: Record<WindowsHelloStateView['availability'],readonly [string,string]> = {
+  available:['Kullanılabilir','Available'],
+  device_not_present:['Donanım bulunamadı','Hardware not found'],
+  not_configured_for_user:['Windows Hello yapılandırılmamış','Windows Hello is not configured'],
+  disabled_by_policy:['Sistem politikasıyla kapalı','Disabled by system policy'],
+  device_busy:['Başka işlem kullanıyor','In use by another operation'],
+  platform_not_supported:['Platform desteklemiyor','Platform not supported'],
+  error:['Uygunluk belirlenemedi','Availability could not be determined']
 };
 
-function WindowsHelloScreen({auth}:{auth:AuthStateView}) {
+export function WindowsHelloScreen({auth}:{auth:AuthStateView}) {
+  const {language}=useLocalization();
   const [state,setState]=useState<WindowsHelloStateView|null>(null);
   const [enrollmentPassword,setEnrollmentPassword]=useState('');
   const [enrollmentCode,setEnrollmentCode]=useState('');
-  const [displayName,setDisplayName]=useState('Bu bilgisayar');
+  const [displayName,setDisplayName]=useState(language==='tr'?'Bu bilgisayar':'This computer');
   const [fallbackPassword,setFallbackPassword]=useState('');
   const [fallbackCode,setFallbackCode]=useState('');
   const [busy,setBusy]=useState<'state'|'enroll'|'reauth'|'fallback'|''>('state');
@@ -1368,7 +1371,7 @@ function WindowsHelloScreen({auth}:{auth:AuthStateView}) {
     if(!window.pardus)return;
     setBusy('state');
     try{setState(await window.pardus.getWindowsHelloState());}
-    catch(error){setMessageTone('danger');setMessage(error instanceof Error?error.message:'Windows Hello durumu okunamadı.');}
+    catch(error){setMessageTone('danger');setMessage(error instanceof Error?error.message:translateWindowsHelloCopy('Windows Hello durumu okunamadı.',language));}
     finally{setBusy('');}
   };
   useEffect(()=>{void refresh();},[]);
@@ -1380,7 +1383,7 @@ function WindowsHelloScreen({auth}:{auth:AuthStateView}) {
       setMessageTone(result.enrolled?'success':result.outcome==='cancelled'?'info':'danger');
       setMessage(windowsHelloOutcomeMessage(result.outcome));
       if(result.enrolled){setEnrollmentPassword('');setEnrollmentCode('');await refresh();}
-    }catch(error){setMessageTone('danger');setMessage(error instanceof Error?error.message:'Windows Hello kaydı tamamlanamadı.');}
+    }catch(error){setMessageTone('danger');setMessage(error instanceof Error?error.message:translateWindowsHelloCopy('Windows Hello kaydı tamamlanamadı.',language));}
     finally{setBusy('');}
   };
   const reauthenticate=async(useFallback:boolean)=>{
@@ -1390,21 +1393,22 @@ function WindowsHelloScreen({auth}:{auth:AuthStateView}) {
       const result=await window.pardus.reauthenticateWithWindowsHello(useFallback?{fallback:{password:fallbackPassword,...(fallbackCode.trim()?{secondFactorCode:fallbackCode.trim()}:{} )}}:{});
       const success=result.authenticated;
       setMessageTone(success?'success':result.outcome==='cancelled'?'info':'danger');
-      setMessage(result.method==='password_fallback'&&success?'Güçlü yerel parola ile yedek doğrulama tamamlandı.':windowsHelloOutcomeMessage(result.outcome));
+      setMessage(result.method==='password_fallback'&&success?translateWindowsHelloCopy('Güçlü yerel parola ile yedek doğrulama tamamlandı.',language):windowsHelloOutcomeMessage(result.outcome));
       if(success&&result.method==='password_fallback'){setFallbackPassword('');setFallbackCode('');}
       await refresh();
-    }catch(error){setMessageTone('danger');setMessage(error instanceof Error?error.message:'Yeniden doğrulama tamamlanamadı.');}
+    }catch(error){setMessageTone('danger');setMessage(error instanceof Error?error.message:translateWindowsHelloCopy('Yeniden doğrulama tamamlanamadı.',language));}
     finally{setBusy('');}
   };
-  return <>
+  const panel=<>
     <PageHeader eyebrow="Cihaz bağlı kimlik" title="Windows Hello" description="Windows Hello doğrulamasını bu cihazdaki şifreli veri kasasına bağlayın; güçlü yerel parola her zaman yedek erişim yöntemi olarak kalır."/>
     <section className="workspace-grid windows-hello-workspace">
-      <Surface className="workspace-summary"><SectionHeader eyebrow="Uygunluk ve kayıt" title={state?windowsHelloAvailabilityLabel[state.availability]:'Kontrol ediliyor…'}/>{state&&<div className="windows-hello-status-list"><StatRow value={state.enrolled?'Etkin':'Kayıtlı değil'} label="Kasa bağı"/><StatRow value={state.passwordFallbackAvailable?'Hazır':'Kullanılamıyor'} label="Parola yedeği"/><StatRow value={state.deviceChanged?'Değişti':'Eşleşiyor'} label="Cihaz bağı"/><StatRow value={state.principalChanged?'Değişti':'Eşleşiyor'} label="Windows kullanıcısı"/><StatRow value={state.securityEpochChanged?'Değişti':'Eşleşiyor'} label="Güvenlik dönemi"/>{state.registration&&<small>Kayıt: {state.registration.displayName} · {formatDate(state.registration.enrolledAt,{dateStyle:'medium',timeStyle:'short'})}</small>}{state.diagnosticCode&&<small>Tanılama: {state.diagnosticCode}</small>}</div>}<Button onClick={()=>void refresh()} disabled={busy!==''}>{busy==='state'?'Kontrol ediliyor…':'Durumu yenile'}</Button></Surface>
+      <Surface className="workspace-summary"><SectionHeader eyebrow="Uygunluk ve kayıt" title={state?windowsHelloAvailabilityLabel[state.availability][language==='tr'?0:1]:'Kontrol ediliyor…'}/>{state&&<div className="windows-hello-status-list"><StatRow value={state.enrolled?'Etkin':'Kayıtlı değil'} label="Kasa bağı"/><StatRow value={state.passwordFallbackAvailable?'Hazır':'Kullanılamıyor'} label="Parola yedeği"/><StatRow value={state.deviceChanged?'Değişti':'Eşleşiyor'} label="Cihaz bağı"/><StatRow value={state.principalChanged?'Değişti':'Eşleşiyor'} label="Windows kullanıcısı"/><StatRow value={state.securityEpochChanged?'Değişti':'Eşleşiyor'} label="Güvenlik dönemi"/>{state.registration&&<small>Kayıt: {state.registration.displayName} · {formatDate(state.registration.enrolledAt,{dateStyle:'medium',timeStyle:'short'})}</small>}{state.diagnosticCode&&<small>Tanılama: {state.diagnosticCode}</small>}</div>}<Button onClick={()=>void refresh()} disabled={busy!==''}>{busy==='state'?'Kontrol ediliyor…':'Durumu yenile'}</Button></Surface>
       <Surface className="workspace-form"><SectionHeader eyebrow="Kayıt" title={state?.enrolled?'Windows Hello kaydını yenile':'Windows Hello’yu etkinleştir'}/><p>Kayıt için mevcut yerel parola ve hesabınızda etkinse 2FA kodu doğrulanır. Ardından Windows Hello penceresi yalnız bu düğmeye bastığınızda açılır.</p><label>Cihaz adı<input value={displayName} maxLength={120} onChange={event=>setDisplayName(event.target.value)}/></label><label>Mevcut yerel parola<input type="password" autoComplete="current-password" maxLength={1024} value={enrollmentPassword} onChange={event=>setEnrollmentPassword(event.target.value)}/></label><label>2FA / kurtarma kodu <small>{auth.twoFactorEnabled?'gerekli':'etkin değil'}</small><input autoComplete="one-time-code" maxLength={256} value={enrollmentCode} onChange={event=>setEnrollmentCode(event.target.value)}/></label><Button tone="primary" disabled={busy!==''||!enrollmentPassword||(auth.twoFactorEnabled&&!enrollmentCode.trim())||state?.availability!=='available'} onClick={()=>void enroll()}>{busy==='enroll'?'Windows Hello bekleniyor…':state?.enrolled?'Kaydı güvenli biçimde yenile':'Windows Hello’yu kaydet'}</Button></Surface>
       <Surface className="span-2 windows-hello-reauth"><SectionHeader eyebrow="Kritik işlem doğrulaması" title="Yeniden doğrula"/><p>Windows Hello iptal edilirse parola otomatik gönderilmez. Yedek doğrulama yalnız aşağıdaki ayrı düğmeyle ve açıkça yazdığınız bilgilerle çalışır.</p><div className="button-row"><Button tone="primary" disabled={busy!==''||!state?.enrolled||state.availability!=='available'} onClick={()=>void reauthenticate(false)}>{busy==='reauth'?'Windows Hello bekleniyor…':'Windows Hello ile yeniden doğrula'}</Button></div><div className="windows-hello-fallback"><label>Yerel parola<input type="password" autoComplete="current-password" maxLength={1024} value={fallbackPassword} onChange={event=>setFallbackPassword(event.target.value)}/></label><label>2FA / kurtarma kodu<input autoComplete="one-time-code" maxLength={256} value={fallbackCode} onChange={event=>setFallbackCode(event.target.value)}/></label><Button disabled={busy!==''||!fallbackPassword||(auth.twoFactorEnabled&&!fallbackCode.trim())} onClick={()=>void reauthenticate(true)}>{busy==='fallback'?'Doğrulanıyor…':'Hello olmazsa parola ile devam et'}</Button></div></Surface>
     </section>
     {message&&<StatusMessage tone={messageTone}>{message}</StatusMessage>}
   </>;
+  return localizeWindowsHelloNode(panel,language);
 }
 
 function PrivacyOwnershipCenter() {

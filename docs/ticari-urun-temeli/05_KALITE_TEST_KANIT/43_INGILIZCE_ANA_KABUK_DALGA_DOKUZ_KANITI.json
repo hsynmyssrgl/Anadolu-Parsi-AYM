@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-INGILIZCE-ANA-KABUK-DALGA-DOKUZ-20260819-01",
+  "executedAt": "2026-08-19T18:41:00+03:00",
+  "repositoryBaseCommitAtExecution": "52266068b23dd51c9712ac2d42aa781f79670b2c",
+  "workItem": "IS-0106",
+  "result": {"status":"PASS_WITH_REMAINING_APP_SHELL_OPEN","targetedTestFilesPassed":2,"targetedTestFilesTotal":2,"targetedTestsPassed":6,"targetedTestsTotal":6,"desktopTypecheck":"PASS"},
+  "translatedSurfaces": ["WindowsHelloScreen", "PlaceholderScreen"],
+  "englishLocaleVisibleTurkishCharacterCount": 0,
+  "turkishLocalePreserved": true,
+  "windowsHelloFallbackRemainsExplicit": true,
+  "remainingApplicationShellAuditOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "Ana kabuk dokuzuncu dalga Windows Hello kayit, cihaz bagi, yeniden dogrulama ve gecersiz menu hedefini iki dilli hale getirir."
+}
