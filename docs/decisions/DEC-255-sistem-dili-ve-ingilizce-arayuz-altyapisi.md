@@ -49,6 +49,7 @@ Dil kararı Electron ana sürecinde `app.getLocale()` üzerinden verilir. Render
 - Veri Onarma Merkezi ile oturum uyarı/kilit yüzeyleri; ana kabuk on beşinci dalga render ve sözlük testlerinde görünür Türkçe karakter sayısı sıfırdır. Onarma için zorunlu önizleme/geri alma ve kilit için yeniden doğrulama semantiği korunur.
 - Hane/Üyelik, Kişi Yaşam Döngüsü ve Profil Davetleri yüzeyleri; ana kabuk on altıncı dalga render ve sözlük testlerinde görünür Türkçe karakter sayısı sıfırdır. Tarihçeli üyelik, geri alınabilir profil işlemleri ve tek kullanımlık davet semantiği korunur.
 - Kimlik, passkey, federated bağlantı, geçici doğrulanabilir yetki ve salt-okunur companion merkezi; ana kabuk on yedinci dalga render ve sözlük testlerinde görünür Türkçe karakter sayısı sıfırdır. Özel anahtar/biyometri saklamama, yapılandırılmamış sağlayıcıyı gizleme, minimum disclosure ve Windows tek-yazar sınırları korunur.
+- Bağlamsal Yetkiler yüzeyi; ana kabuk on sekizinci dalga render ve sözlük testlerinde görünür Türkçe karakter sayısı sıfırdır. Yönetici yetkisi, amaç/aile dalı/süre/sahiplik bağları, açık ret ve sonlu çevrimdışı kira sınırları korunur.
 
 ## Açık kalan iş
 
@@ -93,6 +94,7 @@ Dil kararı Electron ana sürecinde `app.getLocale()` üzerinden verilir. Render
 - `apps/desktop/tests/app-shell-localization-wave-thirty-three.test.ts`
 - `apps/desktop/tests/app-shell-localization-wave-thirty-four.test.ts`
 - `apps/desktop/tests/app-shell-localization-wave-thirty-five.test.ts`
+- `apps/desktop/tests/app-shell-localization-wave-thirty-six.test.ts`
 - `apps/desktop/tests/accessibility-preference-center.test.ts`
 - `apps/desktop/tests/narrated-help-center.test.ts`
 - `apps/desktop/tests/installer-narration-experience.test.ts`

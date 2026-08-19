@@ -522,6 +522,16 @@
       "uretimZamani": "2026-08-19T19:33:08+03:00",
       "disKaynak": false,
       "not": "Kimlik/Erisim Merkezi English locale renderinda gorunur Turkce karakter sifir; private-key/biometri yoklugu, minimum disclosure ve Windows tek-yazar sinirlari korunur."
+    },
+    {
+      "id": "KANIT-0053",
+      "tur": "TEST",
+      "kapsam": "English ana uygulama kabugu yerellestirme on sekizinci dalgasi",
+      "durum": "PASS_WITH_REMAINING_APP_SHELL_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/52_INGILIZCE_ANA_KABUK_DALGA_ON_SEKIZ_KANITI.json",
+      "uretimZamani": "2026-08-19T19:37:15+03:00",
+      "disKaynak": false,
+      "not": "Baglamsal Yetkiler English locale renderinda gorunur Turkce karakter sifir; yonetici, amac, aile dali, sahiplik, ret ve sonlu kira sinirlari korunur."
     }
   ]
 }

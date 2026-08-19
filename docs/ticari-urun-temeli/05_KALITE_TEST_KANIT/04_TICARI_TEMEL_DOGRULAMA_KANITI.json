@@ -9,10 +9,10 @@
   "canonicalRuleSha256": "b79db92a03d559f33ccd49348bad159a70b6034fbcf10a07abe5a407549bf0be",
   "decision": "DEC-259",
   "workItemCount": 49,
-  "fileCount": 84,
-  "sourceFileCount": 83,
-  "sourceFingerprintSha256": "8860006cfd4f40021aceba7324ecc31099919c65850d56e85b13c37b9bd9b8d9",
-  "checks": 992,
+  "fileCount": 85,
+  "sourceFileCount": 84,
+  "sourceFingerprintSha256": "fa621b3c780a3ac03249b825f2a85a3017a8cdcf8fbbbe5093c4ceb154b6c5e7",
+  "checks": 999,
   "status": "PASS",
   "commercialReleaseEligible": false,
   "externalEvidenceDefaultsToNotRun": true,
@@ -120,8 +120,8 @@
     },
     {
       "path": "05_KALITE_TEST_KANIT/03_KANIT_SICILI.json",
-      "bytes": 24458,
-      "sha256": "23087c77243926f462b8062ee6526e3354b351f5635f29eca33d530414e6399d"
+      "bytes": 24985,
+      "sha256": "f821156e7b05bbc95ff443611646c4f761f3d23652444fb8142eec5e60ea837e"
     },
     {
       "path": "05_KALITE_TEST_KANIT/05_GIT_YEDEK_DOGRULAMA_KANITI.json",
@@ -359,6 +359,11 @@
       "sha256": "eceb5949ab1f01ae9bbe7ef253f6e2e458a5ccc924c8617e97c647be7d12771b"
     },
     {
+      "path": "05_KALITE_TEST_KANIT/52_INGILIZCE_ANA_KABUK_DALGA_ON_SEKIZ_KANITI.json",
+      "bytes": 893,
+      "sha256": "1eb8d0366d83b0ebac75b6598dcb29e17b46a02cbed141c4f7d862f5c64d6c23"
+    },
+    {
       "path": "06_DIS_KAYNAK_VE_LISANS/01_TICARI_LISANS_ENVANTERI.md",
       "bytes": 3440,
       "sha256": "3bcbdfd7eea28bd097c28396336eb3637c73386bd9b72b465a1049a8353ee18b"
@@ -395,8 +400,8 @@
     },
     {
       "path": "08_IS_LISTESI/03_ANA_IS_SICILI.json",
-      "bytes": 20113,
-      "sha256": "99363a92608a7e94084f6c6e22f492b8bd83eb6e4915e787eed2cb9092f772cf"
+      "bytes": 20206,
+      "sha256": "f715810a37f7eae16ab68ec5d559c3e314efeaa6abae31f27e1218f68d8f6680"
     },
     {
       "path": "08_IS_LISTESI/04_IS_YURUTME_SIRASI.md",
@@ -434,5 +439,5 @@
       "sha256": "3b489e065d5b3cc6d84a81ac26775a144c0babca825dbd943364c74f7f309527"
     }
   ],
-  "generatedAt": "2026-08-19T16:35:18.647Z"
+  "generatedAt": "2026-08-19T16:38:35.821Z"
 }
