@@ -15,6 +15,7 @@ Dil kararı Electron ana sürecinde `app.getLocale()` üzerinden verilir. Render
 - Görünür tarih/saat biçimlendirmesinde seçili locale kullanımı.
 - Dağıtık operasyon, evrensel UX ve imzalı eklenti uzman panellerinin Türkçe/İngilizce görünür metinleri; English locale sunucu tarafı render testinde görünür Türkçe karakter sayısı sıfırdır.
 - Aile konum haritası, yerel çeviri/dil ve aile AI panellerinin Türkçe/İngilizce görünür metinleri; ikinci English locale render dalgasında görünür Türkçe karakter sayısı sıfırdır.
+- İletişim denetimi, kayıt/saklama ve iletişim güvenliği panellerinin Türkçe/İngilizce görünür metinleri; üçüncü English locale render dalgasında görünür Türkçe karakter sayısı sıfırdır.
 
 ## Açık kalan iş
 
@@ -26,6 +27,7 @@ Dil kararı Electron ana sürecinde `app.getLocale()` üzerinden verilir. Render
 - `apps/desktop/tests/ui-system-localization.test.ts`
 - `apps/desktop/tests/feature-panel-localization-wave-one.test.ts`
 - `apps/desktop/tests/feature-panel-localization-wave-two.test.ts`
+- `apps/desktop/tests/feature-panel-localization-wave-three.test.ts`
 - `apps/desktop/tests/accessibility-preference-center.test.ts`
 - `apps/desktop/tests/narrated-help-center.test.ts`
 - `apps/desktop/tests/installer-narration-experience.test.ts`

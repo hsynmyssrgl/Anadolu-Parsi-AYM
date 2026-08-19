@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-INGILIZCE-UZMAN-PANEL-DALGA-UC-20260819-01",
+  "executedAt": "2026-08-19T16:10:00+03:00",
+  "repositoryBaseCommitAtExecution": "53751b9ba7944e32ac96bd3885625568aca0c6f6",
+  "workItem": "IS-0106",
+  "result": {
+    "status": "PASS_WITH_REMAINING_PANELS_OPEN",
+    "targetedTestFilesPassed": 4,
+    "targetedTestFilesTotal": 4,
+    "targetedTestsPassed": 22,
+    "targetedTestsTotal": 22,
+    "desktopTypecheck": "PASS"
+  },
+  "translatedPanels": [
+    "CommunicationAuditArchivePanel",
+    "CommunicationRecordingRetentionPanel",
+    "CommunicationSecurityPanel"
+  ],
+  "englishLocaleVisibleTurkishCharacterCount": 0,
+  "turkishLocalePreserved": true,
+  "remainingFeaturePanelsOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "Ucuncu dalga iletisim denetimi, kayit/saklama ve guvenlik panellerinde iki dilli gorunur metin kapisini tamamlar; IS-0106 kalan paneller nedeniyle DEVAM durumundadir."
+}

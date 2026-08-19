@@ -192,6 +192,16 @@
       "uretimZamani": "2026-08-19T16:05:00+03:00",
       "disKaynak": false,
       "not": "Harita, yerel ceviri ve aile AI panelleri English locale renderinda gorunur Turkce karakter sifir; tam uygulama English PASS iddiasi yok."
+    },
+    {
+      "id": "KANIT-0020",
+      "tur": "TEST",
+      "kapsam": "English uzman panel yerellestirme ucuncu dalgasi",
+      "durum": "PASS_WITH_REMAINING_PANELS_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/19_INGILIZCE_UZMAN_PANEL_DALGA_UC_KANITI.json",
+      "uretimZamani": "2026-08-19T16:10:00+03:00",
+      "disKaynak": false,
+      "not": "Uc iletisim guvenlik ve denetim paneli English locale renderinda gorunur Turkce karakter sifir; tam uygulama English PASS iddiasi yok."
     }
   ]
 }
