@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-INGILIZCE-UZMAN-PANEL-DALGA-DOKUZ-20260819-01",
+  "executedAt": "2026-08-19T16:34:00+03:00",
+  "repositoryBaseCommitAtExecution": "1045c5ad59096220d46bc64d15cd83eeb4459be8",
+  "workItem": "IS-0106",
+  "result": {"status":"PASS_WITH_REMAINING_PANELS_OPEN","targetedTestFilesPassed":1,"targetedTestFilesTotal":1,"targetedTestsPassed":2,"targetedTestsTotal":2,"desktopTypecheck":"PASS"},
+  "translatedPanels": ["MemoryStudioPanel"],
+  "englishLocaleVisibleTurkishCharacterCount": 0,
+  "turkishLocalePreserved": true,
+  "remainingFeaturePanelsOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "Dokuzuncu dalga Hafiza Studyosu panelinde iki dilli gorunur metin kapisini tamamlar; kalan paneller aciktir."
+}

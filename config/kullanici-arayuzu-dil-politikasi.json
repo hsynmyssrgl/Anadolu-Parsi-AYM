@@ -46,7 +46,8 @@
       "smart-home-energy-panel",
       "finance-import-panel",
       "communication-messaging-panel",
-      "communication-file-sharing-panel"
+      "communication-file-sharing-panel",
+      "memory-studio-panel"
     ],
     "translatedFeaturePanelWaveOne": [
       "DistributedOperationsPanel",
@@ -78,8 +79,10 @@
     "translatedFeaturePanelWaveSevenEnglishVisibleTurkishTextCount": 0,
     "translatedFeaturePanelWaveEight": ["CommunicationFileSharingPanel"],
     "translatedFeaturePanelWaveEightEnglishVisibleTurkishTextCount": 0,
+    "translatedFeaturePanelWaveNine": ["MemoryStudioPanel"],
+    "translatedFeaturePanelWaveNineEnglishVisibleTurkishTextCount": 0,
     "openSurface": "remaining-feature-panel-copy",
-    "openReason": "İlk on dört uzman panel iki dilli ve English locale görünür Türkçe metin sayısı sıfırdır; kalan geniş özellik panellerindeki tarihsel Türkçe metinler henüz bütünüyle taşınmadı.",
+    "openReason": "İlk on beş uzman panel iki dilli ve English locale görünür Türkçe metin sayısı sıfırdır; kalan geniş özellik panellerindeki tarihsel Türkçe metinler henüz bütünüyle taşınmadı.",
     "countsAsFullApplicationEnglishPass": false
   },
   "failClosed": true,

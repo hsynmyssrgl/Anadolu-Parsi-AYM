@@ -252,6 +252,16 @@
       "uretimZamani": "2026-08-19T16:29:00+03:00",
       "disKaynak": false,
       "not": "Dosya paylasimi ve aile iletisim araclari paneli English locale renderinda gorunur Turkce karakter sifir; kalan paneller acik."
+    },
+    {
+      "id": "KANIT-0026",
+      "tur": "TEST",
+      "kapsam": "English uzman panel yerellestirme dokuzuncu dalgasi",
+      "durum": "PASS_WITH_REMAINING_PANELS_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/25_INGILIZCE_UZMAN_PANEL_DALGA_DOKUZ_KANITI.json",
+      "uretimZamani": "2026-08-19T16:34:00+03:00",
+      "disKaynak": false,
+      "not": "Hafiza Studyosu paneli English locale renderinda gorunur Turkce karakter sifir; kalan paneller acik."
     }
   ]
 }
