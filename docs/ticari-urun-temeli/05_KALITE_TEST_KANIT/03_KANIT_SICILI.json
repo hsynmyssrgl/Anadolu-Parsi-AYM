@@ -172,6 +172,16 @@
       "uretimZamani": "2026-08-19T15:49:06+03:00",
       "disKaynak": false,
       "not": "Normal blur ile yuksek-kontrast ve azaltilmis-hareket opak modu ayni Electron zincirinde hesaplanmis stil ve PNG hashleriyle PASS."
+    },
+    {
+      "id": "KANIT-0018",
+      "tur": "TEST",
+      "kapsam": "English uzman panel yerellestirme birinci dalgasi",
+      "durum": "PASS_WITH_REMAINING_PANELS_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/17_INGILIZCE_UZMAN_PANEL_DALGA_BIR_KANITI.json",
+      "uretimZamani": "2026-08-19T16:00:00+03:00",
+      "disKaynak": false,
+      "not": "Uc uzman panel English locale renderinda gorunur Turkce karakter sifir; kalan ozellik panelleri acik ve tam uygulama English PASS iddiasi yok."
     }
   ]
 }

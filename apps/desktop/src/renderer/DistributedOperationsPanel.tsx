@@ -1,17 +1,19 @@
 import { useState } from 'react';
+import { selectUiCopy, useLocalization } from './localization';
 export function DistributedOperationsPanel(){const [profile,setProfile]=useState<'single_node'|'two_full_plus_witness'|'three_full_node'>('single_node');
+  const {language}=useLocalization();const text=(turkish:string,english:string)=>selectUiCopy(language,turkish,english);
   return <section className="distributed-operations panel" aria-labelledby="distributed-operations-title"><div className="panel-heading"><div>
-    <span className="eyebrow">34-I/J · Dağıtık Core Service ve operasyon</span><h2 id="distributed-operations-title">Cluster ve cihaz merkezi</h2></div></div>
-    <div className="communication-recording-truth" role="note"><strong>Olgun Raft, mTLS sertifika otoritesi, mDNS, relay, Windows Service Host ve Apple istemcileri yapılandırılmamıştır.</strong>
-      <span>Raft portu yokken quorum commit ve snapshot bootstrap fail-closed; özel consensus algoritması yazılmamıştır.</span>
-      <span>SQLite yalnız yerel mutlak Windows yolunda açılabilir; ağ paylaşımı ve çoklu node doğrudan veritabanı erişimi yasaktır.</span>
-      <span>Remote bağlantı varsayılan kapalıdır; control plane aile içeriği taşıyamaz ve keşif güven değil yalnız adres ipucudur.</span></div>
-    <div className="workspace-grid"><section><h3>Kurulum profili</h3><label>Profil<select value={profile} onChange={event=>setProfile(event.target.value as typeof profile)}>
-      <option value="single_node">Tek node</option><option value="two_full_plus_witness">2 full node + witness</option><option value="three_full_node">3 full node</option></select></label>
-      <p>Otomatik failover: <strong>{profile==='single_node'?'yok':'yalnız gerçek quorum sağlayıcısı doğrulanırsa'}</strong></p></section>
-      <section><h3>Sağlık ve fencing</h3><p>Rol: maintenance · writable: hayır · safe mode: açık</p><p>Quorum: yapılandırılmadı · replication lag: bilinmiyor · cert: yok · backup age: bilinmiyor</p></section></div>
-    <div className="communication-recording-truth"><span>Rolling update: follower’lar önce, leader son; imzalı paket, N-1 uyumluluk ve rollback zorunlu.</span>
-      <span>Apple istemcisi ancak salt-okunur, şifreli cache ve Core Service authorization ile planlanır; uygulama build edilmemiştir.</span>
-      <span>Fault injection yalnız sentetik test-double kanıtıdır; gerçek Windows node matrisi `NOT_RUN` kalır.</span></div>
-    <button type="button" disabled>Node ekle veya failover provası başlat</button><small>Gerçek sağlayıcı ve güçlü doğrulama bileşimi yoktur.</small>
+    <span className="eyebrow">{text('34-I/J · Dağıtık Core Service ve operasyon','34-I/J · Distributed Core Service and operations')}</span><h2 id="distributed-operations-title">{text('Cluster ve cihaz merkezi','Cluster and device center')}</h2></div></div>
+    <div className="communication-recording-truth" role="note"><strong>{text('Olgun Raft, mTLS sertifika otoritesi, mDNS, relay, Windows Service Host ve Apple istemcileri yapılandırılmamıştır.','Production-grade Raft, an mTLS certificate authority, mDNS, relay, Windows Service Host and Apple clients are not configured.')}</strong>
+      <span>{text('Raft portu yokken quorum commit ve snapshot bootstrap fail-closed; özel consensus algoritması yazılmamıştır.','Quorum commit and snapshot bootstrap fail closed while the Raft port is absent; no custom consensus algorithm has been implemented.')}</span>
+      <span>{text('SQLite yalnız yerel mutlak Windows yolunda açılabilir; ağ paylaşımı ve çoklu node doğrudan veritabanı erişimi yasaktır.','SQLite may open only from an absolute local Windows path; network shares and direct multi-node database access are prohibited.')}</span>
+      <span>{text('Remote bağlantı varsayılan kapalıdır; control plane aile içeriği taşıyamaz ve keşif güven değil yalnız adres ipucudur.','Remote connectivity is off by default; the control plane cannot carry family content, and discovery is only an address hint, not a trust signal.')}</span></div>
+    <div className="workspace-grid"><section><h3>{text('Kurulum profili','Deployment profile')}</h3><label>{text('Profil','Profile')}<select value={profile} onChange={event=>setProfile(event.target.value as typeof profile)}>
+      <option value="single_node">{text('Tek node','Single node')}</option><option value="two_full_plus_witness">{text('2 full node + witness','2 full nodes + witness')}</option><option value="three_full_node">{text('3 full node','3 full nodes')}</option></select></label>
+      <p>{text('Otomatik failover:','Automatic failover:')} <strong>{profile==='single_node'?text('yok','none'):text('yalnız gerçek quorum sağlayıcısı doğrulanırsa','only after a real quorum provider is verified')}</strong></p></section>
+      <section><h3>{text('Sağlık ve fencing','Health and fencing')}</h3><p>{text('Rol: maintenance · writable: hayır · safe mode: açık','Role: maintenance · writable: no · safe mode: on')}</p><p>{text('Quorum: yapılandırılmadı · replication lag: bilinmiyor · cert: yok · backup age: bilinmiyor','Quorum: not configured · replication lag: unknown · certificate: absent · backup age: unknown')}</p></section></div>
+    <div className="communication-recording-truth"><span>{text('Rolling update: follower’lar önce, leader son; imzalı paket, N-1 uyumluluk ve rollback zorunlu.','Rolling update: followers first, leader last; a signed package, N-1 compatibility and rollback are mandatory.')}</span>
+      <span>{text('Apple istemcisi ancak salt-okunur, şifreli cache ve Core Service authorization ile planlanır; uygulama build edilmemiştir.','An Apple client is planned only with a read-only encrypted cache and Core Service authorization; the application has not been built.')}</span>
+      <span>{text('Fault injection yalnız sentetik test-double kanıtıdır; gerçek Windows node matrisi `NOT_RUN` kalır.','Fault injection is synthetic test-double evidence only; the real Windows node matrix remains `NOT_RUN`.')}</span></div>
+    <button type="button" disabled>{text('Node ekle veya failover provası başlat','Add a node or start a failover drill')}</button><small>{text('Gerçek sağlayıcı ve güçlü doğrulama bileşimi yoktur.','A real provider and strong verification combination are not available.')}</small>
   </section>;}

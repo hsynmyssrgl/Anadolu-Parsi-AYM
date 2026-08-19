@@ -32,10 +32,19 @@
       "command-search",
       "narrated-help",
       "system-tray-and-quit",
-      "installer-custom-pages"
+      "installer-custom-pages",
+      "distributed-operations-panel",
+      "universal-ux-panel",
+      "signed-plugin-platform-panel"
     ],
-    "openSurface": "feature-panel-copy",
-    "openReason": "Mevcut geniş özellik panellerindeki tarihsel Türkçe metinler anahtar bazlı İngilizce sözlüğe henüz bütünüyle taşınmadı.",
+    "translatedFeaturePanelWaveOne": [
+      "DistributedOperationsPanel",
+      "UniversalUxConsolidationPanel",
+      "SignedPluginPlatformPanel"
+    ],
+    "translatedFeaturePanelWaveOneEnglishVisibleTurkishTextCount": 0,
+    "openSurface": "remaining-feature-panel-copy",
+    "openReason": "İlk üç uzman panel iki dilli ve English locale görünür Türkçe metin sayısı sıfırdır; kalan geniş özellik panellerindeki tarihsel Türkçe metinler henüz bütünüyle taşınmadı.",
     "countsAsFullApplicationEnglishPass": false
   },
   "failClosed": true,

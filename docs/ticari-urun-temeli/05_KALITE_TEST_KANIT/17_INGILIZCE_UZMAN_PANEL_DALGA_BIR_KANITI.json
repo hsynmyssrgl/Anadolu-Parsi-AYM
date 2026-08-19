@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-INGILIZCE-UZMAN-PANEL-DALGA-BIR-20260819-01",
+  "executedAt": "2026-08-19T16:00:00+03:00",
+  "repositoryBaseCommitAtExecution": "ed4055340bc9bdc0e0f0393760201ddca8ddd60f",
+  "workItem": "IS-0106",
+  "result": {
+    "status": "PASS_WITH_REMAINING_PANELS_OPEN",
+    "targetedTestFilesPassed": 2,
+    "targetedTestFilesTotal": 2,
+    "targetedTestsPassed": 10,
+    "targetedTestsTotal": 10,
+    "desktopTypecheck": "PASS"
+  },
+  "translatedPanels": [
+    "DistributedOperationsPanel",
+    "UniversalUxConsolidationPanel",
+    "SignedPluginPlatformPanel"
+  ],
+  "englishLocaleVisibleTurkishCharacterCount": 0,
+  "turkishLocalePreserved": true,
+  "remainingFeaturePanelsOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "Birinci dalga uc uzman panelde iki dilli gorunur metin ve English locale sifir Turkce karakter render kapisini tamamlar; IS-0106 kalan paneller nedeniyle DEVAM durumundadir."
+}

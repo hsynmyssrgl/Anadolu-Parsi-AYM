@@ -207,6 +207,9 @@ export const configureUiLocalization = (value: UiLocalizationBootstrapView): voi
 export const getActiveUiLocalization = (): UiLocalizationBootstrapView => activeLocalization;
 export const getActiveUiLocale = (): string => activeLocalization.locale;
 
+export const selectUiCopy = (language: SupportedUiLanguage, turkish: string, english: string): string =>
+  language === 'tr' ? turkish : english;
+
 const englishNavigationLabels: Record<ProductScreenId, string> = {
   dashboard:'Dashboard', family:'Family', households:'Households and Branches',
   'people-lifecycle':'Person Profiles', tree:'Family Tree', timeline:'Timeline',

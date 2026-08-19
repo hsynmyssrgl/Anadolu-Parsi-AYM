@@ -13,15 +13,17 @@ Dil kararı Electron ana sürecinde `app.getLocale()` üzerinden verilir. Render
 - Türkçe ve İngilizce sesli ilk tanıtım ile F1 Sesli Yardım Merkezi.
 - İngilizce varsayılan, Türkçe destekli NSIS kurulum metinleri ve iki yerelleştirilmiş lisans.
 - Görünür tarih/saat biçimlendirmesinde seçili locale kullanımı.
+- Dağıtık operasyon, evrensel UX ve imzalı eklenti uzman panellerinin Türkçe/İngilizce görünür metinleri; English locale sunucu tarafı render testinde görünür Türkçe karakter sayısı sıfırdır.
 
 ## Açık kalan iş
 
-Geniş özellik panellerindeki tarihsel Türkçe metinlerin tamamı henüz İngilizce sözlük anahtarlarına taşınmadı. Bu nedenle İngilizce altyapı ve çekirdek kullanıcı yolculuğu `COMPLETE`, uygulamanın uçtan uca bütün ekran İngilizcesi `PARTIAL` ve `countsAsFullApplicationEnglishPass=false` durumundadır. Eksik metinler Türkçeye sessiz fallback yapılarak tamamlanmış sayılamaz.
+İlk uzman panel dalgası tamamlanmış olsa da kalan geniş özellik panellerindeki tarihsel Türkçe metinlerin tamamı henüz İngilizce sözlük anahtarlarına taşınmadı. Bu nedenle İngilizce altyapı ve çekirdek kullanıcı yolculuğu `COMPLETE`, uygulamanın uçtan uca bütün ekran İngilizcesi `PARTIAL` ve `countsAsFullApplicationEnglishPass=false` durumundadır. Eksik metinler Türkçeye sessiz fallback yapılarak tamamlanmış sayılamaz.
 
 ## Kanıt
 
 - `packages/domain/tests/ui-localization.test.ts`
 - `apps/desktop/tests/ui-system-localization.test.ts`
+- `apps/desktop/tests/feature-panel-localization-wave-one.test.ts`
 - `apps/desktop/tests/accessibility-preference-center.test.ts`
 - `apps/desktop/tests/narrated-help-center.test.ts`
 - `apps/desktop/tests/installer-narration-experience.test.ts`
