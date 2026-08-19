@@ -96,4 +96,5 @@ describe('app shell English localization wave nineteen', () => {
   it('preserves the Turkish family-tree copy', () => {
     expect(renderTreeScreen('tr-TR')).toContain('Soy ağacı');
   });
+
 });

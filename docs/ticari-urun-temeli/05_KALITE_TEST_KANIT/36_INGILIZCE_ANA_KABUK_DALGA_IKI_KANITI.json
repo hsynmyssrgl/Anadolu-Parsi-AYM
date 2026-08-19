@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-INGILIZCE-ANA-KABUK-DALGA-IKI-20260819-01",
+  "executedAt": "2026-08-19T18:03:39+03:00",
+  "repositoryBaseCommitAtExecution": "cb5dd3dbb4cd9e8920db53c5bceb3c4f298d2b7c",
+  "workItem": "IS-0106",
+  "result": {"status":"PASS_WITH_REMAINING_APP_SHELL_OPEN","targetedTestFilesPassed":1,"targetedTestFilesTotal":1,"targetedTestsPassed":3,"targetedTestsTotal":3,"desktopTypecheck":"PASS"},
+  "translatedSurfaces": ["TimelineScreen", "ImportantDaysScreen"],
+  "englishLocaleVisibleTurkishCharacterCount": 0,
+  "turkishLocalePreserved": true,
+  "localeAwareDateFormatting": true,
+  "remainingApplicationShellAuditOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "Ana kabuk ikinci dalga, zaman tuneli ve onemli gunler ekranlarinin filtre, arsiv, davetiye, not ve tarih sunumunu iki dilli hale getirir; kalan ana kabuk ekranlari aciktir."
+}

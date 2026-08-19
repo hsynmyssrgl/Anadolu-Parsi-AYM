@@ -9,10 +9,10 @@
   "canonicalRuleSha256": "b79db92a03d559f33ccd49348bad159a70b6034fbcf10a07abe5a407549bf0be",
   "decision": "DEC-259",
   "workItemCount": 49,
-  "fileCount": 68,
-  "sourceFileCount": 67,
-  "sourceFingerprintSha256": "47c11d0925f8df1487ba3b2342cb6bcaa0edf7b3fbbe0cff34e81a448c17914f",
-  "checks": 880,
+  "fileCount": 69,
+  "sourceFileCount": 68,
+  "sourceFingerprintSha256": "cb0e4dc9cec47d760428b110d962a454d08240bec9fa2281ab3cb4a1f3a5b880",
+  "checks": 887,
   "status": "PASS",
   "commercialReleaseEligible": false,
   "externalEvidenceDefaultsToNotRun": true,
@@ -120,8 +120,8 @@
     },
     {
       "path": "05_KALITE_TEST_KANIT/03_KANIT_SICILI.json",
-      "bytes": 16255,
-      "sha256": "42ad014a2a401b8630c365d1e5e4d8e7e21f669b2b6ed253d1ea7dd7a435c72c"
+      "bytes": 16740,
+      "sha256": "c09230a64880ded0090fd598bca2dcbd3583b059790f684cc8dca218105f1e55"
     },
     {
       "path": "05_KALITE_TEST_KANIT/05_GIT_YEDEK_DOGRULAMA_KANITI.json",
@@ -279,6 +279,11 @@
       "sha256": "f176bd31f6bd3cb1a6e48fbbc98b6886eb5ad58c30ddc2486b99141ac016bc35"
     },
     {
+      "path": "05_KALITE_TEST_KANIT/36_INGILIZCE_ANA_KABUK_DALGA_IKI_KANITI.json",
+      "bytes": 918,
+      "sha256": "a48e1ca54daa45ef5aa746f0f0f80d6249cefed3d300d5d0647ed0d50e4fd5c1"
+    },
+    {
       "path": "06_DIS_KAYNAK_VE_LISANS/01_TICARI_LISANS_ENVANTERI.md",
       "bytes": 3440,
       "sha256": "3bcbdfd7eea28bd097c28396336eb3637c73386bd9b72b465a1049a8353ee18b"
@@ -305,8 +310,8 @@
     },
     {
       "path": "08_IS_LISTESI/01_ANA_IS_LISTESI.md",
-      "bytes": 6572,
-      "sha256": "f4cc0b0c3141a73ca409f41f6b1d1641fd6af93814fbda046ad7616c2b1dd8f9"
+      "bytes": 6595,
+      "sha256": "97fe985b665358bb639d1333d1203c50ce31fb0ba18762ed5277783321826f36"
     },
     {
       "path": "08_IS_LISTESI/02_DIS_KAYNAK_GEREKTIREN_ISLER.md",
@@ -315,8 +320,8 @@
     },
     {
       "path": "08_IS_LISTESI/03_ANA_IS_SICILI.json",
-      "bytes": 18378,
-      "sha256": "3ee9bc216e55b4e80c477af64857460c4c9766918ad393701967865250ddcf5f"
+      "bytes": 18469,
+      "sha256": "7fb7f7572188e8a70d6d6258b4bdd3a8407e4da239067577ad242cd839f07f26"
     },
     {
       "path": "08_IS_LISTESI/04_IS_YURUTME_SIRASI.md",
@@ -354,5 +359,5 @@
       "sha256": "3b489e065d5b3cc6d84a81ac26775a144c0babca825dbd943364c74f7f309527"
     }
   ],
-  "generatedAt": "2026-08-19T14:58:00.039Z"
+  "generatedAt": "2026-08-19T15:05:26.149Z"
 }
