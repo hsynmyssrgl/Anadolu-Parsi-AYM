@@ -53,7 +53,8 @@
       "child-education-coordination-panel",
       "household-operations-panel",
       "family-meeting-panel",
-      "finance-planning-panel"
+      "finance-planning-panel",
+      "local-governed-ocr-panel"
     ],
     "translatedFeaturePanelWaveOne": [
       "DistributedOperationsPanel",
@@ -99,8 +100,10 @@
     "translatedFeaturePanelWaveFourteenEnglishVisibleTurkishTextCount": 0,
     "translatedFeaturePanelWaveFifteen": ["FinancePlanningPanel"],
     "translatedFeaturePanelWaveFifteenEnglishVisibleTurkishTextCount": 0,
+    "translatedFeaturePanelWaveSixteen": ["LocalGovernedOcrPanel"],
+    "translatedFeaturePanelWaveSixteenEnglishVisibleTurkishTextCount": 0,
     "openSurface": "remaining-feature-panel-copy",
-    "openReason": "İlk yirmi bir uzman panel iki dilli ve English locale görünür Türkçe metin sayısı sıfırdır; kalan geniş özellik panellerindeki tarihsel Türkçe metinler henüz bütünüyle taşınmadı.",
+    "openReason": "İlk yirmi iki uzman panel iki dilli ve English locale görünür Türkçe metin sayısı sıfırdır; kalan geniş özellik panellerindeki tarihsel Türkçe metinler henüz bütünüyle taşınmadı.",
     "countsAsFullApplicationEnglishPass": false
   },
   "failClosed": true,
