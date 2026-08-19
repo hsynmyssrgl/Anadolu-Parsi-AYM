@@ -262,6 +262,16 @@
       "uretimZamani": "2026-08-19T16:34:00+03:00",
       "disKaynak": false,
       "not": "Hafiza Studyosu paneli English locale renderinda gorunur Turkce karakter sifir; kalan paneller acik."
+    },
+    {
+      "id": "KANIT-0027",
+      "tur": "TEST",
+      "kapsam": "English uzman panel yerellestirme onuncu dalgasi",
+      "durum": "PASS_WITH_REMAINING_PANELS_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/26_INGILIZCE_UZMAN_PANEL_DALGA_ON_KANITI.json",
+      "uretimZamani": "2026-08-19T16:39:00+03:00",
+      "disKaynak": false,
+      "not": "Yer, seyahat, varlik ve evcil hayvan paneli English locale renderinda gorunur Turkce karakter sifir; kalan paneller acik."
     }
   ]
 }

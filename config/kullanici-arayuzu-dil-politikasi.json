@@ -47,7 +47,8 @@
       "finance-import-panel",
       "communication-messaging-panel",
       "communication-file-sharing-panel",
-      "memory-studio-panel"
+      "memory-studio-panel",
+      "places-travel-asset-pet-panel"
     ],
     "translatedFeaturePanelWaveOne": [
       "DistributedOperationsPanel",
@@ -81,8 +82,10 @@
     "translatedFeaturePanelWaveEightEnglishVisibleTurkishTextCount": 0,
     "translatedFeaturePanelWaveNine": ["MemoryStudioPanel"],
     "translatedFeaturePanelWaveNineEnglishVisibleTurkishTextCount": 0,
+    "translatedFeaturePanelWaveTen": ["PlacesTravelAssetPetPanel"],
+    "translatedFeaturePanelWaveTenEnglishVisibleTurkishTextCount": 0,
     "openSurface": "remaining-feature-panel-copy",
-    "openReason": "İlk on beş uzman panel iki dilli ve English locale görünür Türkçe metin sayısı sıfırdır; kalan geniş özellik panellerindeki tarihsel Türkçe metinler henüz bütünüyle taşınmadı.",
+    "openReason": "İlk on altı uzman panel iki dilli ve English locale görünür Türkçe metin sayısı sıfırdır; kalan geniş özellik panellerindeki tarihsel Türkçe metinler henüz bütünüyle taşınmadı.",
     "countsAsFullApplicationEnglishPass": false
   },
   "failClosed": true,

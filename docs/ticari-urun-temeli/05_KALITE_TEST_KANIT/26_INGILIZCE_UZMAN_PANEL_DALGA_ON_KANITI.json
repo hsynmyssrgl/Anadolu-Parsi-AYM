@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-INGILIZCE-UZMAN-PANEL-DALGA-ON-20260819-01",
+  "executedAt": "2026-08-19T16:39:00+03:00",
+  "repositoryBaseCommitAtExecution": "afe30ab8c01ad6612e97329279916db2be33dd6f",
+  "workItem": "IS-0106",
+  "result": {"status":"PASS_WITH_REMAINING_PANELS_OPEN","targetedTestFilesPassed":1,"targetedTestFilesTotal":1,"targetedTestsPassed":2,"targetedTestsTotal":2,"desktopTypecheck":"PASS"},
+  "translatedPanels": ["PlacesTravelAssetPetPanel"],
+  "englishLocaleVisibleTurkishCharacterCount": 0,
+  "turkishLocalePreserved": true,
+  "remainingFeaturePanelsOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "Onuncu dalga yer, seyahat, varlik ve evcil hayvan panelinde iki dilli gorunur metin kapisini tamamlar; kalan paneller aciktir."
+}
