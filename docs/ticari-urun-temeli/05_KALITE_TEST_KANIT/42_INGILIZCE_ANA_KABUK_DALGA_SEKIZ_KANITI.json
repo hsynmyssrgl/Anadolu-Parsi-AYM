@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "PARSYUVA-AYM-INGILIZCE-ANA-KABUK-DALGA-SEKIZ-20260819-01",
+  "executedAt": "2026-08-19T18:35:47+03:00",
+  "repositoryBaseCommitAtExecution": "a5fc275b986f641ab978a231aa9c1def90ec5fd7",
+  "workItem": "IS-0106",
+  "result": {"status":"PASS_WITH_REMAINING_APP_SHELL_OPEN","targetedTestFilesPassed":2,"targetedTestFilesTotal":2,"targetedTestsPassed":5,"targetedTestsTotal":5,"desktopTypecheck":"PASS"},
+  "translatedSurfaces": ["GovernedFormDraftCenter"],
+  "englishLocaleVisibleTurkishCharacterCount": 0,
+  "turkishLocalePreserved": true,
+  "draftRevisionTruthPreserved": true,
+  "remainingApplicationShellAuditOpen": true,
+  "fullApplicationEnglishPass": false,
+  "requirementPass": false,
+  "note": "Ana kabuk sekizinci dalga yonetilen taslak dogrulama, otomatik kayit, geri alma ve degismez gecmis metinlerini iki dilli hale getirir."
+}

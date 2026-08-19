@@ -422,6 +422,16 @@
       "uretimZamani": "2026-08-19T18:32:43+03:00",
       "disKaynak": false,
       "not": "AI izin merkezi English locale renderinda gorunur Turkce karakter sifir; kalan ana kabuk ekranlari aciktir."
+    },
+    {
+      "id": "KANIT-0043",
+      "tur": "TEST",
+      "kapsam": "English ana uygulama kabugu yerellestirme sekizinci dalgasi",
+      "durum": "PASS_WITH_REMAINING_APP_SHELL_OPEN",
+      "kaynak": "05_KALITE_TEST_KANIT/42_INGILIZCE_ANA_KABUK_DALGA_SEKIZ_KANITI.json",
+      "uretimZamani": "2026-08-19T18:35:47+03:00",
+      "disKaynak": false,
+      "not": "Yonetilen taslak merkezi English locale renderinda gorunur Turkce karakter sifir; kalan ana kabuk ekranlari aciktir."
     }
   ]
 }

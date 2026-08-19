@@ -122,8 +122,10 @@
     "translatedApplicationShellWaveSixEnglishVisibleTurkishTextCount": 0,
     "translatedApplicationShellWaveSeven": ["AiGovernanceScreen"],
     "translatedApplicationShellWaveSevenEnglishVisibleTurkishTextCount": 0,
+    "translatedApplicationShellWaveEight": ["GovernedFormDraftCenter"],
+    "translatedApplicationShellWaveEightEnglishVisibleTurkishTextCount": 0,
     "openSurface": "remaining-feature-panel-copy",
-    "openReason": "İlk yirmi dört uzman panel ile ana pano, kişi kataloğu, aile, soy ağacı, zaman tüneli, önemli günler, birleşik yetkili arama, Doküman Merkezi, ilk kurulum/giriş, aile daveti, ilişki ekleme, dijital miras ve AI izin merkezi iki dillidir; ana uygulama kabuğunun kalan ekranlarındaki tarihsel görünür Türkçe metinlerin son taraması sürmektedir.",
+    "openReason": "İlk yirmi dört uzman panel ile ana pano, kişi kataloğu, aile, soy ağacı, zaman tüneli, önemli günler, birleşik yetkili arama, Doküman Merkezi, ilk kurulum/giriş, aile daveti, ilişki ekleme, dijital miras, AI izin merkezi ve yönetilen taslak merkezi iki dillidir; ana uygulama kabuğunun kalan ekranlarındaki tarihsel görünür Türkçe metinlerin son taraması sürmektedir.",
     "countsAsFullApplicationEnglishPass": false
   },
   "failClosed": true,

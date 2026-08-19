@@ -28,6 +28,7 @@ import { NarratedHelpCenter } from './NarratedHelpCenter';
 import { localizeArchiveCenterNode, translateArchiveCenterCopy } from './ArsivMerkeziYerellestirme';
 import { localizeDigitalLegacyNode, translateDigitalLegacyCopy } from './DijitalMirasYerellestirme';
 import { localizeAiGovernanceNode, translateAiGovernanceCopy } from './YapayZekaYonetisimiYerellestirme';
+import { localizeDraftCenterNode, translateDraftCenterCopy } from './TaslakMerkeziYerellestirme';
 import { FamilyMeetingPanel } from './FamilyMeetingPanel';
 import { UniversalUxConsolidationPanel } from './UniversalUxConsolidationPanel';
 import { FamilyLocationMap } from './FamilyLocationMap';
@@ -987,11 +988,11 @@ export function AiGovernanceScreen() {
 
 interface WorkspaceNoteDraft { readonly title:string; readonly note:string }
 const EMPTY_WORKSPACE_NOTE:WorkspaceNoteDraft={title:'',note:''};
-const validateWorkspaceNote=(draft:WorkspaceNoteDraft):readonly ValidationIssue[]=>{
+const validateWorkspaceNote=(draft:WorkspaceNoteDraft,language:'tr'|'en'):readonly ValidationIssue[]=>{
   const issues:ValidationIssue[]=[];
-  if(!draft.title.trim())issues.push({fieldId:'governed-draft-title',message:'Taslak başlığı zorunludur.'});
-  else if(draft.title.trim().length>120)issues.push({fieldId:'governed-draft-title',message:'Taslak başlığı 120 karakteri aşamaz.'});
-  if(draft.note.length>5000)issues.push({fieldId:'governed-draft-note',message:'Taslak notu 5.000 karakteri aşamaz.'});
+  if(!draft.title.trim())issues.push({fieldId:'governed-draft-title',message:translateDraftCenterCopy('Taslak başlığı zorunludur.',language)});
+  else if(draft.title.trim().length>120)issues.push({fieldId:'governed-draft-title',message:translateDraftCenterCopy('Taslak başlığı 120 karakteri aşamaz.',language)});
+  if(draft.note.length>5000)issues.push({fieldId:'governed-draft-note',message:translateDraftCenterCopy('Taslak notu 5.000 karakteri aşamaz.',language)});
   return issues;
 };
 const parseWorkspaceNote=(payloadJson:string):WorkspaceNoteDraft=>{
@@ -1002,7 +1003,8 @@ const parseWorkspaceNote=(payloadJson:string):WorkspaceNoteDraft=>{
 
 interface PendingFormDraftOperation { readonly clientOperationId:string; readonly expectedRevision:number }
 
-function GovernedFormDraftCenter({visible}:{readonly visible:boolean}){
+export function GovernedFormDraftCenter({visible}:{readonly visible:boolean}){
+  const {language}=useLocalization();
   const formKey='workspace.notes';
   const revisionRef=useRef(0);
   const saveChainRef=useRef<Promise<void>>(Promise.resolve());
@@ -1047,7 +1049,7 @@ function GovernedFormDraftCenter({visible}:{readonly visible:boolean}){
     }catch{if(generation===workspaceRefreshGenerationRef.current)setLoadState('error');}
   };
   const draft=useGovernedDraft<WorkspaceNoteDraft>(EMPTY_WORKSPACE_NOTE,{
-    debounceMs:700,validate:validateWorkspaceNote,
+    debounceMs:700,validate:value=>validateWorkspaceNote(value,language),
     save:async(value,{sequence,signal})=>{
       const queued=saveChainRef.current.catch(()=>undefined).then(async()=>{
         if(signal.aborted){operationsRef.current.delete(sequence);return;}
@@ -1074,7 +1076,7 @@ function GovernedFormDraftCenter({visible}:{readonly visible:boolean}){
     wasVisibleRef.current=visible;
     if(leavingVisibleRoute&&draft.state.phase==='dirty')void draft.flush();
   },[visible,draft.state.phase,draft.flush]);
-  const issues=validateWorkspaceNote(draft.draft);
+  const issues=validateWorkspaceNote(draft.draft,language);
   const visibleIssues=draft.state.phase==='invalid'?issues:[];
   const updateDraft=(value:WorkspaceNoteDraft)=>{undoOperationRef.current=undefined;setUndoError(false);draft.setDraft(value);};
   const saveNow=async()=>{
@@ -1103,9 +1105,9 @@ function GovernedFormDraftCenter({visible}:{readonly visible:boolean}){
     }catch{setUndoError(true);}
     finally{undoInFlightRef.current=false;setUndoing(false);}
   };
-  if(loadState==='loading')return <AsyncStatePanel state="loading" title="Taslak merkezi yükleniyor" message="Kişisel, sürümlü taslak ve değişiklik geçmişi hazırlanıyor."/>;
-  if(loadState==='error')return <AsyncStatePanel state="error" title="Taslak merkezi yüklenemedi" message="Kişisel taslak alanına güvenli erişim kurulamadı." onRetry={load}/>;
-  return <Surface className="workspace-summary governed-draft-center"><SectionHeader eyebrow="B3-02 · B7-14 · B7-15" title="Taslak, otomatik kayıt ve geri alma merkezi"/>
+  if(loadState==='loading')return <AsyncStatePanel state="loading" title={translateDraftCenterCopy('Taslak merkezi yükleniyor',language)} message={translateDraftCenterCopy('Kişisel, sürümlü taslak ve değişiklik geçmişi hazırlanıyor.',language)}/>;
+  if(loadState==='error')return <AsyncStatePanel state="error" title={translateDraftCenterCopy('Taslak merkezi yüklenemedi',language)} message={translateDraftCenterCopy('Kişisel taslak alanına güvenli erişim kurulamadı.',language)} onRetry={load}/>;
+  const panel=<Surface className="workspace-summary governed-draft-center"><SectionHeader eyebrow="B3-02 · B7-14 · B7-15" title="Taslak, otomatik kayıt ve geri alma merkezi"/>
     {!online&&<AsyncStatePanel state="offline" title="Çevrimdışı çalışma" message="Ağ bağlantısı yok; yerel kayıt isteği yine merkezi PEP/UoW ve offline lease kararına gider. Ağ üzerinden teslim garantisi verilmez." onRetry={async()=>{setOnline(globalThis.navigator?.onLine!==false);if(draft.state.phase==='dirty'||draft.state.phase==='error')await draft.retry();else await refreshWorkspace();}}/>}
     {!workspace?.current&&<AsyncStatePanel state="empty" title="Henüz kayıtlı taslak yok" message="Başlık ve not yazdığınızda geçerli içerik 700 ms sonra kişisel alana otomatik kaydedilir."/>}
     {draft.state.phase==='error'&&<AsyncStatePanel state="error" title="Otomatik kayıt tamamlanamadı" message="Girdi ekranda korunuyor; aynı işlem kimliği ve özgün revizyonla güvenli biçimde yeniden denenebilir." onRetry={async()=>{await draft.retry();}}/>}
@@ -1116,11 +1118,12 @@ function GovernedFormDraftCenter({visible}:{readonly visible:boolean}){
       <label htmlFor="governed-draft-title">Çalışma başlığı<input id="governed-draft-title" value={draft.draft.title} aria-invalid={visibleIssues.some(item=>item.fieldId==='governed-draft-title')} onChange={event=>updateDraft({...draft.draft,title:event.target.value})}/></label>
       <label htmlFor="governed-draft-note">Çalışma notu<textarea id="governed-draft-note" rows={5} value={draft.draft.note} aria-invalid={visibleIssues.some(item=>item.fieldId==='governed-draft-note')} onChange={event=>updateDraft({...draft.draft,note:event.target.value})}/></label>
       <div className="button-row"><Button onClick={()=>void saveNow()} disabled={draft.state.phase==='saving'||(issues.length===0&&!['dirty','error'].includes(draft.state.phase))}>Şimdi kaydet</Button><Button onClick={()=>void undo()} disabled={revisionRef.current<2||undoing||!canUndoGovernedDraft(draft.state.phase)}>Son değişikliği geri al</Button></div>
-      <small id="governed-draft-status" aria-live="polite">{undoing?'Geri alınıyor…':draft.state.phase==='saving'?'Kaydediliyor…':draft.state.phase==='saved'?`Otomatik kaydedildi · sürüm ${revisionRef.current}`:draft.state.phase==='invalid'?'Alan hataları düzeltilene kadar kayıt bekliyor.':draft.state.phase==='dirty'?'Değişiklikler otomatik kayıt için bekliyor.':`Güncel sürüm ${revisionRef.current||'yok'}`}</small>
+      <small id="governed-draft-status" aria-live="polite">{undoing?translateDraftCenterCopy('Geri alınıyor…',language):draft.state.phase==='saving'?translateDraftCenterCopy('Kaydediliyor…',language):draft.state.phase==='saved'?(language==='tr'?`Otomatik kaydedildi · sürüm ${revisionRef.current}`:`Autosaved · revision ${revisionRef.current}`):draft.state.phase==='invalid'?translateDraftCenterCopy('Alan hataları düzeltilene kadar kayıt bekliyor.',language):draft.state.phase==='dirty'?translateDraftCenterCopy('Değişiklikler otomatik kayıt için bekliyor.',language):(language==='tr'?`Güncel sürüm ${revisionRef.current||'yok'}`:`Current revision ${revisionRef.current||'none'}`)}</small>
     </div>
     <section aria-labelledby="governed-draft-history"><h3 id="governed-draft-history">Değişiklik geçmişi</h3>{!workspace?.history.length?<EmptyState title="Geçmiş henüz boş" body="Her başarılı otomatik kayıt ve geri alma değişmez bir sürüm olarak burada görünür."/>:<div className="stack-list">{workspace.history.map(item=><div className="list-row" key={item.mutationId}><div><strong>Sürüm {item.revision} · {item.operation==='save'?'Kaydedildi':'Geri alındı'}</strong><small>{formatDate(item.createdAt,{dateStyle:'medium',timeStyle:'short'})}{item.restoredFromRevision?` · sürüm ${item.restoredFromRevision} geri yüklendi`:''} · {item.payloadFingerprint.slice(0,12)}</small></div></div>)}</div>}</section>
     <small>Hassas taslak içeriği localStorage/sessionStorage içine yazılmaz; merkezi kişisel PEP/UoW ve değişmez revizyon geçmişi kullanılır.</small>
   </Surface>;
+  return localizeDraftCenterNode(panel,language);
 }
 
 function SystemManagementScreen(){
