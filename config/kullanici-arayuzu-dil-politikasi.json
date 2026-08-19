@@ -48,7 +48,8 @@
       "communication-messaging-panel",
       "communication-file-sharing-panel",
       "memory-studio-panel",
-      "places-travel-asset-pet-panel"
+      "places-travel-asset-pet-panel",
+      "health-care-coordination-panel"
     ],
     "translatedFeaturePanelWaveOne": [
       "DistributedOperationsPanel",
@@ -84,8 +85,10 @@
     "translatedFeaturePanelWaveNineEnglishVisibleTurkishTextCount": 0,
     "translatedFeaturePanelWaveTen": ["PlacesTravelAssetPetPanel"],
     "translatedFeaturePanelWaveTenEnglishVisibleTurkishTextCount": 0,
+    "translatedFeaturePanelWaveEleven": ["HealthCareCoordinationPanel"],
+    "translatedFeaturePanelWaveElevenEnglishVisibleTurkishTextCount": 0,
     "openSurface": "remaining-feature-panel-copy",
-    "openReason": "İlk on altı uzman panel iki dilli ve English locale görünür Türkçe metin sayısı sıfırdır; kalan geniş özellik panellerindeki tarihsel Türkçe metinler henüz bütünüyle taşınmadı.",
+    "openReason": "İlk on yedi uzman panel iki dilli ve English locale görünür Türkçe metin sayısı sıfırdır; kalan geniş özellik panellerindeki tarihsel Türkçe metinler henüz bütünüyle taşınmadı.",
     "countsAsFullApplicationEnglishPass": false
   },
   "failClosed": true,
