@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "release": "Bronze 19.08.2026.33",
   "releaseId": "bronze-2026-08-19-r33",
-  "generatedAt": "2026-08-19T16:06:29.115Z",
+  "generatedAt": "2026-08-19T16:13:20.206Z",
   "selfIndexedPaths": [
     "SHA256SUMS.txt",
     "artifacts/manifests/ALL_DOCUMENTS_INDEX.csv",
@@ -15,16 +15,16 @@
     "manifest.json"
   ],
   "summary": {
-    "totalFiles": 6134,
-    "totalDocuments": 3770,
+    "totalFiles": 6137,
+    "totalDocuments": 3771,
     "classifications": {
       "ACTIVE_AUTHORITY": 30,
-      "ACTIVE_REFERENCE": 852,
+      "ACTIVE_REFERENCE": 853,
       "EVIDENCE": 1413,
       "GENERATED": 655,
       "HISTORICAL": 1578,
-      "SOURCE_CODE": 603,
-      "TEST_OR_GATE": 1003
+      "SOURCE_CODE": 604,
+      "TEST_OR_GATE": 1004
     }
   },
   "files": [
@@ -2005,9 +2005,17 @@
       "isDocument": false
     },
     {
+      "path": "apps/desktop/src/renderer/AileFormlariYerellestirme.tsx",
+      "bytes": 7522,
+      "sha256": "1460958278e7d37c8bae7ce2dbecb1e2bf3739e54a80f75c6e4f7162134de9b2",
+      "extension": ".tsx",
+      "classification": "SOURCE_CODE",
+      "isDocument": false
+    },
+    {
       "path": "apps/desktop/src/renderer/App.tsx",
-      "bytes": 552572,
-      "sha256": "5d349bb522bc659f0aac61361b95b3a23a7869eb2b56584c7850fcfe9d6a8d05",
+      "bytes": 553143,
+      "sha256": "effc80f75b75b224e9e2cacd071c276db5a33b16b079ea9eb4ce57ee311f3ee3",
       "extension": ".tsx",
       "classification": "SOURCE_CODE",
       "isDocument": false
@@ -2400,6 +2408,14 @@
       "path": "apps/desktop/tests/app-shell-localization-wave-nineteen.test.ts",
       "bytes": 4917,
       "sha256": "fa100aff9f600e26208daec295567ab7edae203e67d726e9e30ad614a225de3f",
+      "extension": ".ts",
+      "classification": "TEST_OR_GATE",
+      "isDocument": false
+    },
+    {
+      "path": "apps/desktop/tests/app-shell-localization-wave-thirty-one.test.ts",
+      "bytes": 2226,
+      "sha256": "da36332583e3e3a4bf8aec53820439b1b6de50326be7869cabd338e72a6490cc",
       "extension": ".ts",
       "classification": "TEST_OR_GATE",
       "isDocument": false
@@ -22015,7 +22031,7 @@
     {
       "path": "artifacts/validation/active-release-contract-v2.json",
       "bytes": 186,
-      "sha256": "0324447c9fd535a479ace4b0df715bd5fe43e47a3504404f9ecf1cb8907054a1",
+      "sha256": "81dc52422f9edb6708a55213c202f08a43068b15528dbe7df12a431a87737846",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22639,7 +22655,7 @@
     {
       "path": "artifacts/validation/canonical-rule-registry-gate.json",
       "bytes": 322,
-      "sha256": "0ba095008a677aba0c3848a6a2971be3a1d2df693bab39cfacb900e37c087a59",
+      "sha256": "1ebdeede3a1a0b06ab85e6e0f837d3c2fc386f279106c4ad603eabcd09988295",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22655,7 +22671,7 @@
     {
       "path": "artifacts/validation/conversation-capacity.json",
       "bytes": 241,
-      "sha256": "94475cf265e60d1047a77651a13985be5c8765398da6973acf2a081f580b03a4",
+      "sha256": "fdbdbe821e62ceda95c7c0ad900e2a92a1af489845c974698bb927e7b067446f",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22663,7 +22679,7 @@
     {
       "path": "artifacts/validation/core-service-boundary.json",
       "bytes": 123,
-      "sha256": "c26d58889a1af9a54ae195be7665da6f6dae3649d3bb1cc87731568f07c72a90",
+      "sha256": "e2fc33c426127bc39dd2445c4c364c434a1d14e1c900c88bf84565a4c955aac2",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22671,7 +22687,7 @@
     {
       "path": "artifacts/validation/core-service-local-admin-contract.json",
       "bytes": 260,
-      "sha256": "17fcdd08e61133e5d6bc6ae5c38f2d4f912b91f9f00968873124e7064b05ebe1",
+      "sha256": "870628e93bd96713d845c16d80b5cecf28f9c96b81aba96fdfff35d346a32518",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22695,7 +22711,7 @@
     {
       "path": "artifacts/validation/desktop-core-service-startup-contract.json",
       "bytes": 161,
-      "sha256": "5f0cedc1f999891a7fda601e238dffa46412b55719fcec4faa3bcd0e033a8986",
+      "sha256": "a56068395cc5df4cf6c86608efe45b493dacb669bc4212aa62d6c137685f6dcd",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22703,7 +22719,7 @@
     {
       "path": "artifacts/validation/desktop-core-service-startup-runtime.json",
       "bytes": 161,
-      "sha256": "2e44c387fc2896b9e5a28c6220cd437279468884b933658c8b8d6e52efa64ed3",
+      "sha256": "c88e9396ff4d217e8992ac882f022c8a7ab79869347c45141e5df4cfa427b509",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22719,7 +22735,7 @@
     {
       "path": "artifacts/validation/documentation-synchronization-policy.json",
       "bytes": 283,
-      "sha256": "4c8362ff67fe0b3608e294a3332e6d4755486756dd60fdeb7f25f2cda5d4cb4a",
+      "sha256": "41fa6a3d31b2d033cd3fe42843a1ed2b79eca562143e9e499fa0de27db44e62c",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22735,7 +22751,7 @@
     {
       "path": "artifacts/validation/feature-reality-gate.json",
       "bytes": 673,
-      "sha256": "e3de303b7ac900384c87e83b3286dec3f9004902e14bffd97c1adad1b76c63b1",
+      "sha256": "22d207af06a8927b7b45cb85d2ec13490e3dc46d5442220a5936e601c41601f8",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22759,7 +22775,7 @@
     {
       "path": "artifacts/validation/governed-preflight.json",
       "bytes": 6619,
-      "sha256": "78b1bb34d6027d860cca48a897854c8a3748a5074161543eadd0614f135d8997",
+      "sha256": "4810d3ef9d893abd92d40b89b90f619db2faecff788eaf814381a50b03aa878c",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22807,7 +22823,7 @@
     {
       "path": "artifacts/validation/platform-capability-manifest-gate.json",
       "bytes": 624,
-      "sha256": "52f3b0ce58a26434e4c39bfc3f6b112c8cdd507cd149244798a03dd13afc18e7",
+      "sha256": "41ed8794845140ba99028a5ff6fe1a2e8861b64f6decabae02bf8afa56c2f3b1",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22815,7 +22831,7 @@
     {
       "path": "artifacts/validation/platform-policy-ast-gate.json",
       "bytes": 646,
-      "sha256": "06394dea1fee574c48d24ffdd6d7566c93f850ea8edc26f7d1a2b7455ccac56e",
+      "sha256": "24d2aae5ac3ea72758af619f611d53946cfc53196cf5b3441030c6fd75ac8dfb",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22823,7 +22839,7 @@
     {
       "path": "artifacts/validation/platform-policy-gate.json",
       "bytes": 2203,
-      "sha256": "b4fcad3f1a7fd85db44a21fc7e225ddd43a86dbb9b5d1f45d862882eefc1e491",
+      "sha256": "0efc6f8b1e17f406ebb3a7d58ce2a7c22daf6e2f9b6265ea9ce0f294688b0ab9",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22855,7 +22871,7 @@
     {
       "path": "artifacts/validation/project-artifact-index-gate-v2.json",
       "bytes": 212,
-      "sha256": "09d6bca2c52cde1534f9b5e7f3644ad06ae937f4fef53ceebbe2df69c901511a",
+      "sha256": "e5ae3c50075cc71b4403f767a05e3ef2ce1045b8abf6737be3cec7d5bd06dd37",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22887,7 +22903,7 @@
     {
       "path": "artifacts/validation/step-checkpoint-gate.json",
       "bytes": 188,
-      "sha256": "b8e9cb42fa34645f7b90a89495d6125bc2df26876af5800acccf4540e290e867",
+      "sha256": "7e5ba9aaae426264a09194584d2b6b1e464defd34a539570daa35aced9a32b7f",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22903,7 +22919,7 @@
     {
       "path": "artifacts/validation/system-health-core-service-ipc-contract.json",
       "bytes": 161,
-      "sha256": "458a5aa1dcf03199ae23043f7c6362f92d1655e17b06bfcb76391514d2fe0af8",
+      "sha256": "1f83e68a38ed7f29bcd9a64b72e5b697c6c36dff36cd11b892247845fc5dad6e",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22911,7 +22927,7 @@
     {
       "path": "artifacts/validation/system-health-core-service-ipc-runtime.json",
       "bytes": 161,
-      "sha256": "7a129058275207805a17a5b8b655bad03bb8131aca2ce2c8323d12cd8ac86b6a",
+      "sha256": "4c75c0f61dc856ab0035f158f5154130ab35cbcd95a82bcdbd8aa04dc577b04e",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22927,7 +22943,7 @@
     {
       "path": "artifacts/validation/universal-rule-enforcement-gate.json",
       "bytes": 299,
-      "sha256": "7b53a0c8760a395052426962ab5cec598a7f34cf452eadcbfe83f90b2c165d0d",
+      "sha256": "227d846a7568c5fb3ec0649022f19d43ebc5ee64336b0e44b3fe87ac2a5d2b5d",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -22943,7 +22959,7 @@
     {
       "path": "artifacts/validation/user-decision-ledger-gate.json",
       "bytes": 181,
-      "sha256": "e445e1ce1af353f04a48f367a8d3086a7f2a20e01b02064a462295faba0c6621",
+      "sha256": "571e3ef66a7de09e970e9188e4648c967609346246ac7f7ebb9ec38048026247",
       "extension": ".json",
       "classification": "EVIDENCE",
       "isDocument": true
@@ -28422,8 +28438,8 @@
     },
     {
       "path": "config/kullanici-arayuzu-dil-politikasi.json",
-      "bytes": 7382,
-      "sha256": "78ba318a8d780c95ca1d16abec092e6e0afc7c03907b98e2d83fe4131d5a5f16",
+      "bytes": 7623,
+      "sha256": "0ffd3a002314e49cccfdec23d83aed9597b73153b585422cd9df69df7edf1293",
       "extension": ".json",
       "classification": "ACTIVE_AUTHORITY",
       "isDocument": true
@@ -32790,8 +32806,8 @@
     },
     {
       "path": "docs/decisions/DEC-255-sistem-dili-ve-ingilizce-arayuz-altyapisi.md",
-      "bytes": 11376,
-      "sha256": "780a7a2fd77a07ede7b4dd17351d1e247fe9c5d490a5bd9318206fb1da41f70c",
+      "bytes": 11731,
+      "sha256": "2a563fd54c94b30e0e1c462ea748d3c861da9355884f44a17316854944a1ef1f",
       "extension": ".md",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -33694,16 +33710,16 @@
     },
     {
       "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/03_KANIT_SICILI.json",
-      "bytes": 21757,
-      "sha256": "e5a472f864780acb5ca929765fc408e6b4d844e294272b54c6d38ae511df015d",
+      "bytes": 22286,
+      "sha256": "e45e0e5afdd600882e91daf6fd2bfc08da7c9c0f34f02cb8c7a124c2a5ad7fe1",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
     },
     {
       "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/04_TICARI_TEMEL_DOGRULAMA_KANITI.json",
-      "bytes": 15430,
-      "sha256": "1996cff84f8561a6e8d0e5d6648dfb50880ded9415e530f33e3305975475005d",
+      "bytes": 15631,
+      "sha256": "491e364b2cd595fd9171b8d7e6781a2e0b5b9c373829fb72a804a2a77796cb26",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -34045,6 +34061,14 @@
       "isDocument": true
     },
     {
+      "path": "docs/ticari-urun-temeli/05_KALITE_TEST_KANIT/47_INGILIZCE_ANA_KABUK_DALGA_ON_UC_KANITI.json",
+      "bytes": 974,
+      "sha256": "08fd4d848b24693fdb8f46484e319471a7d2a5656a3e9d14d6b0c576456340b2",
+      "extension": ".json",
+      "classification": "ACTIVE_REFERENCE",
+      "isDocument": true
+    },
+    {
       "path": "docs/ticari-urun-temeli/06_DIS_KAYNAK_VE_LISANS/01_TICARI_LISANS_ENVANTERI.md",
       "bytes": 3440,
       "sha256": "3bcbdfd7eea28bd097c28396336eb3637c73386bd9b72b465a1049a8353ee18b",
@@ -34102,8 +34126,8 @@
     },
     {
       "path": "docs/ticari-urun-temeli/08_IS_LISTESI/03_ANA_IS_SICILI.json",
-      "bytes": 19574,
-      "sha256": "1e754a7cd2700f439c9772ab133017c5c6aca3b348977a1078e6b8471d42c736",
+      "bytes": 19673,
+      "sha256": "7e10ef34f7b6a234712e38ae11863b5660a0e0a85346c94c007695b73c058e9b",
       "extension": ".json",
       "classification": "ACTIVE_REFERENCE",
       "isDocument": true
@@ -40910,8 +40934,8 @@
     },
     {
       "path": "scripts/dogrula-kullanici-arayuzu-dil-politikasi.mjs",
-      "bytes": 23548,
-      "sha256": "d0a2533fd28ee745a8c73853137d8075ec6bf24de36885d3a23a40211ee75693",
+      "bytes": 24634,
+      "sha256": "dcb17992395ab22ef8caad7aaba095802caba78e896a3a874a2133ef833a5b60",
       "extension": ".mjs",
       "classification": "TEST_OR_GATE",
       "isDocument": false
